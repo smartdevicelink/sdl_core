@@ -70,7 +70,9 @@ void ListFilesRequest::Run() {
     return;
   }
 
-  if ((mobile_api::HMILevel::HMI_NONE == application->hmi_level()) &&
+  if ((mobile_api::HMILevel::HMI_NONE ==
+       application->hmi_level(
+           mobile_apis::PredefinedWindows::DEFAULT_WINDOW)) &&
       (application_manager_.get_settings().list_files_in_none() <=
        application->list_files_in_none_count())) {
     // If application is in the HMI_NONE level the quantity of allowed

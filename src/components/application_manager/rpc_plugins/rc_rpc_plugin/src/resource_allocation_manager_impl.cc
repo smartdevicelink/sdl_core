@@ -94,7 +94,7 @@ AcquireResult::eType ResourceAllocationManagerImpl::AcquireResource(
   }
 
   const mobile_apis::HMILevel::eType acquiring_app_hmi_level =
-      acquiring_app->hmi_level();
+      acquiring_app->hmi_level(mobile_apis::PredefinedWindows::DEFAULT_WINDOW);
 
   if (mobile_apis::HMILevel::HMI_FULL != acquiring_app_hmi_level) {
     LOG4CXX_DEBUG(logger_,

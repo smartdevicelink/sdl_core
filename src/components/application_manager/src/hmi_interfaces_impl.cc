@@ -138,6 +138,8 @@ generate_function_to_interface_convert_map() {
   convert_map[UI_AddSubMenu] = HmiInterfaces::HMI_INTERFACE_UI;
   convert_map[UI_DeleteSubMenu] = HmiInterfaces::HMI_INTERFACE_UI;
   convert_map[UI_ShowAppMenu] = HmiInterfaces::HMI_INTERFACE_UI;
+  convert_map[UI_CreateWindow] = HmiInterfaces::HMI_INTERFACE_UI;
+  convert_map[UI_DeleteWindow] = HmiInterfaces::HMI_INTERFACE_UI;
   convert_map[UI_PerformInteraction] = HmiInterfaces::HMI_INTERFACE_UI;
   convert_map[UI_SetMediaClockTimer] = HmiInterfaces::HMI_INTERFACE_UI;
   convert_map[UI_SetGlobalProperties] = HmiInterfaces::HMI_INTERFACE_UI;

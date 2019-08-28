@@ -53,22 +53,25 @@ collect_sources(COMMANDS_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/src/commands")
 set(LIBRARIES
   HMI_API
   MOBILE_API
+  MessageHelper
   ApplicationManager
+  Resumption
   v4_protocol_v1_2_no_extra
   SmartObjects
   Utils
-  sdl_rpc_plugin
+  sdl_rpc_plugin_static
 )
 
 if(ENABLE_LOG)
   list(APPEND LIBRARIES log4cxx -L${LOG4CXX_LIBS_DIRECTORY})
 endif()
 
-add_library("app_service_rpc_plugin" SHARED ${PLUGIN_SOURCES} ${MOBILE_COMMANDS} ${HMI_COMMANDS} ${COMMANDS_SOURCES})
-target_link_libraries("app_service_rpc_plugin" ${LIBRARIES})
+add_library("app_service_rpc_plugin_static" ${PLUGIN_SOURCES} ${MOBILE_COMMANDS} ${HMI_COMMANDS})
+target_link_libraries("app_service_rpc_plugin_static" ${LIBRARIES})
 
-add_library("AppServiceRpcPluginStaticLib" ${PLUGIN_SOURCES} ${MOBILE_COMMANDS} ${HMI_COMMANDS})
-target_link_libraries("AppServiceRpcPluginStaticLib" ${LIBRARIES})
+add_library("app_service_rpc_plugin" SHARED "src/app_service_rpc_plugin.cc")
+target_link_libraries("app_service_rpc_plugin" app_service_rpc_plugin_static)
+
 
 set(INSTALL_DESTINATION bin)
 

@@ -251,7 +251,8 @@ bool AlertRequest::Validate(uint32_t app_id) {
     return false;
   }
 
-  if (mobile_apis::HMILevel::HMI_BACKGROUND == app->hmi_level() &&
+  if (mobile_apis::HMILevel::HMI_BACKGROUND ==
+          app->hmi_level(mobile_apis::PredefinedWindows::DEFAULT_WINDOW) &&
       app->AreCommandLimitsExceeded(
           static_cast<mobile_apis::FunctionID::eType>(function_id()),
           application_manager::TLimitSource::POLICY_TABLE)) {

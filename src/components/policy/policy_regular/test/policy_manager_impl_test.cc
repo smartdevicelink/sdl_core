@@ -247,6 +247,53 @@ class PolicyManagerImplTest2 : public ::testing::Test {
     ASSERT_TRUE(manager->InitPT(file_name, &policy_settings_));
   }
 
+  Json::Value AddWidgetSupportToPt(const std::string& section_name,
+                                   const uint32_t group_number) {
+    std::ifstream ifile("sdl_preloaded_pt.json");
+    Json::Reader reader;
+    Json::Value root(Json::objectValue);
+    if (ifile.is_open() && reader.parse(ifile, root, true)) {
+      auto& groups =
+          root["policy_table"]["app_policies"][section_name]["groups"];
+      if (groups.empty()) {
+        groups = Json::Value(Json::arrayValue);
+      }
+      groups[group_number] = Json::Value("WidgetSupport");
+    }
+    ifile.close();
+    return root;
+  }
+
+  std::string AddWidgetSupportToPt(Json::Value* root,
+                                   const std::string& section_name,
+                                   const uint32_t group_number) {
+    if (root) {
+      auto& groups =
+          (*root)["policy_table"]["app_policies"][section_name]["groups"];
+      if (groups.empty()) {
+        groups = Json::Value(Json::arrayValue);
+      }
+      groups[group_number] = Json::Value("WidgetSupport");
+      return root->toStyledString();
+    }
+    return std::string();
+  }
+
+  std::string AddWidgetSupportToFunctionalGroups(Json::Value* root,
+                                                 const std::string& rpc_name,
+                                                 const std::string& hmi_level) {
+    if (root) {
+      Json::Value val(Json::objectValue);
+      Json::Value val2(Json::arrayValue);
+      val2[0] = hmi_level;
+      val[rpc_name]["hmi_levels"] = val2;
+      (*root)["policy_table"]["functional_groupings"]["WidgetSupport"]["rpcs"] =
+          val;
+      return root->toStyledString();
+    }
+    return std::string();
+  }
+
   void AddRTtoPT(const std::string& update_file_name,
                  const std::string& section_name,
                  const uint32_t rt_number,
@@ -583,6 +630,122 @@ TEST_F(PolicyManagerImplTest2,
 
   manager->CheckPermissions(
       dev_id1, app_id1, std::string("FULL"), "Alert", input_params, output);
+  // Check RPC is disallowed
+  EXPECT_EQ(::policy::kRpcDisallowed, output.hmi_level_permitted);
+  ASSERT_TRUE(output.list_of_allowed_params.empty());
+}
+
+TEST_F(
+    PolicyManagerImplTest2,
+    CheckPermissions_PersistsWidgetAppPermissionsAfter_PTU_ExpectRPCAllowed) {
+  // Arrange
+  CreateLocalPT("sdl_preloaded_pt.json");
+  (manager->GetCache())->AddDevice(dev_id1, "Bluetooth");
+  (manager->GetCache())
+      ->SetDeviceData(dev_id1,
+                      "hardware IPX",
+                      "v.8.0.1",
+                      "Android",
+                      "4.4.2",
+                      "Life",
+                      2,
+                      "Bluetooth");
+  EXPECT_CALL(listener, OnCurrentDeviceIdUpdateRequired(_, app_id1))
+      .WillRepeatedly(Return(dev_id1));
+  manager->SetUserConsentForDevice(dev_id1, true);
+  // Add app from consented device. App will be assigned with default policies
+  manager->AddApplication(
+      app_id1, app_id1, HmiTypes(policy_table::AHT_DEFAULT));
+  EXPECT_CALL(listener, GetDevicesIds(app_id1))
+      .WillRepeatedly(Return(transport_manager::DeviceList()));
+  // Act
+  const char* const rpc_name = "CreateWindow";
+  const char* const hmi_level = "NONE";
+  const uint32_t group_number = 0;
+  Json::Value root = AddWidgetSupportToPt("default", group_number);
+  std::string json =
+      AddWidgetSupportToFunctionalGroups(&root, rpc_name, hmi_level);
+
+  ::policy::BinaryMessage msg(json.begin(), json.end());
+  ASSERT_TRUE(manager->LoadPT("file_pt_update.json", msg));
+
+  ::policy::RPCParams input_params;
+  ::policy::CheckPermissionResult output;
+
+  manager->CheckPermissions(
+      dev_id1, app_id1, hmi_level, rpc_name, input_params, output);
+
+  // Check RPC is allowed
+  EXPECT_EQ(::policy::kRpcAllowed, output.hmi_level_permitted);
+  ASSERT_TRUE(output.list_of_allowed_params.empty());
+  // Act
+  json = AddWidgetSupportToPt(&root, app_id1, group_number);
+  msg = BinaryMessage(json.begin(), json.end());
+  ASSERT_TRUE(manager->LoadPT("file_pt_update.json", msg));
+
+  output.hmi_level_permitted = ::policy::kRpcDisallowed;
+  manager->CheckPermissions(
+      dev_id1, app_id1, hmi_level, rpc_name, input_params, output);
+  // Check RPC is allowed
+  EXPECT_EQ(::policy::kRpcAllowed, output.hmi_level_permitted);
+  ASSERT_TRUE(output.list_of_allowed_params.empty());
+}
+
+TEST_F(
+    PolicyManagerImplTest2,
+    CheckPermissions_AbsenceOfWidgetPermissionsAfter_PTU_ExpectRPCDisallowed) {
+  // Arrange
+  CreateLocalPT("sdl_preloaded_pt.json");
+  (manager->GetCache())->AddDevice(dev_id1, "Bluetooth");
+  (manager->GetCache())
+      ->SetDeviceData(dev_id1,
+                      "hardware IPX",
+                      "v.8.0.1",
+                      "Android",
+                      "4.4.2",
+                      "Life",
+                      2,
+                      "Bluetooth");
+  EXPECT_CALL(listener, OnCurrentDeviceIdUpdateRequired(_, app_id1))
+      .WillRepeatedly(Return(dev_id1));
+  manager->SetUserConsentForDevice(dev_id1, true);
+  // Add app from consented device. App will be assigned with default policies
+  manager->AddApplication(
+      dev_id1, app_id1, HmiTypes(policy_table::AHT_DEFAULT));
+  EXPECT_CALL(listener, GetDevicesIds(app_id1))
+      .WillRepeatedly(Return(transport_manager::DeviceList()));
+  // Act
+  const char* const rpc_name = "DeleteWindow";
+  const char* const hmi_level = "NONE";
+  const uint32_t group_number = 0;
+  Json::Value root = AddWidgetSupportToPt("default", group_number);
+  std::string json =
+      AddWidgetSupportToFunctionalGroups(&root, rpc_name, hmi_level);
+
+  ::policy::BinaryMessage msg(json.begin(), json.end());
+  ASSERT_TRUE(manager->LoadPT("file_pt_update.json", msg));
+
+  ::policy::RPCParams input_params;
+  ::policy::CheckPermissionResult output;
+
+  manager->CheckPermissions(
+      dev_id1, app_id1, hmi_level, rpc_name, input_params, output);
+
+  // Check RPC is allowed
+  EXPECT_EQ(::policy::kRpcAllowed, output.hmi_level_permitted);
+  ASSERT_TRUE(output.list_of_allowed_params.empty());
+  output.hmi_level_permitted = ::policy::kRpcDisallowed;
+  // Act
+  root["policy_table"]["app_policies"][app_id1]["groups"] =
+      Json::Value(Json::arrayValue);
+  root["policy_table"]["app_policies"][app_id1]["groups"][group_number] =
+      Json::Value("Base-4");
+  json = root.toStyledString();
+  msg = BinaryMessage(json.begin(), json.end());
+  ASSERT_TRUE(manager->LoadPT("file_pt_update.json", msg));
+
+  manager->CheckPermissions(
+      dev_id1, app_id1, hmi_level, rpc_name, input_params, output);
   // Check RPC is disallowed
   EXPECT_EQ(::policy::kRpcDisallowed, output.hmi_level_permitted);
   ASSERT_TRUE(output.list_of_allowed_params.empty());

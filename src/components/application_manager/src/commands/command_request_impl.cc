@@ -725,12 +725,17 @@ bool CommandRequestImpl::CheckAllowedParameters() {
   }
 
   mobile_apis::Result::eType check_result =
-      application_manager_.CheckPolicyPermissions(
-          app,
-          MessageHelper::StringifiedFunctionID(
-              static_cast<mobile_api::FunctionID::eType>(function_id())),
-          params,
-          &parameters_permissions_);
+      mobile_apis::Result::eType::INVALID_ID;
+  const auto current_window_id = window_id();
+  if (app->WindowIdExists(current_window_id)) {
+    check_result = application_manager_.CheckPolicyPermissions(
+        app,
+        current_window_id,
+        MessageHelper::StringifiedFunctionID(
+            static_cast<mobile_api::FunctionID::eType>(function_id())),
+        params,
+        &parameters_permissions_);
+  }
 
   // Check, if RPC is allowed by policy
   if (mobile_apis::Result::SUCCESS != check_result) {

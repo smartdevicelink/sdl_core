@@ -126,7 +126,7 @@ class RegisterAppInterfaceRequest
    *
    * @param app application with changed HMI status
    * @param resumption If true, resumption-related parameters will be sent to
-   *the HMI
+   * the HMI
    * @param need_restore_vr If resumption is true, whether or not VR commands
    *should be resumed
    **/
@@ -207,8 +207,8 @@ class RegisterAppInterfaceRequest
   void SendSubscribeCustomButtonNotification();
 
   /**
-   * @brief IsApplicationSwitched checks whether application is switched from
-   * another transport. If application id is found, but not in reconnection
+   * @brief IsApplicationSwitched checks whether application is switched
+   * from another transport. If application id is found, but not in reconnection
    * list, returns 'already registered' code. Otherwise - proceed with
    * switching.
    * @return True if application is detected as switched, otherwise false.

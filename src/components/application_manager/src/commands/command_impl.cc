@@ -1,4 +1,4 @@
-﻿/*
+/*
  Copyright (c) 2014, Ford Motor Company
  All rights reserved.
 
@@ -94,6 +94,15 @@ uint32_t CommandImpl::correlation_id() const {
 
 int32_t CommandImpl::function_id() const {
   return (*message_)[strings::params][strings::function_id].asInt();
+}
+
+WindowID CommandImpl::window_id() const {
+  if ((*message_).keyExists(strings::msg_params)) {
+    if ((*message_)[strings::msg_params].keyExists(strings::window_id)) {
+      return (*message_)[strings::msg_params][strings::window_id].asInt();
+    }
+  }
+  return mobile_apis::PredefinedWindows::DEFAULT_WINDOW;
 }
 
 uint32_t CommandImpl::connection_key() const {

@@ -36,8 +36,12 @@
 
 namespace logger {
 
-static bool logs_enabled_ = false;
-static LogMessageLoopThread* log_message_loop_thread = NULL;
+struct __attribute__((visibility("default"))) LogsEnabled {
+  static std::atomic_bool logs_enabled_;
+};
+
+std::atomic_bool LogsEnabled::logs_enabled_(false);
+static std::unique_ptr<LogMessageLoopThread> log_message_loop_thread;
 
 bool push_log(log4cxx::LoggerPtr logger,
               log4cxx::LevelPtr level,
@@ -73,22 +77,22 @@ bool push_log(log4cxx::LoggerPtr logger,
 }
 
 bool logs_enabled() {
-  return logs_enabled_;
+  return LogsEnabled::logs_enabled_;
 }
 
 void set_logs_enabled(bool state) {
-  logs_enabled_ = state;
+  LogsEnabled::logs_enabled_ = state;
 }
 
 void create_log_message_loop_thread() {
   if (!log_message_loop_thread) {
-    log_message_loop_thread = new LogMessageLoopThread();
+    log_message_loop_thread =
+        std::unique_ptr<LogMessageLoopThread>(new LogMessageLoopThread);
   }
 }
 
 void delete_log_message_loop_thread() {
-  delete log_message_loop_thread;
-  log_message_loop_thread = NULL;
+  log_message_loop_thread.reset();
 }
 
 void flush_logger() {

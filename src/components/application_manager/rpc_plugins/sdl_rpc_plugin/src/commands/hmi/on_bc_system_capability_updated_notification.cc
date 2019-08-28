@@ -161,6 +161,15 @@ void OnBCSystemCapabilityUpdatedNotification::Run() {
                 [strings::app_services_capabilities] = app_service_caps;
       break;
     }
+    case mobile_apis::SystemCapabilityType::DISPLAYS: {
+      if (!hmi_capabilities_.system_display_capabilities()) {
+        LOG4CXX_INFO(logger_, "system_display_capabilities are not available");
+        return;
+      }
+      msg_params[strings::system_capability][strings::display_capabilities] =
+          *hmi_capabilities_.system_display_capabilities();
+      break;
+    }
     default:
       return;
   }

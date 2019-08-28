@@ -69,7 +69,14 @@ using ::testing::Return;
 using ::testing::ReturnRef;
 using usage_statistics_test::MockStatisticsManager;
 
-typedef void (ApplicationImpl::*AddSet)(HmiStatePtr args);
+typedef void (ApplicationImpl::*AddSet)(const WindowID window_id,
+                                        HmiStatePtr args);
+
+namespace {
+const WindowID kDefaultWindowId =
+    mobile_apis::PredefinedWindows::DEFAULT_WINDOW;
+const std::string kDefaultWindowName = "DefaultName";
+}  // namespace
 
 class ApplicationImplTest : public ::testing::Test {
  protected:
@@ -106,7 +113,8 @@ class ApplicationImplTest : public ::testing::Test {
                             mock_application_manager_));
 
     HmiStatePtr initial_state = CreateTestHmiState();
-    app_impl->SetInitialState(initial_state);
+    app_impl->SetInitialState(
+        kDefaultWindowId, kDefaultWindowName, initial_state);
   }
 
   virtual void TearDown() OVERRIDE {
@@ -159,12 +167,12 @@ HmiStatePtr ApplicationImplTest::TestAddHmiState(HMILevel::eType hmi_lvl,
   test_lvl = hmi_lvl;
   state_id = id_state;
   HmiStatePtr state = CreateTestHmiState();
-  ((app_impl.get())->*hmi_action)(state);
+  ((app_impl.get())->*hmi_action)(kDefaultWindowId, state);
   return state;
 }
 
 void ApplicationImplTest::CheckCurrentHMIState() {
-  HmiStatePtr current_state = app_impl->CurrentHmiState();
+  HmiStatePtr current_state = app_impl->CurrentHmiState(kDefaultWindowId);
   EXPECT_EQ(test_lvl, current_state->hmi_level());
   EXPECT_EQ(state_id, current_state->state_id());
 }
@@ -207,7 +215,7 @@ TEST_F(ApplicationImplTest, AddStateAddRegularState_GetRegularState) {
                   HmiState::STATE_ID_VIDEO_STREAMING,
                   &ApplicationImpl::AddHMIState);
 
-  HmiStatePtr current_state = app_impl->RegularHmiState();
+  HmiStatePtr current_state = app_impl->RegularHmiState(kDefaultWindowId);
   EXPECT_EQ(HMILevel::HMI_FULL, current_state->hmi_level());
   EXPECT_EQ(HmiState::STATE_ID_REGULAR, current_state->state_id());
   EXPECT_EQ(app_id, app_impl->app_id());
@@ -228,8 +236,8 @@ TEST_F(ApplicationImplTest, AddStates_RemoveLastState) {
   CheckCurrentHMIState();
 
   // Remove last state
-  app_impl->RemoveHMIState(state3->state_id());
-  HmiStatePtr current_state = app_impl->CurrentHmiState();
+  app_impl->RemoveHMIState(kDefaultWindowId, state3->state_id());
+  HmiStatePtr current_state = app_impl->CurrentHmiState(kDefaultWindowId);
   EXPECT_EQ(state2, current_state);
   EXPECT_EQ(HMILevel::HMI_NONE, current_state->hmi_level());
   EXPECT_EQ(HmiState::STATE_ID_VIDEO_STREAMING, current_state->state_id());
@@ -249,8 +257,8 @@ TEST_F(ApplicationImplTest, AddStates_RemoveNotLastNotFirstState) {
   CheckCurrentHMIState();
 
   // Remove not last state
-  app_impl->RemoveHMIState(state2->state_id());
-  HmiStatePtr current_state = app_impl->CurrentHmiState();
+  app_impl->RemoveHMIState(kDefaultWindowId, state2->state_id());
+  HmiStatePtr current_state = app_impl->CurrentHmiState(kDefaultWindowId);
   EXPECT_EQ(state3, current_state);
   // HMI level is equal to parent hmi_level
   EXPECT_EQ(HMILevel::HMI_FULL, current_state->hmi_level());
@@ -272,8 +280,8 @@ TEST_F(ApplicationImplTest, AddStates_RemoveFirstState) {
   CheckCurrentHMIState();
 
   // Remove first added state
-  app_impl->RemoveHMIState(state1->state_id());
-  HmiStatePtr current_state = app_impl->CurrentHmiState();
+  app_impl->RemoveHMIState(kDefaultWindowId, state1->state_id());
+  HmiStatePtr current_state = app_impl->CurrentHmiState(kDefaultWindowId);
   EXPECT_EQ(state3, current_state);
   // Last state does not have a parent
   EXPECT_EQ(HMILevel::HMI_LIMITED, current_state->hmi_level());
@@ -295,8 +303,8 @@ TEST_F(ApplicationImplTest, SetRegularState_RemoveFirstState) {
   CheckCurrentHMIState();
 
   // Remove first state
-  app_impl->RemoveHMIState(state1->state_id());
-  HmiStatePtr current_state = app_impl->CurrentHmiState();
+  app_impl->RemoveHMIState(kDefaultWindowId, state1->state_id());
+  HmiStatePtr current_state = app_impl->CurrentHmiState(kDefaultWindowId);
   EXPECT_EQ(state3, current_state);
   // Last state has a parent
   EXPECT_EQ(HMILevel::HMI_FULL, current_state->hmi_level());
@@ -311,12 +319,12 @@ TEST_F(ApplicationImplTest, SetPostponedState_RemovePostponedState) {
                                        &ApplicationImpl::SetPostponedState);
 
   // Check that state was setted correctly
-  HmiStatePtr state2 = app_impl->PostponedHmiState();
+  HmiStatePtr state2 = app_impl->PostponedHmiState(kDefaultWindowId);
   EXPECT_EQ(state1, state2);
 
   // Check that state was correctly removed
-  app_impl->RemovePostponedState();
-  state2 = app_impl->PostponedHmiState();
+  app_impl->RemovePostponedState(kDefaultWindowId);
+  state2 = app_impl->PostponedHmiState(kDefaultWindowId);
   EXPECT_EQ(nullptr, state2);
 }
 
@@ -327,9 +335,9 @@ TEST_F(ApplicationImplTest, AddStateAddRegularState_GetHmiLvlAudioSystemState) {
                   HmiState::STATE_ID_REGULAR,
                   &ApplicationImpl::SetRegularState);
 
-  EXPECT_EQ(test_lvl, app_impl->hmi_level());
+  EXPECT_EQ(test_lvl, app_impl->hmi_level(kDefaultWindowId));
   EXPECT_EQ(audiostate, app_impl->audio_streaming_state());
-  EXPECT_EQ(syst_context, app_impl->system_context());
+  EXPECT_EQ(syst_context, app_impl->system_context(kDefaultWindowId));
 
   audiostate = AudioStreamingState::AUDIBLE;
   syst_context = SystemContext::SYSCTXT_MENU;
@@ -337,9 +345,9 @@ TEST_F(ApplicationImplTest, AddStateAddRegularState_GetHmiLvlAudioSystemState) {
                   HmiState::STATE_ID_VIDEO_STREAMING,
                   &ApplicationImpl::AddHMIState);
 
-  EXPECT_EQ(test_lvl, app_impl->hmi_level());
+  EXPECT_EQ(test_lvl, app_impl->hmi_level(kDefaultWindowId));
   EXPECT_EQ(audiostate, app_impl->audio_streaming_state());
-  EXPECT_EQ(syst_context, app_impl->system_context());
+  EXPECT_EQ(syst_context, app_impl->system_context(kDefaultWindowId));
 }
 
 TEST_F(ApplicationImplTest, IsAudioApplication) {
@@ -565,7 +573,9 @@ TEST_F(ApplicationImplTest, SubscribeToSoftButton_UnsubscribeFromSoftButton) {
 
   SoftButtonID test_button;
   for (uint i = 0; i < btn_count; i++) {
-    test_button.insert(i);
+    test_button.insert(std::make_pair(
+        i,
+        static_cast<WindowID>(mobile_apis::PredefinedWindows::DEFAULT_WINDOW)));
   }
   app_impl->SubscribeToSoftButtons(FunctionID::ScrollableMessageID,
                                    test_button);

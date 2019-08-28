@@ -310,7 +310,7 @@ TEST_F(UIGetCapabilitiesResponseTest, SetVideoStreamingCapability_SUCCESS) {
   video_streaming_capability[strings::preferred_resolution]
                             [strings::resolution_width] = 800;
   video_streaming_capability[strings::preferred_resolution]
-                            [strings::resolution_height] = 350;
+                            [strings::resolution_height] = 354;
 
   video_streaming_capability[strings::max_bitrate] = 10000;
 
@@ -328,12 +328,37 @@ TEST_F(UIGetCapabilitiesResponseTest, SetVideoStreamingCapability_SUCCESS) {
 
   video_streaming_capability[strings::haptic_spatial_data_supported] = true;
 
+  video_streaming_capability[strings::diagonal_screen_size] = 7.47;
+
+  video_streaming_capability[strings::pixel_per_inch] = 117.f;
+
+  video_streaming_capability[strings::scale] = 1.f;
+
   ResponseFromHMIPtr command(
       CreateCommand<UIGetCapabilitiesResponse>(command_msg));
 
   EXPECT_CALL(mock_hmi_capabilities_,
               set_video_streaming_capability(video_streaming_capability));
 
+  command->Run();
+}
+
+TEST_F(UIGetCapabilitiesResponseTest, SetSystemDisplayCapabilities_SUCCESS) {
+  MessageSharedPtr command_msg = CreateCommandMsg();
+  (*command_msg)[strings::msg_params][strings::system_capabilities] =
+      smart_objects::SmartObject(smart_objects::SmartType_Map);
+
+  ResponseFromHMIPtr command(
+      CreateCommand<UIGetCapabilitiesResponse>(command_msg));
+
+  const auto& display_capability_so =
+      (*command_msg)[strings::msg_params][strings::system_capabilities]
+                    [strings::display_capabilities];
+
+  EXPECT_CALL(mock_hmi_capabilities_,
+              set_system_display_capabilities(display_capability_so));
+
+  ASSERT_TRUE(command->Init());
   command->Run();
 }
 

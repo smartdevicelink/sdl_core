@@ -79,8 +79,9 @@ class MockPolicyHandlerInterface : public policy::PolicyHandlerInterface {
   MOCK_CONST_METHOD2(GetPriority,
                      bool(const std::string& policy_app_id,
                           std::string* priority));
-  MOCK_METHOD4(CheckPermissions,
+  MOCK_METHOD5(CheckPermissions,
                void(const application_manager::ApplicationSharedPtr app,
+                    const application_manager::WindowID window_id,
                     const policy::PTString& rpc,
                     const application_manager::RPCParams& rpc_params,
                     policy::CheckPermissionResult& result));

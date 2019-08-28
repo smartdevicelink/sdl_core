@@ -492,6 +492,16 @@ enum FunctionID {
   ShowAppMenuID = 59,
 
   /**
+   * @brief CreateWindowID.
+   */
+  CreateWindowID = 60,
+
+  /**
+   * @brief DeleteWindowID.
+   */
+  DeleteWindowID = 61,
+
+  /**
    * @brief OnHMIStatusID.
    */
   OnHMIStatusID = 32768,

@@ -148,6 +148,11 @@ typedef NiceMock<
 #define NAVI true
 #define NOT_NAVI false
 
+namespace {
+const am::WindowID kDefaultWindowId =
+    mobile_apis::PredefinedWindows::DEFAULT_WINDOW;
+}
+
 ACTION_P(GetEventId, event_id) {
   *event_id = arg0.id();
 }
@@ -155,8 +160,8 @@ ACTION_P(GetArg, arg) {
   *arg = arg0;
 }
 
-ACTION_P(GetArg3, result) {
-  arg3 = *result;
+ACTION_P(GetArg4, result) {
+  arg4 = *result;
 }
 
 ACTION_P2(GetConnectIdPermissionConsent, connect_id, consent) {
@@ -1103,6 +1108,7 @@ TEST_F(HMICommandsNotificationsTest,
       .WillOnce(ReturnRef(mock_state_controller_));
   EXPECT_CALL(mock_state_controller_,
               SetRegularState(app_,
+                              kDefaultWindowId,
                               mobile_apis::HMILevel::HMI_NONE,
                               mobile_apis::AudioStreamingState::NOT_AUDIBLE,
                               mobile_apis::VideoStreamingState::NOT_STREAMABLE,
@@ -1127,12 +1133,7 @@ TEST_F(HMICommandsNotificationsTest,
   EXPECT_CALL(app_mngr_, UnregisterApplication(_, _, _, _)).Times(0);
   EXPECT_CALL(app_mngr_, state_controller())
       .WillOnce(ReturnRef(mock_state_controller_));
-  EXPECT_CALL(mock_state_controller_,
-              SetRegularState(app_,
-                              mobile_apis::HMILevel::HMI_NONE,
-                              mobile_apis::AudioStreamingState::NOT_AUDIBLE,
-                              mobile_apis::VideoStreamingState::NOT_STREAMABLE,
-                              false));
+  EXPECT_CALL(mock_state_controller_, ExitDefaultWindow(app_));
   command->Run();
 }
 
@@ -1150,7 +1151,8 @@ TEST_F(HMICommandsNotificationsTest,
   EXPECT_CALL(app_mngr_, state_controller())
       .WillOnce(ReturnRef(mock_state_controller_));
   EXPECT_CALL(mock_state_controller_,
-              SetRegularState(_, mobile_apis::HMILevel::HMI_FULL, true));
+              SetRegularState(
+                  _, kDefaultWindowId, mobile_apis::HMILevel::HMI_FULL, true));
 
   EXPECT_CALL(app_mngr_, get_settings())
       .WillOnce(ReturnRef(app_mngr_settings_));
@@ -1351,8 +1353,10 @@ TEST_F(HMICommandsNotificationsTest,
   EXPECT_CALL(*app_ptr_, language()).WillRepeatedly(ReturnRef(kLang));
   EXPECT_CALL(app_mngr_, state_controller())
       .WillOnce(ReturnRef(mock_state_controller_));
-  EXPECT_CALL(mock_state_controller_,
-              SetRegularState(app_, mobile_apis::HMILevel::HMI_NONE, false));
+  EXPECT_CALL(
+      mock_state_controller_,
+      SetRegularState(
+          app_, kDefaultWindowId, mobile_apis::HMILevel::HMI_NONE, false));
   EXPECT_CALL(mock_message_helper_,
               GetOnAppInterfaceUnregisteredNotificationToMobile(
                   kAppId_,
@@ -1429,7 +1433,8 @@ TEST_F(HMICommandsNotificationsTest,
     EXPECT_CALL(app_mngr_, active_application()).WillOnce(Return(app_));
     EXPECT_CALL(app_mngr_, state_controller())
         .WillOnce(ReturnRef(mock_state_controller_));
-    EXPECT_CALL(mock_state_controller_, SetRegularState(app_, *it));
+    EXPECT_CALL(mock_state_controller_,
+                SetRegularState(app_, kDefaultWindowId, *it));
     command->Run();
   }
 }
@@ -1478,7 +1483,8 @@ TEST_F(HMICommandsNotificationsTest,
     EXPECT_CALL(app_mngr_, application(_)).WillOnce(Return(app_));
     EXPECT_CALL(app_mngr_, state_controller())
         .WillOnce(ReturnRef(mock_state_controller_));
-    EXPECT_CALL(mock_state_controller_, SetRegularState(app_, *it));
+    EXPECT_CALL(mock_state_controller_,
+                SetRegularState(app_, kDefaultWindowId, *it));
     command->Run();
   }
 }
@@ -1885,8 +1891,8 @@ TEST_F(HMICommandsNotificationsTest, OnDriverDistractionNotificationValidApp) {
 
   policy::CheckPermissionResult result;
   result.hmi_level_permitted = policy::kRpcAllowed;
-  EXPECT_CALL(mock_policy_handler_, CheckPermissions(_, _, _, _))
-      .WillOnce(GetArg3(&result));
+  EXPECT_CALL(mock_policy_handler_, CheckPermissions(_, _, _, _, _))
+      .WillOnce(GetArg4(&result));
 
   EXPECT_CALL(mock_rpc_service_,
               ManageMobileCommand(_, Command::CommandSource::SOURCE_SDL))

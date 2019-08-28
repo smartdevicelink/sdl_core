@@ -20,6 +20,7 @@ const char* info = "info";
 const char* app_id = "appID";
 const char* full_app_id = "fullAppID";
 const char* bundle_id = "appBundleID";
+const char* window_id = "windowID";
 const char* app_info = "appInfo";
 const char* app_launch = "app_launch";
 const char* app_launch_list = "app_launch_list";
@@ -139,6 +140,13 @@ const char* activate_app_hmi_level = "level";
 const char* audio_streaming_state = "audioStreamingState";
 const char* video_streaming_state = "videoStreamingState";
 const char* system_context = "systemContext";
+const char* window_name = "windowName";
+const char* window_type = "type";
+const char* window_type_supported = "windowTypeSupported";
+const char* maximum_number_of_windows = "maximumNumberOfWindows";
+const char* window_capabilities = "windowCapabilities";
+const char* associated_service_type = "associatedServiceType";
+const char* duplicate_updates_from_window_id = "duplicateUpdatesFromWindowID";
 const char* speech_capabilities = "speechCapabilities";
 const char* vr_capabilities = "vrCapabilities";
 const char* audio_pass_thru_capabilities = "audioPassThruCapabilities";
@@ -163,6 +171,8 @@ const char* red = "red";
 const char* green = "green";
 const char* blue = "blue";
 const char* display_layout = "displayLayout";
+const char* template_configuration = "templateConfiguration";
+const char* template_layout = "template";
 const char* icon_resumed = "iconResumed";
 const char* nicknames = "nicknames";
 const char* enabled = "enabled";
@@ -172,6 +182,7 @@ const char* hybrid_app_preference = "hybridAppPreference";
 const char* is_cloud_application = "isCloudApplication";
 const char* cloud_connection_status = "cloudConnectionStatus";
 const char* endpoint = "endpoint";
+const char* display_capabilities = "displayCapabilities";
 
 // PutFile
 const char* sync_file_name = "syncFileName";
@@ -380,6 +391,8 @@ const char* delivery_mode = "deliveryMode";
 
 const char* audio_streaming_indicator = "audioStreamingIndicator";
 
+const char* windows_info = "windowsInfo";
+
 const char* const keyboard_properties_supported = "keyboardPropertiesSupported";
 const char* const language_supported = "languageSupported";
 const char* const keyboard_layout_supported = "keyboardLayoutSupported";
@@ -406,6 +419,9 @@ const char* const resolution_height = "resolutionHeight";
 const char* const max_bitrate = "maxBitrate";
 const char* const supported_formats = "supportedFormats";
 const char* const haptic_spatial_data_supported = "hapticSpatialDataSupported";
+const char* const diagonal_screen_size = "diagonalScreenSize";
+const char* const pixel_per_inch = "pixelPerInch";
+const char* const scale = "scale";
 const char* const haptic_rect_data = "hapticRectData";
 const char* const rect = "rect";
 const char* const x = "x";

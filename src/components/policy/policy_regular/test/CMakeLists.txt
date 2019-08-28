@@ -49,7 +49,7 @@ collect_sources(SOURCES "${CMAKE_CURRENT_SOURCE_DIR}")
 set(LIBRARIES
   gmock
   Utils
-  Policy
+  PolicyStatic
   UsageStatistics
 )
 

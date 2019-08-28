@@ -53,6 +53,7 @@ extern const char* info;
 extern const char* app_id;
 extern const char* full_app_id;
 extern const char* bundle_id;
+extern const char* window_id;
 extern const char* app_info;
 extern const char* app_launch;
 extern const char* app_launch_list;
@@ -172,6 +173,13 @@ extern const char* activate_app_hmi_level;
 extern const char* audio_streaming_state;
 extern const char* video_streaming_state;
 extern const char* system_context;
+extern const char* window_name;
+extern const char* window_type;
+extern const char* window_type_supported;
+extern const char* maximum_number_of_windows;
+extern const char* window_capabilities;
+extern const char* associated_service_type;
+extern const char* duplicate_updates_from_window_id;
 extern const char* speech_capabilities;
 extern const char* vr_capabilities;
 extern const char* audio_pass_thru_capabilities;
@@ -196,6 +204,8 @@ extern const char* red;
 extern const char* green;
 extern const char* blue;
 extern const char* display_layout;
+extern const char* template_configuration;
+extern const char* template_layout;
 extern const char* icon_resumed;
 extern const char* nicknames;
 extern const char* enabled;
@@ -205,6 +215,7 @@ extern const char* hybrid_app_preference;
 extern const char* is_cloud_application;
 extern const char* cloud_connection_status;
 extern const char* endpoint;
+extern const char* display_capabilities;
 
 // PutFile
 extern const char* sync_file_name;
@@ -377,6 +388,8 @@ extern const char* ign_off_count;
 
 extern const char* global_ign_on_counter;
 
+extern const char* suspend_count;
+
 extern const char* connection_info;
 extern const char* is_download_complete;
 
@@ -413,6 +426,8 @@ extern const char* delivery_mode;
 
 extern const char* audio_streaming_indicator;
 
+extern const char* windows_info;
+
 // keys for default parameters loaded from hmi_capabilities.json:
 extern const char* const keyboard_properties_default;
 extern const char* const language_default;
@@ -445,6 +460,9 @@ extern const char* const resolution_height;
 extern const char* const max_bitrate;
 extern const char* const supported_formats;
 extern const char* const haptic_spatial_data_supported;
+extern const char* const diagonal_screen_size;
+extern const char* const pixel_per_inch;
+extern const char* const scale;
 extern const char* const haptic_rect_data;
 extern const char* const rect;
 extern const char* const x;

@@ -48,6 +48,8 @@ namespace strings = application_manager::strings;
 
 namespace {
 const uint32_t kConnectionKey = 1u;
+const am::WindowID kDefaultWindowId =
+    mobile_apis::PredefinedWindows::DEFAULT_WINDOW;
 }  // namespace
 
 using application_manager::ApplicationSet;
@@ -102,7 +104,7 @@ TEST_F(OnKeyBoardInputNotificationTest, Run_ActionActive_SUCCESS) {
   EXPECT_CALL(*mock_app, is_perform_interaction_active()).WillOnce(Return(1));
   EXPECT_CALL(*mock_app, perform_interaction_layout())
       .WillOnce(Return(mobile_apis::LayoutMode::KEYBOARD));
-  EXPECT_CALL(*mock_app, hmi_level()).Times(0);
+  EXPECT_CALL(*mock_app, hmi_level(kDefaultWindowId)).Times(0);
 
   EXPECT_CALL(*mock_app, app_id()).WillOnce(Return(kConnectionKey));
 
@@ -126,7 +128,7 @@ TEST_F(OnKeyBoardInputNotificationTest, Run_ActionNotActive_SUCCESS) {
   EXPECT_CALL(*mock_app, is_perform_interaction_active())
       .WillRepeatedly(Return(0));
 
-  EXPECT_CALL(*mock_app, hmi_level())
+  EXPECT_CALL(*mock_app, hmi_level(kDefaultWindowId))
       .WillOnce(Return(mobile_apis::HMILevel::eType::HMI_FULL));
 
   EXPECT_CALL(*mock_app, app_id()).WillOnce(Return(kConnectionKey));
@@ -151,7 +153,7 @@ TEST_F(OnKeyBoardInputNotificationTest, Run_InvalidApp_NoNotification) {
   EXPECT_CALL(*mock_app, is_perform_interaction_active())
       .WillRepeatedly(Return(0));
 
-  EXPECT_CALL(*mock_app, hmi_level())
+  EXPECT_CALL(*mock_app, hmi_level(kDefaultWindowId))
       .WillOnce(Return(mobile_apis::HMILevel::eType::HMI_BACKGROUND));
   EXPECT_CALL(mock_message_helper_, PrintSmartObject(_)).Times(0);
 

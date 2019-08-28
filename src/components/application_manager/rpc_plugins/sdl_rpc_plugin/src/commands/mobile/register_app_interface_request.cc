@@ -158,13 +158,14 @@ class SmartArrayValueExtractor {
 };
 
 struct IsSameNickname {
-  IsSameNickname(const custom_str::CustomString& app_id) : app_id_(app_id) {}
+  IsSameNickname(const custom_str::CustomString app_name)
+      : app_name_(app_name) {}
   bool operator()(const policy::StringArray::value_type& nickname) const {
-    return app_id_.CompareIgnoreCase(nickname.c_str());
+    return app_name_.CompareIgnoreCase(nickname.c_str());
   }
 
  private:
-  const custom_str::CustomString app_id_;
+  const custom_str::CustomString app_name_;
 };
 }  // namespace
 
@@ -836,6 +837,16 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile(
                                             application->mac_address());
   }
 
+  // If app is in resuming state
+  // DisplayCapabilitiesBuilder has to collect all the information
+  // from incoming HMI notifications and send only one notification
+  // to mobile app, even if hash does not match, which means that app data
+  // will not be resumed, notification should be sent for default window as
+  // it will be resumed in any case
+  if (resumption) {
+    resumer.StartWaitingForDisplayCapabilitiesUpdate(application);
+  }
+
   AppHmiTypes hmi_types;
   if ((*message_)[strings::msg_params].keyExists(strings::app_hmi_type)) {
     smart_objects::SmartArray* hmi_types_ptr =
@@ -874,11 +885,12 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile(
   // and HMI level set-up
   GetPolicyHandler().OnAppRegisteredOnMobile(application->mac_address(),
                                              application->policy_app_id());
-
-  if (result_code != mobile_apis::Result::RESUME_FAILED) {
-    resumer.StartResumption(application, hash_id);
-  } else {
-    resumer.StartResumptionOnlyHMILevel(application);
+  if (resumption) {
+    if (result_code != mobile_apis::Result::RESUME_FAILED) {
+      resumer.StartResumption(application, hash_id);
+    } else {
+      resumer.StartResumptionOnlyHMILevel(application);
+    }
   }
 
   // By default app subscribed to CUSTOM_BUTTON
@@ -1354,13 +1366,12 @@ void RegisterAppInterfaceRequest::CheckResponseVehicleTypeParam(
 
 void RegisterAppInterfaceRequest::SendSubscribeCustomButtonNotification() {
   using namespace smart_objects;
-  using namespace hmi_apis;
-
   SmartObject msg_params = SmartObject(SmartType_Map);
   msg_params[strings::app_id] = connection_key();
-  msg_params[strings::name] = Common_ButtonName::CUSTOM_BUTTON;
+  msg_params[strings::name] = hmi_apis::Common_ButtonName::CUSTOM_BUTTON;
   msg_params[strings::is_suscribed] = true;
-  CreateHMINotification(FunctionID::Buttons_OnButtonSubscription, msg_params);
+  CreateHMINotification(hmi_apis::FunctionID::Buttons_OnButtonSubscription,
+                        msg_params);
 }
 
 bool RegisterAppInterfaceRequest::IsApplicationSwitched() {
@@ -1405,7 +1416,10 @@ bool RegisterAppInterfaceRequest::IsApplicationSwitched() {
   application_manager_.ProcessReconnection(app, connection_key());
   SendRegisterAppInterfaceResponseToMobile(app_type);
 
-  application_manager_.SendHMIStatusNotification(app);
+  MessageHelper::SendHMIStatusNotification(
+      app,
+      mobile_apis::PredefinedWindows::DEFAULT_WINDOW,
+      application_manager_);
 
   application_manager_.OnApplicationSwitched(app);
 
