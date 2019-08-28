@@ -728,7 +728,7 @@
         </element>
     </enum>
     
-    <enum name="DisplayType" deprecated="true" since="5.0">
+    <enum name="DisplayType" removed="true" since="6.0">
         <description>See DAES for further infos regarding the displays</description>
         <element name="CID"/>
         <element name="TYPE2" />
@@ -742,6 +742,7 @@
         <element name="GEN3_8-INCH" internal_name="GEN3_8_INCH" since="3.0" />
         <element name="SDL_GENERIC" since="4.0" />
         <history>
+            <enum name="DisplayType" deprecated="true" since="5.0" until="6.0">
             <enum name="DisplayType" since="1.0" until="5.0"/>
         </history>
     </enum>
@@ -2242,9 +2243,10 @@
             <struct name="DisplayCapabilities" since="1.0" until="6.0"/>
         </history>
         <description>Contains information about the display capabilities.</description>
-        <param name="displayType" type="DisplayType" mandatory="true" deprecated="true" since="5.0">
+        <param name="displayType" type="DisplayType" removed="true" since="6.0">
             <description>The type of the display. See DisplayType</description>
             <history>
+                <param name="displayType" type="DisplayType" mandatory="true" deprecated="true" since="5.0" until="6.0">
                 <param name="displayType" type="DisplayType" mandatory="true" since="1.0" until="5.0"/>
             </history>
         </param>
