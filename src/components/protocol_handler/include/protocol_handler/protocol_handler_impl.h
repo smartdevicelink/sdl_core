@@ -717,6 +717,12 @@ class ProtocolHandlerImpl
   const std::string TransportTypeFromTransport(
       const utils::custom_string::CustomString& transport) const;
 
+  const ServiceStatus ServiceDisallowedBySettings(
+      const ServiceType service_type,
+      const ConnectionID connection_id,
+      const uint8_t session_id,
+      const bool protection) const;
+
   const ProtocolHandlerSettings& settings_;
 
   /**

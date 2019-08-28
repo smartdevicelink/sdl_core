@@ -97,6 +97,15 @@ void ServiceStatusUpdateHandler::OnServiceUpdate(
           Common_ServiceEvent::REQUEST_ACCEPTED,
           update_reason);
     }
+    case ServiceStatus::UNSECURE_START_FAILED: {
+      auto update_reason =
+          Common_ServiceStatusUpdateReason::PROTECTION_DISABLED;
+      return listener_->ProcessServiceStatusUpdate(
+          connection_key,
+          hmi_service_type,
+          Common_ServiceEvent::REQUEST_REJECTED,
+          update_reason);
+    }
     default: {
       LOG4CXX_WARN(logger_,
                    "Received unknown ServiceStatus: "

@@ -1596,6 +1596,56 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessageEndSession(
   return RESULT_OK;
 }
 
+const ServiceStatus ProtocolHandlerImpl::ServiceDisallowedBySettings(
+    const ServiceType service_type,
+    const ConnectionID connection_id,
+    const uint8_t session_id,
+    const bool protection) const {
+  const std::string& transport =
+      session_observer_.TransportTypeProfileStringFromConnHandle(connection_id);
+
+  const auto video_transports = settings_.video_service_transports();
+  const bool is_video_allowed =
+      video_transports.empty() ||
+      std::find(video_transports.begin(), video_transports.end(), transport) !=
+          video_transports.end();
+
+  const auto audio_transports = settings_.audio_service_transports();
+  const bool is_audio_allowed =
+      audio_transports.empty() ||
+      std::find(audio_transports.begin(), audio_transports.end(), transport) !=
+          audio_transports.end();
+
+  const auto& force_protected = get_settings().force_protected_service();
+
+  const auto& force_unprotected = get_settings().force_unprotected_service();
+
+  const bool is_force_protected =
+      (helpers::in_range(force_protected, service_type));
+
+  const bool is_force_unprotected =
+      (helpers::in_range(force_unprotected, service_type));
+
+  const bool can_start_protected = is_force_protected && protection;
+
+  const bool can_start_unprotected = is_force_unprotected && !protection;
+
+  if ((ServiceType::kMobileNav == service_type && !is_video_allowed) ||
+      (ServiceType::kAudio == service_type && !is_audio_allowed)) {
+    return ServiceStatus::SERVICE_START_FAILED;
+  }
+
+  if (is_force_protected && !can_start_protected) {
+    return ServiceStatus::PROTECTION_ENFORCED;
+  }
+
+  if (is_force_unprotected && !can_start_unprotected) {
+    return ServiceStatus::UNSECURE_START_FAILED;
+  }
+
+  return ServiceStatus::INVALID_ENUM;
+}
+
 RESULT_CODE ProtocolHandlerImpl::HandleControlMessageEndServiceACK(
     const ProtocolPacket& packet) {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -1636,43 +1686,21 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessageStartSession(
 
   const ConnectionID connection_id = packet->connection_id();
   const uint8_t session_id = packet->session_id();
-  const std::string& transport =
-      session_observer_.TransportTypeProfileStringFromConnHandle(connection_id);
-
-  const auto video_transports = settings_.video_service_transports();
-  const bool is_video_allowed =
-      video_transports.empty() ||
-      std::find(video_transports.begin(), video_transports.end(), transport) !=
-          video_transports.end();
-
-  const auto audio_transports = settings_.audio_service_transports();
-  const bool is_audio_allowed =
-      audio_transports.empty() ||
-      std::find(audio_transports.begin(), audio_transports.end(), transport) !=
-          audio_transports.end();
-
-  const uint32_t connection_key = session_observer_.KeyFromPair(
-      packet->connection_id(), packet->session_id());
-
-  const auto& force_protected = get_settings().force_protected_service();
-
-  const bool is_force_protected =
-      (helpers::in_range(force_protected, service_type));
-
-  const bool can_start_unprotected = is_force_protected && protection;
+  const uint32_t connection_key =
+      session_observer_.KeyFromPair(connection_id, session_id);
 
   service_status_update_handler_->OnServiceUpdate(
       connection_key, service_type, ServiceStatus::SERVICE_RECEIVED);
 
-  if ((ServiceType::kMobileNav == service_type && !is_video_allowed) ||
-      (ServiceType::kAudio == service_type && !is_audio_allowed) ||
-      (is_force_protected && !can_start_unprotected)) {
+  const auto settings_check = ServiceDisallowedBySettings(
+      service_type, connection_id, session_id, protection);
+
+  if (ServiceStatus::INVALID_ENUM != settings_check) {
     LOG4CXX_DEBUG(logger_,
                   "Rejecting StartService for service:"
-                      << service_type << ", over transport: " << transport
-                      << ", disallowed by settings.");
+                      << service_type << ", disallowed by settings.");
     service_status_update_handler_->OnServiceUpdate(
-        connection_key, service_type, ServiceStatus::PROTECTION_ENFORCED);
+        connection_key, service_type, settings_check);
     SendStartSessionNAck(
         connection_id, session_id, protocol_version, service_type);
     return RESULT_OK;
