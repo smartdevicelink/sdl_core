@@ -2234,6 +2234,34 @@ smart_objects::SmartObjectSPtr MessageHelper::CreateNegativeResponse(
   return std::make_shared<smart_objects::SmartObject>(response_data);
 }
 
+smart_objects::SmartObjectSPtr MessageHelper::CreateOnServiceUpdateNotification(
+    const hmi_apis::Common_ServiceType::eType service_type,
+    const hmi_apis::Common_ServiceEvent::eType service_event,
+    const hmi_apis::Common_ServiceStatusUpdateReason::eType
+        service_update_reason,
+    const uint32_t app_id) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  auto notification = MessageHelper::CreateHMINotification(
+      hmi_apis::FunctionID::BasicCommunication_OnServiceUpdate);
+
+  (*notification)[strings::msg_params][hmi_notification::service_type] =
+      service_type;
+  (*notification)[strings::msg_params][hmi_notification::service_event] =
+      service_event;
+
+  if (0 != app_id) {
+    (*notification)[strings::msg_params][strings::app_id] = app_id;
+  }
+
+  if (hmi_apis::Common_ServiceStatusUpdateReason::INVALID_ENUM !=
+      service_update_reason) {
+    (*notification)[strings::msg_params][hmi_notification::reason] =
+        service_update_reason;
+  }
+
+  return notification;
+}
+
 void MessageHelper::SendNaviSetVideoConfig(
     int32_t app_id,
     ApplicationManager& app_mngr,
@@ -2430,6 +2458,14 @@ void MessageHelper::SendPolicySnapshotNotification(
     const std::string& url,
     ApplicationManager& app_mngr) {
   smart_objects::SmartObject content(smart_objects::SmartType_Map);
+  const auto request_type =
+#if defined(PROPRIETARY_MODE) || defined(EXTERNAL_PROPRIETARY_MODE)
+      mobile_apis::RequestType::PROPRIETARY;
+#else
+      mobile_apis::RequestType::HTTP;
+#endif  // PROPRIETARY || EXTERNAL_PROPRIETARY_MODE
+
+  content[strings::msg_params][strings::request_type] = request_type;
 
   if (!url.empty()) {
     content[strings::msg_params][strings::url] =
@@ -2440,13 +2476,6 @@ void MessageHelper::SendPolicySnapshotNotification(
 
   content[strings::params][strings::binary_data] =
       smart_objects::SmartObject(policy_data);
-#if defined(PROPRIETARY_MODE) || defined(EXTERNAL_PROPRIETARY_MODE)
-  content[strings::msg_params][strings::request_type] =
-      mobile_apis::RequestType::PROPRIETARY;
-#else
-  content[strings::msg_params][strings::request_type] =
-      mobile_apis::RequestType::HTTP;
-#endif  // PROPRIETARY || EXTERNAL_PROPRIETARY_MODE
 
   SendSystemRequestNotification(connection_key, content, app_mngr);
 }

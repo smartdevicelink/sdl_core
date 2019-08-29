@@ -1129,12 +1129,24 @@ void ProtocolHandlerImpl::OnUnexpectedDisconnect(
   OnConnectionClosed(connection_id);
 }
 
-void ProtocolHandlerImpl::NotifyOnFailedHandshake() {
+void ProtocolHandlerImpl::NotifyOnGetSystemTimeFailed() {
   LOG4CXX_AUTO_TRACE(logger_);
+  security_manager_->ResetPendingSystemTimeRequests();
 #ifdef ENABLE_SECURITY
-  security_manager_->NotifyListenersOnHandshakeFailed();
+  security_manager_->NotifyListenersOnGetSystemTimeFailed();
 #endif  // ENABLE_SECURITY
 }
+
+void ProtocolHandlerImpl::ProcessFailedPTU() {
+  security_manager_->ProcessFailedPTU();
+}
+
+#ifdef EXTERNAL_PROPRIETARY_MODE
+void ProtocolHandlerImpl::ProcessFailedCertDecrypt() {
+  LOG4CXX_AUTO_TRACE(logger_);
+  security_manager_->ProcessFailedCertDecrypt();
+}
+#endif
 
 void ProtocolHandlerImpl::OnTransportConfigUpdated(
     const transport_manager::transport_adapter::TransportConfig& configs) {
@@ -1584,6 +1596,57 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessageEndSession(
   return RESULT_OK;
 }
 
+const ServiceStatus ProtocolHandlerImpl::ServiceDisallowedBySettings(
+    const ServiceType service_type,
+    const ConnectionID connection_id,
+    const uint8_t session_id,
+    const bool protection) const {
+  LOG4CXX_AUTO_TRACE(logger_);
+  const std::string& transport =
+      session_observer_.TransportTypeProfileStringFromConnHandle(connection_id);
+
+  const auto video_transports = settings_.video_service_transports();
+  const bool is_video_allowed =
+      video_transports.empty() ||
+      std::find(video_transports.begin(), video_transports.end(), transport) !=
+          video_transports.end();
+
+  const auto audio_transports = settings_.audio_service_transports();
+  const bool is_audio_allowed =
+      audio_transports.empty() ||
+      std::find(audio_transports.begin(), audio_transports.end(), transport) !=
+          audio_transports.end();
+
+  const auto& force_protected = get_settings().force_protected_service();
+
+  const auto& force_unprotected = get_settings().force_unprotected_service();
+
+  const bool is_force_protected =
+      (helpers::in_range(force_protected, service_type));
+
+  const bool is_force_unprotected =
+      (helpers::in_range(force_unprotected, service_type));
+
+  const bool can_start_protected = is_force_protected && protection;
+
+  const bool can_start_unprotected = is_force_unprotected && !protection;
+
+  if ((ServiceType::kMobileNav == service_type && !is_video_allowed) ||
+      (ServiceType::kAudio == service_type && !is_audio_allowed)) {
+    return ServiceStatus::SERVICE_START_FAILED;
+  }
+
+  if (is_force_protected && !can_start_protected) {
+    return ServiceStatus::PROTECTION_ENFORCED;
+  }
+
+  if (is_force_unprotected && !can_start_unprotected) {
+    return ServiceStatus::UNSECURE_START_FAILED;
+  }
+
+  return ServiceStatus::INVALID_ENUM;
+}
+
 RESULT_CODE ProtocolHandlerImpl::HandleControlMessageEndServiceACK(
     const ProtocolPacket& packet) {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -1624,27 +1687,21 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessageStartSession(
 
   const ConnectionID connection_id = packet->connection_id();
   const uint8_t session_id = packet->session_id();
-  const std::string& transport =
-      session_observer_.TransportTypeProfileStringFromConnHandle(connection_id);
+  const uint32_t connection_key =
+      session_observer_.KeyFromPair(connection_id, session_id);
 
-  const auto video_transports = settings_.video_service_transports();
-  const bool is_video_allowed =
-      video_transports.empty() ||
-      std::find(video_transports.begin(), video_transports.end(), transport) !=
-          video_transports.end();
+  service_status_update_handler_->OnServiceUpdate(
+      connection_key, service_type, ServiceStatus::SERVICE_RECEIVED);
 
-  const auto audio_transports = settings_.audio_service_transports();
-  const bool is_audio_allowed =
-      audio_transports.empty() ||
-      std::find(audio_transports.begin(), audio_transports.end(), transport) !=
-          audio_transports.end();
+  const auto settings_check = ServiceDisallowedBySettings(
+      service_type, connection_id, session_id, protection);
 
-  if ((ServiceType::kMobileNav == service_type && !is_video_allowed) ||
-      (ServiceType::kAudio == service_type && !is_audio_allowed)) {
+  if (ServiceStatus::INVALID_ENUM != settings_check) {
     LOG4CXX_DEBUG(logger_,
                   "Rejecting StartService for service:"
-                      << service_type << ", over transport: " << transport
-                      << ", disallowed by settings.");
+                      << service_type << ", disallowed by settings.");
+    service_status_update_handler_->OnServiceUpdate(
+        connection_key, service_type, settings_check);
     SendStartSessionNAck(
         connection_id, session_id, protocol_version, service_type);
     return RESULT_OK;
@@ -1836,12 +1893,14 @@ void ProtocolHandlerImpl::NotifySessionStarted(
         context.connection_id_, context.new_session_id_);
 
     std::shared_ptr<HandshakeHandler> handler =
-        std::make_shared<HandshakeHandler>(*this,
-                                           session_observer_,
-                                           *fullVersion,
-                                           context,
-                                           packet->protocol_version(),
-                                           start_session_ack_params);
+        std::make_shared<HandshakeHandler>(
+            *this,
+            session_observer_,
+            *fullVersion,
+            context,
+            packet->protocol_version(),
+            start_session_ack_params,
+            *(service_status_update_handler_.get()));
 
     security_manager::SSLContext* ssl_context =
         security_manager_->CreateSSLContext(
@@ -1872,6 +1931,10 @@ void ProtocolHandlerImpl::NotifySessionStarted(
       // mark service as protected
       session_observer_.SetProtectionFlag(connection_key, service_type);
       // Start service as protected with current SSLContext
+      service_status_update_handler_->OnServiceUpdate(
+          connection_key,
+          context.service_type_,
+          ServiceStatus::SERVICE_ACCEPTED);
       SendStartSessionAck(context.connection_id_,
                           context.new_session_id_,
                           packet->protocol_version(),
@@ -1908,7 +1971,11 @@ void ProtocolHandlerImpl::NotifySessionStarted(
     return;
   }
 #endif  // ENABLE_SECURITY
+  const uint32_t connection_key = session_observer_.KeyFromPair(
+      context.connection_id_, context.new_session_id_);
   if (rejected_params.empty()) {
+    service_status_update_handler_->OnServiceUpdate(
+        connection_key, context.service_type_, ServiceStatus::SERVICE_ACCEPTED);
     SendStartSessionAck(context.connection_id_,
                         context.new_session_id_,
                         packet->protocol_version(),
@@ -1918,6 +1985,10 @@ void ProtocolHandlerImpl::NotifySessionStarted(
                         *fullVersion,
                         *start_session_ack_params);
   } else {
+    service_status_update_handler_->OnServiceUpdate(
+        connection_key,
+        context.service_type_,
+        ServiceStatus::SERVICE_START_FAILED);
     SendStartSessionNAck(context.connection_id_,
                          packet->session_id(),
                          protocol_version,
@@ -2097,6 +2168,11 @@ void ProtocolHandlerImpl::Stop() {
 
   sync_primitives::AutoLock auto_lock(start_session_frame_map_lock_);
   start_session_frame_map_.clear();
+}
+
+void ProtocolHandlerImpl::set_service_status_update_handler(
+    std::unique_ptr<ServiceStatusUpdateHandler> handler) {
+  service_status_update_handler_ = std::move(handler);
 }
 
 #ifdef ENABLE_SECURITY

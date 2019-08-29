@@ -44,6 +44,7 @@
 #include "policy/policy_listener.h"
 #include "policy/policy_table/types.h"
 #include "policy/policy_types.h"
+#include "policy/ptu_retry_handler.h"
 #include "policy/usage_statistics/statistics_manager.h"
 
 namespace policy {
@@ -51,7 +52,8 @@ class PolicySettings;
 typedef std::shared_ptr<utils::Callable> StatusNotifier;
 
 class PolicyManager : public usage_statistics::StatisticsManager,
-                      public PolicyEncryptionFlagGetterInterface {
+                      public PolicyEncryptionFlagGetterInterface,
+                      public PTURetryHandler {
  public:
   /**
    * @brief The NotificationMode enum defines whether application will be
@@ -206,8 +208,9 @@ class PolicyManager : public usage_statistics::StatisticsManager,
 
   /**
    * @brief Resets retry sequence
+   * @param reset_type - reset retry count with sending OnStatusUpdate or not
    */
-  virtual void ResetRetrySequence() = 0;
+  virtual void ResetRetrySequence(const ResetRetryCountType reset_type) = 0;
 
   /**
    * @brief Gets timeout to wait before next retry updating PT

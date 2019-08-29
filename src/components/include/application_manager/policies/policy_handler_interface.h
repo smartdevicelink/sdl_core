@@ -52,12 +52,18 @@
 #include "smart_objects/smart_object.h"
 #include "utils/callable.h"
 #include "utils/custom_string.h"
+#include "utils/optional.h"
+#ifdef EXTERNAL_PROPRIETARY_MODE
+#include "policy/ptu_retry_handler.h"
+#endif  // EXTERNAL_PROPRIETARY_MODE
 
 using namespace ::rpc::policy_table_interface_base;
 namespace policy {
 typedef std::shared_ptr<utils::Callable> StatusNotifier;
 typedef std::shared_ptr<PolicyEncryptionFlagGetterInterface>
     PolicyEncryptionFlagGetterInterfaceSPtr;
+
+class PTURetryHandler;
 
 class PolicyHandlerInterface {
  public:
@@ -87,8 +93,11 @@ class PolicyHandlerInterface {
   virtual void OnSnapshotCreated(const BinaryMessage& pt_string,
                                  const std::vector<int>& retry_delay_seconds,
                                  uint32_t timeout_exchange) = 0;
+
+  virtual PTURetryHandler& ptu_retry_handler() const = 0;
 #else   // EXTERNAL_PROPRIETARY_MODE
-  virtual void OnSnapshotCreated(const BinaryMessage& pt_string) = 0;
+  virtual void OnSnapshotCreated(const BinaryMessage& pt_string,
+                                 const PTUIterationType iteration_type) = 0;
 #endif  // EXTERNAL_PROPRIETARY_MODE
 
   virtual bool GetPriority(const std::string& policy_app_id,

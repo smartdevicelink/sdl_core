@@ -89,10 +89,18 @@ class MessageHelper {
   static smart_objects::SmartObjectSPtr CreateHMINotification(
       hmi_apis::FunctionID::eType function_id);
 
+  static smart_objects::SmartObjectSPtr CreateOnServiceUpdateNotification(
+      const hmi_apis::Common_ServiceType::eType type,
+      const hmi_apis::Common_ServiceEvent::eType event,
+      const hmi_apis::Common_ServiceStatusUpdateReason::eType reason =
+          hmi_apis::Common_ServiceStatusUpdateReason::INVALID_ENUM,
+      const uint32_t app_id = 0);
+
   /**
    * @brief Creates request for different interfaces(JSON)
    * @param correlation_id unique ID
-   * @param params Vector of arguments that we need in GetVehicleData request
+   * @param params Vector of arguments that we need in GetVehicleData
+   * request
    * (e.g. gps, odometer, fuel_level)
    */
   static void CreateGetVehicleDataRequest(

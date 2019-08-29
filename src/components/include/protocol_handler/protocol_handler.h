@@ -118,7 +118,7 @@ class ProtocolHandler {
   /**
    * \brief Called to notify all handsheke handlers about handshake failure.
    */
-  virtual void NotifyOnFailedHandshake() = 0;
+  virtual void NotifyOnGetSystemTimeFailed() = 0;
 
   /**
    * \brief Protocol handler settings getter
@@ -140,6 +140,16 @@ class ProtocolHandler {
       std::vector<std::string>& rejected_params) = 0;
 
   virtual bool IsRPCServiceSecure(const uint32_t connection_key) const = 0;
+
+  virtual void ProcessFailedPTU() = 0;
+
+#ifdef EXTERNAL_PROPRIETARY_MODE
+  /**
+   * @brief ProcessFailedCertDecrypt is called to notify security manager that
+   * certificate decryption failed in the external flow
+   */
+  virtual void ProcessFailedCertDecrypt() = 0;
+#endif
 
  protected:
   /**

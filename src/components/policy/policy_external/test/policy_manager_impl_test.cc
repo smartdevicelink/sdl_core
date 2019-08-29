@@ -37,6 +37,7 @@
 #include "json/reader.h"
 
 #include "policy/policy_manager_impl_test_base.h"
+#include "utils/date_time.h"
 
 using ::testing::_;
 using ::testing::AtLeast;
@@ -46,30 +47,6 @@ using ::testing::SetArgReferee;
 namespace test {
 namespace components {
 namespace policy_test {
-
-TEST_F(
-    PolicyManagerImplTest,
-    RefreshRetrySequence_SetSecondsBetweenRetries_ExpectRetryTimeoutSequenceWithSameSeconds) {
-  // Arrange
-  std::vector<int> seconds;
-  seconds.push_back(50);
-  seconds.push_back(100);
-  seconds.push_back(200);
-
-  // Assert
-  EXPECT_CALL(*cache_manager_, TimeoutResponse()).WillOnce(Return(60));
-  EXPECT_CALL(*cache_manager_, SecondsBetweenRetries(_))
-      .WillOnce(DoAll(SetArgReferee<0>(seconds), Return(true)));
-
-  // Act
-  policy_manager_->RefreshRetrySequence();
-
-  // Assert
-  EXPECT_EQ(50, policy_manager_->NextRetryTimeout());
-  EXPECT_EQ(100, policy_manager_->NextRetryTimeout());
-  EXPECT_EQ(200, policy_manager_->NextRetryTimeout());
-  EXPECT_EQ(0, policy_manager_->NextRetryTimeout());
-}
 
 TEST_F(PolicyManagerImplTest, GetNotificationsNumber) {
   std::string priority = "EMERGENCY";
@@ -199,29 +176,12 @@ TEST_F(PolicyManagerImplTest2, OnSystemReady) {
 TEST_F(PolicyManagerImplTest2, ResetRetrySequence) {
   // Arrange
   CreateLocalPT(preloaded_pt_filename_);
-  policy_manager_->ResetRetrySequence();
+  policy_manager_->ResetRetrySequence(
+      policy::ResetRetryCountType::kResetWithStatusUpdate);
   EXPECT_EQ("UPDATE_NEEDED", policy_manager_->GetPolicyTableStatus());
   policy_manager_->SetSendOnUpdateFlags(false, false);
   policy_manager_->OnUpdateStarted();
   EXPECT_EQ("UPDATING", policy_manager_->GetPolicyTableStatus());
-}
-
-TEST_F(PolicyManagerImplTest2, NextRetryTimeout_ExpectTimeoutsFromPT) {
-  // Arrange
-  std::ifstream ifile(preloaded_pt_filename_);
-  Json::Reader reader;
-  Json::Value root(Json::objectValue);
-  if (ifile.is_open() && reader.parse(ifile, root, true)) {
-    Json::Value seconds_between_retries = Json::Value(Json::arrayValue);
-    seconds_between_retries =
-        root["policy_table"]["module_config"]["seconds_between_retries"];
-    uint32_t size = seconds_between_retries.size();
-    CreateLocalPT(preloaded_pt_filename_);
-    for (uint32_t i = 0; i < size; ++i) {
-      EXPECT_EQ(seconds_between_retries[i],
-                policy_manager_->NextRetryTimeout());
-    }
-  }
 }
 
 TEST_F(PolicyManagerImplTest2, TimeOutExchange) {
@@ -319,6 +279,8 @@ TEST_F(PolicyManagerImplTest2,
        OnExceededTimeout_GetPolicyTableStatus_ExpectUpdateNeeded) {
   // Arrange
   CreateLocalPT(preloaded_pt_filename_);
+  ON_CALL(ptu_retry_handler_, IsAllowedRetryCountExceeded())
+      .WillByDefault(Return(false));
   policy_manager_->ForcePTExchange();
   policy_manager_->OnExceededTimeout();
   // Check

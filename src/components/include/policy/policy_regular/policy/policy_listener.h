@@ -79,11 +79,13 @@ class PolicyListener {
    *
    * @param pt_string the snapshot
    *
-   * @param retry_seconds retry sequence timeouts.
+   * @param iteration_type flag indicating whether PTU was caused by retry
+   * sequence.
    *
    * @param timeout_exceed timeout.
    */
-  virtual void OnSnapshotCreated(const BinaryMessage& pt_string) = 0;
+  virtual void OnSnapshotCreated(const BinaryMessage& pt_string,
+                                 const PTUIterationType iteration_type) = 0;
 
   /**
    * @brief Make appropriate changes for related applications permissions and
@@ -117,6 +119,11 @@ class PolicyListener {
    * @param certificate_data the value of the updated field.
    */
   virtual void OnCertificateUpdated(const std::string& certificate_data) = 0;
+
+  /**
+   * @brief OnPTUTimeOut the callback which signals if PTU timeout occured
+   */
+  virtual void OnPTUTimeOut() = 0;
 
   /**
    * @brief OnAuthTokenUpdated the callback which signals if an app's auth token

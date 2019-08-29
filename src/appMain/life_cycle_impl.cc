@@ -103,6 +103,13 @@ bool LifeCycleImpl::StartComponents() {
   app_manager_ =
       new application_manager::ApplicationManagerImpl(profile_, profile_);
 
+  auto service_status_update_handler =
+      std::unique_ptr<protocol_handler::ServiceStatusUpdateHandler>(
+          new protocol_handler::ServiceStatusUpdateHandler(app_manager_));
+
+  protocol_handler_->set_service_status_update_handler(
+      std::move(service_status_update_handler));
+
   DCHECK(!hmi_handler_);
   hmi_handler_ = new hmi_message_handler::HMIMessageHandlerImpl(profile_);
 

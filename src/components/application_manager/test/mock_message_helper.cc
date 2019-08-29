@@ -627,4 +627,15 @@ MessageHelper::CreateDisplayCapabilityUpdateToMobile(
   return MockMessageHelper::message_helper_mock()
       ->CreateDisplayCapabilityUpdateToMobile(system_capabilities, app);
 }
+
+smart_objects::SmartObjectSPtr MessageHelper::CreateOnServiceUpdateNotification(
+    const hmi_apis::Common_ServiceType::eType service_type,
+    const hmi_apis::Common_ServiceEvent::eType service_event,
+    const hmi_apis::Common_ServiceStatusUpdateReason::eType
+        service_update_reason,
+    const uint32_t app_id) {
+  return MockMessageHelper::message_helper_mock()
+      ->CreateOnServiceUpdateNotification(
+          service_type, service_event, service_update_reason, app_id);
+}
 }  // namespace application_manager

@@ -341,6 +341,13 @@ class MockMessageHelper {
       CreateDisplayCapabilityUpdateToMobile,
       smart_objects::SmartObjectSPtr(const smart_objects::SmartObject&,
                                      application_manager::Application&));
+  MOCK_METHOD4(CreateOnServiceUpdateNotification,
+               smart_objects::SmartObjectSPtr(
+                   const hmi_apis::Common_ServiceType::eType service_type,
+                   const hmi_apis::Common_ServiceEvent::eType service_event,
+                   const hmi_apis::Common_ServiceStatusUpdateReason::eType
+                       service_update_reason,
+                   const uint32_t app_id));
 
   static MockMessageHelper* message_helper_mock();
 };

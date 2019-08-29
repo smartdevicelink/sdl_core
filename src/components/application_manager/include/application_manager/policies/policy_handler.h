@@ -103,8 +103,11 @@ class PolicyHandler : public PolicyHandlerInterface,
   void OnSnapshotCreated(const BinaryMessage& pt_string,
                          const std::vector<int>& retry_delay_seconds,
                          uint32_t timeout_exchange) OVERRIDE;
+
+  PTURetryHandler& ptu_retry_handler() const OVERRIDE;
 #else   // EXTERNAL_PROPRIETARY_MODE
-  void OnSnapshotCreated(const BinaryMessage& pt_string) OVERRIDE;
+  void OnSnapshotCreated(const BinaryMessage& pt_string,
+                         const PTUIterationType iteration_type) OVERRIDE;
 #endif  // EXTERNAL_PROPRIETARY_MODE
   virtual bool GetPriority(const std::string& policy_app_id,
                            std::string* priority) const OVERRIDE;
@@ -176,6 +179,9 @@ class PolicyHandler : public PolicyHandlerInterface,
                          const std::string& policy_app_id,
                          const std::string& hmi_level) OVERRIDE;
 
+#ifndef EXTERNAL_PROPRIETARY_MODE
+  void OnPTUTimeOut() OVERRIDE;
+#endif
   /**
    * Gets all allowed module types
    * @param app_id unique identifier of application
@@ -456,9 +462,12 @@ class PolicyHandler : public PolicyHandlerInterface,
                              std::string& cloud_transport_type,
                              std::string& hybrid_app_preference) const OVERRIDE;
 
+  void OnAuthTokenUpdated(const std::string& policy_app_id,
+                          const std::string& auth_token) OVERRIDE;
+
   /**
-   * @brief Callback for when a SetCloudAppProperties message is received from a
-   * mobile app
+   * @brief Callback for when a SetCloudAppProperties message is received
+   * from a mobile app
    * @param message The SetCloudAppProperties message
    */
   void OnSetCloudAppProperties(
@@ -502,11 +511,11 @@ class PolicyHandler : public PolicyHandlerInterface,
 
   virtual void OnCertificateUpdated(
       const std::string& certificate_data) OVERRIDE;
+
 #ifdef EXTERNAL_PROPRIETARY_MODE
   void OnCertificateDecrypted(bool is_succeeded) OVERRIDE;
+  void ProcessCertDecryptFailed();
 #endif  // EXTERNAL_PROPRIETARY_MODE
-  void OnAuthTokenUpdated(const std::string& policy_app_id,
-                          const std::string& auth_token);
 
   virtual bool CanUpdate() OVERRIDE;
 

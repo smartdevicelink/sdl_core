@@ -78,6 +78,10 @@ enum PolicyTableStatus {
   StatusUnknown
 };
 
+enum class PTUIterationType { DefaultIteration = 0, RetryIteration };
+
+enum class ResetRetryCountType { kResetWithStatusUpdate = 0, kResetInternally };
+
 typedef rpc::Optional<rpc::Boolean> EncryptionRequired;
 
 // Code generator uses String class name, so this typedef was renamed to PTSring

@@ -105,6 +105,12 @@ const std::string kAppName = "appName";
 const WindowID kDefaultWindowId =
     mobile_apis::PredefinedWindows::DEFAULT_WINDOW;
 
+typedef hmi_apis::Common_ServiceStatusUpdateReason::eType
+    ServiceStatusUpdateReason;
+typedef hmi_apis::Common_ServiceType::eType ServiceType;
+typedef hmi_apis::Common_ServiceEvent::eType ServiceEvent;
+typedef utils::Optional<ServiceStatusUpdateReason> UpdateReasonOptional;
+
 #if defined(CLOUD_APP_WEBSOCKET_TRANSPORT_SUPPORT)
 // Cloud application params
 const std::string kEndpoint = "endpoint";
@@ -119,7 +125,20 @@ const bool kEnabled = true;
 #endif  // CLOUD_APP_WEBSOCKET_TRANSPORT_SUPPORT
 }  // namespace
 
-class ApplicationManagerImplTest : public ::testing::Test {
+struct ServiceStatus {
+  ServiceType service_type_;
+  ServiceEvent service_event_;
+  UpdateReasonOptional reason_;
+
+  ServiceStatus(ServiceType type,
+                ServiceEvent event,
+                UpdateReasonOptional reason)
+      : service_type_(type), service_event_(event), reason_(reason) {}
+};
+
+class ApplicationManagerImplTest
+    : public ::testing::Test,
+      public ::testing::WithParamInterface<ServiceStatus> {
  public:
   ApplicationManagerImplTest()
       : app_id_(0u)
@@ -149,10 +168,13 @@ class ApplicationManagerImplTest : public ::testing::Test {
     CreateAppManager();
     ON_CALL(*mock_app_ptr_, app_id()).WillByDefault(Return(kConnectionKey));
     ON_CALL(*mock_app_ptr_, device()).WillByDefault(Return(kDeviceId));
+    ON_CALL(mock_session_observer_, GetDataOnSessionKey(_, _, _, _))
+        .WillByDefault(DoAll(SetArgPointee<3u>(kDeviceId), Return(0)));
     ON_CALL(mock_connection_handler_, GetDataOnSessionKey(_, _, _, &kDeviceId))
         .WillByDefault(DoAll(SetArgPointee<3u>(app_id_), Return(0)));
     ON_CALL(mock_connection_handler_, get_session_observer())
         .WillByDefault(ReturnRef(mock_session_observer_));
+
     app_manager_impl_->SetMockRPCService(mock_rpc_service_);
     app_manager_impl_->resume_controller().set_resumption_storage(
         mock_storage_);
@@ -254,6 +276,72 @@ class ApplicationManagerImplTest : public ::testing::Test {
   std::shared_ptr<MockApplication> mock_app_ptr_;
   NiceMock<protocol_handler_test::MockProtocolHandler> mock_protocol_handler_;
 };
+
+INSTANTIATE_TEST_CASE_P(
+    ProcessServiceStatusUpdate_REQUEST_ACCEPTED,
+    ApplicationManagerImplTest,
+    ::testing::Values(ServiceStatus(ServiceType::AUDIO,
+                                    ServiceEvent::REQUEST_ACCEPTED,
+                                    UpdateReasonOptional::EMPTY),
+                      ServiceStatus(ServiceType::VIDEO,
+                                    ServiceEvent::REQUEST_ACCEPTED,
+                                    UpdateReasonOptional::EMPTY),
+                      ServiceStatus(ServiceType::RPC,
+                                    ServiceEvent::REQUEST_ACCEPTED,
+                                    UpdateReasonOptional::EMPTY)));
+
+INSTANTIATE_TEST_CASE_P(
+    ProcessServiceStatusUpdate_REQUEST_RECEIVED,
+    ApplicationManagerImplTest,
+    ::testing::Values(ServiceStatus(ServiceType::AUDIO,
+                                    ServiceEvent::REQUEST_RECEIVED,
+                                    UpdateReasonOptional::EMPTY),
+                      ServiceStatus(ServiceType::VIDEO,
+                                    ServiceEvent::REQUEST_RECEIVED,
+                                    UpdateReasonOptional::EMPTY),
+                      ServiceStatus(ServiceType::RPC,
+                                    ServiceEvent::REQUEST_RECEIVED,
+                                    UpdateReasonOptional::EMPTY)));
+
+INSTANTIATE_TEST_CASE_P(
+    ProcessServiceStatusUpdate_REQUEST_REJECTED,
+    ApplicationManagerImplTest,
+    ::testing::Values(ServiceStatus(ServiceType::AUDIO,
+                                    ServiceEvent::REQUEST_REJECTED,
+                                    UpdateReasonOptional::EMPTY),
+                      ServiceStatus(ServiceType::VIDEO,
+                                    ServiceEvent::REQUEST_REJECTED,
+                                    UpdateReasonOptional::EMPTY),
+                      ServiceStatus(ServiceType::RPC,
+                                    ServiceEvent::REQUEST_REJECTED,
+                                    UpdateReasonOptional::EMPTY)));
+
+TEST_P(ApplicationManagerImplTest,
+       ProcessServiceStatusUpdate_SendMessageToHMI) {
+  smart_objects::SmartObjectSPtr notification_ =
+      std::make_shared<smart_objects::SmartObject>(
+          smart_objects::SmartType_Map);
+  (*notification_)[strings::msg_params][hmi_notification::service_type] =
+      GetParam().service_type_;
+  (*notification_)[strings::msg_params][hmi_notification::service_event] =
+      GetParam().service_event_;
+  (*notification_)[strings::msg_params][strings::app_id] = kConnectionKey;
+
+  AddMockApplication();
+
+  ON_CALL(*mock_app_ptr_, app_id()).WillByDefault(Return(kConnectionKey));
+
+  ON_CALL(*mock_message_helper_, CreateOnServiceUpdateNotification(_, _, _, _))
+      .WillByDefault(Return(notification_));
+
+  EXPECT_CALL(*mock_rpc_service_, ManageHMICommand(notification_, _))
+      .WillOnce(Return(true));
+
+  app_manager_impl_->ProcessServiceStatusUpdate(kConnectionKey,
+                                                GetParam().service_type_,
+                                                GetParam().service_event_,
+                                                GetParam().reason_);
+}
 
 TEST_F(ApplicationManagerImplTest, ProcessQueryApp_ExpectSuccess) {
   using namespace ns_smart_device_link::ns_smart_objects;
@@ -844,6 +932,7 @@ TEST_F(ApplicationManagerImplTest,
 
   std::shared_ptr<MockApplication> nonswitching_app_ptr =
       std::make_shared<MockApplication>();
+
   const std::string nonswitching_device_id = "nonswitching";
   const std::string nonswitching_device_id_hash =
       encryption::MakeHash(nonswitching_device_id);

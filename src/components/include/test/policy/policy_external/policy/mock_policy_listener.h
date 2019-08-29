@@ -112,6 +112,9 @@ class MockPolicyListener : public ::policy::PolicyListener {
                     const std::string& policy_app_id,
                     const std::string& hmi_level));
   MOCK_METHOD0(OnLockScreenDismissalStateChanged, void());
+  MOCK_METHOD1(OnCertDecryptFinished, void(bool));
+  MOCK_METHOD0(IncrementRetryIndex, void());
+  MOCK_CONST_METHOD0(ptu_retry_handler, policy::PTURetryHandler&());
 };
 
 }  // namespace policy_test

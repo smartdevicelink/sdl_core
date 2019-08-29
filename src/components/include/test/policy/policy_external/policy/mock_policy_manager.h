@@ -102,7 +102,8 @@ class MockPolicyManager : public PolicyManager {
   MOCK_METHOD0(IncrementIgnitionCycles, void());
   MOCK_METHOD0(ForcePTExchange, std::string());
   MOCK_METHOD0(ForcePTExchangeAtUserRequest, std::string());
-  MOCK_METHOD0(ResetRetrySequence, void());
+  MOCK_METHOD1(ResetRetrySequence,
+               void(const policy::ResetRetryCountType send_event));
   MOCK_METHOD0(NextRetryTimeout, int());
   MOCK_METHOD0(TimeoutExchangeMSec, uint32_t());
   MOCK_METHOD0(RetrySequenceDelaysSeconds, const std::vector<int>());
@@ -291,6 +292,11 @@ class MockPolicyManager : public PolicyManager {
                      RequestType::State(const std::string& policy_app_id));
   MOCK_CONST_METHOD1(GetAppRequestSubTypesState,
                      RequestSubType::State(const std::string& policy_app_id));
+  MOCK_METHOD0(IncrementPTURetryIndex, void());
+  MOCK_CONST_METHOD0(IsAllowedPTURetryCountExceeded, bool());
+  MOCK_CONST_METHOD0(IsAllowedRetryCountExceeded, bool());
+  MOCK_METHOD0(OnSystemRequestReceived, void());
+  MOCK_METHOD0(RetrySequenceFailed, void());
 };
 }  // namespace policy_manager_test
 }  // namespace components

@@ -68,11 +68,16 @@ class MockSecurityManager : public ::security_manager::SecurityManager {
                void(const ::protocol_handler::RawMessagePtr));
   MOCK_METHOD1(IsCertificateUpdateRequired, bool(const uint32_t));
   MOCK_METHOD0(NotifyOnCertificateUpdateRequired, void());
-  MOCK_METHOD0(NotifyListenersOnHandshakeFailed, void());
+  MOCK_METHOD0(NotifyListenersOnGetSystemTimeFailed, void());
   MOCK_METHOD0(IsPolicyCertificateDataEmpty, bool());
+  MOCK_METHOD0(ProcessFailedPTU, void());
   MOCK_METHOD1(OnCertificateUpdated, bool(const std::string&));
   MOCK_METHOD1(PostponeHandshake, void(const uint32_t));
   MOCK_CONST_METHOD0(IsSystemTimeProviderReady, bool());
+  MOCK_METHOD0(ResetPendingSystemTimeRequests, void());
+#ifdef EXTERNAL_PROPRIETARY_MODE
+  MOCK_METHOD0(ProcessFailedCertDecrypt, void());
+#endif
 };
 
 /*

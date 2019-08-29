@@ -44,6 +44,7 @@
 #include "policy/update_status_manager.h"
 #include "policy/usage_statistics/statistics_manager.h"
 #include "utils/lock.h"
+#include "utils/timer.h"
 
 namespace policy_table = rpc::policy_table_interface_base;
 
@@ -220,8 +221,10 @@ class PolicyManagerImpl : public PolicyManager {
 
   /**
    * @brief Resets retry sequence
+   * @param send_event - if true corresponding event is sent to
+   * UpdateStatusManager
    */
-  void ResetRetrySequence() OVERRIDE;
+  void ResetRetrySequence(const ResetRetryCountType reset_type) OVERRIDE;
 
   /**
    * @brief Gets timeout to wait before next retry updating PT
@@ -885,7 +888,27 @@ class PolicyManagerImpl : public PolicyManager {
   void Add(const std::string& app_id,
            usage_statistics::AppStopwatchId type,
            int32_t timespan_seconds) OVERRIDE;
+
   // Interface StatisticsManager (end)
+
+  /**
+   * @brief Check whether allowed retry sequence count is exceeded
+   * @return bool value - true is allowed count is exceeded, otherwise - false
+   */
+  bool IsAllowedRetryCountExceeded() const OVERRIDE;
+
+  /**
+   * @brief Finish PTU retry requence
+   */
+  void RetrySequenceFailed() OVERRIDE;
+
+  /**
+   * @brief In EXTERNAL_PROPRIETARY_MODE PTU sequence is driven by HMI and
+   * begins with OnSystemRequest from HMI. Following function is called when
+   * this notification is received to track number of PTU retries and react
+   * accordingly once allowed retry count is exceeded
+   */
+  void OnSystemRequestReceived() OVERRIDE;
 
  protected:
   /**
@@ -897,6 +920,11 @@ class PolicyManagerImpl : public PolicyManager {
       const BinaryMessage& pt_content);
 
  private:
+  /**
+   * @brief Increments PTU retry index for external flow
+   */
+  void IncrementRetryIndex();
+
   /**
    * @brief Checks if PT update should be started and schedules it if needed
    */
@@ -1263,7 +1291,7 @@ class PolicyManagerImpl : public PolicyManager {
   /**
    * @brief Lock for guarding retry sequence
    */
-  sync_primitives::Lock retry_sequence_lock_;
+  mutable sync_primitives::Lock retry_sequence_lock_;
 
   /**
    * @brief Device id, which is used during PTU handling for specific
@@ -1303,6 +1331,12 @@ class PolicyManagerImpl : public PolicyManager {
    * @brief Flag for notifying that invalid PTU should be triggered
    */
   bool trigger_ptu_;
+
+  /**
+   * @brief Flag that indicates whether a PTU sequence (including retries) is in
+   * progress
+   */
+  bool is_ptu_in_progress_;
 };
 
 }  // namespace policy
