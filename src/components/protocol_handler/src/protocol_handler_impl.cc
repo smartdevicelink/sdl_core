@@ -1601,6 +1601,7 @@ const ServiceStatus ProtocolHandlerImpl::ServiceDisallowedBySettings(
     const ConnectionID connection_id,
     const uint8_t session_id,
     const bool protection) const {
+  LOG4CXX_AUTO_TRACE(logger_);
   const std::string& transport =
       session_observer_.TransportTypeProfileStringFromConnHandle(connection_id);
 

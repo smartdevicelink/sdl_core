@@ -53,7 +53,7 @@ typedef std::shared_ptr<utils::Callable> StatusNotifier;
 
 class PolicyManager : public usage_statistics::StatisticsManager,
                       public PolicyEncryptionFlagGetterInterface,
-		      public PTURetryHandler {
+                      public PTURetryHandler {
  public:
   /**
    * @brief The NotificationMode enum defines whether application will be

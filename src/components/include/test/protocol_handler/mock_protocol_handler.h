@@ -69,6 +69,7 @@ class MockProtocolHandler : public ::protocol_handler::ProtocolHandler {
                     std::vector<std::string>& rejected_params));
   MOCK_METHOD0(NotifyOnGetSystemTimeFailed, void());
   MOCK_CONST_METHOD1(IsRPCServiceSecure, bool(const uint32_t connection_key));
+  MOCK_METHOD0(ProcessFailedPTU, void());
 #ifdef EXTERNAL_PROPRIETARY_MODE
   MOCK_METHOD0(ProcessFailedCertDecrypt, void());
 #endif
