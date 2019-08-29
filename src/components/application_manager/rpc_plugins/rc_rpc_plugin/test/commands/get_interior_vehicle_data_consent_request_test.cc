@@ -99,6 +99,21 @@ class GetInteriorVehicleDataConsentRequestTest
         .WillByDefault(Return(true));
   }
 
+  void PrepareNoConsentExistInCache() {
+    ON_CALL(mock_allocation_manager_, GetAccessMode())
+        .WillByDefault(Return(hmi_apis::Common_RCAccessMode::ASK_DRIVER));
+    ON_CALL(app_mngr_, application(_)).WillByDefault(Return(mock_app_));
+    ON_CALL(*mock_app_, app_id()).WillByDefault(Return(kAppId));
+    ON_CALL(*mock_app_, policy_app_id()).WillByDefault(Return(kPolicyAppId));
+    ON_CALL(*mock_app_, mac_address()).WillByDefault(ReturnRef(kMacAddress));
+    ON_CALL(mock_rc_consent_manger_,
+            GetModuleConsent(kPolicyAppId, kMacAddress, _))
+        .WillByDefault(Return(rc_rpc_types::ModuleConsent::NOT_EXISTS));
+    ON_CALL(mock_allocation_manager_,
+            AcquireResource(_, _, mock_app_->app_id()))
+        .WillByDefault(Return(AcquireResult::IN_USE));
+  }
+
   void PrepareMobileMessage() {
     auto& msg_params = (*message_)[application_manager::strings::msg_params];
     msg_params[message_params::kModuleType] = kModule_Type;
@@ -205,6 +220,8 @@ TEST_F(GetInteriorVehicleDataConsentRequestTest,
           GetDefaultModuleIdFromCapabilities(module_type))
       .WillByDefault(Return(default_module_id));
 
+  PrepareNoConsentExistInCache();
+
   EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_, _))
       .WillOnce(DoAll(SaveArg<0>(&message_to_hmi), Return(true)));
 
@@ -225,6 +242,7 @@ TEST_F(GetInteriorVehicleDataConsentRequestTest,
   auto message_to_hmi = CreateMessage();
 
   PrepareMobileMessage();
+  PrepareNoConsentExistInCache();
 
   command_ =
       CreateRCCommand<commands::GetInteriorVehicleDataConsentRequest>(message_);
@@ -301,6 +319,7 @@ TEST_F(GetInteriorVehicleDataConsentRequestTest,
 TEST_F(GetInteriorVehicleDataConsentRequestTest,
        On_Event_ConsentsSizeIsNotEqualModuleIdsSize_Response_GENERIC_ERROR) {
   PrepareMobileMessage();
+  PrepareNoConsentExistInCache();
 
   // ModuleIds collection will be saved
   command_ =
@@ -338,6 +357,7 @@ TEST_F(GetInteriorVehicleDataConsentRequestTest,
 TEST_F(GetInteriorVehicleDataConsentRequestTest,
        On_Event_SaveModuleConsentsToLastState_Response_SUCCESS) {
   PrepareMobileMessage();
+  PrepareNoConsentExistInCache();
 
   // ModuleIds collection will be saved
   command_ =

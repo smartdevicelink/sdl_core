@@ -82,6 +82,16 @@ class GetInteriorVehicleDataConsentRequest
    */
   bool SaveModuleIdConsents(std::string& info_out,
                             const smart_objects::SmartObject& msg_params);
+
+  /**
+   * @brief Gets calculated vehicle data consent and puts it into provided smart
+   * object
+   * @param out_response output smart object
+   * @return true in case all required consent information was provided in
+   * output smart object, otherwise returns false
+   */
+  bool GetCalculatedVehicleDataConsent(
+      smart_objects::SmartObject& out_response) const;
 };
 
 }  // namespace commands
