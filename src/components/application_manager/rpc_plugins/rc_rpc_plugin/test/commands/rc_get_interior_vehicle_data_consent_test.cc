@@ -41,6 +41,7 @@
 #include "application_manager/mock_request_controller_settings.h"
 #include "application_manager/mock_rpc_plugin.h"
 #include "application_manager/mock_rpc_plugin_manager.h"
+#include "application_manager/mock_rpc_protection_manager.h"
 #include "application_manager/request_controller.h"
 #include "application_manager/rpc_service_impl.h"
 #include "hmi_message_handler/mock_hmi_message_handler.h"
@@ -101,11 +102,14 @@ class RCGetInteriorVehicleDataConsentTest
       : mock_app_(std::make_shared<NiceMock<MockApplication> >())
       , command_holder(app_mngr_)
       , request_controller(mock_request_controler)
+      , rpc_protection_manager_(
+            std::make_shared<application_manager::MockRPCProtectionManager>())
       , rpc_service_(app_mngr_,
                      request_controller,
                      &mock_protocol_handler,
                      &mock_hmi_handler,
-                     command_holder)
+                     command_holder,
+                     rpc_protection_manager_)
       , rc_app_extention_(std::make_shared<RCAppExtension>(kPluginID))
       , mock_rpc_plugin_manager(
             std::make_shared<NiceMock<MockRPCPluginManager> >())
@@ -144,6 +148,10 @@ class RCGetInteriorVehicleDataConsentTest
         .WillByDefault(Return(true));
     ON_CALL(mock_allocation_manager_, is_rc_enabled())
         .WillByDefault(Return(true));
+    ON_CALL(mock_protocol_handler, IsRPCServiceSecure(_))
+        .WillByDefault(Return(false));
+    ON_CALL(*rpc_protection_manager_, CheckPolicyEncryptionFlag(_, _, _))
+        .WillByDefault(Return(false));
   }
 
   template <class Command>
@@ -187,6 +195,8 @@ class RCGetInteriorVehicleDataConsentTest
   MockRPCPlugin mock_rpc_plugin;
   MockCommandFactory mock_command_factory;
   am::request_controller::RequestController request_controller;
+  std::shared_ptr<application_manager::MockRPCProtectionManager>
+      rpc_protection_manager_;
   am::rpc_service::RPCServiceImpl rpc_service_;
   std::shared_ptr<RCAppExtension> rc_app_extention_;
   std::shared_ptr<am::plugin_manager::MockRPCPluginManager>

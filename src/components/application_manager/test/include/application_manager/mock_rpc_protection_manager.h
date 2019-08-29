@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Ford Motor Company
+ * Copyright (c) 2019, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,71 +30,36 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "protocol/raw_message.h"
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_TEST_INCLUDE_APPLICATION_MANAGER_MOCK_RPC_PROTECTION_MANAGER_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_TEST_INCLUDE_APPLICATION_MANAGER_MOCK_RPC_PROTECTION_MANAGER_H_
 
-#include <memory.h>
+#include "application_manager/rpc_protection_manager.h"
+#include "gmock/gmock.h"
 
-namespace protocol_handler {
+namespace application_manager {
+class MockRPCProtectionManager : public RPCProtectionManager {
+ public:
+  MOCK_CONST_METHOD3(CheckPolicyEncryptionFlag,
+                     bool(const uint32_t function_id,
+                          const ApplicationSharedPtr app,
+                          const bool is_rpc_service_secure));
 
-RawMessage::RawMessage(uint32_t connection_key,
-                       uint32_t protocol_version,
-                       const uint8_t* const data_param,
-                       uint32_t data_sz,
-                       bool protection,
-                       uint8_t type,
-                       uint32_t payload_size)
-    : connection_key_(connection_key)
-    , data_(NULL)
-    , data_size_(data_sz)
-    , protocol_version_(protocol_version)
-    , protection_(protection)
-    , service_type_(ServiceTypeFromByte(type))
-    , payload_size_(payload_size)
-    , waiting_(false) {
-  if (data_param && data_sz > 0) {
-    data_ = new uint8_t[data_sz];
-    memcpy(data_, data_param, sizeof(*data_) * data_sz);
-  }
-}
+  MOCK_METHOD3(CreateEncryptionNeededResponse,
+               std::shared_ptr<smart_objects::SmartObject>(
+                   const uint32_t connection_key,
+                   const uint32_t function_id,
+                   const uint32_t conrrelation_id));
 
-RawMessage::~RawMessage() {
-  delete[] data_;
-}
+  MOCK_CONST_METHOD2(IsInEncryptionNeededCache,
+                     bool(const uint32_t app_id,
+                          const uint32_t conrrelation_id));
 
-uint32_t RawMessage::connection_key() const {
-  return connection_key_;
-}
+  MOCK_METHOD2(AddToEncryptionNeededCache,
+               void(const uint32_t app_id, const uint32_t correlation_id));
 
-void RawMessage::set_connection_key(uint32_t key) {
-  connection_key_ = key;
-}
+  MOCK_METHOD2(RemoveFromEncryptionNeededCache,
+               void(const uint32_t app_id, const uint32_t correlation_id));
+};
+}  // namespace application_manager
 
-uint8_t* RawMessage::data() const {
-  return data_;
-}
-
-size_t RawMessage::payload_size() const {
-  return payload_size_;
-}
-
-size_t RawMessage::data_size() const {
-  return data_size_;
-}
-
-uint32_t RawMessage::protocol_version() const {
-  return protocol_version_;
-}
-
-bool RawMessage::IsWaiting() const {
-  return waiting_;
-}
-
-bool RawMessage::protection_flag() const {
-  return protection_;
-}
-
-void RawMessage::set_waiting(bool v) {
-  waiting_ = v;
-}
-
-}  // namespace protocol_handler
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_TEST_INCLUDE_APPLICATION_MANAGER_MOCK_RPC_PROTECTION_MANAGER_H_

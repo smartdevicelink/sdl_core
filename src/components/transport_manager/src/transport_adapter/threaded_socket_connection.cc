@@ -304,7 +304,7 @@ bool ThreadedSocketConnection::Receive() {
           logger_,
           "Received " << bytes_read << " bytes for connection " << this);
       ::protocol_handler::RawMessagePtr frame(
-          new protocol_handler::RawMessage(0, 0, buffer, bytes_read));
+          new protocol_handler::RawMessage(0, 0, buffer, bytes_read, false));
       controller_->DataReceiveDone(
           device_handle(), application_handle(), frame);
     } else if (bytes_read < 0) {

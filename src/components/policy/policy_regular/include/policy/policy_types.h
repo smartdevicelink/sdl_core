@@ -41,6 +41,7 @@
 #include <utility>
 #include <vector>
 
+#include "policy/policy_table/types.h"
 #include "transport_manager/common.h"
 #include "utils/helpers.h"
 
@@ -77,6 +78,8 @@ enum PolicyTableStatus {
   StatusUnknown
 };
 
+typedef rpc::Optional<rpc::Boolean> EncryptionRequired;
+
 // Code generator uses String class name, so this typedef was renamed to PTSring
 typedef std::string PTString;
 typedef std::vector<uint8_t> BinaryMessage;
@@ -102,6 +105,7 @@ struct ParameterPermissions
 struct RpcPermissions {
   HMIPermissions hmi_permissions;
   ParameterPermissions parameter_permissions;
+  EncryptionRequired require_encryption;
 };
 
 typedef std::map<RpcName, RpcPermissions> Permissions;
@@ -428,6 +432,28 @@ struct ExternalConsentStatusItemSorter {
 };
 
 /**
+ * @brief The ApplicationPolicyActions struct contains actions which should be
+ * done for some application
+ */
+struct ApplicationPolicyActions {
+  ApplicationPolicyActions()
+      : is_notify_system(false)
+      , is_send_permissions_to_app(false)
+      , is_consent_needed(false) {}
+
+  bool is_notify_system;
+  bool is_send_permissions_to_app;
+  bool is_consent_needed;
+};
+
+/**
+ * @brief ApplicationsPoliciesActions map of actions to be done for every
+ * application
+ */
+typedef std::map<std::string, ApplicationPolicyActions>
+    ApplicationsPoliciesActions;
+
+/**
  * @brief Customer connectivity settings status
  */
 typedef std::set<ExternalConsentStatusItem, ExternalConsentStatusItemSorter>
@@ -476,7 +502,8 @@ enum PermissionsCheckResult {
   RESULT_CONSENT_NOT_REQIURED,
   RESULT_PERMISSIONS_REVOKED_AND_CONSENT_NEEDED,
   RESULT_REQUEST_TYPE_CHANGED,
-  RESULT_REQUEST_SUBTYPE_CHANGED
+  RESULT_REQUEST_SUBTYPE_CHANGED,
+  RESULT_ENCRYPTION_REQUIRED_FLAG_CHANGED
 };
 
 /**

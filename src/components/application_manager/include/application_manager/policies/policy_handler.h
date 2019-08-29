@@ -77,6 +77,8 @@ class PolicyHandler : public PolicyHandlerInterface,
   PolicyHandler(const policy::PolicySettings& get_settings,
                 application_manager::ApplicationManager& application_manager);
   virtual ~PolicyHandler();
+  PolicyEncryptionFlagGetterInterfaceSPtr PolicyEncryptionFlagGetter()
+      const OVERRIDE;
   bool LoadPolicyLibrary() OVERRIDE;
   bool PolicyEnabled() const OVERRIDE;
   bool InitPolicyTable() OVERRIDE;
@@ -673,6 +675,8 @@ class PolicyHandler : public PolicyHandlerInterface,
   const PolicySettings& get_settings() const OVERRIDE;
 
   virtual void OnPTUFinished(const bool ptu_result) OVERRIDE;
+
+  virtual void OnPTInited() OVERRIDE;
 
   /**
    * @brief OnDeviceSwitching Notifies policy manager on device switch event so

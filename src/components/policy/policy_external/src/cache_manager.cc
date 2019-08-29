@@ -325,6 +325,20 @@ const policy_table::Strings& CacheManager::GetGroups(const PTString& app_id) {
   return pt_->policy_table.app_policies_section.apps[app_id].groups;
 }
 
+const policy_table::Strings CacheManager::GetPolicyAppIDs() const {
+  LOG4CXX_AUTO_TRACE(logger_);
+  sync_primitives::AutoLock auto_lock(cache_lock_);
+
+  const auto apps = pt_->policy_table.app_policies_section.apps;
+
+  policy_table::Strings policy_app_ids;
+  for (const auto& app : apps) {
+    policy_app_ids.push_back(app.first);
+  }
+
+  return policy_app_ids;
+}
+
 bool CacheManager::CanAppKeepContext(const std::string& app_id) const {
   CACHE_MANAGER_CHECK(false);
   sync_primitives::AutoLock auto_lock(cache_lock_);
@@ -3076,6 +3090,48 @@ void CacheManager::BackgroundBackuper::DoBackup() {
   sync_primitives::AutoLock auto_lock(need_backup_lock_);
   new_data_available_ = true;
   backup_notifier_.NotifyOne();
+}
+
+EncryptionRequired CacheManager::GetAppEncryptionRequiredFlag(
+    const std::string& application) const {
+  LOG4CXX_AUTO_TRACE(logger_);
+  sync_primitives::AutoLock auto_lock(cache_lock_);
+
+  return pt_->policy_table.app_policies_section.apps[application]
+      .encryption_required;
+}
+
+EncryptionRequired CacheManager::GetFunctionalGroupingEncryptionRequiredFlag(
+    const std::string& functional_group) const {
+  LOG4CXX_AUTO_TRACE(logger_);
+  sync_primitives::AutoLock auto_lock(cache_lock_);
+
+  const auto& functional_groupings = pt_->policy_table.functional_groupings;
+
+  const auto& grouping_itr = functional_groupings.find(functional_group);
+  if (grouping_itr == functional_groupings.end()) {
+    LOG4CXX_WARN(logger_, "Group " << functional_group << " not found");
+    return rpc::Optional<rpc::Boolean>(rpc::Boolean(false));
+  }
+
+  return (*grouping_itr).second.encryption_required;
+}
+
+void CacheManager::GetApplicationParams(
+    const std::string& application_name,
+    policy_table::ApplicationParams& application_params) const {
+  LOG4CXX_AUTO_TRACE(logger_);
+  sync_primitives::AutoLock auto_lock(cache_lock_);
+
+  const auto apps = pt_->policy_table.app_policies_section.apps;
+  const auto it = apps.find(application_name);
+  if (apps.end() == it) {
+    LOG4CXX_WARN(logger_,
+                 "Application " << application_name << " was not found");
+    return;
+  }
+
+  application_params = (*it).second;
 }
 
 }  // namespace policy

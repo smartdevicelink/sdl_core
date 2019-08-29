@@ -39,6 +39,7 @@
  *\namespace protocol_handlerHandler
  *\brief Namespace for SmartDeviceLink ProtocolHandler related functionality.
  */
+
 namespace protocol_handler {
 
 class ProtocolObserver;
@@ -69,10 +70,12 @@ class ProtocolHandler {
   /**
    * \brief Method for sending message to Mobile Application.
    * \param message RawMessage with params to be sent to Mobile App.
+   * \param needs_encryption whether message needs to be encrypted by policy
    * \param final_message tells whether message's
    * connection must be closed when message is processed
    */
   virtual void SendMessageToMobileApp(const RawMessagePtr message,
+                                      bool needs_encryption,
                                       bool final_message) = 0;
 
   /**
@@ -135,6 +138,8 @@ class ProtocolHandler {
   virtual void NotifySessionStarted(
       const SessionContext& context,
       std::vector<std::string>& rejected_params) = 0;
+
+  virtual bool IsRPCServiceSecure(const uint32_t connection_key) const = 0;
 
  protected:
   /**

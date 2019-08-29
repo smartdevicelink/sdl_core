@@ -34,6 +34,7 @@
 #define SRC_COMPONENTS_INCLUDE_TEST_APPLICATION_MANAGER_POLICIES_MOCK_POLICY_HANDLER_INTERFACE_H_
 
 #include "application_manager/application_manager.h"
+#include "application_manager/policies/policy_encryption_flag_getter.h"
 #include "application_manager/policies/policy_handler_interface.h"
 #include "gmock/gmock.h"
 #include "policy/policy_types.h"
@@ -46,6 +47,8 @@ namespace policy_test {
 class MockPolicyHandlerInterface : public policy::PolicyHandlerInterface {
  public:
   MOCK_METHOD0(LoadPolicyLibrary, bool());
+  MOCK_CONST_METHOD0(PolicyEncryptionFlagGetter,
+                     policy::PolicyEncryptionFlagGetterInterfaceSPtr());
   MOCK_CONST_METHOD0(PolicyEnabled, bool());
   MOCK_METHOD0(InitPolicyTable, bool());
   MOCK_METHOD0(ResetPolicyTable, bool());
@@ -184,6 +187,7 @@ class MockPolicyHandlerInterface : public policy::PolicyHandlerInterface {
                void(std::map<std::string, policy::StringArray> app_hmi_types));
   MOCK_METHOD1(OnCertificateUpdated, void(const std::string& certificate_data));
   MOCK_METHOD1(OnPTUFinished, void(const bool ptu_result));
+  MOCK_METHOD0(OnPTInited, void());
   MOCK_METHOD1(OnCertificateDecrypted, void(bool is_succeeded));
   MOCK_METHOD0(CanUpdate, bool());
   MOCK_METHOD2(OnDeviceConsentChanged,

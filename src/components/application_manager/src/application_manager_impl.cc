@@ -53,6 +53,7 @@
 #include "application_manager/policies/policy_handler.h"
 #include "application_manager/resumption/resume_ctrl_impl.h"
 #include "application_manager/rpc_handler_impl.h"
+#include "application_manager/rpc_protection_manager_impl.h"
 #include "application_manager/rpc_service_impl.h"
 #include "connection_handler/connection_handler_impl.h"
 #include "formatters/CFormatterJsonSDLRPCv1.h"
@@ -209,11 +210,15 @@ ApplicationManagerImpl::ApplicationManagerImpl(
   timer_pool_.push_back(clearing_timer);
   rpc_handler_.reset(new rpc_handler::RPCHandlerImpl(*this));
   commands_holder_.reset(new CommandHolderImpl(*this));
+  std::shared_ptr<RPCProtectionManager> rpc_protection_manager =
+      std::make_shared<RPCProtectionManagerImpl>(*policy_handler_);
+  policy_handler_->add_listener(rpc_protection_manager.get());
   rpc_service_.reset(new rpc_service::RPCServiceImpl(*this,
                                                      request_ctrl_,
                                                      protocol_handler_,
                                                      hmi_handler_,
-                                                     *commands_holder_));
+                                                     *commands_holder_,
+                                                     rpc_protection_manager));
 }
 
 ApplicationManagerImpl::~ApplicationManagerImpl() {

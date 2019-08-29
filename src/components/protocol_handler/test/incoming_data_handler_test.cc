@@ -68,8 +68,10 @@ class IncomingDataHandlerTest : public ::testing::Test {
   void ProcessData(transport_manager::ConnectionUID uid,
                    const uint8_t* const data,
                    const uint32_t data_size) {
-    actual_frames = data_handler.ProcessData(
-        RawMessage(uid, 0, data, data_size), &result_code, &malformed_occurs);
+    actual_frames =
+        data_handler.ProcessData(RawMessage(uid, 0, data, data_size, false),
+                                 &result_code,
+                                 &malformed_occurs);
   }
 
   void AppendPacketToTMData(const ProtocolPacket& packet) {
@@ -117,15 +119,17 @@ TEST_F(IncomingDataHandlerTest, NullData) {
 
 TEST_F(IncomingDataHandlerTest, DataForUnknownConnection) {
   size_t malformed_count = 0;
-  actual_frames = data_handler.ProcessData(
-      RawMessage(uid_unknown, 0, NULL, 0), &result_code, &malformed_count);
+  actual_frames =
+      data_handler.ProcessData(RawMessage(uid_unknown, 0, NULL, 0, false),
+                               &result_code,
+                               &malformed_count);
   EXPECT_EQ(RESULT_FAIL, result_code);
   EXPECT_EQ(malformed_count, 0u);
   EXPECT_TRUE(actual_frames.empty());
 
   AppendPacketToTMData(ProtocolPacket());
   actual_frames = data_handler.ProcessData(
-      RawMessage(uid_unknown, 0, tm_data.data(), tm_data.size()),
+      RawMessage(uid_unknown, 0, tm_data.data(), tm_data.size(), false),
       &result_code,
       &malformed_count);
   EXPECT_EQ(RESULT_FAIL, result_code);

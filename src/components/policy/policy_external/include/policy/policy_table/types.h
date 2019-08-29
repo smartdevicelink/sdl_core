@@ -116,7 +116,6 @@ typedef Integer<int32_t, 0, INT32_MAX> FunctionIDInt;
 typedef Map<Strings, 0, 255> RemoteRpcs;
 typedef Map<RemoteRpcs, 0, 255> AccessModules;
 typedef Array<Enum<ModuleType>, 0, 255> ModuleTypes;
-
 typedef AppHMIType AppHmiType;
 typedef std::vector<AppHMIType> AppHmiTypes;
 
@@ -237,6 +236,7 @@ struct ApplicationParams : PolicyBase {
   // App Service Params
   Optional<AppServiceParameters> app_service_parameters;
   Optional<Boolean> allow_unknown_rpc_passthrough;
+  Optional<Boolean> encryption_required;
 
  public:
   ApplicationParams();
@@ -331,6 +331,7 @@ struct Rpcs : CompositeType {
       disallowed_by_external_consent_entities_on;
   Optional<DisallowedByExternalConsentEntities>
       disallowed_by_external_consent_entities_off;
+  Optional<Boolean> encryption_required;
 
  public:
   Rpcs();

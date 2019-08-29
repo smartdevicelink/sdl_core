@@ -2528,7 +2528,8 @@ void MessageHelper::SendQueryApps(const uint32_t connection_key,
 void MessageHelper::SendOnPermissionsChangeNotification(
     uint32_t connection_key,
     const policy::Permissions& permissions,
-    ApplicationManager& app_mngr) {
+    ApplicationManager& app_mngr,
+    const policy::EncryptionRequired encryprion_required) {
   LOG4CXX_AUTO_TRACE(logger_);
   smart_objects::SmartObject content(smart_objects::SmartType_Map);
 
@@ -2545,8 +2546,10 @@ void MessageHelper::SendOnPermissionsChangeNotification(
   content[strings::msg_params] =
       smart_objects::SmartObject(smart_objects::SmartType_Map);
 
-  // content[strings::msg_params][strings::app_id] = connection_key;
-
+  if (encryprion_required.is_initialized()) {
+    content[strings::msg_params][strings::require_encryption] =
+        static_cast<bool>(*encryprion_required);
+  }
   content[strings::msg_params]["permissionItem"] =
       smart_objects::SmartObject(smart_objects::SmartType_Array);
 
@@ -2556,6 +2559,41 @@ void MessageHelper::SendOnPermissionsChangeNotification(
   policy::Permissions::const_iterator it_permissions = permissions.begin();
   policy::Permissions::const_iterator it_permissions_end = permissions.end();
 
+  using policy::EncryptionRequired;
+  auto permission_item_encryption_flag_state =
+      [](const EncryptionRequired& app_flag,
+         const EncryptionRequired& groups_flag) -> EncryptionRequired {
+    enum EncryptionFlagState { TRUE, FALSE, MISSING };
+    auto enum_from_optional_bool = [](const EncryptionRequired& flag) {
+      if (!flag.is_initialized()) {
+        return MISSING;
+      }
+      return *flag ? TRUE : FALSE;
+    };
+
+    typedef std::pair<EncryptionFlagState, EncryptionFlagState>
+        EnctyptionStatePair;
+    typedef std::map<EnctyptionStatePair, EncryptionRequired>
+        PermissionItemEncryptionTable;
+    static PermissionItemEncryptionTable encryption_state_table = {
+        {{TRUE, TRUE}, EncryptionRequired(true)},
+        {{TRUE, FALSE}, EncryptionRequired()},
+        {{TRUE, MISSING}, EncryptionRequired()},
+        {{FALSE, TRUE}, EncryptionRequired()},
+        {{FALSE, FALSE}, EncryptionRequired()},
+        {{FALSE, MISSING}, EncryptionRequired()},
+        {{MISSING, TRUE}, EncryptionRequired(true)},
+        {{MISSING, FALSE}, EncryptionRequired()},
+        {{MISSING, MISSING}, EncryptionRequired()},
+    };
+    const auto app_flag_state = enum_from_optional_bool(app_flag);
+    const auto groups_flag_state = enum_from_optional_bool(groups_flag);
+    auto it = encryption_state_table.find(
+        EnctyptionStatePair(app_flag_state, groups_flag_state));
+    DCHECK_OR_RETURN(it != encryption_state_table.end(), EncryptionRequired());
+    return it->second;
+  };
+
   for (size_t index_pi = 0; it_permissions != it_permissions_end;
        ++it_permissions, ++index_pi) {
     permissions_item_array[index_pi] =
@@ -2564,9 +2602,14 @@ void MessageHelper::SendOnPermissionsChangeNotification(
     smart_objects::SmartObject& permission_item =
         permissions_item_array[index_pi];
 
-    // Filling the rpcName of PermissionItem
     permission_item["rpcName"] = (*it_permissions).first;
     const policy::RpcPermissions& rpc_permissions = (*it_permissions).second;
+    auto item_require_encryption = permission_item_encryption_flag_state(
+        encryprion_required, rpc_permissions.require_encryption);
+    if (item_require_encryption.is_initialized()) {
+      const bool require_encryption = *item_require_encryption;
+      permission_item[strings::require_encryption] = require_encryption;
+    }
 
     // Creating SO for hmiPermissions
     permission_item["hmiPermissions"] =

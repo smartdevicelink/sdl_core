@@ -433,6 +433,7 @@ RawMessagePtr ProtocolPacket::serializePacket() const {
                                                  packet_header_.version,
                                                  packet,
                                                  total_packet_size,
+                                                 false,
                                                  packet_header_.serviceType));
 
   delete[] packet;

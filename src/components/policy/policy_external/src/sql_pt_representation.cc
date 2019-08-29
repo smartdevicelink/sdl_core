@@ -648,6 +648,10 @@ bool SQLPTRepresentation::GatherFunctionalGroupings(
       *rpcs_tbl.user_consent_prompt = func_group.GetString(2);
     }
 
+    if (!func_group.IsNull(3)) {
+      *rpcs_tbl.encryption_required = func_group.GetBoolean(3);
+    }
+
     const int group_id = func_group.GetInteger(0);
 
     rpcs.Bind(0, group_id);
@@ -785,6 +789,10 @@ bool SQLPTRepresentation::GatherApplicationPoliciesSection(
     const auto& gather_app_id = ((*policies).apps[app_id].is_string())
                                     ? (*policies).apps[app_id].get_string()
                                     : app_id;
+
+    if (!query.IsNull(12)) {
+      *params.encryption_required = query.GetBoolean(12);
+    }
     // Data should be gathered from db by  "default" key if application has
     // default policies
 
@@ -903,7 +911,9 @@ bool SQLPTRepresentation::SaveFunctionalGroupings(
     groups_it->second.user_consent_prompt.is_initialized()
         ? query.Bind(2, *(groups_it->second.user_consent_prompt))
         : query.Bind(2);
-
+    groups_it->second.encryption_required.is_initialized()
+        ? query.Bind(3, *(groups_it->second.encryption_required))
+        : query.Bind(3);
     if (!query.Exec() || !query.Reset()) {
       LOG4CXX_WARN(logger_, "Incorrect insert into functional groups");
       return false;
@@ -1099,6 +1109,10 @@ bool SQLPTRepresentation::SaveSpecificAppPolicy(
   app.second.allow_unknown_rpc_passthrough.is_initialized()
       ? app_query.Bind(12, *app.second.allow_unknown_rpc_passthrough)
       : app_query.Bind(12);
+
+  app.second.encryption_required.is_initialized()
+      ? app_query.Bind(13, *app.second.encryption_required)
+      : app_query.Bind(13);
 
   if (!app_query.Exec() || !app_query.Reset()) {
     LOG4CXX_WARN(logger_, "Incorrect insert into application.");
@@ -2355,6 +2369,8 @@ bool SQLPTRepresentation::CopyApplication(const std::string& source,
                         : query.Bind(16, source_app.GetString(15));
   source_app.IsNull(16) ? query.Bind(17)
                         : query.Bind(17, source_app.GetBoolean(16));
+  source_app.IsNull(17) ? query.Bind(18)
+                        : query.Bind(18, source_app.GetBoolean(17));
 
   if (!query.Exec()) {
     LOG4CXX_WARN(logger_, "Failed inserting into application.");

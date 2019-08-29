@@ -303,6 +303,11 @@ PolicyHandler::PolicyHandler(const PolicySettings& settings,
 
 PolicyHandler::~PolicyHandler() {}
 
+PolicyEncryptionFlagGetterInterfaceSPtr
+PolicyHandler::PolicyEncryptionFlagGetter() const {
+  return policy_manager_;
+}
+
 bool PolicyHandler::PolicyEnabled() const {
   return get_settings().enable_policy();
 }
@@ -364,10 +369,23 @@ bool PolicyHandler::InitPolicyTable() {
       hmi_apis::FunctionID::BasicCommunication_OnReady);
   std::string preloaded_file = get_settings().preloaded_pt_file();
   if (file_system::FileExists(preloaded_file)) {
-    return policy_manager_->InitPT(preloaded_file, &get_settings());
+    const bool pt_inited =
+        policy_manager_->InitPT(preloaded_file, &get_settings());
+    OnPTInited();
+    return pt_inited;
   }
   LOG4CXX_FATAL(logger_, "The file which contains preloaded PT is not exist");
   return false;
+}
+
+void PolicyHandler::OnPTInited() {
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  sync_primitives::AutoLock lock(listeners_lock_);
+
+  std::for_each(listeners_.begin(),
+                listeners_.end(),
+                std::mem_fun(&PolicyHandlerObserver::OnPTInited));
 }
 
 bool PolicyHandler::ResetPolicyTable() {
@@ -444,6 +462,7 @@ void PolicyHandler::OnAppPermissionConsent(
 
 void PolicyHandler::OnDeviceConsentChanged(const std::string& device_id,
                                            const bool is_allowed) {
+  LOG4CXX_AUTO_TRACE(logger_);
   POLICY_LIB_CHECK_VOID();
   connection_handler::DeviceHandle device_handle;
   if (!application_manager_.connection_handler().GetDeviceID(device_id,
@@ -1431,8 +1450,11 @@ void PolicyHandler::OnPermissionsUpdated(const std::string& device_id,
     return;
   }
 
+  const auto require_encryption =
+      policy_manager_->GetAppEncryptionRequired(policy_app_id);
+
   MessageHelper::SendOnPermissionsChangeNotification(
-      app->app_id(), permissions, application_manager_);
+      app->app_id(), permissions, application_manager_, require_encryption);
 
   LOG4CXX_DEBUG(logger_,
                 "Notification sent for application_id: "

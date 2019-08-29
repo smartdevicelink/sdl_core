@@ -414,6 +414,12 @@ class CacheManager : public CacheManagerInterface {
   bool GetFunctionalGroupings(policy_table::FunctionalGroupings& groups);
 
   /**
+   * @brief Get policy app names from PT
+   * @return container of strings representing policy application names
+   */
+  const policy_table::Strings GetPolicyAppIDs() const OVERRIDE;
+
+  /**
    * Checks if the application is represented in policy table
    * @param app_id application id
    * @return true if application is represented in policy table
@@ -897,6 +903,16 @@ class CacheManager : public CacheManagerInterface {
   bool IsPermissionsCalculated(const std::string& device_id,
                                const std::string& policy_app_id,
                                policy::Permissions& permission);
+
+  EncryptionRequired GetAppEncryptionRequiredFlag(
+      const std::string& application_policy_name) const OVERRIDE;
+
+  EncryptionRequired GetFunctionalGroupingEncryptionRequiredFlag(
+      const std::string& functional_group) const OVERRIDE;
+
+  void GetApplicationParams(
+      const std::string& application_name,
+      policy_table::ApplicationParams& application_policies) const OVERRIDE;
 
  private:
   std::shared_ptr<policy_table::Table> pt_;

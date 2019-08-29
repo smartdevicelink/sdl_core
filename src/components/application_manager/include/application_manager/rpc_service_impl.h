@@ -38,6 +38,7 @@
 #include "application_manager/message_helper.h"
 #include "application_manager/mobile_message_handler.h"
 #include "application_manager/request_controller.h"
+#include "application_manager/rpc_protection_manager.h"
 #include "application_manager/rpc_service.h"
 #include "application_manager/usage_statistics.h"
 
@@ -87,6 +88,14 @@ typedef threads::MessageLoopThread<utils::PrioritizedQueue<MessageToHmi> >
     ToHmiQueue;
 }  // namespace impl
 
+typedef std::shared_ptr<RPCProtectionManager> RPCProtectionManagerSPtr;
+
+enum class EncryptionFlagCheckResult {
+  kSuccess_Protected,
+  kSuccess_NotProtected,
+  kError_EncryptionNeeded
+};
+
 class RPCServiceImpl : public RPCService,
                        public impl::ToMobileQueue::Handler,
                        public impl::ToHmiQueue::Handler {
@@ -103,7 +112,8 @@ class RPCServiceImpl : public RPCService,
                  request_controller::RequestController& request_ctrl,
                  protocol_handler::ProtocolHandler* protocol_handler,
                  hmi_message_handler::HMIMessageHandler* hmi_handler,
-                 CommandHolder& commands_holder);
+                 CommandHolder& commands_holder,
+                 RPCProtectionManagerSPtr rpc_protection_manager);
   ~RPCServiceImpl();
 
   bool ManageMobileCommand(const commands::MessageSharedPtr message,
@@ -133,6 +143,11 @@ class RPCServiceImpl : public RPCService,
   bool ConvertSOtoMessage(const smart_objects::SmartObject& message,
                           Message& output,
                           const bool allow_unknown_parameters = false);
+
+  EncryptionFlagCheckResult IsEncryptionRequired(
+      const smart_objects::SmartObject& message,
+      ApplicationSharedPtr app,
+      const bool is_rpc_service_secure) const;
   hmi_apis::HMI_API& hmi_so_factory();
   mobile_apis::MOBILE_API& mobile_so_factory();
   void CheckSourceForUnsupportedRequest(
@@ -143,6 +158,7 @@ class RPCServiceImpl : public RPCService,
   request_controller::RequestController& request_ctrl_;
   protocol_handler::ProtocolHandler* protocol_handler_;
   hmi_message_handler::HMIMessageHandler* hmi_handler_;
+  RPCProtectionManagerSPtr rpc_protection_manager_;
   CommandHolder& commands_holder_;
   // Thread that pumps messages being passed to mobile side.
   impl::ToMobileQueue messages_to_mobile_;

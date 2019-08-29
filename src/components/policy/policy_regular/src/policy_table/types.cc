@@ -31,7 +31,6 @@ PolicyBase::~PolicyBase() {}
 PolicyBase::PolicyBase(const Json::Value* value__)
     : CompositeType(InitHelper(value__, &Json::Value::isObject))
     , priority(impl::ValueMember(value__, "priority")) {}
-
 Json::Value PolicyBase::ToJsonValue() const {
   Json::Value result__(Json::objectValue);
   impl::WriteJsonField("priority", priority, &result__);
@@ -280,7 +279,8 @@ ApplicationParams::ApplicationParams(const Json::Value* value__)
     , icon_url(impl::ValueMember(value__, "icon_url"))
     , app_service_parameters(impl::ValueMember(value__, "app_services"))
     , allow_unknown_rpc_passthrough(
-          impl::ValueMember(value__, "allow_unknown_rpc_passthrough")) {}
+          impl::ValueMember(value__, "allow_unknown_rpc_passthrough"))
+    , encryption_required(impl::ValueMember(value__, "encryption_required")) {}
 
 Json::Value ApplicationParams::ToJsonValue() const {
   Json::Value result__(PolicyBase::ToJsonValue());
@@ -305,6 +305,8 @@ Json::Value ApplicationParams::ToJsonValue() const {
   impl::WriteJsonField("allow_unknown_rpc_passthrough",
                        allow_unknown_rpc_passthrough,
                        &result__);
+  impl::WriteJsonField("encryption_required", encryption_required, &result__);
+
   return result__;
 }
 
@@ -358,6 +360,9 @@ bool ApplicationParams::is_valid() const {
     return false;
   }
   if (!allow_unknown_rpc_passthrough.is_valid()) {
+    return false;
+  }
+  if (!encryption_required.is_valid()) {
     return false;
   }
   return Validate();
@@ -420,6 +425,9 @@ bool ApplicationParams::struct_empty() const {
     return false;
   }
   if (allow_unknown_rpc_passthrough.is_initialized()) {
+    return false;
+  }
+  if (encryption_required.is_initialized()) {
     return false;
   }
   return true;
@@ -487,6 +495,10 @@ void ApplicationParams::ReportErrors(rpc::ValidationReport* report__) const {
     allow_unknown_rpc_passthrough.ReportErrors(
         &report__->ReportSubobject("allow_unknown_rpc_passthrough"));
   }
+  if (!encryption_required.is_valid()) {
+    encryption_required.ReportErrors(
+        &report__->ReportSubobject("encryption_required"));
+  }
 }
 
 void ApplicationParams::SetPolicyTableType(PolicyTableType pt_type) {
@@ -535,6 +547,7 @@ bool RpcParameters::is_valid() const {
   if (!parameters.is_valid()) {
     return false;
   }
+
   return Validate();
 }
 
@@ -581,12 +594,14 @@ Rpcs::~Rpcs() {}
 Rpcs::Rpcs(const Json::Value* value__)
     : CompositeType(InitHelper(value__, &Json::Value::isObject))
     , user_consent_prompt(impl::ValueMember(value__, "user_consent_prompt"))
-    , rpcs(impl::ValueMember(value__, "rpcs")) {}
+    , rpcs(impl::ValueMember(value__, "rpcs"))
+    , encryption_required(impl::ValueMember(value__, "encryption_required")) {}
 
 Json::Value Rpcs::ToJsonValue() const {
   Json::Value result__(Json::objectValue);
   impl::WriteJsonField("user_consent_prompt", user_consent_prompt, &result__);
   impl::WriteJsonField("rpcs", rpcs, &result__);
+  impl::WriteJsonField("encryption_required", encryption_required, &result__);
   return result__;
 }
 
@@ -595,6 +610,9 @@ bool Rpcs::is_valid() const {
     return false;
   }
   if (!rpcs.is_valid()) {
+    return false;
+  }
+  if (!encryption_required.is_valid()) {
     return false;
   }
   return Validate();
@@ -611,7 +629,9 @@ bool Rpcs::struct_empty() const {
   if (rpcs.is_initialized()) {
     return false;
   }
-
+  if (encryption_required.is_initialized()) {
+    return false;
+  }
   return true;
 }
 
@@ -625,6 +645,10 @@ void Rpcs::ReportErrors(rpc::ValidationReport* report__) const {
   }
   if (!rpcs.is_valid()) {
     rpcs.ReportErrors(&report__->ReportSubobject("rpcs"));
+  }
+  if (!encryption_required.is_valid()) {
+    encryption_required.ReportErrors(
+        &report__->ReportSubobject("encryption_required"));
   }
 }
 
