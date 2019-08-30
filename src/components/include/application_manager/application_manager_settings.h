@@ -83,6 +83,7 @@ class ApplicationManagerSettings : public RequestControlerSettings,
   virtual const std::string& named_audio_pipe_path() const = 0;
   virtual const std::string& video_stream_file() const = 0;
   virtual const std::string& audio_stream_file() const = 0;
+  virtual uint16_t period_for_consent_expiration() const = 0;
 
   virtual bool use_full_app_id() const = 0;
   virtual uint32_t rpc_pass_through_timeout() const = 0;

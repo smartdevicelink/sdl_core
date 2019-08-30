@@ -453,6 +453,7 @@ HMICapabilitiesImpl::HMICapabilitiesImpl(ApplicationManager& app_mngr)
     , phone_capability_(NULL)
     , video_streaming_capability_(NULL)
     , rc_capability_(NULL)
+    , seat_location_capability_(NULL)
     , app_mngr_(app_mngr)
     , hmi_language_handler_(app_mngr) {
   InitCapabilities();
@@ -757,6 +758,15 @@ void HMICapabilitiesImpl::set_rc_capability(
   rc_capability_ = new smart_objects::SmartObject(rc_capability);
 }
 
+void HMICapabilitiesImpl::set_seat_location_capability(
+    const smart_objects::SmartObject& seat_location_capability) {
+  if (seat_location_capability_) {
+    delete seat_location_capability_;
+  }
+  seat_location_capability_ =
+      new smart_objects::SmartObject(seat_location_capability);
+}
+
 void HMICapabilitiesImpl::Init(resumption::LastState* last_state) {
   hmi_language_handler_.Init(last_state);
   if (false == load_capabilities_from_file()) {
@@ -922,6 +932,11 @@ HMICapabilitiesImpl::video_streaming_capability() const {
 
 const smart_objects::SmartObject* HMICapabilitiesImpl::rc_capability() const {
   return rc_capability_;
+}
+
+const smart_objects::SmartObject*
+HMICapabilitiesImpl::seat_location_capability() const {
+  return seat_location_capability_;
 }
 
 bool HMICapabilitiesImpl::load_capabilities_from_file() {
@@ -1264,6 +1279,15 @@ bool HMICapabilitiesImpl::load_capabilities_from_file() {
           if (!rc_capability_so.empty()) {
             set_rc_supported(true);
           }
+        }
+        if (check_existing_json_member(system_capabilities,
+                                       "seatLocationCapability")) {
+          Json::Value seat_location_capability =
+              system_capabilities.get("seatLocationCapability", "");
+          smart_objects::SmartObject seat_location_capability_so;
+          formatters::CFormatterJsonBase::jsonValueToObj(
+              seat_location_capability, seat_location_capability_so);
+          set_seat_location_capability(seat_location_capability_so);
         }
       }
     }  // UI end

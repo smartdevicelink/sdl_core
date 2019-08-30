@@ -37,8 +37,15 @@
 namespace rc_rpc_plugin {
 
 /**
+ * @brief ModuleUid uniquely identify a module
+ * moduleType + moduleID
+ */
+typedef std::pair<std::string, std::string> ModuleUid;
+
+/**
  * @brief The InteriorDataCache interface for caching data class
- * Provide ability to cache module data by module type name and clear cache
+ * Provide ability to cache module data by module type name and module id
+ * and clear cache
  */
 class InteriorDataCache {
  public:
@@ -49,32 +56,35 @@ class InteriorDataCache {
 
   /**
    * @brief Add module data to cache
-   * @param module_type module type name
+   * @param module module type + module id
    * @param module_data data to be cached
    */
-  virtual void Add(const std::string& module_type,
+  virtual void Add(const ModuleUid& module,
                    const smart_objects::SmartObject& module_data) = 0;
 
   /**
    * @brief Retrieve Get cached data
-   * @param module_type data type to get from cache
+   * @param module data type to get from cache
    * @return smart object with cached data, or nulll smart object
    */
   virtual smart_objects::SmartObject Retrieve(
+      const ModuleUid& module) const = 0;
+
+  virtual std::vector<ModuleUid> GetCachedModulesByType(
       const std::string& module_type) const = 0;
 
   /**
    * @brief Contains check if data exists in cache
-   * @param module_type module type name to check in cache
+   * @param module module name + module id to check in cache
    * @return true if cached, false otherwize
    */
-  virtual bool Contains(const std::string& module_type) const = 0;
+  virtual bool Contains(const ModuleUid& module) const = 0;
 
   /**
    * @brief Remove cached data
-   * @param module_type data type to remove from cache
+   * @param module data type to remove from cache
    */
-  virtual void Remove(const std::string& module_type) = 0;
+  virtual void Remove(const ModuleUid& module) = 0;
 
   /**
    * @brief Clear clear all cached data

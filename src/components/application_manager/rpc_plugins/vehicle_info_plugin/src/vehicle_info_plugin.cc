@@ -52,7 +52,9 @@ bool VehicleInfoPlugin::Init(
     application_manager::ApplicationManager& app_manager,
     application_manager::rpc_service::RPCService& rpc_service,
     application_manager::HMICapabilities& hmi_capabilities,
-    policy::PolicyHandlerInterface& policy_handler) {
+    policy::PolicyHandlerInterface& policy_handler,
+    resumption::LastState& last_state) {
+  UNUSED(last_state);
   application_manager_ = &app_manager;
   custom_vehicle_data_manager_.reset(
       new CustomVehicleDataManagerImpl(policy_handler, rpc_service));

@@ -50,6 +50,8 @@ namespace rc_rpc_plugin {
 class ResourceAllocationManager;
 class InteriorDataCache;
 class InteriorDataManager;
+class RCCapabilitiesManager;
+class RCConsentManager;
 
 struct RCCommandParams {
   application_manager::ApplicationManager& application_manager_;
@@ -59,6 +61,8 @@ struct RCCommandParams {
   rc_rpc_plugin::ResourceAllocationManager& resource_allocation_manager_;
   rc_rpc_plugin::InteriorDataCache& interior_data_cache_;
   rc_rpc_plugin::InteriorDataManager& interior_data_manager_;
+  rc_rpc_plugin::RCCapabilitiesManager& rc_capabilities_manager_;
+  rc_rpc_plugin::RCConsentManager& rc_consent_manager_;
 };
 }  // namespace rc_rpc_plugin
 #endif  // SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_RC_RPC_PLUGIN_INCLUDE_RC_RPC_PLUGIN_COMMANDS_RC_COMMAND_PARAMS_H_

@@ -69,6 +69,7 @@ class RCOnRemoteControlSettingsNotification
  private:
   ResourceAllocationManager& resource_allocation_manager_;
   InteriorDataManager& interior_data_manager_;
+  RCConsentManager& rc_consent_manager_;
   /**
    * @brief Disalows RC functionality for all RC apps
    * All registered apps will be unsubsribed from OnInteriorVehicleData

@@ -317,6 +317,16 @@ class CommandRequestImpl : public CommandImpl,
   bool IsResultCodeUnsupported(const ResponseInfo& first,
                                const ResponseInfo& second) const;
 
+  /**
+   * @brief CheckResult checks whether the overall result
+   * of the responses is successful
+   * @param first response
+   * @param second response
+   * @return true if the overall result is successful
+   * otherwise - false
+   */
+  bool CheckResult(const ResponseInfo& first, const ResponseInfo& second) const;
+
  protected:
   /**
    * @brief Returns policy parameters permissions

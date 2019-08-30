@@ -61,9 +61,9 @@ class InteriorDataManagerImpl : public InteriorDataManager {
 
   void OnDisablingRC() OVERRIDE;
 
-  void StoreRequestToHMITime(const std::string& module_type) OVERRIDE;
+  void StoreRequestToHMITime(const ModuleUid& module) OVERRIDE;
 
-  bool CheckRequestsToHMIFrequency(const std::string& module_type) OVERRIDE;
+  bool CheckRequestsToHMIFrequency(const ModuleUid& module) OVERRIDE;
 
  private:
   /**
@@ -83,18 +83,20 @@ class InteriorDataManagerImpl : public InteriorDataManager {
       application_manager::Application& app);
 
   /**
-   * @brief UnsubscribeFromInteriorVehicleData remove module_type from cache and
+   * @brief UnsubscribeFromInteriorVehicleData remove module from cache and
    * send RC.GetInteriorVehicleData(subscribe=false) to HMI
-   * @param module_type module type that need to be unsubscribed
+   * @param module module that needs to be unsubscribed
    */
-  void UnsubscribeFromInteriorVehicleData(const std::string& module_type);
+  void UnsubscribeFromInteriorVehicleData(const ModuleUid& module);
+
+  void UnsubscribeFromInteriorVehicleDataOfType(const std::string& module_type);
 
   void ClearOldRequestsToHMIHistory();
   /**
    * @brief AppsModules mapping from applications to list of modules
    */
   typedef std::map<application_manager::ApplicationSharedPtr,
-                   std::vector<std::string> >
+                   std::vector<ModuleUid> >
       AppsModules;
 
   /**
@@ -104,11 +106,16 @@ class InteriorDataManagerImpl : public InteriorDataManager {
    */
   AppsModules AppsSubscribedModules();
 
+  typedef std::map<application_manager::ApplicationSharedPtr,
+                   std::vector<std::string> >
+      AppsModuleTypes;
+  AppsModuleTypes AppsSubscribedModuleTypes();
+
   /**
    * @brief RequestsToHMIHistory mapping from module type to vector of time
    * stamps
    */
-  typedef std::map<std::string, std::deque<date_time::TimeDuration> >
+  typedef std::map<ModuleUid, std::deque<date_time::TimeDuration> >
       RequestsToHMIHistory;
   RequestsToHMIHistory requests_to_hmi_history_;
   mutable sync_primitives::Lock requests_to_hmi_history_lock_;

@@ -135,49 +135,72 @@ smart_objects::SmartObject MergeArray(const smart_objects::SmartObject& data1,
   return result;
 }
 
-void InteriorDataCacheImpl::Add(const std::string& module_type,
+void InteriorDataCacheImpl::Add(const ModuleUid& module,
                                 const smart_objects::SmartObject& module_data) {
-  LOG4CXX_TRACE(logger_, "module_type : " << module_type);
+  LOG4CXX_TRACE(
+      logger_,
+      "module_type : " << module.first << " module_id : " << module.second);
   sync_primitives::AutoLock autolock(cached_data_lock_);
-  auto it = cached_data_.find(module_type);
+  auto it = cached_data_.find(module);
   if (cached_data_.end() == it) {
-    cached_data_[module_type] = module_data;
+    cached_data_[module] = module_data;
     return;
   }
-  cached_data_[module_type] = MergeModuleData(it->second, module_data);
+  cached_data_[module] = MergeModuleData(it->second, module_data);
 }
 
 smart_objects::SmartObject InteriorDataCacheImpl::Retrieve(
-    const std::string& module_type) const {
+    const ModuleUid& module) const {
   LOG4CXX_AUTO_TRACE(logger_);
   sync_primitives::AutoLock autolock(cached_data_lock_);
-  auto it = cached_data_.find(module_type);
+  auto it = cached_data_.find(module);
   if (it == cached_data_.end()) {
     LOG4CXX_WARN(logger_,
-                 "Module type " << module_type << " was not found in cache");
+                 "Module with type: " << module.first
+                                      << " and id: " << module.second
+                                      << " was not found in cache");
     return smart_objects::SmartObject(smart_objects::SmartType_Null);
   }
-  LOG4CXX_TRACE(logger_, "module_type : " << module_type);
+  LOG4CXX_TRACE(
+      logger_,
+      "module_type : " << module.first << " module_id : " << module.second);
   return it->second;
 }
 
-bool InteriorDataCacheImpl::Contains(const std::string& module_type) const {
+std::vector<ModuleUid> InteriorDataCacheImpl::GetCachedModulesByType(
+    const std::string& module_type) const {
+  std::vector<ModuleUid> modules;
+  for (auto& item : cached_data_) {
+    auto& module = item.first;
+    if (module_type == module.first) {
+      modules.push_back(module);
+    }
+  }
+  return modules;
+}
+
+bool InteriorDataCacheImpl::Contains(const ModuleUid& module) const {
   LOG4CXX_AUTO_TRACE(logger_);
   sync_primitives::AutoLock autolock(cached_data_lock_);
-  auto it = cached_data_.find(module_type);
+  auto it = cached_data_.find(module);
   const bool contains = it != cached_data_.end();
-  LOG4CXX_TRACE(
-      logger_,
-      "module_type : " << module_type << " " << (contains ? "true" : "false"));
+  LOG4CXX_TRACE(logger_,
+                "module_type : " << module.first
+                                 << " module_id : " << module.second << " "
+                                 << (contains ? "true" : "false"));
   return contains;
 }
 
-void InteriorDataCacheImpl::Remove(const std::string& module_type) {
-  LOG4CXX_TRACE(logger_, "module_type : " << module_type);
+void InteriorDataCacheImpl::Remove(const ModuleUid& module) {
+  LOG4CXX_TRACE(
+      logger_,
+      "module_type : " << module.first << " module_id : " << module.second);
   sync_primitives::AutoLock autolock(cached_data_lock_);
-  auto it = cached_data_.find(module_type);
+  auto it = cached_data_.find(module);
   if (cached_data_.end() == it) {
-    LOG4CXX_TRACE(logger_, "Not existing module_type : " << module_type);
+    LOG4CXX_TRACE(
+        logger_,
+        "Not existing module : " << module.first << " " << module.second);
     return;
   }
   cached_data_.erase(it);

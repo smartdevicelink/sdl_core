@@ -47,7 +47,8 @@ class AppServiceRpcPlugin : public plugins::RPCPlugin {
   bool Init(app_mngr::ApplicationManager& application_manager,
             app_mngr::rpc_service::RPCService& rpc_service,
             app_mngr::HMICapabilities& hmi_capabilities,
-            policy::PolicyHandlerInterface& policy_handler) OVERRIDE;
+            policy::PolicyHandlerInterface& policy_handler,
+            resumption::LastState& last_state) OVERRIDE;
 
   bool IsAbleToProcess(
       const int32_t function_id,

@@ -133,6 +133,17 @@ void GetSystemCapabilityRequest::Run() {
       }
       break;
     }
+    case mobile_apis::SystemCapabilityType::SEAT_LOCATION: {
+      if (hmi_capabilities.seat_location_capability()) {
+        response_params[strings::system_capability]
+                       [strings::seat_location_capability] =
+                           *hmi_capabilities.seat_location_capability();
+      } else {
+        SendResponse(false, mobile_apis::Result::DATA_NOT_AVAILABLE);
+        return;
+      }
+      break;
+    }
     case mobile_apis::SystemCapabilityType::VIDEO_STREAMING:
       if (hmi_capabilities.video_streaming_capability()) {
         response_params[strings::system_capability]

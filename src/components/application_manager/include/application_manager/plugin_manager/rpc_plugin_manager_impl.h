@@ -39,6 +39,10 @@
 #include "application_manager/rpc_service.h"
 #include "utils/optional.h"
 
+namespace resumption {
+class LastState;
+}
+
 namespace application_manager {
 namespace plugin_manager {
 
@@ -55,7 +59,8 @@ class RPCPluginManagerImpl : public RPCPluginManager {
   RPCPluginManagerImpl(ApplicationManager& app_manager,
                        rpc_service::RPCService& rpc_service,
                        HMICapabilities& hmi_capabilities,
-                       policy::PolicyHandlerInterface& policy_handler);
+                       policy::PolicyHandlerInterface& policy_handler,
+                       resumption::LastState& last_state);
 
   uint32_t LoadPlugins(const std::string& plugins_path) OVERRIDE;
 
@@ -74,6 +79,7 @@ class RPCPluginManagerImpl : public RPCPluginManager {
   rpc_service::RPCService& rpc_service_;
   HMICapabilities& hmi_capabilities_;
   policy::PolicyHandlerInterface& policy_handler_;
+  resumption::LastState& last_state_;
 
   // RPCPluginManager interface
  public:

@@ -63,8 +63,8 @@ class GetInteriorVehicleDataRequest : public RCCommandRequest {
   ~GetInteriorVehicleDataRequest();
 
  private:
-  std::vector<application_manager::ApplicationSharedPtr>
-  AppsSubscribedToModuleType(const std::string& module_type);
+  std::vector<application_manager::ApplicationSharedPtr> AppsSubscribedToModule(
+      const ModuleUid& module);
 
   /**
    * @brief Check if app wants to proceed with already setup subscription
@@ -87,7 +87,8 @@ class GetInteriorVehicleDataRequest : public RCCommandRequest {
    */
   void RemoveExcessiveSubscription();
 
-  std::string ModuleType() FINAL;
+  std::string ModuleType() const FINAL;
+  std::string ModuleId() const FINAL;
   bool excessive_subscription_occured_;
   bool ProcessCapabilities();
   void ProcessResponseToMobileFromCache(app_mngr::ApplicationSharedPtr app);

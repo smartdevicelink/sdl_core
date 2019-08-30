@@ -38,6 +38,8 @@
 #include "interfaces/MOBILE_API.h"
 #include "rc_rpc_plugin/mock/mock_interior_data_cache.h"
 #include "rc_rpc_plugin/mock/mock_interior_data_manager.h"
+#include "rc_rpc_plugin/mock/mock_rc_capabilities_manager.h"
+#include "rc_rpc_plugin/mock/mock_rc_consent_manager.h"
 #include "rc_rpc_plugin/mock/mock_resource_allocation_manager.h"
 #include "rc_rpc_plugin/rc_module_constants.h"
 #include "rc_rpc_plugin/rc_rpc_plugin.h"
@@ -58,6 +60,8 @@ namespace {
 const uint32_t kAppId = 0u;
 const uint32_t kConnectionKey = 1u;
 const std::string kPolicyAppId = "Test";
+const std::string module_type = "CLIMATE";
+const std::string module_id = "34045662-a9dc-4823-8435-91056d4c26cb";
 const int kModuleId = 153u;
 }  // namespace
 
@@ -93,6 +97,8 @@ class OnInteriorVehicleDataNotificationTest
         (*message)[application_manager::strings::msg_params];
     msg_param[message_params::kModuleData][message_params::kModuleType] =
         mobile_apis::ModuleType::CLIMATE;
+    msg_param[message_params::kModuleData][message_params::kModuleId] =
+        module_id;
     return message;
   }
 
@@ -105,7 +111,9 @@ class OnInteriorVehicleDataNotificationTest
                            mock_policy_handler_,
                            mock_allocation_manager_,
                            mock_interior_data_cache_,
-                           mock_interior_data_manager_};
+                           mock_interior_data_manager_,
+                           mock_rc_capabilities_manager_,
+                           mock_rc_consent_manger_};
     return ::std::make_shared<Command>(msg ? msg : msg = CreateMessage(),
                                        params);
   }
@@ -122,6 +130,9 @@ class OnInteriorVehicleDataNotificationTest
   application_manager::ApplicationSet apps_;
   const std::shared_ptr<sync_primitives::Lock> apps_lock_;
   DataAccessor<application_manager::ApplicationSet> apps_da_;
+  testing::NiceMock<rc_rpc_plugin_test::MockRCCapabilitiesManager>
+      mock_rc_capabilities_manager_;
+  testing::NiceMock<MockRCConsentManager> mock_rc_consent_manger_;
 };
 
 TEST_F(OnInteriorVehicleDataNotificationTest,
@@ -129,11 +140,12 @@ TEST_F(OnInteriorVehicleDataNotificationTest,
   // Arrange
   MessageSharedPtr mobile_message = CreateBasicMessage();
   apps_.insert(mock_app_);
-  rc_app_extention_->SubscribeToInteriorVehicleData(enums_value::kClimate);
+  const ModuleUid module(module_type, module_id);
+  rc_app_extention_->SubscribeToInteriorVehicleData(module);
   ON_CALL(app_mngr_, applications()).WillByDefault(Return(apps_da_));
 
   // Expectations
-  EXPECT_CALL(mock_interior_data_cache_, Add(enums_value::kClimate, _));
+  EXPECT_CALL(mock_interior_data_cache_, Add(module, _));
   MessageSharedPtr message;
   EXPECT_CALL(mock_rpc_service_, SendMessageToMobile(_, false))
       .WillOnce(SaveArg<0>(&message));
