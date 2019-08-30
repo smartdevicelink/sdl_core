@@ -1788,22 +1788,19 @@ SQLPTRepresentation::SelectPrimitiveVehicleDataItems() const {
 
 bool SQLPTRepresentation::DeleteVehicleDataItems() const {
   utils::dbms::SQLQuery query(db());
-  db_->BeginTransaction();
+  LOG4CXX_AUTO_TRACE(logger_);
+
   if (!query.Exec(sql_pt::kDeleteVehicleDataItems)) {
     LOG4CXX_ERROR(logger_,
                   "Failed clearing database: " << query.LastError().text());
-    db_->RollbackTransaction();
     return false;
   }
 
   if (!query.Exec(sql_pt::kDeleteVehicleDataItemParams)) {
     LOG4CXX_ERROR(logger_,
                   "Failed clearing database: " << query.LastError().text());
-    db_->RollbackTransaction();
     return false;
   }
-  db_->CommitTransaction();
-
   return true;
 }
 
