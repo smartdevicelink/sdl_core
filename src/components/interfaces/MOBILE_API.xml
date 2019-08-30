@@ -568,6 +568,7 @@
         <element name="VEHICLEDATA_ENGINEOILLIFE" since="5.0" />
         <element name="VEHICLEDATA_ELECTRONICPARKBRAKESTATUS" since="5.0" />
         <element name="VEHICLEDATA_CLOUDAPPVEHICLEID" since="5.1"/>
+        <element name="VEHICLEDATA_OEM_CUSTOM_DATA" since="6.0"/>
     </enum>
 
     <enum name="HybridAppPreference" since="5.1">
@@ -2089,6 +2090,9 @@
         </param>
         <param name="resultCode" type="VehicleDataResultCode" mandatory="true">
             <description>Published data result code.</description>
+        </param>
+        <param name="oemCustomDataType" type="String" mandatory="false" since="6.0">
+            <description>Type of requested oem specific parameter </description>
         </param>
     </struct>
     

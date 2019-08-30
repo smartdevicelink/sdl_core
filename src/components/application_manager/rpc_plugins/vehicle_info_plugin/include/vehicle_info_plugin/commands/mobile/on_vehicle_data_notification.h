@@ -37,6 +37,8 @@
 #include "application_manager/application.h"
 #include "application_manager/commands/command_notification_impl.h"
 #include "utils/macro.h"
+#include "vehicle_info_plugin/custom_vehicle_data_manager.h"
+#include "vehicle_info_plugin/vehicle_info_command_params.h"
 
 namespace vehicle_info_plugin {
 namespace app_mngr = application_manager;
@@ -56,10 +58,7 @@ class OnVehicleDataNotification
    * @param message Incoming SmartObject message
    **/
   OnVehicleDataNotification(const app_mngr::commands::MessageSharedPtr& message,
-                            app_mngr::ApplicationManager& application_manager,
-                            app_mngr::rpc_service::RPCService& rpc_service,
-                            app_mngr::HMICapabilities& hmi_capabilities,
-                            policy::PolicyHandlerInterface& policy_handler);
+                            const VehicleInfoCommandParams& params);
 
   /**
    * @brief OnVehicleDataNotification class destructor
@@ -78,6 +77,8 @@ class OnVehicleDataNotification
    * @param app Application to receive notification
    */
   void SendVehicleData(app_mngr::ApplicationConstSharedPtr app);
+
+  CustomVehicleDataManager& custom_vehicle_data_manager_;
 
   DISALLOW_COPY_AND_ASSIGN(OnVehicleDataNotification);
 };

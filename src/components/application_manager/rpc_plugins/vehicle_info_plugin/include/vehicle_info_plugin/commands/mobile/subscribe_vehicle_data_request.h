@@ -40,7 +40,9 @@
 #include "application_manager/application.h"
 #include "application_manager/commands/command_request_impl.h"
 #include "utils/macro.h"
+#include "vehicle_info_plugin/custom_vehicle_data_manager.h"
 #include "vehicle_info_plugin/vehicle_info_app_extension.h"
+#include "vehicle_info_plugin/vehicle_info_command_params.h"
 
 namespace vehicle_info_plugin {
 namespace app_mngr = application_manager;
@@ -60,10 +62,7 @@ class SubscribeVehicleDataRequest
    **/
   SubscribeVehicleDataRequest(
       const app_mngr::commands::MessageSharedPtr& message,
-      app_mngr::ApplicationManager& application_manager,
-      app_mngr::rpc_service::RPCService& rpc_service,
-      app_mngr::HMICapabilities& hmi_capabilities,
-      policy::PolicyHandlerInterface& policy_handler);
+      VehicleInfoCommandParams params);
 
   /**
    * @brief SubscribeButtonCommandRequest class destructor
@@ -94,7 +93,7 @@ class SubscribeVehicleDataRequest
    * @return true, if there are registered apps subscribed for VI parameter,
    * otherwise - false
    */
-  bool IsSomeoneSubscribedFor(const uint32_t param_id) const;
+  bool IsSomeoneSubscribedFor(const std::string& param_name) const;
 
   /**
    * @brief Adds VI parameters being subscribed by another or the same app to
@@ -104,14 +103,14 @@ class SubscribeVehicleDataRequest
   void AddAlreadySubscribedVI(smart_objects::SmartObject& msg_params) const;
 
   /**
-   * @brief Removes subscription for VI parameters which subsription attempt
-   * returned an error
+   * @brief Actual subscription to pending vehicle data after successful
+   * response from HMI
    * @param app Pointer to application sent subscribe request
    * @param msg_params 'message_parameters' response section reference
    */
-  void UnsubscribeFailedSubscriptions(
+  bool SubscribePendingVehicleData(
       app_mngr::ApplicationSharedPtr app,
-      const smart_objects::SmartObject& msg_params) const;
+      const smart_objects::SmartObject& msg_params);
 
   /**
    * @brief Checks if current application and other applications
@@ -134,6 +133,43 @@ class SubscribeVehicleDataRequest
                             bool& out_result);
 
   /**
+   * @brief ConvertResponseToRequestName convert RPCSpec vehicle data names
+   * from response naming to request naming.
+   * This is workaround for cluster mode.
+   * Parameter named in request message as `cluster_mode` and in response
+   * message as `cluster_mode_status`
+   * @param name mobile RPCSpec vehicle data name
+   * @return hmi RPCSpec vehicle data name
+   */
+  const std::string& ConvertResponseToRequestName(const std::string& name);
+
+  /**
+   * @brief ConvertRequestToResponseName convert RPCSpec vehicle data names from
+   * request to response
+   * * This is workaround for cluster mode.
+   * Parameter named in request message as `cluster_mode` and in response
+   * message as `cluster_mode_status`
+   * @param name mobile RPCSpec vehicle data name
+   * @return hmi RPCSpec vehicle data name
+   */
+  const std::string& ConvertRequestToResponseName(const std::string& name);
+
+  /**
+   * @brief Appends data types for vehicle data in response to mobile
+   * @param msg_params 'message_parameters' response section reference
+   */
+  void AppendDataTypesToMobileResponse(
+      smart_objects::SmartObject& msg_params) const;
+
+  /**
+   * @brief Checks subscription status of certain vehicle_item
+   * @param vi_name name of vehicle item to be checked
+   * @param msg_params 'message_parameters' response section reference
+   */
+  bool CheckSubscriptionStatus(std::string vi_name,
+                               const smart_objects::SmartObject& msg_params);
+
+  /**
    * @brief VI parameters which had been already subscribed by another apps
    * befor particular app subscribed for these parameters
    */
@@ -148,6 +184,8 @@ class SubscribeVehicleDataRequest
    * @brief VI parameters which wait for subscribe after HMI respond
    */
   VehicleInfoSubscriptions vi_waiting_for_subscribe_;
+
+  CustomVehicleDataManager& custom_vehicle_data_manager_;
 
   DISALLOW_COPY_AND_ASSIGN(SubscribeVehicleDataRequest);
 };

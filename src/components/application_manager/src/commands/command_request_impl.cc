@@ -144,19 +144,21 @@ struct DisallowedParamsInserter {
       : response_(response), code_(code) {}
 
   bool operator()(const std::string& param) {
-    const VehicleData& vehicle_data =
-        application_manager::MessageHelper::vehicle_data();
-    VehicleData::const_iterator it = vehicle_data.find(param);
-    if (vehicle_data.end() != it) {
-      smart_objects::SmartObjectSPtr disallowed_param =
-          std::make_shared<smart_objects::SmartObject>(
-              smart_objects::SmartType_Map);
-      (*disallowed_param)[strings::data_type] = (*it).second;
-      (*disallowed_param)[strings::result_code] = code_;
-      response_[strings::msg_params][param.c_str()] = *disallowed_param;
-      return true;
-    }
-    return false;
+    smart_objects::SmartObjectSPtr disallowed_param =
+        std::make_shared<smart_objects::SmartObject>(
+            smart_objects::SmartType_Map);
+
+    auto rpc_spec_vehicle_data = MessageHelper::vehicle_data();
+    auto vehicle_data = rpc_spec_vehicle_data.find(param);
+    auto vehicle_data_type =
+        vehicle_data == rpc_spec_vehicle_data.end()
+            ? mobile_apis::VehicleDataType::VEHICLEDATA_OEM_CUSTOM_DATA
+            : vehicle_data->second;
+
+    (*disallowed_param)[strings::data_type] = vehicle_data_type;
+    (*disallowed_param)[strings::result_code] = code_;
+    response_[strings::msg_params][param.c_str()] = *disallowed_param;
+    return true;
   }
 
  private:
@@ -306,9 +308,9 @@ void CommandRequestImpl::SendResponse(
   }
 
   // Add disallowed parameters and info from request back to response with
-  // appropriate
-  // reasons (VehicleData result codes)
-  if (result_code != mobile_apis::Result::APPLICATION_NOT_REGISTERED) {
+  // appropriate reasons (VehicleData result codes)
+  if (result_code != mobile_apis::Result::APPLICATION_NOT_REGISTERED &&
+      result_code != mobile_apis::Result::INVALID_DATA) {
     const mobile_apis::FunctionID::eType& id =
         static_cast<mobile_apis::FunctionID::eType>(function_id());
     if ((id == mobile_apis::FunctionID::SubscribeVehicleDataID) ||
@@ -804,49 +806,28 @@ void CommandRequestImpl::RemoveDisallowedParameters() {
 
   smart_objects::SmartObject& params = (*message_)[strings::msg_params];
 
-  // Remove from request all disallowed parameters
-  RPCParams::const_iterator it_disallowed =
-      parameters_permissions_.disallowed_params.begin();
-  RPCParams::const_iterator it_disallowed_end =
-      parameters_permissions_.disallowed_params.end();
-  for (; it_disallowed != it_disallowed_end; ++it_disallowed) {
-    if (params.keyExists(*it_disallowed)) {
-      const std::string key = *it_disallowed;
+  for (const auto& key : params.enumerate()) {
+    if (parameters_permissions_.disallowed_params.end() !=
+        parameters_permissions_.disallowed_params.find(key)) {
+      // Remove from request all disallowed parameters
       params.erase(key);
       removed_parameters_permissions_.disallowed_params.insert(key);
       LOG4CXX_INFO(logger_,
                    "Following parameter is disallowed by user: " << key);
     }
-  }
 
-  // Remove from request all undefined yet parameters
-  RPCParams::const_iterator it_undefined =
-      parameters_permissions_.undefined_params.begin();
-  RPCParams::const_iterator it_undefined_end =
-      parameters_permissions_.undefined_params.end();
-  for (; it_undefined != it_undefined_end; ++it_undefined) {
-    if (params.keyExists(*it_undefined)) {
-      const std::string key = *it_undefined;
+    else if (removed_parameters_permissions_.undefined_params.end() !=
+             removed_parameters_permissions_.undefined_params.find(key)) {
+      // Remove from request all undefined yet parameters
       params.erase(key);
       removed_parameters_permissions_.undefined_params.insert(key);
       LOG4CXX_INFO(logger_,
                    "Following parameter is disallowed by policy: " << key);
     }
-  }
 
-  // Remove from request all parameters missed in allowed
-  const VehicleData& vehicle_data =
-      application_manager::MessageHelper::vehicle_data();
-
-  VehicleData::const_iterator it_vehicle_data = vehicle_data.begin();
-  VehicleData::const_iterator it_vehicle_data_end = vehicle_data.end();
-  for (; it_vehicle_data != it_vehicle_data_end; ++it_vehicle_data) {
-    const std::string key = it_vehicle_data->first;
-    if (params.keyExists(key) &&
-        parameters_permissions_.allowed_params.end() ==
-            std::find(parameters_permissions_.allowed_params.begin(),
-                      parameters_permissions_.allowed_params.end(),
-                      key)) {
+    else if (parameters_permissions_.allowed_params.end() ==
+             parameters_permissions_.allowed_params.find(key)) {
+      // Remove from request all parameters missed in allowed
       params.erase(key);
       removed_parameters_permissions_.undefined_params.insert(key);
       LOG4CXX_INFO(logger_,

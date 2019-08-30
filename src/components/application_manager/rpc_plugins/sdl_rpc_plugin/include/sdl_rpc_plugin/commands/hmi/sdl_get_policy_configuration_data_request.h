@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018, Ford Motor Company
+ * Copyright (c) 2019, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,43 +30,55 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_HMI_GET_URLS_RESPONSE_H_
-#define SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_HMI_GET_URLS_RESPONSE_H_
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_HMI_SDL_GET_POLICY_CONFIGURATION_DATA_REQUEST_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_HMI_SDL_GET_POLICY_CONFIGURATION_DATA_REQUEST_H_
 
-#include "application_manager/commands/response_to_hmi.h"
+#include "application_manager/commands/request_from_hmi.h"
 
 namespace sdl_rpc_plugin {
 namespace app_mngr = application_manager;
+
 namespace commands {
 
-class GetUrlsResponse : public app_mngr::commands::ResponseToHMI {
+/**
+ * @brief SDLGetPolicyConfigurationDataRequest command class
+ **/
+class SDLGetPolicyConfigurationDataRequest
+    : public app_mngr::commands::RequestFromHMI {
  public:
   /**
-   * @brief GetUrlsResponse class constructor
+   * @brief SDLGetPolicyConfigurationDataRequest class constructor
    *
    * @param message Incoming SmartObject message
    **/
-  GetUrlsResponse(const app_mngr::commands::MessageSharedPtr& message,
-                  app_mngr::ApplicationManager& application_manager,
-                  app_mngr::rpc_service::RPCService& rpc_service,
-                  app_mngr::HMICapabilities& hmi_capabilities,
-                  policy::PolicyHandlerInterface& policy_handle);
+  SDLGetPolicyConfigurationDataRequest(
+      const app_mngr::commands::MessageSharedPtr& message,
+      app_mngr::ApplicationManager& application_manager,
+      app_mngr::rpc_service::RPCService& rpc_service,
+      app_mngr::HMICapabilities& hmi_capabilities,
+      policy::PolicyHandlerInterface& policy_handle);
 
   /**
-   * @brief GetUrlsResponse class destructor
+   * @brief SDLGetPolicyConfigurationDataRequest class destructor
    **/
-  virtual ~GetUrlsResponse();
+  ~SDLGetPolicyConfigurationDataRequest() OVERRIDE;
 
   /**
    * @brief Execute command
    **/
-  virtual void Run();
+  void Run() OVERRIDE;
 
  private:
-  DISALLOW_COPY_AND_ASSIGN(GetUrlsResponse);
+  hmi_apis::Common_Result::eType PrepareResponseParams(
+      smart_objects::SmartObject& response_out) const;
+
+  smart_objects::SmartObject GetValueParam(
+      const Json::Value& policy_property) const;
+
+  DISALLOW_COPY_AND_ASSIGN(SDLGetPolicyConfigurationDataRequest);
 };
 
 }  // namespace commands
 }  // namespace sdl_rpc_plugin
 
-#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_HMI_GET_URLS_RESPONSE_H_
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_HMI_SDL_GET_POLICY_CONFIGURATION_DATA_REQUEST_H_

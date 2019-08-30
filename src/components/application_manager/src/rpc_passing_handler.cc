@@ -40,6 +40,7 @@
 #include "application_manager/application_manager.h"
 #include "application_manager/commands/command_impl.h"
 #include "application_manager/message_helper.h"
+#include "application_manager/policies/policy_handler_interface.h"
 #include "application_manager/rpc_handler.h"
 #include "application_manager/rpc_passing_handler.h"
 #include "application_manager/smart_object_keys.h"
@@ -143,7 +144,7 @@ bool RPCPassingHandler::IsPassthroughAllowed(
           rpc_message[strings::params][strings::function_id].asInt());
   std::string function_id_str =
       MessageHelper::StringifiedFunctionID(function_id);
-  PolicyHandlerInterface& policy_handler = app_manager_.GetPolicyHandler();
+  auto& policy_handler = app_manager_.GetPolicyHandler();
 
   if (function_id_str.empty()) {
     // Unknown RPC, just do basic revoked and user consent checks

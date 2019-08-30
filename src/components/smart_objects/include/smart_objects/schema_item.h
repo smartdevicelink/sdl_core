@@ -40,12 +40,14 @@
 
 #include <memory>
 #include <vector>
+#include "boost/optional/optional.hpp"
 #include "utils/macro.h"
 #include "utils/semantic_version.h"
 
 namespace ns_smart_device_link {
 namespace ns_smart_objects {
 class SmartObject;
+class SMember;
 
 /**
  * @brief Base schema item.
@@ -123,6 +125,17 @@ class ISchemaItem {
   virtual void BuildObjectBySchema(const SmartObject& pattern_object,
                                    SmartObject& result_object);
 
+  virtual boost::optional<SMember&> GetMemberSchemaItem(
+      const std::string& member_key) {
+    UNUSED(member_key);
+    return boost::optional<SMember&>();
+  }
+
+  virtual void AddMemberSchemaItem(const std::string& member_key,
+                                   SMember& member) {
+    UNUSED(member_key);
+    UNUSED(member);
+  }
   /**
    * @brief Get value param, depends of children
    *

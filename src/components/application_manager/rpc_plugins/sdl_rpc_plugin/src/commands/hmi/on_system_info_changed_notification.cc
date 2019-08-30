@@ -33,6 +33,7 @@
 #include "sdl_rpc_plugin/commands/hmi/on_system_info_changed_notification.h"
 #include "application_manager/application_manager.h"
 #include "application_manager/message_helper.h"
+#include "application_manager/policies/policy_handler_interface.h"
 
 namespace sdl_rpc_plugin {
 using namespace application_manager;

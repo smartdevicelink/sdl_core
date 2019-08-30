@@ -34,6 +34,8 @@
 #include "application_manager/rpc_protection_manager_impl.h"
 
 #include "application_manager/app_service_manager.h"
+#include "application_manager/command_factory.h"
+#include "application_manager/commands/command.h"
 #include "application_manager/plugin_manager/plugin_keys.h"
 
 namespace application_manager {
@@ -50,7 +52,9 @@ RPCServiceImpl::RPCServiceImpl(
     protocol_handler::ProtocolHandler* protocol_handler,
     hmi_message_handler::HMIMessageHandler* hmi_handler,
     CommandHolder& commands_holder,
-    RPCProtectionManagerSPtr rpc_protection_manager)
+    RPCProtectionManagerSPtr rpc_protection_manager,
+    hmi_apis::HMI_API& hmi_so_factory,
+    mobile_apis::MOBILE_API& mobile_so_factory)
     : app_manager_(app_manager)
     , request_ctrl_(request_ctrl)
     , protocol_handler_(protocol_handler)
@@ -59,8 +63,8 @@ RPCServiceImpl::RPCServiceImpl(
     , commands_holder_(commands_holder)
     , messages_to_mobile_("AM ToMobile", this)
     , messages_to_hmi_("AM ToHMI", this)
-    , hmi_so_factory_(hmi_apis::HMI_API())
-    , mobile_so_factory_(mobile_apis::MOBILE_API()) {}
+    , hmi_so_factory_(hmi_so_factory)
+    , mobile_so_factory_(mobile_so_factory) {}
 
 RPCServiceImpl::~RPCServiceImpl() {}
 
@@ -546,10 +550,6 @@ void RPCServiceImpl::SendMessageToMobile(
         msg_to_mobile[strings::params][strings::connection_key].asUInt(),
         msg_to_mobile[strings::params][strings::function_id].asInt());
   } else if (app) {
-    mobile_apis::FunctionID::eType function_id =
-        static_cast<mobile_apis::FunctionID::eType>(
-            (*message)[strings::params][strings::function_id].asUInt());
-
     RPCParams params;
 
     const smart_objects::SmartObject& s_map = (*message)[strings::msg_params];
@@ -604,7 +604,6 @@ void RPCServiceImpl::SendMessageToMobile(
 void RPCServiceImpl::SendMessageToHMI(
     const commands::MessageSharedPtr message) {
   LOG4CXX_AUTO_TRACE(logger_);
-
   if (!message) {
     LOG4CXX_WARN(logger_, "Null-pointer message received.");
     NOTREACHED();
@@ -645,7 +644,6 @@ void RPCServiceImpl::SendMessageToHMI(
                  "Cannot send message to HMI: failed to create string");
     return;
   }
-
   messages_to_hmi_.PostMessage(impl::MessageToHmi(message_to_send));
 }
 
@@ -795,6 +793,28 @@ bool RPCServiceImpl::ConvertSOtoMessage(
 
   LOG4CXX_DEBUG(logger_, "Successfully parsed smart object into message");
   return true;
+}
+
+void RPCServiceImpl::UpdateMobileRPCParams(
+    const mobile_apis::FunctionID::eType& function_id,
+    const mobile_apis::messageType::eType& message_type,
+    const std::map<std::string, SMember>& members) {
+  mobile_so_factory().ResetFunctionSchema(function_id, message_type);
+  for (const auto& item : members) {
+    mobile_so_factory().AddCustomMember(
+        function_id, message_type, item.first, item.second);
+  }
+}
+
+void RPCServiceImpl::UpdateHMIRPCParams(
+    const hmi_apis::FunctionID::eType& function_id,
+    const hmi_apis::messageType::eType& message_type,
+    const std::map<std::string, SMember>& members) {
+  hmi_so_factory().ResetFunctionSchema(function_id, message_type);
+  for (const auto& item : members) {
+    hmi_so_factory().AddCustomMember(
+        function_id, message_type, item.first, item.second);
+  }
 }
 
 hmi_apis::HMI_API& RPCServiceImpl::hmi_so_factory() {

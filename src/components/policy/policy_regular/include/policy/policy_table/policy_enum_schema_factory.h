@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2018, Ford Motor Company
+/**
+ * Copyright (c) 2017, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,34 +30,31 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "sdl_rpc_plugin/commands/hmi/get_urls_response.h"
-#include "application_manager/rpc_service.h"
+#ifndef SRC_COMPONENTS_POLICY_POLICY_REGULAR_INCLUDE_POLICY_POLICY_TABLE_POLICY_ENUM_SCHEMA_FACTORY_H
+#define SRC_COMPONENTS_POLICY_POLICY_REGULAR_INCLUDE_POLICY_POLICY_TABLE_POLICY_ENUM_SCHEMA_FACTORY_H
+#include <memory>
+#include <string>
 
-namespace sdl_rpc_plugin {
-using namespace application_manager;
-namespace commands {
+#include "smart_objects/smart_schema.h"
 
-GetUrlsResponse::GetUrlsResponse(
-    const application_manager::commands::MessageSharedPtr& message,
-    ApplicationManager& application_manager,
-    rpc_service::RPCService& rpc_service,
-    HMICapabilities& hmi_capabilities,
-    policy::PolicyHandlerInterface& policy_handle)
-    : ResponseToHMI(message,
-                    application_manager,
-                    rpc_service,
-                    hmi_capabilities,
-                    policy_handle) {}
+namespace rpc {
+namespace policy_table_interface_base {
 
-GetUrlsResponse::~GetUrlsResponse() {}
+class EnumSchemaItemFactory {
+ public:
+  /**
+   * @brief Get enum schema from enum name
+   * Implementation of this function should be generated from MOBILE_API.xml
+   * @param enum_name enum name to get schema factory for
+   * @return shared pointer to schema factory or empty shared pointer if
+   * enum_name is wrong
+   */
+  static std::shared_ptr<ns_smart_device_link::ns_smart_objects::ISchemaItem>
+  Get(const std::string& enum_name);
 
-void GetUrlsResponse::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
-  (*message_)[strings::params][strings::protocol_type] = hmi_protocol_type_;
-  (*message_)[strings::params][strings::protocol_version] = protocol_version_;
+  static bool IsRPCSpecVehicleDataType(const std::string& vd_name);
+};
 
-  rpc_service_.SendMessageToHMI(message_);
-}
-
-}  // namespace commands
-}  // namespace sdl_rpc_plugin
+}  // namespace policy_table_interface_base
+}  // namespace rpc
+#endif  // SRC_COMPONENTS_POLICY_POLICY_REGULAR_INCLUDE_POLICY_POLICY_TABLE_POLICY_ENUM_SCHEMA_FACTORY_H

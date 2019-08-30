@@ -318,13 +318,6 @@ TEST_F(CommandRequestImplTest, SendHMIRequest_UseEvent_SUCCESS) {
 }
 
 TEST_F(CommandRequestImplTest, RemoveDisallowedParameters_SUCCESS) {
-  am::VehicleData vehicle_data;
-  vehicle_data.insert(am::VehicleData::value_type(
-      kMissedParam, mobile_apis::VehicleDataType::VEHICLEDATA_MYKEY));
-
-  EXPECT_CALL(mock_message_helper_, vehicle_data())
-      .WillOnce(ReturnRef(vehicle_data));
-
   MessageSharedPtr msg = CreateMessage();
   (*msg)[strings::msg_params][kDisallowedParam1] = 0u;
   (*msg)[strings::msg_params][kDisallowedParam2] = 0u;
@@ -333,7 +326,6 @@ TEST_F(CommandRequestImplTest, RemoveDisallowedParameters_SUCCESS) {
   (*msg)[strings::msg_params][kMissedParam] = 0u;
 
   CommandPtr command = CreateCommand<UCommandRequestImpl>(msg);
-
   CommandParametersPermissions& permission = command->parameters_permissions();
   permission.disallowed_params.insert(kDisallowedParam1);
   permission.disallowed_params.insert(kDisallowedParam2);
@@ -456,12 +448,12 @@ TEST_F(CommandRequestImplTest, AddDisallowedParameters_SUCCESS) {
   vehicle_data.insert(am::VehicleData::value_type(
       kDisallowedParam1, mobile_apis::VehicleDataType::VEHICLEDATA_MYKEY));
 
-  EXPECT_CALL(mock_message_helper_, vehicle_data())
-      .WillOnce(ReturnRef(vehicle_data));
-
   MessageSharedPtr msg;
 
   CommandPtr command = CreateCommand<UCommandRequestImpl>(msg);
+
+  ON_CALL(mock_message_helper_, vehicle_data())
+      .WillByDefault(ReturnRef(vehicle_data));
 
   command->removed_parameters_permissions().disallowed_params.insert(
       kDisallowedParam1);
@@ -509,9 +501,6 @@ TEST_F(CommandRequestImplTest,
   vehicle_data.insert(am::VehicleData::value_type(
       kDisallowedParam1, mobile_apis::VehicleDataType::VEHICLEDATA_MYKEY));
 
-  EXPECT_CALL(mock_message_helper_, vehicle_data())
-      .WillOnce(ReturnRef(vehicle_data));
-
   MessageSharedPtr msg = CreateMessage();
   (*msg)[strings::params][strings::function_id] =
       mobile_apis::FunctionID::SubscribeVehicleDataID;
@@ -522,6 +511,9 @@ TEST_F(CommandRequestImplTest,
       kDisallowedParam1);
 
   MessageSharedPtr result;
+
+  ON_CALL(mock_message_helper_, vehicle_data())
+      .WillByDefault(ReturnRef(vehicle_data));
 
   EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(_, _))
       .WillOnce(DoAll(SaveArg<0>(&result), Return(true)));

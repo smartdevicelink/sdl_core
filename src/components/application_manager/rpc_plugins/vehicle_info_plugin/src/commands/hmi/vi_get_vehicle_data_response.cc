@@ -31,6 +31,8 @@
  */
 #include "vehicle_info_plugin/commands/hmi/vi_get_vehicle_data_response.h"
 #include "application_manager/event_engine/event.h"
+#include "application_manager/policies/policy_handler_interface.h"
+
 #include "interfaces/HMI_API.h"
 
 namespace vehicle_info_plugin {
@@ -39,15 +41,12 @@ namespace commands {
 
 VIGetVehicleDataResponse::VIGetVehicleDataResponse(
     const application_manager::commands::MessageSharedPtr& message,
-    ApplicationManager& application_manager,
-    rpc_service::RPCService& rpc_service,
-    HMICapabilities& hmi_capabilities,
-    policy::PolicyHandlerInterface& policy_handle)
+    const VehicleInfoCommandParams& params)
     : ResponseFromHMI(message,
-                      application_manager,
-                      rpc_service,
-                      hmi_capabilities,
-                      policy_handle) {}
+                      params.application_manager_,
+                      params.rpc_service_,
+                      params.hmi_capabilities_,
+                      params.policy_handler_) {}
 
 VIGetVehicleDataResponse::~VIGetVehicleDataResponse() {}
 

@@ -1160,6 +1160,7 @@
   <element name="VEHICLEDATA_ENGINEOILLIFE" />
   <element name="VEHICLEDATA_ELECTRONICPARKBRAKESTATUS" />
   <element name="VEHICLEDATA_CLOUDAPPVEHICLEID" />
+  <element name="VEHICLEDATA_OEM_CUSTOM_DATA" />
 </enum>
 
 <enum name="WiperStatus">
@@ -6489,6 +6490,9 @@
     <param name="cloudAppVehicleID" type="String" mandatory="false">
       <description>Parameter used by cloud apps to identify a head unit</description>
     </param>
+    <param name="engineOilLife" type="Float" minvalue="0" maxvalue="100" mandatory="false">
+      <description>The estimated percentage of remaining oil life of the engine.</description>
+    </param>
 
         <!-- Ford Specific Data Items -->
     <param name="eCallInfo" type="Common.ECallInfo" mandatory="false">
@@ -6671,17 +6675,25 @@
       <param name="statisticType" type="Common.StatisticsType" mandatory="true"/>
     </function>
 
-    <function name="GetURLS" messagetype="request" scope="internal">
-      <description>Sent by system to SDL to get list of URL for specified service type and optionally policy's application id.</description>
-      <param name="service" type="Integer" minvalue="0" maxvalue="100" mandatory="true"/>
-    </function>
-    <function name="GetURLS" messagetype="response" scope="internal">
-      <param name="urls" type="Common.ServiceInfo" array="true" mandatory="false" minsize="1" maxsize="100"/>
-    </function>
     <function name="OnDeviceStateChanged" messagetype="notification" scope="internal">
       <param name="deviceState" type="Common.DeviceState" mandatory="true" />
       <param name="deviceInternalId" type="String" mandatory="true" minlength="0" maxlength="500" />
       <param name="deviceId" type="Common.DeviceInfo" mandatory="false"/>
+    </function>
+
+    <function name="GetPolicyConfigurationData" messagetype="request" scope="internal">
+      <description>Request from HMI to SDL core to get policy configuration data (i.e. OEM Network Mapping table file version etc.) from Policy Table.</description>
+      <param name="policyType" type="String" minlength="1" maxlength="1000" mandatory="true">
+        <description>Name of the Struct where configuration data is located in Policy Table, i.e. module_config etc.</description>
+      </param>
+      <param name="property" type="String" minlength="1" maxlength="1000" mandatory="true">
+        <description>Name of the property located within the policyType Struct, i.e. vehicle_year etc.</description>
+      </param>
+    </function>
+    <function name="GetPolicyConfigurationData" messagetype="response">
+      <param name="value" type="String" array="true" maxlength="1000" minsize="1" maxsize="100" mandatory="false">
+        <description>Value of requested property from policyType in PT. If no value is found in PT for specified policyType and property, this parameter will be omitted.</description>
+      </param>
     </function>
 </interface>
 

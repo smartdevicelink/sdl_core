@@ -1597,6 +1597,10 @@ DeviceConsent PolicyHandler::GetUserConsentForDevice(
   return policy_manager_->GetUserConsentForDevice(device_id);
 }
 
+Json::Value PolicyHandler::GetPolicyTableData() const {
+  return policy_manager_->GetPolicyTableData();
+}
+
 bool PolicyHandler::GetDefaultHmi(const std::string& device_id,
                                   const std::string& policy_app_id,
                                   std::string* default_hmi) const {
@@ -2287,9 +2291,10 @@ const std::vector<std::string> PolicyHandler::GetAppRequestSubTypes(
   return policy_manager_->GetAppRequestSubTypes(policy_app_id);
 }
 
-const VehicleInfo policy::PolicyHandler::GetVehicleInfo() const {
-  POLICY_LIB_CHECK(VehicleInfo());
-  return policy_manager_->GetVehicleInfo();
+const std::vector<policy_table::VehicleDataItem>
+policy::PolicyHandler::GetVehicleDataItems() const {
+  POLICY_LIB_CHECK(std::vector<policy_table::VehicleDataItem>());
+  return policy_manager_->GetVehicleDataItems();
 }
 
 #ifdef EXTERNAL_PROPRIETARY_MODE

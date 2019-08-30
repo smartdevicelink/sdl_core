@@ -45,55 +45,57 @@
 
 namespace ns_smart_device_link {
 namespace ns_smart_objects {
+
+/**
+ * @brief Object member.
+ **/
+struct SMember {
+  /**
+   * @brief Default constructor.
+   **/
+  SMember();
+  /**
+   * @brief Constructor.
+   * @param SchemaItem Member schema item.
+   * @param IsMandatory true if member is mandatory, false
+   *                    otherwise. Defaults to true.
+   **/
+
+  SMember(const ISchemaItemPtr SchemaItem,
+          const bool IsMandatory = true,
+          const std::string& Since = "",
+          const std::string& Until = "",
+          const bool IsDeprecated = false,
+          const bool IsRemoved = false,
+          const std::vector<SMember>& history_vector = {});
+  /**
+   * @brief Checks the version a parameter was removed (until)
+   * If the mobile's msg version is greater than or
+   **/
+  bool CheckHistoryFieldVersion(
+      const utils::SemanticVersion& MessageVersion) const;
+
+  /**
+   * @brief Member schema item.
+   **/
+  ISchemaItemPtr mSchemaItem;
+  /**
+   * @brief true if member is mandatory, false otherwise.
+   **/
+  bool mIsMandatory;
+  boost::optional<utils::SemanticVersion> mSince;
+  boost::optional<utils::SemanticVersion> mUntil;
+  bool mIsDeprecated;
+  bool mIsRemoved;
+  std::vector<SMember> mHistoryVector;
+};
+typedef std::map<std::string, SMember> Members;
+
 /**
  * @brief Object schema item.
  **/
 class CObjectSchemaItem : public ISchemaItem {
  public:
-  /**
-   * @brief Object member.
-   **/
-  struct SMember {
-    /**
-     * @brief Default constructor.
-     **/
-    SMember();
-    /**
-     * @brief Constructor.
-     * @param SchemaItem Member schema item.
-     * @param IsMandatory true if member is mandatory, false
-     *                    otherwise. Defaults to true.
-     **/
-
-    SMember(const ISchemaItemPtr SchemaItem,
-            const bool IsMandatory = true,
-            const std::string& Since = "",
-            const std::string& Until = "",
-            const bool IsDeprecated = false,
-            const bool IsRemoved = false,
-            const std::vector<CObjectSchemaItem::SMember>& history_vector = {});
-    /**
-     * @brief Checks the version a parameter was removed (until)
-     * If the mobile's msg version is greater than or
-     **/
-    bool CheckHistoryFieldVersion(
-        const utils::SemanticVersion& MessageVersion) const;
-
-    /**
-     * @brief Member schema item.
-     **/
-    ISchemaItemPtr mSchemaItem;
-    /**
-     * @brief true if member is mandatory, false otherwise.
-     **/
-    bool mIsMandatory;
-    boost::optional<utils::SemanticVersion> mSince;
-    boost::optional<utils::SemanticVersion> mUntil;
-    bool mIsDeprecated;
-    bool mIsRemoved;
-    std::vector<CObjectSchemaItem::SMember> mHistoryVector;
-  };
-  typedef std::map<std::string, SMember> Members;
   /**
    * @brief Create a new schema item.
    *
@@ -153,6 +155,12 @@ class CObjectSchemaItem : public ISchemaItem {
    */
   size_t GetMemberSize() OVERRIDE;
 
+  boost::optional<SMember&> GetMemberSchemaItem(
+      const std::string& member_key) OVERRIDE;
+
+  void AddMemberSchemaItem(const std::string& member_key,
+                           SMember& member) OVERRIDE;
+
  protected:
   /**
    * @brief Constructor.
@@ -173,14 +181,14 @@ class CObjectSchemaItem : public ISchemaItem {
    * @param member Schema member
    * @param MmessageVersion Semantic Version of mobile message.
    **/
-  const CObjectSchemaItem::SMember& GetCorrectMember(
-      const SMember& member, const utils::SemanticVersion& messageVersion);
+  const SMember& GetCorrectMember(const SMember& member,
+                                  const utils::SemanticVersion& messageVersion);
 
   /**
    * @brief Map of member name to SMember structure describing the object
    *member.
    **/
-  const Members mMembers;
+  Members mMembers;
   DISALLOW_COPY_AND_ASSIGN(CObjectSchemaItem);
 };
 }  // namespace ns_smart_objects

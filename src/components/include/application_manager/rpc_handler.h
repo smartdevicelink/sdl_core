@@ -38,10 +38,13 @@
 
 #ifdef TELEMETRY_MONITOR
 #include "application_manager/telemetry_observer.h"
+#include "telemetry_monitor/telemetry_observable.h"
 #endif  // TELEMETRY_MONITOR
 
 namespace application_manager {
 namespace rpc_handler {
+
+using ns_smart_device_link::ns_smart_objects::SMember;
 
 class RPCHandler
     : public hmi_message_handler::HMIMessageObserver,

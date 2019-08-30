@@ -185,6 +185,8 @@ const char* is_cloud_application = "isCloudApplication";
 const char* cloud_connection_status = "cloudConnectionStatus";
 const char* endpoint = "endpoint";
 const char* display_capabilities = "displayCapabilities";
+const char* policy_type = "policyType";
+const char* property = "property";
 
 // PutFile
 const char* sync_file_name = "syncFileName";
@@ -274,6 +276,7 @@ const char* e_call_info = "eCallInfo";
 const char* airbag_status = "airbagStatus";
 const char* emergency_event = "emergencyEvent";
 const char* cluster_mode_status = "clusterModeStatus";
+const char* cluster_modes = "clusterModes";
 const char* my_key = "myKey";
 const char* help_prompt = "helpPrompt";
 const char* scroll_message_body = "scrollableMessageBody";
@@ -293,6 +296,7 @@ const char* sdl_version = "sdlVersion";
 const char* system_software_version = "systemSoftwareVersion";
 const char* priority = "priority";
 const char* engine_oil_life = "engineOilLife";
+const char* oem_custom_data_type = "oemCustomDataType";
 
 // app services
 const char* app_service_manifest = "appServiceManifest";

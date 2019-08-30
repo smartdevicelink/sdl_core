@@ -639,10 +639,17 @@ class PolicyManagerImpl : public PolicyManager {
       const std::string& policy_app_id) const OVERRIDE;
 
   /**
-   * @brief Get information about vehicle
-   * @return vehicle information
+   * @brief Gets copy of current policy table data
+   * @return policy_table as json object
    */
-  const VehicleInfo GetVehicleInfo() const OVERRIDE;
+  Json::Value GetPolicyTableData() const OVERRIDE;
+
+  /**
+   * @brief Gets vehicle data items
+   * @return Structure with vehicle data items
+   */
+  const std::vector<policy_table::VehicleDataItem> GetVehicleDataItems()
+      const OVERRIDE;
 
   /**
    * @brief Get a list of enabled cloud applications

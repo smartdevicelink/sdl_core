@@ -218,6 +218,8 @@ extern const char* is_cloud_application;
 extern const char* cloud_connection_status;
 extern const char* endpoint;
 extern const char* display_capabilities;
+extern const char* policy_type;
+extern const char* property;
 
 // PutFile
 extern const char* sync_file_name;
@@ -307,6 +309,7 @@ extern const char* e_call_info;
 extern const char* airbag_status;
 extern const char* emergency_event;
 extern const char* cluster_mode_status;
+extern const char* cluster_modes;
 extern const char* my_key;
 extern const char* help_prompt;
 extern const char* scroll_message_body;
@@ -326,6 +329,7 @@ extern const char* sdl_version;
 extern const char* system_software_version;
 extern const char* priority;
 extern const char* engine_oil_life;
+extern const char* oem_custom_data_type;
 
 // app services
 extern const char* app_service_manifest;

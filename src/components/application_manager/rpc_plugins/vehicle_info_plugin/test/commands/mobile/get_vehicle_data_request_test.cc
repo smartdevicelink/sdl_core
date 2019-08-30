@@ -37,8 +37,6 @@
 #include "gtest/gtest.h"
 
 #include "application_manager/application.h"
-#include "application_manager/commands/command_request_test.h"
-#include "application_manager/commands/commands_test.h"
 #include "application_manager/event_engine/event.h"
 #include "application_manager/message_helper.h"
 #include "application_manager/mock_application_manager.h"
@@ -47,6 +45,8 @@
 #include "interfaces/MOBILE_API.h"
 #include "mobile/get_vehicle_data_request.h"
 #include "smart_objects/smart_object.h"
+#include "vehicle_info_plugin/commands/vi_command_request_test.h"
+#include "vehicle_info_plugin/vehicle_info_command_params.h"
 
 namespace test {
 namespace components {
@@ -70,20 +70,14 @@ const uint32_t kConnectionKey = 2u;
 }  // namespace
 
 class GetVehicleDataRequestTest
-    : public CommandRequestTest<CommandsTestMocks::kIsNice> {};
+    : public VICommandRequestTest<CommandsTestMocks::kIsNice> {};
 
 class UnwrappedGetVehicleDataRequest : public GetVehicleDataRequest {
  public:
-  UnwrappedGetVehicleDataRequest(const MessageSharedPtr& message,
-                                 am::ApplicationManager& application_manager,
-                                 app_mngr::rpc_service::RPCService& rpc_service,
-                                 app_mngr::HMICapabilities& hmi_capabilities,
-                                 policy::PolicyHandlerInterface& policy_handler)
-      : GetVehicleDataRequest(message,
-                              application_manager,
-                              rpc_service,
-                              hmi_capabilities,
-                              policy_handler) {}
+  UnwrappedGetVehicleDataRequest(
+      const MessageSharedPtr& message,
+      const vehicle_info_plugin::VehicleInfoCommandParams& params)
+      : GetVehicleDataRequest(message, params) {}
 
   policy::RPCParams& get_disallowed_params() {
     return removed_parameters_permissions_.disallowed_params;
@@ -93,7 +87,7 @@ class UnwrappedGetVehicleDataRequest : public GetVehicleDataRequest {
 };
 
 TEST_F(GetVehicleDataRequestTest, Run_ApplicationIsNotRegistered_UNSUCCESS) {
-  GetVehicleDataRequestPtr command(CreateCommand<GetVehicleDataRequest>());
+  GetVehicleDataRequestPtr command(CreateCommandVI<GetVehicleDataRequest>());
 
   EXPECT_CALL(app_mngr_, application(_))
       .WillOnce(Return(ApplicationSharedPtr()));
@@ -115,7 +109,7 @@ TEST_F(GetVehicleDataRequestTest, Run_TooHighFrequency_UNSUCCESS) {
       kConnectionKey;
 
   GetVehicleDataRequestPtr command(
-      CreateCommand<GetVehicleDataRequest>(command_msg));
+      CreateCommandVI<GetVehicleDataRequest>(command_msg));
 
   MockAppPtr app(CreateMockApp());
   EXPECT_CALL(app_mngr_, application(kConnectionKey)).WillOnce(Return(app));
@@ -138,14 +132,17 @@ TEST_F(GetVehicleDataRequestTest, Run_EmptyMsgParams_UNSUCCESS) {
       kConnectionKey;
 
   GetVehicleDataRequestPtr command(
-      CreateCommand<GetVehicleDataRequest>(command_msg));
+      CreateCommandVI<GetVehicleDataRequest>(command_msg));
 
   const am::VehicleData kEmptyVehicleData;
-  EXPECT_CALL(mock_message_helper_, vehicle_data())
-      .WillOnce(ReturnRef(kEmptyVehicleData));
+  ON_CALL(mock_message_helper_, vehicle_data())
+      .WillByDefault(ReturnRef(kEmptyVehicleData));
+  smart_objects::SmartObject empty_hmi_custom_params;
+  ON_CALL(mock_custom_vehicle_data_manager_, CreateHMIMessageParams(_))
+      .WillByDefault(Return(empty_hmi_custom_params));
 
   MockAppPtr app(CreateMockApp());
-  EXPECT_CALL(app_mngr_, application(kConnectionKey)).WillOnce(Return(app));
+  ON_CALL(app_mngr_, application(kConnectionKey)).WillByDefault(Return(app));
 
   EXPECT_CALL(
       mock_rpc_service_,
@@ -161,11 +158,15 @@ TEST_F(GetVehicleDataRequestTest,
       kConnectionKey;
 
   std::shared_ptr<UnwrappedGetVehicleDataRequest> command(
-      CreateCommand<UnwrappedGetVehicleDataRequest>(command_msg));
+      CreateCommandVI<UnwrappedGetVehicleDataRequest>(command_msg));
+
+  smart_objects::SmartObject empty_hmi_custom_params;
+  ON_CALL(mock_custom_vehicle_data_manager_, CreateHMIMessageParams(_))
+      .WillByDefault(Return(empty_hmi_custom_params));
 
   const am::VehicleData kEmptyVehicleData;
-  EXPECT_CALL(mock_message_helper_, vehicle_data())
-      .WillRepeatedly(ReturnRef(kEmptyVehicleData));
+  ON_CALL(mock_message_helper_, vehicle_data())
+      .WillByDefault(ReturnRef(kEmptyVehicleData));
 
   policy::RPCParams& disallowed_params = command->get_disallowed_params();
   disallowed_params.insert("test_param");
@@ -189,13 +190,13 @@ TEST_F(GetVehicleDataRequestTest, Run_SUCCESS) {
   (*command_msg)[am::strings::msg_params][kMsgParamKey] = true;
 
   GetVehicleDataRequestPtr command(
-      CreateCommand<GetVehicleDataRequest>(command_msg));
+      CreateCommandVI<GetVehicleDataRequest>(command_msg));
 
   am::VehicleData vehicle_data;
   vehicle_data.insert(am::VehicleData::value_type(
       kMsgParamKey, mobile_apis::VehicleDataType::VEHICLEDATA_SPEED));
-  EXPECT_CALL(mock_message_helper_, vehicle_data())
-      .WillOnce(ReturnRef(vehicle_data));
+  ON_CALL(mock_message_helper_, vehicle_data())
+      .WillByDefault(ReturnRef(vehicle_data));
 
   MockAppPtr app(CreateMockApp());
   EXPECT_CALL(app_mngr_, application(kConnectionKey)).WillOnce(Return(app));
@@ -215,7 +216,7 @@ TEST_F(GetVehicleDataRequestTest, OnEvent_UnknownEvent_UNSUCCESS) {
       kConnectionKey;
 
   std::shared_ptr<UnwrappedGetVehicleDataRequest> command(
-      CreateCommand<UnwrappedGetVehicleDataRequest>(command_msg));
+      CreateCommandVI<UnwrappedGetVehicleDataRequest>(command_msg));
 
   Event event(hmi_apis::FunctionID::INVALID_ENUM);
 
@@ -235,7 +236,7 @@ TEST_F(GetVehicleDataRequestTest, OnEvent_DataNotAvailable_SUCCESS) {
       kConnectionKey;
 
   std::shared_ptr<UnwrappedGetVehicleDataRequest> command(
-      CreateCommand<UnwrappedGetVehicleDataRequest>(command_msg));
+      CreateCommandVI<UnwrappedGetVehicleDataRequest>(command_msg));
 
   MessageSharedPtr event_msg(CreateMessage(smart_objects::SmartType_Map));
   (*event_msg)[am::strings::params][am::hmi_response::code] = hmi_response_code;

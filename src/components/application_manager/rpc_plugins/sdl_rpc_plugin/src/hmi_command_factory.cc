@@ -71,6 +71,8 @@
 #include "sdl_rpc_plugin/commands/hmi/sdl_activate_app_response.h"
 #include "sdl_rpc_plugin/commands/hmi/sdl_get_list_of_permissions_request.h"
 #include "sdl_rpc_plugin/commands/hmi/sdl_get_list_of_permissions_response.h"
+#include "sdl_rpc_plugin/commands/hmi/sdl_get_policy_configuration_data_request.h"
+#include "sdl_rpc_plugin/commands/hmi/sdl_get_policy_configuration_data_response.h"
 #include "sdl_rpc_plugin/commands/hmi/sdl_get_status_update_request.h"
 #include "sdl_rpc_plugin/commands/hmi/sdl_get_status_update_response.h"
 #include "sdl_rpc_plugin/commands/hmi/sdl_get_user_friendly_message_request.h"
@@ -171,8 +173,6 @@
 #include "sdl_rpc_plugin/commands/hmi/basic_communication_system_response.h"
 #include "sdl_rpc_plugin/commands/hmi/dial_number_request.h"
 #include "sdl_rpc_plugin/commands/hmi/dial_number_response.h"
-#include "sdl_rpc_plugin/commands/hmi/get_urls.h"
-#include "sdl_rpc_plugin/commands/hmi/get_urls_response.h"
 #include "sdl_rpc_plugin/commands/hmi/navi_alert_maneuver_request.h"
 #include "sdl_rpc_plugin/commands/hmi/navi_alert_maneuver_response.h"
 #include "sdl_rpc_plugin/commands/hmi/navi_audio_start_stream_request.h"
@@ -358,11 +358,6 @@ CommandCreator& HMICommandFactory::get_creator_factory(
                  ? factory.GetCreator<commands::SDLPolicyUpdate>()
                  : factory.GetCreator<commands::SDLPolicyUpdateResponse>();
     }
-    case hmi_apis::FunctionID::SDL_GetURLS: {
-      return hmi_apis::messageType::request == message_type
-                 ? factory.GetCreator<commands::GetUrls>()
-                 : factory.GetCreator<commands::GetUrlsResponse>();
-    }
     case hmi_apis::FunctionID::SDL_OnAppPermissionChanged: {
       return factory.GetCreator<commands::OnAppPermissionChangedNotification>();
     }
@@ -384,6 +379,13 @@ CommandCreator& HMICommandFactory::get_creator_factory(
       return hmi_apis::messageType::request == message_type
                  ? factory.GetCreator<commands::SDLGetStatusUpdateRequest>()
                  : factory.GetCreator<commands::SDLGetStatusUpdateResponse>();
+    }
+    case hmi_apis::FunctionID::SDL_GetPolicyConfigurationData: {
+      return hmi_apis::messageType::request == message_type
+                 ? factory.GetCreator<
+                       commands::SDLGetPolicyConfigurationDataRequest>()
+                 : factory.GetCreator<
+                       commands::SDLGetPolicyConfigurationDataResponse>();
     }
     case hmi_apis::FunctionID::SDL_OnStatusUpdate: {
       return factory.GetCreator<commands::OnStatusUpdateNotification>();

@@ -96,6 +96,8 @@ struct CheckAppPolicy {
                         policy_table::Strings* revoked_groups = NULL) const;
   bool HasNewGroups(const AppPoliciesValueType& app_policy,
                     policy_table::Strings* new_groups = NULL) const;
+  bool HasUpdatedGroups(const policy::AppPoliciesValueType& app_policy,
+                        policy_table::Strings* updated_groups = NULL) const;
   bool HasConsentNeededGroups(const AppPoliciesValueType& app_policy) const;
   std::vector<FunctionalGroupPermission> GetRevokedGroups(
       const AppPoliciesValueType& app_policy) const;

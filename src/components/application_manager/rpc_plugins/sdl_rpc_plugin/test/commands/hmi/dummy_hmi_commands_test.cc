@@ -56,8 +56,6 @@
 #include "hmi/dial_number_response.h"
 #include "hmi/get_system_info_request.h"
 #include "hmi/get_system_info_response.h"
-#include "hmi/get_urls.h"
-#include "hmi/get_urls_response.h"
 #include "hmi/mixing_audio_supported_request.h"
 #include "hmi/mixing_audio_supported_response.h"
 #include "hmi/navi_alert_maneuver_request.h"
@@ -320,8 +318,6 @@ typedef Types<commands::OnStartDeviceDiscovery,
               commands::SDLActivateAppRequest,
               commands::SDLPolicyUpdateResponse,
               commands::SDLPolicyUpdate,
-              commands::GetUrlsResponse,
-              commands::GetUrls,
               commands::OnAppPermissionChangedNotification,
               commands::SDLGetListOfPermissionsResponse,
               commands::SDLGetListOfPermissionsRequest,

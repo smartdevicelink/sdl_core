@@ -45,6 +45,8 @@
 #include "application_manager/policies/policy_event_observer.h"
 #include "application_manager/policies/policy_handler_interface.h"
 #include "application_manager/policies/policy_handler_observer.h"
+
+#include "application_manager/policies/custom_vehicle_data_provider.h"
 #include "policy/policy_manager.h"
 #include "policy/policy_settings.h"
 #include "policy/usage_statistics/statistics_manager.h"
@@ -121,6 +123,8 @@ class PolicyHandler : public PolicyHandlerInterface,
   uint32_t GetNotificationsNumber(const std::string& priority) const OVERRIDE;
   virtual DeviceConsent GetUserConsentForDevice(
       const std::string& device_id) const OVERRIDE;
+
+  Json::Value GetPolicyTableData() const OVERRIDE;
 
   /**
    * @brief Sets HMI default type for specified application
@@ -646,12 +650,6 @@ class PolicyHandler : public PolicyHandlerInterface,
   const std::vector<std::string> GetAppRequestSubTypes(
       const std::string& policy_app_id) const OVERRIDE;
 
-  /**
-   * @brief Gets vehicle information
-   * @return Structure with vehicle information
-   */
-  const VehicleInfo GetVehicleInfo() const OVERRIDE;
-
 #ifdef EXTERNAL_PROPRIETARY_MODE
   /**
    * @brief Gets meta information
@@ -695,6 +693,14 @@ class PolicyHandler : public PolicyHandlerInterface,
    */
   void OnDeviceSwitching(const std::string& device_id_from,
                          const std::string& device_id_to) FINAL;
+
+  // VehicleDataItemProvider interface :
+  /**
+   * @brief Gets vehicle data items
+   * @return Structure with vehicle data items
+   */
+  const std::vector<rpc::policy_table_interface_base::VehicleDataItem>
+  GetVehicleDataItems() const OVERRIDE;
 
   void OnLockScreenDismissalStateChanged() FINAL;
 
@@ -844,6 +850,7 @@ class PolicyHandler : public PolicyHandlerInterface,
   std::vector<FunctionalGroupPermission> CollectAppPermissions(
       const uint32_t connection_key);
 
+ private:
   static const std::string kLibrary;
 
   /**

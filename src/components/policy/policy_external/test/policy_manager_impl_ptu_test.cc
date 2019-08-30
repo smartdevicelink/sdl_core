@@ -972,14 +972,18 @@ TEST_F(PolicyManagerImplTest, LoadPT_SetInvalidUpdatePT_PTIsNotLoaded) {
   std::string json = table.toStyledString();
   ::policy::BinaryMessage msg(json.begin(), json.end());
 
+  auto pt = std::make_shared<policy_table::Table>();
+  *pt = update;
+
   // Assert
-  EXPECT_CALL(*cache_manager_, GenerateSnapshot()).Times(0);
   EXPECT_CALL(*cache_manager_, ApplyUpdate(_)).Times(0);
   EXPECT_CALL(listener_, GetAppName(_)).Times(0);
   EXPECT_CALL(listener_, OnUpdateStatusChanged(_)).Times(1);
   EXPECT_CALL(*cache_manager_, SaveUpdateRequired(false)).Times(0);
   EXPECT_CALL(*cache_manager_, TimeoutResponse()).Times(0);
   EXPECT_CALL(*cache_manager_, SecondsBetweenRetries(_)).Times(0);
+  EXPECT_CALL(*cache_manager_, GetVehicleDataItems())
+      .WillOnce(Return(std::vector<policy_table::VehicleDataItem>()));
   EXPECT_FALSE(policy_manager_->LoadPT(kFilePtUpdateJson, msg));
   EXPECT_CALL(*cache_manager_, IsPTPreloaded());
   EXPECT_FALSE(policy_manager_->GetCache()->IsPTPreloaded());
@@ -1167,24 +1171,6 @@ TEST_F(PolicyManagerImplTest2,
   GetPTU(kValidSdlPtUpdateJson);
   // Check keep context in updated policies for app
   EXPECT_TRUE(policy_manager_->CanAppKeepContext(app_id_2_));
-}
-
-TEST_F(PolicyManagerImplTest2,
-       GetVehicleInfo_SetVehicleInfo_ExpectReceivedInfoCorrect) {
-  // Arrange
-  CreateLocalPT(preloaded_pt_filename_);
-  GetPTU(kValidSdlPtUpdateJson);
-  std::shared_ptr<policy_table::Table> pt =
-      (policy_manager_->GetCache())->GetPT();
-  policy_table::ModuleConfig& module_config = pt->policy_table.module_config;
-  ::policy::VehicleInfo vehicle_info = policy_manager_->GetVehicleInfo();
-
-  EXPECT_EQ(static_cast<std::string>(*module_config.vehicle_make),
-            vehicle_info.vehicle_make);
-  EXPECT_EQ(static_cast<std::string>(*module_config.vehicle_model),
-            vehicle_info.vehicle_model);
-  EXPECT_EQ(static_cast<std::string>(*module_config.vehicle_year),
-            vehicle_info.vehicle_year);
 }
 
 TEST_F(

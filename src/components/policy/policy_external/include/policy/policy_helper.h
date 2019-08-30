@@ -129,6 +129,15 @@ struct CheckAppPolicy {
   bool HasNewGroups(const AppPoliciesValueType& app_policy,
                     policy_table::Strings* new_groups = NULL) const;
   /**
+   * @brief Checks whether updated application policy contains group content
+   * update in compare to current one
+   * @param app_policy Reference to updated application policy
+   * @param updated_groups List of updated groups if any
+   * @return True if updated groups found, otherwise - false
+   */
+  bool HasUpdatedGroups(const policy::AppPoliciesValueType& app_policy,
+                        policy_table::Strings* updated_groups = NULL) const;
+  /**
    * @brief Checks whether updated policy has groups which require user consent
    * @param app_policy Reference to updated application policy
    * @return True if has groups requiring user consents, otherwise - false

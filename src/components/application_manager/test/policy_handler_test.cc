@@ -1540,16 +1540,6 @@ TEST_F(PolicyHandlerTest, IsRequestSubTypeAllowed) {
   EXPECT_TRUE(policy_handler_.IsRequestSubTypeAllowed(kPolicyAppId_, subtype));
 }
 
-TEST_F(PolicyHandlerTest, GetVehicleInfo) {
-  // Arrange
-  EnablePolicyAndPolicyManagerMock();
-  // Check expectations
-  EXPECT_CALL(*mock_policy_manager_, GetVehicleInfo())
-      .WillOnce(Return(VehicleInfo()));
-  // Act
-  policy_handler_.GetVehicleInfo();
-}
-
 TEST_F(PolicyHandlerTest, Increment_method_WithOneParameter) {
   // Arrange
   EnablePolicyAndPolicyManagerMock();

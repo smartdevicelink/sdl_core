@@ -194,8 +194,7 @@ class MockApplicationManager : public application_manager::ApplicationManager {
   MOCK_METHOD1(SetIconFileFromSystemRequest, void(const std::string policy_id));
   MOCK_CONST_METHOD0(IsHMICooperating, bool());
   MOCK_METHOD2(IviInfoUpdated,
-               void(mobile_apis::VehicleDataType::eType vehicle_info,
-                    int value));
+               void(const std::string& vehicle_info, int value));
   MOCK_METHOD1(RegisterApplication,
                application_manager::ApplicationSharedPtr(
                    const std::shared_ptr<smart_objects::SmartObject>&

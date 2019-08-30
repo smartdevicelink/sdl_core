@@ -142,6 +142,21 @@ extern const std::string kDeleteModuleTypes;
 extern const std::string kDeleteAllDevices;
 extern const std::string kSelectDBVersion;
 extern const std::string kUpdateDBVersion;
+extern const std::string kSelectVehicleDataItem;
+extern const std::string kInsertVehicleDataItem;
+extern const std::string kDeleteVehicleDataItems;
+extern const std::string kInsertVehicleDataItemParams;
+extern const std::string kSelectVehicleDataItemParams;
+extern const std::string kDeleteVehicleDataItemParams;
+extern const std::string kSelectVehicleDataItemWithVersion;
+extern const std::string kSelectPrimitiveVehicleDataItems;
+extern const std::string kSelectCompositeVehicleDataItemsKey;
+extern const std::string kSelectOEMMappingVersion;
+extern const std::string kSelectVehicleDataSchemaVersion;
+extern const std::string kInsertVehicleDataSchemaVersion;
+extern const std::string kSelectEndpointProperties;
+extern const std::string kInsertEndpointVersion;
+
 }  // namespace sql_pt
 }  // namespace policy
 

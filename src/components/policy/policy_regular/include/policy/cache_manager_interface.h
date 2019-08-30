@@ -149,9 +149,17 @@ class CacheManagerInterface {
   virtual bool SecondsBetweenRetries(std::vector<int>& seconds) = 0;
 
   /**
-   * @brief Get information about vehicle
+   * @brief Gets copy of current policy table data
+   * @return policy_table as json object
    */
-  virtual const VehicleInfo GetVehicleInfo() const = 0;
+  virtual Json::Value GetPolicyTableData() const = 0;
+
+  /**
+   * @brief Gets vehicle data items
+   * @return Structure with vehicle data items
+   */
+  virtual const std::vector<policy_table::VehicleDataItem> GetVehicleDataItems()
+      const = 0;
 
   /**
    * @brief Get a list of enabled cloud applications
