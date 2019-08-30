@@ -801,15 +801,16 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile(
     return;
   }
 
-  bool resumption =
+  const bool hash_id_present =
       (*message_)[strings::msg_params].keyExists(strings::hash_id);
+  const std::string hash_id =
+      (*message_)[strings::msg_params][strings::hash_id].asString();
 
+  const bool resumption = hash_id_present && !hash_id.empty();
   bool need_restore_vr = resumption;
 
-  std::string hash_id;
   std::string add_info;
   if (resumption) {
-    hash_id = (*message_)[strings::msg_params][strings::hash_id].asString();
     if (!resumer.CheckApplicationHash(application, hash_id)) {
       LOG4CXX_WARN(logger_,
                    "Hash from RAI does not match to saved resume data.");
@@ -823,6 +824,8 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile(
       need_restore_vr = false;
     } else {
       add_info = "Resume succeeded.";
+      application->set_app_data_resumption_allowance(true);
+      application->set_is_resuming(true);
     }
   }
   if ((mobile_apis::Result::SUCCESS == result_code) &&
@@ -831,11 +834,9 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile(
     result_code = result_code_;
   }
 
-  // in case application exist in resumption we need to send resumeVrgrammars
-  if (false == resumption) {
-    resumption = resumer.IsApplicationSaved(application->policy_app_id(),
-                                            application->mac_address());
-  }
+  // In case application exist in resumption we need to send resumeVrgrammars
+  const bool is_app_saved_in_resumption = resumer.IsApplicationSaved(
+      application->policy_app_id(), application->mac_address());
 
   // If app is in resuming state
   // DisplayCapabilitiesBuilder has to collect all the information
@@ -843,7 +844,7 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile(
   // to mobile app, even if hash does not match, which means that app data
   // will not be resumed, notification should be sent for default window as
   // it will be resumed in any case
-  if (resumption) {
+  if (resumption || is_app_saved_in_resumption) {
     resumer.StartWaitingForDisplayCapabilitiesUpdate(application);
   }
 
@@ -885,12 +886,12 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile(
   // and HMI level set-up
   GetPolicyHandler().OnAppRegisteredOnMobile(application->mac_address(),
                                              application->policy_app_id());
-  if (resumption) {
-    if (result_code != mobile_apis::Result::RESUME_FAILED) {
-      resumer.StartResumption(application, hash_id);
-    } else {
-      resumer.StartResumptionOnlyHMILevel(application);
-    }
+
+  if (result_code != mobile_apis::Result::RESUME_FAILED &&
+      application->is_app_data_resumption_allowed()) {
+    resumer.StartResumption(application, hash_id);
+  } else if (is_app_saved_in_resumption) {
+    resumer.StartResumptionOnlyHMILevel(application);
   }
 
   // By default app subscribed to CUSTOM_BUTTON
