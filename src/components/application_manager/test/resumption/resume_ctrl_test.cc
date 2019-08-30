@@ -1098,7 +1098,6 @@ TEST_F(ResumeCtrlTest, RestoreAppHMIState_RestoreHMILevelFull) {
 
   ON_CALL(mock_app_mngr_, GetUserConsentForDevice("12345"))
       .WillByDefault(Return(policy::kDeviceAllowed));
-  EXPECT_CALL(*mock_app_, set_is_resuming(true));
 
   const bool res = res_ctrl_->RestoreAppHMIState(mock_app_);
   EXPECT_TRUE(res);
@@ -1204,7 +1203,6 @@ TEST_F(ResumeCtrlTest, SetAppHMIState_HMINone_WithoutCheckPolicy) {
 
   EXPECT_CALL(mock_app_mngr_, GetUserConsentForDevice("12345")).Times(0);
 
-  EXPECT_CALL(*mock_app_, set_is_resuming(true));
   EXPECT_CALL(mock_state_controller_,
               SetRegularState(_, kDefaultWindowId, kDefaultTestLevel_))
       .Times(AtLeast(1));
@@ -1218,7 +1216,6 @@ TEST_F(ResumeCtrlTest, SetAppHMIState_HMILimited_WithoutCheckPolicy) {
   GetInfoFromApp();
   EXPECT_CALL(mock_app_mngr_, GetUserConsentForDevice("12345")).Times(0);
 
-  EXPECT_CALL(*mock_app_, set_is_resuming(true));
   EXPECT_CALL(mock_state_controller_,
               SetRegularState(_, kDefaultWindowId, test_type))
       .Times(AtLeast(1));
@@ -1233,7 +1230,6 @@ TEST_F(ResumeCtrlTest, SetAppHMIState_HMIFull_WithoutCheckPolicy) {
   EXPECT_CALL(mock_app_mngr_, GetDefaultHmiLevel(const_app_)).Times(0);
   EXPECT_CALL(mock_app_mngr_, GetUserConsentForDevice("12345")).Times(0);
 
-  EXPECT_CALL(*mock_app_, set_is_resuming(true));
   EXPECT_CALL(mock_state_controller_,
               SetRegularState(_, kDefaultWindowId, test_type))
       .Times(AtLeast(1));
@@ -1249,7 +1245,6 @@ TEST_F(ResumeCtrlTest, SetAppHMIState_HMIFull_WithPolicy_DevAllowed) {
   ON_CALL(mock_app_mngr_, GetUserConsentForDevice("12345"))
       .WillByDefault(Return(policy::kDeviceAllowed));
 
-  EXPECT_CALL(*mock_app_, set_is_resuming(true));
   EXPECT_CALL(mock_state_controller_,
               SetRegularState(_, kDefaultWindowId, test_type))
       .Times(AtLeast(1));
@@ -1265,7 +1260,6 @@ TEST_F(ResumeCtrlTest, SetAppHMIState_HMIFull_WithPolicy_DevDisallowed) {
   ON_CALL(mock_app_mngr_, GetUserConsentForDevice("12345"))
       .WillByDefault(Return(policy::kDeviceDisallowed));
 
-  EXPECT_CALL(*mock_app_, set_is_resuming(true));
   ON_CALL(mock_app_mngr_, GetDefaultHmiLevel(const_app_))
       .WillByDefault(Return(kDefaultTestLevel_));
   EXPECT_CALL(mock_state_controller_,

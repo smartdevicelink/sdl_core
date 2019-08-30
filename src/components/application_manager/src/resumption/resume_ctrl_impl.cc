@@ -359,6 +359,7 @@ void ResumeCtrlImpl::ApplicationResumptiOnTimer() {
 void ResumeCtrlImpl::OnAppActivated(ApplicationSharedPtr application) {
   if (is_resumption_active_) {
     RemoveFromResumption(application->app_id());
+    application->set_is_resuming(false);
   }
 }
 
@@ -388,12 +389,13 @@ bool ResumeCtrlImpl::SetAppHMIState(
     SetupDefaultHMILevel(application);
     return false;
   }
-  application->set_is_resuming(true);
+
   application_manager_.state_controller().SetRegularState(
       application, mobile_apis::PredefinedWindows::DEFAULT_WINDOW, hmi_level);
   LOG4CXX_INFO(logger_,
                "Application with policy id " << application->policy_app_id()
                                              << " got HMI level " << hmi_level);
+
   return true;
 }
 
@@ -518,6 +520,8 @@ bool ResumeCtrlImpl::StartResumption(ApplicationSharedPtr application,
                           << " hmi_app_id = " << application->hmi_app_id()
                           << " policy_id = " << application->policy_app_id()
                           << " received hash = " << hash);
+  application->set_is_resuming(true);
+
   if (!application->is_cloud_app()) {
     // Default HMI Level is already set before resumption in
     // ApplicationManager::OnApplicationRegistered, and handling low bandwidth
@@ -540,17 +544,18 @@ bool ResumeCtrlImpl::StartResumption(ApplicationSharedPtr application,
 
 bool ResumeCtrlImpl::StartResumptionOnlyHMILevel(
     ApplicationSharedPtr application) {
-  // sync_primitives::AutoLock lock(resumtion_lock_);
   LOG4CXX_AUTO_TRACE(logger_);
   if (!application) {
     LOG4CXX_WARN(logger_, "Application does not exist.");
     return false;
   }
+
+  application->set_is_resuming(true);
   LOG4CXX_DEBUG(logger_,
-                "HMI level resumption requested for application id "
-                    << application->app_id() << "with hmi_app_id "
-                    << application->hmi_app_id() << ", policy_app_id "
-                    << application->policy_app_id());
+                "HMI level resumption requested for application id: "
+                    << application->app_id()
+                    << " with hmi_app_id: " << application->hmi_app_id()
+                    << ", policy_app_id " << application->policy_app_id());
   if (!application->is_cloud_app()) {
     // Default HMI Level is already set before resumption in
     // ApplicationManager::OnApplicationRegistered, and handling low bandwidth
@@ -563,7 +568,6 @@ bool ResumeCtrlImpl::StartResumptionOnlyHMILevel(
   bool result = resumption_storage_->GetSavedApplication(
       application->policy_app_id(), device_mac, saved_app);
   if (result) {
-    // sync_primitives::AutoUnlock unlock(lock);
     AddToResumptionTimerQueue(application->app_id());
   }
   LOG4CXX_INFO(logger_, "StartResumptionOnlyHMILevel::Result = " << result);
@@ -599,9 +603,9 @@ bool ResumeCtrlImpl::StartAppHmiStateResumption(
   DCHECK_OR_RETURN(application, false);
   smart_objects::SmartObject saved_app;
   const std::string& device_mac = application->mac_address();
-  const bool result = resumption_storage_->GetSavedApplication(
+  const bool get_saved_app_result = resumption_storage_->GetSavedApplication(
       application->policy_app_id(), device_mac, saved_app);
-  if (!result) {
+  if (!get_saved_app_result) {
     LOG4CXX_ERROR(logger_, "Application was not saved");
     return false;
   }
@@ -626,14 +630,14 @@ bool ResumeCtrlImpl::StartAppHmiStateResumption(
   if (restore_hmi_level_allowed) {
     LOG4CXX_INFO(logger_,
                  "Resume application " << application->policy_app_id());
-    bool result = RestoreAppHMIState(application);
+    const bool hmi_state_restore_result = RestoreAppHMIState(application);
     if (mobile_apis::HMILevel::eType::INVALID_ENUM !=
         application->deferred_resumption_hmi_level()) {
       // the application has not been fully resumed
       return false;
     }
     RemoveApplicationFromSaved(application);
-    return result;
+    return hmi_state_restore_result;
   } else {
     LOG4CXX_INFO(
         logger_,
@@ -773,7 +777,6 @@ void ResumeCtrlImpl::StartWaitingForDisplayCapabilitiesUpdate(
     windows_info = saved_app[strings::windows_info];
   }
   builder.InitBuilder(resume_callback, windows_info);
-  application->set_is_resuming(true);
 }
 
 void ResumeCtrlImpl::AddFiles(ApplicationSharedPtr application,
