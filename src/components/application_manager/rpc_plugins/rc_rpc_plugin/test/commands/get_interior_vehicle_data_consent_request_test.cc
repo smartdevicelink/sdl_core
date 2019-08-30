@@ -97,6 +97,8 @@ class GetInteriorVehicleDataConsentRequestTest
     message_ = CreateBasicMessage();
     ON_CALL(mock_rc_capabilities_manager_, CheckIfModuleExistsInCapabilities(_))
         .WillByDefault(Return(true));
+    ON_CALL(mock_rc_capabilities_manager_, IsMultipleAccessAllowed(_))
+        .WillByDefault(Return(true));
   }
 
   void PrepareNoConsentExistInCache() {

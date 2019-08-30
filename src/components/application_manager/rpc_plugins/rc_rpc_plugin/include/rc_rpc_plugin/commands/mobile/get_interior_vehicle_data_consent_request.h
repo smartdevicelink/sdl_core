@@ -92,6 +92,10 @@ class GetInteriorVehicleDataConsentRequest
    */
   bool GetCalculatedVehicleDataConsent(
       smart_objects::SmartObject& out_response) const;
+
+  bool MultipleAccessAllowed(
+      const smart_objects::SmartArray& module_ids,
+      smart_objects::SmartArray& out_consents_array) const;
 };
 
 }  // namespace commands

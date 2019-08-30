@@ -185,6 +185,10 @@ bool GetInteriorVehicleDataConsentRequest::GetCalculatedVehicleDataConsent(
       (*message_)[app_mngr::strings::msg_params][message_params::kModuleIds]
           .asArray();
 
+  if (!MultipleAccessAllowed((*module_ids), (*modules_consent_array))) {
+    return true;
+  }
+
   auto fill_auto_allow_consents =
       [&module_ids](smart_objects::SmartArray& out_consents_array) {
         for (uint32_t i = 0; i < module_ids->size(); ++i) {
@@ -281,6 +285,40 @@ bool GetInteriorVehicleDataConsentRequest::GetCalculatedVehicleDataConsent(
       logger_,
       "Can't provide calculated consents - should send request to HMI");
   return false;
+}
+
+bool GetInteriorVehicleDataConsentRequest::MultipleAccessAllowed(
+    const smart_objects::SmartArray& module_ids,
+    smart_objects::SmartArray& out_consents_array) const {
+  LOG4CXX_AUTO_TRACE(logger_);
+  for (auto& module_id : module_ids) {
+    const std::string module_type = ModuleType();
+    auto app = application_manager_.application(connection_key());
+    const uint32_t app_id = app->app_id();
+    const ModuleUid module_uid(module_type, module_id.asString());
+    const bool is_multiple_access_allowed =
+        rc_capabilities_manager_.IsMultipleAccessAllowed(module_uid);
+    if (!is_multiple_access_allowed) {
+      const bool is_resource_free =
+          (resource_allocation_manager_.AcquireResource(
+               module_uid.first, module_uid.second, app_id) ==
+           AcquireResult::ALLOWED);
+
+      out_consents_array.push_back(
+          smart_objects::SmartObject(is_resource_free));
+    } else {
+      out_consents_array.clear();
+      break;
+    }
+  }
+
+  if (!out_consents_array.empty()) {
+    LOG4CXX_DEBUG(logger_,
+                  "Multiple access disallowed, returning true only for "
+                  "FREE resources");
+    return false;
+  }
+  return true;
 }
 
 bool GetInteriorVehicleDataConsentRequest::SaveModuleIdConsents(
