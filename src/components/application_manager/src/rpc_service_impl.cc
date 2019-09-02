@@ -164,6 +164,7 @@ bool RPCServiceImpl::ManageMobileCommand(
       SendMessageToMobile(response);
       return false;
     }
+#ifdef ENABLE_SECURITY
     if (EncryptionFlagCheckResult::kError_EncryptionNeeded ==
         IsEncryptionRequired(
             *message,
@@ -177,6 +178,7 @@ bool RPCServiceImpl::ManageMobileCommand(
       SendMessageToMobile(response);
       return false;
     }
+#endif  // ENABLE_SECURITY
 
     // Message for "CheckPermission" must be with attached schema
     mobile_so_factory().attachSchema(*message, false);
