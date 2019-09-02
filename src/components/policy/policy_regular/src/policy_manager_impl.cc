@@ -381,9 +381,13 @@ bool PolicyManagerImpl::LoadPT(const std::string& file,
       return false;
     }
 
-    // Replace predefined policies with its actual setting, e.g. "123":"default"
-    // to actual values of default section
-    UnwrapAppPolicies(pt_update->policy_table.app_policies_section.apps);
+    // Checking of difference between PTU and current policy state
+    // Must to be done before PTU applying since it is possible, that functional
+    // groups, which had been present before are absent in PTU and will be
+    // removed after update. So in case of revoked groups system has to know
+    // names and ids of revoked groups before they will be removed.
+    const auto results =
+        CheckPermissionsChanges(pt_update, policy_table_snapshot);
 
     // Replace current data with updated
     if (!cache_->ApplyUpdate(*pt_update)) {
@@ -394,14 +398,6 @@ bool PolicyManagerImpl::LoadPT(const std::string& file,
       return false;
     }
     CheckPermissionsChangesAfterUpdate(*pt_update, *policy_table_snapshot);
-
-    // Checking of difference between PTU and current policy state
-    // Must to be done before PTU applying since it is possible, that functional
-    // groups, which had been present before are absent in PTU and will be
-    // removed after update. So in case of revoked groups system has to know
-    // names and ids of revoked groups before they will be removed.
-    const auto results =
-        CheckPermissionsChanges(pt_update, policy_table_snapshot);
 
     ProcessAppPolicyCheckResults(
         results, pt_update->policy_table.app_policies_section.apps);
