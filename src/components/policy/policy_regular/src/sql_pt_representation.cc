@@ -2687,10 +2687,17 @@ bool SQLPTRepresentation::InsertVehicleDataItem(
   }
 
   if (vehicle_data_item.params->is_initialized()) {
+    std::map<std::string, std::string> stored_vehicle_data_item_params;
     for (const auto& param : *(vehicle_data_item.params)) {
       if (!InsertVehicleDataItem(param)) {
         return false;
       }
+
+      if (stored_vehicle_data_item_params.end() !=
+          stored_vehicle_data_item_params.find(param.name)) {
+        LOG4CXX_DEBUG(logger_, "Parameter already stored.");
+        continue;
+      };
 
       if (!query.Prepare(sql_pt::kInsertVehicleDataItemParams)) {
         LOG4CXX_ERROR(logger_,
@@ -2712,6 +2719,7 @@ bool SQLPTRepresentation::InsertVehicleDataItem(
                 << ". Error: " << query.LastError().text());
         return false;
       }
+      stored_vehicle_data_item_params[param.name] = param.key;
     }
   }
 
