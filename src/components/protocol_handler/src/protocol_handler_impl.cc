@@ -1131,14 +1131,16 @@ void ProtocolHandlerImpl::OnUnexpectedDisconnect(
 
 void ProtocolHandlerImpl::NotifyOnGetSystemTimeFailed() {
   LOG4CXX_AUTO_TRACE(logger_);
-  security_manager_->ResetPendingSystemTimeRequests();
 #ifdef ENABLE_SECURITY
+  security_manager_->ResetPendingSystemTimeRequests();
   security_manager_->NotifyListenersOnGetSystemTimeFailed();
 #endif  // ENABLE_SECURITY
 }
 
 void ProtocolHandlerImpl::ProcessFailedPTU() {
+#ifdef ENABLE_SECURITY
   security_manager_->ProcessFailedPTU();
+#endif  // ENABLE_SECURITY
 }
 
 #ifdef EXTERNAL_PROPRIETARY_MODE
@@ -1228,10 +1230,14 @@ void ProtocolHandlerImpl::OnAuthTokenUpdated(const std::string& policy_app_id,
 bool ProtocolHandlerImpl::IsRPCServiceSecure(
     const uint32_t connection_key) const {
   LOG4CXX_AUTO_TRACE(logger_);
+#ifdef ENABLE_SECURITY
 
   security_manager::SSLContext* context =
       session_observer_.GetSSLContext(connection_key, ServiceType::kRpc);
   return (context && context->IsInitCompleted());
+#else
+  return false;
+#endif  // ENABLE_SECURITY
 }
 
 RESULT_CODE ProtocolHandlerImpl::SendFrame(const ProtocolFramePtr packet) {
@@ -1617,6 +1623,7 @@ const ServiceStatus ProtocolHandlerImpl::ServiceDisallowedBySettings(
       std::find(audio_transports.begin(), audio_transports.end(), transport) !=
           audio_transports.end();
 
+#ifdef ENABLE_SECURITY
   const auto& force_protected = get_settings().force_protected_service();
 
   const auto& force_unprotected = get_settings().force_unprotected_service();
@@ -1631,17 +1638,18 @@ const ServiceStatus ProtocolHandlerImpl::ServiceDisallowedBySettings(
 
   const bool can_start_unprotected = is_force_unprotected && !protection;
 
-  if ((ServiceType::kMobileNav == service_type && !is_video_allowed) ||
-      (ServiceType::kAudio == service_type && !is_audio_allowed)) {
-    return ServiceStatus::SERVICE_START_FAILED;
-  }
-
   if (is_force_protected && !can_start_protected) {
     return ServiceStatus::PROTECTION_ENFORCED;
   }
 
   if (is_force_unprotected && !can_start_unprotected) {
     return ServiceStatus::UNSECURE_START_FAILED;
+  }
+#endif  // ENABLE_SECURITY
+
+  if ((ServiceType::kMobileNav == service_type && !is_video_allowed) ||
+      (ServiceType::kAudio == service_type && !is_audio_allowed)) {
+    return ServiceStatus::SERVICE_START_FAILED;
   }
 
   return ServiceStatus::INVALID_ENUM;

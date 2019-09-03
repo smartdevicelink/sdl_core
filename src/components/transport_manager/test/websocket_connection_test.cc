@@ -425,6 +425,7 @@ TEST_F(WebsocketConnectionTest, WSSConnection_SUCCESS_ValidTarget) {
   t1.join();
 }
 
+#ifdef ENABLE_SECURITY
 TEST_F(WebsocketConnectionTest, WSSConnection_FAILURE_InvalidTarget) {
   transport_manager::transport_adapter::CloudAppProperties properties{
       .endpoint = "wss://" + kHost + ":" + std::to_string(kPort),
@@ -486,6 +487,7 @@ TEST_F(WebsocketConnectionTest, WSSConnection_FAILURE_IncorrectCert) {
   wss_session->Stop();
   t1.join();
 }
+#endif  // ENABLE_SECURITY
 }  // namespace transport_manager_test
 }  // namespace components
 }  // namespace test

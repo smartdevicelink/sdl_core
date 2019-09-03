@@ -746,12 +746,11 @@ TEST_F(ProtocolHandlerImplTest,
   const uint8_t session_id1 = 1u;
   const ::transport_manager::ConnectionUID connection_id2 = 0xBu;
   const uint8_t session_id2 = 2u;
+  EXPECT_CALL(session_observer_mock, KeyFromPair(connection_id2, session_id2))
+      .WillRepeatedly(Return(connection_key));
 
 #ifdef ENABLE_SECURITY
   AddSecurityManager();
-
-  EXPECT_CALL(session_observer_mock, KeyFromPair(connection_id2, session_id2))
-      .WillRepeatedly(Return(connection_key));
 
   EXPECT_CALL(session_observer_mock,
               GetSSLContext(connection_key, start_service))

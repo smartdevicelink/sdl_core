@@ -584,7 +584,9 @@ class ApplicationManagerImpl
       utils::Optional<hmi_apis::Common_ServiceStatusUpdateReason::eType>
           service_update_reason) FINAL;
 
+#ifdef ENABLE_SECURITY
   bool OnPTUFailed() FINAL;
+#endif  // ENABLE_SECURITY
   /*
    * @brief Starts audio pass thru thread
    *

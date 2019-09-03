@@ -2163,11 +2163,12 @@ bool ApplicationManagerImpl::OnHandshakeDone(
   }
   return false;
 }
-
+#ifdef ENABLE_SECURITY
 bool ApplicationManagerImpl::OnPTUFailed() {
   LOG4CXX_AUTO_TRACE(logger_);
   return false;
 }
+#endif  // ENABLE_SECURITY
 
 bool ApplicationManagerImpl::OnGetSystemTimeFailed() {
   LOG4CXX_AUTO_TRACE(logger_);
