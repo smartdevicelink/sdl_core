@@ -5,6 +5,7 @@ include_directories(
   ${CMAKE_SOURCE_DIR}/src/components/utils/include/
   ${COMPONENTS_DIR}/smart_objects/include/
   ${JSONCPP_INCLUDE_DIRECTORY}
+  ${BOOST_INCLUDE_DIR}
 )
 
 message(STATUS "Using ${EXTENDED_POLICY} policy mode")
