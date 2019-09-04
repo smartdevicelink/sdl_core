@@ -136,16 +136,20 @@ class PolicyManagerImpl : public PolicyManager {
 
   /**
    * @brief Notifies system by sending OnAppPermissionChanged notification
+   * @param device_id device identifier
    * @param app_policy Reference to application policy
    */
-  void NotifySystem(const AppPoliciesValueType& app_policy) const;
+  void NotifySystem(const std::string& device_id,
+                    const AppPoliciesValueType& app_policy) const;
 
   /**
    * @brief Sends OnPermissionChange notification to application if its
    * currently registered
+   * @param device_id device identifier
    * @param app_policy Reference to application policy
    */
-  void SendPermissionsToApp(const AppPoliciesValueType& app_policy);
+  void SendPermissionsToApp(const std::string& device_id,
+                            const AppPoliciesValueType& app_policy);
 
   /**
    * @brief Resets Policy Table

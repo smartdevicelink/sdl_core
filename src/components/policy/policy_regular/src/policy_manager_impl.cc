@@ -455,40 +455,45 @@ void PolicyManagerImpl::ProcessActionsForAppPolicies(
       continue;
     }
 
-    if (it_actions->second.is_consent_needed) {
-      // Post-check after ExternalConsent consent changes
-      const std::string& policy_app_id = app_policy->first;
-      if (!IsConsentNeeded(last_device_id_, policy_app_id)) {
-        sync_primitives::AutoLock lock(app_permissions_diff_lock_);
+    const auto devices_ids = listener()->GetDevicesIds(app_policy->first);
+    for (const auto& device_id : devices_ids) {
+      if (it_actions->second.is_consent_needed) {
+        // Post-check after ExternalConsent consent changes
+        const std::string& policy_app_id = app_policy->first;
+        if (!IsConsentNeeded(device_id, policy_app_id)) {
+          sync_primitives::AutoLock lock(app_permissions_diff_lock_);
 
-        PendingPermissions::iterator app_id_diff =
-            app_permissions_diff_.find(policy_app_id);
+          PendingPermissions::iterator app_id_diff =
+              app_permissions_diff_.find(policy_app_id);
 
-        if (app_permissions_diff_.end() != app_id_diff) {
-          app_id_diff->second.appPermissionsConsentNeeded = false;
+          if (app_permissions_diff_.end() != app_id_diff) {
+            app_id_diff->second.appPermissionsConsentNeeded = false;
+          }
         }
       }
-    }
-    if (it_actions->second.is_notify_system) {
-      NotifySystem(*app_policy);
-    }
-    if (it_actions->second.is_send_permissions_to_app) {
-      SendPermissionsToApp(*app_policy);
+      if (it_actions->second.is_notify_system) {
+        NotifySystem(device_id, *app_policy);
+      }
+      if (it_actions->second.is_send_permissions_to_app) {
+        SendPermissionsToApp(device_id, *app_policy);
+      }
     }
   }
 }
 
 void PolicyManagerImpl::NotifySystem(
+    const std::string& device_id,
     const PolicyManagerImpl::AppPoliciesValueType& app_policy) const {
-  listener()->OnPendingPermissionChange(last_device_id_, app_policy.first);
+  listener()->OnPendingPermissionChange(device_id, app_policy.first);
 }
 
 void PolicyManagerImpl::SendPermissionsToApp(
+    const std::string& device_id,
     const PolicyManagerImpl::AppPoliciesValueType& app_policy) {
   const std::string app_id = app_policy.first;
 
   std::vector<FunctionalGroupPermission> group_permissons;
-  GetPermissionsForApp(last_device_id_, app_id, group_permissons);
+  GetPermissionsForApp(device_id, app_id, group_permissons);
 
   Permissions notification_data;
 
@@ -504,7 +509,7 @@ void PolicyManagerImpl::SendPermissionsToApp(
   std::string default_hmi;
   default_hmi = "NONE";
   listener()->OnPermissionsUpdated(
-      last_device_id_, app_id, notification_data, default_hmi);
+      device_id, app_id, notification_data, default_hmi);
 }
 
 CheckAppPolicyResults PolicyManagerImpl::CheckPermissionsChanges(

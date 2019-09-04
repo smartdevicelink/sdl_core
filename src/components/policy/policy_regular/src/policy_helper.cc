@@ -453,11 +453,13 @@ bool CheckAppPolicy::operator()(const AppPoliciesValueType& app_policy) {
     return true;
   }
 
+  SetPendingPermissions(app_policy, result);
   if (RESULT_CONSENT_NOT_REQUIRED != result) {
-    SetPendingPermissions(app_policy, result);
     AddResult(app_id, RESULT_CONSENT_NEEDED);
+    return true;
   }
 
+  AddResult(app_id, result);
   return true;
 }
 
