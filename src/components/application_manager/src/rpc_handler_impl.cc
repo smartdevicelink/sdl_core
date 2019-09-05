@@ -308,11 +308,11 @@ void RPCHandlerImpl::GetMessageVersion(
     if (sync_msg_version.keyExists(strings::patch_version)) {
       patch = sync_msg_version[strings::patch_version].asUInt();
     }
+
+    message_version = utils::base_rpc_version;
     utils::SemanticVersion temp_version(major, minor, patch);
     if (temp_version.isValid()) {
-      message_version = (temp_version >= utils::rpc_version_5)
-                            ? temp_version
-                            : utils::base_rpc_version;
+      message_version = temp_version;
     }
   }
 }
