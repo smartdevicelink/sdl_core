@@ -119,13 +119,30 @@ void GetVehicleDataRequest::on_event(const event_engine::Event& event) {
       hmi_apis::Common_Result::eType result_code =
           static_cast<hmi_apis::Common_Result::eType>(
               message[strings::params][hmi_response::code].asInt());
+      mobile_apis::Result::eType mobile_result_code =
+          GetMobileResultCode(result_code);
       bool result = PrepareResultForMobileResponse(
           result_code, HmiInterfaces::HMI_INTERFACE_VehicleInfo);
       std::string response_info;
       GetInfo(message, response_info);
-      result = result ||
-               ((hmi_apis::Common_Result::DATA_NOT_AVAILABLE == result_code) &&
-                (message[strings::msg_params].length() > 1));
+
+      auto data_not_available_with_params = [&result_code, &message]() {
+        if (hmi_apis::Common_Result::DATA_NOT_AVAILABLE != result_code) {
+          return false;
+        }
+
+        const auto& msg_params = message[strings::msg_params];
+        switch (msg_params.length()) {
+          case 0:
+            return false;
+          case 1:
+            return !(msg_params.keyExists(hmi_response::method));
+          default:
+            return true;
+        }
+      };
+
+      result = result || data_not_available_with_params();
 
       if (true ==
           message[strings::msg_params].keyExists(hmi_response::method)) {
@@ -147,7 +164,8 @@ void GetVehicleDataRequest::on_event(const event_engine::Event& event) {
           }
         }
 
-        if (message[strings::msg_params].empty()) {
+        if (message[strings::msg_params].empty() &&
+            hmi_apis::Common_Result::DATA_NOT_AVAILABLE != result_code) {
           response_info = "Failed to retrieve data from vehicle";
           SendResponse(
               false, mobile_apis::Result::GENERIC_ERROR, response_info.c_str());
@@ -156,7 +174,7 @@ void GetVehicleDataRequest::on_event(const event_engine::Event& event) {
       }
 
       SendResponse(result,
-                   MessageHelper::HMIToMobileResult(result_code),
+                   mobile_result_code,
                    response_info.empty() ? NULL : response_info.c_str(),
                    &(message[strings::msg_params]));
       break;

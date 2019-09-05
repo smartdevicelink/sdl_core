@@ -214,6 +214,22 @@ class CommandRequestImpl : public CommandImpl,
   mobile_apis::Result::eType GetMobileResultCode(
       const hmi_apis::Common_Result::eType& hmi_code) const;
 
+  /**
+   * @brief Checks result code from Mobile for single RPC
+   * @param result_code contains result code from Mobile response
+   * @return true if result code complies successful result codes,
+   * false otherwise.
+   */
+  static bool IsMobileResultSuccess(mobile_apis::Result::eType result_code);
+
+  /**
+   * @brief Checks result code from HMI for single RPC
+   * @param result_code contains result code from Mobile response
+   * @return true if result code complies successful result codes,
+   * false otherwise.
+   */
+  static bool IsHMIResultSuccess(hmi_apis::Common_Result::eType result_code);
+
  protected:
   /**
    * @brief Checks message permissions and parameters according to policy table
@@ -247,14 +263,6 @@ class CommandRequestImpl : public CommandImpl,
    * @return true if any param was marked as disallowed
    */
   bool HasDisallowedParams() const;
-
-  /**
-   * @brief Checks result code from Mobile for single RPC
-   * @param result_code contains result code from Mobile response
-   * @return true if result code complies successful result codes,
-   * false otherwise.
-   */
-  bool IsMobileResultSuccess(mobile_apis::Result::eType result_code) const;
 
   /**
    * @brief Checks result code from HMI for single RPC
