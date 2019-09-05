@@ -87,6 +87,7 @@ struct SMember {
   boost::optional<utils::SemanticVersion> mUntil;
   bool mIsDeprecated;
   bool mIsRemoved;
+  mutable bool mIsValid;
   std::vector<SMember> mHistoryVector;
 };
 typedef std::map<std::string, SMember> Members;

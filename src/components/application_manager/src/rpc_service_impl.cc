@@ -179,9 +179,6 @@ bool RPCServiceImpl::ManageMobileCommand(
       return false;
     }
 #endif  // ENABLE_SECURITY
-
-    // Message for "CheckPermission" must be with attached schema
-    mobile_so_factory().attachSchema(*message, false);
   }
 
   auto plugin =
