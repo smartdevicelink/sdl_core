@@ -48,7 +48,8 @@ SMember::SMember()
     : mSchemaItem(CAlwaysFalseSchemaItem::create())
     , mIsMandatory(true)
     , mIsDeprecated(false)
-    , mIsRemoved(false) {}
+    , mIsRemoved(false)
+    , mIsValid(true) {}
 
 SMember::SMember(const ISchemaItemPtr SchemaItem,
                  const bool IsMandatory,
@@ -57,7 +58,7 @@ SMember::SMember(const ISchemaItemPtr SchemaItem,
                  const bool IsDeprecated,
                  const bool IsRemoved,
                  const std::vector<SMember>& history_vector)
-    : mSchemaItem(SchemaItem), mIsMandatory(IsMandatory) {
+    : mSchemaItem(SchemaItem), mIsMandatory(IsMandatory), mIsValid(true) {
   if (Since.size() > 0) {
     utils::SemanticVersion since_struct(Since);
     if (since_struct.isValid()) {
@@ -251,25 +252,23 @@ CObjectSchemaItem::CObjectSchemaItem(const Members& members)
 
 void CObjectSchemaItem::RemoveFakeParams(
     SmartObject& Object, const utils::SemanticVersion& MessageVersion) {
-  for (SmartMap::const_iterator it = Object.map_begin();
-       it != Object.map_end();) {
+  for (SmartMap::const_iterator it = Object.map_begin(); it != Object.map_end();
+       ++it) {
     const std::string& key = it->first;
     std::map<std::string, SMember>::const_iterator members_it =
         mMembers.find(key);
-    if (mMembers.end() == members_it
-        // FIXME(EZamakhov): Remove illegal usage of filed in AM
-        && key.compare(connection_key) != 0 && key.compare(binary_data) != 0 &&
-        key.compare(app_id) != 0) {
-      ++it;
-      Object.erase(key);
 
-    } else if (mMembers.end() != members_it &&
-               GetCorrectMember(members_it->second, MessageVersion)
-                   .mIsRemoved) {
-      ++it;
+    if (mMembers.end() == members_it && key.compare(connection_key) != 0 &&
+        key.compare(binary_data) != 0 && key.compare(app_id) != 0) {
       Object.erase(key);
-    } else {
-      ++it;
+    }
+
+    if (mMembers.end() != members_it) {
+      const SMember& member =
+          GetCorrectMember(members_it->second, MessageVersion);
+      if (member.mIsRemoved || !member.mIsValid) {
+        Object.erase(key);
+      }
     }
   }
 }
@@ -278,16 +277,22 @@ const SMember& CObjectSchemaItem::GetCorrectMember(
     const SMember& member, const utils::SemanticVersion& messageVersion) {
   // Check if member is the correct version
   if (member.CheckHistoryFieldVersion(messageVersion)) {
+    member.mIsValid = true;
     return member;
   }
   // Check for history tag items
   if (!member.mHistoryVector.empty()) {
     for (uint i = 0; i < member.mHistoryVector.size(); i++) {
       if (member.mHistoryVector[i].CheckHistoryFieldVersion(messageVersion)) {
+        member.mHistoryVector[i].mIsValid = true;
         return member.mHistoryVector[i];
       }
     }
   }
+
+  // If member didn't pass checks above then
+  // it becomes not valid and must be removed.
+  member.mIsValid = false;
   // Return member as default
   return member;
 }
