@@ -16,6 +16,8 @@ class MockCustomVehicleDataManager : public CustomVehicleDataManager {
   MOCK_CONST_METHOD1(GetVehicleDataItemType,
                      std::string(const std::string& vehicle_data_item_name));
   MOCK_METHOD1(OnPolicyEvent, void(plugin_manager::PolicyEvent policy_event));
+  MOCK_CONST_METHOD1(IsValidCustomVehicleDataName,
+                     bool(const std::string& name));
 };
 
 }  // namespace vehicle_info_plugin

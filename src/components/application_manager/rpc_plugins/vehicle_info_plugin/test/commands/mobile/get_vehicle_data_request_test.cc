@@ -231,6 +231,10 @@ TEST_F(GetVehicleDataRequestTest, OnEvent_DataNotAvailable_SUCCESS) {
   const mobile_result::eType mobile_response_code =
       mobile_result::VEHICLE_DATA_NOT_AVAILABLE;
 
+  am::VehicleData vehicle_data;
+  ON_CALL(mock_message_helper_, vehicle_data())
+      .WillByDefault(ReturnRef(vehicle_data));
+
   MessageSharedPtr command_msg(CreateMessage(smart_objects::SmartType_Map));
   (*command_msg)[am::strings::params][am::strings::connection_key] =
       kConnectionKey;

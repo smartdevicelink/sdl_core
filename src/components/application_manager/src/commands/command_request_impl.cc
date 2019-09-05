@@ -891,7 +891,7 @@ bool CommandRequestImpl::HasDisallowedParams() const {
 }
 
 bool CommandRequestImpl::IsMobileResultSuccess(
-    mobile_apis::Result::eType result_code) {
+    const mobile_apis::Result::eType result_code) {
   LOG4CXX_AUTO_TRACE(logger_);
   using namespace helpers;
   return Compare<mobile_apis::Result::eType, EQ, ONE>(
@@ -904,7 +904,8 @@ bool CommandRequestImpl::IsMobileResultSuccess(
 }
 
 bool CommandRequestImpl::IsHMIResultSuccess(
-    hmi_apis::Common_Result::eType result_code) {
+    const hmi_apis::Common_Result::eType result_code) {
+  LOG4CXX_AUTO_TRACE(logger_);
   using namespace helpers;
   return Compare<hmi_apis::Common_Result::eType, EQ, ONE>(
       result_code,

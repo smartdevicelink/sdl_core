@@ -39,6 +39,8 @@ class CustomVehicleDataManager {
       smart_objects::SmartObject& msg_params) = 0;
 
   virtual void OnPolicyEvent(plugin_manager::PolicyEvent policy_event) = 0;
+
+  virtual bool IsValidCustomVehicleDataName(const std::string& name) const = 0;
 };
 }  // namespace vehicle_info_plugin
 #endif  // SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_VEHICLE_INFO_PLUGIN_INCLUDE_VEHICLE_INFO_PLUGIN_CUSTOM_VEHICLE_DATA_MANAGER_H_

@@ -116,30 +116,28 @@ void GetVehicleDataRequest::on_event(const event_engine::Event& event) {
   switch (event.id()) {
     case hmi_apis::FunctionID::VehicleInfo_GetVehicleData: {
       EndAwaitForInterface(HmiInterfaces::HMI_INTERFACE_VehicleInfo);
-      hmi_apis::Common_Result::eType result_code =
-          static_cast<hmi_apis::Common_Result::eType>(
-              message[strings::params][hmi_response::code].asInt());
-      mobile_apis::Result::eType mobile_result_code =
-          GetMobileResultCode(result_code);
+      auto result_code = static_cast<hmi_apis::Common_Result::eType>(
+          message[strings::params][hmi_response::code].asInt());
+      auto mobile_result_code = GetMobileResultCode(result_code);
       bool result = PrepareResultForMobileResponse(
           result_code, HmiInterfaces::HMI_INTERFACE_VehicleInfo);
       std::string response_info;
       GetInfo(message, response_info);
 
-      auto data_not_available_with_params = [&result_code, &message]() {
+      auto data_not_available_with_params = [this, &result_code, &message]() {
         if (hmi_apis::Common_Result::DATA_NOT_AVAILABLE != result_code) {
           return false;
         }
 
+        const auto& vehicle_data = MessageHelper::vehicle_data();
         const auto& msg_params = message[strings::msg_params];
-        switch (msg_params.length()) {
-          case 0:
-            return false;
-          case 1:
-            return !(msg_params.keyExists(hmi_response::method));
-          default:
+        for (const auto& item : msg_params.enumerate()) {
+          if (vehicle_data.end() != vehicle_data.find(item) ||
+              custom_vehicle_data_manager_.IsValidCustomVehicleDataName(item)) {
             return true;
+          }
         }
+        return false;
       };
 
       result = result || data_not_available_with_params();
