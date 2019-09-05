@@ -350,33 +350,6 @@ void policy::CheckAppPolicy::NotifySystem(
   }
 }
 
-void CheckAppPolicy::SendPermissionsToApp(
-    const std::string& app_id, const policy_table::Strings& groups) const {
-  const auto devices_ids = pm_->listener()->GetDevicesIds(app_id);
-  if (devices_ids.empty()) {
-    LOG4CXX_WARN(logger_,
-                 "Couldn't find device info for application id: " << app_id);
-    return;
-  }
-
-  for (const auto& device_id : devices_ids) {
-    std::vector<FunctionalGroupPermission> group_permissons;
-    pm_->GetPermissionsForApp(device_id, app_id, group_permissons);
-
-    Permissions notification_data;
-    pm_->PrepareNotificationData(update_->policy_table.functional_groupings,
-                                 groups,
-                                 group_permissons,
-                                 notification_data);
-
-    LOG4CXX_INFO(logger_, "Send notification for application_id: " << app_id);
-    // Default_hmi is Ford-specific and should not be used with basic policy
-    const std::string default_hmi;
-    pm_->listener()->OnPermissionsUpdated(
-        device_id, app_id, notification_data, default_hmi);
-  }
-}
-
 bool CheckAppPolicy::IsAppRevoked(
     const AppPoliciesValueType& app_policy) const {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -480,12 +453,13 @@ bool CheckAppPolicy::operator()(const AppPoliciesValueType& app_policy) {
     return true;
   }
 
+  SetPendingPermissions(app_policy, result);
   if (RESULT_CONSENT_NOT_REQUIRED != result) {
-    SetPendingPermissions(app_policy, result);
     AddResult(app_id, RESULT_CONSENT_NEEDED);
+    return true;
   }
 
-  SendPermissionsToApp(app_policy.first, app_policy.second.groups);
+  AddResult(app_id, result);
   return true;
 }
 
@@ -545,16 +519,16 @@ void policy::CheckAppPolicy::SetPendingPermissions(
 
 policy::PermissionsCheckResult policy::CheckAppPolicy::CheckPermissionsChanges(
     const policy::AppPoliciesValueType& app_policy) const {
-  bool has_revoked_groups = HasRevokedGroups(app_policy);
+  const bool has_revoked_groups = HasRevokedGroups(app_policy);
 
-  bool has_consent_needed_groups = HasConsentNeededGroups(app_policy);
+  const bool has_consent_needed_groups = HasConsentNeededGroups(app_policy);
 
-  bool has_new_groups = HasNewGroups(app_policy);
+  const bool has_new_groups = HasNewGroups(app_policy);
+
+  const bool has_updated_groups = HasUpdatedGroups(app_policy);
 
   const bool encryption_required_flag_changed =
       IsEncryptionRequiredFlagChanged(app_policy);
-
-  bool has_updated_groups = HasUpdatedGroups(app_policy);
 
   if (has_revoked_groups && has_consent_needed_groups) {
     return RESULT_PERMISSIONS_REVOKED_AND_CONSENT_NEEDED;

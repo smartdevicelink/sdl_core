@@ -1013,7 +1013,8 @@ TEST_F(PolicyManagerImplTest, LoadPT_FunctionalGroup_removeRPC_SendUpdate) {
   // Assert
   EXPECT_CALL(*cache_manager, GetVehicleDataItems())
       .WillOnce(Return(std::vector<policy_table::VehicleDataItem>()));
-  EXPECT_CALL(*cache_manager, GenerateSnapshot()).WillOnce(Return(snapshot));
+  EXPECT_CALL(*cache_manager, GenerateSnapshot())
+      .WillRepeatedly(Return(snapshot));
   EXPECT_CALL(*cache_manager, ApplyUpdate(_)).WillOnce(Return(true));
   ExpectOnPermissionsUpdated();
 
@@ -1045,7 +1046,8 @@ TEST_F(PolicyManagerImplTest,
   ::policy::BinaryMessage msg(json.begin(), json.end());
 
   // Assert
-  EXPECT_CALL(*cache_manager, GenerateSnapshot()).WillOnce(Return(snapshot));
+  EXPECT_CALL(*cache_manager, GenerateSnapshot())
+      .WillRepeatedly(Return(snapshot));
   EXPECT_CALL(*cache_manager, GetVehicleDataItems())
       .WillOnce(Return(std::vector<policy_table::VehicleDataItem>()));
   EXPECT_CALL(*cache_manager, ApplyUpdate(_)).WillOnce(Return(true));
@@ -1079,7 +1081,8 @@ TEST_F(PolicyManagerImplTest,
   ::policy::BinaryMessage msg(json.begin(), json.end());
 
   // Assert
-  EXPECT_CALL(*cache_manager, GenerateSnapshot()).WillOnce(Return(snapshot));
+  EXPECT_CALL(*cache_manager, GenerateSnapshot())
+      .WillRepeatedly(Return(snapshot));
   EXPECT_CALL(*cache_manager, GetVehicleDataItems())
       .WillOnce(Return(std::vector<policy_table::VehicleDataItem>()));
   EXPECT_CALL(*cache_manager, ApplyUpdate(_)).WillOnce(Return(true));
@@ -1114,7 +1117,8 @@ TEST_F(PolicyManagerImplTest,
   ::policy::BinaryMessage msg(json.begin(), json.end());
 
   // Assert
-  EXPECT_CALL(*cache_manager, GenerateSnapshot()).WillOnce(Return(snapshot));
+  EXPECT_CALL(*cache_manager, GenerateSnapshot())
+      .WillRepeatedly(Return(snapshot));
   EXPECT_CALL(*cache_manager, GetVehicleDataItems())
       .WillOnce(Return(std::vector<policy_table::VehicleDataItem>()));
   EXPECT_CALL(*cache_manager, ApplyUpdate(_)).WillOnce(Return(true));
@@ -1148,7 +1152,8 @@ TEST_F(PolicyManagerImplTest, LoadPT_FunctionalGroup_addRPCParams_SendUpdate) {
   ::policy::BinaryMessage msg(json.begin(), json.end());
 
   // Assert
-  EXPECT_CALL(*cache_manager, GenerateSnapshot()).WillOnce(Return(snapshot));
+  EXPECT_CALL(*cache_manager, GenerateSnapshot())
+      .WillRepeatedly(Return(snapshot));
   EXPECT_CALL(*cache_manager, GetVehicleDataItems())
       .WillOnce(Return(std::vector<policy_table::VehicleDataItem>()));
   EXPECT_CALL(*cache_manager, ApplyUpdate(_)).WillOnce(Return(true));
@@ -1175,7 +1180,8 @@ TEST_F(PolicyManagerImplTest, LoadPT_FunctionalGroup_NoUpdate_DONT_SendUpdate) {
   ::policy::BinaryMessage msg(json.begin(), json.end());
 
   // Assert
-  EXPECT_CALL(*cache_manager, GenerateSnapshot()).WillOnce(Return(snapshot));
+  EXPECT_CALL(*cache_manager, GenerateSnapshot())
+      .WillRepeatedly(Return(snapshot));
   EXPECT_CALL(*cache_manager, GetVehicleDataItems())
       .WillOnce(Return(std::vector<policy_table::VehicleDataItem>()));
   EXPECT_CALL(*cache_manager, ApplyUpdate(_)).WillOnce(Return(true));
