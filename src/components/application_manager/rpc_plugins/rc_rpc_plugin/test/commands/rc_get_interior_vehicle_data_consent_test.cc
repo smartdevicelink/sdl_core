@@ -273,7 +273,7 @@ TEST_F(RCGetInteriorVehicleDataConsentTest,
   EXPECT_CALL(mock_allocation_manager_, AcquireResource(_, _, _))
       .WillOnce(Return(rc_rpc_plugin::AcquireResult::IN_USE));
 
-  EXPECT_CALL(*mock_app_, msg_version()).WillOnce(ReturnRef(msg_ver));
+  ON_CALL(*mock_app_, msg_version()).WillByDefault(ReturnRef(msg_ver));
 
   EXPECT_CALL(*optional_mock_rpc_plugin, GetCommandFactory())
       .WillOnce(ReturnRef(mock_command_factory));
