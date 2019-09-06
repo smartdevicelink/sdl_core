@@ -257,7 +257,7 @@ void CObjectSchemaItem::RemoveFakeParams(
     const std::string& key = it->first;
     std::map<std::string, SMember>::const_iterator members_it =
         mMembers.find(key);
-    // FIXME(EZamakhov): Remove illegal usage of filed in AM
+    
     if (mMembers.end() == members_it && key.compare(connection_key) != 0 &&
         key.compare(binary_data) != 0 && key.compare(app_id) != 0) {
       Object.erase(key);
