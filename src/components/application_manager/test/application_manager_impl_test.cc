@@ -88,6 +88,8 @@ using ::testing::SaveArg;
 using ::testing::SetArgPointee;
 using ::testing::SetArgReferee;
 
+using test::components::policy_test::MockPolicyHandlerInterface;
+
 using namespace application_manager;
 
 // custom action to call a member function with 4 arguments
@@ -146,8 +148,7 @@ class ApplicationManagerImplTest
             std::make_shared<NiceMock<resumption_test::MockResumptionData> >(
                 mock_app_mngr_))
       , mock_rpc_service_(new MockRPCService)
-      , mock_policy_handler_(
-            new test::components::policy_test::MockPolicyHandlerInterface)
+      , mock_policy_handler_(new MockPolicyHandlerInterface)
       , mock_app_service_manager_(
             new MockAppServiceManager(mock_app_mngr_, mock_last_state_))
       , mock_message_helper_(
@@ -266,8 +267,7 @@ class ApplicationManagerImplTest
   NiceMock<con_test::MockConnectionHandler> mock_connection_handler_;
   NiceMock<protocol_handler_test::MockSessionObserver> mock_session_observer_;
   NiceMock<MockApplicationManagerSettings> mock_application_manager_settings_;
-  test::components::policy_test::MockPolicyHandlerInterface*
-      mock_policy_handler_;
+  MockPolicyHandlerInterface* mock_policy_handler_;
   application_manager_test::MockApplicationManager mock_app_mngr_;
   std::unique_ptr<am::ApplicationManagerImpl> app_manager_impl_;
   MockAppServiceManager* mock_app_service_manager_;
@@ -973,6 +973,7 @@ TEST_F(ApplicationManagerImplTest,
        OnDeviceSwitchingFinish_ExpectUnregisterAppsInWaitList) {
   std::shared_ptr<MockApplication> switching_app_ptr =
       std::make_shared<MockApplication>();
+  app_manager_impl_->SetMockPolicyHandler(mock_policy_handler_);
   ON_CALL(*switching_app_ptr, app_id()).WillByDefault(Return(kConnectionKey));
   ON_CALL(*switching_app_ptr, device()).WillByDefault(Return(kDeviceId));
 
@@ -1037,6 +1038,7 @@ TEST_F(ApplicationManagerImplTest,
 
   EXPECT_TRUE(
       app_manager_impl_->IsAppInReconnectMode(kDeviceId, policy_app_id_switch));
+  EXPECT_CALL(*mock_policy_handler_, ForceRetrySequenceStop());
 
   app_manager_impl_->OnDeviceSwitchingFinish(switching_device_id);
   EXPECT_FALSE(
@@ -1119,6 +1121,7 @@ TEST_F(ApplicationManagerImplTest, UnregisterAnotherAppDuringAudioPassThru) {
   std::string dummy_file_name;
   ON_CALL(mock_application_manager_settings_, recording_file_name())
       .WillByDefault(ReturnRef(dummy_file_name));
+  app_manager_impl_->SetMockPolicyHandler(mock_policy_handler_);
 
   std::unique_ptr<plugin_manager::RPCPluginManager> mock_rpc_plugin_manager_ptr(
       new plugin_manager::MockRPCPluginManager);
@@ -1182,6 +1185,7 @@ TEST_F(ApplicationManagerImplTest, UnregisterAnotherAppDuringAudioPassThru) {
                                                 audio_type);
   }
 
+  EXPECT_CALL(*mock_policy_handler_, ForceRetrySequenceStop());
   // while running APT, app 1 is unregistered
   app_manager_impl_->UnregisterApplication(
       app_id_1, mobile_apis::Result::SUCCESS, false, true);
