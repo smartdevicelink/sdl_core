@@ -40,6 +40,7 @@
 namespace test {
 namespace components {
 namespace application_manager_test {
+
 using ::test::components::application_manager_test::MockApplicationManager;
 using ::testing::_;
 using ::testing::Mock;
@@ -74,7 +75,6 @@ TEST_F(RPCHandlerImplTest, GetMessageVersion_SUCCESS) {
   message[json_str::S_MSG_PARAMS] = SmartObject(SmartType_Map);
   message[json_str::S_MSG_PARAMS][app_str::sync_msg_version] =
       SmartObject(SmartType_Map);
-  utils::SemanticVersion result_message_version;
 
   for (const auto& expected_version : test_versions) {
     message[json_str::S_MSG_PARAMS][app_str::sync_msg_version]
@@ -84,6 +84,7 @@ TEST_F(RPCHandlerImplTest, GetMessageVersion_SUCCESS) {
     message[json_str::S_MSG_PARAMS][app_str::sync_msg_version]
            [app_str::patch_version] = expected_version.patch_version_;
 
+    utils::SemanticVersion result_message_version;
     rpc_handler_->GetMessageVersion(message, result_message_version);
     EXPECT_EQ(expected_version, result_message_version);
   }
