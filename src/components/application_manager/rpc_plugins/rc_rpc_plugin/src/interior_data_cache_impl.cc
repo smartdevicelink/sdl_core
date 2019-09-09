@@ -98,7 +98,7 @@ smart_objects::SmartObject MergeArray(const smart_objects::SmartObject& data1,
   // an ID included, otherwise replace
   bool array_contains_objects =
       !data2.empty() &&
-      data2.getElement(0).getType() != smart_objects::SmartType::SmartType_Map;
+      data2.getElement(0).getType() == smart_objects::SmartType::SmartType_Map;
   bool can_merge_arrays =
       array_contains_objects &&
       data2.getElement(0).keyExists(application_manager::strings::id);

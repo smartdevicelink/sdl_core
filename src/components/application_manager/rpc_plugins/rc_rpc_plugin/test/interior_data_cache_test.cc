@@ -29,6 +29,7 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE. */
 
+#include "application_manager/smart_object_keys.h"
 #include "gtest/gtest.h"
 #include "rc_rpc_plugin/interior_data_cache_impl.h"
 
@@ -38,6 +39,8 @@ class InteriorDataCacheTest : public ::testing::Test {};
 
 namespace {
 const uint32_t time_frame_alowed_requests = 1;
+const std::string kValueKey = "value";
+const std::string kArray = "array";
 }  // namespace
 
 TEST_F(InteriorDataCacheTest,
@@ -175,6 +178,49 @@ TEST_F(InteriorDataCacheTest, Exist2ModuleTypesRemoveOneAnotherOneLeft) {
   EXPECT_EQ(smart_objects::SmartType_Null, retrieved_data1.getType());
   auto retrieved_data2 = cache.Retrieve(module2);
   EXPECT_EQ(data2, retrieved_data2);
+}
+
+TEST_F(InteriorDataCacheTest, CheckCacheDataMerge) {
+  using namespace smart_objects;
+  const std::string module_type_key = "random_module_type";
+  const std::string module_id = "random_module_id";
+  rc_rpc_plugin::ModuleUid module(module_type_key, module_id);
+
+  auto gen_smart_object = [](const std::string& id,
+                             const std::string& value) -> SmartObject {
+    SmartObject result(SmartType_Map);
+    result[application_manager::strings::id] = id;
+    result[kValueKey] = value;
+    return result;
+  };
+
+  SmartObject data1;
+  SmartObject data1_array(SmartType_Array);
+  (*data1_array.asArray()) = SmartArray{gen_smart_object("id1", "value1"),
+                                        gen_smart_object("id2", "value2")};
+  data1[kArray] = data1_array;
+
+  SmartObject data2(SmartType_Map);
+  SmartObject data2_array(SmartType_Array);
+  (*data2_array.asArray()) = SmartArray{gen_smart_object("id1", "value3"),
+                                        gen_smart_object("id3", "value4")};
+  data2[kArray] = data2_array;
+
+  SmartObject expected_data(SmartType_Map);
+  SmartObject expected_array(SmartType_Array);
+  (*expected_array.asArray()) = SmartArray{gen_smart_object("id1", "value3"),
+                                           gen_smart_object("id2", "value2"),
+                                           gen_smart_object("id3", "value4")};
+  expected_data[kArray] = expected_array;
+
+  rc_rpc_plugin::InteriorDataCacheImpl cache;
+  cache.Add(module, data1);
+  cache.Add(module, data2);
+
+  const auto retrieved_data = cache.Retrieve(module);
+
+  EXPECT_TRUE(cache.Contains(module));
+  EXPECT_EQ(expected_data, retrieved_data);
 }
 
 }  // namespace rc_rpc_plugin_test
