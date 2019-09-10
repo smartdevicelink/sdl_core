@@ -207,6 +207,8 @@ class PolicyManagerImpl : public PolicyManager {
    */
   std::string ForcePTExchange() OVERRIDE;
 
+  void StopRetrySequence() OVERRIDE;
+
   /**
    * @brief Exchange by user request
    * @return Current status of policy table

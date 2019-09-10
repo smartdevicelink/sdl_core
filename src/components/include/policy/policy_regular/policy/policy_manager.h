@@ -202,9 +202,9 @@ class PolicyManager : public usage_statistics::StatisticsManager,
   virtual std::string ForcePTExchangeAtUserRequest() = 0;
 
   /**
-   * @brief Force stops retry sequence timer and resets retry sequence
+   * @brief Stops retry sequence timer and resets retry sequence
    */
-  virtual void ForceRetrySequenceStop() = 0;
+  virtual void StopRetrySequence() = 0;
 
   /**
    * @brief Resets retry sequence

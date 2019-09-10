@@ -391,10 +391,10 @@ void PolicyHandler::OnPTInited() {
                 std::mem_fun(&PolicyHandlerObserver::OnPTInited));
 }
 
-void PolicyHandler::ForceRetrySequenceStop() {
+void PolicyHandler::StopRetrySequence() {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  policy_manager_->ForceRetrySequenceStop();
+  policy_manager_->StopRetrySequence();
 }
 
 bool PolicyHandler::ResetPolicyTable() {

@@ -3092,7 +3092,9 @@ void ApplicationManagerImpl::UnregisterApplication(
   MessageHelper::SendOnAppUnregNotificationToHMI(
       app_to_remove, is_unexpected_disconnect, *this);
   request_ctrl_.terminateAppRequests(app_id);
-  policy_handler_->ForceRetrySequenceStop();
+  if (applications_.empty()) {
+    policy_handler_->StopRetrySequence();
+  }
   return;
 }
 
