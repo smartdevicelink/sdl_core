@@ -5503,7 +5503,7 @@
                 If any text field contains no tags or the none tag, the metadata tag for that textfield should be removed.</description>
         </param>
 
-        <param name="templateTitle" type="String" maxlength="100" mandatory="false" since="6.0">
+        <param name="templateTitle" type="String" minlength="0" maxlength="100" mandatory="false" since="6.0">
             <description>
                 The title of the new template that will be displayed.
                 How this will be displayed is dependent on the OEM design and implementation of the template.
