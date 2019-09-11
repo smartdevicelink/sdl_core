@@ -448,7 +448,7 @@ uint32_t PolicyHandler::GetAppIdForSending() const {
       logger_,
       "Number of apps with NONE level: " << apps_with_none_level.size());
 
-  if (apps_with_none_level.empty() && apps_without_none_level.empty()) {
+  if (apps_with_none_level.empty()) {
     LOG4CXX_WARN(logger_, "There is no registered application");
     return 0;
   }
@@ -1537,7 +1537,7 @@ void PolicyHandler::OnSnapshotCreated(const BinaryMessage& pt_string,
 
     if (0 != app_id_for_sending) {
       MessageHelper::SendPolicySnapshotNotification(
-          app_id_for_sending, pt_string, std::string(""), application_manager_);
+          app_id_for_sending, pt_string, std::string(), application_manager_);
     }
 
   } else {

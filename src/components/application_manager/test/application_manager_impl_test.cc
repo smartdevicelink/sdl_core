@@ -153,6 +153,9 @@ class ApplicationManagerImplTest
             new MockAppServiceManager(mock_app_mngr_, mock_last_state_))
       , mock_message_helper_(
             application_manager::MockMessageHelper::message_helper_mock())
+      , mock_statistics_manager_(
+            std::make_shared<
+                NiceMock<usage_statistics_test::MockStatisticsManager> >())
 
   {
 #ifdef ENABLE_LOG
@@ -193,9 +196,7 @@ class ApplicationManagerImplTest
     ON_CALL(*mock_message_helper_, CreateModuleInfoSO(_, _))
         .WillByDefault(Return(request));
     ON_CALL(*mock_policy_handler_, GetStatisticManager())
-        .WillByDefault(
-            Return(std::shared_ptr<usage_statistics::StatisticsManager>(
-                new usage_statistics_test::MockStatisticsManager())));
+        .WillByDefault(Return(mock_statistics_manager_));
   }
 
   void CreateAppManager() {
@@ -285,6 +286,8 @@ class ApplicationManagerImplTest
 
   std::shared_ptr<MockApplication> mock_app_ptr_;
   NiceMock<protocol_handler_test::MockProtocolHandler> mock_protocol_handler_;
+  std::shared_ptr<NiceMock<usage_statistics_test::MockStatisticsManager> >
+      mock_statistics_manager_;
 };
 
 INSTANTIATE_TEST_CASE_P(
