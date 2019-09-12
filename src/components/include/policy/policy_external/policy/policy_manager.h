@@ -201,6 +201,11 @@ class PolicyManager : public usage_statistics::StatisticsManager,
   virtual std::string ForcePTExchange() = 0;
 
   /**
+   * @brief Stops retry sequence timer and resets retry sequence
+   */
+  virtual void StopRetrySequence() = 0;
+
+  /**
    * @brief Exchange by user request
    * @return Current status of policy table
    */

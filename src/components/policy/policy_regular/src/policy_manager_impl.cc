@@ -1229,6 +1229,16 @@ std::string PolicyManagerImpl::ForcePTExchange() {
   return update_status_manager_.StringifiedUpdateStatus();
 }
 
+void PolicyManagerImpl::StopRetrySequence() {
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  if (timer_retry_sequence_.is_running()) {
+    timer_retry_sequence_.Stop();
+  }
+
+  ResetRetrySequence(ResetRetryCountType::kResetWithStatusUpdate);
+}
+
 std::string PolicyManagerImpl::ForcePTExchangeAtUserRequest() {
   update_status_manager_.ScheduleManualUpdate();
   StartPTExchange();

@@ -685,6 +685,8 @@ class PolicyHandler : public PolicyHandlerInterface,
 
   virtual void OnPTInited() OVERRIDE;
 
+  void StopRetrySequence() OVERRIDE;
+
   /**
    * @brief OnDeviceSwitching Notifies policy manager on device switch event so
    * policy permissions should be processed accordingly

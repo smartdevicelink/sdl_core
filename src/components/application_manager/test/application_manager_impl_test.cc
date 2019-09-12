@@ -88,6 +88,8 @@ using ::testing::SaveArg;
 using ::testing::SetArgPointee;
 using ::testing::SetArgReferee;
 
+using test::components::policy_test::MockPolicyHandlerInterface;
+
 using namespace application_manager;
 
 // custom action to call a member function with 4 arguments
@@ -146,12 +148,14 @@ class ApplicationManagerImplTest
             std::make_shared<NiceMock<resumption_test::MockResumptionData> >(
                 mock_app_mngr_))
       , mock_rpc_service_(new MockRPCService)
-      , mock_policy_handler_(
-            new test::components::policy_test::MockPolicyHandlerInterface)
+      , mock_policy_handler_(new NiceMock<MockPolicyHandlerInterface>)
       , mock_app_service_manager_(
             new MockAppServiceManager(mock_app_mngr_, mock_last_state_))
       , mock_message_helper_(
             application_manager::MockMessageHelper::message_helper_mock())
+      , mock_statistics_manager_(
+            std::make_shared<
+                NiceMock<usage_statistics_test::MockStatisticsManager> >())
 
   {
 #ifdef ENABLE_LOG
@@ -159,7 +163,7 @@ class ApplicationManagerImplTest
 #endif
     Mock::VerifyAndClearExpectations(mock_message_helper_);
   }
-  ~ApplicationManagerImplTest() {
+  ~ApplicationManagerImplTest() OVERRIDE {
     Mock::VerifyAndClearExpectations(mock_message_helper_);
   }
 
@@ -186,6 +190,13 @@ class ApplicationManagerImplTest
     app_manager_impl_->SetAppServiceManager(mock_app_service_manager_);
     Json::Value empty;
     ON_CALL(mock_last_state_, get_dictionary()).WillByDefault(ReturnRef(empty));
+
+    auto request = std::make_shared<smart_objects::SmartObject>(
+        smart_objects::SmartType_Map);
+    ON_CALL(*mock_message_helper_, CreateModuleInfoSO(_, _))
+        .WillByDefault(Return(request));
+    ON_CALL(*mock_policy_handler_, GetStatisticManager())
+        .WillByDefault(Return(mock_statistics_manager_));
   }
 
   void CreateAppManager() {
@@ -212,6 +223,7 @@ class ApplicationManagerImplTest
         mock_application_manager_settings_, mock_policy_settings_));
     mock_app_ptr_ = std::shared_ptr<MockApplication>(new MockApplication());
     app_manager_impl_->set_protocol_handler(&mock_protocol_handler_);
+    app_manager_impl_->SetMockPolicyHandler(mock_policy_handler_);
     ASSERT_TRUE(app_manager_impl_.get());
     ASSERT_TRUE(mock_app_ptr_.get());
   }
@@ -266,8 +278,7 @@ class ApplicationManagerImplTest
   NiceMock<con_test::MockConnectionHandler> mock_connection_handler_;
   NiceMock<protocol_handler_test::MockSessionObserver> mock_session_observer_;
   NiceMock<MockApplicationManagerSettings> mock_application_manager_settings_;
-  test::components::policy_test::MockPolicyHandlerInterface*
-      mock_policy_handler_;
+  NiceMock<MockPolicyHandlerInterface>* mock_policy_handler_;
   application_manager_test::MockApplicationManager mock_app_mngr_;
   std::unique_ptr<am::ApplicationManagerImpl> app_manager_impl_;
   MockAppServiceManager* mock_app_service_manager_;
@@ -275,6 +286,8 @@ class ApplicationManagerImplTest
 
   std::shared_ptr<MockApplication> mock_app_ptr_;
   NiceMock<protocol_handler_test::MockProtocolHandler> mock_protocol_handler_;
+  std::shared_ptr<NiceMock<usage_statistics_test::MockStatisticsManager> >
+      mock_statistics_manager_;
 };
 
 INSTANTIATE_TEST_CASE_P(
@@ -1558,7 +1571,6 @@ TEST_F(ApplicationManagerImplTest,
 
 #if defined(CLOUD_APP_WEBSOCKET_TRANSPORT_SUPPORT)
 void ApplicationManagerImplTest::AddCloudAppToPendingDeviceMap() {
-  app_manager_impl_->SetMockPolicyHandler(mock_policy_handler_);
   std::vector<std::string> enabled_apps{"1234"};
   EXPECT_CALL(*mock_policy_handler_, GetEnabledCloudApps(_))
       .WillOnce(SetArgReferee<0>(enabled_apps));
@@ -1775,7 +1787,6 @@ TEST_F(ApplicationManagerImplTest,
 }
 
 TEST_F(ApplicationManagerImplTest, PolicyIDByIconUrl_Success) {
-  app_manager_impl_->SetMockPolicyHandler(mock_policy_handler_);
   std::vector<std::string> enabled_apps{"1234"};
   EXPECT_CALL(*mock_policy_handler_, GetEnabledCloudApps(_))
       .WillOnce(SetArgReferee<0>(enabled_apps));

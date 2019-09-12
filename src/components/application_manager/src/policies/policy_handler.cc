@@ -391,6 +391,12 @@ void PolicyHandler::OnPTInited() {
                 std::mem_fun(&PolicyHandlerObserver::OnPTInited));
 }
 
+void PolicyHandler::StopRetrySequence() {
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  policy_manager_->StopRetrySequence();
+}
+
 bool PolicyHandler::ResetPolicyTable() {
   LOG4CXX_TRACE(logger_, "Reset policy table.");
   POLICY_LIB_CHECK(false);
@@ -441,6 +447,11 @@ uint32_t PolicyHandler::GetAppIdForSending() const {
   LOG4CXX_DEBUG(
       logger_,
       "Number of apps with NONE level: " << apps_with_none_level.size());
+
+  if (apps_with_none_level.empty()) {
+    LOG4CXX_WARN(logger_, "There is no registered application");
+    return 0;
+  }
 
   return ChooseRandomAppForPolicyUpdate(apps_with_none_level);
 }
@@ -1522,8 +1533,13 @@ void PolicyHandler::OnSnapshotCreated(const BinaryMessage& pt_string,
   }
 
   if (PTUIterationType::RetryIteration == iteration_type) {
-    MessageHelper::SendPolicySnapshotNotification(
-        GetAppIdForSending(), pt_string, std::string(""), application_manager_);
+    uint32_t app_id_for_sending = GetAppIdForSending();
+
+    if (0 != app_id_for_sending) {
+      MessageHelper::SendPolicySnapshotNotification(
+          app_id_for_sending, pt_string, std::string(), application_manager_);
+    }
+
   } else {
     MessageHelper::SendPolicyUpdate(
         policy_snapshot_full_path,
