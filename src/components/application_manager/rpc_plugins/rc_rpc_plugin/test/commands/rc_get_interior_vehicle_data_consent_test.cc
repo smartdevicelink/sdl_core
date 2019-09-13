@@ -265,7 +265,6 @@ TEST_F(RCGetInteriorVehicleDataConsentTest,
 
 TEST_F(RCGetInteriorVehicleDataConsentTest,
        Run_MobileSendButtonPressMessage_HMISendINUSEModeToMobile) {
-
   // Expectations
   EXPECT_CALL(mock_allocation_manager_, AcquireResource(_, _, _))
       .WillOnce(Return(rc_rpc_plugin::AcquireResult::IN_USE));
