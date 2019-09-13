@@ -48,8 +48,7 @@ SMember::SMember()
     : mSchemaItem(CAlwaysFalseSchemaItem::create())
     , mIsMandatory(true)
     , mIsDeprecated(false)
-    , mIsRemoved(false)
-    , mIsValid(true) {}
+    , mIsRemoved(false) {}
 
 SMember::SMember(const ISchemaItemPtr SchemaItem,
                  const bool IsMandatory,
@@ -58,7 +57,8 @@ SMember::SMember(const ISchemaItemPtr SchemaItem,
                  const bool IsDeprecated,
                  const bool IsRemoved,
                  const std::vector<SMember>& history_vector)
-    : mSchemaItem(SchemaItem), mIsMandatory(IsMandatory), mIsValid(true) {
+    : mSchemaItem(SchemaItem)
+    , mIsMandatory(IsMandatory) {
   if (Since.size() > 0) {
     utils::SemanticVersion since_struct(Since);
     if (since_struct.isValid()) {
@@ -257,16 +257,14 @@ void CObjectSchemaItem::RemoveFakeParams(
     const std::string& key = it->first;
     std::map<std::string, SMember>::const_iterator members_it =
         mMembers.find(key);
-    
+
     if (mMembers.end() == members_it && key.compare(connection_key) != 0 &&
         key.compare(binary_data) != 0 && key.compare(app_id) != 0) {
       Object.erase(key);
     }
 
     if (mMembers.end() != members_it) {
-      const SMember& member =
-          GetCorrectMember(members_it->second, MessageVersion);
-      if (member.mIsRemoved || !member.mIsValid) {
+      if (GetCorrectMember(members_it->second, MessageVersion).mIsRemoved) {
         Object.erase(key);
       }
     }
@@ -287,8 +285,11 @@ const SMember& CObjectSchemaItem::GetCorrectMember(
       }
     }
   }
+
+  // If member didn't pass checks above then
+  // it becomes not valid and must be removed.
+  member.mIsRemoved = true;
   // Return member as default
-  member.mIsValid = false;
   return member;
 }
 
