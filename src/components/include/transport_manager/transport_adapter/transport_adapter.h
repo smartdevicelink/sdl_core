@@ -111,7 +111,15 @@ class TransportAdapter {
   /**
    * @enum Available types of errors.
    */
-  enum Error { OK, FAIL, NOT_SUPPORTED, ALREADY_EXISTS, BAD_STATE, BAD_PARAM };
+  enum Error {
+    UNKNOWN = -1,
+    OK,
+    FAIL,
+    NOT_SUPPORTED,
+    ALREADY_EXISTS,
+    BAD_STATE,
+    BAD_PARAM
+  };
 
  public:
   /**
@@ -236,18 +244,10 @@ class TransportAdapter {
   virtual bool IsClientOriginatedConnectSupported() const = 0;
 
   /**
-   * @brief Start client listener.
-   *
+   * @brief Changes client listening state of current adapter
    * @return Error information about possible reason of failure.
    */
-  virtual Error StartClientListening() = 0;
-
-  /**
-   * @brief Stop client listener.
-   *
-   * @return Error information about possible reason of failure.
-   */
-  virtual Error StopClientListening() = 0;
+  virtual Error ChangeClientListening(TransportAction required_change) = 0;
 
   /**
    * @brief Remove marked as FINALISING connection from accounting.

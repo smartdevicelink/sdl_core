@@ -202,19 +202,8 @@ class TransportAdapterImpl : public TransportAdapter,
       const ApplicationHandle& app_handle,
       const ::protocol_handler::RawMessagePtr data) OVERRIDE;
 
-  /**
-   * @brief Start client listener.
-   *
-   * @return Error information about possible reason of failure.
-   */
-  TransportAdapter::Error StartClientListening() OVERRIDE;
-
-  /**
-   * @brief Stop client listener.
-   *
-   * @return Error information about possible reason of failure.
-   */
-  TransportAdapter::Error StopClientListening() OVERRIDE;
+  TransportAdapter::Error ChangeClientListening(
+      TransportAction required_change) OVERRIDE;
 
   /**
    * @brief Notify that device scanner is available.

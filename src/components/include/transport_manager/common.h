@@ -43,6 +43,17 @@
 namespace transport_manager {
 
 /**
+ * @enum Actions that could
+ * be performed on connected clients.
+ */
+enum class TransportAction {
+  kVisibilityOn,
+  kVisibilityOff,
+  kListeningOn,
+  kListeningOff
+};
+
+/**
  * @enum Transport manager states.
  */
 enum {
