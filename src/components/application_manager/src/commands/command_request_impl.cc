@@ -189,13 +189,7 @@ ResponseInfo::ResponseInfo(const hmi_apis::Common_Result::eType result,
   interface_state =
       application_manager.hmi_interfaces().GetInterfaceState(hmi_interface);
 
-  is_ok = Compare<hmi_apis::Common_Result::eType, EQ, ONE>(
-      result_code,
-      hmi_apis::Common_Result::SUCCESS,
-      hmi_apis::Common_Result::WARNINGS,
-      hmi_apis::Common_Result::WRONG_LANGUAGE,
-      hmi_apis::Common_Result::RETRY,
-      hmi_apis::Common_Result::SAVED);
+  is_ok = CommandRequestImpl::IsHMIResultSuccess(result_code);
 
   is_not_used = hmi_apis::Common_Result::INVALID_ENUM == result_code;
 
@@ -897,7 +891,7 @@ bool CommandRequestImpl::HasDisallowedParams() const {
 }
 
 bool CommandRequestImpl::IsMobileResultSuccess(
-    mobile_apis::Result::eType result_code) const {
+    const mobile_apis::Result::eType result_code) {
   LOG4CXX_AUTO_TRACE(logger_);
   using namespace helpers;
   return Compare<mobile_apis::Result::eType, EQ, ONE>(
@@ -909,18 +903,24 @@ bool CommandRequestImpl::IsMobileResultSuccess(
       mobile_apis::Result::SAVED);
 }
 
+bool CommandRequestImpl::IsHMIResultSuccess(
+    const hmi_apis::Common_Result::eType result_code) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  using namespace helpers;
+  return Compare<hmi_apis::Common_Result::eType, EQ, ONE>(
+      result_code,
+      hmi_apis::Common_Result::SUCCESS,
+      hmi_apis::Common_Result::WARNINGS,
+      hmi_apis::Common_Result::WRONG_LANGUAGE,
+      hmi_apis::Common_Result::RETRY,
+      hmi_apis::Common_Result::SAVED);
+}
+
 bool CommandRequestImpl::PrepareResultForMobileResponse(
     hmi_apis::Common_Result::eType result_code,
     HmiInterfaces::InterfaceID interface) const {
   LOG4CXX_AUTO_TRACE(logger_);
-  using namespace helpers;
-  if (Compare<hmi_apis::Common_Result::eType, EQ, ONE>(
-          result_code,
-          hmi_apis::Common_Result::SUCCESS,
-          hmi_apis::Common_Result::WARNINGS,
-          hmi_apis::Common_Result::WRONG_LANGUAGE,
-          hmi_apis::Common_Result::RETRY,
-          hmi_apis::Common_Result::SAVED)) {
+  if (IsHMIResultSuccess(result_code)) {
     return true;
   }
 

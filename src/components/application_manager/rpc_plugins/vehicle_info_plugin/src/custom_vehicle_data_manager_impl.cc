@@ -71,6 +71,12 @@ std::string CustomVehicleDataManagerImpl::GetVehicleDataItemType(
                                  : vehicle_data_item_name;
 }
 
+bool CustomVehicleDataManagerImpl::IsValidCustomVehicleDataName(
+    const std::string& name) const {
+  const auto& schema = FindSchemaByNameNonRecursive(name);
+  return schema.is_initialized();
+}
+
 void CustomVehicleDataManagerImpl::CreateMobileMessageParams(
     smart_objects::SmartObject& msg_params) {
   using namespace application_manager;

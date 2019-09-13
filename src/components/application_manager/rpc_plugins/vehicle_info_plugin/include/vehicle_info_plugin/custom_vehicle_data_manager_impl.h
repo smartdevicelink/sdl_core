@@ -40,6 +40,8 @@ class CustomVehicleDataManagerImpl : public CustomVehicleDataManager {
 
   void OnPolicyEvent(plugin_manager::PolicyEvent policy_event) OVERRIDE;
 
+  bool IsValidCustomVehicleDataName(const std::string& name) const OVERRIDE;
+
  private:
   class RPCParams {
    public:
