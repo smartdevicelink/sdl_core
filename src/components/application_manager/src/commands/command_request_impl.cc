@@ -920,7 +920,6 @@ bool CommandRequestImpl::PrepareResultForMobileResponse(
     hmi_apis::Common_Result::eType result_code,
     HmiInterfaces::InterfaceID interface) const {
   LOG4CXX_AUTO_TRACE(logger_);
-  using namespace helpers;
   if (IsHMIResultSuccess(result_code)) {
     return true;
   }
