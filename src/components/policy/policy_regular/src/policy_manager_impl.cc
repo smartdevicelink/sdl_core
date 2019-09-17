@@ -1232,11 +1232,14 @@ std::string PolicyManagerImpl::ForcePTExchange() {
 void PolicyManagerImpl::StopRetrySequence() {
   LOG4CXX_AUTO_TRACE(logger_);
 
+  auto reset_type = ResetRetryCountType::kResetInternally;
+
   if (timer_retry_sequence_.is_running()) {
+    reset_type = ResetRetryCountType::kResetWithStatusUpdate;
     timer_retry_sequence_.Stop();
   }
 
-  ResetRetrySequence(ResetRetryCountType::kResetWithStatusUpdate);
+  ResetRetrySequence(reset_type);
 }
 
 std::string PolicyManagerImpl::ForcePTExchangeAtUserRequest() {
