@@ -106,20 +106,34 @@ void OnBCSystemCapabilityUpdatedNotificationFromHMI::Run() {
 
   const auto& system_capability =
       (*message_)[strings::msg_params][strings::system_capability];
-  if (mobile_apis::SystemCapabilityType::DISPLAYS ==
-          system_capability[strings::system_capability_type].asInt() &&
-      system_capability.keyExists(strings::display_capabilities)) {
-    const auto result = ProcessSystemDisplayCapabilities(
-        system_capability[strings::display_capabilities]);
-    if (ProcessSystemDisplayCapabilitiesResult::FAIL == result) {
-      LOG4CXX_ERROR(logger_,
-                    "Failed to process display capabilities. Notification will "
-                    "be ignored");
-      return;
-    } else if (ProcessSystemDisplayCapabilitiesResult::CAPABILITIES_CACHED ==
-               result) {
-      LOG4CXX_TRACE(logger_, "Capabilities are being cached for resuming app");
-      return;
+
+  switch (system_capability[strings::system_capability_type].asInt()) {
+    case mobile_apis::SystemCapabilityType::DISPLAYS: {
+      if (system_capability.keyExists(strings::display_capabilities)) {
+        const auto result = ProcessSystemDisplayCapabilities(
+            system_capability[strings::display_capabilities]);
+        if (ProcessSystemDisplayCapabilitiesResult::FAIL == result) {
+          LOG4CXX_ERROR(
+              logger_,
+              "Failed to process display capabilities. Notification will "
+              "be ignored");
+          return;
+        } else if (ProcessSystemDisplayCapabilitiesResult::
+                       CAPABILITIES_CACHED == result) {
+          LOG4CXX_TRACE(logger_,
+                        "Capabilities are being cached for resuming app");
+          return;
+        }
+      }
+      break;
+    }
+    case mobile_apis::SystemCapabilityType::REMOTE_CONTROL: {
+      if (system_capability.keyExists(strings::rc_capability)) {
+        LOG4CXX_DEBUG(logger_, "Updating RC Capabilities");
+        hmi_capabilities_.set_rc_capability(
+            system_capability[strings::rc_capability]);
+      }
+      break;
     }
   }
 
