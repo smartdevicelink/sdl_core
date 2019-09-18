@@ -3332,8 +3332,13 @@
   <param name="rolloverEvent" type="Common.VehicleDataEventStatus" mandatory="true">
     <description>References signal "VedsEvntRoll_D_Ltchd". See VehicleDataEventStatus.</description>
   </param>
-  <param name="maximumChangeVelocity" type="Common.VehicleDataEventStatus" mandatory="true">
-    <description>References signal "VedsMaxDeltaV_D_Ltchd". See VehicleDataEventStatus.</description>
+  <param name="maximumChangeVelocity" type="Integer" minvalue="0" maxvalue="255" mandatory="true">
+    <description>
+      References signal "VedsMaxDeltaV_D_Ltchd". Change in velocity in KPH.  Additional reserved values:
+      0x00 No event
+      0xFE Not supported
+      0xFF Fault
+    </description>
   </param>
   <param name="multipleEvents" type="Common.VehicleDataEventStatus" mandatory="true">
     <description>References signal "VedsMultiEvnt_D_Ltchd". See VehicleDataEventStatus.</description>
@@ -4082,7 +4087,7 @@
         <element name="REMOTE_CONTROL"/>
         <element name="APP_SERVICES" />
         <element name="DISPLAYS"/>
-	<element name="SEAT_LOCATION"/>
+        <element name="SEAT_LOCATION"/>
     </enum>
 
     <struct name="SystemCapability">
@@ -4113,7 +4118,7 @@
             </description>
         </param>
         <param name="displayCapabilities" type="Common.DisplayCapability" array="true" minsize="1" maxsize="1000" mandatory="false"/>
-	<param name="seatLocationCapability" type="SeatLocationCapability" mandatory="false">
+        <param name="seatLocationCapability" type="SeatLocationCapability" mandatory="false">
             <description>Contains information about the locations of each seat</description>
         </param>
     </struct>

@@ -1857,7 +1857,8 @@
         </param>
         
         <param name="maximumChangeVelocity" type="Integer" minvalue="0" maxvalue="255" mandatory="true">
-            <description>References signal "VedsMaxDeltaV_D_Ltchd". Change in velocity in KPH.  Additional reserved values:
+            <description>
+                References signal "VedsMaxDeltaV_D_Ltchd". Change in velocity in KPH.  Additional reserved values:
                 0x00 No event
                 0xFE Not supported
                 0xFF Fault
@@ -3021,7 +3022,7 @@
         <element name="REMOTE_CONTROL"/>
         <element name="APP_SERVICES" since="5.1"/>
         <element name="DISPLAYS" since="6.0"/>
-	<element name="SEAT_LOCATION" since="6.0"/>
+        <element name="SEAT_LOCATION" since="6.0"/>
     </enum>
     
     <struct name="NavigationCapability" since="4.5">
