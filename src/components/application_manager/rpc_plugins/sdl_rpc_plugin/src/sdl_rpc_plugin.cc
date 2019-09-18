@@ -101,4 +101,5 @@ Create() {
 extern "C" __attribute__((visibility("default"))) void Delete(
     application_manager::plugin_manager::RPCPlugin* data) {
   delete data;
+  DELETE_THREAD_LOGGER(sdl_rpc_plugin::logger_);
 }

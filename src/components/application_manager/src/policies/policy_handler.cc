@@ -298,7 +298,6 @@ const std::string PolicyHandler::kLibrary = "libPolicy.so";
 PolicyHandler::PolicyHandler(const PolicySettings& settings,
                              ApplicationManager& application_manager)
     : AsyncRunner("PolicyHandler async runner thread")
-    , dl_handle_(0)
     , last_activated_app_id_(0)
     , statistic_manager_impl_(std::make_shared<StatisticManagerImpl>(this))
     , settings_(settings)
@@ -325,36 +324,43 @@ bool PolicyHandler::LoadPolicyLibrary() {
     policy_manager_.reset();
     return false;
   }
-  dl_handle_ = dlopen(kLibrary.c_str(), RTLD_LAZY);
 
-  const char* error = dlerror();
-  if (!error) {
-    if (CreateManager()) {
-      policy_manager_->set_listener(this);
-      event_observer_ =
-          std::shared_ptr<PolicyEventObserver>(new PolicyEventObserver(
-              this, application_manager_.event_dispatcher()));
-    }
-  } else {
-    LOG4CXX_ERROR(logger_, error);
+  if (CreateManager()) {
+    policy_manager_->set_listener(this);
+    event_observer_ = std::shared_ptr<PolicyEventObserver>(
+        new PolicyEventObserver(this, application_manager_.event_dispatcher()));
   }
 
   return (policy_manager_.use_count() != 0);
 }
 
 bool PolicyHandler::CreateManager() {
+  void* policy_handle = dlopen(kLibrary.c_str(), RTLD_LAZY);
+  const char* error = dlerror();
+  if (error) {
+    LOG4CXX_ERROR(logger_, error);
+    return false;
+  }
+
   typedef PolicyManager* (*CreateManager)();
   typedef void (*DeleteManager)(PolicyManager*);
   CreateManager create_manager =
-      reinterpret_cast<CreateManager>(dlsym(dl_handle_, "CreateManager"));
+      reinterpret_cast<CreateManager>(dlsym(policy_handle, "CreateManager"));
   DeleteManager delete_manager =
-      reinterpret_cast<DeleteManager>(dlsym(dl_handle_, "DeleteManager"));
+      reinterpret_cast<DeleteManager>(dlsym(policy_handle, "DeleteManager"));
+  auto policy_destroyer = [delete_manager,
+                           policy_handle](PolicyManager* policy_manager) {
+    LOG4CXX_DEBUG(logger_, "Delete Policy Manager");
+    delete_manager(policy_manager);
+    dlclose(policy_handle);
+  };
   char* error_string = dlerror();
   if (NULL == error_string) {
     policy_manager_ =
-        std::shared_ptr<PolicyManager>(create_manager(), delete_manager);
+        std::shared_ptr<PolicyManager>(create_manager(), policy_destroyer);
   } else {
     LOG4CXX_WARN(logger_, error_string);
+    dlclose(policy_handle);
   }
   return (policy_manager_.use_count() != 0);
 }
@@ -1130,10 +1136,6 @@ bool PolicyHandler::UnloadPolicyLibrary() {
   sync_primitives::AutoWriteLock lock(policy_manager_lock_);
   if (policy_manager_) {
     policy_manager_.reset();
-  }
-  if (dl_handle_) {
-    ret = (dlclose(dl_handle_) == 0);
-    dl_handle_ = 0;
   }
   LOG4CXX_TRACE(logger_, "exit");
   return ret;
