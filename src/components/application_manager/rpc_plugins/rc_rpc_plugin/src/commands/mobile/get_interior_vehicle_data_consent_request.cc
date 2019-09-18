@@ -98,10 +98,12 @@ void GetInteriorVehicleDataConsentRequest::Execute() {
   application_manager::MessageHelper::PrintSmartObject(location_consents);
 
   smart_objects::SmartObject response_params;
-  if (GetCalculatedVehicleDataConsent(response_params)) {
+  if (GetCalculatedVehicleDataConsent(location_consents, response_params)) {
     LOG4CXX_DEBUG(
         logger_,
         "No need to send request to HMI. Sending cached consents to mobile");
+    LOG4CXX_DEBUG(logger_, "RESPONSE_PARAMS:");
+    application_manager::MessageHelper::PrintSmartObject(response_params);
     SendResponse(true, mobile_apis::Result::SUCCESS, nullptr, &response_params);
     return;
   }
@@ -158,6 +160,25 @@ void GetInteriorVehicleDataConsentRequest::on_event(
                success_result ? &response_params : nullptr);
 }
 
+std::string GetInteriorVehicleDataConsentRequest::ModuleType() const {
+  mobile_apis::ModuleType::eType module_type =
+      static_cast<mobile_apis::ModuleType::eType>(
+          (*message_)[app_mngr::strings::msg_params]
+                     [message_params::kModuleType]
+                         .asUInt());
+
+  const char* str;
+  const bool ok = smart_objects::EnumConversionHelper<
+      mobile_apis::ModuleType::eType>::EnumToCString(module_type, &str);
+  return ok ? str : "unknown";
+}
+
+std::string GetInteriorVehicleDataConsentRequest::ModuleId() const {
+  return std::string();
+}
+
+GetInteriorVehicleDataConsentRequest::~GetInteriorVehicleDataConsentRequest() {}
+
 void GetInteriorVehicleDataConsentRequest::GetLocationConsents(
     smart_objects::SmartObject& location_consents) {
   location_consents =
@@ -194,26 +215,8 @@ void GetInteriorVehicleDataConsentRequest::GetLocationConsents(
   }
 }
 
-std::string GetInteriorVehicleDataConsentRequest::ModuleType() const {
-  mobile_apis::ModuleType::eType module_type =
-      static_cast<mobile_apis::ModuleType::eType>(
-          (*message_)[app_mngr::strings::msg_params]
-                     [message_params::kModuleType]
-                         .asUInt());
-
-  const char* str;
-  const bool ok = smart_objects::EnumConversionHelper<
-      mobile_apis::ModuleType::eType>::EnumToCString(module_type, &str);
-  return ok ? str : "unknown";
-}
-
-std::string GetInteriorVehicleDataConsentRequest::ModuleId() const {
-  return std::string();
-}
-
-GetInteriorVehicleDataConsentRequest::~GetInteriorVehicleDataConsentRequest() {}
-
 bool GetInteriorVehicleDataConsentRequest::GetCalculatedVehicleDataConsent(
+    const smart_objects::SmartObject& location_consents,
     smart_objects::SmartObject& out_response) const {
   LOG4CXX_AUTO_TRACE(logger_);
 
@@ -227,43 +230,48 @@ bool GetInteriorVehicleDataConsentRequest::GetCalculatedVehicleDataConsent(
       (*message_)[app_mngr::strings::msg_params][message_params::kModuleIds]
           .asArray();
 
-  if (!MultipleAccessAllowed((*module_ids), (*modules_consent_array))) {
+  if (!MultipleAccessAllowed(
+          (*module_ids), location_consents, (*modules_consent_array))) {
     return true;
   }
 
   auto fill_auto_allow_consents =
-      [&module_ids](smart_objects::SmartArray& out_consents_array) {
+      [&module_ids,
+       &location_consents](smart_objects::SmartArray& out_consents_array) {
         for (uint32_t i = 0; i < module_ids->size(); ++i) {
-          out_consents_array.push_back(smart_objects::SmartObject(true));
+          out_consents_array.push_back(smart_objects::SmartObject(
+              true && location_consents[i].asBool()));
         }
       };
 
   auto fill_auto_deny_consents =
-      [this, &module_ids](smart_objects::SmartArray& out_consents_array) {
+      [this, &module_ids, &location_consents](
+          smart_objects::SmartArray& out_consents_array) {
         const std::string module_type = ModuleType();
         auto app = application_manager_.application(connection_key());
         const uint32_t app_id = app->app_id();
-        for (auto& module_id : (*module_ids)) {
-          const ModuleUid module_uid(module_type, module_id.asString());
+        for (uint32_t i = 0; i < module_ids->size(); ++i) {
+          const ModuleUid module_uid(module_type, (*module_ids)[i].asString());
           const bool is_resource_available =
               (resource_allocation_manager_.AcquireResource(
                    module_uid.first, module_uid.second, app_id) ==
                AcquireResult::ALLOWED);
 
-          out_consents_array.push_back(
-              smart_objects::SmartObject(is_resource_available));
+          out_consents_array.push_back(smart_objects::SmartObject(
+              is_resource_available && location_consents[i].asBool()));
         }
       };
 
   auto fill_ask_driver_consents =
-      [this, &module_ids](smart_objects::SmartArray& out_consents_array) {
+      [this, &module_ids, &location_consents](
+          smart_objects::SmartArray& out_consents_array) {
         auto app = application_manager_.application(connection_key());
         const std::string policy_app_id = app->policy_app_id();
         const std::string mac_address = app->mac_address();
         const std::string module_type = ModuleType();
 
-        for (auto& module_id : (*module_ids)) {
-          const ModuleUid module_uid(module_type, module_id.asString());
+        for (uint32_t i = 0; i < module_ids->size(); ++i) {
+          const ModuleUid module_uid(module_type, (*module_ids)[i].asString());
           auto consent = rc_consent_manager_.GetModuleConsent(
               policy_app_id, mac_address, module_uid);
 
@@ -284,14 +292,14 @@ bool GetInteriorVehicleDataConsentRequest::GetCalculatedVehicleDataConsent(
             }
 
             out_consents_array.push_back(smart_objects::SmartObject(
-                is_resource_available ? true : false));
+                is_resource_available && location_consents[i].asBool()));
             continue;
           }
 
           const bool is_resource_available =
               rc_rpc_types::ModuleConsent::CONSENTED == consent;
-          out_consents_array.push_back(
-              smart_objects::SmartObject(is_resource_available));
+          out_consents_array.push_back(smart_objects::SmartObject(
+              is_resource_available && location_consents[i].asBool()));
         }
       };
 
@@ -331,13 +339,14 @@ bool GetInteriorVehicleDataConsentRequest::GetCalculatedVehicleDataConsent(
 
 bool GetInteriorVehicleDataConsentRequest::MultipleAccessAllowed(
     const smart_objects::SmartArray& module_ids,
+    const smart_objects::SmartObject& location_consents,
     smart_objects::SmartArray& out_consents_array) const {
   LOG4CXX_AUTO_TRACE(logger_);
-  for (auto& module_id : module_ids) {
+  for (uint32_t i = 0; i < module_ids.size(); ++i) {
     const std::string module_type = ModuleType();
     auto app = application_manager_.application(connection_key());
     const uint32_t app_id = app->app_id();
-    const ModuleUid module_uid(module_type, module_id.asString());
+    const ModuleUid module_uid(module_type, module_ids[i].asString());
     const bool is_multiple_access_allowed =
         rc_capabilities_manager_.IsMultipleAccessAllowed(module_uid);
     if (!is_multiple_access_allowed) {
@@ -346,8 +355,8 @@ bool GetInteriorVehicleDataConsentRequest::MultipleAccessAllowed(
                module_uid.first, module_uid.second, app_id) ==
            AcquireResult::ALLOWED);
 
-      out_consents_array.push_back(
-          smart_objects::SmartObject(is_resource_free));
+      out_consents_array.push_back(smart_objects::SmartObject(
+          is_resource_free && location_consents[i].asBool()));
     } else {
       out_consents_array.clear();
       break;
