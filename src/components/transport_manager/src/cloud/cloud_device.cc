@@ -49,7 +49,7 @@ CloudDevice::CloudDevice(std::string& host,
                                  .query = "",
                                  .fragment = ""}) {}
 
-CloudDevice::CloudDevice(CloudAppEndpoint endpoint, std::string& name)
+CloudDevice::CloudDevice(CloudAppEndpoint& endpoint, std::string& name)
     : Device(name, std::string(name)), endpoint_(endpoint) {}
 
 bool CloudDevice::IsSameAs(const Device* other) const {

@@ -1365,6 +1365,7 @@ AppPermissions PolicyManagerImpl::GetAppPermissionsChanges(
     permissions.appPermissionsConsentNeeded =
         IsConsentNeeded(device_id, policy_app_id);
     permissions.appRevoked = IsApplicationRevoked(policy_app_id);
+    permissions.isSDLAllowed = true;
     GetPriority(permissions.application_id, &permissions.priority);
   }
   return permissions;
