@@ -1380,8 +1380,8 @@ bool RegisterAppInterfaceRequest::IsApplicationSwitched() {
       application_manager_.GetCorrectMobileIDFromMessage(message_);
 
   LOG4CXX_DEBUG(logger_, "Looking for application id " << policy_app_id);
-
-  auto app = application_manager_.application(device_id_, policy_app_id);
+  auto app =
+      application_manager_.reregister_application_by_policy_id(policy_app_id);
 
   if (!app) {
     LOG4CXX_DEBUG(
@@ -1392,11 +1392,12 @@ bool RegisterAppInterfaceRequest::IsApplicationSwitched() {
 
   LOG4CXX_DEBUG(logger_,
                 "Application with policy id " << policy_app_id << " is found.");
-  if (!application_manager_.IsAppInReconnectMode(device_handle_,
-                                                 policy_app_id)) {
-    LOG4CXX_DEBUG(
-        logger_,
-        "Policy id " << policy_app_id << " is not found in reconnection list.");
+
+  const auto app_device_handle = app->device();
+  if (app_device_handle == device_handle_) {
+    LOG4CXX_DEBUG(logger_,
+                  "Application " << policy_app_id
+                                 << " is already registered from this device.");
     SendResponse(false, mobile_apis::Result::APPLICATION_REGISTERED_ALREADY);
     return true;
   }

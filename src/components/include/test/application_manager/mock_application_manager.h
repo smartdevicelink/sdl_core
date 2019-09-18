@@ -80,6 +80,8 @@ class MockApplicationManager : public application_manager::ApplicationManager {
   MOCK_CONST_METHOD0(
       pending_applications,
       DataAccessor<application_manager::AppsWaitRegistrationSet>());
+  MOCK_CONST_METHOD0(reregister_applications,
+                     DataAccessor<application_manager::ReregisterWaitList>());
   MOCK_CONST_METHOD1(
       application, application_manager::ApplicationSharedPtr(uint32_t app_id));
   MOCK_CONST_METHOD0(active_application,
@@ -109,6 +111,9 @@ class MockApplicationManager : public application_manager::ApplicationManager {
       application_by_name,
       application_manager::ApplicationSharedPtr(const std::string& app_name));
   MOCK_CONST_METHOD1(pending_application_by_policy_id,
+                     application_manager::ApplicationSharedPtr(
+                         const std::string& policy_app_id));
+  MOCK_CONST_METHOD1(reregister_application_by_policy_id,
                      application_manager::ApplicationSharedPtr(
                          const std::string& policy_app_id));
   MOCK_METHOD1(
