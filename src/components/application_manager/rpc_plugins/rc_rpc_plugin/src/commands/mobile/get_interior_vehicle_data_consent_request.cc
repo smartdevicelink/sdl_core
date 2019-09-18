@@ -94,16 +94,12 @@ void GetInteriorVehicleDataConsentRequest::Execute() {
 
   smart_objects::SmartObject location_consents;
   GetLocationConsents(location_consents);
-  LOG4CXX_DEBUG(logger_, "LOCATION_CONSENTS:");
-  application_manager::MessageHelper::PrintSmartObject(location_consents);
 
   smart_objects::SmartObject response_params;
   if (GetCalculatedVehicleDataConsent(location_consents, response_params)) {
     LOG4CXX_DEBUG(
         logger_,
         "No need to send request to HMI. Sending cached consents to mobile");
-    LOG4CXX_DEBUG(logger_, "RESPONSE_PARAMS:");
-    application_manager::MessageHelper::PrintSmartObject(response_params);
     SendResponse(true, mobile_apis::Result::SUCCESS, nullptr, &response_params);
     return;
   }
@@ -115,22 +111,18 @@ void GetInteriorVehicleDataConsentRequest::Execute() {
                 "Filtering out module ids with serviceArea which does not "
                 "cover userLocation");
 
-  auto module_ids = msg_params[message_params::kModuleIds].asArray();
   smart_objects::SmartObject hmi_msg_params(msg_params);
   auto module_ids_for_consent =
       hmi_msg_params[message_params::kModuleIds].asArray();
   module_ids_for_consent->clear();
 
+  auto module_ids = msg_params[message_params::kModuleIds].asArray();
   for (uint32_t i = 0; i < module_ids->size(); i++) {
+    // Only add modules whose serviceArea covers the userLocation
     if (location_consents[i].asBool()) {
       module_ids_for_consent->push_back((*module_ids)[i]);
     }
   }
-
-  application_manager::MessageHelper::PrintSmartObject(
-      msg_params[message_params::kModuleIds]);
-  application_manager::MessageHelper::PrintSmartObject(
-      hmi_msg_params[message_params::kModuleIds]);
 
   SendHMIRequest(hmi_apis::FunctionID::RC_GetInteriorVehicleDataConsent,
                  (&hmi_msg_params),
@@ -147,31 +139,31 @@ void GetInteriorVehicleDataConsentRequest::on_event(
     return;
   }
 
-  auto hmi_response = event.smart_object();
+  auto temp_response = event.smart_object();
 
   LOG4CXX_DEBUG(logger_,
                 "Adding back filtered out module ids for response to mobile");
 
-  smart_objects::SmartObject location_consents;
-  GetLocationConsents(location_consents);
+  smart_objects::SmartObject all_consents;
+  GetLocationConsents(all_consents);
 
   const auto response_consents =
-      hmi_response[app_mngr::strings::msg_params][message_params::kAllowed]
+      temp_response[app_mngr::strings::msg_params][message_params::kAllowed]
           .asArray();
-
   uint32_t response_consents_counter = 0;
-  for (auto& consent : *(location_consents.asArray())) {
+
+  for (auto& consent : *(all_consents.asArray())) {
+    // Only modify consent for moduleIds allowed by location constraints
     if (consent.asBool()) {
       consent = (*response_consents)[response_consents_counter];
       response_consents_counter++;
     }
   }
 
-  application_manager::MessageHelper::PrintSmartObject(location_consents);
+  temp_response[app_mngr::strings::msg_params][message_params::kAllowed] =
+      all_consents;
 
-  hmi_response[app_mngr::strings::msg_params][message_params::kAllowed] =
-      location_consents;
-
+  const auto hmi_response = temp_response;
   std::string response_info;
   const bool result_of_saving = SaveModuleIdConsents(
       response_info, hmi_response[app_mngr::strings::msg_params]);
