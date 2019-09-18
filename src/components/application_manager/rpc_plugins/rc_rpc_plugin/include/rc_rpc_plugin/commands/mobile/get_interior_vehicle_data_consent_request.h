@@ -93,6 +93,8 @@ class GetInteriorVehicleDataConsentRequest
   bool GetCalculatedVehicleDataConsent(
       smart_objects::SmartObject& out_response) const;
 
+  void GetLocationConsents(smart_objects::SmartObject& location_consents);
+
   bool MultipleAccessAllowed(
       const smart_objects::SmartArray& module_ids,
       smart_objects::SmartArray& out_consents_array) const;

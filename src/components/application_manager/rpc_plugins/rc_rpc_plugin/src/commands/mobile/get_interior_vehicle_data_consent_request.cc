@@ -34,6 +34,7 @@
 #include <ctime>
 #include <vector>
 
+#include "application_manager/message_helper.h"
 #include "rc_rpc_plugin/commands/mobile/get_interior_vehicle_data_consent_request.h"
 #include "rc_rpc_plugin/rc_helpers.h"
 #include "rc_rpc_plugin/rc_module_constants.h"
@@ -91,11 +92,16 @@ void GetInteriorVehicleDataConsentRequest::Execute() {
     }
   }
 
+  smart_objects::SmartObject location_consents;
+  GetLocationConsents(location_consents);
+  LOG4CXX_DEBUG(logger_, "LOCATION_CONSENTS:");
+  application_manager::MessageHelper::PrintSmartObject(location_consents);
+
   smart_objects::SmartObject response_params;
   if (GetCalculatedVehicleDataConsent(response_params)) {
     LOG4CXX_DEBUG(
         logger_,
-        "No need to send response to HMI. Sending cached consents to mobile");
+        "No need to send request to HMI. Sending cached consents to mobile");
     SendResponse(true, mobile_apis::Result::SUCCESS, nullptr, &response_params);
     return;
   }
@@ -150,6 +156,42 @@ void GetInteriorVehicleDataConsentRequest::on_event(
                result_code,
                info.c_str(),
                success_result ? &response_params : nullptr);
+}
+
+void GetInteriorVehicleDataConsentRequest::GetLocationConsents(
+    smart_objects::SmartObject& location_consents) {
+  location_consents =
+      smart_objects::SmartObject(smart_objects::SmartType::SmartType_Array);
+
+  auto modules_consent_array = location_consents.asArray();
+  const auto module_ids =
+      (*message_)[app_mngr::strings::msg_params][message_params::kModuleIds]
+          .asArray();
+  const std::string module_type = ModuleType();
+
+  auto is_user_location_valid = [this](ModuleUid& module) {
+    const auto app_ptr = application_manager_.application(connection_key());
+    const auto extension = RCHelpers::GetRCExtension(*app_ptr);
+    const auto user_location = extension->GetUserLocation();
+    const auto module_service_area =
+        rc_capabilities_manager_.GetModuleServiceArea(module);
+    const auto driver =
+        rc_capabilities_manager_.GetDriverLocationFromSeatLocationCapability();
+    const bool is_driver = user_location == driver;
+    if (is_driver || user_location.IntersectionExists(module_service_area)) {
+      return true;
+    }
+    return false;
+  };
+
+  for (auto& module_id : (*module_ids)) {
+    bool consent = true;
+    if (rc_capabilities_manager_.IsSeatLocationCapabilityProvided()) {
+      ModuleUid module(module_type, module_id.asString());
+      consent = is_user_location_valid(module);
+    }
+    modules_consent_array->push_back(smart_objects::SmartObject(consent));
+  }
 }
 
 std::string GetInteriorVehicleDataConsentRequest::ModuleType() const {
