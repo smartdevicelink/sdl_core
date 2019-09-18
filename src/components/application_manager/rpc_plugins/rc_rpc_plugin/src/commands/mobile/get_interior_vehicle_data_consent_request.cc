@@ -111,8 +111,29 @@ void GetInteriorVehicleDataConsentRequest::Execute() {
   (*message_)[application_manager::strings::msg_params]
              [application_manager::strings::app_id] = connection_key();
 
+  LOG4CXX_DEBUG(logger_,
+                "Filtering out module ids with serviceArea which does not "
+                "cover userLocation");
+
+  auto module_ids = msg_params[message_params::kModuleIds].asArray();
+  smart_objects::SmartObject hmi_msg_params(msg_params);
+  auto module_ids_for_consent =
+      hmi_msg_params[message_params::kModuleIds].asArray();
+  module_ids_for_consent->clear();
+
+  for (uint32_t i = 0; i < module_ids->size(); i++) {
+    if (location_consents[i].asBool()) {
+      module_ids_for_consent->push_back((*module_ids)[i]);
+    }
+  }
+
+  application_manager::MessageHelper::PrintSmartObject(
+      msg_params[message_params::kModuleIds]);
+  application_manager::MessageHelper::PrintSmartObject(
+      hmi_msg_params[message_params::kModuleIds]);
+
   SendHMIRequest(hmi_apis::FunctionID::RC_GetInteriorVehicleDataConsent,
-                 (&msg_params),
+                 (&hmi_msg_params),
                  true);
 }
 
@@ -126,7 +147,30 @@ void GetInteriorVehicleDataConsentRequest::on_event(
     return;
   }
 
-  const auto& hmi_response = event.smart_object();
+  auto hmi_response = event.smart_object();
+
+  LOG4CXX_DEBUG(logger_,
+                "Adding back filtered out module ids for response to mobile");
+
+  smart_objects::SmartObject location_consents;
+  GetLocationConsents(location_consents);
+
+  const auto response_consents =
+      hmi_response[app_mngr::strings::msg_params][message_params::kAllowed]
+          .asArray();
+
+  uint32_t response_consents_counter = 0;
+  for (auto& consent : *(location_consents.asArray())) {
+    if (consent.asBool()) {
+      consent = (*response_consents)[response_consents_counter];
+      response_consents_counter++;
+    }
+  }
+
+  application_manager::MessageHelper::PrintSmartObject(location_consents);
+
+  hmi_response[app_mngr::strings::msg_params][message_params::kAllowed] =
+      location_consents;
 
   std::string response_info;
   const bool result_of_saving = SaveModuleIdConsents(
