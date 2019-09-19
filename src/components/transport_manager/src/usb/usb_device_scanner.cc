@@ -182,12 +182,12 @@ AoaInitSequence::AoaInitSequence(const TransportManagerSettings& settings)
   auto uri = settings.aoa_filter_uri().c_str();
   auto serial_num = settings.aoa_filter_serial_number().c_str();
   AddTransfer(new AoaGetProtocolRequest);
-  AddTransfer(new AoaSendIdString(0, manufacturer, sizeof(manufacturer)));
-  AddTransfer(new AoaSendIdString(1, model_name, sizeof(model_name)));
-  AddTransfer(new AoaSendIdString(2, description, sizeof(description)));
-  AddTransfer(new AoaSendIdString(3, version, sizeof(version)));
-  AddTransfer(new AoaSendIdString(4, uri, sizeof(uri)));
-  AddTransfer(new AoaSendIdString(5, serial_num, sizeof(serial_num)));
+  AddTransfer(new AoaSendIdString(0, manufacturer, strlen(manufacturer)));
+  AddTransfer(new AoaSendIdString(1, model_name, strlen(model_name)));
+  AddTransfer(new AoaSendIdString(2, description, strlen(description)));
+  AddTransfer(new AoaSendIdString(3, version, strlen(version)));
+  AddTransfer(new AoaSendIdString(4, uri, strlen(uri)));
+  AddTransfer(new AoaSendIdString(5, serial_num, strlen(serial_num)));
   AddTransfer(new AoaTurnIntoAccessoryMode);
 }
 

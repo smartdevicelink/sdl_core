@@ -114,7 +114,7 @@ bool operator!=(const policy_table::ApplicationParams& first,
   for (; it_first != it_first_end; ++it_first) {
     CompareGroupName gp(*it_first);
     StringsConstItr it = std::find_if(it_second, it_second_end, gp);
-    if (it_first_end == it) {
+    if (it_second_end == it) {
       return true;
     }
   }

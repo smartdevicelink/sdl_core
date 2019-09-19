@@ -49,6 +49,7 @@ typedef std::pair<std::string, std::string> ModuleUid;
 
 class InteriorDataManager {
  public:
+  virtual ~InteriorDataManager() {}
   /**
    * @brief OnPolicyEvent Processes policy related events
    * @param event Policy event
