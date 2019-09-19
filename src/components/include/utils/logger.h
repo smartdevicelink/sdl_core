@@ -65,6 +65,11 @@
 void deinit_logger();
 #define DEINIT_LOGGER() deinit_logger()
 
+// Logger thread deinitilization macro that need to stop the thread of handling
+// messages for the log4cxx
+#define DELETE_THREAD_LOGGER(logger_var) \
+  logger::delete_log_message_loop_thread(logger_var)
+
 // special macros to dump logs from queue
 // it's need, for example, when crash happend
 #define FLUSH_LOGGER() logger::flush_logger()
@@ -140,6 +145,8 @@ log4cxx_time_t time_now();
 #define INIT_LOGGER(file_name, logs_enabled)
 
 #define DEINIT_LOGGER()
+
+#define DELETE_THREAD_LOGGER(logger_var)
 
 #define FLUSH_LOGGER()
 
