@@ -563,25 +563,23 @@ bool SQLPTExtRepresentation::GatherConsumerFriendlyMessages(
       msg.message_code = query.GetString(7);
 
       std::string language = query.GetString(6);
+      policy_table::Languages& languages =
+          (*messages->messages)[msg.message_code].languages;
+      policy_table::MessageString& specific_message = languages[language];
       if (!msg.tts.empty()) {
-        *(*messages->messages)[msg.message_code].languages[language].tts =
-            msg.tts;
+        *(specific_message).tts = msg.tts;
       }
       if (!msg.label.empty()) {
-        *(*messages->messages)[msg.message_code].languages[language].label =
-            msg.label;
+        *(specific_message).label = msg.label;
       }
       if (!msg.line1.empty()) {
-        *(*messages->messages)[msg.message_code].languages[language].line1 =
-            msg.line1;
+        *(specific_message).line1 = msg.line1;
       }
       if (!msg.line2.empty()) {
-        *(*messages->messages)[msg.message_code].languages[language].line2 =
-            msg.line2;
+        *(specific_message).line2 = msg.line2;
       }
       if (!msg.text_body.empty()) {
-        *(*messages->messages)[msg.message_code].languages[language].textBody =
-            msg.text_body;
+        *(specific_message).textBody = msg.text_body;
       }
     }
   } else {
