@@ -53,8 +53,23 @@ using namespace smart_objects;
 
 class RCHelpersTest : public ::testing::Test {
  public:
-  smart_objects::SmartObject gen_smart_object(const int& object_number,
-                                              const bool& use_id_key) {
+  /**
+   * @brief Generates smart object with next structure:
+   * {
+   *    "status": "status<n>",
+   *    "value": "value<n>",
+   *    "id": "id<n>"
+   * }
+   * where <n> is number specified with 'object_number' param.
+   *
+   * @param int object_number - number of object
+   * @param bool use_id_key - defines, whether "id" key must be added to smart
+   * object
+   *
+   * @return smart_objects::SmartObject - generated smart object
+   */
+  smart_objects::SmartObject gen_smart_object(int object_number,
+                                              bool use_id_key) {
     smart_objects::SmartObject result(smart_objects::SmartType_Map);
     result[kKeyStatus] = kKeyStatus + std::to_string(object_number);
     result[kKeyValue] = kKeyValue + std::to_string(object_number);
