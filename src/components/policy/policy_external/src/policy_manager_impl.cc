@@ -54,14 +54,6 @@
 #include "policy/access_remote_impl.h"
 #include "utils/timer_task_impl.h"
 
-__attribute__((visibility("default"))) policy::PolicyManager* CreateManager() {
-  return new policy::PolicyManagerImpl();
-}
-
-__attribute__((visibility("default"))) void DeleteManager(
-    policy::PolicyManager* pm) {
-  delete pm;
-}
 namespace {
 
 /**
@@ -2012,6 +2004,7 @@ AppPermissions PolicyManagerImpl::GetAppPermissionsChanges(
     permissions.appPermissionsConsentNeeded =
         IsConsentNeeded(device_id, policy_app_id);
     permissions.appRevoked = IsApplicationRevoked(policy_app_id);
+    permissions.isSDLAllowed = false;
     GetPriority(permissions.application_id, &permissions.priority);
   }
   return permissions;
@@ -2522,3 +2515,13 @@ const std::vector<std::string> PolicyManagerImpl::GetRPCsForFunctionGroup(
 }
 
 }  //  namespace policy
+
+__attribute__((visibility("default"))) policy::PolicyManager* CreateManager() {
+  return new policy::PolicyManagerImpl();
+}
+
+__attribute__((visibility("default"))) void DeleteManager(
+    policy::PolicyManager* pm) {
+  delete pm;
+  DELETE_THREAD_LOGGER(policy::logger_);
+}

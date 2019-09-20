@@ -493,8 +493,9 @@ void ProtocolHandlerImpl::SendStartSessionNAck(
     BsonArray rejectedParamsArr;
     bson_array_initialize(&rejectedParamsArr, rejectedParams.size());
     for (std::string param : rejectedParams) {
-      char paramPtr[255];
-      strncpy(paramPtr, param.c_str(), 255);
+      char paramPtr[256];
+      strncpy(paramPtr, param.c_str(), sizeof(paramPtr));
+      paramPtr[sizeof(paramPtr) - 1] = '\0';
       bson_array_add_string(&rejectedParamsArr, paramPtr);
     }
     bson_object_put_array(
@@ -555,8 +556,9 @@ void ProtocolHandlerImpl::SendEndSessionNAck(
     BsonArray rejectedParamsArr;
     bson_array_initialize(&rejectedParamsArr, rejectedParams.size());
     for (std::string param : rejectedParams) {
-      char paramPtr[255];
-      strncpy(paramPtr, param.c_str(), 255);
+      char paramPtr[256];
+      strncpy(paramPtr, param.c_str(), sizeof(paramPtr));
+      paramPtr[sizeof(paramPtr) - 1] = '\0';
       bson_array_add_string(&rejectedParamsArr, paramPtr);
     }
     bson_object_put_array(

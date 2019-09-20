@@ -53,15 +53,6 @@
 #include "policy/access_remote.h"
 #include "policy/access_remote_impl.h"
 
-__attribute__((visibility("default"))) policy::PolicyManager* CreateManager() {
-  return new policy::PolicyManagerImpl();
-}
-
-__attribute__((visibility("default"))) void DeleteManager(
-    policy::PolicyManager* pm) {
-  delete pm;
-}
-
 namespace {
 const uint32_t kDefaultRetryTimeoutInMSec =
     60u * date_time::MILLISECONDS_IN_SECOND;
@@ -1365,6 +1356,7 @@ AppPermissions PolicyManagerImpl::GetAppPermissionsChanges(
     permissions.appPermissionsConsentNeeded =
         IsConsentNeeded(device_id, policy_app_id);
     permissions.appRevoked = IsApplicationRevoked(policy_app_id);
+    permissions.isSDLAllowed = true;
     GetPriority(permissions.application_id, &permissions.priority);
   }
   return permissions;
@@ -1813,3 +1805,13 @@ const std::vector<std::string> PolicyManagerImpl::GetRPCsForFunctionGroup(
 }
 
 }  //  namespace policy
+
+__attribute__((visibility("default"))) policy::PolicyManager* CreateManager() {
+  return new policy::PolicyManagerImpl();
+}
+
+__attribute__((visibility("default"))) void DeleteManager(
+    policy::PolicyManager* pm) {
+  delete pm;
+  DELETE_THREAD_LOGGER(policy::logger_);
+}
