@@ -32,9 +32,9 @@
 
 #include <algorithm>
 #include <ctime>
+#include <numeric>
 #include <vector>
 
-#include "application_manager/message_helper.h"
 #include "rc_rpc_plugin/commands/mobile/get_interior_vehicle_data_consent_request.h"
 #include "rc_rpc_plugin/rc_helpers.h"
 #include "rc_rpc_plugin/rc_module_constants.h"
@@ -132,7 +132,6 @@ void GetInteriorVehicleDataConsentRequest::Execute() {
 void GetInteriorVehicleDataConsentRequest::on_event(
     const app_mngr::event_engine::Event& event) {
   LOG4CXX_AUTO_TRACE(logger_);
-  namespace app_mnrg = application_manager;
 
   if (event.id() != hmi_apis::FunctionID::RC_GetInteriorVehicleDataConsent) {
     LOG4CXX_ERROR(logger_, "Received wrong event. FunctionID: " << event.id());
@@ -141,15 +140,44 @@ void GetInteriorVehicleDataConsentRequest::on_event(
 
   auto temp_response = event.smart_object();
 
+  if (!temp_response[app_mngr::strings::msg_params].keyExists(
+          message_params::kAllowed) ||
+      temp_response[app_mngr::strings::msg_params][message_params::kAllowed]
+          .empty()) {
+    std::string info_out =
+        "Collection of consents is absent in HMI response or empty";
+    LOG4CXX_ERROR(logger_, info_out);
+    SendResponse(false, mobile_apis::Result::GENERIC_ERROR, info_out.c_str());
+    return;
+  }
+
   LOG4CXX_DEBUG(logger_,
                 "Adding back filtered out module ids for response to mobile");
 
   smart_objects::SmartObject all_consents;
   GetLocationConsents(all_consents);
+  uint32_t number_of_expected_response_consents = std::accumulate(
+      all_consents.asArray()->begin(),
+      all_consents.asArray()->end(),
+      uint32_t(0),
+      [](uint32_t num_consents, smart_objects::SmartObject& consent) {
+        // Only module ids with valid location consents were sent to the hmi
+        return (consent.asBool()) ? num_consents + 1 : num_consents;
+      });
 
   const auto response_consents =
       temp_response[app_mngr::strings::msg_params][message_params::kAllowed]
           .asArray();
+
+  if (number_of_expected_response_consents != response_consents->size()) {
+    std::string info_out =
+        "HMI response has incorrect number of consents expected: " +
+        std::to_string(number_of_expected_response_consents) +
+        ", actual: " + std::to_string(response_consents->size());
+    LOG4CXX_ERROR(logger_, info_out);
+    SendResponse(false, mobile_apis::Result::GENERIC_ERROR, info_out.c_str());
+    return;
+  }
   uint32_t response_consents_counter = 0;
 
   for (auto& consent : *(all_consents.asArray())) {
@@ -411,13 +439,6 @@ bool GetInteriorVehicleDataConsentRequest::MultipleAccessAllowed(
 bool GetInteriorVehicleDataConsentRequest::SaveModuleIdConsents(
     std::string& info_out, const smart_objects::SmartObject& msg_params) {
   LOG4CXX_AUTO_TRACE(logger_);
-  const bool is_allowed_exists = msg_params.keyExists(message_params::kAllowed);
-
-  if (!is_allowed_exists || msg_params[message_params::kAllowed].empty()) {
-    info_out = "Collection of consents is absent in HMI response or empty";
-    LOG4CXX_ERROR(logger_, info_out);
-    return false;
-  }
 
   const auto& allowed = msg_params[message_params::kAllowed];
   const auto& moduleIds =
