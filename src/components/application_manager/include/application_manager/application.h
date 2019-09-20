@@ -268,6 +268,12 @@ class DynamicApplicationData {
   virtual void remove_window_capability(const WindowID window_id) = 0;
 
   /**
+   * @brief checks whether a specific menu layout is supported
+   * @param menu layout to check
+   */
+  virtual bool menu_layout_supported(const mobile_apis::MenuLayout::eType layout) = 0;
+
+  /**
    * @brief Sets layout for application's specific window
    * @param window_id window id for which layout should be set
    * @param layout - layout to be set

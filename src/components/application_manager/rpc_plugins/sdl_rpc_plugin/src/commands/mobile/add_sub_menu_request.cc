@@ -112,8 +112,7 @@ void AddSubMenuRequest::Run() {
   if (received_msg_params.keyExists(strings::menu_layout)) {
     auto menu_layout = static_cast<mobile_apis::MenuLayout::eType>(
         received_msg_params[strings::menu_layout].asUInt());
-    if (application_manager_.hmi_capabilities().menu_layout_supported(
-            menu_layout)) {
+    if (app->menu_layout_supported(menu_layout)) {
       msg_params[strings::menu_layout] =
           received_msg_params[strings::menu_layout];
     } else {

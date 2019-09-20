@@ -174,8 +174,7 @@ void SetGlobalPropertiesRequest::Run() {
   if (msg_params.keyExists(strings::menu_layout)) {
     auto menu_layout = static_cast<mobile_apis::MenuLayout::eType>(
         msg_params[strings::menu_layout].asUInt());
-    if (application_manager_.hmi_capabilities().menu_layout_supported(
-            menu_layout)) {
+    if (app->menu_layout_supported(menu_layout)) {
       params[strings::menu_layout] = msg_params[strings::menu_layout];
     } else {
       is_menu_layout_available_ = false;

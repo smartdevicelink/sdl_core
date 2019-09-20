@@ -555,26 +555,18 @@ void DynamicApplicationDataImpl::set_display_capabilities(
       return false;
     }
 
-    const auto find_res = std::find_if(
-        tmp_window_capabilities_arr->begin(),
-        tmp_window_capabilities_arr->end(),
-        [&window_id](const smart_objects::SmartObject& element) {
-          LOG4CXX_DEBUG(logger_,
-                        "Searching for "
-                            << window_id << " with element window id "
-                            << element[strings::window_id].asInt());
-          if ((!element.keyExists(strings::window_id)) && 0 == window_id) {
-            return true;
-          }
-          const auto current_window_id = element[strings::window_id].asInt();
-          if (window_id == current_window_id) {
-            return true;
-          }
-          return false;
-        });
+    for (auto element : *tmp_window_capabilities_arr) {
+      if (element.keyExists(strings::window_id)) {
+        if (window_id == element[strings::window_id].asInt())
+          return true;
+      } else if (window_id == 0) {
+        return true;
+      }
+    }
 
-    return find_res != tmp_window_capabilities_arr->end();
+    return false;
   };
+
   for (uint32_t i = 0; i < incoming_window_capabilities.length(); ++i) {
     const auto window_id =
         incoming_window_capabilities[i][strings::window_id].asInt();
@@ -610,6 +602,28 @@ void DynamicApplicationDataImpl::remove_window_capability(
   LOG4CXX_WARN(
       logger_,
       "No window id " << window_id << " found in display capabilities");
+}
+
+bool DynamicApplicationDataImpl::menu_layout_supported(const mobile_apis::MenuLayout::eType layout) {
+  if (!display_capabilities_)
+    return false;
+
+  const auto tmp_window_capabilities_arr = (*display_capabilities_)[0][strings::window_capabilities].asArray();
+
+  if (!tmp_window_capabilities_arr)
+    return false;
+
+  for (auto element : *tmp_window_capabilities_arr) {
+    if (!element.keyExists(strings::window_id) && element.keyExists(strings::menu_layouts_available)) {
+      for (uint32_t i = 0; i < element[strings::menu_layouts_available].length(); ++i) {
+        if (layout == static_cast<mobile_apis::MenuLayout::eType>(element[strings::menu_layouts_available][i].asUInt())) {
+          return true;
+        }
+      }
+    }
+  }
+
+  return false;
 }
 
 void DynamicApplicationDataImpl::set_window_layout(const WindowID window_id,
