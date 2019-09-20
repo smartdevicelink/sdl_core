@@ -131,16 +131,20 @@ TEST_F(PolicyManagerImplTest, LoadPT_SetPT_PTIsLoaded) {
   EXPECT_CALL(*cache_manager_, ApplyUpdate(_)).WillOnce(Return(true));
   EXPECT_CALL(listener_, GetDevicesIds("1234"))
       .WillRepeatedly(Return(transport_manager::DeviceList()));
-  EXPECT_CALL(listener_, OnUpdateStatusChanged(_));
   EXPECT_CALL(*cache_manager_, SaveUpdateRequired(false));
-  EXPECT_CALL(*cache_manager_, TimeoutResponse());
-  EXPECT_CALL(*cache_manager_, SecondsBetweenRetries(_));
 
   EXPECT_CALL(*cache_manager_, GetVehicleDataItems())
       .WillOnce(Return(std::vector<policy_table::VehicleDataItem>()));
-  EXPECT_TRUE(policy_manager_->LoadPT(kFilePtUpdateJson, msg));
+  ASSERT_EQ(PolicyManager::PtProcessingResult::kSuccess,
+            policy_manager_->LoadPT(kFilePtUpdateJson, msg));
+
   EXPECT_CALL(*cache_manager_, IsPTPreloaded());
   EXPECT_FALSE(policy_manager_->GetCache()->IsPTPreloaded());
+
+  EXPECT_CALL(*cache_manager_, TimeoutResponse());
+  EXPECT_CALL(*cache_manager_, SecondsBetweenRetries(_));
+  EXPECT_CALL(listener_, OnUpdateStatusChanged(_));
+  policy_manager_->OnPTUFinished(PolicyManager::PtProcessingResult::kSuccess);
 }
 
 TEST_F(PolicyManagerImplTest2,
@@ -863,7 +867,9 @@ TEST_F(PolicyManagerImplTest_ExternalConsent,
 
   EXPECT_CALL(listener_, OnCertificateUpdated(_));
 
-  EXPECT_TRUE(policy_manager_->LoadPT("DummyFileName", msg));
+  ASSERT_EQ(PolicyManager::PtProcessingResult::kSuccess,
+            policy_manager_->LoadPT("DummyFileName", msg));
+  policy_manager_->OnPTUFinished(PolicyManager::PtProcessingResult::kSuccess);
 
   pt = policy_manager_->GetCache()->GetPT();
 
@@ -982,7 +988,9 @@ TEST_F(PolicyManagerImplTest_ExternalConsent,
 
   EXPECT_CALL(listener_, OnCertificateUpdated(_));
 
-  EXPECT_TRUE(policy_manager_->LoadPT("DummyFileName", msg));
+  ASSERT_EQ(PolicyManager::PtProcessingResult::kSuccess,
+            policy_manager_->LoadPT("DummyFileName", msg));
+  policy_manager_->OnPTUFinished(PolicyManager::PtProcessingResult::kSuccess);
 
   pt = policy_manager_->GetCache()->GetPT();
 

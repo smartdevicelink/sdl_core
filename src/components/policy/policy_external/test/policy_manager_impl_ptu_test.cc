@@ -110,9 +110,12 @@ TEST_F(PolicyManagerImplTest2, GetNotificationsNumberAfterPTUpdate) {
   // Act
   std::string json = table.toStyledString();
   ::policy::BinaryMessage msg(json.begin(), json.end());
-  EXPECT_CALL(listener_, OnUpdateStatusChanged(_));
-  EXPECT_TRUE(policy_manager_->LoadPT(kFilePtUpdateJson, msg));
+  ASSERT_EQ(PolicyManager::PtProcessingResult::kSuccess,
+            policy_manager_->LoadPT(kFilePtUpdateJson, msg));
   EXPECT_FALSE(policy_manager_->GetCache()->IsPTPreloaded());
+
+  EXPECT_CALL(listener_, OnUpdateStatusChanged(_));
+  policy_manager_->OnPTUFinished(PolicyManager::PtProcessingResult::kSuccess);
 
   std::string priority = "EMERGENCY";
   uint32_t notif_number = policy_manager_->GetNotificationsNumber(priority);
@@ -162,7 +165,10 @@ TEST_F(PolicyManagerImplTest2, IsAppRevoked_SetRevokedAppID_ExpectAppRevoked) {
   ifile.close();
 
   ::policy::BinaryMessage msg(json.begin(), json.end());
-  ASSERT_TRUE(policy_manager_->LoadPT(kFilePtUpdateJson, msg));
+  ASSERT_EQ(PolicyManager::PtProcessingResult::kSuccess,
+            policy_manager_->LoadPT(kFilePtUpdateJson, msg));
+  policy_manager_->OnPTUFinished(PolicyManager::PtProcessingResult::kSuccess);
+
   EXPECT_FALSE(policy_manager_->GetCache()->IsPTPreloaded());
   CheckRpcPermissions(
       app_id_1_, "UnregisterAppInterface", ::policy::kRpcDisallowed);
@@ -253,7 +259,10 @@ TEST_F(PolicyManagerImplTest2,
   ifile.close();
 
   ::policy::BinaryMessage msg(json.begin(), json.end());
-  ASSERT_TRUE(policy_manager_->LoadPT(kFilePtUpdateJson, msg));
+  ASSERT_EQ(PolicyManager::PtProcessingResult::kSuccess,
+            policy_manager_->LoadPT(kFilePtUpdateJson, msg));
+  policy_manager_->OnPTUFinished(PolicyManager::PtProcessingResult::kSuccess);
+
   EXPECT_FALSE(cache->IsPTPreloaded());
 
   policy_manager_->CheckPermissions(
@@ -323,7 +332,10 @@ TEST_F(PolicyManagerImplTest2,
 
   ::policy::BinaryMessage msg(json.begin(), json.end());
   // Load Json to cache
-  EXPECT_TRUE(policy_manager_->LoadPT(kFilePtUpdateJson, msg));
+  ASSERT_EQ(PolicyManager::PtProcessingResult::kSuccess,
+            policy_manager_->LoadPT(kFilePtUpdateJson, msg));
+  policy_manager_->OnPTUFinished(PolicyManager::PtProcessingResult::kSuccess);
+
   EXPECT_FALSE(cache->IsPTPreloaded());
 
   policy_table::RpcParameters rpc_parameters;
@@ -798,7 +810,10 @@ TEST_F(PolicyManagerImplTest2,
   json = root.toStyledString();
   ifile.close();
   ::policy::BinaryMessage msg(json.begin(), json.end());
-  EXPECT_TRUE(policy_manager_->LoadPT(kFilePtUpdateJson, msg));
+  ASSERT_EQ(PolicyManager::PtProcessingResult::kSuccess,
+            policy_manager_->LoadPT(kFilePtUpdateJson, msg));
+  policy_manager_->OnPTUFinished(PolicyManager::PtProcessingResult::kSuccess);
+
   EXPECT_FALSE(cache->IsPTPreloaded());
 
   // Check RPC in each level
@@ -897,7 +912,10 @@ TEST_F(PolicyManagerImplTest2,
   json = root.toStyledString();
   ifile.close();
   ::policy::BinaryMessage msg(json.begin(), json.end());
-  EXPECT_TRUE(policy_manager_->LoadPT(kFilePtUpdateJson, msg));
+  ASSERT_EQ(PolicyManager::PtProcessingResult::kSuccess,
+            policy_manager_->LoadPT(kFilePtUpdateJson, msg));
+  policy_manager_->OnPTUFinished(PolicyManager::PtProcessingResult::kSuccess);
+
   EXPECT_FALSE(cache->IsPTPreloaded());
 
   // Check RPC in each level
@@ -978,15 +996,20 @@ TEST_F(PolicyManagerImplTest, LoadPT_SetInvalidUpdatePT_PTIsNotLoaded) {
   // Assert
   EXPECT_CALL(*cache_manager_, ApplyUpdate(_)).Times(0);
   EXPECT_CALL(listener_, GetAppName(_)).Times(0);
-  EXPECT_CALL(listener_, OnUpdateStatusChanged(_)).Times(1);
   EXPECT_CALL(*cache_manager_, SaveUpdateRequired(false)).Times(0);
   EXPECT_CALL(*cache_manager_, TimeoutResponse()).Times(0);
   EXPECT_CALL(*cache_manager_, SecondsBetweenRetries(_)).Times(0);
   EXPECT_CALL(*cache_manager_, GetVehicleDataItems())
       .WillOnce(Return(std::vector<policy_table::VehicleDataItem>()));
-  EXPECT_FALSE(policy_manager_->LoadPT(kFilePtUpdateJson, msg));
+  ASSERT_EQ(PolicyManager::PtProcessingResult::kWrongPtReceived,
+            policy_manager_->LoadPT(kFilePtUpdateJson, msg));
+
   EXPECT_CALL(*cache_manager_, IsPTPreloaded());
   EXPECT_FALSE(policy_manager_->GetCache()->IsPTPreloaded());
+
+  EXPECT_CALL(listener_, OnUpdateStatusChanged(_)).Times(1);
+  policy_manager_->OnPTUFinished(
+      PolicyManager::PtProcessingResult::kWrongPtReceived);
 }
 
 TEST_F(

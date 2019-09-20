@@ -127,8 +127,10 @@ class PolicyManagerImpl : public PolicyManager {
    * @param pt_content PTU as binary string
    * @return true if successfully
    */
-  bool LoadPT(const std::string& file,
-              const BinaryMessage& pt_content) OVERRIDE;
+  PtProcessingResult LoadPT(const std::string& file,
+                            const BinaryMessage& pt_content) OVERRIDE;
+
+  void OnPTUFinished(const PtProcessingResult ptu_result) OVERRIDE;
 
   /**
    * @brief Resets Policy Table
@@ -860,7 +862,6 @@ class PolicyManagerImpl : public PolicyManager {
   inline void SetSendOnUpdateFlags(const bool send_on_update_sent_out,
                                    const bool wrong_ptu_update_received) {
     send_on_update_sent_out_ = send_on_update_sent_out;
-    wrong_ptu_update_received_ = wrong_ptu_update_received;
   }
 #endif  // BUILD_TESTS
 
@@ -1221,6 +1222,12 @@ class PolicyManagerImpl : public PolicyManager {
                             const AppPoliciesValueType& app_policy);
 
   /**
+   * @brief Resumes all policy actions for all apps, suspended during
+   * PTU applying
+   */
+  void ResumePendingAppPolicyActions();
+
+  /**
    * @brief Gets groups names from collection of groups permissions
    * @param app_group_permissions Collection of groups permissions
    * @return Collection of group names
@@ -1327,11 +1334,6 @@ class PolicyManagerImpl : public PolicyManager {
   friend struct ProccessAppGroups;
 
   /**
-   * @brief Flag for notifying that invalid PTU was received
-   */
-  bool wrong_ptu_update_received_;
-
-  /**
    * @brief Flag for notifying that PTU was started
    */
   bool send_on_update_sent_out_;
@@ -1346,6 +1348,21 @@ class PolicyManagerImpl : public PolicyManager {
    * progress
    */
   bool is_ptu_in_progress_;
+
+  typedef std::list<std::pair<std::string, AppPoliciesValueType> >
+      PendingAppPolicyActionsList;
+
+  /**
+   * @brief List containing device_id and pending permissions structure pairs
+   * which can be processed later on demand
+   */
+  PendingAppPolicyActionsList notify_system_list_;
+
+  /**
+   * @brief List containing device_id and pending permissions structure pairs
+   * which can be processed later on demand
+   */
+  PendingAppPolicyActionsList send_permissions_list_;
 };
 
 }  // namespace policy
