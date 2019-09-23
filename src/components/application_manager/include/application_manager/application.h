@@ -271,7 +271,8 @@ class DynamicApplicationData {
    * @brief checks whether a specific menu layout is supported
    * @param menu layout to check
    */
-  virtual bool menu_layout_supported(const mobile_apis::MenuLayout::eType layout) = 0;
+  virtual bool menu_layout_supported(
+      const mobile_apis::MenuLayout::eType layout) const = 0;
 
   /**
    * @brief Sets layout for application's specific window

@@ -152,7 +152,8 @@ class DynamicApplicationDataImpl : public virtual Application {
    * @brief checks whether a specific menu layout is supported
    * @param menu layout to check
    */
-  bool menu_layout_supported(const mobile_apis::MenuLayout::eType layout) OVERRIDE;
+  bool menu_layout_supported(
+      const mobile_apis::MenuLayout::eType layout) const OVERRIDE;
 
   /*
    * @brief Adds a command to the in application menu
