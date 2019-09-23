@@ -616,7 +616,8 @@ bool DynamicApplicationDataImpl::menu_layout_supported(
     return false;
 
   for (auto element : *tmp_window_capabilities_arr) {
-    if (!element.keyExists(strings::window_id) &&
+    if ((!element.keyExists(strings::window_id) ||
+         element[strings::window_id].asInt() == 0) &&
         element.keyExists(strings::menu_layouts_available)) {
       for (uint32_t i = 0;
            i < element[strings::menu_layouts_available].length();
