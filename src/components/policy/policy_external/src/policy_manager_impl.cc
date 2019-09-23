@@ -1871,8 +1871,9 @@ std::string PolicyManagerImpl::ForcePTExchange() {
 
 void policy::PolicyManagerImpl::StopRetrySequence() {
   LOG4CXX_AUTO_TRACE(logger_);
-
-  ResetRetrySequence(ResetRetryCountType::kResetWithStatusUpdate);
+  if (update_status_manager_.IsUpdateRequired()) {
+    ResetRetrySequence(ResetRetryCountType::kResetWithStatusUpdate);
+  }
 }
 
 std::string PolicyManagerImpl::ForcePTExchangeAtUserRequest() {
