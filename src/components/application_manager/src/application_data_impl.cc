@@ -621,9 +621,9 @@ bool DynamicApplicationDataImpl::menu_layout_supported(
       for (uint32_t i = 0;
            i < element[strings::menu_layouts_available].length();
            ++i) {
-        if (layout ==
-            static_cast<mobile_apis::MenuLayout::eType>(
-                element[strings::menu_layouts_available][i].asUInt())) {
+        if (static_cast<mobile_apis::MenuLayout::eType>(
+                element[strings::menu_layouts_available][i].asUInt()) ==
+            layout) {
           return true;
         }
       }
