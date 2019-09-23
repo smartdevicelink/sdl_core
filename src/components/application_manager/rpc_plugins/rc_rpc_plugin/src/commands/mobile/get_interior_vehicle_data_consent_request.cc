@@ -140,6 +140,24 @@ void GetInteriorVehicleDataConsentRequest::on_event(
 
   auto temp_response = event.smart_object();
 
+  auto result_code =
+      GetMobileResultCode(static_cast<hmi_apis::Common_Result::eType>(
+          temp_response[app_mngr::strings::params][app_mngr::hmi_response::code]
+              .asUInt()));
+
+  const bool success_result =
+      helpers::Compare<mobile_apis::Result::eType, helpers::EQ, helpers::ONE>(
+          result_code,
+          mobile_apis::Result::SUCCESS,
+          mobile_apis::Result::WARNINGS);
+
+  if (!success_result) {
+    std::string info;
+    GetInfo(temp_response, info);
+    SendResponse(false, result_code, info.c_str(), nullptr);
+    return;
+  }
+
   if (!temp_response[app_mngr::strings::msg_params].keyExists(
           message_params::kAllowed) ||
       temp_response[app_mngr::strings::msg_params][message_params::kAllowed]
@@ -203,19 +221,8 @@ void GetInteriorVehicleDataConsentRequest::on_event(
     return;
   }
 
-  auto result_code =
-      GetMobileResultCode(static_cast<hmi_apis::Common_Result::eType>(
-          hmi_response[app_mngr::strings::params][app_mngr::hmi_response::code]
-              .asUInt()));
-
-  const bool success_result =
-      helpers::Compare<mobile_apis::Result::eType, helpers::EQ, helpers::ONE>(
-          result_code,
-          mobile_apis::Result::SUCCESS,
-          mobile_apis::Result::WARNINGS);
-
-  smart_objects::SmartObject response_params;
-  response_params = hmi_response[app_mngr::strings::msg_params];
+  smart_objects::SmartObject response_params =
+      hmi_response[app_mngr::strings::msg_params];
   std::string info;
   GetInfo(hmi_response, info);
   SendResponse(success_result,
