@@ -168,9 +168,6 @@ class MockHMICapabilities : public ::application_manager::HMICapabilities {
   MOCK_CONST_METHOD0(rc_supported, bool());
   MOCK_METHOD1(set_rc_supported, void(const bool supported));
 
-  MOCK_CONST_METHOD1(menu_layout_supported,
-                     bool(mobile_apis::MenuLayout::eType layout));
-
   MOCK_CONST_METHOD0(navigation_capability,
                      const smart_objects::SmartObject*());
   MOCK_METHOD1(set_navigation_capability,
