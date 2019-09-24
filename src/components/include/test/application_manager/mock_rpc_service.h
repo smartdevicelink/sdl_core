@@ -43,6 +43,8 @@ class MockRPCService : public application_manager::rpc_service::RPCService {
                void(const hmi_apis::FunctionID::eType& function_id,
                     const hmi_apis::messageType::eType& message_type,
                     const std::map<std::string, SMember>& members));
+
+  MOCK_METHOD0(Stop, void());
 };
 }  // namespace application_manager_test
 }  // namespace components

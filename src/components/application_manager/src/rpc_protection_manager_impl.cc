@@ -61,6 +61,10 @@ bool RPCProtectionManagerImpl::CheckPolicyEncryptionFlag(
   LOG4CXX_AUTO_TRACE(logger_);
   const auto& policy_encryption_flag_getter =
       policy_handler_.PolicyEncryptionFlagGetter();
+  if (!policy_encryption_flag_getter) {
+    LOG4CXX_ERROR(logger_, "Policy Encryption Flag getter is not inited");
+    return false;
+  }
   const std::string function_name =
       policy_encryption_flag_getter->GetPolicyFunctionName(function_id);
   LOG4CXX_DEBUG(logger_, "Function for check is " << function_name);
