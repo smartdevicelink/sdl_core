@@ -112,11 +112,6 @@ uint32_t RPCPluginManagerImpl::LoadPlugins(const std::string& plugins_path) {
   return loaded_plugins_.size();
 }
 
-std::vector<RPCPluginManagerImpl::RPCPluginPtr>&
-RPCPluginManagerImpl::GetPlugins() {
-  return loaded_plugins_;
-}
-
 utils::Optional<RPCPlugin> RPCPluginManagerImpl::FindPluginToProcess(
     const int32_t function_id,
     const commands::Command::CommandSource message_source) {

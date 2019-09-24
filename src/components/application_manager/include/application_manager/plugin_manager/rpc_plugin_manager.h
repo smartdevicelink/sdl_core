@@ -60,13 +60,6 @@ class RPCPluginManager {
   virtual uint32_t LoadPlugins(const std::string& plugins_path) = 0;
 
   /**
-   * @brief GetPlugins get list of plugins
-   * @return list of loaded plugins
-   */
-  DEPRECATED
-  virtual std::vector<RPCPluginPtr>& GetPlugins() = 0;
-
-  /**
    * @brief FindPluginToProcess find plugin to process message
    * @param function_id RPC identifier to process
    * @param message_source message_source source of message to process
