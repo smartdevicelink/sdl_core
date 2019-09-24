@@ -53,6 +53,8 @@ TEST_F(
   EXPECT_CALL(listener_, OnCurrentDeviceIdUpdateRequired(_, app_id_1_))
       .WillRepeatedly(Return(device_id_1_));
 
+  EXPECT_CALL(listener_, CanUpdate()).WillRepeatedly(Return(true));
+
   policy_manager_->SetUserConsentForDevice(device_id_1_, true);
 
   policy_manager_->AddApplication(
