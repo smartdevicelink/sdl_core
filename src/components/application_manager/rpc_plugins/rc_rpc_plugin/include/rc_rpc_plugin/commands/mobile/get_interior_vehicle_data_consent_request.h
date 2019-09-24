@@ -91,10 +91,30 @@ class GetInteriorVehicleDataConsentRequest
    * output smart object, otherwise returns false
    */
   bool GetCalculatedVehicleDataConsent(
-      const smart_objects::SmartObject& location_consents,
       smart_objects::SmartObject& out_response) const;
 
-  void GetLocationConsents(smart_objects::SmartObject& location_consents);
+  /**
+   * @brief Checks whether the user_location is covered by the module's
+   * serviceArea
+   * @param module_uid module key(module_type + module_id)
+   * @return true if the user_location is covered by the module's serviceArea or
+   * the user is the driver (or if seatLocationCapabilities don't exists)
+   * otherwise false
+   */
+  bool IsUserLocationValid(const ModuleUid& module_uid) const;
+
+  /**
+   * @brief Checks whether user should have access to module using the specific
+   * accessMode's rules
+   * @param module_uid module key(moudle_type + module_id)
+   * @param access_mode current HMI accessMode
+   * @return consent enum value
+   */
+  rc_rpc_types::ModuleConsent GetModuleConsentByAccessMode(
+      const ModuleUid& module_uid,
+      const hmi_apis::Common_RCAccessMode::eType access_mode) const;
+
+  smart_objects::SmartObject hmi_request_consents_;
 };
 
 }  // namespace commands

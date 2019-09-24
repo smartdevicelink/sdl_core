@@ -92,11 +92,8 @@ void GetInteriorVehicleDataConsentRequest::Execute() {
     }
   }
 
-  smart_objects::SmartObject location_consents;
-  GetLocationConsents(location_consents);
-
   smart_objects::SmartObject response_params;
-  if (GetCalculatedVehicleDataConsent(location_consents, response_params)) {
+  if (GetCalculatedVehicleDataConsent(response_params)) {
     LOG4CXX_DEBUG(
         logger_,
         "No need to send request to HMI. Sending cached consents to mobile");
@@ -107,9 +104,11 @@ void GetInteriorVehicleDataConsentRequest::Execute() {
   (*message_)[application_manager::strings::msg_params]
              [application_manager::strings::app_id] = connection_key();
 
-  LOG4CXX_DEBUG(logger_,
-                "Filtering out module ids with serviceArea which does not "
-                "cover userLocation");
+  hmi_request_consents_ =
+      smart_objects::SmartObject(response_params[message_params::kAllowed]);
+
+  LOG4CXX_DEBUG(
+      logger_, "Filtering out module ids with successfully calculated consent");
 
   smart_objects::SmartObject hmi_msg_params(msg_params);
   auto module_ids_for_consent =
@@ -118,12 +117,18 @@ void GetInteriorVehicleDataConsentRequest::Execute() {
 
   auto module_ids = msg_params[message_params::kModuleIds].asArray();
   for (uint32_t i = 0; i < module_ids->size(); i++) {
-    // Only add modules whose serviceArea covers the userLocation
-    if (location_consents[i].asBool()) {
+    // Only add modules whose consent is unknown(needs to be sent to the hmi)
+    bool is_consent_undefined =
+        (*hmi_request_consents_.asArray())[i].getType() ==
+        smart_objects::SmartType::SmartType_Null;
+    if (is_consent_undefined) {
       module_ids_for_consent->push_back((*module_ids)[i]);
     }
   }
 
+  LOG4CXX_DEBUG(logger_,
+                "Forwarding request to HMI with moduleIds for modules with "
+                "unknown consent");
   SendHMIRequest(hmi_apis::FunctionID::RC_GetInteriorVehicleDataConsent,
                  (&hmi_msg_params),
                  true);
@@ -169,18 +174,15 @@ void GetInteriorVehicleDataConsentRequest::on_event(
     return;
   }
 
-  LOG4CXX_DEBUG(logger_,
-                "Adding back filtered out module ids for response to mobile");
-
-  smart_objects::SmartObject all_consents;
-  GetLocationConsents(all_consents);
   uint32_t number_of_expected_response_consents = std::accumulate(
-      all_consents.asArray()->begin(),
-      all_consents.asArray()->end(),
+      hmi_request_consents_.asArray()->begin(),
+      hmi_request_consents_.asArray()->end(),
       uint32_t(0),
       [](uint32_t num_consents, smart_objects::SmartObject& consent) {
         // Only module ids with valid location consents were sent to the hmi
-        return (consent.asBool()) ? num_consents + 1 : num_consents;
+        bool is_consent_undefined =
+            consent.getType() == smart_objects::SmartType::SmartType_Null;
+        return (is_consent_undefined) ? num_consents + 1 : num_consents;
       });
 
   const auto response_consents =
@@ -196,18 +198,22 @@ void GetInteriorVehicleDataConsentRequest::on_event(
     SendResponse(false, mobile_apis::Result::GENERIC_ERROR, info_out.c_str());
     return;
   }
-  uint32_t response_consents_counter = 0;
 
-  for (auto& consent : *(all_consents.asArray())) {
+  LOG4CXX_DEBUG(logger_,
+                "Adding back filtered out module ids for response to mobile");
+  uint32_t response_consents_counter = 0;
+  for (auto& consent : *(hmi_request_consents_.asArray())) {
     // Only modify consent for moduleIds allowed by location constraints
-    if (consent.asBool()) {
+    bool is_consent_undefined =
+        consent.getType() == smart_objects::SmartType::SmartType_Null;
+    if (is_consent_undefined) {
       consent = (*response_consents)[response_consents_counter];
       response_consents_counter++;
     }
   }
 
   temp_response[app_mngr::strings::msg_params][message_params::kAllowed] =
-      all_consents;
+      hmi_request_consents_;
 
   const auto hmi_response = temp_response;
   std::string response_info;
@@ -250,70 +256,32 @@ std::string GetInteriorVehicleDataConsentRequest::ModuleId() const {
 
 GetInteriorVehicleDataConsentRequest::~GetInteriorVehicleDataConsentRequest() {}
 
-void GetInteriorVehicleDataConsentRequest::GetLocationConsents(
-    smart_objects::SmartObject& location_consents) {
-  location_consents =
-      smart_objects::SmartObject(smart_objects::SmartType::SmartType_Array);
-
-  auto modules_consent_array = location_consents.asArray();
-  const auto module_ids =
-      (*message_)[app_mngr::strings::msg_params][message_params::kModuleIds]
-          .asArray();
-  const std::string module_type = ModuleType();
-
-  auto is_user_location_valid = [this](ModuleUid& module) {
-    const auto app_ptr = application_manager_.application(connection_key());
-    const auto extension = RCHelpers::GetRCExtension(*app_ptr);
-    const auto user_location = extension->GetUserLocation();
-    const auto module_service_area =
-        rc_capabilities_manager_.GetModuleServiceArea(module);
-    const auto driver =
-        rc_capabilities_manager_.GetDriverLocationFromSeatLocationCapability();
-    const bool is_driver = user_location == driver;
-    if (is_driver || user_location.IntersectionExists(module_service_area)) {
-      return true;
-    }
-    return false;
-  };
-
-  for (auto& module_id : (*module_ids)) {
-    bool consent = true;
-    if (rc_capabilities_manager_.IsSeatLocationCapabilityProvided()) {
-      ModuleUid module(module_type, module_id.asString());
-      consent = is_user_location_valid(module);
-    }
-    modules_consent_array->push_back(smart_objects::SmartObject(consent));
-  }
-}
-
-bool GetInteriorVehicleDataConsentRequest::GetCalculatedVehicleDataConsent(
-    const smart_objects::SmartObject& location_consents,
-    smart_objects::SmartObject& out_response) const {
+bool GetInteriorVehicleDataConsentRequest::IsUserLocationValid(
+    const ModuleUid& module_uid) const {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  out_response =
-      smart_objects::SmartObject(smart_objects::SmartType::SmartType_Map);
-  out_response[message_params::kAllowed] =
-      smart_objects::SmartObject(smart_objects::SmartType::SmartType_Array);
+  if (!rc_capabilities_manager_.IsSeatLocationCapabilityProvided()) {
+    return true;
+  }
+  const auto app_ptr = application_manager_.application(connection_key());
+  const auto extension = RCHelpers::GetRCExtension(*app_ptr);
+  const auto module_service_area =
+      rc_capabilities_manager_.GetModuleServiceArea(module_uid);
+  const auto user_location = extension->GetUserLocation();
+  const auto driver =
+      rc_capabilities_manager_.GetDriverLocationFromSeatLocationCapability();
+  const bool is_driver = (user_location == driver);
+  if (is_driver || user_location.IntersectionExists(module_service_area)) {
+    return true;
+  }
+  return false;
+}
 
-  auto modules_consent_array = out_response[message_params::kAllowed].asArray();
-  const auto module_ids =
-      (*message_)[app_mngr::strings::msg_params][message_params::kModuleIds]
-          .asArray();
-  const std::string module_type = ModuleType();
-
-  auto get_disallowed_multiple_access_consent =
-      [this](const ModuleUid& module_uid) {
-        auto app = application_manager_.application(connection_key());
-        const uint32_t app_id = app->app_id();
-        const bool is_resource_available =
-            (resource_allocation_manager_.AcquireResource(
-                 module_uid.first, module_uid.second, app_id) ==
-             AcquireResult::ALLOWED);
-        return (is_resource_available)
-                   ? rc_rpc_types::ModuleConsent::CONSENTED
-                   : rc_rpc_types::ModuleConsent::NOT_CONSENTED;
-      };
+rc_rpc_types::ModuleConsent
+GetInteriorVehicleDataConsentRequest::GetModuleConsentByAccessMode(
+    const ModuleUid& module_uid,
+    const hmi_apis::Common_RCAccessMode::eType access_mode) const {
+  LOG4CXX_AUTO_TRACE(logger_);
 
   auto get_auto_allow_consent = [](const ModuleUid& module_uid) {
     return rc_rpc_types::ModuleConsent::CONSENTED;
@@ -361,13 +329,75 @@ bool GetInteriorVehicleDataConsentRequest::GetCalculatedVehicleDataConsent(
                                 : rc_rpc_types::ModuleConsent::NOT_CONSENTED;
   };
 
-  for (uint32_t i = 0; i < module_ids->size(); ++i) {
-    const ModuleUid module_uid(module_type, (*module_ids)[i].asString());
-    if (!location_consents[i].asBool()) {
+  switch (access_mode) {
+    case hmi_apis::Common_RCAccessMode::AUTO_ALLOW: {
+      LOG4CXX_DEBUG(logger_,
+                    "Calculating consent for module("
+                        << module_uid.first << ", " << module_uid.second
+                        << ") in accessMode: AUTO_ALLOW");
+      return get_auto_allow_consent(module_uid);
+    }
+    case hmi_apis::Common_RCAccessMode::AUTO_DENY: {
+      LOG4CXX_DEBUG(logger_,
+                    "Calculating consent for module("
+                        << module_uid.first << ", " << module_uid.second
+                        << ") in accessMode: AUTO_DENY");
+      return get_auto_deny_consent(module_uid);
+    }
+    case hmi_apis::Common_RCAccessMode::ASK_DRIVER: {
+      LOG4CXX_DEBUG(logger_,
+                    "Calculating consent for module("
+                        << module_uid.first << ", " << module_uid.second
+                        << ") in accessMode: ASK_DRIVER");
+      return get_ask_driver_consent(module_uid);
+    }
+    default: {
+      LOG4CXX_DEBUG(logger_,
+                    "Unknown accessMode specified. Denying consent for module("
+                        << module_uid.first << ", " << module_uid.second
+                        << ")");
+      return rc_rpc_types::ModuleConsent::NOT_CONSENTED;
+    }
+  }
+}
+
+bool GetInteriorVehicleDataConsentRequest::GetCalculatedVehicleDataConsent(
+    smart_objects::SmartObject& out_response) const {
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  out_response =
+      smart_objects::SmartObject(smart_objects::SmartType::SmartType_Map);
+  out_response[message_params::kAllowed] =
+      smart_objects::SmartObject(smart_objects::SmartType::SmartType_Array);
+
+  auto modules_consent_array = out_response[message_params::kAllowed].asArray();
+  const auto module_ids =
+      (*message_)[app_mngr::strings::msg_params][message_params::kModuleIds]
+          .asArray();
+  const std::string module_type = ModuleType();
+  bool can_handle_internally = true;
+
+  auto get_disallowed_multiple_access_consent =
+      [this](const ModuleUid& module_uid) {
+        auto app = application_manager_.application(connection_key());
+        const uint32_t app_id = app->app_id();
+        const bool is_resource_available =
+            (resource_allocation_manager_.AcquireResource(
+                 module_uid.first, module_uid.second, app_id) ==
+             AcquireResult::ALLOWED);
+        return (is_resource_available)
+                   ? rc_rpc_types::ModuleConsent::CONSENTED
+                   : rc_rpc_types::ModuleConsent::NOT_CONSENTED;
+      };
+
+  for (const auto module_id : *(module_ids)) {
+    const ModuleUid module_uid(module_type, module_id.asString());
+    // Check if the user_location is covered by the module's serviceArea
+    if (!IsUserLocationValid(module_uid)) {
       LOG4CXX_DEBUG(logger_,
                     "User is outside the serviceArea for module("
                         << module_uid.first << ", " << module_uid.second
-                        << ")");
+                        << "). Denying consent");
       modules_consent_array->push_back(smart_objects::SmartObject(false));
       continue;
     }
@@ -376,8 +406,11 @@ bool GetInteriorVehicleDataConsentRequest::GetCalculatedVehicleDataConsent(
 
     const bool is_multiple_access_allowed =
         rc_capabilities_manager_.IsMultipleAccessAllowed(module_uid);
-
     if (!is_multiple_access_allowed) {
+      LOG4CXX_DEBUG(logger_,
+                    "multipleAccess disallowed for module("
+                        << module_uid.first << ", " << module_uid.second
+                        << ")");
       module_consent = get_disallowed_multiple_access_consent(module_uid);
       modules_consent_array->push_back(smart_objects::SmartObject(
           module_consent == rc_rpc_types::ModuleConsent::CONSENTED));
@@ -385,37 +418,21 @@ bool GetInteriorVehicleDataConsentRequest::GetCalculatedVehicleDataConsent(
     }
 
     const auto access_mode = resource_allocation_manager_.GetAccessMode();
-    switch (access_mode) {
-      case hmi_apis::Common_RCAccessMode::AUTO_ALLOW: {
-        module_consent = get_auto_allow_consent(module_uid);
-        modules_consent_array->push_back(smart_objects::SmartObject(
-            module_consent == rc_rpc_types::ModuleConsent::CONSENTED));
-        break;
-      }
-      case hmi_apis::Common_RCAccessMode::AUTO_DENY: {
-        module_consent = get_auto_deny_consent(module_uid);
-        modules_consent_array->push_back(smart_objects::SmartObject(
-            module_consent == rc_rpc_types::ModuleConsent::CONSENTED));
-        break;
-      }
-      case hmi_apis::Common_RCAccessMode::ASK_DRIVER: {
-        module_consent = get_ask_driver_consent(module_uid);
-        if (module_consent == rc_rpc_types::ModuleConsent::NOT_EXISTS) {
-          LOG4CXX_DEBUG(
-              logger_,
-              "Can't provide calculated consents - should send request to HMI");
-          modules_consent_array->clear();
-          return false;
-        }
-        modules_consent_array->push_back(smart_objects::SmartObject(
-            module_consent == rc_rpc_types::ModuleConsent::CONSENTED));
-        break;
-      }
-      default: { break; }
-    }
-  }
 
-  return true;
+    module_consent = GetModuleConsentByAccessMode(module_uid, access_mode);
+    if (module_consent == rc_rpc_types::ModuleConsent::NOT_EXISTS) {
+      LOG4CXX_DEBUG(logger_,
+                    "Unable to calculate consent for module("
+                        << module_uid.first << ", " << module_uid.second
+                        << "), should send moduleId to HMI for consent");
+      modules_consent_array->push_back(smart_objects::SmartObject());
+      can_handle_internally = false;
+      continue;
+    }
+    modules_consent_array->push_back(smart_objects::SmartObject(
+        module_consent == rc_rpc_types::ModuleConsent::CONSENTED));
+  }
+  return can_handle_internally;
 }
 
 bool GetInteriorVehicleDataConsentRequest::SaveModuleIdConsents(
