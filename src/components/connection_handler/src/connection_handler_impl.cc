@@ -1368,7 +1368,8 @@ void ConnectionHandlerImpl::RemoveCloudAppDevice(const DeviceHandle device_id) {
 
 void ConnectionHandlerImpl::StartTransportManager() {
   LOG4CXX_AUTO_TRACE(logger_);
-  transport_manager_.Visibility(true);
+  transport_manager_.PerformActionOnClients(
+      transport_manager::TransportAction::kVisibilityOn);
 }
 
 void ConnectionHandlerImpl::CloseRevokedConnection(uint32_t connection_key) {

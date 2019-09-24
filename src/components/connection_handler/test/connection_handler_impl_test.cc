@@ -787,7 +787,9 @@ TEST_F(ConnectionHandlerTest, StartTransportManager) {
   AddTestDeviceConnection();
   AddTestSession();
 
-  EXPECT_CALL(mock_transport_manager_, Visibility(true));
+  EXPECT_CALL(mock_transport_manager_,
+              PerformActionOnClients(
+                  transport_manager::TransportAction::kVisibilityOn));
   connection_handler_->StartTransportManager();
 }
 

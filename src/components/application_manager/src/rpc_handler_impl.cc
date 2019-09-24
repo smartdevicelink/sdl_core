@@ -208,6 +208,10 @@ void RPCHandlerImpl::Handle(const impl::MessageFromMobile message) {
     LOG4CXX_INFO(logger_, "Application manager is stopping");
     return;
   }
+  if (app_manager_.IsLowVoltage()) {
+    LOG4CXX_ERROR(logger_, "Low Voltage is active.");
+    return;
+  }
 
   ProcessMessageFromMobile(message);
 }
@@ -219,12 +223,22 @@ void RPCHandlerImpl::Handle(const impl::MessageFromHmi message) {
     LOG4CXX_ERROR(logger_, "Null-pointer message received.");
     return;
   }
+  if (app_manager_.IsLowVoltage()) {
+    LOG4CXX_ERROR(logger_, "Low Voltage is active.");
+    return;
+  }
+
   ProcessMessageFromHMI(message);
 }
 
 void RPCHandlerImpl::OnMessageReceived(
     const protocol_handler::RawMessagePtr message) {
   LOG4CXX_AUTO_TRACE(logger_);
+
+  if (app_manager_.IsLowVoltage()) {
+    LOG4CXX_ERROR(logger_, "Low Voltage is active.");
+    return;
+  }
 
   if (!message) {
     LOG4CXX_ERROR(logger_, "Null-pointer message received.");

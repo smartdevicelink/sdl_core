@@ -3185,10 +3185,10 @@ bool ApplicationManagerImpl::IsLowVoltage() const {
 
 void ApplicationManagerImpl::OnWakeUp() {
   LOG4CXX_AUTO_TRACE(logger_);
-  is_low_voltage_ = false;
   resume_ctrl_->SaveWakeUpTime();
   resume_ctrl_->StartSavePersistentDataTimer();
   request_ctrl_.OnWakeUp();
+  is_low_voltage_ = false;
 }
 
 std::string ApplicationManagerImpl::GetHashedAppID(
