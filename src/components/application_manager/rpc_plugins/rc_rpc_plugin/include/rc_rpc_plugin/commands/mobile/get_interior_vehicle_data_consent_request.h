@@ -95,11 +95,6 @@ class GetInteriorVehicleDataConsentRequest
       smart_objects::SmartObject& out_response) const;
 
   void GetLocationConsents(smart_objects::SmartObject& location_consents);
-
-  bool MultipleAccessAllowed(
-      const smart_objects::SmartArray& module_ids,
-      const smart_objects::SmartObject& location_consents,
-      smart_objects::SmartArray& out_consents_array) const;
 };
 
 }  // namespace commands

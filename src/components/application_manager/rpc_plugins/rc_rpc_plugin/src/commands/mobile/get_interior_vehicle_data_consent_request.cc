@@ -302,10 +302,18 @@ bool GetInteriorVehicleDataConsentRequest::GetCalculatedVehicleDataConsent(
           .asArray();
   const std::string module_type = ModuleType();
 
-  // if (!MultipleAccessAllowed(
-  //         (*module_ids), location_consents, (*modules_consent_array))) {
-  //   return true;
-  // }
+  auto get_disallowed_multiple_access_consent =
+      [this](const ModuleUid& module_uid) {
+        auto app = application_manager_.application(connection_key());
+        const uint32_t app_id = app->app_id();
+        const bool is_resource_available =
+            (resource_allocation_manager_.AcquireResource(
+                 module_uid.first, module_uid.second, app_id) ==
+             AcquireResult::ALLOWED);
+        return (is_resource_available)
+                   ? rc_rpc_types::ModuleConsent::CONSENTED
+                   : rc_rpc_types::ModuleConsent::NOT_CONSENTED;
+      };
 
   auto get_auto_allow_consent = [](const ModuleUid& module_uid) {
     return rc_rpc_types::ModuleConsent::CONSENTED;
@@ -364,8 +372,19 @@ bool GetInteriorVehicleDataConsentRequest::GetCalculatedVehicleDataConsent(
       continue;
     }
 
-    const auto access_mode = resource_allocation_manager_.GetAccessMode();
     rc_rpc_types::ModuleConsent module_consent;
+
+    const bool is_multiple_access_allowed =
+        rc_capabilities_manager_.IsMultipleAccessAllowed(module_uid);
+
+    if (!is_multiple_access_allowed) {
+      module_consent = get_disallowed_multiple_access_consent(module_uid);
+      modules_consent_array->push_back(smart_objects::SmartObject(
+          module_consent == rc_rpc_types::ModuleConsent::CONSENTED));
+      continue;
+    }
+
+    const auto access_mode = resource_allocation_manager_.GetAccessMode();
     switch (access_mode) {
       case hmi_apis::Common_RCAccessMode::AUTO_ALLOW: {
         module_consent = get_auto_allow_consent(module_uid);
@@ -396,41 +415,6 @@ bool GetInteriorVehicleDataConsentRequest::GetCalculatedVehicleDataConsent(
     }
   }
 
-  return true;
-}
-
-bool GetInteriorVehicleDataConsentRequest::MultipleAccessAllowed(
-    const smart_objects::SmartArray& module_ids,
-    const smart_objects::SmartObject& location_consents,
-    smart_objects::SmartArray& out_consents_array) const {
-  LOG4CXX_AUTO_TRACE(logger_);
-  for (uint32_t i = 0; i < module_ids.size(); ++i) {
-    const std::string module_type = ModuleType();
-    auto app = application_manager_.application(connection_key());
-    const uint32_t app_id = app->app_id();
-    const ModuleUid module_uid(module_type, module_ids[i].asString());
-    const bool is_multiple_access_allowed =
-        rc_capabilities_manager_.IsMultipleAccessAllowed(module_uid);
-    if (!is_multiple_access_allowed) {
-      const bool is_resource_free =
-          (resource_allocation_manager_.AcquireResource(
-               module_uid.first, module_uid.second, app_id) ==
-           AcquireResult::ALLOWED);
-
-      out_consents_array.push_back(smart_objects::SmartObject(
-          is_resource_free && location_consents[i].asBool()));
-    } else {
-      out_consents_array.clear();
-      break;
-    }
-  }
-
-  if (!out_consents_array.empty()) {
-    LOG4CXX_DEBUG(logger_,
-                  "Multiple access disallowed, returning true only for "
-                  "FREE resources");
-    return false;
-  }
   return true;
 }
 
