@@ -64,8 +64,9 @@ NaviStartStreamRequest::NaviStartStreamRequest(
 }
 
 NaviStartStreamRequest::~NaviStartStreamRequest() {
-  // unsubscribe_from_all_hmi_events() in EventObserver's destructor isn't enough;
-  // we must unsubscribe before this NaviStartStreamRequest instance is removed
+  // unsubscribe_from_all_hmi_events() in EventObserver's destructor isn't
+  // enough; we must unsubscribe before this NaviStartStreamRequest instance is
+  // removed
   unsubscribe_from_event(hmi_apis::FunctionID::Navigation_StartStream);
 }
 
