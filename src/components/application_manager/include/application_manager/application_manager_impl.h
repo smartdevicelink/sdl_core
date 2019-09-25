@@ -170,6 +170,7 @@ class ApplicationManagerImpl
 
   DataAccessor<ApplicationSet> applications() const OVERRIDE;
   DataAccessor<AppsWaitRegistrationSet> pending_applications() const OVERRIDE;
+  DataAccessor<ReregisterWaitList> reregister_applications() const OVERRIDE;
   ApplicationSharedPtr application(uint32_t app_id) const OVERRIDE;
 
   ApplicationSharedPtr active_application() const OVERRIDE;
@@ -181,6 +182,8 @@ class ApplicationManagerImpl
   ApplicationSharedPtr application_by_name(
       const std::string& app_name) const OVERRIDE;
   ApplicationSharedPtr pending_application_by_policy_id(
+      const std::string& policy_app_id) const OVERRIDE;
+  ApplicationSharedPtr reregister_application_by_policy_id(
       const std::string& policy_app_id) const OVERRIDE;
 
   std::vector<ApplicationSharedPtr> applications_by_button(
@@ -1436,12 +1439,14 @@ class ApplicationManagerImpl
   ApplicationSet applications_;
   AppsWaitRegistrationSet apps_to_register_;
   ForbiddenApps forbidden_applications;
+  ReregisterWaitList reregister_wait_list_;
 
   // Lock for applications list
   mutable std::shared_ptr<sync_primitives::RecursiveLock>
       applications_list_lock_ptr_;
   mutable std::shared_ptr<sync_primitives::Lock>
       apps_to_register_list_lock_ptr_;
+  mutable std::shared_ptr<sync_primitives::Lock> reregister_wait_list_lock_ptr_;
   mutable sync_primitives::Lock subscribed_way_points_apps_lock_;
 
   /**
@@ -1532,15 +1537,6 @@ class ApplicationManagerImpl
   StateControllerImpl state_ctrl_;
   std::unique_ptr<app_launch::AppLaunchData> app_launch_dto_;
   std::unique_ptr<app_launch::AppLaunchCtrl> app_launch_ctrl_;
-
-  /**
-   * @brief ReregisterWaitList is list of applications expected to be
-   * re-registered after transport switching is complete
-   */
-  typedef std::vector<ApplicationSharedPtr> ReregisterWaitList;
-  ReregisterWaitList reregister_wait_list_;
-
-  mutable sync_primitives::Lock reregister_wait_list_lock_;
 
   // This is a cache to remember DeviceHandle of secondary transports. Only used
   // during RegisterApplication().

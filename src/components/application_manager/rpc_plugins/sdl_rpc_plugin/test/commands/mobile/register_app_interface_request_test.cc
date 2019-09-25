@@ -78,6 +78,7 @@ using sdl_rpc_plugin::commands::RegisterAppInterfaceRequest;
 namespace {
 const uint32_t kConnectionKey = 1u;
 const uint32_t kConnectionKey2 = 2u;
+const connection_handler::DeviceHandle kDeviceHandle = 3u;
 const hmi_apis::Common_Language::eType kHmiLanguage =
     hmi_apis::Common_Language::EN_US;
 const mobile_apis::Language::eType kMobileLanguage =
@@ -304,6 +305,8 @@ TEST_F(RegisterAppInterfaceRequestTest, Run_MinimalData_SUCCESS) {
       .WillByDefault(DoAll(SetArgPointee<3>(kMacAddress1), Return(0)));
 
   MockAppPtr mock_app = CreateBasicMockedApp();
+  EXPECT_CALL(app_mngr_, reregister_application_by_policy_id(kAppId1))
+      .WillOnce(Return(ApplicationSharedPtr()));
   EXPECT_CALL(app_mngr_, application(kMacAddress1, kAppId1))
       .WillRepeatedly(Return(ApplicationSharedPtr()));
 
@@ -386,6 +389,8 @@ TEST_F(RegisterAppInterfaceRequestTest,
       .WillByDefault(DoAll(SetArgPointee<3>(kMacAddress1), Return(0)));
 
   MockAppPtr mock_app = CreateBasicMockedApp();
+  EXPECT_CALL(app_mngr_, reregister_application_by_policy_id(kAppId1))
+      .WillOnce(Return(ApplicationSharedPtr()));
   EXPECT_CALL(app_mngr_, application(kMacAddress1, kAppId1))
       .WillRepeatedly(Return(ApplicationSharedPtr()));
 
@@ -484,8 +489,8 @@ TEST_F(RegisterAppInterfaceRequestTest,
 
   MockAppPtr mock_app = CreateBasicMockedApp();
   app_set_.insert(mock_app);
-  EXPECT_CALL(app_mngr_, application_by_policy_id(kAppId1))
-      .WillRepeatedly(Return(mock_app));
+  EXPECT_CALL(app_mngr_, reregister_application_by_policy_id(kAppId1))
+      .WillOnce(Return(mock_app));
 
   connection_handler::DeviceHandle device_id = 1;
   ON_CALL(mock_connection_handler_,
@@ -495,11 +500,7 @@ TEST_F(RegisterAppInterfaceRequestTest,
   ON_CALL(mock_session_observer_, GetDataOnDeviceID(device_id, _, _, _, _))
       .WillByDefault(DoAll(SetArgPointee<3>(kMacAddress1), Return(0)));
 
-  ON_CALL(app_mngr_, application(kMacAddress1, kAppId1))
-      .WillByDefault(Return(mock_app));
-
-  ON_CALL(app_mngr_, IsAppInReconnectMode(device_id, kAppId1))
-      .WillByDefault(Return(true));
+  EXPECT_CALL(*mock_app, device()).WillOnce(Return(kDeviceHandle));
 
   EXPECT_CALL(app_mngr_, ProcessReconnection(_, kConnectionKey));
 
@@ -542,13 +543,9 @@ TEST_F(RegisterAppInterfaceRequestTest,
       .WillByDefault(DoAll(SetArgPointee<3>(kMacAddress1), Return(0)));
 
   MockAppPtr mock_app = CreateBasicMockedApp();
-  EXPECT_CALL(app_mngr_, application_by_policy_id(kAppId1))
-      .WillRepeatedly(Return(mock_app));
-
-  EXPECT_CALL(app_mngr_, application(kMacAddress1, kAppId1))
+  EXPECT_CALL(app_mngr_, reregister_application_by_policy_id(kAppId1))
       .WillOnce(Return(mock_app));
-  ON_CALL(app_mngr_, IsAppInReconnectMode(device_id, kAppId1))
-      .WillByDefault(Return(true));
+  EXPECT_CALL(*mock_app, device()).WillOnce(Return(kDeviceHandle));
 
   EXPECT_CALL(app_mngr_, ProcessReconnection(_, kConnectionKey));
 
@@ -589,14 +586,9 @@ TEST_F(RegisterAppInterfaceRequestTest,
       .WillByDefault(DoAll(SetArgPointee<3>(kMacAddress1), Return(0)));
 
   MockAppPtr mock_app = CreateBasicMockedApp();
-  EXPECT_CALL(app_mngr_, application_by_policy_id(kAppId1))
-      .WillRepeatedly(Return(mock_app));
-
-  EXPECT_CALL(app_mngr_, application(kMacAddress1, kAppId1))
+  EXPECT_CALL(app_mngr_, reregister_application_by_policy_id(kAppId1))
       .WillOnce(Return(mock_app));
-
-  EXPECT_CALL(app_mngr_, IsAppInReconnectMode(device_id, kAppId1))
-      .WillOnce(Return(true));
+  EXPECT_CALL(*mock_app, device()).WillOnce(Return(kDeviceHandle));
 
   EXPECT_CALL(app_mngr_, ProcessReconnection(_, kConnectionKey));
 
@@ -641,6 +633,8 @@ TEST_F(RegisterAppInterfaceRequestTest,
   ON_CALL(mock_session_observer_, GetDataOnDeviceID(device_id, _, _, _, _))
       .WillByDefault(DoAll(SetArgPointee<3>(kMacAddress1), Return(0)));
 
+  EXPECT_CALL(app_mngr_, reregister_application_by_policy_id(kAppId1))
+      .WillOnce(Return(ApplicationSharedPtr()));
   EXPECT_CALL(app_mngr_, application(kMacAddress1, kAppId1))
       .WillOnce(Return(mock_app1));
 
@@ -691,6 +685,8 @@ TEST_F(RegisterAppInterfaceRequestTest,
   ON_CALL(*mock_app2, mac_address()).WillByDefault(ReturnRef(kMacAddress2));
   EXPECT_CALL(app_mngr_, application(kMacAddress2, kAppId1))
       .WillRepeatedly(Return(ApplicationSharedPtr()));
+  EXPECT_CALL(app_mngr_, reregister_application_by_policy_id(kAppId1))
+      .WillOnce(Return(ApplicationSharedPtr()));
 
   EXPECT_CALL(app_mngr_, application(kConnectionKey2))
       .WillOnce(Return(mock_app2));
