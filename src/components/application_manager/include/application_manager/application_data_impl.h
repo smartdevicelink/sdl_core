@@ -147,6 +147,14 @@ class DynamicApplicationDataImpl : public virtual Application {
   void set_display_capabilities(
       const smart_objects::SmartObject& display_capabilities) OVERRIDE;
   void remove_window_capability(const WindowID window_id) OVERRIDE;
+
+  /**
+   * @brief checks whether a specific menu layout is supported
+   * @param menu layout to check
+   */
+  bool menu_layout_supported(
+      const mobile_apis::MenuLayout::eType layout) const OVERRIDE;
+
   /*
    * @brief Adds a command to the in application menu
    */

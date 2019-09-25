@@ -1035,7 +1035,8 @@ TEST_F(TransportAdapterTest, StartClientListening_ClientNotInitialized) {
   EXPECT_CALL(*clientMock, IsInitialised()).WillOnce(Return(false));
   EXPECT_CALL(*clientMock, StartListening()).Times(0);
 
-  TransportAdapter::Error res = transport_adapter.StartClientListening();
+  TransportAdapter::Error res = transport_adapter.ChangeClientListening(
+      transport_manager::TransportAction::kVisibilityOn);
   EXPECT_EQ(TransportAdapter::BAD_STATE, res);
 
   EXPECT_CALL(*dev_mock, Terminate());
@@ -1058,7 +1059,8 @@ TEST_F(TransportAdapterTest, StartClientListening) {
   EXPECT_CALL(*clientMock, StartListening())
       .WillOnce(Return(TransportAdapter::OK));
 
-  TransportAdapter::Error res = transport_adapter.StartClientListening();
+  TransportAdapter::Error res = transport_adapter.ChangeClientListening(
+      transport_manager::TransportAction::kVisibilityOn);
   EXPECT_EQ(TransportAdapter::OK, res);
 
   EXPECT_CALL(*dev_mock, Terminate());
@@ -1092,7 +1094,8 @@ TEST_F(TransportAdapterTest, StopClientListening_Success) {
   EXPECT_CALL(*clientMock, StopListening())
       .WillOnce(Return(TransportAdapter::OK));
 
-  res = transport_adapter.StopClientListening();
+  res = transport_adapter.ChangeClientListening(
+      transport_manager::TransportAction::kVisibilityOff);
   EXPECT_EQ(TransportAdapter::OK, res);
 
   EXPECT_CALL(*dev_mock, Terminate());

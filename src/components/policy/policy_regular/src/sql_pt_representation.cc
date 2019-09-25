@@ -680,10 +680,33 @@ bool SQLPTRepresentation::GatherConsumerFriendlyMessages(
   if (query.Prepare(sql_pt::kCollectFriendlyMsg)) {
     while (query.Next()) {
       UserFriendlyMessage msg;
-      msg.message_code = query.GetString(7);
-      std::string language = query.GetString(6);
 
-      (*messages->messages)[msg.message_code].languages[language];
+      msg.tts = query.GetString(1);
+      msg.label = query.GetString(2);
+      msg.line1 = query.GetString(3);
+      msg.line2 = query.GetString(4);
+      msg.text_body = query.GetString(5);
+      msg.message_code = query.GetString(7);
+
+      std::string language = query.GetString(6);
+      policy_table::Languages& languages =
+          (*messages->messages)[msg.message_code].languages;
+      policy_table::MessageString& specific_message = languages[language];
+      if (!msg.tts.empty()) {
+        *(specific_message).tts = msg.tts;
+      }
+      if (!msg.label.empty()) {
+        *(specific_message).label = msg.label;
+      }
+      if (!msg.line1.empty()) {
+        *(specific_message).line1 = msg.line1;
+      }
+      if (!msg.line2.empty()) {
+        *(specific_message).line2 = msg.line2;
+      }
+      if (!msg.text_body.empty()) {
+        *(specific_message).textBody = msg.text_body;
+      }
     }
   } else {
     LOG4CXX_WARN(logger_, "Incorrect statement for select friendly messages.");

@@ -418,8 +418,9 @@ TransportAdapter::Error TransportAdapterImpl::SendData(
   }
 }
 
-TransportAdapter::Error TransportAdapterImpl::StartClientListening() {
-  LOG4CXX_TRACE(logger_, "enter");
+TransportAdapter::Error TransportAdapterImpl::ChangeClientListening(
+    TransportAction required_change) {
+  LOG4CXX_AUTO_TRACE(logger_);
   if (client_connection_listener_ == 0) {
     LOG4CXX_TRACE(logger_, "exit with NOT_SUPPORTED");
     return NOT_SUPPORTED;
@@ -428,27 +429,43 @@ TransportAdapter::Error TransportAdapterImpl::StartClientListening() {
     LOG4CXX_TRACE(logger_, "exit with BAD_STATE");
     return BAD_STATE;
   }
-  TransportAdapter::Error err = client_connection_listener_->StartListening();
-  LOG4CXX_TRACE(logger_, "exit with error: " << err);
-  return err;
-}
 
-TransportAdapter::Error TransportAdapterImpl::StopClientListening() {
-  LOG4CXX_TRACE(logger_, "enter");
-  if (client_connection_listener_ == 0) {
-    LOG4CXX_TRACE(logger_, "exit with NOT_SUPPORTED");
-    return NOT_SUPPORTED;
+  TransportAdapter::Error err = TransportAdapter::Error::UNKNOWN;
+
+  switch (required_change) {
+    case transport_manager::TransportAction::kVisibilityOn:
+      err = client_connection_listener_->StartListening();
+      break;
+
+    case transport_manager::TransportAction::kListeningOn:
+      err = client_connection_listener_->ResumeListening();
+      break;
+
+    case transport_manager::TransportAction::kListeningOff:
+      err = client_connection_listener_->SuspendListening();
+      {
+        sync_primitives::AutoLock locker(devices_mutex_);
+        for (DeviceMap::iterator it = devices_.begin(); it != devices_.end();
+             ++it) {
+          it->second->Stop();
+        }
+      }
+      break;
+
+    case transport_manager::TransportAction::kVisibilityOff:
+      err = client_connection_listener_->StopListening();
+      {
+        sync_primitives::AutoLock locker(devices_mutex_);
+        for (DeviceMap::iterator it = devices_.begin(); it != devices_.end();
+             ++it) {
+          it->second->Stop();
+        }
+      }
+      break;
+    default:
+      NOTREACHED();
   }
-  if (!client_connection_listener_->IsInitialised()) {
-    LOG4CXX_TRACE(logger_, "exit with BAD_STATE");
-    return BAD_STATE;
-  }
-  TransportAdapter::Error err = client_connection_listener_->StopListening();
-  sync_primitives::AutoLock locker(devices_mutex_);
-  for (DeviceMap::iterator it = devices_.begin(); it != devices_.end(); ++it) {
-    it->second->Stop();
-  }
-  LOG4CXX_TRACE(logger_, "exit with error: " << err);
+  LOG4CXX_TRACE(logger_, "Exit with error: " << err);
   return err;
 }
 

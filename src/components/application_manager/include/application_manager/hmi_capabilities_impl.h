@@ -453,14 +453,6 @@ class HMICapabilitiesImpl : public HMICapabilities {
   bool rc_supported() const OVERRIDE;
 
   /*
-   * @brief Retrieves whether HMI supports passed Menu Layout
-   *
-   * @return TRUE if it supported, otherwise FALSE
-   */
-  bool menu_layout_supported(
-      mobile_apis::MenuLayout::eType layout) const OVERRIDE;
-
-  /*
    * @brief Interface used to store information regarding
    * the navigation "System Capability"
    *

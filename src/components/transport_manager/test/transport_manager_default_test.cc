@@ -97,6 +97,19 @@ TEST(TestTransportManagerDefault, Init_LastStateNotUsed) {
   EXPECT_CALL(transport_manager_settings, bluetooth_uuid())
       .WillRepeatedly(Return(kBTUUID.data()));
 
+  std::string dummy_parameter;
+  EXPECT_CALL(transport_manager_settings, aoa_filter_manufacturer())
+      .WillRepeatedly(ReturnRef(dummy_parameter));
+  EXPECT_CALL(transport_manager_settings, aoa_filter_model_name())
+      .WillRepeatedly(ReturnRef(dummy_parameter));
+  EXPECT_CALL(transport_manager_settings, aoa_filter_description())
+      .WillRepeatedly(ReturnRef(dummy_parameter));
+  EXPECT_CALL(transport_manager_settings, aoa_filter_version())
+      .WillRepeatedly(ReturnRef(dummy_parameter));
+  EXPECT_CALL(transport_manager_settings, aoa_filter_uri())
+      .WillRepeatedly(ReturnRef(dummy_parameter));
+  EXPECT_CALL(transport_manager_settings, aoa_filter_serial_number())
+      .WillRepeatedly(ReturnRef(dummy_parameter));
   transport_manager.Init(mock_last_state);
   transport_manager.Stop();
 }

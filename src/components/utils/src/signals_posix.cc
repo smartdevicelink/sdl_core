@@ -83,7 +83,7 @@ pid_t Signals::Fork() {
 }
 
 void Signals::ExitProcess(const int status) {
-  exit(status);
+  _Exit(status);
 }
 
 void Signals::WaitPid(pid_t cpid, int* status, int options) {

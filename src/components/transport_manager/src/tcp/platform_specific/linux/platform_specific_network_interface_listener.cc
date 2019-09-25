@@ -105,7 +105,7 @@ PlatformSpecificNetworkInterfaceListener::
 
 bool PlatformSpecificNetworkInterfaceListener::Init() {
   LOG4CXX_AUTO_TRACE(logger_);
-
+  LOG4CXX_DEBUG(logger_, "Init socket: " << socket_);
   if (socket_ >= 0) {
     LOG4CXX_WARN(logger_, "Network interface listener is already initialized");
     return false;
@@ -151,7 +151,7 @@ bool PlatformSpecificNetworkInterfaceListener::Init() {
 
 void PlatformSpecificNetworkInterfaceListener::Deinit() {
   LOG4CXX_AUTO_TRACE(logger_);
-
+  LOG4CXX_DEBUG(logger_, "Deinit socket: " << socket_);
   if (socket_ >= 0) {
     close(socket_);
     socket_ = -1;

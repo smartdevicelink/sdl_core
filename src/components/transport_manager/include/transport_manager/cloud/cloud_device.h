@@ -55,7 +55,7 @@ class CloudDevice : public Device {
  public:
   CloudDevice(std::string& host, std::string& port, std::string& name);
 
-  CloudDevice(CloudAppEndpoint endpoint, std::string& name);
+  CloudDevice(CloudAppEndpoint& endpoint, std::string& name);
 
   virtual const std::string& GetHost() const;
 

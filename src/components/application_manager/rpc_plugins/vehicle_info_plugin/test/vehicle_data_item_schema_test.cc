@@ -35,6 +35,7 @@
 #include <type_traits>
 #include "formatters/formatter_json_rpc.h"
 #include "formatters/generic_json_formatter.h"
+#include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include "interfaces/HMI_API.h"
 #include "smart_objects/smart_object.h"
@@ -52,7 +53,6 @@ using ::testing::NiceMock;
 using ::testing::Return;
 using ::testing::ReturnRef;
 
-using application_manager::MockMessageHelper;
 using ErrorCode = smart_objects::errors::eType;
 
 namespace {

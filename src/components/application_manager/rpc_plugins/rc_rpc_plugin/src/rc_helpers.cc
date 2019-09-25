@@ -276,4 +276,86 @@ void RCHelpers::RemoveRedundantGPSDataFromIVDataMsg(
     location_data = new_location_data;
   }
 }
+
+smart_objects::SmartObject RCHelpers::MergeModuleData(
+    const smart_objects::SmartObject& data1,
+    const smart_objects::SmartObject& data2) {
+  if (data1.getType() != smart_objects::SmartType::SmartType_Map ||
+      data2.getType() != smart_objects::SmartType::SmartType_Map) {
+    return data2;
+  }
+
+  smart_objects::SmartObject result = data1;
+
+  for (auto it = data2.map_begin(); it != data2.map_end(); ++it) {
+    const std::string& key = it->first;
+    smart_objects::SmartObject& value = it->second;
+    if (!result.keyExists(key) || value.getType() != result[key].getType()) {
+      result[key] = value;
+      continue;
+    }
+
+    // Merge maps and arrays with `id` param included, replace other types
+    if (value.getType() == smart_objects::SmartType::SmartType_Map) {
+      value = MergeModuleData(result[key], value);
+    } else if (value.getType() == smart_objects::SmartType::SmartType_Array) {
+      value = MergeArray(result[key], value);
+    }
+    result[key] = value;
+  }
+  return result;
+}
+
+smart_objects::SmartObject RCHelpers::MergeArray(
+    const smart_objects::SmartObject& data1,
+    const smart_objects::SmartObject& data2) {
+  // Merge data only in the case where each value in the array is an Object with
+  // an ID included, otherwise replace
+
+  if (data1.getType() != smart_objects::SmartType::SmartType_Array ||
+      data2.getType() != smart_objects::SmartType::SmartType_Array ||
+      data2.empty()) {
+    return data2;
+  }
+
+  auto& data2_array = *data2.asArray();
+  for (const auto& data_item : data2_array) {
+    if (data_item.getType() != smart_objects::SmartType_Map ||
+        !data_item.keyExists(application_manager::strings::id)) {
+      return data2;
+    }
+  }
+
+  smart_objects::SmartObject result = data1;
+  smart_objects::SmartArray* result_array = result.asArray();
+
+  auto find_by_id = [](smart_objects::SmartArray* array,
+                       const smart_objects::SmartObject& id)
+      -> smart_objects::SmartArray::iterator {
+    return std::find_if(array->begin(),
+                        array->end(),
+                        [&id](const smart_objects::SmartObject& obj) -> bool {
+                          return id == obj[application_manager::strings::id];
+                        });
+  };
+
+  auto merge = [&result_array,
+                &find_by_id](const smart_objects::SmartObject& data) -> void {
+    auto element_id = data[application_manager::strings::id];
+    auto result_it = find_by_id(result_array, element_id);
+
+    if (result_array->end() != result_it) {
+      *result_it = RCHelpers::MergeModuleData(*result_it, data);
+    } else {
+      result_array->push_back(data);
+    }
+  };
+
+  for (const auto& data : data2_array) {
+    merge(data);
+  }
+
+  return result;
+}
+
 }  // namespace rc_rpc_plugin

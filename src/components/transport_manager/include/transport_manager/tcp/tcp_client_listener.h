@@ -108,6 +108,10 @@ class TcpClientListener : public ClientConnectionListener {
    */
   virtual TransportAdapter::Error StopListening();
 
+  TransportAdapter::Error SuspendListening() OVERRIDE;
+
+  TransportAdapter::Error ResumeListening() OVERRIDE;
+
   /**
    * @brief Called from NetworkInterfaceListener when IP address of the network
    *        interface is changed.

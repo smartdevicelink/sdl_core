@@ -252,7 +252,7 @@ void CustomVehicleDataManagerImpl::UpdateVehicleDataItems() {
 
   auto vehicle_data_items = get_custom_vdi();
 
-  auto get_ischema_item = [](VehicleDataItem item,
+  auto get_ischema_item = [](const VehicleDataItem& item,
                              SMemberType type,
                              std::vector<SMember> history = {}) -> SMember {
     switch (type) {
@@ -336,7 +336,7 @@ void CustomVehicleDataManagerImpl::UpdateVehicleDataItems() {
     std::copy_if(vehicle_data_items.begin(),
                  vehicle_data_items.end(),
                  std::back_inserter(result),
-                 [&name](VehicleDataItem item) { return item.name == name; });
+                 [&name](VehicleDataItem& item) { return item.name == name; });
 
     std::sort(result.begin(),
               result.end(),

@@ -864,7 +864,6 @@ class PolicyHandler : public PolicyHandlerInterface,
 
   mutable sync_primitives::RWLock policy_manager_lock_;
   std::shared_ptr<PolicyManager> policy_manager_;
-  void* dl_handle_;
   std::shared_ptr<PolicyEventObserver> event_observer_;
   uint32_t last_activated_app_id_;
 

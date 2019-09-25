@@ -1857,7 +1857,8 @@
         </param>
         
         <param name="maximumChangeVelocity" type="Integer" minvalue="0" maxvalue="255" mandatory="true">
-            <description>References signal "VedsMaxDeltaV_D_Ltchd". Change in velocity in KPH.  Additional reserved values:
+            <description>
+                References signal "VedsMaxDeltaV_D_Ltchd". Change in velocity in KPH.  Additional reserved values:
                 0x00 No event
                 0xFE Not supported
                 0xFF Fault
@@ -2283,9 +2284,6 @@
         <param name="numCustomPresetsAvailable" type="Integer" minvalue="1" maxvalue="100" mandatory="false" since="3.0">
             <description>The number of on-screen custom presets available (if any); otherwise omitted.</description>
         </param>
-        <param name="menuLayoutsAvailable" type="MenuLayout" array="true" minsize="1" maxsize="1000" mandatory="false" since="6.0">
-            <description>An array of available menu layouts. If this parameter is not provided, only the `LIST` layout is assumed to be available</description>
-        </param>
         <!-- TODO:  Add pixel density? -->
     </struct>
     
@@ -2416,6 +2414,9 @@
         </param>
         <param name="softButtonCapabilities" type="SoftButtonCapabilities" minsize="1" maxsize="100" array="true" mandatory="false">
             <description>The number of soft buttons available on-window and the capabilities for each button.</description>
+        </param>
+        <param name="menuLayoutsAvailable" type="MenuLayout" array="true" minsize="1" maxsize="1000" mandatory="false" since="6.0">
+            <description>An array of available menu layouts. If this parameter is not provided, only the `LIST` layout is assumed to be available</description>
         </param>
     </struct>
 
@@ -3021,7 +3022,7 @@
         <element name="REMOTE_CONTROL"/>
         <element name="APP_SERVICES" since="5.1"/>
         <element name="DISPLAYS" since="6.0"/>
-	<element name="SEAT_LOCATION" since="6.0"/>
+        <element name="SEAT_LOCATION" since="6.0"/>
     </enum>
     
     <struct name="NavigationCapability" since="4.5">

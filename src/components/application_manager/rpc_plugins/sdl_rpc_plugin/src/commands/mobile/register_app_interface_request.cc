@@ -591,13 +591,6 @@ void FillUIRelatedFields(smart_objects::SmartObject& response_params,
     }
 
     if (hmi_capabilities.display_capabilities()->keyExists(
-            strings::menu_layouts_available)) {
-      display_caps[strings::menu_layouts_available] =
-          hmi_capabilities.display_capabilities()->getElement(
-              strings::menu_layouts_available);
-    }
-
-    if (hmi_capabilities.display_capabilities()->keyExists(
             hmi_response::media_clock_formats)) {
       display_caps[hmi_response::media_clock_formats] =
           hmi_capabilities.display_capabilities()->getElement(

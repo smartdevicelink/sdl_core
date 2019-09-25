@@ -146,6 +146,29 @@ class RCHelpers {
    */
   static void RemoveRedundantGPSDataFromIVDataMsg(
       smart_objects::SmartObject& msg_params);
+
+  /**
+   * @brief MergeModuleData all keys and values from first parameter and
+   * update and append keys and values from the second
+   * @param data1 - initial data
+   * @param data2 - updated data
+   * @return updated data1 with data2 keys and values
+   */
+  static smart_objects::SmartObject MergeModuleData(
+      const smart_objects::SmartObject& data1,
+      const smart_objects::SmartObject& data2);
+
+  /**
+   * @brief MergeArray merge two arrays if their elements contain an `id`
+   * parameter
+   * @param data1 - initial data
+   * @param data2 - updated data
+   * @return updated data1 with any values in data2 if the arrays can be merged,
+   * otherwise data2
+   */
+  static smart_objects::SmartObject MergeArray(
+      const smart_objects::SmartObject& data1,
+      const smart_objects::SmartObject& data2);
 };
 
 }  // namespace rc_rpc_plugin

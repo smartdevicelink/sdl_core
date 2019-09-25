@@ -175,7 +175,8 @@ bool LifeCycleImpl::StartComponents() {
     return false;
   }
   // start transport manager
-  transport_manager_->Visibility(true);
+  transport_manager_->PerformActionOnClients(
+      transport_manager::TransportAction::kVisibilityOn);
 
   LowVoltageSignalsOffset signals_offset{profile_.low_voltage_signal_offset(),
                                          profile_.wake_up_signal_offset(),
@@ -189,7 +190,10 @@ bool LifeCycleImpl::StartComponents() {
 
 void LifeCycleImpl::LowVoltage() {
   LOG4CXX_AUTO_TRACE(logger_);
-  transport_manager_->Visibility(false);
+  transport_manager_->PerformActionOnClients(
+      transport_manager::TransportAction::kListeningOff);
+  transport_manager_->StopEventsProcessing();
+  transport_manager_->Deinit();
   app_manager_->OnLowVoltage();
 }
 
@@ -200,9 +204,11 @@ void LifeCycleImpl::IgnitionOff() {
 
 void LifeCycleImpl::WakeUp() {
   LOG4CXX_AUTO_TRACE(logger_);
-  app_manager_->OnWakeUp();
   transport_manager_->Reinit();
-  transport_manager_->Visibility(true);
+  transport_manager_->PerformActionOnClients(
+      transport_manager::TransportAction::kListeningOn);
+  app_manager_->OnWakeUp();
+  transport_manager_->StartEventsProcessing();
 }
 
 #ifdef MESSAGEBROKER_HMIADAPTER
@@ -293,7 +299,8 @@ void LifeCycleImpl::StopComponents() {
 
   LOG4CXX_INFO(logger_, "Destroying Transport Manager.");
   DCHECK_OR_RETURN_VOID(transport_manager_);
-  transport_manager_->Visibility(false);
+  transport_manager_->PerformActionOnClients(
+      transport_manager::TransportAction::kVisibilityOff);
   transport_manager_->Stop();
   delete transport_manager_;
   transport_manager_ = NULL;
