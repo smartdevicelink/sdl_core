@@ -252,16 +252,9 @@ CObjectSchemaItem::CObjectSchemaItem(const Members& members)
 
 void CObjectSchemaItem::RemoveFakeParams(
     SmartObject& Object, const utils::SemanticVersion& MessageVersion) {
-  for (SmartMap::const_iterator it = Object.map_begin(); it != Object.map_end();
-       ++it) {
-    const std::string& key = it->first;
+  for (const auto& key : Object.enumerate()) {
     std::map<std::string, SMember>::const_iterator members_it =
         mMembers.find(key);
-
-    if (mMembers.end() == members_it && key.compare(connection_key) != 0 &&
-        key.compare(binary_data) != 0 && key.compare(app_id) != 0) {
-      Object.erase(key);
-    }
 
     if (mMembers.end() != members_it) {
       const SMember& member =
@@ -269,6 +262,12 @@ void CObjectSchemaItem::RemoveFakeParams(
       if (member.mIsRemoved || !member.mIsValid) {
         Object.erase(key);
       }
+      continue;
+    }
+
+    if (mMembers.end() == members_it && key.compare(connection_key) != 0 &&
+        key.compare(binary_data) != 0 && key.compare(app_id) != 0) {
+      Object.erase(key);
     }
   }
 }
