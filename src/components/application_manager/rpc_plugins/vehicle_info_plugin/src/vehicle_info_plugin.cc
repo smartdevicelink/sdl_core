@@ -90,7 +90,8 @@ void VehicleInfoPlugin::OnApplicationEvent(
   if (plugins::ApplicationEvent::kApplicationRegistered == event) {
     application->AddExtension(
         std::make_shared<VehicleInfoAppExtension>(*this, *application));
-  } else if (plugins::ApplicationEvent::kDeleteApplicationData == event) {
+  } else if ((plugins::ApplicationEvent::kDeleteApplicationData == event) ||
+             (plugins::ApplicationEvent::kApplicationUnregistered == event)) {
     DeleteSubscriptions(application);
   }
 }
@@ -127,12 +128,14 @@ application_manager::ApplicationSharedPtr FindAppSubscribedToIVI(
   return application_manager::ApplicationSharedPtr();
 }
 
-smart_objects::SmartObjectSPtr GetUnsubscribeIVIRequest(
-    const std::string& ivi_name,
-    application_manager::ApplicationManager& app_mngr) {
+smart_objects::SmartObjectSPtr VehicleInfoPlugin::GetUnsubscribeIVIRequest(
+    const std::vector<std::string>& ivi_names) {
+  LOG4CXX_AUTO_TRACE(logger_);
   using namespace smart_objects;
 
-  auto find_ivi_name = [ivi_name]() {
+  auto msg_params = smart_objects::SmartObject(smart_objects::SmartType_Map);
+
+  auto find_ivi_name = [](const std::string& ivi_name) {
     for (auto item : application_manager::MessageHelper::vehicle_data()) {
       if (ivi_name == item.first) {
         return item.first;
@@ -140,13 +143,26 @@ smart_objects::SmartObjectSPtr GetUnsubscribeIVIRequest(
     }
     return std::string();
   };
-  std::string key_name = find_ivi_name();
-  DCHECK_OR_RETURN(!key_name.empty(), smart_objects::SmartObjectSPtr());
-  auto msg_params = smart_objects::SmartObject(smart_objects::SmartType_Map);
-  msg_params[key_name] = true;
+
+  for (const auto& ivi_name : ivi_names) {
+    // try to find the name in vehicle data types
+    std::string key_name = find_ivi_name(ivi_name);
+
+    if (key_name.empty()) {
+      // the name hasn't been found in vehicle data types
+      if (custom_vehicle_data_manager_->IsValidCustomVehicleDataName(
+              ivi_name)) {
+        key_name = ivi_name;
+      }
+    }
+
+    DCHECK_OR_RETURN(!key_name.empty(), smart_objects::SmartObjectSPtr());
+    msg_params[key_name] = true;
+  }
 
   auto message = application_manager::MessageHelper::CreateMessageForHMI(
-      hmi_apis::messageType::request, app_mngr.GetNextHMICorrelationID());
+      hmi_apis::messageType::request,
+      application_manager_->GetNextHMICorrelationID());
   DCHECK(message);
 
   SmartObject& object = *message;
@@ -161,14 +177,19 @@ void VehicleInfoPlugin::DeleteSubscriptions(
     application_manager::ApplicationSharedPtr app) {
   auto& ext = VehicleInfoAppExtension::ExtractVIExtension(*app);
   auto subscriptions = ext.Subscriptions();
+  std::vector<std::string> ivi_to_unsubscribe;
   for (auto& ivi : subscriptions) {
     ext.unsubscribeFromVehicleInfo(ivi);
     auto still_subscribed_app =
         FindAppSubscribedToIVI(ivi, *application_manager_);
     if (!still_subscribed_app) {
-      auto message = GetUnsubscribeIVIRequest(ivi, *application_manager_);
-      application_manager_->GetRPCService().ManageHMICommand(message);
+      ivi_to_unsubscribe.push_back(ivi);
     }
+  }
+
+  if (!ivi_to_unsubscribe.empty()) {
+    auto message = GetUnsubscribeIVIRequest(ivi_to_unsubscribe);
+    application_manager_->GetRPCService().ManageHMICommand(message);
   }
 }
 }  // namespace vehicle_info_plugin
