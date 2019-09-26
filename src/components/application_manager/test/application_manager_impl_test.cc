@@ -1128,6 +1128,15 @@ TEST_F(ApplicationManagerImplTest, StartStopAudioPassThru) {
   }
 }
 
+TEST_F(ApplicationManagerImplTest,
+       StopApplicationManager_ExpectStopRPCService) {
+  EXPECT_CALL(*mock_policy_handler_, UnloadPolicyLibrary());
+
+  EXPECT_CALL(*mock_rpc_service_, Stop());
+
+  app_manager_impl_->Stop();
+}
+
 TEST_F(ApplicationManagerImplTest, UnregisterAnotherAppDuringAudioPassThru) {
   std::string dummy_file_name;
   ON_CALL(mock_application_manager_settings_, recording_file_name())

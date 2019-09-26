@@ -68,6 +68,13 @@ RPCServiceImpl::RPCServiceImpl(
 
 RPCServiceImpl::~RPCServiceImpl() {}
 
+void RPCServiceImpl::Stop() {
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  messages_to_mobile_.Shutdown();
+  messages_to_hmi_.Shutdown();
+}
+
 EncryptionFlagCheckResult RPCServiceImpl::IsEncryptionRequired(
     const smart_objects::SmartObject& message,
     std::shared_ptr<Application> app,

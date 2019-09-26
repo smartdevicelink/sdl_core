@@ -102,6 +102,11 @@ class RPCService {
       const std::map<std::string, SMember>& members) = 0;
 
   /**
+   * @brief Stop RPC service by shutting down hmi and mobile message queues
+   */
+  virtual void Stop() = 0;
+
+  /**
    * @brief set_protocol_handler
    * @param handler
    * set protocol handler

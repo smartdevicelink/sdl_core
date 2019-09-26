@@ -2367,6 +2367,8 @@ bool ApplicationManagerImpl::Stop() {
   LOG4CXX_DEBUG(logger_, "Unloading policy library.");
   GetPolicyHandler().UnloadPolicyLibrary();
 
+  rpc_service_->Stop();
+
   return true;
 }
 
