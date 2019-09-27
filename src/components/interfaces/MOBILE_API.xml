@@ -2457,6 +2457,9 @@
         <param name="remoteControl" type="Boolean" mandatory="false" since="4.5">
             <description>Availability of remote control feature. True: Available, False: Not Available</description>
         </param>
+        <param name="appServices" type="Boolean" mandatory="false" since="6.0">
+            <description>Availability of App Services functionality. True: Available, False: Not Available</description>
+        </param>
     </struct>
 
     <struct name="MenuParams" since="1.0">
