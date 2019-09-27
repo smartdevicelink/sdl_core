@@ -223,12 +223,20 @@ bool AppServiceManager::UnpublishAppService(const std::string service_id) {
 void AppServiceManager::UnpublishServices(const uint32_t connection_key) {
   LOG4CXX_AUTO_TRACE(logger_);
   LOG4CXX_DEBUG(logger_, "Unpublishing all app services: " << connection_key);
-  sync_primitives::AutoLock lock(published_services_lock_);
-  for (auto it = published_services_.begin(); it != published_services_.end();
-       ++it) {
-    if (it->second.connection_key == connection_key) {
-      UnpublishAppService(it->first);
+
+  std::list<std::string> app_published_services;
+  {
+    sync_primitives::AutoLock lock(published_services_lock_);
+    for (auto it = published_services_.begin(); it != published_services_.end();
+         ++it) {
+      if (it->second.connection_key == connection_key) {
+        app_published_services.push_back(it->first);
+      }
     }
+  }
+
+  for (auto& service_id : app_published_services) {
+    UnpublishAppService(service_id);
   }
 }
 
