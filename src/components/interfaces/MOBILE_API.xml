@@ -6529,7 +6529,7 @@
             <description>Provides additional human readable info regarding the result.</description>
         </param>
         
-        <param name="ecuHeader" type="Integer" minvalue="0" maxvalue="65535" mandatory="true">
+        <param name="ecuHeader" type="Integer" minvalue="0" maxvalue="65535" mandatory="false">
             <description>2 byte ECU Header for DTC response (as defined in VHR_Layout_Specification_DTCs.pdf)</description>
         </param>
         
@@ -6584,7 +6584,7 @@
             <description>Provides additional human readable info regarding the result.</description>
         </param>
         
-        <param name="messageDataResult" type="Integer" minvalue="0" maxvalue="255" minsize="1" maxsize="65535" array="true" mandatory="true">
+        <param name="messageDataResult" type="Integer" minvalue="0" maxvalue="255" minsize="1" maxsize="65535" array="true" mandatory="false">
             <description>
                 Array of bytes comprising CAN message result.
             </description>
@@ -7438,7 +7438,7 @@
     </function>
     
     <function name="GetInteriorVehicleData" functionID="GetInteriorVehicleDataID" messagetype="response" since="4.5">
-        <param name="moduleData" type="ModuleData" mandatory="true">
+        <param name="moduleData" type="ModuleData" mandatory="false">
         </param>
         <param name="resultCode" type="Result" platform="documentation" mandatory="true">
             <description>See Result</description>
@@ -7540,7 +7540,7 @@
     
     <function name="SetInteriorVehicleData" functionID="SetInteriorVehicleDataID" messagetype="response" since="4.5">
         <description>Used to set the values of one remote control module </description>
-        <param name="moduleData" type="ModuleData" mandatory="true">
+        <param name="moduleData" type="ModuleData" mandatory="false">
         </param>
         <param name="resultCode" type="Result" platform="documentation" mandatory="true">
             <description>See Result</description>
@@ -7656,7 +7656,7 @@
     </function>
     
     <function name="GetSystemCapability" functionID="GetSystemCapabilityID" messagetype="response" since="4.5">
-        <param name="systemCapability" type="SystemCapability" mandatory="true">
+        <param name="systemCapability" type="SystemCapability" mandatory="false">
         </param>
         <param name="resultCode" type="Result" platform="documentation" mandatory="true">
             <description>See Result</description>
