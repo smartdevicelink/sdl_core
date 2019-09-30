@@ -634,7 +634,7 @@ void ApplicationImpl::SuspendStreaming(
 }
 
 void ApplicationImpl::WakeUpStreaming(
-    protocol_handler::ServiceType service_type) {
+    protocol_handler::ServiceType service_type, uint32_t timer_len) {
   using namespace protocol_handler;
   LOG4CXX_AUTO_TRACE(logger_);
 
@@ -650,8 +650,9 @@ void ApplicationImpl::WakeUpStreaming(
           ServiceType::kMobileNav, true, application_manager_);
       video_streaming_suspended_ = false;
     }
-    video_stream_suspend_timer_.Start(video_stream_suspend_timeout_,
-                                      timer::kPeriodic);
+    video_stream_suspend_timer_.Start(
+        timer_len == 0 ? video_stream_suspend_timeout_ : timer_len,
+        timer::kPeriodic);
   } else if (ServiceType::kAudio == service_type) {
     sync_primitives::AutoLock lock(audio_streaming_suspended_lock_);
     if (audio_streaming_suspended_) {
@@ -660,8 +661,9 @@ void ApplicationImpl::WakeUpStreaming(
           ServiceType::kAudio, true, application_manager_);
       audio_streaming_suspended_ = false;
     }
-    audio_stream_suspend_timer_.Start(audio_stream_suspend_timeout_,
-                                      timer::kPeriodic);
+    audio_stream_suspend_timer_.Start(
+        timer_len == 0 ? audio_stream_suspend_timeout_ : timer_len,
+        timer::kPeriodic);
   }
 }
 

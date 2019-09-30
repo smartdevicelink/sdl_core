@@ -657,7 +657,8 @@ class Application : public virtual InitialApplicationData,
    * @brief Wakes up streaming process for application
    * @param service_type Type of streaming service
    */
-  virtual void WakeUpStreaming(protocol_handler::ServiceType service_type) = 0;
+  virtual void WakeUpStreaming(protocol_handler::ServiceType service_type,
+                               uint32_t timer_len = 0) = 0;
 
   virtual bool is_voice_communication_supported() const = 0;
   virtual void set_voice_communication_supported(

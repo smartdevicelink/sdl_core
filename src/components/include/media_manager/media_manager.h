@@ -60,6 +60,8 @@ class MediaManager {
    */
   virtual const MediaManagerSettings& settings() const = 0;
 
+  virtual uint32_t DataSizeToMilliseconds(uint64_t data_size) const = 0;
+
   virtual ~MediaManager() {}
 };
 
