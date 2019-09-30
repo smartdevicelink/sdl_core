@@ -1904,10 +1904,9 @@ std::string PolicyManagerImpl::ForcePTExchange() {
 void policy::PolicyManagerImpl::StopRetrySequence() {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  const ResetRetryCountType reset_type =
-      cache_->UpdateRequired() ? ResetRetryCountType::kResetWithStatusUpdate
-                               : ResetRetryCountType::kResetInternally;
-  ResetRetrySequence(reset_type);
+  if (cache_->UpdateRequired()) {
+    ResetRetrySequence(ResetRetryCountType::kResetWithStatusUpdate);
+  }
 }
 
 std::string PolicyManagerImpl::ForcePTExchangeAtUserRequest() {

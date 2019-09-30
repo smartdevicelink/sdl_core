@@ -1261,10 +1261,9 @@ void PolicyManagerImpl::StopRetrySequence() {
     timer_retry_sequence_.Stop();
   }
 
-  const ResetRetryCountType reset_type =
-      cache_->UpdateRequired() ? ResetRetryCountType::kResetWithStatusUpdate
-                               : ResetRetryCountType::kResetInternally;
-  ResetRetrySequence(reset_type);
+  if (cache_->UpdateRequired()) {
+    ResetRetrySequence(ResetRetryCountType::kResetWithStatusUpdate);
+  }
 }
 
 std::string PolicyManagerImpl::ForcePTExchangeAtUserRequest() {
