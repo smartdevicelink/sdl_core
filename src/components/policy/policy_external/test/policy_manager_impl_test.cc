@@ -107,7 +107,7 @@ TEST_F(PolicyManagerImplTest, LoadPT_SetPT_PTIsLoaded) {
   EXPECT_CALL(*cache_manager_, DaysBeforeExchange(_))
       .WillOnce(Return(kNonZero));
   policy_manager_->ForcePTExchange();
-  policy_manager_->SetSendOnUpdateFlags(true, false);
+  policy_manager_->SetSendOnUpdateFlags(true);
   policy_manager_->OnUpdateStarted();
   Json::Value table = createPTforLoad();
 
@@ -186,7 +186,7 @@ TEST_F(PolicyManagerImplTest2, ResetRetrySequence) {
   policy_manager_->ResetRetrySequence(
       policy::ResetRetryCountType::kResetWithStatusUpdate);
   EXPECT_EQ("UPDATE_NEEDED", policy_manager_->GetPolicyTableStatus());
-  policy_manager_->SetSendOnUpdateFlags(false, false);
+  policy_manager_->SetSendOnUpdateFlags(false);
   policy_manager_->OnUpdateStarted();
   EXPECT_EQ("UPDATING", policy_manager_->GetPolicyTableStatus());
 }

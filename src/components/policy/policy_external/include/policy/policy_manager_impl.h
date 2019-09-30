@@ -855,12 +855,10 @@ class PolicyManagerImpl : public PolicyManager {
   }
 
   /**
-   * @brief Setter for send_on_update_sent_out and wrong_ptu_update_received
+   * @brief Setter for send_on_update_sent_out
    * @param send_on_update_sent_out new value of this flag
-   * @param wrong_ptu_update_received new value of this flag
    */
-  inline void SetSendOnUpdateFlags(const bool send_on_update_sent_out,
-                                   const bool wrong_ptu_update_received) {
+  inline void SetSendOnUpdateFlags(const bool send_on_update_sent_out) {
     send_on_update_sent_out_ = send_on_update_sent_out;
   }
 #endif  // BUILD_TESTS
