@@ -33,8 +33,8 @@
 #ifndef SRC_COMPONENTS_MEDIA_MANAGER_INCLUDE_MEDIA_MANAGER_MEDIA_MANAGER_IMPL_H_
 #define SRC_COMPONENTS_MEDIA_MANAGER_INCLUDE_MEDIA_MANAGER_MEDIA_MANAGER_IMPL_H_
 
-#include <map>
 #include <chrono>
+#include <map>
 #include <string>
 #include "media_manager/media_adapter_impl.h"
 #include "media_manager/media_adapter_listener.h"

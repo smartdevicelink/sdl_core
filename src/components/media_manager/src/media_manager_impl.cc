@@ -385,7 +385,9 @@ const MediaManagerSettings& MediaManagerImpl::settings() const {
 }
 
 uint32_t MediaManagerImpl::DataSizeToMilliseconds(uint64_t data_size) const {
-  return 1000 * data_size / (sampling_rate_ * bits_per_sample_ / 8);
+  constexpr uint16_t latency_compensation = 500;
+  return 1000 * data_size / (sampling_rate_ * bits_per_sample_ / 8) +
+         latency_compensation;
 }
 
 }  //  namespace media_manager
