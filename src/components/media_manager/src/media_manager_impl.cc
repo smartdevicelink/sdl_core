@@ -320,15 +320,20 @@ void MediaManagerImpl::OnMessageReceived(
 
   ApplicationSharedPtr app = application_manager_.application(streaming_app_id);
   if (app) {
-    stream_data_size_ += message->data_size();
-    uint32_t ms_for_all_data = DataSizeToMilliseconds(stream_data_size_);
-    uint32_t ms_since_stream_start =
-        std::chrono::duration_cast<std::chrono::milliseconds>(
-            std::chrono::system_clock::now() - stream_start_time_)
-            .count();
-    uint32_t ms_stream_remaining = ms_for_all_data - ms_since_stream_start;
+    if (ServiceType::kAudio == service_type &&
+        "socket" == settings().video_server_type()) {
+      stream_data_size_ += message->data_size();
+      uint32_t ms_for_all_data = DataSizeToMilliseconds(stream_data_size_);
+      uint32_t ms_since_stream_start =
+          std::chrono::duration_cast<std::chrono::milliseconds>(
+              std::chrono::system_clock::now() - stream_start_time_)
+              .count();
+      uint32_t ms_stream_remaining = ms_for_all_data - ms_since_stream_start;
 
-    app->WakeUpStreaming(service_type, ms_stream_remaining);
+      app->WakeUpStreaming(service_type, ms_stream_remaining);
+    } else {
+      app->WakeUpStreaming(service_type);
+    }
     streamer_[service_type]->SendData(streaming_app_id, message);
   }
 }
