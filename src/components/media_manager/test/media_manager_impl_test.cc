@@ -405,9 +405,6 @@ TEST_F(MediaManagerImplTest,
       .WillByDefault(ReturnRef(kDefaultValue));
   ON_CALL(mock_media_manager_settings_, audio_server_type())
       .WillByDefault(ReturnRef(kDefaultValue));
-  const std::string audio_server_type_pipe = "pipe";
-  EXPECT_CALL(mock_media_manager_settings_, audio_server_type())
-      .WillOnce(ReturnRef(audio_server_type_pipe));
   protocol_handler_test::MockProtocolHandler mock_protocol_handler;
   media_manager_impl_->SetProtocolHandler(&mock_protocol_handler);
   const int32_t frame_number = 10;

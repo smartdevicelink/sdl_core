@@ -321,7 +321,7 @@ void MediaManagerImpl::OnMessageReceived(
   ApplicationSharedPtr app = application_manager_.application(streaming_app_id);
   if (app) {
     if (ServiceType::kAudio == service_type &&
-        "socket" == settings().video_server_type()) {
+        "socket" == settings().audio_server_type()) {
       stream_data_size_ += message->data_size();
       uint32_t ms_for_all_data = DataSizeToMilliseconds(stream_data_size_);
       uint32_t ms_since_stream_start =
@@ -347,10 +347,6 @@ void MediaManagerImpl::FramesProcessed(int32_t application_key,
     protocol_handler_->SendFramesNumber(application_key, frame_number);
   }
 
-  if ("pipe" != settings().audio_server_type()) {
-    return;
-  }
-
   application_manager::ApplicationSharedPtr app =
       application_manager_.application(application_key);
 
@@ -360,7 +356,7 @@ void MediaManagerImpl::FramesProcessed(int32_t application_key,
     auto video_stream = std::dynamic_pointer_cast<StreamerAdapter>(
         streamer_[protocol_handler::ServiceType::kMobileNav]);
 
-    if (audio_stream.use_count() != 0) {
+    if (audio_stream.use_count() != 0 && "pipe" == settings().audio_server_type()) {
       size_t audio_queue_size = audio_stream->GetMsgQueueSize();
       LOG4CXX_DEBUG(logger_,
                     "# Messages in audio queue = " << audio_queue_size);
@@ -369,7 +365,7 @@ void MediaManagerImpl::FramesProcessed(int32_t application_key,
       }
     }
 
-    if (video_stream.use_count() != 0) {
+    if (video_stream.use_count() != 0 && "pipe" == settings().video_server_type()) {
       size_t video_queue_size = video_stream->GetMsgQueueSize();
       LOG4CXX_DEBUG(logger_,
                     "# Messages in video queue = " << video_queue_size);
