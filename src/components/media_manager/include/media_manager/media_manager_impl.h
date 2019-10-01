@@ -112,7 +112,8 @@ class MediaManagerImpl : public MediaManager,
   uint32_t bits_per_sample_;
   uint32_t sampling_rate_;
   uint64_t stream_data_size_;
-  std::chrono::time_point<std::chrono::system_clock> stream_start_time_;
+  std::chrono::time_point<std::chrono::system_clock>
+      socket_audio_stream_start_time_;
 
   application_manager::ApplicationManager& application_manager_;
 

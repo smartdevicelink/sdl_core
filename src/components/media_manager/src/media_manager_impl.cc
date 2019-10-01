@@ -166,7 +166,7 @@ void MediaManagerImpl::Init() {
   }
 
   if (application_manager_.hmi_capabilities().pcm_stream_capabilities()) {
-    auto pcm_caps =
+    const auto pcm_caps =
         application_manager_.hmi_capabilities().pcm_stream_capabilities();
 
     if (pcm_caps->keyExists(application_manager::strings::bits_per_sample)) {
@@ -275,8 +275,12 @@ void MediaManagerImpl::StartStreaming(
     int32_t application_key, protocol_handler::ServiceType service_type) {
   LOG4CXX_AUTO_TRACE(logger_);
 
+  if (ServiceType::kAudio == service_type &&
+      "socket" == settings().audio_server_type()) {
+    socket_audio_stream_start_time_ = std::chrono::system_clock::now();
+  }
+
   if (streamer_[service_type]) {
-    stream_start_time_ = std::chrono::system_clock::now();
     streamer_[service_type]->StartActivity(application_key);
   }
 }
@@ -326,7 +330,8 @@ void MediaManagerImpl::OnMessageReceived(
       uint32_t ms_for_all_data = DataSizeToMilliseconds(stream_data_size_);
       uint32_t ms_since_stream_start =
           std::chrono::duration_cast<std::chrono::milliseconds>(
-              std::chrono::system_clock::now() - stream_start_time_)
+              std::chrono::system_clock::now() -
+              socket_audio_stream_start_time_)
               .count();
       uint32_t ms_stream_remaining = ms_for_all_data - ms_since_stream_start;
 
@@ -356,7 +361,8 @@ void MediaManagerImpl::FramesProcessed(int32_t application_key,
     auto video_stream = std::dynamic_pointer_cast<StreamerAdapter>(
         streamer_[protocol_handler::ServiceType::kMobileNav]);
 
-    if (audio_stream.use_count() != 0 && "pipe" == settings().audio_server_type()) {
+    if (audio_stream.use_count() != 0 &&
+        "pipe" == settings().audio_server_type()) {
       size_t audio_queue_size = audio_stream->GetMsgQueueSize();
       LOG4CXX_DEBUG(logger_,
                     "# Messages in audio queue = " << audio_queue_size);
@@ -365,7 +371,8 @@ void MediaManagerImpl::FramesProcessed(int32_t application_key,
       }
     }
 
-    if (video_stream.use_count() != 0 && "pipe" == settings().video_server_type()) {
+    if (video_stream.use_count() != 0 &&
+        "pipe" == settings().video_server_type()) {
       size_t video_queue_size = video_stream->GetMsgQueueSize();
       LOG4CXX_DEBUG(logger_,
                     "# Messages in video queue = " << video_queue_size);
