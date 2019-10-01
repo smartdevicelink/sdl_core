@@ -275,7 +275,7 @@ void MediaManagerImpl::StartStreaming(
     int32_t application_key, protocol_handler::ServiceType service_type) {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  if (ServiceType::kAudio == service_type &&
+  if (protocol_handler::ServiceType::kAudio == service_type &&
       "socket" == settings().audio_server_type()) {
     socket_audio_stream_start_time_ = std::chrono::system_clock::now();
   }
