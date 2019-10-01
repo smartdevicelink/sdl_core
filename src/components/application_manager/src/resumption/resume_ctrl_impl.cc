@@ -637,6 +637,9 @@ bool ResumeCtrlImpl::StartAppHmiStateResumption(
       return false;
     }
     RemoveApplicationFromSaved(application);
+    if (!application->is_app_data_resumption_allowed()) {
+      application->set_is_resuming(false);
+    }
     return hmi_state_restore_result;
   } else {
     LOG4CXX_INFO(
