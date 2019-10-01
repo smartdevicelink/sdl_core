@@ -35,6 +35,7 @@
 
 #include <string>
 #include "application_manager/application.h"
+#include "application_manager/commands/command.h"
 #include "smart_objects/smart_object.h"
 
 namespace application_manager {
@@ -59,10 +60,12 @@ class CommandHolder {
    * internally
    * @param application Application pointer
    * @param type Command type
+   * @param source The source of suspended command
    * @param command Command
    */
   virtual void Suspend(ApplicationSharedPtr application,
                        CommandType type,
+                       commands::Command::CommandSource source,
                        smart_objects::SmartObjectSPtr command) = 0;
 
   /**

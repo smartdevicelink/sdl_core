@@ -257,6 +257,9 @@ void RCHelpers::RemoveRedundantGPSDataFromIVDataMsg(
   using namespace application_manager::strings;
 
   LOG4CXX_AUTO_TRACE(logger_);
+  if (!msg_params.keyExists(kModuleData)) {
+    return;
+  }
   auto& module_data = msg_params[kModuleData];
   if (!module_data.keyExists(kRadioControlData) ||
       !module_data[kRadioControlData].keyExists(kSisData) ||

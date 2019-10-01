@@ -129,8 +129,10 @@ class PolicyManagerImpl : public PolicyManager {
    * @param pt_content PTU as binary string
    * @return true if successfully
    */
-  bool LoadPT(const std::string& file,
-              const BinaryMessage& pt_content) OVERRIDE;
+  PtProcessingResult LoadPT(const std::string& file,
+                            const BinaryMessage& pt_content) OVERRIDE;
+
+  void OnPTUFinished(const PtProcessingResult ptu_result) OVERRIDE;
 
   typedef policy_table::ApplicationPolicies::value_type AppPoliciesValueType;
 
@@ -150,6 +152,12 @@ class PolicyManagerImpl : public PolicyManager {
    */
   void SendPermissionsToApp(const std::string& device_id,
                             const AppPoliciesValueType& app_policy);
+
+  /**
+   * @brief Resumes all policy actions for all apps, suspended during
+   * PTU applying
+   */
+  void ResumePendingAppPolicyActions();
 
   /**
    * @brief Resets Policy Table
@@ -1167,11 +1175,6 @@ class PolicyManagerImpl : public PolicyManager {
   RetrySequenceURL retry_sequence_url_;
 
   /**
-   * @brief Flag for notifying that invalid PTU was received
-   */
-  bool wrong_ptu_update_received_;
-
-  /**
    * @brief Flag for notifying that PTU was started
    */
   bool send_on_update_sent_out_;
@@ -1180,6 +1183,21 @@ class PolicyManagerImpl : public PolicyManager {
    * @brief Flag for notifying that invalid PTU should be triggered
    */
   bool trigger_ptu_;
+
+  typedef std::list<std::pair<std::string, AppPoliciesValueType> >
+      PendingAppPolicyActionsList;
+
+  /**
+   * @brief List containing device_id and pending permissions structure pairs
+   * which can be processed later on demand
+   */
+  PendingAppPolicyActionsList notify_system_list_;
+
+  /**
+   * @brief List containing device_id and pending permissions structure pairs
+   * which can be processed later on demand
+   */
+  PendingAppPolicyActionsList send_permissions_list_;
 };
 
 }  // namespace policy

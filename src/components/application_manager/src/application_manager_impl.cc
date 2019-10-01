@@ -159,6 +159,7 @@ ApplicationManagerImpl::ApplicationManagerImpl(
     , applications_list_lock_ptr_(
           std::make_shared<sync_primitives::RecursiveLock>())
     , apps_to_register_list_lock_ptr_(std::make_shared<sync_primitives::Lock>())
+    , reregister_wait_list_lock_ptr_(std::make_shared<sync_primitives::Lock>())
     , audio_pass_thru_active_(false)
     , audio_pass_thru_app_id_(0)
     , driver_distraction_state_(hmi_apis::Common_DriverDistractionState::DD_OFF)
@@ -266,6 +267,13 @@ ApplicationManagerImpl::pending_applications() const {
   return accessor;
 }
 
+DataAccessor<ReregisterWaitList>
+ApplicationManagerImpl::reregister_applications() const {
+  DataAccessor<ReregisterWaitList> accessor(reregister_wait_list_,
+                                            reregister_wait_list_lock_ptr_);
+  return accessor;
+}
+
 ApplicationSharedPtr ApplicationManagerImpl::application(
     uint32_t app_id) const {
   AppIdPredicate finder(app_id);
@@ -299,6 +307,14 @@ ApplicationSharedPtr ApplicationManagerImpl::pending_application_by_policy_id(
   PolicyAppIdPredicate finder(policy_app_id);
   DataAccessor<AppsWaitRegistrationSet> accessor = pending_applications();
   return FindPendingApp(accessor, finder);
+}
+
+ApplicationSharedPtr
+ApplicationManagerImpl::reregister_application_by_policy_id(
+    const std::string& policy_app_id) const {
+  PolicyAppIdPredicate finder(policy_app_id);
+  DataAccessor<ReregisterWaitList> accessor = reregister_applications();
+  return FindReregisterApp(accessor, finder);
 }
 
 bool ActiveAppPredicate(const ApplicationSharedPtr app) {
@@ -1554,7 +1570,7 @@ void ApplicationManagerImpl::OnDeviceSwitchingStart(
   {
     // During sending of UpdateDeviceList this lock is acquired also so making
     // it scoped
-    sync_primitives::AutoLock lock(reregister_wait_list_lock_);
+    sync_primitives::AutoLock lock(reregister_wait_list_lock_ptr_);
     for (auto i = reregister_wait_list_.begin();
          reregister_wait_list_.end() != i;
          ++i) {
@@ -1594,7 +1610,7 @@ void ApplicationManagerImpl::OnDeviceSwitchingFinish(
     const std::string& device_uid) {
   LOG4CXX_AUTO_TRACE(logger_);
   UNUSED(device_uid);
-  sync_primitives::AutoLock lock(reregister_wait_list_lock_);
+  sync_primitives::AutoLock lock(reregister_wait_list_lock_ptr_);
 
   const bool unexpected_disonnect = true;
   const bool is_resuming = true;
@@ -2350,6 +2366,8 @@ bool ApplicationManagerImpl::Stop() {
   // for PASA customer policy backup should happen :AllApp(SUSPEND)
   LOG4CXX_DEBUG(logger_, "Unloading policy library.");
   GetPolicyHandler().UnloadPolicyLibrary();
+
+  rpc_service_->Stop();
 
   return true;
 }
@@ -3569,7 +3587,7 @@ bool ApplicationManagerImpl::IsAppInReconnectMode(
     const connection_handler::DeviceHandle& device_id,
     const std::string& policy_app_id) const {
   LOG4CXX_AUTO_TRACE(logger_);
-  sync_primitives::AutoLock lock(reregister_wait_list_lock_);
+  sync_primitives::AutoLock lock(reregister_wait_list_lock_ptr_);
   return reregister_wait_list_.end() !=
          std::find_if(reregister_wait_list_.begin(),
                       reregister_wait_list_.end(),
@@ -3902,7 +3920,7 @@ void ApplicationManagerImpl::EraseAppFromReconnectionList(
   }
 
   const auto policy_app_id = app->policy_app_id();
-  sync_primitives::AutoLock lock(reregister_wait_list_lock_);
+  sync_primitives::AutoLock lock(reregister_wait_list_lock_ptr_);
   auto app_it =
       std::find_if(reregister_wait_list_.begin(),
                    reregister_wait_list_.end(),

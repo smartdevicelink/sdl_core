@@ -120,6 +120,12 @@ typedef std::set<ApplicationSharedPtr, ApplicationsSorter> ApplicationSet;
 typedef std::set<ApplicationSharedPtr, ApplicationsPolicyAppIdSorter>
     AppsWaitRegistrationSet;
 
+/**
+ * @brief ReregisterWaitList is list of applications expected to be
+ * re-registered after transport switching is complete
+ */
+typedef std::vector<ApplicationSharedPtr> ReregisterWaitList;
+
 // typedef for Applications list iterator
 typedef ApplicationSet::iterator ApplicationSetIt;
 
@@ -160,6 +166,7 @@ class ApplicationManager {
   virtual DataAccessor<ApplicationSet> applications() const = 0;
   virtual DataAccessor<AppsWaitRegistrationSet> pending_applications()
       const = 0;
+  virtual DataAccessor<ReregisterWaitList> reregister_applications() const = 0;
 
   virtual ApplicationSharedPtr application(uint32_t app_id) const = 0;
   virtual ApplicationSharedPtr active_application() const = 0;
@@ -179,6 +186,9 @@ class ApplicationManager {
       const std::string& app_name) const = 0;
 
   virtual ApplicationSharedPtr pending_application_by_policy_id(
+      const std::string& policy_app_id) const = 0;
+
+  virtual ApplicationSharedPtr reregister_application_by_policy_id(
       const std::string& policy_app_id) const = 0;
 
   virtual AppSharedPtrs applications_by_button(uint32_t button) = 0;

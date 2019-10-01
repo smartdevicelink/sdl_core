@@ -68,6 +68,13 @@ RPCServiceImpl::RPCServiceImpl(
 
 RPCServiceImpl::~RPCServiceImpl() {}
 
+void RPCServiceImpl::Stop() {
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  messages_to_mobile_.Shutdown();
+  messages_to_hmi_.Shutdown();
+}
+
 EncryptionFlagCheckResult RPCServiceImpl::IsEncryptionRequired(
     const smart_objects::SmartObject& message,
     std::shared_ptr<Application> app,
@@ -130,7 +137,7 @@ bool RPCServiceImpl::ManageMobileCommand(
   if (app_ptr && app_manager_.IsAppInReconnectMode(app_ptr->device(),
                                                    app_ptr->policy_app_id())) {
     commands_holder_.Suspend(
-        app_ptr, CommandHolder::CommandType::kMobileCommand, message);
+        app_ptr, CommandHolder::CommandType::kMobileCommand, source, message);
     return true;
   }
   mobile_apis::FunctionID::eType function_id =
@@ -361,7 +368,7 @@ bool RPCServiceImpl::ManageHMICommand(const commands::MessageSharedPtr message,
     if (app && app_manager_.IsAppInReconnectMode(app->device(),
                                                  app->policy_app_id())) {
       commands_holder_.Suspend(
-          app, CommandHolder::CommandType::kHmiCommand, message);
+          app, CommandHolder::CommandType::kHmiCommand, source, message);
       return true;
     }
   }
