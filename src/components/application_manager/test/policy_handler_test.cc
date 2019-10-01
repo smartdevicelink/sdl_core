@@ -401,7 +401,10 @@ TEST_F(PolicyHandlerTest, AppServiceUpdate_CheckAppService) {
   ifile.close();
   BinaryMessage msg(json.begin(), json.end());
   // Checks
-  EXPECT_CALL(*mock_policy_manager_, LoadPT("", msg)).WillOnce(Return(true));
+  EXPECT_CALL(*mock_policy_manager_, LoadPT("", msg))
+      .WillOnce(Return(PolicyManager::PtProcessingResult::kSuccess));
+  EXPECT_CALL(*mock_policy_manager_,
+              OnPTUFinished(PolicyManager::PtProcessingResult::kSuccess));
   policy_handler_.ReceiveMessageFromSDK("", msg);
 
   policy_table::AppServiceParameters app_service_params =
@@ -468,7 +471,10 @@ TEST_F(PolicyHandlerTest, ReceiveMessageFromSDK) {
   EXPECT_CALL(app_manager_, GetNextHMICorrelationID());
   EXPECT_CALL(mock_message_helper_, CreateGetVehicleDataRequest(_, _, _));
   EXPECT_CALL(*mock_policy_manager_, PTUpdatedAt(_, _));
-  EXPECT_CALL(*mock_policy_manager_, LoadPT("", msg)).WillOnce(Return(true));
+  EXPECT_CALL(*mock_policy_manager_, LoadPT("", msg))
+      .WillOnce(Return(PolicyManager::PtProcessingResult::kSuccess));
+  EXPECT_CALL(*mock_policy_manager_,
+              OnPTUFinished(PolicyManager::PtProcessingResult::kSuccess));
   EXPECT_CALL(*mock_policy_manager_, CleanupUnpairedDevices());
   policy_handler_.ReceiveMessageFromSDK("", msg);
 }
@@ -479,7 +485,11 @@ TEST_F(PolicyHandlerTest, ReceiveMessageFromSDK_PTNotLoaded) {
   BinaryMessage msg;
   // Checks
 
-  EXPECT_CALL(*mock_policy_manager_, LoadPT("", msg)).WillOnce(Return(false));
+  EXPECT_CALL(*mock_policy_manager_, LoadPT("", msg))
+      .WillOnce(Return(PolicyManager::PtProcessingResult::kWrongPtReceived));
+  EXPECT_CALL(
+      *mock_policy_manager_,
+      OnPTUFinished(PolicyManager::PtProcessingResult::kWrongPtReceived));
   EXPECT_CALL(app_manager_, GetNextHMICorrelationID()).Times(0);
   EXPECT_CALL(mock_message_helper_, CreateGetVehicleDataRequest(_, _, _))
       .Times(0);

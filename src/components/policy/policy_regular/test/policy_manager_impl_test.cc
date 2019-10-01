@@ -314,7 +314,9 @@ class PolicyManagerImplTest2 : public ::testing::Test {
     ifile.close();
     ::policy::BinaryMessage msg(json.begin(), json.end());
     // Load Json to cache
-    EXPECT_TRUE(manager->LoadPT("file_pt_update.json", msg));
+    EXPECT_EQ(PolicyManager::PtProcessingResult::kSuccess,
+              manager->LoadPT("file_pt_update.json", msg));
+    manager->OnPTUFinished(PolicyManager::PtProcessingResult::kSuccess);
     return root;
   }
 
@@ -609,8 +611,11 @@ TEST_F(PolicyManagerImplTest2, GetNotificationsNumberAfterPTUpdate) {
   // Act
   const std::string json = table.toStyledString();
   ::policy::BinaryMessage msg(json.begin(), json.end());
+  ASSERT_EQ(PolicyManager::PtProcessingResult::kSuccess,
+            manager->LoadPT("file_pt_update.json", msg));
+
   EXPECT_CALL(listener, OnUpdateStatusChanged(_));
-  EXPECT_TRUE(manager->LoadPT("file_pt_update.json", msg));
+  manager->OnPTUFinished(PolicyManager::PtProcessingResult::kSuccess);
 
   std::string priority = "EMERGENCY";
   uint32_t notif_number = manager->GetNotificationsNumber(priority);
@@ -651,7 +656,10 @@ TEST_F(PolicyManagerImplTest2, IsAppRevoked_SetRevokedAppID_ExpectAppRevoked) {
   ifile.close();
 
   ::policy::BinaryMessage msg(json.begin(), json.end());
-  ASSERT_TRUE(manager->LoadPT("file_pt_update.json", msg));
+  ASSERT_EQ(PolicyManager::PtProcessingResult::kSuccess,
+            manager->LoadPT("file_pt_update.json", msg));
+  manager->OnPTUFinished(PolicyManager::PtProcessingResult::kSuccess);
+
   EXPECT_TRUE(manager->IsApplicationRevoked(app_id1));
 }
 
@@ -705,7 +713,9 @@ TEST_F(PolicyManagerImplTest2,
   ifile.close();
 
   ::policy::BinaryMessage msg(json.begin(), json.end());
-  ASSERT_TRUE(manager->LoadPT("file_pt_update.json", msg));
+  ASSERT_EQ(PolicyManager::PtProcessingResult::kSuccess,
+            manager->LoadPT("file_pt_update.json", msg));
+  manager->OnPTUFinished(PolicyManager::PtProcessingResult::kSuccess);
 
   manager->CheckPermissions(
       dev_id1, app_id1, std::string("FULL"), "Alert", input_params, output);
@@ -746,7 +756,9 @@ TEST_F(
       AddWidgetSupportToFunctionalGroups(&root, rpc_name, hmi_level);
 
   ::policy::BinaryMessage msg(json.begin(), json.end());
-  ASSERT_TRUE(manager->LoadPT("file_pt_update.json", msg));
+  ASSERT_EQ(PolicyManager::PtProcessingResult::kSuccess,
+            manager->LoadPT("file_pt_update.json", msg));
+  manager->OnPTUFinished(PolicyManager::PtProcessingResult::kSuccess);
 
   ::policy::RPCParams input_params;
   ::policy::CheckPermissionResult output;
@@ -760,7 +772,9 @@ TEST_F(
   // Act
   json = AddWidgetSupportToPt(&root, app_id1, group_number);
   msg = BinaryMessage(json.begin(), json.end());
-  ASSERT_TRUE(manager->LoadPT("file_pt_update.json", msg));
+  ASSERT_EQ(PolicyManager::PtProcessingResult::kSuccess,
+            manager->LoadPT("file_pt_update.json", msg));
+  manager->OnPTUFinished(PolicyManager::PtProcessingResult::kSuccess);
 
   output.hmi_level_permitted = ::policy::kRpcDisallowed;
   manager->CheckPermissions(
@@ -802,7 +816,9 @@ TEST_F(
       AddWidgetSupportToFunctionalGroups(&root, rpc_name, hmi_level);
 
   ::policy::BinaryMessage msg(json.begin(), json.end());
-  ASSERT_TRUE(manager->LoadPT("file_pt_update.json", msg));
+  ASSERT_EQ(PolicyManager::PtProcessingResult::kSuccess,
+            manager->LoadPT("file_pt_update.json", msg));
+  manager->OnPTUFinished(PolicyManager::PtProcessingResult::kSuccess);
 
   ::policy::RPCParams input_params;
   ::policy::CheckPermissionResult output;
@@ -821,7 +837,9 @@ TEST_F(
       Json::Value("Base-4");
   json = root.toStyledString();
   msg = BinaryMessage(json.begin(), json.end());
-  ASSERT_TRUE(manager->LoadPT("file_pt_update.json", msg));
+  ASSERT_EQ(PolicyManager::PtProcessingResult::kSuccess,
+            manager->LoadPT("file_pt_update.json", msg));
+  manager->OnPTUFinished(PolicyManager::PtProcessingResult::kSuccess);
 
   manager->CheckPermissions(
       dev_id1, app_id1, hmi_level, rpc_name, input_params, output);
@@ -886,7 +904,9 @@ TEST_F(PolicyManagerImplTest2,
 
   ::policy::BinaryMessage msg(json.begin(), json.end());
   // Load Json to cache
-  EXPECT_TRUE(manager->LoadPT("file_pt_update.json", msg));
+  ASSERT_EQ(PolicyManager::PtProcessingResult::kSuccess,
+            manager->LoadPT("file_pt_update.json", msg));
+  manager->OnPTUFinished(PolicyManager::PtProcessingResult::kSuccess);
 
   policy_table::RpcParameters rpc_parameters;
   rpc_parameters.hmi_levels.push_back(policy_table::HL_FULL);
@@ -984,9 +1004,13 @@ TEST_F(PolicyManagerImplTest, LoadPT_SetPT_PTIsLoaded) {
   EXPECT_CALL(listener, GetDevicesIds("1234"))
       .WillRepeatedly(Return(transport_manager::DeviceList()));
   EXPECT_CALL(*cache_manager, SaveUpdateRequired(false));
+  ASSERT_EQ(PolicyManager::PtProcessingResult::kSuccess,
+            manager->LoadPT("file_pt_update.json", msg));
+
   EXPECT_CALL(*cache_manager, TimeoutResponse());
   EXPECT_CALL(*cache_manager, SecondsBetweenRetries(_));
-  EXPECT_TRUE(manager->LoadPT("file_pt_update.json", msg));
+  EXPECT_CALL(listener, OnUpdateStatusChanged(_));
+  manager->OnPTUFinished(PolicyManager::PtProcessingResult::kSuccess);
 }
 
 TEST_F(PolicyManagerImplTest, LoadPT_FunctionalGroup_removeRPC_SendUpdate) {
@@ -1018,7 +1042,9 @@ TEST_F(PolicyManagerImplTest, LoadPT_FunctionalGroup_removeRPC_SendUpdate) {
   EXPECT_CALL(*cache_manager, ApplyUpdate(_)).WillOnce(Return(true));
   ExpectOnPermissionsUpdated();
 
-  EXPECT_TRUE(manager->LoadPT("file_pt_update.json", msg));
+  ASSERT_EQ(PolicyManager::PtProcessingResult::kSuccess,
+            manager->LoadPT("file_pt_update.json", msg));
+  manager->OnPTUFinished(PolicyManager::PtProcessingResult::kSuccess);
 }
 
 TEST_F(PolicyManagerImplTest,
@@ -1053,7 +1079,9 @@ TEST_F(PolicyManagerImplTest,
   EXPECT_CALL(*cache_manager, ApplyUpdate(_)).WillOnce(Return(true));
   ExpectOnPermissionsUpdated();
 
-  EXPECT_TRUE(manager->LoadPT("file_pt_update.json", msg));
+  ASSERT_EQ(PolicyManager::PtProcessingResult::kSuccess,
+            manager->LoadPT("file_pt_update.json", msg));
+  manager->OnPTUFinished(PolicyManager::PtProcessingResult::kSuccess);
 }
 
 TEST_F(PolicyManagerImplTest,
@@ -1088,7 +1116,9 @@ TEST_F(PolicyManagerImplTest,
   EXPECT_CALL(*cache_manager, ApplyUpdate(_)).WillOnce(Return(true));
   ExpectOnPermissionsUpdated();
 
-  EXPECT_TRUE(manager->LoadPT("file_pt_update.json", msg));
+  ASSERT_EQ(PolicyManager::PtProcessingResult::kSuccess,
+            manager->LoadPT("file_pt_update.json", msg));
+  manager->OnPTUFinished(PolicyManager::PtProcessingResult::kSuccess);
 }
 
 TEST_F(PolicyManagerImplTest,
@@ -1124,7 +1154,9 @@ TEST_F(PolicyManagerImplTest,
   EXPECT_CALL(*cache_manager, ApplyUpdate(_)).WillOnce(Return(true));
   ExpectOnPermissionsUpdated();
 
-  EXPECT_TRUE(manager->LoadPT("file_pt_update.json", msg));
+  ASSERT_EQ(PolicyManager::PtProcessingResult::kSuccess,
+            manager->LoadPT("file_pt_update.json", msg));
+  manager->OnPTUFinished(PolicyManager::PtProcessingResult::kSuccess);
 }
 
 TEST_F(PolicyManagerImplTest, LoadPT_FunctionalGroup_addRPCParams_SendUpdate) {
@@ -1159,7 +1191,9 @@ TEST_F(PolicyManagerImplTest, LoadPT_FunctionalGroup_addRPCParams_SendUpdate) {
   EXPECT_CALL(*cache_manager, ApplyUpdate(_)).WillOnce(Return(true));
   ExpectOnPermissionsUpdated();
 
-  EXPECT_TRUE(manager->LoadPT("file_pt_update.json", msg));
+  ASSERT_EQ(PolicyManager::PtProcessingResult::kSuccess,
+            manager->LoadPT("file_pt_update.json", msg));
+  manager->OnPTUFinished(PolicyManager::PtProcessingResult::kSuccess);
 }
 
 TEST_F(PolicyManagerImplTest, LoadPT_FunctionalGroup_NoUpdate_DONT_SendUpdate) {
@@ -1186,7 +1220,9 @@ TEST_F(PolicyManagerImplTest, LoadPT_FunctionalGroup_NoUpdate_DONT_SendUpdate) {
       .WillOnce(Return(std::vector<policy_table::VehicleDataItem>()));
   EXPECT_CALL(*cache_manager, ApplyUpdate(_)).WillOnce(Return(true));
 
-  EXPECT_TRUE(manager->LoadPT("file_pt_update.json", msg));
+  ASSERT_EQ(PolicyManager::PtProcessingResult::kSuccess,
+            manager->LoadPT("file_pt_update.json", msg));
+  manager->OnPTUFinished(PolicyManager::PtProcessingResult::kSuccess);
 }
 
 TEST_F(PolicyManagerImplTest, LoadPT_SetInvalidUpdatePT_PTIsNotLoaded) {
@@ -1214,11 +1250,14 @@ TEST_F(PolicyManagerImplTest, LoadPT_SetInvalidUpdatePT_PTIsNotLoaded) {
   // Assert
   EXPECT_CALL(*cache_manager, ApplyUpdate(_)).Times(0);
   EXPECT_CALL(listener, GetAppName(_)).Times(0);
-  EXPECT_CALL(listener, OnUpdateStatusChanged(_)).Times(1);
   EXPECT_CALL(*cache_manager, SaveUpdateRequired(false)).Times(0);
   EXPECT_CALL(*cache_manager, TimeoutResponse()).Times(0);
   EXPECT_CALL(*cache_manager, SecondsBetweenRetries(_)).Times(0);
-  EXPECT_FALSE(manager->LoadPT("file_pt_update.json", msg));
+  ASSERT_EQ(PolicyManager::PtProcessingResult::kWrongPtReceived,
+            manager->LoadPT("file_pt_update.json", msg));
+
+  EXPECT_CALL(listener, OnUpdateStatusChanged(_));
+  manager->OnPTUFinished(PolicyManager::PtProcessingResult::kWrongPtReceived);
 }
 
 TEST_F(PolicyManagerImplTest2,

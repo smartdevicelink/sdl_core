@@ -1106,15 +1106,21 @@ bool PolicyHandler::ReceiveMessageFromSDK(const std::string& file,
                                           const BinaryMessage& pt_string) {
   POLICY_LIB_CHECK(false);
 
-  bool ret = policy_manager_->LoadPT(file, pt_string);
-  LOG4CXX_INFO(logger_, "Policy table is saved: " << std::boolalpha << ret);
-  if (ret) {
+  const auto load_pt_result = policy_manager_->LoadPT(file, pt_string);
+
+  LOG4CXX_INFO(logger_, "Load policy table result code: " << load_pt_result);
+
+  const bool is_ptu_successful =
+      load_pt_result == PolicyManager::PtProcessingResult::kSuccess;
+  OnPTUFinished(is_ptu_successful);
+
+  if (is_ptu_successful) {
     LOG4CXX_INFO(logger_, "PTU was successful.");
     policy_manager_->CleanupUnpairedDevices();
-    int32_t correlation_id = application_manager_.GetNextHMICorrelationID();
-
     SetDaysAfterEpoch();
+    policy_manager_->OnPTUFinished(load_pt_result);
 
+    uint32_t correlation_id = application_manager_.GetNextHMICorrelationID();
     event_observer_->subscribe_on_event(
         hmi_apis::FunctionID::VehicleInfo_GetVehicleData, correlation_id);
     std::vector<std::string> vehicle_data_args;
@@ -1123,9 +1129,10 @@ bool PolicyHandler::ReceiveMessageFromSDK(const std::string& file,
         correlation_id, vehicle_data_args, application_manager_);
   } else {
     LOG4CXX_WARN(logger_, "Exchange wasn't successful");
+    policy_manager_->OnPTUFinished(load_pt_result);
   }
-  OnPTUFinished(ret);
-  return ret;
+
+  return is_ptu_successful;
 }
 
 bool PolicyHandler::UnloadPolicyLibrary() {

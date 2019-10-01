@@ -76,7 +76,6 @@ PolicyManagerImpl::PolicyManagerImpl()
               this, &PolicyManagerImpl::OnPTUIterationTimeout))
     , ignition_check(true)
     , retry_sequence_url_(0, 0, "")
-    , wrong_ptu_update_received_(false)
     , send_on_update_sent_out_(false)
     , trigger_ptu_(false) {}
 
@@ -315,8 +314,8 @@ void FilterPolicyTable(
   }
 }
 
-bool PolicyManagerImpl::LoadPT(const std::string& file,
-                               const BinaryMessage& pt_content) {
+PolicyManager::PtProcessingResult PolicyManagerImpl::LoadPT(
+    const std::string& file, const BinaryMessage& pt_content) {
   LOG4CXX_INFO(logger_, "LoadPT of size " << pt_content.size());
   LOG4CXX_DEBUG(
       logger_,
@@ -333,9 +332,9 @@ bool PolicyManagerImpl::LoadPT(const std::string& file,
   std::shared_ptr<policy_table::Table> pt_update = ParseArray(pt_content);
 #endif
   if (!pt_update) {
-    LOG4CXX_WARN(logger_, "Parsed table pointer is 0.");
-    update_status_manager_.OnWrongUpdateReceived();
-    return false;
+    LOG4CXX_WARN(logger_, "Parsed table pointer is NULL.");
+    ;
+    return PtProcessingResult::kWrongPtReceived;
   }
 
   file_system::DeleteFile(file);
@@ -344,13 +343,9 @@ bool PolicyManagerImpl::LoadPT(const std::string& file,
 
   FilterPolicyTable(pt_update->policy_table, current_vd_items);
   if (!IsPTValid(pt_update, policy_table::PT_UPDATE)) {
-    wrong_ptu_update_received_ = true;
-    update_status_manager_.OnWrongUpdateReceived();
-    return false;
+    LOG4CXX_WARN(logger_, "Received policy table update is not valid");
+    return PtProcessingResult::kWrongPtReceived;
   }
-
-  update_status_manager_.OnValidUpdateReceived();
-  cache_->SaveUpdateRequired(false);
 
   // Update finished, no need retry
   if (timer_retry_sequence_.is_running()) {
@@ -358,69 +353,89 @@ bool PolicyManagerImpl::LoadPT(const std::string& file,
     timer_retry_sequence_.Stop();
   }
 
-  {
-    sync_primitives::AutoLock lock(apps_registration_lock_);
+  cache_->SaveUpdateRequired(false);
 
-    // Get current DB data, since it could be updated during awaiting of PTU
-    std::shared_ptr<policy_table::Table> policy_table_snapshot =
-        cache_->GenerateSnapshot();
-    if (!policy_table_snapshot) {
-      LOG4CXX_ERROR(
-          logger_,
-          "Failed to create snapshot of policy table, trying another exchange");
-      ForcePTExchange();
-      return false;
-    }
+  sync_primitives::AutoLock lock(apps_registration_lock_);
 
-    // Checking of difference between PTU and current policy state
-    // Must to be done before PTU applying since it is possible, that functional
-    // groups, which had been present before are absent in PTU and will be
-    // removed after update. So in case of revoked groups system has to know
-    // names and ids of revoked groups before they will be removed.
-    const auto results =
-        CheckPermissionsChanges(pt_update, policy_table_snapshot);
-
-    // Replace current data with updated
-    if (!cache_->ApplyUpdate(*pt_update)) {
-      LOG4CXX_WARN(
-          logger_,
-          "Unsuccessful save of updated policy table, trying another exchange");
-      ForcePTExchange();
-      return false;
-    }
-    CheckPermissionsChangesAfterUpdate(*pt_update, *policy_table_snapshot);
-
-    ProcessAppPolicyCheckResults(
-        results, pt_update->policy_table.app_policies_section.apps);
-
-    listener_->OnCertificateUpdated(
-        *(pt_update->policy_table.module_config.certificate));
-
-    std::map<std::string, StringArray> app_hmi_types;
-    cache_->GetHMIAppTypeAfterUpdate(app_hmi_types);
-    if (!app_hmi_types.empty()) {
-      LOG4CXX_INFO(logger_, "app_hmi_types is full calling OnUpdateHMIAppType");
-      listener_->OnUpdateHMIAppType(app_hmi_types);
-    } else {
-      LOG4CXX_INFO(logger_, "app_hmi_types empty" << pt_content.size());
-    }
-
-    std::vector<std::string> enabled_apps;
-    cache_->GetEnabledCloudApps(enabled_apps);
-    for (auto it = enabled_apps.begin(); it != enabled_apps.end(); ++it) {
-      SendAuthTokenUpdated(*it);
-    }
+  // Get current DB data, since it could be updated during awaiting of PTU
+  auto policy_table_snapshot = cache_->GenerateSnapshot();
+  if (!policy_table_snapshot) {
+    LOG4CXX_ERROR(
+        logger_,
+        "Failed to create snapshot of policy table, trying another exchange");
+    return PtProcessingResult::kNewPtRequired;
   }
+
+  // Checking of difference between PTU and current policy state
+  // Must to be done before PTU applying since it is possible, that functional
+  // groups, which had been present before are absent in PTU and will be
+  // removed after update. So in case of revoked groups system has to know
+  // names and ids of revoked groups before they will be removed.
+  const auto results =
+      CheckPermissionsChanges(pt_update, policy_table_snapshot);
+
+  // Replace current data with updated
+  if (!cache_->ApplyUpdate(*pt_update)) {
+    LOG4CXX_WARN(
+        logger_,
+        "Unsuccessful save of updated policy table, trying another exchange");
+    return PtProcessingResult::kNewPtRequired;
+  }
+  CheckPermissionsChangesAfterUpdate(*pt_update, *policy_table_snapshot);
+
+  ProcessAppPolicyCheckResults(
+      results, pt_update->policy_table.app_policies_section.apps);
+
+  listener_->OnCertificateUpdated(
+      *(pt_update->policy_table.module_config.certificate));
+
+  std::map<std::string, StringArray> app_hmi_types;
+  cache_->GetHMIAppTypeAfterUpdate(app_hmi_types);
+  if (!app_hmi_types.empty()) {
+    LOG4CXX_INFO(logger_, "app_hmi_types is full calling OnUpdateHMIAppType");
+    listener_->OnUpdateHMIAppType(app_hmi_types);
+  } else {
+    LOG4CXX_INFO(logger_, "app_hmi_types empty" << pt_content.size());
+  }
+
+  std::vector<std::string> enabled_apps;
+  cache_->GetEnabledCloudApps(enabled_apps);
+  for (auto it = enabled_apps.begin(); it != enabled_apps.end(); ++it) {
+    SendAuthTokenUpdated(*it);
+  }
+
+  return PtProcessingResult::kSuccess;
+}
+
+void PolicyManagerImpl::OnPTUFinished(const PtProcessingResult ptu_result) {
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  if (PtProcessingResult::kWrongPtReceived == ptu_result) {
+    LOG4CXX_DEBUG(logger_, "Wrong PT was received");
+    update_status_manager_.OnWrongUpdateReceived();
+    return;
+  }
+
+  update_status_manager_.OnValidUpdateReceived();
+
+  if (PtProcessingResult::kNewPtRequired == ptu_result) {
+    LOG4CXX_DEBUG(logger_, "New PTU interation is required");
+    ForcePTExchange();
+    return;
+  }
+
+  ResumePendingAppPolicyActions();
 
   // If there was a user request for policy table update, it should be started
   // right after current update is finished
   if (update_status_manager_.IsUpdateRequired()) {
+    LOG4CXX_DEBUG(logger_,
+                  "PTU was successful and new PTU iteration was scheduled");
     StartPTExchange();
-    return true;
+    return;
   }
 
   RefreshRetrySequence();
-  return true;
 }
 
 void PolicyManagerImpl::ProcessAppPolicyCheckResults(
@@ -439,6 +454,9 @@ void PolicyManagerImpl::ProcessAppPolicyCheckResults(
 void PolicyManagerImpl::ProcessActionsForAppPolicies(
     const ApplicationsPoliciesActions& actions,
     const policy_table::ApplicationPolicies& app_policies) {
+  notify_system_list_.clear();
+  send_permissions_list_.clear();
+
   ApplicationsPoliciesActions::const_iterator it_actions = actions.begin();
   for (; it_actions != actions.end(); ++it_actions) {
     auto app_policy = app_policies.find(it_actions->first);
@@ -463,13 +481,29 @@ void PolicyManagerImpl::ProcessActionsForAppPolicies(
         }
       }
       if (it_actions->second.is_notify_system) {
-        NotifySystem(device_id, *app_policy);
+        notify_system_list_.push_back(std::make_pair(device_id, *app_policy));
       }
       if (it_actions->second.is_send_permissions_to_app) {
-        SendPermissionsToApp(device_id, *app_policy);
+        send_permissions_list_.push_back(
+            std::make_pair(device_id, *app_policy));
       }
     }
   }
+}
+
+void PolicyManagerImpl::ResumePendingAppPolicyActions() {
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  for (auto& notify_system_params : notify_system_list_) {
+    NotifySystem(notify_system_params.first, notify_system_params.second);
+  }
+  notify_system_list_.clear();
+
+  for (auto& send_permissions_params : send_permissions_list_) {
+    SendPermissionsToApp(send_permissions_params.first,
+                         send_permissions_params.second);
+  }
+  send_permissions_list_.clear();
 }
 
 void PolicyManagerImpl::NotifySystem(
@@ -1227,7 +1261,7 @@ void PolicyManagerImpl::StopRetrySequence() {
     timer_retry_sequence_.Stop();
   }
 
-  if (update_status_manager_.IsUpdateRequired()) {
+  if (cache_->UpdateRequired()) {
     ResetRetrySequence(ResetRetryCountType::kResetWithStatusUpdate);
   }
 }
