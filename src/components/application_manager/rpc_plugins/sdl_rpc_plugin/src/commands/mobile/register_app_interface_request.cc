@@ -642,6 +642,11 @@ void FillUIRelatedFields(smart_objects::SmartObject& response_params,
       hmi_capabilities.video_streaming_supported();
   response_params[strings::hmi_capabilities][strings::remote_control] =
       hmi_capabilities.rc_supported();
+  response_params[strings::hmi_capabilities][strings::app_services] = true;
+  // Apps are automatically subscribed to the SystemCapability: DISPLAYS
+  response_params[strings::hmi_capabilities][strings::displays] = true;
+  response_params[strings::hmi_capabilities][strings::seat_location] =
+      hmi_capabilities.seat_location_capability() ? true : false;
 }
 
 void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile(

@@ -189,6 +189,8 @@ const char* endpoint = "endpoint";
 const char* display_capabilities = "displayCapabilities";
 const char* policy_type = "policyType";
 const char* property = "property";
+const char* displays = "displays";
+const char* seat_location = "seatLocation";
 
 // PutFile
 const char* sync_file_name = "syncFileName";

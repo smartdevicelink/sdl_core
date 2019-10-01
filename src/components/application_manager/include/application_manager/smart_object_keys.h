@@ -222,6 +222,8 @@ extern const char* endpoint;
 extern const char* display_capabilities;
 extern const char* policy_type;
 extern const char* property;
+extern const char* displays;
+extern const char* seat_location;
 
 // PutFile
 extern const char* sync_file_name;
