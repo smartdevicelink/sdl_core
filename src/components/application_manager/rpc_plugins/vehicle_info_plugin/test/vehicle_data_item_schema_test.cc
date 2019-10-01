@@ -387,7 +387,7 @@ TEST_F(VehicleDataItemSchemaTest, ValidateUnknownType) {
   auto test_schema = PolicyDataItem(test_object_with_invalid_type.schema);
   auto result = VehicleDataItemSchema::create(
       test_schema, VehicleDataItemSchema::SchemaType::HMI);
-  test_object_with_invalid_type.data = "TestEnumType::CVS_NORMAL";    
+  test_object_with_invalid_type.data = "CVS_NORMAL";
   EXPECT_EQ(ErrorCode::OK,
             result->validate(test_object_with_invalid_type.data, &report));
   EXPECT_EQ(std::string(""), rpc::PrettyFormat(report));
