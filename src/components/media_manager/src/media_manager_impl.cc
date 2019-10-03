@@ -275,11 +275,6 @@ void MediaManagerImpl::StartStreaming(
     int32_t application_key, protocol_handler::ServiceType service_type) {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  if (protocol_handler::ServiceType::kAudio == service_type &&
-      "socket" == settings().audio_server_type()) {
-    socket_audio_stream_start_time_ = std::chrono::system_clock::now();
-  }
-
   if (streamer_[service_type]) {
     streamer_[service_type]->StartActivity(application_key);
   }
@@ -288,6 +283,8 @@ void MediaManagerImpl::StartStreaming(
 void MediaManagerImpl::StopStreaming(
     int32_t application_key, protocol_handler::ServiceType service_type) {
   LOG4CXX_AUTO_TRACE(logger_);
+
+  stream_data_size_ = 0ull;
 
   if (streamer_[service_type]) {
     streamer_[service_type]->StopActivity(application_key);
@@ -326,6 +323,10 @@ void MediaManagerImpl::OnMessageReceived(
   if (app) {
     if (ServiceType::kAudio == service_type &&
         "socket" == settings().audio_server_type()) {
+      if (stream_data_size_ == 0) {
+        socket_audio_stream_start_time_ = std::chrono::system_clock::now();
+      }
+
       stream_data_size_ += message->data_size();
       uint32_t ms_for_all_data = DataSizeToMilliseconds(stream_data_size_);
       uint32_t ms_since_stream_start =
