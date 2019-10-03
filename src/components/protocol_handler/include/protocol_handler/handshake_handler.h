@@ -111,6 +111,12 @@ class HandshakeHandler : public security_manager::SecurityManagerListener {
    */
   uint32_t connection_key() const;
 
+  /**
+   * @brief Get primary connection key of this handler
+   * @return primary connection key
+   */
+  uint32_t primary_connection_key() const;
+
  private:
   /**
    * @brief Performs related actions if handshake was successfully finished
