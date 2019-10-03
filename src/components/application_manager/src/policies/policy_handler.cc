@@ -337,8 +337,11 @@ bool PolicyHandler::LoadPolicyLibrary() {
 bool PolicyHandler::CreateManager() {
   void* policy_handle = dlopen(kLibrary.c_str(), RTLD_LAZY);
   const char* error = dlerror();
-  if (error) {
-    LOG4CXX_ERROR(logger_, error);
+  if (!policy_handle) {
+    LOG4CXX_ERROR(
+        logger_,
+        (error == NULL ? "Unknown error in dlopen while loading policy table"
+                       : error));
     return false;
   }
 

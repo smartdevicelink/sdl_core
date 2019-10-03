@@ -231,10 +231,7 @@ void GetInteriorVehicleDataConsentRequest::on_event(
       hmi_response[app_mngr::strings::msg_params];
   std::string info;
   GetInfo(hmi_response, info);
-  SendResponse(success_result,
-               result_code,
-               info.c_str(),
-               success_result ? &response_params : nullptr);
+  SendResponse(success_result, result_code, info.c_str(), &response_params);
 }
 
 std::string GetInteriorVehicleDataConsentRequest::ModuleType() const {
