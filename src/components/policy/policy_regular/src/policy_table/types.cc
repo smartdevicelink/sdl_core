@@ -1940,16 +1940,11 @@ bool VehicleDataItem::ValidateNaming(std::string str) const {
 }
 
 bool VehicleDataItem::ValidateTypes() const {
-  if (IsPrimitiveType() || NULL != EnumSchemaItemFactory::Get(type)) {
-    // params should be empty for POD types
-    // and for enum values, generated from API
-    return (!(params.is_initialized()) || params->empty());
-  }
-
-  if ("Struct" == std::string(type)) {
+  if (VehicleDataItem::kStruct == std::string(type)) {
     return params.is_initialized() && !(params->empty()) && params.is_valid();
   }
-  return false;
+  // params should be empty for POD types and for enum values
+  return (!(params.is_initialized()) || params->empty());
 }
 
 bool VehicleDataItem::IsPrimitiveType() const {
