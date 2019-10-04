@@ -1251,7 +1251,6 @@ int ConnectionHandlerImpl::SetSSLContext(
   sync_primitives::AutoReadLock lock(connection_list_lock_);
   auto connection = GetPrimaryConnection(connection_handle);
   if (!connection) {
-    LOG4CXX_ERROR(logger_, "Unknown connection!");
     return security_manager::SecurityManager::ERROR_INTERNAL;
   }
 
@@ -1268,7 +1267,6 @@ security_manager::SSLContext* ConnectionHandlerImpl::GetSSLContext(
   sync_primitives::AutoReadLock lock(connection_list_lock_);
   auto connection = GetPrimaryConnection(connection_handle);
   if (!connection) {
-    LOG4CXX_ERROR(logger_, "Unknown connection!");
     return nullptr;
   }
 
@@ -1285,7 +1283,6 @@ void ConnectionHandlerImpl::SetProtectionFlag(
   sync_primitives::AutoReadLock lock(connection_list_lock_);
   auto connection = GetPrimaryConnection(connection_handle);
   if (!connection) {
-    LOG4CXX_ERROR(logger_, "Unknown connection!");
     return;
   }
 
@@ -1301,7 +1298,6 @@ ConnectionHandlerImpl::GetHandshakeContext(uint32_t key) const {
   sync_primitives::AutoReadLock lock(connection_list_lock_);
   auto connection = GetPrimaryConnection(connection_handle);
   if (!connection) {
-    LOG4CXX_ERROR(logger_, "Unknown connection!");
     return security_manager::SSLContext::HandshakeContext();
   }
 
@@ -1711,7 +1707,6 @@ bool ConnectionHandlerImpl::IsHeartBeatSupported(
   auto connection = GetPrimaryConnection(connection_id);
 
   if (!connection) {
-    LOG4CXX_WARN(logger_, "Connection not found !");
     return false;
   }
 
@@ -1733,7 +1728,6 @@ bool ConnectionHandlerImpl::ProtocolVersionUsed(
                  connection_id) {
     return ending_connection_->ProtocolVersion(session_id, protocol_version);
   }
-  LOG4CXX_WARN(logger_, "Connection not found !");
   return false;
 }
 
