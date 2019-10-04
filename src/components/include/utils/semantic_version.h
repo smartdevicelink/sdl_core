@@ -60,8 +60,6 @@ struct SemanticVersion {
         major_version_ = 0;
         minor_version_ = 0;
         patch_version_ = 0;
-        // LOG4CXX_WARN(logger_,
-                    // "Error while parsing version string: " << versionString);
       }
     }      
   }
