@@ -71,22 +71,28 @@ TEST_F(RPCHandlerImplTest, GetMessageVersion_SUCCESS) {
       utils::SemanticVersion("5.0.0"),
       utils::SemanticVersion("6.1.0")};
 
+  std::vector<utils::SemanticVersion> expected_versions = {
+      utils::base_rpc_version,
+      utils::base_rpc_version,
+      utils::SemanticVersion("5.0.0"),
+      utils::SemanticVersion("6.1.0")};
+
   SmartObject message;
   message[json_str::S_MSG_PARAMS] = SmartObject(SmartType_Map);
   message[json_str::S_MSG_PARAMS][app_str::sync_msg_version] =
       SmartObject(SmartType_Map);
 
-  for (const auto& expected_version : test_versions) {
+  for(size_t i = 0; i < test_versions.size(); ++i) {
     message[json_str::S_MSG_PARAMS][app_str::sync_msg_version]
-           [app_str::major_version] = expected_version.major_version_;
+           [app_str::major_version] = test_versions[i].major_version_;
     message[json_str::S_MSG_PARAMS][app_str::sync_msg_version]
-           [app_str::minor_version] = expected_version.minor_version_;
+           [app_str::minor_version] = test_versions[i].minor_version_;
     message[json_str::S_MSG_PARAMS][app_str::sync_msg_version]
-           [app_str::patch_version] = expected_version.patch_version_;
+           [app_str::patch_version] = test_versions[i].patch_version_;
 
     utils::SemanticVersion result_message_version;
     rpc_handler_->GetMessageVersion(message, result_message_version);
-    EXPECT_EQ(expected_version, result_message_version);
+    EXPECT_EQ(expected_versions[i], result_message_version);
   }
 }
 
