@@ -289,7 +289,9 @@ void CustomVehicleDataManagerImpl::UpdateVehicleDataItems() {
             item.until.is_initialized() ? std::string(*item.until) : "",
             bool(*item.deprecated),
             bool(*item.removed),
-            history);
+            history,
+            true);  // Mark member as custom as soon as custom data is treated
+                    // in different way
       }
       case SMemberType::SMEMBER_VDR_MOBILE: {
         // valid since struct_schema_items is not used in
@@ -305,7 +307,9 @@ void CustomVehicleDataManagerImpl::UpdateVehicleDataItems() {
             item.until.is_initialized() ? std::string(*item.until) : "",
             bool(*item.deprecated),
             bool(*item.removed),
-            history);
+            history,
+            true);  // Mark member as custom as soon as custom data is treated
+                    // in different way
       }
       case SMemberType::SMEMBER_MOBILE: {
         TSchemaItemParameter<VehicleDataItem> tschema_item(item);
@@ -318,7 +322,9 @@ void CustomVehicleDataManagerImpl::UpdateVehicleDataItems() {
             item.until.is_initialized() ? std::string(*item.until) : "",
             bool(*item.deprecated),
             bool(*item.removed),
-            history);
+            history,
+            true);  // Mark member as custom as soon as custom data is treated
+                    // in different way
       }
       case SMemberType::SMEMBER_BOOL_HMI: {
         auto member_schema =
