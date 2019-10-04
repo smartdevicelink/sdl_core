@@ -82,7 +82,7 @@ TEST_F(RPCHandlerImplTest, GetMessageVersion_SUCCESS) {
   message[json_str::S_MSG_PARAMS][app_str::sync_msg_version] =
       SmartObject(SmartType_Map);
 
-  for(size_t i = 0; i < test_versions.size(); ++i) {
+  for (size_t i = 0; i < test_versions.size(); ++i) {
     message[json_str::S_MSG_PARAMS][app_str::sync_msg_version]
            [app_str::major_version] = test_versions[i].major_version_;
     message[json_str::S_MSG_PARAMS][app_str::sync_msg_version]
