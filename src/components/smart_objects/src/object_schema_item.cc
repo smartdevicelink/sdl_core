@@ -49,7 +49,8 @@ SMember::SMember()
     , mIsMandatory(true)
     , mIsDeprecated(false)
     , mIsRemoved(false)
-    , mIsValid(true) {}
+    , mIsValid(true)
+    , mIsCustom(false) {}
 
 SMember::SMember(const ISchemaItemPtr SchemaItem,
                  const bool IsMandatory,
@@ -57,8 +58,12 @@ SMember::SMember(const ISchemaItemPtr SchemaItem,
                  const std::string& Until,
                  const bool IsDeprecated,
                  const bool IsRemoved,
-                 const std::vector<SMember>& history_vector)
-    : mSchemaItem(SchemaItem), mIsMandatory(IsMandatory), mIsValid(true) {
+                 const std::vector<SMember>& history_vector,
+                 const bool IsCustom)
+    : mSchemaItem(SchemaItem)
+    , mIsMandatory(IsMandatory)
+    , mIsValid(true)
+    , mIsCustom(IsCustom) {
   if (Since.size() > 0) {
     utils::SemanticVersion since_struct(Since);
     if (since_struct.isValid()) {
@@ -80,7 +85,7 @@ bool SMember::CheckHistoryFieldVersion(
     const utils::SemanticVersion& MessageVersion) const {
   if (MessageVersion.isValid()) {
     if (mSince != boost::none) {
-      if (MessageVersion < mSince.get()) {
+      if (MessageVersion < mSince.get() && !mIsCustom) {
         return false;  // Msg version predates `since` field
       } else {
         if (mUntil != boost::none && (MessageVersion >= mUntil.get())) {
