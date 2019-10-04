@@ -67,7 +67,8 @@ struct SMember {
           const std::string& Until = "",
           const bool IsDeprecated = false,
           const bool IsRemoved = false,
-          const std::vector<SMember>& history_vector = {});
+          const std::vector<SMember>& history_vector = {},
+          const bool IsCustom = false);
   /**
    * @brief Checks the version a parameter was removed (until)
    * If the mobile's msg version is greater than or
@@ -89,6 +90,7 @@ struct SMember {
   bool mIsRemoved;
   mutable bool mIsValid;
   std::vector<SMember> mHistoryVector;
+  bool mIsCustom;
 };
 typedef std::map<std::string, SMember> Members;
 
