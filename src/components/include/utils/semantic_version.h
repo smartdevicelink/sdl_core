@@ -51,9 +51,11 @@ struct SemanticVersion {
 
   SemanticVersion(const std::string& versionString)
       : major_version_(0), minor_version_(0), patch_version_(0) {
-    
-    int readElements = sscanf(
-        versionString.c_str(), "%hu.%hu.%hu", &major_version_, &minor_version_, &patch_version_);
+    int readElements = sscanf(versionString.c_str(),
+                              "%hu.%hu.%hu",
+                              &major_version_,
+                              &minor_version_,
+                              &patch_version_);
 
     if (readElements != 3) {
       if (readElements != 2) {
@@ -61,7 +63,7 @@ struct SemanticVersion {
         minor_version_ = 0;
         patch_version_ = 0;
       }
-    }      
+    }
   }
 
   static inline int16_t cmp(const SemanticVersion& version1,
