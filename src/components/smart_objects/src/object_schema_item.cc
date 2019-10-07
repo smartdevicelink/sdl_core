@@ -33,6 +33,7 @@
 
 #include <algorithm>
 
+#include "generated_msg_version.h"
 #include "smart_objects/always_false_schema_item.h"
 #include "smart_objects/smart_object.h"
 
@@ -40,9 +41,13 @@ namespace {
 const char connection_key[] = "connection_key";
 const char binary_data[] = "binary_data";
 const char app_id[] = "appID";
+const utils::SemanticVersion kModuleVersion(application_manager::major_version,
+                                            application_manager::minor_version,
+                                            application_manager::patch_version);
 }  // namespace
 namespace ns_smart_device_link {
 namespace ns_smart_objects {
+CREATE_LOGGERPTR_LOCAL(vehicle_log, "VEHICLELOG")
 
 SMember::SMember()
     : mSchemaItem(CAlwaysFalseSchemaItem::create())
@@ -84,27 +89,44 @@ SMember::SMember(const ISchemaItemPtr SchemaItem,
 bool SMember::CheckHistoryFieldVersion(
     const utils::SemanticVersion& MessageVersion) const {
   if (MessageVersion.isValid()) {
-    if (mSince != boost::none) {
-      if (MessageVersion < mSince.get() && !mIsCustom) {
-        return false;  // Msg version predates `since` field
-      } else {
-        if (mUntil != boost::none && (MessageVersion >= mUntil.get())) {
-          return false;  // Msg version newer than `until` field
-        } else {
-          return true;  // Mobile msg version falls within specified version
-                        // range
-        }
-      }
-    }
-
-    if (mUntil != boost::none && (MessageVersion >= mUntil.get())) {
-      return false;  // Msg version newer than `until` field
+    if (mIsCustom) {
+      return CheckCustomVehicleData(MessageVersion);
     } else {
-      return true;  // Mobile msg version falls within specified version range
+      return CheckAPIVehicleData(MessageVersion);
     }
   }
 
   return true;  // Not enough version information. Default true.
+}
+
+bool SMember::CheckCustomVehicleData(
+    const utils::SemanticVersion& MessageVersion) const {
+  if (mSince != boost::none) {
+    if (MessageVersion < mSince.get() && MessageVersion < kModuleVersion) {
+      return false;  // Msg version predates `since` field
+    }
+  }
+
+  if (mUntil != boost::none && (MessageVersion >= mUntil.get())) {
+    return false;  // Msg version newer than `until` field
+  }
+
+  return true;
+}
+
+bool SMember::CheckAPIVehicleData(
+    const utils::SemanticVersion& MessageVersion) const {
+  if (mSince != boost::none) {
+    if (MessageVersion < mSince.get()) {
+      return false;  // Msg version predates `since` field
+    }
+  }
+
+  if (mUntil != boost::none && (MessageVersion >= mUntil.get())) {
+    return false;  // Msg version newer than `until` field
+  }
+
+  return true;
 }
 
 std::shared_ptr<CObjectSchemaItem> CObjectSchemaItem::create(
@@ -261,6 +283,9 @@ void CObjectSchemaItem::RemoveFakeParams(
     std::map<std::string, SMember>::const_iterator members_it =
         mMembers.find(key);
 
+    LOG4CXX_ERROR(vehicle_log, "PROCESSING " << key);
+    LOG4CXX_ERROR(vehicle_log,
+                  "MESSAGE VERSION: " << MessageVersion.toString());
     if (mMembers.end() != members_it) {
       const SMember& member =
           GetCorrectMember(members_it->second, MessageVersion);

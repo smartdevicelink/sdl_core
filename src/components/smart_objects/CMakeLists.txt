@@ -34,6 +34,7 @@ include_directories(
   ${COMPONENTS_DIR}/include
   ${COMPONENTS_DIR}/smart_objects/include
   ${COMPONENTS_DIR}/utils/include
+  ${CMAKE_BINARY_DIR}/src/components/interfaces
   ${BOOST_INCLUDE_DIR}
 )
 
