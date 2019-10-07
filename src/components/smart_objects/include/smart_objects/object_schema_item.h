@@ -76,6 +76,13 @@ struct SMember {
   bool CheckHistoryFieldVersion(
       const utils::SemanticVersion& MessageVersion) const;
 
+ private:
+  bool CheckCustomVehicleData(
+      const utils::SemanticVersion& MessageVersion) const;
+
+  bool CheckAPIVehicleData(const utils::SemanticVersion& MessageVersion) const;
+
+ public:
   /**
    * @brief Member schema item.
    **/
