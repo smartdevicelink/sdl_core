@@ -1703,7 +1703,7 @@ bool ConnectionHandlerImpl::IsHeartBeatSupported(
     uint8_t session_id) const {
   LOG4CXX_AUTO_TRACE(logger_);
   sync_primitives::AutoReadLock lock(connection_list_lock_);
-  uint32_t connection_id = static_cast<uint32_t>(connection_handle);
+  const uint32_t connection_id = static_cast<uint32_t>(connection_handle);
   auto connection = GetPrimaryConnection(connection_id);
 
   if (!connection) {
