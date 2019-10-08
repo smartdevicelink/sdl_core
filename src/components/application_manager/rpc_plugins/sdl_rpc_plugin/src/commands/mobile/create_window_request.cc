@@ -333,7 +333,10 @@ bool CreateWindowRequest::DoesExceedMaxAllowedWindows(
         return false;
       });
 
-  DCHECK(find_res != windowTypeSupported->end());
+  if (find_res == windowTypeSupported->end()) {
+    LOG4CXX_WARN(logger_, "Requested Window Type is not supported by the HMI");
+    return false;
+  }
 
   if (get_current_number_of_windows(window_type) + 1 >
       (*find_res)[strings::maximum_number_of_windows].asUInt()) {
