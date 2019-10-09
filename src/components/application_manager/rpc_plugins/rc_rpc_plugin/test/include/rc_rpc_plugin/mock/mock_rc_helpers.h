@@ -84,6 +84,10 @@ class MockRCHelpers {
                std::vector<bool>(const smart_objects::SmartObject& consents));
   MOCK_METHOD1(RemoveRedundantGPSDataFromIVDataMsg,
                void(smart_objects::SmartObject& msg_params));
+  MOCK_METHOD2(
+      MergeModuleData,
+      smart_objects::SmartObject(const smart_objects::SmartObject& data1,
+                                 const smart_objects::SmartObject& data2));
 
   static MockRCHelpers* rc_helpers_mock();
 };
