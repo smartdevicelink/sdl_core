@@ -1124,6 +1124,26 @@ const uint8_t ConnectionHandlerImpl::GetSessionIdFromSecondaryTransport(
   return 0;
 }
 
+Connection* ConnectionHandlerImpl::GetPrimaryConnection(
+    const ConnectionHandle connection_handle) const {
+  LOG4CXX_DEBUG(logger_,
+                "Getting primary connection for ID " << connection_handle);
+  ConnectionList::const_iterator it = connection_list_.find(connection_handle);
+  if (connection_list_.end() == it) {
+    LOG4CXX_ERROR(
+        logger_,
+        "Connection with ID " << connection_handle << " was not found");
+    return nullptr;
+  }
+
+  auto connection_ptr = it->second;
+  if (connection_ptr->primary_connection_handle() != 0) {
+    return GetPrimaryConnection(connection_ptr->primary_connection_handle());
+  }
+
+  return connection_ptr;
+}
+
 std::string ConnectionHandlerImpl::GetCloudAppID(
     const transport_manager::ConnectionUID connection_id) const {
   sync_primitives::AutoLock auto_lock(cloud_app_id_map_lock_);
@@ -1229,13 +1249,12 @@ int ConnectionHandlerImpl::SetSSLContext(
   PairFromKey(key, &connection_handle, &session_id);
 
   sync_primitives::AutoReadLock lock(connection_list_lock_);
-  ConnectionList::iterator it = connection_list_.find(connection_handle);
-  if (connection_list_.end() == it) {
-    LOG4CXX_ERROR(logger_, "Unknown connection!");
+  auto connection = GetPrimaryConnection(connection_handle);
+  if (!connection) {
     return security_manager::SecurityManager::ERROR_INTERNAL;
   }
-  Connection& connection = *it->second;
-  return connection.SetSSLContext(session_id, context);
+
+  return connection->SetSSLContext(session_id, context);
 }
 
 security_manager::SSLContext* ConnectionHandlerImpl::GetSSLContext(
@@ -1246,13 +1265,12 @@ security_manager::SSLContext* ConnectionHandlerImpl::GetSSLContext(
   PairFromKey(key, &connection_handle, &session_id);
 
   sync_primitives::AutoReadLock lock(connection_list_lock_);
-  ConnectionList::iterator it = connection_list_.find(connection_handle);
-  if (connection_list_.end() == it) {
-    LOG4CXX_ERROR(logger_, "Unknown connection!");
-    return NULL;
+  auto connection = GetPrimaryConnection(connection_handle);
+  if (!connection) {
+    return nullptr;
   }
-  Connection& connection = *it->second;
-  return connection.GetSSLContext(session_id, service_type);
+
+  return connection->GetSSLContext(session_id, service_type);
 }
 
 void ConnectionHandlerImpl::SetProtectionFlag(
@@ -1263,18 +1281,28 @@ void ConnectionHandlerImpl::SetProtectionFlag(
   PairFromKey(key, &connection_handle, &session_id);
 
   sync_primitives::AutoReadLock lock(connection_list_lock_);
-  ConnectionList::iterator it = connection_list_.find(connection_handle);
-  if (connection_list_.end() == it) {
-    LOG4CXX_ERROR(logger_, "Unknown connection!");
+  auto connection = GetPrimaryConnection(connection_handle);
+  if (!connection) {
     return;
   }
-  Connection& connection = *it->second;
-  connection.SetProtectionFlag(session_id, service_type);
+
+  connection->SetProtectionFlag(session_id, service_type);
 }
 
 security_manager::SSLContext::HandshakeContext
 ConnectionHandlerImpl::GetHandshakeContext(uint32_t key) const {
-  return connection_handler_observer_->GetHandshakeContext(key);
+  transport_manager::ConnectionUID connection_handle = 0;
+  uint8_t session_id = 0;
+  PairFromKey(key, &connection_handle, &session_id);
+
+  sync_primitives::AutoReadLock lock(connection_list_lock_);
+  auto connection = GetPrimaryConnection(connection_handle);
+  if (!connection) {
+    return security_manager::SSLContext::HandshakeContext();
+  }
+
+  auto primary_key = KeyFromPair(connection->connection_handle(), session_id);
+  return connection_handler_observer_->GetHandshakeContext(primary_key);
 }
 
 #endif  // ENABLE_SECURITY
@@ -1664,9 +1692,9 @@ void ConnectionHandlerImpl::BindProtocolVersionWithSession(
   PairFromKey(connection_key, &connection_handle, &session_id);
 
   sync_primitives::AutoReadLock lock(connection_list_lock_);
-  ConnectionList::iterator it = connection_list_.find(connection_handle);
-  if (connection_list_.end() != it) {
-    it->second->UpdateProtocolVersionSession(session_id, protocol_version);
+  auto connection = GetPrimaryConnection(connection_handle);
+  if (connection) {
+    connection->UpdateProtocolVersionSession(session_id, protocol_version);
   }
 }
 
@@ -1675,13 +1703,14 @@ bool ConnectionHandlerImpl::IsHeartBeatSupported(
     uint8_t session_id) const {
   LOG4CXX_AUTO_TRACE(logger_);
   sync_primitives::AutoReadLock lock(connection_list_lock_);
-  uint32_t connection = static_cast<uint32_t>(connection_handle);
-  ConnectionList::const_iterator it = connection_list_.find(connection);
-  if (connection_list_.end() == it) {
-    LOG4CXX_WARN(logger_, "Connection not found !");
+  const uint32_t connection_id = static_cast<uint32_t>(connection_handle);
+  auto connection = GetPrimaryConnection(connection_id);
+
+  if (!connection) {
     return false;
   }
-  return it->second->SupportHeartBeat(session_id);
+
+  return connection->SupportHeartBeat(session_id);
 }
 
 bool ConnectionHandlerImpl::ProtocolVersionUsed(
@@ -1690,15 +1719,15 @@ bool ConnectionHandlerImpl::ProtocolVersionUsed(
     uint8_t& protocol_version) const {
   LOG4CXX_AUTO_TRACE(logger_);
   sync_primitives::AutoReadLock lock(connection_list_lock_);
-  ConnectionList::const_iterator it = connection_list_.find(connection_id);
-  if (connection_list_.end() != it) {
-    return it->second->ProtocolVersion(session_id, protocol_version);
+  auto connection = GetPrimaryConnection(connection_id);
+
+  if (connection) {
+    return connection->ProtocolVersion(session_id, protocol_version);
   } else if (ending_connection_ &&
              static_cast<uint32_t>(ending_connection_->connection_handle()) ==
                  connection_id) {
     return ending_connection_->ProtocolVersion(session_id, protocol_version);
   }
-  LOG4CXX_WARN(logger_, "Connection not found !");
   return false;
 }
 
