@@ -61,7 +61,12 @@ VehicleDataItemSchema::VehicleDataItemSchema(PolicyDataItem& policy_item,
       return enum_schema;
     }
 
-    return nullptr;
+    // If an unknown type is present in the policy table, it is assumed that it
+    // is a future enum type. Since normal validation cannot be performed on
+    // this value, it is treated as a raw string instead
+    policy_data_item.type = "String";
+
+    return GetPODTypeSchema(policy_data_item, schema_type);
   };
 
   if (*policy_data_item.array) {
