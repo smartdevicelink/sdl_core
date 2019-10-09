@@ -34,6 +34,11 @@
 
 namespace rc_rpc_plugin {
 
+smart_objects::SmartObject RCHelpers::MergeModuleData(const smart_objects::SmartObject& data1,
+      const smart_objects::SmartObject& data2) {
+  return MockRCHelpers::rc_helpers_mock()->MergeModuleData(data1, data2);
+}
+
 const std::function<std::string(const std::string&)>
 rc_rpc_plugin::RCHelpers::GetModuleTypeToDataMapping() {
   return MockRCHelpers::rc_helpers_mock()->GetModuleTypeToDataMapping();
