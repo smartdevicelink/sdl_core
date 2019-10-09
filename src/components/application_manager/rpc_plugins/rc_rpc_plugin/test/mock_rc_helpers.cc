@@ -34,8 +34,9 @@
 
 namespace rc_rpc_plugin {
 
-smart_objects::SmartObject RCHelpers::MergeModuleData(const smart_objects::SmartObject& data1,
-      const smart_objects::SmartObject& data2) {
+smart_objects::SmartObject RCHelpers::MergeModuleData(
+    const smart_objects::SmartObject& data1,
+    const smart_objects::SmartObject& data2) {
   return MockRCHelpers::rc_helpers_mock()->MergeModuleData(data1, data2);
 }
 
