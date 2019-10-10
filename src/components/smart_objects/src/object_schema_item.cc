@@ -32,6 +32,7 @@
 #include "smart_objects/object_schema_item.h"
 
 #include <algorithm>
+#include <sstream>
 
 #include "generated_msg_version.h"
 #include "smart_objects/always_false_schema_item.h"
@@ -55,7 +56,7 @@ SMember::SMember()
     , mIsDeprecated(false)
     , mIsRemoved(false)
     , mIsValid(true)
-    , mIsCustom(false) {}
+    , mType(SMember::Type::API) {}
 
 SMember::SMember(const ISchemaItemPtr SchemaItem,
                  const bool IsMandatory,
@@ -64,11 +65,11 @@ SMember::SMember(const ISchemaItemPtr SchemaItem,
                  const bool IsDeprecated,
                  const bool IsRemoved,
                  const std::vector<SMember>& history_vector,
-                 const bool IsCustom)
+                 const Type type)
     : mSchemaItem(SchemaItem)
     , mIsMandatory(IsMandatory)
     , mIsValid(true)
-    , mIsCustom(IsCustom) {
+    , mType(type) {
   if (Since.size() > 0) {
     utils::SemanticVersion since_struct(Since);
     if (since_struct.isValid()) {
@@ -89,9 +90,11 @@ SMember::SMember(const ISchemaItemPtr SchemaItem,
 bool SMember::CheckHistoryFieldVersion(
     const utils::SemanticVersion& MessageVersion) const {
   if (MessageVersion.isValid()) {
-    if (mIsCustom) {
+    if (mType == Type::CUSTOM) {
+      LOG4CXX_ERROR(vehicle_log, "CHECKING CUSTOM DATA: ");
       return CheckCustomVehicleData(MessageVersion);
     } else {
+      LOG4CXX_ERROR(vehicle_log, "CHECKING API DATA: ");
       return CheckAPIVehicleData(MessageVersion);
     }
   }
@@ -129,6 +132,20 @@ bool SMember::CheckAPIVehicleData(
   return true;
 }
 
+std::string SMember::to_string() const {
+  std::ostringstream out;
+
+  out << "Mandatory: " << mIsMandatory << "\n";
+  out << "Deprecated: " << mIsDeprecated << "\n";
+  out << "Removed: " << mIsRemoved << "\n";
+  out << "Valid: " << mIsValid << "\n";
+  out << "Type: " << (mType == Type::API ? "API" : "CUSTOM") << "\n";
+  out << "Since: " << (mSince != boost::none ? mSince.get().toString() : "NONE") << "\n";
+  out << "Until: " << (mUntil != boost::none ? mUntil.get().toString() : "NONE") << "\n";
+
+  return out.str();
+}
+
 std::shared_ptr<CObjectSchemaItem> CObjectSchemaItem::create(
     const Members& members) {
   return std::shared_ptr<CObjectSchemaItem>(new CObjectSchemaItem(members));
@@ -155,6 +172,8 @@ errors::eType CObjectSchemaItem::validate(
     const std::string& key = it->first;
     const SMember& member = it->second;
     const SMember& correct_member = GetCorrectMember(member, MessageVersion);
+
+    LOG4CXX_ERROR(vehicle_log, "" << key << " INFO: " << correct_member.to_string());
 
     std::set<std::string>::const_iterator key_it = object_keys.find(key);
     if (object_keys.end() == key_it) {
