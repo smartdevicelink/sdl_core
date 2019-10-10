@@ -411,23 +411,23 @@ bool RPCHandlerImpl::ConvertMessageToSO(
         return false;
       }
 
-      // rpc::ValidationReport report("RPC");
+      rpc::ValidationReport report("RPC");
 
-      // utils::SemanticVersion empty_version;
-      // if (validate_params &&
-          // smart_objects::errors::OK !=
-              // output.validate(
-                  // &report, empty_version, allow_unknown_parameters)) {
-        // LOG4CXX_ERROR(
-            // logger_,
-            // "Incorrect parameter from HMI - " << rpc::PrettyFormat(report));
+      utils::SemanticVersion empty_version;
+      if (validate_params &&
+          smart_objects::errors::OK !=
+              output.validate(
+                  &report, empty_version, allow_unknown_parameters)) {
+        LOG4CXX_ERROR(
+            logger_,
+            "Incorrect parameter from HMI - " << rpc::PrettyFormat(report));
 
-        // output.erase(strings::msg_params);
-        // output[strings::params][hmi_response::code] =
-            // hmi_apis::Common_Result::INVALID_DATA;
-        // output[strings::msg_params][strings::info] = rpc::PrettyFormat(report);
-        // return false;
-      // }
+        output.erase(strings::msg_params);
+        output[strings::params][hmi_response::code] =
+            hmi_apis::Common_Result::INVALID_DATA;
+        output[strings::msg_params][strings::info] = rpc::PrettyFormat(report);
+        return false;
+      }
       break;
     }
     case protocol_handler::MajorProtocolVersion::PROTOCOL_VERSION_1: {
