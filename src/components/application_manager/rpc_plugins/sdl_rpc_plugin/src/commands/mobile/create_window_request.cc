@@ -307,7 +307,10 @@ bool CreateWindowRequest::DoesExceedMaxAllowedWindows(
   const auto window_type = static_cast<mobile_apis::WindowType::eType>(
       (*message_)[strings::msg_params][strings::window_type].asInt());
 
-  const auto display_capabilities = app->display_capabilities();
+  auto display_capabilities = hmi_capabilities_.system_display_capabilities();
+  if (app->display_capabilities()) {
+    display_capabilities = app->display_capabilities();
+  }
 
   if (!display_capabilities) {
     LOG4CXX_WARN(logger_, "Application has no capabilities");
