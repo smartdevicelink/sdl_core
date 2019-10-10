@@ -508,11 +508,6 @@ void RPCServiceImpl::SendMessageToMobile(
     app->usage_report().RecordRejectionsSyncOutOfMemory();
   }
 
-  mobile_so_factory().attachSchema(*message, false);
-  LOG4CXX_DEBUG(
-      logger_,
-      "Attached schema to message, result if valid: " << message->isValid());
-
   // Messages to mobile are not yet prioritized so use default priority value
   std::shared_ptr<Message> message_to_send(
       new Message(protocol_handler::MessagePriority::kDefault));
@@ -539,13 +534,43 @@ void RPCServiceImpl::SendMessageToMobile(
                (*message)[jhs::S_PARAMS][jhs::S_MESSAGE_TYPE].asInt())) {
     allow_unknown_parameters = false;
   }
+
+
+  LOG4CXX_ERROR(logger_, "ALLOW UNKNOWN PARAMS = " << allow_unknown_parameters);
+  mobile_so_factory().attachSchema(*message, !allow_unknown_parameters, app->msg_version());
+  rpc::ValidationReport report("RPC");
+  auto validation_result = message->validate(&report, app->msg_version(), allow_unknown_parameters);
+  LOG4CXX_DEBUG(
+      logger_,
+      "Attached schema to message, result if valid: " << validation_result << "\nError report: " << rpc::PrettyFormat(report));
+
+  const auto api_function_id = static_cast<mobile_apis::FunctionID::eType>(
+      (*message)[strings::params][strings::function_id].asUInt());
+
+  if (api_function_id == mobile_apis::FunctionID::GetVehicleDataID) {
+    if (validation_result != smart_objects::errors::eType::OK) {
+      if (mobile_apis::Result::SUCCESS == (*message)[strings::msg_params][strings::result_code].asUInt()) {
+        smart_objects::SmartObjectSPtr response =
+            MessageHelper::CreateNegativeResponse(
+                (*message)[strings::params][strings::connection_key].asUInt(),
+                api_function_id,
+                (*message)[strings::params][strings::correlation_id].asUInt(),
+                static_cast<int32_t>(
+                    mobile_apis::Result::GENERIC_ERROR));
+
+        SendMessageToMobile(response);
+        return;
+      }
+    }
+  }
+
   if (!ConvertSOtoMessage(
           (*message), (*message_to_send), allow_unknown_parameters)) {
     LOG4CXX_WARN(logger_, "Can't send msg to Mobile: failed to create string");
     return;
   }
-  const auto api_function_id = static_cast<mobile_apis::FunctionID::eType>(
-      (*message)[strings::params][strings::function_id].asUInt());
+
+  MessageHelper::PrintSmartObject(*message);
 
   smart_objects::SmartObject& msg_to_mobile = *message;
   // If correlation_id is not present, it is from-HMI message which should be
@@ -556,6 +581,11 @@ void RPCServiceImpl::SendMessageToMobile(
         msg_to_mobile[strings::params][strings::connection_key].asUInt(),
         msg_to_mobile[strings::params][strings::function_id].asInt());
   } else if (app) {
+
+    if (validation_result != smart_objects::errors::eType::OK) {
+      return;
+    }
+
     RPCParams params;
 
     const smart_objects::SmartObject& s_map = (*message)[strings::msg_params];

@@ -290,7 +290,7 @@ void CustomVehicleDataManagerImpl::UpdateVehicleDataItems() {
             bool(*item.deprecated),
             bool(*item.removed),
             history,
-            true);  // Mark member as custom as soon as custom data is treated
+            SMember::Type::CUSTOM);  // Mark member as custom as soon as custom data is treated
                     // in different way
       }
       case SMemberType::SMEMBER_VDR_MOBILE: {
@@ -308,8 +308,8 @@ void CustomVehicleDataManagerImpl::UpdateVehicleDataItems() {
             bool(*item.deprecated),
             bool(*item.removed),
             history,
-            true);  // Mark member as custom as soon as custom data is treated
-                    // in different way
+            SMember::Type::CUSTOM);  // Mark member as custom as soon as custom data is treated
+                                     // in different way
       }
       case SMemberType::SMEMBER_MOBILE: {
         TSchemaItemParameter<VehicleDataItem> tschema_item(item);
@@ -323,7 +323,7 @@ void CustomVehicleDataManagerImpl::UpdateVehicleDataItems() {
             bool(*item.deprecated),
             bool(*item.removed),
             history,
-            true);  // Mark member as custom as soon as custom data is treated
+            SMember::Type::CUSTOM);  // Mark member as custom as soon as custom data is treated
                     // in different way
       }
       case SMemberType::SMEMBER_BOOL_HMI: {

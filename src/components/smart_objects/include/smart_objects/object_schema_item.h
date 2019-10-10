@@ -50,6 +50,12 @@ namespace ns_smart_objects {
  * @brief Object member.
  **/
 struct SMember {
+
+  enum class Type {
+    CUSTOM = 0,
+    API = 1
+  };
+
   /**
    * @brief Default constructor.
    **/
@@ -68,13 +74,16 @@ struct SMember {
           const bool IsDeprecated = false,
           const bool IsRemoved = false,
           const std::vector<SMember>& history_vector = {},
-          const bool IsCustom = false);
+          const Type type = Type::API);
+
   /**
    * @brief Checks the version a parameter was removed (until)
    * If the mobile's msg version is greater than or
    **/
   bool CheckHistoryFieldVersion(
       const utils::SemanticVersion& MessageVersion) const;
+
+  std::string to_string() const; 
 
  private:
   bool CheckCustomVehicleData(
@@ -97,7 +106,7 @@ struct SMember {
   bool mIsRemoved;
   mutable bool mIsValid;
   std::vector<SMember> mHistoryVector;
-  bool mIsCustom;
+  Type mType;
 };
 typedef std::map<std::string, SMember> Members;
 
