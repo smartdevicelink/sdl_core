@@ -620,6 +620,15 @@ class ConnectionHandlerImpl
   const uint8_t GetSessionIdFromSecondaryTransport(
       transport_manager::ConnectionUID secondary_transport_id) const;
 
+  /**
+   * @brief Get pointer to the primary connection by connection handle
+   * @param connection_handle handle of the current connection
+   * @return pointer to the primary connection if current one is secondary
+   * otherwise returns pointer to the same connection
+   */
+  Connection* GetPrimaryConnection(
+      const ConnectionHandle connection_handle) const;
+
   const ConnectionHandlerSettings& settings_;
   /**
    * \brief Pointer to observer

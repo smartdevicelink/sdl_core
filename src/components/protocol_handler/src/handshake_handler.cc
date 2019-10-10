@@ -69,6 +69,11 @@ uint32_t HandshakeHandler::connection_key() const {
                                        context_.new_session_id_);
 }
 
+uint32_t HandshakeHandler::primary_connection_key() const {
+  return session_observer_.KeyFromPair(context_.primary_connection_id_,
+                                       context_.new_session_id_);
+}
+
 bool HandshakeHandler::GetPolicyCertificateData(std::string& data) const {
   return false;
 }
@@ -120,11 +125,11 @@ bool HandshakeHandler::OnHandshakeDone(
   LOG4CXX_DEBUG(logger_,
                 "OnHandshakeDone for service : " << context_.service_type_);
 
-  if (connection_key != this->connection_key()) {
+  if (connection_key != this->primary_connection_key()) {
     LOG4CXX_DEBUG(logger_,
                   "Listener " << this
                               << " expects notification for connection id: "
-                              << this->connection_key()
+                              << this->primary_connection_key()
                               << ". Received notification for connection id "
                               << connection_key << " will be ignored");
     return false;
@@ -161,7 +166,7 @@ bool HandshakeHandler::CanBeProtected() const {
 }
 
 bool HandshakeHandler::IsAlreadyProtected() const {
-  return (session_observer_.GetSSLContext(this->connection_key(),
+  return (session_observer_.GetSSLContext(this->primary_connection_key(),
                                           context_.service_type_) != NULL);
 }
 
