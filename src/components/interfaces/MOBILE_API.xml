@@ -7186,6 +7186,9 @@
     </function>
     
     <function name="SetDisplayLayout" functionID="SetDisplayLayoutID" messagetype="request" deprecated="true" since="6.0">
+        <history>
+            <function name="SetDisplayLayout" functionID="SetDisplayLayoutID" messagetype="request" since="3.0" until="6.0"/>
+        </history>
         <description>This RPC is deprecated. Use Show RPC to change layout.</description>
         <param name="displayLayout" type="String" maxlength="500" mandatory="true">
             <description>
@@ -7200,6 +7203,9 @@
     </function>
     
     <function name="SetDisplayLayout" functionID="SetDisplayLayoutID" messagetype="response" deprecated="true" since="6.0">
+        <history>
+            <function name="SetDisplayLayout" functionID="SetDisplayLayoutID" messagetype="response" since="3.0" until="6.0"/>
+        </history>
         <description>This RPC is deprecated. Use Show RPC to change layout.</description>
         <param name="success" type="Boolean" platform="documentation" mandatory="true">
             <description> true, if successful; false, if failed </description>
