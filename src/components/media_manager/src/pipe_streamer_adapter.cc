@@ -82,7 +82,7 @@ PipeStreamerAdapter::PipeStreamer::~PipeStreamer() {
 bool PipeStreamerAdapter::PipeStreamer::Connect() {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  pipe_fd_ = open(named_pipe_path_.c_str(), O_RDWR, 0);
+  pipe_fd_ = open(named_pipe_path_.c_str(), O_RDWR | O_NONBLOCK, 0);
   if (-1 == pipe_fd_) {
     LOG4CXX_ERROR(logger_, "Cannot open pipe for writing " << named_pipe_path_);
     return false;
@@ -106,19 +106,40 @@ void PipeStreamerAdapter::PipeStreamer::Disconnect() {
 bool PipeStreamerAdapter::PipeStreamer::Send(
     protocol_handler::RawMessagePtr msg) {
   LOG4CXX_AUTO_TRACE(logger_);
-  ssize_t ret = write(pipe_fd_, msg->data(), msg->data_size());
-  if (-1 == ret) {
-    LOG4CXX_ERROR(logger_, "Failed writing data to pipe " << named_pipe_path_);
+  fd_set wfds;
+  FD_ZERO(&wfds);
+  FD_SET(pipe_fd_, &wfds);
+  struct timeval tv;
+  tv.tv_sec = 10;
+  tv.tv_usec = 0;
+  int retval = select(pipe_fd_ + 1, NULL, &wfds, NULL, &tv);
+  if (retval == -1) {
+    LOG4CXX_ERROR(logger_,
+                  "Failed writing data to pipe "
+                      << named_pipe_path_ << ". Errno: " << strerror(errno));
+    return false;
+  } else if (retval) {
+    ssize_t ret = write(pipe_fd_, msg->data(), msg->data_size());
+    if (-1 == ret) {
+      LOG4CXX_ERROR(logger_,
+                    "Failed writing data to pipe "
+                        << named_pipe_path_ << ". Errno: " << strerror(errno));
+      return false;
+    }
+
+    if (static_cast<uint32_t>(ret) != msg->data_size()) {
+      LOG4CXX_WARN(logger_,
+                   "Couldn't write all the data to pipe " << named_pipe_path_);
+    }
+
+    LOG4CXX_INFO(logger_, "Streamer::sent " << msg->data_size());
+    return true;
+  } else {
+    LOG4CXX_ERROR(logger_,
+                  "Failed writing data to pipe " << named_pipe_path_
+                                                 << ". Error: TIMEOUT");
     return false;
   }
-
-  if (static_cast<uint32_t>(ret) != msg->data_size()) {
-    LOG4CXX_WARN(logger_,
-                 "Couldn't write all the data to pipe " << named_pipe_path_);
-  }
-
-  LOG4CXX_INFO(logger_, "Streamer::sent " << msg->data_size());
-  return true;
 }
 
 }  // namespace media_manager
