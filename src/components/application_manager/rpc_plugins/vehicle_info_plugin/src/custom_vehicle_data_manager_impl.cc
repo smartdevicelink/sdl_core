@@ -267,8 +267,8 @@ void CustomVehicleDataManagerImpl::UpdateVehicleDataItems() {
             bool(*item.deprecated),
             bool(*item.removed),
             history,
-            SMember::Type::CUSTOM);  // Mark member as custom as soon as custom data is treated
-                    // in different way
+            SMember::Type::CUSTOM);  // Mark member as custom as soon as custom
+                                     // data is treated in different way
       }
       case SMemberType::SMEMBER_VDR_MOBILE: {
         // valid since struct_schema_items is not used in
@@ -285,8 +285,8 @@ void CustomVehicleDataManagerImpl::UpdateVehicleDataItems() {
             bool(*item.deprecated),
             bool(*item.removed),
             history,
-            SMember::Type::CUSTOM);  // Mark member as custom as soon as custom data is treated
-                                     // in different way
+            SMember::Type::CUSTOM);  // Mark member as custom as soon as custom
+                                     // data is treated in different way
       }
       case SMemberType::SMEMBER_MOBILE: {
         TSchemaItemParameter<VehicleDataItem> tschema_item(item);
@@ -300,8 +300,8 @@ void CustomVehicleDataManagerImpl::UpdateVehicleDataItems() {
             bool(*item.deprecated),
             bool(*item.removed),
             history,
-            SMember::Type::CUSTOM);  // Mark member as custom as soon as custom data is treated
-                    // in different way
+            SMember::Type::CUSTOM);  // Mark member as custom as soon as custom
+                                     // data is treated in different way
       }
       case SMemberType::SMEMBER_BOOL_HMI: {
         auto member_schema =
@@ -322,27 +322,30 @@ void CustomVehicleDataManagerImpl::UpdateVehicleDataItems() {
         );
       }
       case SMemberType::SMEMBER_HMI: {
-          std::function<VehicleDataItem(const VehicleDataItem&)> remove_validation_params;
-          remove_validation_params = [&remove_validation_params](const VehicleDataItem& vd_item) -> VehicleDataItem {
-            VehicleDataItem result;
-            result.since = vd_item.since;
-            result.until = vd_item.until;
-            result.key = vd_item.key;
-            result.name = vd_item.name;
-            result.type = vd_item.type;
-            result.array = vd_item.array;
-            result.removed = vd_item.removed;
-            result.deprecated = vd_item.deprecated;
-            result.mark_initialized();
+        std::function<VehicleDataItem(const VehicleDataItem&)>
+            remove_validation_params;
+        remove_validation_params =
+            [&remove_validation_params](
+                const VehicleDataItem& vd_item) -> VehicleDataItem {
+          VehicleDataItem result;
+          result.since = vd_item.since;
+          result.until = vd_item.until;
+          result.key = vd_item.key;
+          result.name = vd_item.name;
+          result.type = vd_item.type;
+          result.array = vd_item.array;
+          result.removed = vd_item.removed;
+          result.deprecated = vd_item.deprecated;
+          result.mark_initialized();
 
-            if (vd_item.params->is_initialized()) {
-              for (const auto& param : *vd_item.params) {
-                result.params->push_back(remove_validation_params(param));
-              }
-              result.params->mark_initialized();
+          if (vd_item.params->is_initialized()) {
+            for (const auto& param : *vd_item.params) {
+              result.params->push_back(remove_validation_params(param));
             }
+            result.params->mark_initialized();
+          }
 
-            return result;
+          return result;
         };
 
         auto processed_item = remove_validation_params(item);

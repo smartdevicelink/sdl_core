@@ -50,11 +50,10 @@ namespace ns_smart_objects {
  * @brief Object member.
  **/
 struct SMember {
-
-  enum class Type {
-    CUSTOM = 0,
-    API = 1
-  };
+  /*
+   *  @brief Defines if SMember belongs to Custom Vehicle data or API data
+   */
+  enum class Type { CUSTOM = 0, API = 1 };
 
   /**
    * @brief Default constructor.
@@ -82,8 +81,6 @@ struct SMember {
    **/
   bool CheckHistoryFieldVersion(
       const utils::SemanticVersion& MessageVersion) const;
-
-  std::string to_string() const; 
 
  private:
   bool CheckCustomVehicleData(

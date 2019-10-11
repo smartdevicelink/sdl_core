@@ -531,23 +531,24 @@ void RPCServiceImpl::SendMessageToMobile(
   mobile_so_factory().attachSchema(*message, false, app->msg_version());
   rpc::ValidationReport report("RPC");
   auto validation_result = message->validate(&report, app->msg_version());
-  LOG4CXX_DEBUG(
-      logger_,
-      "Attached schema to message, result if valid: " << validation_result << "\nError report: " << rpc::PrettyFormat(report));
+  LOG4CXX_DEBUG(logger_,
+                "Attached schema to message, result if valid: "
+                    << validation_result
+                    << "\nError report: " << rpc::PrettyFormat(report));
 
   const auto api_function_id = static_cast<mobile_apis::FunctionID::eType>(
       (*message)[strings::params][strings::function_id].asUInt());
 
   if (api_function_id == mobile_apis::FunctionID::GetVehicleDataID) {
     if (validation_result != smart_objects::errors::eType::OK) {
-      if (mobile_apis::Result::SUCCESS == (*message)[strings::msg_params][strings::result_code].asUInt()) {
+      if (mobile_apis::Result::SUCCESS ==
+          (*message)[strings::msg_params][strings::result_code].asUInt()) {
         smart_objects::SmartObjectSPtr response =
             MessageHelper::CreateNegativeResponse(
                 (*message)[strings::params][strings::connection_key].asUInt(),
                 api_function_id,
                 (*message)[strings::params][strings::correlation_id].asUInt(),
-                static_cast<int32_t>(
-                    mobile_apis::Result::GENERIC_ERROR));
+                static_cast<int32_t>(mobile_apis::Result::GENERIC_ERROR));
 
         SendMessageToMobile(response);
         return;
@@ -561,8 +562,6 @@ void RPCServiceImpl::SendMessageToMobile(
     return;
   }
 
-  MessageHelper::PrintSmartObject(*message);
-
   smart_objects::SmartObject& msg_to_mobile = *message;
   // If correlation_id is not present, it is from-HMI message which should be
   // checked against policy permissions
@@ -572,7 +571,6 @@ void RPCServiceImpl::SendMessageToMobile(
         msg_to_mobile[strings::params][strings::connection_key].asUInt(),
         msg_to_mobile[strings::params][strings::function_id].asInt());
   } else if (app) {
-
     if (validation_result != smart_objects::errors::eType::OK) {
       return;
     }
