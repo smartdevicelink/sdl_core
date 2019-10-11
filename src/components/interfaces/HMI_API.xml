@@ -611,12 +611,6 @@
   <element name="menuTitle">
     <description> Optional text to label an app menu button (for certain touchscreen platforms).</description>
   </element>
-  <element name="navigationText">
-    <description>Navigation text for UpdateTurnList.</description>
-  </element>
-  <element name="notificationText">
-    <description>Text of notification to be displayed on screen.</description>
-  </element>
   <element name="locationName">
     <description> Optional name / title of intended location for SendLocation.</description>
   </element>
@@ -632,6 +626,12 @@
   <element name="timeToDestination"/>
     <!-- TO DO to be removed -->
   <element name="turnText"/>
+  <element name="navigationText">
+    <description>Navigation text for UpdateTurnList.</description>
+  </element>
+  <element name="notificationText">
+    <description>Text of notification to be displayed on screen.</description>
+  </element>
 </enum>
 
 <enum name="MetadataType">
