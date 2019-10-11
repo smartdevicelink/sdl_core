@@ -134,7 +134,7 @@ smart_objects::ISchemaItemPtr VehicleDataItemSchema::GetPODTypeSchema(
     return FloatSchemaItem::create(
         FloatItemParam(policy_item.minvalue.is_initialized()
                            ? double(*policy_item.minvalue)
-                           : std::numeric_limits<double>::min()),
+                           : std::numeric_limits<double>::lowest()),
         FloatItemParam(policy_item.maxvalue.is_initialized()
                            ? double(*policy_item.maxvalue)
                            : std::numeric_limits<double>::max()));
