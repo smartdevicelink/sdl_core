@@ -111,7 +111,7 @@ TEST_F(RPCHandlerImplTest, GetMessageVersion_InvalidVersion) {
   message[json_str::S_MSG_PARAMS][app_str::sync_msg_version]
          [app_str::patch_version] = 0;
 
-  utils::SemanticVersion expected_version(utils::base_rpc_version);
+  utils::SemanticVersion expected_version("0.0.0");
 
   utils::SemanticVersion result_message_version;
   rpc_handler_->GetMessageVersion(message, result_message_version);
