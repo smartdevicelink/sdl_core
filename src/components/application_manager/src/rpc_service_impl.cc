@@ -535,11 +535,9 @@ void RPCServiceImpl::SendMessageToMobile(
     allow_unknown_parameters = false;
   }
 
-
-  LOG4CXX_ERROR(logger_, "ALLOW UNKNOWN PARAMS = " << allow_unknown_parameters);
-  mobile_so_factory().attachSchema(*message, !allow_unknown_parameters, app->msg_version());
+  mobile_so_factory().attachSchema(*message, false, app->msg_version());
   rpc::ValidationReport report("RPC");
-  auto validation_result = message->validate(&report, app->msg_version(), allow_unknown_parameters);
+  auto validation_result = message->validate(&report, app->msg_version());
   LOG4CXX_DEBUG(
       logger_,
       "Attached schema to message, result if valid: " << validation_result << "\nError report: " << rpc::PrettyFormat(report));
