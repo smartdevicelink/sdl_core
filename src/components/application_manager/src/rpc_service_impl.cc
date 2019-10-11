@@ -528,32 +528,47 @@ void RPCServiceImpl::SendMessageToMobile(
     allow_unknown_parameters = false;
   }
 
-  mobile_so_factory().attachSchema(*message, false, app->msg_version());
-  rpc::ValidationReport report("RPC");
-  auto validation_result = message->validate(&report, app->msg_version());
-  LOG4CXX_DEBUG(logger_,
-                "Attached schema to message, result if valid: "
-                    << validation_result
-                    << "\nError report: " << rpc::PrettyFormat(report));
-
   const auto api_function_id = static_cast<mobile_apis::FunctionID::eType>(
       (*message)[strings::params][strings::function_id].asUInt());
 
-  if (api_function_id == mobile_apis::FunctionID::GetVehicleDataID) {
-    if (validation_result != smart_objects::errors::eType::OK) {
-      if (mobile_apis::Result::SUCCESS ==
-          (*message)[strings::msg_params][strings::result_code].asUInt()) {
-        smart_objects::SmartObjectSPtr response =
-            MessageHelper::CreateNegativeResponse(
-                (*message)[strings::params][strings::connection_key].asUInt(),
-                api_function_id,
-                (*message)[strings::params][strings::correlation_id].asUInt(),
-                static_cast<int32_t>(mobile_apis::Result::GENERIC_ERROR));
+  if (app) {
+    mobile_so_factory().attachSchema(*message, false, app->msg_version());
+    rpc::ValidationReport report("RPC");
+    auto validation_result = message->validate(&report, app->msg_version());
+    LOG4CXX_DEBUG(logger_,
+                  "Attached schema to message, result if valid: "
+                      << validation_result
+                      << "\nError report: " << rpc::PrettyFormat(report));
 
-        SendMessageToMobile(response);
-        return;
+    if (validation_result != smart_objects::errors::eType::OK) {
+      switch (api_function_id) {
+        case mobile_apis::FunctionID::GetVehicleDataID: {
+            if (mobile_apis::Result::SUCCESS ==
+                (*message)[strings::msg_params][strings::result_code].asUInt()) {
+              smart_objects::SmartObjectSPtr response =
+                  MessageHelper::CreateNegativeResponse(
+                      (*message)[strings::params][strings::connection_key].asUInt(),
+                      api_function_id,
+                      (*message)[strings::params][strings::correlation_id].asUInt(),
+                      static_cast<int32_t>(mobile_apis::Result::GENERIC_ERROR));
+
+              SendMessageToMobile(response);
+              return;
+            }
+          } break;
+        
+        case mobile_apis::FunctionID::OnVehicleDataID: {
+          return;
+        } break;
+
+        default:break;
       }
     }
+  } else {
+    mobile_so_factory().attachSchema(*message, false);
+    LOG4CXX_DEBUG(logger_,
+                  "Attached schema to message, result if valid: "
+                      << message->isValid());
   }
 
   if (!ConvertSOtoMessage(
@@ -571,10 +586,6 @@ void RPCServiceImpl::SendMessageToMobile(
         msg_to_mobile[strings::params][strings::connection_key].asUInt(),
         msg_to_mobile[strings::params][strings::function_id].asInt());
   } else if (app) {
-    if (validation_result != smart_objects::errors::eType::OK) {
-      return;
-    }
-
     RPCParams params;
 
     const smart_objects::SmartObject& s_map = (*message)[strings::msg_params];
