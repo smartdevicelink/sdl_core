@@ -322,7 +322,31 @@ void CustomVehicleDataManagerImpl::UpdateVehicleDataItems() {
         );
       }
       case SMemberType::SMEMBER_HMI: {
-        TSchemaItemParameter<VehicleDataItem> tschema_item(item);
+          std::function<VehicleDataItem(const VehicleDataItem&)> remove_validation_params;
+          remove_validation_params = [&remove_validation_params](const VehicleDataItem& vd_item) -> VehicleDataItem {
+            VehicleDataItem result;
+            result.since = vd_item.since;
+            result.until = vd_item.until;
+            result.key = vd_item.key;
+            result.name = vd_item.name;
+            result.type = vd_item.type;
+            result.array = vd_item.array;
+            result.removed = vd_item.removed;
+            result.deprecated = vd_item.deprecated;
+            result.mark_initialized();
+
+            if (vd_item.params->is_initialized()) {
+              for (const auto& param : *vd_item.params) {
+                result.params->push_back(remove_validation_params(param));
+              }
+              result.params->mark_initialized();
+            }
+
+            return result;
+        };
+
+        auto processed_item = remove_validation_params(item);
+        TSchemaItemParameter<VehicleDataItem> tschema_item(processed_item);
         auto member_schema = VehicleDataItemSchema::create(
             tschema_item, VehicleDataItemSchema::SchemaType::HMI);
         return SMember(

@@ -32,7 +32,6 @@
 #include "smart_objects/object_schema_item.h"
 
 #include <algorithm>
-#include <sstream>
 
 #include "generated_msg_version.h"
 #include "smart_objects/always_false_schema_item.h"
@@ -48,7 +47,6 @@ const utils::SemanticVersion kModuleVersion(application_manager::major_version,
 }  // namespace
 namespace ns_smart_device_link {
 namespace ns_smart_objects {
-CREATE_LOGGERPTR_LOCAL(vehicle_log, "VEHICLELOG")
 
 SMember::SMember()
     : mSchemaItem(CAlwaysFalseSchemaItem::create())
@@ -91,10 +89,8 @@ bool SMember::CheckHistoryFieldVersion(
     const utils::SemanticVersion& MessageVersion) const {
   if (MessageVersion.isValid()) {
     if (mType == Type::CUSTOM) {
-      LOG4CXX_ERROR(vehicle_log, "CHECKING CUSTOM DATA: ");
       return CheckCustomVehicleData(MessageVersion);
     } else {
-      LOG4CXX_ERROR(vehicle_log, "CHECKING API DATA: ");
       return CheckAPIVehicleData(MessageVersion);
     }
   }
@@ -132,20 +128,6 @@ bool SMember::CheckAPIVehicleData(
   return true;
 }
 
-std::string SMember::to_string() const {
-  std::ostringstream out;
-
-  out << "Mandatory: " << mIsMandatory << "\n";
-  out << "Deprecated: " << mIsDeprecated << "\n";
-  out << "Removed: " << mIsRemoved << "\n";
-  out << "Valid: " << mIsValid << "\n";
-  out << "Type: " << (mType == Type::API ? "API" : "CUSTOM") << "\n";
-  out << "Since: " << (mSince != boost::none ? mSince.get().toString() : "NONE") << "\n";
-  out << "Until: " << (mUntil != boost::none ? mUntil.get().toString() : "NONE") << "\n";
-
-  return out.str();
-}
-
 std::shared_ptr<CObjectSchemaItem> CObjectSchemaItem::create(
     const Members& members) {
   return std::shared_ptr<CObjectSchemaItem>(new CObjectSchemaItem(members));
@@ -172,8 +154,6 @@ errors::eType CObjectSchemaItem::validate(
     const std::string& key = it->first;
     const SMember& member = it->second;
     const SMember& correct_member = GetCorrectMember(member, MessageVersion);
-
-    LOG4CXX_ERROR(vehicle_log, "" << key << " INFO: " << correct_member.to_string());
 
     std::set<std::string>::const_iterator key_it = object_keys.find(key);
     if (object_keys.end() == key_it) {
@@ -302,9 +282,6 @@ void CObjectSchemaItem::RemoveFakeParams(
     std::map<std::string, SMember>::const_iterator members_it =
         mMembers.find(key);
 
-    LOG4CXX_ERROR(vehicle_log, "PROCESSING " << key);
-    LOG4CXX_ERROR(vehicle_log,
-                  "MESSAGE VERSION: " << MessageVersion.toString());
     if (mMembers.end() != members_it) {
       const SMember& member =
           GetCorrectMember(members_it->second, MessageVersion);
