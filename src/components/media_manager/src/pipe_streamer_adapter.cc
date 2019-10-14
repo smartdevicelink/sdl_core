@@ -112,34 +112,47 @@ bool PipeStreamerAdapter::PipeStreamer::Send(
   struct timeval tv;
   tv.tv_sec = 10;
   tv.tv_usec = 0;
-  int retval = select(pipe_fd_ + 1, NULL, &wfds, NULL, &tv);
-  if (retval == -1) {
-    LOG4CXX_ERROR(logger_,
-                  "Failed writing data to pipe "
-                      << named_pipe_path_ << ". Errno: " << strerror(errno));
-    return false;
-  } else if (retval) {
-    ssize_t ret = write(pipe_fd_, msg->data(), msg->data_size());
-    if (-1 == ret) {
+  ssize_t write_ret = 0;
+  bool data_remaining = false;
+  do {
+    int select_ret = select(pipe_fd_ + 1, NULL, &wfds, NULL, &tv);
+    // Most likely pipe closed, fail stream
+    if (select_ret == -1) {
       LOG4CXX_ERROR(logger_,
                     "Failed writing data to pipe "
                         << named_pipe_path_ << ". Errno: " << strerror(errno));
       return false;
+      // Select success, attempt to write
+    } else if (select_ret) {
+      write_ret += write(
+          pipe_fd_, msg->data() + write_ret, msg->data_size() - write_ret);
+      if (-1 == write_ret) {
+        LOG4CXX_ERROR(logger_,
+                      "Failed writing data to pipe "
+                          << named_pipe_path_
+                          << ". Errno: " << strerror(errno));
+        return false;
+      }
+      // Select timed out, fail stream.
+    } else {
+      LOG4CXX_ERROR(logger_,
+                    "Failed writing data to pipe " << named_pipe_path_
+                                                   << ". Error: TIMEOUT");
+      return false;
     }
-
-    if (static_cast<uint32_t>(ret) != msg->data_size()) {
+    // Check that all data was written to the pipe.
+    data_remaining = static_cast<uint32_t>(write_ret) != msg->data_size();
+    if (data_remaining) {
       LOG4CXX_WARN(logger_,
-                   "Couldn't write all the data to pipe " << named_pipe_path_);
+                   "Couldn't write all the data to pipe "
+                       << named_pipe_path_ << ". "
+                       << msg->data_size() - write_ret << " bytes remaining");
     }
+    // Loop to send remaining data if there is any.
+  } while (data_remaining);
 
-    LOG4CXX_INFO(logger_, "Streamer::sent " << msg->data_size());
-    return true;
-  } else {
-    LOG4CXX_ERROR(logger_,
-                  "Failed writing data to pipe " << named_pipe_path_
-                                                 << ". Error: TIMEOUT");
-    return false;
-  }
+  LOG4CXX_INFO(logger_, "Streamer::sent " << msg->data_size());
+  return true;
 }
 
 }  // namespace media_manager
