@@ -71,6 +71,8 @@ using ::testing::ReturnRef;
 using ::testing::SaveArg;
 using ::testing::Truly;
 
+using application_manager::MockMessageHelper;
+
 namespace test {
 namespace components {
 namespace state_controller_test {
@@ -154,7 +156,6 @@ class StateControllerImplTest : public ::testing::Test {
   ~StateControllerImplTest() {
     Mock::VerifyAndClearExpectations(&message_helper_mock_);
   }
-
   NiceMock<application_manager_test::MockApplicationManager> app_manager_mock_;
   NiceMock<application_manager_test::MockRPCService> mock_rpc_service_;
   NiceMock<policy_test::MockPolicyHandlerInterface> policy_interface_;
@@ -1014,7 +1015,6 @@ class StateControllerImplTest : public ::testing::Test {
     ON_CALL(app_manager_mock_, event_dispatcher())
         .WillByDefault(ReturnRef(mock_event_dispatcher_));
     state_ctrl_ = std::make_shared<am::StateControllerImpl>(app_manager_mock_);
-
     ON_CALL(app_manager_mock_, applications())
         .WillByDefault(Return(applications_));
     ConfigureApps();
@@ -1025,6 +1025,22 @@ class StateControllerImplTest : public ::testing::Test {
 
   void TearDown() OVERRIDE {
     delete conn_handler;
+  }
+
+  application_manager::commands::MessageSharedPtr CreateCloseAppMessage() {
+    using namespace application_manager;
+
+    smart_objects::SmartObjectSPtr message =
+        std::make_shared<smart_objects::SmartObject>(
+            smart_objects::SmartType_Map);
+    (*message)[application_manager::strings::params]
+              [application_manager::strings::function_id] =
+                  hmi_apis::FunctionID::BasicCommunication_CloseApplication;
+    (*message)[strings::params][strings::message_type] = MessageType::kRequest;
+    (*message)[strings::params][strings::correlation_id] = kCorrID;
+    (*message)[strings::msg_params][strings::app_id] = kHMIAppID;
+
+    return message;
   }
 
   void SetConnection() {
@@ -1231,6 +1247,12 @@ class StateControllerImplTest : public ::testing::Test {
     using smart_objects::SmartObject;
     namespace FunctionID = hmi_apis::FunctionID;
 
+    ON_CALL(message_helper_mock_, GetBCCloseApplicationRequestToHMI(_, _))
+        .WillByDefault(Return(CreateCloseAppMessage()));
+    ON_CALL(app_manager_mock_, GetRPCService())
+        .WillByDefault(ReturnRef(mock_rpc_service_));
+    ON_CALL(mock_rpc_service_, ManageHMICommand(_, _))
+        .WillByDefault(Return(true));
     EXPECT_CALL(app_mock, CurrentHmiState(kDefaultWindowId))
         .WillRepeatedly(Return(NoneNotAudibleState()));
 
@@ -2587,14 +2609,20 @@ TEST_F(StateControllerImplTest,
 
 TEST_F(StateControllerImplTest, SetRegularStateWithNewHmiLvl) {
   using namespace mobile_apis;
+  auto message = CreateCloseAppMessage();
+  ON_CALL(message_helper_mock_, GetBCCloseApplicationRequestToHMI(_, _))
+      .WillByDefault(Return(message));
+  ON_CALL(app_manager_mock_, GetRPCService())
+      .WillByDefault(ReturnRef(mock_rpc_service_));
+  ON_CALL(mock_rpc_service_, ManageHMICommand(_, _))
+      .WillByDefault(Return(true));
+
+  ON_CALL(*simple_app_ptr_, RegularHmiState(kDefaultWindowId))
+      .WillByDefault(Return(NoneNotAudibleState()));
+  ON_CALL(*simple_app_ptr_, CurrentHmiState(kDefaultWindowId))
+      .WillByDefault(Return(NoneNotAudibleState()));
 
   HMILevel::eType set_lvl = HMILevel::HMI_NONE;
-  EXPECT_CALL(*simple_app_ptr_, RegularHmiState(kDefaultWindowId))
-      .WillOnce(Return(BackgroundState()));
-
-  EXPECT_CALL(*simple_app_ptr_, CurrentHmiState(kDefaultWindowId))
-      .WillOnce(Return(BackgroundState()))
-      .WillOnce(Return(BackgroundState()));
 
   state_ctrl_->SetRegularState(simple_app_, kDefaultWindowId, set_lvl);
 
@@ -2605,6 +2633,7 @@ TEST_F(StateControllerImplTest, SetRegularStateWithNewHmiLvl) {
   EXPECT_CALL(*simple_app_ptr_, CurrentHmiState(kDefaultWindowId))
       .WillOnce(Return(BackgroundState()))
       .WillOnce(Return(BackgroundState()));
+
   state_ctrl_->SetRegularState(simple_app_, kDefaultWindowId, set_lvl);
 
   set_lvl = HMILevel::HMI_FULL;

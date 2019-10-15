@@ -2068,6 +2068,51 @@ void ApplicationManagerImpl::ProcessServiceStatusUpdate(
       service_type, service_event, reason, app_id);
 
   rpc_service_->ManageHMICommand(notification);
+
+  if (hmi_apis::Common_ServiceEvent::REQUEST_REJECTED == service_event &&
+      StopServicesForApp(app, service_type)) {
+    state_ctrl_.SetRegularState(app,
+                                mobile_apis::PredefinedWindows::DEFAULT_WINDOW,
+                                mobile_apis::HMILevel::HMI_NONE,
+                                true);
+  }
+}
+
+bool ApplicationManagerImpl::StopServicesForApp(
+    ApplicationSharedPtr app,
+    const hmi_apis::Common_ServiceType::eType service_type) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  if (!app) {
+    LOG4CXX_WARN(logger_, "Received invalid app");
+    return false;
+  }
+
+  switch (service_type) {
+    case hmi_apis::Common_ServiceType::VIDEO:
+    case hmi_apis::Common_ServiceType::AUDIO: {
+      {
+        sync_primitives::AutoLock lock(navi_service_status_lock_);
+        auto app_services = navi_service_status_.find(app->app_id());
+        if (navi_service_status_.end() != app_services) {
+          navi_service_status_.erase(app_services);
+        }
+      }
+      LOG4CXX_DEBUG(logger_,
+                    "The start of service"
+                        << service_type << " for appID: " << app
+                        << " is failed. Service info has been removed");
+      return true;
+    }
+    case hmi_apis::Common_ServiceType::RPC: {
+      connection_handler().SendEndService(app->app_id(),
+                                          protocol_handler::ServiceType::kRpc);
+      LOG4CXX_DEBUG(logger_, "RPC service for appID: " << app << " is stopped");
+      return true;
+    }
+    default:
+      LOG4CXX_DEBUG(logger_, "Unknown service type: " << service_type);
+      return false;
+  }
 }
 
 void ApplicationManagerImpl::OnSecondaryTransportStartedCallback(
@@ -3365,6 +3410,7 @@ void ApplicationManagerImpl::EndNaviServices(uint32_t app_id) {
       connection_handler().SendEndService(app_id, ServiceType::kAudio);
       app->StopStreamingForce(ServiceType::kAudio);
     }
+
     DisallowStreaming(app_id);
 
     navi_app_to_stop_.push_back(app_id);

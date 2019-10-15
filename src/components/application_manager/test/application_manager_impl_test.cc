@@ -39,12 +39,14 @@
 #include "application_manager/application.h"
 #include "application_manager/application_impl.h"
 #include "application_manager/application_manager_impl.h"
+#include "application_manager/hmi_state.h"
 #include "application_manager/mock_app_service_manager.h"
 #include "application_manager/mock_application.h"
 #include "application_manager/mock_application_manager_settings.h"
 #include "application_manager/mock_resumption_data.h"
 #include "application_manager/mock_rpc_plugin_manager.h"
 #include "application_manager/mock_rpc_service.h"
+#include "application_manager/mock_state_controller.h"
 #include "application_manager/policies/mock_policy_handler_interface.h"
 #include "application_manager/resumption/resume_ctrl_impl.h"
 #include "application_manager/test/include/application_manager/mock_message_helper.h"
@@ -88,6 +90,7 @@ using ::testing::SaveArg;
 using ::testing::SetArgPointee;
 using ::testing::SetArgReferee;
 
+using test::components::application_manager_test::MockStateController;
 using test::components::policy_test::MockPolicyHandlerInterface;
 
 using namespace application_manager;
@@ -98,6 +101,7 @@ ACTION_P6(InvokeMemberFuncWithArg4, ptr, memberFunc, a, b, c, d) {
 }
 
 namespace {
+const uint32_t kCorrelationID = 54321u;
 const std::string kDirectoryName = "./test_storage";
 const uint32_t kTimeout = 10000u;
 connection_handler::DeviceHandle kDeviceId = 12345u;
@@ -170,8 +174,21 @@ class ApplicationManagerImplTest
  protected:
   void SetUp() OVERRIDE {
     CreateAppManager();
+    ON_CALL(mock_state_ctrl_,
+            SetRegularState(_,
+                            mobile_apis::PredefinedWindows::DEFAULT_WINDOW,
+                            mobile_apis::HMILevel::HMI_NONE,
+                            true));
     ON_CALL(*mock_app_ptr_, app_id()).WillByDefault(Return(kConnectionKey));
     ON_CALL(*mock_app_ptr_, device()).WillByDefault(Return(kDeviceId));
+
+    HmiStatePtr hmi_state(std::make_shared<HmiState>(
+        mock_app_ptr_, mock_app_mngr_, HmiState::STATE_ID_REGULAR));
+
+    ON_CALL(*mock_app_ptr_,
+            RegularHmiState(mobile_apis::PredefinedWindows::DEFAULT_WINDOW))
+        .WillByDefault(Return(hmi_state));
+
     ON_CALL(mock_session_observer_, GetDataOnSessionKey(_, _, _, _))
         .WillByDefault(DoAll(SetArgPointee<3u>(kDeviceId), Return(0)));
     ON_CALL(mock_connection_handler_, GetDataOnSessionKey(_, _, _, &kDeviceId))
@@ -195,6 +212,9 @@ class ApplicationManagerImplTest
         smart_objects::SmartType_Map);
     ON_CALL(*mock_message_helper_, CreateModuleInfoSO(_, _))
         .WillByDefault(Return(request));
+    ON_CALL(*mock_message_helper_, GetBCCloseApplicationRequestToHMI(_, _))
+        .WillByDefault(Return(std::make_shared<smart_objects::SmartObject>(
+            smart_objects::SmartType_Map)));
     ON_CALL(*mock_policy_handler_, GetStatisticManager())
         .WillByDefault(Return(mock_statistics_manager_));
   }
@@ -221,11 +241,28 @@ class ApplicationManagerImplTest
 
     app_manager_impl_.reset(new am::ApplicationManagerImpl(
         mock_application_manager_settings_, mock_policy_settings_));
-    mock_app_ptr_ = std::shared_ptr<MockApplication>(new MockApplication());
+    mock_app_ptr_ = std::shared_ptr<NiceMock<MockApplication> >(
+        new NiceMock<MockApplication>());
     app_manager_impl_->set_protocol_handler(&mock_protocol_handler_);
     app_manager_impl_->SetMockPolicyHandler(mock_policy_handler_);
     ASSERT_TRUE(app_manager_impl_.get());
     ASSERT_TRUE(mock_app_ptr_.get());
+  }
+
+  application_manager::commands::MessageSharedPtr CreateCloseAppMessage() {
+    using namespace application_manager;
+
+    smart_objects::SmartObjectSPtr message =
+        std::make_shared<smart_objects::SmartObject>(
+            smart_objects::SmartType_Map);
+    (*message)[application_manager::strings::params]
+              [application_manager::strings::function_id] =
+                  hmi_apis::FunctionID::BasicCommunication_CloseApplication;
+    (*message)[strings::params][strings::message_type] = MessageType::kRequest;
+    (*message)[strings::params][strings::correlation_id] = kCorrelationID;
+    (*message)[strings::msg_params][strings::app_id] = kAppId;
+
+    return message;
   }
 
   void AddMockApplication() {
@@ -273,6 +310,7 @@ class ApplicationManagerImplTest
   NiceMock<policy_test::MockPolicySettings> mock_policy_settings_;
   std::shared_ptr<NiceMock<resumption_test::MockResumptionData> > mock_storage_;
 
+  MockStateController mock_state_ctrl_;
   MockRPCService* mock_rpc_service_;
   resumption_test::MockLastState mock_last_state_;
   NiceMock<con_test::MockConnectionHandler> mock_connection_handler_;
@@ -284,7 +322,7 @@ class ApplicationManagerImplTest
   MockAppServiceManager* mock_app_service_manager_;
   application_manager::MockMessageHelper* mock_message_helper_;
 
-  std::shared_ptr<MockApplication> mock_app_ptr_;
+  std::shared_ptr<NiceMock<MockApplication> > mock_app_ptr_;
   NiceMock<protocol_handler_test::MockProtocolHandler> mock_protocol_handler_;
   std::shared_ptr<NiceMock<usage_statistics_test::MockStatisticsManager> >
       mock_statistics_manager_;
@@ -344,11 +382,16 @@ TEST_P(ApplicationManagerImplTest,
 
   ON_CALL(*mock_app_ptr_, app_id()).WillByDefault(Return(kConnectionKey));
 
+  auto close_message = CreateCloseAppMessage();
+  ON_CALL(*mock_message_helper_, GetBCCloseApplicationRequestToHMI(_, _))
+      .WillByDefault(Return(close_message));
   ON_CALL(*mock_message_helper_, CreateOnServiceUpdateNotification(_, _, _, _))
       .WillByDefault(Return(notification_));
 
-  EXPECT_CALL(*mock_rpc_service_, ManageHMICommand(notification_, _))
-      .WillOnce(Return(true));
+  ON_CALL(*mock_rpc_service_, ManageHMICommand(notification_, _))
+      .WillByDefault(Return(true));
+  ON_CALL(*mock_rpc_service_, ManageHMICommand(close_message, _))
+      .WillByDefault(Return(true));
 
   app_manager_impl_->ProcessServiceStatusUpdate(kConnectionKey,
                                                 GetParam().service_type_,
