@@ -124,15 +124,16 @@ bool PipeStreamerAdapter::PipeStreamer::Send(
       return false;
       // Select success, attempt to write
     } else if (select_ret) {
-      write_ret += write(
+      ssize_t temp_ret = write(
           pipe_fd_, msg->data() + write_ret, msg->data_size() - write_ret);
-      if (-1 == write_ret) {
+      if (-1 == temp_ret) {
         LOG4CXX_ERROR(logger_,
                       "Failed writing data to pipe "
                           << named_pipe_path_
                           << ". Errno: " << strerror(errno));
         return false;
       }
+      write_ret += temp_ret;
       // Select timed out, fail stream.
     } else {
       LOG4CXX_ERROR(logger_,
