@@ -53,7 +53,7 @@ struct SMember {
   /*
    *  @brief Defines if SMember belongs to Custom Vehicle data or API data
    */
-  enum class Type { CUSTOM = 0, API = 1 };
+  enum class Type { OEM_SPECIFIC = 0, RPC_SPECIFIC = 1 };
 
   /**
    * @brief Default constructor.
@@ -73,7 +73,7 @@ struct SMember {
           const bool IsDeprecated = false,
           const bool IsRemoved = false,
           const std::vector<SMember>& history_vector = {},
-          const Type type = Type::API);
+          const Type type = Type::RPC_SPECIFIC);
 
   /**
    * @brief Checks the version a parameter was removed (until)

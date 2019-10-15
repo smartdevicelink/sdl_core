@@ -54,7 +54,7 @@ SMember::SMember()
     , mIsDeprecated(false)
     , mIsRemoved(false)
     , mIsValid(true)
-    , mType(SMember::Type::API) {}
+    , mType(SMember::Type::RPC_SPECIFIC) {}
 
 SMember::SMember(const ISchemaItemPtr SchemaItem,
                  const bool IsMandatory,
@@ -88,7 +88,7 @@ SMember::SMember(const ISchemaItemPtr SchemaItem,
 bool SMember::CheckHistoryFieldVersion(
     const utils::SemanticVersion& MessageVersion) const {
   if (MessageVersion.isValid()) {
-    if (mType == Type::CUSTOM) {
+    if (mType == Type::OEM_SPECIFIC) {
       return CheckCustomVehicleData(MessageVersion);
     } else {
       return CheckAPIVehicleData(MessageVersion);
