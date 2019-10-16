@@ -473,11 +473,13 @@ bool RPCServiceImpl::HandleInvalidVehicleDataRPC(
         SendMessageToMobile(response);
         return true;
       }
-    } break;
+      break;
+    }
 
     case mobile_apis::FunctionID::OnVehicleDataID: {
       return true;
-    } break;
+      break;
+    }
 
     default:
       break;
