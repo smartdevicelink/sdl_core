@@ -72,6 +72,7 @@ class VehicleInfoPlugin : public plugins::RPCPlugin {
                                      VehicleInfoAppExtension& ext);
 
  private:
+  void UnsubscribeFromNonExistingVDItems();
   smart_objects::SmartObjectSPtr GetUnsubscribeIVIRequest(
       const std::vector<std::string>& ivi_names);
   void DeleteSubscriptions(app_mngr::ApplicationSharedPtr app);

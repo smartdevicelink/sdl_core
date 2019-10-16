@@ -82,6 +82,7 @@ app_mngr::CommandFactory& VehicleInfoPlugin::GetCommandFactory() {
 
 void VehicleInfoPlugin::OnPolicyEvent(plugins::PolicyEvent event) {
   custom_vehicle_data_manager_->OnPolicyEvent(event);
+  UnsubscribeFromNonExistingVDItems();
 }
 
 void VehicleInfoPlugin::OnApplicationEvent(
@@ -93,6 +94,29 @@ void VehicleInfoPlugin::OnApplicationEvent(
   } else if ((plugins::ApplicationEvent::kDeleteApplicationData == event) ||
              (plugins::ApplicationEvent::kApplicationUnregistered == event)) {
     DeleteSubscriptions(application);
+  }
+}
+
+void VehicleInfoPlugin::UnsubscribeFromNonExistingVDItems() {
+  auto applications = application_manager_->applications();
+  auto& std_vehicle_data = application_manager::MessageHelper::vehicle_data();
+
+  for (auto& app : applications.GetData()) {
+    auto& ext = VehicleInfoAppExtension::ExtractVIExtension(*app);
+    auto subscription_names = ext.Subscriptions();
+    for (auto& subscription_name : subscription_names) {
+      const bool is_std_vd_name =
+          std_vehicle_data.end() != std_vehicle_data.find(subscription_name);
+      const bool is_valid_custom_vd_name =
+          custom_vehicle_data_manager_->IsValidCustomVehicleDataName(
+              subscription_name);
+      if (!is_std_vd_name && !is_valid_custom_vd_name) {
+        LOG4CXX_DEBUG(logger_,
+                      "Vehicle data item " << subscription_name
+                                           << " has been revoked by policy");
+        ext.unsubscribeFromVehicleInfo(subscription_name);
+      }
+    }
   }
 }
 
