@@ -1699,9 +1699,6 @@
         </param>
     </struct>
     
-    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~ -->
-    <!-- Ford Specific Data Items -->
-    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~ -->
     <enum name="FileType" since="2.0">
         <description>Enumeration listing possible file types.</description>
         <element name="GRAPHIC_BMP" />
@@ -1890,10 +1887,6 @@
         </param>
     </struct>
     
-    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
-    <!-- / Ford Specific Data Items -->
-    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
-    
     <enum name="VehicleDataResultCode" since="2.0">
         <description>Enumeration that describes possible result codes of a vehicle data entry request.</description>
         <element name="SUCCESS" internal_name="VDRC_SUCCESS">
@@ -1903,7 +1896,7 @@
             <description>DTC / DID request successful, however, not all active DTCs or full contents of DID location available</description>
         </element>
         <element name="DISALLOWED" internal_name="VDRC_DISALLOWED">
-            <description>This vehicle data item is not allowed for this app by Ford.</description>
+            <description>This vehicle data item is not allowed for this app by the OEM/Manufactorer of the connected module.</description>
         </element>
         <element name="USER_DISALLOWED" internal_name="VDRC_USER_DISALLOWED">
             <description>The user has not granted access to this type of vehicle data item at this time.</description>
@@ -4458,7 +4451,7 @@
         
         <param name="appName" type="String" maxlength="100" mandatory="true" since="1.0">
             <description>
-                The mobile application name, e.g. "Ford Drive Green".
+                The mobile application name, e.g. "My SDL App".
                 Needs to be unique over all applications from the same device.
                 May not be empty.
                 May not start with a new line character.
@@ -4470,7 +4463,7 @@
         
         <param name="ttsName" type="TTSChunk" minsize="1" maxsize="100" array="true" mandatory="false" since="2.0">
             <description>
-                TTS string for VR recognition of the mobile application name, e.g. "Ford Drive Green".
+                TTS string for VR recognition of the mobile application name, e.g. "My S D L App".
                 Meant to overcome any failing on speech engine in properly pronouncing / understanding app name.
                 Needs to be unique over all applications from the same device.
                 May not be empty.
@@ -5899,8 +5892,6 @@
         <param name="cloudAppVehicleID" type="Boolean" mandatory="false" since="5.1">
             <description>Parameter used by cloud apps to identify a head unit</description>
         </param>
-        
-        <!-- Ford Specific Data Items -->
         <param name="eCallInfo" type="Boolean" mandatory="false">
             <description>Emergency Call notification and confirmation data</description>
         </param>
@@ -5916,9 +5907,6 @@
         <param name="myKey" type="Boolean" mandatory="false">
             <description>Information related to the MyKey feature</description>
         </param>
-        
-        <!-- / Ford Specific Data Items -->
-        
     </function>
     
     <function name="SubscribeVehicleData" functionID="SubscribeVehicleDataID" messagetype="response" since="2.0">
@@ -6017,8 +6005,6 @@
         <param name="cloudAppVehicleID" type="VehicleDataResult" mandatory="false" since="5.1">
             <description>Parameter used by cloud apps to identify a head unit</description>
         </param>
-        
-        <!-- Ford Specific Data Items -->
         <param name="eCallInfo" type="VehicleDataResult" mandatory="false">
             <description>Emergency Call notification and confirmation data</description>
         </param>
@@ -6034,8 +6020,6 @@
         <param name="myKey" type="VehicleDataResult" mandatory="false">
             <description>Information related to the MyKey feature</description>
         </param>
-        <!-- / Ford Specific Data Items -->
-        
     </function>
     
     <function name="UnsubscribeVehicleData" functionID="UnsubscribeVehicleDataID" messagetype="request" since="2.0">
@@ -6113,8 +6097,6 @@
         <param name="cloudAppVehicleID" type="Boolean" mandatory="false" since="5.1">
             <description>Parameter used by cloud apps to identify a head unit</description>
         </param>
-        
-        <!-- Ford Specific Data Items -->
         <param name="eCallInfo" type="Boolean" mandatory="false">
             <description>Emergency Call notification and confirmation data</description>
         </param>
@@ -6130,8 +6112,6 @@
         <param name="myKey" type="Boolean" mandatory="false">
             <description>Information related to the MyKey feature</description>
         </param>
-        <!-- / Ford Specific Data Items -->
-        
     </function>
     
     <function name="UnsubscribeVehicleData" functionID="UnsubscribeVehicleDataID" messagetype="response" since="2.0">
@@ -6229,8 +6209,6 @@
         <param name="cloudAppVehicleID" type="VehicleDataResult" mandatory="false" since="5.1">
             <description>Parameter used by cloud apps to identify a head unit</description>
         </param>
-        
-        <!-- Ford Specific Data Items -->
         <param name="eCallInfo" type="VehicleDataResult" mandatory="false">
             <description>Emergency Call notification and confirmation data</description>
         </param>
@@ -6246,8 +6224,6 @@
         <param name="myKey" type="VehicleDataResult" mandatory="false">
             <description>Information related to the MyKey feature</description>
         </param>
-        <!-- / Ford Specific Data Items -->
-        
     </function>
     
     <function name="GetVehicleData" functionID="GetVehicleDataID" messagetype="request" since="2.0">
@@ -6328,8 +6304,6 @@
         <param name="cloudAppVehicleID" type="Boolean" mandatory="false" since="5.1">
             <description>Parameter used by cloud apps to identify a head unit</description>
         </param>
-        
-        <!-- Ford Specific Data Items -->
         <param name="eCallInfo" type="Boolean" mandatory="false">
             <description>Emergency Call notification and confirmation data</description>
         </param>
@@ -6345,8 +6319,6 @@
         <param name="myKey" type="Boolean" mandatory="false">
             <description>Information related to the MyKey feature</description>
         </param>
-        <!-- / Ford Specific Data Items -->
-        
     </function>
     
     <function name="GetVehicleData" functionID="GetVehicleDataID" messagetype="response" since="2.0">
@@ -6448,8 +6420,6 @@
         <param name="cloudAppVehicleID" type="String" mandatory="false" since="5.1">
             <description>Parameter used by cloud apps to identify a head unit</description>
         </param>
-        
-        <!-- Ford Specific Data Items -->
         <param name="eCallInfo" type="ECallInfo" mandatory="false">
             <description>Emergency Call notification and confirmation data</description>
         </param>
@@ -6465,8 +6435,6 @@
         <param name="myKey" type="MyKey" mandatory="false">
             <description>Information related to the MyKey feature</description>
         </param>
-        <!-- / Ford Specific Data Items -->
-        
     </function>
     
     <function name="ReadDID" functionID="ReadDIDID" messagetype="request" since="2.0">
@@ -8149,8 +8117,6 @@
         <param name="cloudAppVehicleID" type="String" mandatory="false" since="5.1">
             <description>Parameter used by cloud apps to identify a head unit</description>
         </param>
-
-        <!-- Ford Specific Vehicle Data -->
         <param name="eCallInfo" type="ECallInfo" mandatory="false">
             <description>Emergency Call notification and confirmation data</description>
         </param>
@@ -8166,8 +8132,6 @@
         <param name="myKey" type="MyKey" mandatory="false">
             <description>Information related to the MyKey feature</description>
         </param>
-        <!-- / Ford Specific Vehicle Data -->
-        
     </function>
     
     <function name="OnCommand" functionID="OnCommandID" messagetype="notification" since="1.0">
