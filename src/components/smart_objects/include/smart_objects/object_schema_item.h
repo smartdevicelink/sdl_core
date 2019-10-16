@@ -51,8 +51,7 @@ namespace ns_smart_objects {
  **/
 struct SMember {
   /*
-   *  @brief Defines data type that SMember contains
-   *  (OEM specific or RPC specific)
+   *  @brief Defines data type that SMember contains.
    */
   enum class Type { OEM_SPECIFIC = 0, RPC_SPECIFIC = 1 };
 
