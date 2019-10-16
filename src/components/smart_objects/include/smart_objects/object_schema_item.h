@@ -51,7 +51,8 @@ namespace ns_smart_objects {
  **/
 struct SMember {
   /*
-   *  @brief Defines if SMember belongs to Custom Vehicle data or API data
+   *  @brief Defines data type that SMember contains
+   *  (OEM specific or RPC specific)
    */
   enum class Type { OEM_SPECIFIC = 0, RPC_SPECIFIC = 1 };
 
