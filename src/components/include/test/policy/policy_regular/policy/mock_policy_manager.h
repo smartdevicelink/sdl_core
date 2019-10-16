@@ -219,6 +219,8 @@ class MockPolicyManager : public PolicyManager {
   MOCK_CONST_METHOD0(GetPolicyTableData, Json::Value());
   MOCK_CONST_METHOD0(GetVehicleDataItems,
                      const std::vector<policy_table::VehicleDataItem>());
+  MOCK_CONST_METHOD0(GetRemovedVehicleDataItems,
+                     const std::vector<policy_table::VehicleDataItem>());
   MOCK_CONST_METHOD1(GetEnabledCloudApps,
                      void(std::vector<std::string>& enabled_apps));
   MOCK_CONST_METHOD7(GetCloudAppParameters,

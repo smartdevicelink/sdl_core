@@ -81,8 +81,8 @@ app_mngr::CommandFactory& VehicleInfoPlugin::GetCommandFactory() {
 }
 
 void VehicleInfoPlugin::OnPolicyEvent(plugins::PolicyEvent event) {
-  custom_vehicle_data_manager_->OnPolicyEvent(event);
   UnsubscribeFromNonExistingVDItems();
+  custom_vehicle_data_manager_->OnPolicyEvent(event);
 }
 
 void VehicleInfoPlugin::OnApplicationEvent(
@@ -98,26 +98,39 @@ void VehicleInfoPlugin::OnApplicationEvent(
 }
 
 void VehicleInfoPlugin::UnsubscribeFromNonExistingVDItems() {
-  auto applications = application_manager_->applications();
-  auto& std_vehicle_data = application_manager::MessageHelper::vehicle_data();
+  typedef std::vector<std::string> StringsVector;
 
-  for (auto& app : applications.GetData()) {
-    auto& ext = VehicleInfoAppExtension::ExtractVIExtension(*app);
-    auto subscription_names = ext.Subscriptions();
-    for (auto& subscription_name : subscription_names) {
-      const bool is_std_vd_name =
-          std_vehicle_data.end() != std_vehicle_data.find(subscription_name);
-      const bool is_valid_custom_vd_name =
-          custom_vehicle_data_manager_->IsValidCustomVehicleDataName(
-              subscription_name);
-      if (!is_std_vd_name && !is_valid_custom_vd_name) {
-        LOG4CXX_DEBUG(logger_,
-                      "Vehicle data item " << subscription_name
-                                           << " has been revoked by policy");
-        ext.unsubscribeFromVehicleInfo(subscription_name);
+  auto get_items_to_unsubscribe = [this](StringsVector& out_items) {
+    auto applications = application_manager_->applications();
+    for (auto& app : applications.GetData()) {
+      auto& ext = VehicleInfoAppExtension::ExtractVIExtension(*app);
+      auto subscription_names = ext.Subscriptions();
+      for (auto& subscription_name : subscription_names) {
+        if (custom_vehicle_data_manager_->IsRemovedCustomVehicleDataName(
+                subscription_name)) {
+          ext.unsubscribeFromVehicleInfo(subscription_name);
+          if (!helpers::in_range(out_items, subscription_name)) {
+            LOG4CXX_DEBUG(logger_,
+                          "Vehicle data item "
+                              << subscription_name
+                              << " has been removed by policy");
+            out_items.push_back(subscription_name);
+          }
+        }
       }
     }
+  };
+
+  StringsVector items_to_unsubscribe;
+  get_items_to_unsubscribe(items_to_unsubscribe);
+
+  if (items_to_unsubscribe.empty()) {
+    LOG4CXX_DEBUG(logger_, "There is no data to unsubscribe");
+    return;
   }
+
+  auto message = GetUnsubscribeIVIRequest(items_to_unsubscribe);
+  application_manager_->GetRPCService().ManageHMICommand(message);
 }
 
 void VehicleInfoPlugin::ProcessResumptionSubscription(
@@ -175,6 +188,8 @@ smart_objects::SmartObjectSPtr VehicleInfoPlugin::GetUnsubscribeIVIRequest(
     if (key_name.empty()) {
       // the name hasn't been found in vehicle data types
       if (custom_vehicle_data_manager_->IsValidCustomVehicleDataName(
+              ivi_name) ||
+          custom_vehicle_data_manager_->IsRemovedCustomVehicleDataName(
               ivi_name)) {
         key_name = ivi_name;
       }
