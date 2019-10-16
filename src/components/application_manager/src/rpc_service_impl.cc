@@ -456,6 +456,36 @@ void RPCServiceImpl::Handle(const impl::MessageToMobile message) {
   }
 }
 
+bool RPCServiceImpl::HandleInvalidVehicleDataRPC(
+    const mobile_apis::FunctionID::eType& api_function_id,
+    const application_manager::commands::MessageSharedPtr message) {
+  switch (api_function_id) {
+    case mobile_apis::FunctionID::GetVehicleDataID: {
+      if (mobile_apis::Result::SUCCESS ==
+          (*message)[strings::msg_params][strings::result_code].asUInt()) {
+        smart_objects::SmartObjectSPtr response =
+            MessageHelper::CreateNegativeResponse(
+                (*message)[strings::params][strings::connection_key].asUInt(),
+                api_function_id,
+                (*message)[strings::params][strings::correlation_id].asUInt(),
+                static_cast<int32_t>(mobile_apis::Result::GENERIC_ERROR));
+
+        SendMessageToMobile(response);
+        return true;
+      }
+    } break;
+
+    case mobile_apis::FunctionID::OnVehicleDataID: {
+      return true;
+    } break;
+
+    default:
+      break;
+  }
+
+  return false;
+}
+
 void RPCServiceImpl::SendMessageToMobile(
     const application_manager::commands::MessageSharedPtr message,
     bool final_message) {
@@ -541,30 +571,8 @@ void RPCServiceImpl::SendMessageToMobile(
                       << "\nError report: " << rpc::PrettyFormat(report));
 
     if (validation_result != smart_objects::errors::eType::OK) {
-      switch (api_function_id) {
-        case mobile_apis::FunctionID::GetVehicleDataID: {
-          if (mobile_apis::Result::SUCCESS ==
-              (*message)[strings::msg_params][strings::result_code].asUInt()) {
-            smart_objects::SmartObjectSPtr response =
-                MessageHelper::CreateNegativeResponse(
-                    (*message)[strings::params][strings::connection_key]
-                        .asUInt(),
-                    api_function_id,
-                    (*message)[strings::params][strings::correlation_id]
-                        .asUInt(),
-                    static_cast<int32_t>(mobile_apis::Result::GENERIC_ERROR));
-
-            SendMessageToMobile(response);
-            return;
-          }
-        } break;
-
-        case mobile_apis::FunctionID::OnVehicleDataID: {
-          return;
-        } break;
-
-        default:
-          break;
+      if (HandleInvalidVehicleDataRPC(api_function_id, message)) {
+        return;
       }
     }
   } else {
