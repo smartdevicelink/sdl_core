@@ -9,7 +9,8 @@ CREATE_LOGGERPTR_LOCAL(vehicle_data_logger, "VehicleDataItemSchema");
 
 VehicleDataItemSchema::VehicleDataItemSchema(PolicyDataItem& policy_item,
                                              SchemaType schema_type) {
-  policy_table::VehicleDataItem policy_data_item;
+  using namespace policy_table;
+  VehicleDataItem policy_data_item;
   policy_item.getValue(policy_data_item);
 
   auto get_object_schema = [&policy_data_item,
@@ -17,25 +18,69 @@ VehicleDataItemSchema::VehicleDataItemSchema(PolicyDataItem& policy_item,
     smart_objects::Members members;
     auto object_schema = smart_objects::CObjectSchemaItem::create(members);
 
-    for (auto& e : *policy_data_item.params) {
-      auto schema_item = PolicyDataItem(e);
+    std::set<std::string> vehicle_data_names;
+    for (const auto& item : *policy_data_item.params) {
+      vehicle_data_names.insert(item.name);
+    }
+
+    for (const auto& name : vehicle_data_names) {
+      std::vector<VehicleDataItem> full_history_vector;
+      std::copy_if(
+          policy_data_item.params->begin(),
+          policy_data_item.params->end(),
+          std::back_inserter(full_history_vector),
+          [&name](VehicleDataItem& item) { return item.name == name; });
+
+      std::sort(full_history_vector.begin(),
+                full_history_vector.end(),
+                [](const policy_table::VehicleDataItem& left,
+                   const policy_table::VehicleDataItem& right) {
+                  if (!right.since.is_initialized()) {
+                    return false;
+                  }
+                  if (!left.since.is_initialized()) {
+                    return true;
+                  }
+                  const std::string l = *left.since;
+                  const std::string r = *right.since;
+                  return std::stof(l.c_str()) > std::stof(r.c_str());
+                });
+
+      std::vector<smart_objects::SMember> history_vector = {};
+      for (auto history_iterator = full_history_vector.begin() + 1;
+           history_iterator < full_history_vector.end();
+           ++history_iterator) {
+        auto schema_item = PolicyDataItem(*history_iterator);
+        smart_objects::SMember member(create(schema_item, schema_type),
+                                      bool(history_iterator->mandatory),
+                                      std::string(*(history_iterator->since)),
+                                      std::string(*(history_iterator->until)),
+                                      bool(*(history_iterator->deprecated)),
+                                      bool(*(history_iterator->removed)));
+        history_vector.push_back(member);
+      }
+
+      const auto vehicle_data_item = full_history_vector.begin();
+      auto schema_item = PolicyDataItem(*vehicle_data_item);
       smart_objects::SMember member(create(schema_item, schema_type),
-                                    bool(e.mandatory),
-                                    std::string(*e.since),
-                                    std::string(*e.until),
-                                    bool(*e.deprecated),
-                                    bool(*e.removed));
-      std::string name;
+                                    bool(vehicle_data_item->mandatory),
+                                    std::string(*(vehicle_data_item->since)),
+                                    std::string(*(vehicle_data_item->until)),
+                                    bool(*(vehicle_data_item->deprecated)),
+                                    bool(*(vehicle_data_item->removed)),
+                                    history_vector);
+
+      std::string member_name;
       switch (schema_type) {
         case VehicleDataItemSchema::SchemaType::HMI:
-          name = e.key;
+          member_name = vehicle_data_item->key;
           break;
         case VehicleDataItemSchema::SchemaType::MOBILE:
         default:
-          name = e.name;
+          member_name = vehicle_data_item->name;
           break;
       }
-      object_schema->AddMemberSchemaItem(name, member);
+      object_schema->AddMemberSchemaItem(member_name, member);
     }
 
     return object_schema;
