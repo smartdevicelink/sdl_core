@@ -327,8 +327,9 @@ bool CacheManager::ApplyUpdate(const policy_table::Table& update_pt) {
 
     policy_table::VehicleDataItems custom_items_after_apply =
         *pt_->policy_table.vehicle_data->schema_items;
-    SetRemovedCustomVdItems(custom_items_before_apply,
-                            custom_items_after_apply);
+    const auto& items_diff = CalculateCustomVdItemsDiff(
+        custom_items_before_apply, custom_items_after_apply);
+    SetRemovedCustomVdItems(items_diff);
   }
 
   ResetCalculatedPermissions();
@@ -736,7 +737,7 @@ CacheManager::GetVehicleDataItems() const {
   return std::vector<policy_table::VehicleDataItem>();
 }
 
-const std::vector<policy_table::VehicleDataItem>
+std::vector<policy_table::VehicleDataItem>
 CacheManager::GetRemovedVehicleDataItems() const {
   CACHE_MANAGER_CHECK(std::vector<policy_table::VehicleDataItem>());
   return removed_custom_vd_items_;
@@ -1241,20 +1242,19 @@ void CacheManager::CheckSnapshotInitialization() {
   }
 }
 
-void CacheManager::SetRemovedCustomVdItems(
+policy_table::VehicleDataItems CacheManager::CalculateCustomVdItemsDiff(
     const policy_table::VehicleDataItems& items_before,
-    const policy_table::VehicleDataItems& items_after) {
+    const policy_table::VehicleDataItems& items_after) const {
   LOG4CXX_AUTO_TRACE(logger_);
   if (items_before.empty()) {
     LOG4CXX_DEBUG(logger_, "No custom VD items found in policy");
-    return;
+    return policy_table::VehicleDataItems();
   }
 
   if (items_after.empty()) {
     LOG4CXX_DEBUG(logger_,
                   "All custom VD items were removed after policy update");
-    removed_custom_vd_items_ = items_before;
-    return;
+    return items_before;
   }
 
   policy_table::VehicleDataItems removed_items;
@@ -1273,7 +1273,13 @@ void CacheManager::SetRemovedCustomVdItems(
 
   LOG4CXX_DEBUG(logger_,
                 "Was found " << removed_items.size() << " removed VD items");
-  removed_custom_vd_items_.swap(removed_items);
+  return removed_items;
+}
+
+void CacheManager::SetRemovedCustomVdItems(
+    const policy_table::VehicleDataItems& removed_items) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  removed_custom_vd_items_ = removed_items;
 }
 
 void CacheManager::PersistData() {

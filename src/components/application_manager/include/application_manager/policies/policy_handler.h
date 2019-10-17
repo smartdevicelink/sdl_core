@@ -704,7 +704,7 @@ class PolicyHandler : public PolicyHandlerInterface,
   const std::vector<rpc::policy_table_interface_base::VehicleDataItem>
   GetVehicleDataItems() const OVERRIDE;
 
-  const std::vector<rpc::policy_table_interface_base::VehicleDataItem>
+  std::vector<rpc::policy_table_interface_base::VehicleDataItem>
   GetRemovedVehicleDataItems() const OVERRIDE;
 
   void OnLockScreenDismissalStateChanged() FINAL;

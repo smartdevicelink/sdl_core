@@ -567,7 +567,7 @@ class PolicyManager : public usage_statistics::StatisticsManager,
    * @brief Gets removed vehicle data items
    * @return Structure with vehicle data items
    */
-  virtual const std::vector<policy_table::VehicleDataItem>
+  virtual std::vector<policy_table::VehicleDataItem>
   GetRemovedVehicleDataItems() const = 0;
 
   /**

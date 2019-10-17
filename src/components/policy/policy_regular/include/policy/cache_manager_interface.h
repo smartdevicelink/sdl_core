@@ -165,7 +165,7 @@ class CacheManagerInterface {
    * @brief Gets vehicle data items removed after the last PTU
    * @return List of removed vehicle data items
    */
-  virtual const std::vector<policy_table::VehicleDataItem>
+  virtual std::vector<policy_table::VehicleDataItem>
   GetRemovedVehicleDataItems() const = 0;
 
   /**

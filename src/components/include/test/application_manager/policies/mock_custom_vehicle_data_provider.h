@@ -15,7 +15,7 @@ class MockCustomVehicleDataProvider : public policy::VehicleDataItemProvider {
       const std::vector<rpc::policy_table_interface_base::VehicleDataItem>());
   MOCK_CONST_METHOD0(
       GetRemovedVehicleDataItems,
-      const std::vector<rpc::policy_table_interface_base::VehicleDataItem>());
+      std::vector<rpc::policy_table_interface_base::VehicleDataItem>());
 };
 
 }  // namespace policy_test

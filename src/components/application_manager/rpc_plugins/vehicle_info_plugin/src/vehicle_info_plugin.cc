@@ -100,7 +100,8 @@ void VehicleInfoPlugin::OnApplicationEvent(
 void VehicleInfoPlugin::UnsubscribeFromNonExistingVDItems() {
   typedef std::vector<std::string> StringsVector;
 
-  auto get_items_to_unsubscribe = [this](StringsVector& out_items) {
+  auto get_items_to_unsubscribe = [this]() -> StringsVector {
+    StringsVector output_items_list;
     auto applications = application_manager_->applications();
     for (auto& app : applications.GetData()) {
       auto& ext = VehicleInfoAppExtension::ExtractVIExtension(*app);
@@ -109,20 +110,20 @@ void VehicleInfoPlugin::UnsubscribeFromNonExistingVDItems() {
         if (custom_vehicle_data_manager_->IsRemovedCustomVehicleDataName(
                 subscription_name)) {
           ext.unsubscribeFromVehicleInfo(subscription_name);
-          if (!helpers::in_range(out_items, subscription_name)) {
+          if (!helpers::in_range(output_items_list, subscription_name)) {
             LOG4CXX_DEBUG(logger_,
                           "Vehicle data item "
                               << subscription_name
                               << " has been removed by policy");
-            out_items.push_back(subscription_name);
+            output_items_list.push_back(subscription_name);
           }
         }
       }
     }
+    return output_items_list;
   };
 
-  StringsVector items_to_unsubscribe;
-  get_items_to_unsubscribe(items_to_unsubscribe);
+  const StringsVector items_to_unsubscribe = get_items_to_unsubscribe();
 
   if (items_to_unsubscribe.empty()) {
     LOG4CXX_DEBUG(logger_, "There is no data to unsubscribe");

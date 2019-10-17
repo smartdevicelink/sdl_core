@@ -514,7 +514,8 @@ CustomVehicleDataManagerImpl::FindRemovedSchemaByNameNonRecursive(
     const std::string& name) const {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  auto& removed_oem_items = vehicle_data_provider_.GetRemovedVehicleDataItems();
+  const auto& removed_oem_items =
+      vehicle_data_provider_.GetRemovedVehicleDataItems();
   auto compare_by_name = [&name](const policy_table::VehicleDataItem& item) {
     return (name == std::string(item.name));
   };

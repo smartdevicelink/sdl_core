@@ -663,7 +663,7 @@ class PolicyManagerImpl : public PolicyManager {
   const std::vector<policy_table::VehicleDataItem> GetVehicleDataItems()
       const OVERRIDE;
 
-  const std::vector<policy_table::VehicleDataItem> GetRemovedVehicleDataItems()
+  std::vector<policy_table::VehicleDataItem> GetRemovedVehicleDataItems()
       const OVERRIDE;
 
   /**

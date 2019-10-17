@@ -2325,7 +2325,7 @@ policy::PolicyHandler::GetVehicleDataItems() const {
   return policy_manager_->GetVehicleDataItems();
 }
 
-const std::vector<rpc::policy_table_interface_base::VehicleDataItem>
+std::vector<rpc::policy_table_interface_base::VehicleDataItem>
 policy::PolicyHandler::GetRemovedVehicleDataItems() const {
   return policy_manager_->GetRemovedVehicleDataItems();
 }

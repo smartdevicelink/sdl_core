@@ -24,7 +24,7 @@ class VehicleDataItemProvider {
    * @brief Gets vehicle data items removed by policies
    * @return Structure with vehicle data items
    */
-  virtual const std::vector<rpc::policy_table_interface_base::VehicleDataItem>
+  virtual std::vector<rpc::policy_table_interface_base::VehicleDataItem>
   GetRemovedVehicleDataItems() const = 0;
 };
 }  // namespace policy
