@@ -655,6 +655,9 @@ class PolicyManagerImpl : public PolicyManager {
   const std::vector<policy_table::VehicleDataItem> GetVehicleDataItems()
       const OVERRIDE;
 
+  std::vector<policy_table::VehicleDataItem> GetRemovedVehicleDataItems()
+      const OVERRIDE;
+
   /**
    * @brief Get a list of enabled cloud applications
    * @param enabled_apps List filled with the policy app id of each enabled
