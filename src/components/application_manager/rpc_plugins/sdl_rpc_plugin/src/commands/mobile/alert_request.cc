@@ -352,6 +352,10 @@ void AlertRequest::SendAlertRequest(int32_t app_id) {
         (*message_)[strings::msg_params][strings::soft_buttons];
     MessageHelper::SubscribeApplicationToSoftButton(
         (*message_)[strings::msg_params], app, function_id());
+    msg_params[strings::duration] = 0;
+  } else {
+    msg_params[strings::duration] =
+        (*message_)[strings::msg_params][strings::duration].asUInt();
   }
 
   if ((*message_)[strings::msg_params].keyExists(strings::alert_icon)) {
@@ -372,8 +376,6 @@ void AlertRequest::SendAlertRequest(int32_t app_id) {
 
   // app_id
   msg_params[strings::app_id] = app_id;
-  msg_params[strings::duration] =
-      (*message_)[strings::msg_params][strings::duration].asUInt();
 
   // NAVI platform progressIndicator
   if ((*message_)[strings::msg_params].keyExists(strings::progress_indicator)) {
