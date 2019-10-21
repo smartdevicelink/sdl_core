@@ -4086,8 +4086,8 @@
         <element name="VIDEO_STREAMING"/>
         <element name="REMOTE_CONTROL"/>
         <element name="APP_SERVICES" />
-        <element name="DISPLAYS"/>
         <element name="SEAT_LOCATION"/>
+        <element name="DISPLAYS"/>
     </enum>
 
     <struct name="SystemCapability">

@@ -139,7 +139,7 @@
             <description>The data sent failed to pass CRC check in receiver end</description>
         </element>
         <element name="ENCRYPTION_NEEDED" since="6.0">
-        <description>SDL receives an un-encrypted PRC request that needs protection. </description>
+            <description>SDL receives an un-encrypted RPC request that needs protection. </description>
         </element>
     </enum>
     
@@ -923,7 +923,7 @@
         </element>
 
         <element name="alertIcon" since="6.0">
-            <description>The image field for Alert</description>>
+            <description>The image field for Alert</description>
         </element>
 
     </enum>
@@ -1699,9 +1699,6 @@
         </param>
     </struct>
     
-    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~ -->
-    <!-- Ford Specific Data Items -->
-    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~ -->
     <enum name="FileType" since="2.0">
         <description>Enumeration listing possible file types.</description>
         <element name="GRAPHIC_BMP" />
@@ -1890,10 +1887,6 @@
         </param>
     </struct>
     
-    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
-    <!-- / Ford Specific Data Items -->
-    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
-    
     <enum name="VehicleDataResultCode" since="2.0">
         <description>Enumeration that describes possible result codes of a vehicle data entry request.</description>
         <element name="SUCCESS" internal_name="VDRC_SUCCESS">
@@ -1903,7 +1896,7 @@
             <description>DTC / DID request successful, however, not all active DTCs or full contents of DID location available</description>
         </element>
         <element name="DISALLOWED" internal_name="VDRC_DISALLOWED">
-            <description>This vehicle data item is not allowed for this app by Ford.</description>
+            <description>This vehicle data item is not allowed for this app by the OEM/Manufactorer of the connected module.</description>
         </element>
         <element name="USER_DISALLOWED" internal_name="VDRC_USER_DISALLOWED">
             <description>The user has not granted access to this type of vehicle data item at this time.</description>
@@ -2253,7 +2246,7 @@
         <history>
             <struct name="DisplayCapabilities" since="1.0" until="6.0"/>
         </history>
-        <description>Contains information about the display capabilities.</description>
+        <description>Contains information about the display capabilities. This struct is deprecated; please see the new SystemCapability DISPLAYS and corresponding struct DisplayCapability </description>
         <param name="displayType" type="DisplayType" mandatory="true" deprecated="true" since="5.0">
             <description>The type of the display. See DisplayType</description>
             <history>
@@ -2286,7 +2279,7 @@
         </param>
         <!-- TODO:  Add pixel density? -->
     </struct>
-    
+
     <struct name="Grid" since="6.0">
         <description>Describes a location (origin coordinates and span) of a vehicle component.</description>
         <param name="col" type="Integer" mandatory="true" minvalue="-1" maxvalue="100">
@@ -2302,7 +2295,7 @@
         <param name="levelspan" type="Integer" mandatory="false" defvalue="1" minvalue="1" maxvalue="100">
         </param>
     </struct>
-    
+
     <struct name="ModuleInfo" since="6.0">
         <description>Information about a RC module</description>
         <param name="moduleId" type="String" maxlength="100" mandatory="true">
@@ -2318,7 +2311,7 @@
             <description>allow multiple users/apps to access the module or not </description>
         </param>
     </struct>
-    
+
     <struct name="ButtonCapabilities" since="1.0">
         <description>Contains information about a button's capabilities.</description>
         <param name="name" type="ButtonName" mandatory="true">
@@ -2390,8 +2383,9 @@
     <struct name="WindowCapability" since="6.0">
         <param name="windowID" type="Integer" mandatory="false">
             <description>
-                The specified ID of the window. Can be set to a predefined window,
-                or omitted for the main window on the main display.
+                The specified ID of the window. This ID is either one used when sending the CreateWindow request, 
+                or one of the predefined window ID values from the enum PredefinedWindows. If ommited, value is 
+                assumed to be the main window on the main display.
             </description>
         </param>
         <param name="textFields" type="TextField" minsize="1" maxsize="100" array="true" mandatory="false">
@@ -3030,8 +3024,8 @@
         <element name="VIDEO_STREAMING"/>
         <element name="REMOTE_CONTROL"/>
         <element name="APP_SERVICES" since="5.1"/>
-        <element name="DISPLAYS" since="6.0"/>
         <element name="SEAT_LOCATION" since="6.0"/>
+        <element name="DISPLAYS" since="6.0"/>
     </enum>
     
     <struct name="NavigationCapability" since="4.5">
@@ -3076,13 +3070,13 @@
             <description>True if the system can utilize the haptic spatial data from the source being streamed. If not included, it can be assumed the module doesn't support haptic spatial data'. </description>
         </param>
         <param name="diagonalScreenSize" type="Float" minvalue="0" mandatory="false" since="6.0">
-          <description>The diagonal screen size in inches.</description>
+            <description>The diagonal screen size in inches.</description>
         </param>
         <param name="pixelPerInch" type="Float" minvalue="0" mandatory="false" since="6.0">
-          <description>PPI is the diagonal resolution in pixels divided by the diagonal screen size in inches.</description>
+            <description>PPI is the diagonal resolution in pixels divided by the diagonal screen size in inches.</description>
         </param>
         <param name="scale" type="Float" minvalue="1" maxvalue="10" mandatory="false" since="6.0">
-          <description>The scaling factor the app should use to change the size of the projecting view.</description>
+            <description>The scaling factor the app should use to change the size of the projecting view.</description>
         </param>
     </struct>
 
@@ -3209,6 +3203,7 @@
                 <param name="id" type="SupportedSeat" mandatory="true" since="5.0" until="6.0"/>
             </history>
         </param>
+        
         <param name="heatingEnabled" type="Boolean" mandatory="false"></param>
         <param name="coolingEnabled" type="Boolean" mandatory="false"></param>
         <param name="heatingLevel" type="Integer" minvalue="0" maxvalue="100" mandatory="false"></param>
@@ -3415,6 +3410,7 @@
             <description>value false means disabled, value true means enabled.</description>
         </param>
         <param name="climateEnable" type="Boolean" mandatory="false" since="6.0">
+            <description>True if the climate module is on, false if the climate module is off</description>
         </param>
     </struct>
 
@@ -4435,10 +4431,10 @@
         <param name="appServicesCapabilities" type="AppServicesCapabilities" mandatory="false" since="5.1">
             <description>An array of currently available services. If this is an update to the capability the affected services will include an update reason in that item</description>
         </param>
-        <param name="displayCapabilities" type="DisplayCapability" array="true" minsize="1" maxsize="1000" mandatory="false" since="6.0"/>
         <param name="seatLocationCapability" type="SeatLocationCapability" mandatory="false" since="6.0">
             <description>Contains information about the locations of each seat</description>
         </param>
+        <param name="displayCapabilities" type="DisplayCapability" array="true" minsize="1" maxsize="1000" mandatory="false" since="6.0"/>
     </struct>
 
     <!-- Requests/Responses -->
@@ -4455,7 +4451,7 @@
         
         <param name="appName" type="String" maxlength="100" mandatory="true" since="1.0">
             <description>
-                The mobile application name, e.g. "Ford Drive Green".
+                The mobile application name, e.g. "My SDL App".
                 Needs to be unique over all applications from the same device.
                 May not be empty.
                 May not start with a new line character.
@@ -4467,7 +4463,7 @@
         
         <param name="ttsName" type="TTSChunk" minsize="1" maxsize="100" array="true" mandatory="false" since="2.0">
             <description>
-                TTS string for VR recognition of the mobile application name, e.g. "Ford Drive Green".
+                TTS string for VR recognition of the mobile application name, e.g. "My S D L App".
                 Meant to overcome any failing on speech engine in properly pronouncing / understanding app name.
                 Needs to be unique over all applications from the same device.
                 May not be empty.
@@ -4619,7 +4615,7 @@
         <param name="presetBankCapabilities" type="PresetBankCapabilities" mandatory="false" deprecated="true" since="6.0">
             <description>
                 If returned, the platform supports custom on-screen Presets; see PresetBankCapabilities.
-                This parameter is deprecated and replaced by  SystemCapability using DISPLAYS.
+                This parameter is deprecated and replaced by SystemCapability using DISPLAYS.
             </description>
             <history>
                 <param name="presetBankCapabilities" type="PresetBankCapabilities" mandatory="false" since="2.0" until="6.0"/>
@@ -4661,7 +4657,7 @@
         </param>
         
         <param name="hmiCapabilities" type="HMICapabilities" mandatory="false" since="3.0">
-            <description>Specifies the HMIÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢s capabilities. See HMICapabilities.</description>
+            <description>Specifies the HMI's capabilities. See HMICapabilities.</description>
         </param>
         
         <param name="sdlVersion" type="String" maxlength="100" mandatory="false" platform="documentation" since="3.0">
@@ -4817,7 +4813,6 @@
         <param name="userLocation" type="SeatLocation" mandatory="false" since="6.0">
             <description>Location of the user's seat. Default is driver's seat location if it is not set yet.</description>
         </param>
-        
         <param name="helpPrompt" type="TTSChunk" minsize="1" maxsize="100" array="true" mandatory="false" since="1.0">
             <description>
                 The help prompt.
@@ -5105,18 +5100,22 @@
     
     <function name="ShowAppMenu" functionID="ShowAppMenuID" messagetype="request" since="6.0">
         <description>Shows the built in menu view</description>
+
         <param name="menuID" type="Integer" minvalue="1" maxvalue="2000000000" mandatory="false">
             <description>
                 If omitted the HMI opens the app's menu.
                 If set to a sub-menu ID the HMI opens the corresponding sub-menu previously added using `AddSubMenu`.
             </description>
         </param>
+
     </function>
 
     <function name="ShowAppMenu" functionID="ShowAppMenuID" messagetype="response" since="6.0">
+
         <param name="success" type="Boolean" platform="documentation" mandatory="true">
             <description> true if successful; false, if failed </description>
         </param>
+    
         <param name="resultCode" type="Result" platform="documentation" mandatory="true">
             <description>See Result</description>
             <element name="SUCCESS"/>
@@ -5129,9 +5128,11 @@
             <element name="INVALID_ID"/>
             <element name="IN_USE"/>
         </param>
+    
         <param name="info" type="String" maxlength="1000" mandatory="false" platform="documentation">
             <description>Provides additional human readable info regarding the result.</description>
         </param>
+    
     </function>
 
     <function name="CreateInteractionChoiceSet" functionID="CreateInteractionChoiceSetID" messagetype="request" since="1.0">
@@ -5230,10 +5231,10 @@
 
         <param name="cancelID" type="Integer" mandatory="false" since="6.0">
             <description>
-                An ID for this specific alert to allow cancellation through the `CancelInteraction` RPC.
+                An ID for this specific PerformInteraction to allow cancellation through the `CancelInteraction` RPC.
             </description>
         </param>
-        
+
     </function>
     
     <function name="PerformInteraction" functionID="PerformInteractionID" messagetype="response" since="1.0">
@@ -5373,7 +5374,7 @@
                 If omitted on supported displays, no (or the default if applicable) icon should be displayed.
             </description>
         </param>
-        
+
         <param name="cancelID" type="Integer" mandatory="false" since="6.0">
             <description>
                 An ID for this specific alert to allow cancellation through the `CancelInteraction` RPC.
@@ -5508,9 +5509,11 @@
         </param>
         
         <param name="metadataTags" type="MetadataTags" mandatory="false" since="4.5">
-            <description>App defined metadata information. See MetadataStruct. Uses mainField1, mainField2, mainField3, mainField4.
+            <description>
+                App defined metadata information. See MetadataStruct. Uses mainField1, mainField2, mainField3, mainField4.
                 If omitted on supported displays, the currently set metadata tags will not change.
-                If any text field contains no tags or the none tag, the metadata tag for that textfield should be removed.</description>
+                If any text field contains no tags or the none tag, the metadata tag for that textfield should be removed.
+            </description>
         </param>
 
         <param name="templateTitle" type="String" minlength="0" maxlength="100" mandatory="false" since="6.0">
@@ -5519,7 +5522,6 @@
                 How this will be displayed is dependent on the OEM design and implementation of the template.
             </description>
         </param>
-
         <param name="windowID" type="Integer" mandatory="false" since="6.0" >
             <description>
                 This is the unique ID assigned to the window that this RPC is intended. If this param is not included,
@@ -5890,8 +5892,6 @@
         <param name="cloudAppVehicleID" type="Boolean" mandatory="false" since="5.1">
             <description>Parameter used by cloud apps to identify a head unit</description>
         </param>
-        
-        <!-- Ford Specific Data Items -->
         <param name="eCallInfo" type="Boolean" mandatory="false">
             <description>Emergency Call notification and confirmation data</description>
         </param>
@@ -5907,9 +5907,6 @@
         <param name="myKey" type="Boolean" mandatory="false">
             <description>Information related to the MyKey feature</description>
         </param>
-        
-        <!-- / Ford Specific Data Items -->
-        
     </function>
     
     <function name="SubscribeVehicleData" functionID="SubscribeVehicleDataID" messagetype="response" since="2.0">
@@ -6008,8 +6005,6 @@
         <param name="cloudAppVehicleID" type="VehicleDataResult" mandatory="false" since="5.1">
             <description>Parameter used by cloud apps to identify a head unit</description>
         </param>
-        
-        <!-- Ford Specific Data Items -->
         <param name="eCallInfo" type="VehicleDataResult" mandatory="false">
             <description>Emergency Call notification and confirmation data</description>
         </param>
@@ -6025,8 +6020,6 @@
         <param name="myKey" type="VehicleDataResult" mandatory="false">
             <description>Information related to the MyKey feature</description>
         </param>
-        <!-- / Ford Specific Data Items -->
-        
     </function>
     
     <function name="UnsubscribeVehicleData" functionID="UnsubscribeVehicleDataID" messagetype="request" since="2.0">
@@ -6104,8 +6097,6 @@
         <param name="cloudAppVehicleID" type="Boolean" mandatory="false" since="5.1">
             <description>Parameter used by cloud apps to identify a head unit</description>
         </param>
-        
-        <!-- Ford Specific Data Items -->
         <param name="eCallInfo" type="Boolean" mandatory="false">
             <description>Emergency Call notification and confirmation data</description>
         </param>
@@ -6121,8 +6112,6 @@
         <param name="myKey" type="Boolean" mandatory="false">
             <description>Information related to the MyKey feature</description>
         </param>
-        <!-- / Ford Specific Data Items -->
-        
     </function>
     
     <function name="UnsubscribeVehicleData" functionID="UnsubscribeVehicleDataID" messagetype="response" since="2.0">
@@ -6220,8 +6209,6 @@
         <param name="cloudAppVehicleID" type="VehicleDataResult" mandatory="false" since="5.1">
             <description>Parameter used by cloud apps to identify a head unit</description>
         </param>
-        
-        <!-- Ford Specific Data Items -->
         <param name="eCallInfo" type="VehicleDataResult" mandatory="false">
             <description>Emergency Call notification and confirmation data</description>
         </param>
@@ -6237,8 +6224,6 @@
         <param name="myKey" type="VehicleDataResult" mandatory="false">
             <description>Information related to the MyKey feature</description>
         </param>
-        <!-- / Ford Specific Data Items -->
-        
     </function>
     
     <function name="GetVehicleData" functionID="GetVehicleDataID" messagetype="request" since="2.0">
@@ -6319,8 +6304,6 @@
         <param name="cloudAppVehicleID" type="Boolean" mandatory="false" since="5.1">
             <description>Parameter used by cloud apps to identify a head unit</description>
         </param>
-        
-        <!-- Ford Specific Data Items -->
         <param name="eCallInfo" type="Boolean" mandatory="false">
             <description>Emergency Call notification and confirmation data</description>
         </param>
@@ -6336,8 +6319,6 @@
         <param name="myKey" type="Boolean" mandatory="false">
             <description>Information related to the MyKey feature</description>
         </param>
-        <!-- / Ford Specific Data Items -->
-        
     </function>
     
     <function name="GetVehicleData" functionID="GetVehicleDataID" messagetype="response" since="2.0">
@@ -6439,8 +6420,6 @@
         <param name="cloudAppVehicleID" type="String" mandatory="false" since="5.1">
             <description>Parameter used by cloud apps to identify a head unit</description>
         </param>
-        
-        <!-- Ford Specific Data Items -->
         <param name="eCallInfo" type="ECallInfo" mandatory="false">
             <description>Emergency Call notification and confirmation data</description>
         </param>
@@ -6456,8 +6435,6 @@
         <param name="myKey" type="MyKey" mandatory="false">
             <description>Information related to the MyKey feature</description>
         </param>
-        <!-- / Ford Specific Data Items -->
-        
     </function>
     
     <function name="ReadDID" functionID="ReadDIDID" messagetype="request" since="2.0">
@@ -6615,13 +6592,11 @@
                 If omitted on supported displays, only the system defined "Close" SoftButton will be displayed.
             </description>
         </param>
-
         <param name="cancelID" type="Integer" mandatory="false" since="6.0">
             <description>
-                An ID for this specific alert to allow cancellation through the `CancelInteraction` RPC.
+                An ID for this specific ScrollableMessage to allow cancellation through the `CancelInteraction` RPC.
             </description>
         </param>
-
     </function>
     
     <function name="ScrollableMessage" functionID="ScrollableMessageID" messagetype="response" since="2.0">
@@ -6678,7 +6653,7 @@
         </param>
         <param name="cancelID" type="Integer" mandatory="false" since="6.0">
             <description>
-                An ID for this specific alert to allow cancellation through the `CancelInteraction` RPC.
+                An ID for this specific Slider to allow cancellation through the `CancelInteraction` RPC.
             </description>
         </param>
     </function>
@@ -7291,6 +7266,10 @@
             <element name="TIMED_OUT"/>
             <element name="IGNORED"/>
         </param>
+
+        <param name="info" type="String" maxlength="1000" mandatory="false" platform="documentation">
+            <description>Provides additional human readable info regarding the result.</description>
+        </param>
     </function>
     
     <function name="SendLocation" functionID="SendLocationID" messagetype="request" since="3.0">
@@ -7482,20 +7461,19 @@
             </description>
         </param>
     </function>
+
     <function name="GetInteriorVehicleDataConsent" functionID="GetInteriorVehicleDataConsentID" messagetype="request" since="6.0">
         <param name="moduleType" type="ModuleType" mandatory="true">
-          <description>The module type that the app requests to control.</description>
+            <description>The module type that the app requests to control.</description>
         </param>
         <param name="moduleIds" type="String" maxlength="100" array="true" mandatory="true">
-          <description>Ids of a module of same type, published by System Capability. </description>
+            <description>Ids of a module of same type, published by System Capability. </description>
        </param>
     </function>
-    
+
     <function name="GetInteriorVehicleDataConsent" functionID="GetInteriorVehicleDataConsentID" messagetype="response" since="6.0">
-        <param name="allowed" type="Boolean" array="true" mandatory="false">
-            <description>This array has the same size as "moduleIds" in the request; each element corresponding to one moduleId  
-            "true" - if SDL grants the permission for the requested module;
-            "false" - SDL denies the permission for the requested module.</description>
+        <param name="success" type="Boolean" platform="documentation" mandatory="true">
+            <description> true if successful; false, if failed </description>
         </param>
         <param name="resultCode" type="Result" platform="documentation" mandatory="true">
             <description>See Result</description>
@@ -7513,11 +7491,15 @@
         </param>
         <param name="info" type="String" maxlength="1000" mandatory="false">
         </param>
-        <param name="success" type="Boolean" platform="documentation" mandatory="true">
-            <description> true if successful; false, if failed </description>
+        <param name="allowed" type="Boolean" array="true" mandatory="false">
+            <description>
+                This array has the same size as "moduleIds" in the request and each element corresponds to one moduleId
+                If true, SDL grants the permission for the requested module
+                If false, SDL denies the permission for the requested module.
+            </description>
         </param>
     </function>
-    
+
     <function name="ReleaseInteriorVehicleDataModule" functionID="ReleaseInteriorVehicleDataModuleID" messagetype="request" since="6.0">
         <param name="moduleType" type="ModuleType" mandatory="true">
         </param>
@@ -7525,8 +7507,11 @@
            <description>Id of a module, published by System Capability. </description>
         </param>
     </function>
-    
+
     <function name="ReleaseInteriorVehicleDataModule" functionID="ReleaseInteriorVehicleDataModuleID" messagetype="response" since="6.0">
+        <param name="success" type="Boolean" platform="documentation" mandatory="true">
+            <description> true if successful; false, if failed </description>
+        </param>
         <param name="resultCode" type="Result" platform="documentation" mandatory="true">
             <description>See Result</description>
             <element name="SUCCESS"/>
@@ -7541,9 +7526,6 @@
             <element name="UNSUPPORTED_RESOURCE"/>
         </param>
         <param name="info" type="String" maxlength="1000" mandatory="false">
-        </param>
-        <param name="success" type="Boolean" platform="documentation" mandatory="true">
-            <description> true if successful; false, if failed </description>
         </param>
     </function>
     
@@ -7831,13 +7813,13 @@
             <description> The ID of the service to be unpublished. </description>
         </param>
     </function>
-    
+
     <function name="UnpublishAppService" functionID="UnpublishAppServiceID" messagetype="response" since="6.0">
         <description> The response to UnpublishAppService </description>
         <param name="success" type="Boolean" platform="documentation" mandatory="true">
             <description> true, if successful; false, if failed </description>
         </param>
-       
+
         <param name="resultCode" type="Result" platform="documentation" mandatory="true">
             <description>See Result</description>
             <element name="SUCCESS"/>
@@ -7961,10 +7943,17 @@
         <param name="resultCode" type="Result" platform="documentation" mandatory="true">
             <description>See Result</description>
             <element name="SUCCESS"/>
-            <element name="DISALLOWED"/>
+            <element name="IGNORED"/>
+            <element name="INVALID_DATA"/>
+            <element name="OUT_OF_MEMORY"/>
+            <element name="TOO_MANY_PENDING_REQUESTS"/>
             <element name="APPLICATION_NOT_REGISTERED"/>
             <element name="GENERIC_ERROR"/>
-            <element name="IGNORED"/>
+            <element name="REJECTED"/>
+            <element name="DISALLOWED"/>
+            <element name="UNSUPPORTED_RESOURCE"/>
+            <element name="WARNINGS"/>
+            <element name="ABORTED"/>
         </param>
         
         <param name="info" type="String" maxlength="1000" mandatory="false" platform="documentation">
@@ -7980,7 +7969,7 @@
         <param name="success" type="Boolean" platform="documentation" mandatory="true">
             <description> true if successful; false, if failed </description>
         </param>
-        
+
         <param name="resultCode" type="Result" platform="documentation" mandatory="true">
             <description>See Result</description>
             <element name="SUCCESS"/>
@@ -7989,7 +7978,7 @@
             <element name="GENERIC_ERROR"/>
             <element name="IGNORED"/>
         </param>
-        
+
         <param name="info" type="String" maxlength="1000" mandatory="false" platform="documentation">
             <description>Provides additional human readable info regarding the result.</description>
         </param>
@@ -8128,8 +8117,6 @@
         <param name="cloudAppVehicleID" type="String" mandatory="false" since="5.1">
             <description>Parameter used by cloud apps to identify a head unit</description>
         </param>
-
-        <!-- Ford Specific Vehicle Data -->
         <param name="eCallInfo" type="ECallInfo" mandatory="false">
             <description>Emergency Call notification and confirmation data</description>
         </param>
@@ -8145,8 +8132,6 @@
         <param name="myKey" type="MyKey" mandatory="false">
             <description>Information related to the MyKey feature</description>
         </param>
-        <!-- / Ford Specific Vehicle Data -->
-        
     </function>
     
     <function name="OnCommand" functionID="OnCommandID" messagetype="notification" since="1.0">
