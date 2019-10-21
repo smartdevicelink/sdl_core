@@ -141,9 +141,15 @@ void VehicleInfoPlugin::ProcessResumptionSubscription(
       smart_objects::SmartObject(smart_objects::SmartType_Map);
   msg_params[strings::app_id] = app.app_id();
   const auto& subscriptions = ext.Subscriptions();
+  if (subscriptions.empty()) {
+    LOG4CXX_DEBUG(logger_, "No vehicle data to subscribe. Exiting");
+    return;
+  }
+
   for (const auto& item : subscriptions) {
     msg_params[item] = true;
   }
+
   smart_objects::SmartObjectSPtr request =
       application_manager::MessageHelper::CreateModuleInfoSO(
           hmi_apis::FunctionID::VehicleInfo_SubscribeVehicleData,
