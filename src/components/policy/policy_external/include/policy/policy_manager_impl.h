@@ -1139,6 +1139,8 @@ class PolicyManagerImpl : public PolicyManager {
   bool GetModuleTypes(const std::string& policy_app_id,
                       std::vector<std::string>* modules) const OVERRIDE;
 
+  void ResetTimeout() OVERRIDE;
+
   /**
    * @brief Notify application about its permissions changes by preparing and
    * sending OnPermissionsChanged notification

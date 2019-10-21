@@ -179,6 +179,8 @@ class UpdateStatusManager {
    */
   bool IsAppsSearchInProgress();
 
+  void ResetTimeout(uint32_t update_timeout);
+
 #ifdef BUILD_TESTS
   PolicyTableStatus GetLastUpdateStatus() const {
     return current_status_->get_status();

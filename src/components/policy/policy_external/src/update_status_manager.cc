@@ -107,6 +107,12 @@ void UpdateStatusManager::OnValidUpdateReceived() {
   ProcessEvent(kOnValidUpdateReceived);
 }
 
+void UpdateStatusManager::ResetTimeout(uint32_t update_timeout) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  update_status_thread_delegate_->updateTimeOut(
+      update_timeout);  // Restart Timer
+}
+
 void UpdateStatusManager::OnWrongUpdateReceived() {
   LOG4CXX_AUTO_TRACE(logger_);
   update_status_thread_delegate_->updateTimeOut(0);  // Stop Timer

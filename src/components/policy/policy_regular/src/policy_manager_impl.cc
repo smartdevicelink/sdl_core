@@ -1605,6 +1605,16 @@ void PolicyManagerImpl::set_cache_manager(
   cache_ = std::shared_ptr<CacheManagerInterface>(cache_manager);
 }
 
+void PolicyManagerImpl::ResetTimeout() {
+  LOG4CXX_AUTO_TRACE(logger_);
+  if (update_status_manager_.IsUpdatePending()) {
+    if (timer_retry_sequence_.is_running()) {
+      timer_retry_sequence_.Stop();
+    }
+    timer_retry_sequence_.Start(cache_->TimeoutResponse(), timer::kSingleShot);
+  }
+}
+
 void PolicyManagerImpl::OnPTUIterationTimeout() {
   LOG4CXX_DEBUG(logger_, "Start new retry sequence");
 

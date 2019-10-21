@@ -1382,9 +1382,16 @@ void PolicyManagerImpl::RetrySequenceFailed() {
   ResetRetrySequence(ResetRetryCountType::kResetWithStatusUpdate);
 }
 
+void PolicyManagerImpl::ResetTimeout() {
+  LOG4CXX_AUTO_TRACE(logger_);
+  if (update_status_manager_.IsUpdatePending()) {
+    uint32_t update_timeout = TimeoutExchangeMSec();
+    update_status_manager_.ResetTimeout(update_timeout);
+  }
+}
+
 void PolicyManagerImpl::OnSystemRequestReceived() {
   LOG4CXX_AUTO_TRACE(logger_);
-
   IncrementRetryIndex();
 }
 

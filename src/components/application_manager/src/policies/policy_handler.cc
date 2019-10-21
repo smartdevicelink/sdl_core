@@ -719,6 +719,13 @@ void PolicyHandler::OnGetUserFriendlyMessage(
       result, correlation_id, application_manager_);
 }
 
+void PolicyHandler::OnSystemRequestReceived() const {
+#ifdef EXTERNAL_PROPRIETARY_MODE
+  ptu_retry_handler().OnSystemRequestReceived();
+#endif
+  policy_manager_->ResetTimeout();
+}
+
 void PolicyHandler::GetRegisteredLinks(
     std::map<std::string, std::string>& out_links) const {
   DataAccessor<ApplicationSet> accessor = application_manager_.applications();
