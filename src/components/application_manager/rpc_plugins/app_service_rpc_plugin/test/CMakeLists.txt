@@ -30,3 +30,5 @@ set(LIBRARIES
 )
 
 create_cotired_test("app_services_commands_test" "${SOURCES}" "${LIBRARIES}" )
+
+add_subdirectory("app_service_plugin")
