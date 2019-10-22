@@ -146,7 +146,9 @@ TEST_F(AppServiceAppExtensionTest,
 
 TEST_F(AppServiceAppExtensionTest,
        UnsubscribeFromAppService_UnsubscribeAll_SUCCESS) {
-  for (const auto& app_service_type : {kAppServiceType1, kAppServiceType2}) {
+  auto app_service_types = {kAppServiceType1, kAppServiceType2};
+
+  for (const auto& app_service_type : app_service_types) {
     ASSERT_TRUE(
         app_service_app_extension_->SubscribeToAppService(app_service_type));
     ASSERT_TRUE(
@@ -156,7 +158,7 @@ TEST_F(AppServiceAppExtensionTest,
 
   app_service_app_extension_->UnsubscribeFromAppService();
 
-  for (const auto& app_service_type : {kAppServiceType1, kAppServiceType2}) {
+  for (const auto& app_service_type : app_service_types) {
     EXPECT_FALSE(
         app_service_app_extension_->IsSubscribedToAppService(app_service_type));
   }
@@ -185,13 +187,15 @@ TEST_F(AppServiceAppExtensionTest, ProcessResumption_SUCCESS) {
   app_service_app_extension_->UnsubscribeFromAppService();
   ASSERT_EQ(0u, app_service_app_extension_->Subscriptions().size());
 
-  smart_objects::SmartObject resumption_data;
-  resumption_data[kAppServiceInfoKey] =
+  smart_objects::SmartObject app_service_data =
       smart_objects::SmartObject(smart_objects::SmartType_Array);
-  resumption_data[kAppServiceInfoKey].asArray()->push_back(
+  app_service_data.asArray()->push_back(
       smart_objects::SmartObject(kAppServiceType1));
-  resumption_data[kAppServiceInfoKey].asArray()->push_back(
+  app_service_data.asArray()->push_back(
       smart_objects::SmartObject(kAppServiceType2));
+
+  smart_objects::SmartObject resumption_data;
+  resumption_data[kAppServiceInfoKey] = app_service_data;
 
   app_service_app_extension_->ProcessResumption(resumption_data);
 
