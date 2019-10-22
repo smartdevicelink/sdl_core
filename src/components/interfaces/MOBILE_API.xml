@@ -6858,6 +6858,7 @@
             <element name="GENERIC_ERROR"/>
             <element name="REJECTED"/>
             <element name="DISALLOWED"/>
+            <element name="UNSUPPORTED_RESOURCE"/>
         </param>
         
         <param name="info" type="String" maxlength="1000" mandatory="false" platform="documentation">
