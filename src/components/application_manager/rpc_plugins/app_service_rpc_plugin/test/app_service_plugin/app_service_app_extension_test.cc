@@ -43,6 +43,8 @@ const std::string kResumptionDataKey = "kResumptionDataKey";
 const std::string kAppServiceInfoKey = "appService";
 }  // namespace
 
+namespace test {
+namespace components {
 namespace app_service_plugin_test {
 
 using test::components::application_manager_test::MockApplication;
@@ -60,132 +62,118 @@ namespace plugins = application_manager::plugin_manager;
 
 class AppServiceAppExtensionTest : public ::testing::Test {
  public:
-  AppServiceAppExtensionTest()
-      : mock_app_(std::make_shared<NiceMock<MockApplication> >())
-      , app_service_app_extension_(
-            std::make_shared<app_service_rpc_plugin::AppServiceAppExtension>(
-                app_service_plugin_, *mock_app_)) {
-    ON_CALL(*mock_app_, AddExtension(_)).WillByDefault(Return(true));
-    ON_CALL(*mock_app_, QueryInterface(_))
-        .WillByDefault(Return(app_service_app_extension_));
+  AppServiceAppExtensionTest() : mock_app_(new NiceMock<MockApplication>()) {}
+
+  void SetUp() {
+    app_service_app_extension_.reset(
+        new AppServiceAppExtension(app_service_plugin_, *mock_app_));
+  }
+
+  void TearDown() {
+    app_service_app_extension_.reset();
   }
 
  protected:
   app_service_rpc_plugin::AppServiceRpcPlugin app_service_plugin_;
-  std::shared_ptr<MockApplication> mock_app_;
-  std::shared_ptr<AppServiceAppExtension> app_service_app_extension_;
+  std::unique_ptr<MockApplication> mock_app_;
+  std::unique_ptr<AppServiceAppExtension> app_service_app_extension_;
 };
 
 TEST_F(AppServiceAppExtensionTest, SubscribeToAppService_SUCCESS) {
-  auto app_service_app_extension =
-      std::make_shared<AppServiceAppExtension>(app_service_plugin_, *mock_app_);
   EXPECT_TRUE(
-      app_service_app_extension->SubscribeToAppService(kAppServiceType1));
-  const auto& subs = app_service_app_extension->Subscriptions();
+      app_service_app_extension_->SubscribeToAppService(kAppServiceType1));
+  const auto& subs = app_service_app_extension_->Subscriptions();
   EXPECT_EQ(1u, subs.size());
   EXPECT_TRUE(
-      app_service_app_extension->IsSubscribedToAppService(kAppServiceType1));
+      app_service_app_extension_->IsSubscribedToAppService(kAppServiceType1));
 }
 
 TEST_F(AppServiceAppExtensionTest,
        SubscribeToAppService_SubscribeOneAppServiceType_Twice_FAIL) {
-  auto app_service_app_extension =
-      std::make_shared<AppServiceAppExtension>(app_service_plugin_, *mock_app_);
   ASSERT_TRUE(
-      app_service_app_extension->SubscribeToAppService(kAppServiceType1));
+      app_service_app_extension_->SubscribeToAppService(kAppServiceType1));
   ASSERT_TRUE(
-      app_service_app_extension->IsSubscribedToAppService(kAppServiceType1));
+      app_service_app_extension_->IsSubscribedToAppService(kAppServiceType1));
 
   EXPECT_FALSE(
-      app_service_app_extension->SubscribeToAppService(kAppServiceType1));
+      app_service_app_extension_->SubscribeToAppService(kAppServiceType1));
   EXPECT_TRUE(
-      app_service_app_extension->IsSubscribedToAppService(kAppServiceType1));
-  const auto& subs = app_service_app_extension->Subscriptions();
+      app_service_app_extension_->IsSubscribedToAppService(kAppServiceType1));
+  const auto& subs = app_service_app_extension_->Subscriptions();
   EXPECT_EQ(1u, subs.size());
 }
 
 TEST_F(
     AppServiceAppExtensionTest,
     UnsubscribeFromAppService_AppServiceType1Unsubscribed_AppServiceType2Remains_SUCCESS) {
-  auto app_service_app_extension =
-      std::make_shared<AppServiceAppExtension>(app_service_plugin_, *mock_app_);
   // Subscribe
   ASSERT_TRUE(
-      app_service_app_extension->SubscribeToAppService(kAppServiceType1));
+      app_service_app_extension_->SubscribeToAppService(kAppServiceType1));
   ASSERT_TRUE(
-      app_service_app_extension->SubscribeToAppService(kAppServiceType2));
-  auto subs = app_service_app_extension->Subscriptions();
+      app_service_app_extension_->SubscribeToAppService(kAppServiceType2));
+  auto subs = app_service_app_extension_->Subscriptions();
   ASSERT_EQ(2u, subs.size());
   ASSERT_TRUE(
-      app_service_app_extension->IsSubscribedToAppService(kAppServiceType1));
+      app_service_app_extension_->IsSubscribedToAppService(kAppServiceType1));
   ASSERT_TRUE(
-      app_service_app_extension->IsSubscribedToAppService(kAppServiceType2));
+      app_service_app_extension_->IsSubscribedToAppService(kAppServiceType2));
 
   // Unsubscribe
   EXPECT_TRUE(
-      app_service_app_extension->UnsubscribeFromAppService(kAppServiceType1));
+      app_service_app_extension_->UnsubscribeFromAppService(kAppServiceType1));
   EXPECT_FALSE(
-      app_service_app_extension->IsSubscribedToAppService(kAppServiceType1));
+      app_service_app_extension_->IsSubscribedToAppService(kAppServiceType1));
   EXPECT_TRUE(
-      app_service_app_extension->IsSubscribedToAppService(kAppServiceType2));
-  subs = app_service_app_extension->Subscriptions();
+      app_service_app_extension_->IsSubscribedToAppService(kAppServiceType2));
+  subs = app_service_app_extension_->Subscriptions();
   EXPECT_EQ(1u, subs.size());
 }
 
 TEST_F(AppServiceAppExtensionTest,
        UnsubscribeFromAppService_UnsubscribeNotSubscribedAppServiceType_FAIL) {
-  auto app_service_app_extension =
-      std::make_shared<AppServiceAppExtension>(app_service_plugin_, *mock_app_);
-
   ASSERT_TRUE(
-      app_service_app_extension->SubscribeToAppService(kAppServiceType1));
-  ASSERT_EQ(1u, app_service_app_extension->Subscriptions().size());
+      app_service_app_extension_->SubscribeToAppService(kAppServiceType1));
+  ASSERT_EQ(1u, app_service_app_extension_->Subscriptions().size());
   ASSERT_TRUE(
-      app_service_app_extension->IsSubscribedToAppService(kAppServiceType1));
+      app_service_app_extension_->IsSubscribedToAppService(kAppServiceType1));
 
   EXPECT_FALSE(
-      app_service_app_extension->UnsubscribeFromAppService(kAppServiceType2));
+      app_service_app_extension_->UnsubscribeFromAppService(kAppServiceType2));
   EXPECT_TRUE(
-      app_service_app_extension->IsSubscribedToAppService(kAppServiceType1));
-  EXPECT_EQ(1u, app_service_app_extension->Subscriptions().size());
+      app_service_app_extension_->IsSubscribedToAppService(kAppServiceType1));
+  EXPECT_EQ(1u, app_service_app_extension_->Subscriptions().size());
 }
 
 TEST_F(AppServiceAppExtensionTest,
        UnsubscribeFromAppService_UnsubscribeAll_SUCCESS) {
-  auto app_service_app_extension =
-      std::make_shared<AppServiceAppExtension>(app_service_plugin_, *mock_app_);
-
   for (const auto& app_service_type : {kAppServiceType1, kAppServiceType2}) {
     ASSERT_TRUE(
-        app_service_app_extension->SubscribeToAppService(app_service_type));
+        app_service_app_extension_->SubscribeToAppService(app_service_type));
     ASSERT_TRUE(
-        app_service_app_extension->IsSubscribedToAppService(app_service_type));
+        app_service_app_extension_->IsSubscribedToAppService(app_service_type));
   }
-  ASSERT_EQ(2u, app_service_app_extension->Subscriptions().size());
+  ASSERT_EQ(2u, app_service_app_extension_->Subscriptions().size());
 
-  app_service_app_extension->UnsubscribeFromAppService();
+  app_service_app_extension_->UnsubscribeFromAppService();
 
   for (const auto& app_service_type : {kAppServiceType1, kAppServiceType2}) {
     EXPECT_FALSE(
-        app_service_app_extension->IsSubscribedToAppService(app_service_type));
+        app_service_app_extension_->IsSubscribedToAppService(app_service_type));
   }
-  EXPECT_EQ(0u, app_service_app_extension->Subscriptions().size());
+  EXPECT_EQ(0u, app_service_app_extension_->Subscriptions().size());
 }
 
 TEST_F(AppServiceAppExtensionTest, SaveResumptionData_SUCCESS) {
-  auto app_service_app_extension =
-      std::make_shared<AppServiceAppExtension>(app_service_plugin_, *mock_app_);
-
   ASSERT_TRUE(
-      app_service_app_extension->SubscribeToAppService(kAppServiceType1));
-  ASSERT_EQ(1u, app_service_app_extension->Subscriptions().size());
+      app_service_app_extension_->SubscribeToAppService(kAppServiceType1));
+  ASSERT_EQ(1u, app_service_app_extension_->Subscriptions().size());
   ASSERT_TRUE(
-      app_service_app_extension->IsSubscribedToAppService(kAppServiceType1));
+      app_service_app_extension_->IsSubscribedToAppService(kAppServiceType1));
 
   smart_objects::SmartObject resumption_data;
   resumption_data[kResumptionDataKey] = "some resumption data";
 
-  app_service_app_extension->SaveResumptionData(resumption_data);
+  app_service_app_extension_->SaveResumptionData(resumption_data);
 
   EXPECT_TRUE(resumption_data.keyExists(kResumptionDataKey));
   EXPECT_TRUE(resumption_data.keyExists(kAppServiceInfoKey));
@@ -194,10 +182,8 @@ TEST_F(AppServiceAppExtensionTest, SaveResumptionData_SUCCESS) {
 }
 
 TEST_F(AppServiceAppExtensionTest, ProcessResumption_SUCCESS) {
-  auto app_service_app_extension =
-      std::make_shared<AppServiceAppExtension>(app_service_plugin_, *mock_app_);
-  app_service_app_extension->UnsubscribeFromAppService();
-  ASSERT_EQ(0u, app_service_app_extension->Subscriptions().size());
+  app_service_app_extension_->UnsubscribeFromAppService();
+  ASSERT_EQ(0u, app_service_app_extension_->Subscriptions().size());
 
   smart_objects::SmartObject resumption_data;
   resumption_data[kAppServiceInfoKey] =
@@ -207,14 +193,17 @@ TEST_F(AppServiceAppExtensionTest, ProcessResumption_SUCCESS) {
   resumption_data[kAppServiceInfoKey].asArray()->push_back(
       smart_objects::SmartObject(kAppServiceType2));
 
-  app_service_app_extension->ProcessResumption(resumption_data);
+  app_service_app_extension_->ProcessResumption(resumption_data);
 
   for (const auto& app_service_type : {kAppServiceType1, kAppServiceType2}) {
     EXPECT_TRUE(
-        app_service_app_extension->IsSubscribedToAppService(app_service_type));
+        app_service_app_extension_->IsSubscribedToAppService(app_service_type));
   }
-  EXPECT_EQ(2u, app_service_app_extension->Subscriptions().size());
+  EXPECT_EQ(2u, app_service_app_extension_->Subscriptions().size());
   EXPECT_EQ(kAppServiceType1,
-            *app_service_app_extension->Subscriptions().begin());
+            *app_service_app_extension_->Subscriptions().begin());
 }
+
 }  // namespace app_service_plugin_test
+}  // namespace components
+}  // namespace test
