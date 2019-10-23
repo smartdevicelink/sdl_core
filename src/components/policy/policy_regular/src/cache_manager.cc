@@ -1272,7 +1272,7 @@ policy_table::VehicleDataItems CacheManager::CalculateCustomVdItemsDiff(
   }
 
   LOG4CXX_DEBUG(logger_,
-                "Was found " << removed_items.size() << " removed VD items");
+                "Found " << removed_items.size() << " removed VD items");
   return removed_items;
 }
 

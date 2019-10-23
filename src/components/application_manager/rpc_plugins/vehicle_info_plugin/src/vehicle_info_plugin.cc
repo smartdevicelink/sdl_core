@@ -81,7 +81,7 @@ app_mngr::CommandFactory& VehicleInfoPlugin::GetCommandFactory() {
 }
 
 void VehicleInfoPlugin::OnPolicyEvent(plugins::PolicyEvent event) {
-  UnsubscribeFromNonExistingVDItems();
+  UnsubscribeFromRemovedVDItems();
   custom_vehicle_data_manager_->OnPolicyEvent(event);
 }
 
@@ -97,7 +97,7 @@ void VehicleInfoPlugin::OnApplicationEvent(
   }
 }
 
-void VehicleInfoPlugin::UnsubscribeFromNonExistingVDItems() {
+void VehicleInfoPlugin::UnsubscribeFromRemovedVDItems() {
   typedef std::vector<std::string> StringsVector;
 
   auto get_items_to_unsubscribe = [this]() -> StringsVector {
