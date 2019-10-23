@@ -1816,8 +1816,15 @@ void ProtocolHandlerImpl::NotifySessionStarted(
     LOG4CXX_WARN(logger_,
                  "Refused by session_observer to create service "
                      << static_cast<int32_t>(service_type) << " type.");
+    const auto session_id = packet->session_id();
+    const auto connection_key =
+        session_observer_.KeyFromPair(context.connection_id_, session_id);
+    service_status_update_handler_->OnServiceUpdate(
+        connection_key,
+        context.service_type_,
+        ServiceStatus::SERVICE_START_FAILED);
     SendStartSessionNAck(context.connection_id_,
-                         packet->session_id(),
+                         session_id,
                          protocol_version,
                          packet->service_type(),
                          rejected_params);
