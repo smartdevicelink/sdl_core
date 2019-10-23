@@ -463,38 +463,6 @@ void RPCServiceImpl::Handle(const impl::MessageToMobile message) {
   }
 }
 
-bool RPCServiceImpl::HandleInvalidVehicleDataRPC(
-    const mobile_apis::FunctionID::eType& api_function_id,
-    const application_manager::commands::MessageSharedPtr message) {
-  switch (api_function_id) {
-    case mobile_apis::FunctionID::GetVehicleDataID: {
-      if (mobile_apis::Result::SUCCESS ==
-          (*message)[strings::msg_params][strings::result_code].asUInt()) {
-        smart_objects::SmartObjectSPtr response =
-            MessageHelper::CreateNegativeResponse(
-                (*message)[strings::params][strings::connection_key].asUInt(),
-                api_function_id,
-                (*message)[strings::params][strings::correlation_id].asUInt(),
-                static_cast<int32_t>(mobile_apis::Result::GENERIC_ERROR));
-
-        SendMessageToMobile(response);
-        return true;
-      }
-      break;
-    }
-
-    case mobile_apis::FunctionID::OnVehicleDataID: {
-      return true;
-      break;
-    }
-
-    default:
-      break;
-  }
-
-  return false;
-}
-
 void RPCServiceImpl::SendMessageToMobile(
     const application_manager::commands::MessageSharedPtr message,
     bool final_message) {
@@ -570,26 +538,10 @@ void RPCServiceImpl::SendMessageToMobile(
   const auto api_function_id = static_cast<mobile_apis::FunctionID::eType>(
       (*message)[strings::params][strings::function_id].asUInt());
 
-  if (app) {
-    mobile_so_factory().attachSchema(*message, false, app->msg_version());
-    rpc::ValidationReport report("RPC");
-    auto validation_result = message->validate(&report, app->msg_version());
-    LOG4CXX_DEBUG(logger_,
-                  "Attached schema to message, result if valid: "
-                      << validation_result
-                      << "\nError report: " << rpc::PrettyFormat(report));
-
-    if (validation_result != smart_objects::errors::eType::OK) {
-      if (HandleInvalidVehicleDataRPC(api_function_id, message)) {
-        return;
-      }
-    }
-  } else {
-    mobile_so_factory().attachSchema(*message, false);
-    LOG4CXX_DEBUG(
-        logger_,
-        "Attached schema to message, result if valid: " << message->isValid());
-  }
+  mobile_so_factory().attachSchema(*message, false);
+  LOG4CXX_DEBUG(
+      logger_,
+      "Attached schema to message, result if valid: " << message->isValid());
 
   if (!ConvertSOtoMessage(
           (*message), (*message_to_send), allow_unknown_parameters)) {

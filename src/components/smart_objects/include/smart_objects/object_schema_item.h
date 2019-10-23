@@ -101,7 +101,6 @@ struct SMember {
   boost::optional<utils::SemanticVersion> mUntil;
   bool mIsDeprecated;
   bool mIsRemoved;
-  mutable bool mIsValid;
   std::vector<SMember> mHistoryVector;
   Type mType;
 };
@@ -195,9 +194,11 @@ class CObjectSchemaItem : public ISchemaItem {
   /**
    * @brief Returns the correct schema item based on message version.
    * @param member Schema member
-   * @param MmessageVersion Semantic Version of mobile message.
+   * @param MessageVersion Semantic Version of mobile message.
+   * @return Pointer to correct schema item if item found or nullptr, if item
+   *was not found.
    **/
-  const SMember& GetCorrectMember(const SMember& member,
+  const SMember* GetCorrectMember(const SMember& member,
                                   const utils::SemanticVersion& messageVersion);
 
   /**

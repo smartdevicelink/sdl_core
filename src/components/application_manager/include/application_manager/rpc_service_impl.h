@@ -157,17 +157,6 @@ class RPCServiceImpl : public RPCService,
                           Message& output,
                           const bool allow_unknown_parameters = false);
 
-  /*
-   *  @brief Handles invalid VehicleData RPC responses from HMI
-   *  @param mobile_apis::FunctionID - id of function
-   *  @param MessageSharedPtr - message with payload
-   *  @return true, if validation of invalid response was done;
-   *          false, if nothing was done.
-   */
-  bool HandleInvalidVehicleDataRPC(
-      const mobile_apis::FunctionID::eType& api_function_id,
-      const application_manager::commands::MessageSharedPtr message);
-
   EncryptionFlagCheckResult IsEncryptionRequired(
       const smart_objects::SmartObject& message,
       ApplicationSharedPtr app,
