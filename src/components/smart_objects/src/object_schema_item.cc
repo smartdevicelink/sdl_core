@@ -83,11 +83,6 @@ SMember::SMember(const ISchemaItemPtr SchemaItem,
 bool SMember::CheckHistoryFieldVersion(
     const utils::SemanticVersion& MessageVersion) const {
   if (MessageVersion.isValid()) {
-    if (mSince != boost::none) {
-      if (MessageVersion < mSince.get()) {
-        return false;  // Msg version predates `since` field
-      }
-    }
     if (mUntil != boost::none && (MessageVersion >= mUntil.get())) {
       return false;  // Msg version newer than `until` field
     }
