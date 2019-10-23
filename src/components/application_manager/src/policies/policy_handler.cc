@@ -2325,6 +2325,11 @@ policy::PolicyHandler::GetVehicleDataItems() const {
   return policy_manager_->GetVehicleDataItems();
 }
 
+std::vector<rpc::policy_table_interface_base::VehicleDataItem>
+policy::PolicyHandler::GetRemovedVehicleDataItems() const {
+  return policy_manager_->GetRemovedVehicleDataItems();
+}
+
 #ifdef EXTERNAL_PROPRIETARY_MODE
 const MetaInfo PolicyHandler::GetMetaInfo() const {
   POLICY_LIB_CHECK(MetaInfo());

@@ -107,6 +107,7 @@ CacheManager::CacheManager()
     , pt_(new policy_table::Table)
     , backup_(new SQLPTRepresentation())
     , update_required(false)
+    , removed_custom_vd_items_()
     , settings_(nullptr) {
   LOG4CXX_AUTO_TRACE(logger_);
   backuper_ = new BackgroundBackuper(this);
@@ -304,6 +305,12 @@ bool CacheManager::ApplyUpdate(const policy_table::Table& update_pt) {
 
   // Apply update for vehicle data
   if (update_pt.policy_table.vehicle_data.is_initialized()) {
+    policy_table::VehicleDataItems custom_items_before_apply;
+    if (pt_->policy_table.vehicle_data->schema_items.is_initialized()) {
+      custom_items_before_apply =
+          CollectCustomVDItems(*pt_->policy_table.vehicle_data->schema_items);
+    }
+
     if (!update_pt.policy_table.vehicle_data->schema_items.is_initialized() ||
         update_pt.policy_table.vehicle_data->schema_items->empty()) {
       pt_->policy_table.vehicle_data->schema_items =
@@ -317,9 +324,12 @@ bool CacheManager::ApplyUpdate(const policy_table::Table& update_pt) {
       pt_->policy_table.vehicle_data->schema_items =
           rpc::Optional<policy_table::VehicleDataItems>(custom_items);
     }
-    if (update_pt.policy_table.vehicle_data->schema_version.is_initialized() &&
-        update_pt.policy_table.vehicle_data->schema_items.is_initialized()) {
-    }
+
+    policy_table::VehicleDataItems custom_items_after_apply =
+        *pt_->policy_table.vehicle_data->schema_items;
+    const auto& items_diff = CalculateCustomVdItemsDiff(
+        custom_items_before_apply, custom_items_after_apply);
+    SetRemovedCustomVdItems(items_diff);
   }
 
   ResetCalculatedPermissions();
@@ -725,6 +735,12 @@ CacheManager::GetVehicleDataItems() const {
   }
 
   return std::vector<policy_table::VehicleDataItem>();
+}
+
+std::vector<policy_table::VehicleDataItem>
+CacheManager::GetRemovedVehicleDataItems() const {
+  CACHE_MANAGER_CHECK(std::vector<policy_table::VehicleDataItem>());
+  return removed_custom_vd_items_;
 }
 
 Json::Value CacheManager::GetPolicyTableData() const {
@@ -1224,6 +1240,46 @@ void CacheManager::CheckSnapshotInitialization() {
   } else {
     LOG4CXX_WARN(logger_, "app_level is not initialized");
   }
+}
+
+policy_table::VehicleDataItems CacheManager::CalculateCustomVdItemsDiff(
+    const policy_table::VehicleDataItems& items_before,
+    const policy_table::VehicleDataItems& items_after) const {
+  LOG4CXX_AUTO_TRACE(logger_);
+  if (items_before.empty()) {
+    LOG4CXX_DEBUG(logger_, "No custom VD items found in policy");
+    return policy_table::VehicleDataItems();
+  }
+
+  if (items_after.empty()) {
+    LOG4CXX_DEBUG(logger_,
+                  "All custom VD items were removed after policy update");
+    return items_before;
+  }
+
+  policy_table::VehicleDataItems removed_items;
+  for (auto& item_to_search : items_before) {
+    auto item_predicate =
+        [&item_to_search](const policy_table::VehicleDataItem& item_to_check) {
+          return item_to_search.name == item_to_check.name;
+        };
+
+    auto it =
+        std::find_if(items_after.begin(), items_after.end(), item_predicate);
+    if (items_after.end() == it) {
+      removed_items.push_back(item_to_search);
+    }
+  }
+
+  LOG4CXX_DEBUG(logger_,
+                "Found " << removed_items.size() << " removed VD items");
+  return removed_items;
+}
+
+void CacheManager::SetRemovedCustomVdItems(
+    const policy_table::VehicleDataItems& removed_items) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  removed_custom_vd_items_ = removed_items;
 }
 
 void CacheManager::PersistData() {
