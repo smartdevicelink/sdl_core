@@ -156,7 +156,6 @@ generate_function_to_interface_convert_map() {
   convert_map[UI_OnDriverDistraction] = HmiInterfaces::HMI_INTERFACE_UI;
   convert_map[UI_SetAppIcon] = HmiInterfaces::HMI_INTERFACE_UI;
   convert_map[UI_SetDisplayLayout] = HmiInterfaces::HMI_INTERFACE_UI;
-  convert_map[UI_ShowCustomForm] = HmiInterfaces::HMI_INTERFACE_UI;
   convert_map[UI_OnKeyboardInput] = HmiInterfaces::HMI_INTERFACE_UI;
   convert_map[UI_OnTouchEvent] = HmiInterfaces::HMI_INTERFACE_UI;
   convert_map[UI_Slider] = HmiInterfaces::HMI_INTERFACE_UI;

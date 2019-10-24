@@ -5432,39 +5432,6 @@
   </function>
   <function name="SetAppIcon" messagetype="response">
   </function>
-  <function name="ShowCustomForm" messagetype="request">
-    <description>Used to show a custom form; it can be a parent or child screen. If no parent screen is designated, it is set as a parent screen.</description>
-    <param name="customFormID" type="String" maxlength="500" mandatory="true">
-      <description>
-            Predefined or dynamically created screen layout.
-            Currently only predefined forms are defined.
-            Predefined layouts include:
-                "DEFAULT" - Default media / non-media screen
-                "ONSCREEN_PRESETS" - Custom root media screen containing app-defined onscreen presets.
-                "KEYBOARD_SEARCH" - Custom template containing app-configured on-screen keyboard with active search updating; user also can trigger voice search.
-                "NAV_FULLSCREEN_MAP" - Custom root template screen containing full screen map with navigation controls.
-                "NAV_POI_MENU" - Custom template containing app-defined POI options.
-                "NAV_SEARCH_RESULTS" - Custom template containing a list of app-defined search results
-                "NAV_POI_INFO" - Custom template containing app-defined POI information (and potentially map data).
-      </description>
-    </param>
-    <param name="parentFormID" type="String" maxlength="500" defvalue="DEFAULT" mandatory="false">
-      <description>
-            Parent screen of predefined form to display.
-            Currently only predefined forms are defined.
-            If not provided, then set to "DEFAULT".
-            Predefined layouts include:
-                "DEFAULT" - Default media / non-media screen
-                "ONSCREEN_PRESETS" - Custom root media screen containing app-defined onscreen presets.
-                "NAV_FULLSCREEN_MAP" - Custom template containing full screen map with navigation controls.
-      </description>
-    </param>
-  </function>
-  <function name="ShowCustomForm" messagetype="response">
-    <param name="info" type="String" maxlength="1000" mandatory="false" platform="documentation">
-      <description>Provides additional human readable info regarding the result.</description>
-    </param>
-  </function>
   <function name="OnKeyboardInput" messagetype="notification">
     <description>On-screen keyboard event.</description>
     <description>Can be full string or individual keypresses depending on keyboard mode.</description>
