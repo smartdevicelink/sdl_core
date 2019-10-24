@@ -77,6 +77,12 @@ bool CustomVehicleDataManagerImpl::IsValidCustomVehicleDataName(
   return schema.is_initialized();
 }
 
+bool CustomVehicleDataManagerImpl::IsRemovedCustomVehicleDataName(
+    const std::string& name) const {
+  const auto& schema = FindRemovedSchemaByNameNonRecursive(name);
+  return schema.is_initialized();
+}
+
 void CustomVehicleDataManagerImpl::CreateMobileMessageParams(
     smart_objects::SmartObject& msg_params) {
   using namespace application_manager;
@@ -174,6 +180,12 @@ smart_objects::SmartObject CustomVehicleDataManagerImpl::CreateHMIMessageParams(
     auto schema = FindSchemaByNameNonRecursive(name);
     if (schema.is_initialized()) {
       fill_param(fill_hmi_params, *schema, &out_params);
+      continue;
+    }
+
+    auto removed_schema = FindRemovedSchemaByNameNonRecursive(name);
+    if (removed_schema.is_initialized()) {
+      fill_param(fill_hmi_params, *removed_schema, &out_params);
     }
   }
 
@@ -495,6 +507,21 @@ CustomVehicleDataManagerImpl::FindSchemaByNameNonRecursive(
   };
 
   return FindSchema(oem_items, SearchMethod::NON_RECURSIVE, compare_by_name);
+}
+
+const OptionalDataItem
+CustomVehicleDataManagerImpl::FindRemovedSchemaByNameNonRecursive(
+    const std::string& name) const {
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  const auto& removed_oem_items =
+      vehicle_data_provider_.GetRemovedVehicleDataItems();
+  auto compare_by_name = [&name](const policy_table::VehicleDataItem& item) {
+    return (name == std::string(item.name));
+  };
+
+  return FindSchema(
+      removed_oem_items, SearchMethod::NON_RECURSIVE, compare_by_name);
 }
 
 const OptionalDataItem CustomVehicleDataManagerImpl::FindSchemaByNameRecursive(

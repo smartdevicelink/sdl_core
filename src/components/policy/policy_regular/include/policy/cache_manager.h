@@ -154,6 +154,9 @@ class CacheManager : public CacheManagerInterface {
   virtual const std::vector<policy_table::VehicleDataItem> GetVehicleDataItems()
       const;
 
+  std::vector<policy_table::VehicleDataItem> GetRemovedVehicleDataItems()
+      const OVERRIDE;
+
   const boost::optional<bool> LockScreenDismissalEnabledState() const OVERRIDE;
 
   const boost::optional<std::string> LockScreenDismissalWarningMessage(
@@ -919,6 +922,24 @@ class CacheManager : public CacheManagerInterface {
    */
   void CheckSnapshotInitialization();
 
+  /**
+   * @brief Calculates difference between two provided custom vehicle data items
+   * @param items_before list of vehicle data items before PTU was applied
+   * @param items_after list of vehicle data items after PTU was applied
+   * @return list with calculated difference or empty list if two input lists
+   * are equal
+   */
+  policy_table::VehicleDataItems CalculateCustomVdItemsDiff(
+      const policy_table::VehicleDataItems& items_before,
+      const policy_table::VehicleDataItems& items_after) const;
+
+  /**
+   * @brief Sets the custom vehicle data items
+   * @param removed_items list of vehicle data items to set
+   */
+  void SetRemovedCustomVdItems(
+      const policy_table::VehicleDataItems& removed_items);
+
   void PersistData();
 
   /**
@@ -945,6 +966,7 @@ class CacheManager : public CacheManagerInterface {
   bool update_required;
   typedef std::set<std::string> UnpairedDevices;
   UnpairedDevices is_unpaired_;
+  policy_table::VehicleDataItems removed_custom_vd_items_;
 
   mutable sync_primitives::RecursiveLock cache_lock_;
   sync_primitives::Lock unpaired_lock_;

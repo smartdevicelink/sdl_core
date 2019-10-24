@@ -663,6 +663,9 @@ class PolicyManagerImpl : public PolicyManager {
   const std::vector<policy_table::VehicleDataItem> GetVehicleDataItems()
       const OVERRIDE;
 
+  std::vector<policy_table::VehicleDataItem> GetRemovedVehicleDataItems()
+      const OVERRIDE;
+
   /**
    * @brief Gets copy of current policy table data
    * @return policy_table as json object

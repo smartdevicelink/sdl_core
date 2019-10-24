@@ -73,6 +73,9 @@ class MockPolicyHandlerInterface : public policy::PolicyHandlerInterface {
   MOCK_CONST_METHOD0(
       GetVehicleDataItems,
       const std::vector<rpc::policy_table_interface_base::VehicleDataItem>());
+  MOCK_CONST_METHOD0(
+      GetRemovedVehicleDataItems,
+      std::vector<rpc::policy_table_interface_base::VehicleDataItem>());
 
 #ifdef EXTERNAL_PROPRIETARY_MODE
   MOCK_METHOD3(OnSnapshotCreated,

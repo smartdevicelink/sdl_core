@@ -804,6 +804,11 @@ PolicyManagerImpl::GetVehicleDataItems() const {
   return cache_->GetVehicleDataItems();
 }
 
+std::vector<policy_table::VehicleDataItem>
+PolicyManagerImpl::GetRemovedVehicleDataItems() const {
+  return cache_->GetRemovedVehicleDataItems();
+}
+
 Json::Value PolicyManagerImpl::GetPolicyTableData() const {
   return cache_->GetPolicyTableData();
 }

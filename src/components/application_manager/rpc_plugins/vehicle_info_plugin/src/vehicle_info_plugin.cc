@@ -81,6 +81,7 @@ app_mngr::CommandFactory& VehicleInfoPlugin::GetCommandFactory() {
 }
 
 void VehicleInfoPlugin::OnPolicyEvent(plugins::PolicyEvent event) {
+  UnsubscribeFromRemovedVDItems();
   custom_vehicle_data_manager_->OnPolicyEvent(event);
 }
 
@@ -96,6 +97,43 @@ void VehicleInfoPlugin::OnApplicationEvent(
   }
 }
 
+void VehicleInfoPlugin::UnsubscribeFromRemovedVDItems() {
+  typedef std::vector<std::string> StringsVector;
+
+  auto get_items_to_unsubscribe = [this]() -> StringsVector {
+    StringsVector output_items_list;
+    auto applications = application_manager_->applications();
+    for (auto& app : applications.GetData()) {
+      auto& ext = VehicleInfoAppExtension::ExtractVIExtension(*app);
+      auto subscription_names = ext.Subscriptions();
+      for (auto& subscription_name : subscription_names) {
+        if (custom_vehicle_data_manager_->IsRemovedCustomVehicleDataName(
+                subscription_name)) {
+          ext.unsubscribeFromVehicleInfo(subscription_name);
+          if (!helpers::in_range(output_items_list, subscription_name)) {
+            LOG4CXX_DEBUG(logger_,
+                          "Vehicle data item "
+                              << subscription_name
+                              << " has been removed by policy");
+            output_items_list.push_back(subscription_name);
+          }
+        }
+      }
+    }
+    return output_items_list;
+  };
+
+  const StringsVector items_to_unsubscribe = get_items_to_unsubscribe();
+
+  if (items_to_unsubscribe.empty()) {
+    LOG4CXX_DEBUG(logger_, "There is no data to unsubscribe");
+    return;
+  }
+
+  auto message = GetUnsubscribeIVIRequest(items_to_unsubscribe);
+  application_manager_->GetRPCService().ManageHMICommand(message);
+}
+
 void VehicleInfoPlugin::ProcessResumptionSubscription(
     application_manager::Application& app, VehicleInfoAppExtension& ext) {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -103,9 +141,15 @@ void VehicleInfoPlugin::ProcessResumptionSubscription(
       smart_objects::SmartObject(smart_objects::SmartType_Map);
   msg_params[strings::app_id] = app.app_id();
   const auto& subscriptions = ext.Subscriptions();
+  if (subscriptions.empty()) {
+    LOG4CXX_DEBUG(logger_, "No vehicle data to subscribe. Exiting");
+    return;
+  }
+
   for (const auto& item : subscriptions) {
     msg_params[item] = true;
   }
+
   smart_objects::SmartObjectSPtr request =
       application_manager::MessageHelper::CreateModuleInfoSO(
           hmi_apis::FunctionID::VehicleInfo_SubscribeVehicleData,
@@ -151,6 +195,8 @@ smart_objects::SmartObjectSPtr VehicleInfoPlugin::GetUnsubscribeIVIRequest(
     if (key_name.empty()) {
       // the name hasn't been found in vehicle data types
       if (custom_vehicle_data_manager_->IsValidCustomVehicleDataName(
+              ivi_name) ||
+          custom_vehicle_data_manager_->IsRemovedCustomVehicleDataName(
               ivi_name)) {
         key_name = ivi_name;
       }

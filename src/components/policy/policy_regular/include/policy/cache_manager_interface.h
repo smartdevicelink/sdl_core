@@ -162,6 +162,13 @@ class CacheManagerInterface {
       const = 0;
 
   /**
+   * @brief Gets vehicle data items removed after the last PTU
+   * @return List of removed vehicle data items
+   */
+  virtual std::vector<policy_table::VehicleDataItem>
+  GetRemovedVehicleDataItems() const = 0;
+
+  /**
    * @brief Get a list of enabled cloud applications
    * @param enabled_apps List filled with the policy app id of each enabled
    * cloud application
