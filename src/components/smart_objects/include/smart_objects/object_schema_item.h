@@ -50,11 +50,6 @@ namespace ns_smart_objects {
  * @brief Object member.
  **/
 struct SMember {
-  /*
-   *  @brief Defines data type that SMember contains.
-   */
-  enum class Type { OEM_SPECIFIC = 0, RPC_SPECIFIC = 1 };
-
   /**
    * @brief Default constructor.
    **/
@@ -72,8 +67,7 @@ struct SMember {
           const std::string& Until = "",
           const bool IsDeprecated = false,
           const bool IsRemoved = false,
-          const std::vector<SMember>& history_vector = {},
-          const Type type = Type::RPC_SPECIFIC);
+          const std::vector<SMember>& history_vector = {});
 
   /**
    * @brief Checks the version a parameter was removed (until)
@@ -82,13 +76,6 @@ struct SMember {
   bool CheckHistoryFieldVersion(
       const utils::SemanticVersion& MessageVersion) const;
 
- private:
-  bool CheckCustomVehicleData(
-      const utils::SemanticVersion& MessageVersion) const;
-
-  bool CheckAPIVehicleData(const utils::SemanticVersion& MessageVersion) const;
-
- public:
   /**
    * @brief Member schema item.
    **/
