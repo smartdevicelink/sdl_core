@@ -215,8 +215,8 @@ TEST_F(ObjectSchemaItemTest, validation_invalid_data_with_old_version) {
 
   utils::SemanticVersion messageVersion(3, 0, 0);
   rpc::ValidationReport report("RPC");
-  EXPECT_EQ(errors::MISSING_MANDATORY_PARAMETER,
-            schema_item->validate(obj, &report, messageVersion));
+  EXPECT_EQ(errors::OK, schema_item->validate(obj, &report, messageVersion));
+  EXPECT_EQ(std::string(""), rpc::PrettyFormat(report));
 }
 
 TEST_F(ObjectSchemaItemTest, validation_correct_skip_not_mandatory) {
