@@ -121,32 +121,31 @@ smart_objects::ISchemaItemPtr VehicleDataItemSchema::GetPODTypeSchema(
   using BoolItemParam = smart_objects::TSchemaItemParameter<bool>;
 
   if (policy_item.type == policy_table::VehicleDataItem::kInteger) {
-    return IntSchemaItem::create(
-        IntItemParam(policy_item.minvalue.is_initialized()
-                         ? *policy_item.minvalue
-                         : std::numeric_limits<int64_t>::min()),
-        IntItemParam(policy_item.maxvalue.is_initialized()
-                         ? *policy_item.maxvalue
-                         : std::numeric_limits<int64_t>::max()));
+    return IntSchemaItem::create(policy_item.minvalue.is_initialized()
+                                     ? IntItemParam(*policy_item.minvalue)
+                                     : IntItemParam(),
+                                 policy_item.maxvalue.is_initialized()
+                                     ? IntItemParam(*policy_item.maxvalue)
+                                     : IntItemParam());
   }
   if (policy_item.type == policy_table::VehicleDataItem::kFloat ||
       policy_item.type == policy_table::VehicleDataItem::kDouble) {
     return FloatSchemaItem::create(
-        FloatItemParam(policy_item.minvalue.is_initialized()
-                           ? double(*policy_item.minvalue)
-                           : std::numeric_limits<double>::min()),
-        FloatItemParam(policy_item.maxvalue.is_initialized()
-                           ? double(*policy_item.maxvalue)
-                           : std::numeric_limits<double>::max()));
+        policy_item.minvalue.is_initialized()
+            ? FloatItemParam(double(*policy_item.minvalue))
+            : FloatItemParam(),
+        policy_item.maxvalue.is_initialized()
+            ? FloatItemParam(double(*policy_item.maxvalue))
+            : FloatItemParam());
   }
   if (policy_item.type == policy_table::VehicleDataItem::kString) {
     return StringSchemaItem::create(
         StringItemParam(policy_item.minlength.is_initialized()
                             ? *policy_item.minlength
                             : 0),
-        StringItemParam(policy_item.maxlength.is_initialized()
-                            ? *policy_item.maxlength
-                            : std::numeric_limits<uint32_t>::max()));
+        policy_item.maxlength.is_initialized()
+            ? StringItemParam(*policy_item.maxlength)
+            : StringItemParam());
   }
   if (policy_item.type == policy_table::VehicleDataItem::kBoolean) {
     return BoolSchemaItem::create(BoolItemParam(true));
