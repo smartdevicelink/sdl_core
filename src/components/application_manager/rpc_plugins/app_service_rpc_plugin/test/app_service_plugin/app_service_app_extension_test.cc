@@ -64,12 +64,12 @@ class AppServiceAppExtensionTest : public ::testing::Test {
  public:
   AppServiceAppExtensionTest() : mock_app_(new NiceMock<MockApplication>()) {}
 
-  void SetUp() {
+  void SetUp() OVERRIDE {
     app_service_app_extension_.reset(
         new AppServiceAppExtension(app_service_plugin_, *mock_app_));
   }
 
-  void TearDown() {
+  void TearDown() OVERRIDE {
     app_service_app_extension_.reset();
   }
 
@@ -204,8 +204,6 @@ TEST_F(AppServiceAppExtensionTest, ProcessResumption_SUCCESS) {
         app_service_app_extension_->IsSubscribedToAppService(app_service_type));
   }
   EXPECT_EQ(2u, app_service_app_extension_->Subscriptions().size());
-  EXPECT_EQ(kAppServiceType1,
-            *app_service_app_extension_->Subscriptions().begin());
 }
 
 }  // namespace app_service_plugin_test
