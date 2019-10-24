@@ -60,8 +60,7 @@ SMember::SMember(const ISchemaItemPtr SchemaItem,
                  const std::string& Until,
                  const bool IsDeprecated,
                  const bool IsRemoved,
-                 const std::vector<SMember>& history_vector,
-                 const Type type)
+                 const std::vector<SMember>& history_vector)
     : mSchemaItem(SchemaItem), mIsMandatory(IsMandatory) {
   if (Since.size() > 0) {
     utils::SemanticVersion since_struct(Since);
