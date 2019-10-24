@@ -89,7 +89,6 @@ struct SMember {
   bool mIsDeprecated;
   bool mIsRemoved;
   std::vector<SMember> mHistoryVector;
-  Type mType;
 };
 typedef std::map<std::string, SMember> Members;
 
