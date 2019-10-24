@@ -67,9 +67,9 @@ class GetAppServiceDataRequest : public app_mngr::commands::CommandRequestImpl {
    **/
   virtual void Run();
 
-  /*
+  /**
    * @brief Init sets hash update mode for request
-   */
+   **/
   bool Init() FINAL;
 
   /**
