@@ -111,11 +111,21 @@ void CustomVehicleDataManagerImpl::CreateMobileMessageParams(
 
       const auto& item_name = schema->name;
       if (policy_table::VehicleDataItem::kStruct == std::string(schema->type)) {
-        const auto param =
-            fill_mobile_msg(input_params[key], SearchMethod::RECURSIVE);
-        if (!param.empty()) {
-          out_params[item_name] = param;
+        auto& input_param = input_params[key];
+        if (*schema->array) {
+          for (size_t i = 0; i < input_param.length(); i++) {
+            const auto param =
+                fill_mobile_msg(input_param[i], SearchMethod::RECURSIVE);
+            out_params[item_name][i] = param;
+          }
           continue;
+        } else {
+          const auto param =
+              fill_mobile_msg(input_param, SearchMethod::RECURSIVE);
+          if (!param.empty()) {
+            out_params[item_name] = param;
+            continue;
+          }
         }
       }
 
