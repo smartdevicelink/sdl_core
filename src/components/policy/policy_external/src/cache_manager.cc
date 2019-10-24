@@ -3132,15 +3132,15 @@ void CacheManager::BackgroundBackuper::threadMain() {
       InternalBackup();
     }
 
-    if (new_data_available_ || stop_flag_) {
-      continue;
-    }
-
     {
       LOG4CXX_DEBUG(logger_, "Backup is done");
       sync_primitives::AutoLock auto_lock(backup_done_lock_);
       backup_is_in_progress_.exchange(false);
       backup_done_.Broadcast();
+    }
+
+    if (new_data_available_ || stop_flag_) {
+      continue;
     }
 
     LOG4CXX_DEBUG(logger_, "Wait for a next backup");
@@ -3165,11 +3165,9 @@ void CacheManager::BackgroundBackuper::DoBackup() {
 void CacheManager::BackgroundBackuper::WaitForBackupIsDone() {
   LOG4CXX_AUTO_TRACE(logger_);
   sync_primitives::AutoLock auto_lock(backup_done_lock_);
-  if (!backup_is_in_progress_) {
-    return;
+  if (backup_is_in_progress_) {
+    backup_done_.Wait(auto_lock);
   }
-
-  backup_done_.Wait(auto_lock);
 }
 
 EncryptionRequired CacheManager::GetAppEncryptionRequiredFlag(
