@@ -42,7 +42,6 @@ include_directories(
 ) 
 
 set(SOURCES ${APP_SERVICE_TEST_DIR}/app_service_plugin/app_service_app_extension_test.cc
-            ${APP_SERVICE_SRC_DIR}/app_service_rpc_plugin.cc
             ${COMPONENTS_DIR}/application_manager/test/mock_message_helper.cc
 )
 
