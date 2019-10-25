@@ -82,8 +82,15 @@ SMember::SMember(const ISchemaItemPtr SchemaItem,
 bool SMember::CheckHistoryFieldVersion(
     const utils::SemanticVersion& MessageVersion) const {
   if (MessageVersion.isValid()) {
-    if (mUntil != boost::none && (MessageVersion >= mUntil.get())) {
-      return false;  // Msg version newer than `until` field
+    if (mSince != boost::none) {
+      if (MessageVersion < mSince.get()) {
+        return false;
+      }
+    }
+    if (mUntil != boost::none) {
+      if (MessageVersion >= mUntil.get()) {
+        return false;  // Msg version newer than `until` field
+      }
     }
   }
 
@@ -281,7 +288,9 @@ const SMember* CObjectSchemaItem::GetCorrectMember(
   }
 
   // Return member as default
-  return nullptr;
+  return (member.mSince != boost::none && member.mSince.get() > kModuleVersion)
+             ? &member
+             : nullptr;
 }
 
 }  // namespace ns_smart_objects
