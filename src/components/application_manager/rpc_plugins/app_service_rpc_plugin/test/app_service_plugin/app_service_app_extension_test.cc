@@ -64,6 +64,7 @@ class AppServiceAppExtensionTest : public ::testing::Test {
  public:
   AppServiceAppExtensionTest() : mock_app_(new NiceMock<MockApplication>()) {}
 
+ protected:
   void SetUp() OVERRIDE {
     app_service_app_extension_.reset(
         new AppServiceAppExtension(app_service_plugin_, *mock_app_));
@@ -73,7 +74,6 @@ class AppServiceAppExtensionTest : public ::testing::Test {
     app_service_app_extension_.reset();
   }
 
- protected:
   app_service_rpc_plugin::AppServiceRpcPlugin app_service_plugin_;
   std::unique_ptr<MockApplication> mock_app_;
   std::unique_ptr<AppServiceAppExtension> app_service_app_extension_;
