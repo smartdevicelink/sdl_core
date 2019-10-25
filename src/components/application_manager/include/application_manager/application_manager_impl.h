@@ -1138,6 +1138,14 @@ class ApplicationManagerImpl
 
  private:
   /**
+   * @brief Removes service status record for service that failed to start
+   * @param app Application whose service status record should be removed
+   * @param Service type which status record should be removed
+   */
+  bool HandleRejectedServiceStatus(
+      ApplicationSharedPtr app,
+      const hmi_apis::Common_ServiceType::eType service_type);
+  /**
    * @brief PullLanguagesInfo allows to pull information about languages.
    *
    * @param app_data entry to parse
