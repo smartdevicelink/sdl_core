@@ -1138,11 +1138,11 @@ class ApplicationManagerImpl
 
  private:
   /**
-   * @brief Stop services that failed to start
-   * @param app Application whose service should be stopped
-   * @param Service type that should be stopped
+   * @brief Removes service status record for service that failed to start
+   * @param app Application whose service status record should be removed
+   * @param Service type which status record should be removed
    */
-  bool StopServicesForApp(
+  bool HandleRejectedServiceStatus(
       ApplicationSharedPtr app,
       const hmi_apis::Common_ServiceType::eType service_type);
   /**

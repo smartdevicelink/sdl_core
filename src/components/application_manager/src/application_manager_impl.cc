@@ -2070,7 +2070,7 @@ void ApplicationManagerImpl::ProcessServiceStatusUpdate(
   rpc_service_->ManageHMICommand(notification);
 
   if (hmi_apis::Common_ServiceEvent::REQUEST_REJECTED == service_event &&
-      StopServicesForApp(app, service_type)) {
+      HandleRejectedServiceStatus(app, service_type)) {
     state_ctrl_.SetRegularState(app,
                                 mobile_apis::PredefinedWindows::DEFAULT_WINDOW,
                                 mobile_apis::HMILevel::HMI_NONE,
@@ -2078,7 +2078,7 @@ void ApplicationManagerImpl::ProcessServiceStatusUpdate(
   }
 }
 
-bool ApplicationManagerImpl::StopServicesForApp(
+bool ApplicationManagerImpl::HandleRejectedServiceStatus(
     ApplicationSharedPtr app,
     const hmi_apis::Common_ServiceType::eType service_type) {
   LOG4CXX_AUTO_TRACE(logger_);
