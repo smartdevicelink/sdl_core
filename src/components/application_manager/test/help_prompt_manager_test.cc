@@ -180,19 +180,10 @@ void HelpPromptManagerTest::SetUp() {
   mock_help_prompt_manager_ =
       std::shared_ptr<MockHelpPromptManager>(new MockHelpPromptManager());
 
-<<<<<<< HEAD
-  HmiStatePtr state = std::make_shared<HmiState>(
-      static_cast<std::shared_ptr<Application> >(mock_app_),
-      app_mngr_,
-      HmiState::STATE_ID_REGULAR);
-
   const std::string path("storage");
-  if (file_system::CreateDirectory(path))
+  if (file_system::CreateDirectory(path)) {
     file_system::CreateFile(path + "/" + "certificate");
-=======
-  std::string path = file_system::CreateDirectory("storage");
-  file_system::CreateFile(path + "/" + "certificate");
->>>>>>> origin/release/6.0.0
+  }
 
   mock_app_ = std::make_shared<application_manager_test::MockApplication>();
 }
