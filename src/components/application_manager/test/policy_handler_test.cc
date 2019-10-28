@@ -2617,7 +2617,7 @@ TEST_F(PolicyHandlerTest, AddStatisticsInfo_SUCCESS) {
   EXPECT_TRUE(waiter.Wait(auto_lock));
 }
 
-TEST_F(PolicyHandlerTest, DISABLED_OnSystemError_SUCCESS) {
+TEST_F(PolicyHandlerTest, OnSystemError_SUCCESS) {
   EnablePolicyAndPolicyManagerMock();
 
   sync_primitives::Lock wait_hmi_lock;
