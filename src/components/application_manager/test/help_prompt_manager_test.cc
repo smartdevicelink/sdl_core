@@ -180,8 +180,10 @@ void HelpPromptManagerTest::SetUp() {
   mock_help_prompt_manager_ =
       std::shared_ptr<MockHelpPromptManager>(new MockHelpPromptManager());
 
-  std::string path = file_system::CreateDirectory("storage");
-  file_system::CreateFile(path + "/" + "certificate");
+  const std::string path("storage");
+  if (file_system::CreateDirectory(path)) {
+    file_system::CreateFile(path + "/" + "certificate");
+  }
 
   mock_app_ = std::make_shared<application_manager_test::MockApplication>();
 }
