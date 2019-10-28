@@ -34,9 +34,9 @@
 #define SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_RC_RPC_PLUGIN_INCLUDE_RC_RPC_PLUGIN_COMMANDS_MOBILE_SET_INTERIOR_VEHICLE_DATA_RESPONSE_H_
 
 #include "application_manager/commands/command_response_impl.h"
-#include "rc_rpc_plugin/resource_allocation_manager.h"
-#include "rc_rpc_plugin/interior_data_cache.h"
 #include "rc_rpc_plugin/commands/rc_command_request.h"
+#include "rc_rpc_plugin/interior_data_cache.h"
+#include "rc_rpc_plugin/resource_allocation_manager.h"
 #include "utils/macro.h"
 
 namespace rc_rpc_plugin {

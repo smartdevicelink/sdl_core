@@ -33,8 +33,8 @@
 #ifndef SRC_COMPONENTS_INCLUDE_TEST_APPLICATION_MANAGER_MOCK_APP_EXTENSION_H_
 #define SRC_COMPONENTS_INCLUDE_TEST_APPLICATION_MANAGER_MOCK_APP_EXTENSION_H_
 
-#include "gmock/gmock.h"
 #include "application_manager/app_extension.h"
+#include "gmock/gmock.h"
 
 namespace test {
 namespace components {

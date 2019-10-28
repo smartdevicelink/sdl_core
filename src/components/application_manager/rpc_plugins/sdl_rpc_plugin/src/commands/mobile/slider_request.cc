@@ -35,8 +35,8 @@
 
 #include "application_manager/application_impl.h"
 #include "application_manager/message_helper.h"
-#include "utils/helpers.h"
 #include "config_profile/profile.h"
+#include "utils/helpers.h"
 
 namespace sdl_rpc_plugin {
 using namespace application_manager;
@@ -114,6 +114,11 @@ void SliderRequest::Run() {
 
   if (!(*message_)[strings::msg_params].keyExists(strings::timeout)) {
     msg_params[strings::timeout] = default_timeout_;
+  }
+
+  if ((*message_)[strings::msg_params].keyExists(strings::cancel_id)) {
+    msg_params[strings::cancel_id] =
+        (*message_)[strings::msg_params][strings::cancel_id].asInt();
   }
 
   StartAwaitForInterface(HmiInterfaces::HMI_INTERFACE_UI);
@@ -204,4 +209,4 @@ bool SliderRequest::IsWhiteSpaceExist() {
 }
 
 }  // namespace commands
-}  // namespace application_manager
+}  // namespace sdl_rpc_plugin

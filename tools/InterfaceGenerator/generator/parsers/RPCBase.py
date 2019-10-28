@@ -270,7 +270,7 @@ class Parser(object):
                 result = self._parse_version(attrib[attribute])
                 until = result
             elif attribute == "deprecated":
-                deprecated = attributes[attribute]
+                deprecated = attrib[attribute]
             elif attribute == "removed":
                 removed = attrib[attribute]
             else:
@@ -865,8 +865,6 @@ class Parser(object):
         """
         if name in attrib:
             del attrib[name]
-            print ("Ignoring attribute '" +
-                   name + "'")
         return True
 
     def _parse_version(self, version):
@@ -906,7 +904,7 @@ class Parser(object):
             elif subelement.tag == "param" and parent.tag == "param":
                 items.append(self._parse_function_param(subelement, prefix))
             elif subelement.tag == "function" and parent.tag == "function":
-                items.append(self.__parse_function(subelement, prefix))
+                items.append(self._parse_function(subelement, prefix))
             else: 
                 raise ParseError("A history tag must be nested within the element it notes the history for. Fix item: '" +
                  parent.attrib["name"] + "'")

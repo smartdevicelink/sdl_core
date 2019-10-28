@@ -69,7 +69,7 @@ def prepare_data_for_storage(major_version, minor_version, patch_version, minimu
     """Prepares data to store to file.
     """
     temp = Template(
-    u'''/*Copyright (c) 2016, Ford Motor Company\n'''
+    u'''/*Copyright (c) 2019, SmartDeviceLink Consortium, Inc.\n'''
     u'''All rights reserved.\n'''
     u'''Redistribution and use in source and binary forms, with or without\n'''
     u'''modification, are permitted provided that the following conditions are met:\n'''
@@ -79,9 +79,9 @@ def prepare_data_for_storage(major_version, minor_version, patch_version, minimu
     u'''this list of conditions and the following\n'''
     u'''disclaimer in the documentation and/or other materials provided with the\n'''
     u'''distribution.\n'''
-    u'''Neither the name of the Ford Motor Company nor the names of its contributors\n'''
-    u'''may be used to endorse or promote products derived from this software\n'''
-    u'''without specific prior written permission.\n'''
+    u'''Neither the name of the SmartDeviceLink Consortium, Inc. nor the names of its\n'''
+    u'''contributors may be used to endorse or promote products derived from this\n'''
+    u'''software without specific prior written permission.\n'''
     u'''THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS \"AS IS\"\n'''
     u'''AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE\n'''
     u'''IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE\n'''
@@ -96,6 +96,7 @@ def prepare_data_for_storage(major_version, minor_version, patch_version, minimu
     u'''*/\n'''
     u'''#ifndef GENERATED_MSG_VERSION_H\n'''
     u'''#define GENERATED_MSG_VERSION_H\n\n'''
+    u'''#include <cstdint>\n\n'''
     u'''namespace application_manager {\n\n'''
     u'''const uint16_t major_version = $m_version;\n'''
     u'''const uint16_t minor_version = $min_version;\n'''

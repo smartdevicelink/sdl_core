@@ -64,9 +64,11 @@ class ButtonPressRequest : public RCCommandRequest {
   /**
    * @brief IsResourceFree check resource state
    * @param module_type Resource name
+   * @param module_id Resource id
    * @return True if free, otherwise - false
    */
-  bool IsResourceFree(const std::string& module_type) const FINAL;
+  bool IsResourceFree(const std::string& module_type,
+                      const std::string& module_id) const FINAL;
 
   /**
    * @brief SetResourceState changes state of resource
@@ -82,12 +84,18 @@ class ButtonPressRequest : public RCCommandRequest {
    */
   void on_event(const app_mngr::event_engine::Event& event) FINAL;
 
-  std::string ModuleType() FINAL;
+  std::string ModuleType() const FINAL;
+
+  std::string ModuleId() const FINAL;
 
   /**
    * @brief ButtonPressRequest class destructor
    */
   ~ButtonPressRequest();
+
+ private:
+  const mobile_apis::ButtonName::eType GetButtonId() const;
+  std::string GetButtonName() const;
 };
 
 }  // namespace commands

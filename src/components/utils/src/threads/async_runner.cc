@@ -110,4 +110,4 @@ void AsyncRunner::AsyncRunnerDelegate::runDelegate(ThreadDelegate* delegate) {
   delegate_notifier_.NotifyOne();
 }
 
-}  // namespace policy.
+}  // namespace threads

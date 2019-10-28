@@ -34,37 +34,38 @@
 #define SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_VEHICLE_INFO_PLUGIN_INCLUDE_VEHICLE_INFO_PLUGIN_VEHICLE_INFO_COMMAND_FACTORY_H
 
 #include "application_manager/application_manager.h"
+#include "vehicle_info_plugin/custom_vehicle_data_manager.h"
 #include "vehicle_info_plugin/vehicle_info_hmi_command_factory.h"
 #include "vehicle_info_plugin/vehicle_info_mobile_command_factory.h"
 
 namespace vehicle_info_plugin {
 
-namespace app_mngr = application_manager;
-namespace commands = application_manager::commands;
-
 /**
  * @brief The Vehicle Info command factory.
  */
-class VehicleInfoCommandFactory : public app_mngr::CommandFactory {
+class VehicleInfoCommandFactory : public application_manager::CommandFactory {
  public:
-  VehicleInfoCommandFactory(app_mngr::ApplicationManager& application_manager,
-                            app_mngr::rpc_service::RPCService& rpc_service,
-                            app_mngr::HMICapabilities& hmi_capabilities,
-                            policy::PolicyHandlerInterface& policy_handler);
+  VehicleInfoCommandFactory(
+      application_manager::ApplicationManager& application_manager,
+      application_manager::rpc_service::RPCService& rpc_service,
+      application_manager::HMICapabilities& hmi_capabilities,
+      policy::PolicyHandlerInterface& policy_handler,
+      CustomVehicleDataManager& custom_vehicle_data_manager);
   virtual ~VehicleInfoCommandFactory();
 
-  app_mngr::CommandSharedPtr CreateCommand(
-      const commands::MessageSharedPtr& message,
-      commands::Command::CommandSource source) OVERRIDE;
+  application_manager::CommandSharedPtr CreateCommand(
+      const application_manager::commands::MessageSharedPtr& message,
+      application_manager::commands::Command::CommandSource source) OVERRIDE;
 
   bool IsAbleToProcess(
       const int32_t function_id,
-      const commands::Command::CommandSource source) const OVERRIDE;
+      const application_manager::commands::Command::CommandSource source)
+      const OVERRIDE;
 
  private:
-  std::unique_ptr<app_mngr::CommandFactory> hmi_command_factory_;
-  std::unique_ptr<app_mngr::CommandFactory> mob_command_factory_;
+  std::unique_ptr<application_manager::CommandFactory> hmi_command_factory_;
+  std::unique_ptr<application_manager::CommandFactory> mob_command_factory_;
 };
-}
+}  // namespace vehicle_info_plugin
 
 #endif  // SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_VEHICLE_INFO_PLUGIN_INCLUDE_VEHICLE_INFO_PLUGIN_VEHICLE_INFO_COMMAND_FACTORY_H

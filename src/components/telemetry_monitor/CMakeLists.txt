@@ -50,6 +50,7 @@ include_directories (
   ${JSONCPP_INCLUDE_DIRECTORY}
   ${CMAKE_BINARY_DIR}/src/components/
   ${LOG4CXX_INCLUDE_DIRECTORY}
+  ${BOOST_INCLUDE_DIR}
 )
 
 set(PATHS
@@ -62,7 +63,7 @@ set(LIBRARIES
   HMI_API
   MOBILE_API
   Utils
-  Policy
+  PolicyStatic
 )
 
 add_library("TelemetryMonitor" ${SOURCES})

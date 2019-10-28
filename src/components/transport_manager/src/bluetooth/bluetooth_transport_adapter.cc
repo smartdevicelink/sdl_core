@@ -34,18 +34,18 @@
  */
 
 #include <errno.h>
-#include <sys/types.h>
 #include <sys/socket.h>
+#include <sys/types.h>
 #include <unistd.h>
 
+#include <bluetooth/bluetooth.h>
 #include <iomanip>
 #include <set>
-#include <bluetooth/bluetooth.h>
 
-#include "transport_manager/bluetooth/bluetooth_transport_adapter.h"
-#include "transport_manager/bluetooth/bluetooth_device_scanner.h"
 #include "transport_manager/bluetooth/bluetooth_connection_factory.h"
 #include "transport_manager/bluetooth/bluetooth_device.h"
+#include "transport_manager/bluetooth/bluetooth_device_scanner.h"
+#include "transport_manager/bluetooth/bluetooth_transport_adapter.h"
 
 #include "utils/logger.h"
 
@@ -58,11 +58,12 @@ BluetoothTransportAdapter::~BluetoothTransportAdapter() {}
 
 BluetoothTransportAdapter::BluetoothTransportAdapter(
     resumption::LastState& last_state, const TransportManagerSettings& settings)
-    : TransportAdapterImpl(new BluetoothDeviceScanner(this, true, 0),
-                           new BluetoothConnectionFactory(this),
-                           NULL,
-                           last_state,
-                           settings) {}
+    : TransportAdapterImpl(
+          new BluetoothDeviceScanner(this, true, 0, settings.bluetooth_uuid()),
+          new BluetoothConnectionFactory(this),
+          NULL,
+          last_state,
+          settings) {}
 
 DeviceType BluetoothTransportAdapter::GetDeviceType() const {
   return BLUETOOTH;

@@ -52,12 +52,27 @@ class SecurityManagerListener {
    * @brief Notification about handshake failure
    * @return true on success notification handling or false otherwise
    */
-  virtual bool OnHandshakeFailed() = 0;
+  virtual bool OnGetSystemTimeFailed() = 0;
 
   /**
    * @brief Notify listeners that certificate update is required.
    */
   virtual void OnCertificateUpdateRequired() = 0;
+
+  virtual bool OnPTUFailed() = 0;
+
+#ifdef EXTERNAL_PROPRIETARY_MODE
+  /**
+   * @brief OnCertDecryptFailed is called when certificate decryption fails in
+   * external flow
+   * @return since this callback is a part of SecurityManagerListener, bool
+   * return value is used to indicate whether listener instance can be deleted
+   * by calling entity. if true - listener can be deleted and removed from
+   * listeners by SecurityManager, false - listener retains its place within
+   * SecurityManager.
+   */
+  virtual bool OnCertDecryptFailed() = 0;
+#endif
 
   /**
    * @brief Get certificate data from policy

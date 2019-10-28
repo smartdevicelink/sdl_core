@@ -36,8 +36,8 @@
 #include "application_manager/application_impl.h"
 #include "application_manager/message_helper.h"
 
-#include "interfaces/MOBILE_API.h"
 #include "interfaces/HMI_API.h"
+#include "interfaces/MOBILE_API.h"
 
 namespace sdl_rpc_plugin {
 using namespace application_manager;
@@ -161,7 +161,8 @@ void ResetGlobalPropertiesRequest::Run() {
       key_board_properties[hmi_request::limited_character_list] =
         limited_character_list;*/
 
-      key_board_properties[hmi_request::auto_complete_text] = "";
+      key_board_properties[hmi_request::auto_complete_list] =
+          smart_objects::SmartObject(smart_objects::SmartType_Array);
       msg_params[hmi_request::keyboard_properties] = key_board_properties;
     }
 
@@ -333,4 +334,4 @@ bool ResetGlobalPropertiesRequest::IsPendingResponseExist() {
 
 }  // namespace commands
 
-}  // namespace application_manager
+}  // namespace sdl_rpc_plugin

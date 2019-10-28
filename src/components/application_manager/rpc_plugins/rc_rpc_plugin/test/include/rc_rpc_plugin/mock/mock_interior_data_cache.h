@@ -42,10 +42,14 @@ namespace rc_rpc_plugin_test {
 class MockInteriorDataCache : public rc_rpc_plugin::InteriorDataCache {
  public:
   MOCK_METHOD2(Add,
-               void(const std::string&, const smart_objects::SmartObject&));
-  MOCK_CONST_METHOD1(Retrieve, smart_objects::SmartObject(const std::string&));
-  MOCK_CONST_METHOD1(Contains, bool(const std::string&));
-  MOCK_METHOD1(Remove, void(const std::string&));
+               void(const rc_rpc_plugin::ModuleUid&,
+                    const smart_objects::SmartObject&));
+  MOCK_CONST_METHOD1(
+      Retrieve, smart_objects::SmartObject(const rc_rpc_plugin::ModuleUid&));
+  MOCK_CONST_METHOD1(GetCachedModulesByType,
+                     std::vector<rc_rpc_plugin::ModuleUid>(const std::string&));
+  MOCK_CONST_METHOD1(Contains, bool(const rc_rpc_plugin::ModuleUid&));
+  MOCK_METHOD1(Remove, void(const rc_rpc_plugin::ModuleUid&));
   MOCK_METHOD0(Clear, void());
 };
 

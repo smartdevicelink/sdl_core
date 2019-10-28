@@ -79,9 +79,8 @@ void OnButtonEventNotification::Run() {
         (*message_)[strings::msg_params][strings::app_id].asUInt());
 
     // custom_button_id is mandatory for CUSTOM_BUTTON notification
-    if (false ==
-        (*message_)[strings::msg_params].keyExists(
-            hmi_response::custom_button_id)) {
+    if (false == (*message_)[strings::msg_params].keyExists(
+                     hmi_response::custom_button_id)) {
       LOG4CXX_ERROR(logger_,
                     "CUSTOM_BUTTON OnButtonEvent without custom_button_id.");
       return;
@@ -103,8 +102,11 @@ void OnButtonEventNotification::Run() {
       return;
     }
 
-    if ((mobile_api::HMILevel::HMI_FULL != app->hmi_level()) &&
-        (mobile_api::HMILevel::HMI_LIMITED != app->hmi_level())) {
+    const auto window_id = app->GetSoftButtonWindowID(custom_btn_id);
+    (*message_)[strings::msg_params][strings::window_id] = window_id;
+    const auto window_hmi_level = app->hmi_level(window_id);
+    if ((mobile_api::HMILevel::HMI_FULL != window_hmi_level) &&
+        (mobile_api::HMILevel::HMI_LIMITED != window_hmi_level)) {
       LOG4CXX_WARN(logger_,
                    "CUSTOM_BUTTON OnButtonEvent notification is allowed only "
                        << "in FULL or LIMITED hmi level");
@@ -128,8 +130,11 @@ void OnButtonEventNotification::Run() {
     }
 
     // Send ButtonEvent notification only in HMI_FULL or HMI_LIMITED mode
-    if ((mobile_api::HMILevel::HMI_FULL != subscribed_app->hmi_level()) &&
-        (mobile_api::HMILevel::HMI_LIMITED != subscribed_app->hmi_level())) {
+    const mobile_apis::HMILevel::eType app_hmi_level =
+        subscribed_app->hmi_level(
+            mobile_apis::PredefinedWindows::DEFAULT_WINDOW);
+    if ((mobile_api::HMILevel::HMI_FULL != app_hmi_level) &&
+        (mobile_api::HMILevel::HMI_LIMITED != app_hmi_level)) {
       LOG4CXX_WARN(logger_,
                    "OnButtonEvent notification is allowed only"
                        << "in FULL or LIMITED hmi level");
@@ -180,6 +185,11 @@ void OnButtonEventNotification::SendButtonEvent(ApplicationConstSharedPtr app) {
         (*message_)[strings::msg_params][strings::custom_button_id];
   }
 
+  if ((*message_)[strings::msg_params].keyExists(strings::window_id)) {
+    (*on_btn_event)[strings::msg_params][strings::window_id] =
+        (*message_)[strings::msg_params][strings::window_id];
+  }
+
   message_ = on_btn_event;
   SendNotification();
 }
@@ -188,4 +198,4 @@ void OnButtonEventNotification::SendButtonEvent(ApplicationConstSharedPtr app) {
 
 }  // namespace commands
 
-}  // namespace application_manager
+}  // namespace sdl_rpc_plugin

@@ -32,19 +32,19 @@
 
 #include "transport_manager/tcp/tcp_transport_adapter.h"
 
+#include <errno.h>
 #include <memory.h>
 #include <signal.h>
-#include <errno.h>
 #include <stdio.h>
 
 #include <cstdlib>
 #include <sstream>
 
-#include "utils/logger.h"
-#include "utils/threads/thread_delegate.h"
 #include "transport_manager/tcp/tcp_client_listener.h"
 #include "transport_manager/tcp/tcp_connection_factory.h"
 #include "transport_manager/tcp/tcp_device.h"
+#include "utils/logger.h"
+#include "utils/threads/thread_delegate.h"
 
 namespace transport_manager {
 namespace transport_adapter {

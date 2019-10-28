@@ -31,11 +31,11 @@
 
 #include "gmock/gmock.h"
 
-#include "policy/usage_statistics/mock_statistics_manager.h"
 #include "policy/usage_statistics/counter.h"
+#include "policy/usage_statistics/mock_statistics_manager.h"
 
-using ::testing::StrictMock;
 using ::testing::InSequence;
+using ::testing::StrictMock;
 
 namespace test {
 namespace components {

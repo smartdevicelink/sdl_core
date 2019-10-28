@@ -31,11 +31,11 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <string>
-#include <cstring>
-#include <algorithm>
-#include <vector>
 #include "sdl_rpc_plugin/commands/mobile/create_interaction_choice_set_request.h"
+#include <algorithm>
+#include <cstring>
+#include <string>
+#include <vector>
 
 #include "application_manager/application_impl.h"
 #include "application_manager/message_helper.h"
@@ -218,9 +218,9 @@ bool CreateInteractionChoiceSetRequest::compareSynonyms(
                           CreateInteractionChoiceSetRequest::compareStr);
 
   if (it != vr_cmds_1->end()) {
-    LOG4CXX_INFO(logger_,
-                 "Incoming choice set has duplicated VR synonyms "
-                     << it->asString());
+    LOG4CXX_INFO(
+        logger_,
+        "Incoming choice set has duplicated VR synonyms " << it->asString());
     return true;
   }
 
@@ -332,9 +332,9 @@ void CreateInteractionChoiceSetRequest::SendVRAddCommandRequests(
 
     VRCommandInfo vr_command(vr_cmd_id);
     sent_commands_map_[vr_corr_id] = vr_command;
-    LOG4CXX_DEBUG(logger_,
-                  "VR_command sent corr_id " << vr_corr_id << " cmd_id "
-                                             << vr_corr_id);
+    LOG4CXX_DEBUG(
+        logger_,
+        "VR_command sent corr_id " << vr_corr_id << " cmd_id " << vr_corr_id);
   }
   expected_chs_count_ = chs_num;
   LOG4CXX_DEBUG(logger_, "expected_chs_count_ = " << expected_chs_count_);
@@ -480,4 +480,4 @@ void CreateInteractionChoiceSetRequest::OnAllHMIResponsesReceived() {
 
 }  // namespace commands
 
-}  // namespace application_manager
+}  // namespace sdl_rpc_plugin

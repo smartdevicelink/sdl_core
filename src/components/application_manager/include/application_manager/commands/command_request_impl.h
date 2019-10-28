@@ -34,10 +34,10 @@
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_COMMAND_REQUEST_IMPL_H_
 
 #include "application_manager/commands/command_impl.h"
-#include "interfaces/MOBILE_API.h"
 #include "interfaces/HMI_API.h"
-#include "utils/lock.h"
+#include "interfaces/MOBILE_API.h"
 #include "smart_objects/smart_object.h"
+#include "utils/lock.h"
 
 namespace application_manager {
 namespace commands {
@@ -149,6 +149,8 @@ class CommandRequestImpl : public CommandImpl,
    */
   virtual void on_event(const event_engine::Event& event);
 
+  virtual void on_event(const event_engine::MobileEvent& event);
+
   /*
    * @brief Creates Mobile response
    *
@@ -157,10 +159,12 @@ class CommandRequestImpl : public CommandImpl,
    * @param info Provides additional human readable info regarding the result
    * @param response_params Additional params in response
    */
-  void SendResponse(const bool success,
-                    const mobile_apis::Result::eType& result_code,
-                    const char* info = NULL,
-                    const smart_objects::SmartObject* response_params = NULL);
+  void SendResponse(
+      const bool success,
+      const mobile_apis::Result::eType& result_code,
+      const char* info = NULL,
+      const smart_objects::SmartObject* response_params = NULL,
+      const std::vector<uint8_t> binary_data = std::vector<uint8_t>());
 
   /**
    * @brief Check syntax of string from mobile
@@ -169,6 +173,16 @@ class CommandRequestImpl : public CommandImpl,
    * @return true if success otherwise return false
    */
   bool CheckSyntax(const std::string& str, bool allow_empty_line = false);
+
+  void SendProviderRequest(
+      const mobile_apis::FunctionID::eType& mobile_function_id,
+      const hmi_apis::FunctionID::eType& hmi_function_id,
+      const smart_objects::SmartObject* msg,
+      bool use_events = false);
+
+  void SendMobileRequest(const mobile_apis::FunctionID::eType& function_id,
+                         smart_objects::SmartObjectSPtr msg,
+                         bool use_events = false);
 
   /*
    * @brief Sends HMI request
@@ -199,6 +213,24 @@ class CommandRequestImpl : public CommandImpl,
    */
   mobile_apis::Result::eType GetMobileResultCode(
       const hmi_apis::Common_Result::eType& hmi_code) const;
+
+  /**
+   * @brief Checks Mobile result code for single RPC
+   * @param result_code contains result code from response to Mobile
+   * @return true if result code complies to successful result codes,
+   * false otherwise.
+   */
+  static bool IsMobileResultSuccess(
+      const mobile_apis::Result::eType result_code);
+
+  /**
+   * @brief Checks HMI result code for single RPC
+   * @param result_code contains result code from HMI response
+   * @return true if result code complies to successful result codes,
+   * false otherwise.
+   */
+  static bool IsHMIResultSuccess(
+      const hmi_apis::Common_Result::eType result_code);
 
  protected:
   /**
@@ -295,6 +327,16 @@ class CommandRequestImpl : public CommandImpl,
   bool IsResultCodeUnsupported(const ResponseInfo& first,
                                const ResponseInfo& second) const;
 
+  /**
+   * @brief CheckResult checks whether the overall result
+   * of the responses is successful
+   * @param first response
+   * @param second response
+   * @return true if the overall result is successful
+   * otherwise - false
+   */
+  bool CheckResult(const ResponseInfo& first, const ResponseInfo& second) const;
+
  protected:
   /**
    * @brief Returns policy parameters permissions
@@ -313,7 +355,7 @@ class CommandRequestImpl : public CommandImpl,
    * @param interface_id interface which SDL awaits for response in given time
    * @return true if SDL awaits for response from given interface in
    * interface_id
-  */
+   */
   bool IsInterfaceAwaited(const HmiInterfaces::InterfaceID& interface_id) const;
 
   /**
@@ -324,7 +366,7 @@ class CommandRequestImpl : public CommandImpl,
   void EndAwaitForInterface(const HmiInterfaces::InterfaceID& interface_id);
 
   /**
-  * @brief This set stores all the interfaces which are awaited by SDL to
+   * @brief This set stores all the interfaces which are awaited by SDL to
    * return a response on some request
    */
   std::set<HmiInterfaces::InterfaceID> awaiting_response_interfaces_;
@@ -365,10 +407,10 @@ class CommandRequestImpl : public CommandImpl,
       const hmi_apis::FunctionID::eType& function_id);
 
   /**
-    * @brief UpdateHash updates hash field for application and sends
-    * OnHashChanged notification to mobile side in case of approriate hash mode
-    * is set
-    */
+   * @brief UpdateHash updates hash field for application and sends
+   * OnHashChanged notification to mobile side in case of approriate hash mode
+   * is set
+   */
   void UpdateHash();
 
   /**

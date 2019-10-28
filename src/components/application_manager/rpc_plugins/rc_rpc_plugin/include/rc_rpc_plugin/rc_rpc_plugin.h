@@ -35,11 +35,17 @@
 
 #include <memory>
 
-#include "application_manager/plugin_manager/rpc_plugin.h"
 #include "application_manager/command_factory.h"
-#include "rc_rpc_plugin/resource_allocation_manager.h"
+#include "application_manager/plugin_manager/rpc_plugin.h"
 #include "rc_rpc_plugin/interior_data_cache.h"
 #include "rc_rpc_plugin/interior_data_manager.h"
+#include "rc_rpc_plugin/rc_capabilities_manager.h"
+#include "rc_rpc_plugin/rc_consent_manager.h"
+#include "rc_rpc_plugin/resource_allocation_manager.h"
+
+namespace resumption {
+class LastState;
+}
 
 namespace rc_rpc_plugin {
 namespace plugins = application_manager::plugin_manager;
@@ -48,22 +54,23 @@ namespace app_mngr = application_manager;
 class RCRPCPlugin : public plugins::RPCPlugin {
  public:
   /**
-    * @brief Command initialization function
-    * @param app_manager ApplicationManager
-    * @param rpc_service RPCService
-    * @param hmi_capabilities HMICapabilities
-    * @param policy_handler PolicyHandlerInterface
-    * @return true in case initialization was succesful, false otherwise.
-    **/
+   * @brief Command initialization function
+   * @param app_manager ApplicationManager
+   * @param rpc_service RPCService
+   * @param hmi_capabilities HMICapabilities
+   * @param policy_handler PolicyHandlerInterface
+   * @return true in case initialization was succesful, false otherwise.
+   **/
   bool Init(app_mngr::ApplicationManager& app_manager,
             app_mngr::rpc_service::RPCService& rpc_service,
             app_mngr::HMICapabilities& hmi_capabilities,
-            policy::PolicyHandlerInterface& policy_handler) OVERRIDE;
+            policy::PolicyHandlerInterface& policy_handler,
+            resumption::LastState& last_state) OVERRIDE;
   /**
-  * @param int32_t command id
-  * @param CommandSource source
-  * @return return true if command can be create, else return false
-  **/
+   * @param int32_t command id
+   * @param CommandSource source
+   * @return return true if command can be create, else return false
+   **/
   bool IsAbleToProcess(
       const int32_t function_id,
       const app_mngr::commands::Command::CommandSource message_source) OVERRIDE;
@@ -85,10 +92,10 @@ class RCRPCPlugin : public plugins::RPCPlugin {
    */
   void OnPolicyEvent(app_mngr::plugin_manager::PolicyEvent event) OVERRIDE;
   /**
-    * @brief OnApplicationEvent Notifies modules on certain application events
-    * @param event Event
-    * @param application Pointer to application struct
-    */
+   * @brief OnApplicationEvent Notifies modules on certain application events
+   * @param event Event
+   * @param application Pointer to application struct
+   */
   void OnApplicationEvent(plugins::ApplicationEvent event,
                           app_mngr::ApplicationSharedPtr application) OVERRIDE;
 
@@ -101,13 +108,16 @@ class RCRPCPlugin : public plugins::RPCPlugin {
  private:
   application_manager::rpc_service::RPCService* rpc_service_;
   application_manager::ApplicationManager* app_mngr_;
+  std::unique_ptr<rc_rpc_plugin::RCConsentManager> rc_consent_manager_;
   std::unique_ptr<application_manager::CommandFactory> command_factory_;
   std::unique_ptr<ResourceAllocationManager> resource_allocation_manager_;
   std::unique_ptr<InteriorDataCache> interior_data_cache_;
   std::unique_ptr<InteriorDataManager> interior_data_manager_;
+  std::unique_ptr<RCCapabilitiesManager> rc_capabilities_manager_;
 };
 }  // namespace rc_rpc_plugin
 
 extern "C" application_manager::plugin_manager::RPCPlugin* Create();
+extern "C" void Delete(application_manager::plugin_manager::RPCPlugin* data);
 
 #endif  // SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_RC_RPC_PLUGIN_INCLUDE_RC_RPC_PLUGIN_RC_RPC_PLUGIN_H_

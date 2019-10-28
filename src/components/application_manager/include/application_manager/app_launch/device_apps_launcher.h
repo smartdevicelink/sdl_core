@@ -1,12 +1,12 @@
 #ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_APP_LAUNCH_DEVICE_APPS_LAUNCHER_H_
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_APP_LAUNCH_DEVICE_APPS_LAUNCHER_H_
 #include <stdint.h>
-#include <vector>
-#include <string>
 #include <memory>
+#include <string>
+#include <vector>
 #include "application_manager/app_launch/app_launch_data.h"
-#include "application_manager/application_manager.h"
 #include "application_manager/app_launch_settings.h"
+#include "application_manager/application_manager.h"
 
 namespace app_launch {
 class AppLaunchCtrlImpl;

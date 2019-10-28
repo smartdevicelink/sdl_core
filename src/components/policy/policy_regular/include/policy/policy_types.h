@@ -34,15 +34,16 @@
 #define SRC_COMPONENTS_POLICY_POLICY_EXTERNAL_INCLUDE_POLICY_POLICY_TYPES_H_
 
 #include <algorithm>
-#include <string>
-#include <vector>
 #include <map>
-#include <set>
-#include <utility>
 #include <memory>
+#include <set>
+#include <string>
+#include <utility>
+#include <vector>
 
-#include "utils/helpers.h"
+#include "policy/policy_table/types.h"
 #include "transport_manager/common.h"
+#include "utils/helpers.h"
 
 namespace policy {
 
@@ -77,6 +78,12 @@ enum PolicyTableStatus {
   StatusUnknown
 };
 
+enum class PTUIterationType { DefaultIteration = 0, RetryIteration };
+
+enum class ResetRetryCountType { kResetWithStatusUpdate = 0, kResetInternally };
+
+typedef rpc::Optional<rpc::Boolean> EncryptionRequired;
+
 // Code generator uses String class name, so this typedef was renamed to PTSring
 typedef std::string PTString;
 typedef std::vector<uint8_t> BinaryMessage;
@@ -102,6 +109,7 @@ struct ParameterPermissions
 struct RpcPermissions {
   HMIPermissions hmi_permissions;
   ParameterPermissions parameter_permissions;
+  EncryptionRequired require_encryption;
 };
 
 typedef std::map<RpcName, RpcPermissions> Permissions;
@@ -119,10 +127,10 @@ typedef std::vector<std::string> StringArray;
 enum PermitResult { kRpcAllowed = 0, kRpcDisallowed, kRpcUserDisallowed };
 
 /**
-  * @struct Stores result of check:
-  * if HMI Level was allowed for RPC to work in
-  * and list of parameters allowed for RPC if specified in PT.
-  */
+ * @struct Stores result of check:
+ * if HMI Level was allowed for RPC to work in
+ * and list of parameters allowed for RPC if specified in PT.
+ */
 struct CheckPermissionResult {
   CheckPermissionResult() : hmi_level_permitted(kRpcDisallowed) {}
 
@@ -428,6 +436,28 @@ struct ExternalConsentStatusItemSorter {
 };
 
 /**
+ * @brief The ApplicationPolicyActions struct contains actions which should be
+ * done for some application
+ */
+struct ApplicationPolicyActions {
+  ApplicationPolicyActions()
+      : is_notify_system(false)
+      , is_send_permissions_to_app(false)
+      , is_consent_needed(false) {}
+
+  bool is_notify_system;
+  bool is_send_permissions_to_app;
+  bool is_consent_needed;
+};
+
+/**
+ * @brief ApplicationsPoliciesActions map of actions to be done for every
+ * application
+ */
+typedef std::map<std::string, ApplicationPolicyActions>
+    ApplicationsPoliciesActions;
+
+/**
  * @brief Customer connectivity settings status
  */
 typedef std::set<ExternalConsentStatusItem, ExternalConsentStatusItemSorter>
@@ -473,10 +503,11 @@ enum PermissionsCheckResult {
   RESULT_NICKNAME_MISMATCH,
   RESULT_PERMISSIONS_REVOKED,
   RESULT_CONSENT_NEEDED,
-  RESULT_CONSENT_NOT_REQIURED,
+  RESULT_CONSENT_NOT_REQUIRED,
   RESULT_PERMISSIONS_REVOKED_AND_CONSENT_NEEDED,
   RESULT_REQUEST_TYPE_CHANGED,
-  RESULT_REQUEST_SUBTYPE_CHANGED
+  RESULT_REQUEST_SUBTYPE_CHANGED,
+  RESULT_ENCRYPTION_REQUIRED_FLAG_CHANGED
 };
 
 /**

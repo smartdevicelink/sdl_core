@@ -30,27 +30,27 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "application_manager/app_launch/app_launch_data_json.h"
 #include <algorithm>
-#include <sstream>
 #include <memory>
-#include "json/json.h"
+#include <sstream>
+#include "application_manager/mock_app_launch_settings.h"
+#include "application_manager/smart_object_keys.h"
 #include "gtest/gtest.h"
-#include "utils/macro.h"
-#include "utils/file_system.h"
-#include "utils/date_time.h"
+#include "json/json.h"
 #include "resumption/last_state_impl.h"
 #include "smart_objects/smart_object.h"
-#include "application_manager/smart_object_keys.h"
-#include "application_manager/mock_app_launch_settings.h"
-#include "application_manager/app_launch/app_launch_data_json.h"
+#include "utils/date_time.h"
+#include "utils/file_system.h"
+#include "utils/macro.h"
 
 namespace test {
 namespace components {
 namespace test_app_launch {
 
 using ::testing::_;
-using ::testing::Return;
 using ::testing::NiceMock;
+using ::testing::Return;
 
 namespace am = application_manager;
 using namespace Json;
@@ -339,6 +339,6 @@ TEST_F(AppLaunchDataJsonTest, SelectMultipleData) {
   }
 }
 
-}  // namespace app_launch
+}  // namespace test_app_launch
 }  // namespace components
 }  // namespace test

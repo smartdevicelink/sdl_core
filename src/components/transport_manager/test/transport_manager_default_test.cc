@@ -30,20 +30,20 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "gtest/gtest.h"
-#include "transport_manager/transport_manager.h"
 #include "transport_manager/transport_manager_default.h"
-#include "transport_manager/mock_transport_manager_settings.h"
+#include "gtest/gtest.h"
 #include "resumption/mock_last_state.h"
+#include "transport_manager/mock_transport_manager_settings.h"
+#include "transport_manager/transport_manager.h"
 
 namespace test {
 namespace components {
 namespace transport_manager_test {
 
 using resumption_test::MockLastState;
+using ::testing::NiceMock;
 using ::testing::Return;
 using ::testing::ReturnRef;
-using ::testing::NiceMock;
 
 namespace {
 const std::string kDeviceName = "name";
@@ -57,6 +57,22 @@ const std::string kTransportManager = "TransportManager";
 const std::string kTcpAdapter = "TcpAdapter";
 const std::string kBluetoothAdapter = "BluetoothAdapter";
 const std::string kDevices = "devices";
+std::vector<uint8_t> kBTUUID = {0x93,
+                                0x6D,
+                                0xA0,
+                                0x1F,
+                                0x9A,
+                                0xBD,
+                                0x4D,
+                                0x9D,
+                                0x80,
+                                0xC7,
+                                0x02,
+                                0xAF,
+                                0x85,
+                                0xC8,
+                                0x22,
+                                0xA8};
 }  // namespace
 
 TEST(TestTransportManagerDefault, Init_LastStateNotUsed) {
@@ -78,7 +94,22 @@ TEST(TestTransportManagerDefault, Init_LastStateNotUsed) {
   EXPECT_CALL(transport_manager_settings,
               transport_manager_tcp_adapter_network_interface())
       .WillRepeatedly(ReturnRef(network_interface));
+  EXPECT_CALL(transport_manager_settings, bluetooth_uuid())
+      .WillRepeatedly(Return(kBTUUID.data()));
 
+  std::string dummy_parameter;
+  EXPECT_CALL(transport_manager_settings, aoa_filter_manufacturer())
+      .WillRepeatedly(ReturnRef(dummy_parameter));
+  EXPECT_CALL(transport_manager_settings, aoa_filter_model_name())
+      .WillRepeatedly(ReturnRef(dummy_parameter));
+  EXPECT_CALL(transport_manager_settings, aoa_filter_description())
+      .WillRepeatedly(ReturnRef(dummy_parameter));
+  EXPECT_CALL(transport_manager_settings, aoa_filter_version())
+      .WillRepeatedly(ReturnRef(dummy_parameter));
+  EXPECT_CALL(transport_manager_settings, aoa_filter_uri())
+      .WillRepeatedly(ReturnRef(dummy_parameter));
+  EXPECT_CALL(transport_manager_settings, aoa_filter_serial_number())
+      .WillRepeatedly(ReturnRef(dummy_parameter));
   transport_manager.Init(mock_last_state);
   transport_manager.Stop();
 }
@@ -114,6 +145,8 @@ TEST(TestTransportManagerDefault, Init_LastStateUsed) {
   EXPECT_CALL(transport_manager_settings,
               transport_manager_tcp_adapter_network_interface())
       .WillRepeatedly(ReturnRef(network_interface));
+  EXPECT_CALL(transport_manager_settings, bluetooth_uuid())
+      .WillRepeatedly(Return(kBTUUID.data()));
   transport_manager.Init(mock_last_state);
   transport_manager.Stop();
 }
@@ -149,6 +182,8 @@ TEST(TestTransportManagerDefault, Init_LastStateUsed_InvalidPort) {
   EXPECT_CALL(transport_manager_settings,
               transport_manager_tcp_adapter_network_interface())
       .WillRepeatedly(ReturnRef(network_interface));
+  EXPECT_CALL(transport_manager_settings, bluetooth_uuid())
+      .WillRepeatedly(Return(kBTUUID.data()));
   transport_manager.Init(mock_last_state);
   transport_manager.Stop();
 }

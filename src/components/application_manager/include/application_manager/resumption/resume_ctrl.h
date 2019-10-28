@@ -42,7 +42,7 @@ class ApplicationManager;
 class Application;
 typedef std::shared_ptr<Application> ApplicationSharedPtr;
 typedef std::shared_ptr<const Application> ApplicationConstSharedPtr;
-}
+}  // namespace application_manager
 namespace app_mngr = application_manager;
 
 namespace resumption {
@@ -81,6 +81,13 @@ class ResumeCtrl {
       application_manager::ApplicationSharedPtr application) = 0;
 
   /**
+   * @brief Restore widgets HMI level on the resumption response from HMI
+   * @param response_message smart_object with HMI message
+   */
+  virtual void RestoreWidgetsHMIState(
+      const smart_objects::SmartObject& response_message) = 0;
+
+  /**
    * @brief Set application HMI Level as stored in policy
    * @param application is application witch HMI Level is need to setup
    * @return true if success, otherwise return false
@@ -101,6 +108,16 @@ class ResumeCtrl {
       application_manager::ApplicationSharedPtr application,
       const mobile_apis::HMILevel::eType hmi_level,
       bool check_policy = true) = 0;
+
+  /**
+   * @brief RestoreAppWidgets add widgets for the application
+   * @param application application which will be resumed
+   * @param saved_app application specific section from backup file
+   * @return true if widgets resumed successfully otherwise - false
+   */
+  virtual void RestoreAppWidgets(
+      application_manager::ApplicationSharedPtr application,
+      const smart_objects::SmartObject& saved_app) = 0;
 
   /**
    * @brief Remove application from list of saved applications
@@ -233,7 +250,7 @@ class ResumeCtrl {
    * @param application - application to restore hmi level
    * and audio streaming state
    */
-  virtual void StartAppHmiStateResumption(
+  virtual bool StartAppHmiStateResumption(
       application_manager::ApplicationSharedPtr application) = 0;
 
   /**
@@ -281,6 +298,9 @@ class ResumeCtrl {
    */
   virtual int32_t GetSavedAppHmiLevel(const std::string& app_id,
                                       const std::string& device_id) const = 0;
+
+  virtual void StartWaitingForDisplayCapabilitiesUpdate(
+      app_mngr::ApplicationSharedPtr application) = 0;
 
   virtual time_t LaunchTime() const = 0;
 

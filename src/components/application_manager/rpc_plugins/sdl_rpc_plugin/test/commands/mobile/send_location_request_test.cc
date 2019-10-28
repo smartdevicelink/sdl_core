@@ -32,10 +32,10 @@
 #include <stdint.h>
 #include <string>
 
-#include "gtest/gtest.h"
-#include "mobile/send_location_request.h"
 #include "application_manager/mock_hmi_capabilities.h"
 #include "application_manager/mock_message_helper.h"
+#include "gtest/gtest.h"
+#include "mobile/send_location_request.h"
 
 #include "application_manager/commands/command_request_test.h"
 
@@ -45,11 +45,11 @@ namespace commands_test {
 namespace mobile_commands_test {
 namespace send_location_request {
 
+using application_manager::MockMessageHelper;
 using application_manager::commands::MessageSharedPtr;
 using sdl_rpc_plugin::commands::SendLocationRequest;
-using application_manager::MockMessageHelper;
-using test::components::application_manager_test::MockHMICapabilities;
 using smart_objects::SmartObject;
+using test::components::application_manager_test::MockHMICapabilities;
 
 using testing::_;
 using testing::Return;
@@ -137,15 +137,16 @@ class SendLocationRequestTest
   void FinishSetup() {
     EXPECT_CALL(*mock_app_, hmi_app_id()).WillOnce(Return(kAppID));
 
-    EXPECT_CALL(mock_rpc_service_,
-                ManageHMICommand(HMIResultCodeIs(
-                    hmi_apis::FunctionID::Navigation_SendLocation)));
+    EXPECT_CALL(
+        mock_rpc_service_,
+        ManageHMICommand(
+            HMIResultCodeIs(hmi_apis::FunctionID::Navigation_SendLocation), _));
   }
 
   void FinishSetupCancelled(mobile_apis::Result::eType result) {
     EXPECT_CALL(*mock_app_, hmi_app_id()).Times(0);
 
-    EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_)).Times(0);
+    EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_, _)).Times(0);
     EXPECT_CALL(mock_rpc_service_,
                 ManageMobileCommand(MobileResultCodeIs(result), _));
   }

@@ -34,10 +34,10 @@
 #include "sdl_rpc_plugin/commands/mobile/set_app_icon_request.h"
 #include <algorithm>
 
-#include "application_manager/message_helper.h"
 #include "application_manager/application_impl.h"
-#include "interfaces/MOBILE_API.h"
+#include "application_manager/message_helper.h"
 #include "interfaces/HMI_API.h"
+#include "interfaces/MOBILE_API.h"
 #include "utils/file_system.h"
 #include "utils/helpers.h"
 
@@ -148,10 +148,12 @@ void SetAppIconRequest::CopyToIconStorage(
 
   if (storage_max_size < file_size) {
     LOG4CXX_ERROR(logger_,
-                  "Icon size (" << file_size << ") is bigger, than "
-                                                " icons storage maximum size ("
-                                << storage_max_size << ")."
-                                                       "Copying skipped.");
+                  "Icon size (" << file_size
+                                << ") is bigger, than "
+                                   " icons storage maximum size ("
+                                << storage_max_size
+                                << ")."
+                                   "Copying skipped.");
     return;
   }
 
@@ -203,12 +205,12 @@ void SetAppIconRequest::CopyToIconStorage(
 void SetAppIconRequest::RemoveOldestIcons(const std::string& storage,
                                           const uint32_t icons_amount) const {
   const std::vector<std::string> icons_list = file_system::ListFiles(storage);
-  auto compareTime = [](const time_t t1, const time_t t2)
-                         -> bool { return difftime(t1, t2) > 0; };
-  std::map<time_t,
-           std::string,
-           std::function<bool(const time_t, const time_t)> >
-      icon_modification_time(compareTime);
+  auto compareTime = [](const time_t t1, const time_t t2) -> bool {
+    return difftime(t1, t2) > 0;
+  };
+  std::
+      map<time_t, std::string, std::function<bool(const time_t, const time_t)> >
+          icon_modification_time(compareTime);
   std::vector<std::string>::const_iterator it = icons_list.begin();
   for (; it != icons_list.end(); ++it) {
     const std::string file_name = *it;
@@ -271,7 +273,8 @@ void SetAppIconRequest::on_event(const event_engine::Event& event) {
 
         const std::string& path =
             (*message_)[strings::msg_params][strings::sync_file_name]
-                       [strings::value].asString();
+                       [strings::value]
+                           .asString();
 
         if (is_icons_saving_enabled_) {
           CopyToIconStorage(path);
@@ -298,4 +301,4 @@ void SetAppIconRequest::on_event(const event_engine::Event& event) {
 
 }  // namespace commands
 
-}  // namespace application_manager
+}  // namespace sdl_rpc_plugin

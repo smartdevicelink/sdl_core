@@ -46,6 +46,13 @@ set(EXCLUDE_PATHS
   raw_message_matcher.cc
 )
 
+if (NOT BUILD_CLOUD_APP_SUPPORT)
+  list(APPEND EXCLUDE_PATHS
+    ${CMAKE_CURRENT_SOURCE_DIR}/websocket_connection_test.cc
+    ${CMAKE_CURRENT_SOURCE_DIR}/sample_websocket_server.cc
+  )
+endif()
+
 collect_sources(SOURCES "${CMAKE_CURRENT_SOURCE_DIR}" "${EXCLUDE_PATHS}")
 
 set(PLATFORM_DEPENDENT_SOURCES)
@@ -73,6 +80,11 @@ if (BUILD_BT_SUPPORT)
  if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
   list(APPEND LIBRARIES bluetooth)
  endif()
+endif()
+
+if(BUILD_CLOUD_APP_SUPPORT)
+  GET_PROPERTY(BOOST_LIBS_DIRECTORY GLOBAL PROPERTY GLOBAL_BOOST_LIBS)
+  list(APPEND LIBRARIES boost_system boost_regex crypto ssl -L${BOOST_LIBS_DIRECTORY})
 endif()
 
 create_test("transport_manager_test" "${SOURCES}" "${LIBRARIES}")

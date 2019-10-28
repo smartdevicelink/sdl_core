@@ -126,6 +126,26 @@ bool SubscribeButtonRequest::IsSubscriptionAllowed(
        (mobile_apis::ButtonName::TUNEDOWN == btn_id))) {
     return false;
   }
+
+  if (!app->is_navi() &&
+      ((mobile_apis::ButtonName::NAV_CENTER_LOCATION == btn_id) ||
+       (mobile_apis::ButtonName::NAV_ZOOM_IN == btn_id) ||
+       (mobile_apis::ButtonName::NAV_ZOOM_OUT == btn_id) ||
+       (mobile_apis::ButtonName::NAV_PAN_UP == btn_id) ||
+       (mobile_apis::ButtonName::NAV_PAN_UP_RIGHT == btn_id) ||
+       (mobile_apis::ButtonName::NAV_PAN_RIGHT == btn_id) ||
+       (mobile_apis::ButtonName::NAV_PAN_DOWN_RIGHT == btn_id) ||
+       (mobile_apis::ButtonName::NAV_PAN_DOWN == btn_id) ||
+       (mobile_apis::ButtonName::NAV_PAN_DOWN_LEFT == btn_id) ||
+       (mobile_apis::ButtonName::NAV_PAN_LEFT == btn_id) ||
+       (mobile_apis::ButtonName::NAV_PAN_UP_LEFT == btn_id) ||
+       (mobile_apis::ButtonName::NAV_TILT_TOGGLE == btn_id) ||
+       (mobile_apis::ButtonName::NAV_ROTATE_CLOCKWISE == btn_id) ||
+       (mobile_apis::ButtonName::NAV_ROTATE_COUNTERCLOCKWISE == btn_id) ||
+       (mobile_apis::ButtonName::NAV_HEADING_TOGGLE == btn_id))) {
+    return false;
+  }
+
   return true;
 }
 
@@ -144,4 +164,4 @@ void SubscribeButtonRequest::SendSubscribeButtonNotification() {
 
 }  // namespace commands
 
-}  // namespace application_manager
+}  // namespace sdl_rpc_plugin

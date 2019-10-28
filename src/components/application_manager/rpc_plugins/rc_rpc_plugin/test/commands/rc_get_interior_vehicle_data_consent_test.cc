@@ -31,59 +31,61 @@
  */
 
 #include "application_manager/application.h"
-#include "application_manager/mock_application.h"
 #include "application_manager/commands/command_request_test.h"
-#include "application_manager/rpc_service_impl.h"
-#include "application_manager/mock_request_controller_settings.h"
 #include "application_manager/include/application_manager/command_holder_impl.h"
-#include "application_manager/mock_hmi_capabilities.h"
-#include "application_manager/request_controller.h"
-#include "application_manager/mock_rpc_plugin_manager.h"
-#include "application_manager/mock_rpc_plugin.h"
+#include "application_manager/message.h"
+#include "application_manager/mock_application.h"
 #include "application_manager/mock_command_factory.h"
 #include "application_manager/mock_event_dispatcher.h"
-#include "application_manager/message.h"
-#include "rc_rpc_plugin/rc_rpc_plugin.h"
-#include "rc_rpc_plugin/rc_module_constants.h"
-#include "rc_rpc_plugin/mock/mock_resource_allocation_manager.h"
+#include "application_manager/mock_hmi_capabilities.h"
+#include "application_manager/mock_request_controller_settings.h"
+#include "application_manager/mock_rpc_plugin.h"
+#include "application_manager/mock_rpc_plugin_manager.h"
+#include "application_manager/mock_rpc_protection_manager.h"
+#include "application_manager/request_controller.h"
+#include "application_manager/rpc_service_impl.h"
+#include "hmi_message_handler/mock_hmi_message_handler.h"
+#include "include/test/protocol_handler/mock_protocol_handler.h"
+#include "interfaces/MOBILE_API.h"
+#include "rc_rpc_plugin/commands/hmi/rc_get_interior_vehicle_data_consent_request.h"
+#include "rc_rpc_plugin/commands/hmi/rc_get_interior_vehicle_data_consent_response.h"
+#include "rc_rpc_plugin/commands/mobile/button_press_request.h"
 #include "rc_rpc_plugin/mock/mock_interior_data_cache.h"
 #include "rc_rpc_plugin/mock/mock_interior_data_manager.h"
-#include "rc_rpc_plugin/commands/mobile/button_press_request.h"
-#include "rc_rpc_plugin/commands/hmi/rc_get_interior_vehicle_data_consent_response.h"
-#include "rc_rpc_plugin/commands/hmi/rc_get_interior_vehicle_data_consent_request.h"
-#include "hmi_message_handler/mock_hmi_message_handler.h"
-#include "interfaces/MOBILE_API.h"
-#include "include/test/protocol_handler/mock_protocol_handler.h"
+#include "rc_rpc_plugin/mock/mock_rc_capabilities_manager.h"
+#include "rc_rpc_plugin/mock/mock_rc_consent_manager.h"
+#include "rc_rpc_plugin/mock/mock_resource_allocation_manager.h"
+#include "rc_rpc_plugin/rc_module_constants.h"
+#include "rc_rpc_plugin/rc_rpc_plugin.h"
 #include "test/application_manager/mock_application_manager_settings.h"
 
 using ::testing::_;
-using ::testing::Return;
-using ::testing::ReturnRef;
-using ::testing::NiceMock;
-using ::testing::SaveArg;
 using ::testing::Mock;
 using ::testing::NiceMock;
+using ::testing::Return;
+using ::testing::ReturnRef;
+using ::testing::SaveArg;
 namespace am = ::application_manager;
 using am::ApplicationSet;
-using am::commands::MessageSharedPtr;
 using am::commands::CommandImpl;
-using am::plugin_manager::RPCPlugin;
-using ::smart_objects::SmartObject;
-using rc_rpc_plugin::commands::ButtonPressRequest;
-using rc_rpc_plugin::commands::RCGetInteriorVehicleDataConsentResponse;
-using rc_rpc_plugin::commands::RCGetInteriorVehicleDataConsentRequest;
-using rc_rpc_plugin::RCRPCPlugin;
-using test::components::commands_test::CommandsTestMocks;
-using test::components::commands_test::CommandRequestTest;
-using am::plugin_manager::MockRPCPluginManager;
+using am::commands::MessageSharedPtr;
 using am::plugin_manager::MockRPCPlugin;
+using am::plugin_manager::MockRPCPluginManager;
+using am::plugin_manager::RPCPlugin;
+using rc_rpc_plugin::RCRPCPlugin;
+using rc_rpc_plugin::commands::ButtonPressRequest;
+using rc_rpc_plugin::commands::RCGetInteriorVehicleDataConsentRequest;
+using rc_rpc_plugin::commands::RCGetInteriorVehicleDataConsentResponse;
+using ::smart_objects::SmartObject;
 using test::components::application_manager_test::MockApplication;
-using test::components::application_manager_test::MockRequestControlerSettings;
-using test::components::protocol_handler_test::MockProtocolHandler;
-using test::components::hmi_message_handler_test::MockHMIMessageHandler;
-using test::components::application_manager_test::MockHMICapabilities;
 using test::components::application_manager_test::MockCommandFactory;
+using test::components::application_manager_test::MockHMICapabilities;
+using test::components::application_manager_test::MockRequestControlerSettings;
+using test::components::commands_test::CommandRequestTest;
+using test::components::commands_test::CommandsTestMocks;
+using test::components::hmi_message_handler_test::MockHMIMessageHandler;
 using test::components::policy_test::MockPolicyHandlerInterface;
+using test::components::protocol_handler_test::MockProtocolHandler;
 
 namespace rc_rpc_plugin_test {
 using namespace rc_rpc_plugin;
@@ -92,6 +94,9 @@ namespace {
 const uint32_t kConnectionKey = 2u;
 const uint32_t kAppId = 5u;
 const std::string kResource = "CLIMATE";
+const std::string kResourceId = "34045662-a9dc-4823-8435-91056d4c26cb";
+const std::string kPolicyAppId = "policy_app_id";
+const std::string kMacAddress = "device1";
 const uint32_t kPluginID = RCRPCPlugin::kRCPluginID;
 }  // namespace
 
@@ -101,17 +106,25 @@ class RCGetInteriorVehicleDataConsentTest
   RCGetInteriorVehicleDataConsentTest()
       : mock_app_(std::make_shared<NiceMock<MockApplication> >())
       , command_holder(app_mngr_)
+      , rc_capabilities_(smart_objects::SmartType::SmartType_Array)
       , request_controller(mock_request_controler)
+      , rpc_protection_manager_(
+            std::make_shared<application_manager::MockRPCProtectionManager>())
       , rpc_service_(app_mngr_,
                      request_controller,
                      &mock_protocol_handler,
                      &mock_hmi_handler,
-                     command_holder)
+                     command_holder,
+                     rpc_protection_manager_,
+                     hmi_so_factory_,
+                     mobile_so_factoy_)
       , rc_app_extention_(std::make_shared<RCAppExtension>(kPluginID))
       , mock_rpc_plugin_manager(
             std::make_shared<NiceMock<MockRPCPluginManager> >())
       , rpc_plugin(mock_rpc_plugin)
       , optional_mock_rpc_plugin(mock_rpc_plugin) {
+    smart_objects::SmartObject control_caps((smart_objects::SmartType_Array));
+    rc_capabilities_[strings::kradioControlCapabilities] = control_caps;
     ON_CALL(*mock_app_, app_id()).WillByDefault(Return(kAppId));
     ON_CALL(app_mngr_, hmi_interfaces())
         .WillByDefault(ReturnRef(mock_hmi_interfaces_));
@@ -141,9 +154,15 @@ class RCGetInteriorVehicleDataConsentTest
         .WillByDefault(ReturnRef(*mock_rpc_plugin_manager));
     ON_CALL(*mock_rpc_plugin_manager, FindPluginToProcess(_, _))
         .WillByDefault(Return(rpc_plugin));
-    ON_CALL(mock_allocation_manager_, IsResourceFree(kResource))
+    ON_CALL(mock_allocation_manager_, IsResourceFree(kResource, kResourceId))
         .WillByDefault(Return(true));
     ON_CALL(mock_allocation_manager_, is_rc_enabled())
+        .WillByDefault(Return(true));
+    ON_CALL(mock_protocol_handler, IsRPCServiceSecure(_))
+        .WillByDefault(Return(false));
+    ON_CALL(*rpc_protection_manager_, CheckPolicyEncryptionFlag(_, _, _))
+        .WillByDefault(Return(false));
+    ON_CALL(mock_rc_capabilities_manager_, CheckIfModuleExistsInCapabilities(_))
         .WillByDefault(Return(true));
   }
 
@@ -156,7 +175,9 @@ class RCGetInteriorVehicleDataConsentTest
                            mock_policy_handler_,
                            mock_allocation_manager_,
                            mock_interior_data_cache_,
-                           mock_interior_data_manager_};
+                           mock_interior_data_manager_,
+                           mock_rc_capabilities_manager_,
+                           mock_rc_consent_manger_};
     return std::make_shared<Command>(msg ? msg : msg = CreateMessage(), params);
   }
 
@@ -169,6 +190,10 @@ class RCGetInteriorVehicleDataConsentTest
               [application_manager::strings::connection_key] = kConnectionKey;
     (*message)[application_manager::strings::params]
               [application_manager::strings::connection_key] = kAppId;
+    ns_smart_device_link::ns_smart_objects::SmartObject& msg_params =
+        (*message)[application_manager::strings::msg_params];
+    msg_params[message_params::kModuleType] = kResource;
+    msg_params[message_params::kModuleId] = kResourceId;
     return message;
   }
 
@@ -188,12 +213,19 @@ class RCGetInteriorVehicleDataConsentTest
   MockRPCPlugin mock_rpc_plugin;
   MockCommandFactory mock_command_factory;
   am::request_controller::RequestController request_controller;
+  std::shared_ptr<application_manager::MockRPCProtectionManager>
+      rpc_protection_manager_;
   am::rpc_service::RPCServiceImpl rpc_service_;
   std::shared_ptr<RCAppExtension> rc_app_extention_;
   std::shared_ptr<am::plugin_manager::MockRPCPluginManager>
       mock_rpc_plugin_manager;
   utils::Optional<RPCPlugin> rpc_plugin;
   utils::Optional<MockRPCPlugin> optional_mock_rpc_plugin;
+  hmi_apis::HMI_API hmi_so_factory_;
+  mobile_apis::MOBILE_API mobile_so_factoy_;
+  testing::NiceMock<rc_rpc_plugin_test::MockRCCapabilitiesManager>
+      mock_rc_capabilities_manager_;
+  testing::NiceMock<MockRCConsentManager> mock_rc_consent_manger_;
 };
 
 TEST_F(RCGetInteriorVehicleDataConsentTest,
@@ -202,8 +234,17 @@ TEST_F(RCGetInteriorVehicleDataConsentTest,
   auto mobile_message = CreateBasicMessage();
 
   // Expectations
-  EXPECT_CALL(mock_allocation_manager_, AcquireResource(_, _))
+  EXPECT_CALL(mock_allocation_manager_, AcquireResource(_, _, _))
       .WillOnce(Return(rc_rpc_plugin::AcquireResult::ASK_DRIVER));
+  ON_CALL(*mock_app_, app_id()).WillByDefault(Return(kAppId));
+  ON_CALL(*mock_app_, policy_app_id()).WillByDefault(Return(kPolicyAppId));
+  ON_CALL(*mock_app_, mac_address()).WillByDefault(ReturnRef(kMacAddress));
+
+  rc_rpc_types::ModuleUid moduleUid{kResource, kResourceId};
+  EXPECT_CALL(mock_rc_consent_manger_,
+              GetModuleConsent(kPolicyAppId, _, moduleUid))
+      .WillOnce(Return(rc_rpc_types::ModuleConsent::NOT_EXISTS));
+
   EXPECT_CALL(*optional_mock_rpc_plugin, GetCommandFactory())
       .WillOnce(ReturnRef(mock_command_factory));
   auto rc_consent_request =
@@ -228,7 +269,7 @@ TEST_F(RCGetInteriorVehicleDataConsentTest,
   auto mobile_message = CreateBasicMessage();
 
   // Expectations
-  EXPECT_CALL(mock_allocation_manager_, AcquireResource(_, _))
+  EXPECT_CALL(mock_allocation_manager_, AcquireResource(_, _, _))
       .WillOnce(Return(rc_rpc_plugin::AcquireResult::IN_USE));
 
   EXPECT_CALL(*optional_mock_rpc_plugin, GetCommandFactory())

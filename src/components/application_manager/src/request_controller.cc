@@ -32,9 +32,9 @@
 
 #include "utils/logger.h"
 
-#include "application_manager/request_controller.h"
 #include "application_manager/commands/command_request_impl.h"
 #include "application_manager/commands/request_to_hmi.h"
+#include "application_manager/request_controller.h"
 
 #include "utils/timer_task_impl.h"
 
@@ -126,6 +126,12 @@ RequestController::TResult RequestController::CheckPosibilitytoAdd(
     return RequestController::TOO_MANY_REQUESTS;
   }
 
+  if (IsLowVoltage()) {
+    LOG4CXX_ERROR(logger_,
+                  "Impossible to add request due to Low Voltage is active");
+    return RequestController::INVALID_DATA;
+  }
+
   return SUCCESS;
 }
 
@@ -192,6 +198,13 @@ RequestController::TResult RequestController::addHMIRequest(
                   "Default timeout was set to 0."
                   "RequestController will not track timeout of this request.");
   }
+
+  if (IsLowVoltage()) {
+    LOG4CXX_ERROR(logger_,
+                  "Impossible to add request due to Low Voltage is active");
+    return RequestController::INVALID_DATA;
+  }
+
   waiting_for_response_.Add(request_info_ptr);
   LOG4CXX_DEBUG(logger_,
                 "Waiting for response count:" << waiting_for_response_.Size());
@@ -202,6 +215,11 @@ RequestController::TResult RequestController::addHMIRequest(
 
 void RequestController::addNotification(const RequestPtr ptr) {
   LOG4CXX_AUTO_TRACE(logger_);
+  if (IsLowVoltage()) {
+    LOG4CXX_ERROR(
+        logger_, "Impossible to add notification due to Low Voltage is active");
+    return;
+  }
   notification_list_.push_back(ptr);
 }
 

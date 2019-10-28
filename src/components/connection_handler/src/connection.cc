@@ -37,13 +37,13 @@
 #include "connection_handler/connection.h"
 #include "connection_handler/connection_handler.h"
 #include "protocol_handler/protocol_packet.h"
+#include "utils/helpers.h"
 #include "utils/logger.h"
 #include "utils/macro.h"
-#include "utils/helpers.h"
 
 #ifdef ENABLE_SECURITY
-#include "security_manager/ssl_context.h"
 #include "security_manager/security_manager.h"
+#include "security_manager/ssl_context.h"
 #endif  // ENABLE_SECURITY
 
 /**
@@ -190,12 +190,11 @@ bool Connection::AddNewService(uint8_t session_id,
   Session& session = session_it->second;
 
   if (session.protocol_version <= protocol_handler::PROTOCOL_VERSION_2 &&
-      helpers::Compare<protocol_handler::ServiceType,
-                       helpers::EQ,
-                       helpers::ONE>(
-          service_type,
-          protocol_handler::ServiceType::kAudio,
-          protocol_handler::ServiceType::kMobileNav)) {
+      helpers::
+          Compare<protocol_handler::ServiceType, helpers::EQ, helpers::ONE>(
+              service_type,
+              protocol_handler::ServiceType::kAudio,
+              protocol_handler::ServiceType::kMobileNav)) {
     LOG4CXX_WARN(logger_,
                  "Audio and video services are disallowed for protocol version "
                  "2 or lower");
@@ -265,8 +264,10 @@ bool Connection::RemoveService(uint8_t session_id,
       find(service_list.begin(), service_list.end(), service_type);
   if (service_list.end() == service_it) {
     LOG4CXX_WARN(logger_,
-                 "Session " << session_id << " didn't established"
-                                             " service " << service_type);
+                 "Session " << session_id
+                            << " didn't established"
+                               " service "
+                            << service_type);
     return false;
   }
   service_list.erase(service_it);

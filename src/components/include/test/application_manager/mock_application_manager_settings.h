@@ -34,8 +34,8 @@
 #define SRC_COMPONENTS_INCLUDE_TEST_APPLICATION_MANAGER_MOCK_APPLICATION_MANAGER_SETTINGS_H_
 
 #include <string>
-#include "gmock/gmock.h"
 #include "application_manager/application_manager_settings.h"
+#include "gmock/gmock.h"
 
 namespace test {
 namespace components {
@@ -89,7 +89,10 @@ class MockApplicationManagerSettings
   MOCK_CONST_METHOD0(named_audio_pipe_path, const std::string&());
   MOCK_CONST_METHOD0(video_stream_file, const std::string&());
   MOCK_CONST_METHOD0(audio_stream_file, const std::string&());
+  MOCK_CONST_METHOD0(period_for_consent_expiration, uint16_t());
   MOCK_CONST_METHOD0(use_full_app_id, bool());
+  MOCK_CONST_METHOD0(cloud_app_retry_timeout, uint32_t());
+  MOCK_CONST_METHOD0(cloud_app_max_retry_attempts, uint16_t());
   MOCK_CONST_METHOD0(use_db_for_resumption, bool());
   MOCK_CONST_METHOD0(app_resumption_save_persistent_data_timeout,
                      const uint32_t&());
@@ -125,6 +128,7 @@ class MockApplicationManagerSettings
   MOCK_CONST_METHOD0(app_time_scale, const uint32_t&());
   MOCK_CONST_METHOD0(app_time_scale_max_requests, const uint32_t&());
   MOCK_CONST_METHOD0(pending_requests_amount, const uint32_t&());
+  MOCK_CONST_METHOD0(rpc_pass_through_timeout, uint32_t());
 
   // app_launch::AppLaunchSettings
   MOCK_CONST_METHOD0(app_launch_wait_time, const uint16_t());
@@ -134,6 +138,10 @@ class MockApplicationManagerSettings
   MOCK_CONST_METHOD0(max_number_of_ios_device, const uint16_t());
   MOCK_CONST_METHOD0(wait_time_between_apps, const uint16_t());
   MOCK_CONST_METHOD0(enable_app_launch_ios, const bool());
+
+  // AppServices
+  MOCK_CONST_METHOD0(embedded_services, const std::vector<std::string>&());
+  MOCK_CONST_METHOD0(hmi_origin_id, const std::string());
 };
 
 }  // namespace application_manager_test

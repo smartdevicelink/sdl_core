@@ -33,12 +33,12 @@
 #include <stdint.h>
 #include <string>
 
-#include "gtest/gtest.h"
-#include "smart_objects/smart_object.h"
-#include "application_manager/smart_object_keys.h"
-#include "application_manager/commands/commands_test.h"
 #include "application_manager/application.h"
+#include "application_manager/commands/commands_test.h"
+#include "application_manager/smart_object_keys.h"
+#include "gtest/gtest.h"
 #include "hmi/update_sdl_response.h"
+#include "smart_objects/smart_object.h"
 
 namespace test {
 namespace components {
@@ -48,8 +48,8 @@ namespace update_sdl_response {
 
 namespace am = ::application_manager;
 namespace strings = ::application_manager::strings;
-using sdl_rpc_plugin::commands::UpdateSDLResponse;
 using am::commands::CommandImpl;
+using sdl_rpc_plugin::commands::UpdateSDLResponse;
 
 typedef std::shared_ptr<UpdateSDLResponse> UpdateSDLResponsePtr;
 

@@ -33,12 +33,11 @@
 #ifndef SRC_COMPONENTS_INCLUDE_TEST_APPLICATION_MANAGER_MOCK_STATE_CONTROLLER_H_
 #define SRC_COMPONENTS_INCLUDE_TEST_APPLICATION_MANAGER_MOCK_STATE_CONTROLLER_H_
 
-#include "gmock/gmock.h"
 #include "application_manager/application.h"
 #include "application_manager/hmi_state.h"
 #include "application_manager/state_controller.h"
+#include "gmock/gmock.h"
 #include "interfaces/MOBILE_API.h"
-#include "application_manager/application.h"
 
 namespace test {
 namespace components {
@@ -47,55 +46,68 @@ namespace am = application_manager;
 
 class MockStateController : public am::StateController {
  public:
-  MOCK_METHOD3(SetRegularState,
+  MOCK_METHOD4(SetRegularState,
                void(am::ApplicationSharedPtr app,
+                    const am::WindowID window_id,
                     am::HmiStatePtr state,
-                    const bool SendActivateApp));
-  MOCK_METHOD5(SetRegularState,
+                    const bool request_hmi_state_change));
+  MOCK_METHOD6(SetRegularState,
                void(am::ApplicationSharedPtr app,
+                    const am::WindowID window_id,
                     const mobile_apis::HMILevel::eType hmi_level,
                     const mobile_apis::AudioStreamingState::eType audio_state,
                     const mobile_apis::VideoStreamingState::eType video_state,
-                    const bool SendActivateApp));
-  MOCK_METHOD3(SetRegularState,
+                    const bool request_hmi_state_change));
+  MOCK_METHOD4(SetRegularState,
                void(am::ApplicationSharedPtr app,
+                    const am::WindowID window_id,
                     const mobile_apis::HMILevel::eType hmi_level,
-                    const bool SendActivateApp));
-  MOCK_METHOD6(SetRegularState,
+                    const bool request_hmi_state_change));
+  MOCK_METHOD7(SetRegularState,
                void(am::ApplicationSharedPtr app,
+                    const am::WindowID window_id,
                     const mobile_apis::HMILevel::eType hmi_level,
                     const mobile_apis::AudioStreamingState::eType audio_state,
                     const mobile_apis::VideoStreamingState::eType video_state,
                     const mobile_apis::SystemContext::eType system_context,
-                    const bool SendActivateApp));
-  MOCK_METHOD2(SetRegularState,
-               void(am::ApplicationSharedPtr app,
-                    const mobile_apis::HMILevel::eType hmi_level));
+                    const bool request_hmi_state_change));
   MOCK_METHOD3(SetRegularState,
                void(am::ApplicationSharedPtr app,
+                    const am::WindowID window_id,
+                    const mobile_apis::HMILevel::eType hmi_level));
+  MOCK_METHOD4(SetRegularState,
+               void(am::ApplicationSharedPtr app,
+                    const am::WindowID window_id,
                     const mobile_apis::AudioStreamingState::eType audio_state,
                     const mobile_apis::VideoStreamingState::eType video_state));
-  MOCK_METHOD2(SetRegularState,
+  MOCK_METHOD3(SetRegularState,
                void(am::ApplicationSharedPtr app,
+                    const am::WindowID window_id,
                     const mobile_apis::SystemContext::eType system_context));
-  MOCK_METHOD2(SetRegularState,
-               void(am::ApplicationSharedPtr app, am::HmiStatePtr state));
+  MOCK_METHOD3(SetRegularState,
+               void(am::ApplicationSharedPtr app,
+                    const am::WindowID window_id,
+                    am::HmiStatePtr state));
   MOCK_METHOD2(OnApplicationRegistered,
                void(am::ApplicationSharedPtr app,
                     const mobile_apis::HMILevel::eType default_level));
-  MOCK_METHOD3(SendBCActivateApp,
-               int64_t(am::ApplicationConstSharedPtr app,
-                       hmi_apis::Common_HMILevel::eType level,
-                       bool send_policy_priority));
+  MOCK_METHOD4(OnAppWindowAdded,
+               void(am::ApplicationSharedPtr app,
+                    const am::WindowID window_id,
+                    const mobile_apis::WindowType::eType window_type,
+                    const mobile_apis::HMILevel::eType default_level));
   MOCK_METHOD1(OnVideoStreamingStarted,
                void(am::ApplicationConstSharedPtr app));
   MOCK_METHOD1(OnVideoStreamingStopped,
                void(am::ApplicationConstSharedPtr app));
-  MOCK_METHOD3(OnStateChanged,
+  MOCK_METHOD4(OnStateChanged,
                void(am::ApplicationSharedPtr app,
+                    const am::WindowID window_id,
                     am::HmiStatePtr old_state,
                     am::HmiStatePtr new_state));
   MOCK_CONST_METHOD1(IsStateActive, bool(am::HmiState::StateID state_id));
+  MOCK_METHOD1(ActivateDefaultWindow, void(am::ApplicationSharedPtr app));
+  MOCK_METHOD1(ExitDefaultWindow, void(am::ApplicationSharedPtr app));
 };
 
 }  // namespace application_manager_test

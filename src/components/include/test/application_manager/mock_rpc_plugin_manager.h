@@ -2,8 +2,8 @@
 #define SRC_COMPONENTS_INCLUDE_TEST_APPLICATION_MANAGER_MOCK_RPC_PLUGIN_MANAGER_H_
 #include <string>
 
-#include "gmock/gmock.h"
 #include "application_manager/plugin_manager/rpc_plugin_manager.h"
+#include "gmock/gmock.h"
 
 namespace application_manager {
 namespace plugin_manager {

@@ -33,11 +33,13 @@
 #ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_APP_EXTENSION_H_
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_APP_EXTENSION_H_
 
+#include <memory>
+
 namespace ns_smart_device_link {
 namespace ns_smart_objects {
 class SmartObject;
 }
-}
+}  // namespace ns_smart_device_link
 
 namespace application_manager {
 

@@ -36,18 +36,18 @@
 #include "application_manager/resumption/resume_ctrl.h"
 
 #include <stdint.h>
-#include <vector>
+#include <list>
 #include <map>
 #include <set>
-#include <list>
+#include <vector>
 
+#include "application_manager/application.h"
+#include "application_manager/event_engine/event_observer.h"
+#include "application_manager/resumption/resumption_data.h"
 #include "interfaces/HMI_API.h"
 #include "interfaces/HMI_API_schema.h"
 #include "interfaces/MOBILE_API_schema.h"
-#include "application_manager/event_engine/event_observer.h"
 #include "smart_objects/smart_object.h"
-#include "application_manager/application.h"
-#include "application_manager/resumption/resumption_data.h"
 #include "utils/timer.h"
 
 namespace resumption {
@@ -95,6 +95,9 @@ class ResumeCtrlImpl : public ResumeCtrl,
    */
   bool RestoreAppHMIState(app_mngr::ApplicationSharedPtr application) OVERRIDE;
 
+  void RestoreWidgetsHMIState(
+      const smart_objects::SmartObject& response_message) OVERRIDE;
+
   /**
    * @brief Set application HMI Level as stored in policy
    * @param application is application witch HMI Level is need to setup
@@ -115,6 +118,14 @@ class ResumeCtrlImpl : public ResumeCtrl,
   bool SetAppHMIState(app_mngr::ApplicationSharedPtr application,
                       const mobile_apis::HMILevel::eType hmi_level,
                       bool check_policy = true) OVERRIDE;
+
+  /**
+   * @brief RestoreAppWidgets add widgets for the application
+   * @param application application which will be resumed
+   * @param saved_app application specific section from backup file
+   */
+  void RestoreAppWidgets(application_manager::ApplicationSharedPtr application,
+                         const smart_objects::SmartObject& saved_app) OVERRIDE;
 
   /**
    * @brief Remove application from list of saved applications
@@ -250,8 +261,9 @@ class ResumeCtrlImpl : public ResumeCtrl,
    * @brief Resume HMI Level and audio streaming state if needed
    * @param application - application to restore hmi level
    * and audio streaming state
+   * @return true if success otherwise false
    */
-  void StartAppHmiStateResumption(
+  bool StartAppHmiStateResumption(
       app_mngr::ApplicationSharedPtr application) OVERRIDE;
 
   /**
@@ -296,6 +308,9 @@ class ResumeCtrlImpl : public ResumeCtrl,
   int32_t GetSavedAppHmiLevel(const std::string& app_id,
                               const std::string& device_id) const OVERRIDE;
 
+  void StartWaitingForDisplayCapabilitiesUpdate(
+      app_mngr::ApplicationSharedPtr application) OVERRIDE;
+
   /**
    * @brief geter for launch_time_
    * @return value of launch_time_
@@ -322,10 +337,10 @@ class ResumeCtrlImpl : public ResumeCtrl,
 #endif  // BUILD_TESTS
  private:
   /**
-  * @brief Returns Low Voltage signal timestamp
-  * @return Low Voltage event timestamp if event LOW VOLTAGE event occures
-  * otherwise 0
-  */
+   * @brief Returns Low Voltage signal timestamp
+   * @return Low Voltage event timestamp if event LOW VOLTAGE event occures
+   * otherwise 0
+   */
   time_t LowVoltageTime() const;
 
   /**
@@ -592,6 +607,16 @@ class ResumeCtrlImpl : public ResumeCtrl,
       app_mngr::ApplicationConstSharedPtr application) const;
 
   /**
+   * @brief Constructs and sends system capability mobile notification
+   *
+   * @param app to send display capabilities updated
+   * @param display_capabilities SO containing notification data
+   */
+  void ProcessSystemCapabilityUpdated(
+      app_mngr::Application& app,
+      const smart_objects::SmartObject& display_capabilities);
+
+  /**
    *@brief Mapping applications to time_stamps
    *       wait for timer to resume HMI Level
    *
@@ -609,6 +634,13 @@ class ResumeCtrlImpl : public ResumeCtrl,
   time_t wake_up_time_;
   std::shared_ptr<ResumptionData> resumption_storage_;
   application_manager::ApplicationManager& application_manager_;
+  /**
+   *@brief Mapping correlation id to request
+   *wait for on event response from HMI to resume HMI Level
+   */
+  typedef std::map<int32_t, smart_objects::SmartObjectSPtr>
+      WaitingResponseToRequest;
+  WaitingResponseToRequest requests_msg_;
 };
 
 }  // namespace resumption

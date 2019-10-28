@@ -50,6 +50,11 @@ class SystemTimeListener {
    * @param utc_time current system time.
    */
   virtual void OnSystemTimeArrived(const time_t utc_time) = 0;
+
+  /**
+   * @brief OnSystemTimeFailed Notify about system request failure
+   */
+  virtual void OnSystemTimeFailed() = 0;
 };
 
 /**
@@ -95,6 +100,12 @@ class SystemTimeHandler {
    * @return utc time.
    */
   time_t GetUTCTime();
+
+  /**
+   * @brief ResetPendingSystemTimeRequests resets waiting for system time
+   * requests flag
+   */
+  virtual void ResetPendingSystemTimeRequests() = 0;
 
   /**
    * @brief Checks if system time is ready

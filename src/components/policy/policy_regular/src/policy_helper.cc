@@ -1,4 +1,4 @@
-﻿/*
+/*
  Copyright (c) 2013, Ford Motor Company
  All rights reserved.
 
@@ -30,13 +30,13 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "policy/policy_helper.h"
+#include <string.h>
 #include <algorithm>
 #include <sstream>
-#include <string.h>
-#include "utils/logger.h"
-#include "utils/custom_string.h"
-#include "policy/policy_helper.h"
 #include "policy/policy_manager_impl.h"
+#include "utils/custom_string.h"
+#include "utils/logger.h"
 
 namespace policy {
 
@@ -46,7 +46,8 @@ namespace {
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "Policy")
 
-bool Compare(const StringsValueType& first, const StringsValueType& second) {
+bool CompareStrings(const StringsValueType& first,
+                    const StringsValueType& second) {
   const std::string& first_str = first;
   const std::string& second_str = second;
   return (strcasecmp(first_str.c_str(), second_str.c_str()) < 0);
@@ -112,7 +113,7 @@ bool operator!=(const policy_table::ApplicationParams& first,
   for (; it_first != it_first_end; ++it_first) {
     CompareGroupName gp(*it_first);
     StringsConstItr it = std::find_if(it_second, it_second_end, gp);
-    if (it_first_end == it) {
+    if (it_second_end == it) {
       return true;
     }
   }
@@ -122,8 +123,12 @@ bool operator!=(const policy_table::ApplicationParams& first,
 CheckAppPolicy::CheckAppPolicy(
     PolicyManagerImpl* pm,
     const std::shared_ptr<policy_table::Table> update,
-    const std::shared_ptr<policy_table::Table> snapshot)
-    : pm_(pm), update_(update), snapshot_(snapshot) {}
+    const std::shared_ptr<policy_table::Table> snapshot,
+    CheckAppPolicyResults& out_results)
+    : pm_(pm)
+    , update_(update)
+    , snapshot_(snapshot)
+    , out_results_(out_results) {}
 
 bool policy::CheckAppPolicy::HasRevokedGroups(
     const policy::AppPoliciesValueType& app_policy,
@@ -132,10 +137,10 @@ bool policy::CheckAppPolicy::HasRevokedGroups(
       snapshot_->policy_table.app_policies_section.apps.find(app_policy.first);
 
   policy_table::Strings groups_new = app_policy.second.groups;
-  std::sort(groups_new.begin(), groups_new.end(), Compare);
+  std::sort(groups_new.begin(), groups_new.end(), CompareStrings);
 
   policy_table::Strings groups_curr = (*it).second.groups;
-  std::sort(groups_curr.begin(), groups_curr.end(), Compare);
+  std::sort(groups_curr.begin(), groups_curr.end(), CompareStrings);
 
   StringsConstItr it_groups_new = groups_new.begin();
   StringsConstItr it_groups_new_end = groups_new.end();
@@ -149,24 +154,83 @@ bool policy::CheckAppPolicy::HasRevokedGroups(
                       it_groups_new,
                       it_groups_new_end,
                       std::back_inserter(revoked_group_list),
-                      Compare);
-
-  // Remove groups which are not required user consent
-  policy_table::Strings::iterator it_revoked = revoked_group_list.begin();
-  for (; revoked_group_list.end() != it_revoked;) {
-    if (!IsConsentRequired(app_policy.first, std::string(*it_revoked))) {
-      revoked_group_list.erase(it_revoked);
-      it_revoked = revoked_group_list.begin();
-    } else {
-      ++it_revoked;
-    }
-  }
+                      CompareStrings);
 
   if (revoked_groups) {
     *revoked_groups = revoked_group_list;
   }
 
   return !revoked_group_list.empty();
+}
+
+bool policy::CheckAppPolicy::HasUpdatedGroups(
+    const policy::AppPoliciesValueType& app_policy,
+    policy_table::Strings* updated_groups) const {
+  AppPoliciesConstItr it =
+      snapshot_->policy_table.app_policies_section.apps.find(app_policy.first);
+
+  policy_table::Strings groups_new = app_policy.second.groups;
+  std::sort(groups_new.begin(), groups_new.end(), CompareStrings);
+
+  policy_table::Strings groups_curr = (*it).second.groups;
+  std::sort(groups_curr.begin(), groups_curr.end(), CompareStrings);
+
+  policy_table::Strings intersection_list;
+  std::set_intersection(groups_new.begin(),
+                        groups_new.end(),
+                        groups_curr.begin(),
+                        groups_curr.end(),
+                        std::back_inserter(intersection_list));
+
+  auto IsGroupContentUpdated =
+      [this](const StringsValueType& groupName) -> bool {
+    const auto& func_group_from_update =
+        update_->policy_table.functional_groupings.find(groupName);
+    const auto& func_group_from_snapshot =
+        snapshot_->policy_table.functional_groupings.find(groupName);
+
+    const auto& update_fg_rpcs = func_group_from_update->second.rpcs;
+    const auto& snapshot_fg_rpcs = func_group_from_snapshot->second.rpcs;
+
+    if (update_fg_rpcs.is_null() || snapshot_fg_rpcs.is_null()) {
+      return !(update_fg_rpcs.is_null() && snapshot_fg_rpcs.is_null());
+    }
+
+    if (update_fg_rpcs.size() != snapshot_fg_rpcs.size()) {
+      return true;
+    }
+
+    for (const auto& rpc : update_fg_rpcs) {
+      const auto& old_rpc = snapshot_fg_rpcs.find(rpc.first);
+      if (snapshot_fg_rpcs.end() == old_rpc) {
+        return true;
+      }
+
+      const bool hmi_levels_same =
+          old_rpc->second.hmi_levels == rpc.second.hmi_levels;
+      const bool parameters_same =
+          *(old_rpc->second.parameters) == *(rpc.second.parameters);
+
+      if (!hmi_levels_same || !parameters_same) {
+        return true;
+      }
+    }
+
+    return false;
+  };
+
+  policy_table::Strings updated_group_list;
+  for (const auto& item : intersection_list) {
+    if (IsGroupContentUpdated(item)) {
+      updated_group_list.push_back(item);
+    }
+  }
+
+  if (updated_groups) {
+    *updated_groups = updated_group_list;
+  }
+
+  return !updated_group_list.empty();
 }
 
 bool policy::CheckAppPolicy::HasNewGroups(
@@ -176,10 +240,10 @@ bool policy::CheckAppPolicy::HasNewGroups(
       snapshot_->policy_table.app_policies_section.apps.find(app_policy.first);
 
   policy_table::Strings groups_new = app_policy.second.groups;
-  std::sort(groups_new.begin(), groups_new.end(), Compare);
+  std::sort(groups_new.begin(), groups_new.end(), CompareStrings);
 
   policy_table::Strings groups_curr = (*it).second.groups;
-  std::sort(groups_curr.begin(), groups_curr.end(), Compare);
+  std::sort(groups_curr.begin(), groups_curr.end(), CompareStrings);
 
   StringsConstItr it_groups_new = groups_new.begin();
   StringsConstItr it_groups_new_end = groups_new.end();
@@ -193,7 +257,7 @@ bool policy::CheckAppPolicy::HasNewGroups(
                       it_groups_curr,
                       it_groups_curr_end,
                       std::back_inserter(new_group_list),
-                      Compare);
+                      CompareStrings);
 
   if (new_groups) {
     *new_groups = new_group_list;
@@ -205,14 +269,23 @@ bool policy::CheckAppPolicy::HasNewGroups(
 bool policy::CheckAppPolicy::HasConsentNeededGroups(
     const policy::AppPoliciesValueType& app_policy) const {
   policy_table::Strings new_groups;
-  if (!HasNewGroups(app_policy, &new_groups)) {
+  policy_table::Strings updated_groups;
+  if (!HasNewGroups(app_policy, &new_groups) &&
+      !HasUpdatedGroups(app_policy, &updated_groups)) {
     return false;
   }
 
-  StringsConstItr it_new = new_groups.begin();
-  StringsConstItr it_new_end = new_groups.end();
-  for (; it_new != it_new_end; ++it_new) {
-    if (IsConsentRequired(app_policy.first, *it_new)) {
+  policy_table::Strings groups_to_check_consent;
+  std::set_union(new_groups.begin(),
+                 new_groups.end(),
+                 updated_groups.begin(),
+                 updated_groups.end(),
+                 std::back_inserter(groups_to_check_consent));
+
+  StringsConstItr it = groups_to_check_consent.begin();
+  StringsConstItr it_end = groups_to_check_consent.end();
+  for (; it != it_end; ++it) {
+    if (IsConsentRequired(app_policy.first, *it)) {
       return true;
     }
   }
@@ -263,30 +336,18 @@ bool CheckAppPolicy::IsKnownAppication(
 
 void policy::CheckAppPolicy::NotifySystem(
     const policy::AppPoliciesValueType& app_policy) const {
-  pm_->listener()->OnPendingPermissionChange(app_policy.first);
-}
-
-void CheckAppPolicy::SendPermissionsToApp(
-    const std::string& app_id, const policy_table::Strings& groups) const {
-  const std::string device_id = pm_->GetCurrentDeviceId(app_id);
-  if (device_id.empty()) {
-    LOG4CXX_WARN(logger_,
-                 "Couldn't find device info for application id: " << app_id);
+  auto& listener = *pm_->listener();
+  const auto devices_ids = listener.GetDevicesIds(app_policy.first);
+  if (devices_ids.empty()) {
+    LOG4CXX_WARN(
+        logger_,
+        "Couldn't find device info for application id: " << app_policy.first);
     return;
   }
-  std::vector<FunctionalGroupPermission> group_permissons;
-  pm_->GetPermissionsForApp(device_id, app_id, group_permissons);
 
-  Permissions notification_data;
-  pm_->PrepareNotificationData(update_->policy_table.functional_groupings,
-                               groups,
-                               group_permissons,
-                               notification_data);
-
-  LOG4CXX_INFO(logger_, "Send notification for application_id: " << app_id);
-  // Default_hmi is Ford-specific and should not be used with basic policy
-  const std::string default_hmi;
-  pm_->listener()->OnPermissionsUpdated(app_id, notification_data, default_hmi);
+  for (const auto& device_id : devices_ids) {
+    listener.OnPendingPermissionChange(device_id, app_policy.first);
+  }
 }
 
 bool CheckAppPolicy::IsAppRevoked(
@@ -317,6 +378,13 @@ bool CheckAppPolicy::NicknamesMatch(
   return true;
 }
 
+void CheckAppPolicy::AddResult(const std::string& app_id,
+                               PermissionsCheckResult result) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  const auto item = std::make_pair(app_id, result);
+  out_results_.insert(item);
+}
+
 bool CheckAppPolicy::operator()(const AppPoliciesValueType& app_policy) {
   const std::string app_id = app_policy.first;
 
@@ -328,13 +396,13 @@ bool CheckAppPolicy::operator()(const AppPoliciesValueType& app_policy) {
 
   if (!IsPredefinedApp(app_policy) && IsAppRevoked(app_policy)) {
     SetPendingPermissions(app_policy, RESULT_APP_REVOKED);
-    NotifySystem(app_policy);
+    AddResult(app_id, RESULT_APP_REVOKED);
     return true;
   }
 
   if (!IsPredefinedApp(app_policy) && !NicknamesMatch(app_policy)) {
     SetPendingPermissions(app_policy, RESULT_NICKNAME_MISMATCH);
-    NotifySystem(app_policy);
+    AddResult(app_id, RESULT_NICKNAME_MISMATCH);
     return true;
   }
 
@@ -345,49 +413,53 @@ bool CheckAppPolicy::operator()(const AppPoliciesValueType& app_policy) {
 
     if (is_request_type_changed) {
       SetPendingPermissions(app_policy, RESULT_REQUEST_TYPE_CHANGED);
+      AddResult(app_id, RESULT_REQUEST_TYPE_CHANGED);
     }
     if (is_request_subtype_changed) {
       SetPendingPermissions(app_policy, RESULT_REQUEST_SUBTYPE_CHANGED);
-    }
-
-    if (is_request_type_changed || is_request_subtype_changed) {
-      NotifySystem(app_policy);
+      AddResult(app_id, RESULT_REQUEST_SUBTYPE_CHANGED);
     }
   }
   if (RESULT_NO_CHANGES == result) {
-    LOG4CXX_INFO(logger_,
-                 "Permissions for application:" << app_id
-                                                << " wasn't changed.");
+    LOG4CXX_INFO(
+        logger_,
+        "Permissions for application:" << app_id << " wasn't changed.");
+    AddResult(app_id, RESULT_NO_CHANGES);
     return true;
   }
 
-  LOG4CXX_INFO(logger_,
-               "Permissions for application:" << app_id
-                                              << " have been changed.");
+  LOG4CXX_INFO(
+      logger_,
+      "Permissions for application:" << app_id << " have been changed.");
 
   if (IsPredefinedApp(app_policy)) {
-    for (const policy_table::ApplicationPolicies::value_type& app :
-         snapshot_->policy_table.app_policies_section.apps) {
-      if (app_policy.first == app.second.get_string()) {
-        if (RESULT_CONSENT_NOT_REQIURED != result) {
-          SetPendingPermissions(app, result);
-          NotifySystem(app);
-        }
-        SendPermissionsToApp(app.first, app_policy.second.groups);
-      }
+    const auto& snapshot_app_policy_begin =
+        snapshot_->policy_table.app_policies_section.apps.begin();
+    const auto& snapshot_app_policy_end =
+        snapshot_->policy_table.app_policies_section.apps.end();
+
+    auto find_app = [&app_id](AppPoliciesValueType& app) {
+      return app_id == app.second.get_string();
+    };
+
+    const auto& app = std::find_if(
+        snapshot_app_policy_begin, snapshot_app_policy_end, find_app);
+
+    if ((snapshot_app_policy_end != app) &&
+        (RESULT_CONSENT_NOT_REQUIRED != result)) {
+      SetPendingPermissions(*app, result);
+      AddResult(app_id, RESULT_CONSENT_NEEDED);
     }
     return true;
   }
 
-  if (!IsPredefinedApp(app_policy) && RESULT_CONSENT_NOT_REQIURED != result) {
-    SetPendingPermissions(app_policy, result);
-    NotifySystem(app_policy);
+  SetPendingPermissions(app_policy, result);
+  if (RESULT_CONSENT_NOT_REQUIRED != result) {
+    AddResult(app_id, RESULT_CONSENT_NEEDED);
+    return true;
   }
 
-  // Don't sent notification for predefined apps (e.g. default, device etc.)
-  if (!IsPredefinedApp(app_policy)) {
-    SendPermissionsToApp(app_policy.first, app_policy.second.groups);
-  }
+  AddResult(app_id, result);
   return true;
 }
 
@@ -445,14 +517,18 @@ void policy::CheckAppPolicy::SetPendingPermissions(
   pm_->app_permissions_diff_lock_.Release();
 }
 
-policy::CheckAppPolicy::PermissionsCheckResult
-policy::CheckAppPolicy::CheckPermissionsChanges(
+policy::PermissionsCheckResult policy::CheckAppPolicy::CheckPermissionsChanges(
     const policy::AppPoliciesValueType& app_policy) const {
-  bool has_revoked_groups = HasRevokedGroups(app_policy);
+  const bool has_revoked_groups = HasRevokedGroups(app_policy);
 
-  bool has_consent_needed_groups = HasConsentNeededGroups(app_policy);
+  const bool has_consent_needed_groups = HasConsentNeededGroups(app_policy);
 
-  bool has_new_groups = HasNewGroups(app_policy);
+  const bool has_new_groups = HasNewGroups(app_policy);
+
+  const bool has_updated_groups = HasUpdatedGroups(app_policy);
+
+  const bool encryption_required_flag_changed =
+      IsEncryptionRequiredFlagChanged(app_policy);
 
   if (has_revoked_groups && has_consent_needed_groups) {
     return RESULT_PERMISSIONS_REVOKED_AND_CONSENT_NEEDED;
@@ -460,8 +536,10 @@ policy::CheckAppPolicy::CheckPermissionsChanges(
     return RESULT_PERMISSIONS_REVOKED;
   } else if (has_consent_needed_groups) {
     return RESULT_CONSENT_NEEDED;
-  } else if (has_new_groups) {
-    return RESULT_CONSENT_NOT_REQIURED;
+  } else if (has_new_groups || has_updated_groups) {
+    return RESULT_CONSENT_NOT_REQUIRED;
+  } else if (encryption_required_flag_changed) {
+    return RESULT_ENCRYPTION_REQUIRED_FLAG_CHANGED;
   }
 
   return RESULT_NO_CHANGES;
@@ -530,6 +608,130 @@ bool CheckAppPolicy::IsRequestSubTypeChanged(
   return diff.size();
 }
 
+bool CheckAppPolicy::IsEncryptionRequiredFlagChanged(
+    const AppPoliciesValueType& app_policy) const {
+  auto get_app_encryption_needed =
+      [](const std::string& policy_app_id,
+         policy_table::ApplicationPolicies& policies)
+      -> rpc::Optional<rpc::Boolean> {
+    auto it = policies.find(policy_app_id);
+    if (policies.end() == it) {
+      LOG4CXX_WARN(logger_, "App is not present in policies" << policy_app_id);
+      return rpc::Optional<rpc::Boolean>(false);
+    }
+    return it->second.encryption_required;
+  };
+
+  auto get_app_groups =
+      [](const std::string& policy_app_id,
+         policy_table::ApplicationPolicies& policies) -> policy_table::Strings {
+    policy_table::Strings result;
+    auto it = policies.find(policy_app_id);
+    if (policies.end() == it) {
+      LOG4CXX_WARN(logger_, "App is not present in policies" << policy_app_id);
+      return result;
+    }
+    auto& groups = it->second.groups;
+    std::copy(groups.begin(), groups.end(), std::back_inserter(result));
+    return result;
+  };
+
+  auto get_app_rpcs = [](const std::string group_name,
+                         const FunctionalGroupings& groups)
+      -> rpc::Optional<policy_table::Rpcs> {
+    auto it = groups.find(group_name);
+    if (it == groups.end()) {
+      return rpc::Optional<policy_table::Rpcs>();
+    }
+    return rpc::Optional<policy_table::Rpcs>(it->second);
+  };
+
+  const auto snapshot_groups = get_app_groups(
+      app_policy.first, snapshot_->policy_table.app_policies_section.apps);
+  const auto update_groups = get_app_groups(
+      app_policy.first, update_->policy_table.app_policies_section.apps);
+
+  auto get_resulting_encryption_required_flag_for_app_groups =
+      [this, &get_app_rpcs](
+          const rpc::policy_table_interface_base::Strings& app_groups,
+          const std::shared_ptr<rpc::policy_table_interface_base::Table> pt) {
+        for (const auto& group : app_groups) {
+          const auto rpcs =
+              get_app_rpcs(group, pt->policy_table.functional_groupings);
+          if (*rpcs->encryption_required) {
+            return true;
+          }
+        }
+
+        return false;
+      };
+
+  auto group_res_en_flag_changed =
+      [this, &get_resulting_encryption_required_flag_for_app_groups](
+          const rpc::policy_table_interface_base::Strings& snapshot_groups,
+          const rpc::policy_table_interface_base::Strings& update_groups) {
+        return get_resulting_encryption_required_flag_for_app_groups(
+                   snapshot_groups, snapshot_) !=
+               get_resulting_encryption_required_flag_for_app_groups(
+                   update_groups, update_);
+      };
+
+  const auto snapshot_app_encryption_needed = get_app_encryption_needed(
+      app_policy.first, snapshot_->policy_table.app_policies_section.apps);
+  const auto update_app_encryption_needed = get_app_encryption_needed(
+      app_policy.first, update_->policy_table.app_policies_section.apps);
+
+  const bool app_encryption_needed_changed =
+      (snapshot_app_encryption_needed.is_initialized() !=
+       update_app_encryption_needed.is_initialized()) ||
+      (*snapshot_app_encryption_needed != *update_app_encryption_needed);
+
+  if ((!update_app_encryption_needed.is_initialized() ||
+       *update_app_encryption_needed) &&
+      group_res_en_flag_changed(snapshot_groups, update_groups)) {
+    return true;
+  }
+
+  return app_encryption_needed_changed;
+}
+
+void FillActionsForAppPolicies::operator()(
+    const policy::CheckAppPolicyResults::value_type& value) {
+  const std::string app_id = value.first;
+  const auto app_policy = app_policies_.find(app_id);
+
+  if (app_policies_.end() == app_policy) {
+    return;
+  }
+
+  if (IsPredefinedApp(*app_policy)) {
+    return;
+  }
+
+  switch (value.second) {
+    case RESULT_APP_REVOKED:
+    case RESULT_NICKNAME_MISMATCH:
+      actions_[app_id].is_notify_system = true;
+      return;
+    case RESULT_CONSENT_NEEDED:
+    case RESULT_PERMISSIONS_REVOKED_AND_CONSENT_NEEDED:
+      actions_[app_id].is_consent_needed = true;
+      break;
+    case RESULT_CONSENT_NOT_REQUIRED:
+    case RESULT_PERMISSIONS_REVOKED:
+    case RESULT_REQUEST_TYPE_CHANGED:
+    case RESULT_REQUEST_SUBTYPE_CHANGED:
+    case RESULT_ENCRYPTION_REQUIRED_FLAG_CHANGED:
+      break;
+    case RESULT_NO_CHANGES:
+    default:
+      return;
+  }
+
+  actions_[app_id].is_notify_system = true;
+  actions_[app_id].is_send_permissions_to_app = true;
+}
+
 FillNotificationData::FillNotificationData(Permissions& data,
                                            GroupConsent group_state,
                                            GroupConsent undefined_group_consent)
@@ -595,7 +797,7 @@ void FillNotificationData::UpdateParameters(
   ParametersConstItr it_parameters_end = in_parameters.end();
 
   for (; it_parameters != it_parameters_end; ++it_parameters) {
-    out_parameter.insert(policy_table::EnumToJsonString(*it_parameters));
+    out_parameter.insert(*it_parameters);
   }
 }
 
@@ -713,8 +915,29 @@ bool ProcessFunctionalGroup::operator()(const StringsValueType& group_name) {
     FillNotificationData filler(
         data_, GetGroupState(group_name_str), undefined_group_consent_);
     std::for_each(rpcs.begin(), rpcs.end(), filler);
+    FillEncryptionFlagForRpcs(rpcs, (*it).second.encryption_required);
   }
   return true;
+}
+
+void ProcessFunctionalGroup::FillEncryptionFlagForRpcs(
+    const policy_table::Rpc& rpcs,
+    const EncryptionRequired encryption_required) {
+  auto update_encryption_required = [](EncryptionRequired& current,
+                                       const EncryptionRequired& incoming) {
+    if (!incoming.is_initialized()) {
+      return;
+    }
+    if (current.is_initialized() && *current) {
+      return;
+    }
+    current = incoming;
+  };
+
+  for (const auto& rpc : rpcs) {
+    auto& item = data_[rpc.first];
+    update_encryption_required(item.require_encryption, encryption_required);
+  }
 }
 
 GroupConsent ProcessFunctionalGroup::GetGroupState(
@@ -853,4 +1076,4 @@ bool UnwrapAppPolicies(policy_table::ApplicationPolicies& app_policies) {
 
   return true;
 }
-}
+}  // namespace policy

@@ -40,15 +40,12 @@ namespace commands {
 
 OnVIVehicleDataNotification::OnVIVehicleDataNotification(
     const application_manager::commands::MessageSharedPtr& message,
-    ApplicationManager& application_manager,
-    rpc_service::RPCService& rpc_service,
-    HMICapabilities& hmi_capabilities,
-    policy::PolicyHandlerInterface& policy_handle)
+    const VehicleInfoCommandParams& params)
     : NotificationFromHMI(message,
-                          application_manager,
-                          rpc_service,
-                          hmi_capabilities,
-                          policy_handle) {}
+                          params.application_manager_,
+                          params.rpc_service_,
+                          params.hmi_capabilities_,
+                          params.policy_handler_) {}
 
 OnVIVehicleDataNotification::~OnVIVehicleDataNotification() {}
 
@@ -62,9 +59,8 @@ void OnVIVehicleDataNotification::Run() {
   const smart_objects::SmartObject& msg_params =
       (*message_)[strings::msg_params];
   if (msg_params.keyExists(strings::odometer)) {
-    application_manager_.IviInfoUpdated(
-        mobile_apis::VehicleDataType::VEHICLEDATA_ODOMETER,
-        msg_params[strings::odometer].asInt());
+    application_manager_.IviInfoUpdated(strings::odometer,
+                                        msg_params[strings::odometer].asInt());
   }
 
   SendNotificationToMobile(message_);
@@ -72,4 +68,4 @@ void OnVIVehicleDataNotification::Run() {
 
 }  // namespace commands
 
-}  // namespace application_manager
+}  // namespace vehicle_info_plugin

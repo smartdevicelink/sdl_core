@@ -30,21 +30,21 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "gtest/gtest.h"
-#include "application_manager/message.h"
 #include "hmi_message_handler/hmi_message_handler_impl.h"
+#include "application_manager/message.h"
+#include "gtest/gtest.h"
 #include "hmi_message_handler/messagebroker_adapter.h"
-#include "hmi_message_handler/mock_hmi_message_observer.h"
-#include "hmi_message_handler/mock_hmi_message_handler_settings.h"
 #include "hmi_message_handler/mock_hmi_message_adapter_impl.h"
+#include "hmi_message_handler/mock_hmi_message_handler_settings.h"
+#include "hmi_message_handler/mock_hmi_message_observer.h"
 #include "utils/test_async_waiter.h"
 
 namespace test {
 namespace components {
 namespace hmi_message_handler_test {
 
-using ::testing::Return;
 using ::testing::_;
+using ::testing::Return;
 
 class HMIMessageHandlerImplTest : public ::testing::Test {
  public:

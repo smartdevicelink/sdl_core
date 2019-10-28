@@ -31,14 +31,14 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <string>
 #include "sdl_rpc_plugin/commands/mobile/update_turn_list_request.h"
+#include <string>
 
-#include "application_manager/policies/policy_handler.h"
 #include "application_manager/application_impl.h"
 #include "application_manager/message_helper.h"
-#include "interfaces/MOBILE_API.h"
+#include "application_manager/policies/policy_handler.h"
 #include "interfaces/HMI_API.h"
+#include "interfaces/MOBILE_API.h"
 #include "utils/custom_string.h"
 
 namespace sdl_rpc_plugin {
@@ -240,4 +240,4 @@ bool UpdateTurnListRequest::IsWhiteSpaceExist() {
 
 }  // namespace commands
 
-}  // namespace application_manager
+}  // namespace sdl_rpc_plugin

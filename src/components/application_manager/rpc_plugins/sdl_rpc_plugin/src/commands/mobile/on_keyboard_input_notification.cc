@@ -76,7 +76,8 @@ void OnKeyBoardInputNotification::Run() {
       break;
     }
 
-    if (mobile_apis::HMILevel::eType::HMI_FULL == app->hmi_level()) {
+    if (mobile_apis::HMILevel::eType::HMI_FULL ==
+        app->hmi_level(mobile_apis::PredefinedWindows::DEFAULT_WINDOW)) {
       LOG4CXX_INFO(logger_, "There is application in HMI_FULL level");
       app_to_notify = app;
     }
@@ -93,4 +94,4 @@ void OnKeyBoardInputNotification::Run() {
 
 }  // namespace commands
 
-}  // namespace application_manager
+}  // namespace sdl_rpc_plugin

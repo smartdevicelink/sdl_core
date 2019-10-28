@@ -35,11 +35,11 @@
 
 #include <stdint.h>
 #include <string.h>
+#include <time.h>
 #include <fstream>
 #include <iostream>
 #include <string>
 #include <vector>
-#include <time.h>
 
 namespace file_system {
 
@@ -240,6 +240,19 @@ bool WriteBinaryFile(const std::string& name,
  * @return returns true if the operation is successfully.
  */
 bool ReadBinaryFile(const std::string& name, std::vector<uint8_t>& result);
+
+/**
+ * @brief Reads from file
+ *
+ * @param name path to file
+ * @param result read data
+ * @param offset number of bytes to be ignored from begining of file
+ * @return returns true if the operation is successfully.
+ */
+bool ReadBinaryFile(const std::string& name,
+                    std::vector<uint8_t>& result,
+                    uint32_t offset,
+                    uint32_t length);
 
 bool ReadFile(const std::string& name, std::string& result);
 

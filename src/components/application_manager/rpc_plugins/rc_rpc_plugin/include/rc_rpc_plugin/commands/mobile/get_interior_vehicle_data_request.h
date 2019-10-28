@@ -33,8 +33,8 @@
 #ifndef SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_RC_RPC_PLUGIN_INCLUDE_RC_RPC_PLUGIN_COMMANDS_MOBILE_GET_INTERIOR_VEHICLE_DATA_REQUEST_H_
 #define SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_RC_RPC_PLUGIN_INCLUDE_RC_RPC_PLUGIN_COMMANDS_MOBILE_GET_INTERIOR_VEHICLE_DATA_REQUEST_H_
 
-#include "rc_rpc_plugin/commands/rc_command_request.h"
 #include <string>
+#include "rc_rpc_plugin/commands/rc_command_request.h"
 
 namespace rc_rpc_plugin {
 namespace app_mngr = application_manager;
@@ -63,8 +63,8 @@ class GetInteriorVehicleDataRequest : public RCCommandRequest {
   ~GetInteriorVehicleDataRequest();
 
  private:
-  std::vector<application_manager::ApplicationSharedPtr>
-  AppsSubscribedToModuleType(const std::string& module_type);
+  std::vector<application_manager::ApplicationSharedPtr> AppsSubscribedToModule(
+      const ModuleUid& module);
 
   /**
    * @brief Check if app wants to proceed with already setup subscription
@@ -76,9 +76,9 @@ class GetInteriorVehicleDataRequest : public RCCommandRequest {
   bool HasRequestExcessiveSubscription();
 
   /**
-    * @brief Handle subscription to vehicle data
-    * @param hmi_response json message with response from HMI
-    */
+   * @brief Handle subscription to vehicle data
+   * @param hmi_response json message with response from HMI
+   */
   void ProccessSubscription(const smart_objects::SmartObject& hmi_response);
 
   /**
@@ -87,7 +87,8 @@ class GetInteriorVehicleDataRequest : public RCCommandRequest {
    */
   void RemoveExcessiveSubscription();
 
-  std::string ModuleType() FINAL;
+  std::string ModuleType() const FINAL;
+  std::string ModuleId() const FINAL;
   bool excessive_subscription_occured_;
   bool ProcessCapabilities();
   void ProcessResponseToMobileFromCache(app_mngr::ApplicationSharedPtr app);

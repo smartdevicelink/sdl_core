@@ -31,12 +31,12 @@
  */
 
 #include "qdb_wrapper/sql_query.h"
+#include <errno.h>
 #include <string.h>
-#include <cassert>
 #include <algorithm>
+#include <cassert>
 #include "qdb_wrapper/sql_database.h"
 #include "utils/logger.h"
-#include <errno.h>
 
 namespace utils {
 namespace dbms {

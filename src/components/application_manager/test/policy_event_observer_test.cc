@@ -33,10 +33,10 @@
 #include "application_manager/policies/policy_event_observer.h"
 #include "application_manager/policies/mock_policy_handler_interface.h"
 
+#include "application_manager/mock_event_dispatcher.h"
 #include "gmock/gmock.h"
 #include "policy/policy_types.h"
 #include "smart_objects/smart_object.h"
-#include "application_manager/mock_event_dispatcher.h"
 
 namespace test {
 namespace components {
