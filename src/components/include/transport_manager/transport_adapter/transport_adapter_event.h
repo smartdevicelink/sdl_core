@@ -33,9 +33,9 @@
 #ifndef SRC_COMPONENTS_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_ADAPTER_TRANSPORT_ADAPTER_EVENT_H_
 #define SRC_COMPONENTS_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_ADAPTER_TRANSPORT_ADAPTER_EVENT_H_
 
+#include "protocol/common.h"
 #include "transport_manager/common.h"
 #include "transport_manager/transport_adapter/transport_adapter.h"
-#include "protocol/common.h"
 
 namespace transport_manager {
 
@@ -58,7 +58,9 @@ enum class EventTypeEnum {
   ON_COMMUNICATION_ERROR,
   ON_UNEXPECTED_DISCONNECT,
   ON_TRANSPORT_SWITCH_REQUESTED,
-  ON_TRANSPORT_CONFIG_UPDATED
+  ON_TRANSPORT_CONFIG_UPDATED,
+  ON_CONNECT_PENDING,
+  ON_CONNECTION_STATUS_UPDATED
 };
 
 class TransportAdapterEvent {

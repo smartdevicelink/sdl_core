@@ -30,13 +30,13 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "gtest/gtest.h"
-#include "utils/macro.h"
 #include "application_manager/request_tracker.h"
 #include "application_manager/mock_request_controller_settings.h"
+#include "gtest/gtest.h"
 #include "interfaces/MOBILE_API.h"
-#include "utils/lock.h"
 #include "utils/conditional_variable.h"
+#include "utils/lock.h"
+#include "utils/macro.h"
 
 namespace test {
 namespace components {
@@ -246,6 +246,6 @@ TEST_F(RequestTrackerTestClass,
             tracker_.Track(app_id, none_level));
 }
 
-}  // namespace request_controller
+}  // namespace request_controller_test
 }  // namespace components
 }  // namespace test

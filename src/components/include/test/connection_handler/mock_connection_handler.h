@@ -33,23 +33,23 @@
 #ifndef SRC_COMPONENTS_INCLUDE_TEST_CONNECTION_HANDLER_MOCK_CONNECTION_HANDLER_H_
 #define SRC_COMPONENTS_INCLUDE_TEST_CONNECTION_HANDLER_MOCK_CONNECTION_HANDLER_H_
 
-#include <string>
 #include <list>
+#include <string>
 #include <vector>
 
-#include "gmock/gmock.h"
 #include "connection_handler/connection_handler.h"
 #include "connection_handler/connection_handler_observer.h"
-#include "connection_handler/devices_discovery_starter.h"
 #include "connection_handler/connection_handler_settings.h"
+#include "connection_handler/devices_discovery_starter.h"
+#include "gmock/gmock.h"
 
 namespace test {
 namespace components {
 namespace connection_handler_test {
 
+using connection_handler::CloseSessionReason;
 using connection_handler::ConnectionHandle;
 using connection_handler::DeviceHandle;
-using connection_handler::CloseSessionReason;
 using connection_handler::DevicesDiscoveryStarter;
 using connection_handler::SessionTransports;
 
@@ -60,12 +60,23 @@ class MockConnectionHandler : public connection_handler::ConnectionHandler {
   MOCK_METHOD0(StartTransportManager, void());
   MOCK_METHOD1(ConnectToDevice,
                void(connection_handler::DeviceHandle device_handle));
+  MOCK_CONST_METHOD1(
+      GetConnectionStatus,
+      transport_manager::ConnectionStatus(const DeviceHandle& device_handle));
   MOCK_CONST_METHOD2(RunAppOnDevice,
                      void(const std::string&, const std::string&));
   MOCK_METHOD0(ConnectToAllDevices, void());
+  MOCK_METHOD2(
+      AddCloudAppDevice,
+      void(const std::string& policy_app_id,
+           const transport_manager::transport_adapter::CloudAppProperties&));
+  MOCK_METHOD1(RemoveCloudAppDevice, void(const DeviceHandle device_id));
   MOCK_METHOD1(CloseRevokedConnection, void(uint32_t connection_key));
   MOCK_METHOD1(CloseConnection, void(ConnectionHandle connection_handle));
   MOCK_METHOD1(GetConnectionSessionsCount, uint32_t(uint32_t connection_key));
+  MOCK_CONST_METHOD1(
+      GetCloudAppID,
+      std::string(const transport_manager::ConnectionUID connection_id));
   MOCK_METHOD2(GetDeviceID,
                bool(const std::string& mac_address,
                     DeviceHandle* device_handle));

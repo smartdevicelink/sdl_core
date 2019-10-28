@@ -72,6 +72,6 @@ class TTSSpeakRequest : public app_mngr::commands::RequestToHMI {
 
 }  // namespace commands
 
-}  // namespace application_manager
+}  // namespace sdl_rpc_plugin
 
 #endif  // SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_HMI_TTS_SPEAK_REQUEST_H_

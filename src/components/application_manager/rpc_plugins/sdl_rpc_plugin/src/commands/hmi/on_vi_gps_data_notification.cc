@@ -64,4 +64,4 @@ void OnVIGpsDataNotification::Run() {
 
 }  // namespace commands
 
-}  // namespace application_manager
+}  // namespace sdl_rpc_plugin

@@ -38,16 +38,13 @@ using namespace application_manager;
 namespace commands {
 
 VIDiagnosticMessageRequest::VIDiagnosticMessageRequest(
-    const application_manager::commands::MessageSharedPtr& message,
-    ApplicationManager& application_manager,
-    rpc_service::RPCService& rpc_service,
-    HMICapabilities& hmi_capabilities,
-    policy::PolicyHandlerInterface& policy_handle)
+    const app_mngr::commands::MessageSharedPtr& message,
+    const VehicleInfoCommandParams& params)
     : RequestToHMI(message,
-                   application_manager,
-                   rpc_service,
-                   hmi_capabilities,
-                   policy_handle) {}
+                   params.application_manager_,
+                   params.rpc_service_,
+                   params.hmi_capabilities_,
+                   params.policy_handler_) {}
 
 VIDiagnosticMessageRequest::~VIDiagnosticMessageRequest() {}
 
@@ -59,4 +56,4 @@ void VIDiagnosticMessageRequest::Run() {
 
 }  // namespace commands
 
-}  // namespace application_manager
+}  // namespace vehicle_info_plugin

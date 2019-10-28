@@ -36,10 +36,14 @@
 #include "utils/macro.h"
 
 #include "application_manager/commands/command_request_impl.h"
+
+#include "application_manager/app_service_manager.h"
 #include "application_manager/application_manager.h"
-#include "application_manager/rpc_service.h"
 #include "application_manager/message_helper.h"
+#include "application_manager/rpc_service.h"
 #include "smart_objects/smart_object.h"
+
+#include "smart_objects/enum_schema_item.h"
 
 namespace application_manager {
 
@@ -108,7 +112,8 @@ const std::string CreateInfoForUnsupportedResult(
   }
 }
 
-bool CheckResultCode(const ResponseInfo& first, const ResponseInfo& second) {
+bool CommandRequestImpl::CheckResult(const ResponseInfo& first,
+                                     const ResponseInfo& second) const {
   if (first.is_ok && second.is_unsupported_resource) {
     return true;
   }
@@ -140,19 +145,21 @@ struct DisallowedParamsInserter {
       : response_(response), code_(code) {}
 
   bool operator()(const std::string& param) {
-    const VehicleData& vehicle_data =
-        application_manager::MessageHelper::vehicle_data();
-    VehicleData::const_iterator it = vehicle_data.find(param);
-    if (vehicle_data.end() != it) {
-      smart_objects::SmartObjectSPtr disallowed_param =
-          std::make_shared<smart_objects::SmartObject>(
-              smart_objects::SmartType_Map);
-      (*disallowed_param)[strings::data_type] = (*it).second;
-      (*disallowed_param)[strings::result_code] = code_;
-      response_[strings::msg_params][param.c_str()] = *disallowed_param;
-      return true;
-    }
-    return false;
+    smart_objects::SmartObjectSPtr disallowed_param =
+        std::make_shared<smart_objects::SmartObject>(
+            smart_objects::SmartType_Map);
+
+    auto rpc_spec_vehicle_data = MessageHelper::vehicle_data();
+    auto vehicle_data = rpc_spec_vehicle_data.find(param);
+    auto vehicle_data_type =
+        vehicle_data == rpc_spec_vehicle_data.end()
+            ? mobile_apis::VehicleDataType::VEHICLEDATA_OEM_CUSTOM_DATA
+            : vehicle_data->second;
+
+    (*disallowed_param)[strings::data_type] = vehicle_data_type;
+    (*disallowed_param)[strings::result_code] = code_;
+    response_[strings::msg_params][param.c_str()] = *disallowed_param;
+    return true;
   }
 
  private:
@@ -182,13 +189,7 @@ ResponseInfo::ResponseInfo(const hmi_apis::Common_Result::eType result,
   interface_state =
       application_manager.hmi_interfaces().GetInterfaceState(hmi_interface);
 
-  is_ok = Compare<hmi_apis::Common_Result::eType, EQ, ONE>(
-      result_code,
-      hmi_apis::Common_Result::SUCCESS,
-      hmi_apis::Common_Result::WARNINGS,
-      hmi_apis::Common_Result::WRONG_LANGUAGE,
-      hmi_apis::Common_Result::RETRY,
-      hmi_apis::Common_Result::SAVED);
+  is_ok = CommandRequestImpl::IsHMIResultSuccess(result_code);
 
   is_not_used = hmi_apis::Common_Result::INVALID_ENUM == result_code;
 
@@ -233,7 +234,8 @@ void CommandRequestImpl::Run() {}
 void CommandRequestImpl::onTimeOut() {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  unsubscribe_from_all_events();
+  unsubscribe_from_all_hmi_events();
+  unsubscribe_from_all_mobile_events();
   {
     // FIXME (dchmerev@luxoft.com): atomic_xchg fits better
     sync_primitives::AutoLock auto_lock(state_lock_);
@@ -257,11 +259,14 @@ void CommandRequestImpl::onTimeOut() {
 
 void CommandRequestImpl::on_event(const event_engine::Event& event) {}
 
+void CommandRequestImpl::on_event(const event_engine::MobileEvent& event) {}
+
 void CommandRequestImpl::SendResponse(
     const bool success,
     const mobile_apis::Result::eType& result_code,
     const char* info,
-    const smart_objects::SmartObject* response_params) {
+    const smart_objects::SmartObject* response_params,
+    const std::vector<uint8_t> binary_data) {
   LOG4CXX_AUTO_TRACE(logger_);
   {
     sync_primitives::AutoLock auto_lock(state_lock_);
@@ -286,7 +291,9 @@ void CommandRequestImpl::SendResponse(
       CommandImpl::protocol_version_;
   response[strings::params][strings::connection_key] = connection_key();
   response[strings::params][strings::function_id] = function_id();
-
+  if (!binary_data.empty()) {
+    response[strings::params][strings::binary_data] = binary_data;
+  }
   if (response_params) {
     response[strings::msg_params] = *response_params;
   }
@@ -296,9 +303,9 @@ void CommandRequestImpl::SendResponse(
   }
 
   // Add disallowed parameters and info from request back to response with
-  // appropriate
-  // reasons (VehicleData result codes)
-  if (result_code != mobile_apis::Result::APPLICATION_NOT_REGISTERED) {
+  // appropriate reasons (VehicleData result codes)
+  if (result_code != mobile_apis::Result::APPLICATION_NOT_REGISTERED &&
+      result_code != mobile_apis::Result::INVALID_DATA) {
     const mobile_apis::FunctionID::eType& id =
         static_cast<mobile_apis::FunctionID::eType>(function_id());
     if ((id == mobile_apis::FunctionID::SubscribeVehicleDataID) ||
@@ -414,6 +421,94 @@ void CommandRequestImpl::UpdateHash() {
   application->UpdateHash();
 }
 
+void CommandRequestImpl::SendProviderRequest(
+    const mobile_apis::FunctionID::eType& mobile_function_id,
+    const hmi_apis::FunctionID::eType& hmi_function_id,
+    const smart_objects::SmartObject* msg,
+    bool use_events) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  bool hmi_destination = false;
+  ApplicationSharedPtr app;
+  // Default error code and error message
+  std::string error_msg = "No app service provider available";
+  mobile_apis::Result::eType error_code =
+      mobile_apis::Result::DATA_NOT_AVAILABLE;
+
+  if ((*msg)[strings::msg_params].keyExists(strings::service_type)) {
+    std::string service_type =
+        (*msg)[strings::msg_params][strings::service_type].asString();
+    application_manager_.GetAppServiceManager().GetProviderByType(
+        service_type, true, app, hmi_destination);
+    error_msg = "No app service provider with serviceType: " + service_type +
+                " is available";
+    error_code = mobile_apis::Result::DATA_NOT_AVAILABLE;
+  } else if ((*msg)[strings::msg_params].keyExists(strings::service_id)) {
+    std::string service_id =
+        (*msg)[strings::msg_params][strings::service_id].asString();
+    application_manager_.GetAppServiceManager().GetProviderByID(
+        service_id, true, app, hmi_destination);
+    error_msg = "No app service provider with serviceId: " + service_id +
+                " is available";
+    error_code = mobile_apis::Result::INVALID_ID;
+  }
+
+  if (hmi_destination) {
+    LOG4CXX_DEBUG(logger_, "Sending Request to HMI Provider");
+    application_manager_.IncreaseForwardedRequestTimeout(connection_key(),
+                                                         correlation_id());
+    SendHMIRequest(hmi_function_id, &(*msg)[strings::msg_params], use_events);
+    return;
+  }
+
+  if (!app) {
+    LOG4CXX_DEBUG(logger_, "Invalid App Provider pointer");
+    SendResponse(false, error_code, error_msg.c_str());
+    return;
+  }
+
+  if (connection_key() == app->app_id()) {
+    SendResponse(false,
+                 mobile_apis::Result::IGNORED,
+                 "Consumer app is same as producer app");
+    return;
+  }
+
+  smart_objects::SmartObjectSPtr new_msg =
+      std::make_shared<smart_objects::SmartObject>();
+  smart_objects::SmartObject& request = *new_msg;
+
+  request[strings::params] = (*msg)[strings::params];
+  request[strings::msg_params] = (*msg)[strings::msg_params];
+  request[strings::params][strings::connection_key] = app->app_id();
+
+  application_manager_.IncreaseForwardedRequestTimeout(connection_key(),
+                                                       correlation_id());
+  SendMobileRequest(mobile_function_id, new_msg, use_events);
+}
+
+void CommandRequestImpl::SendMobileRequest(
+    const mobile_apis::FunctionID::eType& function_id,
+    smart_objects::SmartObjectSPtr msg,
+    bool use_events) {
+  smart_objects::SmartObject& request = *msg;
+
+  const uint32_t mobile_correlation_id =
+      application_manager_.GetNextMobileCorrelationID();
+
+  request[strings::params][strings::correlation_id] = mobile_correlation_id;
+  request[strings::params][strings::message_type] = MessageType::kRequest;
+  if (use_events) {
+    LOG4CXX_DEBUG(logger_,
+                  "SendMobileRequest subscribe_on_event "
+                      << function_id << " " << mobile_correlation_id);
+    subscribe_on_event(function_id, mobile_correlation_id);
+  }
+
+  if (!rpc_service_.ManageMobileCommand(msg, SOURCE_SDL)) {
+    LOG4CXX_ERROR(logger_, "Unable to send request to mobile");
+  }
+}
+
 uint32_t CommandRequestImpl::SendHMIRequest(
     const hmi_apis::FunctionID::eType& function_id,
     const smart_objects::SmartObject* msg_params,
@@ -439,12 +534,12 @@ uint32_t CommandRequestImpl::SendHMIRequest(
 
   if (use_events) {
     LOG4CXX_DEBUG(logger_,
-                  "subscribe_on_event " << function_id << " "
-                                        << hmi_correlation_id);
+                  "SendHMIRequest subscribe_on_event " << function_id << " "
+                                                       << hmi_correlation_id);
     subscribe_on_event(function_id, hmi_correlation_id);
   }
   if (ProcessHMIInterfacesAvailability(hmi_correlation_id, function_id)) {
-    if (!rpc_service_.ManageHMICommand(result)) {
+    if (!rpc_service_.ManageHMICommand(result, SOURCE_SDL_TO_HMI)) {
       LOG4CXX_ERROR(logger_, "Unable to send request");
       SendResponse(false, mobile_apis::Result::OUT_OF_MEMORY);
     }
@@ -474,7 +569,7 @@ void CommandRequestImpl::CreateHMINotification(
   notify[strings::params][strings::function_id] = function_id;
   notify[strings::msg_params] = msg_params;
 
-  if (!rpc_service_.ManageHMICommand(result)) {
+  if (!rpc_service_.ManageHMICommand(result, SOURCE_SDL_TO_HMI)) {
     LOG4CXX_ERROR(logger_, "Unable to send HMI notification");
   }
 }
@@ -627,12 +722,17 @@ bool CommandRequestImpl::CheckAllowedParameters() {
   }
 
   mobile_apis::Result::eType check_result =
-      application_manager_.CheckPolicyPermissions(
-          app,
-          MessageHelper::StringifiedFunctionID(
-              static_cast<mobile_api::FunctionID::eType>(function_id())),
-          params,
-          &parameters_permissions_);
+      mobile_apis::Result::eType::INVALID_ID;
+  const auto current_window_id = window_id();
+  if (app->WindowIdExists(current_window_id)) {
+    check_result = application_manager_.CheckPolicyPermissions(
+        app,
+        current_window_id,
+        MessageHelper::StringifiedFunctionID(
+            static_cast<mobile_api::FunctionID::eType>(function_id())),
+        params,
+        &parameters_permissions_);
+  }
 
   // Check, if RPC is allowed by policy
   if (mobile_apis::Result::SUCCESS != check_result) {
@@ -701,49 +801,28 @@ void CommandRequestImpl::RemoveDisallowedParameters() {
 
   smart_objects::SmartObject& params = (*message_)[strings::msg_params];
 
-  // Remove from request all disallowed parameters
-  RPCParams::const_iterator it_disallowed =
-      parameters_permissions_.disallowed_params.begin();
-  RPCParams::const_iterator it_disallowed_end =
-      parameters_permissions_.disallowed_params.end();
-  for (; it_disallowed != it_disallowed_end; ++it_disallowed) {
-    if (params.keyExists(*it_disallowed)) {
-      const std::string key = *it_disallowed;
+  for (const auto& key : params.enumerate()) {
+    if (parameters_permissions_.disallowed_params.end() !=
+        parameters_permissions_.disallowed_params.find(key)) {
+      // Remove from request all disallowed parameters
       params.erase(key);
       removed_parameters_permissions_.disallowed_params.insert(key);
       LOG4CXX_INFO(logger_,
                    "Following parameter is disallowed by user: " << key);
     }
-  }
 
-  // Remove from request all undefined yet parameters
-  RPCParams::const_iterator it_undefined =
-      parameters_permissions_.undefined_params.begin();
-  RPCParams::const_iterator it_undefined_end =
-      parameters_permissions_.undefined_params.end();
-  for (; it_undefined != it_undefined_end; ++it_undefined) {
-    if (params.keyExists(*it_undefined)) {
-      const std::string key = *it_undefined;
+    else if (removed_parameters_permissions_.undefined_params.end() !=
+             removed_parameters_permissions_.undefined_params.find(key)) {
+      // Remove from request all undefined yet parameters
       params.erase(key);
       removed_parameters_permissions_.undefined_params.insert(key);
       LOG4CXX_INFO(logger_,
                    "Following parameter is disallowed by policy: " << key);
     }
-  }
 
-  // Remove from request all parameters missed in allowed
-  const VehicleData& vehicle_data =
-      application_manager::MessageHelper::vehicle_data();
-
-  VehicleData::const_iterator it_vehicle_data = vehicle_data.begin();
-  VehicleData::const_iterator it_vehicle_data_end = vehicle_data.end();
-  for (; it_vehicle_data != it_vehicle_data_end; ++it_vehicle_data) {
-    const std::string key = it_vehicle_data->first;
-    if (params.keyExists(key) &&
-        parameters_permissions_.allowed_params.end() ==
-            std::find(parameters_permissions_.allowed_params.begin(),
-                      parameters_permissions_.allowed_params.end(),
-                      key)) {
+    else if (parameters_permissions_.allowed_params.end() ==
+             parameters_permissions_.allowed_params.find(key)) {
+      // Remove from request all parameters missed in allowed
       params.erase(key);
       removed_parameters_permissions_.undefined_params.insert(key);
       LOG4CXX_INFO(logger_,
@@ -811,18 +890,37 @@ bool CommandRequestImpl::HasDisallowedParams() const {
           (!removed_parameters_permissions_.undefined_params.empty()));
 }
 
+bool CommandRequestImpl::IsMobileResultSuccess(
+    const mobile_apis::Result::eType result_code) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  using namespace helpers;
+  return Compare<mobile_apis::Result::eType, EQ, ONE>(
+      result_code,
+      mobile_apis::Result::SUCCESS,
+      mobile_apis::Result::WARNINGS,
+      mobile_apis::Result::WRONG_LANGUAGE,
+      mobile_apis::Result::RETRY,
+      mobile_apis::Result::SAVED);
+}
+
+bool CommandRequestImpl::IsHMIResultSuccess(
+    const hmi_apis::Common_Result::eType result_code) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  using namespace helpers;
+  return Compare<hmi_apis::Common_Result::eType, EQ, ONE>(
+      result_code,
+      hmi_apis::Common_Result::SUCCESS,
+      hmi_apis::Common_Result::WARNINGS,
+      hmi_apis::Common_Result::WRONG_LANGUAGE,
+      hmi_apis::Common_Result::RETRY,
+      hmi_apis::Common_Result::SAVED);
+}
+
 bool CommandRequestImpl::PrepareResultForMobileResponse(
     hmi_apis::Common_Result::eType result_code,
     HmiInterfaces::InterfaceID interface) const {
   LOG4CXX_AUTO_TRACE(logger_);
-  using namespace helpers;
-  if (Compare<hmi_apis::Common_Result::eType, EQ, ONE>(
-          result_code,
-          hmi_apis::Common_Result::SUCCESS,
-          hmi_apis::Common_Result::WARNINGS,
-          hmi_apis::Common_Result::WRONG_LANGUAGE,
-          hmi_apis::Common_Result::RETRY,
-          hmi_apis::Common_Result::SAVED)) {
+  if (IsHMIResultSuccess(result_code)) {
     return true;
   }
 
@@ -838,8 +936,8 @@ bool CommandRequestImpl::PrepareResultForMobileResponse(
 bool CommandRequestImpl::PrepareResultForMobileResponse(
     ResponseInfo& out_first, ResponseInfo& out_second) const {
   LOG4CXX_AUTO_TRACE(logger_);
-  bool result = CheckResultCode(out_first, out_second) ||
-                CheckResultCode(out_second, out_first);
+  bool result =
+      CheckResult(out_first, out_second) || CheckResult(out_second, out_first);
   return result;
 }
 

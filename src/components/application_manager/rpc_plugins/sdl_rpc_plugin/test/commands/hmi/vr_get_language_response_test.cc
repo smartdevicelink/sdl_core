@@ -30,13 +30,13 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "gtest/gtest.h"
 #include "hmi/vr_get_language_response.h"
-#include "application_manager/smart_object_keys.h"
 #include "application_manager/commands/commands_test.h"
-#include "application_manager/mock_hmi_capabilities.h"
-#include "application_manager/mock_event_dispatcher.h"
 #include "application_manager/mock_application_manager.h"
+#include "application_manager/mock_event_dispatcher.h"
+#include "application_manager/mock_hmi_capabilities.h"
+#include "application_manager/smart_object_keys.h"
+#include "gtest/gtest.h"
 
 namespace test {
 namespace components {
@@ -47,8 +47,8 @@ namespace vr_get_language_response {
 using sdl_rpc_plugin::commands::VRGetLanguageResponse;
 using test::components::event_engine_test::MockEventDispatcher;
 using testing::_;
-using testing::ReturnRef;
 using ::testing::NiceMock;
+using testing::ReturnRef;
 
 namespace strings = application_manager::strings;
 namespace hmi_response = application_manager::hmi_response;

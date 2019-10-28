@@ -31,28 +31,27 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef MB_CONTROLLER_H
 #define MB_CONTROLLER_H
 
-#include <iostream>
+#include <algorithm>
+#include <atomic>
+#include <boost/asio/bind_executor.hpp>
+#include <boost/asio/ip/tcp.hpp>
+#include <boost/asio/placeholders.hpp>
+#include <boost/asio/strand.hpp>
 #include <boost/beast/core.hpp>
 #include <boost/beast/websocket.hpp>
-#include <boost/asio/bind_executor.hpp>
-#include <boost/asio/strand.hpp>
-#include <boost/asio/placeholders.hpp>
-#include <boost/asio/ip/tcp.hpp>
 #include <boost/make_shared.hpp>
 #include <boost/thread/thread.hpp>
-#include <algorithm>
 #include <cstdlib>
 #include <functional>
 #include <iostream>
+#include <map>
 #include <memory>
 #include <string>
 #include <thread>
 #include <vector>
-#include <map>
 #include "json/json.h"
-#include "utils/macro.h"
 #include "utils/lock.h"
-#include <atomic>
+#include "utils/macro.h"
 #include "websocket_session.h"
 
 using namespace boost::beast::websocket;
@@ -181,6 +180,6 @@ class CMessageBrokerController
   std::atomic_bool shutdown_;
 };
 
-}  // hmi_message_handler
+}  // namespace hmi_message_handler
 
 #endif /* MB_CONTROLLER_H */

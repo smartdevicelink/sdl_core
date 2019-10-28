@@ -33,11 +33,11 @@
 #ifndef SRC_COMPONENTS_POLICY_POLICY_EXTERNAL_INCLUDE_POLICY_PT_REPRESENTATION_H_
 #define SRC_COMPONENTS_POLICY_POLICY_EXTERNAL_INCLUDE_POLICY_PT_REPRESENTATION_H_
 
-#include <vector>
 #include <string>
-#include "policy/policy_types.h"
-#include "policy/policy_table/types.h"
+#include <vector>
 #include "policy/policy_settings.h"
+#include "policy/policy_table/types.h"
+#include "policy/policy_types.h"
 
 namespace policy_table = rpc::policy_table_interface_base;
 
@@ -132,11 +132,6 @@ class PTRepresentation {
    * @return bool Success of operation
    */
   virtual bool SecondsBetweenRetries(std::vector<int>* seconds) = 0;
-
-  /**
-   * @brief Get information about vehicle
-   */
-  virtual const VehicleInfo GetVehicleInfo() const = 0;
 
   /**
    * @brief Allows to update 'vin' field in module_meta table.
@@ -268,10 +263,10 @@ class PTRepresentation {
   virtual bool IsDefaultPolicy(const std::string& app_id) const = 0;
 
   /**
-       * Checks if the application has pre_data policy
-       * @param app_id application id
-       * @return true if application has pre_data policy
-       */
+   * Checks if the application has pre_data policy
+   * @param app_id application id
+   * @return true if application has pre_data policy
+   */
   virtual bool IsPredataPolicy(const std::string& app_id) const = 0;
 
   /**

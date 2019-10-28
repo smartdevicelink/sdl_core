@@ -33,13 +33,13 @@
 #ifndef SRC_COMPONENTS_PROTOCOL_HANDLER_INCLUDE_PROTOCOL_HANDLER_MULTIFRAME_BUILDER_H_
 #define SRC_COMPONENTS_PROTOCOL_HANDLER_INCLUDE_PROTOCOL_HANDLER_MULTIFRAME_BUILDER_H_
 
-#include <map>
-#include <ostream>    // std::basic_ostream
-#include <iterator>   // std::ostream_iterator
 #include <algorithm>  // std::copy
+#include <iterator>   // std::ostream_iterator
+#include <map>
+#include <ostream>  // std::basic_ostream
 
-#include "utils/date_time.h"
 #include "protocol_handler/protocol_packet.h"
+#include "utils/date_time.h"
 
 /**
  *\namespace protocol_handlerHandler
@@ -86,36 +86,36 @@ typedef std::map<ConnectionID, SessionToFrameMap> MultiFrameMap;
 class MultiFrameBuilder {
  public:
   /**
-  * @brief Constructor
-  */
+   * @brief Constructor
+   */
   MultiFrameBuilder();
 
   /**
-  *\brief Set timeout of waiting CONSECUTIVE frames
-  */
+   *\brief Set timeout of waiting CONSECUTIVE frames
+   */
   void set_waiting_timeout(const uint32_t consecutive_frame_wait_msecs);
 
   /**
-  * @brief Add connection for pending data
-  * @return true on success
-  */
+   * @brief Add connection for pending data
+   * @return true on success
+   */
   bool AddConnection(const ConnectionID connection_id);
 
   /**
-  * @brief Clear all data related to connection_id
-  * @return true on success
-  */
+   * @brief Clear all data related to connection_id
+   * @return true on success
+   */
   bool RemoveConnection(const ConnectionID connection_id);
 
   /**
-  *\brief Pop assembled and expired frames
-  */
+   *\brief Pop assembled and expired frames
+   */
   ProtocolFramePtrList PopMultiframes();
 
   /**
-  *\brief Handle Single or Consecutive frame
-  * @return RESULT_OK on success, or RESULT_FAIL in case of any error
-  */
+   *\brief Handle Single or Consecutive frame
+   * @return RESULT_OK on success, or RESULT_FAIL in case of any error
+   */
   RESULT_CODE AddFrame(const ProtocolFramePtr packet);
 
  private:

@@ -48,5 +48,17 @@ void Event::set_smart_object(const smart_objects::SmartObject& so) {
   response_so_ = so;
 }
 
+MobileEvent::MobileEvent(const MobileEventID& id) : id_(id), response_so_() {}
+
+MobileEvent::~MobileEvent() {}
+
+void MobileEvent::raise(EventDispatcher& event_dispatcher) {
+  event_dispatcher.raise_mobile_event(*this);
+}
+
+void MobileEvent::set_smart_object(const smart_objects::SmartObject& so) {
+  response_so_ = so;
+}
+
 }  // namespace event_engine
 }  // namespace application_manager

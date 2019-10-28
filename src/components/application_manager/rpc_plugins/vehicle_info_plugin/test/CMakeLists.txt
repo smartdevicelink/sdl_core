@@ -31,21 +31,26 @@
 include(${CMAKE_SOURCE_DIR}/tools/cmake/helpers/sources.cmake)
 
 include_directories(
+  include
   ${GMOCK_INCLUDE_DIRECTORY}
   ${COMPONENTS_DIR}/application_manager/rpc_plugins/vehicle_info_plugin/include
-  ${COMPONENTS_DIR}/application_manager/rpc_plugins/vehicle_info_plugin/include/vehicle_info_plugin/commands/
+  ${COMPONENTS_DIR}/application_manager/rpc_plugins/vehicle_info_plugin/include/vehicle_info_plugin/commands
   ${COMPONENTS_DIR}/application_manager/test/include/
-)  
-
-
+  ${COMPONENTS_DIR}/include/test/application_manager/
+  )
 set(COMMANDS_TEST_DIR ${CMAKE_CURRENT_SOURCE_DIR}/commands)
 
 file(GLOB SOURCES
   ${COMPONENTS_DIR}/application_manager/test/mock_message_helper.cc
   ${COMPONENTS_DIR}/application_manager/test/mock_application_helper.cc
   ${COMPONENTS_DIR}/application_manager/src/smart_object_keys.cc
+  ${COMPONENTS_DIR}/${POLICY_PATH}/src/policy_table/types.cc
+  ${COMPONENTS_DIR}/${POLICY_PATH}/src/policy_table/validation.cc
+  ${COMPONENTS_DIR}/${POLICY_PATH}/src/policy_table/enums.cc
   ${COMMANDS_TEST_DIR}/hmi/*
   ${COMMANDS_TEST_DIR}/mobile/*
+  ${CMAKE_CURRENT_SOURCE_DIR}/custom_vehicle_data_manager_test.cc
+  ${CMAKE_CURRENT_SOURCE_DIR}/vehicle_data_item_schema_test.cc
   ${COMPONENTS_DIR}/application_manager/src/message.cc
   ${COMPONENTS_DIR}/application_manager/src/event_engine/*
 )
@@ -58,6 +63,8 @@ set(LIBRARIES
   MOBILE_API
   connectionHandler
   vehicle_info_plugin
+  SmartObjects
+  formatters
   jsoncpp
 )
 

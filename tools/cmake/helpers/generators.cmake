@@ -41,6 +41,19 @@ set(INTEFRACE_GENERATOR "${CMAKE_SOURCE_DIR}/tools/InterfaceGenerator/Generator.
 set(INTEFRACE_GENERATOR_CMD ${PYTHON_EXECUTABLE} -B ${INTEFRACE_GENERATOR})
 file(GLOB_RECURSE INTERFACE_GENERATOR_DEPENDENCIES "${CMAKE_SOURCE_DIR}/tools/InterfaceGenerator/*.*")
 
+macro(generate_policy_types GENERATED_FILES
+                            ARG_FULL_XML_NAME
+                            ARG_NAMESPACE
+                            PARSER_TYPE)
+  add_custom_command(
+    OUTPUT ${GENERATED_FILES}
+    COMMAND ${INTEFRACE_GENERATOR_CMD} ${ARG_FULL_XML_NAME} ${ARG_NAMESPACE} ${CMAKE_CURRENT_BINARY_DIR} "--parser-type" "${PARSER_TYPE}"
+    DEPENDS ${INTERFACE_GENERATOR_DEPENDENCIES} ${ARG_FULL_XML_NAME}
+    COMMENT "Generating files:\n\t${GENERATED_FILES}\nfrom:\n\t${ARG_FULL_XML_NAME}\n\
+    ${INTEFRACE_GENERATOR_CMD} ${ARG_FULL_XML_NAME} ${ARG_NAMESPACE} ${CMAKE_CURRENT_BINARY_DIR} --parser-type ${PARSER_TYPE}"
+    VERBATIM)
+endmacro()
+
 macro(generate_interface ARG_XML_NAME ARG_NAMESPACE PARSER_TYPE)
   string(REGEX MATCH "^[a-zA-Z_0-9]*[^.]" FILE_NAME ${ARG_XML_NAME})  # TODO: make expression more robust
 

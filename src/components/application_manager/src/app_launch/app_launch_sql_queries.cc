@@ -75,4 +75,4 @@ const std::string kRefreshApplicationDataSessionTime =
     "SET `last_session` = STRFTIME('%Y-%m-%d %H:%M:%f', 'NOW')"
     "WHERE `deviceMac` = ? AND appID = ? AND bundleID = ?;";
 
-}  // namespace resumption
+}  // namespace app_launch

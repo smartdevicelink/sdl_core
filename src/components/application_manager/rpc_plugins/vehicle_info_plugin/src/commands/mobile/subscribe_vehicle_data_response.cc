@@ -32,8 +32,8 @@
  */
 
 #include "vehicle_info_plugin/commands/mobile/subscribe_vehicle_data_response.h"
-#include "application_manager/rpc_service.h"
 #include "application_manager/application_impl.h"
+#include "application_manager/rpc_service.h"
 #include "interfaces/MOBILE_API.h"
 
 namespace vehicle_info_plugin {
@@ -42,15 +42,12 @@ namespace commands {
 
 SubscribeVehicleDataResponse::SubscribeVehicleDataResponse(
     const application_manager::commands::MessageSharedPtr& message,
-    ApplicationManager& application_manager,
-    app_mngr::rpc_service::RPCService& rpc_service,
-    app_mngr::HMICapabilities& hmi_capabilities,
-    policy::PolicyHandlerInterface& policy_handler)
+    const VehicleInfoCommandParams& params)
     : CommandResponseImpl(message,
-                          application_manager,
-                          rpc_service,
-                          hmi_capabilities,
-                          policy_handler) {}
+                          params.application_manager_,
+                          params.rpc_service_,
+                          params.hmi_capabilities_,
+                          params.policy_handler_) {}
 
 SubscribeVehicleDataResponse::~SubscribeVehicleDataResponse() {}
 
@@ -60,4 +57,4 @@ void SubscribeVehicleDataResponse::Run() {
 }
 
 }  // namespace commands
-}  // namespace application_manager
+}  // namespace vehicle_info_plugin

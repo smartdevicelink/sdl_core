@@ -33,58 +33,152 @@
 #ifndef SRC_COMPONENTS_INCLUDE_APPLICATION_MANAGER_STATE_CONTROLLER_H_
 #define SRC_COMPONENTS_INCLUDE_APPLICATION_MANAGER_STATE_CONTROLLER_H_
 
-#include "stdint.h"
-#include "application_manager/request_controller_settings.h"
-#include "application_manager/application_manager.h"
 #include "application_manager/application.h"
+#include "application_manager/application_manager.h"
+#include "application_manager/request_controller_settings.h"
+#include "stdint.h"
 
 namespace application_manager {
 class StateController {
  public:
+  /**
+   * @brief SetRegularState setup regular hmi state, that  will appear if
+   * no specific events are active
+   * @param app appication to setup regular State
+   * @param window_id id of applicaion's window to apply HMI state
+   * @param state state of new regular state
+   * @param request_hmi_state_change: if true, ActivateAppRequest or
+   * CloseApplication will be sent to HMI dependent on hmi level of resolved hmi
+   * state
+   */
   virtual void SetRegularState(ApplicationSharedPtr app,
+                               const WindowID window_id,
                                HmiStatePtr state,
-                               const bool SendActivateApp) = 0;
+                               const bool request_hmi_state_change) = 0;
 
+  /**
+   * @brief SetRegularState Change regular hmi level and audio state
+   * @param app appication to setup regular State
+   * @param window_id id of applicaion's window to apply HMI state
+   * @param hmi_level of new regular state
+   * @param audio_state of new regular state
+   * @paran video_state of new regular state
+   * @param request_hmi_state_change: if true, ActivateAppRequest or
+   * CloseApplication will be sent to HMI dependent on hmi level of resolved hmi
+   * state
+   */
   virtual void SetRegularState(
       ApplicationSharedPtr app,
+      const WindowID window_id,
       const mobile_apis::HMILevel::eType hmi_level,
       const mobile_apis::AudioStreamingState::eType audio_state,
       const mobile_apis::VideoStreamingState::eType video_state,
-      const bool SendActivateApp) = 0;
+      const bool request_hmi_state_change) = 0;
 
+  /**
+   * @brief SetRegularState Change regular hmi level
+   * @param app appication to setup regular State
+   * @param window_id id of applicaion's window to apply HMI state
+   * @param hmi_level of new regular state
+   * @param request_hmi_state_change: if true, ActivateAppRequest or
+   * CloseApplication will be sent to HMI dependent on hmi level of resolved hmi
+   * state
+   */
   virtual void SetRegularState(ApplicationSharedPtr app,
+                               const WindowID window_id,
                                const mobile_apis::HMILevel::eType hmi_level,
-                               const bool SendActivateApp) = 0;
+                               const bool request_hmi_state_change) = 0;
+  /**
+   * @brief SetRegularState Change regular hmi level, audio state and system
+   * context
+   * @param app appication to setup regular State
+   * @param window_id id of applicaion's window to apply HMI state
+   * @param hmi_level of new regular state
+   * @param audio_state of new regular state
+   * @param video_state of new regular state
+   * @param system_context of new regular state
+   * @param request_hmi_state_change: if true, ActivateAppRequest or
+   * CloseApplication will be sent to HMI dependent on hmi level of resolved hmi
+   * state
+   */
   virtual void SetRegularState(
       ApplicationSharedPtr app,
+      const WindowID window_id,
       const mobile_apis::HMILevel::eType hmi_level,
       const mobile_apis::AudioStreamingState::eType audio_state,
       const mobile_apis::VideoStreamingState::eType video_state,
       const mobile_apis::SystemContext::eType system_context,
-      const bool SendActivateApp) = 0;
+      const bool request_hmi_state_change) = 0;
 
+  /**
+   * @brief SetRegularState Sets regular state with new hmi level
+   * to application
+   * @param app appication to setup regular state
+   * @param window_id id of applicaion's window to apply HMI state
+   * @param hmi_level new hmi level for application
+   */
   virtual void SetRegularState(
       ApplicationSharedPtr app,
+      const WindowID window_id,
       const mobile_apis::HMILevel::eType hmi_level) = 0;
 
+  /**
+   * @brief SetRegularState Change regular audio state
+   * @param app appication to setup regular State
+   * @param window_id id of applicaion's window to apply HMI state
+   * @param audio_state of new regular state
+   * @param video_state of new regular state
+   */
   virtual void SetRegularState(
       ApplicationSharedPtr app,
+      const WindowID window_id,
       const mobile_apis::AudioStreamingState::eType audio_state,
       const mobile_apis::VideoStreamingState::eType video_state) = 0;
 
+  /**
+   * @brief SetRegularState Change regular  system context
+   * @param app appication to setup regular State
+   * @param window_id id of applicaion's window to apply HMI state
+   * @param system_context of new regular state
+   */
   virtual void SetRegularState(
       ApplicationSharedPtr app,
+      const WindowID window_id,
       const mobile_apis::SystemContext::eType system_context) = 0;
 
-  virtual void SetRegularState(ApplicationSharedPtr app, HmiStatePtr state) = 0;
+  /**
+   * @brief SetRegularState Sets new regular state to application
+   * @param app appication to setup regular state
+   * @param window_id id of applicaion's window to apply HMI state
+   * @param state new hmi state for application
+   */
+  virtual void SetRegularState(ApplicationSharedPtr app,
+                               const WindowID window_id,
+                               HmiStatePtr state) = 0;
 
+  /**
+   * @brief Sets default application state and apply currently active HMI states
+   * on application registration
+   * @param app application to apply states
+   * @param default_level default HMI level
+   */
   virtual void OnApplicationRegistered(
       ApplicationSharedPtr app,
       const mobile_apis::HMILevel::eType default_level) = 0;
 
-  virtual int64_t SendBCActivateApp(ApplicationConstSharedPtr app,
-                                    hmi_apis::Common_HMILevel::eType level,
-                                    bool send_policy_priority) = 0;
+  /**
+   * @brief OnAppWidgetAdded Sets default state for widget and apply currently
+   * active HMI states
+   * @param app application to apply states
+   * @param window_id id of window to add
+   * @param default_level default HMI level
+   */
+  virtual void OnAppWindowAdded(
+      ApplicationSharedPtr app,
+      const WindowID window_id,
+      const mobile_apis::WindowType::eType window_type,
+      const mobile_apis::HMILevel::eType default_level) = 0;
+
   /**
    * @brief OnVideoStreamingStarted process video streaming started
    * @param app projection or navigation application starting streaming
@@ -96,12 +190,41 @@ class StateController {
    * @param app projection or navigation application stopping streaming
    */
   virtual void OnVideoStreamingStopped(ApplicationConstSharedPtr app) = 0;
+
+  /**
+   * @brief OnStateChanged send HMIStatusNotification if needed
+   * @param app application
+   * @param window_id id of applicaion's window to apply HMI state
+   * @param old_state state before change
+   * @param new_state state after change
+   */
   virtual void OnStateChanged(ApplicationSharedPtr app,
+                              const WindowID window_id,
                               HmiStatePtr old_state,
                               HmiStatePtr new_state) = 0;
 
+  /**
+   * @brief Checks activity of Deactivate HMI state.
+   * @return Returns TRUE if deactivate HMI state is active, otherwise returns
+   * FALSE.
+   */
   virtual bool IsStateActive(HmiState::StateID state_id) const = 0;
+
+  /**
+   * @brief ActivateDefaultWindow performs set of actions required for a proper
+   * application activation (i.e. main window activation)
+   * @param app pointer to application to be activated
+   */
+  virtual void ActivateDefaultWindow(ApplicationSharedPtr app) = 0;
+
+  /**
+   * @brief ExitDefaultWindow performs set of action required for a proper
+   * application exiting (i.e. main window exit)
+   * @param app pointer to application to be exited
+   */
+  virtual void ExitDefaultWindow(ApplicationSharedPtr app) = 0;
 };
+
 }  // namespace application_manager
 
 #endif  // SRC_COMPONENTS_INCLUDE_APPLICATION_MANAGER_STATE_CONTROLLER_H_

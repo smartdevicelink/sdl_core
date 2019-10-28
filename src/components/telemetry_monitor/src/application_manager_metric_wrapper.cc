@@ -31,8 +31,8 @@
  */
 
 #include "telemetry_monitor/application_manager_metric_wrapper.h"
-#include "telemetry_monitor/json_keys.h"
 #include "application_manager/smart_object_keys.h"
+#include "telemetry_monitor/json_keys.h"
 #include "utils/convert_utils.h"
 
 namespace telemetry_monitor {

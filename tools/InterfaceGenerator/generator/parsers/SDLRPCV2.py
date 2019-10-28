@@ -8,6 +8,7 @@ import collections
 
 from generator import Model
 from generator.parsers import RPCBase
+import xml.etree.ElementTree as ET
 
 
 class Parser(RPCBase.Parser):
@@ -31,6 +32,7 @@ class Parser(RPCBase.Parser):
         As SDLRPCV2 has no predefined enums this implementation does nothing.
 
         """
+
         pass
 
     def _parse_function_id_type(self, function_name, attrib):

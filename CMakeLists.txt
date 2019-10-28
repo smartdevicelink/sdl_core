@@ -43,6 +43,7 @@ option(EXTENDED_MEDIA_MODE "Turn on and off extended Madia Manager features rela
 option(BUILD_SHARED_LIBS "Build all libraries as shared (if ON) or static (if OFF)" OFF)
 option(BUILD_BT_SUPPORT "Bluetooth support" ON)
 option(BUILD_USB_SUPPORT "libusb support" ON)
+option(BUILD_CLOUD_APP_SUPPORT "Cloud App Transport Support" ON)
 option(BUILD_BACKTRACE_SUPPORT "backtrace support" ON)
 option(BUILD_TESTS "Possibility to build and run tests" OFF)
 option(TELEMETRY_MONITOR "Enable profiling time test util" ON)
@@ -235,7 +236,8 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
 set(CMAKE_INSTALL_PREFIX ${CMAKE_CURRENT_BINARY_DIR})
 set(ARCHIVE_OUTPUT_DIRECTORY ./bin)
 
-set(CMAKE_CXX_FLAGS "-fPIC -std=gnu++0x -Wall -Werror -Wuninitialized -Wvla")
+set(EXCLUDE_ERROR_FLAGS "-Wno-error=unused-variable -Wno-error=unused-but-set-variable -Wno-error=deprecated-declarations")
+set(CMAKE_CXX_FLAGS "-fPIC -std=gnu++0x -Wall -fvisibility=hidden -Werror ${EXCLUDE_ERROR_FLAGS} -Wuninitialized -Wvla")
 
 if (USE_GOLD_LD)
   execute_process(COMMAND ld -v OUTPUT_VARIABLE result)
@@ -315,6 +317,11 @@ if (BUILD_BT_SUPPORT)
   message(STATUS "Bluetooth support enabled")
 endif()
 
+if (BUILD_CLOUD_APP_SUPPORT)
+  add_definitions(-DCLOUD_APP_WEBSOCKET_TRANSPORT_SUPPORT)
+  message(STATUS "Cloud app websocket support enabled")
+endif()
+
 if (BUILD_BACKTRACE_SUPPORT)
   add_definitions(-DBACKTRACE_SUPPORT)
   message(STATUS "Backtrace support enabled")
@@ -336,7 +343,9 @@ endif()
 if (${EXTENDED_POLICY} STREQUAL "EXTERNAL_PROPRIETARY")
     add_definitions(-DEXTERNAL_PROPRIETARY_MODE)
     set(POLICY_PATH ${COMPONENTS_DIR}/policy/policy_external/)
-    set(POLICY_GLOBAL_INCLUDE_PATH ${COMPONENTS_DIR}/include/policy/policy_external/)
+    set(POLICY_GLOBAL_INCLUDE_PATH
+      ${COMPONENTS_DIR}/include/policy/policy_external/
+      ${CMAKE_BINARY_DIR}/src/components/policy/policy_external/)
     set(POLICY_MOCK_INCLUDE_PATH ${COMPONENTS_DIR}/include/test/policy/policy_external/)
     message(STATUS "EXTERNAL_PROPRIETARY policy enabled")
 else()
@@ -347,7 +356,9 @@ else()
      message(STATUS "HTTP policy enabled")
    endif()
    set(POLICY_PATH ${COMPONENTS_DIR}/policy/policy_regular/)
-   set(POLICY_GLOBAL_INCLUDE_PATH ${COMPONENTS_DIR}/include/policy/policy_regular/)
+   set(POLICY_GLOBAL_INCLUDE_PATH
+    ${COMPONENTS_DIR}/include/policy/policy_regular/
+    ${CMAKE_BINARY_DIR}/src/components/policy/policy_regular/)
    set(POLICY_MOCK_INCLUDE_PATH ${COMPONENTS_DIR}/include/test/policy/policy_regular/)
 endif()
 

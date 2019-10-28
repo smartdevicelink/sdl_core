@@ -31,16 +31,22 @@
  */
 
 #include "sdl_rpc_plugin/sdl_rpc_plugin.h"
+#include "application_manager/plugin_manager/plugin_keys.h"
+#include "sdl_rpc_plugin/extensions/system_capability_app_extension.h"
 #include "sdl_rpc_plugin/sdl_command_factory.h"
 
 namespace sdl_rpc_plugin {
+namespace app_mngr = application_manager;
 namespace plugins = application_manager::plugin_manager;
 
-bool SDLRPCPlugin::Init(
-    application_manager::ApplicationManager& app_manager,
-    application_manager::rpc_service::RPCService& rpc_service,
-    application_manager::HMICapabilities& hmi_capabilities,
-    policy::PolicyHandlerInterface& policy_handler) {
+CREATE_LOGGERPTR_GLOBAL(logger_, "SdlRPCPlugin")
+
+bool SDLRPCPlugin::Init(app_mngr::ApplicationManager& app_manager,
+                        app_mngr::rpc_service::RPCService& rpc_service,
+                        app_mngr::HMICapabilities& hmi_capabilities,
+                        policy::PolicyHandlerInterface& policy_handler,
+                        resumption::LastState& last_state) {
+  UNUSED(last_state);
   command_factory_.reset(new sdl_rpc_plugin::SDLCommandFactory(
       app_manager, rpc_service, hmi_capabilities, policy_handler));
   return true;
@@ -48,28 +54,52 @@ bool SDLRPCPlugin::Init(
 
 bool SDLRPCPlugin::IsAbleToProcess(
     const int32_t function_id,
-    const application_manager::commands::Command::CommandSource
-        message_source) {
+    const app_mngr::commands::Command::CommandSource message_source) {
   return command_factory_->IsAbleToProcess(function_id, message_source);
 }
 
 std::string SDLRPCPlugin::PluginName() {
-  return "SDL RPC Plugin";
+  return plugins::plugin_names::sdl_rpc_plugin;
 }
 
-application_manager::CommandFactory& SDLRPCPlugin::GetCommandFactory() {
+app_mngr::CommandFactory& SDLRPCPlugin::GetCommandFactory() {
   return *command_factory_;
 }
 
-void SDLRPCPlugin::OnPolicyEvent(
-    application_manager::plugin_manager::PolicyEvent event) {}
+void SDLRPCPlugin::OnPolicyEvent(plugins::PolicyEvent event) {}
 
 void SDLRPCPlugin::OnApplicationEvent(
-    application_manager::plugin_manager::ApplicationEvent event,
-    application_manager::ApplicationSharedPtr application) {}
+    plugins::ApplicationEvent event,
+    app_mngr::ApplicationSharedPtr application) {
+  if (plugins::ApplicationEvent::kApplicationRegistered == event) {
+    auto sys_cap_ext_ptr =
+        std::make_shared<SystemCapabilityAppExtension>(*this, *application);
+    application->AddExtension(sys_cap_ext_ptr);
+    // Processing automatic subscription to SystemCapabilities for DISPLAY type
+    const auto capability_type =
+        mobile_apis::SystemCapabilityType::eType::DISPLAYS;
+    LOG4CXX_DEBUG(logger_, "Subscription to DISPLAYS capability is enabled");
+    sys_cap_ext_ptr->SubscribeTo(capability_type);
+  } else if (plugins::ApplicationEvent::kDeleteApplicationData == event) {
+    ClearSubscriptions(application);
+  }
+}
+
+void SDLRPCPlugin::ClearSubscriptions(app_mngr::ApplicationSharedPtr app) {
+  auto& ext = SystemCapabilityAppExtension::ExtractExtension(*app);
+  ext.UnsubscribeFromAll();
+}
 
 }  // namespace sdl_rpc_plugin
 
-extern "C" application_manager::plugin_manager::RPCPlugin* Create() {
+extern "C" __attribute__((visibility("default")))
+application_manager::plugin_manager::RPCPlugin*
+Create() {
   return new sdl_rpc_plugin::SDLRPCPlugin();
+}
+
+extern "C" __attribute__((visibility("default"))) void Delete(
+    application_manager::plugin_manager::RPCPlugin* data) {
+  delete data;
+  DELETE_THREAD_LOGGER(sdl_rpc_plugin::logger_);
 }

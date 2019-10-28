@@ -33,12 +33,19 @@
 #ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_PLUGIN_MANAGER_RPC_PLUGIN_H
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_PLUGIN_MANAGER_RPC_PLUGIN_H
 #include <memory>
-#include "utils/macro.h"
-#include "application_manager/commands/command.h"
 #include "application_manager/application.h"
-#include "application_manager/rpc_service.h"
+#include "application_manager/commands/command.h"
 #include "application_manager/hmi_capabilities.h"
-#include "application_manager/policies/policy_handler_interface.h"
+#include "application_manager/rpc_service.h"
+#include "utils/macro.h"
+
+namespace policy {
+class PolicyHandlerInterface;
+}
+
+namespace resumption {
+class LastState;
+}
 
 namespace application_manager {
 class CommandFactory;
@@ -57,7 +64,8 @@ enum ApplicationEvent {
   kApplicationExit = 0,
   kApplicationRegistered,
   kApplicationUnregistered,
-  kDeleteApplicationData
+  kDeleteApplicationData,
+  kGlobalPropertiesUpdated
 };
 
 class RPCPlugin {
@@ -68,17 +76,18 @@ class RPCPlugin {
   virtual ~RPCPlugin() {}
 
   /**
-    * @brief Command initialization function
-    * @param app_manager ApplicationManager
-    * @param rpc_service RPCService
-    * @param hmi_capabilities HMICapabilities
-    * @param policy_handler PolicyHandlerInterface
-    * @return true in case initialization was succesful, false otherwise.
-    **/
+   * @brief Command initialization function
+   * @param app_manager ApplicationManager
+   * @param rpc_service RPCService
+   * @param hmi_capabilities HMICapabilities
+   * @param policy_handler PolicyHandlerInterface
+   * @return true in case initialization was succesful, false otherwise.
+   **/
   virtual bool Init(ApplicationManager& app_manager,
                     rpc_service::RPCService& rpc_service,
                     HMICapabilities& hmi_capabilities,
-                    policy::PolicyHandlerInterface& policy_handler) = 0;
+                    policy::PolicyHandlerInterface& policy_handler,
+                    resumption::LastState& last_state) = 0;
   /**
    * @brief IsAbleToProcess check if plugin is able to process function
    * @param function_id RPC identifier
@@ -117,7 +126,6 @@ class RPCPlugin {
       ApplicationEvent event,
       application_manager::ApplicationSharedPtr application) = 0;
 };
-typedef std::unique_ptr<RPCPlugin> RPCPluginPtr;
 
 }  // namespace plugin_manager
 }  // namespace application_manager

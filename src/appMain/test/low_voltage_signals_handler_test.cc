@@ -1,49 +1,52 @@
 /*
-* Copyright (c) 2018, Ford Motor Company
-* All rights reserved.
-*
-* Redistribution and use in source and binary forms, with or without
-* modification, are permitted provided that the following conditions are met:
-*
-* Redistributions of source code must retain the above copyright notice, this
-* list of conditions and the following disclaimer.
-*
-* Redistributions in binary form must reproduce the above copyright notice,
-* this list of conditions and the following
-* disclaimer in the documentation and/or other materials provided with the
-* distribution.
-*
-* Neither the name of the Ford Motor Company nor the names of its contributors
-* may be used to endorse or promote products derived from this software
-* without specific prior written permission.
-*
-* THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
-* AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
-* IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
-* ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
-* LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
-* CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
-* SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
-* INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
-* CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
-* ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
-* POSSIBILITY OF SUCH DAMAGE.
-*/
+ * Copyright (c) 2018, Ford Motor Company
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *
+ * Redistributions of source code must retain the above copyright notice, this
+ * list of conditions and the following disclaimer.
+ *
+ * Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following
+ * disclaimer in the documentation and/or other materials provided with the
+ * distribution.
+ *
+ * Neither the name of the Ford Motor Company nor the names of its contributors
+ * may be used to endorse or promote products derived from this software
+ * without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
+ */
 
 #include "appMain/low_voltage_signals_handler.h"
 
 #include <memory>
-#include "gtest/gtest.h"
 #include "appMain/test/mock_life_cycle.h"
-#include "utils/mock_signals_posix.h"
-#include "config_profile/profile.h"
+#include "gtest/gtest.h"
 #include "utils/macro.h"
+#include "utils/mock_signals_posix.h"
 
 namespace test {
 
 using ::testing::_;
-using ::testing::Return;
 using ::testing::InSequence;
+using ::testing::Return;
+
+const int kLowVoltageSignalOffset = 1;
+const int kWakeUpSignalOffset = 2;
+const int kIgnitionOffSignalOffset = 3;
 
 class LowVoltageSignalsHandlerTest : public ::testing::Test {
  protected:
@@ -52,10 +55,8 @@ class LowVoltageSignalsHandlerTest : public ::testing::Test {
       , mock_signals_posix_(*utils::MockSignalsPosix::signals_posix_mock()) {}
 
   void SetUp() OVERRIDE {
-    profile_.set_config_file_name("smartDeviceLink.ini");
-    signals_offset_ = {profile_.low_voltage_signal_offset(),
-                       profile_.wake_up_signal_offset(),
-                       profile_.ignition_off_signal_offset()};
+    signals_offset_ = {
+        kLowVoltageSignalOffset, kWakeUpSignalOffset, kIgnitionOffSignalOffset};
 
     low_voltage_signals_handler_ =
         std::unique_ptr<main_namespace::LowVoltageSignalsHandler>(
@@ -63,7 +64,6 @@ class LowVoltageSignalsHandlerTest : public ::testing::Test {
                 *mock_life_cycle_.get(), signals_offset_));
   }
 
-  profile::Profile profile_;
   main_namespace::LowVoltageSignalsOffset signals_offset_;
   std::unique_ptr<main_namespace::LowVoltageSignalsHandler>
       low_voltage_signals_handler_;

@@ -38,9 +38,9 @@
 
 #include <list>
 
-#include "utils/lock.h"
 #include "transport_manager/transport_adapter/device_scanner.h"
 #include "transport_manager/usb/common.h"
+#include "utils/lock.h"
 
 namespace transport_manager {
 
@@ -48,7 +48,8 @@ namespace transport_adapter {
 
 class UsbDeviceScanner : public DeviceScanner, public UsbDeviceListener {
  public:
-  UsbDeviceScanner(class TransportAdapterController* controller);
+  UsbDeviceScanner(class TransportAdapterController* controller,
+                   const TransportManagerSettings& settings);
   virtual ~UsbDeviceScanner();
 
  protected:
@@ -65,13 +66,14 @@ class UsbDeviceScanner : public DeviceScanner, public UsbDeviceListener {
   void SupportedDeviceFound(PlatformUsbDevice* device);
 
   TransportAdapterController* controller_;
+  const TransportManagerSettings& settings_;
 
   typedef std::list<PlatformUsbDevice*> Devices;
   Devices devices_;
   sync_primitives::Lock devices_mutex_;
 };
 
-}  // namespace
-}  // namespace
+}  // namespace transport_adapter
+}  // namespace transport_manager
 
 #endif  // SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_USB_USB_DEVICE_SCANNER_H_

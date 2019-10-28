@@ -53,13 +53,13 @@ VehicleInfoAppExtension::~VehicleInfoAppExtension() {
 }
 
 bool VehicleInfoAppExtension::subscribeToVehicleInfo(
-    const VehicleDataType vehicle_data) {
+    const std::string& vehicle_data) {
   LOG4CXX_DEBUG(logger_, vehicle_data);
   return subscribed_data_.insert(vehicle_data).second;
 }
 
 bool VehicleInfoAppExtension::unsubscribeFromVehicleInfo(
-    const VehicleDataType vehicle_data) {
+    const std::string& vehicle_data) {
   LOG4CXX_DEBUG(logger_, vehicle_data);
   auto it = subscribed_data_.find(vehicle_data);
   if (it != subscribed_data_.end()) {
@@ -75,7 +75,7 @@ void VehicleInfoAppExtension::unsubscribeFromVehicleInfo() {
 }
 
 bool VehicleInfoAppExtension::isSubscribedToVehicleInfo(
-    const VehicleDataType vehicle_data) const {
+    const std::string& vehicle_data) const {
   LOG4CXX_DEBUG(logger_, vehicle_data);
   return subscribed_data_.find(vehicle_data) != subscribed_data_.end();
 }
@@ -91,7 +91,7 @@ void VehicleInfoAppExtension::SaveResumptionData(
       smart_objects::SmartObject(smart_objects::SmartType_Array);
   int i = 0;
   for (const auto& subscription : subscribed_data_) {
-    resumption_data[application_vehicle_info][i] = subscription;
+    resumption_data[application_vehicle_info][i++] = subscription;
   }
 }
 
@@ -99,13 +99,12 @@ void VehicleInfoAppExtension::ProcessResumption(
     const smart_objects::SmartObject& resumption_data) {
   const char* application_vehicle_info = "vehicleInfo";
   if (resumption_data.keyExists(application_vehicle_info)) {
-    const smart_objects::SmartObject& subscriptions_ivi =
-        resumption_data[application_vehicle_info];
-    for (size_t i = 0; i < subscriptions_ivi.length(); ++i) {
-      mobile_apis::VehicleDataType::eType ivi =
-          static_cast<mobile_apis::VehicleDataType::eType>(
-              (resumption_data[i]).asInt());
-      subscribeToVehicleInfo(ivi);
+    const auto* subscriptions_ivi =
+        resumption_data[application_vehicle_info].asArray();
+    if (subscriptions_ivi) {
+      for (const auto& ivi : (*subscriptions_ivi)) {
+        subscribeToVehicleInfo(ivi.asString());
+      }
     }
     plugin_.ProcessResumptionSubscription(app_, *this);
   }
@@ -122,4 +121,4 @@ VehicleInfoAppExtension& VehicleInfoAppExtension::ExtractVIExtension(
   DCHECK(vi_app_extension);
   return *vi_app_extension;
 }
-}
+}  // namespace vehicle_info_plugin

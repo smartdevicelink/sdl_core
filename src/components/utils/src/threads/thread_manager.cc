@@ -31,16 +31,16 @@
  */
 
 #include "utils/threads/thread_manager.h"
-#include "utils/threads/thread_delegate.h"
-#include "utils/lock.h"
 #include "utils/conditional_variable.h"
-#include "utils/threads/thread.h"
+#include "utils/lock.h"
 #include "utils/logger.h"
+#include "utils/threads/thread.h"
+#include "utils/threads/thread_delegate.h"
 
 #include <pthread.h>
 
-#include <sstream>
 #include <list>
+#include <sstream>
 
 #if defined(OS_LINUX)
 #include <sys/syscall.h>

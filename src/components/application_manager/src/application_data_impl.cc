@@ -173,19 +173,16 @@ InitialApplicationDataImpl::perform_interaction_layout() const {
 }
 
 DynamicApplicationDataImpl::DynamicApplicationDataImpl()
-    : help_prompt_(NULL)
-    , timeout_prompt_(NULL)
-    , vr_help_title_(NULL)
-    , vr_help_(NULL)
+    : help_prompt_(nullptr)
+    , timeout_prompt_(nullptr)
+    , vr_help_title_(nullptr)
+    , vr_help_(nullptr)
     , tbt_state_(mobile_api::TBTState::INVALID_ENUM)
-    , show_command_(NULL)
-    , keyboard_props_(NULL)
-    , menu_title_(NULL)
-    , menu_icon_(NULL)
-    , tbt_show_command_(NULL)
-    , day_color_scheme_(NULL)
-    , night_color_scheme_(NULL)
-    , display_layout_("")
+    , show_command_(nullptr)
+    , keyboard_props_(nullptr)
+    , menu_title_(nullptr)
+    , menu_icon_(nullptr)
+    , tbt_show_command_(nullptr)
     , commands_()
     , commands_lock_ptr_(std::make_shared<sync_primitives::RecursiveLock>())
     , sub_menu_()
@@ -195,9 +192,12 @@ DynamicApplicationDataImpl::DynamicApplicationDataImpl()
     , performinteraction_choice_set_map_()
     , performinteraction_choice_set_lock_ptr_(
           std::make_shared<sync_primitives::RecursiveLock>())
+    , window_params_map_()
+    , window_params_map_lock_ptr_(std::make_shared<sync_primitives::Lock>())
     , is_perform_interaction_active_(false)
     , is_reset_global_properties_active_(false)
-    , perform_interaction_mode_(-1) {}
+    , perform_interaction_mode_(-1)
+    , display_capabilities_builder_(*this) {}
 
 DynamicApplicationDataImpl::~DynamicApplicationDataImpl() {
   if (help_prompt_) {
@@ -230,16 +230,6 @@ DynamicApplicationDataImpl::~DynamicApplicationDataImpl() {
     tbt_show_command_ = NULL;
   }
 
-  if (day_color_scheme_) {
-    delete day_color_scheme_;
-    day_color_scheme_ = NULL;
-  }
-
-  if (night_color_scheme_) {
-    delete night_color_scheme_;
-    night_color_scheme_ = NULL;
-  }
-
   for (CommandsMap::iterator command_it = commands_.begin();
        commands_.end() != command_it;
        ++command_it) {
@@ -265,6 +255,8 @@ DynamicApplicationDataImpl::~DynamicApplicationDataImpl() {
     performinteraction_choice_set_map_[it->first].clear();
   }
   performinteraction_choice_set_map_.clear();
+
+  window_params_map_.clear();
 }
 
 const smart_objects::SmartObject* DynamicApplicationDataImpl::help_prompt()
@@ -316,18 +308,93 @@ const smart_objects::SmartObject* DynamicApplicationDataImpl::menu_icon()
   return menu_icon_;
 }
 
-const smart_objects::SmartObject* DynamicApplicationDataImpl::day_color_scheme()
+smart_objects::SmartObject DynamicApplicationDataImpl::day_color_scheme()
     const {
-  return day_color_scheme_;
+  using namespace mobile_apis::PredefinedWindows;
+  auto default_window_it = window_templates_.find(DEFAULT_WINDOW);
+
+  if (window_templates_.end() != default_window_it) {
+    const smart_objects::SmartObject template_config =
+        default_window_it->second;
+    if (template_config.keyExists(strings::day_color_scheme)) {
+      return template_config[strings::day_color_scheme];
+    }
+  }
+
+  return smart_objects::SmartObject(smart_objects::SmartType::SmartType_Null);
 }
 
-const smart_objects::SmartObject*
-DynamicApplicationDataImpl::night_color_scheme() const {
-  return night_color_scheme_;
+smart_objects::SmartObject DynamicApplicationDataImpl::night_color_scheme()
+    const {
+  using namespace mobile_apis::PredefinedWindows;
+  auto default_window_it = window_templates_.find(DEFAULT_WINDOW);
+
+  if (window_templates_.end() != default_window_it) {
+    const smart_objects::SmartObject template_config =
+        default_window_it->second;
+    if (template_config.keyExists(strings::night_color_scheme)) {
+      return template_config[strings::night_color_scheme];
+    }
+  }
+
+  return smart_objects::SmartObject(smart_objects::SmartType::SmartType_Null);
 }
 
-const std::string& DynamicApplicationDataImpl::display_layout() const {
-  return display_layout_;
+std::string DynamicApplicationDataImpl::display_layout() const {
+  using namespace mobile_apis::PredefinedWindows;
+  auto default_window_it = window_templates_.find(DEFAULT_WINDOW);
+
+  if (window_templates_.end() != default_window_it) {
+    smart_objects::SmartObject template_config = default_window_it->second;
+    if (template_config.keyExists(strings::template_layout)) {
+      return template_config[strings::template_layout].asString();
+    }
+  }
+
+  return std::string();
+}
+
+smart_objects::SmartObjectSPtr
+DynamicApplicationDataImpl::display_capabilities() const {
+  return display_capabilities_;
+}
+
+smart_objects::SmartObjectSPtr DynamicApplicationDataImpl::display_capabilities(
+    const WindowID window_id) const {
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  auto result_display_caps = std::make_shared<smart_objects::SmartObject>(
+      smart_objects::SmartType_Array);
+  const auto window_caps =
+      (*display_capabilities_)[0][strings::window_capabilities].asArray();
+  if (!window_caps) {
+    LOG4CXX_WARN(logger_, "Current window capabilities are empty");
+    // SDL still needs to retreive display capabilities
+    return display_capabilities_;
+  }
+  auto find_res =
+      std::find_if(window_caps->begin(),
+                   window_caps->end(),
+                   [&window_id](const smart_objects::SmartObject& element) {
+                     if (window_id == element[strings::window_id].asInt()) {
+                       return true;
+                     }
+
+                     return false;
+                   });
+
+  DCHECK(find_res != window_caps->end());
+  const auto disp_caps_keys = (*display_capabilities_)[0].enumerate();
+  for (const auto& key : disp_caps_keys) {
+    if (strings::window_capabilities == key) {
+      continue;
+    }
+    (*result_display_caps)[0][key] = (*display_capabilities_)[0][key];
+  }
+
+  (*result_display_caps)[0][strings::window_capabilities][0] = *find_res;
+
+  return result_display_caps;
 }
 
 void DynamicApplicationDataImpl::load_global_properties(
@@ -447,24 +514,198 @@ void DynamicApplicationDataImpl::set_menu_icon(
 
 void DynamicApplicationDataImpl::set_day_color_scheme(
     const smart_objects::SmartObject& color_scheme) {
-  if (day_color_scheme_) {
-    delete day_color_scheme_;
-  }
-
-  day_color_scheme_ = new smart_objects::SmartObject(color_scheme);
+  using namespace mobile_apis::PredefinedWindows;
+  DCHECK(color_scheme.getType() == smart_objects::SmartType_Map);
+  window_templates_[DEFAULT_WINDOW][strings::day_color_scheme] = color_scheme;
 }
 
 void DynamicApplicationDataImpl::set_night_color_scheme(
     const smart_objects::SmartObject& color_scheme) {
-  if (night_color_scheme_) {
-    delete night_color_scheme_;
-  }
-
-  night_color_scheme_ = new smart_objects::SmartObject(color_scheme);
+  using namespace mobile_apis::PredefinedWindows;
+  DCHECK(color_scheme.getType() == smart_objects::SmartType_Map);
+  window_templates_[DEFAULT_WINDOW][strings::night_color_scheme] = color_scheme;
 }
 
 void DynamicApplicationDataImpl::set_display_layout(const std::string& layout) {
-  display_layout_ = layout;
+  LOG4CXX_AUTO_TRACE(logger_);
+  using namespace mobile_apis::PredefinedWindows;
+  smart_objects::SmartObject template_config(smart_objects::SmartType_Map);
+  template_config[strings::template_layout] = layout;
+  window_templates_[DEFAULT_WINDOW] = template_config;
+}
+
+void DynamicApplicationDataImpl::set_display_capabilities(
+    const smart_objects::SmartObject& display_capabilities) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  const auto& incoming_window_capabilities =
+      display_capabilities[0][strings::window_capabilities];
+
+  smart_objects::SmartObject tmp_window_capabilities;
+  if (display_capabilities_) {
+    tmp_window_capabilities =
+        (*display_capabilities_)[0][strings::window_capabilities];
+  }
+
+  display_capabilities_.reset(
+      new smart_objects::SmartObject(display_capabilities));
+
+  auto has_window_id = [&tmp_window_capabilities](const WindowID window_id) {
+    const auto tmp_window_capabilities_arr = tmp_window_capabilities.asArray();
+    if (!tmp_window_capabilities_arr) {
+      return false;
+    }
+
+    for (auto element : *tmp_window_capabilities_arr) {
+      if (element.keyExists(strings::window_id)) {
+        if (window_id == element[strings::window_id].asInt())
+          return true;
+      } else if (window_id == 0) {
+        return true;
+      }
+    }
+
+    return false;
+  };
+
+  for (uint32_t i = 0; i < incoming_window_capabilities.length(); ++i) {
+    const auto window_id =
+        incoming_window_capabilities[i][strings::window_id].asInt();
+    if (!has_window_id(window_id)) {
+      tmp_window_capabilities[tmp_window_capabilities.length()] =
+          incoming_window_capabilities[i];
+    }
+  }
+
+  (*display_capabilities_)[0][strings::window_capabilities] =
+      tmp_window_capabilities;
+}
+
+void DynamicApplicationDataImpl::remove_window_capability(
+    const WindowID window_id) {
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  auto window_capabilities =
+      (*display_capabilities_)[0][strings::window_capabilities].asArray();
+  DCHECK_OR_RETURN_VOID(window_capabilities);
+
+  for (auto it = window_capabilities->begin(); it != window_capabilities->end();
+       ++it) {
+    const auto cur_window_id = (*it).keyExists(strings::window_id)
+                                   ? (*it)[strings::window_id].asInt()
+                                   : 0;
+    if (window_id == cur_window_id) {
+      window_capabilities->erase(it);
+      return;
+    }
+  }
+
+  LOG4CXX_WARN(
+      logger_,
+      "No window id " << window_id << " found in display capabilities");
+}
+
+bool DynamicApplicationDataImpl::menu_layout_supported(
+    const mobile_apis::MenuLayout::eType layout) const {
+  if (!display_capabilities_)
+    return false;
+
+  const auto tmp_window_capabilities_arr =
+      (*display_capabilities_)[0][strings::window_capabilities].asArray();
+
+  if (!tmp_window_capabilities_arr)
+    return false;
+
+  for (auto element : *tmp_window_capabilities_arr) {
+    if ((!element.keyExists(strings::window_id) ||
+         element[strings::window_id].asInt() == 0) &&
+        element.keyExists(strings::menu_layouts_available)) {
+      for (uint32_t i = 0;
+           i < element[strings::menu_layouts_available].length();
+           ++i) {
+        if (static_cast<mobile_apis::MenuLayout::eType>(
+                element[strings::menu_layouts_available][i].asUInt()) ==
+            layout) {
+          return true;
+        }
+      }
+    }
+  }
+
+  return false;
+}
+
+void DynamicApplicationDataImpl::set_window_layout(const WindowID window_id,
+                                                   const std::string& layout) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  smart_objects::SmartObject template_config(smart_objects::SmartType_Map);
+
+  template_config[strings::template_layout] = layout;
+  window_templates_[window_id] = template_config;
+}
+
+void DynamicApplicationDataImpl::set_day_color_scheme(
+    const WindowID window_id, const smart_objects::SmartObject& color_scheme) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  DCHECK(color_scheme.getType() == smart_objects::SmartType_Map);
+  window_templates_[window_id][strings::day_color_scheme] = color_scheme;
+}
+
+void DynamicApplicationDataImpl::set_night_color_scheme(
+    const WindowID window_id, const smart_objects::SmartObject& color_scheme) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  DCHECK(color_scheme.getType() == smart_objects::SmartType_Map);
+  window_templates_[window_id][strings::night_color_scheme] = color_scheme;
+}
+
+std::string DynamicApplicationDataImpl::window_layout(
+    const WindowID window_id) const {
+  LOG4CXX_AUTO_TRACE(logger_);
+  AppWindowsTemplates::const_iterator window_template_it =
+      window_templates_.find(window_id);
+
+  if (window_templates_.end() != window_template_it) {
+    const smart_objects::SmartObject template_config =
+        window_template_it->second;
+    if (template_config.keyExists(strings::template_layout)) {
+      return template_config[strings::template_layout].asString();
+    }
+  }
+
+  return std::string();
+}
+
+smart_objects::SmartObject DynamicApplicationDataImpl::day_color_scheme(
+    const WindowID window_id) const {
+  LOG4CXX_AUTO_TRACE(logger_);
+  AppWindowsTemplates::const_iterator window_template_it =
+      window_templates_.find(window_id);
+
+  if (window_templates_.end() != window_template_it) {
+    const smart_objects::SmartObject template_config =
+        window_template_it->second;
+    if (template_config.keyExists(strings::day_color_scheme)) {
+      return template_config[strings::day_color_scheme];
+    }
+  }
+
+  return smart_objects::SmartObject(smart_objects::SmartType::SmartType_Null);
+}
+
+smart_objects::SmartObject DynamicApplicationDataImpl::night_color_scheme(
+    const WindowID window_id) const {
+  LOG4CXX_AUTO_TRACE(logger_);
+  AppWindowsTemplates::const_iterator window_template_it =
+      window_templates_.find(window_id);
+
+  if (window_templates_.end() != window_template_it) {
+    const smart_objects::SmartObject template_config =
+        window_template_it->second;
+    if (template_config.keyExists(strings::night_color_scheme)) {
+      return template_config[strings::night_color_scheme];
+    }
+  }
+
+  return smart_objects::SmartObject(smart_objects::SmartType::SmartType_Null);
 }
 
 void DynamicApplicationDataImpl::SetGlobalProperties(
@@ -553,6 +794,33 @@ bool DynamicApplicationDataImpl::IsSubMenuNameAlreadyExist(
     }
   }
   return false;
+}
+
+DataAccessor<WindowParamsMap>
+DynamicApplicationDataImpl::window_optional_params_map() const {
+  return DataAccessor<WindowParamsMap>(window_params_map_,
+                                       window_params_map_lock_ptr_);
+}
+
+void DynamicApplicationDataImpl::SetWindowInfo(
+    const WindowID window_id, const smart_objects::SmartObject& window_info) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  const auto it = window_params_map_.find(window_id);
+  if (window_params_map_.end() == it) {
+    window_params_map_[window_id] =
+        std::make_shared<smart_objects::SmartObject>(window_info);
+  }
+}
+
+DisplayCapabilitiesBuilder&
+DynamicApplicationDataImpl::display_capabilities_builder() {
+  LOG4CXX_AUTO_TRACE(logger_);
+  return display_capabilities_builder_;
+}
+
+void DynamicApplicationDataImpl::RemoveWindowInfo(const WindowID window_id) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  window_params_map_.erase(window_id);
 }
 
 void DynamicApplicationDataImpl::AddChoiceSet(

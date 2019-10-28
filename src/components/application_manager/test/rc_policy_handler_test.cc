@@ -30,34 +30,34 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <fstream>
 #include <string>
 #include <vector>
-#include <fstream>
 #include "gmock/gmock.h"
 
-#include "application_manager/policies/policy_handler.h"
-#include "application_manager/policies/delegates/app_permission_delegate.h"
-#include "policy/mock_cache_manager.h"
 #include "application_manager/mock_message_helper.h"
+#include "application_manager/policies/delegates/app_permission_delegate.h"
+#include "application_manager/policies/policy_handler.h"
 #include "connection_handler/mock_connection_handler_settings.h"
-#include "policy/policy_types.h"
-#include "policy/access_remote.h"
 #include "json/reader.h"
-#include "json/writer.h"
 #include "json/value.h"
+#include "json/writer.h"
+#include "policy/access_remote.h"
+#include "policy/mock_cache_manager.h"
+#include "policy/policy_types.h"
 #include "smart_objects/smart_object.h"
 
-#include "utils/custom_string.h"
-#include "interfaces/MOBILE_API.h"
-#include "policy/mock_policy_settings.h"
 #include "application_manager/mock_application.h"
+#include "application_manager/mock_application_manager.h"
+#include "application_manager/mock_event_dispatcher.h"
+#include "application_manager/policies/mock_policy_handler_observer.h"
+#include "connection_handler/mock_connection_handler.h"
+#include "interfaces/MOBILE_API.h"
+#include "policy/mock_policy_manager.h"
+#include "policy/mock_policy_settings.h"
 #include "policy/usage_statistics/mock_statistics_manager.h"
 #include "protocol_handler/mock_session_observer.h"
-#include "connection_handler/mock_connection_handler.h"
-#include "application_manager/mock_application_manager.h"
-#include "application_manager/policies/mock_policy_handler_observer.h"
-#include "application_manager/mock_event_dispatcher.h"
-#include "policy/mock_policy_manager.h"
+#include "utils/custom_string.h"
 
 namespace test {
 namespace components {

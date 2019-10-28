@@ -36,21 +36,21 @@
 
 #include "gmock/gmock.h"
 
-#include "smart_objects/smart_object.h"
-#include "smart_objects/smart_schema.h"
-#include "smart_objects/schema_item.h"
-#include "formatters/CFormatterJsonSDLRPCv2.h"
 #include "formatters/CFormatterJsonSDLRPCv1.h"
+#include "formatters/CFormatterJsonSDLRPCv2.h"
 #include "smart_objects/array_schema_item.h"
 #include "smart_objects/bool_schema_item.h"
-#include "smart_objects/object_schema_item.h"
-#include "smart_objects/string_schema_item.h"
 #include "smart_objects/enum_schema_item.h"
 #include "smart_objects/number_schema_item.h"
+#include "smart_objects/object_schema_item.h"
+#include "smart_objects/schema_item.h"
 #include "smart_objects/schema_item_parameter.h"
+#include "smart_objects/smart_object.h"
+#include "smart_objects/smart_schema.h"
+#include "smart_objects/string_schema_item.h"
 
-#include <string>
 #include <time.h>
+#include <string>
 
 namespace test {
 namespace components {
@@ -252,21 +252,20 @@ class SmartObjectConvertionTimeTest : public ::testing::Test {
         TEnumSchemaItem<MessageTypeTest::eType>::create(
             messageType_allowedEnumSubsetValues);
 
-    CObjectSchemaItem::Members paramsMembersMap;
+    Members paramsMembersMap;
     paramsMembersMap
         [ns_smart_device_link::ns_json_handler::strings::S_FUNCTION_ID] =
-            CObjectSchemaItem::SMember(functionId_SchemaItem, true);
+            SMember(functionId_SchemaItem, true);
     paramsMembersMap
         [ns_smart_device_link::ns_json_handler::strings::S_MESSAGE_TYPE] =
-            CObjectSchemaItem::SMember(messageType_SchemaItem, true);
+            SMember(messageType_SchemaItem, true);
     paramsMembersMap
         [ns_smart_device_link::ns_json_handler::strings::S_CORRELATION_ID] =
-            CObjectSchemaItem::SMember(TNumberSchemaItem<int>::create(), true);
+            SMember(TNumberSchemaItem<int>::create(), true);
 
-    std::map<std::string, CObjectSchemaItem::SMember> rootMembersMap;
+    std::map<std::string, SMember> rootMembersMap;
     rootMembersMap[ns_smart_device_link::ns_json_handler::strings::S_PARAMS] =
-        CObjectSchemaItem::SMember(CObjectSchemaItem::create(paramsMembersMap),
-                                   true);
+        SMember(CObjectSchemaItem::create(paramsMembersMap), true);
 
     return CSmartSchema(CObjectSchemaItem::create(rootMembersMap));
   }
@@ -318,51 +317,43 @@ class SmartObjectConvertionTimeTest : public ::testing::Test {
                                        TSchemaItemParameter<int>(2000000000),
                                        TSchemaItemParameter<int>());
 
-    std::map<std::string, CObjectSchemaItem::SMember> schemaMembersMap;
+    std::map<std::string, SMember> schemaMembersMap;
 
-    schemaMembersMap["success"] =
-        CObjectSchemaItem::SMember(success_SchemaItem, true);
-    schemaMembersMap["resultCode"] =
-        CObjectSchemaItem::SMember(resultCode_SchemaItem, true);
-    schemaMembersMap["info"] =
-        CObjectSchemaItem::SMember(info_SchemaItem, false);
-    schemaMembersMap["tryAgainTime"] =
-        CObjectSchemaItem::SMember(tryAgainTime_SchemaItem, true);
+    schemaMembersMap["success"] = SMember(success_SchemaItem, true);
+    schemaMembersMap["resultCode"] = SMember(resultCode_SchemaItem, true);
+    schemaMembersMap["info"] = SMember(info_SchemaItem, false);
+    schemaMembersMap["tryAgainTime"] = SMember(tryAgainTime_SchemaItem, true);
 
-    std::map<std::string, CObjectSchemaItem::SMember> paramsMembersMap;
+    std::map<std::string, SMember> paramsMembersMap;
     paramsMembersMap
         [ns_smart_device_link::ns_json_handler::strings::S_FUNCTION_ID] =
-            CObjectSchemaItem::SMember(
-                TEnumSchemaItem<FunctionIdTest::eType>::create(
-                    functionId_allowedEnumSubsetValues),
-                true);
+            SMember(TEnumSchemaItem<FunctionIdTest::eType>::create(
+                        functionId_allowedEnumSubsetValues),
+                    true);
     paramsMembersMap
         [ns_smart_device_link::ns_json_handler::strings::S_MESSAGE_TYPE] =
-            CObjectSchemaItem::SMember(
-                TEnumSchemaItem<MessageTypeTest::eType>::create(
-                    messageType_allowedEnumSubsetValues),
-                true);
+            SMember(TEnumSchemaItem<MessageTypeTest::eType>::create(
+                        messageType_allowedEnumSubsetValues),
+                    true);
     paramsMembersMap
         [ns_smart_device_link::ns_json_handler::strings::S_CORRELATION_ID] =
-            CObjectSchemaItem::SMember(TNumberSchemaItem<int>::create(), true);
+            SMember(TNumberSchemaItem<int>::create(), true);
     paramsMembersMap
         [ns_smart_device_link::ns_json_handler::strings::S_PROTOCOL_VERSION] =
-            CObjectSchemaItem::SMember(
+            SMember(
                 TNumberSchemaItem<int>::create(TSchemaItemParameter<int>(1),
                                                TSchemaItemParameter<int>(2)),
                 true);
     paramsMembersMap
         [ns_smart_device_link::ns_json_handler::strings::S_PROTOCOL_TYPE] =
-            CObjectSchemaItem::SMember(TNumberSchemaItem<int>::create(), true);
+            SMember(TNumberSchemaItem<int>::create(), true);
 
-    std::map<std::string, CObjectSchemaItem::SMember> rootMembersMap;
+    std::map<std::string, SMember> rootMembersMap;
     rootMembersMap
         [ns_smart_device_link::ns_json_handler::strings::S_MSG_PARAMS] =
-            CObjectSchemaItem::SMember(
-                CObjectSchemaItem::create(schemaMembersMap), true);
+            SMember(CObjectSchemaItem::create(schemaMembersMap), true);
     rootMembersMap[ns_smart_device_link::ns_json_handler::strings::S_PARAMS] =
-        CObjectSchemaItem::SMember(CObjectSchemaItem::create(paramsMembersMap),
-                                   true);
+        SMember(CObjectSchemaItem::create(paramsMembersMap), true);
     return CSmartSchema(CObjectSchemaItem::create(rootMembersMap));
   }
 };
@@ -783,5 +774,5 @@ const test::components::SmartObjects::SmartObjectConvertionTimeTest::
             MessageTypeTest::response,
         test::components::SmartObjects::SmartObjectConvertionTimeTest::
             MessageTypeTest::notification};
-}
-}
+}  // namespace ns_smart_objects
+}  // namespace ns_smart_device_link

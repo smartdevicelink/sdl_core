@@ -47,7 +47,7 @@ typedef mobile_apis::VehicleDataType::eType VehicleDataType;
 /**
  * @brief Defines set of vehicle info types
  */
-typedef std::set<mobile_apis::VehicleDataType::eType> VehicleInfoSubscriptions;
+typedef std::set<std::string> VehicleInfoSubscriptions;
 
 class VehicleInfoAppExtension : public app_mngr::AppExtension {
  public:
@@ -61,12 +61,12 @@ class VehicleInfoAppExtension : public app_mngr::AppExtension {
   virtual ~VehicleInfoAppExtension();
 
   /**
- * @brief subscribeToVehicleInfo add vehicle_data to list of subscriptions of
- * application extension
- * @param vehicle_data data to subscribe
- * @return true in case if subscription is successful
- */
-  bool subscribeToVehicleInfo(const VehicleDataType vehicle_data);
+   * @brief subscribeToVehicleInfo add vehicle_data to list of subscriptions of
+   * application extension
+   * @param vehicle_data data to subscribe
+   * @return true in case if subscription is successful
+   */
+  bool subscribeToVehicleInfo(const std::string& vehicle_data);
 
   /**
    * @brief unsubscribeFromVehicleInfo remove vehicle_data from list of
@@ -74,7 +74,7 @@ class VehicleInfoAppExtension : public app_mngr::AppExtension {
    * @param vehicle_data data to unsubscribe
    * @return true in case if unsubscription is successful
    */
-  bool unsubscribeFromVehicleInfo(const VehicleDataType vehicle_data);
+  bool unsubscribeFromVehicleInfo(const std::string& vehicle_data);
   /**
    * @brief unsubscribeFromVehicleInfo unsubscribe from all vehicle info data
    */
@@ -87,7 +87,7 @@ class VehicleInfoAppExtension : public app_mngr::AppExtension {
    * @return true if extension is subscribed this vehicle_data_type, otherwise
    * return false
    */
-  bool isSubscribedToVehicleInfo(const VehicleDataType vehicle_data_type) const;
+  bool isSubscribedToVehicleInfo(const std::string& vehicle_data_type) const;
 
   /**
    * @brief Subscriptions get list of subscriptions for application extension
@@ -130,6 +130,6 @@ class VehicleInfoAppExtension : public app_mngr::AppExtension {
   VehicleInfoPlugin& plugin_;
   app_mngr::Application& app_;
 };
-}
+}  // namespace vehicle_info_plugin
 
 #endif  // SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_VEHICLE_INFO_PLUGIN_INCLUDE_VEHICLE_INFO_PLUGIN_VEHICLE_INFO_APP_EXTENSION_H

@@ -31,10 +31,10 @@
  */
 
 #include "application_manager/policies/policy_event_observer.h"
-#include "application_manager/smart_object_keys.h"
 #include "application_manager/policies/policy_handler.h"
-#include "utils/date_time.h"
+#include "application_manager/smart_object_keys.h"
 #include "smart_objects/smart_object.h"
+#include "utils/date_time.h"
 
 namespace policy {
 using namespace application_manager;
@@ -54,6 +54,8 @@ void PolicyEventObserver::set_policy_handler(
   LOG4CXX_DEBUG(logger_, "Set policy handler " << policy_handler);
   policy_handler_ = policy_handler;
 }
+
+void PolicyEventObserver::on_event(const event_engine::MobileEvent& event) {}
 
 void PolicyEventObserver::on_event(const event_engine::Event& event) {
   sync_primitives::AutoLock auto_lock(policy_handler_lock_);

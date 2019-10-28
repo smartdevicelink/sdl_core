@@ -35,11 +35,11 @@
 
 #include "gtest/gtest.h"
 
-#include "smart_objects/smart_object.h"
 #include "application_manager/commands/commands_test.h"
+#include "application_manager/mock_event_dispatcher.h"
 #include "application_manager/mock_hmi_capabilities.h"
 #include "hmi/rc_is_ready_response.h"
-#include "application_manager/mock_event_dispatcher.h"
+#include "smart_objects/smart_object.h"
 
 namespace test {
 namespace components {

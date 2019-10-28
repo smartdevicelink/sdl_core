@@ -71,4 +71,4 @@ void MetricWrapper::Clear() {
 MetricWrapper::~MetricWrapper() {
   Clear();
 }
-}
+}  // namespace telemetry_monitor

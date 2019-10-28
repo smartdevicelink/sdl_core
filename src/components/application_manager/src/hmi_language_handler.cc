@@ -28,16 +28,16 @@
  * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
-*/
+ */
 
 #include "application_manager/hmi_language_handler.h"
 #include "application_manager/application_manager.h"
+#include "application_manager/hmi_capabilities.h"
 #include "application_manager/message_helper.h"
 #include "application_manager/rpc_service.h"
-#include "application_manager/hmi_capabilities.h"
-#include "utils/helpers.h"
 #include "resumption/last_state.h"
 #include "smart_objects/smart_object.h"
+#include "utils/helpers.h"
 
 static const std::string LanguagesKey = "Languages";
 static const std::string UIKey = "UI";
@@ -78,9 +78,9 @@ void HMILanguageHandler::set_language_for(
       LOG4CXX_WARN(logger_, "Unknown interface has been passed " << interface);
       return;
   }
-  LOG4CXX_DEBUG(logger_,
-                "Setting language " << language << " for interface "
-                                    << interface);
+  LOG4CXX_DEBUG(
+      logger_,
+      "Setting language " << language << " for interface " << interface);
   Json::Value& dictionary = last_state_->get_dictionary();
   dictionary[LanguagesKey][key] = language;
   return;
@@ -273,8 +273,9 @@ void HMILanguageHandler::VerifyWithPersistedLanguages() {
 
     LOG4CXX_INFO(logger_,
                  "Application with app_id "
-                     << app->app_id() << " will be unregistered because of "
-                                         "HMI language(s) mismatch.");
+                     << app->app_id()
+                     << " will be unregistered because of "
+                        "HMI language(s) mismatch.");
 
     CheckApplication(std::make_pair(app->app_id(), false));
   }
@@ -284,7 +285,7 @@ void HMILanguageHandler::VerifyWithPersistedLanguages() {
     LOG4CXX_DEBUG(logger_,
                   "No registered apps found. HMILanguageHandler unsubscribed "
                   "from all events.");
-    unsubscribe_from_all_events();
+    unsubscribe_from_all_hmi_events();
   }
 }
 
@@ -304,7 +305,7 @@ void HMILanguageHandler::HandleWrongLanguageApp(const Apps::value_type& app) {
     if (0 == apps_.size()) {
       LOG4CXX_DEBUG(logger_,
                     "HMILanguageHandler unsubscribed from all events.");
-      unsubscribe_from_all_events();
+      unsubscribe_from_all_hmi_events();
     }
   }
   SendOnLanguageChangeToMobile(app.first);

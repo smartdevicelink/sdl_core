@@ -72,6 +72,6 @@ class OnUICommandNotification : public app_mngr::commands::NotificationFromHMI {
 
 }  // namespace commands
 
-}  // namespace application_manager
+}  // namespace sdl_rpc_plugin
 
 #endif  // SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_HMI_ON_UI_COMMAND_NOTIFICATION_H_

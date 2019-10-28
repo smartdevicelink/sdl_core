@@ -29,12 +29,12 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "policy/usage_statistics/counter.h"
 #include "gtest/gtest.h"
 #include "policy/usage_statistics/mock_statistics_manager.h"
-#include "policy/usage_statistics/counter.h"
 
-using ::testing::StrictMock;
 using ::testing::InSequence;
+using ::testing::StrictMock;
 
 namespace test {
 namespace components {
@@ -179,6 +179,6 @@ TEST(
   // Act
   hmi_full_stopwatch.WriteTime();
 }
-}  // namespace usage_statistics
-}  // components
+}  // namespace usage_statistics_test
+}  // namespace components
 }  // namespace test

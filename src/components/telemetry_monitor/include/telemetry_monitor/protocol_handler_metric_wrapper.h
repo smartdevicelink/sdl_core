@@ -35,8 +35,8 @@
 
 #include <string>
 
-#include "telemetry_monitor/metric_wrapper.h"
 #include "protocol_handler_observer.h"
+#include "telemetry_monitor/metric_wrapper.h"
 
 namespace telemetry_monitor {
 

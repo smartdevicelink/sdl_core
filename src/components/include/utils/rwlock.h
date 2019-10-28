@@ -98,15 +98,15 @@ class RWLock {
   bool TryAcquireForReading();
 
   /**
-     * @brief Try to Acqure read-write lock for writing.
-     * Applies a write lock like AcquireForWriting(), with the exception that
+   * @brief Try to Acqure read-write lock for writing.
+   * Applies a write lock like AcquireForWriting(), with the exception that
    * the
-     * function fails if any thread currently holds rwlock (for reading or
+   * function fails if any thread currently holds rwlock (for reading or
    * writing)
-     * Invoke of TryAcquireForWriting will not block calling thread and returns
+   * Invoke of TryAcquireForWriting will not block calling thread and returns
    * "false"
-     * @returns true if lock was acquired and false if was not
-     */
+   * @returns true if lock was acquired and false if was not
+   */
   bool TryAcquireForWriting();
 
   /**
@@ -126,12 +126,12 @@ class RWLock {
   bool AcquireForWriting();
 
   /**
-     * @brief Release read-write lock.
-     * Releases a lock held on the read-write lock object.
-     * Results are undefined if the read-write lock rwlock
-     * is not held by the calling thread.
-     * @returns true if lock was released and false if was not
-     */
+   * @brief Release read-write lock.
+   * Releases a lock held on the read-write lock object.
+   * Results are undefined if the read-write lock rwlock
+   * is not held by the calling thread.
+   * @returns true if lock was released and false if was not
+   */
   bool Release();
 
  private:

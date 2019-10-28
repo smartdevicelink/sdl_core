@@ -30,8 +30,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "gmock/gmock.h"
 #include "utils/system.h"
+#include "gmock/gmock.h"
 
 namespace test {
 namespace components {

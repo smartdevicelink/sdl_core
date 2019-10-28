@@ -34,8 +34,8 @@
 #define SRC_COMPONENTS_TELEMETRY_MONITOR_INCLUDE_TELEMETRY_MONITOR_TRANSPORT_MANAGER_OBSERVER_H_
 
 #include "transport_manager/telemetry_observer.h"
-#include "utils/message_queue.h"
 #include "utils/date_time.h"
+#include "utils/message_queue.h"
 
 namespace telemetry_monitor {
 

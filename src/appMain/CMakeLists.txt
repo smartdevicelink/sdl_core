@@ -76,6 +76,7 @@ include_directories(
 # Create object library
 add_library("LowVoltageHandlerObjLibrary" OBJECT ${CMAKE_CURRENT_SOURCE_DIR}/low_voltage_signals_handler.cc
 )
+add_dependencies("LowVoltageHandlerObjLibrary" Boost)
 
 set (SOURCES
   ${CMAKE_CURRENT_SOURCE_DIR}/main.cc

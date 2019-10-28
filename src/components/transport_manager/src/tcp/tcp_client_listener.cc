@@ -33,35 +33,35 @@
 
 #include "transport_manager/tcp/tcp_client_listener.h"
 
-#include <memory.h>
-#include <signal.h>
+#include <arpa/inet.h>
 #include <errno.h>
 #include <fcntl.h>
-#include <arpa/inet.h>
-#include <unistd.h>
-#include <sys/types.h>
-#include <sys/select.h>
-#include <sys/sysctl.h>
-#include <sys/socket.h>
 #include <ifaddrs.h>
+#include <memory.h>
+#include <signal.h>
+#include <sys/select.h>
+#include <sys/socket.h>
+#include <sys/sysctl.h>
+#include <sys/types.h>
+#include <unistd.h>
 #ifdef __linux__
 #include <linux/tcp.h>
 #else  // __linux__
-#include <sys/time.h>
 #include <netinet/in.h>
 #include <netinet/tcp.h>
 #include <netinet/tcp_var.h>
+#include <sys/time.h>
 #endif  // __linux__
 
 #include <sstream>
 
 #include "utils/logger.h"
 
-#include "utils/threads/thread.h"
-#include "transport_manager/transport_adapter/transport_adapter_controller.h"
 #include "transport_manager/tcp/network_interface_listener_impl.h"
 #include "transport_manager/tcp/tcp_device.h"
 #include "transport_manager/tcp/tcp_socket_connection.h"
+#include "transport_manager/transport_adapter/transport_adapter_controller.h"
+#include "utils/threads/thread.h"
 
 namespace transport_manager {
 namespace transport_adapter {
@@ -374,17 +374,16 @@ TransportAdapter::Error TcpClientListener::StartListening() {
   return TransportAdapter::OK;
 }
 
-void TcpClientListener::ListeningThreadDelegate::exitThreadMain() {
-  parent_->StopLoop();
-}
+TransportAdapter::Error TcpClientListener::ResumeListening() {
+  LOG4CXX_AUTO_TRACE(logger_);
 
-void TcpClientListener::ListeningThreadDelegate::threadMain() {
-  parent_->Loop();
-}
+  interface_listener_->Init();
+  StartListeningThread();
+  started_ = true;
 
-TcpClientListener::ListeningThreadDelegate::ListeningThreadDelegate(
-    TcpClientListener* parent)
-    : parent_(parent) {}
+  LOG4CXX_INFO(logger_, "Tcp client listener was resumed successfully");
+  return TransportAdapter::OK;
+}
 
 TransportAdapter::Error TcpClientListener::StopListening() {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -398,9 +397,44 @@ TransportAdapter::Error TcpClientListener::StopListening() {
   StopListeningThread();
 
   started_ = false;
-  LOG4CXX_INFO(logger_, "Tcp client listener has stopped successfully");
+  LOG4CXX_INFO(logger_, "Tcp client listener was stopped successfully");
   return TransportAdapter::OK;
 }
+
+TransportAdapter::Error TcpClientListener::SuspendListening() {
+  LOG4CXX_AUTO_TRACE(logger_);
+  if (!started_) {
+    LOG4CXX_DEBUG(logger_, "TcpClientListener is not running now");
+    return TransportAdapter::BAD_STATE;
+  }
+
+  if (shutdown(socket_, SHUT_RDWR) != 0) {
+    LOG4CXX_WARN(logger_, "Socket was unable to be shutdowned");
+  }
+
+  if (close(socket_) != 0) {
+    LOG4CXX_ERROR_WITH_ERRNO(logger_, "Failed to close socket");
+  }
+
+  interface_listener_->Deinit();
+  StopListeningThread();
+  started_ = false;
+
+  LOG4CXX_INFO(logger_, "Tcp client listener was suspended");
+  return TransportAdapter::OK;
+}
+
+void TcpClientListener::ListeningThreadDelegate::exitThreadMain() {
+  parent_->StopLoop();
+}
+
+void TcpClientListener::ListeningThreadDelegate::threadMain() {
+  parent_->Loop();
+}
+
+TcpClientListener::ListeningThreadDelegate::ListeningThreadDelegate(
+    TcpClientListener* parent)
+    : parent_(parent) {}
 
 TransportAdapter::Error TcpClientListener::StartListeningThread() {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -455,9 +489,9 @@ void TcpClientListener::OnIPAddressUpdated(const std::string ipv4_addr,
     if (IsListeningOnSpecificInterface()) {
       if (!current_ip_address_.empty()) {
         // the server socket is running, terminate it
-        LOG4CXX_DEBUG(logger_,
-                      "Stopping current TCP server socket on "
-                          << designated_interface_);
+        LOG4CXX_DEBUG(
+            logger_,
+            "Stopping current TCP server socket on " << designated_interface_);
         StopOnNetworkInterface();
       }
       if (!ipv4_addr.empty()) {
@@ -525,9 +559,9 @@ bool TcpClientListener::StopOnNetworkInterface() {
       socket_ = -1;
     }
 
-    LOG4CXX_INFO(logger_,
-                 "TCP server socket on " << designated_interface_
-                                         << " stopped");
+    LOG4CXX_INFO(
+        logger_,
+        "TCP server socket on " << designated_interface_ << " stopped");
   }
   return true;
 }

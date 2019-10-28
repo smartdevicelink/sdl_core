@@ -93,7 +93,7 @@ class CodeGenerator(object):
         with codecs.open(os.path.join(destination_dir, header_file_name),
                          encoding="utf-8",
                          mode="w") as f_h:
-            f_h.write(self._h_file_tempalte.substitute(
+            f_h.write(self._h_file_template.substitute(
                 class_name=class_name,
                 guard=guard,
                 namespace_open=namespace_open,
@@ -131,7 +131,7 @@ class CodeGenerator(object):
         with codecs.open(os.path.join(destination_dir, header_file_name),
                          encoding="utf-8",
                          mode="w") as f_h:
-            f_h.write(self._hpp_schema_file_tempalte.substitute(
+            f_h.write(self._hpp_schema_file_template.substitute(
                 class_name=class_name,
                 guard=guard,
                 header_file_name=unicode("".join("{0}.h".format(class_name))),
@@ -156,6 +156,8 @@ class CodeGenerator(object):
                 pre_function_schemas=self._gen_pre_function_schemas(
                     interface.functions.values()),
                 function_schemas=self._gen_function_schemas(
+                    interface.functions.values()),
+                function_schemas_switch=self._gen_function_schema_switch(
                     interface.functions.values()),
                 init_function_impls=self._gen_function_impls(
                     interface.functions.values(),
@@ -449,6 +451,48 @@ class CodeGenerator(object):
         return u"".join([self._indent_code(
             self._gen_function_schema(x), 1)
             for x in functions])
+
+    def _gen_function_schema_switch(self, functions):
+        """Generate initialization code of each function for source file.
+
+        Generates function schema initialization code that should be used
+        in the source file.
+
+        Keyword arguments:
+        function -- function to generate method for.
+
+        Returns:
+        String with switch for functions initialization source code.
+
+        """
+
+        if functions is None:
+            raise GenerateError("Functions is None")
+
+        def function_id_switch(self, message_type, functions):
+            case_list = [self._function_id_case_template.substitute(
+                function_id=x.function_id.primary_name,
+                message_type=x.message_type.primary_name)
+            for x in functions if x.message_type.primary_name == message_type ]
+            case_list.append("default:\n  break;\n")
+            switch_function_id_cases =  self._indent_code(u"".join(case_list), 1)[:-1]
+
+            return self._indent_code(self._function_switch_template.substitute(
+                switchable="function_id",
+                cases=switch_function_id_cases
+            ), 1)[:-1]
+
+        message_type_case_list = [self._message_type_case_template.substitute(
+                message_type = message_type,
+                case_body = function_id_switch(self, message_type, functions)
+            ) for message_type in set([x.message_type.primary_name for x in functions])]
+        message_type_case_list.append("default:\n  break;\n")
+        message_type_cases = self._indent_code(u"".join(message_type_case_list), 1)[:-1]
+
+        return self._indent_code(self._function_switch_template.substitute(
+            switchable="message_type",
+            cases=message_type_cases
+        ), 1)[:-1]
 
     def _gen_function_schema(self, function):
         """Generate function initialization code for source file.
@@ -1361,7 +1405,7 @@ class CodeGenerator(object):
          u"Param": u"Struct member ",
          u"FunctionParam": u"Function parameter "})
 
-    _h_file_tempalte = string.Template(
+    _h_file_template = string.Template(
         u'''/**\n'''
         u''' * @file ${class_name}.h\n'''
         u''' * @brief Generated class ${class_name} header file.\n'''
@@ -1426,7 +1470,7 @@ class CodeGenerator(object):
         u'''#endif //$guard\n'''
         u'''\n\n''')
 
-    _hpp_schema_file_tempalte = string.Template(
+    _hpp_schema_file_template = string.Template(
         u'''/**\n'''
         u''' * @file ${class_name}.h\n'''
         u''' * @brief Generated class ${class_name} header file.\n'''
@@ -1488,6 +1532,7 @@ class CodeGenerator(object):
         u'''#include "formatters/CSmartFactory.h"\n'''
         u'''#include "smart_objects/smart_schema.h"\n'''
         u'''#include "smart_objects/schema_item.h"\n'''
+        u'''#include "smart_objects/object_schema_item.h"\n'''
         u'''#include "$header_file_name"\n'''
         u'''\n'''
         u'''$namespace_open'''
@@ -1512,7 +1557,7 @@ class CodeGenerator(object):
         u'''SmartSchemas\n'''
         u''' * in accordance with definitions from ${class_name}.xml file\n'''
         u''' */\n'''
-        u'''// Copyright (c) 2013, Ford Motor Company\n'''
+        u'''// Copyright (c) 2019, SmartDeviceLink Consortium, Inc.\n'''
         u'''// All rights reserved.\n'''
         u'''//\n'''
         u'''// Redistribution and use in source and binary forms, '''
@@ -1531,11 +1576,11 @@ class CodeGenerator(object):
         u'''provided with the\n'''
         u'''// distribution.\n'''
         u'''//\n'''
-        u'''// Neither the name of the Ford Motor Company nor the names '''
-        u'''of its contributors\n'''
-        u'''// may be used to endorse or promote products derived '''
-        u'''from this software\n'''
-        u'''// without specific prior written permission.\n'''
+        u'''// Neither the name of the SmartDeviceLink Consortium, Inc. nor the names '''
+        u'''of its\n'''
+        u'''// contributors may be used to endorse or promote products derived '''
+        u'''from this\n'''
+        u'''// software without specific prior written permission.\n'''
         u'''//\n'''
         u'''// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND '''
         u'''CONTRIBUTORS "AS IS"\n'''
@@ -1604,6 +1649,32 @@ class CodeGenerator(object):
         u'''CAlwaysFalseSchemaItem::create();\n'''
         u'''}\n'''
         u'''\n'''
+        u'''bool $namespace::$class_name::AddCustomMember(FunctionID::eType function_id,\n'''
+        u'''                                              messageType::eType message_type,\n'''
+        u'''                                              std::string member_key, ns_smart_device_link::ns_smart_objects::SMember member) {\n'''
+        u'''  using namespace ns_smart_device_link::ns_json_handler;\n'''
+        u'''  using namespace ns_smart_device_link::ns_smart_objects;\n'''
+        u'''  SmartSchemaKey<FunctionID::eType, messageType::eType> shema_key(function_id, message_type);\n'''
+        u'''  auto function_schema = functions_schemes_.find(shema_key);\n'''
+        u'''  if (functions_schemes_.end() == function_schema){\n'''
+        u'''    return false;\n'''
+        u'''  }\n'''
+        u'''\n'''
+        u'''  auto schema = function_schema->second.getSchemaItem();\n'''
+        u'''  auto msg_params_schema_item = schema->GetMemberSchemaItem(ns_smart_device_link::ns_json_handler::strings::S_MSG_PARAMS);\n'''
+        u'''  if (!msg_params_schema_item.is_initialized()){\n'''
+        u'''    return false;\n'''
+        u'''  }\n'''
+        u'''\n'''
+        u'''  msg_params_schema_item->mSchemaItem->AddMemberSchemaItem(member_key, member);\n'''
+        u'''  return true;\n'''
+        u'''}\n'''
+        u'''\n'''
+        u'''void $namespace::$class_name::ResetFunctionSchema(FunctionID::eType function_id,\n'''
+        u'''                         messageType::eType message_type) {\n'''
+        u'''  InitFunctionSchema(function_id, message_type);\n'''
+        u'''}\n'''
+        u'''\n'''
         u'''void $namespace::$class_name::InitStructSchemes(\n'''
         u'''    TStructsSchemaItems &struct_schema_items) {'''
         u'''$struct_schema_items'''
@@ -1615,6 +1686,19 @@ class CodeGenerator(object):
         u'''    const std::set<messageType::eType> &message_type_items) {\n'''
         u'''$pre_function_schemas'''
         u'''$function_schemas'''
+        u'''}\n'''
+        u'''\n'''
+        u'''void $namespace::$class_name::InitFunctionSchema(\n'''
+        u'''    const FunctionID::eType &function_id,\n'''
+        u'''    const messageType::eType &message_type) {\n'''
+        u'''\n'''
+        u'''  TStructsSchemaItems struct_schema_items;\n'''
+        u'''  InitStructSchemes(struct_schema_items);\n'''
+        u'''\n'''
+        u'''  std::set<FunctionID::eType> function_id_items { function_id };\n'''
+        u'''  std::set<messageType::eType> message_type_items { message_type };\n'''
+        u'''\n'''
+        u'''$function_schemas_switch'''
         u'''}\n'''
         u'''\n'''
         u'''//------------- Functions schemes initialization -------------\n'''
@@ -1668,6 +1752,26 @@ class CodeGenerator(object):
         u'''};\n'''
         u'''\n''')
 
+    _function_switch_template = string.Template(
+        u'''switch(${switchable}) {\n'''
+        u'''${cases}'''
+        u'''}\n''')
+
+    _message_type_case_template = string.Template(
+        u'''case messageType::${message_type}: {\n'''
+        u'''${case_body}'''
+        u'''  break;\n'''
+        u'''}\n''')
+
+    _function_id_case_template = string.Template(
+        u'''case FunctionID::${function_id}: {\n'''
+        u'''  ns_smart_device_link::ns_json_handler::SmartSchemaKey<FunctionID::eType, messageType::eType> shema_key(function_id, message_type);\n'''
+        u'''  functions_schemes_[shema_key] = '''
+        u'''InitFunction_${function_id}_${message_type}('''
+        u'''struct_schema_items, function_id_items, message_type_items);\n'''
+        u'''  break;\n'''
+        u'''}\n''')
+
     _struct_schema_item_template = string.Template(
         u'''std::shared_ptr<ISchemaItem> struct_schema_item_${name} = '''
         u'''InitStructSchemaItem_${name}(struct_schema_items);\n'''
@@ -1695,7 +1799,7 @@ class CodeGenerator(object):
     _struct_impl_code_tempate = string.Template(
         u'''${schema_loc_decl}'''
         u'''${schema_items_decl}'''
-        u'''CObjectSchemaItem::Members '''
+        u'''Members '''
         u'''schema_members;\n\n'''
         u'''${schema_item_fill}'''
         u'''return CObjectSchemaItem::create(schema_members);''')
@@ -1724,10 +1828,10 @@ class CodeGenerator(object):
         u'''std::shared_ptr<ISchemaItem> ${var_name} = ${item_decl};''')
 
     _impl_code_shared_ptr_vector_template = string.Template(
-        u'''std::vector<CObjectSchemaItem::SMember> ${var_name}_history_vector;''')
+        u'''std::vector<SMember> ${var_name}_history_vector;''')
 
     _impl_code_append_history_vector_template = string.Template(
-        u'''${vector_name}_history_vector.push_back(CObjectSchemaItem::SMember(${name}_SchemaItem, ${mandatory}, "${since}", "${until}", ${deprecated}, ${removed}));''')
+        u'''${vector_name}_history_vector.push_back(SMember(${name}_SchemaItem, ${mandatory}, "${since}", "${until}", ${deprecated}, ${removed}));''')
 
     _impl_code_integer_item_template = string.Template(
         u'''TNumberSchemaItem<${type}>::create(${params})''')
@@ -1755,16 +1859,13 @@ class CodeGenerator(object):
         u'''TSchemaItemParameter<$type>($value)''')
 
     _impl_code_item_fill_template = string.Template(
-        u'''schema_members["${name}"] = CObjectSchemaItem::'''
-        u'''SMember(${var_name}, ${is_mandatory});''')
+        u'''schema_members["${name}"] = SMember(${var_name}, ${is_mandatory});''')
 
     _impl_code_item_fill_template_with_version = string.Template(
-        u'''schema_members["${name}"] = CObjectSchemaItem::'''
-        u'''SMember(${var_name}, ${is_mandatory}, "${since}", "${until}", ${deprecated}, ${removed});''')
+        u'''schema_members["${name}"] = SMember(${var_name}, ${is_mandatory}, "${since}", "${until}", ${deprecated}, ${removed});''')
 
     _impl_code_item_fill_template_with_version_and_history_vector = string.Template(
-        u'''schema_members["${name}"] = CObjectSchemaItem::'''
-        u'''SMember(${var_name}, ${is_mandatory}, "${since}", "${until}", ${deprecated}, ${removed}, ${vector_name}_history_vector);''')
+        u'''schema_members["${name}"] = SMember(${var_name}, ${is_mandatory}, "${since}", "${until}", ${deprecated}, ${removed}, ${vector_name}_history_vector);''')
 
     _function_impl_template = string.Template(
         u'''CSmartSchema $namespace::$class_name::'''
@@ -1778,22 +1879,22 @@ class CodeGenerator(object):
     _function_impl_code_tempate = string.Template(
         u'''${schema_loc_decl}'''
         u'''${schema_items_decl}'''
-        u'''CObjectSchemaItem::Members '''
+        u'''Members '''
         u'''schema_members;\n\n'''
         u'''${schema_item_fill}'''
-        u'''CObjectSchemaItem::Members '''
+        u'''Members '''
         u'''params_members;\n'''
         u'''${schema_params_fill}'''
         u'''\n'''
-        u'''CObjectSchemaItem::Members '''
+        u'''Members '''
         u'''root_members_map;\n'''
         u'''root_members_map[ns_smart_device_link::ns_json_handler::'''
         u'''strings::S_MSG_PARAMS] = '''
-        u'''CObjectSchemaItem::SMember(CObjectSchemaItem::'''
+        u'''SMember(CObjectSchemaItem::'''
         u'''create(schema_members), true);\n'''
         u'''root_members_map[ns_smart_device_link::ns_json_handler::'''
         u'''strings::S_PARAMS] = '''
-        u'''CObjectSchemaItem::SMember(CObjectSchemaItem::'''
+        u'''SMember(CObjectSchemaItem::'''
         u'''create(params_members), true);\n\n'''
         u'''return CSmartSchema(CObjectSchemaItem::'''
         u'''create(root_members_map));''')
@@ -1809,7 +1910,19 @@ class CodeGenerator(object):
         u'''   */\n'''
         u'''  $class_name();\n'''
         u'''\n'''
-        u''' protected:\n'''
+        u'''  /**\n'''
+        u'''   * @brief Adds custom members to existing list of params.\n'''
+        u'''   */\n'''
+        u'''  bool AddCustomMember(FunctionID::eType function_id,\n'''
+        u'''                       messageType::eType message_type,\n'''
+        u'''                       std::string member_key, ns_smart_device_link::ns_smart_objects::SMember member);\n'''
+        u'''\n'''
+        u'''  /**\n'''
+        u'''   * @brief Reset function schema to state defined in API.\n'''
+        u'''   */\n'''
+        u'''  void ResetFunctionSchema(FunctionID::eType function_id,\n'''
+        u'''                           messageType::eType message_type);\n'''
+        u'''\n'''
         u'''  /**\n'''
         u'''   * @brief Type that maps of struct IDs to schema items.\n'''
         u'''   */\n'''
@@ -1817,6 +1930,7 @@ class CodeGenerator(object):
         u'''std::shared_ptr<ns_smart_device_link::ns_smart_objects::'''
         u'''ISchemaItem> > TStructsSchemaItems;\n'''
         u'''\n'''
+        u''' protected:\n'''
         u'''  /**\n'''
         u'''   * @brief Helper that allows to make reference to struct\n'''
         u'''   *\n'''
@@ -1852,8 +1966,19 @@ class CodeGenerator(object):
         u'''      const std::set<messageType::eType> '''
         u'''&message_type_items);\n'''
         u'''\n'''
+        u'''  /**\n'''
+        u'''   * @brief Initializes single function schema.\n'''
+        u'''   *\n'''
+        u'''   * @param function_id Function ID of schema to be initialized.\n'''
+        u'''   * @param message_type Message type of schema to be initialized.\n'''
+        u'''   */\n'''
+        u'''  void InitFunctionSchema(\n'''
+        u'''      const FunctionID::eType &function_id,\n'''
+        u'''      const messageType::eType &message_type);\n'''
+        u'''\n'''
         u'''$init_function_decls'''
         u'''\n'''
+        u''' public:\n'''
         u'''$init_struct_decls'''
         u'''};''')
 

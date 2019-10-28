@@ -30,16 +30,16 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "gtest/gtest.h"
 #include <sstream>
-#include "utils/macro.h"
 #include "application_manager/app_launch/app_launch_ctrl_impl.h"
 #include "application_manager/mock_app_launch_data.h"
 #include "application_manager/mock_app_launch_settings.h"
-#include "application_manager/mock_resume_ctrl.h"
 #include "application_manager/mock_application.h"
 #include "application_manager/mock_application_manager.h"
+#include "application_manager/mock_resume_ctrl.h"
 #include "connection_handler/mock_connection_handler.h"
+#include "gtest/gtest.h"
+#include "utils/macro.h"
 
 #include "utils/test_async_waiter.h"
 
@@ -47,14 +47,14 @@ namespace test {
 namespace components {
 namespace app_launch_test {
 
+using ::testing::AtLeast;
+using ::testing::DoAll;
+using ::testing::InSequence;
+using ::testing::Invoke;
+using ::testing::NiceMock;
 using ::testing::Return;
 using ::testing::ReturnRef;
 using ::testing::Truly;
-using ::testing::NiceMock;
-using ::testing::Invoke;
-using ::testing::AtLeast;
-using ::testing::InSequence;
-using ::testing::DoAll;
 
 namespace ch_test = test::components::connection_handler_test;
 namespace am_test = test::components::application_manager_test;

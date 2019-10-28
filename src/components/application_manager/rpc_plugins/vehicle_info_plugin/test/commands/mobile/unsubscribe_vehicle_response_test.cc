@@ -30,13 +30,15 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "mobile/unsubscribe_vehicle_data_response.h"
 #include <stdint.h>
 #include <string>
-#include "gtest/gtest.h"
-
-#include "application_manager/commands/commands_test.h"
 #include "application_manager/mock_application_manager.h"
+#include "gtest/gtest.h"
+#include "mobile/unsubscribe_vehicle_data_response.h"
+
+#include "vehicle_info_plugin/commands/vi_commands_test.h"
+#include "vehicle_info_plugin/mock_custom_vehicle_data_manager.h"
+#include "vehicle_info_plugin/vehicle_info_command_factory.h"
 
 namespace test {
 namespace components {
@@ -50,12 +52,12 @@ using ::testing::_;
 using ::testing::NotNull;
 using ::testing::Types;
 
-using vehicle_info_plugin::commands::UnsubscribeVehicleDataResponse;
 using commands::MessageSharedPtr;
+using vehicle_info_plugin::commands::UnsubscribeVehicleDataResponse;
 namespace am = ::application_manager;
 
 class UnsubscribeVehicleResponseTest
-    : public CommandsTest<CommandsTestMocks::kIsNice> {};
+    : public VICommandsTest<CommandsTestMocks::kIsNice> {};
 
 MATCHER_P(ResultCodeIs, result_code, "") {
   return result_code ==
@@ -70,7 +72,7 @@ TEST_F(UnsubscribeVehicleResponseTest,
   (*command_msg)[am::strings::msg_params][am::strings::success] = false;
 
   std::shared_ptr<UnsubscribeVehicleDataResponse> command =
-      CreateCommand<UnsubscribeVehicleDataResponse>(command_msg);
+      CreateCommandVI<UnsubscribeVehicleDataResponse>(command_msg);
 
   EXPECT_CALL(
       mock_rpc_service_,
@@ -84,7 +86,7 @@ TEST_F(UnsubscribeVehicleResponseTest,
       std::make_shared<SmartObject>(smart_objects::SmartType_Map);
   (*command_msg)[am::strings::msg_params][am::strings::success] = true;
   std::shared_ptr<UnsubscribeVehicleDataResponse> command =
-      CreateCommand<UnsubscribeVehicleDataResponse>(command_msg);
+      CreateCommandVI<UnsubscribeVehicleDataResponse>(command_msg);
 
   EXPECT_CALL(
       mock_rpc_service_,
@@ -102,7 +104,7 @@ TEST_F(UnsubscribeVehicleResponseTest,
   (*command_msg)[am::strings::msg_params][am::strings::result_code] =
       result_type;
   std::shared_ptr<UnsubscribeVehicleDataResponse> command =
-      CreateCommand<UnsubscribeVehicleDataResponse>(command_msg);
+      CreateCommandVI<UnsubscribeVehicleDataResponse>(command_msg);
 
   command->Run();
 }

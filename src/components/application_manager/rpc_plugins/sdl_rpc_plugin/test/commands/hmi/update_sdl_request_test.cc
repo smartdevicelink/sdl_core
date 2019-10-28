@@ -33,13 +33,13 @@
 #include <stdint.h>
 #include <string>
 
-#include "gtest/gtest.h"
-#include "smart_objects/smart_object.h"
-#include "application_manager/smart_object_keys.h"
-#include "application_manager/commands/commands_test.h"
 #include "application_manager/application.h"
+#include "application_manager/commands/commands_test.h"
 #include "application_manager/policies/mock_policy_handler_interface.h"
+#include "application_manager/smart_object_keys.h"
+#include "gtest/gtest.h"
 #include "hmi/update_sdl_request.h"
+#include "smart_objects/smart_object.h"
 
 namespace test {
 namespace components {
@@ -47,8 +47,8 @@ namespace commands_test {
 namespace hmi_commands_test {
 namespace update_sdl_request {
 
-using ::testing::ReturnRef;
 using ::testing::NiceMock;
+using ::testing::ReturnRef;
 namespace am = ::application_manager;
 namespace strings = ::application_manager::strings;
 using sdl_rpc_plugin::commands::UpdateSDLRequest;

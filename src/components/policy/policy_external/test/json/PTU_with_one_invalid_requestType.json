@@ -1605,6 +1605,7 @@
                      "headLampStatus",
                      "instantFuelConsumption",
                      "fuelRange",
+                     "cloudAppVehicleID",
                      "odometer",
                      "tirePressure",
                      "vin",
@@ -1623,6 +1624,7 @@
                      "headLampStatus",
                      "instantFuelConsumption",
                      "fuelRange",
+                     "cloudAppVehicleID",
                      "odometer",
                      "tirePressure",
                      "vin",
@@ -1641,6 +1643,7 @@
                      "headLampStatus",
                      "instantFuelConsumption",
                      "fuelRange",
+                     "cloudAppVehicleID",
                      "odometer",
                      "tirePressure",
                      "wiperStatus"
@@ -1658,6 +1661,7 @@
                      "headLampStatus",
                      "instantFuelConsumption",
                      "fuelRange",
+                     "cloudAppVehicleID",
                      "odometer",
                      "tirePressure",
                      "wiperStatus"

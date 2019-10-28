@@ -31,8 +31,8 @@
  */
 #include "utils/threads/thread_validator.h"
 
-#include "utils/logger.h"
 #include "utils/back_trace.h"
+#include "utils/logger.h"
 
 namespace threads {
 
@@ -46,14 +46,15 @@ SingleThreadSimpleValidator::~SingleThreadSimpleValidator() {}
 void SingleThreadSimpleValidator::AssertRunningOnCreationThread() const {
   PlatformThreadHandle current_id = Thread::CurrentId();
   if (creation_thread_id_ != current_id) {
-    LOG4CXX_ERROR(logger_,
-                  "Single-threaded object created at thread "
-                      << creation_thread_id_ << " is accessed from thread "
-                      << current_id
+    LOG4CXX_ERROR(
+        logger_,
+        "Single-threaded object created at thread "
+            << creation_thread_id_ << " is accessed from thread " << current_id
 #ifdef BACKTRACE_SUPPORT
-                      << "\n" << utils::Backtrace()
+            << "\n"
+            << utils::Backtrace()
 #endif
-                      );
+    );
   }
 }
 
@@ -80,7 +81,7 @@ void SingleThreadValidator::AssertRunningOnValidThread() const {
 #ifdef BACKTRACE_SUPPORT
                       << utils::Backtrace()
 #endif
-                      );
+    );
   }
 }
 

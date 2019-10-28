@@ -34,6 +34,7 @@
 #define SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_VEHICLE_INFO_PLUGIN_INCLUDE_VEHICLE_INFO_PLUGIN_VEHICLE_INFO_PLUGIN_H
 
 #include "application_manager/command_factory.h"
+#include "vehicle_info_plugin/custom_vehicle_data_manager.h"
 
 namespace vehicle_info_plugin {
 class VehicleInfoAppExtension;
@@ -47,7 +48,8 @@ class VehicleInfoPlugin : public plugins::RPCPlugin {
   bool Init(app_mngr::ApplicationManager& application_manager,
             app_mngr::rpc_service::RPCService& rpc_service,
             app_mngr::HMICapabilities& hmi_capabilities,
-            policy::PolicyHandlerInterface& policy_handler) OVERRIDE;
+            policy::PolicyHandlerInterface& policy_handler,
+            resumption::LastState& last_state) OVERRIDE;
 
   bool IsAbleToProcess(
       const int32_t function_id,
@@ -70,13 +72,17 @@ class VehicleInfoPlugin : public plugins::RPCPlugin {
                                      VehicleInfoAppExtension& ext);
 
  private:
+  void UnsubscribeFromRemovedVDItems();
+  smart_objects::SmartObjectSPtr GetUnsubscribeIVIRequest(
+      const std::vector<std::string>& ivi_names);
   void DeleteSubscriptions(app_mngr::ApplicationSharedPtr app);
 
   std::unique_ptr<app_mngr::CommandFactory> command_factory_;
+  std::unique_ptr<CustomVehicleDataManager> custom_vehicle_data_manager_;
   app_mngr::ApplicationManager* application_manager_;
 };
-}
+}  // namespace vehicle_info_plugin
 
 extern "C" application_manager::plugin_manager::RPCPlugin* Create();
-
+extern "C" void Delete(application_manager::plugin_manager::RPCPlugin* data);
 #endif  // SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_VEHICLE_INFO_PLUGIN_INCLUDE_VEHICLE_INFO_PLUGIN_VEHICLE_INFO_PLUGIN_H
