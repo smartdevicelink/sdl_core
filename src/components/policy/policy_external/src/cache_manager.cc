@@ -2741,10 +2741,14 @@ bool CacheManager::LoadFromFile(const std::string& file_name,
 bool CacheManager::ResetPT(const std::string& file_name) {
   LOG4CXX_AUTO_TRACE(logger_);
   is_unpaired_.clear();
+
+  backuper_->WaitForBackupIsDone();
+
   if (!backup_->RefreshDB()) {
     LOG4CXX_ERROR(logger_, "Can't re-create policy database. Reset failed.");
     return false;
   }
+
   sync_primitives::AutoLock lock(cache_lock_);
   pt_.reset(new policy_table::Table());
   const bool result = LoadFromFile(file_name, *pt_);
@@ -3156,6 +3160,7 @@ void CacheManager::OnDeviceSwitching(const std::string& device_id_from,
 CacheManager::BackgroundBackuper::BackgroundBackuper(
     CacheManager* cache_manager)
     : cache_manager_(cache_manager)
+    , backup_is_in_progress_(false)
     , stop_flag_(false)
     , new_data_available_(false) {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -3180,13 +3185,23 @@ void CacheManager::BackgroundBackuper::threadMain() {
   LOG4CXX_AUTO_TRACE(logger_);
   sync_primitives::AutoLock lock(need_backup_lock_);
   while (!stop_flag_) {
+    backup_is_in_progress_.exchange(true);
     {
       sync_primitives::AutoUnlock need_backup_lock(need_backup_lock_);
       InternalBackup();
     }
+
+    {
+      LOG4CXX_DEBUG(logger_, "Backup is done");
+      sync_primitives::AutoLock auto_lock(backup_done_lock_);
+      backup_is_in_progress_.exchange(false);
+      backup_done_.Broadcast();
+    }
+
     if (new_data_available_ || stop_flag_) {
       continue;
     }
+
     LOG4CXX_DEBUG(logger_, "Wait for a next backup");
     backup_notifier_.Wait(need_backup_lock_);
   }
@@ -3204,6 +3219,14 @@ void CacheManager::BackgroundBackuper::DoBackup() {
   sync_primitives::AutoLock auto_lock(need_backup_lock_);
   new_data_available_ = true;
   backup_notifier_.NotifyOne();
+}
+
+void CacheManager::BackgroundBackuper::WaitForBackupIsDone() {
+  LOG4CXX_AUTO_TRACE(logger_);
+  sync_primitives::AutoLock auto_lock(backup_done_lock_);
+  if (backup_is_in_progress_) {
+    backup_done_.Wait(auto_lock);
+  }
 }
 
 EncryptionRequired CacheManager::GetAppEncryptionRequiredFlag(

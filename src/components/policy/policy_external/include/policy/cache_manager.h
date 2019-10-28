@@ -33,6 +33,7 @@
 #ifndef SRC_COMPONENTS_POLICY_POLICY_EXTERNAL_INCLUDE_POLICY_CACHE_MANAGER_H_
 #define SRC_COMPONENTS_POLICY_POLICY_EXTERNAL_INCLUDE_POLICY_CACHE_MANAGER_H_
 
+#include <atomic>
 #include <map>
 #include "boost/optional.hpp"
 
@@ -1129,12 +1130,28 @@ class CacheManager : public CacheManagerInterface {
     ~BackgroundBackuper();
     virtual void threadMain();
     virtual void exitThreadMain();
+
+    /**
+     * @brief Notifies BackgroundBackuper thread that new data is available and
+     * new backup iteration should be scheduled
+     */
     void DoBackup();
+
+    /**
+     * @brief Waits for BackgroundBackuper thread finish its own backup
+     * iteration. If currently no backup iteration in progress - function just
+     * returns the control back
+     */
+    void WaitForBackupIsDone();
 
    private:
     void InternalBackup();
     CacheManager* cache_manager_;
     sync_primitives::ConditionalVariable backup_notifier_;
+    sync_primitives::ConditionalVariable backup_done_;
+    sync_primitives::Lock backup_done_lock_;
+
+    std::atomic_bool backup_is_in_progress_;
     volatile bool stop_flag_;
     volatile bool new_data_available_;
 
