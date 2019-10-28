@@ -65,52 +65,6 @@ void OnVehicleDataNotification::Run() {
       notify_apps.begin();
   std::vector<smart_objects::SmartObject> appSO;
 
-<<<<<<< HEAD
-  const VehicleData& vehicle_data = MessageHelper::vehicle_data();
-  VehicleData::const_iterator it = vehicle_data.begin();
-
-  for (; vehicle_data.end() != it; ++it) {
-    if (true == (*message_)[strings::msg_params].keyExists(it->first)) {
-      LOG4CXX_DEBUG(logger_, "vehicle_data name: '" << it->first << "'");
-      auto vehicle_data_value =
-          (*message_)[strings::msg_params][it->first].asInt();
-
-      application_manager_.IviInfoUpdated(it->second, vehicle_data_value);
-
-      auto subscribed_to_ivi_predicate = [&it](const ApplicationSharedPtr app) {
-        DCHECK_OR_RETURN(app, false);
-        auto& ext = VehicleInfoAppExtension::ExtractVIExtension(*app);
-        return ext.isSubscribedToVehicleInfo(it->second);
-      };
-
-      const std::vector<ApplicationSharedPtr>& applications =
-          application_manager::FindAllApps(application_manager_.applications(),
-                                           subscribed_to_ivi_predicate);
-
-      std::vector<ApplicationSharedPtr>::const_iterator app_it =
-          applications.begin();
-
-      for (; applications.end() != app_it; ++app_it) {
-        const ApplicationSharedPtr app = *app_it;
-        if (!app) {
-          LOG4CXX_ERROR(logger_, "NULL pointer");
-          continue;
-        }
-
-        appNotification_it =
-            find(appNotification.begin(), appNotification.end(), app);
-        if (appNotification_it == appNotification.end()) {
-          appNotification.push_back(app);
-          smart_objects::SmartObject msg_param =
-              smart_objects::SmartObject(smart_objects::SmartType_Map);
-          msg_param[it->first] = (*message_)[strings::msg_params][it->first];
-          appSO.push_back(msg_param);
-        } else {
-          size_t idx =
-              std::distance(appNotification.begin(), appNotification_it);
-          appSO[idx][it->first] = (*message_)[strings::msg_params][it->first];
-        }
-=======
   custom_vehicle_data_manager_.CreateMobileMessageParams(
       (*message_)[strings::msg_params]);
 
@@ -143,7 +97,6 @@ void OnVehicleDataNotification::Run() {
       } else {
         size_t idx = std::distance(notify_apps.begin(), notified_app_it);
         appSO[idx][name] = (*message_)[strings::msg_params][name];
->>>>>>> origin/release/6.0.0
       }
     }
   }
