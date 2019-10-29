@@ -828,6 +828,10 @@ class ApplicationManagerImpl
       bool result,
       std::vector<std::string>& rejected_params) OVERRIDE;
 
+  bool SetNaviServiceStatus(uint32_t connection_key,
+                            protocol_handler::ServiceType service_type,
+                            bool is_started) FINAL;
+
   /**
    * @brief Callback calls when application starts/stops data streaming
    * @param app_id Streaming application id

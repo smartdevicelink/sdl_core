@@ -1790,23 +1790,6 @@ bool ApplicationManagerImpl::StartNaviService(
   LOG4CXX_AUTO_TRACE(logger_);
 
   if (HMILevelAllowsStreaming(app_id, service_type)) {
-    {
-      sync_primitives::AutoLock lock(navi_service_status_lock_);
-
-      NaviServiceStatusMap::iterator it = navi_service_status_.find(app_id);
-      if (navi_service_status_.end() == it) {
-        std::pair<NaviServiceStatusMap::iterator, bool> res =
-            navi_service_status_.insert(
-                std::pair<uint32_t, std::pair<bool, bool> >(
-                    app_id, std::make_pair(false, false)));
-        if (!res.second) {
-          LOG4CXX_WARN(logger_, "Navi service refused");
-          return false;
-        }
-        it = res.first;
-      }
-    }
-
     if (service_type == ServiceType::kMobileNav) {
       smart_objects::SmartObject converted_params(smart_objects::SmartType_Map);
       ConvertVideoParamsToSO(converted_params, params);
@@ -1866,17 +1849,11 @@ void ApplicationManagerImpl::OnStreamingConfigured(
       sync_primitives::AutoLock lock(navi_service_status_lock_);
 
       NaviServiceStatusMap::iterator it = navi_service_status_.find(app_id);
-      if (navi_service_status_.end() == it) {
+      if (navi_service_status_.end() == it && !result) {
         LOG4CXX_WARN(logger_, "Application not found in navi status map");
         connection_handler().NotifyServiceStartedResult(app_id, false, empty);
         return;
       }
-
-      // Fill NaviServices map. Set true to first value of pair if
-      // we've started video service or to second value if we've
-      // started audio service
-      service_type == ServiceType::kMobileNav ? it->second.first = true
-                                              : it->second.second = true;
     }
 
     application(app_id)->StartStreaming(service_type);
@@ -1889,30 +1866,67 @@ void ApplicationManagerImpl::OnStreamingConfigured(
   }
 }
 
+bool ApplicationManagerImpl::SetNaviServiceStatus(
+    uint32_t connection_key,
+    protocol_handler::ServiceType service_type,
+    bool is_started) {
+  using namespace protocol_handler;
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  auto app = application(connection_key);
+  if (!app) {
+    LOG4CXX_DEBUG(
+        logger_,
+        "Application with app_id: " << connection_key << " is not found");
+    return false;
+  }
+
+  {
+    sync_primitives::AutoLock lock(navi_service_status_lock_);
+
+    NaviServiceStatusMap::iterator it =
+        navi_service_status_.find(app->app_id());
+    if (navi_service_status_.end() == it && (is_started)) {
+      std::pair<NaviServiceStatusMap::iterator, bool> res =
+          navi_service_status_.insert(
+              std::pair<uint32_t, std::pair<bool, bool> >(
+                  app->app_id(), std::make_pair(false, false)));
+      if (!res.second) {
+        LOG4CXX_WARN(logger_, "Navi service refused");
+        return false;
+      }
+      it = res.first;
+    } else {
+      LOG4CXX_DEBUG(logger_,
+                    "Application with app_id: "
+                        << app->app_id() << " is not found in navi status map");
+      return false;
+    }
+
+    service_type == ServiceType::kMobileNav ? it->second.first = is_started
+                                            : it->second.second = is_started;
+    LOG4CXX_DEBUG(logger_,
+                  "ServiceType: " << service_type << " is started: "
+                                  << std::boolalpha << is_started);
+    return true;
+  }
+}
+
 void ApplicationManagerImpl::StopNaviService(
     uint32_t app_id, protocol_handler::ServiceType service_type) {
   using namespace protocol_handler;
   LOG4CXX_AUTO_TRACE(logger_);
 
-  {
-    sync_primitives::AutoLock lock(navi_service_status_lock_);
-
-    NaviServiceStatusMap::iterator it = navi_service_status_.find(app_id);
-    if (navi_service_status_.end() == it) {
-      LOG4CXX_WARN(logger_,
-                   "No Information about navi service " << service_type);
-    } else {
-      // Fill NaviServices map. Set false to first value of pair if
-      // we've stopped video service or to second value if we've
-      // stopped audio service
-      service_type == ServiceType::kMobileNav ? it->second.first = false
-                                              : it->second.second = false;
-    }
-  }
-
   ApplicationSharedPtr app = application(app_id);
   if (!app) {
     LOG4CXX_WARN(logger_, "An application is not registered.");
+    return;
+  }
+
+  if (!SetNaviServiceStatus(app->app_id(), service_type, false)) {
+    LOG4CXX_DEBUG(logger_,
+                  "Application with app_id: "
+                      << app->app_id() << " not found in navi status map");
     return;
   }
 
@@ -2038,7 +2052,7 @@ void ApplicationManagerImpl::OnServiceEndedCallback(
 
   if (Compare<ServiceType, EQ, ONE>(
           type, ServiceType::kMobileNav, ServiceType::kAudio)) {
-    StopNaviService(session_key, type);
+    StopNaviService(static_cast<uint32_t>(session_key), type);
   }
 }
 
@@ -3395,6 +3409,8 @@ void ApplicationManagerImpl::EndNaviServices(uint32_t app_id) {
       LOG4CXX_ERROR(logger_, "No info about navi servicies for app");
       return;
     }
+    LOG4CXX_DEBUG(logger_, "VEDIO_KEK: " << it->second.first);
+    LOG4CXX_DEBUG(logger_, "AUDIO_KEK: " << it->second.second);
     end_video = it->second.first;
     end_audio = it->second.second;
   }

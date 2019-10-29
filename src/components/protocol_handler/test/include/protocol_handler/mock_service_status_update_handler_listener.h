@@ -49,6 +49,11 @@ class MockServiceStatusUpdateHandlerListener
            hmi_apis::Common_ServiceType::eType,
            hmi_apis::Common_ServiceEvent::eType,
            utils::Optional<hmi_apis::Common_ServiceStatusUpdateReason::eType>));
+
+  MOCK_METHOD3(SetNaviServiceStatus,
+               bool(uint32_t connection_key,
+                    protocol_handler::ServiceType service_type,
+                    bool is_started));
 };
 }  // namespace protocol_handler_test
 }  // namespace components

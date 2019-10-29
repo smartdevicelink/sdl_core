@@ -80,6 +80,10 @@ class ServiceStatusUpdateHandler {
                        const protocol_handler::ServiceType service_type,
                        const ServiceStatus service_status);
 
+  void SetNaviServiceStatus(uint32_t app_id,
+                            protocol_handler::ServiceType service_type,
+                            bool is_opened);
+
  private:
   ServiceStatusUpdateHandlerListener* listener_;
 };
