@@ -36,25 +36,33 @@
 #include <vector>
 
 #include "utils/callable.h"
+#include "utils/optional.h"
 
-#include "policy/policy_types.h"
-#include "policy/policy_table/types.h"
-#include "policy/policy_listener.h"
-#include "policy/usage_statistics/statistics_manager.h"
-#include "policy/cache_manager_interface.h"
+#include "application_manager/policies/policy_encryption_flag_getter.h"
 #include "policy/access_remote.h"
+#include "policy/cache_manager_interface.h"
+#include "policy/policy_listener.h"
+#include "policy/policy_table/types.h"
+#include "policy/policy_types.h"
+#include "policy/ptu_retry_handler.h"
+#include "policy/usage_statistics/statistics_manager.h"
 
 namespace policy {
 class PolicySettings;
 typedef std::shared_ptr<utils::Callable> StatusNotifier;
 
-class PolicyManager : public usage_statistics::StatisticsManager {
+class PolicyManager : public usage_statistics::StatisticsManager,
+                      public PolicyEncryptionFlagGetterInterface,
+                      public PTURetryHandler {
  public:
   /**
    * @brief The NotificationMode enum defines whether application will be
    * notified about changes done (e.g. after consents were changed) or not
    */
   enum NotificationMode { kSilentMode, kNotifyApplicationMode };
+
+  enum PtProcessingResult { kSuccess, kWrongPtReceived, kNewPtRequired };
+
   virtual ~PolicyManager() {}
 
   /**
@@ -78,10 +86,16 @@ class PolicyManager : public usage_statistics::StatisticsManager {
    * sent in snapshot and received Policy Table.
    * @param file name of file with update policy table
    * @param pt_content PTU as binary string
-   * @return true if successfully
+   * @return result of PT processing
    */
-  virtual bool LoadPT(const std::string& file,
-                      const BinaryMessage& pt_content) = 0;
+  virtual PtProcessingResult LoadPT(const std::string& file,
+                                    const BinaryMessage& pt_content) = 0;
+
+  /**
+   * @brief Performs finalizing actions after PT update was processed
+   * @param ptu_result result of last PT processing
+   */
+  virtual void OnPTUFinished(const PtProcessingResult ptu_result) = 0;
 
   /**
    * @brief Resets Policy Table
@@ -132,6 +146,7 @@ class PolicyManager : public usage_statistics::StatisticsManager {
    * @brief Check if specified RPC for specified application
    * has permission to be executed in specified HMI Level
    * and also its permitted params.
+   * @param device_id device identifier
    * @param app_id Id of application provided during registration
    * @param hmi_level Current HMI Level of application
    * @param rpc Name of RPC
@@ -139,7 +154,8 @@ class PolicyManager : public usage_statistics::StatisticsManager {
    * @param CheckPermissionResult containing flag if HMI Level is allowed
    * and list of allowed params.
    */
-  virtual void CheckPermissions(const PTString& app_id,
+  virtual void CheckPermissions(const PTString& device_id,
+                                const PTString& app_id,
                                 const PTString& hmi_level,
                                 const PTString& rpc,
                                 const RPCParams& rpc_params,
@@ -165,6 +181,24 @@ class PolicyManager : public usage_statistics::StatisticsManager {
   virtual void KmsChanged(int kilometers) = 0;
 
   /**
+   * @brief Returns state of the lock screen that could be able to be dismissed
+   * while connected to SDL, allowing users the ability to interact with the
+   * app.
+   * @return bool True if lock screen can be dismissed.
+   */
+  virtual const boost::optional<bool> LockScreenDismissalEnabledState()
+      const = 0;
+
+  /**
+   * @brief Returns lock screen warning message. In case when specified language
+   * is absent in policy table will be returned message on default language
+   * ("en-us"). Otherwise returns uninitialized boost::optional<std::string>
+   * @return std::string Lock screen warning message
+   */
+  virtual const boost::optional<std::string> LockScreenDismissalWarningMessage(
+      const std::string& language) const = 0;
+
+  /**
    * @brief Increments counter of ignition cycles
    */
   virtual void IncrementIgnitionCycles() = 0;
@@ -176,6 +210,11 @@ class PolicyManager : public usage_statistics::StatisticsManager {
   virtual std::string ForcePTExchange() = 0;
 
   /**
+   * @brief Stops retry sequence timer and resets retry sequence
+   */
+  virtual void StopRetrySequence() = 0;
+
+  /**
    * @brief Exchange by user request
    * @return Current status of policy table
    */
@@ -183,8 +222,9 @@ class PolicyManager : public usage_statistics::StatisticsManager {
 
   /**
    * @brief Resets retry sequence
+   * @param reset_type - reset retry count with sending OnStatusUpdate or not
    */
-  virtual void ResetRetrySequence() = 0;
+  virtual void ResetRetrySequence(const ResetRetryCountType reset_type) = 0;
 
   /**
    * @brief Gets timeout to wait before next retry updating PT
@@ -246,12 +286,15 @@ class PolicyManager : public usage_statistics::StatisticsManager {
   /**
    * @brief Update Application Policies as reaction
    * on User allowing/disallowing device this app is running on.
+   * @param device_handle device identifier
    * @param app_id Unique application id
    * @param is_device_allowed true if user allowing device otherwise false
    * @return true if operation was successful
    */
-  virtual bool ReactOnUserDevConsentForApp(const std::string& app_id,
-                                           const bool is_device_allowed) = 0;
+  virtual bool ReactOnUserDevConsentForApp(
+      const transport_manager::DeviceHandle& device_handle,
+      const std::string& app_id,
+      const bool is_device_allowed) = 0;
 
   /**
    * @brief Sets counter value that passed for receiving PT UPdate.
@@ -299,12 +342,14 @@ class PolicyManager : public usage_statistics::StatisticsManager {
 
   /**
    * @brief Get default HMI level for application
+   * @param device_id device identifier
    * @param policy_app_id Unique application id
    * @param default_hmi Default HMI level for application or empty, if value
    * was not set
    * @return true, if succedeed, otherwise - false
    */
-  virtual bool GetDefaultHmi(const std::string& policy_app_id,
+  virtual bool GetDefaultHmi(const std::string& device_id,
+                             const std::string& policy_app_id,
                              std::string* default_hmi) const = 0;
 
   /**
@@ -350,11 +395,12 @@ class PolicyManager : public usage_statistics::StatisticsManager {
   /**
    * @brief Gets specific application permissions changes since last policy
    * table update
+   * @param device_id device identifier
    * @param policy_app_id Unique application id
    * @return Permissions changes
    */
   virtual AppPermissions GetAppPermissionsChanges(
-      const std::string& policy_app_id) = 0;
+      const std::string& device_id, const std::string& policy_app_id) = 0;
 
   /**
    * @brief Removes specific application permissions changes
@@ -364,9 +410,11 @@ class PolicyManager : public usage_statistics::StatisticsManager {
 
   /**
    * @brief Return device id, which hosts specific application
+   * @param device_handle device identifier
    * @param policy_app_id Application id, which is required to update device id
    */
   virtual std::string& GetCurrentDeviceId(
+      const transport_manager::DeviceHandle& device_handle,
       const std::string& policy_app_id) const = 0;
 
   /**
@@ -387,10 +435,11 @@ class PolicyManager : public usage_statistics::StatisticsManager {
 
   /**
    * @brief Send OnPermissionsUpdated for choosen application
+   * @param device_id device identifier
    * @param application_id Unique application id
    */
   virtual void SendNotificationOnPermissionsUpdated(
-      const std::string& application_id) = 0;
+      const std::string& device_id, const std::string& application_id) = 0;
 
   /**
    * @brief Marks device as upaired
@@ -401,11 +450,13 @@ class PolicyManager : public usage_statistics::StatisticsManager {
   /**
    * @brief Adds, application to the db or update existed one
    * run PTU if policy update is necessary for application.
+   * @param device_id device identifier
    * @param application_id Unique application id
    * @param hmi_types application HMI types
    * @return function that will notify update manager about new application
    */
   virtual StatusNotifier AddApplication(
+      const std::string& device_id,
       const std::string& application_id,
       const rpc::policy_table_interface_base::AppHmiTypes& hmi_types) = 0;
 
@@ -485,10 +536,13 @@ class PolicyManager : public usage_statistics::StatisticsManager {
   /**
    * @brief OnAppRegisteredOnMobile allows to handle event when application were
    * succesfully registered on mobile device.
-   * It will send OnAppPermissionSend notification and will try to start PTU. *
+   * It will send OnAppPermissionSend notification and will try to start PTU.
+   *
+   * @param device_id device identifier
    * @param application_id registered application.
    */
-  virtual void OnAppRegisteredOnMobile(const std::string& application_id) = 0;
+  virtual void OnAppRegisteredOnMobile(const std::string& device_id,
+                                       const std::string& application_id) = 0;
 
   virtual void OnDeviceSwitching(const std::string& device_id_from,
                                  const std::string& device_id_to) = 0;
@@ -511,25 +565,41 @@ class PolicyManager : public usage_statistics::StatisticsManager {
 
   /**
    * @brief Gets request types for application
+   * @param device_handle device identifier
    * @param policy_app_id Unique application id
    * @return request types of application
    */
   virtual const std::vector<std::string> GetAppRequestTypes(
+      const transport_manager::DeviceHandle& device_handle,
       const std::string policy_app_id) const = 0;
 
   /**
-    * @brief Gets request subtypes for application
-    * @param policy_app_id Unique application id
-    * @return request subtypes of application
-    */
+   * @brief Gets request subtypes for application
+   * @param policy_app_id Unique application id
+   * @return request subtypes of application
+   */
   virtual const std::vector<std::string> GetAppRequestSubTypes(
       const std::string& policy_app_id) const = 0;
 
   /**
-   * @brief Get information about vehicle
-   * @return vehicle information
+   * @brief Gets vehicle data items
+   * @return Structure with vehicle data items
    */
-  virtual const VehicleInfo GetVehicleInfo() const = 0;
+  virtual const std::vector<policy_table::VehicleDataItem> GetVehicleDataItems()
+      const = 0;
+
+  /**
+   * @brief Gets vehicle data items removed by policies
+   * @return Structure with vehicle data items
+   */
+  virtual std::vector<rpc::policy_table_interface_base::VehicleDataItem>
+  GetRemovedVehicleDataItems() const = 0;
+
+  /**
+   * @brief Gets copy of current policy table data
+   * @return policy_table as json object
+   */
+  virtual Json::Value GetPolicyTableData() const = 0;
 
   /**
    * @brief Get a list of enabled cloud applications
@@ -629,7 +699,7 @@ class PolicyManager : public usage_statistics::StatisticsManager {
    * @brief Check if an app can send unknown rpc requests to an app service
    * provider
    * @param policy_app_id Unique application id
-  */
+   */
   virtual bool UnknownRPCPassthroughAllowed(
       const std::string& policy_app_id) const = 0;
 
@@ -675,11 +745,14 @@ class PolicyManager : public usage_statistics::StatisticsManager {
 
   /**
    * @brief Assigns new HMI types for specified application
+   * @param device_handle device identifier
    * @param application_id Unique application id
    * @param hmi_types new HMI types list
    */
-  virtual void SetDefaultHmiTypes(const std::string& application_id,
-                                  const std::vector<int>& hmi_types) = 0;
+  virtual void SetDefaultHmiTypes(
+      const transport_manager::DeviceHandle& device_handle,
+      const std::string& application_id,
+      const std::vector<int>& hmi_types) = 0;
   /**
    * @brief Gets HMI types
    * @param application_id ID application
@@ -707,11 +780,11 @@ class PolicyManager : public usage_statistics::StatisticsManager {
                                          const std::string& application_id) = 0;
 
   /**
-    * @brief Gets all allowed module types
-    * @param policy_app_id unique identifier of application
-    * @param modules list of allowed module types
-    * @return true if application has allowed modules
-    */
+   * @brief Gets all allowed module types
+   * @param policy_app_id unique identifier of application
+   * @param modules list of allowed module types
+   * @return true if application has allowed modules
+   */
   virtual bool GetModuleTypes(const std::string& policy_app_id,
                               std::vector<std::string>* modules) const = 0;
 

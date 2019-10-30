@@ -45,14 +45,18 @@ namespace custom_str = utils::custom_string;
 class PolicyListener {
  public:
   virtual ~PolicyListener() {}
-  virtual void OnPermissionsUpdated(const std::string& policy_app_id,
+  virtual void OnPermissionsUpdated(const std::string& device_id,
+                                    const std::string& policy_app_id,
                                     const Permissions& permissions,
                                     const policy::HMILevel& default_hmi) = 0;
-  virtual void OnPermissionsUpdated(const std::string& policy_app_id,
+  virtual void OnPermissionsUpdated(const std::string& device_id,
+                                    const std::string& policy_app_id,
                                     const Permissions& permissions) = 0;
-  virtual void OnPendingPermissionChange(const std::string& policy_app_id) = 0;
+  virtual void OnPendingPermissionChange(const std::string& device_id,
+                                         const std::string& policy_app_id) = 0;
   virtual void OnUpdateStatusChanged(const std::string&) = 0;
   virtual std::string OnCurrentDeviceIdUpdateRequired(
+      const transport_manager::DeviceHandle& device_handle,
       const std::string& policy_app_id) = 0;
   virtual void OnSystemInfoUpdateRequired() = 0;
   virtual custom_str::CustomString GetAppName(
@@ -61,12 +65,12 @@ class PolicyListener {
       std::map<std::string, StringArray> app_hmi_types) = 0;
 
   /**
- * @brief CanUpdate allows to find active application
- * and check whether related device consented.
- *
- * @return true if there are at least one application has been registered
- * with consented device.
- */
+   * @brief CanUpdate allows to find active application
+   * and check whether related device consented.
+   *
+   * @return true if there are at least one application has been registered
+   * with consented device.
+   */
   virtual bool CanUpdate() = 0;
 
   /**
@@ -75,11 +79,13 @@ class PolicyListener {
    *
    * @param pt_string the snapshot
    *
-   * @param retry_seconds retry sequence timeouts.
+   * @param iteration_type flag indicating whether PTU was caused by retry
+   * sequence.
    *
    * @param timeout_exceed timeout.
    */
-  virtual void OnSnapshotCreated(const BinaryMessage& pt_string) = 0;
+  virtual void OnSnapshotCreated(const BinaryMessage& pt_string,
+                                 const PTUIterationType iteration_type) = 0;
 
   /**
    * @brief Make appropriate changes for related applications permissions and
@@ -93,10 +99,12 @@ class PolicyListener {
   /**
    * @brief Sends OnAppPermissionsChanged notification to HMI
    * @param permissions contains parameter for OnAppPermisionChanged
+   * @param device_id device identifier
    * @param policy_app_id contains policy application id
    */
   virtual void SendOnAppPermissionsChanged(
       const AppPermissions& permissions,
+      const std::string& device_id,
       const std::string& policy_app_id) const = 0;
 
   /**
@@ -111,6 +119,11 @@ class PolicyListener {
    * @param certificate_data the value of the updated field.
    */
   virtual void OnCertificateUpdated(const std::string& certificate_data) = 0;
+
+  /**
+   * @brief OnPTUTimeOut the callback which signals if PTU timeout occured
+   */
+  virtual void OnPTUTimeOut() = 0;
 
   /**
    * @brief OnAuthTokenUpdated the callback which signals if an app's auth token
@@ -128,7 +141,7 @@ class PolicyListener {
    * @return list devices ids
    */
   virtual std::vector<std::string> GetDevicesIds(
-      const std::string& policy_app_id) = 0;
+      const std::string& policy_app_id) const = 0;
 
   /**
    * Notifies about changing HMI level
@@ -157,6 +170,12 @@ class PolicyListener {
   virtual void OnUpdateHMIStatus(const std::string& device_id,
                                  const std::string& policy_app_id,
                                  const std::string& hmi_level) = 0;
+
+  /**
+   * @brief Notify Connected mobile apps about changing state
+   * LockScreenDismissal
+   */
+  virtual void OnLockScreenDismissalStateChanged() = 0;
 };
 }  //  namespace policy
 #endif  // SRC_COMPONENTS_INCLUDE_POLICY_POLICY_REGULAR_POLICY_POLICY_LISTENER_H_

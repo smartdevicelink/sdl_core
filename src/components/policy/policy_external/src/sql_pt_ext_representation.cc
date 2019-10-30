@@ -29,15 +29,15 @@
  ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  POSSIBILITY OF SUCH DAMAGE.
  */
+#include "policy/sql_pt_ext_representation.h"
 #include <algorithm>
 #include <utility>
-#include "utils/logger.h"
-#include "policy/sql_pt_ext_representation.h"
-#include "policy/sql_wrapper.h"
-#include "policy/sql_pt_queries.h"
-#include "policy/sql_pt_ext_queries.h"
-#include "policy/policy_helper.h"
 #include "policy/cache_manager.h"
+#include "policy/policy_helper.h"
+#include "policy/sql_pt_ext_queries.h"
+#include "policy/sql_pt_queries.h"
+#include "policy/sql_wrapper.h"
+#include "utils/logger.h"
 
 namespace policy {
 
@@ -563,25 +563,23 @@ bool SQLPTExtRepresentation::GatherConsumerFriendlyMessages(
       msg.message_code = query.GetString(7);
 
       std::string language = query.GetString(6);
+      policy_table::Languages& languages =
+          (*messages->messages)[msg.message_code].languages;
+      policy_table::MessageString& specific_message = languages[language];
       if (!msg.tts.empty()) {
-        *(*messages->messages)[msg.message_code].languages[language].tts =
-            msg.tts;
+        *(specific_message).tts = msg.tts;
       }
       if (!msg.label.empty()) {
-        *(*messages->messages)[msg.message_code].languages[language].label =
-            msg.label;
+        *(specific_message).label = msg.label;
       }
       if (!msg.line1.empty()) {
-        *(*messages->messages)[msg.message_code].languages[language].line1 =
-            msg.line1;
+        *(specific_message).line1 = msg.line1;
       }
       if (!msg.line2.empty()) {
-        *(*messages->messages)[msg.message_code].languages[language].line2 =
-            msg.line2;
+        *(specific_message).line2 = msg.line2;
       }
       if (!msg.text_body.empty()) {
-        *(*messages->messages)[msg.message_code].languages[language].textBody =
-            msg.text_body;
+        *(specific_message).textBody = msg.text_body;
       }
     }
   } else {
@@ -796,6 +794,9 @@ bool SQLPTExtRepresentation::SaveSpecificAppPolicy(
   app.second.allow_unknown_rpc_passthrough.is_initialized()
       ? app_query.Bind(15, *app.second.allow_unknown_rpc_passthrough)
       : app_query.Bind(15);
+  app.second.encryption_required.is_initialized()
+      ? app_query.Bind(16, *app.second.encryption_required)
+      : app_query.Bind(16);
 
   if (!app_query.Exec() || !app_query.Reset()) {
     LOG4CXX_WARN(logger_, "Incorrect insert into application.");
@@ -940,6 +941,9 @@ bool SQLPTExtRepresentation::GatherApplicationPoliciesSection(
     *params.cloud_transport_type = query.GetString(12);
     *params.icon_url = query.GetString(13);
     *params.allow_unknown_rpc_passthrough = query.GetBoolean(14);
+    if (!query.IsNull(15)) {
+      *params.encryption_required = query.GetBoolean(15);
+    }
     const auto& gather_app_id = ((*policies).apps[app_id].is_string())
                                     ? (*policies).apps[app_id].get_string()
                                     : app_id;

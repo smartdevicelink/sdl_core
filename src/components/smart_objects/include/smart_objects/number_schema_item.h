@@ -33,8 +33,8 @@
 #ifndef SRC_COMPONENTS_SMART_OBJECTS_INCLUDE_SMART_OBJECTS_NUMBER_SCHEMA_ITEM_H_
 #define SRC_COMPONENTS_SMART_OBJECTS_INCLUDE_SMART_OBJECTS_NUMBER_SCHEMA_ITEM_H_
 
-#include <typeinfo>
 #include <limits>
+#include <typeinfo>
 
 #include "smart_objects/default_shema_item.h"
 #include "smart_objects/schema_item_parameter.h"
@@ -113,10 +113,11 @@ class TNumberSchemaItem : public CDefaultSchemaItem<NumberType> {
 };
 
 template <typename NumberType>
-std::shared_ptr<TNumberSchemaItem<NumberType> > TNumberSchemaItem<
-    NumberType>::create(const TSchemaItemParameter<NumberType>& MinValue,
-                        const TSchemaItemParameter<NumberType>& MaxValue,
-                        const TSchemaItemParameter<NumberType>& DefaultValue) {
+std::shared_ptr<TNumberSchemaItem<NumberType> >
+TNumberSchemaItem<NumberType>::create(
+    const TSchemaItemParameter<NumberType>& MinValue,
+    const TSchemaItemParameter<NumberType>& MaxValue,
+    const TSchemaItemParameter<NumberType>& DefaultValue) {
   return std::shared_ptr<TNumberSchemaItem<NumberType> >(
       new TNumberSchemaItem<NumberType>(MinValue, MaxValue, DefaultValue));
 }

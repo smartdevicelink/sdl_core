@@ -29,39 +29,39 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <vector>
-#include <string>
+#include <stdio.h>
+#include <sys/stat.h>
 #include <algorithm>
 #include <fstream>
 #include <memory>
-#include <stdio.h>
-#include <sys/stat.h>
+#include <string>
+#include <vector>
 
 #include "gtest/gtest.h"
-#include "policy/driver_dbms.h"
-#include "policy/sql_pt_representation.h"
-#include "policy/policy_types.h"
-#include "policy/mock_policy_settings.h"
-#include "policy/policy_table/types.h"
-#include "policy/policy_table/enums.h"
-#include "json/writer.h"
 #include "json/reader.h"
+#include "json/writer.h"
+#include "policy/driver_dbms.h"
+#include "policy/mock_policy_settings.h"
+#include "policy/policy_table/enums.h"
+#include "policy/policy_table/types.h"
+#include "policy/policy_types.h"
+#include "policy/sql_pt_representation.h"
 #include "rpc_base/rpc_base.h"
 
 #include "utils/file_system.h"
 #include "utils/sqlite_wrapper/sql_database.h"
 
 namespace policy_table = rpc::policy_table_interface_base;
-using policy::SQLPTRepresentation;
 using policy::CheckPermissionResult;
-using policy::UserFriendlyMessage;
 using policy::EndpointUrls;
+using policy::SQLPTRepresentation;
+using policy::UserFriendlyMessage;
 using policy::VehicleInfo;
 
-using testing::ReturnRef;
-using testing::Return;
-using testing::NiceMock;
 using testing::Mock;
+using testing::NiceMock;
+using testing::Return;
+using testing::ReturnRef;
 
 namespace test {
 namespace components {
@@ -69,7 +69,7 @@ namespace policy_test {
 
 using policy_handler_test::MockPolicySettings;
 
-class SQLPTRepresentationTest : public SQLPTRepresentation,
+class SQLPTRepresentationTest : protected SQLPTRepresentation,
                                 public ::testing::Test {
  protected:
   DBMS* dbms;
@@ -322,6 +322,8 @@ class SQLPTRepresentationTest : public SQLPTRepresentation,
     app_policies["1234"]["steal_focus"] = Json::Value(false);
     app_policies["1234"]["RequestType"] = Json::Value(Json::arrayValue);
     app_policies["1234"]["app_services"] = Json::Value(Json::objectValue);
+    app_policies["1234"]["icon_url"] =
+        Json::Value("http:://www.sdl.com/image.png");
     app_policies["1234"]["app_services"]["MEDIA"] =
         Json::Value(Json::objectValue);
     app_policies["1234"]["app_services"]["MEDIA"]["service_names"] =
@@ -396,7 +398,7 @@ class SQLPTRepresentationTest2 : public ::testing::Test {
   }
 
   void TearDown() OVERRIDE {
-    file_system::RemoveDirectory(kAppStorageFolder, true);
+    ASSERT_TRUE(file_system::RemoveDirectory(kAppStorageFolder, true));
     delete reps;
   }
 
@@ -426,6 +428,148 @@ class SQLPTRepresentationTest3 : public ::testing::Test {
   const std::string kAppStorageFolder;
 };
 
+TEST_F(SQLPTRepresentationTest, VehicleDataItem_Store_Item) {
+  policy_table::VehicleDataItem rpm;
+  rpm.mark_initialized();
+  rpm.name = "rpm";
+  rpm.type = "Integer";
+  rpm.key = "OEM_REF_RPM";
+  rpm.mandatory = false;
+  *rpm.array = false;
+  rpm.params->mark_initialized();
+  ASSERT_FALSE(reps->VehicleDataItemExists(rpm));
+  ASSERT_TRUE(reps->InsertVehicleDataItem(rpm));
+  ASSERT_TRUE(reps->VehicleDataItemExists(rpm));
+
+  auto rpm_retrieved = reps->GetVehicleDataItem(rpm.name, rpm.key);
+  ASSERT_EQ(rpm.ToJsonValue(), rpm_retrieved.begin()->ToJsonValue());
+}
+
+TEST_F(SQLPTRepresentationTest, VehicleDataItem_Store_Complete_Item) {
+  policy_table::VehicleDataItem message;
+  message.mark_initialized();
+  message.name = "messsageName";
+  message.type = "String";
+  message.key = "OEM_REF_MSG";
+  message.mandatory = false;
+  *message.array = false;
+  message.params->mark_initialized();
+  *message.since = "1.0";
+  *message.until = "5.0";
+  *message.removed = false;
+  *message.deprecated = false;
+  *message.minvalue = 0;
+  *message.maxvalue = 255;
+  *message.minsize = 0;
+  *message.maxsize = 255;
+  *message.minlength = 0;
+  *message.maxlength = 255;
+  ASSERT_TRUE(reps->InsertVehicleDataItem(message));
+
+  auto message_retrieved = reps->GetVehicleDataItem(message.name, message.key);
+  ASSERT_EQ(message.ToJsonValue(), message_retrieved.begin()->ToJsonValue());
+}
+
+TEST_F(SQLPTRepresentationTest, VehicleDataItem_Store_Struct) {
+  policy_table::VehicleDataItem alss;
+  alss.mark_initialized();
+  alss.name = "ambientLightSensorStatus";
+  alss.type = "AmbientLightStatus";
+  alss.key = "OEM_REF_AMB_LIGHT";
+  alss.mandatory = false;
+  alss.params->mark_initialized();
+  policy_table::VehicleDataItem lss;
+  lss.mark_initialized();
+  lss.name = "LightSensorStatus";
+  lss.type = "Struct";
+  lss.key = "OEM_REF_SEN_LIGHT";
+  lss.mandatory = false;
+  lss.params->mark_initialized();
+  lss.params->push_back(alss);
+
+  policy_table::VehicleDataItem hbo;
+  hbo.mark_initialized();
+  hbo.name = "highBeamsOn";
+  hbo.type = "Boolean";
+  hbo.key = "OEM_REF_HIGH_BEAM";
+  hbo.mandatory = true;
+  hbo.params->mark_initialized();
+  policy_table::VehicleDataItem lbo;
+  lbo.mark_initialized();
+  lbo.name = "lowBeamsOn";
+  lbo.type = "Boolean";
+  lbo.key = "OEM_REF_LOW_BEAM";
+  lbo.mandatory = false;
+  lbo.params->mark_initialized();
+  policy_table::VehicleDataItem hls;
+  hls.mark_initialized();
+  hls.name = "headLampStatus";
+  hls.type = "Struct";
+  hls.key = "OEM_REF_HLSTATUS";
+  hls.mandatory = false;
+  hls.params->mark_initialized();
+  hls.params->push_back(lss);
+  hls.params->push_back(lbo);
+  hls.params->push_back(hbo);
+  ASSERT_TRUE(reps->InsertVehicleDataItem(alss));
+  ASSERT_TRUE(reps->InsertVehicleDataItem(hls));
+
+  auto hls_retrieved = reps->GetVehicleDataItem(hls.name, hls.key);
+  ASSERT_EQ(hls.ToJsonValue(), hls_retrieved.begin()->ToJsonValue());
+}
+
+TEST_F(SQLPTRepresentationTest, VehicleDataItem_Select_NonParameterizedVDI) {
+  policy_table::VehicleDataItems non_parameterized_vdis;
+  policy_table::VehicleDataItem rpm;
+  rpm.mark_initialized();
+  rpm.name = "rpm";
+  rpm.type = "Integer";
+  rpm.key = "OEM_REF_RPM";
+  rpm.mandatory = false;
+  *rpm.array = false;
+  rpm.params->mark_initialized();
+  ASSERT_TRUE(reps->InsertVehicleDataItem(rpm));
+  policy_table::VehicleDataItem message;
+  message.mark_initialized();
+  message.name = "rpm";
+  message.type = "String";
+  message.key = "OEM_REF_MSG";
+  message.mandatory = false;
+  *message.array = false;
+  message.params->mark_initialized();
+  ASSERT_TRUE(reps->InsertVehicleDataItem(message));
+  non_parameterized_vdis.push_back(rpm);
+  non_parameterized_vdis.push_back(message);
+
+  policy_table::VehicleDataItems parameterized_vdis;
+  policy_table::VehicleDataItem alss;
+  alss.mark_initialized();
+  alss.name = "ambientLightSensorStatus";
+  alss.type = "AmbientLightStatus";
+  alss.key = "OEM_REF_AMB_LIGHT";
+  alss.mandatory = false;
+  alss.params->mark_initialized();
+  policy_table::VehicleDataItem lss;
+  lss.mark_initialized();
+  lss.name = "LightSensorStatus";
+  lss.type = "Struct";
+  lss.key = "OEM_REF_SEN_LIGHT";
+  lss.mandatory = false;
+  lss.params->mark_initialized();
+  lss.params->push_back(alss);
+  ASSERT_TRUE(reps->InsertVehicleDataItem(lss));
+  parameterized_vdis.push_back(lss);
+
+  auto non_param_vdi_retrieved = reps->SelectPrimitiveVehicleDataItems();
+
+  ASSERT_EQ(non_parameterized_vdis.ToJsonValue(),
+            non_param_vdi_retrieved.ToJsonValue());
+
+  auto param_vdi_retrieved = reps->SelectCompositeVehicleDataItems();
+  ASSERT_EQ(parameterized_vdis.ToJsonValue(),
+            param_vdi_retrieved.ToJsonValue());
+}
+
 // {AKozoriz} : Unknown behavior (must try 8 times, tried 2 and opened)
 TEST_F(SQLPTRepresentationTest2,
        DISABLED_OpenAttemptTimeOut_ExpectCorrectNumber) {
@@ -448,8 +592,8 @@ TEST_F(SQLPTRepresentationTest,
   ASSERT_TRUE(reps->RefreshDB());
   // Check PT structure destroyed and tables number is 0
 
-  // There are 33 tables in the database, now.
-  const int32_t total_tables_number = 33;
+  // There are 35 tables in the database, now.
+  const int32_t total_tables_number = 37;
   ASSERT_EQ(total_tables_number, dbms->FetchOneInt(query_select));
   const char* query_select_count_of_iap_buffer_full =
       "SELECT `count_of_iap_buffer_full` FROM `usage_and_error_count`";
@@ -1642,9 +1786,11 @@ TEST_F(SQLPTRepresentationTest, Save_SetPolicyTableThenSave_ExpectSavedToPT) {
 
   const ::policy_table::Parameters& parameters = *(rpc_iter->second.parameters);
   EXPECT_EQ(1u, parameters.size());
-  EXPECT_TRUE(parameters.end() != std::find(parameters.begin(),
-                                            parameters.end(),
-                                            policy_table::Parameter::P_SPEED));
+  EXPECT_TRUE(parameters.end() !=
+              std::find(parameters.begin(),
+                        parameters.end(),
+                        policy_table::EnumToJsonString(
+                            policy_table::Parameter::P_SPEED)));
   // Check Application Policies Section
   GatherApplicationPoliciesSection(&policies);
   const uint32_t apps_size = 3u;
@@ -1745,6 +1891,11 @@ TEST_F(SQLPTRepresentationTest, Save_SetPolicyTableThenSave_ExpectSavedToPT) {
 
   EXPECT_TRUE(handled_rpcs.is_initialized());
   EXPECT_EQ(handled_rpcs[0].function_id, 41);
+
+  policy_table::ApplicationPolicies& apps = policies.apps;
+  auto icon_url = *(apps[kAppId].icon_url);
+
+  EXPECT_EQ(std::string(icon_url), "http:://www.sdl.com/image.png");
 }
 
 }  // namespace policy_test

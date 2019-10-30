@@ -33,14 +33,14 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <cstring>
 #include <cstdlib>
+#include <cstring>
 
-#include "transport_manager/usb/common.h"
 #include "transport_manager/transport_adapter/transport_adapter_impl.h"
+#include "transport_manager/usb/common.h"
 
-#include "utils/macro.h"
 #include "utils/logger.h"
+#include "utils/macro.h"
 #include "utils/threads/thread.h"
 
 namespace transport_manager {
@@ -90,20 +90,20 @@ UsbHandler::UsbHandler()
 
 UsbHandler::~UsbHandler() {
   shutdown_requested_ = true;
-  if (libusb_context_ != 0) {
+  thread_->stop();
+  LOG4CXX_INFO(logger_, "UsbHandler thread finished");
+  if (libusb_context_ != 0) {  // This wakes up libusb_handle_events()
     libusb_hotplug_deregister_callback(libusb_context_,
                                        arrived_callback_handle_);
     libusb_hotplug_deregister_callback(libusb_context_, left_callback_handle_);
   }
-  thread_->stop();
-  LOG4CXX_INFO(logger_, "UsbHandler thread finished");
+  thread_->join();
+  delete thread_->delegate();
+  threads::DeleteThread(thread_);
   if (libusb_context_) {
     libusb_exit(libusb_context_);
     libusb_context_ = 0;
   }
-  thread_->join();
-  delete thread_->delegate();
-  threads::DeleteThread(thread_);
 }
 
 void UsbHandler::DeviceArrived(libusb_device* device_libusb) {

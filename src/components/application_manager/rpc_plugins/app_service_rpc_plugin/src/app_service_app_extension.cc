@@ -103,7 +103,7 @@ void AppServiceAppExtension::ProcessResumption(
     const smart_objects::SmartObject& subscriptions_app_services =
         resumption_data[app_service_info];
     for (size_t i = 0; i < subscriptions_app_services.length(); ++i) {
-      std::string service_type = resumption_data[i].asString();
+      std::string service_type = subscriptions_app_services[i].asString();
       SubscribeToAppService(service_type);
     }
   }
@@ -119,4 +119,4 @@ AppServiceAppExtension& AppServiceAppExtension::ExtractASExtension(
   DCHECK(vi_app_extension);
   return *vi_app_extension;
 }
-}
+}  // namespace app_service_rpc_plugin

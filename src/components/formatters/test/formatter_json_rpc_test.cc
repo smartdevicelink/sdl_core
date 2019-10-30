@@ -30,18 +30,14 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <algorithm>
 #include "formatters/formatter_json_rpc.h"
-#include <string>
-#include <set>
-#include <algorithm>
 #include <json/writer.h>
-#include "gtest/gtest.h"
-#include "formatters/formatter_json_rpc.h"
-#include <string>
+#include <algorithm>
 #include <set>
-#include "gtest/gtest.h"
+#include <string>
 #include "formatters/CSmartFactory.h"
+#include "formatters/formatter_json_rpc.h"
+#include "gtest/gtest.h"
 #include "interfaces/HMI_API_schema.h"
 #include "interfaces/MOBILE_API_schema.h"
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018, Ford Motor Company
+ * Copyright (c) 2019, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -31,52 +31,57 @@
  */
 
 #include "rc_rpc_plugin/commands/mobile/get_interior_vehicle_data_request.h"
-#include "gtest/gtest.h"
-#include "application_manager/mock_application.h"
-#include "rc_rpc_plugin/rc_app_extension.h"
-#include "rc_rpc_plugin/rc_module_constants.h"
-#include "rc_rpc_plugin/rc_rpc_plugin.h"
-#include "application_manager/message_helper.h"
-#include "rc_rpc_plugin/rc_command_factory.h"
-#include "application_manager/event_engine/event_dispatcher.h"
 #include "application_manager/commands/command_request_test.h"
-#include "rc_rpc_plugin/mock/mock_resource_allocation_manager.h"
+#include "application_manager/event_engine/event_dispatcher.h"
+#include "application_manager/message_helper.h"
+#include "application_manager/mock_application.h"
+#include "gtest/gtest.h"
 #include "rc_rpc_plugin/mock/mock_interior_data_cache.h"
 #include "rc_rpc_plugin/mock/mock_interior_data_manager.h"
+#include "rc_rpc_plugin/mock/mock_rc_capabilities_manager.h"
+#include "rc_rpc_plugin/mock/mock_rc_consent_manager.h"
+#include "rc_rpc_plugin/mock/mock_resource_allocation_manager.h"
+#include "rc_rpc_plugin/rc_app_extension.h"
+#include "rc_rpc_plugin/rc_command_factory.h"
+#include "rc_rpc_plugin/rc_module_constants.h"
+#include "rc_rpc_plugin/rc_rpc_plugin.h"
 
-#include <thread>
+#include <stdint.h>
 #include <chrono>
+#include <thread>
 
-using ::testing::_;
-using ::testing::Mock;
-using ::testing::NiceMock;
-using ::testing::StrictMock;
-using ::testing::Return;
-using ::testing::ReturnRef;
-using ::testing::SaveArg;
+using application_manager::ApplicationSet;
+using ::application_manager::ApplicationSharedPtr;
 using ::application_manager::Message;
 using ::application_manager::MessageType;
-using application_manager::ApplicationSet;
 using application_manager::commands::MessageSharedPtr;
-using ::application_manager::ApplicationSharedPtr;
 using ::protocol_handler::MessagePriority;
 using test::components::application_manager_test::MockApplication;
 using test::components::application_manager_test::MockApplicationManager;
-using test::components::commands_test::MockApplicationManager;
 using test::components::commands_test::CommandRequestTest;
 using test::components::commands_test::CommandsTestMocks;
 using test::components::commands_test::HMIResultCodeIs;
 using test::components::commands_test::MobileResultCodeIs;
+using test::components::commands_test::MockApplicationManager;
+using ::testing::_;
+using ::testing::Mock;
+using ::testing::NiceMock;
+using ::testing::Return;
+using ::testing::ReturnRef;
+using ::testing::SaveArg;
+using ::testing::StrictMock;
 
 namespace {
 const int32_t kConnectionKey = 5u;
 const uint32_t kAppId = 0u;
 const uint32_t kAppId2 = 1u;
 const int kModuleId = 153u;
-const auto module_type = mobile_apis::ModuleType::RADIO;
+const auto module_eType = mobile_apis::ModuleType::RADIO;
+const auto module_type = "RADIO";
+const auto module_id = "eb7739ea-b263-4fe1-af9c-9311d1acac2d";
 const int32_t time_frame_of_allowed_requests = 1;
 const uint32_t max_request_in_time_frame = 5u;
-}
+}  // namespace
 
 namespace rc_rpc_plugin_test {
 
@@ -90,7 +95,8 @@ class GetInteriorVehicleDataRequestTest
       , rc_app_extention_(std::make_shared<RCAppExtension>(kModuleId))
       , rc_app_extention2_(std::make_shared<RCAppExtension>(kModuleId))
       , apps_lock_(std::make_shared<sync_primitives::Lock>())
-      , apps_da_(apps_, apps_lock_) {
+      , apps_da_(apps_, apps_lock_)
+      , rc_capabilities_(smart_objects::SmartType::SmartType_Array) {
     ON_CALL(*mock_app_, app_id()).WillByDefault(Return(kAppId));
     ON_CALL(*mock_app2_, app_id()).WillByDefault(Return(kAppId2));
     ON_CALL(*mock_app_, is_remote_control_supported())
@@ -124,6 +130,8 @@ class GetInteriorVehicleDataRequestTest
     std::pair<uint32_t, int32_t> frequency;
     frequency.first = max_request_in_time_frame;
     frequency.second = time_frame_of_allowed_requests;
+    smart_objects::SmartObject control_caps((smart_objects::SmartType_Array));
+    rc_capabilities_[strings::kradioControlCapabilities] = control_caps;
     ON_CALL(app_mngr_, get_settings())
         .WillByDefault(ReturnRef(app_mngr_settings_));
     ON_CALL(app_mngr_settings_, get_interior_vehicle_data_frequency())
@@ -143,7 +151,7 @@ class GetInteriorVehicleDataRequestTest
     ON_CALL(app_mngr_, hmi_capabilities())
         .WillByDefault(ReturnRef(mock_hmi_capabilities_));
     ON_CALL(mock_hmi_capabilities_, rc_capability())
-        .WillByDefault(Return(nullptr));
+        .WillByDefault(Return(&rc_capabilities_));
     ON_CALL(mock_policy_handler_,
             CheckHMIType(
                 _, mobile_apis::AppHMIType::eType::REMOTE_CONTROL, nullptr))
@@ -151,6 +159,8 @@ class GetInteriorVehicleDataRequestTest
     ON_CALL(mock_policy_handler_, CheckModule(_, _))
         .WillByDefault(Return(true));
     ON_CALL(mock_allocation_manager_, is_rc_enabled())
+        .WillByDefault(Return(true));
+    ON_CALL(mock_rc_capabilities_manager_, CheckIfModuleExistsInCapabilities(_))
         .WillByDefault(Return(true));
   }
 
@@ -163,7 +173,9 @@ class GetInteriorVehicleDataRequestTest
                            mock_policy_handler_,
                            mock_allocation_manager_,
                            mock_interior_data_cache_,
-                           mock_interior_data_manager_};
+                           mock_interior_data_manager_,
+                           mock_rc_capabilities_manager_,
+                           mock_rc_consent_manger_};
     return std::make_shared<Command>(msg ? msg : msg = CreateMessage(), params);
   }
 
@@ -181,6 +193,10 @@ class GetInteriorVehicleDataRequestTest
   application_manager::ApplicationSet apps_;
   const std::shared_ptr<sync_primitives::Lock> apps_lock_;
   DataAccessor<application_manager::ApplicationSet> apps_da_;
+  testing::NiceMock<rc_rpc_plugin_test::MockRCCapabilitiesManager>
+      mock_rc_capabilities_manager_;
+  smart_objects::SmartObject rc_capabilities_;
+  testing::NiceMock<MockRCConsentManager> mock_rc_consent_manger_;
 };
 
 TEST_F(GetInteriorVehicleDataRequestTest,
@@ -188,13 +204,15 @@ TEST_F(GetInteriorVehicleDataRequestTest,
   // Arrange
   MessageSharedPtr mobile_message = CreateBasicMessage();
   (*mobile_message)[application_manager::strings::msg_params]
-                   [message_params::kModuleType] = module_type;
-  ON_CALL(mock_interior_data_cache_, Contains(enums_value::kRadio))
+                   [message_params::kModuleType] = module_eType;
+  (*mobile_message)[application_manager::strings::msg_params]
+                   [message_params::kModuleType] = module_id;
+  const ModuleUid module(module_type, module_id);
+  ON_CALL(mock_interior_data_cache_, Contains(module))
       .WillByDefault(Return(false));
   ON_CALL(mock_interior_data_manager_, CheckRequestsToHMIFrequency(_))
       .WillByDefault(Return(true));
-  std::shared_ptr<
-      rc_rpc_plugin::commands::GetInteriorVehicleDataRequest> command =
+  auto command =
       CreateRCCommand<rc_rpc_plugin::commands::GetInteriorVehicleDataRequest>(
           mobile_message);
 
@@ -205,6 +223,8 @@ TEST_F(GetInteriorVehicleDataRequestTest,
           HMIResultCodeIs(hmi_apis::FunctionID::RC_GetInteriorVehicleData), _))
       .WillOnce(Return(true));
   // Act
+
+  ASSERT_TRUE(command->Init());
   command->Run();
 }
 
@@ -213,15 +233,17 @@ TEST_F(GetInteriorVehicleDataRequestTest,
   // Arrange
   MessageSharedPtr mobile_message = CreateBasicMessage();
   (*mobile_message)[application_manager::strings::msg_params]
-                   [message_params::kModuleType] = module_type;
+                   [message_params::kModuleType] = module_eType;
+  (*mobile_message)[application_manager::strings::msg_params]
+                   [message_params::kModuleId] = module_id;
   (*mobile_message)[application_manager::strings::msg_params]
                    [message_params::kSubscribe] = true;
-  ON_CALL(mock_interior_data_cache_, Contains(enums_value::kRadio))
+  const ModuleUid module(module_type, module_id);
+  ON_CALL(mock_interior_data_cache_, Contains(module))
       .WillByDefault(Return(false));
   ON_CALL(mock_interior_data_manager_, CheckRequestsToHMIFrequency(_))
       .WillByDefault(Return(true));
-  std::shared_ptr<
-      rc_rpc_plugin::commands::GetInteriorVehicleDataRequest> command =
+  auto command =
       CreateRCCommand<rc_rpc_plugin::commands::GetInteriorVehicleDataRequest>(
           mobile_message);
 
@@ -232,6 +254,7 @@ TEST_F(GetInteriorVehicleDataRequestTest,
           HMIResultCodeIs(hmi_apis::FunctionID::RC_GetInteriorVehicleData), _))
       .WillOnce(Return(true));
   // Act
+  ASSERT_TRUE(command->Init());
   command->Run();
 }
 
@@ -239,21 +262,35 @@ TEST_F(
     GetInteriorVehicleDataRequestTest,
     Execute_ExpectMessageNotSentToHMI_SuccessSentToMobile_AppSubscribed_DataFromCache) {
   // Arrange
-  rc_app_extention_->SubscribeToInteriorVehicleData(enums_value::kRadio);
+  const ModuleUid module(module_type, module_id);
+  rc_app_extention_->SubscribeToInteriorVehicleData(module);
   MessageSharedPtr mobile_message = CreateBasicMessage();
   (*mobile_message)[application_manager::strings::msg_params]
-                   [message_params::kModuleType] = module_type;
+                   [message_params::kModuleType] = module_eType;
+  (*mobile_message)[application_manager::strings::msg_params]
+                   [message_params::kModuleId] = module_id;
   smart_objects::SmartObject radio_data;
+  smart_objects::SmartObject sis_data;
+  smart_objects::SmartObject gps_data;
+
+  gps_data[application_manager::strings::longitude_degrees] = 1.0;
+  gps_data[application_manager::strings::latitude_degrees] = 1.0;
+
+  sis_data[application_manager::strings::station_short_name] =
+      "dummy_short_name";
+  sis_data[application_manager::strings::station_location] = gps_data;
+
   radio_data[message_params::kBand] = enums_value::kAM;
-  std::shared_ptr<
-      rc_rpc_plugin::commands::GetInteriorVehicleDataRequest> command =
+  radio_data[message_params::kSisData] = sis_data;
+
+  auto command =
       CreateRCCommand<rc_rpc_plugin::commands::GetInteriorVehicleDataRequest>(
           mobile_message);
 
   // Expectations
-  EXPECT_CALL(mock_interior_data_cache_, Contains(enums_value::kRadio))
+  EXPECT_CALL(mock_interior_data_cache_, Contains(module))
       .WillOnce(Return(true));
-  EXPECT_CALL(mock_interior_data_cache_, Retrieve(enums_value::kRadio))
+  EXPECT_CALL(mock_interior_data_cache_, Retrieve(module))
       .WillOnce(Return(radio_data));
   EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_, _)).Times(0);
   MessageSharedPtr command_result;
@@ -263,6 +300,7 @@ TEST_F(
       .WillOnce(DoAll(SaveArg<0>(&command_result), Return(true)));
 
   // Act
+  ASSERT_TRUE(command->Init());
   command->Run();
 
   // Assert
@@ -274,13 +312,16 @@ TEST_F(
 
 TEST_F(
     GetInteriorVehicleDataRequestTest,
-    Execute_ExpectCorrectMessageSentToHMI_LastAppSubscribedUnsubscibe_ClearCache) {
+    Execute_ExpectCorrectMessageSentToHMI_LastAppSubscribedUnsubscribe_ClearCache) {
   // Arrange
   MessageSharedPtr mobile_message = CreateBasicMessage();
   (*mobile_message)[application_manager::strings::msg_params]
-                   [message_params::kModuleType] = module_type;
+                   [message_params::kModuleType] = module_eType;
   (*mobile_message)[application_manager::strings::msg_params]
                    [message_params::kSubscribe] = false;
+  (*mobile_message)[application_manager::strings::msg_params]
+                   [message_params::kModuleId] = module_id;
+  const ModuleUid module(module_type, module_id);
 
   MessageSharedPtr hmi_response = CreateBasicMessage();
   ns_smart_device_link::ns_smart_objects::SmartObject& hmi_msg_params =
@@ -289,9 +330,11 @@ TEST_F(
       hmi_apis::Common_Result::SUCCESS;
   hmi_msg_params[application_manager::hmi_response::code] = response_code;
   hmi_msg_params[application_manager::strings::connection_key] = kConnectionKey;
+  hmi_msg_params[message_params::kModuleData][message_params::kModuleId] =
+      module_id;
 
   apps_.insert(mock_app_);
-  rc_app_extention_->SubscribeToInteriorVehicleData(enums_value::kRadio);
+  rc_app_extention_->SubscribeToInteriorVehicleData(module);
   ON_CALL(app_mngr_, applications()).WillByDefault(Return(apps_da_));
   ON_CALL(mock_interior_data_manager_, CheckRequestsToHMIFrequency(_))
       .WillByDefault(Return(true));
@@ -307,13 +350,13 @@ TEST_F(
       ManageMobileCommand(MobileResultCodeIs(mobile_apis::Result::SUCCESS), _))
       .WillOnce(Return(true));
 
-  EXPECT_CALL(mock_interior_data_cache_, Remove(enums_value::kRadio));
+  EXPECT_CALL(mock_interior_data_cache_, Remove(module));
 
   // Act
-  std::shared_ptr<
-      rc_rpc_plugin::commands::GetInteriorVehicleDataRequest> command =
+  auto command =
       CreateRCCommand<rc_rpc_plugin::commands::GetInteriorVehicleDataRequest>(
           mobile_message);
+  ASSERT_TRUE(command->Init());
   command->Run();
   application_manager::event_engine::Event event(
       hmi_apis::FunctionID::RC_GetInteriorVehicleData);
@@ -326,28 +369,30 @@ TEST_F(GetInteriorVehicleDataRequestTest,
   // Arrange
   MessageSharedPtr mobile_message = CreateBasicMessage();
   (*mobile_message)[application_manager::strings::msg_params]
-                   [message_params::kModuleType] = module_type;
+                   [message_params::kModuleType] = module_eType;
   (*mobile_message)[application_manager::strings::msg_params]
                    [message_params::kSubscribe] = false;
+  (*mobile_message)[application_manager::strings::msg_params]
+                   [message_params::kModuleId] = module_id;
+  const ModuleUid module(module_type, module_id);
 
   apps_.insert(mock_app_);
   apps_.insert(mock_app2_);
-  rc_app_extention_->SubscribeToInteriorVehicleData(enums_value::kRadio);
-  rc_app_extention2_->SubscribeToInteriorVehicleData(enums_value::kRadio);
+  rc_app_extention_->SubscribeToInteriorVehicleData(module);
+  rc_app_extention2_->SubscribeToInteriorVehicleData(module);
 
   smart_objects::SmartObject radio_data;
   radio_data[message_params::kBand] = enums_value::kAM;
   ON_CALL(app_mngr_, applications()).WillByDefault(Return(apps_da_));
 
-  std::shared_ptr<
-      rc_rpc_plugin::commands::GetInteriorVehicleDataRequest> command =
+  auto command =
       CreateRCCommand<rc_rpc_plugin::commands::GetInteriorVehicleDataRequest>(
           mobile_message);
 
   // Expectations
-  EXPECT_CALL(mock_interior_data_cache_, Contains(enums_value::kRadio))
+  EXPECT_CALL(mock_interior_data_cache_, Contains(module))
       .WillOnce(Return(true));
-  EXPECT_CALL(mock_interior_data_cache_, Retrieve(enums_value::kRadio))
+  EXPECT_CALL(mock_interior_data_cache_, Retrieve(module))
       .WillOnce(Return(radio_data));
 
   EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_, _)).Times(0);
@@ -358,11 +403,12 @@ TEST_F(GetInteriorVehicleDataRequestTest,
       .WillOnce(DoAll(SaveArg<0>(&command_result), Return(true)));
 
   // Act
+  ASSERT_TRUE(command->Init());
   command->Run();
 
   // Assert
-  EXPECT_FALSE(
-      rc_app_extention_->IsSubscibedToInteriorVehicleData(enums_value::kRadio));
+  EXPECT_FALSE(rc_app_extention_->IsSubscribedToInteriorVehicleDataOfType(
+      enums_value::kRadio));
   EXPECT_EQ((*command_result)[application_manager::strings::msg_params]
                              [message_params::kModuleData]
                              [message_params::kRadioControlData],
@@ -376,22 +422,22 @@ TEST_F(
   MessageSharedPtr mobile_message = CreateBasicMessage();
   ns_smart_device_link::ns_smart_objects::SmartObject& msg_params =
       (*mobile_message)[application_manager::strings::msg_params];
-  msg_params[message_params::kModuleType] = mobile_apis::ModuleType::RADIO;
-  std::shared_ptr<
-      rc_rpc_plugin::commands::GetInteriorVehicleDataRequest> command =
+  msg_params[message_params::kModuleType] = module_eType;
+  auto command =
       CreateRCCommand<rc_rpc_plugin::commands::GetInteriorVehicleDataRequest>(
           mobile_message);
-  smart_objects::SmartObject rc_capabilities;
   ON_CALL(mock_hmi_capabilities_, rc_capability())
-      .WillByDefault(Return(&rc_capabilities));
+      .WillByDefault(Return(nullptr));
 
   // Expectations
   EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_, _)).Times(0);
-  EXPECT_CALL(mock_rpc_service_,
-              ManageMobileCommand(
-                  MobileResultCodeIs(mobile_apis::Result::UNSUPPORTED_RESOURCE),
-                  _)).WillOnce((Return(true)));
+  EXPECT_CALL(
+      mock_rpc_service_,
+      ManageMobileCommand(
+          MobileResultCodeIs(mobile_apis::Result::UNSUPPORTED_RESOURCE), _))
+      .WillOnce((Return(true)));
   // Act
+  ASSERT_TRUE(command->Init());
   command->Run();
 }
 
@@ -402,9 +448,8 @@ TEST_F(
   MessageSharedPtr mobile_message = CreateBasicMessage();
   ns_smart_device_link::ns_smart_objects::SmartObject& msg_params =
       (*mobile_message)[application_manager::strings::msg_params];
-  msg_params[message_params::kModuleType] = mobile_apis::ModuleType::RADIO;
-  std::shared_ptr<
-      rc_rpc_plugin::commands::GetInteriorVehicleDataRequest> command =
+  msg_params[message_params::kModuleType] = module_eType;
+  auto command =
       CreateRCCommand<rc_rpc_plugin::commands::GetInteriorVehicleDataRequest>(
           mobile_message);
   ON_CALL(mock_policy_handler_, CheckModule(_, _)).WillByDefault(Return(false));
@@ -417,6 +462,7 @@ TEST_F(
       .WillOnce((Return(true)));
 
   // Act
+  ASSERT_TRUE(command->Init());
   command->Run();
 }
 
@@ -429,12 +475,14 @@ TEST_F(GetInteriorVehicleDataRequestTest,
   // Arrange
   MessageSharedPtr mobile_message = CreateBasicMessage();
   auto& msg_params = (*mobile_message)[strings::msg_params];
-  msg_params[message_params::kModuleType] = module_type;
+  msg_params[message_params::kModuleType] = module_eType;
 
   MessageSharedPtr hmi_response_message = CreateBasicMessage();
   auto& hmi_response_params = (*hmi_response_message)[strings::msg_params];
   hmi_response_params[hmi_response::code] = hmi_apis::Common_Result::SUCCESS;
   hmi_response_params[strings::connection_key] = kConnectionKey;
+  hmi_response_params[message_params::kModuleData][message_params::kModuleId] =
+      module_id;
 
   ON_CALL(mock_interior_data_cache_, Contains(_)).WillByDefault(Return(false));
   ON_CALL(mock_interior_data_manager_, CheckRequestsToHMIFrequency(_))
@@ -457,6 +505,7 @@ TEST_F(GetInteriorVehicleDataRequestTest,
   application_manager::event_engine::Event event(
       hmi_apis::FunctionID::RC_GetInteriorVehicleData);
   event.set_smart_object(*hmi_response_message);
+  ASSERT_TRUE(command->Init());
   command->Run();
   command->on_event(event);
 }
@@ -471,7 +520,7 @@ TEST_F(GetInteriorVehicleDataRequestTest,
   MessageSharedPtr mobile_message = CreateBasicMessage();
   auto& msg_params =
       (*mobile_message)[application_manager::strings::msg_params];
-  msg_params[message_params::kModuleType] = module_type;
+  msg_params[message_params::kModuleType] = module_eType;
 
   MessageSharedPtr hmi_message = CreateBasicMessage();
   auto& hmi_msg_params = (*hmi_message)[strings::params];
@@ -497,19 +546,22 @@ TEST_F(GetInteriorVehicleDataRequestTest,
       hmi_apis::FunctionID::RC_GetInteriorVehicleData);
   event.set_smart_object(*hmi_message);
   auto command = CreateRCCommand<GetInteriorVehicleDataRequest>(mobile_message);
+  ASSERT_TRUE(command->Init());
   command->Run();
   command->on_event(event);
 }
 
 TEST_F(GetInteriorVehicleDataRequestTest,
-       OnEvent_InvalidHmiResponse_DontUnsubscibeLastApp_NoClearCache) {
+       OnEvent_InvalidHmiResponse_DontUnsubscribeLastApp_NoClearCache) {
   // Arrange
   MessageSharedPtr mobile_message = CreateBasicMessage();
   (*mobile_message)[application_manager::strings::msg_params]
-                   [message_params::kModuleType] = module_type;
+                   [message_params::kModuleType] = module_eType;
+  (*mobile_message)[application_manager::strings::msg_params]
+                   [message_params::kModuleId] = module_id;
   (*mobile_message)[application_manager::strings::msg_params]
                    [message_params::kSubscribe] = false;
-
+  const ModuleUid module(module_type, module_id);
   MessageSharedPtr hmi_response = CreateBasicMessage();
   ns_smart_device_link::ns_smart_objects::SmartObject& hmi_msg_params =
       (*hmi_response)[application_manager::strings::params];
@@ -518,7 +570,7 @@ TEST_F(GetInteriorVehicleDataRequestTest,
   hmi_msg_params[application_manager::strings::connection_key] = kConnectionKey;
 
   apps_.insert(mock_app_);
-  rc_app_extention_->SubscribeToInteriorVehicleData(enums_value::kRadio);
+  rc_app_extention_->SubscribeToInteriorVehicleData(module);
   ON_CALL(app_mngr_, applications()).WillByDefault(Return(apps_da_));
   ON_CALL(mock_interior_data_manager_, CheckRequestsToHMIFrequency(_))
       .WillByDefault(Return(true));
@@ -537,10 +589,10 @@ TEST_F(GetInteriorVehicleDataRequestTest,
   EXPECT_CALL(mock_interior_data_cache_, Clear()).Times(0);
 
   // Act
-  std::shared_ptr<
-      rc_rpc_plugin::commands::GetInteriorVehicleDataRequest> command =
+  auto command =
       CreateRCCommand<rc_rpc_plugin::commands::GetInteriorVehicleDataRequest>(
           mobile_message);
+  ASSERT_TRUE(command->Init());
   command->Run();
   application_manager::event_engine::Event event(
       hmi_apis::FunctionID::RC_GetInteriorVehicleData);
@@ -548,45 +600,47 @@ TEST_F(GetInteriorVehicleDataRequestTest,
   command->on_event(event);
 
   // Assert
-  EXPECT_TRUE(
-      rc_app_extention_->IsSubscibedToInteriorVehicleData(enums_value::kRadio));
+  EXPECT_TRUE(rc_app_extention_->IsSubscribedToInteriorVehicleData(module));
 }
 
 TEST_F(GetInteriorVehicleDataRequestTest,
        Execute_ExpectRejectDuToRequestLimitation_NoCahce) {
   // Arrange
-  rc_app_extention_->UnsubscribeFromInteriorVehicleData(enums_value::kRadio);
+  rc_app_extention_->UnsubscribeFromInteriorVehicleDataOfType(
+      enums_value::kRadio);
   MessageSharedPtr mobile_message = CreateBasicMessage();
   (*mobile_message)[application_manager::strings::msg_params]
-                   [message_params::kModuleType] = module_type;
+                   [message_params::kModuleType] = module_eType;
+  (*mobile_message)[application_manager::strings::msg_params]
+                   [message_params::kModuleId] = module_id;
   smart_objects::SmartObject radio_data;
   radio_data[message_params::kBand] = enums_value::kAM;
-  std::shared_ptr<
-      rc_rpc_plugin::commands::GetInteriorVehicleDataRequest> command =
+  auto command =
       CreateRCCommand<rc_rpc_plugin::commands::GetInteriorVehicleDataRequest>(
           mobile_message);
+  const ModuleUid module(module_type, module_id);
   size_t i = 0;
   for (; i <= max_request_in_time_frame; ++i) {
     // Expectations
     EXPECT_CALL(mock_interior_data_manager_,
-                CheckRequestsToHMIFrequency(enums_value::kRadio))
+                CheckRequestsToHMIFrequency(module))
         .WillOnce(Return(true));
-    EXPECT_CALL(mock_interior_data_manager_,
-                StoreRequestToHMITime(enums_value::kRadio));
-    EXPECT_CALL(mock_interior_data_cache_, Contains(enums_value::kRadio))
+    EXPECT_CALL(mock_interior_data_manager_, StoreRequestToHMITime(module));
+    EXPECT_CALL(mock_interior_data_cache_, Contains(module))
         .WillRepeatedly(Return(false));
     EXPECT_CALL(
         mock_rpc_service_,
         ManageHMICommand(
             HMIResultCodeIs(hmi_apis::FunctionID::RC_GetInteriorVehicleData),
-            _)).WillRepeatedly(Return(true));
+            _))
+        .WillRepeatedly(Return(true));
     // Act
+    ASSERT_TRUE(command->Init());
     command->Run();
   }
 
   // Expectations
-  EXPECT_CALL(mock_interior_data_manager_,
-              CheckRequestsToHMIFrequency(enums_value::kRadio))
+  EXPECT_CALL(mock_interior_data_manager_, CheckRequestsToHMIFrequency(module))
       .WillOnce(Return(false));
   EXPECT_CALL(
       mock_rpc_service_,
@@ -595,6 +649,130 @@ TEST_F(GetInteriorVehicleDataRequestTest,
   EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_, _)).Times(0);
 
   // Act
+  ASSERT_TRUE(command->Init());
   command->Run();
 }
+
+TEST_F(GetInteriorVehicleDataRequestTest,
+       OnEvent_ValidHmiResponse_AvailableHDChanelsIsArrayWithHDChanels) {
+  using rc_rpc_plugin::commands::GetInteriorVehicleDataRequest;
+  namespace hmi_response = application_manager::hmi_response;
+  namespace strings = application_manager::strings;
+
+  const uint32_t chanel1_index = 1u;
+  const uint32_t chanel2_index = 2u;
+  const uint32_t chanel3_index = 3u;
+
+  const uint32_t expected_array_length = 3u;
+
+  // Arrange
+  MessageSharedPtr mobile_message = CreateBasicMessage();
+
+  MessageSharedPtr hmi_response_message = CreateBasicMessage();
+  auto& hmi_response_params = (*hmi_response_message)[strings::msg_params];
+  hmi_response_params[hmi_response::code] = hmi_apis::Common_Result::SUCCESS;
+  hmi_response_params[strings::connection_key] = kAppId;
+
+  auto& msg_params = (*hmi_response_message)[strings::msg_params];
+  msg_params[message_params::kModuleType] = module_type;
+
+  auto available_hd_chanels =
+      smart_objects::SmartObject(smart_objects::SmartType_Array);
+
+  available_hd_chanels[0] = chanel1_index;
+  available_hd_chanels[1] = chanel2_index;
+  available_hd_chanels[2] = chanel3_index;
+
+  msg_params[message_params::kModuleData][message_params::kRadioControlData]
+            [message_params::kAvailableHdChannels] = available_hd_chanels;
+
+  ON_CALL(mock_interior_data_cache_, Contains(_)).WillByDefault(Return(false));
+  ON_CALL(mock_interior_data_manager_, CheckRequestsToHMIFrequency(_))
+      .WillByDefault(Return(true));
+
+  MessageSharedPtr message_to_mob = CreateBasicMessage();
+
+  // Expectations
+  EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_, _)).WillOnce(Return(true));
+  EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(_, _))
+      .WillOnce(DoAll(SaveArg<0>(&message_to_mob), Return(true)));
+
+  // Act
+  auto command = CreateRCCommand<GetInteriorVehicleDataRequest>(mobile_message);
+  application_manager::event_engine::Event event(
+      hmi_apis::FunctionID::RC_GetInteriorVehicleData);
+
+  ASSERT_TRUE(command->Init());
+  command->Run();
+
+  event.set_smart_object(*hmi_response_message);
+  command->on_event(event);
+
+  auto& hd_chanels =
+      (*message_to_mob)[strings::msg_params][message_params::kModuleData]
+                       [message_params::kRadioControlData]
+                       [message_params::kAvailableHdChannels];
+  const size_t array_length = hd_chanels.length();
+
+  EXPECT_EQ(expected_array_length, array_length);
+
+  EXPECT_EQ(chanel1_index, hd_chanels[0].asUInt());
+  EXPECT_EQ(chanel2_index, hd_chanels[1].asUInt());
+  EXPECT_EQ(chanel3_index, hd_chanels[2].asUInt());
+}
+
+TEST_F(GetInteriorVehicleDataRequestTest,
+       OnEvent_ValidHmiResponse_ClimateEnableAvailable) {
+  using rc_rpc_plugin::commands::GetInteriorVehicleDataRequest;
+  namespace hmi_response = application_manager::hmi_response;
+  namespace strings = application_manager::strings;
+
+  // Arrange
+  MessageSharedPtr mobile_message = CreateBasicMessage();
+
+  MessageSharedPtr hmi_response_message = CreateBasicMessage();
+  auto& hmi_response_params = (*hmi_response_message)[strings::msg_params];
+  hmi_response_params[hmi_response::code] = hmi_apis::Common_Result::SUCCESS;
+  hmi_response_params[strings::connection_key] = kAppId;
+
+  auto& msg_params = (*hmi_response_message)[strings::msg_params];
+
+  auto climate_control_data =
+      smart_objects::SmartObject(smart_objects::SmartType_Boolean);
+  climate_control_data = true;
+
+  msg_params[message_params::kModuleData][message_params::kClimateControlData]
+            [message_params::kClimateEnableAvailable] = climate_control_data;
+
+  ON_CALL(mock_interior_data_cache_, Contains(_)).WillByDefault(Return(false));
+  ON_CALL(mock_interior_data_manager_, CheckRequestsToHMIFrequency(_))
+      .WillByDefault(Return(true));
+
+  auto message_to_mob = CreateBasicMessage();
+
+  // Expectations
+  EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_, _)).WillOnce(Return(true));
+  EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(_, _))
+      .WillOnce(DoAll(SaveArg<0>(&message_to_mob), Return(true)));
+
+  // Act
+  auto command = CreateRCCommand<GetInteriorVehicleDataRequest>(mobile_message);
+  application_manager::event_engine::Event event(
+      hmi_apis::FunctionID::RC_GetInteriorVehicleData);
+
+  ASSERT_TRUE(command->Init());
+  command->Run();
+
+  event.set_smart_object(*hmi_response_message);
+  command->on_event(event);
+
+  const bool climate_enable_available =
+      (*message_to_mob)[strings::msg_params][message_params::kModuleData]
+                       [message_params::kClimateControlData]
+                       [message_params::kClimateEnableAvailable]
+                           .asBool();
+
+  EXPECT_TRUE(climate_enable_available);
+}
+
 }  // namespace rc_rpc_plugin_test

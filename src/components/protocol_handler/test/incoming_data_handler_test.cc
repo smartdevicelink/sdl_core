@@ -30,11 +30,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 #include <gtest/gtest.h>
-#include <vector>
 #include <list>
+#include <vector>
 
-#include "utils/macro.h"
 #include "protocol_handler/incoming_data_handler.h"
+#include "utils/macro.h"
 
 namespace test {
 namespace components {
@@ -68,8 +68,10 @@ class IncomingDataHandlerTest : public ::testing::Test {
   void ProcessData(transport_manager::ConnectionUID uid,
                    const uint8_t* const data,
                    const uint32_t data_size) {
-    actual_frames = data_handler.ProcessData(
-        RawMessage(uid, 0, data, data_size), &result_code, &malformed_occurs);
+    actual_frames =
+        data_handler.ProcessData(RawMessage(uid, 0, data, data_size, false),
+                                 &result_code,
+                                 &malformed_occurs);
   }
 
   void AppendPacketToTMData(const ProtocolPacket& packet) {
@@ -91,7 +93,7 @@ class IncomingDataHandlerTest : public ::testing::Test {
   FrameList actual_frames;
   RESULT_CODE result_code;
   size_t malformed_occurs;
-  uint8_t* some_data, *some_data2;
+  uint8_t *some_data, *some_data2;
   size_t some_data_size, some_data2_size;
   uint32_t protov1_message_id;
   uint32_t some_message_id;
@@ -117,15 +119,17 @@ TEST_F(IncomingDataHandlerTest, NullData) {
 
 TEST_F(IncomingDataHandlerTest, DataForUnknownConnection) {
   size_t malformed_count = 0;
-  actual_frames = data_handler.ProcessData(
-      RawMessage(uid_unknown, 0, NULL, 0), &result_code, &malformed_count);
+  actual_frames =
+      data_handler.ProcessData(RawMessage(uid_unknown, 0, NULL, 0, false),
+                               &result_code,
+                               &malformed_count);
   EXPECT_EQ(RESULT_FAIL, result_code);
   EXPECT_EQ(malformed_count, 0u);
   EXPECT_TRUE(actual_frames.empty());
 
   AppendPacketToTMData(ProtocolPacket());
   actual_frames = data_handler.ProcessData(
-      RawMessage(uid_unknown, 0, tm_data.data(), tm_data.size()),
+      RawMessage(uid_unknown, 0, tm_data.data(), tm_data.size(), false),
       &result_code,
       &malformed_count);
   EXPECT_EQ(RESULT_FAIL, result_code);
@@ -251,8 +255,8 @@ TEST_F(IncomingDataHandlerTest, MixedPayloadData_TwoConnections) {
        it != actual_frames.end();
        ++it, ++it_exp) {
     // TODO(EZamakhov): investigate valgrind warning (unitialized value)
-    EXPECT_EQ(**it, **it_exp) << "Element number "
-                              << std::distance(mobile_packets.begin(), it_exp);
+    EXPECT_EQ(**it, **it_exp)
+        << "Element number " << std::distance(mobile_packets.begin(), it_exp);
   }
 }
 
@@ -654,8 +658,8 @@ TEST_F(IncomingDataHandlerTest, MalformedPacket_AdditionalByte) {
        it != actual_frames.end();
        ++it, ++it_exp) {
     // TODO(EZamakhov): investigate valgrind warning (unitialized value)
-    EXPECT_EQ(**it, **it_exp) << "Element number "
-                              << std::distance(mobile_packets.begin(), it_exp);
+    EXPECT_EQ(**it, **it_exp)
+        << "Element number " << std::distance(mobile_packets.begin(), it_exp);
   }
 }
 
@@ -754,8 +758,8 @@ TEST_F(IncomingDataHandlerTest, MalformedPacket_Mix) {
        it != actual_frames.end();
        ++it, ++it_exp) {
     // TODO(EZamakhov): investigate valgrind warning (unitialized value)
-    EXPECT_EQ(**it, **it_exp) << "Element number "
-                              << std::distance(mobile_packets.begin(), it_exp);
+    EXPECT_EQ(**it, **it_exp)
+        << "Element number " << std::distance(mobile_packets.begin(), it_exp);
   }
 }
 

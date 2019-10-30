@@ -33,9 +33,9 @@
 #ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_COMMAND_IMPL_H_
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_COMMAND_IMPL_H_
 
+#include "application_manager/application_manager.h"
 #include "application_manager/commands/command.h"
 #include "application_manager/event_engine/event_observer.h"
-#include "application_manager/application_manager.h"
 #include "application_manager/smart_object_keys.h"
 #include "policy/policy_types.h"
 #include "utils/logger.h"
@@ -118,6 +118,11 @@ class CommandImpl : public Command {
   int32_t function_id() const OVERRIDE;
 
   /*
+   * @brief Retrieves Window ID
+   */
+  WindowID window_id() const OVERRIDE;
+
+  /*
    * @brief Function is called by RequestController when request execution time
    * has exceed it's limit
    *
@@ -125,18 +130,19 @@ class CommandImpl : public Command {
   void onTimeOut() OVERRIDE;
 
   /**
- * @brief AllowedToTerminate tells request Controller if it can terminate this
- * request by response.
- * By default, RequestCtrl should terminate all requests by their responses.
- *  If request need to terminate itself, it should override this function false
- * @return allowed_to_terminate_ value
- */
+   * @brief AllowedToTerminate tells request Controller if it can terminate this
+   * request by response.
+   * By default, RequestCtrl should terminate all requests by their responses.
+   *  If request need to terminate itself, it should override this function
+   * false
+   * @return allowed_to_terminate_ value
+   */
   bool AllowedToTerminate() OVERRIDE;
 
   /**
-  * @brief SetAllowedToTerminate set up allowed to terminate flag.
-  * If true, request controller will terminate request on response
-  */
+   * @brief SetAllowedToTerminate set up allowed to terminate flag.
+   * If true, request controller will terminate request on response
+   */
   void SetAllowedToTerminate(const bool allowed) OVERRIDE;
 
   // members

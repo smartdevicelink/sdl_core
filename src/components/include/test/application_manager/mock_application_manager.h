@@ -33,9 +33,9 @@
 #ifndef SRC_COMPONENTS_INCLUDE_TEST_APPLICATION_MANAGER_MOCK_APPLICATION_MANAGER_H_
 #define SRC_COMPONENTS_INCLUDE_TEST_APPLICATION_MANAGER_MOCK_APPLICATION_MANAGER_H_
 
+#include <memory>
 #include <string>
 #include <vector>
-#include <memory>
 
 #include "gmock/gmock.h"
 
@@ -80,6 +80,8 @@ class MockApplicationManager : public application_manager::ApplicationManager {
   MOCK_CONST_METHOD0(
       pending_applications,
       DataAccessor<application_manager::AppsWaitRegistrationSet>());
+  MOCK_CONST_METHOD0(reregister_applications,
+                     DataAccessor<application_manager::ReregisterWaitList>());
   MOCK_CONST_METHOD1(
       application, application_manager::ApplicationSharedPtr(uint32_t app_id));
   MOCK_CONST_METHOD0(active_application,
@@ -109,6 +111,9 @@ class MockApplicationManager : public application_manager::ApplicationManager {
       application_by_name,
       application_manager::ApplicationSharedPtr(const std::string& app_name));
   MOCK_CONST_METHOD1(pending_application_by_policy_id,
+                     application_manager::ApplicationSharedPtr(
+                         const std::string& policy_app_id));
+  MOCK_CONST_METHOD1(reregister_application_by_policy_id,
                      application_manager::ApplicationSharedPtr(
                          const std::string& policy_app_id));
   MOCK_METHOD1(
@@ -194,11 +199,11 @@ class MockApplicationManager : public application_manager::ApplicationManager {
   MOCK_METHOD1(SetIconFileFromSystemRequest, void(const std::string policy_id));
   MOCK_CONST_METHOD0(IsHMICooperating, bool());
   MOCK_METHOD2(IviInfoUpdated,
-               void(mobile_apis::VehicleDataType::eType vehicle_info,
-                    int value));
+               void(const std::string& vehicle_info, int value));
   MOCK_METHOD1(RegisterApplication,
-               application_manager::ApplicationSharedPtr(const std::shared_ptr<
-                   smart_objects::SmartObject>& request_for_registration));
+               application_manager::ApplicationSharedPtr(
+                   const std::shared_ptr<smart_objects::SmartObject>&
+                       request_for_registration));
   MOCK_METHOD0(SendUpdateAppList, void());
   MOCK_METHOD2(MarkAppsGreyOut,
                void(const connection_handler::DeviceHandle handle,
@@ -247,9 +252,10 @@ class MockApplicationManager : public application_manager::ApplicationManager {
   MOCK_CONST_METHOD2(HMILevelAllowsStreaming,
                      bool(uint32_t app_id,
                           protocol_handler::ServiceType service_type));
-  MOCK_METHOD4(CheckPolicyPermissions,
+  MOCK_METHOD5(CheckPolicyPermissions,
                mobile_apis::Result::eType(
                    const application_manager::ApplicationSharedPtr app,
+                   const application_manager::WindowID window_id,
                    const std::string& function_id,
                    const application_manager::RPCParams& rpc_params,
                    application_manager::CommandParametersPermissions*
@@ -276,9 +282,10 @@ class MockApplicationManager : public application_manager::ApplicationManager {
                void(uint32_t app_id,
                     protocol_handler::ServiceType service_type,
                     bool state));
-  MOCK_CONST_METHOD5(CreateRegularState,
+  MOCK_CONST_METHOD6(CreateRegularState,
                      application_manager::HmiStatePtr(
                          application_manager::ApplicationSharedPtr app,
+                         const mobile_apis::WindowType::eType window_type,
                          mobile_apis::HMILevel::eType hmi_level,
                          mobile_apis::AudioStreamingState::eType audio_state,
                          mobile_apis::VideoStreamingState::eType video_state,
@@ -334,8 +341,9 @@ class MockApplicationManager : public application_manager::ApplicationManager {
   MOCK_METHOD2(ProcessReconnection,
                void(application_manager::ApplicationSharedPtr application,
                     const uint32_t connection_key));
-  MOCK_CONST_METHOD1(IsAppInReconnectMode,
-                     bool(const std::string& policy_app_id));
+  MOCK_CONST_METHOD2(IsAppInReconnectMode,
+                     bool(const connection_handler::DeviceHandle& device_id,
+                          const std::string& policy_app_id));
   MOCK_CONST_METHOD0(GetCommandFactory, application_manager::CommandFactory&());
   MOCK_CONST_METHOD0(get_current_audio_source, uint32_t());
   MOCK_METHOD1(set_current_audio_source, void(const uint32_t));

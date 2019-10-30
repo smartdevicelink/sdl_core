@@ -35,18 +35,18 @@
 
 #include "application_manager/application_manager.h"
 #include "application_manager/message_helper.h"
-#include "application_manager/rpc_handler.h"
-#include "application_manager/rpc_service.h"
 #include "application_manager/mobile_message_handler.h"
 #include "application_manager/policies/policy_handler_observer.h"
+#include "application_manager/rpc_handler.h"
+#include "application_manager/rpc_service.h"
 
-#include "protocol_handler/protocol_observer.h"
 #include "hmi_message_handler/hmi_message_observer.h"
 #include "hmi_message_handler/hmi_message_sender.h"
+#include "protocol_handler/protocol_observer.h"
 
-#include "formatters/formatter_json_rpc.h"
-#include "formatters/CFormatterJsonSDLRPCv2.h"
 #include "formatters/CFormatterJsonSDLRPCv1.h"
+#include "formatters/CFormatterJsonSDLRPCv2.h"
+#include "formatters/formatter_json_rpc.h"
 #include "interfaces/HMI_API_schema.h"
 #include "interfaces/MOBILE_API_schema.h"
 #ifdef TELEMETRY_MONITOR
@@ -56,8 +56,8 @@
 #include "interfaces/v4_protocol_v1_2_no_extra.h"
 #include "interfaces/v4_protocol_v1_2_no_extra_schema.h"
 
-#include "utils/threads/message_loop_thread.h"
 #include "utils/semantic_version.h"
+#include "utils/threads/message_loop_thread.h"
 
 namespace application_manager {
 namespace rpc_handler {
@@ -87,13 +87,15 @@ typedef threads::MessageLoopThread<utils::PrioritizedQueue<MessageFromMobile> >
     FromMobileQueue;
 typedef threads::MessageLoopThread<utils::PrioritizedQueue<MessageFromHmi> >
     FromHmiQueue;
-}
+}  // namespace impl
 
 class RPCHandlerImpl : public RPCHandler,
                        public impl::FromMobileQueue::Handler,
                        public impl::FromHmiQueue::Handler {
  public:
-  RPCHandlerImpl(ApplicationManager& app_manager);
+  RPCHandlerImpl(ApplicationManager& app_manager,
+                 hmi_apis::HMI_API& hmi_so_factory,
+                 mobile_apis::MOBILE_API& mobile_so_factory);
   ~RPCHandlerImpl();
 
   // CALLED ON messages_from_mobile_ thread!
@@ -177,8 +179,8 @@ class RPCHandlerImpl : public RPCHandler,
   // Thread that pumps messages coming from HMI.
   impl::FromHmiQueue messages_from_hmi_;
 
-  hmi_apis::HMI_API hmi_so_factory_;
-  mobile_apis::MOBILE_API mobile_so_factory_;
+  hmi_apis::HMI_API& hmi_so_factory_;
+  mobile_apis::MOBILE_API& mobile_so_factory_;
 #ifdef TELEMETRY_MONITOR
   AMTelemetryObserver* metric_observer_;
 #endif  // TELEMETRY_MONITOR

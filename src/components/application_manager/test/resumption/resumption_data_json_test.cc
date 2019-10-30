@@ -30,13 +30,13 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <string>
 #include <algorithm>
+#include <string>
 #include "gtest/gtest.h"
 
-#include "application_manager/usage_statistics.h"
 #include "application_manager/mock_application.h"
 #include "application_manager/mock_resumption_data.h"
+#include "application_manager/usage_statistics.h"
 #include "interfaces/MOBILE_API.h"
 #include "resumption/last_state_impl.h"
 
@@ -51,9 +51,9 @@ namespace components {
 namespace resumption_test {
 
 using ::testing::_;
+using ::testing::NiceMock;
 using ::testing::Return;
 using ::testing::ReturnRef;
-using ::testing::NiceMock;
 
 namespace am = application_manager;
 using namespace Json;

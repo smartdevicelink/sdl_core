@@ -35,15 +35,16 @@
 
 #include <list>
 
-#include "utils/lock.h"
-#include "policy/policy_manager.h"
-#include "policy/policy_table.h"
-#include "policy/cache_manager_interface.h"
-#include "policy/update_status_manager.h"
-#include "policy/policy_table/functions.h"
-#include "policy/usage_statistics/statistics_manager.h"
 #include "policy/access_remote.h"
 #include "policy/access_remote_impl.h"
+#include "policy/cache_manager_interface.h"
+#include "policy/policy_manager.h"
+#include "policy/policy_table.h"
+#include "policy/policy_table/functions.h"
+#include "policy/update_status_manager.h"
+#include "policy/usage_statistics/statistics_manager.h"
+#include "utils/lock.h"
+#include "utils/timer.h"
 
 namespace policy_table = rpc::policy_table_interface_base;
 
@@ -54,7 +55,47 @@ class PolicyManagerImpl : public PolicyManager {
  public:
   PolicyManagerImpl();
   explicit PolicyManagerImpl(bool in_memory);
+  /*
+   * \param policy_app_id policy app id
+   * \return true if the app need encryption
+   */
+  bool AppNeedEncryption(const std::string& policy_app_id) const OVERRIDE;
 
+  /*
+   * \param policy_app_id policy app id
+   * \return Optional app need encryption
+   */
+  const rpc::Optional<rpc::Boolean> GetAppEncryptionRequired(
+      const std::string& policy_app_id) const OVERRIDE;
+
+  /*
+   * \param policy_app_id policy app id
+   * \return groups that exist for app
+   */
+  const std::vector<std::string> GetFunctionalGroupsForApp(
+      const std::string& policy_app_id) const OVERRIDE;
+
+  const std::vector<std::string> GetApplicationPolicyIDs() const OVERRIDE;
+
+  /*
+   * \param policy_group group
+   * \return true if the group need encryption
+   */
+  bool FunctionGroupNeedEncryption(
+      const std::string& policy_group) const OVERRIDE;
+
+  /*
+   * \param policy_group group\
+   * \return RPCs that exists in group
+   */
+  const std::vector<std::string> GetRPCsForFunctionGroup(
+      const std::string& group) const OVERRIDE;
+  /*
+   * \param function_id function id
+   * \return policy function name
+   */
+  const std::string GetPolicyFunctionName(
+      const uint32_t function_id) const OVERRIDE;
   /**
    * @brief set_listener set new policy listener instance
    * @param listener new policy listener
@@ -86,8 +127,10 @@ class PolicyManagerImpl : public PolicyManager {
    * @param pt_content PTU as binary string
    * @return true if successfully
    */
-  bool LoadPT(const std::string& file,
-              const BinaryMessage& pt_content) OVERRIDE;
+  PtProcessingResult LoadPT(const std::string& file,
+                            const BinaryMessage& pt_content) OVERRIDE;
+
+  void OnPTUFinished(const PtProcessingResult ptu_result) OVERRIDE;
 
   /**
    * @brief Resets Policy Table
@@ -122,6 +165,7 @@ class PolicyManagerImpl : public PolicyManager {
    * @brief Check if specified RPC for specified application
    * has permission to be executed in specified HMI Level
    * and also its permitted params.
+   * @param device_id device identifier
    * @param app_id Id of application provided during registration
    * @param hmi_level Current HMI Level of application
    * @param rpc Name of RPC
@@ -129,7 +173,8 @@ class PolicyManagerImpl : public PolicyManager {
    * @param result containing flag if HMI Level is allowed
    * and list of allowed params.
    */
-  void CheckPermissions(const PTString& app_id,
+  void CheckPermissions(const PTString& device_id,
+                        const PTString& app_id,
                         const PTString& hmi_level,
                         const PTString& rpc,
                         const RPCParams& rpc_params,
@@ -148,6 +193,11 @@ class PolicyManagerImpl : public PolicyManager {
    */
   void KmsChanged(int kilometers) OVERRIDE;
 
+  const boost::optional<bool> LockScreenDismissalEnabledState() const OVERRIDE;
+
+  const boost::optional<std::string> LockScreenDismissalWarningMessage(
+      const std::string& language) const OVERRIDE;
+
   /**
    * @brief Increments counter of ignition cycles
    */
@@ -158,6 +208,8 @@ class PolicyManagerImpl : public PolicyManager {
    * @return Current status of policy table
    */
   std::string ForcePTExchange() OVERRIDE;
+
+  void StopRetrySequence() OVERRIDE;
 
   /**
    * @brief Exchange by user request
@@ -173,8 +225,10 @@ class PolicyManagerImpl : public PolicyManager {
 
   /**
    * @brief Resets retry sequence
+   * @param send_event - if true corresponding event is sent to
+   * UpdateStatusManager
    */
-  void ResetRetrySequence() OVERRIDE;
+  void ResetRetrySequence(const ResetRetryCountType reset_type) OVERRIDE;
 
   /**
    * @brief Gets timeout to wait before next retry updating PT
@@ -262,12 +316,15 @@ class PolicyManagerImpl : public PolicyManager {
   /**
    * @brief Update Application Policies as reaction
    * on User allowing/disallowing device this app is running on.
+   * @param device_handle device identifier
    * @param app_id Unique application id
    * @param is_device_allowed true if user allowing device otherwise false
    * @return true if operation was successful
    */
-  bool ReactOnUserDevConsentForApp(const std::string& app_id,
-                                   const bool is_device_allowed) OVERRIDE;
+  bool ReactOnUserDevConsentForApp(
+      const transport_manager::DeviceHandle& device_handle,
+      const std::string& app_id,
+      const bool is_device_allowed) OVERRIDE;
 
   /**
    * @brief Retrieves data from app_policies about app on its registration:
@@ -310,12 +367,14 @@ class PolicyManagerImpl : public PolicyManager {
 
   /**
    * @brief Get default HMI level for application
+   * @param device_id device identifier
    * @param policy_app_id Unique application id
    * @param default_hmi Default HMI level for application or empty, if value
    * was not set
    * @return true, if succedeed, otherwise - false
    */
-  bool GetDefaultHmi(const std::string& policy_app_id,
+  bool GetDefaultHmi(const std::string& device_id,
+                     const std::string& policy_app_id,
                      std::string* default_hmi) const OVERRIDE;
 
   /**
@@ -360,9 +419,11 @@ class PolicyManagerImpl : public PolicyManager {
 
   /**
    * @brief Return device id, which hosts specific application
+   * @param device_id device identifier
    * @param policy_app_id Application id, which is required to update device id
    */
   std::string& GetCurrentDeviceId(
+      const transport_manager::DeviceHandle& device_id,
       const std::string& policy_app_id) const OVERRIDE;
 
   /**
@@ -404,11 +465,12 @@ class PolicyManagerImpl : public PolicyManager {
   /**
    * @brief Gets specific application permissions changes since last policy
    * table update
+   * @param device_id device identifier
    * @param policy_app_id Unique application id
    * @return Permissions changes
    */
   AppPermissions GetAppPermissionsChanges(
-      const std::string& policy_app_id) OVERRIDE;
+      const std::string& device_id, const std::string& policy_app_id) OVERRIDE;
 
   /**
    * @brief Removes specific application permissions changes
@@ -418,10 +480,11 @@ class PolicyManagerImpl : public PolicyManager {
 
   /**
    * @brief Send OnPermissionsUpdated for choosen application
+   * @param device_id device identifier
    * @param application_id Unique application id
    */
   void SendNotificationOnPermissionsUpdated(
-      const std::string& application_id) OVERRIDE;
+      const std::string& device_id, const std::string& application_id) OVERRIDE;
 
   /**
    * @brief Removes unpaired device records and related records from DB
@@ -452,20 +515,24 @@ class PolicyManagerImpl : public PolicyManager {
   /**
    * @brief Adds, application to the db or update existed one
    * run PTU if policy update is necessary for application.
+   * @param device_id device identifier
    * @param application_id Unique application id
    * @param hmi_types application HMI types
    * @return function that will notify update manager about new application
    */
   StatusNotifier AddApplication(
+      const std::string& device_id,
       const std::string& application_id,
       const rpc::policy_table_interface_base::AppHmiTypes& hmi_types) OVERRIDE;
 
   /**
    * @brief Assigns new HMI types for specified application
+   * @param device_handle device identifier
    * @param application_id Unique application id
    * @param hmi_types new HMI types list
    */
-  void SetDefaultHmiTypes(const std::string& application_id,
+  void SetDefaultHmiTypes(const transport_manager::DeviceHandle& device_handle,
+                          const std::string& application_id,
                           const std::vector<int>& hmi_types) OVERRIDE;
 
   /**
@@ -542,10 +609,10 @@ class PolicyManagerImpl : public PolicyManager {
   void OnAppsSearchCompleted(const bool trigger_ptu) OVERRIDE;
 
   /**
-    * @brief Get state of request types for given application
-    * @param policy_app_id Unique application id
-    * @return request type state
-    */
+   * @brief Get state of request types for given application
+   * @param policy_app_id Unique application id
+   * @return request type state
+   */
   RequestType::State GetAppRequestTypesState(
       const std::string& policy_app_id) const OVERRIDE;
 
@@ -559,25 +626,37 @@ class PolicyManagerImpl : public PolicyManager {
 
   /**
    * @brief Gets request types for application
+   * @param device_handle device identifier
    * @param policy_app_id Unique application id
    * @return request types of application
    */
   const std::vector<std::string> GetAppRequestTypes(
+      const transport_manager::DeviceHandle& device_handle,
       const std::string policy_app_id) const OVERRIDE;
 
   /**
-    * @brief Gets request subtypes for application
-    * @param policy_app_id Unique application id
-    * @return request subtypes of application
-    */
+   * @brief Gets request subtypes for application
+   * @param policy_app_id Unique application id
+   * @return request subtypes of application
+   */
   const std::vector<std::string> GetAppRequestSubTypes(
       const std::string& policy_app_id) const OVERRIDE;
 
   /**
-   * @brief Get information about vehicle
-   * @return vehicle information
+   * @brief Gets copy of current policy table data
+   * @return policy_table as json object
    */
-  const VehicleInfo GetVehicleInfo() const OVERRIDE;
+  Json::Value GetPolicyTableData() const OVERRIDE;
+
+  /**
+   * @brief Gets vehicle data items
+   * @return Structure with vehicle data items
+   */
+  const std::vector<policy_table::VehicleDataItem> GetVehicleDataItems()
+      const OVERRIDE;
+
+  std::vector<policy_table::VehicleDataItem> GetRemovedVehicleDataItems()
+      const OVERRIDE;
 
   /**
    * @brief Get a list of enabled cloud applications
@@ -677,17 +756,20 @@ class PolicyManagerImpl : public PolicyManager {
    * provider
    * @param policy_app_id Unique application id
    * @return bool true if allowed
-  */
+   */
   bool UnknownRPCPassthroughAllowed(
       const std::string& policy_app_id) const OVERRIDE;
 
   /**
    * @brief OnAppRegisteredOnMobile allows to handle event when application were
    * succesfully registered on mobile device.
-   * It will send OnAppPermissionSend notification and will try to start PTU. *
+   * It will send OnAppPermissionSend notification and will try to start PTU.
+   *
+   * @param device_id device identifier
    * @param application_id registered application.
    */
-  void OnAppRegisteredOnMobile(const std::string& application_id) OVERRIDE;
+  void OnAppRegisteredOnMobile(const std::string& device_id,
+                               const std::string& application_id) OVERRIDE;
 
   void OnDeviceSwitching(const std::string& device_id_from,
                          const std::string& device_id_to) OVERRIDE;
@@ -776,14 +858,11 @@ class PolicyManagerImpl : public PolicyManager {
   }
 
   /**
-   * @brief Setter for send_on_update_sent_out and wrong_ptu_update_received
+   * @brief Setter for send_on_update_sent_out
    * @param send_on_update_sent_out new value of this flag
-   * @param wrong_ptu_update_received new value of this flag
    */
-  inline void SetSendOnUpdateFlags(const bool send_on_update_sent_out,
-                                   const bool wrong_ptu_update_received) {
+  inline void SetSendOnUpdateFlags(const bool send_on_update_sent_out) {
     send_on_update_sent_out_ = send_on_update_sent_out;
-    wrong_ptu_update_received_ = wrong_ptu_update_received;
   }
 #endif  // BUILD_TESTS
 
@@ -820,7 +899,27 @@ class PolicyManagerImpl : public PolicyManager {
   void Add(const std::string& app_id,
            usage_statistics::AppStopwatchId type,
            int32_t timespan_seconds) OVERRIDE;
+
   // Interface StatisticsManager (end)
+
+  /**
+   * @brief Check whether allowed retry sequence count is exceeded
+   * @return bool value - true is allowed count is exceeded, otherwise - false
+   */
+  bool IsAllowedRetryCountExceeded() const OVERRIDE;
+
+  /**
+   * @brief Finish PTU retry requence
+   */
+  void RetrySequenceFailed() OVERRIDE;
+
+  /**
+   * @brief In EXTERNAL_PROPRIETARY_MODE PTU sequence is driven by HMI and
+   * begins with OnSystemRequest from HMI. Following function is called when
+   * this notification is received to track number of PTU retries and react
+   * accordingly once allowed retry count is exceeded
+   */
+  void OnSystemRequestReceived() OVERRIDE;
 
  protected:
   /**
@@ -832,6 +931,11 @@ class PolicyManagerImpl : public PolicyManager {
       const BinaryMessage& pt_content);
 
  private:
+  /**
+   * @brief Increments PTU retry index for external flow
+   */
+  void IncrementRetryIndex();
+
   /**
    * @brief Checks if PT update should be started and schedules it if needed
    */
@@ -849,6 +953,17 @@ class PolicyManagerImpl : public PolicyManager {
   CheckAppPolicyResults CheckPermissionsChanges(
       const std::shared_ptr<policy_table::Table> update,
       const std::shared_ptr<policy_table::Table> snapshot);
+
+  /**
+   * @brief Compares current policies to the updated one.
+   * Trigger actions in case if certain fields after udate was changes.
+   * This function should be called after PT update.
+   * Actions require already updated policy table
+   * @param update Shared pointer to policy table udpate
+   * @param snapshot Shared pointer to old copy of policy table
+   */
+  void CheckPermissionsChangesAfterUpdate(const policy_table::Table& update,
+                                          const policy_table::Table& snapshot);
 
   /**
    * @brief Processes results from policy table update analysis done by
@@ -902,19 +1017,23 @@ class PolicyManagerImpl : public PolicyManager {
   /**
    * @brief Allows to process case when added application is not present in
    * policy db.
+   * @param device_id device identifier
    * @param policy application id.
    * @param cuuren consent for application's device.
    */
-  void AddNewApplication(const std::string& application_id,
+  void AddNewApplication(const std::string& device_id,
+                         const std::string& application_id,
                          DeviceConsent device_consent);
 
   /**
    * @brief Allows to process case when added application is already
    * in policy db.
+   * @param device_id device identifier
    * @param policy application id.
    * @param cuuren consent for application's device.
    */
-  void PromoteExistedApplication(const std::string& application_id,
+  void PromoteExistedApplication(const std::string& device_id,
+                                 const std::string& application_id,
                                  DeviceConsent device_consent);
 
   /**
@@ -932,9 +1051,12 @@ class PolicyManagerImpl : public PolicyManager {
 
   /**
    * @brief Checks whether need ask the permission of users
+   * @param device_id device identifier
+   * @param appid policy application id
    * @return true if user consent is needed
    */
-  virtual bool IsConsentNeeded(const std::string& app_id);
+  virtual bool IsConsentNeeded(const std::string& device_id,
+                               const std::string& app_id);
 
   /**
    * @brief Changes isConsentNeeded for app pending permissions, in case
@@ -1009,22 +1131,24 @@ class PolicyManagerImpl : public PolicyManager {
   void SendAuthTokenUpdated(const std::string policy_app_id);
 
   /**
-    * @brief Gets all allowed module types
-    * @param policy_app_id unique identifier of application
-    * @param modules list of allowed module types
-    * @return true if application has allowed modules
-    */
+   * @brief Gets all allowed module types
+   * @param policy_app_id unique identifier of application
+   * @param modules list of allowed module types
+   * @return true if application has allowed modules
+   */
   bool GetModuleTypes(const std::string& policy_app_id,
                       std::vector<std::string>* modules) const OVERRIDE;
 
   /**
    * @brief Notify application about its permissions changes by preparing and
    * sending OnPermissionsChanged notification
+   * @param device_id device identifier
    * @param policy_app_id Application id to send notification to
    * @param app_group_permissons Current permissions for groups assigned to
    * application
    */
   void NotifyPermissionsChanges(
+      const std::string& device_id,
       const std::string& policy_app_id,
       const std::vector<FunctionalGroupPermission>& app_group_permissions);
 
@@ -1049,11 +1173,13 @@ class PolicyManagerImpl : public PolicyManager {
    * user consents (if any) and ExternalConsent consents (if any) will be
    * updated
    * appropiately to current ExternalConsent status stored by policy table
+   * @param device_id device identifier
    * @param application_id Application id
    * @param processing_policy Defines whether consents timestamps must be
    * considered or external consents take over
    */
   void ProcessExternalConsentStatusForApp(
+      const std::string& device_id,
       const std::string& application_id,
       const ConsentProcessingPolicy processing_policy);
   /**
@@ -1081,16 +1207,26 @@ class PolicyManagerImpl : public PolicyManager {
 
   /**
    * @brief Notifies system by sending OnAppPermissionChanged notification
+   * @param device_id device identifier
    * @param app_policy Reference to application policy
    */
-  void NotifySystem(const AppPoliciesValueType& app_policy) const;
+  void NotifySystem(const std::string& device_id,
+                    const AppPoliciesValueType& app_policy) const;
 
   /**
    * @brief Sends OnPermissionChange notification to application if its
    * currently registered
+   * @param device_id device identifier
    * @param app_policy Reference to application policy
    */
-  void SendPermissionsToApp(const AppPoliciesValueType& app_policy);
+  void SendPermissionsToApp(const std::string& device_id,
+                            const AppPoliciesValueType& app_policy);
+
+  /**
+   * @brief Resumes all policy actions for all apps, suspended during
+   * PTU applying
+   */
+  void ResumePendingAppPolicyActions();
 
   /**
    * @brief Gets groups names from collection of groups permissions
@@ -1172,7 +1308,7 @@ class PolicyManagerImpl : public PolicyManager {
   /**
    * @brief Lock for guarding retry sequence
    */
-  sync_primitives::Lock retry_sequence_lock_;
+  mutable sync_primitives::Lock retry_sequence_lock_;
 
   /**
    * @brief Device id, which is used during PTU handling for specific
@@ -1199,11 +1335,6 @@ class PolicyManagerImpl : public PolicyManager {
   friend struct ProccessAppGroups;
 
   /**
-   * @brief Flag for notifying that invalid PTU was received
-   */
-  bool wrong_ptu_update_received_;
-
-  /**
    * @brief Flag for notifying that PTU was started
    */
   bool send_on_update_sent_out_;
@@ -1212,6 +1343,27 @@ class PolicyManagerImpl : public PolicyManager {
    * @brief Flag for notifying that invalid PTU should be triggered
    */
   bool trigger_ptu_;
+
+  /**
+   * @brief Flag that indicates whether a PTU sequence (including retries) is in
+   * progress
+   */
+  bool is_ptu_in_progress_;
+
+  typedef std::list<std::pair<std::string, AppPoliciesValueType> >
+      PendingAppPolicyActionsList;
+
+  /**
+   * @brief List containing device_id and pending permissions structure pairs
+   * which can be processed later on demand
+   */
+  PendingAppPolicyActionsList notify_system_list_;
+
+  /**
+   * @brief List containing device_id and pending permissions structure pairs
+   * which can be processed later on demand
+   */
+  PendingAppPolicyActionsList send_permissions_list_;
 };
 
 }  // namespace policy

@@ -53,6 +53,10 @@ void CSmartSchema::setSchemaItem(const ISchemaItemPtr schemaItem) {
   mSchemaItem = schemaItem;
 }
 
+ISchemaItemPtr CSmartSchema::getSchemaItem() {
+  return mSchemaItem;
+}
+
 void CSmartSchema::applySchema(SmartObject& Object,
                                const bool remove_unknown_parameters,
                                const utils::SemanticVersion& MessageVersion) {

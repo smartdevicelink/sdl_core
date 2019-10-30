@@ -33,24 +33,27 @@
 #ifndef SRC_COMPONENTS_INCLUDE_APPLICATION_MANAGER_RPC_HANDLER_H
 #define SRC_COMPONENTS_INCLUDE_APPLICATION_MANAGER_RPC_HANDLER_H
 
-#include "protocol_handler/protocol_observer.h"
 #include "hmi_message_handler/hmi_message_handler.h"
+#include "protocol_handler/protocol_observer.h"
 
 #ifdef TELEMETRY_MONITOR
 #include "application_manager/telemetry_observer.h"
+#include "telemetry_monitor/telemetry_observable.h"
 #endif  // TELEMETRY_MONITOR
 
 namespace application_manager {
 namespace rpc_handler {
 
+using ns_smart_device_link::ns_smart_objects::SMember;
+
 class RPCHandler
     : public hmi_message_handler::HMIMessageObserver,
       public protocol_handler::ProtocolObserver
 #ifdef TELEMETRY_MONITOR
-      ,
+    ,
       public telemetry_monitor::TelemetryObservable<AMTelemetryObserver>
 #endif  // TELEMETRY_MONITOR
-      {
+{
  public:
   virtual bool ValidateRpcSO(smart_objects::SmartObject& message,
                              utils::SemanticVersion& msg_version,

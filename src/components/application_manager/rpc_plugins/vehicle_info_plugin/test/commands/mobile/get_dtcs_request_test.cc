@@ -36,17 +36,16 @@
 
 #include "gtest/gtest.h"
 
-#include "smart_objects/smart_object.h"
-#include "application_manager/smart_object_keys.h"
-#include "application_manager/commands/commands_test.h"
-#include "application_manager/commands/command_request_test.h"
 #include "application_manager/application.h"
-#include "application_manager/mock_application_manager.h"
-#include "application_manager/mock_application.h"
 #include "application_manager/event_engine/event.h"
-#include "mobile/get_dtcs_request.h"
+#include "application_manager/mock_application.h"
+#include "application_manager/mock_application_manager.h"
 #include "application_manager/mock_message_helper.h"
+#include "application_manager/smart_object_keys.h"
 #include "interfaces/MOBILE_API.h"
+#include "mobile/get_dtcs_request.h"
+#include "smart_objects/smart_object.h"
+#include "vehicle_info_plugin/commands/vi_command_request_test.h"
 
 namespace test {
 namespace components {
@@ -57,23 +56,23 @@ namespace get_dtcs_request {
 using ::testing::_;
 using ::testing::Return;
 namespace am = ::application_manager;
-using am::commands::MessageSharedPtr;
-using vehicle_info_plugin::commands::GetDTCsRequest;
-using am::event_engine::Event;
 using am::MockMessageHelper;
+using am::commands::MessageSharedPtr;
+using am::event_engine::Event;
 using testing::Mock;
+using vehicle_info_plugin::commands::GetDTCsRequest;
 namespace mobile_result = mobile_apis::Result;
 
 typedef std::shared_ptr<GetDTCsRequest> GetDTCsRequestPtr;
 
 class GetDTCsRequestTest
-    : public CommandRequestTest<CommandsTestMocks::kIsNice> {
+    : public VICommandRequestTest<CommandsTestMocks::kIsNice> {
  public:
-  GetDTCsRequestTest() : CommandRequestTest<CommandsTestMocks::kIsNice>() {}
+  GetDTCsRequestTest() : VICommandRequestTest<CommandsTestMocks::kIsNice>() {}
 };
 
 TEST_F(GetDTCsRequestTest, Run_ApplicationIsNotRegistered_UNSUCCESS) {
-  GetDTCsRequestPtr command(CreateCommand<GetDTCsRequest>());
+  GetDTCsRequestPtr command(CreateCommandVI<GetDTCsRequest>());
 
   EXPECT_CALL(app_mngr_, application(_))
       .WillOnce(Return(ApplicationSharedPtr()));
@@ -93,7 +92,7 @@ TEST_F(GetDTCsRequestTest, Run_SUCCESS) {
   (*command_msg)[am::strings::params][am::strings::connection_key] =
       kConnectionKey;
 
-  GetDTCsRequestPtr command(CreateCommand<GetDTCsRequest>(command_msg));
+  GetDTCsRequestPtr command(CreateCommandVI<GetDTCsRequest>(command_msg));
 
   MockAppPtr app(CreateMockApp());
   EXPECT_CALL(app_mngr_, application(kConnectionKey)).WillOnce(Return(app));
@@ -107,7 +106,7 @@ TEST_F(GetDTCsRequestTest, Run_SUCCESS) {
 }
 
 TEST_F(GetDTCsRequestTest, OnEvent_UnknownEvent_UNSUCCESS) {
-  GetDTCsRequestPtr command(CreateCommand<GetDTCsRequest>());
+  GetDTCsRequestPtr command(CreateCommandVI<GetDTCsRequest>());
 
   Event event(hmi_apis::FunctionID::INVALID_ENUM);
 
@@ -132,7 +131,7 @@ TEST_F(GetDTCsRequestTest, OnEvent_SUCCESS) {
   MockAppPtr app(CreateMockApp());
   EXPECT_CALL(app_mngr_, application(_)).WillRepeatedly(Return(app));
 
-  GetDTCsRequestPtr command(CreateCommand<GetDTCsRequest>());
+  GetDTCsRequestPtr command(CreateCommandVI<GetDTCsRequest>());
   command->on_event(event);
 }
 

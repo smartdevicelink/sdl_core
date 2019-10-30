@@ -33,19 +33,19 @@ Copyright (c) 2018, Ford Motor Company
 
 #include "sdl_rpc_plugin/commands/mobile/system_request.h"
 
-#include <vector>
-#include <string>
 #include <stdio.h>
 #include <algorithm>
 #include <sstream>
+#include <string>
+#include <vector>
 #include "application_manager/policies/policy_handler_interface.h"
-#include "interfaces/MOBILE_API.h"
-#include "utils/file_system.h"
-#include "policy/policy_table/enums.h"
 #include "formatters/CFormatterJsonBase.h"
+#include "interfaces/MOBILE_API.h"
 #include "json/json.h"
-#include "utils/helpers.h"
+#include "policy/policy_table/enums.h"
 #include "utils/custom_string.h"
+#include "utils/file_system.h"
+#include "utils/helpers.h"
 
 namespace sdl_rpc_plugin {
 using namespace application_manager;
@@ -170,17 +170,18 @@ class QueryAppsDataValidator {
                            << "Package name length ["
                            << app_data[json::android][json::packageName]
                                   .asString()
-                                  .length() << "] exceeds max length ["
-                           << kPackageNameLengthMax << "]in json file.");
+                                  .length()
+                           << "] exceeds max length [" << kPackageNameLengthMax
+                           << "]in json file.");
           return false;
         }
       }
 
       // Languages verification
       if (!app_data[os_type].keyExists(json::languages)) {
-        LOG4CXX_WARN(logger_,
-                     kQueryAppsValidationFailedPrefix
-                         << "'languages' doesn't exist");
+        LOG4CXX_WARN(
+            logger_,
+            kQueryAppsValidationFailedPrefix << "'languages' doesn't exist");
         return false;
       }
       if (!ValidateLanguages(app_data[os_type][json::languages],
@@ -217,9 +218,9 @@ class QueryAppsDataValidator {
     ApplicationSharedPtr registered_app =
         manager_.application_by_policy_id(app_id);
     if (registered_app) {
-      LOG4CXX_INFO(logger_,
-                   "Application with the id: " << app_id
-                                               << " is already registered.");
+      LOG4CXX_INFO(
+          logger_,
+          "Application with the id: " << app_id << " is already registered.");
     }
     // And app name length
     const std::string appName(app_data[json::name].asString());
@@ -250,9 +251,9 @@ class QueryAppsDataValidator {
     for (size_t idx = 0; idx < languages_array_size; ++idx) {
       const smart_objects::SmartObject& language = languages.getElement(idx);
       if (smart_objects::SmartType_Map != language.getType()) {
-        LOG4CXX_WARN(logger_,
-                     kQueryAppsValidationFailedPrefix
-                         << "language is not a map.");
+        LOG4CXX_WARN(
+            logger_,
+            kQueryAppsValidationFailedPrefix << "language is not a map.");
         return false;
       }
       if (language.length() != 1) {
@@ -263,9 +264,9 @@ class QueryAppsDataValidator {
       }
       const std::string language_name = (*language.map_begin()).first;
       if (!language_name.length()) {
-        LOG4CXX_WARN(logger_,
-                     kQueryAppsValidationFailedPrefix
-                         << "language name is empty");
+        LOG4CXX_WARN(
+            logger_,
+            kQueryAppsValidationFailedPrefix << "language name is empty");
         return false;
       }
       // Verify default language defined
@@ -329,9 +330,9 @@ class QueryAppsDataValidator {
     const smart_objects::SmartArray* synonyms_array =
         language[language_name][json::vrSynonyms].asArray();
     if (!synonyms_array) {
-      LOG4CXX_WARN(logger_,
-                   kQueryAppsValidationFailedPrefix
-                       << "vrSynonyms is not array.");
+      LOG4CXX_WARN(
+          logger_,
+          kQueryAppsValidationFailedPrefix << "vrSynonyms is not array.");
       return false;
     }
     const size_t synonyms_array_size = synonyms_array->size();
@@ -421,7 +422,7 @@ class QueryAppsDataValidator {
 
   DISALLOW_COPY_AND_ASSIGN(QueryAppsDataValidator);
 };
-}
+}  // namespace
 
 namespace commands {
 
@@ -469,8 +470,8 @@ void SystemRequest::Run() {
           static_cast<rpc::policy_table_interface_base::RequestType>(
               request_type));
 
-  if (!policy_handler.IsRequestTypeAllowed(application->policy_app_id(),
-                                           request_type)) {
+  if (!policy_handler.IsRequestTypeAllowed(
+          application->device(), application->policy_app_id(), request_type)) {
     LOG4CXX_ERROR(logger_,
                   "RequestType " << stringified_request_type
                                  << " is DISALLOWED by policies");
@@ -699,9 +700,9 @@ void SystemRequest::on_event(const event_engine::Event& event) {
 bool SystemRequest::ValidateQueryAppData(
     smart_objects::SmartObject& data) const {
   if (!data.isValid()) {
-    LOG4CXX_ERROR(logger_,
-                  kQueryAppsValidationFailedPrefix
-                      << "QueryApps response is not valid.");
+    LOG4CXX_ERROR(
+        logger_,
+        kQueryAppsValidationFailedPrefix << "QueryApps response is not valid.");
     return false;
   }
   if (!data.keyExists(json::response)) {
@@ -718,4 +719,4 @@ bool SystemRequest::ValidateQueryAppData(
 
 }  // namespace commands
 
-}  // namespace application_manager
+}  // namespace sdl_rpc_plugin

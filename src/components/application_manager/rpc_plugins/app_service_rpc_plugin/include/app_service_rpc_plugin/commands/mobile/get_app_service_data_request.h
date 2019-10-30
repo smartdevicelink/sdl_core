@@ -68,6 +68,11 @@ class GetAppServiceDataRequest : public app_mngr::commands::CommandRequestImpl {
   virtual void Run();
 
   /**
+   * @brief Init sets hash update mode for request
+   **/
+  bool Init() FINAL;
+
+  /**
    * @brief Interface method that is called whenever new event received
    *
    * @param event The received event

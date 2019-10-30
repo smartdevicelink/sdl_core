@@ -25,16 +25,10 @@ file(GLOB SOURCES
 
 set(LIBRARIES
   gmock
-  Utils
-  SmartObjects
-  HMI_API
-  MOBILE_API
-  connectionHandler
-  app_service_rpc_plugin
-  sdl_rpc_plugin
-  jsoncpp
-  Policy
-  Resumption
+  sdl_rpc_plugin_static
+  app_service_rpc_plugin_static
 )
 
 create_cotired_test("app_services_commands_test" "${SOURCES}" "${LIBRARIES}" )
+
+add_subdirectory("app_service_plugin")

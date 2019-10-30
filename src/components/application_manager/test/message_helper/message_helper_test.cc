@@ -36,18 +36,18 @@
 #include "gmock/gmock.h"
 #include "utils/macro.h"
 
-#include "application_manager/policies/policy_handler.h"
+#include "application_manager/commands/command_impl.h"
+#include "application_manager/event_engine/event_dispatcher.h"
 #include "application_manager/mock_application.h"
+#include "application_manager/mock_application_manager.h"
 #include "application_manager/mock_help_prompt_manager.h"
+#include "application_manager/mock_rpc_service.h"
+#include "application_manager/policies/policy_handler.h"
+#include "application_manager/resumption/resume_ctrl.h"
+#include "application_manager/state_controller.h"
+#include "policy/mock_policy_settings.h"
 #include "utils/custom_string.h"
 #include "utils/lock.h"
-#include "policy/mock_policy_settings.h"
-#include "application_manager/commands/command_impl.h"
-#include "application_manager/mock_application_manager.h"
-#include "application_manager/mock_rpc_service.h"
-#include "application_manager/event_engine/event_dispatcher.h"
-#include "application_manager/state_controller.h"
-#include "application_manager/resumption/resume_ctrl.h"
 
 #include "policy/policy_table/types.h"
 #include "rpc_base/rpc_base_json_inl.h"
@@ -70,12 +70,12 @@ typedef std::shared_ptr<MockApplication> MockApplicationSharedPtr;
 typedef std::vector<std::string> StringArray;
 typedef std::shared_ptr<application_manager::Application> ApplicationSharedPtr;
 
-using testing::AtLeast;
-using testing::ReturnRefOfCopy;
-using testing::ReturnRef;
-using testing::Return;
-using testing::SaveArg;
 using testing::_;
+using testing::AtLeast;
+using testing::Return;
+using testing::ReturnRef;
+using testing::ReturnRefOfCopy;
+using testing::SaveArg;
 
 TEST(MessageHelperTestCreate,
      CreateBlockedByPoliciesResponse_SmartObject_Equal) {
@@ -951,7 +951,8 @@ TEST_F(MessageHelperTest, SubscribeApplicationToSoftButton_CallFromApp) {
   size_t function_id = 1;
   //
   EXPECT_CALL(*appSharedPtr,
-              SubscribeToSoftButtons(function_id, SoftButtonID())).Times(1);
+              SubscribeToSoftButtons(function_id, SoftButtonID()))
+      .Times(1);
   MessageHelper::SubscribeApplicationToSoftButton(
       message_params, appSharedPtr, function_id);
 }
@@ -1081,6 +1082,27 @@ TEST_F(MessageHelperTest, SendNaviSetVideoConfigRequest) {
   EXPECT_EQ(640, msg_params[strings::config][strings::width].asInt());
   EXPECT_TRUE(msg_params[strings::config].keyExists(strings::height));
   EXPECT_EQ(480, msg_params[strings::config][strings::height].asInt());
+}
+
+TEST_F(MessageHelperTest, ExtractWindowIdFromSmartObject_SUCCESS) {
+  const WindowID window_id = 145;
+  smart_objects::SmartObject message(smart_objects::SmartType_Map);
+  message[strings::msg_params][strings::window_id] = window_id;
+  EXPECT_EQ(window_id,
+            MessageHelper::ExtractWindowIdFromSmartObject(
+                message[strings::msg_params]));
+}
+
+TEST_F(MessageHelperTest, ExtractWindowIdFromSmartObject_FromEmptyMessage) {
+  smart_objects::SmartObject message(smart_objects::SmartType_Map);
+  EXPECT_EQ(mobile_apis::PredefinedWindows::DEFAULT_WINDOW,
+            MessageHelper::ExtractWindowIdFromSmartObject(message));
+}
+
+TEST_F(MessageHelperTest, ExtractWindowIdFromSmartObject_FromWrongType) {
+  smart_objects::SmartObject message(smart_objects::SmartType_Array);
+  EXPECT_EQ(mobile_apis::PredefinedWindows::DEFAULT_WINDOW,
+            MessageHelper::ExtractWindowIdFromSmartObject(message));
 }
 
 }  // namespace application_manager_test

@@ -36,9 +36,9 @@
 #ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TCP_TCP_CLIENT_LISTENER_H_
 #define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TCP_TCP_CLIENT_LISTENER_H_
 
+#include "transport_manager/transport_adapter/client_connection_listener.h"
 #include "utils/lock.h"
 #include "utils/threads/thread_delegate.h"
-#include "transport_manager/transport_adapter/client_connection_listener.h"
 
 class Thread;
 struct in_addr;
@@ -107,6 +107,10 @@ class TcpClientListener : public ClientConnectionListener {
    * @brief Terminate TCP client listener thread.
    */
   virtual TransportAdapter::Error StopListening();
+
+  TransportAdapter::Error SuspendListening() OVERRIDE;
+
+  TransportAdapter::Error ResumeListening() OVERRIDE;
 
   /**
    * @brief Called from NetworkInterfaceListener when IP address of the network

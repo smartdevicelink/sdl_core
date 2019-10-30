@@ -40,6 +40,7 @@
 #include "application_manager/application_manager.h"
 #include "application_manager/commands/command_impl.h"
 #include "application_manager/message_helper.h"
+#include "application_manager/policies/policy_handler_interface.h"
 #include "application_manager/rpc_handler.h"
 #include "application_manager/rpc_passing_handler.h"
 #include "application_manager/smart_object_keys.h"
@@ -108,9 +109,11 @@ bool RPCPassingHandler::ExtractRPCParams(
   }
 
   CommandParametersPermissions parameters_permissions;
+  const WindowID window_id =
+      MessageHelper::ExtractWindowIdFromSmartObject(s_map);
 
   mobile_apis::Result::eType check_result = app_manager_.CheckPolicyPermissions(
-      app, function_id_str, params, &parameters_permissions);
+      app, window_id, function_id_str, params, &parameters_permissions);
 
   // Check if RPC is allowed by policy (since we are allowing unknown params,
   // check should pass if only undefined parameters exist)
@@ -141,7 +144,7 @@ bool RPCPassingHandler::IsPassthroughAllowed(
           rpc_message[strings::params][strings::function_id].asInt());
   std::string function_id_str =
       MessageHelper::StringifiedFunctionID(function_id);
-  PolicyHandlerInterface& policy_handler = app_manager_.GetPolicyHandler();
+  auto& policy_handler = app_manager_.GetPolicyHandler();
 
   if (function_id_str.empty()) {
     // Unknown RPC, just do basic revoked and user consent checks
@@ -397,9 +400,9 @@ void RPCPassingHandler::ClearCompletedTimers() {
   for (auto it = timeout_queue_.begin(); it != timeout_queue_.end();) {
     TimerSPtr timer = it->first;
     if (timer->is_completed()) {
-      LOG4CXX_DEBUG(logger_,
-                    "Removing completed timer for correlation id "
-                        << it->second);
+      LOG4CXX_DEBUG(
+          logger_,
+          "Removing completed timer for correlation id " << it->second);
       it = timeout_queue_.erase(it);
     } else {
       ++it;
@@ -415,9 +418,9 @@ void RPCPassingHandler::AddRequestTimer(uint32_t correlation_id) {
   const uint32_t timeout_ms =
       app_manager_.get_settings().rpc_pass_through_timeout();
   rpc_passing_timer->Start(timeout_ms, timer::kSingleShot);
-  LOG4CXX_DEBUG(logger_,
-                "Adding and starting timer for correlation id "
-                    << correlation_id);
+  LOG4CXX_DEBUG(
+      logger_,
+      "Adding and starting timer for correlation id " << correlation_id);
   sync_primitives::AutoLock lock(timeout_queue_lock_);
   timeout_queue_.push_back(std::make_pair(rpc_passing_timer, correlation_id));
 }

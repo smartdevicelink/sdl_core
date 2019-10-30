@@ -142,6 +142,7 @@ set(LIBRARIES
   formatters
   dbms
   Utils
+  policy_struct
   bson -L${BSON_LIBS_DIRECTORY}
   emhashmap -L${EMHASHMAP_LIBS_DIRECTORY}
 )
@@ -159,7 +160,7 @@ add_library("AMEventEngine" ${EVENT_ENGINE_SOURCES})
 target_link_libraries("AMEventEngine" ${LIBRARIES})
 
 add_library("AMPolicyLibrary" ${POLICIES_MANAGER_SOURCES} )
-target_link_libraries("AMPolicyLibrary" ${LIBRARIES} AMEventEngine)
+target_link_libraries("AMPolicyLibrary" ${LIBRARIES} AMEventEngine policy_struct)
 
 add_library("SystemTimeLibrary" ${SYSTEM_TIME_SOURCES})
 target_link_libraries("SystemTimeLibrary" ${LIBRARIES} AMEventEngine)

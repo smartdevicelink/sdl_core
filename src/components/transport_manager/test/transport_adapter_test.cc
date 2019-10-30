@@ -118,12 +118,11 @@ class TransportAdapterTest : public ::testing::Test {
                    "101.180.1.213",
                    "23234",
                    "/folder/img_index(1)/file.html/"},
-      TestEndpoint{
-          "[2600:3c00::f03c:91ff:fe73:2b08]:31333/folder/img_index(1)/"
-          "file.html",
-          "[2600:3c00::f03c:91ff:fe73:2b08]",
-          "31333",
-          "/folder/img_index(1)/file.html/"},
+      TestEndpoint{"[2600:3c00::f03c:91ff:fe73:2b08]:31333/folder/img_index(1)/"
+                   "file.html",
+                   "[2600:3c00::f03c:91ff:fe73:2b08]",
+                   "31333",
+                   "/folder/img_index(1)/file.html/"},
       // With query and/or fragment
       TestEndpoint{
           "username@localhost:22/folder/img_index(1)/"
@@ -133,15 +132,14 @@ class TransportAdapterTest : public ::testing::Test {
           "/folder/img_index(1)/file.html/"
           "?eventId=2345&eventName='some%20event'&eventSuccess="
           "true"},
-      TestEndpoint{
-          "username@localhost.com:80/folder/img_index(1)/"
-          "file.html?eventId=2345&eventName='some%20event'&"
-          "eventSuccess=true#section1",
-          "username@localhost.com",
-          "80",
-          "/folder/img_index(1)/file.html/"
-          "?eventId=2345&eventName='some%20event'&eventSuccess=true#"
-          "section1"},
+      TestEndpoint{"username@localhost.com:80/folder/img_index(1)/"
+                   "file.html?eventId=2345&eventName='some%20event'&"
+                   "eventSuccess=true#section1",
+                   "username@localhost.com",
+                   "80",
+                   "/folder/img_index(1)/file.html/"
+                   "?eventId=2345&eventName='some%20event'&eventSuccess=true#"
+                   "section1"},
       TestEndpoint{
           "localhost:443/"
           "?eventId=2345&eventName='some%20event'&eventSuccess=true#section1",
@@ -200,18 +198,16 @@ class TransportAdapterTest : public ::testing::Test {
                    "232",
                    "/folder/img\tindex(1)//file.html/"},
       // Incorrect query
-      TestEndpoint{
-          "username@localhost:443/?eventId=2345&eventName='some "
-          "event'&eventSuccess=true",
-          "username@localhost",
-          "443",
-          "?eventId=2345&eventName='some event'&eventSuccess=true"},
-      TestEndpoint{
-          "username@localhost:443/"
-          "?eventId=2345&eventName='some\tevent'&eventSuccess=true",
-          "username@localhost",
-          "443",
-          "?eventId=2345&eventName='some\tevent'&eventSuccess=true"},
+      TestEndpoint{"username@localhost:443/?eventId=2345&eventName='some "
+                   "event'&eventSuccess=true",
+                   "username@localhost",
+                   "443",
+                   "?eventId=2345&eventName='some event'&eventSuccess=true"},
+      TestEndpoint{"username@localhost:443/"
+                   "?eventId=2345&eventName='some\tevent'&eventSuccess=true",
+                   "username@localhost",
+                   "443",
+                   "?eventId=2345&eventName='some\tevent'&eventSuccess=true"},
       // Incorrect fragment
       TestEndpoint{"a1(b2).com:80/folder/img_index(1)/file.html#section 1",
                    "a1(b2).com",
@@ -973,7 +969,7 @@ TEST_F(TransportAdapterTest, SendData) {
   const unsigned int kSize = 3;
   unsigned char data[kSize] = {0x20, 0x07, 0x01};
   const RawMessagePtr kMessage =
-      std::make_shared<RawMessage>(1, 1, data, kSize);
+      std::make_shared<RawMessage>(1, 1, data, kSize, false);
 
   EXPECT_CALL(*mock_connection, SendData(kMessage))
       .WillOnce(Return(TransportAdapter::OK));
@@ -1013,7 +1009,7 @@ TEST_F(TransportAdapterTest, SendData_ConnectionNotEstablished) {
   const unsigned int kSize = 3;
   unsigned char data[kSize] = {0x20, 0x07, 0x01};
   const RawMessagePtr kMessage =
-      std::make_shared<RawMessage>(1, 1, data, kSize);
+      std::make_shared<RawMessage>(1, 1, data, kSize, false);
 
   EXPECT_CALL(*mock_connection, SendData(kMessage)).Times(0);
   res = transport_adapter.SendData(dev_id, app_handle, kMessage);
@@ -1039,7 +1035,8 @@ TEST_F(TransportAdapterTest, StartClientListening_ClientNotInitialized) {
   EXPECT_CALL(*clientMock, IsInitialised()).WillOnce(Return(false));
   EXPECT_CALL(*clientMock, StartListening()).Times(0);
 
-  TransportAdapter::Error res = transport_adapter.StartClientListening();
+  TransportAdapter::Error res = transport_adapter.ChangeClientListening(
+      transport_manager::TransportAction::kVisibilityOn);
   EXPECT_EQ(TransportAdapter::BAD_STATE, res);
 
   EXPECT_CALL(*dev_mock, Terminate());
@@ -1062,7 +1059,8 @@ TEST_F(TransportAdapterTest, StartClientListening) {
   EXPECT_CALL(*clientMock, StartListening())
       .WillOnce(Return(TransportAdapter::OK));
 
-  TransportAdapter::Error res = transport_adapter.StartClientListening();
+  TransportAdapter::Error res = transport_adapter.ChangeClientListening(
+      transport_manager::TransportAction::kVisibilityOn);
   EXPECT_EQ(TransportAdapter::OK, res);
 
   EXPECT_CALL(*dev_mock, Terminate());
@@ -1096,7 +1094,8 @@ TEST_F(TransportAdapterTest, StopClientListening_Success) {
   EXPECT_CALL(*clientMock, StopListening())
       .WillOnce(Return(TransportAdapter::OK));
 
-  res = transport_adapter.StopClientListening();
+  res = transport_adapter.ChangeClientListening(
+      transport_manager::TransportAction::kVisibilityOff);
   EXPECT_EQ(TransportAdapter::OK, res);
 
   EXPECT_CALL(*dev_mock, Terminate());

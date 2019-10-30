@@ -5,8 +5,8 @@
 
 #include "application_manager/commands/command_request_test.h"
 #include "application_manager/mock_application_manager.h"
-#include "application_manager/mock_message_helper.h"
 #include "application_manager/mock_hmi_capabilities.h"
+#include "application_manager/mock_message_helper.h"
 #include "mobile/unsubscribe_button_request.h"
 
 namespace test {
@@ -20,8 +20,8 @@ namespace mobile_result = mobile_apis::Result;
 
 using ::testing::_;
 
-using sdl_rpc_plugin::commands::UnsubscribeButtonRequest;
 using am::commands::MessageSharedPtr;
+using sdl_rpc_plugin::commands::UnsubscribeButtonRequest;
 
 typedef std::shared_ptr<UnsubscribeButtonRequest> CommandPtr;
 

@@ -29,38 +29,38 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <vector>
-#include <string>
-#include <algorithm>
-#include <fstream>
 #include <stdio.h>
 #include <sys/stat.h>
+#include <algorithm>
+#include <fstream>
 #include <memory>
+#include <string>
+#include <vector>
 
 #include "gtest/gtest.h"
+#include "json/reader.h"
+#include "json/writer.h"
+#include "policy/mock_policy_settings.h"
+#include "policy/policy_table/enums.h"
+#include "policy/policy_table/types.h"
+#include "policy/policy_types.h"
 #include "policy/sql_pt_representation.h"
+#include "policy/sql_wrapper.h"
+#include "rpc_base/rpc_base.h"
 #include "utils/file_system.h"
 #include "utils/system.h"
-#include "policy/sql_wrapper.h"
-#include "policy/policy_types.h"
-#include "json/writer.h"
-#include "json/reader.h"
-#include "policy/policy_table/types.h"
-#include "policy/policy_table/enums.h"
-#include "rpc_base/rpc_base.h"
-#include "policy/mock_policy_settings.h"
 
 namespace policy_table = rpc::policy_table_interface_base;
-using policy::SQLPTRepresentation;
 using policy::CheckPermissionResult;
-using policy::UserFriendlyMessage;
 using policy::EndpointUrls;
+using policy::SQLPTRepresentation;
+using policy::UserFriendlyMessage;
 using policy::VehicleInfo;
 
-using testing::ReturnRef;
-using testing::Return;
-using testing::NiceMock;
 using testing::Mock;
+using testing::NiceMock;
+using testing::Return;
+using testing::ReturnRef;
 
 namespace test {
 namespace components {
@@ -176,7 +176,7 @@ class SQLPTRepresentationTest : public SQLPTRepresentation,
       policy_table::Strings& temp_groups = apps_iter->second.groups;
       StringsCompare(groups, temp_groups);
       EXPECT_EQ(0u, (*(apps_iter->second.nicknames)).size());
-      EXPECT_EQ(prio, apps_iter->second.priority);
+      EXPECT_EQ(prio, (apps_iter->second).priority);
       EXPECT_EQ(0u, (*(apps_iter->second.AppHMIType)).size());
       EXPECT_EQ(memory_kb, (*(apps_iter->second.memory_kb)));
       EXPECT_EQ(heart_beat_timeout_ms,
@@ -376,6 +376,99 @@ class SQLPTRepresentationTest2 : public ::testing::Test {
   const uint16_t kAttemptsToOpenPolicyDB = 2u;
 };
 
+TEST_F(SQLPTRepresentationTest, VehicleDataItem_Store_Item) {
+  policy_table::VehicleDataItem rpm;
+  rpm.mark_initialized();
+  rpm.name = "rpm";
+  rpm.type = "Integer";
+  rpm.key = "OEM_REF_RPM";
+  rpm.mandatory = false;
+  *rpm.array = false;
+  rpm.params->mark_initialized();
+  ASSERT_FALSE(reps->VehicleDataItemExists(rpm));
+  ASSERT_TRUE(reps->InsertVehicleDataItem(rpm));
+  ASSERT_TRUE(reps->VehicleDataItemExists(rpm));
+
+  auto rpm_retrieved = reps->GetVehicleDataItem(rpm.name, rpm.key);
+
+  std::cout << rpm.ToJsonValue().toStyledString() << std::endl;
+  std::cout << rpm_retrieved.ToJsonValue().toStyledString() << std::endl;
+
+  ASSERT_EQ(rpm.ToJsonValue(), rpm_retrieved.begin()->ToJsonValue());
+}
+
+TEST_F(SQLPTRepresentationTest, VehicleDataItem_Store_Complete_Item) {
+  policy_table::VehicleDataItem message;
+  message.name = "messsageName";
+  message.type = "String";
+  message.key = "OEM_REF_MSG";
+  message.mandatory = false;
+  *message.array = false;
+  *message.since = "1.0";
+  *message.until = "5.0";
+  *message.removed = false;
+  *message.deprecated = false;
+  *message.minvalue = 0;
+  *message.maxvalue = 255;
+  *message.minsize = 0;
+  *message.maxsize = 255;
+  *message.minlength = 0;
+  *message.maxlength = 255;
+  message.params->mark_initialized();
+  ASSERT_TRUE(reps->InsertVehicleDataItem(message));
+
+  auto message_retrieved = reps->GetVehicleDataItem(message.name, message.key);
+  ASSERT_EQ(message.ToJsonValue(), message_retrieved.begin()->ToJsonValue());
+}
+
+TEST_F(SQLPTRepresentationTest, VehicleDataItem_Store_Struct) {
+  policy_table::VehicleDataItem alss;
+  alss.mark_initialized();
+  alss.name = "ambientLightSensorStatus";
+  alss.type = "AmbientLightStatus";
+  alss.key = "OEM_REF_AMB_LIGHT";
+  alss.mandatory = false;
+  alss.params->mark_initialized();
+  policy_table::VehicleDataItem lss;
+  lss.mark_initialized();
+  lss.name = "LightSensorStatus";
+  lss.type = "Struct";
+  lss.key = "OEM_REF_SEN_LIGHT";
+  lss.mandatory = false;
+  lss.params->mark_initialized();
+  (*lss.params).push_back(alss);
+
+  policy_table::VehicleDataItem hbo;
+  hbo.mark_initialized();
+  hbo.name = "highBeamsOn";
+  hbo.type = "Boolean";
+  hbo.key = "OEM_REF_HIGH_BEAM";
+  hbo.mandatory = true;
+  hbo.params->mark_initialized();
+  policy_table::VehicleDataItem lbo;
+  lbo.mark_initialized();
+  lbo.name = "lowBeamsOn";
+  lbo.type = "Boolean";
+  lbo.key = "OEM_REF_LOW_BEAM";
+  lbo.mandatory = false;
+  lbo.params->mark_initialized();
+  policy_table::VehicleDataItem hls;
+  hls.mark_initialized();
+  hls.name = "headLampStatus";
+  hls.type = "Struct";
+  hls.key = "OEM_REF_HLSTATUS";
+  hls.mandatory = false;
+  hls.params->mark_initialized();
+  (*hls.params).push_back(lss);
+  (*hls.params).push_back(lbo);
+  (*hls.params).push_back(hbo);
+  ASSERT_TRUE(reps->InsertVehicleDataItem(alss));
+  ASSERT_TRUE(reps->InsertVehicleDataItem(hls));
+
+  auto hls_retrieved = reps->GetVehicleDataItem(hls.name, hls.key);
+  ASSERT_EQ(hls.ToJsonValue(), hls_retrieved.begin()->ToJsonValue());
+}
+
 TEST_F(SQLPTRepresentationTest2,
        CheckActualAttemptsToOpenDB_ExpectCorrectNumber) {
   EXPECT_EQ(::policy::FAIL, reps->Init(&policy_settings_));
@@ -406,8 +499,8 @@ TEST_F(SQLPTRepresentationTest,
   query.Prepare(query_select);
   query.Next();
 
-  // 37 - is current total tables number created by schema
-  const int policy_tables_number = 37;
+  // 41 - is current total tables number created by schema
+  const int policy_tables_number = 41;
   ASSERT_EQ(policy_tables_number, query.GetInteger(0));
 
   const std::string query_select_count_of_iap_buffer_full =
@@ -963,25 +1056,6 @@ TEST_F(
   query.Prepare(query_select);
   query.Next();
   ASSERT_EQ(0, query.GetInteger(0));
-}
-
-TEST_F(
-    SQLPTRepresentationTest,
-    GetVehicleInfo_ManuallySetVehcleInfoThenCallGetVehicleInfo_ExpectValuesReceived) {
-  // Check
-  const std::string query_insert_module_config =
-      "UPDATE `module_config` SET `preloaded_pt` = 1, "
-      " `exchange_after_x_ignition_cycles` = 50,"
-      "  `exchange_after_x_kilometers` = 2000, `exchange_after_x_days` = 30,"
-      " `timeout_after_x_seconds` = 5, `vehicle_make` = 'FORD', "
-      "  `vehicle_model` = 'MUSTANG', `vehicle_year` = '2003', "
-      "`preloaded_date` = '25.04.2015'";
-  ASSERT_TRUE(query_wrapper_->Exec(query_insert_module_config));
-  VehicleInfo info = reps->GetVehicleInfo();
-
-  ASSERT_EQ("FORD", info.vehicle_make);
-  ASSERT_EQ("MUSTANG", info.vehicle_model);
-  ASSERT_EQ("2003", info.vehicle_year);
 }
 
 TEST_F(SQLPTRepresentationTest,
@@ -1695,9 +1769,8 @@ TEST_F(SQLPTRepresentationTest,
 
   const ::policy_table::Parameters& parameters = *(rpc_iter->second.parameters);
   EXPECT_EQ(1u, parameters.size());
-  EXPECT_TRUE(parameters.end() != std::find(parameters.begin(),
-                                            parameters.end(),
-                                            policy_table::Parameter::P_SPEED));
+  EXPECT_TRUE(parameters.end() !=
+              std::find(parameters.begin(), parameters.end(), "P_SPEED"));
   // Check Application Policies Section
   GatherApplicationPoliciesSection(&policies);
   const uint32_t apps_size = 3u;

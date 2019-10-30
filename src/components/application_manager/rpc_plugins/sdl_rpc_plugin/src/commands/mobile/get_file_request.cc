@@ -32,20 +32,20 @@
 
 #include "sdl_rpc_plugin/commands/mobile/get_file_request.h"
 
+#include <boost/crc.hpp>
 #include "application_manager/app_service_manager.h"
 #include "application_manager/application_impl.h"
+#include "application_manager/message_helper.h"
 #include "application_manager/rpc_service.h"
 #include "interfaces/MOBILE_API.h"
-#include "application_manager/message_helper.h"
 #include "utils/file_system.h"
-#include <boost/crc.hpp>
 
 namespace {
 /**
-* Calculates CRC32 checksum
-* @param binary_data - input data for which CRC32 should be calculated
-* @return calculated CRC32 checksum
-*/
+ * Calculates CRC32 checksum
+ * @param binary_data - input data for which CRC32 should be calculated
+ * @return calculated CRC32 checksum
+ */
 uint32_t GetCrc32CheckSum(const std::vector<uint8_t>& binary_data) {
   const std::size_t file_size = binary_data.size();
   boost::crc_32_type result;
@@ -195,9 +195,9 @@ void GetFileRequest::Run() {
   }
 
   if (offset_ > file_size) {
-    LOG4CXX_ERROR(logger_,
-                  "Offset " << offset_ << " greater than file size "
-                            << file_size);
+    LOG4CXX_ERROR(
+        logger_,
+        "Offset " << offset_ << " greater than file size " << file_size);
     SendResponse(false,
                  mobile_apis::Result::INVALID_DATA,
                  "Offset greater than file size",
@@ -309,9 +309,9 @@ void GetFileRequest::on_event(const app_mngr::event_engine::Event& event) {
     }
 
     if (offset_ > file_size) {
-      LOG4CXX_ERROR(logger_,
-                    "Offset " << offset_ << " greater than file size "
-                              << file_size);
+      LOG4CXX_ERROR(
+          logger_,
+          "Offset " << offset_ << " greater than file size " << file_size);
       SendResponse(false,
                    mobile_apis::Result::INVALID_DATA,
                    "Offset greater than file size",

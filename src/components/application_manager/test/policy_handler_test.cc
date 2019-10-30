@@ -30,48 +30,47 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <fstream>
 #include <string>
 #include <vector>
-#include <fstream>
 #include "gmock/gmock.h"
 
-#include "application_manager/policies/policy_handler.h"
-#include "application_manager/policies/delegates/app_permission_delegate.h"
-#include "connection_handler/connection_handler_impl.h"
-#include "application_manager/application_manager_impl.h"
 #include "application_manager/application_impl.h"
+#include "application_manager/application_manager_impl.h"
+#include "application_manager/policies/delegates/app_permission_delegate.h"
+#include "application_manager/policies/policy_handler.h"
+#include "connection_handler/connection_handler_impl.h"
 #ifdef ENABLE_SECURITY
-#include "security_manager/mock_security_manager.h"
 #include "security_manager/mock_crypto_manager.h"
+#include "security_manager/mock_security_manager.h"
 #endif  // ENABLE_SECURITY
 #include "application_manager/mock_message_helper.h"
 #include "connection_handler/mock_connection_handler_settings.h"
-#include "transport_manager/mock_transport_manager.h"
-#include "policy/policy_types.h"
 #include "json/reader.h"
-#include "json/writer.h"
 #include "json/value.h"
+#include "json/writer.h"
+#include "policy/policy_types.h"
 #include "smart_objects/smart_object.h"
+#include "transport_manager/mock_transport_manager.h"
 #include "utils/file_system.h"
 
-#include "utils/custom_string.h"
-#include "policy/usage_statistics/counter.h"
-#include "policy/usage_statistics/statistics_manager.h"
 #include "interfaces/MOBILE_API.h"
 #include "policy/mock_policy_settings.h"
+#include "policy/usage_statistics/counter.h"
+#include "policy/usage_statistics/statistics_manager.h"
+#include "utils/custom_string.h"
 
 #include "application_manager/mock_application.h"
-#include "policy/usage_statistics/mock_statistics_manager.h"
-#include "protocol_handler/mock_session_observer.h"
-#include "connection_handler/mock_connection_handler.h"
 #include "application_manager/mock_application_manager.h"
-#include "application_manager/policies/mock_policy_handler_observer.h"
 #include "application_manager/mock_event_dispatcher.h"
-#include "application_manager/mock_state_controller.h"
 #include "application_manager/mock_hmi_capabilities.h"
 #include "application_manager/mock_rpc_service.h"
+#include "application_manager/mock_state_controller.h"
+#include "application_manager/policies/mock_policy_handler_observer.h"
+#include "connection_handler/mock_connection_handler.h"
 #include "policy/mock_policy_manager.h"
 #include "policy/usage_statistics/mock_statistics_manager.h"
+#include "protocol_handler/mock_session_observer.h"
 
 namespace test {
 namespace components {
@@ -92,6 +91,8 @@ using ::testing::SetArgReferee;
 typedef NiceMock<application_manager_test::MockRPCService> MockRPCService;
 
 const std::string kDummyData = "some_data";
+const WindowID kDefaultWindowId =
+    mobile_apis::PredefinedWindows::DEFAULT_WINDOW;
 
 class PolicyHandlerTest : public ::testing::Test {
  public:
@@ -174,8 +175,9 @@ class PolicyHandlerTest : public ::testing::Test {
     ON_CALL(policy_settings_, enable_policy()).WillByDefault(Return(true));
     ON_CALL(app_manager_, event_dispatcher())
         .WillByDefault(ReturnRef(mock_event_dispatcher_));
-    std::string path = file_system::CreateDirectory("storage");
-    file_system::CreateFile(path + "/" + "certificate");
+    const std::string path("storage");
+    if (file_system::CreateDirectory(path))
+      file_system::CreateFile(path + "/" + "certificate");
     mock_policy_manager_ =
         std::make_shared<policy_manager_test::MockPolicyManager>();
     ASSERT_TRUE(mock_policy_manager_.use_count() != 0);
@@ -234,21 +236,25 @@ class PolicyHandlerTest : public ::testing::Test {
 
   void TestOnPermissionsUpdated(const std::string& default_hmi_level,
                                 const mobile_apis::HMILevel::eType hmi_level) {
-    EXPECT_CALL(app_manager_, application_by_policy_id(kPolicyAppId_))
+    EXPECT_CALL(app_manager_, application(kDeviceId, kPolicyAppId_))
         .WillRepeatedly(Return(mock_app_));
     EXPECT_CALL(*mock_app_, app_id()).WillRepeatedly(Return(kAppId1_));
-    EXPECT_CALL(*mock_app_, hmi_level())
+    EXPECT_CALL(*mock_app_, hmi_level(kDefaultWindowId))
         .WillOnce(Return(mobile_apis::HMILevel::HMI_NONE));
 
     EXPECT_CALL(mock_message_helper_, StringToHMILevel(default_hmi_level))
         .WillOnce(Return(hmi_level));
+    ChangePolicyManagerToMock();
+    const policy::EncryptionRequired require_encryption;
+    EXPECT_CALL(*mock_policy_manager_, GetAppEncryptionRequired(kPolicyAppId_))
+        .WillOnce(Return(require_encryption));
     EXPECT_CALL(mock_message_helper_,
-                SendOnPermissionsChangeNotification(kAppId1_, _, _));
+                SendOnPermissionsChangeNotification(kAppId1_, _, _, _));
     EXPECT_CALL(app_manager_, state_controller()).Times(0);
 
     Permissions permissions;
     policy_handler_.OnPermissionsUpdated(
-        kPolicyAppId_, permissions, default_hmi_level);
+        kDeviceId, kPolicyAppId_, permissions, default_hmi_level);
   }
 
   void CreateFunctionalGroupPermission(
@@ -396,7 +402,10 @@ TEST_F(PolicyHandlerTest, AppServiceUpdate_CheckAppService) {
   ifile.close();
   BinaryMessage msg(json.begin(), json.end());
   // Checks
-  EXPECT_CALL(*mock_policy_manager_, LoadPT("", msg)).WillOnce(Return(true));
+  EXPECT_CALL(*mock_policy_manager_, LoadPT("", msg))
+      .WillOnce(Return(PolicyManager::PtProcessingResult::kSuccess));
+  EXPECT_CALL(*mock_policy_manager_,
+              OnPTUFinished(PolicyManager::PtProcessingResult::kSuccess));
   policy_handler_.ReceiveMessageFromSDK("", msg);
 
   policy_table::AppServiceParameters app_service_params =
@@ -463,7 +472,10 @@ TEST_F(PolicyHandlerTest, ReceiveMessageFromSDK) {
   EXPECT_CALL(app_manager_, GetNextHMICorrelationID());
   EXPECT_CALL(mock_message_helper_, CreateGetVehicleDataRequest(_, _, _));
   EXPECT_CALL(*mock_policy_manager_, PTUpdatedAt(_, _));
-  EXPECT_CALL(*mock_policy_manager_, LoadPT("", msg)).WillOnce(Return(true));
+  EXPECT_CALL(*mock_policy_manager_, LoadPT("", msg))
+      .WillOnce(Return(PolicyManager::PtProcessingResult::kSuccess));
+  EXPECT_CALL(*mock_policy_manager_,
+              OnPTUFinished(PolicyManager::PtProcessingResult::kSuccess));
   EXPECT_CALL(*mock_policy_manager_, CleanupUnpairedDevices());
   policy_handler_.ReceiveMessageFromSDK("", msg);
 }
@@ -474,7 +486,11 @@ TEST_F(PolicyHandlerTest, ReceiveMessageFromSDK_PTNotLoaded) {
   BinaryMessage msg;
   // Checks
 
-  EXPECT_CALL(*mock_policy_manager_, LoadPT("", msg)).WillOnce(Return(false));
+  EXPECT_CALL(*mock_policy_manager_, LoadPT("", msg))
+      .WillOnce(Return(PolicyManager::PtProcessingResult::kWrongPtReceived));
+  EXPECT_CALL(
+      *mock_policy_manager_,
+      OnPTUFinished(PolicyManager::PtProcessingResult::kWrongPtReceived));
   EXPECT_CALL(app_manager_, GetNextHMICorrelationID()).Times(0);
   EXPECT_CALL(mock_message_helper_, CreateGetVehicleDataRequest(_, _, _))
       .Times(0);
@@ -495,38 +511,52 @@ TEST_F(PolicyHandlerTest, UnloadPolicyLibrary_method_ExpectLibraryUnloaded) {
 
 TEST_F(PolicyHandlerTest, OnPermissionsUpdated_method_With2Parameters) {
   // Check expectations
-  EXPECT_CALL(app_manager_, application_by_policy_id(kPolicyAppId_))
+  ChangePolicyManagerToMock();
+  const policy::EncryptionRequired require_encryption;
+  EXPECT_CALL(*mock_policy_manager_, GetAppEncryptionRequired(kPolicyAppId_))
+      .WillOnce(Return(require_encryption));
+  EXPECT_CALL(app_manager_, application(kDeviceId, kPolicyAppId_))
       .WillOnce(Return(mock_app_));
   EXPECT_CALL(*mock_app_, app_id()).WillOnce(Return(kAppId1_));
   EXPECT_CALL(mock_message_helper_,
-              SendOnPermissionsChangeNotification(kAppId1_, _, _));
+              SendOnPermissionsChangeNotification(kAppId1_, _, _, _));
   // Act
   Permissions perms;
-  policy_handler_.OnPermissionsUpdated(kPolicyAppId_, perms);
+  policy_handler_.OnPermissionsUpdated(kDeviceId, kPolicyAppId_, perms);
 }
 
 TEST_F(PolicyHandlerTest, OnPermissionsUpdated_TwoParams_InvalidApp_UNSUCCESS) {
   std::shared_ptr<application_manager_test::MockApplication> invalid_app;
-  EXPECT_CALL(app_manager_, application_by_policy_id(kPolicyAppId_))
+  EXPECT_CALL(app_manager_, application(kDeviceId, kPolicyAppId_))
       .WillOnce(Return(invalid_app));
+  ChangePolicyManagerToMock();
+  const policy::EncryptionRequired require_encryption;
+  EXPECT_CALL(*mock_policy_manager_, GetAppEncryptionRequired(kPolicyAppId_))
+      .Times(0);
   EXPECT_CALL(mock_message_helper_,
-              SendOnPermissionsChangeNotification(_, _, _)).Times(0);
+              SendOnPermissionsChangeNotification(_, _, _, _))
+      .Times(0);
 
   Permissions permissions;
-  policy_handler_.OnPermissionsUpdated(kPolicyAppId_, permissions);
+  policy_handler_.OnPermissionsUpdated(kDeviceId, kPolicyAppId_, permissions);
 }
 
 TEST_F(PolicyHandlerTest, OnPermissionsUpdated_InvalidApp_UNSUCCESS) {
   std::shared_ptr<application_manager_test::MockApplication> invalid_app;
-  EXPECT_CALL(app_manager_, application_by_policy_id(kPolicyAppId_))
+  EXPECT_CALL(app_manager_, application(kDeviceId, kPolicyAppId_))
       .WillOnce(Return(mock_app_))
       .WillOnce(Return(invalid_app));
   EXPECT_CALL(*mock_app_, app_id()).WillOnce(Return(kAppId1_));
+  ChangePolicyManagerToMock();
+  const policy::EncryptionRequired require_encryption;
+  EXPECT_CALL(*mock_policy_manager_, GetAppEncryptionRequired(kPolicyAppId_))
+      .WillOnce(Return(require_encryption));
   EXPECT_CALL(mock_message_helper_,
-              SendOnPermissionsChangeNotification(kAppId1_, _, _));
+              SendOnPermissionsChangeNotification(kAppId1_, _, _, _));
 
   Permissions permissions;
-  policy_handler_.OnPermissionsUpdated(kPolicyAppId_, permissions, "HMI_FULL");
+  policy_handler_.OnPermissionsUpdated(
+      kDeviceId, kPolicyAppId_, permissions, "HMI_FULL");
 }
 
 TEST_F(PolicyHandlerTest, OnPermissionsUpdated_HmiLevelInvalidEnum_UNSUCCESS) {
@@ -544,25 +574,30 @@ TEST_F(PolicyHandlerTest,
   const std::string new_kHmiLevel_string = "HMI_FULL";
   mobile_apis::HMILevel::eType new_hmi_level = mobile_apis::HMILevel::HMI_FULL;
   // Check expectations
-  EXPECT_CALL(app_manager_, application_by_policy_id(kPolicyAppId_))
+  EXPECT_CALL(app_manager_, application(kDeviceId, kPolicyAppId_))
       .Times(2)
       .WillRepeatedly(Return(mock_app_));
   EXPECT_CALL(*mock_app_, app_id()).WillOnce(Return(kAppId1_));
   EXPECT_CALL(mock_message_helper_, StringToHMILevel(new_kHmiLevel_string))
       .WillOnce(Return(new_hmi_level));
 
-  EXPECT_CALL(*mock_app_, hmi_level())
+  EXPECT_CALL(*mock_app_, hmi_level(kDefaultWindowId))
       .WillOnce(Return(mobile_apis::HMILevel::HMI_NONE));
+  ChangePolicyManagerToMock();
+  const policy::EncryptionRequired require_encryption;
+  EXPECT_CALL(*mock_policy_manager_, GetAppEncryptionRequired(kPolicyAppId_))
+      .WillOnce(Return(require_encryption));
   EXPECT_CALL(mock_message_helper_,
-              SendOnPermissionsChangeNotification(kAppId1_, _, _));
+              SendOnPermissionsChangeNotification(kAppId1_, _, _, _));
 
   EXPECT_CALL(app_manager_, state_controller())
       .WillRepeatedly(ReturnRef(mock_state_controller));
-  EXPECT_CALL(mock_state_controller, SetRegularState(_, new_hmi_level, true));
+  EXPECT_CALL(mock_state_controller,
+              SetRegularState(_, kDefaultWindowId, new_hmi_level, true));
   // Act
   Permissions perms;
   policy_handler_.OnPermissionsUpdated(
-      kPolicyAppId_, perms, new_kHmiLevel_string);
+      kDeviceId, kPolicyAppId_, perms, new_kHmiLevel_string);
 }
 
 TEST_F(PolicyHandlerTest,
@@ -572,25 +607,30 @@ TEST_F(PolicyHandlerTest,
   mobile_apis::HMILevel::eType new_hmi_level =
       mobile_apis::HMILevel::HMI_LIMITED;
   // Check expectations
-  EXPECT_CALL(app_manager_, application_by_policy_id(kPolicyAppId_))
+  EXPECT_CALL(app_manager_, application(kDeviceId, kPolicyAppId_))
       .Times(2)
       .WillRepeatedly(Return(mock_app_));
   EXPECT_CALL(*mock_app_, app_id()).WillOnce(Return(kAppId1_));
   EXPECT_CALL(mock_message_helper_, StringToHMILevel(new_kHmiLevel_string))
       .WillOnce(Return(new_hmi_level));
 
-  EXPECT_CALL(*mock_app_, hmi_level())
+  EXPECT_CALL(*mock_app_, hmi_level(kDefaultWindowId))
       .WillOnce(Return(mobile_apis::HMILevel::HMI_NONE));
+  ChangePolicyManagerToMock();
+  const policy::EncryptionRequired require_encryption;
+  EXPECT_CALL(*mock_policy_manager_, GetAppEncryptionRequired(kPolicyAppId_))
+      .WillOnce(Return(require_encryption));
   EXPECT_CALL(mock_message_helper_,
-              SendOnPermissionsChangeNotification(kAppId1_, _, _));
+              SendOnPermissionsChangeNotification(kAppId1_, _, _, _));
 
   EXPECT_CALL(app_manager_, state_controller())
       .WillRepeatedly(ReturnRef(mock_state_controller));
-  EXPECT_CALL(mock_state_controller, SetRegularState(_, new_hmi_level, false));
+  EXPECT_CALL(mock_state_controller,
+              SetRegularState(_, kDefaultWindowId, new_hmi_level, false));
   // Act
   Permissions perms;
   policy_handler_.OnPermissionsUpdated(
-      kPolicyAppId_, perms, new_kHmiLevel_string);
+      kDeviceId, kPolicyAppId_, perms, new_kHmiLevel_string);
 }
 
 TEST_F(PolicyHandlerTest,
@@ -599,23 +639,27 @@ TEST_F(PolicyHandlerTest,
   std::string new_kHmiLevel_string = "HMI_FULL";
   mobile_apis::HMILevel::eType new_hmi_level = mobile_apis::HMILevel::HMI_FULL;
   // Check expectations
-  EXPECT_CALL(app_manager_, application_by_policy_id(kPolicyAppId_))
+  EXPECT_CALL(app_manager_, application(kDeviceId, kPolicyAppId_))
       .Times(2)
       .WillRepeatedly(Return(mock_app_));
   EXPECT_CALL(*mock_app_, app_id()).WillOnce(Return(kAppId1_));
   EXPECT_CALL(mock_message_helper_, StringToHMILevel(new_kHmiLevel_string))
       .WillOnce(Return(new_hmi_level));
 
-  EXPECT_CALL(*mock_app_, hmi_level())
+  EXPECT_CALL(*mock_app_, hmi_level(kDefaultWindowId))
       .WillOnce(Return(mobile_apis::HMILevel::HMI_LIMITED));
+  ChangePolicyManagerToMock();
+  const policy::EncryptionRequired require_encryption;
+  EXPECT_CALL(*mock_policy_manager_, GetAppEncryptionRequired(kPolicyAppId_))
+      .WillOnce(Return(require_encryption));
   EXPECT_CALL(mock_message_helper_,
-              SendOnPermissionsChangeNotification(kAppId1_, _, _));
+              SendOnPermissionsChangeNotification(kAppId1_, _, _, _));
 
   EXPECT_CALL(app_manager_, state_controller()).Times(0);
   // Act
   Permissions perms;
   policy_handler_.OnPermissionsUpdated(
-      kPolicyAppId_, perms, new_kHmiLevel_string);
+      kDeviceId, kPolicyAppId_, perms, new_kHmiLevel_string);
 }
 
 TEST_F(PolicyHandlerTest, GetPriority) {
@@ -636,13 +680,14 @@ TEST_F(PolicyHandlerTest, CheckPermissions) {
   const uint32_t device = 3;
   const mobile_apis::HMILevel::eType hmi_level =
       mobile_apis::HMILevel::HMI_NONE;
-  EXPECT_CALL(*mock_app_, hmi_level()).WillOnce(Return(hmi_level));
+  EXPECT_CALL(*mock_app_, hmi_level(kDefaultWindowId))
+      .WillOnce(Return(hmi_level));
   EXPECT_CALL(*mock_app_, device()).WillOnce(Return(device));
   EXPECT_CALL(*mock_app_, policy_app_id()).WillOnce(Return(kPolicyAppId_));
 #ifdef EXTERNAL_PROPRIETARY_MODE
-  EXPECT_CALL(
-      *mock_policy_manager_,
-      CheckPermissions(kPolicyAppId_, kHmiLevel_, kRpc_, kRpc_params, _));
+  EXPECT_CALL(*mock_policy_manager_,
+              CheckPermissions(
+                  kDeviceId, kPolicyAppId_, kHmiLevel_, kRpc_, kRpc_params, _));
 
 #else   // EXTERNAL_PROPRIETARY_MODE
   EXPECT_CALL(*mock_policy_manager_,
@@ -654,7 +699,8 @@ TEST_F(PolicyHandlerTest, CheckPermissions) {
   EXPECT_CALL(mock_message_helper_, GetDeviceMacAddressForHandle(device, _))
       .WillOnce(Return(kDeviceId));
   // Act
-  policy_handler_.CheckPermissions(mock_app_, kRpc_, kRpc_params, result);
+  policy_handler_.CheckPermissions(
+      mock_app_, kDefaultWindowId, kRpc_, kRpc_params, result);
 }
 
 TEST_F(PolicyHandlerTest, GetNotificationsNumber) {
@@ -681,9 +727,9 @@ TEST_F(PolicyHandlerTest, GetDefaultHmi) {
   EnablePolicyAndPolicyManagerMock();
   // Check expectations
   EXPECT_CALL(*mock_policy_manager_,
-              GetDefaultHmi(kPolicyAppId_, &default_hmi_));
+              GetDefaultHmi(kDeviceId_, kPolicyAppId_, &default_hmi_));
   // Act
-  policy_handler_.GetDefaultHmi(kPolicyAppId_, &default_hmi_);
+  policy_handler_.GetDefaultHmi(kDeviceId_, kPolicyAppId_, &default_hmi_);
 }
 
 TEST_F(PolicyHandlerTest, GetInitialAppData) {
@@ -882,12 +928,14 @@ void PolicyHandlerTest::TestActivateApp(const uint32_t connection_key,
 #endif  // EXTERNAL_PROPRIETARY_MODE
 
   EXPECT_CALL(*application1, policy_app_id()).WillOnce(Return(kPolicyAppId_));
-  EXPECT_CALL(*mock_policy_manager_, GetAppPermissionsChanges(_))
+  EXPECT_CALL(*mock_policy_manager_,
+              GetAppPermissionsChanges(kMacAddr_, kPolicyAppId_))
       .WillOnce(Return(permissions));
   ON_CALL(*mock_policy_manager_, Increment(_, _)).WillByDefault(Return());
   EXPECT_CALL(*mock_policy_manager_, RemovePendingPermissionChanges(_));
   EXPECT_CALL(mock_message_helper_, SendSDLActivateAppResponse(_, _, _));
   ON_CALL(*application1, app_id()).WillByDefault(Return(kAppId1_));
+  ON_CALL(*application1, mac_address()).WillByDefault(ReturnRef(kMacAddr_));
   // Act
   policy_handler_.OnActivateApp(connection_key, correlation_id);
 }
@@ -936,12 +984,14 @@ TEST_F(PolicyHandlerTest, OnActivateApp_AppIsRevoked_AppNotActivated) {
 
   // Check expectations
   EXPECT_CALL(*mock_app_, policy_app_id()).WillOnce(Return(kPolicyAppId_));
-  EXPECT_CALL(*mock_policy_manager_, GetAppPermissionsChanges(_))
+  EXPECT_CALL(*mock_policy_manager_,
+              GetAppPermissionsChanges(kDefaultId, kPolicyAppId_))
       .WillOnce(Return(permissions));
   ON_CALL(*mock_policy_manager_, Increment(_, _)).WillByDefault(Return());
   EXPECT_CALL(*mock_policy_manager_, RemovePendingPermissionChanges(_));
   EXPECT_CALL(mock_message_helper_, SendSDLActivateAppResponse(_, _, _));
   ON_CALL(*mock_app_, app_id()).WillByDefault(Return(kAppId1_));
+  ON_CALL(*mock_app_, mac_address()).WillByDefault(ReturnRef(kDefaultId));
   // Act
   policy_handler_.OnActivateApp(kConnectionKey_, kCorrelationKey_);
 }
@@ -963,10 +1013,10 @@ void PolicyHandlerTest::OnPendingPermissionChangePrecondition(
   std::shared_ptr<application_manager_test::MockApplication> application =
       std::make_shared<application_manager_test::MockApplication>();
 
-  EXPECT_CALL(app_manager_, application_by_policy_id(kPolicyAppId_))
-      .WillOnce(Return(application));
+  EXPECT_CALL(app_manager_, application(_, _)).WillOnce(Return(application));
   EXPECT_CALL(*application, app_id()).WillRepeatedly(Return(kAppId1_));
-  EXPECT_CALL(*application, hmi_level()).WillRepeatedly(Return(hmi_level));
+  EXPECT_CALL(*application, hmi_level(kDefaultWindowId))
+      .WillRepeatedly(Return(hmi_level));
 }
 
 TEST_F(PolicyHandlerTest,
@@ -978,14 +1028,15 @@ TEST_F(PolicyHandlerTest,
   AppPermissions permissions(kPolicyAppId_);
   permissions.appPermissionsConsentNeeded = false;
   EXPECT_CALL(mock_message_helper_,
-              SendOnAppPermissionsChangedNotification(kAppId1_, _, _)).Times(0);
-
-  EXPECT_CALL(*mock_policy_manager_, GetAppPermissionsChanges(_))
+              SendOnAppPermissionsChangedNotification(kAppId1_, _, _))
+      .Times(0);
+  EXPECT_CALL(*mock_policy_manager_,
+              GetAppPermissionsChanges(kDeviceId_, kPolicyAppId_))
       .WillOnce(Return(permissions));
   EXPECT_CALL(*mock_policy_manager_,
               RemovePendingPermissionChanges(kPolicyAppId_));
   // Act
-  policy_handler_.OnPendingPermissionChange(kPolicyAppId_);
+  policy_handler_.OnPendingPermissionChange(kDeviceId_, kPolicyAppId_);
 }
 
 TEST_F(PolicyHandlerTest, OnPendingPermissionChange_AppInLimitedConsentNeeded) {
@@ -997,12 +1048,13 @@ TEST_F(PolicyHandlerTest, OnPendingPermissionChange_AppInLimitedConsentNeeded) {
   // Check expectations
   EXPECT_CALL(mock_message_helper_,
               SendOnAppPermissionsChangedNotification(kAppId1_, _, _));
-  EXPECT_CALL(*mock_policy_manager_, GetAppPermissionsChanges(_))
+  EXPECT_CALL(*mock_policy_manager_,
+              GetAppPermissionsChanges(kDeviceId_, kPolicyAppId_))
       .WillOnce(Return(permissions));
   EXPECT_CALL(*mock_policy_manager_,
               RemovePendingPermissionChanges(kPolicyAppId_));
   // Act
-  policy_handler_.OnPendingPermissionChange(kPolicyAppId_);
+  policy_handler_.OnPendingPermissionChange(kDeviceId_, kPolicyAppId_);
 }
 
 TEST_F(PolicyHandlerTest, OnPendingPermissionChange_AppLimitedAndRevoked) {
@@ -1019,17 +1071,19 @@ TEST_F(PolicyHandlerTest, OnPendingPermissionChange_AppLimitedAndRevoked) {
               SendOnAppPermissionsChangedNotification(kAppId1_, _, _));
   EXPECT_CALL(mock_state_controller,
               SetRegularState(_,
+                              kDefaultWindowId,
                               mobile_apis::HMILevel::HMI_NONE,
                               mobile_apis::AudioStreamingState::NOT_AUDIBLE,
                               mobile_apis::VideoStreamingState::NOT_STREAMABLE,
                               true));
 
-  EXPECT_CALL(*mock_policy_manager_, GetAppPermissionsChanges(_))
+  EXPECT_CALL(*mock_policy_manager_,
+              GetAppPermissionsChanges(kDeviceId_, kPolicyAppId_))
       .WillOnce(Return(permissions));
   EXPECT_CALL(*mock_policy_manager_,
               RemovePendingPermissionChanges(kPolicyAppId_));
   // Act
-  policy_handler_.OnPendingPermissionChange(kPolicyAppId_);
+  policy_handler_.OnPendingPermissionChange(kDeviceId_, kPolicyAppId_);
 }
 
 TEST_F(PolicyHandlerTest, OnPendingPermissionChange_AppInBackgroundAndRevoked) {
@@ -1043,12 +1097,13 @@ TEST_F(PolicyHandlerTest, OnPendingPermissionChange_AppInBackgroundAndRevoked) {
   EXPECT_CALL(mock_message_helper_,
               SendOnAppPermissionsChangedNotification(kAppId1_, _, _));
 
-  EXPECT_CALL(*mock_policy_manager_, GetAppPermissionsChanges(_))
+  EXPECT_CALL(*mock_policy_manager_,
+              GetAppPermissionsChanges(kDeviceId_, kPolicyAppId_))
       .WillOnce(Return(permissions));
   EXPECT_CALL(*mock_policy_manager_,
               RemovePendingPermissionChanges(kPolicyAppId_));
   // Act
-  policy_handler_.OnPendingPermissionChange(kPolicyAppId_);
+  policy_handler_.OnPendingPermissionChange(kDeviceId_, kPolicyAppId_);
 }
 
 TEST_F(PolicyHandlerTest,
@@ -1065,7 +1120,8 @@ TEST_F(PolicyHandlerTest,
   EXPECT_CALL(mock_message_helper_,
               SendOnAppPermissionsChangedNotification(kAppId1_, _, _));
 
-  EXPECT_CALL(*mock_policy_manager_, GetAppPermissionsChanges(_))
+  EXPECT_CALL(*mock_policy_manager_,
+              GetAppPermissionsChanges(kDeviceId_, kPolicyAppId_))
       .WillOnce(Return(permissions));
 
   EXPECT_CALL(mock_message_helper_,
@@ -1082,7 +1138,7 @@ TEST_F(PolicyHandlerTest,
               RemovePendingPermissionChanges(kPolicyAppId_));
 
   // Act
-  policy_handler_.OnPendingPermissionChange(kPolicyAppId_);
+  policy_handler_.OnPendingPermissionChange(kDeviceId_, kPolicyAppId_);
 }
 
 TEST_F(PolicyHandlerTest,
@@ -1095,13 +1151,14 @@ TEST_F(PolicyHandlerTest,
   EXPECT_CALL(mock_message_helper_,
               SendOnAppPermissionsChangedNotification(kAppId1_, _, _));
 
-  EXPECT_CALL(*mock_policy_manager_, GetAppPermissionsChanges(_))
+  EXPECT_CALL(*mock_policy_manager_,
+              GetAppPermissionsChanges(kDeviceId_, kPolicyAppId_))
       .WillOnce(Return(permissions));
 
   EXPECT_CALL(*mock_policy_manager_,
               RemovePendingPermissionChanges(kPolicyAppId_));
 
-  policy_handler_.OnPendingPermissionChange(kPolicyAppId_);
+  policy_handler_.OnPendingPermissionChange(kDeviceId_, kPolicyAppId_);
 }
 
 TEST_F(PolicyHandlerTest,
@@ -1117,9 +1174,11 @@ TEST_F(PolicyHandlerTest,
   // Check expectations
   // Notification won't be sent
   EXPECT_CALL(mock_message_helper_,
-              SendOnAppPermissionsChangedNotification(kAppId1_, _, _)).Times(0);
+              SendOnAppPermissionsChangedNotification(kAppId1_, _, _))
+      .Times(0);
 
-  EXPECT_CALL(*mock_policy_manager_, GetAppPermissionsChanges(_))
+  EXPECT_CALL(*mock_policy_manager_,
+              GetAppPermissionsChanges(kDeviceId_, kPolicyAppId_))
       .WillOnce(Return(permissions));
 
   EXPECT_CALL(mock_message_helper_,
@@ -1136,7 +1195,7 @@ TEST_F(PolicyHandlerTest,
               RemovePendingPermissionChanges(kPolicyAppId_));
 
   // Act
-  policy_handler_.OnPendingPermissionChange(kPolicyAppId_);
+  policy_handler_.OnPendingPermissionChange(kDeviceId_, kPolicyAppId_);
 }
 
 TEST_F(PolicyHandlerTest, PTExchangeAtUserRequest) {
@@ -1232,7 +1291,7 @@ TEST_F(PolicyHandlerTest, OnCurrentDeviceIdUpdateRequired) {
   // Check expectations
   std::shared_ptr<application_manager_test::MockApplication> application =
       std::make_shared<application_manager_test::MockApplication>();
-  EXPECT_CALL(app_manager_, application_by_policy_id(kPolicyAppId_))
+  EXPECT_CALL(app_manager_, application(kDeviceId_, kPolicyAppId_))
       .WillOnce(Return(application));
   EXPECT_CALL(app_manager_, connection_handler())
       .WillOnce(ReturnRef(conn_handler));
@@ -1249,10 +1308,11 @@ TEST_F(PolicyHandlerTest, OnCurrentDeviceIdUpdateRequired) {
                   _,
                   _,
                   _,
-                  _));
+                  _))
+      .WillOnce(DoAll(SetArgPointee<3>(kDeviceId_), Return(0)));
 
   // Act
-  policy_handler_.OnCurrentDeviceIdUpdateRequired(kPolicyAppId_);
+  policy_handler_.OnCurrentDeviceIdUpdateRequired(handle, kPolicyAppId_);
 }
 
 TEST_F(PolicyHandlerTest, OnSystemInfoChanged) {
@@ -1301,11 +1361,17 @@ TEST_F(PolicyHandlerTest, GetAppRequestTypes) {
   // Arrange
   EnablePolicy();
   ChangePolicyManagerToMock();
-  // Check expectations
+  const transport_manager::DeviceHandle handle = 0u;
+// Check expectations
+#ifdef EXTERNAL_PROPRIETARY_MODE
+  EXPECT_CALL(*mock_policy_manager_, GetAppRequestTypes(handle, kPolicyAppId_))
+      .WillOnce(Return(std::vector<std::string>()));
+#else
   EXPECT_CALL(*mock_policy_manager_, GetAppRequestTypes(kPolicyAppId_))
       .WillOnce(Return(std::vector<std::string>()));
+#endif
   // Act
-  policy_handler_.GetAppRequestTypes(kPolicyAppId_);
+  policy_handler_.GetAppRequestTypes(handle, kPolicyAppId_);
 }
 
 TEST_F(PolicyHandlerTest, OnVIIsReady) {
@@ -1374,13 +1440,14 @@ TEST_F(PolicyHandlerTest, SendOnAppPermissionsChanged) {
   std::shared_ptr<application_manager_test::MockApplication> application =
       std::make_shared<application_manager_test::MockApplication>();
   // Check expectations
-  EXPECT_CALL(app_manager_, application_by_policy_id(kPolicyAppId_))
+  EXPECT_CALL(app_manager_, application(kDeviceId_, kPolicyAppId_))
       .WillOnce(Return(application));
   EXPECT_CALL(mock_message_helper_,
               SendOnAppPermissionsChangedNotification(_, _, _));
   AppPermissions permissions(kPolicyAppId_);
   // Act
-  policy_handler_.SendOnAppPermissionsChanged(permissions, kPolicyAppId_);
+  policy_handler_.SendOnAppPermissionsChanged(
+      permissions, kDeviceId_, kPolicyAppId_);
 }
 
 TEST_F(PolicyHandlerTest, OnPTExchangeNeeded) {
@@ -1398,11 +1465,12 @@ TEST_F(PolicyHandlerTest, AddApplication) {
   // Check expectations
   EXPECT_CALL(
       *mock_policy_manager_,
-      AddApplication(kPolicyAppId_, HmiTypes(policy_table::AHT_DEFAULT)))
+      AddApplication(
+          kMacAddr_, kPolicyAppId_, HmiTypes(policy_table::AHT_DEFAULT)))
       .WillOnce(Return(std::make_shared<utils::CallNothing>()));
   // Act
-  policy_handler_.AddApplication(kPolicyAppId_,
-                                 HmiTypes(policy_table::AHT_DEFAULT));
+  policy_handler_.AddApplication(
+      kMacAddr_, kPolicyAppId_, HmiTypes(policy_table::AHT_DEFAULT));
 }
 
 TEST_F(PolicyHandlerTest, HeartBeatTimeout) {
@@ -1437,9 +1505,10 @@ TEST_F(PolicyHandlerTest, OnAppRegisteredOnMobile) {
   EnablePolicyAndPolicyManagerMock();
   // Check expectations
 
-  EXPECT_CALL(*mock_policy_manager_, OnAppRegisteredOnMobile(kPolicyAppId_));
+  EXPECT_CALL(*mock_policy_manager_,
+              OnAppRegisteredOnMobile(kDeviceId, kPolicyAppId_));
   // Act
-  policy_handler_.OnAppRegisteredOnMobile(kPolicyAppId_);
+  policy_handler_.OnAppRegisteredOnMobile(kDeviceId, kPolicyAppId_);
 }
 
 TEST_F(PolicyHandlerTest, IsRequestTypeAllowed) {
@@ -1450,13 +1519,20 @@ TEST_F(PolicyHandlerTest, IsRequestTypeAllowed) {
   mobile_apis::RequestType::eType type =
       mobile_apis::RequestType::eType::EMERGENCY;
 
+  const transport_manager::DeviceHandle handle = 0u;
+
   EXPECT_CALL(*mock_policy_manager_, GetAppRequestTypesState(kPolicyAppId_))
       .WillOnce(Return(policy::RequestType::State::AVAILABLE));
-
+#ifdef EXTERNAL_PROPRIETARY_MODE
+  EXPECT_CALL(*mock_policy_manager_, GetAppRequestTypes(handle, kPolicyAppId_))
+      .WillOnce(Return(std::vector<std::string>({"HTTP"})));
+#else
   EXPECT_CALL(*mock_policy_manager_, GetAppRequestTypes(kPolicyAppId_))
       .WillOnce(Return(std::vector<std::string>({"HTTP"})));
+#endif
   // Act
-  EXPECT_FALSE(policy_handler_.IsRequestTypeAllowed(kPolicyAppId_, type));
+  EXPECT_FALSE(
+      policy_handler_.IsRequestTypeAllowed(handle, kPolicyAppId_, type));
 }
 
 TEST_F(PolicyHandlerTest, IsRequestSubTypeAllowed) {
@@ -1473,16 +1549,6 @@ TEST_F(PolicyHandlerTest, IsRequestSubTypeAllowed) {
   // Act
   const std::string subtype = "fakeSubType";
   EXPECT_TRUE(policy_handler_.IsRequestSubTypeAllowed(kPolicyAppId_, subtype));
-}
-
-TEST_F(PolicyHandlerTest, GetVehicleInfo) {
-  // Arrange
-  EnablePolicyAndPolicyManagerMock();
-  // Check expectations
-  EXPECT_CALL(*mock_policy_manager_, GetVehicleInfo())
-      .WillOnce(Return(VehicleInfo()));
-  // Act
-  policy_handler_.GetVehicleInfo();
 }
 
 TEST_F(PolicyHandlerTest, Increment_method_WithOneParameter) {
@@ -1720,7 +1786,8 @@ TEST_F(PolicyHandlerTest, OnSnapshotCreated_UrlNotAdded) {
       .WillRepeatedly(SetArgReferee<1>(test_data));
   policy_handler_.OnSnapshotCreated(msg, retry_delay_seconds, timeout_exchange);
 #else   // EXTERNAL_PROPRIETARY_MODE
-  policy_handler_.OnSnapshotCreated(msg);
+  policy_handler_.OnSnapshotCreated(msg,
+                                    policy::PTUIterationType::DefaultIteration);
 #endif  // EXTERNAL_PROPRIETARY_MODE
 }
 
@@ -1798,7 +1865,8 @@ TEST_F(PolicyHandlerTest, DISABLED_OnSnapshotCreated_UrlAdded) {
 #endif  // PROPRIETARY_MODE
 
   EXPECT_CALL(*mock_policy_manager_, OnUpdateStarted());
-  policy_handler_.OnSnapshotCreated(msg);
+  policy_handler_.OnSnapshotCreated(msg,
+                                    policy::PTUIterationType::DefaultIteration);
 }
 #endif  // EXTERNAL_PROPRIETARY_MODE
 
@@ -1846,8 +1914,9 @@ TEST_F(PolicyHandlerTest, OnDeviceConsentChanged_ConsentAllowed) {
   connection_handler::DeviceHandle test_device_id = 100u;
   EXPECT_CALL(app_manager_, connection_handler())
       .WillOnce(ReturnRef(conn_handler));
+  EXPECT_CALL(app_manager_, applications()).WillRepeatedly(Return(app_set));
 
-  EXPECT_CALL(conn_handler, GetDeviceID(kPolicyAppId_, _))
+  EXPECT_CALL(conn_handler, GetDeviceID(kDeviceId, _))
       .WillOnce(DoAll(SetArgPointee<1>(test_device_id), Return(true)));
 
   test_app.insert(mock_app_);
@@ -1857,12 +1926,13 @@ TEST_F(PolicyHandlerTest, OnDeviceConsentChanged_ConsentAllowed) {
   EXPECT_CALL(*mock_policy_manager_, IsPredataPolicy(kPolicyAppId_))
       .WillOnce(Return(true));
 
+  EXPECT_CALL(
+      *mock_policy_manager_,
+      ReactOnUserDevConsentForApp(test_device_id, kPolicyAppId_, is_allowed));
   EXPECT_CALL(*mock_policy_manager_,
-              ReactOnUserDevConsentForApp(kPolicyAppId_, is_allowed));
-  EXPECT_CALL(*mock_policy_manager_,
-              SendNotificationOnPermissionsUpdated(kPolicyAppId_));
+              SendNotificationOnPermissionsUpdated(kDeviceId, kPolicyAppId_));
 
-  policy_handler_.OnDeviceConsentChanged(kPolicyAppId_, is_allowed);
+  policy_handler_.OnDeviceConsentChanged(kDeviceId, is_allowed);
 }
 
 TEST_F(PolicyHandlerTest, OnDeviceConsentChanged_ConsentNotAllowed) {
@@ -1870,27 +1940,29 @@ TEST_F(PolicyHandlerTest, OnDeviceConsentChanged_ConsentNotAllowed) {
   // Arrange
   EnablePolicyAndPolicyManagerMock();
 
-  connection_handler::DeviceHandle test_device_id = 100u;
+  connection_handler::DeviceHandle handle = 100u;
   EXPECT_CALL(app_manager_, connection_handler())
       .WillOnce(ReturnRef(conn_handler));
 
   // Check expectations
-  EXPECT_CALL(conn_handler, GetDeviceID(kPolicyAppId_, _))
-      .WillOnce(DoAll(SetArgPointee<1>(test_device_id), Return(true)));
+  EXPECT_CALL(conn_handler, GetDeviceID(kMacAddr_, _))
+      .WillOnce(DoAll(SetArgPointee<1>(handle), Return(true)));
   test_app.insert(mock_app_);
 
-  EXPECT_CALL(*mock_app_, device()).WillOnce(Return(test_device_id));
+  EXPECT_CALL(*mock_app_, device()).WillOnce(Return(handle));
   EXPECT_CALL(*mock_app_, policy_app_id()).WillOnce(Return(kPolicyAppId_));
 
   EXPECT_CALL(*mock_policy_manager_, IsPredataPolicy(kPolicyAppId_))
       .WillOnce(Return(true));
 
-  EXPECT_CALL(*mock_policy_manager_, ReactOnUserDevConsentForApp(_, _))
+  EXPECT_CALL(*mock_policy_manager_,
+              ReactOnUserDevConsentForApp(handle, kPolicyAppId_, is_allowed))
       .Times(0);
-  EXPECT_CALL(*mock_policy_manager_, SendNotificationOnPermissionsUpdated(_))
+  EXPECT_CALL(*mock_policy_manager_,
+              SendNotificationOnPermissionsUpdated(kMacAddr_, kPolicyAppId_))
       .Times(0);
 
-  policy_handler_.OnDeviceConsentChanged(kPolicyAppId_, is_allowed);
+  policy_handler_.OnDeviceConsentChanged(kMacAddr_, is_allowed);
 }
 
 TEST_F(PolicyHandlerTest, OnDeviceConsentChanged_PredatePolicyNotAllowed) {
@@ -1901,8 +1973,9 @@ TEST_F(PolicyHandlerTest, OnDeviceConsentChanged_PredatePolicyNotAllowed) {
   connection_handler::DeviceHandle test_device_id = 100u;
   EXPECT_CALL(app_manager_, connection_handler())
       .WillOnce(ReturnRef(conn_handler));
+  EXPECT_CALL(app_manager_, applications()).WillRepeatedly(Return(app_set));
 
-  EXPECT_CALL(conn_handler, GetDeviceID(kPolicyAppId_, _))
+  EXPECT_CALL(conn_handler, GetDeviceID(kMacAddr_, _))
       .WillOnce(DoAll(SetArgPointee<1>(test_device_id), Return(true)));
 
   test_app.insert(mock_app_);
@@ -1914,12 +1987,13 @@ TEST_F(PolicyHandlerTest, OnDeviceConsentChanged_PredatePolicyNotAllowed) {
   EXPECT_CALL(*mock_policy_manager_, IsPredataPolicy(kPolicyAppId_))
       .WillOnce(Return(false));
 
+  EXPECT_CALL(
+      *mock_policy_manager_,
+      ReactOnUserDevConsentForApp(test_device_id, kPolicyAppId_, is_allowed));
   EXPECT_CALL(*mock_policy_manager_,
-              ReactOnUserDevConsentForApp(kPolicyAppId_, is_allowed));
-  EXPECT_CALL(*mock_policy_manager_,
-              SendNotificationOnPermissionsUpdated(kPolicyAppId_));
+              SendNotificationOnPermissionsUpdated(kMacAddr_, kPolicyAppId_));
 
-  policy_handler_.OnDeviceConsentChanged(kPolicyAppId_, is_allowed);
+  policy_handler_.OnDeviceConsentChanged(kMacAddr_, is_allowed);
 }
 #ifdef ENABLE_SECURITY
 #ifdef EXTERNAL_PROPRIETARY_MODE
@@ -1970,7 +2044,7 @@ TEST_F(PolicyHandlerTest, GetAppIdForSending_GetDefaultMacAddress) {
   test_app.insert(mock_app_);
   EXPECT_CALL(*mock_app_, IsRegistered()).WillOnce(Return(true));
   EXPECT_CALL(*mock_app_, app_id()).WillRepeatedly(Return(kAppId1_));
-  EXPECT_CALL(*mock_app_, hmi_level())
+  EXPECT_CALL(*mock_app_, hmi_level(kDefaultWindowId))
       .WillRepeatedly(Return(mobile_api::HMILevel::HMI_FULL));
   EXPECT_CALL(app_manager_, connection_handler())
       .WillOnce(ReturnRef(conn_handler));
@@ -1993,7 +2067,7 @@ void PolicyHandlerTest::GetAppIDForSending() {
   // Check expectations
   EXPECT_CALL(*mock_app_, app_id()).WillRepeatedly(Return(kAppId1_));
   EXPECT_CALL(*mock_app_, IsRegistered()).WillOnce(Return(true));
-  EXPECT_CALL(*mock_app_, hmi_level())
+  EXPECT_CALL(*mock_app_, hmi_level(kDefaultWindowId))
       .WillRepeatedly(Return(mobile_api::HMILevel::HMI_FULL));
   EXPECT_CALL(mock_session_observer,
               GetDataOnDeviceID(
@@ -2020,7 +2094,7 @@ TEST_F(PolicyHandlerTest, GetAppIdForSending_ExpectReturnAnyIdButNone) {
   const uint32_t app_in_full_id = 1;
   EXPECT_CALL(*mock_app_in_full, app_id())
       .WillRepeatedly(Return(app_in_full_id));
-  EXPECT_CALL(*mock_app_in_full, hmi_level())
+  EXPECT_CALL(*mock_app_in_full, hmi_level(kDefaultWindowId))
       .WillRepeatedly(Return(mobile_api::HMILevel::HMI_FULL));
   ON_CALL(*mock_app_in_full, IsRegistered()).WillByDefault(Return(true));
 
@@ -2032,7 +2106,7 @@ TEST_F(PolicyHandlerTest, GetAppIdForSending_ExpectReturnAnyIdButNone) {
   const uint32_t app_in_limited_id = 2;
   EXPECT_CALL(*mock_app_in_limited, app_id())
       .WillRepeatedly(Return(app_in_limited_id));
-  EXPECT_CALL(*mock_app_in_limited, hmi_level())
+  EXPECT_CALL(*mock_app_in_limited, hmi_level(kDefaultWindowId))
       .WillRepeatedly(Return(mobile_api::HMILevel::HMI_LIMITED));
   ON_CALL(*mock_app_in_limited, IsRegistered()).WillByDefault(Return(true));
 
@@ -2044,7 +2118,7 @@ TEST_F(PolicyHandlerTest, GetAppIdForSending_ExpectReturnAnyIdButNone) {
   const uint32_t app_in_background_id = 3;
   EXPECT_CALL(*mock_app_in_background, app_id())
       .WillRepeatedly(Return(app_in_background_id));
-  EXPECT_CALL(*mock_app_in_background, hmi_level())
+  EXPECT_CALL(*mock_app_in_background, hmi_level(kDefaultWindowId))
       .WillRepeatedly(Return(mobile_api::HMILevel::HMI_BACKGROUND));
   ON_CALL(*mock_app_in_background, IsRegistered()).WillByDefault(Return(true));
 
@@ -2055,7 +2129,7 @@ TEST_F(PolicyHandlerTest, GetAppIdForSending_ExpectReturnAnyIdButNone) {
   const uint32_t app_in_none_id = 4;
   EXPECT_CALL(*mock_app_in_none, app_id())
       .WillRepeatedly(Return(app_in_none_id));
-  EXPECT_CALL(*mock_app_in_none, hmi_level())
+  EXPECT_CALL(*mock_app_in_none, hmi_level(kDefaultWindowId))
       .WillRepeatedly(Return(mobile_api::HMILevel::HMI_NONE));
   EXPECT_CALL(*mock_app_in_none, IsRegistered()).Times(0);
 
@@ -2085,7 +2159,7 @@ TEST_F(PolicyHandlerTest, GetAppIdForSending_ExpectReturnAnyAppInNone) {
   const uint32_t app_in_none_id_1 = 1;
   EXPECT_CALL(*mock_app_in_none_1, app_id())
       .WillRepeatedly(Return(app_in_none_id_1));
-  EXPECT_CALL(*mock_app_in_none_1, hmi_level())
+  EXPECT_CALL(*mock_app_in_none_1, hmi_level(kDefaultWindowId))
       .WillRepeatedly(Return(mobile_api::HMILevel::HMI_FULL));
   ON_CALL(*mock_app_in_none_1, IsRegistered()).WillByDefault(Return(true));
 
@@ -2097,7 +2171,7 @@ TEST_F(PolicyHandlerTest, GetAppIdForSending_ExpectReturnAnyAppInNone) {
   const uint32_t app_in_none_id_2 = 2;
   EXPECT_CALL(*mock_app_in_none_2, app_id())
       .WillRepeatedly(Return(app_in_none_id_2));
-  EXPECT_CALL(*mock_app_in_none_2, hmi_level())
+  EXPECT_CALL(*mock_app_in_none_2, hmi_level(kDefaultWindowId))
       .WillRepeatedly(Return(mobile_api::HMILevel::HMI_NONE));
   ON_CALL(*mock_app_in_none_2, IsRegistered()).WillByDefault(Return(true));
 
@@ -2132,7 +2206,7 @@ TEST_F(PolicyHandlerTest,
   EXPECT_CALL(*mock_app_, app_id()).WillRepeatedly(Return(kAppId1_));
   EXPECT_CALL(*mock_app_, policy_app_id())
       .WillRepeatedly(Return(kPolicyAppId_));
-  EXPECT_CALL(*mock_app_, hmi_level())
+  EXPECT_CALL(*mock_app_, hmi_level(kDefaultWindowId))
       .WillRepeatedly(Return(mobile_apis::HMILevel::HMI_FULL));
   EXPECT_CALL(*mock_app_, IsRegistered()).WillRepeatedly(Return(true));
 
@@ -2159,7 +2233,7 @@ TEST_F(PolicyHandlerTest,
   EXPECT_CALL(*mock_app_, app_id()).WillRepeatedly(Return(kAppId1_));
   EXPECT_CALL(*mock_app_, policy_app_id())
       .WillRepeatedly(Return(kPolicyAppId_));
-  EXPECT_CALL(*mock_app_, hmi_level())
+  EXPECT_CALL(*mock_app_, hmi_level(kDefaultWindowId))
       .WillRepeatedly(Return(mobile_apis::HMILevel::HMI_NONE));
   EXPECT_CALL(*mock_app_, IsRegistered()).WillRepeatedly(Return(true));
 
@@ -2187,9 +2261,9 @@ TEST_F(PolicyHandlerTest, CanUpdate_TwoApplicationForSending_SUCCESS) {
   std::shared_ptr<application_manager_test::MockApplication> second_mock_app =
       std::make_shared<application_manager_test::MockApplication>();
 
-  EXPECT_CALL(*mock_app_, hmi_level())
+  EXPECT_CALL(*mock_app_, hmi_level(kDefaultWindowId))
       .WillOnce(Return(mobile_apis::HMILevel::HMI_FULL));
-  EXPECT_CALL(*second_mock_app, hmi_level())
+  EXPECT_CALL(*second_mock_app, hmi_level(kDefaultWindowId))
       .WillRepeatedly(Return(mobile_apis::HMILevel::HMI_LIMITED));
 
   EXPECT_CALL(*second_mock_app, app_id()).WillRepeatedly(Return(kAppId2_));
@@ -2242,7 +2316,8 @@ TEST_F(PolicyHandlerTest,
                   _,
                   NULL,
                   _,
-                  _)).WillOnce(Return(1u));
+                  _))
+      .WillOnce(Return(1u));
 
   EXPECT_CALL(app_manager_, application(kConnectionKey_))
       .WillOnce(Return(mock_app_));

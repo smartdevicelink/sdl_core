@@ -31,36 +31,42 @@
  */
 #include <iostream>
 
-#include "rc_rpc_plugin/rc_command_factory.h"
-#include "rc_rpc_plugin/commands/mobile/button_press_request.h"
-#include "rc_rpc_plugin/commands/mobile/button_press_response.h"
-#include "rc_rpc_plugin/commands/mobile/get_interior_vehicle_data_request.h"
-#include "rc_rpc_plugin/commands/mobile/get_interior_vehicle_data_response.h"
-#include "rc_rpc_plugin/commands/hmi/rc_get_interior_vehicle_data_consent_request.h"
-#include "rc_rpc_plugin/commands/hmi/rc_get_interior_vehicle_data_consent_response.h"
-#include "rc_rpc_plugin/commands/mobile/set_interior_vehicle_data_request.h"
-#include "rc_rpc_plugin/commands/mobile/set_interior_vehicle_data_response.h"
-#include "rc_rpc_plugin/commands/mobile/on_interior_vehicle_data_notification.h"
 #include "rc_rpc_plugin/commands/hmi/rc_button_press_request.h"
 #include "rc_rpc_plugin/commands/hmi/rc_button_press_response.h"
+#include "rc_rpc_plugin/commands/hmi/rc_get_interior_vehicle_data_consent_request.h"
+#include "rc_rpc_plugin/commands/hmi/rc_get_interior_vehicle_data_consent_response.h"
 #include "rc_rpc_plugin/commands/hmi/rc_get_interior_vehicle_data_request.h"
 #include "rc_rpc_plugin/commands/hmi/rc_get_interior_vehicle_data_response.h"
 #include "rc_rpc_plugin/commands/hmi/rc_on_interior_vehicle_data_notification.h"
 #include "rc_rpc_plugin/commands/hmi/rc_on_remote_control_settings_notification.h"
+#include "rc_rpc_plugin/commands/hmi/rc_set_global_properties_request.h"
+#include "rc_rpc_plugin/commands/hmi/rc_set_global_properties_response.h"
 #include "rc_rpc_plugin/commands/hmi/rc_set_interior_vehicle_data_request.h"
 #include "rc_rpc_plugin/commands/hmi/rc_set_interior_vehicle_data_response.h"
+#include "rc_rpc_plugin/commands/mobile/button_press_request.h"
+#include "rc_rpc_plugin/commands/mobile/button_press_response.h"
+#include "rc_rpc_plugin/commands/mobile/get_interior_vehicle_data_consent_request.h"
+#include "rc_rpc_plugin/commands/mobile/get_interior_vehicle_data_consent_response.h"
+#include "rc_rpc_plugin/commands/mobile/get_interior_vehicle_data_request.h"
+#include "rc_rpc_plugin/commands/mobile/get_interior_vehicle_data_response.h"
+#include "rc_rpc_plugin/commands/mobile/on_interior_vehicle_data_notification.h"
+#include "rc_rpc_plugin/commands/mobile/release_interior_vehicle_data_module_request.h"
+#include "rc_rpc_plugin/commands/mobile/release_interior_vehicle_data_module_response.h"
+#include "rc_rpc_plugin/commands/mobile/set_interior_vehicle_data_request.h"
+#include "rc_rpc_plugin/commands/mobile/set_interior_vehicle_data_response.h"
+#include "rc_rpc_plugin/rc_command_factory.h"
 
-#include "interfaces/MOBILE_API.h"
 #include "interfaces/HMI_API.h"
+#include "interfaces/MOBILE_API.h"
 
-#include "rc_rpc_plugin/resource_allocation_manager.h"
 #include "rc_rpc_plugin/interior_data_cache.h"
+#include "rc_rpc_plugin/resource_allocation_manager.h"
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "RemoteControlModule")
 namespace application_manager {
-using rc_rpc_plugin::ResourceAllocationManager;
 using rc_rpc_plugin::InteriorDataCache;
 using rc_rpc_plugin::RCCommandParams;
+using rc_rpc_plugin::ResourceAllocationManager;
 
 template <typename RCCommandType>
 class RCCommandCreator : public CommandCreator {
@@ -113,7 +119,7 @@ struct RCCommandCreatorFactory {
   }
   const RCCommandParams params_;
 };
-}
+}  // namespace application_manager
 
 namespace rc_rpc_plugin {
 using namespace application_manager;
@@ -158,11 +164,13 @@ bool RCCommandFactory::IsAbleToProcess(
       Command::SOURCE_SDL_TO_HMI == message_source) {
     return get_hmi_creator_factory(
                static_cast<hmi_apis::FunctionID::eType>(function_id),
-               hmi_apis::messageType::INVALID_ENUM).CanBeCreated();
+               hmi_apis::messageType::INVALID_ENUM)
+        .CanBeCreated();
   } else {
     auto id = static_cast<mobile_apis::FunctionID::eType>(function_id);
-    return get_mobile_command_creator(
-               id, mobile_apis::messageType::INVALID_ENUM).CanBeCreated() ||
+    return get_mobile_command_creator(id,
+                                      mobile_apis::messageType::INVALID_ENUM)
+               .CanBeCreated() ||
            get_mobile_notification_creator(id).CanBeCreated();
   }
 }
@@ -193,6 +201,20 @@ CommandCreator& RCCommandFactory::get_mobile_command_creator(
                        .GetCreator<commands::SetInteriorVehicleDataRequest>()
                  : rc_factory
                        .GetCreator<commands::SetInteriorVehicleDataResponse>();
+    }
+    case mobile_apis::FunctionID::ReleaseInteriorVehicleDataModuleID: {
+      return mobile_apis::messageType::request == message_type
+                 ? rc_factory.GetCreator<
+                       commands::ReleaseInteriorVehicleDataModuleRequest>()
+                 : rc_factory.GetCreator<
+                       commands::ReleaseInteriorVehicleDataModuleResponse>();
+    }
+    case mobile_apis::FunctionID::GetInteriorVehicleDataConsentID: {
+      return mobile_apis::messageType::request == message_type
+                 ? rc_factory.GetCreator<
+                       commands::GetInteriorVehicleDataConsentRequest>()
+                 : rc_factory.GetCreator<
+                       commands::GetInteriorVehicleDataConsentResponse>();
     }
     default: {}
   }
@@ -285,7 +307,14 @@ CommandCreator& RCCommandFactory::get_hmi_creator_factory(
       return rc_factory
           .GetCreator<commands::RCOnRemoteControlSettingsNotification>();
     }
+    case hmi_apis::FunctionID::RC_SetGlobalProperties: {
+      return hmi_apis::messageType::request == message_type
+                 ? rc_factory
+                       .GetCreator<commands::RCSetGlobalPropertiesRequest>()
+                 : rc_factory
+                       .GetCreator<commands::RCSetGlobalPropertiesResponse>();
+    }
     default: { return rc_factory.GetCreator<RCInvalidCommand>(); }
   }
 }
-}
+}  // namespace rc_rpc_plugin

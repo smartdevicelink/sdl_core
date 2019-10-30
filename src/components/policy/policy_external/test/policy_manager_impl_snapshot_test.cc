@@ -63,9 +63,8 @@ TEST_F(PolicyManagerImplTest2, UpdatedPreloadedPT_ExpectLPT_IsUpdated) {
     Json::Value val2(Json::arrayValue);
     val2[0] = hmi_level_[index_];
     val[new_data.new_field_value_]["hmi_levels"] = val2;
-    root["policy_table"]["functional_groupings"][new_data
-                                                     .new_field_name_]["rpcs"] =
-        val;
+    root["policy_table"]["functional_groupings"][new_data.new_field_name_]
+        ["rpcs"] = val;
     root["policy_table"]["functional_groupings"][new_data.new_field_name_]
         ["user_consent_prompt"] = new_data.new_field_name_;
   }
@@ -260,25 +259,30 @@ TEST_F(
     PolicyManagerImplTest2,
     AddValidRequestTypeToPT_GetNewAppWithSpecificPoliciesViaPTU_ExpectRTAdded) {
   const std::string& app_id = application_id_;
+  const transport_manager::DeviceHandle handle = 1;
 
   // Arrange
   CreateLocalPT(preloaded_pt_filename_);
+  EXPECT_CALL(listener_, GetDevicesIds(app_id))
+      .WillRepeatedly(Return(transport_manager::DeviceList(1, device_id_1_)));
   // Add app
-  policy_manager_->AddApplication(app_id, HmiTypes(policy_table::AHT_DEFAULT));
+  policy_manager_->AddApplication(
+      device_id_1_, app_id, HmiTypes(policy_table::AHT_DEFAULT));
   // Check app gets RequestTypes from pre_DataConsent of app_policies
   // section
-  pt_request_types_ = policy_manager_->GetAppRequestTypes(app_id);
+  pt_request_types_ = policy_manager_->GetAppRequestTypes(handle, app_id);
 
   // Only single item as in pre_DataConsent in preloaded PT
   EXPECT_EQ(1u, pt_request_types_.size());
-  EXPECT_CALL(listener_, OnPendingPermissionChange(app_id)).Times(1);
+  EXPECT_CALL(listener_, OnPendingPermissionChange(device_id_1_, app_id))
+      .Times(1);
 
   // PTU has RequestTypes as [] - means 'all allowed'
   Json::Value root = GetPTU("json/PTU2.json");
 
   // Setting device consent to 'true' in order to have appropriate application
   // permissions, request type etc.
-  EXPECT_CALL(listener_, OnCurrentDeviceIdUpdateRequired(application_id_))
+  EXPECT_CALL(listener_, OnCurrentDeviceIdUpdateRequired(handle, app_id))
       .WillRepeatedly(Return(device_id_1_));
   policy_manager_->SetUserConsentForDevice(device_id_1_, true);
 
@@ -289,13 +293,13 @@ TEST_F(
 
   pt_request_types_.clear();
   // Get RequestTypes from <app_id> section of app policies after PT update
-  pt_request_types_ = policy_manager_->GetAppRequestTypes(app_id);
+  pt_request_types_ = policy_manager_->GetAppRequestTypes(handle, app_id);
 
   // Check sizes of Request types of PT and PTU
   ASSERT_EQ(ptu_request_types_size_, pt_request_types_.size());
 
   ::policy::AppPermissions permissions =
-      policy_manager_->GetAppPermissionsChanges(app_id);
+      policy_manager_->GetAppPermissionsChanges(device_id_1_, app_id);
   EXPECT_TRUE(permissions.requestTypeChanged);
 
   ::policy::StringArray result;
@@ -333,6 +337,6 @@ TEST_F(PolicyManagerImplTest2, AddDevice_RegisterDevice_TRUE) {
   EXPECT_TRUE(result);
 }
 
-}  // namespace policy
+}  // namespace policy_test
 }  // namespace components
 }  // namespace test

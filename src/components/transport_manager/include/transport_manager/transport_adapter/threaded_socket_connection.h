@@ -38,11 +38,11 @@
 #include <poll.h>
 #include <queue>
 
-#include "transport_manager/transport_adapter/connection.h"
-#include "protocol/common.h"
 #include <atomic>
-#include "utils/threads/thread_delegate.h"
+#include "protocol/common.h"
+#include "transport_manager/transport_adapter/connection.h"
 #include "utils/lock.h"
+#include "utils/threads/thread_delegate.h"
 
 using ::transport_manager::transport_adapter::Connection;
 

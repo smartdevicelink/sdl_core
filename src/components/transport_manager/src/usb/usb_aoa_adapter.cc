@@ -34,9 +34,9 @@
  */
 
 #include "transport_manager/usb/usb_aoa_adapter.h"
-#include "transport_manager/usb/usb_device_scanner.h"
-#include "transport_manager/usb/usb_connection_factory.h"
 #include "transport_manager/usb/common.h"
+#include "transport_manager/usb/usb_connection_factory.h"
+#include "transport_manager/usb/usb_device_scanner.h"
 #include "utils/logger.h"
 
 namespace transport_manager {
@@ -45,7 +45,7 @@ namespace transport_adapter {
 CREATE_LOGGERPTR_GLOBAL(logger_, "TransportManager")
 UsbAoaAdapter::UsbAoaAdapter(resumption::LastState& last_state,
                              const TransportManagerSettings& settings)
-    : TransportAdapterImpl(new UsbDeviceScanner(this),
+    : TransportAdapterImpl(new UsbDeviceScanner(this, settings),
                            new UsbConnectionFactory(this),
                            NULL,
                            last_state,

@@ -32,10 +32,10 @@
 
 #include "sdl_rpc_plugin/commands/mobile/get_system_capability_request.h"
 
-#include "sdl_rpc_plugin/extensions/system_capability_app_extension.h"
+#include <set>
 #include "application_manager/app_service_manager.h"
 #include "application_manager/message_helper.h"
-#include <set>
+#include "sdl_rpc_plugin/extensions/system_capability_app_extension.h"
 
 namespace sdl_rpc_plugin {
 using namespace application_manager;
@@ -133,6 +133,17 @@ void GetSystemCapabilityRequest::Run() {
       }
       break;
     }
+    case mobile_apis::SystemCapabilityType::SEAT_LOCATION: {
+      if (hmi_capabilities.seat_location_capability()) {
+        response_params[strings::system_capability]
+                       [strings::seat_location_capability] =
+                           *hmi_capabilities.seat_location_capability();
+      } else {
+        SendResponse(false, mobile_apis::Result::DATA_NOT_AVAILABLE);
+        return;
+      }
+      break;
+    }
     case mobile_apis::SystemCapabilityType::VIDEO_STREAMING:
       if (hmi_capabilities.video_streaming_capability()) {
         response_params[strings::system_capability]
@@ -146,9 +157,26 @@ void GetSystemCapabilityRequest::Run() {
     case mobile_apis::SystemCapabilityType::APP_SERVICES: {
       auto all_services =
           application_manager_.GetAppServiceManager().GetAllServiceRecords();
-      response_params
-          [strings::system_capability][strings::app_services_capabilities] =
-              MessageHelper::CreateAppServiceCapabilities(all_services);
+      response_params[strings::system_capability]
+                     [strings::app_services_capabilities] =
+                         MessageHelper::CreateAppServiceCapabilities(
+                             all_services);
+      break;
+    }
+    case mobile_apis::SystemCapabilityType::DISPLAYS: {
+      auto capabilities = hmi_capabilities.system_display_capabilities();
+      if (app->display_capabilities()) {
+        capabilities = app->display_capabilities();
+      }
+
+      if (!capabilities) {
+        SendResponse(false, mobile_apis::Result::DATA_NOT_AVAILABLE);
+        LOG4CXX_INFO(logger_, "system_display_capabilities are not available");
+        return;
+      }
+
+      response_params[strings::system_capability]
+                     [strings::display_capabilities] = *capabilities;
       break;
     }
     default:  // Return unsupported resource
@@ -156,22 +184,33 @@ void GetSystemCapabilityRequest::Run() {
       return;
   }
 
-  if ((*message_)[app_mngr::strings::msg_params].keyExists(
-          strings::subscribe)) {
-    auto& ext = SystemCapabilityAppExtension::ExtractExtension(*app);
-    if ((*message_)[app_mngr::strings::msg_params][strings::subscribe]
-            .asBool() == true) {
-      LOG4CXX_DEBUG(logger_,
-                    "Subscribe to system capability: " << response_type);
-      ext.SubscribeTo(response_type);
-    } else {
-      LOG4CXX_DEBUG(logger_,
-                    "Unsubscribe from system capability: " << response_type);
-      ext.UnsubscribeFrom(response_type);
+  const char* info = nullptr;
+  // Ignore subscription/unsubscription for DISPLAYS type
+  if (mobile_apis::SystemCapabilityType::DISPLAYS != response_type) {
+    if ((*message_)[app_mngr::strings::msg_params].keyExists(
+            strings::subscribe)) {
+      auto& ext = SystemCapabilityAppExtension::ExtractExtension(*app);
+      if ((*message_)[app_mngr::strings::msg_params][strings::subscribe]
+              .asBool() == true) {
+        LOG4CXX_DEBUG(logger_,
+                      "Subscribe to system capability: " << response_type);
+        ext.SubscribeTo(response_type);
+      } else {
+        LOG4CXX_DEBUG(logger_,
+                      "Unsubscribe from system capability: " << response_type);
+        ext.UnsubscribeFrom(response_type);
+      }
+    }
+  } else {
+    if ((*message_)[app_mngr::strings::msg_params].keyExists(
+            strings::subscribe)) {
+      info =
+          "Subscribe parameter is ignored. Auto Subscription/Unsubscription is "
+          "used for DISPLAY capability type.";
     }
   }
 
-  SendResponse(true, mobile_apis::Result::SUCCESS, NULL, &response_params);
+  SendResponse(true, mobile_apis::Result::SUCCESS, info, &response_params);
 }
 
 void GetSystemCapabilityRequest::on_event(const event_engine::Event& event) {
@@ -179,4 +218,4 @@ void GetSystemCapabilityRequest::on_event(const event_engine::Event& event) {
 }
 
 }  // namespace commands
-}  // namespace application_manager
+}  // namespace sdl_rpc_plugin

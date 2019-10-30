@@ -32,8 +32,8 @@
 
 #include "security_manager/security_query.h"
 #include <cstring>
-#include "utils/macro.h"
 #include "utils/byte_order.h"
+#include "utils/macro.h"
 
 namespace security_manager {
 

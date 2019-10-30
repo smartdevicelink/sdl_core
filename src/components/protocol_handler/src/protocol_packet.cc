@@ -30,17 +30,17 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <stdint.h>
 #include <memory.h>
-#include <new>
-#include <memory>
+#include <stdint.h>
 #include <cstring>
 #include <limits>
+#include <memory>
+#include <new>
 
 #include "protocol/common.h"
 #include "protocol_handler/protocol_packet.h"
-#include "utils/macro.h"
 #include "utils/byte_order.h"
+#include "utils/macro.h"
 #include "utils/semantic_version.h"
 
 namespace protocol_handler {
@@ -118,9 +118,9 @@ void ProtocolPacket::ProtocolHeader::deserialize(const uint8_t* message,
     case PROTOCOL_VERSION_4:
     case PROTOCOL_VERSION_5: {
       if (messageSize < PROTOCOL_HEADER_V2_SIZE) {
-        LOG4CXX_DEBUG(logger_,
-                      "Message size less " << PROTOCOL_HEADER_V2_SIZE
-                                           << " bytes");
+        LOG4CXX_DEBUG(
+            logger_,
+            "Message size less " << PROTOCOL_HEADER_V2_SIZE << " bytes");
         return;
       }
       messageId = read_be_uint32(message + 8);
@@ -255,9 +255,9 @@ RESULT_CODE ProtocolPacket::ProtocolHeaderValidator::validate(
   // ServiceType shall be equal 0x0 (Control), 0x07 (RPC), 0x0A (PCM), 0x0B
   // (Video), 0x0F (Bulk)
   if (ServiceTypeFromByte(header.serviceType) == kInvalidServiceType) {
-    LOG4CXX_WARN(logger_,
-                 "Invalide service type"
-                     << static_cast<int>(header.serviceType));
+    LOG4CXX_WARN(
+        logger_,
+        "Invalide service type" << static_cast<int>(header.serviceType));
     return RESULT_FAIL;
   }
   // Check frame info for each frame type
@@ -433,6 +433,7 @@ RawMessagePtr ProtocolPacket::serializePacket() const {
                                                  packet_header_.version,
                                                  packet,
                                                  total_packet_size,
+                                                 false,
                                                  packet_header_.serviceType));
 
   delete[] packet;

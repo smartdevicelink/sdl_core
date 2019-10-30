@@ -32,8 +32,8 @@
 
 #include <stdint.h>
 #include <memory>
-#include <string>
 #include <set>
+#include <string>
 
 #include "mobile/add_command_request.h"
 
@@ -41,16 +41,16 @@
 
 #include "utils/helpers.h"
 
-#include "smart_objects/smart_object.h"
-#include "utils/custom_string.h"
 #include "application_manager/commands/command_request_test.h"
-#include "application_manager/smart_object_keys.h"
+#include "application_manager/event_engine/event.h"
 #include "application_manager/mock_application.h"
 #include "application_manager/mock_application_manager.h"
-#include "application_manager/mock_message_helper.h"
-#include "application_manager/event_engine/event.h"
-#include "application_manager/mock_hmi_interface.h"
 #include "application_manager/mock_help_prompt_manager.h"
+#include "application_manager/mock_hmi_interface.h"
+#include "application_manager/mock_message_helper.h"
+#include "application_manager/smart_object_keys.h"
+#include "smart_objects/smart_object.h"
+#include "utils/custom_string.h"
 
 namespace test {
 namespace components {
@@ -60,17 +60,17 @@ namespace add_command_request {
 
 namespace am = application_manager;
 namespace am_test = application_manager_test;
-using am::commands::CommandImpl;
 using am::ApplicationManager;
-using am::commands::MessageSharedPtr;
 using am::ApplicationSharedPtr;
-using ::testing::_;
-using ::testing::Return;
-using ::testing::InSequence;
-using sdl_rpc_plugin::commands::AddCommandRequest;
-using ns_smart_device_link::ns_smart_objects::SmartObjectSPtr;
-using ::test::components::application_manager_test::MockApplication;
+using am::commands::CommandImpl;
+using am::commands::MessageSharedPtr;
 using am::event_engine::EventObserver;
+using ns_smart_device_link::ns_smart_objects::SmartObjectSPtr;
+using sdl_rpc_plugin::commands::AddCommandRequest;
+using ::test::components::application_manager_test::MockApplication;
+using ::testing::_;
+using ::testing::InSequence;
+using ::testing::Return;
 using namespace smart_objects;
 
 namespace custom_str = utils::custom_string;

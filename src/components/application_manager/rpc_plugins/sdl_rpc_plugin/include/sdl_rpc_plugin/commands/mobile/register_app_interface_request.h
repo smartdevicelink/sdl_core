@@ -36,8 +36,8 @@
 
 #include "application_manager/commands/command_request_impl.h"
 #include "application_manager/policies/policy_handler_interface.h"
-#include "utils/macro.h"
 #include "utils/custom_string.h"
+#include "utils/macro.h"
 
 namespace policy {
 struct DeviceInfo;
@@ -126,7 +126,7 @@ class RegisterAppInterfaceRequest
    *
    * @param app application with changed HMI status
    * @param resumption If true, resumption-related parameters will be sent to
-   *the HMI
+   * the HMI
    * @param need_restore_vr If resumption is true, whether or not VR commands
    *should be resumed
    **/
@@ -154,11 +154,11 @@ class RegisterAppInterfaceRequest
       std::vector<app_mngr::ApplicationSharedPtr>& out_duplicate_apps);
 
   /*
-  * @brief Predicate for using with CheckCoincidence method to compare with VR
-  * synonym SO
-  *
-  * return TRUE if there is coincidence of VR, otherwise FALSE
-  */
+   * @brief Predicate for using with CheckCoincidence method to compare with VR
+   * synonym SO
+   *
+   * return TRUE if there is coincidence of VR, otherwise FALSE
+   */
   struct CoincidencePredicateVR {
     CoincidencePredicateVR(const custom_str::CustomString& newItem)
         : newItem_(newItem) {}
@@ -207,17 +207,31 @@ class RegisterAppInterfaceRequest
   void SendSubscribeCustomButtonNotification();
 
   /**
-   * @brief IsApplicationSwitched checks whether application is switched from
-   * another transport. If application id is found, but not in reconnection
+   * @brief IsApplicationSwitched checks whether application is switched
+   * from another transport. If application id is found, but not in reconnection
    * list, returns 'already registered' code. Otherwise - proceed with
    * switching.
    * @return True if application is detected as switched, otherwise false.
    */
   bool IsApplicationSwitched();
 
+  /**
+   * @brief Information about given Connection Key.
+   * @param key Unique key used by other components as session identifier
+   * @param device_id device identifier.
+   * @param mac_address uniq address
+   * @return false in case of error or true in case of success
+   */
+  bool GetDataOnSessionKey(
+      const uint32_t key,
+      connection_handler::DeviceHandle* device_id = nullptr,
+      std::string* mac_address = nullptr) const;
+
  private:
   std::string response_info_;
   mobile_apis::Result::eType result_code_;
+  connection_handler::DeviceHandle device_handle_;
+  std::string device_id_;
 
   policy::PolicyHandlerInterface& GetPolicyHandler();
   DISALLOW_COPY_AND_ASSIGN(RegisterAppInterfaceRequest);
@@ -225,6 +239,6 @@ class RegisterAppInterfaceRequest
 
 }  // namespace commands
 
-}  // namespace application_manager
+}  // namespace sdl_rpc_plugin
 
 #endif  // SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_MOBILE_REGISTER_APP_INTERFACE_REQUEST_H_

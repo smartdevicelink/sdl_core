@@ -30,22 +30,22 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <sstream>
-#include <stdlib.h>
-#include <stdint.h>
 #include <errno.h>
+#include <stdint.h>
+#include <stdlib.h>
 #include <unistd.h>
+#include <sstream>
 
-#include "utils/logger.h"
+#include "config_profile/profile.h"
+#include "policy/cache_manager.h"
+#include "policy/policy_helper.h"
+#include "policy/sql_pt_queries.h"
+#include "policy/sql_pt_representation.h"
+#include "policy/sql_wrapper.h"
 #include "utils/date_time.h"
 #include "utils/file_system.h"
 #include "utils/gen_hash.h"
-#include "policy/sql_pt_representation.h"
-#include "policy/sql_wrapper.h"
-#include "policy/sql_pt_queries.h"
-#include "policy/policy_helper.h"
-#include "policy/cache_manager.h"
-#include "config_profile/profile.h"
+#include "utils/logger.h"
 
 namespace policy {
 
@@ -81,9 +81,9 @@ void SQLPTRepresentation::CheckPermissions(const PTString& app_id,
   utils::dbms::SQLQuery query(db());
 
   if (!query.Prepare(sql_pt::kSelectRpc)) {
-    LOG4CXX_WARN(logger_,
-                 "Incorrect select statement from rpcs"
-                     << query.LastError().text());
+    LOG4CXX_WARN(
+        logger_,
+        "Incorrect select statement from rpcs" << query.LastError().text());
     return;
   }
   query.Bind(0, app_id);
@@ -378,9 +378,9 @@ InitResult SQLPTRepresentation::Init(const PolicySettings* settings) {
             utils::dbms::SQLQuery check_first_run(db());
             if (check_first_run.Prepare(sql_pt::kIsFirstRun) &&
                 check_first_run.Next()) {
-              LOG4CXX_INFO(logger_,
-                           "Selecting is first run "
-                               << check_first_run.GetBoolean(0));
+              LOG4CXX_INFO(
+                  logger_,
+                  "Selecting is first run " << check_first_run.GetBoolean(0));
               if (check_first_run.GetBoolean(0)) {
                 utils::dbms::SQLQuery set_not_first_run(db());
                 set_not_first_run.Exec(sql_pt::kSetNotFirstRun);
@@ -419,16 +419,6 @@ InitResult SQLPTRepresentation::Init(const PolicySettings* settings) {
 bool SQLPTRepresentation::Close() {
   db_->Close();
   return db_->LastError().number() == utils::dbms::OK;
-}
-
-const VehicleInfo SQLPTRepresentation::GetVehicleInfo() const {
-  policy_table::ModuleConfig module_config;
-  GatherModuleConfig(&module_config);
-  VehicleInfo vehicle_info;
-  vehicle_info.vehicle_make = *module_config.vehicle_make;
-  vehicle_info.vehicle_model = *module_config.vehicle_model;
-  vehicle_info.vehicle_year = *module_config.vehicle_year;
-  return vehicle_info;
 }
 
 bool SQLPTRepresentation::Drop() {
@@ -495,6 +485,11 @@ std::shared_ptr<policy_table::Table> SQLPTRepresentation::GenerateSnapshot()
   GatherConsumerFriendlyMessages(
       &*table->policy_table.consumer_friendly_messages);
   GatherApplicationPoliciesSection(&table->policy_table.app_policies_section);
+  GatherVehicleData(&*table->policy_table.vehicle_data);
+  if (!table->policy_table.vehicle_data.is_initialized()) {
+    rpc::Optional<rpc::String<0, 100> > null_version;
+    table->policy_table.vehicle_data->schema_version = null_version;
+  }
   return table;
 }
 
@@ -525,7 +520,9 @@ void SQLPTRepresentation::GatherModuleConfig(
     *config->vehicle_make = query.GetString(6);
     *config->vehicle_model = query.GetString(7);
     *config->vehicle_year = query.GetString(8);
-    *config->preloaded_date = query.GetString(9);
+    if (!query.IsNull(9)) {
+      *config->lock_screen_dismissal_enabled = query.GetBoolean(9);
+    }
   }
 
   utils::dbms::SQLQuery endpoints(db());
@@ -537,6 +534,18 @@ void SQLPTRepresentation::GatherModuleConfig(
       const std::string& service = endpoints.GetString(1);
       const std::string& app_id = endpoints.GetString(2);
       config->endpoints[service][app_id].push_back(url);
+    }
+  }
+
+  utils::dbms::SQLQuery endpoint_properties(db());
+  if (!endpoint_properties.Prepare(sql_pt::kSelectEndpointProperties)) {
+    LOG4CXX_ERROR(logger_, "Incorrect statement for Endpoint properties");
+  } else {
+    while (endpoint_properties.Next()) {
+      const std::string& service = endpoint_properties.GetString(0);
+      const std::string& version = endpoint_properties.GetString(1);
+      auto& ep_properties = (*config->endpoint_properties);
+      *ep_properties[service].version = version;
     }
   }
 
@@ -614,6 +623,10 @@ bool SQLPTRepresentation::GatherFunctionalGroupings(
       *rpcs_structure.user_consent_prompt = functional_group.GetString(2);
     }
 
+    if (!functional_group.IsNull(3)) {
+      *rpcs_structure.encryption_required = functional_group.GetBoolean(3);
+    }
+
     const int group_id = functional_group.GetInteger(0);
 
     // Collecting RPCs with their HMI levels and parameters (if any)
@@ -627,18 +640,17 @@ bool SQLPTRepresentation::GatherFunctionalGroupings(
         }
       }
       if (!rpcs.IsNull(2)) {
-        policy_table::Parameter param;
-        if (EnumFromJsonString(rpcs.GetString(2), &param)) {
-          // EMPTY is a special mark to specify that 'parameters' section is
-          // present, but has no parameters. It is not valid parameter value.
-          if (policy_table::P_EMPTY == param) {
-            (*rpcs_structure.rpcs[rpcs.GetString(0)].parameters)
-                .mark_initialized();
-            continue;
-          }
-          InsertUnique(param,
-                       &(*rpcs_structure.rpcs[rpcs.GetString(0)].parameters));
+        std::string param = rpcs.GetString(2);
+        // EMPTY is a special mark to specify that 'parameters' section is
+        // present, but has no parameters. It is not valid parameter value.
+        if (policy_table::EnumToJsonString(policy_table::P_EMPTY) == param) {
+          (*rpcs_structure.rpcs[rpcs.GetString(0)].parameters)
+              .mark_initialized();
+          continue;
         }
+
+        InsertUnique(param,
+                     &(*rpcs_structure.rpcs[rpcs.GetString(0)].parameters));
       }
     }
 
@@ -668,10 +680,33 @@ bool SQLPTRepresentation::GatherConsumerFriendlyMessages(
   if (query.Prepare(sql_pt::kCollectFriendlyMsg)) {
     while (query.Next()) {
       UserFriendlyMessage msg;
-      msg.message_code = query.GetString(7);
-      std::string language = query.GetString(6);
 
-      (*messages->messages)[msg.message_code].languages[language];
+      msg.tts = query.GetString(1);
+      msg.label = query.GetString(2);
+      msg.line1 = query.GetString(3);
+      msg.line2 = query.GetString(4);
+      msg.text_body = query.GetString(5);
+      msg.message_code = query.GetString(7);
+
+      std::string language = query.GetString(6);
+      policy_table::Languages& languages =
+          (*messages->messages)[msg.message_code].languages;
+      policy_table::MessageString& specific_message = languages[language];
+      if (!msg.tts.empty()) {
+        *(specific_message).tts = msg.tts;
+      }
+      if (!msg.label.empty()) {
+        *(specific_message).label = msg.label;
+      }
+      if (!msg.line1.empty()) {
+        *(specific_message).line1 = msg.line1;
+      }
+      if (!msg.line2.empty()) {
+        *(specific_message).line2 = msg.line2;
+      }
+      if (!msg.text_body.empty()) {
+        *(specific_message).textBody = msg.text_body;
+      }
     }
   } else {
     LOG4CXX_WARN(logger_, "Incorrect statement for select friendly messages.");
@@ -716,6 +751,7 @@ bool SQLPTRepresentation::GatherApplicationPoliciesSection(
     params.priority = priority;
 
     *params.memory_kb = query.GetInteger(2);
+
     *params.heart_beat_timeout_ms = query.GetUInteger(3);
     if (!query.IsNull(4)) {
       *params.certificate = query.GetString(4);
@@ -735,6 +771,10 @@ bool SQLPTRepresentation::GatherApplicationPoliciesSection(
     *params.cloud_transport_type = query.GetString(9);
     *params.icon_url = query.GetString(10);
     *params.allow_unknown_rpc_passthrough = query.GetBoolean(11);
+
+    if (!query.IsNull(12)) {
+      *params.encryption_required = query.GetBoolean(12);
+    }
 
     const auto& gather_app_id = ((*policies).apps[app_id].is_string())
                                     ? (*policies).apps[app_id].get_string()
@@ -778,6 +818,44 @@ bool SQLPTRepresentation::GatherApplicationPoliciesSection(
   return true;
 }
 
+bool SQLPTRepresentation::GatherVehicleData(
+    policy_table::VehicleData* vehicle_data) const {
+  utils::dbms::SQLQuery query(db());
+  if (!query.Prepare(sql_pt::kSelectVehicleDataSchemaVersion) ||
+      !query.Next()) {
+    LOG4CXX_ERROR(logger_,
+                  "Incorrect statement for vehicle data schema version");
+    return false;
+  }
+  *vehicle_data->schema_version = query.GetString(0);
+
+  vehicle_data->mark_initialized();
+  return GatherVehicleDataItems(&*vehicle_data->schema_items);
+}
+
+bool SQLPTRepresentation::GatherVehicleDataItems(
+    policy_table::VehicleDataItems* vehicle_data_items) const {
+  LOG4CXX_AUTO_TRACE(logger_);
+  auto parameterized_vdi = SelectCompositeVehicleDataItems();
+  if (!parameterized_vdi.is_initialized()) {
+    return false;
+  }
+
+  auto non_parameterized_vdi = SelectPrimitiveVehicleDataItems();
+  if (!non_parameterized_vdi.is_initialized()) {
+    return false;
+  }
+
+  vehicle_data_items->insert(vehicle_data_items->end(),
+                             parameterized_vdi.begin(),
+                             parameterized_vdi.end());
+  vehicle_data_items->insert(vehicle_data_items->end(),
+                             non_parameterized_vdi.begin(),
+                             non_parameterized_vdi.end());
+
+  return true;
+}
+
 bool SQLPTRepresentation::Save(const policy_table::Table& table) {
   LOG4CXX_AUTO_TRACE(logger_);
   db_->BeginTransaction();
@@ -809,6 +887,10 @@ bool SQLPTRepresentation::Save(const policy_table::Table& table) {
     return false;
   }
   if (!SaveModuleMeta(*table.policy_table.module_meta)) {
+    db_->RollbackTransaction();
+    return false;
+  }
+  if (!SaveVehicleData(*table.policy_table.vehicle_data)) {
     db_->RollbackTransaction();
     return false;
   }
@@ -851,7 +933,9 @@ bool SQLPTRepresentation::SaveFunctionalGroupings(
     it->second.user_consent_prompt.is_initialized()
         ? query.Bind(2, *(it->second.user_consent_prompt))
         : query.Bind(2);
-
+    it->second.encryption_required.is_initialized()
+        ? query.Bind(3, *(it->second.encryption_required))
+        : query.Bind(3);
     if (!query.Exec() || !query.Reset()) {
       LOG4CXX_WARN(logger_, "Incorrect insert into functional groups");
       return false;
@@ -888,8 +972,7 @@ bool SQLPTRepresentation::SaveRpcs(int64_t group_id,
           query_parameter.Bind(0, it->first);
           query_parameter.Bind(
               1, std::string(policy_table::EnumToJsonString(*hmi_it)));
-          query_parameter.Bind(
-              2, std::string(policy_table::EnumToJsonString(*ps_it)));
+          query_parameter.Bind(2, std::string(*ps_it));
           query_parameter.Bind(3, group_id);
           if (!query_parameter.Exec() || !query_parameter.Reset()) {
             LOG4CXX_WARN(logger_, "Incorrect insert into rpc with parameter");
@@ -1040,6 +1123,10 @@ bool SQLPTRepresentation::SaveSpecificAppPolicy(
       ? app_query.Bind(12, *app.second.allow_unknown_rpc_passthrough)
       : app_query.Bind(12);
 
+  app.second.encryption_required.is_initialized()
+      ? app_query.Bind(13, *app.second.encryption_required)
+      : app_query.Bind(13);
+
   if (!app_query.Exec() || !app_query.Reset()) {
     LOG4CXX_WARN(logger_, "Incorrect insert into application.");
     return false;
@@ -1101,7 +1188,6 @@ bool policy::SQLPTRepresentation::SaveDevicePolicy(
   app_query.Bind(3, 0);
   app_query.Bind(4, 0);
   app_query.Bind(5);
-
   if (!app_query.Exec() || !app_query.Reset()) {
     LOG4CXX_WARN(logger_, "Incorrect insert into application.");
     return false;
@@ -1125,9 +1211,9 @@ bool SQLPTRepresentation::SaveAppGroup(
     query.Bind(0, app_id);
     query.Bind(1, *it);
     if (!query.Exec() || !query.Reset()) {
-      LOG4CXX_WARN(logger_,
-                   "Incorrect insert into app group."
-                       << query.LastError().text());
+      LOG4CXX_WARN(
+          logger_,
+          "Incorrect insert into app group." << query.LastError().text());
       return false;
     }
   }
@@ -1233,7 +1319,9 @@ bool SQLPTRepresentation::SaveRequestSubType(
   } else if (request_subtypes.is_initialized()) {
     LOG4CXX_WARN(logger_, "Request subtypes empty.");
     query.Bind(0, app_id);
-    query.Bind(1, std::string("EMPTY"));
+    query.Bind(1,
+               std::string(policy_table::EnumToJsonString(
+                   policy_table::RequestType::RT_EMPTY)));
     if (!query.Exec() || !query.Reset()) {
       LOG4CXX_WARN(logger_, "Incorrect insert into request subtypes.");
       return false;
@@ -1365,6 +1453,9 @@ bool SQLPTRepresentation::SaveModuleConfig(
                                         : query.Bind(7);
   config.vehicle_year.is_initialized() ? query.Bind(8, *(config.vehicle_year))
                                        : query.Bind(8);
+  config.lock_screen_dismissal_enabled.is_initialized()
+      ? query.Bind(9, *(config.lock_screen_dismissal_enabled))
+      : query.Bind(9);
   if (!query.Exec()) {
     LOG4CXX_WARN(logger_, "Incorrect update module config");
     return false;
@@ -1380,6 +1471,10 @@ bool SQLPTRepresentation::SaveModuleConfig(
   }
 
   if (!SaveServiceEndpoints(config.endpoints)) {
+    return false;
+  }
+
+  if (!SaveServiceEndpointProperties(*config.endpoint_properties)) {
     return false;
   }
 
@@ -1415,6 +1510,31 @@ bool SQLPTRepresentation::SaveServiceEndpoints(
           return false;
         }
       }
+    }
+  }
+
+  return true;
+}
+
+bool SQLPTRepresentation::SaveServiceEndpointProperties(
+    const policy_table::ServiceEndpointProperties& endpoint_properties) {
+  utils::dbms::SQLQuery query(db());
+  if (!query.Prepare(sql_pt::kInsertEndpointVersion)) {
+    LOG4CXX_WARN(
+        logger_,
+        "Incorrect insert of endpoint property to endpoint_properties.");
+    return false;
+  }
+
+  for (auto& endpoint_property : endpoint_properties) {
+    query.Bind(0, endpoint_property.first);
+    query.Bind(1, endpoint_property.second.version);
+
+    if (!query.Exec() || !query.Reset()) {
+      LOG4CXX_WARN(
+          logger_,
+          "Failed to insert endpoint property into endpoint_properties.");
+      return false;
     }
   }
 
@@ -1519,6 +1639,25 @@ bool SQLPTRepresentation::SaveMessageString(
 
   query.Bind(0, lang);
   query.Bind(1, type);
+  if (strings.tts.is_valid() && strings.tts.is_initialized()) {
+    query.Bind(2, (*strings.tts));
+  }
+
+  if (strings.label.is_valid() && strings.label.is_initialized()) {
+    query.Bind(3, (*strings.label));
+  }
+
+  if (strings.line1.is_valid() && strings.line1.is_initialized()) {
+    query.Bind(4, *(strings.line1));
+  }
+
+  if (strings.line2.is_valid() && strings.line2.is_initialized()) {
+    query.Bind(5, (*strings.line2));
+  }
+
+  if (strings.textBody.is_valid() && strings.textBody.is_initialized()) {
+    query.Bind(6, (*strings.textBody));
+  }
 
   if (!query.Exec() || !query.Reset()) {
     LOG4CXX_WARN(logger_, "Incorrect insert into message.");
@@ -1615,6 +1754,44 @@ bool SQLPTRepresentation::SaveUsageAndErrorCounts(
     query.Bind(1, it->second.count_of_tls_errors);
     if (!query.Exec() || !query.Reset()) {
       LOG4CXX_WARN(logger_, "Incorrect insert into app level.");
+      return false;
+    }
+  }
+  return true;
+}
+
+bool SQLPTRepresentation::SaveVehicleData(
+    const policy_table::VehicleData& vehicle_data) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  if (vehicle_data.is_initialized() &&
+      vehicle_data.schema_version.is_initialized()) {
+    utils::dbms::SQLQuery query(db());
+    if (!query.Prepare(sql_pt::kInsertVehicleDataSchemaVersion)) {
+      LOG4CXX_WARN(logger_,
+                   "Incorrect insert of schema_version to vehicle_data.");
+      return false;
+    }
+    query.Bind(0, (*vehicle_data.schema_version));
+    if (!query.Exec() || !query.Reset()) {
+      LOG4CXX_WARN(logger_, "Failed to insert schema_version to vehicle_data.");
+      return false;
+    }
+  }
+
+  auto vehicle_data_items = vehicle_data.is_initialized() &&
+                                    vehicle_data.schema_items.is_initialized()
+                                ? *(vehicle_data.schema_items)
+                                : policy_table::VehicleDataItems();
+
+  return SaveVehicleDataItems(vehicle_data_items);
+}
+
+bool SQLPTRepresentation::SaveVehicleDataItems(
+    const policy_table::VehicleDataItems& vehicle_data_items) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  DeleteVehicleDataItems();
+  for (const auto& item : vehicle_data_items) {
+    if (!InsertVehicleDataItem(item)) {
       return false;
     }
   }
@@ -1750,7 +1927,8 @@ bool SQLPTRepresentation::GatherRequestSubType(
   query.Bind(0, app_id);
   while (query.Next()) {
     const std::string request_subtype = query.GetString(0);
-    if ("EMPTY" == request_subtype) {
+    if (policy_table::EnumToJsonString(policy_table::RT_EMPTY) ==
+        request_subtype) {
       request_subtypes->mark_initialized();
       continue;
     }
@@ -2302,6 +2480,8 @@ bool SQLPTRepresentation::CopyApplication(const std::string& source,
                         : query.Bind(16, source_app.GetString(15));
   source_app.IsNull(16) ? query.Bind(17)
                         : query.Bind(17, source_app.GetBoolean(16));
+  source_app.IsNull(17) ? query.Bind(18)
+                        : query.Bind(18, source_app.GetBoolean(17));
 
   if (!query.Exec()) {
     LOG4CXX_WARN(logger_, "Failed inserting into application.");
@@ -2325,6 +2505,316 @@ void SQLPTRepresentation::SetPreloaded(bool value) {
 }
 
 bool SQLPTRepresentation::SetVINValue(const std::string& value) {
+  return true;
+}
+
+bool SQLPTRepresentation::VehicleDataItemExists(
+    const policy_table::VehicleDataItem& vehicle_data_item) const {
+  utils::dbms::SQLQuery query(db());
+  if (!query.Prepare(sql_pt::kSelectVehicleDataItemWithVersion)) {
+    LOG4CXX_ERROR(logger_,
+                  "Incorrent select statement for vehicle data item. "
+                      << query.LastError().text());
+    return false;
+  }
+
+  query.Bind(0, vehicle_data_item.name);
+  query.Bind(1, vehicle_data_item.key);
+  vehicle_data_item.since.is_initialized()
+      ? query.Bind(2, std::string(*vehicle_data_item.since))
+      : query.Bind(2);
+  vehicle_data_item.until.is_initialized()
+      ? query.Bind(3, std::string(*vehicle_data_item.until))
+      : query.Bind(3);
+
+  if (!query.Exec()) {
+    LOG4CXX_ERROR(logger_,
+                  "Failed to retrieve vehicle data item: "
+                      << std::string(vehicle_data_item.key)
+                      << ". Error: " << query.LastError().text());
+    return false;
+  }
+  return !query.IsNull(0);
+}
+
+policy_table::VehicleDataItems SQLPTRepresentation::GetVehicleDataItem(
+    const std::string& name, const std::string& key) const {
+  policy_table::VehicleDataItems result;
+  utils::dbms::SQLQuery query(db());
+
+  if (!query.Prepare(sql_pt::kSelectVehicleDataItem)) {
+    LOG4CXX_ERROR(logger_,
+                  "Incorrent select statement of vehicle data item. "
+                      << query.LastError().text());
+    return result;
+  }
+
+  query.Bind(0, name);
+  query.Bind(1, key);
+
+  while (query.Next()) {
+    auto vdi = PopulateVDIFromQuery(query);
+    if (!vdi.is_initialized()) {
+      return policy_table::VehicleDataItems();
+    }
+
+    utils::dbms::SQLQuery param_query(db());
+    if (policy_table::VehicleDataItem::kStruct ==
+        static_cast<std::string>(vdi.type)) {
+      if (!param_query.Prepare(sql_pt::kSelectVehicleDataItemParams)) {
+        LOG4CXX_ERROR(logger_,
+                      "Incorrent select statement of vehicle data item. "
+                          << param_query.LastError().text());
+        return policy_table::VehicleDataItems();
+      }
+
+      param_query.Bind(0, name);
+      param_query.Bind(1, key);
+
+      while (param_query.Next()) {
+        const auto param_with_diff_versions = GetVehicleDataItem(
+            param_query.GetString(2), param_query.GetString(3));
+        if (!param_with_diff_versions.is_initialized()) {
+          return policy_table::VehicleDataItems();
+        }
+        for (const auto& param : param_with_diff_versions) {
+          vdi.params->push_back(param);
+        }
+      }
+    }
+
+    result.push_back(vdi);
+  }
+  if (!result.empty()) {
+    result.mark_initialized();
+  }
+
+  return result;
+}
+
+policy_table::VehicleDataItem SQLPTRepresentation::PopulateVDIFromQuery(
+    const utils::dbms::SQLQuery& query) const {
+  policy_table::VehicleDataItem result;
+
+  result.name = query.GetString(0);
+  result.type = query.GetString(1);
+  result.key = query.GetString(2);
+  result.mandatory = query.GetBoolean(3);
+
+  if (!query.IsNull(4)) {
+    *result.array = query.GetBoolean(4);
+  }
+  if (!query.IsNull(5)) {
+    *result.since = query.GetString(5);
+  }
+  if (!query.IsNull(6)) {
+    *result.until = query.GetString(6);
+  }
+  if (!query.IsNull(7)) {
+    *result.removed = query.GetBoolean(7);
+  }
+  if (!query.IsNull(8)) {
+    *result.deprecated = query.GetBoolean(8);
+  }
+  if (!query.IsNull(9)) {
+    *result.minvalue = query.GetInteger(9);
+  }
+  if (!query.IsNull(10)) {
+    *result.maxvalue = query.GetInteger(10);
+  }
+  if (!query.IsNull(11)) {
+    *result.minsize = query.GetUInteger(11);
+  }
+  if (!query.IsNull(12)) {
+    *result.maxsize = query.GetUInteger(12);
+  }
+  if (!query.IsNull(13)) {
+    *result.minlength = query.GetUInteger(13);
+  }
+  if (!query.IsNull(14)) {
+    *result.maxlength = query.GetUInteger(14);
+  }
+  result.params->mark_initialized();
+
+  result.mark_initialized();
+  return result;
+}
+
+bool SQLPTRepresentation::InsertVehicleDataItem(
+    const policy_table::VehicleDataItem& vehicle_data_item) {
+  utils::dbms::SQLQuery query(db());
+
+  if (!vehicle_data_item.is_initialized() || !vehicle_data_item.is_valid()) {
+    LOG4CXX_ERROR(logger_, "Vehicle data item is not initialized.");
+    return false;
+  }
+
+  if (VehicleDataItemExists(vehicle_data_item)) {
+    LOG4CXX_INFO(logger_,
+                 static_cast<std::string>(vehicle_data_item.key)
+                     << " is already stored.");
+    return true;
+  }
+
+  if (!query.Prepare(sql_pt::kInsertVehicleDataItem)) {
+    LOG4CXX_ERROR(logger_,
+                  "Incorrent select statement of vehicle data item. "
+                      << query.LastError().text());
+    return false;
+  }
+
+  query.Bind(0, vehicle_data_item.name);
+  query.Bind(1, vehicle_data_item.type);
+  query.Bind(2, vehicle_data_item.key);
+  query.Bind(3, vehicle_data_item.mandatory);
+  vehicle_data_item.array.is_initialized()
+      ? query.Bind(4, *vehicle_data_item.array)
+      : query.Bind(4);
+  vehicle_data_item.since.is_initialized()
+      ? query.Bind(5, *vehicle_data_item.since)
+      : query.Bind(5);
+  vehicle_data_item.until.is_initialized()
+      ? query.Bind(6, *vehicle_data_item.until)
+      : query.Bind(6);
+  vehicle_data_item.removed.is_initialized()
+      ? query.Bind(7, *vehicle_data_item.removed)
+      : query.Bind(7);
+  vehicle_data_item.deprecated.is_initialized()
+      ? query.Bind(8, *vehicle_data_item.deprecated)
+      : query.Bind(8);
+  vehicle_data_item.minvalue.is_initialized()
+      ? query.Bind(9, *vehicle_data_item.minvalue)
+      : query.Bind(9);
+  vehicle_data_item.maxvalue.is_initialized()
+      ? query.Bind(10, *vehicle_data_item.maxvalue)
+      : query.Bind(10);
+  vehicle_data_item.minsize.is_initialized()
+      ? query.Bind(11, static_cast<int64_t>(*vehicle_data_item.minsize))
+      : query.Bind(11);
+  vehicle_data_item.maxsize.is_initialized()
+      ? query.Bind(12, static_cast<int64_t>(*vehicle_data_item.maxsize))
+      : query.Bind(12);
+  vehicle_data_item.minlength.is_initialized()
+      ? query.Bind(13, static_cast<int64_t>(*vehicle_data_item.minlength))
+      : query.Bind(13);
+  vehicle_data_item.maxlength.is_initialized()
+      ? query.Bind(14, static_cast<int64_t>(*vehicle_data_item.maxlength))
+      : query.Bind(14);
+
+  if (!query.Exec() || !query.Reset()) {
+    LOG4CXX_ERROR(logger_,
+                  "Failed to insert vehicle data item: "
+                      << static_cast<std::string>(vehicle_data_item.key)
+                      << ". Error: " << query.LastError().text());
+    return false;
+  }
+
+  if (vehicle_data_item.params->is_initialized()) {
+    std::map<std::string, std::string> stored_vehicle_data_item_params;
+    for (const auto& param : *(vehicle_data_item.params)) {
+      if (!InsertVehicleDataItem(param)) {
+        return false;
+      }
+
+      if (stored_vehicle_data_item_params.end() !=
+          stored_vehicle_data_item_params.find(param.name)) {
+        LOG4CXX_DEBUG(logger_, "Parameter already stored.");
+        continue;
+      };
+
+      if (!query.Prepare(sql_pt::kInsertVehicleDataItemParams)) {
+        LOG4CXX_ERROR(logger_,
+                      "Incorrent select statement of vehicle data item. "
+                          << query.LastError().text());
+        return false;
+      }
+
+      query.Bind(0, vehicle_data_item.name);
+      query.Bind(1, vehicle_data_item.key);
+      query.Bind(2, param.name);
+      query.Bind(3, param.key);
+
+      if (!query.Exec() || !query.Reset()) {
+        LOG4CXX_ERROR(
+            logger_,
+            "Failed to insert to vehicle data item relations helper table: "
+                << static_cast<std::string>(param.key)
+                << ". Error: " << query.LastError().text());
+        return false;
+      }
+      stored_vehicle_data_item_params[param.name] = param.key;
+    }
+  }
+
+  return true;
+}
+
+policy_table::VehicleDataItems
+SQLPTRepresentation::SelectCompositeVehicleDataItems() const {
+  utils::dbms::SQLQuery query(db());
+  LOG4CXX_AUTO_TRACE(logger_);
+  if (!query.Prepare(sql_pt::kSelectCompositeVehicleDataItemsKey)) {
+    LOG4CXX_ERROR(logger_,
+                  "Incorrect statement for parameterized vehicle data items");
+    return policy_table::VehicleDataItems();
+  }
+
+  policy_table::VehicleDataItems result;
+  result.mark_initialized();
+
+  while (query.Next()) {
+    const auto vdi = GetVehicleDataItem(query.GetString(0), query.GetString(1));
+    if (!vdi.is_initialized()) {
+      return policy_table::VehicleDataItems();
+    }
+    for (const auto& item : vdi) {
+      result.push_back(item);
+    }
+  }
+
+  return result;
+}
+
+policy_table::VehicleDataItems
+SQLPTRepresentation::SelectPrimitiveVehicleDataItems() const {
+  utils::dbms::SQLQuery query(db());
+  LOG4CXX_AUTO_TRACE(logger_);
+  if (!query.Prepare(sql_pt::kSelectPrimitiveVehicleDataItems)) {
+    LOG4CXX_ERROR(
+        logger_,
+        "Incorrect statement for non parameterized vehicle data items");
+    return policy_table::VehicleDataItems();
+  }
+
+  auto result = policy_table::VehicleDataItems();
+  result.mark_initialized();
+
+  while (query.Next()) {
+    const auto vdi = PopulateVDIFromQuery(query);
+    if (!vdi.is_initialized()) {
+      return policy_table::VehicleDataItems();
+    }
+    result.push_back(vdi);
+  }
+  return result;
+}
+
+bool SQLPTRepresentation::DeleteVehicleDataItems() const {
+  utils::dbms::SQLQuery query(db());
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  if (!query.Exec(sql_pt::kDeleteVehicleDataItems)) {
+    LOG4CXX_ERROR(logger_,
+                  "Failed clearing database: " << query.LastError().text());
+    return false;
+  }
+
+  if (!query.Exec(sql_pt::kDeleteVehicleDataItemParams)) {
+    LOG4CXX_ERROR(logger_,
+                  "Failed clearing database: " << query.LastError().text());
+    return false;
+  }
+
   return true;
 }
 

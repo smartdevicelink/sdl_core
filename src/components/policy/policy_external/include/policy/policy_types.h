@@ -34,15 +34,16 @@
 #define SRC_COMPONENTS_POLICY_POLICY_EXTERNAL_INCLUDE_POLICY_POLICY_TYPES_H_
 
 #include <algorithm>
-#include <string>
-#include <vector>
 #include <map>
-#include <set>
-#include <utility>
 #include <memory>
+#include <set>
+#include <string>
+#include <utility>
+#include <vector>
 
-#include "utils/helpers.h"
+#include "policy/policy_table/types.h"
 #include "transport_manager/common.h"
+#include "utils/helpers.h"
 
 namespace policy {
 
@@ -87,6 +88,8 @@ typedef std::string Parameter;
 typedef std::string RpcName;
 typedef std::set<std::string> RPCParams;
 
+typedef rpc::Optional<rpc::Boolean> EncryptionRequired;
+
 typedef std::map<std::string, std::set<policy::HMILevel> > HMIPermissions;
 struct ParameterPermissions
     : std::map<std::string, std::set<policy::Parameter> > {
@@ -102,6 +105,7 @@ struct ParameterPermissions
 struct RpcPermissions {
   HMIPermissions hmi_permissions;
   ParameterPermissions parameter_permissions;
+  EncryptionRequired require_encryption;
 };
 
 typedef std::map<RpcName, RpcPermissions> Permissions;
@@ -118,11 +122,13 @@ typedef std::vector<std::string> StringArray;
 
 enum PermitResult { kRpcAllowed = 0, kRpcDisallowed, kRpcUserDisallowed };
 
+enum class ResetRetryCountType { kResetWithStatusUpdate = 0, kResetInternally };
+
 /**
-  * @struct Stores result of check:
-  * if HMI Level was allowed for RPC to work in
-  * and list of parameters allowed for RPC if specified in PT.
-  */
+ * @struct Stores result of check:
+ * if HMI Level was allowed for RPC to work in
+ * and list of parameters allowed for RPC if specified in PT.
+ */
 struct CheckPermissionResult {
   CheckPermissionResult() : hmi_level_permitted(kRpcDisallowed) {}
 
@@ -505,10 +511,11 @@ enum PermissionsCheckResult {
   RESULT_NICKNAME_MISMATCH,
   RESULT_PERMISSIONS_REVOKED,
   RESULT_CONSENT_NEEDED,
-  RESULT_CONSENT_NOT_REQIURED,
+  RESULT_CONSENT_NOT_REQUIRED,
   RESULT_PERMISSIONS_REVOKED_AND_CONSENT_NEEDED,
   RESULT_REQUEST_TYPE_CHANGED,
-  RESULT_REQUEST_SUBTYPE_CHANGED
+  RESULT_REQUEST_SUBTYPE_CHANGED,
+  RESULT_ENCRYPTION_REQUIRED_FLAG_CHANGED,
 };
 
 /**

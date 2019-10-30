@@ -31,20 +31,20 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <numeric>
-#include <string.h>
-#include <string>
 #include "sdl_rpc_plugin/commands/mobile/perform_interaction_request.h"
+#include <string.h>
+#include <numeric>
+#include <string>
 
 #include "application_manager/application_impl.h"
 #include "application_manager/message_helper.h"
 
-#include "interfaces/MOBILE_API.h"
 #include "interfaces/HMI_API.h"
-#include "utils/file_system.h"
-#include "utils/helpers.h"
+#include "interfaces/MOBILE_API.h"
 #include "utils/custom_string.h"
+#include "utils/file_system.h"
 #include "utils/gen_hash.h"
+#include "utils/helpers.h"
 
 namespace sdl_rpc_plugin {
 using namespace application_manager;
@@ -82,17 +82,18 @@ PerformInteractionRequest::~PerformInteractionRequest() {}
 bool PerformInteractionRequest::Init() {
   /* Timeout in milliseconds.
      If omitted a standard value of 10000 milliseconds is used.*/
-  if ((*message_)[strings::msg_params].keyExists(strings::timeout)) {
-    default_timeout_ =
-        (*message_)[strings::msg_params][strings::timeout].asUInt();
-  }
+  const auto& msg_params = (*message_)[strings::msg_params];
+  uint32_t request_timeout = msg_params[strings::timeout].asUInt();
 
   interaction_mode_ = static_cast<mobile_apis::InteractionMode::eType>(
-      (*message_)[strings::msg_params][strings::interaction_mode].asInt());
+      msg_params[strings::interaction_mode].asInt());
 
   if (mobile_apis::InteractionMode::BOTH == interaction_mode_ ||
       mobile_apis::InteractionMode::MANUAL_ONLY == interaction_mode_) {
-    default_timeout_ *= 2;
+    const uint32_t increase_value = 2;
+    default_timeout_ += request_timeout * increase_value;
+  } else {
+    default_timeout_ += request_timeout;
   }
   return true;
 }
@@ -284,7 +285,7 @@ void PerformInteractionRequest::onTimeOut() {
         CommandRequestImpl::onTimeOut();
       } else {
         application_manager_.updateRequestTimeout(
-            connection_key(), correlation_id(), default_timeout());
+            connection_key(), correlation_id(), default_timeout_);
       }
       break;
     }
@@ -341,7 +342,7 @@ bool PerformInteractionRequest::ProcessVRResponse(
     }
     LOG4CXX_DEBUG(logger_, "Update timeout for UI");
     application_manager_.updateRequestTimeout(
-        connection_key(), correlation_id(), default_timeout());
+        connection_key(), correlation_id(), default_timeout_);
     return false;
   }
 
@@ -356,6 +357,13 @@ bool PerformInteractionRequest::ProcessVRResponse(
       return true;
     }
     msg_params[strings::choice_id] = choice_id;
+  }
+
+  if (mobile_apis::InteractionMode::BOTH == interaction_mode_ ||
+      mobile_apis::InteractionMode::MANUAL_ONLY == interaction_mode_) {
+    LOG4CXX_DEBUG(logger_, "Update timeout for UI");
+    application_manager_.updateRequestTimeout(
+        connection_key(), correlation_id(), default_timeout_);
   }
 
   const bool is_vr_result_success = Compare<Common_Result::eType, EQ, ONE>(
@@ -449,6 +457,11 @@ void PerformInteractionRequest::SendUIPerformInteractionRequest(
   smart_objects::SmartObject msg_params =
       smart_objects::SmartObject(smart_objects::SmartType_Map);
 
+  if ((*message_)[strings::msg_params].keyExists(strings::cancel_id)) {
+    msg_params[strings::cancel_id] =
+        (*message_)[strings::msg_params][strings::cancel_id].asInt();
+  }
+
   mobile_apis::InteractionMode::eType mode =
       static_cast<mobile_apis::InteractionMode::eType>(
           (*message_)[strings::msg_params][strings::interaction_mode].asInt());
@@ -471,12 +484,8 @@ void PerformInteractionRequest::SendUIPerformInteractionRequest(
     }
   }
 
-  if (mobile_apis::InteractionMode::BOTH == mode ||
-      mobile_apis::InteractionMode::MANUAL_ONLY == mode) {
-    msg_params[strings::timeout] = default_timeout_ / 2;
-  } else {
-    msg_params[strings::timeout] = default_timeout_;
-  }
+  msg_params[strings::timeout] =
+      (*message_)[strings::msg_params][strings::timeout].asUInt();
   msg_params[strings::app_id] = app->app_id();
   if (mobile_apis::InteractionMode::VR_ONLY != mode) {
     msg_params[strings::choice_set] =
@@ -532,6 +541,11 @@ void PerformInteractionRequest::SendVRPerformInteractionRequest(
   smart_objects::SmartObject msg_params =
       smart_objects::SmartObject(smart_objects::SmartType_Map);
 
+  if ((*message_)[strings::msg_params].keyExists(strings::cancel_id)) {
+    msg_params[strings::cancel_id] =
+        (*message_)[strings::msg_params][strings::cancel_id].asInt();
+  }
+
   smart_objects::SmartObject& choice_list =
       (*message_)[strings::msg_params][strings::interaction_choice_set_id_list];
 
@@ -560,9 +574,9 @@ void PerformInteractionRequest::SendVRPerformInteractionRequest(
         MessageHelper::VerifyTtsFiles(help_prompt, app, application_manager_);
 
     if (mobile_apis::Result::FILE_NOT_FOUND == verification_result) {
-      LOG4CXX_WARN(logger_,
-                   "MessageHelper::VerifyTtsFiles return "
-                       << verification_result);
+      LOG4CXX_WARN(
+          logger_,
+          "MessageHelper::VerifyTtsFiles return " << verification_result);
       invalid_params.push_back("help_prompt");
     } else {
       msg_params[strings::help_prompt] = help_prompt;
@@ -608,9 +622,9 @@ void PerformInteractionRequest::SendVRPerformInteractionRequest(
             timeout_prompt, app, application_manager_);
 
     if (mobile_apis::Result::FILE_NOT_FOUND == verification_result) {
-      LOG4CXX_WARN(logger_,
-                   "MessageHelper::VerifyTtsFiles return "
-                       << verification_result);
+      LOG4CXX_WARN(
+          logger_,
+          "MessageHelper::VerifyTtsFiles return " << verification_result);
       invalid_params.push_back("timeout_prompt");
     } else {
       msg_params[strings::timeout_prompt] = timeout_prompt;
@@ -629,9 +643,9 @@ void PerformInteractionRequest::SendVRPerformInteractionRequest(
             initial_prompt, app, application_manager_);
 
     if (mobile_apis::Result::FILE_NOT_FOUND == verification_result) {
-      LOG4CXX_WARN(logger_,
-                   "MessageHelper::VerifyTtsFiles return "
-                       << verification_result);
+      LOG4CXX_WARN(
+          logger_,
+          "MessageHelper::VerifyTtsFiles return " << verification_result);
       invalid_params.push_back("initial_prompt");
     } else {
       msg_params[strings::initial_prompt] = initial_prompt;
@@ -652,16 +666,9 @@ void PerformInteractionRequest::SendVRPerformInteractionRequest(
     return;
   }
 
-  mobile_apis::InteractionMode::eType mode =
-      static_cast<mobile_apis::InteractionMode::eType>(
-          (*message_)[strings::msg_params][strings::interaction_mode].asInt());
-
-  if (mobile_apis::InteractionMode::BOTH == mode ||
-      mobile_apis::InteractionMode::MANUAL_ONLY == mode) {
-    msg_params[strings::timeout] = default_timeout_ / 2;
-  } else {
-    msg_params[strings::timeout] = default_timeout_;
-  }
+  msg_params[strings::timeout] =
+      (*message_)[strings::msg_params][strings::timeout].asUInt();
+  ;
   msg_params[strings::app_id] = app->app_id();
   StartAwaitForInterface(HmiInterfaces::HMI_INTERFACE_VR);
   SendHMIRequest(
@@ -1065,4 +1072,4 @@ void PerformInteractionRequest::SendBothModeResponse(
 
 }  // namespace commands
 
-}  // namespace application_manager
+}  // namespace sdl_rpc_plugin

@@ -53,6 +53,8 @@
 #include "hmi/as_perform_app_service_interaction_response_to_hmi.h"
 #include "hmi/as_publish_app_service_request.h"
 #include "hmi/as_publish_app_service_response.h"
+#include "hmi/as_unpublish_app_service_request.h"
+#include "hmi/as_unpublish_app_service_response.h"
 #include "hmi/on_as_app_service_data_notification.h"
 #include "hmi/on_as_app_service_data_notification_from_hmi.h"
 
@@ -72,16 +74,16 @@ namespace dummy_hmi_commands_test {
 
 namespace commands = app_service_rpc_plugin::commands;
 
-using ::testing::_;
-using ::testing::NotNull;
-using ::testing::Types;
+using ::application_manager::ApplicationSharedPtr;
 using application_manager::commands::MessageSharedPtr;
-using ::test::components::event_engine_test::MockEventDispatcher;
+using ::test::components::application_manager_test::MockApplication;
 using ::test::components::application_manager_test::MockApplicationManager;
 using ::test::components::application_manager_test::
     MockApplicationManagerSettings;
-using ::application_manager::ApplicationSharedPtr;
-using ::test::components::application_manager_test::MockApplication;
+using ::test::components::event_engine_test::MockEventDispatcher;
+using ::testing::_;
+using ::testing::NotNull;
+using ::testing::Types;
 
 template <class Command>
 class HMICommandsTest : public components::commands_test::CommandRequestTest<
@@ -132,6 +134,8 @@ typedef Types<commands::ASAppServiceActivationRequest,
               commands::ASPerformAppServiceInteractionResponseToHMI,
               commands::ASPublishAppServiceRequest,
               commands::ASPublishAppServiceResponse,
+              commands::ASUnpublishAppServiceRequest,
+              commands::ASUnpublishAppServiceResponse,
               commands::OnASAppServiceDataNotification,
               commands::OnASAppServiceDataNotificationFromHMI>
     HMICommandsListFirst;

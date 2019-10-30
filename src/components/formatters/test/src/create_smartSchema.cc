@@ -189,39 +189,36 @@ CSmartSchema initObjectSchema() {
                                      TSchemaItemParameter<int>());
 
   // Map of parameters
-  std::map<std::string, CObjectSchemaItem::SMember> schemaMembersMap;
+  std::map<std::string, SMember> schemaMembersMap;
 
-  schemaMembersMap["success"] =
-      CObjectSchemaItem::SMember(success_SchemaItem, false);
-  schemaMembersMap["resultCode"] =
-      CObjectSchemaItem::SMember(resultCode_SchemaItem, false);
-  schemaMembersMap["info"] = CObjectSchemaItem::SMember(info_SchemaItem, false);
-  schemaMembersMap["tryAgainTime"] =
-      CObjectSchemaItem::SMember(tryAgainTime_SchemaItem, false);
+  schemaMembersMap["success"] = SMember(success_SchemaItem, false);
+  schemaMembersMap["resultCode"] = SMember(resultCode_SchemaItem, false);
+  schemaMembersMap["info"] = SMember(info_SchemaItem, false);
+  schemaMembersMap["tryAgainTime"] = SMember(tryAgainTime_SchemaItem, false);
 
-  std::map<std::string, CObjectSchemaItem::SMember> paramsMembersMap;
+  std::map<std::string, SMember> paramsMembersMap;
   paramsMembersMap[S_FUNCTION_ID] =
-      CObjectSchemaItem::SMember(TEnumSchemaItem<FunctionIDTest::eType>::create(
-                                     functionId_allowedEnumSubsetValues),
-                                 true);
-  paramsMembersMap[S_MESSAGE_TYPE] = CObjectSchemaItem::SMember(
-      TEnumSchemaItem<MessageTypeTest::eType>::create(
-          messageType_allowedEnumSubsetValues),
-      true);
+      SMember(TEnumSchemaItem<FunctionIDTest::eType>::create(
+                  functionId_allowedEnumSubsetValues),
+              true);
+  paramsMembersMap[S_MESSAGE_TYPE] =
+      SMember(TEnumSchemaItem<MessageTypeTest::eType>::create(
+                  messageType_allowedEnumSubsetValues),
+              true);
   paramsMembersMap[S_CORRELATION_ID] =
-      CObjectSchemaItem::SMember(TNumberSchemaItem<int>::create(), true);
-  paramsMembersMap[S_PROTOCOL_VERSION] = CObjectSchemaItem::SMember(
-      TNumberSchemaItem<int>::create(TSchemaItemParameter<int>(1),
-                                     TSchemaItemParameter<int>(2)),
-      true);
+      SMember(TNumberSchemaItem<int>::create(), true);
+  paramsMembersMap[S_PROTOCOL_VERSION] =
+      SMember(TNumberSchemaItem<int>::create(TSchemaItemParameter<int>(1),
+                                             TSchemaItemParameter<int>(2)),
+              true);
   paramsMembersMap[S_PROTOCOL_TYPE] =
-      CObjectSchemaItem::SMember(TNumberSchemaItem<int>::create(), true);
+      SMember(TNumberSchemaItem<int>::create(), true);
 
-  std::map<std::string, CObjectSchemaItem::SMember> rootMembersMap;
-  rootMembersMap[S_MSG_PARAMS] = CObjectSchemaItem::SMember(
-      CObjectSchemaItem::create(schemaMembersMap), true);
-  rootMembersMap[S_PARAMS] = CObjectSchemaItem::SMember(
-      CObjectSchemaItem::create(paramsMembersMap), true);
+  std::map<std::string, SMember> rootMembersMap;
+  rootMembersMap[S_MSG_PARAMS] =
+      SMember(CObjectSchemaItem::create(schemaMembersMap), true);
+  rootMembersMap[S_PARAMS] =
+      SMember(CObjectSchemaItem::create(paramsMembersMap), true);
   return CSmartSchema(CObjectSchemaItem::create(rootMembersMap));
 };
 
@@ -294,9 +291,9 @@ CSmartSchema initSchemaForMetaFormatter() {
           speechCapabilities_allowedEnumSubsetValues,
           TSchemaItemParameter<SpeechCapabilities::eType>());
 
-  std::map<std::string, CObjectSchemaItem::SMember> ttsMap;
-  ttsMap["text"] = CObjectSchemaItem::SMember(ttsNameItem_SchemaItem, false);
-  ttsMap["type"] = CObjectSchemaItem::SMember(ttstype_SchemaItem, false);
+  std::map<std::string, SMember> ttsMap;
+  ttsMap["text"] = SMember(ttsNameItem_SchemaItem, false);
+  ttsMap["type"] = SMember(ttstype_SchemaItem, false);
   ;
 
   ISchemaItemPtr hmiDisplayLanguageDesired_SchemaItem =
@@ -350,62 +347,57 @@ CSmartSchema initSchemaForMetaFormatter() {
                                TSchemaItemParameter<size_t>(1000));
 
   // Creation map for syncMsgVersion
-  std::map<std::string, CObjectSchemaItem::SMember> schemaSyncMsgVersionMap;
+  std::map<std::string, SMember> schemaSyncMsgVersionMap;
   schemaSyncMsgVersionMap["majorVersion"] =
-      CObjectSchemaItem::SMember(majorVersion_SchemaItem, false);
+      SMember(majorVersion_SchemaItem, false);
   schemaSyncMsgVersionMap["minorVersion"] =
-      CObjectSchemaItem::SMember(minorVersion_SchemaItem, false);
+      SMember(minorVersion_SchemaItem, false);
   schemaSyncMsgVersionMap["patchVersion"] =
-      CObjectSchemaItem::SMember(patchVersion_SchemaItem, false);
+      SMember(patchVersion_SchemaItem, false);
   ;
 
   // Map of parameters
-  std::map<std::string, CObjectSchemaItem::SMember> schemaMembersMap;
+  std::map<std::string, SMember> schemaMembersMap;
 
-  schemaMembersMap["appID"] =
-      CObjectSchemaItem::SMember(appID_SchemaItem, false);
-  schemaMembersMap["appName"] =
-      CObjectSchemaItem::SMember(appName_SchemaItem, false);
-  schemaMembersMap["appType"] =
-      CObjectSchemaItem::SMember(appType_SchemaItem, false);
+  schemaMembersMap["appID"] = SMember(appID_SchemaItem, false);
+  schemaMembersMap["appName"] = SMember(appName_SchemaItem, false);
+  schemaMembersMap["appType"] = SMember(appType_SchemaItem, false);
   schemaMembersMap["hmiDisplayLanguageDesired"] =
-      CObjectSchemaItem::SMember(hmiDisplayLanguageDesired_SchemaItem, false);
+      SMember(hmiDisplayLanguageDesired_SchemaItem, false);
   schemaMembersMap["isMediaApplication"] =
-      CObjectSchemaItem::SMember(isMediaApplication_SchemaItem, false);
+      SMember(isMediaApplication_SchemaItem, false);
   schemaMembersMap["languageDesired"] =
-      CObjectSchemaItem::SMember(languageDesired_SchemaItem, false);
+      SMember(languageDesired_SchemaItem, false);
   schemaMembersMap["ngnMediaScreenAppName"] =
-      CObjectSchemaItem::SMember(ngnMediaScreenAppName_SchemaItem, false);
-  schemaMembersMap["syncMsgVersion"] = CObjectSchemaItem::SMember(
-      CObjectSchemaItem::create(schemaSyncMsgVersionMap), false);
-  schemaMembersMap["ttsName"] =
-      CObjectSchemaItem::SMember(ttsName_SchemaItem, false);
-  schemaMembersMap["vrSynonyms"] =
-      CObjectSchemaItem::SMember(vrSynonyms_SchemaItem, false);
+      SMember(ngnMediaScreenAppName_SchemaItem, false);
+  schemaMembersMap["syncMsgVersion"] =
+      SMember(CObjectSchemaItem::create(schemaSyncMsgVersionMap), false);
+  schemaMembersMap["ttsName"] = SMember(ttsName_SchemaItem, false);
+  schemaMembersMap["vrSynonyms"] = SMember(vrSynonyms_SchemaItem, false);
 
-  std::map<std::string, CObjectSchemaItem::SMember> paramsMembersMap;
+  std::map<std::string, SMember> paramsMembersMap;
   paramsMembersMap[S_FUNCTION_ID] =
-      CObjectSchemaItem::SMember(TEnumSchemaItem<FunctionIDTest::eType>::create(
-                                     functionId_allowedEnumSubsetValues),
-                                 true);
-  paramsMembersMap[S_MESSAGE_TYPE] = CObjectSchemaItem::SMember(
-      TEnumSchemaItem<MessageTypeTest::eType>::create(
-          messageType_allowedEnumSubsetValues),
-      true);
+      SMember(TEnumSchemaItem<FunctionIDTest::eType>::create(
+                  functionId_allowedEnumSubsetValues),
+              true);
+  paramsMembersMap[S_MESSAGE_TYPE] =
+      SMember(TEnumSchemaItem<MessageTypeTest::eType>::create(
+                  messageType_allowedEnumSubsetValues),
+              true);
   paramsMembersMap[S_CORRELATION_ID] =
-      CObjectSchemaItem::SMember(TNumberSchemaItem<int>::create(), true);
-  paramsMembersMap[S_PROTOCOL_VERSION] = CObjectSchemaItem::SMember(
-      TNumberSchemaItem<int>::create(TSchemaItemParameter<int>(1),
-                                     TSchemaItemParameter<int>(2)),
-      true);
+      SMember(TNumberSchemaItem<int>::create(), true);
+  paramsMembersMap[S_PROTOCOL_VERSION] =
+      SMember(TNumberSchemaItem<int>::create(TSchemaItemParameter<int>(1),
+                                             TSchemaItemParameter<int>(2)),
+              true);
   paramsMembersMap[S_PROTOCOL_TYPE] =
-      CObjectSchemaItem::SMember(TNumberSchemaItem<int>::create(), true);
+      SMember(TNumberSchemaItem<int>::create(), true);
 
-  std::map<std::string, CObjectSchemaItem::SMember> rootMembersMap;
-  rootMembersMap[S_MSG_PARAMS] = CObjectSchemaItem::SMember(
-      CObjectSchemaItem::create(schemaMembersMap), true);
-  rootMembersMap[S_PARAMS] = CObjectSchemaItem::SMember(
-      CObjectSchemaItem::create(paramsMembersMap), true);
+  std::map<std::string, SMember> rootMembersMap;
+  rootMembersMap[S_MSG_PARAMS] =
+      SMember(CObjectSchemaItem::create(schemaMembersMap), true);
+  rootMembersMap[S_PARAMS] =
+      SMember(CObjectSchemaItem::create(paramsMembersMap), true);
   return CSmartSchema(CObjectSchemaItem::create(rootMembersMap));
 };
 

@@ -33,29 +33,29 @@
 #ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_MANAGER_IMPL_H_
 #define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_MANAGER_IMPL_H_
 
-#include <queue>
-#include <map>
-#include <list>
-#include <vector>
-#include <utility>
 #include <algorithm>
-#include <tuple>
 #include <functional>
+#include <list>
+#include <map>
+#include <queue>
+#include <tuple>
+#include <utility>
+#include <vector>
 
-#include "utils/timer.h"
 #include "utils/rwlock.h"
+#include "utils/timer.h"
 
+#include "protocol/common.h"
+#include "transport_manager/transport_adapter/transport_adapter_listener_impl.h"
 #include "transport_manager/transport_manager.h"
 #include "transport_manager/transport_manager_listener.h"
-#include "transport_manager/transport_adapter/transport_adapter_listener_impl.h"
-#include "protocol/common.h"
 #ifdef TELEMETRY_MONITOR
-#include "transport_manager/telemetry_observer.h"
 #include "telemetry_monitor/telemetry_observable.h"
+#include "transport_manager/telemetry_observer.h"
 #endif  // TELEMETRY_MONITOR
-#include "utils/threads/message_loop_thread.h"
 #include "transport_manager/transport_adapter/transport_adapter_event.h"
 #include "transport_manager/transport_manager_settings.h"
+#include "utils/threads/message_loop_thread.h"
 
 namespace transport_manager {
 
@@ -74,10 +74,10 @@ class TransportManagerImpl
       public RawMessageLoopThread::Handler,
       public TransportAdapterEventLoopThread::Handler
 #ifdef TELEMETRY_MONITOR
-      ,
+    ,
       public telemetry_monitor::TelemetryObservable<TMTelemetryObserver>
 #endif  // TELEMETRY_MONITOR
-      {
+{
  public:
   struct Connection {
     ConnectionUID id;
@@ -131,6 +131,12 @@ class TransportManagerImpl
    * @return Error code
    */
   virtual int Reinit() OVERRIDE;
+
+  virtual void Deinit() OVERRIDE;
+
+  void StopEventsProcessing() OVERRIDE;
+
+  void StartEventsProcessing() OVERRIDE;
 
   /**
    * @brief Start scanning for new devices.
@@ -250,14 +256,8 @@ class TransportManagerImpl
    **/
   int RemoveDevice(const DeviceHandle device) OVERRIDE;
 
-  /**
-   * @brief Turns on or off visibility of SDL to mobile devices
-   * when visibility is ON (on_off = true) mobile devices are able to connect
-   * otherwise ((on_off = false)) SDL is not visible from outside
-   *
-   * @return Code error.
-   */
-  int Visibility(const bool& on_off) const OVERRIDE;
+  int PerformActionOnClients(
+      const TransportAction required_action) const OVERRIDE;
 
   /**
    * @brief OnDeviceListUpdated updates device list and sends appropriate
@@ -327,9 +327,9 @@ class TransportManagerImpl
 
  private:
   /**
-    * @brief Structure that contains conversion functions (Device ID -> Device
-    * Handle; Device Handle -> Device ID)
-    */
+   * @brief Structure that contains conversion functions (Device ID -> Device
+   * Handle; Device Handle -> Device ID)
+   */
   struct Handle2GUIDConverter {
     /**
      * @brief ConversionTable Records uid/connection type/handle
@@ -414,6 +414,10 @@ class TransportManagerImpl
   sync_primitives::Lock device_lock_;
   DeviceUID device_to_reconnect_;
 
+  std::atomic_bool events_processing_is_active_;
+  sync_primitives::Lock events_processing_lock_;
+  sync_primitives::ConditionalVariable events_processing_cond_var_;
+
   /**
    * @brief Adds new incoming connection to connections list
    * @param c New connection
@@ -421,18 +425,18 @@ class TransportManagerImpl
   void AddConnection(const ConnectionInternal& c);
 
   /**
-     * @brief Removes connection from connections list
-     * @param id Identifier of connection to be removed
-     * @param transport_adapter Pointer to transport adapter
-     * that holds connection
-     */
+   * @brief Removes connection from connections list
+   * @param id Identifier of connection to be removed
+   * @param transport_adapter Pointer to transport adapter
+   * that holds connection
+   */
   void RemoveConnection(const uint32_t id,
                         transport_adapter::TransportAdapter* transport_adapter);
 
   /**
-     * @brief Deactivates all connections related to certain device
-     * @param device_uid Device unique identifier
-     */
+   * @brief Deactivates all connections related to certain device
+   * @param device_uid Device unique identifier
+   */
   void DeactivateDeviceConnections(const DeviceUID& device_uid);
   /**
    * @brief Returns connection from connections list by connection identifier
@@ -452,14 +456,14 @@ class TransportManagerImpl
                                     const ApplicationHandle& application);
 
   /**
-     * @brief Returns active connection from connections list by device unique
+   * @brief Returns active connection from connections list by device unique
    * id
-     * and application handle
-     * (this method returns only active connections as opposed to previous one)
-     * @param device Device unique identifier
-     * @param application Application handle
-     * @return Pointer to connection or NULL if connection could not be found
-     */
+   * and application handle
+   * (this method returns only active connections as opposed to previous one)
+   * @param device Device unique identifier
+   * @param application Application handle
+   * @return Pointer to connection or NULL if connection could not be found
+   */
   ConnectionInternal* GetActiveConnection(const DeviceUID& device,
                                           const ApplicationHandle& application);
 

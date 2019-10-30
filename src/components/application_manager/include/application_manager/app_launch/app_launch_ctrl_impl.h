@@ -41,11 +41,11 @@
 
 namespace connection_handler {
 class ConnectionHandler;
-}  // connection_handler
+}  // namespace connection_handler
 
 namespace resumption {
 class ResumeCtrl;
-}  // resumption
+}  // namespace resumption
 
 namespace app_launch {
 // TODO(AK) Use unique pointer

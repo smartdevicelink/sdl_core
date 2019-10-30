@@ -51,7 +51,7 @@ BasicCommunicationGetSystemTimeRequest::BasicCommunicationGetSystemTimeRequest(
 
 void BasicCommunicationGetSystemTimeRequest::onTimeOut() {
   LOG4CXX_AUTO_TRACE(logger_);
-  application_manager_.protocol_handler().NotifyOnFailedHandshake();
+  application_manager_.protocol_handler().NotifyOnGetSystemTimeFailed();
 }
 
 }  // namespace commands

@@ -30,25 +30,81 @@
 
 include(${CMAKE_SOURCE_DIR}/tools/cmake/helpers/platform.cmake)
 include(${CMAKE_SOURCE_DIR}/tools/cmake/helpers/sources.cmake)
+include(${CMAKE_SOURCE_DIR}/tools/cmake/helpers/generators.cmake)
 
 include_directories (
-  ${POLICY_PATH}/include
-  ${POLICY_GLOBAL_INCLUDE_PATH}/
-  ${COMPONENTS_DIR}/rpc_base/include
-  ${JSONCPP_INCLUDE_DIRECTORY}
+  ${POLICY_PATH}/include/
+  ${COMPONENTS_DIR}/
   ${COMPONENTS_DIR}/utils/include/
   ${COMPONENTS_DIR}/config_profile/include
-  ${LOG4CXX_INCLUDE_DIRECTORY}
-  ${BOOST_INCLUDE_DIR}
+  ${COMPONENTS_DIR}/connection_handler/include/
+  ${COMPONENTS_DIR}/protocol_handler/include/
+  ${COMPONENTS_DIR}/config_profile/include/
+  ${COMPONENTS_DIR}/smart_objects/include/
+  ${COMPONENTS_DIR}/rpc_base/include/
+  ${CMAKE_BINARY_DIR}/src/components/
+  ${POLICY_GLOBAL_INCLUDE_PATH}/
+  ${BOOST_INCLUDE_DIR}/
+  ${JSONCPP_INCLUDE_DIRECTORY}/
+  ${LOG4CXX_INCLUDE_DIRECTORY}/
 )
+
+set(GENERATED_MOBILE_POLICY_TYPES_CPP
+  "${CMAKE_CURRENT_BINARY_DIR}/generated_MOBILE_API_policy_types.cc"
+  "${CMAKE_CURRENT_BINARY_DIR}/generated_MOBILE_API_enum_schema_factory.cc")
+
+set(GENERATED_MOBILE_POLICY_TYPES_HPP
+  "${CMAKE_CURRENT_BINARY_DIR}/generated_MOBILE_API_policy_types.h")
+
+set(GENERATED_MOBILE_POLICY_TYPES
+  ${GENERATED_MOBILE_POLICY_TYPES_HPP}
+  ${GENERATED_MOBILE_POLICY_TYPES_CPP})
+
+generate_policy_types("${GENERATED_MOBILE_POLICY_TYPES}"
+                      "${COMPONENTS_DIR}/interfaces/MOBILE_API.xml"
+                      "rpc::policy_table_interface_base"
+                      "mobile-policy-types")
+
+
+set(GENERATED_HMI_POLICY_TYPES_CPP
+  "${CMAKE_CURRENT_BINARY_DIR}/generated_HMI_API_policy_types.cc")
+
+set(GENERATED_HMI_POLICY_TYPES_HPP
+  "${CMAKE_CURRENT_BINARY_DIR}/generated_HMI_API_policy_types.h")
+
+set(GENERATED_HMI_POLICY_TYPES
+  ${GENERATED_HMI_POLICY_TYPES_HPP}
+  ${GENERATED_HMI_POLICY_TYPES_CPP})
+
+
+generate_policy_types("${GENERATED_HMI_POLICY_TYPES}"
+                    "${COMPONENTS_DIR}/interfaces/HMI_API.xml"
+                    "rpc::policy_table_interface_base"
+                    "hmi-policy-types")
 
 set(POLICY_TABLE_PATHS
   ${CMAKE_CURRENT_SOURCE_DIR}/include/policy/policy_table
   ${CMAKE_CURRENT_SOURCE_DIR}/src/policy_table
+  ${CMAKE_CURRENT_BINARY_DIR}/
 )
-collect_sources(POLICY_TABLE_SOURCES "${POLICY_TABLE_PATHS}")
+
+set(POLICY_TABLE_SOURCES
+  ${GENERATED_MOBILE_POLICY_TYPES_CPP}
+  ${GENERATED_HMI_POLICY_TYPES_CPP}
+  ${POLICY_PATH}/src/policy_table/enums.cc
+  ${POLICY_PATH}/src/policy_table/types.cc
+  ${POLICY_PATH}/src/policy_table/validation.cc
+)
+
 add_library(policy_struct ${POLICY_TABLE_SOURCES})
-target_link_libraries(policy_struct Utils)
+target_link_libraries(policy_struct
+  MOBILE_API
+  HMI_API
+  Utils
+  SmartObjects
+  formatters
+  jsoncpp
+)
 
 set(USAGE_STATISTICS_PATHS
   ${CMAKE_CURRENT_SOURCE_DIR}/include/policy/usage_statistics
@@ -74,7 +130,6 @@ set(LIBRARIES
   ConfigProfile
   policy_struct
   dbms
-  jsoncpp
   Utils
 )
 
@@ -87,8 +142,13 @@ else ()
   list(APPEND LIBRARIES sqlite3)
 endif ()
 
-add_library(Policy SHARED ${SOURCES})
-target_link_libraries(Policy ${LIBRARIES})
+
+add_library(PolicyStatic ${SOURCES})
+target_link_libraries(PolicyStatic ${LIBRARIES})
+
+
+add_library(Policy SHARED "src/policy_manager_impl.cc")
+target_link_libraries(Policy PolicyStatic)
 
 if(ENABLE_LOG)
   target_link_libraries(Policy log4cxx -L${LOG4CXX_LIBS_DIRECTORY})

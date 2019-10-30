@@ -79,6 +79,15 @@ class TransportManagerSettings : public TransportManagerMMESettings {
    * @brief Returns maximum retry attempts for cloud app connections
    */
   virtual uint16_t cloud_app_max_retry_attempts() const = 0;
+
+  virtual const uint8_t* bluetooth_uuid() const = 0;
+
+  virtual const std::string& aoa_filter_manufacturer() const = 0;
+  virtual const std::string& aoa_filter_model_name() const = 0;
+  virtual const std::string& aoa_filter_description() const = 0;
+  virtual const std::string& aoa_filter_version() const = 0;
+  virtual const std::string& aoa_filter_uri() const = 0;
+  virtual const std::string& aoa_filter_serial_number() const = 0;
 };
 }  // namespace transport_manager
 #endif  // SRC_COMPONENTS_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_MANAGER_SETTINGS_H_

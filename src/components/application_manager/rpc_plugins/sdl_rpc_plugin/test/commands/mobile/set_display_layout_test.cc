@@ -31,19 +31,19 @@
  */
 
 #include <stdint.h>
-#include <string>
 #include <set>
+#include <string>
 
 #include "mobile/set_display_layout_request.h"
 
-#include "gtest/gtest.h"
 #include "application_manager/commands/command_request_test.h"
+#include "application_manager/event_engine/event.h"
 #include "application_manager/mock_application.h"
 #include "application_manager/mock_application_manager.h"
-#include "application_manager/mock_message_helper.h"
-#include "application_manager/event_engine/event.h"
-#include "application_manager/mock_hmi_interface.h"
 #include "application_manager/mock_hmi_capabilities.h"
+#include "application_manager/mock_hmi_interface.h"
+#include "application_manager/mock_message_helper.h"
+#include "gtest/gtest.h"
 
 namespace test {
 namespace components {
@@ -53,10 +53,10 @@ namespace set_display_layout_request {
 
 namespace am = application_manager;
 namespace mobile_result = mobile_apis::Result;
-using sdl_rpc_plugin::commands::SetDisplayLayoutRequest;
+using am::MockMessageHelper;
 using am::commands::CommandImpl;
 using am::commands::MessageSharedPtr;
-using am::MockMessageHelper;
+using sdl_rpc_plugin::commands::SetDisplayLayoutRequest;
 using ::testing::_;
 using ::testing::Return;
 using ::testing::ReturnRef;
@@ -160,6 +160,7 @@ TEST_F(SetDisplayLayoutRequestTest,
       ManageMobileCommand(_, am::commands::Command::CommandSource::SOURCE_SDL))
       .WillOnce(DoAll(SaveArg<0>(&ui_command_result), Return(true)));
 
+  command->Init();
   command->on_event(event);
 
   ResultCommandExpectations(ui_command_result, "UI is not supported by system");
@@ -178,6 +179,7 @@ TEST_F(SetDisplayLayoutRequestTest, Run_InvalidApp_UNSUCCESS) {
                   MobileResultCodeIs(mobile_result::APPLICATION_NOT_REGISTERED),
                   am::commands::Command::CommandSource::SOURCE_SDL));
 
+  command->Init();
   command->Run();
 }
 
@@ -188,7 +190,7 @@ TEST_F(SetDisplayLayoutRequestTest, Run_SUCCESS) {
   MockAppPtr mock_app(CreateMockApp());
   EXPECT_CALL(app_mngr_, application(kConnectionKey))
       .WillOnce(Return(mock_app));
-  EXPECT_CALL(*mock_app, display_layout()).WillOnce(ReturnRef(kLayout));
+  EXPECT_CALL(*mock_app, display_layout()).WillOnce(Return(kLayout));
   EXPECT_CALL(*mock_app, app_id()).WillOnce(Return(kAppId));
 
   EXPECT_CALL(app_mngr_, GetNextHMICorrelationID())
@@ -204,20 +206,60 @@ TEST_F(SetDisplayLayoutRequestTest, Run_SUCCESS) {
               ManageHMICommand(CheckMshCorrId(kCorrelationKey), _))
       .WillOnce(Return(true));
 
+  command->Init();
   command->Run();
 }
 
 TEST_F(SetDisplayLayoutRequestTest, OnEvent_InvalidEventId_UNSUCCESS) {
-  CommandPtr command(CreateCommand<SetDisplayLayoutRequest>());
+  MessageSharedPtr msg(CreateMessage(smart_objects::SmartType_Map));
+  (*msg)[am::strings::params][am::strings::connection_key] = kConnectionKey;
+  CommandPtr command(CreateCommand<SetDisplayLayoutRequest>(msg));
+
   am::event_engine::Event event(hmi_apis::FunctionID::INVALID_ENUM);
-  SmartObject msg(smart_objects::SmartType_Map);
 
-  event.set_smart_object(msg);
-
+  event.set_smart_object(*msg);
+  MockAppPtr mock_app(CreateMockApp());
+  EXPECT_CALL(app_mngr_, application(kConnectionKey))
+      .WillOnce(Return(mock_app));
+  command->Init();
   command->on_event(event);
 }
 
-TEST_F(SetDisplayLayoutRequestTest, OnEvent_SUCCESS) {
+TEST_F(SetDisplayLayoutRequestTest, OnEvent_AppVersion_v6_WARNING) {
+  am::event_engine::Event event(hmi_apis::FunctionID::UI_SetDisplayLayout);
+  MessageSharedPtr msg = CreateMessage();
+
+  (*msg)[am::strings::params][am::hmi_response::code] =
+      hmi_apis::Common_Result::SUCCESS;
+  (*msg)[am::strings::msg_params][am::hmi_response::display_capabilities] = 0;
+  (*msg)[am::strings::params][am::strings::connection_key] = kConnectionKey;
+  event.set_smart_object(*msg);
+
+  MessageSharedPtr dispaly_capabilities_msg = CreateMessage();
+  (*dispaly_capabilities_msg)[am::hmi_response::templates_available] =
+      "templates_available";
+
+  EXPECT_CALL(mock_hmi_capabilities_, display_capabilities())
+      .WillOnce(Return(dispaly_capabilities_msg.get()));
+  EXPECT_CALL(
+      mock_rpc_service_,
+      ManageMobileCommand(MobileResultCodeIs(mobile_result::WARNINGS),
+                          am::commands::Command::CommandSource::SOURCE_SDL));
+
+  CommandPtr command(CreateCommand<SetDisplayLayoutRequest>(msg));
+  MockAppPtr mock_app(CreateMockApp());
+  EXPECT_CALL(app_mngr_, application(kConnectionKey))
+      .WillOnce(Return(mock_app));
+  ::application_manager::Version app_version;
+  app_version.max_supported_api_version =
+      ::application_manager::APIVersion::kAPIV6;
+  EXPECT_CALL(*mock_app, version()).WillOnce(ReturnRef(app_version));
+
+  command->Init();
+  command->on_event(event);
+}
+
+TEST_F(SetDisplayLayoutRequestTest, OnEvent_AppVersion_v5_SUCCESS) {
   am::event_engine::Event event(hmi_apis::FunctionID::UI_SetDisplayLayout);
   MessageSharedPtr msg = CreateMessage();
 
@@ -239,6 +281,15 @@ TEST_F(SetDisplayLayoutRequestTest, OnEvent_SUCCESS) {
                           am::commands::Command::CommandSource::SOURCE_SDL));
 
   CommandPtr command(CreateCommand<SetDisplayLayoutRequest>(msg));
+  MockAppPtr mock_app(CreateMockApp());
+  EXPECT_CALL(app_mngr_, application(kConnectionKey))
+      .WillOnce(Return(mock_app));
+  ::application_manager::Version app_version;
+  app_version.max_supported_api_version =
+      ::application_manager::APIVersion::kAPIV5;
+  EXPECT_CALL(*mock_app, version()).WillOnce(ReturnRef(app_version));
+
+  command->Init();
   command->on_event(event);
 }
 
@@ -246,4 +297,4 @@ TEST_F(SetDisplayLayoutRequestTest, OnEvent_SUCCESS) {
 }  // namespace mobile_commands_test
 }  // namespace commands_test
 }  // namespace components
-}  // namespace tests
+}  // namespace test

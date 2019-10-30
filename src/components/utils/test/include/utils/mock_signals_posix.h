@@ -33,10 +33,10 @@
 #ifndef SRC_COMPONENTS_UTILS_TEST_INCLUDE_UTILS_MOCK_SIGNALS_POSIX_H_
 #define SRC_COMPONENTS_UTILS_TEST_INCLUDE_UTILS_MOCK_SIGNALS_POSIX_H_
 
-#include "gmock/gmock.h"
-#include "utils/signals.h"
 #include <signal.h>
 #include "appMain/low_voltage_signals_handler.h"
+#include "gmock/gmock.h"
+#include "utils/signals.h"
 
 namespace utils {
 

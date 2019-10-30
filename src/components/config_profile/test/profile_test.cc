@@ -33,8 +33,8 @@
 #include <algorithm>
 #include <vector>
 
-#include "gtest/gtest.h"
 #include "config_profile/profile.h"
+#include "gtest/gtest.h"
 #include "utils/file_system.h"
 #include "utils/threads/thread.h"
 

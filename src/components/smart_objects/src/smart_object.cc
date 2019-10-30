@@ -34,13 +34,12 @@
 
 #include <errno.h>
 #include <inttypes.h>
-#include <limits>
 #include <stdlib.h>
 #include <algorithm>
-#include <sstream>
 #include <iomanip>
 #include <iterator>
 #include <limits>
+#include <sstream>
 
 namespace ns_smart_device_link {
 namespace ns_smart_objects {

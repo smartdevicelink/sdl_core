@@ -34,18 +34,18 @@
 #define SRC_COMPONENTS_CONFIG_PROFILE_INCLUDE_CONFIG_PROFILE_PROFILE_H_
 
 #include <stdint.h>
-#include <string>
-#include <vector>
 #include <list>
 #include <map>
-#include "utils/macro.h"
-#include "protocol_handler/protocol_handler_settings.h"
+#include <string>
+#include <vector>
+#include "application_manager/application_manager_settings.h"
 #include "connection_handler/connection_handler_settings.h"
 #include "hmi_message_handler/hmi_message_handler_settings.h"
 #include "media_manager/media_manager_settings.h"
-#include "transport_manager/transport_manager_settings.h"
-#include "application_manager/application_manager_settings.h"
 #include "policy/policy_settings.h"
+#include "protocol_handler/protocol_handler_settings.h"
+#include "transport_manager/transport_manager_settings.h"
+#include "utils/macro.h"
 
 namespace profile {
 
@@ -85,23 +85,23 @@ class Profile : public protocol_handler::ProtocolHandlerSettings,
   const std::string& sdl_version() const OVERRIDE;
 
   /**
-    * @brief Returns true if HMI should be started, otherwise false
-    */
+   * @brief Returns true if HMI should be started, otherwise false
+   */
   bool launch_hmi() const OVERRIDE;
 #ifdef WEB_HMI
   /**
-    * @brief Returns link to web hmi
-    */
+   * @brief Returns link to web hmi
+   */
   std::string link_to_web_hmi() const;
 #endif  // WEB_HMI
         /**
-          * @brief Returns application configuration path
-          */
+         * @brief Returns application configuration path
+         */
   const std::string& app_config_folder() const;
 
   /**
-    * @brief Returns application storage path
-    */
+   * @brief Returns application storage path
+   */
   const std::string& app_storage_folder() const;
 
   /**
@@ -110,24 +110,24 @@ class Profile : public protocol_handler::ProtocolHandlerSettings,
   const std::string& app_resource_folder() const;
 
   /**
-    * @brief Returns offset from SIGRTMIN for user defined signal
-    * SIGLOWVOLTAGE
-    * which is used for handling LOW Voltage functionality
-    */
+   * @brief Returns offset from SIGRTMIN for user defined signal
+   * SIGLOWVOLTAGE
+   * which is used for handling LOW Voltage functionality
+   */
   int low_voltage_signal_offset() const;
 
   /**
-    * @brief Returns offset from SIGRTMIN for user defined signal
-    * SIGWAKEUP
-    * which is used for handling LOW Voltage functionality
-    */
+   * @brief Returns offset from SIGRTMIN for user defined signal
+   * SIGWAKEUP
+   * which is used for handling LOW Voltage functionality
+   */
   int wake_up_signal_offset() const;
 
   /**
-    * @brief Returns offset from SIGRTMIN for user defined signal
-    * SIGIGNITIONOFF
-    * which is used for handling LOW Voltage functionality
-    */
+   * @brief Returns offset from SIGRTMIN for user defined signal
+   * SIGIGNITIONOFF
+   * which is used for handling LOW Voltage functionality
+   */
   int ignition_off_signal_offset() const;
 
   /**
@@ -202,8 +202,8 @@ class Profile : public protocol_handler::ProtocolHandlerSettings,
   uint32_t stop_streaming_timeout() const;
 
   /**
-    * @brief Returns port for time reports
-    */
+   * @brief Returns port for time reports
+   */
   const uint16_t& time_testing_port() const;
 
   /**
@@ -228,8 +228,8 @@ class Profile : public protocol_handler::ProtocolHandlerSettings,
   const std::vector<std::string>& vr_commands() const;
 
   /**
-    * @brief Returns folder containing all plugins
-    */
+   * @brief Returns folder containing all plugins
+   */
   const std::string& plugins_folder() const OVERRIDE;
 
   /**
@@ -254,38 +254,38 @@ class Profile : public protocol_handler::ProtocolHandlerSettings,
   const uint64_t thread_min_stack_size() const;
 
   /**
-    * @brief Returns true if audio mixing is supported
-    */
+   * @brief Returns true if audio mixing is supported
+   */
   bool is_mixing_audio_supported() const;
 
   /**
-    * @brief Returns true if video re-decoding enabled
-    */
+   * @brief Returns true if video re-decoding enabled
+   */
   bool is_redecoding_enabled() const;
 
   /**
-    * @brief Returns title for Vr Help
-    */
+   * @brief Returns title for Vr Help
+   */
   const std::string& vr_help_title() const;
 
   /**
-    * @brief Returns application directory quota size
-    */
+   * @brief Returns application directory quota size
+   */
   const uint32_t& app_dir_quota() const;
 
   /**
-    * @brief Returns the video server type
-    */
+   * @brief Returns the video server type
+   */
   const std::string& video_server_type() const;
 
   /**
-    * @brief Returns the audio server type
-    */
+   * @brief Returns the audio server type
+   */
   const std::string& audio_server_type() const;
 
   /**
-    * @brief Returns the video pipe path
-    */
+   * @brief Returns the video pipe path
+   */
   const std::string& named_video_pipe_path() const;
 
   /**
@@ -300,13 +300,13 @@ class Profile : public protocol_handler::ProtocolHandlerSettings,
   const uint32_t& app_hmi_level_none_time_scale() const;
 
   /**
-    * @brief Returns path to testing file to which redirects video stream
-    */
+   * @brief Returns path to testing file to which redirects video stream
+   */
   const std::string& video_stream_file() const;
 
   /**
-    * @brief Returns path to testing file to which redirects audio stream
-    */
+   * @brief Returns path to testing file to which redirects audio stream
+   */
   const std::string& audio_stream_file() const;
 
   /**
@@ -423,6 +423,15 @@ class Profile : public protocol_handler::ProtocolHandlerSettings,
    */
   uint16_t cloud_app_max_retry_attempts() const OVERRIDE;
 
+  const uint8_t* bluetooth_uuid() const OVERRIDE;
+
+  const std::string& aoa_filter_manufacturer() const OVERRIDE;
+  const std::string& aoa_filter_model_name() const OVERRIDE;
+  const std::string& aoa_filter_description() const OVERRIDE;
+  const std::string& aoa_filter_version() const OVERRIDE;
+  const std::string& aoa_filter_uri() const OVERRIDE;
+  const std::string& aoa_filter_serial_number() const OVERRIDE;
+
   // TransportManageMMESettings interface
 
   const std::string& event_mq_name() const OVERRIDE;
@@ -452,8 +461,8 @@ class Profile : public protocol_handler::ProtocolHandlerSettings,
   const std::vector<uint32_t>& supported_diag_modes() const OVERRIDE;
 
   /**
-    * @brief Returns system files folder path
-    */
+   * @brief Returns system files folder path
+   */
   const std::string& system_files_path() const OVERRIDE;
 
   /**
@@ -527,6 +536,11 @@ class Profile : public protocol_handler::ProtocolHandlerSettings,
   const std::vector<std::string>& video_service_transports() const OVERRIDE;
 
   uint32_t rpc_pass_through_timeout() const OVERRIDE;
+
+  // RcConsentManager
+  uint16_t period_for_consent_expiration() const OVERRIDE;
+  // RcConsentManager end
+
   const std::vector<std::string>& embedded_services() const OVERRIDE;
   const std::string hmi_origin_id() const OVERRIDE;
   /**
@@ -609,6 +623,10 @@ class Profile : public protocol_handler::ProtocolHandlerSettings,
   std::vector<int> ReadIntContainer(const char* const pSection,
                                     const char* const pKey,
                                     bool* out_result) const;
+
+  std::vector<uint8_t> ReadUint8Container(const char* const pSection,
+                                          const char* const pKey,
+                                          bool* out_result) const;
 
   /**
    * @brief Returns delimiter for SDL-generated TTS chunks
@@ -750,9 +768,9 @@ class Profile : public protocol_handler::ProtocolHandlerSettings,
   const bool enable_app_launch_ios() const OVERRIDE;
 
   /**
-     * @brief Returns the millisecond count before timeout
-     * for transport change feature occures.
-     */
+   * @brief Returns the millisecond count before timeout
+   * for transport change feature occures.
+   */
   uint32_t app_transport_change_timer() const OVERRIDE;
 
   /**
@@ -975,6 +993,13 @@ class Profile : public protocol_handler::ProtocolHandlerSettings,
   std::string transport_manager_tcp_adapter_network_interface_;
   uint32_t cloud_app_retry_timeout_;
   uint16_t cloud_app_max_retry_attempts_;
+  std::vector<uint8_t> bluetooth_uuid_;
+  std::string aoa_filter_manufacturer_;
+  std::string aoa_filter_model_name_;
+  std::string aoa_filter_description_;
+  std::string aoa_filter_version_;
+  std::string aoa_filter_uri_;
+  std::string aoa_filter_serial_number_;
   std::string tts_delimiter_;
   uint32_t audio_data_stopped_timeout_;
   uint32_t video_data_stopped_timeout_;
@@ -1067,6 +1092,7 @@ class Profile : public protocol_handler::ProtocolHandlerSettings,
   int wake_up_signal_offset_;
   int ignition_off_signal_offset_;
   uint32_t rpc_pass_through_timeout_;
+  uint16_t period_for_consent_expiration_;
 
   std::vector<std::string> embedded_services_;
 

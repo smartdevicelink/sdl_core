@@ -35,16 +35,16 @@
 
 #include <string>
 
+#include "application_manager/application_manager.h"
+#include "protocol_handler/protocol_handler_impl.h"
+#include "protocol_handler_observer.h"
+#include "telemetry_monitor/application_manager_observer.h"
+#include "telemetry_monitor/metric_wrapper.h"
+#include "telemetry_monitor/transport_manager_observer.h"
+#include "transport_manager/transport_manager_impl.h"
 #include "utils/message_queue.h"
 #include "utils/threads/thread.h"
 #include "utils/threads/thread_delegate.h"
-#include "telemetry_monitor/metric_wrapper.h"
-#include "telemetry_monitor/application_manager_observer.h"
-#include "application_manager/application_manager.h"
-#include "telemetry_monitor/transport_manager_observer.h"
-#include "transport_manager/transport_manager_impl.h"
-#include "protocol_handler_observer.h"
-#include "protocol_handler/protocol_handler_impl.h"
 
 namespace telemetry_monitor {
 
@@ -78,12 +78,13 @@ class TelemetryMonitor {
  public:
   TelemetryMonitor(const std::string& server_address, uint16_t port);
   virtual ~TelemetryMonitor();
-  virtual void Init(TelemetryObservable<protocol_handler::PHTelemetryObserver>*
-                        protocol_handler,
-                    TelemetryObservable<
-                        application_manager::AMTelemetryObserver>* app_manager,
-                    TelemetryObservable<transport_manager::TMTelemetryObserver>*
-                        transport_manager);
+  virtual void Init(
+      TelemetryObservable<protocol_handler::PHTelemetryObserver>*
+          protocol_handler,
+      TelemetryObservable<application_manager::AMTelemetryObserver>*
+          app_manager,
+      TelemetryObservable<transport_manager::TMTelemetryObserver>*
+          transport_manager);
   virtual void Stop();
   virtual void Start();
   virtual void SendMetric(std::shared_ptr<MetricWrapper> metric);

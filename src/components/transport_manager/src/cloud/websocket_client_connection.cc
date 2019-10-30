@@ -169,9 +169,9 @@ TransportAdapter::Error WebsocketClientConnection::Start() {
 #endif  // ENABLE_SECURITY
   if (ec) {
     std::string str_err = "ErrorMessage: " + ec.message();
-    LOG4CXX_ERROR(logger_,
-                  "Could not complete handshake with host/port: " << host << ":"
-                                                                  << port);
+    LOG4CXX_ERROR(
+        logger_,
+        "Could not complete handshake with host/port: " << host << ":" << port);
     LOG4CXX_ERROR(logger_, str_err);
     return TransportAdapter::FAIL;
   }
@@ -208,9 +208,9 @@ TransportAdapter::Error WebsocketClientConnection::Start() {
 
   boost::asio::post(io_pool_, [&]() { ioc_.run(); });
 
-  LOG4CXX_DEBUG(logger_,
-                "Successfully started websocket connection @: " << host << ":"
-                                                                << port);
+  LOG4CXX_DEBUG(
+      logger_,
+      "Successfully started websocket connection @: " << host << ":" << port);
   return TransportAdapter::OK;
 }
 
@@ -261,7 +261,7 @@ void WebsocketClientConnection::OnRead(boost::system::error_code ec,
       boost::beast::buffers_front(buffer_.data()));
 
   ::protocol_handler::RawMessagePtr frame(
-      new protocol_handler::RawMessage(0, 0, data, size));
+      new protocol_handler::RawMessage(0, 0, data, size, false));
 
   controller_->DataReceiveDone(device_uid_, app_handle_, frame);
 

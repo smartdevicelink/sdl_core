@@ -32,12 +32,12 @@
 
 #include <string.h>
 
-#include "utils/macro.h"
 #include "application_manager/mobile_message_handler.h"
-#include "protocol_handler/protocol_payload.h"
 #include "protocol_handler/protocol_packet.h"
+#include "protocol_handler/protocol_payload.h"
 #include "utils/bitstream.h"
 #include "utils/logger.h"
+#include "utils/macro.h"
 
 #include <stdint.h>
 #include <memory>
@@ -48,7 +48,7 @@ const uint8_t kRequest = 0x0;
 const uint8_t kResponse = 0x1;
 const uint8_t kNotification = 0x2;
 const uint8_t kUnknown = 0xF;
-}
+}  // namespace
 
 namespace application_manager {
 using protocol_handler::Extract;
@@ -58,7 +58,7 @@ typedef std::map<MessageType, std::string> MessageTypeMap;
 MessageTypeMap message_types = {std::make_pair(kRequest, "Request"),
                                 std::make_pair(kResponse, "Response"),
                                 std::make_pair(kNotification, "Notification")};
-}
+}  // namespace
 CREATE_LOGGERPTR_GLOBAL(logger_, "ApplicationManager")
 
 application_manager::Message*
@@ -195,6 +195,7 @@ MobileMessageHandler::HandleIncomingMessageProtocolV2(
           message->protocol_version()));
   outgoing_message->set_data_size(message->data_size());
   outgoing_message->set_payload_size(message->payload_size());
+  outgoing_message->set_message_encryption(message->protection_flag());
 
   if (!payload.data.empty()) {
     const BinaryData binary_payload_data(payload.data);
@@ -220,7 +221,8 @@ MobileMessageHandler::HandleOutgoingMessageProtocolV1(
       new protocol_handler::RawMessage(message->connection_key(),
                                        1,
                                        &raw_message[0],
-                                       message_string.length() + 1);
+                                       message_string.length() + 1,
+                                       false);
 
   return result;
 }
@@ -298,6 +300,7 @@ MobileMessageHandler::HandleOutgoingMessageProtocolV2(
                                        message->protocol_version(),
                                        &data_for_sending[0],
                                        data_for_sending_size,
+                                       false,
                                        type);
 
   return msg_to_protocol_handler;

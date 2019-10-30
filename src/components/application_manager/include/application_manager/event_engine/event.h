@@ -36,8 +36,8 @@
 #include <interfaces/HMI_API.h>
 #include <interfaces/MOBILE_API.h>
 
-#include "smart_objects/smart_object.h"
 #include "application_manager/smart_object_keys.h"
+#include "smart_objects/smart_object.h"
 
 namespace application_manager {
 namespace event_engine {

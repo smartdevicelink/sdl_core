@@ -35,13 +35,14 @@
 
 #include <string>
 #include <vector>
+#include "boost/optional.hpp"
 
 #include "policy/policy_table/types.h"
 #include "policy/pt_representation.h"
 
-#include "policy/usage_statistics/counter.h"
-#include "policy/policy_types.h"
 #include "policy/policy_settings.h"
+#include "policy/policy_types.h"
+#include "policy/usage_statistics/counter.h"
 
 namespace policy_table = rpc::policy_table_interface_base;
 
@@ -161,9 +162,24 @@ class CacheManagerInterface {
   virtual bool SecondsBetweenRetries(std::vector<int>& seconds) = 0;
 
   /**
-   * @brief Get information about vehicle
+   * @brief Gets copy of current policy table data
+   * @return policy_table as json object
    */
-  virtual const VehicleInfo GetVehicleInfo() const = 0;
+  virtual Json::Value GetPolicyTableData() const = 0;
+
+  /**
+   * @brief Gets vehicle data items
+   * @return Structure with vehicle data items
+   */
+  virtual const std::vector<policy_table::VehicleDataItem> GetVehicleDataItems()
+      const = 0;
+
+  /**
+   * @brief Gets vehicle data items removed after the last PTU
+   * @return List of removed vehicle data items
+   */
+  virtual std::vector<policy_table::VehicleDataItem>
+  GetRemovedVehicleDataItems() const = 0;
 
   /**
    * @brief Get a list of enabled cloud applications
@@ -199,11 +215,11 @@ class CacheManagerInterface {
       std::string& hybrid_app_preference) const = 0;
 
   /**
-  * Initializes a new cloud application with default policies
-  * Then adds cloud specific policies
-  * @param app_id application id
-  * @return true if success
-  */
+   * Initializes a new cloud application with default policies
+   * Then adds cloud specific policies
+   * @param app_id application id
+   * @return true if success
+   */
   virtual void InitCloudApp(const std::string& policy_app_id) = 0;
 
   /**
@@ -265,9 +281,27 @@ class CacheManagerInterface {
    * @brief Check if an app can send unknown rpc requests to an app service
    * provider
    * @param policy_app_id Unique application id
-  */
+   */
   virtual bool UnknownRPCPassthroughAllowed(
       const std::string& policy_app_id) const = 0;
+
+  /**
+   * @brief Returns state of the lock screen that could be able to be dismissed
+   * while connected to SDL, allowing users the ability to interact with the
+   * app.
+   * @return bool True if lock screen can be dismissed.
+   */
+  virtual const boost::optional<bool> LockScreenDismissalEnabledState()
+      const = 0;
+
+  /**
+   * @brief Returns lock screen warning message. In case when specified language
+   * is absent in policy table will be returned message on default language
+   * ("en-us"). Otherwise returns uninitialized boost::optional<std::string>
+   * @return std::string Lock screen warning message
+   */
+  virtual const boost::optional<std::string> LockScreenDismissalWarningMessage(
+      const std::string& language) const = 0;
 
   /**
    * @brief Allows to update 'vin' field in module_meta table.
@@ -290,7 +324,7 @@ class CacheManagerInterface {
   virtual std::vector<UserFriendlyMessage> GetUserFriendlyMsg(
       const std::vector<std::string>& msg_codes,
       const std::string& language,
-      const std::string& active_hmi_language) = 0;
+      const std::string& active_hmi_language) const = 0;
 
   /**
    * @brief Get list of URL to send PTS to
@@ -415,6 +449,12 @@ class CacheManagerInterface {
    */
   virtual bool GetFunctionalGroupings(
       policy_table::FunctionalGroupings& groups) = 0;
+
+  /**
+   * @brief Get policy app names from PT
+   * @return container of strings representing policy application names
+   */
+  virtual const policy_table::Strings GetPolicyAppIDs() const = 0;
 
   /**
    * Checks if the application is represented in policy table
@@ -867,9 +907,9 @@ class CacheManagerInterface {
   virtual std::string GetCertificate() const = 0;
 
   /**
-    * @brief Sets decrypted certificate in policy table
-    * @param certificate content of certificate
-    */
+   * @brief Sets decrypted certificate in policy table
+   * @param certificate content of certificate
+   */
   virtual void SetDecryptedCertificate(const std::string& certificate) = 0;
 
   /**
@@ -894,34 +934,35 @@ class CacheManagerInterface {
   virtual ExternalConsentStatus GetExternalConsentEntities() = 0;
 
   /**
- * @brief Creates collection of ExternalConsent items known by current
- * functional
- * groupings and appropiate section
- * (disallowed_by_external_consent_entities_on/off) where
- * is item is being holded
- * @param status Current status containing collection of ExternalConsent items
- * @return Collection of ExternalConsent items mapped to list of groups with
- * section
- * marker where the item is found
- */
+   * @brief Creates collection of ExternalConsent items known by current
+   * functional
+   * groupings and appropiate section
+   * (disallowed_by_external_consent_entities_on/off) where
+   * is item is being holded
+   * @param status Current status containing collection of ExternalConsent items
+   * @return Collection of ExternalConsent items mapped to list of groups with
+   * section
+   * marker where the item is found
+   */
   virtual GroupsByExternalConsentStatus GetGroupsWithSameEntities(
       const ExternalConsentStatus& status) = 0;
 
   /**
- * @brief Gets collection of links device-to-application from device_data
- * section of policy table if there any application records present, i.e. if
- * any specific user consent is present
- * @return Collection of device-to-application links
- */
+   * @brief Gets collection of links device-to-application from device_data
+   * section of policy table if there any application records present, i.e. if
+   * any specific user consent is present
+   * @return Collection of device-to-application links
+   */
   virtual std::map<std::string, std::string> GetKnownLinksFromPT() = 0;
 
   /**
- * @brief Sets groups permissions affected by customer connectivity settings
- * entities status, i.e. groups assigned to particular application on
- * particular device which have same entities as current ExternalConsent status
- * @param permissions Groups permissions which result current ExternalConsent
- * status
- */
+   * @brief Sets groups permissions affected by customer connectivity settings
+   * entities status, i.e. groups assigned to particular application on
+   * particular device which have same entities as current ExternalConsent
+   * status
+   * @param permissions Groups permissions which result current ExternalConsent
+   * status
+   */
   virtual void SetExternalConsentForApp(
       const PermissionConsent& permissions) = 0;
 
@@ -933,6 +974,37 @@ class CacheManagerInterface {
    */
   virtual void OnDeviceSwitching(const std::string& device_id_from,
                                  const std::string& device_id_to) = 0;
+
+  /**
+   * @brief GetAppEncryptionRequiredFlag retrieves encryption required flag
+   * for
+   * given application
+   * @param application policy application name
+   * @return optional object containing encryption required flag
+   */
+  virtual rpc::Optional<rpc::Boolean> GetAppEncryptionRequiredFlag(
+      const std::string& application_policy_name) const = 0;
+
+  /**
+   * @brief GetFunctionalGroupingEncryptionRequiredFlag retrieves encryption
+   * required flag
+   * for
+   * given functional grouping
+   * @param functional_group policy functional group name
+   * @return optional object containing encryption required flag
+   */
+  virtual rpc::Optional<rpc::Boolean>
+  GetFunctionalGroupingEncryptionRequiredFlag(
+      const std::string& functional_group) const = 0;
+
+  /**
+   * @brief retreives application params
+   * @param application_name policy applicatoin name
+   * @param application_params application params
+   */
+  virtual void GetApplicationParams(
+      const std::string& application_name,
+      policy_table::ApplicationParams& application_params) const = 0;
 
 #ifdef BUILD_TESTS
   /**

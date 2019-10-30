@@ -1,5 +1,5 @@
 /*
- Copyright (c) 2013, Ford Motor Company
+ Copyright (c) 2019, Ford Motor Company
  All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -38,6 +38,8 @@ namespace application_manager {
 namespace strings {
 
 extern const char* params;
+extern const char* require_encryption;
+extern const char* protection;
 extern const char* message_type;
 extern const char* correlation_id;
 extern const char* function_id;
@@ -53,6 +55,7 @@ extern const char* info;
 extern const char* app_id;
 extern const char* full_app_id;
 extern const char* bundle_id;
+extern const char* window_id;
 extern const char* app_info;
 extern const char* app_launch;
 extern const char* app_launch_list;
@@ -92,6 +95,7 @@ extern const char* main_field_1;
 extern const char* main_field_2;
 extern const char* main_field_3;
 extern const char* main_field_4;
+extern const char* template_title;
 extern const char* metadata_tags;
 extern const char* eta;
 extern const char* time_to_destination;
@@ -110,10 +114,13 @@ extern const char* menu_icon;
 extern const char* keyboard_properties;
 extern const char* vr_commands;
 extern const char* position;
+extern const char* user_location;
 extern const char* num_ticks;
 extern const char* slider_footer;
 extern const char* menu_id;
 extern const char* menu_name;
+extern const char* menu_layout;
+extern const char* menu_layouts_available;
 extern const char* interaction_choice_set_id;
 extern const char* interaction_choice_set_id_list;
 extern const char* choice_set;
@@ -129,7 +136,10 @@ extern const char* initial_prompt;
 extern const char* initial_text;
 extern const char* duration;
 extern const char* progress_indicator;
+extern const char* func_id;
+extern const char* cancel_id;
 extern const char* alert_type;
+extern const char* alert_icon;
 extern const char* play_tone;
 extern const char* soft_buttons;
 extern const char* soft_button_id;
@@ -166,9 +176,17 @@ extern const char* activate_app_hmi_level;
 extern const char* audio_streaming_state;
 extern const char* video_streaming_state;
 extern const char* system_context;
+extern const char* window_name;
+extern const char* window_type;
+extern const char* window_type_supported;
+extern const char* maximum_number_of_windows;
+extern const char* window_capabilities;
+extern const char* associated_service_type;
+extern const char* duplicate_updates_from_window_id;
 extern const char* speech_capabilities;
 extern const char* vr_capabilities;
 extern const char* audio_pass_thru_capabilities;
+extern const char* audio_pass_thru_capabilities_list;
 extern const char* pcm_stream_capabilities;
 extern const char* audio_pass_thru_icon;
 extern const char* way_points;
@@ -179,6 +197,7 @@ extern const char* navigation_capability;
 extern const char* phone_capability;
 extern const char* video_streaming_capability;
 extern const char* rc_capability;
+extern const char* seat_location_capability;
 extern const char* app_services_capabilities;
 extern const char* day_color_scheme;
 extern const char* night_color_scheme;
@@ -189,6 +208,8 @@ extern const char* red;
 extern const char* green;
 extern const char* blue;
 extern const char* display_layout;
+extern const char* template_configuration;
+extern const char* template_layout;
 extern const char* icon_resumed;
 extern const char* nicknames;
 extern const char* enabled;
@@ -198,6 +219,11 @@ extern const char* hybrid_app_preference;
 extern const char* is_cloud_application;
 extern const char* cloud_connection_status;
 extern const char* endpoint;
+extern const char* display_capabilities;
+extern const char* policy_type;
+extern const char* property;
+extern const char* displays;
+extern const char* seat_location;
 
 // PutFile
 extern const char* sync_file_name;
@@ -216,6 +242,7 @@ extern const char* is_template;
 extern const char* image;
 extern const char* type;
 extern const char* system_file;
+extern const char* is_system_file;
 extern const char* offset;
 extern const char* length;
 extern const char* secondary_image;
@@ -254,6 +281,7 @@ extern const char* key_press_mode;
 // duplicate names from hmi_request
 extern const char* limited_character_list;
 extern const char* auto_complete_text;
+extern const char* auto_complete_list;
 extern const char* navigation_text;
 
 // vehicle info
@@ -285,6 +313,7 @@ extern const char* e_call_info;
 extern const char* airbag_status;
 extern const char* emergency_event;
 extern const char* cluster_mode_status;
+extern const char* cluster_modes;
 extern const char* my_key;
 extern const char* help_prompt;
 extern const char* scroll_message_body;
@@ -304,6 +333,7 @@ extern const char* sdl_version;
 extern const char* system_software_version;
 extern const char* priority;
 extern const char* engine_oil_life;
+extern const char* oem_custom_data_type;
 
 // app services
 extern const char* app_service_manifest;
@@ -322,6 +352,7 @@ extern const char* service_active;
 extern const char* app_service_id;
 extern const char* service_data;
 extern const char* media_service_data;
+extern const char* media_image;
 extern const char* weather_service_data;
 extern const char* location;
 extern const char* current_forecast;
@@ -343,6 +374,10 @@ extern const char* activate;
 extern const char* set_as_default;
 extern const char* origin_app;
 
+// sis data
+extern const char* station_short_name;
+extern const char* station_location;
+
 // resuming
 extern const char* application_commands;
 extern const char* application_submenus;
@@ -363,11 +398,16 @@ extern const char* ign_off_count;
 
 extern const char* global_ign_on_counter;
 
+extern const char* suspend_count;
+
 extern const char* connection_info;
 extern const char* is_download_complete;
 
+extern const char* shifted;
+extern const char* altitude;
 extern const char* longitude_degrees;
 extern const char* latitude_degrees;
+
 extern const char* address;
 extern const char* country_name;
 extern const char* country_code;
@@ -396,6 +436,8 @@ extern const char* delivery_mode;
 
 extern const char* audio_streaming_indicator;
 
+extern const char* windows_info;
+
 // keys for default parameters loaded from hmi_capabilities.json:
 extern const char* const keyboard_properties_default;
 extern const char* const language_default;
@@ -408,7 +450,6 @@ extern const char* const language_supported;
 extern const char* const keyboard_layout_supported;
 extern const char* const keypress_mode_supported;
 extern const char* const limited_characters_list_supported;
-extern const char* const auto_complete_text_supported;
 extern const char* const send_location_enabled;
 extern const char* const get_way_points_enabled;
 extern const char* const entity_type;
@@ -429,6 +470,9 @@ extern const char* const resolution_height;
 extern const char* const max_bitrate;
 extern const char* const supported_formats;
 extern const char* const haptic_spatial_data_supported;
+extern const char* const diagonal_screen_size;
+extern const char* const pixel_per_inch;
+extern const char* const scale;
 extern const char* const haptic_rect_data;
 extern const char* const rect;
 extern const char* const x;
@@ -465,12 +509,14 @@ extern const char* instance_follow_redirect;
 extern const char* charset;
 extern const char* content_lenght;
 extern const char* GET;
-}  // http_request
+}  // namespace http_request
 
 namespace mobile_notification {
 extern const char* state;
 extern const char* syncp_timeout;
 extern const char* syncp_url;
+extern const char* lock_screen_dismissal_enabled;
+extern const char* lock_screen_dismissal_warning;
 }  // namespace mobile_notification
 
 namespace hmi_levels {
@@ -517,7 +563,7 @@ extern const char* keyboard_properties;
 extern const char* method_name;
 extern const char* keyboard_layout;
 extern const char* limited_character_list;
-extern const char* auto_complete_text;
+extern const char* auto_complete_list;
 extern const char* file;
 extern const char* file_name;
 extern const char* retry;
@@ -578,6 +624,9 @@ extern const char* policyfile;
 extern const char* is_active;
 extern const char* is_deactivated;
 extern const char* event_name;
+extern const char* service_type;
+extern const char* service_event;
+extern const char* reason;
 
 }  // namespace hmi_notification
 

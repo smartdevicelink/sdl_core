@@ -30,12 +30,12 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "application_manager/message_helper.h"
-#include "application_manager/smart_object_keys.h"
+#include "app_service_rpc_plugin/app_service_rpc_plugin.h"
 #include "app_service_rpc_plugin/app_service_app_extension.h"
 #include "app_service_rpc_plugin/app_service_command_factory.h"
-#include "app_service_rpc_plugin/app_service_rpc_plugin.h"
+#include "application_manager/message_helper.h"
 #include "application_manager/plugin_manager/plugin_keys.h"
+#include "application_manager/smart_object_keys.h"
 
 namespace app_service_rpc_plugin {
 CREATE_LOGGERPTR_GLOBAL(logger_, "AppServiceRpcPlugin")
@@ -49,7 +49,9 @@ bool AppServiceRpcPlugin::Init(
     application_manager::ApplicationManager& app_manager,
     application_manager::rpc_service::RPCService& rpc_service,
     application_manager::HMICapabilities& hmi_capabilities,
-    policy::PolicyHandlerInterface& policy_handler) {
+    policy::PolicyHandlerInterface& policy_handler,
+    resumption::LastState& last_state) {
+  UNUSED(last_state);
   application_manager_ = &app_manager;
   command_factory_.reset(new app_service_rpc_plugin::AppServiceCommandFactory(
       app_manager, rpc_service, hmi_capabilities, policy_handler));
@@ -93,6 +95,14 @@ void AppServiceRpcPlugin::DeleteSubscriptions(
 
 }  // namespace app_service_rpc_plugin
 
-extern "C" application_manager::plugin_manager::RPCPlugin* Create() {
+extern "C" __attribute__((visibility("default")))
+application_manager::plugin_manager::RPCPlugin*
+Create() {
   return new app_service_rpc_plugin::AppServiceRpcPlugin();
+}
+
+extern "C" __attribute__((visibility("default"))) void Delete(
+    application_manager::plugin_manager::RPCPlugin* data) {
+  delete data;
+  DELETE_THREAD_LOGGER(app_service_rpc_plugin::logger_);
 }

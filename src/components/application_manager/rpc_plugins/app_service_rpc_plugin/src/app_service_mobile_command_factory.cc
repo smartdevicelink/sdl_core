@@ -47,6 +47,8 @@
 #include "app_service_rpc_plugin/commands/mobile/perform_app_service_interaction_response_from_mobile.h"
 #include "app_service_rpc_plugin/commands/mobile/publish_app_service_request.h"
 #include "app_service_rpc_plugin/commands/mobile/publish_app_service_response.h"
+#include "app_service_rpc_plugin/commands/mobile/unpublish_app_service_request.h"
+#include "app_service_rpc_plugin/commands/mobile/unpublish_app_service_response.h"
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "AppServiceRpcPlugin")
 
@@ -97,9 +99,9 @@ bool AppServiceMobileCommandFactory::IsAbleToProcess(
     const int32_t function_id,
     const app_mngr::commands::Command::CommandSource source) const {
   UNUSED(source);
-  return buildCommandCreator(function_id,
-                             mobile_apis::messageType::INVALID_ENUM,
-                             source).CanBeCreated();
+  return buildCommandCreator(
+             function_id, mobile_apis::messageType::INVALID_ENUM, source)
+      .CanBeCreated();
 }
 
 app_mngr::CommandCreator& AppServiceMobileCommandFactory::buildCommandCreator(
@@ -118,6 +120,16 @@ app_mngr::CommandCreator& AppServiceMobileCommandFactory::buildCommandCreator(
                      source &&
                  mobile_apis::messageType::request != message_type) {
         return factory.GetCreator<commands::PublishAppServiceResponse>();
+      }
+      break;
+    case mobile_apis::FunctionID::UnpublishAppServiceID:
+      if (app_mngr::commands::Command::CommandSource::SOURCE_MOBILE == source &&
+          mobile_apis::messageType::response != message_type) {
+        return factory.GetCreator<commands::UnpublishAppServiceRequest>();
+      } else if (app_mngr::commands::Command::CommandSource::SOURCE_SDL ==
+                     source &&
+                 mobile_apis::messageType::request != message_type) {
+        return factory.GetCreator<commands::UnpublishAppServiceResponse>();
       }
       break;
     case mobile_apis::FunctionID::OnAppServiceDataID:
@@ -162,4 +174,4 @@ app_mngr::CommandCreator& AppServiceMobileCommandFactory::buildCommandCreator(
   }
   return factory.GetCreator<app_mngr::InvalidCommand>();
 }
-}  // namespace vehicle_info_plugin
+}  // namespace app_service_rpc_plugin

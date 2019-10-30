@@ -30,14 +30,14 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "application_manager/application_manager.h"
 #include "application_manager/resumption/resumption_data_json.h"
-#include "smart_objects/smart_object.h"
-#include "json/json.h"
-#include "formatters/CFormatterJsonBase.h"
+#include "application_manager/application_manager.h"
+#include "application_manager/application_manager_settings.h"
 #include "application_manager/message_helper.h"
 #include "application_manager/smart_object_keys.h"
-#include "application_manager/application_manager_settings.h"
+#include "formatters/CFormatterJsonBase.h"
+#include "json/json.h"
+#include "smart_objects/smart_object.h"
 
 namespace resumption {
 
@@ -64,7 +64,8 @@ void ResumptionDataJson::SaveApplication(
   const uint32_t grammar_id = application->get_grammar_id();
   const uint32_t time_stamp = (uint32_t)time(NULL);
   const std::string device_mac = application->mac_address();
-  const mobile_apis::HMILevel::eType hmi_level = application->hmi_level();
+  const mobile_apis::HMILevel::eType hmi_level =
+      application->hmi_level(mobile_apis::PredefinedWindows::DEFAULT_WINDOW);
   const bool is_subscribed_for_way_points =
       application_manager_.IsAppSubscribedForWayPoints(application);
 
@@ -99,6 +100,9 @@ void ResumptionDataJson::SaveApplication(
   formatters::CFormatterJsonBase::objToJsonValue(
       GetApplicationFiles(application), tmp);
   json_app[strings::application_files] = tmp;
+  formatters::CFormatterJsonBase::objToJsonValue(
+      GetApplicationWidgetsInfo(application), tmp);
+  json_app[strings::windows_info] = tmp;
   json_app[strings::time_stamp] = time_stamp;
   json_app[strings::subscribed_for_way_points] = is_subscribed_for_way_points;
 
@@ -531,4 +535,4 @@ void ResumptionDataJson::Persist() {
   last_state().SaveStateToFileSystem();
 }
 
-}  // resumption
+}  // namespace resumption

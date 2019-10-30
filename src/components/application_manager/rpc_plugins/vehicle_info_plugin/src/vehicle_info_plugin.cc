@@ -31,18 +31,20 @@
  */
 
 #include "vehicle_info_plugin/vehicle_info_plugin.h"
-#include "vehicle_info_plugin/vehicle_info_command_factory.h"
-#include "vehicle_info_plugin/vehicle_info_app_extension.h"
+#include "application_manager/message_helper.h"
 #include "application_manager/plugin_manager/plugin_keys.h"
+#include "application_manager/rpc_handler.h"
 #include "application_manager/smart_object_keys.h"
-#include "application_manager/message_helper.h"
-#include "application_manager/message_helper.h"
+#include "vehicle_info_plugin/custom_vehicle_data_manager_impl.h"
+#include "vehicle_info_plugin/vehicle_info_app_extension.h"
+#include "vehicle_info_plugin/vehicle_info_command_factory.h"
 
 namespace vehicle_info_plugin {
 CREATE_LOGGERPTR_GLOBAL(logger_, "VehicleInfoPlugin")
 
 namespace strings = application_manager::strings;
 namespace plugins = application_manager::plugin_manager;
+namespace commands = application_manager::commands;
 
 VehicleInfoPlugin::VehicleInfoPlugin() : application_manager_(nullptr) {}
 
@@ -50,10 +52,18 @@ bool VehicleInfoPlugin::Init(
     application_manager::ApplicationManager& app_manager,
     application_manager::rpc_service::RPCService& rpc_service,
     application_manager::HMICapabilities& hmi_capabilities,
-    policy::PolicyHandlerInterface& policy_handler) {
+    policy::PolicyHandlerInterface& policy_handler,
+    resumption::LastState& last_state) {
+  UNUSED(last_state);
   application_manager_ = &app_manager;
+  custom_vehicle_data_manager_.reset(
+      new CustomVehicleDataManagerImpl(policy_handler, rpc_service));
   command_factory_.reset(new vehicle_info_plugin::VehicleInfoCommandFactory(
-      app_manager, rpc_service, hmi_capabilities, policy_handler));
+      app_manager,
+      rpc_service,
+      hmi_capabilities,
+      policy_handler,
+      *(custom_vehicle_data_manager_.get())));
   return true;
 }
 
@@ -70,7 +80,10 @@ app_mngr::CommandFactory& VehicleInfoPlugin::GetCommandFactory() {
   return *command_factory_;
 }
 
-void VehicleInfoPlugin::OnPolicyEvent(plugins::PolicyEvent event) {}
+void VehicleInfoPlugin::OnPolicyEvent(plugins::PolicyEvent event) {
+  UnsubscribeFromRemovedVDItems();
+  custom_vehicle_data_manager_->OnPolicyEvent(event);
+}
 
 void VehicleInfoPlugin::OnApplicationEvent(
     plugins::ApplicationEvent event,
@@ -78,9 +91,47 @@ void VehicleInfoPlugin::OnApplicationEvent(
   if (plugins::ApplicationEvent::kApplicationRegistered == event) {
     application->AddExtension(
         std::make_shared<VehicleInfoAppExtension>(*this, *application));
-  } else if (plugins::ApplicationEvent::kDeleteApplicationData == event) {
+  } else if ((plugins::ApplicationEvent::kDeleteApplicationData == event) ||
+             (plugins::ApplicationEvent::kApplicationUnregistered == event)) {
     DeleteSubscriptions(application);
   }
+}
+
+void VehicleInfoPlugin::UnsubscribeFromRemovedVDItems() {
+  typedef std::vector<std::string> StringsVector;
+
+  auto get_items_to_unsubscribe = [this]() -> StringsVector {
+    StringsVector output_items_list;
+    auto applications = application_manager_->applications();
+    for (auto& app : applications.GetData()) {
+      auto& ext = VehicleInfoAppExtension::ExtractVIExtension(*app);
+      auto subscription_names = ext.Subscriptions();
+      for (auto& subscription_name : subscription_names) {
+        if (custom_vehicle_data_manager_->IsRemovedCustomVehicleDataName(
+                subscription_name)) {
+          ext.unsubscribeFromVehicleInfo(subscription_name);
+          if (!helpers::in_range(output_items_list, subscription_name)) {
+            LOG4CXX_DEBUG(logger_,
+                          "Vehicle data item "
+                              << subscription_name
+                              << " has been removed by policy");
+            output_items_list.push_back(subscription_name);
+          }
+        }
+      }
+    }
+    return output_items_list;
+  };
+
+  const StringsVector items_to_unsubscribe = get_items_to_unsubscribe();
+
+  if (items_to_unsubscribe.empty()) {
+    LOG4CXX_DEBUG(logger_, "There is no data to unsubscribe");
+    return;
+  }
+
+  auto message = GetUnsubscribeIVIRequest(items_to_unsubscribe);
+  application_manager_->GetRPCService().ManageHMICommand(message);
 }
 
 void VehicleInfoPlugin::ProcessResumptionSubscription(
@@ -90,13 +141,15 @@ void VehicleInfoPlugin::ProcessResumptionSubscription(
       smart_objects::SmartObject(smart_objects::SmartType_Map);
   msg_params[strings::app_id] = app.app_id();
   const auto& subscriptions = ext.Subscriptions();
-  for (auto& ivi_data : application_manager::MessageHelper::vehicle_data()) {
-    mobile_apis::VehicleDataType::eType type_id = ivi_data.second;
-    if (subscriptions.end() != subscriptions.find(type_id)) {
-      std::string key_name = ivi_data.first;
-      msg_params[key_name] = true;
-    }
+  if (subscriptions.empty()) {
+    LOG4CXX_DEBUG(logger_, "No vehicle data to subscribe. Exiting");
+    return;
   }
+
+  for (const auto& item : subscriptions) {
+    msg_params[item] = true;
+  }
+
   smart_objects::SmartObjectSPtr request =
       application_manager::MessageHelper::CreateModuleInfoSO(
           hmi_apis::FunctionID::VehicleInfo_SubscribeVehicleData,
@@ -106,38 +159,56 @@ void VehicleInfoPlugin::ProcessResumptionSubscription(
 }
 
 application_manager::ApplicationSharedPtr FindAppSubscribedToIVI(
-    mobile_apis::VehicleDataType::eType ivi_data,
+    const std::string& ivi_name,
     application_manager::ApplicationManager& app_mngr) {
   auto applications = app_mngr.applications();
 
   for (auto& app : applications.GetData()) {
     auto& ext = VehicleInfoAppExtension::ExtractVIExtension(*app);
-    if (ext.isSubscribedToVehicleInfo(ivi_data)) {
+    if (ext.isSubscribedToVehicleInfo(ivi_name)) {
       return app;
     }
   }
   return application_manager::ApplicationSharedPtr();
 }
 
-smart_objects::SmartObjectSPtr GetUnsubscribeIVIRequest(
-    int32_t ivi_id, application_manager::ApplicationManager& app_mngr) {
+smart_objects::SmartObjectSPtr VehicleInfoPlugin::GetUnsubscribeIVIRequest(
+    const std::vector<std::string>& ivi_names) {
+  LOG4CXX_AUTO_TRACE(logger_);
   using namespace smart_objects;
 
-  auto find_ivi_name = [ivi_id]() {
+  auto msg_params = smart_objects::SmartObject(smart_objects::SmartType_Map);
+
+  auto find_ivi_name = [](const std::string& ivi_name) {
     for (auto item : application_manager::MessageHelper::vehicle_data()) {
-      if (ivi_id == item.second) {
+      if (ivi_name == item.first) {
         return item.first;
       }
     }
     return std::string();
   };
-  std::string key_name = find_ivi_name();
-  DCHECK_OR_RETURN(!key_name.empty(), smart_objects::SmartObjectSPtr());
-  auto msg_params = smart_objects::SmartObject(smart_objects::SmartType_Map);
-  msg_params[key_name] = true;
+
+  for (const auto& ivi_name : ivi_names) {
+    // try to find the name in vehicle data types
+    std::string key_name = find_ivi_name(ivi_name);
+
+    if (key_name.empty()) {
+      // the name hasn't been found in vehicle data types
+      if (custom_vehicle_data_manager_->IsValidCustomVehicleDataName(
+              ivi_name) ||
+          custom_vehicle_data_manager_->IsRemovedCustomVehicleDataName(
+              ivi_name)) {
+        key_name = ivi_name;
+      }
+    }
+
+    DCHECK_OR_RETURN(!key_name.empty(), smart_objects::SmartObjectSPtr());
+    msg_params[key_name] = true;
+  }
 
   auto message = application_manager::MessageHelper::CreateMessageForHMI(
-      hmi_apis::messageType::request, app_mngr.GetNextHMICorrelationID());
+      hmi_apis::messageType::request,
+      application_manager_->GetNextHMICorrelationID());
   DCHECK(message);
 
   SmartObject& object = *message;
@@ -152,18 +223,31 @@ void VehicleInfoPlugin::DeleteSubscriptions(
     application_manager::ApplicationSharedPtr app) {
   auto& ext = VehicleInfoAppExtension::ExtractVIExtension(*app);
   auto subscriptions = ext.Subscriptions();
+  std::vector<std::string> ivi_to_unsubscribe;
   for (auto& ivi : subscriptions) {
     ext.unsubscribeFromVehicleInfo(ivi);
     auto still_subscribed_app =
         FindAppSubscribedToIVI(ivi, *application_manager_);
     if (!still_subscribed_app) {
-      auto message = GetUnsubscribeIVIRequest(ivi, *application_manager_);
-      application_manager_->GetRPCService().ManageHMICommand(message);
+      ivi_to_unsubscribe.push_back(ivi);
     }
   }
+
+  if (!ivi_to_unsubscribe.empty()) {
+    auto message = GetUnsubscribeIVIRequest(ivi_to_unsubscribe);
+    application_manager_->GetRPCService().ManageHMICommand(message);
+  }
 }
+}  // namespace vehicle_info_plugin
+
+extern "C" __attribute__((visibility("default")))
+application_manager::plugin_manager::RPCPlugin*
+Create() {
+  return new vehicle_info_plugin::VehicleInfoPlugin();
 }
 
-extern "C" application_manager::plugin_manager::RPCPlugin* Create() {
-  return new vehicle_info_plugin::VehicleInfoPlugin();
+extern "C" __attribute__((visibility("default"))) void Delete(
+    application_manager::plugin_manager::RPCPlugin* data) {
+  delete data;
+  DELETE_THREAD_LOGGER(vehicle_info_plugin::logger_);
 }

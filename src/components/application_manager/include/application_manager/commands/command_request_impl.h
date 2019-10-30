@@ -34,10 +34,10 @@
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_COMMAND_REQUEST_IMPL_H_
 
 #include "application_manager/commands/command_impl.h"
-#include "interfaces/MOBILE_API.h"
 #include "interfaces/HMI_API.h"
-#include "utils/lock.h"
+#include "interfaces/MOBILE_API.h"
 #include "smart_objects/smart_object.h"
+#include "utils/lock.h"
 
 namespace application_manager {
 namespace commands {
@@ -214,6 +214,24 @@ class CommandRequestImpl : public CommandImpl,
   mobile_apis::Result::eType GetMobileResultCode(
       const hmi_apis::Common_Result::eType& hmi_code) const;
 
+  /**
+   * @brief Checks Mobile result code for single RPC
+   * @param result_code contains result code from response to Mobile
+   * @return true if result code complies to successful result codes,
+   * false otherwise.
+   */
+  static bool IsMobileResultSuccess(
+      const mobile_apis::Result::eType result_code);
+
+  /**
+   * @brief Checks HMI result code for single RPC
+   * @param result_code contains result code from HMI response
+   * @return true if result code complies to successful result codes,
+   * false otherwise.
+   */
+  static bool IsHMIResultSuccess(
+      const hmi_apis::Common_Result::eType result_code);
+
  protected:
   /**
    * @brief Checks message permissions and parameters according to policy table
@@ -247,14 +265,6 @@ class CommandRequestImpl : public CommandImpl,
    * @return true if any param was marked as disallowed
    */
   bool HasDisallowedParams() const;
-
-  /**
-   * @brief Checks result code from Mobile for single RPC
-   * @param result_code contains result code from Mobile response
-   * @return true if result code complies successful result codes,
-   * false otherwise.
-   */
-  bool IsMobileResultSuccess(mobile_apis::Result::eType result_code) const;
 
   /**
    * @brief Checks result code from HMI for single RPC
@@ -317,6 +327,16 @@ class CommandRequestImpl : public CommandImpl,
   bool IsResultCodeUnsupported(const ResponseInfo& first,
                                const ResponseInfo& second) const;
 
+  /**
+   * @brief CheckResult checks whether the overall result
+   * of the responses is successful
+   * @param first response
+   * @param second response
+   * @return true if the overall result is successful
+   * otherwise - false
+   */
+  bool CheckResult(const ResponseInfo& first, const ResponseInfo& second) const;
+
  protected:
   /**
    * @brief Returns policy parameters permissions
@@ -335,7 +355,7 @@ class CommandRequestImpl : public CommandImpl,
    * @param interface_id interface which SDL awaits for response in given time
    * @return true if SDL awaits for response from given interface in
    * interface_id
-  */
+   */
   bool IsInterfaceAwaited(const HmiInterfaces::InterfaceID& interface_id) const;
 
   /**
@@ -346,7 +366,7 @@ class CommandRequestImpl : public CommandImpl,
   void EndAwaitForInterface(const HmiInterfaces::InterfaceID& interface_id);
 
   /**
-  * @brief This set stores all the interfaces which are awaited by SDL to
+   * @brief This set stores all the interfaces which are awaited by SDL to
    * return a response on some request
    */
   std::set<HmiInterfaces::InterfaceID> awaiting_response_interfaces_;
@@ -387,10 +407,10 @@ class CommandRequestImpl : public CommandImpl,
       const hmi_apis::FunctionID::eType& function_id);
 
   /**
-    * @brief UpdateHash updates hash field for application and sends
-    * OnHashChanged notification to mobile side in case of approriate hash mode
-    * is set
-    */
+   * @brief UpdateHash updates hash field for application and sends
+   * OnHashChanged notification to mobile side in case of approriate hash mode
+   * is set
+   */
   void UpdateHash();
 
   /**

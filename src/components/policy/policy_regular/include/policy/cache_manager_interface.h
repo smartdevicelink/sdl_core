@@ -35,11 +35,13 @@
 
 #include <string>
 #include <vector>
+#include "boost/optional.hpp"
 
-#include "policy/usage_statistics/counter.h"
-#include "policy/policy_types.h"
 #include "policy/policy_settings.h"
 #include "policy/policy_table/types.h"
+#include "policy/policy_types.h"
+#include "policy/usage_statistics/counter.h"
+#include "utils/optional.h"
 
 namespace policy_table = rpc::policy_table_interface_base;
 
@@ -147,9 +149,24 @@ class CacheManagerInterface {
   virtual bool SecondsBetweenRetries(std::vector<int>& seconds) = 0;
 
   /**
-   * @brief Get information about vehicle
+   * @brief Gets copy of current policy table data
+   * @return policy_table as json object
    */
-  virtual const VehicleInfo GetVehicleInfo() const = 0;
+  virtual Json::Value GetPolicyTableData() const = 0;
+
+  /**
+   * @brief Gets vehicle data items
+   * @return Structure with vehicle data items
+   */
+  virtual const std::vector<policy_table::VehicleDataItem> GetVehicleDataItems()
+      const = 0;
+
+  /**
+   * @brief Gets vehicle data items removed after the last PTU
+   * @return List of removed vehicle data items
+   */
+  virtual std::vector<policy_table::VehicleDataItem>
+  GetRemovedVehicleDataItems() const = 0;
 
   /**
    * @brief Get a list of enabled cloud applications
@@ -250,10 +267,27 @@ class CacheManagerInterface {
    * @brief Check if an app can send unknown rpc requests to an app service
    * provider
    * @param policy_app_id Unique application id
-  */
+   */
   virtual bool UnknownRPCPassthroughAllowed(
       const std::string& policy_app_id) const = 0;
 
+  /**
+   * @brief Returns state of the lock screen that could be able to be dismissed
+   * while connected to SDL, allowing users the ability to interact with the
+   * app.
+   * @return bool True if lock screen can be dismissed.
+   */
+  virtual const boost::optional<bool> LockScreenDismissalEnabledState()
+      const = 0;
+
+  /**
+   * @brief Returns lock screen warning message. In case when specified language
+   * is absent in policy table will be returned message on default language
+   * ("en-us"). Otherwise returns uninitialized boost::optional<std::string>
+   * @return std::string Lock screen warning message
+   */
+  virtual const boost::optional<std::string> LockScreenDismissalWarningMessage(
+      const std::string& language_code) const = 0;
   /**
    * @brief Allows to update 'vin' field in module_meta table.
    *
@@ -274,7 +308,7 @@ class CacheManagerInterface {
    */
   virtual std::vector<UserFriendlyMessage> GetUserFriendlyMsg(
       const std::vector<std::string>& msg_codes,
-      const std::string& language) = 0;
+      const std::string& language) const = 0;
 
   /**
    * @brief Get list of URLs related to particular service
@@ -400,6 +434,12 @@ class CacheManagerInterface {
       policy_table::FunctionalGroupings& groups) = 0;
 
   /**
+   * @brief Get policy app names from PT
+   * @return container of strings representing policy application names
+   */
+  virtual const policy_table::Strings GetPolicyAppIDs() const = 0;
+
+  /**
    * Checks if the application is represented in policy table
    * @param app_id application id
    * @return true if application is represented in policy table
@@ -460,10 +500,10 @@ class CacheManagerInterface {
                              std::string& default_hmi) const = 0;
 
   /**
-    * Gets HMI types from specific policy
-    * @param app_id ID application
-    * @return list of HMI types
-    */
+   * Gets HMI types from specific policy
+   * @param app_id ID application
+   * @return list of HMI types
+   */
   virtual const policy_table::AppHMITypes* GetHMITypes(
       const std::string& app_id) = 0;
 
@@ -796,6 +836,36 @@ class CacheManagerInterface {
    */
   virtual void OnDeviceSwitching(const std::string& device_id_from,
                                  const std::string& device_id_to) = 0;
+
+  /**
+   * @brief GetAppEncryptionRequiredFlag retrieves encryption required flag for
+   * given application
+   * @param application policy application name
+   * @return optional object containing encryption required flag
+   */
+  virtual rpc::Optional<rpc::Boolean> GetAppEncryptionRequiredFlag(
+      const std::string& application_policy_name) const = 0;
+
+  /**
+   * @brief GetFunctionalGroupingEncryptionRequiredFlag retrieves encryption
+   * required flag
+   * for
+   * given functional grouping
+   * @param functional_group policy functional group name
+   * @return optional object containing encryption required flag
+   */
+  virtual rpc::Optional<rpc::Boolean>
+  GetFunctionalGroupingEncryptionRequiredFlag(
+      const std::string& functional_group) const = 0;
+
+  /**
+   * @brief retreives application params
+   * @param application_name policy applicatoin name
+   * @param application_params application params
+   */
+  virtual void GetApplicationParams(
+      const std::string& application_name,
+      policy_table::ApplicationParams& application_params) const = 0;
 };
 
 typedef std::shared_ptr<CacheManagerInterface> CacheManagerInterfaceSPtr;

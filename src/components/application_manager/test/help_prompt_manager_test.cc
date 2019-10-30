@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Copyright (c) 2018, Ford Motor Company
  * All rights reserved.
  *
@@ -65,6 +65,9 @@ const std::string kDirectoryName = "./test_storage";
 const uint8_t expected_tread_pool_size = 2u;
 const uint8_t stop_streaming_timeout = 1u;
 const std::vector<std::string> kTimeoutPrompt{"timeoutPrompt"};
+const WindowID kDefaultWindowId =
+    mobile_apis::PredefinedWindows::DEFAULT_WINDOW;
+const std::string kDefaultWindowName = "DefaultName";
 }  // namespace
 
 using namespace application_manager;
@@ -177,8 +180,10 @@ void HelpPromptManagerTest::SetUp() {
   mock_help_prompt_manager_ =
       std::shared_ptr<MockHelpPromptManager>(new MockHelpPromptManager());
 
-  std::string path = file_system::CreateDirectory("storage");
-  file_system::CreateFile(path + "/" + "certificate");
+  const std::string path("storage");
+  if (file_system::CreateDirectory(path)) {
+    file_system::CreateFile(path + "/" + "certificate");
+  }
 
   mock_app_ = std::make_shared<application_manager_test::MockApplication>();
 }
@@ -244,7 +249,8 @@ void HelpPromptManagerTest::CreateApplication(
                               app_mngr_,
                               mock_help_prompt_manager));
   HmiStatePtr initial_state = CreateTestHmiState();
-  app_impl_->SetInitialState(initial_state);
+  app_impl_->SetInitialState(
+      kDefaultWindowId, kDefaultWindowName, initial_state);
 }
 
 TEST_F(HelpPromptManagerTest, AddCommand_OnVrCommandAdded) {

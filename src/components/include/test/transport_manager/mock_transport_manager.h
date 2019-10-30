@@ -33,22 +33,22 @@
 #ifndef SRC_COMPONENTS_INCLUDE_TEST_TRANSPORT_MANAGER_MOCK_TRANSPORT_MANAGER_H_
 #define SRC_COMPONENTS_INCLUDE_TEST_TRANSPORT_MANAGER_MOCK_TRANSPORT_MANAGER_H_
 
-#include "gmock/gmock.h"
 #include <string>
-#include "transport_manager/transport_manager.h"
-#include "transport_manager/transport_adapter/transport_adapter_event.h"
-#include "telemetry_monitor/telemetry_observable.h"
+#include "gmock/gmock.h"
 #include "resumption/last_state.h"
+#include "telemetry_monitor/telemetry_observable.h"
+#include "transport_manager/transport_adapter/transport_adapter_event.h"
+#include "transport_manager/transport_manager.h"
 
 namespace test {
 namespace components {
 namespace transport_manager_test {
 
-using ::transport_manager::DeviceHandle;
 using ::transport_manager::ConnectionUID;
-using ::transport_manager::transport_adapter::TransportAdapter;
+using ::transport_manager::DeviceHandle;
 using ::transport_manager::TransportAdapterEvent;
 using ::transport_manager::TransportManagerListener;
+using ::transport_manager::transport_adapter::TransportAdapter;
 /*
  * MOCK implementation of ::transport_manager::TransportManager interface
  */
@@ -58,6 +58,9 @@ class MockTransportManager : public ::transport_manager::TransportManager,
  public:
   MOCK_METHOD1(Init, int(resumption::LastState& last_state));
   MOCK_METHOD0(Reinit, int());
+  MOCK_METHOD0(Deinit, void());
+  MOCK_METHOD0(StopEventsProcessing, void());
+  MOCK_METHOD0(StartEventsProcessing, void());
   MOCK_METHOD0(SearchDevices, int());
   MOCK_METHOD1(
       AddCloudDevice,
@@ -78,7 +81,9 @@ class MockTransportManager : public ::transport_manager::TransportManager,
   MOCK_METHOD1(AddEventListener, int(TransportManagerListener* listener));
   MOCK_METHOD0(Stop, int());
   MOCK_METHOD1(RemoveDevice, int(const DeviceHandle));
-  MOCK_CONST_METHOD1(Visibility, int(const bool&));
+  MOCK_CONST_METHOD1(PerformActionOnClients,
+                     int(transport_manager::TransportAction required_action));
+
   MOCK_METHOD1(SetTelemetryObserver,
                void(transport_manager::TMTelemetryObserver* observer));
 };

@@ -31,8 +31,9 @@
  */
 
 #include "sdl_rpc_plugin/commands/hmi/sdl_activate_app_request.h"
-#include "application_manager/state_controller.h"
 #include "application_manager/message_helper.h"
+#include "application_manager/policies/policy_handler_interface.h"
+#include "application_manager/state_controller.h"
 
 namespace sdl_rpc_plugin {
 using namespace application_manager;
@@ -45,8 +46,7 @@ struct ProtoV4AppsOnDevice : std::unary_function<ApplicationSharedPtr, bool> {
   ProtoV4AppsOnDevice(const connection_handler::DeviceHandle handle)
       : handle_(handle) {}
   bool operator()(const ApplicationSharedPtr app) const {
-    return app
-               ? handle_ == app->device() &&
+    return app ? handle_ == app->device() &&
                      Message::is_sufficient_version(
                          protocol_handler::MajorProtocolVersion::
                              PROTOCOL_VERSION_4,
@@ -80,7 +80,7 @@ struct SendLaunchApp
     return;
   }
 };
-}
+}  // namespace
 
 SDLActivateAppRequest::SDLActivateAppRequest(
     const application_manager::commands::MessageSharedPtr& message,
@@ -317,4 +317,4 @@ ApplicationSharedPtr SDLActivateAppRequest::get_foreground_app(
 }
 
 }  // namespace commands
-}  // namespace application_manager
+}  // namespace sdl_rpc_plugin

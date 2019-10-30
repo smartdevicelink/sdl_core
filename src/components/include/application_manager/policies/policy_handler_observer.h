@@ -34,8 +34,8 @@
 #define SRC_COMPONENTS_INCLUDE_APPLICATION_MANAGER_POLICIES_POLICY_HANDLER_OBSERVER_H_
 
 #include <map>
-#include <vector>
 #include <string>
+#include <vector>
 
 namespace policy {
 
@@ -52,6 +52,20 @@ class PolicyHandlerObserver {
                                   const std::string& auth_token) {}
 
   virtual void OnPTUFinished(const bool ptu_result) {}
+
+  virtual void OnPTInited() {}
+
+  virtual void OnPTUTimeoutExceeded() {}
+
+#ifdef EXTERNAL_PROPRIETARY_MODE
+  /**
+   * @brief OnCertDecryptFinished is called when certificate decryption is
+   * finished in the external flow
+   * @param decrypt_result bool value indicating whether decryption was
+   * successful
+   */
+  virtual void OnCertDecryptFinished(const bool decrypt_result) {}
+#endif
 
   virtual ~PolicyHandlerObserver() {}
 };

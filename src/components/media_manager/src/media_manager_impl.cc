@@ -31,27 +31,28 @@
  */
 
 #include "media_manager/media_manager_impl.h"
+#include "application_manager/application.h"
+#include "application_manager/application_impl.h"
+#include "application_manager/application_manager.h"
+#include "application_manager/message_helper.h"
+#include "application_manager/smart_object_keys.h"
 #include "media_manager/audio/from_mic_recorder_listener.h"
 #include "media_manager/streamer_listener.h"
-#include "application_manager/message_helper.h"
-#include "application_manager/application.h"
-#include "application_manager/application_manager.h"
-#include "application_manager/application_impl.h"
 #include "protocol_handler/protocol_handler.h"
 #include "utils/file_system.h"
-#include "utils/logger.h"
 #include "utils/helpers.h"
+#include "utils/logger.h"
 #if defined(EXTENDED_MEDIA_MODE)
 #include "media_manager/audio/a2dp_source_player_adapter.h"
 #include "media_manager/audio/from_mic_recorder_adapter.h"
 #endif
-#include "media_manager/video/socket_video_streamer_adapter.h"
-#include "media_manager/audio/socket_audio_streamer_adapter.h"
-#include "media_manager/video/pipe_video_streamer_adapter.h"
-#include "media_manager/audio/pipe_audio_streamer_adapter.h"
-#include "media_manager/video/file_video_streamer_adapter.h"
 #include "media_manager/audio/file_audio_streamer_adapter.h"
+#include "media_manager/audio/pipe_audio_streamer_adapter.h"
+#include "media_manager/audio/socket_audio_streamer_adapter.h"
 #include "media_manager/media_manager_settings.h"
+#include "media_manager/video/file_video_streamer_adapter.h"
+#include "media_manager/video/pipe_video_streamer_adapter.h"
+#include "media_manager/video/socket_video_streamer_adapter.h"
 
 namespace media_manager {
 
@@ -64,6 +65,9 @@ MediaManagerImpl::MediaManagerImpl(
     , protocol_handler_(NULL)
     , a2dp_player_(NULL)
     , from_mic_recorder_(NULL)
+    , bits_per_sample_(16)
+    , sampling_rate_(16000)
+    , stream_data_size_(0ull)
     , application_manager_(application_manager) {
   Init();
 }
@@ -160,6 +164,23 @@ void MediaManagerImpl::Init() {
     streamer_[ServiceType::kAudio]->AddListener(
         streamer_listener_[ServiceType::kAudio]);
   }
+
+  if (application_manager_.hmi_capabilities().pcm_stream_capabilities()) {
+    const auto pcm_caps =
+        application_manager_.hmi_capabilities().pcm_stream_capabilities();
+
+    if (pcm_caps->keyExists(application_manager::strings::bits_per_sample)) {
+      bits_per_sample_ =
+          pcm_caps->getElement(application_manager::strings::bits_per_sample)
+              .asUInt();
+    }
+
+    if (pcm_caps->keyExists(application_manager::strings::sampling_rate)) {
+      sampling_rate_ =
+          pcm_caps->getElement(application_manager::strings::sampling_rate)
+              .asUInt();
+    }
+  }
 }
 
 void MediaManagerImpl::PlayA2DPSource(int32_t application_key) {
@@ -220,9 +241,9 @@ void MediaManagerImpl::StartMicrophoneRecording(int32_t application_key,
   std::vector<uint8_t> buf;
   if (file_system::ReadBinaryFile(record_file_source, buf)) {
     if (file_system::Write(file_path, buf)) {
-      LOG4CXX_INFO(logger_,
-                   "File " << record_file_source << " copied to "
-                           << output_file);
+      LOG4CXX_INFO(
+          logger_,
+          "File " << record_file_source << " copied to " << output_file);
     } else {
       LOG4CXX_WARN(logger_, "Could not write to file " << output_file);
     }
@@ -263,6 +284,8 @@ void MediaManagerImpl::StopStreaming(
     int32_t application_key, protocol_handler::ServiceType service_type) {
   LOG4CXX_AUTO_TRACE(logger_);
 
+  stream_data_size_ = 0ull;
+
   if (streamer_[service_type]) {
     streamer_[service_type]->StopActivity(application_key);
   }
@@ -298,7 +321,25 @@ void MediaManagerImpl::OnMessageReceived(
 
   ApplicationSharedPtr app = application_manager_.application(streaming_app_id);
   if (app) {
-    app->WakeUpStreaming(service_type);
+    if (ServiceType::kAudio == service_type &&
+        "socket" == settings().audio_server_type()) {
+      if (stream_data_size_ == 0) {
+        socket_audio_stream_start_time_ = std::chrono::system_clock::now();
+      }
+
+      stream_data_size_ += message->data_size();
+      uint32_t ms_for_all_data = DataSizeToMilliseconds(stream_data_size_);
+      uint32_t ms_since_stream_start =
+          std::chrono::duration_cast<std::chrono::milliseconds>(
+              std::chrono::system_clock::now() -
+              socket_audio_stream_start_time_)
+              .count();
+      uint32_t ms_stream_remaining = ms_for_all_data - ms_since_stream_start;
+
+      app->WakeUpStreaming(service_type, ms_stream_remaining);
+    } else {
+      app->WakeUpStreaming(service_type);
+    }
     streamer_[service_type]->SendData(streaming_app_id, message);
   }
 }
@@ -311,10 +352,46 @@ void MediaManagerImpl::FramesProcessed(int32_t application_key,
   if (protocol_handler_) {
     protocol_handler_->SendFramesNumber(application_key, frame_number);
   }
+
+  application_manager::ApplicationSharedPtr app =
+      application_manager_.application(application_key);
+
+  if (app) {
+    auto audio_stream = std::dynamic_pointer_cast<StreamerAdapter>(
+        streamer_[protocol_handler::ServiceType::kAudio]);
+    auto video_stream = std::dynamic_pointer_cast<StreamerAdapter>(
+        streamer_[protocol_handler::ServiceType::kMobileNav]);
+
+    if (audio_stream.use_count() != 0 &&
+        "pipe" == settings().audio_server_type()) {
+      size_t audio_queue_size = audio_stream->GetMsgQueueSize();
+      LOG4CXX_DEBUG(logger_,
+                    "# Messages in audio queue = " << audio_queue_size);
+      if (audio_queue_size > 0) {
+        app->WakeUpStreaming(protocol_handler::ServiceType::kAudio);
+      }
+    }
+
+    if (video_stream.use_count() != 0 &&
+        "pipe" == settings().video_server_type()) {
+      size_t video_queue_size = video_stream->GetMsgQueueSize();
+      LOG4CXX_DEBUG(logger_,
+                    "# Messages in video queue = " << video_queue_size);
+      if (video_queue_size > 0) {
+        app->WakeUpStreaming(protocol_handler::ServiceType::kMobileNav);
+      }
+    }
+  }
 }
 
 const MediaManagerSettings& MediaManagerImpl::settings() const {
   return settings_;
+}
+
+uint32_t MediaManagerImpl::DataSizeToMilliseconds(uint64_t data_size) const {
+  constexpr uint16_t latency_compensation = 500;
+  return 1000 * data_size / (sampling_rate_ * bits_per_sample_ / 8) +
+         latency_compensation;
 }
 
 }  //  namespace media_manager

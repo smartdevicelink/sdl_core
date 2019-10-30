@@ -31,25 +31,25 @@
  */
 
 #include <stdint.h>
-#include <string>
 #include <algorithm>
+#include <string>
 
-#include "gtest/gtest.h"
 #include "application_manager/commands/command_impl.h"
 #include "application_manager/commands/command_request_impl.h"
-#include "application_manager/commands/commands_test.h"
 #include "application_manager/commands/command_request_test.h"
+#include "application_manager/commands/commands_test.h"
+#include "gtest/gtest.h"
 #include "utils/lock.h"
 
-#include "utils/data_accessor.h"
-#include "smart_objects/smart_object.h"
-#include "application_manager/smart_object_keys.h"
 #include "application_manager/application_manager.h"
-#include "application_manager/mock_application.h"
 #include "application_manager/event_engine/event.h"
-#include "application_manager/mock_message_helper.h"
+#include "application_manager/mock_application.h"
 #include "application_manager/mock_hmi_interface.h"
+#include "application_manager/mock_message_helper.h"
+#include "application_manager/smart_object_keys.h"
 #include "interfaces/MOBILE_API.h"
+#include "smart_objects/smart_object.h"
+#include "utils/data_accessor.h"
 
 #include "application_manager/mock_app_service_manager.h"
 #include "resumption/last_state_impl.h"
@@ -64,20 +64,20 @@ namespace strings = am::strings;
 namespace hmi_response = am::hmi_response;
 
 using ::testing::_;
+using ::testing::DoAll;
 using ::testing::Return;
 using ::testing::SaveArg;
-using ::testing::DoAll;
 using ::testing::SetArgReferee;
 
-using am::commands::MessageSharedPtr;
-using am::CommandParametersPermissions;
-using am::event_engine::EventObserver;
-using am::commands::CommandImpl;
-using am::commands::CommandRequestImpl;
 using am::ApplicationManager;
 using am::ApplicationSet;
-using am::RPCParams;
+using am::CommandParametersPermissions;
 using am::MockHmiInterfaces;
+using am::RPCParams;
+using am::commands::CommandImpl;
+using am::commands::CommandRequestImpl;
+using am::commands::MessageSharedPtr;
+using am::event_engine::EventObserver;
 using test::components::application_manager_test::MockAppServiceManager;
 
 typedef am::commands::CommandRequestImpl::RequestState RequestState;
@@ -105,10 +105,10 @@ class CommandRequestImplTest
 
   class UnwrappedCommandRequestImpl : public CommandRequestImpl {
    public:
-    using CommandRequestImpl::CheckAllowedParameters;
-    using CommandRequestImpl::RemoveDisallowedParameters;
     using CommandRequestImpl::AddDisallowedParameters;
+    using CommandRequestImpl::CheckAllowedParameters;
     using CommandRequestImpl::HasDisallowedParams;
+    using CommandRequestImpl::RemoveDisallowedParameters;
 
     UnwrappedCommandRequestImpl(const MessageSharedPtr& message,
                                 ApplicationManager& am,
@@ -153,6 +153,13 @@ class CommandRequestImplTest
 
 typedef CommandRequestImplTest::UnwrappedCommandRequestImpl UCommandRequestImpl;
 typedef std::shared_ptr<UCommandRequestImpl> CommandPtr;
+
+TEST_F(CommandRequestImplTest, WindowID_ExpectDefaultWindowID) {
+  auto msg = CreateMessage();
+  const auto command = CreateCommand<UCommandRequestImpl>(msg);
+  EXPECT_EQ(mobile_apis::PredefinedWindows::DEFAULT_WINDOW,
+            command->window_id());
+}
 
 TEST_F(CommandRequestImplTest, OnTimeOut_StateCompleted_UNSUCCESS) {
   CommandPtr command = CreateCommand<UCommandRequestImpl>();
@@ -311,13 +318,6 @@ TEST_F(CommandRequestImplTest, SendHMIRequest_UseEvent_SUCCESS) {
 }
 
 TEST_F(CommandRequestImplTest, RemoveDisallowedParameters_SUCCESS) {
-  am::VehicleData vehicle_data;
-  vehicle_data.insert(am::VehicleData::value_type(
-      kMissedParam, mobile_apis::VehicleDataType::VEHICLEDATA_MYKEY));
-
-  EXPECT_CALL(mock_message_helper_, vehicle_data())
-      .WillOnce(ReturnRef(vehicle_data));
-
   MessageSharedPtr msg = CreateMessage();
   (*msg)[strings::msg_params][kDisallowedParam1] = 0u;
   (*msg)[strings::msg_params][kDisallowedParam2] = 0u;
@@ -326,7 +326,6 @@ TEST_F(CommandRequestImplTest, RemoveDisallowedParameters_SUCCESS) {
   (*msg)[strings::msg_params][kMissedParam] = 0u;
 
   CommandPtr command = CreateCommand<UCommandRequestImpl>(msg);
-
   CommandParametersPermissions& permission = command->parameters_permissions();
   permission.disallowed_params.insert(kDisallowedParam1);
   permission.disallowed_params.insert(kDisallowedParam2);
@@ -366,6 +365,12 @@ TEST_F(CommandRequestImplTest,
 TEST_F(CommandRequestImplTest, CheckAllowedParameters_NoMsgParamsMap_SUCCESS) {
   MockAppPtr mock_app = CreateMockApp();
   ON_CALL(app_mngr_, application(_)).WillByDefault(Return(mock_app));
+  ON_CALL(*mock_app, GetWindowIds())
+      .WillByDefault(Return(
+          am::WindowIds(1, mobile_apis::PredefinedWindows::DEFAULT_WINDOW)));
+  ON_CALL(*mock_app,
+          WindowIdExists(mobile_apis::PredefinedWindows::DEFAULT_WINDOW))
+      .WillByDefault(Return(true));
 
   MessageSharedPtr message = CreateMessage();
   (*message)[strings::msg_params] =
@@ -373,7 +378,7 @@ TEST_F(CommandRequestImplTest, CheckAllowedParameters_NoMsgParamsMap_SUCCESS) {
 
   CommandPtr command = CreateCommand<UCommandRequestImpl>(message);
 
-  EXPECT_CALL(app_mngr_, CheckPolicyPermissions(_, _, _, _))
+  EXPECT_CALL(app_mngr_, CheckPolicyPermissions(_, _, _, _, _))
       .WillOnce(Return(kMobResultSuccess));
 
   EXPECT_TRUE(command->CheckPermissions());
@@ -383,6 +388,12 @@ TEST_F(CommandRequestImplTest,
        CheckAllowedParameters_WrongPolicyPermissions_UNSUCCESS) {
   MockAppPtr mock_app = CreateMockApp();
   ON_CALL(app_mngr_, application(_)).WillByDefault(Return(mock_app));
+  ON_CALL(*mock_app, GetWindowIds())
+      .WillByDefault(Return(
+          am::WindowIds(1, mobile_apis::PredefinedWindows::DEFAULT_WINDOW)));
+  ON_CALL(*mock_app,
+          WindowIdExists(mobile_apis::PredefinedWindows::DEFAULT_WINDOW))
+      .WillByDefault(Return(true));
 
   MessageSharedPtr message = CreateMessage();
   (*message)[strings::msg_params] =
@@ -394,7 +405,7 @@ TEST_F(CommandRequestImplTest,
       .Times(1)
       .WillRepeatedly(Return(kConnectionKey));
 
-  EXPECT_CALL(app_mngr_, CheckPolicyPermissions(_, _, _, _))
+  EXPECT_CALL(app_mngr_, CheckPolicyPermissions(_, _, _, _, _))
       .WillOnce(Return(mobile_apis::Result::INVALID_ENUM));
 
   EXPECT_CALL(mock_message_helper_, CreateBlockedByPoliciesResponse(_, _, _, _))
@@ -405,7 +416,7 @@ TEST_F(CommandRequestImplTest,
 }
 
 ACTION_P(GetArg3, output) {
-  *output = arg2;
+  *output = arg3;
 }
 
 TEST_F(CommandRequestImplTest, CheckAllowedParameters_MsgParamsMap_SUCCESS) {
@@ -417,9 +428,14 @@ TEST_F(CommandRequestImplTest, CheckAllowedParameters_MsgParamsMap_SUCCESS) {
 
   MockAppPtr app = CreateMockApp();
   ON_CALL(app_mngr_, application(_)).WillByDefault(Return(app));
+  ON_CALL(*app, GetWindowIds())
+      .WillByDefault(Return(
+          am::WindowIds(1, mobile_apis::PredefinedWindows::DEFAULT_WINDOW)));
+  ON_CALL(*app, WindowIdExists(mobile_apis::PredefinedWindows::DEFAULT_WINDOW))
+      .WillByDefault(Return(true));
 
   RPCParams params;
-  EXPECT_CALL(app_mngr_, CheckPolicyPermissions(_, _, _, _))
+  EXPECT_CALL(app_mngr_, CheckPolicyPermissions(_, _, _, _, _))
       .WillOnce(DoAll(GetArg3(&params), Return(kMobResultSuccess)));
 
   EXPECT_TRUE(command->CheckPermissions());
@@ -432,12 +448,12 @@ TEST_F(CommandRequestImplTest, AddDisallowedParameters_SUCCESS) {
   vehicle_data.insert(am::VehicleData::value_type(
       kDisallowedParam1, mobile_apis::VehicleDataType::VEHICLEDATA_MYKEY));
 
-  EXPECT_CALL(mock_message_helper_, vehicle_data())
-      .WillOnce(ReturnRef(vehicle_data));
-
   MessageSharedPtr msg;
 
   CommandPtr command = CreateCommand<UCommandRequestImpl>(msg);
+
+  ON_CALL(mock_message_helper_, vehicle_data())
+      .WillByDefault(ReturnRef(vehicle_data));
 
   command->removed_parameters_permissions().disallowed_params.insert(
       kDisallowedParam1);
@@ -485,9 +501,6 @@ TEST_F(CommandRequestImplTest,
   vehicle_data.insert(am::VehicleData::value_type(
       kDisallowedParam1, mobile_apis::VehicleDataType::VEHICLEDATA_MYKEY));
 
-  EXPECT_CALL(mock_message_helper_, vehicle_data())
-      .WillOnce(ReturnRef(vehicle_data));
-
   MessageSharedPtr msg = CreateMessage();
   (*msg)[strings::params][strings::function_id] =
       mobile_apis::FunctionID::SubscribeVehicleDataID;
@@ -498,6 +511,9 @@ TEST_F(CommandRequestImplTest,
       kDisallowedParam1);
 
   MessageSharedPtr result;
+
+  ON_CALL(mock_message_helper_, vehicle_data())
+      .WillByDefault(ReturnRef(vehicle_data));
 
   EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(_, _))
       .WillOnce(DoAll(SaveArg<0>(&result), Return(true)));

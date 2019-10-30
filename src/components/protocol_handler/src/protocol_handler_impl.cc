@@ -32,20 +32,20 @@
 
 #include "protocol_handler/protocol_handler_impl.h"
 #include <arpa/inet.h>  // for INET6_ADDRSTRLEN
-#include <memory.h>
-#include <algorithm>  // std::find
 #include <bson_object.h>
+#include <memory.h>
 #include <protocol/bson_object_keys.h>
+#include <algorithm>  // std::find
 
 #include "connection_handler/connection_handler_impl.h"
+#include "protocol/common.h"
 #include "protocol_handler/session_observer.h"
 #include "utils/byte_order.h"
 #include "utils/helpers.h"
-#include "protocol/common.h"
 
 #ifdef ENABLE_SECURITY
-#include "security_manager/ssl_context.h"
 #include "security_manager/security_manager.h"
+#include "security_manager/ssl_context.h"
 #endif  // ENABLE_SECURITY
 
 namespace protocol_handler {
@@ -493,8 +493,9 @@ void ProtocolHandlerImpl::SendStartSessionNAck(
     BsonArray rejectedParamsArr;
     bson_array_initialize(&rejectedParamsArr, rejectedParams.size());
     for (std::string param : rejectedParams) {
-      char paramPtr[255];
-      strncpy(paramPtr, param.c_str(), 255);
+      char paramPtr[256];
+      strncpy(paramPtr, param.c_str(), sizeof(paramPtr));
+      paramPtr[sizeof(paramPtr) - 1] = '\0';
       bson_array_add_string(&rejectedParamsArr, paramPtr);
     }
     bson_object_put_array(
@@ -555,8 +556,9 @@ void ProtocolHandlerImpl::SendEndSessionNAck(
     BsonArray rejectedParamsArr;
     bson_array_initialize(&rejectedParamsArr, rejectedParams.size());
     for (std::string param : rejectedParams) {
-      char paramPtr[255];
-      strncpy(paramPtr, param.c_str(), 255);
+      char paramPtr[256];
+      strncpy(paramPtr, param.c_str(), sizeof(paramPtr));
+      paramPtr[sizeof(paramPtr) - 1] = '\0';
       bson_array_add_string(&rejectedParamsArr, paramPtr);
     }
     bson_object_put_array(
@@ -850,6 +852,7 @@ void ProtocolHandlerImpl::SendHeartBeat(int32_t connection_id,
 }
 
 void ProtocolHandlerImpl::SendMessageToMobileApp(const RawMessagePtr message,
+                                                 bool needs_encryption,
                                                  bool final_message) {
 #ifdef TELEMETRY_MONITOR
   const date_time::TimeDuration start_time = date_time::getCurrentTime();
@@ -917,6 +920,7 @@ void ProtocolHandlerImpl::SendMessageToMobileApp(const RawMessagePtr message,
                                                 message->service_type(),
                                                 message->data_size(),
                                                 message->data(),
+                                                needs_encryption,
                                                 final_message);
     if (result != RESULT_OK) {
       LOG4CXX_ERROR(logger_,
@@ -934,6 +938,7 @@ void ProtocolHandlerImpl::SendMessageToMobileApp(const RawMessagePtr message,
                                                message->data_size(),
                                                message->data(),
                                                frame_size,
+                                               needs_encryption,
                                                final_message);
     if (result != RESULT_OK) {
       LOG4CXX_ERROR(logger_,
@@ -975,9 +980,9 @@ void ProtocolHandlerImpl::OnTMMessageReceived(const RawMessagePtr tm_message) {
   LOG4CXX_DEBUG(logger_, "Proccessed " << protocol_frames.size() << " frames");
   if (result != RESULT_OK) {
     if (result == RESULT_MALFORMED_OCCURS) {
-      LOG4CXX_WARN(logger_,
-                   "Malformed message occurs, connection id "
-                       << connection_key);
+      LOG4CXX_WARN(
+          logger_,
+          "Malformed message occurs, connection id " << connection_key);
       if (!get_settings().malformed_message_filtering()) {
         LOG4CXX_DEBUG(logger_, "Malformed message filterign disabled");
         session_observer_.OnMalformedMessageCallback(connection_key);
@@ -1126,12 +1131,26 @@ void ProtocolHandlerImpl::OnUnexpectedDisconnect(
   OnConnectionClosed(connection_id);
 }
 
-void ProtocolHandlerImpl::NotifyOnFailedHandshake() {
+void ProtocolHandlerImpl::NotifyOnGetSystemTimeFailed() {
   LOG4CXX_AUTO_TRACE(logger_);
 #ifdef ENABLE_SECURITY
-  security_manager_->NotifyListenersOnHandshakeFailed();
+  security_manager_->ResetPendingSystemTimeRequests();
+  security_manager_->NotifyListenersOnGetSystemTimeFailed();
 #endif  // ENABLE_SECURITY
 }
+
+void ProtocolHandlerImpl::ProcessFailedPTU() {
+#ifdef ENABLE_SECURITY
+  security_manager_->ProcessFailedPTU();
+#endif  // ENABLE_SECURITY
+}
+
+#ifdef EXTERNAL_PROPRIETARY_MODE
+void ProtocolHandlerImpl::ProcessFailedCertDecrypt() {
+  LOG4CXX_AUTO_TRACE(logger_);
+  security_manager_->ProcessFailedCertDecrypt();
+}
+#endif
 
 void ProtocolHandlerImpl::OnTransportConfigUpdated(
     const transport_manager::transport_adapter::TransportConfig& configs) {
@@ -1210,6 +1229,19 @@ void ProtocolHandlerImpl::OnAuthTokenUpdated(const std::string& policy_app_id,
   }
 }
 
+bool ProtocolHandlerImpl::IsRPCServiceSecure(
+    const uint32_t connection_key) const {
+  LOG4CXX_AUTO_TRACE(logger_);
+#ifdef ENABLE_SECURITY
+
+  security_manager::SSLContext* context =
+      session_observer_.GetSSLContext(connection_key, ServiceType::kRpc);
+  return (context && context->IsInitCompleted());
+#else
+  return false;
+#endif  // ENABLE_SECURITY
+}
+
 RESULT_CODE ProtocolHandlerImpl::SendFrame(const ProtocolFramePtr packet) {
   LOG4CXX_AUTO_TRACE(logger_);
   if (!packet) {
@@ -1254,13 +1286,18 @@ RESULT_CODE ProtocolHandlerImpl::SendSingleFrameMessage(
     const uint8_t service_type,
     const size_t data_size,
     const uint8_t* data,
+    const bool needs_encryption,
     const bool is_final_message) {
   LOG4CXX_AUTO_TRACE(logger_);
+
+  LOG4CXX_DEBUG(
+      logger_,
+      "Packet needs encryption: " << std::boolalpha << needs_encryption);
 
   ProtocolFramePtr ptr(
       new protocol_handler::ProtocolPacket(connection_id,
                                            protocol_version,
-                                           PROTECTION_OFF,
+                                           needs_encryption,
                                            FRAME_TYPE_SINGLE,
                                            service_type,
                                            FRAME_DATA_SINGLE,
@@ -1282,12 +1319,13 @@ RESULT_CODE ProtocolHandlerImpl::SendMultiFrameMessage(
     const size_t data_size,
     const uint8_t* data,
     const size_t max_frame_size,
+    const bool needs_encryption,
     const bool is_final_message) {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  LOG4CXX_DEBUG(logger_,
-                " data size " << data_size << " max_frame_size "
-                              << max_frame_size);
+  LOG4CXX_DEBUG(
+      logger_,
+      " data size " << data_size << " max_frame_size " << max_frame_size);
 
   // remainder of last frame
   const size_t lastframe_remainder = data_size % max_frame_size;
@@ -1322,7 +1360,7 @@ RESULT_CODE ProtocolHandlerImpl::SendMultiFrameMessage(
   const ProtocolFramePtr firstPacket(
       new protocol_handler::ProtocolPacket(connection_id,
                                            protocol_version,
-                                           PROTECTION_OFF,
+                                           needs_encryption,
                                            FRAME_TYPE_FIRST,
                                            service_type,
                                            FRAME_DATA_FIRST,
@@ -1346,7 +1384,7 @@ RESULT_CODE ProtocolHandlerImpl::SendMultiFrameMessage(
     const ProtocolFramePtr ptr(
         new protocol_handler::ProtocolPacket(connection_id,
                                              protocol_version,
-                                             PROTECTION_OFF,
+                                             needs_encryption,
                                              FRAME_TYPE_CONSECUTIVE,
                                              service_type,
                                              data_type,
@@ -1408,6 +1446,7 @@ RESULT_CODE ProtocolHandlerImpl::HandleSingleFrameMessage(
                                                 packet->protocol_version(),
                                                 packet->data(),
                                                 packet->total_data_bytes(),
+                                                packet->protection_flag(),
                                                 packet->service_type(),
                                                 packet->payload_size()));
   if (!rawMessage) {
@@ -1565,6 +1604,59 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessageEndSession(
   return RESULT_OK;
 }
 
+const ServiceStatus ProtocolHandlerImpl::ServiceDisallowedBySettings(
+    const ServiceType service_type,
+    const ConnectionID connection_id,
+    const uint8_t session_id,
+    const bool protection) const {
+  LOG4CXX_AUTO_TRACE(logger_);
+  const std::string& transport =
+      session_observer_.TransportTypeProfileStringFromConnHandle(connection_id);
+
+  const auto video_transports = settings_.video_service_transports();
+  const bool is_video_allowed =
+      video_transports.empty() ||
+      std::find(video_transports.begin(), video_transports.end(), transport) !=
+          video_transports.end();
+
+  const auto audio_transports = settings_.audio_service_transports();
+  const bool is_audio_allowed =
+      audio_transports.empty() ||
+      std::find(audio_transports.begin(), audio_transports.end(), transport) !=
+          audio_transports.end();
+
+#ifdef ENABLE_SECURITY
+  const auto& force_protected = get_settings().force_protected_service();
+
+  const auto& force_unprotected = get_settings().force_unprotected_service();
+
+  const bool is_force_protected =
+      (helpers::in_range(force_protected, service_type));
+
+  const bool is_force_unprotected =
+      (helpers::in_range(force_unprotected, service_type));
+
+  const bool can_start_protected = is_force_protected && protection;
+
+  const bool can_start_unprotected = is_force_unprotected && !protection;
+
+  if (is_force_protected && !can_start_protected) {
+    return ServiceStatus::PROTECTION_ENFORCED;
+  }
+
+  if (is_force_unprotected && !can_start_unprotected) {
+    return ServiceStatus::UNSECURE_START_FAILED;
+  }
+#endif  // ENABLE_SECURITY
+
+  if ((ServiceType::kMobileNav == service_type && !is_video_allowed) ||
+      (ServiceType::kAudio == service_type && !is_audio_allowed)) {
+    return ServiceStatus::SERVICE_START_FAILED;
+  }
+
+  return ServiceStatus::INVALID_ENUM;
+}
+
 RESULT_CODE ProtocolHandlerImpl::HandleControlMessageEndServiceACK(
     const ProtocolPacket& packet) {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -1605,27 +1697,21 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessageStartSession(
 
   const ConnectionID connection_id = packet->connection_id();
   const uint8_t session_id = packet->session_id();
-  const std::string& transport =
-      session_observer_.TransportTypeProfileStringFromConnHandle(connection_id);
+  const uint32_t connection_key =
+      session_observer_.KeyFromPair(connection_id, session_id);
 
-  const auto video_transports = settings_.video_service_transports();
-  const bool is_video_allowed =
-      video_transports.empty() ||
-      std::find(video_transports.begin(), video_transports.end(), transport) !=
-          video_transports.end();
+  service_status_update_handler_->OnServiceUpdate(
+      connection_key, service_type, ServiceStatus::SERVICE_RECEIVED);
 
-  const auto audio_transports = settings_.audio_service_transports();
-  const bool is_audio_allowed =
-      audio_transports.empty() ||
-      std::find(audio_transports.begin(), audio_transports.end(), transport) !=
-          audio_transports.end();
+  const auto settings_check = ServiceDisallowedBySettings(
+      service_type, connection_id, session_id, protection);
 
-  if ((ServiceType::kMobileNav == service_type && !is_video_allowed) ||
-      (ServiceType::kAudio == service_type && !is_audio_allowed)) {
+  if (ServiceStatus::INVALID_ENUM != settings_check) {
     LOG4CXX_DEBUG(logger_,
                   "Rejecting StartService for service:"
-                      << service_type << ", over transport: " << transport
-                      << ", disallowed by settings.");
+                      << service_type << ", disallowed by settings.");
+    service_status_update_handler_->OnServiceUpdate(
+        connection_key, service_type, settings_check);
     SendStartSessionNAck(
         connection_id, session_id, protocol_version, service_type);
     return RESULT_OK;
@@ -1723,14 +1809,22 @@ void ProtocolHandlerImpl::NotifySessionStarted(
     start_session_frame_map_.erase(it);
   }
 
+  const ServiceType service_type = ServiceTypeFromByte(packet->service_type());
   const uint8_t protocol_version = packet->protocol_version();
 
   if (0 == context.new_session_id_) {
     LOG4CXX_WARN(logger_,
                  "Refused by session_observer to create service "
-                     << packet->service_type() << " type.");
+                     << static_cast<int32_t>(service_type) << " type.");
+    const auto session_id = packet->session_id();
+    const auto connection_key =
+        session_observer_.KeyFromPair(context.connection_id_, session_id);
+    service_status_update_handler_->OnServiceUpdate(
+        connection_key,
+        context.service_type_,
+        ServiceStatus::SERVICE_START_FAILED);
     SendStartSessionNAck(context.connection_id_,
-                         packet->session_id(),
+                         session_id,
                          protocol_version,
                          packet->service_type(),
                          rejected_params);
@@ -1810,19 +1904,20 @@ void ProtocolHandlerImpl::NotifySessionStarted(
   }
 
 #ifdef ENABLE_SECURITY
-  const ServiceType service_type = ServiceTypeFromByte(packet->service_type());
   // for packet is encrypted and security plugin is enable
   if (context.is_protected_ && security_manager_) {
     const uint32_t connection_key = session_observer_.KeyFromPair(
         context.connection_id_, context.new_session_id_);
 
     std::shared_ptr<HandshakeHandler> handler =
-        std::make_shared<HandshakeHandler>(*this,
-                                           session_observer_,
-                                           *fullVersion,
-                                           context,
-                                           packet->protocol_version(),
-                                           start_session_ack_params);
+        std::make_shared<HandshakeHandler>(
+            *this,
+            session_observer_,
+            *fullVersion,
+            context,
+            packet->protocol_version(),
+            start_session_ack_params,
+            *(service_status_update_handler_.get()));
 
     security_manager::SSLContext* ssl_context =
         security_manager_->CreateSSLContext(
@@ -1853,6 +1948,10 @@ void ProtocolHandlerImpl::NotifySessionStarted(
       // mark service as protected
       session_observer_.SetProtectionFlag(connection_key, service_type);
       // Start service as protected with current SSLContext
+      service_status_update_handler_->OnServiceUpdate(
+          connection_key,
+          context.service_type_,
+          ServiceStatus::SERVICE_ACCEPTED);
       SendStartSessionAck(context.connection_id_,
                           context.new_session_id_,
                           packet->protocol_version(),
@@ -1889,7 +1988,11 @@ void ProtocolHandlerImpl::NotifySessionStarted(
     return;
   }
 #endif  // ENABLE_SECURITY
+  const uint32_t connection_key = session_observer_.KeyFromPair(
+      context.connection_id_, context.new_session_id_);
   if (rejected_params.empty()) {
+    service_status_update_handler_->OnServiceUpdate(
+        connection_key, context.service_type_, ServiceStatus::SERVICE_ACCEPTED);
     SendStartSessionAck(context.connection_id_,
                         context.new_session_id_,
                         packet->protocol_version(),
@@ -1899,6 +2002,10 @@ void ProtocolHandlerImpl::NotifySessionStarted(
                         *fullVersion,
                         *start_session_ack_params);
   } else {
+    service_status_update_handler_->OnServiceUpdate(
+        connection_key,
+        context.service_type_,
+        ServiceStatus::SERVICE_START_FAILED);
     SendStartSessionNAck(context.connection_id_,
                          packet->session_id(),
                          protocol_version,
@@ -1910,9 +2017,9 @@ void ProtocolHandlerImpl::NotifySessionStarted(
 RESULT_CODE ProtocolHandlerImpl::HandleControlMessageHeartBeat(
     const ProtocolPacket& packet) {
   const ConnectionID connection_id = packet.connection_id();
-  LOG4CXX_DEBUG(logger_,
-                "Sending heart beat acknowledgment for connection "
-                    << connection_id);
+  LOG4CXX_DEBUG(
+      logger_,
+      "Sending heart beat acknowledgment for connection " << connection_id);
   uint8_t protocol_version;
   if (session_observer_.ProtocolVersionUsed(
           connection_id, packet.session_id(), protocol_version)) {
@@ -1948,13 +2055,14 @@ void ProtocolHandlerImpl::PopValideAndExpirateMultiframes() {
 
     const uint32_t connection_key = session_observer_.KeyFromPair(
         frame->connection_id(), frame->session_id());
-    LOG4CXX_DEBUG(logger_,
-                  "Result frame" << frame << "for connection "
-                                 << connection_key);
+    LOG4CXX_DEBUG(
+        logger_,
+        "Result frame" << frame << "for connection " << connection_key);
     const RawMessagePtr rawMessage(new RawMessage(connection_key,
                                                   frame->protocol_version(),
                                                   frame->data(),
                                                   frame->total_data_bytes(),
+                                                  frame->protection_flag(),
                                                   frame->service_type(),
                                                   frame->payload_size()));
     DCHECK(rawMessage);
@@ -1977,9 +2085,9 @@ bool ProtocolHandlerImpl::TrackMessage(const uint32_t& connection_key) {
   if (frequency_time > 0u && frequency_count > 0u) {
     const size_t message_frequency =
         message_meter_.TrackMessage(connection_key);
-    LOG4CXX_DEBUG(logger_,
-                  "Frequency of " << connection_key << " is "
-                                  << message_frequency);
+    LOG4CXX_DEBUG(
+        logger_,
+        "Frequency of " << connection_key << " is " << message_frequency);
     if (message_frequency > frequency_count) {
       LOG4CXX_WARN(logger_,
                    "Frequency of " << connection_key << " is marked as high.");
@@ -2005,9 +2113,9 @@ bool ProtocolHandlerImpl::TrackMalformedMessage(const uint32_t& connection_key,
                                             << malformed_message_frequency);
     if (!get_settings().malformed_message_filtering() ||
         malformed_message_frequency > malformed_frequency_count) {
-      LOG4CXX_WARN(logger_,
-                   "Malformed frequency of " << connection_key
-                                             << " is marked as high.");
+      LOG4CXX_WARN(
+          logger_,
+          "Malformed frequency of " << connection_key << " is marked as high.");
       session_observer_.OnMalformedMessageCallback(connection_key);
       malformed_message_meter_.RemoveIdentifier(connection_key);
       return true;
@@ -2057,7 +2165,8 @@ void ProtocolHandlerImpl::Handle(const impl::RawFordMessageToMobile message) {
                 "Message to mobile app: connection id "
                     << static_cast<int>(message->connection_id())
                     << ";"
-                       " dataSize: " << message->data_size()
+                       " dataSize: "
+                    << message->data_size()
                     << " ;"
                        " protocolVersion "
                     << static_cast<int>(message->protocol_version()));
@@ -2076,6 +2185,11 @@ void ProtocolHandlerImpl::Stop() {
 
   sync_primitives::AutoLock auto_lock(start_session_frame_map_lock_);
   start_session_frame_map_.clear();
+}
+
+void ProtocolHandlerImpl::set_service_status_update_handler(
+    std::unique_ptr<ServiceStatusUpdateHandler> handler) {
+  service_status_update_handler_ = std::move(handler);
 }
 
 #ifdef ENABLE_SECURITY
@@ -2105,7 +2219,12 @@ RESULT_CODE ProtocolHandlerImpl::EncryptFrame(ProtocolFramePtr packet) {
       packet->connection_id(), packet->session_id());
   security_manager::SSLContext* context = session_observer_.GetSSLContext(
       connection_key, ServiceTypeFromByte(packet->service_type()));
-  if (!context || !context->IsInitCompleted()) {
+
+  LOG4CXX_DEBUG(
+      logger_,
+      "Protection flag is: " << packet->protection_flag() << std::boolalpha);
+  if ((!context || !context->IsInitCompleted()) || !packet->protection_flag()) {
+    LOG4CXX_DEBUG(logger_, "Ecryption is skipped!");
     return RESULT_OK;
   }
   const uint8_t* out_data;
@@ -2462,9 +2581,9 @@ void ProtocolHandlerImpl::GenerateServiceTransportsForStartSessionAck(
     std::vector<std::string>::const_iterator it = service_transports.begin();
     for (; it != service_transports.end(); it++) {
       const utils::custom_string::CustomString transport(*it);
-      LOG4CXX_TRACE(logger_,
-                    "Service Allowed to run on " << transport.c_str()
-                                                 << " transport");
+      LOG4CXX_TRACE(
+          logger_,
+          "Service Allowed to run on " << transport.c_str() << " transport");
 
       if (!fPrimaryAdded &&
           (transport.CompareIgnoreCase(primary_connection_type.c_str()) ||

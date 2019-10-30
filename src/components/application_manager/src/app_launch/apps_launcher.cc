@@ -1,8 +1,8 @@
-#include <algorithm>
 #include "application_manager/app_launch/apps_launcher.h"
+#include <algorithm>
 
-#include "utils/timer_task_impl.h"
 #include <iostream>
+#include "utils/timer_task_impl.h"
 
 namespace app_launch {
 struct LauncherGenerator {

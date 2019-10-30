@@ -34,41 +34,44 @@
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_APPLICATION_MANAGER_IMPL_H_
 
 #include <stdint.h>
-#include <vector>
-#include <map>
-#include <set>
-#include <deque>
 #include <algorithm>
+#include <deque>
+#include <map>
 #include <memory>
+#include <set>
+#include <vector>
 
-#include "application_manager/application_manager.h"
+#include "application_manager/app_launch/app_launch_data.h"
 #include "application_manager/app_service_manager.h"
+#include "application_manager/application_manager.h"
+#include "application_manager/application_manager_settings.h"
+#include "application_manager/command_factory.h"
+#include "application_manager/command_holder.h"
+#include "application_manager/event_engine/event_dispatcher_impl.h"
 #include "application_manager/hmi_capabilities.h"
+#include "application_manager/hmi_interfaces_impl.h"
 #include "application_manager/message.h"
 #include "application_manager/message_helper.h"
 #include "application_manager/request_controller.h"
 #include "application_manager/resumption/resume_ctrl.h"
-#include "application_manager/state_controller_impl.h"
-#include "application_manager/app_launch/app_launch_data.h"
-#include "application_manager/application_manager_settings.h"
-#include "application_manager/event_engine/event_dispatcher_impl.h"
-#include "application_manager/hmi_interfaces_impl.h"
-#include "application_manager/command_holder.h"
-#include "application_manager/command_factory.h"
+#include "application_manager/rpc_handler.h"
 #include "application_manager/rpc_service.h"
+#include "application_manager/state_controller_impl.h"
+
 #include "application_manager/rpc_handler.h"
 
-#include "protocol_handler/protocol_observer.h"
-#include "protocol_handler/protocol_handler.h"
-#include "hmi_message_handler/hmi_message_observer.h"
-#include "hmi_message_handler/hmi_message_sender.h"
 #include "application_manager/policies/policy_handler_interface.h"
 #include "application_manager/policies/policy_handler_observer.h"
 #include "connection_handler/connection_handler.h"
 #include "connection_handler/connection_handler_observer.h"
 #include "connection_handler/device.h"
 #include "formatters/CSmartFactory.h"
+#include "hmi_message_handler/hmi_message_observer.h"
+#include "hmi_message_handler/hmi_message_sender.h"
 #include "policies/policy_handler.h"
+#include "protocol_handler/protocol_handler.h"
+#include "protocol_handler/protocol_observer.h"
+#include "protocol_handler/service_status_update_handler_listener.h"
 
 #include "interfaces/HMI_API.h"
 #include "interfaces/HMI_API_schema.h"
@@ -88,14 +91,14 @@
 
 #include "utils/macro.h"
 
+#include "smart_objects/smart_object.h"
+#include "utils/data_accessor.h"
+#include "utils/lock.h"
 #include "utils/message_queue.h"
 #include "utils/prioritized_queue.h"
-#include "utils/threads/thread.h"
 #include "utils/threads/message_loop_thread.h"
-#include "utils/lock.h"
-#include "utils/data_accessor.h"
+#include "utils/threads/thread.h"
 #include "utils/timer.h"
-#include "smart_objects/smart_object.h"
 
 struct BsonObject;
 
@@ -132,16 +135,17 @@ typedef std::shared_ptr<timer::Timer> TimerSPtr;
 class ApplicationManagerImpl
     : public ApplicationManager,
       public connection_handler::ConnectionHandlerObserver,
-      public policy::PolicyHandlerObserver
+      public policy::PolicyHandlerObserver,
+      public protocol_handler::ServiceStatusUpdateHandlerListener
 #ifdef ENABLE_SECURITY
-      ,
+    ,
       public security_manager::SecurityManagerListener
 #endif  // ENABLE_SECURITY
 #ifdef TELEMETRY_MONITOR
-      ,
+    ,
       public telemetry_monitor::TelemetryObservable<AMTelemetryObserver>
 #endif  // TELEMETRY_MONITOR
-      {
+{
 
   friend class ResumeCtrl;
   friend class CommandImpl;
@@ -166,6 +170,7 @@ class ApplicationManagerImpl
 
   DataAccessor<ApplicationSet> applications() const OVERRIDE;
   DataAccessor<AppsWaitRegistrationSet> pending_applications() const OVERRIDE;
+  DataAccessor<ReregisterWaitList> reregister_applications() const OVERRIDE;
   ApplicationSharedPtr application(uint32_t app_id) const OVERRIDE;
 
   ApplicationSharedPtr active_application() const OVERRIDE;
@@ -177,6 +182,8 @@ class ApplicationManagerImpl
   ApplicationSharedPtr application_by_name(
       const std::string& app_name) const OVERRIDE;
   ApplicationSharedPtr pending_application_by_policy_id(
+      const std::string& policy_app_id) const OVERRIDE;
+  ApplicationSharedPtr reregister_application_by_policy_id(
       const std::string& policy_app_id) const OVERRIDE;
 
   std::vector<ApplicationSharedPtr> applications_by_button(
@@ -202,9 +209,6 @@ class ApplicationManagerImpl
   void OnHMILevelChanged(uint32_t app_id,
                          mobile_apis::HMILevel::eType from,
                          mobile_apis::HMILevel::eType to) OVERRIDE;
-
-  void SendHMIStatusNotification(
-      const std::shared_ptr<Application> app) OVERRIDE;
 
   void SendDriverDistractionState(ApplicationSharedPtr application);
 
@@ -288,8 +292,7 @@ class ApplicationManagerImpl
    * @param vehicle_info Enum value of type of vehicle data
    * @param new value (for integer values currently) of vehicle data
    */
-  void IviInfoUpdated(mobile_apis::VehicleDataType::eType vehicle_info,
-                      int value) OVERRIDE;
+  void IviInfoUpdated(const std::string& vehicle_info, int value) OVERRIDE;
 
   void OnApplicationRegistered(ApplicationSharedPtr app) OVERRIDE;
 
@@ -324,8 +327,9 @@ class ApplicationManagerImpl
   void SetTelemetryObserver(AMTelemetryObserver* observer) OVERRIDE;
 #endif  // TELEMETRY_MONITOR
 
-  ApplicationSharedPtr RegisterApplication(const std::shared_ptr<
-      smart_objects::SmartObject>& request_for_registration) OVERRIDE;
+  ApplicationSharedPtr RegisterApplication(
+      const std::shared_ptr<smart_objects::SmartObject>&
+          request_for_registration) OVERRIDE;
   /*
    * @brief Closes application by id
    *
@@ -342,9 +346,9 @@ class ApplicationManagerImpl
                              bool is_unexpected_disconnect = false) OVERRIDE;
 
   /**
-  * @brief Handle sequence for unauthorized application
-  * @param app_id Application id
-  */
+   * @brief Handle sequence for unauthorized application
+   * @param app_id Application id
+   */
   void OnAppUnauthorized(const uint32_t& app_id) OVERRIDE;
 
   /*
@@ -475,6 +479,7 @@ class ApplicationManagerImpl
   /**
    * @brief CreateRegularState create regular HMI state for application
    * @param app Application
+   * @param window_type type of window
    * @param hmi_level of returned state
    * @param audio_state of returned state
    * @param system_context of returned state
@@ -482,16 +487,17 @@ class ApplicationManagerImpl
    */
   HmiStatePtr CreateRegularState(
       std::shared_ptr<Application> app,
-      mobile_apis::HMILevel::eType hmi_level,
-      mobile_apis::AudioStreamingState::eType audio_state,
-      mobile_apis::VideoStreamingState::eType video_state,
-      mobile_apis::SystemContext::eType system_context) const OVERRIDE;
+      const mobile_apis::WindowType::eType window_type,
+      const mobile_apis::HMILevel::eType hmi_level,
+      const mobile_apis::AudioStreamingState::eType audio_state,
+      const mobile_apis::VideoStreamingState::eType video_state,
+      const mobile_apis::SystemContext::eType system_context) const OVERRIDE;
 
   /**
    * @brief Checks, if given RPC is allowed at current HMI level for specific
    * application in policy table
    * @param app Application
-   * @param hmi_level Current HMI level of application
+   * @param window_id id of application's window
    * @param function_id FunctionID of RPC
    * @param params_permissions Permissions for RPC parameters (e.g.
    * SubscribeVehicleData) defined in policy table
@@ -499,6 +505,7 @@ class ApplicationManagerImpl
    */
   mobile_apis::Result::eType CheckPolicyPermissions(
       const ApplicationSharedPtr app,
+      const WindowID window_id,
       const std::string& function_id,
       const RPCParams& rpc_params,
       CommandParametersPermissions* params_permissions = NULL) OVERRIDE;
@@ -515,32 +522,6 @@ class ApplicationManagerImpl
    */
   bool IsApplicationForbidden(uint32_t connection_key,
                               const std::string& mobile_app_id);
-
-  struct ApplicationsAppIdSorter {
-    bool operator()(const ApplicationSharedPtr lhs,
-                    const ApplicationSharedPtr rhs) {
-      return lhs->app_id() < rhs->app_id();
-    }
-  };
-
-  struct ApplicationsMobileAppIdSorter {
-    bool operator()(const ApplicationSharedPtr lhs,
-                    const ApplicationSharedPtr rhs) {
-      if (lhs->policy_app_id() == rhs->policy_app_id()) {
-        return lhs->device() < rhs->device();
-      }
-      return lhs->policy_app_id() < rhs->policy_app_id();
-    }
-  };
-
-  // typedef for Applications list
-  typedef std::set<ApplicationSharedPtr, ApplicationsAppIdSorter> ApplictionSet;
-
-  // typedef for Applications list iterator
-  typedef ApplictionSet::iterator ApplictionSetIt;
-
-  // typedef for Applications list const iterator
-  typedef ApplictionSet::const_iterator ApplictionSetConstIt;
 
   /**
    * @brief Notification from PolicyHandler about PTU.
@@ -563,6 +544,52 @@ class ApplicationManagerImpl
    */
   void OnPTUFinished(const bool ptu_result) FINAL;
 
+#if defined(EXTERNAL_PROPRIETARY_MODE) && defined(ENABLE_SECURITY)
+  /**
+   * @brief OnCertDecryptFailed is called when certificate decryption fails in
+   * external flow
+   * @return since this callback is a part of SecurityManagerListener, bool
+   * return value is used to indicate whether listener instance can be deleted
+   * by calling entity. if true - listener can be deleted and removed from
+   * listeners by SecurityManager, false - listener retains its place within
+   * SecurityManager.
+   */
+  bool OnCertDecryptFailed() FINAL;
+
+  /**
+   * @brief OnCertDecryptFinished is called when certificate decryption is
+   * finished in the external flow
+   * @param decrypt_result bool value indicating whether decryption was
+   * successful
+   */
+  void OnCertDecryptFinished(const bool decrypt_result) FINAL;
+#endif
+
+  /**
+   * @brief OnPTUTimeoutExceeded is called on policy table update timed out
+   */
+  void OnPTUTimeoutExceeded() FINAL;
+
+  /**
+   *@brief ProcessServiceStatusUpdate callback that is invoked in case of
+   *service status update
+   *@param connection_key - connection key
+   *@param service_type enum value containing type of service.
+   *@param service_event enum value containing event that occured during service
+   *start.
+   *@param service_update_reason enum value containing reason why service_event
+   *occured.
+   **/
+  void ProcessServiceStatusUpdate(
+      const uint32_t connection_key,
+      hmi_apis::Common_ServiceType::eType service_type,
+      hmi_apis::Common_ServiceEvent::eType service_event,
+      utils::Optional<hmi_apis::Common_ServiceStatusUpdateReason::eType>
+          service_update_reason) FINAL;
+
+#ifdef ENABLE_SECURITY
+  bool OnPTUFailed() FINAL;
+#endif  // ENABLE_SECURITY
   /*
    * @brief Starts audio pass thru thread
    *
@@ -682,7 +709,7 @@ class ApplicationManagerImpl
    * @brief Notification about handshake failure
    * @return true on success notification handling or false otherwise
    */
-  bool OnHandshakeFailed() OVERRIDE;
+  bool OnGetSystemTimeFailed() OVERRIDE;
 
   /**
    * @brief Notification that certificate update is required.
@@ -827,9 +854,9 @@ class ApplicationManagerImpl
       ApplicationConstSharedPtr application) const;
 
   /**
-  * Getter for resume_controller
-  * @return Resume Controller
-  */
+   * Getter for resume_controller
+   * @return Resume Controller
+   */
   resumption::ResumeCtrl& resume_controller() OVERRIDE {
     return *resume_ctrl_.get();
   }
@@ -998,8 +1025,7 @@ class ApplicationManagerImpl
     AppV4DevicePredicate(const connection_handler::DeviceHandle handle)
         : handle_(handle) {}
     bool operator()(const ApplicationSharedPtr app) const {
-      return app
-                 ? handle_ == app->device() &&
+      return app ? handle_ == app->device() &&
                        Message::is_sufficient_version(
                            protocol_handler::MajorProtocolVersion::
                                PROTOCOL_VERSION_4,
@@ -1065,24 +1091,26 @@ class ApplicationManagerImpl
    * @brief IsAppInReconnectMode check if application belongs to session
    * affected by transport switching at the moment by checking internal
    * waiting list prepared on switching start
+   * @param device_id device identifier
    * @param policy_app_id Application id
    * @return True if application is in the waiting list, otherwise - false
    */
-  bool IsAppInReconnectMode(const std::string& policy_app_id) const FINAL;
+  bool IsAppInReconnectMode(const connection_handler::DeviceHandle& device_id,
+                            const std::string& policy_app_id) const FINAL;
 
   bool IsStopping() const OVERRIDE {
     return is_stopping_;
   }
 
   /**
-     * @brief ProcessReconnection handles reconnection flow for application on
-     * transport switch
-     * @param application Pointer to switched application, must be validated
-     * before passing
-     * @param connection_key Connection key from registration request of
-     * switched
-     * application
-     */
+   * @brief ProcessReconnection handles reconnection flow for application on
+   * transport switch
+   * @param application Pointer to switched application, must be validated
+   * before passing
+   * @param connection_key Connection key from registration request of
+   * switched
+   * application
+   */
   void ProcessReconnection(ApplicationSharedPtr application,
                            const uint32_t connection_key) FINAL;
 
@@ -1109,6 +1137,14 @@ class ApplicationManagerImpl
   protocol_handler::MajorProtocolVersion SupportedSDLVersion() const OVERRIDE;
 
  private:
+  /**
+   * @brief Removes service status record for service that failed to start
+   * @param app Application whose service status record should be removed
+   * @param Service type which status record should be removed
+   */
+  bool HandleRejectedServiceStatus(
+      ApplicationSharedPtr app,
+      const hmi_apis::Common_ServiceType::eType service_type);
   /**
    * @brief PullLanguagesInfo allows to pull information about languages.
    *
@@ -1411,12 +1447,14 @@ class ApplicationManagerImpl
   ApplicationSet applications_;
   AppsWaitRegistrationSet apps_to_register_;
   ForbiddenApps forbidden_applications;
+  ReregisterWaitList reregister_wait_list_;
 
   // Lock for applications list
   mutable std::shared_ptr<sync_primitives::RecursiveLock>
       applications_list_lock_ptr_;
   mutable std::shared_ptr<sync_primitives::Lock>
       apps_to_register_list_lock_ptr_;
+  mutable std::shared_ptr<sync_primitives::Lock> reregister_wait_list_lock_ptr_;
   mutable sync_primitives::Lock subscribed_way_points_apps_lock_;
 
   /**
@@ -1452,8 +1490,8 @@ class ApplicationManagerImpl
   connection_handler::ConnectionHandler* connection_handler_;
   std::unique_ptr<policy::PolicyHandlerInterface> policy_handler_;
   protocol_handler::ProtocolHandler* protocol_handler_;
-  request_controller::RequestController request_ctrl_;
   std::unique_ptr<plugin_manager::RPCPluginManager> plugin_manager_;
+  request_controller::RequestController request_ctrl_;
   std::unique_ptr<application_manager::AppServiceManager> app_service_manager_;
 
   /**
@@ -1507,15 +1545,6 @@ class ApplicationManagerImpl
   StateControllerImpl state_ctrl_;
   std::unique_ptr<app_launch::AppLaunchData> app_launch_dto_;
   std::unique_ptr<app_launch::AppLaunchCtrl> app_launch_ctrl_;
-
-  /**
-   * @brief ReregisterWaitList is list of applications expected to be
-   * re-registered after transport switching is complete
-   */
-  typedef std::vector<ApplicationSharedPtr> ReregisterWaitList;
-  ReregisterWaitList reregister_wait_list_;
-
-  mutable sync_primitives::Lock reregister_wait_list_lock_;
 
   // This is a cache to remember DeviceHandle of secondary transports. Only used
   // during RegisterApplication().

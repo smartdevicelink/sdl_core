@@ -33,9 +33,9 @@
 #ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_POLICY_HANDLER_OBSERVER_H_
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_POLICY_HANDLER_OBSERVER_H_
 
-#include <vector>
-#include <string>
 #include <map>
+#include <string>
+#include <vector>
 
 namespace policy {
 
@@ -52,6 +52,8 @@ class PolicyHandlerObserver {
                                   const std::string& auth_token) {}
 
   virtual void OnPTUFinished(const bool ptu_result) {}
+
+  virtual void OnPTUTimeoutExceeded() {}
 
   virtual ~PolicyHandlerObserver() {}
 };

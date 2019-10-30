@@ -30,10 +30,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "policy/update_status_manager.h"
 #include "gtest/gtest.h"
 #include "policy/mock_policy_listener.h"
+#include "policy/mock_ptu_retry_handler.h"
 #include "policy/policy_manager_impl.h"
-#include "policy/update_status_manager.h"
 
 #include "utils/conditional_variable.h"
 
@@ -43,8 +44,8 @@ namespace policy_test {
 
 using namespace ::policy;
 using ::testing::_;
-using ::testing::Return;
 using testing::NiceMock;
+using ::testing::Return;
 
 class UpdateStatusManagerTest : public ::testing::Test {
  protected:
@@ -52,6 +53,7 @@ class UpdateStatusManagerTest : public ::testing::Test {
   PolicyTableStatus status_;
   const uint32_t k_timeout_;
   NiceMock<MockPolicyListener> listener_;
+  NiceMock<MockPTURetryHandler> mock_ptu_retry_handler_;
   const std::string up_to_date_status_;
   const std::string update_needed_status_;
   const std::string updating_status_;
@@ -61,6 +63,7 @@ class UpdateStatusManagerTest : public ::testing::Test {
       : manager_(std::make_shared<UpdateStatusManager>())
       , k_timeout_(1000)
       , listener_()
+      , mock_ptu_retry_handler_()
       , up_to_date_status_("UP_TO_DATE")
       , update_needed_status_("UPDATE_NEEDED")
       , updating_status_("UPDATING") {}
@@ -68,6 +71,8 @@ class UpdateStatusManagerTest : public ::testing::Test {
   void SetUp() OVERRIDE {
     manager_->set_listener(&listener_);
     ON_CALL(listener_, OnUpdateStatusChanged(_)).WillByDefault(Return());
+    ON_CALL(listener_, ptu_retry_handler())
+        .WillByDefault(ReturnRef(mock_ptu_retry_handler_));
   }
 
   void TearDown() OVERRIDE {}
@@ -105,10 +110,15 @@ class WaitAsync {
   const uint32_t timeout_;
   sync_primitives::ConditionalVariable cond_var_;
 };
-}
+}  // namespace
 
 ACTION_P(NotifyAsync, waiter) {
   waiter->Notify();
+}
+
+ACTION_P2(RetryFailed, manager, listener) {
+  manager->OnResetRetrySequence();
+  listener->OnPTUFinished(false);
 }
 
 TEST_F(UpdateStatusManagerTest,
@@ -124,6 +134,38 @@ TEST_F(UpdateStatusManagerTest,
   manager_->ScheduleUpdate();
   manager_->OnUpdateSentOut(k_timeout_);
   status_ = manager_->GetLastUpdateStatus();
+  EXPECT_EQ(StatusUpdatePending, status_);
+  EXPECT_TRUE(waiter.Wait(auto_lock));
+  status_ = manager_->GetLastUpdateStatus();
+  // Check
+  EXPECT_EQ(StatusUpdateRequired, status_);
+}
+
+TEST_F(
+    UpdateStatusManagerTest,
+    OnUpdateSentOut_WaitForTimeoutExpired_ExpectStatusUpdateNeeded_RetryExceeded) {
+  sync_primitives::Lock lock;
+  sync_primitives::AutoLock auto_lock(lock);
+  const uint32_t count = 3u;
+  const uint32_t timeout = 2u * k_timeout_;
+  WaitAsync waiter(count, timeout);
+  EXPECT_CALL(listener_, OnUpdateStatusChanged(_))
+      .WillRepeatedly(NotifyAsync(&waiter));
+  EXPECT_CALL(mock_ptu_retry_handler_, RetrySequenceFailed())
+      .WillOnce(RetryFailed(manager_, &listener_));
+  manager_->ScheduleUpdate();
+  manager_->OnUpdateSentOut(k_timeout_);
+  status_ = manager_->GetLastUpdateStatus();
+  {
+    ::testing::InSequence s;
+    EXPECT_CALL(mock_ptu_retry_handler_, IsAllowedRetryCountExceeded())
+        .WillRepeatedly(Return(false));
+    EXPECT_CALL(mock_ptu_retry_handler_, IsAllowedRetryCountExceeded())
+        .WillRepeatedly(Return(false));
+    EXPECT_CALL(mock_ptu_retry_handler_, IsAllowedRetryCountExceeded())
+        .WillRepeatedly(Return(true));
+    EXPECT_CALL(listener_, OnPTUFinished(false));
+  }
   EXPECT_EQ(StatusUpdatePending, status_);
   EXPECT_TRUE(waiter.Wait(auto_lock));
   status_ = manager_->GetLastUpdateStatus();
@@ -245,7 +287,7 @@ TEST_F(UpdateStatusManagerTest, OnResetRetrySequence_ExpectStatusUpToDate) {
   manager_->OnResetRetrySequence();
   status_ = manager_->GetLastUpdateStatus();
   // Check
-  EXPECT_EQ(StatusUpdatePending, status_);
+  EXPECT_EQ(StatusUpdateRequired, status_);
 }
 
 TEST_F(UpdateStatusManagerTest,
@@ -298,6 +340,6 @@ TEST_F(UpdateStatusManagerTest,
   EXPECT_FALSE(manager_->IsAppsSearchInProgress());
 }
 
-}  // namespace policy
+}  // namespace policy_test
 }  // namespace components
 }  // namespace test

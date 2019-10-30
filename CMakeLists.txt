@@ -237,7 +237,7 @@ set(CMAKE_INSTALL_PREFIX ${CMAKE_CURRENT_BINARY_DIR})
 set(ARCHIVE_OUTPUT_DIRECTORY ./bin)
 
 set(EXCLUDE_ERROR_FLAGS "-Wno-error=unused-variable -Wno-error=unused-but-set-variable -Wno-error=deprecated-declarations")
-set(CMAKE_CXX_FLAGS "-fPIC -std=gnu++0x -Wall -Werror ${EXCLUDE_ERROR_FLAGS} -Wuninitialized -Wvla")
+set(CMAKE_CXX_FLAGS "-fPIC -std=gnu++0x -Wall -fvisibility=hidden -Werror ${EXCLUDE_ERROR_FLAGS} -Wuninitialized -Wvla")
 
 if (USE_GOLD_LD)
   execute_process(COMMAND ld -v OUTPUT_VARIABLE result)
@@ -343,7 +343,9 @@ endif()
 if (${EXTENDED_POLICY} STREQUAL "EXTERNAL_PROPRIETARY")
     add_definitions(-DEXTERNAL_PROPRIETARY_MODE)
     set(POLICY_PATH ${COMPONENTS_DIR}/policy/policy_external/)
-    set(POLICY_GLOBAL_INCLUDE_PATH ${COMPONENTS_DIR}/include/policy/policy_external/)
+    set(POLICY_GLOBAL_INCLUDE_PATH
+      ${COMPONENTS_DIR}/include/policy/policy_external/
+      ${CMAKE_BINARY_DIR}/src/components/policy/policy_external/)
     set(POLICY_MOCK_INCLUDE_PATH ${COMPONENTS_DIR}/include/test/policy/policy_external/)
     message(STATUS "EXTERNAL_PROPRIETARY policy enabled")
 else()
@@ -354,7 +356,9 @@ else()
      message(STATUS "HTTP policy enabled")
    endif()
    set(POLICY_PATH ${COMPONENTS_DIR}/policy/policy_regular/)
-   set(POLICY_GLOBAL_INCLUDE_PATH ${COMPONENTS_DIR}/include/policy/policy_regular/)
+   set(POLICY_GLOBAL_INCLUDE_PATH
+    ${COMPONENTS_DIR}/include/policy/policy_regular/
+    ${CMAKE_BINARY_DIR}/src/components/policy/policy_regular/)
    set(POLICY_MOCK_INCLUDE_PATH ${COMPONENTS_DIR}/include/test/policy/policy_regular/)
 endif()
 

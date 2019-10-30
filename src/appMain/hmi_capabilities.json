@@ -242,6 +242,16 @@
                         "resolutionWidth": 35,
                         "resolutionHeight": 35
                     }
+                },
+                {
+                    "name": "alertIcon",
+                    "imageTypeSupported": [
+                        "GRAPHIC_PNG"
+                    ],
+                    "imageResolution": {
+                        "resolutionWidth": 225,
+                        "resolutionHeight": 225
+                    }
                 }
 
             ],
@@ -249,6 +259,7 @@
                 "CLOCK1", "CLOCK2", "CLOCK3", "CLOCKTEXT1", "CLOCKTEXT2", "CLOCKTEXT3", "CLOCKTEXT4"
             ],
             "graphicSupported": true,
+            "menuLayoutsAvailable": [ "LIST", "TILES" ],
             "templatesAvailable": [
                 "DEFAULT", "MEDIA", "NON-MEDIA", "ONSCREEN_PRESETS", "NAV_FULLSCREEN_MAP", "NAV_KEYBOARD",
                 "GRAPHIC_WITH_TEXT", "TEXT_WITH_GRAPHIC", "TILES_ONLY", "TEXTBUTTONS_ONLY",
@@ -274,11 +285,11 @@
                 "STATIC"
             ]
         },
-        "audioPassThruCapabilities": {
+        "audioPassThruCapabilities": [{
             "samplingRate": "44KHZ",
             "bitsPerSample": "RATE_8_BIT",
             "audioType": "PCM"
-        },
+        }],
         "pcmStreamCapabilities": {
             "samplingRate": "16KHZ",
             "bitsPerSample": "RATE_16_BIT",
@@ -309,125 +320,220 @@
                     "protocol": "RAW",
                     "codec": "H264"
                 }],
-                "hapticSpatialDataSupported": false
+                "hapticSpatialDataSupported": false,
+                "diagonalScreenSize": 8,
+                "pixelPerInch": 117,
+                "scale": 1
+            },
+            "seatLocationCapability": {
+                "rows": 2,
+                "columns": 3,
+                "levels": 1,
+                "seats": [
+                    {
+                        "row": 0,
+                        "col": 0,
+                        "level": 0,
+                        "rowspan": 1,
+                        "levelspan": 1,
+                        "colspan": 1
+                    }
+                ]
             },
             "remoteControlCapability": {
                 "buttonCapabilities": [
                     {
                         "longPressAvailable": true,
                         "name": "AC_MAX",
+                        "moduleInfo": {
+                            "moduleId": "34045662-a9dc-4823-8435-91056d4c26cb",
+                            "allowMultipleAccess": false
+                        },
                         "shortPressAvailable": true,
                         "upDownAvailable": false
                     },
                     {
                         "longPressAvailable": true,
                         "name": "AC",
+                        "moduleInfo": {
+                            "moduleId": "34045662-a9dc-4823-8435-91056d4c26cb",
+                            "allowMultipleAccess": false
+                        },
                         "shortPressAvailable": true,
                         "upDownAvailable": false
                     },
                     {
                         "longPressAvailable": true,
                         "name": "RECIRCULATE",
+                        "moduleInfo": {
+                            "moduleId": "34045662-a9dc-4823-8435-91056d4c26cb",
+                            "allowMultipleAccess": false
+                        },
                         "shortPressAvailable": true,
                         "upDownAvailable": false
                     },
                     {
                         "longPressAvailable": true,
                         "name": "FAN_UP",
+                        "moduleInfo": {
+                            "moduleId": "34045662-a9dc-4823-8435-91056d4c26cb",
+                            "allowMultipleAccess": false
+                        },
                         "shortPressAvailable": true,
                         "upDownAvailable": false
                     },
                     {
                         "longPressAvailable": true,
                         "name": "FAN_DOWN",
+                        "moduleInfo": {
+                            "moduleId": "34045662-a9dc-4823-8435-91056d4c26cb",
+                            "allowMultipleAccess": false
+                        },
                         "shortPressAvailable": true,
                         "upDownAvailable": false
                     },
                     {
                         "longPressAvailable": true,
                         "name": "TEMP_UP",
+                        "moduleInfo": {
+                            "moduleId": "34045662-a9dc-4823-8435-91056d4c26cb",
+                            "allowMultipleAccess": false
+                        },
                         "shortPressAvailable": true,
                         "upDownAvailable": false
                     },
                     {
                         "longPressAvailable": true,
                         "name": "TEMP_DOWN",
+                        "moduleInfo": {
+                            "moduleId": "34045662-a9dc-4823-8435-91056d4c26cb",
+                            "allowMultipleAccess": false
+                        },
                         "shortPressAvailable": true,
                         "upDownAvailable": false
                     },
                     {
                         "longPressAvailable": true,
                         "name": "DEFROST_MAX",
+                        "moduleInfo": {
+                            "moduleId": "34045662-a9dc-4823-8435-91056d4c26cb",
+                            "allowMultipleAccess": false
+                        },
                         "shortPressAvailable": true,
                         "upDownAvailable": false
                     },
                     {
                         "longPressAvailable": true,
                         "name": "DEFROST",
+                        "moduleInfo": {
+                            "moduleId": "34045662-a9dc-4823-8435-91056d4c26cb",
+                            "allowMultipleAccess": false
+                        },
                         "shortPressAvailable": true,
                         "upDownAvailable": false
                     },
                     {
                         "longPressAvailable": true,
                         "name": "DEFROST_REAR",
+                        "moduleInfo": {
+                            "moduleId": "34045662-a9dc-4823-8435-91056d4c26cb",
+                            "allowMultipleAccess": false
+                        },
                         "shortPressAvailable": true,
                         "upDownAvailable": false
                     },
                     {
                         "longPressAvailable": true,
                         "name": "UPPER_VENT",
+                        "moduleInfo": {
+                            "moduleId": "34045662-a9dc-4823-8435-91056d4c26cb",
+                            "allowMultipleAccess": false
+                        },
                         "shortPressAvailable": true,
                         "upDownAvailable": false
                     },
                     {
                         "longPressAvailable": true,
                         "name": "LOWER_VENT",
+                        "moduleInfo": {
+                            "moduleId": "34045662-a9dc-4823-8435-91056d4c26cb",
+                            "allowMultipleAccess": false
+                        },
                         "shortPressAvailable": true,
                         "upDownAvailable": false
                     },
                     {
                         "longPressAvailable": true,
                         "name": "VOLUME_UP",
+                        "moduleInfo": {
+                            "moduleId": "eb7739ea-b263-4fe1-af9c-9311d1acac2d",
+                            "allowMultipleAccess": false
+                        },
                         "shortPressAvailable": true,
                         "upDownAvailable": false
                     },
                     {
                         "longPressAvailable": true,
                         "name": "VOLUME_DOWN",
+                        "moduleInfo": {
+                            "moduleId": "eb7739ea-b263-4fe1-af9c-9311d1acac2d",
+                            "allowMultipleAccess": false
+                        },
                         "shortPressAvailable": true,
                         "upDownAvailable": false
                     },
                     {
                         "longPressAvailable": true,
                         "name": "EJECT",
+                        "moduleInfo": {
+                            "moduleId": "eb7739ea-b263-4fe1-af9c-9311d1acac2d",
+                            "allowMultipleAccess": false
+                        },
                         "shortPressAvailable": true,
                         "upDownAvailable": false
                     },
                     {
                         "longPressAvailable": true,
                         "name": "SOURCE",
+                        "moduleInfo": {
+                            "moduleId": "eb7739ea-b263-4fe1-af9c-9311d1acac2d",
+                            "allowMultipleAccess": false
+                        },
                         "shortPressAvailable": true,
                         "upDownAvailable": false
                     },
                     {
                         "longPressAvailable": true,
                         "name": "SHUFFLE",
+                        "moduleInfo": {
+                            "moduleId": "eb7739ea-b263-4fe1-af9c-9311d1acac2d",
+                            "allowMultipleAccess": false
+                        },
                         "shortPressAvailable": true,
                         "upDownAvailable": false
                     },
                     {
                         "longPressAvailable": true,
                         "name": "REPEAT",
+                        "moduleInfo": {
+                            "moduleId": "eb7739ea-b263-4fe1-af9c-9311d1acac2d",
+                            "allowMultipleAccess": false
+                        },
                         "shortPressAvailable": true,
                         "upDownAvailable": false
                     }
                 ],
                 "climateControlCapabilities": [
                     {
+                        "moduleInfo": {
+                            "moduleId": "34045662-a9dc-4823-8435-91056d4c26cb",
+                            "allowMultipleAccess": false
+                        },
                         "acEnableAvailable": true,
                         "acMaxEnableAvailable": true,
                         "autoModeEnableAvailable": true,
                         "circulateAirEnableAvailable": true,
+                        "climateEnableAvailable": true,
                         "currentTemperatureAvailable": true,
                         "defrostZone": [
                             "FRONT",
@@ -455,7 +561,11 @@
                 ],
                 "radioControlCapabilities": [
                     {
-                        "availableHDsAvailable": true,
+                        "moduleInfo": {
+                            "moduleId": "eb7739ea-b263-4fe1-af9c-9311d1acac2d",
+                            "allowMultipleAccess": true
+                        },
+                        "availableHdChannelsAvailable": true,
                         "hdChannelAvailable": true,
                         "moduleName": "radio",
                         "radioBandAvailable": true,
@@ -473,6 +583,10 @@
                 "audioControlCapabilities": [
                     {
                         "moduleName": "audio",
+                        "moduleInfo": {
+                            "moduleId": "a279fe12-4587-4d12-8514-50f4ea9e9537",
+                            "allowMultipleAccess": true
+                        },
                         "sourceAvailable": true,
                         "volumeAvailable": true,
                         "equalizerAvailable": true,
@@ -483,6 +597,10 @@
                 "seatControlCapabilities": [
                     {
                         "moduleName": "driver_seat",
+                        "moduleInfo": {
+                            "moduleId": "06cdec22-920e-4865-bf2e-9518463edc68",
+                            "allowMultipleAccess": false
+                        },
                         "heatingEnabledAvailable" : true,
                         "coolingEnabledAvailable": true,
                         "heatingLevelAvailable": true,
@@ -502,6 +620,10 @@
                 ],
                 "lightControlCapabilities": {
                         "moduleName": "light",
+                        "moduleInfo": {
+                            "moduleId": "8d73e369-6a1f-4459-ab5a-6e432631881d",
+                            "allowMultipleAccess": false
+                        },
                         "supportedLights":[
                               {
                                  "statusAvailable":true,
@@ -795,6 +917,10 @@
                 },
                 "hmiSettingsControlCapabilities": {
                         "moduleName": "hmiSettings",
+                        "moduleInfo": {
+                            "moduleId": "c8cace3c-d482-4be1-8862-624a21e34563",
+                            "allowMultipleAccess": true
+                        },
                         "distanceUnitAvailable": true,
                         "temperatureUnitAvailable": true,
                         "displayModeUnitAvailable": true

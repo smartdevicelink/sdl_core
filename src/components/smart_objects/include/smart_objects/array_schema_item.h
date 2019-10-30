@@ -34,8 +34,8 @@
 
 #include <stddef.h>
 
-#include "smart_objects/schema_item.h"
 #include "smart_objects/always_true_schema_item.h"
+#include "smart_objects/schema_item.h"
 #include "smart_objects/schema_item_parameter.h"
 
 #include "utils/semantic_version.h"

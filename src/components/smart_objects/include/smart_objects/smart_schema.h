@@ -32,8 +32,8 @@
 #ifndef SRC_COMPONENTS_SMART_OBJECTS_INCLUDE_SMART_OBJECTS_SMART_SCHEMA_H_
 #define SRC_COMPONENTS_SMART_OBJECTS_INCLUDE_SMART_OBJECTS_SMART_SCHEMA_H_
 
-#include "utils/macro.h"
 #include "smart_objects/schema_item.h"
+#include "utils/macro.h"
 
 namespace ns_smart_device_link {
 namespace ns_smart_objects {
@@ -84,6 +84,13 @@ class CSmartSchema FINAL {
    * @param SchemaItem Root schema item.
    */
   void setSchemaItem(const ISchemaItemPtr SchemaItem);
+
+  /**
+   * @brief Set new root schema item.
+   *
+   * @param SchemaItem Root schema item.
+   */
+  ISchemaItemPtr getSchemaItem();
 
   /**
    * @brief Apply schema.

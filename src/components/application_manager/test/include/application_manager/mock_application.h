@@ -1,43 +1,45 @@
 /*
  * Copyright (c) 2016, Ford Motor Company
-* All rights reserved.
-*
-* Redistribution and use in source and binary forms, with or without
-* modification, are permitted provided that the following conditions are met:
-*
-* Redistributions of source code must retain the above copyright notice, this
-* list of conditions and the following disclaimer.
-*
-* Redistributions in binary form must reproduce the above copyright notice,
-* this list of conditions and the following
-* disclaimer in the documentation and/or other materials provided with the
-* distribution.
-*
-* Neither the name of the Ford Motor Company nor the names of its contributors
-* may be used to endorse or promote products derived from this software
-* without specific prior written permission.
-*
-* THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
-* AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
-* IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
-* ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
-* LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
-* CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
-* SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
-* INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
-* CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
-* ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
-* POSSIBILITY OF SUCH DAMAGE.
-*/
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *
+ * Redistributions of source code must retain the above copyright notice, this
+ * list of conditions and the following disclaimer.
+ *
+ * Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following
+ * disclaimer in the documentation and/or other materials provided with the
+ * distribution.
+ *
+ * Neither the name of the Ford Motor Company nor the names of its contributors
+ * may be used to endorse or promote products derived from this software
+ * without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
+ */
 #ifndef SRC_COMPONENTS_APPLICATION_MANAGER_TEST_INCLUDE_APPLICATION_MANAGER_MOCK_APPLICATION_H_
 #define SRC_COMPONENTS_APPLICATION_MANAGER_TEST_INCLUDE_APPLICATION_MANAGER_MOCK_APPLICATION_H_
 #include <string>
-#include "gmock/gmock.h"
-#include "application_manager/application.h"
 #include "application_manager/app_extension.h"
+#include "application_manager/application.h"
+#include "application_manager/display_capabilities_builder.h"
+#include "application_manager/hmi_state.h"
+#include "application_manager/usage_statistics.h"
+#include "gmock/gmock.h"
 #include "smart_objects/smart_object.h"
 #include "utils/custom_string.h"
-#include "application_manager/usage_statistics.h"
 #include "utils/semantic_version.h"
 
 namespace test {
@@ -56,6 +58,8 @@ class MockApplication : public ::application_manager::Application {
   MOCK_CONST_METHOD0(is_application_data_changed, bool());
   MOCK_METHOD1(set_is_application_data_changed,
                void(bool state_application_data));
+  MOCK_CONST_METHOD0(is_app_data_resumption_allowed, bool());
+  MOCK_METHOD1(set_app_data_resumption_allowance, void(bool allowed));
   MOCK_METHOD0(CloseActiveMessage, void());
   MOCK_CONST_METHOD0(IsFullscreen, bool());
   MOCK_METHOD0(ChangeSupportingAppHMIType, void());
@@ -82,8 +86,9 @@ class MockApplication : public ::application_manager::Application {
                void(protocol_handler::ServiceType service_type));
   MOCK_METHOD1(SuspendStreaming,
                void(protocol_handler::ServiceType service_type));
-  MOCK_METHOD1(WakeUpStreaming,
-               void(protocol_handler::ServiceType service_type));
+  MOCK_METHOD2(WakeUpStreaming,
+               void(protocol_handler::ServiceType service_type,
+                    uint32_t timer_len));
   MOCK_CONST_METHOD0(is_voice_communication_supported, bool());
   MOCK_METHOD1(set_voice_communication_supported,
                void(bool is_voice_communication_supported));
@@ -97,11 +102,15 @@ class MockApplication : public ::application_manager::Application {
   MOCK_METHOD1(set_folder_name, void(const std::string& folder_name));
   MOCK_CONST_METHOD0(folder_name, const std::string());
   MOCK_CONST_METHOD0(is_media_application, bool());
-  MOCK_CONST_METHOD0(hmi_level, const mobile_apis::HMILevel::eType());
+  MOCK_CONST_METHOD1(hmi_level,
+                     const mobile_apis::HMILevel::eType(
+                         const application_manager::WindowID window_id));
   MOCK_CONST_METHOD0(put_file_in_none_count, const uint32_t());
   MOCK_CONST_METHOD0(delete_file_in_none_count, const uint32_t());
   MOCK_CONST_METHOD0(list_files_in_none_count, const uint32_t());
-  MOCK_CONST_METHOD0(system_context, const mobile_apis::SystemContext::eType());
+  MOCK_CONST_METHOD1(system_context,
+                     const mobile_apis::SystemContext::eType(
+                         const application_manager::WindowID window_id));
   MOCK_CONST_METHOD0(audio_streaming_state,
                      const mobile_apis::AudioStreamingState::eType());
   MOCK_CONST_METHOD0(video_streaming_state,
@@ -109,11 +118,20 @@ class MockApplication : public ::application_manager::Application {
   MOCK_CONST_METHOD0(app_icon_path, const std::string&());
   MOCK_CONST_METHOD0(device, connection_handler::DeviceHandle());
   MOCK_CONST_METHOD0(secondary_device, connection_handler::DeviceHandle());
-  MOCK_CONST_METHOD0(CurrentHmiState, const application_manager::HmiStatePtr());
-  MOCK_CONST_METHOD0(RegularHmiState, const application_manager::HmiStatePtr());
+  MOCK_CONST_METHOD1(CurrentHmiState,
+                     const application_manager::HmiStatePtr(
+                         const application_manager::WindowID window_id));
+  MOCK_CONST_METHOD1(RegularHmiState,
+                     const application_manager::HmiStatePtr(
+                         const application_manager::WindowID window_id));
+  MOCK_CONST_METHOD0(GetWindowIds, application_manager::WindowIds());
+  MOCK_CONST_METHOD0(GetWindowNames, application_manager::WindowNames());
+  MOCK_CONST_METHOD1(WindowIdExists,
+                     bool(const application_manager::WindowID window_id));
   MOCK_CONST_METHOD0(IsAllowedToChangeAudioSource, bool());
-  MOCK_CONST_METHOD0(PostponedHmiState,
-                     const application_manager::HmiStatePtr());
+  MOCK_CONST_METHOD1(PostponedHmiState,
+                     const application_manager::HmiStatePtr(
+                         const application_manager::WindowID window_id));
   MOCK_METHOD1(set_tts_properties_in_none, void(bool active));
   MOCK_METHOD0(tts_properties_in_none, bool());
   MOCK_METHOD1(set_tts_properties_in_full, void(bool active));
@@ -167,14 +185,24 @@ class MockApplication : public ::application_manager::Application {
                ::application_manager::HelpPromptManager&());
   MOCK_CONST_METHOD0(help_prompt_manager,
                      const ::application_manager::HelpPromptManager&());
-  MOCK_METHOD1(SetInitialState, void(::application_manager::HmiStatePtr state));
-  MOCK_METHOD1(SetRegularState, void(::application_manager::HmiStatePtr state));
-  MOCK_METHOD1(SetPostponedState,
-               void(::application_manager::HmiStatePtr state));
-  MOCK_METHOD0(RemovePostponedState, void());
-  MOCK_METHOD1(AddHMIState, void(::application_manager::HmiStatePtr state));
-  MOCK_METHOD1(RemoveHMIState,
-               void(::application_manager::HmiState::StateID state_id));
+  MOCK_METHOD3(SetInitialState,
+               void(const application_manager::WindowID window_id,
+                    const std::string& window_name,
+                    application_manager::HmiStatePtr state));
+  MOCK_METHOD2(SetRegularState,
+               void(const application_manager::WindowID window_id,
+                    application_manager::HmiStatePtr state));
+  MOCK_METHOD2(SetPostponedState,
+               void(const application_manager::WindowID window_id,
+                    ::application_manager::HmiStatePtr state));
+  MOCK_METHOD1(RemovePostponedState,
+               void(const application_manager::WindowID window_id));
+  MOCK_METHOD2(AddHMIState,
+               void(const application_manager::WindowID window_id,
+                    application_manager::HmiStatePtr state));
+  MOCK_METHOD2(RemoveHMIState,
+               void(const application_manager::WindowID window_id,
+                    ::application_manager::HmiState::StateID state_id));
   MOCK_METHOD2(SubscribeToSoftButtons,
                void(int32_t cmd_id,
                     const ::application_manager::SoftButtonID& softbuttons_id));
@@ -220,9 +248,35 @@ class MockApplication : public ::application_manager::Application {
   MOCK_CONST_METHOD0(keyboard_props, const smart_objects::SmartObject*());
   MOCK_CONST_METHOD0(menu_title, const smart_objects::SmartObject*());
   MOCK_CONST_METHOD0(menu_icon, const smart_objects::SmartObject*());
-  MOCK_CONST_METHOD0(day_color_scheme, const smart_objects::SmartObject*());
-  MOCK_CONST_METHOD0(night_color_scheme, const smart_objects::SmartObject*());
-  MOCK_CONST_METHOD0(display_layout, const std::string&());
+  MOCK_CONST_METHOD0(day_color_scheme, smart_objects::SmartObject());
+  MOCK_CONST_METHOD0(night_color_scheme, smart_objects::SmartObject());
+  MOCK_CONST_METHOD0(display_layout, std::string());
+  MOCK_CONST_METHOD0(display_capabilities, smart_objects::SmartObjectSPtr());
+  MOCK_CONST_METHOD1(display_capabilities,
+                     smart_objects::SmartObjectSPtr(
+                         const application_manager::WindowID window_id));
+
+  MOCK_METHOD2(set_window_layout,
+               void(const application_manager::WindowID window_id,
+                    const std::string& layout));
+  MOCK_METHOD2(set_day_color_scheme,
+               void(const application_manager::WindowID window_id,
+                    const smart_objects::SmartObject& color_scheme));
+  MOCK_METHOD2(set_night_color_scheme,
+               void(const application_manager::WindowID window_id,
+                    const smart_objects::SmartObject& color_scheme));
+  MOCK_CONST_METHOD1(
+      window_layout,
+      std::string(const application_manager::WindowID window_id));
+  MOCK_CONST_METHOD1(day_color_scheme,
+                     smart_objects::SmartObject(
+                         const application_manager::WindowID window_id));
+  MOCK_CONST_METHOD1(night_color_scheme,
+                     smart_objects::SmartObject(
+                         const application_manager::WindowID window_id));
+  MOCK_METHOD1(set_display_capabilities,
+               void(const smart_objects::SmartObject& display_capabilities));
+
   MOCK_METHOD1(load_global_properties,
                void(const smart_objects::SmartObject& so));
   MOCK_METHOD1(set_help_prompt,
@@ -316,9 +370,10 @@ class MockApplication : public ::application_manager::Application {
       SwapMobileMessageQueue,
       void(::application_manager::MobileMessageQueue& mobile_messages));
 
-  MOCK_METHOD1(
+  MOCK_METHOD2(
       set_system_context,
-      void(const application_manager::mobile_api::SystemContext::eType&));
+      void(const application_manager::WindowID window_id,
+           const application_manager::mobile_api::SystemContext::eType&));
   MOCK_METHOD1(
       set_audio_streaming_state,
       void(const application_manager::mobile_api::AudioStreamingState::eType&
@@ -329,9 +384,10 @@ class MockApplication : public ::application_manager::Application {
                bool(smart_objects::SmartObject module));
   MOCK_METHOD1(UnsubscribeFromInteriorVehicleData,
                bool(smart_objects::SmartObject module));
-  MOCK_METHOD1(
+  MOCK_METHOD2(
       set_hmi_level,
-      void(const application_manager::mobile_api::HMILevel::eType& hmi_level));
+      void(const application_manager::WindowID window_id,
+           const application_manager::mobile_api::HMILevel::eType& hmi_level));
   MOCK_METHOD1(QueryInterface,
                application_manager::AppExtensionPtr(
                    application_manager::AppExtensionUID uid));
@@ -357,6 +413,24 @@ class MockApplication : public ::application_manager::Application {
                void(const mobile_apis::HybridAppPreference::eType&
                         hybrid_app_preference));
   MOCK_METHOD1(set_cloud_app_certificate, void(const std::string& certificate));
+  MOCK_METHOD2(SetWindowInfo,
+               void(const ::application_manager::WindowID windowID,
+                    const smart_objects::SmartObject& window_info));
+  MOCK_METHOD1(RemoveWindowInfo,
+               void((const ::application_manager::WindowID window_id)));
+  MOCK_CONST_METHOD0(window_optional_params_map,
+                     DataAccessor< ::application_manager::WindowParamsMap>());
+  MOCK_METHOD0(display_capabilities_builder,
+               application_manager::DisplayCapabilitiesBuilder&());
+  MOCK_METHOD1(GetSoftButtonWindowID,
+               application_manager::WindowID(const uint32_t button_id));
+  MOCK_METHOD1(remove_window_capability,
+               void(const application_manager::WindowID window_id));
+  MOCK_CONST_METHOD1(menu_layout_supported,
+                     bool(const mobile_apis::MenuLayout::eType layout));
+  MOCK_METHOD1(set_user_location,
+               void(const smart_objects::SmartObject& user_location));
+  MOCK_CONST_METHOD0(get_user_location, const smart_objects::SmartObject&());
 };
 
 }  // namespace application_manager_test

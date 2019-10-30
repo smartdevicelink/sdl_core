@@ -65,9 +65,9 @@ void NaviSetVideoConfigRequest::Run() {
   ApplicationSharedPtr app =
       application_manager_.application_by_hmi_app(application_id());
   if (!app) {
-    LOG4CXX_ERROR(logger_,
-                  "Application with hmi_app_id " << application_id()
-                                                 << "does not exist");
+    LOG4CXX_ERROR(
+        logger_,
+        "Application with hmi_app_id " << application_id() << "does not exist");
     return;
   }
 
@@ -100,9 +100,9 @@ void NaviSetVideoConfigRequest::on_event(const event_engine::Event& event) {
         LOG4CXX_DEBUG(logger_, "Received SetVideoConfig success response");
         result = true;
       } else {
-        LOG4CXX_DEBUG(logger_,
-                      "Received SetVideoConfig failure response (" << event.id()
-                                                                   << ")");
+        LOG4CXX_DEBUG(
+            logger_,
+            "Received SetVideoConfig failure response (" << event.id() << ")");
         result = false;
         if (message[strings::msg_params].keyExists(strings::rejected_params)) {
           const smart_objects::SmartArray* list =
@@ -153,4 +153,4 @@ void NaviSetVideoConfigRequest::onTimeOut() {
 
 }  // namespace commands
 
-}  // namespace application_manager
+}  // namespace sdl_rpc_plugin

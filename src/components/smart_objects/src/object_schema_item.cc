@@ -40,24 +40,23 @@ namespace {
 const char connection_key[] = "connection_key";
 const char binary_data[] = "binary_data";
 const char app_id[] = "appID";
-}
+}  // namespace
 namespace ns_smart_device_link {
 namespace ns_smart_objects {
 
-CObjectSchemaItem::SMember::SMember()
+SMember::SMember()
     : mSchemaItem(CAlwaysFalseSchemaItem::create())
     , mIsMandatory(true)
     , mIsDeprecated(false)
     , mIsRemoved(false) {}
 
-CObjectSchemaItem::SMember::SMember(
-    const ISchemaItemPtr SchemaItem,
-    const bool IsMandatory,
-    const std::string& Since,
-    const std::string& Until,
-    const bool IsDeprecated,
-    const bool IsRemoved,
-    const std::vector<CObjectSchemaItem::SMember>& history_vector)
+SMember::SMember(const ISchemaItemPtr SchemaItem,
+                 const bool IsMandatory,
+                 const std::string& Since,
+                 const std::string& Until,
+                 const bool IsDeprecated,
+                 const bool IsRemoved,
+                 const std::vector<SMember>& history_vector)
     : mSchemaItem(SchemaItem), mIsMandatory(IsMandatory) {
   if (Since.size() > 0) {
     utils::SemanticVersion since_struct(Since);
@@ -76,7 +75,7 @@ CObjectSchemaItem::SMember::SMember(
   mHistoryVector = history_vector;
 }
 
-bool CObjectSchemaItem::SMember::CheckHistoryFieldVersion(
+bool SMember::CheckHistoryFieldVersion(
     const utils::SemanticVersion& MessageVersion) const {
   if (MessageVersion.isValid()) {
     if (mSince != boost::none) {
@@ -113,10 +112,10 @@ errors::eType CObjectSchemaItem::validate(
     const utils::SemanticVersion& MessageVersion,
     const bool allow_unknown_enums) {
   if (SmartType_Map != object.getType()) {
-    std::string validation_info = "Incorrect type, expected: " +
-                                  SmartObject::typeToString(SmartType_Map) +
-                                  ", got: " +
-                                  SmartObject::typeToString(object.getType());
+    std::string validation_info =
+        "Incorrect type, expected: " +
+        SmartObject::typeToString(SmartType_Map) +
+        ", got: " + SmartObject::typeToString(object.getType());
     report__->set_validation_info(validation_info);
     return errors::INVALID_VALUE;
   }
@@ -153,6 +152,7 @@ errors::eType CObjectSchemaItem::validate(
     }
     object_keys.erase(key_it);
   }
+
   return errors::OK;
 }
 
@@ -169,10 +169,10 @@ void CObjectSchemaItem::applySchema(
   }
 
   SmartObject default_value;
-  for (Members::const_iterator it = mMembers.begin(); it != mMembers.end();
-       ++it) {
-    const std::string& key = it->first;
-    const SMember& member = it->second;
+
+  for (const auto& item : mMembers) {
+    const std::string& key = item.first;
+    const SMember& member = item.second;
     if (!Object.keyExists(key)) {
       if (member.mSchemaItem->setDefaultValue(default_value)) {
         Object[key] = default_value;
@@ -201,7 +201,6 @@ void CObjectSchemaItem::unapplySchema(SmartObject& Object,
       Object.erase(key);
     }
   }
-
   for (Members::const_iterator it = mMembers.begin(); it != mMembers.end();
        ++it) {
     const std::string& key = it->first;
@@ -232,6 +231,21 @@ size_t CObjectSchemaItem::GetMemberSize() {
   return mMembers.size();
 }
 
+boost::optional<SMember&> CObjectSchemaItem::GetMemberSchemaItem(
+    const std::string& member_key) {
+  auto it = mMembers.find(member_key);
+
+  if (it != mMembers.end()) {
+    return boost::optional<SMember&>(it->second);
+  }
+  return boost::optional<SMember&>();
+}
+
+void CObjectSchemaItem::AddMemberSchemaItem(const std::string& member_key,
+                                            SMember& member) {
+  mMembers[member_key] = member;
+}
+
 CObjectSchemaItem::CObjectSchemaItem(const Members& members)
     : mMembers(members) {}
 
@@ -244,8 +258,7 @@ void CObjectSchemaItem::RemoveFakeParams(
         mMembers.find(key);
     if (mMembers.end() == members_it
         // FIXME(EZamakhov): Remove illegal usage of filed in AM
-        &&
-        key.compare(connection_key) != 0 && key.compare(binary_data) != 0 &&
+        && key.compare(connection_key) != 0 && key.compare(binary_data) != 0 &&
         key.compare(app_id) != 0) {
       ++it;
       Object.erase(key);
@@ -261,7 +274,7 @@ void CObjectSchemaItem::RemoveFakeParams(
   }
 }
 
-const CObjectSchemaItem::SMember& CObjectSchemaItem::GetCorrectMember(
+const SMember& CObjectSchemaItem::GetCorrectMember(
     const SMember& member, const utils::SemanticVersion& messageVersion) {
   // Check if member is the correct version
   if (member.CheckHistoryFieldVersion(messageVersion)) {

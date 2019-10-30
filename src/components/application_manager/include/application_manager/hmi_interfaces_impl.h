@@ -34,8 +34,8 @@
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_HMI_INTERFACES_IMPL_H_
 #include <map>
 #include "application_manager/hmi_interfaces.h"
-#include "utils/macro.h"
 #include "utils/lock.h"
+#include "utils/macro.h"
 /**
  * @brief The HmiInterfacesImpl class handles
  *  hmi interfaces states

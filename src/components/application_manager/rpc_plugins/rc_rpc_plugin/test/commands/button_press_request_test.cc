@@ -30,22 +30,28 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "gtest/gtest.h"
 #include "rc_rpc_plugin/commands/mobile/button_press_request.h"
-#include "rc_rpc_plugin/rc_command_factory.h"
-#include "rc_rpc_plugin/rc_app_extension.h"
-#include "rc_rpc_plugin/rc_rpc_plugin.h"
-#include "rc_rpc_plugin/rc_module_constants.h"
-#include "rc_rpc_plugin/mock/mock_resource_allocation_manager.h"
-#include "rc_rpc_plugin/mock/mock_interior_data_cache.h"
-#include "rc_rpc_plugin/mock/mock_interior_data_manager.h"
+#include "application_manager/commands/command_request_test.h"
 #include "application_manager/mock_application.h"
 #include "application_manager/mock_application_manager.h"
-#include "application_manager/commands/command_request_test.h"
 #include "application_manager/policies/mock_policy_handler_interface.h"
+#include "gtest/gtest.h"
 #include "interfaces/HMI_API.h"
 #include "interfaces/MOBILE_API.h"
+#include "rc_rpc_plugin/mock/mock_interior_data_cache.h"
+#include "rc_rpc_plugin/mock/mock_interior_data_manager.h"
+#include "rc_rpc_plugin/mock/mock_rc_capabilities_manager.h"
+#include "rc_rpc_plugin/mock/mock_rc_consent_manager.h"
+#include "rc_rpc_plugin/mock/mock_resource_allocation_manager.h"
+#include "rc_rpc_plugin/rc_app_extension.h"
+#include "rc_rpc_plugin/rc_command_factory.h"
+#include "rc_rpc_plugin/rc_module_constants.h"
+#include "rc_rpc_plugin/rc_rpc_plugin.h"
 
+using ::application_manager::Message;
+using ::application_manager::MessageType;
+using application_manager::commands::MessageSharedPtr;
+using ::protocol_handler::MessagePriority;
 using test::components::application_manager_test::MockApplication;
 using test::components::commands_test::CommandRequestTest;
 using test::components::commands_test::CommandsTestMocks;
@@ -57,17 +63,13 @@ using ::testing::NiceMock;
 using ::testing::Return;
 using ::testing::ReturnRef;
 using ::testing::SaveArg;
-using ::application_manager::Message;
-using ::application_manager::MessageType;
-using application_manager::commands::MessageSharedPtr;
-using ::protocol_handler::MessagePriority;
 
 namespace {
 const int kModuleId = 153u;
 const uint32_t kConnectionKey = 1u;
 const uint32_t kAppId = 0u;
 const std::string kPolicyAppId = "Test";
-}
+}  // namespace
 
 namespace rc_rpc_plugin_test {
 
@@ -82,40 +84,9 @@ class ButtonPressRequestTest
       , rc_app_extention_(
             std::make_shared<rc_rpc_plugin::RCAppExtension>(kModuleId)) {}
 
-  smart_objects::SmartObject ButtonCapability(
-      const mobile_apis::ButtonName::eType button_name) {
-    smart_objects::SmartObject button(smart_objects::SmartType_Map);
-    button["name"] = button_name;
-    return button;
-  }
-
   void SetUp() OVERRIDE {
-    using namespace mobile_apis;
-
-    std::vector<ButtonName::eType> button_names = {ButtonName::AC_MAX,
-                                                   ButtonName::AC,
-                                                   ButtonName::RECIRCULATE,
-                                                   ButtonName::FAN_UP,
-                                                   ButtonName::FAN_DOWN,
-                                                   ButtonName::TEMP_UP,
-                                                   ButtonName::TEMP_DOWN,
-                                                   ButtonName::DEFROST_MAX,
-                                                   ButtonName::DEFROST,
-                                                   ButtonName::DEFROST_REAR,
-                                                   ButtonName::UPPER_VENT,
-                                                   ButtonName::LOWER_VENT,
-                                                   ButtonName::VOLUME_UP,
-                                                   ButtonName::VOLUME_DOWN,
-                                                   ButtonName::EJECT,
-                                                   ButtonName::SOURCE,
-                                                   ButtonName::SHUFFLE,
-                                                   ButtonName::REPEAT};
-
-    smart_objects::SmartObject button_caps(smart_objects::SmartType_Array);
-    for (size_t i = 0; i < button_names.size(); i++) {
-      button_caps[i] = ButtonCapability(button_names[i]);
-    }
-    rc_capabilities_[strings::kbuttonCapabilities] = button_caps;
+    smart_objects::SmartObject control_caps((smart_objects::SmartType_Array));
+    rc_capabilities_[strings::kradioControlCapabilities] = control_caps;
     ON_CALL(app_mngr_, application(_)).WillByDefault(Return(mock_app_));
     ON_CALL(*mock_app_, QueryInterface(RCRPCPlugin::kRCPluginID))
         .WillByDefault(Return(rc_app_extention_));
@@ -129,8 +100,15 @@ class ButtonPressRequestTest
     ON_CALL(mock_policy_handler_,
             CheckHMIType(kPolicyAppId,
                          mobile_apis::AppHMIType::eType::REMOTE_CONTROL,
-                         nullptr)).WillByDefault(Return(true));
+                         nullptr))
+        .WillByDefault(Return(true));
     ON_CALL(mock_allocation_manager_, is_rc_enabled())
+        .WillByDefault(Return(true));
+    ON_CALL(mock_rc_capabilities_manager_, CheckButtonName(_, _))
+        .WillByDefault(Return(true));
+    ON_CALL(mock_rc_capabilities_manager_, CheckIfModuleExistsInCapabilities(_))
+        .WillByDefault(Return(true));
+    ON_CALL(mock_rc_capabilities_manager_, CheckIfButtonExistInRCCaps(_))
         .WillByDefault(Return(true));
   }
 
@@ -155,7 +133,9 @@ class ButtonPressRequestTest
                            mock_policy_handler_,
                            mock_allocation_manager_,
                            mock_interior_data_cache_,
-                           mock_interior_data_manager_};
+                           mock_interior_data_manager_,
+                           mock_rc_capabilities_manager_,
+                           mock_rc_consent_manger_};
     return std::make_shared<Command>(msg ? msg : msg = CreateMessage(), params);
   }
 
@@ -171,33 +151,41 @@ class ButtonPressRequestTest
       mock_interior_data_cache_;
   testing::NiceMock<rc_rpc_plugin_test::MockInteriorDataManager>
       mock_interior_data_manager_;
+  testing::NiceMock<rc_rpc_plugin_test::MockRCCapabilitiesManager>
+      mock_rc_capabilities_manager_;
+  testing::NiceMock<MockRCConsentManager> mock_rc_consent_manger_;
 };
 
 TEST_F(ButtonPressRequestTest,
        Execute_ButtonNameMatchesModuleType_ExpectCorrectMessageSentToHMI) {
   // Arrange
+  const std::string resource = "CLIMATE";
+  const std::string resource_id = "id1";
   MessageSharedPtr mobile_message = CreateBasicMessage();
   ns_smart_device_link::ns_smart_objects::SmartObject& msg_params =
       (*mobile_message)[application_manager::strings::msg_params];
   msg_params[message_params::kModuleType] = mobile_apis::ModuleType::CLIMATE;
+  msg_params[message_params::kModuleId] = resource_id;
   msg_params[message_params::kButtonName] = mobile_apis::ButtonName::AC;
   msg_params[message_params::kButtonPressMode] =
       mobile_apis::ButtonPressMode::SHORT;
 
   // Expectations
-  const std::string resource = "CLIMATE";
   ON_CALL(mock_policy_handler_, CheckModule(_, _)).WillByDefault(Return(true));
-  EXPECT_CALL(mock_allocation_manager_, IsResourceFree(resource))
+
+  EXPECT_CALL(mock_allocation_manager_, IsResourceFree(resource, resource_id))
       .WillOnce(Return(true));
-  EXPECT_CALL(mock_allocation_manager_, AcquireResource(resource, _))
+  EXPECT_CALL(mock_allocation_manager_, AcquireResource(resource, _, _))
       .WillOnce(Return(rc_rpc_plugin::AcquireResult::ALLOWED));
   EXPECT_CALL(
       mock_allocation_manager_,
-      SetResourceState(resource, kAppId, rc_rpc_plugin::ResourceState::BUSY));
-  EXPECT_CALL(mock_rpc_service_,
-              ManageHMICommand(
-                  HMIResultCodeIs(hmi_apis::FunctionID::Buttons_ButtonPress),
-                  _)).WillOnce(Return(true));
+      SetResourceState(
+          resource, resource_id, kAppId, rc_rpc_plugin::ResourceState::BUSY));
+  EXPECT_CALL(
+      mock_rpc_service_,
+      ManageHMICommand(
+          HMIResultCodeIs(hmi_apis::FunctionID::Buttons_ButtonPress), _))
+      .WillOnce(Return(true));
 
   // Act
   std::shared_ptr<rc_rpc_plugin::commands::ButtonPressRequest> command =
@@ -211,28 +199,34 @@ TEST_F(
     ButtonPressRequestTest,
     Execute_ButtonNameDoesNotMatchModuleType_ExpectMessageNotSentToHMI_AndFalseSentToMobile) {
   // Arrange
+  const std::string resource = "RADIO";
+  const std::string resource_id = "id1";
   MessageSharedPtr mobile_message = CreateBasicMessage();
   ns_smart_device_link::ns_smart_objects::SmartObject& msg_params =
       (*mobile_message)[application_manager::strings::msg_params];
   msg_params[message_params::kModuleType] = mobile_apis::ModuleType::RADIO;
+  msg_params[message_params::kModuleId] = resource_id;
   msg_params[message_params::kButtonName] = mobile_apis::ButtonName::AC;
   msg_params[message_params::kButtonPressMode] =
       mobile_apis::ButtonPressMode::SHORT;
   // Expectations
 
-  const std::string resource = "RADIO";
+  EXPECT_CALL(mock_rc_capabilities_manager_, CheckButtonName(_, _))
+      .WillOnce(Return(false));
   ON_CALL(mock_policy_handler_, CheckModule(_, _)).WillByDefault(Return(true));
-  EXPECT_CALL(mock_allocation_manager_, IsResourceFree(resource))
+  EXPECT_CALL(mock_allocation_manager_, IsResourceFree(resource, resource_id))
       .WillOnce(Return(true));
-  EXPECT_CALL(mock_allocation_manager_, AcquireResource(resource, _))
+  EXPECT_CALL(mock_allocation_manager_, AcquireResource(resource, _, _))
       .WillOnce(Return(rc_rpc_plugin::AcquireResult::ALLOWED));
-  EXPECT_CALL(mock_allocation_manager_, SetResourceState(resource, kAppId, _))
+  EXPECT_CALL(mock_allocation_manager_,
+              SetResourceState(resource, resource_id, kAppId, _))
       .Times(2);
 
-  EXPECT_CALL(mock_rpc_service_,
-              ManageHMICommand(
-                  HMIResultCodeIs(hmi_apis::FunctionID::Buttons_ButtonPress),
-                  _)).Times(0);
+  EXPECT_CALL(
+      mock_rpc_service_,
+      ManageHMICommand(
+          HMIResultCodeIs(hmi_apis::FunctionID::Buttons_ButtonPress), _))
+      .Times(0);
   MessageSharedPtr command_result;
   EXPECT_CALL(mock_rpc_service_,
               ManageMobileCommand(
@@ -266,9 +260,10 @@ TEST_F(ButtonPressRequestTest, OnEvent_ExpectSuccessfullResponseSentToMobile) {
   hmi_msg_params[application_manager::strings::connection_key] = kConnectionKey;
 
   // Expectations
-  EXPECT_CALL(mock_allocation_manager_,
-              SetResourceState(_, kAppId, rc_rpc_plugin::ResourceState::FREE))
-      .Times(2);
+  EXPECT_CALL(
+      mock_allocation_manager_,
+      SetResourceState(_, _, kAppId, rc_rpc_plugin::ResourceState::FREE))
+      .Times(1);
 
   EXPECT_CALL(
       mock_rpc_service_,
@@ -305,9 +300,10 @@ TEST_F(ButtonPressRequestTest,
   hmi_msg_params[application_manager::strings::connection_key] = kConnectionKey;
 
   // Expectations
-  EXPECT_CALL(mock_allocation_manager_,
-              SetResourceState(_, kAppId, rc_rpc_plugin::ResourceState::FREE))
-      .Times(2);
+  EXPECT_CALL(
+      mock_allocation_manager_,
+      SetResourceState(_, _, kAppId, rc_rpc_plugin::ResourceState::FREE))
+      .Times(1);
 
   EXPECT_CALL(mock_rpc_service_,
               ManageMobileCommand(

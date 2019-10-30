@@ -29,14 +29,14 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-#include <string>
 #include <unistd.h>
+#include <string>
 
 #include "application_manager/app_launch/app_launch_data_db.h"
-#include "application_manager/application_manager.h"
 #include "application_manager/app_launch/app_launch_sql_queries.h"
-#include "application_manager/smart_object_keys.h"
+#include "application_manager/application_manager.h"
 #include "application_manager/message_helper.h"
+#include "application_manager/smart_object_keys.h"
 
 namespace app_launch {
 CREATE_LOGGERPTR_GLOBAL(logger_, "AppLaunch")
@@ -332,9 +332,9 @@ uint32_t AppLaunchDataDB::GetCurentNumberOfAppData() const {
                  "Values of ignition off counts were updated successfully");
 
     number_of_app_data = query.GetInteger(result_query);
-    LOG4CXX_DEBUG(logger_,
-                  "Total cout saved mobile applications is "
-                      << number_of_app_data);
+    LOG4CXX_DEBUG(
+        logger_,
+        "Total cout saved mobile applications is " << number_of_app_data);
   } else {
     LOG4CXX_WARN(logger_,
                  "Failed execute query 'kGetNumberOfApplicationData'. Reson: "
@@ -392,4 +392,4 @@ utils::dbms::SQLDatabase* AppLaunchDataDB::db() const {
 #endif  // __QNX__
 }
 
-}  // namespace resumption
+}  // namespace app_launch

@@ -34,8 +34,8 @@
 #define SRC_COMPONENTS_INCLUDE_TEST_APPLICATION_MANAGER_MOCK_APPLICATION_MANAGER_SETTINGS_H_
 
 #include <string>
-#include "gmock/gmock.h"
 #include "application_manager/application_manager_settings.h"
+#include "gmock/gmock.h"
 
 namespace test {
 namespace components {
@@ -89,6 +89,7 @@ class MockApplicationManagerSettings
   MOCK_CONST_METHOD0(named_audio_pipe_path, const std::string&());
   MOCK_CONST_METHOD0(video_stream_file, const std::string&());
   MOCK_CONST_METHOD0(audio_stream_file, const std::string&());
+  MOCK_CONST_METHOD0(period_for_consent_expiration, uint16_t());
   MOCK_CONST_METHOD0(use_full_app_id, bool());
   MOCK_CONST_METHOD0(cloud_app_retry_timeout, uint32_t());
   MOCK_CONST_METHOD0(cloud_app_max_retry_attempts, uint16_t());

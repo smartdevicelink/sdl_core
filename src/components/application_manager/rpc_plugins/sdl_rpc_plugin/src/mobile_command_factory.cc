@@ -31,29 +31,44 @@
  */
 
 #include "sdl_rpc_plugin/mobile_command_factory.h"
+#include "interfaces/MOBILE_API.h"
 #include "sdl_rpc_plugin/commands/mobile/add_command_request.h"
 #include "sdl_rpc_plugin/commands/mobile/add_command_response.h"
-#include "sdl_rpc_plugin/commands/mobile/delete_command_request.h"
-#include "sdl_rpc_plugin/commands/mobile/delete_command_response.h"
 #include "sdl_rpc_plugin/commands/mobile/add_sub_menu_request.h"
 #include "sdl_rpc_plugin/commands/mobile/add_sub_menu_response.h"
-#include "sdl_rpc_plugin/commands/mobile/alert_request.h"
-#include "sdl_rpc_plugin/commands/mobile/alert_response.h"
 #include "sdl_rpc_plugin/commands/mobile/alert_maneuver_request.h"
 #include "sdl_rpc_plugin/commands/mobile/alert_maneuver_response.h"
+#include "sdl_rpc_plugin/commands/mobile/alert_request.h"
+#include "sdl_rpc_plugin/commands/mobile/alert_response.h"
+#include "sdl_rpc_plugin/commands/mobile/cancel_interaction_request.h"
+#include "sdl_rpc_plugin/commands/mobile/cancel_interaction_response.h"
 #include "sdl_rpc_plugin/commands/mobile/change_registration_request.h"
 #include "sdl_rpc_plugin/commands/mobile/change_registration_response.h"
+#include "sdl_rpc_plugin/commands/mobile/close_application_request.h"
+#include "sdl_rpc_plugin/commands/mobile/close_application_response.h"
 #include "sdl_rpc_plugin/commands/mobile/create_interaction_choice_set_request.h"
 #include "sdl_rpc_plugin/commands/mobile/create_interaction_choice_set_response.h"
+#include "sdl_rpc_plugin/commands/mobile/create_window_request.h"
+#include "sdl_rpc_plugin/commands/mobile/create_window_response.h"
+#include "sdl_rpc_plugin/commands/mobile/delete_command_request.h"
+#include "sdl_rpc_plugin/commands/mobile/delete_command_response.h"
 #include "sdl_rpc_plugin/commands/mobile/delete_file_request.h"
 #include "sdl_rpc_plugin/commands/mobile/delete_file_response.h"
 #include "sdl_rpc_plugin/commands/mobile/delete_interaction_choice_set_request.h"
 #include "sdl_rpc_plugin/commands/mobile/delete_interaction_choice_set_response.h"
 #include "sdl_rpc_plugin/commands/mobile/delete_sub_menu_request.h"
 #include "sdl_rpc_plugin/commands/mobile/delete_sub_menu_response.h"
+#include "sdl_rpc_plugin/commands/mobile/delete_window_request.h"
+#include "sdl_rpc_plugin/commands/mobile/delete_window_response.h"
+#include "sdl_rpc_plugin/commands/mobile/dial_number_request.h"
+#include "sdl_rpc_plugin/commands/mobile/dial_number_response.h"
 #include "sdl_rpc_plugin/commands/mobile/end_audio_pass_thru_request.h"
 #include "sdl_rpc_plugin/commands/mobile/end_audio_pass_thru_response.h"
 #include "sdl_rpc_plugin/commands/mobile/generic_response.h"
+#include "sdl_rpc_plugin/commands/mobile/get_cloud_app_properties_request.h"
+#include "sdl_rpc_plugin/commands/mobile/get_cloud_app_properties_response.h"
+#include "sdl_rpc_plugin/commands/mobile/get_file_request.h"
+#include "sdl_rpc_plugin/commands/mobile/get_file_response.h"
 #include "sdl_rpc_plugin/commands/mobile/get_system_capability_request.h"
 #include "sdl_rpc_plugin/commands/mobile/get_system_capability_response.h"
 #include "sdl_rpc_plugin/commands/mobile/get_way_points_request.h"
@@ -64,16 +79,19 @@
 #include "sdl_rpc_plugin/commands/mobile/on_audio_pass_thru_notification.h"
 #include "sdl_rpc_plugin/commands/mobile/on_button_event_notification.h"
 #include "sdl_rpc_plugin/commands/mobile/on_button_press_notification.h"
+#include "sdl_rpc_plugin/commands/mobile/on_command_notification.h"
 #include "sdl_rpc_plugin/commands/mobile/on_driver_distraction_notification.h"
+#include "sdl_rpc_plugin/commands/mobile/on_hash_change_notification.h"
 #include "sdl_rpc_plugin/commands/mobile/on_hmi_status_notification.h"
 #include "sdl_rpc_plugin/commands/mobile/on_hmi_status_notification_from_mobile.h"
+#include "sdl_rpc_plugin/commands/mobile/on_keyboard_input_notification.h"
 #include "sdl_rpc_plugin/commands/mobile/on_language_change_notification.h"
-#include "sdl_rpc_plugin/commands/mobile/on_command_notification.h"
 #include "sdl_rpc_plugin/commands/mobile/on_permissions_change_notification.h"
-#include "sdl_rpc_plugin/commands/mobile/on_tbt_client_state_notification.h"
-#include "sdl_rpc_plugin/commands/mobile/on_hash_change_notification.h"
-#include "sdl_rpc_plugin/commands/mobile/on_way_point_change_notification.h"
 #include "sdl_rpc_plugin/commands/mobile/on_system_capability_updated_notification.h"
+#include "sdl_rpc_plugin/commands/mobile/on_system_request_notification.h"
+#include "sdl_rpc_plugin/commands/mobile/on_tbt_client_state_notification.h"
+#include "sdl_rpc_plugin/commands/mobile/on_touch_event_notification.h"
+#include "sdl_rpc_plugin/commands/mobile/on_way_point_change_notification.h"
 #include "sdl_rpc_plugin/commands/mobile/perform_audio_pass_thru_request.h"
 #include "sdl_rpc_plugin/commands/mobile/perform_audio_pass_thru_response.h"
 #include "sdl_rpc_plugin/commands/mobile/perform_interaction_request.h"
@@ -86,14 +104,22 @@
 #include "sdl_rpc_plugin/commands/mobile/reset_global_properties_response.h"
 #include "sdl_rpc_plugin/commands/mobile/scrollable_message_request.h"
 #include "sdl_rpc_plugin/commands/mobile/scrollable_message_response.h"
+#include "sdl_rpc_plugin/commands/mobile/send_haptic_data_request.h"
+#include "sdl_rpc_plugin/commands/mobile/send_haptic_data_response.h"
+#include "sdl_rpc_plugin/commands/mobile/send_location_request.h"
+#include "sdl_rpc_plugin/commands/mobile/send_location_response.h"
+#include "sdl_rpc_plugin/commands/mobile/set_app_icon_request.h"
+#include "sdl_rpc_plugin/commands/mobile/set_app_icon_response.h"
+#include "sdl_rpc_plugin/commands/mobile/set_cloud_app_properties_request.h"
+#include "sdl_rpc_plugin/commands/mobile/set_cloud_app_properties_response.h"
 #include "sdl_rpc_plugin/commands/mobile/set_display_layout_request.h"
 #include "sdl_rpc_plugin/commands/mobile/set_display_layout_response.h"
 #include "sdl_rpc_plugin/commands/mobile/set_global_properties_request.h"
 #include "sdl_rpc_plugin/commands/mobile/set_global_properties_response.h"
-#include "sdl_rpc_plugin/commands/mobile/set_app_icon_request.h"
-#include "sdl_rpc_plugin/commands/mobile/set_app_icon_response.h"
 #include "sdl_rpc_plugin/commands/mobile/set_media_clock_timer_request.h"
 #include "sdl_rpc_plugin/commands/mobile/set_media_clock_timer_response.h"
+#include "sdl_rpc_plugin/commands/mobile/show_app_menu_request.h"
+#include "sdl_rpc_plugin/commands/mobile/show_app_menu_response.h"
 #include "sdl_rpc_plugin/commands/mobile/show_constant_tbt_request.h"
 #include "sdl_rpc_plugin/commands/mobile/show_constant_tbt_response.h"
 #include "sdl_rpc_plugin/commands/mobile/show_request.h"
@@ -106,32 +132,16 @@
 #include "sdl_rpc_plugin/commands/mobile/subscribe_button_response.h"
 #include "sdl_rpc_plugin/commands/mobile/subscribe_way_points_request.h"
 #include "sdl_rpc_plugin/commands/mobile/subscribe_way_points_response.h"
-#include "sdl_rpc_plugin/commands/mobile/unsubscribe_way_points_request.h"
-#include "sdl_rpc_plugin/commands/mobile/unsubscribe_way_points_response.h"
+#include "sdl_rpc_plugin/commands/mobile/system_request.h"
+#include "sdl_rpc_plugin/commands/mobile/system_response.h"
 #include "sdl_rpc_plugin/commands/mobile/unregister_app_interface_request.h"
 #include "sdl_rpc_plugin/commands/mobile/unregister_app_interface_response.h"
 #include "sdl_rpc_plugin/commands/mobile/unsubscribe_button_request.h"
 #include "sdl_rpc_plugin/commands/mobile/unsubscribe_button_response.h"
+#include "sdl_rpc_plugin/commands/mobile/unsubscribe_way_points_request.h"
+#include "sdl_rpc_plugin/commands/mobile/unsubscribe_way_points_response.h"
 #include "sdl_rpc_plugin/commands/mobile/update_turn_list_request.h"
 #include "sdl_rpc_plugin/commands/mobile/update_turn_list_response.h"
-#include "sdl_rpc_plugin/commands/mobile/system_request.h"
-#include "sdl_rpc_plugin/commands/mobile/system_response.h"
-#include "sdl_rpc_plugin/commands/mobile/on_keyboard_input_notification.h"
-#include "sdl_rpc_plugin/commands/mobile/on_touch_event_notification.h"
-#include "sdl_rpc_plugin/commands/mobile/on_system_request_notification.h"
-#include "sdl_rpc_plugin/commands/mobile/send_location_request.h"
-#include "sdl_rpc_plugin/commands/mobile/send_location_response.h"
-#include "sdl_rpc_plugin/commands/mobile/dial_number_request.h"
-#include "sdl_rpc_plugin/commands/mobile/dial_number_response.h"
-#include "sdl_rpc_plugin/commands/mobile/send_haptic_data_request.h"
-#include "sdl_rpc_plugin/commands/mobile/send_haptic_data_response.h"
-#include "sdl_rpc_plugin/commands/mobile/set_cloud_app_properties_request.h"
-#include "sdl_rpc_plugin/commands/mobile/set_cloud_app_properties_response.h"
-#include "sdl_rpc_plugin/commands/mobile/get_cloud_app_properties_request.h"
-#include "sdl_rpc_plugin/commands/mobile/get_cloud_app_properties_response.h"
-#include "sdl_rpc_plugin/commands/mobile/get_file_request.h"
-#include "sdl_rpc_plugin/commands/mobile/get_file_response.h"
-#include "interfaces/MOBILE_API.h"
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "ApplicationManager")
 namespace sdl_rpc_plugin {
@@ -170,6 +180,11 @@ CommandCreator& MobileCommandFactory::get_command_creator(
                  ? factory.GetCreator<commands::AddCommandRequest>()
                  : factory.GetCreator<commands::AddCommandResponse>();
     }
+    case mobile_apis::FunctionID::CreateWindowID: {
+      return mobile_api::messageType::request == message_type
+                 ? factory.GetCreator<commands::CreateWindowRequest>()
+                 : factory.GetCreator<commands::CreateWindowResponse>();
+    }
     case mobile_apis::FunctionID::DeleteCommandID: {
       return mobile_api::messageType::request == message_type
                  ? factory.GetCreator<commands::DeleteCommandRequest>()
@@ -184,6 +199,16 @@ CommandCreator& MobileCommandFactory::get_command_creator(
       return mobile_api::messageType::request == message_type
                  ? factory.GetCreator<commands::DeleteSubMenuRequest>()
                  : factory.GetCreator<commands::DeleteSubMenuResponse>();
+    }
+    case mobile_apis::FunctionID::ShowAppMenuID: {
+      return mobile_api::messageType::request == message_type
+                 ? factory.GetCreator<commands::ShowAppMenuRequest>()
+                 : factory.GetCreator<commands::ShowAppMenuResponse>();
+    }
+    case mobile_apis::FunctionID::DeleteWindowID: {
+      return mobile_api::messageType::request == message_type
+                 ? factory.GetCreator<commands::DeleteWindowRequest>()
+                 : factory.GetCreator<commands::DeleteWindowResponse>();
     }
     case mobile_apis::FunctionID::DeleteInteractionChoiceSetID: {
       return mobile_api::messageType::request == message_type
@@ -211,6 +236,11 @@ CommandCreator& MobileCommandFactory::get_command_creator(
       return mobile_api::messageType::request == message_type
                  ? factory.GetCreator<commands::PerformAudioPassThruRequest>()
                  : factory.GetCreator<commands::PerformAudioPassThruResponse>();
+    }
+    case mobile_apis::FunctionID::CancelInteractionID: {
+      return mobile_api::messageType::request == message_type
+                 ? factory.GetCreator<commands::CancelInteractionRequest>()
+                 : factory.GetCreator<commands::CancelInteractionResponse>();
     }
     case mobile_apis::FunctionID::CreateInteractionChoiceSetID: {
       return mobile_api::messageType::request == message_type
@@ -355,6 +385,11 @@ CommandCreator& MobileCommandFactory::get_command_creator(
                  ? factory.GetCreator<commands::GetCloudAppPropertiesRequest>()
                  : factory
                        .GetCreator<commands::GetCloudAppPropertiesResponse>();
+    }
+    case mobile_apis::FunctionID::CloseApplicationID: {
+      return mobile_api::messageType::request == message_type
+                 ? factory.GetCreator<commands::CloseApplicationRequest>()
+                 : factory.GetCreator<commands::CloseApplicationResponse>();
     }
     case mobile_apis::FunctionID::GenericResponseID: {
       using app_mngr::commands::Command;
@@ -512,4 +547,4 @@ CommandSharedPtr MobileCommandFactory::CreateCommand(
   return get_creator_factory(function_id, message_type, source).create(message);
 }
 
-}  // namespace application_manager
+}  // namespace sdl_rpc_plugin

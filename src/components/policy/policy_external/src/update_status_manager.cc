@@ -32,6 +32,7 @@
 
 #include "policy/update_status_manager.h"
 #include "policy/policy_listener.h"
+#include "policy/ptu_retry_handler.h"
 #include "utils/logger.h"
 
 namespace policy {
@@ -87,6 +88,14 @@ void UpdateStatusManager::OnUpdateSentOut(uint32_t update_timeout) {
 
 void UpdateStatusManager::OnUpdateTimeoutOccurs() {
   LOG4CXX_AUTO_TRACE(logger_);
+
+  auto& ptu_retry_handler = listener_->ptu_retry_handler();
+
+  if (ptu_retry_handler.IsAllowedRetryCountExceeded()) {
+    ptu_retry_handler.RetrySequenceFailed();
+    return;
+  }
+
   ProcessEvent(kOnUpdateTimeout);
   DCHECK(update_status_thread_delegate_);
   update_status_thread_delegate_->updateTimeOut(0);  // Stop Timer

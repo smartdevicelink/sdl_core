@@ -1,15 +1,15 @@
-#include <iostream>
 #include <algorithm>
+#include <iostream>
 #include "policy/policy_table/types.h"
-#include "utils/logger.h"
 #include "utils/helpers.h"
+#include "utils/logger.h"
 
 namespace {
 bool IsPredefinedApplication(const std::string& app_id) {
   using namespace rpc::policy_table_interface_base;
   return kPreDataConsentApp == app_id || kDefaultApp == app_id;
 }
-}
+}  // namespace
 
 namespace rpc {
 namespace policy_table_interface_base {
@@ -102,9 +102,9 @@ bool ApplicationPoliciesSection::Validate() const {
     }
 
     if (!app_request_types.is_valid()) {
-      LOG4CXX_WARN(logger_,
-                   "Invalid RequestTypes for " << app_id
-                                               << " Will be cleaned up.");
+      LOG4CXX_WARN(
+          logger_,
+          "Invalid RequestTypes for " << app_id << " Will be cleaned up.");
       app_request_types.CleanUp();
       if (app_request_types.is_cleaned_up()) {
         if (PT_PRELOADED == pt_type) {
@@ -221,6 +221,15 @@ bool RpcParameters::Validate() const {
 bool Rpcs::Validate() const {
   return true;
 }
+
+bool EndpointProperty::Validate() const {
+  if (!version.is_valid()) {
+    return false;
+  }
+
+  return true;
+}
+
 bool ModuleConfig::Validate() const {
   switch (GetPolicyTableType()) {
     case PT_PRELOADED: {
@@ -255,6 +264,14 @@ bool ModuleConfig::Validate() const {
                     "Endpoint " << it_endpoints->first
                                 << "does not contain default group");
       return false;
+    }
+  }
+
+  if (endpoint_properties.is_initialized()) {
+    const auto& endpoint_property =
+        endpoint_properties->find(kDefaultOemMappingServiceName);
+    if (endpoint_properties->end() != endpoint_property) {
+      return (*endpoint_property).second.version.is_initialized();
     }
   }
 
@@ -304,6 +321,40 @@ bool ConsentRecords::Validate() const {
 bool DeviceParams::Validate() const {
   return true;
 }
+
+bool VehicleDataItem::Validate() const {
+  if (!ValidateNaming(std::string(name))) {
+    return false;
+  };
+
+  if (!ValidateNaming(std::string(key))) {
+    return false;
+  };
+
+  if (!ValidateTypes()) {
+    LOG4CXX_ERROR(
+        logger_,
+        "Unknown type: " << std::string(type) << " of " << std::string(key));
+    return false;
+  }
+  return true;
+}
+
+bool VehicleData::Validate() const {
+  const PolicyTableType policy_table_type = GetPolicyTableType();
+  bool result = true;
+  if (PT_SNAPSHOT == policy_table_type) {
+    result =
+        (!schema_items.is_initialized()) && schema_version.is_initialized();
+  }
+  if (PT_UPDATE == policy_table_type || PT_PRELOADED == policy_table_type) {
+    result =
+        (schema_version.is_initialized() && schema_items.is_initialized()) ||
+        (!schema_version.is_initialized() && !schema_items.is_initialized());
+  }
+  return result;
+}
+
 bool PolicyTable::Validate() const {
   PolicyTableType policy_table_type = GetPolicyTableType();
 

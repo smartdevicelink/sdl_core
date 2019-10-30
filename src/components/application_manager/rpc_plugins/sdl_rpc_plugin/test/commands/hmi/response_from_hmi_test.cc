@@ -32,24 +32,24 @@
 
 #include <stdint.h>
 
-#include "gtest/gtest.h"
-#include "smart_objects/smart_object.h"
+#include "application_manager/commands/command.h"
+#include "application_manager/commands/response_from_hmi.h"
 #include "application_manager/smart_object_keys.h"
 #include "application_manager/test/include/application_manager/commands/commands_test.h"
-#include "application_manager/commands/command.h"
 #include "application_manager/test/include/application_manager/mock_event_dispatcher.h"
-#include "application_manager/commands/response_from_hmi.h"
+#include "gtest/gtest.h"
+#include "smart_objects/smart_object.h"
 namespace test {
 namespace components {
 namespace commands_test {
 namespace hmi_commands_test {
 namespace response_from_hmi {
 
+using ::test::components::event_engine_test::MockEventDispatcher;
 using ::testing::_;
+using ::testing::DoAll;
 using ::testing::Return;
 using ::testing::SaveArg;
-using ::testing::DoAll;
-using ::test::components::event_engine_test::MockEventDispatcher;
 
 namespace am = ::application_manager;
 using application_manager::commands::ResponseFromHMI;

@@ -31,18 +31,18 @@
  */
 
 #include <stdint.h>
-#include <string>
 #include <set>
+#include <string>
 
 #include "gtest/gtest.h"
 
-#include "mobile/system_request.h"
 #include "application_manager/commands/command_request_test.h"
+#include "application_manager/event_engine/event.h"
 #include "application_manager/mock_application.h"
 #include "application_manager/mock_application_manager.h"
-#include "application_manager/event_engine/event.h"
 #include "application_manager/mock_hmi_interface.h"
 #include "application_manager/policies/mock_policy_handler_interface.h"
+#include "mobile/system_request.h"
 
 namespace test {
 namespace components {
@@ -51,13 +51,13 @@ namespace mobile_commands_test {
 namespace system_request {
 
 namespace am = application_manager;
-using sdl_rpc_plugin::commands::SystemRequest;
+using am::MessageType;
+using am::MockHmiInterfaces;
 using am::commands::CommandImpl;
 using am::commands::MessageSharedPtr;
-using am::MockHmiInterfaces;
 using am::event_engine::Event;
-using am::MessageType;
 using policy_test::MockPolicyHandlerInterface;
+using sdl_rpc_plugin::commands::SystemRequest;
 
 using ::testing::_;
 using ::testing::DoAll;
@@ -74,6 +74,7 @@ const std::string kAppStorageFolder = "fake-storage";
 const std::string kSystemFilesPath = "/fake/system/files";
 const std::string kFileName = "Filename";
 const uint32_t kHmiAppId = 3u;
+const connection_handler::DeviceHandle kDeviceId = 1u;
 }  // namespace
 
 class SystemRequestTest
@@ -99,13 +100,15 @@ class SystemRequestTest
     ON_CALL(*mock_app_, policy_app_id()).WillByDefault(Return(kAppPolicyId));
     ON_CALL(*mock_app_, folder_name()).WillByDefault(Return(kAppFolderName));
     ON_CALL(*mock_app_, hmi_app_id()).WillByDefault(Return(kHmiAppId));
+    ON_CALL(*mock_app_, device()).WillByDefault(Return(kDeviceId));
 
     ON_CALL(app_mngr_settings_, system_files_path())
         .WillByDefault(ReturnRef(kSystemFilesPath));
     ON_CALL(app_mngr_settings_, app_storage_folder())
         .WillByDefault(ReturnRef(kAppStorageFolder));
 
-    ON_CALL(mock_policy_handler_, IsRequestTypeAllowed(kAppPolicyId, _))
+    ON_CALL(mock_policy_handler_,
+            IsRequestTypeAllowed(kDeviceId, kAppPolicyId, _))
         .WillByDefault(Return(true));
   }
 
@@ -146,9 +149,10 @@ TEST_F(SystemRequestTest,
 
   PreConditions();
 
-  EXPECT_CALL(mock_policy_handler_,
-              IsRequestTypeAllowed(kAppPolicyId,
-                                   mobile_apis::RequestType::OEM_SPECIFIC))
+  EXPECT_CALL(
+      mock_policy_handler_,
+      IsRequestTypeAllowed(
+          kDeviceId, kAppPolicyId, mobile_apis::RequestType::OEM_SPECIFIC))
       .WillOnce(Return(true));
 
   EXPECT_CALL(mock_policy_handler_,
@@ -191,9 +195,10 @@ TEST_F(
 
   PreConditions();
 
-  EXPECT_CALL(mock_policy_handler_,
-              IsRequestTypeAllowed(kAppPolicyId,
-                                   mobile_apis::RequestType::OEM_SPECIFIC))
+  EXPECT_CALL(
+      mock_policy_handler_,
+      IsRequestTypeAllowed(
+          kDeviceId, kAppPolicyId, mobile_apis::RequestType::OEM_SPECIFIC))
       .WillOnce(Return(true));
 
   EXPECT_CALL(mock_policy_handler_,
@@ -216,13 +221,45 @@ TEST_F(SystemRequestTest, Run_RequestTypeDisallowed_SendDisallowedResponse) {
 
   PreConditions();
 
-  EXPECT_CALL(mock_policy_handler_,
-              IsRequestTypeAllowed(kAppPolicyId,
-                                   mobile_apis::RequestType::OEM_SPECIFIC))
+  EXPECT_CALL(
+      mock_policy_handler_,
+      IsRequestTypeAllowed(
+          kDeviceId, kAppPolicyId, mobile_apis::RequestType::OEM_SPECIFIC))
       .WillOnce(Return(false));
 
   ExpectManageMobileCommandWithResultCode(mobile_apis::Result::DISALLOWED);
   EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_, _)).Times(0);
+
+  std::shared_ptr<SystemRequest> command(CreateCommand<SystemRequest>(msg));
+  ASSERT_TRUE(command->Init());
+  command->Run();
+}
+
+TEST_F(SystemRequestTest, Run_RequestType_IconURL_Success) {
+  PreConditions();
+  MessageSharedPtr msg = CreateIVSUMessage();
+  (*msg)[am::strings::msg_params][am::strings::request_type] =
+      mobile_apis::RequestType::ICON_URL;
+
+  const std::string url = "https://www.appsfakeiconurlendpoint.com/icon.png";
+
+  (*msg)[am::strings::msg_params][am::strings::file_name] = url;
+  const std::vector<uint8_t> binary_data = {1u, 2u};
+  (*msg)[am::strings::params][am::strings::binary_data] = binary_data;
+
+  EXPECT_CALL(mock_policy_handler_,
+              IsRequestTypeAllowed(
+                  kDeviceId, kAppPolicyId, mobile_apis::RequestType::ICON_URL))
+      .WillOnce(Return(true));
+  EXPECT_CALL(app_mngr_settings_, app_icons_folder())
+      .WillOnce(ReturnRef(kAppStorageFolder));
+  EXPECT_CALL(app_mngr_, PolicyIDByIconUrl(url)).WillOnce(Return(kAppPolicyId));
+
+  EXPECT_CALL(app_mngr_,
+              SaveBinary(binary_data, kAppStorageFolder, kAppPolicyId, 0u))
+      .WillOnce(Return(mobile_apis::Result::SUCCESS));
+
+  EXPECT_CALL(app_mngr_, SetIconFileFromSystemRequest(kAppPolicyId)).Times(1);
 
   std::shared_ptr<SystemRequest> command(CreateCommand<SystemRequest>(msg));
   ASSERT_TRUE(command->Init());

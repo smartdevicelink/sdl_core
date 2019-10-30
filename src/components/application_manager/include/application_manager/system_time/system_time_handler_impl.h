@@ -36,11 +36,11 @@
 #include <time.h>
 #include <vector>
 
+#include "application_manager/application_manager.h"
+#include "application_manager/event_engine/event_observer.h"
 #include "utils/lock.h"
 #include "utils/macro.h"
 #include "utils/system_time_handler.h"
-#include "application_manager/application_manager.h"
-#include "application_manager/event_engine/event_observer.h"
 
 namespace application_manager {
 
@@ -128,6 +128,12 @@ class SystemTimeHandlerImpl : public utils::SystemTimeHandler,
    * GetSystemTimeRequest to HMI in order to obtain system time
    */
   void ProcessSystemTimeReadyNotification();
+
+  /**
+   * @brief ResetPendingSystemTimeRequests resets waiting for system time
+   * requests flag
+   */
+  void ResetPendingSystemTimeRequests() OVERRIDE;
 
   /**
    * @brief Checks if UTC time is ready to provided by HMI

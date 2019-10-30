@@ -33,18 +33,18 @@
 #include "config_profile/profile.h"
 
 #include <errno.h>
-#include <numeric>
-#include <string.h>
 #include <stdlib.h>
-#include <sstream>
+#include <string.h>
 #include <algorithm>
+#include <numeric>
+#include <sstream>
 
 #include <string>
 
 #include "config_profile/ini_file.h"
+#include "utils/file_system.h"
 #include "utils/logger.h"
 #include "utils/threads/thread.h"
-#include "utils/file_system.h"
 
 #ifdef ENABLE_SECURITY
 #include <openssl/ssl.h>
@@ -97,6 +97,7 @@ const char* kTransportRequiredForResumptionSection =
 const char* kLowBandwidthTransportResumptionLevelSection =
     "LowBandwidthTransportResumptionLevel";
 const char* kAppServicesSection = "AppServices";
+const char* kRCModuleConsentSection = "RCModuleConsent";
 
 const char* kSDLVersionKey = "SDLVersion";
 const char* kHmiCapabilitiesKey = "HMICapabilities";
@@ -184,6 +185,13 @@ const char* kAppHmiLevelNoneRequestsTimeScaleKey =
 const char* kPendingRequestsAmoundKey = "PendingRequestsAmount";
 const char* kSupportedDiagModesKey = "SupportedDiagModes";
 const char* kTransportManagerDisconnectTimeoutKey = "DisconnectTimeout";
+const char* kBluetoothUUIDKey = "BluetoothUUID";
+const char* kAOAFilterManufacturerKey = "AOAFilterManufacturer";
+const char* kAOAFilterModelNameKey = "AOAFilterModelName";
+const char* kAOAFilterDescriptionKey = "AOAFilterDescription";
+const char* kAOAFilterVersionKey = "AOAFilterVersion";
+const char* kAOAFilterURIKey = "AOAFilterURI";
+const char* kAOAFilterSerialNumber = "AOAFilterSerialNumber";
 const char* kTTSDelimiterKey = "TTSDelimiter";
 const char* kRecordingFileNameKey = "RecordingFileName";
 const char* kRecordingFileSourceKey = "RecordingFileSource";
@@ -240,6 +248,7 @@ const char* kSecondaryTransportForWiFiKey = "SecondaryTransportForWiFi";
 const char* kAudioServiceTransportsKey = "AudioServiceTransports";
 const char* kVideoServiceTransportsKey = "VideoServiceTransports";
 const char* kRpcPassThroughTimeoutKey = "RpcPassThroughTimeout";
+const char* kPeriodForConsentExpirationKey = "PeriodForConsentExpiration";
 
 const char* kDefaultTransportRequiredForResumptionKey =
     "DefaultTransportRequiredForResumption";
@@ -396,7 +405,30 @@ const std::string kAllowedSymbols =
 const bool kDefaultMultipleTransportsEnabled = false;
 const char* kDefaultLowBandwidthResumptionLevel = "NONE";
 const uint32_t kDefaultRpcPassThroughTimeout = 10000;
+const uint16_t kDefaultPeriodForConsentExpiration = 30;
 const char* kDefaultHMIOriginId = "HMI_ID";
+const std::vector<uint8_t> kDefaultBluetoothUUID = {0x93,
+                                                    0x6D,
+                                                    0xA0,
+                                                    0x1F,
+                                                    0x9A,
+                                                    0xBD,
+                                                    0x4D,
+                                                    0x9D,
+                                                    0x80,
+                                                    0xC7,
+                                                    0x02,
+                                                    0xAF,
+                                                    0x85,
+                                                    0xC8,
+                                                    0x22,
+                                                    0xA8};
+const char* kDefaultAOAFilterManufacturer = "SDL";
+const char* kDefaultAOAFilterModelName = "Core";
+const char* kDefaultAOAFilterDescription = "SmartDeviceLink Core Component USB";
+const char* kDefaultAOAFilterVersion = "1.0";
+const char* kDefaultAOAFilterURI = "http://www.smartdevicelink.org";
+const char* kDefaultAOAFilterSerialNumber = "N000000";
 }  // namespace
 
 namespace profile {
@@ -513,7 +545,8 @@ Profile::Profile()
     , low_voltage_signal_offset_(kDefaultLowVoltageSignalOffset)
     , wake_up_signal_offset_(kDefaultWakeUpSignalOffset)
     , ignition_off_signal_offset_(kDefaultIgnitionOffSignalOffset)
-    , rpc_pass_through_timeout_(kDefaultRpcPassThroughTimeout) {
+    , rpc_pass_through_timeout_(kDefaultRpcPassThroughTimeout)
+    , period_for_consent_expiration_(kDefaultPeriodForConsentExpiration) {
   // SDL version
   ReadStringValue(
       &sdl_version_, kDefaultSDLVersion, kMainSection, kSDLVersionKey);
@@ -806,6 +839,34 @@ uint16_t Profile::cloud_app_max_retry_attempts() const {
   return cloud_app_max_retry_attempts_;
 }
 
+const uint8_t* Profile::bluetooth_uuid() const {
+  return bluetooth_uuid_.data();
+}
+
+const std::string& Profile::aoa_filter_manufacturer() const {
+  return aoa_filter_manufacturer_;
+}
+
+const std::string& Profile::aoa_filter_model_name() const {
+  return aoa_filter_model_name_;
+}
+
+const std::string& Profile::aoa_filter_description() const {
+  return aoa_filter_description_;
+}
+
+const std::string& Profile::aoa_filter_version() const {
+  return aoa_filter_version_;
+}
+
+const std::string& Profile::aoa_filter_uri() const {
+  return aoa_filter_uri_;
+}
+
+const std::string& Profile::aoa_filter_serial_number() const {
+  return aoa_filter_serial_number_;
+}
+
 const std::string& Profile::tts_delimiter() const {
   return tts_delimiter_;
 }
@@ -1087,6 +1148,10 @@ const bool Profile::multiple_transports_enabled() const {
 
 uint32_t Profile::rpc_pass_through_timeout() const {
   return rpc_pass_through_timeout_;
+}
+
+uint16_t Profile::period_for_consent_expiration() const {
+  return period_for_consent_expiration_;
 }
 
 const std::vector<std::string>& Profile::secondary_transports_for_bluetooth()
@@ -1821,6 +1886,64 @@ void Profile::UpdateValues() {
                     kCloudAppMaxRetryAttemptsKey,
                     kCloudAppTransportSection);
 
+  bool read_result = true;
+  bluetooth_uuid_ = ReadUint8Container(
+      kTransportManagerSection, kBluetoothUUIDKey, &read_result);
+  if (!read_result || bluetooth_uuid_.size() != 16) {
+    bluetooth_uuid_ = kDefaultBluetoothUUID;
+  }
+
+  ReadStringValue(&aoa_filter_manufacturer_,
+                  kDefaultAOAFilterManufacturer,
+                  kTransportManagerSection,
+                  kAOAFilterManufacturerKey);
+
+  LOG_UPDATED_VALUE(aoa_filter_manufacturer_,
+                    kAOAFilterManufacturerKey,
+                    kTransportManagerSection);
+
+  ReadStringValue(&aoa_filter_model_name_,
+                  kDefaultAOAFilterModelName,
+                  kTransportManagerSection,
+                  kAOAFilterModelNameKey);
+
+  LOG_UPDATED_VALUE(
+      aoa_filter_model_name_, kAOAFilterModelNameKey, kTransportManagerSection);
+
+  ReadStringValue(&aoa_filter_description_,
+                  kDefaultAOAFilterDescription,
+                  kTransportManagerSection,
+                  kAOAFilterDescriptionKey);
+
+  LOG_UPDATED_VALUE(aoa_filter_description_,
+                    kAOAFilterDescriptionKey,
+                    kTransportManagerSection);
+
+  ReadStringValue(&aoa_filter_version_,
+                  kDefaultAOAFilterVersion,
+                  kTransportManagerSection,
+                  kAOAFilterVersionKey);
+
+  LOG_UPDATED_VALUE(
+      aoa_filter_version_, kAOAFilterVersionKey, kTransportManagerSection);
+
+  ReadStringValue(&aoa_filter_uri_,
+                  kDefaultAOAFilterURI,
+                  kTransportManagerSection,
+                  kAOAFilterURIKey);
+
+  LOG_UPDATED_VALUE(
+      aoa_filter_uri_, kAOAFilterURIKey, kTransportManagerSection);
+
+  ReadStringValue(&aoa_filter_serial_number_,
+                  kDefaultAOAFilterSerialNumber,
+                  kTransportManagerSection,
+                  kAOAFilterSerialNumber);
+
+  LOG_UPDATED_VALUE(aoa_filter_serial_number_,
+                    kAOAFilterSerialNumber,
+                    kTransportManagerSection);
+
   // Event MQ
   ReadStringValue(
       &event_mq_name_, kDefaultEventMQ, kTransportManagerSection, kEventMQKey);
@@ -2263,6 +2386,15 @@ void Profile::UpdateValues() {
                     kRpcPassThroughTimeoutKey,
                     kAppServicesSection);
 
+  ReadUIntValue(&period_for_consent_expiration_,
+                kDefaultPeriodForConsentExpiration,
+                kRCModuleConsentSection,
+                kPeriodForConsentExpirationKey);
+
+  LOG_UPDATED_VALUE(period_for_consent_expiration_,
+                    kPeriodForConsentExpirationKey,
+                    kRCModuleConsentSection);
+
   {  // Secondary Transports and ServicesMap
     struct KeyPair {
       std::vector<std::string>* ini_vector;
@@ -2449,6 +2581,10 @@ int32_t hex_to_int(const std::string& value) {
   return static_cast<int32_t>(strtol(value.c_str(), NULL, 16));
 }
 
+uint8_t hex_to_uint8(const std::string& value) {
+  return static_cast<uint8_t>(strtol(value.c_str(), NULL, 16));
+}
+
 std::string trim_string(const std::string& str) {
   const char* delims = " \t";
 
@@ -2460,7 +2596,7 @@ std::string trim_string(const std::string& str) {
 
   return str.substr(start, end - start + 1);
 }
-}
+}  // namespace
 
 std::vector<int> Profile::ReadIntContainer(const char* const pSection,
                                            const char* const pKey,
@@ -2471,6 +2607,18 @@ std::vector<int> Profile::ReadIntContainer(const char* const pSection,
   value_list.resize(string_list.size());
   std::transform(
       string_list.begin(), string_list.end(), value_list.begin(), hex_to_int);
+  return value_list;
+}
+
+std::vector<uint8_t> Profile::ReadUint8Container(const char* const pSection,
+                                                 const char* const pKey,
+                                                 bool* out_result) const {
+  const std::vector<std::string> string_list =
+      ReadStringContainer(pSection, pKey, out_result);
+  std::vector<uint8_t> value_list;
+  value_list.resize(string_list.size());
+  std::transform(
+      string_list.begin(), string_list.end(), value_list.begin(), hex_to_uint8);
   return value_list;
 }
 

@@ -35,11 +35,11 @@
 
 #include <stdint.h>
 #include <string.h>
+#include <time.h>
 #include <fstream>
 #include <iostream>
 #include <string>
 #include <vector>
-#include <time.h>
 
 namespace file_system {
 
@@ -70,10 +70,10 @@ uint64_t FileSize(const std::string& path);
 
 /**
  * @brief Creates directory with owner_all permissions
- * @param name path to directory
- * @return path to created directory.
+ * @param path directory to create
+ * @return true if directory was created or already exist.
  */
-std::string CreateDirectory(const std::string& name);
+bool CreateDirectory(const std::string& path);
 
 /**
  * @brief Creates directory recursively

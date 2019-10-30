@@ -32,18 +32,17 @@
 
 #include "gtest/gtest.h"
 
-#include "application_manager/commands/commands_test.h"
-#include "application_manager/commands/command_request_test.h"
 #include "application_manager/application.h"
-#include "application_manager/mock_application_manager.h"
+#include "application_manager/commands/command_request_test.h"
+#include "application_manager/commands/commands_test.h"
 #include "application_manager/mock_application.h"
-#include "mobile/get_way_points_request.h"
-#include "application_manager/smart_object_keys.h"
-#include "application_manager/mock_message_helper.h"
-#include "interfaces/HMI_API.h"
-#include "interfaces/MOBILE_API.h"
+#include "application_manager/mock_application_manager.h"
 #include "application_manager/mock_hmi_interface.h"
 #include "application_manager/mock_message_helper.h"
+#include "application_manager/smart_object_keys.h"
+#include "interfaces/HMI_API.h"
+#include "interfaces/MOBILE_API.h"
+#include "mobile/get_way_points_request.h"
 
 namespace test {
 namespace components {
@@ -52,11 +51,11 @@ namespace mobile_commands_test {
 namespace get_way_points_request {
 
 using namespace mobile_apis::Result;
-using ::testing::Return;
-using ::testing::_;
-using sdl_rpc_plugin::commands::GetWayPointsRequest;
-using application_manager::MockMessageHelper;
 using application_manager::MockHmiInterfaces;
+using application_manager::MockMessageHelper;
+using sdl_rpc_plugin::commands::GetWayPointsRequest;
+using ::testing::_;
+using ::testing::Return;
 
 typedef std::shared_ptr<GetWayPointsRequest> CommandPtr;
 typedef mobile_apis::Result::eType MobileResult;
@@ -67,7 +66,7 @@ const uint32_t kCorrelationId = 2u;
 const uint32_t kAppId = 3u;
 const uint32_t kConnectionKey = kAppId;
 const std::string kMethodName = "Navigation.GetWayPoints";
-}
+}  // namespace
 
 class GetWayPointsRequestTest
     : public CommandRequestTest<CommandsTestMocks::kIsNice> {

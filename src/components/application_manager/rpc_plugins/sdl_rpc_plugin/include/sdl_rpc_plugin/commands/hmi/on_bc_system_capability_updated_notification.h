@@ -74,6 +74,6 @@ class OnBCSystemCapabilityUpdatedNotification
 
 }  // namespace commands
 
-}  // namespace app_service_rpc_plugin
+}  // namespace sdl_rpc_plugin
 
 #endif  // SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_HMI_ON_BC_SYSTEM_CAPABILITY_UPDATED_NOTIFICATION_H_

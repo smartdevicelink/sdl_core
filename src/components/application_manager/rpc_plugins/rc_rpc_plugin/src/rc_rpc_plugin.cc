@@ -29,16 +29,18 @@
  ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  POSSIBILITY OF SUCH DAMAGE.
  */
-#include "application_manager/plugin_manager/plugin_keys.h"
 #include "rc_rpc_plugin/rc_rpc_plugin.h"
-#include "rc_rpc_plugin/rc_command_factory.h"
-#include "rc_rpc_plugin/rc_app_extension.h"
-#include "rc_rpc_plugin/resource_allocation_manager_impl.h"
+#include <memory>
+#include "application_manager/plugin_manager/plugin_keys.h"
 #include "rc_rpc_plugin/interior_data_cache_impl.h"
 #include "rc_rpc_plugin/interior_data_manager_impl.h"
+#include "rc_rpc_plugin/rc_app_extension.h"
+#include "rc_rpc_plugin/rc_capabilities_manager_impl.h"
+#include "rc_rpc_plugin/rc_command_factory.h"
+#include "rc_rpc_plugin/rc_consent_manager_impl.h"
 #include "rc_rpc_plugin/rc_helpers.h"
+#include "rc_rpc_plugin/resource_allocation_manager_impl.h"
 #include "utils/helpers.h"
-#include <memory>
 
 namespace rc_rpc_plugin {
 CREATE_LOGGERPTR_GLOBAL(logger_, "RemoteControlModule");
@@ -49,23 +51,35 @@ bool RCRPCPlugin::Init(
     application_manager::ApplicationManager& app_manager,
     application_manager::rpc_service::RPCService& rpc_service,
     application_manager::HMICapabilities& hmi_capabilities,
-    policy::PolicyHandlerInterface& policy_handler) {
+    policy::PolicyHandlerInterface& policy_handler,
+    resumption::LastState& last_state) {
+  rc_consent_manager_.reset(new rc_rpc_plugin::RCConsentManagerImpl(
+      last_state,
+      app_manager,
+      app_manager.get_settings().period_for_consent_expiration()));
   interior_data_cache_.reset(new InteriorDataCacheImpl());
   interior_data_manager_.reset(new InteriorDataManagerImpl(
       *this, *interior_data_cache_, app_manager, rpc_service));
-
-  resource_allocation_manager_.reset(
-      new ResourceAllocationManagerImpl(app_manager, rpc_service));
+  rc_capabilities_manager_.reset(
+      new RCCapabilitiesManagerImpl(hmi_capabilities));
+  resource_allocation_manager_.reset(new ResourceAllocationManagerImpl(
+      app_manager, rpc_service, *(rc_capabilities_manager_.get())));
   RCCommandParams params{app_manager,
                          rpc_service,
                          hmi_capabilities,
                          policy_handler,
                          *(resource_allocation_manager_.get()),
                          *(interior_data_cache_.get()),
-                         *(interior_data_manager_.get())};
+                         *(interior_data_manager_.get()),
+                         *(rc_capabilities_manager_.get()),
+                         *(rc_consent_manager_.get())};
   command_factory_.reset(new rc_rpc_plugin::RCCommandFactory(params));
   rpc_service_ = &rpc_service;
   app_mngr_ = &app_manager;
+
+  // Check all saved consents and remove expired
+  rc_consent_manager_->RemoveExpiredConsents();
+
   return true;
 }
 
@@ -98,8 +112,13 @@ void RCRPCPlugin::OnApplicationEvent(
   }
   switch (event) {
     case plugins::kApplicationRegistered: {
-      application->AddExtension(
-          std::shared_ptr<RCAppExtension>(new RCAppExtension(kRCPluginID)));
+      auto extension =
+          std::shared_ptr<RCAppExtension>(new RCAppExtension(kRCPluginID));
+      application->AddExtension(extension);
+      const auto driver_location =
+          rc_capabilities_manager_
+              ->GetDriverLocationFromSeatLocationCapability();
+      extension->SetUserLocation(driver_location);
       resource_allocation_manager_->SendOnRCStatusNotifications(
           NotificationTrigger::APP_REGISTRATION, application);
       break;
@@ -114,6 +133,12 @@ void RCRPCPlugin::OnApplicationEvent(
       interior_data_manager_->OnApplicationEvent(event, application);
       break;
     }
+    case plugins::kGlobalPropertiesUpdated: {
+      const auto user_location = application->get_user_location();
+      auto extension = RCHelpers::GetRCExtension(*application);
+      extension->SetUserLocation(user_location);
+      break;
+    }
     default:
       break;
   }
@@ -121,8 +146,8 @@ void RCRPCPlugin::OnApplicationEvent(
 
 RCRPCPlugin::Apps RCRPCPlugin::GetRCApplications(
     application_manager::ApplicationManager& app_mngr) {
-  using application_manager::ApplicationSharedPtr;
   using application_manager::ApplicationSet;
+  using application_manager::ApplicationSharedPtr;
   ApplicationSet accessor = app_mngr.applications().GetData();
 
   std::vector<ApplicationSharedPtr> result;
@@ -136,6 +161,14 @@ RCRPCPlugin::Apps RCRPCPlugin::GetRCApplications(
 
 }  // namespace rc_rpc_plugin
 
-extern "C" application_manager::plugin_manager::RPCPlugin* Create() {
+extern "C" __attribute__((visibility("default")))
+application_manager::plugin_manager::RPCPlugin*
+Create() {
   return new rc_rpc_plugin::RCRPCPlugin();
 }  // namespace rc_rpc_plugin
+
+extern "C" __attribute__((visibility("default"))) void Delete(
+    application_manager::plugin_manager::RPCPlugin* data) {
+  delete data;
+  DELETE_THREAD_LOGGER(rc_rpc_plugin::logger_);
+}

@@ -47,6 +47,6 @@ const char connection_key[] = "connection_key";
 const char stime[] = "stime";
 const char utime[] = "utime";
 const char memory[] = "RAM";
-}
-}
+}  // namespace strings
+}  // namespace telemetry_monitor
 #endif  // SRC_COMPONENTS_TELEMETRY_MONITOR_INCLUDE_TELEMETRY_MONITOR_JSON_KEYS_H_

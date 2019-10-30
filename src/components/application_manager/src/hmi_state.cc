@@ -32,9 +32,9 @@
  */
 
 #include "application_manager/hmi_state.h"
-#include <ostream>
 #include <boost/assign.hpp>
 #include <boost/bimap.hpp>
+#include <ostream>
 #include "application_manager/application_manager.h"
 #include "utils/helpers.h"
 
@@ -48,6 +48,7 @@ HmiState::HmiState(std::shared_ptr<Application> app,
     : hmi_app_id_(app->hmi_app_id())
     , state_id_(state_id)
     , app_mngr_(app_mngr)
+    , window_type_(mobile_apis::WindowType::INVALID_ENUM)
     , hmi_level_(mobile_apis::HMILevel::INVALID_ENUM)
     , audio_streaming_state_(mobile_apis::AudioStreamingState::INVALID_ENUM)
     , video_streaming_state_(mobile_apis::VideoStreamingState::INVALID_ENUM)
@@ -60,6 +61,7 @@ HmiState::HmiState(std::shared_ptr<Application> app,
     : hmi_app_id_(app->hmi_app_id())
     , state_id_(STATE_ID_REGULAR)
     , app_mngr_(app_mngr)
+    , window_type_(mobile_apis::WindowType::INVALID_ENUM)
     , hmi_level_(mobile_apis::HMILevel::INVALID_ENUM)
     , audio_streaming_state_(mobile_apis::AudioStreamingState::INVALID_ENUM)
     , video_streaming_state_(mobile_apis::VideoStreamingState::INVALID_ENUM)
@@ -94,6 +96,15 @@ bool HmiState::is_mobile_projection_app() const {
   const ApplicationSharedPtr app =
       app_mngr_.application_by_hmi_app(hmi_app_id_);
   return app ? app->mobile_projection_enabled() : false;
+}
+
+mobile_apis::WindowType::eType HmiState::window_type() const {
+  return window_type_;
+}
+
+void HmiState::set_window_type(
+    const mobile_apis::WindowType::eType window_type) {
+  window_type_ = window_type;
 }
 
 mobile_apis::AudioStreamingState::eType VRHmiState::audio_streaming_state()
@@ -173,17 +184,25 @@ PhoneCallHmiState::PhoneCallHmiState(std::shared_ptr<Application> app,
 mobile_apis::HMILevel::eType PhoneCallHmiState::hmi_level() const {
   using namespace helpers;
   using namespace mobile_apis;
+
+  if (WindowType::WIDGET == window_type()) {
+    return parent()->hmi_level();
+  }
+
   if (Compare<HMILevel::eType, EQ, ONE>(parent()->hmi_level(),
                                         HMILevel::HMI_BACKGROUND,
                                         HMILevel::HMI_NONE)) {
     return parent()->hmi_level();
   }
+
   if (is_navi_app() || is_mobile_projection_app()) {
     return HMILevel::HMI_LIMITED;
   }
+
   if (!is_media_app()) {
     return parent()->hmi_level();
   }
+
   return HMILevel::HMI_BACKGROUND;
 }
 
@@ -198,6 +217,11 @@ DeactivateHMI::DeactivateHMI(std::shared_ptr<Application> app,
 mobile_apis::HMILevel::eType DeactivateHMI::hmi_level() const {
   using namespace helpers;
   using namespace mobile_apis;
+
+  if (WindowType::WIDGET == window_type()) {
+    return parent()->hmi_level();
+  }
+
   if (Compare<HMILevel::eType, EQ, ONE>(parent()->hmi_level(),
                                         HMILevel::HMI_BACKGROUND,
                                         HMILevel::HMI_NONE)) {
@@ -215,14 +239,19 @@ AudioSource::AudioSource(std::shared_ptr<Application> app,
 }
 
 mobile_apis::HMILevel::eType AudioSource::hmi_level() const {
-  // Checking for NONE  is necessary to avoid issue during
-  // calculation of HMI level during setting default HMI level
-  if (keep_context_ ||
-      mobile_apis::HMILevel::HMI_NONE == parent()->hmi_level()) {
+  using namespace mobile_apis;
+
+  if (WindowType::WIDGET == window_type()) {
     return parent()->hmi_level();
   }
 
-  return mobile_apis::HMILevel::HMI_BACKGROUND;
+  // Checking for NONE  is necessary to avoid issue during
+  // calculation of HMI level during setting default HMI level
+  if (keep_context_ || HMILevel::HMI_NONE == parent()->hmi_level()) {
+    return parent()->hmi_level();
+  }
+
+  return HMILevel::HMI_BACKGROUND;
 }
 
 EmbeddedNavi::EmbeddedNavi(std::shared_ptr<Application> app,
@@ -232,11 +261,17 @@ EmbeddedNavi::EmbeddedNavi(std::shared_ptr<Application> app,
 mobile_apis::HMILevel::eType EmbeddedNavi::hmi_level() const {
   using namespace mobile_apis;
   using namespace helpers;
+
+  if (WindowType::WIDGET == window_type()) {
+    return parent()->hmi_level();
+  }
+
   if (Compare<HMILevel::eType, EQ, ONE>(parent()->hmi_level(),
                                         HMILevel::HMI_BACKGROUND,
                                         HMILevel::HMI_NONE)) {
     return parent()->hmi_level();
   }
+
   return HMILevel::HMI_BACKGROUND;
 }
 
@@ -278,7 +313,8 @@ std::ostream& operator<<(std::ostream& os, const HmiState& src) {
   } else {
     os << "(none)";
   }
-  os << ", hmi app id:" << src.hmi_app_id_ << ", state:" << src.state_id()
+  os << ", hmi app id:" << src.hmi_app_id_
+     << ", window_type:" << src.window_type_ << ", state:" << src.state_id()
      << ", hmi_level:" << src.hmi_level()
      << ", audio:" << src.audio_streaming_state()
      << ", video:" << src.video_streaming_state()

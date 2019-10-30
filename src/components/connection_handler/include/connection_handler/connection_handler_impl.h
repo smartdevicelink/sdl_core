@@ -33,26 +33,26 @@
 #ifndef SRC_COMPONENTS_CONNECTION_HANDLER_INCLUDE_CONNECTION_HANDLER_CONNECTION_HANDLER_IMPL_H_
 #define SRC_COMPONENTS_CONNECTION_HANDLER_INCLUDE_CONNECTION_HANDLER_CONNECTION_HANDLER_IMPL_H_
 
-#include <map>
 #include <list>
+#include <map>
 #include <string>
 #include <vector>
 
-#include "transport_manager/transport_manager_listener_empty.h"
-#include "protocol_handler/session_observer.h"
-#include "protocol_handler/protocol_handler.h"
+#include "connection_handler/connection.h"
+#include "connection_handler/connection_handler.h"
 #include "connection_handler/connection_handler_observer.h"
 #include "connection_handler/device.h"
-#include "connection_handler/connection.h"
 #include "connection_handler/devices_discovery_starter.h"
-#include "connection_handler/connection_handler.h"
+#include "protocol_handler/protocol_handler.h"
+#include "protocol_handler/session_observer.h"
+#include "transport_manager/transport_manager_listener_empty.h"
 
+#include "utils/lock.h"
 #include "utils/logger.h"
 #include "utils/macro.h"
 #include "utils/message_queue.h"
-#include "utils/lock.h"
-#include "utils/stl_utils.h"
 #include "utils/rwlock.h"
+#include "utils/stl_utils.h"
 
 const transport_manager::ConnectionUID kDisabledSecondary = 0xFFFFFFFF;
 
@@ -619,6 +619,15 @@ class ConnectionHandlerImpl
 
   const uint8_t GetSessionIdFromSecondaryTransport(
       transport_manager::ConnectionUID secondary_transport_id) const;
+
+  /**
+   * @brief Get pointer to the primary connection by connection handle
+   * @param connection_handle handle of the current connection
+   * @return pointer to the primary connection if current one is secondary
+   * otherwise returns pointer to the same connection
+   */
+  Connection* GetPrimaryConnection(
+      const ConnectionHandle connection_handle) const;
 
   const ConnectionHandlerSettings& settings_;
   /**

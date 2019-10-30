@@ -33,9 +33,9 @@
 #ifndef SRC_COMPONENTS_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_ADAPTER_DEVICE_H_
 #define SRC_COMPONENTS_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_ADAPTER_DEVICE_H_
 
+#include <memory>
 #include <string>
 #include <vector>
-#include <memory>
 
 #include "transport_manager/common.h"
 

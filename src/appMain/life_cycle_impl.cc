@@ -1,46 +1,46 @@
 /*
-* Copyright (c) 2018, Ford Motor Company
-* All rights reserved.
-*
-* Redistribution and use in source and binary forms, with or without
-* modification, are permitted provided that the following conditions are met:
-*
-* Redistributions of source code must retain the above copyright notice, this
-* list of conditions and the following disclaimer.
-*
-* Redistributions in binary form must reproduce the above copyright notice,
-* this list of conditions and the following
-* disclaimer in the documentation and/or other materials provided with the
-* distribution.
-*
-* Neither the name of the Ford Motor Company nor the names of its contributors
-* may be used to endorse or promote products derived from this software
-* without specific prior written permission.
-*
-* THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
-* AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
-* IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
-* ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
-* LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
-* CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
-* SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
-* INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
-* CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
-* ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
-* POSSIBILITY OF SUCH DAMAGE.
-*/
+ * Copyright (c) 2018, Ford Motor Company
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *
+ * Redistributions of source code must retain the above copyright notice, this
+ * list of conditions and the following disclaimer.
+ *
+ * Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following
+ * disclaimer in the documentation and/or other materials provided with the
+ * distribution.
+ *
+ * Neither the name of the Ford Motor Company nor the names of its contributors
+ * may be used to endorse or promote products derived from this software
+ * without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
+ */
 
 #include "appMain/life_cycle_impl.h"
-#include "utils/signals.h"
-#include "config_profile/profile.h"
 #include "application_manager/system_time/system_time_handler_impl.h"
+#include "config_profile/profile.h"
 #include "resumption/last_state_impl.h"
+#include "utils/signals.h"
 
 #ifdef ENABLE_SECURITY
-#include "security_manager/security_manager_impl.h"
+#include "application_manager/policies/policy_handler.h"
 #include "security_manager/crypto_manager_impl.h"
 #include "security_manager/crypto_manager_settings_impl.h"
-#include "application_manager/policies/policy_handler.h"
+#include "security_manager/security_manager_impl.h"
 #endif  // ENABLE_SECURITY
 
 #ifdef ENABLE_LOG
@@ -102,6 +102,13 @@ bool LifeCycleImpl::StartComponents() {
   DCHECK(!app_manager_);
   app_manager_ =
       new application_manager::ApplicationManagerImpl(profile_, profile_);
+
+  auto service_status_update_handler =
+      std::unique_ptr<protocol_handler::ServiceStatusUpdateHandler>(
+          new protocol_handler::ServiceStatusUpdateHandler(app_manager_));
+
+  protocol_handler_->set_service_status_update_handler(
+      std::move(service_status_update_handler));
 
   DCHECK(!hmi_handler_);
   hmi_handler_ = new hmi_message_handler::HMIMessageHandlerImpl(profile_);
@@ -168,7 +175,8 @@ bool LifeCycleImpl::StartComponents() {
     return false;
   }
   // start transport manager
-  transport_manager_->Visibility(true);
+  transport_manager_->PerformActionOnClients(
+      transport_manager::TransportAction::kVisibilityOn);
 
   LowVoltageSignalsOffset signals_offset{profile_.low_voltage_signal_offset(),
                                          profile_.wake_up_signal_offset(),
@@ -182,7 +190,10 @@ bool LifeCycleImpl::StartComponents() {
 
 void LifeCycleImpl::LowVoltage() {
   LOG4CXX_AUTO_TRACE(logger_);
-  transport_manager_->Visibility(false);
+  transport_manager_->PerformActionOnClients(
+      transport_manager::TransportAction::kListeningOff);
+  transport_manager_->StopEventsProcessing();
+  transport_manager_->Deinit();
   app_manager_->OnLowVoltage();
 }
 
@@ -193,9 +204,11 @@ void LifeCycleImpl::IgnitionOff() {
 
 void LifeCycleImpl::WakeUp() {
   LOG4CXX_AUTO_TRACE(logger_);
-  app_manager_->OnWakeUp();
   transport_manager_->Reinit();
-  transport_manager_->Visibility(true);
+  transport_manager_->PerformActionOnClients(
+      transport_manager::TransportAction::kListeningOn);
+  app_manager_->OnWakeUp();
+  transport_manager_->StartEventsProcessing();
 }
 
 #ifdef MESSAGEBROKER_HMIADAPTER
@@ -286,7 +299,8 @@ void LifeCycleImpl::StopComponents() {
 
   LOG4CXX_INFO(logger_, "Destroying Transport Manager.");
   DCHECK_OR_RETURN_VOID(transport_manager_);
-  transport_manager_->Visibility(false);
+  transport_manager_->PerformActionOnClients(
+      transport_manager::TransportAction::kVisibilityOff);
   transport_manager_->Stop();
   delete transport_manager_;
   transport_manager_ = NULL;

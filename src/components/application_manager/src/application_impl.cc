@@ -31,21 +31,21 @@
  */
 
 #include "application_manager/application_impl.h"
-#include <string>
 #include <strings.h>
-#include "application_manager/message_helper.h"
-#include "protocol_handler/protocol_handler.h"
+#include <string>
 #include "application_manager/application_manager.h"
+#include "application_manager/message_helper.h"
 #include "config_profile/profile.h"
 #include "interfaces/MOBILE_API.h"
+#include "protocol_handler/protocol_handler.h"
 #include "utils/file_system.h"
-#include "utils/logger.h"
 #include "utils/gen_hash.h"
+#include "utils/logger.h"
 
-#include "utils/timer_task_impl.h"
 #include "application_manager/policies/policy_handler_interface.h"
 #include "application_manager/resumption/resume_ctrl.h"
 #include "transport_manager/common.h"
+#include "utils/timer_task_impl.h"
 
 namespace {
 
@@ -113,6 +113,7 @@ ApplicationImpl::ApplicationImpl(
     , video_streaming_suspended_(true)
     , audio_streaming_suspended_(true)
     , is_app_allowed_(true)
+    , is_app_data_resumption_allowed_(false)
     , has_been_activated_(false)
     , tts_properties_in_none_(false)
     , tts_properties_in_full_(false)
@@ -187,7 +188,8 @@ void ApplicationImpl::CloseActiveMessage() {
 }
 
 bool ApplicationImpl::IsFullscreen() const {
-  return mobile_api::HMILevel::HMI_FULL == hmi_level();
+  return mobile_api::HMILevel::HMI_FULL ==
+         hmi_level(mobile_apis::PredefinedWindows::DEFAULT_WINDOW);
 }
 
 bool ApplicationImpl::is_audio() const {
@@ -265,19 +267,21 @@ bool ApplicationImpl::IsVideoApplication() const {
   return is_video_app;
 }
 
-void ApplicationImpl::SetRegularState(HmiStatePtr state) {
+void ApplicationImpl::SetRegularState(const WindowID window_id,
+                                      HmiStatePtr state) {
   LOG4CXX_AUTO_TRACE(logger_);
-  state_.AddState(state);
+  state_.AddState(window_id, state);
 }
 
-void ApplicationImpl::RemovePostponedState() {
+void ApplicationImpl::RemovePostponedState(const WindowID window_id) {
   LOG4CXX_AUTO_TRACE(logger_);
-  state_.RemoveState(HmiState::STATE_ID_POSTPONED);
+  state_.RemoveState(window_id, HmiState::STATE_ID_POSTPONED);
 }
 
-void ApplicationImpl::SetPostponedState(HmiStatePtr state) {
+void ApplicationImpl::SetPostponedState(const WindowID window_id,
+                                        HmiStatePtr state) {
   LOG4CXX_AUTO_TRACE(logger_);
-  state_.AddState(state);
+  state_.AddState(window_id, state);
 }
 
 void ApplicationImpl::set_mobile_projection_enabled(bool option) {
@@ -297,22 +301,56 @@ struct StateIDComparator {
   }
 };
 
-void ApplicationImpl::AddHMIState(HmiStatePtr state) {
+void ApplicationImpl::AddHMIState(const WindowID window_id, HmiStatePtr state) {
   LOG4CXX_AUTO_TRACE(logger_);
-  state_.AddState(state);
+  state_.AddState(window_id, state);
 }
 
-void ApplicationImpl::RemoveHMIState(HmiState::StateID state_id) {
+void ApplicationImpl::RemoveHMIState(const WindowID window_id,
+                                     HmiState::StateID state_id) {
   LOG4CXX_AUTO_TRACE(logger_);
-  state_.RemoveState(state_id);
+  state_.RemoveState(window_id, state_id);
 }
 
-const HmiStatePtr ApplicationImpl::CurrentHmiState() const {
-  return state_.GetState(HmiState::STATE_ID_CURRENT);
+const HmiStatePtr ApplicationImpl::CurrentHmiState(
+    const WindowID window_id) const {
+  return state_.GetState(window_id, HmiState::STATE_ID_CURRENT);
 }
 
-const HmiStatePtr ApplicationImpl::RegularHmiState() const {
-  return state_.GetState(HmiState::STATE_ID_REGULAR);
+const HmiStatePtr ApplicationImpl::RegularHmiState(
+    const WindowID window_id) const {
+  return state_.GetState(window_id, HmiState::STATE_ID_REGULAR);
+}
+
+WindowNames ApplicationImpl::GetWindowNames() const {
+  LOG4CXX_DEBUG(logger_,
+                "Collecting window names for application " << app_id());
+
+  WindowNames window_names;
+  std::string stringified_window_names;
+
+  sync_primitives::AutoLock auto_lock(window_params_map_lock_ptr_);
+  for (const auto& window_info_item : window_params_map_) {
+    const auto window_name =
+        (*window_info_item.second)[strings::window_name].asString();
+    window_names.push_back(window_name);
+    stringified_window_names +=
+        (stringified_window_names.empty() ? "" : ",") + window_name;
+  }
+
+  LOG4CXX_DEBUG(logger_,
+                "Existing window names: [" + stringified_window_names + "]");
+  return window_names;
+}
+
+WindowIds ApplicationImpl::GetWindowIds() const {
+  LOG4CXX_DEBUG(logger_, "Collecting window IDs for application " << app_id());
+  return state_.GetWindowIds();
+}
+
+bool ApplicationImpl::WindowIdExists(const WindowID window_id) const {
+  const WindowIds window_ids = GetWindowIds();
+  return helpers::in_range(window_ids, window_id);
 }
 
 bool ApplicationImpl::IsAllowedToChangeAudioSource() const {
@@ -322,8 +360,9 @@ bool ApplicationImpl::IsAllowedToChangeAudioSource() const {
   return false;
 }
 
-const HmiStatePtr ApplicationImpl::PostponedHmiState() const {
-  return state_.GetState(HmiState::STATE_ID_POSTPONED);
+const HmiStatePtr ApplicationImpl::PostponedHmiState(
+    const WindowID window_id) const {
+  return state_.GetState(window_id, HmiState::STATE_ID_POSTPONED);
 }
 
 const smart_objects::SmartObject* ApplicationImpl::active_message() const {
@@ -354,9 +393,10 @@ bool ApplicationImpl::is_media_application() const {
   return is_media_;
 }
 
-const mobile_api::HMILevel::eType ApplicationImpl::hmi_level() const {
+const mobile_api::HMILevel::eType ApplicationImpl::hmi_level(
+    const WindowID window_id) const {
   using namespace mobile_apis;
-  const HmiStatePtr hmi_state = CurrentHmiState();
+  const HmiStatePtr hmi_state = CurrentHmiState(window_id);
   return hmi_state ? hmi_state->hmi_level() : HMILevel::INVALID_ENUM;
 }
 
@@ -380,9 +420,10 @@ const uint32_t ApplicationImpl::list_files_in_none_count() const {
   return list_files_in_none_count_;
 }
 
-const mobile_api::SystemContext::eType ApplicationImpl::system_context() const {
+const mobile_api::SystemContext::eType ApplicationImpl::system_context(
+    const WindowID window_id) const {
   using namespace mobile_apis;
-  const HmiStatePtr hmi_state = CurrentHmiState();
+  const HmiStatePtr hmi_state = CurrentHmiState(window_id);
   return hmi_state ? hmi_state->system_context() : SystemContext::INVALID_ENUM;
   ;
 }
@@ -593,7 +634,7 @@ void ApplicationImpl::SuspendStreaming(
 }
 
 void ApplicationImpl::WakeUpStreaming(
-    protocol_handler::ServiceType service_type) {
+    protocol_handler::ServiceType service_type, uint32_t timer_len) {
   using namespace protocol_handler;
   LOG4CXX_AUTO_TRACE(logger_);
 
@@ -609,8 +650,9 @@ void ApplicationImpl::WakeUpStreaming(
           ServiceType::kMobileNav, true, application_manager_);
       video_streaming_suspended_ = false;
     }
-    video_stream_suspend_timer_.Start(video_stream_suspend_timeout_,
-                                      timer::kPeriodic);
+    video_stream_suspend_timer_.Start(
+        timer_len == 0 ? video_stream_suspend_timeout_ : timer_len,
+        timer::kPeriodic);
   } else if (ServiceType::kAudio == service_type) {
     sync_primitives::AutoLock lock(audio_streaming_suspended_lock_);
     if (audio_streaming_suspended_) {
@@ -619,8 +661,9 @@ void ApplicationImpl::WakeUpStreaming(
           ServiceType::kAudio, true, application_manager_);
       audio_streaming_suspended_ = false;
     }
-    audio_stream_suspend_timer_.Start(audio_stream_suspend_timeout_,
-                                      timer::kPeriodic);
+    audio_stream_suspend_timer_.Start(
+        timer_len == 0 ? audio_stream_suspend_timeout_ : timer_len,
+        timer::kPeriodic);
   }
 }
 
@@ -678,6 +721,14 @@ bool ApplicationImpl::set_app_icon_path(const std::string& path) {
 
 void ApplicationImpl::set_app_allowed(const bool allowed) {
   is_app_allowed_ = allowed;
+}
+
+bool ApplicationImpl::is_app_data_resumption_allowed() const {
+  return is_app_data_resumption_allowed_;
+}
+
+void ApplicationImpl::set_app_data_resumption_allowance(const bool allowed) {
+  is_app_data_resumption_allowed_ = allowed;
 }
 
 void ApplicationImpl::set_secondary_device(
@@ -849,8 +900,9 @@ bool ApplicationImpl::AreCommandLimitsExceeded(
                    "Time Info: "
                        << "\n Current: " << date_time::getSecs(current)
                        << "\n Limit: (" << date_time::getSecs(limit.first)
-                       << "," << limit.second << ")"
-                                                 "\n frequency_restrictions: ("
+                       << "," << limit.second
+                       << ")"
+                          "\n frequency_restrictions: ("
                        << frequency_restrictions.first << ","
                        << frequency_restrictions.second << ")");
       if (date_time::getSecs(current) <
@@ -929,8 +981,10 @@ bool ApplicationImpl::is_application_data_changed() const {
   return is_application_data_changed_;
 }
 
-void ApplicationImpl::SetInitialState(HmiStatePtr state) {
-  state_.InitState(state);
+void ApplicationImpl::SetInitialState(const WindowID window_id,
+                                      const std::string& window_name,
+                                      HmiStatePtr state) {
+  state_.InitState(window_id, window_name, state);
 }
 
 void ApplicationImpl::set_is_application_data_changed(
@@ -1073,19 +1127,56 @@ void ApplicationImpl::SubscribeToSoftButtons(
       cmd_softbuttonid_[cmd_id] = softbuttons_id;
     }
   } else {
-    cmd_softbuttonid_[cmd_id] = softbuttons_id;
+    auto& soft_button_ids = cmd_softbuttonid_[cmd_id];
+    for (auto& softbutton_item : softbuttons_id) {
+      soft_button_ids.insert(softbutton_item);
+    }
   }
 }
 
+struct FindSoftButtonId {
+  uint32_t soft_button_id_;
+
+  FindSoftButtonId(const uint32_t soft_button_id)
+      : soft_button_id_(soft_button_id) {}
+
+  bool operator()(const std::pair<uint32_t, WindowID>& element) {
+    return soft_button_id_ == element.first;
+  }
+};
+
 bool ApplicationImpl::IsSubscribedToSoftButton(const uint32_t softbutton_id) {
+  LOG4CXX_AUTO_TRACE(logger_);
   sync_primitives::AutoLock lock(cmd_softbuttonid_lock_);
   CommandSoftButtonID::iterator it = cmd_softbuttonid_.begin();
   for (; it != cmd_softbuttonid_.end(); ++it) {
-    if ((it->second).find(softbutton_id) != (it->second).end()) {
+    const auto& soft_button_ids = (*it).second;
+    FindSoftButtonId finder(softbutton_id);
+    const auto find_res =
+        std::find_if(soft_button_ids.begin(), soft_button_ids.end(), finder);
+    if ((soft_button_ids.end() != find_res)) {
       return true;
     }
   }
   return false;
+}
+
+WindowID ApplicationImpl::GetSoftButtonWindowID(const uint32_t softbutton_id) {
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  sync_primitives::AutoLock lock(cmd_softbuttonid_lock_);
+  CommandSoftButtonID::iterator it = cmd_softbuttonid_.begin();
+  for (; it != cmd_softbuttonid_.end(); ++it) {
+    const auto& soft_button_ids = (*it).second;
+    FindSoftButtonId finder(softbutton_id);
+    const auto find_res =
+        std::find_if(soft_button_ids.begin(), soft_button_ids.end(), finder);
+    if ((soft_button_ids.end() != find_res)) {
+      return find_res->second;
+    }
+  }
+
+  return mobile_apis::PredefinedWindows::DEFAULT_WINDOW;
 }
 
 void ApplicationImpl::UnsubscribeFromSoftButtons(int32_t cmd_id) {
@@ -1097,8 +1188,9 @@ void ApplicationImpl::UnsubscribeFromSoftButtons(int32_t cmd_id) {
 }
 
 void ApplicationImpl::set_system_context(
+    const WindowID window_id,
     const mobile_api::SystemContext::eType& system_context) {
-  const HmiStatePtr hmi_state = CurrentHmiState();
+  HmiStatePtr hmi_state = CurrentHmiState(window_id);
   hmi_state->set_system_context(system_context);
 }
 
@@ -1111,13 +1203,20 @@ void ApplicationImpl::set_audio_streaming_state(
                  " for non-media application to different from NOT_AUDIBLE");
     return;
   }
-  CurrentHmiState()->set_audio_streaming_state(state);
+
+  // According to proposal SDL-0216 audio streaming state should
+  // be applied for all windows to keep consistency
+  HmiStates hmi_states = state_.GetStates(HmiState::STATE_ID_CURRENT);
+  for (const auto& hmi_state : hmi_states) {
+    hmi_state->set_audio_streaming_state(state);
+  }
 }
 
 void ApplicationImpl::set_hmi_level(
+    const WindowID window_id,
     const mobile_api::HMILevel::eType& new_hmi_level) {
   using namespace mobile_apis;
-  const HMILevel::eType current_hmi_level = hmi_level();
+  const HMILevel::eType current_hmi_level = hmi_level(window_id);
   if (HMILevel::HMI_NONE != current_hmi_level &&
       HMILevel::HMI_NONE == new_hmi_level) {
     put_file_in_none_count_ = 0;
@@ -1126,7 +1225,8 @@ void ApplicationImpl::set_hmi_level(
   }
   ApplicationSharedPtr app = application_manager_.application(app_id());
   DCHECK_OR_RETURN_VOID(app)
-  application_manager_.state_controller().SetRegularState(app, new_hmi_level);
+  application_manager_.state_controller().SetRegularState(
+      app, window_id, new_hmi_level);
   LOG4CXX_INFO(logger_, "hmi_level = " << new_hmi_level);
   usage_report_.RecordHmiStateChanged(new_hmi_level);
 }
@@ -1152,9 +1252,9 @@ bool ApplicationImpl::AddExtension(AppExtensionPtr extension) {
 
 bool ApplicationImpl::RemoveExtension(AppExtensionUID uid) {
   auto it = std::find_if(
-      extensions_.begin(),
-      extensions_.end(),
-      [uid](AppExtensionPtr extension) { return extension->uid() == uid; });
+      extensions_.begin(), extensions_.end(), [uid](AppExtensionPtr extension) {
+        return extension->uid() == uid;
+      });
 
   return it != extensions_.end();
 }
@@ -1213,6 +1313,15 @@ void ApplicationImpl::set_hybrid_app_preference(
 void ApplicationImpl::set_cloud_app_certificate(
     const std::string& certificate) {
   certificate_ = certificate;
+}
+
+void ApplicationImpl::set_user_location(
+    const smart_objects::SmartObject& user_location) {
+  user_location_ = user_location;
+}
+
+const smart_objects::SmartObject& ApplicationImpl::get_user_location() const {
+  return user_location_;
 }
 
 void ApplicationImpl::PushMobileMessage(

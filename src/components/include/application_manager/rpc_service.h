@@ -35,11 +35,16 @@
 
 #include "application_manager/commands/command.h"
 #include "application_manager/message.h"
-#include "protocol_handler/protocol_handler.h"
 #include "hmi_message_handler/hmi_message_handler.h"
+#include "interfaces/HMI_API_schema.h"
+#include "interfaces/MOBILE_API_schema.h"
+#include "protocol_handler/protocol_handler.h"
+#include "smart_objects/object_schema_item.h"
 
 namespace application_manager {
 namespace rpc_service {
+
+using ns_smart_device_link::ns_smart_objects::SMember;
 
 class RPCService {
  public:
@@ -59,8 +64,8 @@ class RPCService {
    * @return true if command is executed, otherwise return false
    */
   virtual bool ManageHMICommand(const commands::MessageSharedPtr message,
-                                commands::Command::CommandSource
-                                    source = commands::Command::SOURCE_HMI) = 0;
+                                commands::Command::CommandSource source =
+                                    commands::Command::SOURCE_HMI) = 0;
 
   /**
    * @brief SendMessageToMobile Put message to the queue to be sent to mobile.
@@ -81,11 +86,25 @@ class RPCService {
    * to app services or handled by app services plugin)
    * @param function_id RPC function id
    * @param source RPC command source
-   * @param rpc_passing Reference to bool. Set to true to enable rpc pasing
    * @return true if App Services can handle RPC
    */
   virtual bool IsAppServiceRPC(int32_t function_id,
                                commands::Command::CommandSource source) = 0;
+
+  virtual void UpdateMobileRPCParams(
+      const mobile_apis::FunctionID::eType& function_id,
+      const mobile_apis::messageType::eType& message_type,
+      const std::map<std::string, SMember>& members) = 0;
+
+  virtual void UpdateHMIRPCParams(
+      const hmi_apis::FunctionID::eType& function_id,
+      const hmi_apis::messageType::eType& message_type,
+      const std::map<std::string, SMember>& members) = 0;
+
+  /**
+   * @brief Stop RPC service by shutting down hmi and mobile message queues
+   */
+  virtual void Stop() = 0;
 
   /**
    * @brief set_protocol_handler
