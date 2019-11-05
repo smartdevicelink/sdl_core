@@ -516,7 +516,11 @@ mobile_apis::HMILevel::eType StateControllerImpl::GetAvailableHmiLevel(
       (active_app.use_count() != 0) && active_app->app_id() != app->app_id();
   if (is_audio_app) {
     if (does_audio_app_with_same_type_exist) {
-      result = app_mngr_.GetDefaultHmiLevel(app);
+      if (hmi_level != mobile_apis::HMILevel::HMI_FULL || app->is_navi()) {
+        result = app_mngr_.GetDefaultHmiLevel(app);
+      } else {
+        result = hmi_level;
+      }
     } else if (is_active_app_exist) {
       result = mobile_apis::HMILevel::HMI_LIMITED;
     } else if (app->is_navi() &&
