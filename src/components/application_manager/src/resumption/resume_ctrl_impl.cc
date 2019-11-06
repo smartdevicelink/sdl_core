@@ -214,7 +214,14 @@ bool ResumeCtrlImpl::RestoreAppHMIState(ApplicationSharedPtr application) {
             "High-bandwidth transport not available, app will resume into : "
                 << saved_hmi_level);
       }
-
+      const bool does_app_with_same_type_exist =
+          application_manager_.IsAppTypeExistsInFullOrLimited(application);
+      if (does_app_with_same_type_exist) {
+        LOG4CXX_DEBUG(
+            logger_,
+            "App of same type exists in full or limited. Do no resume");
+        return false;
+      }
       const bool app_hmi_state_is_set =
           SetAppHMIState(application, saved_hmi_level, true);
       if (app_hmi_state_is_set &&
