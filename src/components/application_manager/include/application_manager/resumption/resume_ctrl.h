@@ -115,7 +115,7 @@ class ResumeCtrl {
    * @param saved_app application specific section from backup file
    * @return true if widgets resumed successfully otherwise - false
    */
-  virtual void RestoreAppWidgets(
+  virtual size_t RestoreAppWidgets(
       application_manager::ApplicationSharedPtr application,
       const smart_objects::SmartObject& saved_app) = 0;
 
