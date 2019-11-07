@@ -11,7 +11,7 @@ SmartDeviceLink (SDL) is a standard set of protocols and messages that connect a
 
 ## SDL Core
 
-The Core component of SDL runs on a vehicle's computing system (head unit). Core’s primary responsibility is to pass messages between connected smartphone applications and the vehicle HMI, and pass notifications from the vehicle to those applications. It can connect a smartphone to a vehicle's head unit via a variety of transport protocols such as Bluetooth, USB, Android AOA, and TCP. Once a connection is established, Core discovers compatible applications and displays them to the driver for interaction via voice or display. The core component is configured to follow a set of policies defined in its local policy database and updated by a [policy server](https://www.github.com/smartdevicelink/sdl_server). The messaging between a connected application and SDL Core is defined by the [Mobile API](https://github.com/smartdevicelink/sdl_core/blob/master/src/components/interfaces/MOBILE_API.xml) and the messaging between SDL Core and the vehicle is defined by the [HMI API](https://github.com/smartdevicelink/sdl_core/blob/master/src/components/interfaces/HMI_API.xml).
+The Core component of SDL runs on a vehicle's computing system (head unit). Core’s primary responsibility is to route messages between connected smartphone applications and the vehicle HMI. It can connect a smartphone to a vehicle's head unit via a variety of transport protocols such as Bluetooth, USB, Android AOA, and TCP. Once a connection is established, Core discovers compatible applications and displays them to the driver for interaction via voice or display. The core component is configured to follow a set of policies defined in its local policy database and updated by a [policy server](https://www.github.com/smartdevicelink/sdl_server). The messaging between a connected application and SDL Core is defined by the [Mobile API](https://github.com/smartdevicelink/sdl_core/blob/master/src/components/interfaces/MOBILE_API.xml) and the messaging between SDL Core and the vehicle is defined by the [HMI API](https://github.com/smartdevicelink/sdl_core/blob/master/src/components/interfaces/HMI_API.xml).
 
 Pull Requests Welcome!
 
@@ -23,6 +23,9 @@ After setting up SDL Core, you will need to connect it to an external HMI. The H
 
   1. The [Generic HMI](https://github.com/smartdevicelink/generic_hmi) (preferred) is a reference implementation for an SDL-connected HMI, including examples of many of the UI elements and templates available to SDL applications.
   2. The [SDL HMI](https://github.com/smartdevicelink/sdl_hmi) emulates a full infotainment system which includes a simplified SDL component
+
+## Manticore
+If you are just developing an SDL-connected application and simply want an environment to test it in, it is not necessary to build SDL Core from scratch. You can use our [Manticore](https://smartdevicelink.com/resources/manticore/) project first, which creates a testing environment in the cloud using SDL Core and the Generic HMI.
 
 ## Frequently Asked Questions
 
