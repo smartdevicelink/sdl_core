@@ -757,7 +757,7 @@ void SmartObject::cleanup_data() {
     case SmartType_Binary:
       if (m_data.binary_value) {
         delete m_data.binary_value;
-        m_data.array_value = nullptr;
+        m_data.binary_value = nullptr;
         m_type = SmartType_Null;
       }
       break;
