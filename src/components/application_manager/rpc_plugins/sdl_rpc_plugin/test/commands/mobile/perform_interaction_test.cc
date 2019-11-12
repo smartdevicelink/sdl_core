@@ -87,12 +87,14 @@ class PerformInteractionRequestTest
   }
 
   void ResultCommandExpectations(MessageSharedPtr msg,
+                                  bool success,
+                                  hmi_apis::Common_Result::eType result_code,
                                  const std::string& info) {
     EXPECT_EQ((*msg)[am::strings::msg_params][am::strings::success].asBool(),
-              true);
+              success);
     EXPECT_EQ(
         (*msg)[am::strings::msg_params][am::strings::result_code].asInt(),
-        static_cast<int32_t>(hmi_apis::Common_Result::UNSUPPORTED_RESOURCE));
+        static_cast<int32_t>(result_code));
     EXPECT_EQ((*msg)[am::strings::msg_params][am::strings::info].asString(),
               info);
   }
@@ -155,7 +157,8 @@ TEST_F(PerformInteractionRequestTest,
       mobile_apis::InteractionMode::VR_ONLY;
   std::shared_ptr<PerformInteractionRequest> command =
       CreateCommand<PerformInteractionRequest>(msg_from_mobile);
-  command->Init();
+  
+  ASSERT_TRUE(command->Init());
 
   MockAppPtr mock_app;
   EXPECT_CALL(app_mngr_, application(_)).WillRepeatedly(Return(mock_app));
@@ -196,7 +199,9 @@ TEST_F(PerformInteractionRequestTest,
   command->on_event(event_vr);
   command->on_event(event_ui);
 
-  ResultCommandExpectations(response_to_mobile,
+  ResultCommandExpectations(response_to_mobile, 
+                            false, 
+                            hmi_apis::Common_Result::UNSUPPORTED_RESOURCE, 
                             "VR is not supported by system");
 }
 
@@ -209,13 +214,11 @@ TEST_F(PerformInteractionRequestTest,
       mobile_apis::InteractionMode::VR_ONLY;
   std::shared_ptr<PerformInteractionRequest> command =
       CreateCommand<PerformInteractionRequest>(msg_from_mobile);
+  
+  ASSERT_TRUE(command->Init());
 
-  ON_CALL(mock_hmi_interfaces_,
-          GetInterfaceState(am::HmiInterfaces::HMI_INTERFACE_UI))
-      .WillByDefault(Return(am::HmiInterfaces::STATE_AVAILABLE));
-  ON_CALL(mock_hmi_interfaces_,
-          GetInterfaceState(am::HmiInterfaces::HMI_INTERFACE_VR))
-      .WillByDefault(Return(am::HmiInterfaces::STATE_AVAILABLE));
+  MockAppPtr mock_app;
+  EXPECT_CALL(app_mngr_, application(_)).WillRepeatedly(Return(mock_app));
 
   MessageSharedPtr response_msg_vr =
       CreateMessage(smart_objects::SmartType_Map);
@@ -241,16 +244,13 @@ TEST_F(PerformInteractionRequestTest,
       mock_rpc_service_,
       ManageMobileCommand(_, am::commands::Command::CommandSource::SOURCE_SDL))
       .WillOnce(DoAll(SaveArg<0>(&response_to_mobile), Return(true)));
-
+  
   command->on_event(event_vr);
-
-  EXPECT_CALL(*mock_app_, is_perform_interaction_active())
-      .WillOnce(Return(false));
-  EXPECT_CALL(*mock_app_, DeletePerformInteractionChoiceSet(_));
-
   command->on_event(event_ui);
 
   ResultCommandExpectations(response_to_mobile,
+                            true,
+                            hmi_apis::Common_Result::SUCCESS,
                             "UI is not supported by system");
 }
 
