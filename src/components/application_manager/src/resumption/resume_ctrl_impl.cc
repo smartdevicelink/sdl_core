@@ -222,7 +222,7 @@ bool ResumeCtrlImpl::RestoreAppHMIState(ApplicationSharedPtr application) {
         restored_widgets = RestoreAppWidgets(application, saved_app);
       }
       const bool active_app_exists = (application_manager_.active_application().use_count() != 0);
-      if (0 == restored_widgets && is_active_app_exists) {
+      if (0 == restored_widgets && active_app_exists) {
         LOG4CXX_DEBUG(
             logger_,
             "App exists in full or limited. Do not resume");
