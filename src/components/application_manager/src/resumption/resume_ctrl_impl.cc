@@ -223,10 +223,10 @@ bool ResumeCtrlImpl::RestoreAppHMIState(ApplicationSharedPtr application) {
       }
       const bool does_app_with_same_level_exist =
           application_manager_.IsAppTypeExistsInFullOrLimited(application);
-      if (does_app_with_same_level_exist && restored_widgets == 0) {
+      if (0 == restored_widgets && does_app_with_same_level_exist) {
         LOG4CXX_DEBUG(
             logger_,
-            "App of same type exists in full or limited. Do no resume");
+            "App of same type exists in full or limited. Do not resume");
         return false;
       }
     } else {
@@ -365,6 +365,7 @@ void ResumeCtrlImpl::ApplicationResumptiOnTimer() {
 }
 
 void ResumeCtrlImpl::OnAppActivated(ApplicationSharedPtr application) {
+  LOG4CXX_AUTO_TRACE(logger_);
   if (is_resumption_active_) {
     RemoveFromResumption(application->app_id());
     application->set_is_resuming(false);
