@@ -169,6 +169,27 @@ void ResumeCtrlImpl::on_event(const event_engine::Event& event) {
   }
 }
 
+// Helper method
+bool ResumeCtrlImpl::AppExistsInFullOrLimited() {
+  if (application_manager_.active_application().use_count() != 0) {
+    return true;
+  } else if (application_manager_.get_limited_media_application().use_count() !=
+             0) {
+    return true;
+  } else if (application_manager_.get_limited_navi_application().use_count() !=
+             0) {
+    return true;
+  } else if (application_manager_.get_limited_voice_application().use_count() !=
+             0) {
+    return true;
+  } else if (application_manager_.get_limited_mobile_projection_application()
+                 .use_count() != 0) {
+    return true;
+  } else {
+    return false;
+  }
+}
+
 bool ResumeCtrlImpl::RestoreAppHMIState(ApplicationSharedPtr application) {
   using namespace mobile_apis;
   LOG4CXX_AUTO_TRACE(logger_);
@@ -214,6 +235,7 @@ bool ResumeCtrlImpl::RestoreAppHMIState(ApplicationSharedPtr application) {
             "High-bandwidth transport not available, app will resume into : "
                 << saved_hmi_level);
       }
+      const bool app_exists_in_full_or_limited = AppExistsInFullOrLimited();
       const bool app_hmi_state_is_set =
           SetAppHMIState(application, saved_hmi_level, true);
       size_t restored_widgets = 0;
@@ -221,9 +243,7 @@ bool ResumeCtrlImpl::RestoreAppHMIState(ApplicationSharedPtr application) {
           application->is_app_data_resumption_allowed()) {
         restored_widgets = RestoreAppWidgets(application, saved_app);
       }
-      const bool active_app_exists =
-          (application_manager_.active_application().use_count() != 0);
-      if (0 == restored_widgets && active_app_exists) {
+      if (0 == restored_widgets && app_exists_in_full_or_limited) {
         LOG4CXX_DEBUG(logger_, "App exists in full or limited. Do not resume");
         return false;
       }
