@@ -128,6 +128,8 @@ class ResumeCtrlTest : public ::testing::Test {
     EXPECT_CALL(mock_app_mngr_, CheckResumptionRequiredTransportAvailable(_))
         .Times(AtLeast(0))
         .WillRepeatedly(Return(true));
+    ON_CALL(mock_app_mngr_, get_full_or_limited_application())
+        .WillByDefault(Return(ApplicationSharedPtr()));
 
     ON_CALL(mock_application_manager_settings_, use_db_for_resumption())
         .WillByDefault(Return(false));

@@ -175,6 +175,8 @@ class ApplicationManagerImpl
 
   ApplicationSharedPtr active_application() const OVERRIDE;
 
+  ApplicationSharedPtr get_full_or_limited_application() const OVERRIDE;
+
   ApplicationSharedPtr application_by_hmi_app(
       uint32_t hmi_app_id) const OVERRIDE;
   ApplicationSharedPtr application_by_policy_id(

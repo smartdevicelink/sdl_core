@@ -124,8 +124,9 @@ class ResumeCtrlImpl : public ResumeCtrl,
    * @param application application which will be resumed
    * @param saved_app application specific section from backup file
    */
-  void RestoreAppWidgets(application_manager::ApplicationSharedPtr application,
-                         const smart_objects::SmartObject& saved_app) OVERRIDE;
+  size_t RestoreAppWidgets(
+      application_manager::ApplicationSharedPtr application,
+      const smart_objects::SmartObject& saved_app) OVERRIDE;
 
   /**
    * @brief Remove application from list of saved applications
