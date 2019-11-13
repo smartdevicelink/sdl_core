@@ -774,8 +774,6 @@ protocol_handler::MajorProtocolVersion ApplicationImpl::protocol_version()
 }
 
 void ApplicationImpl::set_is_resuming(bool is_resuming) {
-  LOG4CXX_DEBUG(logger_, "ApplicationImpl::set_is_resuming id : " << policy_app_id());
-  LOG4CXX_DEBUG(logger_, "ApplicationImpl::set_is_resuming is resuming: " << is_resuming);
   is_resuming_ = is_resuming;
 }
 
