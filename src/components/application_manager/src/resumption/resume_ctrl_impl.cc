@@ -169,27 +169,6 @@ void ResumeCtrlImpl::on_event(const event_engine::Event& event) {
   }
 }
 
-// Helper method
-bool ResumeCtrlImpl::AppExistsInFullOrLimited() {
-  if (application_manager_.active_application().use_count() != 0) {
-    return true;
-  } else if (application_manager_.get_limited_media_application().use_count() !=
-             0) {
-    return true;
-  } else if (application_manager_.get_limited_navi_application().use_count() !=
-             0) {
-    return true;
-  } else if (application_manager_.get_limited_voice_application().use_count() !=
-             0) {
-    return true;
-  } else if (application_manager_.get_limited_mobile_projection_application()
-                 .use_count() != 0) {
-    return true;
-  } else {
-    return false;
-  }
-}
-
 bool ResumeCtrlImpl::RestoreAppHMIState(ApplicationSharedPtr application) {
   using namespace mobile_apis;
   LOG4CXX_AUTO_TRACE(logger_);
@@ -235,7 +214,9 @@ bool ResumeCtrlImpl::RestoreAppHMIState(ApplicationSharedPtr application) {
             "High-bandwidth transport not available, app will resume into : "
                 << saved_hmi_level);
       }
-      const bool app_exists_in_full_or_limited = AppExistsInFullOrLimited();
+      const bool app_exists_in_full_or_limited =
+          application_manager_.get_full_or_limited_application().use_count() !=
+          0;
       const bool app_hmi_state_is_set =
           SetAppHMIState(application, saved_hmi_level, true);
       size_t restored_widgets = 0;
@@ -383,7 +364,6 @@ void ResumeCtrlImpl::ApplicationResumptiOnTimer() {
 }
 
 void ResumeCtrlImpl::OnAppActivated(ApplicationSharedPtr application) {
-  LOG4CXX_AUTO_TRACE(logger_);
   if (is_resumption_active_) {
     RemoveFromResumption(application->app_id());
     application->set_is_resuming(false);

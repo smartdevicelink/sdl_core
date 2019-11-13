@@ -171,6 +171,8 @@ class ApplicationManager {
   virtual ApplicationSharedPtr application(uint32_t app_id) const = 0;
   virtual ApplicationSharedPtr active_application() const = 0;
 
+  virtual ApplicationSharedPtr get_full_or_limited_application() const = 0;
+
   /**
    * Function used only by HMI request/response/notification base classes
    * to change HMI app id to Mobile app id and vice versa.

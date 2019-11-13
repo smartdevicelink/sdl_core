@@ -89,12 +89,6 @@ class ResumeCtrlImpl : public ResumeCtrl,
   void SaveApplication(app_mngr::ApplicationSharedPtr application) OVERRIDE;
 
   /**
-   * @brief Helper function to identify if an app exists in full or limited
-   * @return true if an app exists in full or limited, otherwise return false
-   */
-  bool AppExistsInFullOrLimited();
-
-  /**
    * @brief Set application HMI Level and ausio_state as saved
    * @param application is application witch HMI Level is need to restore
    * @return true if success, otherwise return false

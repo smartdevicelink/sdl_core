@@ -86,6 +86,8 @@ class MockApplicationManager : public application_manager::ApplicationManager {
       application, application_manager::ApplicationSharedPtr(uint32_t app_id));
   MOCK_CONST_METHOD0(active_application,
                      application_manager::ApplicationSharedPtr());
+  MOCK_CONST_METHOD0(get_full_or_limited_application,
+                     application_manager::ApplicationSharedPtr());
   MOCK_CONST_METHOD2(application,
                      application_manager::ApplicationSharedPtr(
                          const std::string& device_id,

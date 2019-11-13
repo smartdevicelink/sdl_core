@@ -327,6 +327,20 @@ ApplicationSharedPtr ApplicationManagerImpl::active_application() const {
   return FindApp(accessor, ActiveAppPredicate);
 }
 
+bool FullOrLimitedAppPredicate(const ApplicationSharedPtr app) {
+  return app ? app->IsFullscreen() ||
+                   app->hmi_level(
+                       mobile_api::PredefinedWindows::DEFAULT_WINDOW) ==
+                       mobile_api::HMILevel::HMI_LIMITED
+             : false;
+}
+
+ApplicationSharedPtr ApplicationManagerImpl::get_full_or_limited_application()
+    const {
+  DataAccessor<ApplicationSet> accessor = applications();
+  return FindApp(accessor, FullOrLimitedAppPredicate);
+}
+
 bool LimitedAppPredicate(const ApplicationSharedPtr app) {
   return app ? app->hmi_level(mobile_api::PredefinedWindows::DEFAULT_WINDOW) ==
                    mobile_api::HMILevel::HMI_LIMITED
