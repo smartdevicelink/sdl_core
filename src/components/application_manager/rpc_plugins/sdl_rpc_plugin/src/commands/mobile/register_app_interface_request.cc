@@ -524,30 +524,30 @@ RegisterAppInterfaceRequest::GetLockScreenIconUrlNotification(
 void FillVRRelatedFields(smart_objects::SmartObject& response_params,
                          const HMICapabilities& hmi_capabilities) {
   response_params[strings::language] = hmi_capabilities.active_vr_language();
-  if (hmi_capabilities.vr_capabilities()) {
-    response_params[strings::vr_capabilities] =
-        *hmi_capabilities.vr_capabilities();
+  auto vr_capabilities = hmi_capabilities.vr_capabilities();
+  if (vr_capabilities) {
+    response_params[strings::vr_capabilities] = *vr_capabilities;
   }
 }
 
 void FillVIRelatedFields(smart_objects::SmartObject& response_params,
                          const HMICapabilities& hmi_capabilities) {
-  if (hmi_capabilities.vehicle_type()) {
-    response_params[hmi_response::vehicle_type] =
-        *hmi_capabilities.vehicle_type();
+  auto vehicle_type = hmi_capabilities.vehicle_type();
+  if (vehicle_type) {
+    response_params[hmi_response::vehicle_type] = *vehicle_type;
   }
 }
 
 void FillTTSRelatedFields(smart_objects::SmartObject& response_params,
                           const HMICapabilities& hmi_capabilities) {
   response_params[strings::language] = hmi_capabilities.active_tts_language();
-  if (hmi_capabilities.speech_capabilities()) {
-    response_params[strings::speech_capabilities] =
-        *hmi_capabilities.speech_capabilities();
+  auto speech_capabilities = hmi_capabilities.speech_capabilities();
+  if (speech_capabilities) {
+    response_params[strings::speech_capabilities] = *speech_capabilities;
   }
-  if (hmi_capabilities.prerecorded_speech()) {
-    response_params[strings::prerecorded_speech] =
-        *(hmi_capabilities.prerecorded_speech());
+  auto prerecorded_speech = hmi_capabilities.prerecorded_speech();
+  if (prerecorded_speech) {
+    response_params[strings::prerecorded_speech] = *prerecorded_speech;
   }
 }
 
@@ -555,82 +555,70 @@ void FillUIRelatedFields(smart_objects::SmartObject& response_params,
                          const HMICapabilities& hmi_capabilities) {
   response_params[strings::hmi_display_language] =
       hmi_capabilities.active_ui_language();
-  if (hmi_capabilities.display_capabilities()) {
+
+  auto display_capabilities = hmi_capabilities.display_capabilities();
+  if (display_capabilities) {
     response_params[hmi_response::display_capabilities] =
         smart_objects::SmartObject(smart_objects::SmartType_Map);
 
     smart_objects::SmartObject& display_caps =
         response_params[hmi_response::display_capabilities];
 
-    if (hmi_capabilities.display_capabilities()->keyExists(
-            hmi_response::display_type)) {
+    if (display_capabilities->keyExists(hmi_response::display_type)) {
       display_caps[hmi_response::display_type] =
-          hmi_capabilities.display_capabilities()->getElement(
-              hmi_response::display_type);
+          display_capabilities->getElement(hmi_response::display_type);
     }
 
-    if (hmi_capabilities.display_capabilities()->keyExists(
-            hmi_response::display_name)) {
+    if (display_capabilities->keyExists(hmi_response::display_name)) {
       display_caps[hmi_response::display_name] =
-          hmi_capabilities.display_capabilities()->getElement(
-              hmi_response::display_name);
+          display_capabilities->getElement(hmi_response::display_name);
     }
 
-    if (hmi_capabilities.display_capabilities()->keyExists(
-            hmi_response::text_fields)) {
+    if (display_capabilities->keyExists(hmi_response::text_fields)) {
       display_caps[hmi_response::text_fields] =
-          hmi_capabilities.display_capabilities()->getElement(
-              hmi_response::text_fields);
+          display_capabilities->getElement(hmi_response::text_fields);
     }
 
-    if (hmi_capabilities.display_capabilities()->keyExists(
-            hmi_response::image_fields)) {
+    if (display_capabilities->keyExists(hmi_response::image_fields)) {
       display_caps[hmi_response::image_fields] =
-          hmi_capabilities.display_capabilities()->getElement(
-              hmi_response::image_fields);
+          display_capabilities->getElement(hmi_response::image_fields);
     }
 
-    if (hmi_capabilities.display_capabilities()->keyExists(
-            hmi_response::media_clock_formats)) {
+    if (display_capabilities->keyExists(hmi_response::media_clock_formats)) {
       display_caps[hmi_response::media_clock_formats] =
-          hmi_capabilities.display_capabilities()->getElement(
-              hmi_response::media_clock_formats);
+          display_capabilities->getElement(hmi_response::media_clock_formats);
     }
 
-    if (hmi_capabilities.display_capabilities()->keyExists(
-            hmi_response::templates_available)) {
+    if (display_capabilities->keyExists(hmi_response::templates_available)) {
       display_caps[hmi_response::templates_available] =
-          hmi_capabilities.display_capabilities()->getElement(
-              hmi_response::templates_available);
+          display_capabilities->getElement(hmi_response::templates_available);
     }
 
-    if (hmi_capabilities.display_capabilities()->keyExists(
-            hmi_response::screen_params)) {
+    if (display_capabilities->keyExists(hmi_response::screen_params)) {
       display_caps[hmi_response::screen_params] =
-          hmi_capabilities.display_capabilities()->getElement(
-              hmi_response::screen_params);
+          display_capabilities->getElement(hmi_response::screen_params);
     }
 
-    if (hmi_capabilities.display_capabilities()->keyExists(
+    if (display_capabilities->keyExists(
             hmi_response::num_custom_presets_available)) {
       display_caps[hmi_response::num_custom_presets_available] =
-          hmi_capabilities.display_capabilities()->getElement(
+          display_capabilities->getElement(
               hmi_response::num_custom_presets_available);
     }
 
-    if (hmi_capabilities.display_capabilities()->keyExists(
-            hmi_response::image_capabilities)) {
+    if (display_capabilities->keyExists(hmi_response::image_capabilities)) {
       display_caps[hmi_response::graphic_supported] =
-          (hmi_capabilities.display_capabilities()
-               ->getElement(hmi_response::image_capabilities)
+          (display_capabilities->getElement(hmi_response::image_capabilities)
                .length() > 0);
     }
   }
 
-  if (hmi_capabilities.audio_pass_thru_capabilities()) {
+  auto audio_pass_thru_capabilities =
+      hmi_capabilities.audio_pass_thru_capabilities();
+  if (audio_pass_thru_capabilities) {
     // hmi_capabilities json contains array and HMI response object
     response_params[strings::audio_pass_thru_capabilities] =
-        *hmi_capabilities.audio_pass_thru_capabilities();
+        *audio_pass_thru_capabilities;
   }
   response_params[strings::hmi_capabilities] =
       smart_objects::SmartObject(smart_objects::SmartType_Map);
@@ -728,36 +716,39 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile(
     FillVIRelatedFields(response_params, hmi_capabilities);
   }
 
-  if (hmi_capabilities.button_capabilities()) {
-    response_params[hmi_response::button_capabilities] =
-        *hmi_capabilities.button_capabilities();
+  auto button_capabilities = hmi_capabilities.button_capabilities();
+  if (button_capabilities) {
+    response_params[hmi_response::button_capabilities] = *button_capabilities;
   }
 
-  if (hmi_capabilities.soft_button_capabilities()) {
+  auto soft_button_capabilities = hmi_capabilities.soft_button_capabilities();
+  if (soft_button_capabilities) {
     response_params[hmi_response::soft_button_capabilities] =
-        *hmi_capabilities.soft_button_capabilities();
+        *soft_button_capabilities;
   }
 
-  if (hmi_capabilities.preset_bank_capabilities()) {
+  auto preset_bank_capabilities = hmi_capabilities.preset_bank_capabilities();
+  if (preset_bank_capabilities) {
     response_params[hmi_response::preset_bank_capabilities] =
-        *hmi_capabilities.preset_bank_capabilities();
+        *preset_bank_capabilities;
   }
 
-  if (hmi_capabilities.hmi_zone_capabilities()) {
-    if (smart_objects::SmartType_Array ==
-        hmi_capabilities.hmi_zone_capabilities()->getType()) {
+  auto hmi_zone_capabilities = hmi_capabilities.hmi_zone_capabilities();
+  if (hmi_zone_capabilities) {
+    if (smart_objects::SmartType_Array == hmi_zone_capabilities->getType()) {
       // hmi_capabilities json contains array and HMI response object
       response_params[hmi_response::hmi_zone_capabilities] =
-          *hmi_capabilities.hmi_zone_capabilities();
+          *hmi_zone_capabilities;
     } else {
       response_params[hmi_response::hmi_zone_capabilities][0] =
-          *hmi_capabilities.hmi_zone_capabilities();
+          *hmi_zone_capabilities;
     }
   }
 
-  if (hmi_capabilities.pcm_stream_capabilities()) {
+  auto pcm_stream_capabilities = hmi_capabilities.pcm_stream_capabilities();
+  if (pcm_stream_capabilities) {
     response_params[strings::pcm_stream_capabilities] =
-        *hmi_capabilities.pcm_stream_capabilities();
+        *pcm_stream_capabilities;
   }
 
   const std::vector<uint32_t>& diag_modes =
