@@ -664,6 +664,13 @@ class ApplicationManager {
   virtual protocol_handler::MajorProtocolVersion SupportedSDLVersion()
       const = 0;
 
+  /**
+   * @brief Applies functor for each plugin
+   * @param functor Functor that will be applied to each plugin
+   */
+  virtual void ApplyFunctorForEachPlugin(
+      std::function<void(plugin_manager::RPCPlugin&)> functor) = 0;
+
   /*
    * @brief Converts connection string transport type representation
    * to HMI Common_TransportType

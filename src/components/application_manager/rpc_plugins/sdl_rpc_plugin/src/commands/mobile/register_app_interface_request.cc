@@ -43,6 +43,7 @@
 #include "application_manager/application_manager.h"
 #include "application_manager/helpers/application_helper.h"
 #include "application_manager/message_helper.h"
+#include "application_manager/plugin_manager/plugin_keys.h"
 #include "application_manager/policies/policy_handler.h"
 #include "application_manager/policies/policy_handler_interface.h"
 #include "application_manager/resumption/resume_ctrl.h"
@@ -457,6 +458,12 @@ void RegisterAppInterfaceRequest::Run() {
       }
     }
   }
+
+  auto on_app_registered = [application](plugin_manager::RPCPlugin& plugin) {
+    plugin.OnApplicationEvent(plugin_manager::kApplicationRegistered,
+                              application);
+  };
+  application_manager_.ApplyFunctorForEachPlugin(on_app_registered);
 
   if (msg_params.keyExists(strings::day_color_scheme)) {
     application->set_day_color_scheme(msg_params[strings::day_color_scheme]);
@@ -875,6 +882,12 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile(
   // Default HMI level should be set before any permissions validation, since it
   // relies on HMI level.
   application_manager_.OnApplicationRegistered(application);
+
+  auto send_rc_status = [application](plugin_manager::RPCPlugin& plugin) {
+    plugin.OnApplicationEvent(plugin_manager::kRCStatusChanged, application);
+  };
+  application_manager_.ApplyFunctorForEachPlugin(send_rc_status);
+
   SendOnAppRegisteredNotificationToHMI(
       application, resumption, need_restore_vr);
   (*notify_upd_manager)();
