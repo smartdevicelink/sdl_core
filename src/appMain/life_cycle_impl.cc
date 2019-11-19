@@ -85,7 +85,8 @@ bool LifeCycleImpl::StartComponents() {
                                               profile_.app_info_storage());
 
   DCHECK(!transport_manager_);
-  transport_manager_ = new transport_manager::TransportManagerDefault(profile_);
+  transport_manager_ = new transport_manager::TransportManagerDefault(
+      profile_, transport_manager::TransportAdapterFactory());
 
   DCHECK(!connection_handler_);
   connection_handler_ = new connection_handler::ConnectionHandlerImpl(

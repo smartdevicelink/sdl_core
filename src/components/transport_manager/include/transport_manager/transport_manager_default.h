@@ -44,12 +44,30 @@ class LastState;
 
 namespace transport_manager {
 
+struct TransportAdapterFactory {
+  TransportAdapterFactory();
+  template <typename... Args>
+  using CreatorTA =
+      std::function<transport_adapter::TransportAdapter*(Args&&... args)>;
+  CreatorTA<resumption::LastState&, const TransportManagerSettings&>
+      ta_bluetooth_creator_;
+  CreatorTA<const uint16_t,
+            resumption::LastState&,
+            const TransportManagerSettings&>
+      ta_tcp_creator_;
+  CreatorTA<resumption::LastState&, const TransportManagerSettings&>
+      ta_usb_creator_;
+  CreatorTA<resumption::LastState&, const TransportManagerSettings&>
+      ta_cloud_creator_;
+};
+
 /**
  * @brief Default realization of transport_manager_impl class.
  */
 class TransportManagerDefault : public TransportManagerImpl {
  public:
-  explicit TransportManagerDefault(const TransportManagerSettings& settings);
+  explicit TransportManagerDefault(const TransportManagerSettings& settings,
+                                   const TransportAdapterFactory& ta_factory_);
 
   /**
    * @brief Initialize transport manager.
@@ -63,6 +81,8 @@ class TransportManagerDefault : public TransportManagerImpl {
    */
   virtual ~TransportManagerDefault();
 
+ private:
+  TransportAdapterFactory ta_factory_;
   DISALLOW_COPY_AND_ASSIGN(TransportManagerDefault);
 };
 }  // namespace transport_manager
