@@ -174,9 +174,11 @@ void ThreadedSocketConnection::threadMain() {
     LOG4CXX_ERROR(logger_, "Connection Establish failed");
     delete connect_error;
     Abort();
+  } else {
+    LOG4CXX_DEBUG(logger_, "Connection established");
+    controller_->ConnectDone(device_handle(), application_handle());
   }
-  LOG4CXX_DEBUG(logger_, "Connection established");
-  controller_->ConnectDone(device_handle(), application_handle());
+
   while (!terminate_flag_) {
     Transmit();
   }
