@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, Ford Motor Company
+ * Copyright (c) 2019, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,10 +30,10 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_TEST_INCLUDE_TRANSPORT_MANAGER_TCP_MOCK_TCP_TRANSPORT_ADAPTER_H_
-#define SRC_COMPONENTS_TRANSPORT_MANAGER_TEST_INCLUDE_TRANSPORT_MANAGER_TCP_MOCK_TCP_TRANSPORT_ADAPTER_H_
+#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_TEST_INCLUDE_TRANSPORT_MANAGER_USB_MOCK_USB_AOA_ADAPTER_H_
+#define SRC_COMPONENTS_TRANSPORT_MANAGER_TEST_INCLUDE_TRANSPORT_MANAGER_USB_MOCK_USB_AOA_ADAPTER_H_
 
-#include "transport_manager/tcp/tcp_transport_adapter.h"
+#include "transport_manager/usb/usb_aoa_adapter.h"
 
 namespace test {
 namespace components {
@@ -41,40 +41,22 @@ namespace transport_manager_test {
 
 using namespace ::transport_manager::transport_adapter;
 
-class MockTCPTransportAdapter : public TcpTransportAdapter {
+class MockUsbAoaAdapter : public UsbAoaAdapter {
  public:
-  MockTCPTransportAdapter(
-      uint16_t port,
-      resumption::LastState& last_state,
-      const transport_manager::TransportManagerSettings& settings)
-      : TcpTransportAdapter(port, last_state, settings) {}
-  MOCK_CONST_METHOD2(
-      FindEstablishedConnection,
-      ConnectionSPtr(const transport_manager::DeviceUID& device_handle,
-                     const transport_manager::ApplicationHandle& app_handle));
-
-  MOCK_CONST_METHOD1(
-      FindDevice,
-      DeviceSptr(const transport_manager::DeviceUID& device_handle));
-  MOCK_METHOD2(Connect,
-               TransportAdapter::Error(
-                   const transport_manager::DeviceUID& device_handle,
-                   const transport_manager::ApplicationHandle& app_handle));
-
+  MockUsbAoaAdapter(resumption::LastState& last_state,
+                    const transport_manager::TransportManagerSettings& settings)
+      : UsbAoaAdapter(last_state, settings) {}
+  MOCK_CONST_METHOD0(GetDeviceType, DeviceType());
   MOCK_CONST_METHOD0(IsInitialised, bool());
   MOCK_METHOD1(AddListener, void(TransportAdapterListener* listener));
   MOCK_METHOD0(Init, TransportAdapter::Error());
   MOCK_METHOD0(Terminate, void());
-  void CallStore() {
-    Store();
-  }
-  bool CallRestore() {
-    return Restore();
-  }
+
+  MOCK_CONST_METHOD1(ToBeAutoConnected, bool(DeviceSptr device));
 };
 
 }  // namespace transport_manager_test
 }  // namespace components
 }  // namespace test
 
-#endif  // SRC_COMPONENTS_TRANSPORT_MANAGER_TEST_INCLUDE_TRANSPORT_MANAGER_TCP_MOCK_TCP_TRANSPORT_ADAPTER_H_
+#endif  // SRC_COMPONENTS_TRANSPORT_MANAGER_TEST_INCLUDE_TRANSPORT_MANAGER_USB_MOCK_USB_AOA_ADAPTER_H_
