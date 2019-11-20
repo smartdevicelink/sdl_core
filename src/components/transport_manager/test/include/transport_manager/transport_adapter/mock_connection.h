@@ -48,6 +48,7 @@ class MockConnection : public Connection {
       SendData,
       TransportAdapter::Error(::protocol_handler::RawMessagePtr message));
   MOCK_METHOD0(Disconnect, TransportAdapter::Error());
+  MOCK_METHOD0(Terminate, void());
 };
 
 }  // namespace transport_manager_test
