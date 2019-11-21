@@ -50,8 +50,8 @@
 #include "application_manager/resumption/resume_ctrl.h"
 #include "application_manager/state_controller.h"
 #include "resumption/last_state_impl.h"
-#include "utils/file_system.h"
 #include "resumption/last_state_wrapper_impl.h"
+#include "utils/file_system.h"
 
 namespace test {
 namespace components {
@@ -603,7 +603,7 @@ TEST_F(HMICapabilitiesTest,
 
   std::shared_ptr<HMICapabilitiesForTesting> hmi_capabilities =
       std::make_shared<HMICapabilitiesForTesting>(mock_app_mngr);
-  hmi_capabilities->Init(&last_state_);
+  hmi_capabilities->Init(last_state_wrapper_);
 
   // with old audio pass thru format, the object is an array containing a single
   // object

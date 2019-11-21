@@ -2333,8 +2333,12 @@ bool ApplicationManagerImpl::Init(
     resumption::LastStateWrapperPtr last_state_wrapper,
     media_manager::MediaManager* media_manager) {
   LOG4CXX_TRACE(logger_, "Init application manager");
-  plugin_manager_.reset(new plugin_manager::RPCPluginManagerImpl(
-      *this, *rpc_service_, *hmi_capabilities_, *policy_handler_, last_state));
+  plugin_manager_.reset(
+      new plugin_manager::RPCPluginManagerImpl(*this,
+                                               *rpc_service_,
+                                               *hmi_capabilities_,
+                                               *policy_handler_,
+                                               last_state_wrapper));
   if (!plugin_manager_->LoadPlugins(get_settings().plugins_folder())) {
     LOG4CXX_ERROR(logger_, "Plugins are not loaded");
     return false;
@@ -2396,7 +2400,7 @@ bool ApplicationManagerImpl::Init(
       *app_launch_dto_.get(), *this, settings_));
 
   app_service_manager_.reset(
-      new application_manager::AppServiceManager(*this, last_state));
+      new application_manager::AppServiceManager(*this, last_state_wrapper));
 
   auto on_app_policy_updated = [](plugin_manager::RPCPlugin& plugin) {
     plugin.OnPolicyEvent(plugin_manager::kApplicationPolicyUpdated);
