@@ -40,8 +40,9 @@
 
 #include "application_manager/mock_application_manager_settings.h"
 #include "rc_rpc_plugin/rc_consent_manager_impl.h"
-#include "resumption/last_state.h"
 #include "resumption/last_state_impl.h"
+#include "resumption/last_state_wrapper.h"
+#include "resumption/last_state_wrapper_impl.h"
 #include "utils/date_time.h"
 #include "utils/file_system.h"
 
@@ -76,10 +77,11 @@ class RCConsentManagerImplTest : public ::testing::Test {
  public:
   RCConsentManagerImplTest()
       : current_date_(0u)
-      , last_state_(new resumption::LastStateImpl(kAppTestStorageFolder,
-                                                  kAppTestInfoStorage))
+      , last_state_(std::make_shared<resumption::LastStateWrapperImpl>(
+            std::make_shared<resumption::LastStateImpl>(kAppTestStorageFolder,
+                                                        kAppTestInfoStorage)))
       , rc_consent_manager_(new rc_rpc_plugin::RCConsentManagerImpl(
-            *last_state_, mock_app_mngr_, kPeriodOfConsentExpired)) {}
+            last_state_, mock_app_mngr_, kPeriodOfConsentExpired)) {}
 
   void SetUp() OVERRIDE {
     current_date_ = std::time(0);
@@ -102,14 +104,20 @@ class RCConsentManagerImplTest : public ::testing::Test {
       file_system::RemoveDirectory(kAppTestStorageFolder);
     }
 
-    last_state_->get_dictionary().clear();
+    auto last_state_accessor = last_state_->get_accessor();
+    last_state_accessor.GetMutableData().set_dictionary(Json::Value());
+  }
+
+  void SaveStateToFileSystem() {
+    auto last_state_accessor = last_state_->get_accessor();
+    last_state_accessor.GetMutableData().SaveToFileSystem();
   }
 
  protected:
   time_t current_date_;
   NiceMock<MockApplicationManagerSettings> mock_app_mnrg_settings_;
   NiceMock<MockApplicationManager> mock_app_mngr_;
-  std::unique_ptr<resumption::LastState> last_state_;
+  resumption::LastStateWrapperPtr last_state_;
   std::unique_ptr<rc_rpc_plugin::RCConsentManagerImpl> rc_consent_manager_;
 };
 
@@ -129,7 +137,7 @@ TEST_F(RCConsentManagerImplTest, SaveAndGetModuleConsents_SUCCESS) {
 
   rc_consent_manager_->SaveModuleConsents(
       kPolicyApp1Id, kMacAddress1, module_consents);
-  last_state_->SaveStateToFileSystem();
+  SaveStateToFileSystem();
 
   auto radio_consent = rc_consent_manager_->GetModuleConsent(
       kPolicyApp1Id, kMacAddress1, {kRadioModule, radio_moduleId});
@@ -160,7 +168,7 @@ TEST_F(RCConsentManagerImplTest, ModuleId_NOT_EXISTS) {
 
   rc_consent_manager_->SaveModuleConsents(
       kPolicyApp1Id, kMacAddress1, module_consents);
-  last_state_->SaveStateToFileSystem();
+  SaveStateToFileSystem();
 
   ModuleConsent consent = rc_consent_manager_->GetModuleConsent(
       kPolicyApp1Id, kMacAddress1, unknown_module);
@@ -197,7 +205,7 @@ TEST_F(RCConsentManagerImplTest, ConsentIsExpired) {
                                         module_consent_not_expired};
   rc_consent_manager_->SaveModuleConsents(
       kPolicyApp1Id, kMacAddress1, module_consents);
-  last_state_->SaveStateToFileSystem();
+  SaveStateToFileSystem();
 
   // All consents, which consent has been saved more than 30 days, will be
   // removed.
@@ -238,7 +246,7 @@ TEST_F(RCConsentManagerImplTest,
   rc_consent_manager_->SaveModuleConsents(
       kPolicyApp1Id, kMacAddress2, module_consents_app2);
 
-  last_state_->SaveStateToFileSystem();
+  SaveStateToFileSystem();
 
   // Module consents for same app ids and different device_id (mac_adress) will
   // haven't been replaced each other
@@ -280,12 +288,12 @@ TEST_F(RCConsentManagerImplTest,
   rc_consent_manager_->SaveModuleConsents(
       kPolicyApp1Id, kMacAddress1, module_consents_app1);
 
-  last_state_->SaveStateToFileSystem();
+  SaveStateToFileSystem();
 
   rc_consent_manager_->SaveModuleConsents(
       kPolicyApp1Id, kMacAddress1, module_consents_app2);
 
-  last_state_->SaveStateToFileSystem();
+  SaveStateToFileSystem();
 
   // Module consents for same app ids and same device_id (mac_adress) will
   // have been replaced each other
@@ -318,7 +326,7 @@ TEST_F(RCConsentManagerImplTest, RemoveAllModuleConsents_SUCCESS) {
   rc_consent_manager_->SaveModuleConsents(
       kPolicyApp1Id, kMacAddress2, module_consents_app2);
 
-  last_state_->SaveStateToFileSystem();
+  SaveStateToFileSystem();
 
   rc_consent_manager_->RemoveAllConsents();
 

@@ -34,7 +34,7 @@
 #define SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_RC_RPC_PLUGIN_INCLUDE_RC_CONSENT_MANAGER_IMPL_H
 
 #include "rc_consent_manager.h"
-#include "resumption/last_state.h"
+#include "resumption/last_state_wrapper.h"
 #include "utils/lock.h"
 
 namespace Json {
@@ -46,7 +46,7 @@ namespace rc_rpc_plugin {
 class RCConsentManagerImpl : public RCConsentManager {
  public:
   RCConsentManagerImpl(
-      resumption::LastState& last_state,
+      resumption::LastStateWrapperPtr last_state,
       application_manager::ApplicationManager& application_manager,
       const uint32_t period_of_consent_expired);
 
@@ -58,7 +58,7 @@ class RCConsentManagerImpl : public RCConsentManager {
   rc_rpc_types::ModuleConsent GetModuleConsent(
       const std::string& app_id,
       const std::string& mac_address,
-      const rc_rpc_types::ModuleUid& module_id) const OVERRIDE;
+      const rc_rpc_types::ModuleUid& module_id) OVERRIDE;
 
   void RemoveExpiredConsents() OVERRIDE;
 
@@ -111,7 +111,7 @@ class RCConsentManagerImpl : public RCConsentManager {
    * In case the section is absent, will be appended a new empty section.
    * @return Remote Control section of LastState in Json
    */
-  Json::Value& GetRemoteControlDataOrAppend() const;
+  Json::Value& GetRemoteControlDataOrAppend(Json::Value& last_state_data);
 
   /**
    * @brief Gets Device applications section for specified device mac adress
@@ -119,8 +119,8 @@ class RCConsentManagerImpl : public RCConsentManager {
    * @param mac_aress Device MAC adress
    * @return Device applications section of LastState in Json
    */
-  Json::Value& GetDeviceApplicationsOrAppend(
-      const std::string& mac_address) const;
+  Json::Value& GetDeviceApplicationsOrAppend(const std::string& mac_address,
+                                             Json::Value& last_state_data);
 
   /**
    * @brief Get AppConsentsList section of LastState for specified application.
@@ -130,7 +130,8 @@ class RCConsentManagerImpl : public RCConsentManager {
    * @return AppConsentsList of LastState in Json
    */
   Json::Value& GetAppConsentsListOrAppend(const std::string& policy_app_id,
-                                          const std::string& mac_address) const;
+                                          const std::string& mac_address,
+                                          Json::Value& last_state_data);
 
   /**
    * @brief Get Application consents section of Remote Control section of
@@ -138,7 +139,7 @@ class RCConsentManagerImpl : public RCConsentManager {
    * is absent, will be created a new empty section
    * @return AppConsents section of RemoteControl section of LastState in Jason
    */
-  Json::Value& GetAppsConsentsOrAppend() const;
+  Json::Value& GetAppsConsentsOrAppend(Json::Value& last_state_data);
 
   /**
    * @brief Get all module resource consents for specified application and
@@ -149,14 +150,14 @@ class RCConsentManagerImpl : public RCConsentManager {
    * acquiring resource
    * @param module_type Module type with consents
    */
-  Json::Value& GetModuleTypeConsentsOrAppend(
-      const std::string& policy_app_id,
-      const std::string& mac_address,
-      const std::string& module_type) const;
+  Json::Value& GetModuleTypeConsentsOrAppend(const std::string& policy_app_id,
+                                             const std::string& mac_address,
+                                             const std::string& module_type,
+                                             Json::Value& last_state_data);
 
  private:
   application_manager::ApplicationManager& app_manager_;
-  resumption::LastState& last_state_;
+  resumption::LastStateWrapperPtr last_state_;
   const uint32_t period_of_consent_expired_;
   mutable sync_primitives::Lock dictionary_control_lock_;
   mutable sync_primitives::Lock remote_control_lock_;
