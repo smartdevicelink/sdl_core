@@ -108,7 +108,7 @@ int TransportManagerDefault::Init(
 
 #if defined(CLOUD_APP_WEBSOCKET_TRANSPORT_SUPPORT)
   transport_adapter::TransportAdapterImpl* ta_cloud =
-      new transport_adapter::CloudWebsocketTransportAdapter(last_state,
+      new transport_adapter::CloudWebsocketTransportAdapter(last_state_wrapper,
                                                             get_settings());
 #ifdef TELEMETRY_MONITOR
   if (metric_observer_) {

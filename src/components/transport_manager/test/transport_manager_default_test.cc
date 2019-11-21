@@ -32,11 +32,11 @@
 
 #include "transport_manager/transport_manager_default.h"
 #include "gtest/gtest.h"
+#include "resumption/last_state_wrapper_impl.h"
+#include "resumption/mock_last_state.h"
+#include "transport_manager/mock_transport_manager_settings.h"
 #include "transport_manager/transport_manager.h"
 #include "transport_manager/transport_manager_default.h"
-#include "transport_manager/mock_transport_manager_settings.h"
-#include "resumption/mock_last_state.h"
-#include "resumption/last_state_wrapper_impl.h"
 
 namespace test {
 namespace components {
@@ -77,17 +77,26 @@ std::vector<uint8_t> kBTUUID = {0x93,
                                 0xA8};
 }  // namespace
 
-TEST(TestTransportManagerDefault, Init_LastStateNotUsed) {
+class TestTransportManagerDefault : public ::testing::Test {
+ protected:
+  void SetUp() OVERRIDE {
+    mock_last_state_ = std::make_shared<MockLastState>();
+  }
+
+ public:
+  std::shared_ptr<MockLastState> mock_last_state_;
+};
+
+TEST_F(TestTransportManagerDefault, Init_LastStateNotUsed) {
   MockTransportManagerSettings transport_manager_settings;
   transport_manager::TransportManagerDefault transport_manager(
       transport_manager_settings);
 
-  auto mock_last_state = std::make_shared<MockLastState>();
   std::shared_ptr<resumption::LastStateWrapperImpl> wrapper =
-      std::make_shared<resumption::LastStateWrapperImpl>(mock_last_state);
+      std::make_shared<resumption::LastStateWrapperImpl>(mock_last_state_);
   Json::Value custom_dictionary = Json::Value();
 
-  ON_CALL(*mock_last_state, dictionary())
+  ON_CALL(*mock_last_state_, dictionary())
       .WillByDefault(Return(custom_dictionary));
 
   EXPECT_CALL(transport_manager_settings, use_last_state())
@@ -114,20 +123,18 @@ TEST(TestTransportManagerDefault, Init_LastStateNotUsed) {
       .WillRepeatedly(ReturnRef(dummy_parameter));
   EXPECT_CALL(transport_manager_settings, aoa_filter_serial_number())
       .WillRepeatedly(ReturnRef(dummy_parameter));
-  transport_manager.Init(mock_last_state);
 
   transport_manager.Init(wrapper);
   transport_manager.Stop();
 }
 
-TEST(TestTransportManagerDefault, Init_LastStateUsed) {
+TEST_F(TestTransportManagerDefault, Init_LastStateUsed) {
   MockTransportManagerSettings transport_manager_settings;
   transport_manager::TransportManagerDefault transport_manager(
       transport_manager_settings);
 
-  auto mock_last_state = std::make_shared<MockLastState>();
   std::shared_ptr<resumption::LastStateWrapperImpl> wrapper =
-      std::make_shared<resumption::LastStateWrapperImpl>(mock_last_state);
+      std::make_shared<resumption::LastStateWrapperImpl>(mock_last_state_);
   Json::Value custom_dictionary;
   Json::Value tcp_device;
   tcp_device[kDeviceName] = "unique_tcp_device_name";
@@ -142,7 +149,7 @@ TEST(TestTransportManagerDefault, Init_LastStateUsed) {
   custom_dictionary[kTransportManager][kBluetoothAdapter][kDevices][0] =
       bluetooth_device;
 
-  ON_CALL(*mock_last_state, dictionary())
+  ON_CALL(*mock_last_state_, dictionary())
       .WillByDefault(Return(custom_dictionary));
 
   EXPECT_CALL(transport_manager_settings, use_last_state())
@@ -159,14 +166,13 @@ TEST(TestTransportManagerDefault, Init_LastStateUsed) {
   transport_manager.Stop();
 }
 
-TEST(TestTransportManagerDefault, Init_LastStateUsed_InvalidPort) {
+TEST_F(TestTransportManagerDefault, Init_LastStateUsed_InvalidPort) {
   MockTransportManagerSettings transport_manager_settings;
   transport_manager::TransportManagerDefault transport_manager(
       transport_manager_settings);
 
-  auto mock_last_state = std::make_shared<MockLastState>();
   std::shared_ptr<resumption::LastStateWrapperImpl> wrapper =
-      std::make_shared<resumption::LastStateWrapperImpl>(mock_last_state);
+      std::make_shared<resumption::LastStateWrapperImpl>(mock_last_state_);
   Json::Value custom_dictionary;
   Json::Value tcp_device;
   tcp_device[kDeviceName] = "unique_tcp_device_name";
@@ -181,7 +187,7 @@ TEST(TestTransportManagerDefault, Init_LastStateUsed_InvalidPort) {
   custom_dictionary[kTransportManager][kBluetoothAdapter][kDevices][0] =
       bluetooth_device;
 
-  ON_CALL(*mock_last_state, dictionary())
+  ON_CALL(*mock_last_state_, dictionary())
       .WillByDefault(Return(custom_dictionary));
 
   EXPECT_CALL(transport_manager_settings, use_last_state())
