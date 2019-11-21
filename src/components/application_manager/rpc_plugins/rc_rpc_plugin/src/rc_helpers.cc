@@ -175,6 +175,7 @@ const std::vector<std::string> RCHelpers::GetModuleTypesList() {
 
 RCAppExtensionPtr RCHelpers::GetRCExtension(
     application_manager::Application& app) {
+  LOG4CXX_AUTO_TRACE(logger_);
   auto extension_interface = app.QueryInterface(RCRPCPlugin::kRCPluginID);
   auto extension =
       std::static_pointer_cast<RCAppExtension>(extension_interface);

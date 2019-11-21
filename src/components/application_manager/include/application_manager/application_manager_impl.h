@@ -1138,7 +1138,18 @@ class ApplicationManagerImpl
    */
   protocol_handler::MajorProtocolVersion SupportedSDLVersion() const OVERRIDE;
 
+  void ApplyFunctorForEachPlugin(
+      std::function<void(plugin_manager::RPCPlugin&)> functor) OVERRIDE;
+
  private:
+  /**
+   * @brief Adds application to registered applications list and marks it as
+   * registered
+   * @param application Application that should be added to registered
+   * applications list.
+   */
+  void AddAppToRegisteredAppList(const ApplicationSharedPtr application);
+
   /**
    * @brief Removes service status record for service that failed to start
    * @param app Application whose service status record should be removed

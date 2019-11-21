@@ -271,6 +271,10 @@ class MockApplicationManager : public application_manager::ApplicationManager {
   MOCK_CONST_METHOD0(SupportedSDLVersion,
                      protocol_handler::MajorProtocolVersion());
   MOCK_METHOD1(
+      ApplyFunctorForEachPlugin,
+      void(std::function<void(application_manager::plugin_manager::RPCPlugin&)>
+               functor));
+  MOCK_METHOD1(
       GetDeviceTransportType,
       hmi_apis::Common_TransportType::eType(const std::string& transport_type));
   MOCK_METHOD1(AddAppToTTSGlobalPropertiesList, void(const uint32_t app_id));

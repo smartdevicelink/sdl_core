@@ -448,12 +448,6 @@ void ApplicationManagerImpl::OnApplicationRegistered(ApplicationSharedPtr app) {
   sync_primitives::AutoLock lock(applications_list_lock_ptr_);
   const mobile_apis::HMILevel::eType default_level = GetDefaultHmiLevel(app);
   state_ctrl_.OnApplicationRegistered(app, default_level);
-
-  std::function<void(plugin_manager::RPCPlugin&)> on_app_registered =
-      [app](plugin_manager::RPCPlugin& plugin) {
-        plugin.OnApplicationEvent(plugin_manager::kApplicationRegistered, app);
-      };
-  plugin_manager_->ForEachPlugin(on_app_registered);
 }
 
 void ApplicationManagerImpl::OnApplicationSwitched(ApplicationSharedPtr app) {
@@ -743,14 +737,7 @@ ApplicationSharedPtr ApplicationManagerImpl::RegisterApplication(
   // Timer will be started after hmi level resumption.
   resume_controller().OnAppRegistrationStart(policy_app_id, device_mac);
 
-  // Add application to registered app list and set appropriate mark.
-  // Lock has to be released before adding app to policy DB to avoid possible
-  // deadlock with simultaneous PTU processing
-  applications_list_lock_ptr_->Acquire();
-  application->MarkRegistered();
-  applications_.insert(application);
-  apps_size_ = applications_.size();
-  applications_list_lock_ptr_->Release();
+  AddAppToRegisteredAppList(application);
 
   // Update cloud app information, in case any pending apps are unable to be
   // registered due to a mobile app taking precedence
@@ -4188,6 +4175,28 @@ ApplicationManagerImpl::SupportedSDLVersion() const {
   LOG4CXX_AUTO_TRACE(logger_);
   return static_cast<protocol_handler::MajorProtocolVersion>(
       get_settings().max_supported_protocol_version());
+}
+
+void ApplicationManagerImpl::AddAppToRegisteredAppList(
+    const ApplicationSharedPtr application) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  DCHECK_OR_RETURN_VOID(application);
+  sync_primitives::AutoLock lock(applications_list_lock_ptr_);
+
+  // Add application to registered app list and set appropriate mark.
+  application->MarkRegistered();
+  applications_.insert(application);
+  LOG4CXX_DEBUG(
+      logger_,
+      "App with app_id: " << application->app_id()
+                          << " has been added to registered applications list");
+  apps_size_ = static_cast<uint32_t>(applications_.size());
+}
+
+void ApplicationManagerImpl::ApplyFunctorForEachPlugin(
+    std::function<void(plugin_manager::RPCPlugin&)> functor) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  plugin_manager_->ForEachPlugin(functor);
 }
 
 event_engine::EventDispatcher& ApplicationManagerImpl::event_dispatcher() {
