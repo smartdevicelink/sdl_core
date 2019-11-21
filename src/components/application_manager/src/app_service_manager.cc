@@ -53,7 +53,7 @@ const char* kAppServiceSection = "AppServices";
 const char* kDefaults = "defaults";
 
 AppServiceManager::AppServiceManager(ApplicationManager& app_manager,
-                                     resumption::LastState& last_state)
+                                     resumption::LastStateWrapperPtr last_state)
     : app_manager_(app_manager)
     , last_state_(last_state)
     , rpc_passing_handler_(*this, app_manager_) {}
@@ -142,10 +142,12 @@ smart_objects::SmartObject AppServiceManager::PublishAppService(
     for (auto it = embedded_services.begin(); it != embedded_services.end();
          ++it) {
       if (*it == service_type) {
-        Json::Value& dictionary = last_state_.get_dictionary();
+        auto last_state_accessor = last_state_->get_accessor();
+        Json::Value dictionary = last_state_accessor.GetData().dictionary();
         dictionary[kAppServiceSection][kDefaults][service_type] =
             kEmbeddedService;
         default_app_id = kEmbeddedService;
+        last_state_accessor.GetMutableData().set_dictionary(dictionary);
       }
     }
   }
@@ -340,9 +342,11 @@ bool AppServiceManager::SetDefaultService(const std::string service_id) {
   }
   service.default_service = true;
 
-  Json::Value& dictionary = last_state_.get_dictionary();
+  auto last_state_accessor = last_state_->get_accessor();
+  Json::Value dictionary = last_state_accessor.GetData().dictionary();
   dictionary[kAppServiceSection][kDefaults][service_type] =
       GetPolicyAppID(service);
+  last_state_accessor.GetMutableData().set_dictionary(dictionary);
   return true;
 }
 
@@ -365,8 +369,11 @@ bool AppServiceManager::RemoveDefaultService(const std::string service_id) {
   std::string service_type =
       service.record[strings::service_manifest][strings::service_type]
           .asString();
-  Json::Value& dictionary = last_state_.get_dictionary();
+
+  auto last_state_accessor = last_state_->get_accessor();
+  Json::Value dictionary = last_state_accessor.GetData().dictionary();
   dictionary[kAppServiceSection][kDefaults].removeMember(service_type);
+  last_state_accessor.GetMutableData().set_dictionary(dictionary);
   return true;
 }
 
@@ -547,7 +554,9 @@ AppService* AppServiceManager::FindServiceByName(std::string name) {
 std::string AppServiceManager::DefaultServiceByType(
     const std::string service_type) {
   LOG4CXX_AUTO_TRACE(logger_);
-  Json::Value& dictionary = last_state_.get_dictionary();
+
+  auto last_state_accessor = last_state_->get_accessor();
+  Json::Value dictionary = last_state_accessor.GetData().dictionary();
   if (dictionary[kAppServiceSection][kDefaults].isMember(service_type)) {
     return dictionary[kAppServiceSection][kDefaults][service_type].asString();
   }
