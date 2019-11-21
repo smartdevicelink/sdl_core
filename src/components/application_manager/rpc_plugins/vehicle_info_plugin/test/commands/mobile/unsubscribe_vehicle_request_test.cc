@@ -79,7 +79,9 @@ class UnsubscribeVehicleRequestTest
       , vi_app_extension_ptr_(
             std::make_shared<vehicle_info_plugin::VehicleInfoAppExtension>(
                 vi_plugin_, *mock_app_))
-      , app_set_lock_ptr_(std::make_shared<sync_primitives::Lock>()) {}
+      , app_set_lock_ptr_(std::make_shared<sync_primitives::Lock>())
+      , mock_last_state_(std::make_shared<resumption::LastStateWrapperImpl>(
+            std::make_shared<resumption_test::MockLastState>())) {}
 
  protected:
   void UnsubscribeSuccessfully();
@@ -108,7 +110,7 @@ class UnsubscribeVehicleRequestTest
   std::shared_ptr<sync_primitives::Lock> app_set_lock_ptr_;
   vehicle_info_plugin::VehicleInfoPlugin vi_plugin_;
   application_manager_test::MockRPCHandler mock_rpc_handler_;
-  resumption_test::MockLastState mock_last_state_;
+  resumption::LastStateWrapperPtr mock_last_state_;
 };
 
 TEST_F(UnsubscribeVehicleRequestTest, Run_AppNotRegistered_UNSUCCESS) {

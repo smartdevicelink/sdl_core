@@ -49,7 +49,7 @@ class VehicleInfoPlugin : public plugins::RPCPlugin {
             app_mngr::rpc_service::RPCService& rpc_service,
             app_mngr::HMICapabilities& hmi_capabilities,
             policy::PolicyHandlerInterface& policy_handler,
-            resumption::LastState& last_state) OVERRIDE;
+            resumption::LastStateWrapperPtr last_state) OVERRIDE;
 
   bool IsAbleToProcess(
       const int32_t function_id,
