@@ -63,9 +63,9 @@ void LastStateImpl::SaveToFileSystem() {
   const std::vector<uint8_t> char_vector_pdata(styled_string.begin(),
                                                styled_string.end());
   DCHECK(file_system::CreateDirectoryRecursively(app_storage_folder_));
-  LOG4CXX_INFO(logger_,
-               "LastState::SaveToFileSystem " << app_info_storage_
-                                              << styled_string);
+  LOG4CXX_INFO(
+      logger_,
+      "LastState::SaveToFileSystem " << app_info_storage_ << styled_string);
   DCHECK(file_system::Write(app_info_storage_, char_vector_pdata));
 }
 
@@ -102,4 +102,4 @@ void LastStateImpl::set_dictionary(const Json::Value& dictionary) {
   dictionary_ = dictionary;
 }
 
-}  // resumption
+}  // namespace resumption

@@ -41,7 +41,6 @@
 #include "application_manager/mock_application_manager_settings.h"
 #include "rc_rpc_plugin/rc_consent_manager_impl.h"
 #include "resumption/last_state_impl.h"
-#include "resumption/last_state_wrapper.h"
 #include "resumption/last_state_wrapper_impl.h"
 #include "utils/date_time.h"
 #include "utils/file_system.h"

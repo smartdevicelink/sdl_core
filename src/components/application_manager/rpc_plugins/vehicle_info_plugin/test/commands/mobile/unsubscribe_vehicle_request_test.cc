@@ -39,6 +39,7 @@
 #include "application_manager/mock_application_manager.h"
 #include "application_manager/mock_message_helper.h"
 #include "mobile/unsubscribe_vehicle_data_request.h"
+#include "resumption/last_state_wrapper_impl.h"
 #include "resumption/mock_last_state.h"
 #include "vehicle_info_plugin/commands/vi_command_request_test.h"
 #include "vehicle_info_plugin/vehicle_info_app_extension.h"

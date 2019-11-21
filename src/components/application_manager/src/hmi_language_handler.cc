@@ -28,16 +28,16 @@
  * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
-*/
+ */
 
 #include "application_manager/hmi_language_handler.h"
 #include "application_manager/application_manager.h"
 #include "application_manager/hmi_capabilities.h"
 #include "application_manager/message_helper.h"
 #include "application_manager/rpc_service.h"
-#include "utils/helpers.h"
 #include "resumption/last_state_wrapper.h"
 #include "smart_objects/smart_object.h"
+#include "utils/helpers.h"
 
 static const std::string LanguagesKey = "Languages";
 static const std::string UIKey = "UI";
@@ -78,9 +78,9 @@ void HMILanguageHandler::set_language_for(
       LOG4CXX_WARN(logger_, "Unknown interface has been passed " << interface);
       return;
   }
-  LOG4CXX_DEBUG(logger_,
-                "Setting language " << language << " for interface "
-                                    << interface);
+  LOG4CXX_DEBUG(
+      logger_,
+      "Setting language " << language << " for interface " << interface);
   resumption::LastStateAccessor accessor = last_state_wrapper_->get_accessor();
   Json::Value dictionary = accessor.GetData().dictionary();
   dictionary[LanguagesKey][key] = static_cast<int32_t>(language);

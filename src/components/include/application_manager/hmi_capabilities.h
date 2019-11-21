@@ -28,7 +28,7 @@
  * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
-*/
+ */
 
 #ifndef SRC_COMPONENTS_INCLUDE_APPLICATION_MANAGER_HMI_CAPABILITIES_H_
 #define SRC_COMPONENTS_INCLUDE_APPLICATION_MANAGER_HMI_CAPABILITIES_H_
@@ -37,14 +37,9 @@
 #include "interfaces/HMI_API.h"
 #include "interfaces/MOBILE_API.h"
 #include "json/json.h"
+#include "resumption/last_state_wrapper.h"
 #include "smart_objects/smart_object.h"
 #include "utils/macro.h"
-#include "application_manager/hmi_language_handler.h"
-#include "resumption/last_state_wrapper.h"
-
-namespace resumption {
-class LastStateWrapper;
-}
 
 namespace application_manager {
 class ApplicationManager;

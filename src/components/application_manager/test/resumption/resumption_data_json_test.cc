@@ -38,8 +38,8 @@
 #include "application_manager/mock_resumption_data.h"
 #include "application_manager/usage_statistics.h"
 #include "interfaces/MOBILE_API.h"
-#include "resumption/last_state_wrapper_impl.h"
 #include "resumption/last_state_impl.h"
+#include "resumption/last_state_wrapper_impl.h"
 
 #include "application_manager/resumption_data_test.h"
 #include "formatters/CFormatterJsonBase.h"

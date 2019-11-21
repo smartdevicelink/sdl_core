@@ -33,9 +33,9 @@
 #ifndef SRC_COMPONENTS_INCLUDE_TEST_APPLICATION_MANAGER_MOCK_APPLICATION_MANAGER_H_
 #define SRC_COMPONENTS_INCLUDE_TEST_APPLICATION_MANAGER_MOCK_APPLICATION_MANAGER_H_
 
+#include <memory>
 #include <string>
 #include <vector>
-#include <memory>
 
 #include "gmock/gmock.h"
 

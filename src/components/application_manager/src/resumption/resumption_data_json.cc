@@ -178,7 +178,7 @@ void ResumptionDataJson::IncrementIgnOffCount() {
     to_save.append(*json_app);
   }
   SetSavedApplication(to_save, dictionary);
-  SetLastIgnOffTime(time(NULL), dictionary);
+  SetLastIgnOffTime(time(nullptr), dictionary);
   accessor.GetMutableData().set_dictionary(dictionary);
   LOG4CXX_DEBUG(logger_, GetResumptionData(dictionary).toStyledString());
 }

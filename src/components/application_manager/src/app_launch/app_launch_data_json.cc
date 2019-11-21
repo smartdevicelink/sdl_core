@@ -32,9 +32,9 @@
 #include "application_manager/app_launch/app_launch_data_json.h"
 #include <algorithm>
 #include "application_manager/smart_object_keys.h"
+#include "json/json.h"
 #include "smart_objects/smart_object.h"
 #include "utils/date_time.h"
-#include "json/json.h"
 
 namespace app_launch {
 
@@ -84,7 +84,7 @@ Json::Value& AppLaunchDataJson::GetApplicationData(
 
 Json::Value& AppLaunchDataJson::GetApplicationListAndIndex(
     const ApplicationData& app_data,
-    int32_t& founded_index,
+    int32_t& found_index,
     Json::Value& dictionary) const {
   using namespace application_manager;
   LOG4CXX_AUTO_TRACE(logger_);
@@ -106,7 +106,7 @@ Json::Value& AppLaunchDataJson::GetApplicationListAndIndex(
 
       if (deviceID == app_data.device_mac_ && bundleID == app_data.bundle_id_ &&
           appID == app_data.mobile_app_id_) {
-        founded_index = idx;
+        found_index = idx;
       }
     }
   }

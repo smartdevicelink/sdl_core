@@ -68,8 +68,8 @@ class AppLaunchDataJsonTest : public ::testing::Test {
   virtual void SetUp() {
     ::file_system::DeleteFile(kAppStorageFile);
     last_state_wrapper_ = std::make_shared<resumption::LastStateWrapperImpl>(
-        std::make_shared<resumption::LastStateImpl>("app_storage_folder",
-                                                    "app_info_storage"));
+        std::make_shared<resumption::LastStateImpl>(kAppStorageFolder,
+                                                    kAppInfoStorage));
     ASSERT_TRUE(::file_system::CreateFile(kAppStorageFile));
 
     NiceMock<app_launch_test::MockAppLaunchSettings> mock_app_launch_settings_;

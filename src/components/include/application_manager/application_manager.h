@@ -47,7 +47,6 @@
 #include "application_manager/plugin_manager/rpc_plugin_manager.h"
 #include "application_manager/state_controller.h"
 #include "policy/policy_types.h"
-#include "application_manager/plugin_manager/rpc_plugin_manager.h"
 
 namespace app_launch {
 class AppLaunchCtrl;

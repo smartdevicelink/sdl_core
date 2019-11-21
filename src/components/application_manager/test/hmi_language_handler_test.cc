@@ -32,7 +32,6 @@
 
 #include <stdint.h>
 
-#include "gtest/gtest.h"
 #include "application_manager/application_manager.h"
 #include "application_manager/hmi_language_handler.h"
 #include "application_manager/mock_application.h"
@@ -44,6 +43,7 @@
 #include "application_manager/resumption/resume_ctrl_impl.h"
 #include "application_manager/smart_object_keys.h"
 #include "application_manager/state_controller.h"
+#include "gtest/gtest.h"
 #include "resumption/last_state_wrapper_impl.h"
 #include "test/resumption/mock_last_state.h"
 

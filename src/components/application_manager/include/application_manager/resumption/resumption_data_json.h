@@ -187,6 +187,7 @@ class ResumptionDataJson : public ResumptionData {
    * or adds the new one.
    * @param policy_app_id application id.
    * @param device_id unique id of device.
+   * @param dictionary - data dictionary where all necessary info stored
    * @return the reference to the record in applications array.
    */
   Json::Value& GetFromSavedOrAppend(const std::string& policy_app_id,
@@ -195,12 +196,14 @@ class ResumptionDataJson : public ResumptionData {
 
   /**
    * @brief Get applications for resumption of LastState
+   * @param dictionary - data dictionary where all necessary info stored
    * @return applications for resumption of LastState
    */
   Json::Value& GetSavedApplications(Json::Value& dictionary) const;
 
   /**
    * @brief Get Resumption section of LastState
+   * @param dictionary - data dictionary where all necessary info stored
    * @return Resumption section of LastState in Json
    */
   Json::Value& GetResumptionData(Json::Value& dictionary) const;
@@ -217,12 +220,14 @@ class ResumptionDataJson : public ResumptionData {
 
   /**
    * @brief Set applications for resumption to LastState
+   * @param dictionary - data dictionary where all necessary info stored
    * @parems apps_json applications to write in LastState
    */
   void SetSavedApplication(Json::Value& apps_json, Json::Value& dictionary);
 
   /**
    * @brief Setup IgnOff time to LastState
+   * @param dictionary - data dictionary where all necessary info stored
    * @param ign_off_time - igition off time
    */
   void SetLastIgnOffTime(time_t ign_off_time, Json::Value& dictionary);

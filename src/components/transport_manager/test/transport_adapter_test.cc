@@ -961,11 +961,6 @@ TEST_F(TransportAdapterTest, SendData) {
   EXPECT_CALL(transport_adapter, Restore()).WillOnce(Return(true));
   transport_adapter.Init();
 
-  EXPECT_CALL(*dev_mock, Init()).WillOnce(Return(TransportAdapter::OK));
-  EXPECT_CALL(*serverMock, Init()).WillOnce(Return(TransportAdapter::OK));
-  EXPECT_CALL(transport_adapter, Restore()).WillOnce(Return(true));
-  transport_adapter.Init();
-
   EXPECT_CALL(*serverMock, IsInitialised()).WillOnce(Return(true));
   EXPECT_CALL(*serverMock, CreateConnection(dev_id, app_handle))
       .WillOnce(Return(TransportAdapter::OK));
@@ -1254,8 +1249,6 @@ TEST_F(TransportAdapterTest, TransportConfigUpdated) {
   MockTransportAdapterImpl transport_adapter(
       NULL, NULL, NULL, last_state_wrapper_, transport_manager_settings);
   SetDefaultExpectations(transport_adapter);
-  EXPECT_CALL(transport_adapter, Restore()).WillOnce(Return(true));
-  transport_adapter.Init();
   EXPECT_CALL(transport_adapter, Restore()).WillOnce(Return(true));
   transport_adapter.Init();
 

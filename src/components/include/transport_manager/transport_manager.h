@@ -34,16 +34,10 @@
 #define SRC_COMPONENTS_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_MANAGER_H_
 
 #include "protocol/common.h"
+#include "resumption/last_state_wrapper.h"
 #include "transport_manager/common.h"
 #include "transport_manager/transport_adapter/transport_adapter_event.h"
 #include "transport_manager/transport_manager_listener.h"
-#include "transport_manager/transport_adapter/transport_adapter_event.h"
-#include "resumption/last_state_wrapper.h"
-#include "protocol/common.h"
-
-namespace resumption {
-class LastStateWrapper;
-}
 
 namespace transport_manager {
 

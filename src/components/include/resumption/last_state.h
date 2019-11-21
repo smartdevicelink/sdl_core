@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018, Ford Motor Company
+ * Copyright (c) 2019, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -45,9 +45,9 @@ class LastState {
   virtual ~LastState() {}
 
   /**
-    * @brief SaveToFileSystem
-    * Saving dictionary to filesystem
-    */
+   * @brief SaveToFileSystem
+   * Saving dictionary to filesystem
+   */
   virtual void SaveToFileSystem() = 0;
 
   /**

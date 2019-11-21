@@ -34,18 +34,18 @@
  */
 
 #include <errno.h>
-#include <sys/types.h>
 #include <sys/socket.h>
+#include <sys/types.h>
 #include <unistd.h>
 
+#include <bluetooth/bluetooth.h>
 #include <iomanip>
 #include <set>
-#include <bluetooth/bluetooth.h>
 
-#include "transport_manager/bluetooth/bluetooth_transport_adapter.h"
-#include "transport_manager/bluetooth/bluetooth_device_scanner.h"
 #include "transport_manager/bluetooth/bluetooth_connection_factory.h"
 #include "transport_manager/bluetooth/bluetooth_device.h"
+#include "transport_manager/bluetooth/bluetooth_device_scanner.h"
+#include "transport_manager/bluetooth/bluetooth_transport_adapter.h"
 
 #include "utils/logger.h"
 
