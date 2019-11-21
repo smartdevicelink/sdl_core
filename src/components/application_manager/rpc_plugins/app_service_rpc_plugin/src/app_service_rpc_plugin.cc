@@ -50,7 +50,7 @@ bool AppServiceRpcPlugin::Init(
     application_manager::rpc_service::RPCService& rpc_service,
     application_manager::HMICapabilities& hmi_capabilities,
     policy::PolicyHandlerInterface& policy_handler,
-    resumption::LastState& last_state) {
+    resumption::LastStateWrapperPtr last_state) {
   UNUSED(last_state);
   application_manager_ = &app_manager;
   command_factory_.reset(new app_service_rpc_plugin::AppServiceCommandFactory(
