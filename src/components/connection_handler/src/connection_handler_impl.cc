@@ -258,7 +258,7 @@ void ConnectionHandlerImpl::OnConnectionPending(
     const transport_manager::ConnectionUID connection_id) {
   LOG4CXX_AUTO_TRACE(logger_);
   LOG4CXX_DEBUG(logger_,
-                "OnConnectionEstablished!!!: "
+                "OnConnectionPending!!!: "
                     << device_info.device_handle() << " " << device_info.name()
                     << " " << device_info.mac_address() << " "
                     << device_info.connection_type());

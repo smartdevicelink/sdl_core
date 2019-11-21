@@ -295,18 +295,18 @@ ApplicationSharedPtr ApplicationManagerImpl::application_by_policy_id(
   return FindApp(accessor, finder);
 }
 
-ApplicationSharedPtr ApplicationManagerImpl::application_by_name(
-    const std::string& app_name) const {
-  AppNamePredicate finder(app_name);
-  DataAccessor<ApplicationSet> accessor = applications();
-  return FindApp(accessor, finder);
-}
-
 ApplicationSharedPtr ApplicationManagerImpl::pending_application_by_policy_id(
     const std::string& policy_app_id) const {
   PolicyAppIdPredicate finder(policy_app_id);
   DataAccessor<AppsWaitRegistrationSet> accessor = pending_applications();
   return FindPendingApp(accessor, finder);
+}
+
+ApplicationSharedPtr ApplicationManagerImpl::application_by_name(
+    const std::string& app_name) const {
+  AppNamePredicate finder(app_name);
+  DataAccessor<ApplicationSet> accessor = applications();
+  return FindApp(accessor, finder);
 }
 
 ApplicationSharedPtr
@@ -416,6 +416,13 @@ std::vector<ApplicationSharedPtr>
 ApplicationManagerImpl::applications_by_button(uint32_t button) {
   SubscribedToButtonPredicate finder(
       static_cast<mobile_apis::ButtonName::eType>(button));
+  DataAccessor<ApplicationSet> accessor = applications();
+  return FindAllApps(accessor, finder);
+}
+
+std::vector<ApplicationSharedPtr> ApplicationManagerImpl::applications_by_name(
+    const std::string& app_name) const {
+  AppNamePredicate finder(app_name);
   DataAccessor<ApplicationSet> accessor = applications();
   return FindAllApps(accessor, finder);
 }
@@ -1026,14 +1033,22 @@ void ApplicationManagerImpl::RefreshCloudAppInformation() {
     } else if (mobile_apis::HybridAppPreference::MOBILE ==
                hybrid_app_preference) {
       auto nickname_it = nicknames.begin();
+      bool duplicate_found = false;
       for (; nickname_it != nicknames.end(); ++nickname_it) {
-        auto app = application_by_name(*nickname_it);
-        if (app.use_count() != 0) {
-          LOG4CXX_ERROR(
-              logger_,
-              "Mobile app already registered for cloud app: " << *nickname_it);
-          continue;
+        auto apps = applications_by_name(*nickname_it);
+        for (auto app : apps) {
+          if (app.use_count() != 0 && !app->is_cloud_app()) {
+            LOG4CXX_ERROR(logger_,
+                          "Mobile app already registered for cloud app: "
+                              << *nickname_it);
+            duplicate_found = true;
+            break;
+          }
         }
+      }
+
+      if (duplicate_found) {
+        continue;
       }
     }
 
@@ -3130,13 +3145,10 @@ void ApplicationManagerImpl::UnregisterApplication(
             "There is no more SDL4 apps with device handle: " << handle);
 
         RemoveAppsWaitingForRegistration(handle);
-        RefreshCloudAppInformation();
-        SendUpdateAppList();
-      } else if (app_to_remove->is_cloud_app()) {
-        RefreshCloudAppInformation();
-        SendUpdateAppList();
       }
     }
+    RefreshCloudAppInformation();
+    SendUpdateAppList();
   }
 
   commands_holder_->Clear(app_to_remove);

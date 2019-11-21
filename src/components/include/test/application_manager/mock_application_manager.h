@@ -118,6 +118,9 @@ class MockApplicationManager : public application_manager::ApplicationManager {
   MOCK_CONST_METHOD1(reregister_application_by_policy_id,
                      application_manager::ApplicationSharedPtr(
                          const std::string& policy_app_id));
+  MOCK_CONST_METHOD1(applications_by_name,
+                     std::vector<application_manager::ApplicationSharedPtr>(
+                         const std::string& app_name));
   MOCK_METHOD1(
       applications_by_button,
       std::vector<application_manager::ApplicationSharedPtr>(uint32_t button));
