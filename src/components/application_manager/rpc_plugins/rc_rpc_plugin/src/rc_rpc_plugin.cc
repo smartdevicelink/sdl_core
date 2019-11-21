@@ -52,7 +52,7 @@ bool RCRPCPlugin::Init(
     application_manager::rpc_service::RPCService& rpc_service,
     application_manager::HMICapabilities& hmi_capabilities,
     policy::PolicyHandlerInterface& policy_handler,
-    resumption::LastState& last_state) {
+    resumption::LastStateWrapperPtr last_state) {
   rc_consent_manager_.reset(new rc_rpc_plugin::RCConsentManagerImpl(
       last_state,
       app_manager,

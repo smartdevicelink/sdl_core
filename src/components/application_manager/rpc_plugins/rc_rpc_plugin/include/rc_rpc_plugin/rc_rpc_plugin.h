@@ -43,10 +43,6 @@
 #include "rc_rpc_plugin/rc_consent_manager.h"
 #include "rc_rpc_plugin/resource_allocation_manager.h"
 
-namespace resumption {
-class LastState;
-}
-
 namespace rc_rpc_plugin {
 namespace plugins = application_manager::plugin_manager;
 namespace app_mngr = application_manager;
@@ -65,7 +61,7 @@ class RCRPCPlugin : public plugins::RPCPlugin {
             app_mngr::rpc_service::RPCService& rpc_service,
             app_mngr::HMICapabilities& hmi_capabilities,
             policy::PolicyHandlerInterface& policy_handler,
-            resumption::LastState& last_state) OVERRIDE;
+            resumption::LastStateWrapperPtr last_state) OVERRIDE;
   /**
    * @param int32_t command id
    * @param CommandSource source
