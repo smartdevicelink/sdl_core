@@ -350,14 +350,14 @@ void RegisterAppInterfaceRequest::Run() {
         }
       }
 
-      bool is_preferred_application =
-          (!mobile_app_exists ||
-           (!is_cloud_app &&
-            preference == mobile_apis::HybridAppPreference::MOBILE)) ||
-          (!cloud_app_exists ||
-           (is_cloud_app &&
-            preference == mobile_apis::HybridAppPreference::CLOUD));
-      if (!is_preferred_application) {
+      bool mobile_app_matches =
+          !is_cloud_app &&
+          preference == mobile_apis::HybridAppPreference::MOBILE;
+      bool cloud_app_matches =
+          is_cloud_app && preference == mobile_apis::HybridAppPreference::CLOUD;
+
+      bool is_preferred_application = mobile_app_matches || cloud_app_matches;
+      if (mobile_app_exists && cloud_app_exists && !is_preferred_application) {
         SendResponse(false,
                      mobile_apis::Result::USER_DISALLOWED,
                      "App is disabled by user preferences");
