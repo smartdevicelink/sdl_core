@@ -90,6 +90,7 @@ using ::testing::SaveArg;
 using ::testing::SetArgPointee;
 using ::testing::SetArgReferee;
 
+using application_manager::plugin_manager::MockRPCPluginManager;
 using test::components::application_manager_test::MockStateController;
 using test::components::policy_test::MockPolicyHandlerInterface;
 
@@ -1607,6 +1608,9 @@ TEST_F(ApplicationManagerImplTest,
   smart_objects::SmartObjectSPtr request_for_registration_ptr =
       std::make_shared<smart_objects::SmartObject>(request_for_registration);
 
+  std::unique_ptr<plugin_manager::RPCPluginManager> rpc_plugin_manager(
+      new MockRPCPluginManager());
+  app_manager_impl_->SetPluginManager(rpc_plugin_manager);
   ApplicationSharedPtr application =
       app_manager_impl_->RegisterApplication(request_for_registration_ptr);
   EXPECT_STREQ(kAppName.c_str(), application->name().c_str());
@@ -1774,6 +1778,9 @@ TEST_F(ApplicationManagerImplTest,
   smart_objects::SmartObjectSPtr request_for_registration_ptr =
       std::make_shared<smart_objects::SmartObject>(request_for_registration);
 
+  std::unique_ptr<plugin_manager::RPCPluginManager> rpc_plugin_manager(
+      new MockRPCPluginManager());
+  app_manager_impl_->SetPluginManager(rpc_plugin_manager);
   ApplicationSharedPtr application =
       app_manager_impl_->RegisterApplication(request_for_registration_ptr);
 

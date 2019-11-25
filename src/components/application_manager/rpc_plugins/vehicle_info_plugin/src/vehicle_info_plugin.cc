@@ -98,6 +98,7 @@ void VehicleInfoPlugin::OnApplicationEvent(
 }
 
 void VehicleInfoPlugin::UnsubscribeFromRemovedVDItems() {
+  LOG4CXX_AUTO_TRACE(logger_);
   typedef std::vector<std::string> StringsVector;
 
   auto get_items_to_unsubscribe = [this]() -> StringsVector {

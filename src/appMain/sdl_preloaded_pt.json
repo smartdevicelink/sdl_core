@@ -3160,20 +3160,20 @@
                             "name": "hdop",
                             "key": "OEM_REF_HDOP",
                             "type": "Float",
-                            "mandatory": true,
+                            "mandatory": false,
                             "minvalue": 0,
                             "maxvalue": 1000,
-                            "since": "2.0",
-                            "until": "5.0"
+                            "since": "5.0"
                         },
                         {
                             "name": "hdop",
                             "key": "OEM_REF_HDOP",
                             "type": "Float",
-                            "mandatory": false,
+                            "mandatory": true,
                             "minvalue": 0,
-                            "maxvalue": 1000,
-                            "since": "5.0"
+                            "maxvalue": 10,
+                            "since": "2.0",
+                            "until": "5.0"
                         },
                         {
                             "name": "vdop",
@@ -3181,7 +3181,7 @@
                             "type": "Float",
                             "mandatory": false,
                             "minvalue": 0,
-                            "maxvalue": 10,
+                            "maxvalue": 1000,
                             "since": "5.0"
                         },
                         {
@@ -3216,7 +3216,7 @@
                             "mandatory": false,
                             "minvalue": 0,
                             "maxvalue": 31,
-                            "until": "5.0"
+                            "since": "5.0"
                         },
                         {
                             "name": "satellites",
@@ -3269,7 +3269,7 @@
                             "mandatory": false,
                             "minvalue": 0,
                             "maxvalue": 359.99,
-                            "until": "5.0"
+                            "since": "5.0"
                         },
                         {
                             "name": "heading",
@@ -3288,7 +3288,7 @@
                             "mandatory": false,
                             "minvalue": 0,
                             "maxvalue": 500,
-                            "until": "5.0"
+                            "since": "5.0"
                         },
                         {
                             "name": "speed",
@@ -3305,8 +3305,6 @@
                             "key": "OEM_REF_SHIFT",
                             "type": "Boolean",
                             "mandatory": false,
-                            "minvalue": 0,
-                            "maxvalue": 500,
                             "since": "6.0"
                         }
                     ],
@@ -3358,16 +3356,16 @@
                         {
                             "name": "type",
                             "key": "OEM_REF_FUEL_RAN_TYPE",
-                            "type": "Float",
-                            "mandatory": false,
-                            "minvalue": 0,
-                            "maxvalue": 10000
+                            "type": "FuelType",
+                            "mandatory": false
                         },
                         {
                             "name": "range",
                             "key": "OEM_REF_FUEL_RAN_RANG",
-                            "type": "FuelType",
-                            "mandatory": false
+                            "type": "Float",
+                            "mandatory": false,
+                            "minvalue": 0,
+                            "maxvalue": 10000
                         }
                     ],
                     "key": "OEM_REF_FUEL_RAN",

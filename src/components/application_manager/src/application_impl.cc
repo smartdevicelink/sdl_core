@@ -132,7 +132,7 @@ ApplicationImpl::ApplicationImpl(
           protocol_handler::MajorProtocolVersion::PROTOCOL_VERSION_3)
     , is_voice_communication_application_(false)
     , is_resuming_(false)
-    , deferred_resumption_hmi_level_(mobile_api::HMILevel::eType::INVALID_ENUM)
+    , deferred_resumption_hmi_level_(mobile_api::HMILevel::INVALID_ENUM)
     , is_hash_changed_during_suspend_(false)
     , video_stream_retry_number_(0)
     , audio_stream_retry_number_(0)
@@ -144,6 +144,7 @@ ApplicationImpl::ApplicationImpl(
           "AudioStreamSuspend",
           new ::timer::TimerTaskImpl<ApplicationImpl>(
               this, &ApplicationImpl::OnAudioStreamSuspend))
+    , hybrid_app_preference_(mobile_api::HybridAppPreference::INVALID_ENUM)
     , vi_lock_ptr_(std::make_shared<sync_primitives::Lock>())
     , button_lock_ptr_(std::make_shared<sync_primitives::Lock>())
     , application_manager_(application_manager) {

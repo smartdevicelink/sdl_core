@@ -175,17 +175,21 @@ class ApplicationManagerImpl
 
   ApplicationSharedPtr active_application() const OVERRIDE;
 
+  ApplicationSharedPtr get_full_or_limited_application() const OVERRIDE;
+
   ApplicationSharedPtr application_by_hmi_app(
       uint32_t hmi_app_id) const OVERRIDE;
   ApplicationSharedPtr application_by_policy_id(
       const std::string& policy_app_id) const OVERRIDE;
-  ApplicationSharedPtr application_by_name(
-      const std::string& app_name) const OVERRIDE;
+  DEPRECATED ApplicationSharedPtr
+  application_by_name(const std::string& app_name) const OVERRIDE;
   ApplicationSharedPtr pending_application_by_policy_id(
       const std::string& policy_app_id) const OVERRIDE;
   ApplicationSharedPtr reregister_application_by_policy_id(
       const std::string& policy_app_id) const OVERRIDE;
 
+  std::vector<ApplicationSharedPtr> applications_by_name(
+      const std::string& app_name) const OVERRIDE;
   std::vector<ApplicationSharedPtr> applications_by_button(
       uint32_t button) OVERRIDE;
   std::vector<ApplicationSharedPtr> applications_with_navi() OVERRIDE;
@@ -1136,7 +1140,18 @@ class ApplicationManagerImpl
    */
   protocol_handler::MajorProtocolVersion SupportedSDLVersion() const OVERRIDE;
 
+  void ApplyFunctorForEachPlugin(
+      std::function<void(plugin_manager::RPCPlugin&)> functor) OVERRIDE;
+
  private:
+  /**
+   * @brief Adds application to registered applications list and marks it as
+   * registered
+   * @param application Application that should be added to registered
+   * applications list.
+   */
+  void AddAppToRegisteredAppList(const ApplicationSharedPtr application);
+
   /**
    * @brief Removes service status record for service that failed to start
    * @param app Application whose service status record should be removed

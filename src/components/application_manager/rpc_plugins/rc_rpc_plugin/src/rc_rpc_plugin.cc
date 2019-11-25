@@ -107,7 +107,12 @@ void RCRPCPlugin::OnPolicyEvent(
 void RCRPCPlugin::OnApplicationEvent(
     application_manager::plugin_manager::ApplicationEvent event,
     application_manager::ApplicationSharedPtr application) {
+  LOG4CXX_AUTO_TRACE(logger_);
   if (!application->is_remote_control_supported()) {
+    LOG4CXX_DEBUG(
+        logger_,
+        "Remote control is not supported for application with app_id: "
+            << application->app_id());
     return;
   }
   switch (event) {
@@ -119,8 +124,6 @@ void RCRPCPlugin::OnApplicationEvent(
           rc_capabilities_manager_
               ->GetDriverLocationFromSeatLocationCapability();
       extension->SetUserLocation(driver_location);
-      resource_allocation_manager_->SendOnRCStatusNotifications(
-          NotificationTrigger::APP_REGISTRATION, application);
       break;
     }
     case plugins::kApplicationExit: {
@@ -137,6 +140,11 @@ void RCRPCPlugin::OnApplicationEvent(
       const auto user_location = application->get_user_location();
       auto extension = RCHelpers::GetRCExtension(*application);
       extension->SetUserLocation(user_location);
+      break;
+    }
+    case plugins::kRCStatusChanged: {
+      resource_allocation_manager_->SendOnRCStatusNotifications(
+          NotificationTrigger::APP_REGISTRATION, application);
       break;
     }
     default:
