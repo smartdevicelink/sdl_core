@@ -86,6 +86,8 @@ class MockApplicationManager : public application_manager::ApplicationManager {
       application, application_manager::ApplicationSharedPtr(uint32_t app_id));
   MOCK_CONST_METHOD0(active_application,
                      application_manager::ApplicationSharedPtr());
+  MOCK_CONST_METHOD0(get_full_or_limited_application,
+                     application_manager::ApplicationSharedPtr());
   MOCK_CONST_METHOD2(application,
                      application_manager::ApplicationSharedPtr(
                          const std::string& device_id,
@@ -116,6 +118,9 @@ class MockApplicationManager : public application_manager::ApplicationManager {
   MOCK_CONST_METHOD1(reregister_application_by_policy_id,
                      application_manager::ApplicationSharedPtr(
                          const std::string& policy_app_id));
+  MOCK_CONST_METHOD1(applications_by_name,
+                     std::vector<application_manager::ApplicationSharedPtr>(
+                         const std::string& app_name));
   MOCK_METHOD1(
       applications_by_button,
       std::vector<application_manager::ApplicationSharedPtr>(uint32_t button));
@@ -268,6 +273,10 @@ class MockApplicationManager : public application_manager::ApplicationManager {
   MOCK_METHOD0(app_launch_ctrl, app_launch::AppLaunchCtrl&());
   MOCK_CONST_METHOD0(SupportedSDLVersion,
                      protocol_handler::MajorProtocolVersion());
+  MOCK_METHOD1(
+      ApplyFunctorForEachPlugin,
+      void(std::function<void(application_manager::plugin_manager::RPCPlugin&)>
+               functor));
   MOCK_METHOD1(
       GetDeviceTransportType,
       hmi_apis::Common_TransportType::eType(const std::string& transport_type));

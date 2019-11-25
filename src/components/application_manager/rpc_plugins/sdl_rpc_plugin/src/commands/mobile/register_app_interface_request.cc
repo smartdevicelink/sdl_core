@@ -43,6 +43,7 @@
 #include "application_manager/application_manager.h"
 #include "application_manager/helpers/application_helper.h"
 #include "application_manager/message_helper.h"
+#include "application_manager/plugin_manager/plugin_keys.h"
 #include "application_manager/policies/policy_handler.h"
 #include "application_manager/policies/policy_handler_interface.h"
 #include "application_manager/resumption/resume_ctrl.h"
@@ -296,53 +297,73 @@ void RegisterAppInterfaceRequest::Run() {
     return;
   }
 
-  std::vector<ApplicationSharedPtr> duplicate_apps;
-  mobile_apis::Result::eType coincidence_result =
-      CheckCoincidence(duplicate_apps);
+  mobile_apis::Result::eType coincidence_result = CheckCoincidence();
 
-  if (mobile_apis::Result::DUPLICATE_NAME == coincidence_result &&
-      duplicate_apps.size() == 1) {
-    ApplicationSharedPtr duplicate_app = duplicate_apps.front();
-    bool error_response = true;
-    if (duplicate_app->is_cloud_app()) {
-      if (duplicate_app->hybrid_app_preference() ==
-          mobile_apis::HybridAppPreference::MOBILE) {
-        // Unregister cloud application and allow mobile application to register
-        // in it's place
-        application_manager_.UnregisterApplication(
-            duplicate_app->app_id(), mobile_apis::Result::USER_DISALLOWED);
-        error_response = false;
-      }
-    } else {
-      ApplicationSharedPtr cloud_app =
-          application_manager_.pending_application_by_policy_id(policy_app_id);
-      // If the duplicate name was not because of a mobile/cloud app pair, go
-      // through the normal process for handling duplicate names
-      if (cloud_app.use_count() == 0 || !cloud_app->is_cloud_app()) {
-        usage_statistics::AppCounter count_of_rejections_duplicate_name(
-            GetPolicyHandler().GetStatisticManager(),
-            policy_app_id,
-            usage_statistics::REJECTIONS_DUPLICATE_NAME);
-        ++count_of_rejections_duplicate_name;
-      } else if (cloud_app->hybrid_app_preference() ==
-                 mobile_apis::HybridAppPreference::CLOUD) {
-        // Unregister mobile application and allow cloud application to
-        // register in it's place
-        application_manager_.UnregisterApplication(
-            duplicate_app->app_id(), mobile_apis::Result::USER_DISALLOWED);
-        error_response = false;
-      }
-    }
-
-    if (error_response) {
-      LOG4CXX_ERROR(logger_, "Coincidence check failed.");
-      SendResponse(false, coincidence_result);
-      return;
-    }
-  } else if (mobile_apis::Result::SUCCESS != coincidence_result) {
+  if (mobile_apis::Result::SUCCESS != coincidence_result) {
     LOG4CXX_ERROR(logger_, "Coincidence check failed.");
     SendResponse(false, coincidence_result);
     return;
+  }
+
+  std::vector<ApplicationSharedPtr> duplicate_apps;
+  if (GetDuplicateNames(duplicate_apps)) {
+    LOG4CXX_ERROR(logger_,
+                  "Found duplicate app names, checking for hybrid apps.");
+    // Default preference to BOTH
+    mobile_apis::HybridAppPreference::eType preference =
+        mobile_apis::HybridAppPreference::BOTH;
+    ApplicationSharedPtr app =
+        application_manager_.pending_application_by_policy_id(policy_app_id);
+    bool is_cloud_app = app.use_count() != 0 && app->is_cloud_app();
+    if (is_cloud_app) {
+      // Retrieve hybrid app preference from registering app
+      preference = app->hybrid_app_preference();
+    } else {
+      // Search for the hybrid app preference in the duplicate app list
+      for (auto duplicate_app : duplicate_apps) {
+        if (duplicate_app->is_cloud_app()) {
+          preference = duplicate_app->hybrid_app_preference();
+          break;
+        }
+      }
+    }
+
+    if (preference == mobile_apis::HybridAppPreference::MOBILE ||
+        preference == mobile_apis::HybridAppPreference::CLOUD) {
+      bool cloud_app_exists = is_cloud_app;
+      bool mobile_app_exists = !is_cloud_app;
+      for (auto duplicate_app : duplicate_apps) {
+        cloud_app_exists = cloud_app_exists || (duplicate_app->IsRegistered() &&
+                                                duplicate_app->is_cloud_app());
+        mobile_app_exists = mobile_app_exists || !duplicate_app->is_cloud_app();
+        if (is_cloud_app && !duplicate_app->is_cloud_app() &&
+            preference == mobile_apis::HybridAppPreference::CLOUD) {
+          // Unregister mobile application and allow cloud application to
+          // register in it's place
+          LOG4CXX_ERROR(
+              logger_,
+              "Unregistering app because a preferred version is registered.");
+          application_manager_.UnregisterApplication(
+              duplicate_app->app_id(),
+              mobile_apis::Result::USER_DISALLOWED,
+              "App is disabled by user preferences");
+        }
+      }
+
+      bool mobile_app_matches =
+          !is_cloud_app &&
+          preference == mobile_apis::HybridAppPreference::MOBILE;
+      bool cloud_app_matches =
+          is_cloud_app && preference == mobile_apis::HybridAppPreference::CLOUD;
+
+      bool is_preferred_application = mobile_app_matches || cloud_app_matches;
+      if (mobile_app_exists && cloud_app_exists && !is_preferred_application) {
+        SendResponse(false,
+                     mobile_apis::Result::USER_DISALLOWED,
+                     "App is disabled by user preferences");
+        return;
+      }
+    }
   }
 
   if (IsWhiteSpaceExist()) {
@@ -457,6 +478,12 @@ void RegisterAppInterfaceRequest::Run() {
       }
     }
   }
+
+  auto on_app_registered = [application](plugin_manager::RPCPlugin& plugin) {
+    plugin.OnApplicationEvent(plugin_manager::kApplicationRegistered,
+                              application);
+  };
+  application_manager_.ApplyFunctorForEachPlugin(on_app_registered);
 
   if (msg_params.keyExists(strings::day_color_scheme)) {
     application->set_day_color_scheme(msg_params[strings::day_color_scheme]);
@@ -875,6 +902,12 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile(
   // Default HMI level should be set before any permissions validation, since it
   // relies on HMI level.
   application_manager_.OnApplicationRegistered(application);
+
+  auto send_rc_status = [application](plugin_manager::RPCPlugin& plugin) {
+    plugin.OnApplicationEvent(plugin_manager::kRCStatusChanged, application);
+  };
+  application_manager_.ApplyFunctorForEachPlugin(send_rc_status);
+
   SendOnAppRegisteredNotificationToHMI(
       application, resumption, need_restore_vr);
   (*notify_upd_manager)();
@@ -983,8 +1016,7 @@ void RegisterAppInterfaceRequest::SendOnAppRegisteredNotificationToHMI(
   DCHECK(rpc_service_.ManageHMICommand(notification));
 }
 
-mobile_apis::Result::eType RegisterAppInterfaceRequest::CheckCoincidence(
-    std::vector<ApplicationSharedPtr>& out_duplicate_apps) {
+mobile_apis::Result::eType RegisterAppInterfaceRequest::CheckCoincidence() {
   LOG4CXX_AUTO_TRACE(logger_);
   const smart_objects::SmartObject& msg_params =
       (*message_)[strings::msg_params];
@@ -1008,8 +1040,7 @@ mobile_apis::Result::eType RegisterAppInterfaceRequest::CheckCoincidence(
     const auto& cur_name = app->name();
     if (app_name.CompareIgnoreCase(cur_name)) {
       LOG4CXX_ERROR(logger_, "Application name is known already.");
-      out_duplicate_apps.push_back(app);
-      continue;
+      return mobile_apis::Result::DUPLICATE_NAME;
     }
     const auto vr = app->vr_synonyms();
     if (vr) {
@@ -1018,8 +1049,7 @@ mobile_apis::Result::eType RegisterAppInterfaceRequest::CheckCoincidence(
 
       if (0 != std::count_if(curr_vr->begin(), curr_vr->end(), v)) {
         LOG4CXX_ERROR(logger_, "Application name is known already.");
-        out_duplicate_apps.push_back(app);
-        continue;
+        return mobile_apis::Result::DUPLICATE_NAME;
       }
     }
 
@@ -1030,8 +1060,7 @@ mobile_apis::Result::eType RegisterAppInterfaceRequest::CheckCoincidence(
       CoincidencePredicateVR v(cur_name);
       if (0 != std::count_if(new_vr->begin(), new_vr->end(), v)) {
         LOG4CXX_ERROR(logger_, "vr_synonyms duplicated with app_name .");
-        out_duplicate_apps.push_back(app);
-        continue;
+        return mobile_apis::Result::DUPLICATE_NAME;
       }
     }  // End vr check
 
@@ -1056,11 +1085,43 @@ mobile_apis::Result::eType RegisterAppInterfaceRequest::CheckCoincidence(
 
   }  // Application for end
 
-  if (!out_duplicate_apps.empty()) {
-    return mobile_apis::Result::DUPLICATE_NAME;
-  }
   return mobile_apis::Result::SUCCESS;
 }  // method end
+
+bool RegisterAppInterfaceRequest::GetDuplicateNames(
+    std::vector<ApplicationSharedPtr>& out_duplicate_apps) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  const smart_objects::SmartObject& msg_params =
+      (*message_)[strings::msg_params];
+
+  const auto& app_name = msg_params[strings::app_name].asCustomString();
+  {
+    const auto& accessor = application_manager_.applications().GetData();
+
+    for (const auto& app : accessor) {
+      const auto& cur_name = app->name();
+      if (app_name.CompareIgnoreCase(cur_name)) {
+        out_duplicate_apps.push_back(app);
+      }
+    }
+  }
+
+  const std::string policy_app_id =
+      application_manager_.GetCorrectMobileIDFromMessage(message_);
+  {
+    const auto& accessor =
+        application_manager_.pending_applications().GetData();
+
+    for (const auto& app : accessor) {
+      const auto& cur_name = app->name();
+      if (app_name.CompareIgnoreCase(cur_name) &&
+          policy_app_id != app->policy_app_id()) {
+        out_duplicate_apps.push_back(app);
+      }
+    }
+  }
+  return !out_duplicate_apps.empty();
+}
 
 mobile_apis::Result::eType RegisterAppInterfaceRequest::CheckWithPolicyData() {
   LOG4CXX_AUTO_TRACE(logger_);

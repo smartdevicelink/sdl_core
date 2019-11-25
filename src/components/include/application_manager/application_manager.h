@@ -171,6 +171,8 @@ class ApplicationManager {
   virtual ApplicationSharedPtr application(uint32_t app_id) const = 0;
   virtual ApplicationSharedPtr active_application() const = 0;
 
+  virtual ApplicationSharedPtr get_full_or_limited_application() const = 0;
+
   /**
    * Function used only by HMI request/response/notification base classes
    * to change HMI app id to Mobile app id and vice versa.
@@ -182,7 +184,7 @@ class ApplicationManager {
   virtual ApplicationSharedPtr application_by_policy_id(
       const std::string& policy_app_id) const = 0;
 
-  virtual ApplicationSharedPtr application_by_name(
+  DEPRECATED virtual ApplicationSharedPtr application_by_name(
       const std::string& app_name) const = 0;
 
   virtual ApplicationSharedPtr pending_application_by_policy_id(
@@ -191,6 +193,8 @@ class ApplicationManager {
   virtual ApplicationSharedPtr reregister_application_by_policy_id(
       const std::string& policy_app_id) const = 0;
 
+  virtual AppSharedPtrs applications_by_name(
+      const std::string& app_name) const = 0;
   virtual AppSharedPtrs applications_by_button(uint32_t button) = 0;
   virtual AppSharedPtrs applications_with_navi() = 0;
 
@@ -663,6 +667,13 @@ class ApplicationManager {
 
   virtual protocol_handler::MajorProtocolVersion SupportedSDLVersion()
       const = 0;
+
+  /**
+   * @brief Applies functor for each plugin
+   * @param functor Functor that will be applied to each plugin
+   */
+  virtual void ApplyFunctorForEachPlugin(
+      std::function<void(plugin_manager::RPCPlugin&)> functor) = 0;
 
   /*
    * @brief Converts connection string transport type representation

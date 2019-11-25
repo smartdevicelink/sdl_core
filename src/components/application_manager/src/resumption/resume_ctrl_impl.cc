@@ -214,12 +214,19 @@ bool ResumeCtrlImpl::RestoreAppHMIState(ApplicationSharedPtr application) {
             "High-bandwidth transport not available, app will resume into : "
                 << saved_hmi_level);
       }
-
+      const bool app_exists_in_full_or_limited =
+          application_manager_.get_full_or_limited_application().use_count() !=
+          0;
       const bool app_hmi_state_is_set =
           SetAppHMIState(application, saved_hmi_level, true);
+      size_t restored_widgets = 0;
       if (app_hmi_state_is_set &&
           application->is_app_data_resumption_allowed()) {
-        RestoreAppWidgets(application, saved_app);
+        restored_widgets = RestoreAppWidgets(application, saved_app);
+      }
+      if (0 == restored_widgets && app_exists_in_full_or_limited) {
+        LOG4CXX_DEBUG(logger_, "App exists in full or limited. Do not resume");
+        return false;
       }
     } else {
       result = false;
@@ -399,7 +406,7 @@ bool ResumeCtrlImpl::SetAppHMIState(
   return true;
 }
 
-void ResumeCtrlImpl::RestoreAppWidgets(
+size_t ResumeCtrlImpl::RestoreAppWidgets(
     application_manager::ApplicationSharedPtr application,
     const smart_objects::SmartObject& saved_app) {
   using namespace mobile_apis;
@@ -407,7 +414,7 @@ void ResumeCtrlImpl::RestoreAppWidgets(
   DCHECK(application);
   if (!saved_app.keyExists(strings::windows_info)) {
     LOG4CXX_ERROR(logger_, "windows_info section does not exist");
-    return;
+    return 0;
   }
   const auto& windows_info = saved_app[strings::windows_info];
   auto request_list = MessageHelper::CreateUICreateWindowRequestsToHMI(
@@ -419,6 +426,7 @@ void ResumeCtrlImpl::RestoreAppWidgets(
         (*request)[strings::params][strings::correlation_id].asInt(), request));
   }
   ProcessHMIRequests(request_list);
+  return request_list.size();
 }
 
 bool ResumeCtrlImpl::IsHMIApplicationIdExist(uint32_t hmi_app_id) {
