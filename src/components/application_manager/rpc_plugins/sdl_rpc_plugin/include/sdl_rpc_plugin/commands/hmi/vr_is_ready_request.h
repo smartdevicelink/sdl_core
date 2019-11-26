@@ -44,8 +44,7 @@ namespace commands {
 /**
  * @brief VRIsReadyRequest command class
  **/
-class VRIsReadyRequest : public app_mngr::commands::RequestToHMI,
-                         public app_mngr::event_engine::EventObserver {
+class VRIsReadyRequest : public app_mngr::commands::RequestToHMI {
  public:
   /**
    * @brief VRIsReadyRequest class constructor
@@ -76,7 +75,7 @@ class VRIsReadyRequest : public app_mngr::commands::RequestToHMI,
   /**
    * @brief onTimeOut from requrst Controller
    */
-  void onTimeOut() OVERRIDE;
+  void OnTimeOut() OVERRIDE;
 
   /**
    * @brief Send request to HMI for fetching of cappabilities

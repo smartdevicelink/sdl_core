@@ -221,8 +221,8 @@ class AddCommandRequestTest
         mock_rpc_service_,
         ManageMobileCommand(response,
                             am::commands::Command::CommandSource::SOURCE_SDL));
-    std::shared_ptr<CommandRequestImpl> base_class_request =
-        static_cast<std::shared_ptr<CommandRequestImpl> >(request_ptr);
+    std::shared_ptr<CommandMobileImpl> base_class_request =
+        static_cast<std::shared_ptr<CommandMobileImpl> >(request_ptr);
     base_class_request->onTimeOut();
   }
 
@@ -1092,8 +1092,8 @@ TEST_F(AddCommandRequestTest,
   EXPECT_CALL(mock_rpc_service_,
               ManageMobileCommand(
                   response, am::commands::Command::CommandSource::SOURCE_SDL));
-  std::shared_ptr<CommandRequestImpl> base_class_request =
-      static_cast<std::shared_ptr<CommandRequestImpl> >(
+  std::shared_ptr<CommandMobileImpl> base_class_request =
+      static_cast<std::shared_ptr<CommandMobileImpl> >(
           CreateCommand<AddCommandRequest>(msg_));
   base_class_request->onTimeOut();
 }
@@ -1142,8 +1142,8 @@ TEST_F(AddCommandRequestTest, OnTimeOut_AppRemoveCommandCalled) {
   EXPECT_CALL(mock_rpc_service_,
               ManageMobileCommand(
                   response, am::commands::Command::CommandSource::SOURCE_SDL));
-  std::shared_ptr<CommandRequestImpl> base_class_request =
-      static_cast<std::shared_ptr<CommandRequestImpl> >(request_ptr);
+  std::shared_ptr<CommandMobileImpl> base_class_request =
+      static_cast<std::shared_ptr<CommandMobileImpl> >(request_ptr);
   base_class_request->onTimeOut();
 }
 

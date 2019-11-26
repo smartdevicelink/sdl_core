@@ -118,7 +118,7 @@ hmi_apis::Common_Language::eType HMILanguageHandler::get_language_for(
   return Common_Language::INVALID_ENUM;
 }
 
-void HMILanguageHandler::on_event(const event_engine::Event& event) {
+void HMILanguageHandler::HandleOnEvent(const event_engine::Event& event) {
   LOG4CXX_AUTO_TRACE(logger_);
   smart_objects::SmartObject msg = event.smart_object();
   switch (event.id()) {

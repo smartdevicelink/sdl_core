@@ -120,7 +120,7 @@ class StateControllerImpl : public event_engine::EventObserver,
   bool IsStateActive(HmiState::StateID state_id) const OVERRIDE;
 
   // EventObserver interface
-  void on_event(const event_engine::Event& event) OVERRIDE;
+  void HandleOnEvent(const event_engine::Event& event) OVERRIDE;
   void on_event(const event_engine::MobileEvent& event) OVERRIDE;
 
   void ActivateDefaultWindow(ApplicationSharedPtr app) OVERRIDE;

@@ -223,6 +223,13 @@ class StateController {
    * @param app pointer to application to be exited
    */
   virtual void ExitDefaultWindow(ApplicationSharedPtr app) = 0;
+
+  /**
+   * @brief Notifies that activate application request finished by timeout.
+   * @param hmi_app_id contains HMI id of application.
+   */
+  virtual void OnTimeOutActivateAppRequest(const uint32_t hmi_app_id) = 0;
+
 };
 
 }  // namespace application_manager

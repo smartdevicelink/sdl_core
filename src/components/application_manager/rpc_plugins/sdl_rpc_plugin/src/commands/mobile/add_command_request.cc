@@ -53,7 +53,7 @@ AddCommandRequest::AddCommandRequest(
     rpc_service::RPCService& rpc_service,
     HMICapabilities& hmi_capabilities,
     policy::PolicyHandlerInterface& policy_handler)
-    : CommandRequestImpl(message,
+    : RequestFromMobileImpl(message,
                          application_manager,
                          rpc_service,
                          hmi_capabilities,
@@ -67,7 +67,7 @@ AddCommandRequest::AddCommandRequest(
 
 AddCommandRequest::~AddCommandRequest() {}
 
-void AddCommandRequest::onTimeOut() {
+void AddCommandRequest::OnTimeOut() {
   LOG4CXX_AUTO_TRACE(logger_);
   RemoveCommand();
   CommandRequestImpl::onTimeOut();
@@ -515,10 +515,6 @@ void AddCommandRequest::on_event(const event_engine::Event& event) {
                result_code,
                info.empty() ? NULL : info.c_str(),
                &(message[strings::msg_params]));
-}
-
-bool AddCommandRequest::IsPendingResponseExist() {
-  return send_ui_ != is_ui_received_ || send_vr_ != is_vr_received_;
 }
 
 bool AddCommandRequest::IsWhiteSpaceExist() {

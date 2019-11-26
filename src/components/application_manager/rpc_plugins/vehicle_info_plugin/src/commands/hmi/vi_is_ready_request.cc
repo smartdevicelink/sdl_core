@@ -47,8 +47,7 @@ VIIsReadyRequest::VIIsReadyRequest(
                    params.application_manager_,
                    params.rpc_service_,
                    params.hmi_capabilities_,
-                   params.policy_handler_)
-    , EventObserver(application_manager_.event_dispatcher()) {}
+                   params.policy_handler_) {}
 
 VIIsReadyRequest::~VIIsReadyRequest() {}
 

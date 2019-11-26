@@ -53,7 +53,7 @@ AlertRequest::AlertRequest(
     rpc_service::RPCService& rpc_service,
     HMICapabilities& hmi_capabilities,
     policy::PolicyHandlerInterface& policy_handler)
-    : CommandRequestImpl(message,
+    : RequestFromMobileImpl(message,
                          application_manager,
                          rpc_service,
                          hmi_capabilities,
@@ -470,6 +470,20 @@ bool AlertRequest::HasHmiResponsesToWait() {
   return awaiting_ui_alert_response_ || awaiting_tts_speak_response_ ||
          awaiting_tts_stop_speaking_response_;
 }
+
+
+void AlertRequest::OnTimeOut() {
+  LOG4CXX_AUTO_TRACE(logger_);
+  if (false ==
+      (*message_)[strings::msg_params].keyExists(strings::soft_buttons)) {
+    RequestFromMobileImpl::OnTimeOut();
+    return;
+  }
+  LOG4CXX_INFO(logger_,
+      "Default timeout ignored. "
+      "AlertRequest with soft buttons wait timeout on HMI side");
+}
+
 
 }  // namespace commands
 

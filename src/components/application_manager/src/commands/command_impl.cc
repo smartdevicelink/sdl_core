@@ -109,7 +109,7 @@ uint32_t CommandImpl::connection_key() const {
   return (*message_)[strings::params][strings::connection_key].asUInt();
 }
 
-void CommandImpl::onTimeOut() {}
+void CommandImpl::HandleTimeOut() {}
 
 bool CommandImpl::AllowedToTerminate() {
   return allowed_to_terminate_;

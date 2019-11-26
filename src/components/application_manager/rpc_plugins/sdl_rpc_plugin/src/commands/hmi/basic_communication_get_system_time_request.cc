@@ -49,7 +49,7 @@ BasicCommunicationGetSystemTimeRequest::BasicCommunicationGetSystemTimeRequest(
                    hmi_capabilities,
                    policy_handler) {}
 
-void BasicCommunicationGetSystemTimeRequest::onTimeOut() {
+void BasicCommunicationGetSystemTimeRequest::OnTimeOut() {
   LOG4CXX_AUTO_TRACE(logger_);
   application_manager_.protocol_handler().NotifyOnGetSystemTimeFailed();
 }

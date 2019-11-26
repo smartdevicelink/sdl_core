@@ -66,7 +66,7 @@ class BasicCommunicationGetSystemTimeRequest
    * system does not respond for certain request in
    * appropriate time window.
    */
-  void onTimeOut() FINAL;
+  void OnTimeOut() FINAL;
 };
 
 }  // namespace commands

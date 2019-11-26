@@ -51,7 +51,7 @@ PerformAudioPassThruRequest::PerformAudioPassThruRequest(
     app_mngr::rpc_service::RPCService& rpc_service,
     app_mngr::HMICapabilities& hmi_capabilities,
     policy::PolicyHandlerInterface& policy_handler)
-    : CommandRequestImpl(message,
+    : RequestFromMobileImpl(message,
                          application_manager,
                          rpc_service,
                          hmi_capabilities,
@@ -63,11 +63,11 @@ PerformAudioPassThruRequest::PerformAudioPassThruRequest(
 
 PerformAudioPassThruRequest::~PerformAudioPassThruRequest() {}
 
-void PerformAudioPassThruRequest::onTimeOut() {
+void PerformAudioPassThruRequest::OnTimeOut() {
   LOG4CXX_AUTO_TRACE(logger_);
 
   FinishTTSSpeak();
-  CommandRequestImpl::onTimeOut();
+  RequestFromMobileImpl::OnTimeOut();
 }
 
 bool PerformAudioPassThruRequest::Init() {

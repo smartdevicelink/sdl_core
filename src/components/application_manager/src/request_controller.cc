@@ -444,10 +444,10 @@ void RequestController::TimeoutThread() {
                      << " request id: " << probably_expired->requestId()
                      << " connection_key: " << probably_expired->app_id()
                      << " is expired");
-    const uint32_t experied_request_id = probably_expired->requestId();
-    const uint32_t experied_app_id = probably_expired->app_id();
+    const uint32_t expired_request_id = probably_expired->requestId();
+    const uint32_t expired_app_id = probably_expired->app_id();
 
-    probably_expired->request()->onTimeOut();
+    probably_expired->request()->HandleTimeOut();
     if (RequestInfo::HmiConnectionKey == probably_expired->app_id()) {
       LOG4CXX_DEBUG(logger_,
                     "Erase HMI request: " << probably_expired->requestId());
@@ -455,8 +455,8 @@ void RequestController::TimeoutThread() {
     }
     probably_expired = waiting_for_response_.FrontWithNotNullTimeout();
     if (probably_expired) {
-      if (experied_request_id == probably_expired->requestId() &&
-          experied_app_id == probably_expired->app_id()) {
+      if (expired_request_id == probably_expired->requestId() &&
+          expired_app_id == probably_expired->app_id()) {
         LOG4CXX_DEBUG(logger_, "Expired request wasn't removed");
         break;
       }
@@ -509,8 +509,8 @@ void RequestController::Worker::threadMain() {
         std::make_shared<MobileRequestInfo>(request_ptr, timeout_in_mseconds);
 
     if (!request_controller_->waiting_for_response_.Add(request_info_ptr)) {
-      commands::CommandRequestImpl* cmd_request =
-          dynamic_cast<commands::CommandRequestImpl*>(request_ptr.get());
+      commands::RequestFromMobileImpl* cmd_request =
+          dynamic_cast<commands::RequestFromMobileImpl*>(request_ptr.get());
       if (cmd_request != NULL) {
         uint32_t corr_id = cmd_request->correlation_id();
         request_controller_->duplicate_message_count_lock_.Acquire();

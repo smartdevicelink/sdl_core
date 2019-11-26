@@ -182,13 +182,13 @@ TEST_F(SliderRequestTest, OnEvent_UI_UNSUPPORTED_RESOURCE) {
 
 class CallOnTimeOut {
  public:
-  CallOnTimeOut(CommandRequestImpl& command) : command_(command) {}
+  CallOnTimeOut(CommandMobileImpl& command) : command_(command) {}
 
   void operator()() {
     command_.onTimeOut();
   }
 
-  CommandRequestImpl& command_;
+  CommandMobileImpl& command_;
 };
 
 TEST_F(SliderRequestTest, Init_SUCCESS) {

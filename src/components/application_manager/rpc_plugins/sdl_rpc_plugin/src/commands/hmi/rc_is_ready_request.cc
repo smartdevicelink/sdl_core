@@ -49,7 +49,7 @@ RCIsReadyRequest::RCIsReadyRequest(
                    rpc_service,
                    hmi_capabilities,
                    policy_handle)
-    , EventObserver(application_manager.event_dispatcher()) {}
+     {}
 
 RCIsReadyRequest::~RCIsReadyRequest() {}
 
@@ -91,7 +91,7 @@ void RCIsReadyRequest::on_event(const event_engine::Event& event) {
   }
 }
 
-void RCIsReadyRequest::onTimeOut() {
+void RCIsReadyRequest::OnTimeOut() {
   // Note(dtrunov): According to new requirment APPLINK-27956
   SendMessageToHMI();
 }

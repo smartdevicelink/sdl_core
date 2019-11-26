@@ -50,7 +50,7 @@ ResetGlobalPropertiesRequest::ResetGlobalPropertiesRequest(
     app_mngr::rpc_service::RPCService& rpc_service,
     app_mngr::HMICapabilities& hmi_capabilities,
     policy::PolicyHandlerInterface& policy_handler)
-    : CommandRequestImpl(message,
+    : RequestFromMobileImpl(message,
                          application_manager,
                          rpc_service,
                          hmi_capabilities,
@@ -330,6 +330,11 @@ bool ResetGlobalPropertiesRequest::PrepareResponseParameters(
 bool ResetGlobalPropertiesRequest::IsPendingResponseExist() {
   return IsInterfaceAwaited(HmiInterfaces::HMI_INTERFACE_TTS) ||
          IsInterfaceAwaited(HmiInterfaces::HMI_INTERFACE_UI);
+}
+
+void ResetGlobalPropertiesRequest::OnTimeOut() {
+  LOG4CXX_AUTO_TRACE(logger_);
+  RequestFromMobileImpl::OnTimeOut();
 }
 
 }  // namespace commands

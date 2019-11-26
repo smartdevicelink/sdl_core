@@ -61,7 +61,7 @@ PerformInteractionRequest::PerformInteractionRequest(
     app_mngr::rpc_service::RPCService& rpc_service,
     app_mngr::HMICapabilities& hmi_capabilities,
     policy::PolicyHandlerInterface& policy_handler)
-    : CommandRequestImpl(message,
+    : RequestFromMobileImpl(message,
                          application_manager,
                          rpc_service,
                          hmi_capabilities,
@@ -273,7 +273,7 @@ void PerformInteractionRequest::on_event(const event_engine::Event& event) {
   }
 }
 
-void PerformInteractionRequest::onTimeOut() {
+void PerformInteractionRequest::OnTimeOut() {
   LOG4CXX_AUTO_TRACE(logger_);
 
   switch (interaction_mode_) {
@@ -282,7 +282,7 @@ void PerformInteractionRequest::onTimeOut() {
       if (true == vr_response_received_) {
         unsubscribe_from_event(hmi_apis::FunctionID::UI_PerformInteraction);
         DisablePerformInteraction();
-        CommandRequestImpl::onTimeOut();
+        RequestFromMobileImpl::OnTimeOut();
       } else {
         application_manager_.updateRequestTimeout(
             connection_key(), correlation_id(), default_timeout_);
@@ -293,14 +293,14 @@ void PerformInteractionRequest::onTimeOut() {
       LOG4CXX_DEBUG(logger_, "Interaction Mode: VR_ONLY");
       unsubscribe_from_event(hmi_apis::FunctionID::UI_PerformInteraction);
       DisablePerformInteraction();
-      CommandRequestImpl::onTimeOut();
+      RequestFromMobileImpl::OnTimeOut();
       break;
     }
     case mobile_apis::InteractionMode::MANUAL_ONLY: {
       LOG4CXX_DEBUG(logger_, "InteractionMode: MANUAL_ONLY");
       unsubscribe_from_event(hmi_apis::FunctionID::UI_PerformInteraction);
       DisablePerformInteraction();
-      CommandRequestImpl::onTimeOut();
+      RequestFromMobileImpl::OnTimeOut();
       break;
     }
     default: {

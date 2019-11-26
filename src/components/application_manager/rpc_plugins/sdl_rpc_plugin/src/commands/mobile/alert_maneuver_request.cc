@@ -43,13 +43,16 @@ AlertManeuverRequest::AlertManeuverRequest(
     rpc_service::RPCService& rpc_service,
     HMICapabilities& hmi_capabilities,
     policy::PolicyHandlerInterface& policy_handler)
-    : CommandRequestImpl(message,
+    : RequestFromMobileImpl(message,
                          application_manager,
                          rpc_service,
                          hmi_capabilities,
                          policy_handler)
     , tts_speak_result_code_(hmi_apis::Common_Result::INVALID_ENUM)
-    , navi_alert_maneuver_result_code_(hmi_apis::Common_Result::INVALID_ENUM) {
+    , navi_alert_maneuver_result_code_(hmi_apis::Common_Result::INVALID_ENUM) 
+    , navi_alert_maneuver_is_sent_(false)
+    , tts_speak_is_sent_(false) {
+
   subscribe_on_event(hmi_apis::FunctionID::TTS_OnResetTimeout);
 }
 

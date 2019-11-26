@@ -55,7 +55,7 @@ CreateInteractionChoiceSetRequest::CreateInteractionChoiceSetRequest(
     rpc_service::RPCService& rpc_service,
     HMICapabilities& hmi_capabilities,
     policy::PolicyHandlerInterface& policy_handler)
-    : CommandRequestImpl(message,
+    : RequestFromMobileImpl(message,
                          application_manager,
                          rpc_service,
                          hmi_capabilities,
@@ -411,13 +411,13 @@ void CreateInteractionChoiceSetRequest::on_event(
   }
 }
 
-void CreateInteractionChoiceSetRequest::onTimeOut() {
+void CreateInteractionChoiceSetRequest::OnTimeOut() {
   LOG4CXX_AUTO_TRACE(logger_);
 
   if (!error_from_hmi_) {
     SendResponse(false, mobile_apis::Result::GENERIC_ERROR);
   }
-  CommandRequestImpl::onTimeOut();
+  RequestFromMobileImpl::OnTimeOut();
   DeleteChoices();
 
   // We have to keep request alive until receive all responses from HMI

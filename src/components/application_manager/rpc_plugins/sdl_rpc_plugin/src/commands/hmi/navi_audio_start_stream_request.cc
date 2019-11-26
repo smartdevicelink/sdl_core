@@ -138,7 +138,7 @@ void AudioStartStreamRequest::on_event(const event_engine::Event& event) {
   }
 }
 
-void AudioStartStreamRequest::onTimeOut() {
+void AudioStartStreamRequest::OnTimeOut() {
   LOG4CXX_AUTO_TRACE(logger_);
   RetryStartSession();
 }

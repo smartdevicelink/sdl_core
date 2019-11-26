@@ -78,56 +78,56 @@ class CommandImpl : public Command {
   /**
    * @brief Checks command permissions according to policy table
    */
-  bool CheckPermissions() OVERRIDE;
+  virtual bool CheckPermissions() OVERRIDE;
 
   /**
    * @brief Init required by command resources
    **/
-  bool Init() OVERRIDE;
+  virtual bool Init() OVERRIDE;
 
   /**
    * @brief Cleanup all resources used by command
    **/
-  bool CleanUp() OVERRIDE;
+  virtual bool CleanUp() OVERRIDE;
 
   /**
    * @brief Execute corresponding command by calling the action on reciever
    **/
-  void Run() OVERRIDE;
+  virtual void Run() OVERRIDE;
   /**
    * @brief Retrieves request default timeout.
    * If request has a custom timeout, request_timeout_ should be reassign to it
    *
    * @return Request default timeout
    */
-  uint32_t default_timeout() const OVERRIDE;
+  virtual uint32_t default_timeout() const OVERRIDE;
 
   /*
    * @brief Retrieves correlation ID
    */
-  uint32_t correlation_id() const OVERRIDE;
+  virtual uint32_t correlation_id() const OVERRIDE;
 
   /*
    * @brief Retrieves connection key
    */
-  uint32_t connection_key() const OVERRIDE;
+  virtual uint32_t connection_key() const OVERRIDE;
 
   /*
    * @brief Retrieves request ID
    */
-  int32_t function_id() const OVERRIDE;
+  virtual int32_t function_id() const OVERRIDE;
 
   /*
    * @brief Retrieves Window ID
    */
-  WindowID window_id() const OVERRIDE;
+  virtual WindowID window_id() const OVERRIDE;
 
   /*
    * @brief Function is called by RequestController when request execution time
    * has exceed it's limit
    *
    */
-  void onTimeOut() OVERRIDE;
+  virtual void HandleTimeOut() OVERRIDE;
 
   /**
    * @brief AllowedToTerminate tells request Controller if it can terminate this
@@ -137,13 +137,13 @@ class CommandImpl : public Command {
    * false
    * @return allowed_to_terminate_ value
    */
-  bool AllowedToTerminate() OVERRIDE;
+  virtual bool AllowedToTerminate() OVERRIDE;
 
   /**
    * @brief SetAllowedToTerminate set up allowed to terminate flag.
    * If true, request controller will terminate request on response
    */
-  void SetAllowedToTerminate(const bool allowed) OVERRIDE;
+  virtual void SetAllowedToTerminate(const bool allowed) OVERRIDE;
 
   // members
   static const int32_t hmi_protocol_type_;

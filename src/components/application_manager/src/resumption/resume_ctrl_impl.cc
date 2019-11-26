@@ -159,7 +159,7 @@ void ResumeCtrlImpl::SaveApplication(ApplicationSharedPtr application) {
   resumption_storage_->SaveApplication(application);
 }
 
-void ResumeCtrlImpl::on_event(const event_engine::Event& event) {
+void ResumeCtrlImpl::HandleOnEvent(const event_engine::Event& event) {
   LOG4CXX_DEBUG(logger_, "Event received: " << event.id());
 
   if (hmi_apis::FunctionID::UI_CreateWindow == event.id()) {

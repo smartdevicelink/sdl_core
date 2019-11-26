@@ -34,78 +34,26 @@
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_COMMAND_REQUEST_IMPL_H_
 
 #include "application_manager/commands/command_impl.h"
-#include "interfaces/HMI_API.h"
-#include "interfaces/MOBILE_API.h"
-#include "smart_objects/smart_object.h"
-#include "utils/lock.h"
+#include "application_manager/event_engine/event_observer.h"
+#include "application_manager/application_manager.h"
+#include "application_manager/smart_object_keys.h"
+#include "application_manager/hmi_interfaces.h"
 
 namespace application_manager {
 namespace commands {
 
-struct ResponseInfo {
-  ResponseInfo();
-  ResponseInfo(const hmi_apis::Common_Result::eType result,
-               const HmiInterfaces::InterfaceID hmi_interface,
-               ApplicationManager& application_manager);
-  hmi_apis::Common_Result::eType result_code;
-  HmiInterfaces::InterfaceID interface;
-  HmiInterfaces::InterfaceState interface_state;
-  bool is_ok;
-  bool is_unsupported_resource;
-  bool is_not_used;
-};
-
-namespace ns_smart = ns_smart_device_link::ns_smart_objects;
-
 /**
- * @brief MergeInfos merge 2 infos in one string
- * @param first - info string that should be first in result info
- * @param second - info string that should be second in result info
- * @return if first is empty return second
- *         if second is empty return first
- *         if both are empty return empty string
- *         if both are not empty return empty first +", " + second
+ * @brief Class is intended to encapsulate RPC as an object
  */
-std::string MergeInfos(const std::string& first, const std::string& second);
-
-/**
- * @brief MergeInfos merge 2 infos into one string with info
- * @param first_info -contains result_code from HMI response and
- * interface that returns response
- * @param first_str - info string that should be first in result info
- * @param second_info -contains result_code from HMI response and
- * interface that returns response
- * @param second_str - info string that should be second in result info
- * @return if first_info is not available and second_str not empty return second
- *         if second_info is not available and first_str not empty return first
- *         other cases return result MergeInfos for 2 params
- */
-std::string MergeInfos(const ResponseInfo& first_info,
-                       const std::string& first_str,
-                       const ResponseInfo& second_info,
-                       const std::string& second_str);
-
-/**
- * @brief MergeInfos merge 3 infos in one string
- * @param first - info string that should be first in result info
- * @param second - info string that should be second in result info
- * @param third - info string that should be second in result info
- * @return resulting string contain merge all incoming parameters
- */
-std::string MergeInfos(const std::string& first,
-                       const std::string& second,
-                       const std::string& third);
-
 class CommandRequestImpl : public CommandImpl,
                            public event_engine::EventObserver {
  public:
   enum RequestState { kAwaitingHMIResponse = 0, kTimedOut, kCompleted };
 
   /**
-   * @brief The HashUpdateMode enum defines whether request has to update
-   * hash after its execution is finished
+   * @brief CommandRequestImpl class constructor
+   * @param message Incoming SmartObject message
    */
-  enum HashUpdateMode { kSkipHashUpdate, kDoHashUpdate };
 
   CommandRequestImpl(const MessageSharedPtr& message,
                      ApplicationManager& application_manager,
@@ -113,7 +61,11 @@ class CommandRequestImpl : public CommandImpl,
                      HMICapabilities& hmi_capabilities,
                      policy::PolicyHandlerInterface& policy_handler);
 
-  ~CommandRequestImpl();
+  /**
+   * @brief CommandRequestImpl class destructor
+   *
+   **/
+  virtual ~CommandRequestImpl();
 
   /**
    * @brief Checks command permissions according to policy table
@@ -135,44 +87,20 @@ class CommandRequestImpl : public CommandImpl,
    **/
   void Run() OVERRIDE;
 
-  /*
-   * @brief Function is called by RequestController when request execution time
-   * has exceed it's limit
-   *
-   */
-  virtual void onTimeOut();
-
   /**
-   * @brief Default EvenObserver's pure virtual method implementation
-   *
-   * @param event The received event
+   * @brief Retrieves request default timeout.
+   * If request has a custom timeout, request_timeout_ should be reassign to it
+   * @return Request default timeout
    */
-  virtual void on_event(const event_engine::Event& event);
+
+  uint32_t default_timeout() const OVERRIDE;
 
   virtual void on_event(const event_engine::MobileEvent& event);
 
-  /*
-   * @brief Creates Mobile response
-   *
-   * @param success true if successful; false, if failed
-   * @param result_code Result code (SUCCESS, INVALID_DATA, e.t.c)
-   * @param info Provides additional human readable info regarding the result
-   * @param response_params Additional params in response
-   */
-  void SendResponse(
-      const bool success,
-      const mobile_apis::Result::eType& result_code,
-      const char* info = NULL,
-      const smart_objects::SmartObject* response_params = NULL,
-      const std::vector<uint8_t> binary_data = std::vector<uint8_t>());
-
-  /**
-   * @brief Check syntax of string from mobile
-   * @param str - string that need to be checked
-   * @param allow_empty_string if true methods allow empty sting
-   * @return true if success otherwise return false
-   */
-  bool CheckSyntax(const std::string& str, bool allow_empty_line = false);
+   /**
+    * @brief Retrieves correlation ID
+    */
+  uint32_t correlation_id() const OVERRIDE;
 
   void SendProviderRequest(
       const mobile_apis::FunctionID::eType& mobile_function_id,
@@ -184,35 +112,21 @@ class CommandRequestImpl : public CommandImpl,
                          smart_objects::SmartObjectSPtr msg,
                          bool use_events = false);
 
-  /*
-   * @brief Sends HMI request
-   *
-   * @param function_id HMI request ID
-   * @param msg_params HMI request msg params
-   * @param use_events true if we need subscribe on event(HMI request)
-   * @return hmi correlation id
-   */
-  uint32_t SendHMIRequest(const hmi_apis::FunctionID::eType& function_id,
-                          const smart_objects::SmartObject* msg_params = NULL,
-                          bool use_events = false);
-
-  /*
-   * @brief Creates HMI request
-   *
-   * @param function_id HMI request ID
-   * @param msg_params HMI request msg params
-   */
-  void CreateHMINotification(const hmi_apis::FunctionID::eType& function_id,
-                             const ns_smart::SmartObject& msg_params) const;
+   /*
+    * * @brief Retrieves connection key
+    */
+  uint32_t connection_key() const OVERRIDE;
 
   /**
-   * @brief Converts HMI result code to Mobile result code
-   *
-   * @param hmi_code HMI result code
-   * @return Mobile result code
+   * @brief Retrieves request ID
    */
-  mobile_apis::Result::eType GetMobileResultCode(
-      const hmi_apis::Common_Result::eType& hmi_code) const;
+  int32_t function_id() const OVERRIDE;
+
+  /*
+   * @brief Function is called by RequestController when request execution time
+   * has exceed it's limit
+   */
+  void HandleTimeOut() FINAL;
 
   /**
    * @brief Checks Mobile result code for single RPC
@@ -232,100 +146,61 @@ class CommandRequestImpl : public CommandImpl,
   static bool IsHMIResultSuccess(
       const hmi_apis::Common_Result::eType result_code);
 
- protected:
-  /**
-   * @brief Checks message permissions and parameters according to policy table
-   * permissions
+  /*
+   * @brief Default EvenObserver's pure virtual method implementation
+   * @param event The received event
    */
-  bool CheckAllowedParameters();
+  void HandleOnEvent(const event_engine::Event& event) FINAL;
 
-  /**
-   * @brief Checks HMI capabilities for specified button support
-   * @param button Button to check
-   * @return true if button is present in HMI capabilities
-   * otherwise returns false
+  /*
+   * @brief Function is called by RequestController when request execution time
+   * has exceeded its limit
+   * @note default value is required as a lot of requests don't use it
+   * as they use automatically generated reason
    */
-  bool CheckHMICapabilities(const mobile_apis::ButtonName::eType button) const;
+  virtual void OnTimeOut();
 
-  /**
-   * @brief Remove from current message parameters disallowed by policy table
-   */
-  void RemoveDisallowedParameters();
 
-  /**
-   * @brief Adds disallowed parameters back to response with appropriate
-   * reasons
-   * @param response Response message, which should be extended with blocked
-   * parameters reasons
+  /*
+   * @brief Algorithm of handling on_event
+   * @param Event The received event
    */
-  void AddDisallowedParameters(smart_objects::SmartObject& response);
+  virtual void on_event(const event_engine::Event&);
 
-  /**
-   * @brief Checks if any request param was marked as disallowed by policy
-   * @return true if any param was marked as disallowed
-   */
-  bool HasDisallowedParams() const;
+  void OnUpdateTimeOut() OVERRIDE;
 
-  /**
-   * @brief Checks result code from HMI for single RPC
-   * and returns parameter for sending to mobile app.
-   * @param result_code contains result code from HMI response
-   * @param interface contains interface for which HMI sent response
-   * @return true if result code complies successful result cods
-   * otherwise returns false.
+#ifdef __QNX__
+  /*
+   * @brief Function is called by RequestController when message was sent to HMI
    */
-  bool PrepareResultForMobileResponse(
-      hmi_apis::Common_Result::eType result_code,
-      HmiInterfaces::InterfaceID interface) const;
+  void OnHMIMessageSent() OVERRIDE;
+#endif  // __QNX__
 
-  /**
-   * @brief Checks result code from HMI for splitted RPC
-   * and returns parameter for sending to mobile app.
-   * @param first contains result_code from HMI response and
-   * interface that returns response
-   * @param second contains result_code from HMI response and
-   * interface that returns response
-   * @return true if result code complies successful result code
-   * otherwise returns false
-   */
-  bool PrepareResultForMobileResponse(ResponseInfo& out_first,
-                                      ResponseInfo& out_second) const;
 
-  /**
-   * @brief If message from HMI contains returns this info
-   * or process result code from HMI and checks state of interface
-   * and create info.
-   * @param interface contains interface for which HMI sent response
-   * @param result_code contains result code from HMI
-   * @param response_from_hmi contains response from HMI
-   * @param out_info contain info for sending to application
-   */
-  void GetInfo(const smart_objects::SmartObject& response_from_hmi,
-               std::string& out_info);
+/*
+ * @brief AllowedToTerminate tells request Controller if it can terminate this
+ * request by response.
+ * By default, RequestCtrl should terminate all requests by their responses.
+ *  If request need to terminate itself, it should override this function false
+ * @return allowed_to_terminate_ value
+ */
+  bool AllowedToTerminate() OVERRIDE;
 
-  /**
-   * @brief Prepare result code for sending to mobile application
-   * @param first contains result_code from HMI response and
-   * interface that returns response
-   * @param second contains result_code from HMI response and
-   * interface that returns response.
-   * @return resulting code for sending to mobile application.
-   */
-  mobile_apis::Result::eType PrepareResultCodeForResponse(
-      const ResponseInfo& first, const ResponseInfo& second);
 
-  /**
-   * @brief Resolves if the return code must be
-   * UNSUPPORTED_RESOURCE
-   * @param first contains result_code from HMI response and
-   * interface that returns response
-   * @param second contains result_code from HMI response and
-   * interface that returns response.
-   * @return True, if the communication return code must be
-   * UNSUPPORTED_RESOURCE, otherwise false.
-   */
-  bool IsResultCodeUnsupported(const ResponseInfo& first,
-                               const ResponseInfo& second) const;
+/*
+ * @brief SetAllowedToTerminate set up allowed to terminate flag.
+ * If true, request controller will terminate request on response
+ */
+  void SetAllowedToTerminate(const bool allowed) OVERRIDE;
+
+/*
+ * @brief Check syntax of string from mobile
+ * @param str - string that need to be checked
+ * @param allow_empty_string if true methods allow empty sting
+ * @return true if success otherwise return false
+ */
+  virtual bool CheckSyntax(const std::string& str,
+                           bool allow_empty_line = false);
 
   /**
    * @brief CheckResult checks whether the overall result
@@ -339,19 +214,13 @@ class CommandRequestImpl : public CommandImpl,
 
  protected:
   /**
-   * @brief Returns policy parameters permissions
-   * @return Parameters permissions struct reference
-   */
-  const CommandParametersPermissions& parameters_permissions() const;
-
-  /**
    * @brief Adds interface to be awaited for by sdl request command
      @param interface_id interface which SDL expects to response in given time
   */
-  void StartAwaitForInterface(const HmiInterfaces::InterfaceID interface_id);
+  void StartAwaitForInterface(const HmiInterfaces::InterfaceID& interface_id);
 
   /**
-   * @brief Gets interface await state.
+   * @brief Gets interface awaiting state.
    * @param interface_id interface which SDL awaits for response in given time
    * @return true if SDL awaits for response from given interface in
    * interface_id
@@ -359,72 +228,68 @@ class CommandRequestImpl : public CommandImpl,
   bool IsInterfaceAwaited(const HmiInterfaces::InterfaceID& interface_id) const;
 
   /**
-   * @brief Sets given HMI interface await status to false
-   * @param interface_id interface which SDL no longer awaits for response in
-   * given time
+   * @brief Stops SDL awaiting from given HMI interface
+   * @param interface_id interface from which SDL no longer awaits
+   * for response in given time
    */
   void EndAwaitForInterface(const HmiInterfaces::InterfaceID& interface_id);
 
-  /**
-   * @brief This set stores all the interfaces which are awaited by SDL to
-   * return a response on some request
-   */
-  std::set<HmiInterfaces::InterfaceID> awaiting_response_interfaces_;
 
-  mutable sync_primitives::Lock awaiting_response_interfaces_lock_;
+/*
+ * @brief Checks if there some not delivered hmi responses exist
+ * @return true if pending responses exist, otherwise - false
+ */
+  bool IsPendingResponseExist() const;
+
+
+
+/*
+ * @brief Parses mobile message and replaces mobile app id with HMI app id
+ * @param message Message to replace its ids
+ * @return True if replacement succeeded, otherwise - false
+ */
+  bool ReplaceMobileWithHMIAppId(
+      smart_objects::SmartObject& message) OVERRIDE;
+
+/*
+ * @brief Parses message from HMI and replaces HMI app id with mobile app id
+ * @param message Message to replace its ids
+ * @return True if replacement succeeded, otherwise - false
+ */
+  bool ReplaceHMIWithMobileAppId(
+      smart_objects::SmartObject& message) OVERRIDE;
 
   RequestState current_state_;
-  sync_primitives::Lock state_lock_;
-  CommandParametersPermissions parameters_permissions_;
-  CommandParametersPermissions removed_parameters_permissions_;
 
   /**
-   * @brief hash_update_mode_ Defines whether request must update hash value of
-   * application or not
+   * @brief This set stores all the interfaces which are awaited by SDL to
+   * return a response to some request
    */
-  HashUpdateMode hash_update_mode_;
+  std::set<HmiInterfaces::InterfaceID> awaiting_response_interfaces_;
+  mutable sync_primitives::Lock awaiting_response_interfaces_lock_;
+
+
+/*
+ * @brief Returns current state of request
+ * @return current request state. E.g. kAwaitingResponse, kTimedOut,
+ * kResponded
+ */
+  virtual RequestState current_state() const;
+
+/*
+ * @brief Sets current state of request
+ * @param request state to set. E.g. kAwaitingResponse, kTimedOut,
+ * kResponded
+ */
+  virtual void set_current_state(const RequestState state);
+
+/*
+ * @brief This lock is used to guarantee thread safe access to request state
+ */
+ std::shared_ptr<sync_primitives::RecursiveLock> state_lock_;
 
  private:
   DISALLOW_COPY_AND_ASSIGN(CommandRequestImpl);
-
-  /**
-   * @brief Adds param to disallowed parameters enumeration
-   * @param info string with disallowed params enumeration
-   * @param param disallowed param
-   */
-  void AddDissalowedParameterToInfoString(std::string& info,
-                                          const std::string& param) const;
-
-  /**
-   * @brief Adds disallowed parameters to response info
-   * @param response Response message, which info should be extended
-   */
-  void AddDisallowedParametersToInfo(
-      smart_objects::SmartObject& response) const;
-
-  bool ProcessHMIInterfacesAvailability(
-      const uint32_t hmi_correlation_id,
-      const hmi_apis::FunctionID::eType& function_id);
-
-  /**
-   * @brief UpdateHash updates hash field for application and sends
-   * OnHashChanged notification to mobile side in case of approriate hash mode
-   * is set
-   */
-  void UpdateHash();
-
-  /**
-   * @brief is_success_result_ Defines whether request succeded, at the moment
-   * it is value of 'success' field of appropriate response sent to mobile
-   */
-  bool is_success_result_;
-
-  /**
-   * @brief Add information for the component of response in case of timeout
-   * @param response Response message, which info should be extended
-   */
-  void AddTimeOutComponentInfoToMessage(
-      smart_objects::SmartObject& response) const;
 };
 
 }  // namespace commands

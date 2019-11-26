@@ -35,7 +35,7 @@
 #define SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_MOBILE_DELETE_INTERACTION_CHOICE_SET_REQUEST_H_
 
 #include "application_manager/application.h"
-#include "application_manager/commands/command_request_impl.h"
+#include "application_manager/commands/request_from_mobile_impl.h"
 #include "utils/macro.h"
 
 namespace sdl_rpc_plugin {
@@ -47,7 +47,7 @@ namespace commands {
  * @brief DeleteInteractionChoiceSetRequest command class
  **/
 class DeleteInteractionChoiceSetRequest
-    : public app_mngr::commands::CommandRequestImpl {
+    : public app_mngr::commands::RequestFromMobileImpl {
  public:
   /**
    * @brief DeleteInteractionChoiceSetRequest class constructor

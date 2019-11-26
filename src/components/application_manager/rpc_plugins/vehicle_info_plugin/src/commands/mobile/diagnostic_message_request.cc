@@ -47,7 +47,7 @@ namespace commands {
 DiagnosticMessageRequest::DiagnosticMessageRequest(
     const application_manager::commands::MessageSharedPtr& message,
     const VehicleInfoCommandParams& params)
-    : CommandRequestImpl(message,
+    : RequestFromMobileImpl(message,
                          params.application_manager_,
                          params.rpc_service_,
                          params.hmi_capabilities_,

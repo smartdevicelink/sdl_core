@@ -39,7 +39,7 @@
 #include <stdint.h>
 #include <set>
 
-#include "application_manager/commands/command_request_impl.h"
+#include "application_manager/commands/request_from_mobile_impl.h"
 #include "commands/request_to_hmi.h"
 
 #include "utils/date_time.h"
