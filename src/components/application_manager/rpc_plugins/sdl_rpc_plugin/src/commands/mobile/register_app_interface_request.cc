@@ -299,12 +299,6 @@ void RegisterAppInterfaceRequest::Run() {
 
   mobile_apis::Result::eType coincidence_result = CheckCoincidence();
 
-  if (mobile_apis::Result::SUCCESS != coincidence_result) {
-    LOG4CXX_ERROR(logger_, "Coincidence check failed.");
-    SendResponse(false, coincidence_result);
-    return;
-  }
-
   std::vector<ApplicationSharedPtr> duplicate_apps;
   if (GetDuplicateNames(duplicate_apps)) {
     LOG4CXX_ERROR(logger_,
@@ -319,6 +313,13 @@ void RegisterAppInterfaceRequest::Run() {
       // Retrieve hybrid app preference from registering app
       preference = app->hybrid_app_preference();
     } else {
+      if (mobile_apis::Result::DUPLICATE_NAME == coincidence_result) {
+        usage_statistics::AppCounter count_of_rejections_duplicate_name(
+            GetPolicyHandler().GetStatisticManager(),
+            policy_app_id,
+            usage_statistics::REJECTIONS_DUPLICATE_NAME);
+        ++count_of_rejections_duplicate_name;
+      }
       // Search for the hybrid app preference in the duplicate app list
       for (auto duplicate_app : duplicate_apps) {
         if (duplicate_app->is_cloud_app()) {
@@ -364,6 +365,12 @@ void RegisterAppInterfaceRequest::Run() {
         return;
       }
     }
+  }
+
+  if (mobile_apis::Result::SUCCESS != coincidence_result) {
+    LOG4CXX_ERROR(logger_, "Coincidence check failed.");
+    SendResponse(false, coincidence_result);
+    return;
   }
 
   if (IsWhiteSpaceExist()) {
