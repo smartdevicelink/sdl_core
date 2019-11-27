@@ -95,10 +95,6 @@ class AppLaunchDataJson : public AppLaunchDataImpl {
                                           int32_t& found_index,
                                           Json::Value& dictionary) const;
 
-  DEPRECATED
-  Json::Value& GetApplicationListAndIndex(const ApplicationData& app_data,
-                                          int32_t& founded_index) const;
-
  private:
   /**
    * @brief update time stamp

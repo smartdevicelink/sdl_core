@@ -65,9 +65,6 @@ class AppServiceManager {
   AppServiceManager(ApplicationManager& app_manager,
                     resumption::LastStateWrapperPtr last_state);
 
-  DEPRECATED AppServiceManager(ApplicationManager& app_manager,
-                               resumption::LastState& last_state);
-
   /**
    * @brief Class destructor
    */

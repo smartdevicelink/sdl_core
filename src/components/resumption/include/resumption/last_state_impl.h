@@ -57,9 +57,6 @@ class LastStateImpl : public LastState {
    */
   ~LastStateImpl();
 
-  DEPRECATED
-  void SaveStateToFileSystem() {}
-
   /**
    * @brief Saving dictionary to filesystem
    */
@@ -74,8 +71,6 @@ class LastStateImpl : public LastState {
    * @brief Get reference to dictionary
    */
   Json::Value dictionary() const OVERRIDE;
-
-  DEPRECATED Json::Value& get_dictionary();
 
   /**
    * @brief Resets internal dictionary

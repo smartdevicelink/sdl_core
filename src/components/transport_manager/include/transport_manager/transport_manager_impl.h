@@ -126,11 +126,6 @@ class TransportManagerImpl
    */
   int Init(resumption::LastStateWrapperPtr last_state_wrapper) OVERRIDE;
 
-  DEPRECATED
-  int Init(resumption::LastState&) {
-    return 1;
-  }
-
   /**
    * Reinitializes transport manager
    * @return Error code

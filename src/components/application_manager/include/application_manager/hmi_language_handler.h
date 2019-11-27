@@ -96,9 +96,6 @@ class HMILanguageHandler : public event_engine::EventObserver {
                                           hmi_apis::Common_Language::eType vr,
                                           hmi_apis::Common_Language::eType tts);
 
-  DEPRECATED
-  void Init(resumption::LastState*);
-
   void Init(resumption::LastStateWrapperPtr value);
 
   /**
