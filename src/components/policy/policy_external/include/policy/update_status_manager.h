@@ -149,6 +149,8 @@ class UpdateStatusManager {
    */
   void ScheduleUpdate();
 
+  void PendingUpdate();
+
   /**
    * @brief ScheduleUpdate allows to schedule next update.
    * It will change state to Update_Needed, that's is

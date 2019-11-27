@@ -61,6 +61,7 @@ UpdateStatusManager::~UpdateStatusManager() {
 }
 
 void UpdateStatusManager::ProcessEvent(UpdateEvent event) {
+  LOG4CXX_AUTO_TRACE(logger_);
   sync_primitives::AutoLock lock(status_lock_);
   current_status_->ProcessEvent(this, event);
   last_processed_event_ = event;
@@ -164,7 +165,13 @@ bool UpdateStatusManager::IsUpdatePending() const {
 }
 
 void UpdateStatusManager::ScheduleUpdate() {
+  LOG4CXX_AUTO_TRACE(logger_);
   ProcessEvent(kScheduleUpdate);
+}
+
+void UpdateStatusManager::PendingUpdate() {
+  LOG4CXX_AUTO_TRACE(logger_);
+  ProcessEvent(kPendingUpdate);
 }
 
 void UpdateStatusManager::ScheduleManualUpdate() {
@@ -202,7 +209,11 @@ void UpdateStatusManager::DoTransition() {
   current_status_ = next_status_;
   next_status_.reset();
 
-  if (last_processed_event_ != kScheduleManualUpdate) {
+  const bool is_update_pending =
+      (policy::kUpdateNeeded == current_status_->get_status_string() &&
+       policy::StatusUpdatePending == current_status_->get_status());
+
+  if (last_processed_event_ != kScheduleManualUpdate && !is_update_pending) {
     listener_->OnUpdateStatusChanged(current_status_->get_status_string());
   }
 
