@@ -52,6 +52,7 @@ enum UpdateEvent {
   kOnResetPolicyTableRequireUpdate,
   kOnResetPolicyTableNoUpdate,
   kScheduleUpdate,
+  kPendingUpdate,
   kScheduleManualUpdate,
   kOnResetRetrySequence,
   kNoEvent
@@ -115,6 +116,39 @@ class Status {
  private:
   const std::string string_status_;
   const PolicyTableStatus enum_status_;
+};
+
+/**
+ * @brief The UpdatePendingStatus class represents cases when SDL knows that an
+ * update is required and but before the snapshot is sent to the HMI
+ */
+class UpdatePendingStatus : public Status {
+ public:
+  /**
+   * @brief Constructor
+   */
+  UpdatePendingStatus();
+
+  /**
+   * @brief Process event by setting next status in case event can affect
+   * current status or ignores the event
+   * @param manager Status manager pointer
+   * @param event Event which needs to be processed
+   */
+  void ProcessEvent(UpdateStatusManagerInterface* manager,
+                    UpdateEvent event) OVERRIDE;
+
+  /**
+   * @brief Check whether update is required in terms of status
+   * @return True if update is required, otherwise - false
+   */
+  bool IsUpdateRequired() const OVERRIDE;
+
+  /**
+   * @brief Check whether update is pending in terms of status
+   * @return True if update is pending, otherwise - false
+   */
+  bool IsUpdatePending() const OVERRIDE;
 };
 
 /**

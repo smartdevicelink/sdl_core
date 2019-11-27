@@ -54,6 +54,11 @@ void UpdateStatusManager::ProcessEvent(UpdateEvent event) {
   DoTransition();
 }
 
+void UpdateStatusManager::PendingUpdate() {
+  LOG4CXX_AUTO_TRACE(logger_);
+  ProcessEvent(kPendingUpdate);
+}
+
 void UpdateStatusManager::SetNextStatus(std::shared_ptr<Status> status) {
   next_status_ = status;
 }
@@ -173,7 +178,11 @@ void UpdateStatusManager::DoTransition() {
   current_status_ = next_status_;
   next_status_.reset();
   LOG4CXX_DEBUG(logger_, "last_processed_event_ = " << last_processed_event_);
-  if (last_processed_event_ != kScheduleManualUpdate) {
+  const bool is_update_pending =
+      (policy::kUpdateNeeded == current_status_->get_status_string() &&
+       policy::StatusUpdatePending == current_status_->get_status());
+
+  if (last_processed_event_ != kScheduleManualUpdate && !is_update_pending) {
     listener_->OnUpdateStatusChanged(current_status_->get_status_string());
   }
   if (!postponed_status_) {
