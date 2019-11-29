@@ -34,7 +34,6 @@
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_REQUEST_FROM_MOBILE_IMPL_H_
 
 #include "application_manager/commands/command_request_impl.h"
-#include "application_manager/commands/command_impl.h"
 #include "interfaces/MOBILE_API.h"
 #include "interfaces/HMI_API.h"
 #include "utils/lock.h"

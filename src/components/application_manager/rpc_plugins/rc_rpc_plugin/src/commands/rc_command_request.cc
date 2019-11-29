@@ -85,7 +85,7 @@ void RCCommandRequest::OnTimeOut() {
 bool RCCommandRequest::CheckDriverConsent() {
   LOG4CXX_AUTO_TRACE(logger_);
   app_mngr::ApplicationSharedPtr app =
-      application_manager_.application(RequestFromMobileImpl::connection_key());
+      application_manager_.application(connection_key());
 
   const std::string module_type = ModuleType();
   rc_rpc_plugin::TypeAccess access = CheckModule(module_type, app);
@@ -131,7 +131,7 @@ void RCCommandRequest::SendDisallowed(rc_rpc_plugin::TypeAccess access) {
 void RCCommandRequest::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
   app_mngr::ApplicationSharedPtr app =
-      application_manager_.application(RequestFromMobileImpl::connection_key());
+      application_manager_.application(connection_key());
 
   if (!IsInterfaceAvailable(app_mngr::HmiInterfaces::HMI_INTERFACE_RC)) {
     LOG4CXX_WARN(logger_, "HMI interface RC is not available");
@@ -295,7 +295,7 @@ void RCCommandRequest::ProcessAskDriverMode(const std::string& module_type,
                                             const std::string& module_id) {
   LOG4CXX_AUTO_TRACE(logger_);
   auto app =
-      application_manager_.application(CommandRequestImpl::connection_key());
+      application_manager_.application(connection_key());
   const std::string policy_app_id = app->policy_app_id();
   const std::string mac_address = app->mac_address();
 
@@ -323,7 +323,7 @@ void RCCommandRequest::SendGetUserConsent(
     const smart_objects::SmartObject& module_ids) {
   LOG4CXX_AUTO_TRACE(logger_);
   app_mngr::ApplicationSharedPtr app =
-      application_manager_.application(RequestFromMobileImpl::connection_key());
+      application_manager_.application(connection_key());
   DCHECK(app);
   smart_objects::SmartObject msg_params =
       smart_objects::SmartObject(smart_objects::SmartType_Map);

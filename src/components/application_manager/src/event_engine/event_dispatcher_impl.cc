@@ -113,6 +113,14 @@ void EventDispatcherImpl::remove_observer(EventObserver& observer) {
   }
 }
 
+void EventDispatcherImpl::remove_observer(const Event::EventID& event_id,
+                                          const int32_t hmi_correlation_id) {
+  auto& observers = observers_event_[event_id][hmi_correlation_id];
+  for (auto observer : observers) {
+    remove_observer_from_vector(*observer);
+  }
+}
+
 void EventDispatcherImpl::remove_observer_from_vector(EventObserver& observer) {
   AutoLock auto_lock(observer_lock_);
 

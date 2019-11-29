@@ -321,6 +321,10 @@ bool CommandRequestImpl::IsInterfaceAwaited(
   return helpers::in_range(awaiting_response_interfaces_, interface_id);
 }
 
+#ifdef __QNX__
+void CommandRequestImpl::OnHMIMessageSent() {}
+#endif
+
 }  // namespace commands
 
 }  // namespace application_manager
