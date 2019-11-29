@@ -44,13 +44,13 @@
 namespace {
 namespace custom_str = utils::custom_string;
 struct IsSameNickname {
-  IsSameNickname(const custom_str::CustomString& app_id) : app_id_(app_id) {}
+  IsSameNickname(const custom_str::CustomString& app_name) : app_name_(app_name) {}
   bool operator()(const policy::StringArray::value_type& nickname) const {
-    return app_id_.CompareIgnoreCase(nickname.c_str());
+    return app_name_.CompareIgnoreCase(nickname.c_str());
   }
 
  private:
-  const custom_str::CustomString app_id_;
+  const custom_str::CustomString app_name_;
 };
 }  // namespace
 
@@ -80,7 +80,6 @@ void ChangeRegistrationRequest::SendVRRequest(
     ApplicationSharedPtr app, smart_objects::SmartObject& msg_params) {
   const HmiInterfaces& hmi_interfaces = application_manager_.hmi_interfaces();
   auto function = hmi_apis::FunctionID::VR_ChangeRegistration;
-  pending_requests_.Add(function);
   smart_objects::SmartObject vr_params =
       smart_objects::SmartObject(smart_objects::SmartType_Map);
 
@@ -99,7 +98,6 @@ void ChangeRegistrationRequest::SendTTSRequest(
     ApplicationSharedPtr app, smart_objects::SmartObject& msg_params) {
   const HmiInterfaces& hmi_interfaces = application_manager_.hmi_interfaces();
   auto function = hmi_apis::FunctionID::TTS_ChangeRegistration;
-  pending_requests_.Add(function);
 
   smart_objects::SmartObject tts_params =
       smart_objects::SmartObject(smart_objects::SmartType_Map);
@@ -121,7 +119,6 @@ void ChangeRegistrationRequest::SendUIRequest(
     const int32_t hmi_language) {
   const HmiInterfaces& hmi_interfaces = application_manager_.hmi_interfaces();
   auto function = hmi_apis::FunctionID::UI_ChangeRegistration;
-  pending_requests_.Add(function);
   // UI processing
   smart_objects::SmartObject ui_params =
       smart_objects::SmartObject(smart_objects::SmartType_Map);
@@ -232,10 +229,12 @@ void ChangeRegistrationRequest::Run() {
   if (HmiInterfaces::InterfaceState::STATE_NOT_AVAILABLE != vr_state) {
     // VR processing
     SendVRRequest(app, msg_params);
+    StartAwaitForInterface(HmiInterfaces::InterfaceID::HMI_INTERFACE_VR);
   }
   if (HmiInterfaces::InterfaceState::STATE_NOT_AVAILABLE != tts_state) {
     // TTS processing
     SendTTSRequest(app, msg_params);
+    StartAwaitForInterface(HmiInterfaces::InterfaceID::HMI_INTERFACE_TTS);
   }
 
   if (HmiInterfaces::InterfaceState::STATE_NOT_AVAILABLE != ui_state) {
@@ -253,7 +252,6 @@ void ChangeRegistrationRequest::on_event(const event_engine::Event& event) {
     case hmi_apis::FunctionID::UI_ChangeRegistration: {
       LOG4CXX_INFO(logger_, "Received UI_ChangeRegistration event");
       EndAwaitForInterface(HmiInterfaces::HMI_INTERFACE_UI);
-      pending_requests_.Remove(event_id);
       ui_result_ = static_cast<hmi_apis::Common_Result::eType>(
           message[strings::params][hmi_response::code].asInt());
       GetInfo(message, ui_response_info_);
@@ -262,7 +260,6 @@ void ChangeRegistrationRequest::on_event(const event_engine::Event& event) {
     case hmi_apis::FunctionID::VR_ChangeRegistration: {
       LOG4CXX_INFO(logger_, "Received VR_ChangeRegistration event");
       EndAwaitForInterface(HmiInterfaces::HMI_INTERFACE_VR);
-      pending_requests_.Remove(event_id);
       vr_result_ = static_cast<hmi_apis::Common_Result::eType>(
           message[strings::params][hmi_response::code].asInt());
       GetInfo(message, vr_response_info_);
@@ -271,7 +268,6 @@ void ChangeRegistrationRequest::on_event(const event_engine::Event& event) {
     case hmi_apis::FunctionID::TTS_ChangeRegistration: {
       LOG4CXX_INFO(logger_, "Received TTS_ChangeRegistration event");
       EndAwaitForInterface(HmiInterfaces::HMI_INTERFACE_TTS);
-      pending_requests_.Remove(event_id);
       tts_result_ = static_cast<hmi_apis::Common_Result::eType>(
           message[strings::params][hmi_response::code].asInt());
       GetInfo(message, tts_response_info_);
@@ -283,42 +279,44 @@ void ChangeRegistrationRequest::on_event(const event_engine::Event& event) {
     }
   }
 
-  if (pending_requests_.IsFinal(event_id)) {
-    ApplicationSharedPtr application =
-        application_manager_.application(connection_key());
-
-    if (!application) {
-      LOG4CXX_ERROR(logger_, "NULL pointer");
-      return;
-    }
-
-    if (hmi_apis::Common_Result::SUCCESS == ui_result_) {
-      application->set_ui_language(static_cast<mobile_api::Language::eType>(
-          (*message_)[strings::msg_params][strings::hmi_display_language]
-              .asInt()));
-    }
-
-    if (hmi_apis::Common_Result::SUCCESS == vr_result_ ||
-        hmi_apis::Common_Result::SUCCESS == tts_result_) {
-      application->set_language(static_cast<mobile_api::Language::eType>(
-          (*message_)[strings::msg_params][strings::language].asInt()));
-    }
-    mobile_apis::Result::eType result_code = mobile_apis::Result::INVALID_ENUM;
-    std::string response_info;
-    const bool result = PrepareResponseParameters(result_code, response_info);
-
-    (*message_)[strings::params][strings::function_id] =
-        mobile_apis::FunctionID::eType::ChangeRegistrationID;
-
-    SendResponse(result,
-                 result_code,
-                 response_info.empty() ? NULL : response_info.c_str(),
-                 &(message[strings::msg_params]));
-  } else {
-    LOG4CXX_INFO(logger_,
-                 "There are some pending responses from HMI."
-                 "ChangeRegistrationRequest still waiting.");
+  if (IsPendingResponseExist()) {
+    LOG4CXX_DEBUG(logger_, "Command still wating for HMI response");
+    set_current_state(RequestState::kAwaitingResponse);
+    return;
   }
+
+  ApplicationSharedPtr application =
+    application_manager_.application(connection_key());
+
+  if (!application) {
+    LOG4CXX_ERROR(logger_, "NULL pointer");
+    return;
+  }
+
+  if (hmi_apis::Common_Result::SUCCESS == ui_result_) {
+    application->set_ui_language(static_cast<mobile_api::Language::eType>())
+        (*message_)[strings::msg_params][strings::hmi_display_language]
+           .asInt();
+  }
+
+
+  if (hmi_apis::Common_Result::SUCCESS == vr_result_ ||
+     hmi_apis::Common_Result::SUCCESS == tts_result_) {
+    application->set_language(static_cast<mobile_api::Language::eType>())
+      (*message_)[strings::msg_params][strings::language].asInt();
+  }
+
+  int32_t greates_result_code =
+  std::max(std::max(static_cast<int32_t>(ui_result_),
+  static_cast<int32_t>(vr_result_)),
+             static_cast<int32_t>(tts_result_));
+  const bool all_hmi_responses_success = hmi_apis::Common_Result::SUCCESS == ui_result_ &&
+       hmi_apis::Common_Result::SUCCESS == vr_result_ &&
+       hmi_apis::Common_Result::SUCCESS == tts_result_;
+  SendResponse(all_hmi_responses_success,
+  static_cast<mobile_apis::Result::eType>(greates_result_code),
+  NULL,
+  &(message[strings::msg_params]));
 }
 
 namespace {

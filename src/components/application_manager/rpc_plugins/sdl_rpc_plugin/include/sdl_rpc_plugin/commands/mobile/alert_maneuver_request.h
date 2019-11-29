@@ -75,7 +75,7 @@ class AlertManeuverRequest : public app_mngr::commands::RequestFromMobileImpl {
    *
    * @param event The received event
    */
-  void on_event(const app_mngr::event_engine::Event& event) OVERRIDE;
+  void on_event(const app_mngr::event_engine::Event& event) FINAL;
 
  private:
   /**
@@ -100,6 +100,8 @@ class AlertManeuverRequest : public app_mngr::commands::RequestFromMobileImpl {
   std::string info_navi_;
   std::string info_tts_;
   app_mngr::commands::Pending pending_requests_;
+  bool navi_alert_maneuver_is_sent_;
+  bool tts_speak_is_sent_;
 
   DISALLOW_COPY_AND_ASSIGN(AlertManeuverRequest);
 };

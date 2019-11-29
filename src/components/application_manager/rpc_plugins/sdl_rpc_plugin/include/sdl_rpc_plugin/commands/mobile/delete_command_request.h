@@ -101,12 +101,6 @@ class DeleteCommandRequest : public app_mngr::commands::RequestFromMobileImpl {
   bool PrepareResponseParameters(mobile_apis::Result::eType& result_code,
                                  std::string& info);
 
-  bool is_ui_send_;
-  bool is_vr_send_;
-
-  bool is_ui_received_;
-  bool is_vr_received_;
-
   hmi_apis::Common_Result::eType ui_result_;
   hmi_apis::Common_Result::eType vr_result_;
   std::string ui_info_;

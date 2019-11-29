@@ -234,8 +234,6 @@ void RCCommandRequest::ProcessAccessResponse(
     return;
   }
 
-  const smart_objects::SmartObject& message = event.smart_object();
-
   mobile_apis::Result::eType result_code =
       GetMobileResultCode(static_cast<hmi_apis::Common_Result::eType>(
           message[app_mngr::strings::params][app_mngr::hmi_response::code]

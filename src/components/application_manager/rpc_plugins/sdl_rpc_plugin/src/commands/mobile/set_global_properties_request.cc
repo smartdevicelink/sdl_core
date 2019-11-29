@@ -75,11 +75,7 @@ SetGlobalPropertiesRequest::SetGlobalPropertiesRequest(
                          rpc_service,
                          hmi_capabilities,
                          policy_handler)
-    , is_ui_send_(false)
-    , is_tts_send_(false)
     , is_rc_send_(false)
-    , is_ui_received_(false)
-    , is_tts_received_(false)
     , is_rc_received_(false)
     , ui_result_(hmi_apis::Common_Result::INVALID_ENUM)
     , tts_result_(hmi_apis::Common_Result::INVALID_ENUM)
@@ -181,11 +177,6 @@ void SetGlobalPropertiesRequest::Run() {
     }
   }
 
-  /* Need to set flags before sending request to HMI
-   * for correct processing this flags in method on_event */
-  if (is_help_prompt_present || is_timeout_prompt_present) {
-    is_tts_send_ = true;
-  }
   if (is_vr_help_title_present && is_vr_help_present) {
     LOG4CXX_DEBUG(logger_, "VRHelp params presents");
 
@@ -196,15 +187,8 @@ void SetGlobalPropertiesRequest::Run() {
       SendResponse(false, mobile_apis::Result::REJECTED);
       return;
     }
-
-    PrepareUIRequestVRHelpData(app, msg_params, params);
-    PrepareUIRequestMenuAndKeyboardData(app, msg_params, params);
-
-    params[strings::app_id] = app->app_id();
-    SendUIRequest(params, true);
-
-    auto& help_prompt_manager = app->help_prompt_manager();
-    help_prompt_manager.OnSetGlobalPropertiesReceived(params, false);
+  
+    StartAwaitForInterface(HmiInterfaces::HMI_INTERFACE_UI);
   } else {
     LOG4CXX_DEBUG(logger_, "VRHelp params does not present");
     DCHECK_OR_RETURN_VOID(!is_vr_help_title_present && !is_vr_help_present);
@@ -215,8 +199,7 @@ void SetGlobalPropertiesRequest::Run() {
     if (params.empty()) {
       LOG4CXX_DEBUG(logger_, "No UI info provided");
     } else {
-      params[strings::app_id] = app->app_id();
-      SendUIRequest(params, true);
+      StartAwaitForInterface(HmiInterfaces::HMI_INTERFACE_UI);
     }
   }
 
@@ -350,7 +333,6 @@ void SetGlobalPropertiesRequest::on_event(const event_engine::Event& event) {
     case hmi_apis::FunctionID::UI_SetGlobalProperties: {
       LOG4CXX_DEBUG(logger_, "Received UI_SetGlobalProperties event");
       EndAwaitForInterface(HmiInterfaces::HMI_INTERFACE_UI);
-      is_ui_received_ = true;
       ui_result_ = static_cast<hmi_apis::Common_Result::eType>(
           message[strings::params][hmi_response::code].asInt());
       GetInfo(message, ui_response_info_);
@@ -363,7 +345,6 @@ void SetGlobalPropertiesRequest::on_event(const event_engine::Event& event) {
     case hmi_apis::FunctionID::TTS_SetGlobalProperties: {
       LOG4CXX_DEBUG(logger_, "Received TTS_SetGlobalProperties event");
       EndAwaitForInterface(HmiInterfaces::HMI_INTERFACE_TTS);
-      is_tts_received_ = true;
       tts_result_ = static_cast<hmi_apis::Common_Result::eType>(
           message[strings::params][hmi_response::code].asInt());
       GetInfo(message, tts_response_info_);
@@ -390,6 +371,7 @@ void SetGlobalPropertiesRequest::on_event(const event_engine::Event& event) {
 
   if (IsPendingResponseExist()) {
     LOG4CXX_DEBUG(logger_, "Continue waiting for response");
+    set_current_state(RequestState::kAwaitingHMIResponse);
     return;
   }
   mobile_apis::Result::eType result_code = mobile_apis::Result::INVALID_ENUM;
@@ -642,7 +624,6 @@ void SetGlobalPropertiesRequest::PrepareUIRequestMenuAndKeyboardData(
 void SetGlobalPropertiesRequest::SendTTSRequest(
     const smart_objects::SmartObject& params, bool use_events) {
   LOG4CXX_AUTO_TRACE(logger_);
-  is_tts_send_ = true;
   StartAwaitForInterface(HmiInterfaces::HMI_INTERFACE_TTS);
   SendHMIRequest(
       hmi_apis::FunctionID::TTS_SetGlobalProperties, &params, use_events);
@@ -651,7 +632,6 @@ void SetGlobalPropertiesRequest::SendTTSRequest(
 void SetGlobalPropertiesRequest::SendUIRequest(
     const smart_objects::SmartObject& params, bool use_events) {
   LOG4CXX_AUTO_TRACE(logger_);
-  is_ui_send_ = true;
   StartAwaitForInterface(HmiInterfaces::HMI_INTERFACE_UI);
   SendHMIRequest(
       hmi_apis::FunctionID::UI_SetGlobalProperties, &params, use_events);
@@ -665,11 +645,6 @@ void SetGlobalPropertiesRequest::SendRCRequest(
   StartAwaitForInterface(HmiInterfaces::HMI_INTERFACE_RC);
   SendHMIRequest(
       hmi_apis::FunctionID::RC_SetGlobalProperties, &params, use_events);
-}
-
-bool SetGlobalPropertiesRequest::IsPendingResponseExist() {
-  return is_ui_send_ != is_ui_received_ || is_tts_send_ != is_tts_received_ ||
-         is_rc_send_ != is_rc_received_;
 }
 
 bool SetGlobalPropertiesRequest::ValidateConditionalMandatoryParameters(

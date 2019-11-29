@@ -84,7 +84,7 @@ class PerformInteractionRequest
    *
    * @param event The received event
    */
-  void on_event(const app_mngr::event_engine::Event& event) OVERRIDE;
+  void on_event(const app_mngr::event_engine::Event& event) FINAL;
 
   void OnTimeOut() FINAL;
 
@@ -228,8 +228,6 @@ class PerformInteractionRequest
   void SendBothModeResponse(const smart_objects::SmartObject& msg_param);
 
   mobile_apis::InteractionMode::eType interaction_mode_;
-  bool ui_response_received_;
-  bool vr_response_received_;
   bool app_pi_was_active_before_;
   static uint32_t pi_requests_count_;
   hmi_apis::Common_Result::eType vr_result_code_;

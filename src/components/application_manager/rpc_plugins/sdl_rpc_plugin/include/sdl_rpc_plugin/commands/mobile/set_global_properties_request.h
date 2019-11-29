@@ -177,13 +177,6 @@ class SetGlobalPropertiesRequest
   static bool CheckVrHelpItemsOrder(const smart_objects::SmartObject& vr_help);
 
   /**
-   * @brief Check if there some not delivered hmi responses exist
-   *
-   * @return true if all responses received
-   */
-  bool IsPendingResponseExist();
-
-  /**
    * @brief Checks if request has at least one parameter
    *
    * @param params request parameters
@@ -210,12 +203,7 @@ class SetGlobalPropertiesRequest
   bool PrepareResponseParameters(mobile_apis::Result::eType& result_code,
                                  std::string& info);
 
-  bool is_ui_send_;
-  bool is_tts_send_;
   bool is_rc_send_;
-
-  bool is_ui_received_;
-  bool is_tts_received_;
   bool is_rc_received_;
 
   hmi_apis::Common_Result::eType ui_result_;

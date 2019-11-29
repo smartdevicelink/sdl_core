@@ -859,35 +859,6 @@ RequestFromMobileImpl::parameters_permissions() const {
   return parameters_permissions_;
 }
 
-void RequestFromMobileImpl::StartAwaitForInterface(
-    const HmiInterfaces::InterfaceID interface_id) {
-  sync_primitives::AutoLock lock(awaiting_response_interfaces_lock_);
-  awaiting_response_interfaces_.insert(interface_id);
-}
-
-bool RequestFromMobileImpl::IsInterfaceAwaited(
-    const HmiInterfaces::InterfaceID& interface_id) const {
-  sync_primitives::AutoLock lock(awaiting_response_interfaces_lock_);
-  std::set<HmiInterfaces::InterfaceID>::const_iterator it =
-      awaiting_response_interfaces_.find(interface_id);
-  return (it != awaiting_response_interfaces_.end());
-}
-
-void RequestFromMobileImpl::EndAwaitForInterface(
-    const HmiInterfaces::InterfaceID& interface_id) {
-  sync_primitives::AutoLock lock(awaiting_response_interfaces_lock_);
-  std::set<HmiInterfaces::InterfaceID>::const_iterator it =
-      awaiting_response_interfaces_.find(interface_id);
-  if (it != awaiting_response_interfaces_.end()) {
-    awaiting_response_interfaces_.erase(it);
-  } else {
-    LOG4CXX_WARN(logger_,
-                 "EndAwaitForInterface called on interface \
-                    which was not put into await state: "
-                     << interface_id);
-  }
-}
-
 bool RequestFromMobileImpl::IsResultCodeUnsupported(
     const ResponseInfo& first, const ResponseInfo& second) const {
   const bool first_ok_second_unsupported =

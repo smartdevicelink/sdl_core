@@ -129,6 +129,8 @@ class CommandImpl : public Command {
    */
    void HandleTimeOut() OVERRIDE;
 
+   void OnUpdateTimeOut() OVERRIDE;
+
   /**
    * @brief AllowedToTerminate tells request Controller if it can terminate this
    * request by response.

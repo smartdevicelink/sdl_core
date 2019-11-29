@@ -114,8 +114,7 @@ void ResetGlobalPropertiesRequest::Run() {
     }
   }
 
-  if (vr_help_title_items || menu_name || menu_icon ||
-      is_key_board_properties) {
+  if (IsInterfaceAwaited(HmiInterfaces::HMI_INTERFACE_UI)) {
     StartAwaitForInterface(HmiInterfaces::HMI_INTERFACE_UI);
   }
 
@@ -218,7 +217,7 @@ bool ResetGlobalPropertiesRequest::ResetTimeoutPromt(
   smart_objects::SmartObject so_time_out_promt =
       smart_objects::SmartObject(smart_objects::SmartType_Array);
 
-  for (uint32_t i = 0; i < time_out_promt.size(); ++i) {
+  for (size_t i = 0; i < time_out_promt.size(); ++i) {
     smart_objects::SmartObject timeoutPrompt =
         smart_objects::SmartObject(smart_objects::SmartType_Map);
     timeoutPrompt[strings::text] = time_out_promt[i];
@@ -267,12 +266,14 @@ void ResetGlobalPropertiesRequest::on_event(const event_engine::Event& event) {
     }
     default: {
       LOG4CXX_ERROR(logger_, "Received unknown event" << event.id());
+      set_current_state(RequestState::kAwaitingHMIResponse);
       return;
     }
   }
 
   if (IsPendingResponseExist()) {
     LOG4CXX_DEBUG(logger_, "Waiting for remaining responses");
+    set_current_state(RequestState::kAwaitingHMIResponse);
     return;
   }
 
@@ -325,11 +326,6 @@ bool ResetGlobalPropertiesRequest::PrepareResponseParameters(
   }
 
   return result;
-}
-
-bool ResetGlobalPropertiesRequest::IsPendingResponseExist() {
-  return IsInterfaceAwaited(HmiInterfaces::HMI_INTERFACE_TTS) ||
-         IsInterfaceAwaited(HmiInterfaces::HMI_INTERFACE_UI);
 }
 
 void ResetGlobalPropertiesRequest::OnTimeOut() {

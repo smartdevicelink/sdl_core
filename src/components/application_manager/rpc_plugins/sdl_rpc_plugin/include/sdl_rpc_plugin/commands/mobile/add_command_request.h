@@ -123,13 +123,6 @@ class AddCommandRequest : public app_mngr::commands::RequestFromMobileImpl {
 
   DISALLOW_COPY_AND_ASSIGN(AddCommandRequest);
 
-  /*
-   * @brief Check if there some not delivered hmi responses exist
-   *
-   * @return true if all responses received
-   */
-  bool IsPendingResponseExist();
-
   /**
    * @brief Checks add command param
    * When type is String there is a check on the contents \t\n \\t \\n
@@ -146,8 +139,8 @@ class AddCommandRequest : public app_mngr::commands::RequestFromMobileImpl {
    * @return info for mobile response
    */
   const std::string GenerateMobileResponseInfo();
-  bool send_ui_;
-  bool send_vr_;
+  bool ui_is_sent_;
+  bool vr_is_sent_;
 
   bool is_ui_received_;
   bool is_vr_received_;

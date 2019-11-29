@@ -58,12 +58,9 @@ AddCommandRequest::AddCommandRequest(
                          rpc_service,
                          hmi_capabilities,
                          policy_handler)
-    , send_ui_(false)
-    , send_vr_(false)
-    , is_ui_received_(false)
-    , is_vr_received_(false)
-    , ui_result_(hmi_apis::Common_Result::INVALID_ENUM)
-    , vr_result_(hmi_apis::Common_Result::INVALID_ENUM) {}
+    , vr_result_(hmi_apis::Common_Result::INVALID_ENUM)  
+    , ui_is_sent_(false)
+    , vr_is_sent_(false) {}
 
 AddCommandRequest::~AddCommandRequest() {}
 
@@ -182,7 +179,7 @@ void AddCommandRequest::Run() {
           (*message_)[strings::msg_params][strings::cmd_icon];
     }
 
-    send_ui_ = true;
+    StartAwaitForInterface(HmiInterfaces::HMI_INTERFACE_UI);
   }
 
   smart_objects::SmartObject vr_msg_params =
@@ -197,16 +194,14 @@ void AddCommandRequest::Run() {
     vr_msg_params[strings::type] = hmi_apis::Common_VRCommandType::Command;
     vr_msg_params[strings::grammar_id] = app->get_grammar_id();
 
-    send_vr_ = true;
+    StartAwaitForInterface(HmiInterfaces::HMI_INTERFACE_VR);
   }
 
-  if (send_ui_) {
-    StartAwaitForInterface(HmiInterfaces::HMI_INTERFACE_UI);
+  if (IsInterfaceAwaited(HmiInterfaces::HMI_INTERFACE_UI)) {
     SendHMIRequest(hmi_apis::FunctionID::UI_AddCommand, &ui_msg_params, true);
   }
 
-  if (send_vr_) {
-    StartAwaitForInterface(HmiInterfaces::HMI_INTERFACE_VR);
+  if (IsInterfaceAwaited(HmiInterfaces::HMI_INTERFACE_VR)) {
     SendHMIRequest(hmi_apis::FunctionID::VR_AddCommand, &vr_msg_params, true);
   }
 }
@@ -361,6 +356,8 @@ void AddCommandRequest::on_event(const event_engine::Event& event) {
   }
 
   if (IsPendingResponseExist()) {
+    LOG4CXX_DEBUG(logger_, "Command still wating for HMI response");
+    set_current_state(RequestState::kAwaitingResponse);
     return;
   }
 
@@ -557,7 +554,7 @@ bool AddCommandRequest::IsWhiteSpaceExist() {
 }
 
 bool AddCommandRequest::BothSend() const {
-  return send_vr_ && send_ui_;
+  return ui_is_sent_ && vr_is_sent_;
 }
 
 const std::string AddCommandRequest::GenerateMobileResponseInfo() {
@@ -605,17 +602,17 @@ void AddCommandRequest::RemoveCommand() {
 
   app->RemoveCommand(cmd_id);
 
-  if (BothSend() && !(is_vr_received_ || is_ui_received_)) {
+  if (BothSend() && !(IsInterfaceAwaited(HmiInterfaces::HMI_INTERFACE_UI) || IsInterfaceAwaited(HmiInterfaces::HMI_INTERFACE_VR))) {
     // in case we have send bth UI and VR and no one respond
     // we have nothing to remove from HMI so no DeleteCommand expected
     return;
   }
 
-  if (BothSend() && !is_vr_received_) {
+  if (BothSend() && !IsInterfaceAwaited(HmiInterfaces::HMI_INTERFACE_UI)) {
     SendHMIRequest(hmi_apis::FunctionID::UI_DeleteCommand, &msg_params);
   }
 
-  if (BothSend() && !is_ui_received_) {
+  if (BothSend() && !IsInterfaceAwaited(HmiInterfaces::HMI_INTERFACE_VR)) {
     msg_params[strings::grammar_id] = app->get_grammar_id();
     msg_params[strings::type] = hmi_apis::Common_VRCommandType::Command;
     SendHMIRequest(hmi_apis::FunctionID::VR_DeleteCommand, &msg_params);

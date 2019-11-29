@@ -188,9 +188,12 @@ void AlertRequest::on_event(const event_engine::Event& event) {
     }
   }
 
-  if (HasHmiResponsesToWait()) {
+  if (IsPendingResponseExist()) {
+    LOG4CXX_DEBUG(logger_, "Command is still waiting for HMI response");
+    set_current_state(RequestState::kAwaitingResponse);
     return;
   }
+
   mobile_apis::Result::eType result_code = mobile_apis::Result::INVALID_ENUM;
   std::string info;
   const bool result = PrepareResponseParameters(result_code, info);
@@ -465,7 +468,7 @@ bool AlertRequest::CheckStringsOfAlertRequest() {
   return true;
 }
 
-bool AlertRequest::HasHmiResponsesToWait() {
+bool AlertRequest::IsPendingResponseExist() {
   LOG4CXX_AUTO_TRACE(logger_);
   return awaiting_ui_alert_response_ || awaiting_tts_speak_response_ ||
          awaiting_tts_stop_speaking_response_;
