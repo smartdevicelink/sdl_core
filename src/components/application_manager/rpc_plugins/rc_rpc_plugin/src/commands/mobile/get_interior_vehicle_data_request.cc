@@ -395,8 +395,8 @@ bool GetInteriorVehicleDataRequest::HasRequestExcessiveSubscription() {
           message_params::kSubscribe);
 
   if (is_subscribe_present_in_request) {
-    app_mngr::ApplicationSharedPtr app =
-        application_manager_.application(RequestFromMobileImpl::connection_key());
+    app_mngr::ApplicationSharedPtr app = application_manager_.application(
+        RequestFromMobileImpl::connection_key());
     const auto extension = RCHelpers::GetRCExtension(*app);
 
     const std::string module_type = ModuleType();

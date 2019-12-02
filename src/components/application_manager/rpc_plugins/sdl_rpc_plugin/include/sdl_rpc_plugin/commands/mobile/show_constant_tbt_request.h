@@ -46,7 +46,8 @@ namespace commands {
 /**
  * @brief ShowConstantTBTRequest command class
  **/
-class ShowConstantTBTRequest : public app_mngr::commands::RequestFromMobileImpl{
+class ShowConstantTBTRequest
+    : public app_mngr::commands::RequestFromMobileImpl {
  public:
   /**
    * @brief ShowConstantTBTRequest class constructor

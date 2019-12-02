@@ -706,7 +706,8 @@ void StateControllerImpl::UpdateAppWindowsStreamingState(
   }
 }
 
-void StateControllerImpl::HandleOnEvent(const event_engine::MobileEvent& event) {}
+void StateControllerImpl::HandleOnEvent(
+    const event_engine::MobileEvent& event) {}
 
 void StateControllerImpl::HandleOnEvent(const event_engine::Event& event) {
   using event_engine::Event;
@@ -1279,13 +1280,13 @@ mobile_apis::VideoStreamingState::eType StateControllerImpl::CalcVideoState(
   return state;
 }
 
-
-void StateControllerImpl::OnTimeOutActivateAppRequest(const uint32_t hmi_app_id) {
+void StateControllerImpl::OnTimeOutActivateAppRequest(
+    const uint32_t hmi_app_id) {
   LOG4CXX_AUTO_TRACE(logger_);
   LOG4CXX_INFO(logger_,
-      "TimeOut was received for"
-      "application with hmi_app_id = "
-      << hmi_app_id);
+               "TimeOut was received for"
+               "application with hmi_app_id = "
+                   << hmi_app_id);
   lock_.Acquire();
   waiting_for_activate_.erase(hmi_app_id);
   lock_.Release();
@@ -1311,12 +1312,14 @@ void StateControllerImpl::ProcessSavingHMIState() {
       }
       app = app_mngr_.application((it->app_id_));
       if (!app) {
-        LOG4CXX_WARN(logger_, "Application with appID = " << it->app_id_
-                                                 << " does not exist");
+        LOG4CXX_WARN(
+            logger_,
+            "Application with appID = " << it->app_id_ << " does not exist");
         waiting_for_applying_state_.erase(it);
         continue;
       }
-      LOG4CXX_INFO(logger_, "Application with appID = " << it->app_id_ << "exist");
+      LOG4CXX_INFO(logger_,
+                   "Application with appID = " << it->app_id_ << "exist");
       send_activate_app = it->send_activate_app_;
       state = it->state_;
       waiting_for_applying_state_.erase(it);
@@ -1324,7 +1327,5 @@ void StateControllerImpl::ProcessSavingHMIState() {
     SetRegularState(app, state, send_activate_app);
   }
 }
-
-
 
 }  // namespace application_manager

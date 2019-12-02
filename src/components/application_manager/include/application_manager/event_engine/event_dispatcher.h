@@ -78,13 +78,13 @@ class EventDispatcher {
   virtual void remove_observer(EventObserver& observer) = 0;
 
   /*
-  * @brief Unsubscribes the observer from specific event
-  *
-  * @param event_id    The event ID to subscribe for
-  * @param hmi_correlation_id  The event HMI correlation ID
-  */
+   * @brief Unsubscribes the observer from specific event
+   *
+   * @param event_id    The event ID to subscribe for
+   * @param hmi_correlation_id  The event HMI correlation ID
+   */
   virtual void remove_observer(const Event::EventID& event_id,
-                                 const int32_t hmi_correlation_id) = 0;
+                               const int32_t hmi_correlation_id) = 0;
 
   // Mobile Events
 

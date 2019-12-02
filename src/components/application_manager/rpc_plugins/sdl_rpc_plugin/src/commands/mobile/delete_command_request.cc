@@ -51,10 +51,10 @@ DeleteCommandRequest::DeleteCommandRequest(
     HMICapabilities& hmi_capabilities,
     policy::PolicyHandlerInterface& policy_handler)
     : RequestFromMobileImpl(message,
-                         application_manager,
-                         rpc_service,
-                         hmi_capabilities,
-                         policy_handler)
+                            application_manager,
+                            rpc_service,
+                            hmi_capabilities,
+                            policy_handler)
     , ui_result_(hmi_apis::Common_Result::INVALID_ENUM)
     , vr_result_(hmi_apis::Common_Result::INVALID_ENUM) {}
 

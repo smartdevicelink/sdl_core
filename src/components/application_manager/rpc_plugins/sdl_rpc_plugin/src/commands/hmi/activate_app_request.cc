@@ -76,7 +76,7 @@ void ActivateAppRequest::Run() {
 void ActivateAppRequest::OnTimeOut() {
   LOG4CXX_AUTO_TRACE(logger_);
   application_manager_.state_controller().OnTimeOutActivateAppRequest(
-    RequestToHMI::application_id());
+      RequestToHMI::application_id());
 }
 
 }  // namespace commands

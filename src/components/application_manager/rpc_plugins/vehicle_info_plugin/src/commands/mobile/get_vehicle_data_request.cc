@@ -53,10 +53,10 @@ GetVehicleDataRequest::GetVehicleDataRequest(
     const application_manager::commands::MessageSharedPtr& message,
     const VehicleInfoCommandParams& params)
     : RequestFromMobileImpl(message,
-                         params.application_manager_,
-                         params.rpc_service_,
-                         params.hmi_capabilities_,
-                         params.policy_handler_)
+                            params.application_manager_,
+                            params.rpc_service_,
+                            params.hmi_capabilities_,
+                            params.policy_handler_)
     , custom_vehicle_data_manager_(params.custom_vehicle_data_manager_) {}
 
 GetVehicleDataRequest::~GetVehicleDataRequest() {}

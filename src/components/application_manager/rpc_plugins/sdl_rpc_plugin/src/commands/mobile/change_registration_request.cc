@@ -44,7 +44,8 @@
 namespace {
 namespace custom_str = utils::custom_string;
 struct IsSameNickname {
-  IsSameNickname(const custom_str::CustomString& app_name) : app_name_(app_name) {}
+  IsSameNickname(const custom_str::CustomString& app_name)
+      : app_name_(app_name) {}
   bool operator()(const policy::StringArray::value_type& nickname) const {
     return app_name_.CompareIgnoreCase(nickname.c_str());
   }
@@ -66,10 +67,10 @@ ChangeRegistrationRequest::ChangeRegistrationRequest(
     HMICapabilities& hmi_capabilities,
     policy::PolicyHandlerInterface& policy_handler)
     : RequestFromMobileImpl(message,
-                         application_manager,
-                         rpc_service,
-                         hmi_capabilities,
-                         policy_handler)
+                            application_manager,
+                            rpc_service,
+                            hmi_capabilities,
+                            policy_handler)
     , ui_result_(hmi_apis::Common_Result::INVALID_ENUM)
     , vr_result_(hmi_apis::Common_Result::INVALID_ENUM)
     , tts_result_(hmi_apis::Common_Result::INVALID_ENUM) {}
@@ -285,7 +286,7 @@ void ChangeRegistrationRequest::on_event(const event_engine::Event& event) {
   }
 
   ApplicationSharedPtr application =
-    application_manager_.application(connection_key());
+      application_manager_.application(connection_key());
 
   if (!application) {
     LOG4CXX_ERROR(logger_, "NULL pointer");
@@ -293,29 +294,32 @@ void ChangeRegistrationRequest::on_event(const event_engine::Event& event) {
   }
 
   if (hmi_apis::Common_Result::SUCCESS == ui_result_) {
-    application->set_ui_language(static_cast<mobile_api::Language::eType>())
-        (*message_)[strings::msg_params][strings::hmi_display_language]
-           .asInt();
+    application
+        ->set_ui_language(static_cast<mobile_api::Language::eType>())(
+            *message_)[strings::msg_params][strings::hmi_display_language]
+        .asInt();
   }
 
-
   if (hmi_apis::Common_Result::SUCCESS == vr_result_ ||
-     hmi_apis::Common_Result::SUCCESS == tts_result_) {
-    application->set_language(static_cast<mobile_api::Language::eType>())
-      (*message_)[strings::msg_params][strings::language].asInt();
+      hmi_apis::Common_Result::SUCCESS == tts_result_) {
+    application
+        ->set_language(static_cast<mobile_api::Language::eType>())(
+            *message_)[strings::msg_params][strings::language]
+        .asInt();
   }
 
   int32_t greates_result_code =
-  std::max(std::max(static_cast<int32_t>(ui_result_),
-  static_cast<int32_t>(vr_result_)),
-             static_cast<int32_t>(tts_result_));
-  const bool all_hmi_responses_success = hmi_apis::Common_Result::SUCCESS == ui_result_ &&
-       hmi_apis::Common_Result::SUCCESS == vr_result_ &&
-       hmi_apis::Common_Result::SUCCESS == tts_result_;
+      std::max(std::max(static_cast<int32_t>(ui_result_),
+                        static_cast<int32_t>(vr_result_)),
+               static_cast<int32_t>(tts_result_));
+  const bool all_hmi_responses_success =
+      hmi_apis::Common_Result::SUCCESS == ui_result_ &&
+      hmi_apis::Common_Result::SUCCESS == vr_result_ &&
+      hmi_apis::Common_Result::SUCCESS == tts_result_;
   SendResponse(all_hmi_responses_success,
-  static_cast<mobile_apis::Result::eType>(greates_result_code),
-  NULL,
-  &(message[strings::msg_params]));
+               static_cast<mobile_apis::Result::eType>(greates_result_code),
+               NULL,
+               &(message[strings::msg_params]));
 }
 
 namespace {

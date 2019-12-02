@@ -49,10 +49,10 @@ GetSystemCapabilityRequest::GetSystemCapabilityRequest(
     HMICapabilities& hmi_capabilities,
     policy::PolicyHandlerInterface& policy_handler)
     : RequestFromMobileImpl(message,
-                         application_manager,
-                         rpc_service,
-                         hmi_capabilities,
-                         policy_handler) {}
+                            application_manager,
+                            rpc_service,
+                            hmi_capabilities,
+                            policy_handler) {}
 
 GetSystemCapabilityRequest::~GetSystemCapabilityRequest() {}
 

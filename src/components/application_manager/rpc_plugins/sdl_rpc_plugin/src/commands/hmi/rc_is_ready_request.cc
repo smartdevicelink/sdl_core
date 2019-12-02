@@ -48,8 +48,7 @@ RCIsReadyRequest::RCIsReadyRequest(
                    application_manager,
                    rpc_service,
                    hmi_capabilities,
-                   policy_handle)
-     {}
+                   policy_handle) {}
 
 RCIsReadyRequest::~RCIsReadyRequest() {}
 

@@ -48,7 +48,7 @@ VRIsReadyRequest::VRIsReadyRequest(
                    application_manager,
                    rpc_service,
                    hmi_capabilities,
-                   policy_handle){}
+                   policy_handle) {}
 
 VRIsReadyRequest::~VRIsReadyRequest() {}
 

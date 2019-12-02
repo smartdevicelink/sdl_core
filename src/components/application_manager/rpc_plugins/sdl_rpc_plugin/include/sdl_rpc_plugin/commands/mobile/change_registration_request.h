@@ -36,8 +36,8 @@
 
 #include <strings.h>
 
-#include "application_manager/commands/request_from_mobile_impl.h"
 #include "application_manager/commands/pending.h"
+#include "application_manager/commands/request_from_mobile_impl.h"
 #include "utils/custom_string.h"
 #include "utils/macro.h"
 

@@ -54,11 +54,11 @@ AddCommandRequest::AddCommandRequest(
     HMICapabilities& hmi_capabilities,
     policy::PolicyHandlerInterface& policy_handler)
     : RequestFromMobileImpl(message,
-                         application_manager,
-                         rpc_service,
-                         hmi_capabilities,
-                         policy_handler)
-    , vr_result_(hmi_apis::Common_Result::INVALID_ENUM)  
+                            application_manager,
+                            rpc_service,
+                            hmi_capabilities,
+                            policy_handler)
+    , vr_result_(hmi_apis::Common_Result::INVALID_ENUM)
     , ui_is_sent_(false)
     , vr_is_sent_(false) {}
 
@@ -601,7 +601,8 @@ void AddCommandRequest::RemoveCommand() {
 
   app->RemoveCommand(cmd_id);
 
-  if (BothSend() && !(IsInterfaceAwaited(HmiInterfaces::HMI_INTERFACE_UI) || IsInterfaceAwaited(HmiInterfaces::HMI_INTERFACE_VR))) {
+  if (BothSend() && !(IsInterfaceAwaited(HmiInterfaces::HMI_INTERFACE_UI) ||
+                      IsInterfaceAwaited(HmiInterfaces::HMI_INTERFACE_VR))) {
     // in case we have send bth UI and VR and no one respond
     // we have nothing to remove from HMI so no DeleteCommand expected
     return;

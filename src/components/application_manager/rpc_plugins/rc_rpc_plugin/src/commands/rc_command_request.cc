@@ -292,8 +292,7 @@ void RCCommandRequest::ProcessConsentResult(const bool is_allowed,
 void RCCommandRequest::ProcessAskDriverMode(const std::string& module_type,
                                             const std::string& module_id) {
   LOG4CXX_AUTO_TRACE(logger_);
-  auto app =
-      application_manager_.application(connection_key());
+  auto app = application_manager_.application(connection_key());
   const std::string policy_app_id = app->policy_app_id();
   const std::string mac_address = app->mac_address();
 

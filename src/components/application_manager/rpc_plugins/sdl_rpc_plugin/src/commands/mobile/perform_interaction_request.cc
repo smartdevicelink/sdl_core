@@ -62,10 +62,10 @@ PerformInteractionRequest::PerformInteractionRequest(
     app_mngr::HMICapabilities& hmi_capabilities,
     policy::PolicyHandlerInterface& policy_handler)
     : RequestFromMobileImpl(message,
-                         application_manager,
-                         rpc_service,
-                         hmi_capabilities,
-                         policy_handler)
+                            application_manager,
+                            rpc_service,
+                            hmi_capabilities,
+                            policy_handler)
     , interaction_mode_(mobile_apis::InteractionMode::INVALID_ENUM)
     , app_pi_was_active_before_(false)
     , vr_result_code_(hmi_apis::Common_Result::INVALID_ENUM)
@@ -1042,7 +1042,8 @@ bool PerformInteractionRequest::CheckChoiceIDFromRequest(
 
 const bool PerformInteractionRequest::HasHMIResponsesToWait() const {
   LOG4CXX_AUTO_TRACE(logger_);
-  return !IsInterfaceAwaited(HmiInterfaces::HMI_INTERFACE_UI) || !IsInterfaceAwaited(HmiInterfaces::HMI_INTERFACE_VR);
+  return !IsInterfaceAwaited(HmiInterfaces::HMI_INTERFACE_UI) ||
+         !IsInterfaceAwaited(HmiInterfaces::HMI_INTERFACE_VR);
 }
 
 void PerformInteractionRequest::SendBothModeResponse(

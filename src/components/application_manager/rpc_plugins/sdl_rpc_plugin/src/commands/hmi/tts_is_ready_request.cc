@@ -49,8 +49,7 @@ TTSIsReadyRequest::TTSIsReadyRequest(
                    application_manager,
                    rpc_service,
                    hmi_capabilities,
-                   policy_handler)
- {}
+                   policy_handler) {}
 
 TTSIsReadyRequest::~TTSIsReadyRequest() {}
 

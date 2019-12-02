@@ -34,10 +34,10 @@
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_REQUEST_FROM_MOBILE_IMPL_H_
 
 #include "application_manager/commands/command_request_impl.h"
-#include "interfaces/MOBILE_API.h"
 #include "interfaces/HMI_API.h"
-#include "utils/lock.h"
+#include "interfaces/MOBILE_API.h"
 #include "smart_objects/smart_object.h"
+#include "utils/lock.h"
 
 namespace application_manager {
 namespace commands {
@@ -103,10 +103,10 @@ class RequestFromMobileImpl : public CommandRequestImpl {
   enum HashUpdateMode { kSkipHashUpdate, kDoHashUpdate };
 
   RequestFromMobileImpl(const MessageSharedPtr& message,
-                    ApplicationManager& application_manager,
-                    rpc_service::RPCService& rpc_service,
-                    HMICapabilities& hmi_capabilities,
-                    policy::PolicyHandlerInterface& policy_handler);
+                        ApplicationManager& application_manager,
+                        rpc_service::RPCService& rpc_service,
+                        HMICapabilities& hmi_capabilities,
+                        policy::PolicyHandlerInterface& policy_handler);
 
   /**
    * @brief RequestFromMobileImpl class destructor
@@ -169,8 +169,10 @@ class RequestFromMobileImpl : public CommandRequestImpl {
    * @param function_id HMI request ID
    * @param msg_params HMI request msg params
    */
-  void CreateHMINotification(const hmi_apis::FunctionID::eType& function_id,
-                             const ns_smart_device_link::ns_smart_objects::SmartObject& msg_params) const;
+  void CreateHMINotification(
+      const hmi_apis::FunctionID::eType& function_id,
+      const ns_smart_device_link::ns_smart_objects::SmartObject& msg_params)
+      const;
 
   /**
    * @brief Converts HMI result code to Mobile result code
@@ -284,7 +286,7 @@ class RequestFromMobileImpl : public CommandRequestImpl {
   const CommandParametersPermissions& parameters_permissions() const;
 
   /**
-  * @brief This set stores all the interfaces which are awaited by SDL to
+   * @brief This set stores all the interfaces which are awaited by SDL to
    * return a response on some request
    */
   std::set<HmiInterfaces::InterfaceID> awaiting_response_interfaces_;
@@ -323,10 +325,10 @@ class RequestFromMobileImpl : public CommandRequestImpl {
       const hmi_apis::FunctionID::eType& function_id);
 
   /**
-    * @brief UpdateHash updates hash field for application and sends
-    * OnHashChanged notification to mobile side in case of approriate hash mode
-    * is set
-    */
+   * @brief UpdateHash updates hash field for application and sends
+   * OnHashChanged notification to mobile side in case of approriate hash mode
+   * is set
+   */
   void UpdateHash();
 
   /**

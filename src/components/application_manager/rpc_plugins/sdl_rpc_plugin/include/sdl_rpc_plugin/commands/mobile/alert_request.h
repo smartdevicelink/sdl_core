@@ -76,9 +76,8 @@ class AlertRequest : public app_mngr::commands::RequestFromMobileImpl {
    **/
   virtual void Run();
 
-
- void on_event(const app_mngr::event_engine::Event& event) FINAL;
- void OnTimeOut() FINAL;
+  void on_event(const app_mngr::event_engine::Event& event) FINAL;
+  void OnTimeOut() FINAL;
 
  private:
   /*

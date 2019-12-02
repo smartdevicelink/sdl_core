@@ -46,7 +46,8 @@ namespace commands {
 /**
  * @brief SubscribeButtonRequest command class
  **/
-class SubscribeButtonRequest : public app_mngr::commands::RequestFromMobileImpl {
+class SubscribeButtonRequest
+    : public app_mngr::commands::RequestFromMobileImpl {
  public:
   /**
    * @brief SubscribeButtonRequest class constructor

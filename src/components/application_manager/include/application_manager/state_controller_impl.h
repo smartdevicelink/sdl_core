@@ -415,7 +415,6 @@ class StateControllerImpl : public event_engine::EventObserver,
    */
   void ProcessSavingHMIState();
 
-
   /**
    * @brief Determines AudioStreamingState value
    * for application with HMI level specified.

@@ -229,7 +229,6 @@ class StateController {
    * @param hmi_app_id contains HMI id of application.
    */
   virtual void OnTimeOutActivateAppRequest(const uint32_t hmi_app_id) = 0;
-
 };
 
 }  // namespace application_manager

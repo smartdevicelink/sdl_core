@@ -71,10 +71,10 @@ SetGlobalPropertiesRequest::SetGlobalPropertiesRequest(
     app_mngr::HMICapabilities& hmi_capabilities,
     policy::PolicyHandlerInterface& policy_handler)
     : RequestFromMobileImpl(message,
-                         application_manager,
-                         rpc_service,
-                         hmi_capabilities,
-                         policy_handler)
+                            application_manager,
+                            rpc_service,
+                            hmi_capabilities,
+                            policy_handler)
     , is_rc_send_(false)
     , is_rc_received_(false)
     , ui_result_(hmi_apis::Common_Result::INVALID_ENUM)
@@ -187,7 +187,7 @@ void SetGlobalPropertiesRequest::Run() {
       SendResponse(false, mobile_apis::Result::REJECTED);
       return;
     }
-  
+
     StartAwaitForInterface(HmiInterfaces::HMI_INTERFACE_UI);
   } else {
     LOG4CXX_DEBUG(logger_, "VRHelp params does not present");
@@ -478,8 +478,9 @@ bool SetGlobalPropertiesRequest::PrepareResultForMobileResponse(
       (hmi_apis::Common_Result::UNSUPPORTED_RESOURCE == first.result_code) ||
       (hmi_apis::Common_Result::UNSUPPORTED_RESOURCE == second.result_code);
 
-  const bool final_result = RequestFromMobileImpl::CheckResult(both_info, third) ||
-                            RequestFromMobileImpl::CheckResult(third, both_info);
+  const bool final_result =
+      RequestFromMobileImpl::CheckResult(both_info, third) ||
+      RequestFromMobileImpl::CheckResult(third, both_info);
 
   return final_result;
 }

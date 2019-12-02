@@ -46,7 +46,7 @@ namespace commands {
 /**
  * @brief UpdateTurnListRequest command class
  **/
-class UpdateTurnListRequest : public app_mngr::commands::RequestFromMobileImpl { 
+class UpdateTurnListRequest : public app_mngr::commands::RequestFromMobileImpl {
  public:
   /**
    * @brief UpdateTurnListRequest class constructor

@@ -31,8 +31,8 @@
  */
 
 #include "application_manager/commands/command_request_impl.h"
-#include "application_manager/application_impl.h"
 #include "application_manager/app_service_manager.h"
+#include "application_manager/application_impl.h"
 #include "application_manager/application_manager.h"
 
 #include "smart_objects/enum_schema_item.h"
@@ -44,9 +44,9 @@ struct AppExtensionPredicate {
   AppExtensionUID uid;
   bool operator()(const ApplicationSharedPtr app) {
     return app ? (app->QueryInterface(uid).use_count() != 0) : false;
-}
+  }
 };
-}
+}  // namespace
 
 namespace commands {
 
@@ -72,7 +72,6 @@ CommandRequestImpl::~CommandRequestImpl() {
 bool CommandRequestImpl::CheckPermissions() {
   return CommandImpl::CheckPermissions();
 }
-
 
 bool CommandRequestImpl::Init() {
   return CommandImpl::Init();
@@ -226,7 +225,6 @@ bool CommandRequestImpl::CheckSyntax(const std::string& str,
   return CommandImpl::CheckSyntax(str, allow_empty_line);
 }
 
-
 bool CommandRequestImpl::ReplaceMobileWithHMIAppId(
     ns_smart_device_link::ns_smart_objects::SmartObject& message) {
   return CommandImpl::ReplaceMobileWithHMIAppId(message);
@@ -256,7 +254,6 @@ void CommandRequestImpl::HandleTimeOut() {
   }
   OnTimeOut();
 }
-
 
 bool CommandRequestImpl::IsMobileResultSuccess(
     const mobile_apis::Result::eType result_code) {

@@ -63,7 +63,7 @@ class GetWayPointsRequest : public app_mngr::commands::RequestFromMobileImpl {
    * @brief Execute command
    **/
   virtual void Run() OVERRIDE;
-  
+
   void on_event(const app_mngr::event_engine::Event& event) FINAL;
 
   void OnTimeOut() FINAL;

@@ -45,7 +45,8 @@ namespace commands {
 /**
  * @brief EndAudioPassThruRequest command class
  **/
-class EndAudioPassThruRequest : public app_mngr::commands::RequestFromMobileImpl {
+class EndAudioPassThruRequest
+    : public app_mngr::commands::RequestFromMobileImpl {
  public:
   /**
    * @brief EndAudioPassThruRequest class constructor

@@ -53,10 +53,10 @@ SetAppIconRequest::SetAppIconRequest(
     app_mngr::HMICapabilities& hmi_capabilities,
     policy::PolicyHandlerInterface& policy_handler)
     : RequestFromMobileImpl(message,
-                         application_manager,
-                         rpc_service,
-                         hmi_capabilities,
-                         policy_handler)
+                            application_manager,
+                            rpc_service,
+                            hmi_capabilities,
+                            policy_handler)
     , is_icons_saving_enabled_(false) {
   const std::string path =
       application_manager_.get_settings().app_icons_folder();

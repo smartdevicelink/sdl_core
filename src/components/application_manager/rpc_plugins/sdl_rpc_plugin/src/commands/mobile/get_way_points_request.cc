@@ -46,10 +46,10 @@ GetWayPointsRequest::GetWayPointsRequest(
     HMICapabilities& hmi_capabilities,
     policy::PolicyHandlerInterface& policy_handler)
     : RequestFromMobileImpl(message,
-                         application_manager,
-                         rpc_service,
-                         hmi_capabilities,
-                         policy_handler) {
+                            application_manager,
+                            rpc_service,
+                            hmi_capabilities,
+                            policy_handler) {
   subscribe_on_event(hmi_apis::FunctionID::UI_OnResetTimeout);
 }
 

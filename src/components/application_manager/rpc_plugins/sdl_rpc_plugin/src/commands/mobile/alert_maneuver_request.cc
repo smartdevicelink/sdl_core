@@ -44,15 +44,14 @@ AlertManeuverRequest::AlertManeuverRequest(
     HMICapabilities& hmi_capabilities,
     policy::PolicyHandlerInterface& policy_handler)
     : RequestFromMobileImpl(message,
-                         application_manager,
-                         rpc_service,
-                         hmi_capabilities,
-                         policy_handler)
+                            application_manager,
+                            rpc_service,
+                            hmi_capabilities,
+                            policy_handler)
     , tts_speak_result_code_(hmi_apis::Common_Result::INVALID_ENUM)
-    , navi_alert_maneuver_result_code_(hmi_apis::Common_Result::INVALID_ENUM) 
+    , navi_alert_maneuver_result_code_(hmi_apis::Common_Result::INVALID_ENUM)
     , navi_alert_maneuver_is_sent_(false)
     , tts_speak_is_sent_(false) {
-
   subscribe_on_event(hmi_apis::FunctionID::TTS_OnResetTimeout);
 }
 
@@ -156,140 +155,141 @@ void AlertManeuverRequest::Run() {
       SendHMIRequest(hmi_apis::FunctionID::TTS_Speak, &msg_params, true);
       tts_speak_is_sent_ = true;
     }
-}
+  }
 
-void AlertManeuverRequest::on_event(const event_engine::Event& event) {
-  LOG4CXX_AUTO_TRACE(logger_);
-  const smart_objects::SmartObject& message = event.smart_object();
-  hmi_apis::FunctionID::eType event_id = event.id();
-  switch (event_id) {
-    case hmi_apis::FunctionID::Navigation_AlertManeuver: {
-      LOG4CXX_INFO(logger_, "Received Navigation_AlertManeuver event");
-      EndAwaitForInterface(HmiInterfaces::HMI_INTERFACE_Navigation);
-      pending_requests_.Remove(event_id);
-      navi_alert_maneuver_result_code_ =
-          static_cast<hmi_apis::Common_Result::eType>(
-              message[strings::params][hmi_response::code].asInt());
-      GetInfo(message, info_navi_);
-      break;
-    }
-    case hmi_apis::FunctionID::TTS_Speak: {
-      LOG4CXX_INFO(logger_, "Received TTS_Speak event");
-      EndAwaitForInterface(HmiInterfaces::HMI_INTERFACE_TTS);
-      pending_requests_.Remove(event_id);
-      tts_speak_result_code_ = static_cast<hmi_apis::Common_Result::eType>(
-          message[strings::params][hmi_response::code].asInt());
-      GetInfo(message, info_tts_);
-      break;
-    }
-    case hmi_apis::FunctionID::TTS_OnResetTimeout: {
-      LOG4CXX_INFO(logger_, "Received TTS_OnResetTimeout event");
+  void AlertManeuverRequest::on_event(const event_engine::Event& event) {
+    LOG4CXX_AUTO_TRACE(logger_);
+    const smart_objects::SmartObject& message = event.smart_object();
+    hmi_apis::FunctionID::eType event_id = event.id();
+    switch (event_id) {
+      case hmi_apis::FunctionID::Navigation_AlertManeuver: {
+        LOG4CXX_INFO(logger_, "Received Navigation_AlertManeuver event");
+        EndAwaitForInterface(HmiInterfaces::HMI_INTERFACE_Navigation);
+        pending_requests_.Remove(event_id);
+        navi_alert_maneuver_result_code_ =
+            static_cast<hmi_apis::Common_Result::eType>(
+                message[strings::params][hmi_response::code].asInt());
+        GetInfo(message, info_navi_);
+        break;
+      }
+      case hmi_apis::FunctionID::TTS_Speak: {
+        LOG4CXX_INFO(logger_, "Received TTS_Speak event");
+        EndAwaitForInterface(HmiInterfaces::HMI_INTERFACE_TTS);
+        pending_requests_.Remove(event_id);
+        tts_speak_result_code_ = static_cast<hmi_apis::Common_Result::eType>(
+            message[strings::params][hmi_response::code].asInt());
+        GetInfo(message, info_tts_);
+        break;
+      }
+      case hmi_apis::FunctionID::TTS_OnResetTimeout: {
+        LOG4CXX_INFO(logger_, "Received TTS_OnResetTimeout event");
 
-      application_manager_.updateRequestTimeout(
-          connection_key(), correlation_id(), default_timeout());
-      break;
+        application_manager_.updateRequestTimeout(
+            connection_key(), correlation_id(), default_timeout());
+        break;
+      }
+      default: {
+        LOG4CXX_ERROR(logger_, "Received unknown event" << event.id());
+        SendResponse(
+            false, mobile_apis::Result::INVALID_ENUM, "Received unknown event");
+        return;
+      }
     }
-    default: {
-      LOG4CXX_ERROR(logger_, "Received unknown event" << event.id());
-      SendResponse(
-          false, mobile_apis::Result::INVALID_ENUM, "Received unknown event");
+
+    if (IsPendingResponseExist()) {
+      LOG4CXX_DEBUG(logger_, "Command still wating for HMI response");
       return;
     }
+
+    std::string return_info;
+    mobile_apis::Result::eType result_code;
+    const bool result = PrepareResponseParameters(result_code, return_info);
+    bool must_be_empty_info = false;
+    if (return_info.find("\n") != std::string::npos ||
+        return_info.find("\t") != std::string::npos) {
+      must_be_empty_info = true;
+    }
+    SendResponse(result,
+                 result_code,
+                 (must_be_empty_info) ? NULL : return_info.c_str(),
+                 &(message[strings::msg_params]));
   }
 
-  if (IsPendingResponseExist()) {
-    LOG4CXX_DEBUG(logger_, "Command still wating for HMI response");
-    return;
-  }
+  bool AlertManeuverRequest::PrepareResponseParameters(
+      mobile_apis::Result::eType & result_code, std::string & return_info) {
+    LOG4CXX_AUTO_TRACE(logger_);
+    using namespace helpers;
 
-  std::string return_info;
-  mobile_apis::Result::eType result_code;
-  const bool result = PrepareResponseParameters(result_code, return_info);
-  bool must_be_empty_info = false;
-  if (return_info.find("\n") != std::string::npos ||
-      return_info.find("\t") != std::string::npos) {
-    must_be_empty_info = true;
-  }
-  SendResponse(result,
-               result_code,
-               (must_be_empty_info) ? NULL : return_info.c_str(),
-               &(message[strings::msg_params]));
-}
+    app_mngr::commands::ResponseInfo navigation_alert_info(
+        navi_alert_maneuver_result_code_,
+        HmiInterfaces::HMI_INTERFACE_Navigation,
+        application_manager_);
 
-bool AlertManeuverRequest::PrepareResponseParameters(
-    mobile_apis::Result::eType& result_code, std::string& return_info) {
-  LOG4CXX_AUTO_TRACE(logger_);
-  using namespace helpers;
+    app_mngr::commands::ResponseInfo tts_alert_info(
+        tts_speak_result_code_,
+        HmiInterfaces::HMI_INTERFACE_TTS,
+        application_manager_);
+    const bool result =
+        PrepareResultForMobileResponse(navigation_alert_info, tts_alert_info);
 
-  app_mngr::commands::ResponseInfo navigation_alert_info(
-      navi_alert_maneuver_result_code_,
-      HmiInterfaces::HMI_INTERFACE_Navigation,
-      application_manager_);
-
-  app_mngr::commands::ResponseInfo tts_alert_info(
-      tts_speak_result_code_,
-      HmiInterfaces::HMI_INTERFACE_TTS,
-      application_manager_);
-  const bool result =
-      PrepareResultForMobileResponse(navigation_alert_info, tts_alert_info);
-
-  if (result && (hmi_apis::Common_Result::UNSUPPORTED_RESOURCE ==
-                     tts_speak_result_code_ &&
-                 (HmiInterfaces::STATE_AVAILABLE ==
-                  application_manager_.hmi_interfaces().GetInterfaceState(
-                      HmiInterfaces::HMI_INTERFACE_TTS)))) {
-    result_code = mobile_apis::Result::WARNINGS;
-    return_info = std::string("Unsupported phoneme type sent in a prompt");
+    if (result && (hmi_apis::Common_Result::UNSUPPORTED_RESOURCE ==
+                       tts_speak_result_code_ &&
+                   (HmiInterfaces::STATE_AVAILABLE ==
+                    application_manager_.hmi_interfaces().GetInterfaceState(
+                        HmiInterfaces::HMI_INTERFACE_TTS)))) {
+      result_code = mobile_apis::Result::WARNINGS;
+      return_info = std::string("Unsupported phoneme type sent in a prompt");
+      return result;
+    }
+    result_code =
+        PrepareResultCodeForResponse(navigation_alert_info, tts_alert_info);
+    return_info = app_mngr::commands::MergeInfos(
+        navigation_alert_info, info_navi_, tts_alert_info, info_tts_);
     return result;
   }
-  result_code =
-      PrepareResultCodeForResponse(navigation_alert_info, tts_alert_info);
-  return_info = app_mngr::commands::MergeInfos(
-      navigation_alert_info, info_navi_, tts_alert_info, info_tts_);
-  return result;
-}
 
-bool AlertManeuverRequest::IsWhiteSpaceExist() {
-  LOG4CXX_AUTO_TRACE(logger_);
-  using smart_objects::SmartArray;
+  bool AlertManeuverRequest::IsWhiteSpaceExist() {
+    LOG4CXX_AUTO_TRACE(logger_);
+    using smart_objects::SmartArray;
 
-  if ((*message_)[strings::msg_params].keyExists(strings::tts_chunks)) {
-    const SmartArray* tts_chunks_arr =
-        (*message_)[strings::msg_params][strings::tts_chunks].asArray();
+    if ((*message_)[strings::msg_params].keyExists(strings::tts_chunks)) {
+      const SmartArray* tts_chunks_arr =
+          (*message_)[strings::msg_params][strings::tts_chunks].asArray();
 
-    SmartArray::const_iterator it_tts_chunk = tts_chunks_arr->begin();
+      SmartArray::const_iterator it_tts_chunk = tts_chunks_arr->begin();
 
-    for (; it_tts_chunk != tts_chunks_arr->end(); ++it_tts_chunk) {
-      const char* tts_chunk_text = (*it_tts_chunk)[strings::text].asCharArray();
-      if (strlen(tts_chunk_text) && !CheckSyntax(tts_chunk_text)) {
-        LOG4CXX_ERROR(logger_, "Invalid tts_chunks syntax check failed");
-        return true;
+      for (; it_tts_chunk != tts_chunks_arr->end(); ++it_tts_chunk) {
+        const char* tts_chunk_text =
+            (*it_tts_chunk)[strings::text].asCharArray();
+        if (strlen(tts_chunk_text) && !CheckSyntax(tts_chunk_text)) {
+          LOG4CXX_ERROR(logger_, "Invalid tts_chunks syntax check failed");
+          return true;
+        }
       }
     }
-  }
-  if ((*message_)[strings::msg_params].keyExists(strings::soft_buttons)) {
-    DCHECK_OR_RETURN(
-        (*message_)[strings::msg_params][strings::soft_buttons].getType() ==
-            smart_objects::SmartType_Array,
-        true);
-    const smart_objects::SmartArray* soft_button_array =
-        (*message_)[strings::msg_params][strings::soft_buttons].asArray();
+    if ((*message_)[strings::msg_params].keyExists(strings::soft_buttons)) {
+      DCHECK_OR_RETURN(
+          (*message_)[strings::msg_params][strings::soft_buttons].getType() ==
+              smart_objects::SmartType_Array,
+          true);
+      const smart_objects::SmartArray* soft_button_array =
+          (*message_)[strings::msg_params][strings::soft_buttons].asArray();
 
-    SmartArray::const_iterator it_soft_button = soft_button_array->begin();
+      SmartArray::const_iterator it_soft_button = soft_button_array->begin();
 
-    for (; it_soft_button != soft_button_array->end(); ++it_soft_button) {
-      const char* soft_button_text =
-          (*it_soft_button)[strings::text].asCharArray();
-      if (!CheckSyntax(soft_button_text)) {
-        LOG4CXX_ERROR(logger_, "Invalid soft_buttons syntax check failed");
-        return true;
+      for (; it_soft_button != soft_button_array->end(); ++it_soft_button) {
+        const char* soft_button_text =
+            (*it_soft_button)[strings::text].asCharArray();
+        if (!CheckSyntax(soft_button_text)) {
+          LOG4CXX_ERROR(logger_, "Invalid soft_buttons syntax check failed");
+          return true;
+        }
       }
     }
-  }
 
-  return false;
-}
+    return false;
+  }
 
 }  // namespace commands
 
-}  // namespace sdl_rpc_plugin
+}  // namespace commands

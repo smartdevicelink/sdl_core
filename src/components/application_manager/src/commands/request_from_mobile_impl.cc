@@ -35,10 +35,10 @@
 #include <string>
 #include "utils/macro.h"
 
-#include "application_manager/commands/request_from_mobile_impl.h"
 #include "application_manager/application_manager.h"
-#include "application_manager/rpc_service.h"
+#include "application_manager/commands/request_from_mobile_impl.h"
 #include "application_manager/message_helper.h"
+#include "application_manager/rpc_service.h"
 #include "smart_objects/smart_object.h"
 
 namespace application_manager {
@@ -408,9 +408,9 @@ uint32_t RequestFromMobileImpl::SendHMIRequest(
   }
 
   if (use_events) {
-    LOG4CXX_DEBUG(logger_,
-                  "subscribe_on_event " << function_id << " "
-                                        << hmi_correlation_id);
+    LOG4CXX_DEBUG(
+        logger_,
+        "subscribe_on_event " << function_id << " " << hmi_correlation_id);
     subscribe_on_event(function_id, hmi_correlation_id);
   }
   if (ProcessHMIInterfacesAvailability(hmi_correlation_id, function_id)) {
@@ -642,8 +642,7 @@ bool RequestFromMobileImpl::CheckHMICapabilities(
     return false;
   }
 
-  const auto button_capabilities_so =
-      hmi_capabilities_.button_capabilities();
+  const auto button_capabilities_so = hmi_capabilities_.button_capabilities();
   if (!button_capabilities_so) {
     LOG4CXX_ERROR(logger_, "Invalid button capabilities object");
     return false;

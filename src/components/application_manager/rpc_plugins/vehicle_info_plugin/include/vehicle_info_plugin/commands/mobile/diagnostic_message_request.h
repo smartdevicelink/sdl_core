@@ -46,7 +46,8 @@ namespace commands {
 /**
  * @brief DiagnosticMessageRequest command class
  **/
-class DiagnosticMessageRequest : public app_mngr::commands::RequestFromMobileImpl {
+class DiagnosticMessageRequest
+    : public app_mngr::commands::RequestFromMobileImpl {
  public:
   /**
    * @brief DiagnosticMessageRequest class constructor

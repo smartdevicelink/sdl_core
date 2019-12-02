@@ -51,7 +51,7 @@ UpdateDeviceListRequest::UpdateDeviceListRequest(
                    application_manager,
                    rpc_service,
                    hmi_capabilities,
-                   policy_handle){}
+                   policy_handle) {}
 
 UpdateDeviceListRequest::~UpdateDeviceListRequest() {}
 

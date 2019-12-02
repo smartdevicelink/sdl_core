@@ -45,7 +45,7 @@ namespace commands {
 /**
  * @brief slider request command class
  **/
-class SliderRequest : public app_mngr::commands::RequestFromMobileImpl { 
+class SliderRequest : public app_mngr::commands::RequestFromMobileImpl {
  public:
   /**
    * \brief SliderRequest class constructor
