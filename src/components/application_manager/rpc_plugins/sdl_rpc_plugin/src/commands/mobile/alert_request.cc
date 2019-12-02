@@ -190,7 +190,6 @@ void AlertRequest::on_event(const event_engine::Event& event) {
 
   if (IsPendingResponseExist()) {
     LOG4CXX_DEBUG(logger_, "Command is still waiting for HMI response");
-    set_current_state(RequestState::kAwaitingResponse);
     return;
   }
 

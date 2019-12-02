@@ -199,7 +199,8 @@ void PerformAudioPassThruRequest::on_event(const event_engine::Event& event) {
       return;
     }
   }
-  if (IsWaitingHMIResponse()) {
+  if (IsPendingResponseExist()) {
+    LOG4CXX_DEBUG(logger_, "Command still wating for HMI response");
     return;
   }
 

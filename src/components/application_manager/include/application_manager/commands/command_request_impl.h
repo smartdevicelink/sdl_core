@@ -48,7 +48,7 @@ namespace commands {
 class CommandRequestImpl : public CommandImpl,
                            public event_engine::EventObserver {
  public:
-  enum RequestState { kAwaitingHMIResponse = 0, kTimedOut, kCompleted };
+  enum RequestState { kAwaitingHMIResponse = 0, kTimedOut, kHandlingResponse, kCompleted };
 
   /**
    * @brief CommandRequestImpl class constructor

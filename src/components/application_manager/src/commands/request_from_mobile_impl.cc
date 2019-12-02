@@ -253,7 +253,7 @@ void RequestFromMobileImpl::SendResponse(
     const smart_objects::SmartObject* response_params) {
   LOG4CXX_AUTO_TRACE(logger_);
   {
-    sync_primitives::AutoLock auto_lock(state_lock_);
+    sync_primitives::AutoLock auto_lock(*state_lock_);
     if (RequestState::kTimedOut == current_state_) {
       // don't send response if request timeout expired
       return;

@@ -371,7 +371,6 @@ void SetGlobalPropertiesRequest::on_event(const event_engine::Event& event) {
 
   if (IsPendingResponseExist()) {
     LOG4CXX_DEBUG(logger_, "Continue waiting for response");
-    set_current_state(RequestState::kAwaitingHMIResponse);
     return;
   }
   mobile_apis::Result::eType result_code = mobile_apis::Result::INVALID_ENUM;

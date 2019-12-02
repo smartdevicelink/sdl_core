@@ -244,12 +244,15 @@ void CommandRequestImpl::on_event(const event_engine::Event&) {}
 void CommandRequestImpl::HandleTimeOut() {
   LOG4CXX_AUTO_TRACE(logger_);
   {
-    sync_primitives::AutoLock auto_lock(state_lock_);
-    if (RequestState::kResponded == current_state_) {
-      LOG4CXX_DEBUG(logger_, "current_state_ = kResponded");
+    sync_primitives::AutoLock auto_lock(*state_lock_);
+    if (helpers::Compare<RequestState, helpers::EQ, helpers::ONE>(
+            current_state(),
+            RequestState::kHandlingResponse,
+            RequestState::kResponded)) {
+      LOG4CXX_DEBUG(logger_, "Current request state = Responding/Responded");
       return;
     }
-    current_state_ = RequestState::kTimedOut;
+    set_current_state(RequestState::kTimedOut);
   }
   OnTimeOut();
 }
@@ -283,14 +286,22 @@ bool CommandRequestImpl::IsHMIResultSuccess(
 
 void CommandRequestImpl::HandleOnEvent(const event_engine::Event& event) {
   {
-    sync_primitives::AutoLock auto_lock(state_lock_);
+    sync_primitives::AutoLock auto_lock(*state_lock_);
     if (RequestState::kTimedOut == current_state_) {
       LOG4CXX_DEBUG(logger_, "current_state_ = kTimedOut");
       return;
     }
-    current_state_ = RequestState::kResponded;
+    set_current_state(RequestState::kHandlingResponse);
   }
   on_event(event);
+
+  if (!state_lock_weak.expired()) {
+    sync_primitives::AutoLock auto_lock(*state_lock_);
+    if (RequestState::kHandlingResponse == current_state()) {
+      LOG4CXX_DEBUG(logger_, "Response was not sent, resetting state");
+      set_current_state(RequestState::kAwaitingResponse);
+    }
+  }
 }
 
 void CommandRequestImpl::GetInfo(
@@ -319,6 +330,28 @@ bool CommandRequestImpl::IsInterfaceAwaited(
     const HmiInterfaces::InterfaceID& interface_id) const {
   sync_primitives::AutoLock lock(awaiting_response_interfaces_lock_);
   return helpers::in_range(awaiting_response_interfaces_, interface_id);
+}
+
+void CommandRequestImpl::EndAwaitForInterface(
+    const HmiInterfaces::InterfaceID& interface_id) {
+  sync_primitives::AutoLock lock(awaiting_response_interfaces_lock_);
+  awaiting_response_interfaces_.erase(interface_id);
+}
+
+bool CommandRequestImpl::IsPendingResponseExist() const {
+  sync_primitives::AutoLock lock(awaiting_response_interfaces_lock_);
+  return !awaiting_response_interfaces_.empty();
+}
+
+CommandRequestImpl::RequestState CommandRequestImpl::current_state() const {
+  sync_primitives::AutoLock auto_lock(*state_lock_);
+  return current_state_;
+}
+
+void CommandRequestImpl::set_current_state(
+    const CommandRequestImpl::RequestState state) {
+  sync_primitives::AutoLock auto_lock(*state_lock_);
+  current_state_ = state;
 }
 
 #ifdef __QNX__
