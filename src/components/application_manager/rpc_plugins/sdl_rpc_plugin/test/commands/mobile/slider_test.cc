@@ -185,7 +185,7 @@ class CallOnTimeOut {
   CallOnTimeOut(CommandMobileImpl& command) : command_(command) {}
 
   void operator()() {
-    command_.onTimeOut();
+    command_.OnTimeOut();
   }
 
   CommandMobileImpl& command_;

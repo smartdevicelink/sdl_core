@@ -136,7 +136,7 @@ TEST_F(PerformInteractionRequestTest, OnTimeout_VR_GENERIC_ERROR) {
       mock_rpc_service_,
       ManageMobileCommand(_, am::commands::Command::CommandSource::SOURCE_SDL))
       .WillOnce(DoAll(SaveArg<0>(&vr_command_result), Return(true)));
-  command->onTimeOut();
+  command->OnTimeOut();
 
   EXPECT_EQ(
       (*vr_command_result)[strings::msg_params][strings::success].asBool(),

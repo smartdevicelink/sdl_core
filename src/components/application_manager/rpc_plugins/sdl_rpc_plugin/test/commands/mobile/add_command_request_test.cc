@@ -223,7 +223,7 @@ class AddCommandRequestTest
                             am::commands::Command::CommandSource::SOURCE_SDL));
     std::shared_ptr<CommandMobileImpl> base_class_request =
         static_cast<std::shared_ptr<CommandMobileImpl> >(request_ptr);
-    base_class_request->onTimeOut();
+    base_class_request->OnTimeOut();
   }
 
   MessageSharedPtr msg_;
@@ -1095,7 +1095,7 @@ TEST_F(AddCommandRequestTest,
   std::shared_ptr<CommandMobileImpl> base_class_request =
       static_cast<std::shared_ptr<CommandMobileImpl> >(
           CreateCommand<AddCommandRequest>(msg_));
-  base_class_request->onTimeOut();
+  base_class_request->OnTimeOut();
 }
 
 TEST_F(AddCommandRequestTest, OnTimeOut_AppRemoveCommandCalled) {
@@ -1144,7 +1144,7 @@ TEST_F(AddCommandRequestTest, OnTimeOut_AppRemoveCommandCalled) {
                   response, am::commands::Command::CommandSource::SOURCE_SDL));
   std::shared_ptr<CommandMobileImpl> base_class_request =
       static_cast<std::shared_ptr<CommandMobileImpl> >(request_ptr);
-  base_class_request->onTimeOut();
+  base_class_request->OnTimeOut();
 }
 
 }  // namespace add_command_request

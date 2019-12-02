@@ -492,7 +492,7 @@ TEST_F(SDLActivateAppRequestTest, OnTimeout_SUCCESS) {
   ON_CALL(mock_event_dispatcher_, remove_observer(_, _));
   EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_, _)).WillOnce(Return(true));
 
-  command->onTimeOut();
+  command->OnTimeOut();
 }
 
 TEST_F(SDLActivateAppRequestTest, OnEvent_InvalidEventId_UNSUCCESS) {

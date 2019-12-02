@@ -184,7 +184,7 @@ TEST_F(CreateInteractionChoiceSetRequestTest, OnTimeout_GENERIC_ERROR) {
       ManageMobileCommand(_, am::commands::Command::CommandSource::SOURCE_SDL))
       .WillOnce(DoAll(SaveArg<0>(&vr_command_result), Return(true)));
 
-  req_vr->onTimeOut();
+  req_vr->OnTimeOut();
   EXPECT_EQ(
       (*vr_command_result)[strings::msg_params][strings::success].asBool(),
       false);
@@ -705,7 +705,7 @@ TEST_F(CreateInteractionChoiceSetRequestTest,
                   am::commands::Command::SOURCE_SDL));
 
   EXPECT_CALL(app_mngr_, TerminateRequest(_, _, _));
-  command_->onTimeOut();
+  command_->OnTimeOut();
 }
 
 TEST_F(CreateInteractionChoiceSetRequestTest,
@@ -749,7 +749,7 @@ TEST_F(CreateInteractionChoiceSetRequestTest,
 
   EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(_, _)).Times(0);
   EXPECT_CALL(app_mngr_, TerminateRequest(_, _, _));
-  command_->onTimeOut();
+  command_->OnTimeOut();
 }
 
 TEST_F(CreateInteractionChoiceSetRequestTest, OnTimeOut_InvalidApp_UNSUCCESS) {
@@ -794,7 +794,7 @@ TEST_F(CreateInteractionChoiceSetRequestTest, OnTimeOut_InvalidApp_UNSUCCESS) {
   EXPECT_CALL(app_mngr_, application(kConnectionKey))
       .WillOnce(Return(invalid_app));
   EXPECT_CALL(*mock_app_, RemoveChoiceSet(_)).Times(0);
-  command_->onTimeOut();
+  command_->OnTimeOut();
 }
 
 TEST_F(CreateInteractionChoiceSetRequestTest,
@@ -845,7 +845,7 @@ TEST_F(CreateInteractionChoiceSetRequestTest,
       .WillOnce(Return(mock_app_));
   EXPECT_CALL(*mock_app_, RemoveChoiceSet(_));
 
-  command_->onTimeOut();
+  command_->OnTimeOut();
 }
 
 TEST_F(CreateInteractionChoiceSetResponseTest, Run_SuccessFalse_UNSUCCESS) {

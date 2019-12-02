@@ -1198,12 +1198,12 @@ class StateControllerImplTest : public ::testing::Test {
       switch (state_id) {
         case am::HmiState::StateID::STATE_ID_VR_SESSION: {
           Event vr_start_event(FunctionID::VR_Started);
-          state_ctrl_->on_event(vr_start_event);
+          state_ctrl_->HandleOnEvent(vr_start_event);
           break;
         }
         case am::HmiState::StateID::STATE_ID_TTS_SESSION: {
           Event tts_start_event(FunctionID::TTS_Started);
-          state_ctrl_->on_event(tts_start_event);
+          state_ctrl_->HandleOnEvent(tts_start_event);
           break;
         }
         case am::HmiState::StateID::STATE_ID_PHONE_CALL: {
@@ -1214,7 +1214,7 @@ class StateControllerImplTest : public ::testing::Test {
           message[am::strings::msg_params][am::hmi_notification::event_name] =
               hmi_apis::Common_EventTypes::PHONE_CALL;
           phone_call_event.set_smart_object(message);
-          state_ctrl_->on_event(phone_call_event);
+          state_ctrl_->HandleOnEvent(phone_call_event);
           break;
         }
         case am::HmiState::StateID::STATE_ID_SAFETY_MODE: {
@@ -1225,7 +1225,7 @@ class StateControllerImplTest : public ::testing::Test {
           message[am::strings::msg_params][am::hmi_notification::event_name] =
               hmi_apis::Common_EventTypes::EMERGENCY_EVENT;
           emergency_event.set_smart_object(message);
-          state_ctrl_->on_event(emergency_event);
+          state_ctrl_->HandleOnEvent(emergency_event);
           break;
         }
         case am::HmiState::StateID::STATE_ID_NAVI_STREAMING: {
@@ -1269,12 +1269,12 @@ class StateControllerImplTest : public ::testing::Test {
       switch (state_id) {
         case am::HmiState::StateID::STATE_ID_VR_SESSION: {
           Event vr_start_event(FunctionID::VR_Started);
-          state_ctrl_->on_event(vr_start_event);
+          state_ctrl_->HandleOnEvent(vr_start_event);
           break;
         }
         case am::HmiState::StateID::STATE_ID_TTS_SESSION: {
           Event tts_start_event(FunctionID::TTS_Started);
-          state_ctrl_->on_event(tts_start_event);
+          state_ctrl_->HandleOnEvent(tts_start_event);
           break;
         }
         case am::HmiState::StateID::STATE_ID_PHONE_CALL: {
@@ -1285,7 +1285,7 @@ class StateControllerImplTest : public ::testing::Test {
           message[am::strings::msg_params][am::hmi_notification::event_name] =
               hmi_apis::Common_EventTypes::PHONE_CALL;
           phone_call_event.set_smart_object(message);
-          state_ctrl_->on_event(phone_call_event);
+          state_ctrl_->HandleOnEvent(phone_call_event);
           break;
         }
         case am::HmiState::StateID::STATE_ID_SAFETY_MODE: {
@@ -1296,7 +1296,7 @@ class StateControllerImplTest : public ::testing::Test {
           message[am::strings::msg_params][am::hmi_notification::event_name] =
               hmi_apis::Common_EventTypes::EMERGENCY_EVENT;
           emergency_event.set_smart_object(message);
-          state_ctrl_->on_event(emergency_event);
+          state_ctrl_->HandleOnEvent(emergency_event);
           break;
         }
         case am::HmiState::StateID::STATE_ID_NAVI_STREAMING: {
@@ -1322,12 +1322,12 @@ class StateControllerImplTest : public ::testing::Test {
       switch (state_id) {
         case am::HmiState::StateID::STATE_ID_VR_SESSION: {
           Event vr_stop_event(FunctionID::VR_Stopped);
-          state_ctrl_->on_event(vr_stop_event);
+          state_ctrl_->HandleOnEvent(vr_stop_event);
           break;
         }
         case am::HmiState::StateID::STATE_ID_TTS_SESSION: {
           Event tts_stop_event(FunctionID::TTS_Stopped);
-          state_ctrl_->on_event(tts_stop_event);
+          state_ctrl_->HandleOnEvent(tts_stop_event);
           break;
         }
         case am::HmiState::StateID::STATE_ID_PHONE_CALL: {
@@ -1338,7 +1338,7 @@ class StateControllerImplTest : public ::testing::Test {
           message[am::strings::msg_params][am::hmi_notification::event_name] =
               hmi_apis::Common_EventTypes::PHONE_CALL;
           phone_call_event.set_smart_object(message);
-          state_ctrl_->on_event(phone_call_event);
+          state_ctrl_->HandleOnEvent(phone_call_event);
           break;
         }
         case am::HmiState::StateID::STATE_ID_SAFETY_MODE: {
@@ -1349,7 +1349,7 @@ class StateControllerImplTest : public ::testing::Test {
           message[am::strings::msg_params][am::hmi_notification::event_name] =
               hmi_apis::Common_EventTypes::EMERGENCY_EVENT;
           emergency_event.set_smart_object(message);
-          state_ctrl_->on_event(emergency_event);
+          state_ctrl_->HandleOnEvent(emergency_event);
           break;
         }
         case am::HmiState::StateID::STATE_ID_NAVI_STREAMING: {
@@ -2101,7 +2101,7 @@ TEST_F(StateControllerImplTest, DISABLED_ActivateAppSuccessReceivedFromHMI) {
     am::event_engine::Event event(
         hmi_apis::FunctionID::BasicCommunication_ActivateApp);
     event.set_smart_object(message);
-    state_ctrl_->on_event(event);
+    state_ctrl_->HandleOnEvent(event);
   }
 }
 
@@ -2165,7 +2165,7 @@ TEST_F(StateControllerImplTest, SendEventBCActivateApp_HMIReceivesError) {
     message[am::strings::params][am::strings::correlation_id] = corr_id;
     am::event_engine::Event event(FunctionID::BasicCommunication_ActivateApp);
     event.set_smart_object(message);
-    state_ctrl_->on_event(event);
+    state_ctrl_->HandleOnEvent(event);
   }
 }
 
@@ -2191,7 +2191,7 @@ TEST_F(StateControllerImplTest, ActivateAppInvalidCorrelationId) {
   message[am::strings::params][am::strings::correlation_id] = corr_id;
   am::event_engine::Event event(FunctionID::BasicCommunication_ActivateApp);
   event.set_smart_object(message);
-  state_ctrl_->on_event(event);
+  state_ctrl_->HandleOnEvent(event);
 }
 
 TEST_F(StateControllerImplTest, DISABLED_ApplyTempStatesForSimpleApp) {
@@ -2686,7 +2686,7 @@ TEST_F(StateControllerImplTest,
 
   // Precondition
   am::event_engine::Event event(hmi_apis::FunctionID::VR_Started);
-  state_ctrl_->on_event(event);
+  state_ctrl_->HandleOnEvent(event);
 
   HmiStatePtr check_state = FullNotAudibleState();
 
@@ -2720,10 +2720,10 @@ TEST_F(StateControllerImplTest, SetRegularStateMediaToNonMediaApp_VR_Stopped) {
 
   // Precondition
   am::event_engine::Event prev_event(hmi_apis::FunctionID::VR_Started);
-  state_ctrl_->on_event(prev_event);
+  state_ctrl_->HandleOnEvent(prev_event);
 
   am::event_engine::Event next_event(hmi_apis::FunctionID::VR_Stopped);
-  state_ctrl_->on_event(next_event);
+  state_ctrl_->HandleOnEvent(next_event);
 
   // Set state of non-media app after vr has stopped
   HmiStatePtr check_state = FullNotAudibleState();
@@ -2784,7 +2784,7 @@ TEST_F(StateControllerImplTest,
       Common_EventTypes::EMERGENCY_EVENT;
 
   event.set_smart_object(message);
-  state_ctrl_->on_event(event);
+  state_ctrl_->HandleOnEvent(event);
 
   // Non-media app can't have LIMITED-AUDIO state
   HmiStatePtr check_state = FullNotAudibleState();
@@ -2832,7 +2832,7 @@ TEST_F(StateControllerImplTest,
       hmi_apis::Common_EventTypes::PHONE_CALL;
 
   event.set_smart_object(message);
-  state_ctrl_->on_event(event);
+  state_ctrl_->HandleOnEvent(event);
 
   am::HmiStatePtr check_state = FullAudibleState();
 
@@ -2868,7 +2868,7 @@ TEST_F(StateControllerImplTest,
       hmi_apis::Common_EventTypes::PHONE_CALL;
 
   event.set_smart_object(message);
-  state_ctrl_->on_event(event);
+  state_ctrl_->HandleOnEvent(event);
 
   am::HmiStatePtr hmi_state = FullAudibleState();
 
@@ -2902,7 +2902,7 @@ TEST_F(StateControllerImplTest,
       hmi_apis::Common_EventTypes::PHONE_CALL;
 
   event.set_smart_object(message);
-  state_ctrl_->on_event(event);
+  state_ctrl_->HandleOnEvent(event);
 
   am::HmiStatePtr hmi_state = FullAudibleState();
 
@@ -2939,7 +2939,7 @@ TEST_F(StateControllerImplTest,
       hmi_apis::Common_EventTypes::PHONE_CALL;
 
   event.set_smart_object(message);
-  state_ctrl_->on_event(event);
+  state_ctrl_->HandleOnEvent(event);
 
   am::HmiStatePtr hmi_state = FullAudibleState();
 
@@ -2976,7 +2976,7 @@ TEST_F(StateControllerImplTest,
       hmi_apis::Common_EventTypes::PHONE_CALL;
 
   event.set_smart_object(message);
-  state_ctrl_->on_event(event);
+  state_ctrl_->HandleOnEvent(event);
 
   am::HmiStatePtr hmi_state = FullAudibleState();
 
@@ -3029,7 +3029,7 @@ TEST_F(StateControllerImplTest,
   am::WindowIds window_ids = {kDefaultWindowId};
   EXPECT_CALL(*simple_app_ptr_, GetWindowIds()).WillOnce(Return(window_ids));
 
-  state_ctrl_->on_event(event);
+  state_ctrl_->HandleOnEvent(event);
 
   EXPECT_EQ(new_state->hmi_level(), mobile_apis::HMILevel::HMI_FULL);
   EXPECT_EQ(new_state->audio_streaming_state(),
@@ -3062,7 +3062,7 @@ TEST_F(StateControllerImplTest, OnEventChangedAudioSourceAppToBackground) {
   am::WindowIds window_ids = {kDefaultWindowId};
   EXPECT_CALL(*simple_app_ptr_, GetWindowIds()).WillOnce(Return(window_ids));
 
-  state_ctrl_->on_event(event);
+  state_ctrl_->HandleOnEvent(event);
 
   EXPECT_EQ(new_state->hmi_level(), mobile_apis::HMILevel::HMI_BACKGROUND);
   EXPECT_EQ(new_state->audio_streaming_state(),
@@ -3086,7 +3086,7 @@ TEST_F(StateControllerImplTest, OnEventOnAppDeactivatedIncorrectHmiLevel) {
   am::WindowIds window_ids = {kDefaultWindowId};
   EXPECT_CALL(*simple_app_ptr_, GetWindowIds()).WillOnce(Return(window_ids));
 
-  state_ctrl_->on_event(event);
+  state_ctrl_->HandleOnEvent(event);
 }
 
 TEST_F(StateControllerImplTest, OnEventOnAppDeactivatedIncorrectApp) {
@@ -3100,7 +3100,7 @@ TEST_F(StateControllerImplTest, OnEventOnAppDeactivatedIncorrectApp) {
   EXPECT_CALL(app_manager_mock_, application(_))
       .WillOnce(Return(incorrect_app));
   EXPECT_CALL(*simple_app_ptr_, hmi_level(kDefaultWindowId)).Times(0);
-  state_ctrl_->on_event(event);
+  state_ctrl_->HandleOnEvent(event);
 }
 
 TEST_F(StateControllerImplTest, OnEventOnAppDeactivatedAudioApplication) {
@@ -3134,7 +3134,7 @@ TEST_F(StateControllerImplTest, OnEventOnAppDeactivatedAudioApplication) {
   am::WindowIds window_ids = {kDefaultWindowId};
   EXPECT_CALL(*simple_app_ptr_, GetWindowIds()).WillOnce(Return(window_ids));
 
-  state_ctrl_->on_event(event);
+  state_ctrl_->HandleOnEvent(event);
 }
 
 TEST_F(StateControllerImplTest, OnEventOnAppDeactivatedNotAudioApplication) {
@@ -3169,7 +3169,7 @@ TEST_F(StateControllerImplTest, OnEventOnAppDeactivatedNotAudioApplication) {
   am::WindowIds window_ids = {kDefaultWindowId};
   EXPECT_CALL(*simple_app_ptr_, GetWindowIds()).WillOnce(Return(window_ids));
 
-  state_ctrl_->on_event(event);
+  state_ctrl_->HandleOnEvent(event);
 }
 
 TEST_F(StateControllerImplTest, OnEventOnAppActivatedIncorrectApp) {
@@ -3184,7 +3184,7 @@ TEST_F(StateControllerImplTest, OnEventOnAppActivatedIncorrectApp) {
   EXPECT_CALL(app_manager_mock_, application(_))
       .WillOnce(Return(incorrect_app));
   EXPECT_CALL(*simple_app_ptr_, app_id()).Times(0);
-  state_ctrl_->on_event(event);
+  state_ctrl_->HandleOnEvent(event);
 }
 
 TEST_F(StateControllerImplTest, OnEventOnAppActivated) {
@@ -3222,7 +3222,7 @@ TEST_F(StateControllerImplTest, OnEventOnAppActivated) {
         std::make_shared<smart_objects::SmartObject>();
     (*activate_app)[am::strings::params][am::strings::correlation_id] = kCorrID;
     SetBCActivateAppRequestToHMI(hmi_apis::Common_HMILevel::FULL, kCorrID);
-    state_ctrl_->on_event(event);
+    state_ctrl_->HandleOnEvent(event);
   }
 }
 
@@ -3258,7 +3258,7 @@ TEST_F(StateControllerImplTest, IsStateActiveApplyNotCorrectTempStates) {
   const hmi_apis::FunctionID::eType event_id = hmi_apis::FunctionID::VR_Started;
   am::event_engine::Event event(event_id);
   event.set_smart_object(msg);
-  state_ctrl_->on_event(event);
+  state_ctrl_->HandleOnEvent(event);
   EXPECT_FALSE(state_ctrl_->IsStateActive(HmiState::STATE_ID_AUDIO_SOURCE));
 }
 
@@ -3275,19 +3275,19 @@ TEST_F(StateControllerImplTest, OnApplicationRegisteredDifferentStates) {
   msg[am::strings::msg_params][am::hmi_notification::event_name] =
       hmi_apis::Common_EventTypes::AUDIO_SOURCE;
   event.set_smart_object(msg);
-  state_ctrl_->on_event(event);
+  state_ctrl_->HandleOnEvent(event);
   msg[am::strings::msg_params][am::hmi_notification::event_name] =
       hmi_apis::Common_EventTypes::PHONE_CALL;
   event.set_smart_object(msg);
-  state_ctrl_->on_event(event);
+  state_ctrl_->HandleOnEvent(event);
   msg[am::strings::msg_params][am::hmi_notification::event_name] =
       hmi_apis::Common_EventTypes::DEACTIVATE_HMI;
   event.set_smart_object(msg);
-  state_ctrl_->on_event(event);
+  state_ctrl_->HandleOnEvent(event);
   msg[am::strings::msg_params][am::hmi_notification::event_name] =
       hmi_apis::Common_EventTypes::EMBEDDED_NAVI;
   event.set_smart_object(msg);
-  state_ctrl_->on_event(event);
+  state_ctrl_->HandleOnEvent(event);
 
   const am::HmiStatePtr old_state = CreateHmiStateByHmiStateType<am::HmiState>(
       mobile_apis::HMILevel::HMI_FULL,
@@ -3336,11 +3336,11 @@ TEST_F(StateControllerImplTest, OnApplicationRegisteredEqualStates) {
   msg[am::strings::msg_params][am::hmi_notification::event_name] =
       hmi_apis::Common_EventTypes::AUDIO_SOURCE;
   event.set_smart_object(msg);
-  state_ctrl_->on_event(event);
+  state_ctrl_->HandleOnEvent(event);
   msg[am::strings::msg_params][am::hmi_notification::event_name] =
       hmi_apis::Common_EventTypes::PHONE_CALL;
   event.set_smart_object(msg);
-  state_ctrl_->on_event(event);
+  state_ctrl_->HandleOnEvent(event);
 
   const am::HmiStatePtr old_state = CreateHmiStateByHmiStateType<am::HmiState>(
       mobile_apis::HMILevel::HMI_FULL,
@@ -3384,7 +3384,7 @@ TEST_F(
   message[am::strings::msg_params][am::hmi_notification::event_name] =
       hmi_apis::Common_EventTypes::AUDIO_SOURCE;
   audio_source_event.set_smart_object(message);
-  state_ctrl_->on_event(audio_source_event);
+  state_ctrl_->HandleOnEvent(audio_source_event);
 
   EXPECT_CALL(*media_app_ptr_, is_resuming()).WillRepeatedly(Return(true));
   EXPECT_CALL(*media_app_ptr_, SetRegularState(_, _)).Times(0);
@@ -3482,7 +3482,7 @@ TEST_F(StateControllerImplTest,
   ExpectAppWontChangeHmiStateDueToConflictResolving(
       simple_app_, simple_app_ptr_, kCustomWindowId, NoneNotAudibleState());
 
-  state_ctrl_->on_event(activate_widget_event);
+  state_ctrl_->HandleOnEvent(activate_widget_event);
 }
 
 TEST_F(StateControllerImplTest,
@@ -3523,7 +3523,7 @@ TEST_F(StateControllerImplTest,
                 GetBCActivateAppRequestToHMI(_, _, _, _, _))
         .Times(0);
 
-    state_ctrl_->on_event(activate_widget_event);
+    state_ctrl_->HandleOnEvent(activate_widget_event);
   }
 }
 
@@ -3544,7 +3544,7 @@ TEST_F(StateControllerImplTest,
   ExpectAppWontChangeHmiStateDueToConflictResolving(
       simple_app_, simple_app_ptr_, kCustomWindowId, FullNotAudibleState());
 
-  state_ctrl_->on_event(activate_widget_event);
+  state_ctrl_->HandleOnEvent(activate_widget_event);
 }
 
 TEST_F(StateControllerImplTest,
@@ -3585,7 +3585,7 @@ TEST_F(StateControllerImplTest,
                 GetBCActivateAppRequestToHMI(_, _, _, _, _))
         .Times(0);
 
-    state_ctrl_->on_event(activate_widget_event);
+    state_ctrl_->HandleOnEvent(activate_widget_event);
   }
 }
 
@@ -3665,7 +3665,7 @@ TEST_F(StateControllerImplTest,
   message[am::strings::msg_params][am::hmi_notification::event_name] =
       hmi_apis::Common_EventTypes::AUDIO_SOURCE;
   audio_source_event.set_smart_object(message);
-  state_ctrl_->on_event(audio_source_event);
+  state_ctrl_->HandleOnEvent(audio_source_event);
 
   HmiStatePtr initial_state =
       createHmiState(mobile_apis::HMILevel::INVALID_ENUM,

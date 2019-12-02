@@ -207,7 +207,7 @@ TEST_F(AlertRequestTest, OnTimeout_GENERIC_ERROR) {
       ManageMobileCommand(_, am::commands::Command::CommandSource::SOURCE_SDL))
       .WillOnce(DoAll(SaveArg<0>(&ui_command_result), Return(true)));
 
-  command->onTimeOut();
+  command->OnTimeOut();
   EXPECT_EQ((*ui_command_result)[am::strings::msg_params][am::strings::success]
                 .asBool(),
             false);
@@ -262,7 +262,7 @@ class CallOnTimeOut {
   CallOnTimeOut(CommandMobileImpl& command) : command_(command) {}
 
   void operator()() {
-    command_.onTimeOut();
+    command_.OnTimeOut();
   }
 
   CommandMobileImpl& command_;

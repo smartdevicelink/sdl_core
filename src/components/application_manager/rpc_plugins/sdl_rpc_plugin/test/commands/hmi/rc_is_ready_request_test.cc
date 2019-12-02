@@ -158,7 +158,7 @@ TEST_F(RCIsReadyRequestTest, Run_KeyAvailableEqualToTrue_StateAvailable) {
 
 TEST_F(RCIsReadyRequestTest, Run_HMIDoestRespond_SendMessageToHMIByTimeout) {
   ExpectSendMessagesToHMI();
-  command_->onTimeOut();
+  command_->OnTimeOut();
 }
 
 }  // namespace rc_is_ready_request

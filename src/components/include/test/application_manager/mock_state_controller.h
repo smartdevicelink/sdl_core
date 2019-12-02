@@ -106,6 +106,7 @@ class MockStateController : public am::StateController {
                     am::HmiStatePtr old_state,
                     am::HmiStatePtr new_state));
   MOCK_CONST_METHOD1(IsStateActive, bool(am::HmiState::StateID state_id));
+  MOCK_METHOD1(OnTimeOutActivateAppRequest, void(uint32_t hmi_app_id));
   MOCK_METHOD1(ActivateDefaultWindow, void(am::ApplicationSharedPtr app));
   MOCK_METHOD1(ExitDefaultWindow, void(am::ApplicationSharedPtr app));
 };
