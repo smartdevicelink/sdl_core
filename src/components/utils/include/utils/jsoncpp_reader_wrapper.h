@@ -1,4 +1,5 @@
-/* Copyright (c) 2013, Ford Motor Company
+/*
+ * Copyright (c) 2019, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,46 +30,23 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <fstream>
+#ifndef SRC_COMPONENTS_UTILS_INCLUDE_UTILS_JSONCPP_READER_WRAPPER_H_
+#define SRC_COMPONENTS_UTILS_INCLUDE_UTILS_JSONCPP_READER_WRAPPER_H_
 
-#include "gtest/gtest.h"
-
+#include <memory>
+#include <string>
 #include "json/reader.h"
-#include "json/value.h"
-#include "policy/policy_table/enums.h"
-#include "policy/policy_table/types.h"
-#include "rpc_base/gtest_support.h"
 
-using rpc::policy_table_interface_base::Table;
+namespace utils {
 
-namespace test {
-namespace components {
-namespace policy_test {
+class JsonReader {
+ public:
+  JsonReader();
+  bool parse(const std::string& json, Json::Value* root);
 
-TEST(PolicyGeneratedCodeTest, TestValidPTPreloadJsonIsValid) {
-  std::ifstream json_file("sdl_preloaded_pt.json");
-  ASSERT_TRUE(json_file.is_open());
-  Json::Value valid_table;
-  Json::CharReaderBuilder reader_builder;
-  ASSERT_TRUE(
-      Json::parseFromStream(reader_builder, json_file, &valid_table, nullptr));
-  Table table(&valid_table);
-  table.SetPolicyTableType(rpc::policy_table_interface_base::PT_PRELOADED);
-  ASSERT_RPCTYPE_VALID(table);
-}
-
-TEST(PolicyGeneratedCodeTest, TestValidPTUpdateJsonIsValid) {
-  std::ifstream json_file("valid_sdl_pt_update.json");
-  ASSERT_TRUE(json_file.is_open());
-  Json::Value valid_table;
-  Json::CharReaderBuilder reader_builder;
-  ASSERT_TRUE(
-      Json::parseFromStream(reader_builder, json_file, &valid_table, nullptr));
-  Table table(&valid_table);
-  table.SetPolicyTableType(rpc::policy_table_interface_base::PT_UPDATE);
-  ASSERT_RPCTYPE_VALID(table);
-}
-
-}  // namespace policy_test
-}  // namespace components
-}  // namespace test
+ private:
+  std::unique_ptr<Json::CharReader> reader_;
+  Json::CharReaderBuilder reader_builder_;
+};
+}  // namespace utils
+#endif  // SRC_COMPONENTS_UTILS_INCLUDE_UTILS_JSONCPP_READER_WRAPPER_H_

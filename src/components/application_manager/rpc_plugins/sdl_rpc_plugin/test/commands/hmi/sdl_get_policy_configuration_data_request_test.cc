@@ -67,7 +67,6 @@ MATCHER_P(GetPolicyConfigurationDataFirstElementMatches,
     return false;
   }
 
-  Json::Reader reader;
   Json::Value msg_json_value(Json::ValueType::arrayValue);
 
   auto msg_value_first = message[strings::msg_params][strings::value][0];
@@ -135,8 +134,8 @@ TEST_F(SDLGetPolicyConfigurationDataRequestTest, Run_Success) {
       .WillByDefault(Return(pt.ToJsonValue()));
 
   auto json_val = module_config_with_endpoints.endpoints.ToJsonValue();
-  Json::FastWriter writer;
-  std::string expected_string = writer.write(json_val);
+  Json::StreamWriterBuilder writer_builder;
+  std::string expected_string = Json::writeString(writer_builder, json_val);
   clear_new_line_symbol(expected_string);
 
   EXPECT_CALL(mock_rpc_service_,

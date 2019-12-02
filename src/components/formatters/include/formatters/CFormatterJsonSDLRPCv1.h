@@ -174,11 +174,14 @@ int32_t formatters::CFormatterJsonSDLRPCv1::fromString(
   int32_t result = kSuccess;
 
   try {
+    Json::CharReaderBuilder reader_builder;
+    const std::unique_ptr<Json::CharReader> reader(
+        reader_builder.newCharReader());
     Json::Value root;
-    Json::Reader reader;
+    const size_t json_len = str.length();
     std::string type;
 
-    if (false == reader.parse(str, root)) {
+    if (!reader->parse(str.c_str(), str.c_str() + json_len, &root, nullptr)) {
       result = kParsingError | kMessageTypeNotFound | kFunctionIdNotFound |
                kCorrelationIdNotFound;
     }

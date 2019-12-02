@@ -902,11 +902,17 @@ bool HMICapabilitiesImpl::load_capabilities_from_file() {
   }
 
   try {
-    Json::Reader reader_;
+    Json::CharReaderBuilder reader_builder;
+    const std::unique_ptr<Json::CharReader> reader_(
+        reader_builder.newCharReader());
+    JSONCPP_STRING err;
     Json::Value root_json;
+    const size_t json_len = json_string.length();
 
-    bool result = reader_.parse(json_string, root_json, false);
+    const bool result = reader_->parse(
+        json_string.c_str(), json_string.c_str() + json_len, &root_json, &err);
     if (!result) {
+      LOG4CXX_DEBUG(logger_, "Json parsing fails: " << err);
       return false;
     }
     // UI

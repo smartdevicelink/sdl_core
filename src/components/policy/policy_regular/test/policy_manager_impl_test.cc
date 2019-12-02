@@ -36,8 +36,8 @@
 #include <vector>
 
 #include "gtest/gtest.h"
-#include "json/reader.h"
 #include "json/writer.h"
+#include "utils/jsoncpp_reader_wrapper.h"
 
 #include "config_profile/profile.h"
 #include "connection_handler/connection_handler.h"
@@ -305,10 +305,11 @@ class PolicyManagerImplTest2 : public ::testing::Test {
   const Json::Value GetPTU(std::string file_name) {
     // Get PTU
     std::ifstream ifile(file_name);
-    Json::Reader reader;
+    Json::CharReaderBuilder reader_builder;
     std::string json;
     Json::Value root(Json::objectValue);
-    if (ifile.is_open() && reader.parse(ifile, root, true)) {
+    if (ifile.is_open() &&
+        Json::parseFromStream(reader_builder, ifile, &root, nullptr)) {
       json = root.toStyledString();
     }
     ifile.close();
@@ -331,9 +332,10 @@ class PolicyManagerImplTest2 : public ::testing::Test {
   Json::Value AddWidgetSupportToPt(const std::string& section_name,
                                    const uint32_t group_number) {
     std::ifstream ifile("sdl_preloaded_pt.json");
-    Json::Reader reader;
+    Json::CharReaderBuilder reader_builder;
     Json::Value root(Json::objectValue);
-    if (ifile.is_open() && reader.parse(ifile, root, true)) {
+    if (ifile.is_open() &&
+        Json::parseFromStream(reader_builder, ifile, &root, nullptr)) {
       auto& groups =
           root["policy_table"]["app_policies"][section_name]["groups"];
       if (groups.empty()) {
@@ -585,8 +587,9 @@ Json::Value CreatePTforLoad() {
       "}"
       "}");
   Json::Value table(Json::objectValue);
-  Json::Reader reader;
-  EXPECT_TRUE(reader.parse(load_table, table));
+  utils::JsonReader reader;
+
+  EXPECT_TRUE(reader.parse(load_table, &table));
   return table;
 }
 
@@ -646,10 +649,11 @@ TEST_F(PolicyManagerImplTest2, IsAppRevoked_SetRevokedAppID_ExpectAppRevoked) {
   CreateLocalPT("sdl_preloaded_pt.json");
   // Arrange
   std::ifstream ifile("sdl_preloaded_pt.json");
-  Json::Reader reader;
+  Json::CharReaderBuilder reader_builder;
   std::string json;
   Json::Value root(Json::objectValue);
-  if (ifile.is_open() && reader.parse(ifile, root, true)) {
+  if (ifile.is_open() &&
+      Json::parseFromStream(reader_builder, ifile, &root, nullptr)) {
     root["policy_table"]["app_policies"][app_id1] = Json::nullValue;
     json = root.toStyledString();
   }
@@ -703,10 +707,11 @@ TEST_F(PolicyManagerImplTest2,
   ASSERT_TRUE(output.list_of_allowed_params.empty());
   // Act
   std::ifstream ifile("sdl_preloaded_pt.json");
-  Json::Reader reader;
+  Json::CharReaderBuilder reader_builder;
   std::string json;
   Json::Value root(Json::objectValue);
-  if (ifile.is_open() && reader.parse(ifile, root, true)) {
+  if (ifile.is_open() &&
+      Json::parseFromStream(reader_builder, ifile, &root, nullptr)) {
     root["policy_table"]["app_policies"][app_id1] = Json::nullValue;
     json = root.toStyledString();
   }
@@ -870,10 +875,11 @@ TEST_F(PolicyManagerImplTest2,
   manager->AddApplication(dev_id1, "1234", HmiTypes(policy_table::AHT_MEDIA));
   // Emulate PTU with new policies for app added above
   std::ifstream ifile("sdl_preloaded_pt.json");
-  Json::Reader reader;
+  Json::CharReaderBuilder reader_builder;
   std::string json;
   Json::Value root(Json::objectValue);
-  if (ifile.is_open() && reader.parse(ifile, root, true)) {
+  if (ifile.is_open() &&
+      Json::parseFromStream(reader_builder, ifile, &root, nullptr)) {
     // Add AppID with policies
     root["policy_table"]["app_policies"]["1234"] =
         Json::Value(Json::objectValue);
@@ -1416,9 +1422,10 @@ TEST_F(PolicyManagerImplTest2, ResetRetrySequence) {
 TEST_F(PolicyManagerImplTest2, NextRetryTimeout_ExpectTimeoutsFromPT) {
   // Arrange
   std::ifstream ifile("sdl_preloaded_pt.json");
-  Json::Reader reader;
+  Json::CharReaderBuilder reader_builder;
   Json::Value root(Json::objectValue);
-  if (ifile.is_open() && reader.parse(ifile, root, true)) {
+  if (ifile.is_open() &&
+      Json::parseFromStream(reader_builder, ifile, &root, nullptr)) {
     Json::Value seconds_between_retries = Json::Value(Json::arrayValue);
     seconds_between_retries =
         root["policy_table"]["module_config"]["seconds_between_retries"];
@@ -1464,10 +1471,11 @@ TEST_F(PolicyManagerImplTest2, UpdatedPreloadedPT_ExpectLPT_IsUpdated) {
   CreateLocalPT("sdl_preloaded_pt.json");
   // Update preloadedPT
   std::ifstream ifile("sdl_preloaded_pt.json");
-  Json::Reader reader;
+  Json::CharReaderBuilder reader_builder;
   Json::Value root(Json::objectValue);
 
-  if (ifile.is_open() && reader.parse(ifile, root, true)) {
+  if (ifile.is_open() &&
+      Json::parseFromStream(reader_builder, ifile, &root, nullptr)) {
     root["policy_table"]["module_config"]["preloaded_date"] =
         new_data.new_date_;
     Json::Value val(Json::objectValue);
@@ -1481,9 +1489,8 @@ TEST_F(PolicyManagerImplTest2, UpdatedPreloadedPT_ExpectLPT_IsUpdated) {
   }
   ifile.close();
 
-  Json::StyledStreamWriter writer;
   std::ofstream ofile("sdl_preloaded_pt.json");
-  writer.write(ofile, root);
+  ofile << root;
   ofile.flush();
   ofile.close();
 
@@ -1533,9 +1540,10 @@ TEST_F(PolicyManagerImplTest2,
        RetrySequenceDelaysSeconds_Expect_CorrectValues) {
   // Arrange
   std::ifstream ifile("sdl_preloaded_pt.json");
-  Json::Reader reader;
+  Json::CharReaderBuilder reader_builder;
   Json::Value root(Json::objectValue);
-  if (ifile.is_open() && reader.parse(ifile, root, true)) {
+  if (ifile.is_open() &&
+      Json::parseFromStream(reader_builder, ifile, &root, nullptr)) {
     Json::Value seconds_between_retries = Json::Value(Json::arrayValue);
     seconds_between_retries =
         root["policy_table"]["module_config"]["seconds_between_retries"];

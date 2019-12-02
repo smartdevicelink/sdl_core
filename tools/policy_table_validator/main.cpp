@@ -2,7 +2,7 @@
 #include <cstdlib>
 #include "policy/policy_table/types.h"
 
-#include "json/reader.h"
+#include "utils/jsoncpp_reader_wrapper.h"
 #include "utils/file_system.h"
 
 namespace policy_table = rpc::policy_table_interface_base;
@@ -59,12 +59,11 @@ int main(int argc, char** argv) {
     exit(READ_ERROR);
   }
 
-  Json::Reader reader;
+  utils::JsonReader  reader;
   Json::Value value;
+  bool parce_result = reader.parse(json_string, &value);
 
-  bool parce_result = reader.parse(json_string, value);
   if (false == parce_result) {
-    std::cout << "Json parce fails" << std::endl;
     exit(PARSE_ERROR);
   }
   std::cout << "DEFAULT_POLICY" << std::endl;

@@ -37,6 +37,7 @@
 #include "hmi_message_handler/mock_hmi_message_adapter_impl.h"
 #include "hmi_message_handler/mock_hmi_message_handler_settings.h"
 #include "hmi_message_handler/mock_hmi_message_observer.h"
+#include "utils/jsoncpp_reader_wrapper.h"
 #include "utils/test_async_waiter.h"
 
 namespace test {
@@ -197,10 +198,10 @@ TEST(WebsocketSessionTest, SendMessage_UnpreparedConnection_WithoutFall) {
         "{\"id\" : 1,\"jsonrpc\" : \"2.0\",\"method\" : "
         "\"BasicCommunication.GetSystemInfo\"}";
 
-    Json::Reader reader;
+    utils::JsonReader reader;
     Json::Value json_value;
 
-    ASSERT_TRUE(reader.parse(message, json_value, false));
+    ASSERT_TRUE(reader.parse(message, &json_value));
 
     // Make unprepared connection
     boost::asio::io_context ioc{1};

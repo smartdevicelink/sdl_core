@@ -1682,11 +1682,12 @@ TEST_F(SQLPTRepresentationTest,
   table["policy_table"]["module_meta"] = Json::Value(Json::objectValue);
   table["policy_table"]["module_config"]["preloaded_pt"] = Json::Value(false);
   policy_table::Table expected(&table);
-  Json::StyledWriter writer;
+  Json::StreamWriterBuilder writer_builder;
   // Checks
-  EXPECT_EQ(writer.write(expected.ToJsonValue()),
-            writer.write(snapshot->ToJsonValue()));
-  std::cout << writer.write(snapshot->ToJsonValue()) << std::endl;
+  EXPECT_EQ(Json::writeString(writer_builder, expected.ToJsonValue()),
+            Json::writeString(writer_builder, snapshot->ToJsonValue()));
+  std::cout << Json::writeString(writer_builder, snapshot->ToJsonValue())
+            << std::endl;
   EXPECT_EQ(expected.ToJsonValue().toStyledString(),
             snapshot->ToJsonValue().toStyledString());
 }
