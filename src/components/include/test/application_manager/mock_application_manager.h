@@ -139,10 +139,10 @@ class MockApplicationManager : public application_manager::ApplicationManager {
   MOCK_METHOD1(application_id, uint32_t(const int32_t correlation_id));
   MOCK_METHOD2(set_application_id,
                void(const int32_t correlation_id, const uint32_t app_id));
-  MOCK_METHOD3(OnHMILevelChanged,
-               void(uint32_t app_id,
-                    mobile_apis::HMILevel::eType from,
-                    mobile_apis::HMILevel::eType to));
+  MOCK_METHOD3(OnHMIStateChanged,
+               void(const uint32_t app_id,
+                    const HmiStatePtr from,
+                    const HmiStatePtr to));
   MOCK_METHOD1(
       SendHMIStatusNotification,
       void(const std::shared_ptr<application_manager::Application> app));
