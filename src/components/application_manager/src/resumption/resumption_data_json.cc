@@ -122,9 +122,9 @@ bool ResumptionDataJson::IsHMIApplicationIdExist(uint32_t hmi_app_id) const {
   Json::Value dictionary = accessor.GetData().dictionary();
   const Json::Value& saved_apps = GetSavedApplications(dictionary);
 
-  for (auto it = saved_apps.begin(); it != saved_apps.end(); ++it) {
-    if ((*it).isMember(strings::hmi_app_id)) {
-      if ((*it)[strings::hmi_app_id].asUInt() == hmi_app_id) {
+  for (const auto& saved_app : saved_apps) {
+    if (saved_app.isMember(strings::hmi_app_id)) {
+      if (saved_app[strings::hmi_app_id].asUInt() == hmi_app_id) {
         return true;
       }
     }
@@ -164,18 +164,17 @@ void ResumptionDataJson::IncrementIgnOffCount() {
   resumption::LastStateAccessor accessor = last_state_wrapper_->get_accessor();
   dictionary = accessor.GetData().dictionary();
   Json::Value& saved_apps = GetSavedApplications(dictionary);
-  for (auto json_app = saved_apps.begin(); json_app != saved_apps.end();
-       ++json_app) {
-    if ((*json_app).isMember(strings::ign_off_count)) {
-      Json::Value& ign_off_count = (*json_app)[strings::ign_off_count];
+  for (auto& json_app : saved_apps) {
+    if (json_app.isMember(strings::ign_off_count)) {
+      Json::Value& ign_off_count = json_app[strings::ign_off_count];
       const uint32_t counter_value = ign_off_count.asUInt();
       ign_off_count = counter_value + 1;
     } else {
       LOG4CXX_WARN(logger_, "Unknown key among saved applications");
-      Json::Value& ign_off_count = (*json_app)[strings::ign_off_count];
+      Json::Value& ign_off_count = json_app[strings::ign_off_count];
       ign_off_count = 1;
     }
-    to_save.append(*json_app);
+    to_save.append(json_app);
   }
   SetSavedApplication(to_save, dictionary);
   SetLastIgnOffTime(time(nullptr), dictionary);
@@ -191,18 +190,17 @@ void ResumptionDataJson::DecrementIgnOffCount() {
   resumption::LastStateAccessor accessor = last_state_wrapper_->get_accessor();
   Json::Value dictionary = accessor.GetData().dictionary();
   Json::Value& saved_apps = GetSavedApplications(dictionary);
-  for (Json::Value::iterator it = saved_apps.begin(); it != saved_apps.end();
-       ++it) {
-    if ((*it).isMember(strings::ign_off_count)) {
-      const uint32_t ign_off_count = (*it)[strings::ign_off_count].asUInt();
+  for (auto& saved_app : saved_apps) {
+    if (saved_app.isMember(strings::ign_off_count)) {
+      const uint32_t ign_off_count = saved_app[strings::ign_off_count].asUInt();
       if (0 == ign_off_count) {
         LOG4CXX_WARN(logger_, "Application has not been suspended");
       } else {
-        (*it)[strings::ign_off_count] = ign_off_count - 1;
+        saved_app[strings::ign_off_count] = ign_off_count - 1;
       }
     } else {
       LOG4CXX_WARN(logger_, "Unknown key among saved applications");
-      (*it)[strings::ign_off_count] = 0;
+      saved_app[strings::ign_off_count] = 0;
     }
   }
   accessor.GetMutableData().set_dictionary(dictionary);
@@ -263,17 +261,15 @@ bool ResumptionDataJson::RemoveApplicationFromSaved(
   resumption::LastStateAccessor accessor = last_state_wrapper_->get_accessor();
   Json::Value dictionary = accessor.GetData().dictionary();
   Json::Value& saved_apps = GetSavedApplications(dictionary);
-  for (Json::Value::iterator it = saved_apps.begin(); it != saved_apps.end();
-       ++it) {
-    if ((*it).isMember(strings::app_id) && (*it).isMember(strings::device_id)) {
-      const std::string& saved_policy_app_id =
-          (*it)[strings::app_id].asString();
-      const std::string& saved_device_id = (*it)[strings::device_id].asString();
+  for (auto& app : saved_apps) {
+    if (app.isMember(strings::app_id) && app.isMember(strings::device_id)) {
+      const std::string& saved_policy_app_id = app[strings::app_id].asString();
+      const std::string& saved_device_id = app[strings::device_id].asString();
       if (saved_policy_app_id == policy_app_id &&
           saved_device_id == device_id) {
         result = true;
       } else {
-        temp.push_back((*it));
+        temp.push_back(app);
       }
     }
   }
@@ -285,9 +281,8 @@ bool ResumptionDataJson::RemoveApplicationFromSaved(
   }
 
   GetSavedApplications(dictionary).clear();
-  for (std::vector<Json::Value>::iterator it = temp.begin(); it != temp.end();
-       ++it) {
-    GetSavedApplications(dictionary).append((*it));
+  for (auto& app : temp) {
+    GetSavedApplications(dictionary).append(app);
   }
   LOG4CXX_TRACE(logger_, "EXIT result: " << (result ? "true" : "false"));
   accessor.GetMutableData().set_dictionary(dictionary);
@@ -377,11 +372,10 @@ Json::Value& ResumptionDataJson::GetFromSavedOrAppend(
   LOG4CXX_AUTO_TRACE(logger_);
   sync_primitives::AutoLock autolock(resumption_lock_);
   Json::Value& saved_apps = GetSavedApplications(dictionary);
-  for (Json::Value::iterator it = saved_apps.begin(); it != saved_apps.end();
-       ++it) {
-    if (device_id == (*it)[strings::device_id].asString() &&
-        policy_app_id == (*it)[strings::app_id].asString()) {
-      return *it;
+  for (auto& saved_app : saved_apps) {
+    if (device_id == saved_app[strings::device_id].asString() &&
+        policy_app_id == saved_app[strings::app_id].asString()) {
+      return saved_app;
     }
   }
 
@@ -398,19 +392,19 @@ void ResumptionDataJson::GetDataForLoadResumeData(
   resumption::LastStateAccessor accessor = last_state_wrapper_->get_accessor();
   Json::Value dictionary = accessor.GetData().dictionary();
   Json::Value& saved_apps = GetSavedApplications(dictionary);
-  for (Json::Value::iterator it = saved_apps.begin(); it != saved_apps.end();
-       ++it) {
-    if (((*it).isMember(strings::hmi_level)) &&
-        ((*it).isMember(strings::ign_off_count)) &&
-        ((*it).isMember(strings::time_stamp)) &&
-        ((*it).isMember(strings::app_id)) &&
-        ((*it).isMember(strings::device_id))) {
+
+  for (auto& saved_app : saved_apps) {
+    if ((saved_app.isMember(strings::hmi_level)) &&
+        (saved_app.isMember(strings::ign_off_count)) &&
+        (saved_app.isMember(strings::time_stamp)) &&
+        (saved_app.isMember(strings::app_id)) &&
+        (saved_app.isMember(strings::device_id))) {
       smart_objects::SmartObject so(smart_objects::SmartType_Map);
-      so[strings::hmi_level] = (*it)[strings::hmi_level].asInt();
-      so[strings::ign_off_count] = (*it)[strings::ign_off_count].asInt();
-      so[strings::time_stamp] = (*it)[strings::time_stamp].asUInt();
-      so[strings::app_id] = (*it)[strings::app_id].asString();
-      so[strings::device_id] = (*it)[strings::device_id].asString();
+      so[strings::hmi_level] = saved_app[strings::hmi_level].asInt();
+      so[strings::ign_off_count] = saved_app[strings::ign_off_count].asInt();
+      so[strings::time_stamp] = saved_app[strings::time_stamp].asUInt();
+      so[strings::app_id] = saved_app[strings::app_id].asString();
+      so[strings::device_id] = saved_app[strings::device_id].asString();
       so_array_data[i++] = so;
     }
   }

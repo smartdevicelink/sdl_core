@@ -145,10 +145,8 @@ bool TcpTransportAdapter::Restore() {
   const Json::Value tcp_adapter_dictionary =
       dictionary["TransportManager"]["TcpAdapter"];
   const Json::Value devices_dictionary = tcp_adapter_dictionary["devices"];
-  for (Json::Value::const_iterator i = devices_dictionary.begin();
-       i != devices_dictionary.end();
-       ++i) {
-    const Json::Value device_dictionary = *i;
+  for (const auto& tcp_adapter_device : devices_dictionary) {
+    const Json::Value device_dictionary = tcp_adapter_device;
     std::string name = device_dictionary["name"].asString();
     std::string address_record = device_dictionary["address"].asString();
     in_addr_t address = inet_addr(address_record.c_str());
@@ -157,10 +155,8 @@ bool TcpTransportAdapter::Restore() {
     AddDevice(device);
     const Json::Value applications_dictionary =
         device_dictionary["applications"];
-    for (Json::Value::const_iterator j = applications_dictionary.begin();
-         j != applications_dictionary.end();
-         ++j) {
-      const Json::Value application_dictionary = *j;
+    for (const auto& application : applications_dictionary) {
+      const Json::Value application_dictionary = application;
       std::string port_record = application_dictionary["port"].asString();
       int port = atoi(port_record.c_str());
       ApplicationHandle app_handle = tcp_device->AddDiscoveredApplication(port);

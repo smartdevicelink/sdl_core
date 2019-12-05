@@ -130,10 +130,8 @@ bool BluetoothTransportAdapter::Restore() {
       dictionary["TransportManager"]["BluetoothAdapter"];
   const Json::Value devices_dictionary =
       bluetooth_adapter_dictionary["devices"];
-  for (Json::Value::const_iterator i = devices_dictionary.begin();
-       i != devices_dictionary.end();
-       ++i) {
-    const Json::Value device_dictionary = *i;
+  for (const auto& bt_device : devices_dictionary) {
+    const Json::Value device_dictionary = bt_device;
     std::string name = device_dictionary["name"].asString();
     std::string address_record = device_dictionary["address"].asString();
     bdaddr_t address;
@@ -141,10 +139,8 @@ bool BluetoothTransportAdapter::Restore() {
     RfcommChannelVector rfcomm_channels;
     const Json::Value applications_dictionary =
         device_dictionary["applications"];
-    for (Json::Value::const_iterator j = applications_dictionary.begin();
-         j != applications_dictionary.end();
-         ++j) {
-      const Json::Value application_dictionary = *j;
+    for (const auto& application : applications_dictionary) {
+      const Json::Value application_dictionary = application;
       std::string rfcomm_channel_record =
           application_dictionary["rfcomm_channel"].asString();
       uint8_t rfcomm_channel =
@@ -155,11 +151,9 @@ bool BluetoothTransportAdapter::Restore() {
         new BluetoothDevice(address, name.c_str(), rfcomm_channels);
     DeviceSptr device(bluetooth_device);
     AddDevice(device);
-    for (RfcommChannelVector::const_iterator j = rfcomm_channels.begin();
-         j != rfcomm_channels.end();
-         ++j) {
+    for (const auto& channel : rfcomm_channels) {
       ApplicationHandle app_handle =
-          *j;  // for Bluetooth device app_handle is just RFCOMM channel
+          channel;  // for Bluetooth device app_handle is just RFCOMM channel
       if (Error::OK != Connect(device->unique_device_id(), app_handle)) {
         errors_occured = true;
       }

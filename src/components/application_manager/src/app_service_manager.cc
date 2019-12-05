@@ -139,9 +139,8 @@ smart_objects::SmartObject AppServiceManager::PublishAppService(
   std::string default_app_id = DefaultServiceByType(service_type);
   if (default_app_id.empty() && !mobile_service) {
     auto embedded_services = app_manager_.get_settings().embedded_services();
-    for (auto it = embedded_services.begin(); it != embedded_services.end();
-         ++it) {
-      if (*it == service_type) {
+    for (const auto& embedded_service : embedded_services) {
+      if (embedded_service == service_type) {
         auto last_state_accessor = last_state_->get_accessor();
         Json::Value dictionary = last_state_accessor.GetData().dictionary();
         dictionary[kAppServiceSection][kDefaults][service_type] =

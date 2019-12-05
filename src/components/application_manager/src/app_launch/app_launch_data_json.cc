@@ -275,10 +275,8 @@ bool AppLaunchDataJson::DeleteOldestAppData() {
   GetSavedApplicationDataList(dictionary).clear();
 
   // Copy to Json new list without oldest one
-  for (std::vector<Json::Value>::iterator it = temp_json_list.begin();
-       it != temp_json_list.end();
-       ++it) {
-    GetSavedApplicationDataList(dictionary).append((*it));
+  for (const auto& item : temp_json_list) {
+    GetSavedApplicationDataList(dictionary).append(item);
   }
   accessor.GetMutableData().set_dictionary(dictionary);
   LOG4CXX_DEBUG(
