@@ -3477,6 +3477,42 @@ void ApplicationManagerImpl::ProcessPostponedMessages(const uint32_t app_id) {
   std::for_each(messages.begin(), messages.end(), push_allowed_messages);
 }
 
+void ApplicationManagerImpl::ProcessOnDataStreamingNotification(
+    const protocol_handler::ServiceType service_type,
+    const uint32_t app_id,
+    const bool status) {
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  bool should_send_notification = false;
+
+  {
+    sync_primitives::AutoLock lock(streaming_services_lock_);
+    auto& active_services = streaming_application_services_[service_type];
+    should_send_notification = active_services.empty();
+    if (status) {
+      active_services.insert(app_id);
+      LOG4CXX_DEBUG(logger_,
+                    "Streaming session with id "
+                        << app_id << " for service "
+                        << static_cast<uint32_t>(service_type)
+                        << " was added. Currently streaming sessions count: "
+                        << active_services.size());
+    } else {
+      active_services.erase(app_id);
+      LOG4CXX_DEBUG(logger_,
+                    "Streaming session with id "
+                        << app_id << " for service "
+                        << static_cast<uint32_t>(service_type)
+                        << " was removed. Currently streaming sessions count: "
+                        << active_services.size());
+    }
+  }
+
+  if (should_send_notification) {
+    MessageHelper::SendOnDataStreaming(service_type, status, *this);
+  }
+}
+
 void ApplicationManagerImpl::ProcessApp(const uint32_t app_id,
                                         const mobile_apis::HMILevel::eType from,
                                         const mobile_apis::HMILevel::eType to) {

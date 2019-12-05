@@ -117,6 +117,9 @@ class ApplicationManagerImpl;
 
 enum VRTTSSessionChanging { kVRSessionChanging = 0, kTTSSessionChanging };
 
+typedef std::map<protocol_handler::ServiceType, std::set<uint32_t> >
+    ServiceStreamingStatusMap;
+
 struct CommandParametersPermissions;
 typedef std::map<std::string, hmi_apis::Common_TransportType::eType>
     DeviceTypes;
@@ -213,6 +216,11 @@ class ApplicationManagerImpl
   void OnHMILevelChanged(uint32_t app_id,
                          mobile_apis::HMILevel::eType from,
                          mobile_apis::HMILevel::eType to) OVERRIDE;
+
+  void ProcessOnDataStreamingNotification(
+      const protocol_handler::ServiceType service_type,
+      const uint32_t app_id,
+      const bool status) FINAL;
 
   void SendDriverDistractionState(ApplicationSharedPtr application);
 
@@ -1592,6 +1600,9 @@ class ApplicationManagerImpl
 
   std::unique_ptr<rpc_service::RPCService> rpc_service_;
   std::unique_ptr<rpc_handler::RPCHandler> rpc_handler_;
+
+  ServiceStreamingStatusMap streaming_application_services_;
+  sync_primitives::Lock streaming_services_lock_;
 
 #ifdef BUILD_TESTS
  public:
