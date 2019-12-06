@@ -649,7 +649,7 @@ void ApplicationImpl::WakeUpStreaming(
     if (video_streaming_suspended_) {
       application_manager_.OnAppStreaming(app_id(), service_type, true);
       application_manager_.ProcessOnDataStreamingNotification(
-          ServiceType::kMobileNav, app_id(), true);
+          service_type, app_id(), true);
       video_streaming_suspended_ = false;
     }
     video_stream_suspend_timer_.Start(
@@ -660,7 +660,7 @@ void ApplicationImpl::WakeUpStreaming(
     if (audio_streaming_suspended_) {
       application_manager_.OnAppStreaming(app_id(), service_type, true);
       application_manager_.ProcessOnDataStreamingNotification(
-          ServiceType::kAudio, app_id(), true);
+          service_type, app_id(), true);
       audio_streaming_suspended_ = false;
     }
     audio_stream_suspend_timer_.Start(

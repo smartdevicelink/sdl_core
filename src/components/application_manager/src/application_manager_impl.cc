@@ -3499,6 +3499,9 @@ void ApplicationManagerImpl::ProcessOnDataStreamingNotification(
                         << active_services.size());
     } else {
       active_services.erase(app_id);
+      should_send_notification =
+          !should_send_notification && active_services.empty();
+
       LOG4CXX_DEBUG(logger_,
                     "Streaming session with id "
                         << app_id << " for service "
