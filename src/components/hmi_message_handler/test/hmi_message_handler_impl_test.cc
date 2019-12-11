@@ -189,6 +189,46 @@ TEST_F(HMIMessageHandlerImplTest, SendMessageToHMI_Success) {
   EXPECT_TRUE(waiter.WaitFor(1, 100));
 }
 
+TEST(WebsocketSessionTest, SendMessage_UnpreparedConnection_WithoutFall) {
+  ::testing::FLAGS_gtest_death_test_style = "threadsafe";
+
+  auto send_message = []() {
+    auto message =
+        "{\"id\" : 1,\"jsonrpc\" : \"2.0\",\"method\" : "
+        "\"BasicCommunication.GetSystemInfo\"}";
+
+    Json::Reader reader;
+    Json::Value json_value;
+
+    ASSERT_TRUE(reader.parse(message, json_value, false));
+
+    // Make unprepared connection
+    boost::asio::io_context ioc{1};
+    boost::asio::ip::tcp::acceptor acceptor{
+        ioc, {boost::asio::ip::make_address("127.0.0.1"), 8087}};
+    boost::asio::ip::tcp::socket socket{ioc};
+
+    std::unique_ptr<hmi_message_handler::WebsocketSession> session(
+        new hmi_message_handler::WebsocketSession(std::move(socket), nullptr));
+
+    // Send message to unprepared connection
+    session->sendJsonMessage(json_value);
+
+    // Wait for the message to be processed
+    std::this_thread::sleep_for(std::chrono::milliseconds(100));
+
+    // Stopping connection thread
+    session->Shutdown();
+    session = nullptr;
+
+    exit(0);
+  };
+
+  // Expected exit code 0, if test terminate by other signal(SIGABRT or
+  // SIGSEGV), we will get failed test
+  EXPECT_EXIT(send_message(), ::testing::ExitedWithCode(0), "");
+}
+
 }  // namespace hmi_message_handler_test
 }  // namespace components
 }  // namespace test
