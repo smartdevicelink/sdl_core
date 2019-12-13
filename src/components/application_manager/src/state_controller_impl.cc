@@ -977,6 +977,7 @@ int64_t StateControllerImpl::RequestHMIStateChange(
 
 void StateControllerImpl::ApplyPostponedStateForApp(ApplicationSharedPtr app) {
   LOG4CXX_AUTO_TRACE(logger_);
+  DCHECK_OR_RETURN_VOID(app);
   const WindowIds window_ids = app->GetWindowIds();
 
   for (const auto& window_id : window_ids) {
