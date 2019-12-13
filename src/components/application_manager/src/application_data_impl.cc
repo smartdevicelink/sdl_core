@@ -773,9 +773,9 @@ void DynamicApplicationDataImpl::RemoveCommand(const uint32_t cmd_id) {
 
     return;
   }
-  LOG4CXX_WARN(logger_,
-               "Command with id " << cmd_id
-                                  << " is not found. Removal skipped.");
+  LOG4CXX_WARN(
+      logger_,
+      "Command with id " << cmd_id << " is not found. Removal skipped.");
 }
 
 smart_objects::SmartObject* DynamicApplicationDataImpl::FindCommand(
