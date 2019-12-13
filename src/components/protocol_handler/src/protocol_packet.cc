@@ -30,9 +30,9 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <algorithm>
 #include <memory.h>
 #include <stdint.h>
+#include <algorithm>
 #include <cstring>
 #include <limits>
 #include <memory>
