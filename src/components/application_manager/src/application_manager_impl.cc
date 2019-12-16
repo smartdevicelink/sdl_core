@@ -191,6 +191,9 @@ ApplicationManagerImpl::ApplicationManagerImpl(
           "AM TTSGLPRTimer",
           new TimerTaskImpl<ApplicationManagerImpl>(
               this, &ApplicationManagerImpl::OnTimerSendTTSGlobalProperties))
+    , clear_pool_timer_("ClearPoolTimer",
+                        new TimerTaskImpl<ApplicationManagerImpl>(
+                            this, &ApplicationManagerImpl::ClearTimerPool))
     , is_low_voltage_(false)
     , apps_size_(0)
     , is_stopping_(false) {
@@ -201,14 +204,9 @@ ApplicationManagerImpl::ApplicationManagerImpl(
                              {TYPE_SYSTEM, "System"},
                              {TYPE_ICONS, "Icons"}};
 
-  sync_primitives::AutoLock lock(timer_pool_lock_);
-  TimerSPtr clearing_timer(std::make_shared<timer::Timer>(
-      "ClearTimerPoolTimer",
-      new TimerTaskImpl<ApplicationManagerImpl>(
-          this, &ApplicationManagerImpl::ClearTimerPool)));
   const uint32_t timeout_ms = 10000u;
-  clearing_timer->Start(timeout_ms, timer::kSingleShot);
-  timer_pool_.push_back(clearing_timer);
+  clear_pool_timer_.Start(timeout_ms, timer::kPeriodic);
+
   rpc_handler_.reset(new rpc_handler::RPCHandlerImpl(
       *this, hmi_so_factory(), mobile_so_factory()));
   commands_holder_.reset(new CommandHolderImpl(*this));
@@ -245,8 +243,15 @@ ApplicationManagerImpl::~ApplicationManagerImpl() {
   LOG4CXX_DEBUG(logger_, "Destroying Policy Handler");
   RemovePolicyObserver(this);
 
-  sync_primitives::AutoLock lock(timer_pool_lock_);
-  timer_pool_.clear();
+  {
+    sync_primitives::AutoLock lock(close_app_timer_pool_lock_);
+    close_app_timer_pool_.clear();
+  }
+
+  {
+    sync_primitives::AutoLock lock(end_stream_timer_pool_lock_);
+    end_stream_timer_pool_.clear();
+  }
 
   navi_app_to_stop_.clear();
   navi_app_to_end_stream_.clear();
@@ -1893,6 +1898,18 @@ void ApplicationManagerImpl::OnStreamingConfigured(
       // started audio service
       service_type == ServiceType::kMobileNav ? it->second.first = true
                                               : it->second.second = true;
+
+      for (ulong i = 0; i < navi_app_to_stop_.size(); ++i) {
+        if (app_id == navi_app_to_stop_[i]) {
+          {
+            sync_primitives::AutoLock lock(close_app_timer_pool_lock_);
+            close_app_timer_pool_[i]->Stop();
+            close_app_timer_pool_.erase(close_app_timer_pool_.begin() + i);
+            navi_app_to_stop_.erase(navi_app_to_stop_.begin() + i);
+          }
+          break;
+        }
+      }
     }
 
     application(app_id)->StartStreaming(service_type);
@@ -3434,8 +3451,8 @@ void ApplicationManagerImpl::EndNaviServices(uint32_t app_id) {
             this, &ApplicationManagerImpl::CloseNaviApp)));
     close_timer->Start(navi_close_app_timeout_, timer::kSingleShot);
 
-    sync_primitives::AutoLock lock(timer_pool_lock_);
-    timer_pool_.push_back(close_timer);
+    sync_primitives::AutoLock lock(close_app_timer_pool_lock_);
+    close_app_timer_pool_.push_back(close_timer);
   }
 }
 
@@ -3511,8 +3528,8 @@ void ApplicationManagerImpl::ProcessApp(const uint32_t app_id,
               this, &ApplicationManagerImpl::EndNaviStreaming)));
       end_stream_timer->Start(navi_end_stream_timeout_, timer::kPeriodic);
 
-      sync_primitives::AutoLock lock(timer_pool_lock_);
-      timer_pool_.push_back(end_stream_timer);
+      sync_primitives::AutoLock lock(end_stream_timer_pool_lock_);
+      end_stream_timer_pool_.push_back(end_stream_timer);
     }
   } else if (to == HMI_NONE) {
     LOG4CXX_TRACE(logger_, "HMILevel to NONE");
@@ -3526,18 +3543,29 @@ void ApplicationManagerImpl::ClearTimerPool() {
   LOG4CXX_AUTO_TRACE(logger_);
 
   std::vector<TimerSPtr> new_timer_pool;
-
-  sync_primitives::AutoLock lock(timer_pool_lock_);
-  new_timer_pool.push_back(timer_pool_[0]);
-
-  for (size_t i = 1; i < timer_pool_.size(); ++i) {
-    if (timer_pool_[i]->is_running()) {
-      new_timer_pool.push_back(timer_pool_[i]);
+  {
+    sync_primitives::AutoLock lock(close_app_timer_pool_lock_);
+    for (size_t i = 0; i < close_app_timer_pool_.size(); ++i) {
+      if (close_app_timer_pool_[i]->is_running()) {
+        new_timer_pool.push_back(close_app_timer_pool_[i]);
+      }
     }
+
+    close_app_timer_pool_.swap(new_timer_pool);
+    new_timer_pool.clear();
   }
 
-  timer_pool_.swap(new_timer_pool);
-  new_timer_pool.clear();
+  {
+    sync_primitives::AutoLock lock(end_stream_timer_pool_lock_);
+    for (size_t i = 0; i < end_stream_timer_pool_.size(); ++i) {
+      if (end_stream_timer_pool_[i]->is_running()) {
+        new_timer_pool.push_back(end_stream_timer_pool_[i]);
+      }
+    }
+
+    end_stream_timer_pool_.swap(new_timer_pool);
+    new_timer_pool.clear();
+  }
 }
 
 void ApplicationManagerImpl::CloseNaviApp() {
