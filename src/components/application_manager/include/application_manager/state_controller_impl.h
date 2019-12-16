@@ -158,12 +158,8 @@ class StateControllerImpl : public event_engine::EventObserver,
       applications = accessor.GetData();
     }
 
-    ApplicationSet::iterator it = applications.begin();
-    for (; it != applications.end(); ++it) {
-      auto app = *it;
-      if (app) {
-        func(app);
-      }
+    for (const auto& app : applications) {
+      func(app);
     }
   }
 
