@@ -360,10 +360,11 @@ RESULT_CODE ProtocolPacket::ProtocolHeaderValidator::validate(
       }
 
       if (wrongDataSize) {
+        std::string str_frame_type = StringifyFrameType(header.frameType);
         LOG4CXX_WARN(
             logger_,
             "Packet data size of "
-                << StringifyFrameType(header.frameType)
+                << str_frame_type
                 << " frame must be in range (0, payload_size=" << payload_size
                 << "], but actual value is " << header.dataSize);
         return RESULT_FAIL;
