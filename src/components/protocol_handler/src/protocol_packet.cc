@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018, Ford Motor Company
+ * Copyright (c) 2019, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -360,7 +360,7 @@ RESULT_CODE ProtocolPacket::ProtocolHeaderValidator::validate(
       }
 
       if (wrongDataSize) {
-        std::string str_frame_type = StringifyFrameType(header.frameType);
+        const std::string str_frame_type = StringifyFrameType(header.frameType);
         LOG4CXX_WARN(
             logger_,
             "Packet data size of "
