@@ -411,6 +411,14 @@ class PolicyHandlerInterface : public VehicleDataItemProvider {
   virtual void OnAppsSearchCompleted(const bool trigger_ptu) = 0;
 
   /**
+   * @brief Notify that new applocation was added to application list
+   * @param new_app_id app_id for this application
+   * @param policy_id policy_id for this application
+   */
+  virtual void OnAddedNewApplicationToAppList(const uint32_t new_app_id,
+                                              const std::string policy_id) = 0;
+
+  /**
    * @brief OnAppRegisteredOnMobile allows to handle event when application were
    * succesfully registered on mobile device.
    * It will send OnAppPermissionSend notification and will try to start PTU.

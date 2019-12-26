@@ -92,6 +92,11 @@ class UpdateStatusManager {
   void OnUpdateTimeoutOccurs();
 
   /**
+   * @brief Postponed update for PTU
+   */
+  void OnUpdatePostponed();
+
+  /**
    * @brief Update status handler for valid PTU receiving
    */
   void OnValidUpdateReceived();
