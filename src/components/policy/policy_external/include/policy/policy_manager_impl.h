@@ -609,6 +609,12 @@ class PolicyManagerImpl : public PolicyManager {
   void OnAppsSearchCompleted(const bool trigger_ptu) OVERRIDE;
 
   /**
+   * @brief Change applicatios count ready for PTU
+   * @param new_app_count new applications count for PTU
+   */
+  void OnChangeApplicationCount(const uint32_t new_app_count) OVERRIDE;
+
+  /**
    * @brief Get state of request types for given application
    * @param policy_app_id Unique application id
    * @return request type state
@@ -1097,6 +1103,11 @@ class PolicyManagerImpl : public PolicyManager {
                  policy_table::PolicyTableType type) const;
 
   /**
+   * @brief Check that application for PTU more than zero
+   */
+  bool HasApplicationForPTU();
+
+  /**
    * @brief Get resulting RPCs permissions for application which started on
    * specific device
    * @param device_id Device id
@@ -1308,6 +1319,11 @@ class PolicyManagerImpl : public PolicyManager {
   uint32_t retry_sequence_index_;
 
   /**
+   * @brief Count application ready for PTU
+   */
+  uint32_t count_application_;
+
+  /**
    * @brief Lock for guarding retry sequence
    */
   mutable sync_primitives::Lock retry_sequence_lock_;
@@ -1345,6 +1361,11 @@ class PolicyManagerImpl : public PolicyManager {
    * @brief Flag for notifying that invalid PTU should be triggered
    */
   bool trigger_ptu_;
+
+  /**
+   * @brief Flag for notifying that PTU was requested
+   */
+  bool ptu_requested_;
 
   /**
    * @brief Flag that indicates whether a PTU sequence (including retries) is in

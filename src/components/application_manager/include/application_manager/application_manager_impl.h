@@ -1610,6 +1610,8 @@ class ApplicationManagerImpl
 
   uint32_t apps_size_;
 
+  bool is_registered_in_timeout_;
+
   volatile bool is_stopping_;
 
   std::unique_ptr<CommandHolder> commands_holder_;

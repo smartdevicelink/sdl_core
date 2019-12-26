@@ -183,9 +183,7 @@ class PolicyHandler : public PolicyHandlerInterface,
                          const std::string& policy_app_id,
                          const std::string& hmi_level) OVERRIDE;
 
-#ifndef EXTERNAL_PROPRIETARY_MODE
-  void OnPTUTimeOut() OVERRIDE;
-#endif
+  void OnPTUTimeOut();
   /**
    * Gets all allowed module types
    * @param app_id unique identifier of application
@@ -424,6 +422,18 @@ class PolicyHandler : public PolicyHandlerInterface,
    */
   uint32_t GetAppIdForSending() const OVERRIDE;
 
+  /**
+   * @brief Add application to PTU queue if don't have application
+   * with the same app_id
+   * @param new_app_id app id new application
+   */
+  void AddNewApplicationIdToPTUQueue(const uint32_t new_app_id);
+
+  /**
+   * @brief Remove first from queue application
+   */
+  void RemoveApplicationFromPTUQueue();
+
   custom_str::CustomString GetAppName(
       const std::string& policy_app_id) OVERRIDE;
 
@@ -584,6 +594,19 @@ class PolicyHandler : public PolicyHandlerInterface,
    * @brief Handler on applications search completed
    */
   void OnAppsSearchCompleted(const bool trigger_ptu) OVERRIDE;
+
+  /**
+   * @brief New application was added to application list
+   * @param new_app_id app_id for this application
+   * @param policy_id policy_id for this application
+   */
+  void OnAddedNewApplicationToAppList(const uint32_t new_app_id,
+                                      const std::string policy_id) OVERRIDE;
+
+  /**
+   * @brief Application queue ready for PTU
+   */
+  std::vector<uint32_t> queue_applications_for_ptu_;
 
   /**
    * @brief OnAppRegisteredOnMobile allows to handle event when application were
@@ -896,6 +919,8 @@ class PolicyHandler : public PolicyHandlerInterface,
   std::shared_ptr<StatisticManagerImpl> statistic_manager_impl_;
   const PolicySettings& settings_;
   application_manager::ApplicationManager& application_manager_;
+  std::string last_registered_app_id_;
+
   friend class AppPermissionDelegate;
 
   /**
