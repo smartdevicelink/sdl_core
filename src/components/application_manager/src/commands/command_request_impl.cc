@@ -772,16 +772,14 @@ bool CommandRequestImpl::CheckHMICapabilities(
     return false;
   }
 
-  const SmartObject* button_capabilities_so =
-      hmi_capabilities_.button_capabilities();
-  if (!button_capabilities_so) {
+  auto button_capabilities = hmi_capabilities_.button_capabilities();
+  if (!button_capabilities) {
     LOG4CXX_ERROR(logger_, "Invalid button capabilities object");
     return false;
   }
 
-  const SmartObject& button_capabilities = *button_capabilities_so;
-  for (size_t i = 0; i < button_capabilities.length(); ++i) {
-    const SmartObject& capabilities = button_capabilities[i];
+  for (size_t i = 0; i < button_capabilities->length(); ++i) {
+    const SmartObject& capabilities = (*button_capabilities)[i];
     const ButtonName::eType current_button = static_cast<ButtonName::eType>(
         capabilities.getElement(hmi_response::button_name).asInt());
     if (current_button == button) {

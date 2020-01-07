@@ -254,10 +254,10 @@ bool SendLocationRequest::CheckHMICapabilities(
     return false;
   }
 
-  if (hmi_capabilities.display_capabilities()) {
-    const SmartObject disp_cap = (*hmi_capabilities.display_capabilities());
+  auto display_capabilities = hmi_capabilities.display_capabilities();
+  if (display_capabilities) {
     const SmartObject& text_fields =
-        disp_cap.getElement(hmi_response::text_fields);
+        display_capabilities->getElement(hmi_response::text_fields);
     const size_t len = text_fields.length();
     for (size_t i = 0; i < len; ++i) {
       const SmartObject& text_field = text_fields[i];
