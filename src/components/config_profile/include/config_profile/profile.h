@@ -212,14 +212,14 @@ class Profile : public protocol_handler::ProtocolHandlerSettings,
   const std::string& hmi_capabilities_file_name() const;
 
   /**
-   * @brief Returns help promt vector
+   * @brief Returns help prompt vector
    */
   const std::vector<std::string>& help_prompt() const;
 
   /**
-   * @brief Returns help promt vector
+   * @brief Returns help prompt vector
    */
-  const std::vector<std::string>& time_out_promt() const;
+  const std::vector<std::string>& time_out_prompt() const;
 
   /**
    * @brief Returns vr commands default for all apps
@@ -952,7 +952,7 @@ class Profile : public protocol_handler::ProtocolHandlerSettings,
   uint16_t time_testing_port_;
   std::string hmi_capabilities_file_name_;
   std::vector<std::string> help_prompt_;
-  std::vector<std::string> time_out_promt_;
+  std::vector<std::string> time_out_prompt_;
   std::vector<std::string> vr_commands_;
   uint64_t min_tread_stack_size_;
   bool is_mixing_audio_supported_;

@@ -49,7 +49,7 @@ void DeleteGlobalProperties(ApplicationSharedPtr app,
   using namespace smart_objects;
 
   const std::vector<std::string>& timeout_prompt =
-      app_manager.get_settings().time_out_promt();
+      app_manager.get_settings().time_out_prompt();
 
   SmartObject so_default_timeout_prompt = SmartObject(SmartType_Array);
 

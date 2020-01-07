@@ -346,6 +346,7 @@ ApplicationParams::ApplicationParams(const Json::Value* value__)
     , heart_beat_timeout_ms(impl::ValueMember(value__, "heart_beat_timeout_ms"))
     , moduleType(impl::ValueMember(value__, "moduleType"))
     , certificate(impl::ValueMember(value__, "certificate"))
+    , encryption_required(impl::ValueMember(value__, "encryption_required"))
     , hybrid_app_preference(impl::ValueMember(value__, "hybrid_app_preference"))
     , endpoint(impl::ValueMember(value__, "endpoint"))
     , enabled(impl::ValueMember(value__, "enabled"))
@@ -354,8 +355,7 @@ ApplicationParams::ApplicationParams(const Json::Value* value__)
     , icon_url(impl::ValueMember(value__, "icon_url"))
     , app_service_parameters(impl::ValueMember(value__, "app_services"))
     , allow_unknown_rpc_passthrough(
-          impl::ValueMember(value__, "allow_unknown_rpc_passthrough"))
-    , encryption_required(impl::ValueMember(value__, "encryption_required")) {}
+          impl::ValueMember(value__, "allow_unknown_rpc_passthrough")) {}
 
 Json::Value ApplicationParams::ToJsonValue() const {
   Json::Value result__(PolicyBase::ToJsonValue());

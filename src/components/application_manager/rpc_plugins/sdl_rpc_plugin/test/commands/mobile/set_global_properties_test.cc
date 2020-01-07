@@ -109,7 +109,7 @@ class SetGlobalPropertiesRequestTest
     msg_params[am::strings::vr_help_title] = "vr_help_title";
     msg_params[am::strings::vr_help][0][am::strings::text] = "vr_help";
     msg_params[am::strings::vr_help][0][am::strings::position] = 1u;
-    msg_params[am::strings::help_prompt][0][am::strings::text] = "help_promt";
+    msg_params[am::strings::help_prompt][0][am::strings::text] = "help_prompt";
     (*msg)[am::strings::msg_params] = msg_params;
 
     return msg;

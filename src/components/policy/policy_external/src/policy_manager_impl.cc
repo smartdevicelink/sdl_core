@@ -1551,7 +1551,7 @@ void PolicyManagerImpl::GetPermissionsForApp(
     // Groups that allowed by default but can be changed by the user
     FunctionalGroupIDs preconsented_groups = group_types[kTypePreconsented];
 
-    // Groups which has user consent promt but there is no any consnets now.
+    // Groups which has user consent prompt but there is no any consent now.
     FunctionalGroupIDs unconsented_groups = group_types[kTypeUnconsented];
 
     // Pull common groups from allowed and preconsented parts.

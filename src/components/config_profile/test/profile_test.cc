@@ -255,14 +255,14 @@ TEST_F(ProfileTest, UpdateBool_ValueAppearsInFileTwice) {
 
 TEST_F(ProfileTest, UpdateVectorOfString_ValueAppearsInFileTwice) {
   // Default values
-  std::vector<std::string> time_out_promt;
-  EXPECT_EQ(time_out_promt, profile_.time_out_promt());
+  std::vector<std::string> time_out_prompt;
+  EXPECT_EQ(time_out_prompt, profile_.time_out_prompt());
   // Change config file
   profile_.set_config_file_name("smartDeviceLink_test.ini");
   EXPECT_EQ("smartDeviceLink_test.ini", profile_.config_file_name());
   // Update config file
-  time_out_promt.push_back("Please say a command,");
-  EXPECT_EQ(time_out_promt, profile_.time_out_promt());
+  time_out_prompt.push_back("Please say a command,");
+  EXPECT_EQ(time_out_prompt, profile_.time_out_prompt());
 }
 
 TEST_F(ProfileTest, UpdateString_ValueAppearsInFileTwice) {
