@@ -42,6 +42,7 @@ namespace telemetry_monitor_test {
 
 using namespace ::telemetry_monitor;
 
+// cppcheck-suppress syntaxError
 TEST(ApplicationManagerMetricWrapper, grabResources) {
   ApplicationManagerMetricWrapper metric_test;
   EXPECT_TRUE(metric_test.grabResources());

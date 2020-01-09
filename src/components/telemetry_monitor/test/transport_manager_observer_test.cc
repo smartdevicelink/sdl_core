@@ -43,6 +43,7 @@ namespace telemetry_monitor_test {
 using namespace telemetry_monitor;
 using ::testing::_;
 
+// cppcheck-suppress syntaxError
 TEST(TransportManagerObserverTest, MessageProcess) {
   MockTelemetryMonitor mock_telemetry_monitor;
   TransportManagerObserver tr_observer(&mock_telemetry_monitor);

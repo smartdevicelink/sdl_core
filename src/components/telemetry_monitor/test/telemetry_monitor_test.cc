@@ -58,6 +58,7 @@ class StreamerMock : public Streamer {
   MOCK_METHOD1(PushMessage, void(std::shared_ptr<MetricWrapper> metric));
 };
 
+// cppcheck-suppress syntaxError
 TEST(TelemetryMonitorTest, MessageProcess) {
   const std::string& server_address = "server_address";
   const uint16_t port = 12345;
