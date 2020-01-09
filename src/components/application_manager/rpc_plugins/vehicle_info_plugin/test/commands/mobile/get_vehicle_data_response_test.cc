@@ -53,6 +53,7 @@ typedef std::shared_ptr<GetVehicleDataResponse> GetVehicleDataResponsePtr;
 class GetVehicleDataResponseTest
     : public VICommandsTest<CommandsTestMocks::kIsNice> {};
 
+// cppcheck-suppress syntaxError
 TEST_F(GetVehicleDataResponseTest, GetVehicleDataResponse_SUCCESS) {
   MessageSharedPtr message(CreateMessage(smart_objects::SmartType_Map));
   GetVehicleDataResponsePtr command(

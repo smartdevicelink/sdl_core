@@ -185,6 +185,7 @@ class AlertRequestTest : public CommandRequestTest<CommandsTestMocks::kIsNice> {
   MessageSharedPtr msg_;
 };
 
+// cppcheck-suppress syntaxError
 TEST_F(AlertRequestTest, OnTimeout_GENERIC_ERROR) {
   PreConditions();
   MessageSharedPtr command_msg = CreateMessage(smart_objects::SmartType_Map);

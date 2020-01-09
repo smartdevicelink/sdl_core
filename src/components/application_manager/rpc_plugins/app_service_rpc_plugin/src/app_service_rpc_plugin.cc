@@ -109,10 +109,12 @@ void AppServiceRpcPlugin::DeleteSubscriptions(
 
 extern "C" __attribute__((visibility("default")))
 application_manager::plugin_manager::RPCPlugin*
+// cppcheck-suppress unusedFunction
 Create() {
   return new app_service_rpc_plugin::AppServiceRpcPlugin();
 }
 
+// cppcheck-suppress unusedFunction
 extern "C" __attribute__((visibility("default"))) void Delete(
     application_manager::plugin_manager::RPCPlugin* data) {
   delete data;

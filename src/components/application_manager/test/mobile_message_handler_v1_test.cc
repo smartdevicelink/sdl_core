@@ -67,6 +67,7 @@ const unsigned char binary[PROTOCOL_HEADER_V1_SIZE] = {
 const unsigned char* data_v1 =
     reinterpret_cast<const unsigned char*>(data_json.c_str());
 
+// cppcheck-suppress syntaxError
 TEST(MobileMessageHandlerTestV1Test,
      HandleIncomingMessageProtocolV1_SendJSONData_ExpectEqual) {
   RawMessagePtr message = std::make_shared<RawMessage>(connection_key_p1,

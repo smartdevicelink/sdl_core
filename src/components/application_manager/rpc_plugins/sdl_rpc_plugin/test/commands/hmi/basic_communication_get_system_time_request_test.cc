@@ -52,6 +52,7 @@ using namespace ::protocol_handler;
 class BasicCommunicationGetSystemTimeRequestTest
     : public CommandRequestTest<CommandsTestMocks::kIsNice> {};
 
+// cppcheck-suppress syntaxError
 TEST_F(BasicCommunicationGetSystemTimeRequestTest, OnTimeout) {
   MessageSharedPtr msg = CreateMessage();
   protocol_handler_test::MockProtocolHandler mock_protocol_handler;

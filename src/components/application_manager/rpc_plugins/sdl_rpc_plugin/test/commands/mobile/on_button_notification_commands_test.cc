@@ -87,6 +87,7 @@ typedef Types<NotificationData<OnButtonEventNotification,
                                mobile_apis::FunctionID::OnButtonPressID> >
     OnButtonNotificationCommandsList;
 
+// cppcheck-suppress syntaxError
 MATCHER_P(CheckNotificationMessage, function_id, "") {
   const bool kIsMobileProtocolTypeCorrect =
       (*arg)[am::strings::params][am::strings::protocol_type].asInt() ==

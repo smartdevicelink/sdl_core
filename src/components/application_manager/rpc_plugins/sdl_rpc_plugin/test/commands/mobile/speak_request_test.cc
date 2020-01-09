@@ -128,6 +128,7 @@ class SpeakRequestTest : public CommandRequestTest<CommandsTestMocks::kIsNice> {
   MockAppPtr app_;
 };
 
+// cppcheck-suppress syntaxError
 TEST_F(SpeakRequestTest, OnEvent_SUCCESS_Expect_true) {
   std::shared_ptr<SpeakRequest> command = CreateCommand<SpeakRequest>(request_);
 

@@ -153,6 +153,7 @@ class SetInteriorVehicleDataRequestTest
   testing::NiceMock<MockRCConsentManager> mock_rc_consent_manger_;
 };
 
+// cppcheck-suppress syntaxError
 TEST_F(SetInteriorVehicleDataRequestTest,
        Execute_ValidWithoutReadOnlyParams_ExpectResendToHMI) {
   // Arrange

@@ -73,6 +73,7 @@ class ListFilesRequestTest
   const uint32_t kResponseSize_;
 };
 
+// cppcheck-suppress syntaxError
 TEST_F(ListFilesRequestTest, Run_AppNotRegistered_UNSUCCESS) {
   std::shared_ptr<ListFilesRequest> command(CreateCommand<ListFilesRequest>());
 

@@ -104,6 +104,7 @@ class ResetGlobalPropertiesRequestTest
 class ResetGlobalPropertiesResponseTest
     : public CommandsTest<CommandsTestMocks::kIsNice> {};
 
+// cppcheck-suppress syntaxError
 TEST_F(ResetGlobalPropertiesRequestTest, Run_InvalidApp_UNSUCCESS) {
   MockAppPtr invalid_app;
   EXPECT_CALL(app_mngr_, application(_)).WillOnce(Return(invalid_app));

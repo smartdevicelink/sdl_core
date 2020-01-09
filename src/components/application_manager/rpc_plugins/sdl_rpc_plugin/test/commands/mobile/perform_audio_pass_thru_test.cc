@@ -156,6 +156,7 @@ class PerformAudioPassThruRequestTest
   MockAppPtr application_sptr_;
 };
 
+// cppcheck-suppress syntaxError
 TEST_F(PerformAudioPassThruRequestTest, OnTimeout_GENERIC_ERROR) {
   MessageSharedPtr msg_ui = CreateMessage(smart_objects::SmartType_Map);
   (*msg_ui)[am::strings::msg_params][am::strings::result_code] =

@@ -99,6 +99,7 @@ class PolicyEventObserverTest : public ::testing::Test {
   }
 };
 
+// cppcheck-suppress syntaxError
 TEST_F(PolicyEventObserverTest, OnEvent_EventInvalid_ExpectNoProcessingEvent) {
   // Arrange
   CreateEvent(Event::EventID::INVALID_ENUM);

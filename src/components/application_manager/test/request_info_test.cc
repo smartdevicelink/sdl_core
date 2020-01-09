@@ -89,6 +89,7 @@ class RequestInfoTest : public ::testing::Test {
   }
 };
 
+// cppcheck-suppress syntaxError
 TEST_F(RequestInfoTest, RequestInfoEqualEndTime) {
   std::vector<std::shared_ptr<TestRequestInfo> > requests;
   const date_time::TimeDuration& time = date_time::getCurrentTime();

@@ -404,6 +404,7 @@ class SetGlobalPropertiesRequestTest
   NiceMock<MockApplicationManager> mock_app_manager_;
 };
 
+// cppcheck-suppress syntaxError
 TEST_F(SetGlobalPropertiesRequestTest,
        OnEvent_UIHmiSendSuccess_UNSUPPORTED_RESOURCE) {
   MessageSharedPtr msg_vr = CreateFullParamsUISO();

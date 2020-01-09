@@ -53,6 +53,7 @@ namespace {
 const uint32_t kAppId = 1u;
 }  // namespace
 
+// cppcheck-suppress syntaxError
 MATCHER(CheckMessageToMobile, "") {
   const auto function_id = mobile_apis::FunctionID::OnSystemCapabilityUpdatedID;
 

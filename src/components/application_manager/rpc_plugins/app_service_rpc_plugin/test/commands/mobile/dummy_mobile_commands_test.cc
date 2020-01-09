@@ -127,6 +127,7 @@ typedef Types<commands::GetAppServiceDataRequest,
 
 TYPED_TEST_CASE(MobileCommandsTestFirst, MobileCommandsListFirst);
 
+// cppcheck-suppress syntaxError
 TYPED_TEST(MobileCommandsTestFirst, CtorAndDtorCall) {
   std::shared_ptr<typename TestFixture::CommandType> command =
       this->template CreateCommand<typename TestFixture::CommandType>();

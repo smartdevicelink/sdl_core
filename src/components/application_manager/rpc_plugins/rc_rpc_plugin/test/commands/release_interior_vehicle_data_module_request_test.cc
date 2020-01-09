@@ -145,6 +145,7 @@ class ReleaseInteriorVehicleDataModuleRequestTest
   MockRCConsentManager mock_rc_consent_manger_;
 };
 
+// cppcheck-suppress syntaxError
 TEST_F(ReleaseInteriorVehicleDataModuleRequestTest,
        ModuleIDIsAbsnetInMessage_ReturnsDefaultFromCapabilities) {
   (*message_)[application_manager::strings::msg_params].erase(

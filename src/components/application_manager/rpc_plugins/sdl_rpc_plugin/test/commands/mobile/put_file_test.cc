@@ -135,6 +135,7 @@ class PutFileResponceTest : public CommandsTest<CommandsTestMocks::kIsNice> {
   std::shared_ptr<PutFileResponse> command_sptr_;
 };
 
+// cppcheck-suppress syntaxError
 TEST_F(PutFileResponceTest, Run_InvalidApp_ApplicationNotRegisteredResponce) {
   ::smart_objects::SmartObject& message_ref = *message_;
 

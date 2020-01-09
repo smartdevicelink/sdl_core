@@ -76,6 +76,7 @@ class TTSGetSupportedLanguageResponseTest
   SmartObject capabilities_;
 };
 
+// cppcheck-suppress syntaxError
 TEST_F(TTSGetSupportedLanguageResponseTest, RUN_SUCCESS) {
   smart_objects::SmartObject supported_languages("EN_US");
 

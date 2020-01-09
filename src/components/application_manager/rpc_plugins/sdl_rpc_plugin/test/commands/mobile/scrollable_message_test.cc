@@ -120,6 +120,7 @@ class ScrollableMessageRequestTest
 
 typedef ScrollableMessageRequestTest::MockHMICapabilities MockHMICapabilities;
 
+// cppcheck-suppress syntaxError
 TEST_F(ScrollableMessageRequestTest, OnEvent_UI_UNSUPPORTED_RESOURCE) {
   MessageSharedPtr msg_ui = CreateFullParamsUISO();
   (*msg_ui)[am::strings::params][am::strings::connection_key] = kConnectionKey;

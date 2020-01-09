@@ -185,6 +185,7 @@ struct AppDataComparator {
   }
 };
 
+// cppcheck-suppress syntaxError
 TEST_F(AppLaunchCtrlTest, AddRegisteredApplicationToDataStorage) {
   MockAppPtr app = GetTestApp(0);
   EXPECT_CALL(app_launch_data_mock_,

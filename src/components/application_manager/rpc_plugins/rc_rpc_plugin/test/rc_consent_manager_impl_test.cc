@@ -120,6 +120,7 @@ class RCConsentManagerImplTest : public ::testing::Test {
   std::unique_ptr<rc_rpc_plugin::RCConsentManagerImpl> rc_consent_manager_;
 };
 
+// cppcheck-suppress syntaxError
 TEST_F(RCConsentManagerImplTest, SaveAndGetModuleConsents_SUCCESS) {
   const std::string radio_moduleId = "eb7739ea-b263-4fe1-af9c-9311d1acac2d";
   const std::string climate_moduleId = "34045662-a9dc-4823-8435-91056d4c26cb";

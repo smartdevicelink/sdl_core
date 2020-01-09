@@ -112,6 +112,7 @@ class SetMediaClockRequestTest
   MockAppPtr mock_app_;
 };
 
+// cppcheck-suppress syntaxError
 TEST_F(SetMediaClockRequestTest,
        OnEvent_UIHmiSendUnsupportedResource_UNSUPPORTED_RESOURCE) {
   MessageSharedPtr msg = CreateMessage(smart_objects::SmartType_Map);

@@ -130,6 +130,7 @@ class VRIsReadyRequestTest
   VRIsReadyRequestPtr command_;
 };
 
+// cppcheck-suppress syntaxError
 TEST_F(VRIsReadyRequestTest, Run_NoKeyAvailableInMessage_HmiInterfacesIgnored) {
   const bool is_vr_cooperating_available = false;
   const bool is_send_message_to_hmi = true;

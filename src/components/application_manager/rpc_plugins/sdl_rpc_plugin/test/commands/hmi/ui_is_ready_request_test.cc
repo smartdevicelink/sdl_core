@@ -145,6 +145,7 @@ class UIIsReadyRequestTest
   policy_test::MockPolicyHandlerInterface mock_policy_handler_interface_;
 };
 
+// cppcheck-suppress syntaxError
 TEST_F(UIIsReadyRequestTest,
        OnEvent_NoKeyAvailableInMessage_HmiInterfacesIgnored) {
   const bool is_ui_cooperating_available = false;

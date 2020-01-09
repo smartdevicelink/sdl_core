@@ -80,6 +80,7 @@ class RCHelpersTest : public ::testing::Test {
   }
 };
 
+// cppcheck-suppress syntaxError
 TEST_F(RCHelpersTest,
        MergeModuleData_OneOfParamsNotSmartMap_ExpectDataReplacedWithNewOne) {
   SmartObject data1(SmartType_Map);

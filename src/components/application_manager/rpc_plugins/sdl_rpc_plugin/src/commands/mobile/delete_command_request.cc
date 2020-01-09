@@ -100,6 +100,7 @@ void DeleteCommandRequest::Run() {
     ++chaining_counter;
   }
 
+  // cppcheck-suppress unreadVariable
   if ((*command).keyExists(strings::vr_commands)) {
     ++chaining_counter;
   }

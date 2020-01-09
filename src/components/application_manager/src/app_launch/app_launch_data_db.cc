@@ -293,6 +293,7 @@ bool AppLaunchDataDB::Clear() {
   bool retVal = false;
 
   utils::dbms::SQLQuery query(db());
+  // cppcheck-suppress redundantAssignment
   retVal = query.Exec(kDropSchema);
 
   if (retVal) {

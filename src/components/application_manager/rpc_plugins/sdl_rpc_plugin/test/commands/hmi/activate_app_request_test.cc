@@ -56,6 +56,7 @@ using ::test::components::application_manager_test::MockApplication;
 typedef std::shared_ptr<MockApplication> MockAppPtr;
 typedef std::shared_ptr<ActivateAppRequest> ActivateAppRequestPtr;
 
+// cppcheck-suppress syntaxError
 MATCHER_P(CheckMessage, level, "") {
   return level ==
          static_cast<mobile_apis::HMILevel::eType>(

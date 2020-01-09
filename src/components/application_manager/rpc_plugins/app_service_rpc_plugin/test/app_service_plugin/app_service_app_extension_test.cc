@@ -79,6 +79,7 @@ class AppServiceAppExtensionTest : public ::testing::Test {
   std::unique_ptr<AppServiceAppExtension> app_service_app_extension_;
 };
 
+// cppcheck-suppress syntaxError
 TEST_F(AppServiceAppExtensionTest, SubscribeToAppService_SUCCESS) {
   EXPECT_TRUE(
       app_service_app_extension_->SubscribeToAppService(kAppServiceType1));

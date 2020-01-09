@@ -58,6 +58,7 @@ typedef std::shared_ptr<ResponseFromHMI> ResponseFromHMIPtr;
 
 class ResponseFromHMITest : public CommandsTest<CommandsTestMocks::kIsNice> {};
 
+// cppcheck-suppress syntaxError
 TEST_F(ResponseFromHMITest, BasicMethodsOverloads_SUCCESS) {
   ResponseFromHMIPtr command(CreateCommand<ResponseFromHMI>());
 

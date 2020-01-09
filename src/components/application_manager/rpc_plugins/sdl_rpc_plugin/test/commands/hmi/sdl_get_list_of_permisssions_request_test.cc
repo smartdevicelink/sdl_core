@@ -74,6 +74,7 @@ class SDLGetListOfPermissionsRequestTest
   MockAppPtr mock_app_;
 };
 
+// cppcheck-suppress syntaxError
 TEST_F(SDLGetListOfPermissionsRequestTest, Run_SUCCESS) {
   MessageSharedPtr msg = CreateMessage();
   (*msg)[strings::params][strings::correlation_id] = kCorrelationID;

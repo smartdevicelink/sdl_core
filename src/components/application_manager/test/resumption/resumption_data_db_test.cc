@@ -542,6 +542,7 @@ void ResumptionDataDBTest::BindId(utils::dbms::SQLQuery& query) {
   query.Bind(1, kMacAddress_);
 }
 
+// cppcheck-suppress syntaxError
 TEST_F(ResumptionDataDBTest, Init) {
   utils::dbms::SQLQuery query_checks(test_db());
 

@@ -67,6 +67,7 @@ const uint32_t kStatisticType = 1u;
 class AddStatisticsInfoNotificationTest
     : public CommandsTest<CommandsTestMocks::kIsNice> {};
 
+// cppcheck-suppress syntaxError
 TEST_F(AddStatisticsInfoNotificationTest, Run_SUCCESS) {
   MessageSharedPtr msg = CreateMessage();
   (*msg)[am::strings::msg_params][am::hmi_notification::statistic_type] =

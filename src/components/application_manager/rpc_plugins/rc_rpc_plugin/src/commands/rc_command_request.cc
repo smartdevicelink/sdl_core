@@ -246,7 +246,7 @@ void RCCommandRequest::ProcessAccessResponse(
           result_code,
           mobile_apis::Result::SUCCESS,
           mobile_apis::Result::WARNINGS);
-
+  // cppcheck-suppress variableScope
   bool is_allowed = false;
   if (result) {
     if (message[app_mngr::strings::msg_params].keyExists(

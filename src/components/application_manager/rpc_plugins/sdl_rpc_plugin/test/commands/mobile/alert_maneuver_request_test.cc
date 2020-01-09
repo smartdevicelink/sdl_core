@@ -107,6 +107,7 @@ class AlertManeuverRequestTest
   }
 };
 
+// cppcheck-suppress syntaxError
 TEST_F(AlertManeuverRequestTest, Run_RequiredFieldsDoesNotExist_UNSUCCESS) {
   CommandPtr command(CreateCommand<AlertManeuverRequest>());
   EXPECT_CALL(app_mngr_, application(_)).Times(0);

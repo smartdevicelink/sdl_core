@@ -116,6 +116,7 @@ class OnAppServiceDataNotificationTest
   MockAppServiceManager app_service_manager_;
 };
 
+// cppcheck-suppress syntaxError
 TEST_F(OnAppServiceDataNotificationTest, Run_SendMessageToMobile_Notification) {
   MessageSharedPtr mobile_message = CreateBasicMessage();
 

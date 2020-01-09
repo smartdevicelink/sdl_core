@@ -68,6 +68,7 @@ typedef std::shared_ptr<DeleteInteractionChoiceSetRequest>
 typedef std::shared_ptr<DeleteInteractionChoiceSetResponse>
     DeleteInteractionChoiceSetResponsePtr;
 
+// cppcheck-suppress syntaxError
 MATCHER_P(CheckMessageSuccess, success, "") {
   return success ==
          (*arg)[am::strings::msg_params][am::strings::success].asBool();

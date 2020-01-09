@@ -234,6 +234,7 @@ class AddCommandRequestTest
   MockAppPtr mock_app_;
 };
 
+// cppcheck-suppress syntaxError
 TEST_F(AddCommandRequestTest, Run_AppNotExisted_EXPECT_AppNotRegistered) {
   CreateBasicParamsUIRequest();
   EXPECT_CALL(app_mngr_, application(kConnectionKey))

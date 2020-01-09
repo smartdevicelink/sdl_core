@@ -86,6 +86,7 @@ class UnwrappedGetVehicleDataRequest : public GetVehicleDataRequest {
   using GetVehicleDataRequest::on_event;
 };
 
+// cppcheck-suppress syntaxError
 TEST_F(GetVehicleDataRequestTest, Run_ApplicationIsNotRegistered_UNSUCCESS) {
   GetVehicleDataRequestPtr command(CreateCommandVI<GetVehicleDataRequest>());
 

@@ -65,6 +65,7 @@ typedef std::shared_ptr<EndAudioPassThruRequest> EndAudioPassThruRequestPtr;
 class EndAudioPassThruRequestTest
     : public CommandRequestTest<CommandsTestMocks::kIsNice> {};
 
+// cppcheck-suppress syntaxError
 TEST_F(EndAudioPassThruRequestTest, OnEvent_UI_UNSUPPORTED_RESOUCRE) {
   const uint32_t kConnectionKey = 2u;
   const uint32_t app_id = kConnectionKey;

@@ -142,6 +142,7 @@ typedef Types<commands::ASAppServiceActivationRequest,
 
 TYPED_TEST_CASE(HMICommandsTestFirst, HMICommandsListFirst);
 
+// cppcheck-suppress syntaxError
 TYPED_TEST(HMICommandsTestFirst, CtorAndDtorCall) {
   std::shared_ptr<typename TestFixture::CommandType> command =
       this->template CreateCommand<typename TestFixture::CommandType>();

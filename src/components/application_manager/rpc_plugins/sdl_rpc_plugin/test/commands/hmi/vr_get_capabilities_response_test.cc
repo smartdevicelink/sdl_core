@@ -81,6 +81,7 @@ class VRGetCapabilitiesResponseTest
   SmartObject capabilities_;
 };
 
+// cppcheck-suppress syntaxError
 TEST_F(VRGetCapabilitiesResponseTest, RUN_SUCCESSS) {
   MessageSharedPtr command_msg = CreateCommandMsg();
   (*command_msg)[strings::msg_params][strings::vr_capabilities] =

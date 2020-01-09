@@ -89,6 +89,7 @@ class UpdateDeviceListRequestTest
   MockEventDispatcher mock_event_dispatcher_;
 };
 
+// cppcheck-suppress syntaxError
 TEST_F(UpdateDeviceListRequestTest, RUN_LaunchHMIReturnsFalse) {
   MessageSharedPtr command_msg = CreateCommandMsg();
 

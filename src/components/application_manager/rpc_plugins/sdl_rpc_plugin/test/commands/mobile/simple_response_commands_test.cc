@@ -124,6 +124,7 @@ typedef Types<commands::ListFilesResponse,
 
 TYPED_TEST_CASE(MobileResponseCommandsTest, ResponseCommandsList);
 
+// cppcheck-suppress syntaxError
 TYPED_TEST(MobileResponseCommandsTest, Run_SendResponseToMobile_SUCCESS) {
   std::shared_ptr<typename TestFixture::CommandType> command =
       this->template CreateCommand<typename TestFixture::CommandType>();

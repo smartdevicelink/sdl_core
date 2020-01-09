@@ -73,6 +73,7 @@ class GetSystemCapabilityRequestTest
   MockAppPtr mock_app_;
 };
 
+// cppcheck-suppress syntaxError
 TEST_F(
     GetSystemCapabilityRequestTest,
     Run_GetSystemDisplayCapabilities_SendMessageToMobileWithSUCCESSResultCode) {

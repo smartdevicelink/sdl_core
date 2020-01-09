@@ -122,6 +122,7 @@ class MobileEventEngineTest : public testing::Test {
   }
 };
 
+// cppcheck-suppress syntaxError
 TEST_F(MobileEventEngineTest, EventObserverTest_ExpectObserversEmpty) {
   // Arrange
   EventObserver* event_observer_ptr =

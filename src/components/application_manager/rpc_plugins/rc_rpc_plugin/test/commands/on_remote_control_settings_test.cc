@@ -116,6 +116,7 @@ class RCOnRemoteControlSettingsNotificationTest
   testing::NiceMock<MockRCConsentManager> mock_rc_consent_manger_;
 };
 
+// cppcheck-suppress syntaxError
 TEST_F(RCOnRemoteControlSettingsNotificationTest,
        Run_Allowed_SetAccessMode) {  // Arrange
   MessageSharedPtr mobile_message = CreateBasicMessage();

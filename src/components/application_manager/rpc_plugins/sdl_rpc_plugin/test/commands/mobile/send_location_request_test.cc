@@ -165,6 +165,7 @@ class SendLocationRequestTest
   CommandSPrt command_;
 };
 
+// cppcheck-suppress syntaxError
 TEST_F(SendLocationRequestTest, Run_InvalidApp_Success) {
   (*message_)[strings::params][strings::connection_key] = kConnectionKey;
   EXPECT_CALL(app_mngr_, application(kConnectionKey))

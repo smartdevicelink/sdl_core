@@ -157,6 +157,7 @@ class ApplicationManagerImplMockHmiTest : public ::testing::Test {
   std::unique_ptr<am::ApplicationManagerImpl> app_manager_impl_;
 };
 
+// cppcheck-suppress syntaxError
 TEST_F(ApplicationManagerImplMockHmiTest,
        PostponeCommandsDuringSwitching_ExpectSendingOnSwitchingEnd) {
   const uint32_t application_id = 1u;

@@ -48,6 +48,7 @@ using sdl_rpc_plugin::commands::BasicCommunicationGetSystemTimeResponse;
 using test::components::event_engine_test::MockEventDispatcher;
 using testing::ReturnRef;
 
+// cppcheck-suppress syntaxError
 ACTION_P(GetEventId, event_id) {
   *event_id = arg0.id();
 }

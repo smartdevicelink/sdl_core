@@ -43,6 +43,7 @@ const std::string kValueKey = "value";
 const std::string kArray = "array";
 }  // namespace
 
+// cppcheck-suppress syntaxError
 TEST_F(InteriorDataCacheTest,
        InteriorDataCacheDoesNotContainRandomDataInitialy) {
   rc_rpc_plugin::InteriorDataCacheImpl cache;

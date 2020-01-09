@@ -141,6 +141,7 @@ class DeleteCommandRequestTest
   MockAppPtr mock_app_;
 };
 
+// cppcheck-suppress syntaxError
 TEST_F(DeleteCommandRequestTest,
        OnEvent_VrHmiSendUnsupportedResource_UNSUPPORTED_RESOURCE) {
   MessageSharedPtr command_msg = CreateFullParamsVRSO();

@@ -508,6 +508,7 @@ TYPED_TEST_CASE(HMICommandsTestThird, HMICommandsListThird);
 TYPED_TEST_CASE(HMICommandsTestFourth, HMICommandsListFourth);
 TYPED_TEST_CASE(HMICommandsTestFifth, HMICommandsListFifth);
 
+// cppcheck-suppress syntaxError
 TYPED_TEST(HMICommandsTestFirst, CtorAndDtorCall) {
   std::shared_ptr<typename TestFixture::CommandType> command =
       this->template CreateCommand<typename TestFixture::CommandType>();

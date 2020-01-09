@@ -77,6 +77,7 @@ class CustomVehicleDataManagerTest : public ::testing::Test {
   MockMessageHelper& mock_message_helper_;
 };
 
+// cppcheck-suppress syntaxError
 TEST_F(CustomVehicleDataManagerTest, CreateHMIMessageParamsEmptyItems) {
   policy_table::VehicleDataItems schema_items;
   InitValidationManager(schema_items);

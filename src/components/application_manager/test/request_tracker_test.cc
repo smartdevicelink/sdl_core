@@ -78,6 +78,7 @@ class RequestTrackerTestClass : public ::testing::Test {
   const uint32_t kDefaultAppRequestsTimeScale = 200u;
 };
 
+// cppcheck-suppress syntaxError
 TEST_F(RequestTrackerTestClass, TrackAppRequestInNone_ExpectSuccessTillLimit) {
   const uint32_t app_id = 1u;
   const mobile_apis::HMILevel::eType none_level =

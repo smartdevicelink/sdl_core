@@ -127,6 +127,7 @@ class GetWayPointsRequestOnEventTest
   MockHmiInterfaces hmi_interfaces_;
 };
 
+// cppcheck-suppress syntaxError
 TEST_F(GetWayPointsRequestTest,
        Run_InvalidApp_ApplicationNotRegisteredResponce) {
   (*message_)[am::strings::params][am::strings::connection_key] =

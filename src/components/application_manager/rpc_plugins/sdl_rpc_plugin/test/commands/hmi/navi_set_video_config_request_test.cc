@@ -88,6 +88,7 @@ class NaviSetVideoConfigRequestTest
   MockEventDispatcher mock_event_dispatcher_;
 };
 
+// cppcheck-suppress syntaxError
 TEST_F(NaviSetVideoConfigRequestTest, OnEventWithSuccessResponse) {
   MessageSharedPtr request_msg = CreateMessage();
   (*request_msg)[am::strings::msg_params][am::strings::app_id] = kAppId;

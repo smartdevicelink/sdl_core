@@ -1363,6 +1363,7 @@ class StateControllerImplTest : public ::testing::Test {
   }
 };
 
+// cppcheck-suppress syntaxError
 TEST_F(StateControllerImplTest, OnStateChangedWithEqualStates) {
   EXPECT_CALL(app_manager_mock_, SendHMIStatusNotification(_)).Times(0);
   EXPECT_CALL(app_manager_mock_, OnHMIStateChanged(_, _, _)).Times(0);

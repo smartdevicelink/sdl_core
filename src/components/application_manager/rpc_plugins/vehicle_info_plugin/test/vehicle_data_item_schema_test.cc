@@ -230,6 +230,7 @@ class VehicleDataItemSchemaTest : public ::testing::Test {
   int key_number_;
 };
 
+// cppcheck-suppress syntaxError
 TEST_F(VehicleDataItemSchemaTest, ValidatePOD_SUCCESS) {
   rpc::ValidationReport report("RPC");
   auto valid_pod_objects = generatePODObjects(SetValidItemValue::YES);

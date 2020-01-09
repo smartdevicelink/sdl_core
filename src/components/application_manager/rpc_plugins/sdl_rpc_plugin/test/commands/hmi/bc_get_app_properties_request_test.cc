@@ -94,6 +94,7 @@ bool CompareNicknames(const smart_objects::SmartObject& nicknames_so,
   return true;
 }
 
+// cppcheck-suppress syntaxError
 ACTION_P(SetTestAppProperties, app_properties) {
   arg1 = app_properties;
 }

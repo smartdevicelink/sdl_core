@@ -82,6 +82,7 @@ class OnHMIStatusNotificationTest
   }
 };
 
+// cppcheck-suppress syntaxError
 TEST_F(OnHMIStatusNotificationTest, Run_InvalidApp_NoNotification) {
   MessageSharedPtr msg = CreateMsgParams(mobile_apis::HMILevel::HMI_FULL);
 

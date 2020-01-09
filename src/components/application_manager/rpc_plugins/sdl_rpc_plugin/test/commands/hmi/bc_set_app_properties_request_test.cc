@@ -90,6 +90,7 @@ class BCSetAppPropertiesRequestTest
   MockAppPtr mock_app_;
 };
 
+// cppcheck-suppress syntaxError
 TEST_F(BCSetAppPropertiesRequestTest,
        Run_NoAppPropertyChanges_AppIsSame_FailToUpdateAppList) {
   smart_objects::SmartObject properties(smart_objects::SmartType_Map);

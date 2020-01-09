@@ -71,6 +71,7 @@ const uint32_t kCorrelationKey = 2u;
 const std::string kLayout = "media";
 }  // namespace
 
+// cppcheck-suppress syntaxError
 MATCHER_P(CheckMshCorrId, corr_id, "") {
   return (*arg)[am::strings::params][am::strings::correlation_id].asUInt() ==
          corr_id;

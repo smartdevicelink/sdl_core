@@ -65,6 +65,7 @@ RCOnRemoteControlSettingsNotification::RCOnRemoteControlSettingsNotification(
 RCOnRemoteControlSettingsNotification::
     ~RCOnRemoteControlSettingsNotification() {}
 
+// cppcheck-suppress unusedFunction
 hmi_apis::Common_RCAccessMode::eType AccessModeFromString(
     const std::string& access_mode) {
   std::map<std::string, hmi_apis::Common_RCAccessMode::eType>::const_iterator

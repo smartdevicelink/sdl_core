@@ -79,6 +79,7 @@ class AudioStartStreamRequestTest
   std::shared_ptr<AudioStartStreamRequest> command_;
 };
 
+// cppcheck-suppress syntaxError
 TEST_F(AudioStartStreamRequestTest, Run_HmiInterfaceNotAvailable_NoRequest) {
   EXPECT_CALL(mock_hmi_interfaces_, GetInterfaceState(kHmiInterface))
       .WillOnce(Return(am::HmiInterfaces::STATE_NOT_AVAILABLE));

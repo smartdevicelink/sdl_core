@@ -239,6 +239,7 @@ class ResumeCtrlTest : public ::testing::Test {
  * @brief  Group of tests which check starting resumption with different data
  */
 
+// cppcheck-suppress syntaxError
 TEST_F(ResumeCtrlTest, StartResumption_AppWithGrammarId) {
   smart_objects::SmartObject saved_app;
   saved_app[application_manager::strings::hash_id] = kHash_;

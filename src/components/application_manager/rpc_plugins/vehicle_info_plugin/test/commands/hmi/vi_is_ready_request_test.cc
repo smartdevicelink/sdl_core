@@ -118,6 +118,7 @@ class VIIsReadyRequestTest
   VIIsReadyRequestPtr command_;
 };
 
+// cppcheck-suppress syntaxError
 TEST_F(VIIsReadyRequestTest, Run_NoKeyAvailableInMessage_HmiInterfacesIgnored) {
   const bool is_vi_cooperating_available = false;
   const bool is_send_message_to_hmi = true;

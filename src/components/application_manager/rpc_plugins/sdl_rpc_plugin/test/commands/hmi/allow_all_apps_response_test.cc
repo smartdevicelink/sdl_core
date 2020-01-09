@@ -58,6 +58,7 @@ const bool kResponseIsAllowed = true;
 class AllowAllAppsResponseTest
     : public CommandsTest<CommandsTestMocks::kIsNice> {};
 
+// cppcheck-suppress syntaxError
 TEST_F(AllowAllAppsResponseTest, Run_SUCCESS) {
   MessageSharedPtr msg = CreateMessage();
   (*msg)[strings::msg_params][hmi_response::allowed] = kResponseIsAllowed;

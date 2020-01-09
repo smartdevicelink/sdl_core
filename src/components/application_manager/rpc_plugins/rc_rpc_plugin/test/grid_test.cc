@@ -38,6 +38,7 @@ namespace rc_rpc_plugin_test {
 namespace grid_test {
 using namespace rc_rpc_plugin;
 
+// cppcheck-suppress syntaxError
 TEST(Grid, IsLevelIntersectionExists) {
   Grid grid_level0{1, 1, 0, 1, 1, 1};
   Grid grid_level1{1, 1, 1, 1, 1, 1};

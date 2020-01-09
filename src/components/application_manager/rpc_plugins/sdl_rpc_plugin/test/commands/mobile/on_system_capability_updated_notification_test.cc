@@ -57,6 +57,7 @@ const uint32_t kConnectionKey = 1u;
 const uint32_t kAppId = 2u;
 }  // namespace
 
+// cppcheck-suppress syntaxError
 MATCHER_P(CheckDisplayCapabilities, display_capabilities, "") {
   return *display_capabilities ==
          (*arg)[strings::msg_params][strings::system_capability]

@@ -63,6 +63,7 @@ class RequestFromHMITest : public CommandsTest<CommandsTestMocks::kIsNice> {
   NiceMock<event_engine_test::MockEventDispatcher> mock_event_dispatcher_;
 };
 
+// cppcheck-suppress syntaxError
 TEST_F(RequestFromHMITest, BasicMethodsOverloads_SUCCESS) {
   std::shared_ptr<commands::RequestFromHMI> command(
       CreateCommand<commands::RequestFromHMI>());

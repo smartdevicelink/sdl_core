@@ -51,6 +51,7 @@ using testing::ReturnRef;
 class OnSystemTimeReadyNotificationTest
     : public CommandsTest<CommandsTestMocks::kIsNice> {};
 
+// cppcheck-suppress syntaxError
 ACTION_P(GetEventId, event_id) {
   *event_id = arg0.id();
 }

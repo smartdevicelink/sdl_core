@@ -162,6 +162,7 @@ class CreateInteractionChoiceSetRequestTest
 class CreateInteractionChoiceSetResponseTest
     : public CommandsTest<CommandsTestMocks::kIsNice> {};
 
+// cppcheck-suppress syntaxError
 TEST_F(CreateInteractionChoiceSetRequestTest, OnTimeout_GENERIC_ERROR) {
   MessageSharedPtr msg_vr = CreateMessage(smart_objects::SmartType_Map);
   (*msg_vr)[strings::msg_params][strings::result_code] =

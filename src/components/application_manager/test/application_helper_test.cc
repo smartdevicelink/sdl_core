@@ -145,6 +145,7 @@ class ApplicationHelperTest : public testing::Test {
   ApplicationSharedPtr app_impl_;
 };
 
+// cppcheck-suppress syntaxError
 TEST_F(ApplicationHelperTest, RecallApplicationData_ExpectAppDataReset) {
   const uint32_t cmd_id = 1;
   const uint32_t menu_id = 2;

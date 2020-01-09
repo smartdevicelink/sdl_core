@@ -44,6 +44,7 @@
 namespace {
 namespace custom_str = utils::custom_string;
 struct IsSameNickname {
+  // cppcheck-suppress noExplicitConstructor
   IsSameNickname(const custom_str::CustomString& app_id) : app_id_(app_id) {}
   bool operator()(const policy::StringArray::value_type& nickname) const {
     return app_id_.CompareIgnoreCase(nickname.c_str());
@@ -515,7 +516,6 @@ bool ChangeRegistrationRequest::IsLanguageSupportedByTTS(
   for (size_t i = 0; i < tts_languages->length(); ++i) {
     if (hmi_display_lang == tts_languages->getElement(i).asInt()) {
       return true;
-      break;
     }
   }
 

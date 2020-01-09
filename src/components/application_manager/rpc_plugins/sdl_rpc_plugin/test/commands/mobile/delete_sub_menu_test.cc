@@ -68,6 +68,7 @@ using sdl_rpc_plugin::commands::DeleteSubMenuResponse;
 typedef std::shared_ptr<DeleteSubMenuRequest> DeleteSubMenuRequestPtr;
 typedef std::shared_ptr<DeleteSubMenuResponse> DeleteSubMenuResponsePtr;
 
+// cppcheck-suppress syntaxError
 MATCHER_P(CheckMessageResultCode, result_code, "") {
   return (*arg)[am::strings::msg_params][am::strings::result_code].asInt() ==
          result_code;

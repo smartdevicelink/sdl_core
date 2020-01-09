@@ -59,6 +59,7 @@ typedef Types<commands::CommandNotificationImpl, NotificationToHMI>
 
 TYPED_TEST_CASE(SimpleNotificationsTest, CommandsList);
 
+// cppcheck-suppress syntaxError
 TYPED_TEST(SimpleNotificationsTest, Run_SendMessageToHMI_SUCCESS) {
   typedef typename TestFixture::CommandType CommandType;
 

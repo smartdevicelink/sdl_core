@@ -70,6 +70,7 @@ const uint32_t kConnectionKey = 2u;
 class DialNumberRequestTest
     : public CommandRequestTest<CommandsTestMocks::kIsNice> {};
 
+// cppcheck-suppress syntaxError
 TEST_F(DialNumberRequestTest, Run_ApplicationIsNotRegistered_UNSUCCESS) {
   DialNumberRequestPtr command(CreateCommand<DialNumberRequest>());
 

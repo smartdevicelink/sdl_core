@@ -212,7 +212,7 @@ bool RequestInfoSet::Erase(const RequestInfoPtr request_info) {
     DCHECK(request_info == found);
     time_sorted_pending_requests_.erase(it);
     CheckSetSizes();
-    return 1 == erased_count;
+    return true;
   }
   CheckSetSizes();
   return false;

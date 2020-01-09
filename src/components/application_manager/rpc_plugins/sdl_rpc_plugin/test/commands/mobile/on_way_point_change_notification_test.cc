@@ -71,6 +71,7 @@ class OnWayPointChangeNotificationTest
   NotificationPtr command_;
 };
 
+// cppcheck-suppress syntaxError
 MATCHER(CheckMessageData, "") {
   const bool kIsMobileProtocolTypeCorrect =
       (*arg)[am::strings::params][am::strings::protocol_type].asInt() ==

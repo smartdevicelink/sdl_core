@@ -71,6 +71,7 @@ class GetDTCsRequestTest
   GetDTCsRequestTest() : VICommandRequestTest<CommandsTestMocks::kIsNice>() {}
 };
 
+// cppcheck-suppress syntaxError
 TEST_F(GetDTCsRequestTest, Run_ApplicationIsNotRegistered_UNSUCCESS) {
   GetDTCsRequestPtr command(CreateCommandVI<GetDTCsRequest>());
 

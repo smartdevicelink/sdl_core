@@ -73,6 +73,7 @@ class OnTBTClientStateNotificationTest
   NotificationPtr command_;
 };
 
+// cppcheck-suppress syntaxError
 TEST_F(OnTBTClientStateNotificationTest, Run_HmiLevelNone_UNSUCCESS) {
   MockAppPtr mock_app(CreateMockApp());
   std::vector<ApplicationSharedPtr> applications_with_navi;

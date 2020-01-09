@@ -68,6 +68,7 @@ typedef Types<commands::SDLActivateAppResponse,
 
 TYPED_TEST_CASE(ResponseToHMICommandsTest, ResponseCommandsList);
 
+// cppcheck-suppress syntaxError
 TYPED_TEST(ResponseToHMICommandsTest, Run_SendMessageToHMI_SUCCESS) {
   typedef typename TestFixture::CommandType CommandType;
 

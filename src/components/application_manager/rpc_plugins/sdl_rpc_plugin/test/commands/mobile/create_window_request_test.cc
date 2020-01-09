@@ -78,6 +78,7 @@ const char* const kWindowName = "WindowName";
 const utils::custom_string::CustomString kAppName("TestApp");
 }  // namespace
 
+// cppcheck-suppress syntaxError
 MATCHER_P2(CheckMessageToMobile, result_code, success, "") {
   const bool is_success =
       (*arg)[am::strings::msg_params][am::strings::success].asBool() == success;

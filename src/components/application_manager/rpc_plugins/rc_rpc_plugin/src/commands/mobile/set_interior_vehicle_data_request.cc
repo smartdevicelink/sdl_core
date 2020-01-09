@@ -104,7 +104,8 @@ mobile_apis::Result::eType PrepareResultCodeAndInfo(
     info = "Accessing not supported module data.";
   }
   return result_code;
-  LOG4CXX_WARN(logger_, info);
+  // cppcheck-suppress unreachableCode
+  LOG4CXX_WARN(logger_, "The requested LightName info");
 }
 
 void SetInteriorVehicleDataRequest::Execute() {

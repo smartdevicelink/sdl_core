@@ -56,6 +56,7 @@ using ::application_manager::commands::MessageSharedPtr;
 class CommandResponseImplTest
     : public CommandsTest<CommandsTestMocks::kIsNice> {};
 
+// cppcheck-suppress syntaxError
 TEST_F(CommandResponseImplTest, BasicMethodsOverloads_SUCCESS) {
   std::shared_ptr<CommandResponseImpl> command =
       CreateCommand<CommandResponseImpl>();

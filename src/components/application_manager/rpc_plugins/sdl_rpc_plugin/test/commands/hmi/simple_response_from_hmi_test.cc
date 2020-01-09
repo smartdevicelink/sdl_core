@@ -225,6 +225,7 @@ TYPED_TEST_CASE(ResponseFromHMICommandsTest, ResponseCommandsList);
 
 TYPED_TEST_CASE(EmptyResponseFromHMICommandsTest, EmptyResponseCommandsList);
 
+// cppcheck-suppress syntaxError
 MATCHER_P(EventIdIsEqualTo, function_id, "") {
   return static_cast<hmi_apis::FunctionID::eType>(function_id) == arg.id();
 }

@@ -117,6 +117,7 @@ class ResumptionDataJsonTest : public ResumptionDataTest {
   ResumptionDataJson res_json;
 };
 
+// cppcheck-suppress syntaxError
 TEST_F(ResumptionDataJsonTest, SaveApplication) {
   PrepareData();
   EXPECT_CALL(*mock_app_extension_, SaveResumptionData(_));

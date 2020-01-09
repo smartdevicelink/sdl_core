@@ -88,6 +88,7 @@ class OnVehicleDataNotificationTest
   MockAppPtr mock_app_;
 };
 
+// cppcheck-suppress syntaxError
 MATCHER_P(SmartObjectCheck, checker, "") {
   return checker(arg);
 }

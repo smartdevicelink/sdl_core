@@ -70,6 +70,7 @@ void GetWayPointsRequest::Run() {
   smart_objects::SmartObject msg_params =
       smart_objects::SmartObject(smart_objects::SmartType_Map);
 
+  // cppcheck-suppress redundantAssignment
   msg_params = (*message_)[strings::msg_params];
   msg_params[strings::app_id] = app->app_id();
   StartAwaitForInterface(HmiInterfaces::HMI_INTERFACE_Navigation);

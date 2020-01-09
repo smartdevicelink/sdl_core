@@ -59,6 +59,7 @@ typedef std::shared_ptr<ResponseFromHMI> ResponseFromHMIPtr;
 class ClosePopupResponseTest : public CommandsTest<CommandsTestMocks::kIsNice> {
 };
 
+// cppcheck-suppress syntaxError
 TEST_F(ClosePopupResponseTest, RUN_SUCCESS) {
   MessageSharedPtr command_msg(CreateMessage(smart_objects::SmartType_Map));
   ResponseFromHMIPtr command(CreateCommand<ClosePopupResponse>(command_msg));

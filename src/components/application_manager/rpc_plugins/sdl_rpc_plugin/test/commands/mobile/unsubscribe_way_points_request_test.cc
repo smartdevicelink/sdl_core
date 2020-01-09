@@ -81,6 +81,7 @@ class UnsubscribeWayPointsRequestTest
   std::shared_ptr<UnsubscribeWayPointsRequest> command_;
 };
 
+// cppcheck-suppress syntaxError
 TEST_F(UnsubscribeWayPointsRequestTest,
        Run_ApplicationIsNotRegistered_UNSUCCESS) {
   EXPECT_CALL(app_mngr_, application(_))

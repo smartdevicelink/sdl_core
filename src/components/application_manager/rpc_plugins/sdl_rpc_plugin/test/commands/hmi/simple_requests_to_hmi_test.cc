@@ -112,6 +112,7 @@ using event_engine_test::MockEventDispatcher;
 
 class RequestToHMITest : public CommandsTest<CommandsTestMocks::kIsNice> {};
 
+// cppcheck-suppress syntaxError
 TEST_F(RequestToHMITest, BasicMethodsOverloads_SUCCESS) {
   std::shared_ptr<am_commands::RequestToHMI> command(
       CreateCommand<am_commands::RequestToHMI>());

@@ -57,6 +57,7 @@ typedef NiceMock<
 class NaviSetVideoConfigResponseTest
     : public CommandsTest<CommandsTestMocks::kIsNice> {};
 
+// cppcheck-suppress syntaxError
 TEST_F(NaviSetVideoConfigResponseTest, RUN_SUCCESS) {
   MessageSharedPtr msg = CreateMessage();
 

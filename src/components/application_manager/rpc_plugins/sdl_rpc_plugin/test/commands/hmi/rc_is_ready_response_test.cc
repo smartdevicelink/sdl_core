@@ -61,6 +61,7 @@ typedef std::shared_ptr<RCIsReadyResponse> RCIsReadyResponsePtr;
 class RCIsReadyResponseTest : public CommandsTest<CommandsTestMocks::kIsNice> {
 };
 
+// cppcheck-suppress syntaxError
 TEST_F(RCIsReadyResponseTest, RUN_SUCCESS) {
   RCIsReadyResponsePtr command(CreateCommand<RCIsReadyResponse>());
 

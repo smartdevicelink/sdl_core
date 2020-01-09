@@ -60,6 +60,7 @@ namespace hmi_response = ::application_manager::hmi_response;
 class SDLGetStatusUpdateRequestTest
     : public CommandRequestTest<CommandsTestMocks::kIsNice> {};
 
+// cppcheck-suppress syntaxError
 TEST_F(SDLGetStatusUpdateRequestTest, Run_SUCCESS) {
   MessageSharedPtr msg = CreateMessage();
   (*msg)[strings::params][strings::correlation_id] = kCorrelationID;

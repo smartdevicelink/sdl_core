@@ -117,6 +117,7 @@ class RCIsReadyRequestTest
   am::MockHmiInterfaces mock_hmi_interfaces_;
 };
 
+// cppcheck-suppress syntaxError
 TEST_F(RCIsReadyRequestTest, Run_NoKeyAvailableInMessage_HmiInterfacesIgnored) {
   const bool is_rc_cooperating_available = false;
   const bool is_send_message_to_hmi = true;

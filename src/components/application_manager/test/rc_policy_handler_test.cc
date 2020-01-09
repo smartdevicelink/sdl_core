@@ -151,6 +151,7 @@ class RCPolicyHandlerTest : public ::testing::Test {
   }
 };
 
+// cppcheck-suppress syntaxError
 TEST_F(RCPolicyHandlerTest,
        SendMessageToSDK_RemoteControlInvalidMobileAppId_UNSUCCESS) {
   // Precondition

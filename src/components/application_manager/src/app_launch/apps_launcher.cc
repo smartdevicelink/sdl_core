@@ -56,6 +56,7 @@ void AppsLauncher::StartLaunching(ApplicationDataPtr app_data) {
 }
 
 struct AppLauncherFinder {
+  // cppcheck-suppress noExplicitConstructor
   AppLauncherFinder(const ApplicationDataPtr& app_data) : app_data_(app_data) {}
   bool operator()(const AppsLauncher::LauncherPtr& launcher) const {
     DCHECK_OR_RETURN(launcher->app_data_ && app_data_, false)

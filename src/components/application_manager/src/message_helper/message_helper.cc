@@ -107,6 +107,7 @@ bool ValidateSoftButtons(smart_objects::SmartObject& soft_buttons) {
 
 struct GroupsAppender
     : std::unary_function<void, const PermissionsList::value_type&> {
+  // cppcheck-suppress noExplicitConstructor
   GroupsAppender(smart_objects::SmartObject& groups)
       : groups_(groups), index_(0) {}
 
@@ -135,6 +136,7 @@ struct GroupsAppender
 struct ExternalConsentStatusAppender
     : std::unary_function<void,
                           const policy::ExternalConsentStatus::value_type&> {
+  // cppcheck-suppress noExplicitConstructor
   ExternalConsentStatusAppender(smart_objects::SmartObject& status)
       : status_(status), index_(0) {}
 
@@ -660,6 +662,7 @@ void MessageHelper::SendResetPropertiesRequest(ApplicationSharedPtr application,
   {
     SmartObject msg_params = SmartObject(smart_objects::SmartType_Map);
 
+    // cppcheck-suppress redundantAssignment
     msg_params = *MessageHelper::CreateAppVrHelp(application);
     msg_params[hmi_request::menu_title] = "";
 
@@ -955,7 +958,7 @@ void MessageHelper::CreateGetVehicleDataRequest(
       smart_objects::SmartObject(smart_objects::SmartType_Map);
   for (std::vector<std::string>::const_iterator it = params.begin();
        it != params.end();
-       it++) {
+       ++it) {
     (*request)[strings::msg_params][*it] = true;
   }
   app_mngr.GetRPCService().ManageHMICommand(request);
@@ -1499,6 +1502,7 @@ MessageHelper::CreateAddVRCommandRequestFromChoiceToHMI(
           (*(it->second))[strings::choice_set][j][strings::choice_id];
       msg_params[strings::vr_commands] =
           smart_objects::SmartObject(smart_objects::SmartType_Array);
+      // cppcheck-suppress redundantAssignment
       msg_params[strings::vr_commands] =
           (*(it->second))[strings::choice_set][j][strings::vr_commands];
       msg_params[strings::type] = hmi_apis::Common_VRCommandType::Choice;
@@ -3221,10 +3225,7 @@ mobile_apis::Result::eType MessageHelper::ProcessSoftButtons(
         }
         break;
       }
-      default: {
-        continue;
-        break;
-      }
+      default: { continue; }
     }
 
     soft_buttons[j++] = request_soft_buttons[i];

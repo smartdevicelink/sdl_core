@@ -197,6 +197,7 @@ bool AddSubMenuRequest::CheckSubMenuName() {
   LOG4CXX_AUTO_TRACE(logger_);
   const char* str = NULL;
 
+  // cppcheck-suppress redundantAssignment
   str = (*message_)[strings::msg_params][strings::menu_name].asCharArray();
   if (!CheckSyntax(str)) {
     LOG4CXX_INFO(logger_, "Invalid subMenu name.");

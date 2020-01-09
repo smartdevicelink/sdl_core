@@ -65,6 +65,7 @@ const hmi_apis::Common_Language::eType kLanguage = Common_Language::EN_GB;
 class VRGetLanguageResponseTest
     : public CommandsTest<CommandsTestMocks::kIsNice> {};
 
+// cppcheck-suppress syntaxError
 TEST_F(VRGetLanguageResponseTest, Run_LanguageSet_SUCCESS) {
   MessageSharedPtr msg = CreateMessage();
   (*msg)[strings::msg_params][hmi_response::language] = kLanguage;

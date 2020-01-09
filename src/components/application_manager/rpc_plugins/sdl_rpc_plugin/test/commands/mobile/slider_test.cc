@@ -135,6 +135,7 @@ class SliderRequestTest
   MockPolicyHandlerInterface mock_policy_handler_;
 };
 
+// cppcheck-suppress syntaxError
 TEST_F(SliderRequestTest, OnEvent_UI_UNSUPPORTED_RESOURCE) {
   MessageSharedPtr msg_ui = CreateFullParamsUISO();
   (*msg_ui)[am::strings::params][am::strings::connection_key] = kConnectionKey;

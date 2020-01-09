@@ -61,6 +61,7 @@ class RPCHandlerImplTest : public ::testing::Test {
   NiceMock<MockApplicationManager> mock_app_mngr_;
 };
 
+// cppcheck-suppress syntaxError
 TEST_F(RPCHandlerImplTest, GetMessageVersion_SUCCESS) {
   namespace json_str = ns_smart_device_link::ns_json_handler::strings;
   namespace app_str = application_manager::strings;

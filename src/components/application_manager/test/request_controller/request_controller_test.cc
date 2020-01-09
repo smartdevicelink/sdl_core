@@ -159,6 +159,7 @@ class RequestControllerTestClass : public ::testing::Test {
   const TestSettings default_settings_;
 };
 
+// cppcheck-suppress syntaxError
 TEST_F(RequestControllerTestClass,
        AddMobileRequest_DuplicateCorrelationId_INVALID_ID) {
   RequestPtr request_valid = GetMockRequest();

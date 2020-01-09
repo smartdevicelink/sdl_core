@@ -177,6 +177,7 @@ void ApplicationImplTest::CheckCurrentHMIState() {
   EXPECT_EQ(state_id, current_state->state_id());
 }
 
+// cppcheck-suppress syntaxError
 TEST_F(ApplicationImplTest, AddHmiState_GetCurrentState) {
   TestAddHmiState(HMILevel::HMI_FULL,
                   HmiState::STATE_ID_PHONE_CALL,

@@ -314,6 +314,7 @@ class RegisterAppInterfaceRequestTest
   application_manager_test::MockApplicationHelper& mock_application_helper_;
 };
 
+// cppcheck-suppress syntaxError
 TEST_F(RegisterAppInterfaceRequestTest, Init_SUCCESS) {
   EXPECT_TRUE(command_->Init());
 }

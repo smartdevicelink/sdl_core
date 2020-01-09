@@ -59,6 +59,7 @@ typedef std::shared_ptr<UnregisterAppInterfaceRequest> CommandPtr;
 class UnregisterAppInterfaceRequestTest
     : public CommandRequestTest<CommandsTestMocks::kIsNice> {};
 
+// cppcheck-suppress syntaxError
 TEST_F(UnregisterAppInterfaceRequestTest, Run_AppNotRegistered_UNSUCCESS) {
   CommandPtr command(CreateCommand<UnregisterAppInterfaceRequest>());
 

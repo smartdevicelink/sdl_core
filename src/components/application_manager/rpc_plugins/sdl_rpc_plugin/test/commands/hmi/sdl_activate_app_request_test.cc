@@ -74,6 +74,7 @@ const uint32_t kAppIDFirst = 1u;
 const connection_handler::DeviceHandle kHandle = 2u;
 }  // namespace
 
+// cppcheck-suppress syntaxError
 MATCHER_P2(CheckMsgParams, result, corr_id, "") {
   const bool is_func_id_valid =
       hmi_apis::FunctionID::SDL_ActivateApp ==

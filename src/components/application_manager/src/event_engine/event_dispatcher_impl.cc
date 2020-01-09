@@ -78,6 +78,7 @@ void EventDispatcherImpl::add_observer(const Event::EventID& event_id,
 }
 
 struct IdCheckFunctor {
+  // cppcheck-suppress noExplicitConstructor
   IdCheckFunctor(const unsigned long id) : target_id(id) {}
 
   bool operator()(const EventObserver* obs) const {

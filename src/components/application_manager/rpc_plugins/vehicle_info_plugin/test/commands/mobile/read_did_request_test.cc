@@ -65,6 +65,7 @@ using vehicle_info_plugin::commands::ReadDIDRequest;
 class ReadDIDRequestTest
     : public VICommandRequestTest<CommandsTestMocks::kIsNice> {};
 
+// cppcheck-suppress syntaxError
 TEST_F(ReadDIDRequestTest, OnEvent_WrongEventId_UNSUCCESS) {
   Event event(Event::EventID::INVALID_ENUM);
   std::shared_ptr<ReadDIDRequest> command(CreateCommandVI<ReadDIDRequest>());

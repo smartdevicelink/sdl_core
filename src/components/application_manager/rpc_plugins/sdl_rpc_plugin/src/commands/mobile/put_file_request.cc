@@ -164,6 +164,7 @@ void PutFileRequest::Run() {
   is_persistent_file_ = false;
   bool is_system_file = false;
   length_ = binary_data.size();
+  // cppcheck-suppress variableScope
   bool is_download_complete = true;
   bool offset_exist =
       (*message_)[strings::msg_params].keyExists(strings::offset);

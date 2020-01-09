@@ -85,6 +85,7 @@ class ApplicationStateTest : public ::testing::Test {
 std::vector<StateID> ApplicationStateTest::added_states_ =
     GenerateCurrentStates();
 
+// cppcheck-suppress syntaxError
 TEST_F(ApplicationStateTest, AddStates_GetCurrentStates) {
   std::vector<StateID>::iterator new_state = added_states_.begin();
   for (; new_state != added_states_.end(); ++new_state) {

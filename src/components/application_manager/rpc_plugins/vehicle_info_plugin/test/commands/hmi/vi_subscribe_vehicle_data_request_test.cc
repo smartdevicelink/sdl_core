@@ -58,6 +58,7 @@ const std::string kHMIParam = "hmi_param";
 class VISubscribeVehicleDataRequestTest
     : public VICommandRequestTest<CommandsTestMocks::kIsNice> {};
 
+// cppcheck-suppress syntaxError
 MATCHER_P(EqualMsgParams, msg_params, "") {
   using namespace app_mngr;
   auto message = static_cast<smart_objects::SmartObject>(*arg);

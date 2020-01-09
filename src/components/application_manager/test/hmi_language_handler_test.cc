@@ -139,6 +139,7 @@ class HmiLanguageHandlerTest : public ::testing::Test {
   MockRPCService mock_rpc_service_;
 };
 
+// cppcheck-suppress syntaxError
 TEST_F(HmiLanguageHandlerTest, OnEvent_AllLanguageIsReceivedAndSame_SUCCESS) {
   // Repeatedly add events to set `is_*_language_received_` flags up
 

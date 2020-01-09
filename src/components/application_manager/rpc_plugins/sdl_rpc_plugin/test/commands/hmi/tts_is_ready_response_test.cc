@@ -80,6 +80,7 @@ class TTSIsReadyResponseTest : public CommandsTest<CommandsTestMocks::kIsNice> {
   SmartObject capabilities_;
 };
 
+// cppcheck-suppress syntaxError
 TEST_F(TTSIsReadyResponseTest, RUN_SUCCESS) {
   ResponseFromHMIPtr command(CreateCommand<TTSIsReadyResponse>());
   MockEventDispatcher mock_event_dispatcher;

@@ -194,6 +194,7 @@ std::string AppLaunchDataDBTest::AddCounter(const std::string& inp,
   return ss.str();
 }
 
+// cppcheck-suppress syntaxError
 TEST_F(AppLaunchDataDBTest, Init) {
   utils::dbms::SQLQuery query_checks(test_db());
   EXPECT_TRUE(query_checks.Prepare(kCheckTablesExist));

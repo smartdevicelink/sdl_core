@@ -65,6 +65,7 @@ const uint32_t kCommandId = 5u;
 class OnCommandNotificationTest
     : public CommandsTest<CommandsTestMocks::kNotNice> {};
 
+// cppcheck-suppress syntaxError
 TEST_F(OnCommandNotificationTest, Run_AppNotRegistered_UNSUCCESS) {
   CommandPtr command(CreateCommand<OnCommandNotification>());
 

@@ -73,6 +73,7 @@ typedef Types<commands::OnAppInterfaceUnregisteredNotification,
               commands::mobile::OnDriverDistractionNotification>
     NotificationCommandsList;
 
+// cppcheck-suppress syntaxError
 MATCHER(CheckNotificationMessage, "") {
   return (*arg)[am::strings::params][am::strings::protocol_type].asInt() ==
              am::commands::CommandImpl::mobile_protocol_type_ &&

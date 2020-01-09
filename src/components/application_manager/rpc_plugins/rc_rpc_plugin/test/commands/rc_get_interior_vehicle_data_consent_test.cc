@@ -228,6 +228,7 @@ class RCGetInteriorVehicleDataConsentTest
   testing::NiceMock<MockRCConsentManager> mock_rc_consent_manger_;
 };
 
+// cppcheck-suppress syntaxError
 TEST_F(RCGetInteriorVehicleDataConsentTest,
        Run_MobileSendButtonPressMessage_HMISendASKDRIVERModeToMobile) {
   // Arrange

@@ -61,6 +61,7 @@ const std::string kStrNumber = "123";
 class SDLActivateAppResponseTest
     : public CommandsTest<CommandsTestMocks::kIsNice> {};
 
+// cppcheck-suppress syntaxError
 TEST_F(SDLActivateAppResponseTest, RUN_SendRequest_SUCCESS) {
   MessageSharedPtr command_msg(CreateMessage(smart_objects::SmartType_Map));
   (*command_msg)[strings::msg_params][strings::number] = kStrNumber;

@@ -123,6 +123,7 @@ class SystemRequestTest
   MockAppPtr mock_app_;
 };
 
+// cppcheck-suppress syntaxError
 TEST_F(SystemRequestTest, Run_HTTP_FileName_no_binary_data_REJECTED) {
   PreConditions();
   MessageSharedPtr msg = CreateIVSUMessage();

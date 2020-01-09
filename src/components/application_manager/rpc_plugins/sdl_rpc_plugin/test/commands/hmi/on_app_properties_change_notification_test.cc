@@ -68,6 +68,7 @@ class OnAppPropertiesChangeNotificationTest
   NotificationPtr command_;
 };
 
+// cppcheck-suppress syntaxError
 TEST_F(OnAppPropertiesChangeNotificationTest, SendNotificationToHMI) {
   (*message_)[strings::msg_params][strings::app_id] = kConnectionKey;
   command_ = CreateCommand<OnAppPropertiesChangeNotification>(message_);

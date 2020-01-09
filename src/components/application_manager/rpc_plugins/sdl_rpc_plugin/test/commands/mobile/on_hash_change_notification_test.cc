@@ -58,6 +58,7 @@ using testing::ReturnRef;
 class OnHashChangeNotificationTest
     : public CommandsTest<CommandsTestMocks::kIsNice> {};
 
+// cppcheck-suppress syntaxError
 TEST_F(OnHashChangeNotificationTest, Run_ValidApp_SUCCESS) {
   const uint32_t kConnectionKey = 1u;
   MessageSharedPtr msg = CreateMessage();

@@ -82,6 +82,7 @@ class AddSubMenuRequestTest
   }
 };
 
+// cppcheck-suppress syntaxError
 TEST_F(AddSubMenuRequestTest, Run_ImageVerificationFailed_EXPECT_INVALID_DATA) {
   const uint32_t menu_id = 10u;
   MessageSharedPtr msg = CreateMsgParams();

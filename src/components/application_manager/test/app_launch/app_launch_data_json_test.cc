@@ -205,6 +205,7 @@ std::string AppLaunchDataJsonTest::AddCounter(const std::string& inp,
   return ss.str();
 }
 
+// cppcheck-suppress syntaxError
 TEST_F(AppLaunchDataJsonTest, SaveAndGetData) {
   ApplicationData data("mobile_app_id", "bundle_id", "device_mac");
   AddApplicationDataWithIncreaseTable(data);

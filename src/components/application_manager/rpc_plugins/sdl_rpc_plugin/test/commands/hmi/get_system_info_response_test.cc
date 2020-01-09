@@ -90,6 +90,7 @@ class GetSystemInfoResponseTest
   SmartObject capabilities_;
 };
 
+// cppcheck-suppress syntaxError
 TEST_F(GetSystemInfoResponseTest, GetSystemInfo_SUCCESS) {
   MessageSharedPtr command_msg = CreateCommandMsg();
   (*command_msg)[strings::params][hmi_response::code] =

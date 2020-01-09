@@ -299,6 +299,7 @@ TYPED_TEST_CASE(MobileCommandsTestFirst, MobileCommandsListFirst);
 TYPED_TEST_CASE(MobileCommandsTestSecond, MobileCommandsListSecond);
 TYPED_TEST_CASE(MobileCommandsTestThird, MobileCommandsListThird);
 
+// cppcheck-suppress syntaxError
 TYPED_TEST(MobileCommandsTestFirst, CtorAndDtorCall) {
   std::shared_ptr<typename TestFixture::CommandType> command =
       this->template CreateCommand<typename TestFixture::CommandType>();

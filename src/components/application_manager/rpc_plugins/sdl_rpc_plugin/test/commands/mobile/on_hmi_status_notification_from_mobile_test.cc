@@ -74,6 +74,7 @@ class OnHMIStatusNotificationFromMobileTest
   std::shared_ptr<sync_primitives::Lock> lock_;
 };
 
+// cppcheck-suppress syntaxError
 TEST_F(OnHMIStatusNotificationFromMobileTest,
        Run_CurrentStateForeground_SUCCESS) {
   MessageSharedPtr msg = CreateMsgParams(mobile_apis::HMILevel::HMI_FULL);

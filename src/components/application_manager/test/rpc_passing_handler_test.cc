@@ -230,6 +230,7 @@ class RPCPassingHandlerTest : public ::testing::Test {
   const uint32_t MAX_TEST_DURATION = 1000;  // 1 second
 };
 
+// cppcheck-suppress syntaxError
 TEST_F(RPCPassingHandlerTest, RPCPassingTest_REQUEST_ForwardToMobile) {
   app_services_.push_back(CreateAppService(
       kConnectionKey_NAV_ASP, "Navigation service", "NAVIGATION"));

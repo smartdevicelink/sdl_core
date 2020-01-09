@@ -59,6 +59,7 @@ typedef std::shared_ptr<ResponseFromHMI> ResponseFromHMIPtr;
 class NaviIsReadyResponseTest
     : public CommandRequestTest<CommandsTestMocks::kIsNice> {};
 
+// cppcheck-suppress syntaxError
 TEST_F(NaviIsReadyResponseTest, NaviIsReadyResponse_Run_SUCCESS) {
   ResponseFromHMIPtr command(CreateCommand<commands::NaviIsReadyResponse>());
   MockEventDispatcher mock_event_dispatcher;

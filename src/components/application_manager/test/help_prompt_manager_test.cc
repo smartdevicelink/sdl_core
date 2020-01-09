@@ -253,6 +253,7 @@ void HelpPromptManagerTest::CreateApplication(
       kDefaultWindowId, kDefaultWindowName, initial_state);
 }
 
+// cppcheck-suppress syntaxError
 TEST_F(HelpPromptManagerTest, AddCommand_OnVrCommandAdded) {
   CreateApplication(*mock_help_prompt_manager_.get());
   MessageSharedPtr msg =

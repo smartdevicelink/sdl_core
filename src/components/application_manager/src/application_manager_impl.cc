@@ -3093,6 +3093,7 @@ void ApplicationManagerImpl::UnregisterAllApplications() {
   using namespace mobile_api::AppInterfaceUnregisteredReason;
   using namespace helpers;
 
+  // cppcheck-suppress redundantAssignment
   is_ignition_off =
       Compare<eType, EQ, ONE>(unregister_reason_, IGNITION_OFF, INVALID_ENUM);
 
@@ -3814,16 +3815,20 @@ void ApplicationManagerImpl::ClearTimerPool() {
   LOG4CXX_AUTO_TRACE(logger_);
   {
     sync_primitives::AutoLock lock(close_app_timer_pool_lock_);
-    std::remove_if(close_app_timer_pool_.begin(),
-                   close_app_timer_pool_.end(),
-                   [](TimerSPtr timer) { return !timer->is_running(); });
+    auto rezult =
+        std::remove_if(close_app_timer_pool_.begin(),
+                       close_app_timer_pool_.end(),
+                       [](TimerSPtr timer) { return !timer->is_running(); });
+    close_app_timer_pool_.erase(rezult, close_app_timer_pool_.end());
   }
 
   {
     sync_primitives::AutoLock lock(end_stream_timer_pool_lock_);
-    std::remove_if(end_stream_timer_pool_.begin(),
-                   end_stream_timer_pool_.end(),
-                   [](TimerSPtr timer) { return !timer->is_running(); });
+    auto rezult =
+        std::remove_if(end_stream_timer_pool_.begin(),
+                       end_stream_timer_pool_.end(),
+                       [](TimerSPtr timer) { return !timer->is_running(); });
+    end_stream_timer_pool_.erase(rezult, end_stream_timer_pool_.end());
   }
 }
 
@@ -4432,6 +4437,7 @@ void ApplicationManagerImpl::SendGetIconUrlNotifications(
       continue;
     }
 
+    // cppcheck-suppress unreadVariable
     std::string endpoint = app_icon_it->second.endpoint;
     bool pending_request = app_icon_it->second.pending_request;
 
@@ -4743,6 +4749,7 @@ void ApplicationManagerImpl::SetMockMediaManager(
 #endif  // BUILD_TESTS
 struct MobileAppIdPredicate {
   std::string policy_app_id_;
+  // cppcheck-suppress noExplicitConstructor
   MobileAppIdPredicate(const std::string& policy_app_id)
       : policy_app_id_(policy_app_id) {}
   bool operator()(const ApplicationSharedPtr app) const {
@@ -4752,6 +4759,7 @@ struct MobileAppIdPredicate {
 
 struct TakeDeviceHandle {
  public:
+  // cppcheck-suppress noExplicitConstructor
   TakeDeviceHandle(const ApplicationManager& app_mngr) : app_mngr_(app_mngr) {}
   std::string operator()(ApplicationSharedPtr& app) {
     DCHECK_OR_RETURN(app, "");

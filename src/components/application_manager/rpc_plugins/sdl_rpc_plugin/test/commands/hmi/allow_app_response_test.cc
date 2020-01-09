@@ -59,6 +59,7 @@ typedef std::shared_ptr<AllowAppResponse> ResponsePtr;
 
 class AllowAppResponseTest : public CommandsTest<CommandsTestMocks::kIsNice> {};
 
+// cppcheck-suppress syntaxError
 TEST_F(AllowAppResponseTest, Run_AppCreated_SUCCESS) {
   MessageSharedPtr msg = CreateMessage();
   (*msg)[strings::params][strings::connection_key] = kConnectionKey;

@@ -109,6 +109,7 @@ void SliderRequest::Run() {
 
   smart_objects::SmartObject msg_params =
       smart_objects::SmartObject(smart_objects::SmartType_Map);
+  // cppcheck-suppress redundantAssignment
   msg_params = (*message_)[strings::msg_params];
   msg_params[strings::app_id] = application->app_id();
 
@@ -184,6 +185,7 @@ bool SliderRequest::IsWhiteSpaceExist() {
   LOG4CXX_AUTO_TRACE(logger_);
   const char* str = NULL;
 
+  // cppcheck-suppress redundantAssignment
   str = (*message_)[strings::msg_params][strings::slider_header].asCharArray();
   if (!CheckSyntax(str)) {
     LOG4CXX_ERROR(logger_, "Invalid slider_header value syntax check failed");

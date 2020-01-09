@@ -80,6 +80,7 @@ class UsageStatisticsTest : public testing::Test {
   const std::string language_;
 };
 
+// cppcheck-suppress syntaxError
 TEST_F(UsageStatisticsTest, RecordHmiStateChanged_CallMethod_ExpectMethodCall) {
   // Arrange
   std::unique_ptr<MockAppStopwatch> mock_app_stopwatch_object(

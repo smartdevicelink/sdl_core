@@ -293,6 +293,7 @@ const StateID2StrMap kStateID2StrMap =
         HmiState::StateID::STATE_ID_EMBEDDED_NAVI, "EMBEDDED_NAVI");
 }  // anonymous namespace
 
+// cppcheck-suppress unusedFunction
 std::ostream& operator<<(std::ostream& os, const HmiState::StateID src) {
   try {
     os << kStateID2StrMap.left.at(src);

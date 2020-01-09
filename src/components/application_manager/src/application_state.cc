@@ -42,6 +42,7 @@ namespace {
 
 struct StateIDComparator {
   application_manager::HmiState::StateID state_id_;
+  // cppcheck-suppress noExplicitConstructor
   StateIDComparator(application_manager::HmiState::StateID state_id)
       : state_id_(state_id) {}
   bool operator()(const application_manager::HmiStatePtr cur) const {
@@ -205,8 +206,8 @@ void ApplicationState::RemoveHMIState(const WindowID window_id,
   DCHECK_OR_RETURN_VOID(hmi_states.begin() != it);
   HmiStates::iterator next = it;
   HmiStates::iterator prev = it;
-  next++;
-  prev--;
+  ++next;
+  --prev;
 
   if (next != hmi_states.end()) {
     HmiStatePtr next_state = *next;

@@ -82,6 +82,7 @@ class UIGetCapabilitiesResponseTest
   SmartObject capabilities_;
 };
 
+// cppcheck-suppress syntaxError
 TEST_F(UIGetCapabilitiesResponseTest, RUN_SetDisplay_SUCCESSS) {
   MessageSharedPtr command_msg = CreateCommandMsg();
   (*command_msg)[strings::msg_params][hmi_response::display_capabilities] =

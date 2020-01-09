@@ -156,6 +156,7 @@ class ButtonPressRequestTest
   testing::NiceMock<MockRCConsentManager> mock_rc_consent_manger_;
 };
 
+// cppcheck-suppress syntaxError
 TEST_F(ButtonPressRequestTest,
        Execute_ButtonNameMatchesModuleType_ExpectCorrectMessageSentToHMI) {
   // Arrange

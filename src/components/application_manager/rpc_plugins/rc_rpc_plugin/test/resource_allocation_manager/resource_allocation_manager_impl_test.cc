@@ -219,6 +219,7 @@ void RAManagerTest::OnRCStatusNotificationExpectations() {
   ON_CALL(mock_app_mngr_, applications()).WillByDefault(Return(apps_da_));
 }
 
+// cppcheck-suppress syntaxError
 TEST_F(RAManagerTest, AcquireResource_NoAppRegistered_Expect_InUse) {
   // Arrange
   EXPECT_CALL(mock_app_mngr_, application(kAppId1))

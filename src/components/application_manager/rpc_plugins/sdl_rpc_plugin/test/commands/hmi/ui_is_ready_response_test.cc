@@ -72,6 +72,7 @@ class UIIsReadyResponseTest : public CommandsTest<CommandsTestMocks::kIsNice> {
   SmartObject capabilities_;
 };
 
+// cppcheck-suppress syntaxError
 TEST_F(UIIsReadyResponseTest, RUN_SUCCESS) {
   UIIsReadyResponsePtr command(CreateCommand<UIIsReadyResponse>());
 

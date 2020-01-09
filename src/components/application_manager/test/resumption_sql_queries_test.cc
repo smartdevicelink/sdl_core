@@ -732,6 +732,7 @@ SQLQuery& ResumptionSqlQueriesTest::FillApplicationFilesArrayTable(
   return query;
 }
 
+// cppcheck-suppress syntaxError
 TEST_F(ResumptionSqlQueriesTest, kCreateSchemaTest_ExpectSchemaCreated) {
   // Arrange
   SQLQuery query(db());

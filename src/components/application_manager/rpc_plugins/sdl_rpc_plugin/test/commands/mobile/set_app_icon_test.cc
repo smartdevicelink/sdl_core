@@ -98,6 +98,7 @@ class SetAppIconRequestTest
       mock_protocol_handler_settings_;
 };
 
+// cppcheck-suppress syntaxError
 TEST_F(SetAppIconRequestTest, OnEvent_UI_UNSUPPORTED_RESOURCE) {
   const std::string file_path = "file_path";
   MessageSharedPtr msg_vr = CreateFullParamsUISO();

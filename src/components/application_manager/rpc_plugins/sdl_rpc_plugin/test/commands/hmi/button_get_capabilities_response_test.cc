@@ -76,6 +76,7 @@ class ButtonGetCapabilitiesResponseTest
   SmartObject preset_bank_capabilities_;
 };
 
+// cppcheck-suppress syntaxError
 TEST_F(ButtonGetCapabilitiesResponseTest, Run_CodeSuccess_SUCCESS) {
   MessageSharedPtr msg = CreateMsgParams();
   (*msg)[strings::params][hmi_response::code] =

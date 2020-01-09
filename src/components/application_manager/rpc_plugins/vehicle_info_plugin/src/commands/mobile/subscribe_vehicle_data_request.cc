@@ -241,7 +241,8 @@ void SubscribeVehicleDataRequest::AddAlreadySubscribedVI(
 
 struct SubscribedToIVIPredicate {
   std::string vehicle_info_;
-  SubscribedToIVIPredicate(std::string vehicle_info)
+  // cppcheck-suppress noExplicitConstructor
+  SubscribedToIVIPredicate(const std::string& vehicle_info)
       : vehicle_info_(vehicle_info) {}
   bool operator()(const ApplicationSharedPtr app) const {
     DCHECK_OR_RETURN(app, false);
@@ -374,6 +375,7 @@ void SubscribeVehicleDataRequest::CheckVISubscriptions(
     return;
   }
 
+  // cppcheck-suppress knownConditionTrueFalse
   if (0 == subscribed_items && !is_interface_not_available) {
     out_result_code = mobile_apis::Result::IGNORED;
     out_info = "Already subscribed on provided VehicleData.";

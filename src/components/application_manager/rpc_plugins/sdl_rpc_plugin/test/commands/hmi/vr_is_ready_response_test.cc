@@ -59,6 +59,7 @@ typedef std::shared_ptr<VRIsReadyResponse> VRIsReadyResponsePtr;
 class VRIsReadyResponseTest : public CommandsTest<CommandsTestMocks::kIsNice> {
 };
 
+// cppcheck-suppress syntaxError
 TEST_F(VRIsReadyResponseTest, RUN_SUCCESS) {
   VRIsReadyResponsePtr command(CreateCommand<VRIsReadyResponse>());
 

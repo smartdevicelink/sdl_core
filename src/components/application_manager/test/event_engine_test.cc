@@ -131,6 +131,7 @@ class EventEngineTest : public testing::Test {
   }
 };
 
+// cppcheck-suppress syntaxError
 TEST_F(EventEngineTest, EventObserverTest_ExpectObserversEmpty) {
   // Arrange
   EventObserver* event_observer_ptr =

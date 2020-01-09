@@ -94,6 +94,7 @@ class SendHapticDataResponseTest
   std::shared_ptr<SendHapticDataResponse> command_sptr_;
 };
 
+// cppcheck-suppress syntaxError
 TEST_F(SendHapticDataRequestTest, Run_SUCCESS) {
   EXPECT_CALL(app_mngr_, application(kConnectionKey))
       .WillOnce(Return(mock_app_));

@@ -199,6 +199,7 @@ class GetInteriorVehicleDataRequestTest
   testing::NiceMock<MockRCConsentManager> mock_rc_consent_manger_;
 };
 
+// cppcheck-suppress syntaxError
 TEST_F(GetInteriorVehicleDataRequestTest,
        Execute_ExpectCorrectMessageSentToHMI_NoSubscriptionNoCache) {
   // Arrange

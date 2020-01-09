@@ -81,6 +81,7 @@ class OnSystemRequestNotificationTest
   MockAppPtr mock_app_;
 };
 
+// cppcheck-suppress syntaxError
 TEST_F(OnSystemRequestNotificationTest, Run_ProprietaryType_SUCCESS) {
   const mobile_apis::RequestType::eType request_type =
       mobile_apis::RequestType::PROPRIETARY;

@@ -89,6 +89,7 @@ commands::Command* PutFileCommand(uint32_t& correlation_id,
   return testCommand;
 }
 
+// cppcheck-suppress syntaxError
 TEST(RequestControlTest, ZeroValuePendingRequestsAmount) {
   // Default value
   const uint32_t big_count_of_requests_for_test_ =

@@ -74,6 +74,7 @@ const int32_t kFunctionID = mobile_apis::FunctionID::DeleteWindowID;
 const WindowID kTestWindowId = 12;
 }  // namespace
 
+// cppcheck-suppress syntaxError
 MATCHER_P2(CheckMessageToMobile, result_code, success, "") {
   const bool is_success =
       (*arg)[am::strings::msg_params][am::strings::success].asBool() == success;

@@ -98,6 +98,7 @@ using test::components::policy_test::MockPolicyHandlerInterface;
 using namespace application_manager;
 
 // custom action to call a member function with 4 arguments
+// cppcheck-suppress syntaxError
 ACTION_P6(InvokeMemberFuncWithArg4, ptr, memberFunc, a, b, c, d) {
   (ptr->*memberFunc)(a, b, c, d);
 }

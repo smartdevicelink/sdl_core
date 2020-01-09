@@ -158,6 +158,7 @@ class CommandRequestImplTest
 typedef CommandRequestImplTest::UnwrappedCommandRequestImpl UCommandRequestImpl;
 typedef std::shared_ptr<UCommandRequestImpl> CommandPtr;
 
+// cppcheck-suppress syntaxError
 TEST_F(CommandRequestImplTest, WindowID_ExpectDefaultWindowID) {
   auto msg = CreateMessage();
   const auto command = CreateCommand<UCommandRequestImpl>(msg);

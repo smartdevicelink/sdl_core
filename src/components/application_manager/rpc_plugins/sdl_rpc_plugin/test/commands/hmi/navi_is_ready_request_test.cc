@@ -72,6 +72,7 @@ class NaviIsReadyRequestTest
   NaviIsReadyRequestPtr command_;
 };
 
+// cppcheck-suppress syntaxError
 TEST_F(NaviIsReadyRequestTest,
        OnEvent_HmiInterfaceIsAvailable_NaviCooperatingIsAvailable) {
   const bool is_hmi_interface_available = true;

@@ -80,6 +80,7 @@ typedef testing::Types<commands::AudioStopStreamRequest,
     RequestCommandsList;
 TYPED_TEST_CASE(NaviStopStreamRequestsTest, RequestCommandsList);
 
+// cppcheck-suppress syntaxError
 TYPED_TEST(NaviStopStreamRequestsTest, Run_HmiInterfaceNotAvailable_NoRequest) {
   EXPECT_CALL(TestFixture::mock_hmi_interfaces_,
               GetInterfaceState(kHmiInterface))

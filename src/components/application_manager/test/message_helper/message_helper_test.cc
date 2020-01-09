@@ -77,6 +77,7 @@ using testing::ReturnRef;
 using testing::ReturnRefOfCopy;
 using testing::SaveArg;
 
+// cppcheck-suppress syntaxError
 TEST(MessageHelperTestCreate,
      CreateBlockedByPoliciesResponse_SmartObject_Equal) {
   mobile_apis::FunctionID::eType function_id =

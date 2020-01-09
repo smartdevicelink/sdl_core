@@ -296,8 +296,9 @@ bool ApplicationImpl::mobile_projection_enabled() const {
 
 struct StateIDComparator {
   HmiState::StateID state_id_;
+  // cppcheck-suppress noExplicitConstructor
   StateIDComparator(HmiState::StateID state_id) : state_id_(state_id) {}
-  bool operator()(const HmiStatePtr cur) {
+  bool operator()(const HmiStatePtr cur) const {
     return cur->state_id() == state_id_;
   }
 };
@@ -461,6 +462,7 @@ void ApplicationImpl::set_is_media_application(bool is_media) {
   is_media_ = is_media;
 }
 
+// cppcheck-suppress unusedFunction
 bool IsTTSState(const HmiStatePtr state) {
   return state->state_id() == HmiState::STATE_ID_TTS_SESSION;
 }
@@ -924,8 +926,6 @@ bool ApplicationImpl::AreCommandLimitsExceeded(
       limit.second = 1;
 
       return false;
-
-      break;
     }
     // In case of policy table values, there is EVEN limitation for number of
     // commands per minute, e.g. 10 command per minute i.e. 1 command per 6 sec
@@ -963,7 +963,6 @@ bool ApplicationImpl::AreCommandLimitsExceeded(
       cmd_number_to_time_limits_[cmd_id] = {current, dummy_limit};
 
       return false;
-      break;
     }
     default: {
       LOG4CXX_WARN(logger_, "Limit source is not implemented.");
@@ -1142,11 +1141,11 @@ void ApplicationImpl::SubscribeToSoftButtons(
 
 struct FindSoftButtonId {
   uint32_t soft_button_id_;
-
+  // cppcheck-suppress noExplicitConstructor
   FindSoftButtonId(const uint32_t soft_button_id)
       : soft_button_id_(soft_button_id) {}
 
-  bool operator()(const std::pair<uint32_t, WindowID>& element) {
+  bool operator()(const std::pair<uint32_t, WindowID>& element) const {
     return soft_button_id_ == element.first;
   }
 };

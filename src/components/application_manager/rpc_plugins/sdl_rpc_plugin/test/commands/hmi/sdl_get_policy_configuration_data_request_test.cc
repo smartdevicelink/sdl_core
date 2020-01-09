@@ -52,6 +52,7 @@ namespace hmi_response = ::app_mngr::hmi_response;
 class SDLGetPolicyConfigurationDataRequestTest
     : public CommandRequestTest<CommandsTestMocks::kIsNice> {};
 
+// cppcheck-suppress syntaxError
 MATCHER_P(GetPolicyConfigurationDataFirstElementMatches,
           string_first_element_value,
           "") {

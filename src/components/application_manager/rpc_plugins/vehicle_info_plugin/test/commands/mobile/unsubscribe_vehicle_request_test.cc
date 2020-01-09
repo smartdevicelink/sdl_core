@@ -113,6 +113,7 @@ class UnsubscribeVehicleRequestTest
   resumption::LastStateWrapperPtr mock_last_state_;
 };
 
+// cppcheck-suppress syntaxError
 TEST_F(UnsubscribeVehicleRequestTest, Run_AppNotRegistered_UNSUCCESS) {
   CommandPtr command(CreateCommandVI<UnsubscribeVehicleDataRequest>());
   EXPECT_CALL(app_mngr_, application(_))

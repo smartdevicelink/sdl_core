@@ -71,6 +71,7 @@ class OnTouchEventNotificationTest
   NotificationPtr command_;
 };
 
+// cppcheck-suppress syntaxError
 TEST_F(OnTouchEventNotificationTest, Run_AppIsNotFullscreen_UNSUCCESS) {
   MockAppPtr mock_app(CreateMockApp());
   std::vector<ApplicationSharedPtr> applications_with_navi;

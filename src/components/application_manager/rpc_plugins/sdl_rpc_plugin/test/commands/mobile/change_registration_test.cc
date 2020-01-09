@@ -273,6 +273,7 @@ class ChangeRegistrationRequestTest
 
 typedef ChangeRegistrationRequestTest::MockHMICapabilities MockHMICapabilities;
 
+// cppcheck-suppress syntaxError
 TEST_F(ChangeRegistrationRequestTest,
        OnEvent_VRHmiSendSuccess_UNSUPPORTED_RESOURCE) {
   MessageSharedPtr msg_from_mobile = CreateMsgFromMobile();

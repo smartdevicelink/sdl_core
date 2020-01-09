@@ -41,6 +41,7 @@ class UnsubscribeButtonRequestTest
       MockHMICapabilities;
 };
 
+// cppcheck-suppress syntaxError
 TEST_F(UnsubscribeButtonRequestTest, Run_AppNotRegistered_UNSUCCESS) {
   CommandPtr command(CreateCommand<UnsubscribeButtonRequest>());
 

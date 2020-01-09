@@ -76,6 +76,7 @@ typedef SubscribeButtonRequestTest::MockHMICapabilities MockHMICapabilities;
 const utils::SemanticVersion mock_semantic_version(5, 0, 0);
 const utils::SemanticVersion mock_base_rpc_version(4, 5, 1);
 
+// cppcheck-suppress syntaxError
 TEST_F(SubscribeButtonRequestTest, Run_AppNotRegistered_UNSUCCESS) {
   CommandPtr command(CreateCommand<SubscribeButtonRequest>());
 

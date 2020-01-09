@@ -91,6 +91,7 @@ class UpdateTurnListRequestTest
   std::shared_ptr<UpdateTurnListRequest> command_;
 };
 
+// cppcheck-suppress syntaxError
 TEST_F(UpdateTurnListRequestTest, Run_ApplicationIsNotRegistered_UNSUCCESS) {
   EXPECT_CALL(app_mngr_, application(kConnectionKey))
       .WillOnce(Return(ApplicationSharedPtr()));

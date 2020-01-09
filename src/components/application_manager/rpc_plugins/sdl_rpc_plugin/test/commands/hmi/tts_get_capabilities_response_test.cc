@@ -60,6 +60,7 @@ const std::string kText = "TEXT";
 class TTSGetCapabilitiesResponseTest
     : public CommandsTest<CommandsTestMocks::kIsNice> {};
 
+// cppcheck-suppress syntaxError
 TEST_F(TTSGetCapabilitiesResponseTest, Run_BothExist_SUCCESS) {
   MessageSharedPtr msg = CreateMessage();
   (*msg)[strings::msg_params][hmi_response::speech_capabilities] = kText;

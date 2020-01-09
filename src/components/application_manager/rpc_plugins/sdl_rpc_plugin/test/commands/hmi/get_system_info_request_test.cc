@@ -65,6 +65,7 @@ const uint32_t kCorrelationId = 1u;
 class GetSystemInfoRequestTest
     : public CommandsTest<CommandsTestMocks::kIsNice> {};
 
+// cppcheck-suppress syntaxError
 TEST_F(GetSystemInfoRequestTest, RUN_SendRequest_SUCCESS) {
   MessageSharedPtr command_msg(CreateMessage(smart_objects::SmartType_Map));
   (*command_msg)[strings::msg_params][strings::number] = "123";

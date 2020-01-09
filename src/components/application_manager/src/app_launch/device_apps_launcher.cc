@@ -69,6 +69,7 @@ class Launcher {
     LaunchNext();
   }
 
+  // cppcheck-suppress unusedFunction
   void OnAppRegistered(const ApplicationDataPtr& app_data) {
     std::vector<ApplicationDataPtr>& apps = apps_on_device_->second;
     std::vector<ApplicationDataPtr>::iterator it =

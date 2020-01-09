@@ -82,6 +82,7 @@ class RCGetCapabilitiesResponseTest
   SmartObject capabilities_;
 };
 
+// cppcheck-suppress syntaxError
 TEST_F(RCGetCapabilitiesResponseTest, RUN_SUCCESSS) {
   MessageSharedPtr command_msg = CreateCommandMsg();
 

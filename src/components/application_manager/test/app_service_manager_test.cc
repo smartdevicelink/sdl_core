@@ -65,6 +65,7 @@ const std::string kPolicyAppId2 = "p_app_id2";
 const uint32_t kConnectionKey = 43629;
 const uint32_t kHMIConnectionKey = 0;
 
+// cppcheck-suppress syntaxError
 MATCHER_P(CapabilityUpdateMatcher, reason, "") {
   smart_objects::SmartObject& services_updated =
       arg[am::strings::system_capability]

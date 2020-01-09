@@ -251,6 +251,7 @@ class MobileMessageHandlerTest : public testing::Test {
   }
 };
 
+// cppcheck-suppress syntaxError
 TEST(mobile_message_test, basic_test) {
   // Example message
   MobileMessage message =

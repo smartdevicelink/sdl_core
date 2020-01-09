@@ -78,6 +78,7 @@ class NaviStartStreamRequestTest
   std::shared_ptr<NaviStartStreamRequest> command_;
 };
 
+// cppcheck-suppress syntaxError
 TEST_F(NaviStartStreamRequestTest, Run_HmiInterfaceNotAvailable_NoRequest) {
   EXPECT_CALL(mock_hmi_interfaces_, GetInterfaceState(kHmiInterface))
       .WillOnce(Return(am::HmiInterfaces::STATE_NOT_AVAILABLE));

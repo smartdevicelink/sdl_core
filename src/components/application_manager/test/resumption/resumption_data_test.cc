@@ -149,6 +149,7 @@ void ResumptionDataTest::CheckChoiceSet(sm::SmartObject& res_list) {
       sm::SmartObject command = res_list[i][am::strings::choice_set][j];
       EXPECT_EQ(i + j, command[am::strings::choice_id].asUInt());
       char numb[12];
+      // cppcheck-suppress invalidPrintfArgType_sint
       std::snprintf(numb, 12, "%d", i + j);
       std::string test_choice =
           (*test_choiceset_map[i])[am::strings::choice_set][j]
@@ -313,11 +314,10 @@ void ResumptionDataTest::CheckTimeoutPrompt(
 
 void ResumptionDataTest::CheckVRHelp(sm::SmartObject& res_list) {
   std::string text;
-  int position;
   for (uint i = 0; i < kCountOfVrhelptitle_; ++i) {
     text = (*vr_help_)[i][am::strings::text].asString();
     EXPECT_EQ(text, res_list[i][am::strings::text].asString());
-    position = (*vr_help_)[i][am::strings::position].asInt();
+    int position = (*vr_help_)[i][am::strings::position].asInt();
     EXPECT_EQ(position, res_list[i][am::strings::position].asInt());
   }
 }
@@ -490,6 +490,7 @@ void ResumptionDataTest::SetCommands() {
   sm::SmartObject sm_icon;
   for (uint32_t i = 0; i < kCountOfCommands_; ++i) {
     char numb[12];
+    // cppcheck-suppress invalidPrintfArgType_sint
     std::snprintf(numb, 12, "%d", i);
     sm_comm[am::strings::cmd_id] = i;
     sm_comm[am::strings::menu_params][am::strings::position] = i;
@@ -499,6 +500,7 @@ void ResumptionDataTest::SetCommands() {
 
     for (uint32_t j = 0; j < kCountOfChoice_; ++j) {
       char vr[12];
+      // cppcheck-suppress invalidPrintfArgType_sint
       std::snprintf(vr, 12, "%d", i + j);
       vr_commandsvector[j] = "VrCommand " + std::string(vr);
     }
@@ -517,6 +519,7 @@ void ResumptionDataTest::SetSubmenues() {
   sm::SmartObject sm_comm;
   for (uint32_t i = 10; i < kCountOfSubmenues_ + 10; ++i) {
     char numb[12];
+    // cppcheck-suppress invalidPrintfArgType_sint
     std::snprintf(numb, 12, "%d", i);
     sm_comm[am::strings::menu_id] = i;
     sm_comm[am::strings::position] = i;
@@ -536,6 +539,7 @@ void ResumptionDataTest::SetChoiceSet() {
   for (uint32_t i = 0; i < kCountOfChoiceSets_; ++i) {
     for (uint32_t j = 0; j < kCountOfChoice_; ++j) {
       char numb[12];
+      // cppcheck-suppress invalidPrintfArgType_sint
       std::snprintf(numb, 12, "%d", i + j);
 
       choice[am::strings::choice_id] = i + j;
@@ -569,11 +573,10 @@ void ResumptionDataTest::SetChoiceSet() {
 
 void ResumptionDataTest::SetAppFiles() {
   am::AppFile test_file;
-  int file_types;
   for (uint i = 0; i < kCountOfFiles_; ++i) {
     char numb[12];
     std::snprintf(numb, 12, "%d", i);
-    file_types = i;
+    int file_types = i;
     test_file.is_persistent = true;
     test_file.is_download_complete = true;
     test_file.file_type = static_cast<FileType::eType>(file_types);

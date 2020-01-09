@@ -47,6 +47,7 @@ using sdl_rpc_plugin::commands::BCGetAppPropertiesResponse;
 class BCGetAppPropertiesResponseTest
     : public CommandsTest<CommandsTestMocks::kIsNice> {};
 
+// cppcheck-suppress syntaxError
 TEST_F(BCGetAppPropertiesResponseTest, RUN_SUCCESS) {
   MessageSharedPtr msg = CreateMessage();
 

@@ -75,6 +75,7 @@ const uint32_t kConnectionKey = 2u;
 class MixingAudioSupportedResponseTest
     : public CommandsTest<CommandsTestMocks::kIsNice> {};
 
+// cppcheck-suppress syntaxError
 TEST_F(MixingAudioSupportedResponseTest, RUN_SUCCESS) {
   MessageSharedPtr command_msg(CreateMessage(smart_objects::SmartType_Map));
   (*command_msg)[am::strings::msg_params][am::strings::number] = "123";

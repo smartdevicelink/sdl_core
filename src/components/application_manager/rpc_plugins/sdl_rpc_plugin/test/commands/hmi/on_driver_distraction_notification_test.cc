@@ -113,6 +113,7 @@ class HMIOnDriverDistractionNotificationTest
   }
 };
 
+// cppcheck-suppress syntaxError
 MATCHER_P2(CheckNotificationParams, function_id, state, "") {
   bool is_function_id_matched =
       function_id ==

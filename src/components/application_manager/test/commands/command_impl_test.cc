@@ -127,6 +127,7 @@ class CommandImplTest : public CommandsTest<CommandsTestMocks::kIsNice> {
 typedef CommandImplTest::UnwrappedCommandImpl UCommandImpl;
 typedef std::shared_ptr<UCommandImpl> UCommandImplPtr;
 
+// cppcheck-suppress syntaxError
 TEST_F(CommandImplTest, GetMethods_SUCCESS) {
   MessageSharedPtr msg;
   std::shared_ptr<CommandImpl> command =

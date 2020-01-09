@@ -169,6 +169,7 @@ class GetInteriorVehicleDataConsentRequestTest
   NiceMock<MockRCConsentManager> mock_rc_consent_manger_;
 };
 
+// cppcheck-suppress syntaxError
 TEST_F(GetInteriorVehicleDataConsentRequestTest,
        ModuleIDReturnsEmptyString_SUCCESS) {
   std::string empty_str;

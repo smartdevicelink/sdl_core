@@ -153,6 +153,7 @@ const am::WindowID kDefaultWindowId =
     mobile_apis::PredefinedWindows::DEFAULT_WINDOW;
 }
 
+// cppcheck-suppress syntaxError
 ACTION_P(GetEventId, event_id) {
   *event_id = arg0.id();
 }

@@ -68,6 +68,7 @@ class OnServiceUpdateNotificationTest
   NotificationPtr command_;
 };
 
+// cppcheck-suppress syntaxError
 TEST_F(OnServiceUpdateNotificationTest, SendNotificationToHMI) {
   (*message_)[strings::msg_params][hmi_notification::service_type] =
       ServiceType::AUDIO;

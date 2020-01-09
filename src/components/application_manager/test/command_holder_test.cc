@@ -78,6 +78,7 @@ class CommandHolderImplTest : public testing::Test {
   application_manager_test::MockRPCService mock_rpc_service_;
 };
 
+// cppcheck-suppress syntaxError
 TEST_F(CommandHolderImplTest, HoldOne_ExpectReleaseOne) {
   am::CommandHolderImpl cmd_holder(mock_app_manager_);
   cmd_holder.Suspend(mock_app_ptr_,

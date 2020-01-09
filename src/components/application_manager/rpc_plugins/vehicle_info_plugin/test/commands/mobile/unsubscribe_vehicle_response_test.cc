@@ -59,6 +59,7 @@ namespace am = ::application_manager;
 class UnsubscribeVehicleResponseTest
     : public VICommandsTest<CommandsTestMocks::kIsNice> {};
 
+// cppcheck-suppress syntaxError
 MATCHER_P(ResultCodeIs, result_code, "") {
   return result_code ==
          static_cast<mobile_apis::Result::eType>(

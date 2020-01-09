@@ -76,6 +76,7 @@ const std::string kStrNumber = "123";
 class VIGetVehicleDataResponseTest
     : public VICommandsTest<CommandsTestMocks::kIsNice> {};
 
+// cppcheck-suppress syntaxError
 TEST_F(VIGetVehicleDataResponseTest, RUN_SUCCESS) {
   MessageSharedPtr command_msg(CreateMessage(smart_objects::SmartType_Map));
   (*command_msg)[strings::msg_params][strings::number] = kStrNumber;

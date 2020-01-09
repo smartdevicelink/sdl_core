@@ -66,6 +66,7 @@ typedef std::shared_ptr<SubscribeWayPointsRequest> CommandPtr;
 class SubscribeWayPointsRequestTest
     : public CommandRequestTest<CommandsTestMocks::kIsNice> {};
 
+// cppcheck-suppress syntaxError
 TEST_F(SubscribeWayPointsRequestTest, Run_SUCCESS) {
   CommandPtr command(CreateCommand<SubscribeWayPointsRequest>());
   MockAppPtr app(CreateMockApp());
