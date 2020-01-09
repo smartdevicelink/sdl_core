@@ -46,6 +46,7 @@ using ::testing::Return;
 typedef std::shared_ptr<MockHMIMessageAdapterImpl>
     MockHMIMessageAdapterImplSPtr;
 
+// cppcheck-suppress syntaxError
 TEST(HMIMessageAdapterImplTest, Handler_CorrectPointer_CorrectReturnedPointer) {
   testing::NiceMock<MockHMIMessageHandlerSettings>
       mock_hmi_message_handler_settings;
