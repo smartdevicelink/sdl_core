@@ -67,6 +67,7 @@ const int64_t big_64int = 100000000000;
 const std::string str_with_big_int64 = "100000000000";
 }  // namespace
 
+// cppcheck-suppress syntaxError
 TEST(FormatterJsonRPCTest, CheckCompactJson) {
   std::string before_compact(
       "{\n   \"jsonrpc\" : \"2.0\",\n   \"method\" : "

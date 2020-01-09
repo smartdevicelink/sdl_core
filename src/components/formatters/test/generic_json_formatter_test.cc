@@ -92,6 +92,7 @@ TEST(GenericJsonFormatter, ToString) {
       result.c_str());
 }
 
+// cppcheck-suppress syntaxError
 TEST(GenericJsonFormatter, FromString) {
   namespace smartobj = ns_smart_device_link::ns_smart_objects;
   namespace formatters = ns_smart_device_link::ns_json_handler::formatters;

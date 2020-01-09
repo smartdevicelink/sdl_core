@@ -45,6 +45,7 @@ TEST(CSmartFactoryTest, CreateSmartSchemaKey_ExpectCreated) {
   EXPECT_EQ(test_key.messageType, MessageTypeTest::notification);
 }
 
+// cppcheck-suppress syntaxError
 TEST(CSmartFactoryTest, CreateSmartFactory_ExpectCreated) {
   CSmartFactoryTest test_factory;
   EXPECT_EQ(9u, test_factory.function_schemes().size());

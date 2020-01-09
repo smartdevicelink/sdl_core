@@ -139,6 +139,7 @@ const AppTypeTest::eType
         test::components::formatters::AppTypeTest::MEDIA,
 };
 
+// cppcheck-suppress unusedFunction
 CSmartSchema initObjectSchema() {
   std::set<TestType::eType> resultCode_allowedEnumSubsetValues;
   resultCode_allowedEnumSubsetValues.insert(
@@ -222,6 +223,7 @@ CSmartSchema initObjectSchema() {
   return CSmartSchema(CObjectSchemaItem::create(rootMembersMap));
 };
 
+// cppcheck-suppress unusedFunction
 CSmartSchema initSchemaForMetaFormatter() {
   std::set<TestType::eType> resultCode_allowedEnumSubsetValues;
   resultCode_allowedEnumSubsetValues.insert(

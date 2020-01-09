@@ -45,6 +45,7 @@ namespace formatters {
 using namespace ns_smart_device_link::ns_smart_objects;
 using namespace ns_smart_device_link::ns_json_handler::formatters;
 
+// cppcheck-suppress syntaxError
 TEST(CFormatterJsonBaseTest, JSonStringValueToSmartObj_ExpectSuccessful) {
   // Arrange value
   std::string string_val("test_string");

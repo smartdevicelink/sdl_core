@@ -62,6 +62,7 @@ TEST(CFormatterJsonSDLRPCv1Test, EmptySmartObjectToString) {
   EXPECT_EQ(expectOutputJsonString, jsonString);
 }
 
+// cppcheck-suppress syntaxError
 TEST(CFormatterJsonSDLRPCv1Test, SmObjWithRequestWithoutMsgNotValid_ToString) {
   SmartObject srcObj;
   CSmartSchema schema = initObjectSchema();

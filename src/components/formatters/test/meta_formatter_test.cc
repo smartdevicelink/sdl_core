@@ -84,6 +84,7 @@ TEST_F(CMetaFormatterTestHelper,
             result_object2[S_PARAMS][S_FUNCTION_ID].asString());
 }
 
+// cppcheck-suppress syntaxError
 TEST_F(CMetaFormatterTestHelper, NormalSchemaWithEmptyObject) {
   SmartObject object;
   SmartObject result_object;
