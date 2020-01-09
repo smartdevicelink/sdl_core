@@ -172,6 +172,7 @@ class ConnectionTest : public ::testing::Test {
   static const transport_manager::ConnectionUID kSecondaryConnectionHandle = 2;
 };
 
+// cppcheck-suppress syntaxError
 TEST_F(ConnectionTest, Session_TryGetProtocolVersionWithoutSession) {
   uint8_t protocol_version;
   EXPECT_FALSE(connection_->ProtocolVersion(session_id, protocol_version));

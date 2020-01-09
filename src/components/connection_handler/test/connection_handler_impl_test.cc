@@ -66,6 +66,7 @@ using ::testing::SaveArg;
 using ::testing::SaveArgPointee;
 
 // custom action to call a member function with 3 arguments
+// cppcheck-suppress syntaxError
 ACTION_P5(InvokeMemberFuncWithArg3, ptr, memberFunc, a, b, c) {
   (ptr->*memberFunc)(a, b, c);
 }

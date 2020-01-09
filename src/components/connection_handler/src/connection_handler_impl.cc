@@ -219,7 +219,7 @@ namespace {
 struct DeviceFinder {
   explicit DeviceFinder(const std::string& device_uid)
       : device_uid_(device_uid) {}
-  bool operator()(const DeviceMap::value_type& device) {
+  bool operator()(const DeviceMap::value_type& device) const {
     return device_uid_ == device.second.mac_address();
   }
 
@@ -1145,7 +1145,7 @@ const uint8_t ConnectionHandlerImpl::GetSessionIdFromSecondaryTransport(
     transport_manager::ConnectionUID secondary_transport_id) const {
   sync_primitives::AutoLock auto_lock(session_connection_map_lock_ptr_);
   SessionConnectionMap::const_iterator it = session_connection_map_.begin();
-  for (; session_connection_map_.end() != it; it++) {
+  for (; session_connection_map_.end() != it; ++it) {
     SessionTransports st = it->second;
     if (st.secondary_transport == secondary_transport_id) {
       return it->first;

@@ -83,6 +83,7 @@ class HeartBeatMonitorTest : public testing::Test {
   }
 };
 
+// cppcheck-suppress syntaxError
 ACTION_P2(RemoveSession, conn, session_id) {
   conn->RemoveSession(session_id);
 }

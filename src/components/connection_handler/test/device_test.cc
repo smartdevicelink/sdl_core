@@ -39,6 +39,7 @@ namespace components {
 namespace connection_handler_test {
 
 using namespace connection_handler;
+// cppcheck-suppress syntaxError
 TEST(ConnectionDevice, CompareDevicesWithDifferentMacAddresses) {
   DeviceHandle device_handle = 0;
 
