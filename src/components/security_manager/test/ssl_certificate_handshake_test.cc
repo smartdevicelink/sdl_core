@@ -378,6 +378,7 @@ INSTANTIATE_TEST_CASE_P(
         Protocol(security_manager::TLSv1_2, security_manager::TLSv1_2),
         Protocol(security_manager::DTLSv1, security_manager::DTLSv1)));
 
+// cppcheck-suppress syntaxError
 TEST_P(SSLHandshakeTest, NoVerification) {
   ASSERT_TRUE(InitServerManagers(GetParam().server_protocol,
                                  server_certificate,

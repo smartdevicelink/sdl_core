@@ -348,8 +348,11 @@ bool CryptoManagerImpl::IsCertificateUpdateRequired(
   const double seconds = difftime(certificates_time, system_time);
 
   LOG4CXX_DEBUG(
-      logger_, "Certificate UTC time: " << asctime(gmtime(&certificates_time)));
+      logger_,
+      // cppcheck-suppress asctimeCalled
+      "Certificate UTC time: " << asctime(gmtime(&certificates_time)));
 
+  // cppcheck-suppress asctimeCalled
   LOG4CXX_DEBUG(logger_, "Host UTC time: " << asctime(gmtime(&system_time)));
   LOG4CXX_DEBUG(logger_, "Seconds before expiration: " << seconds);
   if (seconds < 0) {

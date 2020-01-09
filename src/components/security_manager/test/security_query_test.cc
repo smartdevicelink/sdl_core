@@ -91,6 +91,7 @@ class SecurityQueryTest : public ::testing::Test {
  * Security QueryHeader shall be the same size as RPC header
  * for correct working on Mobile side (3*8 byte)
  */
+// cppcheck-suppress syntaxError
 TEST_F(SecurityQueryTest, Equal_RPCHeader) {
   ASSERT_EQ(sizeof(SecurityQuery::QueryHeader) * 8,
             ::protocol_handler::ProtocolPayloadV2SizeBits());

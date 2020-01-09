@@ -441,6 +441,7 @@ INSTANTIATE_TEST_CASE_P(
 #endif
                           ));
 
+// cppcheck-suppress syntaxError
 TEST_F(SSLTest, OnTSL2Protocol_BrokenHandshake) {
   ASSERT_EQ(security_manager::SSLContext::Handshake_Result_Success,
             client_ctx_->StartHandshake(&kClientBuf, &client_buf_len));

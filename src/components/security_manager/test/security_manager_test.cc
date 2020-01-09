@@ -183,6 +183,7 @@ class SecurityManagerTest : public ::testing::Test {
  * SecurityManager shall not set NULL interfaces
  * and shall not call any methodes
  */
+// cppcheck-suppress syntaxError
 TEST_F(SecurityManagerTest, SetNULL_Intefaces) {
   security_manager_->set_session_observer(NULL);
   security_manager_->set_protocol_handler(NULL);

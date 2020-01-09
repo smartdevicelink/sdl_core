@@ -137,6 +137,7 @@ class CryptoManagerTest : public testing::Test {
 
 std::string CryptoManagerTest::certificate_data_base64_;
 
+// cppcheck-suppress syntaxError
 TEST_F(CryptoManagerTest, UsingBeforeInit) {
   EXPECT_TRUE(crypto_manager_->CreateSSLContext() == NULL);
   EXPECT_EQ(std::string("Initialization is not completed"),

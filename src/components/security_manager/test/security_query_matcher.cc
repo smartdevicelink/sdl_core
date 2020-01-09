@@ -99,6 +99,7 @@ MATCHER_P(InternalErrorWithErrId,
     const ::security_manager::SecurityQuery::QueryHeader& q1,
     const ::security_manager::SecurityQuery::QueryHeader& q2);
 
+// cppcheck-suppress unusedFunction
 ::testing::AssertionResult QueryHeader_EQ(
     const char* m_expr,
     const char* n_expr,
