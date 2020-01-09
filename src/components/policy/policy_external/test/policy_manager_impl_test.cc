@@ -57,6 +57,7 @@ TEST_F(PolicyManagerImplTest, GetNotificationsNumber) {
   EXPECT_EQ(notif_number, policy_manager_->GetNotificationsNumber(priority));
 }
 
+// cppcheck-suppress syntaxError
 TEST_F(PolicyManagerImplTest, IncrementGlobalCounter) {
   // Assert
   EXPECT_CALL(*cache_manager_, Increment(usage_statistics::SYNC_REBOOTS));

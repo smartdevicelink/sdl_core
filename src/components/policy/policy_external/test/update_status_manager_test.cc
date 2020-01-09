@@ -112,6 +112,7 @@ class WaitAsync {
 };
 }  // namespace
 
+// cppcheck-suppress syntaxError
 ACTION_P(NotifyAsync, waiter) {
   waiter->Notify();
 }

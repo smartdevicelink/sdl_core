@@ -166,6 +166,7 @@ struct LinkCollector
   typedef std::vector<policy_table::UserConsentRecords::key_type>
       ApplicationsIds;
 
+  // cppcheck-suppress noExplicitConstructor
   LinkCollector(std::map<std::string, std::string>& links) : links_(links) {}
 
   void operator()(const policy_table::DeviceData::value_type& value) {
@@ -208,10 +209,12 @@ struct ExternalConsentConsentGroupAppender
 };
 
 struct DefaultPolicyUpdater {
+  // cppcheck-suppress noExplicitConstructor
   DefaultPolicyUpdater(const policy_table::ApplicationParams& default_params)
       : default_params_(default_params) {}
 
-  void operator()(policy_table::ApplicationPolicies::value_type& pt_value) {
+  void operator()(
+      policy_table::ApplicationPolicies::value_type& pt_value) const {
     if (policy::kDefaultId == pt_value.second.get_string()) {
       pt_value.second = default_params_;
       pt_value.second.set_to_string(policy::kDefaultId);
@@ -2297,6 +2300,7 @@ bool CacheManager::IsMetaInfoPresent() const {
   CACHE_MANAGER_CHECK(false);
   bool result = true;
   sync_primitives::AutoLock lock(cache_lock_);
+  // cppcheck-suppress redundantAssignment
   result = NULL != pt_->policy_table.module_meta->ccpu_version &&
            NULL != pt_->policy_table.module_meta->wers_country_code &&
            NULL != pt_->policy_table.module_meta->language;

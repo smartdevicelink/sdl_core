@@ -62,6 +62,7 @@ namespace {
 struct GroupNamesAppender
     : public std::unary_function<void,
                                  const policy::FunctionalGroupPermission&> {
+  // cppcheck-suppress noExplicitConstructor
   GroupNamesAppender(policy_table::Strings& names) : names_(names) {}
 
   void operator()(const policy::FunctionalGroupPermission& value) {
@@ -1837,6 +1838,7 @@ bool PolicyManagerImpl::IsNeedToUpdateExternalConsentStatus(
   difference_v.resize(new_status_v.size() + existing_status_v.size());
 
   ItemV::iterator ci = difference_v.begin();
+  // cppcheck-suppress redundantAssignment
   ci = std::set_difference(new_status_v.begin(),
                            new_status_v.end(),
                            existing_status_v.begin(),
@@ -2400,7 +2402,7 @@ void PolicyManagerImpl::SetDefaultHmiTypes(
 }
 
 struct HMITypeToInt {
-  int operator()(const policy_table::AppHMITypes::value_type item) {
+  int operator()(const policy_table::AppHMITypes::value_type item) const {
     return policy_table::AppHMIType(item);
   }
 };
@@ -2600,6 +2602,7 @@ __attribute__((visibility("default"))) policy::PolicyManager* CreateManager() {
   return new policy::PolicyManagerImpl();
 }
 
+// cppcheck-suppress unusedFunction
 __attribute__((visibility("default"))) void DeleteManager(
     policy::PolicyManager* pm) {
   delete pm;

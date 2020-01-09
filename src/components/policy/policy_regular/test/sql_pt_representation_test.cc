@@ -428,6 +428,7 @@ class SQLPTRepresentationTest3 : public ::testing::Test {
   const std::string kAppStorageFolder;
 };
 
+// cppcheck-suppress syntaxError
 TEST_F(SQLPTRepresentationTest, VehicleDataItem_Store_Item) {
   policy_table::VehicleDataItem rpm;
   rpm.mark_initialized();

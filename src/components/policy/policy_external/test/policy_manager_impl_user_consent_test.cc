@@ -44,6 +44,7 @@ using ::testing::_;
 using ::testing::Return;
 
 // Tests that use device without Consent
+// cppcheck-suppress syntaxError
 TEST_F(
     PolicyManagerImplTest2,
     AddApplication_AddNewApplicationFromDeviceWithConsent_ExpectUpdateRequired) {

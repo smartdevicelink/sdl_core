@@ -376,6 +376,7 @@ class SQLPTRepresentationTest2 : public ::testing::Test {
   const uint16_t kAttemptsToOpenPolicyDB = 2u;
 };
 
+// cppcheck-suppress syntaxError
 TEST_F(SQLPTRepresentationTest, VehicleDataItem_Store_Item) {
   policy_table::VehicleDataItem rpm;
   rpm.mark_initialized();

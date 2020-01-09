@@ -61,6 +61,7 @@ class UpdateStatusManagerTest : public ::testing::Test {
   void TearDown() OVERRIDE {}
 };
 
+// cppcheck-suppress syntaxError
 TEST_F(UpdateStatusManagerTest,
        OnAppSearchStartedCompleted_ExpectAppSearchCorrectStatus) {
   // Arrange

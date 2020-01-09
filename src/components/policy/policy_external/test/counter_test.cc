@@ -42,6 +42,7 @@ namespace usage_statistics_test {
 
 using namespace usage_statistics;
 
+// cppcheck-suppress syntaxError
 TEST(
     StatisticsManagerIncrementMethod1Arg,
     GlobalCounterOverloadedIncrement_CallONCE_StatisticsManagerIncrementCalledONCE) {

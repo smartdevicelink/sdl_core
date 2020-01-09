@@ -44,6 +44,7 @@ namespace policy_test {
 
 using ::testing::Return;
 
+// cppcheck-suppress syntaxError
 TEST_F(PolicyManagerImplTest2, UpdatedPreloadedPT_ExpectLPT_IsUpdated) {
   // Arrange necessary pre-conditions
   StringsForUpdate new_data;

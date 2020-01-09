@@ -52,6 +52,7 @@ using ::testing::_;
 using ::testing::Return;
 using ::testing::ReturnRef;
 
+// cppcheck-suppress syntaxError
 TEST_F(PolicyManagerImplTest,
        DISABLED_TiggerPTUForNaviAppInCaseNoCertificateExistsInPolicyTable) {
   EXPECT_CALL(*cache_manager_, GetDeviceConsent(_))

@@ -62,6 +62,7 @@ char GenRandomChar(char range_from, char range_to) {
   return rand() % range_size + range_from;
 }
 
+// cppcheck-suppress unusedFunction
 struct StringsForUpdate CreateNewRandomData(StringsForUpdate& str) {
   // Generate random date
   srand(time(NULL));
@@ -83,6 +84,7 @@ struct StringsForUpdate CreateNewRandomData(StringsForUpdate& str) {
   return str;
 }
 
+// cppcheck-suppress unusedFunction
 void CheckIsParamInList(const ::policy::RPCParams& list,
                         const std::string& parameter) {
   EXPECT_TRUE(std::find(list.begin(), list.end(), parameter) != list.end())

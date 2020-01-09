@@ -54,9 +54,10 @@ bool CompareStrings(const StringsValueType& first,
 }
 
 struct CheckGroupName {
+  // cppcheck-suppress noExplicitConstructor
   CheckGroupName(const policy::StringsValueType& value) : value_(value) {}
 
-  bool operator()(const FunctionalGroupNames::value_type& value) {
+  bool operator()(const FunctionalGroupNames::value_type& value) const {
     return value.second.second == std::string(value_);
   }
 
@@ -562,8 +563,7 @@ bool CheckAppPolicy::IsConsentRequired(const std::string& app_id,
     return false;
   }
 
-  bool is_preconsented = false;
-  return it->second.user_consent_prompt.is_initialized() && !is_preconsented;
+  return it->second.user_consent_prompt.is_initialized();
 }
 
 bool CheckAppPolicy::IsRequestTypeChanged(

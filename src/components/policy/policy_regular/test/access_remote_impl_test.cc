@@ -60,6 +60,7 @@ TEST(AccessRemoteImplTest, CheckModuleType) {
   EXPECT_FALSE(access_remote.CheckModuleType("1234", policy_table::MT_CLIMATE));
 }
 
+// cppcheck-suppress syntaxError
 TEST(AccessRemoteImplTest, SetDefaultHmiTypes) {
   AccessRemoteImpl access_remote;
 

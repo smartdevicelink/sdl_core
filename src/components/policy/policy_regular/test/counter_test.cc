@@ -49,6 +49,7 @@ using namespace usage_statistics;
 // C - Input data
 // D - Expected result
 
+// cppcheck-suppress syntaxError
 TEST(
     StatisticsManagerIncrementMethod1Arg,
     GlobalCounterOverloadedIncrement_CallONCE_StatisticsManagerIncrementCalledONCE) {

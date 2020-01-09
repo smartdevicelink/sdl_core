@@ -59,6 +59,7 @@ TEST(PolicyGeneratedCodeTest, TestValidPTPreloadJsonIsValid) {
   ASSERT_RPCTYPE_VALID(table);
 }
 
+// cppcheck-suppress syntaxError
 TEST(PolicyGeneratedCodeTest, TestValidPTUpdateJsonIsValid) {
   std::ifstream json_file("json/valid_sdl_pt_update.json");
   ASSERT_TRUE(json_file.is_open());

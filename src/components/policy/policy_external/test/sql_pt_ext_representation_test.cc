@@ -274,6 +274,7 @@ const bool SQLPTExtRepresentationTest::in_memory_ = true;
   }
 }
 
+// cppcheck-suppress syntaxError
 TEST_F(SQLPTExtRepresentationTest,
        DISABLED_GenerateSnapshot_SetPolicyTable_SnapshotIsPresent) {
   // TODO(AKutsan): APPLINK-31526 Test requires initial preloaded pt for

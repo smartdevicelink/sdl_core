@@ -231,6 +231,7 @@ void PolicyManagerImplStressTest::CreateTable(std::ofstream& ofs) {
   ofs << "} } }";
 }
 
+// cppcheck-suppress syntaxError
 TEST_F(PolicyManagerImplStressTest,
        OneCheck_AppAndFunctuionExisting_RpcAllowed) {
   EXPECT_CALL(*mock_listener, OnCurrentDeviceIdUpdateRequired(_));

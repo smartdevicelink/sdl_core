@@ -45,6 +45,7 @@ namespace policy_test {
   }
 }
 
+// cppcheck-suppress syntaxError
 TEST(SharedLibraryTest,
      FullTest_OpenLibrarySetSymbolCloseLibrary_ExpectActsWithoutErrors) {
   // Arrange

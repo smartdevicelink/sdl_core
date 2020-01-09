@@ -142,6 +142,7 @@ class VehicleDataItemTypeTest : public ::testing::Test {
   utils::JsonReader reader_;
 };
 
+// cppcheck-suppress syntaxError
 TEST_F(VehicleDataItemTypeTest, Initialize_Success) {
   const std::string str = GetFullJsonString();
   reader_.parse(str, &json_);

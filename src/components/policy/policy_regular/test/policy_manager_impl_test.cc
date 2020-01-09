@@ -598,6 +598,7 @@ Json::Value CreatePTforLoad() {
   return table;
 }
 
+// cppcheck-suppress syntaxError
 TEST_F(PolicyManagerImplTest, GetNotificationsNumber) {
   const std::string priority = "EMERGENCY";
   const uint32_t notif_number = 100u;

@@ -102,6 +102,7 @@ bool CompareGroupName::operator()(
   return !(strcasecmp(gn_.c_str(), gn_compare.c_str()));
 }
 
+// cppcheck-suppress unusedFunction
 bool operator!=(const policy_table::ApplicationParams& first,
                 const policy_table::ApplicationParams& second) {
   if (first.groups.size() != second.groups.size()) {
@@ -622,6 +623,7 @@ bool CheckAppPolicy::IsConsentRequired(const std::string& app_id,
 
   policy_table::Strings::iterator it2 = std::find(pre_begin, pre_end, str);
 
+  // cppcheck-suppress redundantAssignment
   is_preconsented = pre_end != it2;
 
   return it->second.user_consent_prompt.is_initialized() && !is_preconsented;
@@ -957,6 +959,7 @@ void FillNotificationData::UpdateParameters(
 
   // If 'parameters' section is omitted
   if (!in_parameters.is_initialized()) {
+    // cppcheck-suppress redundantCondition
     if (!does_require_user_consent_ ||
         (does_require_user_consent_ && kAllowedKey == current_key_)) {
       out_parameter.any_parameter_allowed = true;
@@ -1255,6 +1258,7 @@ FunctionalGroupIDs Merge(const FunctionalGroupIDs& first,
   return merged;
 }
 
+// cppcheck-suppress unusedFunction
 FunctionalGroupIDs FindSame(const FunctionalGroupIDs& first,
                             const FunctionalGroupIDs& second) {
   LOG4CXX_INFO(logger_, "Find same groups");
