@@ -50,6 +50,7 @@ bool IsValidEnum(TestEnum val) {
 
 }  // namespace
 
+// cppcheck-suppress syntaxError
 TEST(ValidatedTypes, TestBooleanDefaultConstructor) {
   Boolean boolean;
   ASSERT_FALSE(boolean.is_valid());

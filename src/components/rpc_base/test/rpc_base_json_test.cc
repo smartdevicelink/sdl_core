@@ -69,6 +69,7 @@ const char* EnumToJsonString(TestEnum enm) {
 
 }  // namespace
 
+// cppcheck-suppress syntaxError
 TEST(ValidatedTypesJson, BooleanFromJsonTest) {
   Value val(true);
   Boolean boolean(&val);

@@ -106,6 +106,7 @@ const std::string ValidationReportTest::test_validation_info_ =
     "test_validation_info";
 const std::string ValidationReportTest::parent_object_name_ = "test_parent";
 
+// cppcheck-suppress syntaxError
 TEST_F(ValidationReportTest, Ctor_and_object_name_test_ExpectDataCorrect) {
   EXPECT_EQ(object_name_, report_->object_name());
 }
