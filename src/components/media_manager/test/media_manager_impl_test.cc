@@ -214,6 +214,7 @@ class MediaManagerImplTest : public ::testing::Test {
   application_manager_test::MockHMICapabilities mock_hmi_capabilities_;
 };
 
+// cppcheck-suppress syntaxError
 TEST_F(MediaManagerImplTest,
        OnMessageReceived_WithUnsupportedServiceType_Cancelled) {
   EXPECT_CALL(app_mngr_, CanAppStream(_, _)).Times(0);
