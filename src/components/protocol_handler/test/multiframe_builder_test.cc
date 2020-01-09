@@ -264,6 +264,7 @@ class MultiFrameBuilderTest : public ::testing::Test {
 
 size_t MultiFrameBuilderTest::mtu_ = 10;
 
+// cppcheck-suppress syntaxError
 TEST_F(MultiFrameBuilderTest, Pop_Frames_From_Empty_builder) {
   EXPECT_EQ(ProtocolFramePtrList(), multiframe_builder_.PopMultiframes());
 }

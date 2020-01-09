@@ -58,6 +58,7 @@ class ProtocolHeaderValidatorTest : public ::testing::Test {
 };
 
 // Protocol version shall be from 1 to 5
+// cppcheck-suppress syntaxError
 TEST_F(ProtocolHeaderValidatorTest, MaxPayloadSizeSetGet) {
   EXPECT_EQ(std::numeric_limits<size_t>::max(),
             header_validator.max_payload_size());

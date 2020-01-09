@@ -1214,7 +1214,7 @@ void ProtocolHandlerImpl::OnTransportConfigUpdated(
     if (st.secondary_transport != kDisabledSecondary) {
       SendTransportUpdateEvent(st.primary_transport, itr->first);
     }
-    itr++;
+    ++itr;
   }
 }
 
@@ -2553,7 +2553,7 @@ void ProtocolHandlerImpl::GenerateSecondaryTransportsForStartSessionAck(
       secondaryTransports.push_back("TCP_WIFI");
     }
 
-    it++;
+    ++it;
   }
 }
 
@@ -2580,7 +2580,7 @@ void ProtocolHandlerImpl::GenerateServiceTransportsForStartSessionAck(
     bool fPrimaryAdded = false;
     bool fSecondaryAdded = false;
     std::vector<std::string>::const_iterator it = service_transports.begin();
-    for (; it != service_transports.end(); it++) {
+    for (; it != service_transports.end(); ++it) {
       const utils::custom_string::CustomString transport(*it);
       LOG4CXX_TRACE(
           logger_,

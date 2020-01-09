@@ -198,6 +198,7 @@ INSTANTIATE_TEST_CASE_P(
                       ServiceStatus::PROTECTION_DISABLED),
         ServiceUpdate(ServiceType::kRpc, ServiceStatus::PROTECTION_DISABLED)));
 
+// cppcheck-suppress syntaxError
 TEST_P(ServiceStatusUpdateHandlerTest, OnServiceUpdate) {
   auto service_event_ = GetServiceEvent(GetParam().service_status_);
   auto reason_ = GetUpdateReason(GetParam().service_status_);

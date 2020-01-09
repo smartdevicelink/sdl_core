@@ -102,6 +102,7 @@ class IncomingDataHandlerTest : public ::testing::Test {
   std::vector<uint8_t> payload_bigger_mtu;
 };
 
+// cppcheck-suppress syntaxError
 TEST_F(IncomingDataHandlerTest, NullData) {
   ProcessData(uid1, NULL, 0);
   EXPECT_EQ(RESULT_FAIL, result_code);

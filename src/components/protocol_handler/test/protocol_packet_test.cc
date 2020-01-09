@@ -97,6 +97,7 @@ class ProtocolPacketTest : public ::testing::Test {
   ConnectionID some_connection_id_;
 };
 
+// cppcheck-suppress syntaxError
 TEST_F(ProtocolPacketTest, SerializePacketWithDiffVersions) {
   uint8_t version = PROTOCOL_VERSION_1;
   for (; version <= PROTOCOL_VERSION_MAX; ++version) {

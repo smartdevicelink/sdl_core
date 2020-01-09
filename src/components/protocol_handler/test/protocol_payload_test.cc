@@ -82,6 +82,7 @@ void prepare_data(uint8_t* data_for_sending, ProtocolPayloadV2& message) {
   }
 }
 
+// cppcheck-suppress syntaxError
 TEST(ProtocolPayloadTest, ExtractProtocolWithOnlyHeader) {
   ProtocolPayloadV2 prot_payload_test;
 

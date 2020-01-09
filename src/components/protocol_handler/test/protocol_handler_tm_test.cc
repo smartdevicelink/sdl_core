@@ -146,6 +146,7 @@ typedef std::shared_ptr<
     MockServiceStatusUpdateHandlerListenerPtr;
 
 // custom action to call a member function with 6 arguments
+// cppcheck-suppress syntaxError
 ACTION_P4(InvokeMemberFuncWithArg2, ptr, memberFunc, a, b) {
   (ptr->*memberFunc)(a, b);
 }

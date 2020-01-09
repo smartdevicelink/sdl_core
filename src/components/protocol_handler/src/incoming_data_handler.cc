@@ -167,7 +167,7 @@ RESULT_CODE IncomingDataHandler::CreateFrame(
     }
     LOG4CXX_DEBUG(logger_, "Payload size " << header_.dataSize);
     const uint32_t packet_size = GetPacketSize(header_);
-    if (packet_size <= 0) {
+    if (packet_size == 0) {
       LOG4CXX_WARN(logger_, "Null packet size");
       ++data_it;
       --data_size;
