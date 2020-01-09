@@ -62,6 +62,7 @@ RpcType RpcTypeFromByte(uint8_t byte) {
   return supported_type ? type : kRpcTypeReserved;
 }
 
+// cppcheck-suppress unusedFunction
 uint8_t RpcTypeToByte(RpcType type) {
   DCHECK(IsSupported(type));
   return uint8_t(type);

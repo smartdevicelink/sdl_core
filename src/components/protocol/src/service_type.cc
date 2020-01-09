@@ -63,6 +63,7 @@ ServiceType ServiceTypeFromByte(uint8_t byte) {
   return valid_type ? type : kInvalidServiceType;
 }
 
+// cppcheck-suppress unusedFunction
 uint8_t ServiceTypeToByte(ServiceType type) {
   DCHECK(IsValid(type));
   return uint8_t(type);
