@@ -72,6 +72,7 @@ class LastStateTest : public ::testing::Test {
   resumption::LastStateImpl last_state_;
 };
 
+// cppcheck-suppress syntaxError
 TEST_F(LastStateTest, Basic) {
   const Value& dictionary = last_state_.dictionary();
   EXPECT_EQ(empty_dictionary_, dictionary.toStyledString());
