@@ -236,6 +236,7 @@ class StressTestHelper : public ::testing::Test {
  * The iteration continues until all nodes are simple SmartObjects (not arrays
  * or maps)
  */
+// cppcheck-suppress syntaxError
 TEST_F(StressTestHelper, StressTest) {
   SmartObject objects;
 

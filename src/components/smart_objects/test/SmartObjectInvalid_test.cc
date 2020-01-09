@@ -42,6 +42,7 @@ namespace smart_object_test {
 
 using namespace ns_smart_device_link::ns_smart_objects;
 
+// cppcheck-suppress syntaxError
 TEST(test_SmartObjectInvalidTest, simple_type_can_be_set_in_constructor) {
   SmartObject objMap(SmartType_Map);
   ASSERT_EQ(SmartType_Map, objMap.getType());

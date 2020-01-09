@@ -175,6 +175,7 @@ class ObjectSchemaItemTest : public ::testing::Test {
   }
 };
 
+// cppcheck-suppress syntaxError
 TEST_F(ObjectSchemaItemTest, validation_correct) {
   SmartObject obj;
   obj[S_PARAMS][S_FUNCTION_ID] = 0;

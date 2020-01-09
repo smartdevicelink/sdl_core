@@ -49,6 +49,7 @@ using ns_smart_device_link::ns_smart_objects::ISchemaItemPtr;
  *return false
  * and leave SmartObject in previous state.
  **/
+// cppcheck-suppress syntaxError
 TEST(test_int_no_default_value, test_NumberSchemaItemTest) {
   using namespace ns_smart_device_link::ns_smart_objects;
 

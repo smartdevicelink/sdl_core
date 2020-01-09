@@ -47,6 +47,7 @@ namespace smart_object_test {
 using ns_smart_device_link::ns_smart_objects::SmartObject;
 using ns_smart_device_link::ns_smart_objects::SmartType;
 
+// cppcheck-suppress syntaxError
 TEST(SmartObjectsDraftTest, primitive_types) {
   SmartObject obj;
 

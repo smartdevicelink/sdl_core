@@ -60,6 +60,7 @@ void MakeMapObject(SmartObject& obj, const int size) {
 }
 }  // namespace
 
+// cppcheck-suppress syntaxError
 TEST(SmartObjectPerformanceTest, SmartObjectPerformance) {
   SmartObject object;
   MakeMapObject(object, 100);

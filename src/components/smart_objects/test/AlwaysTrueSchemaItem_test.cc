@@ -46,6 +46,7 @@ using namespace ns_smart_device_link::ns_smart_objects;
 /**
  * Test AlwaysTrueSchemaItem
  **/
+// cppcheck-suppress syntaxError
 TEST(test_AlwaysTrueSchemaItemTest, simple_test) {
   SmartObject obj;
 

@@ -97,6 +97,7 @@ TEST(test_no_default_value, test_StringSchemaItemTest) {
  * Not string SmartObject should converted to StringObject and setted up by the
  *default value.
  **/
+// cppcheck-suppress syntaxError
 TEST(test_item_with_default_value, test_StringSchemaItemTest) {
   using namespace ns_smart_device_link::ns_smart_objects;
   SmartObject obj;

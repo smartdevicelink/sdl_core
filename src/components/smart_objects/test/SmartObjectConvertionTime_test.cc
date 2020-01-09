@@ -358,6 +358,7 @@ class SmartObjectConvertionTimeTest : public ::testing::Test {
   }
 };
 
+// cppcheck-suppress syntaxError
 TEST_F(SmartObjectConvertionTimeTest, test_int_object_convertion) {
   SmartObject srcObj, dstObj;
   CSmartSchema schema = initObjectSchema();

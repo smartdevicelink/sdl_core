@@ -84,6 +84,7 @@ class EnumSchemaItemTest : public ::testing::Test {
  * Not Enum SmartObject should converted to intObject and setted up by the
  *default value.
  **/
+// cppcheck-suppress syntaxError
 TEST_F(EnumSchemaItemTest, test_item_with_default_value) {
   SmartObject obj;
   ISchemaItemPtr item = TEnumSchemaItem<TestType::eType>::create(
