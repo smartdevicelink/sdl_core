@@ -49,6 +49,7 @@ class ProfileTest : public ::testing::Test {
   profile::Profile profile_;
 };
 
+// cppcheck-suppress syntaxError
 TEST_F(ProfileTest, UpdateConfigWithDefaultFile) {
   // Default value
   uint32_t thread_min_stack_size = threads::Thread::kMinStackSize;

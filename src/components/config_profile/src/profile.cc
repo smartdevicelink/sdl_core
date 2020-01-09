@@ -1717,6 +1717,7 @@ void Profile::UpdateValues() {
   std::string help_prompt_value;
   if (ReadValue(&help_prompt_value, kGlobalPropertiesSection, kHelpPromptKey)) {
     char* str = NULL;
+    // cppcheck-suppress redundantAssignment
     str = strtok(const_cast<char*>(help_prompt_value.c_str()), ",");
     while (str != NULL) {
       // Default prompt should have delimiter included for each item
@@ -1737,6 +1738,7 @@ void Profile::UpdateValues() {
   if (ReadValue(
           &timeout_prompt_value, kGlobalPropertiesSection, kTimeoutPromptKey)) {
     char* str = NULL;
+    // cppcheck-suppress redundantAssignment
     str = strtok(const_cast<char*>(timeout_prompt_value.c_str()), ",");
     while (str != NULL) {
       // Default prompt should have delimiter included for each item
@@ -1762,6 +1764,7 @@ void Profile::UpdateValues() {
   std::string vr_help_command_value;
   if (ReadValue(&vr_help_command_value, kVrCommandsSection, kHelpCommandKey)) {
     char* str = NULL;
+    // cppcheck-suppress redundantAssignment
     str = strtok(const_cast<char*>(vr_help_command_value.c_str()), ",");
     while (str != NULL) {
       const std::string vr_item = str;
@@ -1845,6 +1848,7 @@ void Profile::UpdateValues() {
                       kMainSection,
                       kSupportedDiagModesKey)) {
     char* str = NULL;
+    // cppcheck-suppress redundantAssignment
     str = strtok(const_cast<char*>(supported_diag_modes_value.c_str()), ",");
     while (str != NULL) {
       errno = 0;

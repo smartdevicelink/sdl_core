@@ -40,6 +40,7 @@ namespace profile_test {
 
 using namespace ::profile;
 
+// cppcheck-suppress syntaxError
 TEST(IniFileTest, WriteItemReadItem) {
   // Write line in chapter
   const char* fname = "./test_ini_file.ini";
