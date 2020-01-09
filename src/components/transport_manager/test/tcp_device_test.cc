@@ -55,6 +55,7 @@ class TestDevice : public Device {
   const uint32_t in_addr_;
 };
 
+// cppcheck-suppress syntaxError
 TEST(TcpDeviceTest, CompareWithOtherTCPDevice) {
   uint32_t in_addr = 10;
   std::string name = "tcp_device";

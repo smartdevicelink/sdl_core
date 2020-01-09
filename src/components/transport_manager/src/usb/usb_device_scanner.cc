@@ -47,6 +47,7 @@ CREATE_LOGGERPTR_GLOBAL(logger_, "TransportManager")
 class AoaInitSequence : public UsbControlTransferSequence {
  public:
   AoaInitSequence();
+  // cppcheck-suppress noExplicitConstructor
   AoaInitSequence(const TransportManagerSettings& settings);
   virtual ~AoaInitSequence() {}
 

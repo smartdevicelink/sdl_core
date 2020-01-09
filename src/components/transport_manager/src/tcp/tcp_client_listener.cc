@@ -164,9 +164,13 @@ TcpClientListener::~TcpClientListener() {
 void SetKeepaliveOptions(const int fd) {
   LOG4CXX_AUTO_TRACE(logger_);
   LOG4CXX_DEBUG(logger_, "fd: " << fd);
+  // cppcheck-suppress unreadVariable
   int yes = 1;
-  int keepidle = 3;  // 3 seconds to disconnection detecting
+  // cppcheck-suppress unreadVariable
+  int keepidle = 3;  // 3 seconds to disconnection detectin
+  // cppcheck-suppress unreadVariable
   int keepcnt = 5;
+  // cppcheck-suppress unreadVariable
   int keepintvl = 1;
 #ifdef __linux__
   int user_timeout = 7000;  // milliseconds

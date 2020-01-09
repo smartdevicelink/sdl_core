@@ -57,6 +57,7 @@ class TransportAdapterListenerTest : public ::testing::Test {
   const int app_handle;
 };
 
+// cppcheck-suppress syntaxError
 MATCHER_P4(IsEvent, eventType, adapter, dev_id, app_id, "") {
   TransportAdapterEvent event = arg;
   return event.application_id == app_id && event.device_uid == dev_id &&

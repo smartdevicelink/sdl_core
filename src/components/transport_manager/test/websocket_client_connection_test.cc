@@ -271,6 +271,7 @@ class WebsocketConnectionTest : public ::testing::Test {
       "CERTIFICATE-----\n";
 };
 
+// cppcheck-suppress syntaxError
 TEST_F(WebsocketConnectionTest, WSConnection_SUCCESS) {
   transport_manager::transport_adapter::CloudAppProperties properties{
       .endpoint = "ws://" + kHost + ":" + std::to_string(kPort),

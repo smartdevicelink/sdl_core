@@ -31,9 +31,13 @@ class NetworkInterfaceListenerTest : public ::testing::Test {
 
  protected:
   struct InterfaceEntry {
+    // cppcheck-suppress unusedStructMember
     const char* name;
+    // cppcheck-suppress unusedStructMember
     const char* ipv4_address;
+    // cppcheck-suppress unusedStructMember
     const char* ipv6_address;
+    // cppcheck-suppress unusedStructMember
     unsigned int flags;
   };
 
@@ -41,6 +45,7 @@ class NetworkInterfaceListenerTest : public ::testing::Test {
     delete interface_listener_impl_;
   }
 
+  // cppcheck-suppress unusedFunction
   void SleepFor(long msec) const {
     if (msec > 0) {
       struct timespec ts = {0, msec * 1000 * 1000};

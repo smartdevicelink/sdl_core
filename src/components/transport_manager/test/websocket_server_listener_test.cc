@@ -103,6 +103,7 @@ class WebSocketListenerTest : public ::testing::Test {
   }
 };
 
+// cppcheck-suppress syntaxError
 TEST_F(WebSocketListenerTest, StartListening_ClientConnect_SUCCESS) {
   ON_CALL(mock_tm_settings_, ws_server_cert_path())
       .WillByDefault(ReturnRef(kDefaultCertPath));

@@ -1408,7 +1408,7 @@ void TransportManagerImpl::Handle(::protocol_handler::RawMessagePtr msg) {
 
   sync_primitives::AutoReadLock lock(connections_lock_);
   ConnectionInternal* connection = GetConnection(msg->connection_key());
-  if (connection == NULL) {
+  if (!connection) {
     LOG4CXX_WARN(logger_,
                  "Connection " << msg->connection_key() << " not found");
     RaiseEvent(&TransportManagerListener::OnTMMessageSendFailed,
@@ -1418,29 +1418,31 @@ void TransportManagerImpl::Handle(::protocol_handler::RawMessagePtr msg) {
   }
 
   TransportAdapter* transport_adapter = connection->transport_adapter;
-  LOG4CXX_DEBUG(logger_,
-                "Got adapter " << transport_adapter << "["
-                               << transport_adapter->GetDeviceType() << "]"
-                               << " by session id " << msg->connection_key());
-
-  if (NULL == transport_adapter) {
+  if (!transport_adapter) {
     std::string error_text = "Transport adapter is not found";
     LOG4CXX_ERROR(logger_, error_text);
     RaiseEvent(&TransportManagerListener::OnTMMessageSendFailed,
                DataSendError(error_text),
                msg);
-  } else {
-    if (TransportAdapter::OK ==
-        transport_adapter->SendData(
-            connection->device, connection->application, msg)) {
-      LOG4CXX_TRACE(logger_, "Data sent to adapter");
-    } else {
-      LOG4CXX_ERROR(logger_, "Data sent error");
-      RaiseEvent(&TransportManagerListener::OnTMMessageSendFailed,
-                 DataSendError("Send failed"),
-                 msg);
-    }
+    return;
   }
+
+  LOG4CXX_DEBUG(logger_,
+                "Got adapter " << transport_adapter << "["
+                               << transport_adapter->GetDeviceType() << "]"
+                               << " by session id " << msg->connection_key());
+
+  if (TransportAdapter::OK ==
+      transport_adapter->SendData(
+          connection->device, connection->application, msg)) {
+    LOG4CXX_TRACE(logger_, "Data sent to adapter");
+  } else {
+    LOG4CXX_ERROR(logger_, "Data sent error");
+    RaiseEvent(&TransportManagerListener::OnTMMessageSendFailed,
+               DataSendError("Send failed"),
+               msg);
+  }
+
   LOG4CXX_TRACE(logger_, "exit");
 }
 

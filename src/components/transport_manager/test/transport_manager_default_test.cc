@@ -286,6 +286,7 @@ void TestTransportManagerDefault::ExpectationsCloudWebsocket_TA() {
 #endif
 }
 
+// cppcheck-suppress syntaxError
 TEST_F(TestTransportManagerDefault, Init_LastStateNotUsed) {
   const bool use_last_state = false;
   ExpectationsSettings_TM(use_last_state);

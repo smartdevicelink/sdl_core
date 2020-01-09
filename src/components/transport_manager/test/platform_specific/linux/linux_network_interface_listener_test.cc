@@ -83,6 +83,7 @@ class NetworkInterfaceListenerTest : public ::testing::Test {
   MockTcpClientListener mock_tcp_client_listener_;
 };
 
+// cppcheck-suppress syntaxError
 TEST_F(NetworkInterfaceListenerTest, Init) {
   Init("");
 

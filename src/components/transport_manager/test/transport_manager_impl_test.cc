@@ -367,6 +367,7 @@ class TransportManagerImplTest : public ::testing::Test {
   BaseErrorPtr error_;
 };
 
+// cppcheck-suppress syntaxError
 TEST_F(TransportManagerImplTest, SearchDevices_AdaptersNotAdded) {
   EXPECT_CALL(*mock_adapter_, SearchDevices())
       .WillOnce(

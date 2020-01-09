@@ -78,6 +78,7 @@ UsbHandler::~UsbHandler() {
   }
 }
 
+// cppcheck-suppress unusedFunction
 bool operator==(const usbd_device_instance_t& a,
                 const usbd_device_instance_t& b) {
   return a.path == b.path && a.devno == b.devno;

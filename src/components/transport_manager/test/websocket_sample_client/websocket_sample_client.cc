@@ -34,9 +34,11 @@
  */
 
 #include "transport_manager/websocket_server/websocket_sample_client.h"
+#include "utils/logger.h"
 
 namespace transport_manager {
 namespace transport_adapter {
+CREATE_LOGGERPTR_GLOBAL(logger_, "TransportManager")
 
 template <>
 WSSampleClient<websocket::stream<ssl::stream<tcp::socket> > >::WSSampleClient(
@@ -105,7 +107,10 @@ bool WSSampleClient<WS>::Connect(tcp::resolver::results_type& results) {
   boost::system::error_code ec;
   boost::asio::connect(ws_->next_layer(), results.begin(), results.end(), ec);
   if (ec) {
-    std::string str_err = "ErrorMessage: " + ec.message();
+#ifdef ENABLE_LOG
+    std::string str_err = "ErrorMessage: ";
+    LOG4CXX_DEBUG(logger_, str_err << ec.message());
+#endif
     return false;
   }
   return true;
@@ -116,7 +121,10 @@ bool WSSampleClient<WSS>::Connect(tcp::resolver::results_type& results) {
   boost::system::error_code ec;
   boost::asio::connect(ws_->lowest_layer(), results.begin(), results.end(), ec);
   if (ec) {
-    std::string str_err = "ErrorMessage: " + ec.message();
+#ifdef ENABLE_LOG
+    std::string str_err = "ErrorMessage: ";
+    LOG4CXX_DEBUG(logger_, str_err << ec.message());
+#endif
     return false;
   }
   return true;
@@ -128,7 +136,10 @@ bool WSSampleClient<WS>::Handshake(const std::string& host,
   boost::system::error_code ec;
   ws_->handshake(host, target, ec);
   if (ec) {
-    std::string str_err = "ErrorMessage: " + ec.message();
+#ifdef ENABLE_LOG
+    std::string str_err = "ErrorMessage: ";
+    LOG4CXX_DEBUG(logger_, str_err << ec.message());
+#endif
     return false;
   }
   return true;
@@ -156,7 +167,10 @@ bool WSSampleClient<WSS>::Handshake(const std::string& host,
 
   ws_->handshake(host, target, ec);
   if (ec) {
-    std::string str_err = "ErrorMessage: " + ec.message();
+#ifdef ENABLE_LOG
+    std::string str_err = "ErrorMessage: ";
+    LOG4CXX_DEBUG(logger_, str_err << ec.message());
+#endif
     return false;
   }
 

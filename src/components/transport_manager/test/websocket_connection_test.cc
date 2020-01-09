@@ -105,6 +105,7 @@ class WebsocketNotSecureSessionConnectionTest : public testing::Test {
   resumption::LastStateImpl last_state_;
 };
 
+// cppcheck-suppress syntaxError
 TEST_F(WebsocketNotSecureSessionConnectionTest, Disconnect_SUCCESS) {
   websocket_connection_->Run();
   EXPECT_CALL(mock_transport_adapter_ctrl_,

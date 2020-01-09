@@ -225,6 +225,7 @@ class TransportAdapterTest : public ::testing::Test {
 #endif  // CLOUD_APP_WEBSOCKET_TRANSPORT_SUPPORT
 };
 
+// cppcheck-suppress syntaxError
 TEST_F(TransportAdapterTest, Init) {
   MockDeviceScanner* dev_mock = new MockDeviceScanner();
   MockClientConnectionListener* clientMock = new MockClientConnectionListener();

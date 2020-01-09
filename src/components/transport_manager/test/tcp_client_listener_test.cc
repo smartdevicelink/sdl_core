@@ -111,6 +111,7 @@ class TcpClientListenerTest : public ::testing::TestWithParam<std::string> {
   TcpClientListener* tcp_client_listener_;
 };
 
+// cppcheck-suppress syntaxError
 TEST_P(TcpClientListenerTest, Ctor_test) {
   EXPECT_EQ(0, tcp_client_listener_->port());
   EXPECT_TRUE(NULL != tcp_client_listener_->thread());
