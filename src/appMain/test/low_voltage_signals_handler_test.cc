@@ -71,6 +71,7 @@ class LowVoltageSignalsHandlerTest : public ::testing::Test {
   utils::MockSignalsPosix& mock_signals_posix_;
 };
 
+// cppcheck-suppress syntaxError
 TEST_F(
     LowVoltageSignalsHandlerTest,
     LowVoltageSignalReceived_CheckParentProcessBehavior_ExpectChildCreationAndtLowVoltageCall) {
