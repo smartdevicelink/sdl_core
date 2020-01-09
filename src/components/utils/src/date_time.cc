@@ -46,6 +46,7 @@ namespace date_time {
 TimeDuration getCurrentTime() {
   return bpt::microsec_clock::local_time() - bpt::from_time_t(0);
 }
+// cppcheck-suppress unusedFunction
 TimeDuration TimeDurationZero() {
   return TimeDuration(0, 0, 0, 0);
 }
@@ -61,10 +62,12 @@ int64_t getuSecs(const TimeDuration& t) {
   return t.total_microseconds();
 }
 
+// cppcheck-suppress unusedFunction
 int64_t get_just_mSecs(const TimeDuration& t) {
   return t.total_milliseconds() % MILLISECONDS_IN_SECOND;
 }
 
+// cppcheck-suppress unusedFunction
 int64_t get_just_uSecs(const TimeDuration& t) {
   return t.total_microseconds() % MICROSECONDS_IN_SECOND;
 }

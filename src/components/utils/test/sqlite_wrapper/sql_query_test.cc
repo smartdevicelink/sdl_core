@@ -101,6 +101,7 @@ sqlite3* SQLQueryTest::conn = 0;
 // mounting /tmp as tmpfs will descrease utils unit tests runing time
 const std::string SQLQueryTest::kDatabaseName = "/tmp/test-query";
 
+// cppcheck-suppress syntaxError
 TEST_F(SQLQueryTest, Query_CreateQuery_QueryInDBEqualCreated) {
   // arrange
   const std::string kSelect("SELECT * FROM testTable WHERE integerValue = ?");

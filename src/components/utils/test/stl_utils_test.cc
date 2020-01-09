@@ -50,6 +50,7 @@ class TestObject {
 typedef std::map<int, TestObject*> TestMap;
 typedef std::vector<TestObject*> TestVector;
 
+// cppcheck-suppress syntaxError
 TEST(StlDeleter, DestructMapWithOneElement) {
   TestMap test_map;
   test_map[1] = new TestObject();

@@ -82,6 +82,7 @@ class SQLQueryTest : public ::testing::Test {
 qdb_hdl_t* SQLQueryTest::conn = 0;
 const std::string SQLQueryTest::kDatabaseName = "test-query";
 
+// cppcheck-suppress syntaxError
 TEST_F(SQLQueryTest, Query) {
   const std::string kSelect("SELECT * FROM testTable WHERE integerValue = ?");
 

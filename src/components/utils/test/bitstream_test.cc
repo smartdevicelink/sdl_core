@@ -41,6 +41,7 @@ namespace utils_test {
 
 using ::utils::BitStream;
 
+// cppcheck-suppress syntaxError
 TEST(BitstreamTest, CreateBitstream_WithDataWithDatasize_BitStreamIsGood) {
   // arrange
   uint8_t data = 10;

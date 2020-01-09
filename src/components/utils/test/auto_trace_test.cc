@@ -130,6 +130,7 @@ bool CheckAutoTraceDebugInFile(const std::string& debug_message) {
   return Compare<bool, EQ, ALL>(true, debug_found, trace_enter, trace_exit);
 }
 // TODO(DTrunov) : Enable after APPLINK-25006 will be resolved
+// cppcheck-suppress syntaxError
 TEST(AutoTraceTest, DISABLED_AutoTrace_WriteToFile_ReadCorrectString) {
   const std::string testlog = "Test trace is working!";
   Preconditions();

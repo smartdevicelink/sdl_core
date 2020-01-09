@@ -92,6 +92,7 @@ void get_version_from_file(int& first_version,
   }
 }
 
+// cppcheck-suppress syntaxError
 TEST(GeneratorTool, GetCorrectVersion) {
   int first_version = 0;
   int second_version = 0;

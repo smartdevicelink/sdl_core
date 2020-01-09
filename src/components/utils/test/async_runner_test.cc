@@ -105,6 +105,7 @@ class AsyncRunnerTest : public ::testing::Test {
   }
 };
 
+// cppcheck-suppress syntaxError
 TEST_F(AsyncRunnerTest, ASyncRunManyDelegates_ExpectSuccessfulAllDelegatesRun) {
   // Create Delegates and run
   sync_primitives::ConditionalVariable cond_var;

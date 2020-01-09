@@ -42,6 +42,7 @@ namespace utils_test {
 
 using namespace ::threads;
 
+// cppcheck-suppress syntaxError
 TEST(ThreadValidatorTest, CompareID_CurrentThreadAndPthread_AreEqual) {
   SingleThreadSimpleValidator object;
   ASSERT_EQ(object.creation_thread_id(), pthread_self());

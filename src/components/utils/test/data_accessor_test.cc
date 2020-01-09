@@ -50,6 +50,7 @@ TEST(DataAccessorTest, CreateDataAccessor) {
   EXPECT_EQ(test_value, data_from_testdata);
 }
 
+// cppcheck-suppress syntaxError
 TEST(DataAccessorTest, CreateDataAccessor_MutexIsLocked_CannotLockItAgain) {
   // arrange
   int test_value = 10;

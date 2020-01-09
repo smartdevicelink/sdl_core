@@ -81,6 +81,7 @@ class MessageMeterTest : public ::testing::TestWithParam<TimePair> {
   int id1, id2, id3;
 };
 
+// cppcheck-suppress syntaxError
 TEST(MessageMeterTest, DefaultTimeRange) {
   const ::utils::MessageMeter<int> default_meter;
   const date_time::TimeDuration time_second = date_time::seconds(1);

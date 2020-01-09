@@ -39,6 +39,7 @@ namespace utils_test {
 
 using namespace ::utils;
 
+// cppcheck-suppress syntaxError
 TEST(SystemTest, Constructor_WithCommandName_ExpectArgsStored) {
   // Command creation without any arguments
   const std::string test_command("ls");

@@ -44,6 +44,7 @@ class ResourceUsagePrivateTest : public ::testing::Test {
   Resources res;
 };
 
+// cppcheck-suppress syntaxError
 TEST_F(ResourceUsagePrivateTest, ReadStatFileTest) {
   std::string proc_buf;
   EXPECT_TRUE(res.ReadStatFile(proc_buf));

@@ -82,6 +82,7 @@ size_t CustomStringTest::amount_symbols_mbstring2_ = 0;
 size_t CustomStringTest::amount_bytes_mbstring1_ = 0;
 size_t CustomStringTest::amount_bytes_mbstring2_ = 0;
 
+// cppcheck-suppress syntaxError
 TEST_F(CustomStringTest,
        AddASCIIStringToCustomString_ExpectCorrectSizeAndIsASCIIStringEQTrue) {
   std::string str("Test string");

@@ -40,6 +40,7 @@ namespace utils_test {
 using sync_primitives::Lock;
 using sync_primitives::RecursiveLock;
 
+// cppcheck-suppress syntaxError
 TEST(LockBoostTest, TestNonRecursive) {
   // Create Lock object
   Lock test_mutex;

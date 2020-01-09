@@ -49,6 +49,7 @@ namespace dbms_test {
   }
 }
 
+// cppcheck-suppress syntaxError
 TEST(SQLDatabaseTest, OpenCloseMemory_OpenAndCloseDB_ActsWithoutError) {
   // arrange
   SQLDatabase db;

@@ -52,6 +52,7 @@ namespace dbms_test {
   }
 }
 
+// cppcheck-suppress syntaxError
 TEST(SQLDatabaseTest, OpenClose) {
   SQLDatabase db("test-database");
   bool ret = db.Open();

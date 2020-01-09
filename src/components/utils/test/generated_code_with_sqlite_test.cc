@@ -87,6 +87,7 @@ const std::string GeneratedCodeTest::kGroupsCreation =
     "application_id VARCHAR(45) NOT NULL COLLATE NOCASE,"
     "group_name VARCHAR(45) NOT NULL )";
 
+// cppcheck-suppress syntaxError
 TEST_F(GeneratedCodeTest,
        FindSectionEndpoints_OpenDBSetDefaultUrl_ExpectDefaultUrl) {
   // arrange

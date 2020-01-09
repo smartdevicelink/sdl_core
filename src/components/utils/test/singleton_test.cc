@@ -55,6 +55,7 @@ class SingletonTest : public ::utils::Singleton<SingletonTest> {
   int test_value;
 };
 
+// cppcheck-suppress syntaxError
 TEST(SingletonTest, CreateAndDestroySingleton) {
   // assert
   ASSERT_EQ(SingletonTest::instance(), SingletonTest::instance());

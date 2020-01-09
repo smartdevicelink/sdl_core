@@ -42,6 +42,7 @@ namespace utils_test {
 using namespace ::logger;
 using ::testing::_;
 
+// cppcheck-suppress syntaxError
 TEST(LogMessageLoopThread, DestroyLogMessage_loggerStatusDeletingLogger) {
   logger::logger_status = CreatingLoggerThread;
   LogMessageLoopThread* loop_thread = new LogMessageLoopThread();

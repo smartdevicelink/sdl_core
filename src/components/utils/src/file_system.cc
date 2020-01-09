@@ -56,8 +56,8 @@ using boost::system::error_code;
 uint64_t file_system::GetAvailableDiskSpace(const std::string& path) {
   LOG4CXX_AUTO_TRACE(logger_);
   error_code ec;
-  fs::space_info si = {0, 0, 0};
-  si = fs::space(path, ec);
+  // fs::space_info si = {0, 0, 0};
+  fs::space_info si = fs::space(path, ec);
 
   if (ec) {
     // If something went wrong, assume no free space

@@ -90,6 +90,7 @@ void ConditionalVariableTest::task_one() {
   test_value_ = "changed again by thread 1";
 }
 
+// cppcheck-suppress syntaxError
 TEST_F(ConditionalVariableTest,
        CheckNotifyOne_OneThreadNotified_ExpectSuccessful) {
   pthread_t thread1;

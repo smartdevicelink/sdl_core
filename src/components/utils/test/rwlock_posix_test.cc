@@ -96,6 +96,7 @@ class RWlockTest : public ::testing::Test {
   pthread_t thread[kNum_threads_];
 };
 
+// cppcheck-suppress syntaxError
 TEST_F(RWlockTest, AcquireForReading_ExpectAccessForReading) {
   // Lock rw lock for reading
   EXPECT_TRUE(test_rwlock.AcquireForReading());

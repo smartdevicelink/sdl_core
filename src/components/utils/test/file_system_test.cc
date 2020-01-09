@@ -59,6 +59,7 @@ StringArray MergeStringsToArray(const std::string& first,
 }
 }  // namespace
 
+// cppcheck-suppress syntaxError
 TEST(FileSystemTest, CreateDeleteDirectory) {
   ASSERT_FALSE(DirectoryExists("./Test directory"));
   // Directory creation

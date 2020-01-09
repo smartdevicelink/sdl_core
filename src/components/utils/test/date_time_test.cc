@@ -41,6 +41,7 @@ namespace utils_test {
 using namespace date_time;
 
 namespace bpt = boost::posix_time;
+// cppcheck-suppress syntaxError
 TEST(DateTimeTest, GetCurrentTime) {
   // arrange
   const date_time::TimeDuration time1 = getCurrentTime();

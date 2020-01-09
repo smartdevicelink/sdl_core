@@ -104,6 +104,7 @@ class TestTaskWithStop : public TestTask {
 
 // Start - Stop
 
+// cppcheck-suppress syntaxError
 TEST(TimerTest, Start_Stop_NoLoop_NoCall) {
   MockTimerTask* mock_task = new MockTimerTask();
   EXPECT_CALL(*mock_task, run()).Times(0);

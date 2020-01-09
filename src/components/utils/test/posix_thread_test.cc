@@ -72,6 +72,7 @@ class TestThreadDelegate : public threads::ThreadDelegate {
   bool check_value_;
 };
 
+// cppcheck-suppress syntaxError
 TEST(PosixThreadTest, CreateThread_ExpectThreadCreated) {
   // Arrange
   threads::Thread* thread = NULL;

@@ -112,6 +112,7 @@ void* MessageQueueTest::ShutDownQueue_helper(void* context) {
   return NULL;
 }
 
+// cppcheck-suppress syntaxError
 TEST_F(MessageQueueTest, DefaultCtorTest_ExpectEmptyQueueCreated) {
   bool test_value = true;
   // Check if the queue is empty

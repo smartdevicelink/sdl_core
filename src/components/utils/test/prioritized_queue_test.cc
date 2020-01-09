@@ -71,6 +71,7 @@ class PrioritizedQueueTest : public testing::Test {
   PrioritizedQueue<TestMessage> test_queue;
 };
 
+// cppcheck-suppress syntaxError
 TEST_F(PrioritizedQueueTest, DefaultCtorTest_ExpectEmptyQueueCreated) {
   EXPECT_TRUE(test_queue.empty());
 }

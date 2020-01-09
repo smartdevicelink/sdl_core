@@ -39,6 +39,7 @@ namespace utils_test {
 
 using namespace ::utils;
 
+// cppcheck-suppress syntaxError
 TEST(BackTraceTest, CallStackShouldNotBeEmpty) {
   // arrange
   Backtrace newtrace = Backtrace();

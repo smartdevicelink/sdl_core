@@ -57,6 +57,7 @@ void dealloc(char* ptr) {
 }
 }  // namespace
 
+// cppcheck-suppress syntaxError
 TEST(ScopeGuardTest, CallFreeFunctionWithParam) {
   {
     call_with_param_count = 0;
