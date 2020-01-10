@@ -57,12 +57,10 @@ struct SemanticVersion {
                               &minor_version_,
                               &patch_version_);
 
-    if (readElements != 3) {
-      if (readElements != 2) {
-        major_version_ = 0;
-        minor_version_ = 0;
-        patch_version_ = 0;
-      }
+    if (readElements < 2) {
+      major_version_ = 0;
+      minor_version_ = 0;
+      patch_version_ = 0;
     }
   }
 
