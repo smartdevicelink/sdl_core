@@ -107,8 +107,8 @@ void OnButtonEventNotification::Run() {
     const auto window_hmi_level = app->hmi_level(window_id);
     if ((mobile_api::HMILevel::HMI_NONE == window_hmi_level)) {
       LOG4CXX_WARN(logger_,
-                   "CUSTOM_BUTTON OnButtonEvent notification is allowed only "
-                       << "in FULL, LIMITED or BACKGROUND hmi level");
+                   "CUSTOM_BUTTON OnButtonEvent notification is not allowed in "
+                   "NONE hmi level");
       return;
     }
 
