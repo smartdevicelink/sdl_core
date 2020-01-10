@@ -94,7 +94,7 @@ bool SMember::CheckHistoryFieldVersion(
     }
   }
 
-  return true;  // Not enough version information. Default true.
+  return true;  // All checks passed. Return true.
 }
 
 std::shared_ptr<CObjectSchemaItem> CObjectSchemaItem::create(
@@ -265,8 +265,8 @@ void CObjectSchemaItem::RemoveFakeParams(
       continue;
     }
 
-    if (mMembers.end() == members_it && key.compare(connection_key) != 0 &&
-        key.compare(binary_data) != 0 && key.compare(app_id) != 0) {
+    else if (key.compare(connection_key) != 0 &&
+             key.compare(binary_data) != 0 && key.compare(app_id) != 0) {
       Object.erase(key);
     }
   }
