@@ -263,10 +263,8 @@ void CObjectSchemaItem::RemoveFakeParams(
         Object.erase(key);
       }
       continue;
-    }
-
-    else if (key.compare(connection_key) != 0 &&
-             key.compare(binary_data) != 0 && key.compare(app_id) != 0) {
+    } else if (key.compare(connection_key) != 0 &&
+               key.compare(binary_data) != 0 && key.compare(app_id) != 0) {
       Object.erase(key);
     }
   }
