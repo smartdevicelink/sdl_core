@@ -1598,28 +1598,6 @@ void ApplicationManagerImpl::OnDeviceSwitchingStart(
 
   policy_handler_->OnDeviceSwitching(device_from.mac_address(),
                                      device_to.mac_address());
-
-  connection_handler::DeviceMap device_list;
-  device_list.insert(std::make_pair(device_to.device_handle(), device_to));
-
-  smart_objects::SmartObjectSPtr msg_params =
-      MessageHelper::CreateDeviceListSO(device_list, GetPolicyHandler(), *this);
-  if (!msg_params) {
-    LOG4CXX_ERROR(logger_, "Can't create UpdateDeviceList notification");
-    return;
-  }
-
-  auto update_list = std::make_shared<smart_objects::SmartObject>();
-  smart_objects::SmartObject& so_to_send = *update_list;
-  so_to_send[jhs::S_PARAMS][jhs::S_FUNCTION_ID] =
-      hmi_apis::FunctionID::BasicCommunication_UpdateDeviceList;
-  so_to_send[jhs::S_PARAMS][jhs::S_MESSAGE_TYPE] =
-      hmi_apis::messageType::request;
-  so_to_send[jhs::S_PARAMS][jhs::S_PROTOCOL_VERSION] = 2;
-  so_to_send[jhs::S_PARAMS][jhs::S_PROTOCOL_TYPE] = 1;
-  so_to_send[jhs::S_PARAMS][jhs::S_CORRELATION_ID] = GetNextHMICorrelationID();
-  so_to_send[jhs::S_MSG_PARAMS] = *msg_params;
-  rpc_service_->ManageHMICommand(update_list);
 }
 
 void ApplicationManagerImpl::OnDeviceSwitchingFinish(

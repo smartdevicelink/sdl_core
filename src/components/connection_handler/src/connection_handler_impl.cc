@@ -169,7 +169,6 @@ void ConnectionHandlerImpl::OnDeviceRemoved(
   // Device has been removed. Perform all needed actions.
   // 1. Delete all the connections and sessions of this device
   // 2. Delete device from a list
-  // 3. Let observer know that device has been deleted.
 
   std::vector<ConnectionHandle> connections_to_remove;
   {
@@ -193,7 +192,6 @@ void ConnectionHandlerImpl::OnDeviceRemoved(
   device_list_.erase(device_info.device_handle());
   if (connection_handler_observer_) {
     connection_handler_observer_->RemoveDevice(device_info.device_handle());
-    connection_handler_observer_->OnDeviceListUpdated(device_list_);
   }
 }
 
