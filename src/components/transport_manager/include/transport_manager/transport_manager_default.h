@@ -49,16 +49,22 @@ struct TransportAdapterFactory {
   template <typename... Args>
   using CreatorTA =
       std::function<transport_adapter::TransportAdapter*(Args&&... args)>;
+#ifdef BLUETOOTH_SUPPORT
   CreatorTA<resumption::LastState&, const TransportManagerSettings&>
       ta_bluetooth_creator_;
+#endif
   CreatorTA<const uint16_t,
             resumption::LastState&,
             const TransportManagerSettings&>
       ta_tcp_creator_;
+#if defined(USB_SUPPORT)
   CreatorTA<resumption::LastState&, const TransportManagerSettings&>
       ta_usb_creator_;
+#endif
+#if defined(CLOUD_APP_WEBSOCKET_TRANSPORT_SUPPORT)
   CreatorTA<resumption::LastState&, const TransportManagerSettings&>
       ta_cloud_creator_;
+#endif
 };
 
 /**

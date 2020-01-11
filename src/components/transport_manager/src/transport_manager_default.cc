@@ -56,29 +56,32 @@ namespace transport_manager {
 CREATE_LOGGERPTR_GLOBAL(logger_, "TransportManager")
 
 TransportAdapterFactory::TransportAdapterFactory() {
+#ifdef BLUETOOTH_SUPPORT
   ta_bluetooth_creator_ = [](resumption::LastState& last_state,
                              const TransportManagerSettings& settings) {
     return new transport_adapter::BluetoothTransportAdapter(last_state,
                                                             settings);
   };
-
+#endif
   ta_tcp_creator_ = [](const uint16_t port,
                        resumption::LastState& last_state,
                        const TransportManagerSettings& settings) {
     return new transport_adapter::TcpTransportAdapter(
         port, last_state, settings);
   };
-
+#if defined(USB_SUPPORT)
   ta_usb_creator_ = [](resumption::LastState& last_state,
                        const TransportManagerSettings& settings) {
     return new transport_adapter::UsbAoaAdapter(last_state, settings);
   };
-
+#endif
+#if defined(CLOUD_APP_WEBSOCKET_TRANSPORT_SUPPORT)
   ta_cloud_creator_ = [](resumption::LastState& last_state,
                          const TransportManagerSettings& settings) {
     return new transport_adapter::CloudWebsocketTransportAdapter(last_state,
                                                                  settings);
   };
+#endif
 }
 
 TransportManagerDefault::TransportManagerDefault(
