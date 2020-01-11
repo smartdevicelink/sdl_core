@@ -1451,7 +1451,9 @@ TEST_F(StateControllerImplTest, MoveSimpleAppToValidStates) {
     EXPECT_CALL(message_helper_mock_,
                 SendHMIStatusNotification(simple_app_, kDefaultWindowId, _));
     EXPECT_CALL(app_manager_mock_,
-                OnHMIStateChanged(simple_app_id_, _, state_to_setup));
+                OnHMIStateChanged(simple_app_id_,
+                                  Truly(HmiStatesComparator(initial_state)),
+                                  state_to_setup));
 
     EXPECT_CALL(*simple_app_ptr_,
                 SetRegularState(kDefaultWindowId,

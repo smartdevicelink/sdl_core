@@ -3294,12 +3294,13 @@ bool ApplicationManagerImpl::HMILevelAllowsStreaming(
   }
 
   const auto hmi_state = app->CurrentHmiState(DEFAULT_WINDOW);
-  const bool allow_streaming =
+  const bool allow_streaming_by_hmi_level =
       Compare<mobile_apis::HMILevel::eType, EQ, ONE>(
-          hmi_state->hmi_level(), HMI_FULL, HMI_LIMITED) &&
+          hmi_state->hmi_level(), HMI_FULL, HMI_LIMITED);
+  const bool allow_streaming_by_streaming_state =
       hmi_state->video_streaming_state() == STREAMABLE;
 
-  return allow_streaming;
+  return allow_streaming_by_hmi_level && allow_streaming_by_streaming_state;
 }
 
 bool ApplicationManagerImpl::CanAppStream(
@@ -3502,7 +3503,7 @@ void ApplicationManagerImpl::ProcessApp(const uint32_t app_id,
 
   if (hmi_level_from == hmi_level_to &&
       streaming_state_from == streaming_state_to) {
-    LOG4CXX_TRACE(logger_, "HMILevel && streaming state was not changed");
+    LOG4CXX_TRACE(logger_, "HMILevel && streaming state were not changed");
     return;
   }
 
@@ -3553,16 +3554,17 @@ void ApplicationManagerImpl::ProcessApp(const uint32_t app_id,
                       << std::boolalpha << end_streaming_by_hmi_level);
     EndNaviServices(app_id);
   }
+  LOG4CXX_TRACE(logger_, "No actions required for app " << app_id);
 }
 
-void ApplicationManagerImpl::StartEndStreamTimer(uint32_t app_id) {
+void ApplicationManagerImpl::StartEndStreamTimer(const uint32_t app_id) {
   LOG4CXX_DEBUG(logger_, "Start end stream timer for app " << app_id);
   navi_app_to_end_stream_.push_back(app_id);
   TimerSPtr end_stream_timer(std::make_shared<timer::Timer>(
-      "AppShouldFinishStreaming",
+      "DisallowAppStreamTimer",
       new TimerTaskImpl<ApplicationManagerImpl>(
           this, &ApplicationManagerImpl::EndNaviStreaming)));
-  end_stream_timer->Start(navi_end_stream_timeout_, timer::kPeriodic);
+  end_stream_timer->Start(navi_end_stream_timeout_, timer::kSingleShot);
 
   sync_primitives::AutoLock lock(timer_pool_lock_);
   timer_pool_.push_back(end_stream_timer);

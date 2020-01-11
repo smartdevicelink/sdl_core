@@ -1285,7 +1285,7 @@ class ApplicationManagerImpl
    * @brief Starts EndStream timer for a specified application
    * @param app_id Application to process
    */
-  void StartEndStreamTimer(uint32_t app_id);
+  void StartEndStreamTimer(const uint32_t app_id);
 
   /**
    * @brief Allows to send appropriate message to mobile device.
