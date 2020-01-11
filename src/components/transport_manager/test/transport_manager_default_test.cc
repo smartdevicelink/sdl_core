@@ -107,7 +107,7 @@ class TestTransportManagerDefault : public ::testing::Test {
         mock_last_state_, transport_manager_settings_);
 
     TransportAdapterFactory ta_factory;
-
+#ifdef BLUETOOTH_SUPPORT
     ta_factory.ta_bluetooth_creator_ =
         [&](resumption::LastState& last_state,
             const TransportManagerSettings& settings) {
@@ -115,7 +115,7 @@ class TestTransportManagerDefault : public ::testing::Test {
           UNUSED(settings);
           return mock_bt_ta_;
         };
-
+#endif
     ta_factory.ta_tcp_creator_ = [&](const uint16_t port,
                                      resumption::LastState& last_state,
                                      const TransportManagerSettings& settings) {
@@ -124,14 +124,15 @@ class TestTransportManagerDefault : public ::testing::Test {
       UNUSED(settings);
       return mock_tcp_ta_;
     };
-
+#if defined(USB_SUPPORT)
     ta_factory.ta_usb_creator_ = [&](resumption::LastState& last_state,
                                      const TransportManagerSettings& settings) {
       UNUSED(last_state);
       UNUSED(settings);
       return mock_usb_aoa_ta_;
     };
-
+#endif
+#if defined(CLOUD_APP_WEBSOCKET_TRANSPORT_SUPPORT)
     ta_factory.ta_cloud_creator_ =
         [&](resumption::LastState& last_state,
             const TransportManagerSettings& settings) {
@@ -139,7 +140,7 @@ class TestTransportManagerDefault : public ::testing::Test {
           UNUSED(settings);
           return mock_cloud_websocket_ta_;
         };
-
+#endif
     transport_manager_ = std::unique_ptr<TransportManagerDefault>(
         new TransportManagerDefault(transport_manager_settings_, ta_factory));
   }
@@ -211,11 +212,13 @@ void TestTransportManagerDefault::ExpectationsSettings_TM(
 
 void TestTransportManagerDefault::ExpectationsBluetooth_TA() {
   // Expectations for Mock of bluetooth transport adapter
+#ifdef BLUETOOTH_SUPPORT
   EXPECT_CALL(*mock_bt_ta_, AddListener(_));
   EXPECT_CALL(*mock_bt_ta_, IsInitialised()).WillRepeatedly(Return(true));
   EXPECT_CALL(*mock_bt_ta_, Init())
       .WillRepeatedly(Return(TransportAdapter::OK));
   EXPECT_CALL(*mock_bt_ta_, Terminate());
+#endif
 }
 
 void TestTransportManagerDefault::ExpectationsTCP_TA() {
@@ -237,21 +240,25 @@ void TestTransportManagerDefault::ExpectationsTCP_TA() {
 
 void TestTransportManagerDefault::ExpectationsUSB_TA() {
   // Expectations for Mock of USB transport adapter
+#if defined(USB_SUPPORT)
   EXPECT_CALL(*mock_usb_aoa_ta_, AddListener(_));
   EXPECT_CALL(*mock_usb_aoa_ta_, IsInitialised()).WillRepeatedly(Return(true));
   EXPECT_CALL(*mock_usb_aoa_ta_, Init())
       .WillRepeatedly(Return(TransportAdapter::OK));
   EXPECT_CALL(*mock_usb_aoa_ta_, Terminate());
+#endif
 }
 
 void TestTransportManagerDefault::ExpectationsCloudWebsocket_TA() {
   // Expectations for Mock of Cloud Websocket transport adapter
+#if defined(CLOUD_APP_WEBSOCKET_TRANSPORT_SUPPORT)
   EXPECT_CALL(*mock_cloud_websocket_ta_, AddListener(_));
   EXPECT_CALL(*mock_cloud_websocket_ta_, IsInitialised())
       .WillRepeatedly(Return(true));
   EXPECT_CALL(*mock_cloud_websocket_ta_, Init())
       .WillRepeatedly(Return(TransportAdapter::OK));
   EXPECT_CALL(*mock_cloud_websocket_ta_, Terminate());
+#endif
 }
 
 TEST_F(TestTransportManagerDefault, Init_LastStateNotUsed) {
