@@ -1901,12 +1901,9 @@ void ApplicationManagerImpl::OnStreamingConfigured(
 
       for (size_t i = 0; i < navi_app_to_stop_.size(); ++i) {
         if (app_id == navi_app_to_stop_[i]) {
-          {
-            sync_primitives::AutoLock lock(close_app_timer_pool_lock_);
-            close_app_timer_pool_[i]->Stop();
-            close_app_timer_pool_.erase(close_app_timer_pool_.begin() + i);
-            navi_app_to_stop_.erase(navi_app_to_stop_.begin() + i);
-          }
+          sync_primitives::AutoLock lock(close_app_timer_pool_lock_);
+          close_app_timer_pool_.erase(close_app_timer_pool_.begin() + i);
+          navi_app_to_stop_.erase(navi_app_to_stop_.begin() + i);
           break;
         }
       }
@@ -3541,25 +3538,18 @@ void ApplicationManagerImpl::ProcessApp(const uint32_t app_id,
 
 void ApplicationManagerImpl::ClearTimerPool() {
   LOG4CXX_AUTO_TRACE(logger_);
-
-  auto clear_timer_pool = [](std::vector<TimerSPtr> vector_to_clear) {
-    std::vector<TimerSPtr> new_timer_pool;
-    for (size_t i = 0; i < vector_to_clear.size(); ++i) {
-      if (vector_to_clear[i]->is_running()) {
-        new_timer_pool.push_back(vector_to_clear[i]);
-      }
-    }
-    vector_to_clear.swap(new_timer_pool);
-  };
-
   {
     sync_primitives::AutoLock lock(close_app_timer_pool_lock_);
-    clear_timer_pool(close_app_timer_pool_);
+    std::remove_if(close_app_timer_pool_.begin(),
+                   close_app_timer_pool_.end(),
+                   [](TimerSPtr timer) { return !timer->is_running(); });
   }
 
   {
     sync_primitives::AutoLock lock(end_stream_timer_pool_lock_);
-    clear_timer_pool(end_stream_timer_pool_);
+    std::remove_if(end_stream_timer_pool_.begin(),
+                   end_stream_timer_pool_.end(),
+                   [](TimerSPtr timer) { return !timer->is_running(); });
   }
 }
 
