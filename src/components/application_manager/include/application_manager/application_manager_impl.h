@@ -220,7 +220,7 @@ class ApplicationManagerImpl
   void ProcessOnDataStreamingNotification(
       const protocol_handler::ServiceType service_type,
       const uint32_t app_id,
-      const bool status) FINAL;
+      const bool streaming_data_available) FINAL;
 
   void SendDriverDistractionState(ApplicationSharedPtr application);
 

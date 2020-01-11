@@ -3480,7 +3480,7 @@ void ApplicationManagerImpl::ProcessPostponedMessages(const uint32_t app_id) {
 void ApplicationManagerImpl::ProcessOnDataStreamingNotification(
     const protocol_handler::ServiceType service_type,
     const uint32_t app_id,
-    const bool status) {
+    const bool streaming_data_available) {
   LOG4CXX_AUTO_TRACE(logger_);
 
   bool should_send_notification = false;
@@ -3489,7 +3489,7 @@ void ApplicationManagerImpl::ProcessOnDataStreamingNotification(
     sync_primitives::AutoLock lock(streaming_services_lock_);
     auto& active_services = streaming_application_services_[service_type];
     should_send_notification = active_services.empty();
-    if (status) {
+    if (streaming_data_available) {
       active_services.insert(app_id);
       LOG4CXX_DEBUG(logger_,
                     "Streaming session with id "
@@ -3512,7 +3512,8 @@ void ApplicationManagerImpl::ProcessOnDataStreamingNotification(
   }
 
   if (should_send_notification) {
-    MessageHelper::SendOnDataStreaming(service_type, status, *this);
+    MessageHelper::SendOnDataStreaming(
+        service_type, streaming_data_available, *this);
   }
 }
 

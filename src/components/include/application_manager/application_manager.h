@@ -301,12 +301,13 @@ class ApplicationManager {
    * HMI via notification if required
    * @param service_type Id of service which status should be updated
    * @param app_id Id of session which status should be updated
-   * @param status New streming status for specified session
+   * @param streaming_data_available Availability of streaming data for
+   * specified session
    */
   virtual void ProcessOnDataStreamingNotification(
       const protocol_handler::ServiceType service_type,
       const uint32_t app_id,
-      const bool status) = 0;
+      const bool streaming_data_available) = 0;
 
   /**
    * @brief Checks if driver distraction state is valid, creates message
