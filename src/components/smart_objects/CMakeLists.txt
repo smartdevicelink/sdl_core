@@ -46,6 +46,7 @@ collect_sources(SOURCES "${PATHS}")
 
 add_library("SmartObjects" ${SOURCES})
 target_link_libraries("SmartObjects" Utils)
+add_dependencies("SmartObjects" MOBILE_API)
 
 if(ENABLE_LOG)
   target_link_libraries("SmartObjects" log4cxx -L${LOG4CXX_LIBS_DIRECTORY})
