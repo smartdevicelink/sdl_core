@@ -112,7 +112,8 @@ std::string WSSession::WSServer::ParseRouteFromTarget(
 }
 
 WSSession::WSSession(const std::string& address, uint16_t port)
-    : address_(address)
+    : io_pool_(1)
+    , address_(address)
     , port_(port)
     , acceptor_(ioc_)
     , socket_(ioc_)
@@ -153,7 +154,7 @@ void WSSession::Run() {
   if (acceptor_.is_open()) {
     acceptor_.async_accept(
         socket_, std::bind(&WSSession::on_accept, this, std::placeholders::_1));
-    ioc_.run();
+    boost::asio::post(io_pool_, [&]() { ioc_.run(); });
   }
 }
 
@@ -161,6 +162,7 @@ void WSSession::Stop() {
   try {
     ioc_.stop();
     acceptor_.close();
+    io_pool_.join();
   } catch (...) {
     std::cerr << "Failed to close connection" << std::endl;
   }
@@ -271,7 +273,8 @@ WSSSession::WSSSession(const std::string& address,
                        uint16_t port,
                        const std::string& certificate,
                        const std::string& private_key)
-    : acceptor_(ioc_)
+    : io_pool_(1)
+    , acceptor_(ioc_)
     , socket_(ioc_)
     , ctx_(ssl::context::sslv23_server)
     , wss_(nullptr) {
@@ -336,6 +339,7 @@ void WSSSession::Stop() {
   try {
     ioc_.stop();
     acceptor_.close();
+    io_pool_.join();
   } catch (...) {
     std::cerr << "Failed to close connection" << std::endl;
   }
@@ -354,7 +358,7 @@ void WSSSession::do_accept() {
     acceptor_.async_accept(
         socket_,
         std::bind(&WSSSession::on_accept, this, std::placeholders::_1));
-    ioc_.run();
+    boost::asio::post(io_pool_, [&]() { ioc_.run(); });
   }
 }
 

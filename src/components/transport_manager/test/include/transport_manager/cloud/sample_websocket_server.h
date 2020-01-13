@@ -39,6 +39,7 @@
 #include <boost/asio/placeholders.hpp>
 #include <boost/asio/ssl/stream.hpp>
 #include <boost/asio/strand.hpp>
+#include <boost/asio/thread_pool.hpp>
 #include <boost/beast/core.hpp>
 #include <boost/beast/websocket.hpp>
 #include <boost/beast/websocket/ssl.hpp>
@@ -95,6 +96,7 @@ class WSSession {
  private:
   void on_accept(boost::system::error_code ec);
   boost::asio::io_context ioc_;
+  boost::asio::thread_pool io_pool_;
   const std::string& address_;
   uint16_t port_;
   tcp::acceptor acceptor_;
@@ -148,6 +150,7 @@ class WSSSession {
 
  private:
   boost::asio::io_context ioc_;
+  boost::asio::thread_pool io_pool_;
   tcp::acceptor acceptor_;
   tcp::socket socket_;
   ssl::context ctx_;
