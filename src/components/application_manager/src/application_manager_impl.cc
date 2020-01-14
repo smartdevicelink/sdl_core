@@ -3553,7 +3553,9 @@ void ApplicationManagerImpl::ProcessApp(const uint32_t app_id,
                   "End streaming services by hmi level: "
                       << std::boolalpha << end_streaming_by_hmi_level);
     EndNaviServices(app_id);
+    return;
   }
+
   LOG4CXX_TRACE(logger_, "No actions required for app " << app_id);
 }
 
