@@ -898,7 +898,8 @@ bool CommandRequestImpl::IsMobileResultSuccess(
       mobile_apis::Result::WARNINGS,
       mobile_apis::Result::WRONG_LANGUAGE,
       mobile_apis::Result::RETRY,
-      mobile_apis::Result::SAVED);
+      mobile_apis::Result::SAVED,
+      mobile_apis::Result::TRUNCATED_DATA);
 }
 
 bool CommandRequestImpl::IsHMIResultSuccess(
