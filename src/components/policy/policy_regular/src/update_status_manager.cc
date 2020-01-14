@@ -120,7 +120,7 @@ void UpdateStatusManager::OnNewApplicationAdded(const DeviceConsent consent) {
   app_registered_from_non_consented_device_ = false;
   if (last_update_was_failed_) {
     last_update_was_failed_ = false;
-    ProcessEvent(kPostponedUpdate);
+    ProcessEvent(kUpdateForNextInQueue);
   }
   ProcessEvent(kOnNewAppRegistered);
 }

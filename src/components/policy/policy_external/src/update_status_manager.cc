@@ -87,9 +87,9 @@ void UpdateStatusManager::OnUpdateSentOut(uint32_t update_timeout) {
   ProcessEvent(kOnUpdateSentOut);
 }
 
-void UpdateStatusManager::OnUpdatePostponed() {
+void UpdateStatusManager::OnUpdateForNextInQueue() {
   LOG4CXX_AUTO_TRACE(logger_);
-  ProcessEvent(kPostponedUpdate);
+  ProcessEvent(kUpdateForNextInQueue);
 }
 
 void UpdateStatusManager::OnUpdateTimeoutOccurs() {

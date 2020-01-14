@@ -220,7 +220,7 @@ class MockPolicyHandlerInterface : public policy::PolicyHandlerInterface {
   MOCK_METHOD0(OnAppsSearchStarted, void());
   MOCK_METHOD1(OnAppsSearchCompleted, void(const bool trigger_ptu));
   MOCK_METHOD2(OnAddedNewApplicationToAppList,
-               void(const uint32_t new_app_id, const std::string policy_id));
+               void(const uint32_t new_app_id, const std::string& policy_id));
   MOCK_METHOD2(OnAppRegisteredOnMobile,
                void(const std::string& device_id,
                     const std::string& application_id));
@@ -318,6 +318,7 @@ class MockPolicyHandlerInterface : public policy::PolicyHandlerInterface {
                void(const std::string& device_id,
                     const std::string& policy_app_id,
                     const std::string& hmi_level));
+  MOCK_METHOD0(OnPTUTimeOut, void());
   MOCK_CONST_METHOD2(GetModuleTypes,
                      bool(const std::string& policy_app_id,
                           std::vector<std::string>* modules));
