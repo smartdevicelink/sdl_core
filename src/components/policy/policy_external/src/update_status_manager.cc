@@ -175,6 +175,7 @@ void UpdateStatusManager::PendingUpdate() {
 }
 
 void UpdateStatusManager::ScheduleManualUpdate() {
+  LOG4CXX_AUTO_TRACE(logger_);
   ProcessEvent(kScheduleManualUpdate);
 }
 
