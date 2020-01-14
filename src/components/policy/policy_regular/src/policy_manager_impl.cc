@@ -70,7 +70,7 @@ PolicyManagerImpl::PolicyManagerImpl()
           new AccessRemoteImpl(std::static_pointer_cast<CacheManager>(cache_)))
     , retry_sequence_timeout_(kDefaultRetryTimeoutInMSec)
     , retry_sequence_index_(0)
-    , count_application_(0)
+    , applications_pending_ptu_count_(0)
     , timer_retry_sequence_(
           "Retry sequence timer",
           new timer::TimerTaskImpl<PolicyManagerImpl>(
@@ -80,7 +80,7 @@ PolicyManagerImpl::PolicyManagerImpl()
     , send_on_update_sent_out_(false)
     , trigger_ptu_(false)
     , ptu_requested_(false)
-    , last_registered_app_id_("") {}
+    , last_registered_policy_app_id_("") {}
 
 void PolicyManagerImpl::set_listener(PolicyListener* listener) {
   listener_ = listener;
@@ -686,14 +686,15 @@ void PolicyManagerImpl::OnAppsSearchCompleted(const bool trigger_ptu) {
 }
 
 void PolicyManagerImpl::OnChangeApplicationCount(const uint32_t new_app_count) {
-  count_application_ = new_app_count;
+  LOG4CXX_AUTO_TRACE(logger_);
+  applications_pending_ptu_count_ = new_app_count;
 }
 
 void PolicyManagerImpl::OnAppRegisteredOnMobile(
     const std::string& device_id, const std::string& application_id) {
-  if (last_registered_app_id_ != application_id) {
+  if (last_registered_policy_app_id_ != application_id) {
     StartPTExchange();
-    last_registered_app_id_ = application_id;
+    last_registered_policy_app_id_ = application_id;
   }
 
   SendNotificationOnPermissionsUpdated(device_id, application_id);
@@ -1671,8 +1672,8 @@ void PolicyManagerImpl::OnPTUIterationTimeout() {
   timer_retry_sequence_.Start(timeout_msec, timer::kPeriodic);
 }
 
-bool PolicyManagerImpl::HasApplicationForPTU() {
-  return count_application_ > 0;
+bool PolicyManagerImpl::HasApplicationForPTU() const {
+  return applications_pending_ptu_count_ > 0;
 }
 
 void PolicyManagerImpl::SetDefaultHmiTypes(

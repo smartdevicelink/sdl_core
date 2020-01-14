@@ -416,7 +416,7 @@ class PolicyHandlerInterface : public VehicleDataItemProvider {
    * @param policy_id policy_id for this application
    */
   virtual void OnAddedNewApplicationToAppList(const uint32_t new_app_id,
-                                              const std::string policy_id) = 0;
+                                              const std::string& policy_id) = 0;
 
   /**
    * @brief OnAppRegisteredOnMobile allows to handle event when application were
@@ -659,6 +659,12 @@ class PolicyHandlerInterface : public VehicleDataItemProvider {
   virtual void OnUpdateHMIStatus(const std::string& device_id,
                                  const std::string& policy_app_id,
                                  const std::string& hmi_level) = 0;
+
+  /**
+   * @brief OnPTUTimeOut the callback which is performed when PTU timeout
+   * occurred
+   */
+  virtual void OnPTUTimeOut() = 0;
 
   /**
    * Gets all allowed module types

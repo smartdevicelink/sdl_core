@@ -625,7 +625,7 @@ class PolicyManagerImpl : public PolicyManager {
   void OnAppsSearchCompleted(const bool trigger_ptu) OVERRIDE;
 
   /**
-   * @brief Change applicatios count ready for PTU
+   * @brief Change applications count ready for PTU
    * @param new_app_count new applications count for PTU
    */
   void OnChangeApplicationCount(const uint32_t new_app_count) OVERRIDE;
@@ -1055,9 +1055,9 @@ class PolicyManagerImpl : public PolicyManager {
   void OnPTUIterationTimeout();
 
   /**
-   * @brief Check that application for PTU more than zero
+   * @brief Check that new applications for PTU were registered
    */
-  bool HasApplicationForPTU();
+  bool HasApplicationForPTU() const;
 
  private:
   /**
@@ -1157,9 +1157,9 @@ class PolicyManagerImpl : public PolicyManager {
   uint32_t retry_sequence_index_;
 
   /**
-   * @brief Count application ready for PTU
+   * @brief Applications pending count ready for PTU
    */
-  uint32_t count_application_;
+  uint32_t applications_pending_ptu_count_;
 
   /**
    * @brief Lock for guarding retry sequence
@@ -1213,7 +1213,7 @@ class PolicyManagerImpl : public PolicyManager {
   /**
    * @brief Last registered application id on mobile
    */
-  std::string last_registered_app_id_;
+  std::string last_registered_policy_app_id_;
 
   typedef std::list<std::pair<std::string, AppPoliciesValueType> >
       PendingAppPolicyActionsList;

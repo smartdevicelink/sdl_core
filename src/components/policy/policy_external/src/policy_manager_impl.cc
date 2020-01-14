@@ -212,7 +212,7 @@ PolicyManagerImpl::PolicyManagerImpl()
           new AccessRemoteImpl(std::static_pointer_cast<CacheManager>(cache_)))
     , retry_sequence_timeout_(60)
     , retry_sequence_index_(0)
-    , count_application_(0)
+    , applications_pending_ptu_count_(0)
     , ignition_check(true)
     , retry_sequence_url_(0, 0, "")
     , ptu_requested_(false)
@@ -226,7 +226,7 @@ PolicyManagerImpl::PolicyManagerImpl(bool in_memory)
           new AccessRemoteImpl(std::static_pointer_cast<CacheManager>(cache_)))
     , retry_sequence_timeout_(60)
     , retry_sequence_index_(0)
-    , count_application_(0)
+    , applications_pending_ptu_count_(0)
     , ignition_check(true)
     , retry_sequence_url_(0, 0, "")
     , send_on_update_sent_out_(false)
@@ -557,7 +557,7 @@ void PolicyManagerImpl::OnPTUFinished(const PtProcessingResult ptu_result) {
   update_status_manager_.OnValidUpdateReceived();
 
   if (HasApplicationForPTU()) {
-    update_status_manager_.OnUpdatePostponed();
+    update_status_manager_.OnUpdateForNextInQueue();
   }
 
   if (PtProcessingResult::kNewPtRequired == ptu_result) {
@@ -779,7 +779,7 @@ void PolicyManagerImpl::OnAppsSearchCompleted(const bool trigger_ptu) {
 }
 
 void PolicyManagerImpl::OnChangeApplicationCount(const uint32_t new_app_count) {
-  count_application_ = new_app_count;
+  applications_pending_ptu_count_ = new_app_count;
 }
 
 const std::vector<std::string> PolicyManagerImpl::GetAppRequestTypes(
@@ -1397,7 +1397,7 @@ void PolicyManagerImpl::RetrySequenceFailed() {
   ResetRetrySequence(ResetRetryCountType::kResetWithStatusUpdate);
 
   if (HasApplicationForPTU()) {
-    update_status_manager_.OnUpdatePostponed();
+    update_status_manager_.OnUpdateForNextInQueue();
     StartPTExchange();
   }
   is_ptu_in_progress_ = false;
@@ -1664,8 +1664,8 @@ bool PolicyManagerImpl::IsPTValid(
   return true;
 }
 
-bool PolicyManagerImpl::HasApplicationForPTU() {
-  return count_application_ > 0;
+bool PolicyManagerImpl::HasApplicationForPTU() const {
+  return applications_pending_ptu_count_ > 0;
 }
 
 const PolicySettings& PolicyManagerImpl::get_settings() const {

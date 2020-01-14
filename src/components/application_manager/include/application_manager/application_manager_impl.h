@@ -1610,7 +1610,7 @@ class ApplicationManagerImpl
 
   uint32_t apps_size_;
 
-  bool is_registered_in_timeout_;
+  std::atomic<bool> registered_during_timer_execution_;
 
   volatile bool is_stopping_;
 

@@ -302,7 +302,7 @@ PolicyHandler::PolicyHandler(const PolicySettings& settings,
     , statistic_manager_impl_(std::make_shared<StatisticManagerImpl>(this))
     , settings_(settings)
     , application_manager_(application_manager)
-    , last_registered_app_id_("") {}
+    , last_registered_policy_app_id_("") {}
 
 PolicyHandler::~PolicyHandler() {}
 
@@ -466,21 +466,19 @@ uint32_t PolicyHandler::GetAppIdForSending() const {
   return ChooseRandomAppForPolicyUpdate(apps_with_none_level);
 }
 
-void PolicyHandler::AddNewApplicationIdToPTUQueue(const uint32_t app_id) {
+void PolicyHandler::PushAppIdToQueue(const uint32_t app_id) {
   LOG4CXX_AUTO_TRACE(logger_);
-
-  if (std::find(queue_applications_for_ptu_.begin(),
-                queue_applications_for_ptu_.end(),
-                app_id) == queue_applications_for_ptu_.end()) {
-    queue_applications_for_ptu_.push_back(app_id);
+  sync_primitives::AutoLock lock(app_id_queue_lock_);
+  const auto result = queue_applications_for_ptu_.insert(app_id);
+  if (result.second) {
     policy_manager_->OnChangeApplicationCount(
         queue_applications_for_ptu_.size());
   }
 }
 
-void PolicyHandler::RemoveApplicationFromPTUQueue() {
+void PolicyHandler::PopAppIdFromQueue() {
   LOG4CXX_AUTO_TRACE(logger_);
-
+  sync_primitives::AutoLock lock(app_id_queue_lock_);
   if (queue_applications_for_ptu_.size() > 0) {
     queue_applications_for_ptu_.erase(queue_applications_for_ptu_.begin());
     policy_manager_->OnChangeApplicationCount(
@@ -1146,7 +1144,7 @@ bool PolicyHandler::ReceiveMessageFromSDK(const std::string& file,
   const bool is_ptu_successful =
       load_pt_result == PolicyManager::PtProcessingResult::kSuccess;
   OnPTUFinished(is_ptu_successful);
-  RemoveApplicationFromPTUQueue();
+  PopAppIdFromQueue();
   if (is_ptu_successful) {
     LOG4CXX_INFO(logger_, "PTU was successful.");
     policy_manager_->CleanupUnpairedDevices();
@@ -1522,8 +1520,9 @@ void PolicyHandler::OnPermissionsUpdated(const std::string& device_id,
                     << policy_app_id << " and connection_key "
                     << app->app_id());
 }
+
 void PolicyHandler::OnPTUTimeOut() {
-  RemoveApplicationFromPTUQueue();
+  PopAppIdFromQueue();
 #ifndef EXTERNAL_PROPRIETARY_MODE
   application_manager_.protocol_handler().ProcessFailedPTU();
 #endif
@@ -1939,7 +1938,7 @@ void PolicyHandler::OnPTUFinished(const bool ptu_result) {
   LOG4CXX_AUTO_TRACE(logger_);
   sync_primitives::AutoLock lock(listeners_lock_);
   if (!ptu_result) {
-    RemoveApplicationFromPTUQueue();
+    PopAppIdFromQueue();
   }
   std::for_each(
       listeners_.begin(),
@@ -2239,12 +2238,13 @@ void PolicyHandler::OnAppsSearchCompleted(const bool trigger_ptu) {
 }
 
 void PolicyHandler::OnAddedNewApplicationToAppList(
-    const uint32_t new_app_id, const std::string policy_id) {
-  if (last_registered_app_id_ == policy_id) {
+    const uint32_t new_app_id, const std::string& policy_id) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  if (policy_id == last_registered_policy_app_id_) {
     return;
   }
-  last_registered_app_id_ = policy_id;
-  AddNewApplicationIdToPTUQueue(new_app_id);
+  last_registered_policy_app_id_ = policy_id;
+  PushAppIdToQueue(new_app_id);
 }
 
 void PolicyHandler::OnAppRegisteredOnMobile(const std::string& device_id,

@@ -57,7 +57,7 @@ policy::UpdateNeededStatus::UpdateNeededStatus()
 void policy::UpdateNeededStatus::ProcessEvent(
     policy::UpdateStatusManagerInterface* manager, policy::UpdateEvent event) {
   switch (event) {
-    case kPostponedUpdate:
+    case kUpdateForNextInQueue:
       manager->SetNextStatus(std::make_shared<UpdateNeededStatus>());
       break;
     case kOnUpdateSentOut:

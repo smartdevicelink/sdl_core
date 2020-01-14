@@ -92,9 +92,10 @@ class UpdateStatusManager {
   void OnUpdateTimeoutOccurs();
 
   /**
-   * @brief Postponed update for PTU
+   * @brief Update status for next in queue application
+   * after previous update been has finished
    */
-  void OnUpdatePostponed();
+  void OnUpdateForNextInQueue();
 
   /**
    * @brief Update status handler for valid PTU receiving
