@@ -299,6 +299,19 @@ class ApplicationManager {
                                  mobile_apis::HMILevel::eType to) = 0;
 
   /**
+   * @brief Updates streaming service status for specified session and notifies
+   * HMI via notification if required
+   * @param service_type Id of service which status should be updated
+   * @param app_id Id of session which status should be updated
+   * @param streaming_data_available Availability of streaming data for
+   * specified session
+   */
+  virtual void ProcessOnDataStreamingNotification(
+      const protocol_handler::ServiceType service_type,
+      const uint32_t app_id,
+      const bool streaming_data_available) = 0;
+
+  /**
    * @brief Checks if driver distraction state is valid, creates message
    * which is sent to the application if allowed, otherwise it is added
    * to a list of postponed messages.
