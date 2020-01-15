@@ -146,7 +146,7 @@ class MockApplicationManager : public application_manager::ApplicationManager {
   MOCK_METHOD3(ProcessOnDataStreamingNotification,
                void(const protocol_handler::ServiceType service_type,
                     const uint32_t app_id,
-                    const bool status));
+                    const bool streaming_data_available));
   MOCK_METHOD1(
       SendHMIStatusNotification,
       void(const std::shared_ptr<application_manager::Application> app));
