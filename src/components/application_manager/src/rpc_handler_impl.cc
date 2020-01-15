@@ -31,7 +31,6 @@
  */
 
 #include "application_manager/rpc_handler_impl.h"
-
 #include "application_manager/app_service_manager.h"
 #include "application_manager/plugin_manager/plugin_keys.h"
 
@@ -308,6 +307,7 @@ void RPCHandlerImpl::GetMessageVersion(
     if (sync_msg_version.keyExists(strings::patch_version)) {
       patch = sync_msg_version[strings::patch_version].asUInt();
     }
+
     utils::SemanticVersion temp_version(major, minor, patch);
     if (temp_version.isValid()) {
       message_version = (temp_version >= utils::rpc_version_5)

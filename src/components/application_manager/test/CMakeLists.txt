@@ -86,6 +86,9 @@ set (RequestController_SOURCES
   ${AM_TEST_DIR}/mock_message_helper.cc
 )
 
+set (RPCHandlerImplTest_SOURCES ${AM_TEST_DIR}/rpc_handler_impl_test.cc 
+                                ${AM_TEST_DIR}/mock_message_helper.cc)
+
 set(LIBRARIES
   Utils
   ApplicationManager
@@ -143,6 +146,8 @@ create_test("application_manager_mock_hmi_test" "${testSourcesMockHmi}" "${LIBRA
 create_test("help_prompt_manager_test" "${testSourcesHelpPromptManager}" "${LIBRARIES}")
 
 create_test("request_controller_test" "${RequestController_SOURCES}" "${LIBRARIES}")
+
+create_test("rpc_handler_impl_test" "${RPCHandlerImplTest_SOURCES}" "${LIBRARIES}")
 
 set(ResumptionData_SOURCES
   ${AM_TEST_DIR}/resumption/resumption_data_test.cc
