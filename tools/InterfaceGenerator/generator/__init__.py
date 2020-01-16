@@ -1,2 +1,0 @@
-"""Top-level application package.
-"""

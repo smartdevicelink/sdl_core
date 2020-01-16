@@ -1,0 +1,4 @@
+[submodule "tools/rpc_spec"]
+	path = tools/rpc_spec
+	url = git@github.com:vladmu/rpc_spec.git
+	branch = master

@@ -3,10 +3,10 @@
 Defines SDLRPC format specific code generation rules.
 
 """
-from generator.generators import SmartFactoryBase
+from generators.SmartFactoryBase import SmartFactoryBase
 
 
-class CodeGenerator(SmartFactoryBase.CodeGenerator):
+class CodeGenerator(SmartFactoryBase):
 
     """SDLRPC SmartFactory generator.
 
@@ -17,8 +17,11 @@ class CodeGenerator(SmartFactoryBase.CodeGenerator):
 
     def __init__(self):
         """Construct new object."""
+        super(CodeGenerator, self).__init__()
 
-        SmartFactoryBase.CodeGenerator.__init__(self)
+    @property
+    def get_version(self):
+        return '1.0.0'
 
     def _gen_pre_function_schemas(self, functions):
         """Generate specific code that goes before schema initialization.
@@ -34,7 +37,7 @@ class CodeGenerator(SmartFactoryBase.CodeGenerator):
 
         """
 
-        return u""
+        return ""
 
     def _preprocess_message_type(self, message_type):
         """Preprocess message_type enum.
@@ -67,21 +70,21 @@ class CodeGenerator(SmartFactoryBase.CodeGenerator):
         """
 
         base_params = \
-            u'''params_members[ns_smart_device_link::ns_json_handler::''' \
-            u'''strings::S_FUNCTION_ID] = SMember(TEnumSchemaItem<FunctionID::eType>::''' \
-            u'''create(function_id_items), true);\n''' \
-            u'''params_members[ns_smart_device_link::ns_json_handler::''' \
-            u'''strings::S_MESSAGE_TYPE] = SMember(TEnumSchemaItem<messageType::eType>::''' \
-            u'''create(message_type_items), true);\n''' \
-            u'''params_members[ns_smart_device_link::ns_json_handler::''' \
-            u'''strings::S_PROTOCOL_VERSION] = SMember(TNumberSchemaItem<int>::create(), true);\n''' \
-            u'''params_members[ns_smart_device_link::ns_json_handler::''' \
-            u'''strings::S_PROTOCOL_TYPE] = SMember(TNumberSchemaItem<int>::create(), true);\n'''
+            '''params_members[ns_smart_device_link::ns_json_handler::''' \
+            '''strings::S_FUNCTION_ID] = SMember(TEnumSchemaItem<FunctionID::eType>::''' \
+            '''create(function_id_items), true);\n''' \
+            '''params_members[ns_smart_device_link::ns_json_handler::''' \
+            '''strings::S_MESSAGE_TYPE] = SMember(TEnumSchemaItem<messageType::eType>::''' \
+            '''create(message_type_items), true);\n''' \
+            '''params_members[ns_smart_device_link::ns_json_handler::''' \
+            '''strings::S_PROTOCOL_VERSION] = SMember(TNumberSchemaItem<int>::create(), true);\n''' \
+            '''params_members[ns_smart_device_link::ns_json_handler::''' \
+            '''strings::S_PROTOCOL_TYPE] = SMember(TNumberSchemaItem<int>::create(), true);\n'''
 
         correlation_id_param = \
-            u'''params_members[ns_smart_device_link::ns_json_handler::''' \
-            u'''strings::S_CORRELATION_ID] = SMember(TNumberSchemaItem<int>::create(), true);\n'''
+            '''params_members[ns_smart_device_link::ns_json_handler::''' \
+            '''strings::S_CORRELATION_ID] = SMember(TNumberSchemaItem<int>::create(), true);\n'''
 
-        return u"".join([base_params, correlation_id_param
-                        if unicode(message_type_name) !=
-                        u"notification" else u""])
+        return "".join([base_params, correlation_id_param
+                        if message_type_name !=
+                        "notification" else ""])

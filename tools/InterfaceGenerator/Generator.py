@@ -16,79 +16,109 @@ optional arguments:
   --parser-type {sdlrpcv2}
 """
 
-import os.path
 import argparse
-import errno
+import os
 import sys
+from inspect import getfile
+from os.path import basename
+from pathlib import Path
+from re import findall
 
-import generator.parsers.SDLRPCV1
-import generator.parsers.SDLRPCV2
-import generator.parsers.JSONRPC
-import generator.generators.SmartFactorySDLRPC
-import generator.generators.SmartFactoryJSONRPC
-import generator.generators.PolicyTypes
-import MsgVersionGenerate
+sys.path.append(Path(__file__).absolute().parents[1].joinpath('rpc_spec/InterfaceParser').as_posix())
 
-from generator.parsers.RPCBase import ParseError
-from generator.generators.SmartFactoryBase import GenerateError
-
-SUPPORTED_FORMATS = {
-    "sdlrpcv1": (generator.parsers.SDLRPCV1.Parser,
-                 generator.generators.SmartFactorySDLRPC.CodeGenerator),
-    "sdlrpcv2": (generator.parsers.SDLRPCV2.Parser,
-                 generator.generators.SmartFactorySDLRPC.CodeGenerator),
-    "jsonrpc": (generator.parsers.JSONRPC.Parser,
-                generator.generators.SmartFactoryJSONRPC.CodeGenerator),
-    "mobile-policy-types": (generator.parsers.SDLRPCV2.Parser,
-                generator.generators.PolicyTypes.CodeGenerator),
-    "hmi-policy-types": (generator.parsers.JSONRPC.Parser,
-                generator.generators.PolicyTypes.CodeGenerator)
-}
+try:
+    from parsers import sdl_rpc_v1, sdl_rpc_v2, json_rpc
+    from parsers.parse_error import ParseError
+    from generators import SmartFactorySDLRPC, SmartFactoryJSONRPC, PolicyTypes
+    from generators.SmartFactoryBase import GenerateError
+    from MsgVersionGenerate import generate_msg_version
+except ModuleNotFoundError as error:
+    print('{}.\nProbably you did not initialize submodule'.format(error))
+    sys.exit(1)
 
 
-def _create_parser():
-    """Create parser for parsing command-line arguments.
-
-    Returns an instance of argparse.ArgumentParser
+class Generator:
+    """Generator application that generates c++ interfaces code from xml description
 
     """
 
-    parser = argparse.ArgumentParser(
-        description="SmartSchema interface generator"
-    )
-    parser.add_argument("source-xml")
-    parser.add_argument("namespace")
-    parser.add_argument("output-dir")
-    parser.add_argument("--parser-type",
-                        choices=SUPPORTED_FORMATS.keys(),
-                        required=True)
-    return parser
+    def __init__(self):
+        self._supported_formats = {
+            'sdlrpcv1': (sdl_rpc_v1.Parser, SmartFactorySDLRPC.CodeGenerator),
+            'sdlrpcv2': (sdl_rpc_v2.Parser, SmartFactorySDLRPC.CodeGenerator),
+            'jsonrpc': (json_rpc.Parser, SmartFactoryJSONRPC.CodeGenerator),
+            'mobile-policy-types': (sdl_rpc_v2.Parser, PolicyTypes.CodeGenerator),
+            'hmi-policy-types': (json_rpc.Parser, PolicyTypes.CodeGenerator)
+        }
 
+    @property
+    def supported_formats(self):
+        """
+        :return: dictionary with supported_formats
+        """
+        return self._supported_formats
 
-def _handle_fatal_error(error):
-    """Handle fatal error during parsing or code generation.
+    def _create_parser(self):
+        """Create parser for parsing command-line arguments.
 
-    Keyword arguments:
-    error -- base exception to handle.
+        Returns an instance of argparse.ArgumentParser
 
-    """
+        """
 
-    print(error.message)
-    print
-    sys.exit(errno.EINVAL)
+        parser = argparse.ArgumentParser(
+            description="SmartSchema interface generator"
+        )
+        parser.add_argument("source-xml")
+        parser.add_argument("namespace")
+        parser.add_argument("output-dir")
+        parser.add_argument("--parser-type",
+                            choices=self.supported_formats.keys(),
+                            required=True)
+        return parser
 
-def main():
-    """Main function of the generator that does actual work."""
+    def versions_compatibility_validating(self, parser_type):
+        """version of generator script requires the same or lesser version of parser script.
+        if the parser script needs to fix a bug (and becomes, e.g. 1.0.1) and the generator script stays at 1.0.0.
+        As long as the generator script is the same or greater major version, it should be parsable.
+        This requires some level of backward compatibility. E.g. they have to be the same major version.
 
-    args = vars(_create_parser().parse_args())
+        :param parser_type: parser-type argument provided to script input
+        """
 
-    src_xml = args["source-xml"]
-    src_xml_name = os.path.splitext(os.path.basename(src_xml))[0]
-    namespace = args["namespace"]
-    output_dir = args["output-dir"]
-    parser_type = args["parser_type"]
+        parser = self.supported_formats[parser_type][0]()
+        generator = self.supported_formats[parser_type][1]()
 
-    print("""
+        regex = r'(\d+\.\d+).(\d)'
+
+        parser_origin = parser.get_version
+        generator_origin = generator.get_version
+        parser_split = findall(regex, parser_origin).pop()
+        generator_split = findall(regex, generator_origin).pop()
+
+        parser_major = float(parser_split[0])
+        generator_major = float(generator_split[0])
+
+        if parser_major > generator_major:
+            print('Generator ({}) requires the same or lesser version of Parser ({})'
+                  .format(generator_origin, parser_origin))
+            sys.exit(1)
+
+        print('Parser type: {}, version {}.\tGenerator type: {}, version {}'
+              .format(basename(getfile(parser.__class__)), parser_origin,
+                      basename(getfile(generator.__class__)), generator_origin))
+
+    def main(self):
+        """Main function of the generator that does actual work."""
+
+        args = vars(self._create_parser().parse_args())
+
+        src_xml = args["source-xml"]
+        src_xml_name = os.path.splitext(os.path.basename(src_xml))[0]
+        namespace = args["namespace"]
+        output_dir = args["output-dir"]
+        parser_type = args["parser_type"]
+
+        print("""
 Generating interface source code with following parameters:
     Source xml      : {0}
     Namespace       : {1}
@@ -96,33 +126,29 @@ Generating interface source code with following parameters:
     Parser type     : {3}
 """.format(src_xml, namespace, output_dir, parser_type))
 
-    # Select required parser and code generator
-    parser = SUPPORTED_FORMATS[parser_type][0]()
-    code_generator = SUPPORTED_FORMATS[parser_type][1]()
+        # Select required parser and code generator
+        parser = self.supported_formats[parser_type][0]()
+        code_generator = self.supported_formats[parser_type][1]()
 
-    # Convert incoming xml to internal model
-    try:
-        interface = parser.parse(args["source-xml"])
-    except ParseError as error:
-        _handle_fatal_error(error)
-
-    # Parse sdl version from MOBILE_API.xml and create source file with this version
-    if src_xml_name == "MOBILE_API":
+        # Convert incoming xml to internal model
         try:
-            MsgVersionGenerate.generate_msg_version(src_xml, output_dir)
-        except ParseError as error:
-            _handle_fatal_error(error)
+            interface = parser.parse(args["source-xml"])
 
-    # Generate SmartFactory source code from internal model
-    try:
-        code_generator.generate(interface,
-                                src_xml_name,
-                                namespace,
-                                output_dir)
-    except GenerateError as error:
-        _handle_fatal_error(error)
+            # Parse sdl version from MOBILE_API.xml and create source file with this version
+            if src_xml_name == "MOBILE_API":
+                generate_msg_version(src_xml, output_dir)
 
-    print("Done.")
+            # Generate SmartFactory source code from internal model
+            code_generator.generate(interface,
+                                    src_xml_name,
+                                    namespace,
+                                    output_dir)
+        except (ParseError, GenerateError) as error1:
+            print(error1)
+            sys.exit(1)
+
+        print('Done.')
+
 
 if __name__ == '__main__':
-    main()
+    Generator().main()

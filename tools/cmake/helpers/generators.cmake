@@ -28,12 +28,12 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-find_package(PythonInterp REQUIRED)
+find_package(PythonInterp 3.5 REQUIRED)
 
 if(NOT PYTHONINTERP_FOUND)
   message(STATUS "Python interpreter is not found")
   message(STATUS "To install it type in the command line:")
-  message(STATUS "sudo apt-get install python")
+  message(STATUS "sudo apt-get install python3")
   message(FATAL_ERROR "Exiting!")
 endif(NOT PYTHONINTERP_FOUND)
 
