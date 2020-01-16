@@ -690,7 +690,7 @@ void PolicyManagerImpl::OnChangeApplicationCount(const uint32_t new_app_count) {
 
 void PolicyManagerImpl::OnAppRegisteredOnMobile(
     const std::string& device_id, const std::string& application_id) {
-  if (last_registered_policy_app_id_ != application_id) {
+  if (application_id != last_registered_policy_app_id_) {
     StartPTExchange();
     last_registered_policy_app_id_ = application_id;
   }
