@@ -608,10 +608,6 @@ class PolicyManagerImpl : public PolicyManager {
    */
   void OnAppsSearchCompleted(const bool trigger_ptu) OVERRIDE;
 
-  /**
-   * @brief Change applications count ready for PTU
-   * @param new_app_count new applications count for PTU
-   */
   void OnChangeApplicationCount(const uint32_t new_app_count) OVERRIDE;
 
   /**

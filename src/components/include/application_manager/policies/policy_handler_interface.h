@@ -411,7 +411,7 @@ class PolicyHandlerInterface : public VehicleDataItemProvider {
   virtual void OnAppsSearchCompleted(const bool trigger_ptu) = 0;
 
   /**
-   * @brief Notify that new applocation was added to application list
+   * @brief Notify that new application was added to application list
    * @param new_app_id app_id for this application
    * @param policy_id policy_id for this application
    */
