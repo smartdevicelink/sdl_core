@@ -284,8 +284,6 @@ bool CryptoManagerImpl::Init() {
 bool CryptoManagerImpl::OnCertificateUpdated(const std::string& data) {
   LOG4CXX_AUTO_TRACE(logger_);
   sync_primitives::AutoLock lock(crypto_manager_lock_);
-  LOG4CXX_DEBUG(logger_,
-                "CryptoManager is locked. Start of sertificate update");
   if (!context_) {
     LOG4CXX_WARN(logger_, "Not initialized");
     return false;
@@ -312,8 +310,6 @@ bool CryptoManagerImpl::OnCertificateUpdated(const std::string& data) {
 SSLContext* CryptoManagerImpl::CreateSSLContext() {
   LOG4CXX_AUTO_TRACE(logger_);
   sync_primitives::AutoLock lock(crypto_manager_lock_);
-  LOG4CXX_DEBUG(logger_,
-                "CryptoManager is locked. Start of SSLContext creation");
   if (NULL == context_) {
     return NULL;
   }
