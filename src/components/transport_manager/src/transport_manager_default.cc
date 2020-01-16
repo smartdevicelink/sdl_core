@@ -140,6 +140,10 @@ int TransportManagerDefault::Init(
   return E_SUCCESS;
 }
 
+int TransportManagerDefault::Init(resumption::LastState&) {
+  return 1;
+}
+
 TransportManagerDefault::~TransportManagerDefault() {}
 
 }  //  namespace transport_manager

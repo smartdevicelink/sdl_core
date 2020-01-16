@@ -57,6 +57,8 @@ class MockTransportManager : public ::transport_manager::TransportManager,
                                  transport_manager::TMTelemetryObserver> {
  public:
   MOCK_METHOD1(Init, int(resumption::LastStateWrapperPtr last_state));
+  DEPRECATED
+  MOCK_METHOD1(Init, int(resumption::LastState& last_state));
   MOCK_METHOD0(Reinit, int());
   MOCK_METHOD0(Deinit, void());
   MOCK_METHOD0(StopEventsProcessing, void());

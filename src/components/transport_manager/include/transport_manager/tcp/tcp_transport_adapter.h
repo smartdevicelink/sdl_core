@@ -53,6 +53,11 @@ class TcpTransportAdapter : public TransportAdapterImpl {
                       resumption::LastStateWrapperPtr last_state_wrapper,
                       const TransportManagerSettings& settings);
 
+  DEPRECATED
+  TcpTransportAdapter(uint16_t port,
+                      resumption::LastState&,
+                      const TransportManagerSettings& settings) = delete;
+
   /**
    * @brief Destructor.
    */

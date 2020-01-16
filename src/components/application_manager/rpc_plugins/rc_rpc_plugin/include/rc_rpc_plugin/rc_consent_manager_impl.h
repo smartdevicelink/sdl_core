@@ -50,6 +50,12 @@ class RCConsentManagerImpl : public RCConsentManager {
       application_manager::ApplicationManager& application_manager,
       const uint32_t period_of_consent_expired);
 
+  DEPRECATED
+  RCConsentManagerImpl(
+      resumption::LastState& last_state,
+      application_manager::ApplicationManager& application_manager,
+      const uint32_t period_of_consent_expired);
+
   void SaveModuleConsents(
       const std::string& policy_app_id,
       const std::string& mac_address,

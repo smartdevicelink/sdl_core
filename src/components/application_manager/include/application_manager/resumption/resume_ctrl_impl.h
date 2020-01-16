@@ -284,6 +284,8 @@ class ResumeCtrlImpl : public ResumeCtrl,
    */
   void RemoveFromResumption(uint32_t app_id) OVERRIDE;
 
+  DEPRECATED bool Init(resumption::LastState& last_state) FINAL;
+
   /**
    * @brief Initialization data for Resume controller
    * @return true if initialization is success otherwise

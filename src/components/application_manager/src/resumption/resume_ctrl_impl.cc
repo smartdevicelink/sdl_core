@@ -377,6 +377,10 @@ void ResumeCtrlImpl::RemoveFromResumption(uint32_t app_id) {
   queue_lock_.Release();
 }
 
+bool ResumeCtrlImpl::Init(LastState&) {
+  return false;
+}
+
 bool ResumeCtrlImpl::SetAppHMIState(
     ApplicationSharedPtr application,
     const mobile_apis::HMILevel::eType hmi_level,

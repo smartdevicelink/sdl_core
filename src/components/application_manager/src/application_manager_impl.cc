@@ -2329,6 +2329,11 @@ void ApplicationManagerImpl::RemoveHMIFakeParameters(
   (*message)[jhs::S_PARAMS][jhs::S_FUNCTION_ID] = mobile_function_id;
 }
 
+bool ApplicationManagerImpl::Init(resumption::LastState&,
+                                  media_manager::MediaManager*) {
+  return false;
+}
+
 bool ApplicationManagerImpl::Init(
     resumption::LastStateWrapperPtr last_state_wrapper,
     media_manager::MediaManager* media_manager) {

@@ -510,6 +510,9 @@ class HMICapabilitiesImpl : public HMICapabilities {
 
   void Init(resumption::LastStateWrapperPtr last_state_wrapper) OVERRIDE;
 
+  DEPRECATED
+  void Init(resumption::LastState* last_state) OVERRIDE;
+
   /*
    * @brief return component which follows for correctness of
    * languages

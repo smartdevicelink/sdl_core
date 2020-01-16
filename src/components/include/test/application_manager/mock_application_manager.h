@@ -68,6 +68,10 @@ class MockApplicationManager : public application_manager::ApplicationManager {
   MOCK_METHOD2(Init,
                bool(resumption::LastStateWrapperPtr last_state,
                     media_manager::MediaManager* media_manager));
+  DEPRECATED
+  MOCK_METHOD2(Init,
+               bool(resumption::LastState& last_state,
+                    media_manager::MediaManager* media_manager));
   MOCK_METHOD0(Stop, bool());
   MOCK_METHOD1(set_hmi_message_handler,
                void(hmi_message_handler::HMIMessageHandler* handler));

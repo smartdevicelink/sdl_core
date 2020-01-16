@@ -576,4 +576,8 @@ void ResumptionDataJson::Persist() {
   last_state_wrapper_->get_accessor().GetMutableData().SaveToFileSystem();
 }
 
+LastState& ResumptionDataJson::last_state() const {
+  return last_state_wrapper_->get_accessor().GetMutableData();
+}
+
 }  // namespace resumption

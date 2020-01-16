@@ -83,6 +83,14 @@ bool RCRPCPlugin::Init(
   return true;
 }
 
+bool RCRPCPlugin::Init(application_manager::ApplicationManager&,
+                       application_manager::rpc_service::RPCService&,
+                       application_manager::HMICapabilities&,
+                       policy::PolicyHandlerInterface&,
+                       resumption::LastState&) {
+  return false;
+}
+
 bool RCRPCPlugin::IsAbleToProcess(
     const int32_t function_id,
     const application_manager::commands::Command::CommandSource
