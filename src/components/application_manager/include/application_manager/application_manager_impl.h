@@ -787,12 +787,13 @@ class ApplicationManagerImpl
   void RemovePolicyObserver(PolicyHandlerObserver* listener);
 
   /**
-   * @brief Checks HMI level and returns true if streaming is allowed
+   * @brief Checks application HMI state and returns true if streaming is
+   * allowed
    * @param app_id Application id
    * @param service_type Service type to check
    * @return True if streaming is allowed, false in other case
    */
-  bool HMILevelAllowsStreaming(
+  bool HMIStateAllowsStreaming(
       uint32_t app_id,
       protocol_handler::ServiceType service_type) const OVERRIDE;
 

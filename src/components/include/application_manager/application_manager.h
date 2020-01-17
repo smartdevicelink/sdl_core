@@ -604,12 +604,13 @@ class ApplicationManager {
       mobile_api::AppInterfaceUnregisteredReason::eType reason) = 0;
 
   /**
-   * @brief Checks HMI level and returns true if streaming is allowed
+   * @brief Checks application HMI state and returns true if streaming is
+   * allowed
    * @param app_id Application id
    * @param service_type Service type to check
    * @return True if streaming is allowed, false in other case
    */
-  virtual bool HMILevelAllowsStreaming(
+  virtual bool HMIStateAllowsStreaming(
       uint32_t app_id, protocol_handler::ServiceType service_type) const = 0;
 
   /**

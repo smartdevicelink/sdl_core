@@ -254,7 +254,7 @@ class MockApplicationManager : public application_manager::ApplicationManager {
                void(mobile_apis::AppInterfaceUnregisteredReason::eType reason));
   MOCK_METHOD1(HeadUnitReset,
                void(mobile_apis::AppInterfaceUnregisteredReason::eType reason));
-  MOCK_CONST_METHOD2(HMILevelAllowsStreaming,
+  MOCK_CONST_METHOD2(HMIStateAllowsStreaming,
                      bool(uint32_t app_id,
                           protocol_handler::ServiceType service_type));
   MOCK_METHOD5(CheckPolicyPermissions,

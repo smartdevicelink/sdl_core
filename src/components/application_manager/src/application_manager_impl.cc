@@ -1805,7 +1805,7 @@ bool ApplicationManagerImpl::StartNaviService(
   using namespace protocol_handler;
   LOG4CXX_AUTO_TRACE(logger_);
 
-  if (HMILevelAllowsStreaming(app_id, service_type)) {
+  if (HMIStateAllowsStreaming(app_id, service_type)) {
     {
       sync_primitives::AutoLock lock(navi_service_status_lock_);
 
@@ -3279,7 +3279,7 @@ std::string ApplicationManagerImpl::GetHashedAppID(
   return mobile_app_id + device_name;
 }
 
-bool ApplicationManagerImpl::HMILevelAllowsStreaming(
+bool ApplicationManagerImpl::HMIStateAllowsStreaming(
     uint32_t app_id, protocol_handler::ServiceType service_type) const {
   LOG4CXX_AUTO_TRACE(logger_);
   using namespace mobile_apis::HMILevel;
@@ -3323,7 +3323,7 @@ bool ApplicationManagerImpl::CanAppStream(
     LOG4CXX_WARN(logger_, "Unsupported service_type " << service_type);
   }
 
-  return HMILevelAllowsStreaming(app_id, service_type) && is_allowed;
+  return HMIStateAllowsStreaming(app_id, service_type) && is_allowed;
 }
 
 void ApplicationManagerImpl::ForbidStreaming(uint32_t app_id) {
