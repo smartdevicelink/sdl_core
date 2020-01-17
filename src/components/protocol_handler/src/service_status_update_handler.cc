@@ -114,4 +114,10 @@ void ServiceStatusUpdateHandler::OnServiceUpdate(
     }
   }
 }
+
+void ServiceStatusUpdateHandler::SetNaviServiceStatus(uint32_t app_id,
+                                                      ServiceType service_type,
+                                                      bool is_opened) {
+  listener_->SetNaviServiceStatus(app_id, service_type, is_opened);
+}
 }  // namespace protocol_handler

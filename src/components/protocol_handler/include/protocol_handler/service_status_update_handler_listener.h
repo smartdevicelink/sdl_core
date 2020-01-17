@@ -70,6 +70,10 @@ class ServiceStatusUpdateHandlerListener {
       hmi_apis::Common_ServiceEvent::eType service_event,
       utils::Optional<hmi_apis::Common_ServiceStatusUpdateReason::eType>
           service_update_reason) = 0;
+
+  virtual bool SetNaviServiceStatus(uint32_t connection_key,
+                                    protocol_handler::ServiceType service_type,
+                                    bool is_started) = 0;
 };
 
 }  // namespace protocol_handler

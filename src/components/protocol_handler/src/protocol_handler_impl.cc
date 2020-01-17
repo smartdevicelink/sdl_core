@@ -435,6 +435,16 @@ void ProtocolHandlerImpl::SendStartSessionAck(
   raw_ford_messages_to_mobile_.PostMessage(
       impl::RawFordMessageToMobile(ptr, false));
 
+  if ((service_type == ServiceType::kAudio) ||
+      (service_type == ServiceType::kMobileNav)) {
+    const uint32_t connection_key =
+        session_observer_.KeyFromPair(connection_id, session_id);
+    service_status_update_handler_->SetNaviServiceStatus(
+        connection_key,
+        static_cast<protocol_handler::ServiceType>(service_type),
+        true);
+  }
+
   LOG4CXX_DEBUG(logger_,
                 "SendStartSessionAck() for connection "
                     << connection_id << " for service_type "
@@ -509,6 +519,13 @@ void ProtocolHandlerImpl::SendStartSessionNAck(
   raw_ford_messages_to_mobile_.PostMessage(
       impl::RawFordMessageToMobile(ptr, false));
 
+  const uint32_t connection_key =
+      session_observer_.KeyFromPair(connection_id, session_id);
+  service_status_update_handler_->SetNaviServiceStatus(
+      connection_key,
+      static_cast<protocol_handler::ServiceType>(service_type),
+      false);
+
   LOG4CXX_DEBUG(logger_,
                 "SendStartSessionNAck() for connection "
                     << connection_id << " for service_type "
@@ -571,6 +588,14 @@ void ProtocolHandlerImpl::SendEndSessionNAck(
 
   raw_ford_messages_to_mobile_.PostMessage(
       impl::RawFordMessageToMobile(ptr, false));
+
+  const uint32_t connection_key = session_observer_.KeyFromPair(
+      connection_id, static_cast<uint8_t>(session_id));
+
+  service_status_update_handler_->SetNaviServiceStatus(
+      connection_key,
+      static_cast<protocol_handler::ServiceType>(service_type),
+      false);
 
   LOG4CXX_DEBUG(logger_,
                 "SendEndSessionNAck() for connection "
