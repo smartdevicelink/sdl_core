@@ -1825,6 +1825,28 @@ bool ApplicationManagerImpl::StartNaviService(
       }
     }
 
+    {
+      /*
+        * Fix: For NaviApp1 Switch to NaviApp2, App1's Endcallback() arrives later than
+        * App2's Startcallback(). Cause streaming issue on HMI.
+      */
+      sync_primitives::AutoLock lock(applications_list_lock_ptr_);
+      auto it_app = applications_.begin();
+      while (applications_.end() != it_app) {
+        ApplicationSharedPtr app = application((*it_app)->app_id());
+        if (!app || (!app->is_navi() && !app->mobile_projection_enabled())) {
+          LOG4CXX_DEBUG(logger_, "Continue, Not Navi App Id: "<< (*it_app)->app_id());
+          ++it_app;
+          continue;
+        } else {
+          LOG4CXX_DEBUG(logger_, "Abort Stream Service of other NaviAppId: " << (*it_app)->app_id()
+           << " Service_type: " << service_type);
+          StopNaviService((*it_app)->app_id(), service_type);
+          ++it_app;
+        }
+      }
+    }
+
     if (service_type == ServiceType::kMobileNav) {
       smart_objects::SmartObject converted_params(smart_objects::SmartType_Map);
       ConvertVideoParamsToSO(converted_params, params);
@@ -1919,10 +1941,24 @@ void ApplicationManagerImpl::StopNaviService(
     if (navi_service_status_.end() == it) {
       LOG4CXX_WARN(logger_,
                    "No Information about navi service " << service_type);
+      // Fix: Need return for Not navi service at now
+      return;
     } else {
+      // Fix: Repeated tests are not executed after they have stopped for Navi
+      if (false == it->second.first && service_type == ServiceType::kMobileNav) {
+        LOG4CXX_DEBUG(logger_, "appId: " << app_id << "Navi had stopped");
+        return;
+      }
+
+      // Fix: Repeated tests are not executed after they have stopped for Audio
+      if (false == it->second.second && service_type == ServiceType::kAudio) {
+        LOG4CXX_DEBUG(logger_, "appId: " << app_id << "Audio had stopped");
+        return;
+      }
       // Fill NaviServices map. Set false to first value of pair if
       // we've stopped video service or to second value if we've
       // stopped audio service
+      LOG4CXX_DEBUG(logger_, "appId: " << app_id << " service_type: "<< service_type << " to stopped");
       service_type == ServiceType::kMobileNav ? it->second.first = false
                                               : it->second.second = false;
     }
