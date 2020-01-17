@@ -67,12 +67,44 @@ void policy::UpdateNeededStatus::ProcessEvent(
     case kOnResetPolicyTableNoUpdate:
       manager->SetNextStatus(std::make_shared<UpToDateStatus>());
       break;
+    case kPendingUpdate:
+      manager->SetNextStatus(std::make_shared<UpdatePendingStatus>());
+      break;
     default:
       break;
   }
 }
 
 bool policy::UpdateNeededStatus::IsUpdateRequired() const {
+  return true;
+}
+
+policy::UpdatePendingStatus::UpdatePendingStatus()
+    : Status(kUpdateNeeded, policy::PolicyTableStatus::StatusUpdatePending) {}
+
+void policy::UpdatePendingStatus::ProcessEvent(
+    policy::UpdateStatusManager* manager, policy::UpdateEvent event) {
+  switch (event) {
+    case kOnUpdateSentOut:
+      manager->SetNextStatus(std::make_shared<UpdatingStatus>());
+      break;
+    case kOnResetPolicyTableRequireUpdate:
+      manager->SetNextStatus(std::make_shared<UpToDateStatus>());
+      manager->SetPostponedStatus(std::make_shared<UpdateNeededStatus>());
+      break;
+    case kOnResetPolicyTableNoUpdate:
+      manager->SetNextStatus(std::make_shared<UpToDateStatus>());
+      break;
+    default:
+      break;
+  }
+}
+
+bool policy::UpdatePendingStatus::IsUpdatePending() const {
+  return true;
+}
+
+bool policy::UpdatePendingStatus::IsUpdateRequired() const {
   return true;
 }
 

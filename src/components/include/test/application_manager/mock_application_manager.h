@@ -143,6 +143,10 @@ class MockApplicationManager : public application_manager::ApplicationManager {
                void(const uint32_t app_id,
                     const application_manager::HmiStatePtr from,
                     const application_manager::HmiStatePtr to));
+  MOCK_METHOD3(ProcessOnDataStreamingNotification,
+               void(const protocol_handler::ServiceType service_type,
+                    const uint32_t app_id,
+                    const bool streaming_data_available));
   MOCK_METHOD1(
       SendHMIStatusNotification,
       void(const std::shared_ptr<application_manager::Application> app));
@@ -241,6 +245,8 @@ class MockApplicationManager : public application_manager::ApplicationManager {
                void(const uint32_t connection_key,
                     const uint32_t corr_id,
                     const int32_t function_id));
+  MOCK_METHOD1(OnQueryAppsRequest,
+               void(const connection_handler::DeviceHandle));
   MOCK_METHOD4(UnregisterApplication,
                void(const uint32_t&, mobile_apis::Result::eType, bool, bool));
   MOCK_METHOD3(updateRequestTimeout,

@@ -117,6 +117,9 @@ class ApplicationManagerImpl;
 
 enum VRTTSSessionChanging { kVRSessionChanging = 0, kTTSSessionChanging };
 
+typedef std::map<protocol_handler::ServiceType, std::set<uint32_t> >
+    ServiceStreamingStatusMap;
+
 struct CommandParametersPermissions;
 typedef std::map<std::string, hmi_apis::Common_TransportType::eType>
     DeviceTypes;
@@ -213,6 +216,11 @@ class ApplicationManagerImpl
   void OnHMIStateChanged(const uint32_t app_id,
                          const HmiStatePtr from,
                          const HmiStatePtr to) OVERRIDE;
+
+  void ProcessOnDataStreamingNotification(
+      const protocol_handler::ServiceType service_type,
+      const uint32_t app_id,
+      const bool streaming_data_available) FINAL;
 
   void SendDriverDistractionState(ApplicationSharedPtr application);
 
@@ -650,6 +658,9 @@ class ApplicationManagerImpl
   void TerminateRequest(const uint32_t connection_key,
                         const uint32_t corr_id,
                         const int32_t function_id) OVERRIDE;
+
+  void OnQueryAppsRequest(
+      const connection_handler::DeviceHandle device) OVERRIDE;
 
   // Overriden ConnectionHandlerObserver method
   void OnDeviceListUpdated(
@@ -1494,11 +1505,12 @@ class ApplicationManagerImpl
    * will send TTS global properties to HMI after timeout
    */
   std::map<uint32_t, date_time::TimeDuration> tts_global_properties_app_list_;
-
+  std::set<connection_handler::DeviceHandle> query_apps_devices_;
   bool audio_pass_thru_active_;
   uint32_t audio_pass_thru_app_id_;
   sync_primitives::Lock audio_pass_thru_lock_;
   sync_primitives::Lock tts_global_properties_app_list_lock_;
+  mutable sync_primitives::Lock query_apps_devices_lock_;
   hmi_apis::Common_DriverDistractionState::eType driver_distraction_state_;
   bool is_vr_session_strated_;
   bool hmi_cooperating_;
@@ -1599,6 +1611,9 @@ class ApplicationManagerImpl
 
   std::unique_ptr<rpc_service::RPCService> rpc_service_;
   std::unique_ptr<rpc_handler::RPCHandler> rpc_handler_;
+
+  ServiceStreamingStatusMap streaming_application_services_;
+  sync_primitives::Lock streaming_services_lock_;
 
 #ifdef BUILD_TESTS
  public:

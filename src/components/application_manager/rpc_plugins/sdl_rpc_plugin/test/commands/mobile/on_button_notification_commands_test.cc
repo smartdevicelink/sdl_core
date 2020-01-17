@@ -231,6 +231,35 @@ TYPED_TEST(OnButtonNotificationCommandsTest, Run_CustomButton_SUCCESS) {
   command->Run();
 }
 
+TYPED_TEST(OnButtonNotificationCommandsTest,
+           Run_CustomButton_SUCCESS_BACKGROUND) {
+  typedef typename TestFixture::Notification Notification;
+
+  MessageSharedPtr notification_msg(
+      this->CreateMessage(smart_objects::SmartType_Map));
+
+  (*notification_msg)[am::strings::msg_params][am::hmi_response::button_name] =
+      mobile_apis::ButtonName::CUSTOM_BUTTON;
+  (*notification_msg)[am::strings::msg_params][am::strings::app_id] = kAppId;
+  (*notification_msg)[am::strings::msg_params]
+                     [am::hmi_response::custom_button_id] = kCustomButtonId;
+
+  std::shared_ptr<Notification> command(
+      this->template CreateCommand<Notification>(notification_msg));
+
+  typename TestFixture::MockAppPtr mock_app = this->CreateMockApp();
+  ON_CALL(*mock_app, hmi_level(kDefaultWindowId))
+      .WillByDefault(Return(mobile_apis::HMILevel::HMI_BACKGROUND));
+  EXPECT_CALL(this->app_mngr_, application(kAppId)).WillOnce(Return(mock_app));
+  EXPECT_CALL(*mock_app, IsSubscribedToSoftButton(kCustomButtonId))
+      .WillOnce(Return(true));
+  EXPECT_CALL(this->mock_rpc_service_,
+              SendMessageToMobile(
+                  CheckNotificationMessage(TestFixture::kFunctionId), _));
+
+  command->Run();
+}
+
 TYPED_TEST(OnButtonNotificationCommandsTest, Run_NoSubscribedApps_UNSUCCESS) {
   typedef typename TestFixture::Notification Notification;
 

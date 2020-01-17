@@ -33,6 +33,7 @@
 
 #include <algorithm>
 
+#include "generated_msg_version.h"
 #include "smart_objects/always_false_schema_item.h"
 #include "smart_objects/smart_object.h"
 
@@ -40,6 +41,9 @@ namespace {
 const char connection_key[] = "connection_key";
 const char binary_data[] = "binary_data";
 const char app_id[] = "appID";
+const utils::SemanticVersion kModuleVersion(application_manager::major_version,
+                                            application_manager::minor_version,
+                                            application_manager::patch_version);
 }  // namespace
 namespace ns_smart_device_link {
 namespace ns_smart_objects {
@@ -80,25 +84,17 @@ bool SMember::CheckHistoryFieldVersion(
   if (MessageVersion.isValid()) {
     if (mSince != boost::none) {
       if (MessageVersion < mSince.get()) {
-        return false;  // Msg version predates `since` field
-      } else {
-        if (mUntil != boost::none && (MessageVersion >= mUntil.get())) {
-          return false;  // Msg version newer than `until` field
-        } else {
-          return true;  // Mobile msg version falls within specified version
-                        // range
-        }
+        return false;
       }
     }
-
-    if (mUntil != boost::none && (MessageVersion >= mUntil.get())) {
-      return false;  // Msg version newer than `until` field
-    } else {
-      return true;  // Mobile msg version falls within specified version range
+    if (mUntil != boost::none) {
+      if (MessageVersion >= mUntil.get()) {
+        return false;  // Msg version newer than `until` field
+      }
     }
   }
 
-  return true;  // Not enough version information. Default true.
+  return true;  // All checks passed. Return true.
 }
 
 std::shared_ptr<CObjectSchemaItem> CObjectSchemaItem::create(
@@ -126,12 +122,12 @@ errors::eType CObjectSchemaItem::validate(
        ++it) {
     const std::string& key = it->first;
     const SMember& member = it->second;
-    const SMember& correct_member = GetCorrectMember(member, MessageVersion);
+    const SMember* correct_member = GetCorrectMember(member, MessageVersion);
 
     std::set<std::string>::const_iterator key_it = object_keys.find(key);
     if (object_keys.end() == key_it) {
-      if (correct_member.mIsMandatory == true &&
-          correct_member.mIsRemoved == false) {
+      if (correct_member && correct_member->mIsMandatory == true &&
+          correct_member->mIsRemoved == false) {
         std::string validation_info = "Missing mandatory parameter: " + key;
         report__->set_validation_info(validation_info);
         return errors::MISSING_MANDATORY_PARAMETER;
@@ -142,11 +138,16 @@ errors::eType CObjectSchemaItem::validate(
 
     errors::eType result = errors::OK;
     // Check if MessageVersion matches schema version
-    result =
-        correct_member.mSchemaItem->validate(field,
-                                             &report__->ReportSubobject(key),
-                                             MessageVersion,
-                                             allow_unknown_enums);
+    if (correct_member) {
+      result =
+          correct_member->mSchemaItem->validate(field,
+                                                &report__->ReportSubobject(key),
+                                                MessageVersion,
+                                                allow_unknown_enums);
+    } else {
+      result = errors::ERROR;
+    }
+
     if (errors::OK != result) {
       return result;
     }
@@ -251,45 +252,43 @@ CObjectSchemaItem::CObjectSchemaItem(const Members& members)
 
 void CObjectSchemaItem::RemoveFakeParams(
     SmartObject& Object, const utils::SemanticVersion& MessageVersion) {
-  for (SmartMap::const_iterator it = Object.map_begin();
-       it != Object.map_end();) {
-    const std::string& key = it->first;
+  for (const auto& key : Object.enumerate()) {
     std::map<std::string, SMember>::const_iterator members_it =
         mMembers.find(key);
-    if (mMembers.end() == members_it
-        // FIXME(EZamakhov): Remove illegal usage of filed in AM
-        && key.compare(connection_key) != 0 && key.compare(binary_data) != 0 &&
-        key.compare(app_id) != 0) {
-      ++it;
-      Object.erase(key);
 
-    } else if (mMembers.end() != members_it &&
-               GetCorrectMember(members_it->second, MessageVersion)
-                   .mIsRemoved) {
-      ++it;
+    if (mMembers.end() != members_it) {
+      const SMember* member =
+          GetCorrectMember(members_it->second, MessageVersion);
+      if (!member || member->mIsRemoved) {
+        Object.erase(key);
+      }
+      continue;
+    } else if (key.compare(connection_key) != 0 &&
+               key.compare(binary_data) != 0 && key.compare(app_id) != 0) {
       Object.erase(key);
-    } else {
-      ++it;
     }
   }
 }
 
-const SMember& CObjectSchemaItem::GetCorrectMember(
+const SMember* CObjectSchemaItem::GetCorrectMember(
     const SMember& member, const utils::SemanticVersion& messageVersion) {
   // Check if member is the correct version
   if (member.CheckHistoryFieldVersion(messageVersion)) {
-    return member;
+    return &member;
   }
   // Check for history tag items
   if (!member.mHistoryVector.empty()) {
     for (uint i = 0; i < member.mHistoryVector.size(); i++) {
       if (member.mHistoryVector[i].CheckHistoryFieldVersion(messageVersion)) {
-        return member.mHistoryVector[i];
+        return &member.mHistoryVector[i];
       }
     }
   }
+
   // Return member as default
-  return member;
+  return (member.mSince != boost::none && member.mSince.get() > kModuleVersion)
+             ? &member
+             : nullptr;
 }
 
 }  // namespace ns_smart_objects

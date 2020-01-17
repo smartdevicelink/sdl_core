@@ -745,6 +745,7 @@ void PolicyManagerImpl::StartPTExchange() {
   if (listener_ && listener_->CanUpdate()) {
     LOG4CXX_INFO(logger_, "Listener CanUpdate");
     if (update_status_manager_.IsUpdateRequired()) {
+      update_status_manager_.PendingUpdate();
       LOG4CXX_INFO(logger_, "IsUpdateRequired");
       RequestPTUpdate();
     }
@@ -1975,7 +1976,8 @@ void PolicyManagerImpl::OnUpdateStarted() {
   uint32_t update_timeout = TimeoutExchangeMSec();
   LOG4CXX_DEBUG(logger_,
                 "Update timeout will be set to (milisec): " << update_timeout);
-  send_on_update_sent_out_ = !update_status_manager_.IsUpdatePending();
+  send_on_update_sent_out_ =
+      policy::kUpdating != update_status_manager_.StringifiedUpdateStatus();
 
   if (send_on_update_sent_out_) {
     update_status_manager_.OnUpdateSentOut(update_timeout);

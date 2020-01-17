@@ -170,6 +170,8 @@ class ApplicationManager {
 
   virtual ApplicationSharedPtr application(uint32_t app_id) const = 0;
   virtual ApplicationSharedPtr active_application() const = 0;
+  virtual void OnQueryAppsRequest(
+      const connection_handler::DeviceHandle device) = 0;
 
   virtual ApplicationSharedPtr get_full_or_limited_application() const = 0;
 
@@ -295,6 +297,19 @@ class ApplicationManager {
   virtual void OnHMIStateChanged(const uint32_t app_id,
                                  const HmiStatePtr from,
                                  const HmiStatePtr to) = 0;
+
+  /**
+   * @brief Updates streaming service status for specified session and notifies
+   * HMI via notification if required
+   * @param service_type Id of service which status should be updated
+   * @param app_id Id of session which status should be updated
+   * @param streaming_data_available Availability of streaming data for
+   * specified session
+   */
+  virtual void ProcessOnDataStreamingNotification(
+      const protocol_handler::ServiceType service_type,
+      const uint32_t app_id,
+      const bool streaming_data_available) = 0;
 
   /**
    * @brief Checks if driver distraction state is valid, creates message

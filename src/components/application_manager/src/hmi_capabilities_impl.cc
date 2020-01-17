@@ -339,6 +339,8 @@ void InitCapabilities() {
   image_field_name_enum.insert(
       std::make_pair(std::string("locationImage"),
                      hmi_apis::Common_ImageFieldName::locationImage));
+  image_field_name_enum.insert(std::make_pair(
+      std::string("alertIcon"), hmi_apis::Common_ImageFieldName::alertIcon));
 
   file_type_enum.insert(std::make_pair(std::string("GRAPHIC_BMP"),
                                        hmi_apis::Common_FileType::GRAPHIC_BMP));
@@ -462,20 +464,9 @@ HMICapabilitiesImpl::HMICapabilitiesImpl(ApplicationManager& app_mngr)
 }
 
 HMICapabilitiesImpl::~HMICapabilitiesImpl() {
-  delete vehicle_type_;
   delete ui_supported_languages_;
   delete tts_supported_languages_;
   delete vr_supported_languages_;
-  delete display_capabilities_;
-  delete hmi_zone_capabilities_;
-  delete soft_buttons_capabilities_;
-  delete button_capabilities_;
-  delete preset_bank_capabilities_;
-  delete vr_capabilities_;
-  delete speech_capabilities_;
-  delete audio_pass_thru_capabilities_;
-  delete pcm_stream_capabilities_;
-  delete prerecorded_speech_;
   delete navigation_capability_;
   delete phone_capability_;
   delete video_streaming_capability_;
@@ -483,13 +474,14 @@ HMICapabilitiesImpl::~HMICapabilitiesImpl() {
 }
 
 bool HMICapabilitiesImpl::VerifyImageType(const int32_t image_type) const {
-  if (!display_capabilities_) {
+  auto capabilities = display_capabilities();
+  if (!capabilities) {
     return false;
   }
 
-  if (display_capabilities_->keyExists(hmi_response::image_capabilities)) {
+  if (capabilities->keyExists(hmi_response::image_capabilities)) {
     const smart_objects::SmartObject& image_caps =
-        display_capabilities_->getElement(hmi_response::image_capabilities);
+        capabilities->getElement(hmi_response::image_capabilities);
     for (uint32_t i = 0; i < image_caps.length(); ++i) {
       if (image_caps.getElement(i).asInt() == image_type) {
         return true;
@@ -603,11 +595,9 @@ void HMICapabilitiesImpl::set_display_capabilities(
   if (app_mngr_.IsSOStructValid(
           hmi_apis::StructIdentifiers::Common_DisplayCapabilities,
           display_capabilities)) {
-    if (display_capabilities_) {
-      delete display_capabilities_;
-    }
-    display_capabilities_ =
-        new smart_objects::SmartObject(display_capabilities);
+    smart_objects::SmartObjectSPtr new_value =
+        std::make_shared<smart_objects::SmartObject>(display_capabilities);
+    display_capabilities_.swap(new_value);
   }
 }
 
@@ -619,88 +609,73 @@ void HMICapabilitiesImpl::set_system_display_capabilities(
 
 void HMICapabilitiesImpl::set_hmi_zone_capabilities(
     const smart_objects::SmartObject& hmi_zone_capabilities) {
-  if (hmi_zone_capabilities_) {
-    delete hmi_zone_capabilities_;
-  }
-  hmi_zone_capabilities_ =
-      new smart_objects::SmartObject(hmi_zone_capabilities);
+  smart_objects::SmartObjectSPtr new_value =
+      std::make_shared<smart_objects::SmartObject>(hmi_zone_capabilities);
+  hmi_zone_capabilities_.swap(new_value);
 }
 
 void HMICapabilitiesImpl::set_soft_button_capabilities(
     const smart_objects::SmartObject& soft_button_capabilities) {
-  if (soft_buttons_capabilities_) {
-    delete soft_buttons_capabilities_;
-  }
-  soft_buttons_capabilities_ =
-      new smart_objects::SmartObject(soft_button_capabilities);
+  smart_objects::SmartObjectSPtr new_value =
+      std::make_shared<smart_objects::SmartObject>(soft_button_capabilities);
+  soft_buttons_capabilities_.swap(new_value);
 }
 
 void HMICapabilitiesImpl::set_button_capabilities(
     const smart_objects::SmartObject& button_capabilities) {
-  if (button_capabilities_) {
-    delete button_capabilities_;
-  }
-  button_capabilities_ = new smart_objects::SmartObject(button_capabilities);
+  smart_objects::SmartObjectSPtr new_value =
+      std::make_shared<smart_objects::SmartObject>(button_capabilities);
+  button_capabilities_.swap(new_value);
 }
 
 void HMICapabilitiesImpl::set_vr_capabilities(
     const smart_objects::SmartObject& vr_capabilities) {
-  if (vr_capabilities_) {
-    delete vr_capabilities_;
-  }
-  vr_capabilities_ = new smart_objects::SmartObject(vr_capabilities);
+  smart_objects::SmartObjectSPtr new_value =
+      std::make_shared<smart_objects::SmartObject>(vr_capabilities);
+  vr_capabilities_.swap(new_value);
 }
 
 void HMICapabilitiesImpl::set_speech_capabilities(
     const smart_objects::SmartObject& speech_capabilities) {
-  if (speech_capabilities_) {
-    delete speech_capabilities_;
-  }
-  speech_capabilities_ = new smart_objects::SmartObject(speech_capabilities);
+  smart_objects::SmartObjectSPtr new_value =
+      std::make_shared<smart_objects::SmartObject>(speech_capabilities);
+  speech_capabilities_.swap(new_value);
 }
 
 void HMICapabilitiesImpl::set_audio_pass_thru_capabilities(
     const smart_objects::SmartObject& audio_pass_thru_capabilities) {
-  if (audio_pass_thru_capabilities_) {
-    delete audio_pass_thru_capabilities_;
-  }
-  audio_pass_thru_capabilities_ =
-      new smart_objects::SmartObject(audio_pass_thru_capabilities);
+  smart_objects::SmartObjectSPtr new_value =
+      std::make_shared<smart_objects::SmartObject>(
+          audio_pass_thru_capabilities);
+  audio_pass_thru_capabilities_.swap(new_value);
 }
 
 void HMICapabilitiesImpl::set_pcm_stream_capabilities(
     const smart_objects::SmartObject& pcm_stream_capabilities) {
-  if (pcm_stream_capabilities_) {
-    delete pcm_stream_capabilities_;
-  }
-  pcm_stream_capabilities_ =
-      new smart_objects::SmartObject(pcm_stream_capabilities);
+  smart_objects::SmartObjectSPtr new_value =
+      std::make_shared<smart_objects::SmartObject>(pcm_stream_capabilities);
+  pcm_stream_capabilities_.swap(new_value);
 }
 
 void HMICapabilitiesImpl::set_preset_bank_capabilities(
     const smart_objects::SmartObject& preset_bank_capabilities) {
-  if (preset_bank_capabilities_) {
-    delete preset_bank_capabilities_;
-  }
-  preset_bank_capabilities_ =
-      new smart_objects::SmartObject(preset_bank_capabilities);
+  smart_objects::SmartObjectSPtr new_value =
+      std::make_shared<smart_objects::SmartObject>(preset_bank_capabilities);
+  preset_bank_capabilities_.swap(new_value);
 }
 
 void HMICapabilitiesImpl::set_vehicle_type(
     const smart_objects::SmartObject& vehicle_type) {
-  if (vehicle_type_) {
-    delete vehicle_type_;
-  }
-  vehicle_type_ = new smart_objects::SmartObject(vehicle_type);
+  smart_objects::SmartObjectSPtr new_value =
+      std::make_shared<smart_objects::SmartObject>(vehicle_type);
+  vehicle_type_.swap(new_value);
 }
 
 void HMICapabilitiesImpl::set_prerecorded_speech(
     const smart_objects::SmartObject& prerecorded_speech) {
-  if (prerecorded_speech_) {
-    delete prerecorded_speech_;
-    prerecorded_speech_ = NULL;
-  }
-  prerecorded_speech_ = new smart_objects::SmartObject(prerecorded_speech);
+  smart_objects::SmartObjectSPtr new_value =
+      std::make_shared<smart_objects::SmartObject>(prerecorded_speech);
+  prerecorded_speech_.swap(new_value);
 }
 
 void HMICapabilitiesImpl::set_navigation_supported(const bool supported) {
@@ -811,7 +786,7 @@ const smart_objects::SmartObject* HMICapabilitiesImpl::tts_supported_languages()
   return tts_supported_languages_;
 }
 
-const smart_objects::SmartObject* HMICapabilitiesImpl::display_capabilities()
+const smart_objects::SmartObjectSPtr HMICapabilitiesImpl::display_capabilities()
     const {
   return display_capabilities_;
 }
@@ -821,41 +796,42 @@ HMICapabilitiesImpl::system_display_capabilities() const {
   return system_display_capabilities_;
 }
 
-const smart_objects::SmartObject* HMICapabilitiesImpl::hmi_zone_capabilities()
-    const {
+const smart_objects::SmartObjectSPtr
+HMICapabilitiesImpl::hmi_zone_capabilities() const {
   return hmi_zone_capabilities_;
 }
 
-const smart_objects::SmartObject*
+const smart_objects::SmartObjectSPtr
 HMICapabilitiesImpl::soft_button_capabilities() const {
   return soft_buttons_capabilities_;
 }
 
-const smart_objects::SmartObject* HMICapabilitiesImpl::button_capabilities()
+const smart_objects::SmartObjectSPtr HMICapabilitiesImpl::button_capabilities()
     const {
   return button_capabilities_;
 }
 
-const smart_objects::SmartObject* HMICapabilitiesImpl::speech_capabilities()
+const smart_objects::SmartObjectSPtr HMICapabilitiesImpl::speech_capabilities()
     const {
   return speech_capabilities_;
 }
 
-const smart_objects::SmartObject* HMICapabilitiesImpl::vr_capabilities() const {
+const smart_objects::SmartObjectSPtr HMICapabilitiesImpl::vr_capabilities()
+    const {
   return vr_capabilities_;
 }
 
-const smart_objects::SmartObject*
+const smart_objects::SmartObjectSPtr
 HMICapabilitiesImpl::audio_pass_thru_capabilities() const {
   return audio_pass_thru_capabilities_;
 }
 
-const smart_objects::SmartObject* HMICapabilitiesImpl::pcm_stream_capabilities()
-    const {
+const smart_objects::SmartObjectSPtr
+HMICapabilitiesImpl::pcm_stream_capabilities() const {
   return pcm_stream_capabilities_;
 }
 
-const smart_objects::SmartObject*
+const smart_objects::SmartObjectSPtr
 HMICapabilitiesImpl::preset_bank_capabilities() const {
   return preset_bank_capabilities_;
 }
@@ -864,11 +840,11 @@ bool HMICapabilitiesImpl::attenuated_supported() const {
   return attenuated_supported_;
 }
 
-const smart_objects::SmartObject* HMICapabilitiesImpl::vehicle_type() const {
+const smart_objects::SmartObjectSPtr HMICapabilitiesImpl::vehicle_type() const {
   return vehicle_type_;
 }
 
-const smart_objects::SmartObject* HMICapabilitiesImpl::prerecorded_speech()
+const smart_objects::SmartObjectSPtr HMICapabilitiesImpl::prerecorded_speech()
     const {
   return prerecorded_speech_;
 }

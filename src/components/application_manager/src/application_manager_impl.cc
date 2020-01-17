@@ -1443,15 +1443,8 @@ ApplicationManagerImpl::AppsWaitingForRegistration() const {
 
 bool ApplicationManagerImpl::IsAppsQueriedFrom(
     const connection_handler::DeviceHandle handle) const {
-  sync_primitives::AutoLock lock(apps_to_register_list_lock_ptr_);
-  AppsWaitRegistrationSet::iterator it = apps_to_register_.begin();
-  AppsWaitRegistrationSet::const_iterator it_end = apps_to_register_.end();
-  for (; it != it_end; ++it) {
-    if (handle == (*it)->device()) {
-      return true;
-    }
-  }
-  return false;
+  sync_primitives::AutoLock lock(query_apps_devices_lock_);
+  return query_apps_devices_.find(handle) != query_apps_devices_.end();
 }
 
 StateController& ApplicationManagerImpl::state_controller() {
@@ -1543,6 +1536,13 @@ void ApplicationManagerImpl::OnFindNewApplicationsRequest() {
   GetPolicyHandler().OnAppsSearchStarted();
 }
 
+void ApplicationManagerImpl::OnQueryAppsRequest(
+    const connection_handler::DeviceHandle device) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  sync_primitives::AutoLock lock(query_apps_devices_lock_);
+  query_apps_devices_.insert(device);
+}
+
 void ApplicationManagerImpl::SendUpdateAppList() {
   LOG4CXX_AUTO_TRACE(logger_);
 
@@ -1567,6 +1567,8 @@ void ApplicationManagerImpl::SendUpdateAppList() {
 void ApplicationManagerImpl::RemoveDevice(
     const connection_handler::DeviceHandle& device_handle) {
   LOG4CXX_DEBUG(logger_, "device_handle " << device_handle);
+  sync_primitives::AutoLock lock(query_apps_devices_lock_);
+  query_apps_devices_.erase(device_handle);
 }
 
 void ApplicationManagerImpl::OnDeviceSwitchingStart(
@@ -3481,6 +3483,46 @@ void ApplicationManagerImpl::ProcessPostponedMessages(const uint32_t app_id) {
     }
   };
   std::for_each(messages.begin(), messages.end(), push_allowed_messages);
+}
+
+void ApplicationManagerImpl::ProcessOnDataStreamingNotification(
+    const protocol_handler::ServiceType service_type,
+    const uint32_t app_id,
+    const bool streaming_data_available) {
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  bool should_send_notification = false;
+
+  {
+    sync_primitives::AutoLock lock(streaming_services_lock_);
+    auto& active_services = streaming_application_services_[service_type];
+    should_send_notification = active_services.empty();
+    if (streaming_data_available) {
+      active_services.insert(app_id);
+      LOG4CXX_DEBUG(logger_,
+                    "Streaming session with id "
+                        << app_id << " for service "
+                        << static_cast<uint32_t>(service_type)
+                        << " was added. Currently streaming sessions count: "
+                        << active_services.size());
+    } else {
+      active_services.erase(app_id);
+      should_send_notification =
+          !should_send_notification && active_services.empty();
+
+      LOG4CXX_DEBUG(logger_,
+                    "Streaming session with id "
+                        << app_id << " for service "
+                        << static_cast<uint32_t>(service_type)
+                        << " was removed. Currently streaming sessions count: "
+                        << active_services.size());
+    }
+  }
+
+  if (should_send_notification) {
+    MessageHelper::SendOnDataStreaming(
+        service_type, streaming_data_available, *this);
+  }
 }
 
 void ApplicationManagerImpl::ProcessApp(const uint32_t app_id,

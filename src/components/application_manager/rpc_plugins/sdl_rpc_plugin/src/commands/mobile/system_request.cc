@@ -612,7 +612,7 @@ void SystemRequest::Run() {
     return;
   } else if (mobile_apis::RequestType::QUERY_APPS == request_type) {
     using namespace ns_smart_device_link::ns_json_handler::formatters;
-
+    application_manager_.OnQueryAppsRequest(application->device());
     smart_objects::SmartObject sm_object;
     Json::Reader reader;
     std::string json(binary_data.begin(), binary_data.end());
@@ -623,6 +623,7 @@ void SystemRequest::Run() {
     }
 
     CFormatterJsonBase::jsonValueToObj(root, sm_object);
+
     if (!ValidateQueryAppData(sm_object)) {
       SendResponse(false, mobile_apis::Result::GENERIC_ERROR);
       return;
