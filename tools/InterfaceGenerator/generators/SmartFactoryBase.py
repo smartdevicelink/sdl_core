@@ -15,7 +15,7 @@ from abc import abstractmethod
 from generators.GenerateError import GenerateError
 from model.array import Array
 from model.boolean import Boolean
-from model.double import Double
+from model.float import Float
 from model.enum import Enum
 from model.enum_element import EnumElement
 from model.enum_subset import EnumSubset
@@ -812,7 +812,7 @@ class SmartFactoryBase(object):
                          ["int64_t", param.default_value]]))
             else:
                 raise GenerateError("Parameter '{}' value too large: {}".format(member_name, vars(param)))
-        elif type(param) is Double:
+        elif type(param) is Float:
             code = self._impl_code_integer_item_template.substitute(
                 type="double",
                 params=self._gen_schema_item_param_values(

@@ -27,7 +27,7 @@ from re import findall
 sys.path.append(Path(__file__).absolute().parents[1].joinpath('rpc_spec/InterfaceParser').as_posix())
 
 try:
-    from parsers import sdl_rpc_v1, sdl_rpc_v2, json_rpc
+    from parsers import sdl_rpc_v1, sdl_rpc_v2, hmi_api_rpc
     from parsers.parse_error import ParseError
     from generators import SmartFactorySDLRPC, SmartFactoryJSONRPC, PolicyTypes
     from generators.SmartFactoryBase import GenerateError
@@ -46,9 +46,9 @@ class Generator:
         self._supported_formats = {
             'sdlrpcv1': (sdl_rpc_v1.Parser, SmartFactorySDLRPC.CodeGenerator),
             'sdlrpcv2': (sdl_rpc_v2.Parser, SmartFactorySDLRPC.CodeGenerator),
-            'jsonrpc': (json_rpc.Parser, SmartFactoryJSONRPC.CodeGenerator),
+            'jsonrpc': (hmi_api_rpc.Parser, SmartFactoryJSONRPC.CodeGenerator),
             'mobile-policy-types': (sdl_rpc_v2.Parser, PolicyTypes.CodeGenerator),
-            'hmi-policy-types': (json_rpc.Parser, PolicyTypes.CodeGenerator)
+            'hmi-policy-types': (hmi_api_rpc.Parser, PolicyTypes.CodeGenerator)
         }
 
     @property

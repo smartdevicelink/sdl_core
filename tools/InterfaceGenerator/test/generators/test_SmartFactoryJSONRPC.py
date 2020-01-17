@@ -21,7 +21,7 @@ try:
     from generators import SmartFactoryJSONRPC
     from model.array import Array
     from model.boolean import Boolean
-    from model.double import Double
+    from model.float import Float
     from model.enum import Enum
     from model.enum_element import EnumElement
     from model.enum_subset import EnumSubset
@@ -396,7 +396,7 @@ class Test(unittest.TestCase):
         members1["m1"] = Param(name="intParam",
                                param_type=Integer(max_value=2))
         members1["m11"] = Param(name="doubleParam",
-                                param_type=Double(min_value=0.333),
+                                param_type=Float(min_value=0.333),
                                 is_mandatory=False)
         members1["m222"] = Param(name="boolParam",
                                  param_type=Boolean())
