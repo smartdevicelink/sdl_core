@@ -213,9 +213,9 @@ class ApplicationManagerImpl
 
   void set_current_audio_source(const uint32_t source) OVERRIDE;
 
-  void OnHMILevelChanged(uint32_t app_id,
-                         mobile_apis::HMILevel::eType from,
-                         mobile_apis::HMILevel::eType to) OVERRIDE;
+  void OnHMIStateChanged(const uint32_t app_id,
+                         const HmiStatePtr from,
+                         const HmiStatePtr to) OVERRIDE;
 
   void ProcessOnDataStreamingNotification(
       const protocol_handler::ServiceType service_type,
@@ -798,12 +798,13 @@ class ApplicationManagerImpl
   void RemovePolicyObserver(PolicyHandlerObserver* listener);
 
   /**
-   * @brief Checks HMI level and returns true if streaming is allowed
+   * @brief Checks application HMI state and returns true if streaming is
+   * allowed
    * @param app_id Application id
    * @param service_type Service type to check
    * @return True if streaming is allowed, false in other case
    */
-  bool HMILevelAllowsStreaming(
+  bool HMIStateAllowsStreaming(
       uint32_t app_id,
       protocol_handler::ServiceType service_type) const OVERRIDE;
 
@@ -1289,8 +1290,14 @@ class ApplicationManagerImpl
    * @param to the new HMILevel for the certain app.
    */
   void ProcessApp(const uint32_t app_id,
-                  const mobile_apis::HMILevel::eType from,
-                  const mobile_apis::HMILevel::eType to);
+                  const HmiStatePtr from,
+                  const HmiStatePtr to);
+
+  /**
+   * @brief Starts EndStream timer for a specified application
+   * @param app_id Application to process
+   */
+  void StartEndStreamTimer(const uint32_t app_id);
 
   /**
    * @brief Allows to send appropriate message to mobile device.
