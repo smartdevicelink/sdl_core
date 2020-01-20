@@ -140,7 +140,8 @@ Generating interface source code with following parameters:
     Namespace       : {1}
     Output directory: {2}
     Parser type     : {3}
-""".format(args.source_xml, args.namespace, args.output_dir, args.parser_type))
+    overwrite       : {4}
+""".format(args.source_xml, args.namespace, args.output_dir, args.parser_type, args.overwrite))
 
         # Select required parser and code generator
         parser = self.supported_formats[args.parser_type][0]()
