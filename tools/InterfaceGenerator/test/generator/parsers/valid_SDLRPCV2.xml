@@ -1,0 +1,85 @@
+<?xml version="1.0"?>
+<interface name="test_interface" attribute1="value1" attribute2="value2">
+    <enum name="FunctionID">
+        <description>Description string 1</description>
+        <element name="Function1_id" value="10">
+            <designdescription>Function1 element design description</designdescription>
+        </element>
+        <description>Description string 2</description>
+        <todo>Function id todo</todo>
+        <element name="Function2_id" internal_name="Function2_internal"/>
+    </enum>
+    <enum name="messageType">
+        <element name="request" value="0">
+            <todo>request todo 1</todo>
+            <issue creator="issue creator">request issue</issue>
+            <todo>request todo 2</todo>
+        </element>
+        <designdescription>messageType design description</designdescription>
+        <issue creator="messageType issue creator">Issue text</issue>
+        <element name="response" value="1"/>
+        <element name="notification" value="2"/>
+        <designdescription>messageType design description 2</designdescription>
+    </enum>
+    <struct name="struct1">
+        <param name="member1" type="Integer">
+            <description>Param1 description</description>
+        </param>
+        <issue creator="creator1">Issue1</issue>
+        <param name="member2" type="Boolean" mandatory="true" platform="member2 platform"/>
+        <param name="member3" type="Float" maxvalue="20.5" mandatory="false"/>
+        <description>Struct description</description>
+        <issue creator="creator2">Issue2</issue>
+        <param name="member4" type="Integer" minvalue="11" maxvalue="100" array="true"/>
+    </struct>
+    <function name="Function1" functionID="Function1_id" messagetype="request">
+        <description>Description of request Function1</description>
+        <param name="param1" type="String" mandatory="false" defvalue="String default value">
+            <issue creator=""/>
+        </param>
+        <param name="param2" type="Integer" platform="param2 platform">
+            <description>Param2 description</description>
+            <todo>Param2 todo</todo>
+            <description/>
+        </param>
+        <todo>Function1 request todo</todo>
+        <param name="param3" type="struct1" mandatory="false"/>
+    </function>
+    <enum name="enum1" internal_scope="scope" platform="enum1 platform">
+        <element name="element1" value="10"/>
+        <element name="element2" internal_name="element2_internal" value="11"/>
+        <element name="element3" platform="element3 platform">
+            <designdescription>Element design description</designdescription>
+        </element>
+    </enum>
+    <function name="Function1" functionID="Function1_id" messagetype="response" platform="">
+        <param name="p1" type="enum1"/>
+        <issue creator="c1"/>
+        <issue creator="c2"></issue>
+        <param name="p2" type="enum1" defvalue="element2"/>
+        <param name="p3" type="Boolean" defvalue="false">
+            <designdescription/>
+        </param>
+    </function>
+    <struct name="struct2" platform="struct2 platform">
+        <description>Description of struct2</description>
+        <param name="m1" type="String"/>
+        <param name="m2" type="String" maxlength="100" array="true" minsize="1" maxsize="50"/>
+        <param name="m3" type="enum1"/>
+        <param name="m4" type="struct1" array="true" maxsize="10"/>
+    </struct>
+    <function name="Function2" functionID="Function2_id" messagetype="notification" platform="function2 platform">
+        <description>Function2 description</description>
+        <param name="n1" type="enum1">
+            <element name="element2"/>
+            <element name="element3"/>
+            <todo>n1 todo</todo>
+        </param>
+        <param name="n2" type="enum1" array="true" minsize="1" maxsize="100">
+            <element name="element3"/>
+            <todo>n2 todo</todo>
+            <element name="element1"/>
+        </param>
+        <param name="n3" type="struct2" mandatory="false"/>
+    </function>
+</interface>

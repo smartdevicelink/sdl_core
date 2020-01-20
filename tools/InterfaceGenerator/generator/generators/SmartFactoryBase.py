@@ -4,15 +4,14 @@ Base of code generator for SmartFactory that provides SmartSchema object in
 accordance with given internal model.
 
 """
+# pylint: disable=W0402
+# pylint: disable=C0302
 import codecs
 import collections
-import logging
 import os
 import string
 import uuid
-from abc import abstractmethod
 
-from generators.GenerateError import GenerateError
 from model.array import Array
 from model.boolean import Boolean
 from model.float import Float
@@ -26,7 +25,20 @@ from model.string import String
 from model.struct import Struct
 
 
-class SmartFactoryBase(object):
+class GenerateError(Exception):
+
+    """Generate error.
+
+    This exception is raised when SmartFactory generator is unable to create
+    output from given model.
+
+    """
+
+    pass
+
+
+class CodeGenerator(object):
+
     """Base SmartFactory generator.
 
     This class provides service which allows to generate pair of *.h and
@@ -38,12 +50,7 @@ class SmartFactoryBase(object):
         """Construct new object."""
 
         self._generated_structs = []
-        self._structs_add_code = ""
-        self.logger = logging.getLogger('SmartFactoryBase')
-
-    @abstractmethod
-    def get_version(self):
-        pass
+        self._structs_add_code = u""
 
     def generate(self, interface, filename, namespace, destination_dir):
         """Generate SmartFactory source files.
@@ -72,24 +79,24 @@ class SmartFactoryBase(object):
         if not os.path.exists(destination_dir):
             os.makedirs(destination_dir)
 
-        namespace_open = ""
-        namespace_close = ""
+        namespace_open = u""
+        namespace_close = u""
 
         if namespace:
-            parts = namespace.split("::")
+            parts = namespace.split(u"::")
             for part in parts:
-                namespace_open = "".join(
+                namespace_open = u"".join(
                     [namespace_open,
                      self._namespace_open_template.substitute(name=part)])
-                namespace_close = "".join(
+                namespace_close = u"".join(
                     [namespace_close,
                      "}} // {0}\n".format(part)])
 
         class_name = os.path.splitext(filename)[0]
-        guard = "__CSMARTFACTORY_{0}_{1}_H__".format(
+        guard = u"__CSMARTFACTORY_{0}_{1}_H__".format(
             class_name.upper(),
             uuid.uuid1().hex.capitalize())
-        header_file_name = "".join("{0}.h".format(class_name))
+        header_file_name = u"".join("{0}.h".format(class_name))
 
         with codecs.open(os.path.join(destination_dir, header_file_name),
                          encoding="utf-8",
@@ -105,28 +112,28 @@ class SmartFactoryBase(object):
 
         self._gen_struct_schema_items(interface.structs.values())
 
-        function_id_items = ""
+        function_id_items = u""
         if "FunctionID" in interface.enums:
             function_id = interface.enums["FunctionID"]
-            function_id_items = "\n".join(
+            function_id_items = u"\n".join(
                 [self._impl_code_loc_decl_enum_insert_template.substitute(
                     var_name="function_id_items",
                     enum=function_id.name,
                     value=x.primary_name)
-                    for x in function_id.elements.values()])
+                 for x in function_id.elements.values()])
 
-        message_type_items = ""
+        message_type_items = u""
         if "messageType" in interface.enums:
             message_type = interface.enums["messageType"]
-            message_type_items = "\n".join(
+            message_type_items = u"\n".join(
                 [self._impl_code_loc_decl_enum_insert_template.substitute(
                     var_name="message_type_items",
                     enum=message_type.name,
                     value=x.primary_name)
-                    for x in message_type.elements.values()])
+                 for x in message_type.elements.values()])
 
         header_file_name = "".join("{0}_schema.h".format(class_name))
-        guard = "__CSMARTFACTORY_{0}_{1}_HPP__".format(
+        guard = u"__CSMARTFACTORY_{0}_{1}_HPP__".format(
             class_name.upper(),
             uuid.uuid1().hex.capitalize())
         with codecs.open(os.path.join(destination_dir, header_file_name),
@@ -145,7 +152,7 @@ class SmartFactoryBase(object):
                 namespace_close=namespace_close))
 
         with codecs.open(os.path.join(destination_dir,
-                                      "".join("{0}_schema.cc".format(class_name))),
+                                      u"".join("{0}_schema.cc".format(class_name))),
                          encoding="utf-8", mode="w") as f_s:
             f_s.write(self._cc_file_template.substitute(
                 header_file_name=header_file_name,
@@ -204,7 +211,7 @@ class SmartFactoryBase(object):
         if enums is None:
             raise GenerateError("Enums is None")
 
-        return "\n".join([self._enum_to_str_converter_template.substitute(
+        return u"\n".join([self._enum_to_str_converter_template.substitute(
             namespace=namespace,
             enum=x.name,
             cstringvalues=self._indent_code(self._gen_enum_cstring_values(x), 2),
@@ -218,7 +225,7 @@ class SmartFactoryBase(object):
         Returns:
         String value with c-string values.
         """
-        return ",\n".join(['"' + x.name + '"' for x in enum.elements.values()])
+        return u",\n".join(['"' + x.name + '"' for x in enum.elements.values()])
 
     def _gen_enum_enum_values(self, enum, namespace):
         """Generate list of all enum values.
@@ -228,7 +235,7 @@ class SmartFactoryBase(object):
         Returns:
         String value with enum values.
         """
-        return ",\n".join([namespace + "::" + enum.name + "::" + x.primary_name for x in enum.elements.values()])
+        return u",\n".join([namespace + "::" + enum.name + "::" + x.primary_name for x in enum.elements.values()])
 
     def _gen_h_class(self, class_name, params, functions, structs):
         """Generate source code of class for header file.
@@ -270,7 +277,7 @@ class SmartFactoryBase(object):
         if structs is None:
             raise GenerateError("Structs is None")
 
-        return "\n".join([self._indent_code(
+        return u"\n".join([self._indent_code(
             self._gen_struct_decl(x), 1) for x in structs])
 
     def _gen_struct_decl(self, struct):
@@ -308,7 +315,7 @@ class SmartFactoryBase(object):
         if functions is None:
             raise GenerateError("Functions is None")
 
-        return "\n".join([self._indent_code(
+        return u"\n".join([self._indent_code(
             self._gen_function_decl(x), 1) for x in functions])
 
     def _gen_function_decl(self, function):
@@ -368,7 +375,7 @@ class SmartFactoryBase(object):
         for member in struct.members.values():
             self._process_struct_member(member)
 
-        self._structs_add_code = "\n".join(
+        self._structs_add_code = u"\n".join(
             [self._structs_add_code, self._indent_code(
                 self._gen_struct_schema_item(struct), 1)])
         self._generated_structs.append(struct.name)
@@ -449,7 +456,7 @@ class SmartFactoryBase(object):
         if functions is None:
             raise GenerateError("Functions is None")
 
-        return "".join([self._indent_code(
+        return u"".join([self._indent_code(
             self._gen_function_schema(x), 1)
             for x in functions])
 
@@ -474,9 +481,9 @@ class SmartFactoryBase(object):
             case_list = [self._function_id_case_template.substitute(
                 function_id=x.function_id.primary_name,
                 message_type=x.message_type.primary_name)
-                for x in functions if x.message_type.primary_name == message_type]
+            for x in functions if x.message_type.primary_name == message_type ]
             case_list.append("default:\n  break;\n")
-            switch_function_id_cases = self._indent_code("".join(case_list), 1)[:-1]
+            switch_function_id_cases =  self._indent_code(u"".join(case_list), 1)[:-1]
 
             return self._indent_code(self._function_switch_template.substitute(
                 switchable="function_id",
@@ -484,11 +491,11 @@ class SmartFactoryBase(object):
             ), 1)[:-1]
 
         message_type_case_list = [self._message_type_case_template.substitute(
-            message_type=message_type,
-            case_body=function_id_switch(self, message_type, functions)
-        ) for message_type in set([x.message_type.primary_name for x in functions])]
+                message_type = message_type,
+                case_body = function_id_switch(self, message_type, functions)
+            ) for message_type in set([x.message_type.primary_name for x in functions])]
         message_type_case_list.append("default:\n  break;\n")
-        message_type_cases = self._indent_code("".join(message_type_case_list), 1)[:-1]
+        message_type_cases = self._indent_code(u"".join(message_type_case_list), 1)[:-1]
 
         return self._indent_code(self._function_switch_template.substitute(
             switchable="message_type",
@@ -532,7 +539,7 @@ class SmartFactoryBase(object):
         if structs is None:
             raise GenerateError("Structs is None")
 
-        return "\n".join([self._gen_struct_impl(
+        return u"\n".join([self._gen_struct_impl(
             x, namespace, class_name) for x in structs])
 
     def _gen_struct_impl(self, struct, namespace, class_name):
@@ -565,40 +572,42 @@ class SmartFactoryBase(object):
                         struct.members.values(), struct.since, struct.until, struct.deprecated, struct.removed)),
                 1))
 
+    
     def _enum_has_history_present(self, enum):
-        """
+        '''
         Check if any elements in an enum has history signature
-        """
+        '''
         for element in enum.param_type.elements.values():
-            if (element.history is not None or
-                        element.since is not None or
-                        element.until is not None or
-                        element.removed is not None):
+            if ( element.history is not None or
+                element.since is not None or
+                element.until is not None or
+                element.removed is not None ):
                 return True
         return False
 
     def _element_has_history_present(self, element):
-        """
+        '''
         Check if a specific element has a history signature
-        """
-        if (element.history is not None or
-                    element.since is not None or
-                    element.until is not None or
-                    element.removed is not None):
-            return True
+        '''
+        if ( element.history is not None or
+            element.since is not None or
+            element.until is not None or
+            element.removed is not None ):
+            return True        
         return False
 
     def _enum_param_type_has_history_present(self, param_type):
-        """
+        '''
         Check if any elements in an enum has history signature
-        """
+        '''
         for element in param_type.elements.values():
-            if (element.history is not None or
-                        element.since is not None or
-                        element.until is not None or
-                        element.removed is not None):
+            if ( element.history is not None or
+                element.since is not None or
+                element.until is not None or
+                element.removed is not None ):
                 return True
         return False
+
 
     def _gen_schema_loc_decls(self, members, processed_enums):
         """Generate local declarations of variables for schema.
@@ -615,92 +624,92 @@ class SmartFactoryBase(object):
 
         """
 
-        result = ""
+        result = u""
         for member in members:
             if type(member.param_type) is Enum and \
-                            member.param_type.name not in processed_enums:
+               member.param_type.name not in processed_enums:
                 has_history = self._enum_has_history_present(member)
                 local_var = self._gen_schema_loc_emum_var_name(
                     member.param_type)
-                result = "\n".join(
-                    ["".join(
+                result = u"\n".join(
+                    [u"".join(
                         [result, self._impl_code_loc_decl_enum_template.
                             substitute(
-                            type=member.param_type.name,
-                            var_name=local_var)]),
-                        "\n".join(
+                                type=member.param_type.name,
+                                var_name=local_var)]),
+                        u"\n".join(
                             [self._impl_code_loc_decl_enum_insert_template.
                                 substitute(
-                                var_name=local_var,
-                                enum=member.param_type.name,
-                                value=x.primary_name)
-                                for x in member.param_type.elements.values()])])
+                                    var_name=local_var,
+                                    enum=member.param_type.name,
+                                    value=x.primary_name)
+                             for x in member.param_type.elements.values()])])
 
-                if has_history:
-                    history_result = "\n"
+                if has_history == True:
+                    history_result = u"\n"
                     history_result += self._impl_code_loc_decl_enum_history_set_template.substitute(
                         type=member.param_type.name)
-                    history_result += "\n"
-                    history_result += "\n".join(
+                    history_result += u"\n"
+                    history_result += u"\n".join(
                         [self._impl_code_loc_decl_enum_history_set_value_init_template.substitute(
                             enum=member.param_type.name,
-                            value=x.primary_name)
+                            value=x.primary_name) 
                             for x in member.param_type.elements.values() if self._element_has_history_present(x)])
-                    history_result += "\n"
+                    history_result += u"\n"
                     history_map_result = []
 
-                    for x in member.param_type.elements.values():
+                    for x in member.param_type.elements.values(): 
                         if self._element_has_history_present(x):
                             history_map_result.append(
                                 self._impl_code_loc_decl_enum_history_set_insert_template.
                                     substitute(
-                                    enum=member.param_type.name,
-                                    value=x.primary_name,
-                                    since=x.since if x.since is not None else "",
-                                    until=x.until if x.until is not None else "",
-                                    removed=x.removed if x.removed is not None else "false"))
-                            if x.history is not None:
+                                        enum=member.param_type.name,
+                                        value=x.primary_name,
+                                        since=x.since if x.since is not None else "",
+                                        until=x.until if x.until is not None else "",
+                                        removed=x.removed if x.removed is not None else u"false"))
+                            if(x.history is not None) :
                                 history_list = x.history
-                                for item in history_list:
+                                for item in history_list:                            
                                     history_map_result.append(
                                         self._impl_code_loc_decl_enum_history_set_insert_template.
                                             substitute(
-                                            enum=member.param_type.name,
-                                            value=x.primary_name,
-                                            since=item.since if item.since is not None else "",
-                                            until=item.until if item.until is not None else "",
-                                            removed=item.removed if item.removed is not None else "false"))
+                                                enum=member.param_type.name,
+                                                value=x.primary_name,
+                                                since=item.since if item.since is not None else "",
+                                                until=item.until if item.until is not None else "",
+                                                removed=item.removed if item.removed is not None else u"false"))
 
-                    history_result += "\n".join(history_map_result)
+                    history_result += u"\n".join(history_map_result)
                     result += "\n"
                     result += history_result
 
                 processed_enums.append(member.param_type.name)
-                result = "".join([result, "\n\n"]) if result else ""
+                result = u"".join([result, u"\n\n"]) if result else u""
             elif type(member.param_type) is EnumSubset:
                 local_var = self._gen_schema_loc_emum_s_var_name(member.name)
-                result = "\n".join(
-                    ["".join(
+                result = u"\n".join(
+                    [u"".join(
                         [result, self._impl_code_loc_decl_enum_template.
                             substitute(
-                            type=member.param_type.enum.name,
-                            var_name=local_var)]),
-                        "\n".join(
+                                type=member.param_type.enum.name,
+                                var_name=local_var)]),
+                        u"\n".join(
                             [self._impl_code_loc_decl_enum_insert_template.
                                 substitute(
-                                var_name=local_var,
-                                enum=member.param_type.enum.name,
-                                value=x.primary_name)
-                                for x in member.param_type.
-                                allowed_elements.values()])])
-                result = "".join([result, "\n\n"]) if result else ""
+                                    var_name=local_var,
+                                    enum=member.param_type.enum.name,
+                                    value=x.primary_name)
+                             for x in member.param_type.
+                             allowed_elements.values()])])
+                result = u"".join([result, u"\n\n"]) if result else u""
             elif type(member.param_type) is Array:
-                result = "".join(
+                result = u"".join(
                     [result, self._gen_schema_loc_decls(
                         [Param(name=member.param_type.element_type.name
-                        if type(member.param_type.element_type) is
-                           EnumSubset else "",
-                               param_type=member.param_type.element_type)],
+                         if type(member.param_type.element_type) is
+                         EnumSubset else "",
+                            param_type=member.param_type.element_type)],
                         processed_enums)])
 
         return result
@@ -726,12 +735,12 @@ class SmartFactoryBase(object):
             if x.history is not None:
                 history_list = x.history
                 for item in history_list:
-                    item.name += "_history_v" + str(len(history_list) - count)
+                    item.name += "_history_v" + str(len(history_list)-count)
                     result_array.append(self._gen_schema_item_decl(item))
                     count += 1
                 result_array.append(self._gen_history_vector_decl(history_list, x.name))
 
-        result = "\n\n".join(result_array)
+        result = u"\n\n".join(result_array)
         return result
 
     def _gen_history_vector_decl(self, history_list, name):
@@ -748,9 +757,11 @@ class SmartFactoryBase(object):
             String with history array code.
         """
         result_array = []
-        result_array.append(self._impl_code_shared_ptr_vector_template.substitute(var_name=name))
-        result = "\n".join(result_array)
+        result_array.append(self._impl_code_shared_ptr_vector_template.substitute(var_name = name))
+        result = u"\n".join(result_array)
         return result
+
+
 
     def _gen_schema_item_decl(self, member):
         """Generate schema item declaration.
@@ -789,57 +800,57 @@ class SmartFactoryBase(object):
         String with schema item initialization source code.
 
         """
-        code = ""
+        code = u""
         if type(param) is Boolean:
             code = self._impl_code_bool_item_template.substitute(
                 params=self._gen_schema_item_param_values(
-                    [["bool", None if param.default_value is None
-                    else "true" if param.default_value is True else "false"]]))
+                    [[u"bool", None if param.default_value is None
+                      else u"true" if param.default_value is True else u"false"]]))
         elif type(param) is Integer:
             if not param.max_value or param.max_value and param.max_value < 2 ** 31:
                 code = self._impl_code_integer_item_template.substitute(
-                    type="int32_t",
+                    type=u"int32_t",
                     params=self._gen_schema_item_param_values(
-                        [["int32_t", param.min_value],
-                         ["int32_t", param.max_value],
-                         ["int32_t", param.default_value]]))
-            elif param.max_value and param.max_value < 2 ** 63:
+                        [[u"int32_t", param.min_value],
+                         [u"int32_t", param.max_value],
+                         [u"int32_t", param.default_value]]))
+            elif param.max_value < 2 ** 63:
                 code = self._impl_code_integer_item_template.substitute(
-                    type="int64_t",
+                    type=u"int64_t",
                     params=self._gen_schema_item_param_values(
-                        [["int64_t", param.min_value],
-                         ["int64_t", str(param.max_value) + "LL"],
-                         ["int64_t", param.default_value]]))
+                        [[u"int64_t", param.min_value],
+                         [u"int64_t", str(param.max_value) + u"LL"],
+                         [u"int64_t", param.default_value]]))
             else:
-                raise GenerateError("Parameter '{}' value too large: {}".format(member_name, vars(param)))
+                raise GenerateError("Parameter value too large: " + str(param.max_value))
         elif type(param) is Float:
             code = self._impl_code_integer_item_template.substitute(
-                type="double",
+                type=u"double",
                 params=self._gen_schema_item_param_values(
-                    [["double", param.min_value],
-                     ["double", param.max_value],
-                     ["double", param.default_value]]))
+                    [[u"double", param.min_value],
+                     [u"double", param.max_value],
+                     [u"double", param.default_value]]))
         elif type(param) is String:
             code = self._impl_code_string_item_template.substitute(
                 params=self._gen_schema_item_param_values(
-                    [["size_t", param.min_length],
-                     ["size_t", param.max_length],
-                     ["std::string", "".join(
-                         ['"', param.default_value, '"']) if param.default_value
-                                                             is not None else ""]]))
+                    [[u"size_t", param.min_length],
+                     [u"size_t", param.max_length],
+                     [u"std::string", u"".join(
+                     [u'"', param.default_value, u'"']) if param.default_value
+                         is not None else u""]]))
         elif type(param) is Array:
             code = self._impl_code_array_item_template.substitute(
-                params="".join(
-                    ["".join(
+                params=u"".join(
+                    [u"".join(
                         [self._gen_schema_item_decl_code(
                             param.element_type,
                             param.element_type.name if type(param.element_type)
-                                                       is EnumSubset else "",
+                            is EnumSubset else u"",
                             None),
-                            ", "]),
+                            u", "]),
                         self._gen_schema_item_param_values(
-                            [["size_t", param.min_size],
-                             ["size_t", param.max_size]])]))
+                            [[u"size_t", param.min_size],
+                             [u"size_t", param.max_size]])]))
         elif type(param) is Struct:
             code = self._impl_code_struct_item_template.substitute(
                 name=param.name)
@@ -847,37 +858,37 @@ class SmartFactoryBase(object):
             if self._enum_param_type_has_history_present(param):
                 code = self._impl_code_enum_item_with_history_template.substitute(
                     type=param.name,
-                    params="".join(
+                    params=u"".join(
                         [self._gen_schema_loc_emum_var_name(param),
-                         ", ",
+                         u", ",
                          self._impl_gen_schema_enum_history_map_template.substitute(name=param.name),
-                         ", ",
+                         u", ",
                          self._gen_schema_item_param_values(
-                             [["".join([param.name, "::eType"]),
-                               "".join([param.name, "::",
+                             [[u"".join([param.name, u"::eType"]),
+                              u"".join([param.name, u"::",
                                         default_value.primary_name]) if
                                default_value is not None else None]])]))
             else:
                 code = self._impl_code_enum_item_template.substitute(
                     type=param.name,
-                    params="".join(
+                    params=u"".join(
                         [self._gen_schema_loc_emum_var_name(param),
-                         ", ",
+                         u", ",
                          self._gen_schema_item_param_values(
-                             [["".join([param.name, "::eType"]),
-                               "".join([param.name, "::",
+                             [[u"".join([param.name, u"::eType"]),
+                              u"".join([param.name, u"::",
                                         default_value.primary_name]) if
                                default_value is not None else None]])]))
         elif type(param) is EnumSubset:
             code = self._impl_code_enum_item_template.substitute(
                 type=param.enum.name,
-                params="".join(
+                params=u"".join(
                     [self._gen_schema_loc_emum_s_var_name(member_name),
-                     ", ",
+                     u", ",
                      self._gen_schema_item_param_values(
-                         [["".join([param.enum.name, "::eType"]),
-                           default_value.primary_name if default_value
-                                                         is not None else None]])]))
+                         [[u"".join([param.enum.name, u"::eType"]),
+                          default_value.primary_name if default_value
+                          is not None else None]])]))
         else:
             raise GenerateError("Unexpected type of parameter: " +
                                 str(type(param)))
@@ -897,14 +908,14 @@ class SmartFactoryBase(object):
 
         """
 
-        result = ""
+        result = u""
         for param in params:
             value = self._impl_code_item_param_value_template.substitute(
                 type=param[0],
                 value=str(param[1] if param[1] is not None else ""))
-            result = "".join([result, "".join(
-                [", ", value])
-            if result else value])
+            result = u"".join([result, u"".join(
+                [u", ", value])
+                if result else value])
 
         return result
 
@@ -922,15 +933,15 @@ class SmartFactoryBase(object):
         """
         result_array = []
         for x in members:
-            # If history, create Smember History vector first
+            #If history, create Smember History vector first
             if x.history is not None:
                 history_list = x.history
                 for item in history_list:
                     result_array.append(self._gen_history_vector_item_fill(item, x.name))
             result_array.append(self._gen_schema_item_fill(x, since, until, deprecated, removed))
 
-        result = "\n".join(result_array)
-        return "".join([result, "\n\n"]) if result else ""
+        result = u"\n".join(result_array)
+        return u"".join([result, u"\n\n"]) if result else u""
 
     def _gen_schema_params_fill(self, message_type_name):
         """Generate schema params fill code.
@@ -954,24 +965,24 @@ class SmartFactoryBase(object):
             Checks set of rules that history items are valid
             Raises error if rules are violated
         """
-        if (member.since is None and
-                    member.until is None and
-                    member.deprecated is None and
-                    member.removed is None and
-                    member.history is None):
+        if (member.since is None and 
+            member.until is None and 
+            member.deprecated is None and 
+            member.removed is None and 
+            member.history is None):
             return
-        if member.history is not None and member.since is None:
+        if (member.history is not None and member.since is None):
             raise GenerateError("Error: Missing since version parameter for " + member.name)
-        if member.until is not None:
+        if (member.until is not None): 
             raise GenerateError("Error: Until should only exist in history tag for " + member.name)
-        if member.history is None:
-            if (member.until is not None or
-                        member.deprecated is not None or
-                        member.removed is not None):
+        if (member.history is None):
+            if(member.until is not None or 
+                member.deprecated is not None or 
+                member.removed is not None):
                 raise GenerateError("Error: No history present for " + member.name)
-        if member.deprecated is not None and member.removed is not None:
+        if (member.deprecated is not None and member.removed is not None):
             raise GenerateError("Error: Deprecated and removed should not be present together for " + member.name)
-        if member.history is not None:
+        if(member.history is not None):
             for item in member.history:
                 if item.since is None or item.until is None:
                     raise GenerateError("Error: History items require since and until parameters for " + member.name)
@@ -990,38 +1001,32 @@ class SmartFactoryBase(object):
         """
         self._check_member_history(member)
 
-        if (since is not None or
-                    member.since is not None):
+        if (since is not None or 
+            member.since is not None):
             if member.history is not None:
                 return self._impl_code_item_fill_template_with_version_and_history_vector.substitute(
                     name=member.name,
                     var_name=self._gen_schema_item_var_name(member),
-                    is_mandatory="true" if member.is_mandatory is True else "false",
-                    since=member.since if member.since is not None else since if since is not None else "",
-                    until=member.until if member.until is not None else until if until is not None else "",
-                    deprecated=member.deprecated if member.deprecated is not None else deprecated if deprecated is
-                                                                                                     not None else
-                    "false",
-                    removed=member.removed if member.removed is not None else removed if removed is not None else
-                    "false",
+                    is_mandatory=u"true" if member.is_mandatory is True else u"false",
+                    since=member.since if member.since is not None else since if since is not None else "", 
+                    until=member.until if member.until is not None else until if until is not None else "", 
+                    deprecated=member.deprecated if member.deprecated is not None else deprecated if deprecated is not None else u"false", 
+                    removed=member.removed if member.removed is not None else removed if removed is not None else u"false",
                     vector_name=member.name)
             else:
                 return self._impl_code_item_fill_template_with_version.substitute(
                     name=member.name,
                     var_name=self._gen_schema_item_var_name(member),
-                    is_mandatory="true" if member.is_mandatory is True else "false",
-                    since=member.since if member.since is not None else since if since is not None else "",
-                    until=member.until if member.until is not None else until if until is not None else "",
-                    deprecated=member.deprecated if member.deprecated is not None else deprecated if deprecated is
-                                                                                                     not None else
-                    "false",
-                    removed=member.removed if member.removed is not None else removed if removed is not None else
-                    "false")
+                    is_mandatory=u"true" if member.is_mandatory is True else u"false",
+                    since=member.since if member.since is not None else since if since is not None else "", 
+                    until=member.until if member.until is not None else until if until is not None else "", 
+                    deprecated=member.deprecated if member.deprecated is not None else deprecated if deprecated is not None else u"false", 
+                    removed=member.removed if member.removed is not None else removed if removed is not None else u"false")
         else:
             return self._impl_code_item_fill_template.substitute(
                 name=member.name,
                 var_name=self._gen_schema_item_var_name(member),
-                is_mandatory="true" if member.is_mandatory is True else "false")
+                is_mandatory=u"true" if member.is_mandatory is True else u"false")            
 
     def _gen_history_vector_item_fill(self, member, vector_name):
         """Generate schema item fill code.
@@ -1036,21 +1041,20 @@ class SmartFactoryBase(object):
 
         """
 
-        if (member.since is not None or
-                    member.until is not None or
-                    member.deprecated is not None or
-                    member.removed is not None):
+        if (member.since is not None or 
+            member.until is not None or 
+            member.deprecated is not None or
+            member.removed is not None):
             return self._impl_code_append_history_vector_template.substitute(
                 vector_name=vector_name,
                 name=member.name,
-                mandatory="true" if member.is_mandatory is True else "false",
-                since=member.since if member.since is not None else "",
-                until=member.until if member.until is not None else "",
-                deprecated=member.deprecated if member.deprecated is not None else "false",
-                removed=member.removed if member.removed is not None else "false")
+                mandatory=u"true" if member.is_mandatory is True else u"false",
+                since=member.since if member.since is not None else "", 
+                until=member.until if member.until is not None else "", 
+                deprecated=member.deprecated if member.deprecated is not None else u"false", 
+                removed=member.removed if member.removed is not None else u"false")
         else:
-            self.logger.warning("Warning! History item does not have any version history. Omitting {}"
-                                .format(member.name))
+            print("Warning! History item does not have any version history. Omitting " + member.name)
 
     @staticmethod
     def _gen_schema_item_var_name(member):
@@ -1066,7 +1070,7 @@ class SmartFactoryBase(object):
 
         """
 
-        return "".join([member.name, "_SchemaItem"])
+        return u"".join([member.name, u"_SchemaItem"])
 
     @staticmethod
     def _gen_schema_loc_emum_var_name(param_type):
@@ -1082,7 +1086,7 @@ class SmartFactoryBase(object):
 
         """
 
-        return "".join([param_type.name, "_all_enum_values"])
+        return u"".join([param_type.name, u"_all_enum_values"])
 
     @staticmethod
     def _gen_schema_loc_emum_s_var_name(member_name):
@@ -1099,7 +1103,7 @@ class SmartFactoryBase(object):
 
         """
 
-        return "".join([member_name, "_allowed_enum_subset_values"])
+        return u"".join([member_name, "_allowed_enum_subset_values"])
 
     def _gen_function_impls(self, functions, namespace, class_name):
         """Generate functions implementation for source file.
@@ -1120,7 +1124,7 @@ class SmartFactoryBase(object):
         if functions is None:
             raise GenerateError("Functions is None")
 
-        return "\n".join([self._gen_function_impl(
+        return u"\n".join([self._gen_function_impl(
             x, namespace, class_name) for x in functions])
 
     def _gen_function_impl(self, function, namespace, class_name):
@@ -1152,8 +1156,7 @@ class SmartFactoryBase(object):
                     schema_items_decl=self._gen_schema_items_decls(
                         function.params.values()),
                     schema_item_fill=self._gen_schema_items_fill(
-                        function.params.values(), function.since, function.until, function.deprecated,
-                        function.removed),
+                        function.params.values(), function.since, function.until, function.deprecated, function.removed),
                     schema_params_fill=self._gen_schema_params_fill(
                         function.message_type.name)),
                 1))
@@ -1182,13 +1185,13 @@ class SmartFactoryBase(object):
             for struct in structs:
                 struct_id_enum_elements[struct.name] = EnumElement(
                     name=struct.name)
-            return "\n".join(
+            return u"\n".join(
                 [self._gen_enum(
                     Enum(name="StructIdentifiers",
-                         elements=struct_id_enum_elements)),
-                    "\n".join([self._gen_enum(x) for x in enums])])
+                               elements=struct_id_enum_elements)),
+                 u"\n".join([self._gen_enum(x) for x in enums])])
 
-        return "\n".join([self._gen_enum(x) for x in enums])
+        return u"\n".join([self._gen_enum(x) for x in enums])
 
     def _gen_enum(self, enum):
         """Generate enum for header file.
@@ -1205,14 +1208,14 @@ class SmartFactoryBase(object):
 
         enum_elements = list(enum.elements.values())
         enum_elements.insert(0, EnumElement(
-            name="INVALID_ENUM",
+            name=u"INVALID_ENUM",
             description=None,
             design_description=None,
             issues=None,
             todos=None,
             platform=None,
             internal_name=None,
-            value="-1"))
+            value=u"-1"))
         return self._enum_template.substitute(
             comment=self._gen_comment(enum),
             name=enum.name,
@@ -1232,8 +1235,8 @@ class SmartFactoryBase(object):
 
         """
 
-        return ",\n\n".join([self._gen_enum_element(x)
-                             for x in enum_elements])
+        return u",\n\n".join([self._gen_enum_element(x)
+                              for x in enum_elements])
 
     def _gen_enum_element(self, enum_element):
         """Generate enum element for header file.
@@ -1275,10 +1278,10 @@ class SmartFactoryBase(object):
 
         return self._class_comment_template.substitute(
             class_name=class_name,
-            class_params="".join(
-                [" *     {0} - {1}\n".format(x[0],
-                                             x[1]) for x in params.items()])
-            if params else " *    none\n")
+            class_params=u"".join(
+                [u" *     {0} - {1}\n".format(x[0],
+                 x[1]) for x in params.items()])
+            if params else u" *    none\n")
 
     def _gen_comment(self, interface_item_base, use_doxygen=True):
         """Generate doxygen comment for iterface_item_base for header file.
@@ -1307,52 +1310,52 @@ class SmartFactoryBase(object):
         name = interface_item_base.primary_name if \
             type(interface_item_base) is EnumElement else \
             interface_item_base.name
-        brief_description = (" * @brief {0}{1}.\n" if use_doxygen is
-                                                      True else "// {0}{1}.\n").format(
-            brief_type_title,
-            name)
+        brief_description = (u" * @brief {0}{1}.\n" if use_doxygen is
+                             True else u"// {0}{1}.\n").format(
+                                 brief_type_title,
+                                 name)
 
-        description = "".join([(" * {0}\n" if use_doxygen
-                                              is True else "// {0}\n").format(x)
-                               for x in self._normalize_multiline_comments(
-                interface_item_base.description)])
-        if description is not "":
-            description = "".join([" *\n" if use_doxygen
-                                             is True else "//\n", description])
+        description = u"".join([(u" * {0}\n" if use_doxygen
+                                is True else u"// {0}\n").format(x)
+                                for x in self._normalize_multiline_comments(
+                                    interface_item_base.description)])
+        if description is not u"":
+            description = u"".join([u" *\n" if use_doxygen
+                                    is True else u"//\n", description])
 
-        design_description = "".join([(" * {0}\n" if use_doxygen is
-                                                     True else "// {0}\n").format(x)
-                                      for x in
-                                      self._normalize_multiline_comments(
-                                          interface_item_base.
-                                              design_description)])
-        if design_description is not "":
-            design_description = "".join([" *\n" if use_doxygen is
-                                                    True else "//\n",
-                                          design_description])
+        design_description = u"".join([(u" * {0}\n" if use_doxygen is
+                                       True else u"// {0}\n").format(x)
+                                       for x in
+                                       self._normalize_multiline_comments(
+                                           interface_item_base.
+                                           design_description)])
+        if design_description is not u"":
+            design_description = u"".join([u" *\n" if use_doxygen is
+                                           True else "//\n",
+                                           design_description])
 
-        issues = "".join([(" * @note {0}\n" if use_doxygen is
-                                               True else "// Note: {0}\n").format(x)
+        issues = u"".join([(u" * @note {0}\n" if use_doxygen is
+                           True else u"// Note: {0}\n").format(x)
+                           for x in self._normalize_multiline_comments(
+                               [x.value for x in interface_item_base.issues])])
+        if issues is not u"":
+            issues = u"".join([u" *\n" if use_doxygen is
+                              True else u"//\n", issues])
+
+        todos = u"".join([(u" * @todo {0}\n" if use_doxygen is
+                          True else u"// ToDo: {0}\n").format(x)
                           for x in self._normalize_multiline_comments(
-                [x.value for x in interface_item_base.issues])])
-        if issues is not "":
-            issues = "".join([" *\n" if use_doxygen is
-                                        True else "//\n", issues])
+                              interface_item_base.todos)])
+        if todos is not u"":
+            todos = u"".join([u" *\n" if use_doxygen is
+                              True else u"//\n", todos])
 
-        todos = "".join([(" * @todo {0}\n" if use_doxygen is
-                                              True else "// ToDo: {0}\n").format(x)
-                         for x in self._normalize_multiline_comments(
-                interface_item_base.todos)])
-        if todos is not "":
-            todos = "".join([" *\n" if use_doxygen is
-                                       True else "//\n", todos])
-
-        returns = ""
+        returns = u""
         if type(interface_item_base) is Function:
-            returns = "".join([" *\n", self._function_return_comment])
+            returns = u"".join([u" *\n", self._function_return_comment])
 
         template = self._comment_doxygen_template if use_doxygen is \
-                                                     True else self._comment_cc_template
+            True else self._comment_cc_template
 
         return template.substitute(
             brief_description=brief_description,
@@ -1377,10 +1380,10 @@ class SmartFactoryBase(object):
         """
 
         code_lines = code.split("\n")
-        return "".join(
-            ["{0}{1}\n".format(
+        return u"".join(
+            [u"{0}{1}\n".format(
                 self._indent_template * indent_level,
-                x) if x is not "" else "\n" for x in code_lines])
+                x) if x is not u"" else u"\n" for x in code_lines])
 
     @staticmethod
     def _normalize_multiline_comments(initial_strings):
@@ -1403,653 +1406,646 @@ class SmartFactoryBase(object):
         return result
 
     _model_types_briefs = dict(
-        {"EnumElement": "",
-         "Enum": "Enumeration ",
-         "Function": "Method that generates schema for function ",
-         "Struct": "Method that generates schema item for structure ",
-         "Param": "Struct member ",
-         "FunctionParam": "Function parameter "})
+        {u"EnumElement": u"",
+         u"Enum": u"Enumeration ",
+         u"Function": u"Method that generates schema for function ",
+         u"Struct": u"Method that generates schema item for structure ",
+         u"Param": u"Struct member ",
+         u"FunctionParam": u"Function parameter "})
 
     _h_file_template = string.Template(
-        '''/**\n'''
-        ''' * @file ${class_name}.h\n'''
-        ''' * @brief Generated class ${class_name} header file.\n'''
-        ''' *\n'''
-        ''' * This class is a part of SmartObjects solution. It provides\n'''
-        ''' * factory functionallity which allows client to use '''
-        '''SmartSchemas\n'''
-        ''' * in accordance with definitions from ${class_name}.xml file\n'''
-        ''' */\n'''
-        '''// Copyright (c) 2013, Ford Motor Company\n'''
-        '''// All rights reserved.\n'''
-        '''//\n'''
-        '''// Redistribution and use in source and binary forms, '''
-        '''with or without\n'''
-        '''// modification, are permitted provided that the following '''
-        '''conditions are met:\n'''
-        '''//\n'''
-        '''// Redistributions of source code must retain the above '''
-        '''copyright notice, this\n'''
-        '''// list of conditions and the following disclaimer.\n'''
-        '''//\n'''
-        '''// Redistributions in binary form must reproduce '''
-        '''the above copyright notice,\n'''
-        '''// this list of conditions and the following\n'''
-        '''// disclaimer in the documentation and/or other materials '''
-        '''provided with the\n'''
-        '''// distribution.\n'''
-        '''//\n'''
-        '''// Neither the name of the Ford Motor Company nor the names '''
-        '''of its contributors\n'''
-        '''// may be used to endorse or promote products derived '''
-        '''from this software\n'''
-        '''// without specific prior written permission.\n'''
-        '''//\n'''
-        '''// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND '''
-        '''CONTRIBUTORS "AS IS"\n'''
-        '''// AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT '''
-        '''LIMITED TO, THE\n'''
-        '''// IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR '''
-        '''A PARTICULAR PURPOSE\n'''
-        '''// ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER '''
-        '''OR CONTRIBUTORS BE\n'''
-        '''// LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, '''
-        '''EXEMPLARY, OR\n'''
-        '''// CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, '''
-        '''PROCUREMENT OF\n'''
-        '''// SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; '''
-        '''OR BUSINESS\n'''
-        '''// INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, '''
-        '''WHETHER IN\n'''
-        '''// CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE '''
-        '''OR OTHERWISE)\n'''
-        '''// ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF '''
-        '''ADVISED OF THE\n'''
-        '''// POSSIBILITY OF SUCH DAMAGE.\n\n'''
-        '''#ifndef $guard\n'''
-        '''#define $guard\n'''
-        '''\n'''
-        '''$namespace_open'''
-        '''$enums_content'''
-        '''$namespace_close'''
-        '''#endif //$guard\n'''
-        '''\n\n''')
+        u'''/**\n'''
+        u''' * @file ${class_name}.h\n'''
+        u''' * @brief Generated class ${class_name} header file.\n'''
+        u''' *\n'''
+        u''' * This class is a part of SmartObjects solution. It provides\n'''
+        u''' * factory functionallity which allows client to use '''
+        u'''SmartSchemas\n'''
+        u''' * in accordance with definitions from ${class_name}.xml file\n'''
+        u''' */\n'''
+        u'''// Copyright (c) 2013, Ford Motor Company\n'''
+        u'''// All rights reserved.\n'''
+        u'''//\n'''
+        u'''// Redistribution and use in source and binary forms, '''
+        u'''with or without\n'''
+        u'''// modification, are permitted provided that the following '''
+        u'''conditions are met:\n'''
+        u'''//\n'''
+        u'''// Redistributions of source code must retain the above '''
+        u'''copyright notice, this\n'''
+        u'''// list of conditions and the following disclaimer.\n'''
+        u'''//\n'''
+        u'''// Redistributions in binary form must reproduce '''
+        u'''the above copyright notice,\n'''
+        u'''// this list of conditions and the following\n'''
+        u'''// disclaimer in the documentation and/or other materials '''
+        u'''provided with the\n'''
+        u'''// distribution.\n'''
+        u'''//\n'''
+        u'''// Neither the name of the Ford Motor Company nor the names '''
+        u'''of its contributors\n'''
+        u'''// may be used to endorse or promote products derived '''
+        u'''from this software\n'''
+        u'''// without specific prior written permission.\n'''
+        u'''//\n'''
+        u'''// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND '''
+        u'''CONTRIBUTORS "AS IS"\n'''
+        u'''// AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT '''
+        u'''LIMITED TO, THE\n'''
+        u'''// IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR '''
+        u'''A PARTICULAR PURPOSE\n'''
+        u'''// ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER '''
+        u'''OR CONTRIBUTORS BE\n'''
+        u'''// LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, '''
+        u'''EXEMPLARY, OR\n'''
+        u'''// CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, '''
+        u'''PROCUREMENT OF\n'''
+        u'''// SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; '''
+        u'''OR BUSINESS\n'''
+        u'''// INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, '''
+        u'''WHETHER IN\n'''
+        u'''// CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE '''
+        u'''OR OTHERWISE)\n'''
+        u'''// ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF '''
+        u'''ADVISED OF THE\n'''
+        u'''// POSSIBILITY OF SUCH DAMAGE.\n\n'''
+        u'''#ifndef $guard\n'''
+        u'''#define $guard\n'''
+        u'''\n'''
+        u'''$namespace_open'''
+        u'''$enums_content'''
+        u'''$namespace_close'''
+        u'''#endif //$guard\n'''
+        u'''\n\n''')
 
     _hpp_schema_file_template = string.Template(
-        '''/**\n'''
-        ''' * @file ${class_name}.h\n'''
-        ''' * @brief Generated class ${class_name} header file.\n'''
-        ''' *\n'''
-        ''' * This class is a part of SmartObjects solution. It provides\n'''
-        ''' * factory functionallity which allows client to use '''
-        '''SmartSchemas\n'''
-        ''' * in accordance with definitions from ${class_name}.xml file\n'''
-        ''' */\n'''
-        '''// Copyright (c) 2013, Ford Motor Company\n'''
-        '''// All rights reserved.\n'''
-        '''//\n'''
-        '''// Redistribution and use in source and binary forms, '''
-        '''with or without\n'''
-        '''// modification, are permitted provided that the following '''
-        '''conditions are met:\n'''
-        '''//\n'''
-        '''// Redistributions of source code must retain the above '''
-        '''copyright notice, this\n'''
-        '''// list of conditions and the following disclaimer.\n'''
-        '''//\n'''
-        '''// Redistributions in binary form must reproduce '''
-        '''the above copyright notice,\n'''
-        '''// this list of conditions and the following\n'''
-        '''// disclaimer in the documentation and/or other materials '''
-        '''provided with the\n'''
-        '''// distribution.\n'''
-        '''//\n'''
-        '''// Neither the name of the Ford Motor Company nor the names '''
-        '''of its contributors\n'''
-        '''// may be used to endorse or promote products derived '''
-        '''from this software\n'''
-        '''// without specific prior written permission.\n'''
-        '''//\n'''
-        '''// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND '''
-        '''CONTRIBUTORS "AS IS"\n'''
-        '''// AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT '''
-        '''LIMITED TO, THE\n'''
-        '''// IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR '''
-        '''A PARTICULAR PURPOSE\n'''
-        '''// ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER '''
-        '''OR CONTRIBUTORS BE\n'''
-        '''// LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, '''
-        '''EXEMPLARY, OR\n'''
-        '''// CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, '''
-        '''PROCUREMENT OF\n'''
-        '''// SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; '''
-        '''OR BUSINESS\n'''
-        '''// INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, '''
-        '''WHETHER IN\n'''
-        '''// CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE '''
-        '''OR OTHERWISE)\n'''
-        '''// ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF '''
-        '''ADVISED OF THE\n'''
-        '''// POSSIBILITY OF SUCH DAMAGE.\n\n'''
-        '''#ifndef $guard\n'''
-        '''#define $guard\n'''
-        '''\n'''
-        '''#include "formatters/CSmartFactory.h"\n'''
-        '''#include "smart_objects/smart_schema.h"\n'''
-        '''#include "smart_objects/schema_item.h"\n'''
-        '''#include "smart_objects/object_schema_item.h"\n'''
-        '''#include "$header_file_name"\n'''
-        '''\n'''
-        '''$namespace_open'''
-        '''\n\n'''
-        '''$class_content'''
-        '''\n\n'''
-        '''$namespace_close'''
-        '''\n'''
-        '''#endif //$guard\n'''
-        '''\n''')
+        u'''/**\n'''
+        u''' * @file ${class_name}.h\n'''
+        u''' * @brief Generated class ${class_name} header file.\n'''
+        u''' *\n'''
+        u''' * This class is a part of SmartObjects solution. It provides\n'''
+        u''' * factory functionallity which allows client to use '''
+        u'''SmartSchemas\n'''
+        u''' * in accordance with definitions from ${class_name}.xml file\n'''
+        u''' */\n'''
+        u'''// Copyright (c) 2013, Ford Motor Company\n'''
+        u'''// All rights reserved.\n'''
+        u'''//\n'''
+        u'''// Redistribution and use in source and binary forms, '''
+        u'''with or without\n'''
+        u'''// modification, are permitted provided that the following '''
+        u'''conditions are met:\n'''
+        u'''//\n'''
+        u'''// Redistributions of source code must retain the above '''
+        u'''copyright notice, this\n'''
+        u'''// list of conditions and the following disclaimer.\n'''
+        u'''//\n'''
+        u'''// Redistributions in binary form must reproduce '''
+        u'''the above copyright notice,\n'''
+        u'''// this list of conditions and the following\n'''
+        u'''// disclaimer in the documentation and/or other materials '''
+        u'''provided with the\n'''
+        u'''// distribution.\n'''
+        u'''//\n'''
+        u'''// Neither the name of the Ford Motor Company nor the names '''
+        u'''of its contributors\n'''
+        u'''// may be used to endorse or promote products derived '''
+        u'''from this software\n'''
+        u'''// without specific prior written permission.\n'''
+        u'''//\n'''
+        u'''// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND '''
+        u'''CONTRIBUTORS "AS IS"\n'''
+        u'''// AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT '''
+        u'''LIMITED TO, THE\n'''
+        u'''// IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR '''
+        u'''A PARTICULAR PURPOSE\n'''
+        u'''// ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER '''
+        u'''OR CONTRIBUTORS BE\n'''
+        u'''// LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, '''
+        u'''EXEMPLARY, OR\n'''
+        u'''// CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, '''
+        u'''PROCUREMENT OF\n'''
+        u'''// SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; '''
+        u'''OR BUSINESS\n'''
+        u'''// INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, '''
+        u'''WHETHER IN\n'''
+        u'''// CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE '''
+        u'''OR OTHERWISE)\n'''
+        u'''// ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF '''
+        u'''ADVISED OF THE\n'''
+        u'''// POSSIBILITY OF SUCH DAMAGE.\n\n'''
+        u'''#ifndef $guard\n'''
+        u'''#define $guard\n'''
+        u'''\n'''
+        u'''#include "formatters/CSmartFactory.h"\n'''
+        u'''#include "smart_objects/smart_schema.h"\n'''
+        u'''#include "smart_objects/schema_item.h"\n'''
+        u'''#include "smart_objects/object_schema_item.h"\n'''
+        u'''#include "$header_file_name"\n'''
+        u'''\n'''
+        u'''$namespace_open'''
+        u'''\n\n'''
+        u'''$class_content'''
+        u'''\n\n'''
+        u'''$namespace_close'''
+        u'''\n'''
+        u'''#endif //$guard\n'''
+        u'''\n''')
 
     _namespace_open_template = string.Template(
-        '''namespace $name {\n''')
+        u'''namespace $name {\n''')
 
     _cc_file_template = string.Template(
-        '''/**\n'''
-        ''' * @file ${class_name}.cc\n'''
-        ''' * @brief Generated class ${class_name} source file.\n'''
-        ''' *\n'''
-        ''' * This class is a part of SmartObjects solution. It provides\n'''
-        ''' * factory functionallity which allows client to use '''
-        '''SmartSchemas\n'''
-        ''' * in accordance with definitions from ${class_name}.xml file\n'''
-        ''' */\n'''
-        '''// Copyright (c) 2019, SmartDeviceLink Consortium, Inc.\n'''
-        '''// All rights reserved.\n'''
-        '''//\n'''
-        '''// Redistribution and use in source and binary forms, '''
-        '''with or without\n'''
-        '''// modification, are permitted provided that the following '''
-        '''conditions are met:\n'''
-        '''//\n'''
-        '''// Redistributions of source code must retain the above '''
-        '''copyright notice, this\n'''
-        '''// list of conditions and the following disclaimer.\n'''
-        '''//\n'''
-        '''// Redistributions in binary form must reproduce '''
-        '''the above copyright notice,\n'''
-        '''// this list of conditions and the following\n'''
-        '''// disclaimer in the documentation and/or other materials '''
-        '''provided with the\n'''
-        '''// distribution.\n'''
-        '''//\n'''
-        '''// Neither the name of the SmartDeviceLink Consortium, Inc. nor the names '''
-        '''of its\n'''
-        '''// contributors may be used to endorse or promote products derived '''
-        '''from this\n'''
-        '''// software without specific prior written permission.\n'''
-        '''//\n'''
-        '''// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND '''
-        '''CONTRIBUTORS "AS IS"\n'''
-        '''// AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT '''
-        '''LIMITED TO, THE\n'''
-        '''// IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR '''
-        ''''A PARTICULAR PURPOSE\n'''
-        '''// ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER '''
-        '''OR CONTRIBUTORS BE\n'''
-        '''// LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, '''
-        '''EXEMPLARY, OR\n'''
-        '''// CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, '''
-        '''PROCUREMENT OF\n'''
-        '''// SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; '''
-        '''OR BUSINESS\n'''
-        '''// INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, '''
-        '''WHETHER IN\n'''
-        '''// CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE '''
-        '''OR OTHERWISE)\n'''
-        '''// ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF '''
-        '''ADVISED OF THE\n'''
-        '''// POSSIBILITY OF SUCH DAMAGE.\n\n'''
-        '''#include <map>\n'''
-        '''#include <set>\n'''
-        '''\n'''
-        '''#include "$header_file_name"\n'''
-        '''#include "smart_objects/always_true_schema_item.h"\n'''
-        '''#include "smart_objects/always_false_schema_item.h"\n'''
-        '''#include "smart_objects/array_schema_item.h"\n'''
-        '''#include "smart_objects/bool_schema_item.h"\n'''
-        '''#include "smart_objects/object_schema_item.h"\n'''
-        '''#include "smart_objects/string_schema_item.h"\n'''
-        '''#include "smart_objects/enum_schema_item.h"\n'''
-        '''#include "smart_objects/number_schema_item.h"\n'''
-        '''#include "smart_objects/schema_item_parameter.h"\n'''
-        '''\n'''
-        '''using namespace ns_smart_device_link::ns_smart_objects;\n'''
-        '''\n'''
-        '''$namespace::$class_name::$class_name()\n'''
-        ''' : ns_smart_device_link::ns_json_handler::CSmartFactory<FunctionID::eType, '''
-        '''messageType::eType, StructIdentifiers::eType>() {\n'''
-        '''  TStructsSchemaItems struct_schema_items;\n'''
-        '''  InitStructSchemes(struct_schema_items);\n'''
-        '''\n'''
-        '''  std::set<FunctionID::eType> function_id_items;\n'''
-        '''${function_id_items}'''
-        '''\n'''
-        '''  std::set<messageType::eType> message_type_items;\n'''
-        '''${message_type_items}'''
-        '''\n'''
-        '''  InitFunctionSchemes(struct_schema_items, function_id_items, '''
-        '''message_type_items);\n'''
-        '''}\n'''
-        '''\n'''
-        '''std::shared_ptr<ISchemaItem> $namespace::$class_name::'''
-        '''ProvideObjectSchemaItemForStruct(\n'''
-        '''    const TStructsSchemaItems &struct_schema_items,\n'''
-        '''    const StructIdentifiers::eType struct_id) {\n'''
-        '''  const TStructsSchemaItems::const_iterator it = '''
-        '''struct_schema_items.find(struct_id);\n'''
-        '''  if (it != struct_schema_items.end()) {\n'''
-        '''    return it->second;\n'''
-        '''  }\n'''
-        '''\n'''
-        '''  return ns_smart_device_link::ns_smart_objects::'''
-        '''CAlwaysFalseSchemaItem::create();\n'''
-        '''}\n'''
-        '''\n'''
-        '''bool $namespace::$class_name::AddCustomMember(FunctionID::eType function_id,\n'''
-        '''                                              messageType::eType message_type,\n'''
-        '''                                              std::string member_key, 
-        ns_smart_device_link::ns_smart_objects::SMember member) {\n'''
-        '''  using namespace ns_smart_device_link::ns_json_handler;\n'''
-        '''  using namespace ns_smart_device_link::ns_smart_objects;\n'''
-        '''  SmartSchemaKey<FunctionID::eType, messageType::eType> shema_key(function_id, message_type);\n'''
-        '''  auto function_schema = functions_schemes_.find(shema_key);\n'''
-        '''  if (functions_schemes_.end() == function_schema){\n'''
-        '''    return false;\n'''
-        '''  }\n'''
-        '''\n'''
-        '''  auto schema = function_schema->second.getSchemaItem();\n'''
-        '''  auto msg_params_schema_item = schema->GetMemberSchemaItem(
-        ns_smart_device_link::ns_json_handler::strings::S_MSG_PARAMS);\n'''
-        '''  if (!msg_params_schema_item.is_initialized()){\n'''
-        '''    return false;\n'''
-        '''  }\n'''
-        '''\n'''
-        '''  msg_params_schema_item->mSchemaItem->AddMemberSchemaItem(member_key, member);\n'''
-        '''  return true;\n'''
-        '''}\n'''
-        '''\n'''
-        '''void $namespace::$class_name::ResetFunctionSchema(FunctionID::eType function_id,\n'''
-        '''                         messageType::eType message_type) {\n'''
-        '''  InitFunctionSchema(function_id, message_type);\n'''
-        '''}\n'''
-        '''\n'''
-        '''void $namespace::$class_name::InitStructSchemes(\n'''
-        '''    TStructsSchemaItems &struct_schema_items) {'''
-        '''$struct_schema_items'''
-        '''}\n'''
-        '''\n'''
-        '''void $namespace::$class_name::InitFunctionSchemes(\n'''
-        '''    const TStructsSchemaItems &struct_schema_items,\n'''
-        '''    const std::set<FunctionID::eType> &function_id_items,\n'''
-        '''    const std::set<messageType::eType> &message_type_items) {\n'''
-        '''$pre_function_schemas'''
-        '''$function_schemas'''
-        '''}\n'''
-        '''\n'''
-        '''void $namespace::$class_name::InitFunctionSchema(\n'''
-        '''    const FunctionID::eType &function_id,\n'''
-        '''    const messageType::eType &message_type) {\n'''
-        '''\n'''
-        '''  TStructsSchemaItems struct_schema_items;\n'''
-        '''  InitStructSchemes(struct_schema_items);\n'''
-        '''\n'''
-        '''  std::set<FunctionID::eType> function_id_items { function_id };\n'''
-        '''  std::set<messageType::eType> message_type_items { message_type };\n'''
-        '''\n'''
-        '''$function_schemas_switch'''
-        '''}\n'''
-        '''\n'''
-        '''//------------- Functions schemes initialization -------------\n'''
-        '''\n'''
-        '''$init_function_impls'''
-        '''\n'''
-        '''//----------- Structs schema items initialization ------------\n'''
-        '''\n'''
-        '''$init_structs_impls'''
-        '''\n'''
-        '''//-------------- String to value enum mapping ----------------\n'''
-        '''\n'''
-        '''namespace ns_smart_device_link {\n'''
-        '''namespace ns_smart_objects {\n'''
-        '''\n'''
-        '''$enum_string_coversions'''
-        '''\n'''
-        '''} // ns_smart_objects\n'''
-        '''} // ns_smart_device_link\n'''
-        '''\n''')
+        u'''/**\n'''
+        u''' * @file ${class_name}.cc\n'''
+        u''' * @brief Generated class ${class_name} source file.\n'''
+        u''' *\n'''
+        u''' * This class is a part of SmartObjects solution. It provides\n'''
+        u''' * factory functionallity which allows client to use '''
+        u'''SmartSchemas\n'''
+        u''' * in accordance with definitions from ${class_name}.xml file\n'''
+        u''' */\n'''
+        u'''// Copyright (c) 2019, SmartDeviceLink Consortium, Inc.\n'''
+        u'''// All rights reserved.\n'''
+        u'''//\n'''
+        u'''// Redistribution and use in source and binary forms, '''
+        u'''with or without\n'''
+        u'''// modification, are permitted provided that the following '''
+        u'''conditions are met:\n'''
+        u'''//\n'''
+        u'''// Redistributions of source code must retain the above '''
+        u'''copyright notice, this\n'''
+        u'''// list of conditions and the following disclaimer.\n'''
+        u'''//\n'''
+        u'''// Redistributions in binary form must reproduce '''
+        u'''the above copyright notice,\n'''
+        u'''// this list of conditions and the following\n'''
+        u'''// disclaimer in the documentation and/or other materials '''
+        u'''provided with the\n'''
+        u'''// distribution.\n'''
+        u'''//\n'''
+        u'''// Neither the name of the SmartDeviceLink Consortium, Inc. nor the names '''
+        u'''of its\n'''
+        u'''// contributors may be used to endorse or promote products derived '''
+        u'''from this\n'''
+        u'''// software without specific prior written permission.\n'''
+        u'''//\n'''
+        u'''// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND '''
+        u'''CONTRIBUTORS "AS IS"\n'''
+        u'''// AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT '''
+        u'''LIMITED TO, THE\n'''
+        u'''// IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR '''
+        u''''A PARTICULAR PURPOSE\n'''
+        u'''// ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER '''
+        u'''OR CONTRIBUTORS BE\n'''
+        u'''// LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, '''
+        u'''EXEMPLARY, OR\n'''
+        u'''// CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, '''
+        u'''PROCUREMENT OF\n'''
+        u'''// SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; '''
+        u'''OR BUSINESS\n'''
+        u'''// INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, '''
+        u'''WHETHER IN\n'''
+        u'''// CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE '''
+        u'''OR OTHERWISE)\n'''
+        u'''// ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF '''
+        u'''ADVISED OF THE\n'''
+        u'''// POSSIBILITY OF SUCH DAMAGE.\n\n'''
+        u'''#include <map>\n'''
+        u'''#include <set>\n'''
+        u'''\n'''
+        u'''#include "$header_file_name"\n'''
+        u'''#include "smart_objects/always_true_schema_item.h"\n'''
+        u'''#include "smart_objects/always_false_schema_item.h"\n'''
+        u'''#include "smart_objects/array_schema_item.h"\n'''
+        u'''#include "smart_objects/bool_schema_item.h"\n'''
+        u'''#include "smart_objects/object_schema_item.h"\n'''
+        u'''#include "smart_objects/string_schema_item.h"\n'''
+        u'''#include "smart_objects/enum_schema_item.h"\n'''
+        u'''#include "smart_objects/number_schema_item.h"\n'''
+        u'''#include "smart_objects/schema_item_parameter.h"\n'''
+        u'''\n'''
+        u'''using namespace ns_smart_device_link::ns_smart_objects;\n'''
+        u'''\n'''
+        u'''$namespace::$class_name::$class_name()\n'''
+        u''' : ns_smart_device_link::ns_json_handler::CSmartFactory<FunctionID::eType, '''
+        u'''messageType::eType, StructIdentifiers::eType>() {\n'''
+        u'''  TStructsSchemaItems struct_schema_items;\n'''
+        u'''  InitStructSchemes(struct_schema_items);\n'''
+        u'''\n'''
+        u'''  std::set<FunctionID::eType> function_id_items;\n'''
+        u'''${function_id_items}'''
+        u'''\n'''
+        u'''  std::set<messageType::eType> message_type_items;\n'''
+        u'''${message_type_items}'''
+        u'''\n'''
+        u'''  InitFunctionSchemes(struct_schema_items, function_id_items, '''
+        u'''message_type_items);\n'''
+        u'''}\n'''
+        u'''\n'''
+        u'''std::shared_ptr<ISchemaItem> $namespace::$class_name::'''
+        u'''ProvideObjectSchemaItemForStruct(\n'''
+        u'''    const TStructsSchemaItems &struct_schema_items,\n'''
+        u'''    const StructIdentifiers::eType struct_id) {\n'''
+        u'''  const TStructsSchemaItems::const_iterator it = '''
+        u'''struct_schema_items.find(struct_id);\n'''
+        u'''  if (it != struct_schema_items.end()) {\n'''
+        u'''    return it->second;\n'''
+        u'''  }\n'''
+        u'''\n'''
+        u'''  return ns_smart_device_link::ns_smart_objects::'''
+        u'''CAlwaysFalseSchemaItem::create();\n'''
+        u'''}\n'''
+        u'''\n'''
+        u'''bool $namespace::$class_name::AddCustomMember(FunctionID::eType function_id,\n'''
+        u'''                                              messageType::eType message_type,\n'''
+        u'''                                              std::string member_key, ns_smart_device_link::ns_smart_objects::SMember member) {\n'''
+        u'''  using namespace ns_smart_device_link::ns_json_handler;\n'''
+        u'''  using namespace ns_smart_device_link::ns_smart_objects;\n'''
+        u'''  SmartSchemaKey<FunctionID::eType, messageType::eType> shema_key(function_id, message_type);\n'''
+        u'''  auto function_schema = functions_schemes_.find(shema_key);\n'''
+        u'''  if (functions_schemes_.end() == function_schema){\n'''
+        u'''    return false;\n'''
+        u'''  }\n'''
+        u'''\n'''
+        u'''  auto schema = function_schema->second.getSchemaItem();\n'''
+        u'''  auto msg_params_schema_item = schema->GetMemberSchemaItem(ns_smart_device_link::ns_json_handler::strings::S_MSG_PARAMS);\n'''
+        u'''  if (!msg_params_schema_item.is_initialized()){\n'''
+        u'''    return false;\n'''
+        u'''  }\n'''
+        u'''\n'''
+        u'''  msg_params_schema_item->mSchemaItem->AddMemberSchemaItem(member_key, member);\n'''
+        u'''  return true;\n'''
+        u'''}\n'''
+        u'''\n'''
+        u'''void $namespace::$class_name::ResetFunctionSchema(FunctionID::eType function_id,\n'''
+        u'''                         messageType::eType message_type) {\n'''
+        u'''  InitFunctionSchema(function_id, message_type);\n'''
+        u'''}\n'''
+        u'''\n'''
+        u'''void $namespace::$class_name::InitStructSchemes(\n'''
+        u'''    TStructsSchemaItems &struct_schema_items) {'''
+        u'''$struct_schema_items'''
+        u'''}\n'''
+        u'''\n'''
+        u'''void $namespace::$class_name::InitFunctionSchemes(\n'''
+        u'''    const TStructsSchemaItems &struct_schema_items,\n'''
+        u'''    const std::set<FunctionID::eType> &function_id_items,\n'''
+        u'''    const std::set<messageType::eType> &message_type_items) {\n'''
+        u'''$pre_function_schemas'''
+        u'''$function_schemas'''
+        u'''}\n'''
+        u'''\n'''
+        u'''void $namespace::$class_name::InitFunctionSchema(\n'''
+        u'''    const FunctionID::eType &function_id,\n'''
+        u'''    const messageType::eType &message_type) {\n'''
+        u'''\n'''
+        u'''  TStructsSchemaItems struct_schema_items;\n'''
+        u'''  InitStructSchemes(struct_schema_items);\n'''
+        u'''\n'''
+        u'''  std::set<FunctionID::eType> function_id_items { function_id };\n'''
+        u'''  std::set<messageType::eType> message_type_items { message_type };\n'''
+        u'''\n'''
+        u'''$function_schemas_switch'''
+        u'''}\n'''
+        u'''\n'''
+        u'''//------------- Functions schemes initialization -------------\n'''
+        u'''\n'''
+        u'''$init_function_impls'''
+        u'''\n'''
+        u'''//----------- Structs schema items initialization ------------\n'''
+        u'''\n'''
+        u'''$init_structs_impls'''
+        u'''\n'''
+        u'''//-------------- String to value enum mapping ----------------\n'''
+        u'''\n'''
+        u'''namespace ns_smart_device_link {\n'''
+        u'''namespace ns_smart_objects {\n'''
+        u'''\n'''
+        u'''$enum_string_coversions'''
+        u'''\n'''
+        u'''} // ns_smart_objects\n'''
+        u'''} // ns_smart_device_link\n'''
+        u'''\n''')
 
     _enum_to_str_converter_template = string.Template(
-        '''template<>\n'''
-        '''const EnumConversionHelper<${namespace}::${enum}::eType>::'''
-        '''EnumToCStringMap\n'''
-        '''EnumConversionHelper<${namespace}::${enum}::eType>::'''
-        '''enum_to_cstring_map_ =\n'''
-        '''  EnumConversionHelper<${namespace}::${enum}::eType>::'''
-        '''InitEnumToCStringMap();\n'''
-        '''\n'''
-        '''template<>\n'''
-        '''const EnumConversionHelper<${namespace}::${enum}::eType>::'''
-        '''CStringToEnumMap\n'''
-        '''EnumConversionHelper<${namespace}::${enum}::eType>::'''
-        '''cstring_to_enum_map_ =\n'''
-        '''  EnumConversionHelper<${namespace}::${enum}::eType>::'''
-        '''InitCStringToEnumMap();\n'''
-        '''\n'''
-        '''template<>\n'''
-        '''const char* const\n'''
-        '''EnumConversionHelper<${namespace}::${enum}::eType>::'''
-        '''cstring_values_[] = {\n'''
-        '''${cstringvalues}'''
-        '''};\n'''
-        '''\n'''
-        '''template<>\n'''
-        '''const ${namespace}::${enum}::eType\n'''
-        '''EnumConversionHelper<${namespace}::${enum}::eType>::'''
-        '''enum_values_[] = {\n'''
-        '''${enumvalues}'''
-        '''};\n'''
-        '''\n''')
+        u'''template<>\n'''
+        u'''const EnumConversionHelper<${namespace}::${enum}::eType>::'''
+        u'''EnumToCStringMap\n'''
+        u'''EnumConversionHelper<${namespace}::${enum}::eType>::'''
+        u'''enum_to_cstring_map_ =\n'''
+        u'''  EnumConversionHelper<${namespace}::${enum}::eType>::'''
+        u'''InitEnumToCStringMap();\n'''
+        u'''\n'''
+        u'''template<>\n'''
+        u'''const EnumConversionHelper<${namespace}::${enum}::eType>::'''
+        u'''CStringToEnumMap\n'''
+        u'''EnumConversionHelper<${namespace}::${enum}::eType>::'''
+        u'''cstring_to_enum_map_ =\n'''
+        u'''  EnumConversionHelper<${namespace}::${enum}::eType>::'''
+        u'''InitCStringToEnumMap();\n'''
+        u'''\n'''
+        u'''template<>\n'''
+        u'''const char* const\n'''
+        u'''EnumConversionHelper<${namespace}::${enum}::eType>::'''
+        u'''cstring_values_[] = {\n'''
+        u'''${cstringvalues}'''
+        u'''};\n'''
+        u'''\n'''
+        u'''template<>\n'''
+        u'''const ${namespace}::${enum}::eType\n'''
+        u'''EnumConversionHelper<${namespace}::${enum}::eType>::'''
+        u'''enum_values_[] = {\n'''
+        u'''${enumvalues}'''
+        u'''};\n'''
+        u'''\n''')
 
     _function_switch_template = string.Template(
-        '''switch(${switchable}) {\n'''
-        '''${cases}'''
-        '''}\n''')
+        u'''switch(${switchable}) {\n'''
+        u'''${cases}'''
+        u'''}\n''')
 
     _message_type_case_template = string.Template(
-        '''case messageType::${message_type}: {\n'''
-        '''${case_body}'''
-        '''  break;\n'''
-        '''}\n''')
+        u'''case messageType::${message_type}: {\n'''
+        u'''${case_body}'''
+        u'''  break;\n'''
+        u'''}\n''')
 
     _function_id_case_template = string.Template(
-        '''case FunctionID::${function_id}: {\n'''
-        '''  ns_smart_device_link::ns_json_handler::SmartSchemaKey<FunctionID::eType, messageType::eType> shema_key(
-        function_id, message_type);\n'''
-        '''  functions_schemes_[shema_key] = '''
-        '''InitFunction_${function_id}_${message_type}('''
-        '''struct_schema_items, function_id_items, message_type_items);\n'''
-        '''  break;\n'''
-        '''}\n''')
+        u'''case FunctionID::${function_id}: {\n'''
+        u'''  ns_smart_device_link::ns_json_handler::SmartSchemaKey<FunctionID::eType, messageType::eType> shema_key(function_id, message_type);\n'''
+        u'''  functions_schemes_[shema_key] = '''
+        u'''InitFunction_${function_id}_${message_type}('''
+        u'''struct_schema_items, function_id_items, message_type_items);\n'''
+        u'''  break;\n'''
+        u'''}\n''')
 
     _struct_schema_item_template = string.Template(
-        '''std::shared_ptr<ISchemaItem> struct_schema_item_${name} = '''
-        '''InitStructSchemaItem_${name}(struct_schema_items);\n'''
-        '''struct_schema_items.insert(std::make_pair('''
-        '''StructIdentifiers::${name}, struct_schema_item_${name}));\n'''
-        '''structs_schemes_.insert(std::make_pair('''
-        '''StructIdentifiers::${name}, CSmartSchema('''
-        '''struct_schema_item_${name})));''')
+        u'''std::shared_ptr<ISchemaItem> struct_schema_item_${name} = '''
+        u'''InitStructSchemaItem_${name}(struct_schema_items);\n'''
+        u'''struct_schema_items.insert(std::make_pair('''
+        u'''StructIdentifiers::${name}, struct_schema_item_${name}));\n'''
+        u'''structs_schemes_.insert(std::make_pair('''
+        u'''StructIdentifiers::${name}, CSmartSchema('''
+        u'''struct_schema_item_${name})));''')
 
     _function_schema_template = string.Template(
-        '''functions_schemes_.insert(std::make_pair(ns_smart_device_link::'''
-        '''ns_json_handler::'''
-        '''SmartSchemaKey<FunctionID::eType, messageType::eType>'''
-        '''(FunctionID::$function_id, messageType::$message_type), '''
-        '''InitFunction_${function_id}_${message_type}('''
-        '''struct_schema_items, function_id_items, message_type_items)));''')
+        u'''functions_schemes_.insert(std::make_pair(ns_smart_device_link::'''
+        u'''ns_json_handler::'''
+        u'''SmartSchemaKey<FunctionID::eType, messageType::eType>'''
+        u'''(FunctionID::$function_id, messageType::$message_type), '''
+        u'''InitFunction_${function_id}_${message_type}('''
+        u'''struct_schema_items, function_id_items, message_type_items)));''')
 
     _struct_impl_template = string.Template(
-        '''std::shared_ptr<ISchemaItem> $namespace::$class_name::'''
-        '''InitStructSchemaItem_${struct_name}(\n'''
-        '''    const TStructsSchemaItems &struct_schema_items) {\n'''
-        '''$code'''
-        '''}\n''')
+        u'''std::shared_ptr<ISchemaItem> $namespace::$class_name::'''
+        u'''InitStructSchemaItem_${struct_name}(\n'''
+        u'''    const TStructsSchemaItems &struct_schema_items) {\n'''
+        u'''$code'''
+        u'''}\n''')
 
     _struct_impl_code_tempate = string.Template(
-        '''${schema_loc_decl}'''
-        '''${schema_items_decl}'''
-        '''Members '''
-        '''schema_members;\n\n'''
-        '''${schema_item_fill}'''
-        '''return CObjectSchemaItem::create(schema_members);''')
+        u'''${schema_loc_decl}'''
+        u'''${schema_items_decl}'''
+        u'''Members '''
+        u'''schema_members;\n\n'''
+        u'''${schema_item_fill}'''
+        u'''return CObjectSchemaItem::create(schema_members);''')
 
     _impl_code_loc_decl_enum_template = string.Template(
-        '''std::set<${type}::eType> ${var_name};''')
+        u'''std::set<${type}::eType> ${var_name};''')
 
     _impl_code_loc_decl_enum_history_set_template = string.Template(
-        '''std::map<${type}::eType, std::vector<ElementSignature>> ${type}_element_signatures;''')
+        u'''std::map<${type}::eType, std::vector<ElementSignature>> ${type}_element_signatures;''')
 
     _impl_code_loc_decl_enum_insert_template = string.Template(
-        '''${var_name}.insert(${enum}::${value});''')
+        u'''${var_name}.insert(${enum}::${value});''')
 
     _impl_code_loc_decl_enum_history_set_value_init_template = string.Template(
-        '''${enum}_element_signatures[${enum}::${value}] = std::vector<ElementSignature>();'''
-    )
+        u'''${enum}_element_signatures[${enum}::${value}] = std::vector<ElementSignature>();'''
+        )
 
     _impl_code_loc_decl_enum_history_set_insert_template = string.Template(
-        '''${enum}_element_signatures[${enum}::${value}].push_back(ElementSignature("${since}", "${until}", 
-        ${removed}));''')
+        u'''${enum}_element_signatures[${enum}::${value}].push_back(ElementSignature("${since}", "${until}", ${removed}));''')
 
     _impl_gen_schema_enum_history_map_template = string.Template(
-        '''${name}_element_signatures''')
+        u'''${name}_element_signatures''')
 
     _impl_code_item_decl_temlate = string.Template(
-        '''${comment}'''
-        '''std::shared_ptr<ISchemaItem> ${var_name} = ${item_decl};''')
+        u'''${comment}'''
+        u'''std::shared_ptr<ISchemaItem> ${var_name} = ${item_decl};''')
 
     _impl_code_shared_ptr_vector_template = string.Template(
-        '''std::vector<SMember> ${var_name}_history_vector;''')
+        u'''std::vector<SMember> ${var_name}_history_vector;''')
 
     _impl_code_append_history_vector_template = string.Template(
-        '''${vector_name}_history_vector.push_back(SMember(${name}_SchemaItem, ${mandatory}, "${since}", "${until}", 
-        ${deprecated}, ${removed}));''')
+        u'''${vector_name}_history_vector.push_back(SMember(${name}_SchemaItem, ${mandatory}, "${since}", "${until}", ${deprecated}, ${removed}));''')
 
     _impl_code_integer_item_template = string.Template(
-        '''TNumberSchemaItem<${type}>::create(${params})''')
+        u'''TNumberSchemaItem<${type}>::create(${params})''')
 
     _impl_code_bool_item_template = string.Template(
-        '''CBoolSchemaItem::create(${params})''')
+        u'''CBoolSchemaItem::create(${params})''')
 
     _impl_code_string_item_template = string.Template(
-        '''CStringSchemaItem::create(${params})''')
+        u'''CStringSchemaItem::create(${params})''')
 
     _impl_code_array_item_template = string.Template(
-        '''CArraySchemaItem::create(${params})''')
+        u'''CArraySchemaItem::create(${params})''')
 
     _impl_code_struct_item_template = string.Template(
-        '''ProvideObjectSchemaItemForStruct(struct_schema_items, '''
-        '''StructIdentifiers::${name})''')
+        u'''ProvideObjectSchemaItemForStruct(struct_schema_items, '''
+        u'''StructIdentifiers::${name})''')
 
     _impl_code_enum_item_template = string.Template(
-        '''TEnumSchemaItem<${type}::eType>::create(${params})''')
+        u'''TEnumSchemaItem<${type}::eType>::create(${params})''')
 
     _impl_code_enum_item_with_history_template = string.Template(
-        '''TEnumSchemaItem<${type}::eType>::createWithSignatures(${params})''')
+        u'''TEnumSchemaItem<${type}::eType>::createWithSignatures(${params})''')
 
     _impl_code_item_param_value_template = string.Template(
-        '''TSchemaItemParameter<$type>($value)''')
+        u'''TSchemaItemParameter<$type>($value)''')
 
     _impl_code_item_fill_template = string.Template(
-        '''schema_members["${name}"] = SMember(${var_name}, ${is_mandatory});''')
+        u'''schema_members["${name}"] = SMember(${var_name}, ${is_mandatory});''')
 
     _impl_code_item_fill_template_with_version = string.Template(
-        '''schema_members["${name}"] = SMember(${var_name}, ${is_mandatory}, "${since}", "${until}", ${deprecated}, 
-        ${removed});''')
+        u'''schema_members["${name}"] = SMember(${var_name}, ${is_mandatory}, "${since}", "${until}", ${deprecated}, ${removed});''')
 
     _impl_code_item_fill_template_with_version_and_history_vector = string.Template(
-        '''schema_members["${name}"] = SMember(${var_name}, ${is_mandatory}, "${since}", "${until}", ${deprecated}, 
-        ${removed}, ${vector_name}_history_vector);''')
+        u'''schema_members["${name}"] = SMember(${var_name}, ${is_mandatory}, "${since}", "${until}", ${deprecated}, ${removed}, ${vector_name}_history_vector);''')
 
     _function_impl_template = string.Template(
-        '''CSmartSchema $namespace::$class_name::'''
-        '''InitFunction_${function_id}_${message_type}(\n'''
-        '''    const TStructsSchemaItems &struct_schema_items,\n'''
-        '''    const std::set<FunctionID::eType> &function_id_items,\n'''
-        '''    const std::set<messageType::eType> &message_type_items) {\n'''
-        '''$code'''
-        '''}\n''')
+        u'''CSmartSchema $namespace::$class_name::'''
+        u'''InitFunction_${function_id}_${message_type}(\n'''
+        u'''    const TStructsSchemaItems &struct_schema_items,\n'''
+        u'''    const std::set<FunctionID::eType> &function_id_items,\n'''
+        u'''    const std::set<messageType::eType> &message_type_items) {\n'''
+        u'''$code'''
+        u'''}\n''')
 
     _function_impl_code_tempate = string.Template(
-        '''${schema_loc_decl}'''
-        '''${schema_items_decl}'''
-        '''Members '''
-        '''schema_members;\n\n'''
-        '''${schema_item_fill}'''
-        '''Members '''
-        '''params_members;\n'''
-        '''${schema_params_fill}'''
-        '''\n'''
-        '''Members '''
-        '''root_members_map;\n'''
-        '''root_members_map[ns_smart_device_link::ns_json_handler::'''
-        '''strings::S_MSG_PARAMS] = '''
-        '''SMember(CObjectSchemaItem::'''
-        '''create(schema_members), true);\n'''
-        '''root_members_map[ns_smart_device_link::ns_json_handler::'''
-        '''strings::S_PARAMS] = '''
-        '''SMember(CObjectSchemaItem::'''
-        '''create(params_members), true);\n\n'''
-        '''return CSmartSchema(CObjectSchemaItem::'''
-        '''create(root_members_map));''')
+        u'''${schema_loc_decl}'''
+        u'''${schema_items_decl}'''
+        u'''Members '''
+        u'''schema_members;\n\n'''
+        u'''${schema_item_fill}'''
+        u'''Members '''
+        u'''params_members;\n'''
+        u'''${schema_params_fill}'''
+        u'''\n'''
+        u'''Members '''
+        u'''root_members_map;\n'''
+        u'''root_members_map[ns_smart_device_link::ns_json_handler::'''
+        u'''strings::S_MSG_PARAMS] = '''
+        u'''SMember(CObjectSchemaItem::'''
+        u'''create(schema_members), true);\n'''
+        u'''root_members_map[ns_smart_device_link::ns_json_handler::'''
+        u'''strings::S_PARAMS] = '''
+        u'''SMember(CObjectSchemaItem::'''
+        u'''create(params_members), true);\n\n'''
+        u'''return CSmartSchema(CObjectSchemaItem::'''
+        u'''create(root_members_map));''')
 
     _class_h_template = string.Template(
-        '''$comment\n'''
-        '''class $class_name : public ns_smart_device_link::ns_json_handler::'''
-        '''CSmartFactory<FunctionID::eType, messageType::eType, '''
-        '''StructIdentifiers::eType> {\n'''
-        ''' public:\n'''
-        '''  /**\n'''
-        '''   * @brief Constructor.\n'''
-        '''   */\n'''
-        '''  $class_name();\n'''
-        '''\n'''
-        '''  /**\n'''
-        '''   * @brief Adds custom members to existing list of params.\n'''
-        '''   */\n'''
-        '''  bool AddCustomMember(FunctionID::eType function_id,\n'''
-        '''                       messageType::eType message_type,\n'''
-        '''                       std::string member_key, ns_smart_device_link::ns_smart_objects::SMember member);\n'''
-        '''\n'''
-        '''  /**\n'''
-        '''   * @brief Reset function schema to state defined in API.\n'''
-        '''   */\n'''
-        '''  void ResetFunctionSchema(FunctionID::eType function_id,\n'''
-        '''                           messageType::eType message_type);\n'''
-        '''\n'''
-        '''  /**\n'''
-        '''   * @brief Type that maps of struct IDs to schema items.\n'''
-        '''   */\n'''
-        '''  typedef std::map<const StructIdentifiers::eType, '''
-        '''std::shared_ptr<ns_smart_device_link::ns_smart_objects::'''
-        '''ISchemaItem> > TStructsSchemaItems;\n'''
-        '''\n'''
-        ''' protected:\n'''
-        '''  /**\n'''
-        '''   * @brief Helper that allows to make reference to struct\n'''
-        '''   *\n'''
-        '''   * @param struct_schema_items Struct schema items.\n'''
-        '''   * @param struct_id ID of structure to provide.\n'''
-        '''   *\n'''
-        '''   * @return std::shared_ptr of strucute\n'''
-        '''   */\n'''
-        '''  static '''
-        '''std::shared_ptr<ns_smart_device_link::ns_smart_objects::ISchemaItem> '''
-        '''ProvideObjectSchemaItemForStruct(\n'''
-        '''        const TStructsSchemaItems &struct_schema_items,\n'''
-        '''        const StructIdentifiers::eType struct_id);\n'''
-        '''\n'''
-        '''  /**\n'''
-        '''   * @brief Initializes all struct schemes.\n'''
-        '''   */\n'''
-        '''  void InitStructSchemes('''
-        '''TStructsSchemaItems &struct_schema_items);\n'''
-        '''\n'''
-        '''  /**\n'''
-        '''   * @brief Initializes all function schemes.\n'''
-        '''   *\n'''
-        '''   * @param struct_schema_items Struct schema items.\n'''
-        '''   * @param function_id_items Set of all elements '''
-        '''of FunctionID enum.\n'''
-        '''   * @param message_type_items Set of all elements '''
-        '''of messageType enum.\n'''
-        '''   */\n'''
-        '''  void InitFunctionSchemes(\n'''
-        '''      const TStructsSchemaItems &struct_schema_items,\n'''
-        '''      const std::set<FunctionID::eType> &function_id_items,\n'''
-        '''      const std::set<messageType::eType> '''
-        '''&message_type_items);\n'''
-        '''\n'''
-        '''  /**\n'''
-        '''   * @brief Initializes single function schema.\n'''
-        '''   *\n'''
-        '''   * @param function_id Function ID of schema to be initialized.\n'''
-        '''   * @param message_type Message type of schema to be initialized.\n'''
-        '''   */\n'''
-        '''  void InitFunctionSchema(\n'''
-        '''      const FunctionID::eType &function_id,\n'''
-        '''      const messageType::eType &message_type);\n'''
-        '''\n'''
-        '''$init_function_decls'''
-        '''\n'''
-        ''' public:\n'''
-        '''$init_struct_decls'''
-        '''};''')
+        u'''$comment\n'''
+        u'''class $class_name : public ns_smart_device_link::ns_json_handler::'''
+        u'''CSmartFactory<FunctionID::eType, messageType::eType, '''
+        u'''StructIdentifiers::eType> {\n'''
+        u''' public:\n'''
+        u'''  /**\n'''
+        u'''   * @brief Constructor.\n'''
+        u'''   */\n'''
+        u'''  $class_name();\n'''
+        u'''\n'''
+        u'''  /**\n'''
+        u'''   * @brief Adds custom members to existing list of params.\n'''
+        u'''   */\n'''
+        u'''  bool AddCustomMember(FunctionID::eType function_id,\n'''
+        u'''                       messageType::eType message_type,\n'''
+        u'''                       std::string member_key, ns_smart_device_link::ns_smart_objects::SMember member);\n'''
+        u'''\n'''
+        u'''  /**\n'''
+        u'''   * @brief Reset function schema to state defined in API.\n'''
+        u'''   */\n'''
+        u'''  void ResetFunctionSchema(FunctionID::eType function_id,\n'''
+        u'''                           messageType::eType message_type);\n'''
+        u'''\n'''
+        u'''  /**\n'''
+        u'''   * @brief Type that maps of struct IDs to schema items.\n'''
+        u'''   */\n'''
+        u'''  typedef std::map<const StructIdentifiers::eType, '''
+        u'''std::shared_ptr<ns_smart_device_link::ns_smart_objects::'''
+        u'''ISchemaItem> > TStructsSchemaItems;\n'''
+        u'''\n'''
+        u''' protected:\n'''
+        u'''  /**\n'''
+        u'''   * @brief Helper that allows to make reference to struct\n'''
+        u'''   *\n'''
+        u'''   * @param struct_schema_items Struct schema items.\n'''
+        u'''   * @param struct_id ID of structure to provide.\n'''
+        u'''   *\n'''
+        u'''   * @return std::shared_ptr of strucute\n'''
+        u'''   */\n'''
+        u'''  static '''
+        u'''std::shared_ptr<ns_smart_device_link::ns_smart_objects::ISchemaItem> '''
+        u'''ProvideObjectSchemaItemForStruct(\n'''
+        u'''        const TStructsSchemaItems &struct_schema_items,\n'''
+        u'''        const StructIdentifiers::eType struct_id);\n'''
+        u'''\n'''
+        u'''  /**\n'''
+        u'''   * @brief Initializes all struct schemes.\n'''
+        u'''   */\n'''
+        u'''  void InitStructSchemes('''
+        u'''TStructsSchemaItems &struct_schema_items);\n'''
+        u'''\n'''
+        u'''  /**\n'''
+        u'''   * @brief Initializes all function schemes.\n'''
+        u'''   *\n'''
+        u'''   * @param struct_schema_items Struct schema items.\n'''
+        u'''   * @param function_id_items Set of all elements '''
+        u'''of FunctionID enum.\n'''
+        u'''   * @param message_type_items Set of all elements '''
+        u'''of messageType enum.\n'''
+        u'''   */\n'''
+        u'''  void InitFunctionSchemes(\n'''
+        u'''      const TStructsSchemaItems &struct_schema_items,\n'''
+        u'''      const std::set<FunctionID::eType> &function_id_items,\n'''
+        u'''      const std::set<messageType::eType> '''
+        u'''&message_type_items);\n'''
+        u'''\n'''
+        u'''  /**\n'''
+        u'''   * @brief Initializes single function schema.\n'''
+        u'''   *\n'''
+        u'''   * @param function_id Function ID of schema to be initialized.\n'''
+        u'''   * @param message_type Message type of schema to be initialized.\n'''
+        u'''   */\n'''
+        u'''  void InitFunctionSchema(\n'''
+        u'''      const FunctionID::eType &function_id,\n'''
+        u'''      const messageType::eType &message_type);\n'''
+        u'''\n'''
+        u'''$init_function_decls'''
+        u'''\n'''
+        u''' public:\n'''
+        u'''$init_struct_decls'''
+        u'''};''')
 
-    _function_return_comment = ''' * @return ns_smart_device_link::''' \
-                               '''ns_smart_objects::CSmartSchema\n'''
+    _function_return_comment = u''' * @return ns_smart_device_link::''' \
+                               u'''ns_smart_objects::CSmartSchema\n'''
 
     _function_decl_template = string.Template(
-        '''$comment\n'''
-        '''static ns_smart_device_link::ns_smart_objects::CSmartSchema '''
-        '''InitFunction_${function_id}_${message_type}(\n'''
-        '''    const TStructsSchemaItems &struct_schema_items,\n'''
-        '''    const std::set<FunctionID::eType> &function_id_items,\n'''
-        '''    const std::set<messageType::eType> &message_type_items);''')
+        u'''$comment\n'''
+        u'''static ns_smart_device_link::ns_smart_objects::CSmartSchema '''
+        u'''InitFunction_${function_id}_${message_type}(\n'''
+        u'''    const TStructsSchemaItems &struct_schema_items,\n'''
+        u'''    const std::set<FunctionID::eType> &function_id_items,\n'''
+        u'''    const std::set<messageType::eType> &message_type_items);''')
 
     _struct_decl_template = string.Template(
-        '''$comment\n'''
-        '''static '''
-        '''std::shared_ptr<ns_smart_device_link::ns_smart_objects::ISchemaItem> '''
-        '''InitStructSchemaItem_${struct_name}(\n'''
-        '''    const TStructsSchemaItems &struct_schema_items);''')
+        u'''$comment\n'''
+        u'''static '''
+        u'''std::shared_ptr<ns_smart_device_link::ns_smart_objects::ISchemaItem> '''
+        u'''InitStructSchemaItem_${struct_name}(\n'''
+        u'''    const TStructsSchemaItems &struct_schema_items);''')
 
     _class_comment_template = string.Template(
-        '''/**\n'''
-        ''' * @brief Class $class_name.\n'''
-        ''' *\n'''
-        ''' * Params:\n'''
-        '''$class_params'''
-        ''' */''')
+        u'''/**\n'''
+        u''' * @brief Class $class_name.\n'''
+        u''' *\n'''
+        u''' * Params:\n'''
+        u'''$class_params'''
+        u''' */''')
 
     _comment_doxygen_template = string.Template(
-        '''/**\n'''
-        '''$brief_description'''
-        '''$description'''
-        '''$design_description'''
-        '''$issues'''
-        '''$todos'''
-        '''$returns */''')
+        u'''/**\n'''
+        u'''$brief_description'''
+        u'''$description'''
+        u'''$design_description'''
+        u'''$issues'''
+        u'''$todos'''
+        u'''$returns */''')
 
     _comment_cc_template = string.Template(
-        '''$brief_description'''
-        '''$description'''
-        '''$design_description'''
-        '''$issues'''
-        '''$todos'''
-        '''$returns''')
+        u'''$brief_description'''
+        u'''$description'''
+        u'''$design_description'''
+        u'''$issues'''
+        u'''$todos'''
+        u'''$returns''')
 
     _enum_template = string.Template(
-        '''namespace $name {\n'''
-        '''$comment\n'''
-        '''enum eType {\n'''
-        '''$enum_items};\n'''
-        '''} // $name\n''')
+        u'''namespace $name {\n'''
+        u'''$comment\n'''
+        u'''enum eType {\n'''
+        u'''$enum_items};\n'''
+        u'''} // $name\n''')
 
     _enum_element_with_value_template = string.Template(
-        '''$comment\n'''
-        '''$name = $value''')
+        u'''$comment\n'''
+        u'''$name = $value''')
 
     _enum_element_with_no_value_template = string.Template(
-        '''$comment\n'''
-        '''$name''')
+        u'''$comment\n'''
+        u'''$name''')
 
-    _indent_template = "  "
+    _indent_template = u"  "
