@@ -72,7 +72,7 @@ class Generator:
         parser.add_argument('-xml', '--source-xml', '--input-file', required=True,
                             help='should point to MOBILE_API.xml')
         parser.add_argument('-ns', '--namespace', required=True)
-        parser.add_argument('-d', '-o', '--output-directory', required=True,
+        parser.add_argument('-d', '-o', '--output-dir', required=True,
                             help='define the place where the generated output should be placed')
         parser.add_argument('-t', '--parser-type', required=True, choices=self.supported_formats.keys())
         parser.add_argument('-v', '--version', action='store_true', help='print the version and exit')
@@ -140,7 +140,7 @@ Generating interface source code with following parameters:
     Namespace       : {1}
     Output directory: {2}
     Parser type     : {3}
-""".format(args.source_xml, args.namespace, args.output_directory, args.parser_type))
+""".format(args.source_xml, args.namespace, args.output_dir, args.parser_type))
 
         # Select required parser and code generator
         parser = self.supported_formats[args.parser_type][0]()
@@ -153,13 +153,13 @@ Generating interface source code with following parameters:
             src_xml_name = os.path.splitext(os.path.basename(args.source_xml))[0]
             # Parse sdl version from MOBILE_API.xml and create source file with this version
             if src_xml_name == "MOBILE_API":
-                generate_msg_version(args.source_xml, args.output_directory)
+                generate_msg_version(args.source_xml, args.output_dir)
 
             # Generate SmartFactory source code from internal model
             code_generator.generate(filtered,
                                     src_xml_name,
                                     args.namespace,
-                                    args.output_directory)
+                                    args.output_dir)
         except (ParseError, GenerateError) as error1:
             print(error1)
             sys.exit(1)
