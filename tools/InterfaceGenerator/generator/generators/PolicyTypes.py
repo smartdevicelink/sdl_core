@@ -163,13 +163,11 @@ class CodeGenerator(object):
             "Parameter" : "Parameter"
         }
 
-        get_first_enum_value_name = lambda enum : enum.elements.values()[0].name
-        enum_required_for_policy = lambda enum : enum.name in required_enums_for_policy and "." not in get_first_enum_value_name(enum)
 
         # In case if "." is in FunctionID name this is HMI_API function ID and should not be included in Policy  enums
 
-        required_enum_values = [val for val in interface.enums.values()
-                               if enum_required_for_policy(val)]
+        required_enum_values = list(filter(lambda e: e.name in required_enums_for_policy
+                                    and "." not in list(e.elements.values())[0].name, list(interface.enums.values())))
 
         if filename == "MOBILE_API":
             self._write_cc_with_enum_schema_factory(filename, namespace, destination_dir, interface.enums.values())
