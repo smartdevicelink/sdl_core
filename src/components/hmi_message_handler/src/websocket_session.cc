@@ -304,12 +304,14 @@ void WebsocketSession::LoopThreadDelegate::exitThreadMain() {
 }
 
 void WebsocketSession::LoopThreadDelegate::DrainQueue() {
-  while (!message_queue_.empty()) {
-    Message message_ptr;
-    message_queue_.pop(message_ptr);
-    if (!shutdown_) {
-      handler_.ws_.write(boost::asio::buffer(*message_ptr));
-    };
+  Message message_ptr;
+  while (!shutdown_ && message_queue_.pop(message_ptr)) {
+    boost::system::error_code ec;
+    handler_.ws_.write(boost::asio::buffer(*message_ptr), ec);
+    if (ec) {
+      LOG4CXX_ERROR(ws_logger_,
+                    "A system error has occurred: " << ec.message());
+    }
   }
 }
 

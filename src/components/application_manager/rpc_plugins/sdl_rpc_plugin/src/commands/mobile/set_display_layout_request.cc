@@ -154,10 +154,13 @@ void SetDisplayLayoutRequest::on_event(const event_engine::Event& event) {
           if (0 == msg_params[hmi_response::display_capabilities]
                              [hmi_response::templates_available]
                                  .length()) {
-            msg_params[hmi_response::display_capabilities]
-                      [hmi_response::templates_available] =
-                          hmi_capabilities.display_capabilities()->getElement(
-                              hmi_response::templates_available);
+            auto display_capabilities = hmi_capabilities.display_capabilities();
+            if (display_capabilities) {
+              msg_params[hmi_response::display_capabilities]
+                        [hmi_response::templates_available] =
+                            display_capabilities->getElement(
+                                hmi_response::templates_available);
+            }
           }
         }
         const Version& app_version = app->version();

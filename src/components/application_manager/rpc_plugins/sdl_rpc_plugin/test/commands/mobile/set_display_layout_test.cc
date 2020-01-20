@@ -240,7 +240,7 @@ TEST_F(SetDisplayLayoutRequestTest, OnEvent_AppVersion_v6_WARNING) {
       "templates_available";
 
   EXPECT_CALL(mock_hmi_capabilities_, display_capabilities())
-      .WillOnce(Return(dispaly_capabilities_msg.get()));
+      .WillOnce(Return(dispaly_capabilities_msg));
   EXPECT_CALL(
       mock_rpc_service_,
       ManageMobileCommand(MobileResultCodeIs(mobile_result::WARNINGS),
@@ -274,7 +274,7 @@ TEST_F(SetDisplayLayoutRequestTest, OnEvent_AppVersion_v5_SUCCESS) {
       "templates_available";
 
   EXPECT_CALL(mock_hmi_capabilities_, display_capabilities())
-      .WillOnce(Return(dispaly_capabilities_msg.get()));
+      .WillOnce(Return(dispaly_capabilities_msg));
   EXPECT_CALL(
       mock_rpc_service_,
       ManageMobileCommand(MobileResultCodeIs(mobile_result::SUCCESS),

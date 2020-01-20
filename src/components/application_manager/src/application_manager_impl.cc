@@ -1448,15 +1448,8 @@ ApplicationManagerImpl::AppsWaitingForRegistration() const {
 
 bool ApplicationManagerImpl::IsAppsQueriedFrom(
     const connection_handler::DeviceHandle handle) const {
-  sync_primitives::AutoLock lock(apps_to_register_list_lock_ptr_);
-  AppsWaitRegistrationSet::iterator it = apps_to_register_.begin();
-  AppsWaitRegistrationSet::const_iterator it_end = apps_to_register_.end();
-  for (; it != it_end; ++it) {
-    if (handle == (*it)->device()) {
-      return true;
-    }
-  }
-  return false;
+  sync_primitives::AutoLock lock(query_apps_devices_lock_);
+  return query_apps_devices_.find(handle) != query_apps_devices_.end();
 }
 
 StateController& ApplicationManagerImpl::state_controller() {
@@ -1548,6 +1541,13 @@ void ApplicationManagerImpl::OnFindNewApplicationsRequest() {
   GetPolicyHandler().OnAppsSearchStarted();
 }
 
+void ApplicationManagerImpl::OnQueryAppsRequest(
+    const connection_handler::DeviceHandle device) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  sync_primitives::AutoLock lock(query_apps_devices_lock_);
+  query_apps_devices_.insert(device);
+}
+
 void ApplicationManagerImpl::SendUpdateAppList() {
   LOG4CXX_AUTO_TRACE(logger_);
 
@@ -1572,6 +1572,8 @@ void ApplicationManagerImpl::SendUpdateAppList() {
 void ApplicationManagerImpl::RemoveDevice(
     const connection_handler::DeviceHandle& device_handle) {
   LOG4CXX_DEBUG(logger_, "device_handle " << device_handle);
+  sync_primitives::AutoLock lock(query_apps_devices_lock_);
+  query_apps_devices_.erase(device_handle);
 }
 
 void ApplicationManagerImpl::OnDeviceSwitchingStart(
@@ -1810,7 +1812,7 @@ bool ApplicationManagerImpl::StartNaviService(
   using namespace protocol_handler;
   LOG4CXX_AUTO_TRACE(logger_);
 
-  if (HMILevelAllowsStreaming(app_id, service_type)) {
+  if (HMIStateAllowsStreaming(app_id, service_type)) {
     {
       sync_primitives::AutoLock lock(navi_service_status_lock_);
 
@@ -3293,10 +3295,12 @@ std::string ApplicationManagerImpl::GetHashedAppID(
   return mobile_app_id + device_name;
 }
 
-bool ApplicationManagerImpl::HMILevelAllowsStreaming(
+bool ApplicationManagerImpl::HMIStateAllowsStreaming(
     uint32_t app_id, protocol_handler::ServiceType service_type) const {
   LOG4CXX_AUTO_TRACE(logger_);
   using namespace mobile_apis::HMILevel;
+  using namespace mobile_apis::PredefinedWindows;
+  using namespace mobile_apis::VideoStreamingState;
   using namespace helpers;
 
   ApplicationSharedPtr app = application(app_id);
@@ -3304,10 +3308,15 @@ bool ApplicationManagerImpl::HMILevelAllowsStreaming(
     LOG4CXX_WARN(logger_, "An application is not registered.");
     return false;
   }
-  return Compare<eType, EQ, ONE>(
-      app->hmi_level(mobile_api::PredefinedWindows::DEFAULT_WINDOW),
-      HMI_FULL,
-      HMI_LIMITED);
+
+  const auto hmi_state = app->CurrentHmiState(DEFAULT_WINDOW);
+  const bool allow_streaming_by_hmi_level =
+      Compare<mobile_apis::HMILevel::eType, EQ, ONE>(
+          hmi_state->hmi_level(), HMI_FULL, HMI_LIMITED);
+  const bool allow_streaming_by_streaming_state =
+      hmi_state->video_streaming_state() == STREAMABLE;
+
+  return allow_streaming_by_hmi_level && allow_streaming_by_streaming_state;
 }
 
 bool ApplicationManagerImpl::CanAppStream(
@@ -3330,7 +3339,7 @@ bool ApplicationManagerImpl::CanAppStream(
     LOG4CXX_WARN(logger_, "Unsupported service_type " << service_type);
   }
 
-  return HMILevelAllowsStreaming(app_id, service_type) && is_allowed;
+  return HMIStateAllowsStreaming(app_id, service_type) && is_allowed;
 }
 
 void ApplicationManagerImpl::ForbidStreaming(uint32_t app_id) {
@@ -3453,10 +3462,9 @@ void ApplicationManagerImpl::EndNaviServices(uint32_t app_id) {
   }
 }
 
-void ApplicationManagerImpl::OnHMILevelChanged(
-    uint32_t app_id,
-    mobile_apis::HMILevel::eType from,
-    mobile_apis::HMILevel::eType to) {
+void ApplicationManagerImpl::OnHMIStateChanged(const uint32_t app_id,
+                                               const HmiStatePtr from,
+                                               const HmiStatePtr to) {
   LOG4CXX_AUTO_TRACE(logger_);
   ProcessPostponedMessages(app_id);
   ProcessApp(app_id, from, to);
@@ -3491,16 +3499,52 @@ void ApplicationManagerImpl::ProcessPostponedMessages(const uint32_t app_id) {
   std::for_each(messages.begin(), messages.end(), push_allowed_messages);
 }
 
-void ApplicationManagerImpl::ProcessApp(const uint32_t app_id,
-                                        const mobile_apis::HMILevel::eType from,
-                                        const mobile_apis::HMILevel::eType to) {
-  using namespace mobile_apis::HMILevel;
-  using namespace helpers;
+void ApplicationManagerImpl::ProcessOnDataStreamingNotification(
+    const protocol_handler::ServiceType service_type,
+    const uint32_t app_id,
+    const bool streaming_data_available) {
+  LOG4CXX_AUTO_TRACE(logger_);
 
-  if (from == to) {
-    LOG4CXX_TRACE(logger_, "HMILevel from = to");
-    return;
+  bool should_send_notification = false;
+
+  {
+    sync_primitives::AutoLock lock(streaming_services_lock_);
+    auto& active_services = streaming_application_services_[service_type];
+    should_send_notification = active_services.empty();
+    if (streaming_data_available) {
+      active_services.insert(app_id);
+      LOG4CXX_DEBUG(logger_,
+                    "Streaming session with id "
+                        << app_id << " for service "
+                        << static_cast<uint32_t>(service_type)
+                        << " was added. Currently streaming sessions count: "
+                        << active_services.size());
+    } else {
+      active_services.erase(app_id);
+      should_send_notification =
+          !should_send_notification && active_services.empty();
+
+      LOG4CXX_DEBUG(logger_,
+                    "Streaming session with id "
+                        << app_id << " for service "
+                        << static_cast<uint32_t>(service_type)
+                        << " was removed. Currently streaming sessions count: "
+                        << active_services.size());
+    }
   }
+
+  if (should_send_notification) {
+    MessageHelper::SendOnDataStreaming(
+        service_type, streaming_data_available, *this);
+  }
+}
+
+void ApplicationManagerImpl::ProcessApp(const uint32_t app_id,
+                                        const HmiStatePtr from,
+                                        const HmiStatePtr to) {
+  using namespace mobile_apis::HMILevel;
+  using namespace mobile_apis::VideoStreamingState;
+  using namespace helpers;
 
   ApplicationSharedPtr app = application(app_id);
   if (!app || (!app->is_navi() && !app->mobile_projection_enabled())) {
@@ -3508,32 +3552,80 @@ void ApplicationManagerImpl::ProcessApp(const uint32_t app_id,
     return;
   }
 
-  if (to == HMI_FULL || to == HMI_LIMITED) {
-    LOG4CXX_TRACE(logger_, "HMILevel to FULL or LIMITED");
-    if (from == HMI_BACKGROUND) {
-      LOG4CXX_TRACE(logger_, "HMILevel from BACKGROUND");
-      AllowStreaming(app_id);
-    }
-  } else if (to == HMI_BACKGROUND) {
-    LOG4CXX_TRACE(logger_, "HMILevel to BACKGROUND");
-    if (from == HMI_FULL || from == HMI_LIMITED) {
-      LOG4CXX_TRACE(logger_, "HMILevel from FULL or LIMITED");
-      navi_app_to_end_stream_.push_back(app_id);
-      TimerSPtr end_stream_timer(std::make_shared<timer::Timer>(
-          "AppShouldFinishStreaming",
-          new TimerTaskImpl<ApplicationManagerImpl>(
-              this, &ApplicationManagerImpl::EndNaviStreaming)));
-      end_stream_timer->Start(navi_end_stream_timeout_, timer::kPeriodic);
+  const auto hmi_level_from = from->hmi_level();
+  const auto hmi_level_to = to->hmi_level();
+  const auto streaming_state_from = from->video_streaming_state();
+  const auto streaming_state_to = to->video_streaming_state();
 
-      sync_primitives::AutoLock lock(end_stream_timer_pool_lock_);
-      end_stream_timer_pool_.push_back(end_stream_timer);
-    }
-  } else if (to == HMI_NONE) {
-    LOG4CXX_TRACE(logger_, "HMILevel to NONE");
-    if (from == HMI_FULL || from == HMI_LIMITED || from == HMI_BACKGROUND) {
-      EndNaviServices(app_id);
-    }
+  if (hmi_level_from == hmi_level_to &&
+      streaming_state_from == streaming_state_to) {
+    LOG4CXX_TRACE(logger_, "HMILevel && streaming state were not changed");
+    return;
   }
+
+  auto full_or_limited_hmi_level = [](mobile_apis::HMILevel::eType hmi_level) {
+    return Compare<mobile_apis::HMILevel::eType, EQ, ONE>(
+        hmi_level, HMI_FULL, HMI_LIMITED);
+  };
+
+  const bool allow_streaming_by_streaming_state =
+      NOT_STREAMABLE == streaming_state_from &&
+      STREAMABLE == streaming_state_to;
+  const bool allow_streaming_by_hmi_level =
+      HMI_BACKGROUND == hmi_level_from &&
+      full_or_limited_hmi_level(hmi_level_to) &&
+      STREAMABLE == streaming_state_to;
+  if (allow_streaming_by_streaming_state || allow_streaming_by_hmi_level) {
+    LOG4CXX_TRACE(logger_,
+                  "Allow streaming by streaming state: "
+                      << std::boolalpha << allow_streaming_by_streaming_state
+                      << "; by hmi level: " << std::boolalpha
+                      << allow_streaming_by_hmi_level);
+    AllowStreaming(app_id);
+    return;
+  }
+
+  const bool end_streaming_by_streaming_state =
+      STREAMABLE == streaming_state_from &&
+      NOT_STREAMABLE == streaming_state_to &&
+      full_or_limited_hmi_level(hmi_level_to);
+  const bool start_timer_by_hmi_level =
+      full_or_limited_hmi_level(hmi_level_from) &&
+      HMI_BACKGROUND == hmi_level_to;
+  if (end_streaming_by_streaming_state || start_timer_by_hmi_level) {
+    LOG4CXX_TRACE(logger_,
+                  "Start EndStream timer by streaming state: "
+                      << std::boolalpha << end_streaming_by_streaming_state
+                      << "; by hmi level: " << std::boolalpha
+                      << start_timer_by_hmi_level);
+    StartEndStreamTimer(app_id);
+    return;
+  }
+
+  const bool end_streaming_by_hmi_level =
+      full_or_limited_hmi_level(hmi_level_from) && HMI_NONE == hmi_level_to;
+  if (end_streaming_by_hmi_level) {
+    LOG4CXX_TRACE(logger_,
+                  "End streaming services by hmi level: "
+                      << std::boolalpha << end_streaming_by_hmi_level);
+    EndNaviServices(app_id);
+    return;
+  }
+
+  LOG4CXX_TRACE(logger_, "No actions required for app " << app_id);
+}
+
+void ApplicationManagerImpl::StartEndStreamTimer(const uint32_t app_id) {
+  LOG4CXX_DEBUG(logger_, "Start end stream timer for app " << app_id);
+  navi_app_to_end_stream_.push_back(app_id);
+  TimerSPtr end_stream_timer(std::make_shared<timer::Timer>(
+      "DisallowAppStreamTimer",
+      new TimerTaskImpl<ApplicationManagerImpl>(
+          this, &ApplicationManagerImpl::EndNaviStreaming)));
+  end_stream_timer->Start(navi_end_stream_timeout_, timer::kSingleShot);
+
+  sync_primitives::AutoLock lock(end_stream_timer_pool_lock_);
+  end_stream_timer_pool_.push_back(end_stream_timer);
 }
 
 void ApplicationManagerImpl::ClearTimerPool() {
@@ -4521,11 +4613,19 @@ void ApplicationManagerImpl::ChangeAppsHMILevel(
     LOG4CXX_ERROR(logger_, "There is no app with id: " << app_id);
     return;
   }
-  const mobile_apis::HMILevel::eType old_level =
-      app->hmi_level(mobile_api::PredefinedWindows::DEFAULT_WINDOW);
-  if (old_level != level) {
+
+  const auto old_hmi_state =
+      app->CurrentHmiState(mobile_apis::PredefinedWindows::DEFAULT_WINDOW);
+  if (old_hmi_state->hmi_level() != level) {
     app->set_hmi_level(mobile_apis::PredefinedWindows::DEFAULT_WINDOW, level);
-    OnHMILevelChanged(app_id, old_level, level);
+    const auto new_hmi_state =
+        CreateRegularState(app,
+                           mobile_apis::WindowType::MAIN,
+                           level,
+                           old_hmi_state->audio_streaming_state(),
+                           old_hmi_state->video_streaming_state(),
+                           old_hmi_state->system_context());
+    OnHMIStateChanged(app_id, old_hmi_state, new_hmi_state);
   } else {
     LOG4CXX_WARN(logger_, "Redundant changing HMI level: " << level);
   }

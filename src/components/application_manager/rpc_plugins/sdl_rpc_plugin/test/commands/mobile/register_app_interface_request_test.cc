@@ -179,6 +179,28 @@ class RegisterAppInterfaceRequestTest
         .WillByDefault(ReturnRef(kDummyString));
     ON_CALL(mock_hmi_capabilities_, ccpu_version())
         .WillByDefault(ReturnRef(kDummyString));
+    ON_CALL(mock_hmi_capabilities_, speech_capabilities())
+        .WillByDefault(Return(smart_objects::SmartObjectSPtr()));
+    ON_CALL(mock_hmi_capabilities_, prerecorded_speech())
+        .WillByDefault(Return(smart_objects::SmartObjectSPtr()));
+    ON_CALL(mock_hmi_capabilities_, vr_capabilities())
+        .WillByDefault(Return(smart_objects::SmartObjectSPtr()));
+    ON_CALL(mock_hmi_capabilities_, display_capabilities())
+        .WillByDefault(Return(smart_objects::SmartObjectSPtr()));
+    ON_CALL(mock_hmi_capabilities_, audio_pass_thru_capabilities())
+        .WillByDefault(Return(smart_objects::SmartObjectSPtr()));
+    ON_CALL(mock_hmi_capabilities_, vehicle_type())
+        .WillByDefault(Return(smart_objects::SmartObjectSPtr()));
+    ON_CALL(mock_hmi_capabilities_, button_capabilities())
+        .WillByDefault(Return(smart_objects::SmartObjectSPtr()));
+    ON_CALL(mock_hmi_capabilities_, soft_button_capabilities())
+        .WillByDefault(Return(smart_objects::SmartObjectSPtr()));
+    ON_CALL(mock_hmi_capabilities_, preset_bank_capabilities())
+        .WillByDefault(Return(smart_objects::SmartObjectSPtr()));
+    ON_CALL(mock_hmi_capabilities_, hmi_zone_capabilities())
+        .WillByDefault(Return(smart_objects::SmartObjectSPtr()));
+    ON_CALL(mock_hmi_capabilities_, pcm_stream_capabilities())
+        .WillByDefault(Return(smart_objects::SmartObjectSPtr()));
     ON_CALL(app_mngr_settings_, supported_diag_modes())
         .WillByDefault(ReturnRef(kDummyDiagModes));
     ON_CALL(mock_policy_handler_, GetAppRequestTypes(_, _))
@@ -432,15 +454,20 @@ TEST_F(RegisterAppInterfaceRequestTest,
       "test_templates_available";
   display_capabilities[am::hmi_response::screen_params] = "test_screen_params";
 
+  auto vehicle_type_ptr = std::make_shared<smart_objects::SmartObject>(
+      (*expected_message)[am::hmi_response::vehicle_type]);
   ON_CALL(mock_hmi_capabilities_, vehicle_type())
-      .WillByDefault(
-          Return(&(*expected_message)[am::hmi_response::vehicle_type]));
+      .WillByDefault(Return(vehicle_type_ptr));
+
+  auto vr_capabilities_ptr = std::make_shared<smart_objects::SmartObject>(
+      (*expected_message)[am::strings::vr_capabilities]);
   ON_CALL(mock_hmi_capabilities_, vr_capabilities())
-      .WillByDefault(
-          Return(&(*expected_message)[am::strings::vr_capabilities]));
+      .WillByDefault(Return(vr_capabilities_ptr));
+
+  auto display_capabilities_ptr = std::make_shared<smart_objects::SmartObject>(
+      (*expected_message)[am::hmi_response::display_capabilities]);
   ON_CALL(mock_hmi_capabilities_, display_capabilities())
-      .WillByDefault(
-          Return(&(*expected_message)[am::hmi_response::display_capabilities]));
+      .WillByDefault(Return(display_capabilities_ptr));
 
   ON_CALL(app_mngr_, applications())
       .WillByDefault(
