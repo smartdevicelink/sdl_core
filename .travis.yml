@@ -16,8 +16,9 @@ addons:
 
 before_install:
   - sudo apt-get update
-  - sudo apt-get install libssl-dev libbluetooth3 libbluetooth-dev libudev-dev cmake html2text lcov git cmake automake1.11 build-essential libavahi-client-dev sqlite3 libsqlite3-dev libgtest-dev bluez-tools libpulse-dev libusb-1.0.0-dev cppcheck
+  - sudo apt-get install libssl-dev libbluetooth3 libbluetooth-dev libudev-dev cmake html2text lcov git cmake automake1.11 build-essential libavahi-client-dev sqlite3 libsqlite3-dev libgtest-dev bluez-tools libpulse-dev libusb-1.0.0-dev cppcheck python3-pip
   - sudo apt-get install -f clang-format-6.0
+  - sudo python3 -m pip install xmlschema
 
 script:
   - cppcheck --force -isrc/3rd_party -isrc/3rd_party-static --quiet --error-exitcode=1 src
