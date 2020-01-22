@@ -1054,8 +1054,6 @@ TEST_F(ApplicationManagerImplTest,
                                                         nonswitching_device_id,
                                                         "USB");
 
-  EXPECT_CALL(*mock_message_helper_, CreateDeviceListSO(_, _, _))
-      .WillOnce(Return(smart_objects::SmartObjectSPtr()));
   app_manager_impl_->OnDeviceSwitchingStart(switching_device,
                                             non_switching_device);
   EXPECT_TRUE(
@@ -1125,8 +1123,6 @@ TEST_F(ApplicationManagerImplTest,
                                                         nonswitching_device_id,
                                                         "USB");
 
-  EXPECT_CALL(*mock_message_helper_, CreateDeviceListSO(_, _, _))
-      .WillOnce(Return(smart_objects::SmartObjectSPtr()));
   app_manager_impl_->OnDeviceSwitchingStart(switching_device,
                                             non_switching_device);
 
