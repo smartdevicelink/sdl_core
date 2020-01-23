@@ -349,22 +349,16 @@ RESULT_CODE ProtocolPacket::ProtocolHeaderValidator::validate(
     case FRAME_TYPE_SINGLE:
     case FRAME_TYPE_CONSECUTIVE:
     case FRAME_TYPE_CONTROL: {
-      bool wrongDataSize = false;
-
-      if (header.dataSize > payload_size) {
-        wrongDataSize = true;
-      }
-
-      if (FRAME_TYPE_CONTROL != header.frameType && header.dataSize <= 0u) {
-        wrongDataSize = true;
-      }
+      bool wrongDataSize =
+          (header.dataSize > payload_size) ||
+          (FRAME_TYPE_CONTROL != header.frameType && header.dataSize == 0u);
 
       if (wrongDataSize) {
-        const std::string str_frame_type = StringifyFrameType(header.frameType);
+        UNUSED(StringifyFrameType);
         LOG4CXX_WARN(
             logger_,
             "Packet data size of "
-                << str_frame_type
+                << StringifyFrameType(header.frameType)
                 << " frame must be in range (0, payload_size=" << payload_size
                 << "], but actual value is " << header.dataSize);
         return RESULT_FAIL;
