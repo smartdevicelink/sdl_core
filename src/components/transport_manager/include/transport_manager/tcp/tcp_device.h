@@ -66,7 +66,7 @@ class TcpDevice : public Device {
    **/
   TcpDevice(const in_addr_t& in_addr, const std::string& name);
 
-#if defined(ENABLE_IAP2EMULATION)
+#if defined(BUILD_TESTS)
   /**
    * @brief TcpDevice
    * @param in_addr IP address of device

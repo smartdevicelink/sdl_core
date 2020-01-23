@@ -48,9 +48,9 @@
 #include "transport_manager/cloud/cloud_websocket_transport_adapter.h"
 #endif  // CLOUD_APP_WEBSOCKET_TRANSPORT_SUPPORT
 
-#if defined(ENABLE_IAP2EMULATION)
+#if defined(BUILD_TESTS)
 #include "transport_manager/iap2_emulation/iap2_transport_adapter.h"
-#endif  // ENABLE_IAP2EMULATION
+#endif  // BUILD_TEST
 
 namespace transport_manager {
 CREATE_LOGGERPTR_GLOBAL(logger_, "TransportManager")
@@ -139,7 +139,7 @@ int TransportManagerDefault::Init(resumption::LastState& last_state) {
   AddTransportAdapter(ta_cloud);
 #endif  // CLOUD_APP_WEBSOCKET_TRANSPORT_SUPPORT
 
-#if defined ENABLE_IAP2EMULATION
+#if defined BUILD_TESTS
   const uint16_t iap2_bt_emu_port = 23456;
   transport_adapter::IAP2BluetoothEmulationTransportAdapter*
       iap2_bt_emu_adapter =
@@ -154,7 +154,7 @@ int TransportManagerDefault::Init(resumption::LastState& last_state) {
           iap2_usb_emu_port, last_state, settings);
 
   AddTransportAdapter(iap2_usb_emu_adapter);
-#endif  // ENABLE_IAP2EMULATION
+#endif  // BUILD_TEST
 
   LOG4CXX_TRACE(logger_, "exit with E_SUCCESS");
   return E_SUCCESS;
