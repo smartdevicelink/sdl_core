@@ -105,7 +105,8 @@ void WebsocketSession::Send(const std::string& message,
 }
 
 void WebsocketSession::sendJsonMessage(Json::Value& message) {
-  const std::string str_msg = Json::writeString(m_writer, message);
+  m_writer["indentation"] = "";
+  const std::string str_msg = Json::writeString(m_writer, message) + '\n';
   sync_primitives::AutoLock auto_lock(queue_lock_);
   if (!isNotification(message) && !isResponse(message)) {
     mWaitResponseQueue.insert(std::map<std::string, std::string>::value_type(
