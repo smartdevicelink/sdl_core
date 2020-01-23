@@ -126,8 +126,8 @@ void OnSystemRequestNotification::Run() {
       static_cast<rpc::policy_table_interface_base::RequestType>(
           (*message_)[strings::msg_params][strings::request_type].asUInt());
 
-  if (RequestType::RT_PROPRIETARY == request_type ||
-      RequestType::RT_HTTP == request_type) {
+  if (helpers::Compare<RequestType, helpers::EQ, helpers::ONE>(
+          request_type, RequestType::RT_PROPRIETARY, RequestType::RT_HTTP)) {
     policy_handler_.OnSystemRequestReceived();
   }
   SendNotificationToMobile(message_);
