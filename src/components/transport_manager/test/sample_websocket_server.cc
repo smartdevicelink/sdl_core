@@ -51,11 +51,12 @@ void WSSession::WSServer::AddURLRoute(const std::string& target) {
 
 void WSSession::WSServer::Run() {
   req_ = {};
-  http::async_read(
-      ws_.next_layer(),
-      buffer_,
-      req_,
-      std::bind(&WSServer::OnWebsocketHandshake, this, std::placeholders::_1));
+  http::async_read(ws_.next_layer(),
+                   buffer_,
+                   req_,
+                   std::bind(&WSServer::OnWebsocketHandshake,
+                             shared_from_this(),
+                             std::placeholders::_1));
 }
 
 void WSSession::WSServer::OnWebsocketHandshake(
@@ -75,9 +76,10 @@ void WSSession::WSServer::OnWebsocketHandshake(
     // Accept the websocket handshake
     ws_.async_accept(
         req_,
-        boost::asio::bind_executor(
-            strand_,
-            std::bind(&WSServer::OnAccept, this, std::placeholders::_1)));
+        boost::asio::bind_executor(strand_,
+                                   std::bind(&WSServer::OnAccept,
+                                             shared_from_this(),
+                                             std::placeholders::_1)));
   }
 }
 
@@ -153,7 +155,9 @@ WSSession::WSSession(const std::string& address, uint16_t port)
 void WSSession::Run() {
   if (acceptor_.is_open()) {
     acceptor_.async_accept(
-        socket_, std::bind(&WSSession::on_accept, this, std::placeholders::_1));
+        socket_,
+        std::bind(
+            &WSSession::on_accept, shared_from_this(), std::placeholders::_1));
     boost::asio::post(io_pool_, [&]() { ioc_.run(); });
   }
 }
@@ -201,9 +205,10 @@ void WSSSession::WSSServer::AddURLRoute(const std::string& target) {
 }
 void WSSSession::WSSServer::Run() {
   // Perform the SSL handshake
-  wss_.next_layer().async_handshake(
-      ssl::stream_base::server,
-      std::bind(&WSSServer::OnSSLHandshake, this, std::placeholders::_1));
+  wss_.next_layer().async_handshake(ssl::stream_base::server,
+                                    std::bind(&WSSServer::OnSSLHandshake,
+                                              shared_from_this(),
+                                              std::placeholders::_1));
 }
 
 void WSSSession::WSSServer::OnSSLHandshake(beast::error_code ec) {
@@ -212,11 +217,12 @@ void WSSSession::WSSServer::OnSSLHandshake(beast::error_code ec) {
   }
 
   req_ = {};
-  http::async_read(
-      wss_.next_layer(),
-      buffer_,
-      req_,
-      std::bind(&WSSServer::OnWebsocketHandshake, this, std::placeholders::_1));
+  http::async_read(wss_.next_layer(),
+                   buffer_,
+                   req_,
+                   std::bind(&WSSServer::OnWebsocketHandshake,
+                             shared_from_this(),
+                             std::placeholders::_1));
 }
 
 void WSSSession::WSSServer::OnWebsocketHandshake(
@@ -235,7 +241,9 @@ void WSSSession::WSSServer::OnWebsocketHandshake(
     }
     // Accept the websocket handshake
     wss_.async_accept(
-        req_, std::bind(&WSSServer::OnAccept, this, std::placeholders::_1));
+        req_,
+        std::bind(
+            &WSSServer::OnAccept, shared_from_this(), std::placeholders::_1));
   }
 }
 
@@ -357,7 +365,8 @@ void WSSSession::do_accept() {
   if (acceptor_.is_open()) {
     acceptor_.async_accept(
         socket_,
-        std::bind(&WSSSession::on_accept, this, std::placeholders::_1));
+        std::bind(
+            &WSSSession::on_accept, shared_from_this(), std::placeholders::_1));
     boost::asio::post(io_pool_, [&]() { ioc_.run(); });
   }
 }
