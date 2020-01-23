@@ -349,11 +349,8 @@ RESULT_CODE ProtocolPacket::ProtocolHeaderValidator::validate(
     case FRAME_TYPE_SINGLE:
     case FRAME_TYPE_CONSECUTIVE:
     case FRAME_TYPE_CONTROL: {
-      bool wrongDataSize =
-          (header.dataSize > payload_size) ||
-          (FRAME_TYPE_CONTROL != header.frameType && header.dataSize == 0u);
-
-      if (wrongDataSize) {
+      if (header.dataSize > payload_size ||
+          (FRAME_TYPE_CONTROL != header.frameType && header.dataSize == 0u)) {
         UNUSED(StringifyFrameType);
         LOG4CXX_WARN(
             logger_,
