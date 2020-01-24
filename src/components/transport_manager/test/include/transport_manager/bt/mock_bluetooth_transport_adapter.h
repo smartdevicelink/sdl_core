@@ -1,7 +1,5 @@
 /*
- * \file connection.h
- * \brief Connection class header.
- * Copyright (c) 2013, Ford Motor Company
+ * Copyright (c) 2019, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -32,49 +30,26 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_ADAPTER_CONNECTION_H_
-#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_ADAPTER_CONNECTION_H_
+#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_TEST_INCLUDE_TRANSPORT_MANAGER_BT_MOCK_BLUETOOTH_TRANSPORT_ADAPTER_H_
+#define SRC_COMPONENTS_TRANSPORT_MANAGER_TEST_INCLUDE_TRANSPORT_MANAGER_BT_MOCK_BLUETOOTH_TRANSPORT_ADAPTER_H_
 
-#include "transport_manager/transport_adapter/transport_adapter.h"
+#include "transport_manager/transport_adapter/mock_transport_adapter.h"
 
-namespace transport_manager {
-namespace transport_adapter {
+namespace test {
+namespace components {
+namespace transport_manager_test {
 
-/**
- * @brief Application connection.
- **/
-class Connection {
+using namespace ::transport_manager::transport_adapter;
+
+class MockBluetoothTransportAdapter : public MockTransportAdapter {
  public:
-  /**
-   * @brief Destructor.
-   **/
-  virtual ~Connection() {}
-
-  /**
-   * @brief Send data frame.
-   *
-   * @param Message Smart pointer to the raw message.
-   *
-   * @return Error Information about possible reason of sending data failure.
-   */
-  virtual TransportAdapter::Error SendData(
-      ::protocol_handler::RawMessagePtr message) = 0;
-
-  /**
-   * @brief Disconnect the current connection.
-   */
-  virtual TransportAdapter::Error Disconnect() = 0;
-
-  /**
-   * @brief Terminate method may implement the logic of correct thread
-   * termination, if necessary for specific connection. Unlike the disconnect
-   * method, which manipulates physical descriptors
-   */
-  virtual void Terminate() {}
+  MOCK_CONST_METHOD0(GetDeviceType, DeviceType());
+  MOCK_CONST_METHOD0(Store, void());
+  MOCK_METHOD0(Restore, bool());
 };
 
-typedef std::shared_ptr<Connection> ConnectionSPtr;
+}  // namespace transport_manager_test
+}  // namespace components
+}  // namespace test
 
-}  // namespace transport_adapter
-}  // namespace transport_manager
-#endif  // SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_ADAPTER_CONNECTION_H_
+#endif  // SRC_COMPONENTS_TRANSPORT_MANAGER_TEST_INCLUDE_TRANSPORT_MANAGER_BT_MOCK_BLUETOOTH_TRANSPORT_ADAPTER_H_

@@ -111,6 +111,9 @@ class MockTransportAdapter
 #ifdef TELEMETRY_MONITOR
   MOCK_METHOD0(GetTelemetryObserver,
                ::transport_manager::TMTelemetryObserver*());
+  MOCK_METHOD1(SetTelemetryObserver,
+               void(::transport_manager::TMTelemetryObserver* observer));
+
 #endif  // TELEMETRY_MONITOR
 };
 

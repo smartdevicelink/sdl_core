@@ -611,6 +611,7 @@ TEST_F(TransportAdapterTest, Disconnect_ConnectDoneSuccess) {
   EXPECT_EQ(TransportAdapter::OK, new_res);
 
   EXPECT_CALL(*serverMock, Terminate());
+  EXPECT_CALL(*mock_connection, Terminate());
 }
 
 #if defined(CLOUD_APP_WEBSOCKET_TRANSPORT_SUPPORT)
@@ -651,6 +652,9 @@ TEST_F(TransportAdapterTest, FindPending) {
   ConnectionSPtr mock_connection_fake =
       transport_adapter.FindPendingConnection(uniq_id, 1);
   ASSERT_TRUE(mock_connection_fake.use_count() == 0);
+
+  EXPECT_CALL(*serverMock, Terminate());
+  EXPECT_CALL(*connection, Terminate());
 }
 
 TEST_F(TransportAdapterTest,
@@ -743,6 +747,8 @@ TEST_F(TransportAdapterTest,
   EXPECT_EQ(ConnectionStatus::PENDING, mockdev2->connection_status());
 
   EXPECT_CALL(*serverMock, Terminate());
+  EXPECT_CALL(*mock_connection, Terminate());
+  EXPECT_CALL(*connection2, Terminate());
 }
 
 TEST_F(TransportAdapterTest, WebsocketEndpointParsing_SUCCESS) {
@@ -864,6 +870,7 @@ TEST_F(TransportAdapterTest, DisconnectDevice_DeviceAddedConnectionCreated) {
   EXPECT_EQ(ConnectionStatus::CLOSING, mockdev->connection_status());
 
   EXPECT_CALL(*serverMock, Terminate());
+  EXPECT_CALL(*mock_connection, Terminate());
 }
 
 TEST_F(TransportAdapterTest, DeviceDisconnected) {
@@ -978,6 +985,7 @@ TEST_F(TransportAdapterTest, SendData) {
 
   EXPECT_CALL(*dev_mock, Terminate());
   EXPECT_CALL(*serverMock, Terminate());
+  EXPECT_CALL(*mock_connection, Terminate());
 }
 
 TEST_F(TransportAdapterTest, SendData_ConnectionNotEstablished) {
@@ -1018,6 +1026,7 @@ TEST_F(TransportAdapterTest, SendData_ConnectionNotEstablished) {
   EXPECT_CALL(*dev_mock, Terminate());
   EXPECT_CALL(*clientMock, Terminate());
   EXPECT_CALL(*serverMock, Terminate());
+  EXPECT_CALL(*mock_connection, Terminate());
 }
 
 TEST_F(TransportAdapterTest, StartClientListening_ClientNotInitialized) {
@@ -1171,7 +1180,7 @@ TEST_F(TransportAdapterTest, FindEstablishedConnection) {
   TransportAdapter::Error res = transport_adapter.Connect(dev_id, app_handle);
   EXPECT_EQ(TransportAdapter::OK, res);
 
-  ConnectionSPtr mock_connection = std::make_shared<MockConnection>();
+  auto mock_connection = std::make_shared<MockConnection>();
   transport_adapter.ConnectionCreated(mock_connection, dev_id, app_handle);
 
   EXPECT_CALL(transport_adapter, Store());
@@ -1182,6 +1191,7 @@ TEST_F(TransportAdapterTest, FindEstablishedConnection) {
   EXPECT_EQ(mock_connection, conn);
 
   EXPECT_CALL(*serverMock, Terminate());
+  EXPECT_CALL(*mock_connection, Terminate());
 }
 
 TEST_F(TransportAdapterTest, RunAppOnDevice_NoDeviseWithAskedId_UNSUCCESS) {
