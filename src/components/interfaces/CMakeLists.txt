@@ -39,6 +39,7 @@ include_directories (
   ${CMAKE_BINARY_DIR}
 )
 
+execute_process(COMMAND /usr/bin/env python3 -m pip install --upgrade --user pip setuptools wheel)
 set(GENERATOR_REQUIREMENTS "${CMAKE_SOURCE_DIR}/tools/InterfaceGenerator/requirements.txt")
 execute_process(COMMAND /usr/bin/env python3 -m pip install --user --requirement ${GENERATOR_REQUIREMENTS})
 
