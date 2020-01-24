@@ -1826,7 +1826,7 @@ bool ApplicationManagerImpl::StartNaviService(
     }
 
     {
-      /* Fix: For NaviApp1 Switch to NaviApp2, App1's Endcallback() arrives 
+      /* Fix: For NaviApp1 Switch to NaviApp2, App1's Endcallback() arrives
        later than App2's Startcallback(). Cause streaming issue on HMI.
       */
       sync_primitives::AutoLock lock(applications_list_lock_ptr_);
@@ -1835,7 +1835,7 @@ bool ApplicationManagerImpl::StartNaviService(
         ApplicationSharedPtr app = application((*it_app)->app_id());
         if (!app || (!app->is_navi() && !app->mobile_projection_enabled())) {
           LOG4CXX_DEBUG(logger_,
-                        "Continue, Not Navi App Id: "<< (*it_app)->app_id());
+                        "Continue, Not Navi App Id: " << (*it_app)->app_id());
           ++it_app;
           continue;
         } else {
@@ -1962,7 +1962,7 @@ void ApplicationManagerImpl::StopNaviService(
       // we've stopped video service or to second value if we've
       // stopped audio service
       LOG4CXX_DEBUG(logger_,
-                    "appId: " << app_id << " service_type: "<< service_type
+                    "appId: " << app_id << " service_type: " << service_type
                               << " to stopped");
       service_type == ServiceType::kMobileNav ? it->second.first = false
                                               : it->second.second = false;
