@@ -215,6 +215,19 @@ class TransportManager {
    */
   virtual int PerformActionOnClients(
       const TransportAction required_action) const = 0;
+
+  /**
+   * @brief Called when VIN code is received, creates
+   * WebSocketDevice for WebEngine and add it to the device list
+   * @param vin_code VIN code received from HMI
+   */
+  virtual void CreateWebEngineDevice(const std::string& vin_code) = 0;
+
+  /**
+   * @brief GetWebEngineDeviceInfo
+   * @return device info for WebEngine device
+   */
+  virtual const DeviceInfo& GetWebEngineDeviceInfo() const = 0;
 };
 }  // namespace transport_manager
 #endif  // SRC_COMPONENTS_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_MANAGER_H_

@@ -172,6 +172,11 @@ class ConnectionHandlerObserver {
       const transport_manager::ConnectionUID connection_id,
       const transport_manager::DeviceInfo& device_info) = 0;
 
+  /**
+   *@brief Called when webengine device added
+   */
+  virtual void OnWebEngineDeviceCreated() = 0;
+
  protected:
   /**
    * \brief Destructor

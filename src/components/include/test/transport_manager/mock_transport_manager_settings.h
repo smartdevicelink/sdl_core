@@ -77,6 +77,7 @@ class MockTransportManagerSettings
   MOCK_CONST_METHOD0(ws_server_cert_path, const std::string&());
   MOCK_CONST_METHOD0(ws_server_key_path, const std::string&());
   MOCK_CONST_METHOD0(ws_server_ca_cert_path, const std::string&());
+  MOCK_CONST_METHOD0(is_wss_settings_setup, const bool());
 };
 
 }  // namespace transport_manager_test

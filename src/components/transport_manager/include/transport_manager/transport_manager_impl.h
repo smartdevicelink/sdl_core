@@ -259,6 +259,10 @@ class TransportManagerImpl
   int PerformActionOnClients(
       const TransportAction required_action) const OVERRIDE;
 
+  void CreateWebEngineDevice(const std::string& vin_code) OVERRIDE;
+
+  const DeviceInfo& GetWebEngineDeviceInfo() const OVERRIDE;
+
   /**
    * @brief OnDeviceListUpdated updates device list and sends appropriate
    * notifications to listeners in case of something is changed
@@ -417,6 +421,8 @@ class TransportManagerImpl
   std::atomic_bool events_processing_is_active_;
   sync_primitives::Lock events_processing_lock_;
   sync_primitives::ConditionalVariable events_processing_cond_var_;
+
+  DeviceInfo web_engine_device_info_;
 
   /**
    * @brief Adds new incoming connection to connections list

@@ -75,7 +75,8 @@ ConnectionHandlerImpl::ConnectionHandlerImpl(
     , connection_list_deleter_(&connection_list_)
     , start_service_context_map_lock_()
     , start_service_context_map_()
-    , ending_connection_(NULL) {}
+    , ending_connection_(NULL)
+    , vin_code_("") {}
 
 ConnectionHandlerImpl::~ConnectionHandlerImpl() {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -120,6 +121,7 @@ void ConnectionHandlerImpl::OnDeviceListUpdated(
     const std::vector<transport_manager::DeviceInfo>&) {
   LOG4CXX_AUTO_TRACE(logger_);
   sync_primitives::AutoReadLock read_lock(connection_handler_observer_lock_);
+  sync_primitives::AutoReadLock lock(device_list_lock_);
   if (connection_handler_observer_) {
     connection_handler_observer_->OnDeviceListUpdated(device_list_);
   }
@@ -152,14 +154,21 @@ void ConnectionHandlerImpl::OnDeviceAdded(
                 device_info.mac_address(),
                 device_info.connection_type());
 
-  auto result = device_list_.insert(std::make_pair(handle, device));
+  {
+    sync_primitives::AutoWriteLock write_lock(device_list_lock_);
+    auto result = device_list_.insert(std::make_pair(handle, device));
 
-  if (!result.second) {
-    LOG4CXX_ERROR(logger_,
-                  "Device with handle " << handle
-                                        << " is known already. "
-                                           "Information won't be updated.");
-    return;
+    if (!result.second) {
+      LOG4CXX_ERROR(logger_,
+                    "Device with handle " << handle
+                                          << " is known already. "
+                                             "Information won't be updated.");
+      return;
+    }
+  }
+  if (device_info.name() ==
+      transport_manager::webengine_constants::kWebEngineDeviceName) {
+    connection_handler_observer_->OnWebEngineDeviceCreated();
   }
 }
 
@@ -189,7 +198,10 @@ void ConnectionHandlerImpl::OnDeviceRemoved(
   }
 
   sync_primitives::AutoReadLock read_lock(connection_handler_observer_lock_);
-  device_list_.erase(device_info.device_handle());
+  {
+    sync_primitives::AutoWriteLock lock(device_list_lock_);
+    device_list_.erase(device_info.device_handle());
+  }
   if (connection_handler_observer_) {
     connection_handler_observer_->RemoveDevice(device_info.device_handle());
   }
@@ -219,6 +231,8 @@ struct DeviceFinder {
 
 void ConnectionHandlerImpl::OnDeviceSwitchingStart(
     const std::string& device_uid_from, const std::string& device_uid_to) {
+  sync_primitives::AutoReadLock lock(device_list_lock_);
+
   auto device_from =
       std::find_if(device_list_.begin(),
                    device_list_.end(),
@@ -260,10 +274,14 @@ void ConnectionHandlerImpl::OnConnectionPending(
                                            << device_info.name() << " "
                                            << device_info.mac_address() << " "
                                            << device_info.connection_type());
-  DeviceMap::iterator it = device_list_.find(device_info.device_handle());
-  if (device_list_.end() == it) {
-    LOG4CXX_ERROR(logger_, "Unknown device!");
-    return;
+  {
+    sync_primitives::AutoReadLock lock(device_list_lock_);
+    auto it = device_list_.find(device_info.device_handle());
+
+    if (device_list_.end() == it) {
+      LOG4CXX_ERROR(logger_, "Unknown device!");
+      return;
+    }
   }
   LOG4CXX_DEBUG(logger_,
                 "Add Pending Connection #" << connection_id << " to the list.");
@@ -310,11 +328,15 @@ void ConnectionHandlerImpl::OnConnectionEstablished(
                     << device_info.device_handle() << " " << device_info.name()
                     << " " << device_info.mac_address() << " "
                     << device_info.connection_type());
-  DeviceMap::iterator it = device_list_.find(device_info.device_handle());
-  if (device_list_.end() == it) {
-    LOG4CXX_ERROR(logger_, "Unknown device!");
-    return;
+  {
+    sync_primitives::AutoReadLock lock(device_list_lock_);
+    auto it = device_list_.find(device_info.device_handle());
+    if (device_list_.end() == it) {
+      LOG4CXX_ERROR(logger_, "Unknown device!");
+      return;
+    }
   }
+
   LOG4CXX_DEBUG(logger_,
                 "Add Connection #" << connection_id << " to the list.");
   sync_primitives::AutoWriteLock lock(connection_list_lock_);
@@ -413,8 +435,9 @@ void ConnectionHandlerImpl::OnSessionStartedCallback(
 
   // In case this is a Session running on a Secondary Transport, we need to
   // find the Sessions's primary transport. In this case, "connection_handle"
-  // reflects the secondary transport, which we need for the various callbacks,
-  // so they can send appropriate Ack or NAK messages on the correct transport.
+  // reflects the secondary transport, which we need for the various
+  // callbacks, so they can send appropriate Ack or NAK messages on the
+  // correct transport.
   transport_manager::ConnectionUID primary_connection_handle =
       connection_handle;
   SessionTransports st = GetSessionTransports(session_id);
@@ -533,7 +556,8 @@ void ConnectionHandlerImpl::NotifyServiceStartedResult(
     start_service_context_map_.erase(it);
   }
 
-  // We need the context's primary connection so we can manage its services list
+  // We need the context's primary connection so we can manage its services
+  // list
   Connection* connection = NULL;
   {
     sync_primitives::AutoReadLock lock(connection_list_lock_);
@@ -646,8 +670,9 @@ uint32_t ConnectionHandlerImpl::OnSessionEndedCallback(
 
   // In case this is a Session running on a Secondary Transport, we need to
   // find the Sessions's primary transport. In this case, "connection_handle"
-  // reflects the secondary transport, which we need for the various callbacks,
-  // so they can send appropriate Ack or NAK messages on the correct transport.
+  // reflects the secondary transport, which we need for the various
+  // callbacks, so they can send appropriate Ack or NAK messages on the
+  // correct transport.
   transport_manager::ConnectionUID primary_connection_handle =
       connection_handle;
   if (session_id != 0) {
@@ -841,6 +866,15 @@ void ConnectionHandlerImpl::OnSecondaryTransportEnded(
   }
 }
 
+void ConnectionHandlerImpl::CreateWebEngineDevice(const std::string& vin_code) {
+  transport_manager_.CreateWebEngineDevice(vin_code);
+}
+
+const transport_manager::DeviceInfo&
+ConnectionHandlerImpl::GetWebEngineDeviceInfo() const {
+  return transport_manager_.GetWebEngineDeviceInfo();
+}
+
 const std::string
 ConnectionHandlerImpl::TransportTypeProfileStringFromConnHandle(
     transport_manager::ConnectionUID connection_handle) const {
@@ -861,11 +895,14 @@ const std::string
 ConnectionHandlerImpl::TransportTypeProfileStringFromDeviceHandle(
     DeviceHandle device_handle) const {
   std::string connection_type;
-  DeviceMap::const_iterator it = device_list_.find(device_handle);
-  if (device_list_.end() == it) {
-    LOG4CXX_ERROR(logger_, "Device not found!");
-  } else {
-    connection_type = it->second.connection_type();
+  {
+    sync_primitives::AutoReadLock lock(device_list_lock_);
+    auto it = device_list_.find(device_handle);
+    if (device_list_.end() == it) {
+      LOG4CXX_ERROR(logger_, "Device not found!");
+    } else {
+      connection_type = it->second.connection_type();
+    }
   }
 
   // Caution: this should be in sync with devicesType map in
@@ -1067,9 +1104,10 @@ SessionTransports ConnectionHandlerImpl::SetSecondaryTransportID(
     st = it->second;
 
     // The only time we overwrite an existing entry in the map is if the new
-    // secondary transport ID is kDisabledSecondary, which effectively DISABLES
-    // the secondary transport feature for the session, or if the new secondary
-    // transport ID is 0, which means a secondary transport has shut down
+    // secondary transport ID is kDisabledSecondary, which effectively
+    // DISABLES the secondary transport feature for the session, or if the new
+    // secondary transport ID is 0, which means a secondary transport has shut
+    // down
     if (st.secondary_transport != 0 &&
         secondary_transport_id != kDisabledSecondary &&
         secondary_transport_id != 0) {
@@ -1167,6 +1205,7 @@ struct CompareMAC {
 bool ConnectionHandlerImpl::GetDeviceID(const std::string& mac_address,
                                         DeviceHandle* device_handle) {
   DCHECK_OR_RETURN(device_handle, false);
+  sync_primitives::AutoReadLock lock(device_list_lock_);
   DeviceMap::const_iterator it = std::find_if(
       device_list_.begin(), device_list_.end(), CompareMAC(mac_address));
   if (it != device_list_.end()) {
@@ -1185,7 +1224,10 @@ int32_t ConnectionHandlerImpl::GetDataOnDeviceID(
   LOG4CXX_AUTO_TRACE(logger_);
 
   int32_t result = -1;
-  DeviceMap::const_iterator it = device_list_.find(device_handle);
+
+  sync_primitives::AutoReadLock lock(device_list_lock_);
+  auto it = device_list_.find(device_handle);
+
   if (device_list_.end() == it) {
     LOG4CXX_ERROR(logger_, "Device not found for handle " << device_handle);
     return result;
@@ -1231,6 +1273,7 @@ void ConnectionHandlerImpl::GetConnectedDevicesMAC(
     std::vector<std::string>& device_macs) const {
   DeviceMap::const_iterator first = device_list_.begin();
   DeviceMap::const_iterator last = device_list_.end();
+  sync_primitives::AutoReadLock lock(device_list_lock_);
 
   while (first != last) {
     device_macs.push_back((*first).second.mac_address());
@@ -1328,6 +1371,7 @@ void ConnectionHandlerImpl::StartDevicesDiscovery() {
 
   transport_manager_.SearchDevices();
   sync_primitives::AutoReadLock read_lock(connection_handler_observer_lock_);
+  sync_primitives::AutoReadLock lock(device_list_lock_);
   if (connection_handler_observer_) {
     connection_handler_observer_->OnDeviceListUpdated(device_list_);
   }
@@ -1336,6 +1380,7 @@ void ConnectionHandlerImpl::StartDevicesDiscovery() {
 void ConnectionHandlerImpl::ConnectToDevice(
     connection_handler::DeviceHandle device_handle) {
   connection_handler::DeviceMap::const_iterator it_in;
+  sync_primitives::AutoReadLock lock(device_list_lock_);
   it_in = device_list_.find(device_handle);
   if (device_list_.end() != it_in) {
     LOG4CXX_INFO(logger_, "Connecting to device with handle " << device_handle);
@@ -1357,6 +1402,7 @@ transport_manager::ConnectionStatus ConnectionHandlerImpl::GetConnectionStatus(
 
 void ConnectionHandlerImpl::RunAppOnDevice(const std::string& device_mac,
                                            const std::string& bundle_id) const {
+  sync_primitives::AutoReadLock lock(device_list_lock_);
   for (DeviceMap::const_iterator i = device_list_.begin();
        i != device_list_.end();
        ++i) {
@@ -1370,6 +1416,7 @@ void ConnectionHandlerImpl::RunAppOnDevice(const std::string& device_mac,
 }
 
 void ConnectionHandlerImpl::ConnectToAllDevices() {
+  sync_primitives::AutoReadLock lock(device_list_lock_);
   for (DeviceMap::iterator i = device_list_.begin(); i != device_list_.end();
        ++i) {
     connection_handler::DeviceHandle device_handle = i->first;

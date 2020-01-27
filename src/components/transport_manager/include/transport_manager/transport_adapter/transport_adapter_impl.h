@@ -276,13 +276,6 @@ class TransportAdapterImpl : public TransportAdapter,
    */
   void SearchDeviceFailed(const SearchDeviceError& error) OVERRIDE;
 
-  /**
-   * @brief Add device to the container(map), if container doesn't hold it yet.
-   *
-   * @param device Smart pointer to the device.
-   *
-   * @return Smart pointer to the device.
-   */
   DeviceSptr AddDevice(DeviceSptr device) OVERRIDE;
 
   /**
@@ -509,6 +502,12 @@ class TransportAdapterImpl : public TransportAdapter,
    */
   TMTelemetryObserver* GetTelemetryObserver() OVERRIDE;
 #endif  // TELEMETRY_MONITOR
+
+  /**
+   * @brief GetWebEngineDevice
+   * @return shared pointer to WebEngine device
+   */
+  DeviceSptr GetWebEngineDevice() const OVERRIDE;
 
  protected:
   /**

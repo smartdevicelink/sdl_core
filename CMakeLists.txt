@@ -44,6 +44,7 @@ option(BUILD_SHARED_LIBS "Build all libraries as shared (if ON) or static (if OF
 option(BUILD_BT_SUPPORT "Bluetooth support" ON)
 option(BUILD_USB_SUPPORT "libusb support" ON)
 option(BUILD_CLOUD_APP_SUPPORT "Cloud App Transport Support" ON)
+option(BUILD_WEBSOCKET_SERVER_SUPPORT "Web Engine App Transport Support" ON)
 option(BUILD_BACKTRACE_SUPPORT "backtrace support" ON)
 option(BUILD_TESTS "Possibility to build and run tests" OFF)
 option(TELEMETRY_MONITOR "Enable profiling time test util" ON)
@@ -208,6 +209,13 @@ get_property(cValue CACHE ENABLE_HMI_PTU_DECRYPTION PROPERTY VALUE)
 file(APPEND "${build_config_path}" "//${cHelpString}\n")
 file(APPEND "${build_config_path}" "ENABLE_HMI_PTU_DECRYPTION:${cType}=${cValue}\n")
 
+get_property(cHelpString CACHE BUILD_WEBSOCKET_SERVER_SUPPORT PROPERTY HELPSTRING)
+get_property(cType CACHE BUILD_WEBSOCKET_SERVER_SUPPORT PROPERTY TYPE)
+get_property(cValue CACHE BUILD_WEBSOCKET_SERVER_SUPPORT PROPERTY VALUE)
+file(APPEND "${build_config_path}" "//${cHelpString}\n")
+file(APPEND "${build_config_path}" "BUILD_WEBSOCKET_SERVER_SUPPORT:${cType}=${cValue}\n")
+
+
 add_custom_target(pasa-tarball
   COMMAND ${CMAKE_SOURCE_DIR}/tools/Utils/export-customer-specific.sh ${CMAKE_SOURCE_DIR} ${CMAKE_BINARY_DIR} pasa
   COMMAND tar -cz -C /tmp/PASA -f ${CMAKE_BINARY_DIR}/pasa.tar.gz .
@@ -320,6 +328,11 @@ endif()
 if (BUILD_CLOUD_APP_SUPPORT)
   add_definitions(-DCLOUD_APP_WEBSOCKET_TRANSPORT_SUPPORT)
   message(STATUS "Cloud app websocket support enabled")
+endif()
+
+if (BUILD_WEBSOCKET_SERVER_SUPPORT)
+  add_definitions(-DWEBSOCKET_SERVER_TRANSPORT_SUPPORT)
+  message(STATUS "Web engine app websocket support enabled")
 endif()
 
 if (BUILD_BACKTRACE_SUPPORT)

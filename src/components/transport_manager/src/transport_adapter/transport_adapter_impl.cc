@@ -40,6 +40,9 @@
 #include "transport_manager/transport_adapter/server_connection_factory.h"
 #include "transport_manager/transport_adapter/transport_adapter_impl.h"
 #include "transport_manager/transport_adapter/transport_adapter_listener.h"
+#ifdef WEBSOCKET_SERVER_TRANSPORT_SUPPORT
+#include "transport_manager/websocket/websocket_device.h"
+#endif
 
 namespace transport_manager {
 namespace transport_adapter {
@@ -62,8 +65,9 @@ DeviceTypes devicesType = {
                    std::string("USB_IOS_DEVICE_MODE")),
     std::make_pair(DeviceType::IOS_CARPLAY_WIRELESS,
                    std::string("CARPLAY_WIRELESS_IOS")),
-    std::make_pair(DeviceType::CLOUD_WEBSOCKET,
-                   std::string("CLOUD_WEBSOCKET"))};
+    std::make_pair(DeviceType::CLOUD_WEBSOCKET, std::string("CLOUD_WEBSOCKET")),
+    std::make_pair(DeviceType::WEBENGINE_WEBSOCKET,
+                   std::string("WEBENGINE_WEBSOCKET"))};
 }
 
 TransportAdapterImpl::TransportAdapterImpl(
@@ -373,6 +377,10 @@ TransportAdapter::Error TransportAdapterImpl::DisconnectDevice(
 
   Error error = OK;
   DeviceSptr device = FindDevice(device_id);
+  if (!device) {
+    LOG4CXX_WARN(logger_, "Device with id: " << device_id << " Not found");
+    return BAD_PARAM;
+  }
   ConnectionStatusUpdated(device, ConnectionStatus::CLOSING);
 
   std::vector<ConnectionInfo> to_disconnect;
@@ -486,6 +494,32 @@ DeviceList TransportAdapterImpl::GetDeviceList() const {
   LOG4CXX_TRACE(logger_,
                 "exit with DeviceList. It's' size = " << devices.size());
   return devices;
+}
+
+DeviceSptr TransportAdapterImpl::GetWebEngineDevice() const {
+#ifndef WEBSOCKET_SERVER_TRANSPORT_SUPPORT
+  LOG4CXX_TRACE(logger_,
+                "Web engine support is disabled. Device does not exist");
+  return DeviceSptr();
+#else
+  LOG4CXX_AUTO_TRACE(logger_);
+  sync_primitives::AutoLock locker(devices_mutex_);
+
+  auto web_engine_device =
+      std::find_if(devices_.begin(),
+                   devices_.end(),
+                   [](const std::pair<DeviceUID, DeviceSptr> device) {
+                     return webengine_constants::kWebEngineDeviceName ==
+                            device.second->name();
+                   });
+
+  if (devices_.end() != web_engine_device) {
+    return web_engine_device->second;
+  }
+
+  LOG4CXX_ERROR(logger_, "WebEngine device not found!");
+  return std::make_shared<transport_adapter::WebSocketDevice>("", "");
+#endif
 }
 
 DeviceSptr TransportAdapterImpl::AddDevice(DeviceSptr device) {

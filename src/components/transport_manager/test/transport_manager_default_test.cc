@@ -64,6 +64,12 @@ const std::string kTransportManager = "TransportManager";
 const std::string kTcpAdapter = "TcpAdapter";
 const std::string kBluetoothAdapter = "BluetoothAdapter";
 const std::string kDevices = "devices";
+const uint16_t kPort = 12345u;
+const std::string kAddress = "127.0.0.1";
+const std::string kServerCertPath = "server_certificate.crt";
+const std::string kServerCACertPath = "ca-certificate.crt";
+const std::string kWSServerKeyPathKey = "WSServerKeyPath";
+const std::string kWSServerCACertPath = "WSServerCACertificatePath";
 std::vector<uint8_t> kBTUUID = {0x93,
                                 0x6D,
                                 0xA0,
@@ -173,7 +179,7 @@ void TestTransportManagerDefault::ExpectationsSettings_TM(
   // Arrange TM Settings expectations
   Json::Value tcp_device;
   tcp_device[kDeviceName] = unique_tcp_dev_name_;
-  tcp_device[kDeviceAddress] = "127.0.0.1";
+  tcp_device[kDeviceAddress] = kAddress;
   tcp_device[kDeviceApplications][0][kApplicationPort] = "1";
   Json::Value bluetooth_device;
 
@@ -185,6 +191,16 @@ void TestTransportManagerDefault::ExpectationsSettings_TM(
   custom_dictionary_[kTransportManager][kTcpAdapter][kDevices][0] = tcp_device;
   custom_dictionary_[kTransportManager][kBluetoothAdapter][kDevices][0] =
       bluetooth_device;
+  ON_CALL(transport_manager_settings_, websocket_server_port())
+      .WillByDefault(Return(kPort));
+  ON_CALL(transport_manager_settings_, websocket_server_address())
+      .WillByDefault(ReturnRef(kAddress));
+  ON_CALL(transport_manager_settings_, ws_server_cert_path())
+      .WillByDefault(ReturnRef(kServerCertPath));
+  ON_CALL(transport_manager_settings_, ws_server_key_path())
+      .WillByDefault(ReturnRef(kWSServerKeyPathKey));
+  ON_CALL(transport_manager_settings_, ws_server_ca_cert_path())
+      .WillByDefault(ReturnRef(kWSServerCACertPath));
   ON_CALL(mock_last_state_, get_dictionary())
       .WillByDefault(ReturnRef(custom_dictionary_));
 
