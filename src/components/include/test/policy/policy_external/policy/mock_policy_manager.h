@@ -194,6 +194,8 @@ class MockPolicyManager : public PolicyManager {
   MOCK_METHOD2(SendAppPermissionsChanged,
                void(const std::string& device_id,
                     const std::string& application_id));
+  MOCK_CONST_METHOD1(SendOnAppPropertiesChangeNotification,
+                     void(const std::string& application_id));
   MOCK_CONST_METHOD2(GetModuleTypes,
                      bool(const std::string& policy_app_id,
                           std::vector<std::string>* modules));
@@ -228,14 +230,12 @@ class MockPolicyManager : public PolicyManager {
                      std::vector<policy_table::VehicleDataItem>());
   MOCK_CONST_METHOD1(GetEnabledCloudApps,
                      void(std::vector<std::string>& enabled_apps));
-  MOCK_CONST_METHOD7(GetCloudAppParameters,
+  MOCK_CONST_METHOD2(GetAppProperties,
                      bool(const std::string& policy_app_id,
-                          bool& enabled,
-                          std::string& endpoint,
-                          std::string& certificate,
-                          std::string& auth_token,
-                          std::string& cloud_transport_type,
-                          std::string& hybrid_app_preference));
+                          AppProperties& out_app_properties));
+  MOCK_CONST_METHOD0(GetEnabledLocalApps, std::vector<std::string>());
+  MOCK_CONST_METHOD1(IsNewApplication, bool(const std::string& application_id));
+  MOCK_METHOD0(OnLocalAppAdded, void());
   MOCK_METHOD1(InitCloudApp, void(const std::string& policy_app_id));
   MOCK_METHOD2(SetCloudAppEnabled,
                void(const std::string& policy_app_id, const bool enabled));

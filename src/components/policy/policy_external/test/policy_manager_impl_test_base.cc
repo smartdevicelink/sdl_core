@@ -257,6 +257,8 @@ void PolicyManagerImplTest2::SetUp() {
   ON_CALL(listener_, GetRegisteredLinks(_)).WillByDefault(Return());
   ON_CALL(listener_, ptu_retry_handler())
       .WillByDefault(ReturnRef(ptu_retry_handler_));
+  ON_CALL(listener_, GetDevicesIds(_))
+      .WillByDefault(Return(transport_manager::DeviceList()));
 
   file_system::CreateDirectory(app_storage_folder_);
 
@@ -675,6 +677,8 @@ PolicyManagerImplTest_RequestTypes::PolicyManagerImplTest_RequestTypes()
 
 void PolicyManagerImplTest_RequestTypes::SetUp() {
   ON_CALL(listener_, GetRegisteredLinks(_)).WillByDefault(Return());
+  ON_CALL(listener_, GetDevicesIds(_))
+      .WillByDefault(Return(transport_manager::DeviceList()));
 
   file_system::CreateDirectory(app_storage_folder_);
   const bool in_memory = true;

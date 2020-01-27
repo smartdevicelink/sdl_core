@@ -466,6 +466,10 @@ void PolicyManagerImpl::ProcessActionsForAppPolicies(
       continue;
     }
 
+    if (it_actions->second.app_properties_changed) {
+      app_properties_changed_list_.push_back(app_policy->first);
+    }
+
     const auto devices_ids = listener()->GetDevicesIds(app_policy->first);
     for (const auto& device_id : devices_ids) {
       if (it_actions->second.is_consent_needed) {
@@ -493,6 +497,12 @@ void PolicyManagerImpl::ProcessActionsForAppPolicies(
   }
 }
 
+void PolicyManagerImpl::SendOnAppPropertiesChangeNotification(
+    const std::string& policy_app_id) const {
+  LOG4CXX_AUTO_TRACE(logger_);
+  listener_->SendOnAppPropertiesChangeNotification(policy_app_id);
+}
+
 void PolicyManagerImpl::ResumePendingAppPolicyActions() {
   LOG4CXX_AUTO_TRACE(logger_);
 
@@ -505,6 +515,11 @@ void PolicyManagerImpl::ResumePendingAppPolicyActions() {
     SendPermissionsToApp(send_permissions_params.first,
                          send_permissions_params.second);
   }
+
+  for (auto& app : app_properties_changed_list_) {
+    SendOnAppPropertiesChangeNotification(app);
+  }
+
   send_permissions_list_.clear();
 }
 
@@ -681,6 +696,12 @@ void PolicyManagerImpl::OnAppsSearchCompleted(const bool trigger_ptu) {
   }
 }
 
+void PolicyManagerImpl::OnLocalAppAdded() {
+  LOG4CXX_AUTO_TRACE(logger_);
+  update_status_manager_.ScheduleUpdate();
+  StartPTExchange();
+}
+
 void PolicyManagerImpl::OnAppRegisteredOnMobile(
     const std::string& device_id, const std::string& application_id) {
   StartPTExchange();
@@ -737,21 +758,13 @@ void PolicyManagerImpl::GetEnabledCloudApps(
   cache_->GetEnabledCloudApps(enabled_apps);
 }
 
-bool PolicyManagerImpl::GetCloudAppParameters(
-    const std::string& policy_app_id,
-    bool& enabled,
-    std::string& endpoint,
-    std::string& certificate,
-    std::string& auth_token,
-    std::string& cloud_transport_type,
-    std::string& hybrid_app_preference) const {
-  return cache_->GetCloudAppParameters(policy_app_id,
-                                       enabled,
-                                       endpoint,
-                                       certificate,
-                                       auth_token,
-                                       cloud_transport_type,
-                                       hybrid_app_preference);
+std::vector<std::string> PolicyManagerImpl::GetEnabledLocalApps() const {
+  return cache_->GetEnabledLocalApps();
+}
+
+bool PolicyManagerImpl::GetAppProperties(
+    const std::string& policy_app_id, AppProperties& out_app_properties) const {
+  return cache_->GetAppProperties(policy_app_id, out_app_properties);
 }
 
 void PolicyManagerImpl::InitCloudApp(const std::string& policy_app_id) {
@@ -1580,10 +1593,10 @@ bool PolicyManagerImpl::InitPT(const std::string& file_name,
     if (!certificate_data.empty()) {
       listener_->OnCertificateUpdated(certificate_data);
     }
-    std::vector<std::string> enabled_apps;
-    cache_->GetEnabledCloudApps(enabled_apps);
-    for (auto it = enabled_apps.begin(); it != enabled_apps.end(); ++it) {
-      SendAuthTokenUpdated(*it);
+    std::vector<std::string> enabled_cloud_apps;
+    cache_->GetEnabledCloudApps(enabled_cloud_apps);
+    for (auto app : enabled_cloud_apps) {
+      SendAuthTokenUpdated(app);
     }
   }
   return ret;
@@ -1734,12 +1747,9 @@ void PolicyManagerImpl::SendAppPermissionsChanged(
 }
 
 void PolicyManagerImpl::SendAuthTokenUpdated(const std::string policy_app_id) {
-  bool enabled = false;
-  std::string end, cert, ctt, hap;
-  std::string auth_token;
-  cache_->GetCloudAppParameters(
-      policy_app_id, enabled, end, cert, auth_token, ctt, hap);
-  listener_->OnAuthTokenUpdated(policy_app_id, auth_token);
+  AppProperties app_properties;
+  cache_->GetAppProperties(policy_app_id, app_properties);
+  listener_->OnAuthTokenUpdated(policy_app_id, app_properties.auth_token);
 }
 
 void PolicyManagerImpl::OnPrimaryGroupsChanged(

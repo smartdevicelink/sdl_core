@@ -1328,6 +1328,8 @@ TEST_F(
   // Arrange
   CreateLocalPT("sdl_preloaded_pt.json");
   EXPECT_EQ("UP_TO_DATE", manager->GetPolicyTableStatus());
+  ON_CALL(listener, GetDevicesIds(_))
+      .WillByDefault(Return(transport_manager::DeviceList()));
   GetPTU("valid_sdl_pt_update.json");
   EXPECT_EQ("UP_TO_DATE", manager->GetPolicyTableStatus());
   // Try to add existing app
@@ -1342,6 +1344,8 @@ TEST_F(PolicyManagerImplTest2, UpdateApplication_AppServices) {
   // Arrange
   CreateLocalPT("sdl_preloaded_pt.json");
   EXPECT_EQ("UP_TO_DATE", manager->GetPolicyTableStatus());
+  ON_CALL(listener, GetDevicesIds(_))
+      .WillByDefault(Return(transport_manager::DeviceList()));
   GetPTU("valid_sdl_pt_update.json");
   EXPECT_EQ("UP_TO_DATE", manager->GetPolicyTableStatus());
   // Try to add existing app
@@ -1376,6 +1380,8 @@ TEST_F(PolicyManagerImplTest2,
   const int kSecondsInDay = 60 * 60 * 24;
   int days = date_time::getSecs(current_time) / kSecondsInDay;
   EXPECT_EQ("UP_TO_DATE", manager->GetPolicyTableStatus());
+  ON_CALL(listener, GetDevicesIds(_))
+      .WillByDefault(Return(transport_manager::DeviceList()));
 
   GetPTU("valid_sdl_pt_update.json");
   EXPECT_EQ("UP_TO_DATE", manager->GetPolicyTableStatus());
