@@ -245,6 +245,21 @@ MATCHER_P(HMIResultCodeIs, result_code, "") {
                                       .asInt());
 }
 
+MATCHER_P3(
+    HMIMessageParametersAre, correlation_id, function_id, result_code, "") {
+  using namespace application_manager;
+
+  const bool corr_ids_eq =
+      correlation_id ==
+      (*arg)[strings::params][strings::correlation_id].asInt();
+  const bool func_ids_eq =
+      (*arg)[strings::params][strings::function_id].asInt() == function_id;
+  const bool res_codes_eq =
+      (*arg)[strings::params][hmi_response::code].asInt() == result_code;
+
+  return corr_ids_eq && func_ids_eq && res_codes_eq;
+}
+
 MATCHER_P3(MobileResponseIs, result_code, result_info, result_success, "") {
   mobile_apis::Result::eType code = static_cast<mobile_apis::Result::eType>(
       (*arg)[am::strings::msg_params][am::strings::result_code].asInt());

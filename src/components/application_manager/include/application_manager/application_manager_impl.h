@@ -405,7 +405,13 @@ class ApplicationManagerImpl
   void CreatePendingApplication(
       const transport_manager::ConnectionUID connection_id,
       const transport_manager::DeviceInfo& device_info,
-      connection_handler::DeviceHandle device_id);
+      connection_handler::DeviceHandle device_id) OVERRIDE;
+
+  void OnWebEngineDeviceCreated() OVERRIDE;
+
+  void CreatePendingApplication(const std::string& policy_app_id) OVERRIDE;
+
+  void RemovePendingApplication(const std::string& policy_app_id) OVERRIDE;
 
   void SetPendingApplicationState(
       const transport_manager::ConnectionUID connection_id,
@@ -1154,6 +1160,8 @@ class ApplicationManagerImpl
 
   void ApplyFunctorForEachPlugin(
       std::function<void(plugin_manager::RPCPlugin&)> functor) OVERRIDE;
+
+  void SetVINCode(const std::string& vin_code) OVERRIDE;
 
  private:
   /**

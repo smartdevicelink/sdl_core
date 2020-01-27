@@ -111,12 +111,19 @@ const uint32_t kConnectionKey = 1232u;
 const std::string kAppName = "appName";
 const WindowID kDefaultWindowId =
     mobile_apis::PredefinedWindows::DEFAULT_WINDOW;
+const std::vector<std::string> kEnabledLocalApps = {"localAppId"};
 
 typedef hmi_apis::Common_ServiceStatusUpdateReason::eType
     ServiceStatusUpdateReason;
 typedef hmi_apis::Common_ServiceType::eType ServiceType;
 typedef hmi_apis::Common_ServiceEvent::eType ServiceEvent;
 typedef utils::Optional<ServiceStatusUpdateReason> UpdateReasonOptional;
+
+const std::string kPolicyAppID = "test policy id";
+transport_manager::DeviceInfo kDeviceInfo(1,
+                                          "mac",
+                                          "name",
+                                          "WEB_ENGINE_DEVICE");
 
 #if defined(CLOUD_APP_WEBSOCKET_TRANSPORT_SUPPORT)
 // Cloud application params
@@ -129,6 +136,12 @@ const mobile_api::HybridAppPreference::eType kHybridAppPreference =
     mobile_api::HybridAppPreference::CLOUD;
 const std::string kHybridAppPreferenceStr = "CLOUD";
 const bool kEnabled = true;
+const policy::AppProperties app_properties(kEndpoint2,
+                                           kCertificate,
+                                           kEnabled,
+                                           kAuthToken,
+                                           kTransportType,
+                                           kHybridAppPreferenceStr);
 #endif  // CLOUD_APP_WEBSOCKET_TRANSPORT_SUPPORT
 }  // namespace
 
@@ -218,6 +231,8 @@ class ApplicationManagerImplTest
             smart_objects::SmartType_Map)));
     ON_CALL(*mock_policy_handler_, GetStatisticManager())
         .WillByDefault(Return(mock_statistics_manager_));
+    ON_CALL(*mock_policy_handler_, GetEnabledLocalApps())
+        .WillByDefault(Return(kEnabledLocalApps));
   }
 
   void CreateAppManager() {
@@ -307,6 +322,9 @@ class ApplicationManagerImplTest
   void AddCloudAppToPendingDeviceMap();
   void CreatePendingApplication();
 #endif
+
+  void CreatePendingApplication(const std::string& policy_app_id);
+
   uint32_t app_id_;
   NiceMock<policy_test::MockPolicySettings> mock_policy_settings_;
   std::shared_ptr<NiceMock<resumption_test::MockResumptionData> > mock_storage_;
@@ -1245,7 +1263,9 @@ TEST_F(ApplicationManagerImplTest, UnregisterAnotherAppDuringAudioPassThru) {
   EXPECT_CALL(*mock_app_2, device()).WillRepeatedly(Return(0));
   EXPECT_CALL(*mock_app_2, mac_address())
       .WillRepeatedly(ReturnRef(dummy_mac_address));
-  EXPECT_CALL(*mock_app_2, policy_app_id()).WillRepeatedly(Return(""));
+  const std::string app2_policy_id = "app2_policy_id";
+  EXPECT_CALL(*mock_app_2, policy_app_id())
+      .WillRepeatedly(Return(app2_policy_id));
   EXPECT_CALL(*mock_app_2, protocol_version())
       .WillRepeatedly(
           Return(protocol_handler::MajorProtocolVersion::PROTOCOL_VERSION_4));
@@ -1281,6 +1301,9 @@ TEST_F(ApplicationManagerImplTest, UnregisterAnotherAppDuringAudioPassThru) {
                                                 bits_per_sample,
                                                 audio_type);
   }
+
+  std::vector<std::string> enabled_apps = {app2_policy_id};
+  EXPECT_CALL(*mock_rpc_service_, ManageHMICommand(_, _)).Times(1);
 
   // while running APT, app 1 is unregistered
   app_manager_impl_->UnregisterApplication(
@@ -1664,14 +1687,8 @@ void ApplicationManagerImplTest::AddCloudAppToPendingDeviceMap() {
   std::vector<std::string> enabled_apps{"1234"};
   EXPECT_CALL(*mock_policy_handler_, GetEnabledCloudApps(_))
       .WillOnce(SetArgReferee<0>(enabled_apps));
-  EXPECT_CALL(*mock_policy_handler_, GetCloudAppParameters(_, _, _, _, _, _, _))
-      .WillOnce(DoAll(SetArgReferee<1>(kEnabled),
-                      SetArgReferee<2>(kEndpoint2),
-                      SetArgReferee<3>(kCertificate),
-                      SetArgReferee<4>(kAuthToken),
-                      SetArgReferee<5>(kTransportType),
-                      SetArgReferee<6>(kHybridAppPreferenceStr),
-                      Return(true)));
+  EXPECT_CALL(*mock_policy_handler_, GetAppProperties(_, _))
+      .WillOnce(DoAll(SetArgReferee<1>(app_properties), Return(true)));
 
   std::vector<std::string> nicknames{"CloudApp"};
   EXPECT_CALL(*mock_policy_handler_, GetInitialAppData(_, _, _))
@@ -1696,14 +1713,8 @@ void ApplicationManagerImplTest::CreatePendingApplication() {
   EXPECT_CALL(*mock_policy_handler_, GetStatisticManager())
       .WillOnce(Return(std::shared_ptr<usage_statistics::StatisticsManager>(
           new usage_statistics_test::MockStatisticsManager())));
-  EXPECT_CALL(*mock_policy_handler_, GetCloudAppParameters(_, _, _, _, _, _, _))
-      .WillOnce(DoAll(SetArgReferee<1>(kEnabled),
-                      SetArgReferee<2>(kEndpoint2),
-                      SetArgReferee<3>(kCertificate),
-                      SetArgReferee<4>(kAuthToken),
-                      SetArgReferee<5>(kTransportType),
-                      SetArgReferee<6>(kHybridAppPreferenceStr),
-                      Return(true)));
+  EXPECT_CALL(*mock_policy_handler_, GetAppProperties(_, _))
+      .WillOnce(DoAll(SetArgReferee<1>(app_properties), Return(true)));
   // Expect Update app list
   EXPECT_CALL(*mock_rpc_service_, ManageHMICommand(_, _)).Times(1);
   app_manager_impl_->CreatePendingApplication(1, device_info, 1);
@@ -1733,14 +1744,8 @@ TEST_F(ApplicationManagerImplTest, SetPendingState) {
 
   EXPECT_CALL(*mock_policy_handler_, GetEnabledCloudApps(_))
       .WillOnce(SetArgReferee<0>(enabled_apps));
-  EXPECT_CALL(*mock_policy_handler_, GetCloudAppParameters(_, _, _, _, _, _, _))
-      .WillOnce(DoAll(SetArgReferee<1>(kEnabled),
-                      SetArgReferee<2>(kEndpoint2),
-                      SetArgReferee<3>(kCertificate),
-                      SetArgReferee<4>(kAuthToken),
-                      SetArgReferee<5>(kTransportType),
-                      SetArgReferee<6>(kHybridAppPreferenceStr),
-                      Return(true)));
+  EXPECT_CALL(*mock_policy_handler_, GetAppProperties(_, _))
+      .WillOnce(DoAll(SetArgReferee<1>(app_properties), Return(true)));
 
   std::vector<std::string> nicknames{"CloudApp"};
   EXPECT_CALL(*mock_policy_handler_, GetInitialAppData(_, _, _))
@@ -1883,14 +1888,8 @@ TEST_F(ApplicationManagerImplTest, PolicyIDByIconUrl_Success) {
   std::vector<std::string> enabled_apps{"1234"};
   EXPECT_CALL(*mock_policy_handler_, GetEnabledCloudApps(_))
       .WillOnce(SetArgReferee<0>(enabled_apps));
-  EXPECT_CALL(*mock_policy_handler_, GetCloudAppParameters(_, _, _, _, _, _, _))
-      .WillOnce(DoAll(SetArgReferee<1>(kEnabled),
-                      SetArgReferee<2>(kEndpoint2),
-                      SetArgReferee<3>(kCertificate),
-                      SetArgReferee<4>(kAuthToken),
-                      SetArgReferee<5>(kTransportType),
-                      SetArgReferee<6>(kHybridAppPreferenceStr),
-                      Return(true)));
+  EXPECT_CALL(*mock_policy_handler_, GetAppProperties(_, _))
+      .WillOnce(DoAll(SetArgReferee<1>(app_properties), Return(true)));
 
   std::vector<std::string> nicknames{"CloudApp"};
   EXPECT_CALL(*mock_policy_handler_, GetInitialAppData(_, _, _))
@@ -1932,8 +1931,105 @@ TEST_F(ApplicationManagerImplTest, SetIconFileFromSystemRequest_Success) {
   app_manager_impl_->SetIconFileFromSystemRequest("1234");
   EXPECT_TRUE(file_system::RemoveDirectory(kDirectoryName, true));
 }
-
 #endif  // CLOUD_APP_WEBSOCKET_TRANSPORT_SUPPORT
+
+void ApplicationManagerImplTest::CreatePendingApplication(
+    const std::string& policy_app_id) {
+  // CreatePendingApplication
+  std::vector<std::string> nicknames{"PendingApplication"};
+  EXPECT_CALL(*mock_policy_handler_, GetInitialAppData(policy_app_id, _, _))
+      .WillOnce(DoAll(SetArgPointee<1>(nicknames), Return(true)));
+  EXPECT_CALL(mock_connection_handler_, GetWebEngineDeviceInfo())
+      .WillOnce(ReturnRef(kDeviceInfo));
+  EXPECT_CALL(*mock_policy_handler_, GetStatisticManager())
+      .WillOnce(Return(std::shared_ptr<usage_statistics::StatisticsManager>(
+          new usage_statistics_test::MockStatisticsManager())));
+  EXPECT_CALL(*mock_policy_handler_, GetAppProperties(_, _))
+      .WillOnce(DoAll(SetArgReferee<1>(app_properties), Return(true)));
+  // Expect NO Update app list
+  EXPECT_CALL(*mock_rpc_service_, ManageHMICommand(_, _)).Times(0);
+  app_manager_impl_->CreatePendingApplication(policy_app_id);
+  AppsWaitRegistrationSet app_list =
+      app_manager_impl_->AppsWaitingForRegistration().GetData();
+  EXPECT_EQ(1u, app_list.size());
+}
+
+TEST_F(ApplicationManagerImplTest, CreatePendingApplicationByPolicyAppID) {
+  CreatePendingApplication(kPolicyAppID);
+}
+
+TEST_F(ApplicationManagerImplTest, RemoveExistingPendingApplication_SUCCESS) {
+  CreatePendingApplication(kPolicyAppID);
+  auto app_list = app_manager_impl_->AppsWaitingForRegistration().GetData();
+  ASSERT_EQ(1u, app_list.size());
+
+  app_manager_impl_->RemovePendingApplication(kPolicyAppID);
+  app_list = app_manager_impl_->AppsWaitingForRegistration().GetData();
+  EXPECT_TRUE(app_list.empty());
+}
+
+TEST_F(ApplicationManagerImplTest,
+       RemovePendingApplicationFromEmptyList_NoAppRemoved_SUCCESS) {
+  auto app_list = app_manager_impl_->AppsWaitingForRegistration().GetData();
+  ASSERT_TRUE(app_list.empty());
+
+  app_manager_impl_->RemovePendingApplication(kPolicyAppID);
+  app_list = app_manager_impl_->AppsWaitingForRegistration().GetData();
+  EXPECT_TRUE(app_list.empty());
+}
+
+TEST_F(
+    ApplicationManagerImplTest,
+    OnWebEngineDeviceCreated_NoEnabledLocalApps_PendingApplicationNotCreatedAndNoUpdateAppList) {
+  std::vector<std::string> enabled_apps;
+  EXPECT_CALL(*mock_policy_handler_, GetEnabledLocalApps())
+      .WillOnce(Return(enabled_apps));
+  EXPECT_CALL(*mock_rpc_service_, ManageHMICommand(_, _)).Times(0);
+
+  app_manager_impl_->OnWebEngineDeviceCreated();
+
+  auto app_list = app_manager_impl_->AppsWaitingForRegistration().GetData();
+  EXPECT_TRUE(app_list.empty());
+}
+
+TEST_F(
+    ApplicationManagerImplTest,
+    OnWebEngineDeviceCreated_PendingApplicationCreatedAndUpdateAppListSentToHMI) {
+  std::vector<std::string> enabled_apps = {"app1"};
+  std::vector<std::string> nicknames{"PendingApplication"};
+
+  EXPECT_CALL(*mock_policy_handler_, GetEnabledLocalApps())
+      .WillOnce(Return(enabled_apps));
+  EXPECT_CALL(*mock_rpc_service_, ManageHMICommand(_, _)).Times(1);
+  EXPECT_CALL(*mock_policy_handler_, GetAppProperties(_, _))
+      .WillOnce(DoAll(SetArgReferee<1>(app_properties), Return(true)));
+  EXPECT_CALL(*mock_policy_handler_, GetInitialAppData(_, _, _))
+      .WillOnce(DoAll(SetArgPointee<1>(nicknames), Return(true)));
+  EXPECT_CALL(mock_connection_handler_, GetWebEngineDeviceInfo())
+      .WillOnce(ReturnRef(kDeviceInfo));
+
+  app_manager_impl_->OnWebEngineDeviceCreated();
+
+  auto app_list = app_manager_impl_->AppsWaitingForRegistration().GetData();
+  EXPECT_EQ(1u, app_list.size());
+}
+
+TEST_F(ApplicationManagerImplTest, AddAndRemoveQueryAppDevice_SUCCESS) {
+  const connection_handler::DeviceHandle device_handle = 1u;
+  ASSERT_FALSE(app_manager_impl_->IsAppsQueriedFrom(device_handle));
+
+  app_manager_impl_->OnQueryAppsRequest(device_handle);
+  EXPECT_TRUE(app_manager_impl_->IsAppsQueriedFrom(device_handle));
+  app_manager_impl_->RemoveDevice(device_handle);
+  EXPECT_FALSE(app_manager_impl_->IsAppsQueriedFrom(device_handle));
+}
+
+TEST_F(ApplicationManagerImplTest, SetVINCode_SUCCESS) {
+  const std::string vin_code = "VIN CODE";
+  EXPECT_CALL(mock_connection_handler_, CreateWebEngineDevice(vin_code));
+  app_manager_impl_->SetVINCode(vin_code);
+}
+
 }  // namespace application_manager_test
 }  // namespace components
 }  // namespace test
