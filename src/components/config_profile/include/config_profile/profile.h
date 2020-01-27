@@ -414,6 +414,16 @@ class Profile : public protocol_handler::ProtocolHandlerSettings,
       const OVERRIDE;
 
   /**
+   * @brief Returns websocket server address
+   */
+  const std::string& websocket_server_address() const OVERRIDE;
+
+  /**
+   * @brief Returns port for websocket server
+   */
+  uint16_t websocket_server_port() const OVERRIDE;
+
+  /**
    * @brief Returns retry timeout for cloud app connections
    */
   uint32_t cloud_app_retry_timeout() const OVERRIDE;
@@ -496,6 +506,21 @@ class Profile : public protocol_handler::ProtocolHandlerSettings,
    * @brief Returns ca certificate path to pem file
    */
   const std::string& ca_cert_path() const;
+
+  /**
+   * @brief Returns ws server certificate path to pem file
+   */
+  const std::string& ws_server_cert_path() const OVERRIDE;
+
+  /**
+   * @brief Returns ws server CA certificate path to pem file
+   */
+  const std::string& ws_server_ca_cert_path() const OVERRIDE;
+
+  /**
+   * @brief Returns ws server key path to pem file
+   */
+  const std::string& ws_server_key_path() const OVERRIDE;
 
   /**
    * @brief Returns ciphers
@@ -991,6 +1016,8 @@ class Profile : public protocol_handler::ProtocolHandlerSettings,
   std::string system_files_path_;
   uint16_t transport_manager_tcp_adapter_port_;
   std::string transport_manager_tcp_adapter_network_interface_;
+  std::string websocket_server_address_;
+  uint16_t websocket_server_port_;
   uint32_t cloud_app_retry_timeout_;
   uint16_t cloud_app_max_retry_attempts_;
   std::vector<uint8_t> bluetooth_uuid_;
@@ -1014,8 +1041,11 @@ class Profile : public protocol_handler::ProtocolHandlerSettings,
 #ifdef ENABLE_SECURITY
   std::string cert_path_;
   std::string ca_cert_path_;
+  std::string ws_server_cert_path_;
+  std::string ws_server_ca_cert_path_;
   std::string ssl_mode_;
   std::string key_path_;
+  std::string ws_server_key_path_;
   std::string ciphers_list_;
   bool verify_peer_;
   uint32_t update_before_hours_;

@@ -136,8 +136,11 @@ const char* kAudioStreamFileKey = "AudioStreamFile";
 const char* kSecurityProtocolKey = "Protocol";
 const char* kSecurityCertificatePathKey = "CertificatePath";
 const char* kSecurityCACertificatePathKey = "CACertificatePath";
+const char* kWSServerCertificatePathKey = "WSServerCertificatePath";
+const char* kWSServerCACertificaePathKey = "WSServerCACertificatePath";
 const char* kSecuritySSLModeKey = "SSLMode";
 const char* kSecurityKeyPathKey = "KeyPath";
+const char* kWSServerKeyPathKey = "WSServerKeyPath";
 const char* kSecurityCipherListKey = "CipherList";
 const char* kSecurityVerifyPeerKey = "VerifyPeer";
 const char* kBeforeUpdateHours = "UpdateBeforeHours";
@@ -157,6 +160,10 @@ const char* kMaxSupportedProtocolVersionKey = "MaxSupportedProtocolVersion";
 const char* kUseLastStateKey = "UseLastState";
 const char* kTCPAdapterPortKey = "TCPAdapterPort";
 const char* kTCPAdapterNetworkInterfaceKey = "TCPAdapterNetworkInterface";
+
+const char* kWebSocketServerAddressKey = "WebSocketServerAddress";
+const char* kWebSocketServerPortKey = "WebSocketServerPort";
+
 const char* kCloudAppRetryTimeoutKey = "CloudAppRetryTimeout";
 const char* kCloudAppMaxRetryAttemptsKey = "CloudAppMaxRetryAttempts";
 const char* kServerPortKey = "ServerPort";
@@ -305,6 +312,7 @@ const char* kDefaultPoliciesSnapshotFileName = "sdl_snapshot.json";
 const char* kDefaultHmiCapabilitiesFileName = "hmi_capabilities.json";
 const char* kDefaultPreloadedPTFileName = "sdl_preloaded_pt.json";
 const char* kDefaultServerAddress = "127.0.0.1";
+const char* kDefaultWebsocketServerAddress = "0.0.0.0";
 const char* kDefaultAppInfoFileName = "app_info.dat";
 const char* kDefaultSystemFilesPath = "/tmp/fs/mp/images/ivsu_cache";
 const char* kDefaultPluginsPath = "plugins";
@@ -334,6 +342,7 @@ const uint32_t kDefaultHubProtocolIndex = 0;
 const uint32_t kDefaultHeartBeatTimeout = 0;
 const uint16_t kDefaultMaxSupportedProtocolVersion = 5;
 const uint16_t kDefautTransportManagerTCPPort = 12345;
+const uint16_t kDefaultWebSocketServerPort = 2020;
 const uint16_t kDefaultCloudAppRetryTimeout = 1000;
 const uint16_t kDefaultCloudAppMaxRetryAttempts = 5;
 const uint16_t kDefaultServerPort = 8087;
@@ -495,6 +504,8 @@ Profile::Profile()
     , supported_diag_modes_()
     , system_files_path_(kDefaultSystemFilesPath)
     , transport_manager_tcp_adapter_port_(kDefautTransportManagerTCPPort)
+    , websocket_server_address_(kDefaultWebsocketServerAddress)
+    , websocket_server_port_(kDefaultWebSocketServerPort)
     , cloud_app_retry_timeout_(kDefaultCloudAppRetryTimeout)
     , cloud_app_max_retry_attempts_(kDefaultCloudAppMaxRetryAttempts)
     , tts_delimiter_(kDefaultTtsDelimiter)
@@ -831,6 +842,14 @@ const std::string& Profile::transport_manager_tcp_adapter_network_interface()
   return transport_manager_tcp_adapter_network_interface_;
 }
 
+const std::string& Profile::websocket_server_address() const {
+  return websocket_server_address_;
+}
+
+uint16_t Profile::websocket_server_port() const {
+  return websocket_server_port_;
+}
+
 uint32_t Profile::cloud_app_retry_timeout() const {
   return cloud_app_retry_timeout_;
 }
@@ -1040,6 +1059,18 @@ const std::string& Profile::ca_cert_path() const {
   return ca_cert_path_;
 }
 
+const std::string& Profile::ws_server_cert_path() const {
+  return ws_server_cert_path_;
+}
+
+const std::string& Profile::ws_server_key_path() const {
+  return ws_server_key_path_;
+}
+
+const std::string& Profile::ws_server_ca_cert_path() const {
+  return ws_server_ca_cert_path_;
+}
+
 const std::string& Profile::ssl_mode() const {
   return ssl_mode_;
 }
@@ -1240,6 +1271,7 @@ void Profile::UpdateValues() {
 
   ReadStringValue(
       &cert_path_, "", kSecuritySection, kSecurityCertificatePathKey);
+
   ReadStringValue(
       &ca_cert_path_, "", kSecuritySection, kSecurityCACertificatePathKey);
 
@@ -1867,6 +1899,52 @@ void Profile::UpdateValues() {
   LOG_UPDATED_VALUE(transport_manager_tcp_adapter_network_interface_,
                     kTCPAdapterNetworkInterfaceKey,
                     kTransportManagerSection);
+
+  // Websocket server address
+  ReadStringValue(&websocket_server_address_,
+                  kDefaultWebsocketServerAddress,
+                  kTransportManagerSection,
+                  kWebSocketServerAddressKey);
+
+  LOG_UPDATED_VALUE(websocket_server_address_,
+                    kWebSocketServerAddressKey,
+                    kTransportManagerSection);
+
+  // Websocket non-secured server port
+  ReadUIntValue(&websocket_server_port_,
+                kDefaultWebSocketServerPort,
+                kTransportManagerSection,
+                kWebSocketServerPortKey);
+
+  LOG_UPDATED_VALUE(websocket_server_port_,
+                    kWebSocketServerPortKey,
+                    kTransportManagerSection);
+
+#ifdef ENABLE_SECURITY
+  ReadStringValue(&ws_server_cert_path_,
+                  "",
+                  kTransportManagerSection,
+                  kWSServerCertificatePathKey);
+
+  LOG_UPDATED_VALUE(ws_server_cert_path_,
+                    kWSServerCertificatePathKey,
+                    kTransportManagerSection);
+
+  ReadStringValue(
+      &ws_server_key_path_, "", kTransportManagerSection, kWSServerKeyPathKey);
+
+  LOG_UPDATED_VALUE(
+      ws_server_key_path_, kWSServerKeyPathKey, kTransportManagerSection);
+
+  ReadStringValue(&ws_server_ca_cert_path_,
+                  "",
+                  kTransportManagerSection,
+                  kWSServerCACertificaePathKey);
+
+  LOG_UPDATED_VALUE(ws_server_ca_cert_path_,
+                    kWSServerCACertificaePathKey,
+                    kTransportManagerSection);
+#endif  // ENABLE_SECURITY
 
   ReadUIntValue(&cloud_app_retry_timeout_,
                 kDefaultCloudAppRetryTimeout,
