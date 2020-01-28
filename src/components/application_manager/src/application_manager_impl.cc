@@ -205,7 +205,7 @@ ApplicationManagerImpl::ApplicationManagerImpl(
                              {TYPE_ICONS, "Icons"}};
 
   const uint32_t timeout_ms = 10000u;
-  clear_pool_timer_.Start(timeout_ms, timer::kSingleShot);
+  clear_pool_timer_.Start(timeout_ms, timer::kPeriodic);
 
   rpc_handler_.reset(new rpc_handler::RPCHandlerImpl(
       *this, hmi_so_factory(), mobile_so_factory()));
@@ -3898,7 +3898,7 @@ void ApplicationManagerImpl::AddAppToTTSGlobalPropertiesList(
     LOG4CXX_INFO(logger_, "Start tts_global_properties_timer_");
     tts_global_properties_app_list_lock_.Release();
     const uint32_t timeout_ms = 1000;
-    tts_global_properties_timer_.Start(timeout_ms, timer::kSingleShot);
+    tts_global_properties_timer_.Start(timeout_ms, timer::kPeriodic);
     return;
   }
   tts_global_properties_app_list_lock_.Release();
