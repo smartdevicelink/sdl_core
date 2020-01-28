@@ -61,9 +61,9 @@ int main(int argc, char** argv) {
 
   utils::JsonReader  reader;
   Json::Value value;
-  bool parce_result = reader.parse(json_string, &value);
+  bool parse_result = reader.parse(json_string, &value);
 
-  if (false == parce_result) {
+  if (false == parse_result) {
     exit(PARSE_ERROR);
   }
   std::cout << "DEFAULT_POLICY" << std::endl;

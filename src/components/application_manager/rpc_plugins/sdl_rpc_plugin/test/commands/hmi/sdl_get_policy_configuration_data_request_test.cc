@@ -135,6 +135,7 @@ TEST_F(SDLGetPolicyConfigurationDataRequestTest, Run_Success) {
 
   auto json_val = module_config_with_endpoints.endpoints.ToJsonValue();
   Json::StreamWriterBuilder writer_builder;
+  writer_builder.settings_["indentation"] = "";
   std::string expected_string = Json::writeString(writer_builder, json_val);
   clear_new_line_symbol(expected_string);
 

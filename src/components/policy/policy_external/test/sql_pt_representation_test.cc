@@ -1684,12 +1684,13 @@ TEST_F(SQLPTRepresentationTest,
   policy_table::Table expected(&table);
   Json::StreamWriterBuilder writer_builder;
   // Checks
+  Json::Value snapshot_json_value = snapshot->ToJsonValue();
   EXPECT_EQ(Json::writeString(writer_builder, expected.ToJsonValue()),
-            Json::writeString(writer_builder, snapshot->ToJsonValue()));
-  std::cout << Json::writeString(writer_builder, snapshot->ToJsonValue())
+            Json::writeString(writer_builder, snapshot_json_value));
+  std::cout << Json::writeString(writer_builder, snapshot_json_value)
             << std::endl;
   EXPECT_EQ(expected.ToJsonValue().toStyledString(),
-            snapshot->ToJsonValue().toStyledString());
+            snapshot_json_value.toStyledString());
 }
 
 TEST_F(SQLPTRepresentationTest,

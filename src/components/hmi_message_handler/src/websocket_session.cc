@@ -48,6 +48,7 @@ WebsocketSession::WebsocketSession(boost::asio::ip::tcp::socket socket,
     , shutdown_(false)
     , thread_delegate_(new LoopThreadDelegate(&message_queue_, this))
     , thread_(threads::CreateThread("WS Async Send", thread_delegate_)) {
+  m_writer["indentation"] = "";
   thread_->start(threads::ThreadOptions());
 }
 
@@ -105,7 +106,6 @@ void WebsocketSession::Send(const std::string& message,
 }
 
 void WebsocketSession::sendJsonMessage(Json::Value& message) {
-  m_writer["indentation"] = "";
   const std::string str_msg = Json::writeString(m_writer, message) + '\n';
   sync_primitives::AutoLock auto_lock(queue_lock_);
   if (!isNotification(message) && !isResponse(message)) {

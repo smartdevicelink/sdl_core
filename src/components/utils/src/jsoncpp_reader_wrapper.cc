@@ -31,7 +31,6 @@
  */
 
 #include "utils/jsoncpp_reader_wrapper.h"
-#include <iostream>
 #include "utils/logger.h"
 
 namespace utils {
