@@ -1,0 +1,4 @@
+[submodule "src/3rd_party-static/jsoncpp"]
+	path = src/3rd_party-static/jsoncpp
+	url = https://github.com/open-source-parsers/jsoncpp.git
+	branch = 1.9.2

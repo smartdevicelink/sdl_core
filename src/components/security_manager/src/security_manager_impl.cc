@@ -37,6 +37,7 @@
 #include "security_manager/crypto_manager_impl.h"
 #include "utils/byte_order.h"
 #include "utils/helpers.h"
+#include "utils/jsoncpp_reader_wrapper.h"
 #include "utils/logger.h"
 
 namespace security_manager {
@@ -589,11 +590,13 @@ bool SecurityManagerImpl::ProccessInternalError(
                "Received InternalError with Json message"
                    << inMessage->get_json_message());
   Json::Value root;
-  Json::Reader reader;
-  const bool parsingSuccessful =
-      reader.parse(inMessage->get_json_message(), root);
-  if (!parsingSuccessful)
+  std::string str = inMessage->get_json_message();
+  utils::JsonReader reader;
+
+  if (!reader.parse(str, &root)) {
+    LOG4CXX_DEBUG(logger_, "Json parsing fails.");
     return false;
+  }
   LOG4CXX_DEBUG(logger_,
                 "Received InternalError id "
                     << root[kErrId].asString()
