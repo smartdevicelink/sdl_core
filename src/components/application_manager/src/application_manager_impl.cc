@@ -3898,7 +3898,7 @@ void ApplicationManagerImpl::AddAppToTTSGlobalPropertiesList(
     LOG4CXX_INFO(logger_, "Start tts_global_properties_timer_");
     tts_global_properties_app_list_lock_.Release();
     const uint32_t timeout_ms = 1000;
-    tts_global_properties_timer_.Start(timeout_ms, timer::kPeriodic);
+    tts_global_properties_timer_.Start(timeout_ms, timer::kSingleShot);
     return;
   }
   tts_global_properties_app_list_lock_.Release();
