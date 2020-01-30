@@ -1948,7 +1948,7 @@ void ApplicationManagerImpl::StopNaviService(
     } else {
       // Fix: Repeated tests are not executed after they have stopped for Navi
       if (false == it->second.first &&
-          service_type == ServiceType::kMobileNav) {
+          ServiceType::kMobileNav == service_type) {
         LOG4CXX_DEBUG(logger_, "appId: " << app_id << "Navi had stopped");
         return;
       }
