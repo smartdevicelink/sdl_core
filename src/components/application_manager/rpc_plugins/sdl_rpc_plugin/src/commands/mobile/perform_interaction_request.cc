@@ -79,6 +79,8 @@ PerformInteractionRequest::PerformInteractionRequest(
     , app_pi_was_active_before_(false)
     , vr_result_code_(hmi_apis::Common_Result::INVALID_ENUM)
     , ui_result_code_(hmi_apis::Common_Result::INVALID_ENUM) {
+  response_msg_params =
+      smart_objects::SmartObject(smart_objects::SmartType_Map);
   subscribe_on_event(hmi_apis::FunctionID::UI_OnResetTimeout);
   subscribe_on_event(hmi_apis::FunctionID::VR_OnCommand);
   subscribe_on_event(hmi_apis::FunctionID::Buttons_OnButtonPress);
@@ -234,8 +236,6 @@ void PerformInteractionRequest::Run() {
 void PerformInteractionRequest::on_event(const event_engine::Event& event) {
   LOG4CXX_AUTO_TRACE(logger_);
   const smart_objects::SmartObject& message = event.smart_object();
-  smart_objects::SmartObject msg_param =
-      smart_objects::SmartObject(smart_objects::SmartType_Map);
 
   switch (event.id()) {
     case hmi_apis::FunctionID::UI_OnResetTimeout: {
@@ -253,7 +253,7 @@ void PerformInteractionRequest::on_event(const event_engine::Event& event) {
       ui_result_code_ = static_cast<hmi_apis::Common_Result::eType>(
           message[strings::params][hmi_response::code].asUInt());
       GetInfo(message, ui_info_);
-      ProcessUIResponse(event.smart_object(), msg_param);
+      ProcessUIResponse(event.smart_object(), response_msg_params);
       break;
     }
     case hmi_apis::FunctionID::VR_PerformInteraction: {
@@ -265,7 +265,7 @@ void PerformInteractionRequest::on_event(const event_engine::Event& event) {
       vr_result_code_ = static_cast<hmi_apis::Common_Result::eType>(
           message[strings::params][hmi_response::code].asUInt());
       GetInfo(message, vr_info_);
-      if (ProcessVRResponse(event.smart_object(), msg_param)) {
+      if (ProcessVRResponse(event.smart_object(), response_msg_params)) {
         return;
       }
       break;
@@ -280,8 +280,8 @@ void PerformInteractionRequest::on_event(const event_engine::Event& event) {
     LOG4CXX_DEBUG(logger_,
                   "Send response in interaction mode "
                       << static_cast<int32_t>(interaction_mode_));
-    if (SetChoiceIdToResponseMsgParams(msg_param)) {
-      SendBothModeResponse(msg_param);
+    if (SetChoiceIdToResponseMsgParams(response_msg_params)) {
+      SendBothModeResponse(response_msg_params);
     } else {
       DisablePerformInteraction();
       SendResponse(false,
