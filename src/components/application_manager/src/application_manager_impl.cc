@@ -1830,22 +1830,17 @@ bool ApplicationManagerImpl::StartNaviService(
        later than App2's Startcallback(). Cause streaming issue on HMI.
       */
       sync_primitives::AutoLock lock(applications_list_lock_ptr_);
-      auto it_app = applications_.begin();
-      while (applications_.end() != it_app) {
-        ApplicationSharedPtr app = application((*it_app)->app_id());
+      for (auto app : applications_) {
         if (!app || (!app->is_navi() && !app->mobile_projection_enabled())) {
           LOG4CXX_DEBUG(logger_,
-                        "Continue, Not Navi App Id: " << (*it_app)->app_id());
-          ++it_app;
+                        "Continue, Not Navi App Id: " << app->app_id());
           continue;
-        } else {
-          LOG4CXX_DEBUG(logger_,
-                        "Abort Stream Service of other NaviAppId: "
-                            << (*it_app)->app_id()
-                            << " Service_type: " << service_type);
-          StopNaviService((*it_app)->app_id(), service_type);
-          ++it_app;
         }
+        LOG4CXX_DEBUG(logger_,
+                      "Abort Stream Service of other NaviAppId: "
+                          << app->app_id()
+                          << " Service_type: " << service_type);
+        StopNaviService(app->app_id(), service_type);
       }
     }
 
