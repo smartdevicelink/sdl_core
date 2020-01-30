@@ -518,6 +518,150 @@ TEST_F(
                             "Received two different choice IDs");
 }
 
+TEST_F(
+    PerformInteractionRequestTest,
+    VR_response_WARNINGS_UI_response_SUCCESS_MobileResponseContains_true_WARNINGS_warnings_info) {
+  ON_CALL(mock_hmi_interfaces_, GetInterfaceState(_))
+      .WillByDefault(Return(am::HmiInterfaces::STATE_AVAILABLE));
+
+  auto msg_from_mobile =
+      CreateRequestMessage(mobile_apis::InteractionMode::VR_ONLY);
+  std::shared_ptr<PerformInteractionRequest> command =
+      CreateCommand<PerformInteractionRequest>(msg_from_mobile);
+
+  ASSERT_TRUE(command->Init());
+
+  MessageSharedPtr response_msg_vr = CreateHMIResponseMessage(
+      hmi_apis::Common_Result::WARNINGS, "WARNING MESSAGE");
+  am::event_engine::Event event_vr(hmi_apis::FunctionID::VR_PerformInteraction);
+  event_vr.set_smart_object(*response_msg_vr);
+
+  MessageSharedPtr response_msg_ui =
+      CreateHMIResponseMessage(hmi_apis::Common_Result::SUCCESS, "");
+  am::event_engine::Event event_ui(hmi_apis::FunctionID::UI_PerformInteraction);
+  event_ui.set_smart_object(*response_msg_ui);
+
+  MessageSharedPtr response_to_mobile;
+  EXPECT_CALL(
+      mock_rpc_service_,
+      ManageMobileCommand(_, am::commands::Command::CommandSource::SOURCE_SDL))
+      .WillOnce(DoAll(SaveArg<0>(&response_to_mobile), Return(true)));
+
+  MessageSharedPtr request_to_hmi;
+  EXPECT_CALL(mock_rpc_service_,
+              ManageHMICommand(
+                  _, am::commands::Command::CommandSource::SOURCE_SDL_TO_HMI))
+      .WillOnce(DoAll(SaveArg<0>(&request_to_hmi), Return(true)));
+
+  command->on_event(event_vr);
+  command->on_event(event_ui);
+
+  HMIRequestExpectations(request_to_hmi,
+                         hmi_apis::FunctionID::UI_ClosePopUp,
+                         "UI.PerformInteraction");
+
+  ResultCommandExpectations(response_to_mobile,
+                            true,
+                            hmi_apis::Common_Result::WARNINGS,
+                            "WARNING MESSAGE");
+}
+
+TEST_F(
+    PerformInteractionRequestTest,
+    VR_response_SUCCESS_UI_response_WARNINGS_MobileResponseContains_true_WARNINGS_warnings_info) {
+  ON_CALL(mock_hmi_interfaces_, GetInterfaceState(_))
+      .WillByDefault(Return(am::HmiInterfaces::STATE_AVAILABLE));
+
+  auto msg_from_mobile =
+      CreateRequestMessage(mobile_apis::InteractionMode::BOTH);
+  std::shared_ptr<PerformInteractionRequest> command =
+      CreateCommand<PerformInteractionRequest>(msg_from_mobile);
+
+  ASSERT_TRUE(command->Init());
+
+  MessageSharedPtr response_msg_vr =
+      CreateHMIResponseMessage(hmi_apis::Common_Result::SUCCESS, "");
+  am::event_engine::Event event_vr(hmi_apis::FunctionID::VR_PerformInteraction);
+  event_vr.set_smart_object(*response_msg_vr);
+
+  MessageSharedPtr response_msg_ui = CreateHMIResponseMessage(
+      hmi_apis::Common_Result::WARNINGS, "WARNING MESSAGE");
+  am::event_engine::Event event_ui(hmi_apis::FunctionID::UI_PerformInteraction);
+  event_ui.set_smart_object(*response_msg_ui);
+
+  MessageSharedPtr response_to_mobile;
+  EXPECT_CALL(
+      mock_rpc_service_,
+      ManageMobileCommand(_, am::commands::Command::CommandSource::SOURCE_SDL))
+      .WillOnce(DoAll(SaveArg<0>(&response_to_mobile), Return(true)));
+
+  MessageSharedPtr request_to_hmi;
+  EXPECT_CALL(mock_rpc_service_,
+              ManageHMICommand(
+                  _, am::commands::Command::CommandSource::SOURCE_SDL_TO_HMI))
+      .WillOnce(DoAll(SaveArg<0>(&request_to_hmi), Return(true)));
+
+  command->on_event(event_vr);
+  command->on_event(event_ui);
+
+  HMIRequestExpectations(request_to_hmi,
+                         hmi_apis::FunctionID::UI_ClosePopUp,
+                         "UI.PerformInteraction");
+
+  ResultCommandExpectations(response_to_mobile,
+                            true,
+                            hmi_apis::Common_Result::WARNINGS,
+                            "WARNING MESSAGE");
+}
+
+TEST_F(
+    PerformInteractionRequestTest,
+    VR_response_UNSUPPORTED_RESOURCE_UI_response_WARNINGS_MobileResponseContains_false_UNSUPPORTED_RESOURSE_error_info) {
+  ON_CALL(mock_hmi_interfaces_, GetInterfaceState(_))
+      .WillByDefault(Return(am::HmiInterfaces::STATE_AVAILABLE));
+
+  auto msg_from_mobile =
+      CreateRequestMessage(mobile_apis::InteractionMode::BOTH);
+  std::shared_ptr<PerformInteractionRequest> command =
+      CreateCommand<PerformInteractionRequest>(msg_from_mobile);
+
+  ASSERT_TRUE(command->Init());
+
+  MessageSharedPtr response_msg_vr = CreateHMIResponseMessage(
+      hmi_apis::Common_Result::UNSUPPORTED_RESOURCE, "VR error message");
+  am::event_engine::Event event_vr(hmi_apis::FunctionID::VR_PerformInteraction);
+  event_vr.set_smart_object(*response_msg_vr);
+
+  MessageSharedPtr response_msg_ui =
+      CreateHMIResponseMessage(hmi_apis::Common_Result::WARNINGS, "");
+  am::event_engine::Event event_ui(hmi_apis::FunctionID::UI_PerformInteraction);
+  event_ui.set_smart_object(*response_msg_ui);
+
+  MessageSharedPtr response_to_mobile;
+  EXPECT_CALL(
+      mock_rpc_service_,
+      ManageMobileCommand(_, am::commands::Command::CommandSource::SOURCE_SDL))
+      .WillOnce(DoAll(SaveArg<0>(&response_to_mobile), Return(true)));
+
+  MessageSharedPtr request_to_hmi;
+  EXPECT_CALL(mock_rpc_service_,
+              ManageHMICommand(
+                  _, am::commands::Command::CommandSource::SOURCE_SDL_TO_HMI))
+      .WillOnce(DoAll(SaveArg<0>(&request_to_hmi), Return(true)));
+
+  command->on_event(event_vr);
+  command->on_event(event_ui);
+
+  HMIRequestExpectations(request_to_hmi,
+                         hmi_apis::FunctionID::UI_ClosePopUp,
+                         "UI.PerformInteraction");
+
+  ResultCommandExpectations(response_to_mobile,
+                            true,
+                            hmi_apis::Common_Result::UNSUPPORTED_RESOURCE,
+                            "VR error message");
+}
+
 }  // namespace perform_interaction_request
 }  // namespace mobile_commands_test
 }  // namespace commands_test
