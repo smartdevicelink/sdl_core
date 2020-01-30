@@ -41,7 +41,6 @@
 #include <utility>
 #include <vector>
 
-#include "json/features.h"
 #include "json/writer.h"
 #include "policy/policy_helper.h"
 #include "policy/policy_table/enums.h"
