@@ -1954,7 +1954,7 @@ void ApplicationManagerImpl::StopNaviService(
       }
 
       // Fix: Repeated tests are not executed after they have stopped for Audio
-      if (false == it->second.second && service_type == ServiceType::kAudio) {
+      if (false == it->second.second && ServiceType::kAudio == service_type) {
         LOG4CXX_DEBUG(logger_, "appId: " << app_id << "Audio had stopped");
         return;
       }
