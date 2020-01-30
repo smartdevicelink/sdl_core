@@ -476,7 +476,7 @@ void PolicyManagerImplTest2::
   std::string json;
   Json::Value root(Json::objectValue);
   if (ifile.is_open()) {
-    Json::parseFromStream(reader_builder, ifile, &root, nullptr)
+    Json::parseFromStream(reader_builder, ifile, &root, nullptr);
   }
   json = root.toStyledString();
   ifile.close();
@@ -626,7 +626,7 @@ void PolicyManagerImplTest2::LoadPTUFromJsonFile(
   std::string json;
   Json::Value root(Json::objectValue);
   if (ifile.is_open()) {
-    Json::parseFromStream(reader_builder, ifile, &root, nullptr)
+    Json::parseFromStream(reader_builder, ifile, &root, nullptr);
   }
   json = root.toStyledString();
   ifile.close();
