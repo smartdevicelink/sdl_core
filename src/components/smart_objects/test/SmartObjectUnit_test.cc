@@ -31,6 +31,7 @@
  */
 
 #include "gmock/gmock.h"
+#define final  // Disable error: cannot derive from ‘final’ base
 #include "smart_objects/smart_object.h"
 
 namespace test {
@@ -584,6 +585,29 @@ TEST(MapEraseTest, SmartObjectTest) {
   ASSERT_FALSE(srcObj.erase("one"));
 }
 // TODO: Add a test to check accessing an array at strange indexes.
+
+TEST(DoubleCleanupDataTest, SmartObjectTest) {
+  class DerivedSmartObject : public SmartObject {
+   public:
+    DerivedSmartObject(SmartType Type) : SmartObject(Type) {}
+    using SmartObject::operator=;
+    void cleanup_data() {
+      SmartObject::cleanup_data();
+    }
+  };
+
+  DerivedSmartObject obj(SmartType_String);
+  ASSERT_EQ(SmartType_String, obj.getType());
+
+  obj = "test string_value";
+  ASSERT_EQ(std::string("test string_value"), obj.asString());
+
+  obj.cleanup_data();
+  ASSERT_EQ(std::string(""), obj.asCharArray());
+
+  obj.cleanup_data();
+  ASSERT_EQ(std::string(""), obj.asCharArray());
+}
 
 }  // namespace smart_object_test
 }  // namespace components

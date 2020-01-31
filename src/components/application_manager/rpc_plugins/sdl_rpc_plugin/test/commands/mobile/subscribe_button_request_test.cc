@@ -162,7 +162,7 @@ TEST_F(SubscribeButtonRequestTest, Run_IsSubscribedToButton_UNSUCCESS) {
   (*button_caps_ptr)[0][am::hmi_response::button_name] = kButtonName;
 
   ON_CALL(mock_hmi_capabilities_, button_capabilities())
-      .WillByDefault(Return(button_caps_ptr.get()));
+      .WillByDefault(Return(button_caps_ptr));
 
   ON_CALL(*app, IsSubscribedToButton(_)).WillByDefault(Return(true));
 
@@ -193,7 +193,7 @@ TEST_F(SubscribeButtonRequestTest, Run_SUCCESS) {
   (*button_caps_ptr)[0][am::hmi_response::button_name] = kButtonName;
 
   ON_CALL(mock_hmi_capabilities_, button_capabilities())
-      .WillByDefault(Return(button_caps_ptr.get()));
+      .WillByDefault(Return(button_caps_ptr));
 
   ON_CALL(*app, IsSubscribedToButton(_)).WillByDefault(Return(false));
 
@@ -240,7 +240,7 @@ TEST_F(SubscribeButtonRequestTest, Run_NAV_SUCCESS) {
   (*button_caps_ptr)[0][am::hmi_response::button_name] = kButtonName;
 
   ON_CALL(mock_hmi_capabilities_, button_capabilities())
-      .WillByDefault(Return(button_caps_ptr.get()));
+      .WillByDefault(Return(button_caps_ptr));
 
   ON_CALL(*app, IsSubscribedToButton(_)).WillByDefault(Return(false));
 
@@ -289,7 +289,7 @@ TEST_F(SubscribeButtonRequestTest, Run_SUCCESS_App_Base_RPC_Version) {
       mobile_apis::ButtonName::PLAY_PAUSE;
 
   ON_CALL(mock_hmi_capabilities_, button_capabilities())
-      .WillByDefault(Return(button_caps_ptr.get()));
+      .WillByDefault(Return(button_caps_ptr));
 
   ON_CALL(*app, IsSubscribedToButton(_)).WillByDefault(Return(false));
 

@@ -601,6 +601,7 @@ class ApplicationImpl : public virtual Application,
   std::atomic_bool is_resuming_;
   mobile_api::HMILevel::eType deferred_resumption_hmi_level_;
   bool is_hash_changed_during_suspend_;
+  smart_objects::SmartObject user_location_;
 
   uint32_t video_stream_retry_number_;
   uint32_t audio_stream_retry_number_;
@@ -617,7 +618,6 @@ class ApplicationImpl : public virtual Application,
   std::string cloud_transport_type_;
   mobile_apis::HybridAppPreference::eType hybrid_app_preference_;
   std::string certificate_;
-  smart_objects::SmartObject user_location_;
 
   /**
    * @brief Defines number per time in seconds limits

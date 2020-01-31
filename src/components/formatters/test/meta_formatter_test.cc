@@ -41,7 +41,6 @@ namespace formatters {
 TEST_F(CMetaFormatterTestHelper,
        inputObjectIdenticalToSchemaWithAndWithoutMandatoryParams) {
   Json::Value value;
-  Json::Reader reader;
   CSmartFactory<FunctionIDTest::eType,
                 MessageTypeTest::eType,
                 StructIdentifiers::eType>

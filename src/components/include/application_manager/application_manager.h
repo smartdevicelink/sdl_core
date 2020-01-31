@@ -170,6 +170,10 @@ class ApplicationManager {
 
   virtual ApplicationSharedPtr application(uint32_t app_id) const = 0;
   virtual ApplicationSharedPtr active_application() const = 0;
+  virtual void OnQueryAppsRequest(
+      const connection_handler::DeviceHandle device) = 0;
+
+  virtual ApplicationSharedPtr get_full_or_limited_application() const = 0;
 
   /**
    * Function used only by HMI request/response/notification base classes
@@ -182,7 +186,7 @@ class ApplicationManager {
   virtual ApplicationSharedPtr application_by_policy_id(
       const std::string& policy_app_id) const = 0;
 
-  virtual ApplicationSharedPtr application_by_name(
+  DEPRECATED virtual ApplicationSharedPtr application_by_name(
       const std::string& app_name) const = 0;
 
   virtual ApplicationSharedPtr pending_application_by_policy_id(
@@ -191,6 +195,8 @@ class ApplicationManager {
   virtual ApplicationSharedPtr reregister_application_by_policy_id(
       const std::string& policy_app_id) const = 0;
 
+  virtual AppSharedPtrs applications_by_name(
+      const std::string& app_name) const = 0;
   virtual AppSharedPtrs applications_by_button(uint32_t button) = 0;
   virtual AppSharedPtrs applications_with_navi() = 0;
 
@@ -280,17 +286,30 @@ class ApplicationManager {
   virtual void set_current_audio_source(const uint32_t source) = 0;
 
   /**
-   * @brief OnHMILevelChanged the callback that allows SDL to react when
+   * @brief OnHMIStateChanged the callback that allows SDL to react when
    * application's HMI level has been changed.
    *
-   * @param app_id application identifier for which HMILevel has been chaned.
+   * @param app_id application identifier for which HMIState has been chaned.
    *
-   * @param from previous HMILevel.
-   * @param to current HMILevel.
+   * @param from previous HMIState.
+   * @param to current HMIState.
    */
-  virtual void OnHMILevelChanged(uint32_t app_id,
-                                 mobile_apis::HMILevel::eType from,
-                                 mobile_apis::HMILevel::eType to) = 0;
+  virtual void OnHMIStateChanged(const uint32_t app_id,
+                                 const HmiStatePtr from,
+                                 const HmiStatePtr to) = 0;
+
+  /**
+   * @brief Updates streaming service status for specified session and notifies
+   * HMI via notification if required
+   * @param service_type Id of service which status should be updated
+   * @param app_id Id of session which status should be updated
+   * @param streaming_data_available Availability of streaming data for
+   * specified session
+   */
+  virtual void ProcessOnDataStreamingNotification(
+      const protocol_handler::ServiceType service_type,
+      const uint32_t app_id,
+      const bool streaming_data_available) = 0;
 
   /**
    * @brief Checks if driver distraction state is valid, creates message
@@ -600,12 +619,13 @@ class ApplicationManager {
       mobile_api::AppInterfaceUnregisteredReason::eType reason) = 0;
 
   /**
-   * @brief Checks HMI level and returns true if streaming is allowed
+   * @brief Checks application HMI state and returns true if streaming is
+   * allowed
    * @param app_id Application id
    * @param service_type Service type to check
    * @return True if streaming is allowed, false in other case
    */
-  virtual bool HMILevelAllowsStreaming(
+  virtual bool HMIStateAllowsStreaming(
       uint32_t app_id, protocol_handler::ServiceType service_type) const = 0;
 
   /**
@@ -663,6 +683,13 @@ class ApplicationManager {
 
   virtual protocol_handler::MajorProtocolVersion SupportedSDLVersion()
       const = 0;
+
+  /**
+   * @brief Applies functor for each plugin
+   * @param functor Functor that will be applied to each plugin
+   */
+  virtual void ApplyFunctorForEachPlugin(
+      std::function<void(plugin_manager::RPCPlugin&)> functor) = 0;
 
   /*
    * @brief Converts connection string transport type representation

@@ -160,7 +160,9 @@ void AddCommandRequest::Run() {
     return;
   }
 
-  app->AddCommand((*message_)[strings::msg_params][strings::cmd_id].asUInt(),
+  const uint32_t internal_consecutive_number = application_manager::commands::
+      CommandImpl::CalcCommandInternalConsecutiveNumber(app);
+  app->AddCommand(internal_consecutive_number,
                   (*message_)[strings::msg_params]);
 
   smart_objects::SmartObject ui_msg_params =

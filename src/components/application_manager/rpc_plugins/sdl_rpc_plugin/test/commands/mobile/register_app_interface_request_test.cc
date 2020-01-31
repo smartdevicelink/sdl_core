@@ -83,6 +83,8 @@ const hmi_apis::Common_Language::eType kHmiLanguage =
     hmi_apis::Common_Language::EN_US;
 const mobile_apis::Language::eType kMobileLanguage =
     mobile_apis::Language::EN_US;
+const mobile_apis::HybridAppPreference::eType kHybridAppPreference =
+    mobile_apis::HybridAppPreference::INVALID_ENUM;
 const std::string kMacAddress1 = "test_mac_address1";
 const std::string kMacAddress2 = "test_mac_address2";
 const std::string kAppId1 = "test_app1_id";
@@ -102,6 +104,7 @@ class RegisterAppInterfaceRequestTest
       , app_name_("test_app_name_")
       , app2_name_("test_app2_name_")
       , lock_ptr_(std::make_shared<sync_primitives::Lock>())
+      , pending_lock_ptr_(std::make_shared<sync_primitives::Lock>())
       , mock_application_helper_(
             application_manager_test::MockApplicationHelper::
                 application_helper_mock()) {
@@ -141,6 +144,9 @@ class RegisterAppInterfaceRequestTest
     ON_CALL(*mock_app, app_icon_path()).WillByDefault(ReturnRef(kDummyString));
     ON_CALL(*mock_app, language()).WillByDefault(ReturnRef(kMobileLanguage));
     ON_CALL(*mock_app, ui_language()).WillByDefault(ReturnRef(kMobileLanguage));
+    ON_CALL(*mock_app, is_cloud_app()).WillByDefault(Return(false));
+    ON_CALL(*mock_app, hybrid_app_preference())
+        .WillByDefault(ReturnRef(kHybridAppPreference));
     ON_CALL(*mock_app, policy_app_id()).WillByDefault(Return(kAppId1));
     ON_CALL(*mock_app, msg_version())
         .WillByDefault(ReturnRef(mock_semantic_version));
@@ -173,6 +179,28 @@ class RegisterAppInterfaceRequestTest
         .WillByDefault(ReturnRef(kDummyString));
     ON_CALL(mock_hmi_capabilities_, ccpu_version())
         .WillByDefault(ReturnRef(kDummyString));
+    ON_CALL(mock_hmi_capabilities_, speech_capabilities())
+        .WillByDefault(Return(smart_objects::SmartObjectSPtr()));
+    ON_CALL(mock_hmi_capabilities_, prerecorded_speech())
+        .WillByDefault(Return(smart_objects::SmartObjectSPtr()));
+    ON_CALL(mock_hmi_capabilities_, vr_capabilities())
+        .WillByDefault(Return(smart_objects::SmartObjectSPtr()));
+    ON_CALL(mock_hmi_capabilities_, display_capabilities())
+        .WillByDefault(Return(smart_objects::SmartObjectSPtr()));
+    ON_CALL(mock_hmi_capabilities_, audio_pass_thru_capabilities())
+        .WillByDefault(Return(smart_objects::SmartObjectSPtr()));
+    ON_CALL(mock_hmi_capabilities_, vehicle_type())
+        .WillByDefault(Return(smart_objects::SmartObjectSPtr()));
+    ON_CALL(mock_hmi_capabilities_, button_capabilities())
+        .WillByDefault(Return(smart_objects::SmartObjectSPtr()));
+    ON_CALL(mock_hmi_capabilities_, soft_button_capabilities())
+        .WillByDefault(Return(smart_objects::SmartObjectSPtr()));
+    ON_CALL(mock_hmi_capabilities_, preset_bank_capabilities())
+        .WillByDefault(Return(smart_objects::SmartObjectSPtr()));
+    ON_CALL(mock_hmi_capabilities_, hmi_zone_capabilities())
+        .WillByDefault(Return(smart_objects::SmartObjectSPtr()));
+    ON_CALL(mock_hmi_capabilities_, pcm_stream_capabilities())
+        .WillByDefault(Return(smart_objects::SmartObjectSPtr()));
     ON_CALL(app_mngr_settings_, supported_diag_modes())
         .WillByDefault(ReturnRef(kDummyDiagModes));
     ON_CALL(mock_policy_handler_, GetAppRequestTypes(_, _))
@@ -189,6 +217,8 @@ class RegisterAppInterfaceRequestTest
         .WillByDefault(Return(hmi_apis::Common_TransportType::WIFI));
     ON_CALL(app_mngr_, IsAppInReconnectMode(_, _)).WillByDefault(Return(false));
     ON_CALL(app_mngr_, application_by_policy_id(_))
+        .WillByDefault(Return(ApplicationSharedPtr()));
+    ON_CALL(app_mngr_, pending_application_by_policy_id(_))
         .WillByDefault(Return(ApplicationSharedPtr()));
     ON_CALL(mock_hmi_interfaces_, GetInterfaceState(_))
         .WillByDefault(Return(am::HmiInterfaces::STATE_NOT_AVAILABLE));
@@ -260,6 +290,8 @@ class RegisterAppInterfaceRequestTest
   const utils::custom_string::CustomString app2_name_;
   std::shared_ptr<sync_primitives::Lock> lock_ptr_;
   am::ApplicationSet app_set_;
+  std::shared_ptr<sync_primitives::Lock> pending_lock_ptr_;
+  am::AppsWaitRegistrationSet pending_app_set_;
 
   typedef IsNiceMock<policy_test::MockPolicyHandlerInterface,
                      kMocksAreNice>::Result MockPolicyHandlerInterface;
@@ -313,6 +345,9 @@ TEST_F(RegisterAppInterfaceRequestTest, Run_MinimalData_SUCCESS) {
   ON_CALL(app_mngr_, applications())
       .WillByDefault(
           Return(DataAccessor<am::ApplicationSet>(app_set_, lock_ptr_)));
+  ON_CALL(app_mngr_, pending_applications())
+      .WillByDefault(Return(DataAccessor<am::AppsWaitRegistrationSet>(
+          pending_app_set_, pending_lock_ptr_)));
 
   EXPECT_CALL(app_mngr_, application(kConnectionKey))
       .WillOnce(Return(mock_app));
@@ -419,19 +454,27 @@ TEST_F(RegisterAppInterfaceRequestTest,
       "test_templates_available";
   display_capabilities[am::hmi_response::screen_params] = "test_screen_params";
 
+  auto vehicle_type_ptr = std::make_shared<smart_objects::SmartObject>(
+      (*expected_message)[am::hmi_response::vehicle_type]);
   ON_CALL(mock_hmi_capabilities_, vehicle_type())
-      .WillByDefault(
-          Return(&(*expected_message)[am::hmi_response::vehicle_type]));
+      .WillByDefault(Return(vehicle_type_ptr));
+
+  auto vr_capabilities_ptr = std::make_shared<smart_objects::SmartObject>(
+      (*expected_message)[am::strings::vr_capabilities]);
   ON_CALL(mock_hmi_capabilities_, vr_capabilities())
-      .WillByDefault(
-          Return(&(*expected_message)[am::strings::vr_capabilities]));
+      .WillByDefault(Return(vr_capabilities_ptr));
+
+  auto display_capabilities_ptr = std::make_shared<smart_objects::SmartObject>(
+      (*expected_message)[am::hmi_response::display_capabilities]);
   ON_CALL(mock_hmi_capabilities_, display_capabilities())
-      .WillByDefault(
-          Return(&(*expected_message)[am::hmi_response::display_capabilities]));
+      .WillByDefault(Return(display_capabilities_ptr));
 
   ON_CALL(app_mngr_, applications())
       .WillByDefault(
           Return(DataAccessor<am::ApplicationSet>(app_set_, lock_ptr_)));
+  ON_CALL(app_mngr_, pending_applications())
+      .WillByDefault(Return(DataAccessor<am::AppsWaitRegistrationSet>(
+          pending_app_set_, pending_lock_ptr_)));
   ON_CALL(mock_policy_handler_, PolicyEnabled()).WillByDefault(Return(true));
   ON_CALL(mock_policy_handler_, GetInitialAppData(kAppId1, _, _))
       .WillByDefault(Return(true));
@@ -622,6 +665,9 @@ TEST_F(RegisterAppInterfaceRequestTest,
   ON_CALL(app_mngr_, applications())
       .WillByDefault(
           Return(DataAccessor<am::ApplicationSet>(app_set_, lock_ptr_)));
+  ON_CALL(app_mngr_, pending_applications())
+      .WillByDefault(Return(DataAccessor<am::AppsWaitRegistrationSet>(
+          pending_app_set_, pending_lock_ptr_)));
 
   MockAppPtr mock_app2 = CreateBasicMockedApp();
 
@@ -659,6 +705,9 @@ TEST_F(RegisterAppInterfaceRequestTest,
   ON_CALL(app_mngr_, applications())
       .WillByDefault(
           Return(DataAccessor<am::ApplicationSet>(app_set_, lock_ptr_)));
+  ON_CALL(app_mngr_, pending_applications())
+      .WillByDefault(Return(DataAccessor<am::AppsWaitRegistrationSet>(
+          pending_app_set_, pending_lock_ptr_)));
 
   InitBasicMessage();
   (*msg_)[am::strings::params][am::strings::connection_key] = kConnectionKey2;

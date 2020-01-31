@@ -265,9 +265,10 @@ TEST_F(PolicyManagerImplTest2,
        RetrySequenceDelaysSeconds_Expect_CorrectValues) {
   // Arrange
   std::ifstream ifile(preloaded_pt_filename_);
-  Json::Reader reader;
+  Json::CharReaderBuilder reader_builder;
   Json::Value root(Json::objectValue);
-  if (ifile.is_open() && reader.parse(ifile, root, true)) {
+  if (ifile.is_open() &&
+      Json::parseFromStream(reader_builder, ifile, &root, nullptr)) {
     Json::Value seconds_between_retries = Json::Value(Json::arrayValue);
     seconds_between_retries =
         root["policy_table"]["module_config"]["seconds_between_retries"];

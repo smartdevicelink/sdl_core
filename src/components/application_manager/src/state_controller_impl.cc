@@ -881,8 +881,7 @@ void StateControllerImpl::OnStateChanged(ApplicationSharedPtr app,
     app->ResetDataInNone();
   }
 
-  app_mngr_.OnHMILevelChanged(
-      app->app_id(), old_state->hmi_level(), new_state->hmi_level());
+  app_mngr_.OnHMIStateChanged(app->app_id(), old_state, new_state);
   app->usage_report().RecordHmiStateChanged(new_state->hmi_level());
 }
 
