@@ -213,7 +213,7 @@ class UpdateStatusManager : public UpdateStatusManagerInterface {
   UpdateEvent last_processed_event_;
   bool apps_search_in_progress_;
   bool app_registered_from_non_consented_device_;
-  bool last_update_was_failed_;
+  bool last_update_failed_;
   sync_primitives::Lock apps_search_in_progress_lock_;
 };
 }  // namespace policy

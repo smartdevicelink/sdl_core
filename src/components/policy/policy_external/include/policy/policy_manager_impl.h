@@ -608,7 +608,7 @@ class PolicyManagerImpl : public PolicyManager {
    */
   void OnAppsSearchCompleted(const bool trigger_ptu) OVERRIDE;
 
-  void OnChangeApplicationCount(const uint32_t new_app_count) OVERRIDE;
+  void UpdatePTUReadyAppsCount(const uint32_t new_app_count) OVERRIDE;
 
   /**
    * @brief Get state of request types for given application

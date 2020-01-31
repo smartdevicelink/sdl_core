@@ -80,7 +80,7 @@ PolicyManagerImpl::PolicyManagerImpl()
     , send_on_update_sent_out_(false)
     , trigger_ptu_(false)
     , ptu_requested_(false)
-    , last_registered_policy_app_id_("") {}
+    , last_registered_policy_app_id_(std::string()) {}
 
 void PolicyManagerImpl::set_listener(PolicyListener* listener) {
   listener_ = listener;
@@ -685,7 +685,7 @@ void PolicyManagerImpl::OnAppsSearchCompleted(const bool trigger_ptu) {
   }
 }
 
-void PolicyManagerImpl::OnChangeApplicationCount(const uint32_t new_app_count) {
+void PolicyManagerImpl::UpdatePTUReadyAppsCount(const uint32_t new_app_count) {
   LOG4CXX_AUTO_TRACE(logger_);
   applications_pending_ptu_count_ = new_app_count;
 }
