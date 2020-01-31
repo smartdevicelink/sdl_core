@@ -1116,20 +1116,12 @@ PerformInteractionRequest::PrepareResultCodeForResponse(
   auto mobile_ui_result_code =
       MessageHelper::HMIToMobileResult(ui_result_code_);
 
-  {
-    bool vr_success =
-        mobile_apis::Result::eType::SUCCESS == mobile_vr_result_code;
-    bool vr_warnings =
-        mobile_apis::Result::eType::WARNINGS == mobile_vr_result_code;
-    bool ui_success =
-        mobile_apis::Result::eType::SUCCESS == mobile_ui_result_code;
-    bool ui_warnings =
-        mobile_apis::Result::eType::WARNINGS == mobile_ui_result_code;
-
-    bool is_vr_success_and_ui_warnings = vr_success && ui_warnings;
-    bool is_ui_success_and_vr_warnings = ui_success && vr_warnings;
-
-    if (is_vr_success_and_ui_warnings || is_ui_success_and_vr_warnings) {
+  if (mobile_apis::Result::eType::WARNINGS == mobile_vr_result_code) {
+    if (mobile_apis::Result::eType::SUCCESS == mobile_ui_result_code) {
+      return mobile_apis::Result::eType::WARNINGS;
+    }
+  } else if (mobile_apis::Result::eType::WARNINGS == mobile_ui_result_code) {
+    if (mobile_apis::Result::eType::SUCCESS == mobile_vr_result_code) {
       return mobile_apis::Result::eType::WARNINGS;
     }
   }
