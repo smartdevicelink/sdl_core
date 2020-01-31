@@ -632,8 +632,8 @@ TEST_F(
   am::event_engine::Event event_vr(hmi_apis::FunctionID::VR_PerformInteraction);
   event_vr.set_smart_object(*response_msg_vr);
 
-  MessageSharedPtr response_msg_ui =
-      CreateHMIResponseMessage(hmi_apis::Common_Result::WARNINGS, "");
+  MessageSharedPtr response_msg_ui = CreateHMIResponseMessage(
+      hmi_apis::Common_Result::WARNINGS, "UI warning message");
   am::event_engine::Event event_ui(hmi_apis::FunctionID::UI_PerformInteraction);
   event_ui.set_smart_object(*response_msg_ui);
 
@@ -659,7 +659,7 @@ TEST_F(
   ResultCommandExpectations(response_to_mobile,
                             true,
                             hmi_apis::Common_Result::UNSUPPORTED_RESOURCE,
-                            "VR error message");
+                            "UI warning message, VR error message");
 }
 
 }  // namespace perform_interaction_request
