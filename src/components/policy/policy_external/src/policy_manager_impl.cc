@@ -777,7 +777,7 @@ void PolicyManagerImpl::OnAppsSearchCompleted(const bool trigger_ptu) {
   }
 }
 
-void PolicyManagerImpl::OnChangeApplicationCount(const uint32_t new_app_count) {
+void PolicyManagerImpl::UpdatePTUReadyAppsCount(const uint32_t new_app_count) {
   applications_pending_ptu_count_ = new_app_count;
 }
 

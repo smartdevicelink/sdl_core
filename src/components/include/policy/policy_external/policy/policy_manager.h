@@ -537,7 +537,7 @@ class PolicyManager : public usage_statistics::StatisticsManager,
    * @brief Change applications count ready for PTU
    * @param new_app_count new applications count for PTU
    */
-  virtual void OnChangeApplicationCount(const uint32_t new_app_count) = 0;
+  virtual void UpdatePTUReadyAppsCount(const uint32_t new_app_count) = 0;
 
   /**
    * @brief OnAppRegisteredOnMobile allows to handle event when application were

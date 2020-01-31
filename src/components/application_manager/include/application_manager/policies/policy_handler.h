@@ -426,12 +426,12 @@ class PolicyHandler : public PolicyHandlerInterface,
    * the same app id exists
    * @param new_app_id app id new application
    */
-  void PushAppIdToQueue(const uint32_t new_app_id);
+  void PushAppIdToPTUQueue(const uint32_t new_app_id);
 
   /**
    * @brief Remove the first application from applications queue
    */
-  void PopAppIdFromQueue();
+  void PopAppIdFromPTUQueue();
 
   custom_str::CustomString GetAppName(
       const std::string& policy_app_id) OVERRIDE;
@@ -600,7 +600,7 @@ class PolicyHandler : public PolicyHandlerInterface,
   /**
    * @brief Queue applications for which PTU has not yet been completed
    */
-  std::set<uint32_t> queue_applications_for_ptu_;
+  std::set<uint32_t> applications_ptu_queue;
 
   /**
    * @brief OnAppRegisteredOnMobile allows to handle event when application were
