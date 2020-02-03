@@ -403,6 +403,20 @@ const char* audio_streaming_indicator = "audioStreamingIndicator";
 
 const char* windows_info = "windowsInfo";
 
+const char* auto_join_wifi_supported = "autoJoinWiFiSupported";
+const char* can_host_wifi_network = "canHostWiFiNetwork";
+const char* data_fallback_supported = "dataFallbackSupported";
+const char* data_usage_preference = "dataUsagePreference";
+const char* wifi_frequency_bands_supported = "wifiFrequencyBandsSupported";
+const char* wifi_specs_supported = "wifiSpecsSupported";
+const char* networking_abilities = "networkingAbilities";
+const char* network_host = "networkHost";
+const char* networking_info = "networkingInfo";
+const char* wifi_state = "wifiState";
+const char* ssid = "ssid";
+const char* password = "password";
+const char* security_type = "securityType";
+
 const char* const keyboard_properties_supported = "keyboardPropertiesSupported";
 const char* const language_supported = "languageSupported";
 const char* const keyboard_layout_supported = "keyboardLayoutSupported";

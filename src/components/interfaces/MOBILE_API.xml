@@ -1,7 +1,7 @@
 <?xml version="1.0" standalone="no"?>
 <?xml-stylesheet type="text/xml" href="protocol2html.xsl"?>
 
-<interface name="SmartDeviceLink RAPI" version="6.0.0" minVersion="1.0" date="2019-03-19">
+<interface name="SmartDeviceLink RAPI" version="6.1.0" minVersion="1.0" date="2019-03-19">
     <enum name="Result" internal_scope="base" since="1.0">
         <element name="SUCCESS">
             <description>The request succeeded</description>
@@ -2583,6 +2583,65 @@
         </param>
     </struct>
 
+    <enum name="FrequencyBand" since="6.1">
+        <element name="FREQUENCY_BAND_2_4_GHZ"/>
+        <element name="FREQUENCY_BAND_5_0_GHZ"/>
+        <element name="FREQUENCY_BAND_6_0_GHZ"/>
+    </enum>
+
+    <enum name="Device" since="6.1">
+        <element name="MOBILE"/>
+        <element name="VEHICLE"/>
+        <element name="NONE"/>
+    </enum>
+
+    <enum name="WiFiSecurityType">
+    <description>enum to define WiFi security types used for WiFi connection.</description>
+        <element name="NONE"/>
+        <element name="WEP"/>
+        <element name="WPA"/>
+        <element name="WPA2"/>
+        <element name="WPA3"/>
+    </enum>
+
+    <enum name="WiFiStateInfo">
+        <description>enum to define WiFi state.</description>
+        <element name="WIFI_STATE_DISABLED"/>
+        <element name="WIFI_STATE_ENABLED"/>
+    </enum>
+
+    <struct name="NetworkingAbilities" since="6.1">
+        <description>Describes some of the sending device's available configurations around WiFi networking. This includes the ability to automatically join a network or host one itself.</description>
+        <param name="autoJoinWiFiSupported" type="Boolean" mandatory="false">
+            <description> </description>
+        </param>        
+        <param name="canHostWiFiNetwork" type="Boolean" mandatory="false">
+            <description> </description>
+        </param>        
+        <param name="dataFallbackSupported" type="Boolean" mandatory="false">
+            <description> This describes the devices ability to support joining multiple networks and using one for internet connectivity if the not available on a different, connected network.</description>
+        </param>            
+        <param name="dataUsagePreference" type="Device" mandatory="false">
+            <description> This describe the preference of what data to use. This is useful when a user might have unlimited data on one device but a cap on another</description>
+        </param>
+        <param name="wifiFrequencyBandsSupported" type="FrequencyBand" array="true" minsize="1" maxsize="100" mandatory="false">
+            <description> An array of frequencies supported by the device. Values should be in units of GHz for example 2.4GHz, 5.0GHz, etc </description>
+        </param>
+        <param name="wifiSpecsSupported" type="String" array="true" minsize="1" maxsize="100" mandatory="false">
+            <description> An array of WiFi Specifications, aka "Names", supported by the device. Currently expected values should be from the following: 802.11b = 1, 802.11a = 2, 802.11g = 3, 802.11n = 4, 802.11ac = 5, 802.11ax = 6.</description>
+        </param>
+    </struct>
+
+    <struct name="NetworkingInfo" since="6.1">
+        <description>Describes the abilities of the head unit as well as who should host a network</description>        
+        <param name="networkingAbilities" type="NetworkingAbilities" mandatory="false">
+            <description>Device's ability around networking</description>
+        </param>            
+        <param name="networkHost" type="Device" mandatory="false">
+            <description> This describe which device is to host the common network that should be joined. The device listed here should immediately start their network.</description>
+        </param>
+    </struct>
+
     <struct name="DeviceInfo" since="3.0">
         <description>Various information about connecting device.</description>         
         <param name="hardware" type="String"  minlength="0" maxlength="500" mandatory="false">
@@ -2602,7 +2661,10 @@
         </param>
         <param name="maxNumberRFCOMMPorts" type="Integer" minvalue="0" maxvalue="100" mandatory="false">
             <description>Omitted if connected not via BT.</description>
-        </param>         
+        </param>
+        <param name="networkingAbilities" type="NetworkingAbilities" mandatory="false">
+                <description>Device's available configurations around networking</description>
+        </param>   
     </struct>         
 
     <enum name="RequestType" since="3.0">
@@ -2840,6 +2902,7 @@
         <element name="DeleteWindowID" value="61" hexvalue="3D" since="6.0" />
         <element name="GetInteriorVehicleDataConsentID" value="62" hexvalue="3E" since="6.0" />
         <element name="ReleaseInteriorVehicleDataModuleID" value="63" hexvalue="3F" since="6.0" /> 
+        <element name="JoinNetworkID" value="64" hexvalue="40" since="6.1" /> 
         
         <!--
          Base Notifications
@@ -4673,6 +4736,10 @@
                 Existence of apps icon at system. If true, apps icon
                 was resumed at system. If false, apps icon is not resumed at system
             </description>
+        </param>
+
+        <param name="networkingInfo" type="NetworkingInfo" mandatory="false">
+            <description>Describes the abilities of the head unit as well as who should host a network</description>
         </param>
     </function>
     
@@ -8306,6 +8373,46 @@
         <param name="systemCapability" type="SystemCapability" mandatory="true">
             <description>The system capability that has been updated</description>
         </param>
+    </function>
+
+    <function name="JoinNetwork" functionID="JoinNetworkID" messagetype="request" since="6.1">
+        <description>A request for the receiver to join the specified network.</description>
+        <param name="wifiState" type="WiFiStateInfo" mandatory="false">
+            <description>wifi state info</description>
+        </param>
+        <param name="ssid" type="String" minlength="1" maxlength="32" mandatory="false">
+            <description>name of the WiFi ssid</description>
+        </param>
+        <param name="password" type="String" minlength="1" maxlength="100" mandatory="false">
+            <description>password to use to connect AP</description>
+        </param>
+        <param name="securityType" type="WiFiSecurityType" mandatory="false">
+            <description>security type of WiFi AP</description>
+        </param>   
+    </function>
+    ​
+    <function name="JoinNetwork" functionID="JoinNetworkID" messagetype="response" since="6.1">
+        <description>A response and description of requested action.</description>
+    <param name="success" type="Boolean" mandatory="true">
+        <description> true, if successful; false, if failed </description>
+    </param>
+            
+    <param name="resultCode" type="Result" mandatory="true">
+        <description>See Result</description>
+        <element name="SUCCESS"/>
+        <element name="UNSUPPORTED_RESOURCE"/>
+        <element name="DISALLOWED"/>
+        <element name="REJECTED"/>
+        <element name="TOO_MANY_PENDING_REQUESTS"/>
+        <element name="APPLICATION_NOT_REGISTERED"/>
+        <element name="GENERIC_ERROR"/>
+        <element name="USER_DISALLOWED"/>
+        <element name="DATA_NOT_AVAILABLE"/>
+    </param>
+            
+    <param name="info" type="String" maxlength="1000" mandatory="false" platform="documentation">
+        <description>Provides additional human readable info regarding the result.</description>
+    </param>   
     </function>
     
     <!-- ~~~~~~~~~~~~~~~~~~ -->

@@ -256,6 +256,12 @@
 #include "sdl_rpc_plugin/commands/hmi/on_bc_system_capability_updated_notification.h"
 #include "sdl_rpc_plugin/commands/hmi/on_bc_system_capability_updated_notification_from_hmi.h"
 
+#include "sdl_rpc_plugin/commands/hmi/bc_join_network_request.h"
+#include "sdl_rpc_plugin/commands/hmi/bc_join_network_response.h"
+
+#include "sdl_rpc_plugin/commands/hmi/bc_join_network_request_from_hmi.h"
+#include "sdl_rpc_plugin/commands/hmi/bc_join_network_response_to_hmi.h"
+
 namespace sdl_rpc_plugin {
 using namespace application_manager;
 
@@ -903,6 +909,17 @@ CommandCreator& HMICommandFactory::get_creator_factory(
                            OnBCSystemCapabilityUpdatedNotificationFromHMI>()
                  : factory.GetCreator<
                        commands::OnBCSystemCapabilityUpdatedNotification>();
+    }
+    case hmi_apis::FunctionID::BasicCommunication_JoinNetwork: {
+      if (application_manager::commands::Command::CommandSource::SOURCE_HMI == source) {
+        return hmi_apis::messageType::request == message_type
+                 ? factory.GetCreator<commands::BCJoinNetworkRequestFromHMI>()
+                 : factory.GetCreator<commands::BCJoinNetworkResponseToHMI>();
+      } else {
+        return hmi_apis::messageType::request == message_type
+                 ? factory.GetCreator<commands::BCJoinNetworkRequest>()
+                 : factory.GetCreator<commands::BCJoinNetworkResponse>();
+      }
     }
     default: { return factory.GetCreator<InvalidCommand>(); }
   }

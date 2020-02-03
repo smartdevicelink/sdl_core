@@ -113,6 +113,7 @@ class ApplicationManagerSettings : public RequestControlerSettings,
   virtual const std::string& plugins_folder() const = 0;
   virtual const std::vector<std::string>& embedded_services() const = 0;
   virtual const std::string hmi_origin_id() const = 0;
+  virtual const std::string network_host() const = 0;
 };
 
 }  // namespace application_manager

@@ -241,6 +241,7 @@ class RegisterAppInterfaceRequest
   mobile_apis::Result::eType result_code_;
   connection_handler::DeviceHandle device_handle_;
   std::string device_id_;
+  mobile_apis::Device::eType negotiated_network_host_;
 
   policy::PolicyHandlerInterface& GetPolicyHandler();
   DISALLOW_COPY_AND_ASSIGN(RegisterAppInterfaceRequest);

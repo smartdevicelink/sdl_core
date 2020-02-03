@@ -65,6 +65,9 @@ class MobileCommandFactory : public app_mngr::CommandFactory {
   app_mngr::CommandCreator& get_command_creator(
       const mobile_apis::FunctionID::eType id,
       const mobile_apis::messageType::eType message_type) const;
+  app_mngr::CommandCreator& get_to_mobile_command_creator(
+      const mobile_apis::FunctionID::eType id,
+      const mobile_apis::messageType::eType message_type) const;
   app_mngr::CommandCreator& get_notification_creator(
       const mobile_apis::FunctionID::eType id) const;
   app_mngr::CommandCreator& get_notification_from_mobile_creator(

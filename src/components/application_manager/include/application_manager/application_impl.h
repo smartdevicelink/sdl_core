@@ -506,6 +506,12 @@ class ApplicationImpl : public virtual Application,
 
   const smart_objects::SmartObject& get_user_location() const OVERRIDE;
 
+  void set_access_point_role(mobile_apis::Device::eType& device);
+  mobile_apis::Device::eType& access_point_role();
+
+  void set_networking_info(smart_objects::SmartObject &networking_info);
+  const smart_objects::SmartObject& networking_info() const OVERRIDE;
+
  protected:
   /**
    * @brief Clean up application folder. Persistent files will stay
@@ -618,6 +624,9 @@ class ApplicationImpl : public virtual Application,
   std::string cloud_transport_type_;
   mobile_apis::HybridAppPreference::eType hybrid_app_preference_;
   std::string certificate_;
+
+  mobile_apis::Device::eType access_point_role_;
+  smart_objects::SmartObject networking_info_;
 
   /**
    * @brief Defines number per time in seconds limits

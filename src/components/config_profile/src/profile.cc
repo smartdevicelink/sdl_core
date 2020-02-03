@@ -98,6 +98,7 @@ const char* kLowBandwidthTransportResumptionLevelSection =
     "LowBandwidthTransportResumptionLevel";
 const char* kAppServicesSection = "AppServices";
 const char* kRCModuleConsentSection = "RCModuleConsent";
+const char* kAccessPointSection = "AccessPoint";
 
 const char* kSDLVersionKey = "SDLVersion";
 const char* kHmiCapabilitiesKey = "HMICapabilities";
@@ -297,6 +298,7 @@ const char* kMediaLowBandwidthResumptionLevelKey =
     "MediaLowBandwidthResumptionLevel";
 const char* kHMIOriginIDKey = "HMIOriginID";
 const char* kEmbeddedServicesKey = "EmbeddedServices";
+const char* kNetworkHostKey = "NetworkHost";
 
 #ifdef WEB_HMI
 const char* kDefaultLinkToWebHMI = "HMI/index.html";
@@ -429,6 +431,7 @@ const char* kDefaultAOAFilterDescription = "SmartDeviceLink Core Component USB";
 const char* kDefaultAOAFilterVersion = "1.0";
 const char* kDefaultAOAFilterURI = "http://www.smartdevicelink.org";
 const char* kDefaultAOAFilterSerialNumber = "N000000";
+const char* kDefaultNetworkHost = "NONE";
 }  // namespace
 
 namespace profile {
@@ -1196,6 +1199,10 @@ const std::vector<std::string>& Profile::embedded_services() const {
 
 const std::string Profile::hmi_origin_id() const {
   return hmi_origin_id_;
+}
+
+const std::string Profile::network_host() const {
+  return network_host_;
 }
 
 void Profile::UpdateValues() {
@@ -2476,6 +2483,13 @@ void Profile::UpdateValues() {
       entry++;
     }
   }
+
+  ReadStringValue(&network_host_,
+                kDefaultNetworkHost,
+                kAccessPointSection,
+                kNetworkHostKey);
+
+  LOG_UPDATED_VALUE(network_host_, kNetworkHostKey, kAccessPointSection);
 }
 
 bool Profile::ReadValue(bool* value,

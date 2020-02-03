@@ -438,6 +438,21 @@ extern const char* audio_streaming_indicator;
 
 extern const char* windows_info;
 
+// Access point information
+extern const char* auto_join_wifi_supported;
+extern const char* can_host_wifi_network;
+extern const char* data_fallback_supported;
+extern const char* data_usage_preference;
+extern const char* wifi_frequency_bands_supported;
+extern const char* wifi_specs_supported;
+extern const char* networking_abilities;
+extern const char* network_host;
+extern const char* networking_info;
+extern const char* wifi_state;
+extern const char* ssid;
+extern const char* password;
+extern const char* security_type;
+
 // keys for default parameters loaded from hmi_capabilities.json:
 extern const char* const keyboard_properties_default;
 extern const char* const language_default;

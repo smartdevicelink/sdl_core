@@ -1804,6 +1804,7 @@ bool MessageHelper::CreateHMIApplicationStruct(
   smart_objects::SmartObject& device_info = message[strings::device_info];
   CreateDeviceInfo(
       app->device(), session_observer, policy_handler, app_mngr, &device_info);
+  device_info[strings::networking_info] = app->networking_info();
 
   if (app->secondary_device() != 0) {
     message[strings::secondary_device_info] =

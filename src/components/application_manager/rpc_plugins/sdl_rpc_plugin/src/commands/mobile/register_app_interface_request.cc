@@ -518,11 +518,51 @@ void RegisterAppInterfaceRequest::Run() {
   device_info.AdoptDeviceType(dev_params.device_connection_type);
   if (msg_params.keyExists(strings::device_info)) {
     FillDeviceInfo(&device_info);
+    // access point negotiation
+    // todo clean up into method
+    if (msg_params[strings::device_info].keyExists(strings::networking_abilities)) {
+      bool auto_join_wifi_supported = false;
+      if (msg_params[strings::device_info][strings::networking_abilities].keyExists(strings::auto_join_wifi_supported)) {
+        auto_join_wifi_supported = msg_params[strings::device_info][strings::networking_abilities][strings::auto_join_wifi_supported].asBool();
+      }
+      bool can_host_wifi_network = false;
+      if (msg_params[strings::device_info][strings::networking_abilities].keyExists(strings::can_host_wifi_network)) {
+        can_host_wifi_network = msg_params[strings::device_info][strings::networking_abilities][strings::auto_join_wifi_supported].asBool();
+      }
+
+      std::string ini_preferred_network_host = application_manager_.get_settings().network_host();
+      bool ivi_network_host_supported = (ini_preferred_network_host == "ALL") || (ini_preferred_network_host == "VEHICLE");
+      bool mobile_network_host_supported = (ini_preferred_network_host == "ALL") || (ini_preferred_network_host == "MOBILE");
+      bool no_network_host_supported = ini_preferred_network_host == "NONE";
+      negotiated_network_host_ = mobile_apis::Device::NONE;
+      if (auto_join_wifi_supported && !can_host_wifi_network && ivi_network_host_supported) {
+        // IVI to host
+        negotiated_network_host_ = mobile_apis::Device::VEHICLE;
+      } else if (!auto_join_wifi_supported && can_host_wifi_network && mobile_network_host_supported) {
+        // Mobile to host
+        negotiated_network_host_ = mobile_apis::Device::MOBILE;
+      } else if (auto_join_wifi_supported && can_host_wifi_network && ivi_network_host_supported) {
+        // IVI to host
+        negotiated_network_host_ = mobile_apis::Device::VEHICLE;
+      }  else if (auto_join_wifi_supported && can_host_wifi_network && mobile_network_host_supported) {
+        // Mobile to host
+        negotiated_network_host_ = mobile_apis::Device::MOBILE;
+      } else if (ivi_network_host_supported) {
+        //IVI to host by default
+        negotiated_network_host_ = mobile_apis::Device::VEHICLE;
+      }
+      application->set_access_point_role(negotiated_network_host_);
+      smart_objects::SmartObject networking_info(smart_objects::SmartType_Map);
+      networking_info[strings::networking_abilities] = msg_params[strings::device_info][strings::networking_abilities];
+      networking_info[strings::network_host] = negotiated_network_host_;
+    }
   }
 
   const std::string& device_mac = application->mac_address();
 
   GetPolicyHandler().SetDeviceInfo(device_mac, device_info);
+
+  
 
   SendRegisterAppInterfaceResponseToMobile(ApplicationType::kNewApplication);
   smart_objects::SmartObjectSPtr so =
@@ -889,6 +929,22 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile(
 
   response_params[strings::icon_resumed] =
       file_system::FileExists(application->app_icon_path());
+
+  // Access point response params
+  response_params[strings::networking_info] = smart_objects::SmartObject(smart_objects::SmartType_Map);
+  smart_objects::SmartObject networking_abilities(smart_objects::SmartType_Map);
+  //smart_objects::SmartObject wifi_spec_supported(smart_objects::SmartType_Array);
+  // todo add wifi capabilities to ini or hmi capabilities
+  networking_abilities[strings::auto_join_wifi_supported] = true;
+  networking_abilities[strings::can_host_wifi_network] = negotiated_network_host_ == mobile_apis::Device::VEHICLE;
+  networking_abilities[strings::data_fallback_supported] = true;
+  response_params[strings::networking_info][strings::networking_abilities] = networking_abilities;
+
+  if (negotiated_network_host_ == mobile_apis::Device::VEHICLE || negotiated_network_host_ == mobile_apis::Device::MOBILE) {
+    response_params[strings::network_host] = negotiated_network_host_;
+  }
+  
+
 
   SendResponse(true, result_code, add_info.c_str(), &response_params);
   if (msg_params.keyExists(strings::app_hmi_type)) {

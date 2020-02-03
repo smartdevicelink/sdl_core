@@ -246,6 +246,8 @@ generate_function_to_interface_convert_map() {
       HmiInterfaces::HMI_INTERFACE_AppService;
   convert_map[AppService_GetActiveServiceConsent] =
       HmiInterfaces::HMI_INTERFACE_AppService;
+  convert_map[BasicCommunication_JoinNetwork] =
+      HmiInterfaces::HMI_INTERFACE_BasicCommunication;
   return convert_map;
 }
 

@@ -543,6 +543,7 @@ class Profile : public protocol_handler::ProtocolHandlerSettings,
 
   const std::vector<std::string>& embedded_services() const OVERRIDE;
   const std::string hmi_origin_id() const OVERRIDE;
+  const std::string network_host() const OVERRIDE;
   /**
    * @brief Reads a string value from the profile
    *
@@ -1097,6 +1098,7 @@ class Profile : public protocol_handler::ProtocolHandlerSettings,
   std::vector<std::string> embedded_services_;
 
   std::string hmi_origin_id_;
+  std::string network_host_;
 
   DISALLOW_COPY_AND_ASSIGN(Profile);
 };

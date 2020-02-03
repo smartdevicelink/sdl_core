@@ -1224,6 +1224,12 @@ class Application : public virtual InitialApplicationData,
    */
   virtual const smart_objects::SmartObject& get_user_location() const = 0;
 
+  virtual void set_access_point_role(mobile_apis::Device::eType& device) = 0;
+  virtual mobile_apis::Device::eType& access_point_role() = 0;
+
+  virtual void set_networking_info(smart_objects::SmartObject &networking_info) = 0;
+  virtual const smart_objects::SmartObject& networking_info() const = 0;
+
  protected:
   mutable sync_primitives::Lock hmi_states_lock_;
 

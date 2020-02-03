@@ -2665,6 +2665,64 @@
   </param>
 </struct>
 
+<enum name="FrequencyBand" >
+    <element name="FREQUENCY_BAND_2_4_GHZ"/>
+    <element name="FREQUENCY_BAND_5_0_GHZ"/>
+    <element name="FREQUENCY_BAND_6_0_GHZ"/>
+</enum>
+
+<enum name="Device" since="6.1">
+    <element name="MOBILE"/>
+    <element name="VEHICLE"/>
+</enum>
+
+<enum name="WiFiSecurityType">
+<description>enum to define WiFi security types used for WiFi connection.</description>
+    <element name="NONE"/>
+    <element name="WEP"/>
+    <element name="WPA"/>
+    <element name="WPA2"/>
+    <element name="WPA3"/>
+</enum>
+
+<enum name="WiFiStateInfo">
+    <description>enum to define WiFi state.</description>
+    <element name="WIFI_STATE_DISABLED"/>
+    <element name="WIFI_STATE_ENABLED"/>
+</enum>
+
+<struct name="NetworkingAbilities">
+    <description>Describes some of the sending device's available configurations around WiFi networking. This includes the ability to automatically join a network or host one itself.</description>
+    <param name="autoJoinWiFiSupported" type="Boolean" mandatory="false">
+        <description> </description>
+    </param>        
+    <param name="canHostWiFiNetwork" type="Boolean" mandatory="false">
+        <description> </description>
+    </param>        
+    <param name="dataFallbackSupported" type="Boolean" mandatory="false">
+        <description> This describes the devices ability to support joining multiple networks and using one for internet connectivity if the not available on a different, connected network.</description>
+    </param>            
+    <param name="dataUsagePreference" type="Common.Device" mandatory="false">
+        <description> This describe the preference of what data to use. This is useful when a user might have unlimited data on one device but a cap on another</description>
+    </param>
+    <param name="wifiFrequencyBandsSupported" type="Common.FrequencyBand" array="true" minsize="1" maxsize="100" mandatory="false">
+        <description> An array of frequencies supported by the device. Values should be in units of GHz for example 2.4GHz, 5.0GHz, etc </description>
+    </param>
+    <param name="wifiSpecsSupported" type="String" array="true" minsize="1" maxsize="100" mandatory="false">
+        <description> An array of WiFi Specifications, aka "Names", supported by the device. Currently expected values should be from the following: 802.11b = 1, 802.11a = 2, 802.11g = 3, 802.11n = 4, 802.11ac = 5, 802.11ax = 6.</description>
+    </param>
+</struct>
+
+<struct name="NetworkingInfo">
+    <description>Describes the abilities of the head unit as well as who should host a network</description>        
+    <param name="networkingAbilities" type="Common.NetworkingAbilities" mandatory="false">
+        <description>Device's ability around networking</description>
+    </param>            
+    <param name="networkHost" type="Common.Device" mandatory="false">
+        <description> This describe which device is to host the common network that should be joined. The device listed here should immediately start their network.</description>
+    </param>
+</struct>
+
 <struct name="DeviceInfo">
   <param name="name" type="String" mandatory="true">
     <description>The name of the device connected.</description>
@@ -2677,6 +2735,9 @@
   </param>
   <param name="isSDLAllowed" type="Boolean" mandatory="false">
     <description>Sent by SDL in UpdateDeviceList. ’true’ – if device is allowed for PolicyTable Exchange; ‘false’ – if device is NOT allowed for PolicyTable Exchange </description>
+  </param>
+  <param name="networkingInfo" type="Common.NetworkingInfo" mandatory="false">
+              <description>Device's available configurations around networking</description>
   </param>
 </struct>
 
@@ -2811,6 +2872,7 @@
     <param name="nightColorScheme" type="Common.TemplateColorScheme" mandatory="false"></param>
     <param name="isCloudApplication" type="Boolean" mandatory="false"></param>
     <param name="cloudConnectionStatus" type="Common.CloudConnectionStatus" mandatory="false"></param>
+    <param name="networkingInfo" type="Common.NetworkingInfo" mandatory="false"></param>
 </struct>
 
 <struct name="MenuParams">
@@ -4213,6 +4275,46 @@
 </interface>
 
 <interface name="BasicCommunication" version="2.1.0" date="2019-03-18">
+<function name="JoinNetwork" messagetype="request" >
+    <description>A request for the receiver to join the specified network.</description>
+    <param name="wifiState" type="Common.WiFiStateInfo" mandatory="false">
+        <description>wifi state info</description>
+    </param>
+    <param name="ssid" type="String" minlength="1" maxlength="32" mandatory="false">
+        <description>name of the WiFi ssid</description>
+    </param>
+    <param name="password" type="String" minlength="1" maxlength="100" mandatory="false">
+        <description>password to use to connect AP</description>
+    </param>
+    <param name="securityType" type="Common.WiFiSecurityType" mandatory="false">
+        <description>security type of WiFi AP</description>
+    </param>   
+</function>
+​
+<function name="JoinNetwork" messagetype="response" >
+    <description>A response and description of requested action.</description>
+  <param name="success" type="Boolean" mandatory="true">
+      <description> true, if successful; false, if failed </description>
+  </param>
+        
+  <param name="resultCode" type="Common.Result" mandatory="true">
+    <description>See Result</description>
+    <element name="SUCCESS"/>
+    <element name="UNSUPPORTED_RESOURCE"/>
+    <element name="DISALLOWED"/>
+    <element name="REJECTED"/>
+    <element name="TOO_MANY_PENDING_REQUESTS"/>
+    <element name="APPLICATION_NOT_REGISTERED"/>
+    <element name="GENERIC_ERROR"/>
+    <element name="USER_DISALLOWED"/>
+    <element name="DATA_NOT_AVAILABLE"/>
+  </param>
+        
+  <param name="info" type="String" maxlength="1000" mandatory="false" platform="documentation">
+      <description>Provides additional human readable info regarding the result.</description>
+  </param>   
+</function>
+
 <function name="OnServiceUpdate" messagetype="notification">
   <description>
     Must be sent by SDL to HMI when there is an update on status of certain services.

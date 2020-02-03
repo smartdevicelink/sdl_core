@@ -59,6 +59,14 @@
         "functional_groupings": {
             "Base-4": {
                 "rpcs": {
+                    "JoinNetwork": {
+                        "hmi_levels": [
+                            "BACKGROUND",
+                            "FULL",
+                            "LIMITED",
+                            "NONE"
+                        ]
+                    },
                     "AddCommand": {
                         "hmi_levels": [
                             "BACKGROUND",

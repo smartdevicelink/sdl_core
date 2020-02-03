@@ -1338,4 +1338,20 @@ void ApplicationImpl::SwapMobileMessageQueue(
   mobile_messages.swap(mobile_message_queue_);
 }
 
+void ApplicationImpl::set_access_point_role(mobile_apis::Device::eType& device) {
+  access_point_role_ = device;
+}
+
+mobile_apis::Device::eType& ApplicationImpl::access_point_role() {
+  return access_point_role_;
+}
+
+void ApplicationImpl::set_networking_info(smart_objects::SmartObject &networking_info) {
+  networking_info_ = networking_info;
+}
+
+const smart_objects::SmartObject& ApplicationImpl::networking_info() const {
+  return networking_info_;
+}
+
 }  // namespace application_manager
