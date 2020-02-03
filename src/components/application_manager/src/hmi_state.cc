@@ -98,6 +98,10 @@ bool HmiState::is_mobile_projection_app() const {
   return app ? app->mobile_projection_enabled() : false;
 }
 
+bool HmiState::is_video_streaming_app() const {
+  return is_navi_app() || is_mobile_projection_app();
+}
+
 mobile_apis::WindowType::eType HmiState::window_type() const {
   return window_type_;
 }
@@ -142,9 +146,13 @@ VideoStreamingHmiState::VideoStreamingHmiState(
 
 mobile_apis::VideoStreamingState::eType
 VideoStreamingHmiState::video_streaming_state() const {
+  using namespace helpers;
+  using namespace mobile_apis;
   const ApplicationSharedPtr app =
       app_mngr_.application_by_hmi_app(hmi_app_id_);
-  if (app && app->IsVideoApplication()) {
+  if (app && app->IsVideoApplication() &&
+      (Compare<HMILevel::eType, EQ, ONE>(
+          hmi_level(), HMILevel::HMI_FULL, HMILevel::HMI_LIMITED))) {
     return parent()->video_streaming_state();
   }
 
@@ -240,6 +248,7 @@ AudioSource::AudioSource(std::shared_ptr<Application> app,
 
 mobile_apis::HMILevel::eType AudioSource::hmi_level() const {
   using namespace mobile_apis;
+  using namespace helpers;
 
   if (WindowType::WIDGET == window_type()) {
     return parent()->hmi_level();
@@ -247,7 +256,11 @@ mobile_apis::HMILevel::eType AudioSource::hmi_level() const {
 
   // Checking for NONE  is necessary to avoid issue during
   // calculation of HMI level during setting default HMI level
-  if (keep_context_ || HMILevel::HMI_NONE == parent()->hmi_level()) {
+
+  if (keep_context_ || !is_media_app() ||
+      Compare<HMILevel::eType, EQ, ONE>(parent()->hmi_level(),
+                                        HMILevel::HMI_BACKGROUND,
+                                        HMILevel::HMI_NONE)) {
     return parent()->hmi_level();
   }
 

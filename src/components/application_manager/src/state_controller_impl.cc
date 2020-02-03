@@ -386,12 +386,14 @@ void StateControllerImpl::HmiLevelConflictResolver::operator()(
   mobile_apis::AudioStreamingState::eType result_audio_state =
       mobile_apis::AudioStreamingState::NOT_AUDIBLE;
 
-  if (to_resolve_grabs_audio && !same_app_audio_type) {
-    result_audio_state = mobile_apis::AudioStreamingState::AUDIBLE;
-  }
+  if (!same_app_audio_type) {
+    if (to_resolve_grabs_audio) {
+      result_audio_state = mobile_apis::AudioStreamingState::AUDIBLE;
+    }
 
-  if (to_resolve_grabs_video && !applied_grabs_video) {
-    result_video_state = mobile_apis::VideoStreamingState::STREAMABLE;
+    if (to_resolve_grabs_video && !applied_grabs_video) {
+      result_video_state = mobile_apis::VideoStreamingState::STREAMABLE;
+    }
   }
 
   mobile_apis::HMILevel::eType result_hmi_level = state_to_resolve->hmi_level();

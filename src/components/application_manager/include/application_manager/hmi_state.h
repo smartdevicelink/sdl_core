@@ -256,6 +256,15 @@ class HmiState {
    */
   bool is_mobile_projection_app() const;
 
+  /**
+   * @brief is_video_streaming_app checks if application of 'projection' or
+   * 'navigation'
+   * HMI type
+   * @return True if application is of 'projection' or 'navigation' HMI type,
+   * otherwise - false
+   */
+  bool is_video_streaming_app() const;
+
  private:
   void operator=(const HmiState&);
 };
