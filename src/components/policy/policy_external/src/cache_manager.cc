@@ -41,8 +41,6 @@
 #include <utility>
 #include <vector>
 
-#include "json/features.h"
-#include "json/reader.h"
 #include "json/writer.h"
 #include "policy/policy_helper.h"
 #include "policy/policy_table/enums.h"
@@ -52,6 +50,7 @@
 #include "utils/file_system.h"
 #include "utils/gen_hash.h"
 #include "utils/helpers.h"
+#include "utils/jsoncpp_reader_wrapper.h"
 #include "utils/logger.h"
 #include "utils/threads/thread.h"
 #include "utils/threads/thread_delegate.h"
@@ -2703,13 +2702,13 @@ bool CacheManager::LoadFromFile(const std::string& file_name,
     LOG4CXX_FATAL(logger_, "Failed to read policy table source file.");
     return false;
   }
+
+  utils::JsonReader reader;
   Json::Value value;
-  Json::Reader reader(Json::Features::strictMode());
+
   std::string json(json_string.begin(), json_string.end());
-  if (!reader.parse(json.c_str(), value)) {
-    LOG4CXX_FATAL(
-        logger_,
-        "Preloaded PT is corrupted: " << reader.getFormattedErrorMessages());
+  if (!reader.parse(json, &value)) {
+    LOG4CXX_FATAL(logger_, "Preloaded PT is corrupted.");
     return false;
   }
 
@@ -2720,10 +2719,10 @@ bool CacheManager::LoadFromFile(const std::string& file_name,
   table = policy_table::Table(&value);
 
 #ifdef ENABLE_LOG
-  Json::StyledWriter s_writer;
-  LOG4CXX_DEBUG(
-      logger_,
-      "Policy table content loaded:" << s_writer.write(table.ToJsonValue()));
+  Json::StreamWriterBuilder writer_builder;
+  LOG4CXX_DEBUG(logger_,
+                "Policy table content loaded:" << Json::writeString(
+                    writer_builder, table.ToJsonValue()));
 #endif  // ENABLE_LOG
 
   MakeLowerCaseAppNames(table);

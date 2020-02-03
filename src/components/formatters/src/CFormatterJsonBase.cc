@@ -107,10 +107,10 @@ void ns_smart_device_link::ns_json_handler::formatters::CFormatterJsonBase::
       item = obj.asBool();
     } else if (ns_smart_device_link::ns_smart_objects::SmartType_Integer ==
                obj.getType()) {
-      item = utils::ConvertInt64ToLongLongInt(obj.asInt());
+      item = obj.asInt();
     } else if (ns_smart_device_link::ns_smart_objects::SmartType_UInteger ==
                obj.getType()) {
-      item = utils::ConvertUInt64ToLongLongUInt(obj.asUInt());
+      item = obj.asUInt();
     } else if (ns_smart_device_link::ns_smart_objects::SmartType_Double ==
                obj.getType()) {
       item = obj.asDouble();

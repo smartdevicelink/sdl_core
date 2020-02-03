@@ -1,4 +1,5 @@
-/* Copyright (c) 2013, Ford Motor Company
+/*
+ * Copyright (c) 2019, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,46 +30,33 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <fstream>
+#include "utils/jsoncpp_reader_wrapper.h"
+#include "utils/logger.h"
 
-#include "gtest/gtest.h"
+namespace utils {
 
-#include "json/reader.h"
-#include "json/value.h"
-#include "policy/policy_table/enums.h"
-#include "policy/policy_table/types.h"
-#include "rpc_base/gtest_support.h"
+CREATE_LOGGERPTR_GLOBAL(logger_, "JsoncppReaderWrapper")
 
-using rpc::policy_table_interface_base::Table;
-
-namespace test {
-namespace components {
-namespace policy_test {
-
-TEST(PolicyGeneratedCodeTest, TestValidPTPreloadJsonIsValid) {
-  std::ifstream json_file("sdl_preloaded_pt.json");
-  ASSERT_TRUE(json_file.is_open());
-  Json::Value valid_table;
-  Json::CharReaderBuilder reader_builder;
-  ASSERT_TRUE(
-      Json::parseFromStream(reader_builder, json_file, &valid_table, nullptr));
-  Table table(&valid_table);
-  table.SetPolicyTableType(rpc::policy_table_interface_base::PT_PRELOADED);
-  ASSERT_RPCTYPE_VALID(table);
+JsonReader::JsonReader() {
+  reader_ = std::unique_ptr<Json::CharReader>(reader_builder_.newCharReader());
 }
 
-TEST(PolicyGeneratedCodeTest, TestValidPTUpdateJsonIsValid) {
-  std::ifstream json_file("valid_sdl_pt_update.json");
-  ASSERT_TRUE(json_file.is_open());
-  Json::Value valid_table;
-  Json::CharReaderBuilder reader_builder;
-  ASSERT_TRUE(
-      Json::parseFromStream(reader_builder, json_file, &valid_table, nullptr));
-  Table table(&valid_table);
-  table.SetPolicyTableType(rpc::policy_table_interface_base::PT_UPDATE);
-  ASSERT_RPCTYPE_VALID(table);
-}
+bool JsonReader::parse(const std::string& json, Json::Value* root) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  JSONCPP_STRING err;
+  bool is_parsing_ok = false;
+  const size_t json_len = json.length();
+  try {
+    is_parsing_ok =
+        reader_->parse(json.c_str(), json.c_str() + json_len, root, &err);
+  } catch (Json::RuntimeError& e) {
+    LOG4CXX_DEBUG(logger_, "Exception caught during parse json: " << e.what());
+    return false;
+  }
 
-}  // namespace policy_test
-}  // namespace components
-}  // namespace test
+  if (!is_parsing_ok) {
+    LOG4CXX_ERROR(logger_, "Json parsing fails: " << err);
+  }
+  return is_parsing_ok;
+}
+}  // namespace utils

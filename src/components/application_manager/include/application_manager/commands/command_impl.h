@@ -145,6 +145,16 @@ class CommandImpl : public Command {
    */
   void SetAllowedToTerminate(const bool allowed) OVERRIDE;
 
+  /**
+   * @brief Calculates command`s internal consecutive number
+   * for specified application used during resumption.
+   * This method is called when a new command is added.
+   * @param[in] app Application for wich a consecutive number is calculated
+   * @return internal consecutive number
+   */
+  static uint32_t CalcCommandInternalConsecutiveNumber(
+      application_manager::ApplicationConstSharedPtr app);
+
   // members
   static const int32_t hmi_protocol_type_;
   static const int32_t mobile_protocol_type_;

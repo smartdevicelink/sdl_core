@@ -53,10 +53,11 @@ TEST_F(PolicyManagerImplTest2, UpdatedPreloadedPT_ExpectLPT_IsUpdated) {
   CreateLocalPT(preloaded_pt_filename_);
   // Update preloadedPT
   std::ifstream ifile(preloaded_pt_filename_);
-  Json::Reader reader;
+  Json::CharReaderBuilder reader_builder;
   Json::Value root(Json::objectValue);
 
-  if (ifile.is_open() && reader.parse(ifile, root, true)) {
+  if (ifile.is_open() &&
+      Json::parseFromStream(reader_builder, ifile, &root, nullptr)) {
     root["policy_table"]["module_config"]["preloaded_date"] =
         new_data.new_date_;
     Json::Value val(Json::objectValue);

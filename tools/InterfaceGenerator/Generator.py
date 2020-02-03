@@ -34,7 +34,11 @@ try:
     from generator.generators.SmartFactoryBase import GenerateError
     from generator.parsers import SDLRPCV1, JSONRPC
 except ModuleNotFoundError as error:
-    print('{}.\nProbably you did not initialize submodule'.format(error))
+    print(str(error) + '\nPlease make sure the RPC Spec Generator Submodule is initialized.\n'
+                       'Check the sdl_core source directory in `tools/rpc_spec`.\n'
+                       'Try running in the source directory:\n'
+                       '$ git submodule init\n'
+                       '$ git submodule update')
     sys.exit(1)
 
 

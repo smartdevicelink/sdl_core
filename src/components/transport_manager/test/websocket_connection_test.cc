@@ -276,8 +276,7 @@ TEST_F(WebsocketConnectionTest, WSConnection_SUCCESS) {
       .hybrid_app_preference = "CLOUD"};
 
   // Start server
-  std::thread t1(&WebsocketConnectionTest::StartWSServer, this, "/");
-  usleep(5000);
+  StartWSServer("/");
 
   // Start client
   InitWebsocketClient(properties, ws_client);
@@ -294,7 +293,6 @@ TEST_F(WebsocketConnectionTest, WSConnection_SUCCESS) {
 
   // Stop server thread
   ws_session->Stop();
-  t1.join();
 }
 
 TEST_F(WebsocketConnectionTest, WSConnection_SUCCESS_ValidTarget) {
@@ -308,8 +306,7 @@ TEST_F(WebsocketConnectionTest, WSConnection_SUCCESS_ValidTarget) {
       .hybrid_app_preference = "CLOUD"};
 
   // Start server
-  std::thread t1(&WebsocketConnectionTest::StartWSServer, this, kPath);
-  usleep(5000);
+  StartWSServer(kPath);
 
   // Start client
   InitWebsocketClient(properties, ws_client);
@@ -326,7 +323,6 @@ TEST_F(WebsocketConnectionTest, WSConnection_SUCCESS_ValidTarget) {
 
   // Stop server thread
   ws_session->Stop();
-  t1.join();
 }
 
 TEST_F(WebsocketConnectionTest, WSConnection_FAILURE_InvalidTarget) {
@@ -340,8 +336,7 @@ TEST_F(WebsocketConnectionTest, WSConnection_FAILURE_InvalidTarget) {
       .hybrid_app_preference = "CLOUD"};
 
   // Start server
-  std::thread t1(&WebsocketConnectionTest::StartWSServer, this, "/");
-  usleep(5000);
+  StartWSServer("/");
 
   // Start client
   InitWebsocketClient(properties, ws_client);
@@ -358,7 +353,6 @@ TEST_F(WebsocketConnectionTest, WSConnection_FAILURE_InvalidTarget) {
 
   // Stop server thread
   ws_session->Stop();
-  t1.join();
 }
 
 TEST_F(WebsocketConnectionTest, WSSConnection_SUCCESS) {
@@ -371,8 +365,7 @@ TEST_F(WebsocketConnectionTest, WSSConnection_SUCCESS) {
       .hybrid_app_preference = "CLOUD"};
 
   // Start server
-  std::thread t1(&WebsocketConnectionTest::StartWSSServer, this, "/");
-  usleep(5000);
+  StartWSSServer("/");
 
   // Start client
   InitWebsocketClient(properties, ws_client);
@@ -389,7 +382,6 @@ TEST_F(WebsocketConnectionTest, WSSConnection_SUCCESS) {
 
   // Stop server thread
   wss_session->Stop();
-  t1.join();
 }
 
 TEST_F(WebsocketConnectionTest, WSSConnection_SUCCESS_ValidTarget) {
@@ -402,10 +394,7 @@ TEST_F(WebsocketConnectionTest, WSSConnection_SUCCESS_ValidTarget) {
       .hybrid_app_preference = "CLOUD"};
 
   // Start server
-  std::thread t1(&WebsocketConnectionTest::StartWSSServer,
-                 this,
-                 (kPath + kQuery + kFragment));
-  usleep(5000);
+  StartWSSServer((kPath + kQuery + kFragment));
 
   // Start client
   InitWebsocketClient(properties, ws_client);
@@ -422,7 +411,6 @@ TEST_F(WebsocketConnectionTest, WSSConnection_SUCCESS_ValidTarget) {
 
   // Stop server thread
   wss_session->Stop();
-  t1.join();
 }
 
 #ifdef ENABLE_SECURITY
@@ -436,8 +424,7 @@ TEST_F(WebsocketConnectionTest, WSSConnection_FAILURE_InvalidTarget) {
       .hybrid_app_preference = "CLOUD"};
 
   // Start server
-  std::thread t1(&WebsocketConnectionTest::StartWSSServer, this, kPath);
-  usleep(5000);
+  StartWSSServer(kPath);
 
   // Start client
   InitWebsocketClient(properties, ws_client);
@@ -454,7 +441,6 @@ TEST_F(WebsocketConnectionTest, WSSConnection_FAILURE_InvalidTarget) {
 
   // Stop server thread
   wss_session->Stop();
-  t1.join();
 }
 
 TEST_F(WebsocketConnectionTest, WSSConnection_FAILURE_IncorrectCert) {
@@ -467,8 +453,7 @@ TEST_F(WebsocketConnectionTest, WSSConnection_FAILURE_IncorrectCert) {
       .hybrid_app_preference = "CLOUD"};
 
   // Start server
-  std::thread t1(&WebsocketConnectionTest::StartWSSServer, this, "/");
-  usleep(5000);
+  StartWSSServer("/");
 
   // Start client
   InitWebsocketClient(properties, ws_client);
@@ -485,7 +470,6 @@ TEST_F(WebsocketConnectionTest, WSSConnection_FAILURE_IncorrectCert) {
 
   // Stop server thread
   wss_session->Stop();
-  t1.join();
 }
 #endif  // ENABLE_SECURITY
 }  // namespace transport_manager_test

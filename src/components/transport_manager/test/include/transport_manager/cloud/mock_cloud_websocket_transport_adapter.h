@@ -1,4 +1,5 @@
-/* Copyright (c) 2013, Ford Motor Company
+/*
+ * Copyright (c) 2019, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,46 +30,35 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <fstream>
+#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_TEST_INCLUDE_TRANSPORT_MANAGER_CLOUD_MOCK_CLOUD_WEBSOCKET_TRANSPORT_ADAPTER_H_
+#define SRC_COMPONENTS_TRANSPORT_MANAGER_TEST_INCLUDE_TRANSPORT_MANAGER_CLOUD_MOCK_CLOUD_WEBSOCKET_TRANSPORT_ADAPTER_H_
 
-#include "gtest/gtest.h"
-
-#include "json/reader.h"
-#include "json/value.h"
-#include "policy/policy_table/enums.h"
-#include "policy/policy_table/types.h"
-#include "rpc_base/gtest_support.h"
-
-using rpc::policy_table_interface_base::Table;
+#include "transport_manager/cloud/cloud_websocket_transport_adapter.h"
 
 namespace test {
 namespace components {
-namespace policy_test {
+namespace transport_manager_test {
 
-TEST(PolicyGeneratedCodeTest, TestValidPTPreloadJsonIsValid) {
-  std::ifstream json_file("sdl_preloaded_pt.json");
-  ASSERT_TRUE(json_file.is_open());
-  Json::Value valid_table;
-  Json::CharReaderBuilder reader_builder;
-  ASSERT_TRUE(
-      Json::parseFromStream(reader_builder, json_file, &valid_table, nullptr));
-  Table table(&valid_table);
-  table.SetPolicyTableType(rpc::policy_table_interface_base::PT_PRELOADED);
-  ASSERT_RPCTYPE_VALID(table);
-}
+using namespace ::transport_manager::transport_adapter;
 
-TEST(PolicyGeneratedCodeTest, TestValidPTUpdateJsonIsValid) {
-  std::ifstream json_file("valid_sdl_pt_update.json");
-  ASSERT_TRUE(json_file.is_open());
-  Json::Value valid_table;
-  Json::CharReaderBuilder reader_builder;
-  ASSERT_TRUE(
-      Json::parseFromStream(reader_builder, json_file, &valid_table, nullptr));
-  Table table(&valid_table);
-  table.SetPolicyTableType(rpc::policy_table_interface_base::PT_UPDATE);
-  ASSERT_RPCTYPE_VALID(table);
-}
+class MockCloudWebsocketTransportAdapter
+    : public CloudWebsocketTransportAdapter {
+ public:
+  MockCloudWebsocketTransportAdapter(
+      resumption::LastState& last_state,
+      const transport_manager::TransportManagerSettings& settings)
+      : CloudWebsocketTransportAdapter(last_state, settings) {}
+  MOCK_CONST_METHOD0(GetDeviceType, DeviceType());
+  MOCK_CONST_METHOD0(Store, void());
+  MOCK_METHOD0(Restore, bool());
+  MOCK_CONST_METHOD0(IsInitialised, bool());
+  MOCK_METHOD1(AddListener, void(TransportAdapterListener* listener));
+  MOCK_METHOD0(Init, TransportAdapter::Error());
+  MOCK_METHOD0(Terminate, void());
+};
 
-}  // namespace policy_test
+}  // namespace transport_manager_test
 }  // namespace components
 }  // namespace test
+
+#endif  // SRC_COMPONENTS_TRANSPORT_MANAGER_TEST_INCLUDE_TRANSPORT_MANAGER_CLOUD_MOCK_CLOUD_WEBSOCKET_TRANSPORT_ADAPTER_H_
