@@ -56,8 +56,9 @@ JoinNetworkRequest::~JoinNetworkRequest() {}
 
 void JoinNetworkRequest::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
-  smart_objects::SmartObject msg_params;
-  msg_params[strings::app_id] = connection_key();
+  smart_objects::SmartObject msg_params(smart_objects::SmartType_Map);
+  msg_params = (*message_)[strings::msg_params];
+  //msg_params[strings::app_id] = connection_key();
   SendHMIRequest(hmi_apis::FunctionID::BasicCommunication_JoinNetwork,
                   &msg_params,
                   true);
