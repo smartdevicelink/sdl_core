@@ -395,6 +395,11 @@ CommandCreator& MobileCommandFactory::get_command_creator(
                  ? factory.GetCreator<commands::CloseApplicationRequest>()
                  : factory.GetCreator<commands::CloseApplicationResponse>();
     }
+    case mobile_apis::FunctionID::JoinNetworkID: {
+      return mobile_api::messageType::request == message_type
+                 ? factory.GetCreator<commands::JoinNetworkRequest>()
+                 : factory.GetCreator<commands::JoinNetworkResponse>();
+    }
     case mobile_apis::FunctionID::GenericResponseID: {
       using app_mngr::commands::Command;
       return factory.GetCreator<commands::GenericResponse>();
