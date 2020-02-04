@@ -517,9 +517,12 @@ void RegisterAppInterfaceRequest::Run() {
   policy::DeviceInfo device_info;
   device_info.AdoptDeviceType(dev_params.device_connection_type);
   if (msg_params.keyExists(strings::device_info)) {
+    LOG4CXX_DEBUG(logger_, "!!!Device Info exists");
     FillDeviceInfo(&device_info);
     // access point negotiation
     // todo clean up into method
+    std::string ini_preferred_network_host = application_manager_.get_settings().network_host();
+    LOG4CXX_DEBUG(logger_, "!!!NETWORK HOST: " << ini_preferred_network_host);
     if (msg_params[strings::device_info].keyExists(strings::networking_abilities)) {
       bool auto_join_wifi_supported = false;
       if (msg_params[strings::device_info][strings::networking_abilities].keyExists(strings::auto_join_wifi_supported)) {
@@ -529,25 +532,30 @@ void RegisterAppInterfaceRequest::Run() {
       if (msg_params[strings::device_info][strings::networking_abilities].keyExists(strings::can_host_wifi_network)) {
         can_host_wifi_network = msg_params[strings::device_info][strings::networking_abilities][strings::auto_join_wifi_supported].asBool();
       }
-
-      std::string ini_preferred_network_host = application_manager_.get_settings().network_host();
+      
+      LOG4CXX_DEBUG(logger_, "!!!NETWORK HOST: " << ini_preferred_network_host);
       bool ivi_network_host_supported = (ini_preferred_network_host == "ALL") || (ini_preferred_network_host == "VEHICLE");
       bool mobile_network_host_supported = (ini_preferred_network_host == "ALL") || (ini_preferred_network_host == "MOBILE");
       bool no_network_host_supported = ini_preferred_network_host == "NONE";
       negotiated_network_host_ = mobile_apis::Device::NONE;
       if (auto_join_wifi_supported && !can_host_wifi_network && ivi_network_host_supported) {
         // IVI to host
+        LOG4CXX_DEBUG(logger_, "!!!NETWORK HOST: 1" );
         negotiated_network_host_ = mobile_apis::Device::VEHICLE;
       } else if (!auto_join_wifi_supported && can_host_wifi_network && mobile_network_host_supported) {
         // Mobile to host
+        LOG4CXX_DEBUG(logger_, "!!!NETWORK HOST: 2" );
         negotiated_network_host_ = mobile_apis::Device::MOBILE;
       } else if (auto_join_wifi_supported && can_host_wifi_network && ivi_network_host_supported) {
+        LOG4CXX_DEBUG(logger_, "!!!NETWORK HOST: 3" );
         // IVI to host
         negotiated_network_host_ = mobile_apis::Device::VEHICLE;
       }  else if (auto_join_wifi_supported && can_host_wifi_network && mobile_network_host_supported) {
+        LOG4CXX_DEBUG(logger_, "!!!NETWORK HOST: 4" );
         // Mobile to host
         negotiated_network_host_ = mobile_apis::Device::MOBILE;
       } else if (ivi_network_host_supported) {
+        LOG4CXX_DEBUG(logger_, "!!!NETWORK HOST: 5");
         //IVI to host by default
         negotiated_network_host_ = mobile_apis::Device::VEHICLE;
       }
@@ -555,6 +563,7 @@ void RegisterAppInterfaceRequest::Run() {
       smart_objects::SmartObject networking_info(smart_objects::SmartType_Map);
       networking_info[strings::networking_abilities] = msg_params[strings::device_info][strings::networking_abilities];
       networking_info[strings::network_host] = negotiated_network_host_;
+      application->set_networking_info(networking_info);
     }
   }
 
@@ -941,7 +950,7 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile(
   response_params[strings::networking_info][strings::networking_abilities] = networking_abilities;
 
   if (negotiated_network_host_ == mobile_apis::Device::VEHICLE || negotiated_network_host_ == mobile_apis::Device::MOBILE) {
-    response_params[strings::network_host] = negotiated_network_host_;
+    response_params[strings::networking_info][strings::network_host] = negotiated_network_host_;
   }
   
 
