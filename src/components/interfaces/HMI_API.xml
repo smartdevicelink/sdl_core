@@ -4277,6 +4277,7 @@
 <interface name="BasicCommunication" version="2.1.0" date="2019-03-18">
 <function name="JoinNetwork" messagetype="request" >
     <description>A request for the receiver to join the specified network.</description>
+    <param name="policyAppID" type="String" mandatory="false"/>
     <param name="wifiState" type="Common.WiFiStateInfo" mandatory="false">
         <description>wifi state info</description>
     </param>

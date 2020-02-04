@@ -67,6 +67,8 @@ class BCJoinNetworkRequestFromHMI : public app_mngr::commands::RequestFromHMI {
    **/
   virtual void Run();
 
+  void on_event(const app_mngr::event_engine::MobileEvent& event) OVERRIDE;
+
  private:
   DISALLOW_COPY_AND_ASSIGN(BCJoinNetworkRequestFromHMI);
 };

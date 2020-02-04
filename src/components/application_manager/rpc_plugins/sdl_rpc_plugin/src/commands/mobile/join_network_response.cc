@@ -55,6 +55,7 @@ JoinNetworkResponse::~JoinNetworkResponse() {}
 
 void JoinNetworkResponse::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
+  rpc_service_.SendMessageToMobile(message_);
 }
 
 }  // namespace commands

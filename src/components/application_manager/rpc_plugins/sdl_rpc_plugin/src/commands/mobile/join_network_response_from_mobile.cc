@@ -55,6 +55,9 @@ JoinNetworkResponseFromMobile::~JoinNetworkResponseFromMobile() {}
 
 void JoinNetworkResponseFromMobile::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
+  event_engine::MobileEvent event(mobile_apis::FunctionID::JoinNetworkID);
+  event.set_smart_object(*message_);
+  event.raise(application_manager_.event_dispatcher());
 }
 
 }  // namespace commands
