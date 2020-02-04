@@ -469,18 +469,18 @@ uint32_t PolicyHandler::GetAppIdForSending() const {
 void PolicyHandler::PushAppIdToPTUQueue(const uint32_t app_id) {
   LOG4CXX_AUTO_TRACE(logger_);
   sync_primitives::AutoLock lock(app_id_queue_lock_);
-  const auto result = applications_ptu_queue.insert(app_id);
+  const auto result = applications_ptu_queue_.insert(app_id);
   if (result.second) {
-    policy_manager_->UpdatePTUReadyAppsCount(applications_ptu_queue.size());
+    policy_manager_->UpdatePTUReadyAppsCount(applications_ptu_queue_.size());
   }
 }
 
 void PolicyHandler::PopAppIdFromPTUQueue() {
   LOG4CXX_AUTO_TRACE(logger_);
   sync_primitives::AutoLock lock(app_id_queue_lock_);
-  if (applications_ptu_queue.size() > 0) {
-    applications_ptu_queue.erase(applications_ptu_queue.begin());
-    policy_manager_->UpdatePTUReadyAppsCount(applications_ptu_queue.size());
+  if (applications_ptu_queue_.size() > 0) {
+    applications_ptu_queue_.erase(applications_ptu_queue_.begin());
+    policy_manager_->UpdatePTUReadyAppsCount(applications_ptu_queue_.size());
   }
 }
 

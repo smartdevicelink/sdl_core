@@ -602,7 +602,7 @@ class PolicyHandler : public PolicyHandlerInterface,
   /**
    * @brief Queue applications for which PTU has not yet been completed
    */
-  std::set<uint32_t> applications_ptu_queue;
+  std::set<uint32_t> applications_ptu_queue_;
 
   /**
    * @brief OnAppRegisteredOnMobile allows to handle event when application were
