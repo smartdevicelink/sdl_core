@@ -940,18 +940,21 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile(
       file_system::FileExists(application->app_icon_path());
 
   // Access point response params
-  response_params[strings::networking_info] = smart_objects::SmartObject(smart_objects::SmartType_Map);
-  smart_objects::SmartObject networking_abilities(smart_objects::SmartType_Map);
-  //smart_objects::SmartObject wifi_spec_supported(smart_objects::SmartType_Array);
-  // todo add wifi capabilities to ini or hmi capabilities
-  networking_abilities[strings::auto_join_wifi_supported] = true;
-  networking_abilities[strings::can_host_wifi_network] = negotiated_network_host_ == mobile_apis::Device::VEHICLE;
-  networking_abilities[strings::data_fallback_supported] = true;
-  response_params[strings::networking_info][strings::networking_abilities] = networking_abilities;
+  if (!application->networking_info().empty()) { // only send networking info in response if mobile sent networking info: todo validate networking_info
+    response_params[strings::networking_info] = smart_objects::SmartObject(smart_objects::SmartType_Map);
+    smart_objects::SmartObject networking_abilities(smart_objects::SmartType_Map);
+    //smart_objects::SmartObject wifi_spec_supported(smart_objects::SmartType_Array);
+    // todo add wifi capabilities to ini or hmi capabilities
+    networking_abilities[strings::auto_join_wifi_supported] = true;
+    networking_abilities[strings::can_host_wifi_network] = negotiated_network_host_ == mobile_apis::Device::VEHICLE;
+    networking_abilities[strings::data_fallback_supported] = true;
+    response_params[strings::networking_info][strings::networking_abilities] = networking_abilities;
 
-  if (negotiated_network_host_ == mobile_apis::Device::VEHICLE || negotiated_network_host_ == mobile_apis::Device::MOBILE) {
-    response_params[strings::networking_info][strings::network_host] = negotiated_network_host_;
+    if (negotiated_network_host_ == mobile_apis::Device::VEHICLE || negotiated_network_host_ == mobile_apis::Device::MOBILE) {
+      response_params[strings::networking_info][strings::network_host] = negotiated_network_host_;
+    }
   }
+
   
 
 
