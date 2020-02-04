@@ -6,13 +6,13 @@ Verifies format specific functions and produced source code.
 import codecs
 import collections
 import os
-import sys
 import unittest
 import uuid
 from pathlib import Path
+from unittest.mock import MagicMock
+from unittest.mock import call
 
-from mock import MagicMock
-from mock import call
+import sys
 
 sys.path.append(Path(__file__).absolute().parents[3].as_posix())
 sys.path.append(Path(__file__).absolute().parents[4].joinpath('rpc_spec/InterfaceParser').as_posix())

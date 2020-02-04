@@ -5,9 +5,9 @@ Verifies common helper functions and produced source code.
 """
 import collections
 import unittest
+from pathlib import Path
 
 import sys
-from pathlib import Path
 
 sys.path.append(Path(__file__).absolute().parents[3].as_posix())
 sys.path.append(Path(__file__).absolute().parents[4].joinpath('rpc_spec/InterfaceParser').as_posix())
@@ -20,7 +20,6 @@ try:
 except ModuleNotFoundError as error:
     print('{}.\nProbably you did not initialize submodule'.format(error))
     sys.exit(1)
-
 
 EXPECTED_RESULT_FULL_COMMENT = u"""/**
  * @brief Enumeration Test Name.
@@ -153,7 +152,6 @@ TODOS = [u"Do1", u"Do2"]
 
 
 class Test(unittest.TestCase):
-
     """Test for SmartFactory base generator.
 
     This class holds set of test cases for the SmartFactory base generator.
@@ -169,10 +167,10 @@ class Test(unittest.TestCase):
         generator = SmartFactoryBase.CodeGenerator()
 
         enum = Enum(name=u"Test Name",
-                          description=DESCRIPTION,
-                          design_description=DESIGN_DESCRIPTION,
-                          issues=ISSUES,
-                          todos=TODOS)
+                    description=DESCRIPTION,
+                    design_description=DESIGN_DESCRIPTION,
+                    issues=ISSUES,
+                    todos=TODOS)
         self.assertEqual(generator._gen_comment(enum),
                          EXPECTED_RESULT_FULL_COMMENT,
                          "Full comment for enum is invalid")
@@ -186,8 +184,8 @@ class Test(unittest.TestCase):
         generator = SmartFactoryBase.CodeGenerator()
 
         enum_element1 = EnumElement(name=u"Element1",
-                                          internal_name=u"InternalName",
-                                          value=u"10")
+                                    internal_name=u"InternalName",
+                                    value=u"10")
 
         self.assertEqual(
             generator._gen_enum_element(enum_element1),
@@ -211,13 +209,13 @@ class Test(unittest.TestCase):
         generator = SmartFactoryBase.CodeGenerator()
 
         elements = [EnumElement(name=u"name1",
-                                      design_description=DESIGN_DESCRIPTION,
-                                      todos=TODOS,
-                                      value=u"1"),
+                                design_description=DESIGN_DESCRIPTION,
+                                todos=TODOS,
+                                value=u"1"),
                     EnumElement(name=u"name2",
-                                      description=DESCRIPTION,
-                                      issues=ISSUES,
-                                      internal_name=u"internal_name2")]
+                                description=DESCRIPTION,
+                                issues=ISSUES,
+                                internal_name=u"internal_name2")]
         self.assertEqual(generator._gen_enum_elements(elements),
                          EXPECTED_RESULT_ENUM_ELEMENTS1,
                          "Simple enum elements are invalid")
@@ -243,8 +241,8 @@ class Test(unittest.TestCase):
             internal_name=u"internal_name2")
 
         enum1 = Enum(name=u"Enum1",
-                           todos=TODOS,
-                           elements=elements1)
+                     todos=TODOS,
+                     elements=elements1)
 
         self.assertEqual(generator._gen_enum(enum1),
                          EXPECTED_RESULT_ENUM1,
@@ -252,14 +250,14 @@ class Test(unittest.TestCase):
 
         elements2 = collections.OrderedDict()
         elements2[u"xxx"] = EnumElement(name=u"xxx",
-                                              internal_name=u"val_1")
+                                        internal_name=u"val_1")
         elements2[u"yyy"] = EnumElement(name=u"yyy",
-                                              internal_name=u"val_2",
-                                              value=u"100")
+                                        internal_name=u"val_2",
+                                        value=u"100")
         elements2[u"zzz"] = EnumElement(name=u"val_3")
 
         enum2 = Enum(name=u"E2",
-                           elements=elements2)
+                     elements=elements2)
         self.assertEqual(generator._gen_enum(enum2),
                          EXPECTED_RESULT_ENUM2,
                          "Long enum is invalid")
@@ -290,6 +288,7 @@ class Test(unittest.TestCase):
                                                                   "ccc\r3",
                                                                   "aaa aaa"]),
                          ["aaa", "1", "bbb", "2", "ccc", "3", "aaa aaa"])
+
 
 if __name__ == '__main__':
     unittest.main()

@@ -6,13 +6,13 @@ Verifies format specific functions and produced source code.
 import codecs
 import collections
 import os
-import sys
 import unittest
 import uuid
 from pathlib import Path
+from unittest.mock import MagicMock
+from unittest.mock import call
 
-from mock import MagicMock
-from mock import call
+import sys
 
 sys.path.append(Path(__file__).absolute().parents[3].as_posix())
 sys.path.append(Path(__file__).absolute().parents[4].joinpath('rpc_spec/InterfaceParser').as_posix())
@@ -33,7 +33,6 @@ try:
 except ModuleNotFoundError as error:
     print('{}.\nProbably you did not initialize submodule'.format(error))
     sys.exit(1)
-
 
 EXPECTED_NOTIFICATION_RESULT = (
     u"""params_members[ns_smart_device_link::ns_json_handler::"""
@@ -68,7 +67,6 @@ TODOS = [u"Do1", u"Do2"]
 
 
 class Test(unittest.TestCase):
-
     """Test for SLDRPC SmartFactory generator.
 
     This class holds set of test cases for the SDLRPC SmartFactory generator.
@@ -344,6 +342,7 @@ class Test(unittest.TestCase):
                                      "Invalid source file content")
         except AssertionError as message:
             print(message)
+
 
 if __name__ == '__main__':
     unittest.main()
