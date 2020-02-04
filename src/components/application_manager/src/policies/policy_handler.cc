@@ -427,8 +427,7 @@ uint32_t PolicyHandler::GetAppIdForSending() const {
   LOG4CXX_AUTO_TRACE(logger_);
   POLICY_LIB_CHECK(0);
   // fix ApplicationSet access crash
-  const ApplicationSet accessor =
-      application_manager_.applications().GetData();
+  const ApplicationSet accessor = application_manager_.applications().GetData();
 
   HMILevelPredicate has_none_level(mobile_api::HMILevel::HMI_NONE);
   Applications apps_without_none_level;
