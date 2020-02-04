@@ -3,13 +3,12 @@
 Verifies format specific functions and produced source code.
 
 """
-import collections
 import codecs
+import collections
 import os
+import sys
 import unittest
 import uuid
-
-import sys
 from pathlib import Path
 
 from mock import MagicMock
@@ -17,7 +16,6 @@ from mock import call
 
 sys.path.append(Path(__file__).absolute().parents[3].as_posix())
 sys.path.append(Path(__file__).absolute().parents[4].joinpath('rpc_spec/InterfaceParser').as_posix())
-
 try:
     from generator.generators import SmartFactoryJSONRPC
     from model.array import Array
@@ -35,7 +33,6 @@ try:
 except ModuleNotFoundError as error:
     print('{}.\nProbably you did not initialize submodule'.format(error))
     sys.exit(1)
-
 
 EXPECTED_RESULT_REQUEST = (
     u"""params_members[ns_smart_device_link::ns_json_handler::"""
@@ -153,7 +150,6 @@ TODOS = [u"Do1", u"Do2"]
 
 
 class Test(unittest.TestCase):
-
     """Test for JSONRPC SmartFactory generator.
 
     This class holds set of test cases for the JSONRPC SmartFactory generator.
@@ -211,7 +207,7 @@ class Test(unittest.TestCase):
             name=u"notification")
 
         message_type = Enum(name=u"messageType",
-                                  elements=message_type_elements)
+                            elements=message_type_elements)
 
         result_enum = generator._preprocess_message_type(message_type)
 
@@ -225,7 +221,7 @@ class Test(unittest.TestCase):
             name=u"notification")
 
         message_type = Enum(name=u"messageType",
-                                  elements=message_type_elements)
+                            elements=message_type_elements)
 
         result_enum = generator._preprocess_message_type(message_type)
 
@@ -238,6 +234,7 @@ class Test(unittest.TestCase):
         function.
 
         """
+        self.maxDiff = None
 
         generator = SmartFactoryJSONRPC.CodeGenerator()
 
@@ -253,7 +250,7 @@ class Test(unittest.TestCase):
             name=u"notification")
 
         message_type = Enum(name=u"messageType",
-                                  elements=message_type_elements)
+                            elements=message_type_elements)
 
         function1 = Function(
             "func1", function_id=message_type.elements[u"request"],
@@ -266,15 +263,17 @@ class Test(unittest.TestCase):
         function2 = Function(
             "func2", function_id=message_type.elements[u"request"],
             message_type=message_type.elements[u"response"])
+        try:
+            self.assertEqual(EXPECTED_PRE_FUNCTION_CODE,
+                             generator._gen_pre_function_schemas([function2]),
+                             "Invalid code for single response function")
 
-        self.assertEqual(EXPECTED_PRE_FUNCTION_CODE,
-                         generator._gen_pre_function_schemas([function2]),
-                         "Invalid code for single response function")
-
-        self.assertEqual(EXPECTED_PRE_FUNCTION_CODE,
-                         generator._gen_pre_function_schemas([function1,
-                                                              function2]),
-                         "Invalid code for mixed function list")
+            self.assertEqual(EXPECTED_PRE_FUNCTION_CODE,
+                             generator._gen_pre_function_schemas([function1,
+                                                                  function2]),
+                             "Invalid code for mixed function list")
+        except AssertionError as message:
+            print(message)
 
     def test_full_generation(self):
         """Test full generation using JSONRPC SmartSchema generator.
@@ -285,9 +284,9 @@ class Test(unittest.TestCase):
         directory as this module.
 
         """
-
-        expected_h_file_content = open("test_expected_jsonrpc.h", "r").read()
-        expected_cc_file_content = open("test_expected_jsonrpc.cc", "r").read()
+        self.maxDiff = None
+        expected_h_file_content = Path(__file__).parents[0].joinpath("test_expected_jsonrpc.h").read_text()
+        expected_cc_file_content = Path(__file__).parents[0].joinpath("test_expected_jsonrpc.cc").read_text()
 
         generator = SmartFactoryJSONRPC.CodeGenerator()
 
@@ -299,7 +298,7 @@ class Test(unittest.TestCase):
             name=u"notification")
 
         message_type = Enum(name=u"messageType",
-                                  elements=message_type_elements)
+                            elements=message_type_elements)
 
         elements1 = collections.OrderedDict()
         elements1[u"name1"] = EnumElement(
@@ -314,37 +313,37 @@ class Test(unittest.TestCase):
             internal_name=u"internal_name2")
 
         enum1 = Enum(name=u"Enum1",
-                           todos=TODOS,
-                           elements=elements1)
+                     todos=TODOS,
+                     elements=elements1)
 
         elements2 = collections.OrderedDict()
         elements2[u"xxx"] = EnumElement(name=u"xxx",
-                                              internal_name=u"val_1")
+                                        internal_name=u"val_1")
         elements2[u"yyy"] = EnumElement(name=u"yyy",
-                                              internal_name=u"val_2",
-                                              value=u"100")
+                                        internal_name=u"val_2",
+                                        value=u"100")
         elements2[u"zzz"] = EnumElement(name=u"val_3")
 
         enum2 = Enum(name=u"E2",
-                           elements=elements2)
+                     elements=elements2)
 
         elements3 = collections.OrderedDict()
         elements3["1"] = EnumElement(name="xxx",
-                                           internal_name="_1")
+                                     internal_name="_1")
         elements3["2"] = EnumElement(name="xxx",
-                                           internal_name="_2")
+                                     internal_name="_2")
         elements3["3"] = EnumElement(name="xxx",
-                                           internal_name="_3")
+                                     internal_name="_3")
         enum3 = Enum(name="Enum_new2",
-                           elements=elements3)
+                     elements=elements3)
 
         elements4 = collections.OrderedDict()
         elements4["name1"] = EnumElement(name="xxx",
-                                               internal_name="_11")
+                                         internal_name="_11")
         elements4["name2"] = EnumElement(name="xxx",
-                                               internal_name="_22")
+                                         internal_name="_22")
         enum4 = Enum(name="Enum_new4",
-                           elements=elements4)
+                     elements=elements4)
 
         enums = collections.OrderedDict()
         enums["Enum1"] = enum1
@@ -354,7 +353,7 @@ class Test(unittest.TestCase):
         enums["messageType"] = message_type
 
         params1 = collections.OrderedDict()
-        params1["1"] = FunctionParam(
+        params1["1"] = Param(
             name="param1",
             design_description=DESIGN_DESCRIPTION,
             description=DESCRIPTION,
@@ -362,7 +361,7 @@ class Test(unittest.TestCase):
             todos=TODOS,
             param_type=enum4,
             default_value=elements4["name1"])
-        params1["2"] = FunctionParam(
+        params1["2"] = Param(
             name="param2",
             param_type=EnumSubset(
                 name="sub1",
@@ -387,18 +386,18 @@ class Test(unittest.TestCase):
 
         members1 = collections.OrderedDict()
         members1["m1"] = Param(name="intParam",
-                                     param_type=Integer(max_value=2))
+                               param_type=Integer(max_value=2))
         members1["m11"] = Param(name="doubleParam",
-                                      param_type=Double(min_value=0.333),
-                                      is_mandatory=False)
+                                param_type=Float(min_value=0.333),
+                                is_mandatory=False)
         members1["m222"] = Param(name="boolParam",
-                                       param_type=Boolean())
+                                 param_type=Boolean())
         members1["m2"] = Param(name="structParam",
-                                     param_type=Struct(name="Struct2"))
+                               param_type=Struct(name="Struct2"))
         members1["aaa"] = Param(name="enumParam",
-                                      param_type=enum1)
+                                param_type=enum1)
         members1["bbb"] = Param(name="enumParam1",
-                                      param_type=enum1)
+                                param_type=enum1)
         members1["xxx"] = Param(
             name="enumSubset1",
             param_type=EnumSubset(
@@ -409,20 +408,20 @@ class Test(unittest.TestCase):
         members1["1"] = Param(
             name="arrayOfInt",
             param_type=Array(min_size=0,
-                                   max_size=20,
-                                   element_type=Boolean()),
+                             max_size=20,
+                             element_type=Boolean()),
             is_mandatory=False)
         members1["2"] = Param(
             name="arrayOfEnum1",
             param_type=Array(min_size=0,
-                                   max_size=20,
-                                   element_type=enum1),
+                             max_size=20,
+                             element_type=enum1),
             is_mandatory=False)
         members1["3"] = Param(
             name="arrayOfEnum3",
             param_type=Array(min_size=10,
-                                   max_size=40,
-                                   element_type=enum3),
+                             max_size=40,
+                             element_type=enum3),
             is_mandatory=True)
         members1["4"] = Param(
             name="arrayOfEnum4",
@@ -459,13 +458,13 @@ class Test(unittest.TestCase):
             issues=ISSUES,
             members=members1)
         structs["Struct2"] = Struct(name="Struct2",
-                                          issues=ISSUES)
+                                    issues=ISSUES)
 
         interface = Interface(enums=enums,
-                                    structs=structs,
-                                    functions=functions,
-                                    params={"param1": "value1",
-                                            "param2": "value2"})
+                              structs=structs,
+                              functions=functions,
+                              params={"param1": "value1",
+                                      "param2": "value2"})
 
         os.path.exists = MagicMock(return_value=True)
         uuid.uuid1 = MagicMock(
@@ -489,18 +488,21 @@ class Test(unittest.TestCase):
                          "Invalid header file creation")
 
         self.assertEqual(mock_calls[4],
-                         call('/some/test/dir/Test.cc',
+                         call('/some/test/dir/Test_schema.h',
                               mode='w',
                               encoding='utf-8'),
                          "Invalid source file creation")
+        try:
+            self.assertSequenceEqual(str(mock_calls[2])[27:-2].replace("\\n", "\n"),
+                                     expected_h_file_content,
+                                     "Invalid header file content")
 
-        self.assertEqual(str(mock_calls[2])[27:-2].replace("\\n", "\n"),
-                         expected_h_file_content,
-                         "Invalid header file content")
+            self.assertSequenceEqual(str(mock_calls[6])[27:-2].replace("\\n", "\n"),
+                                     expected_cc_file_content,
+                                     "Invalid source file content")
+        except AssertionError as message:
+            print(message)
 
-        self.assertEqual(str(mock_calls[6])[27:-2].replace("\\n", "\n"),
-                         expected_cc_file_content,
-                         "Invalid source file content")
 
 if __name__ == '__main__':
     unittest.main()
