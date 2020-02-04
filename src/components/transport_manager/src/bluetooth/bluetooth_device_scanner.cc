@@ -213,7 +213,7 @@ void BluetoothDeviceScanner::DoInquiry() {
       paired_devices_, device_handle, &paired_devices_with_sdl_);
   UpdateTotalDeviceList();
 
-  LOG4CXX_INFO(logger_, "Starting hci_inquiry on device " << device_id);
+  /*LOG4CXX_INFO(logger_, "Starting hci_inquiry on device " << device_id);
   const uint8_t inquiry_time = 8u;  // Time unit is 1.28 seconds
   const size_t max_devices = 256u;
   inquiry_info* inquiry_info_list = new inquiry_info[max_devices];
@@ -236,16 +236,16 @@ void BluetoothDeviceScanner::DoInquiry() {
     CheckSDLServiceOnDevices(
         found_devices, device_handle, &found_devices_with_sdl_);
   }
-  UpdateTotalDeviceList();
+  UpdateTotalDeviceList();*/
   controller_->FindNewApplicationsRequest();
 
   close(device_handle);
-  delete[] inquiry_info_list;
+  //delete[] inquiry_info_list;
 
-  if (number_of_devices < 0) {
+  /*if (number_of_devices < 0) {
     LOG4CXX_DEBUG(logger_, "number_of_devices < 0");
     controller_->SearchDeviceFailed(SearchDeviceError());
-  }
+  }*/
 }
 
 void BluetoothDeviceScanner::CheckSDLServiceOnDevices(
