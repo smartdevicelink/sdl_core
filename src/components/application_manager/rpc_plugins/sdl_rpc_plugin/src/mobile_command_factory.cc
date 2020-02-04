@@ -554,7 +554,7 @@ bool MobileCommandFactory::IsAbleToProcess(
   auto id = static_cast<mobile_apis::FunctionID::eType>(function_id);
   return get_command_creator(id, mobile_apis::messageType::INVALID_ENUM)
              .CanBeCreated() ||
-         get_notification_creator(id).CanBeCreated();
+         get_notification_creator(id).CanBeCreated() || get_to_mobile_command_creator(id, mobile_apis::messageType::INVALID_ENUM).CanBeCreated();
 }
 
 CommandSharedPtr MobileCommandFactory::CreateCommand(
