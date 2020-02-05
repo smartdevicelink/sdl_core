@@ -4,5 +4,5 @@
 	branch = 1.9.2
 [submodule "tools/rpc_spec"]
 	path = tools/rpc_spec
-	url = https://github.com/vladmu/rpc_spec.git
-	branch = master
+	url = https://github.com/smartdevicelink/rpc_spec.git
+	branch = develop
