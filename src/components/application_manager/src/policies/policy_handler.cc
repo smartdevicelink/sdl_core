@@ -719,6 +719,13 @@ void PolicyHandler::OnGetUserFriendlyMessage(
       result, correlation_id, application_manager_);
 }
 
+void PolicyHandler::OnSystemRequestReceived() const {
+#ifdef EXTERNAL_PROPRIETARY_MODE
+  ptu_retry_handler().OnSystemRequestReceived();
+#endif
+  policy_manager_->ResetTimeout();
+}
+
 void PolicyHandler::GetRegisteredLinks(
     std::map<std::string, std::string>& out_links) const {
   DataAccessor<ApplicationSet> accessor = application_manager_.applications();
@@ -1576,8 +1583,6 @@ void PolicyHandler::OnSnapshotCreated(const BinaryMessage& pt_string,
   const std::string& url = urls[app_url.first].url[app_url.second];
   SendMessageToSDK(pt_string, url);
 #endif  // PROPRIETARY_MODE
-  // reset update required false
-  OnUpdateRequestSentToMobile();
 }
 #endif  // EXTERNAL_PROPRIETARY_MODE
 

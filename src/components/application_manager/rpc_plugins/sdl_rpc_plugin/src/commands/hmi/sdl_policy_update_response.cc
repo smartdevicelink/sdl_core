@@ -31,6 +31,7 @@
  */
 
 #include "sdl_rpc_plugin/commands/hmi/sdl_policy_update_response.h"
+#include "application_manager/policies/policy_handler_interface.h"
 
 namespace sdl_rpc_plugin {
 using namespace application_manager;
@@ -52,7 +53,20 @@ SDLPolicyUpdateResponse::~SDLPolicyUpdateResponse() {}
 
 void SDLPolicyUpdateResponse::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
-  // TODO(PV): add some logic here
+  const hmi_apis::Common_Result::eType code =
+      static_cast<hmi_apis::Common_Result::eType>(
+          (*message_)[strings::params][hmi_response::code].asInt());
+
+  if (helpers::Compare<hmi_apis::Common_Result::eType,
+                       helpers::NEQ,
+                       helpers::ALL>(code,
+                                     hmi_apis::Common_Result::SUCCESS,
+                                     hmi_apis::Common_Result::WARNINGS)) {
+    LOG4CXX_ERROR(logger_, "Error is returned. PTU won't be started.");
+    return;
+  }
+
+  application_manager_.GetPolicyHandler().OnUpdateRequestSentToMobile();
 }
 }  // namespace commands
 
