@@ -1580,12 +1580,13 @@ void ApplicationManagerImpl::OnDeviceSwitchingStart(
     const connection_handler::Device& device_from,
     const connection_handler::Device& device_to) {
   LOG4CXX_AUTO_TRACE(logger_);
+  ReregisterWaitList wait_list;
   {
     auto apps_data_accessor = applications();
 
     std::copy_if(apps_data_accessor.GetData().begin(),
                  apps_data_accessor.GetData().end(),
-                 std::back_inserter(reregister_wait_list_),
+                 std::back_inserter(wait_list),
                  std::bind1st(std::ptr_fun(&device_id_comparator),
                               device_from.mac_address()));
   }
@@ -1594,13 +1595,14 @@ void ApplicationManagerImpl::OnDeviceSwitchingStart(
     // During sending of UpdateDeviceList this lock is acquired also so making
     // it scoped
     sync_primitives::AutoLock lock(reregister_wait_list_lock_ptr_);
-    for (auto i = reregister_wait_list_.begin();
-         reregister_wait_list_.end() != i;
-         ++i) {
-      auto app = *i;
-      request_ctrl_.terminateAppRequests(app->app_id());
-      resume_ctrl_->SaveApplication(app);
-    }
+    std::copy(wait_list.begin(),
+              wait_list.end(),
+              std::back_inserter(reregister_wait_list_));
+  }
+
+  for (const auto& app : wait_list) {
+    request_ctrl_.terminateAppRequests(app->app_id());
+    resume_ctrl_->SaveApplication(app);
   }
 
   policy_handler_->OnDeviceSwitching(device_from.mac_address(),
@@ -1611,20 +1613,22 @@ void ApplicationManagerImpl::OnDeviceSwitchingFinish(
     const std::string& device_uid) {
   LOG4CXX_AUTO_TRACE(logger_);
   UNUSED(device_uid);
-  sync_primitives::AutoLock lock(reregister_wait_list_lock_ptr_);
+
+  ReregisterWaitList wait_list;
+  {
+    sync_primitives::AutoLock lock(reregister_wait_list_lock_ptr_);
+    wait_list.swap(reregister_wait_list_);
+  }
 
   const bool unexpected_disonnect = true;
   const bool is_resuming = true;
-  for (auto app_it = reregister_wait_list_.begin();
-       app_it != reregister_wait_list_.end();
-       ++app_it) {
-    auto app = *app_it;
+
+  for (const auto& app : wait_list) {
     UnregisterApplication(app->app_id(),
                           mobile_apis::Result::INVALID_ENUM,
                           is_resuming,
                           unexpected_disonnect);
   }
-  reregister_wait_list_.clear();
 }
 
 void ApplicationManagerImpl::SwitchApplication(ApplicationSharedPtr app,
