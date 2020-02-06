@@ -73,9 +73,6 @@ void policy::UpdateNeededStatus::ProcessEvent(
     case kOnResetPolicyTableNoUpdate:
       manager->SetNextStatus(std::make_shared<UpToDateStatus>());
       break;
-    case kOnNewAppRegistered:
-      manager->SetNextStatus(std::make_shared<UpdateNeededStatus>());
-      break;
     case kPendingUpdate:
       manager->SetNextStatus(std::make_shared<UpdatePendingStatus>());
       break;
@@ -126,9 +123,6 @@ void policy::UpdatingStatus::ProcessEvent(policy::UpdateStatusManager* manager,
     case kOnValidUpdateReceived:
     case kOnResetPolicyTableNoUpdate:
       manager->SetNextStatus(std::make_shared<UpToDateStatus>());
-      break;
-    case kOnNewAppRegistered:
-      manager->SetPostponedStatus(std::make_shared<UpdateNeededStatus>());
       break;
     case kOnWrongUpdateReceived:
     case kOnUpdateTimeout:

@@ -1401,6 +1401,7 @@ void PolicyManagerImpl::RetrySequenceFailed() {
     StartPTExchange();
   }
   is_ptu_in_progress_ = false;
+  ptu_requested_ = false;
 }
 
 void PolicyManagerImpl::ResetTimeout() {
