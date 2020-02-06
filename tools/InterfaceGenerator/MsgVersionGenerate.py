@@ -4,8 +4,10 @@ Generate file with major and minor msg_version.
 import xml.etree.ElementTree
 from string import Template
 import re
-from generator.parsers import RPCBase
- 
+
+from parsers.parse_error import ParseError
+
+
 def generate_msg_version(file_name, path_to_storage):
     """Parses MOBILE_API.xml in order to
     receive major_version, minor_version, and patch_version
@@ -33,9 +35,9 @@ def generate_msg_version(file_name, path_to_storage):
                 minimum_major_version,  minimum_minor_version,  minimum_patch_version)
             store_data_to_file(path_to_storage, data_for_storage)  
         else:
-            raise RPCBase.ParseError("Attribute version has incorect value in MOBILE_API.xml")
+            raise ParseError("Attribute version has incorect value in MOBILE_API.xml")
     else:
-        raise RPCBase.ParseError("Check MOBILE_API.xml file, parser can not find first element "
+        raise ParseError("Check MOBILE_API.xml file, parser can not find first element "
                                  " with tag interface or atribute version")
 
 def store_data_to_file(path_to_storage, data_for_storage):
@@ -53,7 +55,7 @@ def check_version_format(version):
     p = re.compile('\d+\\.\d+\\.\d+')
     result = p.match(version)
     if result == None or (result.end() != len(version)):
-        raise RPCBase.ParseError("Incorrect format of version please check MOBILE_API.xml. "
+        raise ParseError("Incorrect format of version please check MOBILE_API.xml. "
                                  "Need format of version major_version.minor_version.patch_version")
 
 
@@ -63,7 +65,7 @@ def check_minimum_version_format(version):
     p = re.compile('\d+\\.\d+\\.\d+|\d+\\.\d+')
     result = p.match(version)
     if result == None or (result.end() != len(version)):
-        raise RPCBase.ParseError("Incorrect format of version please check MOBILE_API.xml. "
+        raise ParseError("Incorrect format of version please check MOBILE_API.xml. "
                                  "Need format of minVersion major_version.minor_version or major_version.minor_version.patch_version")
 def prepare_data_for_storage(major_version, minor_version, patch_version, minimum_major_version, minimum_minor_version, minimum_patch_version):
     """Prepares data to store to file.
