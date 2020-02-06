@@ -71,9 +71,8 @@ TEST_F(PolicyManagerImplTest2, UpdatedPreloadedPT_ExpectLPT_IsUpdated) {
   }
   ifile.close();
 
-  Json::StyledStreamWriter writer;
   std::ofstream ofile(preloaded_pt_filename_);
-  writer.write(ofile, root);
+  ofile << root;
   ofile.flush();
   ofile.close();
 
