@@ -77,9 +77,24 @@ class OnSystemRequestNotificationTest
     ON_CALL(*mock_app_, device()).WillByDefault(Return(kDeviceId));
   }
 
+  MessageSharedPtr CreateBasicMessage() {
+    MessageSharedPtr message = CreateMessage();
+    (*message)[strings::params][strings::connection_key] = kConnectionKey;
+    (*message)[strings::params][strings::function_id] =
+        static_cast<int32_t>(mobile_apis::FunctionID::eType::OnSystemRequestID);
+    const mobile_apis::RequestType::eType request_type =
+        RequestType::NAVIGATION;
+    (*message)[strings::msg_params][strings::request_type] = request_type;
+    return message;
+  }
+
+  static const std::string big_url_;
+
  protected:
   MockAppPtr mock_app_;
 };
+
+const std::string OnSystemRequestNotificationTest::big_url_(20000u, 'a');
 
 TEST_F(OnSystemRequestNotificationTest, Run_ProprietaryType_SUCCESS) {
   const mobile_apis::RequestType::eType request_type =
@@ -158,6 +173,57 @@ TEST_F(OnSystemRequestNotificationTest, Run_HTTPType_SUCCESS) {
             (*msg)[strings::params][strings::protocol_type].asInt());
   ASSERT_EQ(CommandImpl::protocol_version_,
             (*msg)[strings::params][strings::protocol_version].asInt());
+}
+
+TEST_F(OnSystemRequestNotificationTest, Run_NavigationHugeUrl_SUCCESS) {
+  MessageSharedPtr msg = CreateBasicMessage();
+
+  (*msg)[strings::msg_params][strings::url] = big_url_;
+
+  auto command = CreateCommand<OnSystemRequestNotification>(msg);
+
+  PreConditions();
+
+  ON_CALL(app_mngr_, application(kConnectionKey))
+      .WillByDefault(Return(mock_app_));
+  ON_CALL(*mock_app_, policy_app_id()).WillByDefault(Return(kPolicyAppId));
+  ON_CALL(
+      mock_policy_handler_,
+      IsRequestTypeAllowed(kDeviceId, kPolicyAppId, RequestType::NAVIGATION))
+      .WillByDefault(Return(true));
+
+  EXPECT_CALL(mock_rpc_service_, SendMessageToMobile(msg, false));
+
+  ASSERT_TRUE(command->Init());
+  command->Run();
+
+  EXPECT_EQ(application_manager::MessageType::kNotification,
+            (*msg)[strings::params][strings::message_type].asInt());
+  EXPECT_EQ(big_url_, (*msg)[strings::msg_params][strings::url].asString());
+}
+
+TEST_F(OnSystemRequestNotificationTest,
+       ValidateSchema_NavigationHugeUrl_SUCCESS) {
+  MessageSharedPtr msg = CreateBasicMessage();
+
+  (*msg)[strings::params][strings::protocol_type] =
+      CommandImpl::hmi_protocol_type_;
+  (*msg)[strings::params][strings::protocol_version] =
+      CommandImpl::protocol_version_;
+  (*msg)[strings::params][strings::message_type] =
+      static_cast<int32_t>(application_manager::MessageType::kNotification);
+
+  (*msg)[strings::msg_params][strings::url] = big_url_;
+
+  mobile_apis::MOBILE_API mobile_so_factoy;
+  ns_smart_device_link::ns_smart_objects::CSmartSchema schema;
+  mobile_so_factoy.GetSchema(mobile_apis::FunctionID::eType::OnSystemRequestID,
+                             mobile_apis::messageType::eType::notification,
+                             schema);
+
+  rpc::ValidationReport report("RPC");
+  EXPECT_EQ(smart_objects::errors::eType::OK, schema.validate(*msg, &report));
+  EXPECT_EQ("", rpc::PrettyFormat(report));
 }
 
 TEST_F(OnSystemRequestNotificationTest, Run_InvalidApp_NoNotification) {

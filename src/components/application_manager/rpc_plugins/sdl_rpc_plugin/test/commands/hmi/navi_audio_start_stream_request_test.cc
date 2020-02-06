@@ -60,6 +60,7 @@ using sdl_rpc_plugin::commands::AudioStartStreamRequest;
 
 namespace {
 const uint32_t kHmiAppId = 13u;
+const uint32_t kCorrelationId = 2u;
 const am::HmiInterfaces::InterfaceID kHmiInterface =
     am::HmiInterfaces::HMI_INTERFACE_Navigation;
 }  // namespace
@@ -74,10 +75,23 @@ class AudioStartStreamRequestTest
     command_ = CreateCommand<AudioStartStreamRequest>(msg_);
   }
 
+  void UpdateMsgParams(MessageSharedPtr& message) {
+    (*message)[am::strings::params][am::strings::correlation_id] =
+        kCorrelationId;
+    (*message)[am::strings::params][am::strings::message_type] =
+        am::MessageType::kRequest;
+    (*message)[am::strings::params][am::strings::function_id] =
+        static_cast<int32_t>(hmi_apis::FunctionID::Navigation_StartAudioStream);
+    (*message)[am::strings::msg_params][am::strings::app_id] = kHmiAppId;
+  }
+
   std::pair<uint32_t, int32_t> start_stream_retry_amount_;
   MessageSharedPtr msg_;
   std::shared_ptr<AudioStartStreamRequest> command_;
+  static const std::string big_url_;
 };
+
+const std::string AudioStartStreamRequestTest::big_url_(20000u, 'a');
 
 TEST_F(AudioStartStreamRequestTest, Run_HmiInterfaceNotAvailable_NoRequest) {
   EXPECT_CALL(mock_hmi_interfaces_, GetInterfaceState(kHmiInterface))
@@ -112,6 +126,51 @@ TEST_F(AudioStartStreamRequestTest, Run_HmiInterfaceAvailable_SentRequest) {
   EXPECT_CALL(mock_rpc_service_, SendMessageToHMI(msg_));
 
   command_->Run();
+}
+
+TEST_F(AudioStartStreamRequestTest, Run_HmiHugeUrl_SentRequest_SUCCESS) {
+  UpdateMsgParams(msg_);
+
+  (*msg_)[am::strings::msg_params][am::strings::url] = big_url_;
+
+  ON_CALL(mock_hmi_interfaces_, GetInterfaceState(kHmiInterface))
+      .WillByDefault(Return(am::HmiInterfaces::STATE_AVAILABLE));
+  MockAppPtr mock_app = CreateMockApp();
+  ON_CALL(app_mngr_, application_by_hmi_app(kHmiAppId))
+      .WillByDefault(Return(mock_app));
+
+  ON_CALL(app_mngr_, application(kHmiAppId)).WillByDefault(Return(mock_app));
+  ON_CALL(*mock_app, hmi_app_id()).WillByDefault(Return(kHmiAppId));
+
+  EXPECT_CALL(*mock_app, set_audio_streaming_allowed(true));
+  EXPECT_CALL(mock_rpc_service_, SendMessageToHMI(msg_));
+
+  ASSERT_TRUE(command_->Init());
+  command_->Run();
+
+  EXPECT_EQ(big_url_,
+            (*msg_)[am::strings::msg_params][am::strings::url].asString());
+}
+
+TEST_F(AudioStartStreamRequestTest, ValidateSchema_HmiHugeUrl_SUCCESS) {
+  UpdateMsgParams(msg_);
+
+  (*msg_)[am::strings::params][am::strings::protocol_type] =
+      am::commands::CommandImpl::hmi_protocol_type_;
+  (*msg_)[am::strings::params][am::strings::protocol_version] =
+      am::commands::CommandImpl::protocol_version_;
+
+  (*msg_)[am::strings::msg_params][am::strings::url] = big_url_;
+
+  hmi_apis::HMI_API hmi_so_factory;
+  ns_smart_device_link::ns_smart_objects::CSmartSchema schema;
+  hmi_so_factory.GetSchema(hmi_apis::FunctionID::Navigation_StartAudioStream,
+                           hmi_apis::messageType::eType::request,
+                           schema);
+
+  rpc::ValidationReport report("RPC");
+  EXPECT_EQ(smart_objects::errors::eType::OK, schema.validate(*msg_, &report));
+  EXPECT_EQ("", rpc::PrettyFormat(report));
 }
 
 }  // namespace navi_audio_start_stream_request
