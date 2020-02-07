@@ -124,9 +124,6 @@ void policy::UpdatingStatus::ProcessEvent(policy::UpdateStatusManager* manager,
     case kOnResetPolicyTableNoUpdate:
       manager->SetNextStatus(std::make_shared<UpToDateStatus>());
       break;
-    case kOnNewAppRegistered:
-      manager->SetPostponedStatus(std::make_shared<UpdateNeededStatus>());
-      break;
     case kOnWrongUpdateReceived:
     case kOnUpdateTimeout:
       manager->SetNextStatus(std::make_shared<UpdateNeededStatus>());
