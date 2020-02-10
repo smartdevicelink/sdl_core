@@ -151,13 +151,16 @@ inline bool CFormatterJsonSDLRPCv2::fromString(
   bool result = true;
 
   try {
+    Json::CharReaderBuilder reader_builder;
+    const std::unique_ptr<Json::CharReader> reader(
+        reader_builder.newCharReader());
     Json::Value root;
-    Json::Reader reader;
-
+    const size_t json_len = str.length();
     namespace strings = ns_smart_device_link::ns_json_handler::strings;
-    bool result = reader.parse(str, root);
+    const bool result =
+        reader->parse(str.c_str(), str.c_str() + json_len, &root, nullptr);
 
-    if (true == result) {
+    if (result) {
       out[strings::S_PARAMS][strings::S_MESSAGE_TYPE] = messageType;
       out[strings::S_PARAMS][strings::S_FUNCTION_ID] = functionId;
       out[strings::S_PARAMS][strings::S_PROTOCOL_TYPE] = 0;

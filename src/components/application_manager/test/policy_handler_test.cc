@@ -393,10 +393,11 @@ TEST_F(PolicyHandlerTest, AppServiceUpdate_CheckAppService) {
   ChangePolicyManagerToMock();
   std::string file_name("sdl_pt_update.json");
   std::ifstream ifile(file_name);
-  Json::Reader reader;
+  Json::CharReaderBuilder reader_builder;
   std::string json;
   Json::Value root(Json::objectValue);
-  if (ifile.is_open() && reader.parse(ifile, root, true)) {
+  if (ifile.is_open() &&
+      Json::parseFromStream(reader_builder, ifile, &root, nullptr)) {
     json = root.toStyledString();
   }
   ifile.close();
@@ -460,10 +461,12 @@ TEST_F(PolicyHandlerTest, ReceiveMessageFromSDK) {
   ChangePolicyManagerToMock();
   std::string file_name("sdl_pt_update.json");
   std::ifstream ifile(file_name);
-  Json::Reader reader;
+  Json::CharReaderBuilder reader_builder;
+
   std::string json;
   Json::Value root(Json::objectValue);
-  if (ifile.is_open() && reader.parse(ifile, root, true)) {
+  if (ifile.is_open() &&
+      Json::parseFromStream(reader_builder, ifile, &root, nullptr)) {
     json = root.toStyledString();
   }
   ifile.close();

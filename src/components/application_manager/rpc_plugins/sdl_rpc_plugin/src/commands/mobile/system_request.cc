@@ -46,6 +46,7 @@ Copyright (c) 2018, Ford Motor Company
 #include "utils/custom_string.h"
 #include "utils/file_system.h"
 #include "utils/helpers.h"
+#include "utils/jsoncpp_reader_wrapper.h"
 
 namespace sdl_rpc_plugin {
 using namespace application_manager;
@@ -613,14 +614,17 @@ void SystemRequest::Run() {
   } else if (mobile_apis::RequestType::QUERY_APPS == request_type) {
     using namespace ns_smart_device_link::ns_json_handler::formatters;
     application_manager_.OnQueryAppsRequest(application->device());
-    smart_objects::SmartObject sm_object;
-    Json::Reader reader;
+
+    utils::JsonReader reader;
     std::string json(binary_data.begin(), binary_data.end());
     Json::Value root;
-    if (!reader.parse(json.c_str(), root)) {
-      LOG4CXX_DEBUG(logger_, "Unable to parse query_app json file.");
+
+    if (!reader.parse(json, &root)) {
+      LOG4CXX_DEBUG(logger_, "Unable to parse query_app json file. ");
       return;
     }
+
+    smart_objects::SmartObject sm_object;
 
     CFormatterJsonBase::jsonValueToObj(root, sm_object);
 

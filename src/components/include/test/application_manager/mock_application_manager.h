@@ -139,10 +139,14 @@ class MockApplicationManager : public application_manager::ApplicationManager {
   MOCK_METHOD1(application_id, uint32_t(const int32_t correlation_id));
   MOCK_METHOD2(set_application_id,
                void(const int32_t correlation_id, const uint32_t app_id));
-  MOCK_METHOD3(OnHMILevelChanged,
-               void(uint32_t app_id,
-                    mobile_apis::HMILevel::eType from,
-                    mobile_apis::HMILevel::eType to));
+  MOCK_METHOD3(OnHMIStateChanged,
+               void(const uint32_t app_id,
+                    const application_manager::HmiStatePtr from,
+                    const application_manager::HmiStatePtr to));
+  MOCK_METHOD3(ProcessOnDataStreamingNotification,
+               void(const protocol_handler::ServiceType service_type,
+                    const uint32_t app_id,
+                    const bool streaming_data_available));
   MOCK_METHOD1(
       SendHMIStatusNotification,
       void(const std::shared_ptr<application_manager::Application> app));
@@ -256,7 +260,7 @@ class MockApplicationManager : public application_manager::ApplicationManager {
                void(mobile_apis::AppInterfaceUnregisteredReason::eType reason));
   MOCK_METHOD1(HeadUnitReset,
                void(mobile_apis::AppInterfaceUnregisteredReason::eType reason));
-  MOCK_CONST_METHOD2(HMILevelAllowsStreaming,
+  MOCK_CONST_METHOD2(HMIStateAllowsStreaming,
                      bool(uint32_t app_id,
                           protocol_handler::ServiceType service_type));
   MOCK_METHOD5(CheckPolicyPermissions,

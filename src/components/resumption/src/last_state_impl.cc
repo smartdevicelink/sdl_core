@@ -32,6 +32,7 @@
 
 #include "resumption/last_state_impl.h"
 #include "utils/file_system.h"
+#include "utils/jsoncpp_reader_wrapper.h"
 #include "utils/logger.h"
 
 namespace resumption {
@@ -68,9 +69,10 @@ Json::Value& LastStateImpl::get_dictionary() {
 
 void LastStateImpl::LoadStateFromFileSystem() {
   std::string buffer;
-  bool result = file_system::ReadFile(app_info_storage_, buffer);
-  Json::Reader m_reader;
-  if (result && m_reader.parse(buffer, dictionary_)) {
+  const bool result = file_system::ReadFile(app_info_storage_, buffer);
+  utils::JsonReader reader;
+
+  if (result && reader.parse(buffer, &dictionary_)) {
     LOG4CXX_INFO(logger_,
                  "Valid last state was found." << dictionary_.toStyledString());
     return;

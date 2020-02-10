@@ -68,6 +68,7 @@ struct SMember {
           const bool IsDeprecated = false,
           const bool IsRemoved = false,
           const std::vector<SMember>& history_vector = {});
+
   /**
    * @brief Checks the version a parameter was removed (until)
    * If the mobile's msg version is greater than or
@@ -179,9 +180,11 @@ class CObjectSchemaItem : public ISchemaItem {
   /**
    * @brief Returns the correct schema item based on message version.
    * @param member Schema member
-   * @param MmessageVersion Semantic Version of mobile message.
+   * @param MessageVersion Semantic Version of mobile message.
+   * @return Pointer to correct schema item if item found or nullptr, if item
+   *was not found.
    **/
-  const SMember& GetCorrectMember(const SMember& member,
+  const SMember* GetCorrectMember(const SMember& member,
                                   const utils::SemanticVersion& messageVersion);
 
   /**

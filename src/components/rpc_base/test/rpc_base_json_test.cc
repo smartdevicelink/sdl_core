@@ -124,7 +124,7 @@ TEST(ValidatedTypesJson, IntegerAbsentValueTest) {
 }
 
 TEST(ValidatedTypesJson, IntegerFromOverflowingJsonTest) {
-  Value int_val(0xFFFFFFFFFFll);
+  Value int_val(0xFFFFFFFFFFl);
   Integer<int32_t, -5, 192> integer(&int_val);
   ASSERT_TRUE(integer.is_initialized());
   ASSERT_FALSE(integer.is_valid());

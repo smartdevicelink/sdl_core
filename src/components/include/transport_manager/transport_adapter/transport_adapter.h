@@ -357,6 +357,14 @@ class TransportAdapter {
    * @param return pointer to Time metric observer
    */
   virtual TMTelemetryObserver* GetTelemetryObserver() = 0;
+
+  /**
+   * @brief Setup observer for time metric.
+   *
+   * @param observer - pointer to observer
+   */
+  virtual void SetTelemetryObserver(TMTelemetryObserver* observer) = 0;
+
 #endif  // TELEMETRY_MONITOR
 };
 }  // namespace transport_adapter

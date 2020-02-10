@@ -40,6 +40,7 @@
 #include "gtest/gtest.h"
 #include "interfaces/HMI_API_schema.h"
 #include "interfaces/MOBILE_API_schema.h"
+#include "utils/jsoncpp_reader_wrapper.h"
 
 namespace test {
 namespace components {
@@ -50,11 +51,12 @@ using namespace ns_smart_device_link::ns_json_handler::formatters;
 using namespace ns_smart_device_link::ns_json_handler::strings;
 
 void CompactJson(std::string& str) {
+  utils::JsonReader reader;
   Json::Value root;
-  Json::Reader reader;
-  reader.parse(str, root);
-  Json::FastWriter writer;
-  str = writer.write(root);
+
+  reader.parse(str, &root);
+  Json::StreamWriterBuilder writer_builder;
+  str = Json::writeString(writer_builder, root);
   if (str[str.size() - 1] == '\n') {
     str.erase(str.size() - 1, 1);
   }

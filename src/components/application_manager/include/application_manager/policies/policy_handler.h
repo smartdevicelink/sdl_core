@@ -321,6 +321,8 @@ class PolicyHandler : public PolicyHandlerInterface,
                               const PermissionConsent& permissions) OVERRIDE;
 #endif
 
+  void OnSystemRequestReceived() const OVERRIDE;
+
   /**
    * @brief Get appropriate message parameters and send them with response
    * to HMI

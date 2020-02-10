@@ -104,8 +104,8 @@ bool CFormatterJsonSDLRPCv1::toString(const smart_objects_ns::SmartObject& obj,
     root[type][S_PARAMETERS] = params;
 
     if (formattedObj[strings::S_PARAMS].keyExists(strings::S_CORRELATION_ID)) {
-      root[type][S_CORRELATION_ID] = utils::ConvertInt64ToLongLongInt(
-          formattedObj[strings::S_PARAMS][strings::S_CORRELATION_ID].asInt());
+      root[type][S_CORRELATION_ID] =
+          formattedObj[strings::S_PARAMS][strings::S_CORRELATION_ID].asInt();
     }
 
     root[type][S_NAME] =

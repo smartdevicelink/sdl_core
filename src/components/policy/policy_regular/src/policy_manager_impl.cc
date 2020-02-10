@@ -36,13 +36,13 @@
 #include <limits>
 #include <queue>
 #include <set>
-#include "json/reader.h"
 #include "json/writer.h"
 #include "policy/policy_helper.h"
 #include "policy/policy_table.h"
 #include "policy/pt_representation.h"
 #include "utils/date_time.h"
 #include "utils/file_system.h"
+#include "utils/jsoncpp_reader_wrapper.h"
 #include "utils/logger.h"
 
 #include "config_profile/profile.h"
@@ -89,9 +89,10 @@ void PolicyManagerImpl::set_listener(PolicyListener* listener) {
 std::shared_ptr<policy_table::Table> PolicyManagerImpl::Parse(
     const BinaryMessage& pt_content) {
   std::string json(pt_content.begin(), pt_content.end());
+  utils::JsonReader reader;
   Json::Value value;
-  Json::Reader reader;
-  if (reader.parse(json.c_str(), value)) {
+
+  if (reader.parse(json, &value)) {
     return std::make_shared<policy_table::Table>(&value);
   } else {
     return std::make_shared<policy_table::Table>();
@@ -103,9 +104,10 @@ std::shared_ptr<policy_table::Table> PolicyManagerImpl::Parse(
 std::shared_ptr<policy_table::Table> PolicyManagerImpl::ParseArray(
     const BinaryMessage& pt_content) {
   std::string json(pt_content.begin(), pt_content.end());
+  utils::JsonReader reader;
   Json::Value value;
-  Json::Reader reader;
-  if (reader.parse(json.c_str(), value)) {
+
+  if (reader.parse(json, &value)) {
     // For PT Update received from SDL Server.
     if (value["data"].size() != 0) {
       Json::Value data = value["data"];
@@ -599,8 +601,8 @@ bool PolicyManagerImpl::RequestPTUpdate(const PTUIterationType iteration_type) {
   IsPTValid(policy_table_snapshot, policy_table::PT_SNAPSHOT);
 
   Json::Value value = policy_table_snapshot->ToJsonValue();
-  Json::FastWriter writer;
-  std::string message_string = writer.write(value);
+  Json::StreamWriterBuilder writer_builder;
+  std::string message_string = Json::writeString(writer_builder, value);
 
   LOG4CXX_DEBUG(logger_, "Snapshot contents is : " << message_string);
 
@@ -1603,6 +1605,16 @@ void PolicyManagerImpl::SaveUpdateStatusRequired(bool is_update_needed) {
 void PolicyManagerImpl::set_cache_manager(
     CacheManagerInterface* cache_manager) {
   cache_ = std::shared_ptr<CacheManagerInterface>(cache_manager);
+}
+
+void PolicyManagerImpl::ResetTimeout() {
+  LOG4CXX_AUTO_TRACE(logger_);
+  if (update_status_manager_.IsUpdatePending()) {
+    if (timer_retry_sequence_.is_running()) {
+      timer_retry_sequence_.Stop();
+    }
+    timer_retry_sequence_.Start(cache_->TimeoutResponse(), timer::kSingleShot);
+  }
 }
 
 void PolicyManagerImpl::OnPTUIterationTimeout() {

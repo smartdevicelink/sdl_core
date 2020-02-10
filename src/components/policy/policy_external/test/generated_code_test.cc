@@ -51,8 +51,9 @@ TEST(PolicyGeneratedCodeTest, TestValidPTPreloadJsonIsValid) {
   std::ifstream json_file("json/sdl_preloaded_pt.json");
   ASSERT_TRUE(json_file.is_open());
   Json::Value valid_table;
-  Json::Reader reader;
-  ASSERT_TRUE(reader.parse(json_file, valid_table));
+  Json::CharReaderBuilder reader_builder;
+  ASSERT_TRUE(
+      Json::parseFromStream(reader_builder, json_file, &valid_table, nullptr));
   Table table(&valid_table);
   table.SetPolicyTableType(rpc::policy_table_interface_base::PT_PRELOADED);
   ASSERT_RPCTYPE_VALID(table);
@@ -62,8 +63,9 @@ TEST(PolicyGeneratedCodeTest, TestValidPTUpdateJsonIsValid) {
   std::ifstream json_file("json/valid_sdl_pt_update.json");
   ASSERT_TRUE(json_file.is_open());
   Json::Value valid_table;
-  Json::Reader reader;
-  ASSERT_TRUE(reader.parse(json_file, valid_table));
+  Json::CharReaderBuilder reader_builder;
+  ASSERT_TRUE(
+      Json::parseFromStream(reader_builder, json_file, &valid_table, nullptr));
   Table table(&valid_table);
   table.SetPolicyTableType(rpc::policy_table_interface_base::PT_UPDATE);
   ASSERT_RPCTYPE_VALID(table);

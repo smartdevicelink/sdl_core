@@ -876,6 +876,8 @@ class PolicyManagerImpl : public PolicyManager {
            int32_t timespan_seconds) OVERRIDE;
   // Interface StatisticsManager (end)
 
+  void ResetTimeout() OVERRIDE;
+
  protected:
 #ifdef USE_HMI_PTU_DECRYPTION
   /**

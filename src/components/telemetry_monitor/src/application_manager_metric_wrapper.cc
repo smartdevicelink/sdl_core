@@ -45,10 +45,10 @@ Json::Value ApplicationManagerMetricWrapper::GetJsonMetric() {
   result[strings::end] = Json::Int64(date_time::getuSecs(message_metric->end));
   const ns_smart_device_link::ns_smart_objects::SmartObject& params =
       message_metric->message->getElement(application_manager::strings::params);
-  result[strings::correlation_id] = utils::ConvertInt64ToLongLongInt(
-      params[application_manager::strings::correlation_id].asInt());
-  result[strings::connection_key] = utils::ConvertInt64ToLongLongInt(
-      params[application_manager::strings::connection_key].asInt());
+  result[strings::correlation_id] =
+      params[application_manager::strings::correlation_id].asInt();
+  result[strings::connection_key] =
+      params[application_manager::strings::connection_key].asInt();
   return result;
 }
 }  // namespace telemetry_monitor

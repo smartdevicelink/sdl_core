@@ -785,6 +785,11 @@ class PolicyManager : public usage_statistics::StatisticsManager,
   virtual AppIdURL RetrySequenceUrl(const struct RetrySequenceURL& rs,
                                     const EndpointUrls& urls) const = 0;
 
+  /**
+   * @brief Restart PTU timeout if PTU in UPDATING state
+   */
+  virtual void ResetTimeout() = 0;
+
  protected:
   /**
    * @brief Checks is PT exceeded IgnitionCycles
