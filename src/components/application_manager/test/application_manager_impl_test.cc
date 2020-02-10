@@ -323,7 +323,7 @@ class ApplicationManagerImplTest
   void CreatePendingApplication();
 #endif
 
-  void CreatePendingApplication(const std::string& policy_app_id);
+  void CreatePendingLocalApplication(const std::string& policy_app_id);
 
   uint32_t app_id_;
   NiceMock<policy_test::MockPolicySettings> mock_policy_settings_;
@@ -1933,7 +1933,7 @@ TEST_F(ApplicationManagerImplTest, SetIconFileFromSystemRequest_Success) {
 }
 #endif  // CLOUD_APP_WEBSOCKET_TRANSPORT_SUPPORT
 
-void ApplicationManagerImplTest::CreatePendingApplication(
+void ApplicationManagerImplTest::CreatePendingLocalApplication(
     const std::string& policy_app_id) {
   // CreatePendingApplication
   std::vector<std::string> nicknames{"PendingApplication"};
@@ -1948,18 +1948,18 @@ void ApplicationManagerImplTest::CreatePendingApplication(
       .WillOnce(DoAll(SetArgReferee<1>(app_properties), Return(true)));
   // Expect NO Update app list
   EXPECT_CALL(*mock_rpc_service_, ManageHMICommand(_, _)).Times(0);
-  app_manager_impl_->CreatePendingApplication(policy_app_id);
+  app_manager_impl_->CreatePendingLocalApplication(policy_app_id);
   AppsWaitRegistrationSet app_list =
       app_manager_impl_->AppsWaitingForRegistration().GetData();
   EXPECT_EQ(1u, app_list.size());
 }
 
 TEST_F(ApplicationManagerImplTest, CreatePendingApplicationByPolicyAppID) {
-  CreatePendingApplication(kPolicyAppID);
+  CreatePendingLocalApplication(kPolicyAppID);
 }
 
 TEST_F(ApplicationManagerImplTest, RemoveExistingPendingApplication_SUCCESS) {
-  CreatePendingApplication(kPolicyAppID);
+  CreatePendingLocalApplication(kPolicyAppID);
   auto app_list = app_manager_impl_->AppsWaitingForRegistration().GetData();
   ASSERT_EQ(1u, app_list.size());
 

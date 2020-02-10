@@ -409,7 +409,7 @@ class ApplicationManagerImpl
 
   void OnWebEngineDeviceCreated() OVERRIDE;
 
-  void CreatePendingApplication(const std::string& policy_app_id) OVERRIDE;
+  void CreatePendingLocalApplication(const std::string& policy_app_id) OVERRIDE;
 
   void RemovePendingApplication(const std::string& policy_app_id) OVERRIDE;
 

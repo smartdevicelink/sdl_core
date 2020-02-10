@@ -1243,7 +1243,7 @@ void ApplicationManagerImpl::RemovePendingApplication(
                           << apps_to_register_.size());
 }
 
-void ApplicationManagerImpl::CreatePendingApplication(
+void ApplicationManagerImpl::CreatePendingLocalApplication(
     const std::string& policy_app_id) {
   policy::StringArray nicknames;
   policy::StringArray app_hmi_types;
@@ -1316,7 +1316,7 @@ void ApplicationManagerImpl::OnWebEngineDeviceCreated() {
   }
 
   for (auto policy_app_id : enabled_local_apps) {
-    CreatePendingApplication(policy_app_id);
+    CreatePendingLocalApplication(policy_app_id);
   }
   SendUpdateAppList();
 }
@@ -3222,7 +3222,7 @@ void ApplicationManagerImpl::UnregisterApplication(
       LOG4CXX_DEBUG(logger_,
                     "Enabled local app has been unregistered. Re-create "
                     "pending application");
-      CreatePendingApplication(app_to_remove->policy_app_id());
+      CreatePendingLocalApplication(app_to_remove->policy_app_id());
     }
 
     RefreshCloudAppInformation();

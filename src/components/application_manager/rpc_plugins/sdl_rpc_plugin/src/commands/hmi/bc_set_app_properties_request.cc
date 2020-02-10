@@ -99,7 +99,7 @@ void BCSetAppPropertiesRequest::Run() {
       AppPropertiesState::ENABLED_FLAG_SWITCH == properties_change_status;
 
   if (app_enabled() && (enable_flag_switch || is_new_app)) {
-    application_manager_.CreatePendingApplication(policy_app_id);
+    application_manager_.CreatePendingLocalApplication(policy_app_id);
     application_manager_.SendUpdateAppList();
     return;
   }

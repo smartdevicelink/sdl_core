@@ -176,7 +176,8 @@ class ApplicationManager {
    * nicknames are not empty
    * @param policy_app_id app id to store
    */
-  virtual void CreatePendingApplication(const std::string& policy_app_id) = 0;
+  virtual void CreatePendingLocalApplication(
+      const std::string& policy_app_id) = 0;
 
   /**
    * @brief RemovePendingApplication Remove applicaiton from pending state

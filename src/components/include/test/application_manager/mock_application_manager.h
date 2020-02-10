@@ -82,7 +82,7 @@ class MockApplicationManager : public application_manager::ApplicationManager {
       DataAccessor<application_manager::AppsWaitRegistrationSet>());
   MOCK_CONST_METHOD0(reregister_applications,
                      DataAccessor<application_manager::ReregisterWaitList>());
-  MOCK_METHOD1(CreatePendingApplication,
+  MOCK_METHOD1(CreatePendingLocalApplication,
                void(const std::string& policy_app_id));
   MOCK_METHOD1(RemovePendingApplication,
                void(const std::string& policy_app_id));

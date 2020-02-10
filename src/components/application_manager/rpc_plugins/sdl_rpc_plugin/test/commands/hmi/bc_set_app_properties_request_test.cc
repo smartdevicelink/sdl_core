@@ -125,7 +125,7 @@ TEST_F(BCSetAppPropertiesRequestTest,
           kSource));
   EXPECT_CALL(mock_rpc_service_, ManageHMICommand(notification, kSource))
       .Times(0);
-  EXPECT_CALL(app_mngr_, CreatePendingApplication(kPolicyAppId)).Times(0);
+  EXPECT_CALL(app_mngr_, CreatePendingLocalApplication(kPolicyAppId)).Times(0);
   EXPECT_CALL(app_mngr_, SendUpdateAppList()).Times(0);
 
   ASSERT_TRUE(command->Init());
@@ -166,7 +166,7 @@ TEST_F(BCSetAppPropertiesRequestTest,
               hmi_apis::FunctionID::BasicCommunication_SetAppProperties),
           kSource));
   EXPECT_CALL(mock_rpc_service_, ManageHMICommand(notification, kSource));
-  EXPECT_CALL(app_mngr_, CreatePendingApplication(kPolicyAppId)).Times(0);
+  EXPECT_CALL(app_mngr_, CreatePendingLocalApplication(kPolicyAppId)).Times(0);
   EXPECT_CALL(app_mngr_, SendUpdateAppList()).Times(0);
 
   ASSERT_TRUE(command->Init());
@@ -207,7 +207,7 @@ TEST_F(BCSetAppPropertiesRequestTest,
               hmi_apis::FunctionID::BasicCommunication_SetAppProperties),
           kSource));
   EXPECT_CALL(mock_rpc_service_, ManageHMICommand(notification, kSource));
-  EXPECT_CALL(app_mngr_, CreatePendingApplication(kPolicyAppId));
+  EXPECT_CALL(app_mngr_, CreatePendingLocalApplication(kPolicyAppId));
   EXPECT_CALL(app_mngr_, SendUpdateAppList());
 
   ASSERT_TRUE(command->Init());
@@ -248,7 +248,7 @@ TEST_F(BCSetAppPropertiesRequestTest,
               hmi_apis::FunctionID::BasicCommunication_SetAppProperties),
           kSource));
   EXPECT_CALL(mock_rpc_service_, ManageHMICommand(notification, kSource));
-  EXPECT_CALL(app_mngr_, CreatePendingApplication(kPolicyAppId));
+  EXPECT_CALL(app_mngr_, CreatePendingLocalApplication(kPolicyAppId));
   EXPECT_CALL(app_mngr_, SendUpdateAppList());
 
   ASSERT_TRUE(command->Init());
@@ -289,7 +289,7 @@ TEST_F(BCSetAppPropertiesRequestTest,
               hmi_apis::FunctionID::BasicCommunication_SetAppProperties),
           kSource));
   EXPECT_CALL(mock_rpc_service_, ManageHMICommand(notification, kSource));
-  EXPECT_CALL(app_mngr_, CreatePendingApplication(kPolicyAppId)).Times(0);
+  EXPECT_CALL(app_mngr_, CreatePendingLocalApplication(kPolicyAppId)).Times(0);
   EXPECT_CALL(app_mngr_, RemovePendingApplication(kPolicyAppId));
   EXPECT_CALL(app_mngr_, SendUpdateAppList());
 
