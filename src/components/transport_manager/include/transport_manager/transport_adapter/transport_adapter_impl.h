@@ -500,7 +500,7 @@ class TransportAdapterImpl : public TransportAdapter,
    *
    * @param observer - pointer to observer
    */
-  void SetTelemetryObserver(TMTelemetryObserver* observer);
+  void SetTelemetryObserver(TMTelemetryObserver* observer) OVERRIDE;
 
   /**
    * @brief Return Time metric observer

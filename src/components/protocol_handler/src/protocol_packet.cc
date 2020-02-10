@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Ford Motor Company
+ * Copyright (c) 2019, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -32,6 +32,7 @@
 
 #include <memory.h>
 #include <stdint.h>
+#include <algorithm>
 #include <cstring>
 #include <limits>
 #include <memory>
@@ -46,6 +47,30 @@
 namespace protocol_handler {
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "ProtocolHandler")
+
+namespace {
+std::string StringifyFrameType(uint8_t type) {
+  switch (type) {
+    case FRAME_TYPE_SINGLE:
+      return "FRAME_TYPE_SINGLE";
+
+    case FRAME_TYPE_CONSECUTIVE:
+      return "FRAME_TYPE_CONSECUTIVE";
+
+    case FRAME_TYPE_CONTROL:
+      return "FRAME_TYPE_CONTROL";
+
+    case FRAME_TYPE_FIRST:
+      return "FRAME_TYPE_FIRST";
+
+    default:
+      LOG4CXX_ERROR(logger_, "Unknown frame type:" << static_cast<int>(type));
+      break;
+  }
+
+  return "";
+}
+}  // namespace
 
 ProtocolPacket::ProtocolData::ProtocolData() : data(NULL), totalDataBytes(0u) {}
 
@@ -232,16 +257,13 @@ RESULT_CODE ProtocolPacket::ProtocolHeaderValidator::validate(
   // expected payload size will be calculated depending
   // on used protocol version and service type
   size_t payload_size = MAXIMUM_FRAME_DATA_V2_SIZE;
-  // Protocol version shall be from 1 to 4
   switch (header.version) {
     case PROTOCOL_VERSION_1:
     case PROTOCOL_VERSION_2:
       break;
     case PROTOCOL_VERSION_3:
     case PROTOCOL_VERSION_4:
-      payload_size = max_payload_size_ > MAXIMUM_FRAME_DATA_V2_SIZE
-                         ? max_payload_size_
-                         : MAXIMUM_FRAME_DATA_V2_SIZE;
+      payload_size = std::max(max_payload_size_, MAXIMUM_FRAME_DATA_V2_SIZE);
       break;
     case PROTOCOL_VERSION_5:
       payload_size = max_payload_size_by_service_type(
@@ -252,6 +274,7 @@ RESULT_CODE ProtocolPacket::ProtocolHeaderValidator::validate(
                    "Unknown version:" << static_cast<int>(header.version));
       return RESULT_FAIL;
   }
+
   // ServiceType shall be equal 0x0 (Control), 0x07 (RPC), 0x0A (PCM), 0x0B
   // (Video), 0x0F (Bulk)
   if (ServiceTypeFromByte(header.serviceType) == kInvalidServiceType) {
@@ -319,26 +342,40 @@ RESULT_CODE ProtocolPacket::ProtocolHeaderValidator::validate(
   // For Control frames Data Size value shall be less than MTU header
   // For Single and Consecutive Data Size value shall be greater than 0x00
   // and shall be less than payload size
-  if (header.dataSize > payload_size) {
-    LOG4CXX_WARN(logger_,
-                 "Packet data size is "
-                     << header.dataSize
-                     << " and bigger than allowed payload size " << payload_size
-                     << " bytes");
-    return RESULT_FAIL;
-  }
+  // For First Frame Data Size shall be equal 0x08 (payload of this packet will
+  // be 8 bytes).
+
   switch (header.frameType) {
     case FRAME_TYPE_SINGLE:
     case FRAME_TYPE_CONSECUTIVE:
-      if (header.dataSize <= 0u) {
+    case FRAME_TYPE_CONTROL: {
+      if (header.dataSize > payload_size ||
+          (FRAME_TYPE_CONTROL != header.frameType && header.dataSize == 0u)) {
+        UNUSED(StringifyFrameType);
+        LOG4CXX_WARN(
+            logger_,
+            "Packet data size of "
+                << StringifyFrameType(header.frameType)
+                << " frame must be in range (0, payload_size=" << payload_size
+                << "], but actual value is " << header.dataSize);
+        return RESULT_FAIL;
+      }
+    } break;
+
+    case FRAME_TYPE_FIRST:
+      if (FIRST_FRAME_DATA_SIZE != header.dataSize) {
         LOG4CXX_WARN(logger_,
-                     "Data size of Single and Consecutive frame shall be not "
-                     "equal 0 byte ");
+                     "Packet data size of FRAME_TYPE_FIRST frame must equal "
+                         << static_cast<int>(FIRST_FRAME_DATA_SIZE)
+                         << ", but actual value is " << header.dataSize);
         return RESULT_FAIL;
       }
       break;
+
     default:
-      break;
+      LOG4CXX_WARN(logger_,
+                   "Unknown frame type " << static_cast<int>(header.frameType));
+      return RESULT_FAIL;
   }
   // Message ID be equal or greater than 0x01 (not actual for 1 protocol version
   // and Control frames)
@@ -346,7 +383,6 @@ RESULT_CODE ProtocolPacket::ProtocolHeaderValidator::validate(
     if (FRAME_TYPE_CONTROL != header.frameType &&
         PROTOCOL_VERSION_1 != header.version) {
       LOG4CXX_WARN(logger_, "Message ID shall be greater than 0x00");
-      // Message ID shall be greater than 0x00, but not implemented in SPT
       return RESULT_FAIL;
     }
   }

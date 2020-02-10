@@ -40,7 +40,7 @@
 #include <sstream>
 
 #include "interfaces/MOBILE_API.h"
-#include "json/features.h"
+#include "json/json_features.h"
 #include "json/reader.h"
 #include "json/writer.h"
 #include "smart_objects/enum_schema_item.h"
@@ -1853,13 +1853,16 @@ bool CacheManager::LoadFromFile(const std::string& file_name,
     return false;
   }
 
+  Json::CharReaderBuilder reader_builder;
+  Json::CharReaderBuilder::strictMode(&reader_builder.settings_);
+  auto reader =
+      std::unique_ptr<Json::CharReader>(reader_builder.newCharReader());
   Json::Value value;
-  Json::Reader reader(Json::Features::strictMode());
+  JSONCPP_STRING err;
   std::string json(json_string.begin(), json_string.end());
-  if (!reader.parse(json.c_str(), value)) {
-    LOG4CXX_FATAL(
-        logger_,
-        "Preloaded PT is corrupted: " << reader.getFormattedErrorMessages());
+  const size_t json_len = json.length();
+  if (!reader->parse(json.c_str(), json.c_str() + json_len, &value, &err)) {
+    LOG4CXX_FATAL(logger_, "Preloaded PT is corrupted: " << err);
     return false;
   }
 
@@ -1868,9 +1871,10 @@ bool CacheManager::LoadFromFile(const std::string& file_name,
 
   table = policy_table::Table(&value);
 
-  Json::StyledWriter s_writer;
+  Json::StreamWriterBuilder writer_builder;
   LOG4CXX_DEBUG(logger_, "PT out:");
-  LOG4CXX_DEBUG(logger_, s_writer.write(table.ToJsonValue()));
+  LOG4CXX_DEBUG(logger_,
+                Json::writeString(writer_builder, table.ToJsonValue()));
 
   MakeLowerCaseAppNames(table);
 

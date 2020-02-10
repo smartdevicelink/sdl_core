@@ -1,0 +1,8 @@
+[submodule "src/3rd_party-static/jsoncpp"]
+	path = src/3rd_party-static/jsoncpp
+	url = https://github.com/open-source-parsers/jsoncpp.git
+	branch = 1.9.2
+[submodule "tools/rpc_spec"]
+	path = tools/rpc_spec
+	url = https://github.com/smartdevicelink/rpc_spec.git
+	branch = develop

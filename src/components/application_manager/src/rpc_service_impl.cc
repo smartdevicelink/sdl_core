@@ -587,7 +587,6 @@ void RPCServiceImpl::SendMessageToMobile(
       return;
     }
 
-#ifdef EXTERNAL_PROPRIETARY_MODE
     if (api_function_id == mobile_apis::FunctionID::OnSystemRequestID) {
       mobile_apis::RequestType::eType request_type =
           static_cast<mobile_apis::RequestType::eType>(
@@ -597,7 +596,6 @@ void RPCServiceImpl::SendMessageToMobile(
         app_manager_.GetPolicyHandler().OnUpdateRequestSentToMobile();
       }
     }
-#endif  // EXTERNAL_PROPRIETARY_MODE
   }
 
   if (message_to_send->binary_data()) {

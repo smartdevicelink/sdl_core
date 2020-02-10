@@ -491,8 +491,10 @@ TEST_F(ProtocolHeaderValidatorTest, Malformed_MessageID) {
 
   message_header.frameType = FRAME_TYPE_FIRST;
   message_header.version = PROTOCOL_VERSION_1;
+  message_header.dataSize = FIRST_FRAME_DATA_SIZE;
   EXPECT_EQ(RESULT_OK, header_validator.validate(message_header));
 
+  message_header.dataSize = 0u;
   message_header.version = PROTOCOL_VERSION_2;
   EXPECT_EQ(RESULT_FAIL, header_validator.validate(message_header));
   message_header.version = PROTOCOL_VERSION_3;

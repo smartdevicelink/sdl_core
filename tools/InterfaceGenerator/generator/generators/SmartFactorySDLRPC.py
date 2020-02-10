@@ -83,5 +83,5 @@ class CodeGenerator(SmartFactoryBase.CodeGenerator):
             u'''strings::S_CORRELATION_ID] = SMember(TNumberSchemaItem<int>::create(), true);\n'''
 
         return u"".join([base_params, correlation_id_param
-                        if unicode(message_type_name) !=
+                        if message_type_name !=
                         u"notification" else u""])

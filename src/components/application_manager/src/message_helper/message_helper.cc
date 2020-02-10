@@ -1434,7 +1434,13 @@ smart_objects::SmartObjectList MessageHelper::CreateAddCommandRequestToHMI(
 
       smart_objects::SmartObject msg_params =
           smart_objects::SmartObject(smart_objects::SmartType_Map);
-      msg_params[strings::cmd_id] = i->first;
+
+      if ((*i->second).keyExists(strings::cmd_id)) {
+        msg_params[strings::cmd_id] = (*i->second)[strings::cmd_id].asUInt();
+      } else {
+        LOG4CXX_ERROR(logger_, "Command ID is missing.");
+        continue;
+      }
       msg_params[strings::menu_params] = (*i->second)[strings::menu_params];
       msg_params[strings::app_id] = app->app_id();
 
@@ -1449,8 +1455,9 @@ smart_objects::SmartObjectList MessageHelper::CreateAddCommandRequestToHMI(
     }
 
     // VR Interface
-    if ((*i->second).keyExists(strings::vr_commands)) {
-      SendAddVRCommandToHMI(i->first,
+    if ((*i->second).keyExists(strings::vr_commands) &&
+        (*i->second).keyExists(strings::cmd_id)) {
+      SendAddVRCommandToHMI((*i->second)[strings::cmd_id].asUInt(),
                             (*i->second)[strings::vr_commands],
                             app->app_id(),
                             app_mngr);

@@ -156,20 +156,25 @@ class DynamicApplicationDataImpl : public virtual Application {
       const mobile_apis::MenuLayout::eType layout) const OVERRIDE;
 
   /*
-   * @brief Adds a command to the in application menu
+   * @brief Adds a command to the application menu
+   * @param[in] internal_id Internal consecutive command id
+   * @param[in] command Command to add
    */
-  void AddCommand(uint32_t cmd_id, const smart_objects::SmartObject& command);
+  void AddCommand(const uint32_t internal_id,
+                  const smart_objects::SmartObject& command);
 
   /*
    * @brief Deletes all commands from the application menu with the specified
    * command id
+   * @param[in] cmd_id Command id
    */
-  void RemoveCommand(uint32_t cmd_id);
+  void RemoveCommand(const uint32_t cmd_id);
 
   /*
    * @brief Finds command with the specified command id
+   * @param[in] cmd_id Command id
    */
-  smart_objects::SmartObject* FindCommand(uint32_t cmd_id);
+  smart_objects::SmartObject* FindCommand(const uint32_t cmd_id);
 
   /*
    * @brief Adds a menu to the application
