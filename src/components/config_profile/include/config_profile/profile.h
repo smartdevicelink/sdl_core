@@ -443,7 +443,7 @@ class Profile : public protocol_handler::ProtocolHandlerSettings,
    * @brief Returns bool flag indicating whether WSS settings were setup
    * correctly
    */
-  const bool is_wss_settings_setup() const OVERRIDE;
+  const bool wss_server_supported() const OVERRIDE;
 #endif  // ENABLE_SECURITY
 #endif  // WEBSOCKET_SERVER_TRANSPORT_SUPPORT
 

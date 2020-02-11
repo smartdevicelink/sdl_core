@@ -867,7 +867,7 @@ const std::string& Profile::ws_server_ca_cert_path() const {
   return ws_server_ca_cert_path_;
 }
 
-const bool Profile::is_wss_settings_setup() const {
+const bool Profile::wss_server_supported() const {
   return is_wss_settings_setup_;
 }
 #endif  // ENABLE_SECURITY

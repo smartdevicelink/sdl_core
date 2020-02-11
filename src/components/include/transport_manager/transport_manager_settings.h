@@ -84,7 +84,7 @@ class TransportManagerSettings : public TransportManagerMMESettings {
   virtual const std::string& ws_server_cert_path() const = 0;
   virtual const std::string& ws_server_key_path() const = 0;
   virtual const std::string& ws_server_ca_cert_path() const = 0;
-  virtual const bool is_wss_settings_setup() const = 0;
+  virtual const bool wss_server_supported() const = 0;
 #endif  // ENABLE_SECURITY
 #endif  // WEBSOCKET_SERVER_TRANSPORT_SUPPORT
   /**

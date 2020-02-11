@@ -117,7 +117,7 @@ TransportAdapter::Error WebSocketListener::AddCertificateAuthority() {
   LOG4CXX_DEBUG(logger_, "Path to key : " << key_path);
   const auto ca_cert_path = settings_.ws_server_ca_cert_path();
   LOG4CXX_DEBUG(logger_, "Path to ca cert : " << ca_cert_path);
-  start_secure_ = settings_.is_wss_settings_setup();
+  start_secure_ = settings_.wss_server_supported();
 
   if (start_secure_ && (!file_system::FileExists(cert_path) ||
                         !file_system::FileExists(key_path) ||
