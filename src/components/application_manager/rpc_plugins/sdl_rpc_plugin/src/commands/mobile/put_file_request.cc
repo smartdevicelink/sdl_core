@@ -164,8 +164,6 @@ void PutFileRequest::Run() {
   is_persistent_file_ = false;
   bool is_system_file = false;
   length_ = binary_data.size();
-  // cppcheck-suppress variableScope
-  bool is_download_complete = true;
   bool offset_exist =
       (*message_)[strings::msg_params].keyExists(strings::offset);
 
@@ -254,6 +252,7 @@ void PutFileRequest::Run() {
     case mobile_apis::Result::SUCCESS: {
       LOG4CXX_INFO(logger_, "PutFile is successful");
       if (!is_system_file) {
+        bool is_download_complete = true;
         AppFile file(sync_file_name_,
                      is_persistent_file_,
                      is_download_complete,

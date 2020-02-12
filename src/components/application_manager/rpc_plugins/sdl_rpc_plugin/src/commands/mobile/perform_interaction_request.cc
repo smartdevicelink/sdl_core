@@ -1042,15 +1042,12 @@ bool PerformInteractionRequest::CheckChoiceIDFromRequest(
     const smart_objects::SmartObject& choice_set_id_list) const {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  // cppcheck-suppress variableScope
-  size_t choice_list_length = 0;
   std::set<uint32_t> choice_id_set;
-  // cppcheck-suppress variableScope
-  smart_objects::SmartObject* choice_set = 0;
   std::pair<std::set<uint32_t>::iterator, bool> ins_res;
 
   for (size_t i = 0; i < choice_set_id_list_length; ++i) {
-    choice_set = app->FindChoiceSet(choice_set_id_list[i].asInt());
+    smart_objects::SmartObject* choice_set =
+        app->FindChoiceSet(choice_set_id_list[i].asInt());
     if (!choice_set) {
       LOG4CXX_ERROR(
           logger_,
@@ -1058,7 +1055,7 @@ bool PerformInteractionRequest::CheckChoiceIDFromRequest(
       return false;
     }
 
-    choice_list_length = (*choice_set)[strings::choice_set].length();
+    size_t choice_list_length = (*choice_set)[strings::choice_set].length();
     const smart_objects::SmartObject& choices_list =
         (*choice_set)[strings::choice_set];
     for (size_t k = 0; k < choice_list_length; ++k) {
