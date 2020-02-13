@@ -120,7 +120,7 @@ class Status {
 
 /**
  * @brief The UpdatePendingStatus class represents cases when SDL knows that an
- * update is required and but before the snapshot is sent to the HMI
+ * update is required but before the snapshot is sent to the HMI
  */
 class UpdatePendingStatus : public Status {
  public:

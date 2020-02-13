@@ -75,7 +75,8 @@ enum PolicyTableStatus {
   StatusUpToDate = 0,
   StatusUpdatePending,
   StatusUpdateRequired,
-  StatusUnknown
+  StatusUnknown,
+  StatusProcessingSnapshot
 };
 
 // Code generator uses String class name, so this typedef was renamed to PTSring
