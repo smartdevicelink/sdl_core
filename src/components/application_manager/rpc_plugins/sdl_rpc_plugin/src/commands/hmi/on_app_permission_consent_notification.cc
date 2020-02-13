@@ -50,8 +50,7 @@ namespace {
 struct PermissionsAppender
     : public std::unary_function<void,
                                  const smart_objects::SmartArray::value_type&> {
-  // cppcheck-suppress noExplicitConstructor
-  PermissionsAppender(policy::PermissionConsent& consents)
+  explicit PermissionsAppender(policy::PermissionConsent& consents)
       : allowed_key_(application_manager::hmi_response::allowed)
       , consents_(consents) {}
   void operator()(const smart_objects::SmartArray::value_type& item) const {
@@ -83,8 +82,7 @@ struct PermissionsAppender
  */
 struct ExternalConsentStatusAppender
     : std::unary_function<void, const smart_objects::SmartArray::value_type&> {
-  // cppcheck-suppress noExplicitConstructor
-  ExternalConsentStatusAppender(
+  explicit ExternalConsentStatusAppender(
       policy::ExternalConsentStatus& external_consent_status)
       : external_consent_status_(external_consent_status) {}
   void operator()(const smart_objects::SmartArray::value_type& item) const {

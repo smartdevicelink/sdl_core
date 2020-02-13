@@ -4749,8 +4749,7 @@ void ApplicationManagerImpl::SetMockMediaManager(
 #endif  // BUILD_TESTS
 struct MobileAppIdPredicate {
   std::string policy_app_id_;
-  // cppcheck-suppress noExplicitConstructor
-  MobileAppIdPredicate(const std::string& policy_app_id)
+  explicit MobileAppIdPredicate(const std::string& policy_app_id)
       : policy_app_id_(policy_app_id) {}
   bool operator()(const ApplicationSharedPtr app) const {
     return app ? policy_app_id_ == app->policy_app_id() : false;
@@ -4759,8 +4758,8 @@ struct MobileAppIdPredicate {
 
 struct TakeDeviceHandle {
  public:
-  // cppcheck-suppress noExplicitConstructor
-  TakeDeviceHandle(const ApplicationManager& app_mngr) : app_mngr_(app_mngr) {}
+  explicit TakeDeviceHandle(const ApplicationManager& app_mngr)
+      : app_mngr_(app_mngr) {}
   std::string operator()(ApplicationSharedPtr& app) {
     DCHECK_OR_RETURN(app, "");
     return MessageHelper::GetDeviceMacAddressForHandle(app->device(),

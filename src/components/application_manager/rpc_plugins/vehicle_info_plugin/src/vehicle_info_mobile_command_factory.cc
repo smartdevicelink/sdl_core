@@ -60,8 +60,7 @@ namespace strings = app_mngr::strings;
 template <typename VehicleInfoCommandType>
 class VehicleInfoCommandCreator : public application_manager::CommandCreator {
  public:
-  // cppcheck-suppress noExplicitConstructor
-  VehicleInfoCommandCreator(const VehicleInfoCommandParams& params)
+  explicit VehicleInfoCommandCreator(const VehicleInfoCommandParams& params)
       : params_(params) {}
 
  private:
@@ -104,8 +103,8 @@ class VehicleInfoCommandCreator<VehicleInfoInvalidCommand>
 };
 
 struct VehicleInfoCommandCreatorFactory {
-  // cppcheck-suppress noExplicitConstructor
-  VehicleInfoCommandCreatorFactory(const VehicleInfoCommandParams& params)
+  explicit VehicleInfoCommandCreatorFactory(
+      const VehicleInfoCommandParams& params)
       : params_(params) {}
 
   template <typename VehicleInfoCommandType>

@@ -62,8 +62,7 @@ namespace {
 struct GroupNamesAppender
     : public std::unary_function<void,
                                  const policy::FunctionalGroupPermission&> {
-  // cppcheck-suppress noExplicitConstructor
-  GroupNamesAppender(policy_table::Strings& names) : names_(names) {}
+  explicit GroupNamesAppender(policy_table::Strings& names) : names_(names) {}
 
   void operator()(const policy::FunctionalGroupPermission& value) {
     names_.push_back(value.group_name);

@@ -79,8 +79,7 @@ CREATE_LOGGERPTR_GLOBAL(logger_, "Policy")
   }
 
 struct LanguageFinder {
-  // cppcheck-suppress noExplicitConstructor
-  LanguageFinder(const std::string& language) : language_(language) {}
+  explicit LanguageFinder(const std::string& language) : language_(language) {}
   bool operator()(const policy_table::Languages::value_type& lang) const {
     return !strcasecmp(language_.c_str(), lang.first.c_str());
   }
@@ -90,8 +89,8 @@ struct LanguageFinder {
 };
 
 struct PolicyTableUpdater {
-  // cppcheck-suppress noExplicitConstructor
-  PolicyTableUpdater(const policy_table::ApplicationParams& default_params)
+  explicit PolicyTableUpdater(
+      const policy_table::ApplicationParams& default_params)
       : default_params_(default_params) {}
 
   void operator()(

@@ -296,8 +296,8 @@ bool ApplicationImpl::mobile_projection_enabled() const {
 
 struct StateIDComparator {
   HmiState::StateID state_id_;
-  // cppcheck-suppress noExplicitConstructor
-  StateIDComparator(HmiState::StateID state_id) : state_id_(state_id) {}
+  explicit StateIDComparator(HmiState::StateID state_id)
+      : state_id_(state_id) {}
   bool operator()(const HmiStatePtr cur) const {
     return cur->state_id() == state_id_;
   }
@@ -1141,8 +1141,7 @@ void ApplicationImpl::SubscribeToSoftButtons(
 
 struct FindSoftButtonId {
   uint32_t soft_button_id_;
-  // cppcheck-suppress noExplicitConstructor
-  FindSoftButtonId(const uint32_t soft_button_id)
+  explicit FindSoftButtonId(const uint32_t soft_button_id)
       : soft_button_id_(soft_button_id) {}
 
   bool operator()(const std::pair<uint32_t, WindowID>& element) const {

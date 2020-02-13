@@ -42,8 +42,7 @@ namespace {
 
 struct StateIDComparator {
   application_manager::HmiState::StateID state_id_;
-  // cppcheck-suppress noExplicitConstructor
-  StateIDComparator(application_manager::HmiState::StateID state_id)
+  explicit StateIDComparator(application_manager::HmiState::StateID state_id)
       : state_id_(state_id) {}
   bool operator()(const application_manager::HmiStatePtr cur) const {
     return cur->state_id() == state_id_;

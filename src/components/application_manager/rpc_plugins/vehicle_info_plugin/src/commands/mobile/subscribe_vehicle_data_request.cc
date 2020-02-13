@@ -241,8 +241,7 @@ void SubscribeVehicleDataRequest::AddAlreadySubscribedVI(
 
 struct SubscribedToIVIPredicate {
   std::string vehicle_info_;
-  // cppcheck-suppress noExplicitConstructor
-  SubscribedToIVIPredicate(const std::string& vehicle_info)
+  explicit SubscribedToIVIPredicate(const std::string& vehicle_info)
       : vehicle_info_(vehicle_info) {}
   bool operator()(const ApplicationSharedPtr app) const {
     DCHECK_OR_RETURN(app, false);

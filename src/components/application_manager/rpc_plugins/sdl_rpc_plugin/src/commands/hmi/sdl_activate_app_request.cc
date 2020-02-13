@@ -43,8 +43,7 @@ namespace commands {
 namespace {
 struct ProtoV4AppsOnDevice : std::unary_function<ApplicationSharedPtr, bool> {
   connection_handler::DeviceHandle handle_;
-  // cppcheck-suppress noExplicitConstructor
-  ProtoV4AppsOnDevice(const connection_handler::DeviceHandle handle)
+  explicit ProtoV4AppsOnDevice(const connection_handler::DeviceHandle handle)
       : handle_(handle) {}
   bool operator()(const ApplicationSharedPtr app) const {
     return app ? handle_ == app->device() &&

@@ -54,8 +54,8 @@ bool CompareStrings(const StringsValueType& first,
 }
 
 struct CheckGroupName {
-  // cppcheck-suppress noExplicitConstructor
-  CheckGroupName(const policy::StringsValueType& value) : value_(value) {}
+  explicit CheckGroupName(const policy::StringsValueType& value)
+      : value_(value) {}
 
   bool operator()(const FunctionalGroupNames::value_type& value) const {
     return value.second.second == std::string(value_);

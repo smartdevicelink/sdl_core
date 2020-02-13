@@ -71,8 +71,7 @@ using rc_rpc_plugin::ResourceAllocationManager;
 template <typename RCCommandType>
 class RCCommandCreator : public CommandCreator {
  public:
-  // cppcheck-suppress noExplicitConstructor
-  RCCommandCreator(const RCCommandParams& params) : params_(params) {}
+  explicit RCCommandCreator(const RCCommandParams& params) : params_(params) {}
 
  private:
   bool CanBeCreated() const override {
@@ -111,8 +110,8 @@ class RCCommandCreator<RCInvalidCommand> : public CommandCreator {
 };
 
 struct RCCommandCreatorFactory {
-  // cppcheck-suppress noExplicitConstructor
-  RCCommandCreatorFactory(const RCCommandParams& params) : params_(params) {}
+  explicit RCCommandCreatorFactory(const RCCommandParams& params)
+      : params_(params) {}
 
   template <typename RCCommandType>
   CommandCreator& GetCreator() {
