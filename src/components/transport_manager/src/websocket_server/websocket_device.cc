@@ -1,4 +1,5 @@
 /*
+ *
  * Copyright (c) 2020, Livio
  * All rights reserved.
  *
@@ -30,45 +31,64 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-/**
- * \file websocket_device.h
- * \brief WebSocketDevice class header file.
- */
+#include "transport_manager/websocket_server/websocket_device.h"
 
-#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_WEBSOCKET_WEBSOCKET_DEVICE_H_
-#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_WEBSOCKET_WEBSOCKET_DEVICE_H_
-
-#include <boost/beast/websocket.hpp>
-#include "transport_manager/transport_adapter/device.h"
+#include "utils/logger.h"
 
 namespace transport_manager {
 namespace transport_adapter {
+CREATE_LOGGERPTR_GLOBAL(logger_, "TransportManager")
 
-using tcp = boost::asio::ip::tcp;  // from <boost/asio/ip/tcp.hpp>
-using protocol_type = boost::asio::basic_stream_socket<tcp>::protocol_type;
+WebSocketDevice::WebSocketDevice(const std::string& name,
+                                 const DeviceUID& unique_device_id)
+    : Device(name, unique_device_id)
+    , is_secure_connect_(false)
+    , protocol_(boost::asio::ip::tcp::v4()) {}
 
-class WebSocketDevice : public Device {
- public:
-  WebSocketDevice(const std::string& name, const DeviceUID& unique_device_id);
+bool WebSocketDevice::IsSameAs(const Device* other) const {
+  LOG4CXX_TRACE(logger_, "enter. device: " << other);
 
-  virtual const std::string& GetHost() const;
-  virtual const std::string& GetPort() const;
-  virtual const std::string GetTarget() const;
-  virtual void AddApplication(const ApplicationHandle& app_handle);
+  const WebSocketDevice* other_websocket_device =
+      dynamic_cast<const WebSocketDevice*>(other);
 
- protected:
-  bool IsSameAs(const Device* other_device) const OVERRIDE;
-  ApplicationList GetApplicationList() const OVERRIDE;
+  if (!other_websocket_device) {
+    return false;
+  }
 
- private:
-  std::string host_;
-  std::string port_;
-  bool is_secure_connect_;
-  protocol_type protocol_;
-  ApplicationList app_list_;
-};
+  if (GetHost() != other_websocket_device->GetHost()) {
+    return false;
+  }
+
+  if (GetPort() != other_websocket_device->GetPort()) {
+    return false;
+  }
+
+  if (GetTarget() != other_websocket_device->GetTarget()) {
+    return false;
+  }
+
+  return true;
+}
+
+ApplicationList WebSocketDevice::GetApplicationList() const {
+  return ApplicationList{0};
+}
+
+const std::string& WebSocketDevice::GetHost() const {
+  return host_;
+}
+
+const std::string& WebSocketDevice::GetPort() const {
+  return port_;
+}
+
+const std::string WebSocketDevice::GetTarget() const {
+  return host_ + port_ + name();
+}
+
+void WebSocketDevice::AddApplication(const ApplicationHandle& app_handle) {
+  app_list_.push_back(app_handle);
+}
 
 }  // namespace transport_adapter
 }  // namespace transport_manager
-
-#endif  // SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_WEBSOCKET_WEBSOCKET_DEVICE_H_

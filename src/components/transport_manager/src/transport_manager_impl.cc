@@ -55,7 +55,7 @@
 #include "transport_manager/transport_manager_listener.h"
 #include "transport_manager/transport_manager_listener_empty.h"
 #ifdef WEBSOCKET_SERVER_TRANSPORT_SUPPORT
-#include "transport_manager/websocket/websocket_device.h"
+#include "transport_manager/websocket_server/websocket_device.h"
 #endif
 #include "utils/timer_task_impl.h"
 

@@ -1,6 +1,6 @@
-#include "transport_manager/websocket/websocket_listener.h"
+#include "transport_manager/websocket_server/websocket_listener.h"
 #include "transport_manager/transport_adapter/transport_adapter_controller.h"
-#include "transport_manager/websocket/websocket_device.h"
+#include "transport_manager/websocket_server/websocket_device.h"
 #include "utils/file_system.h"
 
 namespace transport_manager {

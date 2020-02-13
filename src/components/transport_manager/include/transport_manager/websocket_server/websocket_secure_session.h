@@ -28,52 +28,37 @@ OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include "transport_manager/websocket/websocket_secure_session.h"
-#include <unistd.h>
-#include "transport_manager/transport_adapter/transport_adapter_controller.h"
+#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_WEBSOCKET_SERVER_WEBSOCKET_SECURE_SESSION_H_
+#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_WEBSOCKET_SERVER_WEBSOCKET_SECURE_SESSION_H_
+
+#include "transport_manager/websocket_server/websocket_session.h"
+#include <memory>
 
 namespace transport_manager {
 namespace transport_adapter {
 
-using namespace boost::beast::websocket;
+CREATE_LOGGERPTR_GLOBAL(wss_logger_, "WebSocketSecureSession")
 
-template <typename ExecutorType>
-WebSocketSecureSession<ExecutorType>::WebSocketSecureSession(
-    tcp::socket socket,
-    ssl::context& ctx,
-    DataReceiveCallback data_receive,
-    OnIOErrorCallback on_error)
-    : WebSocketSession<ExecutorType>(
-          std::move(socket), ctx, data_receive, on_error) {}
+template <typename ExecutorType = ssl::stream<tcp::socket&> >
+class WebSocketSecureSession : public WebSocketSession<ExecutorType> {
+ public:
+  WebSocketSecureSession(tcp::socket,
+                         ssl::context& ctx,
+                         DataReceiveCallback data_receive,
+                         OnIOErrorCallback on_errror);
 
-template <typename ExecutorType>
-void WebSocketSecureSession<ExecutorType>::AsyncAccept() {
-  LOG4CXX_AUTO_TRACE(ws_logger_);
-  // Perform the SSL handshake
-  WebSocketSecureSession<ExecutorType>::ws_.next_layer().async_handshake(
-      ssl::stream_base::server,
-      boost::asio::bind_executor(
-          WebSocketSecureSession<ExecutorType>::strand_,
-          std::bind(&WebSocketSecureSession::AsyncHandshake,
-                    this->shared_from_this(),
-                    std::placeholders::_1)));
-}
+  void AsyncAccept() OVERRIDE;
+  virtual void AsyncHandshake(boost::system::error_code ec);
 
-template <typename ExecutorType>
-void WebSocketSecureSession<ExecutorType>::AsyncHandshake(
-    boost::system::error_code ec) {
-  LOG4CXX_AUTO_TRACE(ws_logger_);
-  if (ec) {
-    auto str_err = "ErrorMessage: " + ec.message();
-    LOG4CXX_ERROR(ws_logger_, str_err);
-    WebSocketSession<ExecutorType>::on_io_error_();
-    return;
+  std::shared_ptr<WebSocketSecureSession<ExecutorType> > shared_from_this() {
+    auto base_ptr =
+        static_cast<WebSocketSession<ExecutorType>*>(this)->shared_from_this();
+    return std::static_pointer_cast<WebSocketSecureSession<ExecutorType> >(
+        base_ptr);
   }
-
-  WebSocketSession<ExecutorType>::AsyncAccept();
-}
-
-template class WebSocketSecureSession<ssl::stream<tcp::socket&> >;
+};
 
 }  // namespace transport_adapter
 }  // namespace transport_manager
+
+#endif  // SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_WEBSOCKET_SERVER_WEBSOCKET_SECURE_SESSION_H_

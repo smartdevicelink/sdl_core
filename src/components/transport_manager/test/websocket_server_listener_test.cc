@@ -34,8 +34,8 @@
 #include "gtest/gtest.h"
 #include "transport_manager/mock_transport_manager_settings.h"
 #include "transport_manager/transport_adapter/mock_transport_adapter_controller.h"
-#include "transport_manager/websocket/websocket_device.h"
-#include "transport_manager/websocket/websocket_listener.h"
+#include "transport_manager/websocket_server/websocket_device.h"
+#include "transport_manager/websocket_server/websocket_listener.h"
 #include "utils/timer.h"
 #include "utils/timer_task_impl.h"
 

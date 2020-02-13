@@ -28,17 +28,19 @@ OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_WEBSOCKET_WEBSOCKET_CONNECTION_H_
-#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_WEBSOCKET_WEBSOCKET_CONNECTION_H_
+#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_WEBSOCKET_SERVER_WEBSOCKET_CONNECTION_H_
+#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_WEBSOCKET_SERVER_WEBSOCKET_CONNECTION_H_
 
+#include <memory>
+#include <queue>
 #include "transport_manager/transport_adapter/connection.h"
 #include "utils/message_queue.h"
 #include "utils/threads/thread.h"
 
 #ifdef ENABLE_SECURITY
-#include "transport_manager/websocket/websocket_secure_session.h"
+#include "transport_manager/websocket_server/websocket_secure_session.h"
 #else
-#include "transport_manager/websocket/websocket_session.h"
+#include "transport_manager/websocket_server/websocket_session.h"
 #endif  // ENABLE_SECURITY
 
 namespace transport_manager {
@@ -121,4 +123,4 @@ class WebSocketConnection
 }  // namespace transport_adapter
 }  // namespace transport_manager
 
-#endif  // SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_WEBSOCKET_WEBSOCKET_CONNECTION_H_
+#endif  // SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_WEBSOCKET_SERVER_WEBSOCKET_CONNECTION_H_

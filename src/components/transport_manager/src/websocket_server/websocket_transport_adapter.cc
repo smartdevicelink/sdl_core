@@ -30,7 +30,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "transport_manager/websocket/websocket_transport_adapter.h"
+#include "transport_manager/websocket_server/websocket_transport_adapter.h"
 
 #include <errno.h>
 #include <memory.h>
@@ -40,7 +40,7 @@
 #include <cstdlib>
 #include <sstream>
 
-#include "transport_manager/websocket/websocket_listener.h"
+#include "transport_manager/websocket_server/websocket_listener.h"
 #include "utils/logger.h"
 #include "utils/threads/thread_delegate.h"
 

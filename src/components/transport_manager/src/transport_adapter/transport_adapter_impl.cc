@@ -41,7 +41,7 @@
 #include "transport_manager/transport_adapter/transport_adapter_impl.h"
 #include "transport_manager/transport_adapter/transport_adapter_listener.h"
 #ifdef WEBSOCKET_SERVER_TRANSPORT_SUPPORT
-#include "transport_manager/websocket/websocket_device.h"
+#include "transport_manager/websocket_server/websocket_device.h"
 #endif
 
 namespace transport_manager {

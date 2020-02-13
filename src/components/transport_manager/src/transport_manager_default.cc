@@ -49,7 +49,7 @@
 #endif  // CLOUD_APP_WEBSOCKET_TRANSPORT_SUPPORT
 
 #ifdef WEBSOCKET_SERVER_TRANSPORT_SUPPORT
-#include "transport_manager/websocket/websocket_transport_adapter.h"
+#include "transport_manager/websocket_server/websocket_transport_adapter.h"
 #endif
 
 #if defined(BUILD_TESTS)

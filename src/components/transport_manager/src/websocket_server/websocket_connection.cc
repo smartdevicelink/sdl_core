@@ -28,7 +28,7 @@ OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include "transport_manager/websocket/websocket_connection.h"
+#include "transport_manager/websocket_server/websocket_connection.h"
 #include <unistd.h>
 #include "transport_manager/transport_adapter/transport_adapter_controller.h"
 

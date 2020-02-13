@@ -33,13 +33,15 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_WEBSOCKET_WEBSOCKET_LISTENER_H_
-#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_WEBSOCKET_WEBSOCKET_LISTENER_H_
+#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_WEBSOCKET_SERVER_WEBSOCKET_LISTENER_H_
+#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_WEBSOCKET_SERVER_WEBSOCKET_LISTENER_H_
 
 #include <boost/asio/thread_pool.hpp>
+#include <memory>
+#include <vector>
 #include "transport_manager/transport_adapter/client_connection_listener.h"
 #include "transport_manager/transport_manager_settings.h"
-#include "transport_manager/websocket/websocket_connection.h"
+#include "transport_manager/websocket_server/websocket_connection.h"
 
 namespace transport_manager {
 namespace transport_adapter {
@@ -115,4 +117,4 @@ class WebSocketListener : public ClientConnectionListener {
 }  // namespace transport_adapter
 }  // namespace transport_manager
 
-#endif  // SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_WEBSOCKET_WEBSOCKET_LISTENER_H_
+#endif  // SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_WEBSOCKET_SERVER_WEBSOCKET_LISTENER_H_
