@@ -49,7 +49,7 @@
 #endif  // CLOUD_APP_WEBSOCKET_TRANSPORT_SUPPORT
 
 #ifdef WEBSOCKET_SERVER_TRANSPORT_SUPPORT
-#include "transport_manager/websocket_server/websocket_transport_adapter.h"
+#include "transport_manager/websocket_server/websocket_server_transport_adapter.h"
 #endif
 
 #if defined(BUILD_TESTS)
@@ -144,7 +144,7 @@ int TransportManagerDefault::Init(resumption::LastState& last_state) {
 #endif  // CLOUD_APP_WEBSOCKET_TRANSPORT_SUPPORT
 
 #ifdef WEBSOCKET_SERVER_TRANSPORT_SUPPORT
-  auto ta_websocket = new transport_adapter::WebSocketTransportAdapter(
+  auto ta_websocket = new transport_adapter::WebSocketServerTransportAdapter(
       last_state, get_settings());
 #ifdef TELEMETRY_MONITOR
   if (metric_observer_) {

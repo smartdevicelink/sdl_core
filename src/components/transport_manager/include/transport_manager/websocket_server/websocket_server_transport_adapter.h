@@ -33,8 +33,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_WEBSOCKET_SERVER_WEBSOCKET_TRANSPORT_ADAPTER_H_
-#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_WEBSOCKET_SERVER_WEBSOCKET_TRANSPORT_ADAPTER_H_
+#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_WEBSOCKET_SERVER_WEBSOCKET_SERVER_TRANSPORT_ADAPTER_H_
+#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_WEBSOCKET_SERVER_WEBSOCKET_SERVER_TRANSPORT_ADAPTER_H_
 
 #include "transport_manager/transport_adapter/transport_adapter_impl.h"
 
@@ -44,21 +44,21 @@ namespace transport_adapter {
 /**
  * @brief Transport adapter that uses WebSocket transport.
  */
-class WebSocketTransportAdapter : public TransportAdapterImpl {
+class WebSocketServerTransportAdapter : public TransportAdapterImpl {
  public:
   /**
    * @brief Constructor.
    */
-  explicit WebSocketTransportAdapter(resumption::LastState& last_state,
-                                     const TransportManagerSettings& settings);
+  WebSocketServerTransportAdapter(resumption::LastState& last_state,
+                                  const TransportManagerSettings& settings);
 
   /**
    * @brief Destructor.
    */
-  virtual ~WebSocketTransportAdapter();
+  virtual ~WebSocketServerTransportAdapter();
 
   /**
-   * @brief Websocket transport adapter
+   * @brief Websocket server transport adapter
    * specific Init() method
    * @note Perform additional actions required by WS transport adapter
    * then calls basic class Init()
@@ -112,4 +112,4 @@ class WebSocketTransportAdapter : public TransportAdapterImpl {
 }  // namespace transport_adapter
 }  // namespace transport_manager
 
-#endif  // SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_WEBSOCKET_SERVER_WEBSOCKET_TRANSPORT_ADAPTER_H_
+#endif  // SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_WEBSOCKET_SERVER_WEBSOCKET_SERVER_TRANSPORT_ADAPTER_H_

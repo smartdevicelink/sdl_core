@@ -30,7 +30,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "transport_manager/websocket_server/websocket_transport_adapter.h"
+#include "transport_manager/websocket_server/websocket_server_transport_adapter.h"
 
 #include <errno.h>
 #include <memory.h>
@@ -49,7 +49,7 @@ namespace transport_adapter {
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "WebSocketTransportAdapter")
 
-WebSocketTransportAdapter::WebSocketTransportAdapter(
+WebSocketServerTransportAdapter::WebSocketServerTransportAdapter(
     resumption::LastState& last_state, const TransportManagerSettings& settings)
     : TransportAdapterImpl(nullptr,
                            nullptr,
@@ -57,9 +57,9 @@ WebSocketTransportAdapter::WebSocketTransportAdapter(
                            last_state,
                            settings) {}
 
-WebSocketTransportAdapter::~WebSocketTransportAdapter() {}
+WebSocketServerTransportAdapter::~WebSocketServerTransportAdapter() {}
 
-void WebSocketTransportAdapter::TransportConfigUpdated(
+void WebSocketServerTransportAdapter::TransportConfigUpdated(
     const TransportConfig& new_config) {
   LOG4CXX_AUTO_TRACE(logger_);
 
@@ -70,22 +70,22 @@ void WebSocketTransportAdapter::TransportConfigUpdated(
   TransportAdapterImpl::TransportConfigUpdated(new_config);
 }
 
-TransportConfig WebSocketTransportAdapter::GetTransportConfiguration() const {
+TransportConfig WebSocketServerTransportAdapter::GetTransportConfiguration() const {
   LOG4CXX_AUTO_TRACE(logger_);
   return transport_config_;
 }
 
-DeviceType WebSocketTransportAdapter::GetDeviceType() const {
+DeviceType WebSocketServerTransportAdapter::GetDeviceType() const {
   return WEBENGINE_WEBSOCKET;
 }
 
-DeviceSptr WebSocketTransportAdapter::AddDevice(DeviceSptr device) {
+DeviceSptr WebSocketServerTransportAdapter::AddDevice(DeviceSptr device) {
   LOG4CXX_AUTO_TRACE(logger_);
   webengine_device_ = device;
   return TransportAdapterImpl::AddDevice(webengine_device_);
 }
 
-TransportAdapter::Error WebSocketTransportAdapter::Init() {
+TransportAdapter::Error WebSocketServerTransportAdapter::Init() {
   LOG4CXX_AUTO_TRACE(logger_);
   if (webengine_device_) {
     AddDevice(webengine_device_);
