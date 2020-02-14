@@ -45,9 +45,9 @@ class MockCloudWebsocketTransportAdapter
     : public CloudWebsocketTransportAdapter {
  public:
   MockCloudWebsocketTransportAdapter(
-      resumption::LastState& last_state,
+      resumption::LastStateWrapperPtr last_state_wrapper,
       const transport_manager::TransportManagerSettings& settings)
-      : CloudWebsocketTransportAdapter(last_state, settings) {}
+      : CloudWebsocketTransportAdapter(last_state_wrapper, settings) {}
   MOCK_CONST_METHOD0(GetDeviceType, DeviceType());
   MOCK_CONST_METHOD0(Store, void());
   MOCK_METHOD0(Restore, bool());

@@ -45,9 +45,9 @@ class MockTCPTransportAdapter : public TcpTransportAdapter {
  public:
   MockTCPTransportAdapter(
       uint16_t port,
-      resumption::LastState& last_state,
+      resumption::LastStateWrapperPtr last_state_wrapper,
       const transport_manager::TransportManagerSettings& settings)
-      : TcpTransportAdapter(port, last_state, settings) {}
+      : TcpTransportAdapter(port, last_state_wrapper, settings) {}
   MOCK_CONST_METHOD2(
       FindEstablishedConnection,
       ConnectionSPtr(const transport_manager::DeviceUID& device_handle,

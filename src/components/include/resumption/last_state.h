@@ -1,8 +1,5 @@
 /*
- * \file bluetooth_transport_adapter.h
- * \brief BluetoothAdapter class header file.
- *
- * Copyright (c) 2013, Ford Motor Company
+ * Copyright (c) 2019, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,54 +30,58 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_BLUETOOTH_BLUETOOTH_TRANSPORT_ADAPTER_H_
-#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_BLUETOOTH_BLUETOOTH_TRANSPORT_ADAPTER_H_
+#ifndef SRC_COMPONENTS_INCLUDE_RESUMPTION_LAST_STATE_H_
+#define SRC_COMPONENTS_INCLUDE_RESUMPTION_LAST_STATE_H_
 
-#include "transport_manager/transport_adapter/transport_adapter_impl.h"
+#include "json/json.h"
+#include "utils/macro.h"
 
-namespace transport_manager {
-namespace transport_adapter {
+namespace resumption {
 
-/**
- * @brief Transport adapter that use bluetooth transport.
- */
-class BluetoothTransportAdapter : public TransportAdapterImpl {
+class LastState {
  public:
   /**
-   * @brief Constructor.
+   * @brief Destructor
    */
-  BluetoothTransportAdapter(resumption::LastStateWrapperPtr last_state_wrapper,
-                            const TransportManagerSettings& settings);
+  virtual ~LastState() {}
 
+  /**
+   * @brief Saves dictionary to filesystem
+   */
   DEPRECATED
-  BluetoothTransportAdapter(resumption::LastState&,
-                            const TransportManagerSettings& settings);
+  virtual void SaveStateToFileSystem() = 0;
 
   /**
-   * @brief Destructor.
+   * @brief SaveToFileSystem
+   * Saving dictionary to filesystem
    */
-  virtual ~BluetoothTransportAdapter();
-
- protected:
-  /**
-   * @brief Return type of device.
-   */
-  virtual DeviceType GetDeviceType() const;
+  virtual void SaveToFileSystem() = 0;
 
   /**
-   * @brief Store adapter state in last state singleton
+   * @brief RemoveFromFileSystem
+   * Remove dictionary from filesystem
    */
-  virtual void Store() const;
+  virtual void RemoveFromFileSystem() = 0;
 
   /**
-   * @brief Restore adapter state from last state singleton
-   *
-   * @return True on success false otherwise
+   * @brief dictionary Gets internal dictionary
+   * @return Reference to internal dictionary json value
    */
-  virtual bool Restore();
+  virtual Json::Value& get_dictionary() = 0;
+
+  /**
+   * @brief dictionary Gets internal dictionary
+   * @return Copy of internal dictionary json value
+   */
+  virtual Json::Value dictionary() const = 0;
+
+  /**
+   * @brief set_dictionary sets internal dictionary
+   * @param dictionary New dictionary json value to be set
+   */
+  virtual void set_dictionary(const Json::Value& dictionary) = 0;
 };
 
-}  // namespace transport_adapter
-}  // namespace transport_manager
+}  // namespace resumption
 
-#endif  // SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_BLUETOOTH_BLUETOOTH_TRANSPORT_ADAPTER_H_
+#endif  // SRC_COMPONENTS_INCLUDE_RESUMPTION_LAST_STATE_H_

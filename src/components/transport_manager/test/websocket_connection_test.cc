@@ -32,6 +32,7 @@
 
 #include "gtest/gtest.h"
 #include "resumption/last_state_impl.h"
+#include "resumption/last_state_wrapper_impl.h"
 #include "transport_manager/cloud/cloud_websocket_transport_adapter.h"
 #include "transport_manager/cloud/sample_websocket_server.h"
 #include "transport_manager/cloud/websocket_client_connection.h"
@@ -99,7 +100,9 @@ class WebsocketConnectionTest : public ::testing::Test {
 
  protected:
   WebsocketConnectionTest()
-      : last_state_("app_storage_folder", "app_info_storage") {}
+      : last_state_(std::make_shared<resumption::LastStateWrapperImpl>(
+            std::make_shared<resumption::LastStateImpl>("app_storage_folder",
+                                                        "app_info_storage"))) {}
 
   ~WebsocketConnectionTest() {}
 
@@ -109,7 +112,7 @@ class WebsocketConnectionTest : public ::testing::Test {
   }
 
   NiceMock<MockTransportManagerSettings> transport_manager_settings;
-  resumption::LastStateImpl last_state_;
+  resumption::LastStateWrapperPtr last_state_;
   std::string dev_id;
   std::string uniq_id;
   std::shared_ptr<websocket::WSSession> ws_session;
