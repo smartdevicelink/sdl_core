@@ -1705,10 +1705,10 @@ TEST_F(SQLPTRepresentationTest,
   table["policy_table"]["device_data"] = Json::Value(Json::objectValue);
   table["policy_table"]["module_meta"] = Json::Value(Json::objectValue);
   policy_table::Table expected(&table);
-  Json::StyledWriter writer;
+  Json::StreamWriterBuilder writer_builder;
   // Checks
-  EXPECT_EQ(writer.write(expected.ToJsonValue()),
-            writer.write(snapshot->ToJsonValue()));
+  EXPECT_EQ(Json::writeString(writer_builder, expected.ToJsonValue()),
+            Json::writeString(writer_builder, snapshot->ToJsonValue()));
   EXPECT_EQ(expected.ToJsonValue().toStyledString(),
             snapshot->ToJsonValue().toStyledString());
 }

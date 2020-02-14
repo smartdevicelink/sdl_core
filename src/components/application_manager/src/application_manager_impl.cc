@@ -191,6 +191,9 @@ ApplicationManagerImpl::ApplicationManagerImpl(
           "AM TTSGLPRTimer",
           new TimerTaskImpl<ApplicationManagerImpl>(
               this, &ApplicationManagerImpl::OnTimerSendTTSGlobalProperties))
+    , clear_pool_timer_("ClearPoolTimer",
+                        new TimerTaskImpl<ApplicationManagerImpl>(
+                            this, &ApplicationManagerImpl::ClearTimerPool))
     , is_low_voltage_(false)
     , apps_size_(0)
     , is_stopping_(false) {
@@ -201,14 +204,9 @@ ApplicationManagerImpl::ApplicationManagerImpl(
                              {TYPE_SYSTEM, "System"},
                              {TYPE_ICONS, "Icons"}};
 
-  sync_primitives::AutoLock lock(timer_pool_lock_);
-  TimerSPtr clearing_timer(std::make_shared<timer::Timer>(
-      "ClearTimerPoolTimer",
-      new TimerTaskImpl<ApplicationManagerImpl>(
-          this, &ApplicationManagerImpl::ClearTimerPool)));
   const uint32_t timeout_ms = 10000u;
-  clearing_timer->Start(timeout_ms, timer::kSingleShot);
-  timer_pool_.push_back(clearing_timer);
+  clear_pool_timer_.Start(timeout_ms, timer::kPeriodic);
+
   rpc_handler_.reset(new rpc_handler::RPCHandlerImpl(
       *this, hmi_so_factory(), mobile_so_factory()));
   commands_holder_.reset(new CommandHolderImpl(*this));
@@ -245,8 +243,15 @@ ApplicationManagerImpl::~ApplicationManagerImpl() {
   LOG4CXX_DEBUG(logger_, "Destroying Policy Handler");
   RemovePolicyObserver(this);
 
-  sync_primitives::AutoLock lock(timer_pool_lock_);
-  timer_pool_.clear();
+  {
+    sync_primitives::AutoLock lock(close_app_timer_pool_lock_);
+    close_app_timer_pool_.clear();
+  }
+
+  {
+    sync_primitives::AutoLock lock(end_stream_timer_pool_lock_);
+    end_stream_timer_pool_.clear();
+  }
 
   navi_app_to_stop_.clear();
   navi_app_to_end_stream_.clear();
@@ -295,18 +300,18 @@ ApplicationSharedPtr ApplicationManagerImpl::application_by_policy_id(
   return FindApp(accessor, finder);
 }
 
-ApplicationSharedPtr ApplicationManagerImpl::application_by_name(
-    const std::string& app_name) const {
-  AppNamePredicate finder(app_name);
-  DataAccessor<ApplicationSet> accessor = applications();
-  return FindApp(accessor, finder);
-}
-
 ApplicationSharedPtr ApplicationManagerImpl::pending_application_by_policy_id(
     const std::string& policy_app_id) const {
   PolicyAppIdPredicate finder(policy_app_id);
   DataAccessor<AppsWaitRegistrationSet> accessor = pending_applications();
   return FindPendingApp(accessor, finder);
+}
+
+ApplicationSharedPtr ApplicationManagerImpl::application_by_name(
+    const std::string& app_name) const {
+  AppNamePredicate finder(app_name);
+  DataAccessor<ApplicationSet> accessor = applications();
+  return FindApp(accessor, finder);
 }
 
 ApplicationSharedPtr
@@ -420,6 +425,13 @@ ApplicationManagerImpl::applications_by_button(uint32_t button) {
   return FindAllApps(accessor, finder);
 }
 
+std::vector<ApplicationSharedPtr> ApplicationManagerImpl::applications_by_name(
+    const std::string& app_name) const {
+  AppNamePredicate finder(app_name);
+  DataAccessor<ApplicationSet> accessor = applications();
+  return FindAllApps(accessor, finder);
+}
+
 struct IsApplication {
   IsApplication(connection_handler::DeviceHandle device_handle,
                 const std::string& policy_app_id)
@@ -448,12 +460,6 @@ void ApplicationManagerImpl::OnApplicationRegistered(ApplicationSharedPtr app) {
   sync_primitives::AutoLock lock(applications_list_lock_ptr_);
   const mobile_apis::HMILevel::eType default_level = GetDefaultHmiLevel(app);
   state_ctrl_.OnApplicationRegistered(app, default_level);
-
-  std::function<void(plugin_manager::RPCPlugin&)> on_app_registered =
-      [app](plugin_manager::RPCPlugin& plugin) {
-        plugin.OnApplicationEvent(plugin_manager::kApplicationRegistered, app);
-      };
-  plugin_manager_->ForEachPlugin(on_app_registered);
 }
 
 void ApplicationManagerImpl::OnApplicationSwitched(ApplicationSharedPtr app) {
@@ -743,14 +749,7 @@ ApplicationSharedPtr ApplicationManagerImpl::RegisterApplication(
   // Timer will be started after hmi level resumption.
   resume_controller().OnAppRegistrationStart(policy_app_id, device_mac);
 
-  // Add application to registered app list and set appropriate mark.
-  // Lock has to be released before adding app to policy DB to avoid possible
-  // deadlock with simultaneous PTU processing
-  applications_list_lock_ptr_->Acquire();
-  application->MarkRegistered();
-  applications_.insert(application);
-  apps_size_ = applications_.size();
-  applications_list_lock_ptr_->Release();
+  AddAppToRegisteredAppList(application);
 
   // Update cloud app information, in case any pending apps are unable to be
   // registered due to a mobile app taking precedence
@@ -1039,14 +1038,22 @@ void ApplicationManagerImpl::RefreshCloudAppInformation() {
     } else if (mobile_apis::HybridAppPreference::MOBILE ==
                hybrid_app_preference) {
       auto nickname_it = nicknames.begin();
+      bool duplicate_found = false;
       for (; nickname_it != nicknames.end(); ++nickname_it) {
-        auto app = application_by_name(*nickname_it);
-        if (app.use_count() != 0) {
-          LOG4CXX_ERROR(
-              logger_,
-              "Mobile app already registered for cloud app: " << *nickname_it);
-          continue;
+        auto apps = applications_by_name(*nickname_it);
+        for (auto app : apps) {
+          if (app.use_count() != 0 && !app->is_cloud_app()) {
+            LOG4CXX_ERROR(logger_,
+                          "Mobile app already registered for cloud app: "
+                              << *nickname_it);
+            duplicate_found = true;
+            break;
+          }
         }
+      }
+
+      if (duplicate_found) {
+        continue;
       }
     }
 
@@ -1441,15 +1448,8 @@ ApplicationManagerImpl::AppsWaitingForRegistration() const {
 
 bool ApplicationManagerImpl::IsAppsQueriedFrom(
     const connection_handler::DeviceHandle handle) const {
-  sync_primitives::AutoLock lock(apps_to_register_list_lock_ptr_);
-  AppsWaitRegistrationSet::iterator it = apps_to_register_.begin();
-  AppsWaitRegistrationSet::const_iterator it_end = apps_to_register_.end();
-  for (; it != it_end; ++it) {
-    if (handle == (*it)->device()) {
-      return true;
-    }
-  }
-  return false;
+  sync_primitives::AutoLock lock(query_apps_devices_lock_);
+  return query_apps_devices_.find(handle) != query_apps_devices_.end();
 }
 
 StateController& ApplicationManagerImpl::state_controller() {
@@ -1541,6 +1541,13 @@ void ApplicationManagerImpl::OnFindNewApplicationsRequest() {
   GetPolicyHandler().OnAppsSearchStarted();
 }
 
+void ApplicationManagerImpl::OnQueryAppsRequest(
+    const connection_handler::DeviceHandle device) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  sync_primitives::AutoLock lock(query_apps_devices_lock_);
+  query_apps_devices_.insert(device);
+}
+
 void ApplicationManagerImpl::SendUpdateAppList() {
   LOG4CXX_AUTO_TRACE(logger_);
 
@@ -1565,18 +1572,21 @@ void ApplicationManagerImpl::SendUpdateAppList() {
 void ApplicationManagerImpl::RemoveDevice(
     const connection_handler::DeviceHandle& device_handle) {
   LOG4CXX_DEBUG(logger_, "device_handle " << device_handle);
+  sync_primitives::AutoLock lock(query_apps_devices_lock_);
+  query_apps_devices_.erase(device_handle);
 }
 
 void ApplicationManagerImpl::OnDeviceSwitchingStart(
     const connection_handler::Device& device_from,
     const connection_handler::Device& device_to) {
   LOG4CXX_AUTO_TRACE(logger_);
+  ReregisterWaitList wait_list;
   {
     auto apps_data_accessor = applications();
 
     std::copy_if(apps_data_accessor.GetData().begin(),
                  apps_data_accessor.GetData().end(),
-                 std::back_inserter(reregister_wait_list_),
+                 std::back_inserter(wait_list),
                  std::bind1st(std::ptr_fun(&device_id_comparator),
                               device_from.mac_address()));
   }
@@ -1585,59 +1595,40 @@ void ApplicationManagerImpl::OnDeviceSwitchingStart(
     // During sending of UpdateDeviceList this lock is acquired also so making
     // it scoped
     sync_primitives::AutoLock lock(reregister_wait_list_lock_ptr_);
-    for (auto i = reregister_wait_list_.begin();
-         reregister_wait_list_.end() != i;
-         ++i) {
-      auto app = *i;
-      request_ctrl_.terminateAppRequests(app->app_id());
-      resume_ctrl_->SaveApplication(app);
-    }
+    std::copy(wait_list.begin(),
+              wait_list.end(),
+              std::back_inserter(reregister_wait_list_));
+  }
+
+  for (const auto& app : wait_list) {
+    request_ctrl_.terminateAppRequests(app->app_id());
+    resume_ctrl_->SaveApplication(app);
   }
 
   policy_handler_->OnDeviceSwitching(device_from.mac_address(),
                                      device_to.mac_address());
-
-  connection_handler::DeviceMap device_list;
-  device_list.insert(std::make_pair(device_to.device_handle(), device_to));
-
-  smart_objects::SmartObjectSPtr msg_params =
-      MessageHelper::CreateDeviceListSO(device_list, GetPolicyHandler(), *this);
-  if (!msg_params) {
-    LOG4CXX_ERROR(logger_, "Can't create UpdateDeviceList notification");
-    return;
-  }
-
-  auto update_list = std::make_shared<smart_objects::SmartObject>();
-  smart_objects::SmartObject& so_to_send = *update_list;
-  so_to_send[jhs::S_PARAMS][jhs::S_FUNCTION_ID] =
-      hmi_apis::FunctionID::BasicCommunication_UpdateDeviceList;
-  so_to_send[jhs::S_PARAMS][jhs::S_MESSAGE_TYPE] =
-      hmi_apis::messageType::request;
-  so_to_send[jhs::S_PARAMS][jhs::S_PROTOCOL_VERSION] = 2;
-  so_to_send[jhs::S_PARAMS][jhs::S_PROTOCOL_TYPE] = 1;
-  so_to_send[jhs::S_PARAMS][jhs::S_CORRELATION_ID] = GetNextHMICorrelationID();
-  so_to_send[jhs::S_MSG_PARAMS] = *msg_params;
-  rpc_service_->ManageHMICommand(update_list);
 }
 
 void ApplicationManagerImpl::OnDeviceSwitchingFinish(
     const std::string& device_uid) {
   LOG4CXX_AUTO_TRACE(logger_);
   UNUSED(device_uid);
-  sync_primitives::AutoLock lock(reregister_wait_list_lock_ptr_);
+
+  ReregisterWaitList wait_list;
+  {
+    sync_primitives::AutoLock lock(reregister_wait_list_lock_ptr_);
+    wait_list.swap(reregister_wait_list_);
+  }
 
   const bool unexpected_disonnect = true;
   const bool is_resuming = true;
-  for (auto app_it = reregister_wait_list_.begin();
-       app_it != reregister_wait_list_.end();
-       ++app_it) {
-    auto app = *app_it;
+
+  for (const auto& app : wait_list) {
     UnregisterApplication(app->app_id(),
                           mobile_apis::Result::INVALID_ENUM,
                           is_resuming,
                           unexpected_disonnect);
   }
-  reregister_wait_list_.clear();
 }
 
 void ApplicationManagerImpl::SwitchApplication(ApplicationSharedPtr app,
@@ -1803,7 +1794,7 @@ bool ApplicationManagerImpl::StartNaviService(
   using namespace protocol_handler;
   LOG4CXX_AUTO_TRACE(logger_);
 
-  if (HMILevelAllowsStreaming(app_id, service_type)) {
+  if (HMIStateAllowsStreaming(app_id, service_type)) {
     {
       sync_primitives::AutoLock lock(navi_service_status_lock_);
 
@@ -1818,6 +1809,25 @@ bool ApplicationManagerImpl::StartNaviService(
           return false;
         }
         it = res.first;
+      }
+    }
+
+    {
+      /* Fix: For NaviApp1 Switch to NaviApp2, App1's Endcallback() arrives
+       later than App2's Startcallback(). Cause streaming issue on HMI.
+      */
+      sync_primitives::AutoLock lock(applications_list_lock_ptr_);
+      for (auto app : applications_) {
+        if (!app || (!app->is_navi() && !app->mobile_projection_enabled())) {
+          LOG4CXX_DEBUG(logger_,
+                        "Continue, Not Navi App Id: " << app->app_id());
+          continue;
+        }
+        LOG4CXX_DEBUG(logger_,
+                      "Abort Stream Service of other NaviAppId: "
+                          << app->app_id()
+                          << " Service_type: " << service_type);
+        StopNaviService(app->app_id(), service_type);
       }
     }
 
@@ -1891,6 +1901,15 @@ void ApplicationManagerImpl::OnStreamingConfigured(
       // started audio service
       service_type == ServiceType::kMobileNav ? it->second.first = true
                                               : it->second.second = true;
+
+      for (size_t i = 0; i < navi_app_to_stop_.size(); ++i) {
+        if (app_id == navi_app_to_stop_[i]) {
+          sync_primitives::AutoLock lock(close_app_timer_pool_lock_);
+          close_app_timer_pool_.erase(close_app_timer_pool_.begin() + i);
+          navi_app_to_stop_.erase(navi_app_to_stop_.begin() + i);
+          break;
+        }
+      }
     }
 
     application(app_id)->StartStreaming(service_type);
@@ -1915,10 +1934,27 @@ void ApplicationManagerImpl::StopNaviService(
     if (navi_service_status_.end() == it) {
       LOG4CXX_WARN(logger_,
                    "No Information about navi service " << service_type);
+      // Fix: Need return for Not navi service at now
+      return;
     } else {
+      // Fix: Repeated tests are not executed after they have stopped for Navi
+      if (false == it->second.first &&
+          ServiceType::kMobileNav == service_type) {
+        LOG4CXX_DEBUG(logger_, "appId: " << app_id << "Navi had stopped");
+        return;
+      }
+
+      // Fix: Repeated tests are not executed after they have stopped for Audio
+      if (false == it->second.second && ServiceType::kAudio == service_type) {
+        LOG4CXX_DEBUG(logger_, "appId: " << app_id << "Audio had stopped");
+        return;
+      }
       // Fill NaviServices map. Set false to first value of pair if
       // we've stopped video service or to second value if we've
       // stopped audio service
+      LOG4CXX_DEBUG(logger_,
+                    "appId: " << app_id << " service_type: " << service_type
+                              << " to stopped");
       service_type == ServiceType::kMobileNav ? it->second.first = false
                                               : it->second.second = false;
     }
@@ -3153,13 +3189,10 @@ void ApplicationManagerImpl::UnregisterApplication(
             "There is no more SDL4 apps with device handle: " << handle);
 
         RemoveAppsWaitingForRegistration(handle);
-        RefreshCloudAppInformation();
-        SendUpdateAppList();
-      } else if (app_to_remove->is_cloud_app()) {
-        RefreshCloudAppInformation();
-        SendUpdateAppList();
       }
     }
+    RefreshCloudAppInformation();
+    SendUpdateAppList();
   }
 
   commands_holder_->Clear(app_to_remove);
@@ -3290,10 +3323,12 @@ std::string ApplicationManagerImpl::GetHashedAppID(
   return mobile_app_id + device_name;
 }
 
-bool ApplicationManagerImpl::HMILevelAllowsStreaming(
+bool ApplicationManagerImpl::HMIStateAllowsStreaming(
     uint32_t app_id, protocol_handler::ServiceType service_type) const {
   LOG4CXX_AUTO_TRACE(logger_);
   using namespace mobile_apis::HMILevel;
+  using namespace mobile_apis::PredefinedWindows;
+  using namespace mobile_apis::VideoStreamingState;
   using namespace helpers;
 
   ApplicationSharedPtr app = application(app_id);
@@ -3301,10 +3336,15 @@ bool ApplicationManagerImpl::HMILevelAllowsStreaming(
     LOG4CXX_WARN(logger_, "An application is not registered.");
     return false;
   }
-  return Compare<eType, EQ, ONE>(
-      app->hmi_level(mobile_api::PredefinedWindows::DEFAULT_WINDOW),
-      HMI_FULL,
-      HMI_LIMITED);
+
+  const auto hmi_state = app->CurrentHmiState(DEFAULT_WINDOW);
+  const bool allow_streaming_by_hmi_level =
+      Compare<mobile_apis::HMILevel::eType, EQ, ONE>(
+          hmi_state->hmi_level(), HMI_FULL, HMI_LIMITED);
+  const bool allow_streaming_by_streaming_state =
+      hmi_state->video_streaming_state() == STREAMABLE;
+
+  return allow_streaming_by_hmi_level && allow_streaming_by_streaming_state;
 }
 
 bool ApplicationManagerImpl::CanAppStream(
@@ -3327,7 +3367,7 @@ bool ApplicationManagerImpl::CanAppStream(
     LOG4CXX_WARN(logger_, "Unsupported service_type " << service_type);
   }
 
-  return HMILevelAllowsStreaming(app_id, service_type) && is_allowed;
+  return HMIStateAllowsStreaming(app_id, service_type) && is_allowed;
 }
 
 void ApplicationManagerImpl::ForbidStreaming(uint32_t app_id) {
@@ -3445,15 +3485,14 @@ void ApplicationManagerImpl::EndNaviServices(uint32_t app_id) {
             this, &ApplicationManagerImpl::CloseNaviApp)));
     close_timer->Start(navi_close_app_timeout_, timer::kSingleShot);
 
-    sync_primitives::AutoLock lock(timer_pool_lock_);
-    timer_pool_.push_back(close_timer);
+    sync_primitives::AutoLock lock(close_app_timer_pool_lock_);
+    close_app_timer_pool_.push_back(close_timer);
   }
 }
 
-void ApplicationManagerImpl::OnHMILevelChanged(
-    uint32_t app_id,
-    mobile_apis::HMILevel::eType from,
-    mobile_apis::HMILevel::eType to) {
+void ApplicationManagerImpl::OnHMIStateChanged(const uint32_t app_id,
+                                               const HmiStatePtr from,
+                                               const HmiStatePtr to) {
   LOG4CXX_AUTO_TRACE(logger_);
   ProcessPostponedMessages(app_id);
   ProcessApp(app_id, from, to);
@@ -3488,16 +3527,52 @@ void ApplicationManagerImpl::ProcessPostponedMessages(const uint32_t app_id) {
   std::for_each(messages.begin(), messages.end(), push_allowed_messages);
 }
 
-void ApplicationManagerImpl::ProcessApp(const uint32_t app_id,
-                                        const mobile_apis::HMILevel::eType from,
-                                        const mobile_apis::HMILevel::eType to) {
-  using namespace mobile_apis::HMILevel;
-  using namespace helpers;
+void ApplicationManagerImpl::ProcessOnDataStreamingNotification(
+    const protocol_handler::ServiceType service_type,
+    const uint32_t app_id,
+    const bool streaming_data_available) {
+  LOG4CXX_AUTO_TRACE(logger_);
 
-  if (from == to) {
-    LOG4CXX_TRACE(logger_, "HMILevel from = to");
-    return;
+  bool should_send_notification = false;
+
+  {
+    sync_primitives::AutoLock lock(streaming_services_lock_);
+    auto& active_services = streaming_application_services_[service_type];
+    should_send_notification = active_services.empty();
+    if (streaming_data_available) {
+      active_services.insert(app_id);
+      LOG4CXX_DEBUG(logger_,
+                    "Streaming session with id "
+                        << app_id << " for service "
+                        << static_cast<uint32_t>(service_type)
+                        << " was added. Currently streaming sessions count: "
+                        << active_services.size());
+    } else {
+      active_services.erase(app_id);
+      should_send_notification =
+          !should_send_notification && active_services.empty();
+
+      LOG4CXX_DEBUG(logger_,
+                    "Streaming session with id "
+                        << app_id << " for service "
+                        << static_cast<uint32_t>(service_type)
+                        << " was removed. Currently streaming sessions count: "
+                        << active_services.size());
+    }
   }
+
+  if (should_send_notification) {
+    MessageHelper::SendOnDataStreaming(
+        service_type, streaming_data_available, *this);
+  }
+}
+
+void ApplicationManagerImpl::ProcessApp(const uint32_t app_id,
+                                        const HmiStatePtr from,
+                                        const HmiStatePtr to) {
+  using namespace mobile_apis::HMILevel;
+  using namespace mobile_apis::VideoStreamingState;
+  using namespace helpers;
 
   ApplicationSharedPtr app = application(app_id);
   if (!app || (!app->is_navi() && !app->mobile_projection_enabled())) {
@@ -3505,50 +3580,97 @@ void ApplicationManagerImpl::ProcessApp(const uint32_t app_id,
     return;
   }
 
-  if (to == HMI_FULL || to == HMI_LIMITED) {
-    LOG4CXX_TRACE(logger_, "HMILevel to FULL or LIMITED");
-    if (from == HMI_BACKGROUND) {
-      LOG4CXX_TRACE(logger_, "HMILevel from BACKGROUND");
-      AllowStreaming(app_id);
-    }
-  } else if (to == HMI_BACKGROUND) {
-    LOG4CXX_TRACE(logger_, "HMILevel to BACKGROUND");
-    if (from == HMI_FULL || from == HMI_LIMITED) {
-      LOG4CXX_TRACE(logger_, "HMILevel from FULL or LIMITED");
-      navi_app_to_end_stream_.push_back(app_id);
-      TimerSPtr end_stream_timer(std::make_shared<timer::Timer>(
-          "AppShouldFinishStreaming",
-          new TimerTaskImpl<ApplicationManagerImpl>(
-              this, &ApplicationManagerImpl::EndNaviStreaming)));
-      end_stream_timer->Start(navi_end_stream_timeout_, timer::kPeriodic);
+  const auto hmi_level_from = from->hmi_level();
+  const auto hmi_level_to = to->hmi_level();
+  const auto streaming_state_from = from->video_streaming_state();
+  const auto streaming_state_to = to->video_streaming_state();
 
-      sync_primitives::AutoLock lock(timer_pool_lock_);
-      timer_pool_.push_back(end_stream_timer);
-    }
-  } else if (to == HMI_NONE) {
-    LOG4CXX_TRACE(logger_, "HMILevel to NONE");
-    if (from == HMI_FULL || from == HMI_LIMITED || from == HMI_BACKGROUND) {
-      EndNaviServices(app_id);
-    }
+  if (hmi_level_from == hmi_level_to &&
+      streaming_state_from == streaming_state_to) {
+    LOG4CXX_TRACE(logger_, "HMILevel && streaming state were not changed");
+    return;
   }
+
+  auto full_or_limited_hmi_level = [](mobile_apis::HMILevel::eType hmi_level) {
+    return Compare<mobile_apis::HMILevel::eType, EQ, ONE>(
+        hmi_level, HMI_FULL, HMI_LIMITED);
+  };
+
+  const bool allow_streaming_by_streaming_state =
+      NOT_STREAMABLE == streaming_state_from &&
+      STREAMABLE == streaming_state_to;
+  const bool allow_streaming_by_hmi_level =
+      HMI_BACKGROUND == hmi_level_from &&
+      full_or_limited_hmi_level(hmi_level_to) &&
+      STREAMABLE == streaming_state_to;
+  if (allow_streaming_by_streaming_state || allow_streaming_by_hmi_level) {
+    LOG4CXX_TRACE(logger_,
+                  "Allow streaming by streaming state: "
+                      << std::boolalpha << allow_streaming_by_streaming_state
+                      << "; by hmi level: " << std::boolalpha
+                      << allow_streaming_by_hmi_level);
+    AllowStreaming(app_id);
+    return;
+  }
+
+  const bool end_streaming_by_streaming_state =
+      STREAMABLE == streaming_state_from &&
+      NOT_STREAMABLE == streaming_state_to &&
+      full_or_limited_hmi_level(hmi_level_to);
+  const bool start_timer_by_hmi_level =
+      full_or_limited_hmi_level(hmi_level_from) &&
+      HMI_BACKGROUND == hmi_level_to;
+  if (end_streaming_by_streaming_state || start_timer_by_hmi_level) {
+    LOG4CXX_TRACE(logger_,
+                  "Start EndStream timer by streaming state: "
+                      << std::boolalpha << end_streaming_by_streaming_state
+                      << "; by hmi level: " << std::boolalpha
+                      << start_timer_by_hmi_level);
+    StartEndStreamTimer(app_id);
+    return;
+  }
+
+  const bool end_streaming_by_hmi_level =
+      full_or_limited_hmi_level(hmi_level_from) && HMI_NONE == hmi_level_to;
+  if (end_streaming_by_hmi_level) {
+    LOG4CXX_TRACE(logger_,
+                  "End streaming services by hmi level: "
+                      << std::boolalpha << end_streaming_by_hmi_level);
+    EndNaviServices(app_id);
+    return;
+  }
+
+  LOG4CXX_TRACE(logger_, "No actions required for app " << app_id);
+}
+
+void ApplicationManagerImpl::StartEndStreamTimer(const uint32_t app_id) {
+  LOG4CXX_DEBUG(logger_, "Start end stream timer for app " << app_id);
+  navi_app_to_end_stream_.push_back(app_id);
+  TimerSPtr end_stream_timer(std::make_shared<timer::Timer>(
+      "DisallowAppStreamTimer",
+      new TimerTaskImpl<ApplicationManagerImpl>(
+          this, &ApplicationManagerImpl::EndNaviStreaming)));
+  end_stream_timer->Start(navi_end_stream_timeout_, timer::kSingleShot);
+
+  sync_primitives::AutoLock lock(end_stream_timer_pool_lock_);
+  end_stream_timer_pool_.push_back(end_stream_timer);
 }
 
 void ApplicationManagerImpl::ClearTimerPool() {
   LOG4CXX_AUTO_TRACE(logger_);
-
-  std::vector<TimerSPtr> new_timer_pool;
-
-  sync_primitives::AutoLock lock(timer_pool_lock_);
-  new_timer_pool.push_back(timer_pool_[0]);
-
-  for (size_t i = 1; i < timer_pool_.size(); ++i) {
-    if (timer_pool_[i]->is_running()) {
-      new_timer_pool.push_back(timer_pool_[i]);
-    }
+  {
+    sync_primitives::AutoLock lock(close_app_timer_pool_lock_);
+    std::remove_if(close_app_timer_pool_.begin(),
+                   close_app_timer_pool_.end(),
+                   [](TimerSPtr timer) { return !timer->is_running(); });
   }
 
-  timer_pool_.swap(new_timer_pool);
-  new_timer_pool.clear();
+  {
+    sync_primitives::AutoLock lock(end_stream_timer_pool_lock_);
+    std::remove_if(end_stream_timer_pool_.begin(),
+                   end_stream_timer_pool_.end(),
+                   [](TimerSPtr timer) { return !timer->is_running(); });
+  }
 }
 
 void ApplicationManagerImpl::CloseNaviApp() {
@@ -4200,6 +4322,28 @@ ApplicationManagerImpl::SupportedSDLVersion() const {
       get_settings().max_supported_protocol_version());
 }
 
+void ApplicationManagerImpl::AddAppToRegisteredAppList(
+    const ApplicationSharedPtr application) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  DCHECK_OR_RETURN_VOID(application);
+  sync_primitives::AutoLock lock(applications_list_lock_ptr_);
+
+  // Add application to registered app list and set appropriate mark.
+  application->MarkRegistered();
+  applications_.insert(application);
+  LOG4CXX_DEBUG(
+      logger_,
+      "App with app_id: " << application->app_id()
+                          << " has been added to registered applications list");
+  apps_size_ = static_cast<uint32_t>(applications_.size());
+}
+
+void ApplicationManagerImpl::ApplyFunctorForEachPlugin(
+    std::function<void(plugin_manager::RPCPlugin&)> functor) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  plugin_manager_->ForEachPlugin(functor);
+}
+
 event_engine::EventDispatcher& ApplicationManagerImpl::event_dispatcher() {
   return event_dispatcher_;
 }
@@ -4497,11 +4641,19 @@ void ApplicationManagerImpl::ChangeAppsHMILevel(
     LOG4CXX_ERROR(logger_, "There is no app with id: " << app_id);
     return;
   }
-  const mobile_apis::HMILevel::eType old_level =
-      app->hmi_level(mobile_api::PredefinedWindows::DEFAULT_WINDOW);
-  if (old_level != level) {
+
+  const auto old_hmi_state =
+      app->CurrentHmiState(mobile_apis::PredefinedWindows::DEFAULT_WINDOW);
+  if (old_hmi_state->hmi_level() != level) {
     app->set_hmi_level(mobile_apis::PredefinedWindows::DEFAULT_WINDOW, level);
-    OnHMILevelChanged(app_id, old_level, level);
+    const auto new_hmi_state =
+        CreateRegularState(app,
+                           mobile_apis::WindowType::MAIN,
+                           level,
+                           old_hmi_state->audio_streaming_state(),
+                           old_hmi_state->video_streaming_state(),
+                           old_hmi_state->system_context());
+    OnHMIStateChanged(app_id, old_hmi_state, new_hmi_state);
   } else {
     LOG4CXX_WARN(logger_, "Redundant changing HMI level: " << level);
   }

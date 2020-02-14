@@ -55,9 +55,39 @@
 namespace transport_manager {
 CREATE_LOGGERPTR_GLOBAL(logger_, "TransportManager")
 
+TransportAdapterFactory::TransportAdapterFactory() {
+#ifdef BLUETOOTH_SUPPORT
+  ta_bluetooth_creator_ = [](resumption::LastStateWrapperPtr last_state_wrapper,
+                             const TransportManagerSettings& settings) {
+    return new transport_adapter::BluetoothTransportAdapter(last_state_wrapper,
+                                                            settings);
+  };
+#endif
+  ta_tcp_creator_ = [](const uint16_t port,
+                       resumption::LastStateWrapperPtr last_state_wrapper,
+                       const TransportManagerSettings& settings) {
+    return new transport_adapter::TcpTransportAdapter(
+        port, last_state_wrapper, settings);
+  };
+#if defined(USB_SUPPORT)
+  ta_usb_creator_ = [](resumption::LastStateWrapperPtr last_state_wrapper,
+                       const TransportManagerSettings& settings) {
+    return new transport_adapter::UsbAoaAdapter(last_state_wrapper, settings);
+  };
+#endif
+#if defined(CLOUD_APP_WEBSOCKET_TRANSPORT_SUPPORT)
+  ta_cloud_creator_ = [](resumption::LastStateWrapperPtr last_state_wrapper,
+                         const TransportManagerSettings& settings) {
+    return new transport_adapter::CloudWebsocketTransportAdapter(
+        last_state_wrapper, settings);
+  };
+#endif
+}
+
 TransportManagerDefault::TransportManagerDefault(
-    const TransportManagerSettings& settings)
-    : TransportManagerImpl(settings) {}
+    const TransportManagerSettings& settings,
+    const TransportAdapterFactory& ta_factory)
+    : TransportManagerImpl(settings), ta_factory_(ta_factory) {}
 
 int TransportManagerDefault::Init(
     resumption::LastStateWrapperPtr last_state_wrapper) {
@@ -69,54 +99,48 @@ int TransportManagerDefault::Init(
     return E_TM_IS_NOT_INITIALIZED;
   }
 
-#ifdef BLUETOOTH_SUPPORT
-  transport_adapter::TransportAdapterImpl* ta_bluetooth =
-      new transport_adapter::BluetoothTransportAdapter(last_state_wrapper,
-                                                       get_settings());
+  const auto& settings = get_settings();
+
+#if defined(BLUETOOTH_SUPPORT)
+  auto ta_bluetooth =
+      ta_factory_.ta_bluetooth_creator_(last_state_wrapper, settings);
 #ifdef TELEMETRY_MONITOR
   if (metric_observer_) {
     ta_bluetooth->SetTelemetryObserver(metric_observer_);
   }
 #endif  // TELEMETRY_MONITOR
   AddTransportAdapter(ta_bluetooth);
-  ta_bluetooth = NULL;
-#endif
+#endif  // BLUETOOTH_SUPPORT
 
-  const uint16_t port = get_settings().transport_manager_tcp_adapter_port();
-  transport_adapter::TransportAdapterImpl* ta_tcp =
-      new transport_adapter::TcpTransportAdapter(
-          port, last_state_wrapper, get_settings());
+  auto ta_tcp =
+      ta_factory_.ta_tcp_creator_(settings.transport_manager_tcp_adapter_port(),
+                                  last_state_wrapper,
+                                  settings);
 #ifdef TELEMETRY_MONITOR
   if (metric_observer_) {
     ta_tcp->SetTelemetryObserver(metric_observer_);
   }
 #endif  // TELEMETRY_MONITOR
   AddTransportAdapter(ta_tcp);
-  ta_tcp = NULL;
 
 #if defined(USB_SUPPORT)
-  transport_adapter::TransportAdapterImpl* ta_usb =
-      new transport_adapter::UsbAoaAdapter(last_state_wrapper, get_settings());
+  auto ta_usb = ta_factory_.ta_usb_creator_(last_state_wrapper, settings);
 #ifdef TELEMETRY_MONITOR
   if (metric_observer_) {
     ta_usb->SetTelemetryObserver(metric_observer_);
   }
 #endif  // TELEMETRY_MONITOR
   AddTransportAdapter(ta_usb);
-  ta_usb = NULL;
 #endif  // USB_SUPPORT
 
 #if defined(CLOUD_APP_WEBSOCKET_TRANSPORT_SUPPORT)
-  transport_adapter::TransportAdapterImpl* ta_cloud =
-      new transport_adapter::CloudWebsocketTransportAdapter(last_state_wrapper,
-                                                            get_settings());
+  auto ta_cloud = ta_factory_.ta_cloud_creator_(last_state_wrapper, settings);
 #ifdef TELEMETRY_MONITOR
   if (metric_observer_) {
     ta_cloud->SetTelemetryObserver(metric_observer_);
   }
 #endif  // TELEMETRY_MONITOR
   AddTransportAdapter(ta_cloud);
-  ta_cloud = NULL;
 #endif  // CLOUD_APP_WEBSOCKET_TRANSPORT_SUPPORT
 
 #if defined BUILD_TESTS
@@ -124,14 +148,14 @@ int TransportManagerDefault::Init(
   transport_adapter::IAP2BluetoothEmulationTransportAdapter*
       iap2_bt_emu_adapter =
           new transport_adapter::IAP2BluetoothEmulationTransportAdapter(
-              iap2_bt_emu_port, last_state_wrapper, get_settings());
+              iap2_bt_emu_port, last_state_wrapper, settings);
 
   AddTransportAdapter(iap2_bt_emu_adapter);
 
   const uint16_t iap2_usb_emu_port = 34567;
   transport_adapter::IAP2USBEmulationTransportAdapter* iap2_usb_emu_adapter =
       new transport_adapter::IAP2USBEmulationTransportAdapter(
-          iap2_usb_emu_port, last_state_wrapper, get_settings());
+          iap2_usb_emu_port, last_state_wrapper, settings);
 
   AddTransportAdapter(iap2_usb_emu_adapter);
 #endif  // BUILD_TEST

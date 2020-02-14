@@ -216,7 +216,7 @@ class HMICapabilities {
    *
    * @return Currently supported display capabilities
    */
-  virtual const smart_objects::SmartObject* display_capabilities() const = 0;
+  virtual const smart_objects::SmartObjectSPtr display_capabilities() const = 0;
 
   /*
    * @brief Sets supported display capabilities
@@ -245,7 +245,8 @@ class HMICapabilities {
    *
    * @return Currently supported HMI zone capabilities
    */
-  virtual const smart_objects::SmartObject* hmi_zone_capabilities() const = 0;
+  virtual const smart_objects::SmartObjectSPtr hmi_zone_capabilities()
+      const = 0;
 
   /*
    * @brief Sets supported HMI zone capabilities
@@ -260,7 +261,7 @@ class HMICapabilities {
    *
    * @return Currently supported SoftButton's capabilities
    */
-  virtual const smart_objects::SmartObject* soft_button_capabilities()
+  virtual const smart_objects::SmartObjectSPtr soft_button_capabilities()
       const = 0;
 
   /*
@@ -276,7 +277,7 @@ class HMICapabilities {
    *
    * @return Currently supported Button's capabilities
    */
-  virtual const smart_objects::SmartObject* button_capabilities() const = 0;
+  virtual const smart_objects::SmartObjectSPtr button_capabilities() const = 0;
 
   /*
    * @brief Sets supported Button's capabilities
@@ -299,7 +300,7 @@ class HMICapabilities {
    *
    * @return Currently supported speech capabilities
    */
-  virtual const smart_objects::SmartObject* speech_capabilities() const = 0;
+  virtual const smart_objects::SmartObjectSPtr speech_capabilities() const = 0;
 
   /*
    * @brief Sets supported VR capabilities
@@ -314,7 +315,7 @@ class HMICapabilities {
    *
    * @return Currently supported VR capabilities
    */
-  virtual const smart_objects::SmartObject* vr_capabilities() const = 0;
+  virtual const smart_objects::SmartObjectSPtr vr_capabilities() const = 0;
 
   /*
    * @brief Sets supported audio_pass_thru capabilities
@@ -329,7 +330,7 @@ class HMICapabilities {
    *
    * @return Currently supported audio_pass_thru capabilities
    */
-  virtual const smart_objects::SmartObject* audio_pass_thru_capabilities()
+  virtual const smart_objects::SmartObjectSPtr audio_pass_thru_capabilities()
       const = 0;
 
   /*
@@ -345,14 +346,15 @@ class HMICapabilities {
    *
    * @return Currently supported pcm_streaming capabilities
    */
-  virtual const smart_objects::SmartObject* pcm_stream_capabilities() const = 0;
+  virtual const smart_objects::SmartObjectSPtr pcm_stream_capabilities()
+      const = 0;
 
   /*
    * @brief Retrieves information about the preset bank capabilities
    *
    * @return Currently supported preset bank capabilities
    */
-  virtual const smart_objects::SmartObject* preset_bank_capabilities()
+  virtual const smart_objects::SmartObjectSPtr preset_bank_capabilities()
       const = 0;
 
   /*
@@ -376,14 +378,14 @@ class HMICapabilities {
    *
    * @param vehicle_type Cuurent vehicle information
    */
-  virtual const smart_objects::SmartObject* vehicle_type() const = 0;
+  virtual const smart_objects::SmartObjectSPtr vehicle_type() const = 0;
 
   /*
    * @brief Retrieves information about the prerecorded speech
    *
    * @return Currently supported prerecorded speech
    */
-  virtual const smart_objects::SmartObject* prerecorded_speech() const = 0;
+  virtual const smart_objects::SmartObjectSPtr prerecorded_speech() const = 0;
 
   /*
    * @brief Sets supported prerecorded speech

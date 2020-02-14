@@ -110,6 +110,8 @@ class SendLocationRequestTest
     (*message_)[strings::msg_params] =
         SmartObject(smart_objects::SmartType_Map);
     (*message_)[strings::msg_params][strings::address] = kCorrectAddress;
+    ON_CALL(mock_hmi_capabilities_, display_capabilities())
+        .WillByDefault(Return(smart_objects::SmartObjectSPtr()));
     EXPECT_CALL(app_mngr_, application(kConnectionKey))
         .WillOnce(Return(mock_app_));
 
@@ -130,8 +132,7 @@ class SendLocationRequestTest
         SmartObject(smart_objects::SmartType_Map);
     (*disp_cap_)[hmi_response::text_fields][0][strings::name] = field_name;
     EXPECT_CALL(mock_hmi_capabilities_, display_capabilities())
-        .Times(2)
-        .WillRepeatedly(Return(disp_cap_.get()));
+        .WillOnce(Return(disp_cap_));
   }
 
   void FinishSetup() {

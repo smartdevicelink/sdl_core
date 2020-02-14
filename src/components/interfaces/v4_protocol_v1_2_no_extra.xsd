@@ -1,0 +1,83 @@
+<xs:schema attributeFormDefault="unqualified" elementFormDefault="qualified" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+    <xs:element name="interface" type="interfaceType">
+        <xs:annotation>
+            <xs:documentation>edited with XMLSpy v2011 rel. 3 sp1 (x64) (http://www.altova.com) by Olesksandr Leshchenko (HP)</xs:documentation>
+        </xs:annotation>
+    </xs:element>
+    <xs:complexType name="elementType" mixed="true">
+        <xs:sequence>
+            <xs:element type="xs:string" name="description" maxOccurs="unbounded" minOccurs="0"/>
+            <xs:element type="xs:string" name="designdescription" minOccurs="0"/>
+        </xs:sequence>
+        <xs:attribute type="xs:string" name="name" use="optional"/>
+        <xs:attribute type="xs:string" name="internal_name" use="optional"/>
+    </xs:complexType>
+    <xs:complexType name="enumType">
+        <xs:choice maxOccurs="unbounded" minOccurs="0">
+            <xs:element type="xs:string" name="description"/>
+            <xs:element type="elementType" name="element"/>
+            <xs:element type="issueType" name="issue"/>
+            <xs:element type="paramType" name="param"/>
+        </xs:choice>
+        <xs:attribute type="xs:string" name="name" use="optional"/>
+        <xs:attribute type="xs:string" name="platform" use="optional"/>
+    </xs:complexType>
+    <xs:complexType name="issueType">
+        <xs:simpleContent>
+            <xs:extension base="xs:string">
+                <xs:attribute type="xs:string" name="creator" use="optional"/>
+            </xs:extension>
+        </xs:simpleContent>
+    </xs:complexType>
+    <xs:complexType name="paramType" mixed="true">
+        <xs:sequence>
+            <xs:element type="issueType" name="issue" minOccurs="0"/>
+            <xs:element type="xs:string" name="description" maxOccurs="unbounded" minOccurs="0"/>
+            <xs:element type="elementType" name="element" maxOccurs="unbounded" minOccurs="0"/>
+            <xs:element type="xs:string" name="todo" minOccurs="0"/>
+        </xs:sequence>
+        <xs:attribute type="xs:string" name="name" use="optional"/>
+        <xs:attribute type="xs:string" name="type" use="optional"/>
+        <xs:attribute type="xs:short" name="minvalue" use="optional"/>
+        <xs:attribute type="xs:int" name="maxvalue" use="optional"/>
+        <xs:attribute type="xs:string" name="mandatory" use="optional"/>
+        <xs:attribute type="xs:short" name="maxlength" use="optional"/>
+        <xs:attribute type="xs:byte" name="minsize" use="optional"/>
+        <xs:attribute type="xs:byte" name="maxsize" use="optional"/>
+        <xs:attribute type="xs:string" name="array" use="optional"/>
+        <xs:attribute type="xs:string" name="platform" use="optional"/>
+    </xs:complexType>
+    <xs:complexType name="structType">
+        <xs:choice maxOccurs="unbounded" minOccurs="0">
+            <xs:element type="xs:string" name="description" minOccurs="0"/>
+            <xs:element type="paramType" name="param"/>
+            <xs:element type="elementType" name="element"/>
+            <xs:element type="issueType" name="issue"/>
+        </xs:choice>
+        <xs:attribute type="xs:string" name="name" use="optional"/>
+        <xs:attribute type="xs:string" name="platform" use="optional"/>
+    </xs:complexType>
+    <xs:complexType name="functionType">
+        <xs:sequence>
+            <xs:element type="xs:string" name="description" maxOccurs="unbounded" minOccurs="0"/>
+            <xs:element type="paramType" name="param" maxOccurs="unbounded" minOccurs="0"/>
+            <xs:element type="issueType" name="issue" minOccurs="0"/>
+        </xs:sequence>
+        <xs:attribute type="xs:string" name="name" use="optional"/>
+        <xs:attribute type="xs:string" name="messagetype" use="optional"/>
+    </xs:complexType>
+    <xs:complexType name="interfaceType">
+        <xs:choice maxOccurs="unbounded" minOccurs="0">
+            <xs:element type="enumType" name="enum" maxOccurs="unbounded" minOccurs="0"/>
+            <xs:element type="structType" name="struct" maxOccurs="unbounded" minOccurs="0"/>
+            <xs:element type="functionType" name="function" maxOccurs="unbounded" minOccurs="0">
+                <xs:annotation>
+                    <xs:documentation>Requests/Responses  Notifications</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+        </xs:choice>
+        <xs:attribute type="xs:string" name="name"/>
+        <xs:attribute type="xs:float" name="version"/>
+        <xs:attribute type="xs:date" name="date"/>
+    </xs:complexType>
+</xs:schema>

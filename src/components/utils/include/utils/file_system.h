@@ -70,10 +70,10 @@ uint64_t FileSize(const std::string& path);
 
 /**
  * @brief Creates directory with owner_all permissions
- * @param path directory to create
- * @return true if directory was created or already exist.
+ * @param name directory to create
+ * @return true if directory was created or already existed.
  */
-bool CreateDirectory(const std::string& path);
+bool CreateDirectory(const std::string& name);
 
 /**
  * @brief Creates directory recursively
@@ -188,7 +188,7 @@ void remove_directory_content(const std::string& directory_name);
  * @return returns true if the directory is successfully deleted.
  */
 bool RemoveDirectory(const std::string& directory_name,
-                     bool is_recursively = true);
+                     const bool is_recursively = true);
 
 /**
  * @brief Check access rights
@@ -197,7 +197,7 @@ bool RemoveDirectory(const std::string& directory_name,
  * @param how Read/write attribute.
  * @return returns true if file has the given mode.
  */
-bool IsAccessible(const std::string& name, int32_t how);
+bool IsAccessible(const std::string& name, const int32_t how);
 
 /**
  * @brief Check access rights for writing

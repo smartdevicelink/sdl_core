@@ -87,7 +87,8 @@ bool LifeCycleImpl::StartComponents() {
       std::make_shared<resumption::LastStateWrapperImpl>(last_state);
 
   DCHECK(!transport_manager_);
-  transport_manager_ = new transport_manager::TransportManagerDefault(profile_);
+  transport_manager_ = new transport_manager::TransportManagerDefault(
+      profile_, transport_manager::TransportAdapterFactory());
 
   DCHECK(!connection_handler_);
   connection_handler_ = new connection_handler::ConnectionHandlerImpl(

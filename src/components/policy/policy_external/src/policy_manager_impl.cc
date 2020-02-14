@@ -39,7 +39,6 @@
 #include <set>
 #include <vector>
 #include "config_profile/profile.h"
-#include "json/reader.h"
 #include "json/writer.h"
 #include "policy/cache_manager.h"
 #include "policy/policy_helper.h"
@@ -48,6 +47,7 @@
 #include "policy/update_status_manager.h"
 #include "utils/date_time.h"
 #include "utils/file_system.h"
+#include "utils/jsoncpp_reader_wrapper.h"
 #include "utils/logger.h"
 
 #include "policy/access_remote.h"
@@ -238,9 +238,10 @@ void PolicyManagerImpl::set_listener(PolicyListener* listener) {
 std::shared_ptr<policy_table::Table> PolicyManagerImpl::Parse(
     const BinaryMessage& pt_content) {
   std::string json(pt_content.begin(), pt_content.end());
+  utils::JsonReader reader;
   Json::Value value;
-  Json::Reader reader;
-  if (reader.parse(json.c_str(), value)) {
+
+  if (reader.parse(json, &value)) {
     return std::make_shared<policy_table::Table>(&value);
   } else {
     return std::make_shared<policy_table::Table>();
@@ -702,8 +703,8 @@ void PolicyManagerImpl::RequestPTUpdate() {
 
   if (IsPTValid(policy_table_snapshot, policy_table::PT_SNAPSHOT)) {
     Json::Value value = policy_table_snapshot->ToJsonValue();
-    Json::FastWriter writer;
-    std::string message_string = writer.write(value);
+    Json::StreamWriterBuilder writer_builder;
+    std::string message_string = Json::writeString(writer_builder, value);
 
     LOG4CXX_DEBUG(logger_, "Snapshot contents is : " << message_string);
 
@@ -745,6 +746,7 @@ void PolicyManagerImpl::StartPTExchange() {
   if (listener_ && listener_->CanUpdate()) {
     LOG4CXX_INFO(logger_, "Listener CanUpdate");
     if (update_status_manager_.IsUpdateRequired()) {
+      update_status_manager_.PendingUpdate();
       LOG4CXX_INFO(logger_, "IsUpdateRequired");
       RequestPTUpdate();
     }
@@ -1382,9 +1384,16 @@ void PolicyManagerImpl::RetrySequenceFailed() {
   ResetRetrySequence(ResetRetryCountType::kResetWithStatusUpdate);
 }
 
+void PolicyManagerImpl::ResetTimeout() {
+  LOG4CXX_AUTO_TRACE(logger_);
+  if (update_status_manager_.IsUpdatePending()) {
+    uint32_t update_timeout = TimeoutExchangeMSec();
+    update_status_manager_.ResetTimeout(update_timeout);
+  }
+}
+
 void PolicyManagerImpl::OnSystemRequestReceived() {
   LOG4CXX_AUTO_TRACE(logger_);
-
   IncrementRetryIndex();
 }
 
@@ -1975,7 +1984,8 @@ void PolicyManagerImpl::OnUpdateStarted() {
   uint32_t update_timeout = TimeoutExchangeMSec();
   LOG4CXX_DEBUG(logger_,
                 "Update timeout will be set to (milisec): " << update_timeout);
-  send_on_update_sent_out_ = !update_status_manager_.IsUpdatePending();
+  send_on_update_sent_out_ =
+      policy::kUpdating != update_status_manager_.StringifiedUpdateStatus();
 
   if (send_on_update_sent_out_) {
     update_status_manager_.OnUpdateSentOut(update_timeout);

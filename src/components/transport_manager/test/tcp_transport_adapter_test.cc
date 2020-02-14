@@ -364,7 +364,7 @@ TEST_F(TcpAdapterTest, StoreDataWithSeveralDevices_RestoreData) {
 TEST_F(TcpAdapterTest, NotifyTransportConfigUpdated) {
   MockTransportAdapterListener mock_adapter_listener;
 
-  MockTCPTransportAdapter transport_adapter(
+  TcpTransportAdapter transport_adapter(
       port, last_state_wrapper_, transport_manager_settings);
   transport_adapter.AddListener(&mock_adapter_listener);
 
@@ -373,7 +373,9 @@ TEST_F(TcpAdapterTest, NotifyTransportConfigUpdated) {
   config[tc_tcp_ip_address] = std::string("192.168.1.1");
   config[tc_tcp_port] = std::string("12345");
 
-  EXPECT_CALL(mock_adapter_listener, OnTransportConfigUpdated(_)).Times(1);
+  EXPECT_CALL(mock_adapter_listener,
+              OnTransportConfigUpdated(&transport_adapter))
+      .Times(1);
 
   transport_adapter.TransportConfigUpdated(config);
 }

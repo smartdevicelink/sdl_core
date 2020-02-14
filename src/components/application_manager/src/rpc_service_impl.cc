@@ -186,9 +186,6 @@ bool RPCServiceImpl::ManageMobileCommand(
       return false;
     }
 #endif  // ENABLE_SECURITY
-
-    // Message for "CheckPermission" must be with attached schema
-    mobile_so_factory().attachSchema(*message, false);
   }
 
   auto plugin =
@@ -511,11 +508,6 @@ void RPCServiceImpl::SendMessageToMobile(
     app->usage_report().RecordRejectionsSyncOutOfMemory();
   }
 
-  mobile_so_factory().attachSchema(*message, false);
-  LOG4CXX_DEBUG(
-      logger_,
-      "Attached schema to message, result if valid: " << message->isValid());
-
   // Messages to mobile are not yet prioritized so use default priority value
   std::shared_ptr<Message> message_to_send(
       new Message(protocol_handler::MessagePriority::kDefault));
@@ -542,13 +534,20 @@ void RPCServiceImpl::SendMessageToMobile(
                (*message)[jhs::S_PARAMS][jhs::S_MESSAGE_TYPE].asInt())) {
     allow_unknown_parameters = false;
   }
+
+  const auto api_function_id = static_cast<mobile_apis::FunctionID::eType>(
+      (*message)[strings::params][strings::function_id].asUInt());
+
+  mobile_so_factory().attachSchema(*message, false);
+  LOG4CXX_DEBUG(
+      logger_,
+      "Attached schema to message, result if valid: " << message->isValid());
+
   if (!ConvertSOtoMessage(
           (*message), (*message_to_send), allow_unknown_parameters)) {
     LOG4CXX_WARN(logger_, "Can't send msg to Mobile: failed to create string");
     return;
   }
-  const auto api_function_id = static_cast<mobile_apis::FunctionID::eType>(
-      (*message)[strings::params][strings::function_id].asUInt());
 
   smart_objects::SmartObject& msg_to_mobile = *message;
   // If correlation_id is not present, it is from-HMI message which should be
@@ -588,7 +587,6 @@ void RPCServiceImpl::SendMessageToMobile(
       return;
     }
 
-#ifdef EXTERNAL_PROPRIETARY_MODE
     if (api_function_id == mobile_apis::FunctionID::OnSystemRequestID) {
       mobile_apis::RequestType::eType request_type =
           static_cast<mobile_apis::RequestType::eType>(
@@ -598,7 +596,6 @@ void RPCServiceImpl::SendMessageToMobile(
         app_manager_.GetPolicyHandler().OnUpdateRequestSentToMobile();
       }
     }
-#endif  // EXTERNAL_PROPRIETARY_MODE
   }
 
   if (message_to_send->binary_data()) {

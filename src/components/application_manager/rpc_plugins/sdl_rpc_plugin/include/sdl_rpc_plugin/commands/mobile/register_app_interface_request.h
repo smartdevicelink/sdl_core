@@ -134,30 +134,39 @@ class RegisterAppInterfaceRequest
       app_mngr::ApplicationConstSharedPtr app,
       bool resumption = false,
       bool need_restore_vr = false);
-  /*
+
+  /**
    * @brief Check new ID along with known mobile application ID
    *
    * return TRUE if ID is known already, otherwise - FALSE
    */
   bool IsApplicationWithSameAppIdRegistered();
 
-  /*
+  /**
    * @brief Check new application parameters (name, tts, vr) for
    * coincidence with already known parameters of registered applications
-   * @param out_duplicate_apps In the case other apps was found with duplicate
-   * names, this field will be filled with a list of said apps
    *
-   * return SUCCESS if there is no coincidence of app.name/TTS/VR synonyms,
+   * @return SUCCESS if there is no coincidence of app.name/TTS/VR synonyms,
    * otherwise appropriate error code returns
    */
-  mobile_apis::Result::eType CheckCoincidence(
+  mobile_apis::Result::eType CheckCoincidence();
+
+  /**
+   * @brief Search for any apps with the same appName as the one being
+   * registered
+   * @param out_duplicate_apps To be filled with a list of all of the apps which
+   * have duplicate appNames to the app being registered (registered or pending)
+   *
+   * @return TRUE if at least one duplicate app was found, otherwise FALSE
+   */
+  bool GetDuplicateNames(
       std::vector<app_mngr::ApplicationSharedPtr>& out_duplicate_apps);
 
-  /*
+  /**
    * @brief Predicate for using with CheckCoincidence method to compare with VR
    * synonym SO
    *
-   * return TRUE if there is coincidence of VR, otherwise FALSE
+   * @return TRUE if there is coincidence of VR, otherwise FALSE
    */
   struct CoincidencePredicateVR {
     CoincidencePredicateVR(const custom_str::CustomString& newItem)

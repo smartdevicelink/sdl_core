@@ -111,10 +111,10 @@ TEST_F(LastStateTest, SetGetData) {
   const Value& bluetooth_info =
       dictionary["TransportManager"]["BluetoothAdapter"];
   const Value& tcp_adapter_info = dictionary["TransportManager"]["TcpAdapter"];
-  EXPECT_EQ("{\n   \"devices\" : \"bluetooth_device\"\n}\n",
+  EXPECT_EQ("{\n\t\"devices\" : \"bluetooth_device\"\n}\n",
             bluetooth_info.toStyledString());
   EXPECT_EQ(
-      "{\n   \"devices\" : {\n      \"name\" : \"test_device\"\n   }\n}\n",
+      "{\n\t\"devices\" : \n\t{\n\t\t\"name\" : \"test_device\"\n\t}\n}\n",
       tcp_adapter_info.toStyledString());
 }
 

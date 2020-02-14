@@ -91,6 +91,7 @@ using ::testing::SaveArg;
 using ::testing::SetArgPointee;
 using ::testing::SetArgReferee;
 
+using application_manager::plugin_manager::MockRPCPluginManager;
 using test::components::application_manager_test::MockStateController;
 using test::components::policy_test::MockPolicyHandlerInterface;
 
@@ -534,10 +535,16 @@ TEST_F(ApplicationManagerImplTest, OnServiceStartedCallback_VideoServiceStart) {
   const protocol_handler::ServiceType service_type =
       protocol_handler::ServiceType::kMobileNav;
   const int32_t session_key = 123;
+  HmiStatePtr hmi_state(std::make_shared<HmiState>(
+      mock_app_ptr_, mock_app_mngr_, HmiState::STATE_ID_REGULAR));
+  hmi_state->set_video_streaming_state(
+      mobile_apis::VideoStreamingState::eType::STREAMABLE);
+  hmi_state->set_hmi_level(mobile_apis::HMILevel::HMI_FULL);
+
+  EXPECT_CALL(*mock_app_ptr_, CurrentHmiState(_))
+      .WillRepeatedly(Return(hmi_state));
   EXPECT_CALL(*mock_app_ptr_, app_id()).WillRepeatedly(Return(session_key));
   EXPECT_CALL(*mock_app_ptr_, is_navi()).WillRepeatedly(Return(true));
-  EXPECT_CALL(*mock_app_ptr_, hmi_level(kDefaultWindowId))
-      .WillRepeatedly(Return(mobile_apis::HMILevel::HMI_FULL));
 
   bool result = false;
   std::vector<std::string> rejected_params;
@@ -598,8 +605,14 @@ TEST_F(ApplicationManagerImplTest,
   EXPECT_CALL(*mock_app_ptr_, app_id()).WillRepeatedly(Return(session_key));
   EXPECT_CALL(*mock_app_ptr_, is_navi()).WillRepeatedly(Return(true));
   // HMI level is not FULL nor LIMITED
-  EXPECT_CALL(*mock_app_ptr_, hmi_level(kDefaultWindowId))
-      .WillRepeatedly(Return(mobile_apis::HMILevel::HMI_BACKGROUND));
+  HmiStatePtr hmi_state(std::make_shared<HmiState>(
+      mock_app_ptr_, mock_app_mngr_, HmiState::STATE_ID_REGULAR));
+  hmi_state->set_video_streaming_state(
+      mobile_apis::VideoStreamingState::eType::STREAMABLE);
+  hmi_state->set_hmi_level(mobile_apis::HMILevel::HMI_BACKGROUND);
+
+  EXPECT_CALL(*mock_app_ptr_, CurrentHmiState(_))
+      .WillRepeatedly(Return(hmi_state));
 
   bool result = false;
   std::vector<std::string> rejected_params;
@@ -628,8 +641,14 @@ TEST_F(ApplicationManagerImplTest,
   const int32_t session_key = 123;
   EXPECT_CALL(*mock_app_ptr_, app_id()).WillRepeatedly(Return(session_key));
   EXPECT_CALL(*mock_app_ptr_, is_navi()).WillRepeatedly(Return(true));
-  EXPECT_CALL(*mock_app_ptr_, hmi_level(kDefaultWindowId))
-      .WillRepeatedly(Return(mobile_apis::HMILevel::HMI_LIMITED));
+  HmiStatePtr hmi_state(std::make_shared<HmiState>(
+      mock_app_ptr_, mock_app_mngr_, HmiState::STATE_ID_REGULAR));
+  hmi_state->set_video_streaming_state(
+      mobile_apis::VideoStreamingState::eType::STREAMABLE);
+  hmi_state->set_hmi_level(mobile_apis::HMILevel::HMI_LIMITED);
+
+  EXPECT_CALL(*mock_app_ptr_, CurrentHmiState(_))
+      .WillRepeatedly(Return(hmi_state));
 
   bool result = false;
   std::vector<std::string> rejected_params;
@@ -712,8 +731,13 @@ TEST_F(ApplicationManagerImplTest,
   const int32_t session_key = 123;
   EXPECT_CALL(*mock_app_ptr_, app_id()).WillRepeatedly(Return(session_key));
   EXPECT_CALL(*mock_app_ptr_, is_navi()).WillRepeatedly(Return(true));
-  EXPECT_CALL(*mock_app_ptr_, hmi_level(kDefaultWindowId))
-      .WillRepeatedly(Return(mobile_apis::HMILevel::HMI_FULL));
+  HmiStatePtr hmi_state(std::make_shared<HmiState>(
+      mock_app_ptr_, mock_app_mngr_, HmiState::STATE_ID_REGULAR));
+  hmi_state->set_video_streaming_state(
+      mobile_apis::VideoStreamingState::eType::STREAMABLE);
+  hmi_state->set_hmi_level(mobile_apis::HMILevel::HMI_FULL);
+  EXPECT_CALL(*mock_app_ptr_, CurrentHmiState(_))
+      .WillRepeatedly(Return(hmi_state));
 
   bool result = false;
   std::vector<std::string> rejected_params;
@@ -786,8 +810,13 @@ TEST_F(ApplicationManagerImplTest,
   const int32_t session_key = 123;
   EXPECT_CALL(*mock_app_ptr_, app_id()).WillRepeatedly(Return(session_key));
   EXPECT_CALL(*mock_app_ptr_, is_navi()).WillRepeatedly(Return(true));
-  EXPECT_CALL(*mock_app_ptr_, hmi_level(kDefaultWindowId))
-      .WillRepeatedly(Return(mobile_apis::HMILevel::HMI_FULL));
+  HmiStatePtr hmi_state(std::make_shared<HmiState>(
+      mock_app_ptr_, mock_app_mngr_, HmiState::STATE_ID_REGULAR));
+  hmi_state->set_video_streaming_state(
+      mobile_apis::VideoStreamingState::eType::STREAMABLE);
+  hmi_state->set_hmi_level(mobile_apis::HMILevel::HMI_FULL);
+  EXPECT_CALL(*mock_app_ptr_, CurrentHmiState(_))
+      .WillRepeatedly(Return(hmi_state));
 
   bool result = false;
   std::vector<std::string> rejected_params;
@@ -821,8 +850,13 @@ TEST_F(ApplicationManagerImplTest, OnServiceStartedCallback_AudioServiceStart) {
   const int32_t session_key = 123;
   EXPECT_CALL(*mock_app_ptr_, app_id()).WillRepeatedly(Return(session_key));
   EXPECT_CALL(*mock_app_ptr_, is_navi()).WillRepeatedly(Return(true));
-  EXPECT_CALL(*mock_app_ptr_, hmi_level(kDefaultWindowId))
-      .WillRepeatedly(Return(mobile_apis::HMILevel::HMI_FULL));
+  HmiStatePtr hmi_state(std::make_shared<HmiState>(
+      mock_app_ptr_, mock_app_mngr_, HmiState::STATE_ID_REGULAR));
+  hmi_state->set_video_streaming_state(
+      mobile_apis::VideoStreamingState::eType::STREAMABLE);
+  hmi_state->set_hmi_level(mobile_apis::HMILevel::HMI_FULL);
+  EXPECT_CALL(*mock_app_ptr_, CurrentHmiState(_))
+      .WillRepeatedly(Return(hmi_state));
 
   bool result = false;
   std::vector<std::string> rejected_params;
@@ -851,8 +885,13 @@ TEST_F(ApplicationManagerImplTest,
   const int32_t session_key = 123;
   EXPECT_CALL(*mock_app_ptr_, app_id()).WillRepeatedly(Return(session_key));
   EXPECT_CALL(*mock_app_ptr_, is_navi()).WillRepeatedly(Return(true));
-  EXPECT_CALL(*mock_app_ptr_, hmi_level(kDefaultWindowId))
-      .WillRepeatedly(Return(mobile_apis::HMILevel::HMI_FULL));
+  HmiStatePtr hmi_state(std::make_shared<HmiState>(
+      mock_app_ptr_, mock_app_mngr_, HmiState::STATE_ID_REGULAR));
+  hmi_state->set_video_streaming_state(
+      mobile_apis::VideoStreamingState::eType::STREAMABLE);
+  hmi_state->set_hmi_level(mobile_apis::HMILevel::HMI_FULL);
+  EXPECT_CALL(*mock_app_ptr_, CurrentHmiState(_))
+      .WillRepeatedly(Return(hmi_state));
 
   bool result = false;
   std::vector<std::string> rejected_params;
@@ -1019,8 +1058,6 @@ TEST_F(ApplicationManagerImplTest,
                                                         nonswitching_device_id,
                                                         "USB");
 
-  EXPECT_CALL(*mock_message_helper_, CreateDeviceListSO(_, _, _))
-      .WillOnce(Return(smart_objects::SmartObjectSPtr()));
   app_manager_impl_->OnDeviceSwitchingStart(switching_device,
                                             non_switching_device);
   EXPECT_TRUE(
@@ -1090,8 +1127,6 @@ TEST_F(ApplicationManagerImplTest,
                                                         nonswitching_device_id,
                                                         "USB");
 
-  EXPECT_CALL(*mock_message_helper_, CreateDeviceListSO(_, _, _))
-      .WillOnce(Return(smart_objects::SmartObjectSPtr()));
   app_manager_impl_->OnDeviceSwitchingStart(switching_device,
                                             non_switching_device);
 
@@ -1611,6 +1646,9 @@ TEST_F(ApplicationManagerImplTest,
   smart_objects::SmartObjectSPtr request_for_registration_ptr =
       std::make_shared<smart_objects::SmartObject>(request_for_registration);
 
+  std::unique_ptr<plugin_manager::RPCPluginManager> rpc_plugin_manager(
+      new MockRPCPluginManager());
+  app_manager_impl_->SetPluginManager(rpc_plugin_manager);
   ApplicationSharedPtr application =
       app_manager_impl_->RegisterApplication(request_for_registration_ptr);
   EXPECT_STREQ(kAppName.c_str(), application->name().c_str());
@@ -1778,6 +1816,9 @@ TEST_F(ApplicationManagerImplTest,
   smart_objects::SmartObjectSPtr request_for_registration_ptr =
       std::make_shared<smart_objects::SmartObject>(request_for_registration);
 
+  std::unique_ptr<plugin_manager::RPCPluginManager> rpc_plugin_manager(
+      new MockRPCPluginManager());
+  app_manager_impl_->SetPluginManager(rpc_plugin_manager);
   ApplicationSharedPtr application =
       app_manager_impl_->RegisterApplication(request_for_registration_ptr);
 
