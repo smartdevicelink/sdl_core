@@ -53,6 +53,7 @@
 #include "utils/threads/thread.h"
 #include "utils/threads/thread_delegate.h"
 
+#include "policy/policy_helper.h"
 #include "policy/sql_pt_representation.h"
 
 namespace policy_table = rpc::policy_table_interface_base;
@@ -1793,6 +1794,12 @@ bool CacheManager::Init(const std::string& file_name,
         snapshot->ReportErrors(&report);
         LOG4CXX_DEBUG(logger_,
                       "Validation report: " << rpc::PrettyFormat(report));
+        return result;
+      }
+
+      result &= UnwrapAppPolicies(pt_->policy_table.app_policies_section.apps);
+      if (!result) {
+        LOG4CXX_ERROR(logger_, "Cannot unwrap application policies");
         return result;
       }
 
