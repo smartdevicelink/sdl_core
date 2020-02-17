@@ -55,7 +55,7 @@
 #include "application_manager/state_controller.h"
 #include "interfaces/HMI_API.h"
 #include "interfaces/MOBILE_API.h"
-#include "resumption/last_state.h"
+#include "resumption/last_state_wrapper.h"
 #include "smart_objects/smart_object.h"
 
 namespace test {
@@ -65,6 +65,10 @@ using application_manager::plugin_manager::RPCPluginManager;
 
 class MockApplicationManager : public application_manager::ApplicationManager {
  public:
+  MOCK_METHOD2(Init,
+               bool(resumption::LastStateWrapperPtr last_state,
+                    media_manager::MediaManager* media_manager));
+  DEPRECATED
   MOCK_METHOD2(Init,
                bool(resumption::LastState& last_state,
                     media_manager::MediaManager* media_manager));
@@ -139,10 +143,10 @@ class MockApplicationManager : public application_manager::ApplicationManager {
   MOCK_METHOD1(application_id, uint32_t(const int32_t correlation_id));
   MOCK_METHOD2(set_application_id,
                void(const int32_t correlation_id, const uint32_t app_id));
-  MOCK_METHOD3(OnHMILevelChanged,
-               void(uint32_t app_id,
-                    mobile_apis::HMILevel::eType from,
-                    mobile_apis::HMILevel::eType to));
+  MOCK_METHOD3(OnHMIStateChanged,
+               void(const uint32_t app_id,
+                    const application_manager::HmiStatePtr from,
+                    const application_manager::HmiStatePtr to));
   MOCK_METHOD3(ProcessOnDataStreamingNotification,
                void(const protocol_handler::ServiceType service_type,
                     const uint32_t app_id,
@@ -260,7 +264,7 @@ class MockApplicationManager : public application_manager::ApplicationManager {
                void(mobile_apis::AppInterfaceUnregisteredReason::eType reason));
   MOCK_METHOD1(HeadUnitReset,
                void(mobile_apis::AppInterfaceUnregisteredReason::eType reason));
-  MOCK_CONST_METHOD2(HMILevelAllowsStreaming,
+  MOCK_CONST_METHOD2(HMIStateAllowsStreaming,
                      bool(uint32_t app_id,
                           protocol_handler::ServiceType service_type));
   MOCK_METHOD5(CheckPolicyPermissions,

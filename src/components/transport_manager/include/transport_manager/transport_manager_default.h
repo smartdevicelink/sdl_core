@@ -38,24 +38,47 @@
 
 #include "transport_manager/transport_manager_impl.h"
 
-namespace resumption {
-class LastState;
-}
-
 namespace transport_manager {
+
+struct TransportAdapterFactory {
+  TransportAdapterFactory();
+  template <typename... Args>
+  using CreatorTA =
+      std::function<transport_adapter::TransportAdapter*(Args&&... args)>;
+#ifdef BLUETOOTH_SUPPORT
+  CreatorTA<resumption::LastStateWrapperPtr&, const TransportManagerSettings&>
+      ta_bluetooth_creator_;
+#endif
+  CreatorTA<const uint16_t,
+            resumption::LastStateWrapperPtr&,
+            const TransportManagerSettings&>
+      ta_tcp_creator_;
+#if defined(USB_SUPPORT)
+  CreatorTA<resumption::LastStateWrapperPtr&, const TransportManagerSettings&>
+      ta_usb_creator_;
+#endif
+#if defined(CLOUD_APP_WEBSOCKET_TRANSPORT_SUPPORT)
+  CreatorTA<resumption::LastStateWrapperPtr&, const TransportManagerSettings&>
+      ta_cloud_creator_;
+#endif
+};
 
 /**
  * @brief Default realization of transport_manager_impl class.
  */
 class TransportManagerDefault : public TransportManagerImpl {
  public:
-  explicit TransportManagerDefault(const TransportManagerSettings& settings);
+  explicit TransportManagerDefault(const TransportManagerSettings& settings,
+                                   const TransportAdapterFactory& ta_factory_);
 
   /**
    * @brief Initialize transport manager.
    *
    * @return Code error.
    */
+  int Init(resumption::LastStateWrapperPtr last_state_wrapper) OVERRIDE;
+
+  DEPRECATED
   int Init(resumption::LastState& last_state) OVERRIDE;
 
   /**
@@ -63,6 +86,8 @@ class TransportManagerDefault : public TransportManagerImpl {
    */
   virtual ~TransportManagerDefault();
 
+ private:
+  TransportAdapterFactory ta_factory_;
   DISALLOW_COPY_AND_ASSIGN(TransportManagerDefault);
 };
 }  // namespace transport_manager

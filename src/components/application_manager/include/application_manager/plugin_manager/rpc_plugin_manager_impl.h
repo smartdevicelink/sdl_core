@@ -37,11 +37,8 @@
 #include "application_manager/plugin_manager/rpc_plugin_manager.h"
 #include "application_manager/policies/policy_handler_interface.h"
 #include "application_manager/rpc_service.h"
+#include "resumption/last_state_wrapper.h"
 #include "utils/optional.h"
-
-namespace resumption {
-class LastState;
-}
 
 namespace application_manager {
 namespace plugin_manager {
@@ -56,6 +53,13 @@ class RPCPluginManagerImpl : public RPCPluginManager {
    * @param hmi_capabilities HMICapabilities
    * @param policy_handler PolicyHandlerInterface
    **/
+  RPCPluginManagerImpl(ApplicationManager& app_manager,
+                       rpc_service::RPCService& rpc_service,
+                       HMICapabilities& hmi_capabilities,
+                       policy::PolicyHandlerInterface& policy_handler,
+                       resumption::LastStateWrapperPtr last_state);
+
+  DEPRECATED
   RPCPluginManagerImpl(ApplicationManager& app_manager,
                        rpc_service::RPCService& rpc_service,
                        HMICapabilities& hmi_capabilities,
@@ -76,7 +80,7 @@ class RPCPluginManagerImpl : public RPCPluginManager {
   rpc_service::RPCService& rpc_service_;
   HMICapabilities& hmi_capabilities_;
   policy::PolicyHandlerInterface& policy_handler_;
-  resumption::LastState& last_state_;
+  resumption::LastStateWrapperPtr last_state_;
 
   // RPCPluginManager interface
  public:

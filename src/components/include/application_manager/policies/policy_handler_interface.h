@@ -661,6 +661,12 @@ class PolicyHandlerInterface : public VehicleDataItemProvider {
   virtual bool GetModuleTypes(const std::string& policy_app_id,
                               std::vector<std::string>* modules) const = 0;
 
+  /**
+   * @brief Notifies policy manager about OnSystemRequest
+   * notification receiving
+   */
+  virtual void OnSystemRequestReceived() const = 0;
+
  private:
 /**
  * @brief Processes data received via OnAppPermissionChanged notification

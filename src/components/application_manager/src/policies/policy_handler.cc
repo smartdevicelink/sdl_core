@@ -426,8 +426,8 @@ bool PolicyHandler::ClearUserConsent() {
 uint32_t PolicyHandler::GetAppIdForSending() const {
   LOG4CXX_AUTO_TRACE(logger_);
   POLICY_LIB_CHECK(0);
-  const ApplicationSet& accessor =
-      application_manager_.applications().GetData();
+  // fix ApplicationSet access crash
+  const ApplicationSet accessor = application_manager_.applications().GetData();
 
   HMILevelPredicate has_none_level(mobile_api::HMILevel::HMI_NONE);
   Applications apps_without_none_level;
@@ -717,6 +717,13 @@ void PolicyHandler::OnGetUserFriendlyMessage(
   // Send response to HMI with gathered data
   MessageHelper::SendGetUserFriendlyMessageResponse(
       result, correlation_id, application_manager_);
+}
+
+void PolicyHandler::OnSystemRequestReceived() const {
+#ifdef EXTERNAL_PROPRIETARY_MODE
+  ptu_retry_handler().OnSystemRequestReceived();
+#endif
+  policy_manager_->ResetTimeout();
 }
 
 void PolicyHandler::GetRegisteredLinks(
@@ -1576,8 +1583,6 @@ void PolicyHandler::OnSnapshotCreated(const BinaryMessage& pt_string,
   const std::string& url = urls[app_url.first].url[app_url.second];
   SendMessageToSDK(pt_string, url);
 #endif  // PROPRIETARY_MODE
-  // reset update required false
-  OnUpdateRequestSentToMobile();
 }
 #endif  // EXTERNAL_PROPRIETARY_MODE
 

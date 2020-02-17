@@ -191,11 +191,6 @@ TEST_F(ApplicationManagerImplMockHmiTest,
 
   MockCommandFactory mock_command_factory;
 
-  //  // Skip sending notification on device switching as it is not the goal
-  //  here
-  EXPECT_CALL(mock_command_factory, CreateCommand(_, _))
-      .WillOnce(Return(std::shared_ptr<commands::Command>()));
-
   plugin_manager::MockRPCPlugin mock_rpc_plugin;
   utils::Optional<plugin_manager::RPCPlugin> mock_rpc_plugin_opt =
       mock_rpc_plugin;

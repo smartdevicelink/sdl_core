@@ -327,6 +327,8 @@ class MockPolicyHandlerInterface : public policy::PolicyHandlerInterface {
                void(const std::string& device_id_from,
                     const std::string& device_id_to));
 
+  MOCK_CONST_METHOD0(OnSystemRequestReceived, void());
+
  private:
 #ifdef EXTERNAL_PROPRIETARY_MODE
   MOCK_METHOD3(OnAppPermissionConsentInternal,

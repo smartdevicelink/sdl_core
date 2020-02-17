@@ -41,10 +41,6 @@
 #include "smart_objects/smart_object.h"
 #include "utils/macro.h"
 
-namespace resumption {
-class LastState;
-}  // namespace resumption
-
 namespace application_manager {
 class ApplicationManager;
 
@@ -514,6 +510,9 @@ class HMICapabilitiesImpl : public HMICapabilities {
 
   const smart_objects::SmartObject* seat_location_capability() const OVERRIDE;
 
+  void Init(resumption::LastStateWrapperPtr last_state_wrapper) OVERRIDE;
+
+  DEPRECATED
   void Init(resumption::LastState* last_state) OVERRIDE;
 
   /*

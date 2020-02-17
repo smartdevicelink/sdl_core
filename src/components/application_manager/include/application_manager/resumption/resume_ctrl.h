@@ -47,8 +47,6 @@ namespace app_mngr = application_manager;
 
 namespace resumption {
 
-class LastState;
-
 /**
  * @brief Contains logic for storage/restore data of applications.
  */
@@ -272,12 +270,15 @@ class ResumeCtrl {
    */
   virtual void RemoveFromResumption(uint32_t app_id) = 0;
 
+  DEPRECATED
+  virtual bool Init(resumption::LastState& last_state) = 0;
+
   /**
    * @brief Initialization data for Resume controller
    * @return true if initialization is success otherwise
    * returns false
    */
-  virtual bool Init(LastState& last_state) = 0;
+  virtual bool Init(resumption::LastStateWrapperPtr last_state_wrapper) = 0;
 
   /**
    * @brief Notify resume controller about new application

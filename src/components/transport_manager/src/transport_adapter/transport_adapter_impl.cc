@@ -70,7 +70,7 @@ TransportAdapterImpl::TransportAdapterImpl(
     DeviceScanner* device_scanner,
     ServerConnectionFactory* server_connection_factory,
     ClientConnectionListener* client_connection_listener,
-    resumption::LastState& last_state,
+    resumption::LastStateWrapperPtr last_state_wrapper,
     const TransportManagerSettings& settings)
     : listeners_()
     , initialised_(0)
@@ -86,7 +86,7 @@ TransportAdapterImpl::TransportAdapterImpl(
     device_scanner_(device_scanner)
     , server_connection_factory_(server_connection_factory)
     , client_connection_listener_(client_connection_listener)
-    , last_state_(last_state)
+    , last_state_wrapper_(last_state_wrapper)
     , settings_(settings) {
 }
 
@@ -138,6 +138,12 @@ void TransportAdapterImpl::Terminate() {
   connections_lock_.AcquireForWriting();
   std::swap(connections, connections_);
   connections_lock_.Release();
+  for (const auto& connection : connections) {
+    auto& info = connection.second;
+    if (info.connection) {
+      info.connection->Terminate();
+    }
+  }
   connections.clear();
 
   LOG4CXX_DEBUG(logger_, "Connections deleted");
@@ -948,23 +954,35 @@ void TransportAdapterImpl::RemoveFinalizedConnection(
     const DeviceUID& device_handle, const ApplicationHandle& app_handle) {
   const DeviceUID device_uid = device_handle;
   LOG4CXX_AUTO_TRACE(logger_);
-  sync_primitives::AutoWriteLock lock(connections_lock_);
-  ConnectionMap::iterator it_conn =
-      connections_.find(std::make_pair(device_uid, app_handle));
-  if (it_conn == connections_.end()) {
-    LOG4CXX_WARN(logger_,
-                 "Device_id: " << &device_uid << ", app_handle: " << &app_handle
-                               << " connection not found");
+  {
+    sync_primitives::AutoWriteLock lock(connections_lock_);
+    auto it_conn = connections_.find(std::make_pair(device_uid, app_handle));
+    if (connections_.end() == it_conn) {
+      LOG4CXX_WARN(logger_,
+                   "Device_id: " << &device_uid << ", app_handle: "
+                                 << &app_handle << " connection not found");
+      return;
+    }
+    const ConnectionInfo& info = it_conn->second;
+    if (ConnectionInfo::FINALISING != info.state) {
+      LOG4CXX_WARN(logger_,
+                   "Device_id: " << &device_uid << ", app_handle: "
+                                 << &app_handle << " connection not finalized");
+      return;
+    }
+    connections_.erase(it_conn);
+  }
+
+  DeviceSptr device = FindDevice(device_handle);
+  if (!device) {
+    LOG4CXX_WARN(logger_, "Device: uid " << &device_uid << " not found");
     return;
   }
-  const ConnectionInfo& info = it_conn->second;
-  if (info.state != ConnectionInfo::FINALISING) {
-    LOG4CXX_WARN(logger_,
-                 "Device_id: " << &device_uid << ", app_handle: " << &app_handle
-                               << " connection not finalized");
-    return;
+
+  if (ToBeAutoDisconnected(device) &&
+      IsSingleApplication(device_handle, app_handle)) {
+    RemoveDevice(device_uid);
   }
-  connections_.erase(it_conn);
 }
 
 void TransportAdapterImpl::AddListener(TransportAdapterListener* listener) {

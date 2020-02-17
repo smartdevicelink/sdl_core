@@ -158,10 +158,14 @@ class ApplicationManagerImpl
                          const policy::PolicySettings& policy_settings);
   ~ApplicationManagerImpl();
 
+  DEPRECATED
+  bool Init(resumption::LastState&,
+            media_manager::MediaManager* media_manager) OVERRIDE;
+
   /**
    * Inits application manager
    */
-  bool Init(resumption::LastState& last_state,
+  bool Init(resumption::LastStateWrapperPtr last_state_wrapper,
             media_manager::MediaManager* media_manager) OVERRIDE;
 
   /**
@@ -213,9 +217,9 @@ class ApplicationManagerImpl
 
   void set_current_audio_source(const uint32_t source) OVERRIDE;
 
-  void OnHMILevelChanged(uint32_t app_id,
-                         mobile_apis::HMILevel::eType from,
-                         mobile_apis::HMILevel::eType to) OVERRIDE;
+  void OnHMIStateChanged(const uint32_t app_id,
+                         const HmiStatePtr from,
+                         const HmiStatePtr to) OVERRIDE;
 
   void ProcessOnDataStreamingNotification(
       const protocol_handler::ServiceType service_type,
@@ -798,12 +802,13 @@ class ApplicationManagerImpl
   void RemovePolicyObserver(PolicyHandlerObserver* listener);
 
   /**
-   * @brief Checks HMI level and returns true if streaming is allowed
+   * @brief Checks application HMI state and returns true if streaming is
+   * allowed
    * @param app_id Application id
    * @param service_type Service type to check
    * @return True if streaming is allowed, false in other case
    */
-  bool HMILevelAllowsStreaming(
+  bool HMIStateAllowsStreaming(
       uint32_t app_id,
       protocol_handler::ServiceType service_type) const OVERRIDE;
 
@@ -1289,8 +1294,14 @@ class ApplicationManagerImpl
    * @param to the new HMILevel for the certain app.
    */
   void ProcessApp(const uint32_t app_id,
-                  const mobile_apis::HMILevel::eType from,
-                  const mobile_apis::HMILevel::eType to);
+                  const HmiStatePtr from,
+                  const HmiStatePtr to);
+
+  /**
+   * @brief Starts EndStream timer for a specified application
+   * @param app_id Application to process
+   */
+  void StartEndStreamTimer(const uint32_t app_id);
 
   /**
    * @brief Allows to send appropriate message to mobile device.
@@ -1566,8 +1577,11 @@ class ApplicationManagerImpl
   uint32_t navi_close_app_timeout_;
   uint32_t navi_end_stream_timeout_;
 
-  std::vector<TimerSPtr> timer_pool_;
-  sync_primitives::Lock timer_pool_lock_;
+  std::vector<TimerSPtr> close_app_timer_pool_;
+  std::vector<TimerSPtr> end_stream_timer_pool_;
+  sync_primitives::Lock close_app_timer_pool_lock_;
+  sync_primitives::Lock end_stream_timer_pool_lock_;
+
   mutable sync_primitives::RecursiveLock stopping_application_mng_lock_;
   StateControllerImpl state_ctrl_;
   std::unique_ptr<app_launch::AppLaunchData> app_launch_dto_;
@@ -1593,6 +1607,8 @@ class ApplicationManagerImpl
   Timer application_list_update_timer_;
 
   Timer tts_global_properties_timer_;
+
+  Timer clear_pool_timer_;
 
   bool is_low_voltage_;
 
