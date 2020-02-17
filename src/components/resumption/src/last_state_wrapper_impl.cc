@@ -1,8 +1,4 @@
-/*
- * \file usb_aoa_adapter.h
- * \brief UsbAoaAdapter class header file.
- *
- * Copyright (c) 2013, Ford Motor Company
+/* Copyright (c) 2019, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,38 +29,21 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_USB_USB_AOA_ADAPTER_H_
-#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_USB_USB_AOA_ADAPTER_H_
+#include "resumption/last_state_wrapper_impl.h"
+#include "utils/logger.h"
 
-#include "transport_manager/transport_adapter/transport_adapter_impl.h"
-#include "transport_manager/usb/common.h"
+namespace resumption {
 
-namespace transport_manager {
-namespace transport_adapter {
+CREATE_LOGGERPTR_GLOBAL(logger_, "Resumption")
 
-class UsbAoaAdapter : public TransportAdapterImpl {
- public:
-  UsbAoaAdapter(resumption::LastStateWrapperPtr last_state_wrapper,
-                const TransportManagerSettings& settings);
+LastStateWrapperImpl::LastStateWrapperImpl(
+    std::shared_ptr<LastState> last_state)
+    : last_state_(last_state)
+    , lock_(std::make_shared<sync_primitives::Lock>()) {}
 
-  DEPRECATED
-  UsbAoaAdapter(resumption::LastState&,
-                const TransportManagerSettings& settings) = delete;
+LastStateAccessor LastStateWrapperImpl::get_accessor() const {
+  LOG4CXX_AUTO_TRACE(logger_);
+  return MutableDataAccessor<LastState>(*last_state_, lock_);
+}
 
-  virtual ~UsbAoaAdapter();
-
- protected:
-  virtual DeviceType GetDeviceType() const;
-  virtual bool IsInitialised() const;
-  virtual TransportAdapter::Error Init();
-  virtual bool ToBeAutoConnected(DeviceSptr device) const;
-
- private:
-  bool is_initialised_;
-  UsbHandlerSptr usb_handler_;
-};
-
-}  // namespace transport_adapter
-}  // namespace transport_manager
-
-#endif  // SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_USB_USB_AOA_ADAPTER_H_
+}  // namespace resumption

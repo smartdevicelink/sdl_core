@@ -35,7 +35,7 @@
 #include "application_manager/hmi_capabilities.h"
 #include "application_manager/message_helper.h"
 #include "application_manager/rpc_service.h"
-#include "resumption/last_state.h"
+#include "resumption/last_state_wrapper.h"
 #include "smart_objects/smart_object.h"
 #include "utils/helpers.h"
 
@@ -81,9 +81,10 @@ void HMILanguageHandler::set_language_for(
   LOG4CXX_DEBUG(
       logger_,
       "Setting language " << language << " for interface " << interface);
-  Json::Value& dictionary = last_state_->get_dictionary();
-  dictionary[LanguagesKey][key] = language;
-  return;
+  resumption::LastStateAccessor accessor = last_state_wrapper_->get_accessor();
+  Json::Value dictionary = accessor.GetData().dictionary();
+  dictionary[LanguagesKey][key] = static_cast<int32_t>(language);
+  accessor.GetMutableData().set_dictionary(dictionary);
 }
 
 hmi_apis::Common_Language::eType HMILanguageHandler::get_language_for(
@@ -107,7 +108,8 @@ hmi_apis::Common_Language::eType HMILanguageHandler::get_language_for(
       return Common_Language::INVALID_ENUM;
   }
 
-  const Json::Value& dictionary = last_state_->get_dictionary();
+  resumption::LastStateAccessor accessor = last_state_wrapper_->get_accessor();
+  Json::Value dictionary = accessor.GetData().dictionary();
   if (dictionary.isMember(LanguagesKey)) {
     if (dictionary[LanguagesKey].isMember(key)) {
       Common_Language::eType language = static_cast<Common_Language::eType>(
@@ -342,8 +344,8 @@ void HMILanguageHandler::CheckApplication(const Apps::value_type app) {
   }
 }
 
-void HMILanguageHandler::Init(resumption::LastState* value) {
-  last_state_ = value;
+void HMILanguageHandler::Init(resumption::LastStateWrapperPtr value) {
+  last_state_wrapper_ = value;
   persisted_ui_language_ = get_language_for(INTERFACE_UI);
   persisted_vr_language_ = get_language_for(INTERFACE_VR);
   persisted_tts_language_ = get_language_for(INTERFACE_TTS);

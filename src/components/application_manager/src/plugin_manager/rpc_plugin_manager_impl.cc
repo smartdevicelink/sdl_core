@@ -13,7 +13,7 @@ RPCPluginManagerImpl::RPCPluginManagerImpl(
     rpc_service::RPCService& rpc_service,
     HMICapabilities& hmi_capabilities,
     policy::PolicyHandlerInterface& policy_handler,
-    resumption::LastState& last_state)
+    resumption::LastStateWrapperPtr last_state)
     : app_manager_(app_manager)
     , rpc_service_(rpc_service)
     , hmi_capabilities_(hmi_capabilities)

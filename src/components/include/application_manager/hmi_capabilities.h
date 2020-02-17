@@ -37,12 +37,9 @@
 #include "interfaces/HMI_API.h"
 #include "interfaces/MOBILE_API.h"
 #include "json/json.h"
+#include "resumption/last_state_wrapper.h"
 #include "smart_objects/smart_object.h"
 #include "utils/macro.h"
-
-namespace resumption {
-class LastState;
-}
 
 namespace application_manager {
 class ApplicationManager;
@@ -531,7 +528,10 @@ class HMICapabilities {
   virtual const smart_objects::SmartObject* seat_location_capability()
       const = 0;
 
+  DEPRECATED
   virtual void Init(resumption::LastState* last_state) = 0;
+
+  virtual void Init(resumption::LastStateWrapperPtr last_state_wrapper) = 0;
 
   /**
    * @brief Trigger waiting for response

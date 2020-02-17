@@ -41,6 +41,7 @@
 #include "application_manager/mock_application_manager_settings.h"
 #include "application_manager/mock_rpc_handler.h"
 #include "application_manager/mock_rpc_service.h"
+#include "resumption/last_state_wrapper_impl.h"
 #include "resumption/mock_last_state.h"
 
 #include <vector>
@@ -73,7 +74,10 @@ struct PassthroughParams {
 class RPCPassingHandlerTest : public ::testing::Test {
  public:
   RPCPassingHandlerTest()
-      : mock_app_service_manager_(mock_app_manager_, mock_last_state_)
+      : mock_last_state_(std::make_shared<resumption_test::MockLastState>())
+      , last_state_wrapper_(std::make_shared<resumption::LastStateWrapperImpl>(
+            mock_last_state_))
+      , mock_app_service_manager_(mock_app_manager_, last_state_wrapper_)
       , mock_app_ptr_(std::make_shared<NiceMock<MockApplication> >())
       , version_(utils::SemanticVersion(5, 1, 0)) {}
 
@@ -210,7 +214,8 @@ class RPCPassingHandlerTest : public ::testing::Test {
   NiceMock<MockApplicationManagerSettings> mock_app_manager_settings_;
   MockRPCService mock_rpc_service_;
   MockRPCHandler mock_rpc_handler_;
-  resumption_test::MockLastState mock_last_state_;
+  std::shared_ptr<resumption_test::MockLastState> mock_last_state_;
+  resumption::LastStateWrapperPtr last_state_wrapper_;
   MockAppServiceManager mock_app_service_manager_;
   std::shared_ptr<NiceMock<MockApplication> > mock_app_ptr_;
   const utils::SemanticVersion version_;

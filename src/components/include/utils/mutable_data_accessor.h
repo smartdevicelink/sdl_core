@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017, Ford Motor Company
+ * Copyright (c) 2020, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,33 +30,49 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_RESUMPTION_INCLUDE_RESUMPTION_LAST_STATE_H_
-#define SRC_COMPONENTS_RESUMPTION_INCLUDE_RESUMPTION_LAST_STATE_H_
+#ifndef SRC_COMPONENTS_INCLUDE_UTILS_MUTABLE_DATA_ACCESSOR_H
+#define SRC_COMPONENTS_INCLUDE_UTILS_MUTABLE_DATA_ACCESSOR_H
 
-#include <string>
+#include "utils/lock.h"
 
-#include "json/json.h"
+// This class is for thread-safe mutable access to data
 
-namespace resumption {
-
-class LastState {
+template <class T>
+class MutableDataAccessor {
  public:
-  /**
-   * @brief Destructor
-   */
-  virtual ~LastState() {}
+  MutableDataAccessor(T& data,
+                      const std::shared_ptr<sync_primitives::BaseLock>& lock)
+      : data_(data), lock_(lock), counter_(new uint32_t(0)) {
+    lock_->Acquire();
+  }
 
-  /**
-   * @brief Saving dictionary to filesystem
-   */
-  virtual void SaveStateToFileSystem() = 0;
+  MutableDataAccessor(const MutableDataAccessor<T>& other)
+      : data_(other.data_), lock_(other.lock_), counter_(other.counter_) {
+    ++(*counter_);
+  }
 
-  /**
-   * @brief Get reference to dictionary
-   */
-  virtual Json::Value& get_dictionary() = 0;
+  ~MutableDataAccessor() {
+    if (0 == *counter_) {
+      lock_->Release();
+    } else {
+      --(*counter_);
+    }
+  }
+
+  const T& GetData() const {
+    return data_;
+  }
+
+  T& GetMutableData() {
+    return data_;
+  }
+
+ private:
+  void* operator new(size_t size);
+  T& data_;
+  // Require that the lock lives at least as long as the DataAccessor
+  const std::shared_ptr<sync_primitives::BaseLock> lock_;
+  std::shared_ptr<uint32_t> counter_;
 };
 
-}  // namespace resumption
-
-#endif  // SRC_COMPONENTS_RESUMPTION_INCLUDE_RESUMPTION_LAST_STATE_H_
+#endif  // SRC_COMPONENTS_INCLUDE_UTILS_MUTABLE_DATA_ACCESSOR_H

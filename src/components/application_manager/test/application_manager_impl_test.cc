@@ -59,6 +59,7 @@
 #include "protocol/bson_object_keys.h"
 #include "protocol_handler/mock_protocol_handler.h"
 #include "protocol_handler/mock_session_observer.h"
+#include "resumption/last_state_wrapper_impl.h"
 #include "resumption/mock_last_state.h"
 #include "utils/custom_string.h"
 #include "utils/file_system.h"
@@ -153,9 +154,12 @@ class ApplicationManagerImplTest
             std::make_shared<NiceMock<resumption_test::MockResumptionData> >(
                 mock_app_mngr_))
       , mock_rpc_service_(new MockRPCService)
+      , mock_last_state_(std::make_shared<resumption_test::MockLastState>())
       , mock_policy_handler_(new NiceMock<MockPolicyHandlerInterface>)
-      , mock_app_service_manager_(
-            new MockAppServiceManager(mock_app_mngr_, mock_last_state_))
+      , mock_app_service_manager_(new MockAppServiceManager(
+            mock_app_mngr_,
+            std::make_shared<resumption::LastStateWrapperImpl>(
+                mock_last_state_)))
       , mock_message_helper_(
             application_manager::MockMessageHelper::message_helper_mock())
       , mock_statistics_manager_(
@@ -207,7 +211,7 @@ class ApplicationManagerImplTest
         .WillByDefault(Return());
     app_manager_impl_->SetAppServiceManager(mock_app_service_manager_);
     Json::Value empty;
-    ON_CALL(mock_last_state_, get_dictionary()).WillByDefault(ReturnRef(empty));
+    ON_CALL(*mock_last_state_, dictionary()).WillByDefault(Return(empty));
 
     auto request = std::make_shared<smart_objects::SmartObject>(
         smart_objects::SmartType_Map);
@@ -313,7 +317,7 @@ class ApplicationManagerImplTest
 
   MockStateController mock_state_ctrl_;
   MockRPCService* mock_rpc_service_;
-  resumption_test::MockLastState mock_last_state_;
+  std::shared_ptr<resumption_test::MockLastState> mock_last_state_;
   NiceMock<con_test::MockConnectionHandler> mock_connection_handler_;
   NiceMock<protocol_handler_test::MockSessionObserver> mock_session_observer_;
   NiceMock<MockApplicationManagerSettings> mock_application_manager_settings_;

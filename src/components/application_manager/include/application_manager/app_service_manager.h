@@ -36,11 +36,9 @@
 #include "application_manager/application.h"
 #include "application_manager/rpc_passing_handler.h"
 #include "interfaces/MOBILE_API.h"
+#include "resumption/last_state_wrapper.h"
 #include "smart_objects/smart_object.h"
-
-namespace resumption {
-class LastState;
-}
+#include "utils/macro.h"
 
 namespace application_manager {
 
@@ -65,7 +63,10 @@ class AppServiceManager {
    * @param app_manager
    */
   AppServiceManager(ApplicationManager& app_manager,
-                    resumption::LastState& last_state);
+                    resumption::LastStateWrapperPtr last_state);
+
+  DEPRECATED AppServiceManager(ApplicationManager& app_manager,
+                               resumption::LastState& last_state);
 
   /**
    * @brief Class destructor
@@ -221,7 +222,7 @@ class AppServiceManager {
 
  private:
   ApplicationManager& app_manager_;
-  resumption::LastState& last_state_;
+  resumption::LastStateWrapperPtr last_state_;
 
   sync_primitives::RecursiveLock published_services_lock_;
   std::map<std::string, AppService> published_services_;

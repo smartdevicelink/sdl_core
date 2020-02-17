@@ -43,31 +43,52 @@ LastStateImpl::LastStateImpl(const std::string& app_storage_folder,
                              const std::string& app_info_storage)
     : app_storage_folder_(app_storage_folder)
     , app_info_storage_(app_info_storage) {
-  LoadStateFromFileSystem();
+  LoadFromFileSystem();
   LOG4CXX_AUTO_TRACE(logger_);
 }
 
 LastStateImpl::~LastStateImpl() {
   LOG4CXX_AUTO_TRACE(logger_);
-  SaveStateToFileSystem();
+  SaveToFileSystem();
 }
 
 void LastStateImpl::SaveStateToFileSystem() {
   LOG4CXX_AUTO_TRACE(logger_);
-  const std::string& str = dictionary_.toStyledString();
-  const std::vector<uint8_t> char_vector_pdata(str.begin(), str.end());
 
+  std::string styled_string;
+  {
+    sync_primitives::AutoLock lock(dictionary_lock_);
+    styled_string = dictionary_.toStyledString();
+  }
+
+  const std::vector<uint8_t> char_vector_pdata(styled_string.begin(),
+                                               styled_string.end());
   DCHECK(file_system::CreateDirectoryRecursively(app_storage_folder_));
   LOG4CXX_INFO(logger_,
-               "LastState::SaveStateToFileSystem " << app_info_storage_ << str);
+               "LastState::SaveStateToFileSystem[DEPRECATED] "
+                   << app_info_storage_ << styled_string);
   DCHECK(file_system::Write(app_info_storage_, char_vector_pdata));
 }
 
-Json::Value& LastStateImpl::get_dictionary() {
-  return dictionary_;
+void LastStateImpl::SaveToFileSystem() {
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  std::string styled_string;
+  {
+    sync_primitives::AutoLock lock(dictionary_lock_);
+    styled_string = dictionary_.toStyledString();
+  }
+
+  const std::vector<uint8_t> char_vector_pdata(styled_string.begin(),
+                                               styled_string.end());
+  DCHECK(file_system::CreateDirectoryRecursively(app_storage_folder_));
+  LOG4CXX_INFO(
+      logger_,
+      "LastState::SaveToFileSystem " << app_info_storage_ << styled_string);
+  DCHECK(file_system::Write(app_info_storage_, char_vector_pdata));
 }
 
-void LastStateImpl::LoadStateFromFileSystem() {
+void LastStateImpl::LoadFromFileSystem() {
   std::string buffer;
   const bool result = file_system::ReadFile(app_info_storage_, buffer);
   utils::JsonReader reader;
@@ -78,6 +99,30 @@ void LastStateImpl::LoadStateFromFileSystem() {
     return;
   }
   LOG4CXX_WARN(logger_, "No valid last state was found.");
+}
+
+void LastStateImpl::RemoveFromFileSystem() {
+  LOG4CXX_AUTO_TRACE(logger_);
+  if (!file_system::DeleteFile(app_info_storage_)) {
+    LOG4CXX_WARN(logger_, "Failed attempt to delete " << app_info_storage_);
+  }
+}
+
+Json::Value LastStateImpl::dictionary() const {
+  sync_primitives::AutoLock lock(dictionary_lock_);
+  return dictionary_;
+}
+
+Json::Value& LastStateImpl::get_dictionary() {
+  sync_primitives::AutoLock lock(dictionary_lock_);
+  return dictionary_;
+}
+
+void LastStateImpl::set_dictionary(const Json::Value& dictionary) {
+  DCHECK(dictionary.type() == Json::objectValue ||
+         dictionary.type() == Json::nullValue);
+  sync_primitives::AutoLock lock(dictionary_lock_);
+  dictionary_ = dictionary;
 }
 
 }  // namespace resumption
