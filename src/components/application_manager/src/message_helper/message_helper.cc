@@ -2357,25 +2357,22 @@ void MessageHelper::SendNaviStartStream(const int32_t app_id,
   (*start_stream)[strings::params][strings::function_id] =
       hmi_apis::FunctionID::Navigation_StartStream;
 
-  char url[100] = {'\0'};
+  std::string url;
   if ("socket" == app_mngr.get_settings().video_server_type()) {
-    snprintf(url,
-             sizeof(url) / sizeof(url[0]),
-             "http://%s:%d",
-             app_mngr.get_settings().server_address().c_str(),
-             app_mngr.get_settings().video_streaming_port());
+    auto const port = app_mngr.get_settings().video_streaming_port();
+    url = "http://";
+    url += app_mngr.get_settings().server_address();
+    url += ":";
+    url += std::to_string(port);
   } else if ("pipe" == app_mngr.get_settings().video_server_type()) {
-    snprintf(url,
-             sizeof(url) / sizeof(url[0]),
-             "%s",
-             app_mngr.get_settings().named_video_pipe_path().c_str());
+    url.reserve(PATH_MAX);
+    url.insert(
+        0, app_mngr.get_settings().named_video_pipe_path(), 0, PATH_MAX - 1);
+    DCHECK(PATH_MAX > url.length());
   } else {
-    int snprintf_result =
-        snprintf(url,
-                 sizeof(url) / sizeof(url[0]),
-                 "%s",
-                 app_mngr.get_settings().video_stream_file().c_str());
-    DCHECK(snprintf_result);
+    url.reserve(PATH_MAX);
+    url.insert(0, app_mngr.get_settings().video_stream_file(), 0, PATH_MAX - 1);
+    DCHECK(PATH_MAX > url.length());
   }
 
   (*start_stream)[strings::msg_params][strings::app_id] = app_id;
@@ -2414,25 +2411,22 @@ void MessageHelper::SendAudioStartStream(const int32_t app_id,
   (*start_stream)[strings::params][strings::function_id] =
       hmi_apis::FunctionID::Navigation_StartAudioStream;
 
-  char url[100] = {'\0'};
+  std::string url;
   if ("socket" == app_mngr.get_settings().audio_server_type()) {
-    snprintf(url,
-             sizeof(url) / sizeof(url[0]),
-             "http://%s:%d",
-             app_mngr.get_settings().server_address().c_str(),
-             app_mngr.get_settings().audio_streaming_port());
+    auto const port = app_mngr.get_settings().audio_streaming_port();
+    url = "http://";
+    url += app_mngr.get_settings().server_address();
+    url += ":";
+    url += std::to_string(port);
   } else if ("pipe" == app_mngr.get_settings().audio_server_type()) {
-    snprintf(url,
-             sizeof(url) / sizeof(url[0]),
-             "%s",
-             app_mngr.get_settings().named_audio_pipe_path().c_str());
+    url.reserve(PATH_MAX);
+    url.insert(
+        0, app_mngr.get_settings().named_audio_pipe_path(), 0, PATH_MAX - 1);
+    DCHECK(PATH_MAX > url.length());
   } else {
-    int snprintf_result =
-        snprintf(url,
-                 sizeof(url) / sizeof(url[0]),
-                 "%s",
-                 app_mngr.get_settings().audio_stream_file().c_str());
-    DCHECK(snprintf_result);
+    url.reserve(PATH_MAX);
+    url.insert(0, app_mngr.get_settings().audio_stream_file(), 0, PATH_MAX - 1);
+    DCHECK(PATH_MAX > url.length());
   }
 
   (*start_stream)[strings::msg_params][strings::app_id] = app_id;
