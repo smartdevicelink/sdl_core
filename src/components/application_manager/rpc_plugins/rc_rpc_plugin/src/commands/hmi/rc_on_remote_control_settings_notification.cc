@@ -65,16 +65,6 @@ RCOnRemoteControlSettingsNotification::RCOnRemoteControlSettingsNotification(
 RCOnRemoteControlSettingsNotification::
     ~RCOnRemoteControlSettingsNotification() {}
 
-// cppcheck-suppress unusedFunction
-hmi_apis::Common_RCAccessMode::eType AccessModeFromString(
-    const std::string& access_mode) {
-  std::map<std::string, hmi_apis::Common_RCAccessMode::eType>::const_iterator
-      mode = access_modes.find(access_mode);
-  return access_modes.end() != mode
-             ? mode->second
-             : hmi_apis::Common_RCAccessMode::INVALID_ENUM;
-}
-
 std::string AccessModeToString(
     const hmi_apis::Common_RCAccessMode::eType access_mode) {
   std::map<std::string, hmi_apis::Common_RCAccessMode::eType>::const_iterator

@@ -45,14 +45,6 @@ class NetworkInterfaceListenerTest : public ::testing::Test {
     delete interface_listener_impl_;
   }
 
-  // cppcheck-suppress unusedFunction
-  void SleepFor(long msec) const {
-    if (msec > 0) {
-      struct timespec ts = {0, msec * 1000 * 1000};
-      nanosleep(&ts, NULL);
-    }
-  }
-
   NetworkInterfaceListenerImpl* interface_listener_impl_;
   MockTcpClientListener mock_tcp_client_listener_;
 };

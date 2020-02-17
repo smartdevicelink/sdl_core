@@ -79,7 +79,6 @@ enum ServiceType {
  * Service types to binary stream
  */
 ServiceType ServiceTypeFromByte(uint8_t type);
-uint8_t ServiceTypeToByte(ServiceType type);
 
 }  // namespace protocol_handler
 #endif  // SRC_COMPONENTS_INCLUDE_PROTOCOL_SERVICE_TYPE_H_

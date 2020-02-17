@@ -462,11 +462,6 @@ void ApplicationImpl::set_is_media_application(bool is_media) {
   is_media_ = is_media;
 }
 
-// cppcheck-suppress unusedFunction
-bool IsTTSState(const HmiStatePtr state) {
-  return state->state_id() == HmiState::STATE_ID_TTS_SESSION;
-}
-
 void ApplicationImpl::set_tts_properties_in_none(bool active) {
   tts_properties_in_none_ = active;
 }
