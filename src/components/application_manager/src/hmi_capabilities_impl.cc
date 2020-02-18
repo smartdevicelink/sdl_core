@@ -463,15 +463,7 @@ HMICapabilitiesImpl::HMICapabilitiesImpl(ApplicationManager& app_mngr)
   }
 }
 
-HMICapabilitiesImpl::~HMICapabilitiesImpl() {
-  delete ui_supported_languages_;
-  delete tts_supported_languages_;
-  delete vr_supported_languages_;
-  delete navigation_capability_;
-  delete phone_capability_;
-  delete video_streaming_capability_;
-  delete rc_capability_;
-}
+HMICapabilitiesImpl::~HMICapabilitiesImpl() {}
 
 bool HMICapabilitiesImpl::VerifyImageType(const int32_t image_type) const {
   auto capabilities = display_capabilities();
@@ -567,27 +559,23 @@ HMICapabilitiesImpl::active_tts_language() const {
 
 void HMICapabilitiesImpl::set_ui_supported_languages(
     const smart_objects::SmartObject& supported_languages) {
-  if (ui_supported_languages_) {
-    delete ui_supported_languages_;
-  }
-  ui_supported_languages_ = new smart_objects::SmartObject(supported_languages);
+  smart_objects::SmartObjectSPtr new_value =
+      std::make_shared<smart_objects::SmartObject>(supported_languages);
+  ui_supported_languages_.swap(new_value);
 }
 
 void HMICapabilitiesImpl::set_tts_supported_languages(
     const smart_objects::SmartObject& supported_languages) {
-  if (tts_supported_languages_) {
-    delete tts_supported_languages_;
-  }
-  tts_supported_languages_ =
-      new smart_objects::SmartObject(supported_languages);
+  smart_objects::SmartObjectSPtr new_value =
+      std::make_shared<smart_objects::SmartObject>(supported_languages);
+  tts_supported_languages_.swap(new_value);
 }
 
 void HMICapabilitiesImpl::set_vr_supported_languages(
     const smart_objects::SmartObject& supported_languages) {
-  if (vr_supported_languages_) {
-    delete vr_supported_languages_;
-  }
-  vr_supported_languages_ = new smart_objects::SmartObject(supported_languages);
+  smart_objects::SmartObjectSPtr new_value =
+      std::make_shared<smart_objects::SmartObject>(supported_languages);
+  vr_supported_languages_.swap(new_value);
 }
 
 void HMICapabilitiesImpl::set_display_capabilities(
@@ -695,45 +683,37 @@ void HMICapabilitiesImpl::set_rc_supported(const bool supported) {
 
 void HMICapabilitiesImpl::set_navigation_capability(
     const smart_objects::SmartObject& navigation_capability) {
-  if (navigation_capability_) {
-    delete navigation_capability_;
-  }
-  navigation_capability_ =
-      new smart_objects::SmartObject(navigation_capability);
+  smart_objects::SmartObjectSPtr new_value =
+      std::make_shared<smart_objects::SmartObject>(navigation_capability);
+  navigation_capability_.swap(new_value);
 }
 
 void HMICapabilitiesImpl::set_phone_capability(
     const smart_objects::SmartObject& phone_capability) {
-  if (phone_capability_) {
-    delete phone_capability_;
-  }
-  phone_capability_ = new smart_objects::SmartObject(phone_capability);
+  smart_objects::SmartObjectSPtr new_value =
+      std::make_shared<smart_objects::SmartObject>(phone_capability);
+  phone_capability_.swap(new_value);
 }
 
 void HMICapabilitiesImpl::set_video_streaming_capability(
     const smart_objects::SmartObject& video_streaming_capability) {
-  if (video_streaming_capability_) {
-    delete video_streaming_capability_;
-  }
-  video_streaming_capability_ =
-      new smart_objects::SmartObject(video_streaming_capability);
+  smart_objects::SmartObjectSPtr new_value =
+      std::make_shared<smart_objects::SmartObject>(video_streaming_capability);
+  video_streaming_capability_.swap(new_value);
 }
 
 void HMICapabilitiesImpl::set_rc_capability(
     const smart_objects::SmartObject& rc_capability) {
-  if (rc_capability_) {
-    delete rc_capability_;
-  }
-  rc_capability_ = new smart_objects::SmartObject(rc_capability);
+  smart_objects::SmartObjectSPtr new_value =
+      std::make_shared<smart_objects::SmartObject>(rc_capability);
+  rc_capability_.swap(new_value);
 }
 
 void HMICapabilitiesImpl::set_seat_location_capability(
     const smart_objects::SmartObject& seat_location_capability) {
-  if (seat_location_capability_) {
-    delete seat_location_capability_;
-  }
-  seat_location_capability_ =
-      new smart_objects::SmartObject(seat_location_capability);
+  smart_objects::SmartObjectSPtr new_value =
+      std::make_shared<smart_objects::SmartObject>(seat_location_capability);
+  seat_location_capability_.swap(new_value);
 }
 
 void HMICapabilitiesImpl::Init(
@@ -774,18 +754,18 @@ bool HMICapabilitiesImpl::is_rc_cooperating() const {
   return is_rc_cooperating_;
 }
 
-const smart_objects::SmartObject* HMICapabilitiesImpl::ui_supported_languages()
-    const {
+const smart_objects::SmartObjectSPtr
+HMICapabilitiesImpl::ui_supported_languages() const {
   return ui_supported_languages_;
 }
 
-const smart_objects::SmartObject* HMICapabilitiesImpl::vr_supported_languages()
-    const {
+const smart_objects::SmartObjectSPtr
+HMICapabilitiesImpl::vr_supported_languages() const {
   return vr_supported_languages_;
 }
 
-const smart_objects::SmartObject* HMICapabilitiesImpl::tts_supported_languages()
-    const {
+const smart_objects::SmartObjectSPtr
+HMICapabilitiesImpl::tts_supported_languages() const {
   return tts_supported_languages_;
 }
 
@@ -868,26 +848,27 @@ bool HMICapabilitiesImpl::rc_supported() const {
   return is_rc_supported_;
 }
 
-const smart_objects::SmartObject* HMICapabilitiesImpl::navigation_capability()
-    const {
+const smart_objects::SmartObjectSPtr
+HMICapabilitiesImpl::navigation_capability() const {
   return navigation_capability_;
 }
 
-const smart_objects::SmartObject* HMICapabilitiesImpl::phone_capability()
+const smart_objects::SmartObjectSPtr HMICapabilitiesImpl::phone_capability()
     const {
   return phone_capability_;
 }
 
-const smart_objects::SmartObject*
+const smart_objects::SmartObjectSPtr
 HMICapabilitiesImpl::video_streaming_capability() const {
   return video_streaming_capability_;
 }
 
-const smart_objects::SmartObject* HMICapabilitiesImpl::rc_capability() const {
+const smart_objects::SmartObjectSPtr HMICapabilitiesImpl::rc_capability()
+    const {
   return rc_capability_;
 }
 
-const smart_objects::SmartObject*
+const smart_objects::SmartObjectSPtr
 HMICapabilitiesImpl::seat_location_capability() const {
   return seat_location_capability_;
 }

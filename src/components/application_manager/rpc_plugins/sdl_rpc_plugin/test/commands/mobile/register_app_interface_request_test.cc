@@ -201,6 +201,8 @@ class RegisterAppInterfaceRequestTest
         .WillByDefault(Return(smart_objects::SmartObjectSPtr()));
     ON_CALL(mock_hmi_capabilities_, pcm_stream_capabilities())
         .WillByDefault(Return(smart_objects::SmartObjectSPtr()));
+    ON_CALL(mock_hmi_capabilities_, seat_location_capability())
+        .WillByDefault(Return(smart_objects::SmartObjectSPtr()));
     ON_CALL(app_mngr_settings_, supported_diag_modes())
         .WillByDefault(ReturnRef(kDummyDiagModes));
     ON_CALL(mock_policy_handler_, GetAppRequestTypes(_, _))
