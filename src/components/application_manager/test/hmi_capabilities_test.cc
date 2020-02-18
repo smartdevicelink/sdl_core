@@ -72,15 +72,18 @@ class HMICapabilitiesTest : public ::testing::Test {
       : last_state_wrapper_(std::make_shared<resumption::LastStateWrapperImpl>(
             std::make_shared<resumption::LastStateImpl>("app_storage_folder",
                                                         "app_info_storage")))
-      , file_name_("hmi_capabilities.json") {}
+      , file_name_("hmi_capabilities.json")
+      , file_cache_name_("hmi_capabilities_cache.json") {}
   virtual void SetUp() OVERRIDE {
     EXPECT_CALL(app_mngr_, event_dispatcher())
         .WillOnce(ReturnRef(mock_event_dispatcher));
     EXPECT_CALL(app_mngr_, get_settings())
         .WillRepeatedly(ReturnRef(mock_application_manager_settings_));
-    EXPECT_CALL(mock_application_manager_settings_,
-                hmi_capabilities_file_name())
-        .WillOnce(ReturnRef(file_name_));
+    ON_CALL(mock_application_manager_settings_, hmi_capabilities_file_name())
+        .WillByDefault(ReturnRef(file_name_));
+    ON_CALL(mock_application_manager_settings_,
+            hmi_capabilities_cache_file_name())
+        .WillByDefault(ReturnRef(file_cache_name_));
     EXPECT_CALL(mock_event_dispatcher, add_observer(_, _, _)).Times(1);
     EXPECT_CALL(mock_event_dispatcher, remove_observer(_)).Times(1);
     EXPECT_CALL(mock_application_manager_settings_, launch_hmi())
@@ -106,6 +109,7 @@ class HMICapabilitiesTest : public ::testing::Test {
   MockApplicationManagerSettings mock_application_manager_settings_;
   std::shared_ptr<HMICapabilitiesForTesting> hmi_capabilities_test;
   const std::string file_name_;
+  const std::string file_cache_name_;
   application_manager_test::MockRPCService mock_rpc_service_;
 };
 
@@ -506,6 +510,9 @@ TEST_F(HMICapabilitiesTest,
       .WillRepeatedly(ReturnRef(mock_application_manager_settings));
   EXPECT_CALL(mock_application_manager_settings, hmi_capabilities_file_name())
       .WillOnce(ReturnRef(hmi_capabilities_file));
+  EXPECT_CALL(mock_application_manager_settings,
+              hmi_capabilities_cache_file_name())
+      .WillOnce(ReturnRef(file_cache_name_));
   EXPECT_CALL(mock_dispatcher, add_observer(_, _, _)).Times(1);
   EXPECT_CALL(mock_dispatcher, remove_observer(_)).Times(1);
   EXPECT_CALL(mock_application_manager_settings, launch_hmi())
@@ -546,6 +553,9 @@ TEST_F(HMICapabilitiesTest,
       .WillRepeatedly(ReturnRef(mock_application_manager_settings));
   EXPECT_CALL(mock_application_manager_settings, hmi_capabilities_file_name())
       .WillOnce(ReturnRef(hmi_capabilities_file));
+  EXPECT_CALL(mock_application_manager_settings,
+              hmi_capabilities_cache_file_name())
+      .WillOnce(ReturnRef(file_cache_name_));
   EXPECT_CALL(mock_dispatcher, add_observer(_, _, _)).Times(1);
   EXPECT_CALL(mock_dispatcher, remove_observer(_)).Times(1);
   EXPECT_CALL(mock_application_manager_settings, launch_hmi())
@@ -589,6 +599,9 @@ TEST_F(HMICapabilitiesTest,
       .WillRepeatedly(ReturnRef(mock_application_manager_settings));
   EXPECT_CALL(mock_application_manager_settings, hmi_capabilities_file_name())
       .WillOnce(ReturnRef(hmi_capabilities_file));
+  EXPECT_CALL(mock_application_manager_settings,
+              hmi_capabilities_cache_file_name())
+      .WillOnce(ReturnRef(file_cache_name_));
   EXPECT_CALL(mock_dispatcher, add_observer(_, _, _)).Times(1);
   EXPECT_CALL(mock_dispatcher, remove_observer(_)).Times(1);
   EXPECT_CALL(mock_application_manager_settings, launch_hmi())
