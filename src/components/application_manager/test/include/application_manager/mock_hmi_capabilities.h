@@ -75,7 +75,7 @@ class MockHMICapabilities : public ::application_manager::HMICapabilities {
                void(const hmi_apis::Common_Language::eType language));
 
   MOCK_CONST_METHOD0(ui_supported_languages,
-                     const smart_objects::SmartObject*());
+                     const smart_objects::SmartObjectSPtr());
   MOCK_METHOD1(set_ui_supported_languages,
                void(const smart_objects::SmartObject& supported_languages));
 
@@ -85,7 +85,7 @@ class MockHMICapabilities : public ::application_manager::HMICapabilities {
                void(const hmi_apis::Common_Language::eType language));
 
   MOCK_CONST_METHOD0(vr_supported_languages,
-                     const smart_objects::SmartObject*());
+                     const smart_objects::SmartObjectSPtr());
   MOCK_METHOD1(set_vr_supported_languages,
                void(const smart_objects::SmartObject& supported_languages));
 
@@ -95,7 +95,7 @@ class MockHMICapabilities : public ::application_manager::HMICapabilities {
                void(const hmi_apis::Common_Language::eType language));
 
   MOCK_CONST_METHOD0(tts_supported_languages,
-                     const smart_objects::SmartObject*());
+                     const smart_objects::SmartObjectSPtr());
   MOCK_METHOD1(set_tts_supported_languages,
                void(const smart_objects::SmartObject& supported_languages));
 
@@ -173,25 +173,25 @@ class MockHMICapabilities : public ::application_manager::HMICapabilities {
   MOCK_METHOD1(set_rc_supported, void(const bool supported));
 
   MOCK_CONST_METHOD0(navigation_capability,
-                     const smart_objects::SmartObject*());
+                     const smart_objects::SmartObjectSPtr());
   MOCK_METHOD1(set_navigation_capability,
                void(const smart_objects::SmartObject& navigation_capability));
 
-  MOCK_CONST_METHOD0(phone_capability, const smart_objects::SmartObject*());
+  MOCK_CONST_METHOD0(phone_capability, const smart_objects::SmartObjectSPtr());
   MOCK_METHOD1(set_phone_capability,
                void(const smart_objects::SmartObject& phone_capability));
 
   MOCK_CONST_METHOD0(video_streaming_capability,
-                     const smart_objects::SmartObject*());
+                     const smart_objects::SmartObjectSPtr());
   MOCK_METHOD1(
       set_video_streaming_capability,
       void(const smart_objects::SmartObject& video_streaming_capability));
-  MOCK_CONST_METHOD0(rc_capability, const smart_objects::SmartObject*());
+  MOCK_CONST_METHOD0(rc_capability, const smart_objects::SmartObjectSPtr());
   MOCK_METHOD1(set_rc_capability,
                void(const smart_objects::SmartObject& rc_capability));
 
   MOCK_CONST_METHOD0(seat_location_capability,
-                     const smart_objects::SmartObject*());
+                     const smart_objects::SmartObjectSPtr());
   MOCK_METHOD1(
       set_seat_location_capability,
       void(const smart_objects::SmartObject& seat_location_capability));

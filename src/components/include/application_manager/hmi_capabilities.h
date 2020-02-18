@@ -140,7 +140,8 @@ class HMICapabilities {
    *
    * @return Currently supported UI languages
    */
-  virtual const smart_objects::SmartObject* ui_supported_languages() const = 0;
+  virtual const smart_objects::SmartObjectSPtr ui_supported_languages()
+      const = 0;
 
   /*
    * @brief Sets supported UI languages
@@ -170,7 +171,8 @@ class HMICapabilities {
    *
    * @return Currently supported VR languages
    */
-  virtual const smart_objects::SmartObject* vr_supported_languages() const = 0;
+  virtual const smart_objects::SmartObjectSPtr vr_supported_languages()
+      const = 0;
 
   /*
    * @brief Sets supported VR languages
@@ -201,7 +203,8 @@ class HMICapabilities {
    *
    * @return Currently supported TTS languages
    */
-  virtual const smart_objects::SmartObject* tts_supported_languages() const = 0;
+  virtual const smart_objects::SmartObjectSPtr tts_supported_languages()
+      const = 0;
 
   /*
    * @brief Sets supported TTS languages
@@ -468,7 +471,8 @@ class HMICapabilities {
    *
    * @return NAVIGATION system capability
    */
-  virtual const smart_objects::SmartObject* navigation_capability() const = 0;
+  virtual const smart_objects::SmartObjectSPtr navigation_capability()
+      const = 0;
 
   /*
    * @brief Interface used to store information regarding
@@ -485,7 +489,7 @@ class HMICapabilities {
    *
    * @return PHONE_CALL system capability
    */
-  virtual const smart_objects::SmartObject* phone_capability() const = 0;
+  virtual const smart_objects::SmartObjectSPtr phone_capability() const = 0;
 
   /*
    * @brief Sets HMI's video streaming related capability information
@@ -500,7 +504,7 @@ class HMICapabilities {
    *
    * @return HMI's video streaming related capability information
    */
-  virtual const smart_objects::SmartObject* video_streaming_capability()
+  virtual const smart_objects::SmartObjectSPtr video_streaming_capability()
       const = 0;
 
   /**
@@ -510,7 +514,7 @@ class HMICapabilities {
   virtual void set_rc_capability(
       const smart_objects::SmartObject& rc_capability) = 0;
 
-  virtual const smart_objects::SmartObject* rc_capability() const = 0;
+  virtual const smart_objects::SmartObjectSPtr rc_capability() const = 0;
 
   /**
    * @brief Sets available SeatLocation capabilities for further usage by
@@ -525,7 +529,7 @@ class HMICapabilities {
    * seat location capability
    * @return smart object of seat location capability
    */
-  virtual const smart_objects::SmartObject* seat_location_capability()
+  virtual const smart_objects::SmartObjectSPtr seat_location_capability()
       const = 0;
 
   DEPRECATED

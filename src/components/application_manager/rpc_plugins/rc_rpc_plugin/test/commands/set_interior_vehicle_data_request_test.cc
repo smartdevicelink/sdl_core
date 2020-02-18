@@ -74,11 +74,12 @@ class SetInteriorVehicleDataRequestTest
   SetInteriorVehicleDataRequestTest()
       : mock_app_(std::make_shared<NiceMock<MockApplication> >())
       , rc_app_extention_(std::make_shared<RCAppExtension>(kModuleId))
-      , rc_capabilities_(smart_objects::SmartType::SmartType_Array) {}
+      , rc_capabilities_(std::make_shared<smart_objects::SmartObject>(
+            smart_objects::SmartType::SmartType_Array)) {}
 
   void SetUp() OVERRIDE {
     smart_objects::SmartObject control_caps((smart_objects::SmartType_Array));
-    rc_capabilities_[strings::kradioControlCapabilities] = control_caps;
+    (*rc_capabilities_)[strings::kradioControlCapabilities] = control_caps;
     ON_CALL(app_mngr_, hmi_interfaces())
         .WillByDefault(ReturnRef(mock_hmi_interfaces_));
     ON_CALL(
@@ -102,7 +103,7 @@ class SetInteriorVehicleDataRequestTest
                          nullptr))
         .WillByDefault(Return(true));
     ON_CALL(mock_hmi_capabilities_, rc_capability())
-        .WillByDefault(Return(&rc_capabilities_));
+        .WillByDefault(Return(rc_capabilities_));
     ON_CALL(mock_allocation_manager_, is_rc_enabled())
         .WillByDefault(Return(true));
     ON_CALL(mock_rc_capabilities_manager_, CheckIfModuleExistsInCapabilities(_))
@@ -149,7 +150,7 @@ class SetInteriorVehicleDataRequestTest
   std::shared_ptr<RCAppExtension> rc_app_extention_;
   testing::NiceMock<rc_rpc_plugin_test::MockRCCapabilitiesManager>
       mock_rc_capabilities_manager_;
-  smart_objects::SmartObject rc_capabilities_;
+  smart_objects::SmartObjectSPtr rc_capabilities_;
   testing::NiceMock<MockRCConsentManager> mock_rc_consent_manger_;
 };
 

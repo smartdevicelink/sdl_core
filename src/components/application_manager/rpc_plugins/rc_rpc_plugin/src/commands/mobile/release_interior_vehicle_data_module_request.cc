@@ -91,8 +91,7 @@ ReleaseInteriorVehicleDataModuleRequest::
 
 bool ReleaseInteriorVehicleDataModuleRequest::ProcessCapabilities() {
   LOG4CXX_AUTO_TRACE(logger_);
-  const smart_objects::SmartObject* rc_capabilities =
-      hmi_capabilities_.rc_capability();
+  const auto rc_capabilities = hmi_capabilities_.rc_capability();
 
   const std::string module_type = ModuleType();
   const std::string module_id = ModuleId();
