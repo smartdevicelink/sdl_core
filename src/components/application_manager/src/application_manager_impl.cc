@@ -4437,8 +4437,6 @@ void ApplicationManagerImpl::SendGetIconUrlNotifications(
       continue;
     }
 
-    // cppcheck-suppress unreadVariable
-    std::string endpoint = app_icon_it->second.endpoint;
     bool pending_request = app_icon_it->second.pending_request;
 
     if (pending_request) {

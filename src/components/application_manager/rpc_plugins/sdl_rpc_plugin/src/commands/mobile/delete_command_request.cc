@@ -94,16 +94,6 @@ void DeleteCommandRequest::Run() {
       (*message_)[strings::msg_params][strings::cmd_id];
   msg_params[strings::app_id] = application->app_id();
 
-  // we should specify amount of required responses in the 1st request
-  uint32_t chaining_counter = 0;
-  if ((*command).keyExists(strings::menu_params)) {
-    ++chaining_counter;
-  }
-
-  // cppcheck-suppress unreadVariable
-  if ((*command).keyExists(strings::vr_commands)) {
-    ++chaining_counter;
-  }
   /* Need to set all flags before sending request to HMI
    * for correct processing this flags in method on_event */
   if ((*command).keyExists(strings::menu_params)) {

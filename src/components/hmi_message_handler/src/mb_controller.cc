@@ -235,8 +235,8 @@ void CMessageBrokerController::exitReceivingThread() {
   }
   acceptor_.close(ec);
   if (ec) {
-    // cppcheck-suppress unreadVariable
     std::string str_err = "ErrorMessage Close: " + ec.message();
+    LOG4CXX_ERROR(mb_logger_, str_err);
   }
   ioc_.stop();
 }
