@@ -74,6 +74,7 @@ class ApplicationManagerSettings : public RequestControlerSettings,
   virtual const std::string& sdl_version() const = 0;
   virtual const std::vector<std::string>& time_out_promt() const = 0;
   virtual const std::string& hmi_capabilities_file_name() const = 0;
+  virtual const std::string& hmi_capabilities_cache_file_name() const = 0;
   virtual const std::string& video_server_type() const = 0;
   virtual const std::string& audio_server_type() const = 0;
   virtual const std::string& server_address() const = 0;

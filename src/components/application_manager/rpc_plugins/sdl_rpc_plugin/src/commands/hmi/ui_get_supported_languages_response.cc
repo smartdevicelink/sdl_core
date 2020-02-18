@@ -64,6 +64,14 @@ void UIGetSupportedLanguagesResponse::Run() {
 
     hmi_capabilities.set_ui_supported_languages(
         (*message_)[strings::msg_params][hmi_response::languages]);
+
+    std::vector<std::string> sections_to_update;
+    sections_to_update.push_back(hmi_response::languages);
+    if (!hmi_capabilities.SaveCachedCapabilitiesToFile(sections_to_update,
+                                                       message_->getSchema())) {
+      LOG4CXX_ERROR(logger_,
+                    "Failed to save GetCapabilities response to cache");
+    }
   }
 }
 
