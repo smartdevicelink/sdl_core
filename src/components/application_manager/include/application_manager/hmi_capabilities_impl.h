@@ -531,6 +531,12 @@ class HMICapabilitiesImpl : public HMICapabilities {
   void set_handle_response_for(
       const smart_objects::SmartObject& request) OVERRIDE;
 
+  bool SaveCachedCapabilitiesToFile(
+      const std::vector<std::string> sections_to_update,
+      const smart_objects::CSmartSchema& schema) OVERRIDE;
+
+  void DeleteCachedCapabilitiesFile() const OVERRIDE;
+
  protected:
   /*
    * @brief Loads capabilities from local file in case SDL was launched

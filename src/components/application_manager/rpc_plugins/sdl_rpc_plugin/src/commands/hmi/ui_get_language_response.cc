@@ -67,6 +67,13 @@ void UIGetLanguageResponse::Run() {
 
   hmi_capabilities_.set_active_ui_language(language);
 
+  std::vector<std::string> sections_to_update;
+  sections_to_update.push_back(hmi_response::language);
+  if (!hmi_capabilities_.SaveCachedCapabilitiesToFile(sections_to_update,
+                                                      message_->getSchema())) {
+    LOG4CXX_ERROR(logger_, "Failed to save GetCapabilities response to cache");
+  }
+
   LOG4CXX_DEBUG(logger_,
                 "Raising event for function_id " << function_id()
                                                  << " and correlation_id "

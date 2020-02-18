@@ -544,6 +544,24 @@ class HMICapabilities {
   virtual void set_handle_response_for(
       const smart_objects::SmartObject& request) = 0;
 
+  /**
+   * @brief Writes cached HMI capabilities from internal cache into the file if
+   * any of updated sections are not present in the file
+   * @param sections_to_update vector of names of sections which were updated in
+   * cache
+   * @param schema reference to schema which should be unapplied before saving
+   * stringified JSON data into the file
+   * @return true if cache was saved successfully, otherwise returns false
+   */
+  virtual bool SaveCachedCapabilitiesToFile(
+      const std::vector<std::string> sections_to_update,
+      const smart_objects::CSmartSchema& schema) = 0;
+
+  /**
+   * @brief Deletes cached HMI capabilities file from a file system
+   */
+  virtual void DeleteCachedCapabilitiesFile() const = 0;
+
  protected:
   /*
    * @brief function checks if json member exists
