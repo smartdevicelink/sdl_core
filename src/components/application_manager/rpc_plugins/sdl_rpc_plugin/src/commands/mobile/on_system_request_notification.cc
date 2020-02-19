@@ -173,8 +173,7 @@ void OnSystemRequestNotification::AddHeader(BinaryMessage& message) const {
   }
 
   char timeout_str[24];
-  // cppcheck-suppress invalidPrintfArgType_sint
-  if (0 > sprintf(timeout_str, "%d", timeout)) {
+  if (0 > sprintf(timeout_str, "%u", timeout)) {
     memset(timeout_str, 0, sizeof(timeout_str));
   }
 

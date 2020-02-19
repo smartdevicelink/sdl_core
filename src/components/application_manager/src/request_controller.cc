@@ -81,8 +81,7 @@ void RequestController::InitializeThreadpool() {
   pool_state_ = TPoolState::STARTED;
   char name[50];
   for (uint32_t i = 0; i < pool_size_; i++) {
-    // cppcheck-suppress invalidPrintfArgType_sint
-    snprintf(name, sizeof(name) / sizeof(name[0]), "AM Pool %d", i);
+    snprintf(name, sizeof(name) / sizeof(name[0]), "AM Pool %u", i);
     pool_.push_back(threads::CreateThread(name, new Worker(this)));
     pool_[i]->start();
     LOG4CXX_DEBUG(logger_, "Request thread initialized: " << name);
