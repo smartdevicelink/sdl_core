@@ -2024,12 +2024,6 @@ TEST_F(ApplicationManagerImplTest, AddAndRemoveQueryAppDevice_SUCCESS) {
   EXPECT_FALSE(app_manager_impl_->IsAppsQueriedFrom(device_handle));
 }
 
-TEST_F(ApplicationManagerImplTest, SetVINCode_SUCCESS) {
-  const std::string vin_code = "VIN CODE";
-  EXPECT_CALL(mock_connection_handler_, CreateWebEngineDevice(vin_code));
-  app_manager_impl_->SetVINCode(vin_code);
-}
-
 }  // namespace application_manager_test
 }  // namespace components
 }  // namespace test

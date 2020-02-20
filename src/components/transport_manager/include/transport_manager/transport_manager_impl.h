@@ -259,7 +259,7 @@ class TransportManagerImpl
   int PerformActionOnClients(
       const TransportAction required_action) const OVERRIDE;
 
-  void CreateWebEngineDevice(const std::string& vin_code) OVERRIDE;
+  void CreateWebEngineDevice() OVERRIDE;
 
   const DeviceInfo& GetWebEngineDeviceInfo() const OVERRIDE;
 

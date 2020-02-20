@@ -133,8 +133,7 @@ class MockConnectionHandler : public connection_handler::ConnectionHandler {
       OnSecondaryTransportEnded,
       void(const transport_manager::ConnectionUID primary_connection_handle,
            const transport_manager::ConnectionUID secondary_connection_handle));
-
-  MOCK_METHOD1(CreateWebEngineDevice, void(const std::string& vin_code));
+  MOCK_METHOD0(CreateWebEngineDevice, void());
   MOCK_CONST_METHOD0(GetWebEngineDeviceInfo, transport_manager::DeviceInfo&());
 };
 

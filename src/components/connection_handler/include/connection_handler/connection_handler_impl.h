@@ -606,9 +606,9 @@ class ConnectionHandlerImpl
       const transport_manager::ConnectionUID secondary_connection_handle)
       OVERRIDE;
 
-  void CreateWebEngineDevice(const std::string& vin_code) OVERRIDE;
-
   const transport_manager::DeviceInfo& GetWebEngineDeviceInfo() const OVERRIDE;
+
+  void CreateWebEngineDevice() OVERRIDE;
 
  private:
   /**

@@ -313,19 +313,17 @@ class ConnectionHandler {
       const transport_manager::ConnectionUID secondary_connection_handle) = 0;
 
   /**
-   * @brief Called when VIN code is received, creates
-   * WebSocketDevice for WebEngine and add it to the device list
-   * @param vin_code VIN code received from HMI
-   */
-  virtual void CreateWebEngineDevice(const std::string& vin_code) = 0;
-
-  /**
    * @brief GetWebEngineDeviceInfo
    * @return device info for WebEngine device
    */
-
   virtual const transport_manager::DeviceInfo& GetWebEngineDeviceInfo()
       const = 0;
+
+  /**
+   * @brief Called when HMI cooperation is started,
+   * creates WebSocketDevice for WebEngine
+   */
+  virtual void CreateWebEngineDevice() = 0;
 
  protected:
   /**

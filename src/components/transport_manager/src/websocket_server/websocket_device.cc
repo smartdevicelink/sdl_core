@@ -71,7 +71,7 @@ bool WebSocketDevice::IsSameAs(const Device* other) const {
 }
 
 ApplicationList WebSocketDevice::GetApplicationList() const {
-  return ApplicationList{0};
+  return app_list_;
 }
 
 const std::string& WebSocketDevice::GetHost() const {

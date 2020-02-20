@@ -41,6 +41,7 @@
 #include <sstream>
 
 #include "transport_manager/websocket_server/websocket_listener.h"
+#include "utils/gen_hash.h"
 #include "utils/logger.h"
 #include "utils/threads/thread_delegate.h"
 
@@ -83,6 +84,7 @@ DeviceType WebSocketServerTransportAdapter::GetDeviceType() const {
 DeviceSptr WebSocketServerTransportAdapter::AddDevice(DeviceSptr device) {
   LOG4CXX_AUTO_TRACE(logger_);
   webengine_device_ = device;
+  Store();
   return TransportAdapterImpl::AddDevice(webengine_device_);
 }
 
@@ -92,6 +94,46 @@ TransportAdapter::Error WebSocketServerTransportAdapter::Init() {
     AddDevice(webengine_device_);
   }
   return TransportAdapterImpl::Init();
+}
+
+void WebSocketServerTransportAdapter::Store() const {
+  LOG4CXX_AUTO_TRACE(logger_);
+  if (webengine_device_) {
+    Json::Value& dictionary = last_state().get_dictionary();
+    if (dictionary["TransportManager"].isMember("WebsocketServerAdapter")) {
+      LOG4CXX_DEBUG(
+          logger_, "WebsocketServerAdapter already exists. Storing is skipped");
+      return;
+    }
+
+    Json::Value device_dictionary;
+    device_dictionary["unique_id"] = webengine_device_->unique_device_id();
+
+    Json::Value ws_adapter_dictionary;
+    ws_adapter_dictionary["device"] = device_dictionary;
+    dictionary["TransportManager"]["WebsocketServerAdapter"] =
+        ws_adapter_dictionary;
+  }
+}
+
+bool WebSocketServerTransportAdapter::Restore() {
+  LOG4CXX_AUTO_TRACE(logger_);
+  const Json::Value& dictionary = last_state().get_dictionary();
+  const Json::Value ws_adapter_dictionary =
+      dictionary["TransportManager"]["WebsocketServerAdapter"];
+  webengine_device_id_ =
+      ws_adapter_dictionary["device"]["unique_id"].asString();
+  if (webengine_device_id_.empty()) {
+    srand(time(0));
+    const size_t device_id_length = 64u;
+    webengine_device_id_ = utils::gen_hash(device_id_length);
+  }
+  return true;
+}
+
+std::string WebSocketServerTransportAdapter::GetStoredDeviceID() const {
+  LOG4CXX_AUTO_TRACE(logger_);
+  return webengine_device_id_;
 }
 
 }  // namespace transport_adapter

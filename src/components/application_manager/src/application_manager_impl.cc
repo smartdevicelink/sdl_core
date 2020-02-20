@@ -843,6 +843,11 @@ void ApplicationManagerImpl::ConnectToDevice(const std::string& device_mac) {
 void ApplicationManagerImpl::OnHMIStartedCooperation() {
   LOG4CXX_AUTO_TRACE(logger_);
   hmi_cooperating_ = true;
+
+#ifdef WEBSOCKET_SERVER_TRANSPORT_SUPPORT
+  connection_handler_->CreateWebEngineDevice();
+#endif  // WEBSOCKET_SERVER_TRANSPORT_SUPPORT
+
   MessageHelper::SendGetSystemInfoRequest(*this);
 
   std::shared_ptr<smart_objects::SmartObject> is_vr_ready(
@@ -3222,7 +3227,6 @@ void ApplicationManagerImpl::UnregisterApplication(
         RemoveAppsWaitingForRegistration(handle);
       }
     }
-
     const auto enabled_local_apps = policy_handler_->GetEnabledLocalApps();
     if (helpers::in_range(enabled_local_apps, app_to_remove->policy_app_id())) {
       LOG4CXX_DEBUG(logger_,
@@ -4382,11 +4386,6 @@ void ApplicationManagerImpl::ApplyFunctorForEachPlugin(
     std::function<void(plugin_manager::RPCPlugin&)> functor) {
   LOG4CXX_AUTO_TRACE(logger_);
   plugin_manager_->ForEachPlugin(functor);
-}
-
-void ApplicationManagerImpl::SetVINCode(const std::string& vin_code) {
-  LOG4CXX_AUTO_TRACE(logger_);
-  connection_handler_->CreateWebEngineDevice(vin_code);
 }
 
 event_engine::EventDispatcher& ApplicationManagerImpl::event_dispatcher() {

@@ -712,8 +712,6 @@ class ApplicationManager {
   virtual void ApplyFunctorForEachPlugin(
       std::function<void(plugin_manager::RPCPlugin&)> functor) = 0;
 
-  virtual void SetVINCode(const std::string& vin_code) = 0;
-
   /*
    * @brief Converts connection string transport type representation
    * to HMI Common_TransportType

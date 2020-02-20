@@ -56,6 +56,7 @@
 #include "transport_manager/transport_manager_listener_empty.h"
 #ifdef WEBSOCKET_SERVER_TRANSPORT_SUPPORT
 #include "transport_manager/websocket_server/websocket_device.h"
+#include "transport_manager/websocket_server/websocket_server_transport_adapter.h"
 #endif
 #include "utils/timer_task_impl.h"
 
@@ -652,12 +653,12 @@ int TransportManagerImpl::PerformActionOnClients(
   return E_SUCCESS;
 }
 
-void TransportManagerImpl::CreateWebEngineDevice(const std::string& vin_code) {
+void TransportManagerImpl::CreateWebEngineDevice() {
 #ifndef WEBSOCKET_SERVER_TRANSPORT_SUPPORT
   LOG4CXX_TRACE(logger_, "Web engine support is disabled. Exiting function");
 #else
   LOG4CXX_AUTO_TRACE(logger_);
-  auto web_socket_ta = std::find_if(
+  auto web_socket_ta_iterator = std::find_if(
       transport_adapters_.begin(),
       transport_adapters_.end(),
       [](const TransportAdapter* ta) {
@@ -665,19 +666,33 @@ void TransportManagerImpl::CreateWebEngineDevice(const std::string& vin_code) {
                ta->GetDeviceType();
       });
 
-  if (transport_adapters_.end() == web_socket_ta) {
+  if (transport_adapters_.end() == web_socket_ta_iterator) {
     LOG4CXX_WARN(logger_,
-                 "WebSocketTransportAdapter not found."
-                 "Not able to create WebEngineDevice");
+                 "WebSocketServerTransportAdapter not found."
+                 "Impossible to create WebEngineDevice");
     return;
   }
 
+  auto web_socket_ta =
+      dynamic_cast<transport_adapter::WebSocketServerTransportAdapter*>(
+          *web_socket_ta_iterator);
+
+  if (!web_socket_ta) {
+    LOG4CXX_ERROR(logger_,
+                  "Unable to cast from Transport Adapter to "
+                  "WebSocketServerTransportAdapter."
+                  "Impossible to create WebEngineDevice");
+    return;
+  }
+
+  std::string unique_device_id = web_socket_ta->GetStoredDeviceID();
+
   DeviceHandle device_handle = converter_.UidToHandle(
-      vin_code, webengine_constants::kWebEngineConnectionType);
+      unique_device_id, webengine_constants::kWebEngineConnectionType);
 
   web_engine_device_info_ =
       DeviceInfo(device_handle,
-                 vin_code,
+                 unique_device_id,
                  webengine_constants::kWebEngineDeviceName,
                  webengine_constants::kWebEngineConnectionType);
 
@@ -688,10 +703,9 @@ void TransportManagerImpl::CreateWebEngineDevice(const std::string& vin_code) {
 
   RaiseEvent(&TransportManagerListener::OnDeviceAdded, web_engine_device_info_);
   device_list_.push_back(
-      std::make_pair(*web_socket_ta, web_engine_device_info_));
-  (*web_socket_ta)->AddDevice(ws_device);
-
-#endif
+      std::make_pair(web_socket_ta, web_engine_device_info_));
+  web_socket_ta->AddDevice(ws_device);
+#endif  // WEBSOCKET_SERVER_TRANSPORT_SUPPORT
 }
 
 const DeviceInfo& TransportManagerImpl::GetWebEngineDeviceInfo() const {
@@ -900,9 +914,9 @@ void TransportManagerImpl::TryDeviceSwitch(
                                            IOSBTAdapterFinder());
 
   if (transport_adapters_.end() == ios_bt_adapter) {
-    LOG4CXX_WARN(
-        logger_,
-        "There is no iAP2 Bluetooth adapter found. Switching is not possible.");
+    LOG4CXX_WARN(logger_,
+                 "There is no iAP2 Bluetooth adapter found. Switching is not "
+                 "possible.");
     return;
   }
 

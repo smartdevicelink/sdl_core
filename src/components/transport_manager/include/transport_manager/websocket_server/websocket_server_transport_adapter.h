@@ -36,6 +36,7 @@
 #ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_WEBSOCKET_SERVER_WEBSOCKET_SERVER_TRANSPORT_ADAPTER_H_
 #define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_WEBSOCKET_SERVER_WEBSOCKET_SERVER_TRANSPORT_ADAPTER_H_
 
+#include <string>
 #include "transport_manager/transport_adapter/transport_adapter_impl.h"
 
 namespace transport_manager {
@@ -86,6 +87,24 @@ class WebSocketServerTransportAdapter : public TransportAdapterImpl {
    */
   virtual TransportConfig GetTransportConfiguration() const OVERRIDE;
 
+  /**
+   * @brief Store adapter state in last state
+   */
+  void Store() const OVERRIDE;
+
+  /**
+   * @brief Restore adapter state from last state
+   * @return True on success false otherwise
+   */
+  bool Restore() OVERRIDE;
+
+  /**
+   * @brief Get stored device ID
+   * @return stored unique device id, or empty string if no stored device id
+   * present in last saved state
+   */
+  std::string GetStoredDeviceID() const;
+
  protected:
   /**
    * @brief Return type of device.
@@ -107,6 +126,7 @@ class WebSocketServerTransportAdapter : public TransportAdapterImpl {
    */
   TransportConfig transport_config_;
   DeviceSptr webengine_device_;
+  std::string webengine_device_id_;
 };
 
 }  // namespace transport_adapter

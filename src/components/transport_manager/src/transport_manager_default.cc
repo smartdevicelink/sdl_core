@@ -146,6 +146,7 @@ int TransportManagerDefault::Init(resumption::LastState& last_state) {
 #ifdef WEBSOCKET_SERVER_TRANSPORT_SUPPORT
   auto ta_websocket = new transport_adapter::WebSocketServerTransportAdapter(
       last_state, get_settings());
+
 #ifdef TELEMETRY_MONITOR
   if (metric_observer_) {
     ta_websocket->SetTelemetryObserver(metric_observer_);

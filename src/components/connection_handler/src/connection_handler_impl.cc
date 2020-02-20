@@ -866,13 +866,13 @@ void ConnectionHandlerImpl::OnSecondaryTransportEnded(
   }
 }
 
-void ConnectionHandlerImpl::CreateWebEngineDevice(const std::string& vin_code) {
-  transport_manager_.CreateWebEngineDevice(vin_code);
-}
-
 const transport_manager::DeviceInfo&
 ConnectionHandlerImpl::GetWebEngineDeviceInfo() const {
   return transport_manager_.GetWebEngineDeviceInfo();
+}
+
+void ConnectionHandlerImpl::CreateWebEngineDevice() {
+  transport_manager_.CreateWebEngineDevice();
 }
 
 const std::string

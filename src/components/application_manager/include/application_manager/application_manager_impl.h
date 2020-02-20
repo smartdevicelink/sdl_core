@@ -1161,8 +1161,6 @@ class ApplicationManagerImpl
   void ApplyFunctorForEachPlugin(
       std::function<void(plugin_manager::RPCPlugin&)> functor) OVERRIDE;
 
-  void SetVINCode(const std::string& vin_code) OVERRIDE;
-
  private:
   /**
    * @brief Adds application to registered applications list and marks it as

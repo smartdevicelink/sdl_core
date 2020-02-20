@@ -79,12 +79,6 @@ void VIGetVehicleDataResponse::Run() {
   } else {
     event.set_smart_object(*message_);
     policy_handler_.OnVehicleDataUpdated(*message_);
-    if ((*message_).keyExists(strings::msg_params) &&
-        (*message_)[strings::msg_params].keyExists(strings::vin)) {
-      const std::string vin =
-          (*message_)[strings::msg_params][strings::vin].asString();
-      application_manager_.SetVINCode(vin);
-    }
   }
 
   event.raise(application_manager_.event_dispatcher());

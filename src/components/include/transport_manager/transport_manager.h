@@ -217,11 +217,10 @@ class TransportManager {
       const TransportAction required_action) const = 0;
 
   /**
-   * @brief Called when VIN code is received, creates
-   * WebSocketDevice for WebEngine and add it to the device list
-   * @param vin_code VIN code received from HMI
+   * @brief Called when websocket server transport adapter is available.
+   * Creates WebSocketDevice for WebEngine and add it to the device list
    */
-  virtual void CreateWebEngineDevice(const std::string& vin_code) = 0;
+  virtual void CreateWebEngineDevice() = 0;
 
   /**
    * @brief GetWebEngineDeviceInfo
