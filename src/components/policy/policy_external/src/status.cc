@@ -83,7 +83,8 @@ bool policy::UpdateNeededStatus::IsUpdateRequired() const {
 }
 
 policy::UpdatePendingStatus::UpdatePendingStatus()
-    : Status(kUpdateNeeded, policy::PolicyTableStatus::StatusUpdatePending) {}
+    : Status(kUpdateNeeded,
+             policy::PolicyTableStatus::StatusProcessingSnapshot) {}
 
 void policy::UpdatePendingStatus::ProcessEvent(
     policy::UpdateStatusManager* manager, policy::UpdateEvent event) {

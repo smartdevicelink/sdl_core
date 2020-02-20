@@ -650,6 +650,7 @@ void PolicyManagerImpl::StartPTExchange() {
     }
 
     if (update_status_manager_.IsUpdateRequired()) {
+      update_status_manager_.PendingUpdate();
       if (RequestPTUpdate(PTUIterationType::DefaultIteration) &&
           !timer_retry_sequence_.is_running()) {
         // Start retry sequency
