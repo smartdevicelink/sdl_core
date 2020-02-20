@@ -42,8 +42,8 @@ All aforementioned entities are part of transport_manager namespace
 \anchor wes_design_solutions
 ### 2.1 Design solutions
 
-- Introducing extra layers to pass relevant websocket connection data between them
-- Utilizing boost::asio library to establish websocket connection
+- WebSocket server was implemented using several layers (e.g. WebSocketConnection, WebSocketSession, WebSocketSecureSession).
+- Utilizing boost::asio library to host a websocket server and establish websocket connections
 - Utilizing asynchronous programming to make all server calls nonblocking 
 - CRTP and template specialization to facilitate code reuse.
 
