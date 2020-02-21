@@ -52,11 +52,31 @@ VRGetCapabilitiesResponse::~VRGetCapabilitiesResponse() {}
 
 void VRGetCapabilitiesResponse::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
+  const hmi_apis::Common_Result::eType result_code =
+      static_cast<hmi_apis::Common_Result::eType>(
+          (*message_)[strings::params][hmi_response::code].asInt());
 
-  HMICapabilities& hmi_capabilities = hmi_capabilities_;
+  if (hmi_apis::Common_Result::SUCCESS != result_code) {
+    LOG4CXX_DEBUG(logger_,
+                  "Request was not successful. Don't change HMI capabilities");
+    return;
+  }
 
-  hmi_capabilities.set_vr_capabilities(
-      (*message_)[strings::msg_params][strings::vr_capabilities]);
+  const smart_objects::SmartObject& msg_params =
+      (*message_)[strings::msg_params];
+
+  std::vector<std::string> sections_to_update;
+  if (msg_params.keyExists(strings::vr_capabilities)) {
+    sections_to_update.push_back(strings::vr_capabilities);
+    hmi_capabilities_.set_vr_capabilities(
+        (*message_)[strings::msg_params][strings::vr_capabilities]);
+  }
+
+  if (!hmi_capabilities_.SaveCachedCapabilitiesToFile(
+          hmi_interface::vr, sections_to_update, message_->getSchema())) {
+    LOG4CXX_ERROR(logger_,
+                  "Failed to save VR.GetCapabilities response to cache");
+  }
 }
 
 }  // namespace commands

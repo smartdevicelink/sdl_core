@@ -497,6 +497,7 @@ class HMICapabilities {
   /**
    * @brief Writes cached HMI capabilities from internal cache into the file if
    * any of updated sections are not present in the file
+   * @param interface_name name of interface to be updated
    * @param sections_to_update vector of names of sections which were updated in
    * cache
    * @param schema reference to schema which should be unapplied before saving
@@ -504,43 +505,14 @@ class HMICapabilities {
    * @return true if cache was saved successfully, otherwise returns false
    */
   virtual bool SaveCachedCapabilitiesToFile(
-      const std::vector<std::string> sections_to_update,
+      const std::string& interface_name,
+      const std::vector<std::string>& sections_to_update,
       const smart_objects::CSmartSchema& schema) = 0;
 
   /**
    * @brief Deletes cached HMI capabilities file from a file system
    */
   virtual void DeleteCachedCapabilitiesFile() const = 0;
-
- protected:
-  /*
-   * @brief function checks if json member exists
-   *
-   * @param json_member from file hmi_capabilities.json
-   * @param name_of_member name which we should check
-   *     hmi_capabilities.json
-   *
-   * @returns TRUE if member exists and returns FALSE if
-   * member does not exist.
-   */
-  virtual bool check_existing_json_member(const Json::Value& json_member,
-                                          const char* name_of_member) const = 0;
-
-  virtual void convert_json_languages_to_obj(
-      const Json::Value& json_languages,
-      smart_objects::SmartObject& languages) const = 0;
-
-  /*
-   * @brief function that converts a single entry of audio pass thru capability
-   *        to smart object
-   *
-   * @param capability json object that represents a single entry of audio pass
-   *        thru capability
-   * @param output_so the converted object
-   */
-  virtual void convert_audio_capability_to_obj(
-      const Json::Value& capability,
-      smart_objects::SmartObject& output_so) const = 0;
 };
 
 }  //  namespace application_manager

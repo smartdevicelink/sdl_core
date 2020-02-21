@@ -56,6 +56,14 @@ UIGetLanguageResponse::~UIGetLanguageResponse() {}
 void UIGetLanguageResponse::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
   using namespace hmi_apis;
+  const Common_Result::eType result_code = static_cast<Common_Result::eType>(
+      (*message_)[strings::params][hmi_response::code].asInt());
+
+  if (Common_Result::SUCCESS != result_code) {
+    LOG4CXX_DEBUG(logger_,
+                  "Request was not successful. Don't change HMI capabilities");
+    return;
+  }
 
   Common_Language::eType language = Common_Language::INVALID_ENUM;
 
@@ -69,9 +77,9 @@ void UIGetLanguageResponse::Run() {
 
   std::vector<std::string> sections_to_update;
   sections_to_update.push_back(hmi_response::language);
-  if (!hmi_capabilities_.SaveCachedCapabilitiesToFile(sections_to_update,
-                                                      message_->getSchema())) {
-    LOG4CXX_ERROR(logger_, "Failed to save GetCapabilities response to cache");
+  if (!hmi_capabilities_.SaveCachedCapabilitiesToFile(
+          hmi_interface::ui, sections_to_update, message_->getSchema())) {
+    LOG4CXX_ERROR(logger_, "Failed to save UI.GetLanguage response to cache");
   }
 
   LOG4CXX_DEBUG(logger_,

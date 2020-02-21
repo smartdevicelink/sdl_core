@@ -207,22 +207,11 @@ class MockHMICapabilities : public ::application_manager::HMICapabilities {
                application_manager::HMILanguageHandler&());
   MOCK_METHOD1(set_handle_response_for,
                void(const smart_objects::SmartObject& request));
-  MOCK_METHOD2(SaveCachedCapabilitiesToFile,
-               bool(const std::vector<std::string> sections_to_update,
+  MOCK_METHOD3(SaveCachedCapabilitiesToFile,
+               bool(const std::string& interface_name,
+                    const std::vector<std::string>& sections_to_update,
                     const smart_objects::CSmartSchema& schema));
   MOCK_CONST_METHOD0(DeleteCachedCapabilitiesFile, void());
-
- protected:
-  MOCK_CONST_METHOD2(check_existing_json_member,
-                     bool(const Json::Value& json_member,
-                          const char* name_of_member));
-
-  MOCK_CONST_METHOD2(convert_json_languages_to_obj,
-                     void(const Json::Value& json_languages,
-                          smart_objects::SmartObject& languages));
-  MOCK_CONST_METHOD2(convert_audio_capability_to_obj,
-                     void(const Json::Value& capability,
-                          smart_objects::SmartObject& output_so));
 };
 
 }  // namespace application_manager_test

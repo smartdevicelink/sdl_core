@@ -36,6 +36,7 @@
 #include "application_manager/application_manager.h"
 #include "application_manager/hmi_capabilities_impl.h"
 #include "application_manager/message_helper.h"
+#include "application_manager/rpc_plugins/rc_rpc_plugin/include/rc_rpc_plugin/rc_module_constants.h"
 #include "application_manager/smart_object_keys.h"
 #include "config_profile/profile.h"
 #include "formatters/CFormatterJsonBase.h"
@@ -417,6 +418,37 @@ void InitCapabilities() {
 }
 
 }  // namespace
+
+namespace {
+/**
+ * @brief Saves smart object content into the JSON node
+ * @param field_name name of the field to save
+ * @param schema reference to schema to unapply
+ * @param object_to_save pointer to object to save
+ * @param out_json_node JSON node for the output result
+ */
+void save_hmi_capability_field_to_json(
+    const std::string& field_name,
+    const smart_objects::CSmartSchema& schema,
+    smart_objects::SmartObjectSPtr object_to_save,
+    Json::Value& out_json_node) {
+  if (!object_to_save) {
+    return;
+  }
+
+  namespace Formatters = ns_smart_device_link::ns_json_handler::formatters;
+  smart_objects::SmartObject formatted_object(smart_objects::SmartType_Map);
+  formatted_object[strings::msg_params][field_name] = *object_to_save;
+  formatted_object.setSchema(schema);
+  formatted_object.getSchema().unapplySchema(
+      formatted_object);  // converts enums back to strings
+
+  Json::Value temp_value;
+  Formatters::CFormatterJsonBase::objToJsonValue(formatted_object, temp_value);
+  out_json_node[field_name] = temp_value[strings::msg_params][field_name];
+}
+
+}  //  namespace
 
 HMICapabilitiesImpl::HMICapabilitiesImpl(ApplicationManager& app_mngr)
     : is_vr_cooperating_(false)
@@ -875,32 +907,6 @@ HMICapabilitiesImpl::seat_location_capability() const {
   return seat_location_capability_;
 }
 
-/**
- * @brief Saves smart object content into the JSON node
- * @param field_name name of the field to save
- * @param schema reference to schema to unapply
- * @param object_to_save pointer to object to save
- * @param out_json_node JSON node for the output result
- */
-void save_hmi_capability_field_to_json(
-    const std::string& field_name,
-    const smart_objects::CSmartSchema& schema,
-    smart_objects::SmartObjectSPtr object_to_save,
-    Json::Value& out_json_node) {
-  if (!object_to_save) {
-    return;
-  }
-  smart_objects::SmartObject formatted_object(smart_objects::SmartType_Map);
-  formatted_object[strings::msg_params][field_name] = *object_to_save;
-  formatted_object.setSchema(schema);
-  formatted_object.getSchema().unapplySchema(
-      formatted_object);  // converts enums back to strings
-
-  Json::Value temp_value;
-  formatters::CFormatterJsonBase::objToJsonValue(formatted_object, temp_value);
-  out_json_node[field_name] = temp_value[strings::msg_params][field_name];
-}
-
 bool HMICapabilitiesImpl::load_capabilities_from_file() {
   std::string json_string;
   const std::string file_name =
@@ -963,32 +969,36 @@ bool HMICapabilitiesImpl::load_capabilities_from_file() {
       return false;
     }
     // UI
-    if (check_existing_json_member(root_json_override, "UI") ||
-        (check_existing_json_member(root_json, "UI"))) {
-      Json::Value ui = root_json_override.get("UI", Json::Value::null);
+    if (check_existing_json_member(root_json_override, hmi_interface::ui) ||
+        (check_existing_json_member(root_json, hmi_interface::ui))) {
+      Json::Value ui =
+          root_json_override.get(hmi_interface::ui, Json::Value::null);
       if (ui.isNull()) {
-        ui = root_json.get("UI", Json::Value::null);
+        ui = root_json.get(hmi_interface::ui, Json::Value::null);
       }
 
-      if (check_existing_json_member(ui, "language")) {
-        const std::string lang = ui.get("language", "EN-US").asString();
+      if (check_existing_json_member(ui, hmi_response::language)) {
+        const std::string lang =
+            ui.get(hmi_response::language, "EN-US").asString();
         set_active_ui_language(MessageHelper::CommonLanguageFromString(lang));
       } else {
         set_active_ui_language(
             MessageHelper::CommonLanguageFromString("EN-US"));
       }
 
-      if (check_existing_json_member(ui, "languages")) {
+      if (check_existing_json_member(ui, hmi_response::languages)) {
         smart_objects::SmartObject ui_languages_so(
             smart_objects::SmartType_Array);
-        Json::Value languages_ui = ui.get("languages", "");
-        convert_json_languages_to_obj(languages_ui, ui_languages_so);
+        Json::Value languages_ui = ui.get(hmi_response::languages, "");
+        ConvertJsonArrayToSoArray<hmi_apis::Common_Language::eType>(
+            languages_ui, ui_languages_so);
         set_ui_supported_languages(ui_languages_so);
       }
 
-      if (check_existing_json_member(ui, "displayCapabilities")) {
+      if (check_existing_json_member(ui, hmi_response::display_capabilities)) {
         smart_objects::SmartObject display_capabilities_so;
-        Json::Value display_capabilities = ui.get("displayCapabilities", "");
+        Json::Value display_capabilities =
+            ui.get(hmi_response::display_capabilities, "");
         formatters::CFormatterJsonBase::jsonValueToObj(display_capabilities,
                                                        display_capabilities_so);
 
@@ -1124,9 +1134,10 @@ bool HMICapabilitiesImpl::load_capabilities_from_file() {
         set_display_capabilities(display_capabilities_so);
       }
 
-      if (check_existing_json_member(ui, "audioPassThruCapabilities")) {
+      if (check_existing_json_member(ui,
+                                     strings::audio_pass_thru_capabilities)) {
         Json::Value audio_capabilities =
-            ui.get("audioPassThruCapabilities", "");
+            ui.get(strings::audio_pass_thru_capabilities, "");
         smart_objects::SmartObject audio_capabilities_so(
             smart_objects::SmartType_Array);
         if (audio_capabilities.type() == Json::arrayValue) {
@@ -1141,38 +1152,43 @@ bool HMICapabilitiesImpl::load_capabilities_from_file() {
         set_audio_pass_thru_capabilities(audio_capabilities_so);
       }
 
-      if (check_existing_json_member(ui, "pcmStreamCapabilities")) {
-        Json::Value pcm_capabilities = ui.get("pcmStreamCapabilities", "");
+      if (check_existing_json_member(ui, strings::pcm_stream_capabilities)) {
+        Json::Value pcm_capabilities =
+            ui.get(strings::pcm_stream_capabilities, "");
         smart_objects::SmartObject pcm_capabilities_so =
             smart_objects::SmartObject(smart_objects::SmartType_Map);
         convert_audio_capability_to_obj(pcm_capabilities, pcm_capabilities_so);
         set_pcm_stream_capabilities(pcm_capabilities_so);
       }
 
-      if (check_existing_json_member(ui, "hmiZoneCapabilities")) {
+      if (check_existing_json_member(ui, hmi_response::hmi_zone_capabilities)) {
         smart_objects::SmartObject hmi_zone_capabilities_so =
             smart_objects::SmartObject(smart_objects::SmartType_Array);
         hmi_zone_capabilities_so =
-            hmi_zone_enum.find(ui.get("hmiZoneCapabilities", "").asString())
+            hmi_zone_enum
+                .find(
+                    ui.get(hmi_response::hmi_zone_capabilities, "").asString())
                 ->second;
         set_hmi_zone_capabilities(hmi_zone_capabilities_so);
       }
 
-      if (check_existing_json_member(ui, "softButtonCapabilities")) {
+      if (check_existing_json_member(ui,
+                                     hmi_response::soft_button_capabilities)) {
         Json::Value soft_button_capabilities =
-            ui.get("softButtonCapabilities", "");
+            ui.get(hmi_response::soft_button_capabilities, "");
         smart_objects::SmartObject soft_button_capabilities_so;
         formatters::CFormatterJsonBase::jsonValueToObj(
             soft_button_capabilities, soft_button_capabilities_so);
         set_soft_button_capabilities(soft_button_capabilities_so);
       }
 
-      if (check_existing_json_member(ui, "systemCapabilities")) {
-        Json::Value system_capabilities = ui.get("systemCapabilities", "");
+      if (check_existing_json_member(ui, strings::system_capabilities)) {
+        Json::Value system_capabilities =
+            ui.get(strings::system_capabilities, "");
         if (check_existing_json_member(system_capabilities,
-                                       "navigationCapability")) {
+                                       strings::navigation_capability)) {
           Json::Value navigation_capability =
-              system_capabilities.get("navigationCapability", "");
+              system_capabilities.get(strings::navigation_capability, "");
           smart_objects::SmartObject navigation_capability_so;
           formatters::CFormatterJsonBase::jsonValueToObj(
               navigation_capability, navigation_capability_so);
@@ -1182,9 +1198,9 @@ bool HMICapabilitiesImpl::load_capabilities_from_file() {
           }
         }
         if (check_existing_json_member(system_capabilities,
-                                       "phoneCapability")) {
+                                       strings::phone_capability)) {
           Json::Value phone_capability =
-              system_capabilities.get("phoneCapability", "");
+              system_capabilities.get(strings::phone_capability, "");
           smart_objects::SmartObject phone_capability_so;
           formatters::CFormatterJsonBase::jsonValueToObj(phone_capability,
                                                          phone_capability_so);
@@ -1194,22 +1210,22 @@ bool HMICapabilitiesImpl::load_capabilities_from_file() {
           }
         }
         if (check_existing_json_member(system_capabilities,
-                                       "videoStreamingCapability")) {
+                                       strings::video_streaming_capability)) {
           Json::Value vs_capability =
-              system_capabilities.get("videoStreamingCapability", "");
+              system_capabilities.get(strings::video_streaming_capability, "");
           smart_objects::SmartObject vs_capability_so;
           formatters::CFormatterJsonBase::jsonValueToObj(vs_capability,
                                                          vs_capability_so);
 
-          if (vs_capability_so.keyExists("supportedFormats")) {
+          if (vs_capability_so.keyExists(strings::supported_formats)) {
             smart_objects::SmartObject& supported_format_array =
-                vs_capability_so["supportedFormats"];
+                vs_capability_so[strings::supported_formats];
             smart_objects::SmartObject converted_array(
                 smart_objects::SmartType_Array);
             for (uint32_t i = 0, j = 0; i < supported_format_array.length();
                  i++) {
-              if (!supported_format_array[i].keyExists("protocol") ||
-                  !supported_format_array[i].keyExists("codec")) {
+              if (!supported_format_array[i].keyExists(strings::protocol) ||
+                  !supported_format_array[i].keyExists(strings::codec)) {
                 continue;
               }
 
@@ -1217,12 +1233,13 @@ bool HMICapabilitiesImpl::load_capabilities_from_file() {
                        hmi_apis::Common_VideoStreamingProtocol::eType>::
                   const_iterator it_protocol =
                       video_streaming_protocol_enum.find(
-                          supported_format_array[i]["protocol"].asString());
+                          supported_format_array[i][strings::protocol]
+                              .asString());
 
               std::map<std::string,
                        hmi_apis::Common_VideoStreamingCodec::eType>::
                   const_iterator it_codec = video_streaming_codec_enum.find(
-                      supported_format_array[i]["codec"].asString());
+                      supported_format_array[i][strings::codec].asString());
 
               // format is valid only if both protocol and codec are converted
               // to enum values successfully
@@ -1230,13 +1247,13 @@ bool HMICapabilitiesImpl::load_capabilities_from_file() {
                   it_codec != video_streaming_codec_enum.end()) {
                 smart_objects::SmartObject format_so =
                     smart_objects::SmartObject(smart_objects::SmartType_Map);
-                format_so["protocol"] = it_protocol->second;
-                format_so["codec"] = it_codec->second;
+                format_so[strings::protocol] = it_protocol->second;
+                format_so[strings::codec] = it_codec->second;
                 converted_array[j++] = format_so;
               }
             }
-            vs_capability_so.erase("supportedFormats");
-            vs_capability_so["supportedFormats"] = converted_array;
+            vs_capability_so.erase(strings::supported_formats);
+            vs_capability_so[strings::supported_formats] = converted_array;
           }
           set_video_streaming_capability(vs_capability_so);
           if (!vs_capability_so.empty()) {
@@ -1244,20 +1261,24 @@ bool HMICapabilitiesImpl::load_capabilities_from_file() {
           }
         }
         if (check_existing_json_member(system_capabilities,
-                                       "remoteControlCapability")) {
+                                       strings::rc_capability)) {
           Json::Value rc_capability =
-              system_capabilities.get("remoteControlCapability", "");
+              system_capabilities.get(strings::rc_capability, "");
           smart_objects::SmartObject rc_capability_so;
           formatters::CFormatterJsonBase::jsonValueToObj(rc_capability,
                                                          rc_capability_so);
-          if (rc_capability_so.keyExists("lightControlCapabilities")) {
-            if (rc_capability_so["lightControlCapabilities"].keyExists(
-                    "supportedLights")) {
-              auto& lights = rc_capability_so["lightControlCapabilities"]
-                                             ["supportedLights"];
+          if (rc_capability_so.keyExists(
+                  rc_rpc_plugin::strings::klightControlCapabilities)) {
+            if (rc_capability_so
+                    [rc_rpc_plugin::strings::klightControlCapabilities]
+                        .keyExists(rc_rpc_plugin::strings::kSupportedLights)) {
+              auto& lights = rc_capability_so
+                  [rc_rpc_plugin::strings::klightControlCapabilities]
+                  [rc_rpc_plugin::strings::kSupportedLights];
               auto it = lights.asArray()->begin();
               for (; it != lights.asArray()->end(); ++it) {
-                smart_objects::SmartObject& light_name_so = (*it)["name"];
+                smart_objects::SmartObject& light_name_so =
+                    (*it)[strings::name];
                 auto light_name = MessageHelper::CommonLightNameFromString(
                     light_name_so.asString());
                 light_name_so = light_name;
@@ -1270,9 +1291,9 @@ bool HMICapabilitiesImpl::load_capabilities_from_file() {
           }
         }
         if (check_existing_json_member(system_capabilities,
-                                       "seatLocationCapability")) {
+                                       strings::seat_location_capability)) {
           Json::Value seat_location_capability =
-              system_capabilities.get("seatLocationCapability", "");
+              system_capabilities.get(strings::seat_location_capability, "");
           smart_objects::SmartObject seat_location_capability_so;
           formatters::CFormatterJsonBase::jsonValueToObj(
               seat_location_capability, seat_location_capability_so);
@@ -1282,73 +1303,83 @@ bool HMICapabilitiesImpl::load_capabilities_from_file() {
     }  // UI end
 
     // VR
-    if (check_existing_json_member(root_json, "VR")) {
-      Json::Value vr = root_json.get("VR", "");
-      if (check_existing_json_member(vr, "language")) {
-        const std::string lang = vr.get("language", "EN-US").asString();
+    if (check_existing_json_member(root_json_override, hmi_interface::vr) ||
+        check_existing_json_member(root_json, hmi_interface::vr)) {
+      Json::Value vr = root_json.get(hmi_interface::vr, "");
+      Json::Value vr_override =
+          root_json_override.get(hmi_interface::vr, Json::Value::null);
+
+      if (check_existing_json_member(vr_override, hmi_response::language)) {
+        const std::string lang =
+            vr_override.get(hmi_response::language, "EN-US").asString();
         set_active_vr_language(MessageHelper::CommonLanguageFromString(lang));
-      } else {
-        set_active_vr_language(
-            MessageHelper::CommonLanguageFromString("EN-US"));
+      } else if (check_existing_json_member(vr, hmi_response::language)) {
+        const std::string lang =
+            vr.get(hmi_response::language, "EN-US").asString();
+        set_active_vr_language(MessageHelper::CommonLanguageFromString(lang));
       }
 
-      if (check_existing_json_member(vr, "languages")) {
-        Json::Value languages_vr = vr.get("languages", "");
+      if (check_existing_json_member(vr, hmi_response::languages)) {
+        Json::Value languages_vr = vr.get(hmi_response::languages, "");
         smart_objects::SmartObject vr_languages_so =
             smart_objects::SmartObject(smart_objects::SmartType_Array);
-        convert_json_languages_to_obj(languages_vr, vr_languages_so);
+        ConvertJsonArrayToSoArray<hmi_apis::Common_Language::eType>(
+            languages_vr, vr_languages_so);
         set_vr_supported_languages(vr_languages_so);
       }
 
-      if (check_existing_json_member(vr, "capabilities")) {
-        Json::Value capabilities = vr.get("capabilities", "");
+      if (check_existing_json_member(vr, hmi_response::capabilities)) {
+        Json::Value capabilities = vr.get(hmi_response::capabilities, "");
         smart_objects::SmartObject vr_capabilities_so =
             smart_objects::SmartObject(smart_objects::SmartType_Array);
-        for (uint32_t i = 0; i < capabilities.size(); ++i) {
-          vr_capabilities_so[i] =
-              vr_enum_capabilities.find(capabilities[i].asString())->second;
-        }
+        ConvertJsonArrayToSoArray<hmi_apis::Common_VrCapabilities::eType>(
+            capabilities, vr_capabilities_so);
         set_vr_capabilities(vr_capabilities_so);
       }
     }  // VR end
 
     // TTS
-    if (check_existing_json_member(root_json, "TTS")) {
-      Json::Value tts = root_json.get("TTS", "");
+    if (check_existing_json_member(root_json_override, hmi_interface::tts) ||
+        check_existing_json_member(root_json, hmi_interface::tts)) {
+      Json::Value tts = root_json.get(hmi_interface::tts, Json::Value::null);
+      Json::Value tts_override =
+          root_json_override.get(hmi_interface::tts, Json::Value::null);
 
-      if (check_existing_json_member(tts, "language")) {
-        const std::string lang = tts.get("language", "EN-US").asString();
+      if (check_existing_json_member(tts_override, hmi_response::language)) {
+        const std::string lang =
+            tts.get(hmi_response::language, "EN-US").asString();
         set_active_tts_language(MessageHelper::CommonLanguageFromString(lang));
-      } else {
-        set_active_tts_language(
-            MessageHelper::CommonLanguageFromString("EN-US"));
+      } else if (check_existing_json_member(tts, hmi_response::language)) {
+        const std::string lang =
+            tts.get(hmi_response::language, "EN-US").asString();
+        set_active_tts_language(MessageHelper::CommonLanguageFromString(lang));
       }
 
-      if (check_existing_json_member(tts, "languages")) {
-        Json::Value languages_tts = tts.get("languages", "");
+      if (check_existing_json_member(tts, hmi_response::languages)) {
+        Json::Value languages_tts = tts.get(hmi_response::languages, "");
         smart_objects::SmartObject tts_languages_so =
             smart_objects::SmartObject(smart_objects::SmartType_Array);
-        convert_json_languages_to_obj(languages_tts, tts_languages_so);
+        ConvertJsonArrayToSoArray<hmi_apis::Common_Language::eType>(
+            languages_tts, tts_languages_so);
         set_tts_supported_languages(tts_languages_so);
       }
 
-      if (check_existing_json_member(tts, "capabilities")) {
-        Json::Value capabilities = tts.get("capabilities", "");
+      if (check_existing_json_member(tts, hmi_response::capabilities)) {
+        Json::Value capabilities = tts.get(hmi_response::capabilities, "");
         smart_objects::SmartObject tts_capabilities_so =
             smart_objects::SmartObject(smart_objects::SmartType_Array);
-        for (uint32_t i = 0; i < capabilities.size(); ++i) {
-          tts_capabilities_so[i] =
-              tts_enum_capabilities.find(capabilities[i].asString())->second;
-        }
+        ConvertJsonArrayToSoArray<hmi_apis::Common_SpeechCapabilities::eType>(
+            capabilities, tts_capabilities_so);
         set_speech_capabilities(tts_capabilities_so);
       }
     }  // TTS end
 
     // Buttons
-    if (check_existing_json_member(root_json, "Buttons")) {
-      Json::Value buttons = root_json.get("Buttons", "");
-      if (check_existing_json_member(buttons, "capabilities")) {
-        Json::Value bt_capabilities = buttons.get("capabilities", "");
+    if (check_existing_json_member(root_json, hmi_interface::buttons)) {
+      Json::Value buttons = root_json.get(hmi_interface::buttons, "");
+      if (check_existing_json_member(buttons, hmi_response::capabilities)) {
+        Json::Value bt_capabilities =
+            buttons.get(hmi_response::capabilities, "");
         smart_objects::SmartObject buttons_capabilities_so;
         formatters::CFormatterJsonBase::jsonValueToObj(bt_capabilities,
                                                        buttons_capabilities_so);
@@ -1367,8 +1398,10 @@ bool HMICapabilitiesImpl::load_capabilities_from_file() {
         }
         set_button_capabilities(buttons_capabilities_so);
       }
-      if (check_existing_json_member(buttons, "presetBankCapabilities")) {
-        Json::Value presetBank = buttons.get("presetBankCapabilities", "");
+      if (check_existing_json_member(buttons,
+                                     hmi_response::preset_bank_capabilities)) {
+        Json::Value presetBank =
+            buttons.get(hmi_response::preset_bank_capabilities, "");
         smart_objects::SmartObject preset_bank_so;
         formatters::CFormatterJsonBase::jsonValueToObj(presetBank,
                                                        preset_bank_so);
@@ -1377,8 +1410,8 @@ bool HMICapabilitiesImpl::load_capabilities_from_file() {
     }  // Buttons end
 
     // VehicleType
-    if (check_existing_json_member(root_json, "VehicleInfo")) {
-      Json::Value vehicle_info = root_json.get("VehicleInfo", "");
+    if (check_existing_json_member(root_json, hmi_interface::vehicle_info)) {
+      Json::Value vehicle_info = root_json.get(hmi_interface::vehicle_info, "");
       smart_objects::SmartObject vehicle_type_so;
       formatters::CFormatterJsonBase::jsonValueToObj(vehicle_info,
                                                      vehicle_type_so);
@@ -1390,8 +1423,203 @@ bool HMICapabilitiesImpl::load_capabilities_from_file() {
   return true;
 }
 
+hmi_apis::Common_Language::eType
+HMICapabilitiesImpl::GetActiveLanguageForInterface(
+    const char* interface_name) const {
+  LOG4CXX_AUTO_TRACE(logger_);
+  if (strcmp(hmi_interface::ui, interface_name) == 0) {
+    return active_ui_language();
+  }
+  if (strcmp(hmi_interface::vr, interface_name) == 0) {
+    return active_vr_language();
+  }
+  if (strcmp(hmi_interface::tts, interface_name) == 0) {
+    return active_tts_language();
+  }
+  return hmi_apis::Common_Language::INVALID_ENUM;
+}
+
+bool HMICapabilitiesImpl::AreAllFieldsSaved(
+    const Json::Value& root_node,
+    const char* interface_name,
+    const std::vector<std::string>& sections_to_check) const {
+  LOG4CXX_AUTO_TRACE(logger_);
+  if (!check_existing_json_member(root_node, interface_name)) {
+    LOG4CXX_DEBUG(logger_,
+                  interface_name
+                      << " interface is not found. All fields should be saved");
+    return false;
+  }
+
+  const auto& interface_node = root_node.get(interface_name, Json::Value::null);
+  for (auto it = sections_to_check.begin(); it != sections_to_check.end();
+       ++it) {
+    const std::string section = (*it).c_str();
+    if (!check_existing_json_member(interface_node, section.c_str())) {
+      LOG4CXX_DEBUG(logger_,
+                    "Field " << *it << " should be saved into the file");
+      return false;
+    }
+
+    if (hmi_response::language == section) {
+      const auto active_language =
+          GetActiveLanguageForInterface(interface_name);
+      const auto json_language = interface_node[hmi_response::language];
+
+      if (active_language !=
+          MessageHelper::CommonLanguageFromString(json_language.asString())) {
+        LOG4CXX_DEBUG(logger_,
+                      "Active " << interface_name
+                                << " language is not the same as the persisted "
+                                   "one. Field should be overwritten");
+        return false;
+      }
+    }
+  }
+
+  return true;
+}
+
+void HMICapabilitiesImpl::PrepareUiJsonValueForSaving(
+    const std::vector<std::string>& sections_to_update,
+    const smart_objects::CSmartSchema& schema,
+    Json::Value& out_node) const {
+  LOG4CXX_AUTO_TRACE(logger_);
+  if (helpers::in_range(sections_to_update,
+                        hmi_response::display_capabilities)) {
+    save_hmi_capability_field_to_json(hmi_response::display_capabilities,
+                                      schema,
+                                      display_capabilities(),
+                                      out_node);
+  }
+
+  if (helpers::in_range(sections_to_update,
+                        hmi_response::hmi_zone_capabilities)) {
+    save_hmi_capability_field_to_json(hmi_response::hmi_zone_capabilities,
+                                      schema,
+                                      hmi_zone_capabilities(),
+                                      out_node);
+  }
+
+  if (helpers::in_range(sections_to_update,
+                        hmi_response::soft_button_capabilities)) {
+    save_hmi_capability_field_to_json(hmi_response::soft_button_capabilities,
+                                      schema,
+                                      soft_button_capabilities(),
+                                      out_node);
+  }
+
+  if (helpers::in_range(sections_to_update,
+                        strings::audio_pass_thru_capabilities)) {
+    save_hmi_capability_field_to_json(strings::audio_pass_thru_capabilities,
+                                      schema,
+                                      audio_pass_thru_capabilities(),
+                                      out_node);
+  }
+
+  if (helpers::in_range(sections_to_update, strings::navigation)) {
+    out_node[strings::hmi_capabilities] = navigation_supported();
+  }
+
+  if (helpers::in_range(sections_to_update, strings::phone_call)) {
+    out_node[strings::hmi_capabilities] = phone_call_supported();
+  }
+
+  if (helpers::in_range(sections_to_update, strings::navigation_capability)) {
+    save_hmi_capability_field_to_json(strings::navigation_capability,
+                                      schema,
+                                      navigation_capability(),
+                                      out_node[strings::system_capabilities]);
+  }
+  if (helpers::in_range(sections_to_update, strings::phone_capability)) {
+    save_hmi_capability_field_to_json(strings::phone_capability,
+                                      schema,
+                                      phone_capability(),
+                                      out_node[strings::system_capabilities]);
+  }
+  if (helpers::in_range(sections_to_update,
+                        strings::video_streaming_capability)) {
+    save_hmi_capability_field_to_json(strings::video_streaming_capability,
+                                      schema,
+                                      video_streaming_capability(),
+                                      out_node[strings::system_capabilities]);
+  }
+  if (helpers::in_range(sections_to_update,
+                        strings::system_display_capabilities)) {
+    save_hmi_capability_field_to_json(strings::display_capabilities,
+                                      schema,
+                                      system_display_capabilities(),
+                                      out_node[strings::system_capabilities]);
+  }
+
+  if (helpers::in_range(sections_to_update, hmi_response::language)) {
+    out_node[hmi_response::language] =
+        MessageHelper::CommonLanguageToString(active_ui_language());
+  }
+
+  if (helpers::in_range(sections_to_update, hmi_response::languages)) {
+    save_hmi_capability_field_to_json(
+        hmi_response::languages, schema, ui_supported_languages(), out_node);
+  }
+}
+
+void HMICapabilitiesImpl::PrepareVrJsonValueForSaving(
+    const std::vector<std::string>& sections_to_update,
+    const smart_objects::CSmartSchema& schema,
+    Json::Value& out_node) const {
+  UNUSED(schema);
+  LOG4CXX_AUTO_TRACE(logger_);
+  if (helpers::in_range(sections_to_update, hmi_response::language)) {
+    out_node[hmi_response::language] =
+        MessageHelper::CommonLanguageToString(active_vr_language());
+  }
+}
+
+void HMICapabilitiesImpl::PrepareTtsJsonValueForSaving(
+    const std::vector<std::string>& sections_to_update,
+    const smart_objects::CSmartSchema& schema,
+    Json::Value& out_node) const {
+  UNUSED(schema);
+  LOG4CXX_AUTO_TRACE(logger_);
+  if (helpers::in_range(sections_to_update, hmi_response::language)) {
+    out_node[hmi_response::language] =
+        MessageHelper::CommonLanguageToString(active_tts_language());
+  }
+}
+
+void HMICapabilitiesImpl::PrepareJsonValueForSaving(
+    const char* interface_name,
+    const std::vector<std::string>& sections_to_update,
+    const smart_objects::CSmartSchema& schema,
+    Json::Value& out_root_node) const {
+  LOG4CXX_DEBUG(logger_,
+                "Prepare " << interface_name << " sections for saving");
+
+  if (out_root_node.isNull()) {
+    out_root_node = Json::Value(Json::objectValue);
+  }
+
+  if (!out_root_node.isMember(interface_name)) {
+    out_root_node[interface_name] = Json::Value(Json::objectValue);
+  }
+
+  Json::Value& interface_node = out_root_node[interface_name];
+  if (strcmp(interface_name, hmi_interface::ui) == 0) {
+    PrepareUiJsonValueForSaving(sections_to_update, schema, interface_node);
+  }
+
+  if (strcmp(interface_name, hmi_interface::vr) == 0) {
+    PrepareVrJsonValueForSaving(sections_to_update, schema, interface_node);
+  }
+
+  if (strcmp(interface_name, hmi_interface::tts) == 0) {
+    PrepareTtsJsonValueForSaving(sections_to_update, schema, interface_node);
+  }
+}
+
 bool HMICapabilitiesImpl::SaveCachedCapabilitiesToFile(
-    const std::vector<std::string> sections_to_update,
+    const std::string& interface_name,
+    const std::vector<std::string>& sections_to_update,
     const smart_objects::CSmartSchema& schema) {
   LOG4CXX_AUTO_TRACE(logger_);
 
@@ -1413,129 +1641,30 @@ bool HMICapabilitiesImpl::SaveCachedCapabilitiesToFile(
       return false;
     }
 
-    Json::CharReaderBuilder reader_builder;
-    const std::unique_ptr<Json::CharReader> reader(
-        reader_builder.newCharReader());
-    JSONCPP_STRING err;
-    const size_t json_len = file_content.length();
+    Json::CharReaderBuilder builder;
+    const std::unique_ptr<Json::CharReader> reader(builder.newCharReader());
     if (!reader->parse(file_content.c_str(),
-                       file_content.c_str() + json_len,
+                       file_content.c_str() + file_content.length(),
                        &root_node,
-                       &err)) {
-      LOG4CXX_ERROR(logger_, "Can't parse the file." << err << "Skipping");
+                       NULL)) {
+      LOG4CXX_ERROR(logger_, "Can't parse the file. Skipping");
       return false;
     }
 
-    if (check_existing_json_member(root_node, "UI")) {
-      Json::Value ui = root_node.get("UI", Json::Value::null);
-      bool are_all_sections_exist = true;
-      for (auto it = sections_to_update.begin(); it != sections_to_update.end();
-           ++it) {
-        if (!check_existing_json_member(ui, (*it).c_str())) {
-          LOG4CXX_DEBUG(logger_,
-                        "Field " << *it << " should be saved into the file");
-          are_all_sections_exist = false;
-          break;
-        }
-      }
-
-      if (are_all_sections_exist) {
-        LOG4CXX_DEBUG(logger_,
-                      "All fields are present in the file. No need to update");
-        return true;
-      }
+    if (AreAllFieldsSaved(
+            root_node, interface_name.c_str(), sections_to_update)) {
+      LOG4CXX_DEBUG(
+          logger_,
+          "All " << interface_name
+                 << " fields are present in the file. No need to update");
+      return true;
     }
+
+    LOG4CXX_DEBUG(logger_, "Some fields in the cache file should be updated");
   }
 
-  if (root_node.isNull()) {
-    root_node = Json::Value(Json::objectValue);
-  }
-
-  if (!root_node.isMember("UI")) {
-    root_node["UI"] = Json::Value(Json::objectValue);
-  }
-
-  Json::Value& ui_node = root_node["UI"];
-  if (helpers::in_range(sections_to_update,
-                        hmi_response::display_capabilities)) {
-    save_hmi_capability_field_to_json(hmi_response::display_capabilities,
-                                      schema,
-                                      display_capabilities(),
-                                      ui_node);
-  }
-
-  if (helpers::in_range(sections_to_update,
-                        hmi_response::hmi_zone_capabilities)) {
-    save_hmi_capability_field_to_json(hmi_response::hmi_zone_capabilities,
-                                      schema,
-                                      hmi_zone_capabilities(),
-                                      ui_node);
-  }
-
-  if (helpers::in_range(sections_to_update,
-                        hmi_response::soft_button_capabilities)) {
-    save_hmi_capability_field_to_json(hmi_response::soft_button_capabilities,
-                                      schema,
-                                      soft_button_capabilities(),
-                                      ui_node);
-  }
-
-  if (helpers::in_range(sections_to_update,
-                        strings::audio_pass_thru_capabilities)) {
-    save_hmi_capability_field_to_json(strings::audio_pass_thru_capabilities,
-                                      schema,
-                                      audio_pass_thru_capabilities(),
-                                      ui_node);
-  }
-
-  if (helpers::in_range(sections_to_update, strings::navigation)) {
-    ui_node[strings::hmi_capabilities] = navigation_supported();
-  }
-
-  if (helpers::in_range(sections_to_update, strings::phone_call)) {
-    ui_node[strings::hmi_capabilities] = phone_call_supported();
-  }
-
-  if (helpers::in_range(sections_to_update, strings::video_streaming)) {
-    ui_node[strings::hmi_capabilities] = video_streaming_supported();
-  }
-
-  if (helpers::in_range(sections_to_update, strings::navigation_capability)) {
-    save_hmi_capability_field_to_json(strings::navigation_capability,
-                                      schema,
-                                      navigation_capability(),
-                                      ui_node[strings::system_capabilities]);
-  }
-  if (helpers::in_range(sections_to_update, strings::phone_capability)) {
-    save_hmi_capability_field_to_json(strings::phone_capability,
-                                      schema,
-                                      phone_capability(),
-                                      ui_node[strings::system_capabilities]);
-  }
-  if (helpers::in_range(sections_to_update,
-                        strings::video_streaming_capability)) {
-    save_hmi_capability_field_to_json(strings::video_streaming_capability,
-                                      schema,
-                                      video_streaming_capability(),
-                                      ui_node[strings::system_capabilities]);
-  }
-  if (helpers::in_range(sections_to_update,
-                        strings::system_display_capabilities)) {
-    save_hmi_capability_field_to_json(strings::display_capabilities,
-                                      schema,
-                                      system_display_capabilities(),
-                                      ui_node[strings::system_capabilities]);
-  }
-
-  if (helpers::in_range(sections_to_update, hmi_response::language)) {
-    ui_node[hmi_response::language] =
-        MessageHelper::CommonLanguageToString(active_ui_language());
-  }
-
-  if (helpers::in_range(sections_to_update, hmi_response::languages)) {
-    save_hmi_capability_field_to_json(
-        hmi_response::languages, schema, ui_supported_languages(), ui_node);
-  }
+  PrepareJsonValueForSaving(
+      interface_name.c_str(), sections_to_update, schema, root_node);
 
   LOG4CXX_DEBUG(logger_, "Saving cache to file: " << cache_file_name);
   const std::string content_to_save = root_node.toStyledString();
@@ -1575,7 +1704,7 @@ const std::string& HMICapabilitiesImpl::ccpu_version() const {
 
 bool HMICapabilitiesImpl::check_existing_json_member(
     const Json::Value& json_member, const char* name_of_member) const {
-  return json_member.isMember(name_of_member);
+  return !json_member.isNull() && json_member.isMember(name_of_member);
 }
 
 void HMICapabilitiesImpl::convert_json_languages_to_obj(
