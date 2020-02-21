@@ -38,7 +38,6 @@
 #include "interfaces/HMI_API.h"
 #include "interfaces/MOBILE_API.h"
 #include "json/json.h"
-#include "smart_objects/smart_object.h"
 #include "utils/macro.h"
 
 namespace application_manager {
@@ -233,7 +232,8 @@ class HMICapabilitiesImpl : public HMICapabilities {
       const smart_objects::SmartObject& request) OVERRIDE;
 
   bool SaveCachedCapabilitiesToFile(
-      const std::vector<std::string> sections_to_update,
+      const std::string& interface_name,
+      const std::vector<std::string>& sections_to_update,
       const smart_objects::CSmartSchema& schema) OVERRIDE;
 
   bool DeleteCachedCapabilitiesFile() const OVERRIDE;
@@ -245,45 +245,145 @@ class HMICapabilitiesImpl : public HMICapabilities {
    *
    * @return TRUE if capabilities loaded successfully, otherwise FALSE.
    */
-  bool load_capabilities_from_file();
+  bool LoadCapabilitiesFromFile();
 
-  /*
-   * @brief function checks if json member exists
-   *
-   * @param json_member from file hmi_capabilities.json
-   * @param name_of_member name which we should check
-   *     hmi_capabilities.json
-   *
-   * @returns TRUE if member exists and returns FALSE if
-   * member does not exist.
-   */
-  bool check_existing_json_member(const Json::Value& json_member,
-                                  const char* name_of_member) const OVERRIDE;
-
-  /*
+  /**
    * @brief function converts json object "languages" to smart object
-   *
    * @param json_languages from file hmi_capabilities.json
    * @param languages - the converted object
    *
    */
   void convert_json_languages_to_obj(
       const Json::Value& json_languages,
-      smart_objects::SmartObject& languages) const OVERRIDE;
+      smart_objects::SmartObject& languages) const;
 
-  /*
+  /**
    * @brief function that converts a single entry of audio pass thru capability
    *        to smart object
-   *
    * @param capability json object that represents a single entry of audio pass
    *        thru capability
    * @param output_so the converted object
    */
   void convert_audio_capability_to_obj(
       const Json::Value& capability,
-      smart_objects::SmartObject& output_so) const OVERRIDE;
+      smart_objects::SmartObject& output_so) const;
 
  private:
+  /**
+   * @brief Checks are all updating fields are currently saved in the JSON
+   * structure
+   * @param root_node reference to root node of JSON structure
+   * @param interface_name name of interface to check
+   * @param sections_to_check reference to list of fields to check
+   * @return true if all fields from the list are saved in the JSON structure,
+   * otherwise returns false
+   */
+  bool AllFieldsSaved(const Json::Value& root_node,
+                      const std::string& interface_name,
+                      const std::vector<std::string>& sections_to_check) const;
+
+  /**
+   * @brief Gets the currently active language depending on interface
+   * @param interface_name name of interface of currently active language
+   * @return active language for specified interface
+   *
+   */
+  hmi_apis::Common_Language::eType GetActiveLanguageForInterface(
+      const std::string& interface_name) const;
+
+  /**
+   * @brief Prepares specified JSON structure according to sections which
+   * should be updated
+   * @param interface_name name of interface to prepare
+   * @param sections_to_update reference to list of fields to update
+   * @param schema reference to schema which should be unapplied before field
+   * updating
+   * @param out_root_node reference to JSON structure to update
+   */
+  void PrepareJsonValueForSaving(
+      const char* interface_name,
+      const std::vector<std::string>& sections_to_update,
+      const smart_objects::CSmartSchema& schema,
+      Json::Value& out_root_node) const;
+
+  /**
+   * @brief Prepares specified JSON structure for UI interface according to
+   * sections which should be updated
+   * @param sections_to_update reference to list of fields to update
+   * @param schema reference to schema which should be unapplied before field
+   * updating
+   * @param out_node reference to JSON structure to update
+   */
+  void PrepareUiJsonValueForSaving(
+      const std::vector<std::string>& sections_to_update,
+      const smart_objects::CSmartSchema& schema,
+      Json::Value& out_node) const;
+
+  /**
+   * @brief Prepares specified JSON structure for VR interface according to
+   * sections which should be updated
+   * @param sections_to_update reference to list of fields to update
+   * @param schema reference to schema which should be unapplied before field
+   * updating
+   * @param out_node reference to JSON structure to update
+   */
+  void PrepareVrJsonValueForSaving(
+      const std::vector<std::string>& sections_to_update,
+      const smart_objects::CSmartSchema& schema,
+      Json::Value& out_node) const;
+
+  /**
+   * @brief Prepares specified JSON structure for TTS interface according to
+   * sections which should be updated
+   * @param sections_to_update reference to list of fields to update
+   * @param schema reference to schema which should be unapplied before field
+   * updating
+   * @param out_node reference to JSON structure to update
+   */
+  void PrepareTtsJsonValueForSaving(
+      const std::vector<std::string>& sections_to_update,
+      const smart_objects::CSmartSchema& schema,
+      Json::Value& out_node) const;
+
+  /**
+   * @brief Prepares specified JSON structure for Buttons interface according to
+   * sections which should be updated
+   * @param sections_to_update reference to list of fields to update
+   * @param schema reference to schema which should be unapplied before field
+   * updating
+   * @param out_node reference to JSON structure to update
+   */
+  void PrepareButtonsJsonValueForSaving(
+      const std::vector<std::string>& sections_to_update,
+      const smart_objects::CSmartSchema& schema,
+      Json::Value& out_node) const;
+
+  /**
+   * @brief Prepares specified JSON structure for VehicleInfo interface
+   * according to sections which should be updated
+   * @param sections_to_update reference to list of fields to update
+   * @param schema reference to schema which should be unapplied before field
+   * updating
+   * @param out_node reference to JSON structure to update
+   */
+  void PrepareVehicleInfoJsonValueForSaving(
+      const std::vector<std::string>& sections_to_update,
+      const smart_objects::CSmartSchema& schema,
+      Json::Value& out_node) const;
+
+  /**
+   * @brief Prepares specified JSON structure for RC interface according to
+   * sections which should be updated
+   * @param sections_to_update reference to list of fields to update
+   * @param schema reference to schema which should be unapplied before field
+   * updating
+   * @param out_node reference to JSON structure to update
+   */
+  void PrepareRCJsonValueForSaving(
+      const std::vector<std::string>& sections_to_update,
+      const smart_objects::CSmartSchema& schema,
+      Json::Value& out_node) const;
+
   bool is_vr_cooperating_;
   bool is_tts_cooperating_;
   bool is_ui_cooperating_;
