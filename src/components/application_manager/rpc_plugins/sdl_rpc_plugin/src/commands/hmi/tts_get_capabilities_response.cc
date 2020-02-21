@@ -52,18 +52,35 @@ TTSGetCapabilitiesResponse::~TTSGetCapabilitiesResponse() {}
 
 void TTSGetCapabilitiesResponse::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
+  const hmi_apis::Common_Result::eType result_code =
+      static_cast<hmi_apis::Common_Result::eType>(
+          (*message_)[strings::params][hmi_response::code].asInt());
 
-  HMICapabilities& hmi_capabilities = hmi_capabilities_;
+  if (hmi_apis::Common_Result::SUCCESS != result_code) {
+    LOG4CXX_DEBUG(logger_,
+                  "Request was not successful. Don't change HMI capabilities");
+    return;
+  }
+
+  std::vector<std::string> sections_to_update;
   if ((*message_)[strings::msg_params].keyExists(
           hmi_response::speech_capabilities)) {
-    hmi_capabilities.set_speech_capabilities(
+    sections_to_update.push_back(hmi_response::speech_capabilities);
+    hmi_capabilities_.set_speech_capabilities(
         (*message_)[strings::msg_params][hmi_response::speech_capabilities]);
   }
   if ((*message_)[strings::msg_params].keyExists(
           hmi_response::prerecorded_speech_capabilities)) {
-    hmi_capabilities.set_prerecorded_speech(
+    sections_to_update.push_back(hmi_response::prerecorded_speech_capabilities);
+    hmi_capabilities_.set_prerecorded_speech(
         (*message_)[strings::msg_params]
                    [hmi_response::prerecorded_speech_capabilities]);
+  }
+
+  if (!hmi_capabilities_.SaveCachedCapabilitiesToFile(
+          hmi_interface::tts, sections_to_update, message_->getSchema())) {
+    LOG4CXX_ERROR(logger_,
+                  "Failed to save TTS.GetCapabilities response to cache");
   }
 }
 

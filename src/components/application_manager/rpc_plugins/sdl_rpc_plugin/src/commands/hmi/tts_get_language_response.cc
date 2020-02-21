@@ -56,6 +56,15 @@ void TTSGetLanguageResponse::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
   using namespace hmi_apis;
 
+  const Common_Result::eType result_code = static_cast<Common_Result::eType>(
+      (*message_)[strings::params][hmi_response::code].asInt());
+
+  if (Common_Result::SUCCESS != result_code) {
+    LOG4CXX_DEBUG(logger_,
+                  "Request was not successful. Don't change HMI capabilities");
+    return;
+  }
+
   Common_Language::eType language = Common_Language::INVALID_ENUM;
 
   if ((*message_).keyExists(strings::msg_params) &&
@@ -65,6 +74,13 @@ void TTSGetLanguageResponse::Run() {
   }
 
   hmi_capabilities_.set_active_tts_language(language);
+
+  std::vector<std::string> sections_to_update;
+  sections_to_update.push_back(hmi_response::language);
+  if (!hmi_capabilities_.SaveCachedCapabilitiesToFile(
+          hmi_interface::tts, sections_to_update, message_->getSchema())) {
+    LOG4CXX_DEBUG(logger_, "Failed to save TTS.GetLanguage response to cache");
+  }
 
   LOG4CXX_DEBUG(logger_,
                 "Raising event for function_id " << function_id()

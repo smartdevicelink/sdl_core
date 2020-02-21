@@ -50,10 +50,26 @@ VIGetVehicleTypeResponse::~VIGetVehicleTypeResponse() {}
 void VIGetVehicleTypeResponse::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  HMICapabilities& hmi_capabilities = hmi_capabilities_;
+  const hmi_apis::Common_Result::eType result_code =
+      static_cast<hmi_apis::Common_Result::eType>(
+          (*message_)[strings::params][hmi_response::code].asInt());
 
-  hmi_capabilities.set_vehicle_type(
+  if (hmi_apis::Common_Result::SUCCESS != result_code) {
+    LOG4CXX_DEBUG(logger_,
+                  "Request was not successful. Don't change HMI capabilities");
+    return;
+  }
+
+  std::vector<std::string> sections_to_update;
+  hmi_capabilities_.set_vehicle_type(
       (*message_)[strings::msg_params][hmi_response::vehicle_type]);
+  sections_to_update.push_back(hmi_response::vehicle_type);
+
+  if (!hmi_capabilities_.SaveCachedCapabilitiesToFile(
+          hmi_interface::vr, sections_to_update, message_->getSchema())) {
+    LOG4CXX_ERROR(
+        logger_, "Failed to save VehicleInfo.GetVehicleType response to cache");
+  }
 }
 
 }  // namespace commands
