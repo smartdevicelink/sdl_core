@@ -64,6 +64,15 @@ void VRGetSupportedLanguagesResponse::Run() {
     HMICapabilities& hmi_capabilities = hmi_capabilities_;
     hmi_capabilities.set_vr_supported_languages(
         (*message_)[strings::msg_params][hmi_response::languages]);
+
+    std::vector<std::string> sections_to_update;
+    sections_to_update.push_back(hmi_response::languages);
+    if (!hmi_capabilities_.SaveCachedCapabilitiesToFile(
+            hmi_interface::vr, sections_to_update, message_->getSchema())) {
+      LOG4CXX_ERROR(
+          logger_,
+          "Failed to save TTS.GetSupportedLanguages response to cache");
+    }
   }
 }
 

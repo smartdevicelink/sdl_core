@@ -51,10 +51,13 @@ using testing::ReturnRef;
 
 namespace strings = application_manager::strings;
 namespace hmi_response = application_manager::hmi_response;
+namespace hmi_interface = application_manager::hmi_interface;
 using namespace hmi_apis;
 
 namespace {
 const Common_Language::eType kLanguage = Common_Language::EN_GB;
+const hmi_apis::Common_Result::eType kSuccess =
+    hmi_apis::Common_Result::SUCCESS;
 }  // namespace
 
 class TTSGetLanguageResponseTest
@@ -63,11 +66,15 @@ class TTSGetLanguageResponseTest
 TEST_F(TTSGetLanguageResponseTest, Run_LanguageSet_SUCCESS) {
   MessageSharedPtr msg = CreateMessage();
   (*msg)[strings::msg_params][hmi_response::language] = kLanguage;
+  (*msg)[strings::params][hmi_response::code] = kSuccess;
 
   std::shared_ptr<TTSGetLanguageResponse> command(
       CreateCommand<TTSGetLanguageResponse>(msg));
 
   EXPECT_CALL(mock_hmi_capabilities_, set_active_tts_language(kLanguage));
+
+  EXPECT_CALL(mock_hmi_capabilities_,
+              SaveCachedCapabilitiesToFile(hmi_interface::tts, _, _));
 
   MockEventDispatcher mock_event_dispatcher;
   EXPECT_CALL(app_mngr_, event_dispatcher())
@@ -79,12 +86,16 @@ TEST_F(TTSGetLanguageResponseTest, Run_LanguageSet_SUCCESS) {
 
 TEST_F(TTSGetLanguageResponseTest, Run_LanguageNotSet_SUCCESS) {
   MessageSharedPtr msg = CreateMessage();
+  (*msg)[strings::params][hmi_response::code] = kSuccess;
 
   std::shared_ptr<TTSGetLanguageResponse> command(
       CreateCommand<TTSGetLanguageResponse>(msg));
 
   EXPECT_CALL(mock_hmi_capabilities_,
               set_active_tts_language(Common_Language::INVALID_ENUM));
+
+  EXPECT_CALL(mock_hmi_capabilities_,
+              SaveCachedCapabilitiesToFile(hmi_interface::tts, _, _));
 
   MockEventDispatcher mock_event_dispatcher;
   EXPECT_CALL(app_mngr_, event_dispatcher())

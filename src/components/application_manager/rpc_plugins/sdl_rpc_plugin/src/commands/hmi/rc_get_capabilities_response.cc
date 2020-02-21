@@ -53,13 +53,24 @@ RCGetCapabilitiesResponse::~RCGetCapabilitiesResponse() {}
 void RCGetCapabilitiesResponse::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  HMICapabilities& hmi_capabilities = hmi_capabilities_;
+  const hmi_apis::Common_Result::eType result_code =
+      static_cast<hmi_apis::Common_Result::eType>(
+          (*message_)[strings::params][hmi_response::code].asInt());
+
+  if (hmi_apis::Common_Result::SUCCESS != result_code) {
+    LOG4CXX_DEBUG(logger_,
+                  "Request was not successful. Don't change HMI capabilities");
+    return;
+  }
+
+  std::vector<std::string> sections_to_update;
   bool rc_capability_exists =
       (*message_)[strings::msg_params].keyExists(strings::rc_capability);
 
   if (rc_capability_exists) {
-    hmi_capabilities.set_rc_capability(
+    hmi_capabilities_.set_rc_capability(
         (*message_)[strings::msg_params][strings::rc_capability]);
+    sections_to_update.push_back(strings::rc_capability);
   }
 
   bool seat_location_capability_exists =
@@ -67,11 +78,18 @@ void RCGetCapabilitiesResponse::Run() {
           strings::seat_location_capability);
 
   if (seat_location_capability_exists) {
-    hmi_capabilities.set_seat_location_capability(
+    hmi_capabilities_.set_seat_location_capability(
         (*message_)[strings::msg_params][strings::seat_location_capability]);
+    sections_to_update.push_back(strings::seat_location_capability);
   }
 
-  hmi_capabilities.set_rc_supported(rc_capability_exists);
+  hmi_capabilities_.set_rc_supported(rc_capability_exists);
+
+  if (!hmi_capabilities_.SaveCachedCapabilitiesToFile(
+          hmi_interface::rc, sections_to_update, message_->getSchema())) {
+    LOG4CXX_ERROR(logger_,
+                  "Failed to save RC.GetCapabilities response to cache");
+  }
 }
 
 }  // namespace commands
