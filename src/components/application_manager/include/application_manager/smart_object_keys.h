@@ -480,6 +480,19 @@ extern const char* const x;
 extern const char* const y;
 }  // namespace strings
 
+namespace hmi_interface {
+extern const char* basic_communication;
+extern const char* buttons;
+extern const char* navigation;
+extern const char* sdl;
+extern const char* tts;
+extern const char* ui;
+extern const char* vr;
+extern const char* rc;
+extern const char* vehicle_info;
+extern const char* app_service;
+}  // namespace hmi_interface
+
 namespace json {
 extern const char* appId;
 extern const char* name;
