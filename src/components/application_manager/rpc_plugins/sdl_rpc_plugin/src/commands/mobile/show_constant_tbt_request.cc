@@ -78,10 +78,7 @@ void ShowConstantTBTRequest::Run() {
     return;
   }
 
-  smart_objects::SmartObject msg_params =
-      smart_objects::SmartObject(smart_objects::SmartType_Map);
-  // cppcheck-suppress redundantAssignment
-  msg_params = (*message_)[strings::msg_params];
+  auto msg_params = (*message_)[strings::msg_params];
 
   if (IsWhiteSpaceExist()) {
     LOG4CXX_ERROR(logger_,

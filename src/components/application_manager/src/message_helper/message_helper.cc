@@ -658,10 +658,7 @@ void MessageHelper::SendResetPropertiesRequest(ApplicationSharedPtr application,
   using namespace smart_objects;
 
   {
-    SmartObject msg_params = SmartObject(smart_objects::SmartType_Map);
-
-    // cppcheck-suppress redundantAssignment
-    msg_params = *MessageHelper::CreateAppVrHelp(application);
+    auto msg_params = *MessageHelper::CreateAppVrHelp(application);
     msg_params[hmi_request::menu_title] = "";
 
     smart_objects::SmartObject keyboard_properties =
@@ -1498,9 +1495,6 @@ MessageHelper::CreateAddVRCommandRequestFromChoiceToHMI(
       msg_params[strings::app_id] = app->app_id();
       msg_params[strings::cmd_id] =
           (*(it->second))[strings::choice_set][j][strings::choice_id];
-      msg_params[strings::vr_commands] =
-          smart_objects::SmartObject(smart_objects::SmartType_Array);
-      // cppcheck-suppress redundantAssignment
       msg_params[strings::vr_commands] =
           (*(it->second))[strings::choice_set][j][strings::vr_commands];
       msg_params[strings::type] = hmi_apis::Common_VRCommandType::Choice;

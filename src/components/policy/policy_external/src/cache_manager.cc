@@ -2298,12 +2298,10 @@ bool CacheManager::SetMetaInfo(const std::string& ccpu_version,
 
 bool CacheManager::IsMetaInfoPresent() const {
   CACHE_MANAGER_CHECK(false);
-  bool result = true;
   sync_primitives::AutoLock lock(cache_lock_);
-  // cppcheck-suppress redundantAssignment
-  result = NULL != pt_->policy_table.module_meta->ccpu_version &&
-           NULL != pt_->policy_table.module_meta->wers_country_code &&
-           NULL != pt_->policy_table.module_meta->language;
+  bool result = NULL != pt_->policy_table.module_meta->ccpu_version &&
+                NULL != pt_->policy_table.module_meta->wers_country_code &&
+                NULL != pt_->policy_table.module_meta->language;
   return result;
 }
 

@@ -118,10 +118,7 @@ void SendLocationRequest::Run() {
   }
 
   if (msg_params.keyExists(strings::location_image)) {
-    mobile_apis::Result::eType verification_result =
-        mobile_apis::Result::SUCCESS;
-    // cppcheck-suppress redundantAssignment
-    verification_result = MessageHelper::VerifyImage(
+    mobile_apis::Result::eType verification_result = MessageHelper::VerifyImage(
         (*message_)[strings::msg_params][strings::location_image],
         app,
         application_manager_);
@@ -132,9 +129,7 @@ void SendLocationRequest::Run() {
     }
   }
 
-  SmartObject request_msg_params = SmartObject(smart_objects::SmartType_Map);
-  // cppcheck-suppress redundantAssignment
-  request_msg_params = msg_params;
+  auto request_msg_params = msg_params;
   request_msg_params[strings::app_id] = app->hmi_app_id();
   StartAwaitForInterface(HmiInterfaces::HMI_INTERFACE_Navigation);
   SendHMIRequest(

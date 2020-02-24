@@ -67,11 +67,8 @@ void GetWayPointsRequest::Run() {
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     return;
   }
-  smart_objects::SmartObject msg_params =
-      smart_objects::SmartObject(smart_objects::SmartType_Map);
 
-  // cppcheck-suppress redundantAssignment
-  msg_params = (*message_)[strings::msg_params];
+  auto msg_params = (*message_)[strings::msg_params];
   msg_params[strings::app_id] = app->app_id();
   StartAwaitForInterface(HmiInterfaces::HMI_INTERFACE_Navigation);
   SendHMIRequest(hmi_apis::FunctionID::Navigation_GetWayPoints,

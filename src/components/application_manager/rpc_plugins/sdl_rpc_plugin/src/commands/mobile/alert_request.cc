@@ -409,9 +409,6 @@ void AlertRequest::SendSpeakRequest(int32_t app_id,
   SmartObject msg_params = smart_objects::SmartObject(SmartType_Map);
   if (tts_chunks_exists && length_tts_chunks) {
     msg_params[hmi_request::tts_chunks] =
-        smart_objects::SmartObject(SmartType_Array);
-    // cppcheck-suppress redundantAssignment
-    msg_params[hmi_request::tts_chunks] =
         (*message_)[strings::msg_params][strings::tts_chunks];
   }
   if ((*message_)[strings::msg_params].keyExists(strings::play_tone) &&

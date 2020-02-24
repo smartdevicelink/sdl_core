@@ -290,11 +290,9 @@ std::vector<ApplicationDataPtr> AppLaunchDataDB::GetAppDataByDevMac(
 
 bool AppLaunchDataDB::Clear() {
   LOG4CXX_AUTO_TRACE(logger_);
-  bool retVal = false;
 
   utils::dbms::SQLQuery query(db());
-  // cppcheck-suppress redundantAssignment
-  retVal = query.Exec(kDropSchema);
+  bool retVal = query.Exec(kDropSchema);
 
   if (retVal) {
     LOG4CXX_INFO(logger_, "App_Launch table had been cleared successfully");
