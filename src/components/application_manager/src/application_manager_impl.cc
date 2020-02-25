@@ -3086,18 +3086,24 @@ void ApplicationManagerImpl::UnregisterAllApplications() {
 
 void ApplicationManagerImpl::RemoveAppsWaitingForRegistration(
     const connection_handler::DeviceHandle handle) {
+  LOG4CXX_AUTO_TRACE(logger_);
   DevicePredicate device_finder(handle);
   apps_to_register_list_lock_ptr_->Acquire();
-  AppsWaitRegistrationSet::iterator it_app = std::find_if(
-      apps_to_register_.begin(), apps_to_register_.end(), device_finder);
+  std::vector<ApplicationSharedPtr> apps_to_remove;
+  std::copy_if(apps_to_register_.begin(),
+               apps_to_register_.end(),
+               std::back_inserter(apps_to_remove),
+               device_finder);
 
-  while (apps_to_register_.end() != it_app) {
-    LOG4CXX_DEBUG(
-        logger_,
-        "Waiting app: " << (*it_app)->name().c_str() << " is removed.");
-    apps_to_register_.erase(it_app);
-    it_app = std::find_if(
-        apps_to_register_.begin(), apps_to_register_.end(), device_finder);
+  const auto enabled_local_apps = policy_handler_->GetEnabledLocalApps();
+  for (auto app : apps_to_remove) {
+    const bool is_app_enabled =
+        helpers::in_range(enabled_local_apps, app->policy_app_id());
+    if (!is_app_enabled) {
+      LOG4CXX_DEBUG(logger_,
+                    "Waiting app: " << app->name().c_str() << " is removed.");
+      apps_to_register_.erase(app);
+    }
   }
 
   apps_to_register_list_lock_ptr_->Release();

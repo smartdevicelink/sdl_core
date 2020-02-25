@@ -70,7 +70,8 @@ void WebSocketServerTransportAdapter::TransportConfigUpdated(
   TransportAdapterImpl::TransportConfigUpdated(new_config);
 }
 
-TransportConfig WebSocketServerTransportAdapter::GetTransportConfiguration() const {
+TransportConfig WebSocketServerTransportAdapter::GetTransportConfiguration()
+    const {
   LOG4CXX_AUTO_TRACE(logger_);
   return transport_config_;
 }

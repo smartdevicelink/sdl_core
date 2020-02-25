@@ -31,8 +31,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_WEBSOCKET_SERVER_WEBSOCKET_SECURE_SESSION_H_
 #define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_WEBSOCKET_SERVER_WEBSOCKET_SECURE_SESSION_H_
 
-#include "transport_manager/websocket_server/websocket_session.h"
 #include <memory>
+#include "transport_manager/websocket_server/websocket_session.h"
 
 namespace transport_manager {
 namespace transport_adapter {
