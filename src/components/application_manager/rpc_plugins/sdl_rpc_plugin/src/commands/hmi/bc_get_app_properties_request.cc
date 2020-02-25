@@ -102,13 +102,14 @@ void BCGetAppPropertiesRequest::Run() {
 
   const auto& msg_params = (*message_)[strings::msg_params];
   smart_objects::SmartObject response_params(smart_objects::SmartType_Map);
-  smart_objects::SmartObject properties(smart_objects::SmartType_Map);
 
   if (msg_params.keyExists(strings::policy_app_id)) {
     const auto policy_app_id = msg_params[strings::policy_app_id].asString();
+    smart_objects::SmartObject properties(smart_objects::SmartType_Map);
     FillAppProperties(policy_app_id, properties);
-    response_params[strings::properties][0] = properties;
-
+    if (!properties.empty()) {
+      response_params[strings::properties][0] = properties;
+    }
   } else {
     LOG4CXX_DEBUG(logger_,
                   "policyAppID was absent in request, all apps properties "
@@ -116,12 +117,13 @@ void BCGetAppPropertiesRequest::Run() {
     const auto app_ids = policy_handler_.GetApplicationPolicyIDs();
     int i = 0;
     for (auto& app_id : app_ids) {
+      smart_objects::SmartObject properties(smart_objects::SmartType_Map);
       FillAppProperties(app_id, properties);
       response_params[strings::properties][i++] = properties;
     }
   }
 
-  if (properties.empty()) {
+  if (response_params[strings::properties].empty()) {
     SendErrorResponse(
         (*message_)[strings::params][strings::correlation_id].asUInt(),
         hmi_apis::FunctionID::BasicCommunication_GetAppProperties,
