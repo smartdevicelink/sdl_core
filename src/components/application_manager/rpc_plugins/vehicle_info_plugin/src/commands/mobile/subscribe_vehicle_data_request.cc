@@ -204,17 +204,19 @@ bool SubscribeVehicleDataRequest::SubscribePendingVehicleData(
     ApplicationSharedPtr app, const smart_objects::SmartObject& msg_params) {
   LOG4CXX_DEBUG(logger_, "Subscribing to all pending VehicleData");
 
-  for (const auto& vi_name : vi_waiting_for_subscribe_) {
+  for (auto vi_name = vi_waiting_for_subscribe_.begin();
+       vi_name != vi_waiting_for_subscribe_.end();) {
     const bool is_subscription_successful = CheckSubscriptionStatus(
-        ConvertRequestToResponseName(vi_name), msg_params);
+        ConvertRequestToResponseName(*vi_name), msg_params);
 
     if (is_subscription_successful) {
       auto& ext = VehicleInfoAppExtension::ExtractVIExtension(*app);
-      ext.subscribeToVehicleInfo(vi_name);
-      vi_waiting_for_subscribe_.erase(vi_name);
+      ext.subscribeToVehicleInfo(*vi_name);
+      vi_name = vi_waiting_for_subscribe_.erase(vi_name);
+    } else {
+      ++vi_name;
     }
   }
-
   return vi_waiting_for_subscribe_.empty();
 }
 
