@@ -81,8 +81,12 @@ void VIIsReadyRequest::on_event(const event_engine::Event& event) {
             "HmiInterfaces::HMI_INTERFACE_VehicleInfo isn't available");
         return;
       }
-      SendMessageToHMI();
+      if (hmi_capabilities_.GetInterfacesToUpdate().empty()) {
+        LOG4CXX_INFO(logger_, "All fiels are present in the cache");
+        return;
+      }
 
+      SendMessageToHMI();
       break;
     }
     default: {
@@ -98,11 +102,16 @@ void VIIsReadyRequest::onTimeOut() {
 }
 
 void VIIsReadyRequest::SendMessageToHMI() {
-  std::shared_ptr<smart_objects::SmartObject> get_type(
-      MessageHelper::CreateModuleInfoSO(
-          hmi_apis::FunctionID::VehicleInfo_GetVehicleType,
-          application_manager_));
-  rpc_service_.ManageHMICommand(get_type);
+  const auto interfaces_to_update = hmi_capabilities_.GetInterfacesToUpdate();
+
+  if (helpers::in_range(interfaces_to_update,
+                        hmi_apis::FunctionID::VehicleInfo_GetVehicleType)) {
+    std::shared_ptr<smart_objects::SmartObject> get_type(
+        MessageHelper::CreateModuleInfoSO(
+            hmi_apis::FunctionID::VehicleInfo_GetVehicleType,
+            application_manager_));
+    rpc_service_.ManageHMICommand(get_type);
+  }
 }
 
 }  // namespace commands
