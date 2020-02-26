@@ -88,7 +88,7 @@ void UIGetCapabilitiesResponse::Run() {
 
   // use newer parameter "audioPassThruCapabilitiesList" when available
   if (msg_params.keyExists(strings::audio_pass_thru_capabilities_list)) {
-    sections_to_update.push_back(strings::audio_pass_thru_capabilities_list);
+    sections_to_update.push_back(strings::audio_pass_thru_capabilities);
     hmi_capabilities_.set_audio_pass_thru_capabilities(
         msg_params[strings::audio_pass_thru_capabilities_list]);
   } else if (msg_params.keyExists(strings::audio_pass_thru_capabilities)) {
@@ -96,7 +96,7 @@ void UIGetCapabilitiesResponse::Run() {
         smart_objects::SmartType_Array);
     audio_pass_thru_capabilities_list[0] =
         msg_params[strings::audio_pass_thru_capabilities];
-    sections_to_update.push_back(strings::audio_pass_thru_capabilities_list);
+    sections_to_update.push_back(strings::audio_pass_thru_capabilities);
     hmi_capabilities_.set_audio_pass_thru_capabilities(
         audio_pass_thru_capabilities_list);
   }

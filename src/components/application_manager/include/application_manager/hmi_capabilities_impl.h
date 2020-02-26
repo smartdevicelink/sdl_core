@@ -240,6 +240,9 @@ class HMICapabilitiesImpl : public HMICapabilities {
 
   void DeleteCachedCapabilitiesFile() const OVERRIDE;
 
+  std::vector<hmi_apis::FunctionID::eType> GetInterfacesToUpdate()
+      const OVERRIDE;
+
  protected:
   /**
    * @brief Loads capabilities from local file in case SDL was launched
@@ -462,6 +465,8 @@ class HMICapabilitiesImpl : public HMICapabilities {
 
   ApplicationManager& app_mngr_;
   HMILanguageHandler hmi_language_handler_;
+
+  std::vector<hmi_apis::FunctionID::eType> interfaces_to_update_;
 
   DISALLOW_COPY_AND_ASSIGN(HMICapabilitiesImpl);
 };

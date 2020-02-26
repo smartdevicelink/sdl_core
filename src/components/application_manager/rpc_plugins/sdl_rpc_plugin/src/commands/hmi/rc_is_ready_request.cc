@@ -81,6 +81,14 @@ void RCIsReadyRequest::on_event(const event_engine::Event& event) {
                      "HmiInterfaces::HMI_INTERFACE_RC isn't available");
         return;
       }
+
+      // ilytvynenko ToDo: uncomment code after RC capabilities refactoring is
+      // finish
+      //      if (hmi_capabilities_.GetInterfacesToUpdate().empty()) {
+      //        LOG4CXX_INFO(logger_, "All fiels are present in the cache");
+      //        return;
+      //      }
+
       SendMessageToHMI();
       break;
     }
@@ -97,10 +105,16 @@ void RCIsReadyRequest::onTimeOut() {
 }
 
 void RCIsReadyRequest::SendMessageToHMI() {
+  //  const auto interfaces_to_update =
+  //  hmi_capabilities_.GetInterfacesToUpdate();
+
+  //  if (helpers::in_range(interfaces_to_update,
+  //                        hmi_apis::FunctionID::RC_GetCapabilities)) {
   std::shared_ptr<smart_objects::SmartObject> get_capabilities(
       MessageHelper::CreateModuleInfoSO(
           hmi_apis::FunctionID::RC_GetCapabilities, application_manager_));
   rpc_service_.ManageHMICommand(get_capabilities);
+  //  }
 }
 
 }  // namespace commands
