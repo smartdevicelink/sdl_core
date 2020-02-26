@@ -78,8 +78,9 @@ const std::string kPolicyAppId = "policy_app_id";
 const uint32_t kCorrelationId = 1u;
 const uint32_t kFunctionId = 1u;
 const uint32_t kAppId = 1u;
-const int32_t hmi_protocol_type_ = 1;
-const int32_t mobile_protocol_type_ = 0;
+const int32_t kMobileProtocolType = 0;
+const int32_t kProtocolVersion = 1;
+const int32_t kConnectionSessionsCount = 2;
 }  // namespace
 
 class RPCServiceImplTest : public ::testing::Test {
@@ -113,7 +114,7 @@ class RPCServiceImplTest : public ::testing::Test {
     (*message)[am::strings::params][am::strings::correlation_id] =
         kCorrelationId;
     (*message)[am::strings::params][am::strings::protocol_type] =
-        static_cast<int>(am::commands::CommandImpl::mobile_protocol_type_);
+        kMobileProtocolType;
     (*message)[am::strings::params][am::strings::connection_key] =
         kConnectionKey;
   }
@@ -202,7 +203,7 @@ TEST_F(RPCServiceImplTest,
   (*message)[am::strings::params][am::strings::connection_key] = kConnectionKey;
   (*message)[am::strings::params][am::strings::function_id] = kFunctionId;
   (*message)[am::strings::params][am::strings::protocol_type] =
-      mobile_protocol_type_;
+      kMobileProtocolType;
 
   ON_CALL(mock_app_mngr_, IsLowVoltage()).WillByDefault(Return(false));
   mock_app_ptr_ = std::make_shared<NiceMock<MockApplication> >();
@@ -415,6 +416,7 @@ TEST_F(RPCServiceImplTest,
 TEST_F(RPCServiceImplTest,
        UpdateMobileRPCParams_FunctionSchemaIsResettedAndAddedCustomMember) {
   using namespace ns_smart_device_link::ns_smart_objects;
+
   // Get initial state of schema
   auto function_id = mobile_apis::FunctionID::OnHMIStatusID;
   auto message_type = mobile_apis::messageType::notification;
@@ -435,6 +437,7 @@ TEST_F(RPCServiceImplTest,
   CSmartSchema initial_schema;
   extended_mobile_api.GetSchema(function_id, message_type, initial_schema);
   auto initial_schema_item = initial_schema.getSchemaItem();
+
   // Change state of schema and add custom parameter
   auto new_function_id = mobile_apis::FunctionID::OnButtonEventID;
   std::map<std::string, SMember> members;
@@ -443,14 +446,15 @@ TEST_F(RPCServiceImplTest,
       new_function_id, message_type, members);
   CSmartSchema updated_schema;
   extended_mobile_api.GetSchema(new_function_id, message_type, updated_schema);
-  // Check that schema is changed
 
+  // Check that schema is changed
   EXPECT_NE(initial_schema_item, updated_schema.getSchemaItem());
 }
 
 TEST_F(RPCServiceImplTest,
        UpdateHMIRPCParams_FunctionSchemaIsResettedAndAddedCustomMember) {
   using namespace ns_smart_device_link::ns_smart_objects;
+
   // Get initial state of schema
   auto function_id = hmi_apis::FunctionID::Buttons_OnButtonEvent;
   auto message_type = hmi_apis::messageType::notification;
@@ -471,6 +475,7 @@ TEST_F(RPCServiceImplTest,
   CSmartSchema initial_schema;
   extended_hmi_api.GetSchema(function_id, message_type, initial_schema);
   auto initial_schema_item = initial_schema.getSchemaItem();
+
   // Change state of schema and add custom parameter
   auto new_function_id = hmi_apis::FunctionID::Buttons_OnButtonPress;
   std::map<std::string, SMember> members;
@@ -479,8 +484,8 @@ TEST_F(RPCServiceImplTest,
       function_id, message_type, members);
   CSmartSchema updated_schema;
   extended_hmi_api.GetSchema(new_function_id, message_type, updated_schema);
-  // Check that schema is changed
 
+  // Check that schema is changed
   EXPECT_NE(initial_schema_item, updated_schema.getSchemaItem());
 }
 
@@ -636,7 +641,7 @@ TEST_F(RPCServiceImplTest, Handle_HappyPathWithoutClosingSession) {
   message_to_send->set_connection_key(kConnectionKey);
   message_to_send->set_correlation_id(kCorrelationId);
   message_to_send->set_function_id(kFunctionId);
-  message_to_send->set_message_type(static_cast<am::MessageType>(2));
+  message_to_send->set_message_type(am::MessageType::kNotification);
   message_to_send->set_json_message(std::string("message"));
 
   EXPECT_CALL(mock_protocol_handler_, IsRPCServiceSecure(kConnectionKey))
@@ -670,7 +675,7 @@ TEST_F(RPCServiceImplTest, Handle_HappyPathWithClosedSession) {
   message_to_send->set_connection_key(kConnectionKey);
   message_to_send->set_correlation_id(kCorrelationId);
   message_to_send->set_function_id(kFunctionId);
-  message_to_send->set_message_type(static_cast<am::MessageType>(2));
+  message_to_send->set_message_type(am::MessageType::kNotification);
   message_to_send->set_json_message(std::string("message"));
 
   NiceMock<test::components::connection_handler_test::MockConnectionHandler>
@@ -678,7 +683,7 @@ TEST_F(RPCServiceImplTest, Handle_HappyPathWithClosedSession) {
   EXPECT_CALL(mock_app_mngr_, connection_handler())
       .WillRepeatedly(ReturnRef(mock_conn_handler));
   ON_CALL(mock_conn_handler, GetConnectionSessionsCount(_))
-      .WillByDefault(Return(2));
+      .WillByDefault(Return(kConnectionSessionsCount));
   ON_CALL(mock_protocol_handler_, IsRPCServiceSecure(_))
       .WillByDefault(Return(true));
   ON_CALL(mock_app_mngr_, application(_)).WillByDefault(Return(nullptr));
@@ -712,8 +717,8 @@ TEST_F(RPCServiceImplTest, SendMessageToMobile_HappyPath) {
   (*message)[jhs::S_PARAMS][jhs::S_FUNCTION_ID] = func_id;
   (*message)[jhs::S_PARAMS][jhs::S_MESSAGE_TYPE] =
       mobile_apis::messageType::request;
-  (*message)[jhs::S_PARAMS][jhs::S_PROTOCOL_TYPE] = mobile_protocol_type_;
-  (*message)[jhs::S_PARAMS][jhs::S_PROTOCOL_VERSION] = 1;
+  (*message)[jhs::S_PARAMS][jhs::S_PROTOCOL_TYPE] = kMobileProtocolType;
+  (*message)[jhs::S_PARAMS][jhs::S_PROTOCOL_VERSION] = kProtocolVersion;
 
   mock_app_ptr_ = std::make_shared<NiceMock<MockApplication> >();
   ON_CALL(mock_app_mngr_, application(kConnectionKey))
@@ -779,8 +784,8 @@ TEST_F(RPCServiceImplTest,
   (*message)[jhs::S_PARAMS][jhs::S_FUNCTION_ID] = func_id;
   (*message)[jhs::S_PARAMS][jhs::S_MESSAGE_TYPE] =
       mobile_apis::messageType::request;
-  (*message)[jhs::S_PARAMS][jhs::S_PROTOCOL_TYPE] = mobile_protocol_type_;
-  (*message)[jhs::S_PARAMS][jhs::S_PROTOCOL_VERSION] = 1;
+  (*message)[jhs::S_PARAMS][jhs::S_PROTOCOL_TYPE] = kMobileProtocolType;
+  (*message)[jhs::S_PARAMS][jhs::S_PROTOCOL_VERSION] = kProtocolVersion;
 
   mock_app_ptr_ = std::make_shared<NiceMock<MockApplication> >();
   ON_CALL(mock_app_mngr_, application(kConnectionKey))
