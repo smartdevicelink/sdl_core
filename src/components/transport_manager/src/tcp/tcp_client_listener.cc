@@ -300,13 +300,13 @@ void TcpClientListener::Loop() {
       const auto device_uid =
           device_name + std::string(":") + std::to_string(port_);
 
-#if defined(BUILD_TESTS)
+#if defined(ENABLE_IAP2EMULATION)
       auto tcp_device = std::make_shared<TcpDevice>(
           client_address.sin_addr.s_addr, device_uid, device_name);
 #else
       auto tcp_device = std::make_shared<TcpDevice>(
           client_address.sin_addr.s_addr, device_uid);
-#endif  // BUILD_TESTS
+#endif  // ENABLE_IAP2EMULATION
 
       DeviceSptr device = controller_->AddDevice(tcp_device);
       auto tcp_device_raw = static_cast<TcpDevice*>(device.get());

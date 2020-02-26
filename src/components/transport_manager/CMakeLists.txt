@@ -118,8 +118,8 @@ elseif(NOT ENABLE_SECURITY)
   )
 endif()
 
-if(NOT BUILD_TESTS)
-  list (APPEND EXCLUDE_PATH
+if(NOT ENABLE_IAP2EMULATION)
+  list (APPEND EXCLUDE_PATHS
     ${CMAKE_CURRENT_SOURCE_DIR}/include/iap2_emulation/iap2_transport_adapter.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/iap2_emulation/iap2_transport_adapter.cc
   )

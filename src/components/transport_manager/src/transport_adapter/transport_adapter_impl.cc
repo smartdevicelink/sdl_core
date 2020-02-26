@@ -74,7 +74,7 @@ TransportAdapterImpl::TransportAdapterImpl(
     DeviceScanner* device_scanner,
     ServerConnectionFactory* server_connection_factory,
     ClientConnectionListener* client_connection_listener,
-    resumption::LastState& last_state,
+    resumption::LastStateWrapperPtr last_state_wrapper,
     const TransportManagerSettings& settings)
     : listeners_()
     , initialised_(0)
@@ -90,7 +90,7 @@ TransportAdapterImpl::TransportAdapterImpl(
     device_scanner_(device_scanner)
     , server_connection_factory_(server_connection_factory)
     , client_connection_listener_(client_connection_listener)
-    , last_state_(last_state)
+    , last_state_wrapper_(last_state_wrapper)
     , settings_(settings) {
 }
 

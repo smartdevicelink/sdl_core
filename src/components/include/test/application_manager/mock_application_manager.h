@@ -55,7 +55,7 @@
 #include "application_manager/state_controller.h"
 #include "interfaces/HMI_API.h"
 #include "interfaces/MOBILE_API.h"
-#include "resumption/last_state.h"
+#include "resumption/last_state_wrapper.h"
 #include "smart_objects/smart_object.h"
 
 namespace test {
@@ -65,6 +65,10 @@ using application_manager::plugin_manager::RPCPluginManager;
 
 class MockApplicationManager : public application_manager::ApplicationManager {
  public:
+  MOCK_METHOD2(Init,
+               bool(resumption::LastStateWrapperPtr last_state,
+                    media_manager::MediaManager* media_manager));
+  DEPRECATED
   MOCK_METHOD2(Init,
                bool(resumption::LastState& last_state,
                     media_manager::MediaManager* media_manager));

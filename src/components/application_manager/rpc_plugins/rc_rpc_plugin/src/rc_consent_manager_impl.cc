@@ -48,7 +48,7 @@ namespace app_mngr = application_manager;
 CREATE_LOGGERPTR_GLOBAL(logger_, "RCConsentManager")
 
 RCConsentManagerImpl::RCConsentManagerImpl(
-    resumption::LastState& last_state,
+    resumption::LastStateWrapperPtr last_state,
     application_manager::ApplicationManager& application_manager,
     const uint32_t period_of_consent_expired)
     : app_manager_(application_manager)
@@ -64,20 +64,31 @@ void RCConsentManagerImpl::SaveModuleConsents(
   for (const auto& consent : module_consents) {
     std::string module_type = consent.module_id.first;
 
-    auto& app_module_consents =
-        GetModuleTypeConsentsOrAppend(policy_app_id, mac_address, module_type);
+    auto last_state_accessor = last_state_->get_accessor();
+    auto last_state_dictionary = last_state_accessor.GetData().dictionary();
+
+    auto& app_module_consents = GetModuleTypeConsentsOrAppend(
+        policy_app_id, mac_address, module_type, last_state_dictionary);
     SaveAppModuleConsent(app_module_consents, consent);
+
+    last_state_accessor.GetMutableData().set_dictionary(last_state_dictionary);
   }
 }
 
 rc_rpc_types::ModuleConsent RCConsentManagerImpl::GetModuleConsent(
     const std::string& app_id,
     const std::string& mac_address,
-    const rc_rpc_types::ModuleUid& module_id) const {
+    const rc_rpc_types::ModuleUid& module_id) {
   sync_primitives::AutoLock autolock(module_consents_lock_);
 
-  auto& module_consents =
-      GetModuleTypeConsentsOrAppend(app_id, mac_address, module_id.first);
+  auto last_state_accessor = last_state_->get_accessor();
+  auto last_state_dictionary = last_state_accessor.GetData().dictionary();
+
+  auto& module_consents = GetModuleTypeConsentsOrAppend(
+      app_id, mac_address, module_id.first, last_state_dictionary);
+
+  last_state_accessor.GetMutableData().set_dictionary(last_state_dictionary);
+
   if (module_consents.empty()) {
     LOG4CXX_DEBUG(
         logger_,
@@ -102,23 +113,35 @@ rc_rpc_types::ModuleConsent RCConsentManagerImpl::GetModuleConsent(
 
 void RCConsentManagerImpl::RemoveExpiredConsents() {
   LOG4CXX_AUTO_TRACE(logger_);
-  auto& remote_control = GetRemoteControlDataOrAppend();
+
+  auto last_state_accessor = last_state_->get_accessor();
+  auto last_state_dictionary = last_state_accessor.GetData().dictionary();
+
+  auto& remote_control = GetRemoteControlDataOrAppend(last_state_dictionary);
   if (remote_control.empty()) {
+    last_state_accessor.GetMutableData().set_dictionary(last_state_dictionary);
     return;
   }
 
-  auto& devices = GetAppsConsentsOrAppend();
+  auto& devices = GetAppsConsentsOrAppend(last_state_dictionary);
 
   sync_primitives::AutoLock autolock(device_applications_lock_);
 
   for (auto& device_item : devices) {
     RemoveDeviceExpiredConsents(device_item);
   }
+
+  last_state_accessor.GetMutableData().set_dictionary(last_state_dictionary);
 }
 
 void RCConsentManagerImpl::RemoveAllConsents() {
-  auto& remote_control = GetRemoteControlDataOrAppend();
+  auto last_state_accessor = last_state_->get_accessor();
+  auto last_state_dictionary = last_state_accessor.GetData().dictionary();
+
+  auto& remote_control = GetRemoteControlDataOrAppend(last_state_dictionary);
   remote_control.removeMember(message_params::kAppConsents);
+
+  last_state_accessor.GetMutableData().set_dictionary(last_state_dictionary);
 }
 
 rc_rpc_types::ModuleConsentState RCConsentManagerImpl::CheckModuleConsentState(
@@ -203,17 +226,17 @@ void RCConsentManagerImpl::RemoveModuleExpiredConsents(
   }
 }
 
-Json::Value& RCConsentManagerImpl::GetRemoteControlDataOrAppend() const {
-  Json::Value& dictionary = last_state_.get_dictionary();
-
+Json::Value& RCConsentManagerImpl::GetRemoteControlDataOrAppend(
+    Json::Value& last_state_data) {
   sync_primitives::AutoLock autolock(dictionary_control_lock_);
-  if (!dictionary.isMember(app_mngr::strings::remote_control)) {
-    dictionary[app_mngr::strings::remote_control] =
+  if (!last_state_data.isMember(app_mngr::strings::remote_control)) {
+    last_state_data[app_mngr::strings::remote_control] =
         Json::Value(Json::objectValue);
     LOG4CXX_DEBUG(logger_, "remote_control section is missed");
   }
 
-  Json::Value& remote_control = dictionary[app_mngr::strings::remote_control];
+  Json::Value& remote_control =
+      last_state_data[app_mngr::strings::remote_control];
 
   if (!remote_control.isObject()) {
     LOG4CXX_ERROR(logger_, "remote_control type INVALID rewrite");
@@ -223,10 +246,10 @@ Json::Value& RCConsentManagerImpl::GetRemoteControlDataOrAppend() const {
 }
 
 Json::Value& RCConsentManagerImpl::GetDeviceApplicationsOrAppend(
-    const std::string& mac_address) const {
+    const std::string& mac_address, Json::Value& last_state_data) {
   sync_primitives::AutoLock autolock(device_applications_lock_);
 
-  auto& apps_consents = GetAppsConsentsOrAppend();
+  auto& apps_consents = GetAppsConsentsOrAppend(last_state_data);
 
   if (!apps_consents.isArray()) {
     LOG4CXX_DEBUG(logger_, "applications_consents type INVALID rewrite");
@@ -257,8 +280,11 @@ Json::Value& RCConsentManagerImpl::GetDeviceApplicationsOrAppend(
 }
 
 Json::Value& RCConsentManagerImpl::GetAppConsentsListOrAppend(
-    const std::string& policy_app_id, const std::string& mac_address) const {
-  auto& device_applications = GetDeviceApplicationsOrAppend(mac_address);
+    const std::string& policy_app_id,
+    const std::string& mac_address,
+    Json::Value& last_state_data) {
+  auto& device_applications =
+      GetDeviceApplicationsOrAppend(mac_address, last_state_data);
 
   sync_primitives::AutoLock autolock(applications_lock_);
   if (!device_applications.isArray()) {
@@ -291,8 +317,9 @@ Json::Value& RCConsentManagerImpl::GetAppConsentsListOrAppend(
                             [message_params::kAppConsentList];
 }
 
-Json::Value& RCConsentManagerImpl::GetAppsConsentsOrAppend() const {
-  Json::Value& remote_control = GetRemoteControlDataOrAppend();
+Json::Value& RCConsentManagerImpl::GetAppsConsentsOrAppend(
+    Json::Value& last_state_data) {
+  Json::Value& remote_control = GetRemoteControlDataOrAppend(last_state_data);
   sync_primitives::AutoLock autolock(remote_control_lock_);
 
   if (!remote_control.isMember(message_params::kAppConsents)) {
@@ -312,12 +339,13 @@ Json::Value& RCConsentManagerImpl::GetAppsConsentsOrAppend() const {
 Json::Value& RCConsentManagerImpl::GetModuleTypeConsentsOrAppend(
     const std::string& policy_app_id,
     const std::string& mac_address,
-    const std::string& module_type) const {
-  auto& app_consnets_list =
-      GetAppConsentsListOrAppend(policy_app_id, mac_address);
+    const std::string& module_type,
+    Json::Value& last_state_data) {
+  auto& app_consents_list =
+      GetAppConsentsListOrAppend(policy_app_id, mac_address, last_state_data);
 
   sync_primitives::AutoLock autolock(app_consents_lock_);
-  for (auto& module_consents : app_consnets_list) {
+  for (auto& module_consents : app_consents_list) {
     const bool module_exists =
         module_consents.isMember(message_params::kModuleType);
 
@@ -338,10 +366,10 @@ Json::Value& RCConsentManagerImpl::GetModuleTypeConsentsOrAppend(
   consent_item[message_params::kModuleType] = module_type;
   consent_item[message_params::kModuleConsents] = Json::Value(Json::arrayValue);
 
-  app_consnets_list.append(consent_item);
+  app_consents_list.append(consent_item);
 
   // Returns last (appended) object
-  return app_consnets_list[app_consnets_list.size() - 1]
+  return app_consents_list[app_consents_list.size() - 1]
                           [message_params::kModuleConsents];
 }
 

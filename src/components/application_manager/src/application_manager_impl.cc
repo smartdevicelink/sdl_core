@@ -1660,12 +1660,13 @@ void ApplicationManagerImpl::OnDeviceSwitchingStart(
     const connection_handler::Device& device_from,
     const connection_handler::Device& device_to) {
   LOG4CXX_AUTO_TRACE(logger_);
+  ReregisterWaitList wait_list;
   {
     auto apps_data_accessor = applications();
 
     std::copy_if(apps_data_accessor.GetData().begin(),
                  apps_data_accessor.GetData().end(),
-                 std::back_inserter(reregister_wait_list_),
+                 std::back_inserter(wait_list),
                  std::bind1st(std::ptr_fun(&device_id_comparator),
                               device_from.mac_address()));
   }
@@ -1674,13 +1675,14 @@ void ApplicationManagerImpl::OnDeviceSwitchingStart(
     // During sending of UpdateDeviceList this lock is acquired also so making
     // it scoped
     sync_primitives::AutoLock lock(reregister_wait_list_lock_ptr_);
-    for (auto i = reregister_wait_list_.begin();
-         reregister_wait_list_.end() != i;
-         ++i) {
-      auto app = *i;
-      request_ctrl_.terminateAppRequests(app->app_id());
-      resume_ctrl_->SaveApplication(app);
-    }
+    std::copy(wait_list.begin(),
+              wait_list.end(),
+              std::back_inserter(reregister_wait_list_));
+  }
+
+  for (const auto& app : wait_list) {
+    request_ctrl_.terminateAppRequests(app->app_id());
+    resume_ctrl_->SaveApplication(app);
   }
 
   policy_handler_->OnDeviceSwitching(device_from.mac_address(),
@@ -1691,20 +1693,22 @@ void ApplicationManagerImpl::OnDeviceSwitchingFinish(
     const std::string& device_uid) {
   LOG4CXX_AUTO_TRACE(logger_);
   UNUSED(device_uid);
-  sync_primitives::AutoLock lock(reregister_wait_list_lock_ptr_);
+
+  ReregisterWaitList wait_list;
+  {
+    sync_primitives::AutoLock lock(reregister_wait_list_lock_ptr_);
+    wait_list.swap(reregister_wait_list_);
+  }
 
   const bool unexpected_disonnect = true;
   const bool is_resuming = true;
-  for (auto app_it = reregister_wait_list_.begin();
-       app_it != reregister_wait_list_.end();
-       ++app_it) {
-    auto app = *app_it;
+
+  for (const auto& app : wait_list) {
     UnregisterApplication(app->app_id(),
                           mobile_apis::Result::INVALID_ENUM,
                           is_resuming,
                           unexpected_disonnect);
   }
-  reregister_wait_list_.clear();
 }
 
 void ApplicationManagerImpl::SwitchApplication(ApplicationSharedPtr app,
@@ -1888,6 +1892,25 @@ bool ApplicationManagerImpl::StartNaviService(
       }
     }
 
+    {
+      /* Fix: For NaviApp1 Switch to NaviApp2, App1's Endcallback() arrives
+       later than App2's Startcallback(). Cause streaming issue on HMI.
+      */
+      sync_primitives::AutoLock lock(applications_list_lock_ptr_);
+      for (auto app : applications_) {
+        if (!app || (!app->is_navi() && !app->mobile_projection_enabled())) {
+          LOG4CXX_DEBUG(logger_,
+                        "Continue, Not Navi App Id: " << app->app_id());
+          continue;
+        }
+        LOG4CXX_DEBUG(logger_,
+                      "Abort Stream Service of other NaviAppId: "
+                          << app->app_id()
+                          << " Service_type: " << service_type);
+        StopNaviService(app->app_id(), service_type);
+      }
+    }
+
     if (service_type == ServiceType::kMobileNav) {
       smart_objects::SmartObject converted_params(smart_objects::SmartType_Map);
       ConvertVideoParamsToSO(converted_params, params);
@@ -1991,10 +2014,27 @@ void ApplicationManagerImpl::StopNaviService(
     if (navi_service_status_.end() == it) {
       LOG4CXX_WARN(logger_,
                    "No Information about navi service " << service_type);
+      // Fix: Need return for Not navi service at now
+      return;
     } else {
+      // Fix: Repeated tests are not executed after they have stopped for Navi
+      if (false == it->second.first &&
+          ServiceType::kMobileNav == service_type) {
+        LOG4CXX_DEBUG(logger_, "appId: " << app_id << "Navi had stopped");
+        return;
+      }
+
+      // Fix: Repeated tests are not executed after they have stopped for Audio
+      if (false == it->second.second && ServiceType::kAudio == service_type) {
+        LOG4CXX_DEBUG(logger_, "appId: " << app_id << "Audio had stopped");
+        return;
+      }
       // Fill NaviServices map. Set false to first value of pair if
       // we've stopped video service or to second value if we've
       // stopped audio service
+      LOG4CXX_DEBUG(logger_,
+                    "appId: " << app_id << " service_type: " << service_type
+                              << " to stopped");
       service_type == ServiceType::kMobileNav ? it->second.first = false
                                               : it->second.second = false;
     }
@@ -2405,11 +2445,21 @@ void ApplicationManagerImpl::RemoveHMIFakeParameters(
   (*message)[jhs::S_PARAMS][jhs::S_FUNCTION_ID] = mobile_function_id;
 }
 
-bool ApplicationManagerImpl::Init(resumption::LastState& last_state,
-                                  media_manager::MediaManager* media_manager) {
+bool ApplicationManagerImpl::Init(resumption::LastState&,
+                                  media_manager::MediaManager*) {
+  return false;
+}
+
+bool ApplicationManagerImpl::Init(
+    resumption::LastStateWrapperPtr last_state_wrapper,
+    media_manager::MediaManager* media_manager) {
   LOG4CXX_TRACE(logger_, "Init application manager");
-  plugin_manager_.reset(new plugin_manager::RPCPluginManagerImpl(
-      *this, *rpc_service_, *hmi_capabilities_, *policy_handler_, last_state));
+  plugin_manager_.reset(
+      new plugin_manager::RPCPluginManagerImpl(*this,
+                                               *rpc_service_,
+                                               *hmi_capabilities_,
+                                               *policy_handler_,
+                                               last_state_wrapper));
   if (!plugin_manager_->LoadPlugins(get_settings().plugins_folder())) {
     LOG4CXX_ERROR(logger_, "Plugins are not loaded");
     return false;
@@ -2419,11 +2469,11 @@ bool ApplicationManagerImpl::Init(resumption::LastState& last_state,
       !IsReadWriteAllowed(app_storage_folder, TYPE_STORAGE)) {
     return false;
   }
-  if (!resume_controller().Init(last_state)) {
+  if (!resume_controller().Init(last_state_wrapper)) {
     LOG4CXX_ERROR(logger_, "Problem with initialization of resume controller");
     return false;
   }
-  hmi_capabilities_->Init(&last_state);
+  hmi_capabilities_->Init(last_state_wrapper);
 
   if (!(file_system::IsWritingAllowed(app_storage_folder) &&
         file_system::IsReadingAllowed(app_storage_folder))) {
@@ -2465,13 +2515,13 @@ bool ApplicationManagerImpl::Init(resumption::LastState& last_state,
     app_launch_dto_.reset(new app_launch::AppLaunchDataDB(settings_));
   } else {
     app_launch_dto_.reset(
-        new app_launch::AppLaunchDataJson(settings_, last_state));
+        new app_launch::AppLaunchDataJson(settings_, last_state_wrapper));
   }
   app_launch_ctrl_.reset(new app_launch::AppLaunchCtrlImpl(
       *app_launch_dto_.get(), *this, settings_));
 
   app_service_manager_.reset(
-      new application_manager::AppServiceManager(*this, last_state));
+      new application_manager::AppServiceManager(*this, last_state_wrapper));
 
   auto on_app_policy_updated = [](plugin_manager::RPCPlugin& plugin) {
     plugin.OnPolicyEvent(plugin_manager::kApplicationPolicyUpdated);

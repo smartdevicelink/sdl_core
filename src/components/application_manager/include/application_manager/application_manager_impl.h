@@ -158,10 +158,14 @@ class ApplicationManagerImpl
                          const policy::PolicySettings& policy_settings);
   ~ApplicationManagerImpl();
 
+  DEPRECATED
+  bool Init(resumption::LastState&,
+            media_manager::MediaManager* media_manager) OVERRIDE;
+
   /**
    * Inits application manager
    */
-  bool Init(resumption::LastState& last_state,
+  bool Init(resumption::LastStateWrapperPtr last_state_wrapper,
             media_manager::MediaManager* media_manager) OVERRIDE;
 
   /**

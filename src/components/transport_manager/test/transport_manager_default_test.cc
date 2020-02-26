@@ -32,6 +32,7 @@
 
 #include "transport_manager/transport_manager_default.h"
 #include "gtest/gtest.h"
+#include "resumption/last_state_wrapper_impl.h"
 #include "resumption/mock_last_state.h"
 #include "transport_manager/bt/mock_bluetooth_transport_adapter.h"
 #include "transport_manager/cloud/mock_cloud_websocket_transport_adapter.h"
@@ -92,10 +93,13 @@ class TestTransportManagerDefault : public ::testing::Test {
  public:
   TestTransportManagerDefault()
       : transport_manager_settings_()
+      , mock_last_state_(std::make_shared<MockLastState>())
       , unique_tcp_dev_name_("unique_tcp_device_name")
       , dev_id_("device_id")
       , tcp_adapter_port_(1u)
-      , network_interface_("test_iface") {}
+      , network_interface_("test_iface")
+      , last_state_wrapper_(std::make_shared<resumption::LastStateWrapperImpl>(
+            mock_last_state_)) {}
 
   void SetUp() OVERRIDE {
     EXPECT_CALL(transport_manager_settings_,
@@ -106,43 +110,45 @@ class TestTransportManagerDefault : public ::testing::Test {
     // to be able to check related function calls
     mock_bt_ta_ = new MockBluetoothTransportAdapter();
     mock_tcp_ta_ = new MockTCPTransportAdapter(
-        tcp_adapter_port_, mock_last_state_, transport_manager_settings_);
+        tcp_adapter_port_, last_state_wrapper_, transport_manager_settings_);
     mock_usb_aoa_ta_ =
-        new MockUsbAoaAdapter(mock_last_state_, transport_manager_settings_);
+        new MockUsbAoaAdapter(last_state_wrapper_, transport_manager_settings_);
     mock_cloud_websocket_ta_ = new MockCloudWebsocketTransportAdapter(
-        mock_last_state_, transport_manager_settings_);
+        last_state_wrapper_, transport_manager_settings_);
 
     TransportAdapterFactory ta_factory;
 #ifdef BLUETOOTH_SUPPORT
     ta_factory.ta_bluetooth_creator_ =
-        [&](resumption::LastState& last_state,
+        [&](resumption::LastStateWrapperPtr& last_state_wrapper,
             const TransportManagerSettings& settings) {
-          UNUSED(last_state);
+          UNUSED(last_state_wrapper);
           UNUSED(settings);
           return mock_bt_ta_;
         };
 #endif
-    ta_factory.ta_tcp_creator_ = [&](const uint16_t port,
-                                     resumption::LastState& last_state,
-                                     const TransportManagerSettings& settings) {
-      UNUSED(port);
-      UNUSED(last_state);
-      UNUSED(settings);
-      return mock_tcp_ta_;
-    };
+    ta_factory.ta_tcp_creator_ =
+        [&](const uint16_t port,
+            resumption::LastStateWrapperPtr& last_state_wrapper,
+            const TransportManagerSettings& settings) {
+          UNUSED(port);
+          UNUSED(last_state_wrapper);
+          UNUSED(settings);
+          return mock_tcp_ta_;
+        };
 #if defined(USB_SUPPORT)
-    ta_factory.ta_usb_creator_ = [&](resumption::LastState& last_state,
-                                     const TransportManagerSettings& settings) {
-      UNUSED(last_state);
-      UNUSED(settings);
-      return mock_usb_aoa_ta_;
-    };
+    ta_factory.ta_usb_creator_ =
+        [&](resumption::LastStateWrapperPtr& last_state_wrapper,
+            const TransportManagerSettings& settings) {
+          UNUSED(last_state_wrapper);
+          UNUSED(settings);
+          return mock_usb_aoa_ta_;
+        };
 #endif
 #if defined(CLOUD_APP_WEBSOCKET_TRANSPORT_SUPPORT)
     ta_factory.ta_cloud_creator_ =
-        [&](resumption::LastState& last_state,
+        [&](resumption::LastStateWrapperPtr& last_state_wrapper,
             const TransportManagerSettings& settings) {
-          UNUSED(last_state);
+          UNUSED(last_state_wrapper);
           UNUSED(settings);
           return mock_cloud_websocket_ta_;
         };
@@ -172,6 +178,7 @@ class TestTransportManagerDefault : public ::testing::Test {
   MockTCPTransportAdapter* mock_tcp_ta_;
   MockUsbAoaAdapter* mock_usb_aoa_ta_;
   MockCloudWebsocketTransportAdapter* mock_cloud_websocket_ta_;
+  std::shared_ptr<resumption::LastStateWrapperImpl> last_state_wrapper_;
 };
 
 void TestTransportManagerDefault::ExpectationsSettings_TM(
@@ -191,7 +198,7 @@ void TestTransportManagerDefault::ExpectationsSettings_TM(
   custom_dictionary_[kTransportManager][kTcpAdapter][kDevices][0] = tcp_device;
   custom_dictionary_[kTransportManager][kBluetoothAdapter][kDevices][0] =
       bluetooth_device;
-  ON_CALL(transport_manager_settings_, websocket_server_port())
+ ON_CALL(transport_manager_settings_, websocket_server_port())
       .WillByDefault(Return(kPort));
   ON_CALL(transport_manager_settings_, websocket_server_address())
       .WillByDefault(ReturnRef(kAddress));
@@ -201,6 +208,8 @@ void TestTransportManagerDefault::ExpectationsSettings_TM(
       .WillByDefault(ReturnRef(kWSServerKeyPathKey));
   ON_CALL(transport_manager_settings_, ws_server_ca_cert_path())
       .WillByDefault(ReturnRef(kWSServerCACertPath));
+  ON_CALL(mock_last_state_, dictionary())
+      .WillByDefault(Return(custom_dictionary_));
   ON_CALL(mock_last_state_, get_dictionary())
       .WillByDefault(ReturnRef(custom_dictionary_));
 
@@ -287,7 +296,7 @@ TEST_F(TestTransportManagerDefault, Init_LastStateNotUsed) {
   ExpectationsCloudWebsocket_TA();
 
   // Act
-  transport_manager_->Init(mock_last_state_);
+  transport_manager_->Init(last_state_wrapper_);
   transport_manager_->Stop();
 }
 
@@ -301,7 +310,7 @@ TEST_F(TestTransportManagerDefault, Init_LastStateUsed) {
   ExpectationsCloudWebsocket_TA();
 
   // Act
-  transport_manager_->Init(mock_last_state_);
+  transport_manager_->Init(last_state_wrapper_);
   transport_manager_->Stop();
 }
 

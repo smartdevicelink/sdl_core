@@ -46,11 +46,11 @@ class MockRCConsentManager : public rc_rpc_plugin::RCConsentManager {
                void(const std::string&,
                     const std::string&,
                     const rc_rpc_plugin::rc_rpc_types::ModuleIdConsentVector&));
-  MOCK_CONST_METHOD3(GetModuleConsent,
-                     rc_rpc_plugin::rc_rpc_types::ModuleConsent(
-                         const std::string&,
-                         const std::string&,
-                         const rc_rpc_plugin::rc_rpc_types::ModuleUid&));
+  MOCK_METHOD3(GetModuleConsent,
+               rc_rpc_plugin::rc_rpc_types::ModuleConsent(
+                   const std::string&,
+                   const std::string&,
+                   const rc_rpc_plugin::rc_rpc_types::ModuleUid&));
   MOCK_METHOD0(RemoveExpiredConsents, void());
   MOCK_METHOD0(RemoveAllConsents, void());
 };

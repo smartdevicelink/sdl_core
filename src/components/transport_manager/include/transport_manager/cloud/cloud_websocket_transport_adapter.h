@@ -50,7 +50,7 @@ class CloudWebsocketTransportAdapter : public TransportAdapterImpl {
    * @brief Constructor.
    */
   explicit CloudWebsocketTransportAdapter(
-      resumption::LastState& last_state,
+      resumption::LastStateWrapperPtr last_state_wrapper,
       const TransportManagerSettings& settings);
 
   /**

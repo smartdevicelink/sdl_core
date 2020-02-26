@@ -75,7 +75,8 @@ enum PolicyTableStatus {
   StatusUpToDate = 0,
   StatusUpdatePending,
   StatusUpdateRequired,
-  StatusUnknown
+  StatusUnknown,
+  StatusProcessingSnapshot
 };
 
 enum class PTUIterationType { DefaultIteration = 0, RetryIteration };

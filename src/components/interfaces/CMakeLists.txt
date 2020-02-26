@@ -39,6 +39,10 @@ include_directories (
   ${CMAKE_BINARY_DIR}
 )
 
+execute_process(COMMAND /usr/bin/env python3 -m pip install --upgrade --user pip setuptools wheel)
+set(GENERATOR_REQUIREMENTS "${CMAKE_SOURCE_DIR}/tools/InterfaceGenerator/requirements.txt")
+execute_process(COMMAND /usr/bin/env python3 -m pip install --user --requirement ${GENERATOR_REQUIREMENTS})
+
 generate_interface("v4_protocol_v1_2_no_extra.xml" "ns_smart_device_link_rpc::V1" "sdlrpcv1")
 add_library(v4_protocol_v1_2_no_extra ${CMAKE_CURRENT_BINARY_DIR}/v4_protocol_v1_2_no_extra_schema.cc)
 
@@ -51,4 +55,3 @@ add_library(HMI_API ${CMAKE_CURRENT_BINARY_DIR}/HMI_API_schema.cc)
 target_link_libraries(v4_protocol_v1_2_no_extra Utils)
 target_link_libraries(MOBILE_API Utils)
 target_link_libraries(HMI_API Utils)
-

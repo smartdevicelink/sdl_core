@@ -7,13 +7,14 @@ accordance with given internal model.
 # pylint: disable=W0402
 # pylint: disable=C0302
 import codecs
-import collections
 import os
 import string
 import uuid
 import re
 
-from generator import Model
+from model.enum import Enum
+from model.enum_element import EnumElement
+from model.function import Function
 
 
 class GenerateError(Exception):
@@ -106,10 +107,10 @@ class CodeGenerator(object):
         for func in interface.functions.values():
             for param in func.params:
                 params_set.add(param)
-        parameter_enum = Model.Enum('Parameter')
+        parameter_enum = Enum('Parameter')
         
         for item in params_set:
-            parameter_enum.elements[item.upper()] = Model.EnumElement(item)
+            parameter_enum.elements[item.upper()] = EnumElement(item)
                 
 
         required_enums_for_policy = [
@@ -162,13 +163,11 @@ class CodeGenerator(object):
             "Parameter" : "Parameter"
         }
 
-        get_first_enum_value_name = lambda enum : enum.elements.values()[0].name
-        enum_required_for_policy = lambda enum : enum.name in required_enums_for_policy and "." not in get_first_enum_value_name(enum)
 
         # In case if "." is in FunctionID name this is HMI_API function ID and should not be included in Policy  enums
 
-        required_enum_values = [val for val in interface.enums.values()
-                               if enum_required_for_policy(val)]
+        required_enum_values = list(filter(lambda e: e.name in required_enums_for_policy
+                                    and "." not in list(e.elements.values())[0].name, list(interface.enums.values())))
 
         if filename == "MOBILE_API":
             self._write_cc_with_enum_schema_factory(filename, namespace, destination_dir, interface.enums.values())
@@ -190,7 +189,7 @@ class CodeGenerator(object):
                          encoding="utf-8",
                          mode="w") as f_cc:
             guard = u"_{0}_{1}_CC__".format( class_name.upper(),
-                    unicode(uuid.uuid1().hex.capitalize()))
+                    uuid.uuid1().hex.capitalize())
             namespace_open, namespace_close = self._namespaces_strings(namespace)
             includes = '''#include <set>\n'''\
             '''#include "interfaces/MOBILE_API.h"\n'''\
@@ -212,7 +211,7 @@ class CodeGenerator(object):
                          encoding="utf-8",
                          mode="w") as f_h:
             guard = u"_{0}_{1}_H__".format( class_name.upper(),
-                    unicode(uuid.uuid1().hex.capitalize()))
+                    uuid.uuid1().hex.capitalize())
             namespace_open, namespace_close = self._namespaces_strings(namespace)
             f_h.write(self._h_file_template.substitute(
                 class_name=class_name,
@@ -233,7 +232,7 @@ class CodeGenerator(object):
                          encoding="utf-8",
                          mode="w") as f_cc:
             guard = u"_{0}_{1}_CC__".format( class_name.upper(),
-                    unicode(uuid.uuid1().hex.capitalize()))
+                    uuid.uuid1().hex.capitalize())
             namespace_open, namespace_close = self._namespaces_strings(namespace)
             f_cc.write(self._cc_file_template.substitute(
                 class_name=class_name,
@@ -257,7 +256,6 @@ class CodeGenerator(object):
         Tuple with namespace open string and namespace close string
         """
 
-        namespace = unicode(namespace)
         namespace_open = u""
         namespace_close = u""
         if namespace:
@@ -432,7 +430,7 @@ class CodeGenerator(object):
                                 interface_item_base_classname)
 
         name = interface_item_base.primary_name if \
-            type(interface_item_base) is Model.EnumElement else \
+            type(interface_item_base) is EnumElement else \
             interface_item_base.name
         brief_description = (u" * @brief {0}{1}.\n" if use_doxygen is
                              True else u"// {0}{1}.\n").format(
@@ -475,7 +473,7 @@ class CodeGenerator(object):
                               True else u"//\n", todos])
 
         returns = u""
-        if type(interface_item_base) is Model.Function:
+        if type(interface_item_base) is Function:
             returns = u"".join([u" *\n", self._function_return_comment])
 
         template = self._comment_doxygen_template if use_doxygen is \

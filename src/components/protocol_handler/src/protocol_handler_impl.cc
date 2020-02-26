@@ -1586,7 +1586,8 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessageEndSession(
                                            << " type.");
     if (packet.protocol_version() >= PROTOCOL_VERSION_5) {
       std::vector<std::string> rejectedParams;
-      if (hash_id == protocol_handler::HASH_ID_WRONG) {
+      if (hash_id == protocol_handler::HASH_ID_WRONG &&
+          packet.service_type() == kRpc) {
         rejectedParams.push_back(std::string(strings::hash_id));
       }
       SendEndSessionNAck(connection_id,

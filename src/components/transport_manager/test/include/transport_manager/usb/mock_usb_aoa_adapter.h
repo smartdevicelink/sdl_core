@@ -43,9 +43,9 @@ using namespace ::transport_manager::transport_adapter;
 
 class MockUsbAoaAdapter : public UsbAoaAdapter {
  public:
-  MockUsbAoaAdapter(resumption::LastState& last_state,
+  MockUsbAoaAdapter(resumption::LastStateWrapperPtr last_state_wrapper,
                     const transport_manager::TransportManagerSettings& settings)
-      : UsbAoaAdapter(last_state, settings) {}
+      : UsbAoaAdapter(last_state_wrapper, settings) {}
   MOCK_CONST_METHOD0(GetDeviceType, DeviceType());
   MOCK_CONST_METHOD0(IsInitialised, bool());
   MOCK_METHOD1(AddListener, void(TransportAdapterListener* listener));

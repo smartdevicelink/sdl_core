@@ -35,12 +35,10 @@
 
 #include "application_manager/event_engine/event_observer.h"
 #include "interfaces/HMI_API.h"
+#include "resumption/last_state_wrapper.h"
 #include "smart_objects/smart_object.h"
 #include "utils/lock.h"
 
-namespace resumption {
-class LastState;
-}
 namespace application_manager {
 
 class ApplicationManager;
@@ -97,7 +95,11 @@ class HMILanguageHandler : public event_engine::EventObserver {
   void set_default_capabilities_languages(hmi_apis::Common_Language::eType ui,
                                           hmi_apis::Common_Language::eType vr,
                                           hmi_apis::Common_Language::eType tts);
-  void Init(resumption::LastState* value);
+
+  DEPRECATED
+  void Init(resumption::LastState*);
+
+  void Init(resumption::LastStateWrapperPtr value);
 
   /**
    * @brief Removes application from container after
@@ -179,7 +181,7 @@ class HMILanguageHandler : public event_engine::EventObserver {
    * @brief Indicates if current TTS language has been received from HMI
    */
   bool is_tts_language_received_;
-  resumption::LastState* last_state_;
+  resumption::LastStateWrapperPtr last_state_wrapper_;
   ApplicationManager& application_manager_;
 };
 
