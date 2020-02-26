@@ -546,8 +546,8 @@ PolicyManager::PtProcessingResult PolicyManagerImpl::LoadPT(
 
 void PolicyManagerImpl::OnPTUFinished(const PtProcessingResult ptu_result) {
   LOG4CXX_AUTO_TRACE(logger_);
-  ptu_requested_ = false;
 
+  ptu_requested_ = false;
   if (PtProcessingResult::kWrongPtReceived == ptu_result) {
     LOG4CXX_DEBUG(logger_, "Wrong PT was received");
     update_status_manager_.OnWrongUpdateReceived();
@@ -557,7 +557,7 @@ void PolicyManagerImpl::OnPTUFinished(const PtProcessingResult ptu_result) {
   update_status_manager_.OnValidUpdateReceived();
 
   if (HasApplicationForPTU()) {
-    update_status_manager_.OnUpdateForNextInQueue();
+    update_status_manager_.OnExistedApplicationAdded(true);
   }
 
   if (PtProcessingResult::kNewPtRequired == ptu_result) {
@@ -719,7 +719,6 @@ void PolicyManagerImpl::RequestPTUpdate() {
 
     BinaryMessage update(message_string.begin(), message_string.end());
     ptu_requested_ = true;
-
     listener_->OnSnapshotCreated(
         update, RetrySequenceDelaysSeconds(), TimeoutExchangeMSec());
   } else {
@@ -743,7 +742,7 @@ void PolicyManagerImpl::StartPTExchange() {
     return;
   }
 
-  if (update_status_manager_.IsUpdatePending() || is_ptu_in_progress_) {
+  if (update_status_manager_.IsUpdatePending()) {
     if (trigger_ptu_) {
       update_status_manager_.ScheduleUpdate();
     }
@@ -773,7 +772,8 @@ void PolicyManagerImpl::OnAppsSearchCompleted(const bool trigger_ptu) {
   update_status_manager_.OnAppsSearchCompleted();
 
   trigger_ptu_ = trigger_ptu;
-  if (update_status_manager_.IsUpdateRequired() && !ptu_requested_) {
+
+  if (update_status_manager_.IsUpdateRequired()) {
     StartPTExchange();
   }
 }
@@ -1396,12 +1396,11 @@ void PolicyManagerImpl::RetrySequenceFailed() {
   listener_->OnPTUFinished(false);
   ResetRetrySequence(ResetRetryCountType::kResetWithStatusUpdate);
 
+  ptu_requested_ = false;
   if (HasApplicationForPTU()) {
-    update_status_manager_.OnUpdateForNextInQueue();
+    update_status_manager_.OnExistedApplicationAdded(true);
     StartPTExchange();
   }
-  is_ptu_in_progress_ = false;
-  ptu_requested_ = false;
 }
 
 void PolicyManagerImpl::ResetTimeout() {
@@ -1935,7 +1934,6 @@ void PolicyManagerImpl::IncrementIgnitionCycles() {
 
 std::string PolicyManagerImpl::ForcePTExchange() {
   update_status_manager_.ScheduleUpdate();
-  is_ptu_in_progress_ = false;
   StartPTExchange();
   return update_status_manager_.StringifiedUpdateStatus();
 }
@@ -1984,10 +1982,7 @@ void PolicyManagerImpl::ResetRetrySequence(
   LOG4CXX_AUTO_TRACE(logger_);
   sync_primitives::AutoLock auto_lock(retry_sequence_lock_);
   retry_sequence_index_ = 0;
-
-  if (listener_->CanUpdate()) {
-    is_ptu_in_progress_ = false;
-  }
+  is_ptu_in_progress_ = false;
   if (ResetRetryCountType::kResetWithStatusUpdate == reset_type) {
     update_status_manager_.OnResetRetrySequence();
   }

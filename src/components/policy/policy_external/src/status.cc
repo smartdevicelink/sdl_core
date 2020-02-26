@@ -39,9 +39,6 @@ policy::UpToDateStatus::UpToDateStatus()
 void policy::UpToDateStatus::ProcessEvent(UpdateStatusManager* manager,
                                           policy::UpdateEvent event) {
   switch (event) {
-    case kUpdateForNextInQueue:
-      manager->SetNextStatus(std::make_shared<UpdateNeededStatus>());
-      break;
     case kOnNewAppRegistered:
     case kOnResetPolicyTableRequireUpdate:
     case kScheduleUpdate:
@@ -60,9 +57,6 @@ policy::UpdateNeededStatus::UpdateNeededStatus()
 void policy::UpdateNeededStatus::ProcessEvent(
     policy::UpdateStatusManager* manager, policy::UpdateEvent event) {
   switch (event) {
-    case kUpdateForNextInQueue:
-      manager->SetNextStatus(std::make_shared<UpdateNeededStatus>());
-      break;
     case kOnUpdateSentOut:
       manager->SetNextStatus(std::make_shared<UpdatingStatus>());
       break;

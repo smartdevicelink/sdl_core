@@ -1652,7 +1652,7 @@ void PolicyManagerImpl::OnPTUIterationTimeout() {
     }
 
     if (HasApplicationForPTU()) {
-      RequestPTUpdate(PTUIterationType::DefaultIteration);
+      StartPTExchange();
     }
     return;
   }
