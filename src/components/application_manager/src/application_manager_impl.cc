@@ -885,10 +885,16 @@ void ApplicationManagerImpl::OnHMIStartedCooperation() {
                                         *this));
   rpc_service_->ManageHMICommand(is_rc_ready);
 
-  std::shared_ptr<smart_objects::SmartObject> button_capabilities(
-      MessageHelper::CreateModuleInfoSO(
-          hmi_apis::FunctionID::Buttons_GetCapabilities, *this));
-  rpc_service_->ManageHMICommand(button_capabilities);
+  const auto default_initialized_capabilities =
+      hmi_capabilities_->GetDefaultInitializedCapabilities();
+
+  if (helpers::in_range(default_initialized_capabilities,
+                        hmi_apis::FunctionID::Buttons_GetCapabilities)) {
+    std::shared_ptr<smart_objects::SmartObject> button_capabilities(
+        MessageHelper::CreateModuleInfoSO(
+            hmi_apis::FunctionID::Buttons_GetCapabilities, *this));
+    rpc_service_->ManageHMICommand(button_capabilities);
+  }
 
   std::shared_ptr<smart_objects::SmartObject> mixing_audio_supported_request(
       MessageHelper::CreateModuleInfoSO(

@@ -79,9 +79,9 @@ class RCIsReadyRequest : public app_mngr::commands::RequestToHMI,
   void onTimeOut() OVERRIDE;
 
   /**
-   * @brief Send request to HMI for fetching of cappabilities
+   * @brief Send request to HMI for fetching of capabilities
    */
-  void SendMessageToHMI();
+  void RequestCapabilities();
 
  private:
   DISALLOW_COPY_AND_ASSIGN(RCIsReadyRequest);

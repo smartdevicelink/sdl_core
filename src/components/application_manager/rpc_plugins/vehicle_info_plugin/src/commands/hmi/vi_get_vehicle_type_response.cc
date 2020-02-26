@@ -64,7 +64,9 @@ void VIGetVehicleTypeResponse::Run() {
       (*message_)[strings::msg_params][hmi_response::vehicle_type]);
 
   if (!hmi_capabilities_.SaveCachedCapabilitiesToFile(
-          hmi_interface::vr, sections_to_update, message_->getSchema())) {
+          hmi_interface::vehicle_info,
+          sections_to_update,
+          message_->getSchema())) {
     LOG4CXX_ERROR(
         logger_, "Failed to save VehicleInfo.GetVehicleType response to cache");
   }

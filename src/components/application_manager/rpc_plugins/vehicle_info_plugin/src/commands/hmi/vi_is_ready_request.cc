@@ -81,8 +81,8 @@ void VIIsReadyRequest::on_event(const event_engine::Event& event) {
             "HmiInterfaces::HMI_INTERFACE_VehicleInfo isn't available");
         return;
       }
-      SendMessageToHMI();
 
+      RequestCapabilities();
       break;
     }
     default: {
@@ -94,15 +94,21 @@ void VIIsReadyRequest::on_event(const event_engine::Event& event) {
 
 void VIIsReadyRequest::onTimeOut() {
   // Note(dtrunov): According to new requirment APPLINK-27956
-  SendMessageToHMI();
+  RequestCapabilities();
 }
 
-void VIIsReadyRequest::SendMessageToHMI() {
-  std::shared_ptr<smart_objects::SmartObject> get_type(
-      MessageHelper::CreateModuleInfoSO(
-          hmi_apis::FunctionID::VehicleInfo_GetVehicleType,
-          application_manager_));
-  rpc_service_.ManageHMICommand(get_type);
+void VIIsReadyRequest::RequestCapabilities() {
+  const auto default_initialized_capabilities =
+      hmi_capabilities_.GetDefaultInitializedCapabilities();
+
+  if (helpers::in_range(default_initialized_capabilities,
+                        hmi_apis::FunctionID::VehicleInfo_GetVehicleType)) {
+    std::shared_ptr<smart_objects::SmartObject> get_type(
+        MessageHelper::CreateModuleInfoSO(
+            hmi_apis::FunctionID::VehicleInfo_GetVehicleType,
+            application_manager_));
+    rpc_service_.ManageHMICommand(get_type);
+  }
 }
 
 }  // namespace commands

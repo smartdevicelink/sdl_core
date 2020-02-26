@@ -77,7 +77,8 @@ void VRIsReadyRequest::on_event(const event_engine::Event& event) {
                      "HmiInterfaces::HMI_INTERFACE_VR isn't available");
         return;
       }
-      SendMessageToHMI();
+
+      RequestCapabilities();
       break;
     }
     default: {
@@ -89,25 +90,39 @@ void VRIsReadyRequest::on_event(const event_engine::Event& event) {
 
 void VRIsReadyRequest::onTimeOut() {
   // Note(dtrunov): According to new requirment APPLINK-27956
-  SendMessageToHMI();
+  RequestCapabilities();
 }
 
-void VRIsReadyRequest::SendMessageToHMI() {
-  std::shared_ptr<smart_objects::SmartObject> get_language(
-      MessageHelper::CreateModuleInfoSO(hmi_apis::FunctionID::VR_GetLanguage,
-                                        application_manager_));
-  HMICapabilities& hmi_capabilities = hmi_capabilities_;
-  hmi_capabilities.set_handle_response_for(*get_language);
-  rpc_service_.ManageHMICommand(get_language);
-  std::shared_ptr<smart_objects::SmartObject> get_all_languages(
-      MessageHelper::CreateModuleInfoSO(
-          hmi_apis::FunctionID::VR_GetSupportedLanguages,
-          application_manager_));
-  rpc_service_.ManageHMICommand(get_all_languages);
-  std::shared_ptr<smart_objects::SmartObject> get_capabilities(
-      MessageHelper::CreateModuleInfoSO(
-          hmi_apis::FunctionID::VR_GetCapabilities, application_manager_));
-  rpc_service_.ManageHMICommand(get_capabilities);
+void VRIsReadyRequest::RequestCapabilities() {
+  const auto default_initialized_capabilities =
+      hmi_capabilities_.GetDefaultInitializedCapabilities();
+
+  if (helpers::in_range(default_initialized_capabilities,
+                        hmi_apis::FunctionID::VR_GetLanguage)) {
+    std::shared_ptr<smart_objects::SmartObject> get_language(
+        MessageHelper::CreateModuleInfoSO(hmi_apis::FunctionID::VR_GetLanguage,
+                                          application_manager_));
+    HMICapabilities& hmi_capabilities = hmi_capabilities_;
+    hmi_capabilities.set_handle_response_for(*get_language);
+    rpc_service_.ManageHMICommand(get_language);
+  }
+
+  if (helpers::in_range(default_initialized_capabilities,
+                        hmi_apis::FunctionID::VR_GetSupportedLanguages)) {
+    std::shared_ptr<smart_objects::SmartObject> get_supported_languages(
+        MessageHelper::CreateModuleInfoSO(
+            hmi_apis::FunctionID::VR_GetSupportedLanguages,
+            application_manager_));
+    rpc_service_.ManageHMICommand(get_supported_languages);
+  }
+
+  if (helpers::in_range(default_initialized_capabilities,
+                        hmi_apis::FunctionID::VR_GetCapabilities)) {
+    std::shared_ptr<smart_objects::SmartObject> get_capabilities(
+        MessageHelper::CreateModuleInfoSO(
+            hmi_apis::FunctionID::VR_GetCapabilities, application_manager_));
+    rpc_service_.ManageHMICommand(get_capabilities);
+  }
 }
 
 }  // namespace commands

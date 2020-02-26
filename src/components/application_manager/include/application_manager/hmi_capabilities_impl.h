@@ -238,6 +238,9 @@ class HMICapabilitiesImpl : public HMICapabilities {
 
   bool DeleteCachedCapabilitiesFile() const OVERRIDE;
 
+  std::set<hmi_apis::FunctionID::eType> GetDefaultInitializedCapabilities()
+      const OVERRIDE;
+
  protected:
   /**
    * @brief Loads capabilities from local file in case SDL was launched
@@ -428,6 +431,8 @@ class HMICapabilitiesImpl : public HMICapabilities {
 
   ApplicationManager& app_mngr_;
   HMILanguageHandler hmi_language_handler_;
+
+  std::set<hmi_apis::FunctionID::eType> default_initialized_capabilities_;
 
   DISALLOW_COPY_AND_ASSIGN(HMICapabilitiesImpl);
 };
