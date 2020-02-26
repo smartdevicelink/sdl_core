@@ -31,12 +31,13 @@
  */
 
 #include <gmock/gmock.h>
-#include <string>
 #include "gtest/gtest.h"
 
+#include <string>
 #include "application_manager/rpc_service_impl.h"
 
 #include "application_manager/commands/command.h"
+#include "application_manager/commands/command_impl.h"
 #include "application_manager/mock_app_service_manager.h"
 #include "application_manager/mock_application.h"
 #include "application_manager/mock_application_manager.h"
@@ -48,16 +49,11 @@
 #include "application_manager/mock_rpc_plugin.h"
 #include "application_manager/mock_rpc_plugin_manager.h"
 #include "application_manager/mock_rpc_protection_manager.h"
-#include "application_manager/request_controller.h"
-#include "hmi_message_handler/mock_hmi_message_handler.h"
-#include "include/test/protocol_handler/mock_protocol_handler.h"
-#include "resumption/last_state_impl.h"
-
-#include "application_manager/commands/command_impl.h"
 #include "application_manager/plugin_manager/plugin_keys.h"
 #include "application_manager/policies/mock_policy_handler_interface.h"
-#include "application_manager/usage_statistics.h"
 #include "connection_handler/mock_connection_handler.h"
+#include "hmi_message_handler/mock_hmi_message_handler.h"
+#include "include/test/protocol_handler/mock_protocol_handler.h"
 
 namespace test {
 namespace components {
