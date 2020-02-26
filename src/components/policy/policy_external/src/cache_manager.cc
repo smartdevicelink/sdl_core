@@ -2632,7 +2632,6 @@ bool CacheManager::Init(const std::string& file_name,
       result &= UnwrapAppPolicies(pt_->policy_table.app_policies_section.apps);
       if (!result) {
         LOG4CXX_ERROR(logger_, "Cannot unwrap application policies");
-        return result;
       }
 
       if (result) {
