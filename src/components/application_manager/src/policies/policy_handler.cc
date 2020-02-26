@@ -1142,7 +1142,7 @@ bool PolicyHandler::ReceiveMessageFromSDK(const std::string& file,
   const bool is_ptu_successful =
       load_pt_result == PolicyManager::PtProcessingResult::kSuccess;
   OnPTUFinished(is_ptu_successful);
-  PopAppIdFromPTUQueue();
+
   if (is_ptu_successful) {
     LOG4CXX_INFO(logger_, "PTU was successful.");
     policy_manager_->CleanupUnpairedDevices();
@@ -1567,7 +1567,7 @@ void PolicyHandler::OnSnapshotCreated(const BinaryMessage& pt_string,
   POLICY_LIB_CHECK_VOID();
 #ifdef PROPRIETARY_MODE
   std::string policy_snapshot_full_path;
-  if (PTUIterationType::RetryIteration != iteration_type) {
+  if (PTUIterationType::RetryIteration != iteration_type) { 
     if (!SaveSnapshot(pt_string, policy_snapshot_full_path)) {
       LOG4CXX_ERROR(logger_, "Snapshot processing skipped.");
       return;
@@ -1935,9 +1935,9 @@ void PolicyHandler::OnAuthTokenUpdated(const std::string& policy_app_id,
 void PolicyHandler::OnPTUFinished(const bool ptu_result) {
   LOG4CXX_AUTO_TRACE(logger_);
   sync_primitives::AutoLock lock(listeners_lock_);
-  if (!ptu_result) {
-    PopAppIdFromPTUQueue();
-  }
+
+  PopAppIdFromPTUQueue();
+
   std::for_each(
       listeners_.begin(),
       listeners_.end(),

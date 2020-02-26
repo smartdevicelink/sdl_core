@@ -1359,11 +1359,6 @@ class PolicyManagerImpl : public PolicyManager {
   bool trigger_ptu_;
 
   /**
-   * @brief Flag for notifying that PTU was requested
-   */
-  bool ptu_requested_;
-
-  /**
    * @brief Flag that indicates whether a PTU sequence (including retries) is in
    * progress
    */

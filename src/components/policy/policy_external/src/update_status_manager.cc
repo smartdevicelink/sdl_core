@@ -44,8 +44,7 @@ UpdateStatusManager::UpdateStatusManager()
     , current_status_(std::make_shared<UpToDateStatus>())
     , last_processed_event_(kNoEvent)
     , apps_search_in_progress_(false)
-    , app_registered_from_non_consented_device_(true)
-    , last_update_was_failed_(false) {
+    , app_registered_from_non_consented_device_(true) {
   update_status_thread_delegate_ = new UpdateThreadDelegate(this);
   thread_ = threads::CreateThread("UpdateStatusThread",
                                   update_status_thread_delegate_);
@@ -86,11 +85,6 @@ void UpdateStatusManager::OnUpdateSentOut(uint32_t update_timeout) {
   DCHECK(update_status_thread_delegate_);
   update_status_thread_delegate_->updateTimeOut(update_timeout);
   ProcessEvent(kOnUpdateSentOut);
-}
-
-void UpdateStatusManager::OnUpdateForNextInQueue() {
-  LOG4CXX_AUTO_TRACE(logger_);
-  ProcessEvent(kUpdateForNextInQueue);
 }
 
 void UpdateStatusManager::OnUpdateTimeoutOccurs() {
@@ -137,7 +131,6 @@ void UpdateStatusManager::OnResetDefaultPT(bool is_update_required) {
 
 void UpdateStatusManager::OnResetRetrySequence() {
   LOG4CXX_AUTO_TRACE(logger_);
-  last_update_was_failed_ = true;
   ProcessEvent(kOnResetRetrySequence);
 }
 
@@ -159,11 +152,12 @@ void UpdateStatusManager::OnNewApplicationAdded(const DeviceConsent consent) {
   }
   LOG4CXX_DEBUG(logger_, "Application registered from consented device");
   app_registered_from_non_consented_device_ = false;
-  if (last_update_was_failed_) {
-    last_update_was_failed_ = false;
-    ProcessEvent(kUpdateForNextInQueue);
+  if (kOnResetRetrySequence == last_processed_event_) {
+    current_status_.reset(new UpToDateStatus());
+    ProcessEvent(kScheduleUpdate);
+  } else {
+    ProcessEvent(kOnNewAppRegistered);
   }
-  ProcessEvent(kOnNewAppRegistered);
 }
 
 void UpdateStatusManager::OnDeviceConsented() {

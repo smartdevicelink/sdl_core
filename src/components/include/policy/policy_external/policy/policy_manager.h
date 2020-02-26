@@ -78,7 +78,7 @@ class PolicyManager : public usage_statistics::StatisticsManager,
    * @return true if init is successful
    */
   virtual bool InitPT(const std::string& file_name,
-                      const PolicySettings* settings) = 0;
+                      const PolicySettings* settings) = 0; 
 
   /**
    * @brief Updates Policy Table from binary message received from
