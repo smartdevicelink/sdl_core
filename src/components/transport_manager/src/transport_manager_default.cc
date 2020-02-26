@@ -88,11 +88,12 @@ TransportAdapterFactory::TransportAdapterFactory() {
 #endif
 
 #if defined(WEBSOCKET_SERVER_TRANSPORT_SUPPORT)
-  ta_websocket_server_creator_ = [](resumption::LastStateWrapperPtr last_state_wrapper,
-                         const TransportManagerSettings& settings) {
-    return new transport_adapter::WebSocketServerTransportAdapter(
-        last_state_wrapper, settings);
-  };
+  ta_websocket_server_creator_ =
+      [](resumption::LastStateWrapperPtr last_state_wrapper,
+         const TransportManagerSettings& settings) {
+        return new transport_adapter::WebSocketServerTransportAdapter(
+            last_state_wrapper, settings);
+      };
 #endif
 }
 
@@ -156,7 +157,8 @@ int TransportManagerDefault::Init(
 #endif  // CLOUD_APP_WEBSOCKET_TRANSPORT_SUPPORT
 
 #ifdef WEBSOCKET_SERVER_TRANSPORT_SUPPORT
-  auto ta_websocket = ta_factory_.ta_websocket_server_creator_(last_state_wrapper, settings);
+  auto ta_websocket =
+      ta_factory_.ta_websocket_server_creator_(last_state_wrapper, settings);
 
 #ifdef TELEMETRY_MONITOR
   if (metric_observer_) {

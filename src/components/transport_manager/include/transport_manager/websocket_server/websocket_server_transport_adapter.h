@@ -50,8 +50,9 @@ class WebSocketServerTransportAdapter : public TransportAdapterImpl {
   /**
    * @brief Constructor.
    */
-  WebSocketServerTransportAdapter(resumption::LastState& last_state,
-                                  const TransportManagerSettings& settings);
+  WebSocketServerTransportAdapter(
+      resumption::LastStateWrapperPtr last_state_wrapper,
+      const TransportManagerSettings& settings);
 
   /**
    * @brief Destructor.

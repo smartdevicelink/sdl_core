@@ -166,7 +166,7 @@ class TestTransportManagerDefault : public ::testing::Test {
  protected:
   MockTransportManagerSettings transport_manager_settings_;
   std::unique_ptr<TransportManagerDefault> transport_manager_;
-  NiceMock<MockLastState> mock_last_state_;
+  std::shared_ptr<MockLastState> mock_last_state_;
   Json::Value custom_dictionary_;
   const std::string unique_tcp_dev_name_;
   const std::string dev_id_;
@@ -198,7 +198,7 @@ void TestTransportManagerDefault::ExpectationsSettings_TM(
   custom_dictionary_[kTransportManager][kTcpAdapter][kDevices][0] = tcp_device;
   custom_dictionary_[kTransportManager][kBluetoothAdapter][kDevices][0] =
       bluetooth_device;
- ON_CALL(transport_manager_settings_, websocket_server_port())
+  ON_CALL(transport_manager_settings_, websocket_server_port())
       .WillByDefault(Return(kPort));
   ON_CALL(transport_manager_settings_, websocket_server_address())
       .WillByDefault(ReturnRef(kAddress));
@@ -208,9 +208,9 @@ void TestTransportManagerDefault::ExpectationsSettings_TM(
       .WillByDefault(ReturnRef(kWSServerKeyPathKey));
   ON_CALL(transport_manager_settings_, ws_server_ca_cert_path())
       .WillByDefault(ReturnRef(kWSServerCACertPath));
-  ON_CALL(mock_last_state_, dictionary())
+  ON_CALL(*mock_last_state_, dictionary())
       .WillByDefault(Return(custom_dictionary_));
-  ON_CALL(mock_last_state_, get_dictionary())
+  ON_CALL(*mock_last_state_, get_dictionary())
       .WillByDefault(ReturnRef(custom_dictionary_));
 
   EXPECT_CALL(transport_manager_settings_, use_last_state())

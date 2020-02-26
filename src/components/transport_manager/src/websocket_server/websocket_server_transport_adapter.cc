@@ -51,11 +51,12 @@ namespace transport_adapter {
 CREATE_LOGGERPTR_GLOBAL(logger_, "WebSocketTransportAdapter")
 
 WebSocketServerTransportAdapter::WebSocketServerTransportAdapter(
-    resumption::LastState& last_state, const TransportManagerSettings& settings)
+    resumption::LastStateWrapperPtr last_state_wrapper,
+    const TransportManagerSettings& settings)
     : TransportAdapterImpl(nullptr,
                            nullptr,
                            new WebSocketListener(this, settings),
-                           last_state,
+                           last_state_wrapper,
                            settings) {}
 
 WebSocketServerTransportAdapter::~WebSocketServerTransportAdapter() {}
