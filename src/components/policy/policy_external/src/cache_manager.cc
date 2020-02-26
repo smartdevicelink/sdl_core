@@ -2629,8 +2629,7 @@ bool CacheManager::Init(const std::string& file_name,
       LOG4CXX_DEBUG(logger_,
                     "Check if snapshot valid: " << std::boolalpha << result);
 
-      result &= UnwrapAppPolicies(pt_->policy_table.app_policies_section.apps);
-      if (!result) {
+      if (!UnwrapAppPolicies(pt_->policy_table.app_policies_section.apps)) {
         LOG4CXX_ERROR(logger_, "Cannot unwrap application policies");
       }
 
