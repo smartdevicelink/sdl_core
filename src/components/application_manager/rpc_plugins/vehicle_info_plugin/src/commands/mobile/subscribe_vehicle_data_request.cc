@@ -201,8 +201,17 @@ bool SubscribeVehicleDataRequest::CheckSubscriptionStatus(
 }
 
 bool SubscribeVehicleDataRequest::SubscribePendingVehicleData(
-    ApplicationSharedPtr app, const smart_objects::SmartObject& msg_params) {
+    ApplicationSharedPtr app, smart_objects::SmartObject& msg_params) {
   LOG4CXX_DEBUG(logger_, "Subscribing to all pending VehicleData");
+
+  std::set<hmi_apis::Common_VehicleDataResultCode::eType> skiped_result_codes(
+      {hmi_apis::Common_VehicleDataResultCode::VDRC_TRUNCATED_DATA,
+       hmi_apis::Common_VehicleDataResultCode::VDRC_DISALLOWED,
+       hmi_apis::Common_VehicleDataResultCode::VDRC_USER_DISALLOWED,
+       hmi_apis::Common_VehicleDataResultCode::VDRC_INVALID_ID,
+       hmi_apis::Common_VehicleDataResultCode::VDRC_DATA_NOT_AVAILABLE,
+       hmi_apis::Common_VehicleDataResultCode::VDRC_DATA_NOT_SUBSCRIBED,
+       hmi_apis::Common_VehicleDataResultCode::VDRC_IGNORED});
 
   for (auto vi_name = vi_waiting_for_subscribe_.begin();
        vi_name != vi_waiting_for_subscribe_.end();) {
@@ -214,7 +223,15 @@ bool SubscribeVehicleDataRequest::SubscribePendingVehicleData(
       ext.subscribeToVehicleInfo(*vi_name);
       vi_name = vi_waiting_for_subscribe_.erase(vi_name);
     } else {
-      ++vi_name;
+      auto res_code =
+          static_cast<hmi_apis::Common_VehicleDataResultCode::eType>(
+              msg_params[*vi_name][strings::result_code].asInt());
+      if (skiped_result_codes.find(res_code) != skiped_result_codes.end()) {
+        msg_params[*vi_name][strings::result_code] = res_code;
+        vi_name = vi_waiting_for_subscribe_.erase(vi_name);
+      } else {
+        ++vi_name;
+      }
     }
   }
   return vi_waiting_for_subscribe_.empty();
