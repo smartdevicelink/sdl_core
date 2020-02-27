@@ -53,13 +53,32 @@ bool VehicleInfoPlugin::Init(
     application_manager::rpc_service::RPCService& rpc_service,
     application_manager::HMICapabilities& hmi_capabilities,
     policy::PolicyHandlerInterface& policy_handler,
-    resumption::LastState& last_state) {
+    resumption::LastStateWrapperPtr last_state) {
   UNUSED(last_state);
   application_manager_ = &app_manager;
   custom_vehicle_data_manager_.reset(
       new CustomVehicleDataManagerImpl(policy_handler, rpc_service));
   command_factory_.reset(new vehicle_info_plugin::VehicleInfoCommandFactory(
       app_manager,
+      rpc_service,
+      hmi_capabilities,
+      policy_handler,
+      *(custom_vehicle_data_manager_.get())));
+  return true;
+}
+
+bool VehicleInfoPlugin::Init(
+    application_manager::ApplicationManager& application_manager,
+    application_manager::rpc_service::RPCService& rpc_service,
+    application_manager::HMICapabilities& hmi_capabilities,
+    policy::PolicyHandlerInterface& policy_handler,
+    resumption::LastState& last_state) {
+  UNUSED(last_state);
+  application_manager_ = &application_manager;
+  custom_vehicle_data_manager_.reset(
+      new CustomVehicleDataManagerImpl(policy_handler, rpc_service));
+  command_factory_.reset(new vehicle_info_plugin::VehicleInfoCommandFactory(
+      application_manager,
       rpc_service,
       hmi_capabilities,
       policy_handler,
@@ -98,6 +117,7 @@ void VehicleInfoPlugin::OnApplicationEvent(
 }
 
 void VehicleInfoPlugin::UnsubscribeFromRemovedVDItems() {
+  LOG4CXX_AUTO_TRACE(logger_);
   typedef std::vector<std::string> StringsVector;
 
   auto get_items_to_unsubscribe = [this]() -> StringsVector {

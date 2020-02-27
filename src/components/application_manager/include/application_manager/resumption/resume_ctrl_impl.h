@@ -52,8 +52,6 @@
 
 namespace resumption {
 
-class LastState;
-
 /**
  * @brief Contains logic for storage/restore data of applications.
  */
@@ -124,8 +122,9 @@ class ResumeCtrlImpl : public ResumeCtrl,
    * @param application application which will be resumed
    * @param saved_app application specific section from backup file
    */
-  void RestoreAppWidgets(application_manager::ApplicationSharedPtr application,
-                         const smart_objects::SmartObject& saved_app) OVERRIDE;
+  size_t RestoreAppWidgets(
+      application_manager::ApplicationSharedPtr application,
+      const smart_objects::SmartObject& saved_app) OVERRIDE;
 
   /**
    * @brief Remove application from list of saved applications
@@ -285,12 +284,14 @@ class ResumeCtrlImpl : public ResumeCtrl,
    */
   void RemoveFromResumption(uint32_t app_id) OVERRIDE;
 
+  DEPRECATED bool Init(resumption::LastState& last_state) FINAL;
+
   /**
    * @brief Initialization data for Resume controller
    * @return true if initialization is success otherwise
    * returns false
    */
-  bool Init(LastState& last_state) OVERRIDE;
+  bool Init(resumption::LastStateWrapperPtr last_state_wrapper) FINAL;
 
   /**
    * @brief Notify resume controller about new application

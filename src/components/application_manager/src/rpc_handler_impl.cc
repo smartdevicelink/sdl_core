@@ -31,7 +31,6 @@
  */
 
 #include "application_manager/rpc_handler_impl.h"
-
 #include "application_manager/app_service_manager.h"
 #include "application_manager/plugin_manager/plugin_keys.h"
 
@@ -308,6 +307,7 @@ void RPCHandlerImpl::GetMessageVersion(
     if (sync_msg_version.keyExists(strings::patch_version)) {
       patch = sync_msg_version[strings::patch_version].asUInt();
     }
+
     utils::SemanticVersion temp_version(major, minor, patch);
     if (temp_version.isValid()) {
       message_version = (temp_version >= utils::rpc_version_5)
@@ -419,7 +419,7 @@ bool RPCHandlerImpl::ConvertMessageToSO(
                     "Convertion result: "
                         << result << " function id "
                         << output[jhs::S_PARAMS][jhs::S_FUNCTION_ID].asInt());
-      if (!hmi_so_factory().attachSchema(output, false)) {
+      if (!hmi_so_factory().attachSchema(output, true)) {
         LOG4CXX_WARN(logger_, "Failed to attach schema to object.");
         return false;
       }
@@ -435,11 +435,7 @@ bool RPCHandlerImpl::ConvertMessageToSO(
             logger_,
             "Incorrect parameter from HMI - " << rpc::PrettyFormat(report));
 
-        output.erase(strings::msg_params);
-        output[strings::params][hmi_response::code] =
-            hmi_apis::Common_Result::INVALID_DATA;
-        output[strings::msg_params][strings::info] = rpc::PrettyFormat(report);
-        return false;
+        return HandleWrongMessageType(output, report);
       }
       break;
     }
@@ -489,6 +485,47 @@ bool RPCHandlerImpl::ConvertMessageToSO(
   output[strings::params][strings::protection] = message.is_message_encrypted();
 
   LOG4CXX_DEBUG(logger_, "Successfully parsed message into smart object");
+  return true;
+}
+
+bool RPCHandlerImpl::HandleWrongMessageType(
+    smart_objects::SmartObject& output, rpc::ValidationReport report) const {
+  LOG4CXX_AUTO_TRACE(logger_);
+  switch (output[strings::params][strings::message_type].asInt()) {
+    case application_manager::MessageType::kNotification: {
+      LOG4CXX_ERROR(logger_, "Ignore wrong HMI notification");
+      return false;
+    }
+    case application_manager::MessageType::kRequest: {
+      LOG4CXX_ERROR(logger_, "Received invalid data on HMI request");
+      output.erase(strings::msg_params);
+      output[strings::params].erase(hmi_response::message);
+      output[strings::params][hmi_response::code] =
+          hmi_apis::Common_Result::INVALID_DATA;
+      output[strings::params][strings::message_type] =
+          MessageType::kErrorResponse;
+      output[strings::params][strings::error_msg] = rpc::PrettyFormat(report);
+      return true;
+    }
+    case application_manager::MessageType::kResponse: {
+      LOG4CXX_ERROR(logger_, "Received invalid data on HMI response");
+      break;
+    }
+    case application_manager::MessageType::kUnknownType: {
+      LOG4CXX_ERROR(logger_, "Received unknown type data on HMI");
+      break;
+    }
+    default: {
+      LOG4CXX_ERROR(logger_, "Received error response on HMI");
+      break;
+    }
+  }
+  output.erase(strings::msg_params);
+  output[strings::params].erase(hmi_response::message);
+  output[strings::params][hmi_response::code] =
+      hmi_apis::Common_Result::GENERIC_ERROR;
+  output[strings::msg_params][strings::info] =
+      std::string("Invalid message received from vehicle");
   return true;
 }
 

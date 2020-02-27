@@ -33,6 +33,7 @@
 #include <string>
 
 #include "hmi_message_handler/messagebroker_adapter.h"
+#include "utils/jsoncpp_reader_wrapper.h"
 #include "utils/logger.h"
 
 namespace hmi_message_handler {
@@ -60,10 +61,12 @@ void MessageBrokerAdapter::SendMessageToHMI(
     return;
   }
 
-  Json::Reader reader;
+  utils::JsonReader reader;
   Json::Value json_value;
-  if (!reader.parse(message->json_message(), json_value, false)) {
-    LOG4CXX_ERROR(logger_, "Received invalid json string.");
+  const std::string str = message->json_message();
+
+  if (!reader.parse(str, &json_value)) {
+    LOG4CXX_ERROR(logger_, "Received invalid json string. ");
     return;
   }
 
@@ -161,8 +164,8 @@ void MessageBrokerAdapter::ProcessRecievedFromMB(Json::Value& root) {
     return;
   }
 
-  Json::FastWriter writer;
-  std::string message_string = writer.write(root);
+  Json::StreamWriterBuilder writer_builder;
+  const std::string message_string = Json::writeString(writer_builder, root);
 
   if (message_string.empty()) {
     // LOG

@@ -34,7 +34,7 @@
 #include "application_manager/application.h"
 #include "application_manager/resumption/resume_ctrl.h"
 #include "gmock/gmock.h"
-#include "resumption/last_state.h"
+#include "resumption/last_state_wrapper.h"
 
 namespace test {
 namespace components {
@@ -82,7 +82,9 @@ class MockResumeCtrl : public resumption::ResumeCtrl {
   MOCK_METHOD1(OnAppActivated,
                void(app_mngr::ApplicationSharedPtr application));
   MOCK_METHOD1(RemoveFromResumption, void(uint32_t app_id));
+  DEPRECATED
   MOCK_METHOD1(Init, bool(resumption::LastState& last_state));
+  MOCK_METHOD1(Init, bool(resumption::LastStateWrapperPtr last_state));
   MOCK_METHOD2(OnAppRegistrationStart,
                void(const std::string& policy_app_id,
                     const std::string& device_id));
@@ -102,8 +104,8 @@ class MockResumeCtrl : public resumption::ResumeCtrl {
   MOCK_CONST_METHOD0(LaunchTime, time_t());
 
   MOCK_METHOD2(RestoreAppWidgets,
-               void(app_mngr::ApplicationSharedPtr application,
-                    const smart_objects::SmartObject& saved_app));
+               size_t(app_mngr::ApplicationSharedPtr application,
+                      const smart_objects::SmartObject& saved_app));
 
   MOCK_METHOD1(RestoreWidgetsHMIState,
                void(const smart_objects::SmartObject& response_message));

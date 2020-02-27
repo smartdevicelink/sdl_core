@@ -146,18 +146,15 @@ TEST_F(PolicyManagerImplTest2, IsAppRevoked_SetRevokedAppID_ExpectAppRevoked) {
   // Arrange
   CreateLocalPT(preloaded_pt_filename_);
 
-  EXPECT_CALL(listener_, GetDevicesIds(app_id_1_))
-      .WillRepeatedly(Return(transport_manager::DeviceList()));
-
   policy_manager_->AddApplication(
       device_id_1_, app_id_1_, HmiTypes(policy_table::AHT_DEFAULT));
 
   std::ifstream ifile(kValidSdlPtUpdateJson);
-  Json::Reader reader;
+  Json::CharReaderBuilder reader_builder;
   std::string json;
   Json::Value root(Json::objectValue);
   if (ifile.is_open()) {
-    if (reader.parse(ifile, root, true)) {
+    if (Json::parseFromStream(reader_builder, ifile, &root, nullptr)) {
       root["policy_table"]["app_policies"][app_id_1_] = Json::nullValue;
       json = root.toStyledString();
     }
@@ -224,8 +221,10 @@ TEST_F(PolicyManagerImplTest2,
 
   EXPECT_CALL(listener_, OnCurrentDeviceIdUpdateRequired(_, app_id_1_))
       .Times(0);
-  EXPECT_CALL(listener_, GetDevicesIds(app_id_1_))
-      .WillRepeatedly(Return(transport_manager::DeviceList(1, device_id_1_)));
+  ON_CALL(listener_, GetDevicesIds(_))
+      .WillByDefault(Return(transport_manager::DeviceList()));
+  ON_CALL(listener_, GetDevicesIds(app_id_1_))
+      .WillByDefault(Return(transport_manager::DeviceList(1, device_id_1_)));
 
   policy_manager_->SetUserConsentForDevice(device_id_1_, true);
   // Add app from consented device. App will be assigned with default policies
@@ -249,11 +248,11 @@ TEST_F(PolicyManagerImplTest2,
   ASSERT_TRUE(output.list_of_allowed_params.empty());
   // Act
   std::ifstream ifile(kValidSdlPtUpdateJson);
-  Json::Reader reader;
+  Json::CharReaderBuilder reader_builder;
   std::string json;
   Json::Value root(Json::objectValue);
   EXPECT_TRUE(ifile.is_open());
-  EXPECT_TRUE(reader.parse(ifile, root, true));
+  EXPECT_TRUE(Json::parseFromStream(reader_builder, ifile, &root, nullptr));
   root["policy_table"]["app_policies"][app_id_1_] = Json::nullValue;
   json = root.toStyledString();
   ifile.close();
@@ -289,18 +288,23 @@ TEST_F(PolicyManagerImplTest2,
                                    "Bluetooth"));
   EXPECT_CALL(listener_, OnCurrentDeviceIdUpdateRequired(_, application_id_))
       .Times(0);
-  EXPECT_CALL(listener_, GetDevicesIds(application_id_))
-      .WillRepeatedly(Return(transport_manager::DeviceList(1, device_id_1_)));
+
+  ON_CALL(listener_, GetDevicesIds(_))
+      .WillByDefault(Return(transport_manager::DeviceList()));
+  ON_CALL(listener_, GetDevicesIds(app_id_1_))
+      .WillByDefault(Return(transport_manager::DeviceList(1, device_id_1_)));
+
   policy_manager_->SetUserConsentForDevice(device_id_1_, true);
   // Add app from consented device. App will be assigned with default policies
   policy_manager_->AddApplication(
       device_id_1_, application_id_, HmiTypes(policy_table::AHT_MEDIA));
   // Emulate PTU with new policies for app added above
   std::ifstream ifile(kValidSdlPtUpdateJson);
-  Json::Reader reader;
+  Json::CharReaderBuilder reader_builder;
   std::string json;
   Json::Value root(Json::objectValue);
-  if (ifile.is_open() && reader.parse(ifile, root, true)) {
+  if (ifile.is_open() &&
+      Json::parseFromStream(reader_builder, ifile, &root, nullptr)) {
     // Add AppID with policies
     root["policy_table"]["app_policies"][application_id_] =
         Json::Value(Json::objectValue);
@@ -801,11 +805,11 @@ TEST_F(PolicyManagerImplTest2,
       device_id_1_, application_id_, HmiTypes(policy_table::AHT_DEFAULT));
 
   std::ifstream ifile("json/sdl_update_pt_2_groups_no_params_in1.json");
-  Json::Reader reader;
+  Json::CharReaderBuilder reader_builder;
   std::string json;
   Json::Value root(Json::objectValue);
   if (ifile.is_open()) {
-    reader.parse(ifile, root, true);
+    Json::parseFromStream(reader_builder, ifile, &root, nullptr);
   }
   json = root.toStyledString();
   ifile.close();
@@ -903,11 +907,11 @@ TEST_F(PolicyManagerImplTest2,
 
   std::ifstream ifile(
       "json/sdl_update_pt_2_groups_no_params_in1_omitted_in2.json");
-  Json::Reader reader;
+  Json::CharReaderBuilder reader_builder;
   std::string json;
   Json::Value root(Json::objectValue);
   if (ifile.is_open()) {
-    reader.parse(ifile, root, true);
+    Json::parseFromStream(reader_builder, ifile, &root, nullptr);
   }
   json = root.toStyledString();
   ifile.close();

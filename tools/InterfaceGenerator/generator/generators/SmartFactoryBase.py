@@ -12,7 +12,17 @@ import os
 import string
 import uuid
 
-from generator import Model
+from model.array import Array
+from model.boolean import Boolean
+from model.float import Float
+from model.enum import Enum
+from model.enum_element import EnumElement
+from model.enum_subset import EnumSubset
+from model.function import Function
+from model.integer import Integer
+from model.param import Param
+from model.string import String
+from model.struct import Struct
 
 
 class GenerateError(Exception):
@@ -56,8 +66,6 @@ class CodeGenerator(object):
 
         """
 
-        namespace = unicode(namespace)
-
         if interface is None:
             raise GenerateError("Given interface is None.")
 
@@ -84,10 +92,10 @@ class CodeGenerator(object):
                     [namespace_close,
                      "}} // {0}\n".format(part)])
 
-        class_name = unicode(os.path.splitext(filename)[0])
+        class_name = os.path.splitext(filename)[0]
         guard = u"__CSMARTFACTORY_{0}_{1}_H__".format(
             class_name.upper(),
-            unicode(uuid.uuid1().hex.capitalize()))
+            uuid.uuid1().hex.capitalize())
         header_file_name = u"".join("{0}.h".format(class_name))
 
         with codecs.open(os.path.join(destination_dir, header_file_name),
@@ -127,14 +135,14 @@ class CodeGenerator(object):
         header_file_name = "".join("{0}_schema.h".format(class_name))
         guard = u"__CSMARTFACTORY_{0}_{1}_HPP__".format(
             class_name.upper(),
-            unicode(uuid.uuid1().hex.capitalize()))
+            uuid.uuid1().hex.capitalize())
         with codecs.open(os.path.join(destination_dir, header_file_name),
                          encoding="utf-8",
                          mode="w") as f_h:
             f_h.write(self._hpp_schema_file_template.substitute(
                 class_name=class_name,
                 guard=guard,
-                header_file_name=unicode("".join("{0}.h".format(class_name))),
+                header_file_name="".join("{0}.h".format(class_name)),
                 namespace_open=namespace_open,
                 class_content=self._gen_h_class(
                     class_name,
@@ -147,7 +155,7 @@ class CodeGenerator(object):
                                       u"".join("{0}_schema.cc".format(class_name))),
                          encoding="utf-8", mode="w") as f_s:
             f_s.write(self._cc_file_template.substitute(
-                header_file_name=unicode(header_file_name),
+                header_file_name=header_file_name,
                 namespace=namespace,
                 class_name=class_name,
                 function_id_items=self._indent_code(function_id_items, 1),
@@ -382,7 +390,7 @@ class CodeGenerator(object):
 
         """
 
-        if type(member.param_type) is Model.Struct:
+        if type(member.param_type) is Struct:
             self._ensure_struct_generated(member.param_type)
 
     def _ensure_struct_generated(self, struct):
@@ -618,7 +626,7 @@ class CodeGenerator(object):
 
         result = u""
         for member in members:
-            if type(member.param_type) is Model.Enum and \
+            if type(member.param_type) is Enum and \
                member.param_type.name not in processed_enums:
                 has_history = self._enum_has_history_present(member)
                 local_var = self._gen_schema_loc_emum_var_name(
@@ -678,7 +686,7 @@ class CodeGenerator(object):
 
                 processed_enums.append(member.param_type.name)
                 result = u"".join([result, u"\n\n"]) if result else u""
-            elif type(member.param_type) is Model.EnumSubset:
+            elif type(member.param_type) is EnumSubset:
                 local_var = self._gen_schema_loc_emum_s_var_name(member.name)
                 result = u"\n".join(
                     [u"".join(
@@ -695,12 +703,12 @@ class CodeGenerator(object):
                              for x in member.param_type.
                              allowed_elements.values()])])
                 result = u"".join([result, u"\n\n"]) if result else u""
-            elif type(member.param_type) is Model.Array:
+            elif type(member.param_type) is Array:
                 result = u"".join(
                     [result, self._gen_schema_loc_decls(
-                        [Model.Param(name=member.param_type.element_type.name
+                        [Param(name=member.param_type.element_type.name
                          if type(member.param_type.element_type) is
-                         Model.EnumSubset else "",
+                         EnumSubset else "",
                             param_type=member.param_type.element_type)],
                         processed_enums)])
 
@@ -793,13 +801,13 @@ class CodeGenerator(object):
 
         """
         code = u""
-        if type(param) is Model.Boolean:
+        if type(param) is Boolean:
             code = self._impl_code_bool_item_template.substitute(
                 params=self._gen_schema_item_param_values(
                     [[u"bool", None if param.default_value is None
                       else u"true" if param.default_value is True else u"false"]]))
-        elif type(param) is Model.Integer:
-            if param.max_value < 2 ** 31:
+        elif type(param) is Integer:
+            if not param.max_value or param.max_value and param.max_value < 2 ** 31:
                 code = self._impl_code_integer_item_template.substitute(
                     type=u"int32_t",
                     params=self._gen_schema_item_param_values(
@@ -815,14 +823,14 @@ class CodeGenerator(object):
                          [u"int64_t", param.default_value]]))
             else:
                 raise GenerateError("Parameter value too large: " + str(param.max_value))
-        elif type(param) is Model.Double:
+        elif type(param) is Float:
             code = self._impl_code_integer_item_template.substitute(
                 type=u"double",
                 params=self._gen_schema_item_param_values(
                     [[u"double", param.min_value],
                      [u"double", param.max_value],
                      [u"double", param.default_value]]))
-        elif type(param) is Model.String:
+        elif type(param) is String:
             code = self._impl_code_string_item_template.substitute(
                 params=self._gen_schema_item_param_values(
                     [[u"size_t", param.min_length],
@@ -830,23 +838,23 @@ class CodeGenerator(object):
                      [u"std::string", u"".join(
                      [u'"', param.default_value, u'"']) if param.default_value
                          is not None else u""]]))
-        elif type(param) is Model.Array:
+        elif type(param) is Array:
             code = self._impl_code_array_item_template.substitute(
                 params=u"".join(
                     [u"".join(
                         [self._gen_schema_item_decl_code(
                             param.element_type,
                             param.element_type.name if type(param.element_type)
-                            is Model.EnumSubset else u"",
+                            is EnumSubset else u"",
                             None),
                             u", "]),
                         self._gen_schema_item_param_values(
                             [[u"size_t", param.min_size],
                              [u"size_t", param.max_size]])]))
-        elif type(param) is Model.Struct:
+        elif type(param) is Struct:
             code = self._impl_code_struct_item_template.substitute(
                 name=param.name)
-        elif type(param) is Model.Enum:
+        elif type(param) is Enum:
             if self._enum_param_type_has_history_present(param):
                 code = self._impl_code_enum_item_with_history_template.substitute(
                     type=param.name,
@@ -871,7 +879,7 @@ class CodeGenerator(object):
                               u"".join([param.name, u"::",
                                         default_value.primary_name]) if
                                default_value is not None else None]])]))
-        elif type(param) is Model.EnumSubset:
+        elif type(param) is EnumSubset:
             code = self._impl_code_enum_item_template.substitute(
                 type=param.enum.name,
                 params=u"".join(
@@ -1046,7 +1054,7 @@ class CodeGenerator(object):
                 deprecated=member.deprecated if member.deprecated is not None else u"false", 
                 removed=member.removed if member.removed is not None else u"false")
         else:
-            print "Warning! History item does not have any version history. Omitting %s" % member.name      
+            print("Warning! History item does not have any version history. Omitting " + member.name)
 
     @staticmethod
     def _gen_schema_item_var_name(member):
@@ -1175,11 +1183,11 @@ class CodeGenerator(object):
         if structs:
             struct_id_enum_elements = collections.OrderedDict()
             for struct in structs:
-                struct_id_enum_elements[struct.name] = Model.EnumElement(
+                struct_id_enum_elements[struct.name] = EnumElement(
                     name=struct.name)
             return u"\n".join(
                 [self._gen_enum(
-                    Model.Enum(name="StructIdentifiers",
+                    Enum(name="StructIdentifiers",
                                elements=struct_id_enum_elements)),
                  u"\n".join([self._gen_enum(x) for x in enums])])
 
@@ -1198,8 +1206,8 @@ class CodeGenerator(object):
 
         """
 
-        enum_elements = enum.elements.values()
-        enum_elements.insert(0, Model.EnumElement(
+        enum_elements = list(enum.elements.values())
+        enum_elements.insert(0, EnumElement(
             name=u"INVALID_ENUM",
             description=None,
             design_description=None,
@@ -1300,7 +1308,7 @@ class CodeGenerator(object):
                                 interface_item_base_classname)
 
         name = interface_item_base.primary_name if \
-            type(interface_item_base) is Model.EnumElement else \
+            type(interface_item_base) is EnumElement else \
             interface_item_base.name
         brief_description = (u" * @brief {0}{1}.\n" if use_doxygen is
                              True else u"// {0}{1}.\n").format(
@@ -1343,7 +1351,7 @@ class CodeGenerator(object):
                               True else u"//\n", todos])
 
         returns = u""
-        if type(interface_item_base) is Model.Function:
+        if type(interface_item_base) is Function:
             returns = u"".join([u" *\n", self._function_return_comment])
 
         template = self._comment_doxygen_template if use_doxygen is \

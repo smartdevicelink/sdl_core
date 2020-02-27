@@ -43,7 +43,7 @@
 #include "utils/rwlock.h"
 #include "utils/timer.h"
 
-#include "resumption/last_state.h"
+#include "resumption/last_state_wrapper.h"
 #include "transport_manager/transport_adapter/connection.h"
 #include "transport_manager/transport_adapter/transport_adapter.h"
 #include "transport_manager/transport_adapter/transport_adapter_controller.h"
@@ -82,8 +82,15 @@ class TransportAdapterImpl : public TransportAdapter,
   TransportAdapterImpl(DeviceScanner* device_scanner,
                        ServerConnectionFactory* server_connection_factory,
                        ClientConnectionListener* client_connection_listener,
-                       resumption::LastState& last_state,
+                       resumption::LastStateWrapperPtr last_state_wrapper,
                        const TransportManagerSettings& settings);
+
+  DEPRECATED
+  TransportAdapterImpl(DeviceScanner* device_scanner,
+                       ServerConnectionFactory* server_connection_factory,
+                       ClientConnectionListener* client_connection_listener,
+                       resumption::LastState& last_state,
+                       const TransportManagerSettings& settings) = delete;
 
   /**
    * @brief Destructor.
@@ -276,13 +283,6 @@ class TransportAdapterImpl : public TransportAdapter,
    */
   void SearchDeviceFailed(const SearchDeviceError& error) OVERRIDE;
 
-  /**
-   * @brief Add device to the container(map), if container doesn't hold it yet.
-   *
-   * @param device Smart pointer to the device.
-   *
-   * @return Smart pointer to the device.
-   */
   DeviceSptr AddDevice(DeviceSptr device) OVERRIDE;
 
   /**
@@ -500,7 +500,7 @@ class TransportAdapterImpl : public TransportAdapter,
    *
    * @param observer - pointer to observer
    */
-  void SetTelemetryObserver(TMTelemetryObserver* observer);
+  void SetTelemetryObserver(TMTelemetryObserver* observer) OVERRIDE;
 
   /**
    * @brief Return Time metric observer
@@ -509,6 +509,12 @@ class TransportAdapterImpl : public TransportAdapter,
    */
   TMTelemetryObserver* GetTelemetryObserver() OVERRIDE;
 #endif  // TELEMETRY_MONITOR
+
+  /**
+   * @brief GetWebEngineDevice
+   * @return shared pointer to WebEngine device
+   */
+  DeviceSptr GetWebEngineDevice() const OVERRIDE;
 
  protected:
   /**
@@ -662,7 +668,7 @@ class TransportAdapterImpl : public TransportAdapter,
 #endif  // TELEMETRY_MONITOR
 
   resumption::LastState& last_state() const {
-    return last_state_;
+    return last_state_wrapper_->get_accessor().GetMutableData();
   }
 
   /**
@@ -680,7 +686,7 @@ class TransportAdapterImpl : public TransportAdapter,
    */
   ClientConnectionListener* client_connection_listener_;
 
-  resumption::LastState& last_state_;
+  resumption::LastStateWrapperPtr last_state_wrapper_;
   const TransportManagerSettings& settings_;
 };
 

@@ -35,6 +35,7 @@
 #include "gtest/gtest.h"
 #include "protocol/raw_message.h"
 #include "resumption/last_state_impl.h"
+#include "resumption/last_state_wrapper_impl.h"
 #include "transport_manager/common.h"
 #include "transport_manager/mock_telemetry_observer.h"
 #include "transport_manager/mock_transport_manager_impl.h"
@@ -79,9 +80,11 @@ class TransportManagerImplTest : public ::testing::Test {
             device_handle_, mac_address_, device_name_, connection_type_) {}
 
   void SetUp() OVERRIDE {
-    resumption::LastStateImpl last_state_("app_storage_folder",
-                                          "app_info_storage");
-    tm_.Init(last_state_);
+    std::shared_ptr<resumption::LastStateWrapperImpl> wrapper =
+        std::make_shared<resumption::LastStateWrapperImpl>(
+            std::make_shared<resumption::LastStateImpl>("app_storage_folder",
+                                                        "app_info_storage"));
+    tm_.Init(wrapper);
     mock_adapter_ = new MockTransportAdapter();
     tm_listener_ = std::make_shared<MockTransportManagerListener>();
 

@@ -117,6 +117,9 @@ class ApplicationManagerImpl;
 
 enum VRTTSSessionChanging { kVRSessionChanging = 0, kTTSSessionChanging };
 
+typedef std::map<protocol_handler::ServiceType, std::set<uint32_t> >
+    ServiceStreamingStatusMap;
+
 struct CommandParametersPermissions;
 typedef std::map<std::string, hmi_apis::Common_TransportType::eType>
     DeviceTypes;
@@ -155,10 +158,14 @@ class ApplicationManagerImpl
                          const policy::PolicySettings& policy_settings);
   ~ApplicationManagerImpl();
 
+  DEPRECATED
+  bool Init(resumption::LastState&,
+            media_manager::MediaManager* media_manager) OVERRIDE;
+
   /**
    * Inits application manager
    */
-  bool Init(resumption::LastState& last_state,
+  bool Init(resumption::LastStateWrapperPtr last_state_wrapper,
             media_manager::MediaManager* media_manager) OVERRIDE;
 
   /**
@@ -175,17 +182,21 @@ class ApplicationManagerImpl
 
   ApplicationSharedPtr active_application() const OVERRIDE;
 
+  ApplicationSharedPtr get_full_or_limited_application() const OVERRIDE;
+
   ApplicationSharedPtr application_by_hmi_app(
       uint32_t hmi_app_id) const OVERRIDE;
   ApplicationSharedPtr application_by_policy_id(
       const std::string& policy_app_id) const OVERRIDE;
-  ApplicationSharedPtr application_by_name(
-      const std::string& app_name) const OVERRIDE;
+  DEPRECATED ApplicationSharedPtr
+  application_by_name(const std::string& app_name) const OVERRIDE;
   ApplicationSharedPtr pending_application_by_policy_id(
       const std::string& policy_app_id) const OVERRIDE;
   ApplicationSharedPtr reregister_application_by_policy_id(
       const std::string& policy_app_id) const OVERRIDE;
 
+  std::vector<ApplicationSharedPtr> applications_by_name(
+      const std::string& app_name) const OVERRIDE;
   std::vector<ApplicationSharedPtr> applications_by_button(
       uint32_t button) OVERRIDE;
   std::vector<ApplicationSharedPtr> applications_with_navi() OVERRIDE;
@@ -206,9 +217,14 @@ class ApplicationManagerImpl
 
   void set_current_audio_source(const uint32_t source) OVERRIDE;
 
-  void OnHMILevelChanged(uint32_t app_id,
-                         mobile_apis::HMILevel::eType from,
-                         mobile_apis::HMILevel::eType to) OVERRIDE;
+  void OnHMIStateChanged(const uint32_t app_id,
+                         const HmiStatePtr from,
+                         const HmiStatePtr to) OVERRIDE;
+
+  void ProcessOnDataStreamingNotification(
+      const protocol_handler::ServiceType service_type,
+      const uint32_t app_id,
+      const bool streaming_data_available) FINAL;
 
   void SendDriverDistractionState(ApplicationSharedPtr application);
 
@@ -393,7 +409,13 @@ class ApplicationManagerImpl
   void CreatePendingApplication(
       const transport_manager::ConnectionUID connection_id,
       const transport_manager::DeviceInfo& device_info,
-      connection_handler::DeviceHandle device_id);
+      connection_handler::DeviceHandle device_id) OVERRIDE;
+
+  void OnWebEngineDeviceCreated() OVERRIDE;
+
+  void CreatePendingLocalApplication(const std::string& policy_app_id) OVERRIDE;
+
+  void RemovePendingApplication(const std::string& policy_app_id) OVERRIDE;
 
   void SetPendingApplicationState(
       const transport_manager::ConnectionUID connection_id,
@@ -647,6 +669,9 @@ class ApplicationManagerImpl
                         const uint32_t corr_id,
                         const int32_t function_id) OVERRIDE;
 
+  void OnQueryAppsRequest(
+      const connection_handler::DeviceHandle device) OVERRIDE;
+
   // Overriden ConnectionHandlerObserver method
   void OnDeviceListUpdated(
       const connection_handler::DeviceMap& device_list) OVERRIDE;
@@ -783,12 +808,13 @@ class ApplicationManagerImpl
   void RemovePolicyObserver(PolicyHandlerObserver* listener);
 
   /**
-   * @brief Checks HMI level and returns true if streaming is allowed
+   * @brief Checks application HMI state and returns true if streaming is
+   * allowed
    * @param app_id Application id
    * @param service_type Service type to check
    * @return True if streaming is allowed, false in other case
    */
-  bool HMILevelAllowsStreaming(
+  bool HMIStateAllowsStreaming(
       uint32_t app_id,
       protocol_handler::ServiceType service_type) const OVERRIDE;
 
@@ -1136,7 +1162,18 @@ class ApplicationManagerImpl
    */
   protocol_handler::MajorProtocolVersion SupportedSDLVersion() const OVERRIDE;
 
+  void ApplyFunctorForEachPlugin(
+      std::function<void(plugin_manager::RPCPlugin&)> functor) OVERRIDE;
+
  private:
+  /**
+   * @brief Adds application to registered applications list and marks it as
+   * registered
+   * @param application Application that should be added to registered
+   * applications list.
+   */
+  void AddAppToRegisteredAppList(const ApplicationSharedPtr application);
+
   /**
    * @brief Removes service status record for service that failed to start
    * @param app Application whose service status record should be removed
@@ -1263,8 +1300,14 @@ class ApplicationManagerImpl
    * @param to the new HMILevel for the certain app.
    */
   void ProcessApp(const uint32_t app_id,
-                  const mobile_apis::HMILevel::eType from,
-                  const mobile_apis::HMILevel::eType to);
+                  const HmiStatePtr from,
+                  const HmiStatePtr to);
+
+  /**
+   * @brief Starts EndStream timer for a specified application
+   * @param app_id Application to process
+   */
+  void StartEndStreamTimer(const uint32_t app_id);
 
   /**
    * @brief Allows to send appropriate message to mobile device.
@@ -1472,11 +1515,12 @@ class ApplicationManagerImpl
    * will send TTS global properties to HMI after timeout
    */
   std::map<uint32_t, date_time::TimeDuration> tts_global_properties_app_list_;
-
+  std::set<connection_handler::DeviceHandle> query_apps_devices_;
   bool audio_pass_thru_active_;
   uint32_t audio_pass_thru_app_id_;
   sync_primitives::Lock audio_pass_thru_lock_;
   sync_primitives::Lock tts_global_properties_app_list_lock_;
+  mutable sync_primitives::Lock query_apps_devices_lock_;
   hmi_apis::Common_DriverDistractionState::eType driver_distraction_state_;
   bool is_vr_session_strated_;
   bool hmi_cooperating_;
@@ -1539,8 +1583,11 @@ class ApplicationManagerImpl
   uint32_t navi_close_app_timeout_;
   uint32_t navi_end_stream_timeout_;
 
-  std::vector<TimerSPtr> timer_pool_;
-  sync_primitives::Lock timer_pool_lock_;
+  std::vector<TimerSPtr> close_app_timer_pool_;
+  std::vector<TimerSPtr> end_stream_timer_pool_;
+  sync_primitives::Lock close_app_timer_pool_lock_;
+  sync_primitives::Lock end_stream_timer_pool_lock_;
+
   mutable sync_primitives::RecursiveLock stopping_application_mng_lock_;
   StateControllerImpl state_ctrl_;
   std::unique_ptr<app_launch::AppLaunchData> app_launch_dto_;
@@ -1567,6 +1614,8 @@ class ApplicationManagerImpl
 
   Timer tts_global_properties_timer_;
 
+  Timer clear_pool_timer_;
+
   bool is_low_voltage_;
 
   uint32_t apps_size_;
@@ -1577,6 +1626,9 @@ class ApplicationManagerImpl
 
   std::unique_ptr<rpc_service::RPCService> rpc_service_;
   std::unique_ptr<rpc_handler::RPCHandler> rpc_handler_;
+
+  ServiceStreamingStatusMap streaming_application_services_;
+  sync_primitives::Lock streaming_services_lock_;
 
 #ifdef BUILD_TESTS
  public:

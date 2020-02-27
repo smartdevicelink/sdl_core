@@ -39,6 +39,7 @@
 #include "application_manager/usage_statistics.h"
 #include "interfaces/MOBILE_API.h"
 #include "resumption/last_state_impl.h"
+#include "resumption/last_state_wrapper_impl.h"
 
 #include "application_manager/resumption_data_test.h"
 #include "formatters/CFormatterJsonBase.h"
@@ -66,8 +67,10 @@ namespace formatters = ns_smart_device_link::ns_json_handler::formatters;
 class ResumptionDataJsonTest : public ResumptionDataTest {
  protected:
   ResumptionDataJsonTest()
-      : last_state_("app_storage_folder", "app_info_storage")
-      , res_json(last_state_, mock_application_manager_) {}
+      : last_state_wrapper_(std::make_shared<resumption::LastStateWrapperImpl>(
+            std::make_shared<resumption::LastStateImpl>("app_storage_folder",
+                                                        "app_info_storage")))
+      , res_json(last_state_wrapper_, mock_application_manager_) {}
   virtual void SetUp() {
     app_mock = std::make_shared<
         NiceMock<application_manager_test::MockApplication> >();
@@ -83,12 +86,14 @@ class ResumptionDataJsonTest : public ResumptionDataTest {
   }
 
   void CheckSavedJson() {
-    Value& dictionary = last_state_.get_dictionary();
+    resumption::LastStateAccessor accessor =
+        last_state_wrapper_->get_accessor();
+    Value dictionary = accessor.GetData().dictionary();
     ASSERT_TRUE(dictionary[am::strings::resumption].isObject());
     ASSERT_TRUE(
         dictionary[am::strings::resumption][am::strings::resume_app_list]
             .isArray());
-    Value& resume_app_list =
+    const Value& resume_app_list =
         dictionary[am::strings::resumption][am::strings::resume_app_list];
     sm::SmartObject res_app_list;
     for (uint32_t i = 0; i < resume_app_list.size(); i++) {
@@ -99,13 +104,16 @@ class ResumptionDataJsonTest : public ResumptionDataTest {
   }
 
   void SetZeroIgnOff() {
-    Value& dictionary = last_state_.get_dictionary();
+    resumption::LastStateAccessor accessor =
+        last_state_wrapper_->get_accessor();
+    Value dictionary = accessor.GetData().dictionary();
     Value& res = dictionary[am::strings::resumption];
     res[am::strings::last_ign_off_time] = 0;
-    last_state_.SaveStateToFileSystem();
+    accessor.GetMutableData().set_dictionary(dictionary);
+    accessor.GetMutableData().SaveToFileSystem();
   }
 
-  resumption::LastStateImpl last_state_;
+  std::shared_ptr<resumption::LastStateWrapperImpl> last_state_wrapper_;
   ResumptionDataJson res_json;
 };
 

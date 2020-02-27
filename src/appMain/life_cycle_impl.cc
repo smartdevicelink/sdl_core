@@ -34,8 +34,8 @@
 #include "application_manager/system_time/system_time_handler_impl.h"
 #include "config_profile/profile.h"
 #include "resumption/last_state_impl.h"
+#include "resumption/last_state_wrapper_impl.h"
 #include "utils/signals.h"
-
 #ifdef ENABLE_SECURITY
 #include "application_manager/policies/policy_handler.h"
 #include "security_manager/crypto_manager_impl.h"
@@ -67,7 +67,6 @@ LifeCycleImpl::LifeCycleImpl(const profile::Profile& profile)
     , hmi_handler_(NULL)
     , hmi_message_adapter_(NULL)
     , media_manager_(NULL)
-    , last_state_(NULL)
 #ifdef TELEMETRY_MONITOR
     , telemetry_monitor_(NULL)
 #endif  // TELEMETRY_MONITOR
@@ -80,12 +79,16 @@ LifeCycleImpl::LifeCycleImpl(const profile::Profile& profile)
 
 bool LifeCycleImpl::StartComponents() {
   LOG4CXX_AUTO_TRACE(logger_);
-  DCHECK(!last_state_);
-  last_state_ = new resumption::LastStateImpl(profile_.app_storage_folder(),
-                                              profile_.app_info_storage());
+  DCHECK(!last_state_wrapper_);
+
+  auto last_state = std::make_shared<resumption::LastStateImpl>(
+      profile_.app_storage_folder(), profile_.app_info_storage());
+  last_state_wrapper_ =
+      std::make_shared<resumption::LastStateWrapperImpl>(last_state);
 
   DCHECK(!transport_manager_);
-  transport_manager_ = new transport_manager::TransportManagerDefault(profile_);
+  transport_manager_ = new transport_manager::TransportManagerDefault(
+      profile_, transport_manager::TransportAdapterFactory());
 
   DCHECK(!connection_handler_);
   connection_handler_ = new connection_handler::ConnectionHandlerImpl(
@@ -119,7 +122,7 @@ bool LifeCycleImpl::StartComponents() {
   media_manager_ = new media_manager::MediaManagerImpl(*app_manager_, profile_);
   app_manager_->set_connection_handler(connection_handler_);
   app_manager_->AddPolicyObserver(protocol_handler_);
-  if (!app_manager_->Init(*last_state_, media_manager_)) {
+  if (!app_manager_->Init(last_state_wrapper_, media_manager_)) {
     LOG4CXX_ERROR(logger_, "Application manager init failed.");
     return false;
   }
@@ -170,7 +173,8 @@ bool LifeCycleImpl::StartComponents() {
   // It's important to initialise TM after setting up listener chain
   // [TM -> CH -> AM], otherwise some events from TM could arrive at nowhere
   app_manager_->set_protocol_handler(protocol_handler_);
-  if (transport_manager::E_SUCCESS != transport_manager_->Init(*last_state_)) {
+  if (transport_manager::E_SUCCESS !=
+      transport_manager_->Init(last_state_wrapper_)) {
     LOG4CXX_ERROR(logger_, "Transport manager init failed.");
     return false;
   }
@@ -318,10 +322,8 @@ void LifeCycleImpl::StopComponents() {
   delete connection_handler_;
   connection_handler_ = NULL;
 
-  LOG4CXX_INFO(logger_, "Destroying Last State");
-  DCHECK(last_state_);
-  delete last_state_;
-  last_state_ = NULL;
+  LOG4CXX_INFO(logger_, "Destroying Last State.");
+  last_state_wrapper_.reset();
 
   LOG4CXX_INFO(logger_, "Destroying Application Manager.");
   DCHECK(app_manager_);

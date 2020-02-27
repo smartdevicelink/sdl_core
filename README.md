@@ -15,6 +15,12 @@ The Core component of SDL runs on a vehicle's computing system (head unit). Core
 
 Pull Requests Welcome!
 
+## Environment
+Currently supported:
+* Ubuntu Linux 16.04 with GCC 5.4.x
+* Ubuntu Linux 18.04 with GCC 7.3.x
+* [C++11 standard](https://github.com/smartdevicelink/sdl_evolution/issues/132)
+
 ## Getting Started
 See the [Getting Started](https://smartdevicelink.com/en/guides/core/getting-started/) guide in the developer portal for instructions on how to build and start SDL Core.
 

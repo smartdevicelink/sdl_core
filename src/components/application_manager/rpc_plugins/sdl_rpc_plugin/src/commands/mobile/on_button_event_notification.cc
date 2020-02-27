@@ -105,11 +105,10 @@ void OnButtonEventNotification::Run() {
     const auto window_id = app->GetSoftButtonWindowID(custom_btn_id);
     (*message_)[strings::msg_params][strings::window_id] = window_id;
     const auto window_hmi_level = app->hmi_level(window_id);
-    if ((mobile_api::HMILevel::HMI_FULL != window_hmi_level) &&
-        (mobile_api::HMILevel::HMI_LIMITED != window_hmi_level)) {
+    if ((mobile_api::HMILevel::HMI_NONE == window_hmi_level)) {
       LOG4CXX_WARN(logger_,
-                   "CUSTOM_BUTTON OnButtonEvent notification is allowed only "
-                       << "in FULL or LIMITED hmi level");
+                   "CUSTOM_BUTTON OnButtonEvent notification is not allowed in "
+                   "NONE hmi level");
       return;
     }
 

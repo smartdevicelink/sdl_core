@@ -34,13 +34,10 @@
 #define SRC_COMPONENTS_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_MANAGER_H_
 
 #include "protocol/common.h"
+#include "resumption/last_state_wrapper.h"
 #include "transport_manager/common.h"
 #include "transport_manager/transport_adapter/transport_adapter_event.h"
 #include "transport_manager/transport_manager_listener.h"
-
-namespace resumption {
-class LastState;
-}
 
 namespace transport_manager {
 
@@ -56,11 +53,14 @@ class TransportManager {
    **/
   virtual ~TransportManager() {}
 
+  DEPRECATED
+  virtual int Init(resumption::LastState& last_state) = 0;
+
   /**
    * @brief Initialize transport manager.
    * @return Error code.
    */
-  virtual int Init(resumption::LastState& last_state) = 0;
+  virtual int Init(resumption::LastStateWrapperPtr last_state_wrapper) = 0;
 
   /**
    * @brief Reinitializes transport manager
@@ -215,6 +215,18 @@ class TransportManager {
    */
   virtual int PerformActionOnClients(
       const TransportAction required_action) const = 0;
+
+  /**
+   * @brief Called when websocket server transport adapter is available.
+   * Creates WebSocketDevice for WebEngine and add it to the device list
+   */
+  virtual void CreateWebEngineDevice() = 0;
+
+  /**
+   * @brief GetWebEngineDeviceInfo
+   * @return device info for WebEngine device
+   */
+  virtual const DeviceInfo& GetWebEngineDeviceInfo() const = 0;
 };
 }  // namespace transport_manager
 #endif  // SRC_COMPONENTS_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_MANAGER_H_

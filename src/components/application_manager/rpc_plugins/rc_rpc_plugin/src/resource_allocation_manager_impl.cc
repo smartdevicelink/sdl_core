@@ -156,6 +156,7 @@ bool ResourceAllocationManagerImpl::IsUserLocationValid(
     ModuleUid& module, application_manager::ApplicationSharedPtr app) {
   LOG4CXX_AUTO_TRACE(logger_);
   const auto extension = RCHelpers::GetRCExtension(*app);
+  DCHECK_OR_RETURN(extension, false);
   const auto user_location = extension->GetUserLocation();
   const auto module_service_area =
       rc_capabilities_manager_.GetModuleServiceArea(module);

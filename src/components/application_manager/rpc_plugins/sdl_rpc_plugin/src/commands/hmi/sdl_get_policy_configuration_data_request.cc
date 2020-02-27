@@ -131,10 +131,11 @@ smart_objects::SmartObject SDLGetPolicyConfigurationDataRequest::GetValueParam(
 
   auto put_element_in_value_array = [&value](const Json::Value& element,
                                              const int32_t index) {
-    Json::FastWriter writer;
+    Json::StreamWriterBuilder writer_builder;
+    writer_builder["indentation"] = "";
     std::string str;
     if (element.type() == Json::objectValue) {
-      str = writer.write(element);
+      str = Json::writeString(writer_builder, element);
       clear_new_line_symbol(str);
     } else {
       str = element.asString();

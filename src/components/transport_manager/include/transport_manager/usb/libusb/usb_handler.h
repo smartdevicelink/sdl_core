@@ -76,6 +76,7 @@ class UsbHandler {
    public:
     explicit UsbHandlerDelegate(UsbHandler* handler);
     void threadMain() OVERRIDE;
+    void exitThreadMain() OVERRIDE;
 
    private:
     UsbHandler* handler_;

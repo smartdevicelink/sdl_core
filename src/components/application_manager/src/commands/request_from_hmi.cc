@@ -90,12 +90,13 @@ void RequestFromHMI::SendResponse(
   FillCommonParametersOfSO(*message, correlation_id, function_id);
   (*message)[strings::params][strings::message_type] = MessageType::kResponse;
   (*message)[strings::params][hmi_response::code] = result_code;
-  (*message)[strings::msg_params][strings::success] = success;
-  (*message)[strings::msg_params][strings::result_code] = result_code;
 
   if (response_params) {
     (*message)[strings::msg_params] = *response_params;
   }
+
+  (*message)[strings::msg_params][strings::success] = success;
+  (*message)[strings::msg_params][strings::result_code] = result_code;
 
   rpc_service_.ManageHMICommand(message, source);
 }

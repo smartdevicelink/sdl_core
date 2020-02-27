@@ -321,6 +321,8 @@ class PolicyHandler : public PolicyHandlerInterface,
                               const PermissionConsent& permissions) OVERRIDE;
 #endif
 
+  void OnSystemRequestReceived() const OVERRIDE;
+
   /**
    * @brief Get appropriate message parameters and send them with response
    * to HMI
@@ -425,6 +427,8 @@ class PolicyHandler : public PolicyHandlerInterface,
   custom_str::CustomString GetAppName(
       const std::string& policy_app_id) OVERRIDE;
 
+  std::vector<std::string> GetApplicationPolicyIDs() const OVERRIDE;
+
   /**
    * @brief Get a list of enabled cloud applications
    * @param enabled_apps List filled with the policy app id of each enabled
@@ -432,6 +436,13 @@ class PolicyHandler : public PolicyHandlerInterface,
    */
   void GetEnabledCloudApps(
       std::vector<std::string>& enabled_apps) const OVERRIDE;
+
+  /**
+   * @brief Get a list of enabled local applications
+   * @return enabled_apps List filled with the policy app id of each enabled
+   * local application
+   */
+  std::vector<std::string> GetEnabledLocalApps() const OVERRIDE;
 
   /**
    * @brief Checks if a given application is an enabled cloud application
@@ -442,32 +453,23 @@ class PolicyHandler : public PolicyHandlerInterface,
   const bool CheckCloudAppEnabled(
       const std::string& policy_app_id) const OVERRIDE;
 
-  /**
-   * @brief Get cloud app policy information, all fields that aren't set for a
-   * given app will be filled with empty strings
-   * @param policy_app_id Unique application id
-   * @param enabled Whether or not the app is enabled
-   * @param endpoint Filled with the endpoint used to connect to the cloud
-   * application
-   * @param certificate Filled with the certificate used to for creating a
-   * secure connection to the cloud application
-   * @param auth_token Filled with the token used for authentication when
-   * reconnecting to the cloud app
-   * @param cloud_transport_type Filled with the transport type used by the
-   * cloud application (ex. "WSS")
-   * @param hybrid_app_preference Filled with the hybrid app preference for the
-   * cloud application set by the user
-   */
-  bool GetCloudAppParameters(const std::string& policy_app_id,
-                             bool& enabled,
-                             std::string& endpoint,
-                             std::string& certificate,
-                             std::string& auth_token,
-                             std::string& cloud_transport_type,
-                             std::string& hybrid_app_preference) const OVERRIDE;
+  bool GetAppProperties(
+      const std::string& policy_app_id,
+      policy::AppProperties& out_app_properties) const OVERRIDE;
 
   void OnAuthTokenUpdated(const std::string& policy_app_id,
                           const std::string& auth_token) OVERRIDE;
+
+  void OnSetAppProperties(
+      const smart_objects::SmartObject& properties) OVERRIDE;
+
+  AppPropertiesState GetAppPropertiesStatus(
+      const smart_objects::SmartObject& properties,
+      const std::string& app_id) const OVERRIDE;
+
+  bool IsNewApplication(const std::string& policy_app_id) const OVERRIDE;
+
+  void OnLocalAppAdded() OVERRIDE;
 
   /**
    * @brief Callback for when a SetCloudAppProperties message is received
@@ -529,6 +531,9 @@ class PolicyHandler : public PolicyHandlerInterface,
   virtual void SendOnAppPermissionsChanged(
       const AppPermissions& permissions,
       const std::string& device_id,
+      const std::string& policy_app_id) const OVERRIDE;
+
+  void SendOnAppPropertiesChangeNotification(
       const std::string& policy_app_id) const OVERRIDE;
 
   virtual void OnPTExchangeNeeded() OVERRIDE;

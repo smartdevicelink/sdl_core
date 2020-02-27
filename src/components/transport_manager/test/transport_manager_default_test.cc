@@ -32,15 +32,23 @@
 
 #include "transport_manager/transport_manager_default.h"
 #include "gtest/gtest.h"
+#include "resumption/last_state_wrapper_impl.h"
 #include "resumption/mock_last_state.h"
+#include "transport_manager/bt/mock_bluetooth_transport_adapter.h"
+#include "transport_manager/cloud/mock_cloud_websocket_transport_adapter.h"
 #include "transport_manager/mock_transport_manager_settings.h"
+#include "transport_manager/tcp/mock_tcp_transport_adapter.h"
+#include "transport_manager/transport_adapter/mock_device.h"
+#include "transport_manager/transport_adapter/mock_transport_adapter_listener.h"
 #include "transport_manager/transport_manager.h"
+#include "transport_manager/usb/mock_usb_aoa_adapter.h"
 
 namespace test {
 namespace components {
 namespace transport_manager_test {
 
 using resumption_test::MockLastState;
+using ::testing::_;
 using ::testing::NiceMock;
 using ::testing::Return;
 using ::testing::ReturnRef;
@@ -57,6 +65,12 @@ const std::string kTransportManager = "TransportManager";
 const std::string kTcpAdapter = "TcpAdapter";
 const std::string kBluetoothAdapter = "BluetoothAdapter";
 const std::string kDevices = "devices";
+const uint16_t kPort = 12345u;
+const std::string kAddress = "127.0.0.1";
+const std::string kServerCertPath = "server_certificate.crt";
+const std::string kServerCACertPath = "ca-certificate.crt";
+const std::string kWSServerKeyPathKey = "WSServerKeyPath";
+const std::string kWSServerCACertPath = "WSServerCACertificatePath";
 std::vector<uint8_t> kBTUUID = {0x93,
                                 0x6D,
                                 0xA0,
@@ -75,117 +89,229 @@ std::vector<uint8_t> kBTUUID = {0x93,
                                 0xA8};
 }  // namespace
 
-TEST(TestTransportManagerDefault, Init_LastStateNotUsed) {
-  MockTransportManagerSettings transport_manager_settings;
-  transport_manager::TransportManagerDefault transport_manager(
-      transport_manager_settings);
+class TestTransportManagerDefault : public ::testing::Test {
+ public:
+  TestTransportManagerDefault()
+      : transport_manager_settings_()
+      , mock_last_state_(std::make_shared<MockLastState>())
+      , unique_tcp_dev_name_("unique_tcp_device_name")
+      , dev_id_("device_id")
+      , tcp_adapter_port_(1u)
+      , network_interface_("test_iface")
+      , last_state_wrapper_(std::make_shared<resumption::LastStateWrapperImpl>(
+            mock_last_state_)) {}
 
-  NiceMock<MockLastState> mock_last_state;
-  Json::Value custom_dictionary = Json::Value();
+  void SetUp() OVERRIDE {
+    EXPECT_CALL(transport_manager_settings_,
+                transport_manager_tcp_adapter_network_interface())
+        .WillRepeatedly(ReturnRef(network_interface_));
 
-  ON_CALL(mock_last_state, get_dictionary())
-      .WillByDefault(ReturnRef(custom_dictionary));
+    // Replace creation of real transport adapters by mock objects
+    // to be able to check related function calls
+    mock_bt_ta_ = new MockBluetoothTransportAdapter();
+    mock_tcp_ta_ = new MockTCPTransportAdapter(
+        tcp_adapter_port_, last_state_wrapper_, transport_manager_settings_);
+    mock_usb_aoa_ta_ =
+        new MockUsbAoaAdapter(last_state_wrapper_, transport_manager_settings_);
+    mock_cloud_websocket_ta_ = new MockCloudWebsocketTransportAdapter(
+        last_state_wrapper_, transport_manager_settings_);
 
-  EXPECT_CALL(transport_manager_settings, use_last_state())
-      .WillRepeatedly(Return(false));
-  EXPECT_CALL(transport_manager_settings, transport_manager_tcp_adapter_port())
-      .WillRepeatedly(Return(12345u));
-  std::string network_interface = "";
-  EXPECT_CALL(transport_manager_settings,
-              transport_manager_tcp_adapter_network_interface())
-      .WillRepeatedly(ReturnRef(network_interface));
-  EXPECT_CALL(transport_manager_settings, bluetooth_uuid())
-      .WillRepeatedly(Return(kBTUUID.data()));
+    TransportAdapterFactory ta_factory;
+#ifdef BLUETOOTH_SUPPORT
+    ta_factory.ta_bluetooth_creator_ =
+        [&](resumption::LastStateWrapperPtr& last_state_wrapper,
+            const TransportManagerSettings& settings) {
+          UNUSED(last_state_wrapper);
+          UNUSED(settings);
+          return mock_bt_ta_;
+        };
+#endif
+    ta_factory.ta_tcp_creator_ =
+        [&](const uint16_t port,
+            resumption::LastStateWrapperPtr& last_state_wrapper,
+            const TransportManagerSettings& settings) {
+          UNUSED(port);
+          UNUSED(last_state_wrapper);
+          UNUSED(settings);
+          return mock_tcp_ta_;
+        };
+#if defined(USB_SUPPORT)
+    ta_factory.ta_usb_creator_ =
+        [&](resumption::LastStateWrapperPtr& last_state_wrapper,
+            const TransportManagerSettings& settings) {
+          UNUSED(last_state_wrapper);
+          UNUSED(settings);
+          return mock_usb_aoa_ta_;
+        };
+#endif
+#if defined(CLOUD_APP_WEBSOCKET_TRANSPORT_SUPPORT)
+    ta_factory.ta_cloud_creator_ =
+        [&](resumption::LastStateWrapperPtr& last_state_wrapper,
+            const TransportManagerSettings& settings) {
+          UNUSED(last_state_wrapper);
+          UNUSED(settings);
+          return mock_cloud_websocket_ta_;
+        };
+#endif
+    transport_manager_ = std::unique_ptr<TransportManagerDefault>(
+        new TransportManagerDefault(transport_manager_settings_, ta_factory));
+  }
 
-  std::string dummy_parameter;
-  EXPECT_CALL(transport_manager_settings, aoa_filter_manufacturer())
-      .WillRepeatedly(ReturnRef(dummy_parameter));
-  EXPECT_CALL(transport_manager_settings, aoa_filter_model_name())
-      .WillRepeatedly(ReturnRef(dummy_parameter));
-  EXPECT_CALL(transport_manager_settings, aoa_filter_description())
-      .WillRepeatedly(ReturnRef(dummy_parameter));
-  EXPECT_CALL(transport_manager_settings, aoa_filter_version())
-      .WillRepeatedly(ReturnRef(dummy_parameter));
-  EXPECT_CALL(transport_manager_settings, aoa_filter_uri())
-      .WillRepeatedly(ReturnRef(dummy_parameter));
-  EXPECT_CALL(transport_manager_settings, aoa_filter_serial_number())
-      .WillRepeatedly(ReturnRef(dummy_parameter));
-  transport_manager.Init(mock_last_state);
-  transport_manager.Stop();
-}
+  void ExpectationsSettings_TM(const bool use_last_state);
+  void ExpectationsBluetooth_TA();
+  void ExpectationsTCP_TA();
+  void ExpectationsUSB_TA();
+  void ExpectationsCloudWebsocket_TA();
 
-TEST(TestTransportManagerDefault, Init_LastStateUsed) {
-  MockTransportManagerSettings transport_manager_settings;
-  transport_manager::TransportManagerDefault transport_manager(
-      transport_manager_settings);
+ protected:
+  MockTransportManagerSettings transport_manager_settings_;
+  std::unique_ptr<TransportManagerDefault> transport_manager_;
+  std::shared_ptr<MockLastState> mock_last_state_;
+  Json::Value custom_dictionary_;
+  const std::string unique_tcp_dev_name_;
+  const std::string dev_id_;
+  const uint16_t tcp_adapter_port_;
+  std::string network_interface_;
+  std::string dummy_parameter_;
+  // Arrange necessary transport adapters mock objects
+  MockBluetoothTransportAdapter* mock_bt_ta_;
+  MockTCPTransportAdapter* mock_tcp_ta_;
+  MockUsbAoaAdapter* mock_usb_aoa_ta_;
+  MockCloudWebsocketTransportAdapter* mock_cloud_websocket_ta_;
+  std::shared_ptr<resumption::LastStateWrapperImpl> last_state_wrapper_;
+};
 
-  NiceMock<MockLastState> mock_last_state;
-  Json::Value custom_dictionary;
+void TestTransportManagerDefault::ExpectationsSettings_TM(
+    const bool use_last_state) {
+  // Arrange TM Settings expectations
   Json::Value tcp_device;
-  tcp_device[kDeviceName] = "unique_tcp_device_name";
-  tcp_device[kDeviceAddress] = "127.0.0.1";
-  tcp_device[kDeviceApplications][0][kApplicationPort] = kApplicationPortValue;
-  Json::Value bluetooth_device;
-  bluetooth_device[kDeviceName] = "unique_bluetooth_device_name";
-  bluetooth_device[kDeviceAddress] = "AB:CD:EF:GH:IJ:KL";
-  bluetooth_device[kDeviceApplications][0][kApplicationRfcomm] =
-      kApplicationRfcommValue;
-  custom_dictionary[kTransportManager][kTcpAdapter][kDevices][0] = tcp_device;
-  custom_dictionary[kTransportManager][kBluetoothAdapter][kDevices][0] =
-      bluetooth_device;
-
-  ON_CALL(mock_last_state, get_dictionary())
-      .WillByDefault(ReturnRef(custom_dictionary));
-
-  EXPECT_CALL(transport_manager_settings, use_last_state())
-      .WillRepeatedly(Return(true));
-  EXPECT_CALL(transport_manager_settings, transport_manager_tcp_adapter_port())
-      .WillRepeatedly(Return(12345u));
-  std::string network_interface = "";
-  EXPECT_CALL(transport_manager_settings,
-              transport_manager_tcp_adapter_network_interface())
-      .WillRepeatedly(ReturnRef(network_interface));
-  EXPECT_CALL(transport_manager_settings, bluetooth_uuid())
-      .WillRepeatedly(Return(kBTUUID.data()));
-  transport_manager.Init(mock_last_state);
-  transport_manager.Stop();
-}
-
-TEST(TestTransportManagerDefault, Init_LastStateUsed_InvalidPort) {
-  MockTransportManagerSettings transport_manager_settings;
-  transport_manager::TransportManagerDefault transport_manager(
-      transport_manager_settings);
-
-  NiceMock<MockLastState> mock_last_state;
-  Json::Value custom_dictionary;
-  Json::Value tcp_device;
-  tcp_device[kDeviceName] = "unique_tcp_device_name";
-  tcp_device[kDeviceAddress] = "127.0.0.1";
+  tcp_device[kDeviceName] = unique_tcp_dev_name_;
+  tcp_device[kDeviceAddress] = kAddress;
   tcp_device[kDeviceApplications][0][kApplicationPort] = "1";
   Json::Value bluetooth_device;
-  bluetooth_device[kDeviceName] = "unique_bluetooth_device_name";
+
+  std::string unique_bt_dev_name("unique_bluetooth_device_name");
+  bluetooth_device[kDeviceName] = unique_bt_dev_name;
   bluetooth_device[kDeviceAddress] = "AB:CD:EF:GH:IJ:KL";
   bluetooth_device[kDeviceApplications][0][kApplicationRfcomm] =
       kApplicationRfcommValue;
-  custom_dictionary[kTransportManager][kTcpAdapter][kDevices][0] = tcp_device;
-  custom_dictionary[kTransportManager][kBluetoothAdapter][kDevices][0] =
+  custom_dictionary_[kTransportManager][kTcpAdapter][kDevices][0] = tcp_device;
+  custom_dictionary_[kTransportManager][kBluetoothAdapter][kDevices][0] =
       bluetooth_device;
+  ON_CALL(transport_manager_settings_, websocket_server_port())
+      .WillByDefault(Return(kPort));
+  ON_CALL(transport_manager_settings_, websocket_server_address())
+      .WillByDefault(ReturnRef(kAddress));
+  ON_CALL(transport_manager_settings_, ws_server_cert_path())
+      .WillByDefault(ReturnRef(kServerCertPath));
+  ON_CALL(transport_manager_settings_, ws_server_key_path())
+      .WillByDefault(ReturnRef(kWSServerKeyPathKey));
+  ON_CALL(transport_manager_settings_, ws_server_ca_cert_path())
+      .WillByDefault(ReturnRef(kWSServerCACertPath));
+  ON_CALL(*mock_last_state_, dictionary())
+      .WillByDefault(Return(custom_dictionary_));
+  ON_CALL(*mock_last_state_, get_dictionary())
+      .WillByDefault(ReturnRef(custom_dictionary_));
 
-  ON_CALL(mock_last_state, get_dictionary())
-      .WillByDefault(ReturnRef(custom_dictionary));
+  EXPECT_CALL(transport_manager_settings_, use_last_state())
+      .WillRepeatedly(Return(use_last_state));
+  EXPECT_CALL(transport_manager_settings_, transport_manager_tcp_adapter_port())
+      .WillRepeatedly(Return(tcp_adapter_port_));
 
-  EXPECT_CALL(transport_manager_settings, use_last_state())
-      .WillRepeatedly(Return(true));
-  EXPECT_CALL(transport_manager_settings, transport_manager_tcp_adapter_port())
-      .WillRepeatedly(Return(1u));
-  std::string network_interface = "";
-  EXPECT_CALL(transport_manager_settings,
-              transport_manager_tcp_adapter_network_interface())
-      .WillRepeatedly(ReturnRef(network_interface));
-  EXPECT_CALL(transport_manager_settings, bluetooth_uuid())
+  EXPECT_CALL(transport_manager_settings_, bluetooth_uuid())
       .WillRepeatedly(Return(kBTUUID.data()));
-  transport_manager.Init(mock_last_state);
-  transport_manager.Stop();
+
+  EXPECT_CALL(transport_manager_settings_, aoa_filter_manufacturer())
+      .WillRepeatedly(ReturnRef(dummy_parameter_));
+  EXPECT_CALL(transport_manager_settings_, aoa_filter_model_name())
+      .WillRepeatedly(ReturnRef(dummy_parameter_));
+  EXPECT_CALL(transport_manager_settings_, aoa_filter_description())
+      .WillRepeatedly(ReturnRef(dummy_parameter_));
+  EXPECT_CALL(transport_manager_settings_, aoa_filter_version())
+      .WillRepeatedly(ReturnRef(dummy_parameter_));
+  EXPECT_CALL(transport_manager_settings_, aoa_filter_uri())
+      .WillRepeatedly(ReturnRef(dummy_parameter_));
+  EXPECT_CALL(transport_manager_settings_, aoa_filter_serial_number())
+      .WillRepeatedly(ReturnRef(dummy_parameter_));
+}
+
+void TestTransportManagerDefault::ExpectationsBluetooth_TA() {
+  // Expectations for Mock of bluetooth transport adapter
+#ifdef BLUETOOTH_SUPPORT
+  EXPECT_CALL(*mock_bt_ta_, AddListener(_));
+  EXPECT_CALL(*mock_bt_ta_, IsInitialised()).WillRepeatedly(Return(true));
+  EXPECT_CALL(*mock_bt_ta_, Init())
+      .WillRepeatedly(Return(TransportAdapter::OK));
+  EXPECT_CALL(*mock_bt_ta_, Terminate());
+#endif
+}
+
+void TestTransportManagerDefault::ExpectationsTCP_TA() {
+  // Expectations for Mock of TCP transport adapter
+  EXPECT_CALL(*mock_tcp_ta_, AddListener(_));
+  EXPECT_CALL(*mock_tcp_ta_, IsInitialised()).WillRepeatedly(Return(true));
+  EXPECT_CALL(*mock_tcp_ta_, Init())
+      .WillRepeatedly(Return(TransportAdapter::OK));
+
+  std::shared_ptr<MockDevice> mockdev =
+      std::make_shared<MockDevice>(dev_id_, unique_tcp_dev_name_);
+  EXPECT_CALL(*mock_tcp_ta_, FindDevice(unique_tcp_dev_name_))
+      .WillRepeatedly(Return(mockdev));
+  const int app_handle = 1;
+  EXPECT_CALL(*mock_tcp_ta_, Connect(unique_tcp_dev_name_, app_handle))
+      .Times(0);
+  EXPECT_CALL(*mock_tcp_ta_, Terminate());
+}
+
+void TestTransportManagerDefault::ExpectationsUSB_TA() {
+  // Expectations for Mock of USB transport adapter
+#if defined(USB_SUPPORT)
+  EXPECT_CALL(*mock_usb_aoa_ta_, AddListener(_));
+  EXPECT_CALL(*mock_usb_aoa_ta_, IsInitialised()).WillRepeatedly(Return(true));
+  EXPECT_CALL(*mock_usb_aoa_ta_, Init())
+      .WillRepeatedly(Return(TransportAdapter::OK));
+  EXPECT_CALL(*mock_usb_aoa_ta_, Terminate());
+#endif
+}
+
+void TestTransportManagerDefault::ExpectationsCloudWebsocket_TA() {
+  // Expectations for Mock of Cloud Websocket transport adapter
+#if defined(CLOUD_APP_WEBSOCKET_TRANSPORT_SUPPORT)
+  EXPECT_CALL(*mock_cloud_websocket_ta_, AddListener(_));
+  EXPECT_CALL(*mock_cloud_websocket_ta_, IsInitialised())
+      .WillRepeatedly(Return(true));
+  EXPECT_CALL(*mock_cloud_websocket_ta_, Init())
+      .WillRepeatedly(Return(TransportAdapter::OK));
+  EXPECT_CALL(*mock_cloud_websocket_ta_, Terminate());
+#endif
+}
+
+TEST_F(TestTransportManagerDefault, Init_LastStateNotUsed) {
+  const bool use_last_state = false;
+  ExpectationsSettings_TM(use_last_state);
+
+  ExpectationsBluetooth_TA();
+  ExpectationsTCP_TA();
+  ExpectationsUSB_TA();
+  ExpectationsCloudWebsocket_TA();
+
+  // Act
+  transport_manager_->Init(last_state_wrapper_);
+  transport_manager_->Stop();
+}
+
+TEST_F(TestTransportManagerDefault, Init_LastStateUsed) {
+  const bool use_last_state = true;
+  ExpectationsSettings_TM(use_last_state);
+
+  ExpectationsBluetooth_TA();
+  ExpectationsTCP_TA();
+  ExpectationsUSB_TA();
+  ExpectationsCloudWebsocket_TA();
+
+  // Act
+  transport_manager_->Init(last_state_wrapper_);
+  transport_manager_->Stop();
 }
 
 }  // namespace transport_manager_test

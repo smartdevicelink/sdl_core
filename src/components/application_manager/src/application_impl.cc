@@ -132,7 +132,7 @@ ApplicationImpl::ApplicationImpl(
           protocol_handler::MajorProtocolVersion::PROTOCOL_VERSION_3)
     , is_voice_communication_application_(false)
     , is_resuming_(false)
-    , deferred_resumption_hmi_level_(mobile_api::HMILevel::eType::INVALID_ENUM)
+    , deferred_resumption_hmi_level_(mobile_api::HMILevel::INVALID_ENUM)
     , is_hash_changed_during_suspend_(false)
     , video_stream_retry_number_(0)
     , audio_stream_retry_number_(0)
@@ -144,6 +144,7 @@ ApplicationImpl::ApplicationImpl(
           "AudioStreamSuspend",
           new ::timer::TimerTaskImpl<ApplicationImpl>(
               this, &ApplicationImpl::OnAudioStreamSuspend))
+    , hybrid_app_preference_(mobile_api::HybridAppPreference::INVALID_ENUM)
     , vi_lock_ptr_(std::make_shared<sync_primitives::Lock>())
     , button_lock_ptr_(std::make_shared<sync_primitives::Lock>())
     , application_manager_(application_manager) {
@@ -630,7 +631,8 @@ void ApplicationImpl::SuspendStreaming(
     sync_primitives::AutoLock lock(audio_streaming_suspended_lock_);
     audio_streaming_suspended_ = true;
   }
-  MessageHelper::SendOnDataStreaming(service_type, false, application_manager_);
+  application_manager_.ProcessOnDataStreamingNotification(
+      service_type, app_id(), false);
 }
 
 void ApplicationImpl::WakeUpStreaming(
@@ -643,23 +645,27 @@ void ApplicationImpl::WakeUpStreaming(
   sync_primitives::AutoLock lock(streaming_stop_lock_);
 
   if (ServiceType::kMobileNav == service_type) {
-    sync_primitives::AutoLock lock(video_streaming_suspended_lock_);
-    if (video_streaming_suspended_) {
-      application_manager_.OnAppStreaming(app_id(), service_type, true);
-      MessageHelper::SendOnDataStreaming(
-          ServiceType::kMobileNav, true, application_manager_);
-      video_streaming_suspended_ = false;
+    {  // reduce the range of video_streaming_suspended_lock_
+      sync_primitives::AutoLock lock(video_streaming_suspended_lock_);
+      if (video_streaming_suspended_) {
+        application_manager_.OnAppStreaming(app_id(), service_type, true);
+        application_manager_.ProcessOnDataStreamingNotification(
+            service_type, app_id(), true);
+        video_streaming_suspended_ = false;
+      }
     }
     video_stream_suspend_timer_.Start(
         timer_len == 0 ? video_stream_suspend_timeout_ : timer_len,
         timer::kPeriodic);
   } else if (ServiceType::kAudio == service_type) {
-    sync_primitives::AutoLock lock(audio_streaming_suspended_lock_);
-    if (audio_streaming_suspended_) {
-      application_manager_.OnAppStreaming(app_id(), service_type, true);
-      MessageHelper::SendOnDataStreaming(
-          ServiceType::kAudio, true, application_manager_);
-      audio_streaming_suspended_ = false;
+    {  // reduce the range of audio_streaming_suspended_lock_
+      sync_primitives::AutoLock lock(audio_streaming_suspended_lock_);
+      if (audio_streaming_suspended_) {
+        application_manager_.OnAppStreaming(app_id(), service_type, true);
+        application_manager_.ProcessOnDataStreamingNotification(
+            service_type, app_id(), true);
+        audio_streaming_suspended_ = false;
+      }
     }
     audio_stream_suspend_timer_.Start(
         timer_len == 0 ? audio_stream_suspend_timeout_ : timer_len,
