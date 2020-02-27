@@ -88,6 +88,8 @@ class MockTransportManager : public ::transport_manager::TransportManager,
 
   MOCK_METHOD1(SetTelemetryObserver,
                void(transport_manager::TMTelemetryObserver* observer));
+  MOCK_METHOD0(CreateWebEngineDevice, void());
+  MOCK_CONST_METHOD0(GetWebEngineDeviceInfo, transport_manager::DeviceInfo&());
 };
 
 }  // namespace transport_manager_test

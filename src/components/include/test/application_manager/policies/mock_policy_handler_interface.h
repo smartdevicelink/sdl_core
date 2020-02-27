@@ -206,6 +206,8 @@ class MockPolicyHandlerInterface : public policy::PolicyHandlerInterface {
                      void(const policy::AppPermissions& permissions,
                           const std::string& device_id,
                           const std::string& policy_app_id));
+  MOCK_CONST_METHOD1(SendOnAppPropertiesChangeNotification,
+                     void(const std::string& policy_app_id));
   MOCK_METHOD0(OnPTExchangeNeeded, void());
   MOCK_METHOD1(GetAvailableApps, void(std::queue<std::string>& apps));
   MOCK_METHOD3(
@@ -242,18 +244,24 @@ class MockPolicyHandlerInterface : public policy::PolicyHandlerInterface {
                      const std::vector<std::string>(
                          const transport_manager::DeviceHandle& device_handle,
                          const std::string& policy_app_id));
+  MOCK_CONST_METHOD0(GetApplicationPolicyIDs, std::vector<std::string>());
   MOCK_CONST_METHOD1(GetEnabledCloudApps,
                      void(std::vector<std::string>& enabled_apps));
   MOCK_CONST_METHOD1(CheckCloudAppEnabled,
                      const bool(const std::string& policy_app_id));
-  MOCK_CONST_METHOD7(GetCloudAppParameters,
+  MOCK_CONST_METHOD0(GetEnabledLocalApps, std::vector<std::string>());
+  MOCK_CONST_METHOD2(GetAppProperties,
                      bool(const std::string& policy_app_id,
-                          bool& enabled,
-                          std::string& endpoint,
-                          std::string& certificate,
-                          std::string& auth_token,
-                          std::string& cloud_transport_type,
-                          std::string& hybrid_app_preference));
+                          policy::AppProperties& out_app_properties));
+
+  MOCK_METHOD1(OnSetAppProperties,
+               void(const smart_objects::SmartObject& message));
+  MOCK_CONST_METHOD2(
+      GetAppPropertiesStatus,
+      AppPropertiesState(const smart_objects::SmartObject& properties,
+                         const std::string& app_id));
+  MOCK_CONST_METHOD1(IsNewApplication, bool(const std::string& application_id));
+  MOCK_METHOD0(OnLocalAppAdded, void());
   MOCK_METHOD1(OnSetCloudAppProperties,
                void(const smart_objects::SmartObject& message));
   MOCK_CONST_METHOD2(

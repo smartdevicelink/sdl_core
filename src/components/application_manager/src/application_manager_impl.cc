@@ -66,6 +66,7 @@
 #include <time.h>
 #include <boost/filesystem.hpp>
 #include "application_manager/application_impl.h"
+#include "encryption/hashing.h"
 #include "interfaces/HMI_API_schema.h"
 #include "media_manager/media_manager.h"
 #include "policy/usage_statistics/counter.h"
@@ -102,7 +103,9 @@ DeviceTypes devicesType = {
     std::make_pair(std::string("CARPLAY_WIRELESS_IOS"),
                    hmi_apis::Common_TransportType::WIFI),
     std::make_pair(std::string("CLOUD_WEBSOCKET"),
-                   hmi_apis::Common_TransportType::CLOUD_WEBSOCKET)};
+                   hmi_apis::Common_TransportType::CLOUD_WEBSOCKET),
+    std::make_pair(std::string("WEBENGINE_WEBSOCKET"),
+                   hmi_apis::Common_TransportType::WEBENGINE_WEBSOCKET)};
 }
 
 /**
@@ -840,6 +843,11 @@ void ApplicationManagerImpl::ConnectToDevice(const std::string& device_mac) {
 void ApplicationManagerImpl::OnHMIStartedCooperation() {
   LOG4CXX_AUTO_TRACE(logger_);
   hmi_cooperating_ = true;
+
+#ifdef WEBSOCKET_SERVER_TRANSPORT_SUPPORT
+  connection_handler_->CreateWebEngineDevice();
+#endif  // WEBSOCKET_SERVER_TRANSPORT_SUPPORT
+
   MessageHelper::SendGetSystemInfoRequest(*this);
 
   std::shared_ptr<smart_objects::SmartObject> is_vr_ready(
@@ -946,20 +954,9 @@ void ApplicationManagerImpl::DisconnectCloudApp(ApplicationSharedPtr app) {
   LOG4CXX_TRACE(logger_, "Cloud app support is disabled. Exiting function");
   return;
 #else
-  std::string endpoint;
-  std::string certificate;
-  std::string auth_token;
-  std::string cloud_transport_type;
-  std::string hybrid_app_preference;
-  bool enabled = true;
   std::string policy_app_id = app->policy_app_id();
-  GetPolicyHandler().GetCloudAppParameters(policy_app_id,
-                                           enabled,
-                                           endpoint,
-                                           certificate,
-                                           auth_token,
-                                           cloud_transport_type,
-                                           hybrid_app_preference);
+  policy::AppProperties app_properties;
+  GetPolicyHandler().GetAppProperties(policy_app_id, app_properties);
   if (app->IsRegistered() && app->is_cloud_app()) {
     LOG4CXX_DEBUG(logger_, "Disabled app is registered, unregistering now");
     GetRPCService().ManageMobileCommand(
@@ -974,12 +971,12 @@ void ApplicationManagerImpl::DisconnectCloudApp(ApplicationSharedPtr app) {
   connection_handler().RemoveCloudAppDevice(app->device());
 
   transport_manager::transport_adapter::CloudAppProperties properties{
-      endpoint,
-      certificate,
-      enabled,
-      auth_token,
-      cloud_transport_type,
-      hybrid_app_preference};
+      app_properties.endpoint,
+      app_properties.certificate,
+      app_properties.enabled,
+      app_properties.auth_token,
+      app_properties.transport_type,
+      app_properties.hybrid_app_preference};
   // Create device in pending state
   LOG4CXX_DEBUG(logger_, "Re-adding the cloud app device");
   connection_handler().AddCloudAppDevice(policy_app_id, properties);
@@ -999,12 +996,6 @@ void ApplicationManagerImpl::RefreshCloudAppInformation() {
   GetPolicyHandler().GetEnabledCloudApps(enabled_apps);
   std::vector<std::string>::iterator enabled_it = enabled_apps.begin();
   std::vector<std::string>::iterator enabled_end = enabled_apps.end();
-  std::string endpoint;
-  std::string certificate;
-  std::string auth_token;
-  std::string cloud_transport_type;
-  std::string hybrid_app_preference_str;
-  bool enabled = true;
 
   // Store old device map and clear the current map
   pending_device_map_lock_ptr_->Acquire();
@@ -1012,20 +1003,20 @@ void ApplicationManagerImpl::RefreshCloudAppInformation() {
   std::map<std::string, std::string> old_device_map = pending_device_map_;
   pending_device_map_ = std::map<std::string, std::string>();
   // Create a device for each newly enabled cloud app
+  policy::AppProperties app_properties;
   for (; enabled_it != enabled_end; ++enabled_it) {
-    GetPolicyHandler().GetCloudAppParameters(*enabled_it,
-                                             enabled,
-                                             endpoint,
-                                             certificate,
-                                             auth_token,
-                                             cloud_transport_type,
-                                             hybrid_app_preference_str);
+    GetPolicyHandler().GetAppProperties(*enabled_it, app_properties);
+
+    if (app_properties.endpoint.empty()) {
+      continue;
+    }
 
     mobile_apis::HybridAppPreference::eType hybrid_app_preference =
         mobile_apis::HybridAppPreference::INVALID_ENUM;
     smart_objects::EnumConversionHelper<
         mobile_apis::HybridAppPreference::eType>::
-        StringToEnum(hybrid_app_preference_str, &hybrid_app_preference);
+        StringToEnum(app_properties.hybrid_app_preference,
+                     &hybrid_app_preference);
 
     auto policy_id = *enabled_it;
     policy::StringArray nicknames;
@@ -1057,22 +1048,22 @@ void ApplicationManagerImpl::RefreshCloudAppInformation() {
       }
     }
 
-    pending_device_map_.insert(
-        std::pair<std::string, std::string>(endpoint, policy_id));
+    pending_device_map_.insert(std::pair<std::string, std::string>(
+        app_properties.endpoint, policy_id));
     // Determine which endpoints were disabled by erasing all enabled apps from
     // the old device list
-    auto old_device_it = old_device_map.find(endpoint);
+    auto old_device_it = old_device_map.find(app_properties.endpoint);
     if (old_device_it != old_device_map.end()) {
       old_device_map.erase(old_device_it);
     }
 
     transport_manager::transport_adapter::CloudAppProperties properties{
-        endpoint,
-        certificate,
-        enabled,
-        auth_token,
-        cloud_transport_type,
-        hybrid_app_preference_str};
+        app_properties.endpoint,
+        app_properties.certificate,
+        app_properties.enabled,
+        app_properties.auth_token,
+        app_properties.transport_type,
+        app_properties.hybrid_app_preference};
 
     // If the device was disconnected, this will reinitialize the device
     connection_handler().AddCloudAppDevice(policy_id, properties);
@@ -1094,7 +1085,7 @@ void ApplicationManagerImpl::RefreshCloudAppInformation() {
     const std::string app_icon_dir(settings_.app_icons_folder());
     const std::string full_icon_path(app_icon_dir + "/" + policy_id);
     if (!file_system::FileExists(full_icon_path)) {
-      AppIconInfo icon_info(endpoint, false);
+      AppIconInfo icon_info(app_properties.endpoint, false);
       LOG4CXX_DEBUG(
           logger_,
           "Inserting cloud app into icon map: " << app_icon_map_.size());
@@ -1158,12 +1149,6 @@ void ApplicationManagerImpl::CreatePendingApplication(
     connection_handler::DeviceHandle device_id) {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  std::string endpoint;
-  std::string certificate;
-  std::string auth_token;
-  std::string cloud_transport_type;
-  std::string hybrid_app_preference_str;
-  bool enabled = true;
   std::string name = device_info.name();
   pending_device_map_lock_ptr_->Acquire();
   auto it = pending_device_map_.find(name);
@@ -1207,34 +1192,29 @@ void ApplicationManagerImpl::CreatePendingApplication(
   if (file_system::FileExists(full_icon_path)) {
     application->set_app_icon_path(full_icon_path);
   }
-
-  GetPolicyHandler().GetCloudAppParameters(policy_app_id,
-                                           enabled,
-                                           endpoint,
-                                           certificate,
-                                           auth_token,
-                                           cloud_transport_type,
-                                           hybrid_app_preference_str);
+  policy::AppProperties app_properties;
+  GetPolicyHandler().GetAppProperties(policy_app_id, app_properties);
 
   mobile_apis::HybridAppPreference::eType hybrid_app_preference_enum;
 
-  bool convert_result = smart_objects::EnumConversionHelper<
+  const bool convert_result = smart_objects::EnumConversionHelper<
       mobile_apis::HybridAppPreference::eType>::
-      StringToEnum(hybrid_app_preference_str, &hybrid_app_preference_enum);
+      StringToEnum(app_properties.hybrid_app_preference,
+                   &hybrid_app_preference_enum);
 
-  if (!hybrid_app_preference_str.empty() && !convert_result) {
-    LOG4CXX_ERROR(
-        logger_,
-        "Could not convert string to enum: " << hybrid_app_preference_str);
+  if (!app_properties.hybrid_app_preference.empty() && !convert_result) {
+    LOG4CXX_ERROR(logger_,
+                  "Could not convert string to enum: "
+                      << app_properties.hybrid_app_preference);
     return;
   }
 
   application->set_hmi_application_id(GenerateNewHMIAppID());
-  application->set_cloud_app_endpoint(endpoint);
-  application->set_auth_token(auth_token);
-  application->set_cloud_app_transport_type(cloud_transport_type);
+  application->set_cloud_app_endpoint(app_properties.endpoint);
+  application->set_auth_token(app_properties.auth_token);
+  application->set_cloud_app_transport_type(app_properties.transport_type);
   application->set_hybrid_app_preference(hybrid_app_preference_enum);
-  application->set_cloud_app_certificate(certificate);
+  application->set_cloud_app_certificate(app_properties.certificate);
 
   sync_primitives::AutoLock lock(apps_to_register_list_lock_ptr_);
   LOG4CXX_DEBUG(logger_,
@@ -1243,6 +1223,106 @@ void ApplicationManagerImpl::CreatePendingApplication(
   LOG4CXX_DEBUG(logger_,
                 "apps_to_register_ size after: " << apps_to_register_.size());
 
+  SendUpdateAppList();
+}
+
+void ApplicationManagerImpl::RemovePendingApplication(
+    const std::string& policy_app_id) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  sync_primitives::AutoLock lock(apps_to_register_list_lock_ptr_);
+  PolicyAppIdPredicate finder(policy_app_id);
+  auto app_it =
+      std::find_if(apps_to_register_.begin(), apps_to_register_.end(), finder);
+
+  if (apps_to_register_.end() == app_it) {
+    LOG4CXX_WARN(
+        logger_,
+        "Unable to find app to remove (" << policy_app_id << "), skipping");
+    return;
+  }
+
+  apps_to_register_.erase(app_it);
+  LOG4CXX_DEBUG(logger_,
+                "Remove " << policy_app_id
+                          << " from apps_to_register_. new size = "
+                          << apps_to_register_.size());
+}
+
+void ApplicationManagerImpl::CreatePendingLocalApplication(
+    const std::string& policy_app_id) {
+  policy::StringArray nicknames;
+  policy::StringArray app_hmi_types;
+
+  GetPolicyHandler().GetInitialAppData(
+      policy_app_id, &nicknames, &app_hmi_types);
+
+  if (nicknames.empty()) {
+    LOG4CXX_ERROR(logger_,
+                  "Cloud/Web App " << policy_app_id << "missing nickname");
+    return;
+  }
+
+  const std::string display_name = nicknames[0];
+
+  const auto web_engine_device = connection_handler_->GetWebEngineDeviceInfo();
+
+  ApplicationSharedPtr application(
+      new ApplicationImpl(0,
+                          policy_app_id,
+                          web_engine_device.mac_address(),
+                          web_engine_device.device_handle(),
+                          custom_str::CustomString(display_name),
+                          GetPolicyHandler().GetStatisticManager(),
+                          *this));
+
+  const std::string app_icon_dir(settings_.app_icons_folder());
+  const std::string full_icon_path(app_icon_dir + "/" + policy_app_id);
+  if (file_system::FileExists(full_icon_path)) {
+    application->set_app_icon_path(full_icon_path);
+  }
+  policy::AppProperties app_properties;
+  GetPolicyHandler().GetAppProperties(policy_app_id, app_properties);
+
+  mobile_apis::HybridAppPreference::eType hybrid_app_preference_enum;
+  const bool convert_result = smart_objects::EnumConversionHelper<
+      mobile_apis::HybridAppPreference::eType>::
+      StringToEnum(app_properties.hybrid_app_preference,
+                   &hybrid_app_preference_enum);
+
+  if (!app_properties.hybrid_app_preference.empty() && !convert_result) {
+    LOG4CXX_ERROR(logger_,
+                  "Could not convert string to enum: "
+                      << app_properties.hybrid_app_preference);
+    return;
+  }
+
+  application->set_hmi_application_id(GenerateNewHMIAppID());
+  application->set_cloud_app_endpoint(app_properties.endpoint);
+  application->set_auth_token(app_properties.auth_token);
+  application->set_cloud_app_transport_type(app_properties.transport_type);
+  application->set_hybrid_app_preference(hybrid_app_preference_enum);
+  application->set_cloud_app_certificate(app_properties.certificate);
+
+  sync_primitives::AutoLock lock(apps_to_register_list_lock_ptr_);
+  apps_to_register_.insert(application);
+  LOG4CXX_DEBUG(logger_,
+                "Insert " << application->name().c_str()
+                          << " to apps_to_register_. new size = "
+                          << apps_to_register_.size());
+}
+
+void ApplicationManagerImpl::OnWebEngineDeviceCreated() {
+  LOG4CXX_AUTO_TRACE(logger_);
+  const auto enabled_local_apps = policy_handler_->GetEnabledLocalApps();
+
+  if (enabled_local_apps.empty()) {
+    LOG4CXX_DEBUG(logger_, "No enabled local apps present");
+    return;
+  }
+
+  for (auto policy_app_id : enabled_local_apps) {
+    CreatePendingLocalApplication(policy_app_id);
+  }
   SendUpdateAppList();
 }
 
@@ -3061,18 +3141,24 @@ void ApplicationManagerImpl::UnregisterAllApplications() {
 
 void ApplicationManagerImpl::RemoveAppsWaitingForRegistration(
     const connection_handler::DeviceHandle handle) {
+  LOG4CXX_AUTO_TRACE(logger_);
   DevicePredicate device_finder(handle);
   apps_to_register_list_lock_ptr_->Acquire();
-  AppsWaitRegistrationSet::iterator it_app = std::find_if(
-      apps_to_register_.begin(), apps_to_register_.end(), device_finder);
+  std::vector<ApplicationSharedPtr> apps_to_remove;
+  std::copy_if(apps_to_register_.begin(),
+               apps_to_register_.end(),
+               std::back_inserter(apps_to_remove),
+               device_finder);
 
-  while (apps_to_register_.end() != it_app) {
-    LOG4CXX_DEBUG(
-        logger_,
-        "Waiting app: " << (*it_app)->name().c_str() << " is removed.");
-    apps_to_register_.erase(it_app);
-    it_app = std::find_if(
-        apps_to_register_.begin(), apps_to_register_.end(), device_finder);
+  const auto enabled_local_apps = policy_handler_->GetEnabledLocalApps();
+  for (auto app : apps_to_remove) {
+    const bool is_app_enabled =
+        helpers::in_range(enabled_local_apps, app->policy_app_id());
+    if (!is_app_enabled) {
+      LOG4CXX_DEBUG(logger_,
+                    "Waiting app: " << app->name().c_str() << " is removed.");
+      apps_to_register_.erase(app);
+    }
   }
 
   apps_to_register_list_lock_ptr_->Release();
@@ -3191,6 +3277,14 @@ void ApplicationManagerImpl::UnregisterApplication(
         RemoveAppsWaitingForRegistration(handle);
       }
     }
+    const auto enabled_local_apps = policy_handler_->GetEnabledLocalApps();
+    if (helpers::in_range(enabled_local_apps, app_to_remove->policy_app_id())) {
+      LOG4CXX_DEBUG(logger_,
+                    "Enabled local app has been unregistered. Re-create "
+                    "pending application");
+      CreatePendingLocalApplication(app_to_remove->policy_app_id());
+    }
+
     RefreshCloudAppInformation();
     SendUpdateAppList();
   }

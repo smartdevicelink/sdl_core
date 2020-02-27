@@ -667,28 +667,14 @@ class PolicyManagerImpl : public PolicyManager {
       std::vector<std::string>& enabled_apps) const OVERRIDE;
 
   /**
-   * @brief Get cloud app policy information, all fields that aren't set for a
-   * given app will be filled with empty strings
-   * @param policy_app_id Unique application id
-   * @param enabled Whether or not the app is enabled
-   * @param endpoint Filled with the endpoint used to connect to the cloud
-   * application
-   * @param certificate Filled with the certificate used to for creating a
-   * secure connection to the cloud application
-   * @param auth_token Filled with the token used for authentication when
-   * reconnecting to the cloud app
-   * @param cloud_transport_type Filled with the transport type used by the
-   * cloud application (ex. "WSS")
-   * @param hybrid_app_preference Filled with the hybrid app preference for the
-   * cloud application set by the user
+   * @brief Get a list of enabled local applications
+   * @return enabled_apps List filled with the policy app id of each enabled
+   * local application
    */
-  bool GetCloudAppParameters(const std::string& policy_app_id,
-                             bool& enabled,
-                             std::string& endpoint,
-                             std::string& certificate,
-                             std::string& auth_token,
-                             std::string& cloud_transport_type,
-                             std::string& hybrid_app_preference) const OVERRIDE;
+  std::vector<std::string> GetEnabledLocalApps() const OVERRIDE;
+
+  bool GetAppProperties(const std::string& policy_app_id,
+                        AppProperties& out_app_properties) const OVERRIDE;
 
   /**
    * @ brief Initialize new cloud app in the policy table
@@ -921,6 +907,10 @@ class PolicyManagerImpl : public PolicyManager {
    */
   void OnSystemRequestReceived() OVERRIDE;
 
+  void OnLocalAppAdded() OVERRIDE;
+
+  bool IsNewApplication(const std::string& application_id) const OVERRIDE;
+
  protected:
   /**
    * @brief Parse policy table content and convert to PT object
@@ -1037,13 +1027,6 @@ class PolicyManagerImpl : public PolicyManager {
                                  DeviceConsent device_consent);
 
   /**
-   * @brief Check if certain application already in policy db.
-   * @param policy application id.
-   * @return true if application presents false otherwise.
-   */
-  bool IsNewApplication(const std::string& application_id) const;
-
-  /**
    * Checks existing and permissions of AppStorageFolder
    * @return true if AppStorageFolder exists and has permissions read/write
    */
@@ -1123,6 +1106,9 @@ class PolicyManagerImpl : public PolicyManager {
    */
   void SendAppPermissionsChanged(const std::string& device_id,
                                  const std::string& application_id) OVERRIDE;
+
+  void SendOnAppPropertiesChangeNotification(
+      const std::string& policy_app_id) const OVERRIDE;
 
   /**
    * @brief notify listener of updated auth token for a given policy id
@@ -1340,6 +1326,8 @@ class PolicyManagerImpl : public PolicyManager {
    * @brief Flag for notifying that PTU was started
    */
   bool send_on_update_sent_out_;
+
+  std::vector<std::string> app_properties_changed_list_;
 
   /**
    * @brief Flag for notifying that invalid PTU should be triggered
