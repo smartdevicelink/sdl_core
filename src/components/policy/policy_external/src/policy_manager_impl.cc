@@ -558,9 +558,7 @@ void PolicyManagerImpl::OnPTUFinished(const PtProcessingResult ptu_result) {
 
   if (HasApplicationForPTU()) {
     update_status_manager_.OnExistedApplicationAdded(true);
-  }
-
-  if (PtProcessingResult::kNewPtRequired == ptu_result) {
+  } else if (PtProcessingResult::kNewPtRequired == ptu_result) {
     LOG4CXX_DEBUG(logger_, "New PTU interation is required");
     ForcePTExchange();
     return;

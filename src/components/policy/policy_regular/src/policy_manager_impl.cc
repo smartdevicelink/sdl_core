@@ -1337,9 +1337,7 @@ void PolicyManagerImpl::ResetRetrySequence(
   LOG4CXX_AUTO_TRACE(logger_);
   sync_primitives::AutoLock auto_lock(retry_sequence_lock_);
   retry_sequence_index_ = 0;
-  if (listener_->CanUpdate()) {
-    ptu_requested_ = false;
-  }
+  ptu_requested_ = false;
   if (ResetRetryCountType::kResetWithStatusUpdate == reset_type) {
     update_status_manager_.OnResetRetrySequence();
   }
