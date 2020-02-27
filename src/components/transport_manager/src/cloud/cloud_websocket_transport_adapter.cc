@@ -44,11 +44,12 @@ namespace transport_adapter {
 CREATE_LOGGERPTR_GLOBAL(logger_, "TransportManager")
 
 CloudWebsocketTransportAdapter::CloudWebsocketTransportAdapter(
-    resumption::LastState& last_state, const TransportManagerSettings& settings)
+    resumption::LastStateWrapperPtr last_state_wrapper,
+    const TransportManagerSettings& settings)
     : TransportAdapterImpl(NULL,
                            new CloudWebsocketConnectionFactory(this),
                            NULL,
-                           last_state,
+                           last_state_wrapper,
                            settings) {}
 
 CloudWebsocketTransportAdapter::~CloudWebsocketTransportAdapter() {}

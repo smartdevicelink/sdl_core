@@ -70,7 +70,7 @@ class RCConsentManager {
   virtual rc_rpc_plugin::rc_rpc_types::ModuleConsent GetModuleConsent(
       const std::string& app_id,
       const std::string& mac_address,
-      const rc_rpc_types::ModuleUid& module_id) const = 0;
+      const rc_rpc_types::ModuleUid& module_id) = 0;
 
   /**
    * @brief Remove modules consents from LastState if they exist

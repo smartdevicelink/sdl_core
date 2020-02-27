@@ -47,11 +47,6 @@
 #include "application_manager/plugin_manager/rpc_plugin_manager.h"
 #include "application_manager/state_controller.h"
 #include "policy/policy_types.h"
-#include "telemetry_monitor/telemetry_observable.h"
-
-namespace resumption {
-class LastState;
-}
 
 namespace app_launch {
 class AppLaunchCtrl;
@@ -136,10 +131,14 @@ class ApplicationManager {
  public:
   virtual ~ApplicationManager() {}
 
+  DEPRECATED
+  virtual bool Init(resumption::LastState&,
+                    media_manager::MediaManager* media_manager) = 0;
+
   /**
    * Inits application manager
    */
-  virtual bool Init(resumption::LastState& last_state,
+  virtual bool Init(resumption::LastStateWrapperPtr last_state_wrapper,
                     media_manager::MediaManager* media_manager) = 0;
 
   /**

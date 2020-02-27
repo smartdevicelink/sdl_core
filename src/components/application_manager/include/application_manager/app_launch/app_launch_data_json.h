@@ -35,8 +35,7 @@
 
 #include <memory>
 #include "application_manager/app_launch/app_launch_data_impl.h"
-#include "resumption/last_state.h"
-#include "smart_objects/smart_object.h"
+#include "resumption/last_state_wrapper.h"
 #include "utils/lock.h"
 #include "utils/macro.h"
 
@@ -53,7 +52,12 @@ class AppLaunchDataJson : public AppLaunchDataImpl {
    * @brief Constructor of AppLaunchDataJson object
    */
   AppLaunchDataJson(const AppLaunchSettings& settings,
+                    resumption::LastStateWrapperPtr last_state_wrapper);
+
+  DEPRECATED
+  AppLaunchDataJson(const AppLaunchSettings& settings,
                     resumption::LastState& last_state);
+
   /**
    * @brief allows to destroy AppLaunchDataJson object
    */
@@ -88,8 +92,14 @@ class AppLaunchDataJson : public AppLaunchDataImpl {
    * @param app_data - searching filled in object
    * @param founded_index - referenceto index of founded record
    * in case it wasn't found it'll be -1
+   * @param dictionary - data dictionary where all necessary info stored
    * @return  pointer to json list object
    */
+  Json::Value& GetApplicationListAndIndex(const ApplicationData& app_data,
+                                          int32_t& found_index,
+                                          Json::Value& dictionary) const;
+
+  DEPRECATED
   Json::Value& GetApplicationListAndIndex(const ApplicationData& app_data,
                                           int32_t& founded_index) const;
 
@@ -117,27 +127,22 @@ class AppLaunchDataJson : public AppLaunchDataImpl {
       const std::string& dev_mac) const OVERRIDE;
 
   /**
-   * @return pointer to LastState functionality
-   */
-  resumption::LastState& last_state() const {
-    return last_state_;
-  }
-
-  /**
    * @brief delete record with oldest timestamp
    * @return true in success cases and false othrewise
    */
   bool DeleteOldestAppData();
 
   /**
+   * @param dictionary - data dictionary where all necessary info stored
    * @return pointer to AppLaunch data block in Json file
    */
-  Json::Value& GetSavedApplicationDataList() const;
+  Json::Value& GetSavedApplicationDataList(Json::Value& dictionary) const;
 
   /**
+   * @param dictionary - data dictionary where all necessary info stored
    * @return pointer to AppLaunch records block in Json file
    */
-  Json::Value& GetApplicationData() const;
+  Json::Value& GetApplicationData(Json::Value& dictionary) const;
 
   /**
    * @brief lock to protected common data
@@ -147,7 +152,7 @@ class AppLaunchDataJson : public AppLaunchDataImpl {
   /**
    * @brief ponter to Last State object
    */
-  resumption::LastState& last_state_;
+  resumption::LastStateWrapperPtr last_state_wrapper_;
 
   DISALLOW_COPY_AND_ASSIGN(AppLaunchDataJson);
 };

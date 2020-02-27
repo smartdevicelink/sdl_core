@@ -45,7 +45,7 @@ namespace application_manager_test {
 class MockAppServiceManager : public application_manager::AppServiceManager {
  public:
   MockAppServiceManager(application_manager::ApplicationManager& app_manager,
-                        resumption::LastState& last_state)
+                        resumption::LastStateWrapperPtr last_state)
       : application_manager::AppServiceManager(app_manager, last_state) {}
   MOCK_METHOD3(
       PublishAppService,

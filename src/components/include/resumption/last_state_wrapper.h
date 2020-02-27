@@ -1,8 +1,5 @@
 /*
- * \file bluetooth_transport_adapter.h
- * \brief BluetoothAdapter class header file.
- *
- * Copyright (c) 2013, Ford Motor Company
+ * Copyright (c) 2019, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,54 +30,28 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_BLUETOOTH_BLUETOOTH_TRANSPORT_ADAPTER_H_
-#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_BLUETOOTH_BLUETOOTH_TRANSPORT_ADAPTER_H_
+#ifndef SRC_COMPONENTS_INCLUDE_RESUMPTION_LAST_STATE_WRAPPER_H_
+#define SRC_COMPONENTS_INCLUDE_RESUMPTION_LAST_STATE_WRAPPER_H_
 
-#include "transport_manager/transport_adapter/transport_adapter_impl.h"
+#include <memory>
 
-namespace transport_manager {
-namespace transport_adapter {
+#include "resumption/last_state.h"
+#include "utils/mutable_data_accessor.h"
 
-/**
- * @brief Transport adapter that use bluetooth transport.
- */
-class BluetoothTransportAdapter : public TransportAdapterImpl {
+namespace resumption {
+class LastStateWrapper;
+typedef std::shared_ptr<LastStateWrapper> LastStateWrapperPtr;
+typedef MutableDataAccessor<LastState> LastStateAccessor;
+
+class LastStateWrapper {
  public:
   /**
-   * @brief Constructor.
+   * @brief Getter for providing exclusive access to LastState instance
+   * @return accessor with ability to access to LastState instance
    */
-  BluetoothTransportAdapter(resumption::LastStateWrapperPtr last_state_wrapper,
-                            const TransportManagerSettings& settings);
-
-  DEPRECATED
-  BluetoothTransportAdapter(resumption::LastState&,
-                            const TransportManagerSettings& settings);
-
-  /**
-   * @brief Destructor.
-   */
-  virtual ~BluetoothTransportAdapter();
-
- protected:
-  /**
-   * @brief Return type of device.
-   */
-  virtual DeviceType GetDeviceType() const;
-
-  /**
-   * @brief Store adapter state in last state singleton
-   */
-  virtual void Store() const;
-
-  /**
-   * @brief Restore adapter state from last state singleton
-   *
-   * @return True on success false otherwise
-   */
-  virtual bool Restore();
+  virtual LastStateAccessor get_accessor() const = 0;
 };
 
-}  // namespace transport_adapter
-}  // namespace transport_manager
+}  // namespace resumption
 
-#endif  // SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_BLUETOOTH_BLUETOOTH_TRANSPORT_ADAPTER_H_
+#endif  // SRC_COMPONENTS_INCLUDE_RESUMPTION_LAST_STATE_WRAPPER_H_

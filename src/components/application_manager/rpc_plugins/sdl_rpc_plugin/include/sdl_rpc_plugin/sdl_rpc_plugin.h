@@ -48,6 +48,13 @@ class SDLRPCPlugin : public plugins::RPCPlugin {
             app_mngr::rpc_service::RPCService& rpc_service,
             app_mngr::HMICapabilities& hmi_capabilities,
             policy::PolicyHandlerInterface& policy_handler,
+            resumption::LastStateWrapperPtr last_state) OVERRIDE;
+
+  DEPRECATED
+  bool Init(app_mngr::ApplicationManager& app_manager,
+            app_mngr::rpc_service::RPCService& rpc_service,
+            app_mngr::HMICapabilities& hmi_capabilities,
+            policy::PolicyHandlerInterface& policy_handler,
             resumption::LastState& last_state) OVERRIDE;
 
   bool IsAbleToProcess(
