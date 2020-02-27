@@ -24,6 +24,8 @@ After setting up SDL Core, you will need to connect it to an external HMI. The H
   1. The [Generic HMI](https://github.com/smartdevicelink/generic_hmi) (preferred) is a reference implementation for an SDL-connected HMI, including examples of many of the UI elements and templates available to SDL applications.
   2. The [SDL HMI](https://github.com/smartdevicelink/sdl_hmi) emulates a full infotainment system which includes a simplified SDL component.
 
+See the [HMI Development Guide](https://smartdevicelink.com/en/guides/core/integrating-your-hmi/sdl-core-and-hmi-communication/) for more information on building your own HMI.
+
 ## Manticore
 If you are just developing an SDL-connected application and simply want an environment to test it in, it is not necessary to build SDL Core from scratch. You can use our [Manticore](https://smartdevicelink.com/resources/manticore/) project first, which creates a testing environment in the cloud using SDL Core and the Generic HMI.
 
