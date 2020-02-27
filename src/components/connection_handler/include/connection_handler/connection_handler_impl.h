@@ -689,8 +689,6 @@ class ConnectionHandlerImpl
    */
   Connection* ending_connection_;
 
-  std::string vin_code_;
-
 #ifdef BUILD_TESTS
   // Methods for test usage
  public:

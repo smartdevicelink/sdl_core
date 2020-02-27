@@ -75,8 +75,7 @@ ConnectionHandlerImpl::ConnectionHandlerImpl(
     , connection_list_deleter_(&connection_list_)
     , start_service_context_map_lock_()
     , start_service_context_map_()
-    , ending_connection_(NULL)
-    , vin_code_("") {}
+    , ending_connection_(NULL) {}
 
 ConnectionHandlerImpl::~ConnectionHandlerImpl() {
   LOG4CXX_AUTO_TRACE(logger_);
