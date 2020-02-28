@@ -128,7 +128,8 @@ class PolicyListener {
   virtual void OnCertificateUpdated(const std::string& certificate_data) = 0;
 
   /**
-   * @brief OnPTUTimeOut the callback which signals if PTU timeout occured
+   * @brief OnPTUTimeOut the callback which is performed when PTU timeout
+   * occurred
    */
   virtual void OnPTUTimeOut() = 0;
 

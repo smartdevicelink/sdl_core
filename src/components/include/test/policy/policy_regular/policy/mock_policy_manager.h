@@ -212,6 +212,7 @@ class MockPolicyManager : public PolicyManager {
   MOCK_METHOD1(SaveUpdateStatusRequired, void(bool is_update_needed));
   MOCK_METHOD0(OnAppsSearchStarted, void());
   MOCK_METHOD1(OnAppsSearchCompleted, void(const bool trigger_ptu));
+  MOCK_METHOD1(UpdatePTUReadyAppsCount, void(const uint32_t new_app_count));
   MOCK_METHOD2(OnAppRegisteredOnMobile,
                void(const std::string& device_id,
                     const std::string& application_id));

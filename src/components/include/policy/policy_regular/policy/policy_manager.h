@@ -525,6 +525,12 @@ class PolicyManager : public usage_statistics::StatisticsManager,
   virtual void OnAppsSearchCompleted(const bool trigger_ptu) = 0;
 
   /**
+   * @brief Change applications count ready for PTU
+   * @param new_app_count new applications count for PTU
+   */
+  virtual void UpdatePTUReadyAppsCount(const uint32_t new_app_count) = 0;
+
+  /**
    * @brief Get state of request types for given application
    * @param policy_app_id Unique application id
    * @return request type state

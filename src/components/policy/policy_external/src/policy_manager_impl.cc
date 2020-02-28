@@ -212,8 +212,10 @@ PolicyManagerImpl::PolicyManagerImpl()
           new AccessRemoteImpl(std::static_pointer_cast<CacheManager>(cache_)))
     , retry_sequence_timeout_(60)
     , retry_sequence_index_(0)
+    , applications_pending_ptu_count_(0)
     , ignition_check(true)
     , retry_sequence_url_(0, 0, "")
+    , ptu_requested_(false)
     , is_ptu_in_progress_(false) {}
 
 PolicyManagerImpl::PolicyManagerImpl(bool in_memory)
@@ -224,10 +226,12 @@ PolicyManagerImpl::PolicyManagerImpl(bool in_memory)
           new AccessRemoteImpl(std::static_pointer_cast<CacheManager>(cache_)))
     , retry_sequence_timeout_(60)
     , retry_sequence_index_(0)
+    , applications_pending_ptu_count_(0)
     , ignition_check(true)
     , retry_sequence_url_(0, 0, "")
     , send_on_update_sent_out_(false)
     , trigger_ptu_(false)
+    , ptu_requested_(false)
     , is_ptu_in_progress_(false) {}
 
 void PolicyManagerImpl::set_listener(PolicyListener* listener) {
@@ -543,6 +547,7 @@ PolicyManager::PtProcessingResult PolicyManagerImpl::LoadPT(
 void PolicyManagerImpl::OnPTUFinished(const PtProcessingResult ptu_result) {
   LOG4CXX_AUTO_TRACE(logger_);
 
+  ptu_requested_ = false;
   if (PtProcessingResult::kWrongPtReceived == ptu_result) {
     LOG4CXX_DEBUG(logger_, "Wrong PT was received");
     update_status_manager_.OnWrongUpdateReceived();
@@ -551,7 +556,9 @@ void PolicyManagerImpl::OnPTUFinished(const PtProcessingResult ptu_result) {
 
   update_status_manager_.OnValidUpdateReceived();
 
-  if (PtProcessingResult::kNewPtRequired == ptu_result) {
+  if (HasApplicationForPTU()) {
+    update_status_manager_.OnExistedApplicationAdded(true);
+  } else if (PtProcessingResult::kNewPtRequired == ptu_result) {
     LOG4CXX_DEBUG(logger_, "New PTU interation is required");
     ForcePTExchange();
     return;
@@ -713,7 +720,7 @@ void PolicyManagerImpl::RequestPTUpdate() {
     LOG4CXX_DEBUG(logger_, "Snapshot contents is : " << message_string);
 
     BinaryMessage update(message_string.begin(), message_string.end());
-
+    ptu_requested_ = true;
     listener_->OnSnapshotCreated(
         update, RetrySequenceDelaysSeconds(), TimeoutExchangeMSec());
   } else {
@@ -771,6 +778,10 @@ void PolicyManagerImpl::OnAppsSearchCompleted(const bool trigger_ptu) {
   if (update_status_manager_.IsUpdateRequired()) {
     StartPTExchange();
   }
+}
+
+void PolicyManagerImpl::UpdatePTUReadyAppsCount(const uint32_t new_app_count) {
+  applications_pending_ptu_count_ = new_app_count;
 }
 
 const std::vector<std::string> PolicyManagerImpl::GetAppRequestTypes(
@@ -1384,6 +1395,12 @@ void PolicyManagerImpl::RetrySequenceFailed() {
 
   listener_->OnPTUFinished(false);
   ResetRetrySequence(ResetRetryCountType::kResetWithStatusUpdate);
+
+  ptu_requested_ = false;
+  if (HasApplicationForPTU()) {
+    update_status_manager_.OnExistedApplicationAdded(true);
+    StartPTExchange();
+  }
 }
 
 void PolicyManagerImpl::ResetTimeout() {
@@ -1645,6 +1662,10 @@ bool PolicyManagerImpl::IsPTValid(
     return false;
   }
   return true;
+}
+
+bool PolicyManagerImpl::HasApplicationForPTU() const {
+  return applications_pending_ptu_count_ > 0;
 }
 
 const PolicySettings& PolicyManagerImpl::get_settings() const {
@@ -2094,7 +2115,9 @@ void PolicyManagerImpl::MarkUnpairedDevice(const std::string& device_id) {
 
 void PolicyManagerImpl::OnAppRegisteredOnMobile(
     const std::string& device_id, const std::string& application_id) {
-  StartPTExchange();
+  if (!is_ptu_in_progress_) {
+    StartPTExchange();
+  }
   SendNotificationOnPermissionsUpdated(device_id, application_id);
 }
 
@@ -2201,7 +2224,9 @@ StatusNotifier PolicyManagerImpl::AddApplication(
   }
   LOG4CXX_DEBUG(logger_, "Promote existed application");
   PromoteExistedApplication(device_id, application_id, device_consent);
-  update_status_manager_.OnExistedApplicationAdded(cache_->UpdateRequired());
+  if (!ptu_requested_) {
+    update_status_manager_.OnExistedApplicationAdded(cache_->UpdateRequired());
+  }
   return std::make_shared<utils::CallNothing>();
 }
 

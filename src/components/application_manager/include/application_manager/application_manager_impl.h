@@ -1620,6 +1620,8 @@ class ApplicationManagerImpl
 
   uint32_t apps_size_;
 
+  std::atomic<bool> registered_during_timer_execution_;
+
   volatile bool is_stopping_;
 
   std::unique_ptr<CommandHolder> commands_holder_;

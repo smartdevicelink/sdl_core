@@ -121,7 +121,12 @@ void UpdateStatusManager::OnNewApplicationAdded(const DeviceConsent consent) {
     return;
   }
   app_registered_from_non_consented_device_ = false;
-  ProcessEvent(kOnNewAppRegistered);
+  if (kOnResetRetrySequence == last_processed_event_) {
+    current_status_.reset(new UpToDateStatus());
+    ProcessEvent(kScheduleUpdate);
+  } else {
+    ProcessEvent(kOnNewAppRegistered);
+  }
 }
 
 void UpdateStatusManager::OnDeviceConsented() {

@@ -70,6 +70,7 @@ PolicyManagerImpl::PolicyManagerImpl()
           new AccessRemoteImpl(std::static_pointer_cast<CacheManager>(cache_)))
     , retry_sequence_timeout_(kDefaultRetryTimeoutInMSec)
     , retry_sequence_index_(0)
+    , applications_pending_ptu_count_(0)
     , timer_retry_sequence_(
           "Retry sequence timer",
           new timer::TimerTaskImpl<PolicyManagerImpl>(
@@ -77,7 +78,9 @@ PolicyManagerImpl::PolicyManagerImpl()
     , ignition_check(true)
     , retry_sequence_url_(0, 0, "")
     , send_on_update_sent_out_(false)
-    , trigger_ptu_(false) {}
+    , trigger_ptu_(false)
+    , ptu_requested_(false)
+    , last_registered_policy_app_id_(std::string()) {}
 
 void PolicyManagerImpl::set_listener(PolicyListener* listener) {
   listener_ = listener;
@@ -411,7 +414,7 @@ PolicyManager::PtProcessingResult PolicyManagerImpl::LoadPT(
 
 void PolicyManagerImpl::OnPTUFinished(const PtProcessingResult ptu_result) {
   LOG4CXX_AUTO_TRACE(logger_);
-
+  ptu_requested_ = false;
   if (PtProcessingResult::kWrongPtReceived == ptu_result) {
     LOG4CXX_DEBUG(logger_, "Wrong PT was received");
     update_status_manager_.OnWrongUpdateReceived();
@@ -430,7 +433,7 @@ void PolicyManagerImpl::OnPTUFinished(const PtProcessingResult ptu_result) {
 
   // If there was a user request for policy table update, it should be started
   // right after current update is finished
-  if (update_status_manager_.IsUpdateRequired()) {
+  if (update_status_manager_.IsUpdateRequired() && HasApplicationForPTU()) {
     LOG4CXX_DEBUG(logger_,
                   "PTU was successful and new PTU iteration was scheduled");
     StartPTExchange();
@@ -622,7 +625,7 @@ bool PolicyManagerImpl::RequestPTUpdate(const PTUIterationType iteration_type) {
   LOG4CXX_DEBUG(logger_, "Snapshot contents is : " << message_string);
 
   BinaryMessage update(message_string.begin(), message_string.end());
-
+  ptu_requested_ = true;
   listener_->OnSnapshotCreated(update, iteration_type);
   return true;
 }
@@ -692,7 +695,8 @@ void PolicyManagerImpl::OnAppsSearchCompleted(const bool trigger_ptu) {
 
   trigger_ptu_ = trigger_ptu;
 
-  if (update_status_manager_.IsUpdateRequired()) {
+  if (update_status_manager_.IsUpdateRequired() && !ptu_requested_ &&
+      HasApplicationForPTU()) {
     StartPTExchange();
   }
 }
@@ -703,9 +707,18 @@ void PolicyManagerImpl::OnLocalAppAdded() {
   StartPTExchange();
 }
 
+void PolicyManagerImpl::UpdatePTUReadyAppsCount(const uint32_t new_app_count) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  applications_pending_ptu_count_ = new_app_count;
+}
+
 void PolicyManagerImpl::OnAppRegisteredOnMobile(
     const std::string& device_id, const std::string& application_id) {
-  StartPTExchange();
+  if (application_id != last_registered_policy_app_id_) {
+    StartPTExchange();
+    last_registered_policy_app_id_ = application_id;
+  }
+
   SendNotificationOnPermissionsUpdated(device_id, application_id);
 }
 
@@ -1271,6 +1284,8 @@ void PolicyManagerImpl::IncrementIgnitionCycles() {
 
 std::string PolicyManagerImpl::ForcePTExchange() {
   update_status_manager_.ScheduleUpdate();
+
+  ptu_requested_ = false;
   StartPTExchange();
   return update_status_manager_.StringifiedUpdateStatus();
 }
@@ -1336,6 +1351,7 @@ void PolicyManagerImpl::ResetRetrySequence(
   LOG4CXX_AUTO_TRACE(logger_);
   sync_primitives::AutoLock auto_lock(retry_sequence_lock_);
   retry_sequence_index_ = 0;
+  ptu_requested_ = false;
   if (ResetRetryCountType::kResetWithStatusUpdate == reset_type) {
     update_status_manager_.OnResetRetrySequence();
   }
@@ -1512,7 +1528,9 @@ StatusNotifier PolicyManagerImpl::AddApplication(
                                               device_consent);
   }
   PromoteExistedApplication(application_id, device_consent);
-  update_status_manager_.OnExistedApplicationAdded(cache_->UpdateRequired());
+  if (!ptu_requested_) {
+    update_status_manager_.OnExistedApplicationAdded(cache_->UpdateRequired());
+  }
   return std::make_shared<utils::CallNothing>();
 }
 
@@ -1644,6 +1662,10 @@ void PolicyManagerImpl::OnPTUIterationTimeout() {
     if (timer_retry_sequence_.is_running()) {
       timer_retry_sequence_.Stop();
     }
+
+    if (HasApplicationForPTU()) {
+      StartPTExchange();
+    }
     return;
   }
 
@@ -1660,6 +1682,10 @@ void PolicyManagerImpl::OnPTUIterationTimeout() {
 
   RequestPTUpdate(PTUIterationType::RetryIteration);
   timer_retry_sequence_.Start(timeout_msec, timer::kPeriodic);
+}
+
+bool PolicyManagerImpl::HasApplicationForPTU() const {
+  return applications_pending_ptu_count_ > 0;
 }
 
 void PolicyManagerImpl::SetDefaultHmiTypes(

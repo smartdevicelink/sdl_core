@@ -152,7 +152,12 @@ void UpdateStatusManager::OnNewApplicationAdded(const DeviceConsent consent) {
   }
   LOG4CXX_DEBUG(logger_, "Application registered from consented device");
   app_registered_from_non_consented_device_ = false;
-  ProcessEvent(kOnNewAppRegistered);
+  if (kOnResetRetrySequence == last_processed_event_) {
+    current_status_.reset(new UpToDateStatus());
+    ProcessEvent(kScheduleUpdate);
+  } else {
+    ProcessEvent(kOnNewAppRegistered);
+  }
 }
 
 void UpdateStatusManager::OnDeviceConsented() {

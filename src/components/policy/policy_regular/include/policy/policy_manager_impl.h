@@ -624,6 +624,8 @@ class PolicyManagerImpl : public PolicyManager {
    */
   void OnAppsSearchCompleted(const bool trigger_ptu) OVERRIDE;
 
+  void UpdatePTUReadyAppsCount(const uint32_t new_app_count) OVERRIDE;
+
   /**
    * @brief Get state of request types for given application
    * @param policy_app_id Unique application id
@@ -1032,6 +1034,11 @@ class PolicyManagerImpl : public PolicyManager {
    */
   void OnPTUIterationTimeout();
 
+  /**
+   * @brief Check that new applications for PTU were registered
+   */
+  bool HasApplicationForPTU() const;
+
  private:
   /**
    * @brief Get resulting RPCs permissions for application which started on
@@ -1133,6 +1140,11 @@ class PolicyManagerImpl : public PolicyManager {
   uint32_t retry_sequence_index_;
 
   /**
+   * @brief Applications pending count ready for PTU
+   */
+  uint32_t applications_pending_ptu_count_;
+
+  /**
    * @brief Lock for guarding retry sequence
    */
   sync_primitives::Lock retry_sequence_lock_;
@@ -1180,6 +1192,16 @@ class PolicyManagerImpl : public PolicyManager {
    * @brief Flag for notifying that invalid PTU should be triggered
    */
   bool trigger_ptu_;
+
+  /**
+   * @brief Flag for notifying that PTU was requested
+   */
+  bool ptu_requested_;
+
+  /**
+   * @brief Last registered application id on mobile
+   */
+  std::string last_registered_policy_app_id_;
 
   typedef std::list<std::pair<std::string, AppPoliciesValueType> >
       PendingAppPolicyActionsList;

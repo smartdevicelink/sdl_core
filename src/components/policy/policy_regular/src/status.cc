@@ -71,7 +71,6 @@ void policy::UpdateNeededStatus::ProcessEvent(
       manager->SetNextStatus(std::make_shared<UpdatePendingStatus>());
       break;
     case kOnNewAppRegistered:
-      manager->SetNextStatus(std::make_shared<UpdateNeededStatus>());
       break;
     default:
       break;

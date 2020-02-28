@@ -418,6 +418,14 @@ class PolicyHandlerInterface : public VehicleDataItemProvider {
   virtual void OnAppsSearchCompleted(const bool trigger_ptu) = 0;
 
   /**
+   * @brief Notify that new application was added to application list
+   * @param new_app_id app_id for this application
+   * @param policy_id policy_id for this application
+   */
+  virtual void OnAddedNewApplicationToAppList(const uint32_t new_app_id,
+                                              const std::string& policy_id) = 0;
+
+  /**
    * @brief OnAppRegisteredOnMobile allows to handle event when application were
    * succesfully registered on mobile device.
    * It will send OnAppPermissionSend notification and will try to start PTU.
@@ -699,6 +707,12 @@ class PolicyHandlerInterface : public VehicleDataItemProvider {
   virtual void OnUpdateHMIStatus(const std::string& device_id,
                                  const std::string& policy_app_id,
                                  const std::string& hmi_level) = 0;
+
+  /**
+   * @brief OnPTUTimeOut the callback which is performed when PTU timeout
+   * occurred
+   */
+  virtual void OnPTUTimeOut() = 0;
 
   /**
    * Gets all allowed module types
