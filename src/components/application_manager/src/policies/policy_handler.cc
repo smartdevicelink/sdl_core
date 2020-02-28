@@ -1544,21 +1544,11 @@ void PolicyHandler::OnSnapshotCreated(const BinaryMessage& pt_string,
     return;
   }
 
-  if (PTUIterationType::RetryIteration == iteration_type) {
-    uint32_t app_id_for_sending = GetAppIdForSending();
-
-    if (0 != app_id_for_sending) {
-      MessageHelper::SendPolicySnapshotNotification(
-          app_id_for_sending, pt_string, std::string(), application_manager_);
-    }
-
-  } else {
-    MessageHelper::SendPolicyUpdate(
-        policy_snapshot_full_path,
-        TimeoutExchangeSec(),
-        policy_manager_->RetrySequenceDelaysSeconds(),
-        application_manager_);
-  }
+  MessageHelper::SendPolicyUpdate(
+      policy_snapshot_full_path,
+      TimeoutExchangeSec(),
+      policy_manager_->RetrySequenceDelaysSeconds(),
+      application_manager_);
 #else   // PROPRIETARY_MODE
   LOG4CXX_ERROR(logger_, "HTTP policy");
   EndpointUrls urls;
