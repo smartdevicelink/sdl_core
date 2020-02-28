@@ -61,6 +61,10 @@ struct TransportAdapterFactory {
   CreatorTA<resumption::LastStateWrapperPtr&, const TransportManagerSettings&>
       ta_cloud_creator_;
 #endif
+#if defined(WEBSOCKET_SERVER_TRANSPORT_SUPPORT)
+  CreatorTA<resumption::LastStateWrapperPtr&, const TransportManagerSettings&>
+      ta_websocket_server_creator_;
+#endif
 };
 
 /**

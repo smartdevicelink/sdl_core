@@ -608,6 +608,13 @@ class PolicyManager : public usage_statistics::StatisticsManager,
   virtual Json::Value GetPolicyTableData() const = 0;
 
   /**
+   * @brief Get a list of policy app ids
+   * @return apps list filled with the policy app ids of each
+   * application
+   */
+  virtual const std::vector<std::string> GetApplicationPolicyIDs() const = 0;
+
+  /**
    * @brief Get a list of enabled cloud applications
    * @param enabled_apps List filled with the policy app id of each enabled
    * cloud application
@@ -616,29 +623,21 @@ class PolicyManager : public usage_statistics::StatisticsManager,
       std::vector<std::string>& enabled_apps) const = 0;
 
   /**
-   * @brief Get cloud app policy information, all fields that aren't set for a
+   * @brief Get app policy information, all fields that aren't set for a
    * given app will be filled with empty strings
-   * @param policy_app_id Unique application id
-   * @param enabled Whether or not the app is enabled
-   * @param endpoint Filled with the endpoint used to connect to the cloud
-   * application
-   * @param certificate Filled with the certificate used to for creating a
-   * secure connection to the cloud application
-   * @param auth_token Filled with the token used for authentication when
-   * reconnecting to the cloud app
-   * @param cloud_transport_type Filled with the transport type used by the
-   * cloud application (ex. "WSS")
-   * @param hybrid_app_preference Filled with the hybrid app preference for the
-   * cloud application set by the user
+   * @param policy_app_id policy app id
+   * @param out_app_properties application properties
+   * @return true if application presents in database, otherwise - false
    */
-  virtual bool GetCloudAppParameters(
-      const std::string& policy_app_id,
-      bool& enabled,
-      std::string& endpoint,
-      std::string& certificate,
-      std::string& auth_token,
-      std::string& cloud_transport_type,
-      std::string& hybrid_app_preference) const = 0;
+  virtual bool GetAppProperties(const std::string& policy_app_id,
+                                AppProperties& out_app_properties) const = 0;
+
+  /**
+   * @brief Get a list of enabled local applications
+   * @return enabled_apps List filled with the policy app id of each enabled
+   * local application
+   */
+  virtual std::vector<std::string> GetEnabledLocalApps() const = 0;
 
   /**
    * @ brief Initialize new cloud app in the policy table
@@ -784,6 +783,12 @@ class PolicyManager : public usage_statistics::StatisticsManager,
    */
   virtual void SendAppPermissionsChanged(const std::string& device_id,
                                          const std::string& application_id) = 0;
+  /**
+   * @brief Send OnAppPropertiesChangeNotification to the HMI
+   * @param policy_app_id policy app id
+   */
+  virtual void SendOnAppPropertiesChangeNotification(
+      const std::string& policy_app_id) const = 0;
 
   /**
    * @brief Gets all allowed module types
@@ -835,6 +840,18 @@ class PolicyManager : public usage_statistics::StatisticsManager,
    * @return ExternalConsent status
    */
   virtual ExternalConsentStatus GetExternalConsentStatus() = 0;
+
+  /**
+   * @brief OnLocalAppAdded triggers PTU
+   */
+  virtual void OnLocalAppAdded() = 0;
+
+  /**
+   * @brief Check if certain application already in policy db.
+   * @param policy application id.
+   * @return true if application presents false otherwise.
+   */
+  virtual bool IsNewApplication(const std::string& application_id) const = 0;
 
   /**
    * @brief Restart PTU timeout if PTU in UPDATING state

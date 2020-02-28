@@ -269,6 +269,9 @@ class MockMessageHelper {
                void(ApplicationConstSharedPtr app,
                     const bool is_unexpected_disconnect,
                     ApplicationManager& app_mngr));
+  MOCK_METHOD2(CreateOnAppPropertiesChangeNotification,
+               smart_objects::SmartObjectSPtr(const std::string& policy_app_id,
+                                              ApplicationManager& app_mngr));
   MOCK_METHOD4(SendLaunchApp,
                void(const uint32_t connection_key,
                     const std::string& urlSchema,

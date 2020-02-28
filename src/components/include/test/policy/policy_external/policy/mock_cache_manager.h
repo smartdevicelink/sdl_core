@@ -61,6 +61,7 @@ class MockCacheManagerInterface : public ::policy::CacheManagerInterface {
   MOCK_METHOD0(IsPTPreloaded, bool());
   MOCK_METHOD0(IgnitionCyclesBeforeExchange, int());
   MOCK_METHOD1(KilometersBeforeExchange, int(int current));
+  MOCK_CONST_METHOD0(GetEnabledLocalApps, std::vector<std::string>());
   MOCK_CONST_METHOD1(GetPermissionsList, bool(StringArray& perm_list));
   MOCK_METHOD2(SetCountersPassedForSuccessfulUpdate,
                bool(Counters counter, int value));
@@ -83,14 +84,9 @@ class MockCacheManagerInterface : public ::policy::CacheManagerInterface {
                      std::vector<policy_table::VehicleDataItem>());
   MOCK_CONST_METHOD1(GetEnabledCloudApps,
                      void(std::vector<std::string>& enabled_apps));
-  MOCK_CONST_METHOD7(GetCloudAppParameters,
+  MOCK_CONST_METHOD2(GetAppProperties,
                      bool(const std::string& policy_app_id,
-                          bool& enabled,
-                          std::string& endpoint,
-                          std::string& certificate,
-                          std::string& auth_token,
-                          std::string& cloud_transport_type,
-                          std::string& hybrid_app_preference));
+                          AppProperties& out_app_properties));
   MOCK_METHOD1(InitCloudApp, void(const std::string& policy_app_id));
   MOCK_METHOD2(SetCloudAppEnabled,
                void(const std::string& policy_app_id, const bool enabled));

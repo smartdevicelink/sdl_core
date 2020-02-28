@@ -126,9 +126,7 @@ void OnSystemRequestNotification::Run() {
 
   if (mobile_apis::RequestType::OEM_SPECIFIC == request_type) {
     (*message_)[strings::params][strings::binary_data] = binary_data;
-  }
-
-  if (mobile_apis::RequestType::PROPRIETARY == request_type) {
+  } else if (mobile_apis::RequestType::PROPRIETARY == request_type) {
     /* According to requirements:
        "If the requestType = PROPRIETARY, add to mobile API fileType = JSON
         If the requestType = HTTP, add to mobile API fileType = BINARY"
@@ -144,13 +142,18 @@ void OnSystemRequestNotification::Run() {
 #endif  // PROPRIETARY_MODE
 
     (*message_)[strings::msg_params][strings::file_type] = FileType::JSON;
-  }
-
-  if (mobile_apis::RequestType::HTTP == request_type) {
+  } else if (mobile_apis::RequestType::HTTP == request_type) {
     (*message_)[strings::msg_params][strings::file_type] = FileType::BINARY;
     if ((*message_)[strings::msg_params].keyExists(strings::url)) {
       (*message_)[strings::msg_params][strings::timeout] =
           policy_handler.TimeoutExchangeSec();
+    }
+  } else if (mobile_apis::RequestType::LOCK_SCREEN_ICON_URL == request_type) {
+    if (!(*message_)[strings::msg_params].keyExists(strings::url) ||
+        (*message_)[strings::msg_params][strings::url].empty()) {
+      LOG4CXX_ERROR(logger_,
+                    "discarding LOCK_SCREEN_ICON_URL request without URL");
+      return;
     }
   }
 

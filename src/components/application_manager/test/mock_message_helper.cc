@@ -485,6 +485,13 @@ bool MessageHelper::CreateHMIApplicationStruct(
       app, session_observer, policy_handler, output, app_mngr);
 }
 
+smart_objects::SmartObjectSPtr
+MessageHelper::CreateOnAppPropertiesChangeNotification(
+    const std::string& policy_app_id, ApplicationManager& app_mngr) {
+  return MockMessageHelper::message_helper_mock()
+      ->CreateOnAppPropertiesChangeNotification(policy_app_id, app_mngr);
+}
+
 void MessageHelper::SendOnAppUnregNotificationToHMI(
     ApplicationConstSharedPtr app,
     const bool is_unexpected_disconnect,
