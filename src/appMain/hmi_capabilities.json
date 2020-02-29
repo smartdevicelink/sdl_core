@@ -929,7 +929,7 @@
         }
     },
     "VR": {
-        "capabilities": ["TEXT"],
+        "vrCapabilities": ["TEXT"],
         "language": "EN-US",
         "languages": [
             "EN-US", "ES-MX", "FR-CA", "DE-DE", "ES-ES", "EN-GB", "RU-RU", "TR-TR", "PL-PL", "FR-FR", "IT-IT", "SV-SE", "PT-PT", "NL-NL", "ZH-TW",
@@ -937,7 +937,8 @@
         ]
     },
     "TTS": {
-        "capabilities": ["TEXT"],
+        "speechCapabilities": ["TEXT"],
+        "prerecordedSpeechCapabilities": ["HELP_JINGLE"],
         "language": "EN-US",
         "languages": [
             "EN-US", "ES-MX", "FR-CA", "DE-DE", "ES-ES", "EN-GB", "RU-RU", "TR-TR", "PL-PL", "FR-FR", "IT-IT", "SV-SE", "PT-PT", "NL-NL", "ZH-TW",
@@ -1047,10 +1048,12 @@
         }
     },
     "VehicleInfo": {
-        "make": "SDL",
-        "model": "Generic",
-        "modelYear": "2019",
-        "trim": "SE"
+        "vehicleType": {
+            "make": "SDL",
+            "model": "Generic",
+            "modelYear": "2019",
+            "trim": "SE"
+        }
     },
     "SyncMessageVersion": {
         "majorVersion": 3,
