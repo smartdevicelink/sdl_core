@@ -277,18 +277,11 @@ class CacheManager : public CacheManagerInterface {
    * @param service_type If URLs for specific service are preset,
    * return them otherwise default URLs.
    */
-  virtual void GetUpdateUrls(const std::string& service_type,
-                             EndpointUrls& out_end_points);
+  void GetUpdateUrls(const std::string& service_type,
+                     EndpointUrls& out_end_points) const OVERRIDE;
 
-  virtual void GetUpdateUrls(const uint32_t service_type,
-                             EndpointUrls& out_end_points);
-  /**
-   * @brief GetLockScreenIcon allows to obtain lock screen icon url;
-   *
-   * @return url which point to the resourse where lock screen icon could be
-   *obtained.
-   */
-  virtual std::string GetLockScreenIconUrl() const;
+  void GetUpdateUrls(const uint32_t service_type,
+                     EndpointUrls& out_end_points) const OVERRIDE;
 
   /**
    * @brief Get Icon Url used for showing a cloud apps icon before the intial

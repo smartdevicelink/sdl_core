@@ -114,10 +114,11 @@ class MockPolicyHandlerInterface : public policy::PolicyHandlerInterface {
                bool(const std::string& application_id,
                     policy::StringArray* nicknames));
   MOCK_METHOD1(GetInitialAppData, bool(const std::string& application_id));
-  MOCK_METHOD2(GetUpdateUrls,
-               void(const uint32_t service_type,
-                    policy::EndpointUrls& end_points));
-  MOCK_CONST_METHOD0(GetLockScreenIconUrl, std::string());
+  MOCK_CONST_METHOD2(GetUpdateUrls,
+                     void(const uint32_t service_type,
+                          policy::EndpointUrls& end_points));
+  MOCK_CONST_METHOD1(GetLockScreenIconUrl,
+                     std::string(const std::string& policy_app_id));
   MOCK_CONST_METHOD1(GetIconUrl, std::string(const std::string& policy_app_id));
   MOCK_METHOD0(ResetRetrySequence, void());
   MOCK_METHOD0(NextRetryTimeout, uint32_t());
@@ -301,9 +302,9 @@ class MockPolicyHandlerInterface : public policy::PolicyHandlerInterface {
 #endif  // ENABLE_SECURITY
   MOCK_CONST_METHOD0(get_settings, const policy::PolicySettings&());
   MOCK_CONST_METHOD0(RemoteAppsUrl, const std::string());
-  MOCK_METHOD2(GetUpdateUrls,
-               void(const std::string& service_type,
-                    policy::EndpointUrls& end_points));
+  MOCK_CONST_METHOD2(GetUpdateUrls,
+                     void(const std::string& service_type,
+                          policy::EndpointUrls& end_points));
 
   MOCK_METHOD3(OnUpdateHMILevel,
                void(const std::string& device_id,

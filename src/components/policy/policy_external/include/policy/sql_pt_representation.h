@@ -185,7 +185,6 @@ class SQLPTRepresentation : public virtual PTRepresentation {
       const policy_table::AppServiceParameters& app_service_parameters);
 
  public:
-  virtual std::string GetLockScreenIconUrl() const;
   bool UpdateRequired() const;
   void SaveUpdateRequired(bool value);
 

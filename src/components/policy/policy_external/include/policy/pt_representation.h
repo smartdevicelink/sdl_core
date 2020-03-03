@@ -71,14 +71,6 @@ class PTRepresentation {
   virtual bool IsPTPreloaded() = 0;
 
   /**
-   * @brief GetLockScreenIcon allows to obtain lock screen icon url;
-   *
-   * @return url which point to the resourse where lock screen icon could be
-   *obtained.
-   */
-  virtual std::string GetLockScreenIconUrl() const = 0;
-
-  /**
    * @brief Re-creates schema in DB, drops all data
    * @return true, if succedeed, otherwise - false
    */
