@@ -715,6 +715,7 @@ void PolicyManagerImpl::RequestPTUpdate() {
   if (IsPTValid(policy_table_snapshot, policy_table::PT_SNAPSHOT)) {
     Json::Value value = policy_table_snapshot->ToJsonValue();
     Json::StreamWriterBuilder writer_builder;
+    writer_builder["indentation"] = "";
     std::string message_string = Json::writeString(writer_builder, value);
 
     LOG4CXX_DEBUG(logger_, "Snapshot contents is : " << message_string);
