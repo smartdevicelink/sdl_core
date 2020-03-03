@@ -256,6 +256,12 @@
 #include "sdl_rpc_plugin/commands/hmi/on_bc_system_capability_updated_notification.h"
 #include "sdl_rpc_plugin/commands/hmi/on_bc_system_capability_updated_notification_from_hmi.h"
 
+#include "sdl_rpc_plugin/commands/hmi/bc_get_app_properties_request.h"
+#include "sdl_rpc_plugin/commands/hmi/bc_get_app_properties_response.h"
+#include "sdl_rpc_plugin/commands/hmi/bc_set_app_properties_request.h"
+#include "sdl_rpc_plugin/commands/hmi/bc_set_app_properties_response.h"
+#include "sdl_rpc_plugin/commands/hmi/on_app_properties_change_notification.h"
+
 namespace sdl_rpc_plugin {
 using namespace application_manager;
 
@@ -903,6 +909,19 @@ CommandCreator& HMICommandFactory::get_creator_factory(
                            OnBCSystemCapabilityUpdatedNotificationFromHMI>()
                  : factory.GetCreator<
                        commands::OnBCSystemCapabilityUpdatedNotification>();
+    }
+    case hmi_apis::FunctionID::BasicCommunication_GetAppProperties: {
+      return hmi_apis::messageType::request == message_type
+                 ? factory.GetCreator<commands::BCGetAppPropertiesRequest>()
+                 : factory.GetCreator<commands::BCGetAppPropertiesResponse>();
+    }
+    case hmi_apis::FunctionID::BasicCommunication_SetAppProperties: {
+      return hmi_apis::messageType::request == message_type
+                 ? factory.GetCreator<commands::BCSetAppPropertiesRequest>()
+                 : factory.GetCreator<commands::BCSetAppPropertiesResponse>();
+    }
+    case hmi_apis::FunctionID::BasicCommunication_OnAppPropertiesChange: {
+      return factory.GetCreator<commands::OnAppPropertiesChangeNotification>();
     }
     default: { return factory.GetCreator<InvalidCommand>(); }
   }

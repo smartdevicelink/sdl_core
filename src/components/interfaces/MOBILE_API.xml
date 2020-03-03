@@ -540,8 +540,8 @@
         </element>
         <element name="VEHICLEDATA_SPEED" />
         <element name="VEHICLEDATA_RPM" />
-        <element name="VEHICLEDATA_FUELLEVEL" />
-        <element name="VEHICLEDATA_FUELLEVEL_STATE" />
+        <element name="VEHICLEDATA_FUELLEVEL" until="6.0"/>
+        <element name="VEHICLEDATA_FUELLEVEL_STATE" until="6.0"/>
         <element name="VEHICLEDATA_FUELCONSUMPTION" />
         <element name="VEHICLEDATA_EXTERNTEMP" />
         <element name="VEHICLEDATA_VIN" />
@@ -576,6 +576,12 @@
         <element name="MOBILE" />
         <element name="CLOUD" />
         <element name="BOTH" />
+    </enum>
+
+    <enum name="CapacityUnit" since="6.0">
+        <element name="LITERS" />
+        <element name="KILOWATTHOURS" />
+        <element name="KILOGRAMS" />
     </enum>
 
     <struct name="CloudAppProperties" since="5.1">
@@ -1298,6 +1304,18 @@
             <description>
                 The estimate range in KM the vehicle can travel based on fuel level and consumption.
             </description>
+        </param>
+        <param name="level" type="Float" minvalue="-6" maxvalue="1000000" mandatory="false" since="6.0">
+           <description>The relative remaining capacity of this fuel type (percentage).</description>
+        </param>
+        <param name="levelState" type="ComponentVolumeStatus" mandatory="false" since="6.0">
+            <description>The fuel level state</description>
+        </param>
+        <param name="capacity" type="Float" minvalue="0" maxvalue="1000000" mandatory="false" since="6.0">
+            <description>The absolute capacity of this fuel type.</description>
+            </param>
+        <param name="capacityUnit" type="CapacityUnit" mandatory="false" since="6.0">
+            <description>The unit of the capacity of this fuel type such as liters for gasoline or kWh for batteries.</description>
         </param>
     </struct>
 
@@ -5829,17 +5847,26 @@
         <param name="rpm" type="Boolean" mandatory="false">
             <description>The number of revolutions per minute of the engine</description>
         </param>
-        <param name="fuelLevel" type="Boolean" mandatory="false">
-            <description>The fuel level in the tank (percentage)</description>
+        <param name="fuelLevel" type="Boolean" mandatory="false" deprecated="true" since="6.0">
+            <description>The fuel level in the tank (percentage). This parameter is deprecated starting RPC Spec 6.0.x, please see fuelRange.</description>
+            <history>
+                <param name="fuelLevel" type="Boolean" mandatory="false" since="1.0" until="6.0"/>
+            </history>
         </param>
-        <param name="fuelLevel_State" type="Boolean" mandatory="false">
-            <description>The fuel level state</description>
+        <param name="fuelLevel_State" type="Boolean" mandatory="false" deprecated="true" since="6.0">
+            <description>The fuel level state. This parameter is deprecated starting RPC Spec 6.0.x, please see fuelRange.</description>
+            <history>
+                <param name="fuelLevel_State" type="Boolean" mandatory="false" since="1.0" until="6.0"/>
+            </history>
         </param>
         <param name="instantFuelConsumption" type="Boolean" mandatory="false">
             <description>The instantaneous fuel consumption in microlitres</description>
         </param>
         <param name="fuelRange" type="Boolean" mandatory="false" since="5.0">
-            <description>The estimate range in KM the vehicle can travel based on fuel level and consumption</description>
+            <description>
+                The fuel type, estimated range in KM, fuel level/capacity and fuel level state for the vehicle.
+                See struct FuelRange for details.
+            </description>
         </param>
         <param name="externalTemperature" type="Boolean" mandatory="false">
             <description>The external temperature in degrees celsius</description>
@@ -5942,17 +5969,26 @@
         <param name="rpm" type="VehicleDataResult" mandatory="false">
             <description>The number of revolutions per minute of the engine</description>
         </param>
-        <param name="fuelLevel" type="VehicleDataResult" mandatory="false">
-            <description>The fuel level in the tank (percentage)</description>
+        <param name="fuelLevel" type="VehicleDataResult" mandatory="false" deprecated="true" since="6.0">
+            <description>The fuel level in the tank (percentage). This parameter is deprecated starting RPC Spec 6.0.x, please see fuelRange.</description>
+            <history>
+                <param name="fuelLevel" type="VehicleDataResult" mandatory="false" since="1.0" until="6.0"/>
+            </history>
         </param>
-        <param name="fuelLevel_State" type="VehicleDataResult" mandatory="false">
-            <description>The fuel level state</description>
+        <param name="fuelLevel_State" type="VehicleDataResult" mandatory="false" deprecated="true" since="6.0">
+            <description>The fuel level state. This parameter is deprecated starting RPC Spec 6.0.x, please see fuelRange.</description>
+            <history>
+                <param name="fuelLevel_State" type="VehicleDataResult" mandatory="false" since="1.0" until="6.0"/>
+            </history>
         </param>
         <param name="instantFuelConsumption" type="VehicleDataResult" mandatory="false">
             <description>The instantaneous fuel consumption in microlitres</description>
         </param>
         <param name="fuelRange" type="VehicleDataResult" mandatory="false" since="5.0">
-            <description>The estimate range in KM the vehicle can travel based on fuel level and consumption</description>
+            <description>
+                The fuel type, estimated range in KM, fuel level/capacity and fuel level state for the vehicle.
+                See struct FuelRange for details.
+            </description>
         </param>
         <param name="externalTemperature" type="VehicleDataResult" mandatory="false">
             <description>The external temperature in degrees celsius.</description>
@@ -6034,17 +6070,26 @@
         <param name="rpm" type="Boolean" mandatory="false">
             <description>The number of revolutions per minute of the engine</description>
         </param>
-        <param name="fuelLevel" type="Boolean" mandatory="false">
-            <description>The fuel level in the tank (percentage)</description>
+        <param name="fuelLevel" type="Boolean" mandatory="false" deprecated="true" since="6.0">
+            <description>The fuel level in the tank (percentage). This parameter is deprecated starting RPC Spec 6.0.x, please see fuelRange.</description>
+            <history>
+                <param name="fuelLevel" type="Boolean" mandatory="false" since="1.0" until="6.0"/>
+            </history>
         </param>
-        <param name="fuelLevel_State" type="Boolean" mandatory="false">
-            <description>The fuel level state</description>
+        <param name="fuelLevel_State" type="Boolean" mandatory="false" deprecated="true" since="6.0">
+            <description>The fuel level state. This parameter is deprecated starting RPC Spec 6.0.x, please see fuelRange.</description>
+            <history>
+                <param name="fuelLevel_State" type="Boolean" mandatory="false" since="1.0" until="6.0"/>
+            </history>
         </param>
         <param name="instantFuelConsumption" type="Boolean" mandatory="false">
             <description>The instantaneous fuel consumption in microlitres</description>
         </param>
         <param name="fuelRange" type="Boolean" mandatory="false" since="5.0">
-            <description>The estimate range in KM the vehicle can travel based on fuel level and consumption</description>
+            <description>
+                The fuel type, estimated range in KM, fuel level/capacity and fuel level state for the vehicle.
+                See struct FuelRange for details.
+            </description>
         </param>
         <param name="externalTemperature" type="Boolean" mandatory="false">
             <description>The external temperature in degrees celsius.</description>
@@ -6146,17 +6191,26 @@
         <param name="rpm" type="VehicleDataResult" mandatory="false">
             <description>The number of revolutions per minute of the engine</description>
         </param>
-        <param name="fuelLevel" type="VehicleDataResult" mandatory="false">
-            <description>The fuel level in the tank (percentage)</description>
+        <param name="fuelLevel" type="VehicleDataResult" mandatory="false" deprecated="true" since="6.0">
+            <description>The fuel level in the tank (percentage). This parameter is deprecated starting RPC Spec 6.0.x, please see fuelRange.</description>
+            <history>
+                <param name="fuelLevel" type="VehicleDataResult" mandatory="false" since="1.0" until="6.0"/>
+            </history>
         </param>
-        <param name="fuelLevel_State" type="VehicleDataResult" mandatory="false">
-            <description>The fuel level state</description>
+        <param name="fuelLevel_State" type="VehicleDataResult" mandatory="false" deprecated="true" since="6.0">
+            <description>The fuel level state. This parameter is deprecated starting RPC Spec 6.0.x, please see fuelRange.</description>
+            <history>
+                <param name="fuelLevel_State" type="VehicleDataResult" mandatory="false" since="1.0" until="6.0"/>
+            </history>
         </param>
         <param name="instantFuelConsumption" type="VehicleDataResult" mandatory="false">
             <description>The instantaneous fuel consumption in microlitres</description>
         </param>
         <param name="fuelRange" type="VehicleDataResult" mandatory="false" since="5.0">
-            <description>The estimate range in KM the vehicle can travel based on fuel level and consumption</description>
+            <description>
+                The fuel type, estimated range in KM, fuel level/capacity and fuel level state for the vehicle.
+                See struct FuelRange for details.
+            </description>
         </param>
         <param name="externalTemperature" type="VehicleDataResult" mandatory="false">
             <description>The external temperature in degrees celsius</description>
@@ -6238,17 +6292,26 @@
         <param name="rpm" type="Boolean" mandatory="false">
             <description>The number of revolutions per minute of the engine</description>
         </param>
-        <param name="fuelLevel" type="Boolean" mandatory="false">
-            <description>The fuel level in the tank (percentage)</description>
+        <param name="fuelLevel" type="Boolean" mandatory="false" deprecated="true" since="6.0">
+            <description>The fuel level in the tank (percentage). This parameter is deprecated starting RPC Spec 6.0.x, please see fuelRange.</description>
+            <history>
+                <param name="fuelLevel" type="Boolean" mandatory="false" since="1.0" until="6.0"/>
+            </history>
         </param>
-        <param name="fuelLevel_State" type="Boolean" mandatory="false">
-            <description>The fuel level state</description>
+        <param name="fuelLevel_State" type="Boolean" mandatory="false" deprecated="true" since="6.0">
+            <description>The fuel level state. This parameter is deprecated starting RPC Spec 6.0.x, please see fuelRange.</description>
+            <history>
+                <param name="fuelLevel_State" type="Boolean" mandatory="false" since="1.0" until="6.0"/>
+            </history>
         </param>
         <param name="instantFuelConsumption" type="Boolean" mandatory="false">
             <description>The instantaneous fuel consumption in microlitres</description>
         </param>
         <param name="fuelRange" type="Boolean" mandatory="false" since="5.0">
-            <description>The estimate range in KM the vehicle can travel based on fuel level and consumption</description>
+            <description>
+                The fuel type, estimated range in KM, fuel level/capacity and fuel level state for the vehicle.
+                See struct FuelRange for details.
+            </description>
         </param>
         <param name="externalTemperature" type="Boolean" mandatory="false">
             <description>The external temperature in degrees celsius</description>
@@ -6354,17 +6417,26 @@
         <param name="rpm" type="Integer" minvalue="0" maxvalue="20000" mandatory="false">
             <description>The number of revolutions per minute of the engine</description>
         </param>
-        <param name="fuelLevel" type="Float" minvalue="-6" maxvalue="106" mandatory="false">
-            <description>The fuel level in the tank (percentage)</description>
+        <param name="fuelLevel" type="Float" minvalue="-6" maxvalue="106" mandatory="false" deprecated="true" since="6.0">
+            <description>The fuel level in the tank (percentage). This parameter is deprecated starting RPC Spec 6.0.x, please see fuelRange.</description>
+            <history>
+                <param name="fuelLevel" type="Float" minvalue="-6" maxvalue="106" mandatory="false" since="1.0" until="6.0"/>
+            </history>
         </param>
-        <param name="fuelLevel_State" type="ComponentVolumeStatus" mandatory="false">
-            <description>The fuel level state</description>
+        <param name="fuelLevel_State" type="ComponentVolumeStatus" mandatory="false" deprecated="true" since="6.0">
+            <description>The fuel level state. This parameter is deprecated starting RPC Spec 6.0.x, please see fuelRange.</description>
+            <history>
+                <param name="fuelLevel_State" type="ComponentVolumeStatus" mandatory="false" since="1.0" until="6.0"/>
+            </history>
         </param>
         <param name="instantFuelConsumption" type="Float" minvalue="0" maxvalue="25575" mandatory="false">
             <description>The instantaneous fuel consumption in microlitres</description>
         </param>
         <param name="fuelRange" type="FuelRange" minsize="0" maxsize="100" array="true" mandatory="false" since="5.0">
-            <description>The estimate range in KM the vehicle can travel based on fuel level and consumption</description>
+            <description>
+                The fuel type, estimated range in KM, fuel level/capacity and fuel level state for the vehicle.
+                See struct FuelRange for details.
+            </description>
         </param>
         <param name="externalTemperature" type="Float" minvalue="-40" maxvalue="100" mandatory="false">
             <description>The external temperature in degrees celsius</description>
@@ -8052,17 +8124,26 @@
         <param name="rpm" type="Integer" minvalue="0" maxvalue="20000" mandatory="false">
             <description>The number of revolutions per minute of the engine</description>
         </param>
-        <param name="fuelLevel" type="Float" minvalue="-6" maxvalue="106" mandatory="false">
-            <description>The fuel level in the tank (percentage)</description>
+        <param name="fuelLevel" type="Float" minvalue="-6" maxvalue="106" mandatory="false" deprecated="true" since="6.0">
+            <description>The fuel level in the tank (percentage). This parameter is deprecated starting RPC Spec 6.0.x, please see fuelRange.</description>
+            <history>
+                <param name="fuelLevel" type="Float" minvalue="-6" maxvalue="106" mandatory="false" since="1.0" until="6.0"/>
+            </history>
         </param>
-        <param name="fuelLevel_State" type="ComponentVolumeStatus" mandatory="false">
-            <description>The fuel level state</description>
+        <param name="fuelLevel_State" type="ComponentVolumeStatus" mandatory="false" deprecated="true" since="6.0">
+            <description>The fuel level state. This parameter is deprecated starting RPC Spec 6.0.x, please see fuelRange.</description>
+            <history>
+                <param name="fuelLevel_State" type="ComponentVolumeStatus" mandatory="false" since="1.0" until="6.0"/>
+            </history>
         </param>
         <param name="instantFuelConsumption" type="Float" minvalue="0" maxvalue="25575" mandatory="false">
             <description>The instantaneous fuel consumption in microlitres</description>
         </param>
         <param name="fuelRange" type="FuelRange" minsize="0" maxsize="100" array="true" mandatory="false" since="5.0">
-            <description>The estimate range in KM the vehicle can travel based on fuel level and consumption</description>
+            <description>
+                The fuel type, estimated range in KM, fuel level/capacity and fuel level state for the vehicle.
+                See struct FuelRange for details.
+            </description>
         </param>
         <param name="externalTemperature" type="Float" minvalue="-40" maxvalue="100" mandatory="false">
             <description>The external temperature in degrees celsius</description>

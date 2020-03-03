@@ -106,8 +106,20 @@ else()
   )
 endif()
 
-if(NOT BUILD_TESTS)
-  list (APPEND EXCLUDE_PATH
+if(NOT BUILD_WEBSOCKET_SERVER_SUPPORT)
+  list(APPEND EXCLUDE_PATHS
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/transport_manager/websocket_server
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/websocket_server
+  )
+elseif(NOT ENABLE_SECURITY)
+  list(APPEND EXCLUDE_PATHS
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/transport_manager/websocket_server/websocket_secure_session.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/websocket_server/websocket_secure_session.cc
+  )
+endif()
+
+if(NOT ENABLE_IAP2EMULATION)
+  list (APPEND EXCLUDE_PATHS
     ${CMAKE_CURRENT_SOURCE_DIR}/include/iap2_emulation/iap2_transport_adapter.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/iap2_emulation/iap2_transport_adapter.cc
   )

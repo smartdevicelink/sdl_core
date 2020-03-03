@@ -217,8 +217,7 @@ void UpdateStatusManager::DoTransition() {
   next_status_.reset();
 
   const bool is_update_pending =
-      (policy::kUpdateNeeded == current_status_->get_status_string() &&
-       policy::StatusUpdatePending == current_status_->get_status());
+      policy::StatusProcessingSnapshot == current_status_->get_status();
 
   if (last_processed_event_ != kScheduleManualUpdate && !is_update_pending) {
     listener_->OnUpdateStatusChanged(current_status_->get_status_string());

@@ -75,7 +75,8 @@ enum PolicyTableStatus {
   StatusUpToDate = 0,
   StatusUpdatePending,
   StatusUpdateRequired,
-  StatusUnknown
+  StatusUnknown,
+  StatusProcessingSnapshot
 };
 
 enum class PTUIterationType { DefaultIteration = 0, RetryIteration };
@@ -233,8 +234,11 @@ struct DeviceInfo {
     using namespace helpers;
     static const std::string bluetooth("BLUETOOTH");
     static const std::string wifi("WIFI");
+    static const std::string webengine("WEBENGINE_WEBSOCKET");
     if (Compare<std::string, EQ, ONE>(deviceType, bluetooth, wifi)) {
       connection_type.assign("BTMAC");
+    } else if (Compare<std::string, EQ, ONE>(deviceType, webengine)) {
+      connection_type.assign("");
     }
   }
 };
@@ -443,11 +447,13 @@ struct ApplicationPolicyActions {
   ApplicationPolicyActions()
       : is_notify_system(false)
       , is_send_permissions_to_app(false)
-      , is_consent_needed(false) {}
+      , is_consent_needed(false)
+      , app_properties_changed(false) {}
 
   bool is_notify_system;
   bool is_send_permissions_to_app;
   bool is_consent_needed;
+  bool app_properties_changed;
 };
 
 /**
@@ -507,7 +513,8 @@ enum PermissionsCheckResult {
   RESULT_PERMISSIONS_REVOKED_AND_CONSENT_NEEDED,
   RESULT_REQUEST_TYPE_CHANGED,
   RESULT_REQUEST_SUBTYPE_CHANGED,
-  RESULT_ENCRYPTION_REQUIRED_FLAG_CHANGED
+  RESULT_ENCRYPTION_REQUIRED_FLAG_CHANGED,
+  RESULT_APP_PROPERTIES_CHANGED
 };
 
 /**
@@ -522,6 +529,68 @@ typedef std::set<std::pair<std::string, PermissionsCheckResult> >
  * from the Endpoints vector
  */
 typedef std::pair<uint32_t, uint32_t> AppIdURL;
+
+/**
+ * @brief The AppProperties struct contains application properties
+ */
+struct AppProperties {
+  AppProperties()
+      : endpoint()
+      , certificate()
+      , enabled(false)
+      , auth_token()
+      , transport_type()
+      , hybrid_app_preference() {}
+
+  AppProperties(std::string endpoint,
+                std::string certificate,
+                bool enabled,
+                std::string auth_token,
+                std::string transport_type,
+                std::string hybrid_app_preference)
+      : endpoint(endpoint)
+      , certificate(certificate)
+      , enabled(enabled)
+      , auth_token(auth_token)
+      , transport_type(transport_type)
+      , hybrid_app_preference(hybrid_app_preference) {}
+
+  /**
+   * @brief endpoint Filled with the endpoint used to connect to the cloud
+   * application.
+   * @note should be absent for local applications
+   */
+  std::string endpoint;
+
+  /**
+   * @brief certificate Filled with the certificate used for creation
+   * of a secure connection to the cloud application
+   */
+  std::string certificate;
+
+  /**
+   * @brief enabled Whether or not the app is enabled
+   */
+  bool enabled;
+
+  /**
+   * @brief auth_token Filled with the token used for authentication when
+   * reconnecting to the cloud app
+   */
+  std::string auth_token;
+
+  /**
+   * @brief transport_type Filled with the transport type used by the
+   * cloud/local application (ex. "WSS")
+   */
+  std::string transport_type;
+
+  /**
+   * @brief hybrid_app_preference Filled with the hybrid app preference for the
+   * application set by the user
+   */
+  std::string hybrid_app_preference;
+};
 
 }  //  namespace policy
 

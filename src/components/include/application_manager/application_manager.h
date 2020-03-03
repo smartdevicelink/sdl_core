@@ -165,6 +165,27 @@ class ApplicationManager {
   virtual DataAccessor<ApplicationSet> applications() const = 0;
   virtual DataAccessor<AppsWaitRegistrationSet> pending_applications()
       const = 0;
+
+  /**
+   * @brief CreatePendingApplication Add applicaiton to pending state
+   * All info mandatory for application will be fetched from policy database.
+   * Application will be stored to internal pending applicaitons list.
+   * UpdateAppList will not be trigerred
+   * Application will be created if app exists in policy database and
+   * nicknames are not empty
+   * @param policy_app_id app id to store
+   */
+  virtual void CreatePendingLocalApplication(
+      const std::string& policy_app_id) = 0;
+
+  /**
+   * @brief RemovePendingApplication Remove applicaiton from pending state
+   * Application will be removed from the internal pending applicaitons list.
+   * UpdateAppList will not be trigerred
+   * @param policy_app_id app id to remove
+   */
+  virtual void RemovePendingApplication(const std::string& policy_app_id) = 0;
+
   virtual DataAccessor<ReregisterWaitList> reregister_applications() const = 0;
 
   virtual ApplicationSharedPtr application(uint32_t app_id) const = 0;

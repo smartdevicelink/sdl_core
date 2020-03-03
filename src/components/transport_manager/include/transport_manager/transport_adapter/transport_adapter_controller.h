@@ -225,6 +225,8 @@ class TransportAdapterController {
    * @param new_config The new configuration of the transport
    */
   virtual void TransportConfigUpdated(const TransportConfig& new_config) = 0;
+
+  virtual DeviceSptr GetWebEngineDevice() const = 0;
 };
 
 }  // namespace transport_adapter

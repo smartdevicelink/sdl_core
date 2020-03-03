@@ -48,9 +48,13 @@
 #include "transport_manager/cloud/cloud_websocket_transport_adapter.h"
 #endif  // CLOUD_APP_WEBSOCKET_TRANSPORT_SUPPORT
 
-#if defined(BUILD_TESTS)
+#ifdef WEBSOCKET_SERVER_TRANSPORT_SUPPORT
+#include "transport_manager/websocket_server/websocket_server_transport_adapter.h"
+#endif
+
+#if defined(ENABLE_IAP2EMULATION)
 #include "transport_manager/iap2_emulation/iap2_transport_adapter.h"
-#endif  // BUILD_TEST
+#endif  // ENABLE_IAP2EMULATION
 
 namespace transport_manager {
 CREATE_LOGGERPTR_GLOBAL(logger_, "TransportManager")
@@ -81,6 +85,15 @@ TransportAdapterFactory::TransportAdapterFactory() {
     return new transport_adapter::CloudWebsocketTransportAdapter(
         last_state_wrapper, settings);
   };
+#endif
+
+#if defined(WEBSOCKET_SERVER_TRANSPORT_SUPPORT)
+  ta_websocket_server_creator_ =
+      [](resumption::LastStateWrapperPtr last_state_wrapper,
+         const TransportManagerSettings& settings) {
+        return new transport_adapter::WebSocketServerTransportAdapter(
+            last_state_wrapper, settings);
+      };
 #endif
 }
 
@@ -143,7 +156,20 @@ int TransportManagerDefault::Init(
   AddTransportAdapter(ta_cloud);
 #endif  // CLOUD_APP_WEBSOCKET_TRANSPORT_SUPPORT
 
-#if defined BUILD_TESTS
+#ifdef WEBSOCKET_SERVER_TRANSPORT_SUPPORT
+  auto ta_websocket =
+      ta_factory_.ta_websocket_server_creator_(last_state_wrapper, settings);
+
+#ifdef TELEMETRY_MONITOR
+  if (metric_observer_) {
+    ta_websocket->SetTelemetryObserver(metric_observer_);
+  }
+#endif  // TELEMETRY_MONITOR
+  AddTransportAdapter(ta_websocket);
+  ta_websocket = NULL;
+#endif  // WEBSOCKET_SERVER_TRANSPORT_SUPPORT
+
+#if defined ENABLE_IAP2EMULATION
   const uint16_t iap2_bt_emu_port = 23456;
   transport_adapter::IAP2BluetoothEmulationTransportAdapter*
       iap2_bt_emu_adapter =
@@ -158,7 +184,7 @@ int TransportManagerDefault::Init(
           iap2_usb_emu_port, last_state_wrapper, settings);
 
   AddTransportAdapter(iap2_usb_emu_adapter);
-#endif  // BUILD_TEST
+#endif  // ENABLE_IAP2EMULATION
 
   LOG4CXX_TRACE(logger_, "exit with E_SUCCESS");
   return E_SUCCESS;

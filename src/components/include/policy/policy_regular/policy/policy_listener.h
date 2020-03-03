@@ -108,6 +108,13 @@ class PolicyListener {
       const std::string& policy_app_id) const = 0;
 
   /**
+   * @brief Send OnAppPropertiesChangeNotification to the HMI
+   * @param policy_app_id policy app id
+   */
+  virtual void SendOnAppPropertiesChangeNotification(
+      const std::string& policy_app_id) const = 0;
+
+  /**
    * @brief GetAvailableApps allows to obtain list of registered applications.
    */
   virtual void GetAvailableApps(std::queue<std::string>&) = 0;

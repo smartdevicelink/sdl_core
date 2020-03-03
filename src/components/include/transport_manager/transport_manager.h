@@ -215,6 +215,18 @@ class TransportManager {
    */
   virtual int PerformActionOnClients(
       const TransportAction required_action) const = 0;
+
+  /**
+   * @brief Called when websocket server transport adapter is available.
+   * Creates WebSocketDevice for WebEngine and add it to the device list
+   */
+  virtual void CreateWebEngineDevice() = 0;
+
+  /**
+   * @brief GetWebEngineDeviceInfo
+   * @return device info for WebEngine device
+   */
+  virtual const DeviceInfo& GetWebEngineDeviceInfo() const = 0;
 };
 }  // namespace transport_manager
 #endif  // SRC_COMPONENTS_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_MANAGER_H_
