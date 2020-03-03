@@ -29,7 +29,6 @@
 # POSSIBILITY OF SUCH DAMAGE.
 
 # Copy RPC spec submodule files to interfaces directory
-
 if(EXISTS ${CMAKE_SOURCE_DIR}/tools/rpc_spec/)
   execute_process(COMMAND cp ${CMAKE_SOURCE_DIR}/tools/rpc_spec/MOBILE_API.xml ${CMAKE_CURRENT_SOURCE_DIR}/)
   execute_process(COMMAND cp ${CMAKE_SOURCE_DIR}/tools/rpc_spec/MOBILE_API.xsd ${CMAKE_CURRENT_SOURCE_DIR}/)
