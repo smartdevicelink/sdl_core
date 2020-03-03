@@ -10,3 +10,4 @@ src/appMain/build_config.txt
 *.DS_Store
 *htmlcov
 *.coverage
+src/components/interfaces/MOBILE_API.*
