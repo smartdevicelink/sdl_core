@@ -141,17 +141,28 @@ class UIIsReadyRequestTest
     event.set_smart_object(*msg);
   }
 
+  void HMICapabilitiesExpectations() {
+    std::vector<hmi_apis::FunctionID::eType> interfaces_to_update{
+        hmi_apis::FunctionID::UI_GetLanguage,
+        hmi_apis::FunctionID::UI_GetSupportedLanguages,
+        hmi_apis::FunctionID::UI_GetCapabilities};
+    EXPECT_CALL(mock_hmi_capabilities_, GetInterfacesToUpdate())
+        .WillOnce(Return(interfaces_to_update))
+        .WillOnce(Return(interfaces_to_update));
+  }
+
   UIIsReadyRequestPtr command_;
   policy_test::MockPolicyHandlerInterface mock_policy_handler_interface_;
 };
 
 TEST_F(UIIsReadyRequestTest,
-       OnEvent_NoKeyAvailableInMessage_HmiInterfacesIgnored) {
+       OnEvent_NoKeyAvailableInMessage_HmiInterfacesIgnored_CacheIsAbsent) {
   const bool is_ui_cooperating_available = false;
   const bool is_send_message_to_hmi = true;
   const bool is_message_contain_param = false;
   Event event(hmi_apis::FunctionID::UI_IsReady);
   PrepareEvent(is_message_contain_param, event);
+  HMICapabilitiesExpectations();
   SetUpExpectations(is_ui_cooperating_available,
                     is_send_message_to_hmi,
                     is_message_contain_param,
@@ -161,7 +172,7 @@ TEST_F(UIIsReadyRequestTest,
 }
 
 TEST_F(UIIsReadyRequestTest,
-       OnEvent_KeyAvailableEqualToFalse_StateNotAvailable) {
+       OnEvent_KeyAvailableEqualToFalse_StateNotAvailable_CacheIsAbsent) {
   const bool is_ui_cooperating_available = false;
   const bool is_send_message_to_hmi = false;
   const bool is_message_contain_param = true;
@@ -174,12 +185,14 @@ TEST_F(UIIsReadyRequestTest,
   command_->on_event(event);
 }
 
-TEST_F(UIIsReadyRequestTest, OnEvent_KeyAvailableEqualToTrue_StateAvailable) {
+TEST_F(UIIsReadyRequestTest,
+       OnEvent_KeyAvailableEqualToTrue_StateAvailable_CacheIsAbsent) {
   const bool is_ui_cooperating_available = true;
   const bool is_send_message_to_hmi = true;
   const bool is_message_contain_param = true;
   Event event(hmi_apis::FunctionID::UI_IsReady);
   PrepareEvent(is_message_contain_param, event, is_ui_cooperating_available);
+  HMICapabilitiesExpectations();
   SetUpExpectations(is_ui_cooperating_available,
                     is_send_message_to_hmi,
                     is_message_contain_param,
@@ -187,7 +200,13 @@ TEST_F(UIIsReadyRequestTest, OnEvent_KeyAvailableEqualToTrue_StateAvailable) {
   command_->on_event(event);
 }
 
-TEST_F(UIIsReadyRequestTest, OnTimeout_SUCCESS) {
+TEST_F(UIIsReadyRequestTest, OnTimeout_SUCCESS_CacheIsAbsent) {
+  std::vector<hmi_apis::FunctionID::eType> interfaces_to_update{
+      hmi_apis::FunctionID::UI_GetLanguage,
+      hmi_apis::FunctionID::UI_GetSupportedLanguages,
+      hmi_apis::FunctionID::UI_GetCapabilities};
+  EXPECT_CALL(mock_hmi_capabilities_, GetInterfacesToUpdate())
+      .WillOnce(Return(interfaces_to_update));
   ExpectSendMessagesToHMI();
   command_->onTimeOut();
 }
