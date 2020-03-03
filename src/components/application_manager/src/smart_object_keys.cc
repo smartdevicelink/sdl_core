@@ -561,6 +561,7 @@ const char* capabilities = "capabilities";
 const char* speech_capabilities = "speechCapabilities";
 const char* prerecorded_speech_capabilities = "prerecordedSpeechCapabilities";
 const char* preset_bank_capabilities = "presetBankCapabilities";
+const char* on_screen_presets_available = "onScreenPresetsAvailable";
 const char* allowed = "allowed";
 const char* vehicle_type = "vehicleType";
 const char* did_result = "didResult";
