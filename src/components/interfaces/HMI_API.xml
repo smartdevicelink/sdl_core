@@ -5443,6 +5443,7 @@
     <param name="systemCapabilities" type="Common.SystemCapabilities" mandatory="false">
       <description>Specifies system capabilities. See SystemCapabilities</description>
     </param>
+    <param name="pcmStreamCapabilities" type="Common.AudioPassThruCapabilities" mandatory="false"/>
   </function>
   <function name="ChangeRegistration" messagetype="request">
     <description>Request from SmartDeviceLink to HMI to change language for app.</description>

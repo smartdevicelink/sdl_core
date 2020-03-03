@@ -150,6 +150,12 @@ void UIGetCapabilitiesResponse::Run() {
     }
   }
 
+  if (msg_params.keyExists(strings::pcm_stream_capabilities)) {
+    sections_to_update.push_back(strings::pcm_stream_capabilities);
+    hmi_capabilities_.set_pcm_stream_capabilities(
+        msg_params[strings::pcm_stream_capabilities]);
+  }
+
   if (!hmi_capabilities_.SaveCachedCapabilitiesToFile(
           hmi_interface::ui, sections_to_update, message_->getSchema())) {
     LOG4CXX_ERROR(logger_,

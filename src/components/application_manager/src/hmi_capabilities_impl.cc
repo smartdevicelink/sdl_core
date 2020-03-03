@@ -1828,6 +1828,13 @@ void HMICapabilitiesImpl::PrepareUiJsonValueForSaving(
         strings::system_capabilities, schema, system_capabilities, out_node);
   }
 
+  if (helpers::in_range(sections_to_update, strings::pcm_stream_capabilities)) {
+    save_hmi_capability_field_to_json(strings::pcm_stream_capabilities,
+                                      schema,
+                                      pcm_stream_capabilities(),
+                                      out_node);
+  }
+
   if (helpers::in_range(sections_to_update, hmi_response::language)) {
     out_node[hmi_response::language] =
         MessageHelper::CommonLanguageToString(active_ui_language());
