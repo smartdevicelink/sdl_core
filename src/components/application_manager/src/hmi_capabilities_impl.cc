@@ -41,6 +41,7 @@
 #include "config_profile/profile.h"
 #include "formatters/CFormatterJsonBase.h"
 #include "interfaces/HMI_API.h"
+#include "smart_objects/enum_schema_item.h"
 #include "smart_objects/smart_object.h"
 #include "utils/file_system.h"
 #include "utils/helpers.h"
@@ -750,7 +751,7 @@ void HMICapabilitiesImpl::set_seat_location_capability(
 void HMICapabilitiesImpl::Init(
     resumption::LastStateWrapperPtr last_state_wrapper) {
   hmi_language_handler_.Init(last_state_wrapper);
-  if (false == load_capabilities_from_file()) {
+  if (false == LoadCapabilitiesFromFile()) {
     LOG4CXX_ERROR(logger_, "file hmi_capabilities.json was not loaded");
   } else {
     LOG4CXX_INFO(logger_, "file hmi_capabilities.json was loaded");
@@ -916,6 +917,37 @@ bool check_existing_json_member(const Json::Value& json_member,
 }
 
 /**
+ * @brief Converts specified string to appropriate enum value
+ * according to schema
+ * @return converted enum value
+ */
+template <typename EnumType>
+EnumType ConvertStringToEnum(const std::string& str) {
+  using ns_smart_device_link::ns_smart_objects::EnumConversionHelper;
+  EnumType value;
+  if (EnumConversionHelper<EnumType>::StringToEnum(str, &value)) {
+    return value;
+  }
+
+  return EnumType::INVALID_ENUM;
+}
+
+/**
+ * @brief Converts the JSON array of string type into the SmartArray of enums
+ * @param json_array JSON value containing array
+ * @param out_so_array output SmartArray
+ */
+template <typename EnumType>
+void ConvertJsonArrayToSoArray(const Json::Value& json_array,
+                               smart_objects::SmartObject& out_so_array) {
+  out_so_array =
+      smart_objects::SmartObject(smart_objects::SmartType::SmartType_Array);
+  for (uint32_t i = 0; i < json_array.size(); ++i) {
+    out_so_array[i] = ConvertStringToEnum<EnumType>(json_array[i].asString());
+  }
+}
+
+/**
  * @brief Helper class for obtaining proper capabilities JSON value considering
  * case if it were overriden by cache
  */
@@ -991,7 +1023,7 @@ struct JsonCapabilitiesGetter {
   Json::Value& json_override_node_;
 };
 
-bool HMICapabilitiesImpl::load_capabilities_from_file() {
+bool HMICapabilitiesImpl::LoadCapabilitiesFromFile() {
   std::string json_string;
   const std::string file_name =
       app_mngr_.get_settings().hmi_capabilities_file_name();
@@ -1600,7 +1632,7 @@ HMICapabilitiesImpl::GetInterfacesToUpdate() const {
   return interfaces_to_update_;
 }
 
-bool HMICapabilitiesImpl::AreAllFieldsSaved(
+bool HMICapabilitiesImpl::AllFieldsSaved(
     const Json::Value& root_node,
     const char* interface_name,
     const std::vector<std::string>& sections_to_check) const {
@@ -1900,8 +1932,7 @@ bool HMICapabilitiesImpl::SaveCachedCapabilitiesToFile(
       return false;
     }
 
-    if (AreAllFieldsSaved(
-            root_node, interface_name.c_str(), sections_to_update)) {
+    if (AllFieldsSaved(root_node, interface_name.c_str(), sections_to_update)) {
       LOG4CXX_DEBUG(
           logger_,
           "All " << interface_name
