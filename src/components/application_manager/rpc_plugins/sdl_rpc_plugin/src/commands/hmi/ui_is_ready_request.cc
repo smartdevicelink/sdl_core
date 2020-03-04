@@ -77,11 +77,8 @@ void UIIsReadyRequest::on_event(const event_engine::Event& event) {
                      "HmiInterfaces::HMI_INTERFACE_UI isn't available");
         return;
       }
-      if (hmi_capabilities_.GetInterfacesToUpdate().empty()) {
-        LOG4CXX_INFO(logger_, "All fiels are present in the cache");
-        return;
-      }
-      SendMessageToHMI();
+
+      RequestCapabilities();
       break;
     }
     default: {
@@ -93,13 +90,14 @@ void UIIsReadyRequest::on_event(const event_engine::Event& event) {
 
 void UIIsReadyRequest::onTimeOut() {
   // Note(dtrunov): According to new requirment APPLINK-27956
-  SendMessageToHMI();
+  RequestCapabilities();
 }
 
-void UIIsReadyRequest::SendMessageToHMI() {
-  const auto interfaces_to_update = hmi_capabilities_.GetInterfacesToUpdate();
+void UIIsReadyRequest::RequestCapabilities() {
+  const auto interfaces_from_default =
+      hmi_capabilities_.GetInterfacesFromDefault();
 
-  if (helpers::in_range(interfaces_to_update,
+  if (helpers::in_range(interfaces_from_default,
                         hmi_apis::FunctionID::UI_GetLanguage)) {
     std::shared_ptr<smart_objects::SmartObject> get_language(
         MessageHelper::CreateModuleInfoSO(hmi_apis::FunctionID::UI_GetLanguage,
@@ -108,16 +106,16 @@ void UIIsReadyRequest::SendMessageToHMI() {
     rpc_service_.ManageHMICommand(get_language);
   }
 
-  if (helpers::in_range(interfaces_to_update,
+  if (helpers::in_range(interfaces_from_default,
                         hmi_apis::FunctionID::UI_GetSupportedLanguages)) {
-    std::shared_ptr<smart_objects::SmartObject> get_all_languages(
+    std::shared_ptr<smart_objects::SmartObject> get_supported_languages(
         MessageHelper::CreateModuleInfoSO(
             hmi_apis::FunctionID::UI_GetSupportedLanguages,
             application_manager_));
-    rpc_service_.ManageHMICommand(get_all_languages);
+    rpc_service_.ManageHMICommand(get_supported_languages);
   }
 
-  if (helpers::in_range(interfaces_to_update,
+  if (helpers::in_range(interfaces_from_default,
                         hmi_apis::FunctionID::UI_GetCapabilities)) {
     std::shared_ptr<smart_objects::SmartObject> get_capabilities(
         MessageHelper::CreateModuleInfoSO(

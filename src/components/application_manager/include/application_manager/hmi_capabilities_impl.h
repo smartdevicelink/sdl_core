@@ -238,7 +238,7 @@ class HMICapabilitiesImpl : public HMICapabilities {
 
   void DeleteCachedCapabilitiesFile() const OVERRIDE;
 
-  std::vector<hmi_apis::FunctionID::eType> GetInterfacesToUpdate()
+  std::set<hmi_apis::FunctionID::eType> GetInterfacesFromDefault()
       const OVERRIDE;
 
  protected:
@@ -432,7 +432,7 @@ class HMICapabilitiesImpl : public HMICapabilities {
   ApplicationManager& app_mngr_;
   HMILanguageHandler hmi_language_handler_;
 
-  std::vector<hmi_apis::FunctionID::eType> interfaces_to_update_;
+  std::set<hmi_apis::FunctionID::eType> interfaces_from_default_;
 
   DISALLOW_COPY_AND_ASSIGN(HMICapabilitiesImpl);
 };
