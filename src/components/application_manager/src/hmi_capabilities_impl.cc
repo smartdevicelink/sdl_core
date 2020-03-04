@@ -955,20 +955,20 @@ struct JsonCapabilitiesGetter {
  public:
   /**
    * @brief JsonCapabilitiesGetter constructor
-   * @param json_main_node reference to the main JSON capabilities node
-   * @param json_override_node reference to overriden JSON capabilities node
+   * @param json_default_node reference to the main JSON capabilities node
+   * @param json_cache_node reference to cached JSON capabilities node
    */
-  JsonCapabilitiesGetter(Json::Value& json_main_node,
-                         Json::Value& json_override_node)
-      : json_main_node_(json_main_node)
-      , json_override_node_(json_override_node) {}
+  JsonCapabilitiesGetter(Json::Value& json_default_node,
+                         Json::Value& json_cache_node)
+      : json_default_node_(json_default_node)
+      , json_cache_node_(json_cache_node) {}
 
   Json::Value GetInterfaceJsonMember(const char* member_name) {
-    if (JsonIsMemberSafe(json_override_node_, member_name)) {
-      return GetOverrideJsonMember(member_name);
+    if (JsonIsMemberSafe(json_cache_node_, member_name)) {
+      return GetCachedJsonMember(member_name);
     }
 
-    if (JsonIsMemberSafe(json_main_node_, member_name)) {
+    if (JsonIsMemberSafe(json_default_node_, member_name)) {
       return GetMainJsonMember(member_name);
     }
 
@@ -977,7 +977,7 @@ struct JsonCapabilitiesGetter {
 
   /**
    * @brief GetJsonMember gets JSON value for a specified JSON member from
-   * overriden JSON node if member exists, otherwise main JSON node will be
+   * cached JSON node if member exists, otherwise main JSON node will be
    * taken
    * @param member_name name of the JSON member to get
    * @return JSON value for specified member or Value::null if not found
@@ -986,11 +986,11 @@ struct JsonCapabilitiesGetter {
       const char* member_name,
       hmi_apis::FunctionID::eType request_id,
       std::set<hmi_apis::FunctionID::eType>& interfaces_from_default) {
-    if (JsonIsMemberSafe(json_override_node_, member_name)) {
-      return GetOverrideJsonMember(member_name);
+    if (JsonIsMemberSafe(json_cache_node_, member_name)) {
+      return GetCachedJsonMember(member_name);
     }
 
-    if (JsonIsMemberSafe(json_main_node_, member_name)) {
+    if (JsonIsMemberSafe(json_default_node_, member_name)) {
       interfaces_from_default.insert(request_id);
       return GetMainJsonMember(member_name);
     }
@@ -1005,22 +1005,22 @@ struct JsonCapabilitiesGetter {
    * @return JSON value for specified member or Value::null if not found
    */
   Json::Value GetMainJsonMember(const char* member_name) {
-    return json_main_node_.get(member_name, Json::Value::null);
+    return json_default_node_.get(member_name, Json::Value::null);
   }
 
   /**
-   * @brief GetOverrideJsonMember gets JSON value for a specified JSON member
-   * from the overriden JSON node
+   * @brief GetCachedJsonMember gets JSON value for a specified JSON member
+   * from the cached JSON node
    * @param member_name name of the JSON member to get
    * @return JSON value for specified member or Value::null if not found
    */
-  Json::Value GetOverrideJsonMember(const char* member_name) {
-    return json_override_node_.get(member_name, Json::Value::null);
+  Json::Value GetCachedJsonMember(const char* member_name) {
+    return json_cache_node_.get(member_name, Json::Value::null);
   }
 
  private:
-  Json::Value& json_main_node_;
-  Json::Value& json_override_node_;
+  Json::Value& json_default_node_;
+  Json::Value& json_cache_node_;
 };
 
 bool HMICapabilitiesImpl::LoadCapabilitiesFromFile() {
@@ -1089,10 +1089,11 @@ bool HMICapabilitiesImpl::LoadCapabilitiesFromFile() {
     // UI
 
     if (!json_root_getter.GetInterfaceJsonMember(hmi_interface::ui).isNull()) {
-      auto ui_main_node = json_root_getter.GetMainJsonMember(hmi_interface::ui);
-      auto ui_override_node =
-          json_root_getter.GetOverrideJsonMember(hmi_interface::ui);
-      JsonCapabilitiesGetter json_ui_getter(ui_main_node, ui_override_node);
+      auto ui_default_node =
+          json_root_getter.GetMainJsonMember(hmi_interface::ui);
+      auto ui_cache_node =
+          json_root_getter.GetCachedJsonMember(hmi_interface::ui);
+      JsonCapabilitiesGetter json_ui_getter(ui_default_node, ui_cache_node);
 
       auto ui_language_node =
           json_ui_getter.GetJsonMember(hmi_response::language,
@@ -1445,10 +1446,11 @@ bool HMICapabilitiesImpl::LoadCapabilitiesFromFile() {
 
     // VR
     if (!json_root_getter.GetInterfaceJsonMember(hmi_interface::vr).isNull()) {
-      auto vr_main_node = json_root_getter.GetMainJsonMember(hmi_interface::vr);
-      auto vr_override_node =
-          json_root_getter.GetOverrideJsonMember(hmi_interface::vr);
-      JsonCapabilitiesGetter json_vr_getter(vr_main_node, vr_override_node);
+      auto vr_default_node =
+          json_root_getter.GetMainJsonMember(hmi_interface::vr);
+      auto vr_cache_node =
+          json_root_getter.GetCachedJsonMember(hmi_interface::vr);
+      JsonCapabilitiesGetter json_vr_getter(vr_default_node, vr_cache_node);
 
       auto vr_language_node =
           json_vr_getter.GetJsonMember(hmi_response::language,
@@ -1486,11 +1488,11 @@ bool HMICapabilitiesImpl::LoadCapabilitiesFromFile() {
 
     // TTS
     if (!json_root_getter.GetInterfaceJsonMember(hmi_interface::tts).isNull()) {
-      auto tts_main_node =
+      auto tts_default_node =
           json_root_getter.GetMainJsonMember(hmi_interface::tts);
-      auto tts_override_node =
-          json_root_getter.GetOverrideJsonMember(hmi_interface::tts);
-      JsonCapabilitiesGetter json_tts_getter(tts_main_node, tts_override_node);
+      auto tts_cache_node =
+          json_root_getter.GetCachedJsonMember(hmi_interface::tts);
+      JsonCapabilitiesGetter json_tts_getter(tts_default_node, tts_cache_node);
 
       auto tts_language_node =
           json_tts_getter.GetJsonMember(hmi_response::language,
@@ -1542,12 +1544,12 @@ bool HMICapabilitiesImpl::LoadCapabilitiesFromFile() {
     // Buttons
     if (!json_root_getter.GetInterfaceJsonMember(hmi_interface::buttons)
              .isNull()) {
-      auto buttons_main_node =
+      auto buttons_default_node =
           json_root_getter.GetMainJsonMember(hmi_interface::buttons);
-      auto buttons_override_node =
-          json_root_getter.GetOverrideJsonMember(hmi_interface::buttons);
-      JsonCapabilitiesGetter json_buttons_getter(buttons_main_node,
-                                                 buttons_override_node);
+      auto buttons_cache_node =
+          json_root_getter.GetCachedJsonMember(hmi_interface::buttons);
+      JsonCapabilitiesGetter json_buttons_getter(buttons_default_node,
+                                                 buttons_cache_node);
 
       auto buttons_capabilities_node = json_buttons_getter.GetJsonMember(
           hmi_response::capabilities,
@@ -1588,12 +1590,12 @@ bool HMICapabilitiesImpl::LoadCapabilitiesFromFile() {
 
     if (!json_root_getter.GetInterfaceJsonMember(hmi_interface::vehicle_info)
              .isNull()) {
-      auto vehicle_info_main_node =
+      auto vehicle_info_default_node =
           json_root_getter.GetMainJsonMember(hmi_interface::vehicle_info);
-      auto vehicle_info_override_node =
-          json_root_getter.GetOverrideJsonMember(hmi_interface::vehicle_info);
-      JsonCapabilitiesGetter json_vehicle_info_getter(
-          vehicle_info_main_node, vehicle_info_override_node);
+      auto vehicle_info_cache_node =
+          json_root_getter.GetCachedJsonMember(hmi_interface::vehicle_info);
+      JsonCapabilitiesGetter json_vehicle_info_getter(vehicle_info_default_node,
+                                                      vehicle_info_cache_node);
       auto vehicle_type_node = json_vehicle_info_getter.GetJsonMember(
           hmi_response::vehicle_type,
           hmi_apis::FunctionID::VehicleInfo_GetVehicleType,
