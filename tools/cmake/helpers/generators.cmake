@@ -63,11 +63,7 @@ macro(generate_interface ARG_XML_NAME ARG_NAMESPACE PARSER_TYPE)
   )
 
   set(CPP_FILE "${CMAKE_CURRENT_BINARY_DIR}/${FILE_NAME}_schema.cc")
-  if ("${PARSER_TYPE}" STREQUAL "sdlrpcv2")
-    set(FULL_XML_NAME "${CMAKE_SOURCE_DIR}/tools/rpc_spec/${ARG_XML_NAME}")
-  else ()
-    set(FULL_XML_NAME "${CMAKE_CURRENT_SOURCE_DIR}/${ARG_XML_NAME}")
-  endif()
+  set(FULL_XML_NAME "${CMAKE_CURRENT_SOURCE_DIR}/${ARG_XML_NAME}")
 
   add_custom_command(
     OUTPUT ${HPP_FILE} ${CPP_FILE}

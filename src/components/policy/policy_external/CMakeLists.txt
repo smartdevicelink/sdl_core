@@ -76,7 +76,7 @@ set(GENERATED_MOBILE_POLICY_TYPES
   ${GENERATED_MOBILE_POLICY_TYPES_CPP})
 
 generate_policy_types("${GENERATED_MOBILE_POLICY_TYPES}"
-                      "${CMAKE_SOURCE_DIR}/tools/rpc_spec/MOBILE_API.xml"
+                      "${COMPONENTS_DIR}/interfaces/MOBILE_API.xml"
                       "rpc::policy_table_interface_base"
                       "mobile-policy-types")
 
