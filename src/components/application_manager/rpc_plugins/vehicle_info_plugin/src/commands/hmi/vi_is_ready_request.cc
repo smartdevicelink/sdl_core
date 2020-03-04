@@ -81,12 +81,8 @@ void VIIsReadyRequest::on_event(const event_engine::Event& event) {
             "HmiInterfaces::HMI_INTERFACE_VehicleInfo isn't available");
         return;
       }
-      if (hmi_capabilities_.GetInterfacesToUpdate().empty()) {
-        LOG4CXX_INFO(logger_, "All fiels are present in the cache");
-        return;
-      }
 
-      SendMessageToHMI();
+      RequestCapabilities();
       break;
     }
     default: {
@@ -98,13 +94,14 @@ void VIIsReadyRequest::on_event(const event_engine::Event& event) {
 
 void VIIsReadyRequest::onTimeOut() {
   // Note(dtrunov): According to new requirment APPLINK-27956
-  SendMessageToHMI();
+  RequestCapabilities();
 }
 
-void VIIsReadyRequest::SendMessageToHMI() {
-  const auto interfaces_to_update = hmi_capabilities_.GetInterfacesToUpdate();
+void VIIsReadyRequest::RequestCapabilities() {
+  const auto interfaces_from_default =
+      hmi_capabilities_.GetInterfacesFromDefault();
 
-  if (helpers::in_range(interfaces_to_update,
+  if (helpers::in_range(interfaces_from_default,
                         hmi_apis::FunctionID::VehicleInfo_GetVehicleType)) {
     std::shared_ptr<smart_objects::SmartObject> get_type(
         MessageHelper::CreateModuleInfoSO(

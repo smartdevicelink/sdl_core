@@ -881,9 +881,10 @@ void ApplicationManagerImpl::OnHMIStartedCooperation() {
                                         *this));
   rpc_service_->ManageHMICommand(is_rc_ready);
 
-  const auto interfaces_to_update = hmi_capabilities_->GetInterfacesToUpdate();
+  const auto interfaces_from_default =
+      hmi_capabilities_->GetInterfacesFromDefault();
 
-  if (helpers::in_range(interfaces_to_update,
+  if (helpers::in_range(interfaces_from_default,
                         hmi_apis::FunctionID::Buttons_GetCapabilities)) {
     std::shared_ptr<smart_objects::SmartObject> button_capabilities(
         MessageHelper::CreateModuleInfoSO(

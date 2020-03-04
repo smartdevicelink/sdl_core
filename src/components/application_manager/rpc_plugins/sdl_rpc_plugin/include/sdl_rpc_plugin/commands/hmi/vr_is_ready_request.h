@@ -81,7 +81,7 @@ class VRIsReadyRequest : public app_mngr::commands::RequestToHMI,
   /**
    * @brief Send request to HMI for fetching of cappabilities
    */
-  void SendMessageToHMI();
+  void RequestCapabilities();
 
  private:
   DISALLOW_COPY_AND_ASSIGN(VRIsReadyRequest);
