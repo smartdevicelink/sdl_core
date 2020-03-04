@@ -91,12 +91,12 @@ ReleaseInteriorVehicleDataModuleRequest::
 
 bool ReleaseInteriorVehicleDataModuleRequest::ProcessCapabilities() {
   LOG4CXX_AUTO_TRACE(logger_);
-  const auto rc_capabilities = hmi_capabilities_.rc_capability();
+  const auto rc_capability = hmi_capabilities_.rc_capability();
 
   const std::string module_type = ModuleType();
   const std::string module_id = ModuleId();
   const ModuleUid module(module_type, module_id);
-  if (rc_capabilities &&
+  if (rc_capability &&
       !rc_capabilities_manager_.CheckIfModuleExistsInCapabilities(module)) {
     LOG4CXX_WARN(
         logger_,
