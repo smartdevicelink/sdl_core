@@ -38,8 +38,6 @@
 #include "interfaces/HMI_API.h"
 #include "interfaces/MOBILE_API.h"
 #include "json/json.h"
-#include "smart_objects/enum_schema_item.h"
-#include "smart_objects/smart_object.h"
 #include "utils/macro.h"
 
 namespace application_manager {
@@ -250,7 +248,7 @@ class HMICapabilitiesImpl : public HMICapabilities {
    *
    * @return TRUE if capabilities loaded successfully, otherwise FALSE.
    */
-  bool load_capabilities_from_file();
+  bool LoadCapabilitiesFromFile();
 
   /**
    * @brief function converts json object "languages" to smart object
@@ -273,37 +271,6 @@ class HMICapabilitiesImpl : public HMICapabilities {
       const Json::Value& capability,
       smart_objects::SmartObject& output_so) const;
 
-  /**
-   * @brief Converts specified string to appropriate enum value
-   * according to schema
-   * @return converted enum value
-   */
-  template <typename EnumType>
-  EnumType ConvertStringToEnum(const std::string& str) {
-    using ns_smart_device_link::ns_smart_objects::EnumConversionHelper;
-    EnumType value;
-    if (EnumConversionHelper<EnumType>::StringToEnum(str, &value)) {
-      return value;
-    }
-
-    return EnumType::INVALID_ENUM;
-  }
-
-  /**
-   * @brief Converts the JSON array of string type into the SmartArray of enums
-   * @param json_array JSON value containing array
-   * @param out_so_array output SmartArray
-   */
-  template <typename EnumType>
-  void ConvertJsonArrayToSoArray(const Json::Value& json_array,
-                                 smart_objects::SmartObject& out_so_array) {
-    out_so_array =
-        smart_objects::SmartObject(smart_objects::SmartType::SmartType_Array);
-    for (uint32_t i = 0; i < json_array.size(); ++i) {
-      out_so_array[i] = ConvertStringToEnum<EnumType>(json_array[i].asString());
-    }
-  }
-
  private:
   /**
    * @brief Checks are all updating fields are currently saved in the JSON
@@ -314,10 +281,9 @@ class HMICapabilitiesImpl : public HMICapabilities {
    * @return true if all fields from the list are saved in the JSON structure,
    * otherwise returns false
    */
-  bool AreAllFieldsSaved(
-      const Json::Value& root_node,
-      const char* interface_name,
-      const std::vector<std::string>& sections_to_check) const;
+  bool AllFieldsSaved(const Json::Value& root_node,
+                      const char* interface_name,
+                      const std::vector<std::string>& sections_to_check) const;
 
   /**
    * @brief Gets the currently active language depending on interface
