@@ -34,7 +34,7 @@ if(EXISTS ${CMAKE_SOURCE_DIR}/tools/rpc_spec/)
   execute_process(COMMAND cp ${CMAKE_SOURCE_DIR}/tools/rpc_spec/MOBILE_API.xsd ${CMAKE_CURRENT_SOURCE_DIR}/)
 else ()
   message( FATAL_ERROR "Missing the RPC Spec submodule" )
-  message( FATAL_ERROR "Please run `git submodule init` in the SDL Core source directory" )
+  message( FATAL_ERROR "Please run `git submodule update --init` in the SDL Core source directory" )
 endif ()
 
 include(${CMAKE_SOURCE_DIR}/tools/cmake/helpers/generators.cmake)
