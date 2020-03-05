@@ -984,13 +984,13 @@ struct JsonCapabilitiesGetter {
   Json::Value GetJsonMember(
       const char* member_name,
       hmi_apis::FunctionID::eType request_id,
-      std::set<hmi_apis::FunctionID::eType>& interfaces_from_default) {
+      std::set<hmi_apis::FunctionID::eType>& default_initialized_capabilities) {
     if (JsonIsMemberSafe(json_cache_node_, member_name)) {
       return GetCachedJsonMember(member_name);
     }
 
     if (JsonIsMemberSafe(json_default_node_, member_name)) {
-      interfaces_from_default.insert(request_id);
+      default_initialized_capabilities.insert(request_id);
       return GetMainJsonMember(member_name);
     }
 
@@ -1082,7 +1082,7 @@ bool HMICapabilitiesImpl::LoadCapabilitiesFromFile() {
       auto ui_language_node =
           json_ui_getter.GetJsonMember(hmi_response::language,
                                        hmi_apis::FunctionID::UI_GetLanguage,
-                                       interfaces_from_default_);
+                                       default_initialized_capabilities_);
 
       if (!ui_language_node.isNull()) {
         const std::string lang = ui_language_node.asString();
@@ -1092,7 +1092,7 @@ bool HMICapabilitiesImpl::LoadCapabilitiesFromFile() {
       auto ui_languages_node = json_ui_getter.GetJsonMember(
           hmi_response::languages,
           hmi_apis::FunctionID::UI_GetSupportedLanguages,
-          interfaces_from_default_);
+          default_initialized_capabilities_);
       if (!ui_languages_node.isNull()) {
         smart_objects::SmartObject ui_languages_so(
             smart_objects::SmartType_Array);
@@ -1104,7 +1104,7 @@ bool HMICapabilitiesImpl::LoadCapabilitiesFromFile() {
       auto ui_display_capabilities_node =
           json_ui_getter.GetJsonMember(hmi_response::display_capabilities,
                                        hmi_apis::FunctionID::UI_GetCapabilities,
-                                       interfaces_from_default_);
+                                       default_initialized_capabilities_);
       if (!ui_display_capabilities_node.isNull()) {
         smart_objects::SmartObject display_capabilities_so;
         formatters::CFormatterJsonBase::jsonValueToObj(
@@ -1245,7 +1245,7 @@ bool HMICapabilitiesImpl::LoadCapabilitiesFromFile() {
       auto ui_audio_pass_thru_capabilities_node =
           json_ui_getter.GetJsonMember(strings::audio_pass_thru_capabilities,
                                        hmi_apis::FunctionID::UI_GetCapabilities,
-                                       interfaces_from_default_);
+                                       default_initialized_capabilities_);
       if (!ui_audio_pass_thru_capabilities_node.isNull()) {
         smart_objects::SmartObject audio_capabilities_so(
             smart_objects::SmartType_Array);
@@ -1268,7 +1268,7 @@ bool HMICapabilitiesImpl::LoadCapabilitiesFromFile() {
       auto ui_pcm_stream_capabilities_node =
           json_ui_getter.GetJsonMember(strings::pcm_stream_capabilities,
                                        hmi_apis::FunctionID::INVALID_ENUM,
-                                       interfaces_from_default_);
+                                       default_initialized_capabilities_);
       if (!ui_pcm_stream_capabilities_node.isNull()) {
         smart_objects::SmartObject pcm_capabilities_so =
             smart_objects::SmartObject(smart_objects::SmartType_Map);
@@ -1280,7 +1280,7 @@ bool HMICapabilitiesImpl::LoadCapabilitiesFromFile() {
       auto ui_hmi_zone_capabilities_node =
           json_ui_getter.GetJsonMember(hmi_response::hmi_zone_capabilities,
                                        hmi_apis::FunctionID::UI_GetCapabilities,
-                                       interfaces_from_default_);
+                                       default_initialized_capabilities_);
       if (!ui_hmi_zone_capabilities_node.isNull()) {
         smart_objects::SmartObject hmi_zone_capabilities_so =
             smart_objects::SmartObject(smart_objects::SmartType_Array);
@@ -1293,7 +1293,7 @@ bool HMICapabilitiesImpl::LoadCapabilitiesFromFile() {
       auto ui_soft_button_capabilities_node =
           json_ui_getter.GetJsonMember(hmi_response::soft_button_capabilities,
                                        hmi_apis::FunctionID::UI_GetCapabilities,
-                                       interfaces_from_default_);
+                                       default_initialized_capabilities_);
       if (!ui_soft_button_capabilities_node.isNull()) {
         smart_objects::SmartObject soft_button_capabilities_so;
         formatters::CFormatterJsonBase::jsonValueToObj(
@@ -1304,7 +1304,7 @@ bool HMICapabilitiesImpl::LoadCapabilitiesFromFile() {
       auto ui_system_capabilities_capabilities_node =
           json_ui_getter.GetJsonMember(strings::system_capabilities,
                                        hmi_apis::FunctionID::UI_GetCapabilities,
-                                       interfaces_from_default_);
+                                       default_initialized_capabilities_);
       if (!ui_system_capabilities_capabilities_node.isNull()) {
         if (JsonIsMemberSafe(ui_system_capabilities_capabilities_node,
                              strings::navigation_capability)) {
@@ -1439,7 +1439,7 @@ bool HMICapabilitiesImpl::LoadCapabilitiesFromFile() {
       auto vr_language_node =
           json_vr_getter.GetJsonMember(hmi_response::language,
                                        hmi_apis::FunctionID::VR_GetLanguage,
-                                       interfaces_from_default_);
+                                       default_initialized_capabilities_);
       if (!vr_language_node.isNull()) {
         const std::string lang = vr_language_node.asString();
         set_active_vr_language(MessageHelper::CommonLanguageFromString(lang));
@@ -1448,7 +1448,7 @@ bool HMICapabilitiesImpl::LoadCapabilitiesFromFile() {
       auto vr_languages_node = json_vr_getter.GetJsonMember(
           hmi_response::languages,
           hmi_apis::FunctionID::VR_GetSupportedLanguages,
-          interfaces_from_default_);
+          default_initialized_capabilities_);
       if (!vr_languages_node.isNull()) {
         smart_objects::SmartObject vr_languages_so =
             smart_objects::SmartObject(smart_objects::SmartType_Array);
@@ -1460,7 +1460,7 @@ bool HMICapabilitiesImpl::LoadCapabilitiesFromFile() {
       auto vr_capabilities_node =
           json_vr_getter.GetJsonMember(strings::vr_capabilities,
                                        hmi_apis::FunctionID::VR_GetCapabilities,
-                                       interfaces_from_default_);
+                                       default_initialized_capabilities_);
       if (!vr_capabilities_node.isNull()) {
         smart_objects::SmartObject vr_capabilities_so =
             smart_objects::SmartObject(smart_objects::SmartType_Array);
@@ -1481,7 +1481,7 @@ bool HMICapabilitiesImpl::LoadCapabilitiesFromFile() {
       auto tts_language_node =
           json_tts_getter.GetJsonMember(hmi_response::language,
                                         hmi_apis::FunctionID::TTS_GetLanguage,
-                                        interfaces_from_default_);
+                                        default_initialized_capabilities_);
       if (!tts_language_node.isNull()) {
         const std::string lang = tts_language_node.asString();
         set_active_tts_language(MessageHelper::CommonLanguageFromString(lang));
@@ -1490,7 +1490,7 @@ bool HMICapabilitiesImpl::LoadCapabilitiesFromFile() {
       auto tts_languages_node = json_tts_getter.GetJsonMember(
           hmi_response::languages,
           hmi_apis::FunctionID::TTS_GetSupportedLanguages,
-          interfaces_from_default_);
+          default_initialized_capabilities_);
       if (!tts_languages_node.isNull()) {
         smart_objects::SmartObject tts_languages_so =
             smart_objects::SmartObject(smart_objects::SmartType_Array);
@@ -1502,7 +1502,7 @@ bool HMICapabilitiesImpl::LoadCapabilitiesFromFile() {
       auto tts_speech_capabilities_node = json_tts_getter.GetJsonMember(
           hmi_response::speech_capabilities,
           hmi_apis::FunctionID::TTS_GetCapabilities,
-          interfaces_from_default_);
+          default_initialized_capabilities_);
       if (!tts_speech_capabilities_node.isNull()) {
         smart_objects::SmartObject tts_capabilities_so =
             smart_objects::SmartObject(smart_objects::SmartType_Array);
@@ -1515,7 +1515,7 @@ bool HMICapabilitiesImpl::LoadCapabilitiesFromFile() {
           json_tts_getter.GetJsonMember(
               hmi_response::prerecorded_speech_capabilities,
               hmi_apis::FunctionID::TTS_GetCapabilities,
-              interfaces_from_default_);
+              default_initialized_capabilities_);
       if (!tts_prerecorded_speech_capabilities_node.isNull()) {
         smart_objects::SmartObject tts_capabilities_so =
             smart_objects::SmartObject(smart_objects::SmartType_Array);
@@ -1538,7 +1538,7 @@ bool HMICapabilitiesImpl::LoadCapabilitiesFromFile() {
       auto buttons_capabilities_node = json_buttons_getter.GetJsonMember(
           hmi_response::capabilities,
           hmi_apis::FunctionID::Buttons_GetCapabilities,
-          interfaces_from_default_);
+          default_initialized_capabilities_);
       if (!buttons_capabilities_node.isNull()) {
         smart_objects::SmartObject buttons_capabilities_so;
         formatters::CFormatterJsonBase::jsonValueToObj(
@@ -1583,7 +1583,7 @@ bool HMICapabilitiesImpl::LoadCapabilitiesFromFile() {
       auto vehicle_type_node = json_vehicle_info_getter.GetJsonMember(
           hmi_response::vehicle_type,
           hmi_apis::FunctionID::VehicleInfo_GetVehicleType,
-          interfaces_from_default_);
+          default_initialized_capabilities_);
       if (!vehicle_type_node.isNull()) {
         smart_objects::SmartObject vehicle_type_so;
         formatters::CFormatterJsonBase::jsonValueToObj(vehicle_type_node,
@@ -1614,8 +1614,8 @@ HMICapabilitiesImpl::GetActiveLanguageForInterface(
 }
 
 std::set<hmi_apis::FunctionID::eType>
-HMICapabilitiesImpl::GetInterfacesFromDefault() const {
-  return interfaces_from_default_;
+HMICapabilitiesImpl::GetDefaultInitializedCapabilities() const {
+  return default_initialized_capabilities_;
 }
 
 bool HMICapabilitiesImpl::AllFieldsSaved(

@@ -514,8 +514,13 @@ class HMICapabilities {
    */
   virtual bool DeleteCachedCapabilitiesFile() const = 0;
 
-  virtual std::set<hmi_apis::FunctionID::eType> GetInterfacesFromDefault()
-      const = 0;
+  /**
+   * @brief Returns collection of requests that should be send to
+   * the HMI to get required HMI capabilities, that was missing in the cache
+   * @return set of function id's
+   */
+  virtual std::set<hmi_apis::FunctionID::eType>
+  GetDefaultInitializedCapabilities() const = 0;
 };
 
 }  //  namespace application_manager
