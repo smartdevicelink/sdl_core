@@ -282,7 +282,7 @@ class HMICapabilitiesImpl : public HMICapabilities {
    * otherwise returns false
    */
   bool AllFieldsSaved(const Json::Value& root_node,
-                      const char* interface_name,
+                      const std::string& interface_name,
                       const std::vector<std::string>& sections_to_check) const;
 
   /**
@@ -292,7 +292,7 @@ class HMICapabilitiesImpl : public HMICapabilities {
    *
    */
   hmi_apis::Common_Language::eType GetActiveLanguageForInterface(
-      const char* interface_name) const;
+      const std::string& interface_name) const;
 
   /**
    * @brief Prepares specified JSON structure according to sections which

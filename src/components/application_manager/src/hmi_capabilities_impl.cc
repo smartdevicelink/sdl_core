@@ -1599,15 +1599,15 @@ bool HMICapabilitiesImpl::LoadCapabilitiesFromFile() {
 
 hmi_apis::Common_Language::eType
 HMICapabilitiesImpl::GetActiveLanguageForInterface(
-    const char* interface_name) const {
+    const std::string& interface_name) const {
   LOG4CXX_AUTO_TRACE(logger_);
-  if (strcmp(hmi_interface::ui, interface_name) == 0) {
+  if (hmi_interface::ui == interface_name) {
     return active_ui_language();
   }
-  if (strcmp(hmi_interface::vr, interface_name) == 0) {
+  if (hmi_interface::vr == interface_name) {
     return active_vr_language();
   }
-  if (strcmp(hmi_interface::tts, interface_name) == 0) {
+  if (hmi_interface::tts == interface_name) {
     return active_tts_language();
   }
   return hmi_apis::Common_Language::INVALID_ENUM;
@@ -1620,10 +1620,10 @@ HMICapabilitiesImpl::GetInterfacesFromDefault() const {
 
 bool HMICapabilitiesImpl::AllFieldsSaved(
     const Json::Value& root_node,
-    const char* interface_name,
+    const std::string& interface_name,
     const std::vector<std::string>& sections_to_check) const {
   LOG4CXX_AUTO_TRACE(logger_);
-  if (!JsonIsMemberSafe(root_node, interface_name)) {
+  if (!JsonIsMemberSafe(root_node, interface_name.c_str())) {
     LOG4CXX_DEBUG(logger_,
                   interface_name
                       << " interface is not found. All fields should be saved");
@@ -1918,7 +1918,7 @@ bool HMICapabilitiesImpl::SaveCachedCapabilitiesToFile(
       return false;
     }
 
-    if (AllFieldsSaved(root_node, interface_name.c_str(), sections_to_update)) {
+    if (AllFieldsSaved(root_node, interface_name, sections_to_update)) {
       LOG4CXX_DEBUG(
           logger_,
           "All " << interface_name
