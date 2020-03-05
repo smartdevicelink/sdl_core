@@ -4452,7 +4452,7 @@
           This parameter is filled for supporting OEM proprietary data exchanges.
         </description>
       </param>
-      <param name="url" type="String" maxlength="1000" minlength="1" mandatory="false">
+      <param name="url" type="String" minlength="1" mandatory="false">
         <description>Optional array of URL(s) for HTTP requests.</description>
       </param>
       <param name="fileType" type="Common.FileType" mandatory="false">
@@ -5829,7 +5829,7 @@
   </function>
   <function name="StartStream" messagetype="request">
     <description>Request from SmartDeviceLinkCore to HMI to start playing video streaming.</description>
-    <param name="url" type="String" minlength="21" maxlength="500" mandatory="true">
+    <param name="url" type="String" minlength="21" mandatory="true">
       <description>URL that HMI start playing.</description>
     </param>
     <param name="appID" type="Integer" mandatory="true">
@@ -5848,7 +5848,7 @@
   </function>
   <function name="StartAudioStream" messagetype="request">
     <description>Request from SmartDeviceLinkCore to HMI to start playing audio streaming.</description>
-    <param name="url" type="String" minlength="21" maxlength="500" mandatory="true">
+    <param name="url" type="String" minlength="21" mandatory="true">
       <description>URL that HMI start playing.</description>
     </param>
     <param name="appID" type="Integer" mandatory="true">
