@@ -98,10 +98,10 @@ void RCIsReadyRequest::onTimeOut() {
 }
 
 void RCIsReadyRequest::RequestCapabilities() {
-  //  const auto interfaces_from_default =
-  //  hmi_capabilities_.GetInterfacesFromDefault();
+  //  const auto default_initialized_capabilities =
+  //  hmi_capabilities_.GetDefaultInitializedCapabilities();
 
-  //  if (helpers::in_range(interfaces_from_default,
+  //  if (helpers::in_range(default_initialized_capabilities,
   //                        hmi_apis::FunctionID::RC_GetCapabilities)) {
   std::shared_ptr<smart_objects::SmartObject> get_capabilities(
       MessageHelper::CreateModuleInfoSO(

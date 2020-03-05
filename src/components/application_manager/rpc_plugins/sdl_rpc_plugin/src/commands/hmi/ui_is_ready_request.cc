@@ -94,10 +94,10 @@ void UIIsReadyRequest::onTimeOut() {
 }
 
 void UIIsReadyRequest::RequestCapabilities() {
-  const auto interfaces_from_default =
-      hmi_capabilities_.GetInterfacesFromDefault();
+  const auto default_initialized_capabilities =
+      hmi_capabilities_.GetDefaultInitializedCapabilities();
 
-  if (helpers::in_range(interfaces_from_default,
+  if (helpers::in_range(default_initialized_capabilities,
                         hmi_apis::FunctionID::UI_GetLanguage)) {
     std::shared_ptr<smart_objects::SmartObject> get_language(
         MessageHelper::CreateModuleInfoSO(hmi_apis::FunctionID::UI_GetLanguage,
@@ -106,7 +106,7 @@ void UIIsReadyRequest::RequestCapabilities() {
     rpc_service_.ManageHMICommand(get_language);
   }
 
-  if (helpers::in_range(interfaces_from_default,
+  if (helpers::in_range(default_initialized_capabilities,
                         hmi_apis::FunctionID::UI_GetSupportedLanguages)) {
     std::shared_ptr<smart_objects::SmartObject> get_supported_languages(
         MessageHelper::CreateModuleInfoSO(
@@ -115,7 +115,7 @@ void UIIsReadyRequest::RequestCapabilities() {
     rpc_service_.ManageHMICommand(get_supported_languages);
   }
 
-  if (helpers::in_range(interfaces_from_default,
+  if (helpers::in_range(default_initialized_capabilities,
                         hmi_apis::FunctionID::UI_GetCapabilities)) {
     std::shared_ptr<smart_objects::SmartObject> get_capabilities(
         MessageHelper::CreateModuleInfoSO(

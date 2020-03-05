@@ -98,10 +98,10 @@ void VIIsReadyRequest::onTimeOut() {
 }
 
 void VIIsReadyRequest::RequestCapabilities() {
-  const auto interfaces_from_default =
-      hmi_capabilities_.GetInterfacesFromDefault();
+  const auto default_initialized_capabilities =
+      hmi_capabilities_.GetDefaultInitializedCapabilities();
 
-  if (helpers::in_range(interfaces_from_default,
+  if (helpers::in_range(default_initialized_capabilities,
                         hmi_apis::FunctionID::VehicleInfo_GetVehicleType)) {
     std::shared_ptr<smart_objects::SmartObject> get_type(
         MessageHelper::CreateModuleInfoSO(
