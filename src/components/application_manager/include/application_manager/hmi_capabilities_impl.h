@@ -236,7 +236,7 @@ class HMICapabilitiesImpl : public HMICapabilities {
       const std::vector<std::string>& sections_to_update,
       const smart_objects::CSmartSchema& schema) OVERRIDE;
 
-  void DeleteCachedCapabilitiesFile() const OVERRIDE;
+  bool DeleteCachedCapabilitiesFile() const OVERRIDE;
 
   std::set<hmi_apis::FunctionID::eType> GetInterfacesFromDefault()
       const OVERRIDE;

@@ -2984,7 +2984,9 @@ void ApplicationManagerImpl::HeadUnitReset(
       GetPolicyHandler().UnloadPolicyLibrary();
 
       resume_controller().StopSavePersistentDataTimer();
-      hmi_capabilities_->DeleteCachedCapabilitiesFile();
+      if (!hmi_capabilities_->DeleteCachedCapabilitiesFile()) {
+        LOG4CXX_ERROR(logger_, "Failed to remove HMI capabilities cache file");
+      }
       const std::string storage_folder = get_settings().app_storage_folder();
       file_system::RemoveDirectory(storage_folder, true);
       ClearAppsPersistentData();
@@ -2995,7 +2997,9 @@ void ApplicationManagerImpl::HeadUnitReset(
       GetPolicyHandler().ClearUserConsent();
 
       resume_controller().StopSavePersistentDataTimer();
-      hmi_capabilities_->DeleteCachedCapabilitiesFile();
+      if (!hmi_capabilities_->DeleteCachedCapabilitiesFile()) {
+        LOG4CXX_ERROR(logger_, "Failed to remove HMI capabilities cache file");
+      }
       ClearAppsPersistentData();
       break;
     }

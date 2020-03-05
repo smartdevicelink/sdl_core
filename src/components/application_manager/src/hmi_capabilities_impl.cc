@@ -45,6 +45,7 @@
 #include "smart_objects/smart_object.h"
 #include "utils/file_system.h"
 #include "utils/helpers.h"
+#include "utils/jsoncpp_reader_wrapper.h"
 #include "utils/logger.h"
 
 namespace application_manager {
@@ -430,7 +431,7 @@ namespace {
  */
 void save_hmi_capability_field_to_json(
     const std::string& field_name,
-    const smart_objects::CSmartSchema& schema,
+    smart_objects::CSmartSchema schema,
     smart_objects::SmartObjectSPtr object_to_save,
     Json::Value& out_json_node) {
   if (!object_to_save) {
@@ -440,9 +441,7 @@ void save_hmi_capability_field_to_json(
   namespace Formatters = ns_smart_device_link::ns_json_handler::formatters;
   smart_objects::SmartObject formatted_object(smart_objects::SmartType_Map);
   formatted_object[strings::msg_params][field_name] = *object_to_save;
-  formatted_object.setSchema(schema);
-  formatted_object.getSchema().unapplySchema(
-      formatted_object);  // converts enums back to strings
+  schema.unapplySchema(formatted_object);  // converts enums back to strings
 
   Json::Value temp_value;
   Formatters::CFormatterJsonBase::objToJsonValue(formatted_object, temp_value);
@@ -1051,18 +1050,10 @@ bool HMICapabilitiesImpl::LoadCapabilitiesFromFile() {
           "Failed to read data from cache file. Cache will be ignored");
     }
 
-    Json::CharReaderBuilder reader_builder;
-    const std::unique_ptr<Json::CharReader> reader(
-        reader_builder.newCharReader());
-    JSONCPP_STRING err;
-    const size_t json_len = cache_json_string.length();
-    if (!reader->parse(cache_json_string.c_str(),
-                       cache_json_string.c_str() + json_len,
-                       &root_json_override,
-                       &err)) {
-      LOG4CXX_ERROR(
-          logger_,
-          "Cached JSON file is invalid." << err << "Deleting the file");
+    utils::JsonReader reader;
+    std::string json(cache_json_string.begin(), cache_json_string.end());
+    if (!reader.parse(json, &root_json_override)) {
+      LOG4CXX_ERROR(logger_, "Cached JSON file is invalid. Deleting the file");
       file_system::DeleteFile(cache_file_name);
       root_json_override =
           Json::Value::null;  // Just to clear intermediate state of value
@@ -1070,18 +1061,11 @@ bool HMICapabilitiesImpl::LoadCapabilitiesFromFile() {
   }
 
   try {
-    Json::CharReaderBuilder reader_builder;
-    const std::unique_ptr<Json::CharReader> reader_(
-        reader_builder.newCharReader());
-    JSONCPP_STRING err;
     Json::Value root_json;
-    const size_t json_len = json_string.length();
-
-    const bool result = reader_->parse(
-        json_string.c_str(), json_string.c_str() + json_len, &root_json, &err);
-
-    if (!result) {
-      LOG4CXX_DEBUG(logger_, "Json parsing fails: " << err);
+    utils::JsonReader reader;
+    std::string json(json_string.begin(), json_string.end());
+    if (!reader.parse(json, &root_json)) {
+      LOG4CXX_DEBUG(logger_, "Default JSON parsing fails");
       return false;
     }
 
@@ -1956,24 +1940,26 @@ bool HMICapabilitiesImpl::SaveCachedCapabilitiesToFile(
   return file_system::Write(cache_file_name, binary_data_to_save);
 }
 
-void HMICapabilitiesImpl::DeleteCachedCapabilitiesFile() const {
+bool HMICapabilitiesImpl::DeleteCachedCapabilitiesFile() const {
   LOG4CXX_AUTO_TRACE(logger_);
   const std::string cache_file_name =
       app_mngr_.get_settings().hmi_capabilities_cache_file_name();
   if (cache_file_name.empty()) {
     LOG4CXX_DEBUG(logger_,
                   "Cache file name is not specified. Nothing to delete");
-    return;
+    return false;
   }
 
   if (!file_system::FileExists(cache_file_name)) {
     LOG4CXX_DEBUG(logger_, "Cache file does not exist");
-    return;
+    return false;
   }
 
   if (!file_system::DeleteFile(cache_file_name)) {
     LOG4CXX_ERROR(logger_, "Failed to delete cache file");
+    return false;
   }
+  return true;
 }
 
 void HMICapabilitiesImpl::set_ccpu_version(const std::string& ccpu_version) {

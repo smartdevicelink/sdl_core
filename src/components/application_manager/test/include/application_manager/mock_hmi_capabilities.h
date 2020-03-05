@@ -211,7 +211,7 @@ class MockHMICapabilities : public ::application_manager::HMICapabilities {
                bool(const std::string& interface_name,
                     const std::vector<std::string>& sections_to_update,
                     const smart_objects::CSmartSchema& schema));
-  MOCK_CONST_METHOD0(DeleteCachedCapabilitiesFile, void());
+  MOCK_CONST_METHOD0(DeleteCachedCapabilitiesFile, bool());
   MOCK_CONST_METHOD0(GetInterfacesFromDefault,
                      std::set<hmi_apis::FunctionID::eType>());
 };
