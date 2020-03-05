@@ -512,7 +512,7 @@ class HMICapabilities {
   /**
    * @brief Deletes cached HMI capabilities file from a file system
    */
-  virtual void DeleteCachedCapabilitiesFile() const = 0;
+  virtual bool DeleteCachedCapabilitiesFile() const = 0;
 
   virtual std::set<hmi_apis::FunctionID::eType> GetInterfacesFromDefault()
       const = 0;
