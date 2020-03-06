@@ -1666,12 +1666,18 @@ void ConnectionHandlerImpl::OnConnectionEnded(
       const uint32_t session_key =
           KeyFromPair(connection_id, session_it->first);
       const ServiceList& service_list = session_it->second.service_list;
-      for (ServiceList::const_iterator service_it = service_list.begin(),
-                                       end = service_list.end();
-           service_it != end;
-           ++service_it) {
+
+      // Fix:
+      // Endcallback(service_type) by Disconnected,
+      // It should ended in order by 10|11 -> 7.
+      // Refer to service_list.rend() of CloseSession()
+      ServiceList::const_reverse_iterator service_list_itr =
+          service_list.rbegin();
+      for (; service_list_itr != service_list.rend(); ++service_list_itr) {
         connection_handler_observer_->OnServiceEndedCallback(
-            session_key, service_it->service_type, CloseSessionReason::kCommon);
+            session_key,
+            service_list_itr->service_type,
+            CloseSessionReason::kCommon);
       }
     }
     ending_connection_ = NULL;
