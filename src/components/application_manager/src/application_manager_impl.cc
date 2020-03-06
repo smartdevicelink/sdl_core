@@ -1899,6 +1899,14 @@ void ApplicationManagerImpl::OnStreamingConfigured(
 
     application(app_id)->StartStreaming(service_type);
     connection_handler().NotifyServiceStartedResult(app_id, true, empty);
+
+    // Fix: For wifi Secondary
+    // Should erase appid from deque of ForbidStreaming() push in the last time
+    std::deque<uint32_t>::const_iterator iter = std::find(
+      navi_app_to_end_stream_.begin(), navi_app_to_end_stream_.end(), app_id);
+    if (navi_app_to_end_stream_.end() != iter) {
+      navi_app_to_end_stream_.erase(iter);
+    }
   } else {
     std::vector<std::string> converted_params =
         ConvertRejectedParamList(rejected_params);
@@ -1926,6 +1934,22 @@ void ApplicationManagerImpl::StopNaviService(
       service_type == ServiceType::kMobileNav ? it->second.first = false
                                               : it->second.second = false;
     }
+    // Fix: For wifi Secondary
+    // undisposed data active the VPMService restart again,
+    // because Not set Allowstream flag
+    ApplicationSharedPtr app = application(app_id);
+    if (!app || (!app->is_navi() && !app->mobile_projection_enabled())) {
+      LOG4CXX_ERROR(logger_, "Navi/Projection application not found");
+      return;
+    }
+    if (service_type == ServiceType::kMobileNav) {
+      app->set_video_streaming_allowed(false);
+    }
+    if (service_type == ServiceType::kAudio) {
+      app->set_audio_streaming_allowed(false);
+    }
+    //  push_back for judge in ForbidStreaming(),
+    navi_app_to_end_stream_.push_back(app_id);
   }
 
   ApplicationSharedPtr app = application(app_id);
