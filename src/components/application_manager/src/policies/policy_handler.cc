@@ -1953,7 +1953,7 @@ void PolicyHandler::OnPTUFinished(const bool ptu_result) {
 }
 
 bool PolicyHandler::CanUpdate() {
-  return 0 != GetAppIdForSending();
+  return true;
 }
 
 void PolicyHandler::RemoveDevice(const std::string& device_id) {
