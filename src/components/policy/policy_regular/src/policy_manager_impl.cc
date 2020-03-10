@@ -662,7 +662,7 @@ void PolicyManagerImpl::StartPTExchange() {
     return;
   }
 
-  if (listener_ && listener_->CanUpdate()) {
+  if (listener_) {
     if (ignition_check) {
       CheckTriggers();
       ignition_check = false;
