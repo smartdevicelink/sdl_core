@@ -106,6 +106,8 @@ TEST_F(PolicyManagerImplTest, LoadPT_SetPT_PTIsLoaded) {
   // Arrange
   EXPECT_CALL(*cache_manager_, DaysBeforeExchange(_))
       .WillOnce(Return(kNonZero));
+  ON_CALL(*cache_manager_, GenerateSnapshot())
+      .WillByDefault(Return(default_pt_snapshot_));
   policy_manager_->ForcePTExchange();
   policy_manager_->SetSendOnUpdateFlags(true);
   policy_manager_->OnUpdateStarted();
@@ -254,6 +256,8 @@ TEST_F(PolicyManagerImplTest2, GetPolicyTableStatus_ExpectUpToDate) {
 TEST_F(PolicyManagerImplTest,
        SetUpdateStarted_GetPolicyTableStatus_Expect_Updating) {
   // Arrange
+  EXPECT_CALL(*cache_manager_, GenerateSnapshot())
+      .WillOnce(Return(default_pt_snapshot_));
   policy_manager_->ForcePTExchange();
   EXPECT_CALL(*cache_manager_, SaveUpdateRequired(true));
   policy_manager_->OnUpdateStarted();
@@ -306,6 +310,8 @@ TEST_F(PolicyManagerImplTest, MarkUnpairedDevice) {
   EXPECT_CALL(*cache_manager_, IgnitionCyclesBeforeExchange());
   EXPECT_CALL(*cache_manager_, DaysBeforeExchange(_));
   // Act
+  EXPECT_CALL(*cache_manager_, GenerateSnapshot())
+      .WillOnce(Return(default_pt_snapshot_));
   policy_manager_->MarkUnpairedDevice(unpaired_device_id_);
 }
 
