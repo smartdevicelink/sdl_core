@@ -77,6 +77,8 @@ namespace custom_str = utils::custom_string;
 typedef std::multimap<std::string, policy_table::Rpcs&>
     UserConsentPromptToRpcsConnections;
 
+typedef std::shared_ptr<policy_table::Table> PolicyTableSPtr;
+
 namespace {
 std::string kSpeed = "speed";
 std::string kRPM = "rpm";
@@ -153,6 +155,7 @@ class PolicyManagerImplTest : public ::testing::Test {
   NiceMock<MockUpdateStatusManager> update_status_manager;
   const std::string device_id;
   std::shared_ptr<access_remote_test::MockAccessRemote> access_remote;
+  PolicyTableSPtr default_pt_snapshot_;
 
   void SetUp() OVERRIDE {
     manager = new PolicyManagerImpl();
@@ -161,6 +164,8 @@ class PolicyManagerImplTest : public ::testing::Test {
     manager->set_cache_manager(cache_manager);
     access_remote = std::make_shared<access_remote_test::MockAccessRemote>();
     manager->set_access_remote(access_remote);
+    // Json::Value table = createPTforLoad();
+    default_pt_snapshot_ = std::make_shared<policy_table::Table>();
   }
 
   void TearDown() OVERRIDE {
@@ -985,6 +990,7 @@ TEST_F(PolicyManagerImplTest, ResetPT) {
 
 TEST_F(PolicyManagerImplTest, LoadPT_SetPT_PTIsLoaded) {
   // Arrange
+  EXPECT_CALL(*cache_manager, GenerateSnapshot()).WillOnce(Return(default_pt_snapshot_));
   manager->ForcePTExchange();
   manager->OnUpdateStarted();
   Json::Value table = CreatePTforLoad();
@@ -1021,6 +1027,7 @@ TEST_F(PolicyManagerImplTest, LoadPT_SetPT_PTIsLoaded) {
 
 TEST_F(PolicyManagerImplTest, LoadPT_FunctionalGroup_removeRPC_SendUpdate) {
   // Arrange
+  EXPECT_CALL(*cache_manager, GenerateSnapshot()).WillOnce(Return(default_pt_snapshot_));
   manager->ForcePTExchange();
   manager->OnUpdateStarted();
   Json::Value table = CreatePTforLoad();
@@ -1056,6 +1063,7 @@ TEST_F(PolicyManagerImplTest, LoadPT_FunctionalGroup_removeRPC_SendUpdate) {
 TEST_F(PolicyManagerImplTest,
        LoadPT_FunctionalGroup_removeRPCParams_SendUpdate) {
   // Arrange
+  EXPECT_CALL(*cache_manager, GenerateSnapshot()).WillOnce(Return(default_pt_snapshot_));
   manager->ForcePTExchange();
   manager->OnUpdateStarted();
   Json::Value table = CreatePTforLoad();
@@ -1093,6 +1101,7 @@ TEST_F(PolicyManagerImplTest,
 TEST_F(PolicyManagerImplTest,
        LoadPT_FunctionalGroup_removeRPC_HMILevels_SendUpdate) {
   // Arrange
+  EXPECT_CALL(*cache_manager, GenerateSnapshot()).WillOnce(Return(default_pt_snapshot_));
   manager->ForcePTExchange();
   manager->OnUpdateStarted();
   Json::Value table = CreatePTforLoad();
@@ -1130,6 +1139,7 @@ TEST_F(PolicyManagerImplTest,
 TEST_F(PolicyManagerImplTest,
        LoadPT_FunctionalGroup_addRPC_HMILevels_SendUpdate) {
   // Arrange
+  EXPECT_CALL(*cache_manager, GenerateSnapshot()).WillOnce(Return(default_pt_snapshot_));
   manager->ForcePTExchange();
   manager->OnUpdateStarted();
   Json::Value table = CreatePTforLoad();
@@ -1168,6 +1178,7 @@ TEST_F(PolicyManagerImplTest,
 TEST_F(PolicyManagerImplTest, LoadPT_FunctionalGroup_addRPCParams_SendUpdate) {
   using namespace application_manager;
   // Arrange
+  EXPECT_CALL(*cache_manager, GenerateSnapshot()).WillOnce(Return(default_pt_snapshot_));
   manager->ForcePTExchange();
   manager->OnUpdateStarted();
   Json::Value table = CreatePTforLoad();
@@ -1204,6 +1215,7 @@ TEST_F(PolicyManagerImplTest, LoadPT_FunctionalGroup_addRPCParams_SendUpdate) {
 
 TEST_F(PolicyManagerImplTest, LoadPT_FunctionalGroup_NoUpdate_DONT_SendUpdate) {
   // Arrange
+  EXPECT_CALL(*cache_manager, GenerateSnapshot()).WillOnce(Return(default_pt_snapshot_));
   manager->ForcePTExchange();
   manager->OnUpdateStarted();
   Json::Value table = CreatePTforLoad();
@@ -1234,6 +1246,7 @@ TEST_F(PolicyManagerImplTest, LoadPT_FunctionalGroup_NoUpdate_DONT_SendUpdate) {
 TEST_F(PolicyManagerImplTest, LoadPT_SetInvalidUpdatePT_PTIsNotLoaded) {
   // Arrange
   Json::Value table(Json::objectValue);
+  EXPECT_CALL(*cache_manager, GenerateSnapshot()).WillOnce(Return(default_pt_snapshot_));
   manager->ForcePTExchange();
   manager->OnUpdateStarted();
 
