@@ -117,6 +117,7 @@ class PolicyManagerImplTest : public ::testing::Test {
   MockUpdateStatusManager update_manager_;
   NiceMock<MockPolicyListener> listener_;
   NiceMock<MockPTURetryHandler> ptu_retry_handler_;
+  PolicyTableSPtr default_pt_snapshot_;
 
   void SetUp() OVERRIDE;
 

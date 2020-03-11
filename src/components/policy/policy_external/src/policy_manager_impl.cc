@@ -755,7 +755,7 @@ void PolicyManagerImpl::StartPTExchange() {
     return;
   }
   LOG4CXX_INFO(logger_, "Policy want to  call RequestPTUpdate");
-  if (listener_ && listener_->CanUpdate()) {
+  if (listener_) {
     LOG4CXX_INFO(logger_, "Listener CanUpdate");
     if (update_status_manager_.IsUpdateRequired()) {
       update_status_manager_.PendingUpdate();

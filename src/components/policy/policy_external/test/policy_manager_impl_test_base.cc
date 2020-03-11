@@ -220,6 +220,8 @@ void PolicyManagerImplTest::SetUp() {
   ON_CALL(listener_, GetRegisteredLinks(_)).WillByDefault(Return());
   ON_CALL(listener_, ptu_retry_handler())
       .WillByDefault(ReturnRef(ptu_retry_handler_));
+  Json::Value table = createPTforLoad();
+  default_pt_snapshot_ = std::make_shared<policy_table::Table>(&table);
 }
 
 void PolicyManagerImplTest::TearDown() {
