@@ -4699,7 +4699,7 @@
       <description>
         If specified the response will contain the properties of the specified app ID.
         Otherwise if omitted all app properties will be returned at once.
-      <description>
+      </description>
     </param>
   </function>
   
