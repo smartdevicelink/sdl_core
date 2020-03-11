@@ -4131,6 +4131,34 @@
         <element name="BOTH"/>
     </enum>
 
+    <struct name="AppProperties">
+      <param name="nicknames" type="String" minlength="0" maxlength="100" array="true" minsize="0" maxsize="100" mandatory="false">
+          <description>An array of app names an app is allowed to register with. If included in a SetAppProperties request, this value will overwrite the existing "nicknames" field in the app policies section of the policy table.</description>
+      </param>
+      <param name="policyAppID" type="String" maxlength="100" minlength="1" mandatory="true" />
+      <param name="enabled" type="Boolean" mandatory="false">
+          <description>If true, the app will be marked as "available" or "installed" and will be included in HMI RPC UpdateAppList.</description>
+      </param>
+      <param name="authToken" type="String" maxlength="65535" mandatory="false">
+          <description>Used to authenticate connection on app activation</description>
+      </param>
+      <param name="transportType" type="String" maxlength="100" mandatory="false">
+          <description>
+            Specifies the connection type Core should use. The Core role (server or client) is dependent of "endpoint" being specified.
+            See "endpoint" for details.
+          </description>
+      </param>
+      <param name="hybridAppPreference" type="Common.HybridAppPreference" mandatory="false">
+          <description>Specifies the user preference to use one specific app type or all available types</description>
+      </param>
+      <param name="endpoint" type="String" maxlength="65535" mandatory="false">
+          <description>
+            If specified, which Core uses a client implementation of the connection type and attempts to connect to the endpoint when this app is selected (activated).
+            If omitted, Core won't attempt to connect as the app selection (activation) is managed outside of Core. Instead it uses a server implementation of the connection type and expects the app to connect.
+          </description>
+      </param>
+    </struct>
+
 </interface>
 
 <interface name="Buttons" version="1.3.0" date="2017-07-18">
@@ -4650,39 +4678,11 @@
     </param>
   </function>
   
-  <struct name="AppProperties">
-    <param name="nicknames" type="String" minlength="0" maxlength="100" array="true" minsize="0" maxsize="100" mandatory="false">
-        <description>An array of app names an app is allowed to register with. If included in a SetAppProperties request, this value will overwrite the existing "nicknames" field in the app policies section of the policy table.</description>
-    </param>
-    <param name="policyAppID" type="String" maxlength="100" minlength="1" mandatory="true" />
-    <param name="enabled" type="Boolean" mandatory="false">
-        <description>If true, the app will be marked as "available" or "installed" and will be included in HMI RPC UpdateAppList.</description>
-    </param>
-    <param name="authToken" type="String" maxlength="65535" mandatory="false">
-        <description>Used to authenticate connection on app activation</description>
-    </param>
-    <param name="transportType" type="String" maxlength="100" mandatory="false">
-        <description>
-          Specifies the connection type Core should use. The Core role (server or client) is dependent of "endpoint" being specified.
-          See "endpoint" for details.
-        </description>
-    </param>
-    <param name="hybridAppPreference" type="Common.HybridAppPreference" mandatory="false">
-        <description>Specifies the user preference to use one specific app type or all available types</description>
-    </param>
-    <param name="endpoint" type="String" maxlength="65535" mandatory="false">
-        <description>
-          If specified, which Core uses a client implementation of the connection type and attempts to connect to the endpoint when this app is selected (activated).
-          If omitted, Core won't attempt to connect as the app selection (activation) is managed outside of Core. Instead it uses a server implementation of the connection type and expects the app to connect.
-        </description>
-    </param>
-  </struct>
-  
   <function name="SetAppProperties" messagetype="request">
     <description>
       HMI >SDL. RPC used to enable/disable an application and set authentication data
     </description>
-    <param name="properties" type="AppProperties" mandatory="true">
+    <param name="properties" type="Common.AppProperties" mandatory="true">
       <description>The new application properties</description>
     </param>
   </function> 
@@ -4717,7 +4717,7 @@
   
   <function name="GetAppProperties" messagetype="response">
     <description>The response to GetAppProperties</description>
-    <param name="properties" type="AppProperties" array="true" minsize="1" mandatory="false">
+    <param name="properties" type="Common.AppProperties" array="true" minsize="1" mandatory="false">
       <description>The requested application properties</description>
     </param>
     <param name="success" type="Boolean" platform="documentation" mandatory="true">
@@ -4740,7 +4740,7 @@
     <description>
       SDL >HMI. RPC used to inform HMI about app properties change (such as auth token).
     </description>
-    <param name="properties" type="AppProperties" mandatory="true">
+    <param name="properties" type="Common.AppProperties" mandatory="true">
       <description>The new application properties</description>
     </param>
   </function>
