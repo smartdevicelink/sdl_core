@@ -49,7 +49,6 @@ LastStateImpl::LastStateImpl(const std::string& app_storage_folder,
 
 LastStateImpl::~LastStateImpl() {
   LOG4CXX_AUTO_TRACE(logger_);
-  SaveToFileSystem();
 }
 
 void LastStateImpl::SaveStateToFileSystem() {
