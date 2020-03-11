@@ -158,6 +158,7 @@ const char* pcm_stream_capabilities = "pcmStreamCapabilities";
 const char* audio_pass_thru_icon = "audioPassThruIcon";
 const char* way_points = "wayPoints";
 const char* system_capability = "systemCapability";
+const char* system_display_capabilities = "systemDisplayCapabilities";
 const char* system_capability_type = "systemCapabilityType";
 const char* system_capabilities = "systemCapabilities";
 const char* navigation_capability = "navigationCapability";
@@ -437,6 +438,19 @@ const char* const rect = "rect";
 const char* const x = "x";
 const char* const y = "y";
 }  // namespace strings
+
+namespace hmi_interface {
+const char* basic_communication = "BasicCommunication";
+const char* buttons = "Buttons";
+const char* navigation = "Navigation";
+const char* sdl = "SDL";
+const char* tts = "TTS";
+const char* ui = "UI";
+const char* vr = "VR";
+const char* rc = "RC";
+const char* vehicle_info = "VehicleInfo";
+const char* app_service = "AppService";
+}  // namespace hmi_interface
 
 namespace json {
 const char* appId = "appId";

@@ -872,10 +872,16 @@ void ApplicationManagerImpl::OnHMIStartedCooperation() {
                                         *this));
   rpc_service_->ManageHMICommand(is_rc_ready);
 
-  std::shared_ptr<smart_objects::SmartObject> button_capabilities(
-      MessageHelper::CreateModuleInfoSO(
-          hmi_apis::FunctionID::Buttons_GetCapabilities, *this));
-  rpc_service_->ManageHMICommand(button_capabilities);
+  const auto default_initialized_capabilities =
+      hmi_capabilities_->GetDefaultInitializedCapabilities();
+
+  if (helpers::in_range(default_initialized_capabilities,
+                        hmi_apis::FunctionID::Buttons_GetCapabilities)) {
+    std::shared_ptr<smart_objects::SmartObject> button_capabilities(
+        MessageHelper::CreateModuleInfoSO(
+            hmi_apis::FunctionID::Buttons_GetCapabilities, *this));
+    rpc_service_->ManageHMICommand(button_capabilities);
+  }
 
   std::shared_ptr<smart_objects::SmartObject> mixing_audio_supported_request(
       MessageHelper::CreateModuleInfoSO(
@@ -2897,7 +2903,9 @@ void ApplicationManagerImpl::HeadUnitReset(
       GetPolicyHandler().UnloadPolicyLibrary();
 
       resume_controller().StopSavePersistentDataTimer();
-
+      if (!hmi_capabilities_->DeleteCachedCapabilitiesFile()) {
+        LOG4CXX_ERROR(logger_, "Failed to remove HMI capabilities cache file");
+      }
       const std::string storage_folder = get_settings().app_storage_folder();
       file_system::RemoveDirectory(storage_folder, true);
       ClearAppsPersistentData();
@@ -2908,7 +2916,9 @@ void ApplicationManagerImpl::HeadUnitReset(
       GetPolicyHandler().ClearUserConsent();
 
       resume_controller().StopSavePersistentDataTimer();
-
+      if (!hmi_capabilities_->DeleteCachedCapabilitiesFile()) {
+        LOG4CXX_ERROR(logger_, "Failed to remove HMI capabilities cache file");
+      }
       ClearAppsPersistentData();
       break;
     }

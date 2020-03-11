@@ -81,7 +81,8 @@ void RCIsReadyRequest::on_event(const event_engine::Event& event) {
                      "HmiInterfaces::HMI_INTERFACE_RC isn't available");
         return;
       }
-      SendMessageToHMI();
+
+      RequestCapabilities();
       break;
     }
     default: {
@@ -93,14 +94,20 @@ void RCIsReadyRequest::on_event(const event_engine::Event& event) {
 
 void RCIsReadyRequest::onTimeOut() {
   // Note(dtrunov): According to new requirment APPLINK-27956
-  SendMessageToHMI();
+  RequestCapabilities();
 }
 
-void RCIsReadyRequest::SendMessageToHMI() {
+void RCIsReadyRequest::RequestCapabilities() {
+  //  const auto default_initialized_capabilities =
+  //  hmi_capabilities_.GetDefaultInitializedCapabilities();
+
+  //  if (helpers::in_range(default_initialized_capabilities,
+  //                        hmi_apis::FunctionID::RC_GetCapabilities)) {
   std::shared_ptr<smart_objects::SmartObject> get_capabilities(
       MessageHelper::CreateModuleInfoSO(
           hmi_apis::FunctionID::RC_GetCapabilities, application_manager_));
   rpc_service_.ManageHMICommand(get_capabilities);
+  //  }
 }
 
 }  // namespace commands

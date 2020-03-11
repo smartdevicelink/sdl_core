@@ -59,17 +59,23 @@ OnUILanguageChangeNotification::~OnUILanguageChangeNotification() {}
 void OnUILanguageChangeNotification::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  HMICapabilities& hmi_capabilities = hmi_capabilities_;
-
-  hmi_capabilities.set_active_ui_language(
+  hmi_capabilities_.set_active_ui_language(
       static_cast<hmi_apis::Common_Language::eType>(
           (*message_)[strings::msg_params][strings::language].asInt()));
+
+  std::vector<std::string> sections_to_update;
+  sections_to_update.push_back(hmi_response::language);
+  if (!hmi_capabilities_.SaveCachedCapabilitiesToFile(
+          hmi_interface::ui, sections_to_update, message_->getSchema())) {
+    LOG4CXX_ERROR(logger_,
+                  "Failed to save UI.OnLanguageChange response to cache");
+  }
 
   (*message_)[strings::msg_params][strings::hmi_display_language] =
       (*message_)[strings::msg_params][strings::language];
 
   (*message_)[strings::msg_params][strings::language] =
-      hmi_capabilities.active_vr_language();
+      hmi_capabilities_.active_vr_language();
 
   (*message_)[strings::params][strings::function_id] =
       static_cast<int32_t>(mobile_apis::FunctionID::OnLanguageChangeID);

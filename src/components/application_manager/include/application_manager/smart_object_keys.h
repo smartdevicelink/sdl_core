@@ -220,6 +220,7 @@ extern const char* is_cloud_application;
 extern const char* cloud_connection_status;
 extern const char* endpoint;
 extern const char* display_capabilities;
+extern const char* system_display_capabilities;
 extern const char* policy_type;
 extern const char* property;
 extern const char* displays;
@@ -478,6 +479,19 @@ extern const char* const rect;
 extern const char* const x;
 extern const char* const y;
 }  // namespace strings
+
+namespace hmi_interface {
+extern const char* basic_communication;
+extern const char* buttons;
+extern const char* navigation;
+extern const char* sdl;
+extern const char* tts;
+extern const char* ui;
+extern const char* vr;
+extern const char* rc;
+extern const char* vehicle_info;
+extern const char* app_service;
+}  // namespace hmi_interface
 
 namespace json {
 extern const char* appId;

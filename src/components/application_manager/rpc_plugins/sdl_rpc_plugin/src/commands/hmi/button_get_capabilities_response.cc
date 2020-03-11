@@ -63,16 +63,23 @@ void ButtonGetCapabilitiesResponse::Run() {
     return;
   }
 
-  HMICapabilities& hmi_capabilities = hmi_capabilities_;
-
-  hmi_capabilities.set_button_capabilities(
+  std::vector<std::string> sections_to_update;
+  hmi_capabilities_.set_button_capabilities(
       (*message_)[strings::msg_params][hmi_response::capabilities]);
+  sections_to_update.push_back(hmi_response::button_capabilities);
 
   if ((*message_)[strings::msg_params].keyExists(
           hmi_response::preset_bank_capabilities)) {
-    hmi_capabilities.set_preset_bank_capabilities(
+    sections_to_update.push_back(hmi_response::preset_bank_capabilities);
+    hmi_capabilities_.set_preset_bank_capabilities(
         (*message_)[strings::msg_params]
                    [hmi_response::preset_bank_capabilities]);
+  }
+
+  if (!hmi_capabilities_.SaveCachedCapabilitiesToFile(
+          hmi_interface::buttons, sections_to_update, message_->getSchema())) {
+    LOG4CXX_ERROR(logger_,
+                  "Failed to save Buttons.GetCapabilities response to cache");
   }
 }
 
