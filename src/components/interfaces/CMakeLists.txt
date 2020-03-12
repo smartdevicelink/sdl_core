@@ -30,14 +30,12 @@
 
 # Copy RPC spec submodule files to interfaces directory
 if(EXISTS ${CMAKE_SOURCE_DIR}/tools/rpc_spec/)
-  execute_process(COMMAND  cmp --silent ${CMAKE_SOURCE_DIR}/tools/rpc_spec/MOBILE_API.xml ${CMAKE_CURRENT_SOURCE_DIR}/MOBILE_API.xml RESULT_VARIABLE ret)
-  if(NOT ret EQUAL "0")
-    execute_process(COMMAND cp ${CMAKE_SOURCE_DIR}/tools/rpc_spec/MOBILE_API.xml ${CMAKE_CURRENT_SOURCE_DIR}/)
-  endif()
-  execute_process(COMMAND  cmp --silent ${CMAKE_SOURCE_DIR}/tools/rpc_spec/MOBILE_API.xsd ${CMAKE_CURRENT_SOURCE_DIR}/MOBILE_API.xsd RESULT_VARIABLE ret)
-  if(NOT ret EQUAL "0")
-    execute_process(COMMAND cp ${CMAKE_SOURCE_DIR}/tools/rpc_spec/MOBILE_API.xsd ${CMAKE_CURRENT_SOURCE_DIR}/)
-  endif()
+  execute_process(COMMAND ${CMAKE_COMMAND} -E copy_if_different 
+                  ${CMAKE_SOURCE_DIR}/tools/rpc_spec/MOBILE_API.xml 
+                  ${CMAKE_CURRENT_SOURCE_DIR}/MOBILE_API.xml)
+  execute_process(COMMAND ${CMAKE_COMMAND} -E copy_if_different 
+                  ${CMAKE_SOURCE_DIR}/tools/rpc_spec/MOBILE_API.xsd 
+                  ${CMAKE_CURRENT_SOURCE_DIR}/MOBILE_API.xsd)
 else ()
   message( FATAL_ERROR "Missing the RPC Spec submodule" )
   message( FATAL_ERROR "Please run `git submodule update --init` in the SDL Core source directory" )
