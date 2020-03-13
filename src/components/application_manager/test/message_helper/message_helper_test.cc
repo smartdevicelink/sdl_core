@@ -266,10 +266,10 @@ TEST(MessageHelperTestCreate,
       vis, std::make_shared<sync_primitives::RecursiveLock>());
 
   EXPECT_CALL(*appSharedMock, commands_map()).WillOnce(Return(data_accessor));
-  application_manager_test::MockApplicationManager mock_application_manager_;
+  application_manager_test::MockApplicationManager mock_application_manager;
   smart_objects::SmartObjectList ptr =
       MessageHelper::CreateAddCommandRequestToHMI(appSharedMock,
-                                                  mock_application_manager_);
+                                                  mock_application_manager);
 
   EXPECT_TRUE(ptr.empty());
 }
@@ -300,10 +300,10 @@ TEST(MessageHelperTestCreate,
 
   EXPECT_CALL(*appSharedMock, commands_map()).WillOnce(Return(data_accessor));
   EXPECT_CALL(*appSharedMock, app_id()).WillOnce(Return(app_id));
-  application_manager_test::MockApplicationManager mock_application_manager_;
+  application_manager_test::MockApplicationManager mock_application_manager;
   smart_objects::SmartObjectList ptr =
       MessageHelper::CreateAddCommandRequestToHMI(appSharedMock,
-                                                  mock_application_manager_);
+                                                  mock_application_manager);
 
   EXPECT_FALSE(ptr.empty());
 
@@ -331,10 +331,10 @@ TEST(MessageHelperTestCreate,
       vis, std::make_shared<sync_primitives::RecursiveLock>());
 
   EXPECT_CALL(*appSharedMock, choice_set_map()).WillOnce(Return(data_accessor));
-  application_manager_test::MockApplicationManager mock_application_manager_;
+  application_manager_test::MockApplicationManager mock_application_manager;
   smart_objects::SmartObjectList ptr =
       MessageHelper::CreateAddVRCommandRequestFromChoiceToHMI(
-          appSharedMock, mock_application_manager_);
+          appSharedMock, mock_application_manager);
 
   EXPECT_TRUE(ptr.empty());
 }
@@ -365,10 +365,10 @@ TEST(MessageHelperTestCreate,
   EXPECT_CALL(*appSharedMock, app_id())
       .Times(AtLeast(5))
       .WillRepeatedly(Return(1u));
-  application_manager_test::MockApplicationManager mock_application_manager_;
+  application_manager_test::MockApplicationManager mock_application_manager;
   smart_objects::SmartObjectList ptr =
       MessageHelper::CreateAddVRCommandRequestFromChoiceToHMI(
-          appSharedMock, mock_application_manager_);
+          appSharedMock, mock_application_manager);
 
   EXPECT_FALSE(ptr.empty());
 
