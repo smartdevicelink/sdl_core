@@ -2368,11 +2368,9 @@ void MessageHelper::SendNaviStartStream(const int32_t app_id,
     url.reserve(PATH_MAX);
     url.insert(
         0, app_mngr.get_settings().named_video_pipe_path(), 0, PATH_MAX - 1);
-    DCHECK(PATH_MAX > url.length());
   } else {
     url.reserve(PATH_MAX);
     url.insert(0, app_mngr.get_settings().video_stream_file(), 0, PATH_MAX - 1);
-    DCHECK(PATH_MAX > url.length());
   }
 
   (*start_stream)[strings::msg_params][strings::app_id] = app_id;
@@ -2422,11 +2420,9 @@ void MessageHelper::SendAudioStartStream(const int32_t app_id,
     url.reserve(PATH_MAX);
     url.insert(
         0, app_mngr.get_settings().named_audio_pipe_path(), 0, PATH_MAX - 1);
-    DCHECK(PATH_MAX > url.length());
   } else {
     url.reserve(PATH_MAX);
     url.insert(0, app_mngr.get_settings().audio_stream_file(), 0, PATH_MAX - 1);
-    DCHECK(PATH_MAX > url.length());
   }
 
   (*start_stream)[strings::msg_params][strings::app_id] = app_id;
