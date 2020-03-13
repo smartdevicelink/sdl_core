@@ -98,16 +98,16 @@ void RCIsReadyRequest::onTimeOut() {
 }
 
 void RCIsReadyRequest::RequestCapabilities() {
-  //  const auto default_initialized_capabilities =
-  //  hmi_capabilities_.GetDefaultInitializedCapabilities();
+  const auto default_initialized_capabilities =
+      hmi_capabilities_.GetDefaultInitializedCapabilities();
 
-  //  if (helpers::in_range(default_initialized_capabilities,
-  //                        hmi_apis::FunctionID::RC_GetCapabilities)) {
-  std::shared_ptr<smart_objects::SmartObject> get_capabilities(
-      MessageHelper::CreateModuleInfoSO(
-          hmi_apis::FunctionID::RC_GetCapabilities, application_manager_));
-  rpc_service_.ManageHMICommand(get_capabilities);
-  //  }
+  if (helpers::in_range(default_initialized_capabilities,
+                        hmi_apis::FunctionID::RC_GetCapabilities)) {
+    std::shared_ptr<smart_objects::SmartObject> get_capabilities(
+        MessageHelper::CreateModuleInfoSO(
+            hmi_apis::FunctionID::RC_GetCapabilities, application_manager_));
+    rpc_service_.ManageHMICommand(get_capabilities);
+  }
 }
 
 }  // namespace commands
