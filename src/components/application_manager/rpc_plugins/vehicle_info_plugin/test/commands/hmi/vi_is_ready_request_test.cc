@@ -32,6 +32,7 @@
 
 #include "hmi/vi_is_ready_request.h"
 
+#include <set>
 #include "gtest/gtest.h"
 
 #include "application_manager/event_engine/event.h"
@@ -58,6 +59,7 @@ namespace am = ::application_manager;
 using am::commands::MessageSharedPtr;
 using am::event_engine::Event;
 using vehicle_info_plugin::commands::VIIsReadyRequest;
+using MockHmiCapabilities = application_manager_test::MockHMICapabilities;
 
 typedef std::shared_ptr<VIIsReadyRequest> VIIsReadyRequestPtr;
 
@@ -115,6 +117,14 @@ class VIIsReadyRequestTest
     event.set_smart_object(*msg);
   }
 
+  void HMICapabilitiesExpectations() {
+    std::set<hmi_apis::FunctionID::eType> interfaces_to_update{
+        hmi_apis::FunctionID::VehicleInfo_GetVehicleType};
+
+    EXPECT_CALL(mock_hmi_capabilities_, GetDefaultInitializedCapabilities())
+        .WillOnce(Return(interfaces_to_update));
+  }
+
   VIIsReadyRequestPtr command_;
 };
 
@@ -124,6 +134,7 @@ TEST_F(VIIsReadyRequestTest, Run_NoKeyAvailableInMessage_HmiInterfacesIgnored) {
   const bool is_message_contain_param = false;
   Event event(hmi_apis::FunctionID::VehicleInfo_IsReady);
   PrepareEvent(is_message_contain_param, event);
+  HMICapabilitiesExpectations();
   SetUpExpectations(is_vi_cooperating_available,
                     is_send_message_to_hmi,
                     is_message_contain_param,
@@ -149,6 +160,7 @@ TEST_F(VIIsReadyRequestTest, Run_KeyAvailableEqualToTrue_StateAvailable) {
   const bool is_send_message_to_hmi = true;
   const bool is_message_contain_param = true;
   Event event(hmi_apis::FunctionID::VehicleInfo_IsReady);
+  HMICapabilitiesExpectations();
   PrepareEvent(is_message_contain_param, event, is_vi_cooperating_available);
   SetUpExpectations(is_vi_cooperating_available,
                     is_send_message_to_hmi,
@@ -158,6 +170,10 @@ TEST_F(VIIsReadyRequestTest, Run_KeyAvailableEqualToTrue_StateAvailable) {
 }
 
 TEST_F(VIIsReadyRequestTest, Run_HMIDoestRespond_SendMessageToHMIByTimeout) {
+  std::set<hmi_apis::FunctionID::eType> interfaces_to_update{
+      hmi_apis::FunctionID::VehicleInfo_GetVehicleType};
+  EXPECT_CALL(mock_hmi_capabilities_, GetDefaultInitializedCapabilities())
+      .WillOnce(Return(interfaces_to_update));
   ExpectSendMessagesToHMI();
   command_->onTimeOut();
 }

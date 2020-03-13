@@ -113,8 +113,14 @@ class RCIsReadyRequestTest
     event.set_smart_object(*msg);
   }
 
+  void HMICapabilitiesExpectations() {
+    std::set<hmi_apis::FunctionID::eType> interfaces_to_update{
+        hmi_apis::FunctionID::RC_GetCapabilities};
+    EXPECT_CALL(mock_hmi_capabilities_, GetDefaultInitializedCapabilities())
+        .WillOnce(Return(interfaces_to_update));
+  }
+
   RCIsReadyRequestPtr command_;
-  am::MockHmiInterfaces mock_hmi_interfaces_;
 };
 
 TEST_F(RCIsReadyRequestTest, Run_NoKeyAvailableInMessage_HmiInterfacesIgnored) {
@@ -123,6 +129,7 @@ TEST_F(RCIsReadyRequestTest, Run_NoKeyAvailableInMessage_HmiInterfacesIgnored) {
   const bool is_message_contain_param = false;
   Event event(hmi_apis::FunctionID::RC_IsReady);
   PrepareEvent(is_message_contain_param, event);
+  HMICapabilitiesExpectations();
   SetUpExpectations(is_rc_cooperating_available,
                     is_send_message_to_hmi,
                     is_message_contain_param,
@@ -149,6 +156,7 @@ TEST_F(RCIsReadyRequestTest, Run_KeyAvailableEqualToTrue_StateAvailable) {
   const bool is_message_contain_param = true;
   Event event(hmi_apis::FunctionID::RC_IsReady);
   PrepareEvent(is_message_contain_param, event, is_rc_cooperating_available);
+  HMICapabilitiesExpectations();
   SetUpExpectations(is_rc_cooperating_available,
                     is_send_message_to_hmi,
                     is_message_contain_param,
@@ -157,6 +165,7 @@ TEST_F(RCIsReadyRequestTest, Run_KeyAvailableEqualToTrue_StateAvailable) {
 }
 
 TEST_F(RCIsReadyRequestTest, Run_HMIDoestRespond_SendMessageToHMIByTimeout) {
+  HMICapabilitiesExpectations();
   ExpectSendMessagesToHMI();
   command_->onTimeOut();
 }
