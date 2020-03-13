@@ -32,7 +32,7 @@
 
 #include "hmi/vi_is_ready_request.h"
 
-#include <vector>
+#include <set>
 #include "gtest/gtest.h"
 
 #include "application_manager/event_engine/event.h"
@@ -118,11 +118,10 @@ class VIIsReadyRequestTest
   }
 
   void HMICapabilitiesExpectations() {
-    std::vector<hmi_apis::FunctionID::eType> interfaces_to_update{
+    std::set<hmi_apis::FunctionID::eType> interfaces_to_update{
         hmi_apis::FunctionID::VehicleInfo_GetVehicleType};
 
-    EXPECT_CALL(mock_hmi_capabilities_, GetInterfacesToUpdate())
-        .WillOnce(Return(interfaces_to_update))
+    EXPECT_CALL(mock_hmi_capabilities_, GetDefaultInitializedCapabilities())
         .WillOnce(Return(interfaces_to_update));
   }
 
@@ -171,10 +170,9 @@ TEST_F(VIIsReadyRequestTest, Run_KeyAvailableEqualToTrue_StateAvailable) {
 }
 
 TEST_F(VIIsReadyRequestTest, Run_HMIDoestRespond_SendMessageToHMIByTimeout) {
-  std::vector<hmi_apis::FunctionID::eType> interfaces_to_update;
-  interfaces_to_update.push_back(
-      hmi_apis::FunctionID::VehicleInfo_GetVehicleType);
-  EXPECT_CALL(mock_hmi_capabilities_, GetInterfacesToUpdate())
+  std::set<hmi_apis::FunctionID::eType> interfaces_to_update{
+      hmi_apis::FunctionID::VehicleInfo_GetVehicleType};
+  EXPECT_CALL(mock_hmi_capabilities_, GetDefaultInitializedCapabilities())
       .WillOnce(Return(interfaces_to_update));
   ExpectSendMessagesToHMI();
   command_->onTimeOut();

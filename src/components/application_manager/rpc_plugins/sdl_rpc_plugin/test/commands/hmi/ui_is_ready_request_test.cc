@@ -142,12 +142,11 @@ class UIIsReadyRequestTest
   }
 
   void HMICapabilitiesExpectations() {
-    std::vector<hmi_apis::FunctionID::eType> interfaces_to_update{
+    std::set<hmi_apis::FunctionID::eType> interfaces_to_update{
         hmi_apis::FunctionID::UI_GetLanguage,
         hmi_apis::FunctionID::UI_GetSupportedLanguages,
         hmi_apis::FunctionID::UI_GetCapabilities};
-    EXPECT_CALL(mock_hmi_capabilities_, GetInterfacesToUpdate())
-        .WillOnce(Return(interfaces_to_update))
+    EXPECT_CALL(mock_hmi_capabilities_, GetDefaultInitializedCapabilities())
         .WillOnce(Return(interfaces_to_update));
   }
 
@@ -201,11 +200,11 @@ TEST_F(UIIsReadyRequestTest,
 }
 
 TEST_F(UIIsReadyRequestTest, OnTimeout_SUCCESS_CacheIsAbsent) {
-  std::vector<hmi_apis::FunctionID::eType> interfaces_to_update{
+  std::set<hmi_apis::FunctionID::eType> interfaces_to_update{
       hmi_apis::FunctionID::UI_GetLanguage,
       hmi_apis::FunctionID::UI_GetSupportedLanguages,
       hmi_apis::FunctionID::UI_GetCapabilities};
-  EXPECT_CALL(mock_hmi_capabilities_, GetInterfacesToUpdate())
+  EXPECT_CALL(mock_hmi_capabilities_, GetDefaultInitializedCapabilities())
       .WillOnce(Return(interfaces_to_update));
   ExpectSendMessagesToHMI();
   command_->onTimeOut();

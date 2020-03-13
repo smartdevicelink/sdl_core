@@ -1301,16 +1301,15 @@ bool HMICapabilitiesImpl::LoadCapabilitiesFromFile() {
         set_soft_button_capabilities(soft_button_capabilities_so);
       }
 
-      auto ui_system_capabilities_capabilities_node =
+      auto ui_system_capabilities_node =
           json_ui_getter.GetJsonMember(strings::system_capabilities,
                                        hmi_apis::FunctionID::UI_GetCapabilities,
                                        default_initialized_capabilities_);
-      if (!ui_system_capabilities_capabilities_node.isNull()) {
-        if (JsonIsMemberSafe(ui_system_capabilities_capabilities_node,
+      if (!ui_system_capabilities_node.isNull()) {
+        if (JsonIsMemberSafe(ui_system_capabilities_node,
                              strings::navigation_capability)) {
-          Json::Value navigation_capability =
-              ui_system_capabilities_capabilities_node.get(
-                  strings::navigation_capability, "");
+          Json::Value navigation_capability = ui_system_capabilities_node.get(
+              strings::navigation_capability, "");
           smart_objects::SmartObject navigation_capability_so;
           formatters::CFormatterJsonBase::jsonValueToObj(
               navigation_capability, navigation_capability_so);
@@ -1319,11 +1318,10 @@ bool HMICapabilitiesImpl::LoadCapabilitiesFromFile() {
             set_navigation_supported(true);
           }
         }
-        if (JsonIsMemberSafe(ui_system_capabilities_capabilities_node,
+        if (JsonIsMemberSafe(ui_system_capabilities_node,
                              strings::phone_capability)) {
           Json::Value phone_capability =
-              ui_system_capabilities_capabilities_node.get(
-                  strings::phone_capability, "");
+              ui_system_capabilities_node.get(strings::phone_capability, "");
           smart_objects::SmartObject phone_capability_so;
           formatters::CFormatterJsonBase::jsonValueToObj(phone_capability,
                                                          phone_capability_so);
@@ -1332,11 +1330,10 @@ bool HMICapabilitiesImpl::LoadCapabilitiesFromFile() {
             set_phone_call_supported(true);
           }
         }
-        if (JsonIsMemberSafe(ui_system_capabilities_capabilities_node,
+        if (JsonIsMemberSafe(ui_system_capabilities_node,
                              strings::video_streaming_capability)) {
-          Json::Value vs_capability =
-              ui_system_capabilities_capabilities_node.get(
-                  strings::video_streaming_capability, "");
+          Json::Value vs_capability = ui_system_capabilities_node.get(
+              strings::video_streaming_capability, "");
           smart_objects::SmartObject vs_capability_so;
           formatters::CFormatterJsonBase::jsonValueToObj(vs_capability,
                                                          vs_capability_so);
@@ -1384,49 +1381,67 @@ bool HMICapabilitiesImpl::LoadCapabilitiesFromFile() {
             set_video_streaming_supported(true);
           }
         }
-        if (JsonIsMemberSafe(ui_system_capabilities_capabilities_node,
-                             strings::rc_capability)) {
-          Json::Value rc_capability =
-              ui_system_capabilities_capabilities_node.get(
-                  strings::rc_capability, "");
-          smart_objects::SmartObject rc_capability_so;
-          formatters::CFormatterJsonBase::jsonValueToObj(rc_capability,
-                                                         rc_capability_so);
-          if (rc_capability_so.keyExists(
-                  rc_rpc_plugin::strings::klightControlCapabilities)) {
-            if (rc_capability_so
-                    [rc_rpc_plugin::strings::klightControlCapabilities]
-                        .keyExists(rc_rpc_plugin::strings::kSupportedLights)) {
-              auto& lights = rc_capability_so
+      }
+    }  // UI end
+
+    // RC
+    if (!json_root_getter.GetInterfaceJsonMember(hmi_interface::rc).isNull()) {
+      auto rc_interface_main_node =
+          json_root_getter.GetMainJsonMember(hmi_interface::rc);
+      auto rc_interface_cache_node =
+          json_root_getter.GetCachedJsonMember(hmi_interface::rc);
+
+      JsonCapabilitiesGetter rc_json_getter(rc_interface_main_node,
+                                            rc_interface_cache_node);
+
+      auto rc_capabilitity_node =
+          rc_json_getter.GetJsonMember(strings::rc_capability,
+                                       hmi_apis::FunctionID::RC_GetCapabilities,
+                                       default_initialized_capabilities_);
+      if (!rc_capabilitity_node.isNull()) {
+        smart_objects::SmartObject rc_capability_so;
+        formatters::CFormatterJsonBase::jsonValueToObj(rc_capabilitity_node,
+                                                       rc_capability_so);
+        if (rc_capability_so.keyExists(
+                rc_rpc_plugin::strings::klightControlCapabilities)) {
+          if (rc_capability_so
                   [rc_rpc_plugin::strings::klightControlCapabilities]
-                  [rc_rpc_plugin::strings::kSupportedLights];
-              auto it = lights.asArray()->begin();
-              for (; it != lights.asArray()->end(); ++it) {
-                smart_objects::SmartObject& light_name_so =
-                    (*it)[strings::name];
-                auto light_name = MessageHelper::CommonLightNameFromString(
-                    light_name_so.asString());
-                light_name_so = light_name;
-              }
+                      .keyExists(rc_rpc_plugin::strings::kSupportedLights)) {
+            auto& lights = rc_capability_so
+                [rc_rpc_plugin::strings::klightControlCapabilities]
+                [rc_rpc_plugin::strings::kSupportedLights];
+            auto it = lights.asArray()->begin();
+            for (; it != lights.asArray()->end(); ++it) {
+              smart_objects::SmartObject& light_name_so = (*it)[strings::name];
+              auto light_name = MessageHelper::CommonLightNameFromString(
+                  light_name_so.asString());
+              light_name_so = light_name;
             }
           }
-          set_rc_capability(rc_capability_so);
-          if (!rc_capability_so.empty()) {
-            set_rc_supported(true);
-          }
         }
-        if (JsonIsMemberSafe(ui_system_capabilities_capabilities_node,
-                             strings::seat_location_capability)) {
-          Json::Value seat_location_capability =
-              ui_system_capabilities_capabilities_node.get(
-                  strings::seat_location_capability, "");
-          smart_objects::SmartObject seat_location_capability_so;
-          formatters::CFormatterJsonBase::jsonValueToObj(
-              seat_location_capability, seat_location_capability_so);
+        if (!rc_capability_so.empty()) {
+          set_rc_supported(true);
+          set_rc_capability(rc_capability_so);
+        }
+      }
+
+      auto seat_location_capabilitiy_node =
+          rc_json_getter.GetJsonMember(strings::seat_location_capability,
+                                       hmi_apis::FunctionID::RC_GetCapabilities,
+                                       default_initialized_capabilities_);
+
+      if (!seat_location_capabilitiy_node.isNull()) {
+        smart_objects::SmartObject seat_location_capability_so;
+        formatters::CFormatterJsonBase::jsonValueToObj(
+            seat_location_capabilitiy_node, seat_location_capability_so);
+
+        if (!seat_location_capability_so.empty()) {
+          set_rc_supported(true);
           set_seat_location_capability(seat_location_capability_so);
         }
       }
-    }  // UI end
+    }
+    // RC end
 
     // VR
     if (!json_root_getter.GetInterfaceJsonMember(hmi_interface::vr).isNull()) {

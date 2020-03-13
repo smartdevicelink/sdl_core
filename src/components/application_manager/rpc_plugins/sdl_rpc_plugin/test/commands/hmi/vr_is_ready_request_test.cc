@@ -128,12 +128,11 @@ class VRIsReadyRequestTest
   }
 
   void HMICapabilitiesExpectations() {
-    std::vector<hmi_apis::FunctionID::eType> interfaces_to_update{
+    std::set<hmi_apis::FunctionID::eType> interfaces_to_update{
         hmi_apis::FunctionID::VR_GetLanguage,
         hmi_apis::FunctionID::VR_GetSupportedLanguages,
         hmi_apis::FunctionID::VR_GetCapabilities};
-    EXPECT_CALL(mock_hmi_capabilities_, GetInterfacesToUpdate())
-        .WillOnce(Return(interfaces_to_update))
+    EXPECT_CALL(mock_hmi_capabilities_, GetDefaultInitializedCapabilities())
         .WillOnce(Return(interfaces_to_update));
   }
 
@@ -186,11 +185,11 @@ TEST_F(VRIsReadyRequestTest,
 
 TEST_F(VRIsReadyRequestTest,
        Run_HMIDoestRespond_SendMessageToHMIByTimeout_CacheIsAbsent) {
-  std::vector<hmi_apis::FunctionID::eType> interfaces_to_update{
+  std::set<hmi_apis::FunctionID::eType> interfaces_to_update{
       hmi_apis::FunctionID::VR_GetLanguage,
       hmi_apis::FunctionID::VR_GetSupportedLanguages,
       hmi_apis::FunctionID::VR_GetCapabilities};
-  EXPECT_CALL(mock_hmi_capabilities_, GetInterfacesToUpdate())
+  EXPECT_CALL(mock_hmi_capabilities_, GetDefaultInitializedCapabilities())
       .WillOnce(Return(interfaces_to_update));
   const bool is_send_message_by_timeout = true;
   ExpectSendMessagesToHMI(is_send_message_by_timeout);
