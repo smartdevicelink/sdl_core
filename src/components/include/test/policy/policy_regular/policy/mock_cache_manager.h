@@ -112,12 +112,12 @@ class MockCacheManagerInterface : public CacheManagerInterface {
   MOCK_CONST_METHOD2(GetPriority,
                      bool(const std::string& policy_app_id,
                           std::string& priority));
-  MOCK_METHOD2(GetUpdateUrls,
-               void(const std::string& service_type,
-                    EndpointUrls& out_end_points));
-  MOCK_METHOD2(GetUpdateUrls,
-               void(const uint32_t service_type, EndpointUrls& out_end_points));
-  MOCK_CONST_METHOD0(GetLockScreenIconUrl, std::string());
+  MOCK_CONST_METHOD2(GetUpdateUrls,
+                     void(const std::string& service_type,
+                          EndpointUrls& out_end_points));
+  MOCK_CONST_METHOD2(GetUpdateUrls,
+                     void(const uint32_t service_type,
+                          EndpointUrls& out_end_points));
   MOCK_CONST_METHOD1(GetIconUrl, std::string(const std::string& policy_app_id));
   MOCK_METHOD2(Init,
                bool(const std::string& file_name,

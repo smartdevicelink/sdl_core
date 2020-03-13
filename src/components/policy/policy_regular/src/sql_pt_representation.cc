@@ -241,28 +241,6 @@ EndpointUrls SQLPTRepresentation::GetUpdateUrls(int service_type) {
   return ret;
 }
 
-std::string SQLPTRepresentation::GetLockScreenIconUrl() const {
-  utils::dbms::SQLQuery query(db());
-  std::string ret;
-  if (query.Prepare(sql_pt::kSelectLockScreenIcon)) {
-    query.Bind(0, std::string("lock_screen_icon_url"));
-    query.Bind(1, std::string("default"));
-
-    if (!query.Exec()) {
-      LOG4CXX_WARN(logger_, "Incorrect select from notifications by priority.");
-      return ret;
-    }
-
-    if (!query.IsNull(0)) {
-      ret = query.GetString(0);
-    }
-
-  } else {
-    LOG4CXX_WARN(logger_, "Invalid select endpoints statement.");
-  }
-  return ret;
-}
-
 int SQLPTRepresentation::GetNotificationsNumber(const std::string& priority) {
   LOG4CXX_AUTO_TRACE(logger_);
   utils::dbms::SQLQuery query(db());

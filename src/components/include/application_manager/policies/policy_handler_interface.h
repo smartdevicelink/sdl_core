@@ -121,11 +121,19 @@ class PolicyHandlerInterface : public VehicleDataItemProvider {
                                  StringArray* nicknames = NULL,
                                  StringArray* app_hmi_types = NULL) = 0;
   virtual void GetUpdateUrls(const std::string& service_type,
-                             EndpointUrls& out_end_points) = 0;
+                             EndpointUrls& out_end_points) const = 0;
   virtual void GetUpdateUrls(const uint32_t service_type,
-                             EndpointUrls& out_end_points) = 0;
+                             EndpointUrls& out_end_points) const = 0;
   virtual Json::Value GetPolicyTableData() const = 0;
-  virtual std::string GetLockScreenIconUrl() const = 0;
+
+  /**
+   * @brief Gets lock screen icon URL for a requested application
+   * @param policy_app_id policy application id
+   * @return URL for a requested application
+   */
+  virtual std::string GetLockScreenIconUrl(
+      const std::string& policy_app_id) const = 0;
+
   virtual std::string GetIconUrl(const std::string& policy_app_id) const = 0;
   virtual uint32_t NextRetryTimeout() = 0;
 

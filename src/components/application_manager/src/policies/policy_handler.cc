@@ -1680,20 +1680,50 @@ bool PolicyHandler::GetInitialAppData(const std::string& application_id,
 }
 
 void PolicyHandler::GetUpdateUrls(const std::string& service_type,
-                                  EndpointUrls& out_end_points) {
+                                  EndpointUrls& out_end_points) const {
   POLICY_LIB_CHECK_VOID();
   policy_manager_->GetUpdateUrls(service_type, out_end_points);
 }
 
 void PolicyHandler::GetUpdateUrls(const uint32_t service_type,
-                                  EndpointUrls& out_end_points) {
+                                  EndpointUrls& out_end_points) const {
   POLICY_LIB_CHECK_VOID();
   policy_manager_->GetUpdateUrls(service_type, out_end_points);
 }
 
-std::string PolicyHandler::GetLockScreenIconUrl() const {
-  POLICY_LIB_CHECK(std::string(""));
-  return policy_manager_->GetLockScreenIconUrl();
+std::string PolicyHandler::GetLockScreenIconUrl(
+    const std::string& policy_app_id) const {
+  const std::string default_url;
+  POLICY_LIB_CHECK(default_url);
+
+  EndpointUrls endpoints;
+  policy_manager_->GetUpdateUrls("lock_screen_icon_url", endpoints);
+
+  auto it_specific =
+      std::find_if(endpoints.begin(),
+                   endpoints.end(),
+                   [&policy_app_id](const EndpointData& endpoint) {
+                     return endpoint.app_id == policy_app_id;
+                   });
+
+  if (endpoints.end() != it_specific && !it_specific->url.empty()) {
+    LOG4CXX_DEBUG(logger_,
+                  "Specific app URL will be used for " << policy_app_id);
+    return it_specific->url.front();
+  }
+
+  auto it_default = std::find_if(
+      endpoints.begin(), endpoints.end(), [](const EndpointData& endpoint) {
+        return endpoint.app_id == kDefaultId;
+      });
+
+  if (endpoints.end() != it_default && !it_default->url.empty()) {
+    LOG4CXX_DEBUG(logger_, "Default URL will be used for " << policy_app_id);
+    return it_default->url.front();
+  }
+
+  LOG4CXX_ERROR(logger_, "Can't find URL for " << policy_app_id);
+  return std::string();
 }
 
 std::string PolicyHandler::GetIconUrl(const std::string& policy_app_id) const {

@@ -201,10 +201,11 @@ class PolicyHandler : public PolicyHandlerInterface,
                          StringArray* nicknames = NULL,
                          StringArray* app_hmi_types = NULL) OVERRIDE;
   void GetUpdateUrls(const std::string& service_type,
-                     EndpointUrls& out_end_points) OVERRIDE;
+                     EndpointUrls& out_end_points) const OVERRIDE;
   void GetUpdateUrls(const uint32_t service_type,
-                     EndpointUrls& out_end_points) OVERRIDE;
-  virtual std::string GetLockScreenIconUrl() const OVERRIDE;
+                     EndpointUrls& out_end_points) const OVERRIDE;
+  virtual std::string GetLockScreenIconUrl(
+      const std::string& policy_app_id) const OVERRIDE;
   virtual std::string GetIconUrl(
       const std::string& policy_app_id) const OVERRIDE;
   uint32_t NextRetryTimeout() OVERRIDE;
