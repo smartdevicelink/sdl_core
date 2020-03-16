@@ -66,7 +66,7 @@ class RCIsReadyRequestTest
 
   void SetUpExpectations(bool is_rc_cooperating_available,
                          bool is_send_message_to_hmi,
-                         bool is_message_contain_param,
+                         bool is_message_contains_param,
                          am::HmiInterfaces::InterfaceState state) {
     if (is_send_message_to_hmi) {
       ExpectSendMessagesToHMI();
@@ -77,7 +77,7 @@ class RCIsReadyRequestTest
       EXPECT_CALL(mock_hmi_capabilities_, set_rc_supported(false));
     }
 
-    if (is_message_contain_param) {
+    if (is_message_contains_param) {
       EXPECT_CALL(app_mngr_, hmi_interfaces())
           .WillRepeatedly(ReturnRef(mock_hmi_interfaces_));
       EXPECT_CALL(
@@ -113,31 +113,44 @@ class RCIsReadyRequestTest
     event.set_smart_object(*msg);
   }
 
-  void HMICapabilitiesExpectations() {
-    std::set<hmi_apis::FunctionID::eType> interfaces_to_update{
-        hmi_apis::FunctionID::RC_GetCapabilities};
+  void InterfacesUpdateExpectations(
+      const std::set<hmi_apis::FunctionID::eType>& interfaces_to_update) {
     EXPECT_CALL(mock_hmi_capabilities_, GetDefaultInitializedCapabilities())
-        .WillOnce(Return(interfaces_to_update));
+        .WillRepeatedly(Return(interfaces_to_update));
   }
 
   RCIsReadyRequestPtr command_;
 };
 
-TEST_F(RCIsReadyRequestTest, Run_NoKeyAvailableInMessage_HmiInterfacesIgnored) {
+MATCHER_P(HMIFunctionIDIs, function_id, "") {
+  const auto msg_function_id = static_cast<hmi_apis::FunctionID::eType>(
+      (*arg)[am::strings::params][am::strings::function_id].asInt());
+
+  return msg_function_id == function_id;
+}
+
+TEST_F(RCIsReadyRequestTest,
+       OnEvent_NoKeyAvailableInMessage_HmiInterfacesIgnored_CacheIsAbsent) {
   const bool is_rc_cooperating_available = false;
   const bool is_send_message_to_hmi = true;
   const bool is_message_contain_param = false;
   Event event(hmi_apis::FunctionID::RC_IsReady);
   PrepareEvent(is_message_contain_param, event);
-  HMICapabilitiesExpectations();
+  std::set<hmi_apis::FunctionID::eType> interfaces_to_update{
+      hmi_apis::FunctionID::RC_GetCapabilities};
+  InterfacesUpdateExpectations(interfaces_to_update);
   SetUpExpectations(is_rc_cooperating_available,
                     is_send_message_to_hmi,
                     is_message_contain_param,
                     am::HmiInterfaces::STATE_NOT_RESPONSE);
+
+  ASSERT_TRUE(command_->Init());
+  command_->Run();
   command_->on_event(event);
 }
 
-TEST_F(RCIsReadyRequestTest, Run_KeyAvailableEqualToFalse_StateNotAvailable) {
+TEST_F(RCIsReadyRequestTest,
+       OnEvent_KeyAvailableEqualToFalse_StateNotAvailable_CacheIsAbsent) {
   const bool is_rc_cooperating_available = false;
   const bool is_send_message_to_hmi = false;
   const bool is_message_contain_param = true;
@@ -147,27 +160,61 @@ TEST_F(RCIsReadyRequestTest, Run_KeyAvailableEqualToFalse_StateNotAvailable) {
                     is_send_message_to_hmi,
                     is_message_contain_param,
                     am::HmiInterfaces::STATE_NOT_AVAILABLE);
+
+  ASSERT_TRUE(command_->Init());
+  command_->Run();
   command_->on_event(event);
 }
 
-TEST_F(RCIsReadyRequestTest, Run_KeyAvailableEqualToTrue_StateAvailable) {
+TEST_F(RCIsReadyRequestTest,
+       OnEvent_KeyAvailableEqualToTrue_StateAvailable_CacheIsAbsent) {
   const bool is_rc_cooperating_available = true;
   const bool is_send_message_to_hmi = true;
   const bool is_message_contain_param = true;
   Event event(hmi_apis::FunctionID::RC_IsReady);
   PrepareEvent(is_message_contain_param, event, is_rc_cooperating_available);
-  HMICapabilitiesExpectations();
+  std::set<hmi_apis::FunctionID::eType> interfaces_to_update{
+      hmi_apis::FunctionID::RC_GetCapabilities};
+  InterfacesUpdateExpectations(interfaces_to_update);
   SetUpExpectations(is_rc_cooperating_available,
                     is_send_message_to_hmi,
                     is_message_contain_param,
                     am::HmiInterfaces::STATE_AVAILABLE);
+
+  ASSERT_TRUE(command_->Init());
+  command_->Run();
   command_->on_event(event);
 }
 
-TEST_F(RCIsReadyRequestTest, Run_HMIDoestRespond_SendMessageToHMIByTimeout) {
-  HMICapabilitiesExpectations();
+TEST_F(RCIsReadyRequestTest,
+       OnEvent_HMIDoestRespond_SendMessageToHMIByTimeout_CacheIsAbsent) {
+  std::set<hmi_apis::FunctionID::eType> interfaces_to_update{
+      hmi_apis::FunctionID::RC_GetCapabilities};
+  InterfacesUpdateExpectations(interfaces_to_update);
   ExpectSendMessagesToHMI();
+
+  ASSERT_TRUE(command_->Init());
+  command_->Run();
   command_->onTimeOut();
+}
+
+TEST_F(
+    RCIsReadyRequestTest,
+    OnEvent_RCGetCapabilitiesExistInTheCache_DoesntSendRCGetCapabilitiesRequest) {
+  const bool is_message_contain_param = true;
+  Event event(hmi_apis::FunctionID::RC_IsReady);
+  PrepareEvent(is_message_contain_param, event);
+  std::set<hmi_apis::FunctionID::eType> interfaces_to_update;
+  InterfacesUpdateExpectations(interfaces_to_update);
+
+  EXPECT_CALL(mock_rpc_service_,
+              ManageHMICommand(
+                  HMIFunctionIDIs(hmi_apis::FunctionID::RC_GetCapabilities), _))
+      .Times(0);
+
+  ASSERT_TRUE(command_->Init());
+  command_->Run();
+  command_->on_event(event);
 }
 
 }  // namespace rc_is_ready_request

@@ -70,12 +70,12 @@ class VIIsReadyRequestTest
 
   void SetUpExpectations(bool is_vi_cooperating_available,
                          bool is_send_message_to_hmi,
-                         bool is_message_contain_param,
+                         bool is_message_contains_param,
                          am::HmiInterfaces::InterfaceState state) {
     EXPECT_CALL(mock_hmi_capabilities_,
                 set_is_ivi_cooperating(is_vi_cooperating_available));
 
-    if (is_message_contain_param) {
+    if (is_message_contains_param) {
       EXPECT_CALL(app_mngr_, hmi_interfaces())
           .WillRepeatedly(ReturnRef(mock_hmi_interfaces_));
       EXPECT_CALL(mock_hmi_interfaces_,
@@ -117,10 +117,8 @@ class VIIsReadyRequestTest
     event.set_smart_object(*msg);
   }
 
-  void HMICapabilitiesExpectations() {
-    std::set<hmi_apis::FunctionID::eType> interfaces_to_update{
-        hmi_apis::FunctionID::VehicleInfo_GetVehicleType};
-
+  void InterfacesUpdateExpectations(
+      const std::set<hmi_apis::FunctionID::eType>& interfaces_to_update) {
     EXPECT_CALL(mock_hmi_capabilities_, GetDefaultInitializedCapabilities())
         .WillOnce(Return(interfaces_to_update));
   }
@@ -128,21 +126,35 @@ class VIIsReadyRequestTest
   VIIsReadyRequestPtr command_;
 };
 
-TEST_F(VIIsReadyRequestTest, Run_NoKeyAvailableInMessage_HmiInterfacesIgnored) {
+MATCHER_P(HMIFunctionIDIs, function_id, "") {
+  const auto msg_function_id = static_cast<hmi_apis::FunctionID::eType>(
+      (*arg)[am::strings::params][am::strings::function_id].asInt());
+
+  return msg_function_id == function_id;
+}
+
+TEST_F(VIIsReadyRequestTest,
+       OnEvent_NoKeyAvailableInMessage_HmiInterfacesIgnored_CacheIsAbsent) {
   const bool is_vi_cooperating_available = false;
   const bool is_send_message_to_hmi = true;
   const bool is_message_contain_param = false;
   Event event(hmi_apis::FunctionID::VehicleInfo_IsReady);
   PrepareEvent(is_message_contain_param, event);
-  HMICapabilitiesExpectations();
+  std::set<hmi_apis::FunctionID::eType> interfaces_to_update{
+      hmi_apis::FunctionID::VehicleInfo_GetVehicleType};
+  InterfacesUpdateExpectations(interfaces_to_update);
   SetUpExpectations(is_vi_cooperating_available,
                     is_send_message_to_hmi,
                     is_message_contain_param,
                     am::HmiInterfaces::STATE_NOT_RESPONSE);
+
+  ASSERT_TRUE(command_->Init());
+  command_->Run();
   command_->on_event(event);
 }
 
-TEST_F(VIIsReadyRequestTest, Run_KeyAvailableEqualToFalse_StateNotAvailable) {
+TEST_F(VIIsReadyRequestTest,
+       OnEvent_KeyAvailableEqualToFalse_StateNotAvailable_CacheIsAbsent) {
   const bool is_vi_cooperating_available = false;
   const bool is_send_message_to_hmi = false;
   const bool is_message_contain_param = true;
@@ -152,30 +164,60 @@ TEST_F(VIIsReadyRequestTest, Run_KeyAvailableEqualToFalse_StateNotAvailable) {
                     is_send_message_to_hmi,
                     is_message_contain_param,
                     am::HmiInterfaces::STATE_NOT_AVAILABLE);
+
+  ASSERT_TRUE(command_->Init());
+  command_->Run();
   command_->on_event(event);
 }
 
-TEST_F(VIIsReadyRequestTest, Run_KeyAvailableEqualToTrue_StateAvailable) {
+TEST_F(VIIsReadyRequestTest,
+       OnEvent_KeyAvailableEqualToTrue_StateAvailable_CacheIsAbsent) {
   const bool is_vi_cooperating_available = true;
   const bool is_send_message_to_hmi = true;
   const bool is_message_contain_param = true;
   Event event(hmi_apis::FunctionID::VehicleInfo_IsReady);
-  HMICapabilitiesExpectations();
+  std::set<hmi_apis::FunctionID::eType> interfaces_to_update{
+      hmi_apis::FunctionID::VehicleInfo_GetVehicleType};
+  InterfacesUpdateExpectations(interfaces_to_update);
   PrepareEvent(is_message_contain_param, event, is_vi_cooperating_available);
   SetUpExpectations(is_vi_cooperating_available,
                     is_send_message_to_hmi,
                     is_message_contain_param,
                     am::HmiInterfaces::STATE_AVAILABLE);
+
+  ASSERT_TRUE(command_->Init());
+  command_->Run();
   command_->on_event(event);
 }
 
-TEST_F(VIIsReadyRequestTest, Run_HMIDoestRespond_SendMessageToHMIByTimeout) {
+TEST_F(VIIsReadyRequestTest,
+       OnEvent_HMIDoestRespond_SendMessageToHMIByTimeout_CacheIsAbsent) {
   std::set<hmi_apis::FunctionID::eType> interfaces_to_update{
       hmi_apis::FunctionID::VehicleInfo_GetVehicleType};
-  EXPECT_CALL(mock_hmi_capabilities_, GetDefaultInitializedCapabilities())
-      .WillOnce(Return(interfaces_to_update));
+  InterfacesUpdateExpectations(interfaces_to_update);
   ExpectSendMessagesToHMI();
+
+  ASSERT_TRUE(command_->Init());
+  command_->Run();
   command_->onTimeOut();
+}
+
+TEST_F(VIIsReadyRequestTest,
+       OnEvent_VehicleInfoExistInTheCache_DoesntSendVIGetVehicleTypeRequest) {
+  const bool is_message_contain_param = false;
+  Event event(hmi_apis::FunctionID::VehicleInfo_IsReady);
+  PrepareEvent(is_message_contain_param, event);
+  std::set<hmi_apis::FunctionID::eType> interfaces_to_update;
+  InterfacesUpdateExpectations(interfaces_to_update);
+  EXPECT_CALL(
+      mock_rpc_service_,
+      ManageHMICommand(
+          HMIFunctionIDIs(hmi_apis::FunctionID::VehicleInfo_GetVehicleType), _))
+      .Times(0);
+
+  ASSERT_TRUE(command_->Init());
+  command_->Run();
+  command_->on_event(event);
 }
 
 }  // namespace vi_is_ready_request

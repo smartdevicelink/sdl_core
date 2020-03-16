@@ -69,12 +69,12 @@ class UIIsReadyRequestTest
 
   void SetUpExpectations(bool is_ui_cooperating_available,
                          bool is_send_message_to_hmi,
-                         bool is_message_contain_param,
+                         bool is_message_contains_param,
                          am::HmiInterfaces::InterfaceState state) {
     EXPECT_CALL(mock_hmi_capabilities_,
                 set_is_ui_cooperating(is_ui_cooperating_available));
 
-    if (is_message_contain_param) {
+    if (is_message_contains_param) {
       EXPECT_CALL(app_mngr_, hmi_interfaces())
           .WillRepeatedly(ReturnRef(mock_hmi_interfaces_));
       EXPECT_CALL(
@@ -141,11 +141,8 @@ class UIIsReadyRequestTest
     event.set_smart_object(*msg);
   }
 
-  void HMICapabilitiesExpectations() {
-    std::set<hmi_apis::FunctionID::eType> interfaces_to_update{
-        hmi_apis::FunctionID::UI_GetLanguage,
-        hmi_apis::FunctionID::UI_GetSupportedLanguages,
-        hmi_apis::FunctionID::UI_GetCapabilities};
+  void InterfacesUpdateExpectations(
+      const std::set<hmi_apis::FunctionID::eType>& interfaces_to_update) {
     EXPECT_CALL(mock_hmi_capabilities_, GetDefaultInitializedCapabilities())
         .WillOnce(Return(interfaces_to_update));
   }
@@ -154,6 +151,13 @@ class UIIsReadyRequestTest
   policy_test::MockPolicyHandlerInterface mock_policy_handler_interface_;
 };
 
+MATCHER_P(HMIFunctionIDIs, function_id, "") {
+  const auto msg_function_id = static_cast<hmi_apis::FunctionID::eType>(
+      (*arg)[am::strings::params][am::strings::function_id].asInt());
+
+  return msg_function_id == function_id;
+}
+
 TEST_F(UIIsReadyRequestTest,
        OnEvent_NoKeyAvailableInMessage_HmiInterfacesIgnored_CacheIsAbsent) {
   const bool is_ui_cooperating_available = false;
@@ -161,12 +165,18 @@ TEST_F(UIIsReadyRequestTest,
   const bool is_message_contain_param = false;
   Event event(hmi_apis::FunctionID::UI_IsReady);
   PrepareEvent(is_message_contain_param, event);
-  HMICapabilitiesExpectations();
+  std::set<hmi_apis::FunctionID::eType> interfaces_to_update{
+      hmi_apis::FunctionID::UI_GetLanguage,
+      hmi_apis::FunctionID::UI_GetSupportedLanguages,
+      hmi_apis::FunctionID::UI_GetCapabilities};
+  InterfacesUpdateExpectations(interfaces_to_update);
   SetUpExpectations(is_ui_cooperating_available,
                     is_send_message_to_hmi,
                     is_message_contain_param,
                     am::HmiInterfaces::STATE_NOT_RESPONSE);
 
+  ASSERT_TRUE(command_->Init());
+  command_->Run();
   command_->on_event(event);
 }
 
@@ -181,6 +191,9 @@ TEST_F(UIIsReadyRequestTest,
                     is_send_message_to_hmi,
                     is_message_contain_param,
                     am::HmiInterfaces::STATE_NOT_AVAILABLE);
+
+  ASSERT_TRUE(command_->Init());
+  command_->Run();
   command_->on_event(event);
 }
 
@@ -191,11 +204,18 @@ TEST_F(UIIsReadyRequestTest,
   const bool is_message_contain_param = true;
   Event event(hmi_apis::FunctionID::UI_IsReady);
   PrepareEvent(is_message_contain_param, event, is_ui_cooperating_available);
-  HMICapabilitiesExpectations();
+  std::set<hmi_apis::FunctionID::eType> interfaces_to_update{
+      hmi_apis::FunctionID::UI_GetLanguage,
+      hmi_apis::FunctionID::UI_GetSupportedLanguages,
+      hmi_apis::FunctionID::UI_GetCapabilities};
+  InterfacesUpdateExpectations(interfaces_to_update);
   SetUpExpectations(is_ui_cooperating_available,
                     is_send_message_to_hmi,
                     is_message_contain_param,
                     am::HmiInterfaces::STATE_AVAILABLE);
+
+  ASSERT_TRUE(command_->Init());
+  command_->Run();
   command_->on_event(event);
 }
 
@@ -204,10 +224,125 @@ TEST_F(UIIsReadyRequestTest, OnTimeout_SUCCESS_CacheIsAbsent) {
       hmi_apis::FunctionID::UI_GetLanguage,
       hmi_apis::FunctionID::UI_GetSupportedLanguages,
       hmi_apis::FunctionID::UI_GetCapabilities};
-  EXPECT_CALL(mock_hmi_capabilities_, GetDefaultInitializedCapabilities())
-      .WillOnce(Return(interfaces_to_update));
+  InterfacesUpdateExpectations(interfaces_to_update);
   ExpectSendMessagesToHMI();
+
+  ASSERT_TRUE(command_->Init());
+  command_->Run();
   command_->onTimeOut();
+}
+
+TEST_F(UIIsReadyRequestTest,
+       OnEvent_UIGetLanguageIsAbsentInCache_SendOnlyUIGetLanguageRequest) {
+  Event event(hmi_apis::FunctionID::UI_IsReady);
+  std::set<hmi_apis::FunctionID::eType> interfaces_to_update{
+      hmi_apis::FunctionID::UI_GetLanguage};
+
+  InterfacesUpdateExpectations(interfaces_to_update);
+
+  smart_objects::SmartObjectSPtr language(
+      std::make_shared<smart_objects::SmartObject>(
+          smart_objects::SmartType_Map));
+  (*language)[am::strings::params][am::strings::function_id] =
+      hmi_apis::FunctionID::UI_GetLanguage;
+
+  EXPECT_CALL(mock_message_helper_,
+              CreateModuleInfoSO(hmi_apis::FunctionID::UI_GetLanguage, _))
+      .WillOnce(Return(language));
+  EXPECT_CALL(mock_hmi_capabilities_, set_handle_response_for(*language));
+  EXPECT_CALL(mock_rpc_service_,
+              ManageHMICommand(
+                  HMIFunctionIDIs(hmi_apis::FunctionID::UI_GetLanguage), _));
+
+  EXPECT_CALL(
+      mock_rpc_service_,
+      ManageHMICommand(
+          HMIFunctionIDIs(hmi_apis::FunctionID::UI_GetSupportedLanguages), _))
+      .Times(0);
+  EXPECT_CALL(mock_rpc_service_,
+              ManageHMICommand(
+                  HMIFunctionIDIs(hmi_apis::FunctionID::UI_GetCapabilities), _))
+      .Times(0);
+
+  ASSERT_TRUE(command_->Init());
+  command_->Run();
+  command_->on_event(event);
+}
+
+TEST_F(
+    UIIsReadyRequestTest,
+    OnEvent_UIGetSupportedLanguagesIsAbsentInCache_SendOnlyUIGetSupportedLanguagesRequest) {
+  Event event(hmi_apis::FunctionID::UI_IsReady);
+  std::set<hmi_apis::FunctionID::eType> interfaces_to_update{
+      hmi_apis::FunctionID::UI_GetSupportedLanguages};
+
+  InterfacesUpdateExpectations(interfaces_to_update);
+
+  smart_objects::SmartObjectSPtr all_languages(
+      std::make_shared<smart_objects::SmartObject>(
+          smart_objects::SmartType_Map));
+  (*all_languages)[am::strings::params][am::strings::function_id] =
+      hmi_apis::FunctionID::UI_GetSupportedLanguages;
+
+  EXPECT_CALL(
+      mock_message_helper_,
+      CreateModuleInfoSO(hmi_apis::FunctionID::UI_GetSupportedLanguages, _))
+      .WillOnce(Return(all_languages));
+  EXPECT_CALL(
+      mock_rpc_service_,
+      ManageHMICommand(
+          HMIFunctionIDIs(hmi_apis::FunctionID::UI_GetSupportedLanguages), _));
+
+  EXPECT_CALL(mock_rpc_service_,
+              ManageHMICommand(
+                  HMIFunctionIDIs(hmi_apis::FunctionID::UI_GetLanguage), _))
+      .Times(0);
+  EXPECT_CALL(mock_rpc_service_,
+              ManageHMICommand(
+                  HMIFunctionIDIs(hmi_apis::FunctionID::UI_GetCapabilities), _))
+      .Times(0);
+
+  ASSERT_TRUE(command_->Init());
+  command_->Run();
+  command_->on_event(event);
+}
+
+TEST_F(
+    UIIsReadyRequestTest,
+    OnEvent_UIGetCapabilitiesIsAbsentInCache_SendOnlyUIGetCapabilitiesRequest) {
+  Event event(hmi_apis::FunctionID::UI_IsReady);
+  std::set<hmi_apis::FunctionID::eType> interfaces_to_update{
+      hmi_apis::FunctionID::UI_GetCapabilities};
+
+  InterfacesUpdateExpectations(interfaces_to_update);
+
+  smart_objects::SmartObjectSPtr all_languages(
+      std::make_shared<smart_objects::SmartObject>(
+          smart_objects::SmartType_Map));
+  (*all_languages)[am::strings::params][am::strings::function_id] =
+      hmi_apis::FunctionID::UI_GetCapabilities;
+
+  EXPECT_CALL(mock_message_helper_,
+              CreateModuleInfoSO(hmi_apis::FunctionID::UI_GetCapabilities, _))
+      .WillOnce(Return(all_languages));
+  EXPECT_CALL(
+      mock_rpc_service_,
+      ManageHMICommand(
+          HMIFunctionIDIs(hmi_apis::FunctionID::UI_GetCapabilities), _));
+
+  EXPECT_CALL(mock_rpc_service_,
+              ManageHMICommand(
+                  HMIFunctionIDIs(hmi_apis::FunctionID::UI_GetLanguage), _))
+      .Times(0);
+  EXPECT_CALL(
+      mock_rpc_service_,
+      ManageHMICommand(
+          HMIFunctionIDIs(hmi_apis::FunctionID::UI_GetSupportedLanguages), _))
+      .Times(0);
+
+  ASSERT_TRUE(command_->Init());
+  command_->Run();
+  command_->on_event(event);
 }
 
 }  // namespace ui_is_ready_request
