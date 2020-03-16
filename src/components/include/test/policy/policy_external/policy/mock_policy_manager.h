@@ -81,11 +81,12 @@ class MockPolicyManager : public PolicyManager {
   MOCK_METHOD1(OnPTUFinished, void(const PtProcessingResult ptu_result));
   MOCK_METHOD1(ResetPT, bool(const std::string& file_name));
   MOCK_METHOD1(GetUpdateUrl, std::string(int service_type));
-  MOCK_METHOD2(GetUpdateUrls,
-               void(const uint32_t service_type, EndpointUrls& out_end_points));
-  MOCK_METHOD2(GetUpdateUrls,
-               void(const std::string& service_type,
-                    EndpointUrls& out_end_points));
+  MOCK_CONST_METHOD2(GetUpdateUrls,
+                     void(const uint32_t service_type,
+                          EndpointUrls& out_end_points));
+  MOCK_CONST_METHOD2(GetUpdateUrls,
+                     void(const std::string& service_type,
+                          EndpointUrls& out_end_points));
   MOCK_METHOD0(RequestPTUpdate, void());
   MOCK_METHOD6(CheckPermissions,
                void(const PTString& device_id,
@@ -218,7 +219,6 @@ class MockPolicyManager : public PolicyManager {
   MOCK_METHOD2(OnAppRegisteredOnMobile,
                void(const std::string& device_id,
                     const std::string& application_id));
-  MOCK_CONST_METHOD0(GetLockScreenIconUrl, std::string());
   MOCK_CONST_METHOD1(GetIconUrl, std::string(const std::string& policy_app_id));
   MOCK_CONST_METHOD2(GetAppRequestTypes,
                      const std::vector<std::string>(

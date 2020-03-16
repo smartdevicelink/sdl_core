@@ -2590,11 +2590,24 @@ TEST_F(PolicyHandlerTest,
 #endif
 }
 
+ACTION_P(SetEndpoint, endpoint) {
+  arg1 = endpoint;
+}
+
 TEST_F(PolicyHandlerTest, GetLockScreenIconUrl_SUCCESS) {
   EnablePolicyAndPolicyManagerMock();
-  EXPECT_CALL(*mock_policy_manager_, GetLockScreenIconUrl());
 
-  policy_handler_.GetLockScreenIconUrl();
+  const std::string url_str = "test_icon_url";
+  EndpointData data(url_str);
+
+  EndpointUrls endpoints;
+  endpoints.push_back(data);
+
+  const std::string service_type = "lock_screen_icon_url";
+  EXPECT_CALL(*mock_policy_manager_, GetUpdateUrls(service_type, _))
+      .WillOnce(SetEndpoint(endpoints));
+
+  EXPECT_EQ(url_str, policy_handler_.GetLockScreenIconUrl(kPolicyAppId_));
 }
 
 TEST_F(PolicyHandlerTest, RemoveListener_SUCCESS) {
@@ -2655,10 +2668,6 @@ TEST_F(PolicyHandlerTest, OnSystemError_SUCCESS) {
   policy_handler_.OnSystemError(
       hmi_apis::Common_SystemError::SYNC_OUT_OF_MEMMORY);
   EXPECT_TRUE(waiter1.Wait(auto_lock));
-}
-
-ACTION_P(SetEndpoint, endpoint) {
-  arg1 = endpoint;
 }
 
 TEST_F(PolicyHandlerTest, RemoteAppsUrl_EndpointsEmpty_UNSUCCESS) {

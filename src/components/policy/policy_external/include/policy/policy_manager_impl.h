@@ -152,9 +152,9 @@ class PolicyManagerImpl : public PolicyManager {
    * @param out_end_points output vector of urls
    */
   void GetUpdateUrls(const uint32_t service_type,
-                     EndpointUrls& out_end_points) OVERRIDE;
+                     EndpointUrls& out_end_points) const OVERRIDE;
   void GetUpdateUrls(const std::string& service_type,
-                     EndpointUrls& out_end_points) OVERRIDE;
+                     EndpointUrls& out_end_points) const OVERRIDE;
 
   /**
    * @brief PTU is needed, for this PTS has to be formed and sent.
@@ -254,13 +254,6 @@ class PolicyManagerImpl : public PolicyManager {
    * @brief Handler of exceeding timeout of exchanging policy table
    */
   void OnExceededTimeout() OVERRIDE;
-
-  /**
-   * @brief GetLockScreenIcon allows to obtain lock screen icon url;
-   * @return url which point to the resourse where lock screen icon could be
-   *obtained.
-   */
-  std::string GetLockScreenIconUrl() const OVERRIDE;
 
   /**
    * @brief Get Icon Url used for showing a cloud apps icon before the intial

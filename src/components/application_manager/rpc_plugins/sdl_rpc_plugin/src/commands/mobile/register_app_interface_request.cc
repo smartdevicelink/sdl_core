@@ -551,7 +551,7 @@ RegisterAppInterfaceRequest::GetLockScreenIconUrlNotification(
   (*message)[strings::msg_params][strings::request_type] =
       mobile_apis::RequestType::LOCK_SCREEN_ICON_URL;
   (*message)[strings::msg_params][strings::url] =
-      GetPolicyHandler().GetLockScreenIconUrl();
+      GetPolicyHandler().GetLockScreenIconUrl(app->policy_app_id());
   return message;
 }
 

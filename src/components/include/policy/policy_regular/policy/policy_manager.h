@@ -97,13 +97,6 @@ class PolicyManager : public usage_statistics::StatisticsManager,
   virtual bool ResetPT(const std::string& file_name) = 0;
 
   /**
-   * @brief GetLockScreenIcon allows to obtain lock screen icon url;
-   * @return url which point to the resource where lock screen icon could be
-   *obtained.
-   */
-  virtual std::string GetLockScreenIconUrl() const = 0;
-
-  /**
    * @brief Get Icon Url used for showing a cloud apps icon before the initial
    *registration
    *
@@ -118,9 +111,9 @@ class PolicyManager : public usage_statistics::StatisticsManager,
    * @param out_end_points output vector of urls
    */
   virtual void GetUpdateUrls(const std::string& service_type,
-                             EndpointUrls& out_end_points) = 0;
+                             EndpointUrls& out_end_points) const = 0;
   virtual void GetUpdateUrls(const uint32_t service_type,
-                             EndpointUrls& out_end_points) = 0;
+                             EndpointUrls& out_end_points) const = 0;
 
   /**
    * @brief PTU is needed, for this PTS has to be formed and sent.
