@@ -3130,6 +3130,7 @@ TEST_F(PolicyHandlerTest, PushAppIdToPTUQueue_PolicyEnabled_SUCCESS) {
   ChangePolicyManagerToMock();
   EXPECT_CALL(*mock_policy_manager_, UpdatePTUReadyAppsCount(_));
   policy_handler_.PushAppIdToPTUQueue(kAppId1_);
+  EXPECT_EQ(1u, policy_handler_.applications_ptu_queue_.size());
 }
 
 TEST_F(PolicyHandlerTest, PushAppIdToPTUQueue_PolicyDisabled_FAIL) {
@@ -3140,6 +3141,7 @@ TEST_F(PolicyHandlerTest, PushAppIdToPTUQueue_PolicyDisabled_FAIL) {
 
   policy_handler_.LoadPolicyLibrary();
   policy_handler_.PushAppIdToPTUQueue(kAppId1_);
+  EXPECT_EQ(0u, policy_handler_.applications_ptu_queue_.size());
 }
 
 }  // namespace policy_handler_test
