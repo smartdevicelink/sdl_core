@@ -3465,9 +3465,11 @@ bool ApplicationManagerImpl::CanAppStream(
   return HMIStateAllowsStreaming(app_id, service_type) && is_allowed;
 }
 
-void ApplicationManagerImpl::ForbidStreaming(uint32_t app_id) {
+void ApplicationManagerImpl::ForbidStreaming(
+    uint32_t app_id, protocol_handler::ServiceType service_type) {
   using namespace mobile_apis::AppInterfaceUnregisteredReason;
   using namespace mobile_apis::Result;
+  using namespace protocol_handler;
 
   LOG4CXX_AUTO_TRACE(logger_);
 
@@ -3507,6 +3509,18 @@ void ApplicationManagerImpl::ForbidStreaming(uint32_t app_id) {
     UnregisterApplication(app_id, ABORTED);
     return;
   }
+
+  if (ServiceType::kMobileNav == service_type &&
+      app->video_streaming_allowed()) {
+    LOG4CXX_DEBUG(logger_, "Video streaming is still allowed");
+    return;
+  }
+
+  if (ServiceType::kAudio == service_type && app->audio_streaming_allowed()) {
+    LOG4CXX_DEBUG(logger_, "Audio streaming is still allowed");
+    return;
+  }
+
   EndNaviServices(app_id);
 }
 

@@ -788,8 +788,10 @@ class ApplicationManager {
   /**
    * @brief ForbidStreaming forbid the stream over the certain application.
    * @param app_id the application's id which should stop streaming.
+   * @param service_type Service type to check
    */
-  virtual void ForbidStreaming(uint32_t app_id) = 0;
+  virtual void ForbidStreaming(uint32_t app_id,
+                               protocol_handler::ServiceType service_type) = 0;
 
   /**
    * @brief Called when application completes streaming configuration
