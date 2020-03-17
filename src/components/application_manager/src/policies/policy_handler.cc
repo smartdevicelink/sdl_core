@@ -470,7 +470,8 @@ void PolicyHandler::PushAppIdToPTUQueue(const uint32_t app_id) {
   LOG4CXX_AUTO_TRACE(logger_);
   sync_primitives::AutoLock lock(app_id_queue_lock_);
   const auto result = applications_ptu_queue_.insert(app_id);
-  if (result.second && PolicyEnabled()) {
+  if (result.second) {
+    POLICY_LIB_CHECK_VOID();
     policy_manager_->UpdatePTUReadyAppsCount(applications_ptu_queue_.size());
   }
 }
