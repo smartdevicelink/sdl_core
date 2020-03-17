@@ -3128,10 +3128,7 @@ TEST_F(PolicyHandlerTest, GetEnabledLocalApps_SUCCESS) {
 
 TEST_F(PolicyHandlerTest, PushAppIdToPTUQueue_PolicyEnabled_SUCCESS) {
   ChangePolicyManagerToMock();
-
-  EXPECT_CALL(policy_settings_, enable_policy()).WillOnce(Return(true));
   EXPECT_CALL(*mock_policy_manager_, UpdatePTUReadyAppsCount(_));
-
   policy_handler_.PushAppIdToPTUQueue(kAppId1_);
 }
 
@@ -3141,6 +3138,7 @@ TEST_F(PolicyHandlerTest, PushAppIdToPTUQueue_PolicyDisabled_FAIL) {
   EXPECT_CALL(policy_settings_, enable_policy()).WillOnce(Return(false));
   EXPECT_CALL(*mock_policy_manager_, UpdatePTUReadyAppsCount(_)).Times(0);
 
+  policy_handler_.LoadPolicyLibrary();
   policy_handler_.PushAppIdToPTUQueue(kAppId1_);
 }
 
