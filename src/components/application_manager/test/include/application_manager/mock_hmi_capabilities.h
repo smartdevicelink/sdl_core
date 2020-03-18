@@ -203,6 +203,9 @@ class MockHMICapabilities : public ::application_manager::HMICapabilities {
 
   MOCK_CONST_METHOD0(ccpu_version, const std::string&());
   MOCK_METHOD1(set_ccpu_version, void(const std::string& ccpu_version));
+  MOCK_CONST_METHOD1(MatchesCCPUVersion, bool(const std::string& ccpu_version));
+  MOCK_METHOD1(OnSoftwareVersionReceived,
+               void(const std::string& ccpu_version));
   MOCK_METHOD0(get_hmi_language_handler,
                application_manager::HMILanguageHandler&());
   MOCK_METHOD1(set_handle_response_for,
@@ -214,6 +217,8 @@ class MockHMICapabilities : public ::application_manager::HMICapabilities {
   MOCK_CONST_METHOD0(DeleteCachedCapabilitiesFile, bool());
   MOCK_CONST_METHOD0(GetDefaultInitializedCapabilities,
                      std::set<hmi_apis::FunctionID::eType>());
+  MOCK_METHOD1(OnCapabilityInitialized,
+               void(hmi_apis::FunctionID::eType requested_interface));
 };
 
 }  // namespace application_manager_test

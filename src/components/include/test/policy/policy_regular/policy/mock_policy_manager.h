@@ -307,6 +307,7 @@ class MockPolicyManager : public PolicyManager {
   MOCK_CONST_METHOD1(GetAppRequestSubTypesState,
                      RequestSubType::State(const std::string& policy_app_id));
   MOCK_METHOD0(ResetTimeout, void());
+  MOCK_CONST_METHOD0(GetCCPUVersionFromPT, std::string());
 };
 
 }  // namespace policy_manager_test
