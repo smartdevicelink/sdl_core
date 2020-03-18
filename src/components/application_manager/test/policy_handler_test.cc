@@ -3157,6 +3157,43 @@ TEST_F(PolicyHandlerTest, PushAppIdToPTUQueue_PolicyDisabled_FAIL) {
             policy_handler_.applications_ptu_queue_.size());
 }
 
+TEST_F(PolicyHandlerTest, StopRetrySequence_PolicyEnabled_SUCCESS) {
+  ChangePolicyManagerToMock();
+  EXPECT_CALL(*mock_policy_manager_, StopRetrySequence());
+  policy_handler_.StopRetrySequence();
+}
+
+TEST_F(PolicyHandlerTest, StopRetrySequence_PolicyDisabled_FAIL) {
+  ChangePolicyManagerToMock();
+
+  EXPECT_CALL(policy_settings_, enable_policy()).WillOnce(Return(false));
+  EXPECT_CALL(*mock_policy_manager_, StopRetrySequence()).Times(0);
+
+  policy_handler_.LoadPolicyLibrary();
+  policy_handler_.StopRetrySequence();
+}
+
+TEST_F(PolicyHandlerTest, GetPolicyTableData_PolicyEnabled_SUCCESS) {
+  ChangePolicyManagerToMock();
+  Json::Value expected_table_data(Json::objectValue);
+  expected_table_data["test_key"] = "test_value";
+  EXPECT_CALL(*mock_policy_manager_, GetPolicyTableData())
+      .WillOnce(Return(expected_table_data));
+  EXPECT_EQ(expected_table_data, policy_handler_.GetPolicyTableData());
+}
+
+TEST_F(PolicyHandlerTest, GetPolicyTableData_PolicyDisabled_FAIL) {
+  ChangePolicyManagerToMock();
+
+  EXPECT_CALL(policy_settings_, enable_policy()).WillOnce(Return(false));
+  EXPECT_CALL(*mock_policy_manager_, GetPolicyTableData()).Times(0);
+
+  policy_handler_.LoadPolicyLibrary();
+
+  Json::Value expected_table_data;
+  EXPECT_EQ(expected_table_data, policy_handler_.GetPolicyTableData());
+}
+
 }  // namespace policy_handler_test
 }  // namespace components
 }  // namespace test
