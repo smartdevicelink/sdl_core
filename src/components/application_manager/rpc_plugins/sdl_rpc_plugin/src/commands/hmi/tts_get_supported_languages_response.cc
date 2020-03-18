@@ -59,6 +59,9 @@ void TTSGetSupportedLanguagesResponse::Run() {
       static_cast<hmi_apis::Common_Result::eType>(
           (*message_)[strings::params][hmi_response::code].asInt());
 
+  hmi_capabilities_.OnCapabilityInitialized(
+      hmi_apis::FunctionID::TTS_GetSupportedLanguages);
+
   if (hmi_apis::Common_Result::SUCCESS != code) {
     LOG4CXX_DEBUG(logger_,
                   "Request was not successful. Don't change HMI capabilities");

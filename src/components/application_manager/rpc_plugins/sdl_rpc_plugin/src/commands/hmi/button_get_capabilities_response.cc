@@ -58,6 +58,9 @@ void ButtonGetCapabilitiesResponse::Run() {
       static_cast<hmi_apis::Common_Result::eType>(
           (*message_)[strings::params][hmi_response::code].asInt());
 
+  hmi_capabilities_.OnCapabilityInitialized(
+      hmi_apis::FunctionID::Buttons_GetCapabilities);
+
   if (hmi_apis::Common_Result::SUCCESS != code) {
     LOG4CXX_ERROR(logger_, "Error is returned. Capabilities won't be updated.");
     return;

@@ -837,10 +837,31 @@ void ApplicationManagerImpl::ConnectToDevice(const std::string& device_mac) {
   connection_handler().ConnectToDevice(handle);
 }
 
-void ApplicationManagerImpl::OnHMIStartedCooperation() {
+void ApplicationManagerImpl::OnHMIReady() {
   LOG4CXX_AUTO_TRACE(logger_);
-  hmi_cooperating_ = true;
   MessageHelper::SendGetSystemInfoRequest(*this);
+
+  std::shared_ptr<smart_objects::SmartObject> is_navi_ready(
+      MessageHelper::CreateModuleInfoSO(
+          hmi_apis::FunctionID::Navigation_IsReady, *this));
+  rpc_service_->ManageHMICommand(is_navi_ready);
+
+  std::shared_ptr<smart_objects::SmartObject> mixing_audio_supported_request(
+      MessageHelper::CreateModuleInfoSO(
+          hmi_apis::FunctionID::BasicCommunication_MixingAudioSupported,
+          *this));
+  rpc_service_->ManageHMICommand(mixing_audio_supported_request);
+  resume_controller().ResetLaunchTime();
+
+  RefreshCloudAppInformation();
+}
+
+void ApplicationManagerImpl::RequestForInterfacesAvailability() {
+  LOG4CXX_AUTO_TRACE(logger_);
+  std::shared_ptr<smart_objects::SmartObject> is_ivi_ready(
+      MessageHelper::CreateModuleInfoSO(
+          hmi_apis::FunctionID::VehicleInfo_IsReady, *this));
+  rpc_service_->ManageHMICommand(is_ivi_ready);
 
   std::shared_ptr<smart_objects::SmartObject> is_vr_ready(
       MessageHelper::CreateModuleInfoSO(hmi_apis::FunctionID::VR_IsReady,
@@ -857,16 +878,6 @@ void ApplicationManagerImpl::OnHMIStartedCooperation() {
                                         *this));
   rpc_service_->ManageHMICommand(is_ui_ready);
 
-  std::shared_ptr<smart_objects::SmartObject> is_navi_ready(
-      MessageHelper::CreateModuleInfoSO(
-          hmi_apis::FunctionID::Navigation_IsReady, *this));
-  rpc_service_->ManageHMICommand(is_navi_ready);
-
-  std::shared_ptr<smart_objects::SmartObject> is_ivi_ready(
-      MessageHelper::CreateModuleInfoSO(
-          hmi_apis::FunctionID::VehicleInfo_IsReady, *this));
-  rpc_service_->ManageHMICommand(is_ivi_ready);
-
   std::shared_ptr<smart_objects::SmartObject> is_rc_ready(
       MessageHelper::CreateModuleInfoSO(hmi_apis::FunctionID::RC_IsReady,
                                         *this));
@@ -882,15 +893,6 @@ void ApplicationManagerImpl::OnHMIStartedCooperation() {
             hmi_apis::FunctionID::Buttons_GetCapabilities, *this));
     rpc_service_->ManageHMICommand(button_capabilities);
   }
-
-  std::shared_ptr<smart_objects::SmartObject> mixing_audio_supported_request(
-      MessageHelper::CreateModuleInfoSO(
-          hmi_apis::FunctionID::BasicCommunication_MixingAudioSupported,
-          *this));
-  rpc_service_->ManageHMICommand(mixing_audio_supported_request);
-  resume_controller().ResetLaunchTime();
-
-  RefreshCloudAppInformation();
 }
 
 std::string ApplicationManagerImpl::PolicyIDByIconUrl(const std::string url) {
@@ -3017,7 +3019,7 @@ void ApplicationManagerImpl::SendOnSDLClose() {
 void ApplicationManagerImpl::UnregisterAllApplications() {
   LOG4CXX_DEBUG(logger_, "Unregister reason  " << unregister_reason_);
 
-  hmi_cooperating_ = false;
+  SetHMICooperating(false);
   bool is_ignition_off = false;
   using namespace mobile_api::AppInterfaceUnregisteredReason;
   using namespace helpers;
@@ -3879,6 +3881,10 @@ uint32_t ApplicationManagerImpl::GetAvailableSpaceForApp(
 
 bool ApplicationManagerImpl::IsHMICooperating() const {
   return hmi_cooperating_;
+}
+
+void ApplicationManagerImpl::SetHMICooperating(const bool hmi_cooperating) {
+  hmi_cooperating_ = hmi_cooperating;
 }
 
 void ApplicationManagerImpl::OnApplicationListUpdateTimer() {
