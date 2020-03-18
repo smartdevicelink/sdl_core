@@ -1024,6 +1024,11 @@ void PolicyHandler::OnGetSystemInfo(const std::string& ccpu_version,
   policy_manager_->SetSystemInfo(ccpu_version, wers_country_code, language);
 }
 
+std::string PolicyHandler::GetCCPUVersionFromPT() const {
+  LOG4CXX_AUTO_TRACE(logger_);
+  return policy_manager_->GetCCPUVersionFromPT();
+}
+
 void PolicyHandler::OnVIIsReady() {
   LOG4CXX_AUTO_TRACE(logger_);
   const uint32_t correlation_id =

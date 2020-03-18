@@ -59,7 +59,8 @@ const std::string kCreateSchema =
     "  `pt_exchanged_at_odometer_x` INTEGER NOT NULL DEFAULT 0, "
     "  `pt_exchanged_x_days_after_epoch` INTEGER NOT NULL DEFAULT 0, "
     "  `ignition_cycles_since_last_exchange` INTEGER NOT NULL DEFAULT 0, "
-    "  `flag_update_required` BOOL NOT NULL "
+    "  `flag_update_required` BOOL NOT NULL, "
+    "  `ccpu_version` VARCHAR(45) "
     "); "
     "CREATE TABLE IF NOT EXISTS `module_config`( "
     "  `preloaded_pt` BOOL NOT NULL, "
@@ -1047,5 +1048,9 @@ const std::string kSaveModuleMeta =
     "`ignition_cycles_since_last_exchange` = ? ";
 
 const std::string kSelectModuleMeta = "SELECT* FROM `module_meta`";
+
+const std::string kUpdateMetaParams =
+    "UPDATE `module_meta` SET "
+    "`ccpu_version` = ? ";
 }  // namespace sql_pt
 }  // namespace policy

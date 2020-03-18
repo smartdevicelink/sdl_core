@@ -479,6 +479,7 @@ void SQLPTRepresentation::GatherModuleMeta(
     *meta->pt_exchanged_at_odometer_x = query.GetInteger(0);
     *meta->pt_exchanged_x_days_after_epoch = query.GetInteger(1);
     *meta->ignition_cycles_since_last_exchange = query.GetInteger(2);
+    *meta->ccpu_version = query.GetString(4);
   }
 }
 
@@ -690,6 +691,23 @@ bool SQLPTRepresentation::GatherConsumerFriendlyMessages(
     LOG4CXX_WARN(logger_, "Incorrect statement for select friendly messages.");
   }
 
+  return true;
+}
+
+bool SQLPTRepresentation::SetMetaInfo(const std::string& ccpu_version) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  utils::dbms::SQLQuery query(db());
+  if (!query.Prepare(sql_pt::kUpdateMetaParams)) {
+    LOG4CXX_WARN(logger_, "Incorrect statement for insert to module meta.");
+    return false;
+  }
+
+  query.Bind(0, ccpu_version);
+
+  if (!query.Exec() || !query.Reset()) {
+    LOG4CXX_WARN(logger_, "Incorrect insert to module meta.");
+    return false;
+  }
   return true;
 }
 

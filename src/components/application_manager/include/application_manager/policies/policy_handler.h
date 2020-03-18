@@ -385,6 +385,8 @@ class PolicyHandler : public PolicyHandlerInterface,
                        const std::string& wers_country_code,
                        const std::string& language) OVERRIDE;
 
+  std::string GetCCPUVersionFromPT() const OVERRIDE;
+
   /**
    * @brief Sends GetVehicleData request in case when Vechicle info is ready.
    */

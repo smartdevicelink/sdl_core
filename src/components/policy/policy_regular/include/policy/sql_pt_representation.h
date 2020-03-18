@@ -89,7 +89,7 @@ class SQLPTRepresentation : public virtual PTRepresentation {
                          StringArray* nicknames = NULL,
                          StringArray* app_hmi_types = NULL);
   bool GetFunctionalGroupings(policy_table::FunctionalGroupings& groups);
-
+  bool SetMetaInfo(const std::string& ccpu_version);
 #ifdef BUILD_TESTS
   uint32_t open_counter() {
     return open_counter_;

@@ -1215,6 +1215,12 @@ void PolicyManagerImpl::SetSystemInfo(const std::string& ccpu_version,
                                       const std::string& wers_country_code,
                                       const std::string& language) {
   LOG4CXX_AUTO_TRACE(logger_);
+  cache_->SetMetaInfo(ccpu_version, wers_country_code, language);
+}
+
+std::string PolicyManagerImpl::GetCCPUVersionFromPT() const {
+  LOG4CXX_AUTO_TRACE(logger_);
+  return cache_->GetCCPUVersionFromPT();
 }
 
 uint32_t PolicyManagerImpl::GetNotificationsNumber(

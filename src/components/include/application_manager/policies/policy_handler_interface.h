@@ -326,6 +326,12 @@ class PolicyHandlerInterface : public VehicleDataItemProvider {
                                const std::string& language) = 0;
 
   /**
+   * @brief Get information about last ccpu_version from PT
+   * @return ccpu_version from PT
+   */
+  virtual std::string GetCCPUVersionFromPT() const = 0;
+
+  /**
    * @brief Sends GetVehicleData request in case when Vechicle info is ready.
    */
   virtual void OnVIIsReady() = 0;
