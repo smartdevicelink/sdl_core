@@ -750,7 +750,7 @@ void HMICapabilitiesImpl::set_seat_location_capability(
 void HMICapabilitiesImpl::Init(
     resumption::LastStateWrapperPtr last_state_wrapper) {
   hmi_language_handler_.Init(last_state_wrapper);
-  if (false == LoadCapabilitiesFromFile()) {
+  if (!LoadCapabilitiesFromFile()) {
     LOG4CXX_ERROR(logger_, "file hmi_capabilities.json was not loaded");
   } else {
     LOG4CXX_INFO(logger_, "file hmi_capabilities.json was loaded");
@@ -1633,6 +1633,46 @@ HMICapabilitiesImpl::GetDefaultInitializedCapabilities() const {
   return default_initialized_capabilities_;
 }
 
+void HMICapabilitiesImpl::OnCapabilityInitialized(
+    hmi_apis::FunctionID::eType requested_interface) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  if (app_mngr_.IsHMICooperating()) {
+    LOG4CXX_DEBUG(logger_,
+                  "Remove from default initialized capabilities skipped, "
+                  "because hmi_cooperating equal true already");
+    return;
+  }
+  RemoveFromDefaultInitialized(requested_interface);
+  CheckPendingDefaultInitialized();
+}
+
+bool HMICapabilitiesImpl::MatchesCCPUVersion(
+    const std::string& ccpu_version) const {
+  return ccpu_version_ == ccpu_version;
+}
+
+void HMICapabilitiesImpl::OnSoftwareVersionReceived(
+    const std::string& ccpu_version) {
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  if (MatchesCCPUVersion(ccpu_version)) {
+    LOG4CXX_DEBUG(logger_, "Software version not changed");
+    app_mngr_.SetHMICooperating(true);
+    app_mngr_.RequestForInterfacesAvailability();
+    return;
+  }
+
+  LOG4CXX_DEBUG(logger_, "Software version changed");
+  set_ccpu_version(ccpu_version);
+  DeleteCachedCapabilitiesFile();
+
+  if (!LoadCapabilitiesFromFile()) {
+    LOG4CXX_ERROR(logger_, "file hmi_capabilities.json was not loaded");
+  }
+
+  app_mngr_.RequestForInterfacesAvailability();
+}
+
 bool HMICapabilitiesImpl::AllFieldsSaved(
     const Json::Value& root_node,
     const std::string& interface_name,
@@ -1672,6 +1712,28 @@ bool HMICapabilitiesImpl::AllFieldsSaved(
   }
 
   return true;
+}
+
+void HMICapabilitiesImpl::RemoveFromDefaultInitialized(
+    hmi_apis::FunctionID::eType requested_interface) {
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  auto it = find(default_initialized_capabilities_.begin(),
+                 default_initialized_capabilities_.end(),
+                 requested_interface);
+  if (it != default_initialized_capabilities_.end()) {
+    default_initialized_capabilities_.erase(it);
+    LOG4CXX_DEBUG(logger_,
+                  "Wait for " << default_initialized_capabilities_.size()
+                              << " responses");
+  }
+}
+
+void HMICapabilitiesImpl::CheckPendingDefaultInitialized() const {
+  LOG4CXX_AUTO_TRACE(logger_);
+  if (default_initialized_capabilities_.empty()) {
+    app_mngr_.SetHMICooperating(true);
+  }
 }
 
 void HMICapabilitiesImpl::PrepareUiJsonValueForSaving(

@@ -57,6 +57,11 @@ void UIGetCapabilitiesRequest::Run() {
   SendRequest();
 }
 
+void UIGetCapabilitiesRequest::onTimeOut() {
+  LOG4CXX_AUTO_TRACE(logger_);
+  hmi_capabilities_.OnCapabilityInitialized(
+      hmi_apis::FunctionID::UI_GetCapabilities);
+}
 }  // namespace commands
 
 }  // namespace sdl_rpc_plugin

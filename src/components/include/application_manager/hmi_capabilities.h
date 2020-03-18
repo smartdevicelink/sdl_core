@@ -521,6 +521,26 @@ class HMICapabilities {
    */
   virtual std::set<hmi_apis::FunctionID::eType>
   GetDefaultInitializedCapabilities() const = 0;
+
+  /**
+   * @brief Response was received for default initialized capabilities
+   * @param requested_interface interface for which received response
+   */
+  virtual void OnCapabilityInitialized(
+      hmi_apis::FunctionID::eType requested_interface) = 0;
+
+  /**
+   * @brief Interface that checks for compliance new software version of the
+   * target with last received
+   * @param ccpu_version Received system/hmi software version
+   */
+  virtual bool MatchesCCPUVersion(const std::string& ccpu_version) const = 0;
+
+  /**
+   * @brief Interface that update capabilities depending on ccpu_version
+   * @param ccpu_version Received system/hmi software version
+   */
+  virtual void OnSoftwareVersionReceived(const std::string& ccpu_version) = 0;
 };
 
 }  //  namespace application_manager

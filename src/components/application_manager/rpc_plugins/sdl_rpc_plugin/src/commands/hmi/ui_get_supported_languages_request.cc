@@ -57,6 +57,11 @@ void UIGetSupportedLanguagesRequest::Run() {
   SendRequest();
 }
 
+void UIGetSupportedLanguagesRequest::onTimeOut() {
+  LOG4CXX_AUTO_TRACE(logger_);
+  hmi_capabilities_.OnCapabilityInitialized(
+      hmi_apis::FunctionID::UI_GetSupportedLanguages);
+}
 }  // namespace commands
 
 }  // namespace sdl_rpc_plugin

@@ -57,6 +57,7 @@ void GetSystemInfoResponse::Run() {
       static_cast<hmi_apis::Common_Result::eType>(
           (*message_)[strings::params][hmi_response::code].asInt());
 
+  hmi_capabilities_.set_ccpu_version(policy_handler_.GetCCPUVersionFromPT());
   const SystemInfo& info = GetSystemInfo(code);
 
   // We have to set preloaded flag as false in policy table on any response
@@ -84,7 +85,7 @@ const SystemInfo GetSystemInfoResponse::GetSystemInfo(
   info.language = application_manager::MessageHelper::CommonLanguageToString(
       static_cast<hmi_apis::Common_Language::eType>(lang_code));
 
-  hmi_capabilities_.set_ccpu_version(info.ccpu_version);
+  hmi_capabilities_.OnSoftwareVersionReceived(info.ccpu_version);
 
   return info;
 }

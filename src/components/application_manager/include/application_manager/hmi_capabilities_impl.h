@@ -241,6 +241,13 @@ class HMICapabilitiesImpl : public HMICapabilities {
   std::set<hmi_apis::FunctionID::eType> GetDefaultInitializedCapabilities()
       const OVERRIDE;
 
+  void OnCapabilityInitialized(
+      hmi_apis::FunctionID::eType requested_interface) OVERRIDE;
+
+  bool MatchesCCPUVersion(const std::string& ccpu_version) const OVERRIDE;
+
+  void OnSoftwareVersionReceived(const std::string& ccpu_version) OVERRIDE;
+
  protected:
   /**
    * @brief Loads capabilities from local file in case SDL was launched
@@ -284,6 +291,18 @@ class HMICapabilitiesImpl : public HMICapabilities {
   bool AllFieldsSaved(const Json::Value& root_node,
                       const std::string& interface_name,
                       const std::vector<std::string>& sections_to_check) const;
+
+  /**
+   * @brief Remove received interface from default initialized capabilities
+   * @param requested_interface interface which should be removed
+   */
+  void RemoveFromDefaultInitialized(
+      hmi_apis::FunctionID::eType requested_interface);
+
+  /**
+   * @brief Setting HMICooperating to true for respond all holding RAI requests
+   */
+  void CheckPendingDefaultInitialized() const;
 
   /**
    * @brief Gets the currently active language depending on interface

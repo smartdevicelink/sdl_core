@@ -56,6 +56,9 @@ void UIGetCapabilitiesResponse::Run() {
   const auto result_code = static_cast<hmi_apis::Common_Result::eType>(
       (*message_)[strings::params][hmi_response::code].asInt());
 
+  hmi_capabilities_.OnCapabilityInitialized(
+      hmi_apis::FunctionID::UI_GetCapabilities);
+
   if (hmi_apis::Common_Result::SUCCESS != result_code) {
     LOG4CXX_DEBUG(logger_,
                   "Request was not successful. Don't change HMI capabilities");

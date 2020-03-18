@@ -400,7 +400,9 @@ class ApplicationManagerImpl
   mobile_api::HMILevel::eType IsHmiLevelFullAllowed(ApplicationSharedPtr app);
 
   void ConnectToDevice(const std::string& device_mac) OVERRIDE;
-  void OnHMIStartedCooperation() OVERRIDE;
+  void OnHMIReady() OVERRIDE;
+
+  void RequestForInterfacesAvailability() OVERRIDE;
 
   void DisconnectCloudApp(ApplicationSharedPtr app) OVERRIDE;
 
@@ -934,6 +936,7 @@ class ApplicationManagerImpl
    */
   bool IsHMICooperating() const OVERRIDE;
 
+  void SetHMICooperating(const bool hmi_cooperating) OVERRIDE;
   /**
    * @brief Method used to send default app tts globalProperties
    * in case they were not provided from mobile side after defined time
