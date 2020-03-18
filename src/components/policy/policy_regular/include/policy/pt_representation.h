@@ -160,6 +160,13 @@ class PTRepresentation {
   virtual std::string GetLockScreenIconUrl() const = 0;
 
   /**
+   * @brief Records information about head unit system to PT
+   * @return bool Success of operation
+   */
+  virtual bool SetMetaInfo(const std::string& ccpu_version,
+                           const std::string& wers_country_code,
+                           const std::string& language) = 0;
+  /**
    * @brief Get allowed number of notifications
    * depending on application priority.
    * @param priority Priority of application

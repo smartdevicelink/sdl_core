@@ -458,6 +458,8 @@ class PolicyManagerImpl : public PolicyManager {
                      const std::string& wers_country_code,
                      const std::string& language) OVERRIDE;
 
+  std::string GetCCPUVersionFromPT() const OVERRIDE;
+
   /**
    * @brief Runs necessary operations, which is depends on external system
    * state, e.g. getting system-specific parameters which are need to be
