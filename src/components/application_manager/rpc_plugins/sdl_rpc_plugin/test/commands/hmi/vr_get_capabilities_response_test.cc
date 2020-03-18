@@ -51,6 +51,7 @@ using ::testing::NiceMock;
 namespace am = ::application_manager;
 namespace strings = am::strings;
 namespace hmi_response = am::hmi_response;
+namespace hmi_interface = ::application_manager::hmi_interface;
 using am::commands::CommandImpl;
 using sdl_rpc_plugin::commands::VRGetCapabilitiesResponse;
 
@@ -95,6 +96,26 @@ TEST_F(VRGetCapabilitiesResponseTest, RUN_SUCCESSS) {
       (*command_msg)[strings::msg_params][strings::vr_capabilities];
 
   EXPECT_CALL(mock_hmi_capabilities_, set_vr_capabilities(vr_capabilities_so));
+  EXPECT_CALL(mock_hmi_capabilities_,
+              SaveCachedCapabilitiesToFile(hmi_interface::vr, _, _));
+  ASSERT_TRUE(command->Init());
+
+  command->Run();
+}
+
+TEST_F(VRGetCapabilitiesResponseTest,
+       onTimeOut_Run_ResponseForInterface_ReceivedError) {
+  MessageSharedPtr command_msg = CreateCommandMsg();
+  (*command_msg)[strings::params][hmi_response::code] =
+      hmi_apis::Common_Result::ABORTED;
+
+  VRGetCapabilitiesResponsePtr command(
+      CreateCommand<VRGetCapabilitiesResponse>(command_msg));
+
+  EXPECT_CALL(
+      mock_hmi_capabilities_,
+      OnCapabilityInitialized(hmi_apis::FunctionID::VR_GetCapabilities));
+  ASSERT_TRUE(command->Init());
 
   command->Run();
 }

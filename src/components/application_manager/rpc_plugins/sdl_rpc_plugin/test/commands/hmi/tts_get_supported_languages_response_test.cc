@@ -57,6 +57,7 @@ using ::testing::Return;
 namespace am = ::application_manager;
 namespace strings = ::application_manager::strings;
 namespace hmi_response = am::hmi_response;
+namespace hmi_interface = ::application_manager::hmi_interface;
 using am::commands::CommandImpl;
 using application_manager::commands::ResponseFromHMI;
 using sdl_rpc_plugin::commands::TTSGetSupportedLanguagesResponse;
@@ -95,6 +96,9 @@ TEST_F(TTSGetSupportedLanguageResponseTest, RUN_SUCCESS) {
   EXPECT_CALL(mock_hmi_capabilities_,
               set_tts_supported_languages((
                   *command_msg)[strings::msg_params][hmi_response::languages]));
+  EXPECT_CALL(mock_hmi_capabilities_,
+              SaveCachedCapabilitiesToFile(hmi_interface::tts, _, _));
+  ASSERT_TRUE(command->Init());
 
   command->Run();
 }
@@ -115,11 +119,29 @@ TEST_F(TTSGetSupportedLanguageResponseTest, RUN_UNSUCCESS) {
   EXPECT_CALL(mock_hmi_capabilities_,
               set_tts_supported_languages(supported_languages))
       .Times(0);
+  ASSERT_TRUE(command->Init());
 
   command->Run();
 
   EXPECT_FALSE((*command_msg)[am::strings::msg_params].keyExists(
       am::hmi_response::languages));
+}
+
+TEST_F(TTSGetSupportedLanguageResponseTest,
+       onTimeOut_Run_ResponseForInterface_ReceivedError) {
+  MessageSharedPtr command_msg(CreateMessage(smart_objects::SmartType_Map));
+  (*command_msg)[strings::params][hmi_response::code] =
+      hmi_apis::Common_Result::ABORTED;
+
+  ResponseFromHMIPtr command(
+      CreateCommand<TTSGetSupportedLanguagesResponse>(command_msg));
+
+  EXPECT_CALL(
+      mock_hmi_capabilities_,
+      OnCapabilityInitialized(hmi_apis::FunctionID::TTS_GetSupportedLanguages));
+  ASSERT_TRUE(command->Init());
+
+  command->Run();
 }
 
 }  // namespace tts_get_supported_languages_response

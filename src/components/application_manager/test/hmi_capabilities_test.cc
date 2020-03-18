@@ -904,7 +904,7 @@ TEST_F(HMICapabilitiesTest,
 
   DeleteFileIfExists(kAppInfoDataFile);
 
-  std::shared_ptr<HMICapabilitiesForTesting> hmi_capabilities =
+  auto hmi_capabilities =
       std::make_shared<HMICapabilitiesForTesting>(mock_app_mngr);
   hmi_capabilities->Init(last_state_wrapper_);
 
@@ -945,7 +945,7 @@ TEST_F(HMICapabilitiesTest,
 
   DeleteFileIfExists(kAppInfoDataFile);
 
-  std::shared_ptr<HMICapabilitiesForTesting> hmi_capabilities =
+  auto hmi_capabilities =
       std::make_shared<HMICapabilitiesForTesting>(mock_app_mngr);
   hmi_capabilities->Init(last_state_wrapper_);
 
@@ -992,7 +992,7 @@ TEST_F(HMICapabilitiesTest,
 
   DeleteFileIfExists(kAppInfoDataFile);
 
-  std::shared_ptr<HMICapabilitiesForTesting> hmi_capabilities =
+  auto hmi_capabilities =
       std::make_shared<HMICapabilitiesForTesting>(mock_app_mngr);
   hmi_capabilities->Init(last_state_wrapper_);
 
@@ -1058,6 +1058,75 @@ TEST_F(HMICapabilitiesTest, SetUICooperating) {
 TEST_F(HMICapabilitiesTest, SetIviCooperating) {
   hmi_capabilities_test->set_is_ivi_cooperating(true);
   EXPECT_EQ(true, hmi_capabilities_test->is_ivi_cooperating());
+}
+
+TEST_F(
+    HMICapabilitiesTest,
+    UpdateCapabilitiesDependingOn_ccpuVersion_FromCacheForOld_RequestForNew) {
+  MockApplicationManager mock_app_mngr;
+  event_engine_test::MockEventDispatcher mock_dispatcher;
+  MockApplicationManagerSettings mock_application_manager_settings;
+  const std::string ccpu_version = "4.1.3.B_EB355B";
+  const std::string ccpu_version_new = "5.1.3.B_EB355B";
+  const std::string hmi_capabilities_invalid_file =
+      "hmi_capabilities_invalid_file.json";
+
+  EXPECT_CALL(mock_application_manager_settings, hmi_capabilities_file_name())
+      .WillOnce(ReturnRef(hmi_capabilities_invalid_file));
+  EXPECT_CALL(mock_app_mngr, event_dispatcher())
+      .WillOnce(ReturnRef(mock_dispatcher));
+  EXPECT_CALL(mock_app_mngr, get_settings())
+      .WillRepeatedly(ReturnRef(mock_application_manager_settings));
+  EXPECT_CALL(mock_application_manager_settings,
+              hmi_capabilities_cache_file_name())
+      .WillOnce(ReturnRef(file_cache_name_));
+
+  auto hmi_capabilities =
+      std::make_shared<HMICapabilitiesForTesting>(mock_app_mngr);
+
+  EXPECT_CALL(mock_app_mngr, SetHMICooperating(true));
+  EXPECT_CALL(mock_app_mngr, RequestForInterfacesAvailability()).Times(2);
+
+  hmi_capabilities->set_ccpu_version(ccpu_version);
+  hmi_capabilities->OnSoftwareVersionReceived(ccpu_version);
+
+  EXPECT_EQ(ccpu_version, hmi_capabilities->ccpu_version());
+
+  hmi_capabilities->OnSoftwareVersionReceived(ccpu_version_new);
+  EXPECT_EQ(ccpu_version_new, hmi_capabilities->ccpu_version());
+}
+
+TEST_F(HMICapabilitiesTest,
+       UpdateCapabilitiesForNew_ccpuVersion_DeleteCacheFile) {
+  MockApplicationManager mock_app_mngr;
+  event_engine_test::MockEventDispatcher mock_dispatcher;
+  MockApplicationManagerSettings mock_application_manager_settings;
+  const std::string ccpu_version = "4.1.3.B_EB355B";
+  const std::string ccpu_version_new = "5.1.3.B_EB355B";
+  const std::string hmi_capabilities_invalid_file =
+      "hmi_capabilities_invalid_file.json";
+
+  file_system::CreateFile(file_cache_name_);
+  EXPECT_TRUE(file_system::FileExists(file_cache_name_));
+
+  EXPECT_CALL(mock_application_manager_settings, hmi_capabilities_file_name())
+      .WillOnce(ReturnRef(hmi_capabilities_invalid_file));
+  EXPECT_CALL(mock_app_mngr, event_dispatcher())
+      .WillOnce(ReturnRef(mock_dispatcher));
+  EXPECT_CALL(mock_app_mngr, get_settings())
+      .WillRepeatedly(ReturnRef(mock_application_manager_settings));
+  EXPECT_CALL(mock_application_manager_settings,
+              hmi_capabilities_cache_file_name())
+      .WillOnce(ReturnRef(file_cache_name_));
+
+  auto hmi_capabilities =
+      std::make_shared<HMICapabilitiesForTesting>(mock_app_mngr);
+
+  hmi_capabilities->set_ccpu_version(ccpu_version);
+  hmi_capabilities->OnSoftwareVersionReceived(ccpu_version_new);
+  EXPECT_EQ(ccpu_version_new, hmi_capabilities->ccpu_version());
+
+  EXPECT_FALSE(file_system::FileExists(file_cache_name_));
 }
 
 }  // namespace application_manager_test

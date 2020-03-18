@@ -51,6 +51,7 @@ using ::testing::NiceMock;
 namespace am = ::application_manager;
 namespace strings = am::strings;
 namespace hmi_response = am::hmi_response;
+namespace hmi_interface = ::application_manager::hmi_interface;
 using am::commands::CommandImpl;
 using application_manager::commands::ResponseFromHMI;
 using sdl_rpc_plugin::commands::UIGetCapabilitiesResponse;
@@ -99,6 +100,7 @@ TEST_F(UIGetCapabilitiesResponseTest, RUN_SetDisplay_SUCCESSS) {
 
   EXPECT_CALL(mock_hmi_capabilities_,
               set_display_capabilities(display_capabilities_so));
+  ASSERT_TRUE(command->Init());
 
   command->Run();
 }
@@ -119,6 +121,7 @@ TEST_F(UIGetCapabilitiesResponseTest, SetSoftButton_SUCCESS) {
 
   EXPECT_CALL(mock_hmi_capabilities_,
               set_soft_button_capabilities(soft_button_capabilities_so));
+  ASSERT_TRUE(command->Init());
 
   command->Run();
 }
@@ -138,6 +141,7 @@ TEST_F(UIGetCapabilitiesResponseTest, SetHmiZone_SUCCESS) {
 
   EXPECT_CALL(mock_hmi_capabilities_,
               set_hmi_zone_capabilities(hmi_zone_capabilities_so));
+  ASSERT_TRUE(command->Init());
 
   command->Run();
 }
@@ -162,6 +166,7 @@ TEST_F(UIGetCapabilitiesResponseTest, SetAudioPassThru_SUCCESS) {
   EXPECT_CALL(
       mock_hmi_capabilities_,
       set_audio_pass_thru_capabilities(audio_pass_thru_capabilities_list_so));
+  ASSERT_TRUE(command->Init());
 
   command->Run();
 }
@@ -187,6 +192,7 @@ TEST_F(UIGetCapabilitiesResponseTest, SetAudioPassThruList_SUCCESS) {
   EXPECT_CALL(
       mock_hmi_capabilities_,
       set_audio_pass_thru_capabilities(audio_pass_thru_capabilities_list_so));
+  ASSERT_TRUE(command->Init());
 
   command->Run();
 }
@@ -206,6 +212,7 @@ TEST_F(UIGetCapabilitiesResponseTest, SetNavigation_SUCCESS) {
   EXPECT_CALL(mock_hmi_capabilities_,
               set_navigation_supported(
                   hmi_capabilities_so[strings::navigation].asBool()));
+  ASSERT_TRUE(command->Init());
 
   command->Run();
 }
@@ -225,6 +232,7 @@ TEST_F(UIGetCapabilitiesResponseTest, SetPhoneCall_SUCCESS) {
   EXPECT_CALL(mock_hmi_capabilities_,
               set_phone_call_supported(
                   hmi_capabilities_so[strings::phone_call].asBool()));
+  ASSERT_TRUE(command->Init());
 
   command->Run();
 }
@@ -244,6 +252,7 @@ TEST_F(UIGetCapabilitiesResponseTest, SetVideoStreaming_SUCCESS) {
   EXPECT_CALL(mock_hmi_capabilities_,
               set_video_streaming_supported(
                   hmi_capabilities_so[strings::video_streaming].asBool()));
+  ASSERT_TRUE(command->Init());
 
   command->Run();
 }
@@ -268,6 +277,7 @@ TEST_F(UIGetCapabilitiesResponseTest, SetNavigationCapability_SUCCESS) {
 
   EXPECT_CALL(mock_hmi_capabilities_,
               set_navigation_capability(navigation_capability_so));
+  ASSERT_TRUE(command->Init());
 
   command->Run();
 }
@@ -289,6 +299,7 @@ TEST_F(UIGetCapabilitiesResponseTest, SetPhonenCapability_SUCCESS) {
 
   EXPECT_CALL(mock_hmi_capabilities_,
               set_phone_capability(phone_capability_so));
+  ASSERT_TRUE(command->Init());
 
   command->Run();
 }
@@ -339,6 +350,7 @@ TEST_F(UIGetCapabilitiesResponseTest, SetVideoStreamingCapability_SUCCESS) {
 
   EXPECT_CALL(mock_hmi_capabilities_,
               set_video_streaming_capability(video_streaming_capability));
+  ASSERT_TRUE(command->Init());
 
   command->Run();
 }
@@ -359,6 +371,39 @@ TEST_F(UIGetCapabilitiesResponseTest, SetSystemDisplayCapabilities_SUCCESS) {
               set_system_display_capabilities(display_capability_so));
 
   ASSERT_TRUE(command->Init());
+  command->Run();
+}
+
+TEST_F(UIGetCapabilitiesResponseTest,
+       SaveCachedCapabilitiesToFileCall_SUCCESS) {
+  MessageSharedPtr command_msg = CreateCommandMsg();
+  (*command_msg)[strings::msg_params][strings::system_capabilities] =
+      smart_objects::SmartObject(smart_objects::SmartType_Map);
+
+  ResponseFromHMIPtr command(
+      CreateCommand<UIGetCapabilitiesResponse>(command_msg));
+
+  EXPECT_CALL(mock_hmi_capabilities_,
+              SaveCachedCapabilitiesToFile(hmi_interface::ui, _, _));
+
+  ASSERT_TRUE(command->Init());
+  command->Run();
+}
+
+TEST_F(UIGetCapabilitiesResponseTest,
+       onTimeOut_Run_ResponseForInterface_ReceivedError) {
+  MessageSharedPtr command_msg = CreateCommandMsg();
+  (*command_msg)[strings::params][hmi_response::code] =
+      hmi_apis::Common_Result::ABORTED;
+
+  ResponseFromHMIPtr command(
+      CreateCommand<UIGetCapabilitiesResponse>(command_msg));
+
+  EXPECT_CALL(
+      mock_hmi_capabilities_,
+      OnCapabilityInitialized(hmi_apis::FunctionID::UI_GetCapabilities));
+  ASSERT_TRUE(command->Init());
+
   command->Run();
 }
 

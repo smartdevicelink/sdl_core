@@ -166,6 +166,24 @@ TEST_F(RCGetCapabilitiesResponseTest, RUN_SUCCESSS) {
 
   EXPECT_CALL(mock_hmi_capabilities_, set_rc_capability(rc_capability_so));
   EXPECT_CALL(mock_hmi_capabilities_, set_rc_supported(true));
+  ASSERT_TRUE(command->Init());
+
+  command->Run();
+}
+
+TEST_F(RCGetCapabilitiesResponseTest,
+       onTimeOut_Run_ResponseForInterface_ReceivedError) {
+  MessageSharedPtr command_msg = CreateCommandMsg();
+  (*command_msg)[strings::params][hmi_response::code] =
+      hmi_apis::Common_Result::ABORTED;
+
+  RCGetCapabilitiesResponsePtr command(
+      CreateCommand<RCGetCapabilitiesResponse>(command_msg));
+
+  EXPECT_CALL(
+      mock_hmi_capabilities_,
+      OnCapabilityInitialized(hmi_apis::FunctionID::RC_GetCapabilities));
+  ASSERT_TRUE(command->Init());
 
   command->Run();
 }

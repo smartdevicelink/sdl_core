@@ -84,6 +84,7 @@ TEST_F(UIGetLanguageResponseTest, Run_LanguageSet_SUCCESS) {
   EXPECT_CALL(app_mngr_, event_dispatcher())
       .WillOnce(ReturnRef(mock_event_dispatcher));
   EXPECT_CALL(mock_event_dispatcher, raise_event(_));
+  ASSERT_TRUE(command->Init());
 
   command->Run();
 }
@@ -104,6 +105,23 @@ TEST_F(UIGetLanguageResponseTest, Run_LanguageNotSet_SUCCESS) {
   EXPECT_CALL(app_mngr_, event_dispatcher())
       .WillOnce(ReturnRef(mock_event_dispatcher));
   EXPECT_CALL(mock_event_dispatcher, raise_event(_));
+  ASSERT_TRUE(command->Init());
+
+  command->Run();
+}
+
+TEST_F(UIGetLanguageResponseTest,
+       onTimeOut_Run_ResponseForInterface_ReceivedError) {
+  MessageSharedPtr msg = CreateMessage();
+  (*msg)[strings::params][hmi_response::code] =
+      hmi_apis::Common_Result::ABORTED;
+
+  std::shared_ptr<UIGetLanguageResponse> command(
+      CreateCommand<UIGetLanguageResponse>(msg));
+
+  EXPECT_CALL(mock_hmi_capabilities_,
+              OnCapabilityInitialized(hmi_apis::FunctionID::UI_GetLanguage));
+  ASSERT_TRUE(command->Init());
 
   command->Run();
 }

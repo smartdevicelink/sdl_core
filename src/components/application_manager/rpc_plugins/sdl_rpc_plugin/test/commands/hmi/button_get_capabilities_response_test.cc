@@ -86,6 +86,7 @@ TEST_F(ButtonGetCapabilitiesResponseTest, Run_CodeSuccess_SUCCESS) {
   EXPECT_CALL(mock_hmi_capabilities_, set_button_capabilities(capabilities_));
   EXPECT_CALL(mock_hmi_capabilities_,
               set_preset_bank_capabilities(preset_bank_capabilities_));
+  ASSERT_TRUE(command->Init());
 
   command->Run();
 }
@@ -102,6 +103,23 @@ TEST_F(ButtonGetCapabilitiesResponseTest, Run_CodeAborted_SUCCESS) {
   EXPECT_CALL(mock_hmi_capabilities_,
               set_preset_bank_capabilities(preset_bank_capabilities_))
       .Times(0);
+  ASSERT_TRUE(command->Init());
+
+  command->Run();
+}
+
+TEST_F(ButtonGetCapabilitiesResponseTest,
+       onTimeOut_Run_ResponseForInterface_ReceivedError) {
+  MessageSharedPtr msg = CreateMsgParams();
+  (*msg)[strings::params][hmi_response::code] =
+      hmi_apis::Common_Result::ABORTED;
+
+  ResponsePtr command(CreateCommand<ButtonGetCapabilitiesResponse>(msg));
+
+  EXPECT_CALL(
+      mock_hmi_capabilities_,
+      OnCapabilityInitialized(hmi_apis::FunctionID::Buttons_GetCapabilities));
+  ASSERT_TRUE(command->Init());
 
   command->Run();
 }

@@ -79,6 +79,7 @@ TEST_F(TTSGetCapabilitiesResponseTest, Run_BothExist_SUCCESS) {
 
   std::shared_ptr<TTSGetCapabilitiesResponse> command(
       CreateCommand<TTSGetCapabilitiesResponse>(msg));
+  ASSERT_TRUE(command->Init());
 
   command->Run();
 }
@@ -96,6 +97,7 @@ TEST_F(TTSGetCapabilitiesResponseTest, Run_OnlySpeech_SUCCESS) {
 
   std::shared_ptr<TTSGetCapabilitiesResponse> command(
       CreateCommand<TTSGetCapabilitiesResponse>(msg));
+  ASSERT_TRUE(command->Init());
 
   command->Run();
 }
@@ -114,6 +116,7 @@ TEST_F(TTSGetCapabilitiesResponseTest, Run_OnlyPrerecorded_SUCCESS) {
 
   std::shared_ptr<TTSGetCapabilitiesResponse> command(
       CreateCommand<TTSGetCapabilitiesResponse>(msg));
+  ASSERT_TRUE(command->Init());
 
   command->Run();
 }
@@ -129,6 +132,24 @@ TEST_F(TTSGetCapabilitiesResponseTest, Run_Nothing_SUCCESS) {
 
   std::shared_ptr<TTSGetCapabilitiesResponse> command(
       CreateCommand<TTSGetCapabilitiesResponse>(msg));
+  ASSERT_TRUE(command->Init());
+
+  command->Run();
+}
+
+TEST_F(TTSGetCapabilitiesResponseTest,
+       onTimeOut_Run_ResponseForInterface_ReceivedError) {
+  MessageSharedPtr msg = CreateMessage();
+  (*msg)[strings::params][hmi_response::code] =
+      hmi_apis::Common_Result::ABORTED;
+
+  std::shared_ptr<TTSGetCapabilitiesResponse> command(
+      CreateCommand<TTSGetCapabilitiesResponse>(msg));
+
+  EXPECT_CALL(
+      mock_hmi_capabilities_,
+      OnCapabilityInitialized(hmi_apis::FunctionID::TTS_GetCapabilities));
+  ASSERT_TRUE(command->Init());
 
   command->Run();
 }
