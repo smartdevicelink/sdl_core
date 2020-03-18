@@ -552,6 +552,12 @@ class CacheManager : public CacheManagerInterface {
                    const std::string& language);
 
   /**
+   * @brief Get information about last ccpu_version from PT
+   * @return ccpu_version from PT
+   */
+  std::string GetCCPUVersionFromPT() const;
+
+  /**
    * @brief Checks, if specific head unit is present in PT
    * @return boot Suceess, if present, otherwise - false
    */

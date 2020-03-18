@@ -382,6 +382,8 @@ class PolicyHandler : public PolicyHandlerInterface,
                        const std::string& wers_country_code,
                        const std::string& language) OVERRIDE;
 
+  std::string GetCCPUVersionFromPT() const OVERRIDE;
+
   /**
    * @brief Send request to HMI to get update on system parameters
    */

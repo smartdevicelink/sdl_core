@@ -56,6 +56,9 @@ const std::string kCreateSchema =
     "  `count_of_sync_reboots` INTEGER "
     "); "
     "CREATE TABLE IF NOT EXISTS `module_meta`( "
+    "  `ccpu_version` VARCHAR(45), "
+    "  `language` VARCHAR(45), "
+    "  `wers_country_code` VARCHAR(45), "
     "  `pt_exchanged_at_odometer_x` INTEGER NOT NULL DEFAULT 0, "
     "  `pt_exchanged_x_days_after_epoch` INTEGER NOT NULL DEFAULT 0, "
     "  `ignition_cycles_since_last_exchange` INTEGER NOT NULL DEFAULT 0, "
@@ -1047,5 +1050,9 @@ const std::string kSaveModuleMeta =
     "`ignition_cycles_since_last_exchange` = ? ";
 
 const std::string kSelectModuleMeta = "SELECT* FROM `module_meta`";
+
+const std::string kUpdateMetaParams =
+    "UPDATE `module_meta` SET "
+    "`ccpu_version` = ?, `language` = ?, `wers_country_code` = ? ";
 }  // namespace sql_pt
 }  // namespace policy

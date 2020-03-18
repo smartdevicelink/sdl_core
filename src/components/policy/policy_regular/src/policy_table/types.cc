@@ -1269,6 +1269,9 @@ ModuleMeta::~ModuleMeta() {}
 
 ModuleMeta::ModuleMeta(const Json::Value* value__)
     : CompositeType(InitHelper(value__, &Json::Value::isObject))
+    , ccpu_version(impl::ValueMember(value__, "ccpu_version"))
+    , language(impl::ValueMember(value__, "language"))
+    , wers_country_code(impl::ValueMember(value__, "wers_country_code"))
     , pt_exchanged_at_odometer_x(
           impl::ValueMember(value__, "pt_exchanged_at_odometer_x"))
     , pt_exchanged_x_days_after_epoch(
@@ -1278,6 +1281,9 @@ ModuleMeta::ModuleMeta(const Json::Value* value__)
 
 Json::Value ModuleMeta::ToJsonValue() const {
   Json::Value result__(Json::objectValue);
+  impl::WriteJsonField("ccpu_version", ccpu_version, &result__);
+  impl::WriteJsonField("language", language, &result__);
+  impl::WriteJsonField("wers_country_code", wers_country_code, &result__);
   impl::WriteJsonField(
       "pt_exchanged_at_odometer_x", pt_exchanged_at_odometer_x, &result__);
   impl::WriteJsonField("pt_exchanged_x_days_after_epoch",
@@ -1292,6 +1298,15 @@ Json::Value ModuleMeta::ToJsonValue() const {
 bool ModuleMeta::is_valid() const {
   if (struct_empty()) {
     return initialization_state__ == kInitialized && Validate();
+  }
+  if (!ccpu_version.is_valid()) {
+    return false;
+  }
+  if (!language.is_valid()) {
+    return false;
+  }
+  if (!wers_country_code.is_valid()) {
+    return false;
   }
   if (!pt_exchanged_at_odometer_x.is_valid()) {
     return false;
@@ -1310,6 +1325,16 @@ bool ModuleMeta::is_initialized() const {
 }
 
 bool ModuleMeta::struct_empty() const {
+  if (ccpu_version.is_initialized()) {
+    return false;
+  }
+  if (language.is_initialized()) {
+    return false;
+  }
+
+  if (wers_country_code.is_initialized()) {
+    return false;
+  }
   if (pt_exchanged_at_odometer_x.is_initialized()) {
     return false;
   }
@@ -1327,6 +1352,16 @@ void ModuleMeta::ReportErrors(rpc::ValidationReport* report__) const {
   if (struct_empty()) {
     rpc::CompositeType::ReportErrors(report__);
   }
+  if (!ccpu_version.is_valid()) {
+    ccpu_version.ReportErrors(&report__->ReportSubobject("ccpu_version"));
+  }
+  if (!language.is_valid()) {
+    language.ReportErrors(&report__->ReportSubobject("language"));
+  }
+  if (!wers_country_code.is_valid()) {
+    wers_country_code.ReportErrors(
+        &report__->ReportSubobject("wers_country_code"));
+  }
   if (!pt_exchanged_at_odometer_x.is_valid()) {
     pt_exchanged_at_odometer_x.ReportErrors(
         &report__->ReportSubobject("pt_exchanged_at_odometer_x"));
@@ -1343,6 +1378,9 @@ void ModuleMeta::ReportErrors(rpc::ValidationReport* report__) const {
 
 void ModuleMeta::SetPolicyTableType(PolicyTableType pt_type) {
   CompositeType::SetPolicyTableType(pt_type);
+  ccpu_version.SetPolicyTableType(pt_type);
+  language.SetPolicyTableType(pt_type);
+  wers_country_code.SetPolicyTableType(pt_type);
   pt_exchanged_at_odometer_x.SetPolicyTableType(pt_type);
   pt_exchanged_x_days_after_epoch.SetPolicyTableType(pt_type);
   ignition_cycles_since_last_exchange.SetPolicyTableType(pt_type);

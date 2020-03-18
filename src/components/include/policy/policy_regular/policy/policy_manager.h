@@ -418,6 +418,12 @@ class PolicyManager : public usage_statistics::StatisticsManager,
                              const std::string& language) = 0;
 
   /**
+   * @brief Get information about last ccpu_version from PT
+   * @return ccpu_version from PT
+   */
+  virtual std::string GetCCPUVersionFromPT() const = 0;
+
+  /**
    * @brief Send OnPermissionsUpdated for choosen application
    * @param device_id device identifier
    * @param application_id Unique application id

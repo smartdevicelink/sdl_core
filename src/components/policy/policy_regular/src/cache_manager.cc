@@ -1344,6 +1344,11 @@ void CacheManager::PersistData() {
         backup_->SaveApplicationCustomData(
             app_id, is_revoked, is_default_policy, is_predata_policy);
         is_revoked = false;
+
+        backup_->SetMetaInfo(
+            *(*copy_pt.policy_table.module_meta).ccpu_version,
+            *(*copy_pt.policy_table.module_meta).wers_country_code,
+            *(*copy_pt.policy_table.module_meta).language);
       }
 
       // In case of extended policy the meta info should be backuped as well.
@@ -1480,13 +1485,23 @@ bool CacheManager::SetMetaInfo(const std::string& ccpu_version,
                                const std::string& language) {
   CACHE_MANAGER_CHECK(false);
   sync_primitives::AutoLock auto_lock(cache_lock_);
-
+  rpc::Optional<policy_table::ModuleMeta>& module_meta =
+      pt_->policy_table.module_meta;
+  *(module_meta->ccpu_version) = ccpu_version;
+  *(module_meta->wers_country_code) = wers_country_code;
+  *(module_meta->language) = language;
   // We have to set preloaded flag as false in policy table on any response
   // of GetSystemInfo (SDLAQ-CRS-2365)
-  *pt_->policy_table.module_config.preloaded_pt = false;
-
+  *(pt_->policy_table.module_config.preloaded_pt) = false;
   Backup();
   return true;
+}
+
+std::string CacheManager::GetCCPUVersionFromPT() const {
+  LOG4CXX_AUTO_TRACE(logger_);
+  rpc::Optional<policy_table::ModuleMeta>& module_meta =
+      pt_->policy_table.module_meta;
+  return *(module_meta->ccpu_version);
 }
 
 bool CacheManager::IsMetaInfoPresent() const {
