@@ -403,7 +403,7 @@ void PolicyHandler::OnPTInited() {
 
 void PolicyHandler::StopRetrySequence() {
   LOG4CXX_AUTO_TRACE(logger_);
-
+  POLICY_LIB_CHECK_VOID();
   policy_manager_->StopRetrySequence();
 }
 
@@ -1662,6 +1662,7 @@ DeviceConsent PolicyHandler::GetUserConsentForDevice(
 }
 
 Json::Value PolicyHandler::GetPolicyTableData() const {
+  POLICY_LIB_CHECK(Json::Value());
   return policy_manager_->GetPolicyTableData();
 }
 
