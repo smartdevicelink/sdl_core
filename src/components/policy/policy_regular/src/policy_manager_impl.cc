@@ -926,9 +926,6 @@ void PolicyManagerImpl::SetUserConsentForDevice(const std::string& device_id,
   DeviceConsent current_consent = GetUserConsentForDevice(device_id);
   bool is_current_device_allowed =
       DeviceConsent::kDeviceAllowed == current_consent ? true : false;
-  if (is_allowed) {
-    StartPTExchange();
-  }
   if (DeviceConsent::kDeviceHasNoConsent != current_consent &&
       is_current_device_allowed == is_allowed) {
     const std::string consent = is_allowed ? "allowed" : "disallowed";

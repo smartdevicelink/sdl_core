@@ -55,6 +55,7 @@ void OnReadyNotification::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
 
   application_manager_.OnHMIStartedCooperation();
+  policy_handler_.TriggerPTUIfNeeded();
   event_engine::Event event(hmi_apis::FunctionID::BasicCommunication_OnReady);
   event.set_smart_object(*message_);
   event.raise(application_manager_.event_dispatcher());

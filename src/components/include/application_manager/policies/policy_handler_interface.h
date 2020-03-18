@@ -381,6 +381,11 @@ class PolicyHandlerInterface : public VehicleDataItemProvider {
 
   virtual void OnPTExchangeNeeded() = 0;
 
+  /**
+   * @brief Used to trigger a PTU if at least one of the triggers is set
+   */
+  virtual void TriggerPTUIfNeeded() = 0;
+
   virtual void GetAvailableApps(std::queue<std::string>& apps) = 0;
 
   /**

@@ -550,6 +550,8 @@ class PolicyHandler : public PolicyHandlerInterface,
 
   virtual void OnPTExchangeNeeded() OVERRIDE;
 
+  virtual void TriggerPTUIfNeeded() OVERRIDE;
+
   virtual void GetAvailableApps(std::queue<std::string>& apps) OVERRIDE;
 
   /**
