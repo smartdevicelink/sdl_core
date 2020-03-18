@@ -83,6 +83,9 @@ class TTSIsReadyRequest : public app_mngr::commands::RequestToHMI,
   void RequestCapabilities();
 
  private:
+  std::vector<hmi_apis::FunctionID::eType>
+      requests_required_for_TTS_capabilities_;
+
   DISALLOW_COPY_AND_ASSIGN(TTSIsReadyRequest);
 };
 

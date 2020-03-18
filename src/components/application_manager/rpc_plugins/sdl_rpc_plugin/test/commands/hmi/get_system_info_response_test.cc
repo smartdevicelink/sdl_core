@@ -126,8 +126,24 @@ TEST_F(GetSystemInfoResponseTest, GetSystemInfo_UNSUCCESS) {
                   static_cast<hmi_apis::Common_Language::eType>(lang_code)))
       .Times(0);
 
+  EXPECT_CALL(mock_hmi_capabilities_, UpdateCachedCapabilities());
   EXPECT_CALL(mock_policy_handler_, OnGetSystemInfo("", "", ""));
 
+  command->Run();
+}
+
+TEST_F(GetSystemInfoResponseTest, GetSystemInfo_UpdateCapabilities_Called) {
+  MessageSharedPtr command_msg = CreateCommandMsg();
+  (*command_msg)[strings::params][hmi_response::code] =
+      hmi_apis::Common_Result::SUCCESS;
+  (*command_msg)[strings::msg_params][hmi_response::capabilities] =
+      (capabilities_);
+
+  ResponseFromHMIPtr command(CreateCommand<GetSystemInfoResponse>(command_msg));
+
+  EXPECT_CALL(mock_hmi_capabilities_, OnSoftwareVersionReceived(ccpu_version));
+
+  ASSERT_TRUE(command->Init());
   command->Run();
 }
 

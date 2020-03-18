@@ -205,7 +205,8 @@ class MockApplicationManager : public application_manager::ApplicationManager {
   MOCK_METHOD1(BeginAudioPassThru, bool(uint32_t app_id));
   MOCK_METHOD1(EndAudioPassThru, bool(uint32_t app_id));
   MOCK_METHOD1(ConnectToDevice, void(const std::string& device_mac));
-  MOCK_METHOD0(OnHMIStartedCooperation, void());
+  MOCK_METHOD0(OnHMIReady, void());
+  MOCK_METHOD0(RequestForInterfacesAvailability, void());
   MOCK_METHOD1(DisconnectCloudApp,
                void(application_manager::ApplicationSharedPtr app));
   MOCK_METHOD0(RefreshCloudAppInformation, void());
@@ -215,6 +216,7 @@ class MockApplicationManager : public application_manager::ApplicationManager {
   MOCK_METHOD1(PolicyIDByIconUrl, std::string(const std::string url));
   MOCK_METHOD1(SetIconFileFromSystemRequest, void(const std::string policy_id));
   MOCK_CONST_METHOD0(IsHMICooperating, bool());
+  MOCK_METHOD1(SetHMICooperating, void(const bool hmi_cooperating));
   MOCK_METHOD2(IviInfoUpdated,
                void(const std::string& vehicle_info, int value));
   MOCK_METHOD1(RegisterApplication,

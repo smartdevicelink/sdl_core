@@ -146,7 +146,7 @@ class UIIsReadyRequestTest
         hmi_apis::FunctionID::UI_GetLanguage,
         hmi_apis::FunctionID::UI_GetSupportedLanguages,
         hmi_apis::FunctionID::UI_GetCapabilities};
-    EXPECT_CALL(mock_hmi_capabilities_, GetDefaultInitializedCapabilities())
+    EXPECT_CALL(mock_hmi_capabilities_, GetRequestsRequiredForCapabilities())
         .WillOnce(Return(interfaces_to_update));
   }
 
@@ -204,7 +204,7 @@ TEST_F(UIIsReadyRequestTest, OnTimeout_SUCCESS_CacheIsAbsent) {
       hmi_apis::FunctionID::UI_GetLanguage,
       hmi_apis::FunctionID::UI_GetSupportedLanguages,
       hmi_apis::FunctionID::UI_GetCapabilities};
-  EXPECT_CALL(mock_hmi_capabilities_, GetDefaultInitializedCapabilities())
+  EXPECT_CALL(mock_hmi_capabilities_, GetRequestsRequiredForCapabilities())
       .WillOnce(Return(interfaces_to_update));
   ExpectSendMessagesToHMI();
   command_->onTimeOut();
