@@ -1647,6 +1647,11 @@ void PolicyManagerImpl::ResetTimeout() {
   }
 }
 
+void PolicyManagerImpl::TriggerPTUIfNeeded() {
+  LOG4CXX_AUTO_TRACE(logger_);
+  StartPTExchange();
+}
+
 void PolicyManagerImpl::OnPTUIterationTimeout() {
   LOG4CXX_DEBUG(logger_, "Start new retry sequence");
 

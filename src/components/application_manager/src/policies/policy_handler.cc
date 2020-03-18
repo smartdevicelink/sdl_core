@@ -582,9 +582,9 @@ void PolicyHandler::OnPTExchangeNeeded() {
   policy_manager_->ForcePTExchange();
 }
 
-void TriggerPTUIfNeeded() {
+void PolicyHandler::TriggerPTUIfNeeded() {
   LOG4CXX_AUTO_TRACE(logger_);
-  policy_manager_->StartPTExchange();
+  policy_manager_->TriggerPTUIfNeeded();
 }
 
 void PolicyHandler::GetAvailableApps(std::queue<std::string>& apps) {

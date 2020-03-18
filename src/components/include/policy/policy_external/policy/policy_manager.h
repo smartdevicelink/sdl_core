@@ -851,6 +851,11 @@ class PolicyManager : public usage_statistics::StatisticsManager,
    */
   virtual void ResetTimeout() = 0;
 
+  /**
+   * @brief Used to trigger a PTU if at least one of the triggers is set
+   */
+  virtual void TriggerPTUIfNeeded() = 0;
+
  protected:
   /**
    * @brief Checks is PT exceeded IgnitionCycles
