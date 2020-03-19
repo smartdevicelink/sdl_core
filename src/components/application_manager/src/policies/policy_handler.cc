@@ -2560,6 +2560,7 @@ policy::PolicyHandler::GetVehicleDataItems() const {
 
 std::vector<rpc::policy_table_interface_base::VehicleDataItem>
 policy::PolicyHandler::GetRemovedVehicleDataItems() const {
+  POLICY_LIB_CHECK(std::vector<policy_table::VehicleDataItem>());
   return policy_manager_->GetRemovedVehicleDataItems();
 }
 
