@@ -63,6 +63,7 @@ void SDLPolicyUpdateResponse::Run() {
                                      hmi_apis::Common_Result::SUCCESS,
                                      hmi_apis::Common_Result::WARNINGS)) {
     LOG4CXX_ERROR(logger_, "Error is returned. PTU won't be started.");
+    application_manager_.GetPolicyHandler().ResetRetrySequence();
     application_manager_.GetPolicyHandler().OnAppsSearchCompleted(false);
     return;
   }

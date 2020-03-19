@@ -371,6 +371,8 @@ class PolicyHandlerInterface : public VehicleDataItemProvider {
    */
   virtual void StopRetrySequence() = 0;
 
+  virtual void ResetRetrySequence() = 0;
+
 #ifdef EXTERNAL_PROPRIETARY_MODE
   virtual void OnCertificateDecrypted(bool is_succeeded) = 0;
 #endif  // EXTERNAL_PROPRIETARY_MODE

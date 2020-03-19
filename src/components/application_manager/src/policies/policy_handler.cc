@@ -407,6 +407,13 @@ void PolicyHandler::StopRetrySequence() {
   policy_manager_->StopRetrySequence();
 }
 
+void PolicyHandler::ResetRetrySequence() {
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  policy_manager_->ResetRetrySequence(
+      ResetRetryCountType::kResetWithStatusUpdate);
+}
+
 bool PolicyHandler::ResetPolicyTable() {
   LOG4CXX_TRACE(logger_, "Reset policy table.");
   POLICY_LIB_CHECK(false);

@@ -692,7 +692,11 @@ void PolicyManagerImpl::OnAppsSearchCompleted(const bool trigger_ptu) {
   update_status_manager_.OnAppsSearchCompleted();
 
   trigger_ptu_ = trigger_ptu;
-
+  LOG4CXX_DEBUG(logger_, "trigger_ptu_ " << trigger_ptu_);
+  LOG4CXX_DEBUG(
+      logger_,
+      "is update required: " << update_status_manager_.IsUpdateRequired());
+  LOG4CXX_DEBUG(logger_, "ptu_requested_ " << ptu_requested_);
   if (update_status_manager_.IsUpdateRequired() && !ptu_requested_ &&
       HasApplicationForPTU()) {
     StartPTExchange();
