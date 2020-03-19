@@ -1267,7 +1267,7 @@ bool HMICapabilitiesImpl::LoadCapabilitiesFromFile() {
       // ilytvynenko ToDo: change to UI_GetCapabilities
       auto ui_pcm_stream_capabilities_node =
           json_ui_getter.GetJsonMember(strings::pcm_stream_capabilities,
-                                       hmi_apis::FunctionID::INVALID_ENUM,
+                                       hmi_apis::FunctionID::UI_GetCapabilities,
                                        default_initialized_capabilities_);
       if (!ui_pcm_stream_capabilities_node.isNull()) {
         smart_objects::SmartObject pcm_capabilities_so =
