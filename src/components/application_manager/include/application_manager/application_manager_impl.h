@@ -834,11 +834,11 @@ class ApplicationManagerImpl
    */
   void EndNaviServices(uint32_t app_id) OVERRIDE;
 
-  /**
-   * @brief ForbidStreaming forbid the stream over the certain application.
-   * @param app_id the application's id which should stop streaming.
-   */
+  DEPRECATED
   void ForbidStreaming(uint32_t app_id) OVERRIDE;
+
+  void ForbidStreaming(uint32_t app_id,
+                       protocol_handler::ServiceType service_type) OVERRIDE;
 
   /**
    * @brief Called when application completes streaming configuration

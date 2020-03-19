@@ -313,9 +313,11 @@ void MediaManagerImpl::OnMessageReceived(
   }
 
   if (!application_manager_.CanAppStream(streaming_app_id, service_type)) {
-    application_manager_.ForbidStreaming(streaming_app_id);
+    application_manager_.ForbidStreaming(streaming_app_id, service_type);
     LOG4CXX_ERROR(logger_,
-                  "The application trying to stream when it should not.");
+                  "The application is trying to stream when it should not."
+                  " service type: "
+                      << service_type);
     return;
   }
 
