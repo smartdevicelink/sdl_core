@@ -371,8 +371,6 @@ class PolicyHandlerInterface : public VehicleDataItemProvider {
    */
   virtual void StopRetrySequence() = 0;
 
-  virtual void ResetRetrySequence() = 0;
-
 #ifdef EXTERNAL_PROPRIETARY_MODE
   virtual void OnCertificateDecrypted(bool is_succeeded) = 0;
 #endif  // EXTERNAL_PROPRIETARY_MODE
@@ -382,11 +380,6 @@ class PolicyHandlerInterface : public VehicleDataItemProvider {
                                       const bool is_allowed) = 0;
 
   virtual void OnPTExchangeNeeded() = 0;
-
-  /**
-   * @brief Used to trigger a PTU if at least one of the triggers is set
-   */
-  virtual void TriggerPTUIfNeeded() = 0;
 
   virtual void GetAvailableApps(std::queue<std::string>& apps) = 0;
 

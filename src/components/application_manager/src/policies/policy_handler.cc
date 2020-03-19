@@ -407,13 +407,6 @@ void PolicyHandler::StopRetrySequence() {
   policy_manager_->StopRetrySequence();
 }
 
-void PolicyHandler::ResetRetrySequence() {
-  LOG4CXX_AUTO_TRACE(logger_);
-
-  policy_manager_->ResetRetrySequence(
-      ResetRetryCountType::kResetWithStatusUpdate);
-}
-
 bool PolicyHandler::ResetPolicyTable() {
   LOG4CXX_TRACE(logger_, "Reset policy table.");
   POLICY_LIB_CHECK(false);
@@ -587,11 +580,6 @@ void PolicyHandler::OnPTExchangeNeeded() {
   LOG4CXX_AUTO_TRACE(logger_);
   POLICY_LIB_CHECK_VOID();
   policy_manager_->ForcePTExchange();
-}
-
-void PolicyHandler::TriggerPTUIfNeeded() {
-  LOG4CXX_AUTO_TRACE(logger_);
-  policy_manager_->TriggerPTUIfNeeded();
 }
 
 void PolicyHandler::GetAvailableApps(std::queue<std::string>& apps) {

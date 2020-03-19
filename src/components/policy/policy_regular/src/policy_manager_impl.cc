@@ -692,11 +692,7 @@ void PolicyManagerImpl::OnAppsSearchCompleted(const bool trigger_ptu) {
   update_status_manager_.OnAppsSearchCompleted();
 
   trigger_ptu_ = trigger_ptu;
-  LOG4CXX_DEBUG(logger_, "trigger_ptu_ " << trigger_ptu_);
-  LOG4CXX_DEBUG(
-      logger_,
-      "is update required: " << update_status_manager_.IsUpdateRequired());
-  LOG4CXX_DEBUG(logger_, "ptu_requested_ " << ptu_requested_);
+
   if (update_status_manager_.IsUpdateRequired() && !ptu_requested_ &&
       HasApplicationForPTU()) {
     StartPTExchange();
@@ -930,6 +926,9 @@ void PolicyManagerImpl::SetUserConsentForDevice(const std::string& device_id,
   DeviceConsent current_consent = GetUserConsentForDevice(device_id);
   bool is_current_device_allowed =
       DeviceConsent::kDeviceAllowed == current_consent ? true : false;
+  if (is_allowed) {
+    StartPTExchange();
+  }
   if (DeviceConsent::kDeviceHasNoConsent != current_consent &&
       is_current_device_allowed == is_allowed) {
     const std::string consent = is_allowed ? "allowed" : "disallowed";
@@ -1649,11 +1648,6 @@ void PolicyManagerImpl::ResetTimeout() {
     }
     timer_retry_sequence_.Start(cache_->TimeoutResponse(), timer::kSingleShot);
   }
-}
-
-void PolicyManagerImpl::TriggerPTUIfNeeded() {
-  LOG4CXX_AUTO_TRACE(logger_);
-  StartPTExchange();
 }
 
 void PolicyManagerImpl::OnPTUIterationTimeout() {

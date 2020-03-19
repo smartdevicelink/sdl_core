@@ -549,8 +549,6 @@ TEST_F(HMICommandsNotificationsTest, OnReadyNotificationEventDispatcher) {
   EXPECT_CALL(app_mngr_, event_dispatcher());
   EXPECT_CALL(mock_event_dispatcher_, raise_event(_))
       .WillOnce(GetEventId(&event_id));
-  EXPECT_CALL(app_mngr_, GetPolicyHandler())
-      .WillOnce(ReturnRef(mock_policy_handler_));
   command->Run();
   EXPECT_EQ(hmi_apis::FunctionID::BasicCommunication_OnReady, event_id);
 }

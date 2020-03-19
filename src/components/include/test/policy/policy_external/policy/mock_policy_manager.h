@@ -268,7 +268,6 @@ class MockPolicyManager : public PolicyManager {
   MOCK_METHOD0(ExceededIgnitionCycles, bool());
   MOCK_METHOD0(ExceededDays, bool());
   MOCK_METHOD0(StartPTExchange, void());
-  MOCK_METHOD0(TriggerPTUIfNeeded, void());
   MOCK_METHOD1(Increment, void(usage_statistics::GlobalCounterId type));
   MOCK_METHOD2(Increment,
                void(const std::string& app_id,

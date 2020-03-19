@@ -864,8 +864,6 @@ class PolicyManagerImpl : public PolicyManager {
 
   void ResetTimeout() OVERRIDE;
 
-  void TriggerPTUIfNeeded() OVERRIDE;
-
  protected:
 #ifdef USE_HMI_PTU_DECRYPTION
   /**

@@ -550,8 +550,6 @@ class PolicyHandler : public PolicyHandlerInterface,
 
   virtual void OnPTExchangeNeeded() OVERRIDE;
 
-  virtual void TriggerPTUIfNeeded() OVERRIDE;
-
   virtual void GetAvailableApps(std::queue<std::string>& apps) OVERRIDE;
 
   /**
@@ -713,7 +711,6 @@ class PolicyHandler : public PolicyHandlerInterface,
   virtual void OnPTInited() OVERRIDE;
 
   void StopRetrySequence() OVERRIDE;
-  void ResetRetrySequence() OVERRIDE;
 
   /**
    * @brief OnDeviceSwitching Notifies policy manager on device switch event so

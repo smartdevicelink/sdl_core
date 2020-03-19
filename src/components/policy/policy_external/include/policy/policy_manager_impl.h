@@ -1127,8 +1127,6 @@ class PolicyManagerImpl : public PolicyManager {
 
   void ResetTimeout() OVERRIDE;
 
-  void TriggerPTUIfNeeded() OVERRIDE;
-
   /**
    * @brief Notify application about its permissions changes by preparing and
    * sending OnPermissionsChanged notification
