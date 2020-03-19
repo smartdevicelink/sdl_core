@@ -3185,6 +3185,36 @@ TEST_F(PolicyHandlerTest, GetPolicyTableData_PolicyDisabled_FAIL) {
   EXPECT_EQ(expected_table_data, policy_handler_.GetPolicyTableData());
 }
 
+TEST_F(PolicyHandlerTest, GetRemovedVehicleDataItems_PolicyEnabled_SUCCESS) {
+  using rpc::policy_table_interface_base::VehicleDataItem;
+
+  ChangePolicyManagerToMock();
+
+  std::vector<VehicleDataItem> expected_removed_items;
+  expected_removed_items.push_back(VehicleDataItem());
+
+  EXPECT_CALL(*mock_policy_manager_, GetRemovedVehicleDataItems())
+      .WillOnce(Return(expected_removed_items));
+
+  const auto& actually_removed_items =
+      policy_handler_.GetRemovedVehicleDataItems();
+  ASSERT_EQ(expected_removed_items.size(), actually_removed_items.size());
+  EXPECT_TRUE(expected_removed_items[0] == actually_removed_items[0]);
+}
+
+TEST_F(PolicyHandlerTest, GetRemovedVehicleDataItems_PolicyDisabled_FAIL) {
+  using rpc::policy_table_interface_base::VehicleDataItem;
+
+  ChangePolicyManagerToMock();
+
+  EXPECT_CALL(policy_settings_, enable_policy()).WillOnce(Return(false));
+  EXPECT_CALL(*mock_policy_manager_, GetRemovedVehicleDataItems()).Times(0);
+
+  policy_handler_.LoadPolicyLibrary();
+
+  EXPECT_TRUE(policy_handler_.GetRemovedVehicleDataItems().empty());
+}
+
 }  // namespace policy_handler_test
 }  // namespace components
 }  // namespace test
