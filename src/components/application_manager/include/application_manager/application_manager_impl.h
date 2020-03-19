@@ -834,6 +834,9 @@ class ApplicationManagerImpl
    */
   void EndNaviServices(uint32_t app_id) OVERRIDE;
 
+  DEPRECATED
+  void ForbidStreaming(uint32_t app_id) OVERRIDE;
+
   void ForbidStreaming(uint32_t app_id,
                        protocol_handler::ServiceType service_type) OVERRIDE;
 

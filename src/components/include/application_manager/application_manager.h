@@ -785,6 +785,9 @@ class ApplicationManager {
   virtual bool CanAppStream(
       uint32_t app_id, protocol_handler::ServiceType service_type) const = 0;
 
+  DEPRECATED
+  virtual void ForbidStreaming(uint32_t app_id) = 0;
+
   /**
    * @brief ForbidStreaming forbid the stream over the certain application.
    * @param app_id the application's id which should stop streaming.

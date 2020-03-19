@@ -3465,6 +3465,51 @@ bool ApplicationManagerImpl::CanAppStream(
   return HMIStateAllowsStreaming(app_id, service_type) && is_allowed;
 }
 
+void ApplicationManagerImpl::ForbidStreaming(uint32_t app_id) {
+  using namespace mobile_apis::AppInterfaceUnregisteredReason;
+  using namespace mobile_apis::Result;
+
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  ApplicationSharedPtr app = application(app_id);
+  if (!app || (!app->is_navi() && !app->mobile_projection_enabled())) {
+    LOG4CXX_DEBUG(
+        logger_,
+        "There is no navi or projection application with id: " << app_id);
+    return;
+  }
+
+  if (navi_app_to_stop_.end() != std::find(navi_app_to_stop_.begin(),
+                                           navi_app_to_stop_.end(),
+                                           app_id) ||
+      navi_app_to_end_stream_.end() !=
+          std::find(navi_app_to_end_stream_.begin(),
+                    navi_app_to_end_stream_.end(),
+                    app_id)) {
+    return;
+  }
+
+  bool unregister = false;
+  {
+    sync_primitives::AutoLock lock(navi_service_status_lock_);
+
+    NaviServiceStatusMap::iterator it = navi_service_status_.find(app_id);
+    if (navi_service_status_.end() == it ||
+        (!it->second.first && !it->second.second)) {
+      unregister = true;
+    }
+  }
+  if (unregister) {
+    rpc_service_->ManageMobileCommand(
+        MessageHelper::GetOnAppInterfaceUnregisteredNotificationToMobile(
+            app_id, PROTOCOL_VIOLATION),
+        commands::Command::SOURCE_SDL);
+    UnregisterApplication(app_id, ABORTED);
+    return;
+  }
+  EndNaviServices(app_id);
+}
+
 void ApplicationManagerImpl::ForbidStreaming(
     uint32_t app_id, protocol_handler::ServiceType service_type) {
   using namespace mobile_apis::AppInterfaceUnregisteredReason;
