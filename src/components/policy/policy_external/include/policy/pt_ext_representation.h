@@ -206,12 +206,6 @@ class PTExtRepresentation : public virtual PTRepresentation {
                            const std::string& language) = 0;
 
   /**
-   * @brief Checks, if specific head unit is present in PT
-   * @return boot Suceess, if present, otherwise - false
-   */
-  virtual bool IsMetaInfoPresent() = 0;
-
-  /**
    * @brief Kms pass since last successfull PT update
    */
   virtual int GetKmFromSuccessfulExchange() = 0;

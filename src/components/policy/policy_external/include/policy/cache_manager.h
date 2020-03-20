@@ -611,12 +611,6 @@ class CacheManager : public CacheManagerInterface {
   std::string GetCCPUVersionFromPT() const;
 
   /**
-   * @brief Checks, if specific head unit is present in PT
-   * @return boot Suceess, if present, otherwise - false
-   */
-  bool IsMetaInfoPresent() const;
-
-  /**
    * @brief Set current system language
    * @param language System language
    * @return true, if succedeed, otherwise - false

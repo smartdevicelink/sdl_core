@@ -149,7 +149,6 @@ class PolicyHandlerInterface : public VehicleDataItemProvider {
    */
   virtual uint32_t TimeoutExchangeMSec() const = 0;
   virtual void OnExceededTimeout() = 0;
-  virtual void OnSystemReady() = 0;
   virtual const boost::optional<bool> LockScreenDismissalEnabledState()
       const = 0;
   virtual const boost::optional<std::string> LockScreenDismissalWarningMessage(
@@ -318,11 +317,6 @@ class PolicyHandlerInterface : public VehicleDataItemProvider {
    * @return ccpu_version from PT
    */
   virtual std::string GetCCPUVersionFromPT() const = 0;
-
-  /**
-   * @brief Send request to HMI to get update on system parameters
-   */
-  virtual void OnSystemInfoUpdateRequired() = 0;
 
   /**
    * @brief Sends GetVehicleData request in case when Vechicle info is ready.

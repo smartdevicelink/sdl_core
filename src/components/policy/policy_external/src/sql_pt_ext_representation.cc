@@ -609,22 +609,6 @@ bool SQLPTExtRepresentation::SetMetaInfo(const std::string& ccpu_version,
   return true;
 }
 
-bool SQLPTExtRepresentation::IsMetaInfoPresent() {
-  LOG4CXX_AUTO_TRACE(logger_);
-  utils::dbms::SQLQuery query(db());
-  if (!query.Prepare(sql_pt_ext::kSelectMetaParams)) {
-    LOG4CXX_WARN(logger_, "Incorrect statement for selecting meta info.");
-    return false;
-  }
-
-  if (!query.Exec()) {
-    LOG4CXX_WARN(logger_, "Incorrect select from module meta.");
-    return false;
-  }
-
-  return !query.IsNull(0) && !query.IsNull(1) && !query.IsNull(2);
-}
-
 bool SQLPTExtRepresentation::SetSystemLanguage(const std::string& language) {
   LOG4CXX_AUTO_TRACE(logger_);
   utils::dbms::SQLQuery query(db());

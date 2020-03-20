@@ -1184,7 +1184,6 @@ TEST_F(SQLPTExtRepresentationTest,
       "UPDATE `module_meta` SET `ccpu_version` = '4.1.3.B_EB355B', "
       "`wers_country_code` = 'WAEGB', `language` = 'ru-ru' ";
   ASSERT_TRUE(query_wrapper_->Exec(query_insert_meta_info));
-  EXPECT_TRUE(reps_->IsMetaInfoPresent());
 }
 
 TEST_F(SQLPTExtRepresentationTest,

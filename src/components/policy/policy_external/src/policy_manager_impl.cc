@@ -1635,13 +1635,6 @@ std::string PolicyManagerImpl::GetCCPUVersionFromPT() const {
   return cache_->GetCCPUVersionFromPT();
 }
 
-void PolicyManagerImpl::OnSystemReady() {
-  // Update policy table for the first time with system information
-  if (!cache_->IsMetaInfoPresent()) {
-    listener()->OnSystemInfoUpdateRequired();
-  }
-}
-
 uint32_t PolicyManagerImpl::GetNotificationsNumber(
     const std::string& priority) const {
   LOG4CXX_AUTO_TRACE(logger_);

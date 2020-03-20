@@ -125,7 +125,6 @@ class MockPolicyHandlerInterface : public policy::PolicyHandlerInterface {
   MOCK_CONST_METHOD0(TimeoutExchangeSec, uint32_t());
   MOCK_CONST_METHOD0(TimeoutExchangeMSec, uint32_t());
   MOCK_METHOD0(OnExceededTimeout, void());
-  MOCK_METHOD0(OnSystemReady, void());
   MOCK_CONST_METHOD0(LockScreenDismissalEnabledState,
                      const boost::optional<bool>());
   MOCK_CONST_METHOD1(LockScreenDismissalWarningMessage,
@@ -183,7 +182,6 @@ class MockPolicyHandlerInterface : public policy::PolicyHandlerInterface {
                     const std::string& wers_country_code,
                     const std::string& language));
   MOCK_CONST_METHOD0(GetCCPUVersionFromPT, std::string());
-  MOCK_METHOD0(OnSystemInfoUpdateRequired, void());
   MOCK_METHOD0(OnVIIsReady, void());
   MOCK_METHOD1(OnVehicleDataUpdated,
                void(const smart_objects::SmartObject& message));

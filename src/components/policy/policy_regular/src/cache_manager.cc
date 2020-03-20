@@ -1504,12 +1504,6 @@ std::string CacheManager::GetCCPUVersionFromPT() const {
   return *(module_meta->ccpu_version);
 }
 
-bool CacheManager::IsMetaInfoPresent() const {
-  CACHE_MANAGER_CHECK(false);
-  bool result = true;
-  return result;
-}
-
 bool CacheManager::SetSystemLanguage(const std::string& language) {
   CACHE_MANAGER_CHECK(false);
   Backup();

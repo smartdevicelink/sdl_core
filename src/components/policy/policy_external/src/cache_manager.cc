@@ -2300,16 +2300,6 @@ std::string CacheManager::GetCCPUVersionFromPT() const {
   return *(module_meta->ccpu_version);
 }
 
-bool CacheManager::IsMetaInfoPresent() const {
-  CACHE_MANAGER_CHECK(false);
-  bool result = true;
-  sync_primitives::AutoLock lock(cache_lock_);
-  result = NULL != pt_->policy_table.module_meta->ccpu_version &&
-           NULL != pt_->policy_table.module_meta->wers_country_code &&
-           NULL != pt_->policy_table.module_meta->language;
-  return result;
-}
-
 bool CacheManager::SetSystemLanguage(const std::string& language) {
   CACHE_MANAGER_CHECK(false);
   sync_primitives::AutoLock lock(cache_lock_);

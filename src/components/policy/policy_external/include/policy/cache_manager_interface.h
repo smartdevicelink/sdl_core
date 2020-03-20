@@ -652,12 +652,6 @@ class CacheManagerInterface {
   virtual std::string GetCCPUVersionFromPT() const = 0;
 
   /**
-   * @brief Checks, if specific head unit is present in PT
-   * @return boot Suceess, if present, otherwise - false
-   */
-  virtual bool IsMetaInfoPresent() const = 0;
-
-  /**
    * @brief Set current system language
    * @param language System language
    * @return true, if succedeed, otherwise - false
