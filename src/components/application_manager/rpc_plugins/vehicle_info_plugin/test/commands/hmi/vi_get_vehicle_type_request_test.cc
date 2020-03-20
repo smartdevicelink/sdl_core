@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018, Ford Motor Company
+ * Copyright (c) 2020, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,56 +30,79 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <stdint.h>
+#include "hmi/vi_get_vehicle_type_request.h"
+
 #include <string>
 
-#include "application_manager/application.h"
-#include "application_manager/commands/commands_test.h"
-#include "application_manager/policies/mock_policy_handler_interface.h"
-#include "application_manager/smart_object_keys.h"
 #include "gtest/gtest.h"
-#include "hmi/update_sdl_request.h"
+
+#include "application_manager/commands/command_request_test.h"
+#include "application_manager/commands/commands_test.h"
+#include "application_manager/commands/request_to_hmi.h"
+#include "application_manager/smart_object_keys.h"
 #include "smart_objects/smart_object.h"
+#include "vehicle_info_plugin/commands/vi_command_request_test.h"
 
 namespace test {
 namespace components {
 namespace commands_test {
 namespace hmi_commands_test {
-namespace update_sdl_request {
+namespace vi_get_vehicle_type_request {
 
-using ::testing::NiceMock;
-using ::testing::ReturnRef;
 namespace am = ::application_manager;
 namespace strings = ::application_manager::strings;
-using sdl_rpc_plugin::commands::UpdateSDLRequest;
-
-typedef std::shared_ptr<UpdateSDLRequest> UpdateSDLRequestPtr;
+using am::commands::CommandImpl;
+using ::testing::_;
+using vehicle_info_plugin::commands::VIGetVehicleTypeRequest;
 
 namespace {
 const uint32_t kConnectionKey = 2u;
-const uint32_t kCorrelationId = 1u;
 const std::string kStrNumber{"123"};
 }  // namespace
 
-class UpdateSDLRequestTest : public CommandsTest<CommandsTestMocks::kIsNice> {};
+class VIGetVehicleTypeRequestTest
+    : public VICommandRequestTest<CommandsTestMocks::kIsNice> {
+ public:
+  MessageSharedPtr CreateCommandMsg() {
+    auto command_msg = CreateMessage(smart_objects::SmartType_Map);
+    (*command_msg)[am::strings::msg_params][am::strings::number] = kStrNumber;
+    (*command_msg)[am::strings::params][am::strings::connection_key] =
+        kConnectionKey;
+    return command_msg;
+  }
+};
 
-TEST_F(UpdateSDLRequestTest, RUN_SUCCESS) {
-  MessageSharedPtr command_msg(CreateMessage(smart_objects::SmartType_Map));
-  (*command_msg)[strings::msg_params][strings::number] = kStrNumber;
-  (*command_msg)[strings::params][strings::connection_key] = kConnectionKey;
-  (*command_msg)[strings::params][strings::correlation_id] = kCorrelationId;
+TEST_F(VIGetVehicleTypeRequestTest, RUN_SendRequest_SUCCESS) {
+  MessageSharedPtr command_msg = CreateCommandMsg();
+  auto command = CreateCommandVI<VIGetVehicleTypeRequest>(command_msg);
 
-  UpdateSDLRequestPtr command(CreateCommand<UpdateSDLRequest>(command_msg));
-
-  EXPECT_CALL(mock_policy_handler_, PTExchangeAtUserRequest(kCorrelationId));
+  EXPECT_CALL(mock_rpc_service_, SendMessageToHMI(command_msg));
+  ASSERT_TRUE(command->Init());
 
   command->Run();
 
-  EXPECT_EQ(kCorrelationId,
-            (*command_msg)[strings::params][strings::correlation_id].asUInt());
+  EXPECT_EQ(CommandImpl::hmi_protocol_type_,
+            (*command_msg)[strings::params][strings::protocol_type].asInt());
+  EXPECT_EQ(CommandImpl::protocol_version_,
+            (*command_msg)[strings::params][strings::protocol_version].asInt());
 }
 
-}  // namespace update_sdl_request
+TEST_F(
+    VIGetVehicleTypeRequestTest,
+    onTimeOut_VIGetVehicleTypeRequestTimeoutExpired_UpdateRequestsRequiredForVIGetVehicleType) {
+  MessageSharedPtr command_msg = CreateCommandMsg();
+  auto command(CreateCommandVI<VIGetVehicleTypeRequest>(command_msg));
+
+  EXPECT_CALL(mock_hmi_capabilities_,
+              UpdateRequestsRequiredForCapabilities(
+                  hmi_apis::FunctionID::VehicleInfo_GetVehicleType));
+  ASSERT_TRUE(command->Init());
+
+  command->Run();
+  command->onTimeOut();
+}
+
+}  // namespace vi_get_vehicle_type_request
 }  // namespace hmi_commands_test
 }  // namespace commands_test
 }  // namespace components

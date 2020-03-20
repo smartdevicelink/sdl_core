@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018, Ford Motor Company
+ * Copyright (c) 2020, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,54 +30,88 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <stdint.h>
+#include "hmi/vr_get_supported_languages_request.h"
+
+#include <memory>
 #include <string>
 
-#include "application_manager/application.h"
-#include "application_manager/commands/commands_test.h"
-#include "application_manager/smart_object_keys.h"
 #include "gtest/gtest.h"
-#include "hmi/update_sdl_response.h"
+
+#include "application_manager/commands/command_request_test.h"
+#include "application_manager/commands/commands_test.h"
+#include "application_manager/commands/request_to_hmi.h"
+#include "application_manager/smart_object_keys.h"
 #include "smart_objects/smart_object.h"
 
 namespace test {
 namespace components {
 namespace commands_test {
 namespace hmi_commands_test {
-namespace update_sdl_response {
+namespace vr_get_supported_languages_request {
 
+using ::testing::_;
+using ::testing::Return;
 namespace am = ::application_manager;
 namespace strings = ::application_manager::strings;
 using am::commands::CommandImpl;
-using sdl_rpc_plugin::commands::UpdateSDLResponse;
+using am::commands::RequestToHMI;
+using sdl_rpc_plugin::commands::VRGetSupportedLanguagesRequest;
 
-typedef std::shared_ptr<UpdateSDLResponse> UpdateSDLResponsePtr;
+typedef std::shared_ptr<RequestToHMI> RequestToHMIPtr;
 
 namespace {
 const uint32_t kConnectionKey = 2u;
 const std::string kStrNumber{"123"};
 }  // namespace
 
-class UpdateSDLResponseTest : public CommandsTest<CommandsTestMocks::kIsNice> {
+class VRGetSupportedLanguagesRequestTest
+    : public CommandsTest<CommandsTestMocks::kIsNice> {
+ public:
+  MessageSharedPtr CreateCommandMsg() {
+    MessageSharedPtr command_msg(CreateMessage(smart_objects::SmartType_Map));
+    (*command_msg)[strings::msg_params][strings::number] = kStrNumber;
+    (*command_msg)[strings::params][strings::connection_key] = kConnectionKey;
+    return command_msg;
+  }
 };
 
-TEST_F(UpdateSDLResponseTest, RUN_SendRequest_SUCCESS) {
-  MessageSharedPtr command_msg(CreateMessage(smart_objects::SmartType_Map));
-  (*command_msg)[strings::msg_params][strings::number] = kStrNumber;
-  (*command_msg)[strings::params][strings::connection_key] = kConnectionKey;
+TEST_F(VRGetSupportedLanguagesRequestTest, RUN_SendRequest_SUCCESS) {
+  MessageSharedPtr command_msg = CreateCommandMsg();
 
-  UpdateSDLResponsePtr command(CreateCommand<UpdateSDLResponse>(command_msg));
+  RequestToHMIPtr command(
+      CreateCommand<VRGetSupportedLanguagesRequest>(command_msg));
   EXPECT_CALL(mock_rpc_service_, SendMessageToHMI(command_msg));
+  ASSERT_TRUE(command->Init());
 
   command->Run();
 
-  EXPECT_EQ((*command_msg)[strings::params][strings::protocol_type].asInt(),
-            CommandImpl::hmi_protocol_type_);
-  EXPECT_EQ((*command_msg)[strings::params][strings::protocol_version].asInt(),
-            CommandImpl::protocol_version_);
+  EXPECT_EQ(CommandImpl::hmi_protocol_type_,
+            (*command_msg)[strings::params][strings::protocol_type].asInt());
+  EXPECT_EQ(CommandImpl::protocol_version_,
+            (*command_msg)[strings::params][strings::protocol_version].asInt());
 }
 
-}  // namespace update_sdl_response
+TEST_F(VRGetSupportedLanguagesRequestTest,
+       onTimeOut_VRGetSupportedLanguagesUpdated) {
+  MessageSharedPtr command_msg = CreateCommandMsg();
+  RequestToHMIPtr command(
+      CreateCommand<VRGetSupportedLanguagesRequest>(command_msg));
+
+  EXPECT_CALL(mock_hmi_capabilities_,
+              UpdateRequestsRequiredForCapabilities(
+                  hmi_apis::FunctionID::VR_GetSupportedLanguages));
+  ASSERT_TRUE(command->Init());
+
+  command->Run();
+  command->onTimeOut();
+
+  EXPECT_EQ(CommandImpl::hmi_protocol_type_,
+            (*command_msg)[strings::params][strings::protocol_type].asInt());
+  EXPECT_EQ(CommandImpl::protocol_version_,
+            (*command_msg)[strings::params][strings::protocol_version].asInt());
+}
+
+}  // namespace vr_get_supported_languages_request
 }  // namespace hmi_commands_test
 }  // namespace commands_test
 }  // namespace components

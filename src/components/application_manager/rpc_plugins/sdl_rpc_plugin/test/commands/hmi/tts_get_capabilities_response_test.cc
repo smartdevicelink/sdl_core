@@ -55,7 +55,7 @@ namespace hmi_response = ::application_manager::hmi_response;
 namespace hmi_interface = ::application_manager::hmi_interface;
 
 namespace {
-const std::string kText = "TEXT";
+const std::string kText{"TEXT"};
 const hmi_apis::Common_Result::eType kSuccess =
     hmi_apis::Common_Result::SUCCESS;
 }  // namespace
