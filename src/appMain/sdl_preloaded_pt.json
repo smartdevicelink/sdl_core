@@ -587,7 +587,8 @@
                             "odometer",
                             "tirePressure",
                             "vin",
-                            "wiperStatus"
+                            "wiperStatus",
+                            "stabilityControlsStatus"
                         ]
                     },
                     "OnVehicleData": {
@@ -612,7 +613,8 @@
                             "odometer",
                             "tirePressure",
                             "vin",
-                            "wiperStatus"
+                            "wiperStatus",
+                            "stabilityControlsStatus"
                         ]
                     },
                     "SubscribeVehicleData": {
@@ -636,7 +638,8 @@
                             "cloudAppVehicleID",
                             "odometer",
                             "tirePressure",
-                            "wiperStatus"
+                            "wiperStatus",
+                            "stabilityControlsStatus"
                         ]
                     },
                     "UnsubscribeVehicleData": {
@@ -660,7 +663,8 @@
                             "cloudAppVehicleID",
                             "odometer",
                             "tirePressure",
-                            "wiperStatus"
+                            "wiperStatus",
+                            "stabilityControlsStatus"
                         ]
                     }
                 }
@@ -3906,6 +3910,13 @@
                     "type": "ElectronicParkBrakeStatus",
                     "mandatory": false,
                     "since": "5.0"
+                },
+                {
+                    "name": "stabilityControlsStatus",
+                    "key": "OEM_REF_STAB_CTRLS_ST",
+                    "type": "StabilityControlsStatus",
+                    "mandatory": false,
+                    "since": "6.2"
                 },
                 {
                     "name": "cloudAppVehicleID",
