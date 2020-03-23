@@ -4,7 +4,7 @@ pip3 list | grep -F tornado > /dev/null
 if [ $? -eq 1 ]
   then
     echo "Installing tornado python package"
-    sudo pip3 install tornado
+    sudo -H pip3 install tornado
 fi
 
 echo "Starting Policy Manager"
