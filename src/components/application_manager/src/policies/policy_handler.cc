@@ -478,6 +478,7 @@ void PolicyHandler::PushAppIdToPTUQueue(const uint32_t app_id) {
 
 void PolicyHandler::PopAppIdFromPTUQueue() {
   LOG4CXX_AUTO_TRACE(logger_);
+  POLICY_LIB_CHECK_VOID();
   sync_primitives::AutoLock lock(app_id_queue_lock_);
   if (applications_ptu_queue_.size() > 0) {
     applications_ptu_queue_.erase(applications_ptu_queue_.begin());
@@ -789,9 +790,11 @@ PolicyHandler::CollectRegisteredAppsPermissions() {
 
 std::vector<FunctionalGroupPermission> PolicyHandler::CollectAppPermissions(
     const uint32_t connection_key) {
+  std::vector<FunctionalGroupPermission> group_permissions;
+  POLICY_LIB_CHECK_OR_RETURN(group_permissions);
+
   // Single app only
   ApplicationSharedPtr app = application_manager_.application(connection_key);
-  std::vector<FunctionalGroupPermission> group_permissions;
 
   if (NULL == app.get() || app.use_count() == 0) {
     LOG4CXX_WARN(logger_,
@@ -869,6 +872,7 @@ void PolicyHandler::LinkAppsToDevice() {
 bool PolicyHandler::IsAppSuitableForPolicyUpdate(
     const Applications::value_type value) const {
   LOG4CXX_AUTO_TRACE(logger_);
+  POLICY_LIB_CHECK_OR_RETURN(false);
 
   if (!value->IsRegistered()) {
     LOG4CXX_DEBUG(
@@ -1508,6 +1512,8 @@ void PolicyHandler::OnPermissionsUpdated(const std::string& device_id,
                                          const std::string& policy_app_id,
                                          const Permissions& permissions) {
   LOG4CXX_AUTO_TRACE(logger_);
+  POLICY_LIB_CHECK_VOID();
+
   ApplicationSharedPtr app =
       application_manager_.application(device_id, policy_app_id);
   if (app.use_count() == 0) {
@@ -2064,6 +2070,7 @@ PolicyHandler::AppPropertiesState PolicyHandler::GetAppPropertiesStatus(
     const smart_objects::SmartObject& properties,
     const std::string& app_id) const {
   LOG4CXX_AUTO_TRACE(logger_);
+  POLICY_LIB_CHECK_OR_RETURN(AppPropertiesState::NO_CHANGES);
 
   AppProperties app_properties;
   policy_manager_->GetAppProperties(app_id, app_properties);
@@ -2158,6 +2165,7 @@ PolicyHandler::AppPropertiesState PolicyHandler::GetAppPropertiesStatus(
 }
 
 bool PolicyHandler::IsNewApplication(const std::string& policy_app_id) const {
+  POLICY_LIB_CHECK_OR_RETURN(false);
   return policy_manager_->IsNewApplication(policy_app_id);
 }
 
@@ -2216,6 +2224,7 @@ void PolicyHandler::OnSetAppProperties(
 }
 
 void PolicyHandler::OnLocalAppAdded() {
+  POLICY_LIB_CHECK_VOID();
   policy_manager_->OnLocalAppAdded();
 }
 
