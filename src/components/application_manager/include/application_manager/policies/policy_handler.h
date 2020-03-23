@@ -205,7 +205,7 @@ class PolicyHandler : public PolicyHandlerInterface,
   void GetUpdateUrls(const uint32_t service_type,
                      EndpointUrls& out_end_points) const OVERRIDE;
   virtual std::string GetLockScreenIconUrl(
-      const std::string& policy_app_id) const OVERRIDE;
+      const std::string& policy_app_id = kDefaultId) const OVERRIDE;
   virtual std::string GetIconUrl(
       const std::string& policy_app_id) const OVERRIDE;
   uint32_t NextRetryTimeout() OVERRIDE;

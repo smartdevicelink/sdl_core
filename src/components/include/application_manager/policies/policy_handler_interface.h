@@ -132,7 +132,7 @@ class PolicyHandlerInterface : public VehicleDataItemProvider {
    * @return URL for a requested application
    */
   virtual std::string GetLockScreenIconUrl(
-      const std::string& policy_app_id) const = 0;
+      const std::string& policy_app_id = kDefaultId) const = 0;
 
   virtual std::string GetIconUrl(const std::string& policy_app_id) const = 0;
   virtual uint32_t NextRetryTimeout() = 0;
