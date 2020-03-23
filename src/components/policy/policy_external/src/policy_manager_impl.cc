@@ -268,10 +268,6 @@ void PolicyManagerImpl::CheckTriggers() {
   }
 }
 
-std::string PolicyManagerImpl::GetLockScreenIconUrl() const {
-  return cache_->GetLockScreenIconUrl();
-}
-
 std::string PolicyManagerImpl::GetIconUrl(
     const std::string& policy_app_id) const {
   return cache_->GetIconUrl(policy_app_id);
@@ -693,12 +689,12 @@ std::string PolicyManagerImpl::GetUpdateUrl(int service_type) {
 }
 
 void PolicyManagerImpl::GetUpdateUrls(const std::string& service_type,
-                                      EndpointUrls& out_end_points) {
+                                      EndpointUrls& out_end_points) const {
   LOG4CXX_AUTO_TRACE(logger_);
   cache_->GetUpdateUrls(service_type, out_end_points);
 }
 void PolicyManagerImpl::GetUpdateUrls(const uint32_t service_type,
-                                      EndpointUrls& out_end_points) {
+                                      EndpointUrls& out_end_points) const {
   LOG4CXX_AUTO_TRACE(logger_);
   cache_->GetUpdateUrls(service_type, out_end_points);
 }

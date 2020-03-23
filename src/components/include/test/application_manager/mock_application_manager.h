@@ -321,7 +321,11 @@ class MockApplicationManager : public application_manager::ApplicationManager {
   MOCK_CONST_METHOD2(CanAppStream,
                      bool(uint32_t app_id,
                           protocol_handler::ServiceType service_type));
+  DEPRECATED
   MOCK_METHOD1(ForbidStreaming, void(uint32_t app_id));
+  MOCK_METHOD2(ForbidStreaming,
+               void(uint32_t app_id,
+                    protocol_handler::ServiceType service_type));
   MOCK_CONST_METHOD0(get_settings,
                      const application_manager::ApplicationManagerSettings&());
   MOCK_CONST_METHOD1(

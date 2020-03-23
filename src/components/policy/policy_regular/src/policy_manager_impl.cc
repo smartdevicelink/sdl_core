@@ -597,12 +597,13 @@ void PolicyManagerImpl::PrepareNotificationData(
 }
 
 void PolicyManagerImpl::GetUpdateUrls(const std::string& service_type,
-                                      EndpointUrls& out_end_points) {
+                                      EndpointUrls& out_end_points) const {
   LOG4CXX_AUTO_TRACE(logger_);
   cache_->GetUpdateUrls(service_type, out_end_points);
 }
+
 void PolicyManagerImpl::GetUpdateUrls(const uint32_t service_type,
-                                      EndpointUrls& out_end_points) {
+                                      EndpointUrls& out_end_points) const {
   LOG4CXX_AUTO_TRACE(logger_);
   cache_->GetUpdateUrls(service_type, out_end_points);
 }
@@ -629,10 +630,6 @@ bool PolicyManagerImpl::RequestPTUpdate(const PTUIterationType iteration_type) {
   ptu_requested_ = true;
   listener_->OnSnapshotCreated(update, iteration_type);
   return true;
-}
-
-std::string PolicyManagerImpl::GetLockScreenIconUrl() const {
-  return cache_->GetLockScreenIconUrl();
 }
 
 std::string PolicyManagerImpl::GetIconUrl(
@@ -929,6 +926,9 @@ void PolicyManagerImpl::SetUserConsentForDevice(const std::string& device_id,
   DeviceConsent current_consent = GetUserConsentForDevice(device_id);
   bool is_current_device_allowed =
       DeviceConsent::kDeviceAllowed == current_consent ? true : false;
+  if (is_allowed) {
+    StartPTExchange();
+  }
   if (DeviceConsent::kDeviceHasNoConsent != current_consent &&
       is_current_device_allowed == is_allowed) {
     const std::string consent = is_allowed ? "allowed" : "disallowed";
