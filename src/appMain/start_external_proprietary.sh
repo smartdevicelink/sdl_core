@@ -1,12 +1,14 @@
 #!/bin/bash
-pip list | grep -F tornado > /dev/null
+pip3 list | grep -F tornado > /dev/null
+
 if [ $? -eq 1 ]
   then
     echo "Installing tornado python package"
-    sudo pip install tornado
+    sudo -H pip3 install tornado
 fi
+
 echo "Starting Policy Manager"
-python sample_policy_manager.py --pack_port 8088 --unpack_port 8089 --add_http_header --encryption &
+python3 sample_policy_manager.py --pack_port 8088 --unpack_port 8089 --add_http_header --encryption &
 POLICY_MANAGER=$!
 
 trap ctrl_c INT
