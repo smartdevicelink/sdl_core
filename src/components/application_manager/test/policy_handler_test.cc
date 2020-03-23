@@ -3121,6 +3121,23 @@ TEST_F(PolicyHandlerTest, GetAppPropertiesStatus_HybridAppNotChanged_SUCCESS) {
       policy::PolicyHandlerInterface::AppPropertiesState::NO_CHANGES);
 }
 
+TEST_F(PolicyHandlerTest, GetAppPropertiesStatus_PolicyDisabled_FAIL) {
+  ChangePolicyManagerToMock();
+
+  EXPECT_CALL(policy_settings_, enable_policy()).WillOnce(Return(false));
+  policy_handler_.LoadPolicyLibrary();
+
+  smart_objects::SmartObject properties;
+  properties[strings::app_id] = kPolicyAppId_;
+
+  EXPECT_CALL(*mock_policy_manager_, GetAppProperties(_, _)).Times(0);
+  EXPECT_CALL(*mock_policy_manager_, GetInitialAppData(_, _, _)).Times(0);
+  const auto expected_app_properties_state =
+      policy::PolicyHandlerInterface::AppPropertiesState::NO_CHANGES;
+  EXPECT_EQ(expected_app_properties_state,
+            policy_handler_.GetAppPropertiesStatus(properties, kPolicyAppId_));
+}
+
 TEST_F(PolicyHandlerTest, GetEnabledLocalApps_SUCCESS) {
   ChangePolicyManagerToMock();
   std::vector<std::string> enabled_local_apps;
@@ -3133,6 +3150,194 @@ TEST_F(PolicyHandlerTest, GetEnabledLocalApps_SUCCESS) {
   EXPECT_CALL(*mock_policy_manager_, GetEnabledLocalApps())
       .WillOnce(Return(enabled_local_apps));
   EXPECT_EQ(enabled_local_apps, policy_handler_.GetEnabledLocalApps());
+}
+
+TEST_F(PolicyHandlerTest, PushAppIdToPTUQueue_PolicyEnabled_SUCCESS) {
+  ChangePolicyManagerToMock();
+  const uint32_t expected_apps_count = 1u;
+  EXPECT_CALL(*mock_policy_manager_,
+              UpdatePTUReadyAppsCount(expected_apps_count));
+  policy_handler_.PushAppIdToPTUQueue(kAppId1_);
+  EXPECT_EQ(expected_apps_count,
+            policy_handler_.applications_ptu_queue_.size());
+}
+
+TEST_F(PolicyHandlerTest, PushAppIdToPTUQueue_PolicyDisabled_FAIL) {
+  ChangePolicyManagerToMock();
+
+  const uint32_t expected_apps_count = 0u;
+  EXPECT_CALL(policy_settings_, enable_policy()).WillOnce(Return(false));
+  EXPECT_CALL(*mock_policy_manager_,
+              UpdatePTUReadyAppsCount(expected_apps_count))
+      .Times(0);
+
+  policy_handler_.LoadPolicyLibrary();
+  policy_handler_.PushAppIdToPTUQueue(kAppId1_);
+  EXPECT_EQ(expected_apps_count,
+            policy_handler_.applications_ptu_queue_.size());
+}
+
+TEST_F(PolicyHandlerTest, StopRetrySequence_PolicyEnabled_SUCCESS) {
+  ChangePolicyManagerToMock();
+  EXPECT_CALL(*mock_policy_manager_, StopRetrySequence());
+  policy_handler_.StopRetrySequence();
+}
+
+TEST_F(PolicyHandlerTest, StopRetrySequence_PolicyDisabled_FAIL) {
+  ChangePolicyManagerToMock();
+
+  EXPECT_CALL(policy_settings_, enable_policy()).WillOnce(Return(false));
+  EXPECT_CALL(*mock_policy_manager_, StopRetrySequence()).Times(0);
+
+  policy_handler_.LoadPolicyLibrary();
+  policy_handler_.StopRetrySequence();
+}
+
+TEST_F(PolicyHandlerTest, GetPolicyTableData_PolicyEnabled_SUCCESS) {
+  ChangePolicyManagerToMock();
+  Json::Value expected_table_data(Json::objectValue);
+  expected_table_data["test_key"] = "test_value";
+  EXPECT_CALL(*mock_policy_manager_, GetPolicyTableData())
+      .WillOnce(Return(expected_table_data));
+  EXPECT_EQ(expected_table_data, policy_handler_.GetPolicyTableData());
+}
+
+TEST_F(PolicyHandlerTest, GetPolicyTableData_PolicyDisabled_FAIL) {
+  ChangePolicyManagerToMock();
+
+  EXPECT_CALL(policy_settings_, enable_policy()).WillOnce(Return(false));
+  EXPECT_CALL(*mock_policy_manager_, GetPolicyTableData()).Times(0);
+
+  policy_handler_.LoadPolicyLibrary();
+
+  Json::Value expected_table_data;
+  EXPECT_EQ(expected_table_data, policy_handler_.GetPolicyTableData());
+}
+
+TEST_F(PolicyHandlerTest, GetRemovedVehicleDataItems_PolicyEnabled_SUCCESS) {
+  using rpc::policy_table_interface_base::VehicleDataItem;
+
+  ChangePolicyManagerToMock();
+
+  std::vector<VehicleDataItem> expected_removed_items;
+  expected_removed_items.push_back(VehicleDataItem());
+
+  EXPECT_CALL(*mock_policy_manager_, GetRemovedVehicleDataItems())
+      .WillOnce(Return(expected_removed_items));
+
+  const auto& actually_removed_items =
+      policy_handler_.GetRemovedVehicleDataItems();
+  ASSERT_EQ(expected_removed_items.size(), actually_removed_items.size());
+  EXPECT_TRUE(expected_removed_items[0] == actually_removed_items[0]);
+}
+
+TEST_F(PolicyHandlerTest, GetRemovedVehicleDataItems_PolicyDisabled_FAIL) {
+  using rpc::policy_table_interface_base::VehicleDataItem;
+
+  ChangePolicyManagerToMock();
+
+  EXPECT_CALL(policy_settings_, enable_policy()).WillOnce(Return(false));
+  EXPECT_CALL(*mock_policy_manager_, GetRemovedVehicleDataItems()).Times(0);
+
+  policy_handler_.LoadPolicyLibrary();
+
+  EXPECT_TRUE(policy_handler_.GetRemovedVehicleDataItems().empty());
+}
+
+TEST_F(PolicyHandlerTest, PopAppIdFromPTUQueue_PolicyEnabled_SUCCESS) {
+  ChangePolicyManagerToMock();
+
+  policy_handler_.PushAppIdToPTUQueue(kAppId1_);
+  ASSERT_EQ(1u, policy_handler_.applications_ptu_queue_.size());
+
+  policy_handler_.PopAppIdFromPTUQueue();
+  EXPECT_EQ(0u, policy_handler_.applications_ptu_queue_.size());
+}
+
+TEST_F(PolicyHandlerTest, PopAppIdFromPTUQueue_PolicyDisabled_FAIL) {
+  ChangePolicyManagerToMock();
+
+  const uint32_t expected_apps_count = 0u;
+  EXPECT_CALL(policy_settings_, enable_policy()).WillOnce(Return(false));
+  EXPECT_CALL(*mock_policy_manager_,
+              UpdatePTUReadyAppsCount(expected_apps_count))
+      .Times(0);
+
+  policy_handler_.LoadPolicyLibrary();
+  policy_handler_.PopAppIdFromPTUQueue();
+  EXPECT_EQ(expected_apps_count,
+            policy_handler_.applications_ptu_queue_.size());
+}
+
+TEST_F(PolicyHandlerTest, OnLocalAppAdded_PolicyEnabled_SUCCESS) {
+  ChangePolicyManagerToMock();
+  EXPECT_CALL(*mock_policy_manager_, OnLocalAppAdded());
+  policy_handler_.OnLocalAppAdded();
+}
+
+TEST_F(PolicyHandlerTest, OnLocalAppAdded_PolicyDisabled_FAIL) {
+  ChangePolicyManagerToMock();
+
+  EXPECT_CALL(policy_settings_, enable_policy()).WillOnce(Return(false));
+  EXPECT_CALL(*mock_policy_manager_, OnLocalAppAdded()).Times(0);
+
+  policy_handler_.LoadPolicyLibrary();
+  policy_handler_.OnLocalAppAdded();
+}
+
+TEST_F(PolicyHandlerTest, OnPermissionsUpdated_PolicyEnabled_SUCCESS) {
+  ChangePolicyManagerToMock();
+
+  EXPECT_CALL(app_manager_, application(kDeviceId_, kPolicyAppId_))
+      .WillOnce(Return(mock_app_));
+
+  const rpc::Optional<rpc::Boolean> encryption_requiered;
+  EXPECT_CALL(*mock_policy_manager_, GetAppEncryptionRequired(kPolicyAppId_))
+      .WillOnce(Return(encryption_requiered));
+  EXPECT_CALL(*mock_app_, app_id()).WillRepeatedly(Return(kAppId1_));
+
+  Permissions app_permissions;
+  EXPECT_CALL(mock_message_helper_,
+              SendOnPermissionsChangeNotification(kAppId1_, _, _, _));
+  policy_handler_.OnPermissionsUpdated(
+      kDeviceId_, kPolicyAppId_, app_permissions);
+}
+
+TEST_F(PolicyHandlerTest, OnPermissionsUpdated_PolicyDisabled_FAIL) {
+  ChangePolicyManagerToMock();
+
+  EXPECT_CALL(policy_settings_, enable_policy()).WillOnce(Return(false));
+  policy_handler_.LoadPolicyLibrary();
+
+  EXPECT_CALL(app_manager_, application(kDeviceId_, kPolicyAppId_)).Times(0);
+  EXPECT_CALL(*mock_policy_manager_, GetAppEncryptionRequired(kPolicyAppId_))
+      .Times(0);
+  EXPECT_CALL(*mock_app_, app_id()).Times(0);
+
+  Permissions app_permissions;
+  EXPECT_CALL(mock_message_helper_,
+              SendOnPermissionsChangeNotification(_, _, _, _))
+      .Times(0);
+  policy_handler_.OnPermissionsUpdated(
+      kDeviceId_, kPolicyAppId_, app_permissions);
+}
+
+TEST_F(PolicyHandlerTest, IsNewApplication_PolicyEnabled_SUCCESS) {
+  ChangePolicyManagerToMock();
+
+  EXPECT_CALL(*mock_policy_manager_, IsNewApplication(kPolicyAppId_))
+      .WillOnce(Return(true));
+  EXPECT_TRUE(policy_handler_.IsNewApplication(kPolicyAppId_));
+}
+
+TEST_F(PolicyHandlerTest, IsNewApplication_PolicyDisabled_FAIL) {
+  ChangePolicyManagerToMock();
+
+  EXPECT_CALL(policy_settings_, enable_policy()).WillOnce(Return(false));
+  policy_handler_.LoadPolicyLibrary();
+
+  EXPECT_CALL(*mock_policy_manager_, IsNewApplication(kPolicyAppId_)).Times(0);
+  EXPECT_FALSE(policy_handler_.IsNewApplication(kPolicyAppId_));
 }
 
 }  // namespace policy_handler_test
