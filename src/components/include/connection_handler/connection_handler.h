@@ -312,6 +312,19 @@ class ConnectionHandler {
       const transport_manager::ConnectionUID primary_connection_handle,
       const transport_manager::ConnectionUID secondary_connection_handle) = 0;
 
+  /**
+   * @brief GetWebEngineDeviceInfo
+   * @return device info for WebEngine device
+   */
+  virtual const transport_manager::DeviceInfo& GetWebEngineDeviceInfo()
+      const = 0;
+
+  /**
+   * @brief Called when HMI cooperation is started,
+   * creates WebSocketDevice for WebEngine
+   */
+  virtual void CreateWebEngineDevice() = 0;
+
  protected:
   /**
    * \brief Destructor

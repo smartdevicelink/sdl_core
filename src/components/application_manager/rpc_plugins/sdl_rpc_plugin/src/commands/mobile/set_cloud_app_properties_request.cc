@@ -1,4 +1,5 @@
 #include "sdl_rpc_plugin/commands/mobile/set_cloud_app_properties_request.h"
+#include "application_manager/message_helper.h"
 #include "application_manager/policies/policy_handler_interface.h"
 
 namespace sdl_rpc_plugin {
@@ -30,9 +31,29 @@ void SetCloudAppPropertiesRequest::Run() {
     return;
   }
 
-  policy_handler_.OnSetCloudAppProperties(*message_);
+  const auto& properties =
+      (*message_)[strings::msg_params][strings::properties];
 
+  const auto app_id(properties[strings::app_id].asString());
+
+  const auto properties_change_status =
+      policy_handler_.GetAppPropertiesStatus(properties, app_id);
+
+  using AppPropertiesState = policy::PolicyHandlerInterface::AppPropertiesState;
+  const bool is_properties_changed =
+      AppPropertiesState::NO_CHANGES != properties_change_status;
+
+  const bool is_new_app = policy_handler_.IsNewApplication(app_id);
+
+  policy_handler_.OnSetCloudAppProperties(*message_);
   SendResponse(true, mobile_apis::Result::SUCCESS);
+
+  if (is_properties_changed || is_new_app) {
+    const auto notification =
+        MessageHelper::CreateOnAppPropertiesChangeNotification(
+            app_id, application_manager_);
+    application_manager_.GetRPCService().ManageHMICommand(notification);
+  }
 }
 
 void SetCloudAppPropertiesRequest::on_event(

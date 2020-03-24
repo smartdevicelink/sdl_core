@@ -40,7 +40,7 @@
 #include <sstream>
 
 #include "interfaces/MOBILE_API.h"
-#include "json/features.h"
+#include "json/json_features.h"
 #include "json/reader.h"
 #include "json/writer.h"
 #include "smart_objects/enum_schema_item.h"
@@ -53,6 +53,7 @@
 #include "utils/threads/thread.h"
 #include "utils/threads/thread_delegate.h"
 
+#include "policy/policy_helper.h"
 #include "policy/sql_pt_representation.h"
 
 namespace policy_table = rpc::policy_table_interface_base;
@@ -766,35 +767,55 @@ void CacheManager::GetEnabledCloudApps(
 #endif  // CLOUD_APP_WEBSOCKET_TRANSPORT_SUPPORT
 }
 
-bool CacheManager::GetCloudAppParameters(
-    const std::string& policy_app_id,
-    bool& enabled,
-    std::string& endpoint,
-    std::string& certificate,
-    std::string& auth_token,
-    std::string& cloud_transport_type,
-    std::string& hybrid_app_preference) const {
+std::vector<std::string> CacheManager::GetEnabledLocalApps() const {
+#if !defined(WEBSOCKET_SERVER_TRANSPORT_SUPPORT)
+  return std::vector<std::string>();
+#else
+  std::vector<std::string> enabled_apps;
+  const policy_table::ApplicationPolicies& app_policies =
+      pt_->policy_table.app_policies_section.apps;
+  for (const auto& app_policies_item : app_policies) {
+    const auto app_policy = app_policies_item.second;
+    // Local (WebEngine) applications
+    // should not have "endpoint" field
+    if (app_policy.endpoint.is_initialized()) {
+      continue;
+    }
+    if (app_policy.enabled.is_initialized() && *app_policy.enabled) {
+      enabled_apps.push_back(app_policies_item.first);
+    }
+  }
+  return enabled_apps;
+#endif  // WEBSOCKET_SERVER_TRANSPORT_SUPPORT
+}
+
+bool CacheManager::GetAppProperties(const std::string& policy_app_id,
+                                    AppProperties& out_app_properties) const {
   const policy_table::ApplicationPolicies& policies =
       pt_->policy_table.app_policies_section.apps;
   policy_table::ApplicationPolicies::const_iterator policy_iter =
       policies.find(policy_app_id);
   if (policies.end() != policy_iter) {
     auto app_policy = (*policy_iter).second;
-    endpoint = app_policy.endpoint.is_initialized() ? *app_policy.endpoint
-                                                    : std::string();
-    auth_token = app_policy.auth_token.is_initialized() ? *app_policy.auth_token
-                                                        : std::string();
-    cloud_transport_type = app_policy.cloud_transport_type.is_initialized()
-                               ? *app_policy.cloud_transport_type
-                               : std::string();
-    certificate = app_policy.certificate.is_initialized()
-                      ? *app_policy.certificate
-                      : std::string();
-    hybrid_app_preference =
+    out_app_properties.endpoint = app_policy.endpoint.is_initialized()
+                                      ? *app_policy.endpoint
+                                      : std::string();
+    out_app_properties.auth_token = app_policy.auth_token.is_initialized()
+                                        ? *app_policy.auth_token
+                                        : std::string();
+    out_app_properties.transport_type =
+        app_policy.cloud_transport_type.is_initialized()
+            ? *app_policy.cloud_transport_type
+            : std::string();
+    out_app_properties.certificate = app_policy.certificate.is_initialized()
+                                         ? *app_policy.certificate
+                                         : std::string();
+    out_app_properties.hybrid_app_preference =
         app_policy.hybrid_app_preference.is_initialized()
             ? EnumToJsonString(*app_policy.hybrid_app_preference)
             : std::string();
-    enabled = app_policy.enabled.is_initialized() && *app_policy.enabled;
+    out_app_properties.enabled =
+        app_policy.enabled.is_initialized() && *app_policy.enabled;
     return true;
   }
   return false;
@@ -1019,7 +1040,7 @@ std::vector<UserFriendlyMessage> CacheManager::GetUserFriendlyMsg(
 }
 
 void CacheManager::GetUpdateUrls(const uint32_t service_type,
-                                 EndpointUrls& out_end_points) {
+                                 EndpointUrls& out_end_points) const {
   auto find_hexademical =
       [service_type](policy_table::ServiceEndpoints::value_type end_point) {
         uint32_t decimal;
@@ -1036,7 +1057,7 @@ void CacheManager::GetUpdateUrls(const uint32_t service_type,
 }
 
 void CacheManager::GetUpdateUrls(const std::string& service_type,
-                                 EndpointUrls& out_end_points) {
+                                 EndpointUrls& out_end_points) const {
   LOG4CXX_AUTO_TRACE(logger_);
   CACHE_MANAGER_CHECK_VOID();
 
@@ -1061,13 +1082,6 @@ void CacheManager::GetUpdateUrls(const std::string& service_type,
       out_end_points.push_back(data);
     }
   }
-}
-
-std::string CacheManager::GetLockScreenIconUrl() const {
-  if (backup_) {
-    return backup_->GetLockScreenIconUrl();
-  }
-  return std::string("");
 }
 
 std::string CacheManager::GetIconUrl(const std::string& policy_app_id) const {
@@ -1796,6 +1810,10 @@ bool CacheManager::Init(const std::string& file_name,
         return result;
       }
 
+      if (!UnwrapAppPolicies(pt_->policy_table.app_policies_section.apps)) {
+        LOG4CXX_ERROR(logger_, "Cannot unwrap application policies");
+      }
+
       backup_->UpdateDBVersion();
       Backup();
     } break;
@@ -1853,13 +1871,16 @@ bool CacheManager::LoadFromFile(const std::string& file_name,
     return false;
   }
 
+  Json::CharReaderBuilder reader_builder;
+  Json::CharReaderBuilder::strictMode(&reader_builder.settings_);
+  auto reader =
+      std::unique_ptr<Json::CharReader>(reader_builder.newCharReader());
   Json::Value value;
-  Json::Reader reader(Json::Features::strictMode());
+  JSONCPP_STRING err;
   std::string json(json_string.begin(), json_string.end());
-  if (!reader.parse(json.c_str(), value)) {
-    LOG4CXX_FATAL(
-        logger_,
-        "Preloaded PT is corrupted: " << reader.getFormattedErrorMessages());
+  const size_t json_len = json.length();
+  if (!reader->parse(json.c_str(), json.c_str() + json_len, &value, &err)) {
+    LOG4CXX_FATAL(logger_, "Preloaded PT is corrupted: " << err);
     return false;
   }
 
@@ -1868,9 +1889,10 @@ bool CacheManager::LoadFromFile(const std::string& file_name,
 
   table = policy_table::Table(&value);
 
-  Json::StyledWriter s_writer;
+  Json::StreamWriterBuilder writer_builder;
   LOG4CXX_DEBUG(logger_, "PT out:");
-  LOG4CXX_DEBUG(logger_, s_writer.write(table.ToJsonValue()));
+  LOG4CXX_DEBUG(logger_,
+                Json::writeString(writer_builder, table.ToJsonValue()));
 
   MakeLowerCaseAppNames(table);
 

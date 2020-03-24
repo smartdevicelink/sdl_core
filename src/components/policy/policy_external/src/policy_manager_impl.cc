@@ -39,7 +39,6 @@
 #include <set>
 #include <vector>
 #include "config_profile/profile.h"
-#include "json/reader.h"
 #include "json/writer.h"
 #include "policy/cache_manager.h"
 #include "policy/policy_helper.h"
@@ -48,6 +47,7 @@
 #include "policy/update_status_manager.h"
 #include "utils/date_time.h"
 #include "utils/file_system.h"
+#include "utils/jsoncpp_reader_wrapper.h"
 #include "utils/logger.h"
 
 #include "policy/access_remote.h"
@@ -212,8 +212,10 @@ PolicyManagerImpl::PolicyManagerImpl()
           new AccessRemoteImpl(std::static_pointer_cast<CacheManager>(cache_)))
     , retry_sequence_timeout_(60)
     , retry_sequence_index_(0)
+    , applications_pending_ptu_count_(0)
     , ignition_check(true)
     , retry_sequence_url_(0, 0, "")
+    , ptu_requested_(false)
     , is_ptu_in_progress_(false) {}
 
 PolicyManagerImpl::PolicyManagerImpl(bool in_memory)
@@ -224,10 +226,12 @@ PolicyManagerImpl::PolicyManagerImpl(bool in_memory)
           new AccessRemoteImpl(std::static_pointer_cast<CacheManager>(cache_)))
     , retry_sequence_timeout_(60)
     , retry_sequence_index_(0)
+    , applications_pending_ptu_count_(0)
     , ignition_check(true)
     , retry_sequence_url_(0, 0, "")
     , send_on_update_sent_out_(false)
     , trigger_ptu_(false)
+    , ptu_requested_(false)
     , is_ptu_in_progress_(false) {}
 
 void PolicyManagerImpl::set_listener(PolicyListener* listener) {
@@ -238,9 +242,10 @@ void PolicyManagerImpl::set_listener(PolicyListener* listener) {
 std::shared_ptr<policy_table::Table> PolicyManagerImpl::Parse(
     const BinaryMessage& pt_content) {
   std::string json(pt_content.begin(), pt_content.end());
+  utils::JsonReader reader;
   Json::Value value;
-  Json::Reader reader;
-  if (reader.parse(json.c_str(), value)) {
+
+  if (reader.parse(json, &value)) {
     return std::make_shared<policy_table::Table>(&value);
   } else {
     return std::make_shared<policy_table::Table>();
@@ -261,10 +266,6 @@ void PolicyManagerImpl::CheckTriggers() {
   if (exceed_ignition_cycles || exceed_days) {
     update_status_manager_.ScheduleUpdate();
   }
-}
-
-std::string PolicyManagerImpl::GetLockScreenIconUrl() const {
-  return cache_->GetLockScreenIconUrl();
 }
 
 std::string PolicyManagerImpl::GetIconUrl(
@@ -542,6 +543,7 @@ PolicyManager::PtProcessingResult PolicyManagerImpl::LoadPT(
 void PolicyManagerImpl::OnPTUFinished(const PtProcessingResult ptu_result) {
   LOG4CXX_AUTO_TRACE(logger_);
 
+  ptu_requested_ = false;
   if (PtProcessingResult::kWrongPtReceived == ptu_result) {
     LOG4CXX_DEBUG(logger_, "Wrong PT was received");
     update_status_manager_.OnWrongUpdateReceived();
@@ -550,7 +552,9 @@ void PolicyManagerImpl::OnPTUFinished(const PtProcessingResult ptu_result) {
 
   update_status_manager_.OnValidUpdateReceived();
 
-  if (PtProcessingResult::kNewPtRequired == ptu_result) {
+  if (HasApplicationForPTU()) {
+    update_status_manager_.OnExistedApplicationAdded(true);
+  } else if (PtProcessingResult::kNewPtRequired == ptu_result) {
     LOG4CXX_DEBUG(logger_, "New PTU interation is required");
     ForcePTExchange();
     return;
@@ -621,6 +625,10 @@ void PolicyManagerImpl::ProcessActionsForAppPolicies(
       continue;
     }
 
+    if (action.second.app_properties_changed) {
+      app_properties_changed_list_.push_back(app_policy->first);
+    }
+
     const auto devices_ids = listener()->GetDevicesIds(app_policy->first);
     for (const auto& device_id : devices_ids) {
       if (action.second.is_consent_needed) {
@@ -681,12 +689,12 @@ std::string PolicyManagerImpl::GetUpdateUrl(int service_type) {
 }
 
 void PolicyManagerImpl::GetUpdateUrls(const std::string& service_type,
-                                      EndpointUrls& out_end_points) {
+                                      EndpointUrls& out_end_points) const {
   LOG4CXX_AUTO_TRACE(logger_);
   cache_->GetUpdateUrls(service_type, out_end_points);
 }
 void PolicyManagerImpl::GetUpdateUrls(const uint32_t service_type,
-                                      EndpointUrls& out_end_points) {
+                                      EndpointUrls& out_end_points) const {
   LOG4CXX_AUTO_TRACE(logger_);
   cache_->GetUpdateUrls(service_type, out_end_points);
 }
@@ -702,13 +710,14 @@ void PolicyManagerImpl::RequestPTUpdate() {
 
   if (IsPTValid(policy_table_snapshot, policy_table::PT_SNAPSHOT)) {
     Json::Value value = policy_table_snapshot->ToJsonValue();
-    Json::FastWriter writer;
-    std::string message_string = writer.write(value);
+    Json::StreamWriterBuilder writer_builder;
+    writer_builder["indentation"] = "";
+    std::string message_string = Json::writeString(writer_builder, value);
 
     LOG4CXX_DEBUG(logger_, "Snapshot contents is : " << message_string);
 
     BinaryMessage update(message_string.begin(), message_string.end());
-
+    ptu_requested_ = true;
     listener_->OnSnapshotCreated(
         update, RetrySequenceDelaysSeconds(), TimeoutExchangeMSec());
   } else {
@@ -742,7 +751,7 @@ void PolicyManagerImpl::StartPTExchange() {
     return;
   }
   LOG4CXX_INFO(logger_, "Policy want to  call RequestPTUpdate");
-  if (listener_ && listener_->CanUpdate()) {
+  if (listener_) {
     LOG4CXX_INFO(logger_, "Listener CanUpdate");
     if (update_status_manager_.IsUpdateRequired()) {
       update_status_manager_.PendingUpdate();
@@ -766,6 +775,10 @@ void PolicyManagerImpl::OnAppsSearchCompleted(const bool trigger_ptu) {
   if (update_status_manager_.IsUpdateRequired()) {
     StartPTExchange();
   }
+}
+
+void PolicyManagerImpl::UpdatePTUReadyAppsCount(const uint32_t new_app_count) {
+  applications_pending_ptu_count_ = new_app_count;
 }
 
 const std::vector<std::string> PolicyManagerImpl::GetAppRequestTypes(
@@ -819,21 +832,13 @@ void PolicyManagerImpl::GetEnabledCloudApps(
   cache_->GetEnabledCloudApps(enabled_apps);
 }
 
-bool PolicyManagerImpl::GetCloudAppParameters(
-    const std::string& policy_app_id,
-    bool& enabled,
-    std::string& endpoint,
-    std::string& certificate,
-    std::string& auth_token,
-    std::string& cloud_transport_type,
-    std::string& hybrid_app_preference) const {
-  return cache_->GetCloudAppParameters(policy_app_id,
-                                       enabled,
-                                       endpoint,
-                                       certificate,
-                                       auth_token,
-                                       cloud_transport_type,
-                                       hybrid_app_preference);
+std::vector<std::string> PolicyManagerImpl::GetEnabledLocalApps() const {
+  return cache_->GetEnabledLocalApps();
+}
+
+bool PolicyManagerImpl::GetAppProperties(
+    const std::string& policy_app_id, AppProperties& out_app_properties) const {
+  return cache_->GetAppProperties(policy_app_id, out_app_properties);
 }
 
 void PolicyManagerImpl::InitCloudApp(const std::string& policy_app_id) {
@@ -1200,6 +1205,12 @@ void PolicyManagerImpl::AddDevice(const std::string& device_id,
   }
 }
 
+void PolicyManagerImpl::OnLocalAppAdded() {
+  LOG4CXX_AUTO_TRACE(logger_);
+  update_status_manager_.ScheduleUpdate();
+  StartPTExchange();
+}
+
 void PolicyManagerImpl::SetDeviceInfo(const std::string& device_id,
                                       const DeviceInfo& device_info) {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -1381,11 +1392,24 @@ void PolicyManagerImpl::RetrySequenceFailed() {
 
   listener_->OnPTUFinished(false);
   ResetRetrySequence(ResetRetryCountType::kResetWithStatusUpdate);
+
+  ptu_requested_ = false;
+  if (HasApplicationForPTU()) {
+    update_status_manager_.OnExistedApplicationAdded(true);
+    StartPTExchange();
+  }
+}
+
+void PolicyManagerImpl::ResetTimeout() {
+  LOG4CXX_AUTO_TRACE(logger_);
+  if (update_status_manager_.IsUpdatePending()) {
+    uint32_t update_timeout = TimeoutExchangeMSec();
+    update_status_manager_.ResetTimeout(update_timeout);
+  }
 }
 
 void PolicyManagerImpl::OnSystemRequestReceived() {
   LOG4CXX_AUTO_TRACE(logger_);
-
   IncrementRetryIndex();
 }
 
@@ -1637,6 +1661,10 @@ bool PolicyManagerImpl::IsPTValid(
   return true;
 }
 
+bool PolicyManagerImpl::HasApplicationForPTU() const {
+  return applications_pending_ptu_count_ > 0;
+}
+
 const PolicySettings& PolicyManagerImpl::get_settings() const {
   DCHECK(settings_);
   return *settings_;
@@ -1694,6 +1722,12 @@ void PolicyManagerImpl::UpdateAppConsentWithExternalConsent(
   cache_->SetExternalConsentForApp(updated_external_consent_permissions);
 }
 
+void PolicyManagerImpl::SendOnAppPropertiesChangeNotification(
+    const std::string& policy_app_id) const {
+  LOG4CXX_AUTO_TRACE(logger_);
+  listener_->SendOnAppPropertiesChangeNotification(policy_app_id);
+}
+
 void PolicyManagerImpl::ResumePendingAppPolicyActions() {
   LOG4CXX_AUTO_TRACE(logger_);
 
@@ -1705,6 +1739,10 @@ void PolicyManagerImpl::ResumePendingAppPolicyActions() {
   for (auto& send_permissions_params : send_permissions_list_) {
     SendPermissionsToApp(send_permissions_params.first,
                          send_permissions_params.second);
+  }
+
+  for (auto& app : app_properties_changed_list_) {
+    SendOnAppPropertiesChangeNotification(app);
   }
   send_permissions_list_.clear();
 }
@@ -2074,7 +2112,9 @@ void PolicyManagerImpl::MarkUnpairedDevice(const std::string& device_id) {
 
 void PolicyManagerImpl::OnAppRegisteredOnMobile(
     const std::string& device_id, const std::string& application_id) {
-  StartPTExchange();
+  if (!is_ptu_in_progress_) {
+    StartPTExchange();
+  }
   SendNotificationOnPermissionsUpdated(device_id, application_id);
 }
 
@@ -2181,7 +2221,9 @@ StatusNotifier PolicyManagerImpl::AddApplication(
   }
   LOG4CXX_DEBUG(logger_, "Promote existed application");
   PromoteExistedApplication(device_id, application_id, device_consent);
-  update_status_manager_.OnExistedApplicationAdded(cache_->UpdateRequired());
+  if (!ptu_requested_) {
+    update_status_manager_.OnExistedApplicationAdded(cache_->UpdateRequired());
+  }
   return std::make_shared<utils::CallNothing>();
 }
 
@@ -2310,10 +2352,10 @@ bool PolicyManagerImpl::InitPT(const std::string& file_name,
   const bool ret = cache_->Init(file_name, settings);
   if (ret) {
     RefreshRetrySequence();
-    std::vector<std::string> enabled_apps;
-    cache_->GetEnabledCloudApps(enabled_apps);
-    for (auto it = enabled_apps.begin(); it != enabled_apps.end(); ++it) {
-      SendAuthTokenUpdated(*it);
+    std::vector<std::string> enabled_cloud_apps;
+    cache_->GetEnabledCloudApps(enabled_cloud_apps);
+    for (auto app : enabled_cloud_apps) {
+      SendAuthTokenUpdated(app);
     }
   }
   return ret;
@@ -2432,12 +2474,9 @@ void PolicyManagerImpl::SendAppPermissionsChanged(
 }
 
 void PolicyManagerImpl::SendAuthTokenUpdated(const std::string policy_app_id) {
-  bool enabled = false;
-  std::string end, cert, ctt, hap;
-  std::string auth_token;
-  cache_->GetCloudAppParameters(
-      policy_app_id, enabled, end, cert, auth_token, ctt, hap);
-  listener_->OnAuthTokenUpdated(policy_app_id, auth_token);
+  AppProperties app_properties;
+  cache_->GetAppProperties(policy_app_id, app_properties);
+  listener_->OnAuthTokenUpdated(policy_app_id, app_properties.auth_token);
 }
 
 void PolicyManagerImpl::OnPrimaryGroupsChanged(

@@ -172,16 +172,9 @@ class PolicyManagerImpl : public PolicyManager {
    * @param out_end_points output vector of urls
    */
   void GetUpdateUrls(const uint32_t service_type,
-                     EndpointUrls& out_end_points) OVERRIDE;
+                     EndpointUrls& out_end_points) const OVERRIDE;
   void GetUpdateUrls(const std::string& service_type,
-                     EndpointUrls& out_end_points) OVERRIDE;
-
-  /**
-   * @brief GetLockScreenIcon allows to obtain lock screen icon url;
-   * @return url which point to the resourse where lock screen icon could be
-   *obtained.
-   */
-  std::string GetLockScreenIconUrl() const OVERRIDE;
+                     EndpointUrls& out_end_points) const OVERRIDE;
 
   /**
    * @brief Get Icon Url used for showing a cloud apps icon before the intial
@@ -624,6 +617,8 @@ class PolicyManagerImpl : public PolicyManager {
    */
   void OnAppsSearchCompleted(const bool trigger_ptu) OVERRIDE;
 
+  void UpdatePTUReadyAppsCount(const uint32_t new_app_count) OVERRIDE;
+
   /**
    * @brief Get state of request types for given application
    * @param policy_app_id Unique application id
@@ -671,6 +666,7 @@ class PolicyManagerImpl : public PolicyManager {
    * @return policy_table as json object
    */
   Json::Value GetPolicyTableData() const OVERRIDE;
+
   /**
    * @brief Get a list of enabled cloud applications
    * @param enabled_apps List filled with the policy app id of each enabled
@@ -680,28 +676,14 @@ class PolicyManagerImpl : public PolicyManager {
       std::vector<std::string>& enabled_apps) const OVERRIDE;
 
   /**
-   * @brief Get cloud app policy information, all fields that aren't set for a
-   * given app will be filled with empty strings
-   * @param policy_app_id Unique application id
-   * @param enabled Whether or not the app is enabled
-   * @param endpoint Filled with the endpoint used to connect to the cloud
-   * application
-   * @param certificate Filled with the certificate used to for creating a
-   * secure connection to the cloud application
-   * @param auth_token Filled with the token used for authentication when
-   * reconnecting to the cloud app
-   * @param cloud_transport_type Filled with the transport type used by the
-   * cloud application (ex. "WSS")
-   * @param hybrid_app_preference Filled with the hybrid app preference for the
-   * cloud application set by the user
+   * @brief Get a list of enabled local applications
+   * @return enabled_apps List filled with the policy app id of each enabled
+   * local application
    */
-  bool GetCloudAppParameters(const std::string& policy_app_id,
-                             bool& enabled,
-                             std::string& endpoint,
-                             std::string& certificate,
-                             std::string& auth_token,
-                             std::string& cloud_transport_type,
-                             std::string& hybrid_app_preference) const OVERRIDE;
+  std::vector<std::string> GetEnabledLocalApps() const OVERRIDE;
+
+  bool GetAppProperties(const std::string& policy_app_id,
+                        AppProperties& out_app_properties) const OVERRIDE;
 
   /**
    * @ brief Initialize new cloud app in the policy table
@@ -876,6 +858,12 @@ class PolicyManagerImpl : public PolicyManager {
            int32_t timespan_seconds) OVERRIDE;
   // Interface StatisticsManager (end)
 
+  void OnLocalAppAdded() OVERRIDE;
+
+  bool IsNewApplication(const std::string& application_id) const OVERRIDE;
+
+  void ResetTimeout() OVERRIDE;
+
  protected:
 #ifdef USE_HMI_PTU_DECRYPTION
   /**
@@ -982,13 +970,6 @@ class PolicyManagerImpl : public PolicyManager {
                                  DeviceConsent device_consent);
 
   /**
-   * @brief Check if certain application already in policy db.
-   * @param policy application id.
-   * @return true if application presents false otherwise.
-   */
-  bool IsNewApplication(const std::string& application_id) const;
-
-  /**
    * Checks existing and permissions of AppStorageFolder
    * @return true if AppStorageFolder exists and has permissions read/write
    */
@@ -1046,6 +1027,11 @@ class PolicyManagerImpl : public PolicyManager {
    */
   void OnPTUIterationTimeout();
 
+  /**
+   * @brief Check that new applications for PTU were registered
+   */
+  bool HasApplicationForPTU() const;
+
  private:
   /**
    * @brief Get resulting RPCs permissions for application which started on
@@ -1074,6 +1060,9 @@ class PolicyManagerImpl : public PolicyManager {
    */
   void SendAppPermissionsChanged(const std::string& device_id,
                                  const std::string& application_id) OVERRIDE;
+
+  void SendOnAppPropertiesChangeNotification(
+      const std::string& policy_app_id) const OVERRIDE;
 
   /**
    * @brief notify listener of updated auth token for a given policy id
@@ -1144,6 +1133,11 @@ class PolicyManagerImpl : public PolicyManager {
   uint32_t retry_sequence_index_;
 
   /**
+   * @brief Applications pending count ready for PTU
+   */
+  uint32_t applications_pending_ptu_count_;
+
+  /**
    * @brief Lock for guarding retry sequence
    */
   sync_primitives::Lock retry_sequence_lock_;
@@ -1183,9 +1177,24 @@ class PolicyManagerImpl : public PolicyManager {
   bool send_on_update_sent_out_;
 
   /**
+   * @brief List of chnaged application properties
+   */
+  std::vector<std::string> app_properties_changed_list_;
+
+  /**
    * @brief Flag for notifying that invalid PTU should be triggered
    */
   bool trigger_ptu_;
+
+  /**
+   * @brief Flag for notifying that PTU was requested
+   */
+  bool ptu_requested_;
+
+  /**
+   * @brief Last registered application id on mobile
+   */
+  std::string last_registered_policy_app_id_;
 
   typedef std::list<std::pair<std::string, AppPoliciesValueType> >
       PendingAppPolicyActionsList;

@@ -152,13 +152,14 @@ class StateControllerImpl : public event_engine::EventObserver,
 
   template <typename UnaryFunction>
   void ForEachApplication(UnaryFunction func) const {
-    DataAccessor<ApplicationSet> accessor = app_mngr_.applications();
-    ApplicationSet::iterator it = accessor.GetData().begin();
-    for (; it != accessor.GetData().end(); ++it) {
-      ApplicationConstSharedPtr const_app = *it;
-      if (const_app) {
-        func(app_mngr_.application(const_app->app_id()));
-      }
+    ApplicationSet applications;
+    {
+      DataAccessor<ApplicationSet> accessor = app_mngr_.applications();
+      applications = accessor.GetData();
+    }
+
+    for (const auto& app : applications) {
+      func(app);
     }
   }
 

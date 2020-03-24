@@ -4,13 +4,16 @@ Contains parser for JSON RPC XML format.
 
 """
 
-from generator import Model
-from generator.parsers import RPCBase
-import xml.etree.ElementTree as ET
+from parsers.parse_error import ParseError
+from parsers.rpc_base import RPCBase
 
-class Parser(RPCBase.Parser):
 
+class Parser(RPCBase):
     """JSON RPC parser."""
+
+    @property
+    def get_version(self):
+        return '1.0.0'
 
     def __init__(self):
         """Constructor."""
@@ -33,11 +36,11 @@ class Parser(RPCBase.Parser):
 
         for element in root:
             if element.tag != "interface":
-                raise RPCBase.ParseError("Subelement '" + element.tag +
-                                         "' is unexpected in interfaces")
+                raise ParseError("Subelement '" + element.tag +
+                                 "' is unexpected in interfaces")
 
             if "name" not in element.attrib:
-                raise RPCBase.ParseError(
+                raise ParseError(
                     "Name is not specified for interface")
 
             self._interface_name = element.attrib["name"]
@@ -72,7 +75,7 @@ class Parser(RPCBase.Parser):
         if "FunctionID" == enum_name:
             prefix_length = len(self._interface_name) + 1
             if element_name[:prefix_length] != self._interface_name + '_':
-                raise RPCBase.ParseError(
+                raise ParseError(
                     "Unexpected prefix for function id '" +
                     element_name + "'")
             name = self._interface_name + "." + element_name[prefix_length:]
@@ -95,7 +98,7 @@ class Parser(RPCBase.Parser):
         """
 
         if function_param_name in ['method', 'code']:
-            raise RPCBase.ParseError(
+            raise ParseError(
                 "'" + function_param_name +
                 "' is a predefined name and can't be used" +
                 " as a function parameter name")

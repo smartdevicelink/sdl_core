@@ -36,8 +36,8 @@
 #include <vector>
 
 #include "gtest/gtest.h"
-#include "json/reader.h"
 #include "json/writer.h"
+#include "utils/jsoncpp_reader_wrapper.h"
 
 #include "config_profile/profile.h"
 #include "connection_handler/connection_handler.h"
@@ -76,6 +76,8 @@ namespace custom_str = utils::custom_string;
 
 typedef std::multimap<std::string, policy_table::Rpcs&>
     UserConsentPromptToRpcsConnections;
+
+typedef std::shared_ptr<policy_table::Table> PolicyTableSPtr;
 
 namespace {
 std::string kSpeed = "speed";
@@ -153,6 +155,7 @@ class PolicyManagerImplTest : public ::testing::Test {
   NiceMock<MockUpdateStatusManager> update_status_manager;
   const std::string device_id;
   std::shared_ptr<access_remote_test::MockAccessRemote> access_remote;
+  PolicyTableSPtr default_pt_snapshot_;
 
   void SetUp() OVERRIDE {
     manager = new PolicyManagerImpl();
@@ -161,6 +164,8 @@ class PolicyManagerImplTest : public ::testing::Test {
     manager->set_cache_manager(cache_manager);
     access_remote = std::make_shared<access_remote_test::MockAccessRemote>();
     manager->set_access_remote(access_remote);
+    // Json::Value table = createPTforLoad();
+    default_pt_snapshot_ = std::make_shared<policy_table::Table>();
   }
 
   void TearDown() OVERRIDE {
@@ -305,10 +310,11 @@ class PolicyManagerImplTest2 : public ::testing::Test {
   const Json::Value GetPTU(std::string file_name) {
     // Get PTU
     std::ifstream ifile(file_name);
-    Json::Reader reader;
+    Json::CharReaderBuilder reader_builder;
     std::string json;
     Json::Value root(Json::objectValue);
-    if (ifile.is_open() && reader.parse(ifile, root, true)) {
+    if (ifile.is_open() &&
+        Json::parseFromStream(reader_builder, ifile, &root, nullptr)) {
       json = root.toStyledString();
     }
     ifile.close();
@@ -331,9 +337,10 @@ class PolicyManagerImplTest2 : public ::testing::Test {
   Json::Value AddWidgetSupportToPt(const std::string& section_name,
                                    const uint32_t group_number) {
     std::ifstream ifile("sdl_preloaded_pt.json");
-    Json::Reader reader;
+    Json::CharReaderBuilder reader_builder;
     Json::Value root(Json::objectValue);
-    if (ifile.is_open() && reader.parse(ifile, root, true)) {
+    if (ifile.is_open() &&
+        Json::parseFromStream(reader_builder, ifile, &root, nullptr)) {
       auto& groups =
           root["policy_table"]["app_policies"][section_name]["groups"];
       if (groups.empty()) {
@@ -585,8 +592,9 @@ Json::Value CreatePTforLoad() {
       "}"
       "}");
   Json::Value table(Json::objectValue);
-  Json::Reader reader;
-  EXPECT_TRUE(reader.parse(load_table, table));
+  utils::JsonReader reader;
+
+  EXPECT_TRUE(reader.parse(load_table, &table));
   return table;
 }
 
@@ -646,10 +654,11 @@ TEST_F(PolicyManagerImplTest2, IsAppRevoked_SetRevokedAppID_ExpectAppRevoked) {
   CreateLocalPT("sdl_preloaded_pt.json");
   // Arrange
   std::ifstream ifile("sdl_preloaded_pt.json");
-  Json::Reader reader;
+  Json::CharReaderBuilder reader_builder;
   std::string json;
   Json::Value root(Json::objectValue);
-  if (ifile.is_open() && reader.parse(ifile, root, true)) {
+  if (ifile.is_open() &&
+      Json::parseFromStream(reader_builder, ifile, &root, nullptr)) {
     root["policy_table"]["app_policies"][app_id1] = Json::nullValue;
     json = root.toStyledString();
   }
@@ -703,10 +712,11 @@ TEST_F(PolicyManagerImplTest2,
   ASSERT_TRUE(output.list_of_allowed_params.empty());
   // Act
   std::ifstream ifile("sdl_preloaded_pt.json");
-  Json::Reader reader;
+  Json::CharReaderBuilder reader_builder;
   std::string json;
   Json::Value root(Json::objectValue);
-  if (ifile.is_open() && reader.parse(ifile, root, true)) {
+  if (ifile.is_open() &&
+      Json::parseFromStream(reader_builder, ifile, &root, nullptr)) {
     root["policy_table"]["app_policies"][app_id1] = Json::nullValue;
     json = root.toStyledString();
   }
@@ -870,10 +880,11 @@ TEST_F(PolicyManagerImplTest2,
   manager->AddApplication(dev_id1, "1234", HmiTypes(policy_table::AHT_MEDIA));
   // Emulate PTU with new policies for app added above
   std::ifstream ifile("sdl_preloaded_pt.json");
-  Json::Reader reader;
+  Json::CharReaderBuilder reader_builder;
   std::string json;
   Json::Value root(Json::objectValue);
-  if (ifile.is_open() && reader.parse(ifile, root, true)) {
+  if (ifile.is_open() &&
+      Json::parseFromStream(reader_builder, ifile, &root, nullptr)) {
     // Add AppID with policies
     root["policy_table"]["app_policies"]["1234"] =
         Json::Value(Json::objectValue);
@@ -979,6 +990,8 @@ TEST_F(PolicyManagerImplTest, ResetPT) {
 
 TEST_F(PolicyManagerImplTest, LoadPT_SetPT_PTIsLoaded) {
   // Arrange
+  EXPECT_CALL(*cache_manager, GenerateSnapshot())
+      .WillOnce(Return(default_pt_snapshot_));
   manager->ForcePTExchange();
   manager->OnUpdateStarted();
   Json::Value table = CreatePTforLoad();
@@ -1015,6 +1028,8 @@ TEST_F(PolicyManagerImplTest, LoadPT_SetPT_PTIsLoaded) {
 
 TEST_F(PolicyManagerImplTest, LoadPT_FunctionalGroup_removeRPC_SendUpdate) {
   // Arrange
+  EXPECT_CALL(*cache_manager, GenerateSnapshot())
+      .WillOnce(Return(default_pt_snapshot_));
   manager->ForcePTExchange();
   manager->OnUpdateStarted();
   Json::Value table = CreatePTforLoad();
@@ -1050,6 +1065,8 @@ TEST_F(PolicyManagerImplTest, LoadPT_FunctionalGroup_removeRPC_SendUpdate) {
 TEST_F(PolicyManagerImplTest,
        LoadPT_FunctionalGroup_removeRPCParams_SendUpdate) {
   // Arrange
+  EXPECT_CALL(*cache_manager, GenerateSnapshot())
+      .WillOnce(Return(default_pt_snapshot_));
   manager->ForcePTExchange();
   manager->OnUpdateStarted();
   Json::Value table = CreatePTforLoad();
@@ -1087,6 +1104,8 @@ TEST_F(PolicyManagerImplTest,
 TEST_F(PolicyManagerImplTest,
        LoadPT_FunctionalGroup_removeRPC_HMILevels_SendUpdate) {
   // Arrange
+  EXPECT_CALL(*cache_manager, GenerateSnapshot())
+      .WillOnce(Return(default_pt_snapshot_));
   manager->ForcePTExchange();
   manager->OnUpdateStarted();
   Json::Value table = CreatePTforLoad();
@@ -1124,6 +1143,8 @@ TEST_F(PolicyManagerImplTest,
 TEST_F(PolicyManagerImplTest,
        LoadPT_FunctionalGroup_addRPC_HMILevels_SendUpdate) {
   // Arrange
+  EXPECT_CALL(*cache_manager, GenerateSnapshot())
+      .WillOnce(Return(default_pt_snapshot_));
   manager->ForcePTExchange();
   manager->OnUpdateStarted();
   Json::Value table = CreatePTforLoad();
@@ -1162,6 +1183,8 @@ TEST_F(PolicyManagerImplTest,
 TEST_F(PolicyManagerImplTest, LoadPT_FunctionalGroup_addRPCParams_SendUpdate) {
   using namespace application_manager;
   // Arrange
+  EXPECT_CALL(*cache_manager, GenerateSnapshot())
+      .WillOnce(Return(default_pt_snapshot_));
   manager->ForcePTExchange();
   manager->OnUpdateStarted();
   Json::Value table = CreatePTforLoad();
@@ -1198,6 +1221,8 @@ TEST_F(PolicyManagerImplTest, LoadPT_FunctionalGroup_addRPCParams_SendUpdate) {
 
 TEST_F(PolicyManagerImplTest, LoadPT_FunctionalGroup_NoUpdate_DONT_SendUpdate) {
   // Arrange
+  EXPECT_CALL(*cache_manager, GenerateSnapshot())
+      .WillOnce(Return(default_pt_snapshot_));
   manager->ForcePTExchange();
   manager->OnUpdateStarted();
   Json::Value table = CreatePTforLoad();
@@ -1228,6 +1253,8 @@ TEST_F(PolicyManagerImplTest, LoadPT_FunctionalGroup_NoUpdate_DONT_SendUpdate) {
 TEST_F(PolicyManagerImplTest, LoadPT_SetInvalidUpdatePT_PTIsNotLoaded) {
   // Arrange
   Json::Value table(Json::objectValue);
+  EXPECT_CALL(*cache_manager, GenerateSnapshot())
+      .WillOnce(Return(default_pt_snapshot_));
   manager->ForcePTExchange();
   manager->OnUpdateStarted();
 
@@ -1322,6 +1349,8 @@ TEST_F(
   // Arrange
   CreateLocalPT("sdl_preloaded_pt.json");
   EXPECT_EQ("UP_TO_DATE", manager->GetPolicyTableStatus());
+  ON_CALL(listener, GetDevicesIds(_))
+      .WillByDefault(Return(transport_manager::DeviceList()));
   GetPTU("valid_sdl_pt_update.json");
   EXPECT_EQ("UP_TO_DATE", manager->GetPolicyTableStatus());
   // Try to add existing app
@@ -1336,6 +1365,8 @@ TEST_F(PolicyManagerImplTest2, UpdateApplication_AppServices) {
   // Arrange
   CreateLocalPT("sdl_preloaded_pt.json");
   EXPECT_EQ("UP_TO_DATE", manager->GetPolicyTableStatus());
+  ON_CALL(listener, GetDevicesIds(_))
+      .WillByDefault(Return(transport_manager::DeviceList()));
   GetPTU("valid_sdl_pt_update.json");
   EXPECT_EQ("UP_TO_DATE", manager->GetPolicyTableStatus());
   // Try to add existing app
@@ -1370,6 +1401,8 @@ TEST_F(PolicyManagerImplTest2,
   const int kSecondsInDay = 60 * 60 * 24;
   int days = date_time::getSecs(current_time) / kSecondsInDay;
   EXPECT_EQ("UP_TO_DATE", manager->GetPolicyTableStatus());
+  ON_CALL(listener, GetDevicesIds(_))
+      .WillByDefault(Return(transport_manager::DeviceList()));
 
   GetPTU("valid_sdl_pt_update.json");
   EXPECT_EQ("UP_TO_DATE", manager->GetPolicyTableStatus());
@@ -1416,9 +1449,10 @@ TEST_F(PolicyManagerImplTest2, ResetRetrySequence) {
 TEST_F(PolicyManagerImplTest2, NextRetryTimeout_ExpectTimeoutsFromPT) {
   // Arrange
   std::ifstream ifile("sdl_preloaded_pt.json");
-  Json::Reader reader;
+  Json::CharReaderBuilder reader_builder;
   Json::Value root(Json::objectValue);
-  if (ifile.is_open() && reader.parse(ifile, root, true)) {
+  if (ifile.is_open() &&
+      Json::parseFromStream(reader_builder, ifile, &root, nullptr)) {
     Json::Value seconds_between_retries = Json::Value(Json::arrayValue);
     seconds_between_retries =
         root["policy_table"]["module_config"]["seconds_between_retries"];
@@ -1464,10 +1498,11 @@ TEST_F(PolicyManagerImplTest2, UpdatedPreloadedPT_ExpectLPT_IsUpdated) {
   CreateLocalPT("sdl_preloaded_pt.json");
   // Update preloadedPT
   std::ifstream ifile("sdl_preloaded_pt.json");
-  Json::Reader reader;
+  Json::CharReaderBuilder reader_builder;
   Json::Value root(Json::objectValue);
 
-  if (ifile.is_open() && reader.parse(ifile, root, true)) {
+  if (ifile.is_open() &&
+      Json::parseFromStream(reader_builder, ifile, &root, nullptr)) {
     root["policy_table"]["module_config"]["preloaded_date"] =
         new_data.new_date_;
     Json::Value val(Json::objectValue);
@@ -1481,9 +1516,8 @@ TEST_F(PolicyManagerImplTest2, UpdatedPreloadedPT_ExpectLPT_IsUpdated) {
   }
   ifile.close();
 
-  Json::StyledStreamWriter writer;
   std::ofstream ofile("sdl_preloaded_pt.json");
-  writer.write(ofile, root);
+  ofile << root;
   ofile.flush();
   ofile.close();
 
@@ -1533,9 +1567,10 @@ TEST_F(PolicyManagerImplTest2,
        RetrySequenceDelaysSeconds_Expect_CorrectValues) {
   // Arrange
   std::ifstream ifile("sdl_preloaded_pt.json");
-  Json::Reader reader;
+  Json::CharReaderBuilder reader_builder;
   Json::Value root(Json::objectValue);
-  if (ifile.is_open() && reader.parse(ifile, root, true)) {
+  if (ifile.is_open() &&
+      Json::parseFromStream(reader_builder, ifile, &root, nullptr)) {
     Json::Value seconds_between_retries = Json::Value(Json::arrayValue);
     seconds_between_retries =
         root["policy_table"]["module_config"]["seconds_between_retries"];

@@ -736,8 +736,9 @@ void HMICapabilitiesImpl::set_seat_location_capability(
       new smart_objects::SmartObject(seat_location_capability);
 }
 
-void HMICapabilitiesImpl::Init(resumption::LastState* last_state) {
-  hmi_language_handler_.Init(last_state);
+void HMICapabilitiesImpl::Init(
+    resumption::LastStateWrapperPtr last_state_wrapper) {
+  hmi_language_handler_.Init(last_state_wrapper);
   if (false == load_capabilities_from_file()) {
     LOG4CXX_ERROR(logger_, "file hmi_capabilities.json was not loaded");
   } else {
@@ -746,6 +747,8 @@ void HMICapabilitiesImpl::Init(resumption::LastState* last_state) {
   hmi_language_handler_.set_default_capabilities_languages(
       ui_language_, vr_language_, tts_language_);
 }
+
+void HMICapabilitiesImpl::Init(resumption::LastState*) {}
 
 bool HMICapabilitiesImpl::is_ui_cooperating() const {
   return is_ui_cooperating_;
@@ -902,11 +905,17 @@ bool HMICapabilitiesImpl::load_capabilities_from_file() {
   }
 
   try {
-    Json::Reader reader_;
+    Json::CharReaderBuilder reader_builder;
+    const std::unique_ptr<Json::CharReader> reader_(
+        reader_builder.newCharReader());
+    JSONCPP_STRING err;
     Json::Value root_json;
+    const size_t json_len = json_string.length();
 
-    bool result = reader_.parse(json_string, root_json, false);
+    const bool result = reader_->parse(
+        json_string.c_str(), json_string.c_str() + json_len, &root_json, &err);
     if (!result) {
+      LOG4CXX_DEBUG(logger_, "Json parsing fails: " << err);
       return false;
     }
     // UI

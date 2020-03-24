@@ -606,6 +606,10 @@ class ConnectionHandlerImpl
       const transport_manager::ConnectionUID secondary_connection_handle)
       OVERRIDE;
 
+  const transport_manager::DeviceInfo& GetWebEngineDeviceInfo() const OVERRIDE;
+
+  void CreateWebEngineDevice() OVERRIDE;
+
  private:
   /**
    * \brief Disconnect application.
@@ -646,7 +650,7 @@ class ConnectionHandlerImpl
    * \brief List of devices
    */
   DeviceMap device_list_;
-
+  mutable sync_primitives::RWLock device_list_lock_;
   /**
    * @brief session/connection map
    */

@@ -52,6 +52,7 @@
 #include "utils/macro.h"
 
 #include "media_manager/mock_media_manager.h"
+#include "resumption/last_state_wrapper_impl.h"
 #include "test/resumption/mock_last_state.h"
 
 namespace {
@@ -118,7 +119,10 @@ class ApplicationHelperTest : public testing::Test {
     const std::string path_to_plagin = "";
     EXPECT_CALL(mock_application_manager_settings_, plugins_folder())
         .WillOnce(ReturnRef(path_to_plagin));
-    app_manager_impl_.Init(mock_last_state_, &mock_media_manager_);
+    mock_last_state_ = std::make_shared<MockLastState>();
+    last_state_wrapper_ =
+        std::make_shared<resumption::LastStateWrapperImpl>(mock_last_state_);
+    app_manager_impl_.Init(last_state_wrapper_, &mock_media_manager_);
 
     app_impl_ = std::make_shared<ApplicationImpl>(
         application_id,
@@ -136,7 +140,8 @@ class ApplicationHelperTest : public testing::Test {
 
   ApplicationManagerImpl app_manager_impl_;
   MockMediaManager mock_media_manager_;
-  MockLastState mock_last_state_;
+  std::shared_ptr<MockLastState> mock_last_state_;
+  std::shared_ptr<resumption::LastStateWrapperImpl> last_state_wrapper_;
   ApplicationSharedPtr app_impl_;
 };
 

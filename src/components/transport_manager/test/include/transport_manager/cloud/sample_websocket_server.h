@@ -39,6 +39,7 @@
 #include <boost/asio/placeholders.hpp>
 #include <boost/asio/ssl/stream.hpp>
 #include <boost/asio/strand.hpp>
+#include <boost/asio/thread_pool.hpp>
 #include <boost/beast/core.hpp>
 #include <boost/beast/websocket.hpp>
 #include <boost/beast/websocket/ssl.hpp>
@@ -61,9 +62,9 @@ namespace ssl = boost::asio::ssl;        // from <boost/asio/ssl.hpp>
 using tcp = boost::asio::ip::tcp;        // from <boost/asio/ip/tcp.hpp>
 
 // Accepts incoming connections and launches the WSServer
-class WSSession {
+class WSSession : public std::enable_shared_from_this<WSSession> {
  private:
-  class WSServer {
+  class WSServer : public std::enable_shared_from_this<WSServer> {
    public:
     explicit WSServer(tcp::socket&& socket);
     void AddURLRoute(const std::string& route);
@@ -95,6 +96,7 @@ class WSSession {
  private:
   void on_accept(boost::system::error_code ec);
   boost::asio::io_context ioc_;
+  boost::asio::thread_pool io_pool_;
   const std::string& address_;
   uint16_t port_;
   tcp::acceptor acceptor_;
@@ -106,9 +108,9 @@ class WSSession {
 };
 
 // Accepts incoming connections and launches the sessions
-class WSSSession {
+class WSSSession : public std::enable_shared_from_this<WSSSession> {
  private:
-  class WSSServer {
+  class WSSServer : public std::enable_shared_from_this<WSSServer> {
    public:
     // Take ownership of the socket
     WSSServer(tcp::socket&& socket, ssl::context& ctx);
@@ -148,6 +150,7 @@ class WSSSession {
 
  private:
   boost::asio::io_context ioc_;
+  boost::asio::thread_pool io_pool_;
   tcp::acceptor acceptor_;
   tcp::socket socket_;
   ssl::context ctx_;

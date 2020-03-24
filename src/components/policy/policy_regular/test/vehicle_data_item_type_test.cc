@@ -30,8 +30,8 @@
  * POSSIBILITY OF SUCH DAMAGE. */
 
 #include "gtest/gtest.h"
-#include "json/reader.h"
 #include "policy/policy_table/types.h"
+#include "utils/jsoncpp_reader_wrapper.h"
 
 #include <type_traits>
 
@@ -139,11 +139,12 @@ class VehicleDataItemTypeTest : public ::testing::Test {
   }
 
   Json::Value json_;
-  Json::Reader reader_;
+  utils::JsonReader reader_;
 };
 
 TEST_F(VehicleDataItemTypeTest, Initialize_Success) {
-  reader_.parse(GetFullJsonString(), json_);
+  const std::string str = GetFullJsonString();
+  reader_.parse(str, &json_);
   VehicleDataItem vdi(&json_);
 
   EXPECT_TRUE(vdi.is_initialized());
@@ -156,7 +157,8 @@ TEST_F(VehicleDataItemTypeTest, Initialize_Failed) {
 }
 
 TEST_F(VehicleDataItemTypeTest, CheckConvertFromJsonToVehicleDataItem_Success) {
-  reader_.parse(GetFullJsonString(), json_);
+  const std::string str = GetFullJsonString();
+  reader_.parse(str, &json_);
   VehicleDataItem vdi(&json_);
 
   EXPECT_TRUE((std::string)vdi.name == "VehicleDataItem");
@@ -178,7 +180,8 @@ TEST_F(VehicleDataItemTypeTest, CheckConvertFromJsonToVehicleDataItem_Success) {
 }
 
 TEST_F(VehicleDataItemTypeTest, CheckConvertFromVehicleDataItemToJson_Success) {
-  reader_.parse(GetFullJsonString(), json_);
+  const std::string str = GetFullJsonString();
+  reader_.parse(str, &json_);
   VehicleDataItem vdi(&json_);
 
   auto jsonFrom = vdi.ToJsonValue();
@@ -193,7 +196,8 @@ TEST_F(VehicleDataItemTypeTest, CheckIsValid_Failed) {
 }
 
 TEST_F(VehicleDataItemTypeTest, CheckIsValid_Struct_Success) {
-  reader_.parse(GetFullJsonString(GetFullJsonString()), json_);
+  std::string str = GetFullJsonString(GetFullJsonString());
+  reader_.parse(str, &json_);
   VehicleDataItem vdi(&json_);
 
   vdi.type = "Struct";
@@ -201,7 +205,9 @@ TEST_F(VehicleDataItemTypeTest, CheckIsValid_Struct_Success) {
 }
 
 TEST_F(VehicleDataItemTypeTest, CheckIsValid_Struct_EmptyParams_Failed) {
-  reader_.parse(GetFullJsonString(), json_);
+  const std::string str = GetFullJsonString();
+  reader_.parse(str, &json_);
+
   VehicleDataItem vdi(&json_);
 
   vdi.type = "Struct";
@@ -209,7 +215,9 @@ TEST_F(VehicleDataItemTypeTest, CheckIsValid_Struct_EmptyParams_Failed) {
 }
 
 TEST_F(VehicleDataItemTypeTest, CheckIsValid_PODTypes_Success) {
-  reader_.parse(GetFullJsonString(), json_);
+  const std::string str = GetFullJsonString();
+  reader_.parse(str, &json_);
+
   VehicleDataItem vdi(&json_);
 
   vdi.type = "Integer";
@@ -231,14 +239,16 @@ TEST_F(VehicleDataItemTypeTest, CheckEmptiness_True) {
 }
 
 TEST_F(VehicleDataItemTypeTest, CheckEmptiness_False) {
-  reader_.parse(GetFullJsonString(), json_);
+  const std::string str = GetFullJsonString();
+  reader_.parse(str, &json_);
 
   VehicleDataItem vdi(&json_);
   EXPECT_TRUE(vdi.struct_not_empty());
 }
 
 TEST_F(VehicleDataItemTypeTest, CheckCopyConstructor) {
-  reader_.parse(GetFullJsonString(), json_);
+  const std::string str = GetFullJsonString();
+  reader_.parse(str, &json_);
 
   VehicleDataItem vdi1(&json_);
   VehicleDataItem vdi2(vdi1);

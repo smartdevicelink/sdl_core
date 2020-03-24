@@ -191,18 +191,20 @@ TEST(ValidatedTypes, TestOptionalEmptyArray) {
   Optional<Array<Integer<int8_t, 0, 10>, 0, 5> > ai;
   ASSERT_RPCTYPE_VALID(ai);
   ASSERT_FALSE(ai.is_initialized());
-  Json::FastWriter fw;
-  std::string serialized = fw.write(ai.ToJsonValue());
-  ASSERT_EQ(serialized, "[]\n");
+  Json::StreamWriterBuilder writer_builder;
+  const std::string serialized =
+      Json::writeString(writer_builder, ai.ToJsonValue());
+  ASSERT_EQ("[]", serialized);
 }
 
 TEST(ValidatedTypes, TestMandatoryEmptyArray) {
   Array<Integer<int8_t, 0, 10>, 0, 5> ai;
   ASSERT_FALSE(ai.is_valid());
   ASSERT_FALSE(ai.is_initialized());
-  Json::FastWriter fw;
-  std::string serialized = fw.write(ai.ToJsonValue());
-  ASSERT_EQ(serialized, "[]\n");
+  Json::StreamWriterBuilder writer_builder;
+  const std::string serialized =
+      Json::writeString(writer_builder, ai.ToJsonValue());
+  ASSERT_EQ("[]", serialized);
 }
 
 TEST(ValidatedTypes, TestMap) {
@@ -230,9 +232,10 @@ TEST(ValidatedTypes, TestEmptyMandatoryMap) {
   Map<Integer<int8_t, 0, 10>, 0, 5> im;
   ASSERT_FALSE(im.is_valid());
   ASSERT_FALSE(im.is_initialized());
-  Json::FastWriter fw;
-  std::string serialized = fw.write(im.ToJsonValue());
-  ASSERT_EQ(serialized, "{}\n");
+  Json::StreamWriterBuilder writer_builder;
+  const std::string serialized =
+      Json::writeString(writer_builder, im.ToJsonValue());
+  ASSERT_EQ("{}", serialized);
 }
 
 TEST(ValidatedTypes, TestEnumConstructor) {

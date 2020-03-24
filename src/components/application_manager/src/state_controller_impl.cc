@@ -881,8 +881,7 @@ void StateControllerImpl::OnStateChanged(ApplicationSharedPtr app,
     app->ResetDataInNone();
   }
 
-  app_mngr_.OnHMILevelChanged(
-      app->app_id(), old_state->hmi_level(), new_state->hmi_level());
+  app_mngr_.OnHMIStateChanged(app->app_id(), old_state, new_state);
   app->usage_report().RecordHmiStateChanged(new_state->hmi_level());
 }
 
@@ -977,6 +976,7 @@ int64_t StateControllerImpl::RequestHMIStateChange(
 
 void StateControllerImpl::ApplyPostponedStateForApp(ApplicationSharedPtr app) {
   LOG4CXX_AUTO_TRACE(logger_);
+  DCHECK_OR_RETURN_VOID(app);
   const WindowIds window_ids = app->GetWindowIds();
 
   for (const auto& window_id : window_ids) {

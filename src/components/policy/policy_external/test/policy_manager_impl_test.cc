@@ -106,6 +106,8 @@ TEST_F(PolicyManagerImplTest, LoadPT_SetPT_PTIsLoaded) {
   // Arrange
   EXPECT_CALL(*cache_manager_, DaysBeforeExchange(_))
       .WillOnce(Return(kNonZero));
+  ON_CALL(*cache_manager_, GenerateSnapshot())
+      .WillByDefault(Return(default_pt_snapshot_));
   policy_manager_->ForcePTExchange();
   policy_manager_->SetSendOnUpdateFlags(true);
   policy_manager_->OnUpdateStarted();
@@ -254,6 +256,8 @@ TEST_F(PolicyManagerImplTest2, GetPolicyTableStatus_ExpectUpToDate) {
 TEST_F(PolicyManagerImplTest,
        SetUpdateStarted_GetPolicyTableStatus_Expect_Updating) {
   // Arrange
+  EXPECT_CALL(*cache_manager_, GenerateSnapshot())
+      .WillOnce(Return(default_pt_snapshot_));
   policy_manager_->ForcePTExchange();
   EXPECT_CALL(*cache_manager_, SaveUpdateRequired(true));
   policy_manager_->OnUpdateStarted();
@@ -265,9 +269,10 @@ TEST_F(PolicyManagerImplTest2,
        RetrySequenceDelaysSeconds_Expect_CorrectValues) {
   // Arrange
   std::ifstream ifile(preloaded_pt_filename_);
-  Json::Reader reader;
+  Json::CharReaderBuilder reader_builder;
   Json::Value root(Json::objectValue);
-  if (ifile.is_open() && reader.parse(ifile, root, true)) {
+  if (ifile.is_open() &&
+      Json::parseFromStream(reader_builder, ifile, &root, nullptr)) {
     Json::Value seconds_between_retries = Json::Value(Json::arrayValue);
     seconds_between_retries =
         root["policy_table"]["module_config"]["seconds_between_retries"];
@@ -305,6 +310,8 @@ TEST_F(PolicyManagerImplTest, MarkUnpairedDevice) {
   EXPECT_CALL(*cache_manager_, IgnitionCyclesBeforeExchange());
   EXPECT_CALL(*cache_manager_, DaysBeforeExchange(_));
   // Act
+  EXPECT_CALL(*cache_manager_, GenerateSnapshot())
+      .WillOnce(Return(default_pt_snapshot_));
   policy_manager_->MarkUnpairedDevice(unpaired_device_id_);
 }
 

@@ -97,13 +97,6 @@ class PolicyManager : public usage_statistics::StatisticsManager,
   virtual bool ResetPT(const std::string& file_name) = 0;
 
   /**
-   * @brief GetLockScreenIcon allows to obtain lock screen icon url;
-   * @return url which point to the resource where lock screen icon could be
-   *obtained.
-   */
-  virtual std::string GetLockScreenIconUrl() const = 0;
-
-  /**
    * @brief Get Icon Url used for showing a cloud apps icon before the initial
    *registration
    *
@@ -118,9 +111,9 @@ class PolicyManager : public usage_statistics::StatisticsManager,
    * @param out_end_points output vector of urls
    */
   virtual void GetUpdateUrls(const std::string& service_type,
-                             EndpointUrls& out_end_points) = 0;
+                             EndpointUrls& out_end_points) const = 0;
   virtual void GetUpdateUrls(const uint32_t service_type,
-                             EndpointUrls& out_end_points) = 0;
+                             EndpointUrls& out_end_points) const = 0;
 
   /**
    * @brief PTU is needed, for this PTS has to be formed and sent.
@@ -525,6 +518,12 @@ class PolicyManager : public usage_statistics::StatisticsManager,
   virtual void OnAppsSearchCompleted(const bool trigger_ptu) = 0;
 
   /**
+   * @brief Change applications count ready for PTU
+   * @param new_app_count new applications count for PTU
+   */
+  virtual void UpdatePTUReadyAppsCount(const uint32_t new_app_count) = 0;
+
+  /**
    * @brief Get state of request types for given application
    * @param policy_app_id Unique application id
    * @return request type state
@@ -575,6 +574,14 @@ class PolicyManager : public usage_statistics::StatisticsManager,
    * @return policy_table as json object
    */
   virtual Json::Value GetPolicyTableData() const = 0;
+
+  /**
+   * @brief Get a list of policy app ids
+   * @return apps list filled with the policy app ids of each
+   * application
+   */
+  virtual const std::vector<std::string> GetApplicationPolicyIDs() const = 0;
+
   /**
    * @brief Get a list of enabled cloud applications
    * @param enabled_apps List filled with the policy app id of each enabled
@@ -584,29 +591,21 @@ class PolicyManager : public usage_statistics::StatisticsManager,
       std::vector<std::string>& enabled_apps) const = 0;
 
   /**
-   * @brief Get cloud app policy information, all fields that aren't set for a
-   * given app will be filled with empty strings
-   * @param policy_app_id Unique application id
-   * @param enabled Whether or not the app is enabled
-   * @param endpoint Filled with the endpoint used to connect to the cloud
-   * application
-   * @param certificate Filled with the certificate used to for creating a
-   * secure connection to the cloud application
-   * @param auth_token Filled with the token used for authentication when
-   * reconnecting to the cloud app
-   * @param cloud_transport_type Filled with the transport type used by the
-   * cloud application (ex. "WSS")
-   * @param hybrid_app_preference Filled with the hybrid app preference for the
-   * cloud application set by the user
+   * @brief Get a list of enabled local applications
+   * @return enabled_apps List filled with the policy app id of each enabled
+   * local application
    */
-  virtual bool GetCloudAppParameters(
-      const std::string& policy_app_id,
-      bool& enabled,
-      std::string& endpoint,
-      std::string& certificate,
-      std::string& auth_token,
-      std::string& cloud_transport_type,
-      std::string& hybrid_app_preference) const = 0;
+  virtual std::vector<std::string> GetEnabledLocalApps() const = 0;
+
+  /**
+   * @brief Get app policy information, all fields that aren't set for a
+   * given app will be filled with empty strings
+   * @param policy_app_id policy app id
+   * @param out_app_properties application properties
+   * @return true if application presents in database, otherwise - false
+   */
+  virtual bool GetAppProperties(const std::string& policy_app_id,
+                                AppProperties& out_app_properties) const = 0;
 
   /**
    * @ brief Initialize new cloud app in the policy table
@@ -758,6 +757,13 @@ class PolicyManager : public usage_statistics::StatisticsManager,
                                          const std::string& application_id) = 0;
 
   /**
+   * @brief Send OnAppPropertiesChangeNotification to the HMI
+   * @param policy_app_id policy app id
+   */
+  virtual void SendOnAppPropertiesChangeNotification(
+      const std::string& policy_app_id) const = 0;
+
+  /**
    * @brief Gets all allowed module types
    * @param policy_app_id unique identifier of application
    * @param modules list of allowed module types
@@ -784,6 +790,23 @@ class PolicyManager : public usage_statistics::StatisticsManager,
    */
   virtual AppIdURL RetrySequenceUrl(const struct RetrySequenceURL& rs,
                                     const EndpointUrls& urls) const = 0;
+
+  /**
+   * @brief OnLocalAppAdded triggers PTU
+   */
+  virtual void OnLocalAppAdded() = 0;
+
+  /**
+   * @brief Check if certain application already in policy db.
+   * @param policy application id.
+   * @return true if application presents false otherwise.
+   */
+  virtual bool IsNewApplication(const std::string& application_id) const = 0;
+
+  /**
+   * @brief Restart PTU timeout if PTU in UPDATING state
+   */
+  virtual void ResetTimeout() = 0;
 
  protected:
   /**

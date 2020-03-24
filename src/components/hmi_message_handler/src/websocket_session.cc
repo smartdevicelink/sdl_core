@@ -31,6 +31,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "hmi_message_handler/websocket_session.h"
 #include <unistd.h>
 #include "hmi_message_handler/mb_controller.h"
+#include "utils/jsoncpp_reader_wrapper.h"
+
 using namespace boost::beast::websocket;
 namespace hmi_message_handler {
 
@@ -46,6 +48,7 @@ WebsocketSession::WebsocketSession(boost::asio::ip::tcp::socket socket,
     , shutdown_(false)
     , thread_delegate_(new LoopThreadDelegate(&message_queue_, this))
     , thread_(threads::CreateThread("WS Async Send", thread_delegate_)) {
+  m_writer["indentation"] = "";
   thread_->start(threads::ThreadOptions());
 }
 
@@ -92,7 +95,8 @@ void WebsocketSession::Recv(boost::system::error_code ec) {
                                                       std::placeholders::_2)));
 }
 
-void WebsocketSession::Send(std::string& message, Json::Value& json_message) {
+void WebsocketSession::Send(const std::string& message,
+                            Json::Value& json_message) {
   if (shutdown_) {
     return;
   }
@@ -102,7 +106,7 @@ void WebsocketSession::Send(std::string& message, Json::Value& json_message) {
 }
 
 void WebsocketSession::sendJsonMessage(Json::Value& message) {
-  std::string str_msg = m_writer.write(message);
+  const std::string str_msg = Json::writeString(m_writer, message) + '\n';
   sync_primitives::AutoLock auto_lock(queue_lock_);
   if (!isNotification(message) && !isResponse(message)) {
     mWaitResponseQueue.insert(std::map<std::string, std::string>::value_type(
@@ -128,14 +132,15 @@ void WebsocketSession::Read(boost::system::error_code ec,
   std::string data = boost::beast::buffers_to_string(buffer_.data());
   m_receivingBuffer += data;
 
+  utils::JsonReader reader;
   Json::Value root;
-  if (!m_reader.parse(m_receivingBuffer, root)) {
-    std::string str_err = "Invalid JSON Message: " + data;
-    LOG4CXX_ERROR(ws_logger_, str_err);
+
+  if (!reader.parse(data, &root)) {
+    LOG4CXX_ERROR(ws_logger_, "Invalid JSON Message.");
     return;
   }
 
-  std::string wmes = m_receiverWriter.write(root);
+  const std::string wmes = Json::writeString(m_receiver_writer, root);
   ssize_t beginpos = m_receivingBuffer.find(wmes);
   if (-1 != beginpos) {
     m_receivingBuffer.erase(0, beginpos + wmes.length());

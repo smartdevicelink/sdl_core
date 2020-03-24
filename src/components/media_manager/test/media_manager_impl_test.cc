@@ -246,7 +246,7 @@ TEST_F(MediaManagerImplTest,
   const ServiceType audio_type = ServiceType::kAudio;
   EXPECT_CALL(app_mngr_, CanAppStream(kConnectionKey, audio_type))
       .WillOnce(Return(false));
-  EXPECT_CALL(app_mngr_, ForbidStreaming(kConnectionKey));
+  EXPECT_CALL(app_mngr_, ForbidStreaming(kConnectionKey, audio_type));
   EmulateMobileMessage(audio_type);
 }
 
@@ -255,7 +255,7 @@ TEST_F(MediaManagerImplTest,
   const ServiceType video_type = ServiceType::kMobileNav;
   EXPECT_CALL(app_mngr_, CanAppStream(kConnectionKey, video_type))
       .WillOnce(Return(false));
-  EXPECT_CALL(app_mngr_, ForbidStreaming(kConnectionKey));
+  EXPECT_CALL(app_mngr_, ForbidStreaming(kConnectionKey, video_type));
   EmulateMobileMessage(video_type);
 }
 

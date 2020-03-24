@@ -80,7 +80,8 @@ bool policy::UpdateNeededStatus::IsUpdateRequired() const {
 }
 
 policy::UpdatePendingStatus::UpdatePendingStatus()
-    : Status(kUpdateNeeded, policy::PolicyTableStatus::StatusUpdatePending) {}
+    : Status(kUpdateNeeded,
+             policy::PolicyTableStatus::StatusProcessingSnapshot) {}
 
 void policy::UpdatePendingStatus::ProcessEvent(
     policy::UpdateStatusManager* manager, policy::UpdateEvent event) {
@@ -117,9 +118,6 @@ void policy::UpdatingStatus::ProcessEvent(policy::UpdateStatusManager* manager,
     case kOnValidUpdateReceived:
     case kOnResetPolicyTableNoUpdate:
       manager->SetNextStatus(std::make_shared<UpToDateStatus>());
-      break;
-    case kOnNewAppRegistered:
-      manager->SetPostponedStatus(std::make_shared<UpdateNeededStatus>());
       break;
     case kOnWrongUpdateReceived:
     case kOnUpdateTimeout:

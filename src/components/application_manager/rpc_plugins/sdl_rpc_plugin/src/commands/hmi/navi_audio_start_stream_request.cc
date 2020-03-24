@@ -113,7 +113,7 @@ void AudioStartStreamRequest::on_event(const event_engine::Event& event) {
 
       if (hmi_apis::Common_Result::SUCCESS == code) {
         LOG4CXX_INFO(logger_, "StartAudioStream response SUCCESS");
-        if (application_manager_.HMILevelAllowsStreaming(app->app_id(),
+        if (application_manager_.HMIStateAllowsStreaming(app->app_id(),
                                                          ServiceType::kAudio)) {
           app->set_audio_streaming_approved(true);
         } else {

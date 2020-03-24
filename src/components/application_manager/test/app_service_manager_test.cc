@@ -38,6 +38,7 @@
 #include "application_manager/mock_application_manager_settings.h"
 #include "application_manager/mock_message_helper.h"
 #include "application_manager/smart_object_keys.h"
+#include "resumption/last_state_wrapper_impl.h"
 #include "resumption/mock_last_state.h"
 #include "smart_objects/smart_object.h"
 
@@ -85,7 +86,10 @@ class AppServiceManagerTest : public testing::Test {
   AppServiceManagerTest()
       : mock_app_ptr_(new MockApplication)
       , mock_app_ptr2_(new MockApplication)
-      , app_service_manager_(mock_app_manager_, mock_last_state_)
+      , mock_last_state_(std::make_shared<resumption_test::MockLastState>())
+      , last_state_wrapper_(std::make_shared<resumption::LastStateWrapperImpl>(
+            mock_last_state_))
+      , app_service_manager_(mock_app_manager_, last_state_wrapper_)
       , mock_message_helper_(
             application_manager::MockMessageHelper::message_helper_mock()) {
     Mock::VerifyAndClearExpectations(mock_message_helper_);
@@ -105,7 +109,7 @@ class AppServiceManagerTest : public testing::Test {
         .WillByDefault(Return(kPolicyAppId));
     ON_CALL(*mock_app_ptr2_, policy_app_id())
         .WillByDefault(Return(kPolicyAppId2));
-    ON_CALL(mock_last_state_, get_dictionary()).WillByDefault(ReturnRef(dict_));
+    ON_CALL(*mock_last_state_, dictionary()).WillByDefault(Return(dict_));
     auto app_ptr = std::static_pointer_cast<am::Application>(mock_app_ptr_);
     auto app_ptr2 = std::static_pointer_cast<am::Application>(mock_app_ptr2_);
     ON_CALL(mock_app_manager_, application(kConnectionKey))
@@ -134,8 +138,7 @@ class AppServiceManagerTest : public testing::Test {
         GenerateMediaManifest(true, service_name);
 
     Json::Value empty_json;
-    EXPECT_CALL(mock_last_state_, get_dictionary())
-        .WillOnce(ReturnRef(empty_json));
+    EXPECT_CALL(*mock_last_state_, dictionary()).WillOnce(Return(empty_json));
 
     EXPECT_CALL(*mock_message_helper_,
                 BroadcastCapabilityUpdate(
@@ -201,7 +204,8 @@ class AppServiceManagerTest : public testing::Test {
   std::shared_ptr<MockApplication> mock_app_ptr_;
   std::shared_ptr<MockApplication> mock_app_ptr2_;
   MockApplicationManager mock_app_manager_;
-  resumption_test::MockLastState mock_last_state_;
+  std::shared_ptr<resumption_test::MockLastState> mock_last_state_;
+  resumption::LastStateWrapperPtr last_state_wrapper_;
   MockApplicationManagerSettings mock_settings_;
   application_manager::AppServiceManager app_service_manager_;
   application_manager::MockMessageHelper* mock_message_helper_;
@@ -211,8 +215,7 @@ TEST_F(AppServiceManagerTest, PublishAppService_Mobile_SUCCESS) {
   smart_objects::SmartObject manifest = GenerateMediaManifest(true);
 
   Json::Value empty_json;
-  EXPECT_CALL(mock_last_state_, get_dictionary())
-      .WillOnce(ReturnRef(empty_json));
+  EXPECT_CALL(*mock_last_state_, dictionary()).WillOnce(Return(empty_json));
 
   smart_objects::SmartObject syscap_update_published;
   EXPECT_CALL(
@@ -260,8 +263,7 @@ TEST_F(AppServiceManagerTest, PublishAppService_HMI_SUCCESS) {
   smart_objects::SmartObject manifest = GenerateMediaManifest(true);
 
   Json::Value empty_json;
-  EXPECT_CALL(mock_last_state_, get_dictionary())
-      .WillOnce(ReturnRef(empty_json));
+  EXPECT_CALL(*mock_last_state_, dictionary()).WillOnce(Return(empty_json));
 
   smart_objects::SmartObject syscap_update_published;
   EXPECT_CALL(
