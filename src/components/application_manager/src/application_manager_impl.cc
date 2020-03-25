@@ -893,7 +893,9 @@ void ApplicationManagerImpl::OnHMIStartedCooperation() {
   rpc_service_->ManageHMICommand(mixing_audio_supported_request);
   resume_controller().ResetLaunchTime();
 
+  LOG4CXX_DEBUG(logger_, "[!] Refresh Cloud App Info");
   RefreshCloudAppInformation();
+  SendUpdateAppList();
 }
 
 std::string ApplicationManagerImpl::PolicyIDByIconUrl(const std::string url) {
@@ -1006,6 +1008,7 @@ void ApplicationManagerImpl::RefreshCloudAppInformation() {
   // Create a device for each newly enabled cloud app
   policy::AppProperties app_properties;
   for (; enabled_it != enabled_end; ++enabled_it) {
+    LOG4CXX_DEBUG(logger_, "[!V] Get App Properties for " << *enabled_it);
     GetPolicyHandler().GetAppProperties(*enabled_it, app_properties);
 
     if (app_properties.endpoint.empty()) {
