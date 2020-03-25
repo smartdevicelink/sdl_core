@@ -174,14 +174,6 @@ TEST_F(PolicyManagerImplTest2, ForcePTExchange_ExpectUpdateNeeded) {
   EXPECT_EQ("UPDATE_NEEDED", policy_manager_->GetPolicyTableStatus());
 }
 
-TEST_F(PolicyManagerImplTest2, OnSystemReady) {
-  // Arrange
-  CreateLocalPT(preloaded_pt_filename_);
-  // Check
-  EXPECT_CALL(listener_, OnSystemInfoUpdateRequired());
-  policy_manager_->OnSystemReady();
-}
-
 TEST_F(PolicyManagerImplTest2, ResetRetrySequence) {
   // Arrange
   CreateLocalPT(preloaded_pt_filename_);

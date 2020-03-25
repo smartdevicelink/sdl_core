@@ -376,10 +376,6 @@ const PolicySettings& PolicyHandler::get_settings() const {
 bool PolicyHandler::InitPolicyTable() {
   LOG4CXX_AUTO_TRACE(logger_);
   POLICY_LIB_CHECK_OR_RETURN(false);
-  // Subscribing to notification for system readiness to be able to get system
-  // info necessary for policy table
-  event_observer_->subscribe_on_event(
-      hmi_apis::FunctionID::BasicCommunication_OnReady);
   std::string preloaded_file = get_settings().preloaded_pt_file();
   if (file_system::FileExists(preloaded_file)) {
     const bool pt_inited =
@@ -985,12 +981,6 @@ void PolicyHandler::OnGetSystemInfo(const std::string& ccpu_version,
   LOG4CXX_AUTO_TRACE(logger_);
   POLICY_LIB_CHECK_VOID();
   policy_manager_->SetSystemInfo(ccpu_version, wers_country_code, language);
-}
-
-void PolicyHandler::OnSystemInfoUpdateRequired() {
-  LOG4CXX_AUTO_TRACE(logger_);
-  POLICY_LIB_CHECK_VOID();
-  MessageHelper::SendGetSystemInfoRequest(application_manager_);
 }
 
 void PolicyHandler::OnVIIsReady() {
@@ -1763,11 +1753,6 @@ void PolicyHandler::OnExceededTimeout() {
                 std::mem_fn(&PolicyHandlerObserver::OnPTUTimeoutExceeded));
 
   policy_manager_->OnExceededTimeout();
-}
-
-void PolicyHandler::OnSystemReady() {
-  POLICY_LIB_CHECK_VOID();
-  policy_manager_->OnSystemReady();
 }
 
 const boost::optional<bool> PolicyHandler::LockScreenDismissalEnabledState()

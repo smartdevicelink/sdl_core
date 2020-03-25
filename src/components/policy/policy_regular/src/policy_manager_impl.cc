@@ -1212,14 +1212,6 @@ void PolicyManagerImpl::SetSystemInfo(const std::string& ccpu_version,
   LOG4CXX_AUTO_TRACE(logger_);
 }
 
-void PolicyManagerImpl::OnSystemReady() {
-  // Update policy table for the first time with system information
-  if (cache_->IsPTPreloaded()) {
-    listener()->OnSystemInfoUpdateRequired();
-    return;
-  }
-}
-
 uint32_t PolicyManagerImpl::GetNotificationsNumber(
     const std::string& priority) const {
   LOG4CXX_AUTO_TRACE(logger_);

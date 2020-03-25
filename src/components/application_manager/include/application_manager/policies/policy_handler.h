@@ -222,7 +222,6 @@ class PolicyHandler : public PolicyHandlerInterface,
    */
   uint32_t TimeoutExchangeMSec() const OVERRIDE;
   void OnExceededTimeout() OVERRIDE;
-  void OnSystemReady() OVERRIDE;
   const boost::optional<bool> LockScreenDismissalEnabledState() const OVERRIDE;
   const boost::optional<std::string> LockScreenDismissalWarningMessage(
       const std::string& language) const OVERRIDE;
@@ -381,11 +380,6 @@ class PolicyHandler : public PolicyHandlerInterface,
   void OnGetSystemInfo(const std::string& ccpu_version,
                        const std::string& wers_country_code,
                        const std::string& language) OVERRIDE;
-
-  /**
-   * @brief Send request to HMI to get update on system parameters
-   */
-  virtual void OnSystemInfoUpdateRequired() OVERRIDE;
 
   /**
    * @brief Sends GetVehicleData request in case when Vechicle info is ready.

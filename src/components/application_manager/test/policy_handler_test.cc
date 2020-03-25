@@ -811,15 +811,6 @@ TEST_F(PolicyHandlerTest, OnExceededTimeout) {
   policy_handler_.OnExceededTimeout();
 }
 
-TEST_F(PolicyHandlerTest, OnSystemReady) {
-  // Arrange
-  EnablePolicyAndPolicyManagerMock();
-  // Check expectations
-  EXPECT_CALL(*mock_policy_manager_, OnSystemReady());
-  // Act
-  policy_handler_.OnSystemReady();
-}
-
 TEST_F(PolicyHandlerTest, PTUpdatedAt_method_UseCounter_KILOMETERS) {
   // Arrange
   EnablePolicyAndPolicyManagerMock();
@@ -1364,15 +1355,6 @@ TEST_F(PolicyHandlerTest, IsApplicationRevoked) {
   EXPECT_CALL(*mock_policy_manager_, IsApplicationRevoked(kPolicyAppId_));
   // Act
   policy_handler_.IsApplicationRevoked(kPolicyAppId_);
-}
-
-TEST_F(PolicyHandlerTest, OnSystemInfoUpdateRequired) {
-  // Arrange
-  ChangePolicyManagerToMock();
-  // Check expectations
-  EXPECT_CALL(mock_message_helper_, SendGetSystemInfoRequest(_));
-  // Act
-  policy_handler_.OnSystemInfoUpdateRequired();
 }
 
 TEST_F(PolicyHandlerTest, GetAppRequestTypes) {
