@@ -894,6 +894,7 @@ void ApplicationManagerImpl::OnHMIStartedCooperation() {
   resume_controller().ResetLaunchTime();
 
   RefreshCloudAppInformation();
+  SendUpdateAppList();
 }
 
 std::string ApplicationManagerImpl::PolicyIDByIconUrl(const std::string url) {
