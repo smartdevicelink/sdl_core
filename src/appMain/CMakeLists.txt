@@ -217,7 +217,8 @@ endif ()
 # Install rules
 install(TARGETS ${PROJECT} DESTINATION bin)
 install(
-  FILES build_config.txt log4cxx.properties audio.8bit.wav test.txt smartDeviceLink.ini
+  FILES build_config.txt log4cxx.properties audio.8bit.wav test.txt
+    ${CMAKE_CURRENT_BINARY_DIR}/smartDeviceLink.ini
     hmi_capabilities.json sdl_preloaded_pt.json sample_policy_manager.py
     ${CMAKE_SOURCE_DIR}/mycert.pem ${CMAKE_SOURCE_DIR}/mykey.pem
   DESTINATION bin
