@@ -1162,6 +1162,7 @@
   <element name="VEHICLEDATA_ELECTRONICPARKBRAKESTATUS" />
   <element name="VEHICLEDATA_CLOUDAPPVEHICLEID" />
   <element name="VEHICLEDATA_OEM_CUSTOM_DATA" />
+  <element name="VEHICLEDATA_WINDOWSTATUS"/>
 </enum>
 
 <enum name="WiperStatus">
@@ -1671,6 +1672,21 @@
     </param>
     <param name="levelspan" type="Integer" mandatory="false" defvalue="1" minvalue="1" maxvalue="100">
     </param>
+</struct>
+
+<struct name="WindowState">
+  <param name="approximatePosition" type="Integer" minvalue="0" maxvalue="100" mandatory="true">
+    <description>The approximate percentage that the window is open - 0 being fully closed, 100 being fully open</description>
+  </param>
+  <param name="deviation" type="Integer" minvalue="0" maxvalue="100" mandatory="true">
+    <description>The percentage deviation of the approximatePosition. e.g. If the approximatePosition is 50 and the deviation is 10, then the window's location is somewhere between 40 and 60.</description>
+  </param>
+</struct>
+
+<struct name="WindowStatus">
+  <description>Describes the status of a window of a door/liftgate etc.</description>
+  <param name="location" type="Common.Grid" mandatory="true"/>
+  <param name="state" type="Common.WindowState" mandatory="true"/>      
 </struct>
 
 <struct name="ModuleInfo">
@@ -6050,6 +6066,9 @@
     <param name="cloudAppVehicleID" type="Boolean" mandatory="false">
       <description>Parameter used by cloud apps to identify a head unit</description>
     </param>
+    <param name="windowStatus" type="Boolean" mandatory="false">
+      <description>See WindowStatus</description>
+    </param>
 
         <!-- Ford Specific Data Items -->
     <param name="eCallInfo" type="Boolean" mandatory="false">
@@ -6142,6 +6161,9 @@
     </param>
     <param name="cloudAppVehicleID" type="Common.VehicleDataResult" mandatory="false">
       <description>Parameter used by cloud apps to identify a head unit</description>
+    </param>
+    <param name="windowStatus" type="Common.VehicleDataResult" mandatory="false">
+      <description>See WindowStatus</description>
     </param>
 
         <!-- Ford Specific Data Items -->
@@ -6242,6 +6264,9 @@
     <param name="cloudAppVehicleID" type="Boolean" mandatory="false">
       <description>Parameter used by cloud apps to identify a head unit</description>
     </param>
+    <param name="windowStatus" type="Boolean" mandatory="false">
+      <description>See WindowStatus</description>
+    </param>
 
         <!-- Ford Specific Data Items -->
     <param name="eCallInfo" type="Boolean" mandatory="false">
@@ -6334,6 +6359,9 @@
     </param>
     <param name="cloudAppVehicleID" type="Common.VehicleDataResult" mandatory="false">
       <description>Parameter used by cloud apps to identify a head unit</description>
+    </param>
+    <param name="windowStatus" type="Common.VehicleDataResult" mandatory="false">
+      <description>See WindowStatus</description>
     </param>
 
         <!-- Ford Specific Data Items -->
@@ -6432,6 +6460,9 @@
     <param name="cloudAppVehicleID" type="Boolean" mandatory="false">
       <description>Parameter used by cloud apps to identify a head unit</description>
     </param>
+    <param name="windowStatus" type="Boolean" mandatory="false">
+      <description>See WindowStatus</description>
+    </param>
 
         <!-- Ford Specific Data Items -->
     <param name="eCallInfo" type="Boolean" mandatory="false">
@@ -6527,6 +6558,9 @@
     </param>
     <param name="cloudAppVehicleID" type="String" mandatory="false">
       <description>Parameter used by cloud apps to identify a head unit</description>
+    </param>
+    <param name="windowStatus" type="Common.WindowStatus" array="true" minsize="0" maxsize="100" mandatory="false">
+      <description>See WindowStatus</description>
     </param>
 
         <!-- Ford Specific Data Items -->
@@ -6624,6 +6658,9 @@
     </param>
     <param name="engineOilLife" type="Float" minvalue="0" maxvalue="100" mandatory="false">
       <description>The estimated percentage of remaining oil life of the engine.</description>
+    </param>
+    <param name="windowStatus" type="Common.WindowStatus" array="true" minsize="0" maxsize="100" mandatory="false">
+      <description>See WindowStatus</description>
     </param>
 
         <!-- Ford Specific Data Items -->
