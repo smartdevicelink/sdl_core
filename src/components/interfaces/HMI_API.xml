@@ -1162,6 +1162,7 @@
   <element name="VEHICLEDATA_ELECTRONICPARKBRAKESTATUS" />
   <element name="VEHICLEDATA_CLOUDAPPVEHICLEID" />
   <element name="VEHICLEDATA_OEM_CUSTOM_DATA" />
+  <element name="VEHICLEDATA_HANDSOFFSTEERING"/>
 </enum>
 
 <enum name="WiperStatus">
@@ -6050,6 +6051,9 @@
     <param name="cloudAppVehicleID" type="Boolean" mandatory="false">
       <description>Parameter used by cloud apps to identify a head unit</description>
     </param>
+    <param name="handsOffSteering" type="Boolean" mandatory="false">
+      <description>To indicate whether driver hands are off the steering wheel</description>
+    </param>
 
         <!-- Ford Specific Data Items -->
     <param name="eCallInfo" type="Boolean" mandatory="false">
@@ -6142,6 +6146,9 @@
     </param>
     <param name="cloudAppVehicleID" type="Common.VehicleDataResult" mandatory="false">
       <description>Parameter used by cloud apps to identify a head unit</description>
+    </param>
+    <param name="handsOffSteering" type="Common.VehicleDataResult" mandatory="false">
+      <description>To indicate whether driver hands are off the steering wheel</description>
     </param>
 
         <!-- Ford Specific Data Items -->
@@ -6242,6 +6249,9 @@
     <param name="cloudAppVehicleID" type="Boolean" mandatory="false">
       <description>Parameter used by cloud apps to identify a head unit</description>
     </param>
+    <param name="handsOffSteering" type="Boolean" mandatory="false">
+      <description>To indicate whether driver hands are off the steering wheel</description>
+    </param>
 
         <!-- Ford Specific Data Items -->
     <param name="eCallInfo" type="Boolean" mandatory="false">
@@ -6334,6 +6344,9 @@
     </param>
     <param name="cloudAppVehicleID" type="Common.VehicleDataResult" mandatory="false">
       <description>Parameter used by cloud apps to identify a head unit</description>
+    </param>
+    <param name="handsOffSteering" type="Common.VehicleDataResult" mandatory="false">
+      <description>To indicate whether driver hands are off the steering wheel</description>
     </param>
 
         <!-- Ford Specific Data Items -->
@@ -6432,6 +6445,9 @@
     <param name="cloudAppVehicleID" type="Boolean" mandatory="false">
       <description>Parameter used by cloud apps to identify a head unit</description>
     </param>
+    <param name="handsOffSteering" type="Boolean" mandatory="false">
+      <description>To indicate whether driver hands are off the steering wheel</description>
+    </param>
 
         <!-- Ford Specific Data Items -->
     <param name="eCallInfo" type="Boolean" mandatory="false">
@@ -6527,6 +6543,9 @@
     </param>
     <param name="cloudAppVehicleID" type="String" mandatory="false">
       <description>Parameter used by cloud apps to identify a head unit</description>
+    </param>
+    <param name="handsOffSteering" type="Boolean" mandatory="false">
+      <description>To indicate whether driver hands are off the steering wheel</description>
     </param>
 
         <!-- Ford Specific Data Items -->
@@ -6624,6 +6643,9 @@
     </param>
     <param name="engineOilLife" type="Float" minvalue="0" maxvalue="100" mandatory="false">
       <description>The estimated percentage of remaining oil life of the engine.</description>
+    </param>
+    <param name="handsOffSteering" type="Boolean" mandatory="false">
+      <description>To indicate whether driver hands are off the steering wheel</description>
     </param>
 
         <!-- Ford Specific Data Items -->
