@@ -313,8 +313,6 @@ const char* kDefaultLinkToWebHMI = "HMI/index.html";
 #endif  // WEB_HMI
 const char* kDefaultPoliciesSnapshotFileName = "sdl_snapshot.json";
 const char* kDefaultHmiCapabilitiesFileName = "hmi_capabilities.json";
-const char* kDefaultHmiCapabilitiesCacheFileName =
-    "hmi_capabilities_cache.json";
 const char* kDefaultPreloadedPTFileName = "sdl_preloaded_pt.json";
 const char* kDefaultServerAddress = "127.0.0.1";
 const char* kDefaultWebsocketServerAddress = "0.0.0.0";
@@ -475,7 +473,7 @@ Profile::Profile()
     , stop_streaming_timeout_(kDefaultStopStreamingTimeout)
     , time_testing_port_(kDefaultTimeTestingPort)
     , hmi_capabilities_file_name_(kDefaultHmiCapabilitiesFileName)
-    , hmi_capabilities_cache_file_name_(kDefaultHmiCapabilitiesCacheFileName)
+    , hmi_capabilities_cache_file_name_()
     , help_prompt_()
     , time_out_promt_()
     , min_tread_stack_size_(threads::Thread::kMinStackSize)
@@ -1345,12 +1343,14 @@ void Profile::UpdateValues() {
 
   // HMI capabilities cache file
   ReadStringValue(&hmi_capabilities_cache_file_name_,
-                  kDefaultHmiCapabilitiesCacheFileName,
+                  "",
                   kMainSection,
                   kHmiCapabilitiesCacheFileKey);
 
-  hmi_capabilities_cache_file_name_ =
-      app_storage_folder_ + "/" + hmi_capabilities_cache_file_name_;
+  if (!hmi_capabilities_cache_file_name_.empty()) {
+    hmi_capabilities_cache_file_name_ =
+        app_storage_folder_ + "/" + hmi_capabilities_cache_file_name_;
+  }
 
   LOG_UPDATED_VALUE(hmi_capabilities_cache_file_name_,
                     kHmiCapabilitiesCacheFileKey,
