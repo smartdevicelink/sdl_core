@@ -301,6 +301,7 @@ const char* system_software_version = "systemSoftwareVersion";
 const char* priority = "priority";
 const char* engine_oil_life = "engineOilLife";
 const char* oem_custom_data_type = "oemCustomDataType";
+const char* window_status = "windowStatus";
 
 // app services
 const char* app_service_manifest = "appServiceManifest";
