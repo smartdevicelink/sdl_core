@@ -30,6 +30,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <algorithm>
 #include <string>
 #include <vector>
 
@@ -46,6 +47,7 @@
 #include "application_manager/resumption/resume_ctrl.h"
 #include "application_manager/state_controller.h"
 #include "policy/mock_policy_settings.h"
+#include "smart_objects/enum_schema_item.h"
 #include "utils/custom_string.h"
 #include "utils/lock.h"
 
@@ -1110,6 +1112,38 @@ TEST_F(MessageHelperTest, ExtractWindowIdFromSmartObject_FromWrongType) {
   smart_objects::SmartObject message(smart_objects::SmartType_Array);
   EXPECT_EQ(mobile_apis::PredefinedWindows::DEFAULT_WINDOW,
             MessageHelper::ExtractWindowIdFromSmartObject(message));
+}
+
+TEST_F(MessageHelperTest,
+       VehicleDataMapping_ContainsGeneratedVehicleTypes_SUCCESS) {
+  using VehicleDataTypeEnum = mobile_apis::VehicleDataType::eType;
+  using VehicleDataTypes =
+      smart_objects::EnumConversionHelper<VehicleDataTypeEnum>;
+
+  const auto& vehicle_data_mapping = MessageHelper::vehicle_data();
+  const auto& enum_map = VehicleDataTypes::enum_to_cstring_map();
+
+  // Values which vehicle_data_mapping doesn't contain
+  const std::vector<VehicleDataTypeEnum> excluded_values = {
+      VehicleDataTypeEnum::INVALID_ENUM,
+      VehicleDataTypeEnum::VEHICLEDATA_OEM_CUSTOM_DATA,
+      VehicleDataTypeEnum::VEHICLEDATA_BATTVOLTAGE};
+
+  for (const auto& enum_item : enum_map) {
+    const auto& excluded_value = std::find(
+        excluded_values.begin(), excluded_values.end(), enum_item.first);
+    if (excluded_value != excluded_values.end()) {
+      continue;
+    }
+
+    const auto& found_value = std::find_if(
+        vehicle_data_mapping.begin(),
+        vehicle_data_mapping.end(),
+        [&enum_item](const std::pair<std::string, VehicleDataTypeEnum>& item)
+            -> bool { return enum_item.first == item.second; });
+
+    EXPECT_NE(found_value, vehicle_data_mapping.end());
+  }
 }
 
 }  // namespace application_manager_test
