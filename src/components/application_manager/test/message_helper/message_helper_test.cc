@@ -1112,6 +1112,16 @@ TEST_F(MessageHelperTest, ExtractWindowIdFromSmartObject_FromWrongType) {
             MessageHelper::ExtractWindowIdFromSmartObject(message));
 }
 
+TEST_F(MessageHelperTest,
+       VehicleDataMapping_ContainsWindowStatusMapping_SUCCESS) {
+  const auto& vehicle_data_mapping = MessageHelper::vehicle_data();
+  const auto window_status_mapping =
+      vehicle_data_mapping.find(application_manager::strings::window_status);
+  ASSERT_NE(window_status_mapping, vehicle_data_mapping.end());
+  EXPECT_EQ(mobile_apis::VehicleDataType::VEHICLEDATA_WINDOWSTATUS,
+            window_status_mapping->second);
+}
+
 }  // namespace application_manager_test
 }  // namespace components
 }  // namespace test
