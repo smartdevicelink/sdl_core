@@ -1784,22 +1784,29 @@ void HMICapabilitiesImpl::PrepareUiJsonValueForSaving(
   }
 
   if (helpers::in_range(sections_to_update, strings::system_capabilities)) {
-    save_hmi_capability_field_to_json(strings::navigation_capability,
-                                      schema,
-                                      navigation_capability(),
-                                      out_node[strings::system_capabilities]);
-    save_hmi_capability_field_to_json(strings::phone_capability,
-                                      schema,
-                                      phone_capability(),
-                                      out_node[strings::system_capabilities]);
-    save_hmi_capability_field_to_json(strings::video_streaming_capability,
-                                      schema,
-                                      video_streaming_capability(),
-                                      out_node[strings::system_capabilities]);
-    save_hmi_capability_field_to_json(strings::display_capabilities,
-                                      schema,
-                                      system_display_capabilities(),
-                                      out_node[strings::system_capabilities]);
+    smart_objects::SmartObject capability(smart_objects::SmartType_Map);
+    auto system_capabilities = std::make_shared<smart_objects::SmartObject>(
+        capability[strings::system_capabilities]);
+
+    auto const navigation_capabilities = navigation_capability();
+    if (navigation_capabilities) {
+      (*system_capabilities)[strings::navigation_capability] =
+          *navigation_capabilities;
+    }
+
+    auto const phone_capabilities = phone_capability();
+    if (phone_capabilities) {
+      (*system_capabilities)[strings::phone_capability] = *phone_capabilities;
+    }
+
+    auto const video_streaming_capabilities = video_streaming_capability();
+    if (video_streaming_capabilities) {
+      (*system_capabilities)[strings::video_streaming_capability] =
+          *video_streaming_capabilities;
+    }
+
+    save_hmi_capability_field_to_json(
+        strings::system_capabilities, schema, system_capabilities, out_node);
   }
 
   if (helpers::in_range(sections_to_update, hmi_response::language)) {
