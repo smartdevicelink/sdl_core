@@ -60,7 +60,7 @@ void ButtonGetCapabilitiesRequest::Run() {
 
 void ButtonGetCapabilitiesRequest::onTimeOut() {
   LOG4CXX_AUTO_TRACE(logger_);
-  hmi_capabilities_.OnCapabilityInitialized(
+  hmi_capabilities_.UpdateRequestsRequiredForCapabilities(
       hmi_apis::FunctionID::Buttons_GetCapabilities);
 }
 

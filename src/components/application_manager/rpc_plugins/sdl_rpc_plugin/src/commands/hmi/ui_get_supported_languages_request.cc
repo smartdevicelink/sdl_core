@@ -59,7 +59,7 @@ void UIGetSupportedLanguagesRequest::Run() {
 
 void UIGetSupportedLanguagesRequest::onTimeOut() {
   LOG4CXX_AUTO_TRACE(logger_);
-  hmi_capabilities_.OnCapabilityInitialized(
+  hmi_capabilities_.UpdateRequestsRequiredForCapabilities(
       hmi_apis::FunctionID::UI_GetSupportedLanguages);
 }
 }  // namespace commands

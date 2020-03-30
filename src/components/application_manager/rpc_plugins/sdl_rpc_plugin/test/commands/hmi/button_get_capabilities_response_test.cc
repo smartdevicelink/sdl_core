@@ -116,9 +116,9 @@ TEST_F(ButtonGetCapabilitiesResponseTest,
 
   ResponsePtr command(CreateCommand<ButtonGetCapabilitiesResponse>(msg));
 
-  EXPECT_CALL(
-      mock_hmi_capabilities_,
-      OnCapabilityInitialized(hmi_apis::FunctionID::Buttons_GetCapabilities));
+  EXPECT_CALL(mock_hmi_capabilities_,
+              UpdateRequestsRequiredForCapabilities(
+                  hmi_apis::FunctionID::Buttons_GetCapabilities));
   ASSERT_TRUE(command->Init());
 
   command->Run();

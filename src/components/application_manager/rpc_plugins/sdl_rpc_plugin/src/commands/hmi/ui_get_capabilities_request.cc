@@ -59,7 +59,7 @@ void UIGetCapabilitiesRequest::Run() {
 
 void UIGetCapabilitiesRequest::onTimeOut() {
   LOG4CXX_AUTO_TRACE(logger_);
-  hmi_capabilities_.OnCapabilityInitialized(
+  hmi_capabilities_.UpdateRequestsRequiredForCapabilities(
       hmi_apis::FunctionID::UI_GetCapabilities);
 }
 }  // namespace commands

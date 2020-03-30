@@ -95,7 +95,7 @@ void UIIsReadyRequest::onTimeOut() {
 
 void UIIsReadyRequest::RequestCapabilities() {
   const auto default_initialized_capabilities =
-      hmi_capabilities_.GetDefaultInitializedCapabilities();
+      hmi_capabilities_.GetRequestsRequiredForCapabilities();
 
   if (helpers::in_range(default_initialized_capabilities,
                         hmi_apis::FunctionID::UI_GetLanguage)) {

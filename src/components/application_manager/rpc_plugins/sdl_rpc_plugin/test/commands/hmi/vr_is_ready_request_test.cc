@@ -132,7 +132,7 @@ class VRIsReadyRequestTest
         hmi_apis::FunctionID::VR_GetLanguage,
         hmi_apis::FunctionID::VR_GetSupportedLanguages,
         hmi_apis::FunctionID::VR_GetCapabilities};
-    EXPECT_CALL(mock_hmi_capabilities_, GetDefaultInitializedCapabilities())
+    EXPECT_CALL(mock_hmi_capabilities_, GetRequestsRequiredForCapabilities())
         .WillOnce(Return(interfaces_to_update));
   }
 
@@ -189,7 +189,7 @@ TEST_F(VRIsReadyRequestTest,
       hmi_apis::FunctionID::VR_GetLanguage,
       hmi_apis::FunctionID::VR_GetSupportedLanguages,
       hmi_apis::FunctionID::VR_GetCapabilities};
-  EXPECT_CALL(mock_hmi_capabilities_, GetDefaultInitializedCapabilities())
+  EXPECT_CALL(mock_hmi_capabilities_, GetRequestsRequiredForCapabilities())
       .WillOnce(Return(interfaces_to_update));
   const bool is_send_message_by_timeout = true;
   ExpectSendMessagesToHMI(is_send_message_by_timeout);

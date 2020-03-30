@@ -60,7 +60,7 @@ void VRGetSupportedLanguagesResponse::Run() {
       static_cast<hmi_apis::Common_Result::eType>(
           (*message_)[strings::params][hmi_response::code].asInt());
 
-  hmi_capabilities_.OnCapabilityInitialized(
+  hmi_capabilities_.UpdateRequestsRequiredForCapabilities(
       hmi_apis::FunctionID::VR_GetSupportedLanguages);
 
   if (hmi_apis::Common_Result::SUCCESS == code) {

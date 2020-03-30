@@ -122,7 +122,8 @@ TEST_F(VRGetLanguageResponseTest,
       CreateCommand<VRGetLanguageResponse>(msg));
 
   EXPECT_CALL(mock_hmi_capabilities_,
-              OnCapabilityInitialized(hmi_apis::FunctionID::VR_GetLanguage));
+              UpdateRequestsRequiredForCapabilities(
+                  hmi_apis::FunctionID::VR_GetLanguage));
   ASSERT_TRUE(command->Init());
 
   command->Run();
