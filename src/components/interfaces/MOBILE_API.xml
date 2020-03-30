@@ -5678,7 +5678,7 @@
         <param name="samplingRate" type="SamplingRate" mandatory="true">
             <description> This value shall be allowed at 8 kHz or 16 or 22 or 44 kHz.</description>
         </param>
-        <param name="maxDuration" type="Integer" minvalue="1" maxvalue="1000000" mandatory="true">
+        <param name="maxDuration" type="Integer" minvalue="3000" maxvalue="1000000" mandatory="true">
             <description>The maximum duration of audio recording in milliseconds. </description>
         </param>
         <param name="bitsPerSample" type="BitsPerSample" mandatory="true">
