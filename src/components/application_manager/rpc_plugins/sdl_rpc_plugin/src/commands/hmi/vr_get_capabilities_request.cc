@@ -59,7 +59,7 @@ void VRGetCapabilitiesRequest::Run() {
 
 void VRGetCapabilitiesRequest::onTimeOut() {
   LOG4CXX_AUTO_TRACE(logger_);
-  hmi_capabilities_.OnCapabilityInitialized(
+  hmi_capabilities_.UpdateRequestsRequiredForCapabilities(
       hmi_apis::FunctionID::VR_GetCapabilities);
 }
 }  // namespace commands

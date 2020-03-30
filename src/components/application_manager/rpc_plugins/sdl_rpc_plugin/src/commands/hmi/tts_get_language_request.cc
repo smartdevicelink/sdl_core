@@ -59,7 +59,7 @@ void TTSGetLanguageRequest::Run() {
 
 void TTSGetLanguageRequest::onTimeOut() {
   LOG4CXX_AUTO_TRACE(logger_);
-  hmi_capabilities_.OnCapabilityInitialized(
+  hmi_capabilities_.UpdateRequestsRequiredForCapabilities(
       hmi_apis::FunctionID::TTS_GetLanguage);
 }
 }  // namespace commands

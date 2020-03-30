@@ -99,7 +99,7 @@ void RCIsReadyRequest::onTimeOut() {
 
 void RCIsReadyRequest::RequestCapabilities() {
   const auto default_initialized_capabilities =
-      hmi_capabilities_.GetDefaultInitializedCapabilities();
+      hmi_capabilities_.GetRequestsRequiredForCapabilities();
 
   if (helpers::in_range(default_initialized_capabilities,
                         hmi_apis::FunctionID::RC_GetCapabilities)) {

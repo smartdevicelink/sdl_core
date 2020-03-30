@@ -130,9 +130,9 @@ TEST_F(VRGetSupportedLanguagesResponseTest,
   VRGetSupportedLanguagesResponsePtr command(
       CreateCommand<VRGetSupportedLanguagesResponse>(command_msg));
 
-  EXPECT_CALL(
-      mock_hmi_capabilities_,
-      OnCapabilityInitialized(hmi_apis::FunctionID::VR_GetSupportedLanguages));
+  EXPECT_CALL(mock_hmi_capabilities_,
+              UpdateRequestsRequiredForCapabilities(
+                  hmi_apis::FunctionID::VR_GetSupportedLanguages));
   ASSERT_TRUE(command->Init());
 
   command->Run();

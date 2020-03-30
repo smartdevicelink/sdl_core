@@ -58,7 +58,7 @@ void ButtonGetCapabilitiesResponse::Run() {
       static_cast<hmi_apis::Common_Result::eType>(
           (*message_)[strings::params][hmi_response::code].asInt());
 
-  hmi_capabilities_.OnCapabilityInitialized(
+  hmi_capabilities_.UpdateRequestsRequiredForCapabilities(
       hmi_apis::FunctionID::Buttons_GetCapabilities);
 
   if (hmi_apis::Common_Result::SUCCESS != code) {

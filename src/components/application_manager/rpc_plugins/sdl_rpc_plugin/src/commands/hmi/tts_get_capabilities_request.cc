@@ -59,7 +59,7 @@ void TTSGetCapabilitiesRequest::Run() {
 
 void TTSGetCapabilitiesRequest::onTimeOut() {
   LOG4CXX_AUTO_TRACE(logger_);
-  hmi_capabilities_.OnCapabilityInitialized(
+  hmi_capabilities_.UpdateRequestsRequiredForCapabilities(
       hmi_apis::FunctionID::TTS_GetCapabilities);
 }
 }  // namespace commands

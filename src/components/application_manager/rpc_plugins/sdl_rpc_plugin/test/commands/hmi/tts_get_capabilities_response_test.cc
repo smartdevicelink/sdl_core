@@ -146,9 +146,9 @@ TEST_F(TTSGetCapabilitiesResponseTest,
   std::shared_ptr<TTSGetCapabilitiesResponse> command(
       CreateCommand<TTSGetCapabilitiesResponse>(msg));
 
-  EXPECT_CALL(
-      mock_hmi_capabilities_,
-      OnCapabilityInitialized(hmi_apis::FunctionID::TTS_GetCapabilities));
+  EXPECT_CALL(mock_hmi_capabilities_,
+              UpdateRequestsRequiredForCapabilities(
+                  hmi_apis::FunctionID::TTS_GetCapabilities));
   ASSERT_TRUE(command->Init());
 
   command->Run();

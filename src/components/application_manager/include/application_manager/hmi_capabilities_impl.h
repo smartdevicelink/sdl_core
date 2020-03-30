@@ -238,10 +238,10 @@ class HMICapabilitiesImpl : public HMICapabilities {
 
   bool DeleteCachedCapabilitiesFile() const OVERRIDE;
 
-  std::set<hmi_apis::FunctionID::eType> GetDefaultInitializedCapabilities()
+  std::set<hmi_apis::FunctionID::eType> GetRequestsRequiredForCapabilities()
       const OVERRIDE;
 
-  void OnCapabilityInitialized(
+  void UpdateRequestsRequiredForCapabilities(
       hmi_apis::FunctionID::eType requested_interface) OVERRIDE;
 
   bool MatchesCCPUVersion(const std::string& ccpu_version) const OVERRIDE;
@@ -296,13 +296,13 @@ class HMICapabilitiesImpl : public HMICapabilities {
    * @brief Remove received interface from default initialized capabilities
    * @param requested_interface interface which should be removed
    */
-  void RemoveFromDefaultInitialized(
+  void RemoveFromRequestsRequiredForCapabilities(
       hmi_apis::FunctionID::eType requested_interface);
 
   /**
    * @brief Setting HMICooperating to true for respond all holding RAI requests
    */
-  void CheckPendingDefaultInitialized() const;
+  void CheckPendingRequestsRequiredForCapabilities() const;
 
   /**
    * @brief Gets the currently active language depending on interface
@@ -451,7 +451,7 @@ class HMICapabilitiesImpl : public HMICapabilities {
   ApplicationManager& app_mngr_;
   HMILanguageHandler hmi_language_handler_;
 
-  std::set<hmi_apis::FunctionID::eType> default_initialized_capabilities_;
+  std::set<hmi_apis::FunctionID::eType> requests_required_for_capabilities_;
 
   DISALLOW_COPY_AND_ASSIGN(HMICapabilitiesImpl);
 };

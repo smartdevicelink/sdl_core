@@ -95,7 +95,7 @@ void VRIsReadyRequest::onTimeOut() {
 
 void VRIsReadyRequest::RequestCapabilities() {
   const auto default_initialized_capabilities =
-      hmi_capabilities_.GetDefaultInitializedCapabilities();
+      hmi_capabilities_.GetRequestsRequiredForCapabilities();
 
   if (helpers::in_range(default_initialized_capabilities,
                         hmi_apis::FunctionID::VR_GetLanguage)) {

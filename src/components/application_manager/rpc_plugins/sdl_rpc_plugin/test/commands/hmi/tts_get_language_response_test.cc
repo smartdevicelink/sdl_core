@@ -117,7 +117,8 @@ TEST_F(TTSGetLanguageResponseTest,
       CreateCommand<TTSGetLanguageResponse>(msg));
 
   EXPECT_CALL(mock_hmi_capabilities_,
-              OnCapabilityInitialized(hmi_apis::FunctionID::TTS_GetLanguage));
+              UpdateRequestsRequiredForCapabilities(
+                  hmi_apis::FunctionID::TTS_GetLanguage));
   ASSERT_TRUE(command->Init());
 
   command->Run();

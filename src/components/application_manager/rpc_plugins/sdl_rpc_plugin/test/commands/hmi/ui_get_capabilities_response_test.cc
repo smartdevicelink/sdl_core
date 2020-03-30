@@ -399,9 +399,9 @@ TEST_F(UIGetCapabilitiesResponseTest,
   ResponseFromHMIPtr command(
       CreateCommand<UIGetCapabilitiesResponse>(command_msg));
 
-  EXPECT_CALL(
-      mock_hmi_capabilities_,
-      OnCapabilityInitialized(hmi_apis::FunctionID::UI_GetCapabilities));
+  EXPECT_CALL(mock_hmi_capabilities_,
+              UpdateRequestsRequiredForCapabilities(
+                  hmi_apis::FunctionID::UI_GetCapabilities));
   ASSERT_TRUE(command->Init());
 
   command->Run();

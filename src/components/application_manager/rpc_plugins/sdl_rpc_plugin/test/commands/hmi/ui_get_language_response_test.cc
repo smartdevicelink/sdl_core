@@ -120,7 +120,8 @@ TEST_F(UIGetLanguageResponseTest,
       CreateCommand<UIGetLanguageResponse>(msg));
 
   EXPECT_CALL(mock_hmi_capabilities_,
-              OnCapabilityInitialized(hmi_apis::FunctionID::UI_GetLanguage));
+              UpdateRequestsRequiredForCapabilities(
+                  hmi_apis::FunctionID::UI_GetLanguage));
   ASSERT_TRUE(command->Init());
 
   command->Run();

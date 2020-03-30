@@ -520,13 +520,14 @@ class HMICapabilities {
    * @return set of function id's
    */
   virtual std::set<hmi_apis::FunctionID::eType>
-  GetDefaultInitializedCapabilities() const = 0;
+  GetRequestsRequiredForCapabilities() const = 0;
 
   /**
-   * @brief Response was received for default initialized capabilities
-   * @param requested_interface interface for which received response
+   * @brief Update collection of requests that should be send to
+   * the HMI to get required HMI capabilities
+   * @param requested_interface function id
    */
-  virtual void OnCapabilityInitialized(
+  virtual void UpdateRequestsRequiredForCapabilities(
       hmi_apis::FunctionID::eType requested_interface) = 0;
 
   /**

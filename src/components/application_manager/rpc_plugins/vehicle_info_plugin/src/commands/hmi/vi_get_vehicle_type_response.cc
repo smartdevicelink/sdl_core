@@ -53,7 +53,7 @@ void VIGetVehicleTypeResponse::Run() {
   const auto result_code = static_cast<hmi_apis::Common_Result::eType>(
       (*message_)[strings::params][hmi_response::code].asInt());
 
-  hmi_capabilities_.OnCapabilityInitialized(
+  hmi_capabilities_.UpdateRequestsRequiredForCapabilities(
       hmi_apis::FunctionID::VehicleInfo_GetVehicleType);
 
   if (hmi_apis::Common_Result::SUCCESS != result_code) {
