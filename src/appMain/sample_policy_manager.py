@@ -42,7 +42,7 @@ def http_header(data):
     return json.dumps(header)
 
 
-def crypt(data):
+def encrypt(data):
     return data
 
 
@@ -60,7 +60,7 @@ def pack(data, encryption, add_http_header):
     new_data = pack_handler(data, file_ptr)
     if new_data is not None:
         if encryption:
-            new_data = crypt(new_data)
+            new_data = encrypt(new_data)
         if add_http_header:
             new_data = http_header(new_data)
 
