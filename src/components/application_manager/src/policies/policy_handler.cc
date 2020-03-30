@@ -1581,11 +1581,10 @@ void PolicyHandler::OnSnapshotCreated(const BinaryMessage& pt_string,
     return;
   }
 
-  MessageHelper::SendPolicyUpdate(
-      policy_snapshot_full_path,
-      TimeoutExchangeSec(),
-      policy_manager_->RetrySequenceDelaysSeconds(),
-      application_manager_);
+  MessageHelper::SendPolicyUpdate(policy_snapshot_full_path,
+                                  TimeoutExchangeSec(),
+                                  policy_manager_->RetrySequenceDelaysSeconds(),
+                                  application_manager_);
 #else   // PROPRIETARY_MODE
   LOG4CXX_ERROR(logger_, "HTTP policy");
   EndpointUrls urls;
