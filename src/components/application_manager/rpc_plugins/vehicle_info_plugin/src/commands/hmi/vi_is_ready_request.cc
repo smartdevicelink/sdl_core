@@ -79,6 +79,8 @@ void VIIsReadyRequest::on_event(const event_engine::Event& event) {
         LOG4CXX_INFO(
             logger_,
             "HmiInterfaces::HMI_INTERFACE_VehicleInfo isn't available");
+        hmi_capabilities_.UpdateRequestsRequiredForCapabilities(
+            hmi_apis::FunctionID::VehicleInfo_GetVehicleType);
         return;
       }
 
