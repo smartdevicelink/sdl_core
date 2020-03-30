@@ -94,6 +94,8 @@ class MockPolicyListener : public ::policy::PolicyListener {
                      void(const policy::AppPermissions& permissions,
                           const std::string& device_id,
                           const std::string& policy_app_id));
+  MOCK_CONST_METHOD1(SendOnAppPropertiesChangeNotification,
+                     void(const std::string& policy_app_id));
   MOCK_CONST_METHOD1(
       GetDevicesIds,
       std::vector<std::string>(const std::string& policy_app_id));

@@ -183,9 +183,8 @@ class PolicyHandler : public PolicyHandlerInterface,
                          const std::string& policy_app_id,
                          const std::string& hmi_level) OVERRIDE;
 
-#ifndef EXTERNAL_PROPRIETARY_MODE
   void OnPTUTimeOut() OVERRIDE;
-#endif
+
   /**
    * Gets all allowed module types
    * @param app_id unique identifier of application
@@ -202,10 +201,11 @@ class PolicyHandler : public PolicyHandlerInterface,
                          StringArray* nicknames = NULL,
                          StringArray* app_hmi_types = NULL) OVERRIDE;
   void GetUpdateUrls(const std::string& service_type,
-                     EndpointUrls& out_end_points) OVERRIDE;
+                     EndpointUrls& out_end_points) const OVERRIDE;
   void GetUpdateUrls(const uint32_t service_type,
-                     EndpointUrls& out_end_points) OVERRIDE;
-  virtual std::string GetLockScreenIconUrl() const OVERRIDE;
+                     EndpointUrls& out_end_points) const OVERRIDE;
+  virtual std::string GetLockScreenIconUrl(
+      const std::string& policy_app_id) const OVERRIDE;
   virtual std::string GetIconUrl(
       const std::string& policy_app_id) const OVERRIDE;
   uint32_t NextRetryTimeout() OVERRIDE;
@@ -321,6 +321,8 @@ class PolicyHandler : public PolicyHandlerInterface,
                               const PermissionConsent& permissions) OVERRIDE;
 #endif
 
+  void OnSystemRequestReceived() const OVERRIDE;
+
   /**
    * @brief Get appropriate message parameters and send them with response
    * to HMI
@@ -422,8 +424,22 @@ class PolicyHandler : public PolicyHandlerInterface,
    */
   uint32_t GetAppIdForSending() const OVERRIDE;
 
+  /**
+   * @brief Add application to PTU queue if no application with
+   * the same app id exists
+   * @param new_app_id app id new application
+   */
+  void PushAppIdToPTUQueue(const uint32_t new_app_id);
+
+  /**
+   * @brief Remove the first application from applications queue
+   */
+  void PopAppIdFromPTUQueue();
+
   custom_str::CustomString GetAppName(
       const std::string& policy_app_id) OVERRIDE;
+
+  std::vector<std::string> GetApplicationPolicyIDs() const OVERRIDE;
 
   /**
    * @brief Get a list of enabled cloud applications
@@ -434,6 +450,13 @@ class PolicyHandler : public PolicyHandlerInterface,
       std::vector<std::string>& enabled_apps) const OVERRIDE;
 
   /**
+   * @brief Get a list of enabled local applications
+   * @return enabled_apps List filled with the policy app id of each enabled
+   * local application
+   */
+  std::vector<std::string> GetEnabledLocalApps() const OVERRIDE;
+
+  /**
    * @brief Checks if a given application is an enabled cloud application
    * @param policy_app_id Unique application id
    * @return true, if the application is an enabled cloud application,
@@ -442,32 +465,23 @@ class PolicyHandler : public PolicyHandlerInterface,
   const bool CheckCloudAppEnabled(
       const std::string& policy_app_id) const OVERRIDE;
 
-  /**
-   * @brief Get cloud app policy information, all fields that aren't set for a
-   * given app will be filled with empty strings
-   * @param policy_app_id Unique application id
-   * @param enabled Whether or not the app is enabled
-   * @param endpoint Filled with the endpoint used to connect to the cloud
-   * application
-   * @param certificate Filled with the certificate used to for creating a
-   * secure connection to the cloud application
-   * @param auth_token Filled with the token used for authentication when
-   * reconnecting to the cloud app
-   * @param cloud_transport_type Filled with the transport type used by the
-   * cloud application (ex. "WSS")
-   * @param hybrid_app_preference Filled with the hybrid app preference for the
-   * cloud application set by the user
-   */
-  bool GetCloudAppParameters(const std::string& policy_app_id,
-                             bool& enabled,
-                             std::string& endpoint,
-                             std::string& certificate,
-                             std::string& auth_token,
-                             std::string& cloud_transport_type,
-                             std::string& hybrid_app_preference) const OVERRIDE;
+  bool GetAppProperties(
+      const std::string& policy_app_id,
+      policy::AppProperties& out_app_properties) const OVERRIDE;
 
   void OnAuthTokenUpdated(const std::string& policy_app_id,
                           const std::string& auth_token) OVERRIDE;
+
+  void OnSetAppProperties(
+      const smart_objects::SmartObject& properties) OVERRIDE;
+
+  AppPropertiesState GetAppPropertiesStatus(
+      const smart_objects::SmartObject& properties,
+      const std::string& app_id) const OVERRIDE;
+
+  bool IsNewApplication(const std::string& policy_app_id) const OVERRIDE;
+
+  void OnLocalAppAdded() OVERRIDE;
 
   /**
    * @brief Callback for when a SetCloudAppProperties message is received
@@ -531,6 +545,9 @@ class PolicyHandler : public PolicyHandlerInterface,
       const std::string& device_id,
       const std::string& policy_app_id) const OVERRIDE;
 
+  void SendOnAppPropertiesChangeNotification(
+      const std::string& policy_app_id) const OVERRIDE;
+
   virtual void OnPTExchangeNeeded() OVERRIDE;
 
   virtual void GetAvailableApps(std::queue<std::string>& apps) OVERRIDE;
@@ -582,6 +599,14 @@ class PolicyHandler : public PolicyHandlerInterface,
    * @brief Handler on applications search completed
    */
   void OnAppsSearchCompleted(const bool trigger_ptu) OVERRIDE;
+
+  void OnAddedNewApplicationToAppList(const uint32_t new_app_id,
+                                      const std::string& policy_id) OVERRIDE;
+
+  /**
+   * @brief Queue applications for which PTU has not yet been completed
+   */
+  std::set<uint32_t> applications_ptu_queue_;
 
   /**
    * @brief OnAppRegisteredOnMobile allows to handle event when application were
@@ -880,6 +905,7 @@ class PolicyHandler : public PolicyHandlerInterface,
   typedef std::list<PolicyHandlerObserver*> HandlersCollection;
   HandlersCollection listeners_;
   mutable sync_primitives::Lock listeners_lock_;
+  mutable sync_primitives::Lock app_id_queue_lock_;
 
   /**
    * @brief Application-to-device links are used for collecting their current
@@ -894,6 +920,8 @@ class PolicyHandler : public PolicyHandlerInterface,
   std::shared_ptr<StatisticManagerImpl> statistic_manager_impl_;
   const PolicySettings& settings_;
   application_manager::ApplicationManager& application_manager_;
+  std::string last_registered_policy_app_id_;
+
   friend class AppPermissionDelegate;
 
   /**

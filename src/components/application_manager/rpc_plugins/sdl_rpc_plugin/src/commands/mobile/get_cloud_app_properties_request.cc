@@ -33,20 +33,10 @@ void GetCloudAppPropertiesRequest::Run() {
   std::string policy_app_id =
       (*message_)[strings::msg_params][strings::app_id].asString();
 
-  bool enabled = true;
-  std::string endpoint;
-  std::string auth_token;
-  std::string certificate;
-  std::string cloud_transport_type;
-  std::string hybrid_app_preference;
+  policy::AppProperties app_properties;
 
-  bool result = policy_handler_.GetCloudAppParameters(policy_app_id,
-                                                      enabled,
-                                                      endpoint,
-                                                      certificate,
-                                                      auth_token,
-                                                      cloud_transport_type,
-                                                      hybrid_app_preference);
+  const bool result =
+      policy_handler_.GetAppProperties(policy_app_id, app_properties);
 
   if (!result) {
     SendResponse(false,
@@ -70,19 +60,20 @@ void GetCloudAppPropertiesRequest::Run() {
   }
   properties[strings::nicknames] = nicknames_array;
   properties[strings::app_id] = policy_app_id;
-  properties[strings::enabled] = enabled;
+  properties[strings::enabled] = app_properties.enabled;
 
-  if (!auth_token.empty()) {
-    properties[strings::auth_token] = auth_token;
+  if (!app_properties.auth_token.empty()) {
+    properties[strings::auth_token] = app_properties.auth_token;
   }
-  if (!cloud_transport_type.empty()) {
-    properties[strings::cloud_transport_type] = cloud_transport_type;
+  if (!app_properties.transport_type.empty()) {
+    properties[strings::cloud_transport_type] = app_properties.transport_type;
   }
-  if (!hybrid_app_preference.empty()) {
-    properties[strings::hybrid_app_preference] = hybrid_app_preference;
+  if (!app_properties.hybrid_app_preference.empty()) {
+    properties[strings::hybrid_app_preference] =
+        app_properties.hybrid_app_preference;
   }
-  if (!endpoint.empty()) {
-    properties[strings::endpoint] = endpoint;
+  if (!app_properties.endpoint.empty()) {
+    properties[strings::endpoint] = app_properties.endpoint;
   }
 
   response_params[strings::properties] = properties;

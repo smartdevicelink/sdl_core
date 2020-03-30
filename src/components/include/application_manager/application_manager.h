@@ -47,11 +47,6 @@
 #include "application_manager/plugin_manager/rpc_plugin_manager.h"
 #include "application_manager/state_controller.h"
 #include "policy/policy_types.h"
-#include "telemetry_monitor/telemetry_observable.h"
-
-namespace resumption {
-class LastState;
-}
 
 namespace app_launch {
 class AppLaunchCtrl;
@@ -136,10 +131,14 @@ class ApplicationManager {
  public:
   virtual ~ApplicationManager() {}
 
+  DEPRECATED
+  virtual bool Init(resumption::LastState&,
+                    media_manager::MediaManager* media_manager) = 0;
+
   /**
    * Inits application manager
    */
-  virtual bool Init(resumption::LastState& last_state,
+  virtual bool Init(resumption::LastStateWrapperPtr last_state_wrapper,
                     media_manager::MediaManager* media_manager) = 0;
 
   /**
@@ -166,6 +165,27 @@ class ApplicationManager {
   virtual DataAccessor<ApplicationSet> applications() const = 0;
   virtual DataAccessor<AppsWaitRegistrationSet> pending_applications()
       const = 0;
+
+  /**
+   * @brief CreatePendingApplication Add applicaiton to pending state
+   * All info mandatory for application will be fetched from policy database.
+   * Application will be stored to internal pending applicaitons list.
+   * UpdateAppList will not be trigerred
+   * Application will be created if app exists in policy database and
+   * nicknames are not empty
+   * @param policy_app_id app id to store
+   */
+  virtual void CreatePendingLocalApplication(
+      const std::string& policy_app_id) = 0;
+
+  /**
+   * @brief RemovePendingApplication Remove applicaiton from pending state
+   * Application will be removed from the internal pending applicaitons list.
+   * UpdateAppList will not be trigerred
+   * @param policy_app_id app id to remove
+   */
+  virtual void RemovePendingApplication(const std::string& policy_app_id) = 0;
+
   virtual DataAccessor<ReregisterWaitList> reregister_applications() const = 0;
 
   virtual ApplicationSharedPtr application(uint32_t app_id) const = 0;
@@ -286,17 +306,30 @@ class ApplicationManager {
   virtual void set_current_audio_source(const uint32_t source) = 0;
 
   /**
-   * @brief OnHMILevelChanged the callback that allows SDL to react when
+   * @brief OnHMIStateChanged the callback that allows SDL to react when
    * application's HMI level has been changed.
    *
-   * @param app_id application identifier for which HMILevel has been chaned.
+   * @param app_id application identifier for which HMIState has been chaned.
    *
-   * @param from previous HMILevel.
-   * @param to current HMILevel.
+   * @param from previous HMIState.
+   * @param to current HMIState.
    */
-  virtual void OnHMILevelChanged(uint32_t app_id,
-                                 mobile_apis::HMILevel::eType from,
-                                 mobile_apis::HMILevel::eType to) = 0;
+  virtual void OnHMIStateChanged(const uint32_t app_id,
+                                 const HmiStatePtr from,
+                                 const HmiStatePtr to) = 0;
+
+  /**
+   * @brief Updates streaming service status for specified session and notifies
+   * HMI via notification if required
+   * @param service_type Id of service which status should be updated
+   * @param app_id Id of session which status should be updated
+   * @param streaming_data_available Availability of streaming data for
+   * specified session
+   */
+  virtual void ProcessOnDataStreamingNotification(
+      const protocol_handler::ServiceType service_type,
+      const uint32_t app_id,
+      const bool streaming_data_available) = 0;
 
   /**
    * @brief Checks if driver distraction state is valid, creates message
@@ -606,12 +639,13 @@ class ApplicationManager {
       mobile_api::AppInterfaceUnregisteredReason::eType reason) = 0;
 
   /**
-   * @brief Checks HMI level and returns true if streaming is allowed
+   * @brief Checks application HMI state and returns true if streaming is
+   * allowed
    * @param app_id Application id
    * @param service_type Service type to check
    * @return True if streaming is allowed, false in other case
    */
-  virtual bool HMILevelAllowsStreaming(
+  virtual bool HMIStateAllowsStreaming(
       uint32_t app_id, protocol_handler::ServiceType service_type) const = 0;
 
   /**

@@ -28,6 +28,15 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
+# Copy RPC spec submodule files to interfaces directory
+if(EXISTS ${CMAKE_SOURCE_DIR}/tools/rpc_spec/)
+  execute_process(COMMAND cp ${CMAKE_SOURCE_DIR}/tools/rpc_spec/MOBILE_API.xml ${CMAKE_CURRENT_SOURCE_DIR}/)
+  execute_process(COMMAND cp ${CMAKE_SOURCE_DIR}/tools/rpc_spec/MOBILE_API.xsd ${CMAKE_CURRENT_SOURCE_DIR}/)
+else ()
+  message( FATAL_ERROR "Missing the RPC Spec submodule" )
+  message( FATAL_ERROR "Please run `git submodule update --init` in the SDL Core source directory" )
+endif ()
+
 include(${CMAKE_SOURCE_DIR}/tools/cmake/helpers/generators.cmake)
 
 include_directories (
@@ -38,6 +47,10 @@ include_directories (
   ${BOOST_INCLUDE_DIR}
   ${CMAKE_BINARY_DIR}
 )
+
+execute_process(COMMAND /usr/bin/env python3 -m pip install --upgrade --user pip setuptools wheel)
+set(GENERATOR_REQUIREMENTS "${CMAKE_SOURCE_DIR}/tools/InterfaceGenerator/requirements.txt")
+execute_process(COMMAND /usr/bin/env python3 -m pip install --user --requirement ${GENERATOR_REQUIREMENTS})
 
 generate_interface("v4_protocol_v1_2_no_extra.xml" "ns_smart_device_link_rpc::V1" "sdlrpcv1")
 add_library(v4_protocol_v1_2_no_extra ${CMAKE_CURRENT_BINARY_DIR}/v4_protocol_v1_2_no_extra_schema.cc)
@@ -51,4 +64,3 @@ add_library(HMI_API ${CMAKE_CURRENT_BINARY_DIR}/HMI_API_schema.cc)
 target_link_libraries(v4_protocol_v1_2_no_extra Utils)
 target_link_libraries(MOBILE_API Utils)
 target_link_libraries(HMI_API Utils)
-

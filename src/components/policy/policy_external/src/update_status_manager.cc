@@ -108,6 +108,12 @@ void UpdateStatusManager::OnValidUpdateReceived() {
   ProcessEvent(kOnValidUpdateReceived);
 }
 
+void UpdateStatusManager::ResetTimeout(uint32_t update_timeout) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  update_status_thread_delegate_->updateTimeOut(
+      update_timeout);  // Restart Timer
+}
+
 void UpdateStatusManager::OnWrongUpdateReceived() {
   LOG4CXX_AUTO_TRACE(logger_);
   update_status_thread_delegate_->updateTimeOut(0);  // Stop Timer
@@ -146,7 +152,12 @@ void UpdateStatusManager::OnNewApplicationAdded(const DeviceConsent consent) {
   }
   LOG4CXX_DEBUG(logger_, "Application registered from consented device");
   app_registered_from_non_consented_device_ = false;
-  ProcessEvent(kOnNewAppRegistered);
+  if (kOnResetRetrySequence == last_processed_event_) {
+    current_status_.reset(new UpToDateStatus());
+    ProcessEvent(kScheduleUpdate);
+  } else {
+    ProcessEvent(kOnNewAppRegistered);
+  }
 }
 
 void UpdateStatusManager::OnDeviceConsented() {
@@ -211,8 +222,7 @@ void UpdateStatusManager::DoTransition() {
   next_status_.reset();
 
   const bool is_update_pending =
-      (policy::kUpdateNeeded == current_status_->get_status_string() &&
-       policy::StatusUpdatePending == current_status_->get_status());
+      policy::StatusProcessingSnapshot == current_status_->get_status();
 
   if (last_processed_event_ != kScheduleManualUpdate && !is_update_pending) {
     listener_->OnUpdateStatusChanged(current_status_->get_status_string());

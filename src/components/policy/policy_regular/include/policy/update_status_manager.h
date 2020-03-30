@@ -149,6 +149,12 @@ class UpdateStatusManager : public UpdateStatusManagerInterface {
   void ScheduleUpdate();
 
   /**
+   * @brief PendingUpdate will change state from Update_Needed
+   * to Update_Pending
+   */
+  void PendingUpdate();
+
+  /**
    * @brief ScheduleUpdate allows to schedule next update.
    * It will change state to Update_Needed, that's is
    * and will not send any notifications about updating to HMI

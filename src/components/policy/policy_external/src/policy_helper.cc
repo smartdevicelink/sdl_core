@@ -434,6 +434,13 @@ void CheckAppPolicy::InsertPermission(const std::string& app_id,
 
 bool CheckAppPolicy::operator()(const AppPoliciesValueType& app_policy) {
   const std::string app_id = app_policy.first;
+
+  const bool app_properties_changed = IsAppPropertiesChanged(app_policy);
+  const bool is_predefined_app = IsPredefinedApp(app_policy);
+  if (!is_predefined_app && app_properties_changed) {
+    AddResult(app_id, RESULT_APP_PROPERTIES_CHANGED);
+  }
+
   AppPermissions permissions_diff(app_id);
   if (!IsKnownAppication(app_id)) {
     LOG4CXX_WARN(logger_,
@@ -668,6 +675,74 @@ bool CheckAppPolicy::IsRequestSubTypeChanged(
   return diff.size();
 }
 
+bool CheckAppPolicy::IsAppPropertiesProvided(
+    const AppPoliciesValueType& app_policy) const {
+  LOG4CXX_AUTO_TRACE(logger_);
+  if (app_policy.second.hybrid_app_preference.is_initialized() ||
+      app_policy.second.endpoint.is_initialized() ||
+      app_policy.second.enabled.is_initialized() ||
+      app_policy.second.auth_token.is_initialized() ||
+      app_policy.second.cloud_transport_type.is_initialized() ||
+      app_policy.second.nicknames.is_initialized()) {
+    return true;
+  }
+  return false;
+}
+
+bool CheckAppPolicy::IsAppPropertiesChanged(
+    const AppPoliciesValueType& app_policy) const {
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  if (!IsAppPropertiesProvided(app_policy)) {
+    return false;
+  }
+
+  if (!IsKnownAppication(app_policy.first)) {
+    LOG4CXX_DEBUG(
+        logger_,
+        "AppProperties provided for new application: " << app_policy.first);
+    return true;
+  }
+
+  policy::AppPoliciesConstItr it =
+      snapshot_->policy_table.app_policies_section.apps.find(app_policy.first);
+  const auto snapshot_properties = *it;
+
+  if (app_policy.second.enabled.is_initialized() &&
+      app_policy.second.enabled != snapshot_properties.second.enabled) {
+    LOG4CXX_DEBUG(logger_, "\"enabled\" was changed");
+    return true;
+  }
+
+  if (app_policy.second.endpoint.is_initialized() &&
+      app_policy.second.endpoint != snapshot_properties.second.endpoint) {
+    LOG4CXX_DEBUG(logger_, "\"endpoint\" was changed");
+    return true;
+  }
+
+  if (app_policy.second.hybrid_app_preference.is_initialized() &&
+      app_policy.second.hybrid_app_preference !=
+          snapshot_properties.second.hybrid_app_preference) {
+    LOG4CXX_DEBUG(logger_, "\"hybrid_app_preference\" was changed");
+    return true;
+  }
+
+  if (app_policy.second.auth_token.is_initialized() &&
+      app_policy.second.auth_token != snapshot_properties.second.auth_token) {
+    LOG4CXX_DEBUG(logger_, "\"auth_token\" was changed");
+    return true;
+  }
+
+  if (app_policy.second.cloud_transport_type.is_initialized() &&
+      app_policy.second.cloud_transport_type !=
+          snapshot_properties.second.cloud_transport_type) {
+    LOG4CXX_DEBUG(logger_, "\"cloud_transport_type\" was changed");
+    return true;
+  }
+
+  return false;
+}
+
 bool CheckAppPolicy::IsEncryptionRequiredFlagChanged(
     const AppPoliciesValueType& app_policy) const {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -777,6 +852,9 @@ void FillActionsForAppPolicies::operator()(
     case RESULT_CONSENT_NEEDED:
     case RESULT_PERMISSIONS_REVOKED_AND_CONSENT_NEEDED:
       actions_[app_id].is_consent_needed = true;
+      break;
+    case RESULT_APP_PROPERTIES_CHANGED:
+      actions_[app_id].app_properties_changed = true;
       break;
     case RESULT_CONSENT_NOT_REQUIRED:
     case RESULT_PERMISSIONS_REVOKED:

@@ -81,11 +81,12 @@ class MockPolicyManager : public PolicyManager {
   MOCK_METHOD1(OnPTUFinished, void(const PtProcessingResult ptu_result));
   MOCK_METHOD1(ResetPT, bool(const std::string& file_name));
   MOCK_METHOD1(GetUpdateUrl, std::string(int service_type));
-  MOCK_METHOD2(GetUpdateUrls,
-               void(const uint32_t service_type, EndpointUrls& out_end_points));
-  MOCK_METHOD2(GetUpdateUrls,
-               void(const std::string& service_type,
-                    EndpointUrls& out_end_points));
+  MOCK_CONST_METHOD2(GetUpdateUrls,
+                     void(const uint32_t service_type,
+                          EndpointUrls& out_end_points));
+  MOCK_CONST_METHOD2(GetUpdateUrls,
+                     void(const std::string& service_type,
+                          EndpointUrls& out_end_points));
   MOCK_METHOD0(RequestPTUpdate, void());
   MOCK_METHOD6(CheckPermissions,
                void(const PTString& device_id,
@@ -194,6 +195,8 @@ class MockPolicyManager : public PolicyManager {
   MOCK_METHOD2(SendAppPermissionsChanged,
                void(const std::string& device_id,
                     const std::string& application_id));
+  MOCK_CONST_METHOD1(SendOnAppPropertiesChangeNotification,
+                     void(const std::string& application_id));
   MOCK_CONST_METHOD2(GetModuleTypes,
                      bool(const std::string& policy_app_id,
                           std::vector<std::string>* modules));
@@ -212,10 +215,10 @@ class MockPolicyManager : public PolicyManager {
   MOCK_METHOD1(SaveUpdateStatusRequired, void(bool is_update_needed));
   MOCK_METHOD0(OnAppsSearchStarted, void());
   MOCK_METHOD1(OnAppsSearchCompleted, void(const bool trigger_ptu));
+  MOCK_METHOD1(UpdatePTUReadyAppsCount, void(const uint32_t new_app_count));
   MOCK_METHOD2(OnAppRegisteredOnMobile,
                void(const std::string& device_id,
                     const std::string& application_id));
-  MOCK_CONST_METHOD0(GetLockScreenIconUrl, std::string());
   MOCK_CONST_METHOD1(GetIconUrl, std::string(const std::string& policy_app_id));
   MOCK_CONST_METHOD2(GetAppRequestTypes,
                      const std::vector<std::string>(
@@ -228,14 +231,12 @@ class MockPolicyManager : public PolicyManager {
                      std::vector<policy_table::VehicleDataItem>());
   MOCK_CONST_METHOD1(GetEnabledCloudApps,
                      void(std::vector<std::string>& enabled_apps));
-  MOCK_CONST_METHOD7(GetCloudAppParameters,
+  MOCK_CONST_METHOD2(GetAppProperties,
                      bool(const std::string& policy_app_id,
-                          bool& enabled,
-                          std::string& endpoint,
-                          std::string& certificate,
-                          std::string& auth_token,
-                          std::string& cloud_transport_type,
-                          std::string& hybrid_app_preference));
+                          AppProperties& out_app_properties));
+  MOCK_CONST_METHOD0(GetEnabledLocalApps, std::vector<std::string>());
+  MOCK_CONST_METHOD1(IsNewApplication, bool(const std::string& application_id));
+  MOCK_METHOD0(OnLocalAppAdded, void());
   MOCK_METHOD1(InitCloudApp, void(const std::string& policy_app_id));
   MOCK_METHOD2(SetCloudAppEnabled,
                void(const std::string& policy_app_id, const bool enabled));
@@ -304,6 +305,7 @@ class MockPolicyManager : public PolicyManager {
   MOCK_CONST_METHOD0(IsAllowedRetryCountExceeded, bool());
   MOCK_METHOD0(OnSystemRequestReceived, void());
   MOCK_METHOD0(RetrySequenceFailed, void());
+  MOCK_METHOD0(ResetTimeout, void());
 };
 }  // namespace policy_manager_test
 }  // namespace components

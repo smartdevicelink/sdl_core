@@ -68,6 +68,7 @@ enum DeviceType {
   IOS_USB_HOST_MODE,
   IOS_USB_DEVICE_MODE,
   IOS_CARPLAY_WIRELESS,  // running on iAP over Carplay wireless transport
+  WEBENGINE_WEBSOCKET,
   UNKNOWN
 };
 
@@ -225,6 +226,16 @@ class TransportAdapter {
       const DeviceUID& device_handle) const = 0;
 
   /**
+   * @brief Add device to the container(map), if container doesn't hold it yet.
+   * in TransportAdapter is used only to add a WebEngine device
+   *
+   * @param device Smart pointer to the device.
+   *
+   * @return Smart pointer to the device.
+   */
+  virtual DeviceSptr AddDevice(DeviceSptr device) = 0;
+
+  /**
    * @brief RunAppOnDevice allows to run specific application on the certain
    *device.
    *
@@ -357,6 +368,14 @@ class TransportAdapter {
    * @param return pointer to Time metric observer
    */
   virtual TMTelemetryObserver* GetTelemetryObserver() = 0;
+
+  /**
+   * @brief Setup observer for time metric.
+   *
+   * @param observer - pointer to observer
+   */
+  virtual void SetTelemetryObserver(TMTelemetryObserver* observer) = 0;
+
 #endif  // TELEMETRY_MONITOR
 };
 }  // namespace transport_adapter

@@ -39,8 +39,8 @@
 
 #include "utils/file_system.h"
 
-#include "json/reader.h"
 #include "utils/gen_hash.h"
+#include "utils/jsoncpp_reader_wrapper.h"
 
 #include "policy/mock_pt_ext_representation.h"
 
@@ -175,8 +175,8 @@ Json::Value createPTforLoad() {
       "}");
 
   Json::Value table(Json::objectValue);
-  Json::Reader reader;
-  EXPECT_TRUE(reader.parse(load_table, table));
+  utils::JsonReader reader;
+  EXPECT_TRUE(reader.parse(load_table, &table));
   return table;
 }
 
@@ -257,6 +257,8 @@ void PolicyManagerImplTest2::SetUp() {
   ON_CALL(listener_, GetRegisteredLinks(_)).WillByDefault(Return());
   ON_CALL(listener_, ptu_retry_handler())
       .WillByDefault(ReturnRef(ptu_retry_handler_));
+  ON_CALL(listener_, GetDevicesIds(_))
+      .WillByDefault(Return(transport_manager::DeviceList()));
 
   file_system::CreateDirectory(app_storage_folder_);
 
@@ -282,10 +284,11 @@ void PolicyManagerImplTest2::SetUp() {
 const Json::Value PolicyManagerImplTest2::GetPTU(const std::string& file_name) {
   // Get PTU
   std::ifstream ifile(file_name);
-  Json::Reader reader;
+  Json::CharReaderBuilder reader_builder;
   std::string json;
   Json::Value root(Json::objectValue);
-  if (ifile.is_open() && reader.parse(ifile, root, true)) {
+  if (ifile.is_open() &&
+      Json::parseFromStream(reader_builder, ifile, &root, nullptr)) {
     json = root.toStyledString();
   }
   ifile.close();
@@ -471,11 +474,11 @@ void PolicyManagerImplTest2::
 
   // Expect all parameters are allowed
   std::ifstream ifile(update_file);
-  Json::Reader reader;
+  Json::CharReaderBuilder reader_builder;
   std::string json;
   Json::Value root(Json::objectValue);
   if (ifile.is_open()) {
-    reader.parse(ifile, root, true);
+    Json::parseFromStream(reader_builder, ifile, &root, nullptr);
   }
   json = root.toStyledString();
   ifile.close();
@@ -578,10 +581,11 @@ void PolicyManagerImplTest2::CheckRpcPermissions(
 
 void PolicyManagerImplTest2::EmulatePTAppRevoked(const std::string& ptu_name) {
   std::ifstream ifile(ptu_name);
-  Json::Reader reader;
+  Json::CharReaderBuilder reader_builder;
   std::string json;
   Json::Value root(Json::objectValue);
-  if (ifile.is_open() && reader.parse(ifile, root, true)) {
+  if (ifile.is_open() &&
+      Json::parseFromStream(reader_builder, ifile, &root, nullptr)) {
     // Emulate application is revoked
     root["policy_table"]["app_policies"]["1234"]["is_revoked"] = 1;
     json = root.toStyledString();
@@ -620,11 +624,11 @@ void PolicyManagerImplTest2::LoadPTUFromJsonFile(
     const std::string& update_file) {
   // Load Json to cache
   std::ifstream ifile(update_file);
-  Json::Reader reader;
+  Json::CharReaderBuilder reader_builder;
   std::string json;
   Json::Value root(Json::objectValue);
   if (ifile.is_open()) {
-    reader.parse(ifile, root, true);
+    Json::parseFromStream(reader_builder, ifile, &root, nullptr);
   }
   json = root.toStyledString();
   ifile.close();
@@ -673,6 +677,8 @@ PolicyManagerImplTest_RequestTypes::PolicyManagerImplTest_RequestTypes()
 
 void PolicyManagerImplTest_RequestTypes::SetUp() {
   ON_CALL(listener_, GetRegisteredLinks(_)).WillByDefault(Return());
+  ON_CALL(listener_, GetDevicesIds(_))
+      .WillByDefault(Return(transport_manager::DeviceList()));
 
   file_system::CreateDirectory(app_storage_folder_);
   const bool in_memory = true;
@@ -684,10 +690,11 @@ const Json::Value PolicyManagerImplTest_RequestTypes::GetPTU(
     const std::string& file_name) {
   // Get PTU
   std::ifstream ifile(file_name);
-  Json::Reader reader;
+  Json::CharReaderBuilder reader_builder;
   std::string json;
   Json::Value root(Json::objectValue);
-  if (ifile.is_open() && reader.parse(ifile, root, true)) {
+  if (ifile.is_open() &&
+      Json::parseFromStream(reader_builder, ifile, &root, nullptr)) {
     json = root.toStyledString();
   }
   ifile.close();
@@ -905,10 +912,11 @@ std::string PolicyManagerImplTest_ExternalConsent::PreparePTUWithNewGroup(
   using namespace rpc;
 
   std::ifstream ifile(preloaded_pt_filename_);
-  Json::Reader reader;
+  Json::CharReaderBuilder reader_builder;
   std::string json;
   Json::Value root(Json::objectValue);
-  if (ifile.is_open() && reader.parse(ifile, root, true)) {
+  if (ifile.is_open() &&
+      Json::parseFromStream(reader_builder, ifile, &root, nullptr)) {
     Table t = PreparePTWithGroupsHavingExternalConsent();
 
     ExternalConsentEntity entity_4(type, id);

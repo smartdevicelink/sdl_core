@@ -91,7 +91,7 @@ bool ResumeCtrlImpl::get_resumption_active() const {
 }
 #endif  // BUILD_TESTS
 
-bool ResumeCtrlImpl::Init(resumption::LastState& last_state) {
+bool ResumeCtrlImpl::Init(resumption::LastStateWrapperPtr last_state_wrapper) {
   bool use_db = application_manager_.get_settings().use_db_for_resumption();
   if (use_db) {
     resumption_storage_.reset(
@@ -120,7 +120,7 @@ bool ResumeCtrlImpl::Init(resumption::LastState& last_state) {
     }
   } else {
     resumption_storage_.reset(
-        new ResumptionDataJson(last_state, application_manager_));
+        new ResumptionDataJson(last_state_wrapper, application_manager_));
     if (!resumption_storage_->Init()) {
       LOG4CXX_DEBUG(logger_, "Resumption storage initialisation failed");
       return false;
@@ -375,6 +375,10 @@ void ResumeCtrlImpl::RemoveFromResumption(uint32_t app_id) {
   queue_lock_.Acquire();
   waiting_for_timer_.remove(app_id);
   queue_lock_.Release();
+}
+
+bool ResumeCtrlImpl::Init(LastState&) {
+  return false;
 }
 
 bool ResumeCtrlImpl::SetAppHMIState(
@@ -840,15 +844,19 @@ void ResumeCtrlImpl::AddCommands(ApplicationSharedPtr application,
   if (saved_app.keyExists(strings::application_commands)) {
     const smart_objects::SmartObject& app_commands =
         saved_app[strings::application_commands];
-    for (size_t i = 0; i < app_commands.length(); ++i) {
-      const smart_objects::SmartObject& command = app_commands[i];
+
+    for (size_t cmd_num = 0; cmd_num < app_commands.length(); ++cmd_num) {
+      const smart_objects::SmartObject& command = app_commands[cmd_num];
       const uint32_t cmd_id = command[strings::cmd_id].asUInt();
       const bool is_resumption = true;
-
-      application->AddCommand(cmd_id, command);
+      application->AddCommand(
+          commands::CommandImpl::CalcCommandInternalConsecutiveNumber(
+              application),
+          command);
       application->help_prompt_manager().OnVrCommandAdded(
           cmd_id, command, is_resumption);
     }
+
     ProcessHMIRequests(MessageHelper::CreateAddCommandRequestToHMI(
         application, application_manager_));
   } else {

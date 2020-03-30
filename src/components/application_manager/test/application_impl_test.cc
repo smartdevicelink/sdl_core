@@ -764,16 +764,16 @@ TEST_F(ApplicationImplTest, SuspendNaviStreaming) {
   protocol_handler::ServiceType type =
       protocol_handler::ServiceType::kMobileNav;
   EXPECT_CALL(mock_application_manager_, OnAppStreaming(app_id, type, false));
-  EXPECT_CALL(*MockMessageHelper::message_helper_mock(),
-              SendOnDataStreaming(type, false, _));
+  EXPECT_CALL(mock_application_manager_,
+              ProcessOnDataStreamingNotification(type, app_id, false));
   app_impl->SuspendStreaming(type);
 }
 
 TEST_F(ApplicationImplTest, SuspendAudioStreaming) {
   protocol_handler::ServiceType type = protocol_handler::ServiceType::kAudio;
   EXPECT_CALL(mock_application_manager_, OnAppStreaming(app_id, type, false));
-  EXPECT_CALL(*MockMessageHelper::message_helper_mock(),
-              SendOnDataStreaming(type, false, _));
+  EXPECT_CALL(mock_application_manager_,
+              ProcessOnDataStreamingNotification(type, app_id, false));
   app_impl->SuspendStreaming(type);
 }
 
@@ -812,8 +812,8 @@ TEST_F(ApplicationImplTest, StopStreaming_StreamingApproved) {
   app_impl->set_video_streaming_approved(true);
 
   EXPECT_CALL(mock_application_manager_, OnAppStreaming(app_id, type, false));
-  EXPECT_CALL(*MockMessageHelper::message_helper_mock(),
-              SendOnDataStreaming(type, false, _));
+  EXPECT_CALL(mock_application_manager_,
+              ProcessOnDataStreamingNotification(type, app_id, false));
   EXPECT_CALL(*MockMessageHelper::message_helper_mock(),
               SendNaviStopStream(app_id, _));
 
@@ -824,8 +824,8 @@ TEST_F(ApplicationImplTest, StopStreaming_StreamingApproved) {
   app_impl->set_audio_streaming_approved(true);
   type = protocol_handler::ServiceType::kAudio;
   EXPECT_CALL(mock_application_manager_, OnAppStreaming(app_id, type, false));
-  EXPECT_CALL(*MockMessageHelper::message_helper_mock(),
-              SendOnDataStreaming(type, false, _));
+  EXPECT_CALL(mock_application_manager_,
+              ProcessOnDataStreamingNotification(type, app_id, false));
   EXPECT_CALL(*MockMessageHelper::message_helper_mock(),
               SendAudioStopStream(app_id, _));
 

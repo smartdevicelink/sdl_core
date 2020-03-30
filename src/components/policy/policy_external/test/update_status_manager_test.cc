@@ -340,6 +340,12 @@ TEST_F(UpdateStatusManagerTest,
   EXPECT_FALSE(manager_->IsAppsSearchInProgress());
 }
 
+TEST_F(UpdateStatusManagerTest, OnAppRegistered) {
+  manager_->ScheduleUpdate();
+  ASSERT_EQ(policy::kUpdateNeeded, manager_->StringifiedUpdateStatus());
+  manager_->ProcessEvent(policy::UpdateEvent::kOnNewAppRegistered);
+  EXPECT_EQ(policy::kUpdateNeeded, manager_->StringifiedUpdateStatus());
+}
 }  // namespace policy_test
 }  // namespace components
 }  // namespace test

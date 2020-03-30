@@ -131,6 +131,10 @@ struct CheckAppPolicy {
   bool IsEncryptionRequiredFlagChanged(
       const AppPoliciesValueType& app_policy) const;
 
+  bool IsAppPropertiesChanged(const AppPoliciesValueType& app_policy) const;
+
+  bool IsAppPropertiesProvided(const AppPoliciesValueType& app_policy) const;
+
  private:
   PolicyManagerImpl* pm_;
   const std::shared_ptr<policy_table::Table> update_;

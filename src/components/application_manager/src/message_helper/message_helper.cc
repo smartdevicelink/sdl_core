@@ -1434,7 +1434,13 @@ smart_objects::SmartObjectList MessageHelper::CreateAddCommandRequestToHMI(
 
       smart_objects::SmartObject msg_params =
           smart_objects::SmartObject(smart_objects::SmartType_Map);
-      msg_params[strings::cmd_id] = i->first;
+
+      if ((*i->second).keyExists(strings::cmd_id)) {
+        msg_params[strings::cmd_id] = (*i->second)[strings::cmd_id].asUInt();
+      } else {
+        LOG4CXX_ERROR(logger_, "Command ID is missing.");
+        continue;
+      }
       msg_params[strings::menu_params] = (*i->second)[strings::menu_params];
       msg_params[strings::app_id] = app->app_id();
 
@@ -1449,8 +1455,9 @@ smart_objects::SmartObjectList MessageHelper::CreateAddCommandRequestToHMI(
     }
 
     // VR Interface
-    if ((*i->second).keyExists(strings::vr_commands)) {
-      SendAddVRCommandToHMI(i->first,
+    if ((*i->second).keyExists(strings::vr_commands) &&
+        (*i->second).keyExists(strings::cmd_id)) {
+      SendAddVRCommandToHMI((*i->second)[strings::cmd_id].asUInt(),
                             (*i->second)[strings::vr_commands],
                             app->app_id(),
                             app_mngr);
@@ -1810,8 +1817,10 @@ bool MessageHelper::CreateHMIApplicationStruct(
                      &secondary_device_info);
   }
 
-  message[strings::is_cloud_application] = app->is_cloud_app();
-  if (app->is_cloud_app()) {
+  const bool is_cloud_app = app->is_cloud_app();
+  message[strings::is_cloud_application] = is_cloud_app;
+
+  if (is_cloud_app) {
     message[strings::cloud_connection_status] =
         app_mngr.GetCloudAppConnectionStatus(app);
   }
@@ -1894,6 +1903,57 @@ void MessageHelper::SendOnAppUnregNotificationToHMI(
   message[strings::msg_params][strings::unexpected_disconnect] =
       is_unexpected_disconnect;
   app_mngr.GetRPCService().ManageHMICommand(notification);
+}
+
+smart_objects::SmartObjectSPtr
+MessageHelper::CreateOnAppPropertiesChangeNotification(
+    const std::string& policy_app_id, ApplicationManager& app_mngr) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  smart_objects::SmartObjectSPtr notification =
+      std::make_shared<smart_objects::SmartObject>(
+          smart_objects::SmartType_Map);
+
+  smart_objects::SmartObject& message = *notification;
+  message[strings::params][strings::function_id] =
+      hmi_apis::FunctionID::BasicCommunication_OnAppPropertiesChange;
+  message[strings::params][strings::message_type] = MessageType::kNotification;
+
+  policy::AppProperties app_properties;
+  app_mngr.GetPolicyHandler().GetAppProperties(policy_app_id, app_properties);
+
+  policy::StringArray nicknames;
+  policy::StringArray app_hmi_types;
+
+  app_mngr.GetPolicyHandler().GetInitialAppData(
+      policy_app_id, &nicknames, &app_hmi_types);
+
+  smart_objects::SmartObject properties(smart_objects::SmartType_Map);
+  properties[strings::policy_app_id] = policy_app_id;
+  properties[strings::enabled] = app_properties.enabled;
+
+  smart_objects::SmartObject nicknames_array(smart_objects::SmartType_Array);
+  size_t i = 0;
+  for (const auto& nickname : nicknames) {
+    nicknames_array[i++] = nickname;
+  }
+  properties[strings::nicknames] = nicknames_array;
+
+  if (!app_properties.auth_token.empty()) {
+    properties[strings::auth_token] = app_properties.auth_token;
+  }
+  if (!app_properties.transport_type.empty()) {
+    properties[strings::transport_type] = app_properties.transport_type;
+  }
+  if (!app_properties.hybrid_app_preference.empty()) {
+    properties[strings::hybrid_app_preference] =
+        app_properties.hybrid_app_preference;
+  }
+  if (!app_properties.endpoint.empty()) {
+    properties[strings::endpoint] = app_properties.endpoint;
+  }
+
+  message[strings::msg_params][strings::properties] = properties;
+  return notification;
 }
 
 smart_objects::SmartObjectSPtr MessageHelper::GetBCActivateAppRequestToHMI(

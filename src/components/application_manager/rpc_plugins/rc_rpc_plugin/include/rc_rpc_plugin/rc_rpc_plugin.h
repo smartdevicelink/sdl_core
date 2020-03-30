@@ -43,10 +43,6 @@
 #include "rc_rpc_plugin/rc_consent_manager.h"
 #include "rc_rpc_plugin/resource_allocation_manager.h"
 
-namespace resumption {
-class LastState;
-}
-
 namespace rc_rpc_plugin {
 namespace plugins = application_manager::plugin_manager;
 namespace app_mngr = application_manager;
@@ -61,6 +57,13 @@ class RCRPCPlugin : public plugins::RPCPlugin {
    * @param policy_handler PolicyHandlerInterface
    * @return true in case initialization was succesful, false otherwise.
    **/
+  bool Init(app_mngr::ApplicationManager& app_manager,
+            app_mngr::rpc_service::RPCService& rpc_service,
+            app_mngr::HMICapabilities& hmi_capabilities,
+            policy::PolicyHandlerInterface& policy_handler,
+            resumption::LastStateWrapperPtr last_state) OVERRIDE;
+
+  DEPRECATED
   bool Init(app_mngr::ApplicationManager& app_manager,
             app_mngr::rpc_service::RPCService& rpc_service,
             app_mngr::HMICapabilities& hmi_capabilities,

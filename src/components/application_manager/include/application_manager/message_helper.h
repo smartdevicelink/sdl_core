@@ -380,6 +380,15 @@ class MessageHelper {
   static void SendOnAppUnregNotificationToHMI(ApplicationConstSharedPtr app,
                                               bool is_unexpected_disconnect,
                                               ApplicationManager& app_mngr);
+  /**
+   * @brief Creates BasicCommunication.OnAppPropertiesChange
+   * notification to the HMI
+   * @param policy_app_id unique policy app id
+   * @param app_mngr application manager
+   * @return smart object with BC.OnAppPropertiesChange notification
+   */
+  static smart_objects::SmartObjectSPtr CreateOnAppPropertiesChangeNotification(
+      const std::string& policy_app_id, ApplicationManager& app_mngr);
 
   static smart_objects::SmartObjectSPtr GetBCActivateAppRequestToHMI(
       ApplicationConstSharedPtr app,

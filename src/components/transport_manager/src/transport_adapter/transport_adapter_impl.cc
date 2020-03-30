@@ -40,6 +40,9 @@
 #include "transport_manager/transport_adapter/server_connection_factory.h"
 #include "transport_manager/transport_adapter/transport_adapter_impl.h"
 #include "transport_manager/transport_adapter/transport_adapter_listener.h"
+#ifdef WEBSOCKET_SERVER_TRANSPORT_SUPPORT
+#include "transport_manager/websocket_server/websocket_device.h"
+#endif
 
 namespace transport_manager {
 namespace transport_adapter {
@@ -62,15 +65,16 @@ DeviceTypes devicesType = {
                    std::string("USB_IOS_DEVICE_MODE")),
     std::make_pair(DeviceType::IOS_CARPLAY_WIRELESS,
                    std::string("CARPLAY_WIRELESS_IOS")),
-    std::make_pair(DeviceType::CLOUD_WEBSOCKET,
-                   std::string("CLOUD_WEBSOCKET"))};
+    std::make_pair(DeviceType::CLOUD_WEBSOCKET, std::string("CLOUD_WEBSOCKET")),
+    std::make_pair(DeviceType::WEBENGINE_WEBSOCKET,
+                   std::string("WEBENGINE_WEBSOCKET"))};
 }
 
 TransportAdapterImpl::TransportAdapterImpl(
     DeviceScanner* device_scanner,
     ServerConnectionFactory* server_connection_factory,
     ClientConnectionListener* client_connection_listener,
-    resumption::LastState& last_state,
+    resumption::LastStateWrapperPtr last_state_wrapper,
     const TransportManagerSettings& settings)
     : listeners_()
     , initialised_(0)
@@ -86,7 +90,7 @@ TransportAdapterImpl::TransportAdapterImpl(
     device_scanner_(device_scanner)
     , server_connection_factory_(server_connection_factory)
     , client_connection_listener_(client_connection_listener)
-    , last_state_(last_state)
+    , last_state_wrapper_(last_state_wrapper)
     , settings_(settings) {
 }
 
@@ -138,6 +142,12 @@ void TransportAdapterImpl::Terminate() {
   connections_lock_.AcquireForWriting();
   std::swap(connections, connections_);
   connections_lock_.Release();
+  for (const auto& connection : connections) {
+    auto& info = connection.second;
+    if (info.connection) {
+      info.connection->Terminate();
+    }
+  }
   connections.clear();
 
   LOG4CXX_DEBUG(logger_, "Connections deleted");
@@ -367,6 +377,10 @@ TransportAdapter::Error TransportAdapterImpl::DisconnectDevice(
 
   Error error = OK;
   DeviceSptr device = FindDevice(device_id);
+  if (!device) {
+    LOG4CXX_WARN(logger_, "Device with id: " << device_id << " Not found");
+    return BAD_PARAM;
+  }
   ConnectionStatusUpdated(device, ConnectionStatus::CLOSING);
 
   std::vector<ConnectionInfo> to_disconnect;
@@ -480,6 +494,32 @@ DeviceList TransportAdapterImpl::GetDeviceList() const {
   LOG4CXX_TRACE(logger_,
                 "exit with DeviceList. It's' size = " << devices.size());
   return devices;
+}
+
+DeviceSptr TransportAdapterImpl::GetWebEngineDevice() const {
+#ifndef WEBSOCKET_SERVER_TRANSPORT_SUPPORT
+  LOG4CXX_TRACE(logger_,
+                "Web engine support is disabled. Device does not exist");
+  return DeviceSptr();
+#else
+  LOG4CXX_AUTO_TRACE(logger_);
+  sync_primitives::AutoLock locker(devices_mutex_);
+
+  auto web_engine_device =
+      std::find_if(devices_.begin(),
+                   devices_.end(),
+                   [](const std::pair<DeviceUID, DeviceSptr> device) {
+                     return webengine_constants::kWebEngineDeviceName ==
+                            device.second->name();
+                   });
+
+  if (devices_.end() != web_engine_device) {
+    return web_engine_device->second;
+  }
+
+  LOG4CXX_ERROR(logger_, "WebEngine device not found!");
+  return std::make_shared<transport_adapter::WebSocketDevice>("", "");
+#endif
 }
 
 DeviceSptr TransportAdapterImpl::AddDevice(DeviceSptr device) {
@@ -948,23 +988,35 @@ void TransportAdapterImpl::RemoveFinalizedConnection(
     const DeviceUID& device_handle, const ApplicationHandle& app_handle) {
   const DeviceUID device_uid = device_handle;
   LOG4CXX_AUTO_TRACE(logger_);
-  sync_primitives::AutoWriteLock lock(connections_lock_);
-  ConnectionMap::iterator it_conn =
-      connections_.find(std::make_pair(device_uid, app_handle));
-  if (it_conn == connections_.end()) {
-    LOG4CXX_WARN(logger_,
-                 "Device_id: " << &device_uid << ", app_handle: " << &app_handle
-                               << " connection not found");
+  {
+    sync_primitives::AutoWriteLock lock(connections_lock_);
+    auto it_conn = connections_.find(std::make_pair(device_uid, app_handle));
+    if (connections_.end() == it_conn) {
+      LOG4CXX_WARN(logger_,
+                   "Device_id: " << &device_uid << ", app_handle: "
+                                 << &app_handle << " connection not found");
+      return;
+    }
+    const ConnectionInfo& info = it_conn->second;
+    if (ConnectionInfo::FINALISING != info.state) {
+      LOG4CXX_WARN(logger_,
+                   "Device_id: " << &device_uid << ", app_handle: "
+                                 << &app_handle << " connection not finalized");
+      return;
+    }
+    connections_.erase(it_conn);
+  }
+
+  DeviceSptr device = FindDevice(device_handle);
+  if (!device) {
+    LOG4CXX_WARN(logger_, "Device: uid " << &device_uid << " not found");
     return;
   }
-  const ConnectionInfo& info = it_conn->second;
-  if (info.state != ConnectionInfo::FINALISING) {
-    LOG4CXX_WARN(logger_,
-                 "Device_id: " << &device_uid << ", app_handle: " << &app_handle
-                               << " connection not finalized");
-    return;
+
+  if (ToBeAutoDisconnected(device) &&
+      IsSingleApplication(device_handle, app_handle)) {
+    RemoveDevice(device_uid);
   }
-  connections_.erase(it_conn);
 }
 
 void TransportAdapterImpl::AddListener(TransportAdapterListener* listener) {
