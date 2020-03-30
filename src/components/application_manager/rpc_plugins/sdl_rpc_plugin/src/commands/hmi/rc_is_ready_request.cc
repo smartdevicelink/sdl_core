@@ -77,6 +77,8 @@ void RCIsReadyRequest::on_event(const event_engine::Event& event) {
 
       if (!app_mngr::commands::CheckAvailabilityHMIInterfaces(
               application_manager_, HmiInterfaces::HMI_INTERFACE_RC)) {
+        hmi_capabilities_.UpdateRequestsRequiredForCapabilities(
+            hmi_apis::FunctionID::RC_GetCapabilities);
         LOG4CXX_INFO(logger_,
                      "HmiInterfaces::HMI_INTERFACE_RC isn't available");
         return;

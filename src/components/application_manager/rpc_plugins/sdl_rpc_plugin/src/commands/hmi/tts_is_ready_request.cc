@@ -50,7 +50,12 @@ TTSIsReadyRequest::TTSIsReadyRequest(
                    rpc_service,
                    hmi_capabilities,
                    policy_handler)
-    , EventObserver(application_manager.event_dispatcher()) {}
+    , EventObserver(application_manager.event_dispatcher()) {
+  requests_required_for_TTS_capabilities_ = {
+      hmi_apis::FunctionID::TTS_GetLanguage,
+      hmi_apis::FunctionID::TTS_GetSupportedLanguages,
+      hmi_apis::FunctionID::TTS_GetCapabilities};
+}
 
 TTSIsReadyRequest::~TTSIsReadyRequest() {}
 
@@ -74,6 +79,9 @@ void TTSIsReadyRequest::on_event(const event_engine::Event& event) {
       hmi_capabilities.set_is_tts_cooperating(is_available);
       if (!app_mngr::commands::CheckAvailabilityHMIInterfaces(
               application_manager_, HmiInterfaces::HMI_INTERFACE_TTS)) {
+        for (auto request_id : requests_required_for_TTS_capabilities_) {
+          hmi_capabilities_.UpdateRequestsRequiredForCapabilities(request_id);
+        }
         LOG4CXX_INFO(logger_,
                      "HmiInterfaces::HMI_INTERFACE_TTS isn't available");
         return;

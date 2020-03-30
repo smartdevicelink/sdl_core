@@ -50,7 +50,12 @@ UIIsReadyRequest::UIIsReadyRequest(
                    rpc_service,
                    hmi_capabilities,
                    policy_handle)
-    , EventObserver(application_manager.event_dispatcher()) {}
+    , EventObserver(application_manager.event_dispatcher()) {
+  requests_required_for_UI_capabilities_ = {
+      hmi_apis::FunctionID::UI_GetLanguage,
+      hmi_apis::FunctionID::UI_GetSupportedLanguages,
+      hmi_apis::FunctionID::UI_GetCapabilities};
+}
 
 UIIsReadyRequest::~UIIsReadyRequest() {}
 
@@ -73,6 +78,9 @@ void UIIsReadyRequest::on_event(const event_engine::Event& event) {
       hmi_capabilities.set_is_ui_cooperating(is_available);
       if (!app_mngr::commands::CheckAvailabilityHMIInterfaces(
               application_manager_, HmiInterfaces::HMI_INTERFACE_UI)) {
+        for (auto request_id : requests_required_for_UI_capabilities_) {
+          hmi_capabilities_.UpdateRequestsRequiredForCapabilities(request_id);
+        }
         LOG4CXX_INFO(logger_,
                      "HmiInterfaces::HMI_INTERFACE_UI isn't available");
         return;

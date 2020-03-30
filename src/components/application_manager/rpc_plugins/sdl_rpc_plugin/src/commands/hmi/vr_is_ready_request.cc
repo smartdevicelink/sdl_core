@@ -49,7 +49,12 @@ VRIsReadyRequest::VRIsReadyRequest(
                    rpc_service,
                    hmi_capabilities,
                    policy_handle)
-    , EventObserver(application_manager.event_dispatcher()) {}
+    , EventObserver(application_manager.event_dispatcher()) {
+  requests_required_for_VR_capabilities_ = {
+      hmi_apis::FunctionID::VR_GetLanguage,
+      hmi_apis::FunctionID::VR_GetSupportedLanguages,
+      hmi_apis::FunctionID::VR_GetCapabilities};
+}
 
 VRIsReadyRequest::~VRIsReadyRequest() {}
 
@@ -73,6 +78,9 @@ void VRIsReadyRequest::on_event(const event_engine::Event& event) {
       hmi_capabilities.set_is_vr_cooperating(is_available);
       if (!app_mngr::commands::CheckAvailabilityHMIInterfaces(
               application_manager_, HmiInterfaces::HMI_INTERFACE_VR)) {
+        for (auto request_id : requests_required_for_VR_capabilities_) {
+          hmi_capabilities_.UpdateRequestsRequiredForCapabilities(request_id);
+        }
         LOG4CXX_INFO(logger_,
                      "HmiInterfaces::HMI_INTERFACE_VR isn't available");
         return;
