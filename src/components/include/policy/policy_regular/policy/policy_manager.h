@@ -408,6 +408,12 @@ class PolicyManager : public usage_statistics::StatisticsManager,
   virtual void SetSystemLanguage(const std::string& language) = 0;
 
   /**
+   * @brief Set preloaded_pt flag value in policy table
+   * @param is_preloaded value to set
+   */
+  virtual void SetPreloadedPtFlag(const bool is_preloaded) = 0;
+
+  /**
    * @brief Set data from GetSystemInfo response to policy table
    * @param ccpu_version CCPU version
    * @param wers_country_code WERS country code

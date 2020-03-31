@@ -1255,6 +1255,15 @@ TEST_F(HMICapabilitiesTest, PrepareJsonValueForSaving_Success) {
       hmi_response::button_capabilities,
       hmi_response::preset_bank_capabilities};
 
+  smart_objects::SmartObject audio_capabilities_so(
+      smart_objects::SmartType_Array);
+  audio_capabilities_so[0][strings::sampling_rate] =
+      hmi_apis::Common_SamplingRate::RATE_44KHZ;
+  audio_capabilities_so[0][strings::bits_per_sample] =
+      hmi_apis::Common_BitsPerSample::RATE_8_BIT;
+  audio_capabilities_so[0][strings::audio_type] =
+      hmi_apis::Common_AudioType::PCM;
+
   const std::string content_to_save = "{\"field\" : \"value\" }";
   const std::vector<uint8_t> binary_data_to_save(content_to_save.begin(),
                                                  content_to_save.end());
@@ -1268,6 +1277,7 @@ TEST_F(HMICapabilitiesTest, PrepareJsonValueForSaving_Success) {
 
   auto hmi_capabilities =
       std::make_shared<HMICapabilitiesForTesting>(mock_app_mngr);
+  hmi_capabilities->set_audio_pass_thru_capabilities(audio_capabilities_so);
 
   file_system::CreateFile(file_cache_name_);
   EXPECT_TRUE(file_system::FileExists(file_cache_name_));
@@ -1284,11 +1294,14 @@ TEST_F(HMICapabilitiesTest, PrepareJsonValueForSaving_Success) {
 
   Json::Value root_node;
   utils::JsonReader reader;
-  EXPECT_TRUE(reader.parse(content_after_update, &root_node));
+  ASSERT_TRUE(reader.parse(content_after_update, &root_node));
 
   for (size_t i = 0; i < interfaces_name.size(); ++i) {
     EXPECT_TRUE(static_cast<bool>(root_node[interfaces_name[i]]));
   }
+  EXPECT_TRUE(
+      root_node[hmi_interface::ui][strings::audio_pass_thru_capabilities]
+          .isArray());
 }
 
 TEST_F(HMICapabilitiesTest,

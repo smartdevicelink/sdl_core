@@ -451,6 +451,8 @@ class PolicyManagerImpl : public PolicyManager {
                      const std::string& wers_country_code,
                      const std::string& language) OVERRIDE;
 
+  void SetPreloadedPtFlag(const bool is_preloaded) OVERRIDE;
+
   std::string GetCCPUVersionFromPT() const OVERRIDE;
 
   /**

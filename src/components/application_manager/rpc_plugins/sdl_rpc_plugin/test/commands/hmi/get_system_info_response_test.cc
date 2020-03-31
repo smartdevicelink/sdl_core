@@ -127,7 +127,7 @@ TEST_F(GetSystemInfoResponseTest, GetSystemInfo_UNSUCCESS) {
       .Times(0);
 
   EXPECT_CALL(mock_hmi_capabilities_, UpdateCachedCapabilities());
-  EXPECT_CALL(mock_policy_handler_, OnGetSystemInfo("", "", ""));
+  EXPECT_CALL(mock_policy_handler_, SetPreloadedPtFlag(false));
 
   command->Run();
 }

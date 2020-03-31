@@ -2275,6 +2275,12 @@ int CacheManager::CountUnconsentedGroups(const std::string& policy_app_id,
   return result;
 }
 
+void CacheManager::SetPreloadedPtFlag(const bool is_preloaded) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  *pt_->policy_table.module_config.preloaded_pt = is_preloaded;
+  Backup();
+}
+
 bool CacheManager::SetMetaInfo(const std::string& ccpu_version,
                                const std::string& wers_country_code,
                                const std::string& language) {

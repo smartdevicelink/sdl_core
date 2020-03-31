@@ -180,6 +180,7 @@ class MockPolicyHandlerInterface : public policy::PolicyHandlerInterface {
                std::string(const transport_manager::DeviceHandle& device_handle,
                            const std::string& policy_app_id));
   MOCK_METHOD1(OnSystemInfoChanged, void(const std::string& language));
+  MOCK_METHOD1(SetPreloadedPtFlag, void(const bool is_preloaded));
   MOCK_METHOD3(OnGetSystemInfo,
                void(const std::string& ccpu_version,
                     const std::string& wers_country_code,

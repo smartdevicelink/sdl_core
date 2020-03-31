@@ -176,6 +176,7 @@ class MockCacheManagerInterface : public CacheManagerInterface {
                bool(const std::string& app_id, bool is_device_allowed));
   MOCK_METHOD1(SetUserPermissionsForApp,
                bool(const PermissionConsent& permissions));
+  MOCK_METHOD1(SetPreloadedPtFlag, void(const bool is_preloaded));
   MOCK_METHOD3(SetMetaInfo,
                bool(const std::string& ccpu_version,
                     const std::string& wers_country_code,

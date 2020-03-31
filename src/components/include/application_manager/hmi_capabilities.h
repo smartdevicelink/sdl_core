@@ -512,7 +512,7 @@ class HMICapabilities {
   /**
    * @brief Deletes cached HMI capabilities file from a file system
    */
-  virtual void DeleteCachedCapabilitiesFile() const = 0;
+  virtual bool DeleteCachedCapabilitiesFile() const = 0;
 
   /**
    * @brief Returns collection of requests that should be send to

@@ -1016,6 +1016,11 @@ void PolicyHandler::OnSystemInfoChanged(const std::string& language) {
   policy_manager_->SetSystemLanguage(language);
 }
 
+void PolicyHandler::SetPreloadedPtFlag(const bool is_preloaded) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  policy_manager_->SetPreloadedPtFlag(is_preloaded);
+}
+
 void PolicyHandler::OnGetSystemInfo(const std::string& ccpu_version,
                                     const std::string& wers_country_code,
                                     const std::string& language) {

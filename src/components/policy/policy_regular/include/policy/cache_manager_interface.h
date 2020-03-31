@@ -579,6 +579,12 @@ class CacheManagerInterface {
       const PermissionConsent& permissions) = 0;
 
   /**
+   * @brief Set preloaded_pt flag value in policy table
+   * @param is_preloaded value to set
+   */
+  virtual void SetPreloadedPtFlag(const bool is_preloaded) = 0;
+
+  /**
    * @brief Records information about head unit system to PT
    * @return bool Success of operation
    */

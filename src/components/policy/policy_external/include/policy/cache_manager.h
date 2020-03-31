@@ -596,6 +596,8 @@ class CacheManager : public CacheManagerInterface {
   bool SetUserPermissionsForApp(const PermissionConsent& permissions,
                                 bool* out_app_permissions_changed);
 
+  void SetPreloadedPtFlag(const bool is_preloaded) OVERRIDE;
+
   /**
    * @brief Records information about head unit system to PT
    * @return bool Success of operation

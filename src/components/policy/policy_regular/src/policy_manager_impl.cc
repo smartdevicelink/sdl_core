@@ -1211,6 +1211,11 @@ std::string& PolicyManagerImpl::GetCurrentDeviceId(
 
 void PolicyManagerImpl::SetSystemLanguage(const std::string& language) {}
 
+void PolicyManagerImpl::SetPreloadedPtFlag(const bool is_preloaded) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  cache_->SetPreloadedPtFlag(is_preloaded);
+}
+
 void PolicyManagerImpl::SetSystemInfo(const std::string& ccpu_version,
                                       const std::string& wers_country_code,
                                       const std::string& language) {

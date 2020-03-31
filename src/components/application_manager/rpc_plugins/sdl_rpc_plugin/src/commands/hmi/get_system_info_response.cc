@@ -58,10 +58,16 @@ void GetSystemInfoResponse::Run() {
           (*message_)[strings::params][hmi_response::code].asInt());
 
   hmi_capabilities_.set_ccpu_version(policy_handler_.GetCCPUVersionFromPT());
+
+  if (hmi_apis::Common_Result::SUCCESS != code) {
+    LOG4CXX_WARN(logger_, "GetSystemError returns an error code " << code);
+    hmi_capabilities_.UpdateCachedCapabilities();
+    policy_handler_.SetPreloadedPtFlag(false);
+    return;
+  }
+
   const SystemInfo& info = GetSystemInfo(code);
 
-  // We have to set preloaded flag as false in policy table on any response
-  // of GetSystemInfo (SDLAQ-CRS-2365)
   policy_handler_.OnGetSystemInfo(
       info.ccpu_version, info.wers_country_code, info.language);
 }
@@ -70,11 +76,6 @@ const SystemInfo GetSystemInfoResponse::GetSystemInfo(
     const hmi_apis::Common_Result::eType code) const {
   SystemInfo info;
 
-  if (hmi_apis::Common_Result::SUCCESS != code) {
-    LOG4CXX_WARN(logger_, "GetSystemError returns an error code " << code);
-    hmi_capabilities_.UpdateCachedCapabilities();
-    return info;
-  }
   info.ccpu_version =
       (*message_)[strings::msg_params]["ccpu_version"].asString();
 
