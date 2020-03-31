@@ -46,6 +46,7 @@
 #include "application_manager/resumption/resume_ctrl.h"
 #include "application_manager/state_controller.h"
 #include "policy/mock_policy_settings.h"
+#include "smart_objects/enum_schema_item.h"
 #include "utils/custom_string.h"
 #include "utils/lock.h"
 
@@ -1113,13 +1114,19 @@ TEST_F(MessageHelperTest, ExtractWindowIdFromSmartObject_FromWrongType) {
 }
 
 TEST_F(MessageHelperTest,
-       VehicleDataMapping_ContainsWindowStatusMapping_SUCCESS) {
+       VehicleDataMapping_ContainsGeneratedVehicleTypes_SUCCESS) {
+  using VehicleDataTypes =
+      smart_objects::EnumConversionHelper<mobile_apis::VehicleDataType::eType>;
+
   const auto& vehicle_data_mapping = MessageHelper::vehicle_data();
-  const auto window_status_mapping =
-      vehicle_data_mapping.find(application_manager::strings::window_status);
-  ASSERT_NE(window_status_mapping, vehicle_data_mapping.end());
-  EXPECT_EQ(mobile_apis::VehicleDataType::VEHICLEDATA_WINDOWSTATUS,
-            window_status_mapping->second);
+  const auto& enum_map = VehicleDataTypes::enum_to_cstring_map();
+
+  ASSERT_EQ(vehicle_data_mapping.size(), enum_map.size() - 1u);
+
+  for (const auto& it : vehicle_data_mapping) {
+    const auto& found_value = enum_map.find(it.second);
+    EXPECT_NE(found_value, enum_map.end());
+  }
 }
 
 }  // namespace application_manager_test
