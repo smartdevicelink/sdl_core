@@ -31,6 +31,7 @@
  */
 #include "sdl_rpc_plugin/commands/hmi/get_system_info_response.h"
 #include "application_manager/message_helper.h"
+#include "application_manager/policies/policy_handler_interface.h"
 
 namespace sdl_rpc_plugin {
 using namespace application_manager;
@@ -90,4 +91,4 @@ const SystemInfo GetSystemInfoResponse::GetSystemInfo(
 
 }  // namespace commands
 
-}  // namespace application_manager
+}  // namespace sdl_rpc_plugin

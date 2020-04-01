@@ -33,6 +33,7 @@
 #include <string>
 
 #include "hmi_message_handler/messagebroker_adapter.h"
+#include "utils/jsoncpp_reader_wrapper.h"
 #include "utils/logger.h"
 
 namespace hmi_message_handler {
@@ -55,15 +56,17 @@ void MessageBrokerAdapter::SendMessageToHMI(
     hmi_message_handler::MessageSharedPointer message) {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  if (!message.valid()) {
+  if (message.use_count() == 0) {
     LOG4CXX_ERROR(logger_, "Can`t send not valid message");
     return;
   }
 
-  Json::Reader reader;
+  utils::JsonReader reader;
   Json::Value json_value;
-  if (!reader.parse(message->json_message(), json_value, false)) {
-    LOG4CXX_ERROR(logger_, "Received invalid json string.");
+  const std::string str = message->json_message();
+
+  if (!reader.parse(str, &json_value)) {
+    LOG4CXX_ERROR(logger_, "Received invalid json string. ");
     return;
   }
 
@@ -138,6 +141,8 @@ void MessageBrokerAdapter::SubscribeTo() {
   MessageBrokerController::subscribeTo("BasicCommunication.OnEventChanged");
   MessageBrokerController::subscribeTo("RC.OnInteriorVehicleData");
   MessageBrokerController::subscribeTo("RC.OnRemoteControlSettings");
+  MessageBrokerController::subscribeTo(
+      "BasicCommunication.OnSystemCapabilityUpdated");
 
   LOG4CXX_INFO(logger_, "Subscribed to notifications.");
 }
@@ -159,8 +164,8 @@ void MessageBrokerAdapter::ProcessRecievedFromMB(Json::Value& root) {
     return;
   }
 
-  Json::FastWriter writer;
-  std::string message_string = writer.write(root);
+  Json::StreamWriterBuilder writer_builder;
+  const std::string message_string = Json::writeString(writer_builder, root);
 
   if (message_string.empty()) {
     // LOG

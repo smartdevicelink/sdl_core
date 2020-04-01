@@ -35,8 +35,8 @@
 
 #include <string>
 
-#include "hmi_message_handler/mb_controller.h"
 #include "hmi_message_handler/hmi_message_adapter_impl.h"
+#include "hmi_message_handler/mb_controller.h"
 #include "utils/threads/thread_validator.h"
 
 namespace hmi_message_handler {

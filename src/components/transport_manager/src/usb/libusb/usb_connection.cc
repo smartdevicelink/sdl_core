@@ -38,8 +38,8 @@
 
 #include <sstream>
 
-#include "transport_manager/usb/libusb/usb_connection.h"
 #include "transport_manager/transport_adapter/transport_adapter_impl.h"
+#include "transport_manager/usb/libusb/usb_connection.h"
 
 #include "utils/logger.h"
 
@@ -137,7 +137,7 @@ void UsbConnection::OnInTransfer(libusb_transfer* transfer) {
                       << transfer->actual_length << ", data:"
                       << hex_data(transfer->buffer, transfer->actual_length));
     ::protocol_handler::RawMessagePtr data(new protocol_handler::RawMessage(
-        0, 0, in_buffer_, transfer->actual_length));
+        0, 0, in_buffer_, transfer->actual_length, false));
     controller_->DataReceiveDone(device_uid_, app_handle_, data);
   } else {
     LOG4CXX_ERROR(logger_,
@@ -224,7 +224,7 @@ void UsbConnection::OnOutTransfer(libusb_transfer* transfer) {
         device_uid_, app_handle_, current_out_message_, DataSendError());
     PopOutMessage();
   }
-  if (!current_out_message_.valid()) {
+  if (current_out_message_.use_count() == 0) {
     libusb_free_transfer(transfer);
     out_transfer_ = NULL;
     waiting_out_transfer_cancel_ = false;
@@ -242,7 +242,7 @@ TransportAdapter::Error UsbConnection::SendData(
     return TransportAdapter::BAD_STATE;
   }
   sync_primitives::AutoLock locker(out_messages_mutex_);
-  if (current_out_message_.valid()) {
+  if (current_out_message_.use_count() != 0) {
     out_messages_.push_back(message);
   } else {
     current_out_message_ = message;

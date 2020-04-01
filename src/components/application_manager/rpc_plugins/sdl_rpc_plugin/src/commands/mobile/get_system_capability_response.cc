@@ -30,9 +30,9 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "sdl_rpc_plugin/commands/mobile/get_system_capability_response.h"
 #include "application_manager/application_manager.h"
 #include "application_manager/rpc_service.h"
-#include "sdl_rpc_plugin/commands/mobile/get_system_capability_response.h"
 
 namespace sdl_rpc_plugin {
 using namespace application_manager;
@@ -61,4 +61,4 @@ void GetSystemCapabilityResponse::Run() {
 
 }  // namespace commands
 
-}  // namespace application_manager
+}  // namespace sdl_rpc_plugin

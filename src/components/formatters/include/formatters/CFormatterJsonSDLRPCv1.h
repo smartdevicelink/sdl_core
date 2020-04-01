@@ -32,17 +32,17 @@
 
 #include "json/json.h"
 
-#include "smart_objects/smart_object.h"
 #include "smart_objects/enum_schema_item.h"
+#include "smart_objects/smart_object.h"
 
 #include "CFormatterJsonBase.h"
 
 #include "formatters/CSmartFactory.h"
 #include "formatters/meta_formatter.h"
 
-namespace NsSmartDeviceLink {
-namespace NsJSONHandler {
-namespace Formatters {
+namespace ns_smart_device_link {
+namespace ns_json_handler {
+namespace formatters {
 
 /**
  * @brief Class is used to convert SmartObjects to JSON string and vice versa.
@@ -69,7 +69,7 @@ class CFormatterJsonSDLRPCv1 : public CFormatterJsonBase {
    * @brief Extracts a message type from the SmartObject
    */
   static const std::string getMessageType(
-      const NsSmartDeviceLink::NsSmartObjects::SmartObject& obj);
+      const ns_smart_device_link::ns_smart_objects::SmartObject& obj);
 
   /**
    * @brief Extracts a message type from the root JSON object.
@@ -117,7 +117,7 @@ class CFormatterJsonSDLRPCv1 : public CFormatterJsonBase {
   static const int32_t kMessageTypeNotFound;
   static const int32_t kCorrelationIdNotFound;
 
-  typedef NsSmartDeviceLink::NsJSONHandler::Formatters::
+  typedef ns_smart_device_link::ns_json_handler::formatters::
       meta_formatter_error_code::tMetaFormatterErrorCode
           tMetaFormatterErrorCode;
 
@@ -126,11 +126,14 @@ class CFormatterJsonSDLRPCv1 : public CFormatterJsonBase {
    *
    * @param obj input SmartObject
    * @param outStr resulting JSON string
+   * @param remove_unknown_parameters contains true if need to remove unknown
+   *parameters
    * @return true if success, false otherwise
    */
   static bool toString(
-      const NsSmartDeviceLink::NsSmartObjects::SmartObject& obj,
-      std::string& outStr);
+      const ns_smart_device_link::ns_smart_objects::SmartObject& obj,
+      std::string& outStr,
+      const bool remove_unknown_parameters = true);
 
   /**
    * @brief Creates a SmartObject from a JSON string.
@@ -142,7 +145,7 @@ class CFormatterJsonSDLRPCv1 : public CFormatterJsonBase {
   template <typename FunctionId, typename MessageType>
   static int32_t fromString(
       const std::string& str,
-      NsSmartDeviceLink::NsSmartObjects::SmartObject& out);
+      ns_smart_device_link::ns_smart_objects::SmartObject& out);
 
   /**
    * @brief Converts to string the smart object against the given schema
@@ -151,28 +154,34 @@ class CFormatterJsonSDLRPCv1 : public CFormatterJsonBase {
    * @param schema Smart schema which describes 'fake' smart object to be
    *formatted
    * @param outStr Resulting JSON string
+   * @param remove_unknown_parameters contains true if need to remove unknown
+   *parameters
    * @return formatting error code
    */
   static tMetaFormatterErrorCode MetaFormatToString(
-      const NsSmartDeviceLink::NsSmartObjects::SmartObject& object,
-      const NsSmartDeviceLink::NsSmartObjects::CSmartSchema& schema,
-      std::string& outStr);
+      const ns_smart_device_link::ns_smart_objects::SmartObject& object,
+      const ns_smart_device_link::ns_smart_objects::CSmartSchema& schema,
+      std::string& outStr,
+      const bool remove_unknown_parameters = true);
 };
 
 // ----------------------------------------------------------------------------
 
 template <typename FunctionId, typename MessageType>
-int32_t Formatters::CFormatterJsonSDLRPCv1::fromString(
+int32_t formatters::CFormatterJsonSDLRPCv1::fromString(
     const std::string& str,
-    NsSmartDeviceLink::NsSmartObjects::SmartObject& out) {
+    ns_smart_device_link::ns_smart_objects::SmartObject& out) {
   int32_t result = kSuccess;
 
   try {
+    Json::CharReaderBuilder reader_builder;
+    const std::unique_ptr<Json::CharReader> reader(
+        reader_builder.newCharReader());
     Json::Value root;
-    Json::Reader reader;
+    const size_t json_len = str.length();
     std::string type;
 
-    if (false == reader.parse(str, root)) {
+    if (!reader->parse(str.c_str(), str.c_str() + json_len, &root, nullptr)) {
       result = kParsingError | kMessageTypeNotFound | kFunctionIdNotFound |
                kCorrelationIdNotFound;
     }
@@ -189,7 +198,7 @@ int32_t Formatters::CFormatterJsonSDLRPCv1::fromString(
     MessageType messageType = MessageType::INVALID_ENUM;
 
     if (kSuccess == result) {
-      if (!NsSmartObjects::EnumConversionHelper<MessageType>::StringToEnum(
+      if (!ns_smart_objects::EnumConversionHelper<MessageType>::StringToEnum(
               type, &messageType)) {
         // If MessageType is not found than FunctionId and CorrelationId can not
         // be found either
@@ -199,14 +208,14 @@ int32_t Formatters::CFormatterJsonSDLRPCv1::fromString(
     }
 
     if (kSuccess == result) {
-      if (!NsSmartObjects::EnumConversionHelper<FunctionId>::StringToEnum(
+      if (!ns_smart_objects::EnumConversionHelper<FunctionId>::StringToEnum(
               root[type][S_NAME].asString(), &functionId)) {
         result = kFunctionIdNotFound;
         functionId = FunctionId::INVALID_ENUM;
       }
     }
 
-    namespace S = NsSmartDeviceLink::NsJSONHandler::strings;
+    namespace S = ns_smart_device_link::ns_json_handler::strings;
 
     if (!(result & kMessageTypeNotFound)) {
       jsonValueToObj(root[type][S_PARAMETERS], out[S::S_MSG_PARAMS]);
@@ -232,8 +241,8 @@ int32_t Formatters::CFormatterJsonSDLRPCv1::fromString(
 
   return result;
 }
-}
-}
-}  // namespace NsSmartDeviceLink::NsJSONHandler::Formatters
+}  // namespace formatters
+}  // namespace ns_json_handler
+}  // namespace ns_smart_device_link
 
 #endif  // SRC_COMPONENTS_FORMATTERS_INCLUDE_FORMATTERS_CFORMATTERJSONSDLRPCV1_H_

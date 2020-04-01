@@ -35,7 +35,6 @@
 #ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_ADAPTER_CONNECTION_H_
 #define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_ADAPTER_CONNECTION_H_
 
-#include "utils/shared_ptr.h"
 #include "transport_manager/transport_adapter/transport_adapter.h"
 
 namespace transport_manager {
@@ -65,9 +64,16 @@ class Connection {
    * @brief Disconnect the current connection.
    */
   virtual TransportAdapter::Error Disconnect() = 0;
+
+  /**
+   * @brief Terminate method may implement the logic of correct thread
+   * termination, if necessary for specific connection. Unlike the disconnect
+   * method, which manipulates physical descriptors
+   */
+  virtual void Terminate() {}
 };
 
-typedef utils::SharedPtr<Connection> ConnectionSPtr;
+typedef std::shared_ptr<Connection> ConnectionSPtr;
 
 }  // namespace transport_adapter
 }  // namespace transport_manager

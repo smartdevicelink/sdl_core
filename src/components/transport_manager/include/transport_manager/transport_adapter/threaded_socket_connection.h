@@ -38,11 +38,11 @@
 #include <poll.h>
 #include <queue>
 
-#include "transport_manager/transport_adapter/connection.h"
+#include <atomic>
 #include "protocol/common.h"
-#include "utils/atomic_object.h"
-#include "utils/threads/thread_delegate.h"
+#include "transport_manager/transport_adapter/connection.h"
 #include "utils/lock.h"
+#include "utils/threads/thread_delegate.h"
 
 using ::transport_manager::transport_adapter::Connection;
 
@@ -73,6 +73,8 @@ class ThreadedSocketConnection : public Connection {
    * @return Error Information about possible reason of Disconnect failure.
    */
   TransportAdapter::Error Disconnect();
+
+  void Terminate() OVERRIDE;
 
   /**
    * @brief Start thread creation.
@@ -201,7 +203,7 @@ class ThreadedSocketConnection : public Connection {
   FrameQueue frames_to_send_;
   mutable sync_primitives::Lock frames_to_send_mutex_;
 
-  sync_primitives::atomic_int socket_;
+  std::atomic_int socket_;
   bool terminate_flag_;
   bool unexpected_disconnect_;
   const DeviceUID device_uid_;

@@ -33,26 +33,26 @@
 #ifndef SRC_COMPONENTS_CONNECTION_HANDLER_INCLUDE_CONNECTION_HANDLER_CONNECTION_HANDLER_IMPL_H_
 #define SRC_COMPONENTS_CONNECTION_HANDLER_INCLUDE_CONNECTION_HANDLER_CONNECTION_HANDLER_IMPL_H_
 
-#include <map>
 #include <list>
+#include <map>
 #include <string>
 #include <vector>
 
-#include "transport_manager/transport_manager_listener_empty.h"
-#include "protocol_handler/session_observer.h"
-#include "protocol_handler/protocol_handler.h"
+#include "connection_handler/connection.h"
+#include "connection_handler/connection_handler.h"
 #include "connection_handler/connection_handler_observer.h"
 #include "connection_handler/device.h"
-#include "connection_handler/connection.h"
 #include "connection_handler/devices_discovery_starter.h"
-#include "connection_handler/connection_handler.h"
+#include "protocol_handler/protocol_handler.h"
+#include "protocol_handler/session_observer.h"
+#include "transport_manager/transport_manager_listener_empty.h"
 
+#include "utils/lock.h"
 #include "utils/logger.h"
 #include "utils/macro.h"
 #include "utils/message_queue.h"
-#include "utils/lock.h"
-#include "utils/stl_utils.h"
 #include "utils/rwlock.h"
+#include "utils/stl_utils.h"
 
 const transport_manager::ConnectionUID kDisabledSecondary = 0xFFFFFFFF;
 
@@ -81,7 +81,7 @@ class ConnectionHandlerImpl
   ConnectionHandlerImpl(const ConnectionHandlerSettings& settings,
                         transport_manager::TransportManager& tm);
   /**
-   * \brief Destructor
+   * @brief Destructor
    */
   ~ConnectionHandlerImpl();
 
@@ -102,9 +102,19 @@ class ConnectionHandlerImpl
 
   /**
    * \brief Connects to all services of device
-   * \param deviceHandle Handle of device to connect to
+   * \param device_handle Handle of device to connect to
    */
   void ConnectToDevice(connection_handler::DeviceHandle device_handle) OVERRIDE;
+
+  /**
+   * @brief Retrieves the connection status of a given device
+   *
+   * @param device_handle Handle of device to query
+   *
+   * @return The connection status of the given device
+   */
+  transport_manager::ConnectionStatus GetConnectionStatus(
+      const DeviceHandle& device_handle) const OVERRIDE;
 
   /**
    * @brief RunAppOnDevice allows to run specific application on the certain
@@ -119,6 +129,13 @@ class ConnectionHandlerImpl
                       const std::string& bundle_id) const OVERRIDE;
 
   void ConnectToAllDevices() OVERRIDE;
+
+  void AddCloudAppDevice(
+      const std::string& policy_app_id,
+      const transport_manager::transport_adapter::CloudAppProperties&
+          cloud_properties) OVERRIDE;
+
+  void RemoveCloudAppDevice(const DeviceHandle device_id) OVERRIDE;
 
   void StartTransportManager() OVERRIDE;
 
@@ -162,6 +179,16 @@ class ConnectionHandlerImpl
   void OnScanDevicesFailed(
       const transport_manager::SearchDeviceError& error) OVERRIDE;
 
+  void OnConnectionStatusUpdated() OVERRIDE;
+
+  /**
+   * \brief Notifies about pending connection.
+   *
+   * \param connection_id ID of new connection.
+   **/
+  void OnConnectionPending(
+      const transport_manager::DeviceInfo& device_info,
+      const transport_manager::ConnectionUID connection_id) OVERRIDE;
   /**
    * \brief Notifies about established connection.
    *
@@ -196,25 +223,6 @@ class ConnectionHandlerImpl
   /**
    * \brief Callback function used by ProtocolHandler
    * when Mobile Application initiates start of new session.
-   * \param connection_handle Connection identifier within which session has to
-   * be started.
-   * \param session_id Identifier of the session to be started
-   * \param service_type Type of service
-   * \param is_protected would be service protected
-   * \param hash_id pointer for session hash identifier
-   * \return uint32_t Id (number) of new session if successful, otherwise 0.
-   * \deprecated
-   */
-  virtual uint32_t OnSessionStartedCallback(
-      const transport_manager::ConnectionUID connection_handle,
-      const uint8_t session_id,
-      const protocol_handler::ServiceType& service_type,
-      const bool is_protected,
-      uint32_t* hash_id);
-
-  /**
-   * \brief Callback function used by ProtocolHandler
-   * when Mobile Application initiates start of new session.
    * Result must be notified through NotifySessionStartedContext().
    * \param connection_handle Connection identifier within which session
    * has to be started.
@@ -230,22 +238,7 @@ class ConnectionHandlerImpl
       const protocol_handler::ServiceType& service_type,
       const bool is_protected,
       const BsonObject* params);
-  /**
-   * \brief Callback function used by ProtocolHandler
-   * when Mobile Application initiates session ending.
-   * \param connection_handle Connection identifier within which session exists
-   * \param sessionId Identifier of the session to be ended
-   * \param hashCode Hash used only in second version of SmartDeviceLink
-   * protocol.
-   * If not equal to hash assigned to session on start then operation fails.
-   * \return uint32_t 0 if operation fails, session key otherwise
-   * \deprecated
-   */
-  uint32_t OnSessionEndedCallback(
-      const transport_manager::ConnectionUID connection_handle,
-      const uint8_t session_id,
-      const uint32_t& hashCode,
-      const protocol_handler::ServiceType& service_type) OVERRIDE;
+
   /**
    * \brief Callback function used by ProtocolHandler
    * when Mobile Application initiates session ending.
@@ -384,6 +377,15 @@ class ConnectionHandlerImpl
   bool SessionServiceExists(
       const uint32_t connection_key,
       const protocol_handler::ServiceType& service_type) const OVERRIDE;
+
+  /**
+   * @brief Get cloud app id by connection id
+   * @param connection_id unique connection id
+   * @return the policy app id of the cloud app if the connection is tied to a
+   * cloud app, an empty string otherwise.
+   */
+  std::string GetCloudAppID(
+      const transport_manager::ConnectionUID connection_id) const OVERRIDE;
 
   /**
    * \brief Get device handle by mac address
@@ -604,6 +606,10 @@ class ConnectionHandlerImpl
       const transport_manager::ConnectionUID secondary_connection_handle)
       OVERRIDE;
 
+  const transport_manager::DeviceInfo& GetWebEngineDeviceInfo() const OVERRIDE;
+
+  void CreateWebEngineDevice() OVERRIDE;
+
  private:
   /**
    * \brief Disconnect application.
@@ -617,6 +623,15 @@ class ConnectionHandlerImpl
 
   const uint8_t GetSessionIdFromSecondaryTransport(
       transport_manager::ConnectionUID secondary_transport_id) const;
+
+  /**
+   * @brief Get pointer to the primary connection by connection handle
+   * @param connection_handle handle of the current connection
+   * @return pointer to the primary connection if current one is secondary
+   * otherwise returns pointer to the same connection
+   */
+  Connection* GetPrimaryConnection(
+      const ConnectionHandle connection_handle) const;
 
   const ConnectionHandlerSettings& settings_;
   /**
@@ -635,12 +650,12 @@ class ConnectionHandlerImpl
    * \brief List of devices
    */
   DeviceMap device_list_;
-
+  mutable sync_primitives::RWLock device_list_lock_;
   /**
    * @brief session/connection map
    */
   SessionConnectionMap session_connection_map_;
-  mutable std::shared_ptr<sync_primitives::Lock>
+  mutable std::shared_ptr<sync_primitives::RecursiveLock>
       session_connection_map_lock_ptr_;
 
   /**
@@ -662,6 +677,12 @@ class ConnectionHandlerImpl
   sync_primitives::Lock start_service_context_map_lock_;
   std::map<uint32_t, protocol_handler::SessionContext>
       start_service_context_map_;
+
+  // Map app id -> (cloud_app_endpoint, connection_uid)
+  mutable sync_primitives::Lock cloud_app_id_map_lock_;
+  std::map<std::string,
+           std::pair<std::string, transport_manager::ConnectionUID> >
+      cloud_app_id_map_;
 
   /**
    * @brief connection object as it's being closed

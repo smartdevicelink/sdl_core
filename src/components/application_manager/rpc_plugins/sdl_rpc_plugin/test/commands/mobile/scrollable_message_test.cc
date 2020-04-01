@@ -31,20 +31,20 @@
  */
 
 #include <stdint.h>
-#include <string>
 #include <set>
+#include <string>
 
 #include "mobile/scrollable_message_request.h"
 
-#include "gtest/gtest.h"
 #include "application_manager/commands/command_request_test.h"
+#include "application_manager/event_engine/event.h"
 #include "application_manager/mock_application.h"
 #include "application_manager/mock_application_manager.h"
-#include "application_manager/mock_message_helper.h"
-#include "application_manager/event_engine/event.h"
-#include "application_manager/mock_hmi_interface.h"
 #include "application_manager/mock_hmi_capabilities.h"
+#include "application_manager/mock_hmi_interface.h"
+#include "application_manager/mock_message_helper.h"
 #include "application_manager/policies/mock_policy_handler_interface.h"
+#include "gtest/gtest.h"
 
 namespace test {
 namespace components {
@@ -57,11 +57,10 @@ namespace hmi_response = am::hmi_response;
 namespace mobile_result = mobile_apis::Result;
 namespace am = ::application_manager;
 
-using sdl_rpc_plugin::commands::ScrollableMessageRequest;
+using am::MockMessageHelper;
 using am::commands::CommandImpl;
 using am::commands::MessageSharedPtr;
-using am::MockMessageHelper;
-using ::utils::SharedPtr;
+using sdl_rpc_plugin::commands::ScrollableMessageRequest;
 using ::testing::_;
 using ::testing::Eq;
 using ::testing::Ref;
@@ -116,7 +115,7 @@ class ScrollableMessageRequestTest
 
   MockAppPtr mock_app_;
   MessageSharedPtr msg_;
-  SharedPtr<ScrollableMessageRequest> command_;
+  std::shared_ptr<ScrollableMessageRequest> command_;
 };
 
 typedef ScrollableMessageRequestTest::MockHMICapabilities MockHMICapabilities;
@@ -125,7 +124,7 @@ TEST_F(ScrollableMessageRequestTest, OnEvent_UI_UNSUPPORTED_RESOURCE) {
   MessageSharedPtr msg_ui = CreateFullParamsUISO();
   (*msg_ui)[am::strings::params][am::strings::connection_key] = kConnectionKey;
 
-  utils::SharedPtr<ScrollableMessageRequest> command =
+  std::shared_ptr<ScrollableMessageRequest> command =
       CreateCommand<ScrollableMessageRequest>(msg_ui);
 
   MockAppPtr mock_app = CreateMockApp();
@@ -176,7 +175,7 @@ TEST_F(ScrollableMessageRequestTest, Init_CorrectTimeout_SUCCESS) {
       mobile_apis::InteractionMode::MANUAL_ONLY;
   EXPECT_EQ(kDefaultTimeout_, command_->default_timeout());
   command_->Init();
-  EXPECT_EQ(kTimeOut, command_->default_timeout());
+  EXPECT_EQ(kTimeOut + kDefaultTimeout_, command_->default_timeout());
 }
 
 TEST_F(ScrollableMessageRequestTest, Init_CorrectTimeout_UNSUCCESS) {
@@ -184,7 +183,7 @@ TEST_F(ScrollableMessageRequestTest, Init_CorrectTimeout_UNSUCCESS) {
       mobile_apis::InteractionMode::MANUAL_ONLY;
   EXPECT_EQ(kDefaultTimeout_, command_->default_timeout());
   command_->Init();
-  EXPECT_EQ(kTimeOut, command_->default_timeout());
+  EXPECT_EQ(kDefaultTimeout_, command_->default_timeout());
 }
 
 TEST_F(ScrollableMessageRequestTest, Run_ApplicationIsNotRegistered_UNSUCCESS) {
@@ -283,4 +282,4 @@ TEST_F(ScrollableMessageRequestTest,
 }  // namespace mobile_commands_test
 }  // namespace commands_test
 }  // namespace components
-}  // namespace tests
+}  // namespace test

@@ -1,35 +1,3 @@
-/*
- * Copyright (c) 2018 Xevo Inc.
- * All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- *
- * Redistributions of source code must retain the above copyright notice, this
- * list of conditions and the following disclaimer.
- *
- * Redistributions in binary form must reproduce the above copyright notice,
- * this list of conditions and the following
- * disclaimer in the documentation and/or other materials provided with the
- * distribution.
- *
- * Neither the names of the copyright holders nor the names of its contributors
- * may be used to endorse or promote products derived from this software
- * without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
- * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
- * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
- * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
- * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
- * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
- * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- */
-
 #include "transport_manager/tcp/platform_specific/linux/platform_specific_network_interface_listener_impl.h"
 
 #include <arpa/inet.h>
@@ -37,11 +5,11 @@
 #include <errno.h>
 #include <fcntl.h>
 #include <ifaddrs.h>
-#include <unistd.h>
 #include <net/if.h>
-#include <sys/types.h>
 #include <sys/select.h>
 #include <sys/socket.h>
+#include <sys/types.h>
+#include <unistd.h>
 
 #include <linux/netlink.h>
 #include <linux/rtnetlink.h>
@@ -137,7 +105,7 @@ PlatformSpecificNetworkInterfaceListener::
 
 bool PlatformSpecificNetworkInterfaceListener::Init() {
   LOG4CXX_AUTO_TRACE(logger_);
-
+  LOG4CXX_DEBUG(logger_, "Init socket: " << socket_);
   if (socket_ >= 0) {
     LOG4CXX_WARN(logger_, "Network interface listener is already initialized");
     return false;
@@ -183,7 +151,7 @@ bool PlatformSpecificNetworkInterfaceListener::Init() {
 
 void PlatformSpecificNetworkInterfaceListener::Deinit() {
   LOG4CXX_AUTO_TRACE(logger_);
-
+  LOG4CXX_DEBUG(logger_, "Deinit socket: " << socket_);
   if (socket_ >= 0) {
     close(socket_);
     socket_ = -1;
@@ -388,7 +356,7 @@ bool PlatformSpecificNetworkInterfaceListener::InitializeStatus() {
   }
 #endif  // BUILD_TESTS
 
-  struct ifaddrs* if_list, *interface;
+  struct ifaddrs *if_list, *interface;
   if (getifaddrs(&if_list) != 0) {
     LOG4CXX_WARN(logger_,
                  "getifaddr failed, interface status won't be available until "
@@ -453,9 +421,9 @@ bool PlatformSpecificNetworkInterfaceListener::UpdateStatus(
 
     switch (type) {
       case RTM_NEWLINK: {
-        LOG4CXX_DEBUG(logger_,
-                      "netlink event: interface " << ifname
-                                                  << " created or updated");
+        LOG4CXX_DEBUG(
+            logger_,
+            "netlink event: interface " << ifname << " created or updated");
         status.SetFlags(it->flags);
         break;
       }
@@ -652,6 +620,7 @@ void PlatformSpecificNetworkInterfaceListener::DumpTable() const {
   for (auto it = status_table_.begin(); it != status_table_.end(); ++it) {
     const std::string ifname = it->first;
     const InterfaceStatus& status = it->second;
+    UNUSED(status);
 
     LOG4CXX_DEBUG(
         logger_,

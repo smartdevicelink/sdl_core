@@ -60,7 +60,7 @@ class GetSystemCapabilityResponse
   DISALLOW_COPY_AND_ASSIGN(GetSystemCapabilityResponse);
 
 };  // GetSystemCapabilityResponse
-}  // commands
-}  // application_manager
+}  // namespace commands
+}  // namespace sdl_rpc_plugin
 
 #endif  // SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_MOBILE_GET_SYSTEM_CAPABILITY_RESPONSE_H_

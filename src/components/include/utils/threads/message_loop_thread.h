@@ -33,14 +33,14 @@
 #ifndef SRC_COMPONENTS_INCLUDE_UTILS_THREADS_MESSAGE_LOOP_THREAD_H_
 #define SRC_COMPONENTS_INCLUDE_UTILS_THREADS_MESSAGE_LOOP_THREAD_H_
 
-#include <string>
 #include <queue>
+#include <string>
 
 #include "utils/logger.h"
 #include "utils/macro.h"
 #include "utils/message_queue.h"
 #include "utils/threads/thread.h"
-#include "utils/shared_ptr.h"
+
 #include "utils/lock.h"
 
 namespace threads {

@@ -34,8 +34,8 @@
 #define SRC_COMPONENTS_INCLUDE_MEDIA_MANAGER_MEDIA_MANAGER_H_
 
 #include <string>
-#include "protocol/service_type.h"
 #include "media_manager/media_manager_settings.h"
+#include "protocol/service_type.h"
 namespace media_manager {
 
 class MediaManager {
@@ -59,6 +59,14 @@ class MediaManager {
    * \return pointer to media manager settings class
    */
   virtual const MediaManagerSettings& settings() const = 0;
+
+  /**
+   * \brief Convert an amount of audio bytes to an estimated time in ms
+   * \param data_size number of bytes to be played
+   * \return milliseconds required to play <data_size> many bytes with
+   *          the current pcm stream capabilities
+   */
+  virtual uint32_t DataSizeToMilliseconds(uint64_t data_size) const = 0;
 
   virtual ~MediaManager() {}
 };

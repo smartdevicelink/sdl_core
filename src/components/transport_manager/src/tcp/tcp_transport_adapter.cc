@@ -2,9 +2,6 @@
  * Copyright (c) 2017, Ford Motor Company
  * All rights reserved.
  *
- * Copyright (c) 2018 Xevo Inc.
- * All rights reserved.
- *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *
@@ -16,7 +13,7 @@
  * disclaimer in the documentation and/or other materials provided with the
  * distribution.
  *
- * Neither the name of the copyright holders nor the names of its contributors
+ * Neither the name of the Ford Motor Company nor the names of its contributors
  * may be used to endorse or promote products derived from this software
  * without specific prior written permission.
  *
@@ -35,19 +32,19 @@
 
 #include "transport_manager/tcp/tcp_transport_adapter.h"
 
+#include <errno.h>
 #include <memory.h>
 #include <signal.h>
-#include <errno.h>
 #include <stdio.h>
 
 #include <cstdlib>
 #include <sstream>
 
-#include "utils/logger.h"
-#include "utils/threads/thread_delegate.h"
 #include "transport_manager/tcp/tcp_client_listener.h"
 #include "transport_manager/tcp/tcp_connection_factory.h"
 #include "transport_manager/tcp/tcp_device.h"
+#include "utils/logger.h"
+#include "utils/threads/thread_delegate.h"
 
 namespace transport_manager {
 namespace transport_adapter {
@@ -56,7 +53,7 @@ CREATE_LOGGERPTR_GLOBAL(logger_, "TransportManager")
 
 TcpTransportAdapter::TcpTransportAdapter(
     const uint16_t port,
-    resumption::LastState& last_state,
+    resumption::LastStateWrapperPtr last_state_wrapper,
     const TransportManagerSettings& settings)
     : TransportAdapterImpl(
           NULL,
@@ -66,7 +63,7 @@ TcpTransportAdapter::TcpTransportAdapter(
               port,
               true,
               settings.transport_manager_tcp_adapter_network_interface()),
-          last_state,
+          last_state_wrapper,
           settings) {}
 
 TcpTransportAdapter::~TcpTransportAdapter() {}
@@ -103,8 +100,8 @@ void TcpTransportAdapter::Store() const {
     if (!device) {  // device could have been disconnected
       continue;
     }
-    utils::SharedPtr<TcpDevice> tcp_device =
-        DeviceSptr::static_pointer_cast<TcpDevice>(device);
+    std::shared_ptr<TcpDevice> tcp_device =
+        std::static_pointer_cast<TcpDevice>(device);
     Json::Value device_dictionary;
     device_dictionary["name"] = tcp_device->name();
     struct in_addr address;
@@ -134,20 +131,22 @@ void TcpTransportAdapter::Store() const {
     }
   }
   tcp_adapter_dictionary["devices"] = devices_dictionary;
-  Json::Value& dictionary = last_state().get_dictionary();
+  resumption::LastStateAccessor accessor = last_state_wrapper_->get_accessor();
+  Json::Value dictionary = accessor.GetData().dictionary();
   dictionary["TransportManager"]["TcpAdapter"] = tcp_adapter_dictionary;
+  accessor.GetMutableData().set_dictionary(dictionary);
 }
 
 bool TcpTransportAdapter::Restore() {
   LOG4CXX_AUTO_TRACE(logger_);
   bool errors_occurred = false;
+  resumption::LastStateAccessor accessor = last_state_wrapper_->get_accessor();
+  Json::Value dictionary = accessor.GetData().dictionary();
   const Json::Value tcp_adapter_dictionary =
-      last_state().get_dictionary()["TransportManager"]["TcpAdapter"];
+      dictionary["TransportManager"]["TcpAdapter"];
   const Json::Value devices_dictionary = tcp_adapter_dictionary["devices"];
-  for (Json::Value::const_iterator i = devices_dictionary.begin();
-       i != devices_dictionary.end();
-       ++i) {
-    const Json::Value device_dictionary = *i;
+  for (const auto& tcp_adapter_device : devices_dictionary) {
+    const Json::Value device_dictionary = tcp_adapter_device;
     std::string name = device_dictionary["name"].asString();
     std::string address_record = device_dictionary["address"].asString();
     in_addr_t address = inet_addr(address_record.c_str());
@@ -156,10 +155,8 @@ bool TcpTransportAdapter::Restore() {
     AddDevice(device);
     const Json::Value applications_dictionary =
         device_dictionary["applications"];
-    for (Json::Value::const_iterator j = applications_dictionary.begin();
-         j != applications_dictionary.end();
-         ++j) {
-      const Json::Value application_dictionary = *j;
+    for (const auto& application : applications_dictionary) {
+      const Json::Value application_dictionary = application;
       std::string port_record = application_dictionary["port"].asString();
       int port = atoi(port_record.c_str());
       ApplicationHandle app_handle = tcp_device->AddDiscoveredApplication(port);

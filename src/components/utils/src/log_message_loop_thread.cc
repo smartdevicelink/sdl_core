@@ -35,7 +35,7 @@
 
 namespace logger {
 
-void LogMessageHandler::Handle(const LogMessage message) {
+void LogMessageLoopThread::Handle(const LogMessage message) {
   message.logger->forcedLog(message.level,
                             message.entry,
                             message.timeStamp,
@@ -44,14 +44,13 @@ void LogMessageHandler::Handle(const LogMessage message) {
 }
 
 LogMessageLoopThread::LogMessageLoopThread()
-    : LogMessageLoopThreadTemplate("Logger",
-                                   handler_ = new LogMessageHandler()) {}
+    : LogMessageLoopThreadTemplate("Logger", this) {}
 
 LogMessageLoopThread::~LogMessageLoopThread() {
   // we'll have to drop messages
   // while deleting logger thread
   logger_status = DeletingLoggerThread;
-  delete handler_;
+  LogMessageLoopThreadTemplate::Shutdown();
 }
 
 }  // namespace logger

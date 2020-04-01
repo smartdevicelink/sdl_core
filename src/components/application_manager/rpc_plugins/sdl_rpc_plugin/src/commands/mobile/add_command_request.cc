@@ -31,14 +31,14 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <string>
 #include "sdl_rpc_plugin/commands/mobile/add_command_request.h"
+#include <string>
 
 #include "application_manager/application.h"
 #include "application_manager/message_helper.h"
+#include "utils/custom_string.h"
 #include "utils/file_system.h"
 #include "utils/helpers.h"
-#include "utils/custom_string.h"
 
 namespace sdl_rpc_plugin {
 using namespace application_manager;
@@ -96,7 +96,7 @@ void AddCommandRequest::Run() {
         app,
         application_manager_);
 
-    if (mobile_apis::Result::SUCCESS != verification_result) {
+    if (mobile_apis::Result::INVALID_DATA == verification_result) {
       LOG4CXX_ERROR(
           logger_, "MessageHelper::VerifyImage return " << verification_result);
       SendResponse(false, verification_result);
@@ -126,9 +126,9 @@ void AddCommandRequest::Run() {
     }
     if (((*message_)[strings::msg_params][strings::menu_params].keyExists(
             hmi_request::parent_id)) &&
-        (0 !=
-         (*message_)[strings::msg_params][strings::menu_params]
-                    [hmi_request::parent_id].asUInt())) {
+        (0 != (*message_)[strings::msg_params][strings::menu_params]
+                         [hmi_request::parent_id]
+                             .asUInt())) {
       if (!CheckCommandParentId(app)) {
         SendResponse(
             false, mobile_apis::Result::INVALID_ID, "Parent ID doesn't exist");
@@ -160,7 +160,9 @@ void AddCommandRequest::Run() {
     return;
   }
 
-  app->AddCommand((*message_)[strings::msg_params][strings::cmd_id].asUInt(),
+  const uint32_t internal_consecutive_number = application_manager::commands::
+      CommandImpl::CalcCommandInternalConsecutiveNumber(app);
+  app->AddCommand(internal_consecutive_number,
                   (*message_)[strings::msg_params]);
 
   smart_objects::SmartObject ui_msg_params =
@@ -224,7 +226,8 @@ bool AddCommandRequest::CheckCommandName(ApplicationConstSharedPtr app) {
   if ((*message_)[strings::msg_params][strings::menu_params].keyExists(
           hmi_request::parent_id)) {
     parent_id = (*message_)[strings::msg_params][strings::menu_params]
-                           [hmi_request::parent_id].asUInt();
+                           [hmi_request::parent_id]
+                               .asUInt();
   }
 
   for (; commands.end() != i; ++i) {
@@ -239,7 +242,8 @@ bool AddCommandRequest::CheckCommandName(ApplicationConstSharedPtr app) {
     }
     if (((*i->second)[strings::menu_params][strings::menu_name].asString() ==
          (*message_)[strings::msg_params][strings::menu_params]
-                    [strings::menu_name].asString()) &&
+                    [strings::menu_name]
+                        .asString()) &&
         (saved_parent_id == parent_id)) {
       LOG4CXX_INFO(logger_,
                    "AddCommandRequest::CheckCommandName received"
@@ -293,7 +297,8 @@ bool AddCommandRequest::CheckCommandParentId(ApplicationConstSharedPtr app) {
 
   const int32_t parent_id =
       (*message_)[strings::msg_params][strings::menu_params]
-                 [hmi_request::parent_id].asInt();
+                 [hmi_request::parent_id]
+                     .asInt();
   smart_objects::SmartObject* parent = app->FindSubMenu(parent_id);
 
   if (!parent) {
@@ -320,9 +325,10 @@ void AddCommandRequest::on_event(const event_engine::Event& event) {
     return;
   }
 
+  const uint32_t cmd_id =
+      (*message_)[strings::msg_params][strings::cmd_id].asUInt();
   smart_objects::SmartObject msg_param(smart_objects::SmartType_Map);
-  msg_param[strings::cmd_id] =
-      (*message_)[strings::msg_params][strings::cmd_id];
+  msg_param[strings::cmd_id] = cmd_id;
   msg_param[strings::app_id] = application->app_id();
 
   switch (event.id()) {
@@ -458,8 +464,7 @@ void AddCommandRequest::on_event(const event_engine::Event& event) {
       msg_params[strings::type] = hmi_apis::Common_VRCommandType::Command;
 
       SendHMIRequest(hmi_apis::FunctionID::VR_DeleteCommand, &msg_params);
-      application->RemoveCommand(
-          (*message_)[strings::msg_params][strings::cmd_id].asUInt());
+      application->RemoveCommand(cmd_id);
       result = false;
       LOG4CXX_DEBUG(logger_, "Result " << result);
     }
@@ -474,8 +479,7 @@ void AddCommandRequest::on_event(const event_engine::Event& event) {
 
     SendHMIRequest(hmi_apis::FunctionID::UI_DeleteCommand, &msg_params);
 
-    application->RemoveCommand(
-        (*message_)[strings::msg_params][strings::cmd_id].asUInt());
+    application->RemoveCommand(cmd_id);
     result = false;
     LOG4CXX_DEBUG(logger_, "Result " << result);
   }
@@ -501,7 +505,10 @@ void AddCommandRequest::on_event(const event_engine::Event& event) {
     result = false;
   }
 
-  if (!result) {
+  if (result) {
+    application->help_prompt_manager().OnVrCommandAdded(
+        cmd_id, (*message_)[strings::msg_params], false);
+  } else {
     RemoveCommand();
   }
 
@@ -522,7 +529,8 @@ bool AddCommandRequest::IsWhiteSpaceExist() {
 
   if ((*message_)[strings::msg_params].keyExists(strings::menu_params)) {
     str = (*message_)[strings::msg_params][strings::menu_params]
-                     [strings::menu_name].asCharArray();
+                     [strings::menu_name]
+                         .asCharArray();
     if (!CheckSyntax(str)) {
       LOG4CXX_ERROR(logger_, "Invalid menu name syntax check failed.");
       return true;
@@ -590,18 +598,18 @@ const std::string AddCommandRequest::GenerateMobileResponseInfo() {
 void AddCommandRequest::RemoveCommand() {
   LOG4CXX_AUTO_TRACE(logger_);
   ApplicationSharedPtr app = application_manager_.application(connection_key());
-  if (!app.valid()) {
+  if (app.use_count() == 0) {
     LOG4CXX_ERROR(logger_, "No application associated with session key");
     return;
   }
 
+  const uint32_t cmd_id =
+      (*message_)[strings::msg_params][strings::cmd_id].asUInt();
   smart_objects::SmartObject msg_params(smart_objects::SmartType_Map);
-  msg_params[strings::cmd_id] =
-      (*message_)[strings::msg_params][strings::cmd_id];
+  msg_params[strings::cmd_id] = cmd_id;
   msg_params[strings::app_id] = app->app_id();
 
-  app->RemoveCommand(
-      (*message_)[strings::msg_params][strings::cmd_id].asUInt());
+  app->RemoveCommand(cmd_id);
 
   if (BothSend() && !(is_vr_received_ || is_ui_received_)) {
     // in case we have send bth UI and VR and no one respond
@@ -622,4 +630,4 @@ void AddCommandRequest::RemoveCommand() {
 
 }  // namespace commands
 
-}  // namespace application_manager
+}  // namespace sdl_rpc_plugin

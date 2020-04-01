@@ -34,8 +34,8 @@
 #define SRC_COMPONENTS_INCLUDE_TEST_PROTOCOL_HANDLER_MOCK_SESSION_OBSERVER_H_
 
 #include <gmock/gmock.h>
-#include <string>
 #include <list>
+#include <string>
 #include "protocol_handler/session_observer.h"
 #include "transport_manager/common.h"
 
@@ -47,13 +47,6 @@ namespace protocol_handler_test {
  */
 class MockSessionObserver : public ::protocol_handler::SessionObserver {
  public:
-  DEPRECATED MOCK_METHOD5(
-      OnSessionStartedCallback,
-      uint32_t(const transport_manager::ConnectionUID connection_handle,
-               const uint8_t sessionId,
-               const protocol_handler::ServiceType& service_type,
-               const bool is_protected,
-               uint32_t* hash_id));
   MOCK_METHOD5(OnSessionStartedCallback,
                void(const transport_manager::ConnectionUID connection_handle,
                     const uint8_t sessionId,

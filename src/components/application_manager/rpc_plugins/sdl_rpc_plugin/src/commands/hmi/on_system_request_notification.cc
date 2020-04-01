@@ -32,10 +32,14 @@
 
 #include "application_manager/application_impl.h"
 
-#include "sdl_rpc_plugin/commands/hmi/on_system_request_notification.h"
 #include "application_manager/policies/policy_handler_interface.h"
 #include "interfaces/MOBILE_API.h"
+#include "sdl_rpc_plugin/commands/hmi/on_system_request_notification.h"
 #include "utils/macro.h"
+
+#ifdef EXTERNAL_PROPRIETARY_MODE
+#include "policy/ptu_retry_handler.h"
+#endif  // EXTERNAL_PROPRIETARY_MODE
 
 using policy::PolicyHandlerInterface;
 
@@ -91,7 +95,7 @@ void OnSystemRequestNotification::Run() {
     app = application_manager_.application(selected_app_id);
   }
 
-  if (!app.valid()) {
+  if (app.use_count() == 0) {
     LOG4CXX_WARN(logger_,
                  "No valid application found to forward OnSystemRequest.");
     return;
@@ -116,9 +120,19 @@ void OnSystemRequestNotification::Run() {
                 "Sending request with application id " << app->policy_app_id());
 
   params[strings::connection_key] = app->app_id();
+
+  using namespace rpc::policy_table_interface_base;
+  const auto request_type =
+      static_cast<rpc::policy_table_interface_base::RequestType>(
+          (*message_)[strings::msg_params][strings::request_type].asUInt());
+
+  if (helpers::Compare<RequestType, helpers::EQ, helpers::ONE>(
+          request_type, RequestType::RT_PROPRIETARY, RequestType::RT_HTTP)) {
+    policy_handler_.OnSystemRequestReceived();
+  }
   SendNotificationToMobile(message_);
 }
 
 }  // namespace commands
 
-}  // namespace application_manager
+}  // namespace sdl_rpc_plugin

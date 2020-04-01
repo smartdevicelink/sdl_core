@@ -1,4 +1,4 @@
-﻿/*
+/*
  Copyright (c) 2014, Ford Motor Company
  All rights reserved.
 
@@ -40,10 +40,10 @@ namespace {
 struct AppExtensionPredicate {
   AppExtensionUID uid;
   bool operator()(const ApplicationSharedPtr app) {
-    return app ? app->QueryInterface(uid).valid() : false;
+    return app ? (app->QueryInterface(uid).use_count() != 0) : false;
   }
 };
-}
+}  // namespace
 
 namespace commands {
 
@@ -96,6 +96,15 @@ int32_t CommandImpl::function_id() const {
   return (*message_)[strings::params][strings::function_id].asInt();
 }
 
+WindowID CommandImpl::window_id() const {
+  if ((*message_).keyExists(strings::msg_params)) {
+    if ((*message_)[strings::msg_params].keyExists(strings::window_id)) {
+      return (*message_)[strings::msg_params][strings::window_id].asInt();
+    }
+  }
+  return mobile_apis::PredefinedWindows::DEFAULT_WINDOW;
+}
+
 uint32_t CommandImpl::connection_key() const {
   return (*message_)[strings::params][strings::connection_key].asUInt();
 }
@@ -111,7 +120,7 @@ void CommandImpl::SetAllowedToTerminate(const bool allowed) {
 }
 
 bool CommandImpl::ReplaceMobileWithHMIAppId(
-    NsSmartDeviceLink::NsSmartObjects::SmartObject& message) {
+    ns_smart_device_link::ns_smart_objects::SmartObject& message) {
   LOG4CXX_AUTO_TRACE(logger_);
   if (message.keyExists(strings::app_id)) {
     ApplicationSharedPtr application =
@@ -155,15 +164,8 @@ bool CommandImpl::ReplaceMobileWithHMIAppId(
   return true;
 }
 
-DEPRECATED void CommandImpl::ReplaceMobileByHMIAppId(
-    NsSmartDeviceLink::NsSmartObjects::SmartObject& message) {
-  if (!ReplaceMobileWithHMIAppId(message)) {
-    LOG4CXX_ERROR(logger_, "Substitution mobile --> HMI id is failed.");
-  }
-}
-
 bool CommandImpl::ReplaceHMIWithMobileAppId(
-    NsSmartDeviceLink::NsSmartObjects::SmartObject& message) {
+    ns_smart_device_link::ns_smart_objects::SmartObject& message) {
   if (message.keyExists(strings::app_id)) {
     ApplicationSharedPtr application =
         application_manager_.application_by_hmi_app(
@@ -207,11 +209,18 @@ bool CommandImpl::ReplaceHMIWithMobileAppId(
   return true;
 }
 
-DEPRECATED void CommandImpl::ReplaceHMIByMobileAppId(
-    NsSmartDeviceLink::NsSmartObjects::SmartObject& message) {
-  if (!ReplaceHMIWithMobileAppId(message)) {
-    LOG4CXX_ERROR(logger_, "Substitution HMI --> mobile id is failed.");
+uint32_t CommandImpl::CalcCommandInternalConsecutiveNumber(
+    ApplicationConstSharedPtr app) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  const DataAccessor<CommandsMap> accessor = app->commands_map();
+  const CommandsMap& commands = accessor.GetData();
+
+  uint32_t last_command_number = 0u;
+  if (!commands.empty()) {
+    last_command_number = commands.rbegin()->first;
   }
+
+  return last_command_number + 1;
 }
 
 }  // namespace commands

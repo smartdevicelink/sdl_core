@@ -62,6 +62,8 @@
 #include "mobile/end_audio_pass_thru_request.h"
 #include "mobile/end_audio_pass_thru_response.h"
 #include "mobile/generic_response.h"
+#include "mobile/get_file_request.h"
+#include "mobile/get_file_response.h"
 #include "mobile/get_way_points_request.h"
 #include "mobile/get_way_points_response.h"
 #include "mobile/list_files_request.h"
@@ -78,6 +80,7 @@
 #include "mobile/on_keyboard_input_notification.h"
 #include "mobile/on_language_change_notification.h"
 #include "mobile/on_permissions_change_notification.h"
+#include "mobile/on_system_capability_updated_notification.h"
 #include "mobile/on_system_request_notification.h"
 #include "mobile/on_tbt_client_state_notification.h"
 #include "mobile/on_touch_event_notification.h"
@@ -128,8 +131,8 @@
 
 #include "application_manager/mock_application.h"
 #include "application_manager/mock_application_manager.h"
-#include "test/application_manager/mock_application_manager_settings.h"
 #include "application_manager/mock_event_dispatcher.h"
+#include "test/application_manager/mock_application_manager_settings.h"
 
 namespace am = application_manager;
 
@@ -140,16 +143,16 @@ namespace mobile_commands_test {
 namespace dummy_mobile_commands_test {
 
 namespace commands = sdl_rpc_plugin::commands;
-using ::testing::_;
-using ::testing::NotNull;
-using ::testing::Types;
 using am::commands::MessageSharedPtr;
-using ::test::components::event_engine_test::MockEventDispatcher;
+using ::application_manager::ApplicationSharedPtr;
+using ::test::components::application_manager_test::MockApplication;
 using ::test::components::application_manager_test::MockApplicationManager;
 using ::test::components::application_manager_test::
     MockApplicationManagerSettings;
-using ::application_manager::ApplicationSharedPtr;
-using ::test::components::application_manager_test::MockApplication;
+using ::test::components::event_engine_test::MockEventDispatcher;
+using ::testing::_;
+using ::testing::NotNull;
+using ::testing::Types;
 
 namespace {
 const std::string kEmptyString_ = "";
@@ -220,6 +223,8 @@ typedef Types<commands::AddCommandRequest,
               commands::EndAudioPassThruRequest,
               commands::EndAudioPassThruResponse,
               commands::GenericResponse,
+              commands::GetFileRequest,
+              commands::GetFileResponse,
               commands::GetWayPointsRequest,
               commands::GetWayPointsResponse,
               commands::ListFilesRequest,
@@ -236,12 +241,13 @@ typedef Types<commands::AddCommandRequest,
               commands::mobile::OnKeyBoardInputNotification,
               commands::OnLanguageChangeNotification,
               commands::OnPermissionsChangeNotification,
-              commands::mobile::OnSystemRequestNotification,
-              commands::OnTBTClientStateNotification,
-              commands::mobile::OnTouchEventNotification>
+              commands::mobile::OnSystemCapabilityUpdatedNotification>
     MobileCommandsListFirst;
 
-typedef Types<commands::OnWayPointChangeNotification,
+typedef Types<commands::mobile::OnSystemRequestNotification,
+              commands::OnTBTClientStateNotification,
+              commands::mobile::OnTouchEventNotification,
+              commands::OnWayPointChangeNotification,
               commands::PerformAudioPassThruRequest,
               commands::PerformAudioPassThruResponse,
               commands::PerformInteractionRequest,
@@ -277,35 +283,37 @@ typedef Types<commands::OnWayPointChangeNotification,
               commands::SubscribeWayPointsRequest,
               commands::SubscribeWayPointsResponse,
               commands::SystemResponse,
-              commands::UnregisterAppInterfaceRequest,
-              commands::UnregisterAppInterfaceResponse,
-              commands::UnsubscribeButtonRequest,
-              commands::UnsubscribeButtonResponse> MobileCommandsListSecond;
+              commands::UnregisterAppInterfaceRequest>
+    MobileCommandsListSecond;
 
-typedef Types<commands::UnSubscribeWayPointsRequest,
+typedef Types<commands::UnregisterAppInterfaceResponse,
+              commands::UnsubscribeButtonRequest,
+              commands::UnsubscribeButtonResponse,
+              commands::UnsubscribeWayPointsRequest,
               commands::UnsubscribeWayPointsResponse,
               commands::UpdateTurnListRequest,
-              commands::UpdateTurnListResponse> MobileCommandsListThird;
+              commands::UpdateTurnListResponse>
+    MobileCommandsListThird;
 
 TYPED_TEST_CASE(MobileCommandsTestFirst, MobileCommandsListFirst);
 TYPED_TEST_CASE(MobileCommandsTestSecond, MobileCommandsListSecond);
 TYPED_TEST_CASE(MobileCommandsTestThird, MobileCommandsListThird);
 
 TYPED_TEST(MobileCommandsTestFirst, CtorAndDtorCall) {
-  utils::SharedPtr<typename TestFixture::CommandType> command =
+  std::shared_ptr<typename TestFixture::CommandType> command =
       this->template CreateCommand<typename TestFixture::CommandType>();
-  UNUSED(command);
+  EXPECT_NE(command.use_count(), 0);
 }
 
 TYPED_TEST(MobileCommandsTestSecond, CtorAndDtorCall) {
-  utils::SharedPtr<typename TestFixture::CommandType> command =
+  std::shared_ptr<typename TestFixture::CommandType> command =
       this->template CreateCommand<typename TestFixture::CommandType>();
-  UNUSED(command);
+  EXPECT_NE(command.use_count(), 0);
 }
 TYPED_TEST(MobileCommandsTestThird, CtorAndDtorCall) {
-  utils::SharedPtr<typename TestFixture::CommandType> command =
+  std::shared_ptr<typename TestFixture::CommandType> command =
       this->template CreateCommand<typename TestFixture::CommandType>();
-  UNUSED(command);
+  EXPECT_NE(command.use_count(), 0);
 }
 
 }  // namespace dummy_mobile_commands_test

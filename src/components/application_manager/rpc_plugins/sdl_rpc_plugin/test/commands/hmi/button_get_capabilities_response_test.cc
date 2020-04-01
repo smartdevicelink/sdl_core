@@ -30,13 +30,13 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "gtest/gtest.h"
 #include "hmi/button_get_capabilities_response.h"
-#include "utils/shared_ptr.h"
-#include "smart_objects/smart_object.h"
+#include "gtest/gtest.h"
+
 #include "application_manager/commands/commands_test.h"
 #include "application_manager/mock_application.h"
 #include "application_manager/mock_hmi_capabilities.h"
+#include "smart_objects/smart_object.h"
 namespace test {
 namespace components {
 namespace commands_test {
@@ -45,13 +45,13 @@ namespace button_get_capabilities_response {
 
 using application_manager::commands::MessageSharedPtr;
 using sdl_rpc_plugin::commands::ButtonGetCapabilitiesResponse;
-using ::testing::ReturnRef;
 using ::testing::NiceMock;
+using ::testing::ReturnRef;
 
 namespace strings = ::application_manager::strings;
 namespace hmi_response = ::application_manager::hmi_response;
 
-typedef ::utils::SharedPtr<ButtonGetCapabilitiesResponse> ResponsePtr;
+typedef std::shared_ptr<ButtonGetCapabilitiesResponse> ResponsePtr;
 
 typedef NiceMock<
     ::test::components::application_manager_test::MockHMICapabilities>
@@ -100,7 +100,8 @@ TEST_F(ButtonGetCapabilitiesResponseTest, Run_CodeAborted_SUCCESS) {
   EXPECT_CALL(mock_hmi_capabilities_, set_button_capabilities(capabilities_))
       .Times(0);
   EXPECT_CALL(mock_hmi_capabilities_,
-              set_preset_bank_capabilities(preset_bank_capabilities_)).Times(0);
+              set_preset_bank_capabilities(preset_bank_capabilities_))
+      .Times(0);
 
   command->Run();
 }

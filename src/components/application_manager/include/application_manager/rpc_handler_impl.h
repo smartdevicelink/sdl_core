@@ -35,18 +35,18 @@
 
 #include "application_manager/application_manager.h"
 #include "application_manager/message_helper.h"
-#include "application_manager/rpc_handler.h"
-#include "application_manager/rpc_service.h"
 #include "application_manager/mobile_message_handler.h"
 #include "application_manager/policies/policy_handler_observer.h"
+#include "application_manager/rpc_handler.h"
+#include "application_manager/rpc_service.h"
 
-#include "protocol_handler/protocol_observer.h"
 #include "hmi_message_handler/hmi_message_observer.h"
 #include "hmi_message_handler/hmi_message_sender.h"
+#include "protocol_handler/protocol_observer.h"
 
-#include "formatters/formatter_json_rpc.h"
-#include "formatters/CFormatterJsonSDLRPCv2.h"
 #include "formatters/CFormatterJsonSDLRPCv1.h"
+#include "formatters/CFormatterJsonSDLRPCv2.h"
+#include "formatters/formatter_json_rpc.h"
 #include "interfaces/HMI_API_schema.h"
 #include "interfaces/MOBILE_API_schema.h"
 #ifdef TELEMETRY_MONITOR
@@ -56,27 +56,26 @@
 #include "interfaces/v4_protocol_v1_2_no_extra.h"
 #include "interfaces/v4_protocol_v1_2_no_extra_schema.h"
 
+#include "utils/semantic_version.h"
 #include "utils/threads/message_loop_thread.h"
-#include "utils/shared_ptr.h"
-#include "utils/make_shared.h"
 
 namespace application_manager {
 namespace rpc_handler {
 
 namespace impl {
-struct MessageFromMobile : public utils::SharedPtr<Message> {
+struct MessageFromMobile : public std::shared_ptr<Message> {
   MessageFromMobile() {}
-  explicit MessageFromMobile(const utils::SharedPtr<Message>& message)
-      : utils::SharedPtr<Message>(message) {}
+  explicit MessageFromMobile(const std::shared_ptr<Message>& message)
+      : std::shared_ptr<Message>(message) {}
   // PrioritizedQueue requires this method to decide which priority to assign
   size_t PriorityOrder() const {
     return (*this)->Priority().OrderingValue();
   }
 };
-struct MessageFromHmi : public utils::SharedPtr<Message> {
+struct MessageFromHmi : public std::shared_ptr<Message> {
   MessageFromHmi() {}
-  explicit MessageFromHmi(const utils::SharedPtr<Message>& message)
-      : utils::SharedPtr<Message>(message) {}
+  explicit MessageFromHmi(const std::shared_ptr<Message>& message)
+      : std::shared_ptr<Message>(message) {}
   // PrioritizedQueue requires this method to decide which priority to assign
   size_t PriorityOrder() const {
     return (*this)->Priority().OrderingValue();
@@ -88,13 +87,15 @@ typedef threads::MessageLoopThread<utils::PrioritizedQueue<MessageFromMobile> >
     FromMobileQueue;
 typedef threads::MessageLoopThread<utils::PrioritizedQueue<MessageFromHmi> >
     FromHmiQueue;
-}
+}  // namespace impl
 
 class RPCHandlerImpl : public RPCHandler,
                        public impl::FromMobileQueue::Handler,
                        public impl::FromHmiQueue::Handler {
  public:
-  RPCHandlerImpl(ApplicationManager& app_manager);
+  RPCHandlerImpl(ApplicationManager& app_manager,
+                 hmi_apis::HMI_API& hmi_so_factory,
+                 mobile_apis::MOBILE_API& mobile_so_factory);
   ~RPCHandlerImpl();
 
   // CALLED ON messages_from_mobile_ thread!
@@ -144,12 +145,40 @@ class RPCHandlerImpl : public RPCHandler,
   void SetTelemetryObserver(AMTelemetryObserver* observer) OVERRIDE;
 #endif  // TELEMETRY_MONITOR
 
+  /**
+   * @brief Extracts and validates the syncMsgVersion included in
+   * a RegisterAppInterfaceRequest
+   *
+   * @param output - SmartObject Message received from mobile
+   * @param messageVersion - message version to be updated
+   */
+  void GetMessageVersion(
+      ns_smart_device_link::ns_smart_objects::SmartObject& output,
+      utils::SemanticVersion& message_version);
+
+  bool ValidateRpcSO(smart_objects::SmartObject& message,
+                     utils::SemanticVersion& msg_version,
+                     rpc::ValidationReport& report_out,
+                     bool allow_unknown_parameters) OVERRIDE;
+
  private:
-  void ProcessMessageFromMobile(const utils::SharedPtr<Message> message);
-  void ProcessMessageFromHMI(const utils::SharedPtr<Message> message);
+  /**
+   * @brief Checks if message has to be sent to mobile or not
+   * update output message according to checks
+   * @param output - message to check
+   * @returns true if message type is response otherwise false
+   */
+  bool HandleWrongMessageType(smart_objects::SmartObject& output,
+                              rpc::ValidationReport report) const;
+
+  void ProcessMessageFromMobile(const std::shared_ptr<Message> message);
+  void ProcessMessageFromHMI(const std::shared_ptr<Message> message);
+
   bool ConvertMessageToSO(const Message& message,
-                          smart_objects::SmartObject& output);
-  utils::SharedPtr<Message> ConvertRawMsgToMessage(
+                          smart_objects::SmartObject& output,
+                          const bool allow_unknown_parameters = false,
+                          const bool validate_params = true);
+  std::shared_ptr<Message> ConvertRawMsgToMessage(
       const ::protocol_handler::RawMessagePtr message);
   hmi_apis::HMI_API& hmi_so_factory();
   mobile_apis::MOBILE_API& mobile_so_factory();
@@ -160,8 +189,8 @@ class RPCHandlerImpl : public RPCHandler,
   // Thread that pumps messages coming from HMI.
   impl::FromHmiQueue messages_from_hmi_;
 
-  hmi_apis::HMI_API hmi_so_factory_;
-  mobile_apis::MOBILE_API mobile_so_factory_;
+  hmi_apis::HMI_API& hmi_so_factory_;
+  mobile_apis::MOBILE_API& mobile_so_factory_;
 #ifdef TELEMETRY_MONITOR
   AMTelemetryObserver* metric_observer_;
 #endif  // TELEMETRY_MONITOR

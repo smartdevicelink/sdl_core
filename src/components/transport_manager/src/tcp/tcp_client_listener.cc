@@ -3,9 +3,6 @@
  * Copyright (c) 2017, Ford Motor Company
  * All rights reserved.
  *
- * Copyright (c) 2018 Xevo Inc.
- * All rights reserved.
- *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *
@@ -17,7 +14,7 @@
  * disclaimer in the documentation and/or other materials provided with the
  * distribution.
  *
- * Neither the name of the copyright holders nor the names of its contributors
+ * Neither the name of the Ford Motor Company nor the names of its contributors
  * may be used to endorse or promote products derived from this software
  * without specific prior written permission.
  *
@@ -36,35 +33,35 @@
 
 #include "transport_manager/tcp/tcp_client_listener.h"
 
-#include <memory.h>
-#include <signal.h>
+#include <arpa/inet.h>
 #include <errno.h>
 #include <fcntl.h>
-#include <arpa/inet.h>
-#include <unistd.h>
-#include <sys/types.h>
-#include <sys/select.h>
-#include <sys/sysctl.h>
-#include <sys/socket.h>
 #include <ifaddrs.h>
+#include <memory.h>
+#include <signal.h>
+#include <sys/select.h>
+#include <sys/socket.h>
+#include <sys/sysctl.h>
+#include <sys/types.h>
+#include <unistd.h>
 #ifdef __linux__
 #include <linux/tcp.h>
 #else  // __linux__
-#include <sys/time.h>
 #include <netinet/in.h>
 #include <netinet/tcp.h>
 #include <netinet/tcp_var.h>
+#include <sys/time.h>
 #endif  // __linux__
 
 #include <sstream>
 
 #include "utils/logger.h"
-#include "utils/make_shared.h"
-#include "utils/threads/thread.h"
-#include "transport_manager/transport_adapter/transport_adapter_controller.h"
+
 #include "transport_manager/tcp/network_interface_listener_impl.h"
 #include "transport_manager/tcp/tcp_device.h"
 #include "transport_manager/tcp/tcp_socket_connection.h"
+#include "transport_manager/transport_adapter/transport_adapter_controller.h"
+#include "utils/threads/thread.h"
 
 namespace transport_manager {
 namespace transport_adapter {
@@ -289,9 +286,10 @@ void TcpClientListener::Loop() {
       }
 
       char device_name[32];
-      strncpy(device_name,
-              inet_ntoa(client_address.sin_addr),
-              sizeof(device_name) / sizeof(device_name[0]));
+      size_t size = sizeof(device_name) / sizeof(device_name[0]);
+      strncpy(device_name, inet_ntoa(client_address.sin_addr), size);
+
+      device_name[size - 1] = '\0';
       LOG4CXX_INFO(logger_, "Connected client " << device_name);
       LOG4CXX_INFO(logger_, "Port is: " << port_);
 
@@ -302,21 +300,21 @@ void TcpClientListener::Loop() {
       const auto device_uid =
           device_name + std::string(":") + std::to_string(port_);
 
-#if defined(BUILD_TESTS)
-      TcpDevice* tcp_device = new TcpDevice(
+#if defined(ENABLE_IAP2EMULATION)
+      auto tcp_device = std::make_shared<TcpDevice>(
           client_address.sin_addr.s_addr, device_uid, device_name);
 #else
-      TcpDevice* tcp_device =
-          new TcpDevice(client_address.sin_addr.s_addr, device_uid);
-#endif  // BUILD_TESTS
+      auto tcp_device = std::make_shared<TcpDevice>(
+          client_address.sin_addr.s_addr, device_uid);
+#endif  // ENABLE_IAP2EMULATION
 
       DeviceSptr device = controller_->AddDevice(tcp_device);
-      tcp_device = static_cast<TcpDevice*>(device.get());
+      auto tcp_device_raw = static_cast<TcpDevice*>(device.get());
       const ApplicationHandle app_handle =
-          tcp_device->AddIncomingApplication(connection_fd);
+          tcp_device_raw->AddIncomingApplication(connection_fd);
 
-      utils::SharedPtr<TcpSocketConnection> connection =
-          utils::MakeShared<TcpSocketConnection>(
+      std::shared_ptr<TcpSocketConnection> connection =
+          std::make_shared<TcpSocketConnection>(
               device->unique_device_id(), app_handle, controller_);
       controller_->ConnectionCreated(
           connection, device->unique_device_id(), app_handle);
@@ -376,17 +374,16 @@ TransportAdapter::Error TcpClientListener::StartListening() {
   return TransportAdapter::OK;
 }
 
-void TcpClientListener::ListeningThreadDelegate::exitThreadMain() {
-  parent_->StopLoop();
-}
+TransportAdapter::Error TcpClientListener::ResumeListening() {
+  LOG4CXX_AUTO_TRACE(logger_);
 
-void TcpClientListener::ListeningThreadDelegate::threadMain() {
-  parent_->Loop();
-}
+  interface_listener_->Init();
+  StartListeningThread();
+  started_ = true;
 
-TcpClientListener::ListeningThreadDelegate::ListeningThreadDelegate(
-    TcpClientListener* parent)
-    : parent_(parent) {}
+  LOG4CXX_INFO(logger_, "Tcp client listener was resumed successfully");
+  return TransportAdapter::OK;
+}
 
 TransportAdapter::Error TcpClientListener::StopListening() {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -400,9 +397,44 @@ TransportAdapter::Error TcpClientListener::StopListening() {
   StopListeningThread();
 
   started_ = false;
-  LOG4CXX_INFO(logger_, "Tcp client listener has stopped successfully");
+  LOG4CXX_INFO(logger_, "Tcp client listener was stopped successfully");
   return TransportAdapter::OK;
 }
+
+TransportAdapter::Error TcpClientListener::SuspendListening() {
+  LOG4CXX_AUTO_TRACE(logger_);
+  if (!started_) {
+    LOG4CXX_DEBUG(logger_, "TcpClientListener is not running now");
+    return TransportAdapter::BAD_STATE;
+  }
+
+  if (shutdown(socket_, SHUT_RDWR) != 0) {
+    LOG4CXX_WARN(logger_, "Socket was unable to be shutdowned");
+  }
+
+  if (close(socket_) != 0) {
+    LOG4CXX_ERROR_WITH_ERRNO(logger_, "Failed to close socket");
+  }
+
+  interface_listener_->Deinit();
+  StopListeningThread();
+  started_ = false;
+
+  LOG4CXX_INFO(logger_, "Tcp client listener was suspended");
+  return TransportAdapter::OK;
+}
+
+void TcpClientListener::ListeningThreadDelegate::exitThreadMain() {
+  parent_->StopLoop();
+}
+
+void TcpClientListener::ListeningThreadDelegate::threadMain() {
+  parent_->Loop();
+}
+
+TcpClientListener::ListeningThreadDelegate::ListeningThreadDelegate(
+    TcpClientListener* parent)
+    : parent_(parent) {}
 
 TransportAdapter::Error TcpClientListener::StartListeningThread() {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -457,9 +489,9 @@ void TcpClientListener::OnIPAddressUpdated(const std::string ipv4_addr,
     if (IsListeningOnSpecificInterface()) {
       if (!current_ip_address_.empty()) {
         // the server socket is running, terminate it
-        LOG4CXX_DEBUG(logger_,
-                      "Stopping current TCP server socket on "
-                          << designated_interface_);
+        LOG4CXX_DEBUG(
+            logger_,
+            "Stopping current TCP server socket on " << designated_interface_);
         StopOnNetworkInterface();
       }
       if (!ipv4_addr.empty()) {
@@ -527,9 +559,9 @@ bool TcpClientListener::StopOnNetworkInterface() {
       socket_ = -1;
     }
 
-    LOG4CXX_INFO(logger_,
-                 "TCP server socket on " << designated_interface_
-                                         << " stopped");
+    LOG4CXX_INFO(
+        logger_,
+        "TCP server socket on " << designated_interface_ << " stopped");
   }
   return true;
 }

@@ -35,40 +35,39 @@
 
 #include "gtest/gtest.h"
 #include "utils/helpers.h"
-#include "utils/shared_ptr.h"
+
 #include "application_manager/commands/commands_test.h"
 #include "application_manager/mock_application_manager.h"
-#include "mobile/delete_command_response.h"
+#include "mobile/add_command_response.h"
+#include "mobile/add_sub_menu_response.h"
 #include "mobile/alert_maneuver_response.h"
 #include "mobile/alert_response.h"
-#include "mobile/list_files_response.h"
-#include "mobile/subscribe_button_response.h"
-#include "mobile/add_sub_menu_response.h"
+#include "mobile/change_registration_response.h"
+#include "mobile/delete_command_response.h"
 #include "mobile/dial_number_response.h"
 #include "mobile/end_audio_pass_thru_response.h"
-#include "mobile/unregister_app_interface_response.h"
-#include "mobile/unsubscribe_button_response.h"
-#include "mobile/unsubscribe_way_points_response.h"
-#include "mobile/update_turn_list_response.h"
-#include "mobile/slider_response.h"
-#include "mobile/speak_response.h"
-#include "mobile/subscribe_way_points_response.h"
-#include "mobile/system_response.h"
+#include "mobile/generic_response.h"
 #include "mobile/get_way_points_response.h"
-#include "mobile/perform_interaction_response.h"
+#include "mobile/list_files_response.h"
 #include "mobile/perform_audio_pass_thru_response.h"
+#include "mobile/perform_interaction_response.h"
+#include "mobile/scrollable_message_response.h"
+#include "mobile/send_location_response.h"
+#include "mobile/set_app_icon_response.h"
+#include "mobile/set_display_layout_response.h"
 #include "mobile/set_global_properties_response.h"
 #include "mobile/set_media_clock_timer_response.h"
 #include "mobile/show_constant_tbt_response.h"
 #include "mobile/show_response.h"
-#include "mobile/add_command_response.h"
-#include "mobile/send_location_response.h"
-#include "mobile/set_app_icon_response.h"
-#include "mobile/set_display_layout_response.h"
-#include "mobile/generic_response.h"
-#include "mobile/set_app_icon_response.h"
-#include "mobile/scrollable_message_response.h"
-#include "mobile/change_registration_response.h"
+#include "mobile/slider_response.h"
+#include "mobile/speak_response.h"
+#include "mobile/subscribe_button_response.h"
+#include "mobile/subscribe_way_points_response.h"
+#include "mobile/system_response.h"
+#include "mobile/unregister_app_interface_response.h"
+#include "mobile/unsubscribe_button_response.h"
+#include "mobile/unsubscribe_way_points_response.h"
+#include "mobile/update_turn_list_response.h"
 
 namespace test {
 namespace components {
@@ -120,12 +119,13 @@ typedef Types<commands::ListFilesResponse,
               commands::SendLocationResponse,
               commands::SetAppIconResponse,
               commands::SetDisplayLayoutResponse,
-              commands::ChangeRegistrationResponse> ResponseCommandsList;
+              commands::ChangeRegistrationResponse>
+    ResponseCommandsList;
 
 TYPED_TEST_CASE(MobileResponseCommandsTest, ResponseCommandsList);
 
 TYPED_TEST(MobileResponseCommandsTest, Run_SendResponseToMobile_SUCCESS) {
-  ::utils::SharedPtr<typename TestFixture::CommandType> command =
+  std::shared_ptr<typename TestFixture::CommandType> command =
       this->template CreateCommand<typename TestFixture::CommandType>();
   EXPECT_CALL(this->mock_rpc_service_, SendMessageToMobile(NotNull(), _));
   command->Run();
@@ -154,7 +154,7 @@ MATCHER_P2(CheckMessageParams, success, result, "") {
 TEST_F(GenericResponseFromHMICommandsTest, Run_SUCCESS) {
   MessageSharedPtr command_msg(CreateMessage(smart_objects::SmartType_Map));
 
-  SharedPtr<commands::GenericResponse> command(
+  std::shared_ptr<commands::GenericResponse> command(
       CreateCommand<commands::GenericResponse>(command_msg));
 
   EXPECT_CALL(
@@ -175,7 +175,7 @@ TEST_F(ScrollableMessageResponseTest, Run_SUCCESS) {
 
   MockAppPtr app(CreateMockApp());
 
-  SharedPtr<commands::ScrollableMessageResponse> command(
+  std::shared_ptr<commands::ScrollableMessageResponse> command(
       CreateCommand<commands::ScrollableMessageResponse>(message));
   EXPECT_CALL(app_mngr_, application(_)).WillOnce(Return(app));
   EXPECT_CALL(*app, UnsubscribeFromSoftButtons(_));

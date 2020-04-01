@@ -36,12 +36,12 @@
 #include <map>
 #include <vector>
 
-#include "utils/lock.h"
-#include "utils/threads/thread.h"
 #include "connection_handler/device.h"
 #include "connection_handler/heartbeat_monitor.h"
 #include "protocol/service_type.h"
 #include "protocol_handler/protocol_packet.h"
+#include "utils/lock.h"
+#include "utils/threads/thread.h"
 
 #ifdef ENABLE_SECURITY
 namespace security_manager {
@@ -340,7 +340,7 @@ class Connection {
    */
   SessionMap session_map_;
 
-  mutable sync_primitives::Lock session_map_lock_;
+  mutable sync_primitives::RecursiveLock session_map_lock_;
 
   /**
    * @brief primary connection handle for secondary connections

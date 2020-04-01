@@ -37,14 +37,14 @@
 #include "mobile/delete_interaction_choice_set_response.h"
 
 #include "gtest/gtest.h"
-#include "utils/shared_ptr.h"
-#include "smart_objects/smart_object.h"
-#include "application_manager/smart_object_keys.h"
-#include "application_manager/commands/commands_test.h"
+
 #include "application_manager/commands/command_request_test.h"
-#include "application_manager/mock_application_manager.h"
-#include "application_manager/mock_application.h"
+#include "application_manager/commands/commands_test.h"
 #include "application_manager/event_engine/event.h"
+#include "application_manager/mock_application.h"
+#include "application_manager/mock_application_manager.h"
+#include "application_manager/smart_object_keys.h"
+#include "smart_objects/smart_object.h"
 
 namespace test {
 namespace components {
@@ -53,19 +53,19 @@ namespace mobile_commands_test {
 namespace delete_interaction_choice_set {
 
 using ::testing::_;
-using ::testing::Return;
 using ::testing::InSequence;
+using ::testing::Return;
 
 namespace am = ::application_manager;
 
-using sdl_rpc_plugin::commands::DeleteInteractionChoiceSetRequest;
-using sdl_rpc_plugin::commands::DeleteInteractionChoiceSetResponse;
 using am::commands::MessageSharedPtr;
 using am::event_engine::Event;
+using sdl_rpc_plugin::commands::DeleteInteractionChoiceSetRequest;
+using sdl_rpc_plugin::commands::DeleteInteractionChoiceSetResponse;
 
-typedef SharedPtr<DeleteInteractionChoiceSetRequest>
+typedef std::shared_ptr<DeleteInteractionChoiceSetRequest>
     DeleteInteractionChoiceSetRequestPtr;
-typedef SharedPtr<DeleteInteractionChoiceSetResponse>
+typedef std::shared_ptr<DeleteInteractionChoiceSetResponse>
     DeleteInteractionChoiceSetResponsePtr;
 
 MATCHER_P(CheckMessageSuccess, success, "") {
@@ -252,7 +252,7 @@ TEST_F(DeleteInteractionChoiceSetRequestTest, Run_SendVrDeleteCommand_SUCCESS) {
     EXPECT_CALL(*app_, UpdateHash());
   }
 
-  EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_)).WillOnce(Return(true));
+  EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_, _)).WillOnce(Return(true));
   EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(_, _));
 
   DeleteInteractionChoiceSetRequestPtr command =

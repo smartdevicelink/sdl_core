@@ -30,15 +30,14 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "gtest/gtest.h"
-#include "utils/shared_ptr.h"
-#include "smart_objects/smart_object.h"
-#include "application_manager/smart_object_keys.h"
-#include "application_manager/commands/commands_test.h"
 #include "application_manager/commands/command.h"
+#include "application_manager/commands/commands_test.h"
+#include "application_manager/commands/request_from_hmi.h"
 #include "application_manager/event_engine/event.h"
 #include "application_manager/mock_event_dispatcher.h"
-#include "application_manager/commands/request_from_hmi.h"
+#include "application_manager/smart_object_keys.h"
+#include "gtest/gtest.h"
+#include "smart_objects/smart_object.h"
 
 namespace test {
 namespace components {
@@ -47,14 +46,12 @@ namespace hmi_commands_test {
 namespace simple_requests_from_hmi_test {
 
 using ::testing::_;
-using ::testing::Types;
-using ::testing::NotNull;
 using ::testing::NiceMock;
-
-using ::utils::SharedPtr;
+using ::testing::NotNull;
+using ::testing::Types;
 namespace commands = ::application_manager::commands;
-using commands::MessageSharedPtr;
 using ::application_manager::event_engine::EventObserver;
+using commands::MessageSharedPtr;
 using ::test::components::event_engine_test::MockEventDispatcher;
 
 class RequestFromHMITest : public CommandsTest<CommandsTestMocks::kIsNice> {
@@ -67,7 +64,7 @@ class RequestFromHMITest : public CommandsTest<CommandsTestMocks::kIsNice> {
 };
 
 TEST_F(RequestFromHMITest, BasicMethodsOverloads_SUCCESS) {
-  SharedPtr<commands::RequestFromHMI> command(
+  std::shared_ptr<commands::RequestFromHMI> command(
       CreateCommand<commands::RequestFromHMI>());
   application_manager::event_engine::Event event(
       hmi_apis::FunctionID::BasicCommunication_ActivateApp);
@@ -79,12 +76,12 @@ TEST_F(RequestFromHMITest, BasicMethodsOverloads_SUCCESS) {
 }
 
 TEST_F(RequestFromHMITest, SendResponse_SUCCESS) {
-  SharedPtr<commands::RequestFromHMI> command(
+  std::shared_ptr<commands::RequestFromHMI> command(
       CreateCommand<commands::RequestFromHMI>());
 
   const bool success = false;
   const uint32_t correlation_id = 1u;
-  EXPECT_CALL(mock_rpc_service_, ManageHMICommand(NotNull()));
+  EXPECT_CALL(mock_rpc_service_, ManageHMICommand(NotNull(), _));
 
   command->SendResponse(success,
                         correlation_id,
@@ -92,7 +89,7 @@ TEST_F(RequestFromHMITest, SendResponse_SUCCESS) {
                         hmi_apis::Common_Result::SUCCESS);
 }
 
-}  // namespace simple_requests_to_hmi_test
+}  // namespace simple_requests_from_hmi_test
 }  // namespace hmi_commands_test
 }  // namespace commands_test
 }  // namespace components

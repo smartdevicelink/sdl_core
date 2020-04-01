@@ -34,20 +34,18 @@
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_RESUMPTION_RESUME_CTRL_H_
 
 #include <stdint.h>
-#include "utils/shared_ptr.h"
+#include <time.h>
 #include "application_manager/resumption/resumption_data.h"
 
 namespace application_manager {
 class ApplicationManager;
 class Application;
-typedef utils::SharedPtr<Application> ApplicationSharedPtr;
-typedef utils::SharedPtr<const Application> ApplicationConstSharedPtr;
-}
+typedef std::shared_ptr<Application> ApplicationSharedPtr;
+typedef std::shared_ptr<const Application> ApplicationConstSharedPtr;
+}  // namespace application_manager
 namespace app_mngr = application_manager;
 
 namespace resumption {
-
-class LastState;
 
 /**
  * @brief Contains logic for storage/restore data of applications.
@@ -81,6 +79,13 @@ class ResumeCtrl {
       application_manager::ApplicationSharedPtr application) = 0;
 
   /**
+   * @brief Restore widgets HMI level on the resumption response from HMI
+   * @param response_message smart_object with HMI message
+   */
+  virtual void RestoreWidgetsHMIState(
+      const smart_objects::SmartObject& response_message) = 0;
+
+  /**
    * @brief Set application HMI Level as stored in policy
    * @param application is application witch HMI Level is need to setup
    * @return true if success, otherwise return false
@@ -101,6 +106,16 @@ class ResumeCtrl {
       application_manager::ApplicationSharedPtr application,
       const mobile_apis::HMILevel::eType hmi_level,
       bool check_policy = true) = 0;
+
+  /**
+   * @brief RestoreAppWidgets add widgets for the application
+   * @param application application which will be resumed
+   * @param saved_app application specific section from backup file
+   * @return the number of widget windows to be resumed
+   */
+  virtual size_t RestoreAppWidgets(
+      application_manager::ApplicationSharedPtr application,
+      const smart_objects::SmartObject& saved_app) = 0;
 
   /**
    * @brief Remove application from list of saved applications
@@ -125,6 +140,16 @@ class ResumeCtrl {
   virtual void OnAwake() = 0;
 
   /**
+   * @brief Saves Low Voltage signal timestamp
+   */
+  virtual void SaveLowVoltageTime() = 0;
+
+  /**
+   * @brief Saves Wake Up signal timestamp
+   */
+  virtual void SaveWakeUpTime() = 0;
+
+  /**
    * @brief Checks if SDL has already received OnExitAllApplication notification
    * with "SUSPEND" reason
    *
@@ -134,11 +159,17 @@ class ResumeCtrl {
   virtual bool is_suspended() const = 0;
 
   /**
-   * @brief Method stops timer "RsmCtrlPercist" when SDL
+   * @brief Method stops timer "RsmCtrlPersist" when SDL
    * receives OnExitAllApplication notification
    * with reason "SUSPEND"
    */
   virtual void StopSavePersistentDataTimer() = 0;
+
+  /**
+   * @brief Method starts timer "RsmCtrlPersist" when
+   * SDL receives onAwakeSDL notification
+   */
+  virtual void StartSavePersistentDataTimer() = 0;
 
   /**
    * @brief Start timer for resumption applications
@@ -217,7 +248,7 @@ class ResumeCtrl {
    * @param application - application to restore hmi level
    * and audio streaming state
    */
-  virtual void StartAppHmiStateResumption(
+  virtual bool StartAppHmiStateResumption(
       application_manager::ApplicationSharedPtr application) = 0;
 
   /**
@@ -239,12 +270,15 @@ class ResumeCtrl {
    */
   virtual void RemoveFromResumption(uint32_t app_id) = 0;
 
+  DEPRECATED
+  virtual bool Init(resumption::LastState& last_state) = 0;
+
   /**
    * @brief Initialization data for Resume controller
    * @return true if initialization is success otherwise
    * returns false
    */
-  virtual bool Init(LastState& last_state) = 0;
+  virtual bool Init(resumption::LastStateWrapperPtr last_state_wrapper) = 0;
 
   /**
    * @brief Notify resume controller about new application
@@ -266,11 +300,14 @@ class ResumeCtrl {
   virtual int32_t GetSavedAppHmiLevel(const std::string& app_id,
                                       const std::string& device_id) const = 0;
 
+  virtual void StartWaitingForDisplayCapabilitiesUpdate(
+      app_mngr::ApplicationSharedPtr application) = 0;
+
   virtual time_t LaunchTime() const = 0;
 
 #ifdef BUILD_TESTS
   virtual void set_resumption_storage(
-      utils::SharedPtr<ResumptionData> mock_storage) = 0;
+      std::shared_ptr<ResumptionData> mock_storage) = 0;
 
   virtual bool get_resumption_active() const = 0;
 #endif  // BUILD_TESTS

@@ -42,7 +42,7 @@ include_directories(
 set(testLibraries
   gmock
   Utils
-  Policy
+  PolicyStatic
   UsageStatistics
   ConfigProfile
 )

@@ -32,14 +32,18 @@
 
 #include <stdint.h>
 
-#include "gtest/gtest.h"
-#include "utils/shared_ptr.h"
-#include "smart_objects/smart_object.h"
-#include "application_manager/smart_object_keys.h"
-#include "application_manager/commands/commands_test.h"
 #include "application_manager/commands/command.h"
+#include "application_manager/commands/commands_test.h"
+#include "application_manager/commands/notification_from_hmi.h"
+#include "application_manager/mock_event_dispatcher.h"
+#include "application_manager/mock_hmi_capabilities.h"
+#include "application_manager/policies/mock_policy_handler_interface.h"
+#include "application_manager/smart_object_keys.h"
+#include "gtest/gtest.h"
 #include "hmi/activate_app_response.h"
 #include "hmi/basic_communication_system_response.h"
+#include "hmi/close_popup_response.h"
+#include "hmi/dial_number_response.h"
 #include "hmi/navi_alert_maneuver_response.h"
 #include "hmi/navi_audio_start_stream_response.h"
 #include "hmi/navi_audio_stop_stream_response.h"
@@ -51,20 +55,13 @@
 #include "hmi/navi_subscribe_way_points_response.h"
 #include "hmi/navi_unsubscribe_way_points_response.h"
 #include "hmi/navi_update_turn_list_response.h"
+#include "hmi/on_find_applications.h"
+#include "hmi/on_update_device_list.h"
+#include "hmi/sdl_policy_update_response.h"
 #include "hmi/tts_change_registration_response.h"
-#include "hmi/ui_set_app_icon_response.h"
-#include "hmi/ui_set_display_layout_response.h"
-#include "hmi/ui_set_global_properties_response.h"
-#include "hmi/ui_scrollable_message_response.h"
-#include "application_manager/mock_event_dispatcher.h"
-#include "application_manager/mock_hmi_capabilities.h"
-#include "application_manager/policies/mock_policy_handler_interface.h"
-#include "hmi/dial_number_response.h"
-#include "hmi/close_popup_response.h"
 #include "hmi/tts_set_global_properties_response.h"
 #include "hmi/tts_speak_response.h"
 #include "hmi/tts_stop_speaking_response.h"
-#include "hmi/tts_change_registration_response.h"
 #include "hmi/ui_add_command_response.h"
 #include "hmi/ui_add_submenu_response.h"
 #include "hmi/ui_alert_response.h"
@@ -74,28 +71,21 @@
 #include "hmi/ui_end_audio_pass_thru_response.h"
 #include "hmi/ui_perform_audio_pass_thru_response.h"
 #include "hmi/ui_perform_interaction_response.h"
+#include "hmi/ui_scrollable_message_response.h"
+#include "hmi/ui_send_haptic_data_response.h"
+#include "hmi/ui_set_app_icon_response.h"
+#include "hmi/ui_set_display_layout_response.h"
+#include "hmi/ui_set_global_properties_response.h"
 #include "hmi/ui_set_media_clock_timer_response.h"
 #include "hmi/ui_show_response.h"
 #include "hmi/ui_slider_response.h"
+#include "hmi/update_app_list_response.h"
+#include "hmi/update_device_list_response.h"
 #include "hmi/vr_add_command_response.h"
 #include "hmi/vr_change_registration_response.h"
 #include "hmi/vr_delete_command_response.h"
 #include "hmi/vr_perform_interaction_response.h"
-#include "hmi/activate_app_response.h"
-#include "hmi/basic_communication_system_response.h"
-#include "hmi/navi_unsubscribe_way_points_response.h"
-#include "hmi/navi_update_turn_list_response.h"
-#include "hmi/navi_send_location_response.h"
-#include "hmi/navi_show_constant_tbt_response.h"
-#include "hmi/navi_start_stream_response.h"
-#include "hmi/navi_subscribe_way_points_response.h"
-#include "hmi/on_find_applications.h"
-#include "hmi/on_update_device_list.h"
-#include "hmi/sdl_policy_update_response.h"
-#include "hmi/update_app_list_response.h"
-#include "hmi/update_device_list_response.h"
-#include "application_manager/commands/notification_from_hmi.h"
-#include "hmi/ui_send_haptic_data_response.h"
+#include "smart_objects/smart_object.h"
 
 namespace test {
 namespace components {
@@ -103,14 +93,12 @@ namespace commands_test {
 namespace hmi_commands_test {
 namespace simple_response_from_hmi_test {
 
+using ::test::components::event_engine_test::MockEventDispatcher;
 using ::testing::_;
+using ::testing::Eq;
 using ::testing::Return;
 using ::testing::ReturnRef;
 using ::testing::Types;
-using ::testing::Eq;
-
-using ::utils::SharedPtr;
-using ::test::components::event_engine_test::MockEventDispatcher;
 
 namespace am = ::application_manager;
 namespace commands = sdl_rpc_plugin::commands;
@@ -221,7 +209,8 @@ typedef Types<
     CommandData<sdl_rpc_plugin::commands::UIScrollableMessageResponse,
                 hmi_apis::FunctionID::UI_ScrollableMessage>,
     CommandData<sdl_rpc_plugin::commands::UISendHapticDataResponse,
-                hmi_apis::FunctionID::UI_SendHapticData> > ResponseCommandsList;
+                hmi_apis::FunctionID::UI_SendHapticData> >
+    ResponseCommandsList;
 
 typedef Types<sdl_rpc_plugin::commands::AudioStopStreamResponse,
               sdl_rpc_plugin::commands::NaviStopStreamResponse,
@@ -244,7 +233,8 @@ TYPED_TEST(ResponseFromHMICommandsTest, Run_SendMessageToHMI_SUCCESS) {
   typedef typename TestFixture::CommandData CommandData;
   typedef typename CommandData::CommandType CommandType;
 
-  SharedPtr<CommandType> command = this->template CreateCommand<CommandType>();
+  std::shared_ptr<CommandType> command =
+      this->template CreateCommand<CommandType>();
 
   EXPECT_CALL(this->event_dispatcher_,
               raise_event(EventIdIsEqualTo(CommandData::kEventId)));
@@ -255,7 +245,8 @@ TYPED_TEST(ResponseFromHMICommandsTest, Run_SendMessageToHMI_SUCCESS) {
 TYPED_TEST(EmptyResponseFromHMICommandsTest, Run_SUCCESS) {
   typedef typename TestFixture::CommandType CommandType;
 
-  SharedPtr<CommandType> command = this->template CreateCommand<CommandType>();
+  std::shared_ptr<CommandType> command =
+      this->template CreateCommand<CommandType>();
 
   command->Run();
 }
@@ -277,7 +268,7 @@ class NotificationFromHMITest
     : public CommandsTest<CommandsTestMocks::kIsNice> {};
 
 TEST_F(NotificationFromHMITest, BasicMethodsOverloads_SUCCESS) {
-  SharedPtr<application_manager::commands::NotificationFromHMI> command(
+  std::shared_ptr<application_manager::commands::NotificationFromHMI> command(
       CreateCommand<application_manager::commands::NotificationFromHMI>());
   // Current implementation always return `true`
   EXPECT_TRUE(command->Init());
@@ -290,7 +281,7 @@ TEST_F(NotificationFromHMITest, SendNotificationToMobile_SUCCESS) {
   (*command_msg)[am::strings::params][am::strings::message_type] =
       static_cast<int32_t>(am::MessageType::kNotification);
 
-  SharedPtr<application_manager::commands::NotificationFromHMI> command(
+  std::shared_ptr<application_manager::commands::NotificationFromHMI> command(
       CreateCommand<application_manager::commands::NotificationFromHMI>());
   EXPECT_CALL(
       mock_rpc_service_,
@@ -303,7 +294,7 @@ TEST_F(NotificationFromHMITest, SendNotificationToMobile_SUCCESS) {
 TEST_F(NotificationFromHMITest, CreateHMIRequest_UNSUCCESS) {
   MessageSharedPtr command_msg(CreateMessage(smart_objects::SmartType_Map));
   (*command_msg)[am::strings::msg_params] = 0;
-  SharedPtr<application_manager::commands::NotificationFromHMI> command(
+  std::shared_ptr<application_manager::commands::NotificationFromHMI> command(
       CreateCommand<application_manager::commands::NotificationFromHMI>(
           command_msg));
 
@@ -311,7 +302,7 @@ TEST_F(NotificationFromHMITest, CreateHMIRequest_UNSUCCESS) {
   EXPECT_CALL(app_mngr_, GetNextHMICorrelationID())
       .WillOnce(Return(correlation_id));
   EXPECT_CALL(mock_rpc_service_,
-              ManageHMICommand(CheckMsgType(am::MessageType::kRequest)))
+              ManageHMICommand(CheckMsgType(am::MessageType::kRequest), _))
       .WillOnce(Return(false));
 
   command->CreateHMIRequest(hmi_apis::FunctionID::INVALID_ENUM,

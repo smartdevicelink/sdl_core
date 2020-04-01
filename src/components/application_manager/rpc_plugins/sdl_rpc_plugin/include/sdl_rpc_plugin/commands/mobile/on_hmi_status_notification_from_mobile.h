@@ -34,8 +34,8 @@
 #ifndef SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_MOBILE_ON_HMI_STATUS_NOTIFICATION_FROM_MOBILE_H_
 #define SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_MOBILE_ON_HMI_STATUS_NOTIFICATION_FROM_MOBILE_H_
 
-#include "application_manager/commands/command_notification_from_mobile_impl.h"
 #include "application_manager/application_manager.h"
+#include "application_manager/commands/command_notification_from_mobile_impl.h"
 #include "interfaces/MOBILE_API.h"
 #include "utils/macro.h"
 
@@ -77,6 +77,6 @@ class OnHMIStatusNotificationFromMobile
 };
 
 }  // namespace commands
-}  // namespace application_manager
+}  // namespace sdl_rpc_plugin
 
 #endif  // SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_MOBILE_ON_HMI_STATUS_NOTIFICATION_FROM_MOBILE_H_

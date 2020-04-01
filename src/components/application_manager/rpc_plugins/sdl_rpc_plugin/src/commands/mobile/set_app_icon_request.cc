@@ -34,10 +34,10 @@
 #include "sdl_rpc_plugin/commands/mobile/set_app_icon_request.h"
 #include <algorithm>
 
-#include "application_manager/message_helper.h"
 #include "application_manager/application_impl.h"
-#include "interfaces/MOBILE_API.h"
+#include "application_manager/message_helper.h"
 #include "interfaces/HMI_API.h"
+#include "interfaces/MOBILE_API.h"
 #include "utils/file_system.h"
 #include "utils/helpers.h"
 
@@ -106,25 +106,22 @@ void SetAppIconRequest::Run() {
   msg_params[strings::sync_file_name] =
       smart_objects::SmartObject(smart_objects::SmartType_Map);
 
-  // Panasonic requres unchanged path value without encoded special characters
-  const std::string full_file_path_for_hmi =
-      file_system::ConvertPathForURL(full_file_path);
+  // For further use in on_event function
+  full_file_path_for_hmi_ = file_system::ConvertPathForURL(full_file_path);
 
-  msg_params[strings::sync_file_name][strings::value] = full_file_path_for_hmi;
+  msg_params[strings::sync_file_name][strings::value] = full_file_path_for_hmi_;
 
   // TODO(VS): research why is image_type hardcoded
   msg_params[strings::sync_file_name][strings::image_type] =
       static_cast<int32_t>(SetAppIconRequest::ImageType::DYNAMIC);
 
-  // for further use in on_event function
-  (*message_)[strings::msg_params][strings::sync_file_name] =
-      msg_params[strings::sync_file_name];
   StartAwaitForInterface(HmiInterfaces::HMI_INTERFACE_UI);
   SendHMIRequest(hmi_apis::FunctionID::UI_SetAppIcon, &msg_params, true);
 }
 
 void SetAppIconRequest::CopyToIconStorage(
-    const std::string& path_to_file) const {
+    const std::string& policy_app_id, const std::string& path_to_file) const {
+  LOG4CXX_AUTO_TRACE(logger_);
   if (!(application_manager_.protocol_handler()
             .get_settings()
             .max_supported_protocol_version() >=
@@ -146,17 +143,30 @@ void SetAppIconRequest::CopyToIconStorage(
       application_manager_.get_settings().app_icons_folder_max_size());
   const uint64_t file_size = file_system::FileSize(path_to_file);
 
+  if (0 == file_size) {
+    LOG4CXX_ERROR(logger_, "Can't get the icon file size: " << path_to_file);
+    return;
+  }
+
   if (storage_max_size < file_size) {
     LOG4CXX_ERROR(logger_,
-                  "Icon size (" << file_size << ") is bigger, than "
-                                                " icons storage maximum size ("
-                                << storage_max_size << ")."
-                                                       "Copying skipped.");
+                  "Icon size (" << file_size
+                                << ") is bigger, than "
+                                   " icons storage maximum size ("
+                                << storage_max_size
+                                << ")."
+                                   "Copying skipped.");
     return;
   }
 
   const uint64_t storage_size =
       static_cast<uint64_t>(file_system::DirectorySize(icon_storage));
+
+  if (0 == storage_size) {
+    LOG4CXX_ERROR(logger_, "Can't get the folder size: " << icon_storage);
+    return;
+  }
+
   if (storage_max_size < (file_size + storage_size)) {
     const uint32_t icons_amount =
         application_manager_.get_settings().app_icons_amount_to_remove();
@@ -172,23 +182,15 @@ void SetAppIconRequest::CopyToIconStorage(
       RemoveOldestIcons(icon_storage, icons_amount);
     }
   }
-  ApplicationConstSharedPtr app =
-      application_manager_.application(connection_key());
 
-  if (!app) {
-    LOG4CXX_ERROR(
-        logger_,
-        "Can't get application for connection key: " << connection_key());
-    return;
-  }
+  const std::string icon_path = icon_storage + "/" + policy_app_id;
 
-  const std::string icon_path = icon_storage + "/" + app->policy_app_id();
   if (!file_system::CreateFile(icon_path)) {
     LOG4CXX_ERROR(logger_, "Can't create icon: " << icon_path);
     return;
   }
 
-  if (!file_system::Write(icon_path, file_content)) {
+  if (!file_system::WriteBinaryFile(icon_path, file_content)) {
     LOG4CXX_ERROR(logger_, "Can't write icon: " << icon_path);
     return;
   }
@@ -203,7 +205,12 @@ void SetAppIconRequest::CopyToIconStorage(
 void SetAppIconRequest::RemoveOldestIcons(const std::string& storage,
                                           const uint32_t icons_amount) const {
   const std::vector<std::string> icons_list = file_system::ListFiles(storage);
-  std::map<uint64_t, std::string> icon_modification_time;
+  auto compareTime = [](const time_t t1, const time_t t2) -> bool {
+    return difftime(t1, t2) > 0;
+  };
+  std::
+      map<time_t, std::string, std::function<bool(const time_t, const time_t)> >
+          icon_modification_time(compareTime);
   std::vector<std::string>::const_iterator it = icons_list.begin();
   for (; it != icons_list.end(); ++it) {
     const std::string file_name = *it;
@@ -211,7 +218,7 @@ void SetAppIconRequest::RemoveOldestIcons(const std::string& storage,
     if (!file_system::FileExists(file_path)) {
       continue;
     }
-    const uint64_t time = file_system::GetFileModificationTime(file_path);
+    const time_t time = file_system::GetFileModificationTime(file_path);
     icon_modification_time[time] = file_name;
   }
 
@@ -259,20 +266,19 @@ void SetAppIconRequest::on_event(const event_engine::Event& event) {
         ApplicationSharedPtr app =
             application_manager_.application(connection_key());
 
-        if (!message_.valid() || !app.valid()) {
-          LOG4CXX_ERROR(logger_, "NULL pointer.");
+        if (!app) {
+          LOG4CXX_ERROR(
+              logger_,
+              "Can't get application for connection key: " << connection_key());
           return;
         }
 
-        const std::string& path =
-            (*message_)[strings::msg_params][strings::sync_file_name]
-                       [strings::value].asString();
-
-        if (is_icons_saving_enabled_) {
-          CopyToIconStorage(path);
+        if (is_icons_saving_enabled_ && !full_file_path_for_hmi_.empty()) {
+          const auto policy_app_id = app->policy_app_id();
+          CopyToIconStorage(policy_app_id, full_file_path_for_hmi_);
         }
 
-        app->set_app_icon_path(path);
+        app->set_app_icon_path(full_file_path_for_hmi_);
 
         LOG4CXX_INFO(logger_,
                      "Icon path was set to '" << app->app_icon_path() << "'");
@@ -293,4 +299,4 @@ void SetAppIconRequest::on_event(const event_engine::Event& event) {
 
 }  // namespace commands
 
-}  // namespace application_manager
+}  // namespace sdl_rpc_plugin

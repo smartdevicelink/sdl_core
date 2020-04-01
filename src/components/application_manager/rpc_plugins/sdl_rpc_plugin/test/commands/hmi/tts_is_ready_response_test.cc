@@ -33,19 +33,18 @@
 #include <stdint.h>
 #include <string>
 
-#include "gtest/gtest.h"
-#include "utils/shared_ptr.h"
-#include "smart_objects/smart_object.h"
-#include "application_manager/smart_object_keys.h"
-#include "application_manager/commands/commands_test.h"
 #include "application_manager/application.h"
+#include "application_manager/commands/commands_test.h"
+#include "application_manager/commands/response_from_hmi.h"
+#include "application_manager/mock_application_manager.h"
+#include "application_manager/mock_event_dispatcher.h"
 #include "application_manager/mock_hmi_capabilities.h"
 #include "application_manager/mock_message_helper.h"
-#include "application_manager/mock_application_manager.h"
-#include "application_manager/commands/response_from_hmi.h"
-#include "hmi/tts_is_ready_response.h"
 #include "application_manager/policies/mock_policy_handler_interface.h"
-#include "application_manager/mock_event_dispatcher.h"
+#include "application_manager/smart_object_keys.h"
+#include "gtest/gtest.h"
+#include "hmi/tts_is_ready_response.h"
+#include "smart_objects/smart_object.h"
 
 namespace test {
 namespace components {
@@ -54,18 +53,17 @@ namespace hmi_commands_test {
 namespace tts_is_ready_response {
 
 using ::testing::_;
-using ::testing::Return;
-using ::utils::SharedPtr;
 using ::testing::NiceMock;
+using ::testing::Return;
 namespace am = ::application_manager;
 namespace strings = ::application_manager::strings;
 namespace hmi_response = am::hmi_response;
+using am::commands::CommandImpl;
 using application_manager::commands::ResponseFromHMI;
 using sdl_rpc_plugin::commands::TTSIsReadyResponse;
-using am::commands::CommandImpl;
 using test::components::event_engine_test::MockEventDispatcher;
 
-typedef SharedPtr<ResponseFromHMI> ResponseFromHMIPtr;
+typedef std::shared_ptr<ResponseFromHMI> ResponseFromHMIPtr;
 typedef NiceMock<
     ::test::components::application_manager_test::MockHMICapabilities>
     MockHMICapabilities;

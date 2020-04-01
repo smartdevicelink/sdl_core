@@ -31,8 +31,8 @@
  */
 
 #include "sdl_rpc_plugin/commands/hmi/tts_is_ready_request.h"
-#include "application_manager/rpc_service.h"
 #include "application_manager/message_helper.h"
+#include "application_manager/rpc_service.h"
 
 namespace sdl_rpc_plugin {
 using namespace application_manager;
@@ -94,22 +94,22 @@ void TTSIsReadyRequest::onTimeOut() {
 }
 
 void TTSIsReadyRequest::SendMessageToHMI() {
-  utils::SharedPtr<smart_objects::SmartObject> get_language(
+  std::shared_ptr<smart_objects::SmartObject> get_language(
       MessageHelper::CreateModuleInfoSO(hmi_apis::FunctionID::TTS_GetLanguage,
                                         application_manager_));
   HMICapabilities& hmi_capabilities = hmi_capabilities_;
   hmi_capabilities.set_handle_response_for(*get_language);
   rpc_service_.ManageHMICommand(get_language);
-  utils::SharedPtr<smart_objects::SmartObject> get_all_languages(
+  std::shared_ptr<smart_objects::SmartObject> get_all_languages(
       MessageHelper::CreateModuleInfoSO(
           hmi_apis::FunctionID::TTS_GetSupportedLanguages,
           application_manager_));
   rpc_service_.ManageHMICommand(get_all_languages);
-  utils::SharedPtr<smart_objects::SmartObject> get_capabilities(
+  std::shared_ptr<smart_objects::SmartObject> get_capabilities(
       MessageHelper::CreateModuleInfoSO(
           hmi_apis::FunctionID::TTS_GetCapabilities, application_manager_));
   rpc_service_.ManageHMICommand(get_capabilities);
 }
 }  // namespace commands
 
-}  // namespace application_manager
+}  // namespace sdl_rpc_plugin

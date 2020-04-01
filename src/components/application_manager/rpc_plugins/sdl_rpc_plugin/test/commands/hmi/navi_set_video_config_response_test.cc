@@ -30,13 +30,13 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "gtest/gtest.h"
-#include "application_manager/commands/commands_test.h"
 #include "hmi/navi_set_video_config_response.h"
+#include "application_manager/commands/commands_test.h"
 #include "application_manager/mock_application_manager.h"
 #include "application_manager/mock_event_dispatcher.h"
 #include "application_manager/mock_hmi_capabilities.h"
 #include "application_manager/smart_object_keys.h"
+#include "gtest/gtest.h"
 
 namespace test {
 namespace components {
@@ -44,12 +44,11 @@ namespace commands_test {
 namespace hmi_commands_test {
 namespace navi_set_video_config_response {
 
-using utils::SharedPtr;
 using sdl_rpc_plugin::commands::NaviSetVideoConfigResponse;
 using test::components::event_engine_test::MockEventDispatcher;
 using testing::_;
-using testing::ReturnRef;
 using ::testing::NiceMock;
+using testing::ReturnRef;
 
 typedef NiceMock<
     ::test::components::application_manager_test::MockHMICapabilities>
@@ -61,7 +60,7 @@ class NaviSetVideoConfigResponseTest
 TEST_F(NaviSetVideoConfigResponseTest, RUN_SUCCESS) {
   MessageSharedPtr msg = CreateMessage();
 
-  SharedPtr<NaviSetVideoConfigResponse> command(
+  std::shared_ptr<NaviSetVideoConfigResponse> command(
       CreateCommand<NaviSetVideoConfigResponse>(msg));
 
   MockEventDispatcher mock_event_dispatcher;

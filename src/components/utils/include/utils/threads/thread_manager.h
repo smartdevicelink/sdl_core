@@ -37,16 +37,16 @@
 
 #include <pthread.h>
 
-#include <map>
-#include <string>
-#include <set>
 #include <list>
+#include <map>
+#include <set>
+#include <string>
 
-#include "utils/macro.h"
-#include "utils/singleton.h"
-#include "utils/lock.h"
 #include "utils/conditional_variable.h"
+#include "utils/lock.h"
+#include "utils/macro.h"
 #include "utils/message_queue.h"
+#include "utils/singleton.h"
 #include "utils/threads/thread.h"
 #include "utils/threads/thread_delegate.h"
 

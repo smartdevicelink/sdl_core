@@ -30,25 +30,26 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 #include "application_manager/resumption/resume_ctrl_impl.h"
+#include "application_manager/display_capabilities_builder.h"
 
-#include <fstream>
 #include <algorithm>
+#include <fstream>
 
 #include "application_manager/application_manager.h"
 #include "application_manager/rpc_service.h"
 
-#include "utils/file_system.h"
-#include "connection_handler/connection_handler_impl.h"
-#include "application_manager/message_helper.h"
-#include "connection_handler/connection.h"
 #include "application_manager/commands/command_impl.h"
-#include "policy/policy_manager_impl.h"
+#include "application_manager/message_helper.h"
 #include "application_manager/policies/policy_handler.h"
-#include "application_manager/state_controller.h"
-#include "utils/helpers.h"
 #include "application_manager/resumption/resumption_data_db.h"
 #include "application_manager/resumption/resumption_data_json.h"
-#include "utils/make_shared.h"
+#include "application_manager/state_controller.h"
+#include "connection_handler/connection.h"
+#include "connection_handler/connection_handler_impl.h"
+#include "policy/policy_manager_impl.h"
+#include "utils/file_system.h"
+#include "utils/helpers.h"
+
 #include "utils/timer_task_impl.h"
 
 namespace resumption {
@@ -64,7 +65,6 @@ CREATE_LOGGERPTR_GLOBAL(logger_, "Resumption")
 
 ResumeCtrlImpl::ResumeCtrlImpl(ApplicationManager& application_manager)
     : event_engine::EventObserver(application_manager.event_dispatcher())
-    , queue_lock_(false)
     , restore_hmi_level_timer_(
           "RsmCtrlRstore",
           new timer::TimerTaskImpl<ResumeCtrlImpl>(
@@ -75,11 +75,13 @@ ResumeCtrlImpl::ResumeCtrlImpl(ApplicationManager& application_manager)
     , is_resumption_active_(false)
     , is_data_saved_(false)
     , is_suspended_(false)
-    , launch_time_(time(NULL))
+    , launch_time_(time(nullptr))
+    , low_voltage_time_(0)
+    , wake_up_time_(0)
     , application_manager_(application_manager) {}
 #ifdef BUILD_TESTS
 void ResumeCtrlImpl::set_resumption_storage(
-    utils::SharedPtr<ResumptionData> mock_storage) {
+    std::shared_ptr<ResumptionData> mock_storage) {
   resumption_storage_ = mock_storage;
 }
 
@@ -89,7 +91,7 @@ bool ResumeCtrlImpl::get_resumption_active() const {
 }
 #endif  // BUILD_TESTS
 
-bool ResumeCtrlImpl::Init(resumption::LastState& last_state) {
+bool ResumeCtrlImpl::Init(resumption::LastStateWrapperPtr last_state_wrapper) {
   bool use_db = application_manager_.get_settings().use_db_for_resumption();
   if (use_db) {
     resumption_storage_.reset(
@@ -118,7 +120,7 @@ bool ResumeCtrlImpl::Init(resumption::LastState& last_state) {
     }
   } else {
     resumption_storage_.reset(
-        new ResumptionDataJson(last_state, application_manager_));
+        new ResumptionDataJson(last_state_wrapper, application_manager_));
     if (!resumption_storage_->Init()) {
       LOG4CXX_DEBUG(logger_, "Resumption storage initialisation failed");
       return false;
@@ -129,6 +131,8 @@ bool ResumeCtrlImpl::Init(resumption::LastState& last_state) {
       application_manager_.get_settings()
           .app_resumption_save_persistent_data_timeout(),
       timer::kPeriodic);
+
+  resumption_storage_->IncrementGlobalIgnOnCounter();
   return true;
 }
 
@@ -145,14 +149,24 @@ void ResumeCtrlImpl::SaveAllApplications() {
 void ResumeCtrlImpl::SaveApplication(ApplicationSharedPtr application) {
   LOG4CXX_AUTO_TRACE(logger_);
   DCHECK_OR_RETURN_VOID(application);
-  LOG4CXX_INFO(logger_,
-               "application with appID " << application->app_id()
-                                         << " will be saved");
+  if (application_manager_.IsLowVoltage()) {
+    LOG4CXX_DEBUG(logger_, "Low Voltage state is active");
+    return;
+  }
+  LOG4CXX_DEBUG(
+      logger_,
+      "application with appID " << application->app_id() << " will be saved");
   resumption_storage_->SaveApplication(application);
 }
 
 void ResumeCtrlImpl::on_event(const event_engine::Event& event) {
-  LOG4CXX_DEBUG(logger_, "Event received" << event.id());
+  LOG4CXX_DEBUG(logger_, "Event received: " << event.id());
+
+  if (hmi_apis::FunctionID::UI_CreateWindow == event.id()) {
+    LOG4CXX_INFO(logger_, "Received UI_CreateWindow event");
+    const auto& response_message = event.smart_object();
+    RestoreWidgetsHMIState(response_message);
+  }
 }
 
 bool ResumeCtrlImpl::RestoreAppHMIState(ApplicationSharedPtr application) {
@@ -200,8 +214,20 @@ bool ResumeCtrlImpl::RestoreAppHMIState(ApplicationSharedPtr application) {
             "High-bandwidth transport not available, app will resume into : "
                 << saved_hmi_level);
       }
-
-      return SetAppHMIState(application, saved_hmi_level, true);
+      const bool app_exists_in_full_or_limited =
+          application_manager_.get_full_or_limited_application().use_count() !=
+          0;
+      const bool app_hmi_state_is_set =
+          SetAppHMIState(application, saved_hmi_level, true);
+      size_t restored_widgets = 0;
+      if (app_hmi_state_is_set &&
+          application->is_app_data_resumption_allowed()) {
+        restored_widgets = RestoreAppWidgets(application, saved_app);
+      }
+      if (0 == restored_widgets && app_exists_in_full_or_limited) {
+        LOG4CXX_DEBUG(logger_, "App exists in full or limited. Do not resume");
+        return false;
+      }
     } else {
       result = false;
       LOG4CXX_ERROR(logger_, "saved app data corrupted");
@@ -210,6 +236,89 @@ bool ResumeCtrlImpl::RestoreAppHMIState(ApplicationSharedPtr application) {
     LOG4CXX_ERROR(logger_, "Application not saved");
   }
   return result;
+}
+
+void ResumeCtrlImpl::RestoreWidgetsHMIState(
+    const smart_objects::SmartObject& response_message) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  const auto correlation_id =
+      response_message[strings::params][strings::correlation_id].asInt();
+  const auto& request = requests_msg_.find(correlation_id);
+  if (requests_msg_.end() == request) {
+    LOG4CXX_ERROR(logger_,
+                  "Request UI_CreateWindow for correlation id: "
+                      << correlation_id << " not found");
+    return;
+  }
+
+  const auto& msg_params = (*request->second)[strings::msg_params];
+  const auto hmi_app_id = msg_params[strings::app_id].asInt();
+  auto application = application_manager_.application_by_hmi_app(hmi_app_id);
+  if (!application) {
+    LOG4CXX_ERROR(logger_,
+                  "Application is not registered by hmi id: " << hmi_app_id);
+    requests_msg_.erase(request);
+    return;
+  }
+  const WindowID window_id = msg_params[strings::window_id].asInt();
+
+  const auto result_code = static_cast<hmi_apis::Common_Result::eType>(
+      response_message[strings::params][hmi_response::code].asInt());
+  if (hmi_apis::Common_Result::SUCCESS != result_code) {
+    LOG4CXX_ERROR(logger_,
+                  "UI_CreateWindow for correlation id: "
+                      << correlation_id
+                      << " failed with code: " << result_code);
+    requests_msg_.erase(request);
+    auto& builder = application->display_capabilities_builder();
+    builder.StopWaitingForWindow(window_id);
+    return;
+  }
+
+  smart_objects::SmartObject window_info(smart_objects::SmartType_Map);
+  auto fill_optional_param = [&window_info,
+                              &msg_params](const std::string& key) {
+    if (msg_params.keyExists(key)) {
+      window_info[key] = msg_params[key].asString();
+    }
+  };
+  fill_optional_param(strings::associated_service_type);
+  fill_optional_param(strings::duplicate_updates_from_window_id);
+
+  const auto window_name = msg_params[strings::window_name].asString();
+  window_info[strings::window_name] = window_name;
+  application->SetWindowInfo(window_id, window_info);
+
+  const auto window_type = static_cast<mobile_apis::WindowType::eType>(
+      msg_params[strings::window_type].asInt());
+  // State should be initialized with INVALID_ENUM value to let state controller
+  // trigger OnHmiStatus notifiation sending
+  auto initial_state = application_manager_.CreateRegularState(
+      application,
+      window_type,
+      mobile_apis::HMILevel::INVALID_ENUM,
+      mobile_apis::AudioStreamingState::INVALID_ENUM,
+      mobile_apis::VideoStreamingState::INVALID_ENUM,
+      mobile_api::SystemContext::INVALID_ENUM);
+  application->SetInitialState(window_id, window_name, initial_state);
+
+  // Default HMI level for all windows except the main one is always NONE
+  application_manager_.state_controller().OnAppWindowAdded(
+      application, window_id, window_type, mobile_apis::HMILevel::HMI_NONE);
+
+  requests_msg_.erase(request);
+}
+
+void ResumeCtrlImpl::ProcessSystemCapabilityUpdated(
+    Application& app, const smart_objects::SmartObject& display_capabilities) {
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  auto notification = MessageHelper::CreateDisplayCapabilityUpdateToMobile(
+      display_capabilities, app);
+
+  application_manager_.GetRPCService().ManageMobileCommand(
+      notification, commands::Command::SOURCE_SDL);
+  app.set_is_resuming(false);
 }
 
 bool ResumeCtrlImpl::SetupDefaultHMILevel(ApplicationSharedPtr application) {
@@ -245,7 +354,9 @@ void ResumeCtrlImpl::ApplicationResumptiOnTimer() {
       LOG4CXX_ERROR(logger_, "Invalid app_id = " << *it);
       continue;
     }
-    StartAppHmiStateResumption(app);
+    if (!StartAppHmiStateResumption(app)) {
+      app->set_is_resuming(false);
+    }
   }
   is_resumption_active_ = false;
   waiting_for_timer_.clear();
@@ -255,6 +366,7 @@ void ResumeCtrlImpl::ApplicationResumptiOnTimer() {
 void ResumeCtrlImpl::OnAppActivated(ApplicationSharedPtr application) {
   if (is_resumption_active_) {
     RemoveFromResumption(application->app_id());
+    application->set_is_resuming(false);
   }
 }
 
@@ -263,6 +375,10 @@ void ResumeCtrlImpl::RemoveFromResumption(uint32_t app_id) {
   queue_lock_.Acquire();
   waiting_for_timer_.remove(app_id);
   queue_lock_.Release();
+}
+
+bool ResumeCtrlImpl::Init(LastState&) {
+  return false;
 }
 
 bool ResumeCtrlImpl::SetAppHMIState(
@@ -284,13 +400,37 @@ bool ResumeCtrlImpl::SetAppHMIState(
     SetupDefaultHMILevel(application);
     return false;
   }
-  application->set_is_resuming(true);
-  application_manager_.state_controller().SetRegularState(application,
-                                                          hmi_level);
+
+  application_manager_.state_controller().SetRegularState(
+      application, mobile_apis::PredefinedWindows::DEFAULT_WINDOW, hmi_level);
   LOG4CXX_INFO(logger_,
                "Application with policy id " << application->policy_app_id()
                                              << " got HMI level " << hmi_level);
+
   return true;
+}
+
+size_t ResumeCtrlImpl::RestoreAppWidgets(
+    application_manager::ApplicationSharedPtr application,
+    const smart_objects::SmartObject& saved_app) {
+  using namespace mobile_apis;
+  LOG4CXX_AUTO_TRACE(logger_);
+  DCHECK(application);
+  if (!saved_app.keyExists(strings::windows_info)) {
+    LOG4CXX_ERROR(logger_, "windows_info section does not exist");
+    return 0;
+  }
+  const auto& windows_info = saved_app[strings::windows_info];
+  auto request_list = MessageHelper::CreateUICreateWindowRequestsToHMI(
+      application, application_manager_, windows_info);
+
+  requests_msg_.clear();
+  for (auto& request : request_list) {
+    requests_msg_.insert(std::make_pair(
+        (*request)[strings::params][strings::correlation_id].asInt(), request));
+  }
+  ProcessHMIRequests(request_list);
+  return request_list.size();
 }
 
 bool ResumeCtrlImpl::IsHMIApplicationIdExist(uint32_t hmi_app_id) {
@@ -311,6 +451,10 @@ uint32_t ResumeCtrlImpl::GetHMIApplicationID(
 
 bool ResumeCtrlImpl::RemoveApplicationFromSaved(
     ApplicationConstSharedPtr application) {
+  if (application_manager_.IsLowVoltage()) {
+    LOG4CXX_DEBUG(logger_, "Low Voltage state is active");
+    return false;
+  }
   const std::string& device_mac = application->mac_address();
   return resumption_storage_->RemoveApplicationFromSaved(
       application->policy_app_id(), device_mac);
@@ -324,8 +468,11 @@ void ResumeCtrlImpl::OnSuspend() {
 
 void ResumeCtrlImpl::OnIgnitionOff() {
   LOG4CXX_AUTO_TRACE(logger_);
-  resumption_storage_->IncrementIgnOffCount();
-  FinalPersistData();
+  if (!application_manager_.IsLowVoltage()) {
+    resumption_storage_->IncrementIgnOffCount();
+    resumption_storage_->ResetGlobalIgnOnCount();
+    FinalPersistData();
+  }
 }
 
 void ResumeCtrlImpl::OnAwake() {
@@ -333,6 +480,25 @@ void ResumeCtrlImpl::OnAwake() {
   is_suspended_ = false;
   ResetLaunchTime();
   StartSavePersistentDataTimer();
+}
+
+void ResumeCtrlImpl::SaveLowVoltageTime() {
+  low_voltage_time_ = time(nullptr);
+  LOG4CXX_DEBUG(logger_,
+                "Low Voltage timestamp : " << low_voltage_time_ << " saved");
+}
+
+void ResumeCtrlImpl::SaveWakeUpTime() {
+  wake_up_time_ = std::time(nullptr);
+  LOG4CXX_DEBUG(logger_, "Wake Up timestamp : " << wake_up_time_ << " saved");
+}
+
+time_t ResumeCtrlImpl::LowVoltageTime() const {
+  return low_voltage_time_;
+}
+
+time_t ResumeCtrlImpl::WakeUpTime() const {
+  return wake_up_time_;
 }
 
 bool ResumeCtrlImpl::is_suspended() const {
@@ -366,7 +532,15 @@ bool ResumeCtrlImpl::StartResumption(ApplicationSharedPtr application,
                           << " hmi_app_id = " << application->hmi_app_id()
                           << " policy_id = " << application->policy_app_id()
                           << " received hash = " << hash);
-  SetupDefaultHMILevel(application);
+  application->set_is_resuming(true);
+
+  if (!application->is_cloud_app()) {
+    // Default HMI Level is already set before resumption in
+    // ApplicationManager::OnApplicationRegistered, and handling low bandwidth
+    // transports doesn't apply to cloud apps, so this step can be skipped for
+    // such apps
+    SetupDefaultHMILevel(application);
+  }
   smart_objects::SmartObject saved_app;
   const std::string& device_mac = application->mac_address();
   bool result = resumption_storage_->GetSavedApplication(
@@ -382,24 +556,30 @@ bool ResumeCtrlImpl::StartResumption(ApplicationSharedPtr application,
 
 bool ResumeCtrlImpl::StartResumptionOnlyHMILevel(
     ApplicationSharedPtr application) {
-  // sync_primitives::AutoLock lock(resumtion_lock_);
   LOG4CXX_AUTO_TRACE(logger_);
   if (!application) {
     LOG4CXX_WARN(logger_, "Application does not exist.");
     return false;
   }
+
+  application->set_is_resuming(true);
   LOG4CXX_DEBUG(logger_,
-                "HMI level resumption requested for application id "
-                    << application->app_id() << "with hmi_app_id "
-                    << application->hmi_app_id() << ", policy_app_id "
-                    << application->policy_app_id());
-  SetupDefaultHMILevel(application);
+                "HMI level resumption requested for application id: "
+                    << application->app_id()
+                    << " with hmi_app_id: " << application->hmi_app_id()
+                    << ", policy_app_id " << application->policy_app_id());
+  if (!application->is_cloud_app()) {
+    // Default HMI Level is already set before resumption in
+    // ApplicationManager::OnApplicationRegistered, and handling low bandwidth
+    // transports doesn't apply to cloud apps, so this step can be skipped for
+    // such apps
+    SetupDefaultHMILevel(application);
+  }
   const std::string& device_mac = application->mac_address();
   smart_objects::SmartObject saved_app;
   bool result = resumption_storage_->GetSavedApplication(
       application->policy_app_id(), device_mac, saved_app);
   if (result) {
-    // sync_primitives::AutoUnlock unlock(lock);
     AddToResumptionTimerQueue(application->app_id());
   }
   LOG4CXX_INFO(logger_, "StartResumptionOnlyHMILevel::Result = " << result);
@@ -428,39 +608,54 @@ void ResumeCtrlImpl::RetryResumption(const uint32_t app_id) {
   AddToResumptionTimerQueue(app_id);
 }
 
-void ResumeCtrlImpl::StartAppHmiStateResumption(
+bool ResumeCtrlImpl::StartAppHmiStateResumption(
     ApplicationSharedPtr application) {
   using namespace date_time;
   LOG4CXX_AUTO_TRACE(logger_);
-  DCHECK_OR_RETURN_VOID(application);
+  DCHECK_OR_RETURN(application, false);
   smart_objects::SmartObject saved_app;
   const std::string& device_mac = application->mac_address();
-  const bool result = resumption_storage_->GetSavedApplication(
+  const bool get_saved_app_result = resumption_storage_->GetSavedApplication(
       application->policy_app_id(), device_mac, saved_app);
-  if (!result) {
+  if (!get_saved_app_result) {
     LOG4CXX_ERROR(logger_, "Application was not saved");
-    return;
+    return false;
   }
-  const uint32_t ign_off_count = saved_app[strings::ign_off_count].asUInt();
-  bool restore_data_allowed = false;
-  restore_data_allowed =
-      CheckAppRestrictions(application, saved_app) &&
-      ((0 == ign_off_count) || CheckIgnCycleRestrictions(saved_app));
-  if (restore_data_allowed) {
+
+  const bool is_hmi_level_applicable_to_resume =
+      CheckAppRestrictions(application, saved_app);
+
+  if (!is_hmi_level_applicable_to_resume) {
+    LOG4CXX_DEBUG(logger_, "No applicable HMI level found for resuming");
+    return false;
+  }
+
+  const bool is_resume_allowed_by_low_voltage =
+      CheckLowVoltageRestrictions(saved_app);
+
+  const bool is_hmi_level_allowed_by_ign_cycle =
+      CheckIgnCycleRestrictions(saved_app);
+
+  const bool restore_hmi_level_allowed =
+      is_resume_allowed_by_low_voltage && is_hmi_level_allowed_by_ign_cycle;
+
+  if (restore_hmi_level_allowed) {
     LOG4CXX_INFO(logger_,
                  "Resume application " << application->policy_app_id());
-    RestoreAppHMIState(application);
+    const bool hmi_state_restore_result = RestoreAppHMIState(application);
     if (mobile_apis::HMILevel::eType::INVALID_ENUM !=
         application->deferred_resumption_hmi_level()) {
       // the application has not been fully resumed
-      return;
+      return false;
     }
     RemoveApplicationFromSaved(application);
+    return hmi_state_restore_result;
   } else {
-    LOG4CXX_INFO(logger_,
-                 "Do not need to resume application "
-                     << application->policy_app_id());
+    LOG4CXX_INFO(
+        logger_,
+        "Do not need to resume application " << application->policy_app_id());
   }
+  return true;
 }
 
 void ResumeCtrlImpl::ResetLaunchTime() {
@@ -503,9 +698,14 @@ bool ResumeCtrlImpl::CheckApplicationHash(ApplicationSharedPtr application,
                 "app_id : " << application->app_id() << " hash : " << hash);
   smart_objects::SmartObject saved_app;
   const std::string& device_mac = application->mac_address();
-  bool result = resumption_storage_->GetSavedApplication(
+  const bool get_app_result = resumption_storage_->GetSavedApplication(
       application->policy_app_id(), device_mac, saved_app);
-  return result ? saved_app[strings::hash_id].asString() == hash : false;
+  const bool check_result =
+      get_app_result ? saved_app[strings::hash_id].asString() == hash : false;
+  if (check_result) {
+    application->set_app_data_resumption_allowance(true);
+  }
+  return check_result;
 }
 
 void ResumeCtrlImpl::SaveDataOnTimer() {
@@ -570,6 +770,27 @@ bool ResumeCtrlImpl::RestoreApplicationData(ApplicationSharedPtr application) {
   return result;
 }
 
+void ResumeCtrlImpl::StartWaitingForDisplayCapabilitiesUpdate(
+    app_mngr::ApplicationSharedPtr application) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  smart_objects::SmartObject saved_app(smart_objects::SmartType_Map);
+  resumption_storage_->GetSavedApplication(
+      application->policy_app_id(), application->mac_address(), saved_app);
+  auto resume_callback =
+      [this](Application& app,
+             const smart_objects::SmartObject& display_capabilities) -> void {
+    LOG4CXX_AUTO_TRACE(logger_);
+    ProcessSystemCapabilityUpdated(app, display_capabilities);
+  };
+  auto& builder = application->display_capabilities_builder();
+
+  smart_objects::SmartObject windows_info(smart_objects::SmartType_Null);
+  if (saved_app.keyExists(strings::windows_info)) {
+    windows_info = saved_app[strings::windows_info];
+  }
+  builder.InitBuilder(resume_callback, windows_info);
+}
+
 void ResumeCtrlImpl::AddFiles(ApplicationSharedPtr application,
                               const smart_objects::SmartObject& saved_app) {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -623,11 +844,19 @@ void ResumeCtrlImpl::AddCommands(ApplicationSharedPtr application,
   if (saved_app.keyExists(strings::application_commands)) {
     const smart_objects::SmartObject& app_commands =
         saved_app[strings::application_commands];
-    for (size_t i = 0; i < app_commands.length(); ++i) {
-      const smart_objects::SmartObject& command = app_commands[i];
 
-      application->AddCommand(command[strings::cmd_id].asUInt(), command);
+    for (size_t cmd_num = 0; cmd_num < app_commands.length(); ++cmd_num) {
+      const smart_objects::SmartObject& command = app_commands[cmd_num];
+      const uint32_t cmd_id = command[strings::cmd_id].asUInt();
+      const bool is_resumption = true;
+      application->AddCommand(
+          commands::CommandImpl::CalcCommandInternalConsecutiveNumber(
+              application),
+          command);
+      application->help_prompt_manager().OnVrCommandAdded(
+          cmd_id, command, is_resumption);
     }
+
     ProcessHMIRequests(MessageHelper::CreateAddCommandRequestToHMI(
         application, application_manager_));
   } else {
@@ -713,30 +942,62 @@ void ResumeCtrlImpl::AddSubscriptions(
 bool ResumeCtrlImpl::CheckIgnCycleRestrictions(
     const smart_objects::SmartObject& saved_app) {
   LOG4CXX_AUTO_TRACE(logger_);
-  bool result = true;
 
   if (!CheckDelayAfterIgnOn()) {
-    LOG4CXX_INFO(logger_, "Application was connected long after ign on");
-    result = false;
+    LOG4CXX_DEBUG(logger_, "Application was connected long after ign on");
+    return false;
   }
 
-  if (!DisconnectedJustBeforeIgnOff(saved_app)) {
-    LOG4CXX_INFO(logger_, "Application was dissconnected long before ign off");
-    result = false;
+  if (!CheckDelayBeforeIgnOff(saved_app)) {
+    LOG4CXX_DEBUG(logger_, "Application was disconnected long before ign off");
+    return false;
   }
-  return result;
+  return true;
 }
 
-bool ResumeCtrlImpl::DisconnectedJustBeforeIgnOff(
+bool ResumeCtrlImpl::CheckLowVoltageRestrictions(
     const smart_objects::SmartObject& saved_app) {
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  if (!CheckDelayBeforeLowVoltage(saved_app)) {
+    LOG4CXX_DEBUG(logger_,
+                  "Application was disconnected long before low voltage");
+    return false;
+  }
+
+  if (!CheckDelayAfterWakeUp()) {
+    LOG4CXX_DEBUG(logger_, "Application was connected long after wake up");
+    return false;
+  }
+
+  LOG4CXX_DEBUG(logger_, "HMI Level resuming in not restricted by Low Voltage");
+  return true;
+}
+
+bool ResumeCtrlImpl::CheckDelayBeforeIgnOff(
+    const smart_objects::SmartObject& saved_app) const {
   using namespace date_time;
   LOG4CXX_AUTO_TRACE(logger_);
   DCHECK_OR_RETURN(saved_app.keyExists(strings::time_stamp), false);
 
   const time_t time_stamp =
       static_cast<time_t>(saved_app[strings::time_stamp].asInt());
-  time_t ign_off_time =
+  const time_t ign_off_time =
       static_cast<time_t>(resumption_storage_->GetIgnOffTime());
+
+  if (CheckIgnCyclesData() && 0 == ign_off_time) {
+    LOG4CXX_DEBUG(
+        logger_, "No IGNITION OFF records found: This is first Ignition cycle");
+    return true;
+  }
+
+  // This means that ignition off timestamp was not saved
+  // Possible reasons: Low Voltage event, core crash etc.
+  if (ign_off_time < time_stamp) {
+    LOG4CXX_DEBUG(logger_, "Last IGNITION OFF record missed");
+    return true;
+  }
+
   const uint32_t sec_spent_before_ign = labs(ign_off_time - time_stamp);
   LOG4CXX_DEBUG(
       logger_,
@@ -747,6 +1008,71 @@ bool ResumeCtrlImpl::DisconnectedJustBeforeIgnOff(
           << application_manager_.get_settings().resumption_delay_before_ign());
   return sec_spent_before_ign <=
          application_manager_.get_settings().resumption_delay_before_ign();
+}
+
+bool ResumeCtrlImpl::CheckDelayBeforeLowVoltage(
+    const smart_objects::SmartObject& saved_app) const {
+  using namespace date_time;
+  LOG4CXX_AUTO_TRACE(logger_);
+  DCHECK_OR_RETURN(saved_app.keyExists(strings::time_stamp), false);
+
+  if (0 == LowVoltageTime()) {
+    LOG4CXX_DEBUG(logger_, "No Low Voltage signal timestamp saved");
+    return true;
+  }
+
+  const time_t unregistration_time_stamp =
+      static_cast<time_t>(saved_app[strings::time_stamp].asInt());
+  const time_t low_voltage_timestamp = static_cast<time_t>(LowVoltageTime());
+  const int32_t sec_spent_before_low_voltage =
+      (low_voltage_timestamp - unregistration_time_stamp);
+  if (0 > sec_spent_before_low_voltage) {
+    LOG4CXX_DEBUG(logger_,
+                  "Low Voltage time: "
+                      << low_voltage_timestamp
+                      << "; App disconnect time: " << unregistration_time_stamp
+                      << "; Secs between app disconnect and low voltage event "
+                      << sec_spent_before_low_voltage);
+    return true;
+  }
+
+  const uint32_t secs_between_app_disconnect_and_low_voltage =
+      static_cast<uint32_t>(sec_spent_before_low_voltage);
+  const uint32_t wait_time =
+      application_manager_.get_settings().resumption_delay_before_ign();
+  LOG4CXX_DEBUG(logger_,
+                "Low Voltage time: "
+                    << low_voltage_timestamp
+                    << "; App disconnect time: " << unregistration_time_stamp
+                    << "; Secs between app disconnect and low voltage event "
+                    << secs_between_app_disconnect_and_low_voltage
+                    << "; Timeout for HMI level resuming:  " << wait_time);
+  return secs_between_app_disconnect_and_low_voltage <= wait_time;
+}
+
+bool ResumeCtrlImpl::CheckDelayAfterWakeUp() const {
+  using namespace date_time;
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  if (0 == WakeUpTime()) {
+    LOG4CXX_DEBUG(logger_, "No WakeUp signal timestamp saved");
+    return true;
+  }
+
+  const time_t current_time = time(nullptr);
+  const time_t wake_up_timestamp = static_cast<time_t>(WakeUpTime());
+
+  const uint32_t seconds_from_wake_up_signal =
+      labs(current_time - wake_up_timestamp);
+  const uint32_t wait_time =
+      application_manager_.get_settings().resumption_delay_after_ign();
+  LOG4CXX_DEBUG(
+      logger_,
+      "Current time: " << current_time << "; WakeUp Signal time: "
+                       << wake_up_timestamp << "; Seconds passed from wake up: "
+                       << seconds_from_wake_up_signal
+                       << "; Timeout for HMI level resuming:  " << wait_time);
+  return seconds_from_wake_up_signal <= wait_time;
 }
 
 bool ResumeCtrlImpl::CheckAppRestrictions(
@@ -770,9 +1096,10 @@ bool ResumeCtrlImpl::CheckAppRestrictions(
                           ? true
                           : false;
   LOG4CXX_DEBUG(logger_,
-                "is_media_app " << application->is_media_application()
-                                << "; hmi_level " << hmi_level << " result "
-                                << result);
+                "is_media_app: " << application->is_media_application()
+                                 << "; hmi_level: " << hmi_level << "; result: "
+                                 << (result ? "Applicable for resume"
+                                            : "Non-applicable for resume"));
   return result;
 }
 
@@ -785,11 +1112,36 @@ bool ResumeCtrlImpl::CheckIcons(ApplicationSharedPtr application,
   return mobile_apis::Result::INVALID_DATA != verify_images;
 }
 
-bool ResumeCtrlImpl::CheckDelayAfterIgnOn() {
+bool ResumeCtrlImpl::CheckIgnCyclesData() const {
+  LOG4CXX_AUTO_TRACE(logger_);
+  const uint32_t global_ign_on_count =
+      resumption_storage_->GetGlobalIgnOnCounter();
+  const uint32_t the_first_ignition = 1;
+  const bool is_emergency_ign_off_occurred =
+      global_ign_on_count > the_first_ignition;
+  // global_ign_on_count is reseting to 0 at ignition off
+  // global_ign_on_count is incrementing at ignition on
+  // global_ign_on_count > 1 means that correct ignition off was not present.
+  if (is_emergency_ign_off_occurred) {
+    LOG4CXX_WARN(logger_,
+                 "Emergency IGN OFF occurred. Possibly after Low Voltage");
+    return false;
+  }
+  return true;
+}
+
+bool ResumeCtrlImpl::CheckDelayAfterIgnOn() const {
   using namespace date_time;
   LOG4CXX_AUTO_TRACE(logger_);
-  const time_t curr_time = time(NULL);
+  const time_t ign_off_time = GetIgnOffTime();
+
+  if (CheckIgnCyclesData() && 0 == ign_off_time) {
+    LOG4CXX_DEBUG(logger_, "This is first Ignition cycle");
+    return true;
+  }
+  const time_t curr_time = time(nullptr);
   const time_t sdl_launch_time = LaunchTime();
+
   const uint32_t seconds_from_sdl_start = labs(curr_time - sdl_launch_time);
   const uint32_t wait_time =
       application_manager_.get_settings().resumption_delay_after_ign();
@@ -805,7 +1157,7 @@ time_t ResumeCtrlImpl::LaunchTime() const {
   return launch_time_;
 }
 
-time_t ResumeCtrlImpl::GetIgnOffTime() {
+time_t ResumeCtrlImpl::GetIgnOffTime() const {
   return resumption_storage_->GetIgnOffTime();
 }
 
@@ -821,7 +1173,8 @@ bool ResumeCtrlImpl::ProcessHMIRequest(smart_objects::SmartObjectSPtr request,
         (*request)[strings::correlation_id].asInt();
     subscribe_on_event(function_id, hmi_correlation_id);
   }
-  if (!application_manager_.GetRPCService().ManageHMICommand(request)) {
+  if (!application_manager_.GetRPCService().ManageHMICommand(
+          request, commands::Command::SOURCE_SDL_TO_HMI)) {
     LOG4CXX_ERROR(logger_, "Unable to send request");
     return false;
   }
@@ -850,9 +1203,12 @@ void ResumeCtrlImpl::AddToResumptionTimerQueue(const uint32_t app_id) {
   }
   queue_lock_.Release();
   LOG4CXX_DEBUG(logger_,
-                "Application ID " << app_id << " have been added"
-                                               " to resumption queue.");
+                "Application ID " << app_id
+                                  << " have been added"
+                                     " to resumption queue.");
   if (run_resumption) {
+    LOG4CXX_DEBUG(logger_,
+                  "Application ID " << app_id << " will be restored by timer");
     restore_hmi_level_timer_.Start(
         application_manager_.get_settings().app_resuming_timeout(),
         timer::kSingleShot);
@@ -1010,4 +1366,4 @@ static mobile_api::HMILevel::eType ConvertHmiLevelString(
   }
 }
 
-}  // namespce resumption
+}  // namespace resumption

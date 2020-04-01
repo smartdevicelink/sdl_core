@@ -40,21 +40,22 @@
 #include "policy/policy_manager_impl.h"
 
 #include "policy/mock_cache_manager.h"
-#include "policy/mock_update_status_manager.h"
 #include "policy/mock_policy_listener.h"
 #include "policy/mock_policy_settings.h"
+#include "policy/mock_ptu_retry_handler.h"
+#include "policy/mock_update_status_manager.h"
 
 namespace test {
 namespace components {
 namespace policy_test {
 
-using ::testing::NiceMock;
 using ::policy::PolicyManagerImpl;
+using ::testing::NiceMock;
 
 typedef std::multimap<std::string, policy_table::Rpcs&>
     UserConsentPromptToRpcsConnections;
 
-typedef utils::SharedPtr<policy_table::Table> PolicyTableSPtr;
+typedef std::shared_ptr<policy_table::Table> PolicyTableSPtr;
 
 namespace {
 const std::string kSdlPreloadedPtJson = "json/sdl_preloaded_pt.json";
@@ -112,9 +113,10 @@ class PolicyManagerImplTest : public ::testing::Test {
   const std::string unpaired_device_id_;
 
   PolicyManagerImpl* policy_manager_;
-  MockCacheManagerInterface* cache_manager_;
+  NiceMock<MockCacheManagerInterface>* cache_manager_;
   MockUpdateStatusManager update_manager_;
   NiceMock<MockPolicyListener> listener_;
+  NiceMock<MockPTURetryHandler> ptu_retry_handler_;
 
   void SetUp() OVERRIDE;
 
@@ -140,6 +142,7 @@ class PolicyManagerImplTest2 : public ::testing::Test {
 
   PolicyManagerImpl* policy_manager_;
   NiceMock<MockPolicyListener> listener_;
+  NiceMock<MockPTURetryHandler> ptu_retry_handler_;
   ::policy::StringArray hmi_level_;
   ::policy::StringArray pt_request_types_;
   size_t ptu_request_types_size_;
@@ -203,7 +206,7 @@ class PolicyManagerImplTest2 : public ::testing::Test {
 
   void EmulatePTAppRevoked(const std::string& ptu_name);
 
-  utils::SharedPtr<policy_table::Table> PreconditionForBasicValidateSnapshot();
+  std::shared_ptr<policy_table::Table> PreconditionForBasicValidateSnapshot();
 
   template <typename ParentType, typename Value>
   bool IsKeyExisted(const ParentType& parent, const Value& value) const {
@@ -236,7 +239,7 @@ class PolicyManagerImplTest_RequestTypes : public ::testing::Test {
   const std::string app_storage_folder_;
   const std::string preloaded_pt_filename_;
 
-  utils::SharedPtr<PolicyManagerImpl> policy_manager_impl_sptr_;
+  std::shared_ptr<PolicyManagerImpl> policy_manager_impl_sptr_;
   NiceMock<MockPolicyListener> listener_;
   NiceMock<policy_handler_test::MockPolicySettings> policy_settings_;
 

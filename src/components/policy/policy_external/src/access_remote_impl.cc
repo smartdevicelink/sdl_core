@@ -89,7 +89,7 @@ struct ToModuleType {
 
 AccessRemoteImpl::AccessRemoteImpl() : cache_(new CacheManager()) {}
 
-AccessRemoteImpl::AccessRemoteImpl(utils::SharedPtr<CacheManager> cache)
+AccessRemoteImpl::AccessRemoteImpl(std::shared_ptr<CacheManager> cache)
     : cache_(cache) {}
 
 bool AccessRemoteImpl::CheckModuleType(const PTString& app_id,

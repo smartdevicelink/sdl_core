@@ -36,8 +36,21 @@
 
 namespace logger {
 
-static bool logs_enabled_ = false;
-static LogMessageLoopThread* log_message_loop_thread = NULL;
+struct __attribute__((visibility("default"))) LogsEnabled {
+  static std::atomic_bool logs_enabled_;
+};
+
+std::atomic_bool LogsEnabled::logs_enabled_(false);
+
+template <typename T>
+using logger_ptr = std::unique_ptr<T, std::function<void(T*)> >;
+
+static logger_ptr<LogMessageLoopThread> log_message_loop_thread;
+
+auto deinit_logger = [](LogMessageLoopThread* logMsgThread) {
+  delete logMsgThread;
+  logger::logger_status = logger::LoggerThreadNotCreated;
+};
 
 bool push_log(log4cxx::LoggerPtr logger,
               log4cxx::LevelPtr level,
@@ -73,22 +86,46 @@ bool push_log(log4cxx::LoggerPtr logger,
 }
 
 bool logs_enabled() {
-  return logs_enabled_;
+  return LogsEnabled::logs_enabled_;
 }
 
 void set_logs_enabled(bool state) {
-  logs_enabled_ = state;
+  LogsEnabled::logs_enabled_ = state;
 }
 
 void create_log_message_loop_thread() {
   if (!log_message_loop_thread) {
-    log_message_loop_thread = new LogMessageLoopThread();
+    log_message_loop_thread = logger_ptr<LogMessageLoopThread>(
+        new LogMessageLoopThread, deinit_logger);
   }
 }
 
-void delete_log_message_loop_thread() {
-  delete log_message_loop_thread;
-  log_message_loop_thread = NULL;
+void delete_log_message_loop_thread(log4cxx::LoggerPtr& logger) {
+  if (logger::logger_status == logger::LoggerThreadCreated) {
+    logger::flush_logger();
+  }
+
+  log_message_loop_thread.reset();
+
+  if (LOG4CXX_UNLIKELY(logger->isDebugEnabled())) {
+    ::log4cxx::helpers::MessageBuffer oss_;
+    logger->forcedLog(::log4cxx::Level::getDebug(),
+                      oss_.str(oss_ << "Logger loop thread deinitialized"),
+                      LOG4CXX_LOCATION);
+  }
+
+  if (logger->getRootLogger() == logger) {
+    return;
+  }
+
+  if (LOG4CXX_UNLIKELY(logger->isDebugEnabled())) {
+    ::log4cxx::helpers::MessageBuffer oss_;
+    logger->forcedLog(::log4cxx::Level::getDebug(),
+                      oss_.str(oss_ << "Logger calling removeAllAppenders"),
+                      LOG4CXX_LOCATION);
+  }
+
+  logger->removeAllAppenders();
 }
 
 void flush_logger() {

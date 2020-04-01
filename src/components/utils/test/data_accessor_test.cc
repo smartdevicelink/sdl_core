@@ -30,8 +30,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "gtest/gtest.h"
 #include "utils/data_accessor.h"
+#include "gtest/gtest.h"
 #include "utils/lock.h"
 
 namespace test {

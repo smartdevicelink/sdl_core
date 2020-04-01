@@ -29,28 +29,30 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-#include "gtest/gtest.h"
 #include <string>
-#include "protocol_handler/protocol_handler.h"
-#include "protocol_handler/protocol_handler_impl.h"
+#include "connection_handler/connection_handler_impl.h"
+#include "connection_handler/mock_connection_handler.h"
+#include "gtest/gtest.h"
 #include "protocol/bson_object_keys.h"
 #include "protocol/common.h"
 #include "protocol_handler/control_message_matcher.h"
 #include "protocol_handler/mock_protocol_handler.h"
-#include "protocol_handler/mock_protocol_observer.h"
 #include "protocol_handler/mock_protocol_handler_settings.h"
+#include "protocol_handler/mock_protocol_observer.h"
+#include "protocol_handler/mock_service_status_update_handler_listener.h"
 #include "protocol_handler/mock_session_observer.h"
-#include "connection_handler/mock_connection_handler.h"
-#include "connection_handler/connection_handler_impl.h"
+#include "protocol_handler/protocol_handler.h"
+#include "protocol_handler/protocol_handler_impl.h"
 #ifdef ENABLE_SECURITY
 #include "security_manager/mock_security_manager.h"
 #include "security_manager/mock_ssl_context.h"
 #endif  // ENABLE_SECURITY
 #include "transport_manager/mock_transport_manager.h"
 #include "utils/mock_system_time_handler.h"
-#include "utils/make_shared.h"
-#include "utils/test_async_waiter.h"
+#include "utils/semantic_version.h"
+
 #include <bson_object.h>
+#include "utils/test_async_waiter.h"
 
 namespace transport_manager {
 namespace transport_adapter {
@@ -58,8 +60,8 @@ namespace transport_adapter {
 const char* tc_enabled = "enabled";
 const char* tc_tcp_port = "tcp_port";
 const char* tc_tcp_ip_address = "tcp_ip_address";
-}
-}
+}  // namespace transport_adapter
+}  // namespace transport_manager
 
 namespace test {
 namespace components {
@@ -69,50 +71,51 @@ namespace protocol_handler_test {
 #define NEW_SESSION_ID 0u
 #define SESSION_START_REJECT 0u
 // Protocol Handler Entities
-using protocol_handler::ProtocolHandlerImpl;
-using protocol_handler::ServiceType;
-using protocol_handler::RawMessage;
-using protocol_handler::RawMessagePtr;
-using protocol_handler::PROTECTION_ON;
+using protocol_handler::FRAME_DATA_END_SERVICE;
+using protocol_handler::FRAME_DATA_END_SERVICE_ACK;
+using protocol_handler::FRAME_DATA_END_SERVICE_NACK;
+using protocol_handler::FRAME_DATA_FIRST;
+using protocol_handler::FRAME_DATA_HEART_BEAT;
+using protocol_handler::FRAME_DATA_HEART_BEAT_ACK;
+using protocol_handler::FRAME_DATA_LAST_CONSECUTIVE;
+using protocol_handler::FRAME_DATA_REGISTER_SECONDARY_TRANSPORT;
+using protocol_handler::FRAME_DATA_REGISTER_SECONDARY_TRANSPORT_ACK;
+using protocol_handler::FRAME_DATA_REGISTER_SECONDARY_TRANSPORT_NACK;
+using protocol_handler::FRAME_DATA_SERVICE_DATA_ACK;
+using protocol_handler::FRAME_DATA_SINGLE;
+using protocol_handler::FRAME_DATA_START_SERVICE;
+using protocol_handler::FRAME_DATA_START_SERVICE_ACK;
+using protocol_handler::FRAME_DATA_TRANSPORT_EVENT_UPDATE;
+using protocol_handler::FRAME_TYPE_CONSECUTIVE;
+using protocol_handler::FRAME_TYPE_CONTROL;
+using protocol_handler::FRAME_TYPE_FIRST;
+using protocol_handler::FRAME_TYPE_MAX_VALUE;
+using protocol_handler::FRAME_TYPE_SINGLE;
+using protocol_handler::kAudio;
+using protocol_handler::kBulk;
+using protocol_handler::kControl;
+using protocol_handler::kInvalidServiceType;
+using protocol_handler::kMobileNav;
+using protocol_handler::kRpc;
+using protocol_handler::MAXIMUM_FRAME_DATA_V2_SIZE;
 using protocol_handler::PROTECTION_OFF;
+using protocol_handler::PROTECTION_ON;
 using protocol_handler::PROTOCOL_VERSION_1;
 using protocol_handler::PROTOCOL_VERSION_2;
 using protocol_handler::PROTOCOL_VERSION_3;
 using protocol_handler::PROTOCOL_VERSION_4;
 using protocol_handler::PROTOCOL_VERSION_5;
 using protocol_handler::PROTOCOL_VERSION_MAX;
-using protocol_handler::FRAME_TYPE_CONTROL;
-using protocol_handler::FRAME_TYPE_SINGLE;
-using protocol_handler::FRAME_TYPE_FIRST;
-using protocol_handler::FRAME_TYPE_CONSECUTIVE;
-using protocol_handler::FRAME_TYPE_MAX_VALUE;
-using protocol_handler::MAXIMUM_FRAME_DATA_V2_SIZE;
-using protocol_handler::FRAME_DATA_START_SERVICE;
-using protocol_handler::FRAME_DATA_START_SERVICE_ACK;
-using protocol_handler::FRAME_DATA_END_SERVICE_NACK;
-using protocol_handler::FRAME_DATA_END_SERVICE_ACK;
-using protocol_handler::FRAME_DATA_END_SERVICE;
-using protocol_handler::FRAME_DATA_HEART_BEAT;
-using protocol_handler::FRAME_DATA_HEART_BEAT_ACK;
-using protocol_handler::FRAME_DATA_SERVICE_DATA_ACK;
-using protocol_handler::FRAME_DATA_SINGLE;
-using protocol_handler::FRAME_DATA_FIRST;
-using protocol_handler::FRAME_DATA_LAST_CONSECUTIVE;
-using protocol_handler::FRAME_DATA_REGISTER_SECONDARY_TRANSPORT;
-using protocol_handler::FRAME_DATA_REGISTER_SECONDARY_TRANSPORT_ACK;
-using protocol_handler::FRAME_DATA_REGISTER_SECONDARY_TRANSPORT_NACK;
-using protocol_handler::FRAME_DATA_TRANSPORT_EVENT_UPDATE;
-using protocol_handler::kRpc;
-using protocol_handler::kControl;
-using protocol_handler::kAudio;
-using protocol_handler::kMobileNav;
-using protocol_handler::kBulk;
-using protocol_handler::kInvalidServiceType;
+using protocol_handler::ProtocolHandlerImpl;
+using protocol_handler::RawMessage;
+using protocol_handler::RawMessagePtr;
+using protocol_handler::ServiceStatusUpdateHandler;
+using protocol_handler::ServiceType;
 // For TM states
-using transport_manager::TransportManagerListener;
 using test::components::security_manager_test::MockSystemTimeHandler;
-using transport_manager::E_SUCCESS;
 using transport_manager::DeviceInfo;
+using transport_manager::E_SUCCESS;
+using transport_manager::TransportManagerListener;
 #ifdef ENABLE_SECURITY
 // For security
 using ContextCreationStrategy =
@@ -121,23 +124,26 @@ using ContextCreationStrategy =
 // For CH entities
 using connection_handler::DeviceHandle;
 // Google Testing Framework Entities
-using ::testing::Return;
-using ::testing::ReturnRef;
-using ::testing::ReturnRefOfCopy;
-using ::testing::ReturnNull;
+using ::testing::_;
 using ::testing::An;
 using ::testing::AnyOf;
 using ::testing::AtLeast;
 using ::testing::ByRef;
 using ::testing::DoAll;
-using ::testing::SaveArg;
 using ::testing::Eq;
-using ::testing::_;
 using ::testing::Invoke;
-using ::testing::SetArgReferee;
+using ::testing::Return;
+using ::testing::ReturnNull;
+using ::testing::ReturnRef;
+using ::testing::ReturnRefOfCopy;
+using ::testing::SaveArg;
 using ::testing::SetArgPointee;
+using ::testing::SetArgReferee;
 
 typedef std::vector<uint8_t> UCharDataVector;
+typedef std::shared_ptr<
+    testing::NiceMock<MockServiceStatusUpdateHandlerListener> >
+    MockServiceStatusUpdateHandlerListenerPtr;
 
 // custom action to call a member function with 6 arguments
 ACTION_P4(InvokeMemberFuncWithArg2, ptr, memberFunc, a, b) {
@@ -148,7 +154,7 @@ namespace {
 const uint32_t kAsyncExpectationsTimeout = 10000u;
 const uint32_t kMicrosecondsInMillisecond = 1000u;
 const uint32_t kAddSessionWaitTimeMs = 100u;
-}
+}  // namespace
 
 class ProtocolHandlerImplTest : public ::testing::Test {
  protected:
@@ -185,10 +191,17 @@ class ProtocolHandlerImplTest : public ::testing::Test {
                                 session_observer_mock,
                                 connection_handler_mock,
                                 transport_manager_mock));
+    std::unique_ptr<ServiceStatusUpdateHandler> service_status_update_handler_(
+        new ServiceStatusUpdateHandler(
+            &(*mock_service_status_update_handler_listener_)));
+    protocol_handler_impl->set_service_status_update_handler(
+        std::move(service_status_update_handler_));
     tm_listener = protocol_handler_impl.get();
   }
 
   void SetUp() OVERRIDE {
+    mock_service_status_update_handler_listener_ = std::make_shared<
+        testing::NiceMock<MockServiceStatusUpdateHandlerListener> >();
     InitProtocolHandlerImpl(0u, 0u);
     connection_id = 0xAu;
     session_id = 0xFFu;
@@ -213,9 +226,11 @@ class ProtocolHandlerImplTest : public ::testing::Test {
 
   void TearDown() OVERRIDE {
     const_cast<protocol_handler::impl::FromMobileQueue&>(
-        protocol_handler_impl->get_from_mobile_queue()).WaitDumpQueue();
+        protocol_handler_impl->get_from_mobile_queue())
+        .WaitDumpQueue();
     const_cast<protocol_handler::impl::ToMobileQueue&>(
-        protocol_handler_impl->get_to_mobile_queue()).WaitDumpQueue();
+        protocol_handler_impl->get_to_mobile_queue())
+        .WaitDumpQueue();
   }
 
   // Emulate connection establish
@@ -243,7 +258,7 @@ class ProtocolHandlerImplTest : public ::testing::Test {
                                             protection_flag);
   }
 
-  void AddSession(const ::utils::SharedPtr<TestAsyncWaiter>& waiter,
+  void AddSession(const std::shared_ptr<TestAsyncWaiter>& waiter,
                   uint32_t& times) {
     using namespace protocol_handler;
     ASSERT_TRUE(NULL != waiter.get());
@@ -267,6 +282,21 @@ class ProtocolHandlerImplTest : public ::testing::Test {
                           start_service,
                           HASH_ID_WRONG,
                           callback_protection_flag);
+
+    // Expect verification of allowed transport
+    EXPECT_CALL(session_observer_mock,
+                TransportTypeProfileStringFromConnHandle(connection_id))
+        .WillOnce(Return("TCP_WIFI"));
+
+    std::vector<std::string> audio_service_transports;
+    audio_service_transports.push_back("TCP_WIFI");
+    std::vector<std::string> video_service_transports;
+    video_service_transports.push_back("TCP_WIFI");
+
+    EXPECT_CALL(protocol_handler_settings_mock, audio_service_transports())
+        .WillOnce(ReturnRef(audio_service_transports));
+    EXPECT_CALL(protocol_handler_settings_mock, video_service_transports())
+        .WillOnce(ReturnRef(video_service_transports));
 
     // Expect ConnectionHandler check
     EXPECT_CALL(session_observer_mock,
@@ -367,8 +397,13 @@ class ProtocolHandlerImplTest : public ::testing::Test {
       const std::vector<int32_t>& expected_audio_service_transports,
       const std::vector<int32_t>& expected_video_service_transports);
 
+  void VerifyCloudAppParamsInStartSessionAck(const std::string& policy_app_id,
+                                             char* auth_token);
+
   testing::NiceMock<MockProtocolHandlerSettings> protocol_handler_settings_mock;
-  ::utils::SharedPtr<ProtocolHandlerImpl> protocol_handler_impl;
+  std::shared_ptr<ProtocolHandlerImpl> protocol_handler_impl;
+  MockServiceStatusUpdateHandlerListenerPtr
+      mock_service_status_update_handler_listener_;
   TransportManagerListener* tm_listener;
   // Uniq connection
   ::transport_manager::ConnectionUID connection_id;
@@ -451,6 +486,24 @@ TEST_F(ProtocolHandlerImplTest,
   TestAsyncWaiter waiter;
   uint32_t times = 0;
   ServiceType service_type;
+  // Expect verification of allowed transport
+  EXPECT_CALL(session_observer_mock,
+              TransportTypeProfileStringFromConnHandle(connection_id))
+      .Times(call_times)
+      .WillRepeatedly(Return("TCP_WIFI"));
+
+  std::vector<std::string> audio_service_transports;
+  audio_service_transports.push_back("TCP_WIFI");
+  std::vector<std::string> video_service_transports;
+  video_service_transports.push_back("TCP_WIFI");
+
+  EXPECT_CALL(protocol_handler_settings_mock, audio_service_transports())
+      .Times(call_times)
+      .WillRepeatedly(ReturnRef(audio_service_transports));
+  EXPECT_CALL(protocol_handler_settings_mock, video_service_transports())
+      .Times(call_times)
+      .WillRepeatedly(ReturnRef(video_service_transports));
+
   // Expect ConnectionHandler check
   EXPECT_CALL(
       session_observer_mock,
@@ -519,6 +572,24 @@ TEST_F(ProtocolHandlerImplTest, StartSession_Protected_SessionObserverReject) {
   TestAsyncWaiter waiter;
   uint32_t times = 0;
   ServiceType service_type;
+  // Expect verification of allowed transport
+  EXPECT_CALL(session_observer_mock,
+              TransportTypeProfileStringFromConnHandle(connection_id))
+      .Times(call_times)
+      .WillRepeatedly(Return("TCP_WIFI"));
+
+  std::vector<std::string> audio_service_transports;
+  audio_service_transports.push_back("TCP_WIFI");
+  std::vector<std::string> video_service_transports;
+  video_service_transports.push_back("TCP_WIFI");
+
+  EXPECT_CALL(protocol_handler_settings_mock, audio_service_transports())
+      .Times(call_times)
+      .WillRepeatedly(ReturnRef(audio_service_transports));
+  EXPECT_CALL(protocol_handler_settings_mock, video_service_transports())
+      .Times(call_times)
+      .WillRepeatedly(ReturnRef(video_service_transports));
+
   // Expect ConnectionHandler check
   EXPECT_CALL(
       session_observer_mock,
@@ -577,6 +648,21 @@ TEST_F(ProtocolHandlerImplTest,
 
   TestAsyncWaiter waiter;
   uint32_t times = 0;
+  // Expect verification of allowed transport
+  EXPECT_CALL(session_observer_mock,
+              TransportTypeProfileStringFromConnHandle(connection_id))
+      .WillOnce(Return("TCP_WIFI"));
+
+  std::vector<std::string> audio_service_transports;
+  audio_service_transports.push_back("TCP_WIFI");
+  std::vector<std::string> video_service_transports;
+  video_service_transports.push_back("TCP_WIFI");
+
+  EXPECT_CALL(protocol_handler_settings_mock, audio_service_transports())
+      .WillOnce(ReturnRef(audio_service_transports));
+  EXPECT_CALL(protocol_handler_settings_mock, video_service_transports())
+      .WillOnce(ReturnRef(video_service_transports));
+
   // Expect ConnectionHandler check
   EXPECT_CALL(session_observer_mock,
               OnSessionStartedCallback(connection_id,
@@ -621,8 +707,7 @@ TEST_F(ProtocolHandlerImplTest,
 TEST_F(ProtocolHandlerImplTest, StartSession_Protected_SessionObserverAccept) {
   SetProtocolVersion2();
 
-  ::utils::SharedPtr<TestAsyncWaiter> waiter =
-      utils::MakeShared<TestAsyncWaiter>();
+  std::shared_ptr<TestAsyncWaiter> waiter = std::make_shared<TestAsyncWaiter>();
   uint32_t times = 0;
 
   AddSession(waiter, times);
@@ -661,12 +746,11 @@ TEST_F(ProtocolHandlerImplTest,
   const uint8_t session_id1 = 1u;
   const ::transport_manager::ConnectionUID connection_id2 = 0xBu;
   const uint8_t session_id2 = 2u;
+  EXPECT_CALL(session_observer_mock, KeyFromPair(connection_id2, session_id2))
+      .WillRepeatedly(Return(connection_key));
 
 #ifdef ENABLE_SECURITY
   AddSecurityManager();
-
-  EXPECT_CALL(session_observer_mock, KeyFromPair(connection_id2, session_id2))
-      .WillOnce(Return(connection_key));
 
   EXPECT_CALL(session_observer_mock,
               GetSSLContext(connection_key, start_service))
@@ -693,6 +777,26 @@ TEST_F(ProtocolHandlerImplTest,
 
   TestAsyncWaiter waiter;
   uint32_t times = 0;
+
+  // Expect verification of allowed transport
+  EXPECT_CALL(session_observer_mock,
+              TransportTypeProfileStringFromConnHandle(connection_id1))
+      .WillOnce(Return("TCP_WIFI"));
+  EXPECT_CALL(session_observer_mock,
+              TransportTypeProfileStringFromConnHandle(connection_id2))
+      .WillOnce(Return("TCP_WIFI"));
+
+  std::vector<std::string> audio_service_transports;
+  audio_service_transports.push_back("TCP_WIFI");
+  std::vector<std::string> video_service_transports;
+  video_service_transports.push_back("TCP_WIFI");
+
+  EXPECT_CALL(protocol_handler_settings_mock, audio_service_transports())
+      .Times(2)
+      .WillRepeatedly(ReturnRef(audio_service_transports));
+  EXPECT_CALL(protocol_handler_settings_mock, video_service_transports())
+      .Times(2)
+      .WillRepeatedly(ReturnRef(video_service_transports));
 
   BsonObject bson_params1;
   bson_object_initialize_default(&bson_params1);
@@ -830,14 +934,91 @@ TEST_F(ProtocolHandlerImplTest,
   bson_object_deinitialize(&bson_params2);
 }
 
+/*
+ * ProtocolHandler shall send NAck on session_observer rejection
+ * Check protection flag OFF for all services from kControl to kBulk
+ */
+TEST_F(ProtocolHandlerImplTest, StartSession_Audio_RejectByTransportType) {
+  using namespace protocol_handler;
+  AddConnection();
+  const ServiceType start_service = kAudio;
+
+  TestAsyncWaiter waiter;
+  uint32_t times = 0;
+  // Expect verification of allowed transport
+  EXPECT_CALL(session_observer_mock,
+              TransportTypeProfileStringFromConnHandle(connection_id))
+      .WillOnce(Return("TCP_WIFI"));
+
+  std::vector<std::string> audio_service_transports;
+  audio_service_transports.push_back("AOA_USB");
+  std::vector<std::string> video_service_transports;
+  video_service_transports.push_back("TCP_WIFI");
+
+  EXPECT_CALL(protocol_handler_settings_mock, audio_service_transports())
+      .WillOnce(ReturnRef(audio_service_transports));
+  EXPECT_CALL(protocol_handler_settings_mock, video_service_transports())
+      .WillOnce(ReturnRef(video_service_transports));
+
+  // Expect send Ack
+  EXPECT_CALL(transport_manager_mock,
+              SendMessageToDevice(ControlMessage(FRAME_DATA_START_SERVICE_NACK,
+                                                 PROTECTION_OFF)))
+      .WillOnce(DoAll(NotifyTestAsyncWaiter(&waiter), Return(E_SUCCESS)));
+  times++;
+
+  SendControlMessage(
+      PROTECTION_OFF, start_service, NEW_SESSION_ID, FRAME_DATA_START_SERVICE);
+
+  EXPECT_TRUE(waiter.WaitFor(times, kAsyncExpectationsTimeout));
+}
+
+/*
+ * ProtocolHandler shall send NAck on session_observer rejection
+ * Check protection flag OFF for all services from kControl to kBulk
+ */
+TEST_F(ProtocolHandlerImplTest, StartSession_Video_RejectByTransportType) {
+  using namespace protocol_handler;
+  AddConnection();
+  const ServiceType start_service = kMobileNav;
+
+  TestAsyncWaiter waiter;
+  uint32_t times = 0;
+  // Expect verification of allowed transport
+  EXPECT_CALL(session_observer_mock,
+              TransportTypeProfileStringFromConnHandle(connection_id))
+      .WillOnce(Return("TCP_WIFI"));
+
+  std::vector<std::string> audio_service_transports;
+  audio_service_transports.push_back("TCP_WIFI");
+  std::vector<std::string> video_service_transports;
+  video_service_transports.push_back("AOA_USB");
+
+  EXPECT_CALL(protocol_handler_settings_mock, audio_service_transports())
+      .WillOnce(ReturnRef(audio_service_transports));
+  EXPECT_CALL(protocol_handler_settings_mock, video_service_transports())
+      .WillOnce(ReturnRef(video_service_transports));
+
+  // Expect send Ack
+  EXPECT_CALL(transport_manager_mock,
+              SendMessageToDevice(ControlMessage(FRAME_DATA_START_SERVICE_NACK,
+                                                 PROTECTION_OFF)))
+      .WillOnce(DoAll(NotifyTestAsyncWaiter(&waiter), Return(E_SUCCESS)));
+  times++;
+
+  SendControlMessage(
+      PROTECTION_OFF, start_service, NEW_SESSION_ID, FRAME_DATA_START_SERVICE);
+
+  EXPECT_TRUE(waiter.WaitFor(times, kAsyncExpectationsTimeout));
+}
+
 // TODO(EZamakhov): add test for get_hash_id/set_hash_id from
 // protocol_handler_impl.cc
 /*
  * ProtocolHandler shall send NAck on session_observer rejection
  */
 TEST_F(ProtocolHandlerImplTest, EndSession_SessionObserverReject) {
-  ::utils::SharedPtr<TestAsyncWaiter> waiter =
-      utils::MakeShared<TestAsyncWaiter>();
+  std::shared_ptr<TestAsyncWaiter> waiter = std::make_shared<TestAsyncWaiter>();
   uint32_t times = 0;
 
   AddSession(waiter, times);
@@ -870,8 +1051,7 @@ TEST_F(ProtocolHandlerImplTest, EndSession_SessionObserverReject) {
  * ProtocolHandler shall send NAck on wrong hash code
  */
 TEST_F(ProtocolHandlerImplTest, EndSession_Success) {
-  ::utils::SharedPtr<TestAsyncWaiter> waiter =
-      utils::MakeShared<TestAsyncWaiter>();
+  std::shared_ptr<TestAsyncWaiter> waiter = std::make_shared<TestAsyncWaiter>();
   uint32_t times = 0;
 
   AddSession(waiter, times);
@@ -904,8 +1084,7 @@ TEST_F(ProtocolHandlerImplTest, EndSession_Success) {
 #ifdef ENABLE_SECURITY
 TEST_F(ProtocolHandlerImplTest, SecurityEnable_StartSessionProtocoloV1) {
   using namespace protocol_handler;
-  ::utils::SharedPtr<TestAsyncWaiter> waiter =
-      utils::MakeShared<TestAsyncWaiter>();
+  std::shared_ptr<TestAsyncWaiter> waiter = std::make_shared<TestAsyncWaiter>();
   uint32_t times = 0;
 
   AddSession(waiter, times);
@@ -913,6 +1092,21 @@ TEST_F(ProtocolHandlerImplTest, SecurityEnable_StartSessionProtocoloV1) {
   // Add security manager
   AddSecurityManager();
   const ServiceType start_service = kRpc;
+  // Expect verification of allowed transport
+  EXPECT_CALL(session_observer_mock,
+              TransportTypeProfileStringFromConnHandle(connection_id))
+      .WillOnce(Return("TCP_WIFI"));
+
+  std::vector<std::string> audio_service_transports;
+  audio_service_transports.push_back("TCP_WIFI");
+  std::vector<std::string> video_service_transports;
+  video_service_transports.push_back("TCP_WIFI");
+
+  EXPECT_CALL(protocol_handler_settings_mock, audio_service_transports())
+      .WillOnce(ReturnRef(audio_service_transports));
+  EXPECT_CALL(protocol_handler_settings_mock, video_service_transports())
+      .WillOnce(ReturnRef(video_service_transports));
+
   // Expect ConnectionHandler check
   EXPECT_CALL(session_observer_mock,
               OnSessionStartedCallback(connection_id,
@@ -969,6 +1163,21 @@ TEST_F(ProtocolHandlerImplTest, SecurityEnable_StartSessionUnprotected) {
 
   TestAsyncWaiter waiter;
   uint32_t times = 0;
+  // Expect verification of allowed transport
+  EXPECT_CALL(session_observer_mock,
+              TransportTypeProfileStringFromConnHandle(connection_id))
+      .WillOnce(Return("TCP_WIFI"));
+
+  std::vector<std::string> audio_service_transports;
+  audio_service_transports.push_back("TCP_WIFI");
+  std::vector<std::string> video_service_transports;
+  video_service_transports.push_back("TCP_WIFI");
+
+  EXPECT_CALL(protocol_handler_settings_mock, audio_service_transports())
+      .WillOnce(ReturnRef(audio_service_transports));
+  EXPECT_CALL(protocol_handler_settings_mock, video_service_transports())
+      .WillOnce(ReturnRef(video_service_transports));
+
   // Expect ConnectionHandler check
   EXPECT_CALL(session_observer_mock,
               OnSessionStartedCallback(connection_id,
@@ -1024,6 +1233,21 @@ TEST_F(ProtocolHandlerImplTest, SecurityEnable_StartSessionProtected_Fail) {
                                                                PROTECTION_ON);
   context.is_new_service_ = true;
 
+  // Expect verification of allowed transport
+  EXPECT_CALL(session_observer_mock,
+              TransportTypeProfileStringFromConnHandle(connection_id))
+      .WillOnce(Return("TCP_WIFI"));
+
+  std::vector<std::string> audio_service_transports;
+  audio_service_transports.push_back("TCP_WIFI");
+  std::vector<std::string> video_service_transports;
+  video_service_transports.push_back("TCP_WIFI");
+
+  EXPECT_CALL(protocol_handler_settings_mock, audio_service_transports())
+      .WillOnce(ReturnRef(audio_service_transports));
+  EXPECT_CALL(protocol_handler_settings_mock, video_service_transports())
+      .WillOnce(ReturnRef(video_service_transports));
+
   // Expect ConnectionHandler check
   EXPECT_CALL(session_observer_mock,
               OnSessionStartedCallback(connection_id,
@@ -1077,6 +1301,21 @@ TEST_F(ProtocolHandlerImplTest,
 
   TestAsyncWaiter waiter;
   uint32_t times = 0;
+  // Expect verification of allowed transport
+  EXPECT_CALL(session_observer_mock,
+              TransportTypeProfileStringFromConnHandle(connection_id))
+      .WillOnce(Return("TCP_WIFI"));
+
+  std::vector<std::string> audio_service_transports;
+  audio_service_transports.push_back("TCP_WIFI");
+  std::vector<std::string> video_service_transports;
+  video_service_transports.push_back("TCP_WIFI");
+
+  EXPECT_CALL(protocol_handler_settings_mock, audio_service_transports())
+      .WillOnce(ReturnRef(audio_service_transports));
+  EXPECT_CALL(protocol_handler_settings_mock, video_service_transports())
+      .WillOnce(ReturnRef(video_service_transports));
+
   // Expect ConnectionHandler check
   EXPECT_CALL(session_observer_mock,
               OnSessionStartedCallback(connection_id,
@@ -1153,6 +1392,21 @@ TEST_F(ProtocolHandlerImplTest,
                                                                PROTECTION_ON);
   context.is_new_service_ = true;
 
+  // Expect verification of allowed transport
+  EXPECT_CALL(session_observer_mock,
+              TransportTypeProfileStringFromConnHandle(connection_id))
+      .WillOnce(Return("TCP_WIFI"));
+
+  std::vector<std::string> audio_service_transports;
+  audio_service_transports.push_back("TCP_WIFI");
+  std::vector<std::string> video_service_transports;
+  video_service_transports.push_back("TCP_WIFI");
+
+  EXPECT_CALL(protocol_handler_settings_mock, audio_service_transports())
+      .WillOnce(ReturnRef(audio_service_transports));
+  EXPECT_CALL(protocol_handler_settings_mock, video_service_transports())
+      .WillOnce(ReturnRef(video_service_transports));
+
   // Expect ConnectionHandler check
   EXPECT_CALL(session_observer_mock,
               OnSessionStartedCallback(connection_id,
@@ -1175,7 +1429,7 @@ TEST_F(ProtocolHandlerImplTest,
   services.push_back(0x0A);
   services.push_back(0x0B);
   EXPECT_CALL(protocol_handler_settings_mock, force_protected_service())
-      .WillOnce(ReturnRefOfCopy(services));
+      .WillRepeatedly(ReturnRefOfCopy(services));
 
   // call new SSLContext creation
   EXPECT_CALL(security_manager_mock, CreateSSLContext(connection_key, _))
@@ -1234,6 +1488,21 @@ TEST_F(ProtocolHandlerImplTest,
 
   TestAsyncWaiter waiter;
   uint32_t times = 0;
+  // Expect verification of allowed transport
+  EXPECT_CALL(session_observer_mock,
+              TransportTypeProfileStringFromConnHandle(connection_id))
+      .WillOnce(Return("TCP_WIFI"));
+
+  std::vector<std::string> audio_service_transports;
+  audio_service_transports.push_back("TCP_WIFI");
+  std::vector<std::string> video_service_transports;
+  video_service_transports.push_back("TCP_WIFI");
+
+  EXPECT_CALL(protocol_handler_settings_mock, audio_service_transports())
+      .WillOnce(ReturnRef(audio_service_transports));
+  EXPECT_CALL(protocol_handler_settings_mock, video_service_transports())
+      .WillOnce(ReturnRef(video_service_transports));
+
   // Expect ConnectionHandler check
   EXPECT_CALL(session_observer_mock,
               OnSessionStartedCallback(connection_id,
@@ -1332,6 +1601,21 @@ TEST_F(
 
   TestAsyncWaiter waiter;
   uint32_t times = 0;
+  // Expect verification of allowed transport
+  EXPECT_CALL(session_observer_mock,
+              TransportTypeProfileStringFromConnHandle(connection_id))
+      .WillOnce(Return("TCP_WIFI"));
+
+  std::vector<std::string> audio_service_transports;
+  audio_service_transports.push_back("TCP_WIFI");
+  std::vector<std::string> video_service_transports;
+  video_service_transports.push_back("TCP_WIFI");
+
+  EXPECT_CALL(protocol_handler_settings_mock, audio_service_transports())
+      .WillOnce(ReturnRef(audio_service_transports));
+  EXPECT_CALL(protocol_handler_settings_mock, video_service_transports())
+      .WillOnce(ReturnRef(video_service_transports));
+
   // Expect ConnectionHandler check
   EXPECT_CALL(session_observer_mock,
               OnSessionStartedCallback(connection_id,
@@ -1428,6 +1712,21 @@ TEST_F(ProtocolHandlerImplTest,
 
   TestAsyncWaiter waiter;
   uint32_t times = 0;
+  // Expect verification of allowed transport
+  EXPECT_CALL(session_observer_mock,
+              TransportTypeProfileStringFromConnHandle(connection_id))
+      .WillOnce(Return("TCP_WIFI"));
+
+  std::vector<std::string> audio_service_transports;
+  audio_service_transports.push_back("TCP_WIFI");
+  std::vector<std::string> video_service_transports;
+  video_service_transports.push_back("TCP_WIFI");
+
+  EXPECT_CALL(protocol_handler_settings_mock, audio_service_transports())
+      .WillOnce(ReturnRef(audio_service_transports));
+  EXPECT_CALL(protocol_handler_settings_mock, video_service_transports())
+      .WillOnce(ReturnRef(video_service_transports));
+
   // Expect ConnectionHandler check
   EXPECT_CALL(session_observer_mock,
               OnSessionStartedCallback(connection_id,
@@ -1543,7 +1842,7 @@ void ProtocolHandlerImplTest::VerifySecondaryTransportParamsInStartSessionAck(
 
   const uint8_t input_protocol_version = 5;
   const uint32_t hash_id = 123456;
-  ProtocolPacket::ProtocolVersion full_version(5, 1, 0);
+  utils::SemanticVersion full_version(5, 1, 0);
   char full_version_string[] = "5.1.0";
 
   // configuration setup
@@ -1639,6 +1938,117 @@ void ProtocolHandlerImplTest::VerifySecondaryTransportParamsInStartSessionAck(
 
   bson_object_deinitialize(&expected_obj);
 
+  EXPECT_CALL(
+      transport_manager_mock,
+      SendMessageToDevice(ControlMessage(
+          FRAME_DATA_START_SERVICE_ACK, PROTECTION_OFF, connection_id, _)))
+      .WillOnce(DoAll(NotifyTestAsyncWaiter(&waiter), Return(E_SUCCESS)));
+  times++;
+
+#ifdef ENABLE_SECURITY
+  AddSecurityManager();
+
+  EXPECT_CALL(session_observer_mock, KeyFromPair(connection_id, session_id))
+      .WillOnce(Return(connection_key));
+
+  EXPECT_CALL(session_observer_mock, GetSSLContext(connection_key, kRpc))
+      .WillOnce(ReturnNull());
+#endif  // ENABLE_SECURITY
+
+  protocol_handler_impl->SendStartSessionAck(connection_id,
+                                             session_id,
+                                             input_protocol_version,
+                                             hash_id,
+                                             protocol_handler::SERVICE_TYPE_RPC,
+                                             false /* protection */,
+                                             full_version);
+
+  EXPECT_TRUE(waiter.WaitFor(times, kAsyncExpectationsTimeout));
+}
+
+void ProtocolHandlerImplTest::VerifyCloudAppParamsInStartSessionAck(
+    const std::string& policy_app_id, char* auth_token) {
+  const size_t maximum_rpc_payload_size = 1500;
+  EXPECT_CALL(protocol_handler_settings_mock, maximum_rpc_payload_size())
+      .WillRepeatedly(Return(maximum_rpc_payload_size));
+  InitProtocolHandlerImpl(0u, 0u);
+
+  TestAsyncWaiter waiter;
+  uint32_t times = 0;
+
+  const uint8_t input_protocol_version = 5;
+  const uint32_t hash_id = 123456;
+  utils::SemanticVersion full_version(5, 2, 0);
+  char full_version_string[] = "5.2.0";
+
+  // configuration setup
+  EXPECT_CALL(protocol_handler_settings_mock, max_supported_protocol_version())
+      .WillRepeatedly(Return(PROTOCOL_VERSION_5));
+  EXPECT_CALL(connection_handler_mock, GetCloudAppID(connection_id))
+      .WillOnce(Return(policy_app_id));
+  connection_handler::SessionTransports dummy_st = {0, 0};
+  EXPECT_CALL(connection_handler_mock,
+              SetSecondaryTransportID(_, kDisabledSecondary))
+      .WillOnce(Return(dummy_st));
+  EXPECT_CALL(protocol_handler_settings_mock, multiple_transports_enabled())
+      .WillRepeatedly(Return(false));
+  std::vector<std::string> empty_vec;
+  EXPECT_CALL(protocol_handler_settings_mock, audio_service_transports())
+      .WillRepeatedly(ReturnRef(empty_vec));
+  EXPECT_CALL(protocol_handler_settings_mock, video_service_transports())
+      .WillRepeatedly(ReturnRef(empty_vec));
+  EXPECT_CALL(session_observer_mock,
+              TransportTypeProfileStringFromConnHandle(connection_id))
+      .WillRepeatedly(Return("WEBSOCKET"));
+
+  // Prepare expected BSON parameters. When we add another param in Start
+  // Service ACK frame in future, it should be also added here.
+  BsonObject expected_obj;
+  bson_object_initialize_default(&expected_obj);
+
+  // mtu
+  bson_object_put_int64(&expected_obj,
+                        protocol_handler::strings::mtu,
+                        static_cast<int64_t>(maximum_rpc_payload_size));
+  // hashId
+  bson_object_put_int32(&expected_obj,
+                        protocol_handler::strings::hash_id,
+                        static_cast<int32_t>(hash_id));
+  // protocolVersion
+  bson_object_put_string(&expected_obj,
+                         protocol_handler::strings::protocol_version,
+                         full_version_string);
+
+  // secondaryTransports
+  BsonArray secondary_transports;
+  bson_array_initialize(&secondary_transports, 0);
+  bson_object_put_array(&expected_obj,
+                        protocol_handler::strings::secondary_transports,
+                        &secondary_transports);
+
+  BsonArray audio_service_transports;
+  bson_array_initialize(&audio_service_transports, 1);
+  bson_array_add_int32(&audio_service_transports, 1);
+  bson_object_put_array(&expected_obj,
+                        protocol_handler::strings::audio_service_transports,
+                        &audio_service_transports);
+
+  BsonArray video_service_transports;
+  bson_array_initialize(&video_service_transports, 1);
+  bson_array_add_int32(&video_service_transports, 1);
+  bson_object_put_array(&expected_obj,
+                        protocol_handler::strings::video_service_transports,
+                        &video_service_transports);
+
+  // authToken
+  bson_object_put_string(
+      &expected_obj, protocol_handler::strings::auth_token, auth_token);
+
+  std::vector<uint8_t> expected_param =
+      CreateVectorFromBsonObject(&expected_obj);
+
+  bson_object_deinitialize(&expected_obj);
+
   EXPECT_CALL(transport_manager_mock,
               SendMessageToDevice(ControlMessage(FRAME_DATA_START_SERVICE_ACK,
                                                  PROTECTION_OFF,
@@ -1657,6 +2067,8 @@ void ProtocolHandlerImplTest::VerifySecondaryTransportParamsInStartSessionAck(
       .WillOnce(ReturnNull());
 #endif  // ENABLE_SECURITY
 
+  protocol_handler_impl->OnAuthTokenUpdated(policy_app_id,
+                                            std::string(auth_token));
   protocol_handler_impl->SendStartSessionAck(connection_id,
                                              session_id,
                                              input_protocol_version,
@@ -2034,7 +2446,7 @@ TEST_F(ProtocolHandlerImplTest,
 
   const uint8_t input_protocol_version = 5;
   const uint32_t hash_id = 123456;
-  ProtocolPacket::ProtocolVersion full_version(5, 0, 0);
+  utils::SemanticVersion full_version(5, 0, 0);
   char full_version_string[] = "5.0.0";
 
   const size_t maximum_rpc_payload_size = 1500;
@@ -2187,6 +2599,18 @@ TEST_F(ProtocolHandlerImplTest, StartSessionAck_PrimaryTransportUSBHostMode) {
       expected_video_service_transports);
 }
 
+TEST_F(ProtocolHandlerImplTest, StartSessionAck_CloudAppAuthTokenAvailable) {
+  std::string policy_id = "policy_id";
+  char auth_token[] = "Sample auth token";
+
+  // A TransportUpdateEvent is also issued after Start Service ACK. We don't
+  // check it in this test case.
+  EXPECT_CALL(session_observer_mock, ProtocolVersionUsed(_, _, _))
+      .WillRepeatedly(Return(false));
+
+  VerifyCloudAppParamsInStartSessionAck(policy_id, auth_token);
+}
+
 TEST_F(ProtocolHandlerImplTest,
        TransportEventUpdate_afterVersionNegotiation_TCPEnabled) {
   TestAsyncWaiter waiter;
@@ -2194,7 +2618,7 @@ TEST_F(ProtocolHandlerImplTest,
 
   const uint8_t input_protocol_version = 5;
   const uint32_t hash_id = 123456;
-  ProtocolPacket::ProtocolVersion full_version(5, 1, 0);
+  utils::SemanticVersion full_version(5, 1, 0);
 
   const size_t maximum_rpc_payload_size = 1500;
   EXPECT_CALL(protocol_handler_settings_mock, maximum_rpc_payload_size())
@@ -2317,7 +2741,7 @@ TEST_F(ProtocolHandlerImplTest,
 
   const uint8_t input_protocol_version = 5;
   const uint32_t hash_id = 123456;
-  ProtocolPacket::ProtocolVersion full_version(5, 1, 0);
+  utils::SemanticVersion full_version(5, 1, 0);
 
   const size_t maximum_rpc_payload_size = 1500;
   EXPECT_CALL(protocol_handler_settings_mock, maximum_rpc_payload_size())
@@ -2653,8 +3077,7 @@ TEST_F(ProtocolHandlerImplTest, DISABLED_FloodVerification) {
   InitProtocolHandlerImpl(period_msec, max_messages);
   AddConnection();
 
-  ::utils::SharedPtr<TestAsyncWaiter> waiter =
-      utils::MakeShared<TestAsyncWaiter>();
+  std::shared_ptr<TestAsyncWaiter> waiter = std::make_shared<TestAsyncWaiter>();
   uint32_t times = 0;
 
   AddSession(waiter, times);
@@ -2691,8 +3114,7 @@ TEST_F(ProtocolHandlerImplTest, DISABLED_FloodVerification_ThresholdValue) {
   InitProtocolHandlerImpl(period_msec, max_messages);
   AddConnection();
 
-  ::utils::SharedPtr<TestAsyncWaiter> waiter =
-      utils::MakeShared<TestAsyncWaiter>();
+  std::shared_ptr<TestAsyncWaiter> waiter = std::make_shared<TestAsyncWaiter>();
   uint32_t times = 0;
 
   AddSession(waiter, times);
@@ -2728,8 +3150,7 @@ TEST_F(ProtocolHandlerImplTest, DISABLED_FloodVerification_VideoFrameSkip) {
   InitProtocolHandlerImpl(period_msec, max_messages);
   AddConnection();
 
-  ::utils::SharedPtr<TestAsyncWaiter> waiter =
-      utils::MakeShared<TestAsyncWaiter>();
+  std::shared_ptr<TestAsyncWaiter> waiter = std::make_shared<TestAsyncWaiter>();
   uint32_t times = 0;
 
   AddSession(waiter, times);
@@ -2757,8 +3178,7 @@ TEST_F(ProtocolHandlerImplTest, DISABLED_FloodVerification_AudioFrameSkip) {
   InitProtocolHandlerImpl(period_msec, max_messages);
   AddConnection();
 
-  ::utils::SharedPtr<TestAsyncWaiter> waiter =
-      utils::MakeShared<TestAsyncWaiter>();
+  std::shared_ptr<TestAsyncWaiter> waiter = std::make_shared<TestAsyncWaiter>();
   uint32_t times = 0;
 
   AddSession(waiter, times);
@@ -2786,8 +3206,7 @@ TEST_F(ProtocolHandlerImplTest, DISABLED_FloodVerificationDisable) {
   InitProtocolHandlerImpl(period_msec, max_messages);
   AddConnection();
 
-  ::utils::SharedPtr<TestAsyncWaiter> waiter =
-      utils::MakeShared<TestAsyncWaiter>();
+  std::shared_ptr<TestAsyncWaiter> waiter = std::make_shared<TestAsyncWaiter>();
   uint32_t times = 0;
 
   AddSession(waiter, times);
@@ -2815,8 +3234,7 @@ TEST_F(ProtocolHandlerImplTest, MalformedVerificationDisable) {
   InitProtocolHandlerImpl(0u, 0u, false, period_msec, max_messages);
   AddConnection();
 
-  ::utils::SharedPtr<TestAsyncWaiter> waiter =
-      utils::MakeShared<TestAsyncWaiter>();
+  std::shared_ptr<TestAsyncWaiter> waiter = std::make_shared<TestAsyncWaiter>();
   uint32_t times = 0;
 
   AddSession(waiter, times);
@@ -2848,8 +3266,7 @@ TEST_F(ProtocolHandlerImplTest, DISABLED_MalformedLimitVerification) {
   InitProtocolHandlerImpl(0u, 0u, true, period_msec, max_messages);
   AddConnection();
 
-  ::utils::SharedPtr<TestAsyncWaiter> waiter =
-      utils::MakeShared<TestAsyncWaiter>();
+  std::shared_ptr<TestAsyncWaiter> waiter = std::make_shared<TestAsyncWaiter>();
   uint32_t times = 0;
 
   AddSession(waiter, times);
@@ -2896,8 +3313,7 @@ TEST_F(ProtocolHandlerImplTest,
   InitProtocolHandlerImpl(0u, 0u, true, period_msec, max_messages);
   AddConnection();
 
-  ::utils::SharedPtr<TestAsyncWaiter> waiter =
-      utils::MakeShared<TestAsyncWaiter>();
+  std::shared_ptr<TestAsyncWaiter> waiter = std::make_shared<TestAsyncWaiter>();
   uint32_t times = 0;
 
   AddSession(waiter, times);
@@ -2968,8 +3384,7 @@ TEST_F(ProtocolHandlerImplTest, MalformedLimitVerification_MalformedOnly) {
   InitProtocolHandlerImpl(0u, 0u, true, period_msec, max_messages);
   AddConnection();
 
-  ::utils::SharedPtr<TestAsyncWaiter> waiter =
-      utils::MakeShared<TestAsyncWaiter>();
+  std::shared_ptr<TestAsyncWaiter> waiter = std::make_shared<TestAsyncWaiter>();
   uint32_t times = 0;
 
   AddSession(waiter, times);
@@ -3029,8 +3444,7 @@ TEST_F(ProtocolHandlerImplTest, MalformedLimitVerification_NullTimePeriod) {
   InitProtocolHandlerImpl(0u, 0u, true, period_msec, max_messages);
   AddConnection();
 
-  ::utils::SharedPtr<TestAsyncWaiter> waiter =
-      utils::MakeShared<TestAsyncWaiter>();
+  std::shared_ptr<TestAsyncWaiter> waiter = std::make_shared<TestAsyncWaiter>();
   uint32_t times = 0;
 
   AddSession(waiter, times);
@@ -3063,8 +3477,7 @@ TEST_F(ProtocolHandlerImplTest, MalformedLimitVerification_NullCount) {
   InitProtocolHandlerImpl(0u, 0u, true, period_msec, max_messages);
   AddConnection();
 
-  ::utils::SharedPtr<TestAsyncWaiter> waiter =
-      utils::MakeShared<TestAsyncWaiter>();
+  std::shared_ptr<TestAsyncWaiter> waiter = std::make_shared<TestAsyncWaiter>();
   uint32_t times = 0;
 
   AddSession(waiter, times);
@@ -3107,8 +3520,7 @@ TEST_F(ProtocolHandlerImplTest,
 TEST_F(ProtocolHandlerImplTest,
        DISABLED_SendEndServicePrivate_EndSession_MessageSent) {
   // Arrange
-  ::utils::SharedPtr<TestAsyncWaiter> waiter =
-      utils::MakeShared<TestAsyncWaiter>();
+  std::shared_ptr<TestAsyncWaiter> waiter = std::make_shared<TestAsyncWaiter>();
   uint32_t times = 0;
 
   AddSession(waiter, times);
@@ -3132,8 +3544,7 @@ TEST_F(ProtocolHandlerImplTest,
 TEST_F(ProtocolHandlerImplTest,
        SendEndServicePrivate_ServiceTypeControl_MessageSent) {
   // Arrange
-  ::utils::SharedPtr<TestAsyncWaiter> waiter =
-      utils::MakeShared<TestAsyncWaiter>();
+  std::shared_ptr<TestAsyncWaiter> waiter = std::make_shared<TestAsyncWaiter>();
   uint32_t times = 0;
 
   AddSession(waiter, times);
@@ -3172,8 +3583,7 @@ TEST_F(ProtocolHandlerImplTest, SendHeartBeat_NoConnection_NotSent) {
 
 TEST_F(ProtocolHandlerImplTest, SendHeartBeat_Successful) {
   // Arrange
-  ::utils::SharedPtr<TestAsyncWaiter> waiter =
-      utils::MakeShared<TestAsyncWaiter>();
+  std::shared_ptr<TestAsyncWaiter> waiter = std::make_shared<TestAsyncWaiter>();
   uint32_t times = 0;
 
   AddSession(waiter, times);
@@ -3198,8 +3608,7 @@ TEST_F(ProtocolHandlerImplTest, SendHeartBeat_Successful) {
 
 TEST_F(ProtocolHandlerImplTest, SendHeartBeatAck_Successful) {
   // Arrange
-  ::utils::SharedPtr<TestAsyncWaiter> waiter =
-      utils::MakeShared<TestAsyncWaiter>();
+  std::shared_ptr<TestAsyncWaiter> waiter = std::make_shared<TestAsyncWaiter>();
   uint32_t times = 0;
 
   AddSession(waiter, times);
@@ -3228,8 +3637,7 @@ TEST_F(ProtocolHandlerImplTest, SendHeartBeatAck_Successful) {
 TEST_F(ProtocolHandlerImplTest,
        DISABLED_SendHeartBeatAck_WrongProtocolVersion_NotSent) {
   // Arrange
-  ::utils::SharedPtr<TestAsyncWaiter> waiter =
-      utils::MakeShared<TestAsyncWaiter>();
+  std::shared_ptr<TestAsyncWaiter> waiter = std::make_shared<TestAsyncWaiter>();
   uint32_t times = 0;
 
   AddSession(waiter, times);
@@ -3245,7 +3653,8 @@ TEST_F(ProtocolHandlerImplTest,
               SendMessageToDevice(ExpectedMessage(FRAME_TYPE_CONTROL,
                                                   FRAME_DATA_HEART_BEAT_ACK,
                                                   PROTECTION_OFF,
-                                                  kControl))).Times(0);
+                                                  kControl)))
+      .Times(0);
   // Act
   SendControlMessage(
       PROTECTION_OFF, kControl, session_id, FRAME_DATA_HEART_BEAT);
@@ -3258,8 +3667,7 @@ TEST_F(ProtocolHandlerImplTest,
 TEST_F(ProtocolHandlerImplTest,
        SendMessageToMobileApp_SendSingleControlMessage) {
   // Arrange
-  ::utils::SharedPtr<TestAsyncWaiter> waiter =
-      utils::MakeShared<TestAsyncWaiter>();
+  std::shared_ptr<TestAsyncWaiter> waiter = std::make_shared<TestAsyncWaiter>();
   uint32_t times = 0;
 
   AddSession(waiter, times);
@@ -3267,8 +3675,12 @@ TEST_F(ProtocolHandlerImplTest,
   const bool is_final = true;
   const uint32_t total_data_size = 1;
   UCharDataVector data(total_data_size);
-  RawMessagePtr message = utils::MakeShared<RawMessage>(
-      connection_key, PROTOCOL_VERSION_3, &data[0], total_data_size, kControl);
+  RawMessagePtr message = std::make_shared<RawMessage>(connection_key,
+                                                       PROTOCOL_VERSION_3,
+                                                       &data[0],
+                                                       total_data_size,
+                                                       false,
+                                                       kControl);
   // Expect getting pair from key from session observer
   EXPECT_CALL(session_observer_mock,
               PairFromKey(message->connection_key(), _, _))
@@ -3289,7 +3701,7 @@ TEST_F(ProtocolHandlerImplTest,
   times++;
 
   // Act
-  protocol_handler_impl->SendMessageToMobileApp(message, is_final);
+  protocol_handler_impl->SendMessageToMobileApp(message, false, is_final);
 
   EXPECT_TRUE(waiter->WaitFor(times, kAsyncExpectationsTimeout));
 }
@@ -3297,8 +3709,7 @@ TEST_F(ProtocolHandlerImplTest,
 TEST_F(ProtocolHandlerImplTest,
        SendMessageToMobileApp_SendSingleNonControlMessage) {
   // Arrange
-  ::utils::SharedPtr<TestAsyncWaiter> waiter =
-      utils::MakeShared<TestAsyncWaiter>();
+  std::shared_ptr<TestAsyncWaiter> waiter = std::make_shared<TestAsyncWaiter>();
   uint32_t times = 0;
 
   AddSession(waiter, times);
@@ -3306,8 +3717,12 @@ TEST_F(ProtocolHandlerImplTest,
   const bool is_final = true;
   const uint32_t total_data_size = 1;
   UCharDataVector data(total_data_size);
-  RawMessagePtr message = utils::MakeShared<RawMessage>(
-      connection_key, PROTOCOL_VERSION_3, &data[0], total_data_size, kRpc);
+  RawMessagePtr message = std::make_shared<RawMessage>(connection_key,
+                                                       PROTOCOL_VERSION_3,
+                                                       &data[0],
+                                                       total_data_size,
+                                                       false,
+                                                       kRpc);
   // Expect getting pair from key from session observer
   EXPECT_CALL(session_observer_mock,
               PairFromKey(message->connection_key(), _, _))
@@ -3333,15 +3748,14 @@ TEST_F(ProtocolHandlerImplTest,
   times++;
 
   // Act
-  protocol_handler_impl->SendMessageToMobileApp(message, is_final);
+  protocol_handler_impl->SendMessageToMobileApp(message, false, is_final);
 
   EXPECT_TRUE(waiter->WaitFor(times, kAsyncExpectationsTimeout));
 }
 
 TEST_F(ProtocolHandlerImplTest, SendMessageToMobileApp_SendMultiframeMessage) {
   // Arrange
-  ::utils::SharedPtr<TestAsyncWaiter> waiter =
-      utils::MakeShared<TestAsyncWaiter>();
+  std::shared_ptr<TestAsyncWaiter> waiter = std::make_shared<TestAsyncWaiter>();
   uint32_t times = 0;
 
   AddSession(waiter, times);
@@ -3350,8 +3764,12 @@ TEST_F(ProtocolHandlerImplTest, SendMessageToMobileApp_SendMultiframeMessage) {
   const uint32_t total_data_size = MAXIMUM_FRAME_DATA_V2_SIZE * 2;
   UCharDataVector data(total_data_size);
   const uint8_t first_consecutive_frame = 0x01;
-  RawMessagePtr message = utils::MakeShared<RawMessage>(
-      connection_key, PROTOCOL_VERSION_3, &data[0], total_data_size, kBulk);
+  RawMessagePtr message = std::make_shared<RawMessage>(connection_key,
+                                                       PROTOCOL_VERSION_3,
+                                                       &data[0],
+                                                       total_data_size,
+                                                       false,
+                                                       kBulk);
   // Expect getting pair from key from session observer
   EXPECT_CALL(session_observer_mock,
               PairFromKey(message->connection_key(), _, _))
@@ -3389,14 +3807,13 @@ TEST_F(ProtocolHandlerImplTest, SendMessageToMobileApp_SendMultiframeMessage) {
   times++;
 
   // Act
-  protocol_handler_impl->SendMessageToMobileApp(message, is_final);
+  protocol_handler_impl->SendMessageToMobileApp(message, false, is_final);
 
   EXPECT_TRUE(waiter->WaitFor(times, kAsyncExpectationsTimeout));
 }
 
 TEST_F(ProtocolHandlerImplTest, SendServiceDataAck_PreVersion5) {
-  ::utils::SharedPtr<TestAsyncWaiter> waiter =
-      utils::MakeShared<TestAsyncWaiter>();
+  std::shared_ptr<TestAsyncWaiter> waiter = std::make_shared<TestAsyncWaiter>();
   uint32_t times = 0;
 
   AddSession(waiter, times);
@@ -3422,8 +3839,7 @@ TEST_F(ProtocolHandlerImplTest, SendServiceDataAck_PreVersion5) {
 }
 
 TEST_F(ProtocolHandlerImplTest, SendServiceDataAck_AfterVersion5) {
-  ::utils::SharedPtr<TestAsyncWaiter> waiter =
-      utils::MakeShared<TestAsyncWaiter>();
+  std::shared_ptr<TestAsyncWaiter> waiter = std::make_shared<TestAsyncWaiter>();
   uint32_t times = 0;
 
   AddSession(waiter, times);
@@ -3440,7 +3856,8 @@ TEST_F(ProtocolHandlerImplTest, SendServiceDataAck_AfterVersion5) {
               SendMessageToDevice(ExpectedMessage(FRAME_TYPE_CONTROL,
                                                   FRAME_DATA_SERVICE_DATA_ACK,
                                                   PROTECTION_OFF,
-                                                  kMobileNav))).Times(0);
+                                                  kMobileNav)))
+      .Times(0);
 
   protocol_handler_impl->SendFramesNumber(connection_key, 0);
 

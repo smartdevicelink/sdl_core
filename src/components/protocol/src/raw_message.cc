@@ -40,12 +40,14 @@ RawMessage::RawMessage(uint32_t connection_key,
                        uint32_t protocol_version,
                        const uint8_t* const data_param,
                        uint32_t data_sz,
+                       bool protection,
                        uint8_t type,
                        uint32_t payload_size)
     : connection_key_(connection_key)
     , data_(NULL)
     , data_size_(data_sz)
     , protocol_version_(protocol_version)
+    , protection_(protection)
     , service_type_(ServiceTypeFromByte(type))
     , payload_size_(payload_size)
     , waiting_(false) {
@@ -85,6 +87,10 @@ uint32_t RawMessage::protocol_version() const {
 
 bool RawMessage::IsWaiting() const {
   return waiting_;
+}
+
+bool RawMessage::protection_flag() const {
+  return protection_;
 }
 
 void RawMessage::set_waiting(bool v) {

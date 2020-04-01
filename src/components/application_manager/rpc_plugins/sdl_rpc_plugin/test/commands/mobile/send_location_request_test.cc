@@ -32,11 +32,11 @@
 #include <stdint.h>
 #include <string>
 
-#include "gtest/gtest.h"
-#include "mobile/send_location_request.h"
 #include "application_manager/mock_hmi_capabilities.h"
 #include "application_manager/mock_message_helper.h"
-#include "utils/shared_ptr.h"
+#include "gtest/gtest.h"
+#include "mobile/send_location_request.h"
+
 #include "application_manager/commands/command_request_test.h"
 
 namespace test {
@@ -45,12 +45,12 @@ namespace commands_test {
 namespace mobile_commands_test {
 namespace send_location_request {
 
+using application_manager::MockMessageHelper;
 using application_manager::commands::MessageSharedPtr;
 using sdl_rpc_plugin::commands::SendLocationRequest;
-using application_manager::MockMessageHelper;
-using test::components::application_manager_test::MockHMICapabilities;
 using smart_objects::SmartObject;
-using utils::SharedPtr;
+using test::components::application_manager_test::MockHMICapabilities;
+
 using testing::_;
 using testing::Return;
 using testing::ReturnRef;
@@ -95,11 +95,11 @@ class SendLocationRequestTest
     }
   };
 
-  typedef SharedPtr<UnwrappedSendLocationRequest> CommandSPrt;
+  typedef std::shared_ptr<UnwrappedSendLocationRequest> CommandSPrt;
 
   SendLocationRequestTest() {
     mock_app_ = CreateMockApp();
-    disp_cap_ = utils::MakeShared<SmartObject>(smart_objects::SmartType_Map);
+    disp_cap_ = std::make_shared<SmartObject>(smart_objects::SmartType_Map);
     message_ = CreateMessage();
     command_ = CreateCommand<UnwrappedSendLocationRequest>(message_);
   }
@@ -110,6 +110,8 @@ class SendLocationRequestTest
     (*message_)[strings::msg_params] =
         SmartObject(smart_objects::SmartType_Map);
     (*message_)[strings::msg_params][strings::address] = kCorrectAddress;
+    ON_CALL(mock_hmi_capabilities_, display_capabilities())
+        .WillByDefault(Return(smart_objects::SmartObjectSPtr()));
     EXPECT_CALL(app_mngr_, application(kConnectionKey))
         .WillOnce(Return(mock_app_));
 
@@ -130,22 +132,22 @@ class SendLocationRequestTest
         SmartObject(smart_objects::SmartType_Map);
     (*disp_cap_)[hmi_response::text_fields][0][strings::name] = field_name;
     EXPECT_CALL(mock_hmi_capabilities_, display_capabilities())
-        .Times(2)
-        .WillRepeatedly(Return(disp_cap_.get()));
+        .WillOnce(Return(disp_cap_));
   }
 
   void FinishSetup() {
     EXPECT_CALL(*mock_app_, hmi_app_id()).WillOnce(Return(kAppID));
 
-    EXPECT_CALL(mock_rpc_service_,
-                ManageHMICommand(HMIResultCodeIs(
-                    hmi_apis::FunctionID::Navigation_SendLocation)));
+    EXPECT_CALL(
+        mock_rpc_service_,
+        ManageHMICommand(
+            HMIResultCodeIs(hmi_apis::FunctionID::Navigation_SendLocation), _));
   }
 
   void FinishSetupCancelled(mobile_apis::Result::eType result) {
     EXPECT_CALL(*mock_app_, hmi_app_id()).Times(0);
 
-    EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_)).Times(0);
+    EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_, _)).Times(0);
     EXPECT_CALL(mock_rpc_service_,
                 ManageMobileCommand(MobileResultCodeIs(result), _));
   }
@@ -158,7 +160,7 @@ class SendLocationRequestTest
   }
 
   MockAppPtr mock_app_;
-  SharedPtr<SmartObject> disp_cap_;
+  std::shared_ptr<SmartObject> disp_cap_;
   MessageSharedPtr message_;
   CommandSPrt command_;
 };
@@ -315,6 +317,21 @@ TEST_F(SendLocationRequestTest, Run_LocationImageValid_Success) {
   command_->Run();
 }
 
+TEST_F(SendLocationRequestTest, Run_LocationImageValid_Warnings) {
+  InitialSetup(message_);
+  (*message_)[strings::msg_params][strings::location_image] =
+      SmartObject(smart_objects::SmartType_Map);
+  (*message_)[strings::msg_params][strings::location_image][strings::value] =
+      "notavailable";
+  EXPECT_CALL(
+      mock_message_helper_,
+      VerifyImage(
+          (*message_)[strings::msg_params][strings::location_image], _, _))
+      .WillOnce(Return(mobile_apis::Result::WARNINGS));
+  FinishSetup();
+  command_->Run();
+}
+
 TEST_F(SendLocationRequestTest, Run_LocationImageInvalid_Cancelled) {
   InitialSetup(message_);
   (*message_)[strings::msg_params][strings::location_image] =
@@ -325,8 +342,8 @@ TEST_F(SendLocationRequestTest, Run_LocationImageInvalid_Cancelled) {
       mock_message_helper_,
       VerifyImage(
           (*message_)[strings::msg_params][strings::location_image], _, _))
-      .WillOnce(Return(mobile_apis::Result::ABORTED));
-  FinishSetupCancelled(mobile_apis::Result::ABORTED);
+      .WillOnce(Return(mobile_apis::Result::INVALID_DATA));
+  FinishSetupCancelled(mobile_apis::Result::INVALID_DATA);
   command_->Run();
 }
 

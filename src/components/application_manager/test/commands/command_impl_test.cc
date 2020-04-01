@@ -31,39 +31,38 @@
  */
 
 #include <stdint.h>
-#include <string>
 #include <algorithm>
 #include <functional>
 #include <set>
+#include <string>
 
 #include "gtest/gtest.h"
-#include "utils/shared_ptr.h"
-#include "smart_objects/smart_object.h"
-#include "application_manager/smart_object_keys.h"
-#include "application_manager/commands/commands_test.h"
+
+#include "application_manager/application_manager.h"
 #include "application_manager/commands/command.h"
 #include "application_manager/commands/command_impl.h"
-#include "application_manager/application_manager.h"
+#include "application_manager/commands/commands_test.h"
 #include "application_manager/mock_application.h"
+#include "application_manager/smart_object_keys.h"
+#include "smart_objects/smart_object.h"
 
 namespace test {
 namespace components {
 namespace commands_test {
 namespace command_impl {
 
-using ::testing::Return;
-using ::testing::AtLeast;
 using ::testing::_;
+using ::testing::AtLeast;
+using ::testing::Return;
 
-using ::utils::SharedPtr;
 namespace strings = ::application_manager::strings;
-using ::application_manager::commands::CommandImpl;
 using ::application_manager::ApplicationManager;
-using ::application_manager::commands::MessageSharedPtr;
 using ::application_manager::ApplicationSharedPtr;
+using ::application_manager::commands::CommandImpl;
+using ::application_manager::commands::MessageSharedPtr;
 using ::test::components::application_manager_test::MockApplication;
 
-typedef SharedPtr<MockApplication> MockAppPtr;
+typedef std::shared_ptr<MockApplication> MockAppPtr;
 
 namespace {
 const uint32_t kDefaultMsgCount = 5u;
@@ -83,14 +82,15 @@ class CommandImplTest : public CommandsTest<CommandsTestMocks::kIsNice> {
  public:
   class UnwrappedCommandImpl : CommandImpl {
    public:
-    using CommandImpl::ReplaceMobileWithHMIAppId;
     using CommandImpl::ReplaceHMIWithMobileAppId;
+    using CommandImpl::ReplaceMobileWithHMIAppId;
 
-    UnwrappedCommandImpl(const MessageSharedPtr& message,
-                         ApplicationManager& application_manager,
-                         app_mngr::rpc_service::RPCService& rpc_service,
-                         app_mngr::HMICapabilities& hmi_capabilities,
-                         policy::PolicyHandlerInterface& policy_handler)
+    UnwrappedCommandImpl(
+        const MessageSharedPtr& message,
+        ApplicationManager& application_manager,
+        application_manager::rpc_service::RPCService& rpc_service,
+        application_manager::HMICapabilities& hmi_capabilities,
+        policy::PolicyHandlerInterface& policy_handler)
         : CommandImpl(message,
                       application_manager,
                       rpc_service,
@@ -125,11 +125,11 @@ class CommandImplTest : public CommandsTest<CommandsTestMocks::kIsNice> {
 };
 
 typedef CommandImplTest::UnwrappedCommandImpl UCommandImpl;
-typedef SharedPtr<UCommandImpl> UCommandImplPtr;
+typedef std::shared_ptr<UCommandImpl> UCommandImplPtr;
 
 TEST_F(CommandImplTest, GetMethods_SUCCESS) {
   MessageSharedPtr msg;
-  SharedPtr<CommandImpl> command =
+  std::shared_ptr<CommandImpl> command =
       CreateCommand<CommandImpl>(kDefaultTimeout_, msg);
 
   // Current implementation always return `true`

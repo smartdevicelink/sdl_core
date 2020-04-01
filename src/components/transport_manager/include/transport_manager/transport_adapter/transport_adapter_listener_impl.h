@@ -2,9 +2,6 @@
  * Copyright (c) 2014, Ford Motor Company
  * All rights reserved.
  *
- * Copyright (c) 2018 Xevo Inc.
- * All rights reserved.
- *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *
@@ -16,7 +13,7 @@
  * disclaimer in the documentation and/or other materials provided with the
  * distribution.
  *
- * Neither the name of the copyright holders nor the names of its contributors
+ * Neither the name of the Ford Motor Company nor the names of its contributors
  * may be used to endorse or promote products derived from this software
  * without specific prior written permission.
  *
@@ -37,8 +34,8 @@
 #define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_ADAPTER_TRANSPORT_ADAPTER_LISTENER_IMPL_H_
 
 #include "transport_manager/common.h"
-#include "transport_manager/transport_adapter/transport_adapter_listener.h"
 #include "transport_manager/transport_adapter/transport_adapter.h"
+#include "transport_manager/transport_adapter/transport_adapter_listener.h"
 #include "transport_manager/transport_manager.h"
 
 namespace transport_manager {
@@ -89,6 +86,24 @@ class TransportAdapterListenerImpl
   virtual void OnDeviceListUpdated(const TransportAdapter* adapter);
 
   virtual void OnFindNewApplicationsRequest(const TransportAdapter* adapter);
+
+  /**
+   * @brief Passes notification to that the cloud conection status has updated
+   */
+  virtual void OnConnectionStatusUpdated(const TransportAdapter* adapter);
+
+  /**
+   * @brief Search specified device adapter in the container of shared pointers
+   * to device adapters to be sure it is available,
+   * launch event ON_CONNECT_PENDING in transport manager.
+   *
+   * @param device_adater Pointer to the device adapter.
+   * @param device_handle Device unique identifier.
+   * @param app_id Handle of application.
+   */
+  virtual void OnConnectPending(const TransportAdapter* adapter,
+                                const DeviceUID& device_handle,
+                                const ApplicationHandle& app_id);
 
   /**
    * @brief Search specified device adapter in the container of shared pointers

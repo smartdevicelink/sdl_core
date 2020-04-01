@@ -33,12 +33,12 @@
 #include <stdint.h>
 #include <string>
 
-#include "gtest/gtest.h"
-#include "application_manager/commands/commands_test.h"
 #include "application_manager/commands/command_request_test.h"
-#include "application_manager/mock_hmi_capabilities.h"
+#include "application_manager/commands/commands_test.h"
 #include "application_manager/mock_application_manager.h"
 #include "application_manager/mock_event_dispatcher.h"
+#include "application_manager/mock_hmi_capabilities.h"
+#include "gtest/gtest.h"
 #include "hmi/navi_is_ready_response.h"
 
 namespace test {
@@ -46,16 +46,15 @@ namespace components {
 namespace commands_test {
 namespace hmi_commands_test {
 namespace navi_is_ready_responce {
-
 namespace am = ::application_manager;
 namespace commands = sdl_rpc_plugin::commands;
 
 using ::testing::ReturnRef;
-using ::utils::SharedPtr;
+
 using application_manager::commands::ResponseFromHMI;
 using test::components::event_engine_test::MockEventDispatcher;
 
-typedef SharedPtr<ResponseFromHMI> ResponseFromHMIPtr;
+typedef std::shared_ptr<ResponseFromHMI> ResponseFromHMIPtr;
 
 class NaviIsReadyResponseTest
     : public CommandRequestTest<CommandsTestMocks::kIsNice> {};

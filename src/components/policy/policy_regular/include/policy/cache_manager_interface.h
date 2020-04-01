@@ -35,12 +35,13 @@
 
 #include <string>
 #include <vector>
+#include "boost/optional.hpp"
 
-#include "utils/shared_ptr.h"
-#include "policy/usage_statistics/counter.h"
-#include "policy/policy_types.h"
 #include "policy/policy_settings.h"
 #include "policy/policy_table/types.h"
+#include "policy/policy_types.h"
+#include "policy/usage_statistics/counter.h"
+#include "utils/optional.h"
 
 namespace policy_table = rpc::policy_table_interface_base;
 
@@ -148,10 +149,137 @@ class CacheManagerInterface {
   virtual bool SecondsBetweenRetries(std::vector<int>& seconds) = 0;
 
   /**
-   * @brief Get information about vehicle
+   * @brief Gets copy of current policy table data
+   * @return policy_table as json object
    */
-  virtual const VehicleInfo GetVehicleInfo() const = 0;
+  virtual Json::Value GetPolicyTableData() const = 0;
 
+  /**
+   * @brief Gets vehicle data items
+   * @return Structure with vehicle data items
+   */
+  virtual const std::vector<policy_table::VehicleDataItem> GetVehicleDataItems()
+      const = 0;
+
+  /**
+   * @brief Gets vehicle data items removed after the last PTU
+   * @return List of removed vehicle data items
+   */
+  virtual std::vector<policy_table::VehicleDataItem>
+  GetRemovedVehicleDataItems() const = 0;
+
+  /**
+   * @brief Get a list of enabled cloud applications
+   * @param enabled_apps List filled with the policy app id of each enabled
+   * cloud application
+   */
+  virtual void GetEnabledCloudApps(
+      std::vector<std::string>& enabled_apps) const = 0;
+
+  /**
+   * @brief Get a list of enabled local applications
+   * @return enabled_apps List filled with the policy app id of each enabled
+   * local application
+   */
+  virtual std::vector<std::string> GetEnabledLocalApps() const = 0;
+
+  /**
+   * @brief Get app policy information, all fields that aren't set for a
+   * given app will be filled with empty strings
+   * @param policy_app_id policy app id
+   * @param out_app_properties application properties
+   * @return true if application presents in database, otherwise - false
+   */
+  virtual bool GetAppProperties(const std::string& policy_app_id,
+                                AppProperties& out_app_properties) const = 0;
+
+  /**
+   * Initializes a new cloud application with default policies
+   * Then adds cloud specific policies
+   * @param app_id application id
+   * @return true if success
+   */
+  virtual void InitCloudApp(const std::string& policy_app_id) = 0;
+
+  /**
+   * @brief Enable or disable a cloud application in the HMI
+   * @param enabled Cloud app enabled state
+   */
+  virtual void SetCloudAppEnabled(const std::string& policy_app_id,
+                                  const bool enabled) = 0;
+
+  /**
+   * @brief Set an app's auth token
+   * @param auth_token Cloud app authentication token
+   */
+  virtual void SetAppAuthToken(const std::string& policy_app_id,
+                               const std::string& auth_token) = 0;
+
+  /**
+   * @brief Set a cloud app's transport type
+   * @param cloud_transport_type Cloud app transport type
+   */
+  virtual void SetAppCloudTransportType(
+      const std::string& policy_app_id,
+      const std::string& cloud_transport_type) = 0;
+
+  /**
+   * @brief Set a cloud app's endpoint url
+   * @param endpoint URL for websocket connection
+   */
+  virtual void SetAppEndpoint(const std::string& policy_app_id,
+                              const std::string& endpoint) = 0;
+
+  /**
+   * @brief Set a cloud app's nicknames
+   * @param nicknames Nicknames for cloud app
+   */
+  virtual void SetAppNicknames(const std::string& policy_app_id,
+                               const StringArray& nicknames) = 0;
+  /**
+   * @brief Set the user preference for how a hybrid (cloud and mobile) app
+   * should be used
+   * @param hybrid_app_preference Hybrid app user preference
+   */
+  virtual void SetHybridAppPreference(
+      const std::string& policy_app_id,
+      const std::string& hybrid_app_preference) = 0;
+
+  /**
+   * @brief Get app service parameters from the policy table
+   * @param policy_app_id Unique application id
+   * @param app_service_parameters Pointer to struct containing all app service
+   * information
+   */
+  virtual void GetAppServiceParameters(
+      const std::string& policy_app_id,
+      policy_table::AppServiceParameters* app_service_parameters) const = 0;
+
+  /**
+   * @brief Check if an app can send unknown rpc requests to an app service
+   * provider
+   * @param policy_app_id Unique application id
+   */
+  virtual bool UnknownRPCPassthroughAllowed(
+      const std::string& policy_app_id) const = 0;
+
+  /**
+   * @brief Returns state of the lock screen that could be able to be dismissed
+   * while connected to SDL, allowing users the ability to interact with the
+   * app.
+   * @return bool True if lock screen can be dismissed.
+   */
+  virtual const boost::optional<bool> LockScreenDismissalEnabledState()
+      const = 0;
+
+  /**
+   * @brief Returns lock screen warning message. In case when specified language
+   * is absent in policy table will be returned message on default language
+   * ("en-us"). Otherwise returns uninitialized boost::optional<std::string>
+   * @return std::string Lock screen warning message
+   */
+  virtual const boost::optional<std::string> LockScreenDismissalWarningMessage(
+      const std::string& language_code) const = 0;
   /**
    * @brief Allows to update 'vin' field in module_meta table.
    *
@@ -172,7 +300,7 @@ class CacheManagerInterface {
    */
   virtual std::vector<UserFriendlyMessage> GetUserFriendlyMsg(
       const std::vector<std::string>& msg_codes,
-      const std::string& language) = 0;
+      const std::string& language) const = 0;
 
   /**
    * @brief Get list of URLs related to particular service
@@ -180,17 +308,18 @@ class CacheManagerInterface {
    * return them otherwise default URLs.
    */
   virtual void GetUpdateUrls(const std::string& service_type,
-                             EndpointUrls& out_end_points) = 0;
+                             EndpointUrls& out_end_points) const = 0;
   virtual void GetUpdateUrls(const uint32_t service_type,
-                             EndpointUrls& out_end_points) = 0;
+                             EndpointUrls& out_end_points) const = 0;
 
   /**
-   * @brief GetLockScreenIcon allows to obtain lock screen icon url;
+   * @brief Get Icon Url used for showing a cloud apps icon before the intial
+   *registration
    *
-   * @return url which point to the resourse where lock screen icon could be
+   * @return url which point to the resourse where icon could be
    *obtained.
    */
-  virtual std::string GetLockScreenIconUrl() const = 0;
+  virtual std::string GetIconUrl(const std::string& policy_app_id) const = 0;
 
   /**
    * @brief Get allowed number of notifications
@@ -222,7 +351,7 @@ class CacheManagerInterface {
    * device_info, statistics, excluding user messages
    * @return Generated structure for obtaining Json string.
    */
-  virtual utils::SharedPtr<policy_table::Table> GenerateSnapshot() = 0;
+  virtual std::shared_ptr<policy_table::Table> GenerateSnapshot() = 0;
 
   /**
    * Applies policy table to the current table
@@ -289,6 +418,12 @@ class CacheManagerInterface {
       policy_table::FunctionalGroupings& groups) = 0;
 
   /**
+   * @brief Get policy app names from PT
+   * @return container of strings representing policy application names
+   */
+  virtual const policy_table::Strings GetPolicyAppIDs() const = 0;
+
+  /**
    * Checks if the application is represented in policy table
    * @param app_id application id
    * @return true if application is represented in policy table
@@ -349,10 +484,10 @@ class CacheManagerInterface {
                              std::string& default_hmi) const = 0;
 
   /**
-    * Gets HMI types from specific policy
-    * @param app_id ID application
-    * @return list of HMI types
-    */
+   * Gets HMI types from specific policy
+   * @param app_id ID application
+   * @return list of HMI types
+   */
   virtual const policy_table::AppHMITypes* GetHMITypes(
       const std::string& app_id) = 0;
 
@@ -670,12 +805,12 @@ class CacheManagerInterface {
   virtual std::string GetCertificate() const = 0;
 
   /**
-   * @brief pt allows to obtain SharedPtr to PT.
+   * @brief pt allows to obtain std::shared_ptr to PT.
    * Used ONLY in Unit tests
-   * @return SharedPTR to PT
+   * @return std::shared_ptr to PT
    *
    */
-  virtual utils::SharedPtr<policy_table::Table> pt() const = 0;
+  virtual std::shared_ptr<policy_table::Table> pt() const = 0;
 
   /**
    * @brief OnDeviceSwitching Processes existing policy permissions for devices
@@ -685,9 +820,39 @@ class CacheManagerInterface {
    */
   virtual void OnDeviceSwitching(const std::string& device_id_from,
                                  const std::string& device_id_to) = 0;
+
+  /**
+   * @brief GetAppEncryptionRequiredFlag retrieves encryption required flag for
+   * given application
+   * @param application policy application name
+   * @return optional object containing encryption required flag
+   */
+  virtual rpc::Optional<rpc::Boolean> GetAppEncryptionRequiredFlag(
+      const std::string& application_policy_name) const = 0;
+
+  /**
+   * @brief GetFunctionalGroupingEncryptionRequiredFlag retrieves encryption
+   * required flag
+   * for
+   * given functional grouping
+   * @param functional_group policy functional group name
+   * @return optional object containing encryption required flag
+   */
+  virtual rpc::Optional<rpc::Boolean>
+  GetFunctionalGroupingEncryptionRequiredFlag(
+      const std::string& functional_group) const = 0;
+
+  /**
+   * @brief retreives application params
+   * @param application_name policy applicatoin name
+   * @param application_params application params
+   */
+  virtual void GetApplicationParams(
+      const std::string& application_name,
+      policy_table::ApplicationParams& application_params) const = 0;
 };
 
-typedef utils::SharedPtr<CacheManagerInterface> CacheManagerInterfaceSPtr;
+typedef std::shared_ptr<CacheManagerInterface> CacheManagerInterfaceSPtr;
 
 }  // namespace policy
 

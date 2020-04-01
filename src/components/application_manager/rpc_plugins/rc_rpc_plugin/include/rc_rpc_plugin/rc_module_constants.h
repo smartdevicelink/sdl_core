@@ -30,8 +30,8 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_REMOTE_CONTROL_INCLUDE_REMOTE_CONTROL_RC_MODULE_CONSTANTS_H_
-#define SRC_COMPONENTS_REMOTE_CONTROL_INCLUDE_REMOTE_CONTROL_RC_MODULE_CONSTANTS_H_
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_RC_RPC_PLUGIN_INCLUDE_RC_RPC_PLUGIN_RC_MODULE_CONSTANTS_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_RC_RPC_PLUGIN_INCLUDE_RC_RPC_PLUGIN_RC_MODULE_CONSTANTS_H_
 
 namespace rc_rpc_plugin {
 
@@ -40,11 +40,101 @@ namespace strings {
 const char kclimateControlCapabilities[] = "climateControlCapabilities";
 const char kradioControlCapabilities[] = "radioControlCapabilities";
 const char kbuttonCapabilities[] = "buttonCapabilities";
+const char kaudioControlCapabilities[] = "audioControlCapabilities";
+const char klightControlCapabilities[] = "lightControlCapabilities";
+const char khmiSettingsControlCapabilities[] = "hmiSettingsControlCapabilities";
+const char kseatControlCapabilities[] = "seatControlCapabilities";
 // RemoteControlCapabilities constants
 
-const char kRadioControlData[] = "radioControlData";
-const char kClimateControlData[] = "climateControlData";
-}  //  strings
+const char kServiceArea[] = "serviceArea";
+const char kLocation[] = "location";
+const char kCol[] = "col";
+const char kRow[] = "row";
+const char kLevel[] = "level";
+const char kColspan[] = "colspan";
+const char kRowspan[] = "rowspan";
+const char kLevelspan[] = "levelspan";
+
+// SeatLocationCapability constants
+const char kCols[] = "columns";
+const char kRows[] = "rows";
+const char kLevels[] = "levels";
+const char kSeats[] = "seats";
+const char kGrid[] = "grid";
+// SeatLocationCapability constants
+
+const char kAllowMultipleAccess[] = "allowMultipleAccess";
+
+const char kSupportedLights[] = "supportedLights";
+
+// ClimateControlCapabilities
+const char kFanSpeedAvailable[] = "fanSpeedAvailable";
+const char kCurrentTemperatureAvailable[] = "currentTemperatureAvailable";
+const char kDesiredTemperatureAvailable[] = "desiredTemperatureAvailable";
+const char kAcEnableAvailable[] = "acEnableAvailable";
+const char kCirculateAirEnableAvailable[] = "circulateAirEnableAvailable";
+const char kAutoModeEnableAvailable[] = "autoModeEnableAvailable";
+const char kDefrostZoneAvailable[] = "defrostZoneAvailable";
+const char kDualModeEnableAvailable[] = "dualModeEnableAvailable";
+const char kAcMaxEnableAvailable[] = "acMaxEnableAvailable";
+const char kVentilationModeAvailable[] = "ventilationModeAvailable";
+const char kHeatedSteeringWheelAvailable[] = "heatedSteeringWheelAvailable";
+const char kHeatedWindshieldAvailable[] = "heatedWindshieldAvailable";
+const char kHeatedMirrorsAvailable[] = "heatedMirrorsAvailable";
+const char kHeatedRearWindowAvailable[] = "heatedRearWindowAvailable";
+
+// LightControlCapabilities
+const char kName[] = "name";
+const char kStatusAvailable[] = "statusAvailable";
+const char kDensityAvailable[] = "densityAvailable";
+const char kRGBColorSpaceAvailable[] = "rgbColorSpaceAvailable";
+
+// RadioControlCapabilities
+const char kRadioBandAvailable[] = "radioBandAvailable";
+const char kRadioFrequencyAvailable[] = "radioFrequencyAvailable";
+const char kRdsDataAvailable[] = "rdsDataAvailable";
+const char kAvailableHDsAvailable[] = "availableHDsAvailable";
+const char kHdRadioEnableAvailable[] = "hdRadioEnableAvailable";
+const char kSignalStrengthAvailable[] = "signalStrengthAvailable";
+const char kSignalChangeThresholdAvailable[] = "signalChangeThresholdAvailable";
+const char kRadioEnableAvailable[] = "radioEnableAvailable";
+const char kStateAvailable[] = "stateAvailable";
+const char kSisDataAvailable[] = "sisDataAvailable";
+
+const char kSiriusxmRadioAvailable[] = "siriusxmRadioAvailable";
+
+// SeatControlCapabilities
+const char kHeatingEnabledAvailable[] = "heatingEnabledAvailable";
+const char kCoolingEnabledAvailable[] = "coolingEnabledAvailable";
+const char kHeatingLevelAvailable[] = "heatingLevelAvailable";
+const char kCoolingLevelAvailable[] = "coolingLevelAvailable";
+const char kHorizontalPositionAvailable[] = "horizontalPositionAvailable";
+const char kVerticalPositionAvailable[] = "verticalPositionAvailable";
+const char kFrontVerticalPositionAvailable[] = "frontVerticalPositionAvailable";
+const char kBackVerticalPositionAvailable[] = "backVerticalPositionAvailable";
+const char kBackTiltAngleAvailable[] = "backTiltAngleAvailable";
+const char kHeadSupportHorizontalPositionAvailable[] =
+    "headSupportHorizontalPositionAvailable";
+const char kHeadSupportVerticalPositionAvailable[] =
+    "headSupportVerticalPositionAvailable";
+const char kMassageEnabledAvailable[] = "massageEnabledAvailable";
+const char kMassageModeAvailable[] = "massageModeAvailable";
+const char kMassageCushionFirmnessAvailable[] =
+    "massageCushionFirmnessAvailable";
+const char kMemoryAvailable[] = "memoryAvailable";
+
+// AudioControlCapabilities
+const char kSourceAvailable[] = "sourceAvailable";
+const char kKeepContextAvailable[] = "keepContextAvailable";
+const char kVolumeAvailable[] = "volumeAvailable";
+const char kEqualizerAvailable[] = "equalizerAvailable";
+
+// HmiSettingsCapabilities
+const char kDistanceUnitAvailable[] = "distanceUnitAvailable";
+const char kTemperatureUnitAvailable[] = "temperatureUnitAvailable";
+const char kDisplayModeUnitAvailable[] = "displayModeUnitAvailable";
+
+}  // namespace strings
 
 namespace result_codes {
 const char kSuccess[] = "SUCCESS";
@@ -70,7 +160,7 @@ const char kWrongLanguage[] = "WRONG_LANGUAGE";
 const char kGenericError[] = "GENERIC_ERROR";
 const char kUserDisallowed[] = "USER_DISALLOWED";
 const char kReadOnly[] = "READ_ONLY";
-}  //  result_codes
+}  // namespace result_codes
 
 namespace json_keys {
 const char kParams[] = "params";
@@ -86,10 +176,25 @@ const char kMessage[] = "message";
 const char kData[] = "data";
 const char kAppId[] = "appID";
 const char kCode[] = "code";
-}  //  json_keys
+}  // namespace json_keys
 
 namespace message_params {
 const char kName[] = "name";
+const char kId[] = "id";
+
+// RCConsentManager, ResumptionCtrl, GetInteriorVehicleDataConsent request
+const char kModuleId[] = "moduleId";
+const char kModuleInfo[] = "moduleInfo";
+const char kAppConsents[] = "appConsents";
+const char kAppConsentList[] = "appConsentsList";
+const char kConsent[] = "consent";
+const char kConsentDate[] = "consentDate";
+const char kModuleConsents[] = "moduleConsents";
+const char kAppId[] = "appId";
+const char kModuleIds[] = "moduleIds";
+const char kMacAddress[] = "macAddress";
+const char kApplications[] = "applications";
+// RCConsentManager, ResumptionCtrl, GetInteriorVehicleDataConsent request
 
 // SetInteriorVehicleData request
 const char kModuleData[] = "moduleData";
@@ -135,12 +240,16 @@ const char kFrequencyInteger[] = "frequencyInteger";
 const char kFrequencyFraction[] = "frequencyFraction";
 const char kBand[] = "band";
 const char kRdsData[] = "rdsData";
+const char kHdRadioEnable[] = "hdRadioEnable";
 const char kAvailableHDs[] = "availableHDs";
+const char kAvailableHdChannels[] = "availableHdChannels";
+const char kAvailableHdChannelsAvailable[] = "availableHdChannelsAvailable";
 const char kHdChannel[] = "hdChannel";
 const char kSignalStrength[] = "signalStrength";
 const char kSignalChangeThreshold[] = "signalChangeThreshold";
 const char kRadioEnable[] = "radioEnable";
 const char kState[] = "state";
+const char kSisData[] = "sisData";
 // RadioControlData struct
 
 // ClimateControlData struct
@@ -155,17 +264,70 @@ const char kDefrostZone[] = "defrostZone";
 const char kDualModeEnable[] = "dualModeEnable";
 const char kACMaxEnable[] = "acMaxEnable";
 const char kVentilationMode[] = "ventilationMode";
+const char kHeatedSteeringWheelEnable[] = "heatedSteeringWheelEnable";
+const char kHeatedWindshieldEnable[] = "heatedWindshieldEnable";
+const char kHeatedRearWindowEnable[] = "heatedRearWindowEnable";
+const char kHeatedMirrorsEnable[] = "heatedMirrorsEnable";
+const char kClimateEnable[] = "climateEnable";
+const char kClimateEnableAvailable[] = "climateEnableAvailable";
 // ClimateControlData struct
+
+// SeatControlData
+const char kHeatingEnabled[] = "heatingEnabled";
+const char kCoolingEnabled[] = "coolingEnabled";
+const char kHeatingLevele[] = "heatingLevel";
+const char kCoolingLevel[] = "coolingLevel";
+const char kHorizontalPosition[] = "horizontalPosition";
+const char kVerticalPosition[] = "verticalPosition";
+const char kFrontVerticalPosition[] = "frontVerticalPosition";
+const char kBackVerticalPosition[] = "backVerticalPosition";
+const char kBackTiltAngle[] = "backTiltAngle";
+const char kHeadSupportHorizontalPosition[] = "headSupportHorizontalPosition";
+const char kHeadSupportVerticalPosition[] = "headSupportVerticalPosition";
+const char kMassageEnabled[] = "massageEnabled";
+const char kMassageMode[] = "massageMode";
+const char kMassageCushionFirmness[] = "massageCushionFirmness";
+const char kMemory[] = "memory";
+
+// LightControlData
+const char kLightState[] = "lightState";
+const char kLightStatus[] = "status";
+const char kLightDensity[] = "density";
+const char kLightColor[] = "color";
+
+// AudioControlData
+const char kSource[] = "source";
+const char kVolume[] = "volume";
+const char kKeepContext[] = "keepContext";
+const char kEqualizerSettings[] = "equalizerSettings";
+const char kChannelName[] = "channelName";
+
+// HmiSettingsControlData
+const char kDistanceUnit[] = "distanceUnit";
+const char kDisplayMode[] = "displayMode";
 
 // ModuleData struct
 const char kRadioControlData[] = "radioControlData";
 const char kClimateControlData[] = "climateControlData";
+const char kAudioControlData[] = "audioControlData";
+const char kLightControlData[] = "lightControlData";
+const char kHmiSettingsControlData[] = "hmiSettingsControlData";
+const char kSeatControlData[] = "seatControlData";
 // ModuleData struct
 
 const char kHMIAppID[] = "appID";
 const char kHmiLevel[] = "hmiLevel";
 const char kSysContext[] = "systemContext";
 const char kAudioState[] = "audioStreamingState";
+
+// Grid struct
+const char kCol[] = "col";
+const char kRow[] = "row";
+const char kLevel[] = "level";
+const char kColspan[] = "colspan";
+const char kRowspan[] = "rowspan";
+const char kLevelspan[] = "levelspan";
+
 }  //  namespace message_params
 
 namespace enums_value {
@@ -173,6 +335,10 @@ namespace enums_value {
 // ModuleType enum
 const char kClimate[] = "CLIMATE";
 const char kRadio[] = "RADIO";
+const char kSeat[] = "SEAT";
+const char kAudio[] = "AUDIO";
+const char kLight[] = "LIGHT";
+const char kHmiSettings[] = "HMI_SETTINGS";
 // ModuleType enum
 
 // RadioBand enum
@@ -233,6 +399,6 @@ const char kAskDriver[] = "ASK_DRIVER";
 
 }  //  namespace enums_value
 
-}  //  namespace remote_control
+}  // namespace rc_rpc_plugin
 
-#endif  // SRC_COMPONENTS_REMOTE_CONTROL_INCLUDE_REMOTE_CONTROL_RC_MODULE_CONSTANTS_H_
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_RC_RPC_PLUGIN_INCLUDE_RC_RPC_PLUGIN_RC_MODULE_CONSTANTS_H_

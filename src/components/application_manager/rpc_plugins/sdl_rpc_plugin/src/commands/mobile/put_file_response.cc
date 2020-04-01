@@ -32,8 +32,8 @@
  */
 
 #include "sdl_rpc_plugin/commands/mobile/put_file_response.h"
-#include "utils/file_system.h"
 #include "application_manager/application_impl.h"
+#include "utils/file_system.h"
 
 namespace sdl_rpc_plugin {
 using namespace application_manager;
@@ -70,4 +70,4 @@ void PutFileResponse::Run() {
 
 }  // namespace commands
 
-}  // namespace application_manager
+}  // namespace sdl_rpc_plugin

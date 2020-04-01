@@ -1,11 +1,11 @@
 /*! \page components_smartobjects_types_repr Type value representation methods for SmartObjects
 
-As alternative to the type casts NsSmartDeviceLink::NsSmartObjects::CSmartObject class defines set of usable methods that allow to represent object values as desired type. Use of these methods may change code style and readability but functionally it completely similar to the type casts of Smart Objects.
+As alternative to the type casts ns_smart_device_link::ns_smart_objects::CSmartObject class defines set of usable methods that allow to represent object values as desired type. Use of these methods may change code style and readability but functionally it completely similar to the type casts of Smart Objects.
 
 Example:
 
 <pre>
-NsSmartDeviceLink::NsSmartObjects::CSmartObject obj;
+ns_smart_device_link::ns_smart_objects::CSmartObject obj;
 
 obj[0] = 1;
 

@@ -32,46 +32,21 @@
 
 #include <fstream>
 
-#include "json/reader.h"
-#include "gtest/gtest.h"
 #include <utility>
+#include "gtest/gtest.h"
+#include "json/reader.h"
 
 #include "policy/policy_manager_impl_test_base.h"
-#include "utils/make_shared.h"
-#include "utils/shared_ptr.h"
+#include "utils/date_time.h"
 
 using ::testing::_;
+using ::testing::AtLeast;
 using ::testing::Return;
 using ::testing::SetArgReferee;
-using ::testing::AtLeast;
 
 namespace test {
 namespace components {
 namespace policy_test {
-
-TEST_F(
-    PolicyManagerImplTest,
-    RefreshRetrySequence_SetSecondsBetweenRetries_ExpectRetryTimeoutSequenceWithSameSeconds) {
-  // Arrange
-  std::vector<int> seconds;
-  seconds.push_back(50);
-  seconds.push_back(100);
-  seconds.push_back(200);
-
-  // Assert
-  EXPECT_CALL(*cache_manager_, TimeoutResponse()).WillOnce(Return(60));
-  EXPECT_CALL(*cache_manager_, SecondsBetweenRetries(_))
-      .WillOnce(DoAll(SetArgReferee<0>(seconds), Return(true)));
-
-  // Act
-  policy_manager_->RefreshRetrySequence();
-
-  // Assert
-  EXPECT_EQ(50, policy_manager_->NextRetryTimeout());
-  EXPECT_EQ(100, policy_manager_->NextRetryTimeout());
-  EXPECT_EQ(200, policy_manager_->NextRetryTimeout());
-  EXPECT_EQ(0, policy_manager_->NextRetryTimeout());
-}
 
 TEST_F(PolicyManagerImplTest, GetNotificationsNumber) {
   std::string priority = "EMERGENCY";
@@ -132,7 +107,7 @@ TEST_F(PolicyManagerImplTest, LoadPT_SetPT_PTIsLoaded) {
   EXPECT_CALL(*cache_manager_, DaysBeforeExchange(_))
       .WillOnce(Return(kNonZero));
   policy_manager_->ForcePTExchange();
-  policy_manager_->SetSendOnUpdateFlags(true, false);
+  policy_manager_->SetSendOnUpdateFlags(true);
   policy_manager_->OnUpdateStarted();
   Json::Value table = createPTforLoad();
 
@@ -148,21 +123,28 @@ TEST_F(PolicyManagerImplTest, LoadPT_SetPT_PTIsLoaded) {
   std::string json = table.toStyledString();
   ::policy::BinaryMessage msg(json.begin(), json.end());
 
-  utils::SharedPtr<policy_table::Table> snapshot =
-      new policy_table::Table(update.policy_table);
-  // Assert
-  EXPECT_CALL(*cache_manager_, GenerateSnapshot()).WillOnce(Return(snapshot));
-  EXPECT_CALL(*cache_manager_, ApplyUpdate(_)).WillOnce(Return(true));
-  EXPECT_CALL(listener_, GetAppName("1234"))
-      .WillOnce(Return(custom_str::CustomString("")));
-  EXPECT_CALL(listener_, OnUpdateStatusChanged(_));
-  EXPECT_CALL(*cache_manager_, SaveUpdateRequired(false));
-  EXPECT_CALL(*cache_manager_, TimeoutResponse());
-  EXPECT_CALL(*cache_manager_, SecondsBetweenRetries(_));
+  std::shared_ptr<policy_table::Table> snapshot =
+      std::make_shared<policy_table::Table>(update.policy_table);
+  ON_CALL(*cache_manager_, GenerateSnapshot()).WillByDefault(Return(snapshot));
 
-  EXPECT_TRUE(policy_manager_->LoadPT(kFilePtUpdateJson, msg));
+  // Assert
+  EXPECT_CALL(*cache_manager_, ApplyUpdate(_)).WillOnce(Return(true));
+  EXPECT_CALL(listener_, GetDevicesIds("1234"))
+      .WillRepeatedly(Return(transport_manager::DeviceList()));
+  EXPECT_CALL(*cache_manager_, SaveUpdateRequired(false));
+
+  EXPECT_CALL(*cache_manager_, GetVehicleDataItems())
+      .WillOnce(Return(std::vector<policy_table::VehicleDataItem>()));
+  ASSERT_EQ(PolicyManager::PtProcessingResult::kSuccess,
+            policy_manager_->LoadPT(kFilePtUpdateJson, msg));
+
   EXPECT_CALL(*cache_manager_, IsPTPreloaded());
   EXPECT_FALSE(policy_manager_->GetCache()->IsPTPreloaded());
+
+  EXPECT_CALL(*cache_manager_, TimeoutResponse());
+  EXPECT_CALL(*cache_manager_, SecondsBetweenRetries(_));
+  EXPECT_CALL(listener_, OnUpdateStatusChanged(_));
+  policy_manager_->OnPTUFinished(PolicyManager::PtProcessingResult::kSuccess);
 }
 
 TEST_F(PolicyManagerImplTest2,
@@ -201,29 +183,12 @@ TEST_F(PolicyManagerImplTest2, OnSystemReady) {
 TEST_F(PolicyManagerImplTest2, ResetRetrySequence) {
   // Arrange
   CreateLocalPT(preloaded_pt_filename_);
-  policy_manager_->ResetRetrySequence();
+  policy_manager_->ResetRetrySequence(
+      policy::ResetRetryCountType::kResetWithStatusUpdate);
   EXPECT_EQ("UPDATE_NEEDED", policy_manager_->GetPolicyTableStatus());
-  policy_manager_->SetSendOnUpdateFlags(false, false);
+  policy_manager_->SetSendOnUpdateFlags(false);
   policy_manager_->OnUpdateStarted();
   EXPECT_EQ("UPDATING", policy_manager_->GetPolicyTableStatus());
-}
-
-TEST_F(PolicyManagerImplTest2, NextRetryTimeout_ExpectTimeoutsFromPT) {
-  // Arrange
-  std::ifstream ifile(preloaded_pt_filename_);
-  Json::Reader reader;
-  Json::Value root(Json::objectValue);
-  if (ifile.is_open() && reader.parse(ifile, root, true)) {
-    Json::Value seconds_between_retries = Json::Value(Json::arrayValue);
-    seconds_between_retries =
-        root["policy_table"]["module_config"]["seconds_between_retries"];
-    uint32_t size = seconds_between_retries.size();
-    CreateLocalPT(preloaded_pt_filename_);
-    for (uint32_t i = 0; i < size; ++i) {
-      EXPECT_EQ(seconds_between_retries[i],
-                policy_manager_->NextRetryTimeout());
-    }
-  }
 }
 
 TEST_F(PolicyManagerImplTest2, TimeOutExchange) {
@@ -236,9 +201,9 @@ TEST_F(PolicyManagerImplTest2, TimeOutExchange) {
 TEST_F(PolicyManagerImplTest,
        RequestPTUpdate_SetPT_GeneratedSnapshotAndPTUpdate) {
   Json::Value table = createPTforLoad();
-  utils::SharedPtr<policy_table::Table> p_table =
-      utils::MakeShared<policy_table::Table>(&table);
-  ASSERT_TRUE(p_table);
+  std::shared_ptr<policy_table::Table> p_table =
+      std::make_shared<policy_table::Table>(&table);
+  ASSERT_TRUE(p_table.get());
   p_table->SetPolicyTableType(rpc::policy_table_interface_base::PT_UPDATE);
   EXPECT_TRUE(IsValid(*p_table));
 
@@ -249,9 +214,9 @@ TEST_F(PolicyManagerImplTest,
 }
 
 TEST_F(PolicyManagerImplTest, RequestPTUpdate_InvalidPT_PTUpdateFail) {
-  utils::SharedPtr<policy_table::Table> p_table =
-      utils::MakeShared<policy_table::Table>();
-  ASSERT_TRUE(p_table);
+  std::shared_ptr<policy_table::Table> p_table =
+      std::make_shared<policy_table::Table>();
+  ASSERT_TRUE(p_table.get());
   EXPECT_FALSE(IsValid(*p_table));
 
   EXPECT_CALL(listener_, OnSnapshotCreated(_, _, _)).Times(0);
@@ -261,7 +226,7 @@ TEST_F(PolicyManagerImplTest, RequestPTUpdate_InvalidPT_PTUpdateFail) {
 }
 
 TEST_F(PolicyManagerImplTest, RequestPTUpdate_InvalidSnapshot_PTUpdateFail) {
-  utils::SharedPtr<policy_table::Table> p_table;
+  std::shared_ptr<policy_table::Table> p_table;
   EXPECT_FALSE(p_table);
 
   EXPECT_CALL(listener_, OnSnapshotCreated(_, _, _)).Times(0);
@@ -300,9 +265,10 @@ TEST_F(PolicyManagerImplTest2,
        RetrySequenceDelaysSeconds_Expect_CorrectValues) {
   // Arrange
   std::ifstream ifile(preloaded_pt_filename_);
-  Json::Reader reader;
+  Json::CharReaderBuilder reader_builder;
   Json::Value root(Json::objectValue);
-  if (ifile.is_open() && reader.parse(ifile, root, true)) {
+  if (ifile.is_open() &&
+      Json::parseFromStream(reader_builder, ifile, &root, nullptr)) {
     Json::Value seconds_between_retries = Json::Value(Json::arrayValue);
     seconds_between_retries =
         root["policy_table"]["module_config"]["seconds_between_retries"];
@@ -321,6 +287,8 @@ TEST_F(PolicyManagerImplTest2,
        OnExceededTimeout_GetPolicyTableStatus_ExpectUpdateNeeded) {
   // Arrange
   CreateLocalPT(preloaded_pt_filename_);
+  ON_CALL(ptu_retry_handler_, IsAllowedRetryCountExceeded())
+      .WillByDefault(Return(false));
   policy_manager_->ForcePTExchange();
   policy_manager_->OnExceededTimeout();
   // Check
@@ -343,8 +311,41 @@ TEST_F(PolicyManagerImplTest, MarkUnpairedDevice) {
 
 TEST_F(PolicyManagerImplTest2, GetCurrentDeviceId) {
   // Arrange
-  EXPECT_CALL(listener_, OnCurrentDeviceIdUpdateRequired(app_id_2_)).Times(1);
-  EXPECT_EQ("", policy_manager_->GetCurrentDeviceId(app_id_2_));
+  const transport_manager::DeviceHandle handle = 1;
+  EXPECT_CALL(listener_, OnCurrentDeviceIdUpdateRequired(handle, app_id_2_))
+      .Times(1);
+  EXPECT_EQ("", policy_manager_->GetCurrentDeviceId(handle, app_id_2_));
+}
+
+TEST_F(PolicyManagerImplTest2, UpdateApplication_AppServices) {
+  // Arrange
+  std::string kServiceType = "MEDIA";
+  CreateLocalPT(preloaded_pt_filename_);
+  EXPECT_EQ("UP_TO_DATE", policy_manager_->GetPolicyTableStatus());
+  GetPTU("json/valid_sdl_pt_update.json");
+  EXPECT_EQ("UP_TO_DATE", policy_manager_->GetPolicyTableStatus());
+  // Try to add existing app
+  policy_table::AppServiceParameters app_service_parameters =
+      policy_table::AppServiceParameters();
+  policy_manager_->GetAppServiceParameters(app_id_2_, &app_service_parameters);
+
+  ASSERT_FALSE(app_service_parameters.find(kServiceType) ==
+               app_service_parameters.end());
+
+  auto service_names = *(app_service_parameters[kServiceType].service_names);
+
+  ASSERT_TRUE(service_names.is_initialized());
+  ASSERT_EQ(service_names.size(), 2u);
+  EXPECT_EQ(static_cast<std::string>(service_names[0]), "SDL App");
+  EXPECT_EQ(static_cast<std::string>(service_names[1]), "SDL Music");
+
+  auto handled_rpcs = app_service_parameters[kServiceType].handled_rpcs;
+
+  ASSERT_TRUE(handled_rpcs.is_initialized());
+  EXPECT_EQ(handled_rpcs[0].function_id, 41);
+
+  // Check no update required
+  EXPECT_EQ("UP_TO_DATE", policy_manager_->GetPolicyTableStatus());
 }
 
 TEST_F(
@@ -355,7 +356,7 @@ TEST_F(
 
   PreconditionExternalConsentPreparePTWithAppGroupsAndConsents();
 
-  utils::SharedPtr<policy_table::Table> pt =
+  std::shared_ptr<policy_table::Table> pt =
       policy_manager_->GetCache()->GetPT();
 
   // Checking groups consents before setting ExternalConsent status
@@ -395,7 +396,7 @@ TEST_F(
   status.insert(ExternalConsentStatusItem(type_2_, id_2_, kStatusOn));
   status.insert(ExternalConsentStatusItem(type_3_, id_3_, kStatusOn));
 
-  EXPECT_CALL(listener_, OnPermissionsUpdated(app_id_1_, _));
+  EXPECT_CALL(listener_, OnPermissionsUpdated(device_id_1_, app_id_1_, _));
 
   EXPECT_TRUE(policy_manager_->SetExternalConsentStatus(status));
 
@@ -420,7 +421,7 @@ TEST_F(
   PreconditionExternalConsentPreparePTWithAppGroupsAndConsents();
 
   // Act
-  utils::SharedPtr<policy_table::Table> pt =
+  std::shared_ptr<policy_table::Table> pt =
       policy_manager_->GetCache()->GetPT();
 
   // Checking ExternalConsent consents before setting new ExternalConsent status
@@ -444,7 +445,7 @@ TEST_F(
   status.insert(ExternalConsentStatusItem(type_2_, id_2_, kStatusOn));
   status.insert(ExternalConsentStatusItem(type_3_, id_3_, kStatusOn));
 
-  EXPECT_CALL(listener_, OnPermissionsUpdated(app_id_1_, _));
+  EXPECT_CALL(listener_, OnPermissionsUpdated(device_id_1_, app_id_1_, _));
 
   EXPECT_TRUE(policy_manager_->SetExternalConsentStatus(status));
 
@@ -484,7 +485,7 @@ TEST_F(
   PreconditionExternalConsentPreparePTWithAppPolicy();
 
   // Act
-  utils::SharedPtr<policy_table::Table> pt =
+  std::shared_ptr<policy_table::Table> pt =
       policy_manager_->GetCache()->GetPT();
 
   ExternalConsentStatus status;
@@ -500,12 +501,12 @@ TEST_F(
 
   EXPECT_FALSE(pt->policy_table.device_data->end() != updated_device_data);
 
-  EXPECT_CALL(listener_, OnPermissionsUpdated(app_id_1_, _));
-  EXPECT_CALL(listener_, OnCurrentDeviceIdUpdateRequired(app_id_1_))
+  EXPECT_CALL(listener_, OnPermissionsUpdated(device_id_1_, app_id_1_, _));
+  EXPECT_CALL(listener_, OnCurrentDeviceIdUpdateRequired(_, app_id_1_))
       .WillRepeatedly(Return(device_id_1_));
 
-  policy_manager_->AddApplication(app_id_1_,
-                                  HmiTypes(policy_table::AHT_DEFAULT));
+  policy_manager_->AddApplication(
+      device_id_1_, app_id_1_, HmiTypes(policy_table::AHT_DEFAULT));
 
   // Check ExternalConsent consents for application
   updated_device_data = pt->policy_table.device_data->find(device_id_1_);
@@ -552,7 +553,7 @@ TEST_F(
   PreconditionExternalConsentPreparePTWithAppPolicy();
 
   // Act
-  utils::SharedPtr<policy_table::Table> pt =
+  std::shared_ptr<policy_table::Table> pt =
       policy_manager_->GetCache()->GetPT();
 
   ExternalConsentStatus status;
@@ -568,12 +569,12 @@ TEST_F(
 
   EXPECT_FALSE(pt->policy_table.device_data->end() != updated_device_data);
 
-  EXPECT_CALL(listener_, OnPermissionsUpdated(app_id_1_, _));
-  EXPECT_CALL(listener_, OnCurrentDeviceIdUpdateRequired(app_id_1_))
+  EXPECT_CALL(listener_, OnPermissionsUpdated(device_id_1_, app_id_1_, _));
+  EXPECT_CALL(listener_, OnCurrentDeviceIdUpdateRequired(_, app_id_1_))
       .WillRepeatedly(Return(device_id_1_));
 
-  policy_manager_->AddApplication(app_id_1_,
-                                  HmiTypes(policy_table::AHT_DEFAULT));
+  policy_manager_->AddApplication(
+      device_id_1_, app_id_1_, HmiTypes(policy_table::AHT_DEFAULT));
 
   // Checking ExternalConsent consents after setting new ExternalConsent status
   ApplicationPolicies::const_iterator app_parameters =
@@ -623,18 +624,15 @@ TEST_F(
 
   EXPECT_TRUE(policy_manager_->GetCache()->ApplyUpdate(t));
 
-  EXPECT_CALL(listener_, OnPermissionsUpdated(app_id_1_, _));
-  EXPECT_CALL(listener_, OnCurrentDeviceIdUpdateRequired(app_id_1_))
-      .WillOnce(Return(device_id_1_))         // registered
-      .WillOnce(Return(""))                   // not registered
-      .WillRepeatedly(Return(device_id_1_));  // again registered
-
+  EXPECT_CALL(listener_, OnPermissionsUpdated(device_id_1_, app_id_1_, _));
+  EXPECT_CALL(listener_, GetDevicesIds(app_id_1_))
+      .WillRepeatedly(Return(transport_manager::DeviceList()));
   // First register w/o app having groups to consent
-  policy_manager_->AddApplication(app_id_1_,
-                                  HmiTypes(policy_table::AHT_DEFAULT));
+  policy_manager_->AddApplication(
+      device_id_1_, app_id_1_, HmiTypes(policy_table::AHT_DEFAULT));
 
   // Act
-  utils::SharedPtr<policy_table::Table> pt =
+  std::shared_ptr<policy_table::Table> pt =
       policy_manager_->GetCache()->GetPT();
 
   ExternalConsentStatus status;
@@ -662,8 +660,8 @@ TEST_F(
   EXPECT_TRUE(policy_manager_->GetCache()->ApplyUpdate(t));
 
   // Second time register w/ app having groups to consent
-  policy_manager_->AddApplication(app_id_1_,
-                                  HmiTypes(policy_table::AHT_DEFAULT));
+  policy_manager_->AddApplication(
+      device_id_1_, app_id_1_, HmiTypes(policy_table::AHT_DEFAULT));
 
   // Checking ExternalConsent consents after setting new ExternalConsent status
   ApplicationPolicies::const_iterator app_parameters =
@@ -713,18 +711,14 @@ TEST_F(
 
   EXPECT_TRUE(policy_manager_->GetCache()->ApplyUpdate(t));
 
-  EXPECT_CALL(listener_, OnPermissionsUpdated(app_id_1_, _));
-  EXPECT_CALL(listener_, OnCurrentDeviceIdUpdateRequired(app_id_1_))
-      .WillOnce(Return(device_id_1_))         // registered
-      .WillOnce(Return(""))                   // not registered
-      .WillRepeatedly(Return(device_id_1_));  // registered again
+  EXPECT_CALL(listener_, OnPermissionsUpdated(device_id_1_, app_id_1_, _));
 
   // First register w/o app having groups to consent
-  policy_manager_->AddApplication(app_id_1_,
-                                  HmiTypes(policy_table::AHT_DEFAULT));
+  policy_manager_->AddApplication(
+      device_id_1_, app_id_1_, HmiTypes(policy_table::AHT_DEFAULT));
 
   // Act
-  utils::SharedPtr<policy_table::Table> pt =
+  std::shared_ptr<policy_table::Table> pt =
       policy_manager_->GetCache()->GetPT();
 
   ExternalConsentStatus status;
@@ -752,8 +746,8 @@ TEST_F(
   EXPECT_TRUE(policy_manager_->GetCache()->ApplyUpdate(t));
 
   // Second time register w/ app having groups to consent
-  policy_manager_->AddApplication(app_id_1_,
-                                  HmiTypes(policy_table::AHT_DEFAULT));
+  policy_manager_->AddApplication(
+      device_id_1_, app_id_1_, HmiTypes(policy_table::AHT_DEFAULT));
 
   // Check ExternalConsent consents for application
   updated_device_data = pt->policy_table.device_data->find(device_id_1_);
@@ -811,14 +805,13 @@ TEST_F(PolicyManagerImplTest_ExternalConsent,
 
   EXPECT_TRUE(policy_manager_->SetExternalConsentStatus(status));
 
-  EXPECT_CALL(listener_, OnPermissionsUpdated(app_id_1_, _));
-  EXPECT_CALL(listener_, OnCurrentDeviceIdUpdateRequired(app_id_1_))
-      .WillRepeatedly(Return(device_id_1_));
+  EXPECT_CALL(listener_, OnPermissionsUpdated(device_id_1_, app_id_1_, _));
+  EXPECT_CALL(listener_, GetDevicesIds(app_id_1_))
+      .WillRepeatedly(Return(transport_manager::DeviceList()));
+  policy_manager_->AddApplication(
+      device_id_1_, app_id_1_, HmiTypes(policy_table::AHT_DEFAULT));
 
-  policy_manager_->AddApplication(app_id_1_,
-                                  HmiTypes(policy_table::AHT_DEFAULT));
-
-  utils::SharedPtr<policy_table::Table> pt =
+  std::shared_ptr<policy_table::Table> pt =
       policy_manager_->GetCache()->GetPT();
 
   // Check ExternalConsent consents for application
@@ -875,7 +868,9 @@ TEST_F(PolicyManagerImplTest_ExternalConsent,
 
   EXPECT_CALL(listener_, OnCertificateUpdated(_));
 
-  EXPECT_TRUE(policy_manager_->LoadPT("DummyFileName", msg));
+  ASSERT_EQ(PolicyManager::PtProcessingResult::kSuccess,
+            policy_manager_->LoadPT("DummyFileName", msg));
+  policy_manager_->OnPTUFinished(PolicyManager::PtProcessingResult::kSuccess);
 
   pt = policy_manager_->GetCache()->GetPT();
 
@@ -936,14 +931,13 @@ TEST_F(PolicyManagerImplTest_ExternalConsent,
 
   EXPECT_TRUE(policy_manager_->SetExternalConsentStatus(status));
 
-  EXPECT_CALL(listener_, OnPermissionsUpdated(app_id_1_, _));
-  EXPECT_CALL(listener_, OnCurrentDeviceIdUpdateRequired(app_id_1_))
-      .WillRepeatedly(Return(device_id_1_));
+  EXPECT_CALL(listener_, OnPermissionsUpdated(device_id_1_, app_id_1_, _));
+  EXPECT_CALL(listener_, GetDevicesIds(app_id_1_))
+      .WillRepeatedly(Return(transport_manager::DeviceList()));
+  policy_manager_->AddApplication(
+      device_id_1_, app_id_1_, HmiTypes(policy_table::AHT_DEFAULT));
 
-  policy_manager_->AddApplication(app_id_1_,
-                                  HmiTypes(policy_table::AHT_DEFAULT));
-
-  utils::SharedPtr<policy_table::Table> pt =
+  std::shared_ptr<policy_table::Table> pt =
       policy_manager_->GetCache()->GetPT();
 
   // Check ExternalConsent consents for application
@@ -995,7 +989,9 @@ TEST_F(PolicyManagerImplTest_ExternalConsent,
 
   EXPECT_CALL(listener_, OnCertificateUpdated(_));
 
-  EXPECT_TRUE(policy_manager_->LoadPT("DummyFileName", msg));
+  ASSERT_EQ(PolicyManager::PtProcessingResult::kSuccess,
+            policy_manager_->LoadPT("DummyFileName", msg));
+  policy_manager_->OnPTUFinished(PolicyManager::PtProcessingResult::kSuccess);
 
   pt = policy_manager_->GetCache()->GetPT();
 
@@ -1046,7 +1042,7 @@ TEST_F(
   PreconditionExternalConsentPreparePTWithAppGroupsAndConsents();
 
   // Act
-  utils::SharedPtr<policy_table::Table> pt =
+  std::shared_ptr<policy_table::Table> pt =
       policy_manager_->GetCache()->GetPT();
 
   // Checking ExternalConsent consents before setting new ExternalConsent status
@@ -1070,7 +1066,7 @@ TEST_F(
   status_on.insert(ExternalConsentStatusItem(type_2_, id_2_, kStatusOn));
   status_on.insert(ExternalConsentStatusItem(type_3_, id_3_, kStatusOn));
 
-  EXPECT_CALL(listener_, OnPermissionsUpdated(app_id_1_, _));
+  EXPECT_CALL(listener_, OnPermissionsUpdated(device_id_1_, app_id_1_, _));
 
   EXPECT_TRUE(policy_manager_->SetExternalConsentStatus(status_on));
 
@@ -1106,7 +1102,8 @@ TEST_F(
   status_off.insert(ExternalConsentStatusItem(type_2_, id_2_, kStatusOff));
   status_off.insert(ExternalConsentStatusItem(type_3_, id_3_, kStatusOff));
 
-  EXPECT_CALL(listener_, OnPermissionsUpdated(app_id_1_, _)).Times(1);
+  EXPECT_CALL(listener_, OnPermissionsUpdated(device_id_1_, app_id_1_, _))
+      .Times(1);
 
   EXPECT_TRUE(policy_manager_->SetExternalConsentStatus(status_off));
 
@@ -1122,6 +1119,6 @@ TEST_F(
   EXPECT_EQ(Boolean(false), updated_group_2->second);
 }
 
-}  // namespace policy
+}  // namespace policy_test
 }  // namespace components
 }  // namespace test

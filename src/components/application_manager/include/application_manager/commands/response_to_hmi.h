@@ -42,7 +42,7 @@ namespace application_manager {
 
 namespace commands {
 
-namespace NsSmart = NsSmartDeviceLink::NsSmartObjects;
+namespace ns_smart = ns_smart_device_link::ns_smart_objects;
 
 class ResponseToHMI : public CommandImpl {
  public:
