@@ -334,6 +334,7 @@
   <element name="SYSTEM" />
   <element name="PROJECTION" />
   <element name="REMOTE_CONTROL" />
+  <element name="WEB_VIEW" />
 </enum>
 
 <enum name="CloudConnectionStatus">
