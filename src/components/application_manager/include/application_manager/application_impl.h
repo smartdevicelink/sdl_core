@@ -123,6 +123,9 @@ class ApplicationImpl : public virtual Application,
 
   bool mobile_projection_enabled() const;
 
+  void set_webengine_projection_enabled(const bool option) OVERRIDE;
+  bool webengine_projection_enabled() const OVERRIDE;
+
   bool video_streaming_approved() const;
   void set_video_streaming_approved(bool state);
   bool audio_streaming_approved() const;
@@ -565,6 +568,7 @@ class ApplicationImpl : public virtual Application,
   bool is_navi_;
   bool is_remote_control_supported_;
   bool mobile_projection_enabled_;
+  bool webengine_projection_enabled_;
 
   bool video_streaming_approved_;
   bool audio_streaming_approved_;

@@ -106,6 +106,7 @@ ApplicationImpl::ApplicationImpl(
     , is_navi_(false)
     , is_remote_control_supported_(false)
     , mobile_projection_enabled_(false)
+    , webengine_projection_enabled_(false)
     , video_streaming_approved_(false)
     , audio_streaming_approved_(false)
     , video_streaming_allowed_(false)
@@ -202,24 +203,29 @@ void ApplicationImpl::ChangeSupportingAppHMIType() {
   is_navi_ = false;
   is_voice_communication_application_ = false;
   mobile_projection_enabled_ = false;
+  webengine_projection_enabled_ = false;
   const smart_objects::SmartObject& array_app_types = *app_types_;
   uint32_t lenght_app_types = array_app_types.length();
 
   for (uint32_t i = 0; i < lenght_app_types; ++i) {
-    if (mobile_apis::AppHMIType::NAVIGATION ==
-        static_cast<mobile_apis::AppHMIType::eType>(
-            array_app_types[i].asUInt())) {
-      is_navi_ = true;
-    }
-    if (mobile_apis::AppHMIType::COMMUNICATION ==
-        static_cast<mobile_apis::AppHMIType::eType>(
-            array_app_types[i].asUInt())) {
-      is_voice_communication_application_ = true;
-    }
-    if (mobile_apis::AppHMIType::PROJECTION ==
-        static_cast<mobile_apis::AppHMIType::eType>(
-            array_app_types[i].asUInt())) {
-      mobile_projection_enabled_ = true;
+    const auto app_hmi_type = static_cast<mobile_apis::AppHMIType::eType>(
+        array_app_types[i].asUInt());
+
+    switch (app_hmi_type) {
+      case mobile_apis::AppHMIType::NAVIGATION:
+        is_navi_ = true;
+        break;
+      case mobile_apis::AppHMIType::COMMUNICATION:
+        is_voice_communication_application_ = true;
+        break;
+      case mobile_apis::AppHMIType::PROJECTION:
+        mobile_projection_enabled_ = true;
+        break;
+      case mobile_apis::AppHMIType::WEB_VIEW:
+        webengine_projection_enabled_ = true;
+        break;
+      default:
+        break;
     }
   }
 }
@@ -292,6 +298,15 @@ void ApplicationImpl::set_mobile_projection_enabled(bool option) {
 
 bool ApplicationImpl::mobile_projection_enabled() const {
   return mobile_projection_enabled_;
+}
+
+void ApplicationImpl::set_webengine_projection_enabled(const bool option) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  webengine_projection_enabled_ = option;
+}
+
+bool ApplicationImpl::webengine_projection_enabled() const {
+  return webengine_projection_enabled_;
 }
 
 struct StateIDComparator {
