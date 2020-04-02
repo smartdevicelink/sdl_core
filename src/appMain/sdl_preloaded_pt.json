@@ -587,7 +587,8 @@
                             "odometer",
                             "tirePressure",
                             "vin",
-                            "wiperStatus"
+                            "wiperStatus",
+                            "windowStatus"
                         ]
                     },
                     "OnVehicleData": {
@@ -612,7 +613,8 @@
                             "odometer",
                             "tirePressure",
                             "vin",
-                            "wiperStatus"
+                            "wiperStatus",
+                            "windowStatus"
                         ]
                     },
                     "SubscribeVehicleData": {
@@ -636,7 +638,8 @@
                             "cloudAppVehicleID",
                             "odometer",
                             "tirePressure",
-                            "wiperStatus"
+                            "wiperStatus",
+                            "windowStatus"
                         ]
                     },
                     "UnsubscribeVehicleData": {
@@ -660,7 +663,8 @@
                             "cloudAppVehicleID",
                             "odometer",
                             "tirePressure",
-                            "wiperStatus"
+                            "wiperStatus",
+                            "windowStatus"
                         ]
                     }
                 }
