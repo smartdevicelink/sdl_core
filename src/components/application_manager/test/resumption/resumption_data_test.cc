@@ -292,9 +292,10 @@ void ResumptionDataTest::CheckMenuIcon(sm::SmartObject& res_list) {
 
 void ResumptionDataTest::CheckHelpPrompt(sm::SmartObject& res_list) {
   for (uint i = 0; i < tts_chunks_count; ++i) {
-    std::string promt = (*help_prompt_)[i][am::strings::help_prompt].asString();
-    std::string dict_promt = res_list[i][am::strings::help_prompt].asString();
-    EXPECT_EQ(promt, dict_promt);
+    std::string prompt =
+        (*help_prompt_)[i][am::strings::help_prompt].asString();
+    std::string dict_prompt = res_list[i][am::strings::help_prompt].asString();
+    EXPECT_EQ(prompt, dict_prompt);
   }
 }
 

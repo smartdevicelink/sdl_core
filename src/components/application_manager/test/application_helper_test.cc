@@ -96,7 +96,7 @@ class ApplicationHelperTest : public testing::Test {
         .WillByDefault(Return(true));
     ON_CALL(mock_application_manager_settings_, stop_streaming_timeout())
         .WillByDefault(Return(stop_streaming_timeout));
-    ON_CALL(mock_application_manager_settings_, time_out_promt())
+    ON_CALL(mock_application_manager_settings_, time_out_prompt())
         .WillByDefault(ReturnRef(kTimeoutPrompt));
 
     CreateApplication();

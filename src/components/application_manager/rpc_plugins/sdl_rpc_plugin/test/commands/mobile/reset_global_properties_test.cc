@@ -145,7 +145,7 @@ TEST_F(ResetGlobalPropertiesRequestTest, Run_InvalidVrHelp_UNSUCCESS) {
 
   std::vector<std::string> time_out_prompt;
   time_out_prompt.push_back("time_out");
-  EXPECT_CALL(app_mngr_settings_, time_out_promt())
+  EXPECT_CALL(app_mngr_settings_, time_out_prompt())
       .WillOnce(ReturnRef(time_out_prompt));
 
   smart_objects::SmartObject timeout_prompt =
@@ -196,7 +196,7 @@ TEST_F(ResetGlobalPropertiesRequestTest, Run_SUCCESS) {
 
   std::vector<std::string> time_out_prompt;
   time_out_prompt.push_back("time_out");
-  EXPECT_CALL(app_mngr_settings_, time_out_promt())
+  EXPECT_CALL(app_mngr_settings_, time_out_prompt())
       .WillOnce(ReturnRef(time_out_prompt));
 
   smart_objects::SmartObject timeout_prompt =
@@ -306,7 +306,7 @@ TEST_F(ResetGlobalPropertiesRequestTest,
 
   std::vector<std::string> time_out_prompt;
   time_out_prompt.push_back("time_out");
-  EXPECT_CALL(app_mngr_settings_, time_out_promt())
+  EXPECT_CALL(app_mngr_settings_, time_out_prompt())
       .WillOnce(ReturnRef(time_out_prompt));
 
   EXPECT_CALL(*mock_app_, set_timeout_prompt(_));
@@ -405,7 +405,7 @@ TEST_F(ResetGlobalPropertiesRequestTest,
 
   std::vector<std::string> time_out_prompt;
   time_out_prompt.push_back("time_out");
-  EXPECT_CALL(app_mngr_settings_, time_out_promt())
+  EXPECT_CALL(app_mngr_settings_, time_out_prompt())
       .WillOnce(ReturnRef(time_out_prompt));
 
   EXPECT_CALL(*mock_app_, set_timeout_prompt(_));
@@ -472,7 +472,7 @@ TEST_F(ResetGlobalPropertiesRequestTest,
 
   std::vector<std::string> time_out_prompt;
   time_out_prompt.push_back("time_out");
-  EXPECT_CALL(app_mngr_settings_, time_out_promt())
+  EXPECT_CALL(app_mngr_settings_, time_out_prompt())
       .WillOnce(ReturnRef(time_out_prompt));
 
   EXPECT_CALL(*mock_app_, set_timeout_prompt(_));
@@ -538,7 +538,7 @@ TEST_F(ResetGlobalPropertiesRequestTest,
 
   std::vector<std::string> time_out_prompt;
   time_out_prompt.push_back("time_out");
-  EXPECT_CALL(app_mngr_settings_, time_out_promt())
+  EXPECT_CALL(app_mngr_settings_, time_out_prompt())
       .WillOnce(ReturnRef(time_out_prompt));
 
   EXPECT_CALL(*mock_app_, set_timeout_prompt(_));

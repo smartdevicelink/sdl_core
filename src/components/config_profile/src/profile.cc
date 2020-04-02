@@ -146,8 +146,8 @@ const char* kBeforeUpdateHours = "UpdateBeforeHours";
 const char* kAudioDataStoppedTimeoutKey = "AudioDataStoppedTimeout";
 const char* kVideoDataStoppedTimeoutKey = "VideoDataStoppedTimeout";
 const char* kMixingAudioSupportedKey = "MixingAudioSupported";
-const char* kHelpPromptKey = "HelpPromt";
-const char* kTimeoutPromptKey = "TimeOutPromt";
+const char* kHelpPromptKey = "HelpPrompt";
+const char* kTimeoutPromptKey = "TimeOutPrompt";
 const char* kHelpTitleKey = "HelpTitle";
 const char* kHelpCommandKey = "HelpCommand";
 const char* kSystemFilesPathKey = "SystemFilesPath";
@@ -473,7 +473,7 @@ Profile::Profile()
     , time_testing_port_(kDefaultTimeTestingPort)
     , hmi_capabilities_file_name_(kDefaultHmiCapabilitiesFileName)
     , help_prompt_()
-    , time_out_promt_()
+    , time_out_prompt_()
     , min_tread_stack_size_(threads::Thread::kMinStackSize)
     , is_mixing_audio_supported_(false)
     , is_redecoding_enabled_(false)
@@ -658,8 +658,8 @@ const std::vector<std::string>& Profile::help_prompt() const {
   return help_prompt_;
 }
 
-const std::vector<std::string>& Profile::time_out_promt() const {
-  return time_out_promt_;
+const std::vector<std::string>& Profile::time_out_prompt() const {
+  return time_out_prompt_;
 }
 
 const std::vector<std::string>& Profile::vr_commands() const {
@@ -1732,7 +1732,7 @@ void Profile::UpdateValues() {
   }
 
   // Timeout prompt
-  time_out_promt_.clear();
+  time_out_prompt_.clear();
   std::string timeout_prompt_value;
   if (ReadValue(
           &timeout_prompt_value, kGlobalPropertiesSection, kTimeoutPromptKey)) {
@@ -1741,7 +1741,7 @@ void Profile::UpdateValues() {
     while (str != NULL) {
       // Default prompt should have delimiter included for each item
       const std::string prompt_item = std::string(str) + tts_delimiter_;
-      time_out_promt_.push_back(prompt_item);
+      time_out_prompt_.push_back(prompt_item);
       LOG_UPDATED_VALUE(
           prompt_item, kTimeoutPromptKey, kGlobalPropertiesSection);
       str = strtok(NULL, ",");

@@ -85,26 +85,24 @@ class ResetGlobalPropertiesRequest
 
  private:
   /*
-   * @brief Sets default value of the HELPPROMT global property
+   * @brief Sets default value of the HELPPROMPT global property
    * to the first vrCommand of each Command Menu registered in application
    *
    * @param app Registered application
-   * @param is_timeout_promp Flag indicating that timeout prompt
-   * should be reset
    *
    * @return TRUE on success, otherwise FALSE
    */
-  bool ResetHelpPromt(app_mngr::ApplicationSharedPtr app);
+  bool ResetHelpPrompt(app_mngr::ApplicationSharedPtr app);
 
   /*
-   * @brief  Sets default value of the TIMEOUTPROMT global property
+   * @brief  Sets default value of the TIMEOUTPROMPT global property
    * to the first vrCommand of each Command Menu registered in application
    *
    * @param app Registered application
    *
    * @return TRUE on success, otherwise FALSE
    */
-  bool ResetTimeoutPromt(application_manager::ApplicationSharedPtr const app);
+  bool ResetTimeoutPrompt(application_manager::ApplicationSharedPtr const app);
 
   /*
    * @brief Sets default value of the VRHELPTITLE global property

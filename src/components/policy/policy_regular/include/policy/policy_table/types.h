@@ -197,6 +197,8 @@ struct ApplicationParams : PolicyBase {
   Optional<Integer<uint32_t, 0, UINT_MAX> > heart_beat_timeout_ms;
   Optional<String<0, 65535> > certificate;
   mutable Optional<ModuleTypes> moduleType;
+  Optional<Boolean> encryption_required;
+
   // Cloud application params
   Optional<Enum<HybridAppPreference> > hybrid_app_preference;
   Optional<String<0, 255> > endpoint;
@@ -208,7 +210,6 @@ struct ApplicationParams : PolicyBase {
   // App Service Params
   Optional<AppServiceParameters> app_service_parameters;
   Optional<Boolean> allow_unknown_rpc_passthrough;
-  Optional<Boolean> encryption_required;
 
  public:
   ApplicationParams();

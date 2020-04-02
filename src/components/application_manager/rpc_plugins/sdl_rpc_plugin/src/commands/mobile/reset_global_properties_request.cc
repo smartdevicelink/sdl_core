@@ -80,7 +80,7 @@ void ResetGlobalPropertiesRequest::Run() {
   LOG4CXX_INFO(logger_, "RemoveAppFromTTSGlobalPropertiesList");
   application_manager_.RemoveAppFromTTSGlobalPropertiesList(app_id);
 
-  bool helpt_promt = false;
+  bool help_prompt = false;
   bool timeout_prompt = false;
   bool vr_help_title_items = false;
   bool menu_name = false;
@@ -95,9 +95,9 @@ void ResetGlobalPropertiesRequest::Run() {
         (*message_)[strings::msg_params][strings::properties][i].asInt());
 
     if (mobile_apis::GlobalProperty::HELPPROMPT == global_property) {
-      helpt_promt = ResetHelpPromt(app);
+      help_prompt = ResetHelpPrompt(app);
     } else if (mobile_apis::GlobalProperty::TIMEOUTPROMPT == global_property) {
-      timeout_prompt = ResetTimeoutPromt(app);
+      timeout_prompt = ResetTimeoutPrompt(app);
     } else if (((mobile_apis::GlobalProperty::VRHELPTITLE == global_property) ||
                 (mobile_apis::GlobalProperty::VRHELPITEMS ==
                  global_property)) &&
@@ -119,7 +119,7 @@ void ResetGlobalPropertiesRequest::Run() {
     StartAwaitForInterface(HmiInterfaces::HMI_INTERFACE_UI);
   }
 
-  if (timeout_prompt || helpt_promt) {
+  if (timeout_prompt || help_prompt) {
     StartAwaitForInterface(HmiInterfaces::HMI_INTERFACE_TTS);
   }
 
@@ -171,12 +171,12 @@ void ResetGlobalPropertiesRequest::Run() {
         hmi_apis::FunctionID::UI_SetGlobalProperties, &msg_params, true);
   }
 
-  if (timeout_prompt || helpt_promt) {
+  if (timeout_prompt || help_prompt) {
     // create ui request
     smart_objects::SmartObject msg_params =
         smart_objects::SmartObject(smart_objects::SmartType_Map);
 
-    if (helpt_promt) {
+    if (help_prompt) {
       msg_params[strings::help_prompt] = (*app->help_prompt());
     }
 
@@ -191,7 +191,7 @@ void ResetGlobalPropertiesRequest::Run() {
   }
 }
 
-bool ResetGlobalPropertiesRequest::ResetHelpPromt(
+bool ResetGlobalPropertiesRequest::ResetHelpPrompt(
     application_manager::ApplicationSharedPtr app) {
   if (!app) {
     LOG4CXX_ERROR(logger_, "Null pointer");
@@ -204,7 +204,7 @@ bool ResetGlobalPropertiesRequest::ResetHelpPromt(
   return true;
 }
 
-bool ResetGlobalPropertiesRequest::ResetTimeoutPromt(
+bool ResetGlobalPropertiesRequest::ResetTimeoutPrompt(
     application_manager::ApplicationSharedPtr const app) {
   if (!app) {
     LOG4CXX_ERROR(logger_, "Null pointer");
@@ -212,21 +212,21 @@ bool ResetGlobalPropertiesRequest::ResetTimeoutPromt(
     return false;
   }
 
-  const std::vector<std::string>& time_out_promt =
-      application_manager_.get_settings().time_out_promt();
+  const std::vector<std::string>& time_out_prompt =
+      application_manager_.get_settings().time_out_prompt();
 
-  smart_objects::SmartObject so_time_out_promt =
+  smart_objects::SmartObject so_time_out_prompt =
       smart_objects::SmartObject(smart_objects::SmartType_Array);
 
-  for (uint32_t i = 0; i < time_out_promt.size(); ++i) {
+  for (uint32_t i = 0; i < time_out_prompt.size(); ++i) {
     smart_objects::SmartObject timeoutPrompt =
         smart_objects::SmartObject(smart_objects::SmartType_Map);
-    timeoutPrompt[strings::text] = time_out_promt[i];
+    timeoutPrompt[strings::text] = time_out_prompt[i];
     timeoutPrompt[strings::type] = hmi_apis::Common_SpeechCapabilities::SC_TEXT;
-    so_time_out_promt[i] = timeoutPrompt;
+    so_time_out_prompt[i] = timeoutPrompt;
   }
 
-  app->set_timeout_prompt(so_time_out_promt);
+  app->set_timeout_prompt(so_time_out_prompt);
 
   return true;
 }
