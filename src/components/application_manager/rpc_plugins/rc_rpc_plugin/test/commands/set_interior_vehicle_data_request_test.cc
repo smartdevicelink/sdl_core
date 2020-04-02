@@ -48,6 +48,7 @@
 
 using application_manager::ApplicationSet;
 using application_manager::commands::MessageSharedPtr;
+using rc_rpc_plugin::commands::SetInteriorVehicleDataRequest;
 using test::components::application_manager_test::MockApplication;
 using test::components::application_manager_test::MockApplicationManager;
 using test::components::commands_test::CommandRequestTest;
@@ -56,6 +57,7 @@ using test::components::commands_test::HMIResultCodeIs;
 using ::testing::_;
 using ::testing::NiceMock;
 using ::testing::Return;
+using ::testing::ReturnRef;
 using ::testing::SaveArg;
 
 namespace {
@@ -186,24 +188,23 @@ TEST_F(SetInteriorVehicleDataRequestTest,
 TEST_F(
     SetInteriorVehicleDataRequestTest,
     Execute_ValidWithSettableAndReadOnlyParams_ExpectCutReadOnlyAndResendToHMI) {
-  // Arrange
+  using namespace rc_rpc_plugin::message_params;
 
-  MessageSharedPtr mobile_message = CreateBasicMessage();
-  ns_smart_device_link::ns_smart_objects::SmartObject& msg_params =
+  auto mobile_message = CreateBasicMessage();
+  auto& msg_params =
       (*mobile_message)[application_manager::strings::msg_params];
-  msg_params[message_params::kModuleData][message_params::kModuleType] =
-      mobile_apis::ModuleType::RADIO;
-  smart_objects::SmartObject radio_control_data(smart_objects::SmartType_Map);
-  radio_control_data[message_params::kState] = true;
-  radio_control_data[message_params::kRadioEnable] = true;
-  msg_params[message_params::kModuleData][message_params::kRadioControlData] =
-      radio_control_data;
+  msg_params[kModuleData][kModuleType] = mobile_apis::ModuleType::RADIO;
+  auto& control_data = msg_params[kModuleData][kRadioControlData];
+  control_data[kState] = true;
+  control_data[kRadioEnable] = true;
 
-  // Expectations
+  ON_CALL(mock_rc_capabilities_manager_, ControlDataForType(_, _))
+      .WillByDefault(ReturnRef(control_data));
+  ON_CALL(mock_rc_capabilities_manager_, AreReadOnlyParamsPresent(_, _, _))
+      .WillByDefault(Return(true));
+
   EXPECT_CALL(mock_policy_handler_, CheckModule(kPolicyAppId, _))
-      .WillOnce(Return(rc_rpc_plugin::TypeAccess::kAllowed));
-
-  EXPECT_CALL(app_mngr_, RemoveHMIFakeParameters(_, _));
+      .WillOnce(Return(true));
 
   EXPECT_CALL(
       mock_rpc_service_,
@@ -211,13 +212,12 @@ TEST_F(
           HMIResultCodeIs(hmi_apis::FunctionID::RC_SetInteriorVehicleData), _))
       .WillOnce(Return(true));
 
-  // Act
-  std::shared_ptr<rc_rpc_plugin::commands::SetInteriorVehicleDataRequest>
-      command = CreateRCCommand<
-          rc_rpc_plugin::commands::SetInteriorVehicleDataRequest>(
-          mobile_message);
+  auto command = CreateRCCommand<SetInteriorVehicleDataRequest>(mobile_message);
   ASSERT_TRUE(command->Init());
   command->Run();
+
+  EXPECT_FALSE(control_data.keyExists(kState));
+  EXPECT_TRUE(control_data.keyExists(kRadioEnable));
 }
 
 TEST_F(
