@@ -1428,14 +1428,6 @@ TEST_F(PolicyManagerImplTest2, ForcePTExchange_ExpectUpdateNeeded) {
   EXPECT_EQ("UPDATE_NEEDED", manager->GetPolicyTableStatus());
 }
 
-TEST_F(PolicyManagerImplTest2, OnSystemReady) {
-  // Arrange
-  CreateLocalPT("sdl_preloaded_pt.json");
-  // Check
-  EXPECT_CALL(listener, OnSystemInfoUpdateRequired());
-  manager->OnSystemReady();
-}
-
 TEST_F(PolicyManagerImplTest2, ResetRetrySequence) {
   // Arrange
   CreateLocalPT("sdl_preloaded_pt.json");

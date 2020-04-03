@@ -452,13 +452,6 @@ class PolicyManagerImpl : public PolicyManager {
                      const std::string& language) OVERRIDE;
 
   /**
-   * @brief Runs necessary operations, which is depends on external system
-   * state, e.g. getting system-specific parameters which are need to be
-   * filled into policy table
-   */
-  void OnSystemReady() OVERRIDE;
-
-  /**
    * @brief Get number of notification by priority
    * @param priority Specified priority
    * @return notification number

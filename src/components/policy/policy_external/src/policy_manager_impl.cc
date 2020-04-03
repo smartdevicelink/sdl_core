@@ -1630,13 +1630,6 @@ void PolicyManagerImpl::SetSystemInfo(const std::string& ccpu_version,
   cache_->SetMetaInfo(ccpu_version, wers_country_code, language);
 }
 
-void PolicyManagerImpl::OnSystemReady() {
-  // Update policy table for the first time with system information
-  if (!cache_->IsMetaInfoPresent()) {
-    listener()->OnSystemInfoUpdateRequired();
-  }
-}
-
 uint32_t PolicyManagerImpl::GetNotificationsNumber(
     const std::string& priority) const {
   LOG4CXX_AUTO_TRACE(logger_);
