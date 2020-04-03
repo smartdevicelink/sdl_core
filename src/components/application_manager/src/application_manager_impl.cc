@@ -3815,16 +3815,21 @@ void ApplicationManagerImpl::ClearTimerPool() {
   LOG4CXX_AUTO_TRACE(logger_);
   {
     sync_primitives::AutoLock lock(close_app_timer_pool_lock_);
-    std::remove_if(close_app_timer_pool_.begin(),
-                   close_app_timer_pool_.end(),
-                   [](TimerSPtr timer) { return !timer->is_running(); });
+
+    close_app_timer_pool_.erase(
+        std::remove_if(close_app_timer_pool_.begin(),
+                       close_app_timer_pool_.end(),
+                       [](TimerSPtr timer) { return !timer->is_running(); }),
+        close_app_timer_pool_.end());
   }
 
   {
     sync_primitives::AutoLock lock(end_stream_timer_pool_lock_);
-    std::remove_if(end_stream_timer_pool_.begin(),
-                   end_stream_timer_pool_.end(),
-                   [](TimerSPtr timer) { return !timer->is_running(); });
+    end_stream_timer_pool_.erase(
+        std::remove_if(end_stream_timer_pool_.begin(),
+                       end_stream_timer_pool_.end(),
+                       [](TimerSPtr timer) { return !timer->is_running(); }),
+        end_stream_timer_pool_.end());
   }
 }
 
