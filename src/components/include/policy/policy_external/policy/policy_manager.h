@@ -727,12 +727,13 @@ class PolicyManager : public usage_statistics::StatisticsManager,
   virtual const PolicySettings& get_settings() const = 0;
 
   /**
+   * @deprecated Unused in EXTERNAL_PROPRIETARY policies
    * @brief Finds the next URL that must be sent on OnSystemRequest retry
    * @param urls vector of vectors that contain urls for each application
    * @return Pair of policy application id and application url id from the
    * urls vector
    */
-  virtual AppIdURL GetNextUpdateUrl(const EndpointUrls& urls) = 0;
+  DEPRECATED virtual AppIdURL GetNextUpdateUrl(const EndpointUrls& urls) = 0;
 
   /**
    * @brief Assigns new HMI types for specified application

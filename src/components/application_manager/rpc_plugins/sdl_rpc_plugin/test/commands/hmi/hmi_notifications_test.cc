@@ -1557,7 +1557,8 @@ TEST_F(HMICommandsNotificationsTest,
   std::shared_ptr<Command> command =
       CreateCommand<OnSystemRequestNotification>(message);
 
-  EXPECT_CALL(mock_policy_handler_, GetAppIdForSending())
+  EXPECT_CALL(mock_policy_handler_,
+              GetAppIdForSending(policy::PTUIterationType::DefaultIteration))
       .WillOnce(Return(kAppId_));
   EXPECT_CALL(app_mngr_, application(_)).WillOnce(Return(app_));
   ON_CALL(app_mngr_, connection_handler())
@@ -1593,7 +1594,8 @@ TEST_F(HMICommandsNotificationsTest,
   std::shared_ptr<Command> command =
       CreateCommand<OnSystemRequestNotification>(message);
 
-  EXPECT_CALL(mock_policy_handler_, GetAppIdForSending())
+  EXPECT_CALL(mock_policy_handler_,
+              GetAppIdForSending(policy::PTUIterationType::DefaultIteration))
       .WillOnce(Return(kNullApppId));
   EXPECT_CALL(app_mngr_, application(_)).Times(0);
   EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(_, _)).Times(0);

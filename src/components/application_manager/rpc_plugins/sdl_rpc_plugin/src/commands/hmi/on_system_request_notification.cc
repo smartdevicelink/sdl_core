@@ -71,6 +71,25 @@ void OnSystemRequestNotification::Run() {
   params[strings::function_id] =
       static_cast<int32_t>(mobile_apis::FunctionID::eType::OnSystemRequestID);
 
+  using namespace rpc::policy_table_interface_base;
+  const auto request_type =
+      static_cast<rpc::policy_table_interface_base::RequestType>(
+          (*message_)[strings::msg_params][strings::request_type].asUInt());
+
+#ifdef PROPRIETARY_MODE
+  if (RequestType::RT_PROPRIETARY == request_type) {
+    // URL and app are chosen by Core for PROPRIETARY mode
+    uint32_t app_id = 0;
+    msg_params[strings::url] = policy_handler_.GetNextUpdateUrl(
+        policy::PTUIterationType::DefaultIteration, app_id);
+    if (0 == app_id) {
+      LOG4CXX_WARN(logger_,
+                   "Can't select application to forward OnSystemRequest.");
+      return;
+    }
+    msg_params[strings::app_id] = app_id;
+  }
+#endif
   // According to HMI API, this should be HMI unique id, but during processing
   // messages from HMI this param is replaced by connection key, so below it
   // will be treated as connection key
@@ -85,8 +104,7 @@ void OnSystemRequestNotification::Run() {
                   "Received OnSystemRequest without appID."
                   " One of registered apps will be used.");
     LOG4CXX_DEBUG(logger_, "Searching registered app to send OnSystemRequest.");
-    const PolicyHandlerInterface& policy_handler = policy_handler_;
-    const uint32_t selected_app_id = policy_handler.GetAppIdForSending();
+    const uint32_t selected_app_id = policy_handler_.GetAppIdForSending();
     if (0 == selected_app_id) {
       LOG4CXX_WARN(logger_,
                    "Can't select application to forward OnSystemRequest.");
@@ -120,11 +138,6 @@ void OnSystemRequestNotification::Run() {
                 "Sending request with application id " << app->policy_app_id());
 
   params[strings::connection_key] = app->app_id();
-
-  using namespace rpc::policy_table_interface_base;
-  const auto request_type =
-      static_cast<rpc::policy_table_interface_base::RequestType>(
-          (*message_)[strings::msg_params][strings::request_type].asUInt());
 
   if (helpers::Compare<RequestType, helpers::EQ, helpers::ONE>(
           request_type, RequestType::RT_PROPRIETARY, RequestType::RT_HTTP)) {

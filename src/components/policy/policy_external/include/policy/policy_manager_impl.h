@@ -786,7 +786,7 @@ class PolicyManagerImpl : public PolicyManager {
    * @return Pair of policy application id and application url id from the
    * urls vector
    */
-  AppIdURL GetNextUpdateUrl(const EndpointUrls& urls) OVERRIDE;
+  DEPRECATED AppIdURL GetNextUpdateUrl(const EndpointUrls& urls) OVERRIDE;
 
   /**
    * @brief Checks if there is existing URL in the EndpointUrls vector with
