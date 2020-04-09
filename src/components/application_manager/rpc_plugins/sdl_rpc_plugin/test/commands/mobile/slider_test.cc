@@ -274,22 +274,6 @@ TEST_F(SliderRequestTest, Run_SUCCESS) {
   command->Run();
 }
 
-TEST_F(SliderRequestTest, OnEvent_UI_OnResetTimeout_UNSUCCESS) {
-  PreConditions();
-  (*msg_)[am::strings::msg_params][am::strings::timeout] = kDefaultTimeout;
-  (*msg_)[am::strings::params][am::strings::correlation_id] = kCorrelationId;
-
-  CommandPtr command(CreateCommand<SliderRequest>(msg_));
-  EXPECT_TRUE(command->Init());
-
-  EXPECT_CALL(app_mngr_,
-              updateRequestTimeout(kConnectionKey, kCorrelationId, _));
-
-  Event event(hmi_apis::FunctionID::UI_OnResetTimeout);
-  event.set_smart_object(*msg_);
-  command->on_event(event);
-}
-
 TEST_F(SliderRequestTest, OnEvent_UI_UnknownEventId_UNSUCCESS) {
   PreConditions();
   EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(_, _)).Times(0);

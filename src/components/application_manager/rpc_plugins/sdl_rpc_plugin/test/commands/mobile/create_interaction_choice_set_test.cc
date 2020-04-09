@@ -612,7 +612,7 @@ TEST_F(CreateInteractionChoiceSetRequestTest, OnEvent_ValidVrNoError_SUCCESS) {
 
   command_->Run();
 
-  EXPECT_CALL(app_mngr_, updateRequestTimeout(_, _, _));
+  EXPECT_CALL(app_mngr_, UpdateRequestTimeout(_, _, _));
   EXPECT_CALL(app_mngr_, TerminateRequest(_, _, _)).Times(0);
   event.set_smart_object(*message_);
 
@@ -648,7 +648,7 @@ TEST_F(CreateInteractionChoiceSetRequestTest,
       .WillByDefault(Return(kCorrelationId));
 
   command_->Run();
-  EXPECT_CALL(app_mngr_, updateRequestTimeout(_, _, _));
+  EXPECT_CALL(app_mngr_, UpdateRequestTimeout(_, _, _));
   EXPECT_CALL(app_mngr_, TerminateRequest(_, _, _)).Times(0);
   event.set_smart_object(*message_);
 
@@ -689,7 +689,7 @@ TEST_F(CreateInteractionChoiceSetRequestTest,
 
   FillMessageFieldsItem2(message_);
 
-  EXPECT_CALL(app_mngr_, updateRequestTimeout(_, _, _)).Times(0);
+  EXPECT_CALL(app_mngr_, UpdateRequestTimeout(_, _, _)).Times(0);
   EXPECT_CALL(app_mngr_, TerminateRequest(_, _, _));
   event.set_smart_object(*message_);
   command_->on_event(event);
@@ -739,7 +739,7 @@ TEST_F(CreateInteractionChoiceSetRequestTest,
   command_->Run();
 
   FillMessageFieldsItem2(message_);
-  EXPECT_CALL(app_mngr_, updateRequestTimeout(_, _, _)).Times(0);
+  EXPECT_CALL(app_mngr_, UpdateRequestTimeout(_, _, _)).Times(0);
   EXPECT_CALL(app_mngr_, TerminateRequest(_, _, _));
   Event event(hmi_apis::FunctionID::VR_AddCommand);
   event.set_smart_object(*message_);
@@ -784,7 +784,7 @@ TEST_F(CreateInteractionChoiceSetRequestTest, OnTimeOut_InvalidApp_UNSUCCESS) {
   command_->Run();
 
   FillMessageFieldsItem2(message_);
-  EXPECT_CALL(app_mngr_, updateRequestTimeout(_, _, _)).Times(0);
+  EXPECT_CALL(app_mngr_, UpdateRequestTimeout(_, _, _)).Times(0);
   EXPECT_CALL(app_mngr_, TerminateRequest(_, _, _)).Times(2);
   Event event(hmi_apis::FunctionID::VR_AddCommand);
   event.set_smart_object(*message_);
@@ -832,7 +832,7 @@ TEST_F(CreateInteractionChoiceSetRequestTest,
 
   FillMessageFieldsItem2(message_);
 
-  EXPECT_CALL(app_mngr_, updateRequestTimeout(_, _, _)).Times(0);
+  EXPECT_CALL(app_mngr_, UpdateRequestTimeout(_, _, _)).Times(0);
   EXPECT_CALL(app_mngr_, TerminateRequest(_, _, _));
 
   Event event(hmi_apis::FunctionID::VR_AddCommand);
@@ -909,7 +909,7 @@ TEST_F(CreateInteractionChoiceSetRequestTest, Run_ErrorFromHmiFalse_UNSUCCESS) {
               ManageMobileCommand(
                   MobileResultCodeIs(mobile_apis::Result::GENERIC_ERROR),
                   am::commands::Command::SOURCE_SDL));
-  EXPECT_CALL(app_mngr_, updateRequestTimeout(_, _, _)).Times(0);
+  EXPECT_CALL(app_mngr_, UpdateRequestTimeout(_, _, _)).Times(0);
   EXPECT_CALL(app_mngr_, TerminateRequest(_, _, _));
   event.set_smart_object(*message_);
   command_->on_event(event);

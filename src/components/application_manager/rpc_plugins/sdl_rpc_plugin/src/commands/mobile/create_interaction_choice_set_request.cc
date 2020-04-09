@@ -374,7 +374,7 @@ void CreateInteractionChoiceSetRequest::CountReceivedVRResponses() {
                     << expected_chs_count_ - received_chs_count_
                     << " more to wait.");
   if (received_chs_count_ < expected_chs_count_) {
-    application_manager_.updateRequestTimeout(
+    application_manager_.UpdateRequestTimeout(
         connection_key(), correlation_id(), default_timeout());
     LOG4CXX_DEBUG(logger_, "Timeout for request was updated");
   } else {

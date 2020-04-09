@@ -472,7 +472,7 @@ TEST_F(SDLActivateAppRequestTest, WaitingCloudApplication_ConnectDevice) {
   EXPECT_CALL(app_mngr_, get_settings()).WillOnce(ReturnRef(settings));
 
   EXPECT_CALL(app_mngr_,
-              updateRequestTimeout(0, kCorrelationID, Gt(kMinimumTimeout)));
+              UpdateRequestTimeout(0, kCorrelationID, Gt(kMinimumTimeout)));
 
   MockConnectionHandler connection_handler;
   EXPECT_CALL(connection_handler, ConnectToDevice(kHandle));

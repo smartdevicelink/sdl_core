@@ -413,6 +413,13 @@ class CommandRequestImpl : public CommandImpl,
    */
   void AddTimeOutComponentInfoToMessage(
       smart_objects::SmartObject& response) const;
+  /**
+   * @brief AddRequestToTimeoutHandler checks the request and adds it to
+   * request_timeout_handler map for tracking
+   * @param request request to HMI
+   */
+  void AddRequestToTimeoutHandler(
+      const smart_objects::SmartObject& request_to_hmi) const;
 };
 
 }  // namespace commands

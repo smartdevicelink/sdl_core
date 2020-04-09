@@ -415,7 +415,7 @@ TEST_F(AlertRequestTest, DISABLED_OnEvent_UI_OnResetTimeout_SUCCESS) {
 
   EXPECT_CALL(
       app_mngr_,
-      updateRequestTimeout(kConnectionKey, kCorrelationId, kDefaultTimeout));
+      UpdateRequestTimeout(kConnectionKey, kCorrelationId, kDefaultTimeout));
 
   ExpectManageMobileCommandWithResultCode(mobile_apis::Result::INVALID_ENUM);
 

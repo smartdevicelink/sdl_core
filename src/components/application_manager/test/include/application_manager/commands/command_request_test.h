@@ -38,6 +38,7 @@
 #include "gtest/gtest.h"
 
 #include "application_manager/commands/command_request_impl.h"
+#include "application_manager/mock_request_timeout_handler.h"
 #include "application_manager/smart_object_keys.h"
 #include "application_manager/test/include/application_manager/commands/commands_test.h"
 #include "application_manager/test/include/application_manager/mock_event_dispatcher.h"
@@ -59,6 +60,7 @@ namespace am = ::application_manager;
 using am::commands::Command;
 using am::commands::CommandRequestImpl;
 using am::event_engine::Event;
+using test::components::application_manager_test::MockRequestTimeoutHandler;
 
 class CallRun {
  public:
@@ -112,6 +114,7 @@ class CommandRequestTest : public CommandsTest<kIsNice> {
   }
 
   MockEventDisp event_dispatcher_;
+  MockRequestTimeoutHandler mock_request_timeout_handler_;
 
  protected:
   CommandRequestTest() : CommandsTest<kIsNice>() {}
@@ -120,6 +123,8 @@ class CommandRequestTest : public CommandsTest<kIsNice> {
     CommandsTest<kIsNice>::InitCommand(default_timeout);
     ON_CALL(CommandsTest<kIsNice>::app_mngr_, event_dispatcher())
         .WillByDefault(ReturnRef(event_dispatcher_));
+    ON_CALL(CommandsTest<kIsNice>::app_mngr_, get_request_timeout_handler())
+        .WillByDefault(ReturnRef(mock_request_timeout_handler_));
   }
 };
 

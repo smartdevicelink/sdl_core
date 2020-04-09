@@ -52,12 +52,12 @@
 #include "application_manager/hmi_interfaces_impl.h"
 #include "application_manager/message.h"
 #include "application_manager/message_helper.h"
-#include "application_manager/request_controller.h"
 #include "application_manager/resumption/resume_ctrl.h"
 #include "application_manager/rpc_handler.h"
 #include "application_manager/rpc_service.h"
 #include "application_manager/state_controller_impl.h"
 
+#include "application_manager/request_timeout_handler.h"
 #include "application_manager/rpc_handler.h"
 
 #include "application_manager/policies/policy_handler_interface.h"
@@ -783,14 +783,14 @@ class ApplicationManagerImpl
    *
    * @param ptr Reference to shared pointer that point on hmi notification
    */
-  void addNotification(const CommandSharedPtr ptr);
+  void AddNotification(const CommandSharedPtr ptr);
 
   /**
    * @ Add notification to collection
    *
-   * @param ptr Reference to shared pointer that point on hmi notification
+   * @param notification Pointer that points to hmi notification
    */
-  void removeNotification(const commands::Command* notification);
+  void RemoveNotification(const commands::Command* notification);
 
   /**
    * @ Updates request timeout
@@ -799,7 +799,7 @@ class ApplicationManagerImpl
    * @param mobile_correlation_id Correlation ID of the mobile request
    * @param new_timeout_value New timeout in milliseconds to be set
    */
-  void updateRequestTimeout(uint32_t connection_key,
+  void UpdateRequestTimeout(uint32_t connection_key,
                             uint32_t mobile_correlation_id,
                             uint32_t new_timeout_value) OVERRIDE;
 
@@ -994,6 +994,16 @@ class ApplicationManagerImpl
 
   rpc_handler::RPCHandler& GetRPCHandler() const OVERRIDE {
     return *rpc_handler_;
+  }
+
+  request_controller::RequestTimeoutHandler& get_request_timeout_handler()
+      const OVERRIDE {
+    return *request_timeout_handler_;
+  }
+
+  request_controller::RequestController& get_request_controller()
+      const OVERRIDE {
+    return *request_ctrl_;
   }
 
   void SetRPCService(std::unique_ptr<rpc_service::RPCService>& rpc_service) {
@@ -1554,8 +1564,10 @@ class ApplicationManagerImpl
   connection_handler::ConnectionHandler* connection_handler_;
   std::unique_ptr<policy::PolicyHandlerInterface> policy_handler_;
   protocol_handler::ProtocolHandler* protocol_handler_;
+  std::unique_ptr<request_controller::RequestTimeoutHandler>
+      request_timeout_handler_;
+  std::unique_ptr<request_controller::RequestController> request_ctrl_;
   std::unique_ptr<plugin_manager::RPCPluginManager> plugin_manager_;
-  request_controller::RequestController request_ctrl_;
   std::unique_ptr<application_manager::AppServiceManager> app_service_manager_;
 
   /**

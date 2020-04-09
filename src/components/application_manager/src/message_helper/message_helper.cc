@@ -314,6 +314,17 @@ hmi_apis::Common_LightName::eType MessageHelper::CommonLightNameFromString(
   return hmi_apis::Common_LightName::INVALID_ENUM;
 }
 
+hmi_apis::FunctionID::eType MessageHelper::HMIFunctionIDFromString(
+    const std::string& function_id) {
+  using namespace ns_smart_device_link::ns_smart_objects;
+  hmi_apis::FunctionID::eType value;
+  if (EnumConversionHelper<hmi_apis::FunctionID::eType>::StringToEnum(
+          function_id, &value)) {
+    return value;
+  }
+  return hmi_apis::FunctionID::INVALID_ENUM;
+}
+
 std::string MessageHelper::GetDeviceMacAddressForHandle(
     const transport_manager::DeviceHandle device_handle,
     const ApplicationManager& app_mngr) {

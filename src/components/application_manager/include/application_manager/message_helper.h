@@ -888,6 +888,15 @@ class MessageHelper {
   static hmi_apis::Common_LightName::eType CommonLightNameFromString(
       const std::string& lightName);
 
+  /**
+   * @brief HMIFunctionIDFromString converts function_id from
+   * string to enum value
+   * @param function_id function_id string to convert
+   * @return FunctionID enum value
+   */
+  static hmi_apis::FunctionID::eType HMIFunctionIDFromString(
+      const std::string& function_id);
+
   static smart_objects::SmartObjectSPtr
   GetOnAppInterfaceUnregisteredNotificationToMobile(
       int32_t connection_key,

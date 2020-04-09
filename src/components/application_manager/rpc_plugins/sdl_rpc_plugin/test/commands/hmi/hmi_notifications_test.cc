@@ -61,6 +61,7 @@
 #include "sdl_rpc_plugin/commands/hmi/on_ready_notification.h"
 #include "sdl_rpc_plugin/commands/hmi/on_received_policy_update.h"
 #include "sdl_rpc_plugin/commands/hmi/on_record_start_notification.h"
+#include "sdl_rpc_plugin/commands/hmi/on_reset_timeout_notification.h"
 #include "sdl_rpc_plugin/commands/hmi/on_resume_audio_source_notification.h"
 #include "sdl_rpc_plugin/commands/hmi/on_sdl_close_notification.h"
 #include "sdl_rpc_plugin/commands/hmi/on_sdl_consent_needed_notification.h"
@@ -72,13 +73,11 @@
 #include "sdl_rpc_plugin/commands/hmi/on_system_info_changed_notification.h"
 #include "sdl_rpc_plugin/commands/hmi/on_system_request_notification.h"
 #include "sdl_rpc_plugin/commands/hmi/on_tts_language_change_notification.h"
-#include "sdl_rpc_plugin/commands/hmi/on_tts_reset_timeout_notification.h"
 #include "sdl_rpc_plugin/commands/hmi/on_tts_started_notification.h"
 #include "sdl_rpc_plugin/commands/hmi/on_tts_stopped_notification.h"
 #include "sdl_rpc_plugin/commands/hmi/on_ui_command_notification.h"
 #include "sdl_rpc_plugin/commands/hmi/on_ui_keyboard_input_notification.h"
 #include "sdl_rpc_plugin/commands/hmi/on_ui_language_change_notification.h"
-#include "sdl_rpc_plugin/commands/hmi/on_ui_reset_timeout_notification.h"
 #include "sdl_rpc_plugin/commands/hmi/on_ui_touch_event_notification.h"
 #include "sdl_rpc_plugin/commands/hmi/on_video_data_streaming_notification.h"
 #include "sdl_rpc_plugin/commands/hmi/on_vr_command_notification.h"
@@ -347,12 +346,10 @@ typedef Types<
                 hmi_apis::FunctionID::BasicCommunication_OnAppDeactivated>,
     CommandPair<OnEventChangedNotification,
                 hmi_apis::FunctionID::BasicCommunication_OnEventChanged>,
-    CommandPair<hmi::OnTTSResetTimeoutNotification,
-                hmi_apis::FunctionID::TTS_OnResetTimeout>,
+    CommandPair<hmi::OnResetTimeoutNotification,
+                hmi_apis::FunctionID::BasicCommunication_OnResetTimeout>,
     CommandPair<OnTTSStartedNotification, hmi_apis::FunctionID::TTS_Started>,
     CommandPair<OnTTSStoppedNotification, hmi_apis::FunctionID::TTS_Stopped>,
-    CommandPair<hmi::OnUIResetTimeoutNotification,
-                hmi_apis::FunctionID::UI_OnResetTimeout>,
     CommandPair<OnVRStartedNotification, hmi_apis::FunctionID::VR_Started>,
     CommandPair<OnVRStoppedNotification, hmi_apis::FunctionID::VR_Stopped> >
     HMIOnNotificationsEventDispatcherTypes;

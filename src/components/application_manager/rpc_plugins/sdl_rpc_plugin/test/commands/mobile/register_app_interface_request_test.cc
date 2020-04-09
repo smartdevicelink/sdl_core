@@ -326,7 +326,7 @@ TEST_F(RegisterAppInterfaceRequestTest, Run_MinimalData_SUCCESS) {
       .WillOnce(Return(true))
       .WillOnce(Return(false));
   ON_CALL(app_mngr_, IsHMICooperating()).WillByDefault(Return(false));
-  EXPECT_CALL(app_mngr_, updateRequestTimeout(_, _, _));
+  EXPECT_CALL(app_mngr_, UpdateRequestTimeout(_, _, _));
   EXPECT_CALL(app_mngr_, IsApplicationForbidden(_, _)).WillOnce(Return(false));
 
   connection_handler::DeviceHandle handle = 1;
@@ -413,7 +413,7 @@ TEST_F(RegisterAppInterfaceRequestTest,
       .WillOnce(Return(true))
       .WillOnce(Return(false));
   ON_CALL(app_mngr_, IsHMICooperating()).WillByDefault(Return(false));
-  EXPECT_CALL(app_mngr_, updateRequestTimeout(_, _, _));
+  EXPECT_CALL(app_mngr_, UpdateRequestTimeout(_, _, _));
   EXPECT_CALL(app_mngr_, IsApplicationForbidden(_, _)).WillOnce(Return(false));
 
   connection_handler::DeviceHandle handle = 1;
@@ -716,7 +716,7 @@ TEST_F(RegisterAppInterfaceRequestTest,
       .WillOnce(Return(true))
       .WillOnce(Return(false));
   ON_CALL(app_mngr_, IsHMICooperating()).WillByDefault(Return(false));
-  EXPECT_CALL(app_mngr_, updateRequestTimeout(kConnectionKey2, _, _));
+  EXPECT_CALL(app_mngr_, UpdateRequestTimeout(kConnectionKey2, _, _));
   EXPECT_CALL(app_mngr_, IsApplicationForbidden(kConnectionKey2, kAppId1))
       .WillOnce(Return(false));
 

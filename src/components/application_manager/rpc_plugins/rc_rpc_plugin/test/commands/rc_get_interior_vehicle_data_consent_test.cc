@@ -39,10 +39,11 @@
 #include "application_manager/mock_event_dispatcher.h"
 #include "application_manager/mock_hmi_capabilities.h"
 #include "application_manager/mock_request_controller_settings.h"
+#include "application_manager/mock_request_timeout_handler.h"
 #include "application_manager/mock_rpc_plugin.h"
 #include "application_manager/mock_rpc_plugin_manager.h"
 #include "application_manager/mock_rpc_protection_manager.h"
-#include "application_manager/request_controller.h"
+#include "application_manager/request_controller_impl.h"
 #include "application_manager/rpc_service_impl.h"
 #include "hmi_message_handler/mock_hmi_message_handler.h"
 #include "include/test/protocol_handler/mock_protocol_handler.h"
@@ -81,6 +82,7 @@ using test::components::application_manager_test::MockApplication;
 using test::components::application_manager_test::MockCommandFactory;
 using test::components::application_manager_test::MockHMICapabilities;
 using test::components::application_manager_test::MockRequestControlerSettings;
+using test::components::application_manager_test::MockRequestTimeoutHandler;
 using test::components::commands_test::CommandRequestTest;
 using test::components::commands_test::CommandsTestMocks;
 using test::components::hmi_message_handler_test::MockHMIMessageHandler;
@@ -107,9 +109,10 @@ class RCGetInteriorVehicleDataConsentTest
       : mock_app_(std::make_shared<NiceMock<MockApplication> >())
       , command_holder(app_mngr_)
       , rc_capabilities_(smart_objects::SmartType::SmartType_Array)
-      , request_controller(mock_request_controler)
       , rpc_protection_manager_(
             std::make_shared<application_manager::MockRPCProtectionManager>())
+      , request_controller(mock_request_controler,
+                           mock_request_timeout_handler_)
       , rpc_service_(app_mngr_,
                      request_controller,
                      &mock_protocol_handler,
@@ -212,9 +215,10 @@ class RCGetInteriorVehicleDataConsentTest
   smart_objects::SmartObject rc_capabilities_;
   MockRPCPlugin mock_rpc_plugin;
   MockCommandFactory mock_command_factory;
-  am::request_controller::RequestController request_controller;
   std::shared_ptr<application_manager::MockRPCProtectionManager>
       rpc_protection_manager_;
+  MockRequestTimeoutHandler mock_request_timeout_handler_;
+  am::request_controller::RequestControllerImpl request_controller;
   am::rpc_service::RPCServiceImpl rpc_service_;
   std::shared_ptr<RCAppExtension> rc_app_extention_;
   std::shared_ptr<am::plugin_manager::MockRPCPluginManager>

@@ -216,7 +216,7 @@ void RegisterAppInterfaceRequest::Run() {
                       << ", correlation_id=" << correlation_id()
                       << ", default_timeout=" << default_timeout()
                       << ", thread=" << pthread_self());
-    application_manager_.updateRequestTimeout(
+    application_manager_.UpdateRequestTimeout(
         connection_key(), correlation_id(), default_timeout());
     sleep(1);
     // TODO(DK): timer_->StartWait(1);

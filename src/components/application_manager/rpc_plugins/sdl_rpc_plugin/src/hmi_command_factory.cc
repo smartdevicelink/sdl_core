@@ -215,6 +215,7 @@
 #include "sdl_rpc_plugin/commands/hmi/on_ready_notification.h"
 #include "sdl_rpc_plugin/commands/hmi/on_received_policy_update.h"
 #include "sdl_rpc_plugin/commands/hmi/on_record_start_notification.h"
+#include "sdl_rpc_plugin/commands/hmi/on_reset_timeout_notification.h"
 #include "sdl_rpc_plugin/commands/hmi/on_sdl_close_notification.h"
 #include "sdl_rpc_plugin/commands/hmi/on_sdl_persistence_complete_notification.h"
 #include "sdl_rpc_plugin/commands/hmi/on_system_context_notification.h"
@@ -222,13 +223,11 @@
 #include "sdl_rpc_plugin/commands/hmi/on_system_request_notification.h"
 #include "sdl_rpc_plugin/commands/hmi/on_system_time_ready_notification.h"
 #include "sdl_rpc_plugin/commands/hmi/on_tts_language_change_notification.h"
-#include "sdl_rpc_plugin/commands/hmi/on_tts_reset_timeout_notification.h"
 #include "sdl_rpc_plugin/commands/hmi/on_tts_started_notification.h"
 #include "sdl_rpc_plugin/commands/hmi/on_tts_stopped_notification.h"
 #include "sdl_rpc_plugin/commands/hmi/on_ui_command_notification.h"
 #include "sdl_rpc_plugin/commands/hmi/on_ui_keyboard_input_notification.h"
 #include "sdl_rpc_plugin/commands/hmi/on_ui_language_change_notification.h"
-#include "sdl_rpc_plugin/commands/hmi/on_ui_reset_timeout_notification.h"
 #include "sdl_rpc_plugin/commands/hmi/on_ui_touch_event_notification.h"
 #include "sdl_rpc_plugin/commands/hmi/on_vr_command_notification.h"
 #include "sdl_rpc_plugin/commands/hmi/on_vr_language_change_notification.h"
@@ -764,8 +763,8 @@ CommandCreator& HMICommandFactory::get_creator_factory(
     case hmi_apis::FunctionID::UI_OnTouchEvent: {
       return factory.GetCreator<commands::hmi::OnUITouchEventNotification>();
     }
-    case hmi_apis::FunctionID::UI_OnResetTimeout: {
-      return factory.GetCreator<commands::hmi::OnUIResetTimeoutNotification>();
+    case hmi_apis::FunctionID::BasicCommunication_OnResetTimeout: {
+      return factory.GetCreator<commands::hmi::OnResetTimeoutNotification>();
     }
     case hmi_apis::FunctionID::Navigation_SetVideoConfig: {
       return hmi_apis::messageType::request == message_type
@@ -863,9 +862,6 @@ CommandCreator& HMICommandFactory::get_creator_factory(
     }
     case hmi_apis::FunctionID::SDL_OnDeviceStateChanged: {
       return factory.GetCreator<commands::OnDeviceStateChangedNotification>();
-    }
-    case hmi_apis::FunctionID::TTS_OnResetTimeout: {
-      return factory.GetCreator<commands::hmi::OnTTSResetTimeoutNotification>();
     }
     case hmi_apis::FunctionID::BasicCommunication_OnEventChanged: {
       return factory.GetCreator<commands::OnEventChangedNotification>();

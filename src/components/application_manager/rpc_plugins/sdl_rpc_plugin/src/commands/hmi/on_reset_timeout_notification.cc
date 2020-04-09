@@ -29,55 +29,42 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_HMI_ON_TTS_RESET_TIMEOUT_NOTIFICATION_H_
-#define SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_HMI_ON_TTS_RESET_TIMEOUT_NOTIFICATION_H_
-
-#include "application_manager/commands/notification_from_hmi.h"
+#include "sdl_rpc_plugin/commands/hmi/on_reset_timeout_notification.h"
+#include "application_manager/event_engine/event.h"
+#include "interfaces/HMI_API.h"
 
 namespace sdl_rpc_plugin {
-namespace app_mngr = application_manager;
+using namespace application_manager;
 
 namespace commands {
 
 namespace hmi {
 
-/**
- * @brief OnTTSResetTimeoutNotification command class
- **/
-class OnTTSResetTimeoutNotification
-    : public app_mngr::commands::NotificationFromHMI {
- public:
-  /**
-   * @brief OnTTSResetTimeoutNotification class constructor
-   *
-   * @param message Incoming SmartObject message
-   **/
-  OnTTSResetTimeoutNotification(
-      const app_mngr::commands::MessageSharedPtr& message,
-      app_mngr::ApplicationManager& application_manager,
-      app_mngr::rpc_service::RPCService& rpc_service,
-      app_mngr::HMICapabilities& hmi_capabilities,
-      policy::PolicyHandlerInterface& policy_handle);
+OnResetTimeoutNotification::OnResetTimeoutNotification(
+    const application_manager::commands::MessageSharedPtr& message,
+    ApplicationManager& application_manager,
+    rpc_service::RPCService& rpc_service,
+    HMICapabilities& hmi_capabilities,
+    policy::PolicyHandlerInterface& policy_handle)
+    : NotificationFromHMI(message,
+                          application_manager,
+                          rpc_service,
+                          hmi_capabilities,
+                          policy_handle) {}
 
-  /**
-   * @brief OnTTSResetTimeoutNotification class destructor
-   **/
-  virtual ~OnTTSResetTimeoutNotification();
+OnResetTimeoutNotification::~OnResetTimeoutNotification() {}
 
-  /**
-   * @brief Execute command
-   **/
-  virtual void Run();
+void OnResetTimeoutNotification::Run() {
+  LOG4CXX_AUTO_TRACE(logger_);
 
- private:
-  DISALLOW_COPY_AND_ASSIGN(OnTTSResetTimeoutNotification);
-};
+  event_engine::Event event(
+      hmi_apis::FunctionID::BasicCommunication_OnResetTimeout);
+  event.set_smart_object(*message_);
+  event.raise(application_manager_.event_dispatcher());
+}
 
 }  // namespace hmi
 
 }  // namespace commands
 
 }  // namespace sdl_rpc_plugin
-
-#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_HMI_ON_TTS_RESET_TIMEOUT_NOTIFICATION_H_

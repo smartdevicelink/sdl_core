@@ -36,7 +36,6 @@
 #include "gmock/gmock.h"
 #include "utils/macro.h"
 
-#include "application_manager/commands/command_impl.h"
 #include "application_manager/event_engine/event_dispatcher.h"
 #include "application_manager/mock_application.h"
 #include "application_manager/mock_application_manager.h"
@@ -49,6 +48,7 @@
 #include "utils/custom_string.h"
 #include "utils/lock.h"
 
+#include "application_manager/commands/command_impl.h"
 #include "policy/policy_table/types.h"
 #include "rpc_base/rpc_base_json_inl.h"
 
@@ -600,7 +600,163 @@ class MessageHelperTest : public ::testing::Test {
                           "OnSystemRequest",
                           "OnHashChange"}
       , hmi_level_strings{"FULL", "LIMITED", "BACKGROUND", "NONE"}
-      , delta_from_functions_id(32768) {}
+      , delta_from_functions_id(32768)
+      , hmi_function_id_strings{
+            "Buttons.GetCapabilities",
+            "Buttons.ButtonPress",
+            "Buttons.OnButtonEvent",
+            "Buttons.OnButtonPress",
+            "Buttons.OnButtonSubscription",
+            "BasicCommunication.OnServiceUpdate",
+            "BasicCommunication.GetSystemTime",
+            "BasicCommunication.OnSystemTimeReady",
+            "BasicCommunication.OnReady",
+            "BasicCommunication.OnStartDeviceDiscovery",
+            "BasicCommunication.OnUpdateDeviceList",
+            "BasicCommunication.OnResumeAudioSource",
+            "BasicCommunication.OnSDLPersistenceComplete",
+            "BasicCommunication.UpdateAppList",
+            "BasicCommunication.UpdateDeviceList",
+            "BasicCommunication.OnFileRemoved",
+            "BasicCommunication.OnDeviceChosen",
+            "BasicCommunication.OnFindApplications",
+            "BasicCommunication.ActivateApp",
+            "BasicCommunication.CloseApplication",
+            "BasicCommunication.OnAppActivated",
+            "BasicCommunication.OnAppDeactivated",
+            "BasicCommunication.OnAppRegistered",
+            "BasicCommunication.OnAppUnregistered",
+            "BasicCommunication.OnExitApplication",
+            "BasicCommunication.OnExitAllApplications",
+            "BasicCommunication.OnAwakeSDL",
+            "BasicCommunication.MixingAudioSupported",
+            "BasicCommunication.DialNumber",
+            "BasicCommunication.OnResetTimeout",
+            "BasicCommunication.OnSystemRequest",
+            "BasicCommunication.SystemRequest",
+            "BasicCommunication.PolicyUpdate",
+            "BasicCommunication.OnSDLClose",
+            "BasicCommunication.OnPutFile",
+            "BasicCommunication.GetFilePath",
+            "BasicCommunication.GetSystemInfo",
+            "BasicCommunication.OnSystemInfoChanged",
+            "BasicCommunication.OnIgnitionCycleOver",
+            "BasicCommunication.DecryptCertificate",
+            "BasicCommunication.OnEventChanged",
+            "BasicCommunication.OnSystemCapabilityUpdated",
+            "BasicCommunication.SetAppProperties",
+            "BasicCommunication.GetAppProperties",
+            "BasicCommunication.OnAppPropertiesChange",
+            "VR.IsReady",
+            "VR.Started",
+            "VR.Stopped",
+            "VR.AddCommand",
+            "VR.DeleteCommand",
+            "VR.PerformInteraction",
+            "VR.OnCommand",
+            "VR.ChangeRegistration",
+            "VR.OnLanguageChange",
+            "VR.GetSupportedLanguages",
+            "VR.GetLanguage",
+            "VR.GetCapabilities",
+            "TTS.GetCapabilities",
+            "TTS.Started",
+            "TTS.Stopped",
+            "TTS.IsReady",
+            "TTS.Speak",
+            "TTS.StopSpeaking",
+            "TTS.ChangeRegistration",
+            "TTS.OnLanguageChange",
+            "TTS.GetSupportedLanguages",
+            "TTS.GetLanguage",
+            "TTS.SetGlobalProperties",
+            "TTS.OnResetTimeout",
+            "UI.Alert",
+            "UI.SetDisplayLayout",
+            "UI.Show",
+            "UI.CreateWindow",
+            "UI.DeleteWindow",
+            "UI.AddCommand",
+            "UI.DeleteCommand",
+            "UI.AddSubMenu",
+            "UI.DeleteSubMenu",
+            "UI.ShowAppMenu",
+            "UI.PerformInteraction",
+            "UI.CancelInteraction",
+            "UI.SetMediaClockTimer",
+            "UI.SetGlobalProperties",
+            "UI.OnCommand",
+            "UI.OnSystemContext",
+            "UI.GetCapabilities",
+            "UI.ChangeRegistration",
+            "UI.OnLanguageChange",
+            "UI.GetSupportedLanguages",
+            "UI.GetLanguage",
+            "UI.OnDriverDistraction",
+            "UI.SetAppIcon",
+            "UI.OnKeyboardInput",
+            "UI.OnTouchEvent",
+            "UI.Slider",
+            "UI.ScrollableMessage",
+            "UI.PerformAudioPassThru",
+            "UI.EndAudioPassThru",
+            "UI.IsReady",
+            "UI.ClosePopUp",
+            "UI.OnResetTimeout",
+            "UI.OnRecordStart",
+            "UI.SendHapticData",
+            "Navigation.IsReady",
+            "Navigation.SendLocation",
+            "Navigation.ShowConstantTBT",
+            "Navigation.AlertManeuver",
+            "Navigation.UpdateTurnList",
+            "Navigation.OnTBTClientState",
+            "Navigation.SetVideoConfig",
+            "Navigation.StartStream",
+            "Navigation.StopStream",
+            "Navigation.StartAudioStream",
+            "Navigation.StopAudioStream",
+            "Navigation.OnAudioDataStreaming",
+            "Navigation.OnVideoDataStreaming",
+            "Navigation.GetWayPoints",
+            "Navigation.OnWayPointChange",
+            "Navigation.SubscribeWayPoints",
+            "Navigation.UnsubscribeWayPoints",
+            "VehicleInfo.IsReady",
+            "VehicleInfo.GetVehicleType",
+            "VehicleInfo.ReadDID",
+            "VehicleInfo.GetDTCs",
+            "VehicleInfo.DiagnosticMessage",
+            "VehicleInfo.SubscribeVehicleData",
+            "VehicleInfo.UnsubscribeVehicleData",
+            "VehicleInfo.GetVehicleData",
+            "VehicleInfo.OnVehicleData",
+            "SDL.ActivateApp",
+            "SDL.GetUserFriendlyMessage",
+            "SDL.OnAllowSDLFunctionality",
+            "SDL.OnReceivedPolicyUpdate",
+            "SDL.OnPolicyUpdate",
+            "SDL.GetListOfPermissions",
+            "SDL.OnAppPermissionConsent",
+            "SDL.OnAppPermissionChanged",
+            "SDL.OnSDLConsentNeeded",
+            "SDL.UpdateSDL",
+            "SDL.GetStatusUpdate",
+            "SDL.OnStatusUpdate",
+            "SDL.OnSystemError",
+            "SDL.AddStatisticsInfo",
+            "SDL.OnDeviceStateChanged",
+            "SDL.GetPolicyConfigurationData",
+            "RC.IsReady",
+            "RC.GetCapabilities",
+            "RC.SetGlobalProperties",
+            "RC.SetInteriorVehicleData",
+            "RC.GetInteriorVehicleData",
+            "RC.GetInteriorVehicleDataConsent",
+            "RC.OnInteriorVehicleData",
+            "RC.OnRemoteControlSettings",
+            "RC.OnRCStatus",
+        } {}
 
  protected:
   application_manager_test::MockApplicationManager mock_application_manager;
@@ -611,8 +767,8 @@ class MessageHelperTest : public ::testing::Test {
   const StringArray function_id_strings;
   const StringArray events_id_strings;
   const StringArray hmi_level_strings;
-
   const size_t delta_from_functions_id;
+  const StringArray hmi_function_id_strings;
 };
 
 TEST_F(MessageHelperTest,
@@ -1110,6 +1266,23 @@ TEST_F(MessageHelperTest, ExtractWindowIdFromSmartObject_FromWrongType) {
   smart_objects::SmartObject message(smart_objects::SmartType_Array);
   EXPECT_EQ(mobile_apis::PredefinedWindows::DEFAULT_WINDOW,
             MessageHelper::ExtractWindowIdFromSmartObject(message));
+}
+
+TEST_F(MessageHelperTest, HMIFunctionIDFromString) {
+  hmi_apis::FunctionID::eType enum_value;
+  hmi_apis::FunctionID::eType enum_from_string_value;
+  // Check function_ids >= 0
+  for (size_t array_index = 0; array_index < hmi_function_id_strings.size();
+       ++array_index) {
+    enum_value = static_cast<hmi_apis::FunctionID::eType>(array_index);
+    enum_from_string_value = MessageHelper::HMIFunctionIDFromString(
+        hmi_function_id_strings[array_index]);
+    EXPECT_EQ(enum_value, enum_from_string_value);
+  }
+  // Check InvalidEnum == -1
+  enum_value = hmi_apis::FunctionID::eType::INVALID_ENUM;
+  enum_from_string_value = MessageHelper::HMIFunctionIDFromString("");
+  EXPECT_EQ(enum_value, enum_from_string_value);
 }
 
 }  // namespace application_manager_test
