@@ -112,6 +112,14 @@ void OnExitApplicationNotification::Run() {
       break;
     }
 #endif  // CLOUD_APP_WEBSOCKET_TRANSPORT_SUPPORT
+    case Common_ApplicationExitReason::RESOURCE_CONSTRAINT: {
+      const auto message =
+          MessageHelper::GetOnAppInterfaceUnregisteredNotificationToMobile(
+              app_id, AppInterfaceUnregisteredReason::RESOURCE_CONSTRAINT);
+      SendNotificationToMobile(message);
+      application_manager_.UnregisterApplication(app_id, Result::SUCCESS);
+      return;
+    }
 
     default: {
       LOG4CXX_WARN(logger_, "Unhandled reason");

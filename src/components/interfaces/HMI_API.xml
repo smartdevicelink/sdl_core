@@ -535,6 +535,9 @@
   <element name="CLOSE_CLOUD_CONNECTION">
     <description>By getting this value, SDL puts the named app to NONE HMILevel. Used by the HMI to close a cloud app connection.</description>
   </element>
+  <element name="RESOURCE_CONSTRAINT">
+    <description>By getting this value, SDL should unregister the application to allow the HMI to close the application.</description>
+  </element>
 </enum>
 
 <enum name="TextFieldName">
