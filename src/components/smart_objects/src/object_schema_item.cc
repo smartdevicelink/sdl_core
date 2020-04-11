@@ -126,8 +126,8 @@ errors::eType CObjectSchemaItem::validate(
 
     std::set<std::string>::const_iterator key_it = object_keys.find(key);
     if (object_keys.end() == key_it) {
-      if (correct_member && correct_member->mIsMandatory == true &&
-          correct_member->mIsRemoved == false) {
+      if (correct_member && correct_member->mIsMandatory &&
+          !correct_member->mIsDeprecated && !correct_member->mIsRemoved) {
         std::string validation_info = "Missing mandatory parameter: " + key;
         report__->set_validation_info(validation_info);
         return errors::MISSING_MANDATORY_PARAMETER;
