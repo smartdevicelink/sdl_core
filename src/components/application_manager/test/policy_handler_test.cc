@@ -31,6 +31,7 @@
  */
 
 #include <fstream>
+#include <memory>
 #include <string>
 #include <vector>
 #include "gmock/gmock.h"
@@ -92,9 +93,12 @@ using ::testing::SetArgReferee;
 
 typedef NiceMock<application_manager_test::MockRPCService> MockRPCService;
 
+namespace {
+const std::string kFakeNickname = "fake_nickname";
 const std::string kDummyData = "some_data";
 const WindowID kDefaultWindowId =
     mobile_apis::PredefinedWindows::DEFAULT_WINDOW;
+}  // namespace
 
 class PolicyHandlerTest : public ::testing::Test {
  public:
@@ -3008,8 +3012,6 @@ TEST_F(PolicyHandlerTest, GetAppPropertiesStatus_EndPointNotChanged_SUCCESS) {
 TEST_F(PolicyHandlerTest, GetAppPropertiesStatus_NicknameChanged_SUCCESS) {
   ChangePolicyManagerToMock();
 
-  const std::string kFakeNickname = "fake_nickname";
-
   smart_objects::SmartObject properties;
   properties[strings::app_id] = kPolicyAppId_;
   properties[strings::nicknames] =
@@ -3031,10 +3033,32 @@ TEST_F(PolicyHandlerTest, GetAppPropertiesStatus_NicknameChanged_SUCCESS) {
             policy_handler_.GetAppPropertiesStatus(properties, kPolicyAppId_));
 }
 
-TEST_F(PolicyHandlerTest, GetAppPropertiesStatus_NicknameNotChanged_SUCCESS) {
+TEST_F(PolicyHandlerTest,
+       GetAppPropertiesStatus_RemoveNickname_NicknamesChanged) {
   ChangePolicyManagerToMock();
 
-  const std::string kFakeNickname = "fake_nickname";
+  smart_objects::SmartObject properties;
+  properties[strings::app_id] = kPolicyAppId_;
+  properties[strings::nicknames] =
+      smart_objects::SmartObject(smart_objects::SmartType_Array);
+  properties[strings::nicknames].asArray()->push_back(
+      smart_objects::SmartObject(kFakeNickname));
+
+  auto nicknames = std::make_shared<policy::StringArray>(2, kFakeNickname);
+
+  const auto expected_app_properties_state =
+      policy::PolicyHandlerInterface::AppPropertiesState::NICKNAMES_CHANGED;
+
+  EXPECT_CALL(*mock_policy_manager_, GetAppProperties(kPolicyAppId_, _))
+      .WillOnce(Return(true));
+  EXPECT_CALL(*mock_policy_manager_, GetInitialAppData(kPolicyAppId_, _, _))
+      .WillOnce(DoAll(SetArgPointee<1>(*nicknames), Return(true)));
+  EXPECT_EQ(expected_app_properties_state,
+            policy_handler_.GetAppPropertiesStatus(properties, kPolicyAppId_));
+}
+
+TEST_F(PolicyHandlerTest, GetAppPropertiesStatus_NicknameNotChanged_SUCCESS) {
+  ChangePolicyManagerToMock();
 
   smart_objects::SmartObject properties;
   properties[strings::app_id] = kPolicyAppId_;
