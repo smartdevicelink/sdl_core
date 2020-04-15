@@ -1644,6 +1644,12 @@ std::string PolicyHandler::GetNextUpdateUrl(
   POLICY_LIB_CHECK_OR_RETURN(std::string());
   app_id = ChoosePtuApplication(iteration_type);
 
+  // Use cached URL for retries if it was provided by the HMI
+  if (PTUIterationType::RetryIteration == iteration_type &&
+      !retry_update_url_.empty()) {
+    return retry_update_url_;
+  }
+
   EndpointUrls endpoint_urls;
   policy_manager_->GetUpdateUrls("0x07", endpoint_urls);
 
@@ -1681,6 +1687,12 @@ std::string PolicyHandler::GetNextUpdateUrl(
   }
   const std::string& url = data.url[app_url.second];
   return url;
+}
+
+void PolicyHandler::CacheRetryInfo(const uint32_t app_id,
+                                   const std::string url) {
+  last_ptu_app_id_ = app_id;
+  retry_update_url_ = url;
 }
 #endif  // EXTERNAL_PROPRIETARY_MODE
 

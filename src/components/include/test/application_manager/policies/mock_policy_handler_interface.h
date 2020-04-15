@@ -89,6 +89,8 @@ class MockPolicyHandlerInterface : public policy::PolicyHandlerInterface {
   MOCK_METHOD2(GetNextUpdateUrl,
                std::string(const policy::PTUIterationType iteration_type,
                            uint32_t& app_id));
+  MOCK_METHOD2(CacheRetryInfo,
+               void(const uint32_t app_id, const std::string url));
 #endif  // EXTERNAL_PROPRIETARY_MODE
 
   MOCK_CONST_METHOD2(GetPriority,

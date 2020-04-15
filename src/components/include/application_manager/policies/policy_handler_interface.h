@@ -102,6 +102,7 @@ class PolicyHandlerInterface : public VehicleDataItemProvider {
                                  const PTUIterationType iteration_type) = 0;
   virtual std::string GetNextUpdateUrl(const PTUIterationType iteration_type,
                                        uint32_t& app_id) = 0;
+  virtual void CacheRetryInfo(const uint32_t app_id, const std::string url) = 0;
 #endif  // EXTERNAL_PROPRIETARY_MODE
 
   virtual bool GetPriority(const std::string& policy_app_id,

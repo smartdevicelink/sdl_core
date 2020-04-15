@@ -121,6 +121,7 @@ class PolicyHandler : public PolicyHandlerInterface,
    */
   std::string GetNextUpdateUrl(const PTUIterationType iteration_type,
                                uint32_t& app_id) OVERRIDE;
+  void CacheRetryInfo(const uint32_t app_id, const std::string url) OVERRIDE;
 #endif  // EXTERNAL_PROPRIETARY_MODE
   virtual bool GetPriority(const std::string& policy_app_id,
                            std::string* priority) const OVERRIDE;
@@ -919,7 +920,10 @@ class PolicyHandler : public PolicyHandlerInterface,
   std::shared_ptr<PolicyManager> policy_manager_;
   std::shared_ptr<PolicyEventObserver> event_observer_;
   uint32_t last_activated_app_id_;
+
+  // PTU retry information
   uint32_t last_ptu_app_id_;
+  std::string retry_update_url_;
 
   /**
    * @brief Contains device handles, which were sent for user consent to HMI

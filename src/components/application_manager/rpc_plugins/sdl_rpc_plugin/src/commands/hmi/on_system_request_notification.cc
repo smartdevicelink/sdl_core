@@ -78,16 +78,28 @@ void OnSystemRequestNotification::Run() {
 
 #ifdef PROPRIETARY_MODE
   if (RequestType::RT_PROPRIETARY == request_type) {
-    // URL and app are chosen by Core for PROPRIETARY mode
-    uint32_t app_id = 0;
-    msg_params[strings::url] = policy_handler_.GetNextUpdateUrl(
-        policy::PTUIterationType::DefaultIteration, app_id);
-    if (0 == app_id) {
-      LOG4CXX_WARN(logger_,
-                   "Can't select application to forward OnSystemRequest.");
-      return;
+    if (msg_params.keyExists(strings::url)) {
+      // For backward-compatibility, the URL is cached for retries if provided
+      // by HMI
+      policy_handler_.CacheRetryInfo(msg_params.keyExists(strings::app_id)
+                                         ? msg_params[strings::app_id].asUInt()
+                                         : 0,
+                                     msg_params[strings::url].asString());
+    } else {
+      // Clear cached retry info
+      policy_handler_.CacheRetryInfo(0, std::string());
+
+      // URL and app are chosen by Core for PROPRIETARY mode normally
+      uint32_t app_id = 0;
+      msg_params[strings::url] = policy_handler_.GetNextUpdateUrl(
+          policy::PTUIterationType::DefaultIteration, app_id);
+      if (0 == app_id) {
+        LOG4CXX_WARN(logger_,
+                     "Can't select application to forward OnSystemRequest.");
+        return;
+      }
+      msg_params[strings::app_id] = app_id;
     }
-    msg_params[strings::app_id] = app_id;
   }
 #endif
   // According to HMI API, this should be HMI unique id, but during processing
