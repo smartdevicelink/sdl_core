@@ -2142,7 +2142,7 @@ PolicyHandler::AppPropertiesState PolicyHandler::GetAppPropertiesStatus(
     const smart_objects::SmartArray* nicknames_array =
         properties[strings::nicknames].asArray();
 
-    if (nicknames_array->empty() && !nicknames.empty()) {
+    if (nicknames_array->size() != nicknames.size()) {
       return AppPropertiesState::NICKNAMES_CHANGED;
     }
 
