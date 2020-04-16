@@ -101,7 +101,8 @@ TEST_F(VIGetVehicleDataResponseTest, RUN_SUCCESS) {
   command->Run();
 }
 
-TEST_F(VIGetVehicleDataResponseTest, ErrorResponse_OnVehicleDataUpdated_NotCalled) {
+TEST_F(VIGetVehicleDataResponseTest,
+       ErrorResponse_OnVehicleDataUpdated_NotCalled) {
   MessageSharedPtr command_msg(CreateMessage(smart_objects::SmartType_Map));
   (*command_msg)[strings::msg_params][strings::number] = kStrNumber;
   (*command_msg)[strings::params][strings::connection_key] = kConnectionKey;
@@ -120,7 +121,8 @@ TEST_F(VIGetVehicleDataResponseTest, ErrorResponse_OnVehicleDataUpdated_NotCalle
   VIGetVehicleDataResponsePtr command(
       CreateCommandVI<VIGetVehicleDataResponse>(command_msg));
 
-  EXPECT_CALL(mock_policy_handler_, OnVehicleDataUpdated(*command_msg)).Times(0);
+  EXPECT_CALL(mock_policy_handler_, OnVehicleDataUpdated(*command_msg))
+      .Times(0);
 
   MockEventDispatcher mock_event_dispatcher;
   EXPECT_CALL(app_mngr_, event_dispatcher())
