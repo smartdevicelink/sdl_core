@@ -257,7 +257,11 @@ ApplicationManagerImpl::~ApplicationManagerImpl() {
     end_stream_timer_pool_.clear();
   }
 
-  navi_app_to_stop_.clear();
+  {
+    sync_primitives::AutoLock lock(navi_app_to_stop_lock_);
+    navi_app_to_stop_.clear();
+  }
+
   navi_app_to_end_stream_.clear();
 
   secondary_transport_devices_cache_.clear();
@@ -1984,12 +1988,15 @@ void ApplicationManagerImpl::OnStreamingConfigured(
       service_type == ServiceType::kMobileNav ? it->second.first = true
                                               : it->second.second = true;
 
-      for (size_t i = 0; i < navi_app_to_stop_.size(); ++i) {
-        if (app_id == navi_app_to_stop_[i]) {
-          sync_primitives::AutoLock lock(close_app_timer_pool_lock_);
-          close_app_timer_pool_.erase(close_app_timer_pool_.begin() + i);
-          navi_app_to_stop_.erase(navi_app_to_stop_.begin() + i);
-          break;
+      {
+        sync_primitives::AutoLock lock(navi_app_to_stop_lock_);
+        for (size_t i = 0; i < navi_app_to_stop_.size(); ++i) {
+          if (app_id == navi_app_to_stop_[i]) {
+            sync_primitives::AutoLock lock(close_app_timer_pool_lock_);
+            close_app_timer_pool_.erase(close_app_timer_pool_.begin() + i);
+            navi_app_to_stop_.erase(navi_app_to_stop_.begin() + i);
+            break;
+          }
         }
       }
     }
@@ -3506,14 +3513,17 @@ void ApplicationManagerImpl::ForbidStreaming(uint32_t app_id) {
     return;
   }
 
-  if (navi_app_to_stop_.end() != std::find(navi_app_to_stop_.begin(),
-                                           navi_app_to_stop_.end(),
-                                           app_id) ||
-      navi_app_to_end_stream_.end() !=
-          std::find(navi_app_to_end_stream_.begin(),
-                    navi_app_to_end_stream_.end(),
-                    app_id)) {
-    return;
+  {
+    sync_primitives::AutoLock lock(navi_app_to_stop_lock_);
+    if (navi_app_to_stop_.end() != std::find(navi_app_to_stop_.begin(),
+                                             navi_app_to_stop_.end(),
+                                             app_id) ||
+        navi_app_to_end_stream_.end() !=
+            std::find(navi_app_to_end_stream_.begin(),
+                      navi_app_to_end_stream_.end(),
+                      app_id)) {
+      return;
+    }
   }
 
   bool unregister = false;
@@ -3553,14 +3563,18 @@ void ApplicationManagerImpl::ForbidStreaming(
     return;
   }
 
-  if (navi_app_to_stop_.end() != std::find(navi_app_to_stop_.begin(),
-                                           navi_app_to_stop_.end(),
-                                           app_id) ||
-      navi_app_to_end_stream_.end() !=
-          std::find(navi_app_to_end_stream_.begin(),
-                    navi_app_to_end_stream_.end(),
-                    app_id)) {
-    return;
+  {
+    sync_primitives::AutoLock lock(navi_app_to_stop_lock_);
+
+    if (navi_app_to_stop_.end() != std::find(navi_app_to_stop_.begin(),
+                                             navi_app_to_stop_.end(),
+                                             app_id) ||
+        navi_app_to_end_stream_.end() !=
+            std::find(navi_app_to_end_stream_.begin(),
+                      navi_app_to_end_stream_.end(),
+                      app_id)) {
+      return;
+    }
   }
 
   bool unregister = false;
@@ -3658,7 +3672,10 @@ void ApplicationManagerImpl::EndNaviServices(uint32_t app_id) {
 
     DisallowStreaming(app_id);
 
-    navi_app_to_stop_.push_back(app_id);
+    {
+      sync_primitives::AutoLock lock(navi_app_to_stop_lock_);
+      navi_app_to_stop_.push_back(app_id);
+    }
 
     TimerSPtr close_timer(std::make_shared<timer::Timer>(
         "CloseNaviAppTimer",
@@ -3863,9 +3880,14 @@ void ApplicationManagerImpl::CloseNaviApp() {
   LOG4CXX_AUTO_TRACE(logger_);
   using namespace mobile_apis::AppInterfaceUnregisteredReason;
   using namespace mobile_apis::Result;
-  DCHECK_OR_RETURN_VOID(!navi_app_to_stop_.empty());
-  uint32_t app_id = navi_app_to_stop_.front();
-  navi_app_to_stop_.pop_front();
+  uint32_t app_id;
+
+  {
+    sync_primitives::AutoLock lock(navi_app_to_stop_lock_);
+    DCHECK_OR_RETURN_VOID(!navi_app_to_stop_.empty());
+    app_id = navi_app_to_stop_.front();
+    navi_app_to_stop_.pop_front();
+  }
 
   bool unregister = false;
   {
@@ -3898,9 +3920,13 @@ void ApplicationManagerImpl::EndNaviStreaming() {
     const uint32_t app_id = navi_app_to_end_stream_.front();
     navi_app_to_end_stream_.pop_front();
 
-    if (navi_app_to_stop_.end() ==
-        std::find(navi_app_to_stop_.begin(), navi_app_to_stop_.end(), app_id)) {
-      DisallowStreaming(app_id);
+    {
+      sync_primitives::AutoLock lock(navi_app_to_stop_lock_);
+      if (navi_app_to_stop_.end() == std::find(navi_app_to_stop_.begin(),
+                                               navi_app_to_stop_.end(),
+                                               app_id)) {
+        DisallowStreaming(app_id);
+      }
     }
   }
 }
