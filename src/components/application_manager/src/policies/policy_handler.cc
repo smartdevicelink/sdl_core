@@ -423,7 +423,7 @@ bool PolicyHandler::ClearUserConsent() {
   return policy_manager_->ResetUserConsent();
 }
 
-uint32_t PolicyHandler::ChoosePtuApplication(
+uint32_t PolicyHandler::ChoosePTUApplication(
     const PTUIterationType iteration_type) {
   LOG4CXX_AUTO_TRACE(logger_);
   last_ptu_app_id_ = GetAppIdForSending(iteration_type);
@@ -480,8 +480,7 @@ uint32_t PolicyHandler::GetAppIdForSending(
     return 0;
   }
 
-  app_id = ChooseRandomAppForPolicyUpdate(apps_with_none_level);
-  return app_id;
+  return ChooseRandomAppForPolicyUpdate(apps_with_none_level);
 }
 
 void PolicyHandler::PushAppIdToPTUQueue(const uint32_t app_id) {
@@ -1122,7 +1121,7 @@ void PolicyHandler::OnPendingPermissionChange(
 bool PolicyHandler::SendMessageToSDK(const BinaryMessage& pt_string,
                                      const std::string& url) {
   const uint32_t app_id =
-      ChoosePtuApplication(PTUIterationType::DefaultIteration);
+      ChoosePTUApplication(PTUIterationType::DefaultIteration);
   return SendMessageToSDK(pt_string, url, app_id);
 }
 
@@ -1642,7 +1641,7 @@ std::string PolicyHandler::GetNextUpdateUrl(
     const PTUIterationType iteration_type, uint32_t& app_id) {
   LOG4CXX_AUTO_TRACE(logger_);
   POLICY_LIB_CHECK_OR_RETURN(std::string());
-  app_id = ChoosePtuApplication(iteration_type);
+  app_id = ChoosePTUApplication(iteration_type);
 
   // Use cached URL for retries if it was provided by the HMI
   if (PTUIterationType::RetryIteration == iteration_type &&
@@ -1661,7 +1660,7 @@ std::string PolicyHandler::GetNextUpdateUrl(
   auto get_ptu_app = [this](AppIdURL app_url, uint32_t& app_id) {
     if (app_url.first == 0 && app_url.second == 0) {
       // We've looped past the end of the list, choose new application
-      app_id = ChoosePtuApplication(PTUIterationType::DefaultIteration);
+      app_id = ChoosePTUApplication(PTUIterationType::DefaultIteration);
       if (0 == app_id) {
         return ApplicationSharedPtr();
       }

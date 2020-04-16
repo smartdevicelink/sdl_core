@@ -192,7 +192,7 @@ class MockPolicyHandlerInterface : public policy::PolicyHandlerInterface {
   MOCK_METHOD1(RemoveDevice, void(const std::string& device_id));
   MOCK_METHOD1(AddStatisticsInfo, void(int type));
   MOCK_METHOD1(OnSystemError, void(int code));
-  MOCK_METHOD1(ChoosePtuApplication,
+  MOCK_METHOD1(ChoosePTUApplication,
                uint32_t(const policy::PTUIterationType iteration_type));
   MOCK_CONST_METHOD1(GetAppIdForSending,
                      uint32_t(const policy::PTUIterationType iteration_type));

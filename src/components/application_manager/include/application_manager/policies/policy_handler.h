@@ -114,13 +114,23 @@ class PolicyHandler : public PolicyHandlerInterface,
   /**
    * @brief Get the next available PTU URL and the associated application for
    * performing the PTU
-   * @param iteration_type The iteration type of the PTU
+   * @param iteration_type The iteration type of the PTU.
+   * If this is a retry and a retry URL was cached, that URL will be returned
    * @param app_id Filled with the ID of application used to perform the PTU on
    * success
    * @return The next available PTU URL on success, empty string on failure
    */
   std::string GetNextUpdateUrl(const PTUIterationType iteration_type,
                                uint32_t& app_id) OVERRIDE;
+
+  /**
+   * @brief Update the cached URL and app ID used for policy retries
+   * @param app_id The ID of the application to be used for performing PTUs.
+   * If 0, the existing cached application will be cleared
+   * @param url The URL provided by the HMI to be used for performing PTU
+   * retries. If empty, the existing cached URL will be cleared and Core will
+   * choose which URLs to use on retry
+   */
   void CacheRetryInfo(const uint32_t app_id, const std::string url) OVERRIDE;
 #endif  // EXTERNAL_PROPRIETARY_MODE
   virtual bool GetPriority(const std::string& policy_app_id,
@@ -427,19 +437,19 @@ class PolicyHandler : public PolicyHandlerInterface,
    * @brief Chooses and stores random application id to be used for snapshot
    * sending considering HMI level
    * @param iteration_type The iteration type of the request. If RetryIteration,
-   * the previously chosen app ID (via ChoosePtuApplication) will be returned if
-   * available
+   * the previously chosen app ID (via ChoosePTUApplication or CacheRetryInfo)
+   * will be returned if available
    * @return Application id or 0, if there are no suitable applications
    */
-  uint32_t ChoosePtuApplication(
+  uint32_t ChoosePTUApplication(
       const PTUIterationType iteration_type =
           PTUIterationType::DefaultIteration) OVERRIDE;
 
   /**
    * @brief Retrieve potential application id to be used for snapshot sending
    * @param iteration_type The iteration type of the request. If RetryIteration,
-   * the previously chosen app ID (via ChoosePtuApplication) will be returned if
-   * available
+   * the previously chosen app ID (via ChoosePTUApplication or CacheRetryInfo)
+   * will be returned if available
    * @return Application id or 0, if there are no suitable applications
    */
   uint32_t GetAppIdForSending(

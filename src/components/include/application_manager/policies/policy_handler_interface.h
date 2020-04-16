@@ -350,7 +350,7 @@ class PolicyHandlerInterface : public VehicleDataItemProvider {
    * @brief Choose application id to be used for snapshot sending
    * @return Application id or 0, if there are no applications registered
    */
-  virtual uint32_t ChoosePtuApplication(
+  virtual uint32_t ChoosePTUApplication(
       const PTUIterationType iteration_type =
           PTUIterationType::DefaultIteration) = 0;
 
