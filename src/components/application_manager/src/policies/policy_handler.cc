@@ -1629,8 +1629,7 @@ void PolicyHandler::OnSnapshotCreated(const BinaryMessage& pt_string,
   LOG4CXX_INFO(logger_, "HTTP policy");
 
   uint32_t app_id_for_sending = 0;
-  const std::string& url =
-      GetNextUpdateUrl(PTUIterationType::RetryIteration, app_id_for_sending);
+  const std::string& url = GetNextUpdateUrl(iteration_type, app_id_for_sending);
   if (0 != url.length()) {
     SendMessageToSDK(pt_string, url, app_id_for_sending);
   }
