@@ -1156,7 +1156,7 @@ class CodeGenerator(object):
                     schema_items_decl=self._gen_schema_items_decls(
                         function.params.values()),
                     schema_item_fill=self._gen_schema_items_fill(
-                        function.params.values(), function.since, function.until, function.deprecated, function.removed),
+                        function.params.values(), function.since, function.until, function.removed),
                     schema_params_fill=self._gen_schema_params_fill(
                         function.message_type.name)),
                 1))
