@@ -894,7 +894,6 @@ void ApplicationManagerImpl::OnHMIStartedCooperation() {
   resume_controller().ResetLaunchTime();
 
   RefreshCloudAppInformation();
-  SendUpdateAppList();
 }
 
 std::string ApplicationManagerImpl::PolicyIDByIconUrl(const std::string url) {
@@ -4028,11 +4027,17 @@ bool ApplicationManagerImpl::IsHMICooperating() const {
 
 void ApplicationManagerImpl::OnApplicationListUpdateTimer() {
   LOG4CXX_DEBUG(logger_, "Application list update timer finished");
+  const bool is_new_app_registered = registered_during_timer_execution_;
   registered_during_timer_execution_ = false;
+
   apps_to_register_list_lock_ptr_->Acquire();
   const bool trigger_ptu = apps_size_ != applications_.size();
   apps_to_register_list_lock_ptr_->Release();
-  SendUpdateAppList();
+
+  if (is_new_app_registered || trigger_ptu) {
+    SendUpdateAppList();
+  }
+
   GetPolicyHandler().OnAppsSearchCompleted(trigger_ptu);
 }
 

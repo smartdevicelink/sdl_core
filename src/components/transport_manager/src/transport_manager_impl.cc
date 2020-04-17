@@ -711,10 +711,9 @@ void TransportManagerImpl::CreateWebEngineDevice() {
 
   ws_device->set_keep_on_disconnect(true);
 
-  RaiseEvent(&TransportManagerListener::OnDeviceAdded, web_engine_device_info_);
-  device_list_.push_back(
-      std::make_pair(web_socket_ta, web_engine_device_info_));
   web_socket_ta->AddDevice(ws_device);
+  OnDeviceListUpdated(web_socket_ta);
+  web_socket_ta->ConnectDevice(unique_device_id);
 #endif  // WEBSOCKET_SERVER_TRANSPORT_SUPPORT
 }
 
@@ -723,7 +722,7 @@ const DeviceInfo& TransportManagerImpl::GetWebEngineDeviceInfo() const {
   return web_engine_device_info_;
 }
 
-void TransportManagerImpl::UpdateDeviceList(TransportAdapter* ta) {
+bool TransportManagerImpl::UpdateDeviceList(TransportAdapter* ta) {
   LOG4CXX_TRACE(logger_, "enter. TransportAdapter: " << ta);
   std::set<DeviceInfo> old_devices;
   std::set<DeviceInfo> new_devices;
@@ -775,7 +774,9 @@ void TransportManagerImpl::UpdateDeviceList(TransportAdapter* ta) {
        ++it) {
     RaiseEvent(&TransportManagerListener::OnDeviceRemoved, *it);
   }
+
   LOG4CXX_TRACE(logger_, "exit");
+  return added_devices.size() + removed_devices.size() > 0;
 }
 
 void TransportManagerImpl::PostMessage(
@@ -1067,7 +1068,12 @@ void TransportManagerImpl::OnDeviceListUpdated(TransportAdapter* ta) {
     LOG4CXX_ERROR(logger_, "Device list update failed.");
     return;
   }
-  UpdateDeviceList(ta);
+
+  if (!UpdateDeviceList(ta)) {
+    LOG4CXX_DEBUG(logger_, "Device list was not changed");
+    return;
+  }
+
   std::vector<DeviceInfo> device_infos;
   device_list_lock_.AcquireForReading();
   for (DeviceInfoList::const_iterator it = device_list_.begin();
