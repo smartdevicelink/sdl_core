@@ -32,9 +32,12 @@
 #include <boost/algorithm/string.hpp>
 #include "application_manager/application_impl.h"
 #include "application_manager/message_helper.h"
+#include "interfaces/HMI_API.h"
 #include "smart_objects/enum_schema_item.h"
 #include "utils/helpers.h"
 #include "vehicle_info_plugin/vehicle_info_app_extension.h"
+
+namespace VD_ResultCode = hmi_apis::Common_VehicleDataResultCode;
 
 namespace vehicle_info_plugin {
 using namespace application_manager;
@@ -189,9 +192,8 @@ bool SubscribeVehicleDataRequest::CheckSubscriptionStatus(
   }
 
   auto res_code = msg_params[vi_name][strings::result_code].asInt();
-  if (hmi_apis::Common_VehicleDataResultCode::VDRC_SUCCESS != res_code &&
-      hmi_apis::Common_VehicleDataResultCode::VDRC_DATA_ALREADY_SUBSCRIBED !=
-          res_code) {
+  if (VD_ResultCode::VDRC_SUCCESS != res_code &&
+      VD_ResultCode::VDRC_DATA_ALREADY_SUBSCRIBED != res_code) {
     LOG4CXX_WARN(logger_,
                  "Subscription to " << vi_name << " for " << connection_key()
                                     << " failed.");
@@ -205,13 +207,13 @@ bool SubscribeVehicleDataRequest::SubscribePendingVehicleData(
   LOG4CXX_DEBUG(logger_, "Subscribing to all pending VehicleData");
 
   std::set<hmi_apis::Common_VehicleDataResultCode::eType> skiped_result_codes(
-      {hmi_apis::Common_VehicleDataResultCode::VDRC_TRUNCATED_DATA,
-       hmi_apis::Common_VehicleDataResultCode::VDRC_DISALLOWED,
-       hmi_apis::Common_VehicleDataResultCode::VDRC_USER_DISALLOWED,
-       hmi_apis::Common_VehicleDataResultCode::VDRC_INVALID_ID,
-       hmi_apis::Common_VehicleDataResultCode::VDRC_DATA_NOT_AVAILABLE,
-       hmi_apis::Common_VehicleDataResultCode::VDRC_DATA_NOT_SUBSCRIBED,
-       hmi_apis::Common_VehicleDataResultCode::VDRC_IGNORED});
+      {VD_ResultCode::VDRC_TRUNCATED_DATA,
+       VD_ResultCode::VDRC_DISALLOWED,
+       VD_ResultCode::VDRC_USER_DISALLOWED,
+       VD_ResultCode::VDRC_INVALID_ID,
+       VD_ResultCode::VDRC_DATA_NOT_AVAILABLE,
+       VD_ResultCode::VDRC_DATA_NOT_SUBSCRIBED,
+       VD_ResultCode::VDRC_IGNORED});
 
   for (auto vi_name = vi_waiting_for_subscribe_.begin();
        vi_name != vi_waiting_for_subscribe_.end();) {
