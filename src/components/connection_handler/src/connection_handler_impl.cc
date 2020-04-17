@@ -1418,8 +1418,12 @@ void ConnectionHandlerImpl::ConnectToAllDevices() {
   sync_primitives::AutoReadLock lock(device_list_lock_);
   for (DeviceMap::iterator i = device_list_.begin(); i != device_list_.end();
        ++i) {
-    connection_handler::DeviceHandle device_handle = i->first;
-    ConnectToDevice(device_handle);
+    if (transport_manager::webengine_constants::kWebEngineDeviceName ==
+        i->second.user_friendly_name()) {
+      LOG4CXX_DEBUG(logger_, "No need to connect to web engine device");
+      continue;
+    }
+    ConnectToDevice(i->first);
   }
 }
 

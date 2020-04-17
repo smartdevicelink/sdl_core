@@ -713,7 +713,6 @@ void TransportManagerImpl::CreateWebEngineDevice() {
 
   web_socket_ta->AddDevice(ws_device);
   OnDeviceListUpdated(web_socket_ta);
-  web_socket_ta->ConnectDevice(unique_device_id);
 #endif  // WEBSOCKET_SERVER_TRANSPORT_SUPPORT
 }
 
