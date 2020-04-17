@@ -179,7 +179,9 @@ TransportAdapter::Error UsbConnection::PostOutTransfer() {
   out_transfer_ = libusb_alloc_transfer(0);
   if (nullptr == out_transfer_) {
     LOG4CXX_ERROR(logger_, "libusb_alloc_transfer failed");
-    LOG4CXX_TRACE(logger_, "exit with FALSE. Condition: 0 == out_transfer_");
+    LOG4CXX_TRACE(logger_,
+                  "exit with TransportAdapter::BAD_STATE. Condition: nullptr "
+                  "== out_transfer_");
     return TransportAdapter::BAD_STATE;
   }
   libusb_fill_bulk_transfer(out_transfer_,
@@ -196,11 +198,11 @@ TransportAdapter::Error UsbConnection::PostOutTransfer() {
         logger_,
         "libusb_submit_transfer failed: " << libusb_error_name(libusb_ret));
     LOG4CXX_TRACE(logger_,
-                  "exit with FALSE. Condition: "
+                  "exit with TransportAdapter::FAIL. Condition: "
                       << "LIBUSB_SUCCESS != libusb_fill_bulk_transfer");
     return TransportAdapter::FAIL;
   }
-  LOG4CXX_TRACE(logger_, "exit with TRUE");
+  LOG4CXX_TRACE(logger_, "exit with TransportAdapter::OK");
   return TransportAdapter::OK;
 }
 
