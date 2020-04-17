@@ -2063,7 +2063,7 @@ void ApplicationManagerImpl::StopNaviService(
       app->set_audio_streaming_allowed(false);
     }
     //  push_back for judge in ForbidStreaming(),
-    navi_app_to_end_stream_.push_back(app_id);
+    StartEndStreamTimer(app_id);
   }
 
   ApplicationSharedPtr app = application(app_id);
