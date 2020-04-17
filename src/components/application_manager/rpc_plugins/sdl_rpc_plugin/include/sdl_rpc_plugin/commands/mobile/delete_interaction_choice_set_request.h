@@ -34,6 +34,10 @@
 #ifndef SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_MOBILE_DELETE_INTERACTION_CHOICE_SET_REQUEST_H_
 #define SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_MOBILE_DELETE_INTERACTION_CHOICE_SET_REQUEST_H_
 
+#include <set>
+#include <cstdint>
+
+#include "application_manager/commands/command_request_impl.h"
 #include "application_manager/application.h"
 #include "application_manager/commands/command_request_impl.h"
 #include "utils/macro.h"
@@ -42,6 +46,8 @@ namespace sdl_rpc_plugin {
 namespace app_mngr = application_manager;
 
 namespace commands {
+
+typedef std::set<uint32_t> SentRequestsSet;
 
 /**
  * @brief DeleteInteractionChoiceSetRequest command class
@@ -76,6 +82,20 @@ class DeleteInteractionChoiceSetRequest
    */
   bool Init() FINAL;
 
+  /**
+   * @brief Interface method that is called whenever new event received
+   * Need to observe VR_DeleteCommand event, to send
+   * DeleteInteractionChoiceSetResponse when VR command was delete from HMI.
+   * @param event The received event.
+   */
+  void on_event(const app_mngr::event_engine::Event& event) FINAL;
+
+  /**
+   * @brief Function is called by RequestController when request execution time
+   * has exceed it's limit
+   */
+  void onTimeOut() FINAL;
+
  private:
   /*
    * @brief Check if requested choice set ID in use by perform interaction
@@ -85,6 +105,29 @@ class DeleteInteractionChoiceSetRequest
   bool ChoiceSetInUse(app_mngr::ApplicationConstSharedPtr app);
 
   void SendVrDeleteCommand(app_mngr::ApplicationSharedPtr app);
+
+  void SendDeleteInteractionChoiceSetResponse();
+
+  /**
+   * @brief Final result_code for sending to Mobile.
+   */
+  hmi_apis::Common_Result::eType response_result_code_;
+
+  /**
+   * @brief Final result of response success for sending to Mobile.
+   */
+  bool response_result_;
+
+  sync_primitives::Lock requests_lock_;
+
+  /**
+   * @brief Collection that contains sent request to HMI.
+   * When HMI response will start come, that collection will helps to control,
+   * when SDL should sends DeleteInteractionChoiceSetResponse to Mobile.
+   * Because, for send DeleteInteractionChoiceSetResponse SDL should will be saw
+   * all response results from HMI.
+   */
+  SentRequestsSet sent_requests_;
 
   DISALLOW_COPY_AND_ASSIGN(DeleteInteractionChoiceSetRequest);
 };
