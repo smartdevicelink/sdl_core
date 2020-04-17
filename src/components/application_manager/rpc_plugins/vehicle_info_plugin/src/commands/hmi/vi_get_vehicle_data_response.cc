@@ -55,32 +55,14 @@ void VIGetVehicleDataResponse::Run() {
 
   event_engine::Event event(hmi_apis::FunctionID::VehicleInfo_GetVehicleData);
 
-  if ((*message_)[strings::params][strings::message_type] ==
-      static_cast<int32_t>(hmi_apis::messageType::error_response)) {
-    smart_objects::SmartObject result(smart_objects::SmartType_Map);
-
-    if ((*message_)[strings::params].keyExists(strings::data)) {
-      result[strings::msg_params] = (*message_)[strings::params][strings::data];
-      result[strings::params][hmi_response::code] =
-          (*message_)[strings::params][hmi_response::code];
-      result[strings::params][strings::correlation_id] =
-          (*message_)[strings::params][strings::correlation_id];
-      result[strings::params][strings::error_msg] =
-          (*message_)[strings::params][strings::error_msg];
-      result[strings::params][strings::message_type] =
-          (*message_)[strings::params][strings::message_type];
-      result[strings::params][strings::protocol_type] =
-          (*message_)[strings::params][strings::protocol_type];
-      result[strings::params][strings::protocol_version] =
-          (*message_)[strings::params][strings::protocol_version];
-    }
-
-    event.set_smart_object(result);
-  } else {
-    event.set_smart_object(*message_);
+  const bool error_response =
+      (*message_)[strings::params][strings::message_type] ==
+      static_cast<int32_t>(hmi_apis::messageType::error_response);
+  if (!error_response) {
     policy_handler_.OnVehicleDataUpdated(*message_);
   }
 
+  event.set_smart_object(*message_);
   event.raise(application_manager_.event_dispatcher());
 }
 
