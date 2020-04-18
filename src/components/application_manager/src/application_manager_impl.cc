@@ -3142,7 +3142,6 @@ void ApplicationManagerImpl::UnregisterAllApplications() {
           MessageHelper::GetOnAppInterfaceUnregisteredNotificationToMobile(
               app_to_remove->app_id(), unregister_reason_),
           commands::Command::SOURCE_SDL);
-      EndNaviServices(app_to_remove->app_id());
       UnregisterApplication(app_to_remove->app_id(),
                             mobile_apis::Result::INVALID_ENUM,
                             is_ignition_off,
@@ -3222,6 +3221,7 @@ void ApplicationManagerImpl::UnregisterApplication(
     LOG4CXX_ERROR(logger_, "Send UnsubscribeWayPoints");
     MessageHelper::SendUnsubscribedWayPoints(*this);
   }
+  EndNaviServices(app_id);
 
   {
     sync_primitives::AutoLock lock(navi_service_status_lock_);
