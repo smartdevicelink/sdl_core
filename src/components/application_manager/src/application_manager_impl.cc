@@ -3896,6 +3896,7 @@ void ApplicationManagerImpl::CloseNaviApp() {
     if (navi_service_status_.end() != it) {
       if (it->second.first || it->second.second) {
         unregister = true;
+        navi_service_status_.erase(it);
       }
     }
   }
