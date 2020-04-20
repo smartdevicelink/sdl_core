@@ -1579,6 +1579,7 @@ class ApplicationManagerImpl
   NaviServiceStatusMap navi_service_status_;
   sync_primitives::Lock navi_service_status_lock_;
   std::deque<uint32_t> navi_app_to_stop_;
+  sync_primitives::Lock navi_app_to_stop_lock_;
   std::deque<uint32_t> navi_app_to_end_stream_;
   uint32_t navi_close_app_timeout_;
   uint32_t navi_end_stream_timeout_;
