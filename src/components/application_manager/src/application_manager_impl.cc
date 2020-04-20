@@ -4034,7 +4034,7 @@ void ApplicationManagerImpl::OnApplicationListUpdateTimer() {
   const bool trigger_ptu = apps_size_ != applications_.size();
   apps_to_register_list_lock_ptr_->Release();
 
-  if (is_new_app_registered || trigger_ptu) {
+  if (is_new_app_registered) {
     SendUpdateAppList();
   }
 
