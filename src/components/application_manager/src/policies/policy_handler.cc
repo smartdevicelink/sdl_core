@@ -299,6 +299,7 @@ PolicyHandler::PolicyHandler(const PolicySettings& settings,
                              ApplicationManager& application_manager)
     : AsyncRunner("PolicyHandler async runner thread")
     , last_activated_app_id_(0)
+    , last_ptu_app_id_(0)
     , statistic_manager_impl_(std::make_shared<StatisticManagerImpl>(this))
     , settings_(settings)
     , application_manager_(application_manager)
@@ -400,6 +401,8 @@ void PolicyHandler::OnPTInited() {
 void PolicyHandler::StopRetrySequence() {
   LOG4CXX_AUTO_TRACE(logger_);
   POLICY_LIB_CHECK_VOID();
+  // Clear cached PTU app
+  last_ptu_app_id_ = 0;
   policy_manager_->StopRetrySequence();
 }
 
@@ -420,9 +423,28 @@ bool PolicyHandler::ClearUserConsent() {
   return policy_manager_->ResetUserConsent();
 }
 
-uint32_t PolicyHandler::GetAppIdForSending() const {
+uint32_t PolicyHandler::ChoosePTUApplication(
+    const PTUIterationType iteration_type) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  last_ptu_app_id_ = GetAppIdForSending(iteration_type);
+  return last_ptu_app_id_;
+}
+
+uint32_t PolicyHandler::GetAppIdForSending(
+    const PTUIterationType iteration_type) const {
   LOG4CXX_AUTO_TRACE(logger_);
   POLICY_LIB_CHECK_OR_RETURN(0);
+  // Return the previous app chosen if this is a retry for a PTU in progress
+  if (iteration_type == PTUIterationType::RetryIteration &&
+      last_ptu_app_id_ != 0) {
+    ApplicationSharedPtr app =
+        application_manager_.application(last_ptu_app_id_);
+    if (app && app->IsRegistered()) {
+      LOG4CXX_INFO(logger_, "Previously chosen application exists, returning");
+      return last_ptu_app_id_;
+    }
+  }
+
   // fix ApplicationSet access crash
   const ApplicationSet accessor = application_manager_.applications().GetData();
 
@@ -437,11 +459,10 @@ uint32_t PolicyHandler::GetAppIdForSending() const {
                 "Number of apps with different from NONE level: "
                     << apps_without_none_level.size());
 
-  uint32_t choosen_app_id =
-      ChooseRandomAppForPolicyUpdate(apps_without_none_level);
+  uint32_t app_id = ChooseRandomAppForPolicyUpdate(apps_without_none_level);
 
-  if (choosen_app_id) {
-    return choosen_app_id;
+  if (app_id) {
+    return app_id;
   }
 
   Applications apps_with_none_level;
@@ -1099,10 +1120,17 @@ void PolicyHandler::OnPendingPermissionChange(
 
 bool PolicyHandler::SendMessageToSDK(const BinaryMessage& pt_string,
                                      const std::string& url) {
+  const uint32_t app_id =
+      ChoosePTUApplication(PTUIterationType::DefaultIteration);
+  return SendMessageToSDK(pt_string, url, app_id);
+}
+
+bool PolicyHandler::SendMessageToSDK(const BinaryMessage& pt_string,
+                                     const std::string& url,
+                                     const uint32_t app_id) {
   LOG4CXX_AUTO_TRACE(logger_);
   POLICY_LIB_CHECK_OR_RETURN(false);
 
-  const uint32_t app_id = GetAppIdForSending();
   ApplicationSharedPtr app = application_manager_.application(app_id);
 
   if (!app) {
@@ -1152,6 +1180,9 @@ bool PolicyHandler::ReceiveMessageFromSDK(const std::string& file,
     policy_manager_->CleanupUnpairedDevices();
     SetDaysAfterEpoch();
     policy_manager_->OnPTUFinished(load_pt_result);
+
+    // Clean up retry information (used in PROPRIETARY and HTTP mode)
+    last_ptu_app_id_ = 0;
 
     uint32_t correlation_id = application_manager_.GetNextHMICorrelationID();
     event_observer_->subscribe_on_event(
@@ -1573,11 +1604,12 @@ void PolicyHandler::OnSnapshotCreated(const BinaryMessage& pt_string,
   POLICY_LIB_CHECK_VOID();
 #ifdef PROPRIETARY_MODE
   if (PTUIterationType::RetryIteration == iteration_type) {
-    uint32_t app_id_for_sending = GetAppIdForSending();
-
-    if (0 != app_id_for_sending) {
+    uint32_t app_id_for_sending = 0;
+    const std::string& url =
+        GetNextUpdateUrl(PTUIterationType::RetryIteration, app_id_for_sending);
+    if (0 != url.length()) {
       MessageHelper::SendPolicySnapshotNotification(
-          app_id_for_sending, pt_string, std::string(), application_manager_);
+          app_id_for_sending, pt_string, url, application_manager_);
     }
 
   } else {
@@ -1594,22 +1626,71 @@ void PolicyHandler::OnSnapshotCreated(const BinaryMessage& pt_string,
         application_manager_);
   }
 #else   // PROPRIETARY_MODE
-  LOG4CXX_ERROR(logger_, "HTTP policy");
-  EndpointUrls urls;
-  policy_manager_->GetUpdateUrls("0x07", urls);
+  LOG4CXX_INFO(logger_, "HTTP policy");
 
-  if (urls.empty()) {
-    LOG4CXX_ERROR(logger_, "Service URLs are empty! NOT sending PT to mobile!");
-    return;
+  uint32_t app_id_for_sending = 0;
+  const std::string& url = GetNextUpdateUrl(iteration_type, app_id_for_sending);
+  if (0 != url.length()) {
+    SendMessageToSDK(pt_string, url, app_id_for_sending);
   }
-
-  AppIdURL app_url = policy_manager_->GetNextUpdateUrl(urls);
-  while (!IsUrlAppIdValid(app_url.first, urls)) {
-    app_url = policy_manager_->GetNextUpdateUrl(urls);
-  }
-  const std::string& url = urls[app_url.first].url[app_url.second];
-  SendMessageToSDK(pt_string, url);
 #endif  // PROPRIETARY_MODE
+}
+
+std::string PolicyHandler::GetNextUpdateUrl(
+    const PTUIterationType iteration_type, uint32_t& app_id) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  POLICY_LIB_CHECK_OR_RETURN(std::string());
+  app_id = ChoosePTUApplication(iteration_type);
+
+  // Use cached URL for retries if it was provided by the HMI
+  if (PTUIterationType::RetryIteration == iteration_type &&
+      !retry_update_url_.empty()) {
+    return retry_update_url_;
+  }
+
+  EndpointUrls endpoint_urls;
+  policy_manager_->GetUpdateUrls("0x07", endpoint_urls);
+
+  if (endpoint_urls.empty()) {
+    LOG4CXX_ERROR(logger_, "Service URLs are empty!");
+    return std::string();
+  }
+
+  auto get_ptu_app = [this](AppIdURL app_url, uint32_t& app_id) {
+    if (app_url.first == 0 && app_url.second == 0) {
+      // We've looped past the end of the list, choose new application
+      app_id = ChoosePTUApplication(PTUIterationType::DefaultIteration);
+      if (0 == app_id) {
+        return ApplicationSharedPtr();
+      }
+    }
+    return application_manager_.application(app_id);
+  };
+
+  AppIdURL app_url = policy_manager_->GetNextUpdateUrl(endpoint_urls);
+  ApplicationSharedPtr app = get_ptu_app(app_url, app_id);
+  if (!app) {
+    LOG4CXX_ERROR(logger_, "No available applications for PTU!");
+    return std::string();
+  }
+  EndpointData& data = endpoint_urls[app_url.first];
+  while (!IsUrlAppIdValid(app->policy_app_id(), data)) {
+    app_url = policy_manager_->GetNextUpdateUrl(endpoint_urls);
+    app = get_ptu_app(app_url, app_id);
+    if (!app) {
+      LOG4CXX_ERROR(logger_, "No available applications for PTU!");
+      return std::string();
+    }
+    data = endpoint_urls[app_url.first];
+  }
+  const std::string& url = data.url[app_url.second];
+  return url;
+}
+
+void PolicyHandler::CacheRetryInfo(const uint32_t app_id,
+                                   const std::string url) {
+  last_ptu_app_id_ = app_id;
+  retry_update_url_ = url;
 }
 #endif  // EXTERNAL_PROPRIETARY_MODE
 
@@ -2590,28 +2671,24 @@ void PolicyHandler::Add(const std::string& app_id,
   policy_manager_->Add(app_id, type, timespan_seconds);
 }
 
-bool PolicyHandler::IsUrlAppIdValid(const uint32_t app_idx,
-                                    const EndpointUrls& urls) const {
-  const EndpointData& app_data = urls[app_idx];
-  const std::vector<std::string> app_urls = app_data.url;
-  const ApplicationSharedPtr app =
-      application_manager_.application_by_policy_id(app_data.app_id);
-
+bool PolicyHandler::IsUrlAppIdValid(const std::string app_id,
+                                    const EndpointData& app_data) const {
   if (policy::kDefaultId == app_data.app_id) {
     return true;
   }
 
-  if (app_urls.empty()) {
+  const std::vector<std::string> app_urls = app_data.url;
+  if (app_urls.empty() || app_id != app_data.app_id) {
     return false;
   }
 
-  const auto devices_ids = GetDevicesIds(app_data.app_id);
-  LOG4CXX_TRACE(logger_,
-                "Count devices: " << devices_ids.size()
-                                  << " for app_id: " << app_data.app_id);
+  const auto devices_ids = GetDevicesIds(app_id);
+  LOG4CXX_TRACE(
+      logger_,
+      "Count devices: " << devices_ids.size() << " for app_id: " << app_id);
   for (const auto& device_id : devices_ids) {
-    ApplicationSharedPtr app =
-        application_manager_.application(device_id, app_data.app_id);
+    const ApplicationSharedPtr app =
+        application_manager_.application(device_id, app_id);
     if (app && (app->IsRegistered())) {
       return true;
     }

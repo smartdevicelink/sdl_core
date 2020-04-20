@@ -151,58 +151,6 @@ class RCPolicyHandlerTest : public ::testing::Test {
   }
 };
 
-TEST_F(RCPolicyHandlerTest,
-       SendMessageToSDK_RemoteControlInvalidMobileAppId_UNSUCCESS) {
-  // Precondition
-  BinaryMessage msg;
-  EnablePolicyAndPolicyManagerMock();
-
-  EXPECT_CALL(app_manager_, applications()).WillOnce(Return(app_set));
-  test_app.insert(mock_app_);
-
-  ON_CALL(*mock_app_, app_id()).WillByDefault(Return(kAppId1_));
-  ON_CALL(*mock_app_, hmi_level())
-      .WillByDefault(Return(mobile_apis::HMILevel::HMI_FULL));
-  EXPECT_CALL(*mock_app_, IsRegistered()).WillOnce(Return(true));
-
-  EXPECT_CALL(app_manager_, application(kAppId1_))
-      .WillRepeatedly(Return(mock_app_));
-  const std::string empty_mobile_app_id("");
-  EXPECT_CALL(*mock_app_, policy_app_id())
-      .WillOnce(Return(empty_mobile_app_id));
-
-  EXPECT_CALL(*mock_policy_manager_, GetUserConsentForDevice(_))
-      .WillOnce(Return(kDeviceAllowed));
-
-  EXPECT_CALL(mock_message_helper_, SendPolicySnapshotNotification(_, _, _, _))
-      .Times(0);
-  EXPECT_FALSE(policy_handler_.SendMessageToSDK(msg, kUrl_));
-}
-
-TEST_F(RCPolicyHandlerTest, SendMessageToSDK_RemoteControl_SUCCESS) {
-  BinaryMessage msg;
-  EnablePolicyAndPolicyManagerMock();
-  EXPECT_CALL(app_manager_, applications()).WillOnce(Return(app_set));
-  test_app.insert(mock_app_);
-
-  ON_CALL(*mock_app_, app_id()).WillByDefault(Return(kAppId1_));
-  ON_CALL(*mock_app_, hmi_level())
-      .WillByDefault(Return(mobile_apis::HMILevel::HMI_FULL));
-  EXPECT_CALL(*mock_app_, IsRegistered()).WillOnce(Return(true));
-
-  EXPECT_CALL(app_manager_, application(kAppId1_))
-      .WillRepeatedly(Return(mock_app_));
-
-  EXPECT_CALL(*mock_app_, policy_app_id()).WillOnce(Return(kPolicyAppId_));
-
-  EXPECT_CALL(*mock_policy_manager_, GetUserConsentForDevice(_))
-      .WillOnce(Return(kDeviceAllowed));
-
-  EXPECT_CALL(mock_message_helper_,
-              SendPolicySnapshotNotification(kAppId1_, _, kUrl_, _));
-  EXPECT_TRUE(policy_handler_.SendMessageToSDK(msg, kUrl_));
-}
-
 TEST_F(RCPolicyHandlerTest, OnUpdateHMILevel_InvalidApp_UNSUCCESS) {
   EnablePolicyAndPolicyManagerMock();
 

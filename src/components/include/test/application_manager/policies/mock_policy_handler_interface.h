@@ -86,6 +86,11 @@ class MockPolicyHandlerInterface : public policy::PolicyHandlerInterface {
   MOCK_METHOD2(OnSnapshotCreated,
                void(const policy::BinaryMessage& pt_string,
                     const policy::PTUIterationType iteration_type));
+  MOCK_METHOD2(GetNextUpdateUrl,
+               std::string(const policy::PTUIterationType iteration_type,
+                           uint32_t& app_id));
+  MOCK_METHOD2(CacheRetryInfo,
+               void(const uint32_t app_id, const std::string url));
 #endif  // EXTERNAL_PROPRIETARY_MODE
 
   MOCK_CONST_METHOD2(GetPriority,
@@ -187,7 +192,10 @@ class MockPolicyHandlerInterface : public policy::PolicyHandlerInterface {
   MOCK_METHOD1(RemoveDevice, void(const std::string& device_id));
   MOCK_METHOD1(AddStatisticsInfo, void(int type));
   MOCK_METHOD1(OnSystemError, void(int code));
-  MOCK_CONST_METHOD0(GetAppIdForSending, uint32_t());
+  MOCK_METHOD1(ChoosePTUApplication,
+               uint32_t(const policy::PTUIterationType iteration_type));
+  MOCK_CONST_METHOD1(GetAppIdForSending,
+                     uint32_t(const policy::PTUIterationType iteration_type));
   MOCK_METHOD1(
       GetAppName,
       utils::custom_string::CustomString(const std::string& policy_app_id));

@@ -77,8 +77,9 @@ class PolicyHandlerInterface : public VehicleDataItemProvider {
   virtual bool InitPolicyTable() = 0;
   virtual bool ResetPolicyTable() = 0;
   virtual bool ClearUserConsent() = 0;
-  virtual bool SendMessageToSDK(const BinaryMessage& pt_string,
-                                const std::string& url) = 0;
+  // Deprecated in favor of private variant
+  DEPRECATED virtual bool SendMessageToSDK(const BinaryMessage& pt_string,
+                                           const std::string& url) = 0;
   virtual bool ReceiveMessageFromSDK(const std::string& file,
                                      const BinaryMessage& pt_string) = 0;
   virtual bool UnloadPolicyLibrary() = 0;
@@ -99,6 +100,9 @@ class PolicyHandlerInterface : public VehicleDataItemProvider {
 #else   // EXTERNAL_PROPRIETARY_MODE
   virtual void OnSnapshotCreated(const BinaryMessage& pt_string,
                                  const PTUIterationType iteration_type) = 0;
+  virtual std::string GetNextUpdateUrl(const PTUIterationType iteration_type,
+                                       uint32_t& app_id) = 0;
+  virtual void CacheRetryInfo(const uint32_t app_id, const std::string url) = 0;
 #endif  // EXTERNAL_PROPRIETARY_MODE
 
   virtual bool GetPriority(const std::string& policy_app_id,
@@ -346,7 +350,18 @@ class PolicyHandlerInterface : public VehicleDataItemProvider {
    * @brief Choose application id to be used for snapshot sending
    * @return Application id or 0, if there are no applications registered
    */
-  virtual uint32_t GetAppIdForSending() const = 0;
+  virtual uint32_t ChoosePTUApplication(
+      const PTUIterationType iteration_type =
+          PTUIterationType::DefaultIteration) = 0;
+
+  /**
+   * @brief Retrieve an application id to be used for snapshot sending
+   * @param iteration_type
+   * @return Application id or 0, if there are no applications registered
+   */
+  virtual uint32_t GetAppIdForSending(
+      const PTUIterationType iteration_type =
+          PTUIterationType::DefaultIteration) const = 0;
 
   virtual utils::custom_string::CustomString GetAppName(
       const std::string& policy_app_id) = 0;

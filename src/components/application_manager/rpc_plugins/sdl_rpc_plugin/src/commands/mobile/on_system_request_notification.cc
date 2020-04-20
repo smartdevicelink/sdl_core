@@ -130,8 +130,7 @@ void OnSystemRequestNotification::Run() {
     /* According to requirements:
        "If the requestType = PROPRIETARY, add to mobile API fileType = JSON
         If the requestType = HTTP, add to mobile API fileType = BINARY"
-       Also in Genivi SDL we don't save the PT to file - we put it directly in
-       binary_data */
+       Also we don't save the PT to file - we put it directly in binary_data */
 
 #if defined(PROPRIETARY_MODE)
     AddHeader(binary_data);
