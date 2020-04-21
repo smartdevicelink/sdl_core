@@ -2035,9 +2035,7 @@ TEST_F(PolicyHandlerTest, GetAppIdForSending_WithoutApps) {
   EXPECT_CALL(app_manager_, applications()).WillRepeatedly(Return(app_set));
   // Set does not include any applications
   EXPECT_CALL(*mock_policy_manager_, GetUserConsentForDevice(_)).Times(0);
-  EXPECT_EQ(
-      0u,
-      policy_handler_.GetAppIdForSending(PTUIterationType::DefaultIteration));
+  EXPECT_EQ(0u, policy_handler_.GetAppIdForSending());
 }
 
 TEST_F(PolicyHandlerTest, GetAppIdForSending_GetDefaultMacAddress) {
@@ -2063,9 +2061,7 @@ TEST_F(PolicyHandlerTest, GetAppIdForSending_GetDefaultMacAddress) {
   EXPECT_CALL(*mock_policy_manager_, GetUserConsentForDevice(_))
       .WillRepeatedly(Return(kDeviceAllowed));
   // Act
-  EXPECT_EQ(
-      kAppId1_,
-      policy_handler_.GetAppIdForSending(PTUIterationType::DefaultIteration));
+  EXPECT_EQ(kAppId1_, policy_handler_.GetAppIdForSending());
 }
 
 void PolicyHandlerTest::GetAppIDForSending() {
@@ -2090,9 +2086,7 @@ TEST_F(PolicyHandlerTest, GetAppIdForSending_SetMacAddress) {
   // Arrange
   GetAppIDForSending();
   // Act
-  EXPECT_EQ(
-      kAppId1_,
-      policy_handler_.GetAppIdForSending(PTUIterationType::DefaultIteration));
+  EXPECT_EQ(kAppId1_, policy_handler_.GetAppIdForSending());
 }
 
 TEST_F(PolicyHandlerTest, GetAppIdForSending_ExpectReturnAnyIdButNone) {
@@ -2156,9 +2150,7 @@ TEST_F(PolicyHandlerTest, GetAppIdForSending_ExpectReturnAnyIdButNone) {
       .WillRepeatedly(Return(kDeviceAllowed));
 
   // Act
-  EXPECT_NE(
-      app_in_none_id,
-      policy_handler_.GetAppIdForSending(PTUIterationType::DefaultIteration));
+  EXPECT_NE(app_in_none_id, policy_handler_.GetAppIdForSending());
 }
 
 TEST_F(PolicyHandlerTest, GetAppIdForSending_ExpectReturnAnyAppInNone) {
@@ -2201,8 +2193,7 @@ TEST_F(PolicyHandlerTest, GetAppIdForSending_ExpectReturnAnyAppInNone) {
 
   // Act
 
-  const uint32_t app_id =
-      policy_handler_.GetAppIdForSending(PTUIterationType::DefaultIteration);
+  const uint32_t app_id = policy_handler_.GetAppIdForSending();
 
   EXPECT_EQ(app_in_none_id_1 || app_in_none_id_2, app_id);
 }

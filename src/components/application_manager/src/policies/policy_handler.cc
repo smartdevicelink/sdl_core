@@ -299,11 +299,14 @@ PolicyHandler::PolicyHandler(const PolicySettings& settings,
                              ApplicationManager& application_manager)
     : AsyncRunner("PolicyHandler async runner thread")
     , last_activated_app_id_(0)
+#ifndef EXTERNAL_PROPRIETARY_MODE
     , last_ptu_app_id_(0)
+#endif  // EXTERNAL_PROPRIETARY_MODE
     , statistic_manager_impl_(std::make_shared<StatisticManagerImpl>(this))
     , settings_(settings)
     , application_manager_(application_manager)
-    , last_registered_policy_app_id_(std::string()) {}
+    , last_registered_policy_app_id_(std::string()) {
+}
 
 PolicyHandler::~PolicyHandler() {}
 
@@ -401,8 +404,10 @@ void PolicyHandler::OnPTInited() {
 void PolicyHandler::StopRetrySequence() {
   LOG4CXX_AUTO_TRACE(logger_);
   POLICY_LIB_CHECK_VOID();
+#ifndef EXTERNAL_PROPRIETARY_MODE
   // Clear cached PTU app
   last_ptu_app_id_ = 0;
+#endif  // EXTERNAL_PROPRIETARY_MODE
   policy_manager_->StopRetrySequence();
 }
 
@@ -423,17 +428,11 @@ bool PolicyHandler::ClearUserConsent() {
   return policy_manager_->ResetUserConsent();
 }
 
+#ifndef EXTERNAL_PROPRIETARY_MODE
 uint32_t PolicyHandler::ChoosePTUApplication(
     const PTUIterationType iteration_type) {
   LOG4CXX_AUTO_TRACE(logger_);
-  last_ptu_app_id_ = GetAppIdForSending(iteration_type);
-  return last_ptu_app_id_;
-}
 
-uint32_t PolicyHandler::GetAppIdForSending(
-    const PTUIterationType iteration_type) const {
-  LOG4CXX_AUTO_TRACE(logger_);
-  POLICY_LIB_CHECK_OR_RETURN(0);
   // Return the previous app chosen if this is a retry for a PTU in progress
   if (iteration_type == PTUIterationType::RetryIteration &&
       last_ptu_app_id_ != 0) {
@@ -444,6 +443,21 @@ uint32_t PolicyHandler::GetAppIdForSending(
       return last_ptu_app_id_;
     }
   }
+
+  last_ptu_app_id_ = GetAppIdForSending();
+  return last_ptu_app_id_;
+}
+
+void PolicyHandler::CacheRetryInfo(const uint32_t app_id,
+                                   const std::string url) {
+  last_ptu_app_id_ = app_id;
+  retry_update_url_ = url;
+}
+#endif  // EXTERNAL_PROPRIETARY_MODE
+
+uint32_t PolicyHandler::GetAppIdForSending() const {
+  LOG4CXX_AUTO_TRACE(logger_);
+  POLICY_LIB_CHECK_OR_RETURN(0);
 
   // fix ApplicationSet access crash
   const ApplicationSet accessor = application_manager_.applications().GetData();
@@ -1120,8 +1134,7 @@ void PolicyHandler::OnPendingPermissionChange(
 
 bool PolicyHandler::SendMessageToSDK(const BinaryMessage& pt_string,
                                      const std::string& url) {
-  const uint32_t app_id =
-      ChoosePTUApplication(PTUIterationType::DefaultIteration);
+  const uint32_t app_id = GetAppIdForSending();
   return SendMessageToSDK(pt_string, url, app_id);
 }
 
@@ -1180,9 +1193,10 @@ bool PolicyHandler::ReceiveMessageFromSDK(const std::string& file,
     policy_manager_->CleanupUnpairedDevices();
     SetDaysAfterEpoch();
     policy_manager_->OnPTUFinished(load_pt_result);
-
-    // Clean up retry information (used in PROPRIETARY and HTTP mode)
+#ifndef EXTERNAL_PROPRIETARY_MODE
+    // Clean up retry information
     last_ptu_app_id_ = 0;
+#endif  // EXTERNAL_PROPRIETARY_MODE
 
     uint32_t correlation_id = application_manager_.GetNextHMICorrelationID();
     event_observer_->subscribe_on_event(
@@ -1685,12 +1699,6 @@ std::string PolicyHandler::GetNextUpdateUrl(
   }
   const std::string& url = data.url[app_url.second];
   return url;
-}
-
-void PolicyHandler::CacheRetryInfo(const uint32_t app_id,
-                                   const std::string url) {
-  last_ptu_app_id_ = app_id;
-  retry_update_url_ = url;
 }
 #endif  // EXTERNAL_PROPRIETARY_MODE
 
