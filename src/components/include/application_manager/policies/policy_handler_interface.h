@@ -100,9 +100,18 @@ class PolicyHandlerInterface : public VehicleDataItemProvider {
 #else   // EXTERNAL_PROPRIETARY_MODE
   virtual void OnSnapshotCreated(const BinaryMessage& pt_string,
                                  const PTUIterationType iteration_type) = 0;
+
+  /**
+   * @brief Get the next available PTU URL and the associated application for
+   * performing the PTU
+   * @param iteration_type The iteration type of the PTU.
+   * If this is a retry and a retry URL was cached, that URL will be returned
+   * @param app_id Filled with the ID of application used to perform the PTU on
+   * success
+   * @return The next available PTU URL on success, empty string on failure
+   */
   virtual std::string GetNextUpdateUrl(const PTUIterationType iteration_type,
                                        uint32_t& app_id) = 0;
-  virtual void CacheRetryInfo(const uint32_t app_id, const std::string url) = 0;
 #endif  // EXTERNAL_PROPRIETARY_MODE
 
   virtual bool GetPriority(const std::string& policy_app_id,
@@ -346,22 +355,35 @@ class PolicyHandlerInterface : public VehicleDataItemProvider {
    */
   virtual void OnSystemError(int code) = 0;
 
+#ifndef EXTERNAL_PROPRIETARY_MODE
   /**
-   * @brief Choose application id to be used for snapshot sending
-   * @return Application id or 0, if there are no applications registered
+   * @brief Chooses and stores random application id to be used for snapshot
+   * sending considering HMI level
+   * @param iteration_type The iteration type of the request. If RetryIteration,
+   * the previously chosen app ID (via ChoosePTUApplication or CacheRetryInfo)
+   * will be returned if available
+   * @return Application id or 0, if there are no suitable applications
    */
   virtual uint32_t ChoosePTUApplication(
       const PTUIterationType iteration_type =
           PTUIterationType::DefaultIteration) = 0;
 
   /**
-   * @brief Retrieve an application id to be used for snapshot sending
-   * @param iteration_type
-   * @return Application id or 0, if there are no applications registered
+   * @brief Update the cached URL and app ID used for policy retries
+   * @param app_id The ID of the application to be used for performing PTUs.
+   * If 0, the existing cached application will be cleared
+   * @param url The URL provided by the HMI to be used for performing PTU
+   * retries. If empty, the existing cached URL will be cleared and Core will
+   * choose which URLs to use on retry
    */
-  virtual uint32_t GetAppIdForSending(
-      const PTUIterationType iteration_type =
-          PTUIterationType::DefaultIteration) const = 0;
+  virtual void CacheRetryInfo(const uint32_t app_id, const std::string url) = 0;
+#endif  // EXTERNAL_PROPRIETARY_MODE
+
+  /**
+   * @brief Retrieve potential application id to be used for snapshot sending
+   * @return Application id or 0, if there are no suitable applications
+   */
+  virtual uint32_t GetAppIdForSending() const = 0;
 
   virtual utils::custom_string::CustomString GetAppName(
       const std::string& policy_app_id) = 0;
