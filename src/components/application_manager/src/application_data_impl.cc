@@ -568,9 +568,11 @@ void DynamicApplicationDataImpl::set_display_capabilities(
   display_capabilities_.reset(
       new smart_objects::SmartObject(display_capabilities));
 
-  auto has_window_id = [&tmp_window_capabilities](const WindowID window_id) {
+  auto has_window_id = [&tmp_window_capabilities](const WindowID window_id,
+                                                  int& found_index) {
     const auto tmp_window_capabilities_arr = tmp_window_capabilities.asArray();
     if (!tmp_window_capabilities_arr) {
+      found_index = -1;
       return false;
     }
 
@@ -578,20 +580,25 @@ void DynamicApplicationDataImpl::set_display_capabilities(
       if (element.keyExists(strings::window_id)) {
         if (window_id == element[strings::window_id].asInt())
           return true;
-      } else if (window_id == 0) {
+      } else if (window_id == 0 || window_id == -1) {
         return true;
       }
+      found_index++;
     }
-
+    found_index = -1;
     return false;
   };
 
   for (uint32_t i = 0; i < incoming_window_capabilities.length(); ++i) {
     const auto window_id =
         incoming_window_capabilities[i][strings::window_id].asInt();
-    if (!has_window_id(window_id)) {
+    int found_index = 0;
+    if (!has_window_id(window_id, found_index)) {
       tmp_window_capabilities[tmp_window_capabilities.length()] =
           incoming_window_capabilities[i];
+    } else if (found_index >= 0) {
+      // Update the existing window capability
+      tmp_window_capabilities[found_index] = incoming_window_capabilities[i];
     }
   }
 
