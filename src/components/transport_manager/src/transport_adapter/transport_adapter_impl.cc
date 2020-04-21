@@ -339,13 +339,6 @@ ConnectionStatus TransportAdapterImpl::GetConnectionStatus(
 
 void TransportAdapterImpl::ConnectionStatusUpdated(DeviceSptr device,
                                                    ConnectionStatus status) {
-  if (device->connection_status() == status) {
-    LOG4CXX_DEBUG(
-        logger_,
-        "Connection status for device " << device << " was not changed");
-    return;
-  }
-
   device->set_connection_status(status);
   for (TransportAdapterListenerList::iterator it = listeners_.begin();
        it != listeners_.end();
