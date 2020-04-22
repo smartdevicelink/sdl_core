@@ -588,7 +588,7 @@ void DynamicApplicationDataImpl::set_display_capabilities(
   };
 
   for (uint32_t i = 0; i < incoming_window_capabilities.length(); ++i) {
-    auto window_id = 0;
+    int64_t window_id = 0;
     if (incoming_window_capabilities[i].keyExists(strings::window_id)) {
       window_id = incoming_window_capabilities[i][strings::window_id].asInt();
     }
