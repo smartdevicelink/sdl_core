@@ -568,37 +568,37 @@ void DynamicApplicationDataImpl::set_display_capabilities(
   display_capabilities_.reset(
       new smart_objects::SmartObject(display_capabilities));
 
-  auto has_window_id = [&tmp_window_capabilities](const WindowID window_id,
-                                                  int& found_index) {
+  auto get_window_index = [&tmp_window_capabilities](const WindowID window_id) {
     const auto tmp_window_capabilities_arr = tmp_window_capabilities.asArray();
     if (!tmp_window_capabilities_arr) {
-      found_index = -1;
-      return false;
+      return -1;
     }
 
+    int index = 0;
     for (auto element : *tmp_window_capabilities_arr) {
       if (element.keyExists(strings::window_id)) {
         if (window_id == element[strings::window_id].asInt())
-          return true;
-      } else if (window_id == 0 || window_id == -1) {
-        return true;
+          return index;
+      } else if (window_id == 0) {
+        return index;
       }
-      found_index++;
+      index++;
     }
-    found_index = -1;
-    return false;
+    return -1;
   };
 
   for (uint32_t i = 0; i < incoming_window_capabilities.length(); ++i) {
-    const auto window_id =
-        incoming_window_capabilities[i][strings::window_id].asInt();
-    int found_index = 0;
-    if (!has_window_id(window_id, found_index)) {
-      tmp_window_capabilities[tmp_window_capabilities.length()] =
-          incoming_window_capabilities[i];
-    } else if (found_index >= 0) {
+    auto window_id = 0;
+    if (incoming_window_capabilities[i].keyExists(strings::window_id)) {
+      window_id = incoming_window_capabilities[i][strings::window_id].asInt();
+    }
+    int found_index = get_window_index(window_id);
+    if (0 <= found_index) {
       // Update the existing window capability
       tmp_window_capabilities[found_index] = incoming_window_capabilities[i];
+    } else {
+      tmp_window_capabilities[tmp_window_capabilities.length()] =
+          incoming_window_capabilities[i];
     }
   }
 
