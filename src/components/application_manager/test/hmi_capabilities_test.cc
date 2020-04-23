@@ -1279,6 +1279,48 @@ TEST_F(HMICapabilitiesTest,
       hmi_apis::FunctionID::UI_GetCapabilities);
 }
 
+TEST_F(
+    HMICapabilitiesTest,
+    ConvertJsonArrayToSoArray_ConvertPrerecordedSpeech_SuccessConvertFromStringToEnum) {
+  SetUpLanguageAndLightCapabilitiesExpectation();
+
+  CreateFile(kHmiCapabilitiesCacheFile);
+  const std::string prerecordedSpeechCapabilities =
+      "{ \"TTS\" :{"
+      "\"prerecordedSpeechCapabilities\" :["
+      "\"HELP_JINGLE\","
+      "\"INITIAL_JINGLE\","
+      "\"LISTEN_JINGLE\","
+      "\"POSITIVE_JINGLE\","
+      "\"NEGATIVE_JINGLE\"]}"
+      "}";
+
+  const std::vector<uint8_t> binary_data_to_save(
+      prerecordedSpeechCapabilities.begin(),
+      prerecordedSpeechCapabilities.end());
+  file_system::Write(kHmiCapabilitiesCacheFile, binary_data_to_save);
+
+  hmi_capabilities_->Init(last_state_wrapper_);
+
+  const auto tts_capabilities_so = *(hmi_capabilities_->prerecorded_speech());
+
+  EXPECT_EQ(hmi_apis::Common_PrerecordedSpeech::HELP_JINGLE,
+            static_cast<hmi_apis::Common_PrerecordedSpeech::eType>(
+                tts_capabilities_so[0].asInt()));
+  EXPECT_EQ(hmi_apis::Common_PrerecordedSpeech::INITIAL_JINGLE,
+            static_cast<hmi_apis::Common_PrerecordedSpeech::eType>(
+                tts_capabilities_so[1].asInt()));
+  EXPECT_EQ(hmi_apis::Common_PrerecordedSpeech::LISTEN_JINGLE,
+            static_cast<hmi_apis::Common_PrerecordedSpeech::eType>(
+                tts_capabilities_so[2].asInt()));
+  EXPECT_EQ(hmi_apis::Common_PrerecordedSpeech::POSITIVE_JINGLE,
+            static_cast<hmi_apis::Common_PrerecordedSpeech::eType>(
+                tts_capabilities_so[3].asInt()));
+  EXPECT_EQ(hmi_apis::Common_PrerecordedSpeech::NEGATIVE_JINGLE,
+            static_cast<hmi_apis::Common_PrerecordedSpeech::eType>(
+                tts_capabilities_so[4].asInt()));
+}
+
 }  // namespace application_manager_test
 }  // namespace components
 }  // namespace test

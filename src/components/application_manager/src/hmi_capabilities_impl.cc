@@ -58,6 +58,8 @@ std::map<std::string, hmi_apis::Common_VrCapabilities::eType>
     vr_enum_capabilities;
 std::map<std::string, hmi_apis::Common_SpeechCapabilities::eType>
     tts_enum_capabilities;
+std::map<std::string, hmi_apis::Common_PrerecordedSpeech::eType>
+    tts_enum_prerecorded_speech;
 std::map<std::string, hmi_apis::Common_ButtonName::eType> button_enum_name;
 std::map<std::string, hmi_apis::Common_TextFieldName::eType>
     text_fields_enum_name;
@@ -102,6 +104,22 @@ void InitCapabilities() {
       std::string("SILENCE"), hmi_apis::Common_SpeechCapabilities::SILENCE));
   tts_enum_capabilities.insert(std::make_pair(
       std::string("FILE"), hmi_apis::Common_SpeechCapabilities::FILE));
+
+  tts_enum_prerecorded_speech.insert(
+      std::make_pair(std::string("HELP_JINGLE"),
+                     hmi_apis::Common_PrerecordedSpeech::HELP_JINGLE));
+  tts_enum_prerecorded_speech.insert(
+      std::make_pair(std::string("INITIAL_JINGLE"),
+                     hmi_apis::Common_PrerecordedSpeech::INITIAL_JINGLE));
+  tts_enum_prerecorded_speech.insert(
+      std::make_pair(std::string("LISTEN_JINGLE"),
+                     hmi_apis::Common_PrerecordedSpeech::LISTEN_JINGLE));
+  tts_enum_prerecorded_speech.insert(
+      std::make_pair(std::string("POSITIVE_JINGLE"),
+                     hmi_apis::Common_PrerecordedSpeech::POSITIVE_JINGLE));
+  tts_enum_prerecorded_speech.insert(
+      std::make_pair(std::string("NEGATIVE_JINGLE"),
+                     hmi_apis::Common_PrerecordedSpeech::NEGATIVE_JINGLE));
 
   button_enum_name.insert(
       std::make_pair(std::string("OK"), hmi_apis::Common_ButtonName::OK));
@@ -1533,7 +1551,7 @@ bool HMICapabilitiesImpl::LoadCapabilitiesFromFile() {
       if (!tts_prerecorded_speech_capabilities_node.isNull()) {
         smart_objects::SmartObject tts_capabilities_so =
             smart_objects::SmartObject(smart_objects::SmartType_Array);
-        ConvertJsonArrayToSoArray<hmi_apis::Common_SpeechCapabilities::eType>(
+        ConvertJsonArrayToSoArray<hmi_apis::Common_PrerecordedSpeech::eType>(
             tts_prerecorded_speech_capabilities_node, tts_capabilities_so);
         set_prerecorded_speech(tts_capabilities_so);
       }
