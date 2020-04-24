@@ -13,9 +13,14 @@ addons:
   apt:
     sources:
     - sourceline: "ppa:ubuntu-toolchain-r/test"
-
+    packages:
+    - cppcheck
+    - cmake
+    - make
+    - automake
+    - sqlite3
 before_install:
-  - sudo apt-get update && sudo apt-get install cppcheck cmake build-essential sqlite3 libsqlite3-dev libssl1.0-dev libssl1.0.0 libusb-1.0-0-dev libudev-dev libgtest-dev libbluetooth3 libbluetooth-dev bluez-tools libpulse-dev python3-pip python3-setuptools automake
+  - sudo apt-get update && sudo apt-get install libsqlite3-dev libssl1.0-dev libssl1.0.0 libusb-1.0-0-dev libudev-dev libgtest-dev libbluetooth3 libbluetooth-dev bluez-tools libpulse-dev python3-pip python3-setuptools
   - sudo apt-get install -f clang-format-6.0
 
 script:
