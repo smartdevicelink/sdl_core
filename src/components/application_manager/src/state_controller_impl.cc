@@ -333,15 +333,15 @@ void StateControllerImpl::HmiLevelConflictResolver::operator()(
   DCHECK_OR_RETURN_VOID(state_to_resolve);
 
   // If applied HMI state is FULL:
-  // - all NOT audio/video applications becomes BACKGROUND
+  // - all NOT audio/video applications become BACKGROUND
   // - all audio/video applications with other app type
-  //  (navi, vc, media, projection) in FULL becomes LIMMITED
-  // - all audio/video applications with same app type becomes BACKGROUND
+  //  (navi, vc, media, projection) in FULL become LIMITED
+  // - all audio/video applications with the same app type become BACKGROUND
   //
   // If applied HMI state is LIMITED:
-  // - all NOT audio/video applications saves their's HMI states
-  // - all applications with other app types saves their's HMI states
-  // - all audio/video applications with same app type becomes BACKGROUND
+  // - all NOT audio/video applications saves their HMI states
+  // - all applications with the other app types saves their HMI states
+  // - all audio/video applications with the same app type become BACKGROUND
 
   if (!IsStreamableHMILevel(state_->hmi_level())) {
     LOG4CXX_DEBUG(logger_,
@@ -479,9 +479,10 @@ bool StateControllerImpl::IsResumptionAllowed(ApplicationSharedPtr app,
   }
 
   if (IsTempStateActive(HmiState::StateID::STATE_ID_EMBEDDED_NAVI) &&
-      (app->is_navi() || app->mobile_projection_enabled())) {
+      (app->is_navi() || app->mobile_projection_enabled() ||
+       app->webengine_projection_enabled())) {
     LOG4CXX_DEBUG(logger_,
-                  "Resumption for navi or projection app is not allowed. "
+                  "Resumption for navi and projection apps is not allowed. "
                       << "EMBEDDED_NAVI event is active");
     return false;
   }
@@ -895,7 +896,7 @@ void StateControllerImpl::OnApplicationRegistered(
     const mobile_apis::HMILevel::eType default_level) {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  // After app registration HMI level should be set for DEFAUL_WINDOW only
+  // After app registration HMI level should be set for DEFAULT_WINDOW only
   OnAppWindowAdded(app,
                    mobile_apis::PredefinedWindows::DEFAULT_WINDOW,
                    mobile_apis::WindowType::MAIN,
@@ -1268,6 +1269,15 @@ mobile_apis::VideoStreamingState::eType StateControllerImpl::CalcVideoState(
     ApplicationSharedPtr app,
     const mobile_apis::HMILevel::eType hmi_level) const {
   auto state = mobile_apis::VideoStreamingState::NOT_STREAMABLE;
+
+  if (app->webengine_projection_enabled()) {
+    LOG4CXX_DEBUG(logger_,
+                  "Calculated video state of app "
+                      << app->app_id() << " for " << hmi_level
+                      << " HMI level is " << state);
+    return state;
+  }
+
   if (IsStreamableHMILevel(hmi_level) && app->IsVideoApplication()) {
     state = mobile_apis::VideoStreamingState::STREAMABLE;
   }
