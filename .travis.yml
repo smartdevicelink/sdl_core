@@ -12,10 +12,10 @@ only:
 addons:
   apt:
     sources:
-    - ubuntu-toolchain-r-test
+    - sourceline: "ppa:ubuntu-toolchain-r/test"
 
 before_install:
-  - sudo apt-get update && apt-get install git cmake build-essential sqlite3 libsqlite3-dev libssl1.0-dev libssl1.0.0 libusb-1.0-0-dev libudev-dev libgtest-dev libbluetooth3 libbluetooth-dev bluez-tools libpulse-dev python3-pip python3-setuptools automake
+  - sudo apt-get update && sudo apt-get install git cmake build-essential sqlite3 libsqlite3-dev libssl1.0-dev libssl1.0.0 libusb-1.0-0-dev libudev-dev libgtest-dev libbluetooth3 libbluetooth-dev bluez-tools libpulse-dev python3-pip python3-setuptools automake
   - sudo apt-get install -f clang-format-6.0
 
 script:
