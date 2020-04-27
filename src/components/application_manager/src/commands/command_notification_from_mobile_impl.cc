@@ -57,6 +57,10 @@ bool CommandNotificationFromMobileImpl::Init() {
   return true;
 }
 
+bool CommandNotificationFromMobileImpl::CheckPermissions() {
+  return CheckAllowedParameters(Command::CommandSource::SOURCE_MOBILE);
+}
+
 bool CommandNotificationFromMobileImpl::CleanUp() {
   return true;
 }

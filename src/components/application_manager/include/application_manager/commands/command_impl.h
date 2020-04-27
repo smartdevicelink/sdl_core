@@ -162,6 +162,20 @@ class CommandImpl : public Command {
 
  protected:
   /**
+   * @brief Checks message permissions and parameters according to policy table
+   * permissions
+   * @param source The source of the command (used to determine if a response
+   * should be sent on failure)
+   * @return true if the RPC is allowed, false otherwise
+   */
+  bool CheckAllowedParameters(const Command::CommandSource source);
+
+  /**
+   * @brief Remove from current message parameters disallowed by policy table
+   */
+  void RemoveDisallowedParameters();
+
+  /**
    * @brief Parses mobile message and replaces mobile app id with HMI app id
    * @param message Message to replace its ids
    * @return True if replacement succeeded, otherwise - false
@@ -182,6 +196,9 @@ class CommandImpl : public Command {
   rpc_service::RPCService& rpc_service_;
   HMICapabilities& hmi_capabilities_;
   policy::PolicyHandlerInterface& policy_handler_;
+
+  CommandParametersPermissions parameters_permissions_;
+  CommandParametersPermissions removed_parameters_permissions_;
 
 #ifdef ENABLE_LOG
   static log4cxx::LoggerPtr logger_;

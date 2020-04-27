@@ -236,8 +236,11 @@ class CommandRequestImpl : public CommandImpl,
   /**
    * @brief Checks message permissions and parameters according to policy table
    * permissions
+   * @param source The source of the command (used to determine if a response
+   * should be sent on failure)
+   * @return true if the RPC is allowed, false otherwise
    */
-  bool CheckAllowedParameters();
+  bool CheckAllowedParameters(const Command::CommandSource source);
 
   /**
    * @brief Checks HMI capabilities for specified button support
@@ -246,11 +249,6 @@ class CommandRequestImpl : public CommandImpl,
    * otherwise returns false
    */
   bool CheckHMICapabilities(const mobile_apis::ButtonName::eType button) const;
-
-  /**
-   * @brief Remove from current message parameters disallowed by policy table
-   */
-  void RemoveDisallowedParameters();
 
   /**
    * @brief Adds disallowed parameters back to response with appropriate
@@ -375,8 +373,6 @@ class CommandRequestImpl : public CommandImpl,
 
   RequestState current_state_;
   sync_primitives::Lock state_lock_;
-  CommandParametersPermissions parameters_permissions_;
-  CommandParametersPermissions removed_parameters_permissions_;
 
   /**
    * @brief hash_update_mode_ Defines whether request must update hash value of
