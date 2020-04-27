@@ -51,6 +51,7 @@ class CommandRequestToMobile : public CommandImpl {
                          policy::PolicyHandlerInterface& policy_handler);
   ~CommandRequestToMobile();
   bool Init() OVERRIDE;
+  bool CheckPermissions() OVERRIDE;
   bool CleanUp() OVERRIDE;
   void Run() OVERRIDE;
   void SendRequest();

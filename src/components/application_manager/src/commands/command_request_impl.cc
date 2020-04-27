@@ -222,7 +222,7 @@ bool CommandRequestImpl::Init() {
 }
 
 bool CommandRequestImpl::CheckPermissions() {
-  return CheckAllowedParameters();
+  return CheckAllowedParameters(Command::CommandSource::SOURCE_MOBILE);
 }
 
 bool CommandRequestImpl::CleanUp() {
@@ -691,7 +691,8 @@ mobile_apis::Result::eType CommandRequestImpl::GetMobileResultCode(
   return mobile_result;
 }
 
-bool CommandRequestImpl::CheckAllowedParameters() {
+bool CommandRequestImpl::CheckAllowedParameters(
+    const Command::CommandSource source) {
   LOG4CXX_AUTO_TRACE(logger_);
 
   // RegisterAppInterface should always be allowed
@@ -700,64 +701,7 @@ bool CommandRequestImpl::CheckAllowedParameters() {
     return true;
   }
 
-  const ApplicationSharedPtr app =
-      application_manager_.application(connection_key());
-  if (!app) {
-    LOG4CXX_ERROR(logger_,
-                  "There is no registered application with "
-                  "connection key '"
-                      << connection_key() << "'");
-    return false;
-  }
-
-  RPCParams params;
-
-  const smart_objects::SmartObject& s_map = (*message_)[strings::msg_params];
-  smart_objects::SmartMap::const_iterator iter = s_map.map_begin();
-  smart_objects::SmartMap::const_iterator iter_end = s_map.map_end();
-
-  for (; iter != iter_end; ++iter) {
-    LOG4CXX_DEBUG(logger_, "Request's param: " << iter->first);
-    params.insert(iter->first);
-  }
-
-  mobile_apis::Result::eType check_result =
-      mobile_apis::Result::eType::INVALID_ID;
-  const auto current_window_id = window_id();
-  if (app->WindowIdExists(current_window_id)) {
-    check_result = application_manager_.CheckPolicyPermissions(
-        app,
-        current_window_id,
-        MessageHelper::StringifiedFunctionID(
-            static_cast<mobile_api::FunctionID::eType>(function_id())),
-        params,
-        &parameters_permissions_);
-  }
-
-  // Check, if RPC is allowed by policy
-  if (mobile_apis::Result::SUCCESS != check_result) {
-    smart_objects::SmartObjectSPtr response =
-        MessageHelper::CreateBlockedByPoliciesResponse(
-            static_cast<mobile_api::FunctionID::eType>(function_id()),
-            check_result,
-            correlation_id(),
-            app->app_id());
-
-    rpc_service_.SendMessageToMobile(response);
-    return false;
-  }
-
-  // If no parameters specified in policy table, no restriction will be
-  // applied for parameters
-  if (parameters_permissions_.allowed_params.empty() &&
-      parameters_permissions_.disallowed_params.empty() &&
-      parameters_permissions_.undefined_params.empty()) {
-    return true;
-  }
-
-  RemoveDisallowedParameters();
-
-  return true;
+  return CommandImpl::CheckAllowedParameters(source);
 }
 
 bool CommandRequestImpl::CheckHMICapabilities(
@@ -792,42 +736,6 @@ bool CommandRequestImpl::CheckHMICapabilities(
   LOG4CXX_DEBUG(logger_,
                 "Button capabilities for " << button << " was not found");
   return false;
-}
-
-void CommandRequestImpl::RemoveDisallowedParameters() {
-  LOG4CXX_AUTO_TRACE(logger_);
-
-  smart_objects::SmartObject& params = (*message_)[strings::msg_params];
-
-  for (const auto& key : params.enumerate()) {
-    if (parameters_permissions_.disallowed_params.end() !=
-        parameters_permissions_.disallowed_params.find(key)) {
-      // Remove from request all disallowed parameters
-      params.erase(key);
-      removed_parameters_permissions_.disallowed_params.insert(key);
-      LOG4CXX_INFO(logger_,
-                   "Following parameter is disallowed by user: " << key);
-    }
-
-    else if (removed_parameters_permissions_.undefined_params.end() !=
-             removed_parameters_permissions_.undefined_params.find(key)) {
-      // Remove from request all undefined yet parameters
-      params.erase(key);
-      removed_parameters_permissions_.undefined_params.insert(key);
-      LOG4CXX_INFO(logger_,
-                   "Following parameter is disallowed by policy: " << key);
-    }
-
-    else if (parameters_permissions_.allowed_params.end() ==
-             parameters_permissions_.allowed_params.find(key)) {
-      // Remove from request all parameters missed in allowed
-      params.erase(key);
-      removed_parameters_permissions_.undefined_params.insert(key);
-      LOG4CXX_INFO(logger_,
-                   "Following parameter is not found among allowed parameters '"
-                       << key << "' and will be treated as disallowed.");
-    }
-  }
 }
 
 void CommandRequestImpl::AddDissalowedParameterToInfoString(

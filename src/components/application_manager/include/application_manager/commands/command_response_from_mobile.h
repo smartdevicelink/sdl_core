@@ -51,6 +51,7 @@ class CommandResponseFromMobile : public CommandImpl {
                             policy::PolicyHandlerInterface& policy_handler);
   ~CommandResponseFromMobile();
   bool Init() OVERRIDE;
+  bool CheckPermissions() OVERRIDE;
   bool CleanUp() OVERRIDE;
   void Run() OVERRIDE;
   void SendResponse();

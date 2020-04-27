@@ -206,7 +206,7 @@ bool RPCServiceImpl::ManageMobileCommand(
   int32_t message_type =
       (*message)[strings::params][strings::message_type].asInt();
   if (message_type == mobile_apis::messageType::response) {
-    if (command->Init()) {
+    if (command->Init() && command->CheckPermissions()) {
       command->Run();
       command->CleanUp();
     }
@@ -214,7 +214,7 @@ bool RPCServiceImpl::ManageMobileCommand(
   }
   if (message_type == mobile_apis::messageType::notification) {
     request_ctrl_.addNotification(command);
-    if (command->Init()) {
+    if (command->Init() && command->CheckPermissions()) {
       command->Run();
       if (command->CleanUp()) {
         request_ctrl_.removeNotification(command.get());
@@ -226,7 +226,7 @@ bool RPCServiceImpl::ManageMobileCommand(
 
   if (message_type == mobile_apis::messageType::request &&
       source == commands::Command::CommandSource::SOURCE_SDL) {
-    if (command->Init()) {
+    if (command->Init() && command->CheckPermissions()) {
       command->Run();
       command->CleanUp();
       return true;
