@@ -402,6 +402,8 @@ TEST_F(CommandRequestImplTest,
   MessageSharedPtr message = CreateMessage();
   (*message)[strings::msg_params] =
       smart_objects::SmartObject(smart_objects::SmartType_Map);
+  (*message)[strings::params][strings::message_type] =
+      mobile_apis::messageType::request;
 
   CommandPtr command = CreateCommand<UCommandRequestImpl>(message);
 
