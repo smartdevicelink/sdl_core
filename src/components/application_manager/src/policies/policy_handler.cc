@@ -1621,7 +1621,7 @@ void PolicyHandler::OnSnapshotCreated(const BinaryMessage& pt_string,
     uint32_t app_id_for_sending = 0;
     const std::string& url =
         GetNextUpdateUrl(PTUIterationType::RetryIteration, app_id_for_sending);
-    if (0 != url.length() && 0 != app_id_for_sending) {
+    if (0 != url.length()) {
       MessageHelper::SendPolicySnapshotNotification(
           app_id_for_sending, pt_string, url, application_manager_);
     }
@@ -1655,6 +1655,10 @@ std::string PolicyHandler::GetNextUpdateUrl(
   LOG4CXX_AUTO_TRACE(logger_);
   POLICY_LIB_CHECK_OR_RETURN(std::string());
   app_id = ChoosePTUApplication(iteration_type);
+
+  if (0 == app_id) {
+    return std::string();
+  }
 
   // Use cached URL for retries if it was provided by the HMI
   if (PTUIterationType::RetryIteration == iteration_type &&
