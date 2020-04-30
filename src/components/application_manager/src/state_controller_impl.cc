@@ -1270,15 +1270,7 @@ mobile_apis::VideoStreamingState::eType StateControllerImpl::CalcVideoState(
     const mobile_apis::HMILevel::eType hmi_level) const {
   auto state = mobile_apis::VideoStreamingState::NOT_STREAMABLE;
 
-  if (app->webengine_projection_enabled()) {
-    LOG4CXX_DEBUG(logger_,
-                  "Calculated video state of app "
-                      << app->app_id() << " for " << hmi_level
-                      << " HMI level is " << state);
-    return state;
-  }
-
-  if (IsStreamableHMILevel(hmi_level) && app->IsVideoApplication()) {
+  if (app->IsVideoApplication() && IsStreamableHMILevel(hmi_level)) {
     state = mobile_apis::VideoStreamingState::STREAMABLE;
   }
 
