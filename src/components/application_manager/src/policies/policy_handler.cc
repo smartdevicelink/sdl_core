@@ -1656,6 +1656,10 @@ std::string PolicyHandler::GetNextUpdateUrl(
   POLICY_LIB_CHECK_OR_RETURN(std::string());
   app_id = ChoosePTUApplication(iteration_type);
 
+  if (0 == app_id) {
+    return std::string();
+  }
+
   // Use cached URL for retries if it was provided by the HMI
   if (PTUIterationType::RetryIteration == iteration_type &&
       !retry_update_url_.empty()) {
