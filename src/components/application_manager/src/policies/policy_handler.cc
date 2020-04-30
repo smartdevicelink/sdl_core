@@ -1621,7 +1621,7 @@ void PolicyHandler::OnSnapshotCreated(const BinaryMessage& pt_string,
     uint32_t app_id_for_sending = 0;
     const std::string& url =
         GetNextUpdateUrl(PTUIterationType::RetryIteration, app_id_for_sending);
-    if (0 != url.length()) {
+    if (0 != url.length() && 0 != app_id_for_sending) {
       MessageHelper::SendPolicySnapshotNotification(
           app_id_for_sending, pt_string, url, application_manager_);
     }
