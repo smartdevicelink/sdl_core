@@ -2035,7 +2035,7 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessageHeartBeat(
   }
 }
 
-void ProtocolHandlerImpl::PopValideAndExpirateMultiframes() {
+void ProtocolHandlerImpl::PopValidAndExpiredMultiframes() {
   LOG4CXX_AUTO_TRACE(logger_);
   const ProtocolFramePtrList& frame_list = multiframe_builder_.PopMultiframes();
   for (ProtocolFramePtrList::const_iterator it = frame_list.begin();
@@ -2147,7 +2147,7 @@ void ProtocolHandlerImpl::Handle(const impl::RawFordMessageFromMobile message) {
       FRAME_TYPE_FIRST == message->frame_type()) {
     LOG4CXX_DEBUG(logger_, "Packet: dataSize " << message->data_size());
     HandleMessage(message);
-    PopValideAndExpirateMultiframes();
+    PopValidAndExpiredMultiframes();
   } else {
     LOG4CXX_WARN(logger_,
                  "handleMessagesFromMobileApp() - incorrect or NULL data");

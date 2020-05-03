@@ -1,6 +1,6 @@
 
 /*
- * Copyright (c) 2018, Ford Motor Company
+ * Copyright (c) 2020, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -31,8 +31,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "gtest/gtest.h"
 #include "utils/convert_utils.h"
+#include "gtest/gtest.h"
 
 namespace test {
 namespace components {
@@ -66,8 +66,9 @@ TEST(ConvertUtilsTest, ConvertLongLongUIntToUInt64_CorrectValue) {
 
 TEST(ConvertUtilsTest, ConvertBinaryDataToString_ValidCharacteres_CorrectText) {
   const uint8_t data[] = {'s', 'u', 'c', 'c', 'e', 's', 's'};
+  const std::string convertion_result = "success";
   const size_t data_size = 7;
-  EXPECT_EQ("success", ConvertBinaryDataToString(&data[0], data_size));
+  EXPECT_EQ(convertion_result, ConvertBinaryDataToString(&data[0], data_size));
 }
 
 TEST(ConvertUtilsTest,
@@ -75,7 +76,8 @@ TEST(ConvertUtilsTest,
   const size_t data_size = 7;
   uint8_t data[data_size];
   data[0] = 0u;
-  EXPECT_EQ("is raw data", ConvertBinaryDataToString(&data[0], data_size));
+  const std::string is_raw_data = "is raw data";
+  EXPECT_EQ(is_raw_data, ConvertBinaryDataToString(&data[0], data_size));
 }
 
 }  // namespace utils_test

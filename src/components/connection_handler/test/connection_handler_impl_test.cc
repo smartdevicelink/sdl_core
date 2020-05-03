@@ -422,15 +422,15 @@ TEST_F(ConnectionHandlerTest, GetAppIdOnSessionKey) {
 
   EXPECT_EQ(0,
             connection_handler_->GetDataOnSessionKey(
-                connection_key_, &app_id, NULL, &test_handle));
+                connection_key_, &app_id, nullptr, &test_handle));
   EXPECT_EQ(test_id, app_id);
 }
 
 TEST_F(ConnectionHandlerTest, GetAppIdOnSessionKey_InvalidConnectionId) {
   uint8_t invalid_id = 0;
-  EXPECT_EQ(
-      -1,
-      connection_handler_->GetDataOnSessionKey(invalid_id, NULL, NULL, NULL));
+  EXPECT_EQ(-1,
+            connection_handler_->GetDataOnSessionKey(
+                invalid_id, nullptr, nullptr, nullptr));
 }
 
 TEST_F(ConnectionHandlerTest, GetAppIdOnSessionKey_SessionNotStarted) {
@@ -464,9 +464,9 @@ TEST_F(ConnectionHandlerTest, GetDeviceID) {
 
 TEST_F(ConnectionHandlerTest, GetDataOnDeviceID_InvalidDeviceHandle) {
   const DeviceHandle handle = 0;
-  EXPECT_EQ(
-      -1,
-      connection_handler_->GetDataOnDeviceID(handle, NULL, NULL, NULL, NULL));
+  EXPECT_EQ(-1,
+            connection_handler_->GetDataOnDeviceID(
+                handle, nullptr, nullptr, nullptr, nullptr));
 }
 
 TEST_F(ConnectionHandlerTest, GetDeviceName) {
@@ -487,9 +487,10 @@ TEST_F(ConnectionHandlerTest, GetConnectionType) {
   const DeviceHandle handle = 0;
   std::string test_mac_address;
   std::string test_connection_type;
-  EXPECT_EQ(0,
-            connection_handler_->GetDataOnDeviceID(
-                handle, NULL, NULL, &test_mac_address, &test_connection_type));
+  EXPECT_EQ(
+      0,
+      connection_handler_->GetDataOnDeviceID(
+          handle, nullptr, nullptr, &test_mac_address, &test_connection_type));
   EXPECT_EQ(connection_type_, test_connection_type);
 }
 
@@ -510,7 +511,7 @@ TEST_F(ConnectionHandlerTest, GetApplicationsOnDevice) {
   EXPECT_EQ(test_id, applications_list.front());
 }
 
-TEST_F(ConnectionHandlerTest, GetDefaultProtocolVersion) {
+TEST_F(ConnectionHandlerTest, ProtocolVersionUsed_Default_Success) {
   AddTestDeviceConnection();
   AddTestSession();
 
@@ -521,7 +522,7 @@ TEST_F(ConnectionHandlerTest, GetDefaultProtocolVersion) {
   EXPECT_EQ(PROTOCOL_VERSION_2, protocol_version);
 }
 
-TEST_F(ConnectionHandlerTest, GetProtocolVersion) {
+TEST_F(ConnectionHandlerTest, ProtocolVersionUsed_Success) {
   AddTestDeviceConnection();
   AddTestSession();
   ChangeProtocol(uid_, out_context_.new_session_id_, PROTOCOL_VERSION_3);
@@ -533,7 +534,7 @@ TEST_F(ConnectionHandlerTest, GetProtocolVersion) {
   EXPECT_EQ(PROTOCOL_VERSION_3, protocol_version);
 }
 
-TEST_F(ConnectionHandlerTest, GetProtocolVersionAfterBinding) {
+TEST_F(ConnectionHandlerTest, ProtocolVersionUsed_AfterBinding_Success) {
   AddTestDeviceConnection();
   AddTestSession();
   uint8_t protocol_version = 0;
@@ -549,7 +550,7 @@ TEST_F(ConnectionHandlerTest, GetProtocolVersionAfterBinding) {
   EXPECT_EQ(PROTOCOL_VERSION_3, protocol_version);
 }
 
-TEST_F(ConnectionHandlerTest, GetProtocolVerssionWrongConnection) {
+TEST_F(ConnectionHandlerTest, ProtocolVersionUsed_WrongConnection_Fail) {
   AddTestDeviceConnection();
   AddTestSession();
   uint8_t connection_id = 0;
@@ -576,7 +577,16 @@ MATCHER_P(SameDevice, device, "") {
          arg.connection_type() == device.connection_type();
 }
 
-TEST_F(ConnectionHandlerTest, IsHeartBeatSupported) {
+TEST_F(ConnectionHandlerTest, IsHeartBeatSupported_Success) {
+  AddTestDeviceConnection();
+  AddTestSession();
+  ChangeProtocol(uid_, out_context_.new_session_id_, PROTOCOL_VERSION_3);
+
+  EXPECT_TRUE(connection_handler_->IsHeartBeatSupported(
+      uid_, out_context_.new_session_id_));
+}
+
+TEST_F(ConnectionHandlerTest, IsHeartBeatSupported_Fail) {
   AddTestDeviceConnection();
   AddTestSession();
   ChangeProtocol(uid_, out_context_.new_session_id_, PROTOCOL_VERSION_3);
@@ -584,9 +594,6 @@ TEST_F(ConnectionHandlerTest, IsHeartBeatSupported) {
   uint8_t invalid_id = 0u;
   EXPECT_FALSE(connection_handler_->IsHeartBeatSupported(
       invalid_id, out_context_.new_session_id_));
-
-  EXPECT_TRUE(connection_handler_->IsHeartBeatSupported(
-      uid_, out_context_.new_session_id_));
 }
 
 TEST_F(ConnectionHandlerTest, SendEndServiceWithoutSetProtocolHandler) {
@@ -596,7 +603,7 @@ TEST_F(ConnectionHandlerTest, SendEndServiceWithoutSetProtocolHandler) {
   connection_handler_->SendEndService(connection_key_, kRpc);
 }
 
-TEST_F(ConnectionHandlerTest, SendEndServiceWithoutSession) {
+TEST_F(ConnectionHandlerTest, SendEndService_NoSession_Fail) {
   AddTestDeviceConnection();
   EXPECT_CALL(mock_protocol_handler_, SendEndService(_, _, _, kRpc)).Times(0);
   connection_handler_->SendEndService(connection_key_, kRpc);
@@ -881,7 +888,7 @@ TEST_F(ConnectionHandlerTest, OnDeviceRemoved_ServiceStarted) {
   connection_handler_->OnDeviceRemoved(device1);
 }
 
-TEST_F(ConnectionHandlerTest, OnConnectionClosedInvalidConnectionId) {
+TEST_F(ConnectionHandlerTest, OnConnectionClosed_InvalidConnectionId_Fail) {
   AddTestDeviceConnection();
   AddTestSession();
 
@@ -891,15 +898,17 @@ TEST_F(ConnectionHandlerTest, OnConnectionClosedInvalidConnectionId) {
       &mock_connection_handler_observer);
 
   EXPECT_CALL(mock_connection_handler_observer,
-              OnServiceEndedCallback(connection_key_, kBulk, kCommon)).Times(0);
+              OnServiceEndedCallback(connection_key_, kBulk, kCommon))
+      .Times(0);
   EXPECT_CALL(mock_connection_handler_observer,
-              OnServiceEndedCallback(connection_key_, kRpc, kCommon)).Times(0);
+              OnServiceEndedCallback(connection_key_, kRpc, kCommon))
+      .Times(0);
 
   uint8_t invalid_id = 0;
   connection_handler_->OnConnectionClosed(invalid_id);
 }
 
-TEST_F(ConnectionHandlerTest, OnConnectionClosed) {
+TEST_F(ConnectionHandlerTest, OnConnectionClosed_Success) {
   AddTestDeviceConnection();
   AddTestSession();
 

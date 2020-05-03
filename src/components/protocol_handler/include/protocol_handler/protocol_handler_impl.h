@@ -43,10 +43,10 @@
 #include "utils/prioritized_queue.h"
 #include "utils/threads/message_loop_thread.h"
 
+#include "utils/convert_utils.h"
 #include "utils/custom_string.h"
 #include "utils/messagemeter.h"
 #include "utils/semantic_version.h"
-#include "utils/convert_utils.h"
 
 #include "application_manager/policies/policy_handler_observer.h"
 #include "connection_handler/connection_handler.h"
@@ -467,10 +467,6 @@ class ProtocolHandlerImpl
     tcp_ip_address_ = tcp_address;
     tcp_port_ = tcp_port;
   }
-
-  const size_t get_protocol_observers_count() const {
-    return protocol_observers_.size();
-  }
 #endif
 
   void OnAuthTokenUpdated(const std::string&, const std::string&) OVERRIDE;
@@ -670,7 +666,7 @@ class ProtocolHandlerImpl
 
   RESULT_CODE HandleControlMessageHeartBeat(const ProtocolPacket& packet);
 
-  void PopValideAndExpirateMultiframes();
+  void PopValidAndExpiredMultiframes();
 
   // threads::MessageLoopThread<*>::Handler implementations
   // CALLED ON raw_ford_messages_from_mobile_ thread!

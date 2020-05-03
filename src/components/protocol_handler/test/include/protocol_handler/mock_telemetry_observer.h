@@ -34,6 +34,7 @@
 #define SRC_COMPONENTS_PROTOCOL_HANDLER_TEST_INCLUDE_PROTOCOL_HANDLER_MOCK_TELEMETRY_OBSERVER_H_
 
 #include "gmock/gmock.h"
+#include "protocol_handler/telemetry_observer.h"
 
 namespace test {
 namespace components {
