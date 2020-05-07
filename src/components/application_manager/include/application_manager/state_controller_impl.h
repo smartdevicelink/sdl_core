@@ -112,11 +112,6 @@ class StateControllerImpl : public event_engine::EventObserver,
 
   void OnVideoStreamingStopped(ApplicationConstSharedPtr app) OVERRIDE;
 
-  void OnStateChanged(ApplicationSharedPtr app,
-                      const WindowID window_id,
-                      HmiStatePtr old_state,
-                      HmiStatePtr new_state) OVERRIDE;
-
   bool IsStateActive(HmiState::StateID state_id) const OVERRIDE;
 
   // EventObserver interface
@@ -127,6 +122,11 @@ class StateControllerImpl : public event_engine::EventObserver,
   void ExitDefaultWindow(ApplicationSharedPtr app) OVERRIDE;
 
  private:
+  void OnStateChanged(ApplicationSharedPtr app,
+                      const WindowID window_id,
+                      HmiStatePtr old_state,
+                      HmiStatePtr new_state);
+
   int64_t RequestHMIStateChange(ApplicationConstSharedPtr app,
                                 hmi_apis::Common_HMILevel::eType level,
                                 bool send_policy_priority);
@@ -423,6 +423,9 @@ class StateControllerImpl : public event_engine::EventObserver,
       const mobile_apis::HMILevel::eType hmi_level) const;
 
   typedef std::list<HmiState::StateID> StateIDList;
+  /**
+   * @brief active_states_ list of active temporary states(system events)
+   */
   StateIDList active_states_;
   mutable sync_primitives::Lock active_states_lock_;
   std::map<uint32_t, HmiStatePtr> waiting_for_response_;

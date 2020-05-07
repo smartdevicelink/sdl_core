@@ -100,11 +100,7 @@ class MockStateController : public am::StateController {
                void(am::ApplicationConstSharedPtr app));
   MOCK_METHOD1(OnVideoStreamingStopped,
                void(am::ApplicationConstSharedPtr app));
-  MOCK_METHOD4(OnStateChanged,
-               void(am::ApplicationSharedPtr app,
-                    const am::WindowID window_id,
-                    am::HmiStatePtr old_state,
-                    am::HmiStatePtr new_state));
+
   MOCK_CONST_METHOD1(IsStateActive, bool(am::HmiState::StateID state_id));
   MOCK_METHOD1(ActivateDefaultWindow, void(am::ApplicationSharedPtr app));
   MOCK_METHOD1(ExitDefaultWindow, void(am::ApplicationSharedPtr app));

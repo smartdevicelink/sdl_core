@@ -192,18 +192,6 @@ class StateController {
   virtual void OnVideoStreamingStopped(ApplicationConstSharedPtr app) = 0;
 
   /**
-   * @brief OnStateChanged send HMIStatusNotification if needed
-   * @param app application
-   * @param window_id id of applicaion's window to apply HMI state
-   * @param old_state state before change
-   * @param new_state state after change
-   */
-  virtual void OnStateChanged(ApplicationSharedPtr app,
-                              const WindowID window_id,
-                              HmiStatePtr old_state,
-                              HmiStatePtr new_state) = 0;
-
-  /**
    * @brief Checks activity of Deactivate HMI state.
    * @return Returns TRUE if deactivate HMI state is active, otherwise returns
    * FALSE.
