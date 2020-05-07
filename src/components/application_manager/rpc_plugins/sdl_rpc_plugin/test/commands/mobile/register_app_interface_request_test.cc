@@ -30,9 +30,14 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "mobile/register_app_interface_request.h"
+
 #include <stdint.h>
+
 #include <string>
 #include <vector>
+
+#include "gtest/gtest.h"
 
 #include "application_manager/application.h"
 #include "application_manager/commands/command_request_test.h"
@@ -46,15 +51,14 @@
 #include "application_manager/policies/mock_policy_handler_interface.h"
 #include "application_manager/smart_object_keys.h"
 #include "connection_handler/mock_connection_handler.h"
-#include "gtest/gtest.h"
 #include "interfaces/MOBILE_API.h"
-#include "mobile/register_app_interface_request.h"
 #include "protocol_handler/mock_session_observer.h"
 #include "smart_objects/smart_object.h"
 #include "utils/custom_string.h"
 #include "utils/data_accessor.h"
 #include "utils/lock.h"
 #include "utils/macro.h"
+#include "utils/mutable_data_accessor.h"
 #include "utils/semantic_version.h"
 
 namespace test {
@@ -105,6 +109,7 @@ class RegisterAppInterfaceRequestTest
       , app2_name_("test_app2_name_")
       , lock_ptr_(std::make_shared<sync_primitives::Lock>())
       , pending_lock_ptr_(std::make_shared<sync_primitives::Lock>())
+      , reg_status_lock_(std::make_shared<sync_primitives::Lock>())
       , mock_application_helper_(
             application_manager_test::MockApplicationHelper::
                 application_helper_mock()) {
@@ -292,6 +297,7 @@ class RegisterAppInterfaceRequestTest
   am::ApplicationSet app_set_;
   std::shared_ptr<sync_primitives::Lock> pending_lock_ptr_;
   am::AppsWaitRegistrationSet pending_app_set_;
+  std::shared_ptr<sync_primitives::Lock> reg_status_lock_;
 
   typedef IsNiceMock<policy_test::MockPolicyHandlerInterface,
                      kMocksAreNice>::Result MockPolicyHandlerInterface;
@@ -348,6 +354,13 @@ TEST_F(RegisterAppInterfaceRequestTest, Run_MinimalData_SUCCESS) {
   ON_CALL(app_mngr_, pending_applications())
       .WillByDefault(Return(DataAccessor<am::AppsWaitRegistrationSet>(
           pending_app_set_, pending_lock_ptr_)));
+
+  auto status = am::Application::ApplicationRegisterState::kRegistered;
+  MutableDataAccessor<am::Application::ApplicationRegisterState>
+      reg_status_accessor(status, reg_status_lock_);
+
+  ON_CALL(*mock_app, registration_status_accessor())
+      .WillByDefault(Return(reg_status_accessor));
 
   EXPECT_CALL(app_mngr_, application(kConnectionKey))
       .WillOnce(Return(mock_app));
@@ -424,6 +437,14 @@ TEST_F(RegisterAppInterfaceRequestTest,
       .WillByDefault(DoAll(SetArgPointee<3>(kMacAddress1), Return(0)));
 
   MockAppPtr mock_app = CreateBasicMockedApp();
+
+  auto status = am::Application::ApplicationRegisterState::kRegistered;
+  MutableDataAccessor<am::Application::ApplicationRegisterState>
+      reg_status_accessor(status, reg_status_lock_);
+
+  ON_CALL(*mock_app, registration_status_accessor())
+      .WillByDefault(Return(reg_status_accessor));
+
   EXPECT_CALL(app_mngr_, reregister_application_by_policy_id(kAppId1))
       .WillOnce(Return(ApplicationSharedPtr()));
   EXPECT_CALL(app_mngr_, application(kMacAddress1, kAppId1))
@@ -729,6 +750,13 @@ TEST_F(RegisterAppInterfaceRequestTest,
       .WillByDefault(DoAll(SetArgPointee<3>(kMacAddress2), Return(0)));
 
   MockAppPtr mock_app2 = CreateBasicMockedApp();
+
+  auto status = am::Application::ApplicationRegisterState::kRegistered;
+  MutableDataAccessor<am::Application::ApplicationRegisterState>
+      reg_status_accessor(status, reg_status_lock_);
+
+  ON_CALL(*mock_app2, registration_status_accessor())
+      .WillByDefault(Return(reg_status_accessor));
 
   ON_CALL(*mock_app2, device()).WillByDefault(Return(device_id2));
   ON_CALL(*mock_app2, mac_address()).WillByDefault(ReturnRef(kMacAddress2));

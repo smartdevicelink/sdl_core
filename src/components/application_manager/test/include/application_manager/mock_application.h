@@ -31,15 +31,19 @@
  */
 #ifndef SRC_COMPONENTS_APPLICATION_MANAGER_TEST_INCLUDE_APPLICATION_MANAGER_MOCK_APPLICATION_H_
 #define SRC_COMPONENTS_APPLICATION_MANAGER_TEST_INCLUDE_APPLICATION_MANAGER_MOCK_APPLICATION_H_
+
 #include <string>
+
+#include "gmock/gmock.h"
+
 #include "application_manager/app_extension.h"
 #include "application_manager/application.h"
 #include "application_manager/display_capabilities_builder.h"
 #include "application_manager/hmi_state.h"
 #include "application_manager/usage_statistics.h"
-#include "gmock/gmock.h"
 #include "smart_objects/smart_object.h"
 #include "utils/custom_string.h"
+#include "utils/mutable_data_accessor.h"
 #include "utils/semantic_version.h"
 
 namespace test {
@@ -362,6 +366,8 @@ class MockApplication : public ::application_manager::Application {
   MOCK_METHOD1(set_mobile_app_id, void(const std::string& policy_app_id));
   MOCK_CONST_METHOD0(is_foreground, bool());
   MOCK_METHOD1(set_foreground, void(bool is_foreground));
+  MOCK_METHOD0(registration_status_accessor,
+               MutableDataAccessor<ApplicationRegisterState>());
   MOCK_CONST_METHOD0(IsRegistered, bool());
   MOCK_CONST_METHOD0(SchemaUrl, std::string());
   MOCK_CONST_METHOD0(PackageName, std::string());

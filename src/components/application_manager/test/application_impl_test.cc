@@ -449,7 +449,8 @@ TEST_F(ApplicationImplTest, LoadPersistentFiles) {
   // Precondition
   // Create test folder with diff files
 
-  app_impl->MarkRegistered();
+  app_impl->registration_status_accessor().GetMutableData() =
+      ApplicationImpl::ApplicationRegisterState::kRegistered;
   std::string folder_name = "";
   app_impl->set_folder_name(folder_name);
 

@@ -32,11 +32,17 @@
 
 #include "mobile/on_system_capability_updated_notification.h"
 
+#include <memory>
+
+#include "gtest/gtest.h"
+
 #include "application_manager/commands/commands_test.h"
 #include "application_manager/display_capabilities_builder.h"
-#include "gtest/gtest.h"
 #include "sdl_rpc_plugin/extensions/system_capability_app_extension.h"
 #include "sdl_rpc_plugin/sdl_rpc_plugin.h"
+#include "utils/data_accessor.h"
+#include "utils/lock.h"
+#include "utils/mutable_data_accessor.h"
 
 namespace test {
 namespace components {
@@ -72,10 +78,12 @@ class OnSystemCapabilityUpdatedNotificationTest
 
     command_ = CreateCommand<OnSystemCapabilityUpdatedNotification>(message_);
     mock_app_ = CreateMockApp();
+    reg_status_lock_ = std::make_shared<sync_primitives::Lock>();
   }
 
   OnSystemCapabilityUpdatedNotificationPtr command_;
   MockAppPtr mock_app_;
+  std::shared_ptr<sync_primitives::Lock> reg_status_lock_;
   MessageSharedPtr message_;
 };
 
@@ -92,6 +100,13 @@ TEST_F(
 
   ON_CALL(mock_hmi_capabilities_, system_display_capabilities())
       .WillByDefault(Return(system_display_capabilities));
+
+  auto status = am::Application::ApplicationRegisterState::kRegistered;
+  MutableDataAccessor<am::Application::ApplicationRegisterState>
+      reg_status_accessor(status, reg_status_lock_);
+
+  ON_CALL(*mock_app_, registration_status_accessor())
+      .WillByDefault(Return(reg_status_accessor));
 
   sdl_rpc_plugin::SDLRPCPlugin sdl_rpc_plugin;
 
@@ -129,6 +144,56 @@ TEST_F(
 
 TEST_F(
     OnSystemCapabilityUpdatedNotificationTest,
+    Run_AppExistAppDuringRegistrationSubscribedToNotification_SystemDisplayCapabilitiesNotSendToMobile) {
+  (*message_)[am::strings::msg_params][strings::system_capability]
+             [am::strings::system_capability_type] =
+                 mobile_apis::SystemCapabilityType::DISPLAYS;
+
+  const auto system_display_capabilities =
+      std::make_shared<smart_objects::SmartObject>(
+          smart_objects::SmartType_Null);
+
+  ON_CALL(mock_hmi_capabilities_, system_display_capabilities())
+      .WillByDefault(Return(system_display_capabilities));
+
+  auto status =
+      am::Application::ApplicationRegisterState::kWaitingForRegistration;
+  MutableDataAccessor<am::Application::ApplicationRegisterState>
+      reg_status_accessor(status, reg_status_lock_);
+
+  ON_CALL(*mock_app_, registration_status_accessor())
+      .WillByDefault(Return(reg_status_accessor));
+
+  sdl_rpc_plugin::SDLRPCPlugin sdl_rpc_plugin;
+
+  const auto system_capability_app_extension =
+      std::make_shared<sdl_rpc_plugin::SystemCapabilityAppExtension>(
+          sdl_rpc_plugin, *mock_app_);
+  system_capability_app_extension->SubscribeTo(
+      mobile_apis::SystemCapabilityType::DISPLAYS);
+  application_manager::ApplicationSet apps({mock_app_});
+  const auto apps_lock_ = std::make_shared<sync_primitives::Lock>();
+  DataAccessor<application_manager::ApplicationSet> apps_data(apps, apps_lock_);
+
+  ON_CALL(app_mngr_, applications()).WillByDefault(Return(apps_data));
+  ON_CALL(*mock_app_, app_id()).WillByDefault(Return(kConnectionKey));
+  ON_CALL(*mock_app_, display_capabilities()).WillByDefault(Return(nullptr));
+  ON_CALL(*mock_app_,
+          QueryInterface(sdl_rpc_plugin::SystemCapabilityAppExtension::
+                             SystemCapabilityAppExtensionUID))
+      .WillByDefault(Return(system_capability_app_extension));
+  application_manager::DisplayCapabilitiesBuilder builder(*mock_app_);
+  ON_CALL(*mock_app_, display_capabilities_builder())
+      .WillByDefault(ReturnRef(builder));
+
+  EXPECT_CALL(mock_rpc_service_, SendMessageToMobile(_, _)).Times(0);
+
+  ASSERT_TRUE(command_->Init());
+  command_->Run();
+}
+
+TEST_F(
+    OnSystemCapabilityUpdatedNotificationTest,
     Run_AppExistConnectionKeyNotEqualWithAppId_SystemDisplayCapabilitiesNotSendToMobile) {
   (*message_)[am::strings::msg_params][strings::system_capability]
              [am::strings::system_capability_type] =
@@ -140,6 +205,13 @@ TEST_F(
 
   ON_CALL(mock_hmi_capabilities_, system_display_capabilities())
       .WillByDefault(Return(system_display_capabilities));
+
+  auto status = am::Application::ApplicationRegisterState::kRegistered;
+  MutableDataAccessor<am::Application::ApplicationRegisterState>
+      reg_status_accessor(status, reg_status_lock_);
+
+  ON_CALL(*mock_app_, registration_status_accessor())
+      .WillByDefault(Return(reg_status_accessor));
 
   sdl_rpc_plugin::SDLRPCPlugin sdl_rpc_plugin;
 
@@ -182,6 +254,13 @@ TEST_F(
 
   ON_CALL(mock_hmi_capabilities_, system_display_capabilities())
       .WillByDefault(Return(system_display_capabilities));
+
+  auto status = am::Application::ApplicationRegisterState::kRegistered;
+  MutableDataAccessor<am::Application::ApplicationRegisterState>
+      reg_status_accessor(status, reg_status_lock_);
+
+  ON_CALL(*mock_app_, registration_status_accessor())
+      .WillByDefault(Return(reg_status_accessor));
 
   sdl_rpc_plugin::SDLRPCPlugin sdl_rpc_plugin;
 
