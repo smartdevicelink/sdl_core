@@ -1,0 +1,144 @@
+@startuml
+skinparam line orto
+
+enum StateID {
+    STATE_ID_CURRENT = 1,
+    STATE_ID_REGULAR = 2,
+    STATE_ID_POSTPONED = 3,
+    STATE_ID_PHONE_CALL = 4,
+    STATE_ID_SAFETY_MODE = 5,
+    STATE_ID_VR_SESSION = 6,
+    STATE_ID_TTS_SESSION = 7,
+    STATE_ID_VIDEO_STREAMING = 8,
+    STATE_ID_NAVI_STREAMING = 9,
+    STATE_ID_DEACTIVATE_HMI = 10,
+    STATE_ID_AUDIO_SOURCE = 11,
+    STATE_ID_EMBEDDED_NAVI = 12
+}
+
+class Application  {
+  app_state_
+}
+
+Application *- ApplicationState
+
+class ApplicationState  {
+  hmi_states_
+}
+
+package hmi_state {
+    
+class HMIState {
+  + HMIState parent();
+  + hmi_level();
+  + audio_streaming_state();
+  + video_streaming_state();
+  + system_context();
+  + state_id();
+  + window_type();
+}
+HMIState *-- HMIState
+
+ApplicationState "1" *-down- "many" HMIState 
+StateID -left-* HMIState 
+
+class VRHmiState {
+  + hmi_level();
+  + audio_streaming_state();
+  + video_streaming_state();
+  + system_context();
+}
+
+VRHmiState -down-|> HMIState
+
+class TTSHmiState {
+  + hmi_level();
+  + audio_streaming_state();
+  + video_streaming_state();
+  + system_context();
+}
+TTSHmiState -down-|> HMIState
+
+class VideoStreamingHmiState {
+  + hmi_level();
+  + audio_streaming_state();
+  + video_streaming_state();
+  + system_context();
+}
+VideoStreamingHmiState -down-|> HMIState
+
+class NaviStreamingHmiState {
+  + hmi_level();
+  + audio_streaming_state();
+  + video_streaming_state();
+  + system_context();
+}
+NaviStreamingHmiState -down-|> HMIState
+
+class PhoneCallHmiState {
+  + hmi_level();
+  + audio_streaming_state();
+  + video_streaming_state();
+  + system_context();
+}
+PhoneCallHmiState -right-|> HMIState
+
+class SafetyModeHmiState {
+  + hmi_level();
+  + audio_streaming_state();
+  + video_streaming_state();
+  + system_context();
+}
+SafetyModeHmiState -up-|> HMIState
+
+class DeactivateHMI {
+  + hmi_level();
+  + audio_streaming_state();
+  + video_streaming_state();
+  + system_context();
+}
+DeactivateHMI -up-|> HMIState
+
+class AudioSource {
+  + hmi_level();
+  + audio_streaming_state();
+  + video_streaming_state();
+  + system_context();
+}
+AudioSource -up-|> HMIState
+
+class EmbeddedNavi {
+  + hmi_level();
+  + audio_streaming_state();
+  + video_streaming_state();
+  + system_context();
+}
+EmbeddedNavi -left-|> HMIState
+
+}
+
+interface StateController {
+   SetRegularState()
+   OnApplicationRegistered()
+   OnAppWindowAdded()
+   OnVideoStreamingStarted()
+   OnVideoStreamingStopped()
+   IsStateActive()
+   ActivateDefaultWindow()
+   ExitDefaultWindow()
+}
+interface EventObserver {
+  on_event()
+}
+
+class StateControllerImpl {
+   ---
+   list<StateID> active_states_
+   ApplicationManager app_mngr_
+}
+StateControllerImpl "1" *-down- "many"  StateID
+StateControllerImpl -up-|> StateController
+StateControllerImpl -up-|> EventObserver
+
+StateControllerImpl -right-> Application : set hmi_state
+@enduml

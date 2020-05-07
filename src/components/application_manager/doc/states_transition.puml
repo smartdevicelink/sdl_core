@@ -1,0 +1,78 @@
+@startuml "Initial Application State Transitions"
+
+title HMI states transition example
+
+note right : "Transition rules depends on Applicaiton HMI type\n\
+This paticular example is for media app\
+"
+
+(*) --> [<b>Application created] \
+"HMI State :\n\
+level : **INVALID_ENUM**;\n\
+audio_streaming_state : **INVALID_ENUM**;\n\
+Regular state : INVALID_ENUM ; INVALID_ENUM ;\n\
+Temporary states: []\
+"
+
+-->[<b>Registration -> OnPendingPermissionChange] \
+"HMI State : **NONE**; **NOT_AUDIBLE**;
+Regular state : NONE ; NOT_AUDIBLE ;\n\
+Temporary states: []\
+"
+
+--> [<b>Activation]\
+"HMI State :**FULL**  **AUDIBLE**;;\n\
+Regular state : FULL ; AUDIBLE ; \n\
+Temporary states: []\
+"
+
+-> [<b>HMIStateStarted(OnPhoneCall)] \
+"HMI State :**BACKGROUND**  **NOT_AUDIBLE**;\n\
+Regular state : FULL ; AUDIBLE ; \n\
+Temporary states: [OnPhoneCall]\
+" 
+
+--> [<b>HMIStateStarted(VRSession)] \
+"HMI State :**BACKGROUND**  **NOT_AUDIBLE**;\n\
+Regular state : FULL ; AUDIBLE ; \n\
+Temporary states: [OnPhoneCall, VRSession]\
+" 
+--> [<b>HMIStateStopped(OnPhoneCall)] \
+"HMI State :**FULL**  **NOT_AUDIBLE**;;\n\
+Regular state : FULL ; AUDIBLE ; \n\
+Temporary states: [VRSession]\
+" 
+
+-> [<b>HMIStateStopped(VRSession)] \
+"HMI State :**FULL**  **AUDIBLE**;;\n\
+Regular state : FULL ; AUDIBLE ; \n\
+Temporary states: []\
+" 
+
+--> [<b>AppDeactivation] \
+"HMI State :**LIMITED**  **AUDIBLE**;;\n\
+Regular state : LIMITED ; AUDIBLE ; \n\
+Temporary states: []\
+" 
+
+--> [<b>HMIStateStarted(OnPhoneCall)] \
+"HMI State :\n\
+**BACKGROUND**;
+**NOT_AUDIBLE**;
+Regular state : FULL ; AUDIBLE ; \n\
+Temporary states: [OnPhoneCall]\
+"
+--> [<b>Another media app activation] \
+"HMI State :**BACKGROUND**  **NOT_AUDIBLE**;;\n\
+Regular state : BACKGROUND ; NOT_AUDIBLE ; \n\
+Temporary states: [OnPhoneCall]\
+"
+--> [<b>HMIStateStoped(OnPhoneCall)] \
+"HMI State :\n\
+**BACKGROUND**;
+**NOT_AUDIBLE**;
+Regular state : BACKGROUND ; BACKGROUND ; \n\
+Temporary states: []\
+"
+
+@enduml

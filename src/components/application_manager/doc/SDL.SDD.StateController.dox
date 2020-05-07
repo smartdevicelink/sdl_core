@@ -1,0 +1,78 @@
+/**
+\page application_manager State Controller Detailed Design
+
+## State Controller Design
+- \subpage state_controller_high_level_logic
+
+*/
+
+/**
+\page state_controller_high_level_logic 3 State Controller High Level Logic
+
+## Introduction
+The state controller is responsible for keeping applications in appropriate HMI state.
+HMI state contains: 
+ - HMILevel 
+ - AudioStreamingState
+ - VideoStreamingState
+ - SystemContext 
+ 
+SDL should take care of conflicts between the HMI states of different apps. 
+For example, 2 apps cannot be in FULL at the same time. So if one application goes FULL, another one should be moved to BACKGROUND or LIMITED.
+Rules are described in the scope of the proposal https://github.com/smartdevicelink/sdl_evolution/blob/master/proposals/0150-video-streaming-state.md 
+
+SDL should resolve application HMI states to avoid conflicts. There are several triggers for HMI state change:
+ - application activation
+ - application deactivation
+ - Start System Event from HMI (Phone call, TTS, etc ...)
+ - End System Event from HMI 
+ - Resumption
+
+\link application_manager::StateController 
+\endlink is responsible for this.
+
+Event from HMI may change HMI state of registered applications.
+Some modifications introduced within https://github.com/smartdevicelink/sdl_evolution/blob/master/proposals/0264-Separating-the-change-of-Audible-status-and-the-change-of-HMI-Status.md 
+
+Events from HMI are temporary an  d will be ended.
+After finishing of system Event all applications should receive a previous HMI state. So SDL should keep it.
+
+Multiple system events might be active at the same time. SDL should calculate HMI states considering all of them.
+
+## Technical solution
+
+To track complicated logic of #application_manager::HmiState within system events SDL put events in internal "stack" of HMI States.
+
+There is a Regular HMI state of the application (STATE_ID_REGULAR).
+The regular state contains HMI Level, AudioStreamingState, VideoStreamingState, SystemContext of the app. 
+And regular hmi state is agnostic to system events. 
+A regular state can be changed by activation\deactivation or resumption.
+
+There is a Temporary HMI state of the application.
+Temporary HMI state is not independent and should be on the top of Regular or another Temporary HMI state, consider it as parent state.
+Temporary HMI state does not contain any values, it contains the rules on how it changes values of the parent state. 
+The temporary state is created within SystemEvent start and deleted on SystemEvent end.
+
+SDL creates a linked list of HMI states for each app.
+This list contains at least one element: Regular HMIstate. And it always should be the first. 
+Temporary State is added to this list on the system even start, and removed from this list on system event end. 
+
+System Events do not follow FILO, so events may be started on order 1, 2, 3, and ended on order 1, 3, 2.
+
+Stack of application states: 
+@diafile hmi_state_stack.dia
+
+State transitions example : 
+
+@startuml {states_transition.png} "State transition diagramm" width=5cm
+  !include states_transition.puml!0
+@enduml
+
+Class diagram of the state controller : 
+
+ @startuml {state_controller.png} "State controller class diagram" width=5cm
+  !include state_controller.puml!0
+  @enduml
+
+
+**/
