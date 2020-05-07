@@ -890,7 +890,18 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile(
   response_params[strings::icon_resumed] =
       file_system::FileExists(application->app_icon_path());
 
-  SendResponse(true, result_code, add_info.c_str(), &response_params);
+  {
+    // Set application registration status to "Registered"
+    auto accessor = application->registration_status_accessor();
+    SendResponse(true, result_code, add_info.c_str(), &response_params);
+    accessor.GetMutableData() =
+        ApplicationImpl::ApplicationRegisterState::kRegistered;
+  }
+
+  LOG4CXX_DEBUG(logger_,
+                "Registration status for app " << application->app_id()
+                                               << " was set to Registered");
+
   if (msg_params.keyExists(strings::app_hmi_type)) {
     GetPolicyHandler().SetDefaultHmiTypes(application->device(),
                                           application->policy_app_id(),

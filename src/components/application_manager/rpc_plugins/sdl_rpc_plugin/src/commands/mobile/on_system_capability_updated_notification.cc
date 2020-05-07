@@ -1,5 +1,8 @@
 #include "sdl_rpc_plugin/commands/mobile/on_system_capability_updated_notification.h"
 
+#include <algorithm>
+#include <vector>
+
 #include "application_manager/app_service_manager.h"
 #include "application_manager/application_manager.h"
 #include "application_manager/display_capabilities_builder.h"
@@ -157,6 +160,17 @@ void OnSystemCapabilityUpdatedNotification::Run() {
       [&system_capability_type,
        &initial_connection_key](const ApplicationSharedPtr app) {
         DCHECK_OR_RETURN(app, false);
+        bool is_registered = false;
+        {
+          const auto accessor = app->registration_status_accessor();
+          is_registered = Application::ApplicationRegisterState::kRegistered ==
+                          accessor.GetData();
+        }
+        if (!is_registered) {
+          LOG4CXX_WARN(logger_,
+                       "App " << app->app_id() << " is not registered");
+          return false;
+        }
         auto& ext = SystemCapabilityAppExtension::ExtractExtension(*app);
         if (!ext.IsSubscribedTo(system_capability_type)) {
           LOG4CXX_DEBUG(logger_,
@@ -180,8 +194,12 @@ void OnSystemCapabilityUpdatedNotification::Run() {
         return true;
       };
 
-  const std::vector<ApplicationSharedPtr>& applications = FindAllApps(
-      application_manager_.applications(), subscribed_to_capability_predicate);
+  const auto app_list = application_manager_.applications().GetData();
+  std::vector<ApplicationSharedPtr> applications;
+  std::copy_if(app_list.cbegin(),
+               app_list.cend(),
+               std::back_inserter(applications),
+               subscribed_to_capability_predicate);
 
   LOG4CXX_DEBUG(logger_,
                 "Number of Notifications to be sent: " << applications.size());

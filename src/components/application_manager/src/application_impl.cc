@@ -31,20 +31,24 @@
  */
 
 #include "application_manager/application_impl.h"
+
 #include <strings.h>
+
 #include <string>
+
 #include "application_manager/application_manager.h"
 #include "application_manager/message_helper.h"
+#include "application_manager/policies/policy_handler_interface.h"
+#include "application_manager/resumption/resume_ctrl.h"
 #include "config_profile/profile.h"
 #include "interfaces/MOBILE_API.h"
 #include "protocol_handler/protocol_handler.h"
+#include "transport_manager/common.h"
 #include "utils/file_system.h"
 #include "utils/gen_hash.h"
+#include "utils/lock.h"
 #include "utils/logger.h"
-
-#include "application_manager/policies/policy_handler_interface.h"
-#include "application_manager/resumption/resume_ctrl.h"
-#include "transport_manager/common.h"
+#include "utils/mutable_data_accessor.h"
 #include "utils/timer_task_impl.h"
 
 namespace {
@@ -147,6 +151,7 @@ ApplicationImpl::ApplicationImpl(
     , hybrid_app_preference_(mobile_api::HybridAppPreference::INVALID_ENUM)
     , vi_lock_ptr_(std::make_shared<sync_primitives::Lock>())
     , button_lock_ptr_(std::make_shared<sync_primitives::Lock>())
+    , app_state_lock_ptr_(std::make_shared<sync_primitives::Lock>())
     , application_manager_(application_manager) {
   cmd_number_to_time_limits_[mobile_apis::FunctionID::ReadDIDID] = {
       date_time::getCurrentTime(), 0};
@@ -1340,6 +1345,12 @@ void ApplicationImpl::SwapMobileMessageQueue(
     MobileMessageQueue& mobile_messages) {
   sync_primitives::AutoLock lock(mobile_message_lock_);
   mobile_messages.swap(mobile_message_queue_);
+}
+
+MutableDataAccessor<ApplicationImpl::ApplicationRegisterState>
+ApplicationImpl::registration_status_accessor() {
+  return MutableDataAccessor<ApplicationRegisterState>(app_state_,
+                                                       app_state_lock_ptr_);
 }
 
 }  // namespace application_manager

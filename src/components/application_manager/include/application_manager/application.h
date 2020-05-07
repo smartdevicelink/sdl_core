@@ -51,6 +51,7 @@
 #include "smart_objects/smart_object.h"
 #include "utils/data_accessor.h"
 #include "utils/macro.h"
+#include "utils/mutable_data_accessor.h"
 #include "utils/semantic_version.h"
 
 namespace application_manager {
@@ -995,18 +996,20 @@ class Application : public virtual InitialApplicationData,
   virtual bool IsVideoApplication() const = 0;
 
   /**
+   * @brief Provides a thread safe access to registration status instance for
+   * reading and writing
+   * @return data accessor to registration status variable
+   */
+  virtual MutableDataAccessor<ApplicationRegisterState>
+  registration_status_accessor() = 0;
+
+  /**
    * @brief IsRegistered allows to distinguish if this
    * application has been registered.
    *
    * @return true if registered, false otherwise.
    */
   virtual bool IsRegistered() const = 0;
-  /**
-   * @brief MarkRegistered allows to mark application as registered.
-   */
-  void MarkRegistered() {
-    app_state_ = kRegistered;
-  }
 
   /**
    * @brief MarkUnregistered allows to mark application as unregistered.

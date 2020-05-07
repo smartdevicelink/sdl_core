@@ -34,6 +34,8 @@
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_APPLICATION_IMPL_H_
 
 #include <stdint.h>
+
+#include <atomic>
 #include <forward_list>
 #include <list>
 #include <map>
@@ -46,14 +48,13 @@
 #include "application_manager/help_prompt_manager_impl.h"
 #include "application_manager/hmi_state.h"
 #include "application_manager/usage_statistics.h"
-#include "protocol_handler/protocol_handler.h"
-
-#include <atomic>
 #include "connection_handler/device.h"
+#include "protocol_handler/protocol_handler.h"
 #include "utils/custom_string.h"
 #include "utils/date_time.h"
 #include "utils/lock.h"
 #include "utils/macro.h"
+#include "utils/mutable_data_accessor.h"
 #include "utils/timer.h"
 
 namespace usage_statistics {
@@ -506,6 +507,9 @@ class ApplicationImpl : public virtual Application,
 
   const smart_objects::SmartObject& get_user_location() const OVERRIDE;
 
+  MutableDataAccessor<ApplicationRegisterState> registration_status_accessor()
+      OVERRIDE;
+
  protected:
   /**
    * @brief Clean up application folder. Persistent files will stay
@@ -640,6 +644,7 @@ class ApplicationImpl : public virtual Application,
   sync_primitives::Lock cmd_softbuttonid_lock_;
   mutable std::shared_ptr<sync_primitives::Lock> vi_lock_ptr_;
   mutable std::shared_ptr<sync_primitives::Lock> button_lock_ptr_;
+  mutable std::shared_ptr<sync_primitives::Lock> app_state_lock_ptr_;
   std::string folder_name_;
   ApplicationManager& application_manager_;
 
