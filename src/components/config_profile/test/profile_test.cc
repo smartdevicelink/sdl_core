@@ -511,7 +511,7 @@ TEST_F(ProfileTest, StringUpperBoundValue) {
   profile_.set_config_file_name("smartDeviceLink_invalid_string.ini");
   EXPECT_EQ("smartDeviceLink_invalid_string.ini", profile_.config_file_name());
 
-  // Total count of elements in ini file's string will be less 512
+  // Total count of elements in ini file's string will be less 1024
   vr_help_title =
       "0/0/0/1/"
       "2345678'90abc!def@ghi#jkl$mno%pqr^stu*vwx:yz()ABC-DEF_GHIJKL+MNO|PQR~"
