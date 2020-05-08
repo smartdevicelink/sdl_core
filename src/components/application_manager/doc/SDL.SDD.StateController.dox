@@ -2,22 +2,22 @@
 \page application_manager State Controller Detailed Design
 
 ## State Controller Design
-- \subpage state_controller_hight_level_logic
+- \subpage state_controller_high_level_logic
 
 */
 
 /**
-\page state_controller_hight_level_logic 1 State Controller hight level logic
+\page state_controller_high_level_logic 3 State Controller High Level Logic
 
 ## Introduction
-The state controller is responsible for keeping applications inappropriate HMI states 
+The state controller is responsible for keeping applications in appropriate HMI state
 HMI state contains: 
  - HMILevel 
  - AudioStreamingState
  - VideoStreamingState
  - SystemContext 
  
-SDL should take care of conflicts between the HMI state of different apps. 
+SDL should take care of conflicts between the HMI states of different apps. 
 For example, 2 apps cannot be in FULL at the same time. So if one application goes FULL, another one should be moved to BACKGROUND or LIMITED.
 Rules are described in the scope of the proposal https://github.com/smartdevicelink/sdl_evolution/blob/master/proposals/0150-video-streaming-state.md 
 
@@ -29,16 +29,16 @@ SDL should keep resolve application HMI states to avoid conflicts. There are sev
  - Resumption
 
 \link application_manager::StateController 
-\endlink is responcible for this.
+\endlink is responsible for this.
 
-Event from HMI should change HMI state for app registered applications.
+Event from HMI should change HMI state for registered applications.
 Changing rules described in  https://github.com/smartdevicelink/sdl_evolution/blob/proposals/0150-video-streaming-state.md 
 Some modifications introduced within https://github.com/smartdevicelink/sdl_evolution/blob/master/proposals/0264-Separating-the-change-of-Audible-status-and-the-change-of-HMI-Status.md 
 
 Events from HMI are temporary and will be ended.
-After finishing of system Event all applications should receive a previous HMI state. Sp SDL should keep it.
+After finishing of system Event all applications should receive a previous HMI state. So SDL should keep it.
 
-Multiple system events can present at the same time. SDL should calculate HMI state according to all of them.
+Multiple system events might be active at the same time. SDL should calculate HMI states considering all of them.
 
 ## Technical solution
 
