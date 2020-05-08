@@ -211,6 +211,16 @@ class StateControllerImplTest : public ::testing::Test {
   uint32_t media_navi_vc_app_id_ = 1922;
   uint32_t media_navi_vc_hmi_app_id_ = 21419;
 
+  am::ApplicationSharedPtr media_wep_app_;
+  NiceMock<application_manager_test::MockApplication>* media_wep_app_ptr_;
+  uint32_t media_wep_app_id_ = 1977;
+  uint32_t media_wep_app_hmi_app_id_ = 21491;
+
+  am::ApplicationSharedPtr non_media_wep_app_;
+  NiceMock<application_manager_test::MockApplication>* non_media_wep_app_ptr_;
+  uint32_t non_media_wep_app_id_ = 1979;
+  uint32_t non_media_wep_app_hmi_app_id_ = 21599;
+
   std::vector<am::HmiStatePtr> valid_states_for_audio_app_;
   std::vector<am::HmiStatePtr> valid_states_for_not_audio_app_;
   std::vector<am::HmiStatePtr> common_invalid_states_;
@@ -557,7 +567,7 @@ class StateControllerImplTest : public ::testing::Test {
     }
   }
 
-  ApplicationType AppType(uint32_t app_id) {
+  ApplicationType AppType(const uint32_t app_id) {
     // TODO(AOleynik): Currently there is ongoing discussion regarding mixed
     // application properties, i.e. is_media_application flag from RAI and
     // AppHmiTypes (NAVIGATION, etc.). Most likely logic should be changed
@@ -573,7 +583,7 @@ class StateControllerImplTest : public ::testing::Test {
       return APP_TYPE_NON_MEDIA;
     }
 
-    auto app = it->first;
+    const auto app = it->first;
     if (app->is_navi()) {
       return APP_TYPE_NAVI;
     }
@@ -687,7 +697,7 @@ class StateControllerImplTest : public ::testing::Test {
       bool vc) {
     *app_mock = new NiceMock<application_manager_test::MockApplication>;
 
-    Mock::AllowLeak(*app_mock);  // WorkAround for gogletest bug
+    Mock::AllowLeak(*app_mock);  // WorkAround for googletest bug
     am::ApplicationSharedPtr app(*app_mock);
 
     ON_CALL(**app_mock, app_id()).WillByDefault(Return(app_id));
@@ -937,6 +947,19 @@ class StateControllerImplTest : public ::testing::Test {
                                       MEDIA,
                                       NAVI,
                                       VC);
+    media_wep_app_ = ConfigureApp(&media_wep_app_ptr_,
+                                  media_wep_app_id_,
+                                  media_wep_app_hmi_app_id_,
+                                  MEDIA,
+                                  NOT_NAVI,
+                                  NOT_VC);
+    non_media_wep_app_ = ConfigureApp(&non_media_wep_app_ptr_,
+                                      non_media_wep_app_id_,
+                                      non_media_wep_app_hmi_app_id_,
+                                      NOT_MEDIA,
+                                      NOT_NAVI,
+                                      NOT_VC);
+
     applications_list_[simple_app_] = simple_app_ptr_;
     applications_list_[media_app_] = media_app_ptr_;
     applications_list_[navi_app_] = navi_app_ptr_;
@@ -945,7 +968,10 @@ class StateControllerImplTest : public ::testing::Test {
     applications_list_[media_vc_app_] = media_vc_app_ptr_;
     applications_list_[navi_vc_app_] = navi_vc_app_ptr_;
     applications_list_[media_navi_vc_app_] = media_navi_vc_app_ptr_;
+    applications_list_[media_wep_app_] = media_wep_app_ptr_;
+    applications_list_[non_media_wep_app_] = non_media_wep_app_ptr_;
   }
+
   void CheckAppConfiguration() {
     ASSERT_EQ(simple_app_.get(), simple_app_ptr_);
     ASSERT_EQ(media_app_.get(), media_app_ptr_);
@@ -955,6 +981,8 @@ class StateControllerImplTest : public ::testing::Test {
     ASSERT_EQ(media_vc_app_.get(), media_vc_app_ptr_);
     ASSERT_EQ(navi_vc_app_.get(), navi_vc_app_ptr_);
     ASSERT_EQ(media_navi_vc_app_.get(), media_navi_vc_app_ptr_);
+    ASSERT_EQ(media_wep_app_.get(), media_wep_app_ptr_);
+    ASSERT_EQ(non_media_wep_app_.get(), non_media_wep_app_ptr_);
 
     ASSERT_EQ(simple_app_->app_id(), simple_app_id_);
     ASSERT_EQ(media_app_->app_id(), media_app_id_);
@@ -964,6 +992,8 @@ class StateControllerImplTest : public ::testing::Test {
     ASSERT_EQ(media_vc_app_->app_id(), media_vc_app_id_);
     ASSERT_EQ(navi_vc_app_->app_id(), navi_vc_app_id_);
     ASSERT_EQ(media_navi_vc_app_->app_id(), media_navi_vc_app_id_);
+    ASSERT_EQ(media_wep_app_->app_id(), media_wep_app_id_);
+    ASSERT_EQ(non_media_wep_app_->app_id(), non_media_wep_app_id_);
 
     ASSERT_EQ(simple_app_->hmi_app_id(), simple_hmi_app_id_);
     ASSERT_EQ(media_app_->hmi_app_id(), media_hmi_app_id_);
@@ -973,6 +1003,8 @@ class StateControllerImplTest : public ::testing::Test {
     ASSERT_EQ(media_vc_app_->hmi_app_id(), media_vc_hmi_app_id_);
     ASSERT_EQ(navi_vc_app_->hmi_app_id(), navi_vc_hmi_app_id_);
     ASSERT_EQ(media_navi_vc_app_->hmi_app_id(), media_navi_vc_hmi_app_id_);
+    ASSERT_EQ(media_wep_app_->hmi_app_id(), media_wep_app_hmi_app_id_);
+    ASSERT_EQ(non_media_wep_app_->hmi_app_id(), non_media_wep_app_hmi_app_id_);
 
     ASSERT_FALSE(simple_app_->IsAudioApplication());
     ASSERT_TRUE(media_app_->IsAudioApplication());
@@ -982,6 +1014,8 @@ class StateControllerImplTest : public ::testing::Test {
     ASSERT_TRUE(media_vc_app_->IsAudioApplication());
     ASSERT_TRUE(navi_vc_app_->IsAudioApplication());
     ASSERT_TRUE(media_navi_vc_app_->IsAudioApplication());
+    ASSERT_TRUE(media_wep_app_->IsAudioApplication());
+    ASSERT_FALSE(non_media_wep_app_->IsAudioApplication());
 
     ASSERT_FALSE(simple_app_->is_media_application());
     ASSERT_TRUE(media_app_->is_media_application());
@@ -991,6 +1025,8 @@ class StateControllerImplTest : public ::testing::Test {
     ASSERT_TRUE(media_vc_app_->is_media_application());
     ASSERT_FALSE(navi_vc_app_->is_media_application());
     ASSERT_TRUE(media_navi_vc_app_->is_media_application());
+    ASSERT_TRUE(media_wep_app_->is_media_application());
+    ASSERT_FALSE(non_media_wep_app_->is_media_application());
 
     ASSERT_FALSE(simple_app_->is_navi());
     ASSERT_TRUE(navi_app_->is_navi());
@@ -1000,6 +1036,8 @@ class StateControllerImplTest : public ::testing::Test {
     ASSERT_FALSE(media_vc_app_->is_navi());
     ASSERT_TRUE(navi_vc_app_->is_navi());
     ASSERT_TRUE(media_navi_vc_app_->is_navi());
+    ASSERT_FALSE(media_wep_app_->is_navi());
+    ASSERT_FALSE(non_media_wep_app_->is_navi());
 
     ASSERT_FALSE(simple_app_->is_voice_communication_supported());
     ASSERT_FALSE(navi_app_->is_voice_communication_supported());
@@ -1009,6 +1047,8 @@ class StateControllerImplTest : public ::testing::Test {
     ASSERT_TRUE(media_vc_app_->is_voice_communication_supported());
     ASSERT_TRUE(navi_vc_app_->is_voice_communication_supported());
     ASSERT_TRUE(media_navi_vc_app_->is_voice_communication_supported());
+    ASSERT_FALSE(media_wep_app_->is_voice_communication_supported());
+    ASSERT_FALSE(non_media_wep_app_->is_voice_communication_supported());
   }
 
   virtual void SetUp() OVERRIDE {
