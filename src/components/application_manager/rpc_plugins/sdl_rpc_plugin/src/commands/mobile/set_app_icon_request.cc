@@ -170,11 +170,6 @@ void SetAppIconRequest::CopyToIconStorage(
   const uint64_t storage_size =
       static_cast<uint64_t>(file_system::DirectorySize(icon_storage));
 
-  if (0 == storage_size) {
-    LOG4CXX_ERROR(logger_, "Can't get the folder size: " << icon_storage);
-    return;
-  }
-
   if (storage_max_size < (file_size + storage_size)) {
     const uint32_t icons_amount =
         application_manager_.get_settings().app_icons_amount_to_remove();
