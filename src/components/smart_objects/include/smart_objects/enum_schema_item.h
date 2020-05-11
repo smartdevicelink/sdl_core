@@ -203,6 +203,9 @@ class EnumConversionHelper {
     typename CStringToEnumMap::const_iterator it =
         cstring_to_enum_map().find(str);
     if (it == cstring_to_enum_map().end()) {
+      if (value) {
+        *value = EnumType::INVALID_ENUM;
+      }
       return false;
     }
     if (value) {
