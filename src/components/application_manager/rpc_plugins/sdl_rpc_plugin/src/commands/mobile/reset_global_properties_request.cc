@@ -256,7 +256,7 @@ bool ResetGlobalPropertiesRequest::ResetVrHelpTitleItems(
       application_manager_.get_settings().vr_help_title();
   smart_objects::SmartObject so_vr_help_title =
       smart_objects::SmartObject(smart_objects::SmartType_String);
-  so_vr_help_title[strings::vr_help_title] = vr_help_title;
+  so_vr_help_title = vr_help_title;
 
   app->reset_vr_help_title();
   app->reset_vr_help();

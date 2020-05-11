@@ -1317,10 +1317,8 @@ smart_objects::SmartObjectSPtr MessageHelper::CreateAppVrHelp(
   }
   smart_objects::SmartObject& vr_help = *result;
   const smart_objects::SmartObject* vr_help_title = app->vr_help_title();
-  if (vr_help_title &&
-      vr_help_title->keyExists(strings::vr_help_title)) {
-    vr_help[strings::vr_help_title] =
-        (*vr_help_title)[strings::vr_help_title].asString();
+  if (vr_help_title) {
+    vr_help[strings::vr_help_title] = vr_help_title->asString();
   }
 
   int32_t index = 0;
