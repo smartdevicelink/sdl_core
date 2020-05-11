@@ -43,7 +43,7 @@ using namespace ns_smart_device_link::ns_smart_objects;
 class TestHelper : public ::testing::Test {
  protected:
   void makeMapObject(SmartObject& obj, const int size) const {
-    char i_key[8], j_key[8], k_key[8], value[8];
+    char i_key[16], j_key[16], k_key[16], value[16];
 
     for (int i = 0; i < size; i++)
       for (int j = 0; j < size; j++)
@@ -57,7 +57,7 @@ class TestHelper : public ::testing::Test {
   }
 
   void checkMapObject(SmartObject& obj, const int size) const {
-    char i_key[8], j_key[8], k_key[8], value[8];
+    char i_key[16], j_key[16], k_key[16], value[16];
 
     for (int i = 0; i < size; i++)
       for (int j = 0; j < size; j++)
