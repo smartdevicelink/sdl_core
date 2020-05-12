@@ -159,7 +159,7 @@ void TelnetAppender::append(const spi::LoggingEventPtr& event, Pool& p) {
 
     if (count > 0) {
         LogString msg;
-        this->layout->format(msg, event, pool);
+        this->layout->format(msg, event, p);
         msg.append(LOG4CXX_STR("\r\n"));
         size_t bytesSize = msg.size() * 2;
         char* bytes = p.pstralloc(bytesSize);
