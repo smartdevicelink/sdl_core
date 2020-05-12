@@ -36,11 +36,14 @@
 namespace logger {
 
 void LogMessageLoopThread::Handle(const LogMessage message) {
-  message.logger->forcedLog(message.level,
-                            message.entry,
-                            message.timeStamp,
-                            message.location,
-                            message.threadName);
+  if (message.logger.expired()) {
+    return;
+  }
+  message.logger.lock()->forcedLog(message.level,
+                                   message.entry,
+                                   message.timeStamp,
+                                   message.location,
+                                   message.threadName);
 }
 
 LogMessageLoopThread::LogMessageLoopThread()

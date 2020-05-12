@@ -52,8 +52,8 @@
   }
 
 #define CREATE_LOGGERPTR_LOCAL(logger_var, logger_name) \
-  log4cxx::LoggerPtr logger_var =                       \
-      log4cxx::LoggerPtr(log4cxx::Logger::getLogger(logger_name));
+  const log4cxx::LoggerWeakPtr logger_var =             \
+      log4cxx::Logger::getLogger(logger_name);
 
 #define INIT_LOGGER(file_name, logs_enabled)           \
   log4cxx::PropertyConfigurator::configure(file_name); \
@@ -82,7 +82,7 @@ log4cxx_time_t time_now();
   do {                                                               \
     if (logger::logs_enabled()) {                                    \
       if (logger::logger_status != logger::DeletingLoggerThread) {   \
-        if (loggerPtr->isEnabledFor(logLevel)) {                     \
+        if (loggerPtr.lock()->isEnabledFor(logLevel)) {              \
           std::stringstream accumulator;                             \
           accumulator << logEvent;                                   \
           logger::push_log(                                          \

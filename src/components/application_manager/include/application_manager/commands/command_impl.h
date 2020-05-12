@@ -201,7 +201,7 @@ class CommandImpl : public Command {
   CommandParametersPermissions removed_parameters_permissions_;
 
 #ifdef ENABLE_LOG
-  static log4cxx::LoggerPtr logger_;
+  static const log4cxx::LoggerWeakPtr logger_;
 #endif  // ENABLE_LOG
 
  private:

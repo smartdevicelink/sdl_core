@@ -40,12 +40,12 @@ namespace logger {
 
 class AutoTrace {
  public:
-  AutoTrace(log4cxx::LoggerPtr logger,
+  AutoTrace(const log4cxx::LoggerWeakPtr& logger,
             const log4cxx::spi::LocationInfo& location);
   ~AutoTrace();
 
  private:
-  log4cxx::LoggerPtr logger_;
+  log4cxx::LoggerWeakPtr logger_;
   log4cxx::spi::LocationInfo location_;
 };
 

@@ -38,7 +38,7 @@
 
 namespace logger {
 
-bool push_log(log4cxx::LoggerPtr logger,
+bool push_log(const log4cxx::LoggerWeakPtr& logger,
               log4cxx::LevelPtr level,
               const std::string& entry,
               log4cxx_time_t timeStamp,
@@ -51,7 +51,7 @@ bool logs_enabled();
 void set_logs_enabled(bool state);
 
 void create_log_message_loop_thread();
-void delete_log_message_loop_thread(log4cxx::LoggerPtr& logger);
+void delete_log_message_loop_thread(const log4cxx::LoggerWeakPtr& logger);
 }  // namespace logger
 
 #endif  // SRC_COMPONENTS_INCLUDE_UTILS_PUSH_LOG_H_

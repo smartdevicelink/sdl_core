@@ -43,7 +43,7 @@
 namespace logger {
 
 typedef struct {
-  log4cxx::LoggerPtr logger;
+  log4cxx::LoggerWeakPtr logger;
   log4cxx::LevelPtr level;
   std::string entry;
   log4cxx_time_t timeStamp;

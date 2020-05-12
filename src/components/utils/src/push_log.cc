@@ -52,7 +52,7 @@ auto deinit_logger = [](LogMessageLoopThread* logMsgThread) {
   logger::logger_status = logger::LoggerThreadNotCreated;
 };
 
-bool push_log(log4cxx::LoggerPtr logger,
+bool push_log(const log4cxx::LoggerWeakPtr& logger,
               log4cxx::LevelPtr level,
               const std::string& entry,
               log4cxx_time_t timeStamp,
@@ -100,7 +100,9 @@ void create_log_message_loop_thread() {
   }
 }
 
-void delete_log_message_loop_thread(log4cxx::LoggerPtr& logger) {
+void delete_log_message_loop_thread(const log4cxx::LoggerWeakPtr& del_logger) {
+  const auto logger = del_logger.lock();
+
   if (logger::logger_status == logger::LoggerThreadCreated) {
     logger::flush_logger();
   }
@@ -114,7 +116,7 @@ void delete_log_message_loop_thread(log4cxx::LoggerPtr& logger) {
                       LOG4CXX_LOCATION);
   }
 
-  if (logger->getRootLogger() == logger) {
+  if (logger->getRootLogger().lock() == logger) {
     return;
   }
 

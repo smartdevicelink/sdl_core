@@ -38,10 +38,11 @@
 
 namespace logger {
 
-AutoTrace::AutoTrace(log4cxx::LoggerPtr logger,
+AutoTrace::AutoTrace(const log4cxx::LoggerWeakPtr& logger,
                      const log4cxx::spi::LocationInfo& location)
     : logger_(logger), location_(location) {
-  if (logger::logs_enabled() && logger_->isTraceEnabled()) {
+  if (logger::logs_enabled() && (false == logger_.expired()) &&
+      logger_.lock()->isTraceEnabled()) {
     push_log(logger_,
              ::log4cxx::Level::getTrace(),
              "Enter",
@@ -52,7 +53,8 @@ AutoTrace::AutoTrace(log4cxx::LoggerPtr logger,
 }
 
 AutoTrace::~AutoTrace() {
-  if (logger::logs_enabled() && logger_->isTraceEnabled()) {
+  if (logger::logs_enabled() && (false == logger_.expired()) &&
+      logger_.lock()->isTraceEnabled()) {
     push_log(logger_,
              ::log4cxx::Level::getTrace(),
              "Exit",
