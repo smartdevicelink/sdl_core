@@ -33,20 +33,20 @@ using namespace log4cxx::helpers;
 IMPLEMENT_LOG4CXX_OBJECT(MessagePatternConverter)
 
 MessagePatternConverter::MessagePatternConverter() :
-   LoggingEventPatternConverter(LOG4CXX_STR("Message"),
-      LOG4CXX_STR("message")) {
+    LoggingEventPatternConverter(LOG4CXX_STR("Message"),
+                                 LOG4CXX_STR("message")) {
 }
 
 PatternConverterPtr MessagePatternConverter::newInstance(
-   const std::vector<LogString>& /* options */) {
-     static PatternConverterPtr def(new MessagePatternConverter());
-     return def;
+    const std::vector<LogString>& /* options */) {
+    static PatternConverterPtr def(new MessagePatternConverter());
+    return def;
 }
 
 void MessagePatternConverter::format(
-  const LoggingEventPtr& event,
-  LogString& toAppendTo,
-  Pool& /* p */) const {
-   toAppendTo.append(event->getRenderedMessage());
- }
+    const LoggingEvent* event,
+    LogString& toAppendTo,
+    Pool& /* p */) const {
+    toAppendTo.append(event->getRenderedMessage());
+}
 

@@ -27,63 +27,44 @@ using namespace log4cxx::spi;
 IMPLEMENT_LOG4CXX_OBJECT(OnlyOnceErrorHandler)
 
 OnlyOnceErrorHandler::OnlyOnceErrorHandler() :
- WARN_PREFIX(LOG4CXX_STR("log4cxx warning: ")),
-ERROR_PREFIX(LOG4CXX_STR("log4cxx error: ")), firstTime(true)
-{
+    WARN_PREFIX(LOG4CXX_STR("log4cxx warning: ")),
+    ERROR_PREFIX(LOG4CXX_STR("log4cxx error: ")), firstTime(true) {
 }
 
- void OnlyOnceErrorHandler::addRef() const {
-    ObjectImpl::addRef();
- }
-
- void OnlyOnceErrorHandler::releaseRef() const {
-    ObjectImpl::releaseRef();
- }
-
-void OnlyOnceErrorHandler::setLogger(const LoggerPtr&)
-{
+void OnlyOnceErrorHandler::setLogger(const LoggerPtr&) {
 }
 
-void OnlyOnceErrorHandler::activateOptions(Pool&)
-{
+void OnlyOnceErrorHandler::activateOptions(Pool&) {
 }
 
-void OnlyOnceErrorHandler::setOption(const LogString&, const LogString&)
-{
+void OnlyOnceErrorHandler::setOption(const LogString&, const LogString&) {
 }
 
 void OnlyOnceErrorHandler::error(const LogString& message, const std::exception& e,
-        int) const
-{
-        if(firstTime)
-        {
-                LogLog::error(message, e);
-                firstTime = false;
-        }
+                                 int) const {
+    if(firstTime) {
+        LogLog::error(message, e);
+        firstTime = false;
+    }
 }
 
 void OnlyOnceErrorHandler::error(const LogString& message, const std::exception& e,
-        int errorCode, const log4cxx::spi::LoggingEventPtr&) const
-{
-        error(message, e, errorCode);
+                                 int errorCode, const log4cxx::spi::LoggingEventPtr&) const {
+    error(message, e, errorCode);
 }
 
 
-void OnlyOnceErrorHandler::error(const LogString& message) const
-{
-        if(firstTime)
-        {
-                LogLog::error(message);
-                firstTime = false;
-        }
+void OnlyOnceErrorHandler::error(const LogString& message) const {
+    if(firstTime) {
+        LogLog::error(message);
+        firstTime = false;
+    }
 }
 
 
-void OnlyOnceErrorHandler::setAppender(const AppenderPtr&)
-{
+void OnlyOnceErrorHandler::setAppender(const AppenderPtr&) {
 }
 
 
-void OnlyOnceErrorHandler::setBackupAppender(const AppenderPtr&)
-{
+void OnlyOnceErrorHandler::setBackupAppender(const AppenderPtr&) {
 }

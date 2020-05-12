@@ -19,9 +19,9 @@
 #define _LOG4CXX_ROLLING_ACTION_H
 
 #include <log4cxx/portability.h>
-#include <log4cxx/helpers/objectimpl.h>
 #include <log4cxx/helpers/mutex.h>
 #include <log4cxx/helpers/pool.h>
+#include <log4cxx/helpers/object.h>
 
 namespace log4cxx {
     namespace rolling {
@@ -30,55 +30,54 @@ namespace log4cxx {
         /**
          *  A file system action performed as part of a rollover event.
          */
-        class Action : public virtual log4cxx::helpers::ObjectImpl {
-          DECLARE_ABSTRACT_LOG4CXX_OBJECT(Action)
-          BEGIN_LOG4CXX_CAST_MAP()
-                  LOG4CXX_CAST_ENTRY(Action)
-          END_LOG4CXX_CAST_MAP()
-        /**
-         * Is action complete.
-         */
-        bool complete;
+        class Action : public virtual log4cxx::helpers::Object {
+                DECLARE_ABSTRACT_LOG4CXX_OBJECT(Action)
+                BEGIN_LOG4CXX_CAST_MAP()
+                LOG4CXX_CAST_ENTRY(Action)
+                END_LOG4CXX_CAST_MAP()
+                /**
+                 * Is action complete.
+                 */
+                bool complete;
 
-        /**
-         * Is action interrupted.
-         */
-        bool interrupted;
+                /**
+                 * Is action interrupted.
+                 */
+                bool interrupted;
 
-        log4cxx::helpers::Pool pool;
-        log4cxx::helpers::Mutex mutex;
+                log4cxx::helpers::Pool pool;
+                log4cxx::helpers::Mutex mutex;
 
 
-        protected:
-        /**
-         * Constructor.
-         */
-        Action();
-        virtual ~Action();
+            protected:
+                /**
+                 * Constructor.
+                 */
+                Action();
+                virtual ~Action();
 
-        public:
-        /**
-         * Perform action.
-         *
-         * @return true if successful.
-         */
-        virtual bool execute(log4cxx::helpers::Pool& pool) const = 0;
+            public:
+                /**
+                 * Perform action.
+                 *
+                 * @return true if successful.
+                 */
+                virtual bool execute(log4cxx::helpers::Pool& pool) const = 0;
 
-        void run(log4cxx::helpers::Pool& pool);
+                void run(log4cxx::helpers::Pool& pool);
 
-        void close();
+                void close();
 
-          /**
-           * Tests if the action is complete.
-           * @return true if action is complete.
-           */
-        bool isComplete() const;
+                /**
+                 * Tests if the action is complete.
+                 * @return true if action is complete.
+                 */
+                bool isComplete() const;
 
-        void reportException(const std::exception&);
+                void reportException(const std::exception&);
 
 
         };
-
         LOG4CXX_PTR_DEF(Action);
 
     }

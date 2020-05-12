@@ -13,8 +13,6 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
- * Note: This file has been modified from its original form.
  */
 
 #ifndef _LOG4CXX_SPI_LOCATION_LOCATIONINFO_H
@@ -24,115 +22,116 @@
 #include <string>
 #include <log4cxx/helpers/objectoutputstream.h>
 
-namespace log4cxx
-{
-  namespace spi
-  {
-      /**
-       * This class represents the location of a logging statement.
-       *
-       */
-      class LOG4CXX_EXPORT LocationInfo
-      {
-      public:
-
-
-
-      /**
-        *   When location information is not available the constant
-        * <code>NA</code> is returned. Current value of this string constant is <b>?</b>.
-        */
-        static const char * const NA;
-        static const char * const NA_METHOD;
-
-        static const LocationInfo& getLocationUnavailable();
-
-
-
-       /**
-        *   Constructor.
-        *   @remarks Used by LOG4CXX_LOCATION to generate
-        *       location info for current code site
-        */
-        LocationInfo( const char * const fileName,
-                      const char * const functionName,
-                      int lineNumber);
-
-       /**
-        *   Default constructor.
-        */
-        LocationInfo();
-
-       /**
-        *   Copy constructor.
-        *   @param src source location
-        */
-        LocationInfo( const LocationInfo & src );
-
-       /**
-        *  Assignment operator.
-        * @param src source location
-        */
-        LocationInfo & operator = ( const LocationInfo & src );
-
+namespace log4cxx {
+    namespace spi {
         /**
-         *   Resets location info to default state.
+         * This class represents the location of a logging statement.
+         *
          */
-        void clear();
+        class LOG4CXX_EXPORT LocationInfo {
+            public:
 
 
-        /** Return the class name of the call site. */
-        const std::string getClassName() const;
 
-        /**
-         *   Return the file name of the caller.
-         *   @returns file name, may be null.
-         */
-        const std::string& getFileName() const;
+                /**
+                  *   When location information is not available the constant
+                  * <code>NA</code> is returned. Current value of this string constant is <b>?</b>.
+                  */
+                static const char * const NA;
+                static const char * const NA_METHOD;
 
-        /**
-          *   Returns the line number of the caller.
-          * @returns line number, -1 if not available.
-          */
-        int getLineNumber() const;
-
-        /** Returns the method name of the caller. */
-        const std::string getMethodName() const;
-
-        void write(log4cxx::helpers::ObjectOutputStream& os, log4cxx::helpers::Pool& p) const;
+                static const LocationInfo& getLocationUnavailable();
 
 
-        private:
-        /** Caller's line number. */
-        int lineNumber;
 
-        /** Caller's file name. */
-        std::string fileName;
+                /**
+                 *   Constructor.
+                 *   @remarks Used by LOG4CXX_LOCATION to generate
+                 *       location info for current code site
+                 */
+                LocationInfo( const char * const fileName,
+                              const char * const functionName,
+                              int lineNumber);
 
-        /** Caller's method name. */
-        std::string methodName;
-        
+                /**
+                 *   Default constructor.
+                 */
+                LocationInfo();
 
-      };
-  }
+                /**
+                 *   Copy constructor.
+                 *   @param src source location
+                 */
+                LocationInfo( const LocationInfo & src );
+
+                /**
+                 *  Assignment operator.
+                 * @param src source location
+                 */
+                LocationInfo & operator = ( const LocationInfo & src );
+
+                /**
+                 *   Resets location info to default state.
+                 */
+                void clear();
+
+
+                /** Return the class name of the call site. */
+                const std::string getClassName() const;
+
+                /**
+                 *   Return the file name of the caller.
+                 *   @returns file name, may be null.
+                 */
+                const char * getFileName() const;
+
+                /**
+                  *   Returns the line number of the caller.
+                  * @returns line number, -1 if not available.
+                  */
+                int getLineNumber() const;
+
+                /** Returns the method name of the caller. */
+                const std::string getMethodName() const;
+
+                void write(log4cxx::helpers::ObjectOutputStream& os, log4cxx::helpers::Pool& p) const;
+
+
+            private:
+                /** Caller's line number. */
+                int lineNumber;
+
+                /** Caller's file name. */
+                const char * fileName;
+
+                /** Caller's method name. */
+                const char * methodName;
+
+
+        };
+    }
 }
 
-  #if !defined(LOG4CXX_LOCATION)
+#if !defined(LOG4CXX_LOCATION)
 #if defined(_MSC_VER)
 #if _MSC_VER >= 1300
-      #define __LOG4CXX_FUNC__ __FUNCSIG__
+#define __LOG4CXX_FUNC__ __FUNCSIG__
 #endif
 #else
 #if defined(__GNUC__)
-      #define __LOG4CXX_FUNC__ __PRETTY_FUNCTION__
+#define __LOG4CXX_FUNC__ __PRETTY_FUNCTION__
+#else
+#if defined(__BORLANDC__)
+#define __LOG4CXX_FUNC__ __FUNC__
+#endif
 #endif
 #endif
 #if !defined(__LOG4CXX_FUNC__)
 #define __LOG4CXX_FUNC__ ""
 #endif
-      #define LOG4CXX_LOCATION ::log4cxx::spi::LocationInfo(__FILE__, \
-           __LOG4CXX_FUNC__,                                                         \
-           __LINE__)
-  #endif
+#define LOG4CXX_LOCATION ::log4cxx::spi::LocationInfo(__FILE__,         \
+                                                        __LOG4CXX_FUNC__, \
+                                                        __LINE__)
+#endif
 
 #endif //_LOG4CXX_SPI_LOCATION_LOCATIONINFO_H

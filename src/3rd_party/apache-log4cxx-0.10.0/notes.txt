@@ -1,0 +1,4 @@
+have run into the following problem: http://stackoverflow.com/questions/196733/how-can-i-use-covariant-return-types-with-smart-pointers
+
+Note on virtual destructors: http://stackoverflow.com/questions/461203/when-to-use-virtual-destructors
+this led me to this article: http://www.gotw.ca/publications/mill18.htm

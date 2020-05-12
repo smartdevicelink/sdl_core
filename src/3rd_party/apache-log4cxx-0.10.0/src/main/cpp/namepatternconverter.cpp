@@ -41,16 +41,17 @@ NamePatternConverter::NamePatternConverter(
 NameAbbreviatorPtr NamePatternConverter::getAbbreviator(
     const std::vector<LogString>& options) {
     if (options.size() > 0) {
-       return NameAbbreviator::getAbbreviator(options[0]);
+        return NameAbbreviator::getAbbreviator(options[0]);
     }
+
     return NameAbbreviator::getDefaultAbbreviator();
 }
 
-  /**
-   * Abbreviate name in string buffer.
-   * @param nameStart starting position of name to abbreviate.
-   * @param buf string buffer containing name.
-   */
+/**
+ * Abbreviate name in string buffer.
+ * @param nameStart starting position of name to abbreviate.
+ * @param buf string buffer containing name.
+ */
 void NamePatternConverter::abbreviate(int nameStart, LogString& buf) const {
     abbreviator->abbreviate(nameStart, buf);
 }

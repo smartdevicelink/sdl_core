@@ -24,16 +24,16 @@
 #include <log4cxx/spi/loggingevent.h>
 #include <log4cxx/spi/location/locationinfo.h>
 
- using namespace log4cxx;
- using namespace log4cxx::pattern;
- using namespace log4cxx::spi;
- using namespace helpers;
+using namespace log4cxx;
+using namespace log4cxx::pattern;
+using namespace log4cxx::spi;
+using namespace helpers;
 
 IMPLEMENT_LOG4CXX_OBJECT(FileLocationPatternConverter)
 
 FileLocationPatternConverter::FileLocationPatternConverter() :
     LoggingEventPatternConverter(LOG4CXX_STR("File Location"),
-       LOG4CXX_STR("file")) {
+                                 LOG4CXX_STR("file")) {
 }
 
 PatternConverterPtr FileLocationPatternConverter::newInstance(
@@ -43,8 +43,8 @@ PatternConverterPtr FileLocationPatternConverter::newInstance(
 }
 
 void FileLocationPatternConverter::format(
-   const LoggingEventPtr& event,
-   LogString& toAppendTo,
-   Pool& /* p */ ) const {
+    const LoggingEvent* event,
+    LogString& toAppendTo,
+    Pool& /* p */ ) const {
     append(toAppendTo, event->getLocationInformation().getFileName());
 }

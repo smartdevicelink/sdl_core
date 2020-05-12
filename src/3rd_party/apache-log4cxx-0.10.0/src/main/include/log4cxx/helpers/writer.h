@@ -18,40 +18,42 @@
 #ifndef _LOG4CXX_HELPERS_WRITER_H
 #define _LOG4CXX_HELPERS_WRITER_H
 
-#include <log4cxx/helpers/objectimpl.h>
+#include <log4cxx/helpers/outputstream.h>
 
-namespace log4cxx
-{
+namespace log4cxx {
 
-        namespace helpers {
+    namespace helpers {
 
-          /**
-          *   Abstract class for writing to character streams.
-          */
-          class LOG4CXX_EXPORT Writer : public ObjectImpl
-          {
-          public:
-                  DECLARE_ABSTRACT_LOG4CXX_OBJECT(Writer)
-                  BEGIN_LOG4CXX_CAST_MAP()
-                          LOG4CXX_CAST_ENTRY(Writer)
-                  END_LOG4CXX_CAST_MAP()
+        /**
+        *   Abstract class for writing to character streams.
+        */
+        class LOG4CXX_EXPORT Writer : public Object {
+            public:
+                DECLARE_ABSTRACT_LOG4CXX_OBJECT(Writer)
+                BEGIN_LOG4CXX_CAST_MAP()
+                LOG4CXX_CAST_ENTRY(Writer)
+                END_LOG4CXX_CAST_MAP()
 
-          protected:
-                  Writer();
-                  virtual ~Writer();
+                virtual ~Writer();
 
-          public:
-                  virtual void close(Pool& p) = 0;
-                  virtual void flush(Pool& p) = 0;
-                  virtual void write(const LogString& str, Pool& p) = 0;
+            protected:
+                Writer();
 
-          private:
-                  Writer(const Writer&);
-                  Writer& operator=(const Writer&);
-          };
+            public:
+                virtual void close(Pool& p) = 0;
+                virtual void flush(Pool& p) = 0;
+                virtual void write(const LogString& str, Pool& p) = 0;
+#ifdef LOG4CXX_MULTI_PROCESS
+                virtual OutputStreamPtr getOutPutStreamPtr();
+#endif
 
-          LOG4CXX_PTR_DEF(Writer);
-        } // namespace helpers
+            private:
+                Writer(const Writer&);
+                Writer& operator=(const Writer&);
+        };
+
+        LOG4CXX_PTR_DEF(Writer);
+    } // namespace helpers
 
 }  //namespace log4cxx
 

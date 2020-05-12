@@ -21,10 +21,8 @@
 #include <log4cxx/net/socketappenderskeleton.h>
 #include <log4cxx/helpers/writer.h>
 
-namespace log4cxx
-{
-        namespace net
-        {
+namespace log4cxx {
+    namespace net {
 
         /**
         Sends {@link log4cxx::spi::LoggingEvent LoggingEvent} objects in XML format
@@ -42,7 +40,7 @@ namespace log4cxx
         XML stream representing a {@link spi::LoggingEvent LoggingEvent} object
                 to the server side.
 
-       - Remote logging uses the TCP protocol. Consequently, if
+        - Remote logging uses the TCP protocol. Consequently, if
         the server is reachable, then log events will eventually arrive
         at the server.
 
@@ -83,11 +81,10 @@ namespace log4cxx
         #close the <code>XMLSocketAppender</code> either explicitly or by
         calling the LogManager#shutdown method
         before exiting the application.
-       */
+        */
 
-        class LOG4CXX_EXPORT XMLSocketAppender : public SocketAppenderSkeleton
-        {
-        public:
+        class LOG4CXX_EXPORT XMLSocketAppender : public SocketAppenderSkeleton {
+            public:
                 /**
                 The default port number of remote logging server (4560).
                 */
@@ -105,8 +102,8 @@ namespace log4cxx
 
                 DECLARE_LOG4CXX_OBJECT(XMLSocketAppender)
                 BEGIN_LOG4CXX_CAST_MAP()
-                        LOG4CXX_CAST_ENTRY(XMLSocketAppender)
-                        LOG4CXX_CAST_ENTRY_CHAIN(AppenderSkeleton)
+                LOG4CXX_CAST_ENTRY(XMLSocketAppender)
+                LOG4CXX_CAST_ENTRY_CHAIN(AppenderSkeleton)
                 END_LOG4CXX_CAST_MAP()
 
                 XMLSocketAppender();
@@ -123,26 +120,26 @@ namespace log4cxx
                 XMLSocketAppender(const LogString& host, int port);
 
 
-      protected:
+            protected:
                 virtual void setSocket(log4cxx::helpers::SocketPtr& socket, log4cxx::helpers::Pool& p);
-                
+
                 virtual void cleanUp(log4cxx::helpers::Pool& p);
-                
+
                 virtual int getDefaultDelay() const;
-                
+
                 virtual int getDefaultPort() const;
 
                 void append(const spi::LoggingEventPtr& event, log4cxx::helpers::Pool& pool);
 
-       private:
+            private:
                 log4cxx::helpers::WriterPtr writer;
                 //  prevent copy and assignment statements
                 XMLSocketAppender(const XMLSocketAppender&);
                 XMLSocketAppender& operator=(const XMLSocketAppender&);
         }; // class XMLSocketAppender
-        
+
         LOG4CXX_PTR_DEF(XMLSocketAppender);
-        
+
     } // namespace net
 } // namespace log4cxx
 

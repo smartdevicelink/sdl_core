@@ -24,7 +24,6 @@ IMPLEMENT_LOG4CXX_OBJECT(DefaultLoggerFactory)
 
 LoggerPtr DefaultLoggerFactory::makeNewLoggerInstance(
     log4cxx::helpers::Pool& pool,
-    const LogString& name) const
-{
-    return new Logger(pool, name);
+    const LogString& name) const {
+    return LoggerPtr( new Logger(pool, name) );
 }

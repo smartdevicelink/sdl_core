@@ -32,7 +32,7 @@ namespace log4cxx
 
      protected:
           void format(
-              const log4cxx::spi::LoggingEventPtr& event,
+              const log4cxx::spi::LoggingEvent* event,
               LogString& toAppendTo,
               log4cxx::helpers::Pool& pool) const;
      };

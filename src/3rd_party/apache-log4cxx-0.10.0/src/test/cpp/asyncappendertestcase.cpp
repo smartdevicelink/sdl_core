@@ -94,7 +94,7 @@ public:
 
     };
 
-typedef helpers::ObjectPtrT<BlockableVectorAppender> BlockableVectorAppenderPtr;
+typedef log4cxx::ptr::shared_ptr<BlockableVectorAppender> BlockableVectorAppenderPtr;
 
 #if APR_HAS_THREADS
 /**
@@ -139,9 +139,9 @@ public:
         void closeTest() 
         {
                 LoggerPtr root = Logger::getRootLogger();
-                LayoutPtr layout = new SimpleLayout();
-                VectorAppenderPtr vectorAppender = new VectorAppender();
-                AsyncAppenderPtr asyncAppender = new AsyncAppender();
+                LayoutPtr layout( new SimpleLayout() );
+                VectorAppenderPtr vectorAppender( new VectorAppender() );
+                AsyncAppenderPtr asyncAppender( new AsyncAppender() );
                 asyncAppender->setName(LOG4CXX_STR("async-CloseTest"));
                 asyncAppender->addAppender(vectorAppender);
                 root->addAppender(asyncAppender);
@@ -159,9 +159,9 @@ public:
         void test2()
         {
                 LoggerPtr root = Logger::getRootLogger();
-                LayoutPtr layout = new SimpleLayout();
-                VectorAppenderPtr vectorAppender = new VectorAppender();
-                AsyncAppenderPtr asyncAppender = new AsyncAppender();
+                LayoutPtr layout( new SimpleLayout() );
+                VectorAppenderPtr vectorAppender( new VectorAppender() );
+                AsyncAppenderPtr asyncAppender( new AsyncAppender() );
                 asyncAppender->setName(LOG4CXX_STR("async-test2"));
                 asyncAppender->addAppender(vectorAppender);
                 root->addAppender(asyncAppender);
@@ -181,8 +181,8 @@ public:
         {
                 size_t LEN = 200;
                 LoggerPtr root = Logger::getRootLogger();
-                VectorAppenderPtr vectorAppender = new VectorAppender();
-                AsyncAppenderPtr asyncAppender = new AsyncAppender();
+                VectorAppenderPtr vectorAppender( new VectorAppender() );
+                AsyncAppenderPtr asyncAppender( new AsyncAppender() );
                 asyncAppender->setName(LOG4CXX_STR("async-test3"));
                 asyncAppender->addAppender(vectorAppender);
                 root->addAppender(asyncAppender);
@@ -203,8 +203,8 @@ public:
      * Tests that a bad appender will switch async back to sync.
      */
     void testBadAppender() {
-        AppenderPtr nullPointerAppender = new NullPointerAppender();
-        AsyncAppenderPtr asyncAppender = new AsyncAppender();
+        AppenderPtr nullPointerAppender( new NullPointerAppender() );
+        AsyncAppenderPtr asyncAppender( new AsyncAppender() );
         asyncAppender->addAppender(nullPointerAppender);
         asyncAppender->setBufferSize(5);
         Pool p;
@@ -224,8 +224,8 @@ public:
      * Tests non-blocking behavior.
      */
     void testLocationInfoTrue() {
-        BlockableVectorAppenderPtr blockableAppender = new BlockableVectorAppender();
-        AsyncAppenderPtr async = new AsyncAppender();
+        BlockableVectorAppenderPtr blockableAppender( new BlockableVectorAppender() );
+        AsyncAppenderPtr async( new AsyncAppender() );
         async->addAppender(blockableAppender);
         async->setBufferSize(5);
         async->setLocationInfo(true);
@@ -255,8 +255,8 @@ public:
     
         void testConfiguration() {
               log4cxx::xml::DOMConfigurator::configure("input/xml/asyncAppender1.xml");
-              AsyncAppenderPtr asyncAppender(Logger::getRootLogger()->getAppender(LOG4CXX_STR("ASYNC")));
-              LOGUNIT_ASSERT(!(asyncAppender == 0));
+              AsyncAppender* asyncAppender(dynamic_cast<AsyncAppender*>(Logger::getRootLogger()->getAppender(LOG4CXX_STR("ASYNC")).get() ));
+              LOGUNIT_ASSERT(asyncAppender != 0);
               LOGUNIT_ASSERT_EQUAL(100, asyncAppender->getBufferSize());
               LOGUNIT_ASSERT_EQUAL(false, asyncAppender->getBlocking());
               LOGUNIT_ASSERT_EQUAL(true, asyncAppender->getLocationInfo());

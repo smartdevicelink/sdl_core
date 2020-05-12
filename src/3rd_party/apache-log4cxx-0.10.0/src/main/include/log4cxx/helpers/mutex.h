@@ -21,31 +21,28 @@
 #include <log4cxx/log4cxx.h>
 
 extern "C" {
-   struct apr_thread_mutex_t;
-   struct apr_pool_t;
+    struct apr_thread_mutex_t;
+    struct apr_pool_t;
 }
 
 
-namespace log4cxx
-{
-        namespace helpers
-        {
-                class Pool;
+namespace log4cxx {
+    namespace helpers {
+        class Pool;
 
-                class LOG4CXX_EXPORT Mutex
-                {
-                public:
-                        Mutex(log4cxx::helpers::Pool& p);
-                        Mutex(apr_pool_t* p);
-                        ~Mutex();
-                        apr_thread_mutex_t* getAPRMutex() const;
+        class LOG4CXX_EXPORT Mutex {
+            public:
+                Mutex(log4cxx::helpers::Pool& p);
+                Mutex(apr_pool_t* p);
+                ~Mutex();
+                apr_thread_mutex_t* getAPRMutex() const;
 
-                private:
-                        Mutex(const Mutex&);
-                        Mutex& operator=(const Mutex&);
-                        apr_thread_mutex_t* mutex;
-                };
-        } // namespace helpers
+            private:
+                Mutex(const Mutex&);
+                Mutex& operator=(const Mutex&);
+                apr_thread_mutex_t* mutex;
+        };
+    } // namespace helpers
 } // namespace log4cxx
 
 #endif //_LOG4CXX_HELPERS_MUTEX_H

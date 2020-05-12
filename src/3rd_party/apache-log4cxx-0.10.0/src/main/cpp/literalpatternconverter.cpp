@@ -32,31 +32,32 @@ using namespace log4cxx::helpers;
 IMPLEMENT_LOG4CXX_OBJECT(LiteralPatternConverter)
 
 LiteralPatternConverter::LiteralPatternConverter(const LogString& literal1) :
-   LoggingEventPatternConverter(LOG4CXX_STR("Literal"),LOG4CXX_STR("literal")),
-   literal(literal1) {
+    LoggingEventPatternConverter(LOG4CXX_STR("Literal"),LOG4CXX_STR("literal")),
+    literal(literal1) {
 }
 
 PatternConverterPtr LiteralPatternConverter::newInstance(
-   const LogString& literal) {
-   if (literal.length() == 1 && literal[0] == 0x20 /* ' ' */) {
-     static PatternConverterPtr blank(new LiteralPatternConverter(literal));
-     return blank;
-   }
-   PatternConverterPtr pattern(new LiteralPatternConverter(literal));
-   return pattern;
+    const LogString& literal) {
+    if (literal.length() == 1 && literal[0] == 0x20 /* ' ' */) {
+        static PatternConverterPtr blank(new LiteralPatternConverter(literal));
+        return blank;
+    }
+
+    PatternConverterPtr pattern(new LiteralPatternConverter(literal));
+    return pattern;
 }
 
 void LiteralPatternConverter::format(
-  const LoggingEventPtr& /* event */,
-  LogString& toAppendTo,
-  Pool& /* p */) const {
-  toAppendTo.append(literal);
- }
+    const LoggingEvent* /* event */,
+    LogString& toAppendTo,
+    Pool& /* p */) const {
+    toAppendTo.append(literal);
+}
 
 void LiteralPatternConverter::format(
-  const ObjectPtr& /* event */,
-  LogString& toAppendTo,
-  Pool& /* p */)  const {
-  toAppendTo.append(literal);
- }
+    const log4cxx::ptr::shared_ptr<Object>& /* event */,
+    LogString& toAppendTo,
+    Pool& /* p */)  const {
+    toAppendTo.append(literal);
+}
 

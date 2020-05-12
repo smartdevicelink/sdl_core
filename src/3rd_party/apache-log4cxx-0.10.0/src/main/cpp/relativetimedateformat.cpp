@@ -25,8 +25,7 @@
 
 
 log4cxx::helpers::RelativeTimeDateFormat::RelativeTimeDateFormat()
- : DateFormat(), startTime(log4cxx::spi::LoggingEvent::getStartTime())
-{
+    : DateFormat(), startTime(log4cxx::spi::LoggingEvent::getStartTime()) {
 }
 
 void log4cxx::helpers::RelativeTimeDateFormat::format(

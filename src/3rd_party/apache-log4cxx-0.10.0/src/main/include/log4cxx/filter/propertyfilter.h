@@ -28,46 +28,43 @@
 #include <log4cxx/spi/filter.h>
 #include <map>
 
-namespace log4cxx
-{
-    namespace filter
-    {
+namespace log4cxx {
+    namespace filter {
 
-/**
- * NOTE: This filter modifies logging events by adding properties to the event.
- *
- * The 'properties' param is converted to event properties, which are
- * set on every event processed by the filter.
- *
- * Individual properties are only set if they do not already exist on the
- * logging event (will not override existing properties).
- *
- * This class relies on the convention that property name/value pairs are
- * equals-symbol delimited, and each name/value pair is comma-delimited
- *
- * Example properties param:
- * somename=somevalue,anothername=anothervalue,thirdname=third value
- *
- * 
- */
-        class LOG4CXX_EXPORT PropertyFilter : public log4cxx::spi::Filter
-        {
-            typedef std::map < LogString, LogString > PropertyMap;
-            PropertyMap* properties;
-            PropertyFilter(const PropertyFilter &);
-                  PropertyFilter & operator=(const PropertyFilter &);
+        /**
+         * NOTE: This filter modifies logging events by adding properties to the event.
+         *
+         * The 'properties' param is converted to event properties, which are
+         * set on every event processed by the filter.
+         *
+         * Individual properties are only set if they do not already exist on the
+         * logging event (will not override existing properties).
+         *
+         * This class relies on the convention that property name/value pairs are
+         * equals-symbol delimited, and each name/value pair is comma-delimited
+         *
+         * Example properties param:
+         * somename=somevalue,anothername=anothervalue,thirdname=third value
+         *
+         *
+         */
+        class LOG4CXX_EXPORT PropertyFilter : public log4cxx::spi::Filter {
+                typedef std::map < LogString, LogString > PropertyMap;
+                PropertyMap* properties;
+                PropertyFilter(const PropertyFilter &);
+                PropertyFilter & operator=(const PropertyFilter &);
 
-          public:
-                  DECLARE_LOG4CXX_OBJECT(PropertyFilter)
-                  BEGIN_LOG4CXX_CAST_MAP()
-                  LOG4CXX_CAST_ENTRY(log4cxx::spi::Filter)
-                  END_LOG4CXX_CAST_MAP()
+            public:
+                DECLARE_LOG4CXX_OBJECT(PropertyFilter)
+                BEGIN_LOG4CXX_CAST_MAP()
+                LOG4CXX_CAST_ENTRY(log4cxx::spi::Filter)
+                END_LOG4CXX_CAST_MAP()
 
-                  PropertyFilter();
-                  ~PropertyFilter();
-            void setProperties(const LogString & props);
+                PropertyFilter();
+                ~PropertyFilter();
+                void setProperties(const LogString & props);
 
-            FilterDecision decide(const spi::LoggingEventPtr & event) const;
+                FilterDecision decide(const spi::LoggingEventPtr & event) const;
 
         };
 

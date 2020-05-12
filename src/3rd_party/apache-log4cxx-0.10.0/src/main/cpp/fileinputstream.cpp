@@ -45,8 +45,9 @@ void FileInputStream::open(const LogString& filename) {
     apr_fileperms_t perm = APR_OS_DEFAULT;
     apr_int32_t flags = APR_READ;
     apr_status_t stat = File().setPath(filename).open(&fileptr, flags, perm, pool);
+
     if (stat != APR_SUCCESS) {
-      throw IOException(stat);
+        throw IOException(stat);
     }
 }
 
@@ -55,40 +56,44 @@ FileInputStream::FileInputStream(const File& aFile) {
     apr_fileperms_t perm = APR_OS_DEFAULT;
     apr_int32_t flags = APR_READ;
     apr_status_t stat = aFile.open(&fileptr, flags, perm, pool);
+
     if (stat != APR_SUCCESS) {
-      throw IOException(stat);
+        throw IOException(stat);
     }
 }
 
 
 FileInputStream::~FileInputStream() {
-  if (fileptr != NULL && !APRInitializer::isDestructed) {
-    apr_file_close(fileptr);
-  }
+    if (fileptr != NULL && !APRInitializer::isDestructed) {
+        apr_file_close(fileptr);
+    }
 }
 
 
 void FileInputStream::close() {
-  apr_status_t stat = apr_file_close(fileptr);
-  if (stat == APR_SUCCESS) {
-    fileptr = NULL;
-  } else {
-    throw IOException(stat);
-  }
+    apr_status_t stat = apr_file_close(fileptr);
+
+    if (stat == APR_SUCCESS) {
+        fileptr = NULL;
+    } else {
+        throw IOException(stat);
+    }
 }
 
 
 int FileInputStream::read(ByteBuffer& buf) {
-  apr_size_t bytesRead = buf.remaining();
-  apr_status_t stat = apr_file_read(fileptr, buf.current(), &bytesRead);
-  int retval = -1; 
-  if (!APR_STATUS_IS_EOF(stat)) {
-    if (stat != APR_SUCCESS) {
-      throw IOException(stat);
-    }
-    buf.position(buf.position() + bytesRead);
-    retval = bytesRead;
-  }
+    apr_size_t bytesRead = buf.remaining();
+    apr_status_t stat = apr_file_read(fileptr, buf.current(), &bytesRead);
+    int retval = -1;
 
-  return retval;
+    if (!APR_STATUS_IS_EOF(stat)) {
+        if (stat != APR_SUCCESS) {
+            throw IOException(stat);
+        }
+
+        buf.position(buf.position() + bytesRead);
+        retval = bytesRead;
+    }
+
+    return retval;
 }

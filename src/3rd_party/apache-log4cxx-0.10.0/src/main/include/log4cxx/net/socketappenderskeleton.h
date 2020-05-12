@@ -23,18 +23,15 @@
 #include <log4cxx/helpers/thread.h>
 #include <log4cxx/helpers/objectoutputstream.h>
 
-namespace log4cxx
-{
+namespace log4cxx {
 
-        namespace net
-        {
+    namespace net {
 
-                /**
-                 *  Abstract base class for SocketAppender and XMLSocketAppender
-                 */
-        class LOG4CXX_EXPORT SocketAppenderSkeleton : public AppenderSkeleton
-        {
-        private:
+        /**
+         *  Abstract base class for SocketAppender and XMLSocketAppender
+         */
+        class LOG4CXX_EXPORT SocketAppenderSkeleton : public AppenderSkeleton {
+            private:
                 /**
                 host name
                 */
@@ -49,9 +46,9 @@ namespace log4cxx
                 int reconnectionDelay;
                 bool locationInfo;
 
-        public:
+            public:
                 SocketAppenderSkeleton(int defaultPort, int reconnectionDelay);
-                        ~SocketAppenderSkeleton();
+                ~SocketAppenderSkeleton();
 
                 /**
                 Connects to remote server at <code>address</code> and <code>port</code>.
@@ -67,59 +64,66 @@ namespace log4cxx
                 Connect to the specified <b>RemoteHost</b> and <b>Port</b>.
                 */
                 void activateOptions(log4cxx::helpers::Pool& p);
-                
+
                 void close();
 
 
-                   /**
+                /**
                 * This appender does not use a layout. Hence, this method
                 * returns <code>false</code>.
                 *
-                        */
-                bool requiresLayout() const
-                        { return false; }
+                     */
+                bool requiresLayout() const {
+                    return false;
+                }
 
                 /**
                 * The <b>RemoteHost</b> option takes a string value which should be
                 * the host name of the server where a
                 * Apache Chainsaw or compatible is running.
                 * */
-                inline void setRemoteHost(const LogString& host)
-                        { address = helpers::InetAddress::getByName(host);
-                        remoteHost.assign(host); }
+                inline void setRemoteHost(const LogString& host) {
+                    address = helpers::InetAddress::getByName(host);
+                    remoteHost.assign(host);
+                }
 
                 /**
                 Returns value of the <b>RemoteHost</b> option.
                 */
-                inline const LogString& getRemoteHost() const
-                        { return remoteHost; }
+                inline const LogString& getRemoteHost() const {
+                    return remoteHost;
+                }
 
                 /**
                 The <b>Port</b> option takes a positive integer representing
                 the port where the server is waiting for connections.
                 */
-                void setPort(int port1)
-                        { this->port = port1; }
+                void setPort(int port1) {
+                    this->port = port1;
+                }
 
                 /**
                 Returns value of the <b>Port</b> option.
                 */
-                int getPort() const
-                        { return port; }
+                int getPort() const {
+                    return port;
+                }
 
                 /**
                 The <b>LocationInfo</b> option takes a boolean value. If true,
                 the information sent to the remote host will include location
                 information. By default no location information is sent to the server.
                 */
-                void setLocationInfo(bool locationInfo1)
-                        { this->locationInfo = locationInfo1; }
+                void setLocationInfo(bool locationInfo1) {
+                    this->locationInfo = locationInfo1;
+                }
 
                 /**
                 Returns value of the <b>LocationInfo</b> option.
                 */
-                bool getLocationInfo() const
-                        { return locationInfo; }
+                bool getLocationInfo() const {
+                    return locationInfo;
+                }
 
                 /**
                 The <b>ReconnectionDelay</b> option takes a positive integer
@@ -130,46 +134,48 @@ namespace log4cxx
                 <p>Setting this option to zero turns off reconnection
                 capability.
                 */
-                void setReconnectionDelay(int reconnectionDelay1)
-                        { this->reconnectionDelay = reconnectionDelay1; }
+                void setReconnectionDelay(int reconnectionDelay1) {
+                    this->reconnectionDelay = reconnectionDelay1;
+                }
 
                 /**
                 Returns value of the <b>ReconnectionDelay</b> option.
                 */
-                int getReconnectionDelay() const
-                        { return reconnectionDelay; }
+                int getReconnectionDelay() const {
+                    return reconnectionDelay;
+                }
 
                 void fireConnector();
 
                 void setOption(const LogString& option,
-                                const LogString& value);
+                               const LogString& value);
 
-           protected:
+            protected:
 
                 virtual void setSocket(log4cxx::helpers::SocketPtr& socket, log4cxx::helpers::Pool& p) = 0;
-                
+
                 virtual void cleanUp(log4cxx::helpers::Pool& p) = 0;
-                
+
                 virtual int getDefaultDelay() const = 0;
-                
+
                 virtual int getDefaultPort() const = 0;
 
-           private:
+            private:
                 void connect(log4cxx::helpers::Pool& p);
-                   /**
-                        The Connector will reconnect when the server becomes available
-                        again.  It does this by attempting to open a new connection every
-                        <code>reconnectionDelay</code> milliseconds.
+                /**
+                     The Connector will reconnect when the server becomes available
+                     again.  It does this by attempting to open a new connection every
+                     <code>reconnectionDelay</code> milliseconds.
 
-                        <p>It stops trying whenever a connection is established. It will
-                        restart to try reconnect to the server when previpously open
-                        connection is droppped.
-                        */
+                     <p>It stops trying whenever a connection is established. It will
+                     restart to try reconnect to the server when previously open
+                     connection is droppped.
+                     */
 
-                   helpers::Thread thread;
-                   static void* LOG4CXX_THREAD_FUNC monitor(apr_thread_t* thread, void* data);
-                        SocketAppenderSkeleton(const SocketAppenderSkeleton&);
-                        SocketAppenderSkeleton& operator=(const SocketAppenderSkeleton&);
+                helpers::Thread thread;
+                static void* LOG4CXX_THREAD_FUNC monitor(apr_thread_t* thread, void* data);
+                SocketAppenderSkeleton(const SocketAppenderSkeleton&);
+                SocketAppenderSkeleton& operator=(const SocketAppenderSkeleton&);
 
         }; // class SocketAppenderSkeleton
     } // namespace net

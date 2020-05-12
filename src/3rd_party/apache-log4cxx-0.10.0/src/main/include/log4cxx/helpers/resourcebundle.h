@@ -18,71 +18,68 @@
 #ifndef _LOG4CXX_HELPERS_RESOURCE_BUNDLE_H
 #define _LOG4CXX_HELPERS_RESOURCE_BUNDLE_H
 
-#include <log4cxx/helpers/objectimpl.h>
-#include <log4cxx/helpers/objectptr.h>
+#include <log4cxx/helpers/object.h>
 
-namespace log4cxx
-{
-        namespace helpers
-        {
-                class Locale;
+namespace log4cxx {
+    namespace helpers {
+        class Locale;
 
-                class ResourceBundle;
-                LOG4CXX_PTR_DEF(ResourceBundle);
+        class ResourceBundle;
+        LOG4CXX_PTR_DEF(ResourceBundle);
+
+        /**
+        Resource bundles contain locale-specific objects
+        */
+        class LOG4CXX_EXPORT ResourceBundle : public Object {
+            public:
+                DECLARE_ABSTRACT_LOG4CXX_OBJECT(ResourceBundle)
+                BEGIN_LOG4CXX_CAST_MAP()
+                LOG4CXX_CAST_ENTRY(ResourceBundle)
+                END_LOG4CXX_CAST_MAP()
 
                 /**
-                Resource bundles contain locale-specific objects
+                Gets a string for the given key from this resource bundle or one of
+                its parents. Calling this method is equivalent to calling
+
+                @param key the key for the desired string
+                @return the string for the given key
+                @throw MissingResourceException - if no object for the given key
+                can be found
                 */
-                class LOG4CXX_EXPORT ResourceBundle : public ObjectImpl
-                {
-                public:
-                        DECLARE_ABSTRACT_LOG4CXX_OBJECT(ResourceBundle)
-                        BEGIN_LOG4CXX_CAST_MAP()
-                                LOG4CXX_CAST_ENTRY(ResourceBundle)
-                        END_LOG4CXX_CAST_MAP()
+                virtual LogString getString(const LogString& key) const = 0;
 
-                        /**
-                        Gets a string for the given key from this resource bundle or one of
-                        its parents. Calling this method is equivalent to calling
+                /**
+                Gets a resource bundle using the specified base name and locale
 
-                        @param key the key for the desired string
-                        @return the string for the given key
-                        @throw MissingResourceException - if no object for the given key
-                        can be found
-                        */
-                        virtual LogString getString(const LogString& key) const = 0;
+                @param baseName the base name of the resource bundle, a fully
+                qualified class name or property filename
+                @param locale the locale for which a resource bundle is desired
+                */
+                static ResourceBundlePtr getBundle(const LogString& baseName,
+                                                   const Locale& locale);
 
-                        /**
-                        Gets a resource bundle using the specified base name and locale
+            protected:
+                /*
+                Sets the parent bundle of this bundle. The parent bundle is
+                searched by #getString when this bundle does not contain a particular
+                resource.
 
-                        @param baseName the base name of the resource bundle, a fully
-                        qualified class name or property filename
-                        @param locale the locale for which a resource bundle is desired
-                        */
-                        static ResourceBundlePtr getBundle(const LogString& baseName,
-                                const Locale& locale);
+                Parameters:
+                parent - this bundle's parent bundle.
+                */
+                inline void setParent(const ResourceBundlePtr& parent1) {
+                    this->parent = parent1;
+                }
 
-                protected:
-                        /*
-                        Sets the parent bundle of this bundle. The parent bundle is
-                        searched by #getString when this bundle does not contain a particular
-                        resource.
+                /**
+                The parent bundle of this bundle.
 
-                        Parameters:
-                        parent - this bundle's parent bundle.
-                        */
-                        inline void setParent(const ResourceBundlePtr& parent1)
-                                { this->parent = parent1; }
-
-                        /**
-                        The parent bundle of this bundle.
-
-                        The parent bundle is searched by #getString when this bundle does
-                        not contain a particular resource.
-                        */
-                        ResourceBundlePtr parent;
-                }; // class ResourceBundle
-        }  // namespace helpers
+                The parent bundle is searched by #getString when this bundle does
+                not contain a particular resource.
+                */
+                ResourceBundlePtr parent;
+        }; // class ResourceBundle
+    }  // namespace helpers
 } // namespace log4cxx
 
 #endif

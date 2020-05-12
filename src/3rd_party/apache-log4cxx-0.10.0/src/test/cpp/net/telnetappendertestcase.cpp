@@ -53,7 +53,8 @@ public:
         
         void testActivateClose() {
             TelnetAppenderPtr appender(new TelnetAppender());
-            appender->setLayout(new TTCCLayout());
+            TTCCLayoutPtr layout( new TTCCLayout() );
+            appender->setLayout(layout);
             appender->setPort(TEST_PORT);
             Pool p;
             appender->activateOptions(p);
@@ -62,7 +63,8 @@ public:
 
         void testActivateSleepClose() {
             TelnetAppenderPtr appender(new TelnetAppender());
-            appender->setLayout(new TTCCLayout());
+            TTCCLayoutPtr layout( new TTCCLayout() );
+            appender->setLayout(layout);
             appender->setPort(TEST_PORT);
             Pool p;
             appender->activateOptions(p);
@@ -72,7 +74,8 @@ public:
 
         void testActivateWriteClose() {
             TelnetAppenderPtr appender(new TelnetAppender());
-            appender->setLayout(new TTCCLayout());
+            TTCCLayoutPtr layout( new TTCCLayout() );
+            appender->setLayout(layout);
             appender->setPort(TEST_PORT);
             Pool p;
             appender->activateOptions(p);

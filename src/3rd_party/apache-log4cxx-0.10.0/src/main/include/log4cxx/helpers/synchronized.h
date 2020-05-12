@@ -19,26 +19,29 @@
 #define _LOG4CXX_HELPERS_SYNCHRONIZED_H
 #include <log4cxx/log4cxx.h>
 
-namespace log4cxx
-{
-        namespace helpers {
-                class Mutex;
+extern "C" {
+    typedef struct apr_thread_mutex_t apr_thread_mutex_t;
+}
 
-                /** utility class for objects multi-thread synchronization.*/
-                class LOG4CXX_EXPORT synchronized
-                {
-                public:
+namespace log4cxx {
+    namespace helpers {
+        class Mutex;
+
+        /** utility class for objects multi-thread synchronization.*/
+        class LOG4CXX_EXPORT synchronized {
+            public:
                 synchronized(const Mutex& mutex);
+                synchronized(apr_thread_mutex_t* mutex);
                 ~synchronized();
 
 
-                private:
+            private:
                 void* mutex;
                 //  prevent use of copy and assignment
                 synchronized(const synchronized&);
                 synchronized& operator=(const synchronized&);
-                };
-        }
+        };
+    }
 }
 
 #endif //_LOG4CXX_HELPERS_SYNCHRONIZED_H

@@ -25,95 +25,89 @@
 
 
 #include <log4cxx/spi/appenderattachable.h>
-#include <log4cxx/helpers/objectimpl.h>
 #include <log4cxx/helpers/mutex.h>
 #include <log4cxx/helpers/pool.h>
 
-namespace log4cxx
-{
-    namespace spi
-    {
+namespace log4cxx {
+    namespace spi {
         class LoggingEvent;
-        typedef helpers::ObjectPtrT<LoggingEvent> LoggingEventPtr;
+        LOG4CXX_PTR_DEF(LoggingEvent);
     }
 
-    namespace helpers
-    {
+    namespace helpers {
 
         class LOG4CXX_EXPORT AppenderAttachableImpl :
             public virtual spi::AppenderAttachable,
-            public virtual helpers::ObjectImpl
-        {
-        protected:
-            /** Array of appenders. */
-            AppenderList  appenderList;
+            public virtual helpers::Object {
+            protected:
+                /** Array of appenders. */
+                AppenderList  appenderList;
 
-        public:            
-            /**
-             *   Create new instance.
-             *   @param pool pool, must be longer-lived than instance. 
-             */
-            AppenderAttachableImpl(Pool& pool);
+            public:
+                /**
+                 *   Create new instance.
+                 *   @param pool pool, must be longer-lived than instance.
+                 */
+                AppenderAttachableImpl(Pool& pool);
 
-            DECLARE_ABSTRACT_LOG4CXX_OBJECT(AppenderAttachableImpl)
-            BEGIN_LOG4CXX_CAST_MAP()
+                DECLARE_ABSTRACT_LOG4CXX_OBJECT(AppenderAttachableImpl)
+                BEGIN_LOG4CXX_CAST_MAP()
                 LOG4CXX_CAST_ENTRY(AppenderAttachableImpl)
                 LOG4CXX_CAST_ENTRY(spi::AppenderAttachable)
-            END_LOG4CXX_CAST_MAP()
+                END_LOG4CXX_CAST_MAP()
 
-            void addRef() const;
-            void releaseRef() const;
+                // Methods
+                /**
+                 * Add an appender.
+                 */
+                virtual void addAppender(const AppenderPtr newAppender);
 
-                  // Methods
-            /**
-             * Add an appender.
-             */
-            virtual void addAppender(const AppenderPtr& newAppender);
+                /**
+                 Call the <code>doAppend</code> method on all attached appenders.
+                */
+                int appendLoopOnAppenders(const spi::LoggingEventPtr& event,
+                                          log4cxx::helpers::Pool& p);
 
-            /**
-             Call the <code>doAppend</code> method on all attached appenders.
-            */
-            int appendLoopOnAppenders(const spi::LoggingEventPtr& event,
-                log4cxx::helpers::Pool& p);
+                /**
+                 * Get all previously added appenders as an Enumeration.
+                 */
+                virtual AppenderList getAllAppenders() const;
 
-            /**
-             * Get all previously added appenders as an Enumeration.
-             */
-            virtual AppenderList getAllAppenders() const;
+                /**
+                 * Get an appender by name.
+                 */
+                virtual AppenderPtr getAppender(const LogString& name) const;
 
-            /**
-             * Get an appender by name.
-             */
-            virtual AppenderPtr getAppender(const LogString& name) const;
+                /**
+                 Returns <code>true</code> if the specified appender is in the
+                 list of attached appenders, <code>false</code> otherwise.
+                */
+                virtual bool isAttached(const AppenderPtr& appender) const;
 
-            /**
-             Returns <code>true</code> if the specified appender is in the
-             list of attached appenders, <code>false</code> otherwise.
-            */
-            virtual bool isAttached(const AppenderPtr& appender) const;
+                /**
+                 * Remove all previously added appenders.
+                 */
+                virtual void removeAllAppenders();
 
-            /**
-             * Remove all previously added appenders.
-             */
-            virtual void removeAllAppenders();
+                /**
+                 * Remove the appender passed as parameter from the list of appenders.
+                 */
+                virtual void removeAppender(const AppenderPtr& appender);
 
-            /**
-             * Remove the appender passed as parameter from the list of appenders.
-             */
-            virtual void removeAppender(const AppenderPtr& appender);
+                /**
+                 * Remove the appender with the name passed as parameter from the
+                 * list of appenders.
+                 */
+                virtual void removeAppender(const LogString& name);
 
-            /**
-             * Remove the appender with the name passed as parameter from the
-             * list of appenders.
-             */
-            virtual void removeAppender(const LogString& name);
+                inline const log4cxx::helpers::Mutex& getMutex() const {
+                    return mutex;
+                }
 
-            inline const log4cxx::helpers::Mutex& getMutex() const { return mutex; }
-
-        private:
-            log4cxx::helpers::Mutex mutex;
-            AppenderAttachableImpl(const AppenderAttachableImpl&);
-            AppenderAttachableImpl& operator=(const AppenderAttachableImpl&);
+            private:
+                log4cxx::helpers::Mutex mutex;
+                AppenderAttachableImpl(const AppenderAttachableImpl&);
+                AppenderAttachableImpl& operator=(const AppenderAttachableImpl&);
         };
 
         LOG4CXX_PTR_DEF(AppenderAttachableImpl);

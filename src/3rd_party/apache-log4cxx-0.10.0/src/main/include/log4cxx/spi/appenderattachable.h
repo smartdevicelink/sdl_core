@@ -25,68 +25,64 @@
 
 #include <log4cxx/logstring.h>
 #include <vector>
-#include <log4cxx/helpers/objectptr.h>
 #include <log4cxx/helpers/object.h>
 #include <log4cxx/appender.h>
 
-namespace log4cxx
-{
+namespace log4cxx {
 
-    namespace spi
-    {
+    namespace spi {
 
         /**
          * This Interface is for attaching Appenders to objects.
          */
-        class LOG4CXX_EXPORT AppenderAttachable : public virtual helpers::Object
-        {
-        public:
-          // Methods
-         DECLARE_ABSTRACT_LOG4CXX_OBJECT(AppenderAttachable)
-            /**
-             * Add an appender.
-             */
-            virtual void addAppender(const AppenderPtr& newAppender) = 0;
+        class LOG4CXX_EXPORT AppenderAttachable : public virtual helpers::Object {
+            public:
+                // Methods
+                DECLARE_ABSTRACT_LOG4CXX_OBJECT(AppenderAttachable)
+                /**
+                 * Add an appender.
+                 */
+                virtual void addAppender(const AppenderPtr newAppender) = 0;
 
-            /**
-             * Get all previously added appenders as an AppenderList.
-             */
-            virtual AppenderList getAllAppenders() const = 0;
+                /**
+                 * Get all previously added appenders as an AppenderList.
+                 */
+                virtual AppenderList getAllAppenders() const = 0;
 
-            /**
-             * Get an appender by name.
-             */
-            virtual AppenderPtr getAppender(const LogString& name) const = 0;
+                /**
+                 * Get an appender by name.
+                 */
+                virtual AppenderPtr getAppender(const LogString& name) const = 0;
 
-            /**
-         Returns <code>true</code> if the specified appender is in list of
-         attached attached, <code>false</code> otherwise.
-         */
-         virtual bool isAttached(const AppenderPtr& appender) const = 0;
+                /**
+                Returns <code>true</code> if the specified appender is in list of
+                attached attached, <code>false</code> otherwise.
+                */
+                virtual bool isAttached(const AppenderPtr& appender) const = 0;
 
-            /**
-             * Remove all previously added appenders.
-             */
-            virtual void removeAllAppenders() = 0;
+                /**
+                 * Remove all previously added appenders.
+                 */
+                virtual void removeAllAppenders() = 0;
 
-            /**
-             * Remove the appender passed as parameter from the list of appenders.
-             */
-            virtual void removeAppender(const AppenderPtr& appender) = 0;
+                /**
+                 * Remove the appender passed as parameter from the list of appenders.
+                 */
+                virtual void removeAppender(const AppenderPtr& appender) = 0;
 
-            /**
-             * Remove the appender with the name passed as parameter from the
-             * list of appenders.
-             */
-            virtual void removeAppender(const LogString& name) = 0;
+                /**
+                 * Remove the appender with the name passed as parameter from the
+                 * list of appenders.
+                 */
+                virtual void removeAppender(const LogString& name) = 0;
 
-          // Dtor
-            virtual ~AppenderAttachable(){}
+                // Dtor
+                virtual ~AppenderAttachable() {}
         };
 
 
         LOG4CXX_PTR_DEF(AppenderAttachable);
-        
+
     }
 }
 

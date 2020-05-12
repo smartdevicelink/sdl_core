@@ -28,30 +28,27 @@ using namespace log4cxx::helpers;
 IMPLEMENT_LOG4CXX_OBJECT(PropertyResourceBundle)
 
 
-PropertyResourceBundle::PropertyResourceBundle(InputStreamPtr inStream)
-{
-   properties.load(inStream);
+PropertyResourceBundle::PropertyResourceBundle(InputStreamPtr inStream) {
+    properties.load(inStream);
 }
 
-LogString PropertyResourceBundle::getString(const LogString& key) const
-{
-   LogString resource;
-   PropertyResourceBundlePtr resourceBundle(const_cast<PropertyResourceBundle*>(this));
+LogString PropertyResourceBundle::getString(const LogString& key) const {
+    LogString resource;
+    //PropertyResourceBundlePtr resourceBundle(const_cast<PropertyResourceBundle*>(this));
+    PropertyResourceBundle* resourceBundle = const_cast<PropertyResourceBundle*>(this);
 
-   do
-   {
-      resource = resourceBundle->properties.getProperty(key);
-      if (!resource.empty())
-      {
-         return resource;
-      }
+    do {
+        resource = resourceBundle->properties.getProperty(key);
 
-      resourceBundle = resourceBundle->parent;
-   }
-   while (resourceBundle != 0);
+        if (!resource.empty()) {
+            return resource;
+        }
 
-   throw MissingResourceException(key);
+        resourceBundle = dynamic_cast<PropertyResourceBundle*>(resourceBundle->parent.get());
+    } while (resourceBundle != 0);
+
+    throw MissingResourceException(key);
 #if LOG4CXX_RETURN_AFTER_THROW
-   return resource;
+    return resource;
 #endif
 }

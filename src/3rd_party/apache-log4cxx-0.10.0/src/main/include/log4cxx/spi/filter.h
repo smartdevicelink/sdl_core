@@ -18,18 +18,12 @@
 #ifndef _LOG4CXX_SPI_FILTER_H
 #define _LOG4CXX_SPI_FILTER_H
 
-#include <log4cxx/helpers/objectptr.h>
-#include <log4cxx/helpers/objectimpl.h>
 #include <log4cxx/spi/optionhandler.h>
 #include <log4cxx/spi/loggingevent.h>
 
-namespace log4cxx
-{
-        namespace spi
-        {
-                class Filter;
-                LOG4CXX_PTR_DEF(Filter);
-
+namespace log4cxx {
+    namespace spi {
+        class Filter;
 
         /**
         Users should extend this class to implement customized logging
@@ -66,68 +60,63 @@ namespace log4cxx
         <p>Note that filtering is only supported by the {@link
         xml::DOMConfigurator DOMConfigurator}.
         */
-                class LOG4CXX_EXPORT Filter : public virtual OptionHandler,
-                        public virtual helpers::ObjectImpl
-                {
-                  /**
-                  Points to the next filter in the filter chain.
-                  */
-                  FilterPtr next;
-                public:
-                        Filter();
+        class LOG4CXX_EXPORT Filter : public virtual OptionHandler,
+            public virtual helpers::Object {
+                /**
+                Points to the next filter in the filter chain.
+                */
+                FilterPtr next;
+            public:
+                Filter();
 
-                        void addRef() const;
-                        void releaseRef() const;
+                DECLARE_ABSTRACT_LOG4CXX_OBJECT(Filter)
+                BEGIN_LOG4CXX_CAST_MAP()
+                LOG4CXX_CAST_ENTRY(Filter)
+                LOG4CXX_CAST_ENTRY(spi::OptionHandler)
+                END_LOG4CXX_CAST_MAP()
 
-                        DECLARE_ABSTRACT_LOG4CXX_OBJECT(Filter)
-                        BEGIN_LOG4CXX_CAST_MAP()
-                                LOG4CXX_CAST_ENTRY(Filter)
-                                LOG4CXX_CAST_ENTRY(spi::OptionHandler)
-                        END_LOG4CXX_CAST_MAP()
+                log4cxx::spi::FilterPtr getNext() const;
+                void setNext(const log4cxx::spi::FilterPtr& newNext);
 
-                        log4cxx::spi::FilterPtr getNext() const;
-                        void setNext(const log4cxx::spi::FilterPtr& newNext);
- 
-            enum FilterDecision
-            {
-            /**
-            The log event must be dropped immediately without consulting
-                        with the remaining filters, if any, in the chain.  */
-                        DENY = -1,
-            /**
-            This filter is neutral with respect to the log event. The
-            remaining filters, if any, should be consulted for a final decision.
-            */
-                        NEUTRAL = 0,
-            /**
-            The log event must be logged immediately without consulting with
-            the remaining filters, if any, in the chain.
-                        */
-                        ACCEPT = 1
+                enum FilterDecision {
+                    /**
+                    The log event must be dropped immediately without consulting
+                                with the remaining filters, if any, in the chain.  */
+                    DENY = -1,
+                    /**
+                    This filter is neutral with respect to the log event. The
+                    remaining filters, if any, should be consulted for a final decision.
+                    */
+                    NEUTRAL = 0,
+                    /**
+                    The log event must be logged immediately without consulting with
+                    the remaining filters, if any, in the chain.
+                                */
+                    ACCEPT = 1
 
-                        };
-
-
-            /**
-            Usually filters options become active when set. We provide a
-
-            default do-nothing implementation for convenience.
-            */
-            void activateOptions(log4cxx::helpers::Pool& p);
-            void setOption(const LogString& option, const LogString& value);
-
-            /**
-            <p>If the decision is <code>DENY</code>, then the event will be
-            dropped. If the decision is <code>NEUTRAL</code>, then the next
-            filter, if any, will be invoked. If the decision is ACCEPT then
-            the event will be logged without consulting with other filters in
-            the chain.
-
-            @param event The LoggingEvent to decide upon.
-            @return The decision of the filter.  */
-            virtual FilterDecision decide(const LoggingEventPtr& event) const = 0;
                 };
-        }
+
+
+                /**
+                Usually filters options become active when set. We provide a
+
+                default do-nothing implementation for convenience.
+                */
+                void activateOptions(log4cxx::helpers::Pool& p);
+                void setOption(const LogString& option, const LogString& value);
+
+                /**
+                <p>If the decision is <code>DENY</code>, then the event will be
+                dropped. If the decision is <code>NEUTRAL</code>, then the next
+                filter, if any, will be invoked. If the decision is ACCEPT then
+                the event will be logged without consulting with other filters in
+                the chain.
+
+                @param event The LoggingEvent to decide upon.
+                @return The decision of the filter.  */
+                virtual FilterDecision decide(const LoggingEventPtr& event) const = 0;
+        };
+    }
 }
 
 #endif //_LOG4CXX_SPI_FILTER_H

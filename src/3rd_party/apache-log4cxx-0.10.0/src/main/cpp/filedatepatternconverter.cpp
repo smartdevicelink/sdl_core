@@ -28,12 +28,13 @@ using namespace log4cxx::spi;
 using namespace log4cxx::helpers;
 
 PatternConverterPtr FileDatePatternConverter::newInstance(
-   const std::vector<LogString>& options) {
-   if (options.size() == 0) {
-     std::vector<LogString> altOptions;
-     altOptions.push_back(LOG4CXX_STR("yyyy-MM-dd"));
-     return DatePatternConverter::newInstance(altOptions);
-   }
-   return DatePatternConverter::newInstance(options);
+    const std::vector<LogString>& options) {
+    if (options.size() == 0) {
+        std::vector<LogString> altOptions;
+        altOptions.push_back(LOG4CXX_STR("yyyy-MM-dd"));
+        return DatePatternConverter::newInstance(altOptions);
+    }
+
+    return DatePatternConverter::newInstance(options);
 }
 

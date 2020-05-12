@@ -18,8 +18,7 @@
 #ifndef _LOG4CXX_PATTERN_PATTERN_CONVERTER_H
 #define _LOG4CXX_PATTERN_PATTERN_CONVERTER_H
 
-
-#include <log4cxx/helpers/objectimpl.h>
+#include <log4cxx/helpers/object.h>
 #include <log4cxx/logstring.h>
 #include <vector>
 
@@ -31,93 +30,93 @@
 #define DECLARE_LOG4CXX_PATTERN(cls) DECLARE_ABSTRACT_LOG4CXX_OBJECT(cls)
 
 namespace log4cxx {
-  namespace pattern {
+    namespace pattern {
 
-  typedef std::vector<LogString> OptionsList;
+        typedef std::vector<LogString> OptionsList;
 
-/**
+        /**
 
-   <p>PatternConverter is an abstract class that provides the
-   formatting functionality that derived classes need.
+           <p>PatternConverter is an abstract class that provides the
+           formatting functionality that derived classes need.
 
-   <p>Conversion specifiers in a conversion patterns are parsed to
-   individual PatternConverters. Each of which is responsible for
-   converting an object in a converter specific manner.
-   
- */
-class LOG4CXX_EXPORT PatternConverter : public virtual log4cxx::helpers::ObjectImpl {
+           <p>Conversion specifiers in a conversion patterns are parsed to
+           individual PatternConverters. Each of which is responsible for
+           converting an object in a converter specific manner.
 
-  /**
-   * Converter name.
-   */
-  const LogString name;
+         */
+        class LOG4CXX_EXPORT PatternConverter : public virtual log4cxx::helpers::Object {
 
-  /**
-   * Converter style name.
-   */
-  const LogString style;
+                /**
+                 * Converter name.
+                 */
+                const LogString name;
 
-
-protected:
-  /**
-   * Create a new pattern converter.
-   * @param name name for pattern converter.
-   * @param style CSS style for formatted output.
-   */
-  PatternConverter(const LogString& name,
-         const LogString& style);
-
-  virtual ~PatternConverter();
-
-public:
-  DECLARE_LOG4CXX_PATTERN(PatternConverter)
-  BEGIN_LOG4CXX_CAST_MAP()
-          LOG4CXX_CAST_ENTRY(PatternConverter)
-  END_LOG4CXX_CAST_MAP()
-
-  /**
-   * Formats an object into a string buffer.
-   * @param obj event to format, may not be null.
-   * @param toAppendTo string buffer to which the formatted event will be appended.  May not be null.
-   * @param p pool for any allocations necessary during formatting.
-   */
-  virtual void format(const log4cxx::helpers::ObjectPtr& obj,
-      LogString& toAppendTo,
-      log4cxx::helpers::Pool& p) const = 0;
-
-  /**
-   * This method returns the name of the conversion pattern.
-   *
-   * The name can be useful to certain Layouts such as HTMLLayout.
-   *
-   * @return        the name of the conversion pattern
-   */
-  LogString getName() const;
-
-  /**
-   * This method returns the CSS style class that should be applied to
-   * the LoggingEvent passed as parameter, which can be null.
-   *
-   * This information is currently used only by HTMLLayout.
-   *
-   * @param e null values are accepted
-   * @return  the name of the conversion pattern
-   */
-  virtual LogString getStyleClass(const log4cxx::helpers::ObjectPtr& e) const;
-
-protected:
-/**
-* Appends content in the locale code page to a LogString.
-* @param toAppendTo string to which content is appended.
-* @param src content.
-*/
-  static void append(LogString& toAppendTo, const std::string& src);
-};
+                /**
+                 * Converter style name.
+                 */
+                const LogString style;
 
 
-LOG4CXX_PTR_DEF(PatternConverter);
+            protected:
+                /**
+                 * Create a new pattern converter.
+                 * @param name name for pattern converter.
+                 * @param style CSS style for formatted output.
+                 */
+                PatternConverter(const LogString& name,
+                                 const LogString& style);
 
-  }
+            public:
+                DECLARE_LOG4CXX_PATTERN(PatternConverter);
+                BEGIN_LOG4CXX_CAST_MAP();
+                LOG4CXX_CAST_ENTRY(PatternConverter);
+                END_LOG4CXX_CAST_MAP();
+
+                virtual ~PatternConverter();
+
+                /**
+                 * Formats an object into a string buffer.
+                 * @param obj event to format, may not be null.
+                 * @param toAppendTo string buffer to which the formatted event will be appended.  May not be null.
+                 * @param p pool for any allocations necessary during formatting.
+                 */
+                virtual void format(const log4cxx::ptr::shared_ptr<Object>& obj,
+                                    LogString& toAppendTo,
+                                    log4cxx::helpers::Pool& p) const = 0;
+
+                /**
+                 * This method returns the name of the conversion pattern.
+                 *
+                 * The name can be useful to certain Layouts such as HTMLLayout.
+                 *
+                 * @return        the name of the conversion pattern
+                 */
+                LogString getName() const;
+
+                /**
+                 * This method returns the CSS style class that should be applied to
+                 * the LoggingEvent passed as parameter, which can be null.
+                 *
+                 * This information is currently used only by HTMLLayout.
+                 *
+                 * @param e null values are accepted
+                 * @return  the name of the conversion pattern
+                 */
+                virtual LogString getStyleClass(const log4cxx::helpers::ObjectPtr& e) const;
+
+            protected:
+                /**
+                * Appends content in the locale code page to a LogString.
+                * @param toAppendTo string to which content is appended.
+                * @param src content.
+                */
+                static void append(LogString& toAppendTo, const std::string& src);
+        };
+
+
+        LOG4CXX_PTR_DEF(PatternConverter);
+
+    }
 }
 
 

@@ -55,5 +55,5 @@ namespace log4cxx
                 bool requiresLayout() const
                         { return false;   }
         };
-        typedef helpers::ObjectPtrT<VectorAppender> VectorAppenderPtr;
+        typedef log4cxx::ptr::shared_ptr<VectorAppender> VectorAppenderPtr;
 }

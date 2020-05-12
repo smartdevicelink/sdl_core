@@ -63,8 +63,9 @@ public:
 
       LoggerPtr logger1 = Logger::getLogger(LOG4CXX_TEST_STR("LOG4J"));
       logger1->setAdditivity(false);
-      logger1->addAppender(
-         new ConsoleAppender(new PatternLayout(LOG4CXX_STR("log4j: %-22c{2} - %m%n"))));
+      PatternLayoutPtr pattern( new PatternLayout(LOG4CXX_STR("log4j: %-22c{2} - %m%n")));
+      AppenderPtr console( new ConsoleAppender( pattern ) );
+      logger1->addAppender( console );
    }
 
    void test1()

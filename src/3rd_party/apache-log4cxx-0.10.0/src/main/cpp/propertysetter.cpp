@@ -31,74 +31,67 @@ using namespace log4cxx::helpers;
 using namespace log4cxx::spi;
 using namespace log4cxx::config;
 
-PropertySetter::PropertySetter(const helpers::ObjectPtr& obj1) : obj(obj1)
-{
+PropertySetter::PropertySetter(spi::OptionHandler* obj1) : obj(obj1) {
 }
 
-void PropertySetter::setProperties(const helpers::ObjectPtr& obj,
-     helpers::Properties& properties,
-     const LogString& prefix,
-     Pool& p)
-{
-        PropertySetter(obj).setProperties(properties, prefix, p);
+void PropertySetter::setProperties(spi::OptionHandler* obj,
+                                   helpers::Properties& properties,
+                                   const LogString& prefix,
+                                   Pool& p) {
+    PropertySetter(obj).setProperties(properties, prefix, p);
 }
 
 
 void PropertySetter::setProperties(helpers::Properties& properties,
-        const LogString& prefix,
-        Pool& p)
-{
-        int len = prefix.length();
+                                   const LogString& prefix,
+                                   Pool& p) {
+    int len = prefix.length();
 
-        std::vector<LogString> names = properties.propertyNames();
-        std::vector<LogString>::iterator it;
+    std::vector<LogString> names = properties.propertyNames();
+    std::vector<LogString>::iterator it;
 
-        for (it = names.begin(); it != names.end(); it++)
-        {
-                LogString key = *it;
+    for (it = names.begin(); it != names.end(); it++) {
+        LogString key = *it;
 
-                // handle only properties that start with the desired frefix.
-                if (key.find(prefix) == 0)
-                {
-                        // ignore key if it contains dots after the prefix
-                        if (key.find(0x2E /* '.' */, len + 1) != LogString::npos)
-                        {
-                                continue;
-                        }
+        // handle only properties that start with the desired frefix.
+        if (key.find(prefix) == 0) {
+            // ignore key if it contains dots after the prefix
+            if (key.find(0x2E /* '.' */, len + 1) != LogString::npos) {
+                continue;
+            }
 
-                        LogString value = OptionConverter::findAndSubst(key, properties);
-                        key = key.substr(len);
-                        if (key == LOG4CXX_STR("layout")
-                                && obj != 0
-                                && obj->instanceof(Appender::getStaticClass()))
-                        {
-                                continue;
-                        }
-                        setProperty(key, value, p);
-                }
+            LogString value = OptionConverter::findAndSubst(key, properties);
+            key = key.substr(len);
+
+            if (key == LOG4CXX_STR("layout")
+                    && obj != 0
+                    && obj->instanceof(Appender::getStaticClass())) {
+                continue;
+            }
+
+            setProperty(key, value, p);
         }
-        activate(p);
+    }
+
+    activate(p);
 }
 
 void PropertySetter::setProperty(const LogString& option,
                                  const LogString& value,
-                                 Pool&)
-{
-        if (value.empty())
-                return;
+                                 Pool&) {
+    if (value.empty()) {
+        return;
+    }
 
-        if (obj != 0 && obj->instanceof(OptionHandler::getStaticClass()))
-        {
-                LogLog::debug(LOG4CXX_STR("Setting option name=[") +
-                        option + LOG4CXX_STR("], value=[") + value + LOG4CXX_STR("]"));
-                OptionHandlerPtr(obj)->setOption(option, value);
-        }
+    if (obj != 0 ) {
+        LogLog::debug(LOG4CXX_STR("Setting option name=[") +
+                      option + LOG4CXX_STR("], value=[") + value + LOG4CXX_STR("]"));
+        obj->setOption(option, value);
+    }
 }
 
-void PropertySetter::activate(Pool& p)
-{
-        if (obj != 0 && obj->instanceof(OptionHandler::getStaticClass()))
-        {
-                OptionHandlerPtr(obj)->activateOptions(p);
-        }
+void PropertySetter::activate(Pool& p) {
+    if (obj != 0 ) {
+        obj->activateOptions(p);
+    }
 }

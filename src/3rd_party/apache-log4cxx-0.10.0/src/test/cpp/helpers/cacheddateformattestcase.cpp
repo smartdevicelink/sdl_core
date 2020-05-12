@@ -48,37 +48,35 @@ using namespace log4cxx::pattern;
 
 
 /**
-   Unit test {@link CachedDateFormat}.
-   
-   */
+ * Unit test {@link CachedDateFormat}.
+ */
 LOGUNIT_CLASS(CachedDateFormatTestCase)
    {
      LOGUNIT_TEST_SUITE( CachedDateFormatTestCase );
-     LOGUNIT_TEST( test1 );
-     LOGUNIT_TEST( test2 );
-     LOGUNIT_TEST( test3 );
-     LOGUNIT_TEST( test4 );
+     LOGUNIT_TEST(test1);
+     LOGUNIT_TEST(test2);
+     LOGUNIT_TEST(test3);
+     LOGUNIT_TEST(test4);
 #if LOG4CXX_HAS_STD_LOCALE
-     LOGUNIT_TEST( test5 );
+     LOGUNIT_TEST(test5);
 #endif
-     LOGUNIT_TEST( test6 );
-     LOGUNIT_TEST( test8 );
+     LOGUNIT_TEST(test6);
+     LOGUNIT_TEST(test8);
 //   Gump doesn't like this test
-//     LOGUNIT_TEST( test9 );
-     LOGUNIT_TEST( test10 );
-     LOGUNIT_TEST( test11);
-     LOGUNIT_TEST( test12 );
-     LOGUNIT_TEST( test13 );
-     LOGUNIT_TEST( test14 );
-     LOGUNIT_TEST( test15 );
-     LOGUNIT_TEST( test16 );
-     LOGUNIT_TEST( test17);
-     LOGUNIT_TEST( test18);
-     LOGUNIT_TEST( test19);
-     LOGUNIT_TEST( test20);
-     LOGUNIT_TEST( test21);
+//     LOGUNIT_TEST(test9);
+     LOGUNIT_TEST(test10);
+     LOGUNIT_TEST(test11);
+     LOGUNIT_TEST(test12);
+     LOGUNIT_TEST(test13);
+     LOGUNIT_TEST(test14);
+     LOGUNIT_TEST(test15);
+     LOGUNIT_TEST(test16);
+     LOGUNIT_TEST(test17);
+     LOGUNIT_TEST(test18);
+     LOGUNIT_TEST(test19);
+     LOGUNIT_TEST(test20);
+     LOGUNIT_TEST(test21);
      LOGUNIT_TEST_SUITE_END();
-
 
 #define MICROSECONDS_PER_DAY APR_INT64_C(86400000000)
 
@@ -145,9 +143,9 @@ LOGUNIT_CLASS(CachedDateFormatTestCase)
      chicagoFormat.format(actual, jul2, p);
      LOGUNIT_ASSERT_EQUAL((LogString) LOG4CXX_STR("19:00:00,000"), actual);
 
-      actual.erase(actual.begin(), actual.end());
-      gmtFormat.format(actual, jul2, p);
-      LOGUNIT_ASSERT_EQUAL((LogString) LOG4CXX_STR("00:00:00,000"), actual);
+     actual.erase(actual.begin(), actual.end());
+     gmtFormat.format(actual, jul2, p);
+     LOGUNIT_ASSERT_EQUAL((LogString) LOG4CXX_STR("00:00:00,000"), actual);
   }
 
   /**
@@ -299,9 +297,9 @@ LOGUNIT_CLASS(CachedDateFormatTestCase)
 void test9() {
   std::locale localeUS(LOCALE_US);
 
-  DateFormatPtr baseFormat = new SimpleDateFormat(
-      LOG4CXX_STR("yyyy-MMMM-dd HH:mm:ss,SS Z"), &localeUS);
-  DateFormatPtr cachedFormat = new CachedDateFormat(baseFormat, 1000000);
+  DateFormatPtr baseFormat( new SimpleDateFormat(
+      LOG4CXX_STR("yyyy-MMMM-dd HH:mm:ss,SS Z"), &localeUS) );
+  DateFormatPtr cachedFormat( new CachedDateFormat(baseFormat, 1000000) );
   TimeZonePtr cet = TimeZone::getTimeZone(LOG4CXX_STR("GMT+1"));
   cachedFormat->setTimeZone(cet);
 
@@ -358,9 +356,9 @@ void test10() {
 #else
   std::locale* localeUS = NULL;
 #endif
-  DateFormatPtr baseFormat = new SimpleDateFormat(
-      LOG4CXX_STR("MMMM SSS EEEEEE"), localeUS);
-  DateFormatPtr cachedFormat = new CachedDateFormat(baseFormat, 1000000);
+  DateFormatPtr baseFormat( new SimpleDateFormat(
+      LOG4CXX_STR("MMMM SSS EEEEEE"), localeUS) );
+  DateFormatPtr cachedFormat( new CachedDateFormat(baseFormat, 1000000) );
   TimeZonePtr cet = TimeZone::getTimeZone(LOG4CXX_STR("GMT+1"));
   cachedFormat->setTimeZone(cet);
 
@@ -419,8 +417,8 @@ void test11() {
    //   Earlier versions could be tricked by "SS0" patterns.
    //
    LogString badPattern(LOG4CXX_STR("ss,SS0"));
-   DateFormatPtr simpleFormat = new SimpleDateFormat(badPattern);
-   DateFormatPtr gmtFormat = new CachedDateFormat(simpleFormat, 1000000);
+   DateFormatPtr simpleFormat( new SimpleDateFormat(badPattern) );
+   DateFormatPtr gmtFormat( new CachedDateFormat(simpleFormat, 1000000) );
    gmtFormat->setTimeZone(TimeZone::getGMT());
 
    //
@@ -450,24 +448,47 @@ void test11() {
  * Check pattern location for ISO8601
  */
 void test12() {
-   DateFormatPtr df = new SimpleDateFormat(LOG4CXX_STR("yyyy-MM-dd HH:mm:ss,SSS"));
-   apr_time_t ticks = 11142L * MICROSECONDS_PER_DAY;
-
+   DateFormatPtr df( new SimpleDateFormat(LOG4CXX_STR("yyyy-MM-dd HH:mm:ss,SSS")) );
+   apr_time_t    ticks = 11142L * MICROSECONDS_PER_DAY;
    Pool p;
-
    LogString formatted;
-   df->format(formatted, ticks, p);
 
-   int millisecondStart = CachedDateFormat::findMillisecondStart(ticks,
-       formatted, df, p);
-   LOGUNIT_ASSERT_EQUAL(20, millisecondStart);
+   df->format(formatted, ticks, p);
+   int msStart = CachedDateFormat::findMillisecondStart(ticks, formatted, df, p);
+   LOGUNIT_ASSERT_EQUAL(20, msStart);
+
+   // Test for for milliseconds overlapping with the magic ones as per LOGCXX-420.
+   apr_time_exp_t c;
+   memset(&c, 0, sizeof(c));
+   c.tm_year = 110;
+   c.tm_mon  = 7;
+   c.tm_mday = 12;
+   c.tm_hour = 9;
+   c.tm_min  = 4;
+   c.tm_sec  = 50;
+   c.tm_usec = 406000;
+
+   LOGUNIT_ASSERT_EQUAL(0, apr_time_exp_gmt_get(&ticks, &c));
+
+   formatted.clear();
+   df->format(formatted, ticks, p);
+   msStart = CachedDateFormat::findMillisecondStart(ticks, formatted, df, p);
+   LOGUNIT_ASSERT_EQUAL(20, msStart);
+
+   c.tm_usec = 609000;
+   LOGUNIT_ASSERT_EQUAL(0, apr_time_exp_gmt_get(&ticks, &c));
+
+   formatted.clear();
+   df->format(formatted, ticks, p);
+   msStart = CachedDateFormat::findMillisecondStart(ticks, formatted, df, p);
+   LOGUNIT_ASSERT_EQUAL(20, msStart);
 }
 
 /**
  * Check pattern location for DATE
  */
 void test13() {
-   DateFormatPtr df = new SimpleDateFormat(LOG4CXX_STR("yyyy-MM-dd"));
+   DateFormatPtr df( new SimpleDateFormat(LOG4CXX_STR("yyyy-MM-dd")) );
    apr_time_t ticks = 11142L * MICROSECONDS_PER_DAY;
 
    Pool p;
@@ -484,7 +505,7 @@ void test13() {
  * Check pattern location for ABSOLUTE
  */
 void test14() {
-   DateFormatPtr df = new SimpleDateFormat(LOG4CXX_STR("HH:mm:ss,SSS"));
+   DateFormatPtr df( new SimpleDateFormat(LOG4CXX_STR("HH:mm:ss,SSS")) );
    apr_time_t ticks = 11142L * MICROSECONDS_PER_DAY;
 
    Pool p;
@@ -500,7 +521,7 @@ void test14() {
  * Check pattern location for single S
  */
 void test15() {
-   DateFormatPtr df = new SimpleDateFormat(LOG4CXX_STR("HH:mm:ss,S"));
+   DateFormatPtr df( new SimpleDateFormat(LOG4CXX_STR("HH:mm:ss,S")) );
    apr_time_t ticks = 11142L * MICROSECONDS_PER_DAY;
 
    Pool p;
@@ -516,7 +537,7 @@ void test15() {
  * Check pattern location for single SS
  */
 void test16() {
-   DateFormatPtr df = new SimpleDateFormat(LOG4CXX_STR("HH:mm:ss,SS"));
+   DateFormatPtr df( new SimpleDateFormat(LOG4CXX_STR("HH:mm:ss,SS")) );
    apr_time_t ticks = 11142L * MICROSECONDS_PER_DAY;
 
    Pool p;
@@ -528,16 +549,15 @@ void test16() {
    LOGUNIT_ASSERT_EQUAL((int) CachedDateFormat::UNRECOGNIZED_MILLISECONDS, millisecondStart);
 }
 
-
 /**
  * Check caching when multiple SSS appear in pattern
  */
 void test17() {
     apr_time_t jul2 = 12602L * MICROSECONDS_PER_DAY;
     LogString badPattern(LOG4CXX_STR("HH:mm:ss,SSS HH:mm:ss,SSS"));
-    DateFormatPtr simpleFormat = new SimpleDateFormat(badPattern);
+    DateFormatPtr simpleFormat( new SimpleDateFormat(badPattern) );
     simpleFormat->setTimeZone(TimeZone::getGMT());
-    DateFormatPtr cachedFormat = new CachedDateFormat(simpleFormat, 1000000);
+    DateFormatPtr cachedFormat( new CachedDateFormat(simpleFormat, 1000000) );
 
     Pool p;
     LogString s;
@@ -551,12 +571,27 @@ void test17() {
     LOGUNIT_ASSERT_EQUAL((LogString) LOG4CXX_STR("00:00:00,120 00:00:00,120"), s);
 
     s.erase(s.begin(), s.end());
-    cachedFormat->format(s, jul2, p);
+    int msStart = CachedDateFormat::findMillisecondStart(jul2, s, simpleFormat, p);
+    LOGUNIT_ASSERT_EQUAL((int) CachedDateFormat::UNRECOGNIZED_MILLISECONDS, msStart);
 
+    cachedFormat->format(s, jul2, p);
     LOGUNIT_ASSERT_EQUAL((LogString) LOG4CXX_STR("00:00:00,120 00:00:00,120"), s) ;
 
     int maxValid = CachedDateFormat::getMaximumCacheValidity(badPattern);
     LOGUNIT_ASSERT_EQUAL(1000, maxValid);
+
+    // Test overlapping millis with a magic string from CachedDateFormat for LOGCXX-420.
+    s.clear();
+    jul2 += 286000;
+    cachedFormat->format(s, jul2, p);
+    msStart = CachedDateFormat::findMillisecondStart(jul2, s, simpleFormat, p);
+    LOGUNIT_ASSERT_EQUAL((int) CachedDateFormat::UNRECOGNIZED_MILLISECONDS, msStart);
+
+    s.clear();
+    jul2 += 203000;
+    cachedFormat->format(s, jul2, p);
+    msStart = CachedDateFormat::findMillisecondStart(jul2, s, simpleFormat, p);
+    LOGUNIT_ASSERT_EQUAL((int) CachedDateFormat::UNRECOGNIZED_MILLISECONDS, msStart);
 }
 
 /**
@@ -608,6 +643,5 @@ void test21() {
 }
 
 };
-
 
 LOGUNIT_TEST_SUITE_REGISTRATION(CachedDateFormatTestCase);

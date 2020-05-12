@@ -21,7 +21,6 @@
 
 
 #include <log4cxx/spi/optionhandler.h>
-#include <log4cxx/helpers/objectimpl.h>
 #include <log4cxx/spi/loggingevent.h>
 #include <log4cxx/appender.h>
 
@@ -35,39 +34,37 @@ namespace log4cxx {
          * occurs. Such conditions include time of day, file size, an
          * external event or a combination thereof.
          *
-         * 
-         * 
+         *
+         *
          * */
 
         class LOG4CXX_EXPORT TriggeringPolicy :
-              public virtual spi::OptionHandler,
-              public virtual helpers::ObjectImpl {
-              DECLARE_ABSTRACT_LOG4CXX_OBJECT(TriggeringPolicy)
-              BEGIN_LOG4CXX_CAST_MAP()
-                      LOG4CXX_CAST_ENTRY(TriggeringPolicy)
-                      LOG4CXX_CAST_ENTRY(spi::OptionHandler)
-              END_LOG4CXX_CAST_MAP()
-        public:
-             virtual ~TriggeringPolicy();
-             void addRef() const;
-             void releaseRef() const;
+            public virtual spi::OptionHandler,
+            public virtual helpers::Object {
+                DECLARE_ABSTRACT_LOG4CXX_OBJECT(TriggeringPolicy)
+                BEGIN_LOG4CXX_CAST_MAP()
+                LOG4CXX_CAST_ENTRY(TriggeringPolicy)
+                LOG4CXX_CAST_ENTRY(spi::OptionHandler)
+                END_LOG4CXX_CAST_MAP()
+            public:
+                virtual ~TriggeringPolicy();
 
-            /**
-             * Determines if a rollover may be appropriate at this time.  If
-             * true is returned, RolloverPolicy.rollover will be called but it
-             * can determine that a rollover is not warranted.
-             *
-             * @param appender A reference to the appender.
-             * @param event A reference to the currently event.
-             * @param filename The filename for the currently active log file.
-             * @param fileLength Length of the file in bytes.
-             * @return true if a rollover should occur.
-             */
-            virtual bool isTriggeringEvent(
-              Appender* appender,
-              const log4cxx::spi::LoggingEventPtr& event,
-              const LogString& filename,
-              size_t fileLength) = 0;
+                /**
+                 * Determines if a rollover may be appropriate at this time.  If
+                 * true is returned, RolloverPolicy.rollover will be called but it
+                 * can determine that a rollover is not warranted.
+                 *
+                 * @param appender A reference to the appender.
+                 * @param event A reference to the currently event.
+                 * @param filename The filename for the currently active log file.
+                 * @param fileLength Length of the file in bytes.
+                 * @return true if a rollover should occur.
+                 */
+                virtual bool isTriggeringEvent(
+                    Appender* appender,
+                    const log4cxx::spi::LoggingEventPtr& event,
+                    const LogString& filename,
+                    size_t fileLength) = 0;
 
         };
 

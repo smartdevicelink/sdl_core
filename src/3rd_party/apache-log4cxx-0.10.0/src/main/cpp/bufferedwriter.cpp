@@ -35,26 +35,27 @@ BufferedWriter::~BufferedWriter() {
 }
 
 void BufferedWriter::close(Pool& p) {
-   flush(p);
-   out->close(p);
+    flush(p);
+    out->close(p);
 }
 
 void BufferedWriter::flush(Pool& p) {
-  if (buf.length() > 0) {
-     out->write(buf, p);
-     buf.erase(buf.begin(), buf.end());
-  }
+    if (buf.length() > 0) {
+        out->write(buf, p);
+        buf.erase(buf.begin(), buf.end());
+    }
 }
 
 void BufferedWriter::write(const LogString& str, Pool& p) {
-  if (buf.length() + str.length() > sz) {
-    out->write(buf, p);
-    buf.erase(buf.begin(), buf.end());
-  }
-  if (str.length() > sz) {
-    out->write(str, p);
-  } else {
-    buf.append(str);
-  }
+    if (buf.length() + str.length() > sz) {
+        out->write(buf, p);
+        buf.erase(buf.begin(), buf.end());
+    }
+
+    if (str.length() > sz) {
+        out->write(str, p);
+    } else {
+        buf.append(str);
+    }
 }
 

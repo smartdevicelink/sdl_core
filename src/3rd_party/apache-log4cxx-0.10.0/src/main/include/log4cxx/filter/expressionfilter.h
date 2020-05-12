@@ -26,98 +26,94 @@
 
 #include <log4cxx/spi/filter.h>
 
-namespace log4cxx
-{
-    namespace rule
-    {
+namespace log4cxx {
+    namespace rule {
         class Rule;
         typedef helpers::ObjectPtrT < Rule > RulePtr;
     }
 
 
-    namespace filter
-    {
+    namespace filter {
 
 
-/**
- *A filter supporting complex expressions - supports both infix and postfix
- * expressions (infix expressions must first be converted to postfix prior
- * to processing).
- *
- * <p>See <code>org.apache.log4j.chainsaw.LoggingEventFieldResolver.java</code>
- * for the correct names for logging event fields used when building expressions.
- *
- * <p>See <code>org.apache.log4j.chainsaw.rule</code> package for a list of available
- * rules which can be applied using the expression syntax.
- *
- * <p>See <code>org.apache.log4j.chainsaw.RuleFactory</code> for the symbols
- * used to activate the corresponding rules.
- *
- *NOTE:  Grouping using parentheses is supported - all tokens must be separated by spaces, and
- *operands which contain spaces are not yet supported.
- *
- *Example:
- *
- *In order to build a filter that displays all messages with infomsg-45 or infomsg-44 in the message,
- *as well as all messages with a level of WARN or higher, build an expression using
- *the LikeRule (supports ORO-based regular expressions) and the InequalityRule.
- * <b> ( MSG LIKE infomsg-4[4,5] ) && ( LEVEL >= WARN ) </b>
- *
- *Three options are required:
- *  <b>Expression</b> - the expression to match
- *  <b>ConvertInFixToPostFix</b> - convert from infix to posfix (default true)
- *  <b>AcceptOnMatch</b> - true or false (default true)
- *
- * Meaning of <b>AcceptToMatch</b>:
- * If there is a match between the value of the
- * Expression option and the {@link log4cxx::spi::LoggingEvent} and AcceptOnMatch is true,
- * the {@link #decide} method returns {@link log4cxx::spi::Filter#ACCEPT}.
- *
- * If there is a match between the value of the
- * Expression option and the {@link log4cxx::spi::LoggingEvent} and AcceptOnMatch is false,
- * {@link log4cxx::spi::Filter#DENY} is returned.
- *
- * If there is no match, {@link log4cxx::spi::Filter#NEUTRAL} is returned.
- *
- * 
- */
-        class LOG4CXX_EXPORT ExpressionFilter:public log4cxx::spi::Filter
-        {
-          private:
-            bool acceptOnMatch;
-            bool convertInFixToPostFix;
-            LogString expression;
-                      log4cxx::rule::RulePtr expressionRule;
-                      ExpressionFilter(const ExpressionFilter &);
-                  ExpressionFilter & operator=(const ExpressionFilter &);
+        /**
+         *A filter supporting complex expressions - supports both infix and postfix
+         * expressions (infix expressions must first be converted to postfix prior
+         * to processing).
+         *
+         * <p>See <code>org.apache.log4j.chainsaw.LoggingEventFieldResolver.java</code>
+         * for the correct names for logging event fields used when building expressions.
+         *
+         * <p>See <code>org.apache.log4j.chainsaw.rule</code> package for a list of available
+         * rules which can be applied using the expression syntax.
+         *
+         * <p>See <code>org.apache.log4j.chainsaw.RuleFactory</code> for the symbols
+         * used to activate the corresponding rules.
+         *
+         *NOTE:  Grouping using parentheses is supported - all tokens must be separated by spaces, and
+         *operands which contain spaces are not yet supported.
+         *
+         *Example:
+         *
+         *In order to build a filter that displays all messages with infomsg-45 or infomsg-44 in the message,
+         *as well as all messages with a level of WARN or higher, build an expression using
+         *the LikeRule (supports ORO-based regular expressions) and the InequalityRule.
+         * <b> ( MSG LIKE infomsg-4[4,5] ) && ( LEVEL >= WARN ) </b>
+         *
+         *Three options are required:
+         *  <b>Expression</b> - the expression to match
+         *  <b>ConvertInFixToPostFix</b> - convert from infix to posfix (default true)
+         *  <b>AcceptOnMatch</b> - true or false (default true)
+         *
+         * Meaning of <b>AcceptToMatch</b>:
+         * If there is a match between the value of the
+         * Expression option and the {@link log4cxx::spi::LoggingEvent} and AcceptOnMatch is true,
+         * the {@link #decide} method returns {@link log4cxx::spi::Filter#ACCEPT}.
+         *
+         * If there is a match between the value of the
+         * Expression option and the {@link log4cxx::spi::LoggingEvent} and AcceptOnMatch is false,
+         * {@link log4cxx::spi::Filter#DENY} is returned.
+         *
+         * If there is no match, {@link log4cxx::spi::Filter#NEUTRAL} is returned.
+         *
+         *
+         */
+        class LOG4CXX_EXPORT ExpressionFilter:public log4cxx::spi::Filter {
+            private:
+                bool acceptOnMatch;
+                bool convertInFixToPostFix;
+                LogString expression;
+                log4cxx::rule::RulePtr expressionRule;
+                ExpressionFilter(const ExpressionFilter &);
+                ExpressionFilter & operator=(const ExpressionFilter &);
 
-          public:
-                  DECLARE_LOG4CXX_OBJECT(ExpressionFilter)
-                  BEGIN_LOG4CXX_CAST_MAP()
-                  LOG4CXX_CAST_ENTRY(log4cxx::spi::Filter)
-                  END_LOG4CXX_CAST_MAP()
+            public:
+                DECLARE_LOG4CXX_OBJECT(ExpressionFilter)
+                BEGIN_LOG4CXX_CAST_MAP()
+                LOG4CXX_CAST_ENTRY(log4cxx::spi::Filter)
+                END_LOG4CXX_CAST_MAP()
 
 
-                  ExpressionFilter();
+                ExpressionFilter();
 
-            void activateOptions(log4cxx::helpers::Pool & p);
+                void activateOptions(log4cxx::helpers::Pool & p);
 
-            void setExpression(const LogString & expression);
+                void setExpression(const LogString & expression);
 
-            LogString getExpression() const;
+                LogString getExpression() const;
 
-            void setConvertInFixToPostFix(bool convertInFixToPostFix);
+                void setConvertInFixToPostFix(bool convertInFixToPostFix);
 
-            bool getConvertInFixToPostFix() const;
+                bool getConvertInFixToPostFix() const;
 
-            void setAcceptOnMatch(bool acceptOnMatch);
+                void setAcceptOnMatch(bool acceptOnMatch);
 
-            bool getAcceptOnMatch() const;
+                bool getAcceptOnMatch() const;
 
-  /**
-     Returns {@link log4cxx::spi::Filter#NEUTRAL} is there is no string match.
-   */
-            FilterDecision decide(const spi::LoggingEventPtr & event) const;
+                /**
+                   Returns {@link log4cxx::spi::Filter#NEUTRAL} is there is no string match.
+                 */
+                FilterDecision decide(const spi::LoggingEventPtr & event) const;
         };
     }
 }

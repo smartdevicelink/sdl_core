@@ -25,10 +25,10 @@ using namespace log4cxx::helpers;
 IMPLEMENT_LOG4CXX_OBJECT(Action)
 
 Action::Action() :
-   complete(false),
-   interrupted(false),
-   pool(),
-   mutex(pool) {
+    complete(false),
+    interrupted(false),
+    pool(),
+    mutex(pool) {
 }
 
 Action::~Action() {
@@ -38,30 +38,32 @@ Action::~Action() {
  * {@inheritDoc}
  */
 void Action::run(log4cxx::helpers::Pool& pool1) {
-  synchronized sync(mutex);
-  if (!interrupted) {
-      try {
-         execute(pool1);
-      } catch(std::exception& ex) {
-         reportException(ex);
-      }
-      complete = true;
-      interrupted = true;
-  }
+    synchronized sync(mutex);
+
+    if (!interrupted) {
+        try {
+            execute(pool1);
+        } catch(std::exception& ex) {
+            reportException(ex);
+        }
+
+        complete = true;
+        interrupted = true;
+    }
 }
 
-  /**
-   * {@inheritDoc}
-   */
+/**
+ * {@inheritDoc}
+ */
 void Action::close() {
     synchronized sync(mutex);
     interrupted = true;
 }
 
-  /**
-   * Tests if the action is complete.
-   * @return true if action is complete.
-   */
+/**
+ * Tests if the action is complete.
+ * @return true if action is complete.
+ */
 bool Action::isComplete() const {
     return complete;
 }

@@ -97,13 +97,13 @@ LOGUNIT_CLASS(ManualRollingTest)  {
    *
    */
   void test1() {
-    PatternLayoutPtr layout = new PatternLayout(LOG4CXX_STR("%m\n"));
-    RollingFileAppenderPtr rfa = new RollingFileAppender();
+    PatternLayoutPtr layout( new PatternLayout(LOG4CXX_STR("%m\n")) );
+    RollingFileAppenderPtr rfa( new RollingFileAppender() );
     rfa->setName(LOG4CXX_STR("ROLLING"));
     rfa->setAppend(false);
     rfa->setLayout(layout);
 
-    FixedWindowRollingPolicyPtr swrp = new FixedWindowRollingPolicy();
+    FixedWindowRollingPolicyPtr swrp( new FixedWindowRollingPolicy() );
     swrp->setMinIndex(0);
 
     swrp->setFileNamePattern(LOG4CXX_STR("output/manual-test1.%i"));
@@ -132,8 +132,8 @@ LOGUNIT_CLASS(ManualRollingTest)  {
    * Test basic rolling functionality with explicit setting of FileAppender.file.
    */
   void test2() {
-    PatternLayoutPtr layout = new PatternLayout(LOG4CXX_STR("%m\n"));
-    RollingFileAppenderPtr rfa = new RollingFileAppender();
+    PatternLayoutPtr layout( new PatternLayout(LOG4CXX_STR("%m\n")) );
+    RollingFileAppenderPtr rfa( new RollingFileAppender() );
     rfa->setName(LOG4CXX_STR("ROLLING"));
     rfa->setAppend(false);
     rfa->setLayout(layout);
@@ -161,12 +161,12 @@ LOGUNIT_CLASS(ManualRollingTest)  {
    * Same as testBasic but also with GZ compression.
    */
   void test3() {
-    PatternLayoutPtr layout = new PatternLayout(LOG4CXX_STR("%m\n"));
-    RollingFileAppenderPtr rfa = new RollingFileAppender();
+    PatternLayoutPtr layout( new PatternLayout(LOG4CXX_STR("%m\n")) );
+    RollingFileAppenderPtr rfa( new RollingFileAppender() );
     rfa->setAppend(false);
     rfa->setLayout(layout);
 
-    FixedWindowRollingPolicyPtr  fwrp = new FixedWindowRollingPolicy();
+    FixedWindowRollingPolicyPtr  fwrp( new FixedWindowRollingPolicy() );
 
     fwrp->setMinIndex(0);
     rfa->setFile(LOG4CXX_STR("output/manual-test3.log"));
@@ -192,14 +192,14 @@ LOGUNIT_CLASS(ManualRollingTest)  {
    * Test basic rolling functionality with bogus path in file name pattern.
    */
   void test4() {
-    PatternLayoutPtr layout = new PatternLayout(LOG4CXX_STR("%m\n"));
-    RollingFileAppenderPtr rfa = new RollingFileAppender();
+    PatternLayoutPtr layout( new PatternLayout(LOG4CXX_STR("%m\n")) );
+    RollingFileAppenderPtr rfa( new RollingFileAppender() );
     rfa->setName(LOG4CXX_STR("ROLLING"));
     rfa->setAppend(false);
     rfa->setLayout(layout);
     rfa->setFile(LOG4CXX_STR("output/manual-test4.log"));
 
-    FixedWindowRollingPolicyPtr swrp = new FixedWindowRollingPolicy();
+    FixedWindowRollingPolicyPtr swrp( new FixedWindowRollingPolicy() );
 
     swrp->setMinIndex(0);
 
@@ -227,14 +227,14 @@ LOGUNIT_CLASS(ManualRollingTest)  {
    * to the indexed files.
    */
   void test5()  {
-    PatternLayoutPtr layout = new PatternLayout(LOG4CXX_STR("%m\n"));
-    RollingFileAppenderPtr rfa = new RollingFileAppender();
+    PatternLayoutPtr layout( new PatternLayout(LOG4CXX_STR("%m\n")) );
+    RollingFileAppenderPtr rfa( new RollingFileAppender() );
     rfa->setName(LOG4CXX_STR("ROLLING"));
     rfa->setAppend(false);
     rfa->setLayout(layout);
     rfa->setFile(LOG4CXX_STR("output/manual-test5.log"));
 
-    FixedWindowRollingPolicyPtr swrp = new FixedWindowRollingPolicy();
+    FixedWindowRollingPolicyPtr swrp( new FixedWindowRollingPolicy() );
 
     swrp->setMinIndex(0);
 

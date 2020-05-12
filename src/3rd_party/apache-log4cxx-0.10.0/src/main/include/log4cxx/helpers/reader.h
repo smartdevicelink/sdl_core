@@ -18,54 +18,52 @@
 #ifndef _LOG4CXX_HELPERS_READER_H
 #define _LOG4CXX_HELPERS_READER_H
 
-#include <log4cxx/helpers/objectimpl.h>
+#include <log4cxx/helpers/object.h>
 
-namespace log4cxx
-{
+namespace log4cxx {
 
-        namespace helpers {
+    namespace helpers {
 
-          /**
-           * Abstract class for reading from character streams.
-           * 
-           */
-          class LOG4CXX_EXPORT Reader : public ObjectImpl
-          {
-          public:
-                  DECLARE_ABSTRACT_LOG4CXX_OBJECT(Reader)
-                  BEGIN_LOG4CXX_CAST_MAP()
-                          LOG4CXX_CAST_ENTRY(Reader)
-                  END_LOG4CXX_CAST_MAP()
+        /**
+         * Abstract class for reading from character streams.
+         *
+         */
+        class LOG4CXX_EXPORT Reader : public Object {
+            public:
+                DECLARE_ABSTRACT_LOG4CXX_OBJECT(Reader)
+                BEGIN_LOG4CXX_CAST_MAP()
+                LOG4CXX_CAST_ENTRY(Reader)
+                END_LOG4CXX_CAST_MAP()
 
-          protected:
-                  /**
-                   * Creates a new character-stream reader.
-                   */
-                  Reader();
+            protected:
+                /**
+                 * Creates a new character-stream reader.
+                 */
+                Reader();
 
-                  virtual ~Reader();
+                virtual ~Reader();
 
-          public:
-                  /**
-                   * Closes the stream.
-                   * @param p The memory pool associated with the reader.
-                   */
-                  virtual void close(Pool& p) = 0;
+            public:
+                /**
+                 * Closes the stream.
+                 * @param p The memory pool associated with the reader.
+                 */
+                virtual void close(Pool& p) = 0;
 
-                  /**
-                   * @return The complete stream contents as a LogString.
-                   * @param p The memory pool associated with the reader.
-                   */
-                  virtual LogString read(Pool& p) = 0;
+                /**
+                 * @return The complete stream contents as a LogString.
+                 * @param p The memory pool associated with the reader.
+                 */
+                virtual LogString read(Pool& p) = 0;
 
-          private:
-                  Reader(const Reader&);
+            private:
+                Reader(const Reader&);
 
-                  Reader& operator=(const Reader&);
-          };
+                Reader& operator=(const Reader&);
+        };
 
-          LOG4CXX_PTR_DEF(Reader);
-        } // namespace helpers
+        LOG4CXX_PTR_DEF(Reader);
+    } // namespace helpers
 
 }  //namespace log4cxx
 

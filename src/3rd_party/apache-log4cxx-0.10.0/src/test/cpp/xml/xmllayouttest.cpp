@@ -250,9 +250,9 @@ public:
    */
   void testFormat() {
     LogString logger = LOG4CXX_STR("org.apache.log4j.xml.XMLLayoutTest");
-    LoggingEventPtr event =
+    LoggingEventPtr event(
       new LoggingEvent(
-        logger, Level::getInfo(), LOG4CXX_STR("Hello, World"), LOG4CXX_LOCATION);
+        logger, Level::getInfo(), LOG4CXX_STR("Hello, World"), LOG4CXX_LOCATION) );
     Pool p;
     XMLLayout layout;
     LogString result;
@@ -281,9 +281,9 @@ public:
     LogString logger = LOG4CXX_STR("org.apache.log4j.xml.XMLLayoutTest");
     NDC::push("NDC goes here");
 
-    LoggingEventPtr event =
+    LoggingEventPtr event(
       new LoggingEvent(
-        logger, Level::getInfo(), LOG4CXX_STR("Hello, World"), LOG4CXX_LOCATION);
+        logger, Level::getInfo(), LOG4CXX_STR("Hello, World"), LOG4CXX_LOCATION) );
     Pool p;
     XMLLayout layout;
     LogString result;
@@ -338,12 +338,12 @@ public:
     void testProblemCharacters()  {
       std::string problemName = "com.example.bar<>&\"'";
       LogString problemNameLS = LOG4CXX_STR("com.example.bar<>&\"'");
-      LevelPtr level = new XLevel(6000, problemNameLS, 7);
+      LevelPtr level( new XLevel(6000, problemNameLS, 7) );
       NDC::push(problemName);
       MDC::clear();
       MDC::put(problemName, problemName);
-      LoggingEventPtr event =
-        new LoggingEvent(problemNameLS, level, problemNameLS, LOG4CXX_LOCATION);
+      LoggingEventPtr event(
+        new LoggingEvent(problemNameLS, level, problemNameLS, LOG4CXX_LOCATION) );
       XMLLayout layout;
       layout.setProperties(true);
       Pool p;
@@ -389,9 +389,9 @@ public:
         LevelPtr level = Level::getInfo();
         std::string ndcMessage ="<envelope><faultstring><![CDATA[The EffectiveDate]]></faultstring><envelope>";
         NDC::push(ndcMessage);
-        LoggingEventPtr event =
+        LoggingEventPtr event(
           new LoggingEvent(
-            logger, level, LOG4CXX_STR("Hello, World"), LOG4CXX_LOCATION);
+            logger, level, LOG4CXX_STR("Hello, World"), LOG4CXX_LOCATION) );
         XMLLayout layout;
         Pool p;
         LogString result;

@@ -25,9 +25,6 @@
 #pragma warning ( disable: 4231 4251 4275 4786 )
 #endif
 
-
-
-#include <log4cxx/helpers/objectptr.h>
 #include <log4cxx/logstring.h>
 #include <time.h>
 #include <log4cxx/logger.h>
@@ -36,53 +33,52 @@
 #include <vector>
 
 
-namespace log4cxx
-{
-        namespace helpers
-        {
-                class ObjectOutputStream;
-        }
+namespace log4cxx {
+    namespace helpers {
+        class ObjectOutputStream;
+    }
 
-        namespace spi
-        {
+    namespace spi {
+        LOG4CXX_LIST_DEF(KeySet, LogString);
+
+        /**
+        The internal representation of logging events. When an affirmative
+        decision is made to log then a <code>LoggingEvent</code> instance
+        is created. This instance is passed around to the different log4cxx
+        components.
+
+        <p>This class is of concern to those wishing to extend log4cxx.
+        */
+        class LOG4CXX_EXPORT LoggingEvent :
+            public virtual helpers::Object {
+            public:
+                DECLARE_LOG4CXX_OBJECT(LoggingEvent)
+                BEGIN_LOG4CXX_CAST_MAP()
+                LOG4CXX_CAST_ENTRY(LoggingEvent)
+                END_LOG4CXX_CAST_MAP()
+
+                typedef spi::KeySet KeySet;
+
+                /** For serialization only
+                */
+                LoggingEvent();
 
                 /**
-                The internal representation of logging events. When an affirmative
-                decision is made to log then a <code>LoggingEvent</code> instance
-                is created. This instance is passed around to the different log4cxx
-                components.
+                Instantiate a LoggingEvent from the supplied parameters.
 
-                <p>This class is of concern to those wishing to extend log4cxx.
+                <p>Except timeStamp all the other fields of
+                <code>LoggingEvent</code> are filled when actually needed.
+                <p>
+                @param logger The logger of this event.
+                @param level The level of this event.
+                @param message  The message of this event.
+                @param location location of logging request.
                 */
-                class LOG4CXX_EXPORT LoggingEvent :
-                        public virtual helpers::ObjectImpl
-                {
-                public:
-                        DECLARE_LOG4CXX_OBJECT(LoggingEvent)
-                        BEGIN_LOG4CXX_CAST_MAP()
-                                LOG4CXX_CAST_ENTRY(LoggingEvent)
-                        END_LOG4CXX_CAST_MAP()
+                LoggingEvent(const LogString& logger,
+                             const LevelPtr& level,   const LogString& message,
+                             const log4cxx::spi::LocationInfo& location);
 
-                        /** For serialization only
-                        */
-                        LoggingEvent();
-
-                        /**
-                        Instantiate a LoggingEvent from the supplied parameters.
-
-                        <p>Except timeStamp all the other fields of
-                        <code>LoggingEvent</code> are filled when actually needed.
-                        <p>
-                        @param logger The logger of this event.
-                        @param level The level of this event.
-                        @param message  The message of this event.
-                        @param location location of logging request.
-                        */
-                        LoggingEvent(const LogString& logger,
-                                const LevelPtr& level,   const LogString& message,
-                                const log4cxx::spi::LocationInfo& location);
-
-                        /**
+                 /**
                         Instantiate a LoggingEvent from the supplied parameters.
 
                         <p>All the fields of
@@ -101,181 +97,186 @@ namespace log4cxx
                                 const log4cxx::spi::LocationInfo& location,
                                 const LogString& threadName);
 
-                        ~LoggingEvent();
 
-                        /** Return the level of this event. */
-                        inline const LevelPtr& getLevel() const
-                                { return level; }
+                ~LoggingEvent();
 
-                        /**  Return the name of the logger. */
-                        inline const LogString& getLoggerName() const {
-                               return logger;
-                        }
+                /** Return the level of this event. */
+                inline const LevelPtr& getLevel() const {
+                    return level;
+                }
 
-                        /** Return the message for this logging event. */
-                        inline const LogString& getMessage() const
-                                { return message; }
+                /**  Return the name of the logger. */
+                inline const LogString& getLoggerName() const {
+                    return logger;
+                }
 
-                        /** Return the message for this logging event. */
-                        inline const LogString& getRenderedMessage() const
-                                { return message; }
+                /** Return the message for this logging event. */
+                inline const LogString& getMessage() const {
+                    return message;
+                }
 
-                        /**Returns the time when the application started,
-                        in seconds elapsed since 01.01.1970.
-                        */
-                        static log4cxx_time_t getStartTime();
+                /** Return the message for this logging event. */
+                inline const LogString& getRenderedMessage() const {
+                    return message;
+                }
 
-                        /** Return current thread name. */
-                        static const LogString getCurrentThreadName();
+                /**Returns the time when the application started,
+                in seconds elapsed since 01.01.1970.
+                */
+                static log4cxx_time_t getStartTime();
 
-                        /** Return the threadName of this event. */
-                        inline const LogString& getThreadName() const {
-                             return threadName;
-                        }
+                 /** Return current thread name. */
+                static const LogString getCurrentThreadName();
 
-                        /** Return the timeStamp of this event. */
-                        inline log4cxx_time_t getTimeStamp() const
-                                { return timeStamp; }
+                /** Return the threadName of this event. */
+                inline const LogString& getThreadName() const {
+                    return threadName;
+                }
 
-                        /* Return the file where this log statement was written. */
-                        inline const log4cxx::spi::LocationInfo& getLocationInformation() const
-                                { return locationInfo; }
+                /** Return the timeStamp of this event. */
+                inline log4cxx_time_t getTimeStamp() const {
+                    return timeStamp;
+                }
 
-                        /**
-                        * This method appends the NDC for this event to passed string. It will return the
-                        * correct content even if the event was generated in a different
-                        * thread or even on a different machine. The NDC#get method
-                        * should <em>never</em> be called directly.
-                        *
-                        * @param dest destination for NDC, unchanged if NDC is not set.
-                        * @return true if NDC is set.  
-                        */
-                        bool getNDC(LogString& dest) const;
+                /* Return the file where this log statement was written. */
+                inline const log4cxx::spi::LocationInfo& getLocationInformation() const {
+                    return locationInfo;
+                }
 
-                        /**
-                         *  Writes the content of the LoggingEvent 
-                         *  in a format compatible with log4j's serialized form.
-                         */ 
-                        void write(helpers::ObjectOutputStream& os, helpers::Pool& p) const;
+                /**
+                * This method appends the NDC for this event to passed string. It will return the
+                * correct content even if the event was generated in a different
+                * thread or even on a different machine. The NDC#get method
+                * should <em>never</em> be called directly.
+                *
+                * @param dest destination for NDC, unchanged if NDC is not set.
+                * @return true if NDC is set.
+                */
+                bool getNDC(LogString& dest) const;
 
-                        /**
-                        * Appends the the context corresponding to the <code>key</code> parameter.
-                        * If there is a local MDC copy, possibly because we are in a logging
-                        * server or running inside AsyncAppender, then we search for the key in
-                        * MDC copy, if a value is found it is returned. Otherwise, if the search
-                        * in MDC copy returns an empty result, then the current thread's
-                        * <code>MDC</code> is used.
-                        *
-                        * <p>
-                        * Note that <em>both</em> the local MDC copy and the current thread's MDC
-                        * are searched.
-                        * </p>
-                        * @param key key.
-                        * @param dest string to which value, if any, is appended.
-                        * @return true if key had a corresponding value.
-                        */
-                        bool getMDC(const LogString& key, LogString& dest) const;
+                /**
+                 *  Writes the content of the LoggingEvent
+                 *  in a format compatible with log4j's serialized form.
+                 */
+                void write(helpers::ObjectOutputStream& os, helpers::Pool& p) const;
 
-                        LOG4CXX_LIST_DEF(KeySet, LogString);
-                        /**
-                        * Returns the set of of the key values in the MDC for the event.
-                        * The returned set is unmodifiable by the caller.
-                        *
-                        * @return Set an unmodifiable set of the MDC keys.
-                        * 
-                        */
-                        KeySet getMDCKeySet() const;
+                /**
+                * Appends the the context corresponding to the <code>key</code> parameter.
+                * If there is a local MDC copy, possibly because we are in a logging
+                * server or running inside AsyncAppender, then we search for the key in
+                * MDC copy, if a value is found it is returned. Otherwise, if the search
+                * in MDC copy returns an empty result, then the current thread's
+                * <code>MDC</code> is used.
+                *
+                * <p>
+                * Note that <em>both</em> the local MDC copy and the current thread's MDC
+                * are searched.
+                * </p>
+                * @param key key.
+                * @param dest string to which value, if any, is appended.
+                * @return true if key had a corresponding value.
+                */
+                bool getMDC(const LogString& key, LogString& dest) const;
 
-                        /**
-                        Obtain a copy of this thread's MDC prior to serialization
-                        or asynchronous logging.
-                        */
-                        void getMDCCopy() const;
+                /**
+                * Returns the set of of the key values in the MDC for the event.
+                * The returned set is unmodifiable by the caller.
+                *
+                * @return Set an unmodifiable set of the MDC keys.
+                *
+                */
+                KeySet getMDCKeySet() const;
 
-                        /**
-                        * Return a previously set property.
-                        * @param key key.
-                        * @param dest string to which value, if any, is appended.
-                        * @return true if key had a corresponding value.
-                        */
-                        bool getProperty(const LogString& key, LogString& dest) const;
-                        /**
-                        * Returns the set of of the key values in the properties
-                        * for the event. The returned set is unmodifiable by the caller.
-                        *
-                        * @return Set an unmodifiable set of the property keys.
-                        */
-                        KeySet getPropertyKeySet() const;
+                /**
+                Obtain a copy of this thread's MDC prior to serialization
+                or asynchronous logging.
+                */
+                void getMDCCopy() const;
 
-                        /**
-                        * Set a string property using a key and a string value.  since 1.3
-                        */
-                        void setProperty(const LogString& key, const LogString& value);
+                /**
+                * Return a previously set property.
+                * @param key key.
+                * @param dest string to which value, if any, is appended.
+                * @return true if key had a corresponding value.
+                */
+                bool getProperty(const LogString& key, LogString& dest) const;
+                /**
+                * Returns the set of of the key values in the properties
+                * for the event. The returned set is unmodifiable by the caller.
+                *
+                * @return Set an unmodifiable set of the property keys.
+                */
+                KeySet getPropertyKeySet() const;
 
-                private:
-                        /**
-                        * The logger of the logging event.
-                        **/
-                        LogString logger;
+                /**
+                * Set a string property using a key and a string value.  since 1.3
+                */
+                void setProperty(const LogString& key, const LogString& value);              
 
-                        /** level of logging event. */
-                        LevelPtr level;
+            private:
+                /**
+                * The logger of the logging event.
+                **/
+                LogString logger;
 
-                        /** The nested diagnostic context (NDC) of logging event. */
-                        mutable LogString* ndc;
+                /** level of logging event. */
+                LevelPtr level;
 
-                        /** The mapped diagnostic context (MDC) of logging event. */
-                        mutable MDC::Map* mdcCopy;
+                /** The nested diagnostic context (NDC) of logging event. */
+                mutable LogString* ndc;
 
-                        /**
-                        * A map of String keys and String values.
-                        */
-                        std::map<LogString, LogString> * properties;
+                /** The mapped diagnostic context (MDC) of logging event. */
+                mutable MDC::Map* mdcCopy;
 
-                        /** Have we tried to do an NDC lookup? If we did, there is no need
-                        *  to do it again.  Note that its value is always false when
-                        *  serialized. Thus, a receiving SocketNode will never use it's own
-                        *  (incorrect) NDC. See also writeObject method.
-                        */
-                        mutable bool ndcLookupRequired;
+                /**
+                * A map of String keys and String values.
+                */
+                std::map<LogString, LogString> * properties;
 
-                        /**
-                        * Have we tried to do an MDC lookup? If we did, there is no need to do it
-                        * again.  Note that its value is always false when serialized. See also
-                        * the getMDC and getMDCCopy methods.
-                        */
-                        mutable bool mdcCopyLookupRequired;
+                /** Have we tried to do an NDC lookup? If we did, there is no need
+                *  to do it again.  Note that its value is always false when
+                *  serialized. Thus, a receiving SocketNode will never use it's own
+                *  (incorrect) NDC. See also writeObject method.
+                */
+                mutable bool ndcLookupRequired;
 
-                        /** The application supplied message of logging event. */
-                        LogString message;
+                /**
+                * Have we tried to do an MDC lookup? If we did, there is no need to do it
+                * again.  Note that its value is always false when serialized. See also
+                * the getMDC and getMDCCopy methods.
+                */
+                mutable bool mdcCopyLookupRequired;
 
-
-                        /** The number of milliseconds elapsed from 1/1/1970 until logging event
-                         was created. */
-                        log4cxx_time_t timeStamp;
-
-                        /** The is the location where this log statement was written. */
-                        const log4cxx::spi::LocationInfo locationInfo;
+                /** The application supplied message of logging event. */
+                LogString message;
 
 
-                        /** The identifier of thread in which this logging event
-                        was generated.
-                        */
-                       const LogString threadName;
+                /** The number of milliseconds elapsed from 1/1/1970 until logging event
+                 was created. */
+                log4cxx_time_t timeStamp;
 
-                       //
-                       //   prevent copy and assignment
-                       //
-                       LoggingEvent(const LoggingEvent&);
-                       LoggingEvent& operator=(const LoggingEvent&);
+                /** The is the location where this log statement was written. */
+                const log4cxx::spi::LocationInfo locationInfo;
 
-                       static void writeProlog(log4cxx::helpers::ObjectOutputStream& os, log4cxx::helpers::Pool& p);
-                       
-                };
 
-                LOG4CXX_PTR_DEF(LoggingEvent);
-                LOG4CXX_LIST_DEF(LoggingEventList, LoggingEventPtr);
-        }
+                /** The identifier of thread in which this logging event
+                was generated.
+                */
+                const LogString threadName;
+
+                //
+                //   prevent copy and assignment
+                //
+                LoggingEvent(const LoggingEvent&);
+                LoggingEvent& operator=(const LoggingEvent&);                
+
+                static void writeProlog(log4cxx::helpers::ObjectOutputStream& os, log4cxx::helpers::Pool& p);
+
+        };
+
+        LOG4CXX_PTR_DEF(LoggingEvent);
+        LOG4CXX_LIST_DEF(LoggingEventList, LoggingEventPtr);
+    }
 }
 
 #if defined(_MSC_VER)

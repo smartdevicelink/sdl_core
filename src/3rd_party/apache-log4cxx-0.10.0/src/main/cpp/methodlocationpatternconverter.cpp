@@ -33,19 +33,19 @@ using namespace log4cxx::helpers;
 IMPLEMENT_LOG4CXX_OBJECT(MethodLocationPatternConverter)
 
 MethodLocationPatternConverter::MethodLocationPatternConverter() :
-   LoggingEventPatternConverter(LOG4CXX_STR("Method"),
-      LOG4CXX_STR("method")) {
+    LoggingEventPatternConverter(LOG4CXX_STR("Method"),
+                                 LOG4CXX_STR("method")) {
 }
 
 PatternConverterPtr MethodLocationPatternConverter::newInstance(
-   const std::vector<LogString>& /* options */ ) {
-   static PatternConverterPtr def(new MethodLocationPatternConverter());
-   return def;
+    const std::vector<LogString>& /* options */ ) {
+    static PatternConverterPtr def(new MethodLocationPatternConverter());
+    return def;
 }
 
 void MethodLocationPatternConverter::format(
-  const LoggingEventPtr& event,
-  LogString& toAppendTo,
-  Pool& /* p */ ) const {
-   append(toAppendTo, event->getLocationInformation().getMethodName());
- }
+    const LoggingEvent* event,
+    LogString& toAppendTo,
+    Pool& /* p */ ) const {
+    append(toAppendTo, event->getLocationInformation().getMethodName());
+}

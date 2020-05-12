@@ -24,7 +24,7 @@ using namespace log4cxx::helpers;
 IMPLEMENT_LOG4CXX_OBJECT(Integer)
 
 
-Integer::Integer() : val(0){
+Integer::Integer() : val(0) {
 }
 
 Integer::Integer(int val1) : val(val1) {

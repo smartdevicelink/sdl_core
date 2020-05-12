@@ -33,14 +33,15 @@ IMPLEMENT_LOG4CXX_OBJECT(LoggingEventPatternConverter)
 
 LoggingEventPatternConverter::LoggingEventPatternConverter(
     const LogString& name1, const LogString& style1) : PatternConverter(name1, style1) {
-  }
+}
 
-void LoggingEventPatternConverter::format(const ObjectPtr& obj,
-    LogString& output,
-    log4cxx::helpers::Pool& p) const {
-    LoggingEventPtr le(obj);
+void LoggingEventPatternConverter::format(const log4cxx::ptr::shared_ptr<Object>& obj,
+        LogString& output,
+        log4cxx::helpers::Pool& p) const {
+    const LoggingEvent* le = dynamic_cast<const LoggingEvent*>(obj.get());
+
     if (le != NULL) {
-       format(le, output, p);
+        format(le, output, p);
     }
 }
 

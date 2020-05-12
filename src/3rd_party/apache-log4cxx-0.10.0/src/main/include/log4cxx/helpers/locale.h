@@ -20,30 +20,27 @@
 
 #include <log4cxx/logstring.h>
 
-namespace log4cxx
-{
-        namespace helpers
-        {
-                class LOG4CXX_EXPORT Locale
-                {
-                public:
-                        Locale(const LogString& language);
-                        Locale(const LogString& language, const LogString& country);
-                        Locale(const LogString& language, const LogString& country,
-                                const LogString& variant);
+namespace log4cxx {
+    namespace helpers {
+        class LOG4CXX_EXPORT Locale {
+            public:
+                Locale(const LogString& language);
+                Locale(const LogString& language, const LogString& country);
+                Locale(const LogString& language, const LogString& country,
+                       const LogString& variant);
 
-                        const LogString& getLanguage() const;
-                        const LogString& getCountry() const;
-                        const LogString& getVariant() const;
+                const LogString& getLanguage() const;
+                const LogString& getCountry() const;
+                const LogString& getVariant() const;
 
-                protected:
-                        Locale(const Locale&);
-                        Locale& operator=(const Locale&);
-                        const LogString language;
-                        const LogString country;
-                        const LogString variant;
-                }; // class Locale
-        }  // namespace helpers
+            protected:
+                Locale(const Locale&);
+                Locale& operator=(const Locale&);
+                const LogString language;
+                const LogString country;
+                const LogString variant;
+        }; // class Locale
+    }  // namespace helpers
 } // namespace log4cxx
 
 #endif // _LOG4CXX_HELPERS_LOCALE_H

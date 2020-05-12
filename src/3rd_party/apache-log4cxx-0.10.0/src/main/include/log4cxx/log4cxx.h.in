@@ -34,6 +34,8 @@
 #define LOG4CXX_UNICHAR_API @UNICHAR_API@
 #define LOG4CXX_CFSTRING_API @CFSTRING_API@
 
+#define LOG4CXX_CPP_11 @CPP_11@
+#define LOG4CXX_BOOST @BOOST@
 
 typedef long long log4cxx_int64_t;
 #define LOG4CXX_USE_GLOBAL_SCOPE_TEMPLATE 0
@@ -42,10 +44,27 @@ typedef log4cxx_int64_t log4cxx_time_t;
 typedef int log4cxx_status_t;
 typedef unsigned int log4cxx_uint32_t;
 
+#if LOG4CXX_CPP_11 == 1 && LOG4CXX_BOOST == 1
+#error "Both cpp11 and boost"
+#elif LOG4CXX_CPP_11 == 0 && LOG4CXX_BOOST == 0
+#error "neither cpp11 nor boost"
+#endif
+
+#if LOG4CXX_CPP_11 == 1
+#include <memory>
+namespace log4cxx{
+  namespace ptr = std;
+}
+#elif LOG4CXX_BOOST == 1
+#include <boost/shared_ptr.hpp>
+namespace log4cxx{
+  namespace ptr = boost;
+}
+#endif
 
 #define LOG4CXX_EXPORT
-#define LOG4CXX_PTR_DEF(T) typedef log4cxx::helpers::ObjectPtrT<T> T##Ptr
+#define LOG4CXX_PTR_DEF(T) typedef log4cxx::ptr::shared_ptr<T> T##Ptr
+#define LOG4CXX_WEAKPTR_DEF(T) typedef log4cxx::ptr::weak_ptr<T> T##WeakPtr
 #define LOG4CXX_LIST_DEF(N, T) typedef std::vector<T> N
-
 
 #endif

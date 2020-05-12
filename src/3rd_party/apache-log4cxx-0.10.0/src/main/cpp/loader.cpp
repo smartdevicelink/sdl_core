@@ -54,18 +54,17 @@ IMPLEMENT_LOG4CXX_OBJECT(XMLDOMElement)
 IMPLEMENT_LOG4CXX_OBJECT(XMLDOMNodeList)
 IMPLEMENT_LOG4CXX_OBJECT(TriggeringEventEvaluator)
 
-const Class& Loader::loadClass(const LogString& clazz)
-{
-   return Class::forName(clazz);
+const Class& Loader::loadClass(const LogString& clazz) {
+    return Class::forName(clazz);
 }
 
 
 InputStreamPtr Loader::getResourceAsStream(const LogString& name) {
 
-  try {
-    return new FileInputStream(name);
-  } catch(const IOException& ioex) {
-  }
+    try {
+        return InputStreamPtr( new FileInputStream(name) );
+    } catch(const IOException& ioex) {
+    }
 
-  return 0;
+    return 0;
 }

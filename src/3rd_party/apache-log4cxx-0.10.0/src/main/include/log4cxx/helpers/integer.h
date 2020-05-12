@@ -18,32 +18,31 @@
 #ifndef _LOG4CXX_HELPERS_INTEGER_H
 #define _LOG4CXX_HELPERS_INTEGER_H
 
-#include <log4cxx/helpers/objectimpl.h>
-
+#include <log4cxx/helpers/object.h>
 
 namespace log4cxx {
-   namespace helpers {
-      class LOG4CXX_EXPORT Integer : public ObjectImpl {
-          const int val;
-      public:
-      DECLARE_LOG4CXX_OBJECT(Integer)
-      BEGIN_LOG4CXX_CAST_MAP()
-              LOG4CXX_CAST_ENTRY(Integer)
-      END_LOG4CXX_CAST_MAP()
+    namespace helpers {
+        class LOG4CXX_EXPORT Integer : public Object {
+                const int val;
+            public:
+                DECLARE_LOG4CXX_OBJECT(Integer)
+                BEGIN_LOG4CXX_CAST_MAP()
+                LOG4CXX_CAST_ENTRY(Integer)
+                END_LOG4CXX_CAST_MAP()
 
-      Integer();
-      Integer(int i);
-      virtual ~Integer();
+                Integer();
+                Integer(int i);
+                virtual ~Integer();
 
-      inline int intValue() const {
-        return val;
-      }
+                inline int intValue() const {
+                    return val;
+                }
 
-      };
+        };
 
-      LOG4CXX_PTR_DEF(Integer);
+        LOG4CXX_PTR_DEF(Integer);
 
-   }
+    }
 }
 
 

@@ -34,12 +34,12 @@ Num343PatternConverter::Num343PatternConverter() :
 
 PatternConverterPtr Num343PatternConverter::newInstance(
    const std::vector<LogString>&) {
-   return new Num343PatternConverter();
+   return PatternConverterPtr( new Num343PatternConverter() );
 }
 
 
 void Num343PatternConverter::format(
-    const spi::LoggingEventPtr&,
+    const spi::LoggingEvent*,
     LogString& sbuf,
     Pool&) const
 {

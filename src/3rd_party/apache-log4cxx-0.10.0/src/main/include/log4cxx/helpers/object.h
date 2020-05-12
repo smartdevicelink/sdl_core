@@ -20,7 +20,6 @@
 
 #include <log4cxx/logstring.h>
 #include <log4cxx/helpers/class.h>
-#include <log4cxx/helpers/objectptr.h>
 #include <log4cxx/helpers/classregistration.h>
 
 
@@ -45,7 +44,7 @@ public:\
         Clazz##object() : helpers::Class() {}\
         virtual ~Clazz##object() {}\
         virtual log4cxx::LogString getName() const { return LOG4CXX_STR(#object); } \
-        virtual helpers::ObjectPtr newInstance() const\
+        virtual object* newInstance() const\
         {\
                 return new object();\
         }\
@@ -61,8 +60,8 @@ static const helpers::Class& getStaticClass();\
 static const log4cxx::helpers::ClassRegistration&  registerClass();
 
 #define IMPLEMENT_LOG4CXX_OBJECT(object)\
-const log4cxx::helpers::Class& object::getClass() const { return getStaticClass(); }\
-const log4cxx::helpers::Class& object::getStaticClass() { \
+const ::log4cxx::helpers::Class& object::getClass() const { return getStaticClass(); }\
+const ::log4cxx::helpers::Class& object::getStaticClass() { \
    static Clazz##object theClass;                         \
    return theClass;                                       \
 }                                                                      \
@@ -71,7 +70,7 @@ const log4cxx::helpers::ClassRegistration& object::registerClass() {   \
     return classReg; \
 }\
 namespace log4cxx { namespace classes { \
-const log4cxx::helpers::ClassRegistration& object##Registration = object::registerClass(); \
+const ::log4cxx::helpers::ClassRegistration& object##Registration = object::registerClass(); \
 } }
 
 
@@ -89,28 +88,23 @@ namespace log4cxx { namespace classes { \
 const log4cxx::helpers::ClassRegistration& object##Registration = object::registerClass(); \
 } }
 
-namespace log4cxx
-{
-        class AppenderSkeleton;
-        class Logger;
+namespace log4cxx {
+    class AppenderSkeleton;
+    class Logger;
 
-        namespace helpers
-        {
-            class Pool;
+    namespace helpers {
+        class Pool;
 
-                /** base class for java-like objects.*/
-                class LOG4CXX_EXPORT Object
-                {
-                public:
-                        DECLARE_ABSTRACT_LOG4CXX_OBJECT(Object)
-                        virtual ~Object() {}
-                        virtual void addRef() const = 0;
-                        virtual void releaseRef() const = 0;
-                        virtual bool instanceof(const Class& clazz) const = 0;
-                        virtual const void * cast(const Class& clazz) const = 0;
-                };
-            LOG4CXX_PTR_DEF(Object);
-        }
+        /** base class for java-like objects.*/
+        class LOG4CXX_EXPORT Object {
+            public:
+                DECLARE_ABSTRACT_LOG4CXX_OBJECT(Object)
+                virtual ~Object() {}
+                virtual bool instanceof(const Class& clazz) const = 0;
+                virtual const void * cast(const Class& clazz) const = 0;
+        };
+        LOG4CXX_PTR_DEF(Object);
+    }
 }
 
 #define BEGIN_LOG4CXX_CAST_MAP()\

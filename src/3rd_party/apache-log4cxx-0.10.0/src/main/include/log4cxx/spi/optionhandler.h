@@ -20,52 +20,47 @@
 
 #include <log4cxx/logstring.h>
 #include <log4cxx/helpers/object.h>
-#include <log4cxx/helpers/objectptr.h>
 
-namespace log4cxx
-{
-        namespace spi
-        {
-                class OptionHandler;
-                typedef helpers::ObjectPtrT<OptionHandler> OptionHandlerPtr;
+namespace log4cxx {
+    namespace spi {
+        class OptionHandler;
+
+        /**
+        A string based interface to configure package components.
+        */
+        class LOG4CXX_EXPORT OptionHandler : public virtual helpers::Object {
+            public:
+                DECLARE_ABSTRACT_LOG4CXX_OBJECT(OptionHandler)
+                virtual ~OptionHandler() {}
 
                 /**
-                A string based interface to configure package components.
+                Activate the options that were previously set with calls to option
+                setters.
+
+                <p>This allows to defer activiation of the options until all
+                options have been set. This is required for components which have
+                related options that remain ambigous until all are set.
+
+                <p>For example, the FileAppender has the {@link
+                FileAppender#setFile File} and {@link
+                FileAppender#setAppend Append} options both of
+                which are ambigous until the other is also set.  */
+                virtual void activateOptions(log4cxx::helpers::Pool& p) = 0;
+
+
+                /**
+                Set <code>option</code> to <code>value</code>.
+
+                <p>The handling of each option depends on the OptionHandler
+                instance. Some options may become active immediately whereas
+                other may be activated only when #activateOptions is
+                called.
                 */
-                class LOG4CXX_EXPORT OptionHandler : public virtual helpers::Object
-                {
-                public:
-                        DECLARE_ABSTRACT_LOG4CXX_OBJECT(OptionHandler)
-                        virtual ~OptionHandler() {}
+                virtual void setOption(const LogString& option,
+                                       const LogString& value) = 0;
 
-                        /**
-                        Activate the options that were previously set with calls to option
-                        setters.
-
-                        <p>This allows to defer activiation of the options until all
-                        options have been set. This is required for components which have
-                        related options that remain ambigous until all are set.
-
-                        <p>For example, the FileAppender has the {@link
-                        FileAppender#setFile File} and {@link
-                        FileAppender#setAppend Append} options both of
-                        which are ambigous until the other is also set.  */
-                        virtual void activateOptions(log4cxx::helpers::Pool& p) = 0;
-
-
-                        /**
-                        Set <code>option</code> to <code>value</code>.
-
-                        <p>The handling of each option depends on the OptionHandler
-                        instance. Some options may become active immediately whereas
-                        other may be activated only when #activateOptions is
-                        called.
-                        */
-                        virtual void setOption(const LogString& option,
-                            const LogString& value) = 0;
-
-                }; // class OptionConverter
-        }  // namespace spi
+        }; // class OptionConverter
+    }  // namespace spi
 } // namespace log4cxx
 
 

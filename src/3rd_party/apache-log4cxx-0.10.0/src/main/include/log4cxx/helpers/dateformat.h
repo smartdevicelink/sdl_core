@@ -18,75 +18,73 @@
 #ifndef _LOG4CXX_HELPERS_DATE_FORMAT_H
 #define _LOG4CXX_HELPERS_DATE_FORMAT_H
 
+#include <log4cxx/helpers/object.h>
 #include <log4cxx/helpers/timezone.h>
 
+namespace log4cxx {
+    namespace helpers {
 
-namespace log4cxx
-{
-        namespace helpers
-        {
+        /**
+        *  DateFormat is an abstract class for date/time formatting
+        * patterned after java.text.DateFormat.
+        */
+        class LOG4CXX_EXPORT DateFormat : public Object {
+            public:
+                DECLARE_ABSTRACT_LOG4CXX_OBJECT(DateFormat)
+                BEGIN_LOG4CXX_CAST_MAP()
+                LOG4CXX_CAST_ENTRY(DateFormat)
+                END_LOG4CXX_CAST_MAP()
 
                 /**
-                *  DateFormat is an abstract class for date/time formatting
-                * patterned after java.text.DateFormat.
+                *  Destructor
                 */
-                class LOG4CXX_EXPORT DateFormat : public ObjectImpl {
-                   public:
-                   DECLARE_ABSTRACT_LOG4CXX_OBJECT(DateFormat)
-                   BEGIN_LOG4CXX_CAST_MAP()
-                           LOG4CXX_CAST_ENTRY(DateFormat)
-                   END_LOG4CXX_CAST_MAP()
+                virtual ~DateFormat();
 
-                  /**
-                  *  Destructor
-                  */
-                   virtual ~DateFormat();
+                /**
+                * Formats an log4cxx_time_t into a date/time string.
+                * @param s string to which the date/time string is appended.
+                * @param tm date to be formatted.
+                * @param p memory pool used during formatting.
+                */
+                virtual void format(LogString &s, log4cxx_time_t tm, log4cxx::helpers::Pool& p) const = 0;
 
-                   /**
-                   * Formats an log4cxx_time_t into a date/time string.
-                   * @param s string to which the date/time string is appended.
-                   * @param tm date to be formatted.
-                   * @param p memory pool used during formatting.
-                   */
-                   virtual void format(LogString &s, log4cxx_time_t tm, log4cxx::helpers::Pool& p) const = 0;
+                /**
+                * Sets the time zone.
+                * @param zone the given new time zone.
+                */
+                virtual void setTimeZone(const TimeZonePtr& zone);
 
-                   /**
-                   * Sets the time zone.
-                   * @param zone the given new time zone.
-                   */
-                   virtual void setTimeZone(const TimeZonePtr& zone);
-
-                   /**
-                   * Format an integer consistent with the format method.
-                   * @param s string to which the numeric string is appended.
-                   * @param n integer value.
-                   * @param p memory pool used during formatting.
-                   * @remarks This method is used by CachedDateFormat to
-                   * format the milliseconds.
-                   */
-                   virtual void numberFormat(LogString& s, int n, log4cxx::helpers::Pool& p) const;
+                /**
+                * Format an integer consistent with the format method.
+                * @param s string to which the numeric string is appended.
+                * @param n integer value.
+                * @param p memory pool used during formatting.
+                * @remarks This method is used by CachedDateFormat to
+                * format the milliseconds.
+                */
+                virtual void numberFormat(LogString& s, int n, log4cxx::helpers::Pool& p) const;
 
 
-                   protected:
-                   /**
-                   * Constructor.
-                   */
-                   DateFormat();
+            protected:
+                /**
+                * Constructor.
+                */
+                DateFormat();
 
-                   private:
-                   /**
-                   *  Copy constructor definition to prevent copying.
-                   */
-                   DateFormat(const DateFormat&);
-                   /**
-                   *  Assignment definition to prevent assignment.
-                   */
-                   DateFormat& operator=(const DateFormat&);
-                };
-                LOG4CXX_PTR_DEF(DateFormat);
+            private:
+                /**
+                *  Copy constructor definition to prevent copying.
+                */
+                DateFormat(const DateFormat&);
+                /**
+                *  Assignment definition to prevent assignment.
+                */
+                DateFormat& operator=(const DateFormat&);
+        };
+        LOG4CXX_PTR_DEF(DateFormat);
 
 
-        }  // namespace helpers
+    }  // namespace helpers
 } // namespace log4cxx
 
 #endif //_LOG4CXX_HELPERS_DATE_FORMAT_H

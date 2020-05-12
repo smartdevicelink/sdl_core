@@ -29,10 +29,10 @@ ManualTriggeringPolicy::ManualTriggeringPolicy() {
 }
 
 bool ManualTriggeringPolicy::isTriggeringEvent(Appender* /* appender */,
-          const log4cxx::spi::LoggingEventPtr& /* event */,
-          const LogString& /* file */,
-          size_t /* fileLength */ ) {
-  return false;
+        const log4cxx::spi::LoggingEventPtr& /* event */,
+        const LogString& /* file */,
+        size_t /* fileLength */ ) {
+    return false;
 }
 
 void ManualTriggeringPolicy::activateOptions(Pool& /* p */ ) {

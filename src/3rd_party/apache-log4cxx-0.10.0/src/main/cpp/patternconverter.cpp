@@ -28,8 +28,8 @@ using namespace log4cxx::pattern;
 IMPLEMENT_LOG4CXX_OBJECT(PatternConverter)
 
 PatternConverter::PatternConverter(
-   const LogString& name1, const LogString& style1) :
-   name(name1), style(style1) {
+    const LogString& name1, const LogString& style1) :
+    name(name1), style(style1) {
 }
 
 PatternConverter::~PatternConverter() {
@@ -41,10 +41,10 @@ LogString PatternConverter::getName() const {
 
 LogString PatternConverter::getStyleClass(const log4cxx::helpers::ObjectPtr& /* e */) const {
     return style;
-  }
+}
 
 void PatternConverter::append(LogString& toAppendTo, const std::string& src) {
-  LOG4CXX_DECODE_CHAR(decoded, src);
-  toAppendTo.append(decoded);
+    LOG4CXX_DECODE_CHAR(decoded, src);
+    toAppendTo.append(decoded);
 }
 

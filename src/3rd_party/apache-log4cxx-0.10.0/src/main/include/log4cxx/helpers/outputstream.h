@@ -18,41 +18,47 @@
 #ifndef _LOG4CXX_HELPERS_OUTPUTSTREAM_H
 #define _LOG4CXX_HELPERS_OUTPUTSTREAM_H
 
-#include <log4cxx/helpers/objectimpl.h>
+#include <log4cxx/helpers/object.h>
 
-namespace log4cxx
-{
+#ifdef LOG4CXX_MULTI_PROCESS
+#include <apr_file_io.h>
+#endif
 
-        namespace helpers {
-          class ByteBuffer;
+namespace log4cxx {
 
-          /**
-          *   Abstract class for writing to character streams.
-          */
-          class LOG4CXX_EXPORT OutputStream : public ObjectImpl
-          {
-          public:
-                  DECLARE_ABSTRACT_LOG4CXX_OBJECT(OutputStream)
-                  BEGIN_LOG4CXX_CAST_MAP()
-                          LOG4CXX_CAST_ENTRY(OutputStream)
-                  END_LOG4CXX_CAST_MAP()
+    namespace helpers {
+        class ByteBuffer;
 
-          protected:
-                  OutputStream();
-                  virtual ~OutputStream();
+        /**
+        *   Abstract class for writing to character streams.
+        */
+        class LOG4CXX_EXPORT OutputStream : public Object {
+            public:
+                DECLARE_ABSTRACT_LOG4CXX_OBJECT(OutputStream)
+                BEGIN_LOG4CXX_CAST_MAP()
+                LOG4CXX_CAST_ENTRY(OutputStream)
+                END_LOG4CXX_CAST_MAP()
 
-          public:
-                  virtual void close(Pool& p) = 0;
-                  virtual void flush(Pool& p) = 0;
-                  virtual void write(ByteBuffer& buf, Pool& p) = 0;
+            protected:
+                OutputStream();
+                virtual ~OutputStream();
 
-          private:
-                  OutputStream(const OutputStream&);
-                  OutputStream& operator=(const OutputStream&);
-          };
+            public:
+                virtual void close(Pool& p) = 0;
+                virtual void flush(Pool& p) = 0;
+                virtual void write(ByteBuffer& buf, Pool& p) = 0;
+#ifdef LOG4CXX_MULTI_PROCESS
+                virtual apr_file_t* getFilePtr();
+                virtual OutputStream& getFileOutPutStreamPtr();
+#endif
 
-          LOG4CXX_PTR_DEF(OutputStream);
-        } // namespace helpers
+            private:
+                OutputStream(const OutputStream&);
+                OutputStream& operator=(const OutputStream&);
+        };
+
+        LOG4CXX_PTR_DEF(OutputStream);
+    } // namespace helpers
 
 }  //namespace log4cxx
 

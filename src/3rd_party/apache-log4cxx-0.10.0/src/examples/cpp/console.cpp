@@ -13,8 +13,6 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
- * Note: This file has been modified from its original form.
  */
 
 #include <stdlib.h>
@@ -26,6 +24,11 @@
 #include <log4cxx/logmanager.h>
 #include <iostream>
 #include <locale.h>
+#include <cstring>
+#include <cstdio>
+#ifndef WIN32
+#include <stdint.h>
+#endif
 
 using namespace log4cxx;
 using namespace log4cxx::helpers;

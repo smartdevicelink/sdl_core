@@ -21,11 +21,8 @@
 #include <log4cxx/net/socketappenderskeleton.h>
 #include <log4cxx/helpers/objectoutputstream.h>
 
-namespace log4cxx
-{
-        namespace net
-        {
-
+namespace log4cxx {
+    namespace net {
         /**
         Sends {@link log4cxx::spi::LoggingEvent LoggingEvent} objects to a remote a log server,
         usually Apache Chainsaw.
@@ -33,14 +30,14 @@ namespace log4cxx
         <p>The SocketAppender has the following properties:
 
         - If sent to Apache Chainsaw, remote logging
-                is non-intrusive as far as the log event is concerned. In other
+        		is non-intrusive as far as the log event is concerned. In other
         words, the event will be logged with the same time stamp, {@link
         NDC NDC}, location info as if it were logged locally by
         the client.
 
         - SocketAppenders do not use a layout. They ship a
         serialized {@link log4cxx::spi::LoggingEvent LoggingEvent} object
-                to the server side.
+        		to the server side.
 
         - Remote logging uses the TCP protocol. Consequently, if
         the server is reachable, then log events will eventually arrive
@@ -76,7 +73,7 @@ namespace log4cxx
         ignore it.
 
         - If the application hosting the <code>SocketAppender</code>
-                exits before the <code>SocketAppender</code> is closed either
+        		exits before the <code>SocketAppender</code> is closed either
         explicitly or subsequent to destruction, then there might
         be untransmitted data in the pipe which might be lost.
         @n @n To avoid lost data, it is usually sufficient to
@@ -84,10 +81,8 @@ namespace log4cxx
         calling the LogManager#shutdown method
         before exiting the application.
         */
-
-        class LOG4CXX_EXPORT SocketAppender : public SocketAppenderSkeleton
-        {
-        public:
+        class LOG4CXX_EXPORT SocketAppender : public SocketAppenderSkeleton {
+            public:
                 /**
                 The default port number of remote logging server (4560).
                 */
@@ -100,8 +95,8 @@ namespace log4cxx
 
                 DECLARE_LOG4CXX_OBJECT(SocketAppender)
                 BEGIN_LOG4CXX_CAST_MAP()
-                        LOG4CXX_CAST_ENTRY(SocketAppender)
-                        LOG4CXX_CAST_ENTRY_CHAIN(AppenderSkeleton)
+                LOG4CXX_CAST_ENTRY(SocketAppender)
+                LOG4CXX_CAST_ENTRY_CHAIN(AppenderSkeleton)
                 END_LOG4CXX_CAST_MAP()
 
                 SocketAppender();
@@ -117,25 +112,19 @@ namespace log4cxx
                 */
                 SocketAppender(const LogString& host, int port);
 
-
-        protected:
+            protected:
                 virtual void setSocket(log4cxx::helpers::SocketPtr& socket, log4cxx::helpers::Pool& p);
-                
                 virtual void cleanUp(log4cxx::helpers::Pool& p);
-                
                 virtual int getDefaultDelay() const;
-                
                 virtual int getDefaultPort() const;
-
                 void append(const spi::LoggingEventPtr& event, log4cxx::helpers::Pool& pool);
 
-        private:
+            private:
                 log4cxx::helpers::ObjectOutputStreamPtr oos;
 
         }; // class SocketAppender
-        
+
         LOG4CXX_PTR_DEF(SocketAppender);
-        
     } // namespace net
 } // namespace log4cxx
 

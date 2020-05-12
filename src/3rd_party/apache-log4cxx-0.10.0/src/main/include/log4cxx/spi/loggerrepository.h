@@ -29,33 +29,30 @@
 #include <log4cxx/level.h>
 #include <log4cxx/spi/hierarchyeventlistener.h>
 
-namespace log4cxx
-{
-    namespace spi
-        {
-            
-            /**
-            A <code>LoggerRepository</code> is used to create and retrieve
-            <code>Loggers</code>. The relation between loggers in a repository
-            depends on the repository but typically loggers are arranged in a
-            named hierarchy.
+namespace log4cxx {
+    namespace spi {
 
-            <p>In addition to the creational methods, a
-            <code>LoggerRepository</code> can be queried for existing loggers,
-            can act as a point of registry for events related to loggers.
-            */
-            class LOG4CXX_EXPORT LoggerRepository : public virtual helpers::Object
-            {
+        /**
+        A <code>LoggerRepository</code> is used to create and retrieve
+        <code>Loggers</code>. The relation between loggers in a repository
+        depends on the repository but typically loggers are arranged in a
+        named hierarchy.
+
+        <p>In addition to the creational methods, a
+        <code>LoggerRepository</code> can be queried for existing loggers,
+        can act as a point of registry for events related to loggers.
+        */
+        class LOG4CXX_EXPORT LoggerRepository : public virtual helpers::Object {
             public:
                 DECLARE_ABSTRACT_LOG4CXX_OBJECT(LoggerRepository)
-                    virtual ~LoggerRepository() {}
+                virtual ~LoggerRepository() {}
 
                 /**
                 Add a {@link spi::HierarchyEventListener HierarchyEventListener}
                             event to the repository.
                 */
                 virtual void addHierarchyEventListener(const HierarchyEventListenerPtr&
-                                    listener) = 0;
+                                                       listener) = 0;
                 /**
                 Is the repository disabled for a given level? The answer depends
                 on the repository threshold and the <code>level</code>
@@ -74,7 +71,7 @@ namespace log4cxx
                 parameter instead of a <code>Level</code>. */
                 virtual void setThreshold(const LogString& val) = 0;
 
-                virtual void emitNoAppenderWarning(const LoggerPtr& logger) = 0;
+                virtual void emitNoAppenderWarning(const Logger* logger) = 0;
 
                 /**
                 Get the repository-wide threshold. See {@link
@@ -85,7 +82,7 @@ namespace log4cxx
                 virtual LoggerPtr getLogger(const LogString& name) = 0;
 
                 virtual LoggerPtr getLogger(const LogString& name,
-                     const spi::LoggerFactoryPtr& factory) = 0;
+                                            const spi::LoggerFactoryPtr& factory) = 0;
 
                 virtual LoggerPtr getRootLogger() const = 0;
 
@@ -95,17 +92,17 @@ namespace log4cxx
 
                 virtual LoggerList getCurrentLoggers() const = 0;
 
-                virtual void fireAddAppenderEvent(const LoggerPtr& logger,
-                                    const AppenderPtr& appender) = 0;
+                virtual void fireAddAppenderEvent(const Logger* logger,
+                                                  const Appender* appender) = 0;
 
                 virtual void resetConfiguration() = 0;
 
-            virtual bool isConfigured() = 0;
-            virtual void setConfigured(bool configured) = 0;
+                virtual bool isConfigured() = 0;
+                virtual void setConfigured(bool configured) = 0;
 
-            }; // class LoggerRepository
+        }; // class LoggerRepository
 
-        }  // namespace spi
+    }  // namespace spi
 } // namespace log4cxx
 
 #if defined(_MSC_VER)

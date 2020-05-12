@@ -31,7 +31,7 @@ namespace log4cxx
         // LoggerFactory.
         class XFactory :
                 public virtual spi::LoggerFactory,
-                public virtual helpers::ObjectImpl
+                public virtual helpers::Object
         {
         public:
                 DECLARE_ABSTRACT_LOG4CXX_OBJECT(XFactory)
@@ -46,7 +46,7 @@ namespace log4cxx
                    const LogString& name) const;
         };
 
-        typedef helpers::ObjectPtrT<XFactory> XFactoryPtr;
+        typedef log4cxx::ptr::shared_ptr<XFactory> XFactoryPtr;
 
         /**
         A simple example showing Logger sub-classing. It shows the
@@ -110,6 +110,6 @@ namespace log4cxx
                 void trace(const LogString& message);
         };
 
-        typedef helpers::ObjectPtrT<XLogger> XLoggerPtr;
+        typedef log4cxx::ptr::shared_ptr<XLogger> XLoggerPtr;
 }
 

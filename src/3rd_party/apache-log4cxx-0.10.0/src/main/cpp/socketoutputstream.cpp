@@ -13,15 +13,15 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
- * Note: This file has been modified from its original form.
  */
 
-#include <string.h>
 #include <log4cxx/logstring.h>
 #include <log4cxx/helpers/socketoutputstream.h>
 #include <log4cxx/helpers/socket.h>
 #include <log4cxx/helpers/bytebuffer.h>
+
+#include <cstdio>
+#include <cstring>
 
 using namespace log4cxx;
 using namespace log4cxx::helpers;
@@ -29,7 +29,7 @@ using namespace log4cxx::helpers;
 IMPLEMENT_LOG4CXX_OBJECT(SocketOutputStream)
 
 SocketOutputStream::SocketOutputStream(const SocketPtr& socket1)
-: socket(socket1) {
+    : socket(socket1) {
 }
 
 SocketOutputStream::~SocketOutputStream() {
@@ -41,20 +41,20 @@ void SocketOutputStream::close(Pool& p) {
 }
 
 void SocketOutputStream::flush(Pool& /* p */) {
-   if (array.size() > 0) {
-     ByteBuffer buf((char*) &array[0], array.size());
-     socket->write(buf);
-     array.resize(0);
-   }
+    if (array.size() > 0) {
+        ByteBuffer buf((char*) &array[0], array.size());
+        socket->write(buf);
+        array.resize(0);
+    }
 }
 
 void SocketOutputStream::write(ByteBuffer& buf, Pool& /* p */ ) {
-  if (buf.remaining() > 0) {
-    size_t sz = array.size();
-    array.resize(sz + buf.remaining());
-    memcpy(&array[sz], buf.current(), buf.remaining());
-    buf.position(buf.limit());
-  }
+    if (buf.remaining() > 0) {
+        size_t sz = array.size();
+        array.resize(sz + buf.remaining());
+        memcpy(&array[sz], buf.current(), buf.remaining());
+        buf.position(buf.limit());
+    }
 }
 
 

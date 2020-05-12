@@ -25,116 +25,112 @@
 
 
 #include <log4cxx/spi/optionhandler.h>
-#include <log4cxx/helpers/objectptr.h>
 #include <log4cxx/helpers/object.h>
 #include <vector>
 
 
-namespace log4cxx
-{
+namespace log4cxx {
     // Forward declarations
-    namespace spi
-        {
+    namespace spi {
         class LoggingEvent;
-        typedef helpers::ObjectPtrT<LoggingEvent> LoggingEventPtr;
+        LOG4CXX_PTR_DEF(LoggingEvent);
 
         class Filter;
-        typedef helpers::ObjectPtrT<Filter> FilterPtr;
+        typedef log4cxx::ptr::shared_ptr<Filter> FilterPtr;
 
         class ErrorHandler;
-                typedef log4cxx::helpers::ObjectPtrT<ErrorHandler> ErrorHandlerPtr;
+        typedef log4cxx::ptr::shared_ptr<ErrorHandler> ErrorHandlerPtr;
     }
 
     class Layout;
-    typedef log4cxx::helpers::ObjectPtrT<Layout> LayoutPtr;
+    typedef log4cxx::ptr::shared_ptr<Layout> LayoutPtr;
 
 
-        /**
-        Implement this interface for your own strategies for outputting log
-        statements.
-        */
+    /**
+    Implement this interface for your own strategies for outputting log
+    statements.
+    */
     class LOG4CXX_EXPORT Appender :
-                public virtual spi::OptionHandler
-    {
-    public:
-        DECLARE_ABSTRACT_LOG4CXX_OBJECT(Appender)
+        public virtual spi::OptionHandler {
+        public:
+            DECLARE_ABSTRACT_LOG4CXX_OBJECT(Appender)
 
-        virtual ~Appender() {}
+            virtual ~Appender() {}
 
-        /**
-         Add a filter to the end of the filter list.
-        */
-        virtual void addFilter(const spi::FilterPtr& newFilter) = 0;
+            /**
+             Add a filter to the end of the filter list.
+            */
+            virtual void addFilter(const spi::FilterPtr& newFilter) = 0;
 
-        /**
-         Returns the head Filter. The Filters are organized in a linked list
-         and so all Filters on this Appender are available through the result.
+            /**
+             Returns the head Filter. The Filters are organized in a linked list
+             and so all Filters on this Appender are available through the result.
 
-         @return the head Filter or null, if no Filters are present
-         */
-        virtual spi::FilterPtr getFilter() const = 0;
+             @return the head Filter or null, if no Filters are present
+             */
+            virtual spi::FilterPtr getFilter() const = 0;
 
-        /**
-         Clear the list of filters by removing all the filters in it.
-        */
-        virtual void clearFilters() = 0;
+            /**
+             Clear the list of filters by removing all the filters in it.
+            */
+            virtual void clearFilters() = 0;
 
-        /**
-         Release any resources allocated within the appender such as file
-         handles, network connections, etc.
-         <p>It is a programming error to append to a closed appender.
-        */
-        virtual void close() = 0;
+            /**
+             Release any resources allocated within the appender such as file
+             handles, network connections, etc.
+             <p>It is a programming error to append to a closed appender.
+            */
+            virtual void close() = 0;
 
-        /**
-         Log in <code>Appender</code> specific way. When appropriate,
-         Loggers will call the <code>doAppend</code> method of appender
-         implementations in order to log.
-        */
-        virtual void doAppend(const spi::LoggingEventPtr& event,
-              log4cxx::helpers::Pool& pool) = 0;
-
-
-        /**
-         Get the name of this appender. The name uniquely identifies the
-         appender.
-        */
-        virtual LogString getName() const = 0;
+            /**
+             Log in <code>Appender</code> specific way. When appropriate,
+             Loggers will call the <code>doAppend</code> method of appender
+             implementations in order to log.
+            */
+            virtual void doAppend(const spi::LoggingEventPtr& event,
+                                  log4cxx::helpers::Pool& pool) = 0;
 
 
-       /**
-        Set the Layout for this appender.
-       */
-       virtual void setLayout(const LayoutPtr& layout) = 0;
-
-       /**
-        Returns this appenders layout.
-       */
-       virtual LayoutPtr getLayout() const = 0;
+            /**
+             Get the name of this appender. The name uniquely identifies the
+             appender.
+            */
+            virtual LogString getName() const = 0;
 
 
-       /**
-        Set the name of this appender. The name is used by other
-        components to identify this appender.
-       */
-       virtual void setName(const LogString& name) = 0;
+            /**
+             Set the Layout for this appender.
+            */
+            virtual void setLayout(const LayoutPtr& layout) = 0;
 
-       /**
-        Configurators call this method to determine if the appender
-        requires a layout. If this method returns <code>true</code>,
-        meaning that layout is required, then the configurator will
-        configure an layout using the configuration information at its
-        disposal.  If this method returns <code>false</code>, meaning that
-        a layout is not required, then layout configuration will be
-        skipped even if there is available layout configuration
-        information at the disposal of the configurator..
+            /**
+             Returns this appenders layout.
+            */
+            virtual LayoutPtr getLayout() const = 0;
 
-        <p>In the rather exceptional case, where the appender
-        implementation admits a layout but can also work without it, then
-        the appender should return <code>true</code>.
-       */
-       virtual bool requiresLayout() const = 0;
-   };
+
+            /**
+             Set the name of this appender. The name is used by other
+             components to identify this appender.
+            */
+            virtual void setName(const LogString& name) = 0;
+
+            /**
+             Configurators call this method to determine if the appender
+             requires a layout. If this method returns <code>true</code>,
+             meaning that layout is required, then the configurator will
+             configure an layout using the configuration information at its
+             disposal.  If this method returns <code>false</code>, meaning that
+             a layout is not required, then layout configuration will be
+             skipped even if there is available layout configuration
+             information at the disposal of the configurator..
+
+             <p>In the rather exceptional case, where the appender
+             implementation admits a layout but can also work without it, then
+             the appender should return <code>true</code>.
+            */
+            virtual bool requiresLayout() const = 0;
+    };
 
     LOG4CXX_PTR_DEF(Appender);
     LOG4CXX_LIST_DEF(AppenderList, AppenderPtr);

@@ -96,14 +96,14 @@ LOGUNIT_CLASS(SizeBasedRollingTest)  {
    *
    */
   void test1() {
-    PatternLayoutPtr layout = new PatternLayout(LOG4CXX_STR("%m\n"));
-    RollingFileAppenderPtr rfa = new RollingFileAppender();
+    PatternLayoutPtr layout( new PatternLayout(LOG4CXX_STR("%m\n")) );
+    RollingFileAppenderPtr rfa( new RollingFileAppender() );
     rfa->setName(LOG4CXX_STR("ROLLING"));
     rfa->setAppend(false);
     rfa->setLayout(layout);
 
-    FixedWindowRollingPolicyPtr swrp = new FixedWindowRollingPolicy();
-    SizeBasedTriggeringPolicyPtr sbtp = new SizeBasedTriggeringPolicy();
+    FixedWindowRollingPolicyPtr swrp( new FixedWindowRollingPolicy() );
+    SizeBasedTriggeringPolicyPtr sbtp( new SizeBasedTriggeringPolicy() );
 
     sbtp->setMaxFileSize(100);
     swrp->setMinIndex(0);
@@ -135,15 +135,15 @@ LOGUNIT_CLASS(SizeBasedRollingTest)  {
    * Test basic rolling functionality with explicit setting of FileAppender.file.
    */
   void test2() {
-    PatternLayoutPtr layout = new PatternLayout(LOG4CXX_STR("%m\n"));
-    RollingFileAppenderPtr rfa = new RollingFileAppender();
+    PatternLayoutPtr layout( new PatternLayout(LOG4CXX_STR("%m\n")) );
+    RollingFileAppenderPtr rfa( new RollingFileAppender() );
     rfa->setName(LOG4CXX_STR("ROLLING"));
     rfa->setAppend(false);
     rfa->setLayout(layout);
     rfa->setFile(LOG4CXX_STR("output/sizeBased-test2.log"));
 
-    FixedWindowRollingPolicyPtr swrp = new FixedWindowRollingPolicy();
-    SizeBasedTriggeringPolicyPtr sbtp = new SizeBasedTriggeringPolicy();
+    FixedWindowRollingPolicyPtr swrp( new FixedWindowRollingPolicy() );
+    SizeBasedTriggeringPolicyPtr sbtp( new SizeBasedTriggeringPolicy() );
 
     sbtp->setMaxFileSize(100);
     swrp->setMinIndex(0);
@@ -175,13 +175,13 @@ LOGUNIT_CLASS(SizeBasedRollingTest)  {
    * Same as testBasic but also with GZ compression.
    */
   void test3() {
-    PatternLayoutPtr layout = new PatternLayout(LOG4CXX_STR("%m\n"));
-    RollingFileAppenderPtr rfa = new RollingFileAppender();
+    PatternLayoutPtr layout( new PatternLayout(LOG4CXX_STR("%m\n")) );
+    RollingFileAppenderPtr rfa( new RollingFileAppender() );
     rfa->setAppend(false);
     rfa->setLayout(layout);
 
-    FixedWindowRollingPolicyPtr  fwrp = new FixedWindowRollingPolicy();
-    SizeBasedTriggeringPolicyPtr sbtp = new SizeBasedTriggeringPolicy();
+    FixedWindowRollingPolicyPtr  fwrp( new FixedWindowRollingPolicy() );
+    SizeBasedTriggeringPolicyPtr sbtp( new SizeBasedTriggeringPolicy() );
 
     sbtp->setMaxFileSize(100);
     fwrp->setMinIndex(0);
@@ -209,15 +209,15 @@ LOGUNIT_CLASS(SizeBasedRollingTest)  {
    * Test basic rolling functionality with bogus path in file name pattern.
    */
   void test4() {
-    PatternLayoutPtr layout = new PatternLayout(LOG4CXX_STR("%m\n"));
-    RollingFileAppenderPtr rfa = new RollingFileAppender();
+    PatternLayoutPtr layout( new PatternLayout(LOG4CXX_STR("%m\n")) );
+    RollingFileAppenderPtr rfa( new RollingFileAppender() );
     rfa->setName(LOG4CXX_STR("ROLLING"));
     rfa->setAppend(false);
     rfa->setLayout(layout);
     rfa->setFile(LOG4CXX_STR("output/sizeBased-test4.log"));
 
-    FixedWindowRollingPolicyPtr swrp = new FixedWindowRollingPolicy();
-    SizeBasedTriggeringPolicyPtr sbtp = new SizeBasedTriggeringPolicy();
+    FixedWindowRollingPolicyPtr swrp( new FixedWindowRollingPolicy() );
+    SizeBasedTriggeringPolicyPtr sbtp( new SizeBasedTriggeringPolicy() );
 
     sbtp->setMaxFileSize(100);
     swrp->setMinIndex(0);
@@ -247,15 +247,15 @@ LOGUNIT_CLASS(SizeBasedRollingTest)  {
    * to the indexed files.
    */
   void test5()  {
-    PatternLayoutPtr layout = new PatternLayout(LOG4CXX_STR("%m\n"));
-    RollingFileAppenderPtr rfa = new RollingFileAppender();
+    PatternLayoutPtr layout( new PatternLayout(LOG4CXX_STR("%m\n")) );
+    RollingFileAppenderPtr rfa( new RollingFileAppender() );
     rfa->setName(LOG4CXX_STR("ROLLING"));
     rfa->setAppend(false);
     rfa->setLayout(layout);
     rfa->setFile(LOG4CXX_STR("output/sizeBased-test5.log"));
 
-    FixedWindowRollingPolicyPtr swrp = new FixedWindowRollingPolicy();
-    SizeBasedTriggeringPolicyPtr sbtp = new SizeBasedTriggeringPolicy();
+    FixedWindowRollingPolicyPtr swrp( new FixedWindowRollingPolicy() );
+    SizeBasedTriggeringPolicyPtr sbtp( new SizeBasedTriggeringPolicy() );
 
     sbtp->setMaxFileSize(100);
     swrp->setMinIndex(0);
@@ -317,13 +317,13 @@ LOGUNIT_CLASS(SizeBasedRollingTest)  {
    * Same as testBasic but also with GZ compression.
    */
   void test6() {
-    PatternLayoutPtr layout = new PatternLayout(LOG4CXX_STR("%m\n"));
-    RollingFileAppenderPtr rfa = new RollingFileAppender();
+    PatternLayoutPtr layout( new PatternLayout(LOG4CXX_STR("%m\n")) );
+    RollingFileAppenderPtr rfa( new RollingFileAppender() );
     rfa->setAppend(false);
     rfa->setLayout(layout);
 
-    FixedWindowRollingPolicyPtr  fwrp = new FixedWindowRollingPolicy();
-    SizeBasedTriggeringPolicyPtr sbtp = new SizeBasedTriggeringPolicy();
+    FixedWindowRollingPolicyPtr  fwrp( new FixedWindowRollingPolicy() );
+    SizeBasedTriggeringPolicyPtr sbtp( new SizeBasedTriggeringPolicy() );
 
     sbtp->setMaxFileSize(100);
     fwrp->setMinIndex(0);

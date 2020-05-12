@@ -34,52 +34,50 @@ extern "C" {
     struct apr_threadkey_t;
 }
 
-namespace log4cxx
-{
-        namespace helpers
-        {
+namespace log4cxx {
+    namespace helpers {
 
+        /**
+         *  This class provides thread-local variables.  This class is similar in function
+         *  to java.lang.ThreadLocal.
+         */
+        class LOG4CXX_EXPORT ThreadLocal {
+            public:
                 /**
-                 *  This class provides thread-local variables.  This class is similar in function
-                 *  to java.lang.ThreadLocal.
+                 *   Create new instance.
                  */
-                class LOG4CXX_EXPORT ThreadLocal {
-                public:
-                    /**
-                     *   Create new instance.
-                     */
-                    ThreadLocal();
-                    /**
-                     *    Destructor.
-                     */
-                    ~ThreadLocal();
-                    /**
-                     *  Sets the value in the current thread's copy of this thread-local variable.
-                     *  @param priv new value.
-                     */
-                    void set(void* priv);                    
-                    /**
-                     *  Returns the value in the current thread's copy of this thread-local variable.
-                     *  @return value of thread-local variable for the current thread.
-                     */
-                    void* get();
-               
-                private:
-                    /**
-                     * Prevent use of default copy constructor.
-                     */
-                     ThreadLocal(const ThreadLocal&);
-                    /**
-                     *   Prevent use of default assignment operator.  
-                     */
-                     ThreadLocal& operator=(const ThreadLocal&);
-                     
-                     static apr_threadkey_t* create(Pool& p);
+                ThreadLocal();
+                /**
+                 *    Destructor.
+                 */
+                ~ThreadLocal();
+                /**
+                 *  Sets the value in the current thread's copy of this thread-local variable.
+                 *  @param priv new value.
+                 */
+                void set(void* priv);
+                /**
+                 *  Returns the value in the current thread's copy of this thread-local variable.
+                 *  @return value of thread-local variable for the current thread.
+                 */
+                void* get();
+
+            private:
+                /**
+                 * Prevent use of default copy constructor.
+                 */
+                ThreadLocal(const ThreadLocal&);
+                /**
+                 *   Prevent use of default assignment operator.
+                 */
+                ThreadLocal& operator=(const ThreadLocal&);
+
+                static apr_threadkey_t* create(Pool& p);
 
                 Pool p;
-                     apr_threadkey_t* key;
-                };
-        } // namespace helpers
+                apr_threadkey_t* key;
+        };
+    } // namespace helpers
 } // namespace log4cxx
 
 #endif //_LOG4CXX_HELPERS_THREAD_LOCAL_H

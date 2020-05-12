@@ -80,8 +80,8 @@ public:
           File defFile;
           Pool pool;
           try {
-            InputStreamPtr defInput = new FileInputStream(defFile);
-            InputStreamReaderPtr inputReader = new InputStreamReader(defInput);
+            InputStreamPtr defInput( new FileInputStream(defFile) );
+            InputStreamReaderPtr inputReader( new InputStreamReader(defInput) );
             LogString contents(inputReader->read(pool));
             LOGUNIT_ASSERT(false);
           } catch(IOException &ex) {
@@ -138,8 +138,8 @@ public:
         void propertyRead() {
           File propFile("input/patternLayout1.properties");
           Pool pool;
-          InputStreamPtr propStream = new FileInputStream(propFile);
-          InputStreamReaderPtr propReader = new InputStreamReader(propStream);
+          InputStreamPtr propStream( new FileInputStream(propFile) );
+          InputStreamReaderPtr propReader( new InputStreamReader(propStream) );
           LogString props(propReader->read(pool));
           LogString line1(LOG4CXX_STR("# Licensed to the Apache Software Foundation (ASF) under one or more"));
           LOGUNIT_ASSERT_EQUAL(line1, props.substr(0, line1.length()));
@@ -153,18 +153,18 @@ public:
         }
 
         void fileWrite1() {
-          OutputStreamPtr fos =
-                      new FileOutputStream(LOG4CXX_STR("output/fileWrite1.txt"));
-          OutputStreamWriterPtr osw = new OutputStreamWriter(fos);
+          OutputStreamPtr fos(
+                      new FileOutputStream(LOG4CXX_STR("output/fileWrite1.txt")) );
+          OutputStreamWriterPtr osw( new OutputStreamWriter(fos) );
 
           Pool pool;
           LogString greeting(LOG4CXX_STR("Hello, World"));
           greeting.append(LOG4CXX_EOL);
           osw->write(greeting, pool);
 
-          InputStreamPtr is =
-                      new FileInputStream(LOG4CXX_STR("output/fileWrite1.txt"));
-          InputStreamReaderPtr isr = new InputStreamReader(is);
+          InputStreamPtr is(
+                      new FileInputStream(LOG4CXX_STR("output/fileWrite1.txt")) );
+          InputStreamReaderPtr isr( new InputStreamReader(is) );
           LogString reply = isr->read(pool);
 
           LOGUNIT_ASSERT_EQUAL(greeting, reply);
