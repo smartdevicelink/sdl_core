@@ -262,6 +262,7 @@ class MockPolicyManager : public PolicyManager {
   MOCK_METHOD0(ExceededIgnitionCycles, bool());
   MOCK_METHOD0(ExceededDays, bool());
   MOCK_METHOD0(StartPTExchange, void());
+  MOCK_METHOD0(TriggerPTUIfRequired, void());
 
   // --- Statistics Manager section
   MOCK_METHOD1(Increment, void(usage_statistics::GlobalCounterId type));

@@ -768,6 +768,11 @@ class PolicyHandlerInterface : public VehicleDataItemProvider {
    */
   virtual void OnSystemRequestReceived() const = 0;
 
+  /**
+   * @brief
+   */
+  virtual void TriggerPTUIfRequired() = 0;
+
  private:
 /**
  * @brief Processes data received via OnAppPermissionChanged notification

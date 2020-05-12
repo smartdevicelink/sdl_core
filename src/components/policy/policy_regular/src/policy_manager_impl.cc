@@ -1867,6 +1867,13 @@ bool PolicyManagerImpl::FunctionGroupNeedEncryption(
              : false;
 }
 
+void PolicyManagerImpl::TriggerPTUIfRequired() {
+  LOG4CXX_AUTO_TRACE(logger_);
+  if (ignition_check) {
+    StartPTExchange();
+  }
+}
+
 const std::string PolicyManagerImpl::GetPolicyFunctionName(
     const uint32_t function_id) const {
   return policy_table::EnumToJsonString(

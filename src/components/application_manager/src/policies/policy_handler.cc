@@ -787,6 +787,12 @@ void PolicyHandler::OnSystemRequestReceived() const {
   policy_manager_->ResetTimeout();
 }
 
+void PolicyHandler::TriggerPTUIfRequired() {
+#ifndef EXTERNAL_PROPRIETARY_MODE
+  policy_manager_->TriggerPTUIfRequired();
+#endif
+}
+
 void PolicyHandler::GetRegisteredLinks(
     std::map<std::string, std::string>& out_links) const {
   DataAccessor<ApplicationSet> accessor = application_manager_.applications();
