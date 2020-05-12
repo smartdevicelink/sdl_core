@@ -41,7 +41,7 @@ void deinit_logger() {
   logger::set_logs_enabled(false);
   log4cxx::LoggerPtr rootLogger = log4cxx::Logger::getRootLogger();
   logger::delete_log_message_loop_thread(rootLogger);
-  log4cxx::spi::LoggerRepositoryPtr repository =
+  log4cxx::spi::LoggerRepository* repository =
       rootLogger->getLoggerRepository();
   log4cxx::LoggerList loggers = repository->getCurrentLoggers();
   for (log4cxx::LoggerList::iterator i = loggers.begin(); i != loggers.end();

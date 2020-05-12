@@ -43,6 +43,7 @@ file(MAKE_DIRECTORY
 set(COMMON_CONFIGURE_FLAGS
   "--with-apr=../apr-build"
   "--with-apr-util=../apr-util-build"
+  "--enable-cpp11"
   "LDFLAGS=-L${EXPAT_LIBS_DIRECTORY}"
 )
 
