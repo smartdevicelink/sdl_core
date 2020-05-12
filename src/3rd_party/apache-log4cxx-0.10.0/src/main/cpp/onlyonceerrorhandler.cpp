@@ -31,7 +31,7 @@ OnlyOnceErrorHandler::OnlyOnceErrorHandler() :
     ERROR_PREFIX(LOG4CXX_STR("log4cxx error: ")), firstTime(true) {
 }
 
-void OnlyOnceErrorHandler::setLogger(const LoggerPtr&) {
+void OnlyOnceErrorHandler::setLogger(const LoggerWeakPtr&) {
 }
 
 void OnlyOnceErrorHandler::activateOptions(Pool&) {
@@ -62,9 +62,9 @@ void OnlyOnceErrorHandler::error(const LogString& message) const {
 }
 
 
-void OnlyOnceErrorHandler::setAppender(const AppenderPtr&) {
+void OnlyOnceErrorHandler::setAppender(const AppenderWeakPtr&) {
 }
 
 
-void OnlyOnceErrorHandler::setBackupAppender(const AppenderPtr&) {
+void OnlyOnceErrorHandler::setBackupAppender(const AppenderWeakPtr&) {
 }

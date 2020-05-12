@@ -52,7 +52,7 @@ namespace log4cxx {
                 /**
                  Does not do anything.
                  */
-                void setLogger(const LoggerPtr& logger);
+                void setLogger(const LoggerWeakPtr& logger);
 
 
                 /**
@@ -83,12 +83,12 @@ namespace log4cxx {
                 /**
                 Does not do anything.
                 */
-                void setAppender(const AppenderPtr& appender);
+                void setAppender(const AppenderWeakPtr& appender);
 
                 /**
                 Does not do anything.
                 */
-                void setBackupAppender(const AppenderPtr& appender);
+                void setBackupAppender(const AppenderWeakPtr& appender);
         };
     }  // namespace helpers
 } // namespace log4cxx

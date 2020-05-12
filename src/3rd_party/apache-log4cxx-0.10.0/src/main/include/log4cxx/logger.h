@@ -43,16 +43,21 @@ namespace log4cxx {
     namespace spi {
         class LoggerRepository;
         LOG4CXX_PTR_DEF(LoggerRepository);
+        LOG4CXX_WEAKPTR_DEF(LoggerRepository);
         class LoggerFactory;
         LOG4CXX_PTR_DEF(LoggerFactory);
+        LOG4CXX_WEAKPTR_DEF(LoggerFactory);
         class LoggingEvent;
         LOG4CXX_PTR_DEF(LoggingEvent);
+        LOG4CXX_WEAKPTR_DEF(LoggingEvent);
     }
 
     class Logger;
     /** smart pointer to a Logger class */
     LOG4CXX_PTR_DEF(Logger);
     LOG4CXX_LIST_DEF(LoggerList, LoggerPtr);
+    LOG4CXX_WEAKPTR_DEF(Logger);    
+    LOG4CXX_LIST_DEF(LoggerWeakList, LoggerWeakPtr);
 
 
     /**
@@ -90,7 +95,7 @@ namespace log4cxx {
             /**
             The parent of this logger. All loggers have at least one
             ancestor which is the root logger. */
-            LoggerPtr parent;
+            LoggerWeakPtr parent;
 
             /** The resourceBundle for localized messages.
 
@@ -617,7 +622,7 @@ namespace log4cxx {
             Look for the appender named as <code>name</code>.
             <p>Return the appender with that name if in the list. Return
             <code>NULL</code> otherwise.  */
-            AppenderPtr getAppender(const LogString& name) const;
+            AppenderWeakPtr getAppender(const LogString& name) const;
 
             /**
             Starting from this logger, search the logger hierarchy for a
@@ -677,7 +682,7 @@ namespace log4cxx {
 
             <p>The root logger will return <code>0</code>.
             */
-            LoggerPtr getParent() const;
+            LoggerWeakPtr getParent() const;
 
 
             /**
@@ -685,54 +690,54 @@ namespace log4cxx {
 
             @return Level - the assigned Level, can be null.
             */
-            LevelPtr getLevel() const;
+            LevelWeakPtr getLevel() const;
 
             /**
             * Retrieve a logger by name in current encoding.
             * @param name logger name.
             */
-            static LoggerPtr getLogger(const std::string& name);
+            static LoggerWeakPtr getLogger(const std::string& name);
             /**
             * Retrieve a logger by name in current encoding.
             * @param name logger name.
             */
-            static LoggerPtr getLogger(const char* const name);
+            static LoggerWeakPtr getLogger(const char* const name);
 #if LOG4CXX_WCHAR_T_API
             /**
             * Retrieve a logger by name.
             * @param name logger name.
             */
-            static LoggerPtr getLogger(const std::wstring& name);
+            static LoggerWeakPtr getLogger(const std::wstring& name);
             /**
             * Retrieve a logger by name.
             * @param name logger name.
             */
-            static LoggerPtr getLogger(const wchar_t* const name);
+            static LoggerWeakPtr getLogger(const wchar_t* const name);
 #endif
 #if LOG4CXX_UNICHAR_API
             /**
             * Retrieve a logger by name.
             * @param name logger name.
             */
-            static LoggerPtr getLogger(const std::basic_string<UniChar>& name);
+            static LoggerWeakPtr getLogger(const std::basic_string<UniChar>& name);
 #endif
 #if LOG4CXX_CFSTRING_API
             /**
             * Retrieve a logger by name.
             * @param name logger name.
             */
-            static LoggerPtr getLogger(const CFStringRef& name);
+            static LoggerWeakPtr getLogger(const CFStringRef& name);
 #endif
             /**
             * Retrieve a logger by name in Unicode.
             * @param name logger name.
             */
-            static LoggerPtr getLoggerLS(const LogString& name);
+            static LoggerWeakPtr getLoggerLS(const LogString& name);
 
             /**
             Retrieve the root logger.
             */
-            static LoggerPtr getRootLogger();
+            static LoggerWeakPtr getRootLogger();
 
             /**
             Like #getLogger except that the type of logger
@@ -747,7 +752,7 @@ namespace log4cxx {
             @param factory A LoggerFactory implementation that will
             actually create a new Instance.
             */
-            static LoggerPtr getLoggerLS(const LogString& name,
+            static LoggerWeakPtr getLoggerLS(const LogString& name,
                                          const log4cxx::spi::LoggerFactoryPtr& factory);
             /**
             Like #getLogger except that the type of logger
@@ -762,7 +767,7 @@ namespace log4cxx {
             @param factory A LoggerFactory implementation that will
             actually create a new Instance.
             */
-            static LoggerPtr getLogger(const std::string& name,
+            static LoggerWeakPtr getLogger(const std::string& name,
                                        const log4cxx::spi::LoggerFactoryPtr& factory);
 #if LOG4CXX_WCHAR_T_API
             /**
@@ -778,7 +783,7 @@ namespace log4cxx {
             @param factory A LoggerFactory implementation that will
             actually create a new Instance.
             */
-            static LoggerPtr getLogger(const std::wstring& name,
+            static LoggerWeakPtr getLogger(const std::wstring& name,
                                        const log4cxx::spi::LoggerFactoryPtr& factory);
 #endif
 #if LOG4CXX_UNICHAR_API
@@ -795,7 +800,7 @@ namespace log4cxx {
             @param factory A LoggerFactory implementation that will
             actually create a new Instance.
             */
-            static LoggerPtr getLogger(const std::basic_string<UniChar>& name,
+            static LoggerWeakPtr getLogger(const std::basic_string<UniChar>& name,
                                        const log4cxx::spi::LoggerFactoryPtr& factory);
 #endif
 #if LOG4CXX_CFSTRING_API
@@ -812,7 +817,7 @@ namespace log4cxx {
             @param factory A LoggerFactory implementation that will
             actually create a new Instance.
             */
-            static LoggerPtr getLogger(const CFStringRef& name,
+            static LoggerWeakPtr getLogger(const CFStringRef& name,
                                        const log4cxx::spi::LoggerFactoryPtr& factory);
 #endif
 
@@ -825,7 +830,7 @@ namespace log4cxx {
             this logger, much like the way priorities are searched. In case there
             is no bundle in the hierarchy then <code>NULL</code> is returned.
             */
-            helpers::ResourceBundlePtr getResourceBundle() const;
+            helpers::ResourceBundleWeakPtr getResourceBundle() const;
 
         protected:
             /**
@@ -1457,7 +1462,7 @@ namespace log4cxx {
             /**
             Remove the appender passed as parameter form the list of appenders.
             */
-            void removeAppender(const AppenderPtr& appender);
+            void removeAppender(const AppenderWeakPtr& appender);
 
             /**
             Remove the appender with the name passed as parameter form the
@@ -1735,6 +1740,7 @@ namespace log4cxx {
             friend class log4cxx::helpers::synchronized;
     };
     LOG4CXX_LIST_DEF(LoggerList, LoggerPtr);
+    LOG4CXX_LIST_DEF(LoggerWeakList, LoggerWeakPtr);
 
 }
 

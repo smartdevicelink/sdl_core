@@ -38,9 +38,9 @@ namespace log4cxx {
             public virtual spi::ErrorHandler,
             public virtual helpers::Object {
             private:
-                AppenderPtr backup;
-                AppenderPtr primary;
-                std::vector<LoggerPtr> loggers;
+                AppenderWeakPtr backup_;
+                AppenderWeakPtr primary_;
+                std::vector<LoggerWeakPtr> loggers;
 
             public:
                 DECLARE_LOG4CXX_OBJECT(FallbackErrorHandler)
@@ -56,7 +56,7 @@ namespace log4cxx {
                 <em>Adds</em> the logger passed as parameter to the list of
                 loggers that we need to search for in case of appender failure.
                 */
-                void setLogger(const LoggerPtr& logger);
+                void setLogger(const LoggerWeakPtr& logger);
 
 
                 /**
@@ -90,19 +90,19 @@ namespace log4cxx {
                 /**
                 Return the backup appender.
                 */
-                const AppenderPtr& getBackupAppender() const {
-                    return backup;
+                const AppenderWeakPtr& getBackupAppender() const {
+                    return backup_;
                 }
 
                 /**
                 The appender to which this error handler is attached.
                 */
-                void setAppender(const AppenderPtr& primary);
+                void setAppender(const AppenderWeakPtr& primary);
 
                 /**
                 Set the backup appender.
                 */
-                void setBackupAppender(const AppenderPtr& backup);
+                void setBackupAppender(const AppenderWeakPtr& backup);
         };
         LOG4CXX_PTR_DEF(FallbackErrorHandler);
 

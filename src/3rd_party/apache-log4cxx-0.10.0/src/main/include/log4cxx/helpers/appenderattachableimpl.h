@@ -76,7 +76,7 @@ namespace log4cxx {
                 /**
                  * Get an appender by name.
                  */
-                virtual AppenderPtr getAppender(const LogString& name) const;
+                virtual AppenderWeakPtr getAppender(const LogString& name) const;
 
                 /**
                  Returns <code>true</code> if the specified appender is in the
@@ -92,7 +92,7 @@ namespace log4cxx {
                 /**
                  * Remove the appender passed as parameter from the list of appenders.
                  */
-                virtual void removeAppender(const AppenderPtr& appender);
+                virtual void removeAppender(const AppenderWeakPtr& appender);
 
                 /**
                  * Remove the appender with the name passed as parameter from the

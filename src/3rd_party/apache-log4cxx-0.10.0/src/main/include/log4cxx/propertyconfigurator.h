@@ -32,9 +32,11 @@
 namespace log4cxx {
     class Logger;
     typedef log4cxx::ptr::shared_ptr<Logger> LoggerPtr;
+    typedef log4cxx::ptr::weak_ptr<Logger> LoggerWeakPtr;
 
     class Appender;
     typedef log4cxx::ptr::shared_ptr<Appender> AppenderPtr;
+    typedef log4cxx::ptr::weak_ptr<Appender> AppenderWeakPtr;
 
     namespace helpers {
         class Properties;
@@ -368,11 +370,11 @@ namespace log4cxx {
                 const LogString& optionKey, const LogString& loggerName,
                 const LogString& value);
 
-            AppenderPtr parseAppender(
+            AppenderWeakPtr parseAppender(
                 helpers::Properties& props, const LogString& appenderName);
 
             void registryPut(const AppenderPtr& appender);
-            AppenderPtr registryGet(const LogString& name);
+            AppenderWeakPtr registryGet(const LogString& name);
 
         private:
             PropertyConfigurator(const PropertyConfigurator&);

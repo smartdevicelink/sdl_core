@@ -31,12 +31,12 @@ using namespace log4cxx::varia;
 IMPLEMENT_LOG4CXX_OBJECT(FallbackErrorHandler)
 
 FallbackErrorHandler::FallbackErrorHandler()
-    : backup(), primary(), loggers() {
+    : backup_(), primary_(), loggers() {
 }
 
-void FallbackErrorHandler::setLogger(const LoggerPtr& logger) {
+void FallbackErrorHandler::setLogger(const LoggerWeakPtr& logger) {
     LogLog::debug(((LogString) LOG4CXX_STR("FB: Adding logger ["))
-                  + logger->getName() + LOG4CXX_STR("]."));
+                  + logger.lock()->getName() + LOG4CXX_STR("]."));
     loggers.push_back(logger);
 }
 
@@ -53,8 +53,12 @@ void FallbackErrorHandler::error(const LogString& message,
                   +  message, e);
     LogLog::debug(LOG4CXX_STR("FB: INITIATING FALLBACK PROCEDURE."));
 
+    auto primary = primary_.lock();
+    auto backup = backup_.lock();
+
     for(size_t i = 0; i < loggers.size(); i++) {
-        LoggerPtr& l = (LoggerPtr&)loggers.at(i);
+        auto& logger = (LoggerWeakPtr&)loggers.at(i);
+        auto  l = logger.lock();
         LogLog::debug(((LogString) LOG4CXX_STR("FB: Searching for ["))
                       + primary->getName() + LOG4CXX_STR("] in logger [")
                       + l->getName() + LOG4CXX_STR("]."));
@@ -70,16 +74,16 @@ void FallbackErrorHandler::error(const LogString& message,
     }
 }
 
-void FallbackErrorHandler::setAppender(const AppenderPtr& primary1) {
+void FallbackErrorHandler::setAppender(const AppenderWeakPtr& primary1) {
     LogLog::debug(((LogString) LOG4CXX_STR("FB: Setting primary appender to ["))
-                  + primary1->getName() + LOG4CXX_STR("]."));
-    this->primary = primary1;
+                  + primary1.lock()->getName() + LOG4CXX_STR("]."));
+    primary_ = primary1;
 }
 
-void FallbackErrorHandler::setBackupAppender(const AppenderPtr& backup1) {
+void FallbackErrorHandler::setBackupAppender(const AppenderWeakPtr& backup1) {
     LogLog::debug(((LogString) LOG4CXX_STR("FB: Setting backup appender to ["))
-                  + backup1->getName() + LOG4CXX_STR("]."));
-    this->backup = backup1;
+                  + backup1.lock()->getName() + LOG4CXX_STR("]."));
+    backup_ = backup1;
 }
 
 void FallbackErrorHandler::activateOptions(Pool&) {

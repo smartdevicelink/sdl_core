@@ -33,6 +33,7 @@ namespace log4cxx {
      */
     class Level;
     typedef log4cxx::ptr::shared_ptr<Level> LevelPtr;
+    typedef log4cxx::ptr::weak_ptr<Level> LevelWeakPtr;
 
     /**
     Defines the minimum set of levels recognized by the system, that is

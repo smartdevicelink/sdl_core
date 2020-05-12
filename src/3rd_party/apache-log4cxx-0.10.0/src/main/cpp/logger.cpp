@@ -77,7 +77,7 @@ void Logger::callAppenders(const spi::LoggingEventPtr& event, Pool& p) const {
 
     for(const Logger* logger = this;
             logger != 0;
-            logger = logger->parent.get() ) {
+            logger = logger->parent.lock().get() ) {
         // Protected against simultaneous call to addAppender, removeAppender,...
         synchronized sync(logger->mutex);
 
@@ -155,18 +155,18 @@ AppenderList Logger::getAllAppenders() const {
     }
 }
 
-AppenderPtr Logger::getAppender(const LogString& name1) const {
+AppenderWeakPtr Logger::getAppender(const LogString& name1) const {
     synchronized sync(mutex);
 
     if (aai == 0 || name1.empty()) {
-        return 0;
+        return AppenderWeakPtr();
     }
 
     return aai->getAppender(name1);
 }
 
 const LevelPtr Logger::getEffectiveLevel() const {
-    for(const Logger * l = this; l != 0; l=l->parent.get()) {
+    for(const Logger * l = this; l != 0; l=l->parent.lock().get()) {
         if(l->level != 0) {
             return l->level;
         }
@@ -182,28 +182,28 @@ LoggerRepository* Logger::getLoggerRepository() const {
     return repository;
 }
 
-ResourceBundlePtr Logger::getResourceBundle() const {
-    for (const Logger* l = this; l != 0; l = l->parent.get()) {
+ResourceBundleWeakPtr Logger::getResourceBundle() const {
+    for (const Logger* l = this; l != 0; l = l->parent.lock().get()) {
         if (l->resourceBundle != 0) {
             return l->resourceBundle;
         }
     }
 
     // It might be the case that there is no resource bundle
-    return 0;
+    return ResourceBundleWeakPtr();
 }
 
 
 LogString Logger::getResourceBundleString(const LogString& key) const {
-    ResourceBundlePtr rb = getResourceBundle();
+    ResourceBundleWeakPtr rb = getResourceBundle();
 
     // This is one of the rare cases where we can use logging in order
     // to report errors from within log4j.
-    if (rb == 0) {
+    if (rb.expired()) {
         return LogString();
     } else {
         try {
-            return rb->getString(key);
+            return rb.lock()->getString(key);
         } catch (MissingResourceException&) {
             logLS(Level::getError(), LOG4CXX_STR("No resource is associated with key \"") +
                   key + LOG4CXX_STR("\"."), LocationInfo::getLocationUnavailable());
@@ -214,12 +214,12 @@ LogString Logger::getResourceBundleString(const LogString& key) const {
 }
 
 
-LoggerPtr Logger::getParent() const {
+LoggerWeakPtr Logger::getParent() const {
     return parent;
 }
 
-LevelPtr Logger::getLevel() const {
-    return level;
+LevelWeakPtr Logger::getLevel() const {
+    return LevelWeakPtr(level);
 }
 
 
@@ -393,10 +393,10 @@ void Logger::removeAllAppenders() {
     }
 }
 
-void Logger::removeAppender(const AppenderPtr& appender) {
+void Logger::removeAppender(const AppenderWeakPtr& appender) {
     synchronized sync(mutex);
 
-    if(appender == 0 || aai == 0) {
+    if(appender.expired() || aai == 0) {
         return;
     }
 
@@ -428,22 +428,22 @@ void Logger::setLevel(const LevelPtr level1) {
 
 
 
-LoggerPtr Logger::getLogger(const std::string& name) {
+LoggerWeakPtr Logger::getLogger(const std::string& name) {
     return LogManager::getLogger(name);
 }
 
 
-LoggerPtr Logger::getLogger(const char* const name) {
+LoggerWeakPtr Logger::getLogger(const char* const name) {
     return LogManager::getLogger(name);
 }
 
 
 
-LoggerPtr Logger::getRootLogger() {
+LoggerWeakPtr Logger::getRootLogger() {
     return LogManager::getRootLogger();
 }
 
-LoggerPtr Logger::getLoggerLS(const LogString& name,
+LoggerWeakPtr Logger::getLoggerLS(const LogString& name,
                               const spi::LoggerFactoryPtr& factory) {
     return LogManager::getLoggerLS(name, factory);
 }
@@ -548,7 +548,7 @@ void Logger::warn(const std::string& msg) const {
     }
 }
 
-LoggerPtr Logger::getLoggerLS(const LogString& name) {
+LoggerWeakPtr Logger::getLoggerLS(const LogString& name) {
     return LogManager::getLoggerLS(name);
 }
 
@@ -576,11 +576,11 @@ void Logger::getName(std::wstring& rv) const {
     Transcoder::encode(name, rv);
 }
 
-LoggerPtr Logger::getLogger(const std::wstring& name) {
+LoggerWeakPtr Logger::getLogger(const std::wstring& name) {
     return LogManager::getLogger(name);
 }
 
-LoggerPtr Logger::getLogger(const wchar_t* const name) {
+LoggerWeakPtr Logger::getLogger(const wchar_t* const name) {
     return LogManager::getLogger(name);
 }
 

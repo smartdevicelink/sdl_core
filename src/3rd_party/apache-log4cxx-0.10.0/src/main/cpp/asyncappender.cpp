@@ -212,7 +212,7 @@ AppenderList AsyncAppender::getAllAppenders() const {
     return appenders->getAllAppenders();
 }
 
-AppenderPtr AsyncAppender::getAppender(const LogString& n) const {
+AppenderWeakPtr AsyncAppender::getAppender(const LogString& n) const {
     synchronized sync(appenders->getMutex());
     return appenders->getAppender(n);
 }
@@ -231,7 +231,7 @@ void AsyncAppender::removeAllAppenders() {
     appenders->removeAllAppenders();
 }
 
-void AsyncAppender::removeAppender(const AppenderPtr& appender) {
+void AsyncAppender::removeAppender(const AppenderWeakPtr& appender) {
     synchronized sync(appenders->getMutex());
     appenders->removeAppender(appender);
 }

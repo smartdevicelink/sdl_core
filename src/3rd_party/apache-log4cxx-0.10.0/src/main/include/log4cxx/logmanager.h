@@ -30,6 +30,7 @@
 namespace log4cxx {
     class Logger;
     typedef log4cxx::ptr::shared_ptr<Logger> LoggerPtr;
+    typedef log4cxx::ptr::weak_ptr<Logger> LoggerWeakPtr;
     typedef std::vector<LoggerPtr> LoggerList;
 
     namespace spi {
@@ -75,49 +76,49 @@ namespace log4cxx {
             /**
             Retrieve the appropriate root logger.
             */
-            static LoggerPtr getRootLogger();
+            static LoggerWeakPtr getRootLogger();
 
             /**
             Retrieve the appropriate Logger instance.
             * @param name logger name in current encoding.
             * @return logger.
             */
-            static LoggerPtr getLogger(const std::string& name);
+            static LoggerWeakPtr getLogger(const std::string& name);
             /**
             Retrieve the appropriate Logger instance.
             * @param name logger name in current encoding.
             * @param factory logger factory.
             * @return logger.
             */
-            static LoggerPtr getLogger(const std::string& name,
+            static LoggerWeakPtr getLogger(const std::string& name,
                                        const spi::LoggerFactoryPtr& factory);
             /**
              * Determines if logger name exists in the hierarchy.
              * @param name logger name.
              * @return true if logger exists.
              */
-            static LoggerPtr exists(const std::string& name);
+            static LoggerWeakPtr exists(const std::string& name);
 #if LOG4CXX_WCHAR_T_API
             /**
             Retrieve the appropriate Logger instance.
             * @param name logger name.
             * @return logger.
             */
-            static LoggerPtr getLogger(const std::wstring& name);
+            static LoggerWeakPtr getLogger(const std::wstring& name);
             /**
             Retrieve the appropriate Logger instance.
             * @param name logger name.
             * @param factory logger factory.
             * @return logger.
             */
-            static LoggerPtr getLogger(const std::wstring& name,
+            static LoggerWeakPtr getLogger(const std::wstring& name,
                                        const spi::LoggerFactoryPtr& factory);
             /**
              * Determines if logger name exists in the hierarchy.
              * @param name logger name.
              * @return true if logger exists.
              */
-            static LoggerPtr exists(const std::wstring& name);
+            static LoggerWeakPtr exists(const std::wstring& name);
 #endif
 #if LOG4CXX_UNICHAR_API
             /**
@@ -125,21 +126,21 @@ namespace log4cxx {
             * @param name logger name.
             * @return logger.
             */
-            static LoggerPtr getLogger(const std::basic_string<UniChar>& name);
+            static LoggerWeakPtr getLogger(const std::basic_string<UniChar>& name);
             /**
             Retrieve the appropriate Logger instance.
             * @param name logger name.
             * @param factory logger factory.
             * @return logger.
             */
-            static LoggerPtr getLogger(const std::basic_string<UniChar>& name,
+            static LoggerWeakPtr getLogger(const std::basic_string<UniChar>& name,
                                        const spi::LoggerFactoryPtr& factory);
             /**
              * Determines if logger name exists in the hierarchy.
              * @param name logger name.
              * @return true if logger exists.
              */
-            static LoggerPtr exists(const std::basic_string<UniChar>& name);
+            static LoggerWeakPtr exists(const std::basic_string<UniChar>& name);
 #endif
 #if LOG4CXX_CFSTRING_API
             /**
@@ -147,21 +148,21 @@ namespace log4cxx {
             * @param name logger name.
             * @return logger.
             */
-            static LoggerPtr getLogger(const CFStringRef& name);
+            static LoggerWeakPtr getLogger(const CFStringRef& name);
             /**
             Retrieve the appropriate Logger instance.
             * @param name logger name.
             * @param factory logger factory.
             * @return logger.
             */
-            static LoggerPtr getLogger(const CFStringRef& name,
+            static LoggerWeakPtr getLogger(const CFStringRef& name,
                                        const spi::LoggerFactoryPtr& factory);
             /**
              * Determines if logger name exists in the hierarchy.
              * @param name logger name.
              * @return true if logger exists.
              */
-            static LoggerPtr exists(const CFStringRef& name);
+            static LoggerWeakPtr exists(const CFStringRef& name);
 #endif
 
 
@@ -170,14 +171,14 @@ namespace log4cxx {
             * @param name logger name.
             * @return logger.
             */
-            static LoggerPtr getLoggerLS(const LogString& name);
+            static LoggerWeakPtr getLoggerLS(const LogString& name);
             /**
             Retrieve the appropriate Logger instance.
             * @param name logger name.
             * @param factory logger factory.
             * @return logger.
             */
-            static LoggerPtr getLoggerLS(const LogString& name,
+            static LoggerWeakPtr getLoggerLS(const LogString& name,
                                          const spi::LoggerFactoryPtr& factory);
 
             /**
@@ -185,7 +186,7 @@ namespace log4cxx {
              * @param name logger name.
              * @return true if logger exists.
              */
-            static LoggerPtr existsLS(const LogString& name);
+            static LoggerWeakPtr existsLS(const LogString& name);
 
             static LoggerList getCurrentLoggers();
 

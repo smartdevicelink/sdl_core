@@ -109,7 +109,7 @@ namespace log4cxx {
               @param name The name of the logger to search for.
 
             */
-            LoggerPtr exists(const LogString& name);
+            LoggerWeakPtr exists(const LogString& name);
 
             /**
             The string form of {@link #setThreshold(const LevelPtr&) setThreshold}.
@@ -146,7 +146,7 @@ namespace log4cxx {
             @param name The name of the logger to retrieve.
 
             */
-            LoggerPtr getLogger(const LogString& name);
+            LoggerWeakPtr getLogger(const LogString& name);
 
             /**
             Return a new logger instance named as the first parameter using
@@ -161,7 +161,7 @@ namespace log4cxx {
             @param factory The factory that will make the new logger instance.
 
             */
-            LoggerPtr getLogger(const LogString& name,
+            LoggerWeakPtr getLogger(const LogString& name,
                                 const spi::LoggerFactoryPtr& factory);
 
             /**
@@ -175,7 +175,7 @@ namespace log4cxx {
             /**
             Get the root of this hierarchy.
             */
-            LoggerPtr getRootLogger() const;
+            LoggerWeakPtr getRootLogger() const;
 
             /**
             This method will return <code>true</code> if this repository is

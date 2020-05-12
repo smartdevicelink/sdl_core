@@ -99,7 +99,7 @@ namespace log4cxx {
              * @param name name, may not be null.
              * @return matching appender or null.
             */
-            AppenderPtr getAppender(const LogString& name) const;
+            AppenderWeakPtr getAppender(const LogString& name) const;
 
             /**
              * Gets whether the location of the logging request call
@@ -126,7 +126,7 @@ namespace log4cxx {
              * Removes an appender.
              * @param appender appender to remove.
             */
-            void removeAppender(const AppenderPtr& appender);
+            void removeAppender(const AppenderWeakPtr& appender);
             /**
             * Remove appender by name.
             * @param name name.

@@ -63,9 +63,9 @@ AppenderList AppenderAttachableImpl::getAllAppenders() const {
     return appenderList;
 }
 
-AppenderPtr AppenderAttachableImpl::getAppender(const LogString& name) const {
+AppenderWeakPtr AppenderAttachableImpl::getAppender(const LogString& name) const {
     if (name.empty()) {
-        return 0;
+        return AppenderWeakPtr();
     }
 
     AppenderList::const_iterator it, itEnd = appenderList.end();
@@ -75,11 +75,11 @@ AppenderPtr AppenderAttachableImpl::getAppender(const LogString& name) const {
         appender = *it;
 
         if(name == appender->getName()) {
-            return appender;
+            return AppenderWeakPtr(appender);
         }
     }
 
-    return 0;
+    return AppenderWeakPtr();
 }
 
 bool AppenderAttachableImpl::isAttached(const AppenderPtr& appender) const {
@@ -105,13 +105,15 @@ void AppenderAttachableImpl::removeAllAppenders() {
     appenderList.clear();
 }
 
-void AppenderAttachableImpl::removeAppender(const AppenderPtr& appender) {
-    if (appender == 0) {
+void AppenderAttachableImpl::removeAppender(const AppenderWeakPtr& appender) {
+    if (appender.expired()) {
         return;
     }
 
+    auto remove_appender = appender.lock();
+
     AppenderList::iterator it = std::find(
-                                    appenderList.begin(), appenderList.end(), appender);
+                                    appenderList.begin(), appenderList.end(), remove_appender);
 
     if (it != appenderList.end()) {
         appenderList.erase(it);

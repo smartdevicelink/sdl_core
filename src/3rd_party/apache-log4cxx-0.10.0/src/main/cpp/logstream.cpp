@@ -188,12 +188,12 @@ logstream::logstream(const log4cxx::LoggerPtr& logger,
 
 logstream::logstream(const Ch* loggerName,
                      const log4cxx::LevelPtr& level)
-    : logstream_base(log4cxx::Logger::getLogger(loggerName), level), stream(0) {
+    : logstream_base(log4cxx::Logger::getLogger(loggerName).lock(), level), stream(0) {
 }
 
 
 logstream::logstream(const std::basic_string<Ch>& loggerName,
-                     const log4cxx::LevelPtr& level) : logstream_base(log4cxx::Logger::getLogger(loggerName), level), stream(0) {
+                     const log4cxx::LevelPtr& level) : logstream_base(log4cxx::Logger::getLogger(loggerName).lock(), level), stream(0) {
 }
 
 logstream::~logstream() {
@@ -293,12 +293,12 @@ wlogstream::wlogstream(const log4cxx::LoggerPtr& logger,
 
 wlogstream::wlogstream(const Ch* loggerName,
                        const log4cxx::LevelPtr& level)
-    : logstream_base(log4cxx::Logger::getLogger(loggerName), level), stream(0) {
+    : logstream_base(log4cxx::Logger::getLogger(loggerName).lock(), level), stream(0) {
 }
 
 
 wlogstream::wlogstream(const std::basic_string<Ch>& loggerName,
-                       const log4cxx::LevelPtr& level) : logstream_base(log4cxx::Logger::getLogger(loggerName), level), stream(0) {
+                       const log4cxx::LevelPtr& level) : logstream_base(log4cxx::Logger::getLogger(loggerName).lock(), level), stream(0) {
 }
 
 wlogstream::~wlogstream() {

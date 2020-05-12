@@ -212,7 +212,8 @@ void PropertyConfigurator::configureRootLogger(helpers::Properties& props,
     if (value.empty()) {
         LogLog::debug(LOG4CXX_STR("Could not find root logger information. Is this OK?"));
     } else {
-        LoggerPtr root = hierarchy->getRootLogger();
+        auto root_logger = hierarchy->getRootLogger();
+        auto root = root_logger.lock();
 
         synchronized sync(root->getMutex());
         static const LogString INTERNAL_ROOT_NAME(LOG4CXX_STR("root"));
@@ -243,7 +244,8 @@ void PropertyConfigurator::parseCatsAndRenderers(helpers::Properties& props,
             }
 
             LogString value = OptionConverter::findAndSubst(key, props);
-            LoggerPtr logger = hierarchy->getLogger(loggerName, loggerFactory);
+            auto logger_ptr = hierarchy->getLogger(loggerName, loggerFactory);
+            auto logger = logger_ptr.lock();
 
             synchronized sync(logger->getMutex());
             parseLogger(props, logger, key, loggerName, value);
@@ -320,7 +322,7 @@ void PropertyConfigurator::parseLogger(
 
             LogLog::debug((LogString) LOG4CXX_STR("Logger ")
                           + loggerName + LOG4CXX_STR(" set to ")
-                          + logger->getLevel()->toString());
+                          + logger->getLevel().lock()->toString());
         }
 
     }
@@ -328,7 +330,7 @@ void PropertyConfigurator::parseLogger(
     // Begin by removing all existing appenders.
     logger->removeAllAppenders();
 
-    AppenderPtr appender;
+    AppenderWeakPtr appender;
     LogString appenderName;
 
     while (st.hasMoreTokens()) {
@@ -342,22 +344,24 @@ void PropertyConfigurator::parseLogger(
                       + appenderName + LOG4CXX_STR("\"."));
         appender = parseAppender(props, appenderName);
 
-        if (appender != 0) {
-            logger->addAppender(appender);
+        if (false == appender.expired()) {
+            logger->addAppender(appender.lock());
         }
     }
 }
 
-AppenderPtr PropertyConfigurator::parseAppender(
+AppenderWeakPtr PropertyConfigurator::parseAppender(
     helpers::Properties& props, const LogString& appenderName) {
-    AppenderPtr appender = registryGet(appenderName);
+    AppenderWeakPtr reg_appender = registryGet(appenderName);
 
-    if (appender != 0) {
+    if (false == reg_appender.expired()) {
         LogLog::debug((LogString) LOG4CXX_STR("Appender \"")
                       + appenderName + LOG4CXX_STR("\" was already parsed."));
 
-        return appender;
+        return reg_appender;
     }
+
+    AppenderPtr appender;
 
     static const LogString APPENDER_PREFIX(LOG4CXX_STR("log4j.appender."));
 
@@ -371,13 +375,14 @@ AppenderPtr PropertyConfigurator::parseAppender(
         if( ptr != NULL ){
             Appender* rawptr_Appender = reinterpret_cast<Appender*>( ptr );
             appender.reset( rawptr_Appender );
+            reg_appender = appender;
         }
     }
 
-    if (appender == 0) {
+    if (reg_appender.expired()) {
         LogLog::error((LogString) LOG4CXX_STR("Could not instantiate appender named \"")
                       + appenderName + LOG4CXX_STR("\"."));
-        return 0;
+        return AppenderWeakPtr();
     }
 
     appender->setName(appenderName);
@@ -414,13 +419,13 @@ AppenderPtr PropertyConfigurator::parseAppender(
 
     registryPut(appender);
 
-    return appender;
+    return reg_appender;
 }
 
 void PropertyConfigurator::registryPut(const AppenderPtr& appender) {
     (*registry)[appender->getName()] = appender;
 }
 
-AppenderPtr PropertyConfigurator::registryGet(const LogString& name) {
-    return (*registry)[name];
+AppenderWeakPtr PropertyConfigurator::registryGet(const LogString& name) {
+    return AppenderWeakPtr((*registry)[name]);
 }

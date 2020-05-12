@@ -105,7 +105,7 @@ void Hierarchy::emitNoAppenderWarning(const Logger* logger) {
 }
 
 
-LoggerPtr Hierarchy::exists(const LogString& name) {
+LoggerWeakPtr Hierarchy::exists(const LogString& name) {
     synchronized sync(mutex);
 
     LoggerPtr logger;
@@ -180,11 +180,11 @@ const LevelPtr& Hierarchy::getThreshold() const {
     return threshold;
 }
 
-LoggerPtr Hierarchy::getLogger(const LogString& name) {
+LoggerWeakPtr Hierarchy::getLogger(const LogString& name) {
     return getLogger(name, defaultFactory);
 }
 
-LoggerPtr Hierarchy::getLogger(const LogString& name,
+LoggerWeakPtr Hierarchy::getLogger(const LogString& name,
                                const spi::LoggerFactoryPtr& factory) {
     synchronized sync(mutex);
 
@@ -224,7 +224,7 @@ LoggerList Hierarchy::getCurrentLoggers() const {
     return v;
 }
 
-LoggerPtr Hierarchy::getRootLogger() const {
+LoggerWeakPtr Hierarchy::getRootLogger() const {
     return root;
 }
 
@@ -245,7 +245,7 @@ bool Hierarchy::isDisabled(int level) const {
 void Hierarchy::resetConfiguration() {
     synchronized sync(mutex);
 
-    getRootLogger()->setLevel(Level::getDebug());
+    getRootLogger().lock()->setLevel(Level::getDebug());
     root->setResourceBundle(0);
     setThreshold(Level::getAll());
 
@@ -269,7 +269,8 @@ void Hierarchy::shutdown() {
 
     setConfigured(false);
 
-    LoggerPtr root1 = getRootLogger();
+    auto root_logger = getRootLogger();
+    auto root1 = root_logger.lock();
 
     // begin by closing nested appenders
     root1->closeNestedAppenders();
@@ -339,7 +340,7 @@ void Hierarchy::updateChildren(ProvisionNode& pn, LoggerPtr logger) {
 
         // Unless this child already points to a correct (lower) parent,
         // make cat.parent point to l.parent and l.parent to cat.
-        if(!StringHelper::startsWith(l->parent->name, logger->name)) {
+        if(!StringHelper::startsWith(l->parent.lock()->name, logger->name)) {
             logger->parent = l->parent;
             l->parent = logger;
         }

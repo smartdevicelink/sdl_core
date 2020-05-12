@@ -79,14 +79,14 @@ namespace log4cxx {
                             for an explanation. */
                 virtual const LevelPtr& getThreshold() const = 0;
 
-                virtual LoggerPtr getLogger(const LogString& name) = 0;
+                virtual LoggerWeakPtr getLogger(const LogString& name) = 0;
 
-                virtual LoggerPtr getLogger(const LogString& name,
+                virtual LoggerWeakPtr getLogger(const LogString& name,
                                             const spi::LoggerFactoryPtr& factory) = 0;
 
-                virtual LoggerPtr getRootLogger() const = 0;
+                virtual LoggerWeakPtr getRootLogger() const = 0;
 
-                virtual LoggerPtr exists(const LogString& name) = 0;
+                virtual LoggerWeakPtr exists(const LogString& name) = 0;
 
                 virtual void shutdown() = 0;
 

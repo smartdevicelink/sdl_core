@@ -25,16 +25,16 @@ using namespace log4cxx;
 
 void BasicConfigurator::configure() {
     LogManager::getLoggerRepository()->setConfigured(true);
-    LoggerPtr root = Logger::getRootLogger();
+    LoggerWeakPtr root = Logger::getRootLogger();
     static const LogString TTCC_CONVERSION_PATTERN(LOG4CXX_STR("%r [%t] %p %c %x - %m%n"));
     LayoutPtr layout(new PatternLayout(TTCC_CONVERSION_PATTERN));
     AppenderPtr appender(new ConsoleAppender(layout));
-    root->addAppender(appender);
+    root.lock()->addAppender(appender);
 }
 
 void BasicConfigurator::configure(const AppenderPtr& appender) {
-    LoggerPtr root = Logger::getRootLogger();
-    root->addAppender(appender);
+    LoggerWeakPtr root = Logger::getRootLogger();
+    root.lock()->addAppender(appender);
 }
 
 void BasicConfigurator::resetConfiguration() {

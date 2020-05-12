@@ -314,10 +314,10 @@ void DOMConfigurator::parseErrorHandler(Pool& p,
                 eh->setBackupAppender(findAppenderByReference(p, utf8Decoder, currentElement, doc, appenders));
             } else if(tagName == LOGGER_REF) {
                 LogString loggerName(getAttribute(utf8Decoder, currentElement, REF_ATTR));
-                LoggerPtr logger = repository->getLogger(loggerName, loggerFactory);
+                auto logger = repository->getLogger(loggerName, loggerFactory);
                 eh->setLogger(logger);
             } else if(tagName == ROOT_REF) {
-                LoggerPtr root = repository->getRootLogger();
+                auto root = repository->getRootLogger();
                 eh->setLogger(root);
             }
         }
@@ -381,7 +381,8 @@ void DOMConfigurator::parseLogger(
     LogString loggerName = subst(getAttribute(utf8Decoder, loggerElement, NAME_ATTR));
 
     LogLog::debug(LOG4CXX_STR("Retreiving an instance of Logger."));
-    LoggerPtr logger = repository->getLogger(loggerName, loggerFactory);
+    auto logger_ptr = repository->getLogger(loggerName, loggerFactory);
+    auto logger = logger_ptr.lock();
 
     // Setting up a logger needs to be an atomic operation, in order
     // to protect potential log operations while logger
@@ -444,7 +445,8 @@ void DOMConfigurator::parseRoot(
     apr_xml_elem* rootElement,
     apr_xml_doc* doc,
     AppenderMap& appenders) {
-    LoggerPtr root = repository->getRootLogger();
+    auto root_logger = repository->getRootLogger();
+    auto root = root_logger.lock();
     // logger configuration needs to be atomic
     synchronized sync(root->getMutex());
     parseChildrenOfLoggerElement(p, utf8Decoder, rootElement, root, true, doc, appenders);

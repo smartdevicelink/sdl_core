@@ -75,7 +75,7 @@ namespace log4cxx {
                 @param logger One of the loggers that will be searched for the failing
                 appender in view of replacement.
                 */
-                virtual void setLogger(const LoggerPtr& logger) = 0;
+                virtual void setLogger(const LoggerWeakPtr& logger) = 0;
 
 
                 /**
@@ -108,12 +108,12 @@ namespace log4cxx {
                 Set the appender for which errors are handled. This method is
                 usually called when the error handler is configured.
                 */
-                virtual void setAppender(const AppenderPtr& appender) = 0;
+                virtual void setAppender(const AppenderWeakPtr& appender) = 0;
 
                 /**
                 Set the appender to fallback upon in case of failure.
                 */
-                virtual void setBackupAppender(const AppenderPtr& appender) = 0;
+                virtual void setBackupAppender(const AppenderWeakPtr& appender) = 0;
         };
 
         LOG4CXX_PTR_DEF(ErrorHandler);
