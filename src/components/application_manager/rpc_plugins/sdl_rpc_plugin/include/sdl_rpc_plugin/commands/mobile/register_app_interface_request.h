@@ -140,7 +140,7 @@ class RegisterAppInterfaceRequest
    *
    * return TRUE if ID is known already, otherwise - FALSE
    */
-  bool IsApplicationWithSameAppIdRegistered();
+  bool IsApplicationWithSameAppIdOrAppNameRegistered();
 
   /**
    * @brief Check new application parameters (name, tts, vr) for

@@ -248,6 +248,11 @@ void RegisterAppInterfaceRequest::Run() {
       logger_,
       "device_handle: " << device_handle_ << " device_id: " << device_id_);
 
+  if (IsApplicationWithSameAppIdOrAppNameRegistered()) {
+    SendResponse(false, mobile_apis::Result::DUPLICATE_NAME);
+    return;
+  }
+
   if (IsApplicationSwitched()) {
     return;
   }
@@ -280,11 +285,6 @@ void RegisterAppInterfaceRequest::Run() {
                    new_app_id_full.begin(),
                    ::tolower);
     (*message_)[strings::msg_params][strings::full_app_id] = new_app_id_full;
-  }
-
-  if (IsApplicationWithSameAppIdRegistered()) {
-    SendResponse(false, mobile_apis::Result::DISALLOWED);
-    return;
   }
 
   mobile_apis::Result::eType policy_result = CheckWithPolicyData();
@@ -1236,11 +1236,13 @@ void RegisterAppInterfaceRequest::FillDeviceInfo(
   }
 }
 
-bool RegisterAppInterfaceRequest::IsApplicationWithSameAppIdRegistered() {
+bool RegisterAppInterfaceRequest::IsApplicationWithSameAppIdOrAppNameRegistered() {
   LOG4CXX_AUTO_TRACE(logger_);
 
   const custom_string::CustomString mobile_app_id(
       application_manager_.GetCorrectMobileIDFromMessage(message_));
+  const custom_str::CustomString& app_name =
+      (*message_)[strings::msg_params][strings::app_name].asCustomString();
 
   const auto& applications = application_manager_.applications().GetData();
 
@@ -1255,6 +1257,9 @@ bool RegisterAppInterfaceRequest::IsApplicationWithSameAppIdRegistered() {
                           << " device_handle: " << app->device());
         continue;
       }
+      return true;
+    }
+    if (app_name.CompareIgnoreCase(app->name())) {
       return true;
     }
   }
