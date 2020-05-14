@@ -899,7 +899,7 @@ void ApplicationManagerImpl::OnHMIStartedCooperation() {
 
   RefreshCloudAppInformation();
 
-  policy_handler_->TriggerPTUIfRequired();
+  policy_handler_->TriggerPTUOnStartupIfRequired();
 }
 
 std::string ApplicationManagerImpl::PolicyIDByIconUrl(const std::string url) {

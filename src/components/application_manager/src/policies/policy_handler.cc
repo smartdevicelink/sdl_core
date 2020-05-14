@@ -787,9 +787,9 @@ void PolicyHandler::OnSystemRequestReceived() const {
   policy_manager_->ResetTimeout();
 }
 
-void PolicyHandler::TriggerPTUIfRequired() {
+void PolicyHandler::TriggerPTUOnStartupIfRequired() {
 #ifndef EXTERNAL_PROPRIETARY_MODE
-  policy_manager_->TriggerPTUIfRequired();
+  policy_manager_->TriggerPTUOnStartupIfRequired();
 #endif
 }
 

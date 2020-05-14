@@ -800,7 +800,7 @@ class PolicyManagerImpl : public PolicyManager {
   /**
    * @brief Trigger a PTU once on startup if it is required
    */
-  virtual void TriggerPTUIfRequired() OVERRIDE;
+  virtual void TriggerPTUOnStartupIfRequired() OVERRIDE;
 
 #ifdef BUILD_TESTS
   /**

@@ -804,7 +804,7 @@ class PolicyManager : public usage_statistics::StatisticsManager,
   /**
    * @brief Trigger a PTU once on startup if it is required
    */
-  virtual void TriggerPTUIfRequired() = 0;
+  virtual void TriggerPTUOnStartupIfRequired() = 0;
 
  protected:
   /**

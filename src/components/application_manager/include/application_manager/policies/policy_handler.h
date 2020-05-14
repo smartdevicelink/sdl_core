@@ -324,7 +324,7 @@ class PolicyHandler : public PolicyHandlerInterface,
 
   void OnSystemRequestReceived() const OVERRIDE;
 
-  void TriggerPTUIfRequired() OVERRIDE;
+  void TriggerPTUOnStartupIfRequired() OVERRIDE;
 
   /**
    * @brief Get appropriate message parameters and send them with response

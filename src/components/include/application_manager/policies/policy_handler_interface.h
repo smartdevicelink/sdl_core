@@ -769,9 +769,13 @@ class PolicyHandlerInterface : public VehicleDataItemProvider {
   virtual void OnSystemRequestReceived() const = 0;
 
   /**
-   * @brief
+   * @brief Triggers a PolicyTableUpdate on startup (only if an update is
+   * required)
+   *
+   * Currently, this function is only implemented for regular policies
+   * since the device consent is not enabled by default for external policies.
    */
-  virtual void TriggerPTUIfRequired() = 0;
+  virtual void TriggerPTUOnStartupIfRequired() = 0;
 
  private:
 /**

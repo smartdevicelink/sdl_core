@@ -217,7 +217,7 @@ class MockPolicyHandlerInterface : public policy::PolicyHandlerInterface {
   MOCK_CONST_METHOD1(SendOnAppPropertiesChangeNotification,
                      void(const std::string& policy_app_id));
   MOCK_METHOD0(OnPTExchangeNeeded, void());
-  MOCK_METHOD0(TriggerPTUIfRequired, void());
+  MOCK_METHOD0(TriggerPTUOnStartupIfRequired, void());
   MOCK_METHOD1(GetAvailableApps, void(std::queue<std::string>& apps));
   MOCK_METHOD3(
       AddApplication,

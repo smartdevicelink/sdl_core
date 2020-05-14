@@ -1872,7 +1872,7 @@ bool PolicyManagerImpl::FunctionGroupNeedEncryption(
              : false;
 }
 
-void PolicyManagerImpl::TriggerPTUIfRequired() {
+void PolicyManagerImpl::TriggerPTUOnStartupIfRequired() {
   LOG4CXX_AUTO_TRACE(logger_);
   if (ignition_check) {
     StartPTExchange();
