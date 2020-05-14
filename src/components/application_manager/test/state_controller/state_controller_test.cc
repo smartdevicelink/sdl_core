@@ -83,6 +83,15 @@ const uint32_t kHMIAppID = 2718u;
 const am::WindowID kDefaultWindowId =
     mobile_apis::PredefinedWindows::DEFAULT_WINDOW;
 const am::WindowID kCustomWindowId = 2;
+
+const uint32_t kAppIdInFull = 1761;
+const uint32_t kHMIAppIdInFull = 15685;
+const uint32_t kAppIdMovedToFull = 1796;
+const uint32_t kHMIAppIdMovedToFull = 30093;
+const uint32_t kAppIdLimited = 1762;
+const uint32_t kHMIAppIdLimited = 17559;
+const uint32_t kAppIDMovedToLimited = 1763;
+const uint32_t kHMIAppIdMovedToLimited = 17663;
 }  // namespace
 
 struct HmiStatesComparator {
@@ -131,6 +140,8 @@ struct HmiStatesIDComparator {
 #define NOT_VC false
 #define NAVI true
 #define NOT_NAVI false
+#define WEP true
+#define NOT_WEP false
 
 enum ApplicationType {
   APP_TYPE_NON_MEDIA,
@@ -692,9 +703,10 @@ class StateControllerImplTest : public ::testing::Test {
       NiceMock<application_manager_test::MockApplication>** app_mock,
       uint32_t app_id,
       uint32_t hmi_app_id,
-      bool media,
-      bool navi,
-      bool vc) {
+      const bool media,
+      const bool navi,
+      const bool vc,
+      const bool wep) {
     *app_mock = new NiceMock<application_manager_test::MockApplication>;
 
     Mock::AllowLeak(*app_mock);  // WorkAround for googletest bug
@@ -704,6 +716,8 @@ class StateControllerImplTest : public ::testing::Test {
     ON_CALL(**app_mock, hmi_app_id()).WillByDefault(Return(hmi_app_id));
     ON_CALL(**app_mock, is_media_application()).WillByDefault(Return(media));
     ON_CALL(**app_mock, is_navi()).WillByDefault(Return(navi));
+    ON_CALL(**app_mock, webengine_projection_enabled())
+        .WillByDefault(Return(wep));
     ON_CALL(**app_mock, is_voice_communication_supported())
         .WillByDefault(Return(vc));
     ON_CALL(**app_mock, IsAudioApplication())
@@ -908,57 +922,71 @@ class StateControllerImplTest : public ::testing::Test {
                                simple_hmi_app_id_,
                                NOT_MEDIA,
                                NOT_NAVI,
-                               NOT_VC);
+                               NOT_VC,
+                               NOT_WEP);
     media_app_ = ConfigureApp(&media_app_ptr_,
                               media_app_id_,
                               media_hmi_app_id_,
                               MEDIA,
                               NOT_NAVI,
-                              NOT_VC);
+                              NOT_VC,
+                              NOT_WEP);
     navi_app_ = ConfigureApp(&navi_app_ptr_,
                              navi_app_id_,
                              navi_hmi_app_id_,
                              NOT_MEDIA,
                              NAVI,
-                             NOT_VC);
-    vc_app_ = ConfigureApp(
-        &vc_app_ptr_, vc_app_id_, vc_hmi_app_id_, NOT_MEDIA, NOT_NAVI, VC);
+                             NOT_VC,
+                             NOT_WEP);
+    vc_app_ = ConfigureApp(&vc_app_ptr_,
+                           vc_app_id_,
+                           vc_hmi_app_id_,
+                           NOT_MEDIA,
+                           NOT_NAVI,
+                           VC,
+                           NOT_WEP);
     media_navi_app_ = ConfigureApp(&media_navi_app_ptr_,
                                    media_navi_app_id_,
                                    media_navi_hmi_app_id_,
                                    MEDIA,
                                    NAVI,
-                                   NOT_VC);
+                                   NOT_VC,
+                                   NOT_WEP);
     media_vc_app_ = ConfigureApp(&media_vc_app_ptr_,
                                  media_vc_app_id_,
                                  media_vc_hmi_app_id_,
                                  MEDIA,
                                  NOT_NAVI,
-                                 VC);
+                                 VC,
+                                 NOT_WEP);
     navi_vc_app_ = ConfigureApp(&navi_vc_app_ptr_,
                                 navi_vc_app_id_,
                                 navi_vc_hmi_app_id_,
                                 NOT_MEDIA,
                                 NAVI,
-                                VC);
+                                VC,
+                                NOT_WEP);
     media_navi_vc_app_ = ConfigureApp(&media_navi_vc_app_ptr_,
                                       media_navi_vc_app_id_,
                                       media_navi_vc_hmi_app_id_,
                                       MEDIA,
                                       NAVI,
-                                      VC);
+                                      VC,
+                                      NOT_WEP);
     media_wep_app_ = ConfigureApp(&media_wep_app_ptr_,
                                   media_wep_app_id_,
                                   media_wep_app_hmi_app_id_,
                                   MEDIA,
                                   NOT_NAVI,
-                                  NOT_VC);
+                                  NOT_VC,
+                                  WEP);
     non_media_wep_app_ = ConfigureApp(&non_media_wep_app_ptr_,
                                       non_media_wep_app_id_,
                                       non_media_wep_app_hmi_app_id_,
                                       NOT_MEDIA,
                                       NOT_NAVI,
-                                      NOT_VC);
+                                      NOT_VC,
+                                      WEP);
 
     applications_list_[simple_app_] = simple_app_ptr_;
     applications_list_[media_app_] = media_app_ptr_;
@@ -1641,10 +1669,21 @@ TEST_F(StateControllerImplTest,
   am::ApplicationSharedPtr app_moved_to_full;
   NiceMock<application_manager_test::MockApplication>* app_moved_to_full_mock;
 
-  app_in_full =
-      ConfigureApp(&app_in_full_mock, 1761, 15685, NOT_MEDIA, NOT_NAVI, NOT_VC);
-  app_moved_to_full = ConfigureApp(
-      &app_moved_to_full_mock, 1796, 30093, NOT_MEDIA, NOT_NAVI, NOT_VC);
+  app_in_full = ConfigureApp(&app_in_full_mock,
+                             kAppIdInFull,
+                             kHMIAppIdInFull,
+                             NOT_MEDIA,
+                             NOT_NAVI,
+                             NOT_VC,
+                             NOT_WEP);
+
+  app_moved_to_full = ConfigureApp(&app_moved_to_full_mock,
+                                   kAppIdMovedToFull,
+                                   kHMIAppIdMovedToFull,
+                                   NOT_MEDIA,
+                                   NOT_NAVI,
+                                   NOT_VC,
+                                   NOT_WEP);
 
   InsertApplication(app_in_full);
   InsertApplication(app_moved_to_full);
@@ -1718,12 +1757,23 @@ TEST_F(StateControllerImplTest,
   namespace HMILevel = mobile_apis::HMILevel;
   namespace SystemContext = mobile_apis::SystemContext;
   NiceMock<application_manager_test::MockApplication>* app_in_full_mock;
-  am::ApplicationSharedPtr app_in_full =
-      ConfigureApp(&app_in_full_mock, 1761, 15685, MEDIA, NOT_NAVI, NOT_VC);
+  am::ApplicationSharedPtr app_in_full = ConfigureApp(&app_in_full_mock,
+                                                      kAppIdInFull,
+                                                      kHMIAppIdInFull,
+                                                      MEDIA,
+                                                      NOT_NAVI,
+                                                      NOT_VC,
+                                                      NOT_WEP);
 
   NiceMock<application_manager_test::MockApplication>* app_moved_to_full_mock;
-  am::ApplicationSharedPtr app_moved_to_full = ConfigureApp(
-      &app_moved_to_full_mock, 1796, 30093, MEDIA, NOT_NAVI, NOT_VC);
+  am::ApplicationSharedPtr app_moved_to_full =
+      ConfigureApp(&app_moved_to_full_mock,
+                   kAppIdMovedToFull,
+                   kHMIAppIdMovedToFull,
+                   MEDIA,
+                   NOT_NAVI,
+                   NOT_VC,
+                   NOT_WEP);
 
   InsertApplication(app_in_full);
   InsertApplication(app_moved_to_full);
@@ -1745,12 +1795,23 @@ TEST_F(StateControllerImplTest,
   namespace SystemContext = mobile_apis::SystemContext;
 
   NiceMock<application_manager_test::MockApplication>* app_in_limited_mock;
-  am::ApplicationSharedPtr app_in_limited =
-      ConfigureApp(&app_in_limited_mock, 1761, 15685, NOT_MEDIA, NAVI, NOT_VC);
+  am::ApplicationSharedPtr app_in_limited = ConfigureApp(&app_in_limited_mock,
+                                                         kAppIdLimited,
+                                                         kHMIAppIdLimited,
+                                                         NOT_MEDIA,
+                                                         NAVI,
+                                                         NOT_VC,
+                                                         NOT_WEP);
 
   NiceMock<application_manager_test::MockApplication>* app_moved_to_full_mock;
   am::ApplicationSharedPtr app_moved_to_full =
-      ConfigureApp(&app_moved_to_full_mock, 1796, 30093, NOT_MEDIA, NAVI, VC);
+      ConfigureApp(&app_moved_to_full_mock,
+                   kAppIdMovedToFull,
+                   kHMIAppIdMovedToFull,
+                   NOT_MEDIA,
+                   NAVI,
+                   VC,
+                   NOT_WEP);
 
   InsertApplication(app_in_limited);
   InsertApplication(app_moved_to_full);
@@ -1771,13 +1832,24 @@ TEST_F(StateControllerImplTest,
   namespace HMILevel = mobile_apis::HMILevel;
   namespace SystemContext = mobile_apis::SystemContext;
   NiceMock<application_manager_test::MockApplication>* app_in_limited_mock;
-  am::ApplicationSharedPtr app_in_limited =
-      ConfigureApp(&app_in_limited_mock, 1761, 15685, NOT_MEDIA, NOT_NAVI, VC);
+  am::ApplicationSharedPtr app_in_limited = ConfigureApp(&app_in_limited_mock,
+                                                         kAppIdLimited,
+                                                         kHMIAppIdLimited,
+                                                         NOT_MEDIA,
+                                                         NOT_NAVI,
+                                                         VC,
+                                                         NOT_WEP);
 
   NiceMock<application_manager_test::MockApplication>*
       app_moved_to_limited_mock;
-  am::ApplicationSharedPtr app_moved_to_limited = ConfigureApp(
-      &app_moved_to_limited_mock, 1796, 30093, NOT_MEDIA, NOT_NAVI, VC);
+  am::ApplicationSharedPtr app_moved_to_limited =
+      ConfigureApp(&app_moved_to_limited_mock,
+                   kAppIDMovedToLimited,
+                   kHMIAppIdMovedToLimited,
+                   NOT_MEDIA,
+                   NOT_NAVI,
+                   VC,
+                   NOT_WEP);
 
   InsertApplication(app_in_limited);
   InsertApplication(app_moved_to_limited);
@@ -1926,16 +1998,27 @@ TEST_F(StateControllerImplTest,
   namespace SystemContext = mobile_apis::SystemContext;
 
   NiceMock<application_manager_test::MockApplication>* app_moved_to_full_mock;
-  am::ApplicationSharedPtr app_moved_to_full = ConfigureApp(
-      &app_moved_to_full_mock, 1761, 15685, NOT_MEDIA, NOT_NAVI, NOT_VC);
+  am::ApplicationSharedPtr app_moved_to_full =
+      ConfigureApp(&app_moved_to_full_mock,
+                   kAppIdMovedToFull,
+                   kHMIAppIdMovedToFull,
+                   NOT_MEDIA,
+                   NOT_NAVI,
+                   NOT_VC,
+                   NOT_WEP);
 
   am::ApplicationSharedPtr limited_app = media_app_;
   NiceMock<application_manager_test::MockApplication>* limited_app_mock =
       media_app_ptr_;
 
   NiceMock<application_manager_test::MockApplication>* full_app_mock;
-  am::ApplicationSharedPtr full_app =
-      ConfigureApp(&full_app_mock, 1796, 30093, NOT_MEDIA, NOT_NAVI, NOT_VC);
+  am::ApplicationSharedPtr full_app = ConfigureApp(&full_app_mock,
+                                                   kAppIdInFull,
+                                                   kHMIAppIdInFull,
+                                                   NOT_MEDIA,
+                                                   NOT_NAVI,
+                                                   NOT_VC,
+                                                   NOT_WEP);
 
   InsertApplication(app_moved_to_full);
   InsertApplication(limited_app);
@@ -1964,16 +2047,32 @@ TEST_F(
   namespace SystemContext = mobile_apis::SystemContext;
 
   NiceMock<application_manager_test::MockApplication>* app_moved_to_full_mock;
-  am::ApplicationSharedPtr app_moved_to_full = ConfigureApp(
-      &app_moved_to_full_mock, 1761, 15685, MEDIA, NOT_NAVI, NOT_VC);
+  am::ApplicationSharedPtr app_moved_to_full =
+      ConfigureApp(&app_moved_to_full_mock,
+                   kAppIdMovedToFull,
+                   kHMIAppIdMovedToFull,
+                   MEDIA,
+                   NOT_NAVI,
+                   NOT_VC,
+                   NOT_WEP);
 
   NiceMock<application_manager_test::MockApplication>* limited_app_mock;
-  am::ApplicationSharedPtr limited_app =
-      ConfigureApp(&limited_app_mock, 1762, 17559, MEDIA, NOT_NAVI, NOT_VC);
+  am::ApplicationSharedPtr limited_app = ConfigureApp(&limited_app_mock,
+                                                      kAppIdLimited,
+                                                      kHMIAppIdLimited,
+                                                      MEDIA,
+                                                      NOT_NAVI,
+                                                      NOT_VC,
+                                                      NOT_WEP);
 
   NiceMock<application_manager_test::MockApplication>* full_app_mock;
-  am::ApplicationSharedPtr full_app =
-      ConfigureApp(&full_app_mock, 1796, 30093, NOT_MEDIA, NOT_NAVI, NOT_VC);
+  am::ApplicationSharedPtr full_app = ConfigureApp(&full_app_mock,
+                                                   kAppIdInFull,
+                                                   kHMIAppIdInFull,
+                                                   NOT_MEDIA,
+                                                   NOT_NAVI,
+                                                   NOT_VC,
+                                                   NOT_WEP);
 
   InsertApplication(app_moved_to_full);
   InsertApplication(limited_app);
@@ -2002,16 +2101,32 @@ TEST_F(
   namespace SystemContext = mobile_apis::SystemContext;
 
   NiceMock<application_manager_test::MockApplication>* app_moved_to_full_mock;
-  am::ApplicationSharedPtr app_moved_to_full = ConfigureApp(
-      &app_moved_to_full_mock, 1761, 15685, MEDIA, NOT_NAVI, NOT_VC);
+  am::ApplicationSharedPtr app_moved_to_full =
+      ConfigureApp(&app_moved_to_full_mock,
+                   kAppIdMovedToFull,
+                   kHMIAppIdMovedToFull,
+                   MEDIA,
+                   NOT_NAVI,
+                   NOT_VC,
+                   NOT_WEP);
 
   NiceMock<application_manager_test::MockApplication>* limited_app_mock;
-  am::ApplicationSharedPtr limited_app =
-      ConfigureApp(&limited_app_mock, 1762, 17559, MEDIA, NOT_NAVI, NOT_VC);
+  am::ApplicationSharedPtr limited_app = ConfigureApp(&limited_app_mock,
+                                                      kAppIdLimited,
+                                                      kHMIAppIdLimited,
+                                                      MEDIA,
+                                                      NOT_NAVI,
+                                                      NOT_VC,
+                                                      NOT_WEP);
 
   NiceMock<application_manager_test::MockApplication>* full_app_mock;
-  am::ApplicationSharedPtr full_app =
-      ConfigureApp(&full_app_mock, 1796, 30093, NOT_MEDIA, NAVI, NOT_VC);
+  am::ApplicationSharedPtr full_app = ConfigureApp(&full_app_mock,
+                                                   kAppIdInFull,
+                                                   kHMIAppIdInFull,
+                                                   NOT_MEDIA,
+                                                   NAVI,
+                                                   NOT_VC,
+                                                   NOT_WEP);
 
   InsertApplication(app_moved_to_full);
   InsertApplication(limited_app);
@@ -3426,6 +3541,29 @@ TEST_F(
   const bool send_activate_app = true;
   state_ctrl_->SetRegularState(
       media_app_, kDefaultWindowId, new_state, send_activate_app);
+}
+
+TEST_F(
+    StateControllerImplTest,
+    SetRegularState_WEPAppIsInResumingModeEmbeddedNaviIsActive_HmiStateIsNotChanged) {
+  am::event_engine::Event embedded_navi_event(
+      hmi_apis::FunctionID::BasicCommunication_OnEventChanged);
+  smart_objects::SmartObject message;
+  message[am::strings::msg_params][am::hmi_notification::is_active] = true;
+  message[am::strings::msg_params][am::hmi_notification::event_name] =
+      hmi_apis::Common_EventTypes::EMBEDDED_NAVI;
+  embedded_navi_event.set_smart_object(message);
+  state_ctrl_->on_event(embedded_navi_event);
+
+  EXPECT_CALL(*media_wep_app_ptr_, is_resuming())
+      .Times(2)
+      .WillRepeatedly(Return(true));
+  EXPECT_CALL(*media_wep_app_ptr_, SetRegularState(_, _)).Times(0);
+
+  const auto new_state = FullAudibleState();
+  const bool send_activate_app = true;
+  state_ctrl_->SetRegularState(
+      media_wep_app_, kDefaultWindowId, new_state, send_activate_app);
 }
 
 TEST_F(StateControllerImplTest,
