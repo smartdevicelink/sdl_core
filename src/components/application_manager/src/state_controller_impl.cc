@@ -88,7 +88,10 @@ void StateControllerImpl::SetRegularState(ApplicationSharedPtr app,
     return;
   }
 
-  if (app->is_resuming() && !IsResumptionAllowed(app, state)) {
+  const bool app_is_resuming = app->is_resuming();
+  const bool is_resumption_allowed = IsResumptionAllowed(app, state);
+
+  if (app_is_resuming && !is_resumption_allowed) {
     return;
   }
 
@@ -478,9 +481,12 @@ bool StateControllerImpl::IsResumptionAllowed(ApplicationSharedPtr app,
     return false;
   }
 
+  const bool is_navi_app = app->is_navi();
+  const bool is_mob_projection_app = app->mobile_projection_enabled();
+  const bool is_wep_app = app->webengine_projection_enabled();
+
   if (IsTempStateActive(HmiState::StateID::STATE_ID_EMBEDDED_NAVI) &&
-      (app->is_navi() || app->mobile_projection_enabled() ||
-       app->webengine_projection_enabled())) {
+      (is_navi_app || is_mob_projection_app || is_wep_app)) {
     LOG4CXX_DEBUG(logger_,
                   "Resumption for navi and projection apps is not allowed. "
                       << "EMBEDDED_NAVI event is active");
