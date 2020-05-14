@@ -155,6 +155,14 @@ class CommandImpl : public Command {
   static uint32_t CalcCommandInternalConsecutiveNumber(
       application_manager::ApplicationConstSharedPtr app);
 
+  /**
+   * @brief Check syntax of string from mobile
+   * @param str - string that need to be checked
+   * @param allow_empty_string if true methods allow empty sting
+   * @return true if success otherwise return false
+   */
+  bool CheckSyntax(const std::string& str, bool allow_empty_line = false) const;
+
   // members
   static const int32_t hmi_protocol_type_;
   static const int32_t mobile_protocol_type_;
