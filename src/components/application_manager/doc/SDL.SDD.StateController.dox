@@ -28,6 +28,19 @@ SDL should keep resolve application HMI states to avoid conflicts. There are sev
  - End System Event from HMI 
  - Resumption
 
+Events from HMI can be started by the following RPCs:
+
+ - VR.Started
+ - TTS.Started
+ - BC.OnEventChanged(is_active = true)
+
+And can be stopped by the following RPCs:
+
+ - VR.Stopped
+ - TTS.Stopped
+ - BC.OnEventChanged(is_active = false)
+
+
 \link application_manager::StateController 
 \endlink is responsible for this.
 
