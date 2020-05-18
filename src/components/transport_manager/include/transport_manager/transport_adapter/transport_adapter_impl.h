@@ -582,6 +582,16 @@ class TransportAdapterImpl : public TransportAdapter,
   DeviceUID GetNextRetryDevice();
 
   /**
+   * @brief Remove a connection from the list without triggering
+   *the connection's destructor inside of a list lock
+   *
+   * @param device_handle Device unique identifier.
+   * @param app_handle Handle of application.
+   */
+  void RemoveConnection(const DeviceUID& device_id, 
+                        const ApplicationHandle& app_handle);
+
+  /**
    * @brief Remove specified device
    * @param device_handle Device unique identifier.
    */
