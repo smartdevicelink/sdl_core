@@ -35,11 +35,11 @@
 
 #include "gtest/gtest.h"
 #include "mobile/on_touch_event_notification.h"
-#include "utils/shared_ptr.h"
-#include "smart_objects/smart_object.h"
-#include "application_manager/smart_object_keys.h"
-#include "application_manager/commands/commands_test.h"
+
 #include "application_manager/commands/command_impl.h"
+#include "application_manager/commands/commands_test.h"
+#include "application_manager/smart_object_keys.h"
+#include "smart_objects/smart_object.h"
 #include "utils/helpers.h"
 
 namespace test {
@@ -56,7 +56,7 @@ using ::testing::Return;
 using am::commands::MessageSharedPtr;
 using sdl_rpc_plugin::commands::mobile::OnTouchEventNotification;
 
-typedef ::utils::SharedPtr<OnTouchEventNotification> NotificationPtr;
+typedef std::shared_ptr<OnTouchEventNotification> NotificationPtr;
 
 namespace {
 const uint32_t kAppId = 1u;

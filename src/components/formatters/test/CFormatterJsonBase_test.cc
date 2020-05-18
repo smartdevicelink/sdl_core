@@ -30,20 +30,20 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <string>
-#include <algorithm>
-#include "json/value.h"
-#include "gtest/gtest.h"
-#include "json/reader.h"
 #include "formatters/CFormatterJsonBase.h"
+#include <algorithm>
+#include <string>
 #include "formatters/generic_json_formatter.h"
+#include "gtest/gtest.h"
+#include "json/value.h"
+#include "utils/jsoncpp_reader_wrapper.h"
 
 namespace test {
 namespace components {
 namespace formatters {
 
-using namespace NsSmartDeviceLink::NsSmartObjects;
-using namespace NsSmartDeviceLink::NsJSONHandler::Formatters;
+using namespace ns_smart_device_link::ns_smart_objects;
+using namespace ns_smart_device_link::ns_json_handler::formatters;
 
 TEST(CFormatterJsonBaseTest, JSonStringValueToSmartObj_ExpectSuccessful) {
   // Arrange value
@@ -168,9 +168,12 @@ TEST(CFormatterJsonBaseTest, JSonArrayValueToSmartObj_ExpectSuccessful) {
       "[\"test1\", \"test2\", \"test3\"]";  // Array in json format
   Json::Value json_value;  // Json value from array. Will be initialized later
   SmartObject object;
-  Json::Reader reader;  // Json reader - Needed for correct parsing
+  Json::CharReaderBuilder reader_builder;
+  const std::unique_ptr<Json::CharReader> reader(
+      reader_builder.newCharReader());
   // Parse array to json value
-  ASSERT_TRUE(reader.parse(json_array, json_value));
+  ASSERT_TRUE(reader->parse(
+      json_array, json_array + strlen(json_array), &json_value, nullptr));
   // Convert json array to SmartObject
   CFormatterJsonBase::jsonValueToObj(json_value, object);
   // Check conversion was successful
@@ -187,10 +190,15 @@ TEST(CFormatterJsonBaseTest, JSonObjectValueToSmartObj_ExpectSuccessful) {
       "\"json_test_object2\": [\"test11\", \"test12\", \"test13\" ]}";
   Json::Value json_value;  // Json value from object. Will be initialized later
   SmartObject object;
-  Json::Reader reader;  // Json reader - Needed for correct parsing
-  ASSERT_TRUE(reader.parse(
+  Json::CharReaderBuilder reader_builder;
+  const std::unique_ptr<Json::CharReader> reader(
+      reader_builder
+          .newCharReader());  // Json reader - Needed for correct parsing
+  ASSERT_TRUE(reader->parse(
       json_object,
-      json_value));  // If parsing not successful - no sense to continue
+      json_object + strlen(json_object),
+      &json_value,
+      nullptr));  // If parsing not successful - no sense to continue
   CFormatterJsonBase::jsonValueToObj(json_value, object);
   // Check conversion was successful
   EXPECT_TRUE(json_value.isObject());
@@ -302,10 +310,15 @@ TEST(CFormatterJsonBaseTest, ArraySmartObjectToJSon_ExpectSuccessful) {
   Json::Value json_value;  // Json value from array. Will be initialized later
   Json::Value result;      // Json value from array. Will be initialized later
   SmartObject object;
-  Json::Reader reader;  // Json reader - Needed for correct parsing
+  Json::CharReaderBuilder reader_builder;
+  const std::unique_ptr<Json::CharReader> reader(
+      reader_builder
+          .newCharReader());  // Json reader - Needed for correct parsing
   // Parse array to json value
-  ASSERT_TRUE(reader.parse(json_array,
-                           json_value));  // Convert json array to SmartObject
+  ASSERT_TRUE(reader->parse(json_array,
+                            json_array + strlen(json_array),
+                            &json_value,
+                            nullptr));  // Convert json array to SmartObject
   // Convert json array to SmartObject
   CFormatterJsonBase::jsonValueToObj(json_value, object);
   // Convert SmartObject to JSon
@@ -325,11 +338,16 @@ TEST(CFormatterJsonBaseTest, JSonObjectValueToObj_ExpectSuccessful) {
   Json::Value
       result;  // Json value from Smart object. Will keep conversion result
   SmartObject object;
-  Json::Reader reader;  // Json reader - Needed for correct parsing
+  Json::CharReaderBuilder reader_builder;
+  const std::unique_ptr<Json::CharReader> reader(
+      reader_builder
+          .newCharReader());  // Json reader - Needed for correct parsing
   // Parse json object to correct json value
-  ASSERT_TRUE(reader.parse(
+  ASSERT_TRUE(reader->parse(
       json_object,
-      json_value));  // If parsing not successful - no sense to continue
+      json_object + strlen(json_object),
+      &json_value,
+      nullptr));  // If parsing not successful - no sense to continue
   // Convert json array to SmartObject
   CFormatterJsonBase::jsonValueToObj(json_value, object);
   // Convert SmartObject to JSon

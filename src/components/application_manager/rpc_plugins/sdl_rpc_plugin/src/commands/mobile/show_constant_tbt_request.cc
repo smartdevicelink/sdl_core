@@ -31,15 +31,15 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <cstring>
 #include "sdl_rpc_plugin/commands/mobile/show_constant_tbt_request.h"
+#include <cstring>
 
-#include "application_manager/policies/policy_handler.h"
 #include "application_manager/application_impl.h"
 #include "application_manager/message_helper.h"
+#include "application_manager/policies/policy_handler.h"
 #include "application_manager/policies/policy_handler_interface.h"
-#include "interfaces/MOBILE_API.h"
 #include "interfaces/HMI_API.h"
+#include "interfaces/MOBILE_API.h"
 
 namespace sdl_rpc_plugin {
 using namespace application_manager;
@@ -105,7 +105,7 @@ void ShowConstantTBTRequest::Run() {
   if (msg_params.keyExists(strings::turn_icon)) {
     verification_result = MessageHelper::VerifyImage(
         msg_params[strings::turn_icon], app, application_manager_);
-    if (mobile_apis::Result::SUCCESS != verification_result) {
+    if (mobile_apis::Result::INVALID_DATA == verification_result) {
       LOG4CXX_ERROR(logger_, "VerifyImage INVALID_DATA!");
       SendResponse(false, verification_result);
       return;
@@ -115,7 +115,7 @@ void ShowConstantTBTRequest::Run() {
   if (msg_params.keyExists(strings::next_turn_icon)) {
     verification_result = MessageHelper::VerifyImage(
         msg_params[strings::next_turn_icon], app, application_manager_);
-    if (mobile_apis::Result::SUCCESS != verification_result) {
+    if (mobile_apis::Result::INVALID_DATA == verification_result) {
       LOG4CXX_ERROR(logger_, "VerifyImage INVALID_DATA!");
       SendResponse(false, verification_result);
       return;
@@ -228,7 +228,8 @@ bool ShowConstantTBTRequest::IsWhiteSpaceExist() {
 
   if ((*message_)[strings::msg_params].keyExists(strings::next_turn_icon)) {
     str = (*message_)[strings::msg_params][strings::next_turn_icon]
-                     [strings::value].asCharArray();
+                     [strings::value]
+                         .asCharArray();
     if (!CheckSyntax(str)) {
       LOG4CXX_ERROR(logger_,
                     "Invalid next_turn_icon value syntax check failed");
@@ -289,4 +290,4 @@ bool ShowConstantTBTRequest::IsWhiteSpaceExist() {
 
 }  // namespace commands
 
-}  // namespace application_manager
+}  // namespace sdl_rpc_plugin

@@ -33,8 +33,8 @@
 #ifndef SRC_COMPONENTS_INCLUDE_PROTOCOL_COMMON_H_
 #define SRC_COMPONENTS_INCLUDE_PROTOCOL_COMMON_H_
 
-#include "utils/macro.h"
 #include "protocol/raw_message.h"
+#include "utils/macro.h"
 
 /**
  *\namespace protocol_handlerHandler
@@ -111,20 +111,20 @@ const bool PROTECTION_OFF = false;
  */
 enum {
   /**
-  *\brief Constant: Control type of frame
-  */
+   *\brief Constant: Control type of frame
+   */
   FRAME_TYPE_CONTROL = 0x00,
   /**
-  *\brief Constant: Single type of frame.
-  */
+   *\brief Constant: Single type of frame.
+   */
   FRAME_TYPE_SINGLE = 0x01,
   /**
-  *\brief Constant: First frame for multiple frames
-  */
+   *\brief Constant: First frame for multiple frames
+   */
   FRAME_TYPE_FIRST = 0x02,
   /**
-  *\brief Constant: Consecutive type of frame for multiple frames
-  */
+   *\brief Constant: Consecutive type of frame for multiple frames
+   */
   FRAME_TYPE_CONSECUTIVE = 0x03,
   /**
    *\brief Maximum value of frame type field (size 3-bit)
@@ -166,6 +166,22 @@ enum {
    *\brief End service not acknowledgement frame
    */
   FRAME_DATA_END_SERVICE_NACK = 0x06,
+  /**
+   *\brief Register Secondary Transport frame
+   */
+  FRAME_DATA_REGISTER_SECONDARY_TRANSPORT = 0x07,
+  /**
+   *\brief Register Secondary Transport acknowledgement frame
+   */
+  FRAME_DATA_REGISTER_SECONDARY_TRANSPORT_ACK = 0x08,
+  /**
+   *\brief Register Secondary Transport not acknowledgement frame
+   */
+  FRAME_DATA_REGISTER_SECONDARY_TRANSPORT_NACK = 0x09,
+  /**
+   *\brief Transport Event Update frame
+   */
+  FRAME_DATA_TRANSPORT_EVENT_UPDATE = 0xFD,
   /**
    *\brief Service data ACK frame
    */

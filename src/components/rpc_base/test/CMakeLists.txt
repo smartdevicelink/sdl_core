@@ -31,8 +31,6 @@
 include(${CMAKE_SOURCE_DIR}/tools/cmake/helpers/sources.cmake)
 
 include_directories(
-    ${COMPONENTS_DIR}/dbus/include
-    ${COMPONENTS_DIR}/dbus/src
     ${COMPONENTS_DIR}/rpc_base/include
     ${GMOCK_INCLUDE_DIRECTORY}
     ${JSONCPP_INCLUDE_DIRECTORY}
@@ -42,17 +40,6 @@ set(LIBRARIES
   gmock
   jsoncpp
 )
-
-if(${HMI_DBUS_API})
-  include_directories(${DBUS_INCLUDE_DIRS})
-  list(APPEND LIBRARIES
-    DBus
-  )
-else()
-  set(EXCLUDE_PATHS
-    rpc_base_dbus_test.cc
-  )
-endif()
 
 collect_sources(SOURCES "${CMAKE_CURRENT_SOURCE_DIR}" "${EXCLUDE_PATHS}")
 create_test(rpc_base_test "${SOURCES}" "${LIBRARIES}")

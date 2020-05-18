@@ -1,8 +1,8 @@
-#include <algorithm>
 #include "application_manager/app_launch/apps_launcher.h"
-#include "utils/make_shared.h"
-#include "utils/timer_task_impl.h"
+#include <algorithm>
+
 #include <iostream>
+#include "utils/timer_task_impl.h"
 
 namespace app_launch {
 struct LauncherGenerator {
@@ -15,7 +15,7 @@ struct LauncherGenerator {
       , app_launch_max_retry_attempt_(app_launch_max_retry_attempt)
       , app_launch_retry_wait_time_(app_launch_retry_wait_time) {}
   AppsLauncher::LauncherPtr operator()() {
-    return utils::MakeShared<AppsLauncher::Launcher>(
+    return std::make_shared<AppsLauncher::Launcher>(
         apps_laucnher_,
         connection_handler_,
         app_launch_max_retry_attempt_,

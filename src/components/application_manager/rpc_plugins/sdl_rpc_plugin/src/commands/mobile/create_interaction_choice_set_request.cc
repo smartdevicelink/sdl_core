@@ -31,21 +31,23 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <string>
-#include <cstring>
-#include <algorithm>
-#include <vector>
 #include "sdl_rpc_plugin/commands/mobile/create_interaction_choice_set_request.h"
+#include <algorithm>
+#include <cstring>
+#include <string>
+#include <vector>
 
 #include "application_manager/application_impl.h"
 #include "application_manager/message_helper.h"
 #include "utils/gen_hash.h"
 #include "utils/helpers.h"
 
-namespace sdl_rpc_plugin {
-using namespace application_manager;
+const char* kInvalidImageWarningInfo = "Requested image(s) not found.";
 
+namespace sdl_rpc_plugin {
 namespace commands {
+
+using namespace application_manager;
 
 CreateInteractionChoiceSetRequest::CreateInteractionChoiceSetRequest(
     const application_manager::commands::MessageSharedPtr& message,
@@ -61,9 +63,9 @@ CreateInteractionChoiceSetRequest::CreateInteractionChoiceSetRequest(
     , choice_set_id_(0)
     , expected_chs_count_(0)
     , received_chs_count_(0)
+    , should_send_warnings_(false)
     , error_from_hmi_(false)
-    , is_timed_out_(false)
-    , vr_commands_lock_(true) {}
+    , is_timed_out_(false) {}
 
 CreateInteractionChoiceSetRequest::~CreateInteractionChoiceSetRequest() {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -79,6 +81,7 @@ void CreateInteractionChoiceSetRequest::Run() {
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     return;
   }
+
   for (uint32_t i = 0;
        i < (*message_)[strings::msg_params][strings::choice_set].length();
        ++i) {
@@ -105,6 +108,10 @@ void CreateInteractionChoiceSetRequest::Run() {
       LOG4CXX_ERROR(logger_, "Image verification failed.");
       SendResponse(false, Result::INVALID_DATA);
       return;
+    } else if (verification_result_image == Result::WARNINGS ||
+               verification_result_secondary_image == Result::WARNINGS) {
+      should_send_warnings_ = true;
+      break;
     }
   }
 
@@ -124,10 +131,30 @@ void CreateInteractionChoiceSetRequest::Run() {
     SendResponse(false, result);
     return;
   }
-  uint32_t grammar_id = application_manager_.GenerateGrammarID();
-  (*message_)[strings::msg_params][strings::grammar_id] = grammar_id;
+  auto vr_status = MessageHelper::CheckChoiceSetVRCommands(
+      (*message_)[strings::msg_params][strings::choice_set]);
+  if (vr_status == MessageHelper::ChoiceSetVRCommandsStatus::MIXED) {
+    // this is an error
+    SendResponse(false,
+                 Result::INVALID_DATA,
+                 "Some choices don't contain VR commands. Either all or none "
+                 "must have voice commands.");
+    return;  // exit now, this is a bad set
+  } else if (vr_status == MessageHelper::ChoiceSetVRCommandsStatus::ALL) {
+    // everyone had a vr command, setup the grammar
+    uint32_t grammar_id = application_manager_.GenerateGrammarID();
+    (*message_)[strings::msg_params][strings::grammar_id] = grammar_id;
+  }
+  // continue on as usual
   app->AddChoiceSet(choice_set_id_, (*message_)[strings::msg_params]);
-  SendVRAddCommandRequests(app);
+
+  if (vr_status == MessageHelper::ChoiceSetVRCommandsStatus::ALL) {
+    // we have VR commands
+    SendVRAddCommandRequests(app);
+  } else {
+    // we have none, just return with success
+    SendResponse(true, Result::SUCCESS);
+  }
 }
 
 mobile_apis::Result::eType CreateInteractionChoiceSetRequest::CheckChoiceSet(
@@ -149,7 +176,7 @@ mobile_apis::Result::eType CreateInteractionChoiceSetRequest::CheckChoiceSet(
             (*current_choice_set_it)[strings::choice_id].asInt());
     if (!ins_res.second) {
       LOG4CXX_ERROR(logger_,
-                    "Choise with ID "
+                    "Choice with ID "
                         << (*current_choice_set_it)[strings::choice_id].asInt()
                         << " already exists");
       return mobile_apis::Result::INVALID_ID;
@@ -171,14 +198,17 @@ mobile_apis::Result::eType CreateInteractionChoiceSetRequest::CheckChoiceSet(
 }
 
 bool CreateInteractionChoiceSetRequest::compareSynonyms(
-    const NsSmartDeviceLink::NsSmartObjects::SmartObject& choice1,
-    const NsSmartDeviceLink::NsSmartObjects::SmartObject& choice2) {
+    const ns_smart_device_link::ns_smart_objects::SmartObject& choice1,
+    const ns_smart_device_link::ns_smart_objects::SmartObject& choice2) {
+  // only compare if they both have vr commands
+  if (!(choice1.keyExists(strings::vr_commands) &&
+        choice2.keyExists(strings::vr_commands))) {
+    return false;  // clearly there isn't a duplicate if one of them is null
+  }
   smart_objects::SmartArray* vr_cmds_1 =
       choice1[strings::vr_commands].asArray();
-  DCHECK(vr_cmds_1 != NULL);
   smart_objects::SmartArray* vr_cmds_2 =
       choice2[strings::vr_commands].asArray();
-  DCHECK(vr_cmds_2 != NULL);
 
   smart_objects::SmartArray::iterator it;
   it = std::find_first_of(vr_cmds_1->begin(),
@@ -188,9 +218,9 @@ bool CreateInteractionChoiceSetRequest::compareSynonyms(
                           CreateInteractionChoiceSetRequest::compareStr);
 
   if (it != vr_cmds_1->end()) {
-    LOG4CXX_INFO(logger_,
-                 "Incoming choice set has duplicated VR synonyms "
-                     << it->asString());
+    LOG4CXX_INFO(
+        logger_,
+        "Incoming choice set has duplicated VR synonyms " << it->asString());
     return true;
   }
 
@@ -198,8 +228,8 @@ bool CreateInteractionChoiceSetRequest::compareSynonyms(
 }
 
 bool CreateInteractionChoiceSetRequest::compareStr(
-    const NsSmartDeviceLink::NsSmartObjects::SmartObject& str1,
-    const NsSmartDeviceLink::NsSmartObjects::SmartObject& str2) {
+    const ns_smart_device_link::ns_smart_objects::SmartObject& str1,
+    const ns_smart_device_link::ns_smart_objects::SmartObject& str2) {
   return 0 == strcasecmp(str1.asCharArray(), str2.asCharArray());
 }
 
@@ -302,9 +332,9 @@ void CreateInteractionChoiceSetRequest::SendVRAddCommandRequests(
 
     VRCommandInfo vr_command(vr_cmd_id);
     sent_commands_map_[vr_corr_id] = vr_command;
-    LOG4CXX_DEBUG(logger_,
-                  "VR_command sent corr_id " << vr_corr_id << " cmd_id "
-                                             << vr_corr_id);
+    LOG4CXX_DEBUG(
+        logger_,
+        "VR_command sent corr_id " << vr_corr_id << " cmd_id " << vr_corr_id);
   }
   expected_chs_count_ = chs_num;
   LOG4CXX_DEBUG(logger_, "expected_chs_count_ = " << expected_chs_count_);
@@ -436,7 +466,9 @@ void CreateInteractionChoiceSetRequest::DeleteChoices() {
 void CreateInteractionChoiceSetRequest::OnAllHMIResponsesReceived() {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  if (!error_from_hmi_) {
+  if (!error_from_hmi_ && should_send_warnings_) {
+    SendResponse(true, mobile_apis::Result::WARNINGS, kInvalidImageWarningInfo);
+  } else if (!error_from_hmi_) {
     SendResponse(true, mobile_apis::Result::SUCCESS);
   } else {
     DeleteChoices();
@@ -448,4 +480,4 @@ void CreateInteractionChoiceSetRequest::OnAllHMIResponsesReceived() {
 
 }  // namespace commands
 
-}  // namespace application_manager
+}  // namespace sdl_rpc_plugin

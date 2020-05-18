@@ -34,17 +34,19 @@
 #define SRC_COMPONENTS_TRANSPORT_MANAGER_TEST_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_ADAPTER_MOCK_TRANSPORT_ADAPTER_IMPL_H_
 
 #include "gmock/gmock.h"
-#include "transport_manager/transport_manager_settings.h"
+#include "transport_manager/common.h"
+#include "transport_manager/transport_adapter/device.h"
 #include "transport_manager/transport_adapter/transport_adapter_impl.h"
+#include "transport_manager/transport_manager_settings.h"
 
-using ::transport_manager::transport_adapter::TransportAdapterImpl;
-using ::transport_manager::transport_adapter::DeviceScanner;
-using ::transport_manager::transport_adapter::ServerConnectionFactory;
-using ::transport_manager::transport_adapter::ClientConnectionListener;
-using ::transport_manager::transport_adapter::DeviceType;
-using ::transport_manager::transport_adapter::ConnectionSPtr;
-using ::transport_manager::DeviceUID;
 using ::transport_manager::ApplicationHandle;
+using ::transport_manager::DeviceUID;
+using ::transport_manager::transport_adapter::ClientConnectionListener;
+using ::transport_manager::transport_adapter::ConnectionSPtr;
+using ::transport_manager::transport_adapter::DeviceScanner;
+using ::transport_manager::transport_adapter::DeviceType;
+using ::transport_manager::transport_adapter::ServerConnectionFactory;
+using ::transport_manager::transport_adapter::TransportAdapterImpl;
 
 namespace test {
 namespace components {
@@ -56,13 +58,20 @@ class MockTransportAdapterImpl : public TransportAdapterImpl {
       DeviceScanner* device_scanner,
       ServerConnectionFactory* server_connection_factory,
       ClientConnectionListener* client_connection_listener,
-      resumption::LastState& last_state,
+      resumption::LastStateWrapperPtr last_state_wrapper,
       const transport_manager::TransportManagerSettings& settings)
       : TransportAdapterImpl(device_scanner,
                              server_connection_factory,
                              client_connection_listener,
-                             last_state,
+                             last_state_wrapper,
                              settings) {}
+
+  DEPRECATED
+  MockTransportAdapterImpl(DeviceScanner*,
+                           ServerConnectionFactory*,
+                           ClientConnectionListener*,
+                           resumption::LastState&,
+                           const transport_manager::TransportManagerSettings&);
 
   ConnectionSPtr FindStatedConnection(const DeviceUID& device_handle,
                                       const ApplicationHandle& app_handle) {
@@ -70,15 +79,17 @@ class MockTransportAdapterImpl : public TransportAdapterImpl {
   }
   virtual ~MockTransportAdapterImpl() {}
 
-  virtual DeviceType GetDeviceType() const {
-    return DeviceType::UNKNOWN;
-  }
-
   MOCK_CONST_METHOD0(Store, void());
   MOCK_METHOD0(Restore, bool());
   MOCK_CONST_METHOD1(FindDevice,
                      transport_manager::transport_adapter::DeviceSptr(
                          const DeviceUID& device_id));
+  MOCK_METHOD2(ConnectionStatusUpdated,
+               void(transport_manager::transport_adapter::DeviceSptr device,
+                    ::transport_manager::ConnectionStatus status));
+  MOCK_CONST_METHOD0(GetDeviceType,
+                     ::transport_manager::transport_adapter::DeviceType());
+  MOCK_METHOD0(RetryConnection, void());
 };
 
 }  // namespace transport_manager_test

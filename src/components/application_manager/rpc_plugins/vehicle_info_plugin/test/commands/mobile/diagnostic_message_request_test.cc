@@ -35,18 +35,18 @@
 #include <vector>
 
 #include "gtest/gtest.h"
-#include "utils/shared_ptr.h"
-#include "smart_objects/smart_object.h"
-#include "application_manager/smart_object_keys.h"
-#include "application_manager/commands/commands_test.h"
-#include "application_manager/commands/command_request_test.h"
+
 #include "application_manager/application.h"
-#include "application_manager/mock_application_manager.h"
-#include "application_manager/mock_application.h"
 #include "application_manager/event_engine/event.h"
+#include "application_manager/mock_application.h"
+#include "application_manager/mock_application_manager.h"
 #include "application_manager/mock_message_helper.h"
+#include "application_manager/smart_object_keys.h"
 #include "interfaces/MOBILE_API.h"
+#include "smart_objects/smart_object.h"
 #include "vehicle_info_plugin/commands/mobile/diagnostic_message_request.h"
+#include "vehicle_info_plugin/commands/vi_command_request_test.h"
+#include "vehicle_info_plugin/mock_custom_vehicle_data_manager.h"
 
 namespace test {
 namespace components {
@@ -59,11 +59,11 @@ using ::testing::Return;
 using ::testing::ReturnRef;
 namespace am = ::application_manager;
 using am::commands::MessageSharedPtr;
-using vehicle_info_plugin::commands::DiagnosticMessageRequest;
 using am::event_engine::Event;
+using vehicle_info_plugin::commands::DiagnosticMessageRequest;
 namespace mobile_result = mobile_apis::Result;
 
-typedef SharedPtr<DiagnosticMessageRequest> DiagnosticMessageRequestPtr;
+typedef std::shared_ptr<DiagnosticMessageRequest> DiagnosticMessageRequestPtr;
 
 namespace {
 const uint32_t kConnectionKey = 2u;
@@ -71,7 +71,7 @@ const uint32_t kDiagnosticMode = 5u;
 }  // namespace
 
 class DiagnosticMessageRequestTest
-    : public CommandRequestTest<CommandsTestMocks::kIsNice> {};
+    : public VICommandRequestTest<CommandsTestMocks::kIsNice> {};
 
 TEST_F(DiagnosticMessageRequestTest, Run_ApplicationIsNotRegistered_UNSUCCESS) {
   MessageSharedPtr command_msg(CreateMessage(smart_objects::SmartType_Map));
@@ -79,7 +79,7 @@ TEST_F(DiagnosticMessageRequestTest, Run_ApplicationIsNotRegistered_UNSUCCESS) {
       kConnectionKey;
 
   DiagnosticMessageRequestPtr command(
-      CreateCommand<DiagnosticMessageRequest>(command_msg));
+      CreateCommandVI<DiagnosticMessageRequest>(command_msg));
 
   EXPECT_CALL(app_mngr_, application(kConnectionKey))
       .WillOnce(Return(ApplicationSharedPtr()));
@@ -100,7 +100,7 @@ TEST_F(DiagnosticMessageRequestTest, Run_NotSupportedDiagnosticMode_UNSUCCESS) {
       kConnectionKey;
 
   DiagnosticMessageRequestPtr command(
-      CreateCommand<DiagnosticMessageRequest>(command_msg));
+      CreateCommandVI<DiagnosticMessageRequest>(command_msg));
 
   MockAppPtr app(CreateMockApp());
   EXPECT_CALL(app_mngr_, application(kConnectionKey)).WillOnce(Return(app));
@@ -127,7 +127,7 @@ TEST_F(DiagnosticMessageRequestTest, Run_SUCCESS) {
       kConnectionKey;
 
   DiagnosticMessageRequestPtr command(
-      CreateCommand<DiagnosticMessageRequest>(command_msg));
+      CreateCommandVI<DiagnosticMessageRequest>(command_msg));
 
   MockAppPtr app(CreateMockApp());
   EXPECT_CALL(app_mngr_, application(kConnectionKey)).WillOnce(Return(app));
@@ -141,9 +141,11 @@ TEST_F(DiagnosticMessageRequestTest, Run_SUCCESS) {
   EXPECT_CALL(app_mngr_settings_, supported_diag_modes())
       .WillOnce(ReturnRef(supported_diag_modes));
 
-  EXPECT_CALL(mock_rpc_service_,
-              ManageHMICommand(HMIResultCodeIs(
-                  hmi_apis::FunctionID::VehicleInfo_DiagnosticMessage)));
+  EXPECT_CALL(
+      mock_rpc_service_,
+      ManageHMICommand(
+          HMIResultCodeIs(hmi_apis::FunctionID::VehicleInfo_DiagnosticMessage),
+          _));
 
   command->Run();
 }
@@ -152,7 +154,7 @@ TEST_F(DiagnosticMessageRequestTest, OnEvent_UNSUCCESS) {
   Event event(hmi_apis::FunctionID::INVALID_ENUM);
 
   DiagnosticMessageRequestPtr command(
-      CreateCommand<DiagnosticMessageRequest>());
+      CreateCommandVI<DiagnosticMessageRequest>());
 
   EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(_, _)).Times(0);
 
@@ -169,7 +171,7 @@ TEST_F(DiagnosticMessageRequestTest, OnEvent_SUCCESS) {
   event.set_smart_object(*event_message);
 
   DiagnosticMessageRequestPtr command(
-      CreateCommand<DiagnosticMessageRequest>());
+      CreateCommandVI<DiagnosticMessageRequest>());
 
   EXPECT_CALL(
       mock_rpc_service_,

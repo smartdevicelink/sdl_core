@@ -31,27 +31,25 @@
  */
 
 #include <stdint.h>
-#include <string>
 #include <set>
+#include <string>
 
 #include "mobile/change_registration_request.h"
 
-#include "gtest/gtest.h"
-#include "utils/shared_ptr.h"
-#include "utils/helpers.h"
-#include "utils/make_shared.h"
-#include "utils/custom_string.h"
-#include "smart_objects/smart_object.h"
 #include "application_manager/commands/command_request_test.h"
-#include "application_manager/smart_object_keys.h"
-#include "policy/policy_regular/policy/usage_statistics/mock_statistics_manager.h"
+#include "application_manager/event_engine/event.h"
 #include "application_manager/mock_application.h"
 #include "application_manager/mock_application_manager.h"
-#include "application_manager/mock_message_helper.h"
 #include "application_manager/mock_hmi_capabilities.h"
-#include "application_manager/event_engine/event.h"
 #include "application_manager/mock_hmi_interface.h"
+#include "application_manager/mock_message_helper.h"
 #include "application_manager/policies/mock_policy_handler_interface.h"
+#include "application_manager/smart_object_keys.h"
+#include "gtest/gtest.h"
+#include "policy/policy_regular/policy/usage_statistics/mock_statistics_manager.h"
+#include "smart_objects/smart_object.h"
+#include "utils/custom_string.h"
+#include "utils/helpers.h"
 
 namespace test {
 namespace components {
@@ -60,19 +58,18 @@ namespace mobile_commands_test {
 namespace change_registration_request {
 
 namespace am = application_manager;
-using am::commands::CommandImpl;
 using am::ApplicationManager;
-using am::commands::MessageSharedPtr;
 using am::ApplicationSharedPtr;
 using am::MockMessageHelper;
+using am::commands::CommandImpl;
+using am::commands::MessageSharedPtr;
+using policy_test::MockPolicyHandlerInterface;
+using sdl_rpc_plugin::commands::ChangeRegistrationRequest;
+using ::test::components::application_manager_test::MockApplication;
 using ::testing::_;
-using ::utils::SharedPtr;
 using ::testing::Return;
 using ::testing::ReturnRef;
 using ::testing::SetArgPointee;
-using sdl_rpc_plugin::commands::ChangeRegistrationRequest;
-using policy_test::MockPolicyHandlerInterface;
-using ::test::components::application_manager_test::MockApplication;
 
 namespace custom_str = utils::custom_string;
 namespace strings = ::application_manager::strings;
@@ -149,7 +146,7 @@ class ChangeRegistrationRequestTest
                              hmi_apis::Common_Result::UNSUPPORTED_RESOURCE) {
     MessageSharedPtr msg_from_mobile = CreateMsgFromMobile();
 
-    utils::SharedPtr<ChangeRegistrationRequest> command =
+    std::shared_ptr<ChangeRegistrationRequest> command =
         CreateCommand<ChangeRegistrationRequest>(msg_from_mobile);
     MockAppPtr mock_app = CreateMockApp();
     ON_CALL(app_mngr_, application(_)).WillByDefault(Return(mock_app));
@@ -279,7 +276,7 @@ typedef ChangeRegistrationRequestTest::MockHMICapabilities MockHMICapabilities;
 TEST_F(ChangeRegistrationRequestTest,
        OnEvent_VRHmiSendSuccess_UNSUPPORTED_RESOURCE) {
   MessageSharedPtr msg_from_mobile = CreateMsgFromMobile();
-  utils::SharedPtr<ChangeRegistrationRequest> command =
+  std::shared_ptr<ChangeRegistrationRequest> command =
       CreateCommand<ChangeRegistrationRequest>(msg_from_mobile);
 
   am::ApplicationSet application_set;
@@ -367,7 +364,7 @@ TEST_F(ChangeRegistrationRequestTest,
 TEST_F(ChangeRegistrationRequestTest,
        OnEvent_TTS_UNSUPPORTED_RESOURCE_STATE_NOT_AVAILABLE_Expect_false) {
   MessageSharedPtr msg_from_mobile = CreateMsgFromMobile();
-  utils::SharedPtr<ChangeRegistrationRequest> command =
+  std::shared_ptr<ChangeRegistrationRequest> command =
       CreateCommand<ChangeRegistrationRequest>(msg_from_mobile);
   MockAppPtr mock_app = CreateMockApp();
   ON_CALL(app_mngr_, application(_)).WillByDefault(Return(mock_app));
@@ -472,7 +469,7 @@ TEST_F(ChangeRegistrationRequestTest,
        OnEvent_UIHmiSendSuccess_UNSUPPORTED_RESOURCE) {
   MessageSharedPtr msg_from_mobile = CreateMsgFromMobile();
 
-  utils::SharedPtr<ChangeRegistrationRequest> command =
+  std::shared_ptr<ChangeRegistrationRequest> command =
       CreateCommand<ChangeRegistrationRequest>(msg_from_mobile);
 
   am::ApplicationSet application_set;

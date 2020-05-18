@@ -32,8 +32,8 @@
  */
 
 #include "sdl_rpc_plugin/commands/mobile/list_files_response.h"
-#include "application_manager/rpc_service.h"
 #include "application_manager/application_impl.h"
+#include "application_manager/rpc_service.h"
 
 namespace sdl_rpc_plugin {
 using namespace application_manager;
@@ -62,4 +62,4 @@ void ListFilesResponse::Run() {
 
 }  // namespace commands
 
-}  // namespace application_manager
+}  // namespace sdl_rpc_plugin

@@ -34,9 +34,9 @@
 #ifndef SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_MOBILE_PUT_FILE_REQUEST_H_
 #define SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_MOBILE_PUT_FILE_REQUEST_H_
 
+#include "application_manager/application_manager.h"
 #include "application_manager/commands/command_request_impl.h"
 #include "utils/macro.h"
-#include "application_manager/application_manager.h"
 
 namespace sdl_rpc_plugin {
 namespace app_mngr = application_manager;
@@ -70,17 +70,17 @@ class PutFileRequest : public app_mngr::commands::CommandRequestImpl {
   virtual void Run();
 
  private:
-  int64_t offset_;
+  uint64_t offset_;
   std::string sync_file_name_;
   int64_t length_;
   mobile_apis::FileType::eType file_type_;
   bool is_persistent_file_;
 
-  void SendOnPutFileNotification();
+  void SendOnPutFileNotification(bool is_system_file);
   DISALLOW_COPY_AND_ASSIGN(PutFileRequest);
 };
 
 }  // namespace commands
-}  // namespace application_manager
+}  // namespace sdl_rpc_plugin
 
 #endif  // SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_MOBILE_PUT_FILE_REQUEST_H_

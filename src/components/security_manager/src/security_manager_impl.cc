@@ -32,12 +32,13 @@
 
 #include "security_manager/security_manager_impl.h"
 #include <functional>
-#include "security_manager/crypto_manager_impl.h"
-#include "protocol_handler/protocol_packet.h"
-#include "utils/logger.h"
-#include "utils/byte_order.h"
 #include "json/json.h"
+#include "protocol_handler/protocol_packet.h"
+#include "security_manager/crypto_manager_impl.h"
+#include "utils/byte_order.h"
 #include "utils/helpers.h"
+#include "utils/jsoncpp_reader_wrapper.h"
+#include "utils/logger.h"
 
 namespace security_manager {
 
@@ -69,7 +70,7 @@ void SecurityManagerImpl::OnMessageReceived(
     return;
   }
 
-  SecurityMessage securityMessagePtr(new SecurityQuery());
+  SecurityMessage securityMessagePtr(std::make_shared<SecurityQuery>());
   const bool result =
       securityMessagePtr->SerializeQuery(message->data(), message->data_size());
   if (!result) {
@@ -213,6 +214,13 @@ void SecurityManagerImpl::ResumeHandshake(uint32_t connection_key) {
     return;
   }
 
+  LOG4CXX_DEBUG(logger_,
+                "Connection key : "
+                    << connection_key
+                    << " is waiting for certificate: " << std::boolalpha
+                    << waiting_for_certificate_ << " and has certificate: "
+                    << ssl_context->HasCertificate());
+
   ssl_context->ResetConnection();
   if (!waiting_for_certificate_ && !ssl_context->HasCertificate()) {
     NotifyListenersOnHandshakeDone(connection_key,
@@ -228,6 +236,7 @@ void SecurityManagerImpl::StartHandshake(uint32_t connection_key) {
   LOG4CXX_INFO(logger_, "StartHandshake: connection_key " << connection_key);
   security_manager::SSLContext* ssl_context = session_observer_->GetSSLContext(
       connection_key, protocol_handler::kControl);
+
   if (!ssl_context) {
     const std::string error_text(
         "StartHandshake failed, "
@@ -277,6 +286,7 @@ void SecurityManagerImpl::ProceedHandshake(
   time_t cert_due_date;
   if (!ssl_context->GetCertificateDueDate(cert_due_date)) {
     LOG4CXX_ERROR(logger_, "Failed to get certificate due date!");
+    PostponeHandshake(connection_key);
     return;
   }
 
@@ -388,6 +398,68 @@ void SecurityManagerImpl::OnSystemTimeArrived(const time_t utc_time) {
   awaiting_time_connections_.clear();
 }
 
+void SecurityManagerImpl::OnSystemTimeFailed() {
+  LOG4CXX_AUTO_TRACE(logger_);
+  {
+    sync_primitives::AutoLock lock(waiters_lock_);
+    waiting_for_time_ = false;
+  }
+
+  NotifyListenersOnGetSystemTimeFailed();
+
+  awaiting_time_connections_.clear();
+}
+
+void SecurityManagerImpl::ProcessFailedPTU() {
+  LOG4CXX_AUTO_TRACE(logger_);
+  if (listeners_.empty()) {
+    LOG4CXX_DEBUG(logger_, "listeners arrays IS EMPTY!");
+    return;
+  }
+
+  std::list<SecurityManagerListener*> listeners_to_remove;
+  for (auto listener : listeners_) {
+    if (listener->OnPTUFailed()) {
+      listeners_to_remove.push_back(listener);
+    }
+  }
+
+  for (auto& listener : listeners_to_remove) {
+    auto it = std::find(listeners_.begin(), listeners_.end(), listener);
+    DCHECK(it != listeners_.end());
+    LOG4CXX_DEBUG(logger_, "Destroying listener: " << *it);
+    delete (*it);
+    listeners_.erase(it);
+  }
+}
+
+#ifdef EXTERNAL_PROPRIETARY_MODE
+void SecurityManagerImpl::ProcessFailedCertDecrypt() {
+  LOG4CXX_AUTO_TRACE(logger_);
+  {
+    sync_primitives::AutoLock lock(waiters_lock_);
+    waiting_for_certificate_ = false;
+  }
+
+  std::list<SecurityManagerListener*> listeners_to_remove;
+  for (auto listener : listeners_) {
+    if (listener->OnCertDecryptFailed()) {
+      listeners_to_remove.push_back(listener);
+    }
+  }
+
+  for (auto& listener : listeners_to_remove) {
+    auto it = std::find(listeners_.begin(), listeners_.end(), listener);
+    DCHECK(it != listeners_.end());
+    LOG4CXX_DEBUG(logger_, "Destroying listener: " << *it);
+    delete (*it);
+    listeners_.erase(it);
+  }
+
+  awaiting_certificate_connections_.clear();
+}
+#endif
+
 void SecurityManagerImpl::NotifyListenersOnHandshakeDone(
     const uint32_t& connection_key, SSLContext::HandshakeResult error) {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -403,10 +475,6 @@ void SecurityManagerImpl::NotifyListenersOnHandshakeDone(
   }
 }
 
-void SecurityManagerImpl::NotifyOnCertififcateUpdateRequired() {
-  NotifyOnCertificateUpdateRequired();
-}
-
 void SecurityManagerImpl::NotifyOnCertificateUpdateRequired() {
   LOG4CXX_AUTO_TRACE(logger_);
   std::list<SecurityManagerListener*>::iterator it = listeners_.begin();
@@ -416,11 +484,15 @@ void SecurityManagerImpl::NotifyOnCertificateUpdateRequired() {
   }
 }
 
-void SecurityManagerImpl::NotifyListenersOnHandshakeFailed() {
+void SecurityManagerImpl::ResetPendingSystemTimeRequests() {
+  system_time_handler_->ResetPendingSystemTimeRequests();
+}
+
+void SecurityManagerImpl::NotifyListenersOnGetSystemTimeFailed() {
   LOG4CXX_AUTO_TRACE(logger_);
   std::list<SecurityManagerListener*>::iterator it = listeners_.begin();
   while (it != listeners_.end()) {
-    if ((*it)->OnHandshakeFailed()) {
+    if ((*it)->OnGetSystemTimeFailed()) {
       LOG4CXX_DEBUG(logger_, "Destroying listener: " << *it);
       delete (*it);
       it = listeners_.erase(it);
@@ -452,9 +524,9 @@ bool SecurityManagerImpl::ProccessHandshakeData(
   const uint32_t seqNumber = inMessage->get_header().seq_number;
   const uint32_t connection_key = inMessage->get_connection_key();
 
-  LOG4CXX_DEBUG(logger_,
-                "Received " << inMessage->get_data_size()
-                            << " bytes handshake data ");
+  LOG4CXX_DEBUG(
+      logger_,
+      "Received " << inMessage->get_data_size() << " bytes handshake data ");
 
   if (!inMessage->get_data_size()) {
     const std::string error_text("SendHandshakeData: null arguments size.");
@@ -518,11 +590,13 @@ bool SecurityManagerImpl::ProccessInternalError(
                "Received InternalError with Json message"
                    << inMessage->get_json_message());
   Json::Value root;
-  Json::Reader reader;
-  const bool parsingSuccessful =
-      reader.parse(inMessage->get_json_message(), root);
-  if (!parsingSuccessful)
+  std::string str = inMessage->get_json_message();
+  utils::JsonReader reader;
+
+  if (!reader.parse(str, &root)) {
+    LOG4CXX_DEBUG(logger_, "Json parsing fails.");
     return false;
+  }
   LOG4CXX_DEBUG(logger_,
                 "Received InternalError id "
                     << root[kErrId].asString()
@@ -586,10 +660,11 @@ void SecurityManagerImpl::SendQuery(const SecurityQuery& query,
                                          protocol_version,
                                          &data_sending[0],
                                          data_sending.size(),
+                                         false,
                                          protocol_handler::kControl));
     DCHECK(protocol_handler_);
     // Add RawMessage to ProtocolHandler message query
-    protocol_handler_->SendMessageToMobileApp(rawMessagePtr, false);
+    protocol_handler_->SendMessageToMobileApp(rawMessagePtr, false, false);
   }
 }
 

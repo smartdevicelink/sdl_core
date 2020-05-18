@@ -1,6 +1,3 @@
-flake8
-pep8-naming
-pep257
-mccabe
+xmlschema
 pylint
-mock
+coverage

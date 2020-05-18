@@ -37,9 +37,9 @@
 
 #include "gmock/gmock.h"
 
+#include "policy/policy_table/types.h"
 #include "policy/pt_representation.h"
 #include "rpc_base/rpc_base.h"
-#include "policy/policy_table/types.h"
 
 namespace policy_table = ::rpc::policy_table_interface_base;
 
@@ -64,7 +64,6 @@ class MockPTRepresentation : virtual public PTRepresentation {
   MOCK_METHOD1(SecondsBetweenRetries, bool(std::vector<int>* seconds));
   MOCK_METHOD2(GetPriority,
                bool(const std::string& app_id, std::string* priority));
-  MOCK_CONST_METHOD0(GetVehicleInfo, const VehicleInfo());
   MOCK_METHOD1(SetVINValue, bool(const std::string& value));
   MOCK_METHOD2(
       GetUserFriendlyMsg,
@@ -76,7 +75,7 @@ class MockPTRepresentation : virtual public PTRepresentation {
   MOCK_METHOD0(Close, bool());
   MOCK_METHOD0(Clear, bool());
   MOCK_METHOD0(Drop, bool());
-  MOCK_CONST_METHOD0(GenerateSnapshot, utils::SharedPtr<policy_table::Table>());
+  MOCK_CONST_METHOD0(GenerateSnapshot, std::shared_ptr<policy_table::Table>());
   MOCK_METHOD1(Save, bool(const policy_table::Table& table));
   MOCK_CONST_METHOD0(UpdateRequired, bool());
   MOCK_METHOD1(SaveUpdateRequired, void(bool value));

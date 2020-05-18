@@ -33,8 +33,8 @@
 #ifndef SRC_COMPONENTS_INCLUDE_TEST_CONNECTION_HANDLER_MOCK_CONNECTION_HANDLER_OBSERVER_H_
 #define SRC_COMPONENTS_INCLUDE_TEST_CONNECTION_HANDLER_MOCK_CONNECTION_HANDLER_OBSERVER_H_
 
-#include "gmock/gmock.h"
 #include "connection_handler/connection_handler_observer.h"
+#include "gmock/gmock.h"
 
 namespace test {
 namespace components {
@@ -46,13 +46,9 @@ class MockConnectionHandlerObserver
   MOCK_METHOD1(OnDeviceListUpdated,
                void(const connection_handler::DeviceMap& device_list));
   MOCK_METHOD0(OnFindNewApplicationsRequest, void());
+  MOCK_METHOD0(OnWebEngineDeviceCreated, void());
   MOCK_METHOD1(RemoveDevice,
                void(const connection_handler::DeviceHandle& device_handle));
-  DEPRECATED MOCK_METHOD3(
-      OnServiceStartedCallback,
-      bool(const connection_handler::DeviceHandle& device_handle,
-           const int32_t& session_key,
-           const protocol_handler::ServiceType& type));
   MOCK_METHOD4(OnServiceStartedCallback,
                void(const connection_handler::DeviceHandle& device_handle,
                     const int32_t& session_key,
@@ -74,6 +70,19 @@ class MockConnectionHandlerObserver
                     const connection_handler::Device& device_to));
   MOCK_METHOD1(OnDeviceSwitchingFinish, void(const std::string& device_uid));
   MOCK_CONST_METHOD1(CheckAppIsNavi, bool(const uint32_t app_id));
+  MOCK_METHOD2(OnSecondaryTransportStartedCallback,
+               void(const connection_handler::DeviceHandle device_handle,
+                    const int32_t session_key));
+  MOCK_METHOD1(OnSecondaryTransportEndedCallback,
+               void(const int32_t session_key));
+  MOCK_METHOD0(OnConnectionStatusUpdated, void());
+  MOCK_METHOD3(CreatePendingApplication,
+               void(const transport_manager::ConnectionUID connection_id,
+                    const transport_manager::DeviceInfo& device_info,
+                    connection_handler::DeviceHandle device_id));
+  MOCK_METHOD2(SetPendingApplicationState,
+               void(const transport_manager::ConnectionUID connection_id,
+                    const transport_manager::DeviceInfo& device_info));
 };
 
 }  // namespace connection_handler_test

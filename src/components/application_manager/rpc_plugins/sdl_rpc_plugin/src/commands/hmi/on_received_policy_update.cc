@@ -30,9 +30,10 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <string>
 #include "sdl_rpc_plugin/commands/hmi/on_received_policy_update.h"
+#include <string>
 #include "application_manager/application_manager.h"
+#include "application_manager/policies/policy_handler_interface.h"
 #include "utils/file_system.h"
 
 namespace sdl_rpc_plugin {
@@ -74,4 +75,4 @@ void OnReceivedPolicyUpdate::Run() {
 
 }  // namespace commands
 
-}  // namespace application_manager
+}  // namespace sdl_rpc_plugin

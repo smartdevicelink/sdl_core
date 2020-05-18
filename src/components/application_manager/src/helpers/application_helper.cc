@@ -1,9 +1,9 @@
-#include <vector>
-#include <string>
 #include "application_manager/helpers/application_helper.h"
+#include <string>
+#include <vector>
 #include "application_manager/message_helper.h"
-#include "utils/logger.h"
 #include "utils/file_system.h"
+#include "utils/logger.h"
 
 namespace {
 using namespace application_manager;
@@ -21,6 +21,7 @@ void DeleteCommands(ApplicationSharedPtr app, ApplicationManager& app_manager) {
   for (auto cmd : cmap) {
     MessageHelper::SendDeleteCommandRequest(cmd.second, app, app_manager);
     app->RemoveCommand(cmd.first);
+    app->help_prompt_manager().OnVrCommandDeleted(cmd.first, true);
   }
 }
 

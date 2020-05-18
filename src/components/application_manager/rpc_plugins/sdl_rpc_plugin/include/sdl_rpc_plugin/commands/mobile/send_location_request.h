@@ -75,10 +75,10 @@ class SendLocationRequest : public app_mngr::commands::CommandRequestImpl {
 
  private:
   /**
- * @brief CheckFieldsCompatibility checks if fields are compatible with each
- * other.
- * @return true if compatible, otherwise return false
- */
+   * @brief CheckFieldsCompatibility checks if fields are compatible with each
+   * other.
+   * @return true if compatible, otherwise return false
+   */
   bool CheckFieldsCompatibility();
 
   /**
@@ -95,6 +95,6 @@ class SendLocationRequest : public app_mngr::commands::CommandRequestImpl {
 
 }  // namespace commands
 
-}  // namespace application_manager
+}  // namespace sdl_rpc_plugin
 
 #endif  // SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_MOBILE_SEND_LOCATION_REQUEST_H_

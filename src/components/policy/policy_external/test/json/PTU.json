@@ -403,6 +403,7 @@
             "parameters": [
               "accPedalPosition",
               "beltStatus",
+              "electronicParkBrakeStatus",
               "driverBraking",
               "myKey",
               "prndl",
@@ -419,6 +420,7 @@
             "parameters": [
               "accPedalPosition",
               "beltStatus",
+              "electronicParkBrakeStatus",
               "driverBraking",
               "myKey",
               "prndl",
@@ -435,6 +437,7 @@
             "parameters": [
               "accPedalPosition",
               "beltStatus",
+              "electronicParkBrakeStatus",
               "driverBraking",
               "myKey",
               "prndl",
@@ -451,6 +454,7 @@
             "parameters": [
               "accPedalPosition",
               "beltStatus",
+              "electronicParkBrakeStatus",
               "driverBraking",
               "myKey",
               "prndl",
@@ -481,6 +485,7 @@
               "headLampStatus",
               "instantFuelConsumption",
               "fuelRange",
+              "cloudAppVehicleID",
               "odometer",
               "tirePressure",
               "vin",
@@ -505,6 +510,7 @@
               "headLampStatus",
               "instantFuelConsumption",
               "fuelRange",
+              "cloudAppVehicleID",
               "odometer",
               "tirePressure",
               "vin",
@@ -529,6 +535,7 @@
               "headLampStatus",
               "instantFuelConsumption",
               "fuelRange",
+              "cloudAppVehicleID",
               "odometer",
               "tirePressure",
               "wiperStatus"
@@ -552,6 +559,7 @@
               "headLampStatus",
               "instantFuelConsumption",
               "fuelRange",
+              "cloudAppVehicleID",
               "odometer",
               "tirePressure",
               "wiperStatus"

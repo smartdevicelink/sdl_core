@@ -64,13 +64,13 @@ class OnAppUnregisteredNotification
   ~OnAppUnregisteredNotification() FINAL;
 
   /**
-    * @brief Init overrides and skips replacement of app id with hmi id since
-    * 1) at the moment this notification is being sent there is no application
-    * registered in application manager
-    * 2) hmi id is already used whenever this message is being constructed, so
-    * its already there
-    * @return True in any case
-    */
+   * @brief Init overrides and skips replacement of app id with hmi id since
+   * 1) at the moment this notification is being sent there is no application
+   * registered in application manager
+   * 2) hmi id is already used whenever this message is being constructed, so
+   * its already there
+   * @return True in any case
+   */
   bool Init() FINAL;
 
   /**
@@ -84,6 +84,6 @@ class OnAppUnregisteredNotification
 
 }  // namespace commands
 
-}  // namespace application_manager
+}  // namespace sdl_rpc_plugin
 
 #endif  // SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_HMI_ON_APP_UNREGISTERED_NOTIFICATION_H_

@@ -83,9 +83,11 @@ class SetAppIconRequest : public app_mngr::commands::CommandRequestImpl {
  private:
   /**
    * @brief Copies file to icon storage
+   * @param policy_app_id application policy app id
    * @param path_to_file Path to icon
    */
-  void CopyToIconStorage(const std::string& path_to_file) const;
+  void CopyToIconStorage(const std::string& policy_app_id,
+                         const std::string& path_to_file) const;
 
   /**
    * @brief Remove oldest icons
@@ -108,9 +110,14 @@ class SetAppIconRequest : public app_mngr::commands::CommandRequestImpl {
    * @brief Checks, if icons saving to configured folder is enabled
    */
   bool is_icons_saving_enabled_;
+
+  /**
+   * @brief Contains full file path to icon
+   */
+  std::string full_file_path_for_hmi_;
 };
 
 }  // namespace commands
-}  // namespace application_manager
+}  // namespace sdl_rpc_plugin
 
 #endif  // SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_MOBILE_SET_APP_ICON_REQUEST_H_

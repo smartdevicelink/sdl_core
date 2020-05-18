@@ -32,10 +32,10 @@
 #ifndef SRC_COMPONENTS_PROTOCOL_HANDLER_TEST_INCLUDE_PROTOCOL_HANDLER_CONTROL_MESSAGE_MATCHER_H_
 #define SRC_COMPONENTS_PROTOCOL_HANDLER_TEST_INCLUDE_PROTOCOL_HANDLER_CONTROL_MESSAGE_MATCHER_H_
 
-#include "gmock/gmock.h"
 #include <ios>
 #include <string>
 #include <vector>
+#include "gmock/gmock.h"
 #include "protocol/raw_message.h"
 #include "protocol_handler/protocol_packet.h"
 
@@ -43,11 +43,11 @@ namespace test {
 namespace components {
 namespace protocol_handler_test {
 
+using protocol_handler::FRAME_DATA_START_SERVICE_NACK;
+using protocol_handler::FRAME_TYPE_CONTROL;
 using protocol_handler::ProtocolPacket;
 using protocol_handler::RawMessagePtr;
 using protocol_handler::RESULT_CODE;
-using protocol_handler::FRAME_TYPE_CONTROL;
-using protocol_handler::FRAME_DATA_START_SERVICE_NACK;
 
 bool CheckRegularMatches(const ProtocolPacket& packet,
                          RESULT_CODE result,

@@ -33,16 +33,15 @@
 #include <stdint.h>
 #include <string>
 
-#include "gtest/gtest.h"
-#include "utils/shared_ptr.h"
-#include "smart_objects/smart_object.h"
-#include "application_manager/smart_object_keys.h"
 #include "application_manager/application.h"
 #include "application_manager/commands/commands_test.h"
-#include "application_manager/mock_hmi_capabilities.h"
 #include "application_manager/mock_application_manager.h"
-#include "hmi/ui_get_supported_languages_response.h"
+#include "application_manager/mock_hmi_capabilities.h"
 #include "application_manager/policies/mock_policy_handler_interface.h"
+#include "application_manager/smart_object_keys.h"
+#include "gtest/gtest.h"
+#include "hmi/ui_get_supported_languages_response.h"
+#include "smart_objects/smart_object.h"
 
 namespace test {
 namespace components {
@@ -50,15 +49,14 @@ namespace commands_test {
 namespace hmi_commands_test {
 namespace ui_get_supported_languages_response {
 
-using ::testing::Return;
-using ::utils::SharedPtr;
 using ::testing::NiceMock;
+using ::testing::Return;
 namespace am = ::application_manager;
 namespace strings = ::application_manager::strings;
 namespace hmi_response = am::hmi_response;
 using sdl_rpc_plugin::commands::UIGetSupportedLanguagesResponse;
 
-typedef SharedPtr<UIGetSupportedLanguagesResponse>
+typedef std::shared_ptr<UIGetSupportedLanguagesResponse>
     UIGetSupportedLanguagesResponsePtr;
 typedef NiceMock<
     ::test::components::application_manager_test::MockHMICapabilities>
@@ -109,7 +107,8 @@ TEST_F(UIGetSupportedLanguagesResponseTest, RUN_UNSUCCESS) {
       CreateCommand<UIGetSupportedLanguagesResponse>(command_msg));
 
   EXPECT_CALL(mock_hmi_capabilities_,
-              set_ui_supported_languages(supported_languages)).Times(0);
+              set_ui_supported_languages(supported_languages))
+      .Times(0);
 
   command->Run();
 

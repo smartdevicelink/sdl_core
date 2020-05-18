@@ -32,13 +32,13 @@
 
 #include "sdl_rpc_plugin/commands/hmi/on_exit_all_applications_notification.h"
 
+#include <signal.h>
 #include <sys/types.h>
 #include <unistd.h>
-#include <signal.h>
 
 #include "application_manager/application_manager.h"
-#include "application_manager/rpc_service.h"
 #include "application_manager/resumption/resume_ctrl.h"
+#include "application_manager/rpc_service.h"
 #include "interfaces/HMI_API.h"
 
 namespace sdl_rpc_plugin {
@@ -109,7 +109,8 @@ void OnExitAllApplicationsNotification::SendOnSDLPersistenceComplete() {
   LOG4CXX_AUTO_TRACE(logger_);
 
   smart_objects::SmartObjectSPtr message =
-      new smart_objects::SmartObject(smart_objects::SmartType_Map);
+      std::make_shared<smart_objects::SmartObject>(
+          smart_objects::SmartType_Map);
   (*message)[strings::params][strings::function_id] =
       hmi_apis::FunctionID::BasicCommunication_OnSDLPersistenceComplete;
   (*message)[strings::params][strings::message_type] =
@@ -121,4 +122,4 @@ void OnExitAllApplicationsNotification::SendOnSDLPersistenceComplete() {
 }
 
 }  // namespace commands
-}  // namespace application_manager
+}  // namespace sdl_rpc_plugin

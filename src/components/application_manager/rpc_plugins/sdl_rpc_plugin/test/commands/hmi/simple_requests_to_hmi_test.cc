@@ -30,17 +30,18 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "gtest/gtest.h"
-#include "utils/shared_ptr.h"
-#include "smart_objects/smart_object.h"
-#include "application_manager/smart_object_keys.h"
-#include "application_manager/commands/commands_test.h"
-#include "application_manager/commands/command_request_test.h"
 #include "application_manager/commands/command.h"
-#include "sdl_rpc_plugin/commands/hmi/allow_app_request.h"
+#include "application_manager/commands/command_request_test.h"
+#include "application_manager/commands/commands_test.h"
+#include "application_manager/commands/request_to_hmi.h"
+#include "application_manager/smart_object_keys.h"
+#include "gtest/gtest.h"
 #include "sdl_rpc_plugin/commands/hmi/allow_all_apps_request.h"
+#include "sdl_rpc_plugin/commands/hmi/allow_app_request.h"
 #include "sdl_rpc_plugin/commands/hmi/basic_communication_system_request.h"
 #include "sdl_rpc_plugin/commands/hmi/button_get_capabilities_request.h"
+#include "sdl_rpc_plugin/commands/hmi/close_popup_request.h"
+#include "sdl_rpc_plugin/commands/hmi/dial_number_request.h"
 #include "sdl_rpc_plugin/commands/hmi/navi_alert_maneuver_request.h"
 #include "sdl_rpc_plugin/commands/hmi/navi_audio_stop_stream_request.h"
 #include "sdl_rpc_plugin/commands/hmi/navi_get_way_points_request.h"
@@ -54,21 +55,15 @@
 #include "sdl_rpc_plugin/commands/hmi/sdl_activate_app_response.h"
 #include "sdl_rpc_plugin/commands/hmi/sdl_get_list_of_permissions_response.h"
 #include "sdl_rpc_plugin/commands/hmi/sdl_get_status_update_response.h"
-#include "sdl_rpc_plugin/commands/hmi/ui_scrollable_message_request.h"
-#include "sdl_rpc_plugin/commands/hmi/ui_set_app_icon_request.h"
-#include "sdl_rpc_plugin/commands/hmi/ui_set_display_layout_request.h"
-#include "sdl_rpc_plugin/commands/hmi/ui_set_global_properties_request.h"
-#include "application_manager/commands/request_to_hmi.h"
-#include "sdl_rpc_plugin/commands/hmi/dial_number_request.h"
+#include "sdl_rpc_plugin/commands/hmi/sdl_policy_update.h"
+#include "sdl_rpc_plugin/commands/hmi/tts_change_registration_request.h"
+#include "sdl_rpc_plugin/commands/hmi/tts_get_capabilities_request.h"
+#include "sdl_rpc_plugin/commands/hmi/tts_get_language_request.h"
+#include "sdl_rpc_plugin/commands/hmi/tts_get_supported_languages_request.h"
 #include "sdl_rpc_plugin/commands/hmi/tts_is_ready_request.h"
 #include "sdl_rpc_plugin/commands/hmi/tts_set_global_properties_request.h"
 #include "sdl_rpc_plugin/commands/hmi/tts_speak_request.h"
 #include "sdl_rpc_plugin/commands/hmi/tts_stop_speaking_request.h"
-#include "sdl_rpc_plugin/commands/hmi/tts_get_supported_languages_request.h"
-#include "sdl_rpc_plugin/commands/hmi/tts_change_registration_request.h"
-#include "sdl_rpc_plugin/commands/hmi/tts_get_capabilities_request.h"
-#include "sdl_rpc_plugin/commands/hmi/tts_get_language_request.h"
-#include "sdl_rpc_plugin/commands/hmi/close_popup_request.h"
 #include "sdl_rpc_plugin/commands/hmi/ui_add_command_request.h"
 #include "sdl_rpc_plugin/commands/hmi/ui_add_submenu_request.h"
 #include "sdl_rpc_plugin/commands/hmi/ui_alert_request.h"
@@ -82,6 +77,11 @@
 #include "sdl_rpc_plugin/commands/hmi/ui_is_ready_request.h"
 #include "sdl_rpc_plugin/commands/hmi/ui_perform_audio_pass_thru_request.h"
 #include "sdl_rpc_plugin/commands/hmi/ui_perform_interaction_request.h"
+#include "sdl_rpc_plugin/commands/hmi/ui_scrollable_message_request.h"
+#include "sdl_rpc_plugin/commands/hmi/ui_send_haptic_data_request.h"
+#include "sdl_rpc_plugin/commands/hmi/ui_set_app_icon_request.h"
+#include "sdl_rpc_plugin/commands/hmi/ui_set_display_layout_request.h"
+#include "sdl_rpc_plugin/commands/hmi/ui_set_global_properties_request.h"
 #include "sdl_rpc_plugin/commands/hmi/ui_set_media_clock_timer_request.h"
 #include "sdl_rpc_plugin/commands/hmi/ui_show_request.h"
 #include "sdl_rpc_plugin/commands/hmi/ui_slider_request.h"
@@ -89,24 +89,11 @@
 #include "sdl_rpc_plugin/commands/hmi/vr_change_registration_request.h"
 #include "sdl_rpc_plugin/commands/hmi/vr_delete_command_request.h"
 #include "sdl_rpc_plugin/commands/hmi/vr_get_capabilities_request.h"
-#include "sdl_rpc_plugin/commands/hmi/vr_get_supported_languages_request.h"
 #include "sdl_rpc_plugin/commands/hmi/vr_get_language_request.h"
+#include "sdl_rpc_plugin/commands/hmi/vr_get_supported_languages_request.h"
 #include "sdl_rpc_plugin/commands/hmi/vr_is_ready_request.h"
 #include "sdl_rpc_plugin/commands/hmi/vr_perform_interaction_request.h"
-#include "sdl_rpc_plugin/commands/hmi/allow_all_apps_request.h"
-#include "sdl_rpc_plugin/commands/hmi/basic_communication_system_request.h"
-#include "sdl_rpc_plugin/commands/hmi/button_get_capabilities_request.h"
-#include "sdl_rpc_plugin/commands/hmi/allow_app_request.h"
-#include "sdl_rpc_plugin/commands/hmi/navi_send_location_request.h"
-#include "sdl_rpc_plugin/commands/hmi/navi_unsubscribe_way_points_request.h"
-#include "sdl_rpc_plugin/commands/hmi/navi_update_turn_list_request.h"
-#include "sdl_rpc_plugin/commands/hmi/navi_show_constant_tbt_request.h"
-#include "sdl_rpc_plugin/commands/hmi/navi_stop_stream_request.h"
-#include "sdl_rpc_plugin/commands/hmi/navi_subscribe_way_points_request.h"
-#include "sdl_rpc_plugin/commands/hmi/sdl_policy_update.h"
-#include "sdl_rpc_plugin/commands/hmi/ui_set_icon_request.h"
-#include "sdl_rpc_plugin/commands/hmi/dial_number_request.h"
-#include "sdl_rpc_plugin/commands/hmi/ui_send_haptic_data_request.h"
+#include "smart_objects/smart_object.h"
 
 #include "application_manager/mock_event_dispatcher.h"
 
@@ -117,11 +104,8 @@ namespace hmi_commands_test {
 namespace simple_requests_to_hmi_test {
 
 using ::testing::_;
-using ::testing::Types;
 using ::testing::NotNull;
-
-using ::utils::SharedPtr;
-
+using ::testing::Types;
 namespace am_commands = application_manager::commands;
 using am_commands::MessageSharedPtr;
 using event_engine_test::MockEventDispatcher;
@@ -129,7 +113,7 @@ using event_engine_test::MockEventDispatcher;
 class RequestToHMITest : public CommandsTest<CommandsTestMocks::kIsNice> {};
 
 TEST_F(RequestToHMITest, BasicMethodsOverloads_SUCCESS) {
-  SharedPtr<am_commands::RequestToHMI> command(
+  std::shared_ptr<am_commands::RequestToHMI> command(
       CreateCommand<am_commands::RequestToHMI>());
 
   // Current implementation always return `true`
@@ -139,7 +123,7 @@ TEST_F(RequestToHMITest, BasicMethodsOverloads_SUCCESS) {
 }
 
 TEST_F(RequestToHMITest, SendRequest_SUCCESS) {
-  SharedPtr<am_commands::RequestToHMI> command(
+  std::shared_ptr<am_commands::RequestToHMI> command(
       CreateCommand<am_commands::RequestToHMI>());
   EXPECT_CALL(mock_rpc_service_, SendMessageToHMI(NotNull()));
 
@@ -194,7 +178,7 @@ typedef Types<sdl_rpc_plugin::commands::hmi::DialNumberRequest,
               sdl_rpc_plugin::commands::BasicCommunicationSystemRequest,
               sdl_rpc_plugin::commands::ButtonGetCapabilitiesRequest,
               sdl_rpc_plugin::commands::NaviSendLocationRequest,
-              sdl_rpc_plugin::commands::NaviUnSubscribeWayPointsRequest,
+              sdl_rpc_plugin::commands::NaviUnsubscribeWayPointsRequest,
               sdl_rpc_plugin::commands::NaviUpdateTurnListRequest,
               sdl_rpc_plugin::commands::NaviShowConstantTBTRequest,
               sdl_rpc_plugin::commands::NaviStopStreamRequest,
@@ -226,7 +210,8 @@ typedef Types<sdl_rpc_plugin::commands::UIScrollableMessageRequest,
 typedef Types<sdl_rpc_plugin::commands::TTSIsReadyRequest,
               sdl_rpc_plugin::commands::UIIsReadyRequest,
               sdl_rpc_plugin::commands::NaviIsReadyRequest,
-              sdl_rpc_plugin::commands::VRIsReadyRequest> RequestCommandsList3;
+              sdl_rpc_plugin::commands::VRIsReadyRequest>
+    RequestCommandsList3;
 
 TYPED_TEST_CASE(RequestToHMICommandsTest, RequestCommandsList);
 TYPED_TEST_CASE(RequestToHMICommandsTest2, RequestCommandsList2);
@@ -235,7 +220,8 @@ TYPED_TEST_CASE(RequestToHMICommandsTest3, RequestCommandsList3);
 TYPED_TEST(RequestToHMICommandsTest, Run_SendMessageToHMI_SUCCESS) {
   typedef typename TestFixture::CommandType CommandType;
 
-  SharedPtr<CommandType> command = this->template CreateCommand<CommandType>();
+  std::shared_ptr<CommandType> command =
+      this->template CreateCommand<CommandType>();
 
   EXPECT_CALL(this->mock_rpc_service_, SendMessageToHMI(NotNull()));
 
@@ -245,7 +231,8 @@ TYPED_TEST(RequestToHMICommandsTest, Run_SendMessageToHMI_SUCCESS) {
 TYPED_TEST(RequestToHMICommandsTest2, Run_SendMessageToHMI_SUCCESS) {
   typedef typename TestFixture::CommandType CommandType;
 
-  SharedPtr<CommandType> command = this->template CreateCommand<CommandType>();
+  std::shared_ptr<CommandType> command =
+      this->template CreateCommand<CommandType>();
   EXPECT_CALL(this->mock_rpc_service_, SendMessageToHMI(NotNull()));
 
   command->Run();
@@ -254,7 +241,8 @@ TYPED_TEST(RequestToHMICommandsTest2, Run_SendMessageToHMI_SUCCESS) {
 TYPED_TEST(RequestToHMICommandsTest3, Run_SendMessageToHMI_SUCCESS) {
   typedef typename TestFixture::CommandType CommandType;
 
-  SharedPtr<CommandType> command = this->template CreateCommand<CommandType>();
+  std::shared_ptr<CommandType> command =
+      this->template CreateCommand<CommandType>();
   EXPECT_CALL(this->mock_rpc_service_, SendMessageToHMI(NotNull()));
 
   command->Run();

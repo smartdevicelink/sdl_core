@@ -39,40 +39,40 @@
 #include "smart_objects/smart_object.h"
 #include "smart_objects/smart_schema.h"
 
-namespace NsSmartDeviceLink {
-namespace NsJSONHandler {
-namespace Formatters {
+namespace ns_smart_device_link {
+namespace ns_json_handler {
+namespace formatters {
 
 /**
-  * @brief Formats to string the smart object against given schema for given
-  *formatter
-  *
-  * Sample usage:
-  *    CSmartFactory factory;
-  *    SmartObject object;
-  *    CSmartSchmema schema;
-  *
-  */
+ * @brief Formats to string the smart object against given schema for given
+ *formatter
+ *
+ * Sample usage:
+ *    CSmartFactory factory;
+ *    SmartObject object;
+ *    CSmartSchmema schema;
+ *
+ */
 class CMetaFormatter {
  public:
   /**
-    * @brief Creates smart object by the given schema having copied
-    *        matched tree elements from original object.
-    *
-    * @param object Original smart object which macthed tree elements
-    *        will be copied from
-    * @param schema Smart schema which describes result smart object
-    * @param result_object createdsmart object
-    * @return true if successful, false - otherwise
-    */
+   * @brief Creates smart object by the given schema having copied
+   *        matched tree elements from original object.
+   *
+   * @param object Original smart object which macthed tree elements
+   *        will be copied from
+   * @param schema Smart schema which describes result smart object
+   * @param result_object createdsmart object
+   * @return true if successful, false - otherwise
+   */
   static bool CreateObjectByPattern(
-      const NsSmartDeviceLink::NsSmartObjects::SmartObject& object,
-      const NsSmartDeviceLink::NsSmartObjects::CSmartSchema& schema,
-      NsSmartDeviceLink::NsSmartObjects::SmartObject& result_object);
+      const ns_smart_device_link::ns_smart_objects::SmartObject& object,
+      const ns_smart_device_link::ns_smart_objects::CSmartSchema& schema,
+      ns_smart_device_link::ns_smart_objects::SmartObject& result_object);
 };
 
-}  // namespace NsSmartDeviceLink
-}  // namespace NsSmartDeviceLink::NsJSONHandler
-}  // namespace NsSmartDeviceLink::NsJSONHandler::Formatters
+}  // namespace formatters
+}  // namespace ns_json_handler
+}  // namespace ns_smart_device_link
 
 #endif  // SRC_COMPONENTS_FORMATTERS_INCLUDE_FORMATTERS_META_FORMATTER_H_

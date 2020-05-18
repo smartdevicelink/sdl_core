@@ -28,12 +28,12 @@
  * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
-*/
+ */
 
 #include "hmi/basic_communication_get_system_time_request.h"
 
 #include "gtest/gtest.h"
-#include "utils/shared_ptr.h"
+
 #include "application_manager/commands/command_request_test.h"
 #include "protocol_handler/mock_protocol_handler.h"
 
@@ -60,7 +60,7 @@ TEST_F(BasicCommunicationGetSystemTimeRequestTest, OnTimeout) {
 
   ON_CALL(app_mngr_, protocol_handler())
       .WillByDefault(ReturnRef(mock_protocol_handler));
-  EXPECT_CALL(mock_protocol_handler, NotifyOnFailedHandshake());
+  EXPECT_CALL(mock_protocol_handler, NotifyOnGetSystemTimeFailed());
 
   command->onTimeOut();
 }

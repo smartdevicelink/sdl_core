@@ -33,11 +33,12 @@
 #ifndef SRC_COMPONENTS_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_MANAGER_LISTENER_H_
 #define SRC_COMPONENTS_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_MANAGER_LISTENER_H_
 
+#include <map>
 #include <vector>
-#include "transport_manager/common.h"
-#include "transport_manager/info.h"
-#include "transport_manager/error.h"
 #include "protocol/common.h"
+#include "transport_manager/common.h"
+#include "transport_manager/error.h"
+#include "transport_manager/info.h"
 
 namespace transport_manager {
 
@@ -56,8 +57,8 @@ class TransportManagerListener {
   virtual void OnDeviceListUpdated(const std::vector<DeviceInfo>&) = 0;
 
   /**
-  * @brief Reaction to "Find new applications" request
-  */
+   * @brief Reaction to "Find new applications" request
+   */
   virtual void OnFindNewApplicationsRequest() = 0;
 
   /**
@@ -99,6 +100,19 @@ class TransportManagerListener {
    */
   virtual void OnScanDevicesFailed(const SearchDeviceError& error) = 0;
 
+  /**
+   * @brief Reaction to the event, when the cloud connection status is updated.
+   */
+  virtual void OnConnectionStatusUpdated() = 0;
+
+  /**
+   * @brief Reaction to the event, when connection is pending.
+   *
+   * @param devcie_info Variable that hold information about device.
+   * @param connection_id connection unique identifier.
+   */
+  virtual void OnConnectionPending(const DeviceInfo& device_info,
+                                   const ConnectionUID connection_id) = 0;
   /**
    * @brief Reaction to the event, when connection is established.
    *
@@ -193,6 +207,14 @@ class TransportManagerListener {
   virtual void OnTMMessageSendFailed(
       const DataSendError& error,
       const ::protocol_handler::RawMessagePtr message) = 0;
+
+  /**
+   * @brief Notifies that configuration of a transport has been updated.
+   *
+   * @param configs pairs of key and value that represent configuration.
+   */
+  virtual void OnTransportConfigUpdated(
+      const std::map<std::string, std::string>& configs) = 0;
 };
 }  //  namespace transport_manager
 #endif  // SRC_COMPONENTS_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_MANAGER_LISTENER_H_

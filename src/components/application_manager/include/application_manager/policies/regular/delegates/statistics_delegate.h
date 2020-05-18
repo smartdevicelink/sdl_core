@@ -35,10 +35,10 @@
 
 #include <string>
 
+#include "application_manager/usage_statistics.h"
+#include "utils/conditional_variable.h"
 #include "utils/threads/thread.h"
 #include "utils/threads/thread_delegate.h"
-#include "utils/conditional_variable.h"
-#include "application_manager/usage_statistics.h"
 
 namespace policy {
 

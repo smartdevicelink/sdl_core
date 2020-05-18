@@ -128,6 +128,7 @@ class CreateInteractionChoiceSetRequest
   int32_t choice_set_id_;
   size_t expected_chs_count_;
   size_t received_chs_count_;
+  bool should_send_warnings_;
 
   /**
    * @brief Flag for stop sending VR commands to HMI, in case one of responses
@@ -142,7 +143,7 @@ class CreateInteractionChoiceSetRequest
   volatile bool is_timed_out_;
   sync_primitives::Lock is_timed_out_lock_;
 
-  sync_primitives::Lock vr_commands_lock_;
+  sync_primitives::RecursiveLock vr_commands_lock_;
   /*
    * @brief Sends VR AddCommand request to HMI
    *
@@ -161,11 +162,11 @@ class CreateInteractionChoiceSetRequest
       app_mngr::ApplicationConstSharedPtr app);
 
   /*
-  * @brief Predicate for using with CheckChoiceSet method to compare choice ID
-  *param
-  *
-  * return TRUE if there is coincidence of choice ID, otherwise FALSE
-  */
+   * @brief Predicate for using with CheckChoiceSet method to compare choice ID
+   *param
+   *
+   * return TRUE if there is coincidence of choice ID, otherwise FALSE
+   */
   struct CoincidencePredicateChoiceID {
     CoincidencePredicateChoiceID(const uint32_t newItem) : newItem_(newItem) {}
 
@@ -177,11 +178,11 @@ class CreateInteractionChoiceSetRequest
   };
 
   /*
-  * @brief Predicate for using with CheckChoiceSet method to compare menu name
-  *param
-  *
-  * return TRUE if there is coincidence of menu name, otherwise FALSE
-  */
+   * @brief Predicate for using with CheckChoiceSet method to compare menu name
+   *param
+   *
+   * return TRUE if there is coincidence of menu name, otherwise FALSE
+   */
   struct CoincidencePredicateMenuName {
     CoincidencePredicateMenuName(const std::string& newItem)
         : newItem_(newItem) {}
@@ -194,11 +195,11 @@ class CreateInteractionChoiceSetRequest
   };
 
   /*
-  * @brief Predicate for using with CheckChoiceSet method to compare VR commands
-  *param
-  *
-  * return TRUE if there is coincidence of VR commands, otherwise FALSE
-  */
+   * @brief Predicate for using with CheckChoiceSet method to compare VR
+   *commands param
+   *
+   * return TRUE if there is coincidence of VR commands, otherwise FALSE
+   */
   struct CoincidencePredicateVRCommands {
     CoincidencePredicateVRCommands(const smart_objects::SmartObject& newItem)
         : newItem_(newItem) {}
@@ -218,10 +219,10 @@ class CreateInteractionChoiceSetRequest
    *
    * return Return TRUE if there are similar VR synonyms in choice set,
    * otherwise FALSE
-  */
+   */
   bool compareSynonyms(
-      const NsSmartDeviceLink::NsSmartObjects::SmartObject& choice1,
-      const NsSmartDeviceLink::NsSmartObjects::SmartObject& choice2);
+      const ns_smart_device_link::ns_smart_objects::SmartObject& choice1,
+      const ns_smart_device_link::ns_smart_objects::SmartObject& choice2);
 
   /*
    * @brief Checks VR synonyms ignoring differences in case.
@@ -231,10 +232,10 @@ class CreateInteractionChoiceSetRequest
    *
    * return Return TRUE if there are similar VR synonyms in choice set,
    * otherwise FALSE
-  */
+   */
   static bool compareStr(
-      const NsSmartDeviceLink::NsSmartObjects::SmartObject& str1,
-      const NsSmartDeviceLink::NsSmartObjects::SmartObject& str2);
+      const ns_smart_device_link::ns_smart_objects::SmartObject& str1,
+      const ns_smart_device_link::ns_smart_objects::SmartObject& str2);
 
   /**
    * @brief Checks choice set params(menuName, tertiaryText, ...)
@@ -272,6 +273,6 @@ class CreateInteractionChoiceSetRequest
 };
 
 }  // namespace commands
-}  // namespace application_manager
+}  // namespace sdl_rpc_plugin
 
 #endif  // SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_MOBILE_CREATE_INTERACTION_CHOICE_SET_REQUEST_H_

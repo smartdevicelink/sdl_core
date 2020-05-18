@@ -30,8 +30,8 @@
  ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  POSSIBILITY OF SUCH DAMAGE.
  */
-#include <algorithm>
 #include "sdl_rpc_plugin/commands/mobile/send_location_request.h"
+#include <algorithm>
 #include "application_manager/message_helper.h"
 #include "utils/custom_string.h"
 
@@ -124,7 +124,7 @@ void SendLocationRequest::Run() {
         (*message_)[strings::msg_params][strings::location_image],
         app,
         application_manager_);
-    if (mobile_apis::Result::SUCCESS != verification_result) {
+    if (mobile_apis::Result::INVALID_DATA == verification_result) {
       LOG4CXX_ERROR(logger_, "VerifyImage INVALID_DATA!");
       SendResponse(false, verification_result);
       return;
@@ -254,10 +254,10 @@ bool SendLocationRequest::CheckHMICapabilities(
     return false;
   }
 
-  if (hmi_capabilities.display_capabilities()) {
-    const SmartObject disp_cap = (*hmi_capabilities.display_capabilities());
+  auto display_capabilities = hmi_capabilities.display_capabilities();
+  if (display_capabilities) {
     const SmartObject& text_fields =
-        disp_cap.getElement(hmi_response::text_fields);
+        display_capabilities->getElement(hmi_response::text_fields);
     const size_t len = text_fields.length();
     for (size_t i = 0; i < len; ++i) {
       const SmartObject& text_field = text_fields[i];
@@ -281,4 +281,4 @@ bool SendLocationRequest::CheckHMICapabilities(
 
 }  // namespace commands
 
-}  // namespace application_manager
+}  // namespace sdl_rpc_plugin

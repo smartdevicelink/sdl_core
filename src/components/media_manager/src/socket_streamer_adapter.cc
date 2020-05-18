@@ -30,15 +30,15 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <sys/socket.h>
-#include <sys/types.h>
-#include <sys/select.h>
-#include <netinet/in.h>
+#include "media_manager/socket_streamer_adapter.h"
 #include <arpa/inet.h>
 #include <netdb.h>
+#include <netinet/in.h>
+#include <sys/select.h>
+#include <sys/socket.h>
+#include <sys/types.h>
 #include <unistd.h>
 #include "utils/logger.h"
-#include "media_manager/socket_streamer_adapter.h"
 
 namespace media_manager {
 

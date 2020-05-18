@@ -1,11 +1,11 @@
 /** @page components_transportmanager_internal_design_transport_adapters_tcp_adapter TCP Adapter
  *
  * TCP adapter handles communication with remote devices via TCP/IP socket. It is implemented in
- * NsSmartDeviceLink::NsTransportManager::CTCPAdapter.
+ * ns_smart_device_link::ns_transport_manager::CTCPAdapter.
  *
  * @section components_transportmanager_internal_design_transport_adapters_tcp_adapter_listen Listening for connections
  *
- * TCP adapter creates listening TCP socket (TCP port is specified in NsSmartDeviceLink::NsTransportManager::CTCPAdapter::cTCPAdapterPort)
+ * TCP adapter creates listening TCP socket (TCP port is specified in ns_smart_device_link::ns_transport_manager::CTCPAdapter::cTCPAdapterPort)
  * and listens for incoming connections. Devices are identified by their IP address.
  *
  * @section components_transportmanager_internal_design_transport_adapters_tcp_adapter_accept Accepting connection

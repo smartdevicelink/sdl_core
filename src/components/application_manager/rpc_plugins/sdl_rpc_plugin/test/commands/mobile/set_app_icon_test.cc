@@ -31,20 +31,20 @@
  */
 
 #include <stdint.h>
-#include <string>
 #include <set>
+#include <string>
 
 #include "mobile/set_app_icon_request.h"
 
-#include "gtest/gtest.h"
 #include "application_manager/commands/command_request_test.h"
+#include "application_manager/event_engine/event.h"
 #include "application_manager/mock_application.h"
 #include "application_manager/mock_application_manager.h"
+#include "application_manager/mock_hmi_interface.h"
+#include "application_manager/mock_message_helper.h"
+#include "gtest/gtest.h"
 #include "protocol_handler/mock_protocol_handler.h"
 #include "protocol_handler/mock_protocol_handler_settings.h"
-#include "application_manager/mock_message_helper.h"
-#include "application_manager/event_engine/event.h"
-#include "application_manager/mock_hmi_interface.h"
 
 namespace test {
 namespace components {
@@ -53,14 +53,13 @@ namespace mobile_commands_test {
 namespace set_app_icon_request {
 
 namespace am = application_manager;
-using sdl_rpc_plugin::commands::SetAppIconRequest;
+using am::MockHmiInterfaces;
+using am::MockMessageHelper;
 using am::commands::CommandImpl;
 using am::commands::MessageSharedPtr;
-using am::MockMessageHelper;
-using am::MockHmiInterfaces;
+using sdl_rpc_plugin::commands::SetAppIconRequest;
 using test::components::protocol_handler_test::MockProtocolHandler;
 using test::components::protocol_handler_test::MockProtocolHandlerSettings;
-using ::utils::SharedPtr;
 using ::testing::_;
 using ::testing::Return;
 using ::testing::ReturnRef;
@@ -110,7 +109,7 @@ TEST_F(SetAppIconRequestTest, OnEvent_UI_UNSUPPORTED_RESOURCE) {
   ON_CALL(app_mngr_settings_, app_icons_folder())
       .WillByDefault(ReturnRef(dir_path));
 
-  utils::SharedPtr<SetAppIconRequest> req_vr =
+  std::shared_ptr<SetAppIconRequest> req_vr =
       CreateCommand<SetAppIconRequest>(msg_vr);
 
   MockAppPtr mock_app = CreateMockApp();
@@ -171,4 +170,4 @@ TEST_F(SetAppIconRequestTest, OnEvent_UI_UNSUPPORTED_RESOURCE) {
 }  // namespace mobile_commands_test
 }  // namespace commands_test
 }  // namespace components
-}  // namespace tests
+}  // namespace test
