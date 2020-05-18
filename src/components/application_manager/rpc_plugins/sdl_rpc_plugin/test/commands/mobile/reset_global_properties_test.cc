@@ -275,8 +275,7 @@ TEST_F(ResetGlobalPropertiesRequestTest, Run_SUCCESS) {
               set_menu_title(msg_params[am::hmi_request::menu_title]));
 
   EXPECT_CALL(*mock_app_, help_prompt()).WillOnce(Return(&so_help_prompt));
-  EXPECT_CALL(*mock_app_, timeout_prompt())
-      .WillOnce(Return(&so_help_prompt));
+  EXPECT_CALL(*mock_app_, timeout_prompt()).WillOnce(Return(&so_help_prompt));
 
   EXPECT_CALL(
       mock_rpc_service_,
