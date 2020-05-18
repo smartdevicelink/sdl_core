@@ -35,11 +35,11 @@
 
 #include <errno.h>
 
-#include <cstring>
 #include <cstdlib>
+#include <cstring>
 
-#include "transport_manager/usb/common.h"
 #include "transport_manager/transport_adapter/transport_adapter_impl.h"
+#include "transport_manager/usb/common.h"
 
 #include "utils/logger.h"
 
@@ -321,5 +321,5 @@ TransportAdapter::Error UsbHandler::Init() {
   return TransportAdapter::OK;
 }
 
-}  // namespace
-}  // namespace
+}  // namespace transport_adapter
+}  // namespace transport_manager

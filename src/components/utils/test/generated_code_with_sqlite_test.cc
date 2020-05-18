@@ -29,9 +29,9 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "utils/generated_code_with_sqlite_test.h"
 #include <sqlite3.h>
 #include "gtest/gtest.h"
-#include "utils/generated_code_with_sqlite_test.h"
 
 namespace test {
 namespace components {

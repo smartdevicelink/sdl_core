@@ -43,35 +43,35 @@ namespace commands {
 /**
  * @brief NaviSubscribeWayPointsRequest command class
  **/
-class NaviUnSubscribeWayPointsRequest
+class NaviUnsubscribeWayPointsRequest
     : public app_mngr::commands::RequestToHMI {
  public:
   /**
-   * @brief NaviUnSubscribeWayPointsRequest class constructor
+   * @brief NaviUnsubscribeWayPointsRequest class constructor
    *
    * @param message Incoming SmartObject message
    **/
-  NaviUnSubscribeWayPointsRequest(
+  NaviUnsubscribeWayPointsRequest(
       const app_mngr::commands::MessageSharedPtr& message,
       app_mngr::ApplicationManager& application_manager,
       app_mngr::rpc_service::RPCService& rpc_service,
       app_mngr::HMICapabilities& hmi_capabilities,
       policy::PolicyHandlerInterface& policy_handle);
   /**
-   * @brief NaviUnSubscribeWayPointsRequest class destructor
+   * @brief NaviUnsubscribeWayPointsRequest class destructor
    **/
-  virtual ~NaviUnSubscribeWayPointsRequest();
+  virtual ~NaviUnsubscribeWayPointsRequest();
   /**
    * @brief Execute command
    **/
   virtual void Run() OVERRIDE;
 
  private:
-  DISALLOW_COPY_AND_ASSIGN(NaviUnSubscribeWayPointsRequest);
+  DISALLOW_COPY_AND_ASSIGN(NaviUnsubscribeWayPointsRequest);
 };
 
 }  // namespace commands
 
-}  // namespace application_manager
+}  // namespace sdl_rpc_plugin
 
 #endif  // SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_HMI_NAVI_UNSUBSCRIBE_WAY_POINTS_REQUEST_H_

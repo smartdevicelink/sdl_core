@@ -35,8 +35,8 @@
 
 #include "application_manager/application_impl.h"
 #include "application_manager/message_helper.h"
-#include "interfaces/MOBILE_API.h"
 #include "interfaces/HMI_API.h"
+#include "interfaces/MOBILE_API.h"
 #include "utils/helpers.h"
 
 namespace sdl_rpc_plugin {
@@ -198,14 +198,15 @@ void DeleteCommandRequest::on_event(const event_engine::Event& event) {
   }
   smart_objects::SmartObject& msg_params = (*message_)[strings::msg_params];
 
-  const int32_t cmd_id = msg_params[strings::cmd_id].asInt();
+  const uint32_t cmd_id = msg_params[strings::cmd_id].asUInt();
 
   smart_objects::SmartObject* command = application->FindCommand(cmd_id);
 
   if (!command) {
     LOG4CXX_ERROR(logger_,
-                  "Command id " << cmd_id << " not found for "
-                                             "application with connection key "
+                  "Command id " << cmd_id
+                                << " not found for "
+                                   "application with connection key "
                                 << connection_key());
     return;
   }
@@ -213,7 +214,8 @@ void DeleteCommandRequest::on_event(const event_engine::Event& event) {
   std::string info;
   const bool result = PrepareResponseParameters(result_code, info);
   if (result) {
-    application->RemoveCommand(msg_params[strings::cmd_id].asInt());
+    application->RemoveCommand(cmd_id);
+    application->help_prompt_manager().OnVrCommandDeleted(cmd_id, false);
   }
   SendResponse(
       result, result_code, info.empty() ? NULL : info.c_str(), &msg_params);
@@ -231,4 +233,4 @@ bool DeleteCommandRequest::IsPendingResponseExist() {
 
 }  // namespace commands
 
-}  // namespace application_manager
+}  // namespace sdl_rpc_plugin

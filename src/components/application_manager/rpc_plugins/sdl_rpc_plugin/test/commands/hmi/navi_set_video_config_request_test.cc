@@ -35,15 +35,15 @@
 #include "hmi/navi_set_video_config_request.h"
 
 #include "gtest/gtest.h"
-#include "utils/shared_ptr.h"
-#include "smart_objects/smart_object.h"
-#include "application_manager/smart_object_keys.h"
+
 #include "application_manager/commands/command_request_test.h"
-#include "application_manager/mock_application_manager.h"
-#include "application_manager/hmi_interfaces.h"
-#include "application_manager/mock_hmi_interface.h"
 #include "application_manager/event_engine/event.h"
+#include "application_manager/hmi_interfaces.h"
+#include "application_manager/mock_application_manager.h"
 #include "application_manager/mock_event_dispatcher.h"
+#include "application_manager/mock_hmi_interface.h"
+#include "application_manager/smart_object_keys.h"
+#include "smart_objects/smart_object.h"
 
 namespace test {
 namespace components {
@@ -55,8 +55,8 @@ using ::testing::_;
 using ::testing::ReturnRef;
 namespace am = ::application_manager;
 using am::commands::MessageSharedPtr;
-using sdl_rpc_plugin::commands::NaviSetVideoConfigRequest;
 using am::event_engine::Event;
+using sdl_rpc_plugin::commands::NaviSetVideoConfigRequest;
 
 namespace {
 const uint32_t kAppId = 1u;
@@ -65,7 +65,7 @@ const hmi_apis::FunctionID::eType kEventID =
     hmi_apis::FunctionID::Navigation_SetVideoConfig;
 }  // namespace
 
-typedef SharedPtr<NaviSetVideoConfigRequest> NaviSetVideoConfigRequestPtr;
+typedef std::shared_ptr<NaviSetVideoConfigRequest> NaviSetVideoConfigRequestPtr;
 
 class NaviSetVideoConfigRequestTest
     : public CommandRequestTest<CommandsTestMocks::kIsNice> {

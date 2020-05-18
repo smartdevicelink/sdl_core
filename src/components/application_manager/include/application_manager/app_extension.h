@@ -33,13 +33,13 @@
 #ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_APP_EXTENSION_H_
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_APP_EXTENSION_H_
 
-#include "utils/shared_ptr.h"
+#include <memory>
 
-namespace NsSmartDeviceLink {
-namespace NsSmartObjects {
+namespace ns_smart_device_link {
+namespace ns_smart_objects {
 class SmartObject;
 }
-}
+}  // namespace ns_smart_device_link
 
 namespace application_manager {
 
@@ -60,21 +60,21 @@ class AppExtension {
    * plugin
    */
   virtual void SaveResumptionData(
-      NsSmartDeviceLink::NsSmartObjects::SmartObject& resumption_data) = 0;
+      ns_smart_device_link::ns_smart_objects::SmartObject& resumption_data) = 0;
 
   /**
    * @brief ProcessResumption Method called by SDL during resumption.
    * @param resumption_data list of resumption data
    */
   virtual void ProcessResumption(
-      const NsSmartDeviceLink::NsSmartObjects::SmartObject&
+      const ns_smart_device_link::ns_smart_objects::SmartObject&
           resumption_data) = 0;
 
  private:
   const AppExtensionUID kUid_;
 };
 
-typedef utils::SharedPtr<AppExtension> AppExtensionPtr;
+typedef std::shared_ptr<AppExtension> AppExtensionPtr;
 
 }  //  namespace application_manager
 

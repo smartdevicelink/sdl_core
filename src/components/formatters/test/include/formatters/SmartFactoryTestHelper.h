@@ -38,23 +38,23 @@
 
 #include "formatters/CSmartFactory.h"
 #include "interfaces/HMI_API_schema.h"
-#include "smart_objects/always_true_schema_item.h"
 #include "smart_objects/always_false_schema_item.h"
+#include "smart_objects/always_true_schema_item.h"
 #include "smart_objects/array_schema_item.h"
 #include "smart_objects/bool_schema_item.h"
-#include "smart_objects/object_schema_item.h"
-#include "smart_objects/string_schema_item.h"
 #include "smart_objects/enum_schema_item.h"
 #include "smart_objects/number_schema_item.h"
+#include "smart_objects/object_schema_item.h"
 #include "smart_objects/schema_item_parameter.h"
+#include "smart_objects/string_schema_item.h"
 
 namespace test {
 namespace components {
 namespace formatters {
 
-using namespace NsSmartDeviceLink::NsSmartObjects;
-using namespace NsSmartDeviceLink::NsJSONHandler;
-using namespace NsSmartDeviceLink::NsJSONHandler::strings;
+using namespace ns_smart_device_link::ns_smart_objects;
+using namespace ns_smart_device_link::ns_json_handler;
+using namespace ns_smart_device_link::ns_json_handler::strings;
 using namespace hmi_apis;
 
 namespace TestType {
@@ -107,9 +107,10 @@ class CSmartFactoryTest : public CSmartFactory<FunctionIdTest::eType,
 
  protected:
   typedef std::map<const StructIdentifiersTest::eType,
-                   utils::SharedPtr<ISchemaItem> > TStructsSchemaItems;
+                   std::shared_ptr<ISchemaItem> >
+      TStructsSchemaItems;
 
-  static utils::SharedPtr<ISchemaItem> ProvideObjectSchemaItemForStruct(
+  static std::shared_ptr<ISchemaItem> ProvideObjectSchemaItemForStruct(
       TStructsSchemaItems& struct_schema_items,
       const StructIdentifiersTest::eType struct_id);
 
@@ -147,10 +148,10 @@ class CSmartFactoryTest : public CSmartFactory<FunctionIdTest::eType,
       const std::set<FunctionIdTest::eType>& function_id_items,
       const std::set<MessageTypeTest::eType>& message_type_items);
 
-  static utils::SharedPtr<ISchemaItem> InitStructSchemaItem_Common_1(
+  static std::shared_ptr<ISchemaItem> InitStructSchemaItem_Common_1(
       TStructsSchemaItems& struct_schema_items);
 
-  static utils::SharedPtr<ISchemaItem> InitStructSchemaItem_Common_2();
+  static std::shared_ptr<ISchemaItem> InitStructSchemaItem_Common_2();
 };
 
 }  // namespace formatters

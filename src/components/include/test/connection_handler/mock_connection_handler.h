@@ -33,24 +33,25 @@
 #ifndef SRC_COMPONENTS_INCLUDE_TEST_CONNECTION_HANDLER_MOCK_CONNECTION_HANDLER_H_
 #define SRC_COMPONENTS_INCLUDE_TEST_CONNECTION_HANDLER_MOCK_CONNECTION_HANDLER_H_
 
-#include <string>
 #include <list>
+#include <string>
 #include <vector>
 
-#include "gmock/gmock.h"
 #include "connection_handler/connection_handler.h"
 #include "connection_handler/connection_handler_observer.h"
-#include "connection_handler/devices_discovery_starter.h"
 #include "connection_handler/connection_handler_settings.h"
+#include "connection_handler/devices_discovery_starter.h"
+#include "gmock/gmock.h"
 
 namespace test {
 namespace components {
 namespace connection_handler_test {
 
+using connection_handler::CloseSessionReason;
 using connection_handler::ConnectionHandle;
 using connection_handler::DeviceHandle;
-using connection_handler::CloseSessionReason;
 using connection_handler::DevicesDiscoveryStarter;
+using connection_handler::SessionTransports;
 
 class MockConnectionHandler : public connection_handler::ConnectionHandler {
  public:
@@ -59,12 +60,23 @@ class MockConnectionHandler : public connection_handler::ConnectionHandler {
   MOCK_METHOD0(StartTransportManager, void());
   MOCK_METHOD1(ConnectToDevice,
                void(connection_handler::DeviceHandle device_handle));
+  MOCK_CONST_METHOD1(
+      GetConnectionStatus,
+      transport_manager::ConnectionStatus(const DeviceHandle& device_handle));
   MOCK_CONST_METHOD2(RunAppOnDevice,
                      void(const std::string&, const std::string&));
   MOCK_METHOD0(ConnectToAllDevices, void());
+  MOCK_METHOD2(
+      AddCloudAppDevice,
+      void(const std::string& policy_app_id,
+           const transport_manager::transport_adapter::CloudAppProperties&));
+  MOCK_METHOD1(RemoveCloudAppDevice, void(const DeviceHandle device_id));
   MOCK_METHOD1(CloseRevokedConnection, void(uint32_t connection_key));
   MOCK_METHOD1(CloseConnection, void(ConnectionHandle connection_handle));
   MOCK_METHOD1(GetConnectionSessionsCount, uint32_t(uint32_t connection_key));
+  MOCK_CONST_METHOD1(
+      GetCloudAppID,
+      std::string(const transport_manager::ConnectionUID connection_id));
   MOCK_METHOD2(GetDeviceID,
                bool(const std::string& mac_address,
                     DeviceHandle* device_handle));
@@ -84,13 +96,6 @@ class MockConnectionHandler : public connection_handler::ConnectionHandler {
                void(uint32_t connection_key, uint8_t session_id));
   MOCK_METHOD2(BindProtocolVersionWithSession,
                void(uint32_t connection_key, uint8_t protocol_version));
-
-  // DEPRECATED
-  MOCK_CONST_METHOD4(GetDataOnSessionKey,
-                     int32_t(uint32_t key,
-                             uint32_t* app_id,
-                             std::list<int32_t>* sessions_list,
-                             uint32_t* device_id));
   MOCK_CONST_METHOD4(GetDataOnSessionKey,
                      int32_t(uint32_t key,
                              uint32_t* app_id,
@@ -103,10 +108,33 @@ class MockConnectionHandler : public connection_handler::ConnectionHandler {
   MOCK_METHOD0(get_device_discovery_starter, DevicesDiscoveryStarter&());
   MOCK_CONST_METHOD1(GetConnectedDevicesMAC,
                      void(std::vector<std::string>& macs));
+  MOCK_METHOD1(
+      AddSession,
+      uint32_t(const transport_manager::ConnectionUID primary_transport_id));
+  MOCK_METHOD1(RemoveSession, bool(uint8_t session_id));
+  MOCK_METHOD0(session_connection_map,
+               DataAccessor<connection_handler::SessionConnectionMap>());
+  MOCK_METHOD2(SetSecondaryTransportID,
+               SessionTransports(
+                   uint8_t session_id,
+                   transport_manager::ConnectionUID secondary_transport_id));
+  MOCK_CONST_METHOD1(GetSessionTransports,
+                     const SessionTransports(uint8_t session_id));
   MOCK_METHOD3(NotifyServiceStartedResult,
                void(uint32_t session_key,
                     bool result,
                     std::vector<std::string>& rejected_params));
+  MOCK_METHOD3(
+      OnSecondaryTransportStarted,
+      bool(transport_manager::ConnectionUID& primary_connection_handle,
+           const transport_manager::ConnectionUID secondary_connection_handle,
+           const uint8_t session_id));
+  MOCK_METHOD2(
+      OnSecondaryTransportEnded,
+      void(const transport_manager::ConnectionUID primary_connection_handle,
+           const transport_manager::ConnectionUID secondary_connection_handle));
+  MOCK_METHOD0(CreateWebEngineDevice, void());
+  MOCK_CONST_METHOD0(GetWebEngineDeviceInfo, transport_manager::DeviceInfo&());
 };
 
 }  // namespace connection_handler_test

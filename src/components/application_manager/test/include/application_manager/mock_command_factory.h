@@ -37,7 +37,6 @@
 #include "application_manager/command_factory.h"
 #include "application_manager/commands/command.h"
 #include "smart_objects/smart_object.h"
-#include "utils/shared_ptr.h"
 
 namespace test {
 namespace components {
@@ -53,9 +52,6 @@ class MockCommandFactory : public application_manager::CommandFactory {
       IsAbleToProcess,
       bool(const int32_t,
            const application_manager::commands::Command::CommandSource));
-
-  //               const commands::MessageSharedPtr& message,
-  //                   application_manager::commands::Command::CommandSource));
 };
 
 }  // namespace application_manager_test

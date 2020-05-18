@@ -57,9 +57,11 @@ class MockCacheManagerInterface : public ::policy::CacheManagerInterface {
                     const PTString& hmi_level,
                     const PTString& rpc,
                     CheckPermissionResult& result));
+  MOCK_CONST_METHOD0(pt, std::shared_ptr<policy_table::Table>());
   MOCK_METHOD0(IsPTPreloaded, bool());
   MOCK_METHOD0(IgnitionCyclesBeforeExchange, int());
   MOCK_METHOD1(KilometersBeforeExchange, int(int current));
+  MOCK_CONST_METHOD0(GetEnabledLocalApps, std::vector<std::string>());
   MOCK_CONST_METHOD1(GetPermissionsList, bool(StringArray& perm_list));
   MOCK_METHOD2(SetCountersPassedForSuccessfulUpdate,
                bool(Counters counter, int value));
@@ -75,7 +77,44 @@ class MockCacheManagerInterface : public ::policy::CacheManagerInterface {
   MOCK_METHOD0(TimeoutResponse, int());
   MOCK_METHOD1(SecondsBetweenRetries, bool(std::vector<int>& seconds));
   MOCK_CONST_METHOD1(IsDeviceConsentCached, bool(const std::string& device_id));
-  MOCK_CONST_METHOD0(GetVehicleInfo, const VehicleInfo());
+  MOCK_CONST_METHOD0(GetPolicyTableData, Json::Value());
+  MOCK_CONST_METHOD0(GetVehicleDataItems,
+                     const std::vector<policy_table::VehicleDataItem>());
+  MOCK_CONST_METHOD0(GetRemovedVehicleDataItems,
+                     std::vector<policy_table::VehicleDataItem>());
+  MOCK_CONST_METHOD1(GetEnabledCloudApps,
+                     void(std::vector<std::string>& enabled_apps));
+  MOCK_CONST_METHOD2(GetAppProperties,
+                     bool(const std::string& policy_app_id,
+                          AppProperties& out_app_properties));
+  MOCK_METHOD1(InitCloudApp, void(const std::string& policy_app_id));
+  MOCK_METHOD2(SetCloudAppEnabled,
+               void(const std::string& policy_app_id, const bool enabled));
+  MOCK_METHOD2(SetAppAuthToken,
+               void(const std::string& policy_app_id,
+                    const std::string& auth_token));
+  MOCK_METHOD2(SetAppCloudTransportType,
+               void(const std::string& policy_app_id,
+                    const std::string& cloud_transport_type));
+  MOCK_METHOD2(SetAppEndpoint,
+               void(const std::string& policy_app_id,
+                    const std::string& endpoint));
+  MOCK_METHOD2(SetAppNicknames,
+               void(const std::string& policy_app_id,
+                    const StringArray& nicknames));
+  MOCK_METHOD2(SetHybridAppPreference,
+               void(const std::string& policy_app_id,
+                    const std::string& hybrid_app_preference));
+  MOCK_CONST_METHOD2(
+      GetAppServiceParameters,
+      void(const std::string& policy_app_id,
+           policy_table::AppServiceParameters* app_service_parameters));
+  MOCK_CONST_METHOD1(UnknownRPCPassthroughAllowed,
+                     bool(const std::string& policy_app_id));
+  MOCK_CONST_METHOD0(LockScreenDismissalEnabledState,
+                     const boost::optional<bool>());
+  MOCK_CONST_METHOD1(LockScreenDismissalWarningMessage,
+                     const boost::optional<std::string>(const std::string&));
   MOCK_CONST_METHOD1(GetDeviceConsent,
                      DeviceConsent(const std::string& device_id));
   MOCK_METHOD2(SetDeviceConsent,
@@ -86,17 +125,18 @@ class MockCacheManagerInterface : public ::policy::CacheManagerInterface {
   MOCK_CONST_METHOD1(GetCachedDeviceConsent,
                      DeviceConsent(const std::string& device_id));
   MOCK_METHOD1(SetVINValue, bool(const std::string& value));
-  MOCK_METHOD3(GetUserFriendlyMsg,
-               std::vector<UserFriendlyMessage>(
-                   const std::vector<std::string>& msg_codes,
-                   const std::string& language,
-                   const std::string& active_hmi_language));
-  MOCK_METHOD2(GetUpdateUrls,
-               void(const std::string& service_type,
-                    EndpointUrls& out_end_points));
-  MOCK_METHOD2(GetUpdateUrls,
-               void(const uint32_t service_type, EndpointUrls& out_end_points));
-  MOCK_CONST_METHOD0(GetLockScreenIconUrl, std::string());
+  MOCK_CONST_METHOD3(GetUserFriendlyMsg,
+                     std::vector<UserFriendlyMessage>(
+                         const std::vector<std::string>& msg_codes,
+                         const std::string& language,
+                         const std::string& active_hmi_language));
+  MOCK_CONST_METHOD2(GetUpdateUrls,
+                     void(const std::string& service_type,
+                          EndpointUrls& out_end_points));
+  MOCK_CONST_METHOD2(GetUpdateUrls,
+                     void(const uint32_t service_type,
+                          EndpointUrls& out_end_points));
+  MOCK_CONST_METHOD1(GetIconUrl, std::string(const std::string& policy_app_id));
   MOCK_METHOD1(
       GetNotificationsNumber,
       policy_table::NumberOfNotificationsType(const std::string& priority));
@@ -106,7 +146,7 @@ class MockCacheManagerInterface : public ::policy::CacheManagerInterface {
   MOCK_METHOD2(Init,
                bool(const std::string& file_name,
                     const PolicySettings* settings));
-  MOCK_METHOD0(GenerateSnapshot, utils::SharedPtr<policy_table::Table>());
+  MOCK_METHOD0(GenerateSnapshot, std::shared_ptr<policy_table::Table>());
   MOCK_METHOD1(ApplyUpdate, bool(const policy_table::Table& update_pt));
   MOCK_METHOD1(Save, bool(const policy_table::Table& table));
   MOCK_CONST_METHOD0(UpdateRequired, bool());
@@ -231,7 +271,7 @@ class MockCacheManagerInterface : public ::policy::CacheManagerInterface {
                bool(const std::string& device_id,
                     const std::string& policy_app_id,
                     policy::Permissions& permission));
-  MOCK_CONST_METHOD0(GetPT, utils::SharedPtr<policy_table::Table>());
+  MOCK_CONST_METHOD0(GetPT, std::shared_ptr<policy_table::Table>());
   MOCK_CONST_METHOD0(GetMetaInfo, const MetaInfo());
   MOCK_CONST_METHOD0(GetCertificate, std::string());
   MOCK_METHOD1(SetDecryptedCertificate, void(const std::string&));
@@ -257,6 +297,19 @@ class MockCacheManagerInterface : public ::policy::CacheManagerInterface {
                      RequestType::State(const std::string& policy_app_id));
   MOCK_CONST_METHOD1(GetAppRequestSubTypesState,
                      RequestSubType::State(const std::string& policy_app_id));
+
+  MOCK_CONST_METHOD1(
+      GetAppEncryptionRequiredFlag,
+      rpc::Optional<rpc::Boolean>(const std::string& application_policy_name));
+
+  MOCK_CONST_METHOD1(
+      GetFunctionalGroupingEncryptionRequiredFlag,
+      rpc::Optional<rpc::Boolean>(const std::string& functional_group));
+
+  MOCK_CONST_METHOD2(GetApplicationParams,
+                     void(const std::string& application_name,
+                          policy_table::ApplicationParams& application_params));
+  MOCK_CONST_METHOD0(GetPolicyAppIDs, const policy_table::Strings());
 };
 
 }  // namespace policy_test

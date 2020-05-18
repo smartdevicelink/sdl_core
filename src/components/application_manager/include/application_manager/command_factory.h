@@ -33,22 +33,27 @@
 #ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMAND_FACTORY_H
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMAND_FACTORY_H
 
-#include "application_manager/commands/command.h"
 #include "application_manager/application_manager.h"
-#include "application_manager/rpc_service.h"
+#include "application_manager/commands/command.h"
+#include "application_manager/hmi_capabilities.h"
 #include "application_manager/policies/policy_handler_interface.h"
+#include "application_manager/rpc_service.h"
 #include "utils/macro.h"
 
 namespace application_manager {
-using rpc_service::RPCService;
 using policy::PolicyHandlerInterface;
-typedef utils::SharedPtr<commands::Command> CommandSharedPtr;
+typedef std::shared_ptr<commands::Command> CommandSharedPtr;
 
 /**
  * @brief Factory class for command creation
  **/
 class CommandFactory {
  public:
+  /**
+   * @brief Class destructor
+   */
+  virtual ~CommandFactory() {}
+
   /**
    * @brief Create command object and return pointer to it
    *
@@ -59,10 +64,10 @@ class CommandFactory {
       const commands::MessageSharedPtr& message,
       commands::Command::CommandSource source) = 0;
   /**
-  * @param int32_t command id
-  * @param CommandSource source
-  * @return return true if command can be create, else return false
-  **/
+   * @param int32_t command id
+   * @param CommandSource source
+   * @return return true if command can be create, else return false
+   **/
   virtual bool IsAbleToProcess(
       const int32_t,
       const application_manager::commands::Command::CommandSource source)
@@ -105,7 +110,7 @@ class DefaultCommandCreator : public CommandCreator {
    * @param  policy_handler PolicyHandlerInterface.
    */
   DefaultCommandCreator(ApplicationManager& application_manager,
-                        RPCService& rpc_service,
+                        rpc_service::RPCService& rpc_service,
                         HMICapabilities& hmi_capabilities,
                         PolicyHandlerInterface& policy_handler)
       : application_manager_(application_manager)
@@ -137,7 +142,7 @@ class DefaultCommandCreator : public CommandCreator {
   }
 
   ApplicationManager& application_manager_;
-  RPCService& rpc_service_;
+  rpc_service::RPCService& rpc_service_;
   HMICapabilities& hmi_capabilities_;
   PolicyHandlerInterface& policy_handler_;
 };
@@ -158,7 +163,7 @@ class DefaultCommandCreator<InvalidCommand> : public CommandCreator {
    * @param  policy_handler PolicyHandlerInterface.
    */
   DefaultCommandCreator(ApplicationManager& application_manager,
-                        RPCService& rpc_service,
+                        rpc_service::RPCService& rpc_service,
                         HMICapabilities& hmi_capabilities,
                         PolicyHandlerInterface& policy_handler) {
     UNUSED(application_manager);
@@ -203,7 +208,7 @@ struct CommandCreatorFactory {
     return res;
   }
   ApplicationManager& application_manager_;
-  RPCService& rpc_service_;
+  rpc_service::RPCService& rpc_service_;
   HMICapabilities& hmi_capabilities_;
   PolicyHandlerInterface& policy_handler_;
 };

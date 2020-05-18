@@ -33,27 +33,27 @@
 #include "application_manager/application_impl.h"
 
 #include <stdint.h>
+
 #include <iostream>
 
-#include "gtest/gtest.h"
+#include "application_manager/event_engine/event_dispatcher.h"
 #include "application_manager/hmi_state.h"
-#include "utils/file_system.h"
-
-#include "utils/make_shared.h"
-#include "application_manager/mock_message_helper.h"
-#include "utils/custom_string.h"
 #include "application_manager/mock_application_manager.h"
 #include "application_manager/mock_application_manager_settings.h"
+#include "application_manager/mock_message_helper.h"
 #include "application_manager/mock_request_controller_settings.h"
-#include "application_manager/event_engine/event_dispatcher.h"
-#include "application_manager/state_controller.h"
-#include "resumption/last_state.h"
-#include "application_manager/resumption/resume_ctrl.h"
-#include "application_manager/policies/mock_policy_handler_interface.h"
 #include "application_manager/mock_resume_ctrl.h"
+#include "application_manager/policies/mock_policy_handler_interface.h"
+#include "application_manager/resumption/resume_ctrl.h"
+#include "application_manager/state_controller.h"
+#include "gtest/gtest.h"
 #include "policy/usage_statistics/mock_statistics_manager.h"
+#include "resumption/last_state.h"
 #include "smart_objects/smart_object.h"
+#include "utils/custom_string.h"
+#include "utils/file_system.h"
 #include "utils/test_async_waiter.h"
+#include "utils/threads/async_runner.h"
 
 namespace test {
 namespace components {
@@ -65,12 +65,20 @@ using namespace mobile_apis;
 namespace custom_str = utils::custom_string;
 
 using ::testing::_;
+using ::testing::AtLeast;
+using ::testing::Mock;
 using ::testing::Return;
 using ::testing::ReturnRef;
-using ::testing::AtLeast;
 using usage_statistics_test::MockStatisticsManager;
 
-typedef void (ApplicationImpl::*AddSet)(HmiStatePtr args);
+typedef void (ApplicationImpl::*AddSet)(const WindowID window_id,
+                                        HmiStatePtr args);
+
+namespace {
+const WindowID kDefaultWindowId =
+    mobile_apis::PredefinedWindows::DEFAULT_WINDOW;
+const std::string kDefaultWindowName = "DefaultName";
+}  // namespace
 
 class ApplicationImplTest : public ::testing::Test {
  protected:
@@ -92,21 +100,29 @@ class ApplicationImplTest : public ::testing::Test {
     EXPECT_CALL(mock_application_manager_settings_, app_storage_folder())
         .WillRepeatedly(ReturnRef(directory_name));
     EXPECT_CALL(mock_application_manager_settings_,
-                audio_data_stopped_timeout()).WillOnce(Return(0));
+                audio_data_stopped_timeout())
+        .WillOnce(Return(0));
     EXPECT_CALL(mock_application_manager_settings_,
-                video_data_stopped_timeout()).WillOnce(Return(0));
+                video_data_stopped_timeout())
+        .WillOnce(Return(0));
     app_impl.reset(
         new ApplicationImpl(app_id,
                             policy_app_id,
                             mac_address,
                             device_handle,
                             app_name,
-                            utils::MakeShared<MockStatisticsManager>(),
+                            std::make_shared<MockStatisticsManager>(),
                             mock_application_manager_));
 
     HmiStatePtr initial_state = CreateTestHmiState();
-    app_impl->SetInitialState(initial_state);
+    app_impl->SetInitialState(
+        kDefaultWindowId, kDefaultWindowName, initial_state);
   }
+
+  virtual void TearDown() OVERRIDE {
+    Mock::VerifyAndClearExpectations(MockMessageHelper::message_helper_mock());
+  }
+
   HmiStatePtr CreateTestHmiState();
 
   HmiStatePtr TestAddHmiState(HMILevel::eType hmi_lvl,
@@ -114,15 +130,21 @@ class ApplicationImplTest : public ::testing::Test {
                               AddSet hmi_action);
 
   void CheckCurrentHMIState();
+  // 'directory_name' has to be declared prior to 'app_impl' so that when
+  // deleting ApplicationImplTest class, 'directory_name' will be removed
+  // after 'app_impl' runs its destructor.
+  // (ApplicationImpl's destructor calls CleanupFiles(), which will call
+  // application_manager_.get_settings().app_storage_folder() and will
+  // access 'directory_name'.)
+  const std::string directory_name = "./test_storage";
   MockApplicationManagerSettings mock_application_manager_settings_;
   MockApplicationManager mock_application_manager_;
-  utils::SharedPtr<ApplicationImpl> app_impl;
+  std::shared_ptr<ApplicationImpl> app_impl;
   uint32_t app_id;
   std::string policy_app_id;
   std::string mac_address;
   connection_handler::DeviceHandle device_handle;
   custom_str::CustomString app_name;
-  const std::string directory_name = "./test_storage";
   HmiState::StateID state_id;
   HmiStatePtr testHmiState;
   HMILevel::eType test_lvl;
@@ -131,8 +153,8 @@ class ApplicationImplTest : public ::testing::Test {
 };
 
 HmiStatePtr ApplicationImplTest::CreateTestHmiState() {
-  HmiStatePtr testState = utils::MakeShared<HmiState>(
-      static_cast<utils::SharedPtr<Application> >(app_impl),
+  HmiStatePtr testState = std::make_shared<HmiState>(
+      static_cast<std::shared_ptr<Application> >(app_impl),
       mock_application_manager_,
       state_id);
   testState->set_hmi_level(test_lvl);
@@ -147,12 +169,12 @@ HmiStatePtr ApplicationImplTest::TestAddHmiState(HMILevel::eType hmi_lvl,
   test_lvl = hmi_lvl;
   state_id = id_state;
   HmiStatePtr state = CreateTestHmiState();
-  ((app_impl.get())->*hmi_action)(state);
+  ((app_impl.get())->*hmi_action)(kDefaultWindowId, state);
   return state;
 }
 
 void ApplicationImplTest::CheckCurrentHMIState() {
-  HmiStatePtr current_state = app_impl->CurrentHmiState();
+  HmiStatePtr current_state = app_impl->CurrentHmiState(kDefaultWindowId);
   EXPECT_EQ(test_lvl, current_state->hmi_level());
   EXPECT_EQ(state_id, current_state->state_id());
 }
@@ -195,7 +217,7 @@ TEST_F(ApplicationImplTest, AddStateAddRegularState_GetRegularState) {
                   HmiState::STATE_ID_VIDEO_STREAMING,
                   &ApplicationImpl::AddHMIState);
 
-  HmiStatePtr current_state = app_impl->RegularHmiState();
+  HmiStatePtr current_state = app_impl->RegularHmiState(kDefaultWindowId);
   EXPECT_EQ(HMILevel::HMI_FULL, current_state->hmi_level());
   EXPECT_EQ(HmiState::STATE_ID_REGULAR, current_state->state_id());
   EXPECT_EQ(app_id, app_impl->app_id());
@@ -216,8 +238,8 @@ TEST_F(ApplicationImplTest, AddStates_RemoveLastState) {
   CheckCurrentHMIState();
 
   // Remove last state
-  app_impl->RemoveHMIState(state3->state_id());
-  HmiStatePtr current_state = app_impl->CurrentHmiState();
+  app_impl->RemoveHMIState(kDefaultWindowId, state3->state_id());
+  HmiStatePtr current_state = app_impl->CurrentHmiState(kDefaultWindowId);
   EXPECT_EQ(state2, current_state);
   EXPECT_EQ(HMILevel::HMI_NONE, current_state->hmi_level());
   EXPECT_EQ(HmiState::STATE_ID_VIDEO_STREAMING, current_state->state_id());
@@ -237,8 +259,8 @@ TEST_F(ApplicationImplTest, AddStates_RemoveNotLastNotFirstState) {
   CheckCurrentHMIState();
 
   // Remove not last state
-  app_impl->RemoveHMIState(state2->state_id());
-  HmiStatePtr current_state = app_impl->CurrentHmiState();
+  app_impl->RemoveHMIState(kDefaultWindowId, state2->state_id());
+  HmiStatePtr current_state = app_impl->CurrentHmiState(kDefaultWindowId);
   EXPECT_EQ(state3, current_state);
   // HMI level is equal to parent hmi_level
   EXPECT_EQ(HMILevel::HMI_FULL, current_state->hmi_level());
@@ -260,13 +282,13 @@ TEST_F(ApplicationImplTest, AddStates_RemoveFirstState) {
   CheckCurrentHMIState();
 
   // Remove first added state
-  app_impl->RemoveHMIState(state1->state_id());
-  HmiStatePtr current_state = app_impl->CurrentHmiState();
+  app_impl->RemoveHMIState(kDefaultWindowId, state1->state_id());
+  HmiStatePtr current_state = app_impl->CurrentHmiState(kDefaultWindowId);
   EXPECT_EQ(state3, current_state);
   // Last state does not have a parent
   EXPECT_EQ(HMILevel::HMI_LIMITED, current_state->hmi_level());
   EXPECT_EQ(HmiState::STATE_ID_TTS_SESSION, current_state->state_id());
-  EXPECT_EQ(NULL, current_state->parent());
+  EXPECT_EQ(nullptr, current_state->parent());
 }
 
 TEST_F(ApplicationImplTest, SetRegularState_RemoveFirstState) {
@@ -283,8 +305,8 @@ TEST_F(ApplicationImplTest, SetRegularState_RemoveFirstState) {
   CheckCurrentHMIState();
 
   // Remove first state
-  app_impl->RemoveHMIState(state1->state_id());
-  HmiStatePtr current_state = app_impl->CurrentHmiState();
+  app_impl->RemoveHMIState(kDefaultWindowId, state1->state_id());
+  HmiStatePtr current_state = app_impl->CurrentHmiState(kDefaultWindowId);
   EXPECT_EQ(state3, current_state);
   // Last state has a parent
   EXPECT_EQ(HMILevel::HMI_FULL, current_state->hmi_level());
@@ -299,13 +321,13 @@ TEST_F(ApplicationImplTest, SetPostponedState_RemovePostponedState) {
                                        &ApplicationImpl::SetPostponedState);
 
   // Check that state was setted correctly
-  HmiStatePtr state2 = app_impl->PostponedHmiState();
+  HmiStatePtr state2 = app_impl->PostponedHmiState(kDefaultWindowId);
   EXPECT_EQ(state1, state2);
 
   // Check that state was correctly removed
-  app_impl->RemovePostponedState();
-  state2 = app_impl->PostponedHmiState();
-  EXPECT_EQ(NULL, state2);
+  app_impl->RemovePostponedState(kDefaultWindowId);
+  state2 = app_impl->PostponedHmiState(kDefaultWindowId);
+  EXPECT_EQ(nullptr, state2);
 }
 
 TEST_F(ApplicationImplTest, AddStateAddRegularState_GetHmiLvlAudioSystemState) {
@@ -315,9 +337,9 @@ TEST_F(ApplicationImplTest, AddStateAddRegularState_GetHmiLvlAudioSystemState) {
                   HmiState::STATE_ID_REGULAR,
                   &ApplicationImpl::SetRegularState);
 
-  EXPECT_EQ(test_lvl, app_impl->hmi_level());
+  EXPECT_EQ(test_lvl, app_impl->hmi_level(kDefaultWindowId));
   EXPECT_EQ(audiostate, app_impl->audio_streaming_state());
-  EXPECT_EQ(syst_context, app_impl->system_context());
+  EXPECT_EQ(syst_context, app_impl->system_context(kDefaultWindowId));
 
   audiostate = AudioStreamingState::AUDIBLE;
   syst_context = SystemContext::SYSCTXT_MENU;
@@ -325,9 +347,9 @@ TEST_F(ApplicationImplTest, AddStateAddRegularState_GetHmiLvlAudioSystemState) {
                   HmiState::STATE_ID_VIDEO_STREAMING,
                   &ApplicationImpl::AddHMIState);
 
-  EXPECT_EQ(test_lvl, app_impl->hmi_level());
+  EXPECT_EQ(test_lvl, app_impl->hmi_level(kDefaultWindowId));
   EXPECT_EQ(audiostate, app_impl->audio_streaming_state());
-  EXPECT_EQ(syst_context, app_impl->system_context());
+  EXPECT_EQ(syst_context, app_impl->system_context(kDefaultWindowId));
 }
 
 TEST_F(ApplicationImplTest, IsAudioApplication) {
@@ -401,7 +423,7 @@ TEST_F(ApplicationImplTest, GetFile) {
   test_file.file_type = FileType::GRAPHIC_JPEG;
   test_file.file_name = "test_file 1";
 
-  EXPECT_EQ(NULL, app_impl->GetFile(test_file.file_name));
+  EXPECT_EQ(nullptr, app_impl->GetFile(test_file.file_name));
   EXPECT_TRUE(app_impl->AddFile(test_file));
   const AppFile* app_file = app_impl->GetFile(test_file.file_name);
   EXPECT_EQ(test_file.is_persistent, app_file->is_persistent);
@@ -553,7 +575,9 @@ TEST_F(ApplicationImplTest, SubscribeToSoftButton_UnsubscribeFromSoftButton) {
 
   SoftButtonID test_button;
   for (uint i = 0; i < btn_count; i++) {
-    test_button.insert(i);
+    test_button.insert(std::make_pair(
+        i,
+        static_cast<WindowID>(mobile_apis::PredefinedWindows::DEFAULT_WINDOW)));
   }
   app_impl->SubscribeToSoftButtons(FunctionID::ScrollableMessageID,
                                    test_button);
@@ -656,7 +680,8 @@ TEST_F(ApplicationImplTest,
 
 TEST_F(ApplicationImplTest, UpdateHash_AppMngrNotSuspended) {
   EXPECT_CALL(*MockMessageHelper::message_helper_mock(),
-              SendHashUpdateNotification(app_id, _)).Times(1);
+              SendHashUpdateNotification(app_id, _))
+      .Times(1);
   resumprion_test::MockResumeCtrl mock_resume_ctrl;
   EXPECT_CALL(mock_application_manager_, resume_controller())
       .WillOnce(ReturnRef(mock_resume_ctrl));
@@ -668,7 +693,8 @@ TEST_F(ApplicationImplTest, UpdateHash_AppMngrNotSuspended) {
 
 TEST_F(ApplicationImplTest, UpdateHash_AppMngrSuspended) {
   EXPECT_CALL(*MockMessageHelper::message_helper_mock(),
-              SendHashUpdateNotification(app_id, _)).Times(0);
+              SendHashUpdateNotification(app_id, _))
+      .Times(0);
   resumprion_test::MockResumeCtrl mock_resume_ctrl;
   EXPECT_CALL(mock_application_manager_, resume_controller())
       .WillOnce(ReturnRef(mock_resume_ctrl));
@@ -689,7 +715,8 @@ TEST_F(ApplicationImplTest, SetVideoConfig_MobileNavi_StreamingNotApproved) {
 TEST_F(ApplicationImplTest, SetVideoConfig_MobileNavi_StreamingApproved) {
   app_impl->set_video_streaming_approved(true);
   EXPECT_CALL(*MockMessageHelper::message_helper_mock(),
-              SendNaviSetVideoConfig(app_id, _, _)).Times(0);
+              SendNaviSetVideoConfig(app_id, _, _))
+      .Times(0);
 
   smart_objects::SmartObject params;
   app_impl->SetVideoConfig(protocol_handler::ServiceType::kMobileNav, params);
@@ -697,7 +724,8 @@ TEST_F(ApplicationImplTest, SetVideoConfig_MobileNavi_StreamingApproved) {
 
 TEST_F(ApplicationImplTest, SetVideoConfig_NotMobileNavi) {
   EXPECT_CALL(*MockMessageHelper::message_helper_mock(),
-              SendNaviSetVideoConfig(app_id, _, _)).Times(0);
+              SendNaviSetVideoConfig(app_id, _, _))
+      .Times(0);
 
   smart_objects::SmartObject params;
   app_impl->SetVideoConfig(protocol_handler::ServiceType::kAudio, params);
@@ -722,13 +750,15 @@ TEST_F(ApplicationImplTest, StartStreaming_Audio_StreamingNotApproved) {
 TEST_F(ApplicationImplTest, StartStreaming_StreamingApproved) {
   app_impl->set_video_streaming_approved(true);
   EXPECT_CALL(*MockMessageHelper::message_helper_mock(),
-              SendNaviStartStream(app_id, _)).Times(0);
+              SendNaviStartStream(app_id, _))
+      .Times(0);
   app_impl->StartStreaming(protocol_handler::ServiceType::kMobileNav);
 
   app_impl->set_audio_streaming_approved(true);
 
   EXPECT_CALL(*MockMessageHelper::message_helper_mock(),
-              SendAudioStartStream(app_id, _)).Times(0);
+              SendAudioStartStream(app_id, _))
+      .Times(0);
   app_impl->StartStreaming(protocol_handler::ServiceType::kAudio);
 }
 
@@ -736,16 +766,16 @@ TEST_F(ApplicationImplTest, SuspendNaviStreaming) {
   protocol_handler::ServiceType type =
       protocol_handler::ServiceType::kMobileNav;
   EXPECT_CALL(mock_application_manager_, OnAppStreaming(app_id, type, false));
-  EXPECT_CALL(*MockMessageHelper::message_helper_mock(),
-              SendOnDataStreaming(type, false, _));
+  EXPECT_CALL(mock_application_manager_,
+              ProcessOnDataStreamingNotification(type, app_id, false));
   app_impl->SuspendStreaming(type);
 }
 
 TEST_F(ApplicationImplTest, SuspendAudioStreaming) {
   protocol_handler::ServiceType type = protocol_handler::ServiceType::kAudio;
   EXPECT_CALL(mock_application_manager_, OnAppStreaming(app_id, type, false));
-  EXPECT_CALL(*MockMessageHelper::message_helper_mock(),
-              SendOnDataStreaming(type, false, _));
+  EXPECT_CALL(mock_application_manager_,
+              ProcessOnDataStreamingNotification(type, app_id, false));
   app_impl->SuspendStreaming(type);
 }
 
@@ -784,8 +814,8 @@ TEST_F(ApplicationImplTest, StopStreaming_StreamingApproved) {
   app_impl->set_video_streaming_approved(true);
 
   EXPECT_CALL(mock_application_manager_, OnAppStreaming(app_id, type, false));
-  EXPECT_CALL(*MockMessageHelper::message_helper_mock(),
-              SendOnDataStreaming(type, false, _));
+  EXPECT_CALL(mock_application_manager_,
+              ProcessOnDataStreamingNotification(type, app_id, false));
   EXPECT_CALL(*MockMessageHelper::message_helper_mock(),
               SendNaviStopStream(app_id, _));
 
@@ -796,8 +826,8 @@ TEST_F(ApplicationImplTest, StopStreaming_StreamingApproved) {
   app_impl->set_audio_streaming_approved(true);
   type = protocol_handler::ServiceType::kAudio;
   EXPECT_CALL(mock_application_manager_, OnAppStreaming(app_id, type, false));
-  EXPECT_CALL(*MockMessageHelper::message_helper_mock(),
-              SendOnDataStreaming(type, false, _));
+  EXPECT_CALL(mock_application_manager_,
+              ProcessOnDataStreamingNotification(type, app_id, false));
   EXPECT_CALL(*MockMessageHelper::message_helper_mock(),
               SendAudioStopStream(app_id, _));
 
@@ -807,7 +837,7 @@ TEST_F(ApplicationImplTest, StopStreaming_StreamingApproved) {
 
 TEST_F(ApplicationImplTest, PushPopMobileMessage) {
   smart_objects::SmartObjectSPtr on_driver_distraction =
-      utils::MakeShared<smart_objects::SmartObject>();
+      std::make_shared<smart_objects::SmartObject>();
   const hmi_apis::Common_DriverDistractionState::eType state =
       hmi_apis::Common_DriverDistractionState::DD_ON;
   (*on_driver_distraction)[strings::params][strings::function_id] =
@@ -828,6 +858,29 @@ TEST_F(ApplicationImplTest, PushPopMobileMessage) {
   EXPECT_TRUE(messages.empty());
 }
 
+TEST_F(ApplicationImplTest, SetSecondaryDeviceTest) {
+  connection_handler::DeviceHandle initial_device =
+      app_impl->secondary_device();
+  EXPECT_EQ(0u, initial_device);
+
+  connection_handler::DeviceHandle device = 123;
+  app_impl->set_secondary_device(device);
+
+  EXPECT_EQ(device, app_impl->secondary_device());
+}
+
+TEST_F(ApplicationImplTest, SetDeferredResumptionHMILevelTest) {
+  using namespace mobile_api::HMILevel;
+  HMILevel::eType initial_deferred_level =
+      app_impl->deferred_resumption_hmi_level();
+  EXPECT_EQ(HMILevel::eType::INVALID_ENUM, initial_deferred_level);
+
+  HMILevel::eType deferred_level = HMILevel::eType::HMI_FULL;
+  app_impl->set_deferred_resumption_hmi_level(deferred_level);
+
+  EXPECT_EQ(deferred_level, app_impl->deferred_resumption_hmi_level());
+}
+
 TEST_F(ApplicationImplTest, WaitForSetupDone_SetupNotInProgress) {
   // test should succeed without blocking on WaitForSetupDone()
   app_impl->WaitForSetupDone();
@@ -836,8 +889,8 @@ TEST_F(ApplicationImplTest, WaitForSetupDone_SetupNotInProgress) {
 TEST_F(ApplicationImplTest, WaitForSetupDone_SetupInProgress) {
   class Delegate : public threads::ThreadDelegate {
    public:
-    Delegate(utils::SharedPtr<ApplicationImpl> app,
-             ::utils::SharedPtr<TestAsyncWaiter> waiter,
+    Delegate(std::shared_ptr<ApplicationImpl> app,
+             std::shared_ptr<TestAsyncWaiter> waiter,
              unsigned int waitSeconds)
         : app_(app), waiter_(waiter), seconds_(waitSeconds) {}
     virtual ~Delegate() {}
@@ -849,13 +902,13 @@ TEST_F(ApplicationImplTest, WaitForSetupDone_SetupInProgress) {
     virtual void exitThreadMain() {}
 
    private:
-    utils::SharedPtr<ApplicationImpl> app_;
-    ::utils::SharedPtr<TestAsyncWaiter> waiter_;
+    std::shared_ptr<ApplicationImpl> app_;
+    std::shared_ptr<TestAsyncWaiter> waiter_;
     unsigned int seconds_;
   };
 
-  ::utils::SharedPtr<TestAsyncWaiter> waiter =
-      utils::MakeShared<TestAsyncWaiter>();
+  std::shared_ptr<TestAsyncWaiter> waiter =
+      std::make_shared<TestAsyncWaiter>();
   uint32_t times = 0;
   unsigned int waitSeconds = 3;
 

@@ -31,11 +31,11 @@
  */
 
 #include <gtest/gtest.h>
-#include <vector>
 #include <list>
+#include <vector>
 
-#include "utils/macro.h"
 #include "protocol_handler/protocol_packet.h"
+#include "utils/macro.h"
 
 namespace {
 const size_t MAXIMUM_FRAME_DATA_V3_SIZE = 131072;
@@ -230,12 +230,12 @@ TEST_F(ProtocolHeaderValidatorTest, Malformed_FrameType) {
   }
 }
 
-// For Control frames Frame info value shall be from 0x00 to 0x06 or 0xFE(Data
-// Ack), 0xFF(HB Ack)
+// For Control frames Frame info value shall be from 0x00 to 0x09 or 0xFD
+// (Transport Update Event), 0xFE(Data Ack), 0xFF(HB Ack)
 TEST_F(ProtocolHeaderValidatorTest, Malformed_ControlFrame) {
   std::vector<uint8_t> malformed_frame_data;
-  for (uint8_t frame_type = FRAME_DATA_END_SERVICE_NACK + 1;
-       frame_type < FRAME_DATA_SERVICE_DATA_ACK;
+  for (uint8_t frame_type = FRAME_DATA_REGISTER_SECONDARY_TRANSPORT_NACK + 1;
+       frame_type < FRAME_DATA_TRANSPORT_EVENT_UPDATE;
        ++frame_type) {
     malformed_frame_data.push_back(frame_type);
   }
@@ -491,8 +491,10 @@ TEST_F(ProtocolHeaderValidatorTest, Malformed_MessageID) {
 
   message_header.frameType = FRAME_TYPE_FIRST;
   message_header.version = PROTOCOL_VERSION_1;
+  message_header.dataSize = FIRST_FRAME_DATA_SIZE;
   EXPECT_EQ(RESULT_OK, header_validator.validate(message_header));
 
+  message_header.dataSize = 0u;
   message_header.version = PROTOCOL_VERSION_2;
   EXPECT_EQ(RESULT_FAIL, header_validator.validate(message_header));
   message_header.version = PROTOCOL_VERSION_3;

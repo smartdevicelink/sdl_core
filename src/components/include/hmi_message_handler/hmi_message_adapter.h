@@ -53,7 +53,7 @@ class HMIMessageAdapter : public HMIMessageSender {
   /**
    * \brief Interface for subscriptions.
    * Each class implementing interface should use it according to
-   * standarts of transport for which it is to be an adapter.
+   * standards of transport for which it is to be an adapter.
    * For example, Adapter for MessageBroker will use it to subscribe to
    * notifications
    * from HMI.

@@ -97,7 +97,7 @@ void RCIsReadyRequest::onTimeOut() {
 }
 
 void RCIsReadyRequest::SendMessageToHMI() {
-  utils::SharedPtr<smart_objects::SmartObject> get_capabilities(
+  std::shared_ptr<smart_objects::SmartObject> get_capabilities(
       MessageHelper::CreateModuleInfoSO(
           hmi_apis::FunctionID::RC_GetCapabilities, application_manager_));
   rpc_service_.ManageHMICommand(get_capabilities);
@@ -105,4 +105,4 @@ void RCIsReadyRequest::SendMessageToHMI() {
 
 }  // namespace commands
 
-}  // namespace application_manager
+}  // namespace sdl_rpc_plugin

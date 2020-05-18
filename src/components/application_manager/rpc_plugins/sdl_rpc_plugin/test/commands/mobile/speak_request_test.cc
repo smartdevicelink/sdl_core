@@ -31,26 +31,26 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "mobile/speak_request.h"
 #include <string>
 #include "gtest/gtest.h"
-#include "mobile/speak_request.h"
-#include "utils/shared_ptr.h"
-#include "application_manager/commands/commands_test.h"
+
 #include "application_manager/commands/command_request_test.h"
+#include "application_manager/commands/commands_test.h"
 #include "interfaces/HMI_API.h"
 #include "interfaces/MOBILE_API.h"
-#include "utils/shared_ptr.h"
+
 #include "utils/helpers.h"
-#include "utils/make_shared.h"
-#include "smart_objects/smart_object.h"
-#include "utils/custom_string.h"
+
 #include "application_manager/application.h"
-#include "application_manager/smart_object_keys.h"
+#include "application_manager/event_engine/event.h"
 #include "application_manager/mock_application.h"
 #include "application_manager/mock_application_manager.h"
-#include "application_manager/mock_message_helper.h"
-#include "application_manager/event_engine/event.h"
 #include "application_manager/mock_hmi_interface.h"
+#include "application_manager/mock_message_helper.h"
+#include "application_manager/smart_object_keys.h"
+#include "smart_objects/smart_object.h"
+#include "utils/custom_string.h"
 
 namespace test {
 namespace components {
@@ -62,24 +62,24 @@ namespace am = application_manager;
 namespace mobile_result = mobile_apis::Result;
 namespace hmi_response = ::application_manager::hmi_response;
 namespace strings = ::application_manager::strings;
-using am::commands::CommandImpl;
 using am::ApplicationManager;
-using am::commands::MessageSharedPtr;
 using am::ApplicationSharedPtr;
 using am::MockMessageHelper;
+using am::commands::CommandImpl;
+using am::commands::MessageSharedPtr;
 using ::testing::_;
-using ::utils::SharedPtr;
-using ::testing::Return;
-using ::testing::ReturnRef;
+
 using sdl_rpc_plugin::commands::SpeakRequest;
 using ::test::components::application_manager_test::MockApplication;
+using ::testing::Return;
+using ::testing::ReturnRef;
 
-typedef SharedPtr<SpeakRequest> CommandPtr;
+typedef std::shared_ptr<SpeakRequest> CommandPtr;
 
 namespace {
 const uint32_t kAppId = 10u;
 const uint32_t kConnectionKey = 5u;
-}
+}  // namespace
 
 class SpeakRequestTest : public CommandRequestTest<CommandsTestMocks::kIsNice> {
  public:
@@ -92,7 +92,7 @@ class SpeakRequestTest : public CommandRequestTest<CommandsTestMocks::kIsNice> {
                          const mobile_apis::Result::eType mobile_response,
                          const am::HmiInterfaces::InterfaceState state,
                          const bool success) {
-    utils::SharedPtr<SpeakRequest> command =
+    std::shared_ptr<SpeakRequest> command =
         CreateCommand<SpeakRequest>(request_);
 
     (*response_)[strings::params][hmi_response::code] = hmi_response;
@@ -129,8 +129,7 @@ class SpeakRequestTest : public CommandRequestTest<CommandsTestMocks::kIsNice> {
 };
 
 TEST_F(SpeakRequestTest, OnEvent_SUCCESS_Expect_true) {
-  utils::SharedPtr<SpeakRequest> command =
-      CreateCommand<SpeakRequest>(request_);
+  std::shared_ptr<SpeakRequest> command = CreateCommand<SpeakRequest>(request_);
 
   (*response_)[strings::params][hmi_response::code] =
       hmi_apis::Common_Result::SUCCESS;
@@ -296,7 +295,7 @@ TEST_F(SpeakRequestTest, Run_MsgWithEmptyString_Success) {
 
   EXPECT_CALL(
       mock_rpc_service_,
-      ManageHMICommand(HMIResultCodeIs(hmi_apis::FunctionID::TTS_Speak)));
+      ManageHMICommand(HMIResultCodeIs(hmi_apis::FunctionID::TTS_Speak), _));
 
   command->Run();
 }
@@ -316,7 +315,7 @@ TEST_F(SpeakRequestTest, Run_MsgCorrect_Success) {
 
   EXPECT_CALL(
       mock_rpc_service_,
-      ManageHMICommand(HMIResultCodeIs(hmi_apis::FunctionID::TTS_Speak)));
+      ManageHMICommand(HMIResultCodeIs(hmi_apis::FunctionID::TTS_Speak), _));
 
   command->Run();
 }
@@ -403,5 +402,5 @@ TEST_F(SpeakRequestTest, OnEvent_ApplicationIsNotRegistered_UNSUCCESS) {
 }  // namespace speak_request
 }  // namespace mobile_commands_test
 }  // namespace commands_test
-}  // namespace component
+}  // namespace components
 }  // namespace test

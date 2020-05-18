@@ -46,8 +46,7 @@ class Interface;
 class MessageFactoryFunction: public CppFunction {
  public:
   enum SerializationType {
-    kJson,
-    kDbus
+    kJson
   };
 
   // Methods

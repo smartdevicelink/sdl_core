@@ -32,8 +32,8 @@
 
 #include "utils/gen_hash.h"
 #include <cstdlib>
-#include <string>
 #include <locale>
+#include <string>
 #include "utils/custom_string.h"
 
 namespace utils {

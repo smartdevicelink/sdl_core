@@ -30,13 +30,12 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "gtest/gtest.h"
 #include "hmi/tts_get_language_response.h"
-#include "application_manager/smart_object_keys.h"
 #include "application_manager/commands/commands_test.h"
-#include "application_manager/mock_hmi_capabilities.h"
 #include "application_manager/mock_event_dispatcher.h"
-#include "application_manager/commands/commands_test.h"
+#include "application_manager/mock_hmi_capabilities.h"
+#include "application_manager/smart_object_keys.h"
+#include "gtest/gtest.h"
 
 namespace test {
 namespace components {
@@ -44,7 +43,6 @@ namespace commands_test {
 namespace hmi_commands_test {
 namespace tts_get_language_response {
 
-using utils::SharedPtr;
 using sdl_rpc_plugin::commands::TTSGetLanguageResponse;
 using test::components::application_manager_test::MockHMICapabilities;
 using test::components::event_engine_test::MockEventDispatcher;
@@ -66,7 +64,7 @@ TEST_F(TTSGetLanguageResponseTest, Run_LanguageSet_SUCCESS) {
   MessageSharedPtr msg = CreateMessage();
   (*msg)[strings::msg_params][hmi_response::language] = kLanguage;
 
-  SharedPtr<TTSGetLanguageResponse> command(
+  std::shared_ptr<TTSGetLanguageResponse> command(
       CreateCommand<TTSGetLanguageResponse>(msg));
 
   EXPECT_CALL(mock_hmi_capabilities_, set_active_tts_language(kLanguage));
@@ -82,7 +80,7 @@ TEST_F(TTSGetLanguageResponseTest, Run_LanguageSet_SUCCESS) {
 TEST_F(TTSGetLanguageResponseTest, Run_LanguageNotSet_SUCCESS) {
   MessageSharedPtr msg = CreateMessage();
 
-  SharedPtr<TTSGetLanguageResponse> command(
+  std::shared_ptr<TTSGetLanguageResponse> command(
       CreateCommand<TTSGetLanguageResponse>(msg));
 
   EXPECT_CALL(mock_hmi_capabilities_,

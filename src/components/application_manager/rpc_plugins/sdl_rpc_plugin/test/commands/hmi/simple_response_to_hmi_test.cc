@@ -30,17 +30,16 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "gtest/gtest.h"
-#include "utils/shared_ptr.h"
-#include "smart_objects/smart_object.h"
-#include "application_manager/smart_object_keys.h"
 #include "application_manager/commands/command.h"
 #include "application_manager/commands/commands_test.h"
+#include "application_manager/commands/response_to_hmi.h"
+#include "application_manager/smart_object_keys.h"
+#include "gtest/gtest.h"
 #include "sdl_rpc_plugin/commands/hmi/sdl_activate_app_response.h"
 #include "sdl_rpc_plugin/commands/hmi/sdl_get_list_of_permissions_response.h"
 #include "sdl_rpc_plugin/commands/hmi/sdl_get_status_update_response.h"
 #include "sdl_rpc_plugin/commands/hmi/sdl_get_user_friendly_message_response.h"
-#include "application_manager/commands/response_to_hmi.h"
+#include "smart_objects/smart_object.h"
 
 namespace test {
 namespace components {
@@ -49,10 +48,8 @@ namespace hmi_commands_test {
 namespace simple_response_to_hmi_test {
 
 using ::testing::_;
-using ::testing::Types;
 using ::testing::NotNull;
-using ::utils::SharedPtr;
-
+using ::testing::Types;
 namespace commands = sdl_rpc_plugin::commands;
 using application_manager::commands::MessageSharedPtr;
 
@@ -66,14 +63,16 @@ class ResponseToHMICommandsTest
 typedef Types<commands::SDLActivateAppResponse,
               commands::SDLGetListOfPermissionsResponse,
               commands::SDLGetStatusUpdateResponse,
-              commands::SDLGetUserFriendlyMessageResponse> ResponseCommandsList;
+              commands::SDLGetUserFriendlyMessageResponse>
+    ResponseCommandsList;
 
 TYPED_TEST_CASE(ResponseToHMICommandsTest, ResponseCommandsList);
 
 TYPED_TEST(ResponseToHMICommandsTest, Run_SendMessageToHMI_SUCCESS) {
   typedef typename TestFixture::CommandType CommandType;
 
-  SharedPtr<CommandType> command = this->template CreateCommand<CommandType>();
+  std::shared_ptr<CommandType> command =
+      this->template CreateCommand<CommandType>();
   EXPECT_CALL(this->mock_rpc_service_, SendMessageToHMI(NotNull()));
 
   command->Run();
@@ -82,7 +81,7 @@ TYPED_TEST(ResponseToHMICommandsTest, Run_SendMessageToHMI_SUCCESS) {
 class ResponseToHMITest : public CommandsTest<CommandsTestMocks::kIsNice> {};
 
 TEST_F(ResponseToHMITest, BasicMethodsOverloads_SUCCESS) {
-  SharedPtr<application_manager::commands::ResponseToHMI> command(
+  std::shared_ptr<application_manager::commands::ResponseToHMI> command(
       CreateCommand<application_manager::commands::ResponseToHMI>());
 
   // Current implementation always return `true`
@@ -91,7 +90,7 @@ TEST_F(ResponseToHMITest, BasicMethodsOverloads_SUCCESS) {
 }
 
 TEST_F(ResponseToHMITest, Run_SUCCESS) {
-  SharedPtr<application_manager::commands::ResponseToHMI> command(
+  std::shared_ptr<application_manager::commands::ResponseToHMI> command(
       CreateCommand<application_manager::commands::ResponseToHMI>());
   EXPECT_CALL(mock_rpc_service_, SendMessageToHMI(NotNull()));
 

@@ -30,13 +30,13 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <string>
 #include "vehicle_info_plugin/commands/mobile/read_did_request.h"
+#include <string>
 
 #include "application_manager/application_impl.h"
-#include "interfaces/MOBILE_API.h"
-#include "interfaces/HMI_API.h"
 #include "application_manager/message_helper.h"
+#include "interfaces/HMI_API.h"
+#include "interfaces/MOBILE_API.h"
 
 namespace vehicle_info_plugin {
 using namespace application_manager;
@@ -45,15 +45,12 @@ namespace commands {
 
 ReadDIDRequest::ReadDIDRequest(
     const application_manager::commands::MessageSharedPtr& message,
-    ApplicationManager& application_manager,
-    app_mngr::rpc_service::RPCService& rpc_service,
-    app_mngr::HMICapabilities& hmi_capabilities,
-    policy::PolicyHandlerInterface& policy_handler)
+    const VehicleInfoCommandParams& params)
     : CommandRequestImpl(message,
-                         application_manager,
-                         rpc_service,
-                         hmi_capabilities,
-                         policy_handler) {}
+                         params.application_manager_,
+                         params.rpc_service_,
+                         params.hmi_capabilities_,
+                         params.policy_handler_) {}
 
 ReadDIDRequest::~ReadDIDRequest() {}
 
@@ -131,4 +128,4 @@ void ReadDIDRequest::on_event(const event_engine::Event& event) {
 
 }  // namespace commands
 
-}  // namespace application_manager
+}  // namespace vehicle_info_plugin

@@ -36,19 +36,18 @@
 
 #include "gtest/gtest.h"
 
-#include "application_manager/commands/commands_test.h"
 #include "application_manager/commands/command_request_test.h"
+#include "application_manager/commands/commands_test.h"
 
-#include "mobile/put_file_response.h"
 #include "mobile/put_file_request.h"
+#include "mobile/put_file_response.h"
 
-#include "utils/make_shared.h"
-#include "utils/file_system.h"
-#include "smart_objects/smart_object.h"
-#include "interfaces/MOBILE_API.h"
 #include "application_manager/application.h"
 #include "application_manager/mock_application.h"
 #include "application_manager/policies/mock_policy_handler_interface.h"
+#include "interfaces/MOBILE_API.h"
+#include "smart_objects/smart_object.h"
+#include "utils/file_system.h"
 
 namespace test {
 namespace components {
@@ -57,19 +56,19 @@ namespace mobile_commands_test {
 namespace put_file {
 
 using ::testing::_;
+using ::testing::AtLeast;
 using ::testing::Return;
 using ::testing::ReturnRef;
-using ::testing::AtLeast;
 
 namespace am = ::application_manager;
 
-using sdl_rpc_plugin::commands::PutFileRequest;
-using sdl_rpc_plugin::commands::PutFileResponse;
 using am::commands::MessageSharedPtr;
 using policy_test::MockPolicyHandlerInterface;
+using sdl_rpc_plugin::commands::PutFileRequest;
+using sdl_rpc_plugin::commands::PutFileResponse;
 
-typedef SharedPtr<PutFileRequest> PutFileRequestPtr;
-typedef SharedPtr<PutFileResponse> PutFileResponsePtr;
+typedef std::shared_ptr<PutFileRequest> PutFileRequestPtr;
+typedef std::shared_ptr<PutFileResponse> PutFileResponsePtr;
 
 namespace {
 const uint32_t kConnectionKey = 1u;
@@ -79,7 +78,9 @@ const int64_t kZeroOffset = 0u;
 const std::string kStorageFolder = "./storage";
 const std::string kFolder = "folder";
 const std::string kAppFolder = "app_folder";
-}
+const am::WindowID kDefaultWindowId =
+    mobile_apis::PredefinedWindows::DEFAULT_WINDOW;
+}  // namespace
 
 class PutFileRequestTest
     : public CommandRequestTest<CommandsTestMocks::kIsNice> {
@@ -100,7 +101,7 @@ class PutFileRequestTest
 
     ON_CALL(app_mngr_, application(kConnectionKey))
         .WillByDefault(Return(mock_app_));
-    ON_CALL(*mock_app_, hmi_level())
+    ON_CALL(*mock_app_, hmi_level(kDefaultWindowId))
         .WillByDefault(Return(mobile_apis::HMILevel::HMI_FULL));
   }
 
@@ -131,7 +132,7 @@ class PutFileResponceTest : public CommandsTest<CommandsTestMocks::kIsNice> {
   }
 
   MessageSharedPtr message_;
-  SharedPtr<PutFileResponse> command_sptr_;
+  std::shared_ptr<PutFileResponse> command_sptr_;
 };
 
 TEST_F(PutFileResponceTest, Run_InvalidApp_ApplicationNotRegisteredResponce) {
@@ -140,7 +141,7 @@ TEST_F(PutFileResponceTest, Run_InvalidApp_ApplicationNotRegisteredResponce) {
   message_ref[am::strings::params][am::strings::connection_key] =
       kConnectionKey;
 
-  utils::SharedPtr<am::Application> null_application_sptr;
+  std::shared_ptr<am::Application> null_application_sptr;
   EXPECT_CALL(app_mngr_, application(kConnectionKey))
       .WillOnce(Return(null_application_sptr));
   EXPECT_CALL(
@@ -158,8 +159,8 @@ TEST_F(PutFileResponceTest, Run_ApplicationRegistered_Success) {
       kConnectionKey;
   message_ref[am::strings::msg_params][am::strings::success] = true;
 
-  utils::SharedPtr<am::Application> application_sptr =
-      utils::MakeShared<MockApplication>();
+  std::shared_ptr<am::Application> application_sptr =
+      std::make_shared<MockApplication>();
 
   EXPECT_CALL(app_mngr_, application(kConnectionKey))
       .WillOnce(Return(application_sptr));
@@ -180,7 +181,7 @@ TEST_F(PutFileRequestTest, Run_ApplicationIsNotRegistered_UNSUCCESS) {
 }
 
 TEST_F(PutFileRequestTest, Run_HmiLevelNone_UNSUCCESS) {
-  EXPECT_CALL(*mock_app_, hmi_level())
+  EXPECT_CALL(*mock_app_, hmi_level(kDefaultWindowId))
       .WillOnce(Return(mobile_apis::HMILevel::HMI_NONE));
 
   const uint32_t settings_put_file_in_none = 1u;
@@ -316,9 +317,11 @@ TEST_F(PutFileRequestTest, Run_SendOnPutFileNotification_SUCCESS) {
   EXPECT_CALL(app_mngr_,
               SaveBinary(binary_data_, kStorageFolder, kFileName, kZeroOffset))
       .WillOnce(Return(mobile_apis::Result::SUCCESS));
-  EXPECT_CALL(mock_rpc_service_,
-              ManageHMICommand(HMIResultCodeIs(
-                  hmi_apis::FunctionID::BasicCommunication_OnPutFile)))
+  EXPECT_CALL(
+      mock_rpc_service_,
+      ManageHMICommand(
+          HMIResultCodeIs(hmi_apis::FunctionID::BasicCommunication_OnPutFile),
+          _))
       .WillOnce(Return(true));
   ExpectManageMobileCommandWithResultCode(mobile_apis::Result::SUCCESS);
 

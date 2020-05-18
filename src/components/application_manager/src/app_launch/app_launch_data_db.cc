@@ -29,15 +29,14 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-#include <string>
 #include <unistd.h>
+#include <string>
 
 #include "application_manager/app_launch/app_launch_data_db.h"
-#include "application_manager/application_manager_impl.h"
 #include "application_manager/app_launch/app_launch_sql_queries.h"
-#include "application_manager/smart_object_keys.h"
+#include "application_manager/application_manager.h"
 #include "application_manager/message_helper.h"
-#include "utils/make_shared.h"
+#include "application_manager/smart_object_keys.h"
 
 namespace app_launch {
 CREATE_LOGGERPTR_GLOBAL(logger_, "AppLaunch")
@@ -276,7 +275,7 @@ std::vector<ApplicationDataPtr> AppLaunchDataDB::GetAppDataByDevMac(
       const std::string device_mac = query.GetString(device_mac_index);
       const std::string mobile_app_id = query.GetString(application_id_index);
       const std::string bundle_id = query.GetString(bundle_id_index);
-      dev_apps.push_back(utils::MakeShared<ApplicationData>(
+      dev_apps.push_back(std::make_shared<ApplicationData>(
           mobile_app_id, bundle_id, device_mac));
     } while (query.Next());
     LOG4CXX_DEBUG(logger_, "All application data has been successfully loaded");
@@ -333,9 +332,9 @@ uint32_t AppLaunchDataDB::GetCurentNumberOfAppData() const {
                  "Values of ignition off counts were updated successfully");
 
     number_of_app_data = query.GetInteger(result_query);
-    LOG4CXX_DEBUG(logger_,
-                  "Total cout saved mobile applications is "
-                      << number_of_app_data);
+    LOG4CXX_DEBUG(
+        logger_,
+        "Total cout saved mobile applications is " << number_of_app_data);
   } else {
     LOG4CXX_WARN(logger_,
                  "Failed execute query 'kGetNumberOfApplicationData'. Reson: "
@@ -384,7 +383,7 @@ bool AppLaunchDataDB::WriteDb() {
 
 utils::dbms::SQLDatabase* AppLaunchDataDB::db() const {
 #ifdef __QNX__
-  std::auto_ptr<utils::dbms::SQLDatabase> db_qnx(
+  std::unique_ptr<utils::dbms::SQLDatabase> db_qnx(
       new utils::dbms::SQLDatabase(kDatabaseName));
   db_qnx.get()->Open();
   return db_qnx.get();
@@ -393,4 +392,4 @@ utils::dbms::SQLDatabase* AppLaunchDataDB::db() const {
 #endif  // __QNX__
 }
 
-}  // namespace resumption
+}  // namespace app_launch

@@ -40,7 +40,7 @@
 
 namespace media_manager {
 
-typedef utils::SharedPtr<MediaAdapterListener> MediaListenerPtr;
+typedef std::shared_ptr<MediaAdapterListener> MediaListenerPtr;
 
 class MediaAdapterImpl : public MediaAdapter {
  public:
@@ -57,7 +57,7 @@ class MediaAdapterImpl : public MediaAdapter {
   DISALLOW_COPY_AND_ASSIGN(MediaAdapterImpl);
 };
 
-typedef utils::SharedPtr<MediaAdapterImpl> MediaAdapterImplPtr;
+typedef std::shared_ptr<MediaAdapterImpl> MediaAdapterImplPtr;
 
 }  //  namespace media_manager
 

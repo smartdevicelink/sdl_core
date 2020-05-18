@@ -47,8 +47,8 @@ class MockUpdateStatusManager : public UpdateStatusManager {
   MOCK_METHOD0(OnWrongUpdateReceived, void());
   MOCK_METHOD1(OnResetDefaultPT, void(bool is_update_required));
   MOCK_METHOD0(OnResetRetrySequence, void());
+  MOCK_METHOD1(OnExistedApplicationAdded, void(const bool is_update_required));
   MOCK_METHOD0(OnNewApplicationAdded, void());
-  MOCK_METHOD1(OnPolicyInit, void(bool is_update_required));
   MOCK_METHOD0(GetUpdateStatus, PolicyTableStatus());
 };
 

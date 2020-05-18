@@ -31,8 +31,8 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <cstring>
 #include "sdl_rpc_plugin/commands/mobile/perform_audio_pass_thru_request.h"
+#include <cstring>
 
 #include "application_manager/application_impl.h"
 #include "application_manager/message_helper.h"
@@ -87,7 +87,8 @@ void PerformAudioPassThruRequest::Run() {
     return;
   }
 
-  if (mobile_api::HMILevel::HMI_NONE == app->hmi_level()) {
+  if (mobile_api::HMILevel::HMI_NONE ==
+      app->hmi_level(mobile_apis::PredefinedWindows::DEFAULT_WINDOW)) {
     LOG4CXX_ERROR(logger_, "application isn't activated");
     SendResponse(false, mobile_apis::Result::REJECTED);
     return;
@@ -113,9 +114,9 @@ void PerformAudioPassThruRequest::Run() {
             initial_prompt, app, application_manager_);
 
     if (mobile_apis::Result::FILE_NOT_FOUND == verification_result) {
-      LOG4CXX_ERROR(logger_,
-                    "MessageHelper::VerifyTtsFiles return "
-                        << verification_result);
+      LOG4CXX_ERROR(
+          logger_,
+          "MessageHelper::VerifyTtsFiles return " << verification_result);
       SendResponse(
           false,
           mobile_apis::Result::FILE_NOT_FOUND,
@@ -250,13 +251,6 @@ PerformAudioPassThruRequest::PrepareResponseParameters() {
   return response_params_;
 }
 
-bool PerformAudioPassThruRequest::PrepareResponseParameters(
-    mobile_apis::Result::eType& result_code, std::string& info) {
-  LOG4CXX_AUTO_TRACE(logger_);
-  NOTREACHED();
-  return false;
-}
-
 void PerformAudioPassThruRequest::SendSpeakRequest() {
   LOG4CXX_AUTO_TRACE(logger_);
 
@@ -293,20 +287,22 @@ void PerformAudioPassThruRequest::SendPerformAudioPassThruRequest() {
   msg_params[hmi_request::audio_pass_display_texts] =
       smart_objects::SmartObject(smart_objects::SmartType_Array);
 
+  int32_t index = 0;
   if ((*message_)[str::msg_params].keyExists(str::audio_pass_display_text1)) {
-    msg_params[hmi_request::audio_pass_display_texts][0]
+    msg_params[hmi_request::audio_pass_display_texts][index]
               [hmi_request::field_name] = static_cast<int32_t>(
                   hmi_apis::Common_TextFieldName::audioPassThruDisplayText1);
-    msg_params[hmi_request::audio_pass_display_texts][0]
+    msg_params[hmi_request::audio_pass_display_texts][index]
               [hmi_request::field_text] =
                   (*message_)[str::msg_params][str::audio_pass_display_text1];
+    ++index;
   }
 
   if ((*message_)[str::msg_params].keyExists(str::audio_pass_display_text2)) {
-    msg_params[hmi_request::audio_pass_display_texts][1]
+    msg_params[hmi_request::audio_pass_display_texts][index]
               [hmi_request::field_name] = static_cast<int32_t>(
                   hmi_apis::Common_TextFieldName::audioPassThruDisplayText2);
-    msg_params[hmi_request::audio_pass_display_texts][1]
+    msg_params[hmi_request::audio_pass_display_texts][index]
               [hmi_request::field_text] =
                   (*message_)[str::msg_params][str::audio_pass_display_text2];
   }
@@ -457,4 +453,4 @@ bool PerformAudioPassThruRequest::IsWaitingHMIResponse() {
 
 }  // namespace commands
 
-}  // namespace application_manager
+}  // namespace sdl_rpc_plugin

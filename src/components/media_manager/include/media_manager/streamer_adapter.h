@@ -33,13 +33,12 @@
 #ifndef SRC_COMPONENTS_MEDIA_MANAGER_INCLUDE_MEDIA_MANAGER_STREAMER_ADAPTER_H_
 #define SRC_COMPONENTS_MEDIA_MANAGER_INCLUDE_MEDIA_MANAGER_STREAMER_ADAPTER_H_
 
+#include <atomic>
 #include "media_manager/media_adapter_impl.h"
+#include "protocol/raw_message.h"
 #include "utils/message_queue.h"
 #include "utils/threads/thread.h"
 #include "utils/threads/thread_delegate.h"
-#include "utils/atomic_object.h"
-#include "utils/shared_ptr.h"
-#include "protocol/raw_message.h"
 
 namespace media_manager {
 
@@ -61,6 +60,7 @@ class StreamerAdapter : public MediaAdapterImpl {
   virtual void SendData(int32_t application_key,
                         const ::protocol_handler::RawMessagePtr msg);
   virtual bool is_app_performing_activity(int32_t application_key) const;
+  virtual size_t GetMsgQueueSize();
 
  protected:
   // TODO(AN): APPLINK-15203 Use MessageLoopThread
@@ -80,7 +80,7 @@ class StreamerAdapter : public MediaAdapterImpl {
     virtual bool Send(protocol_handler::RawMessagePtr msg) = 0;
 
    private:
-    sync_primitives::atomic_bool stop_flag_;
+    std::atomic_bool stop_flag_;
     StreamerAdapter* adapter_;
 
     DISALLOW_COPY_AND_ASSIGN(Streamer);
@@ -96,7 +96,7 @@ class StreamerAdapter : public MediaAdapterImpl {
   DISALLOW_COPY_AND_ASSIGN(StreamerAdapter);
 };
 
-typedef utils::SharedPtr<StreamerAdapter> StreamerAdapterPtr;
+typedef std::shared_ptr<StreamerAdapter> StreamerAdapterPtr;
 
 }  // namespace media_manager
 

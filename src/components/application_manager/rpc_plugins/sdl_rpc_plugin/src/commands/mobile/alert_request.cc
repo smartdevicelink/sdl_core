@@ -35,12 +35,12 @@
 
 #include <string.h>
 
-#include "application_manager/message_helper.h"
 #include "application_manager/application_impl.h"
+#include "application_manager/message_helper.h"
 
 #include "application_manager/policies/policy_handler.h"
-#include "utils/helpers.h"
 #include "smart_objects/smart_object.h"
+#include "utils/helpers.h"
 
 namespace sdl_rpc_plugin {
 using namespace application_manager;
@@ -73,18 +73,15 @@ AlertRequest::~AlertRequest() {}
 
 bool AlertRequest::Init() {
   /* Timeout in milliseconds.
-     If omitted a standard value of 10000 milliseconds is used.*/
-  if ((*message_)[strings::msg_params].keyExists(strings::duration)) {
-    default_timeout_ =
-        (*message_)[strings::msg_params][strings::duration].asUInt();
-  } else {
-    const int32_t def_value = 5000;
-    default_timeout_ = def_value;
-  }
+    If omitted a standard value of 10000 milliseconds is used.*/
+  auto& msg_params = (*message_)[strings::msg_params];
+  uint32_t duration_timeout = msg_params[strings::duration].asUInt();
+
+  default_timeout_ += duration_timeout;
 
   // If soft buttons are present, SDL will not use initiate timeout tracking for
   // response.
-  if ((*message_)[strings::msg_params].keyExists(strings::soft_buttons)) {
+  if (msg_params.keyExists(strings::soft_buttons)) {
     LOG4CXX_INFO(logger_,
                  "Request contains soft buttons - request timeout "
                  "will be set to 0.");
@@ -251,7 +248,8 @@ bool AlertRequest::Validate(uint32_t app_id) {
     return false;
   }
 
-  if (mobile_apis::HMILevel::HMI_BACKGROUND == app->hmi_level() &&
+  if (mobile_apis::HMILevel::HMI_BACKGROUND ==
+          app->hmi_level(mobile_apis::PredefinedWindows::DEFAULT_WINDOW) &&
       app->AreCommandLimitsExceeded(
           static_cast<mobile_apis::FunctionID::eType>(function_id()),
           application_manager::TLimitSource::POLICY_TABLE)) {
@@ -298,9 +296,9 @@ bool AlertRequest::Validate(uint32_t app_id) {
         MessageHelper::VerifyTtsFiles(tts_chunks, app, application_manager_);
 
     if (mobile_apis::Result::FILE_NOT_FOUND == verification_result) {
-      LOG4CXX_ERROR(logger_,
-                    "MessageHelper::VerifyTtsFiles return "
-                        << verification_result);
+      LOG4CXX_ERROR(
+          logger_,
+          "MessageHelper::VerifyTtsFiles return " << verification_result);
       SendResponse(false,
                    mobile_apis::Result::FILE_NOT_FOUND,
                    "One or more files needed for tts_chunks are not present");
@@ -320,6 +318,11 @@ void AlertRequest::SendAlertRequest(int32_t app_id) {
 
   msg_params[hmi_request::alert_strings] =
       smart_objects::SmartObject(smart_objects::SmartType_Array);
+
+  if ((*message_)[strings::msg_params].keyExists(strings::cancel_id)) {
+    msg_params[strings::cancel_id] =
+        (*message_)[strings::msg_params][strings::cancel_id].asInt();
+  }
 
   int32_t index = 0;
   if ((*message_)[strings::msg_params].keyExists(strings::alert_text1)) {
@@ -349,10 +352,30 @@ void AlertRequest::SendAlertRequest(int32_t app_id) {
         (*message_)[strings::msg_params][strings::soft_buttons];
     MessageHelper::SubscribeApplicationToSoftButton(
         (*message_)[strings::msg_params], app, function_id());
+    msg_params[strings::duration] = 0;
+  } else {
+    msg_params[strings::duration] =
+        (*message_)[strings::msg_params][strings::duration].asUInt();
   }
+
+  if ((*message_)[strings::msg_params].keyExists(strings::alert_icon)) {
+    auto verification_result = MessageHelper::VerifyImage(
+        (*message_)[strings::msg_params][strings::alert_icon],
+        app,
+        application_manager_);
+
+    if (mobile_apis::Result::INVALID_DATA == verification_result) {
+      LOG4CXX_ERROR(logger_, "Image verification failed.");
+      SendResponse(false, verification_result);
+      return;
+    }
+
+    msg_params[strings::alert_icon] =
+        (*message_)[strings::msg_params][strings::alert_icon];
+  }
+
   // app_id
   msg_params[strings::app_id] = app_id;
-  msg_params[strings::duration] = default_timeout_;
 
   // NAVI platform progressIndicator
   if ((*message_)[strings::msg_params].keyExists(strings::progress_indicator)) {
@@ -450,4 +473,4 @@ bool AlertRequest::HasHmiResponsesToWait() {
 
 }  // namespace commands
 
-}  // namespace application_manager
+}  // namespace sdl_rpc_plugin

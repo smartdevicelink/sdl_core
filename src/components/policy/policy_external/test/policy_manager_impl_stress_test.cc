@@ -29,15 +29,15 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "gtest/gtest.h"
 #include <fstream>
+#include "gtest/gtest.h"
 #include "mock_policy_listener.h"
 #include "policy/policy_manager_impl.h"
 
-using ::testing::_;
-using ::policy::PolicyManagerImpl;
 using ::policy::BinaryMessage;
 using ::policy::MockPolicyListener;
+using ::policy::PolicyManagerImpl;
+using ::testing::_;
 
 namespace test {
 namespace components {
