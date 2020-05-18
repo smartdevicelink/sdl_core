@@ -153,7 +153,7 @@ void UnsubscribeVehicleDataRequest::Run() {
   if (0 == unsubscribed_items) {
     SendResponse(false,
                  mobile_apis::Result::IGNORED,
-                 "Was not subscribed on any VehicleData.",
+                 "Some provided VehicleData was not subscribed.",
                  &response_params_);
     return;
   }

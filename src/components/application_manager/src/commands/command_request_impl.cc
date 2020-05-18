@@ -92,13 +92,13 @@ const std::string CreateInfoForUnsupportedResult(
       return "UI is not supported by system";
     }
     case (HmiInterfaces::InterfaceID::HMI_INTERFACE_Navigation): {
-      return "Navi is not supported by system";
+      return "Navigation is not supported by system";
     }
     case (HmiInterfaces::InterfaceID::HMI_INTERFACE_VehicleInfo): {
       return "VehicleInfo is not supported by system";
     }
     case (HmiInterfaces::InterfaceID::HMI_INTERFACE_RC): {
-      return "Remote control is not supported by system";
+      return "RC is not supported by system";
     }
     default:
 #ifdef ENABLE_LOG
