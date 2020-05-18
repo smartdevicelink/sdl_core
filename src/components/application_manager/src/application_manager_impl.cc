@@ -3222,9 +3222,12 @@ void ApplicationManagerImpl::UnregisterApplication(
     subscribed_for_way_points_app_count =
         subscribed_way_points_apps_list_.size();
   }
-  if (1 == subscribed_for_way_points_app_count) {
-    LOG4CXX_ERROR(logger_, "Send UnsubscribeWayPoints");
-    MessageHelper::SendUnsubscribedWayPoints(*this);
+  if (IsAppIdSubscribedForWayPoints(app_id)) {
+    if (1 == subscribed_for_way_points_app_count) {
+      LOG4CXX_ERROR(logger_, "Send UnsubscribeWayPoints");
+      MessageHelper::SendUnsubscribedWayPoints(*this);
+    }
+    UnsubscribeAppIdFromWayPoints(app_id);
   }
   EndNaviServices(app_id);
 
@@ -4632,18 +4635,23 @@ void ApplicationManagerImpl::ClearTTSGlobalPropertiesList() {
   tts_global_properties_app_list_.clear();
 }
 
-bool ApplicationManagerImpl::IsAppSubscribedForWayPoints(
-    ApplicationSharedPtr app) const {
+bool ApplicationManagerImpl::IsAppIdSubscribedForWayPoints(
+    uint32_t app_id) const {
   LOG4CXX_AUTO_TRACE(logger_);
   sync_primitives::AutoLock lock(subscribed_way_points_apps_lock_);
   LOG4CXX_DEBUG(logger_,
                 "There are applications subscribed: "
                     << subscribed_way_points_apps_list_.size());
-  if (subscribed_way_points_apps_list_.find(app->app_id()) ==
+  if (subscribed_way_points_apps_list_.find(app_id) ==
       subscribed_way_points_apps_list_.end()) {
     return false;
   }
   return true;
+}
+
+bool ApplicationManagerImpl::IsAppSubscribedForWayPoints(
+    ApplicationSharedPtr app) const {
+  return IsAppIdSubscribedForWayPoints(app->app_id());
 }
 
 void ApplicationManagerImpl::SubscribeAppForWayPoints(
@@ -4657,15 +4665,20 @@ void ApplicationManagerImpl::SubscribeAppForWayPoints(
                     << subscribed_way_points_apps_list_.size());
 }
 
-void ApplicationManagerImpl::UnsubscribeAppFromWayPoints(
-    ApplicationSharedPtr app) {
+void ApplicationManagerImpl::UnsubscribeAppIdFromWayPoints(
+    uint32_t app_id) {
   LOG4CXX_AUTO_TRACE(logger_);
   sync_primitives::AutoLock lock(subscribed_way_points_apps_lock_);
-  LOG4CXX_DEBUG(logger_, "Unsubscribing " << app->app_id());
-  subscribed_way_points_apps_list_.erase(app->app_id());
+  LOG4CXX_DEBUG(logger_, "Unsubscribing " << app_id);
+  subscribed_way_points_apps_list_.erase(app_id);
   LOG4CXX_DEBUG(logger_,
                 "There are applications subscribed: "
                     << subscribed_way_points_apps_list_.size());
+}
+
+void ApplicationManagerImpl::UnsubscribeAppFromWayPoints(
+    ApplicationSharedPtr app) {
+  UnsubscribeAppIdFromWayPoints(app->app_id());
 }
 
 bool ApplicationManagerImpl::IsAnyAppSubscribedForWayPoints() const {
