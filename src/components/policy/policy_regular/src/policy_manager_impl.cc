@@ -713,6 +713,11 @@ void PolicyManagerImpl::UpdatePTUReadyAppsCount(const uint32_t new_app_count) {
 void PolicyManagerImpl::OnAppRegisteredOnMobile(
     const std::string& device_id, const std::string& application_id) {
   if (application_id != last_registered_policy_app_id_) {
+    if (last_registered_policy_app_id_.empty()) {
+      LOG4CXX_DEBUG(logger_, "Stopping update after first app is registered");
+      // ResetRetrySequence(ResetRetryCountType::kResetInternally);
+      StopRetrySequence();
+    }
     StartPTExchange();
     last_registered_policy_app_id_ = application_id;
   }
@@ -1865,6 +1870,13 @@ bool PolicyManagerImpl::FunctionGroupNeedEncryption(
   return grouping.encryption_required.is_initialized()
              ? *grouping.encryption_required
              : false;
+}
+
+void PolicyManagerImpl::TriggerPTUOnStartupIfRequired() {
+  LOG4CXX_AUTO_TRACE(logger_);
+  if (ignition_check) {
+    StartPTExchange();
+  }
 }
 
 const std::string PolicyManagerImpl::GetPolicyFunctionName(
