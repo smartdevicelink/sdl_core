@@ -75,7 +75,7 @@ void SDLGetUserFriendlyMessageRequest::Run() {
       SendErrorResponse(correlation_id(),
                         static_cast<hmi_apis::FunctionID::eType>(function_id()),
                         hmi_apis::Common_Result::INVALID_DATA,
-                        "");
+                        "invalid messageCode syntax");
       return;
     }
     msg_codes.push_back(str);
