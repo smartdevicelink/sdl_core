@@ -797,6 +797,11 @@ class PolicyManagerImpl : public PolicyManager {
   AppIdURL RetrySequenceUrl(const struct RetrySequenceURL& rs,
                             const EndpointUrls& urls) const OVERRIDE;
 
+  /**
+   * @brief Trigger a PTU once on startup if it is required
+   */
+  virtual void TriggerPTUOnStartupIfRequired() OVERRIDE;
+
 #ifdef BUILD_TESTS
   /**
    * @brief Getter for cache_manager instance

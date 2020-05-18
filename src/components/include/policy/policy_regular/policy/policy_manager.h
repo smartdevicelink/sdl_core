@@ -801,6 +801,11 @@ class PolicyManager : public usage_statistics::StatisticsManager,
    */
   virtual void ResetTimeout() = 0;
 
+  /**
+   * @brief Trigger a PTU once on startup if it is required
+   */
+  virtual void TriggerPTUOnStartupIfRequired() = 0;
+
  protected:
   /**
    * @brief Checks is PT exceeded IgnitionCycles

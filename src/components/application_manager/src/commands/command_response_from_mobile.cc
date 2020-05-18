@@ -56,6 +56,10 @@ bool CommandResponseFromMobile::Init() {
   return true;
 }
 
+bool CommandResponseFromMobile::CheckPermissions() {
+  return CheckAllowedParameters(Command::CommandSource::SOURCE_MOBILE);
+}
+
 bool CommandResponseFromMobile::CleanUp() {
   return true;
 }

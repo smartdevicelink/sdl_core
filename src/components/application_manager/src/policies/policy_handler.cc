@@ -787,6 +787,12 @@ void PolicyHandler::OnSystemRequestReceived() const {
   policy_manager_->ResetTimeout();
 }
 
+void PolicyHandler::TriggerPTUOnStartupIfRequired() {
+#ifndef EXTERNAL_PROPRIETARY_MODE
+  policy_manager_->TriggerPTUOnStartupIfRequired();
+#endif
+}
+
 void PolicyHandler::GetRegisteredLinks(
     std::map<std::string, std::string>& out_links) const {
   DataAccessor<ApplicationSet> accessor = application_manager_.applications();
@@ -1655,6 +1661,10 @@ std::string PolicyHandler::GetNextUpdateUrl(
   LOG4CXX_AUTO_TRACE(logger_);
   POLICY_LIB_CHECK_OR_RETURN(std::string());
   app_id = ChoosePTUApplication(iteration_type);
+
+  if (0 == app_id) {
+    return std::string();
+  }
 
   // Use cached URL for retries if it was provided by the HMI
   if (PTUIterationType::RetryIteration == iteration_type &&
