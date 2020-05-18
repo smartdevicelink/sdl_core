@@ -175,9 +175,9 @@ void NaviStartStreamRequest::RetryStartSession() {
   uint32_t curr_retry_number = app->video_stream_retry_number();
 
   if (curr_retry_number <= retry_number_) {
-    LOG4CXX_DEBUG(logger_,
-                  "Retry number " << curr_retry_number << " of "
-                                  << retry_number_);
+    LOG4CXX_DEBUG(
+        logger_,
+        "Retry number " << curr_retry_number << " of " << retry_number_);
     MessageHelper::SendNaviStartStream(app->app_id(), application_manager_);
     app->set_video_stream_retry_number(++curr_retry_number);
   } else {
