@@ -983,34 +983,41 @@ void TransportAdapterImpl::RemoveFinalizedConnection(
   {
     connections_lock_.AcquireForWriting();
     ConnectionMap::iterator it_conn =
-      connections_.find(std::make_pair(device_uid, app_handle));
+        connections_.find(std::make_pair(device_uid, app_handle));
     if (it_conn == connections_.end()) {
       LOG4CXX_WARN(logger_,
-                 "Device_id: " << &device_uid << ", app_handle: " << &app_handle
-                               << " connection not found");
+                   "Device_id: " << &device_uid << ", app_handle: "
+                                 << &app_handle << " connection not found");
       connections_lock_.Release();
       return;
     }
     const ConnectionInfo& info = it_conn->second;
     if (info.state != ConnectionInfo::FINALISING) {
       LOG4CXX_WARN(logger_,
-                 "Device_id: " << &device_uid << ", app_handle: " << &app_handle
-                               << " connection not finalized");
+                   "Device_id: " << &device_uid << ", app_handle: "
+                                 << &app_handle << " connection not finalized");
       connections_lock_.Release();
       return;
     }
-    // By copying the info.connection shared pointer into this local variable, we
-    // can delay the connection's destructor until after connections_lock_.Release.
-    LOG4CXX_TRACE(logger_, "RemoveFinalizedConnection copying connection with Device_id: " << &device_uid << ", app_handle: " << &app_handle);
+    // By copying the info.connection shared pointer into this local variable,
+    // we can delay the connection's destructor until after
+    // connections_lock_.Release.
+    LOG4CXX_DEBUG(
+        logger_,
+        "RemoveFinalizedConnection copying connection with Device_id: "
+            << &device_uid << ", app_handle: " << &app_handle);
     ConnectionSPtr connection = info.connection;
     connections_.erase(it_conn);
     connections_lock_.Release();
-    LOG4CXX_TRACE(logger_, "RemoveFinalizedConnection Connections Lock Released");
+    LOG4CXX_DEBUG(logger_,
+                  "RemoveFinalizedConnection Connections Lock Released");
   }
 
   DeviceSptr device = FindDevice(device_handle);
   if (!device) {
     LOG4CXX_WARN(logger_, "Device: uid " << &device_uid << " not found");
+    return;
+  }
 
   if (ToBeAutoDisconnected(device) &&
       IsSingleApplication(device_handle, app_handle)) {
@@ -1023,20 +1030,22 @@ void TransportAdapterImpl::RemoveConnection(
   ConnectionSPtr connection;
   connections_lock_.AcquireForWriting();
   ConnectionMap::const_iterator it =
-    connections_.find(std::make_pair(device_id, app_handle));
+      connections_.find(std::make_pair(device_id, app_handle));
   if (it != connections_.end()) {
     // By copying the connection from the map to this shared pointer,
     // we can erase the object from the map without triggering the destructor
-    LOG4CXX_TRACE(logger_, "Copying connection with Device_id: " << &device_id << ", app_handle: " << &app_handle);
+    LOG4CXX_DEBUG(logger_,
+                  "Copying connection with Device_id: "
+                      << &device_id << ", app_handle: " << &app_handle);
     connection = it->second.connection;
     connections_.erase(it);
   }
   connections_lock_.Release();
-  LOG4CXX_TRACE(logger_, "Connections Lock Released");
+  LOG4CXX_DEBUG(logger_, "Connections Lock Released");
 
-  // And now, "connection" goes out of scope, triggering the destructor outside of the "connections_lock_"
+  // And now, "connection" goes out of scope, triggering the destructor outside
+  // of the "connections_lock_"
 }
-
 
 void TransportAdapterImpl::AddListener(TransportAdapterListener* listener) {
   LOG4CXX_TRACE(logger_, "enter");

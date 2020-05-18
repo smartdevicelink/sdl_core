@@ -588,7 +588,7 @@ class TransportAdapterImpl : public TransportAdapter,
    * @param device_handle Device unique identifier.
    * @param app_handle Handle of application.
    */
-  void RemoveConnection(const DeviceUID& device_id, 
+  void RemoveConnection(const DeviceUID& device_id,
                         const ApplicationHandle& app_handle);
 
   /**
