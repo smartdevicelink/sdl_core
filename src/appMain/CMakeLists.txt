@@ -70,9 +70,20 @@ include_directories(
   ${default_media_inc}
   ${MESSAGE_BROKER_INCLUDE_DIRECTORY}
   ${BOOST_INCLUDE_DIR}
+  ${CMAKE_SOURCE_DIR}/src
 )
 
-collect_sources(SOURCES "${CMAKE_CURRENT_SOURCE_DIR}")
+# Create object library
+add_library("LowVoltageHandlerObjLibrary" OBJECT ${CMAKE_CURRENT_SOURCE_DIR}/low_voltage_signals_handler.cc
+)
+add_dependencies("LowVoltageHandlerObjLibrary" Boost)
+
+set (SOURCES
+  ${CMAKE_CURRENT_SOURCE_DIR}/main.cc
+  ${CMAKE_CURRENT_SOURCE_DIR}/life_cycle_impl.cc
+  ${CMAKE_CURRENT_SOURCE_DIR}/signal_handlers.cc
+  $<TARGET_OBJECTS:LowVoltageHandlerObjLibrary>
+)
 
 cmake_policy(PUSH)
 # make link_directories() treat paths relative to the source dir
@@ -206,7 +217,8 @@ endif ()
 # Install rules
 install(TARGETS ${PROJECT} DESTINATION bin)
 install(
-  FILES build_config.txt log4cxx.properties audio.8bit.wav test.txt smartDeviceLink.ini
+  FILES build_config.txt log4cxx.properties audio.8bit.wav test.txt
+    ${CMAKE_CURRENT_BINARY_DIR}/smartDeviceLink.ini
     hmi_capabilities.json sdl_preloaded_pt.json sample_policy_manager.py
     ${CMAKE_SOURCE_DIR}/mycert.pem ${CMAKE_SOURCE_DIR}/mykey.pem
   DESTINATION bin
@@ -243,3 +255,6 @@ else()
       GROUP_EXECUTE WORLD_READ WORLD_EXECUTE)
 endif()
 
+if(BUILD_TESTS)
+  add_subdirectory(test)
+endif()

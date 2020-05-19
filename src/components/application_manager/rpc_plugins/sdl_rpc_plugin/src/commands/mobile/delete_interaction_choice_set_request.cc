@@ -34,9 +34,9 @@
 #include "sdl_rpc_plugin/commands/mobile/delete_interaction_choice_set_request.h"
 
 #include "application_manager/application_impl.h"
-#include "interfaces/MOBILE_API.h"
-#include "interfaces/HMI_API.h"
 #include "application_manager/message_helper.h"
+#include "interfaces/HMI_API.h"
+#include "interfaces/MOBILE_API.h"
 
 namespace sdl_rpc_plugin {
 using namespace application_manager;
@@ -63,9 +63,9 @@ void DeleteInteractionChoiceSetRequest::Run() {
   ApplicationSharedPtr app = application_manager_.application(connection_key());
 
   if (!app) {
-    LOG4CXX_ERROR(logger_,
-                  "No application associated with connection key "
-                      << connection_key());
+    LOG4CXX_ERROR(
+        logger_,
+        "No application associated with connection key " << connection_key());
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     return;
   }
@@ -165,4 +165,4 @@ void DeleteInteractionChoiceSetRequest::SendVrDeleteCommand(
 
 }  // namespace commands
 
-}  // namespace application_manager
+}  // namespace sdl_rpc_plugin

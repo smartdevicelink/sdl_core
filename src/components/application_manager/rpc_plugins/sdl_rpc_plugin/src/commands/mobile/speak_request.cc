@@ -31,8 +31,8 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <string.h>
 #include "sdl_rpc_plugin/commands/mobile/speak_request.h"
+#include <string.h>
 
 #include "application_manager/application_impl.h"
 #include "application_manager/message_helper.h"
@@ -84,9 +84,9 @@ void SpeakRequest::Run() {
       MessageHelper::VerifyTtsFiles(tts_chunks, app, application_manager_);
 
   if (mobile_apis::Result::FILE_NOT_FOUND == verification_result) {
-    LOG4CXX_ERROR(logger_,
-                  "MessageHelper::VerifyTtsFiles return "
-                      << verification_result);
+    LOG4CXX_ERROR(
+        logger_,
+        "MessageHelper::VerifyTtsFiles return " << verification_result);
     SendResponse(false,
                  mobile_apis::Result::FILE_NOT_FOUND,
                  "One or more files needed for tts_chunks are not present");
@@ -181,4 +181,4 @@ bool SpeakRequest::IsWhiteSpaceExist() {
 
 }  // namespace commands
 
-}  // namespace application_manager
+}  // namespace sdl_rpc_plugin

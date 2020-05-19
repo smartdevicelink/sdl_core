@@ -34,8 +34,8 @@
 
 #include "application_manager/commands/commands_test.h"
 
-#include "application_manager/commands/notification_to_hmi.h"
 #include "application_manager/commands/command_notification_impl.h"
+#include "application_manager/commands/notification_to_hmi.h"
 
 namespace test {
 namespace components {
@@ -45,8 +45,8 @@ namespace simple_notifications_test {
 
 using namespace application_manager;
 
-using ::testing::Types;
 using commands::NotificationToHMI;
+using ::testing::Types;
 template <typename Command>
 class SimpleNotificationsTest
     : public CommandsTest<CommandsTestMocks::kIsNice> {

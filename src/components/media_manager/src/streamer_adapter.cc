@@ -48,8 +48,8 @@ StreamerAdapter::~StreamerAdapter() {
     streamer_->Close();
   }
   thread_->join();
-  threads::DeleteThread(thread_);
   delete streamer_;
+  threads::DeleteThread(thread_);
 }
 
 void StreamerAdapter::StartActivity(int32_t application_key) {
@@ -72,6 +72,10 @@ void StreamerAdapter::StartActivity(int32_t application_key) {
     (*it)->OnActivityStarted(application_key);
   }
   current_application_ = application_key;
+}
+
+size_t StreamerAdapter::GetMsgQueueSize() {
+  return messages_.size();
 }
 
 void StreamerAdapter::StopActivity(int32_t application_key) {

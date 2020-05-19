@@ -37,19 +37,14 @@ namespace rc_rpc_plugin {
 namespace commands {
 
 RCButtonPressResponse::RCButtonPressResponse(
-    const app_mngr::commands::MessageSharedPtr& message,
-    app_mngr::ApplicationManager& application_manager,
-    app_mngr::rpc_service::RPCService& rpc_service,
-    app_mngr::HMICapabilities& hmi_capabilities,
-    policy::PolicyHandlerInterface& policy_handle,
-    ResourceAllocationManager& resource_allocation_manager)
-    : application_manager::commands::ResponseFromHMI(message,
-                                                     application_manager,
-                                                     rpc_service,
-                                                     hmi_capabilities,
-                                                     policy_handle) {
-  UNUSED(resource_allocation_manager);
-}
+    const application_manager::commands::MessageSharedPtr& message,
+    const RCCommandParams& params)
+    : application_manager::commands::ResponseFromHMI(
+          message,
+          params.application_manager_,
+          params.rpc_service_,
+          params.hmi_capabilities_,
+          params.policy_handler_) {}
 
 void RCButtonPressResponse::Run() {
   LOG4CXX_AUTO_TRACE(logger_);

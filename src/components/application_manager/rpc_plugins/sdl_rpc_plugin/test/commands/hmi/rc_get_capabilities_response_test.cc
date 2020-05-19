@@ -34,13 +34,13 @@
 
 #include "gtest/gtest.h"
 
-#include "smart_objects/smart_object.h"
-#include "interfaces/MOBILE_API.h"
+#include "application_manager/commands/command_impl.h"
+#include "application_manager/commands/commands_test.h"
 #include "application_manager/mock_hmi_capabilities.h"
 #include "application_manager/smart_object_keys.h"
-#include "application_manager/commands/commands_test.h"
-#include "application_manager/commands/command_impl.h"
 #include "hmi/rc_get_capabilities_response.h"
+#include "interfaces/MOBILE_API.h"
+#include "smart_objects/smart_object.h"
 
 namespace test {
 namespace components {
@@ -52,8 +52,8 @@ using ::testing::NiceMock;
 namespace am = ::application_manager;
 namespace strings = am::strings;
 namespace hmi_response = am::hmi_response;
-using sdl_rpc_plugin::commands::RCGetCapabilitiesResponse;
 using am::commands::CommandImpl;
+using sdl_rpc_plugin::commands::RCGetCapabilitiesResponse;
 
 typedef std::shared_ptr<RCGetCapabilitiesResponse> RCGetCapabilitiesResponsePtr;
 typedef NiceMock<
@@ -139,6 +139,7 @@ TEST_F(RCGetCapabilitiesResponseTest, RUN_SUCCESSS) {
   radio_control_capability["hdChannelAvailable"] = true;
   radio_control_capability["rdsDataAvailable"] = true;
   radio_control_capability["availableHDsAvailable"] = true;
+  radio_control_capability["availableHdChannelsAvailable"] = true;
   radio_control_capability["stateAvailable"] = true;
   radio_control_capability["signalStrengthAvailable"] = true;
   radio_control_capability["signalChangeThresholdAvailable"] = true;

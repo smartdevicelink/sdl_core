@@ -32,6 +32,7 @@
 
 #include "sdl_rpc_plugin/commands/hmi/on_system_error_notification.h"
 #include "application_manager/application_manager.h"
+#include "application_manager/policies/policy_handler_interface.h"
 #include "interfaces/HMI_API.h"
 
 namespace sdl_rpc_plugin {
@@ -64,4 +65,4 @@ void OnSystemErrorNotification::Run() {
 
 }  // namespace commands
 
-}  // namespace application_manager
+}  // namespace sdl_rpc_plugin

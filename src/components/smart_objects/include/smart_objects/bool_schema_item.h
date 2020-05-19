@@ -35,8 +35,8 @@
 
 #include "smart_objects/default_shema_item.h"
 
-namespace NsSmartDeviceLink {
-namespace NsSmartObjects {
+namespace ns_smart_device_link {
+namespace ns_smart_objects {
 /**
  * @brief Bool schema item.
  **/
@@ -59,6 +59,6 @@ class CBoolSchemaItem : public CDefaultSchemaItem<bool> {
  private:
   DISALLOW_COPY_AND_ASSIGN(CBoolSchemaItem);
 };
-}  // namespace NsSmartObjects
-}  // namespace NsSmartDeviceLink
+}  // namespace ns_smart_objects
+}  // namespace ns_smart_device_link
 #endif  // SRC_COMPONENTS_SMART_OBJECTS_INCLUDE_SMART_OBJECTS_BOOL_SCHEMA_ITEM_H_

@@ -47,10 +47,10 @@ class NaviStartStreamRequest : public app_mngr::commands::RequestToHMI,
                                public app_mngr::event_engine::EventObserver {
  public:
   /**
- * @brief NaviStartStreamRequest class constructor
- *
- * @param message Incoming SmartObject message
- **/
+   * @brief NaviStartStreamRequest class constructor
+   *
+   * @param message Incoming SmartObject message
+   **/
   NaviStartStreamRequest(const app_mngr::commands::MessageSharedPtr& message,
                          app_mngr::ApplicationManager& application_manager,
                          app_mngr::rpc_service::RPCService& rpc_service,
@@ -78,9 +78,9 @@ class NaviStartStreamRequest : public app_mngr::commands::RequestToHMI,
   virtual void onTimeOut();
 
   /**
- * @brief RetryStartSession resend HMI startSession request if needed.
- * If limit expired, set video_stream_retry_number counter to 0
- */
+   * @brief RetryStartSession resend HMI startSession request if needed.
+   * If limit expired, set video_stream_retry_number counter to 0
+   */
   void RetryStartSession();
 
  private:
@@ -90,6 +90,6 @@ class NaviStartStreamRequest : public app_mngr::commands::RequestToHMI,
 
 }  // namespace commands
 
-}  // namespace application_manager
+}  // namespace sdl_rpc_plugin
 
 #endif  // SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_HMI_NAVI_START_STREAM_REQUEST_H_

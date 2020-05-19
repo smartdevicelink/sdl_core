@@ -30,8 +30,8 @@
 
 include("./set_3rd_party_paths.cmake")
 
-set(3RD_PARTY_SOURCE_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}) 
-set(3RD_PARTY_BINARY_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}) 
+set(3RD_PARTY_SOURCE_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
+set(3RD_PARTY_BINARY_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
 
 set (install-3rd_party_logger_var "")
 
@@ -41,9 +41,9 @@ endif()
 
 if(FORCE_3RD_PARTY)
   if(NO_REBUILD_3RD_PARTY)
-  	message(FATAL_ERROR "Please don't turn on both FORCE_3RD_PARTY and NO_REBUILD_3RD_PARTY at the same time.")
+    message(FATAL_ERROR "Please don't turn on both FORCE_3RD_PARTY and NO_REBUILD_3RD_PARTY at the same time.")
   else()
-	set(FORCE_3RD_PARTY_LOGGER ON)
+    set(FORCE_3RD_PARTY_LOGGER ON)
   endif()
 endif()
 
@@ -55,13 +55,18 @@ if(ENABLE_LOG)
   if(NO_REBUILD_3RD_PARTY_LOGGER)
     message(STATUS "Not rebuilding logger.")
   else()
+    set(LOGGER_INSTALL_COMMAND make install)
+    if (${USE_DEFAULT_3RD_PARTY_PATH} STREQUAL "true")
+      set(LOGGER_INSTALL_COMMAND sudo make install)
+    endif()
     if(FORCE_3RD_PARTY_LOGGER)
       message(STATUS "Force to rebuild logger.")
 
       #build logger
       add_custom_target(3rd_party_logger
         make
-        WORKING_DIRECTORY ${3RD_PARTY_BINARY_DIRECTORY}
+        DEPENDS apr-util
+        WORKING_DIRECTORY ${3RD_PARTY_BINARY_DIRECTORY}/apache-log4cxx-cmake
       )
 
       #install logger
@@ -71,12 +76,15 @@ if(ENABLE_LOG)
         COMMAND /bin/bash -c \"USE_DEFAULT_3RD_PARTY_PATH=${USE_DEFAULT_3RD_PARTY_PATH}\;
                                if [ \\$$USE_DEFAULT_3RD_PARTY_PATH == "true" ]\; then
                                  sudo -k \;
-                                 sudo make install\;
-                               else
-                                 make install\;
-                               fi\"
+                               fi\;
+                               cd ${3RD_PARTY_BINARY_DIRECTORY}/apr-cmake\;
+                               ${LOGGER_INSTALL_COMMAND}\;
+                               cd ${3RD_PARTY_BINARY_DIRECTORY}/apr-util-cmake\;
+                               ${LOGGER_INSTALL_COMMAND}\;
+                               cd ${3RD_PARTY_BINARY_DIRECTORY}/apache-log4cxx-cmake\;
+                               ${LOGGER_INSTALL_COMMAND}\"
         DEPENDS 3rd_party_logger
-        WORKING_DIRECTORY ${3RD_PARTY_BINARY_DIRECTORY}
+        WORKING_DIRECTORY ${3RD_PARTY_BINARY_DIRECTORY}/apache-log4cxx-cmake
       )
     else()
       #build logger
@@ -94,17 +102,18 @@ if(ENABLE_LOG)
                                  fi\;
                                  if [ \\$$VAR1 != \\$$VAR2 ]\; then
                                    echo " Need to rebuild logger. " \;
-                                   cd ${3RD_PARTY_BINARY_DIRECTORY}\;
+                                   cd ${3RD_PARTY_BINARY_DIRECTORY}/apache-log4cxx-cmake\;
                                    make\;
                                  else
                                    echo " Logger is actual. " \;
                                  fi\;
                                else
                                  echo " Need to build logger. " \;
-                                 cd ${3RD_PARTY_BINARY_DIRECTORY}\;
+                                 cd ${3RD_PARTY_BINARY_DIRECTORY}/apache-log4cxx-cmake\;
                                  make\;
                                fi\"
-        WORKING_DIRECTORY ${3RD_PARTY_BINARY_DIRECTORY}
+        DEPENDS apr-util
+        WORKING_DIRECTORY ${3RD_PARTY_BINARY_DIRECTORY}/apache-log4cxx-build
       )
 
       #install logger
@@ -125,27 +134,29 @@ if(ENABLE_LOG)
                                  if [ \\$$VAR1 != \\$$VAR2 ]\; then
                                    USE_DEFAULT_3RD_PARTY_PATH=${USE_DEFAULT_3RD_PARTY_PATH}\;
                                    if [ \\$$USE_DEFAULT_3RD_PARTY_PATH == "true" ]\; then
-                                     cd ${3RD_PARTY_BINARY_DIRECTORY}\;
                                      sudo -k \;
-                                     sudo make install\;
-                                   else
-                                     cd ${3RD_PARTY_BINARY_DIRECTORY}\;
-                                     make install\;
                                    fi\;
+                                   cd ${3RD_PARTY_BINARY_DIRECTORY}/apr-cmake\;
+                                   ${LOGGER_INSTALL_COMMAND}\;
+                                   cd ${3RD_PARTY_BINARY_DIRECTORY}/apr-util-cmake\;
+                                   ${LOGGER_INSTALL_COMMAND}\;
+                                   cd ${3RD_PARTY_BINARY_DIRECTORY}/apache-log4cxx-cmake\;
+                                   ${LOGGER_INSTALL_COMMAND}\;
                                  fi\;
                                else
                                  USE_DEFAULT_3RD_PARTY_PATH=${USE_DEFAULT_3RD_PARTY_PATH}\;
                                  if [ \\$$USE_DEFAULT_3RD_PARTY_PATH == "true" ]\; then
-                                   cd ${3RD_PARTY_BINARY_DIRECTORY}\;
                                    sudo -k \;
-                                   sudo make install\;
-                                 else
-                                   cd ${3RD_PARTY_BINARY_DIRECTORY}\;
-                                   make install\;
                                  fi\;
+                                 cd ${3RD_PARTY_BINARY_DIRECTORY}/apr-cmake\;
+                                 ${LOGGER_INSTALL_COMMAND}\;
+                                 cd ${3RD_PARTY_BINARY_DIRECTORY}/apr-util-cmake\;
+                                 ${LOGGER_INSTALL_COMMAND}\;
+                                 cd ${3RD_PARTY_BINARY_DIRECTORY}/apache-log4cxx-cmake\;
+                                 ${LOGGER_INSTALL_COMMAND}\;
                                fi\"
         DEPENDS 3rd_party_logger
-        WORKING_DIRECTORY ${3RD_PARTY_BINARY_DIRECTORY}
+        WORKING_DIRECTORY ${3RD_PARTY_BINARY_DIRECTORY}/apache-log4cxx-build
       )
     endif()
 
@@ -169,12 +180,13 @@ if(ENABLE_LOG)
 endif()
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}")
-set(CMAKE_SOURCE_PREFIX ${CMAKE_SOURCE_PREFIX} "${3RD_PARTY_INSTALL_PREFIX}")
-find_package (BSON)
-message (STATUS "bson installed in " ${BSON_LIBS_DIRECTORY} " , " ${BSON_INCLUDE_DIRECTORY})
-message (STATUS "emhashmap installed in " ${EMHASHMAP_LIBS_DIRECTORY} " , " ${EMHASHMAP_INCLUDE_DIRECTORY})
+set(CMAKE_PREFIX_PATH ${CMAKE_PREFIX_PATH} "${3RD_PARTY_INSTALL_PREFIX}/etc")
+set(ENV{PKG_CONFIG_PATH} $ENV{CMAKE_PREFIX_PATH} "${3RD_PARTY_INSTALL_PREFIX}/etc")
+find_package(PkgConfig)
+pkg_check_modules(BSON libbson)
+message (STATUS "bson installed in " ${BSON_LIBDIR} ", " ${BSON_INCLUDEDIR})
 
-if (${BSON_LIB} MATCHES "BSON_LIB-NOTFOUND")
+if ((NOT "${BSON_FOUND}") OR ("${BSON_VERSION}" VERSION_LESS "1.2.0"))
   message (STATUS "Building bson required")
   set(BSON_LIB_SOURCE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/bson_c_lib CACHE INTERNAL "Sources of bson library" FORCE)
   set(BSON_LIBS_DIRECTORY ${3RD_PARTY_INSTALL_PREFIX}/lib CACHE INTERNAL "Installation path of bson libraries" FORCE)
@@ -188,20 +200,19 @@ if (${BSON_LIB} MATCHES "BSON_LIB-NOTFOUND")
   endif()
   include(ExternalProject)
   ExternalProject_Add(libbson
-      GIT_REPOSITORY "http://github.com/smartdevicelink/bson_c_lib.git"
+      GIT_REPOSITORY "https://github.com/smartdevicelink/bson_c_lib.git"
       GIT_TAG "master"
       BINARY_DIR ${BSON_LIB_SOURCE_DIRECTORY}
       INSTALL_DIR ${3RD_PARTY_INSTALL_PREFIX}
       DOWNLOAD_DIR ${BSON_LIB_SOURCE_DIRECTORY}
       SOURCE_DIR ${BSON_LIB_SOURCE_DIRECTORY}
-      CONFIGURE_COMMAND touch aclocal.m4 configure.ac Makefile.am Makefile.in configure config.h.in && ./configure --prefix=${3RD_PARTY_INSTALL_PREFIX}
+      CONFIGURE_COMMAND touch aclocal.m4 configure.ac Makefile.am Makefile.in configure config.h.in libbson.pc.in && ./configure --prefix=${3RD_PARTY_INSTALL_PREFIX}
       BUILD_COMMAND make
-      INSTALL_COMMAND ${BSON_INSTALL_COMMAND})
+      INSTALL_COMMAND ${BSON_INSTALL_COMMAND}
+      UPDATE_COMMAND git pull)
 else()
-  get_filename_component(BSON_LIBS_DIRECTORY ${BSON_LIB} DIRECTORY)
-  get_filename_component(EMHASHMAP_LIBS_DIRECTORY ${EMHASHMAP_LIB} DIRECTORY)
-  set(BSON_LIBS_DIRECTORY ${BSON_LIBS_DIRECTORY} CACHE INTERNAL "Installation path of bson libraries" FORCE)
-  set(EMHASHMAP_LIBS_DIRECTORY ${BSON_LIBS_DIRECTORY} CACHE INTERNAL "Installation path of emashmap libraries" FORCE)
+  set(BSON_LIBS_DIRECTORY ${BSON_LIBDIR} CACHE INTERNAL "Installation path of bson libraries" FORCE)
+  set(EMHASHMAP_LIBS_DIRECTORY ${BSON_LIBDIR} CACHE INTERNAL "Installation path of emashmap libraries" FORCE)
   add_custom_target(
       libbson
       DEPENDS ${BSON_LIBS_DIRECTORY}
@@ -209,11 +220,12 @@ else()
       )
 endif()
 
-find_package(Boost 1.66.0 COMPONENTS system thread) 
+set(BOOST_ROOT ${3RD_PARTY_INSTALL_PREFIX})
+find_package(Boost 1.66.0 COMPONENTS system thread date_time filesystem regex) 
 set(BOOST_LIB_SOURCE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/boost_src)
 set(BOOST_LIBS_DIRECTORY ${3RD_PARTY_INSTALL_PREFIX}/lib)
+set(BOOST_INCLUDE_DIR ${3RD_PARTY_INSTALL_PREFIX}/include PARENT_SCOPE)
 SET_PROPERTY(GLOBAL PROPERTY GLOBAL_BOOST_LIBS ${BOOST_LIBS_DIRECTORY})
-set(BOOST_INCLUDE_DIRECTORY ${3RD_PARTY_INSTALL_PREFIX}/include )
 if (NOT ${Boost_FOUND})
   message(STATUS "Did not find boost. Downloading and installing boost 1.66")
   set(BOOST_INSTALL_COMMAND ./b2 install)
@@ -226,23 +238,19 @@ if (NOT ${Boost_FOUND})
     URL https://dl.bintray.com/boostorg/release/1.66.0/source/boost_1_66_0.tar.gz
     DOWNLOAD_DIR ${BOOST_LIB_SOURCE_DIRECTORY}
     SOURCE_DIR ${BOOST_LIB_SOURCE_DIRECTORY}
-    CONFIGURE_COMMAND ./bootstrap.sh --with-libraries=system,thread --prefix=${3RD_PARTY_INSTALL_PREFIX}
+    CONFIGURE_COMMAND ./bootstrap.sh --with-libraries=system,thread,date_time,filesystem,regex --prefix=${3RD_PARTY_INSTALL_PREFIX}
     BUILD_COMMAND ./b2
-    INSTALL_COMMAND ${BOOST_INSTALL_COMMAND} --with-system --with-thread --prefix=${3RD_PARTY_INSTALL_PREFIX} > boost_install.log
+    INSTALL_COMMAND ${BOOST_INSTALL_COMMAND} --with-system --with-thread --with-date_time --with-filesystem --with-regex --prefix=${3RD_PARTY_INSTALL_PREFIX} > boost_install.log
     INSTALL_DIR ${3RD_PARTY_INSTALL_PREFIX}
     BUILD_IN_SOURCE true
   )
-
-  set(BOOST_INCLUDE_DIR ${BOOST_ROOT_DIR}/Boost-prefix/src/Boost)
-  set(BOOST_LIB_DIR ${BOOST_ROOT_DIR}/Boost-prefix/src/Boost/stage/lib/)
 else()
 add_custom_target(Boost) # empty target, Boost is already installed
 endif()
 
 add_custom_target(install-3rd_party
-  DEPENDS ${install-3rd_party_logger_var}
   DEPENDS libbson
   DEPENDS Boost
+  DEPENDS ${install-3rd_party_logger_var}
   WORKING_DIRECTORY ${3RD_PARTY_BINARY_DIRECTORY}
 )
-

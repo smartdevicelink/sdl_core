@@ -36,28 +36,28 @@
 
 #include "gmock/gmock.h"
 
-#include "smart_objects/smart_object.h"
-#include "smart_objects/smart_schema.h"
-#include "smart_objects/schema_item.h"
-#include "formatters/CFormatterJsonSDLRPCv2.h"
 #include "formatters/CFormatterJsonSDLRPCv1.h"
+#include "formatters/CFormatterJsonSDLRPCv2.h"
 #include "smart_objects/array_schema_item.h"
 #include "smart_objects/bool_schema_item.h"
-#include "smart_objects/object_schema_item.h"
-#include "smart_objects/string_schema_item.h"
 #include "smart_objects/enum_schema_item.h"
 #include "smart_objects/number_schema_item.h"
+#include "smart_objects/object_schema_item.h"
+#include "smart_objects/schema_item.h"
 #include "smart_objects/schema_item_parameter.h"
+#include "smart_objects/smart_object.h"
+#include "smart_objects/smart_schema.h"
+#include "smart_objects/string_schema_item.h"
 
-#include <string>
 #include <time.h>
+#include <string>
 
 namespace test {
 namespace components {
 namespace smart_object_test {
 
-using namespace NsSmartDeviceLink::NsJSONHandler::strings;
-using namespace NsSmartDeviceLink::NsSmartObjects;
+using namespace ns_smart_device_link::ns_json_handler::strings;
+using namespace ns_smart_device_link::ns_smart_objects;
 
 namespace TestType {
 enum eType {
@@ -96,7 +96,7 @@ class SmartObjectConvertionTimeTest : public ::testing::Test {
     clock_gettime(CLOCK_REALTIME, &convertionStartTime);
 
     // SmartObjects --> JSON
-    NsSmartDeviceLink::NsJSONHandler::Formatters::CFormatterJsonSDLRPCv2::
+    ns_smart_device_link::ns_json_handler::formatters::CFormatterJsonSDLRPCv2::
         toString(srcObj, jsonString);
 
     clock_gettime(CLOCK_REALTIME, &convertionEndTime);
@@ -114,7 +114,7 @@ class SmartObjectConvertionTimeTest : public ::testing::Test {
     clock_gettime(CLOCK_REALTIME, &convertionStartTime);
 
     // JSON --> SmartObjects
-    NsSmartDeviceLink::NsJSONHandler::Formatters::CFormatterJsonSDLRPCv2::
+    ns_smart_device_link::ns_json_handler::formatters::CFormatterJsonSDLRPCv2::
         fromString<FunctionIdTest::eType, MessageTypeTest::eType>(
             jsonString,
             dstObj,
@@ -136,7 +136,7 @@ class SmartObjectConvertionTimeTest : public ::testing::Test {
     clock_gettime(CLOCK_REALTIME, &convertionStartTime);
 
     // SmartObjects --> JSON
-    NsSmartDeviceLink::NsJSONHandler::Formatters::CFormatterJsonSDLRPCv1::
+    ns_smart_device_link::ns_json_handler::formatters::CFormatterJsonSDLRPCv1::
         toString(srcObj, jsonString);
 
     clock_gettime(CLOCK_REALTIME, &convertionEndTime);
@@ -153,7 +153,7 @@ class SmartObjectConvertionTimeTest : public ::testing::Test {
     clock_gettime(CLOCK_REALTIME, &convertionStartTime);
 
     // JSON --> SmartObjects
-    NsSmartDeviceLink::NsJSONHandler::Formatters::CFormatterJsonSDLRPCv1::
+    ns_smart_device_link::ns_json_handler::formatters::CFormatterJsonSDLRPCv1::
         fromString<FunctionIdTest::eType, MessageTypeTest::eType>(jsonString,
                                                                   dstObj);
 
@@ -252,20 +252,20 @@ class SmartObjectConvertionTimeTest : public ::testing::Test {
         TEnumSchemaItem<MessageTypeTest::eType>::create(
             messageType_allowedEnumSubsetValues);
 
-    CObjectSchemaItem::Members paramsMembersMap;
-    paramsMembersMap[NsSmartDeviceLink::NsJSONHandler::strings::S_FUNCTION_ID] =
-        CObjectSchemaItem::SMember(functionId_SchemaItem, true);
+    Members paramsMembersMap;
     paramsMembersMap
-        [NsSmartDeviceLink::NsJSONHandler::strings::S_MESSAGE_TYPE] =
-            CObjectSchemaItem::SMember(messageType_SchemaItem, true);
+        [ns_smart_device_link::ns_json_handler::strings::S_FUNCTION_ID] =
+            SMember(functionId_SchemaItem, true);
     paramsMembersMap
-        [NsSmartDeviceLink::NsJSONHandler::strings::S_CORRELATION_ID] =
-            CObjectSchemaItem::SMember(TNumberSchemaItem<int>::create(), true);
+        [ns_smart_device_link::ns_json_handler::strings::S_MESSAGE_TYPE] =
+            SMember(messageType_SchemaItem, true);
+    paramsMembersMap
+        [ns_smart_device_link::ns_json_handler::strings::S_CORRELATION_ID] =
+            SMember(TNumberSchemaItem<int>::create(), true);
 
-    std::map<std::string, CObjectSchemaItem::SMember> rootMembersMap;
-    rootMembersMap[NsSmartDeviceLink::NsJSONHandler::strings::S_PARAMS] =
-        CObjectSchemaItem::SMember(CObjectSchemaItem::create(paramsMembersMap),
-                                   true);
+    std::map<std::string, SMember> rootMembersMap;
+    rootMembersMap[ns_smart_device_link::ns_json_handler::strings::S_PARAMS] =
+        SMember(CObjectSchemaItem::create(paramsMembersMap), true);
 
     return CSmartSchema(CObjectSchemaItem::create(rootMembersMap));
   }
@@ -317,49 +317,43 @@ class SmartObjectConvertionTimeTest : public ::testing::Test {
                                        TSchemaItemParameter<int>(2000000000),
                                        TSchemaItemParameter<int>());
 
-    std::map<std::string, CObjectSchemaItem::SMember> schemaMembersMap;
+    std::map<std::string, SMember> schemaMembersMap;
 
-    schemaMembersMap["success"] =
-        CObjectSchemaItem::SMember(success_SchemaItem, true);
-    schemaMembersMap["resultCode"] =
-        CObjectSchemaItem::SMember(resultCode_SchemaItem, true);
-    schemaMembersMap["info"] =
-        CObjectSchemaItem::SMember(info_SchemaItem, false);
-    schemaMembersMap["tryAgainTime"] =
-        CObjectSchemaItem::SMember(tryAgainTime_SchemaItem, true);
+    schemaMembersMap["success"] = SMember(success_SchemaItem, true);
+    schemaMembersMap["resultCode"] = SMember(resultCode_SchemaItem, true);
+    schemaMembersMap["info"] = SMember(info_SchemaItem, false);
+    schemaMembersMap["tryAgainTime"] = SMember(tryAgainTime_SchemaItem, true);
 
-    std::map<std::string, CObjectSchemaItem::SMember> paramsMembersMap;
-    paramsMembersMap[NsSmartDeviceLink::NsJSONHandler::strings::S_FUNCTION_ID] =
-        CObjectSchemaItem::SMember(
-            TEnumSchemaItem<FunctionIdTest::eType>::create(
-                functionId_allowedEnumSubsetValues),
-            true);
+    std::map<std::string, SMember> paramsMembersMap;
     paramsMembersMap
-        [NsSmartDeviceLink::NsJSONHandler::strings::S_MESSAGE_TYPE] =
-            CObjectSchemaItem::SMember(
-                TEnumSchemaItem<MessageTypeTest::eType>::create(
-                    messageType_allowedEnumSubsetValues),
-                true);
+        [ns_smart_device_link::ns_json_handler::strings::S_FUNCTION_ID] =
+            SMember(TEnumSchemaItem<FunctionIdTest::eType>::create(
+                        functionId_allowedEnumSubsetValues),
+                    true);
     paramsMembersMap
-        [NsSmartDeviceLink::NsJSONHandler::strings::S_CORRELATION_ID] =
-            CObjectSchemaItem::SMember(TNumberSchemaItem<int>::create(), true);
+        [ns_smart_device_link::ns_json_handler::strings::S_MESSAGE_TYPE] =
+            SMember(TEnumSchemaItem<MessageTypeTest::eType>::create(
+                        messageType_allowedEnumSubsetValues),
+                    true);
     paramsMembersMap
-        [NsSmartDeviceLink::NsJSONHandler::strings::S_PROTOCOL_VERSION] =
-            CObjectSchemaItem::SMember(
+        [ns_smart_device_link::ns_json_handler::strings::S_CORRELATION_ID] =
+            SMember(TNumberSchemaItem<int>::create(), true);
+    paramsMembersMap
+        [ns_smart_device_link::ns_json_handler::strings::S_PROTOCOL_VERSION] =
+            SMember(
                 TNumberSchemaItem<int>::create(TSchemaItemParameter<int>(1),
                                                TSchemaItemParameter<int>(2)),
                 true);
     paramsMembersMap
-        [NsSmartDeviceLink::NsJSONHandler::strings::S_PROTOCOL_TYPE] =
-            CObjectSchemaItem::SMember(TNumberSchemaItem<int>::create(), true);
+        [ns_smart_device_link::ns_json_handler::strings::S_PROTOCOL_TYPE] =
+            SMember(TNumberSchemaItem<int>::create(), true);
 
-    std::map<std::string, CObjectSchemaItem::SMember> rootMembersMap;
-    rootMembersMap[NsSmartDeviceLink::NsJSONHandler::strings::S_MSG_PARAMS] =
-        CObjectSchemaItem::SMember(CObjectSchemaItem::create(schemaMembersMap),
-                                   true);
-    rootMembersMap[NsSmartDeviceLink::NsJSONHandler::strings::S_PARAMS] =
-        CObjectSchemaItem::SMember(CObjectSchemaItem::create(paramsMembersMap),
-                                   true);
+    std::map<std::string, SMember> rootMembersMap;
+    rootMembersMap
+        [ns_smart_device_link::ns_json_handler::strings::S_MSG_PARAMS] =
+            SMember(CObjectSchemaItem::create(schemaMembersMap), true);
+    rootMembersMap[ns_smart_device_link::ns_json_handler::strings::S_PARAMS] =
+        SMember(CObjectSchemaItem::create(paramsMembersMap), true);
     return CSmartSchema(CObjectSchemaItem::create(rootMembersMap));
   }
 };
@@ -638,8 +632,8 @@ TEST_F(SmartObjectConvertionTimeTest, test_object_without_enum_convertion) {
 }  // namespace components
 }  // namespace test
 
-namespace NsSmartDeviceLink {
-namespace NsSmartObjects {
+namespace ns_smart_device_link {
+namespace ns_smart_objects {
 
 template <>
 const EnumConversionHelper<test::components::SmartObjects::
@@ -780,5 +774,5 @@ const test::components::SmartObjects::SmartObjectConvertionTimeTest::
             MessageTypeTest::response,
         test::components::SmartObjects::SmartObjectConvertionTimeTest::
             MessageTypeTest::notification};
-}
-}
+}  // namespace ns_smart_objects
+}  // namespace ns_smart_device_link

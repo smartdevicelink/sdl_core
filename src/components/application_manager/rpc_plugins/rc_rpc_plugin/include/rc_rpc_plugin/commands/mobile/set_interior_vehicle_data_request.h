@@ -30,8 +30,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_RC_RPC_PLUGIN_INCLUDE_COMMANDS_SET_INTERIOR_VEHICLE_DATA_REQUEST_H
-#define SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_RC_RPC_PLUGIN_INCLUDE_COMMANDS_SET_INTERIOR_VEHICLE_DATA_REQUEST_H
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_RC_RPC_PLUGIN_INCLUDE_RC_RPC_PLUGIN_COMMANDS_MOBILE_SET_INTERIOR_VEHICLE_DATA_REQUEST_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_RC_RPC_PLUGIN_INCLUDE_RC_RPC_PLUGIN_COMMANDS_MOBILE_SET_INTERIOR_VEHICLE_DATA_REQUEST_H_
 
 #include "rc_rpc_plugin/commands/rc_command_request.h"
 
@@ -39,15 +39,12 @@ namespace rc_rpc_plugin {
 namespace app_mngr = application_manager;
 
 namespace commands {
+
 class SetInteriorVehicleDataRequest : public RCCommandRequest {
  public:
   SetInteriorVehicleDataRequest(
-      const app_mngr::commands::MessageSharedPtr& message,
-      app_mngr::ApplicationManager& application_manager,
-      app_mngr::rpc_service::RPCService& rpc_service,
-      app_mngr::HMICapabilities& hmi_capabilities,
-      policy::PolicyHandlerInterface& policy_handle,
-      rc_rpc_plugin::ResourceAllocationManager& resource_allocation_manager);
+      const application_manager::commands::MessageSharedPtr& message,
+      const RCCommandParams& params);
 
   /**
    * @brief Execute command
@@ -65,9 +62,11 @@ class SetInteriorVehicleDataRequest : public RCCommandRequest {
   /**
    * @brief IsResourceFree check resource state
    * @param module_type Resource name
+   * @param module_id Resource id
    * @return True if free, otherwise - false
    */
-  bool IsResourceFree(const std::string& module_type) const FINAL;
+  bool IsResourceFree(const std::string& module_type,
+                      const std::string& module_id) const FINAL;
 
   /**
    * @brief SetResourceState changes state of resource
@@ -84,26 +83,14 @@ class SetInteriorVehicleDataRequest : public RCCommandRequest {
   void on_event(const app_mngr::event_engine::Event& event) FINAL;
 
   /**
-   * @brief Method that check if READ_ONLY parameters present
-   * @param request_params params from received message
-   * @return true if present , false - otherwise
-   */
-  bool AreReadOnlyParamsPresent(const smart_objects::SmartObject& module_data);
-
-  /**
-   * @brief Method that check if all request parameters are READ_ONLY
-   * @param request_params params from received message
-   * @return true if all are read only , false - otherwise
-   */
-  bool AreAllParamsReadOnly(const smart_objects::SmartObject& module_data);
-
-  /**
    * @brief Method that cuts-off READ_ONLY parameters
-   * @param request_params params to handle
+   * @param module_data params to handle
    */
   void CutOffReadOnlyParams(smart_objects::SmartObject& module_data);
 
-  std::string ModuleType() FINAL;
+  std::string ModuleType() const FINAL;
+
+  std::string ModuleId() const FINAL;
 
   /**
    * @brief SetInteriorVehicleDataRequest class destructor
@@ -111,14 +98,6 @@ class SetInteriorVehicleDataRequest : public RCCommandRequest {
   ~SetInteriorVehicleDataRequest();
 
  private:
-  /**
-   * @brief ControlData
-   * @param module_data received params
-   * @return value of module data depending on module type
-   */
-  const smart_objects::SmartObject& ControlData(
-      const smart_objects::SmartObject& module_data);
-
   /**
    * @brief CheckAudioSource check that if app wants to change
    * the audio source from MOBILE_APP to other types of audio
@@ -131,4 +110,4 @@ class SetInteriorVehicleDataRequest : public RCCommandRequest {
 }  // namespace commands
 }  // namespace rc_rpc_plugin
 
-#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_RC_RPC_PLUGIN_INCLUDE_COMMANDS_SET_INTERIOR_VEHICLE_DATA_REQUEST_H
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_RC_RPC_PLUGIN_INCLUDE_RC_RPC_PLUGIN_COMMANDS_MOBILE_SET_INTERIOR_VEHICLE_DATA_REQUEST_H_

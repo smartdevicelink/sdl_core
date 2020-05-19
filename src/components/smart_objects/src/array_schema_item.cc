@@ -31,8 +31,8 @@
 #include "smart_objects/array_schema_item.h"
 #include "smart_objects/smart_object.h"
 
-namespace NsSmartDeviceLink {
-namespace NsSmartObjects {
+namespace ns_smart_device_link {
+namespace ns_smart_objects {
 
 std::shared_ptr<CArraySchemaItem> CArraySchemaItem::create(
     const ISchemaItemPtr ElementSchemaItem,
@@ -42,22 +42,18 @@ std::shared_ptr<CArraySchemaItem> CArraySchemaItem::create(
       new CArraySchemaItem(ElementSchemaItem, MinSize, MaxSize));
 }
 
-Errors::eType CArraySchemaItem::validate(const SmartObject& Object) {
-  rpc::ValidationReport report("RPC");
-  return validate(Object, &report);
-}
-
-Errors::eType CArraySchemaItem::validate(
+errors::eType CArraySchemaItem::validate(
     const SmartObject& Object,
     rpc::ValidationReport* report__,
-    const utils::SemanticVersion& MessageVersion) {
+    const utils::SemanticVersion& MessageVersion,
+    const bool allow_unknown_enums) {
   if (SmartType_Array != Object.getType()) {
-    std::string validation_info = "Incorrect type, expected: " +
-                                  SmartObject::typeToString(SmartType_Array) +
-                                  ", got: " +
-                                  SmartObject::typeToString(Object.getType());
+    std::string validation_info =
+        "Incorrect type, expected: " +
+        SmartObject::typeToString(SmartType_Array) +
+        ", got: " + SmartObject::typeToString(Object.getType());
     report__->set_validation_info(validation_info);
-    return Errors::INVALID_VALUE;
+    return errors::INVALID_VALUE;
   }
   size_t sizeLimit;
   const size_t array_len = Object.length();
@@ -68,7 +64,7 @@ Errors::eType CArraySchemaItem::validate(
            << ", minimum allowed: " << sizeLimit;
     std::string validation_info = stream.str();
     report__->set_validation_info(validation_info);
-    return Errors::OUT_OF_RANGE;
+    return errors::OUT_OF_RANGE;
   }
   if (mMaxSize.getValue(sizeLimit) && (array_len > sizeLimit)) {
     std::stringstream stream;
@@ -76,39 +72,41 @@ Errors::eType CArraySchemaItem::validate(
            << ", maximum allowed: " << sizeLimit;
     std::string validation_info = stream.str();
     report__->set_validation_info(validation_info);
-    return Errors::OUT_OF_RANGE;
+    return errors::OUT_OF_RANGE;
   }
 
   for (size_t i = 0u; i < array_len; ++i) {
     std::stringstream strVal;
     strVal << i;
-    const Errors::eType result =
+    const errors::eType result =
         mElementSchemaItem->validate(Object.getElement(i),
                                      &report__->ReportSubobject(strVal.str()),
-                                     MessageVersion);
-    if (Errors::OK != result) {
+                                     MessageVersion,
+                                     allow_unknown_enums);
+    if (errors::OK != result) {
       return result;
     }
   }
-  return Errors::OK;
+  return errors::OK;
 }
 
 void CArraySchemaItem::applySchema(
     SmartObject& Object,
-    const bool RemoveFakeParameters,
+    const bool remove_unknown_parameters,
     const utils::SemanticVersion& MessageVersion) {
   if (SmartType_Array == Object.getType()) {
     for (size_t i = 0U; i < Object.length(); ++i) {
       mElementSchemaItem->applySchema(
-          Object[i], RemoveFakeParameters, MessageVersion);
+          Object[i], remove_unknown_parameters, MessageVersion);
     }
   }
 }
 
-void CArraySchemaItem::unapplySchema(SmartObject& Object) {
+void CArraySchemaItem::unapplySchema(SmartObject& Object,
+                                     const bool remove_unknown_parameters) {
   if (SmartType_Array == Object.getType()) {
     for (size_t i = 0U; i < Object.length(); ++i) {
-      mElementSchemaItem->unapplySchema(Object[i]);
+      mElementSchemaItem->unapplySchema(Object[i], remove_unknown_parameters);
     }
   }
 }
@@ -136,5 +134,5 @@ CArraySchemaItem::CArraySchemaItem(const ISchemaItemPtr ElementSchemaItem,
     , mMinSize(MinSize)
     , mMaxSize(MaxSize) {}
 
-}  // namespace NsSmartObjects
-}  // namespace NsSmartDeviceLink
+}  // namespace ns_smart_objects
+}  // namespace ns_smart_device_link

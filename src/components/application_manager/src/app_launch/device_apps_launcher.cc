@@ -1,15 +1,15 @@
+#include <algorithm>
 #include <string>
 #include <vector>
-#include <algorithm>
 
-#include "application_manager/app_launch/device_apps_launcher.h"
 #include "application_manager/app_launch/app_launch_data.h"
 #include "application_manager/app_launch/apps_launcher.h"
+#include "application_manager/app_launch/device_apps_launcher.h"
 #include "application_manager/resumption/resume_ctrl.h"
 
+#include <iostream>
 #include "utils/timer.h"
 #include "utils/timer_task_impl.h"
-#include <iostream>
 
 namespace app_launch {
 CREATE_LOGGERPTR_GLOBAL(logger_, "AppLaunch")
@@ -58,9 +58,9 @@ class Launcher {
           device_launcher_.settings().wait_time_between_apps(),
           timer::kSingleShot);
     } else {
-      LOG4CXX_DEBUG(logger_,
-                    "All Apps on " << apps_on_device_->first
-                                   << " postponed launched");
+      LOG4CXX_DEBUG(
+          logger_,
+          "All Apps on " << apps_on_device_->first << " postponed launched");
       device_launcher_.StopLaunchingAppsOnDevice(apps_on_device_->first);
     }
   }

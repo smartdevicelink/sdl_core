@@ -32,8 +32,8 @@
 #include "smart_objects/bool_schema_item.h"
 #include "smart_objects/smart_object.h"
 
-namespace NsSmartDeviceLink {
-namespace NsSmartObjects {
+namespace ns_smart_device_link {
+namespace ns_smart_objects {
 
 std::shared_ptr<CBoolSchemaItem> CBoolSchemaItem::create(
     const TSchemaItemParameter<bool>& DefaultValue) {
@@ -51,5 +51,5 @@ bool CBoolSchemaItem::getDefaultValue() const {
   return false;
 }
 
-}  // namespace NsSmartObjects
-}  // namespace NsSmartDeviceLink
+}  // namespace ns_smart_objects
+}  // namespace ns_smart_device_link

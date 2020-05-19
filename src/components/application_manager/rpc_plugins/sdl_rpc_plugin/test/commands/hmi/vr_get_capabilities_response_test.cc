@@ -32,14 +32,14 @@
 
 #include <stdint.h>
 
-#include "gtest/gtest.h"
-#include "smart_objects/smart_object.h"
-#include "interfaces/MOBILE_API.h"
+#include "application_manager/commands/command_impl.h"
+#include "application_manager/commands/commands_test.h"
 #include "application_manager/mock_hmi_capabilities.h"
 #include "application_manager/smart_object_keys.h"
-#include "application_manager/commands/commands_test.h"
-#include "application_manager/commands/command_impl.h"
+#include "gtest/gtest.h"
 #include "hmi/vr_get_capabilities_response.h"
+#include "interfaces/MOBILE_API.h"
+#include "smart_objects/smart_object.h"
 
 namespace test {
 namespace components {
@@ -51,8 +51,8 @@ using ::testing::NiceMock;
 namespace am = ::application_manager;
 namespace strings = am::strings;
 namespace hmi_response = am::hmi_response;
-using sdl_rpc_plugin::commands::VRGetCapabilitiesResponse;
 using am::commands::CommandImpl;
+using sdl_rpc_plugin::commands::VRGetCapabilitiesResponse;
 
 typedef std::shared_ptr<VRGetCapabilitiesResponse> VRGetCapabilitiesResponsePtr;
 typedef NiceMock<

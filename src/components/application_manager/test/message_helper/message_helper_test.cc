@@ -36,18 +36,21 @@
 #include "gmock/gmock.h"
 #include "utils/macro.h"
 
-#include "application_manager/policies/policy_handler.h"
+#include "application_manager/commands/command_impl.h"
+#include "application_manager/event_engine/event_dispatcher.h"
 #include "application_manager/mock_application.h"
+#include "application_manager/mock_application_manager.h"
 #include "application_manager/mock_help_prompt_manager.h"
+#include "application_manager/mock_rpc_service.h"
+#include "application_manager/policies/policy_handler.h"
+#include "application_manager/resumption/resume_ctrl.h"
+#include "application_manager/state_controller.h"
+#include "policy/mock_policy_settings.h"
 #include "utils/custom_string.h"
 #include "utils/lock.h"
-#include "policy/mock_policy_settings.h"
-#include "application_manager/policies/policy_handler.h"
-#include "application_manager/mock_application_manager.h"
-#include "application_manager/mock_rpc_service.h"
-#include "application_manager/event_engine/event_dispatcher.h"
-#include "application_manager/state_controller.h"
-#include "application_manager/resumption/resume_ctrl.h"
+
+#include "policy/policy_table/types.h"
+#include "rpc_base/rpc_base_json_inl.h"
 
 #ifdef EXTERNAL_PROPRIETARY_MODE
 #include "policy/policy_external/include/policy/policy_types.h"
@@ -67,12 +70,12 @@ typedef std::shared_ptr<MockApplication> MockApplicationSharedPtr;
 typedef std::vector<std::string> StringArray;
 typedef std::shared_ptr<application_manager::Application> ApplicationSharedPtr;
 
-using testing::AtLeast;
-using testing::ReturnRefOfCopy;
-using testing::ReturnRef;
-using testing::Return;
-using testing::SaveArg;
 using testing::_;
+using testing::AtLeast;
+using testing::Return;
+using testing::ReturnRef;
+using testing::ReturnRefOfCopy;
+using testing::SaveArg;
 
 TEST(MessageHelperTestCreate,
      CreateBlockedByPoliciesResponse_SmartObject_Equal) {
@@ -276,14 +279,21 @@ TEST(MessageHelperTestCreate,
 
   smart_objects::SmartObject& object = *smartObjectPtr;
 
+  const uint32_t app_id = 1u;
+  const std::string cmd_icon_value = "10";
+  const uint32_t cmd_id = 5u;
+  const uint32_t internal_id = 1u;
+
   object[strings::menu_params] = 1;
   object[strings::cmd_icon] = 1;
-  object[strings::cmd_icon][strings::value] = "10";
+  object[strings::cmd_icon][strings::value] = cmd_icon_value;
+  object[strings::cmd_id] = cmd_id;
 
-  vis.insert(std::pair<uint32_t, smart_objects::SmartObject*>(5, &object));
+  vis.insert(
+      std::pair<uint32_t, smart_objects::SmartObject*>(internal_id, &object));
 
   EXPECT_CALL(*appSharedMock, commands_map()).WillOnce(Return(data_accessor));
-  EXPECT_CALL(*appSharedMock, app_id()).WillOnce(Return(1u));
+  EXPECT_CALL(*appSharedMock, app_id()).WillOnce(Return(app_id));
   application_manager_test::MockApplicationManager mock_application_manager;
   smart_objects::SmartObjectList ptr =
       MessageHelper::CreateAddCommandRequestToHMI(appSharedMock,
@@ -296,14 +306,14 @@ TEST(MessageHelperTestCreate,
   int function_id = static_cast<int>(hmi_apis::FunctionID::UI_AddCommand);
 
   EXPECT_EQ(function_id, obj[strings::params][strings::function_id].asInt());
-  EXPECT_EQ(1u, obj[strings::msg_params][strings::app_id].asUInt());
-  EXPECT_EQ(5, obj[strings::msg_params][strings::cmd_id].asInt());
+  EXPECT_EQ(app_id, obj[strings::msg_params][strings::app_id].asUInt());
+  EXPECT_EQ(cmd_id, obj[strings::msg_params][strings::cmd_id].asUInt());
   EXPECT_EQ(object[strings::menu_params],
             obj[strings::msg_params][strings::menu_params]);
   EXPECT_EQ(object[strings::cmd_icon],
             obj[strings::msg_params][strings::cmd_icon]);
   EXPECT_EQ(
-      "10",
+      cmd_icon_value,
       obj[strings::msg_params][strings::cmd_icon][strings::value].asString());
 }
 
@@ -948,7 +958,8 @@ TEST_F(MessageHelperTest, SubscribeApplicationToSoftButton_CallFromApp) {
   size_t function_id = 1;
   //
   EXPECT_CALL(*appSharedPtr,
-              SubscribeToSoftButtons(function_id, SoftButtonID())).Times(1);
+              SubscribeToSoftButtons(function_id, SoftButtonID()))
+      .Times(1);
   MessageHelper::SubscribeApplicationToSoftButton(
       message_params, appSharedPtr, function_id);
 }
@@ -964,7 +975,7 @@ TEST_F(MessageHelperTest, SendGetListOfPermissionsResponse_SUCCESS) {
 
   ON_CALL(mock_application_manager, GetRPCService())
       .WillByDefault(ReturnRef(mock_rpc_service_));
-  EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_))
+  EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_, _))
       .WillOnce(DoAll(SaveArg<0>(&result), Return(true)));
 
   const uint32_t correlation_id = 0u;
@@ -1004,7 +1015,7 @@ TEST_F(MessageHelperTest,
 
   ON_CALL(mock_application_manager, GetRPCService())
       .WillByDefault(ReturnRef(mock_rpc_service_));
-  EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_))
+  EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_, _))
       .WillOnce(DoAll(SaveArg<0>(&result), Return(true)));
 
   const uint32_t correlation_id = 0u;
@@ -1050,7 +1061,7 @@ TEST_F(MessageHelperTest, SendNaviSetVideoConfigRequest) {
   smart_objects::SmartObjectSPtr result;
   ON_CALL(mock_application_manager, GetRPCService())
       .WillByDefault(ReturnRef(mock_rpc_service_));
-  EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_))
+  EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_, _))
       .WillOnce(DoAll(SaveArg<0>(&result), Return(true)));
 
   int32_t app_id = 123;
@@ -1078,6 +1089,27 @@ TEST_F(MessageHelperTest, SendNaviSetVideoConfigRequest) {
   EXPECT_EQ(640, msg_params[strings::config][strings::width].asInt());
   EXPECT_TRUE(msg_params[strings::config].keyExists(strings::height));
   EXPECT_EQ(480, msg_params[strings::config][strings::height].asInt());
+}
+
+TEST_F(MessageHelperTest, ExtractWindowIdFromSmartObject_SUCCESS) {
+  const WindowID window_id = 145;
+  smart_objects::SmartObject message(smart_objects::SmartType_Map);
+  message[strings::msg_params][strings::window_id] = window_id;
+  EXPECT_EQ(window_id,
+            MessageHelper::ExtractWindowIdFromSmartObject(
+                message[strings::msg_params]));
+}
+
+TEST_F(MessageHelperTest, ExtractWindowIdFromSmartObject_FromEmptyMessage) {
+  smart_objects::SmartObject message(smart_objects::SmartType_Map);
+  EXPECT_EQ(mobile_apis::PredefinedWindows::DEFAULT_WINDOW,
+            MessageHelper::ExtractWindowIdFromSmartObject(message));
+}
+
+TEST_F(MessageHelperTest, ExtractWindowIdFromSmartObject_FromWrongType) {
+  smart_objects::SmartObject message(smart_objects::SmartType_Array);
+  EXPECT_EQ(mobile_apis::PredefinedWindows::DEFAULT_WINDOW,
+            MessageHelper::ExtractWindowIdFromSmartObject(message));
 }
 
 }  // namespace application_manager_test

@@ -84,7 +84,7 @@ void FromMicToFileRecorderThread::set_record_duration(int32_t duration) {
 void FromMicToFileRecorderThread::initArgs() {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  argv_ = new gchar* [argc_];
+  argv_ = new gchar*[argc_];
 
   argv_[0] = new gchar[14];
   argv_[1] = new gchar[3];
@@ -122,7 +122,7 @@ void FromMicToFileRecorderThread::threadMain() {
   initArgs();
 
   GstElement* pipeline;
-  GstElement* alsasrc, *audioconvert, *capsfilter, *wavenc, *filesink;
+  GstElement *alsasrc, *audioconvert, *capsfilter, *wavenc, *filesink;
   GstCaps* audiocaps;
   GstBus* bus;
 
@@ -155,7 +155,7 @@ void FromMicToFileRecorderThread::threadMain() {
                             {NULL}};
   // g_option_context_parse() modifies params, so keep argc_ and argv_
   int32_t argc = argc_;
-  gchar** argv = new gchar* [argc];
+  gchar** argv = new gchar*[argc];
   for (int32_t i = 0; i < argc; i++) {
     argv[i] = argv_[i];
   }

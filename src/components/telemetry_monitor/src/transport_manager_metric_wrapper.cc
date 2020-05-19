@@ -31,9 +31,9 @@
  */
 
 #include "telemetry_monitor/transport_manager_metric_wrapper.h"
+#include "application_manager/smart_object_keys.h"
 #include "json/json.h"
 #include "telemetry_monitor/json_keys.h"
-#include "application_manager/smart_object_keys.h"
 
 namespace telemetry_monitor {
 
@@ -41,9 +41,8 @@ Json::Value TransportManagerMecticWrapper::GetJsonMetric() {
   Json::Value result = MetricWrapper::GetJsonMetric();
   result[strings::logger] = "TransportManager";
   result[strings::begin] =
-      Json::Int64(date_time::DateTime::getuSecs(message_metric->begin));
-  result[strings::end] =
-      Json::Int64(date_time::DateTime::getuSecs(message_metric->end));
+      Json::Int64(date_time::getuSecs(message_metric->begin));
+  result[strings::end] = Json::Int64(date_time::getuSecs(message_metric->end));
   result[strings::data_size] = static_cast<uint32_t>(message_metric->data_size);
   return result;
 }

@@ -31,18 +31,18 @@
  */
 
 #include <algorithm>
+#include <memory>
 #include <sstream>
 #include <string>
-#include <memory>
 #include "gtest/gtest.h"
-#include "utils/macro.h"
 #include "sql_database.h"
 #include "sql_query.h"
+#include "utils/macro.h"
 
-#include "utils/file_system.h"
-#include "application_manager/mock_app_launch_settings.h"
 #include "application_manager/app_launch/app_launch_data_db.h"
 #include "application_manager/app_launch/app_launch_sql_queries.h"
+#include "application_manager/mock_app_launch_settings.h"
+#include "utils/file_system.h"
 
 namespace test {
 namespace components {
@@ -51,9 +51,9 @@ namespace app_launch_test {
 using namespace file_system;
 using namespace app_launch;
 
-using ::testing::ReturnRef;
-using ::testing::Return;
 using ::testing::NiceMock;
+using ::testing::Return;
+using ::testing::ReturnRef;
 
 namespace {
 const std::string kEmptyString = "";

@@ -2,9 +2,6 @@
  * Copyright (c) 2014, Ford Motor Company
  * All rights reserved.
  *
- * Copyright (c) 2018 Xevo Inc.
- * All rights reserved.
- *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *
@@ -16,7 +13,7 @@
  * disclaimer in the documentation and/or other materials provided with the
  * distribution.
  *
- * Neither the name of the copyright holders nor the names of its contributors
+ * Neither the name of the Ford Motor Company nor the names of its contributors
  * may be used to endorse or promote products derived from this software
  * without specific prior written permission.
  *
@@ -37,9 +34,9 @@
 
 #include "utils/logger.h"
 
+#include "transport_manager/transport_adapter/transport_adapter_event.h"
 #include "transport_manager/transport_adapter/transport_adapter_listener_impl.h"
 #include "transport_manager/transport_manager_impl.h"
-#include "transport_manager/transport_adapter/transport_adapter_event.h"
 
 namespace transport_manager {
 CREATE_LOGGERPTR_GLOBAL(logger_, "TransportManager")
@@ -111,6 +108,44 @@ void TransportAdapterListenerImpl::OnFindNewApplicationsRequest(
       0,
       ::protocol_handler::RawMessagePtr(),
       BaseErrorPtr());
+  if (transport_manager_ != NULL &&
+      transport_manager::E_SUCCESS !=
+          transport_manager_->ReceiveEventFromDevice(event)) {
+    LOG4CXX_WARN(logger_, "Failed to receive event from device");
+  }
+  LOG4CXX_TRACE(logger_, "exit");
+}
+
+void TransportAdapterListenerImpl::OnConnectionStatusUpdated(
+    const TransportAdapter* adapter) {
+  LOG4CXX_TRACE(logger_, "enter. adapter* " << adapter);
+  const TransportAdapterEvent event(EventTypeEnum::ON_CONNECTION_STATUS_UPDATED,
+                                    transport_adapter_,
+                                    "",
+                                    0,
+                                    ::protocol_handler::RawMessagePtr(),
+                                    BaseErrorPtr(new BaseError()));
+  if (transport_manager_ != NULL &&
+      transport_manager::E_SUCCESS !=
+          transport_manager_->ReceiveEventFromDevice(event)) {
+    LOG4CXX_WARN(logger_, "Failed to receive event from device");
+  }
+  LOG4CXX_TRACE(logger_, "exit");
+}
+
+void TransportAdapterListenerImpl::OnConnectPending(
+    const TransportAdapter* adapter,
+    const DeviceUID& device,
+    const ApplicationHandle& application_id) {
+  LOG4CXX_TRACE(logger_,
+                "enter adapter*: " << adapter << ", device: " << &device
+                                   << ", application_id: " << &application_id);
+  const TransportAdapterEvent event(EventTypeEnum::ON_CONNECT_PENDING,
+                                    transport_adapter_,
+                                    device,
+                                    application_id,
+                                    ::protocol_handler::RawMessagePtr(),
+                                    BaseErrorPtr(new BaseError()));
   if (transport_manager_ != NULL &&
       transport_manager::E_SUCCESS !=
           transport_manager_->ReceiveEventFromDevice(event)) {

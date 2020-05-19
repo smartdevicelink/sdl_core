@@ -43,6 +43,6 @@ class HMIMessageSender {
   virtual ~HMIMessageSender() {}
   virtual void SendMessageToHMI(MessageSharedPointer message) = 0;
 };
-}
+}  // namespace hmi_message_handler
 
 #endif  // SRC_COMPONENTS_INCLUDE_HMI_MESSAGE_HANDLER_HMI_MESSAGE_SENDER_H_

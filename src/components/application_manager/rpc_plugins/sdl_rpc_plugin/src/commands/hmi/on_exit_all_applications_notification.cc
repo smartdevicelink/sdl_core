@@ -32,13 +32,13 @@
 
 #include "sdl_rpc_plugin/commands/hmi/on_exit_all_applications_notification.h"
 
+#include <signal.h>
 #include <sys/types.h>
 #include <unistd.h>
-#include <signal.h>
 
 #include "application_manager/application_manager.h"
-#include "application_manager/rpc_service.h"
 #include "application_manager/resumption/resume_ctrl.h"
+#include "application_manager/rpc_service.h"
 #include "interfaces/HMI_API.h"
 
 namespace sdl_rpc_plugin {
@@ -122,4 +122,4 @@ void OnExitAllApplicationsNotification::SendOnSDLPersistenceComplete() {
 }
 
 }  // namespace commands
-}  // namespace application_manager
+}  // namespace sdl_rpc_plugin

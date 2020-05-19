@@ -35,6 +35,8 @@
 
 #include <string>
 #include "application_manager/commands/command_notification_impl.h"
+#include "rc_rpc_plugin/commands/rc_command_request.h"
+#include "rc_rpc_plugin/interior_data_cache.h"
 #include "rc_rpc_plugin/resource_allocation_manager.h"
 #include "utils/macro.h"
 
@@ -46,18 +48,21 @@ class OnInteriorVehicleDataNotification
     : public application_manager::commands::CommandNotificationImpl {
  public:
   OnInteriorVehicleDataNotification(
-      const app_mngr::commands::MessageSharedPtr& message,
-      app_mngr::ApplicationManager& application_manager,
-      app_mngr::rpc_service::RPCService& rpc_service,
-      app_mngr::HMICapabilities& hmi_capabilities,
-      policy::PolicyHandlerInterface& policy_handler,
-      ResourceAllocationManager& resource_allocation_manager);
+      const application_manager::commands::MessageSharedPtr& message,
+      const RCCommandParams& params);
 
   void Run() OVERRIDE;
 
-  std::string ModuleType();
+  std::string ModuleType() const;
+
+  std::string ModuleId() const;
 
   ~OnInteriorVehicleDataNotification();
+
+ private:
+  InteriorDataCache& interior_data_cache_;
+  RCCapabilitiesManager& rc_capabilities_manager_;
+  void AddDataToCache(const ModuleUid& module);
 };
 }  // namespace commands
 }  // namespace rc_rpc_plugin

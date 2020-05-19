@@ -36,7 +36,9 @@
 #include <climits>
 
 #include "policy/policy_table/enums.h"
+#include "policy/policy_table/policy_enum_schema_factory.h"
 #include "rpc_base/rpc_message.h"
+#include "utils/helpers.h"
 
 namespace Json {
 class Value;
@@ -46,10 +48,13 @@ namespace policy_table_interface_base {
 struct AppLevel;
 struct ApplicationParams;
 struct DeviceParams;
+struct EndpointProperty;
 struct MessageLanguages;
 struct MessageString;
 struct RpcParameters;
 struct Rpcs;
+struct AppServiceHandledRpc;
+struct AppServiceInfo;
 }  // namespace policy_table_interface_base
 }  // namespace rpc
 
@@ -65,15 +70,17 @@ typedef Array<Enum<AppHMIType>, 0, 255> AppHMITypes;
 
 typedef Array<Enum<HmiLevel>, 0, 4> HmiLevels;
 
-typedef Array<Enum<Parameter>, 0, 255> Parameters;
+typedef Array<String<0, 255>, 0, 255> Parameters;
 
 typedef Map<RpcParameters, 0, UINT_MAX> Rpc;
 
-typedef Array<String<10, 255>, 1, 3> URL;
+typedef Array<String<10, INT_MAX>, 1, 3> URL;
 
 typedef Map<URL, 1, 255> URLList;
 
 typedef Map<URLList, 1, 255> ServiceEndpoints;
+
+typedef Map<EndpointProperty, 0, 255> ServiceEndpointProperties;
 
 typedef uint8_t NumberOfNotificationsType;
 typedef Map<Integer<NumberOfNotificationsType, 0, 255>, 0, 7>
@@ -98,12 +105,58 @@ typedef Array<Enum<RequestType>, 0, 255> RequestTypes;
 
 typedef Strings RequestSubTypes;
 
+typedef String<0, 255> AppServiceType;
+typedef String<0, 255> AppServiceName;
+typedef Array<AppServiceName, 0, 255> AppServiceNames;
+typedef Array<AppServiceHandledRpc, 0, 255> AppServiceHandledRpcs;
+typedef Map<AppServiceInfo, 0, 255> AppServiceParameters;
+typedef Integer<int32_t, 0, INT32_MAX> FunctionIDInt;
+
 typedef Map<Strings, 0, 255> RemoteRpcs;
 typedef Map<RemoteRpcs, 0, 255> AccessModules;
 typedef Array<Enum<ModuleType>, 0, 255> ModuleTypes;
 
 typedef AppHMIType AppHmiType;
 typedef std::vector<AppHMIType> AppHmiTypes;
+
+struct AppServiceHandledRpc : CompositeType {
+ public:
+  FunctionIDInt function_id;
+
+ public:
+  AppServiceHandledRpc();
+  ~AppServiceHandledRpc();
+  AppServiceHandledRpc(const Json::Value* value__);
+  Json::Value ToJsonValue() const;
+  bool is_valid() const;
+  bool is_initialized() const;
+  bool struct_empty() const;
+  virtual void SetPolicyTableType(PolicyTableType pt_type);
+  void ReportErrors(rpc::ValidationReport* report__) const;
+
+ private:
+  bool Validate() const;
+};
+
+struct AppServiceInfo : CompositeType {
+ public:
+  Optional<AppServiceNames> service_names;
+  AppServiceHandledRpcs handled_rpcs;
+
+ public:
+  AppServiceInfo();
+  ~AppServiceInfo();
+  AppServiceInfo(const Json::Value* value__);
+  Json::Value ToJsonValue() const;
+  bool is_valid() const;
+  bool is_initialized() const;
+  bool struct_empty() const;
+  virtual void SetPolicyTableType(PolicyTableType pt_type);
+  void ReportErrors(rpc::ValidationReport* report__) const;
+
+ private:
+  bool Validate() const;
+};
 
 struct PolicyBase : CompositeType {
  public:
@@ -142,8 +195,20 @@ struct ApplicationParams : PolicyBase {
   Optional<RequestSubTypes> RequestSubType;
   Optional<Integer<uint16_t, 0, 65225> > memory_kb;
   Optional<Integer<uint32_t, 0, UINT_MAX> > heart_beat_timeout_ms;
-  Optional<String<0, 255> > certificate;
+  Optional<String<0, 65535> > certificate;
   mutable Optional<ModuleTypes> moduleType;
+  // Cloud application params
+  Optional<Enum<HybridAppPreference> > hybrid_app_preference;
+  Optional<String<0, 255> > endpoint;
+  Optional<Boolean> enabled;
+  Optional<String<0, 65535> > auth_token;
+  Optional<String<0, 255> > cloud_transport_type;
+  Optional<String<0, 65535> > icon_url;
+
+  // App Service Params
+  Optional<AppServiceParameters> app_service_parameters;
+  Optional<Boolean> allow_unknown_rpc_passthrough;
+  Optional<Boolean> encryption_required;
 
  public:
   ApplicationParams();
@@ -209,6 +274,7 @@ struct Rpcs : CompositeType {
  public:
   Optional<String<1, 255> > user_consent_prompt;
   Nullable<Rpc> rpcs;
+  Optional<Boolean> encryption_required;
 
  public:
   Rpcs();
@@ -226,22 +292,45 @@ struct Rpcs : CompositeType {
   bool Validate() const;
 };
 
+struct EndpointProperty : CompositeType {
+ public:
+  Optional<String<0, 100> > version;
+
+  EndpointProperty();
+  ~EndpointProperty();
+  explicit EndpointProperty(const Json::Value* value__);
+  Json::Value ToJsonValue() const;
+  bool is_valid() const;
+  bool is_initialized() const;
+  bool struct_empty() const;
+  void ReportErrors(rpc::ValidationReport* report__) const;
+  void SetPolicyTableType(PolicyTableType pt_type) OVERRIDE;
+
+ private:
+  bool Validate() const;
+};
+
 struct ModuleConfig : CompositeType {
  public:
   Optional<Map<String<0, 100>, 0, 255> > device_certificates;
   Optional<Boolean> preloaded_pt;
+  Optional<Boolean> full_app_id_supported;
   Integer<uint8_t, 0, 255> exchange_after_x_ignition_cycles;
   Integer<int64_t, 0, 4294967296ll> exchange_after_x_kilometers;
   Integer<uint8_t, 0, 255> exchange_after_x_days;
   Integer<uint16_t, 0, 65535> timeout_after_x_seconds;
   SecondsBetweenRetries seconds_between_retries;
   ServiceEndpoints endpoints;
+  Optional<ServiceEndpointProperties> endpoint_properties;
   NumberOfNotificationsPerMinute notifications_per_minute_by_priority;
   Optional<String<1, 100> > vehicle_make;
   Optional<String<1, 100> > vehicle_model;
   Optional<String<4, 4> > vehicle_year;
   Optional<String<0, 10> > preloaded_date;
   Optional<String<0, 65535> > certificate;
+  Optional<Boolean> lock_screen_dismissal_enabled;
+
+  static const std::string kDefaultOemMappingServiceName;
 
  public:
   ModuleConfig();
@@ -251,6 +340,7 @@ struct ModuleConfig : CompositeType {
                uint16_t timeout_after_x_seconds,
                const SecondsBetweenRetries& seconds_between_retries,
                const ServiceEndpoints& endpoints,
+               const ServiceEndpointProperties& endpoint_properties,
                const NumberOfNotificationsPerMinute&
                    notifications_per_minute_by_priority);
   ~ModuleConfig();
@@ -434,6 +524,88 @@ struct DeviceParams : CompositeType {
   bool Validate() const;
 };
 
+struct VehicleDataItem : CompositeType {
+ public:
+  static const std::vector<std::string> kPODTypes;
+
+  static const std::string kInteger;
+  static const std::string kStruct;
+  static const std::string kString;
+  static const std::string kFloat;
+  static const std::string kDouble;
+  static const std::string kBoolean;
+  static const std::string kName;
+  static const std::string kParams;
+
+  String<1, 255> name;
+  String<0, 255> type;
+  String<1, 255> key;
+  Boolean mandatory;
+  Optional<Array<VehicleDataItem, 0, 255> > params;
+
+  Optional<Boolean> array;
+  Optional<String<0, 255> > since;
+  Optional<String<0, 255> > until;
+  Optional<Boolean> removed;
+  Optional<Boolean> deprecated;
+  Optional<Float<-INT32_MAX, INT32_MAX> > minvalue;
+  Optional<Float<-INT32_MAX, INT32_MAX> > maxvalue;
+  Optional<Integer<uint32_t, 0, UINT32_MAX> > minsize;
+  Optional<Integer<uint32_t, 0, UINT32_MAX> > maxsize;
+  Optional<Integer<uint32_t, 0, UINT32_MAX> > minlength;
+  Optional<Integer<uint32_t, 0, UINT32_MAX> > maxlength;
+
+  VehicleDataItem();
+  VehicleDataItem(const VehicleDataItem& policy_table);
+  explicit VehicleDataItem(const Json::Value* value__);
+
+  bool operator==(const VehicleDataItem& vd);
+
+  ~VehicleDataItem();
+
+  Json::Value ToJsonValue() const;
+  bool is_valid() const;
+  bool is_initialized() const;
+  bool struct_not_empty() const;
+  void ReportErrors(rpc::ValidationReport* report__) const;
+  virtual void SetPolicyTableType(PolicyTableType pt_type);
+
+  /**
+   * @brief Validates type of vehicle data item according to
+   * POD types and generated from API enums.
+   * @return true if type is valid.
+   */
+  bool ValidateTypes() const;
+  bool IsPrimitiveType() const;
+  bool ValidateNaming(std::string str) const;
+
+ private:
+  bool Validate() const;
+};
+
+typedef Array<VehicleDataItem, 0, 255> VehicleDataItems;
+
+struct VehicleData : CompositeType {
+ public:
+  Optional<String<0, 100> > schema_version;
+  Optional<VehicleDataItems> schema_items;
+
+  VehicleData();
+  VehicleData(const VehicleData& vehicle_data);
+  VehicleData(const Json::Value* value__);
+  ~VehicleData();
+
+  Json::Value ToJsonValue() const;
+  bool is_valid() const;
+  bool is_initialized() const;
+  bool struct_empty() const;
+  void ReportErrors(rpc::ValidationReport* report__) const;
+  virtual void SetPolicyTableType(PolicyTableType pt_type);
+
+ private:
+  bool Validate() const;
+};
+
 struct PolicyTable : CompositeType {
  public:
   ApplicationPoliciesSection app_policies_section;
@@ -443,6 +615,7 @@ struct PolicyTable : CompositeType {
   Optional<ModuleMeta> module_meta;
   Optional<UsageAndErrorCounts> usage_and_error_counts;
   Optional<DeviceData> device_data;
+  Optional<VehicleData> vehicle_data;
 
  public:
   PolicyTable();

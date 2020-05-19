@@ -33,8 +33,8 @@
 #ifndef SRC_COMPONENTS_POLICY_INCLUDE_POLICY_STATISTICS_MANAGER_H_
 #define SRC_COMPONENTS_POLICY_INCLUDE_POLICY_STATISTICS_MANAGER_H_
 
-#include <cassert>
 #include "policy/usage_statistics/counter.h"
+#include <cassert>
 #include "utils/date_time.h"
 
 #include "utils/timer_task_impl.h"
@@ -103,8 +103,7 @@ AppStopwatchImpl::AppStopwatchImpl(
 
 void AppStopwatchImpl::Start(AppStopwatchId stopwatch_type) {
   stopwatch_type_ = stopwatch_type;
-  timer_.Start(time_out_ * date_time::DateTime::MILLISECONDS_IN_SECOND,
-               timer::kPeriodic);
+  timer_.Start(time_out_ * date_time::MILLISECONDS_IN_SECOND, timer::kPeriodic);
 }
 
 void AppStopwatchImpl::Switch(AppStopwatchId stopwatch_type) {

@@ -34,8 +34,8 @@
 #define SRC_COMPONENTS_POLICY_POLICY_EXTERNAL_INCLUDE_POLICY_SQL_PT_EXT_REPRESENTATION_H_
 
 #include <string>
-#include "policy/sql_pt_representation.h"
 #include "policy/pt_ext_representation.h"
+#include "policy/sql_pt_representation.h"
 
 namespace policy {
 

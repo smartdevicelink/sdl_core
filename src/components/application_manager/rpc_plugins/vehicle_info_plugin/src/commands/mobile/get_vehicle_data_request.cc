@@ -31,13 +31,16 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <string>
 #include "vehicle_info_plugin/commands/mobile/get_vehicle_data_request.h"
+#include "vehicle_info_plugin/custom_vehicle_data_manager.h"
+
+#include <string>
 
 #include "application_manager/application_impl.h"
 #include "application_manager/message_helper.h"
-#include "interfaces/MOBILE_API.h"
 #include "interfaces/HMI_API.h"
+#include "interfaces/MOBILE_API.h"
+#include "policy/policy_table/types.h"
 
 namespace vehicle_info_plugin {
 using namespace application_manager;
@@ -48,55 +51,57 @@ namespace str = strings;
 
 GetVehicleDataRequest::GetVehicleDataRequest(
     const application_manager::commands::MessageSharedPtr& message,
-    ApplicationManager& application_manager,
-    rpc_service::RPCService& rpc_service,
-    HMICapabilities& hmi_capabilities,
-    policy::PolicyHandlerInterface& policy_handler)
+    const VehicleInfoCommandParams& params)
     : CommandRequestImpl(message,
-                         application_manager,
-                         rpc_service,
-                         hmi_capabilities,
-                         policy_handler) {}
+                         params.application_manager_,
+                         params.rpc_service_,
+                         params.hmi_capabilities_,
+                         params.policy_handler_)
+    , custom_vehicle_data_manager_(params.custom_vehicle_data_manager_) {}
 
 GetVehicleDataRequest::~GetVehicleDataRequest() {}
 
 void GetVehicleDataRequest::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  int32_t app_id =
-      (*message_)[strings::params][strings::connection_key].asUInt();
-  ApplicationSharedPtr app = application_manager_.application(app_id);
+  auto app = application_manager_.application(connection_key());
 
   if (!app) {
-    LOG4CXX_ERROR(logger_, "NULL pointer");
+    LOG4CXX_ERROR(logger_, "No such application : " << connection_key());
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     return;
   }
 
-  if (app->AreCommandLimitsExceeded(
-          static_cast<mobile_apis::FunctionID::eType>(function_id()),
-          application_manager::TLimitSource::CONFIG_FILE)) {
-    LOG4CXX_ERROR(logger_, "GetVehicleData frequency is too high.");
+  if (!CheckFrequency(*app)) {
     SendResponse(false, mobile_apis::Result::REJECTED);
     return;
   }
-  const VehicleData& vehicle_data = MessageHelper::vehicle_data();
-  VehicleData::const_iterator it = vehicle_data.begin();
-  smart_objects::SmartObject msg_params =
+
+  auto hmi_msg_params =
       smart_objects::SmartObject(smart_objects::SmartType_Map);
-  msg_params[strings::app_id] = app->app_id();
-  const uint32_t min_length_msg_params = 1;
-  for (; vehicle_data.end() != it; ++it) {
-    if (true == (*message_)[str::msg_params].keyExists(it->first) &&
-        true == (*message_)[str::msg_params][it->first].asBool()) {
-      msg_params[it->first] = (*message_)[strings::msg_params][it->first];
+  hmi_msg_params[strings::app_id] = app->app_id();
+
+  int params_count = 0;
+  auto& msg_params = (*message_)[strings::msg_params];
+  for (const auto& name : msg_params.enumerate()) {
+    auto enabled = msg_params[name].asBool();
+    if (!enabled) {
+      continue;
     }
+    hmi_msg_params[name] = msg_params[name];
+    params_count++;
   }
-  if (msg_params.length() > min_length_msg_params) {
+
+  const int minimal_params_count = 1;
+
+  if (params_count >= minimal_params_count) {
+    for (const auto& param : msg_params.enumerate()) {
+      pending_vehicle_data_.insert(param);
+    }
     StartAwaitForInterface(HmiInterfaces::HMI_INTERFACE_VehicleInfo);
-    SendHMIRequest(
-        hmi_apis::FunctionID::VehicleInfo_GetVehicleData, &msg_params, true);
-    return;
+    SendHMIRequest(hmi_apis::FunctionID::VehicleInfo_GetVehicleData,
+                   &hmi_msg_params,
+                   true);
   } else if (HasDisallowedParams()) {
     SendResponse(false, mobile_apis::Result::DISALLOWED);
   } else {
@@ -111,16 +116,31 @@ void GetVehicleDataRequest::on_event(const event_engine::Event& event) {
   switch (event.id()) {
     case hmi_apis::FunctionID::VehicleInfo_GetVehicleData: {
       EndAwaitForInterface(HmiInterfaces::HMI_INTERFACE_VehicleInfo);
-      hmi_apis::Common_Result::eType result_code =
-          static_cast<hmi_apis::Common_Result::eType>(
-              message[strings::params][hmi_response::code].asInt());
+      auto result_code = static_cast<hmi_apis::Common_Result::eType>(
+          message[strings::params][hmi_response::code].asInt());
+      auto mobile_result_code = GetMobileResultCode(result_code);
       bool result = PrepareResultForMobileResponse(
           result_code, HmiInterfaces::HMI_INTERFACE_VehicleInfo);
       std::string response_info;
       GetInfo(message, response_info);
-      result = result ||
-               ((hmi_apis::Common_Result::DATA_NOT_AVAILABLE == result_code) &&
-                (message[strings::msg_params].length() > 1));
+
+      auto data_not_available_with_params = [this, &result_code, &message]() {
+        if (hmi_apis::Common_Result::DATA_NOT_AVAILABLE != result_code) {
+          return false;
+        }
+
+        const auto& vehicle_data = MessageHelper::vehicle_data();
+        const auto& msg_params = message[strings::msg_params];
+        for (const auto& item : msg_params.enumerate()) {
+          if (vehicle_data.end() != vehicle_data.find(item) ||
+              custom_vehicle_data_manager_.IsValidCustomVehicleDataName(item)) {
+            return true;
+          }
+        }
+        return false;
+      };
+
+      result = result || data_not_available_with_params();
 
       if (true ==
           message[strings::msg_params].keyExists(hmi_response::method)) {
@@ -129,8 +149,30 @@ void GetVehicleDataRequest::on_event(const event_engine::Event& event) {
       if (true == message[strings::params].keyExists(strings::error_msg)) {
         response_info = message[strings::params][strings::error_msg].asString();
       }
+
+      custom_vehicle_data_manager_.CreateMobileMessageParams(
+          const_cast<smart_objects::SmartObject&>(
+              message[strings::msg_params]));
+
+      if (result) {
+        for (const auto& item : message[strings::msg_params].enumerate()) {
+          const auto& found_item = pending_vehicle_data_.find(item);
+          if (pending_vehicle_data_.end() == found_item) {
+            message[strings::msg_params].erase(item);
+          }
+        }
+
+        if (message[strings::msg_params].empty() &&
+            hmi_apis::Common_Result::DATA_NOT_AVAILABLE != result_code) {
+          response_info = "Failed to retrieve data from vehicle";
+          SendResponse(
+              false, mobile_apis::Result::GENERIC_ERROR, response_info.c_str());
+          return;
+        }
+      }
+
       SendResponse(result,
-                   MessageHelper::HMIToMobileResult(result_code),
+                   mobile_result_code,
                    response_info.empty() ? NULL : response_info.c_str(),
                    &(message[strings::msg_params]));
       break;
@@ -142,6 +184,15 @@ void GetVehicleDataRequest::on_event(const event_engine::Event& event) {
   }
 }
 
-}  // namespace commands
+bool GetVehicleDataRequest::CheckFrequency(Application& app) {
+  if (app.AreCommandLimitsExceeded(
+          static_cast<mobile_apis::FunctionID::eType>(function_id()),
+          application_manager::TLimitSource::CONFIG_FILE)) {
+    LOG4CXX_ERROR(logger_, "GetVehicleData frequency is too high.");
+    return false;
+  }
+  return true;
+}
 
-}  // namespace application_manager
+}  // namespace commands
+}  // namespace vehicle_info_plugin

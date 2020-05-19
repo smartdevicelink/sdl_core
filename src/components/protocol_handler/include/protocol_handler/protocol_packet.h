@@ -34,9 +34,9 @@
 #define SRC_COMPONENTS_PROTOCOL_HANDLER_INCLUDE_PROTOCOL_HANDLER_PROTOCOL_PACKET_H_
 
 #include <list>
-#include "utils/macro.h"
 #include "protocol/common.h"
 #include "transport_manager/common.h"
+#include "utils/macro.h"
 
 /**
  *\namespace protocol_handlerHandler
@@ -275,8 +275,8 @@ class ProtocolPacket {
   /*End of Deserialization*/
 
   /**
-    * \brief Getter for Connection Identifier
-    */
+   * \brief Getter for Connection Identifier
+   */
   ConnectionID connection_id() const;
 
   /**
@@ -285,13 +285,13 @@ class ProtocolPacket {
   void set_connection_id(ConnectionID connection_id);
 
   /**
-    * \brief Getter for data payload size
-    */
+   * \brief Getter for data payload size
+   */
   uint32_t payload_size() const;
 
   /**
-    * \brief Getter for full header information
-    */
+   * \brief Getter for full header information
+   */
   const ProtocolHeader& packet_header() const;
 
  private:
@@ -311,9 +311,9 @@ class ProtocolPacket {
   uint32_t payload_size_;
 
   /**
-    * \brief Connection Identifier
-    * Obtained from connection_handler
-    */
+   * \brief Connection Identifier
+   * Obtained from connection_handler
+   */
   ConnectionID connection_id_;
 
   DISALLOW_COPY_AND_ASSIGN(ProtocolPacket);

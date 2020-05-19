@@ -32,8 +32,8 @@
 #ifndef SRC_COMPONENTS_INCLUDE_TEST_POLICY_MOCK_POLICY_SETTINGS_H_
 #define SRC_COMPONENTS_INCLUDE_TEST_POLICY_MOCK_POLICY_SETTINGS_H_
 
-#include "gmock/gmock.h"
 #include <string>
+#include "gmock/gmock.h"
 #include "policy/policy_settings.h"
 
 namespace test {
@@ -49,9 +49,10 @@ class MockPolicySettings : public ::policy::PolicySettings {
   MOCK_CONST_METHOD0(open_attempt_timeout_ms, uint16_t());
   MOCK_CONST_METHOD0(policies_snapshot_file_name, const std::string&());
   MOCK_CONST_METHOD0(system_files_path, const std::string&());
+  MOCK_CONST_METHOD0(use_full_app_id, bool());
 };
 
-}  // namespace policy_test
+}  // namespace policy_handler_test
 }  // namespace components
 }  // namespace test
 

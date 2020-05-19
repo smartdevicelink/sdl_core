@@ -64,6 +64,13 @@ class Connection {
    * @brief Disconnect the current connection.
    */
   virtual TransportAdapter::Error Disconnect() = 0;
+
+  /**
+   * @brief Terminate method may implement the logic of correct thread
+   * termination, if necessary for specific connection. Unlike the disconnect
+   * method, which manipulates physical descriptors
+   */
+  virtual void Terminate() {}
 };
 
 typedef std::shared_ptr<Connection> ConnectionSPtr;

@@ -280,10 +280,10 @@ class PTExtRepresentation : public virtual PTRepresentation {
   virtual bool GetFunctionalGroupNames(policy::FunctionalGroupNames& names) = 0;
 
   /**
-       * @brief Set app policy to pre_DataConsented policy
-       * @param app_id Policy ID of application to be changed
-       * @return true, if succeeded, otherwise - false
-       */
+   * @brief Set app policy to pre_DataConsented policy
+   * @param app_id Policy ID of application to be changed
+   * @return true, if succeeded, otherwise - false
+   */
   virtual bool SetPredataPolicy(const std::string& app_id) = 0;
 
   /**

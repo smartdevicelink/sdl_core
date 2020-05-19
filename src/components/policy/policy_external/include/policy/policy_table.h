@@ -33,8 +33,8 @@
 #ifndef SRC_COMPONENTS_POLICY_POLICY_EXTERNAL_INCLUDE_POLICY_POLICY_TABLE_H_
 #define SRC_COMPONENTS_POLICY_POLICY_EXTERNAL_INCLUDE_POLICY_POLICY_TABLE_H_
 
-#include "policy/pt_representation.h"
 #include "policy/pt_ext_representation.h"
+#include "policy/pt_representation.h"
 
 namespace policy {
 

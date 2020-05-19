@@ -31,13 +31,13 @@
  */
 
 #include "application_manager/usage_statistics.h"
-#include "smart_objects/smart_object.h"
-#include "smart_objects/enum_schema_item.h"
 #include "policy/usage_statistics/statistics_manager.h"
+#include "smart_objects/enum_schema_item.h"
+#include "smart_objects/smart_object.h"
 #include "utils/macro.h"
 
 using namespace mobile_apis;
-using namespace NsSmartDeviceLink::NsSmartObjects;
+using namespace ns_smart_device_link::ns_smart_objects;
 using namespace usage_statistics;
 
 namespace application_manager {

@@ -36,8 +36,8 @@
 
 #include "utils/logger.h"
 
-#include "utils/lock.h"
 #include "utils/date_time.h"
+#include "utils/lock.h"
 
 namespace protocol_handler {
 
@@ -124,7 +124,7 @@ ProtocolFramePtrList MultiFrameBuilder::PopMultiframes() {
         if (consecutive_frame_wait_msecs_ != 0) {
           LOG4CXX_TRACE(logger_, "Expiration verification");
           const int64_t time_left =
-              date_time::DateTime::calculateTimeSpan(frame_data.append_time);
+              date_time::calculateTimeSpan(frame_data.append_time);
           LOG4CXX_DEBUG(logger_, "mSecs left: " << time_left);
           if (time_left >= consecutive_frame_wait_msecs_) {
             LOG4CXX_WARN(logger_, "Expired frame: " << frame);
@@ -200,7 +200,7 @@ RESULT_CODE MultiFrameBuilder::HandleFirstFrame(const ProtocolFramePtr packet) {
                     << connection_id
                     << ", session_id: " << static_cast<int>(session_id)
                     << ", message_id: " << message_id);
-  messageId_map[message_id] = {packet, date_time::DateTime::getCurrentTime()};
+  messageId_map[message_id] = {packet, date_time::getCurrentTime()};
   return RESULT_OK;
 }
 
@@ -261,6 +261,11 @@ RESULT_CODE MultiFrameBuilder::HandleConsecutiveFrame(
     }
   }
 
+  const bool packet_protection_flag = packet->protection_flag();
+  if (!assembling_frame->protection_flag() && packet_protection_flag) {
+    assembling_frame->set_protection_flag(packet_protection_flag);
+  }
+
   assembling_frame->set_frame_data(new_frame_data);
 
   LOG4CXX_DEBUG(logger_,
@@ -279,7 +284,7 @@ RESULT_CODE MultiFrameBuilder::HandleConsecutiveFrame(
   LOG4CXX_INFO(logger_,
                "Assembled frame with payload size: "
                    << assembling_frame->payload_size());
-  frame_data.append_time = date_time::DateTime::getCurrentTime();
+  frame_data.append_time = date_time::getCurrentTime();
   return RESULT_OK;
 }
 

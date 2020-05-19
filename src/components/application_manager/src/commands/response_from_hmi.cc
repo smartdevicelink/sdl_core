@@ -92,7 +92,7 @@ void ResponseFromHMI::CreateHMIRequest(
   const uint32_t hmi_correlation_id_ =
       application_manager_.GetNextHMICorrelationID();
 
-  NsSmartDeviceLink::NsSmartObjects::SmartObject& request = *result;
+  ns_smart_device_link::ns_smart_objects::SmartObject& request = *result;
   request[strings::params][strings::message_type] = MessageType::kRequest;
   request[strings::params][strings::function_id] = function_id;
   request[strings::params][strings::correlation_id] = hmi_correlation_id_;

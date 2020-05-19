@@ -30,11 +30,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "gtest/gtest.h"
-#include "telemetry_monitor/mock_telemetry_monitor.h"
-#include "application_manager/telemetry_observer.h"
-#include "telemetry_monitor/application_manager_metric_wrapper.h"
 #include "telemetry_monitor/application_manager_observer.h"
+#include "application_manager/telemetry_observer.h"
+#include "gtest/gtest.h"
+#include "telemetry_monitor/application_manager_metric_wrapper.h"
+#include "telemetry_monitor/mock_telemetry_monitor.h"
 
 #include "telemetry_monitor/telemetry_monitor.h"
 
