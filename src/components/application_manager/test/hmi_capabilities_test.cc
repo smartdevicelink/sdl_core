@@ -1125,6 +1125,42 @@ TEST_F(HMICapabilitiesTest,
   EXPECT_FALSE(file_system::FileExists(kHmiCapabilitiesCacheFile));
 }
 
+TEST_F(
+    HMICapabilitiesTest,
+    OnSoftwareVersionReceived_CcpuMatchNoPendingRequestsForCapability_SetHMICooperatingToTrue) {
+  // If local ccpu_version matches with the received ccpu_version from the HMI,
+  // and cache exists, SDL Core should check if hmi_cooperating is set to true
+  // if yes - SDL should respond to all pending RAI requests, if they exist.
+  // hmi_cooperting is set to true when no pending capability requests exist
+  const std::string ccpu_version = "4.1.3.B_EB355B";
+
+  hmi_capabilities_->set_ccpu_version(ccpu_version);
+
+  EXPECT_CALL(mock_app_mngr_, SetHMICooperating(true));
+
+  hmi_capabilities_->OnSoftwareVersionReceived(ccpu_version);
+}
+
+TEST_F(
+    HMICapabilitiesTest,
+    OnSoftwareVersionReceived_CcpuMatchHavePendingRequestsForCapability_NoSetHMICooperatingToTrue) {
+  // If local ccpu_version matches with the received ccpu_version from the HMI,
+  // and there is no cache, SDL Core should check if hmi_cooperating is set to
+  // true if no - SDL should suspend all RAI responses (if any) and wait for HMI
+  // responses with all required capabilities. The RAI responses (if any) could
+  // be handled only after hmi_cooperating is set to true, it is set when all
+  // capabilities responses are received from the HMI
+  const std::string ccpu_version = "4.1.3.B_EB355B";
+
+  // Init() is required to set pending capabilities requests to the HMI
+  hmi_capabilities_->Init(last_state_wrapper_);
+  hmi_capabilities_->set_ccpu_version(ccpu_version);
+
+  EXPECT_CALL(mock_app_mngr_, SetHMICooperating(true)).Times(0);
+
+  hmi_capabilities_->OnSoftwareVersionReceived(ccpu_version);
+}
+
 TEST_F(HMICapabilitiesTest,
        CacheFileNameNotSpecified_NoNeedToSave_ReturnSuccess) {
   const std::string hmi_capabilities_empty_file_name = "";
