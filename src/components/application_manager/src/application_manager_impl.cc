@@ -4647,8 +4647,7 @@ bool ApplicationManagerImpl::IsAppSubscribedForWayPoints(
   return IsAppSubscribedForWayPoints(app->app_id());
 }
 
-void ApplicationManagerImpl::SubscribeAppForWayPoints(
-    uint32_t app_id) {
+void ApplicationManagerImpl::SubscribeAppForWayPoints(uint32_t app_id) {
   LOG4CXX_AUTO_TRACE(logger_);
   sync_primitives::AutoLock lock(subscribed_way_points_apps_lock_);
   LOG4CXX_DEBUG(logger_, "Subscribing " << app_id);
@@ -4663,8 +4662,7 @@ void ApplicationManagerImpl::SubscribeAppForWayPoints(
   SubscribeAppForWayPoints(app->app_id());
 }
 
-void ApplicationManagerImpl::UnsubscribeAppFromWayPoints(
-    uint32_t app_id) {
+void ApplicationManagerImpl::UnsubscribeAppFromWayPoints(uint32_t app_id) {
   LOG4CXX_AUTO_TRACE(logger_);
   sync_primitives::AutoLock lock(subscribed_way_points_apps_lock_);
   LOG4CXX_DEBUG(logger_, "Unsubscribing " << app_id);

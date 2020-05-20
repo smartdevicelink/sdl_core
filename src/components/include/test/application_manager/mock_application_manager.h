@@ -338,16 +338,13 @@ class MockApplicationManager : public application_manager::ApplicationManager {
   MOCK_METHOD2(IsSOStructValid,
                bool(const hmi_apis::StructIdentifiers::eType struct_id,
                     const smart_objects::SmartObject& display_capabilities));
-  MOCK_CONST_METHOD1(IsAppSubscribedForWayPoints,
-                     bool(uint32_t));
+  MOCK_CONST_METHOD1(IsAppSubscribedForWayPoints, bool(uint32_t));
   MOCK_CONST_METHOD1(IsAppSubscribedForWayPoints,
                      bool(application_manager::ApplicationSharedPtr));
-  MOCK_METHOD1(SubscribeAppForWayPoints,
-               void(uint32_t));
+  MOCK_METHOD1(SubscribeAppForWayPoints, void(uint32_t));
   MOCK_METHOD1(SubscribeAppForWayPoints,
                void(application_manager::ApplicationSharedPtr));
-  MOCK_METHOD1(UnsubscribeAppFromWayPoints,
-               void(uint32_t));
+  MOCK_METHOD1(UnsubscribeAppFromWayPoints, void(uint32_t));
   MOCK_METHOD1(UnsubscribeAppFromWayPoints,
                void(application_manager::ApplicationSharedPtr));
   MOCK_CONST_METHOD0(IsAnyAppSubscribedForWayPoints, bool());
