@@ -82,6 +82,8 @@ class TNumberSchemaItem : public CDefaultSchemaItem<NumberType> {
       const utils::SemanticVersion& MessageVersion = utils::SemanticVersion(),
       const bool allow_unknown_enums = false) OVERRIDE;
 
+  TypeID GetType() OVERRIDE;
+
  private:
   /**
    * @brief Get smart type for this NumberType.
@@ -189,6 +191,11 @@ errors::eType TNumberSchemaItem<NumberType>::validate(
     return errors::OUT_OF_RANGE;
   }
   return errors::OK;
+}
+
+template <typename NumberType>
+TypeID TNumberSchemaItem<NumberType>::GetType() {
+  return TYPE_NUMBER;
 }
 
 template <typename NumberType>

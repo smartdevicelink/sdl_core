@@ -65,5 +65,9 @@ size_t ISchemaItem::GetMemberSize() {
   return 0;
 }
 
+TypeID ISchemaItem::GetType() {
+  return TYPE_NONE;
+}
+
 }  // namespace ns_smart_objects
 }  // namespace ns_smart_device_link

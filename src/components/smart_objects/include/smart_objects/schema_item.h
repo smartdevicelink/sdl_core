@@ -49,6 +49,16 @@ namespace ns_smart_objects {
 class SmartObject;
 class SMember;
 
+enum TypeID {
+  TYPE_NONE,
+  TYPE_OBJECT,
+  TYPE_ARRAY,
+  TYPE_STRING,
+  TYPE_NUMBER,
+  TYPE_ENUM,
+  TYPE_BOOLEAN
+};
+
 /**
  * @brief Base schema item.
  **/
@@ -142,6 +152,13 @@ class ISchemaItem {
    * @return value of any parameter
    */
   virtual size_t GetMemberSize();
+
+  /**
+   * @brief Get type ID of schema
+   *
+   * @return The type ID of this schema
+   */
+  virtual TypeID GetType();
 
   virtual ~ISchemaItem() {}
 };

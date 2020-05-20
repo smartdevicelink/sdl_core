@@ -166,6 +166,7 @@ class TEnumSchemaItem : public CDefaultSchemaItem<EnumType> {
                       ElementSignatures);
   SmartType getSmartType() const OVERRIDE;
   EnumType getDefaultValue() const OVERRIDE;
+  TypeID GetType() OVERRIDE;
   /**
    * @brief Set of allowed enumeration elements.
    **/
@@ -410,6 +411,11 @@ SmartType TEnumSchemaItem<EnumType>::getSmartType() const {
 template <typename EnumType>
 EnumType TEnumSchemaItem<EnumType>::getDefaultValue() const {
   return EnumType::INVALID_ENUM;
+}
+
+template <typename EnumType>
+TypeID TEnumSchemaItem<EnumType>::GetType() {
+  return TYPE_ENUM;
 }
 
 template <typename EnumType>

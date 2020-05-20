@@ -113,6 +113,8 @@ class CArraySchemaItem : public ISchemaItem {
   void BuildObjectBySchema(const SmartObject& pattern_object,
                            SmartObject& result_object) OVERRIDE;
 
+  TypeID GetType() OVERRIDE;
+
  private:
   /**
    * @brief Constructor.
@@ -124,6 +126,16 @@ class CArraySchemaItem : public ISchemaItem {
   CArraySchemaItem(const ISchemaItemPtr ElementSchemaItem,
                    const TSchemaItemParameter<size_t>& MinSize,
                    const TSchemaItemParameter<size_t>& MaxSize);
+
+  /**
+   * @brief Removes unknown parameters from array.
+   * @param Object Array to remove unknown parameters.
+   * @param MessageVersion The version to check against for which parameters are
+   *                       unknown.
+   **/
+  void RemoveUnknownParams(SmartObject& Object,
+                           const utils::SemanticVersion& MessageVersion);
+
   /**
    * @brief SchemaItem for array elements.
    **/

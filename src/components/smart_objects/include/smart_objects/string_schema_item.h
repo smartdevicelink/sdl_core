@@ -77,6 +77,8 @@ class CStringSchemaItem : public CDefaultSchemaItem<std::string> {
       const utils::SemanticVersion& MessageVersion = utils::SemanticVersion(),
       const bool allow_unknown_enums = false) OVERRIDE;
 
+  TypeID GetType() OVERRIDE;
+
  private:
   /**
    * @brief Constructor.

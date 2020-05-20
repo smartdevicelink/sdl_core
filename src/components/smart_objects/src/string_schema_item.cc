@@ -90,6 +90,10 @@ std::string CStringSchemaItem::getDefaultValue() const {
   return std::string("");
 }
 
+TypeID CStringSchemaItem::GetType() {
+  return TYPE_STRING;
+}
+
 CStringSchemaItem::CStringSchemaItem(
     const TSchemaItemParameter<size_t>& MinLength,
     const TSchemaItemParameter<size_t>& MaxLength,

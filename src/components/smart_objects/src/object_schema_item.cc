@@ -35,6 +35,7 @@
 
 #include "generated_msg_version.h"
 #include "smart_objects/always_false_schema_item.h"
+#include "smart_objects/enum_schema_item.h"
 #include "smart_objects/smart_object.h"
 
 namespace {
@@ -165,10 +166,6 @@ void CObjectSchemaItem::applySchema(
     return;
   }
 
-  if (remove_unknown_parameters) {
-    RemoveFakeParams(Object, MessageVersion);
-  }
-
   SmartObject default_value;
 
   for (const auto& item : mMembers) {
@@ -184,6 +181,10 @@ void CObjectSchemaItem::applySchema(
       member.mSchemaItem->applySchema(
           Object[key], remove_unknown_parameters, MessageVersion);
     }
+  }
+
+  if (remove_unknown_parameters) {
+    RemoveUnknownParams(Object, MessageVersion);
   }
 }
 
@@ -232,6 +233,10 @@ size_t CObjectSchemaItem::GetMemberSize() {
   return mMembers.size();
 }
 
+TypeID CObjectSchemaItem::GetType() {
+  return TYPE_OBJECT;
+}
+
 boost::optional<SMember&> CObjectSchemaItem::GetMemberSchemaItem(
     const std::string& member_key) {
   auto it = mMembers.find(member_key);
@@ -250,7 +255,7 @@ void CObjectSchemaItem::AddMemberSchemaItem(const std::string& member_key,
 CObjectSchemaItem::CObjectSchemaItem(const Members& members)
     : mMembers(members) {}
 
-void CObjectSchemaItem::RemoveFakeParams(
+void CObjectSchemaItem::RemoveUnknownParams(
     SmartObject& Object, const utils::SemanticVersion& MessageVersion) {
   for (const auto& key : Object.enumerate()) {
     std::map<std::string, SMember>::const_iterator members_it =
@@ -259,7 +264,13 @@ void CObjectSchemaItem::RemoveFakeParams(
     if (mMembers.end() != members_it) {
       const SMember* member =
           GetCorrectMember(members_it->second, MessageVersion);
-      if (!member || member->mIsRemoved) {
+      rpc::ValidationReport report("");
+      const bool is_invalid_enum =
+          TYPE_ENUM == member->mSchemaItem->GetType() &&
+          (member->mSchemaItem->validate(
+               Object.getElement(key), &report, MessageVersion, false) !=
+           errors::OK);
+      if (!member || member->mIsRemoved || is_invalid_enum) {
         Object.erase(key);
       }
       continue;
