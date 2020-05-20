@@ -69,6 +69,7 @@ set(testSources
   ${AM_TEST_DIR}/rpc_passing_handler_test.cc
   ${AM_TEST_DIR}/application_manager_impl_test.cc
   ${AM_TEST_DIR}/application_helper_test.cc
+  ${AM_TEST_DIR}/rpc_service_impl_test.cc
   ${AM_TEST_DIR}/command_holder_test.cc
 )
 

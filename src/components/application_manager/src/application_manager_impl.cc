@@ -898,6 +898,8 @@ void ApplicationManagerImpl::OnHMIStartedCooperation() {
   resume_controller().ResetLaunchTime();
 
   RefreshCloudAppInformation();
+
+  policy_handler_->TriggerPTUOnStartupIfRequired();
 }
 
 std::string ApplicationManagerImpl::PolicyIDByIconUrl(const std::string url) {
@@ -2571,8 +2573,12 @@ bool ApplicationManagerImpl::Stop() {
   stopping_application_mng_lock_.Release();
   application_list_update_timer_.Stop();
   try {
-    SetUnregisterAllApplicationsReason(
-        mobile_api::AppInterfaceUnregisteredReason::IGNITION_OFF);
+    if (unregister_reason_ ==
+        mobile_api::AppInterfaceUnregisteredReason::INVALID_ENUM) {
+      SetUnregisterAllApplicationsReason(
+          mobile_api::AppInterfaceUnregisteredReason::IGNITION_OFF);
+    }
+
     UnregisterAllApplications();
   } catch (...) {
     LOG4CXX_ERROR(logger_,
@@ -3310,6 +3316,11 @@ void ApplicationManagerImpl::UnregisterApplication(
         RemoveAppsWaitingForRegistration(handle);
       }
     }
+
+    MessageHelper::SendOnAppUnregNotificationToHMI(
+        app_to_remove, is_unexpected_disconnect, *this);
+    commands_holder_->Clear(app_to_remove);
+
     const auto enabled_local_apps = policy_handler_->GetEnabledLocalApps();
     if (helpers::in_range(enabled_local_apps, app_to_remove->policy_app_id())) {
       LOG4CXX_DEBUG(logger_,
@@ -3322,8 +3333,6 @@ void ApplicationManagerImpl::UnregisterApplication(
     SendUpdateAppList();
   }
 
-  commands_holder_->Clear(app_to_remove);
-
   if (EndAudioPassThru(app_id)) {
     // May be better to put this code in MessageHelper?
     StopAudioPassThru(app_id);
@@ -3334,11 +3343,10 @@ void ApplicationManagerImpl::UnregisterApplication(
         plugin.OnApplicationEvent(plugin_manager::kApplicationUnregistered,
                                   app_to_remove);
       };
-  plugin_manager_->ForEachPlugin(on_app_unregistered);
 
-  MessageHelper::SendOnAppUnregNotificationToHMI(
-      app_to_remove, is_unexpected_disconnect, *this);
+  plugin_manager_->ForEachPlugin(on_app_unregistered);
   request_ctrl_.terminateAppRequests(app_id);
+
   if (applications_.empty()) {
     policy_handler_->StopRetrySequence();
   }

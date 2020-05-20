@@ -468,6 +468,7 @@ void ResumeCtrlImpl::OnSuspend() {
 
 void ResumeCtrlImpl::OnIgnitionOff() {
   LOG4CXX_AUTO_TRACE(logger_);
+  DCHECK_OR_RETURN_VOID(resumption_storage_);
   if (!application_manager_.IsLowVoltage()) {
     resumption_storage_->IncrementIgnOffCount();
     resumption_storage_->ResetGlobalIgnOnCount();
@@ -726,6 +727,7 @@ void ResumeCtrlImpl::SaveDataOnTimer() {
 
 void ResumeCtrlImpl::FinalPersistData() {
   LOG4CXX_AUTO_TRACE(logger_);
+  DCHECK_OR_RETURN_VOID(resumption_storage_);
   StopSavePersistentDataTimer();
   SaveAllApplications();
   resumption_storage_->Persist();
