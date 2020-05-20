@@ -922,7 +922,7 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile(
         application, resumption, need_restore_vr);
     (*notify_upd_manager)();
 
-    // Start PTU after successfull registration
+    // Start PTU after successful registration
     // Sends OnPermissionChange notification to mobile right after RAI response
     // and HMI level set-up
     GetPolicyHandler().OnAppRegisteredOnMobile(application->mac_address(),

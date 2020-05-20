@@ -907,8 +907,7 @@ TEST_F(ApplicationImplTest, WaitForSetupDone_SetupInProgress) {
     unsigned int seconds_;
   };
 
-  std::shared_ptr<TestAsyncWaiter> waiter =
-      std::make_shared<TestAsyncWaiter>();
+  std::shared_ptr<TestAsyncWaiter> waiter = std::make_shared<TestAsyncWaiter>();
   uint32_t times = 0;
   unsigned int waitSeconds = 3;
 

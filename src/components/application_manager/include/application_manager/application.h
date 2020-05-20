@@ -1224,7 +1224,7 @@ class Application : public virtual InitialApplicationData,
    */
   virtual const smart_objects::SmartObject& get_user_location() const = 0;
 
-  /*
+  /**
    * @brief Update internal state to indicate whether setup is running or not.
    *
    * The method WaitForSetupDone() will block when setup is running. Also, the
