@@ -3212,22 +3212,15 @@ void ApplicationManagerImpl::UnregisterApplication(
                             << "; is_resuming = " << is_resuming
                             << "; is_unexpected_disconnect = "
                             << is_unexpected_disconnect);
-  size_t subscribed_for_way_points_app_count = 0;
 
   GetAppServiceManager().UnpublishServices(app_id);
 
-  // SDL sends UnsubscribeWayPoints only for last application
-  {
-    sync_primitives::AutoLock lock(subscribed_way_points_apps_lock_);
-    subscribed_for_way_points_app_count =
-        subscribed_way_points_apps_list_.size();
-  }
-  if (IsAppIdSubscribedForWayPoints(app_id)) {
-    if (1 == subscribed_for_way_points_app_count) {
+  if (IsAppSubscribedForWayPoints(app_id)) {
+    UnsubscribeAppFromWayPoints(app_id);
+    if (!IsAnyAppSubscribedForWayPoints()) {
       LOG4CXX_ERROR(logger_, "Send UnsubscribeWayPoints");
       MessageHelper::SendUnsubscribedWayPoints(*this);
     }
-    UnsubscribeAppIdFromWayPoints(app_id);
   }
   EndNaviServices(app_id);
 
@@ -4635,7 +4628,7 @@ void ApplicationManagerImpl::ClearTTSGlobalPropertiesList() {
   tts_global_properties_app_list_.clear();
 }
 
-bool ApplicationManagerImpl::IsAppIdSubscribedForWayPoints(
+bool ApplicationManagerImpl::IsAppSubscribedForWayPoints(
     uint32_t app_id) const {
   LOG4CXX_AUTO_TRACE(logger_);
   sync_primitives::AutoLock lock(subscribed_way_points_apps_lock_);
@@ -4651,21 +4644,26 @@ bool ApplicationManagerImpl::IsAppIdSubscribedForWayPoints(
 
 bool ApplicationManagerImpl::IsAppSubscribedForWayPoints(
     ApplicationSharedPtr app) const {
-  return IsAppIdSubscribedForWayPoints(app->app_id());
+  return IsAppSubscribedForWayPoints(app->app_id());
 }
 
 void ApplicationManagerImpl::SubscribeAppForWayPoints(
-    ApplicationSharedPtr app) {
+    uint32_t app_id) {
   LOG4CXX_AUTO_TRACE(logger_);
   sync_primitives::AutoLock lock(subscribed_way_points_apps_lock_);
-  LOG4CXX_DEBUG(logger_, "Subscribing " << app->app_id());
-  subscribed_way_points_apps_list_.insert(app->app_id());
+  LOG4CXX_DEBUG(logger_, "Subscribing " << app_id);
+  subscribed_way_points_apps_list_.insert(app_id);
   LOG4CXX_DEBUG(logger_,
                 "There are applications subscribed: "
                     << subscribed_way_points_apps_list_.size());
 }
 
-void ApplicationManagerImpl::UnsubscribeAppIdFromWayPoints(
+void ApplicationManagerImpl::SubscribeAppForWayPoints(
+    ApplicationSharedPtr app) {
+  SubscribeAppForWayPoints(app->app_id());
+}
+
+void ApplicationManagerImpl::UnsubscribeAppFromWayPoints(
     uint32_t app_id) {
   LOG4CXX_AUTO_TRACE(logger_);
   sync_primitives::AutoLock lock(subscribed_way_points_apps_lock_);
@@ -4678,7 +4676,7 @@ void ApplicationManagerImpl::UnsubscribeAppIdFromWayPoints(
 
 void ApplicationManagerImpl::UnsubscribeAppFromWayPoints(
     ApplicationSharedPtr app) {
-  UnsubscribeAppIdFromWayPoints(app->app_id());
+  UnsubscribeAppFromWayPoints(app->app_id());
 }
 
 bool ApplicationManagerImpl::IsAnyAppSubscribedForWayPoints() const {
