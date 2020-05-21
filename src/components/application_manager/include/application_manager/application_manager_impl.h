@@ -271,6 +271,14 @@ class ApplicationManagerImpl
 
   /**
    * @brief Checks if Application is subscribed for way points
+   * @param Application id
+   * @return true if Application is subscribed for way points
+   * otherwise false
+   */
+  bool IsAppSubscribedForWayPoints(uint32_t app_id) const OVERRIDE;
+
+  /**
+   * @brief Checks if Application is subscribed for way points
    * @param Application pointer
    * @return true if Application is subscribed for way points
    * otherwise false
@@ -279,9 +287,21 @@ class ApplicationManagerImpl
 
   /**
    * @brief Subscribe Application for way points
+   * @param Application id
+   */
+  void SubscribeAppForWayPoints(uint32_t app_id) OVERRIDE;
+
+  /**
+   * @brief Subscribe Application for way points
    * @param Application pointer
    */
   void SubscribeAppForWayPoints(ApplicationSharedPtr app) OVERRIDE;
+
+  /**
+   * @brief Unsubscribe Application for way points
+   * @param Application id
+   */
+  void UnsubscribeAppFromWayPoints(uint32_t app_id) OVERRIDE;
 
   /**
    * @brief Unsubscribe Application for way points
