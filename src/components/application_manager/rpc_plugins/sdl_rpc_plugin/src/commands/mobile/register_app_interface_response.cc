@@ -32,11 +32,10 @@
  */
 
 #include "sdl_rpc_plugin/commands/mobile/register_app_interface_response.h"
-#include "interfaces/MOBILE_API.h"
 #include "application_manager/application_manager.h"
 #include "application_manager/policies/policy_handler_interface.h"
 #include "connection_handler/connection_handler.h"
-#include "application_manager/policies/policy_handler_interface.h"
+#include "interfaces/MOBILE_API.h"
 
 namespace sdl_rpc_plugin {
 using namespace application_manager;
@@ -63,7 +62,7 @@ void RegisterAppInterfaceResponse::Run() {
   application_manager::ApplicationSharedPtr app =
       application_manager_.application(connection_key());
 
-  if (app && app->msg_version() <= utils::version_4_5 &&
+  if (app && app->msg_version() < utils::rpc_version_5 &&
       app->is_media_application() &&
       (*message_)[strings::msg_params].keyExists(
           hmi_response::button_capabilities)) {
@@ -128,4 +127,4 @@ void RegisterAppInterfaceResponse::SetHeartBeatTimeout(
 }
 
 }  // namespace commands
-}  // namespace application_manager
+}  // namespace sdl_rpc_plugin

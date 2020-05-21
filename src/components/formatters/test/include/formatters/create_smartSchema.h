@@ -33,8 +33,8 @@
 #ifndef SRC_COMPONENTS_FORMATTERS_TEST_INCLUDE_FORMATTERS_CREATE_SMARTSCHEMA_H_
 #define SRC_COMPONENTS_FORMATTERS_TEST_INCLUDE_FORMATTERS_CREATE_SMARTSCHEMA_H_
 
-#include "formatters/CFormatterJsonSDLRPCv1.h"
 #include "SmartFactoryTestHelper.h"
+#include "formatters/CFormatterJsonSDLRPCv1.h"
 
 namespace test {
 namespace components {

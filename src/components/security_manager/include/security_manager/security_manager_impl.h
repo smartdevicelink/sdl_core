@@ -34,18 +34,18 @@
 #define SRC_COMPONENTS_SECURITY_MANAGER_INCLUDE_SECURITY_MANAGER_SECURITY_MANAGER_IMPL_H_
 
 #include <list>
-#include <string>
-#include <set>
 #include <memory>
+#include <set>
+#include <string>
 
 #include "utils/macro.h"
 #include "utils/message_queue.h"
 #include "utils/threads/message_loop_thread.h"
 
+#include "protocol/common.h"
+#include "protocol_handler/protocol_handler.h"
 #include "security_manager/security_manager.h"
 #include "security_manager/security_query.h"
-#include "protocol_handler/protocol_handler.h"
-#include "protocol/common.h"
 #include "utils/system_time_handler.h"
 
 namespace security_manager {
@@ -200,7 +200,7 @@ class SecurityManagerImpl : public SecurityManager,
   /**
    * @brief Notify all listeners that handshake was failed
    */
-  void NotifyListenersOnHandshakeFailed() OVERRIDE;
+  void NotifyListenersOnGetSystemTimeFailed() OVERRIDE;
 
   /**
    * @brief Check is policy certificate data is empty
@@ -213,6 +213,16 @@ class SecurityManagerImpl : public SecurityManager,
    * @return Session name in config file
    */
   static const char* ConfigSection();
+
+  void ProcessFailedPTU() OVERRIDE;
+
+#ifdef EXTERNAL_PROPRIETARY_MODE
+  /**
+   * @brief ProcessFailedCertDecrypt is called to notify listeners that
+   * certificate decryption failed in the external flow
+   */
+  void ProcessFailedCertDecrypt() OVERRIDE;
+#endif
 
  private:
   /**
@@ -279,6 +289,17 @@ class SecurityManagerImpl : public SecurityManager,
    * @param utc_time the current system time.
    */
   void OnSystemTimeArrived(const time_t utc_time) OVERRIDE;
+
+  /**
+   * @brief OnSystemTimeFailed Notify about system request failure
+   */
+  void OnSystemTimeFailed() OVERRIDE;
+
+  /**
+   * @brief ResetPendingSystemTimeRequests resets waiting for system time
+   * requests flag
+   */
+  void ResetPendingSystemTimeRequests();
 
   // Thread that pumps handshake data
   SecurityMessageLoop security_messages_;

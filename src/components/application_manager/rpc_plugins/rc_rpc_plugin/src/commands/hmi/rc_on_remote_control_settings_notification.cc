@@ -31,10 +31,10 @@
  */
 
 #include "rc_rpc_plugin/commands/hmi/rc_on_remote_control_settings_notification.h"
-#include "rc_rpc_plugin/rc_rpc_plugin.h"
 #include "rc_rpc_plugin/interior_data_manager.h"
-#include "rc_rpc_plugin/rc_module_constants.h"
 #include "rc_rpc_plugin/rc_helpers.h"
+#include "rc_rpc_plugin/rc_module_constants.h"
+#include "rc_rpc_plugin/rc_rpc_plugin.h"
 #include "utils/macro.h"
 
 namespace rc_rpc_plugin {
@@ -59,7 +59,8 @@ RCOnRemoteControlSettingsNotification::RCOnRemoteControlSettingsNotification(
           params.hmi_capabilities_,
           params.policy_handler_)
     , resource_allocation_manager_(params.resource_allocation_manager_)
-    , interior_data_manager_(params.interior_data_manager_) {}
+    , interior_data_manager_(params.interior_data_manager_)
+    , rc_consent_manager_(params.rc_consent_manager_) {}
 
 RCOnRemoteControlSettingsNotification::
     ~RCOnRemoteControlSettingsNotification() {}
@@ -115,7 +116,8 @@ void RCOnRemoteControlSettingsNotification::Run() {
             message_params::kAccessMode)) {
       access_mode = static_cast<hmi_apis::Common_RCAccessMode::eType>(
           (*message_)[app_mngr::strings::msg_params]
-                     [message_params::kAccessMode].asUInt());
+                     [message_params::kAccessMode]
+                         .asUInt());
       LOG4CXX_DEBUG(
           logger_,
           "Setting up access mode : " << AccessModeToString(access_mode));
@@ -131,6 +133,7 @@ void RCOnRemoteControlSettingsNotification::Run() {
     DisallowRCFunctionality();
     resource_allocation_manager_.ResetAllAllocations();
     resource_allocation_manager_.set_rc_enabled(false);
+    rc_consent_manager_.RemoveAllConsents();
   }
 }
 

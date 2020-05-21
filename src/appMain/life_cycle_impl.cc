@@ -1,46 +1,46 @@
 /*
-* Copyright (c) 2018, Ford Motor Company
-* All rights reserved.
-*
-* Redistribution and use in source and binary forms, with or without
-* modification, are permitted provided that the following conditions are met:
-*
-* Redistributions of source code must retain the above copyright notice, this
-* list of conditions and the following disclaimer.
-*
-* Redistributions in binary form must reproduce the above copyright notice,
-* this list of conditions and the following
-* disclaimer in the documentation and/or other materials provided with the
-* distribution.
-*
-* Neither the name of the Ford Motor Company nor the names of its contributors
-* may be used to endorse or promote products derived from this software
-* without specific prior written permission.
-*
-* THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
-* AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
-* IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
-* ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
-* LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
-* CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
-* SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
-* INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
-* CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
-* ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
-* POSSIBILITY OF SUCH DAMAGE.
-*/
+ * Copyright (c) 2018, Ford Motor Company
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *
+ * Redistributions of source code must retain the above copyright notice, this
+ * list of conditions and the following disclaimer.
+ *
+ * Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following
+ * disclaimer in the documentation and/or other materials provided with the
+ * distribution.
+ *
+ * Neither the name of the Ford Motor Company nor the names of its contributors
+ * may be used to endorse or promote products derived from this software
+ * without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
+ */
 
 #include "appMain/life_cycle_impl.h"
-#include "utils/signals.h"
-#include "config_profile/profile.h"
 #include "application_manager/system_time/system_time_handler_impl.h"
+#include "config_profile/profile.h"
 #include "resumption/last_state_impl.h"
-
+#include "resumption/last_state_wrapper_impl.h"
+#include "utils/signals.h"
 #ifdef ENABLE_SECURITY
-#include "security_manager/security_manager_impl.h"
+#include "application_manager/policies/policy_handler.h"
 #include "security_manager/crypto_manager_impl.h"
 #include "security_manager/crypto_manager_settings_impl.h"
-#include "application_manager/policies/policy_handler.h"
+#include "security_manager/security_manager_impl.h"
 #endif  // ENABLE_SECURITY
 
 #ifdef ENABLE_LOG
@@ -67,7 +67,6 @@ LifeCycleImpl::LifeCycleImpl(const profile::Profile& profile)
     , hmi_handler_(NULL)
     , hmi_message_adapter_(NULL)
     , media_manager_(NULL)
-    , last_state_(NULL)
 #ifdef TELEMETRY_MONITOR
     , telemetry_monitor_(NULL)
 #endif  // TELEMETRY_MONITOR
@@ -80,12 +79,16 @@ LifeCycleImpl::LifeCycleImpl(const profile::Profile& profile)
 
 bool LifeCycleImpl::StartComponents() {
   LOG4CXX_AUTO_TRACE(logger_);
-  DCHECK(!last_state_);
-  last_state_ = new resumption::LastStateImpl(profile_.app_storage_folder(),
-                                              profile_.app_info_storage());
+  DCHECK(!last_state_wrapper_);
+
+  auto last_state = std::make_shared<resumption::LastStateImpl>(
+      profile_.app_storage_folder(), profile_.app_info_storage());
+  last_state_wrapper_ =
+      std::make_shared<resumption::LastStateWrapperImpl>(last_state);
 
   DCHECK(!transport_manager_);
-  transport_manager_ = new transport_manager::TransportManagerDefault(profile_);
+  transport_manager_ = new transport_manager::TransportManagerDefault(
+      profile_, transport_manager::TransportAdapterFactory());
 
   DCHECK(!connection_handler_);
   connection_handler_ = new connection_handler::ConnectionHandlerImpl(
@@ -103,6 +106,13 @@ bool LifeCycleImpl::StartComponents() {
   app_manager_ =
       new application_manager::ApplicationManagerImpl(profile_, profile_);
 
+  auto service_status_update_handler =
+      std::unique_ptr<protocol_handler::ServiceStatusUpdateHandler>(
+          new protocol_handler::ServiceStatusUpdateHandler(app_manager_));
+
+  protocol_handler_->set_service_status_update_handler(
+      std::move(service_status_update_handler));
+
   DCHECK(!hmi_handler_);
   hmi_handler_ = new hmi_message_handler::HMIMessageHandlerImpl(profile_);
 
@@ -111,7 +121,8 @@ bool LifeCycleImpl::StartComponents() {
 
   media_manager_ = new media_manager::MediaManagerImpl(*app_manager_, profile_);
   app_manager_->set_connection_handler(connection_handler_);
-  if (!app_manager_->Init(*last_state_, media_manager_)) {
+  app_manager_->AddPolicyObserver(protocol_handler_);
+  if (!app_manager_->Init(last_state_wrapper_, media_manager_)) {
     LOG4CXX_ERROR(logger_, "Application manager init failed.");
     return false;
   }
@@ -134,7 +145,6 @@ bool LifeCycleImpl::StartComponents() {
   security_manager_->AddListener(app_manager_);
 
   app_manager_->AddPolicyObserver(security_manager_);
-  app_manager_->AddPolicyObserver(protocol_handler_);
   if (!crypto_manager_->Init()) {
     LOG4CXX_ERROR(logger_, "CryptoManager initialization fail.");
     return false;
@@ -163,12 +173,14 @@ bool LifeCycleImpl::StartComponents() {
   // It's important to initialise TM after setting up listener chain
   // [TM -> CH -> AM], otherwise some events from TM could arrive at nowhere
   app_manager_->set_protocol_handler(protocol_handler_);
-  if (transport_manager::E_SUCCESS != transport_manager_->Init(*last_state_)) {
+  if (transport_manager::E_SUCCESS !=
+      transport_manager_->Init(last_state_wrapper_)) {
     LOG4CXX_ERROR(logger_, "Transport manager init failed.");
     return false;
   }
   // start transport manager
-  transport_manager_->Visibility(true);
+  transport_manager_->PerformActionOnClients(
+      transport_manager::TransportAction::kVisibilityOn);
 
   LowVoltageSignalsOffset signals_offset{profile_.low_voltage_signal_offset(),
                                          profile_.wake_up_signal_offset(),
@@ -182,7 +194,10 @@ bool LifeCycleImpl::StartComponents() {
 
 void LifeCycleImpl::LowVoltage() {
   LOG4CXX_AUTO_TRACE(logger_);
-  transport_manager_->Visibility(false);
+  transport_manager_->PerformActionOnClients(
+      transport_manager::TransportAction::kListeningOff);
+  transport_manager_->StopEventsProcessing();
+  transport_manager_->Deinit();
   app_manager_->OnLowVoltage();
 }
 
@@ -193,9 +208,11 @@ void LifeCycleImpl::IgnitionOff() {
 
 void LifeCycleImpl::WakeUp() {
   LOG4CXX_AUTO_TRACE(logger_);
-  app_manager_->OnWakeUp();
   transport_manager_->Reinit();
-  transport_manager_->Visibility(true);
+  transport_manager_->PerformActionOnClients(
+      transport_manager::TransportAction::kListeningOn);
+  app_manager_->OnWakeUp();
+  transport_manager_->StartEventsProcessing();
 }
 
 #ifdef MESSAGEBROKER_HMIADAPTER
@@ -286,7 +303,8 @@ void LifeCycleImpl::StopComponents() {
 
   LOG4CXX_INFO(logger_, "Destroying Transport Manager.");
   DCHECK_OR_RETURN_VOID(transport_manager_);
-  transport_manager_->Visibility(false);
+  transport_manager_->PerformActionOnClients(
+      transport_manager::TransportAction::kVisibilityOff);
   transport_manager_->Stop();
   delete transport_manager_;
   transport_manager_ = NULL;
@@ -304,10 +322,8 @@ void LifeCycleImpl::StopComponents() {
   delete connection_handler_;
   connection_handler_ = NULL;
 
-  LOG4CXX_INFO(logger_, "Destroying Last State");
-  DCHECK(last_state_);
-  delete last_state_;
-  last_state_ = NULL;
+  LOG4CXX_INFO(logger_, "Destroying Last State.");
+  last_state_wrapper_.reset();
 
   LOG4CXX_INFO(logger_, "Destroying Application Manager.");
   DCHECK(app_manager_);

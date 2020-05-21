@@ -33,8 +33,8 @@
 #ifndef SRC_COMPONENTS_MEDIA_MANAGER_INCLUDE_MEDIA_MANAGER_FILE_STREAMER_ADAPTER_H_
 #define SRC_COMPONENTS_MEDIA_MANAGER_INCLUDE_MEDIA_MANAGER_FILE_STREAMER_ADAPTER_H_
 
-#include <string>
 #include <fstream>
+#include <string>
 #include "media_manager/streamer_adapter.h"
 #include "utils/threads/thread_delegate.h"
 

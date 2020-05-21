@@ -33,9 +33,9 @@
 #ifndef SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_MOBILE_SET_GLOBAL_PROPERTIES_REQUEST_H_
 #define SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_MOBILE_SET_GLOBAL_PROPERTIES_REQUEST_H_
 #include <string>
+#include "application_manager/application.h"
 #include "application_manager/commands/command_request_impl.h"
 #include "utils/macro.h"
-#include "application_manager/application.h"
 
 namespace sdl_rpc_plugin {
 namespace app_mngr = application_manager;
@@ -82,7 +82,76 @@ class SetGlobalPropertiesRequest
    */
   bool Init() FINAL;
 
+  /**
+   * @brief Prepares total result for mobile according to three results:
+   * ui_properties_result, tts_properties_result, rc_properties_result.
+   * @param first ResponseInfo as first argument
+   * @param second ResponseInfo as secondargument
+   * @param third ResponseInfo as third argument
+   * @return total result
+   */
+  bool PrepareResultForMobileResponse(
+      const app_mngr::commands::ResponseInfo& first,
+      const app_mngr::commands::ResponseInfo& second,
+      const app_mngr::commands::ResponseInfo& third) const;
+
+  /**
+   * @brief Prepare result code for sending to mobile application
+   * @param first contains result_code from HMI response and
+   * interface that returns response
+   * @param second contains result_code from HMI response and
+   * interface that returns response.
+   * * @param third contains result_code from HMI response and
+   * interface that returns response.
+   * @return resulting code for sending to mobile application.
+   */
+  mobile_apis::Result::eType PrepareResultCodeForResponse(
+      const app_mngr::commands::ResponseInfo& first,
+      const app_mngr::commands::ResponseInfo& second,
+      const app_mngr::commands::ResponseInfo& third);
+
+  /**
+   * @brief Resolves if the return code must be
+   * UNSUPPORTED_RESOURCE
+   * @param first contains result_code from HMI response and
+   * interface that returns response
+   * @param second contains result_code from HMI response and
+   * interface that returns response.
+   * * @param third contains result_code from HMI response and
+   * interface that returns response.
+   * @return True, if the communication return code must be
+   * UNSUPPORTED_RESOURCE, otherwise false.
+   */
+  bool IsResultCodeUnsupported(
+      const app_mngr::commands::ResponseInfo& first,
+      const app_mngr::commands::ResponseInfo& second,
+      const app_mngr::commands::ResponseInfo& third) const;
+
  private:
+  /**
+   * @brief MergeInfos merge 2 infos into one string with info
+   * @param first_info -contains result_code from HMI response and
+   * interface that returns response
+   * @param first_str - info string that should be first in result info
+   * @param second_info -contains result_code from HMI response and
+   * interface that returns response
+   * @param second_str - info string that should be second in result info
+   * @param third_info - contains result_code from HMI response and
+   * interface that returns response
+   * @param third_str - info string that should be third in result info
+   * @return if first_info is not available and second_str and third_info not
+   * empty return second if second_info is not available and first_str and
+   * third_info not empty return first if third_info is not available and
+   * first_str and second_str not empty return first other cases return result
+   * MergeInfos for 2 params
+   */
+  std::string MergeInfos(const app_mngr::commands::ResponseInfo& first_info,
+                         const std::string& first_str,
+                         const app_mngr::commands::ResponseInfo& second_info,
+                         const std::string& second_str,
+                         const app_mngr::commands::ResponseInfo& third_info,
+                         const std::string& third_str);
+
   // prepare UI sending data (VrHelps, Menus, Keyboard) to SmartObject
   static void PrepareUIRequestVRHelpData(
       const app_mngr::ApplicationSharedPtr app,
@@ -100,6 +169,9 @@ class SetGlobalPropertiesRequest
 
   // Send UI request to HMI
   void SendUIRequest(const smart_objects::SmartObject& params, bool use_events);
+
+  // Send SetGlobalProperties with userLocation parameter
+  void SendRCRequest(const smart_objects::SmartObject& params, bool use_events);
 
   // VRHelp shall contain sequential positions and start from 1
   static bool CheckVrHelpItemsOrder(const smart_objects::SmartObject& vr_help);
@@ -140,19 +212,25 @@ class SetGlobalPropertiesRequest
 
   bool is_ui_send_;
   bool is_tts_send_;
+  bool is_rc_send_;
 
   bool is_ui_received_;
   bool is_tts_received_;
+  bool is_rc_received_;
 
   hmi_apis::Common_Result::eType ui_result_;
   hmi_apis::Common_Result::eType tts_result_;
+  hmi_apis::Common_Result::eType rc_result_;
   std::string ui_response_info_;
   std::string tts_response_info_;
+  std::string rc_response_info_;
+
+  bool is_menu_layout_available_ = true;
 
   DISALLOW_COPY_AND_ASSIGN(SetGlobalPropertiesRequest);
 };
 
 }  // namespace commands
-}  // namespace application_manager
+}  // namespace sdl_rpc_plugin
 
 #endif  // SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_MOBILE_SET_GLOBAL_PROPERTIES_REQUEST_H_

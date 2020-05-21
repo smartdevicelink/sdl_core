@@ -32,12 +32,12 @@
  */
 
 #include "sdl_rpc_plugin/commands/hmi/on_app_permission_consent_notification.h"
-#include "application_manager/application_manager.h"
-#include "application_manager/policies/policy_handler.h"
-#include "application_manager/message_helper.h"
 #include <algorithm>
 #include <functional>
 #include <string>
+#include "application_manager/application_manager.h"
+#include "application_manager/message_helper.h"
+#include "application_manager/policies/policy_handler.h"
 #include "policy/policy_types.h"
 #include "smart_objects/smart_object.h"
 
@@ -178,5 +178,5 @@ void OnAppPermissionConsentNotification::Run() {
   policy_handler_.OnAppPermissionConsent(connection_key, permission_consent);
 #endif
 }
-}  // commands
-}  // namespace application_manager
+}  // namespace commands
+}  // namespace sdl_rpc_plugin

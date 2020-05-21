@@ -30,30 +30,30 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <string>
 #include <algorithm>
-#include "gtest/gtest.h"
+#include <string>
 #include "application_manager/mock_application.h"
 #include "application_manager/mock_application_manager_settings.h"
+#include "gtest/gtest.h"
 #include "interfaces/MOBILE_API.h"
 #include "utils/sqlite_wrapper/sql_database.h"
 #include "utils/sqlite_wrapper/sql_query.h"
 
-#include "utils/file_system.h"
 #include "application_manager/resumption_data_test.h"
 #include "application_manager/test_resumption_data_db.h"
+#include "utils/file_system.h"
 
-#include "application_manager/resumption/resumption_sql_queries.h"
 #include "application_manager/resumption/resumption_data_db.h"
+#include "application_manager/resumption/resumption_sql_queries.h"
 
 namespace test {
 namespace components {
 namespace resumption_test {
 
+using application_manager_test::MockApplication;
+using ::testing::_;
 using ::testing::NiceMock;
 using ::testing::ReturnRef;
-using ::testing::_;
-using application_manager_test::MockApplication;
 
 namespace am = application_manager;
 using namespace file_system;
@@ -344,7 +344,8 @@ void ResumptionDataDBTest::CheckCharacters(int64_t global_properties_key) {
     while (select_characters.Next()) {
       std::string character =
           (*keyboard_props_)[am::strings::limited_character_list]
-                            [characters_idx++].asString();
+                            [characters_idx++]
+                                .asString();
       EXPECT_EQ(character, select_characters.GetString(0));
     }
   }
@@ -392,16 +393,17 @@ void ResumptionDataDBTest::CheckCommandsData() {
       ++i;
       uint cmd = (*test_commands_map[i])[am::strings::cmd_id].asUInt();
       EXPECT_EQ(cmd, select_commands.GetUInteger(1));
-      std::string name =
-          (*test_commands_map[i])[am::strings::menu_params]
-                                 [am::strings::menu_name].asString();
+      std::string name = (*test_commands_map[i])[am::strings::menu_params]
+                                                [am::strings::menu_name]
+                                                    .asString();
       EXPECT_EQ(name, select_commands.GetString(2));
       int position = (*test_commands_map[i])[am::strings::menu_params]
-                                            [am::strings::position].asInt();
+                                            [am::strings::position]
+                                                .asInt();
       EXPECT_EQ(position, select_commands.GetInteger(4));
-      int parent_id =
-          (*test_commands_map[i])[am::strings::menu_params]
-                                 [am::hmi_request::parent_id].asInt();
+      int parent_id = (*test_commands_map[i])[am::strings::menu_params]
+                                             [am::hmi_request::parent_id]
+                                                 .asInt();
       EXPECT_EQ(parent_id, select_commands.GetInteger(3));
       std::string icon_name =
           (*test_commands_map[i])[am::strings::cmd_icon][am::strings::value]
@@ -409,7 +411,8 @@ void ResumptionDataDBTest::CheckCommandsData() {
       EXPECT_EQ(icon_name, select_commands.GetString(5));
 
       int icon_type = (*test_commands_map[i])[am::strings::cmd_icon]
-                                             [am::strings::image_type].asInt();
+                                             [am::strings::image_type]
+                                                 .asInt();
       EXPECT_EQ(icon_type, select_commands.GetInteger(6));
 
       j = 0;
@@ -461,12 +464,12 @@ void ResumptionDataDBTest::CheckChoiceSetData() {
       std::string menu_name =
           command[am::strings::choice_set][choice_idx][am::strings::menu_name]
               .asString();
-      std::string secondary_text =
-          command[am::strings::choice_set][choice_idx]
-                 [am::strings::secondary_text].asString();
-      std::string tertiary_text =
-          command[am::strings::choice_set][choice_idx]
-                 [am::strings::tertiary_text].asString();
+      std::string secondary_text = command[am::strings::choice_set][choice_idx]
+                                          [am::strings::secondary_text]
+                                              .asString();
+      std::string tertiary_text = command[am::strings::choice_set][choice_idx]
+                                         [am::strings::tertiary_text]
+                                             .asString();
 
       EXPECT_EQ(choice_id, select_choice_set.GetInteger(4));
       EXPECT_EQ(menu_name, select_choice_set.GetString(5));
@@ -478,12 +481,12 @@ void ResumptionDataDBTest::CheckChoiceSetData() {
       EXPECT_TRUE(select_image.Prepare(kSelectImage));
       select_image.Bind(0, select_choice_set.GetLongInt(8));
       EXPECT_TRUE(select_image.Exec());
-      std::string image_value =
-          command[am::strings::choice_set][choice_idx][am::strings::image]
-                 [am::strings::value].asString();
-      int image_type =
-          command[am::strings::choice_set][choice_idx][am::strings::image]
-                 [am::strings::image_type].asInt();
+      std::string image_value = command[am::strings::choice_set][choice_idx]
+                                       [am::strings::image][am::strings::value]
+                                           .asString();
+      int image_type = command[am::strings::choice_set][choice_idx]
+                              [am::strings::image][am::strings::image_type]
+                                  .asInt();
       EXPECT_EQ(image_value, select_image.GetString(1));
       EXPECT_EQ(image_type, select_image.GetInteger(0));
 
@@ -491,9 +494,9 @@ void ResumptionDataDBTest::CheckChoiceSetData() {
       EXPECT_TRUE(select_image.Prepare(kSelectImage));
       select_image.Bind(0, select_choice_set.GetLongInt(9));
       EXPECT_TRUE(select_image.Exec());
-      image_value =
-          command[am::strings::choice_set][choice_idx]
-                 [am::strings::secondary_image][am::strings::value].asString();
+      image_value = command[am::strings::choice_set][choice_idx]
+                           [am::strings::secondary_image][am::strings::value]
+                               .asString();
       image_type =
           command[am::strings::choice_set][choice_idx]
                  [am::strings::secondary_image][am::strings::image_type]
@@ -503,9 +506,9 @@ void ResumptionDataDBTest::CheckChoiceSetData() {
 
       vr_cmd_idx = 0;
     }
-    std::string vr_comm =
-        command[am::strings::choice_set][choice_idx][am::strings::vr_commands]
-               [vr_cmd_idx++].asString();
+    std::string vr_comm = command[am::strings::choice_set][choice_idx]
+                                 [am::strings::vr_commands][vr_cmd_idx++]
+                                     .asString();
     EXPECT_EQ(vr_comm, select_choice_set.GetString(10));
   }
 }

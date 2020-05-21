@@ -32,8 +32,8 @@
 
 #include <algorithm>
 #include <fstream>
-#include <vector>
 #include <string>
+#include <vector>
 
 #include "gtest/gtest.h"
 #include "utils/file_system.h"
@@ -57,7 +57,7 @@ StringArray MergeStringsToArray(const std::string& first,
 
   return array_of_strings;
 }
-}
+}  // namespace
 
 TEST(FileSystemTest, CreateDeleteDirectory) {
   ASSERT_FALSE(DirectoryExists("./Test directory"));

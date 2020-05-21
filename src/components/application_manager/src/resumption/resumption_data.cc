@@ -31,9 +31,9 @@
  */
 
 #include "application_manager/resumption/resumption_data.h"
-#include "utils/logger.h"
-#include "application_manager/smart_object_keys.h"
 #include "application_manager/application_manager_settings.h"
+#include "application_manager/smart_object_keys.h"
+#include "utils/logger.h"
 
 namespace resumption {
 
@@ -196,6 +196,52 @@ smart_objects::SmartObject ResumptionData::GetApplicationFiles(
     }
   }
   return files;
+}
+
+smart_objects::SmartObject ResumptionData::GetApplicationWidgetsInfo(
+    app_mngr::ApplicationConstSharedPtr application) const {
+  using namespace app_mngr;
+  LOG4CXX_AUTO_TRACE(logger_);
+  smart_objects::SmartObject windows_info =
+      smart_objects::SmartObject(smart_objects::SmartType_Array);
+  DCHECK_OR_RETURN(application, windows_info);
+  const auto window_ids = application->GetWindowIds();
+  const auto& window_optional_params_map =
+      application->window_optional_params_map().GetData();
+  for (const auto& window_id : window_ids) {
+    const HmiStatePtr hmi_state = application->CurrentHmiState(window_id);
+    if (mobile_apis::WindowType::WIDGET != hmi_state->window_type()) {
+      continue;
+    }
+    auto info = CreateWindowInfoSO(
+        window_id, hmi_state->window_type(), window_optional_params_map);
+
+    windows_info[windows_info.length()] = info;
+  }
+  return windows_info;
+}
+
+smart_objects::SmartObject ResumptionData::CreateWindowInfoSO(
+    const app_mngr::WindowID window_id,
+    const mobile_apis::WindowType::eType window_type,
+    const app_mngr::WindowParamsMap& window_optional_params_map) const {
+  using namespace app_mngr;
+  LOG4CXX_AUTO_TRACE(logger_);
+  auto window_info = smart_objects::SmartObject(smart_objects::SmartType_Map);
+
+  window_info[strings::window_id] = window_id;
+  window_info[strings::window_type] = window_type;
+
+  const auto& it_info = window_optional_params_map.find(window_id);
+  if (window_optional_params_map.end() != it_info) {
+    const auto keys = it_info->second->enumerate();
+
+    for (const auto& key : keys) {
+      window_info[key] = (*it_info->second)[key];
+    }
+  }
+
+  return window_info;
 }
 
 smart_objects::SmartObject ResumptionData::PointerToSmartObj(

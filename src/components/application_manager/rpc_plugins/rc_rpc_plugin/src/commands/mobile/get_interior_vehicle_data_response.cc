@@ -31,6 +31,7 @@
  */
 
 #include "rc_rpc_plugin/commands/mobile/get_interior_vehicle_data_response.h"
+#include "rc_rpc_plugin/rc_helpers.h"
 #include "utils/macro.h"
 
 namespace rc_rpc_plugin {
@@ -49,6 +50,9 @@ GetInteriorVehicleDataResponse::~GetInteriorVehicleDataResponse() {}
 
 void GetInteriorVehicleDataResponse::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
+
+  RCHelpers::RemoveRedundantGPSDataFromIVDataMsg(
+      (*message_)[app_mngr::strings::msg_params]);
   application_manager_.GetRPCService().SendMessageToMobile(message_);
 }
 

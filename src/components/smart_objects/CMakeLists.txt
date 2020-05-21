@@ -34,6 +34,8 @@ include_directories(
   ${COMPONENTS_DIR}/include
   ${COMPONENTS_DIR}/smart_objects/include
   ${COMPONENTS_DIR}/utils/include
+  ${CMAKE_BINARY_DIR}/src/components/interfaces
+  ${BOOST_INCLUDE_DIR}
 )
 
 set(PATHS
@@ -44,6 +46,7 @@ collect_sources(SOURCES "${PATHS}")
 
 add_library("SmartObjects" ${SOURCES})
 target_link_libraries("SmartObjects" Utils)
+add_dependencies("SmartObjects" MOBILE_API)
 
 if(ENABLE_LOG)
   target_link_libraries("SmartObjects" log4cxx -L${LOG4CXX_LIBS_DIRECTORY})

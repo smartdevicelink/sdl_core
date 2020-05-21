@@ -33,8 +33,8 @@
 #ifndef SRC_COMPONENTS_CONNECTION_HANDLER_INCLUDE_CONNECTION_HANDLER_DEVICE_H_
 #define SRC_COMPONENTS_CONNECTION_HANDLER_INCLUDE_CONNECTION_HANDLER_DEVICE_H_
 
-#include <string>
 #include <map>
+#include <string>
 #include <vector>
 #include "transport_manager/common.h"
 
@@ -77,9 +77,9 @@ class Device {
   std::string user_friendly_name() const;
 
   /**
-      *\brief Also should be used for iOS USB connections
-      *(better not know why this same method)
-      */
+   *\brief Also should be used for iOS USB connections
+   *(better not know why this same method)
+   */
   std::string mac_address() const;
 
   /**

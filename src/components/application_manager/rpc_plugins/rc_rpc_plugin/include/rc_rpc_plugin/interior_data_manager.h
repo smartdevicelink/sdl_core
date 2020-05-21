@@ -41,8 +41,15 @@ namespace rc_rpc_plugin {
 namespace app_mngr = application_manager;
 namespace plugins = application_manager::plugin_manager;
 
+/**
+ * @brief ModuleUid uniquely identify a module
+ * moduleType + moduleID
+ */
+typedef std::pair<std::string, std::string> ModuleUid;
+
 class InteriorDataManager {
  public:
+  virtual ~InteriorDataManager() {}
   /**
    * @brief OnPolicyEvent Processes policy related events
    * @param event Policy event
@@ -50,10 +57,10 @@ class InteriorDataManager {
   virtual void OnPolicyEvent(app_mngr::plugin_manager::PolicyEvent event) = 0;
 
   /**
-    * @brief OnApplicationEvent Notifies modules on certain application events
-    * @param event Event
-    * @param application Pointer to application struct
-    */
+   * @brief OnApplicationEvent Notifies modules on certain application events
+   * @param event Event
+   * @param application Pointer to application struct
+   */
   virtual void OnApplicationEvent(
       plugins::ApplicationEvent event,
       app_mngr::ApplicationSharedPtr application) = 0;
@@ -67,18 +74,19 @@ class InteriorDataManager {
   /**
    * @brief StoreRequestToHMITime save information and time stamp of
    * current interior data subscriptions
+   * @param module Module resource (module_type + module_id)
    */
-  virtual void StoreRequestToHMITime(const std::string& module_type) = 0;
+  virtual void StoreRequestToHMITime(const ModuleUid& module) = 0;
 
   /**
- * @brief CheckRequestsToHMIFrequency check that rate limits are not allowed of
- * bounce during current time frame.
- * calculate amount of requests per module type in time frame and checks if it
- * bigger then allowed by ini file
- * @param module_type moduletype to calculate frequency on
- * @return true if amount of requests was not exceeded, otherwise return false.
- */
-  virtual bool CheckRequestsToHMIFrequency(const std::string& module_type) = 0;
+   * @brief CheckRequestsToHMIFrequency check that rate limits are not allowed
+   * of bounce during current time frame. calculate amount of requests per
+   * module in time frame and checks if it bigger then allowed by ini file
+   * @param module module to calculate frequency on
+   * @return true if amount of requests was not exceeded, otherwise return
+   * false.
+   */
+  virtual bool CheckRequestsToHMIFrequency(const ModuleUid& module) = 0;
 };
 
 }  // namespace rc_rpc_plugin

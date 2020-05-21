@@ -30,22 +30,22 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "gtest/gtest.h"
-#include <fstream>
-#include <stdint.h>
-#include <vector>
 #include "connection_handler/connection_handler_impl.h"
+#include <stdint.h>
+#include <fstream>
+#include <vector>
+#include "gtest/gtest.h"
 #include "protocol/common.h"
 // TODO(EZamakhov): move security test
 #ifdef ENABLE_SECURITY
 #include "security_manager/mock_security_manager.h"
 #include "security_manager/mock_ssl_context.h"
 #endif  // ENABLE_SECURITY
-#include "protocol_handler/mock_protocol_handler.h"
 #include "connection_handler/mock_connection_handler_observer.h"
 #include "connection_handler/mock_connection_handler_settings.h"
-#include "transport_manager/mock_transport_manager.h"
 #include "encryption/hashing.h"
+#include "protocol_handler/mock_protocol_handler.h"
+#include "transport_manager/mock_transport_manager.h"
 #include "utils/test_async_waiter.h"
 
 namespace test {
@@ -333,7 +333,8 @@ class ConnectionHandlerTest : public ::testing::Test {
     connection_handler_->set_connection_handler_observer(
         &temp_connection_handler_observer);
     EXPECT_CALL(temp_connection_handler_observer,
-                OnServiceStartedCallback(_, _, service_type, _)).Times(1);
+                OnServiceStartedCallback(_, _, service_type, _))
+        .Times(1);
 
     connection_handler_->OnSessionStartedCallback(2u,
                                                   out_context_.new_session_id_,
@@ -635,7 +636,8 @@ TEST_F(ConnectionHandlerTest, OnApplicationFloodCallBack) {
   connection_handler_->set_protocol_handler(&mock_protocol_handler_);
 
   EXPECT_CALL(mock_protocol_handler_,
-              SendEndSession(uid_, out_context_.new_session_id_)).Times(1);
+              SendEndSession(uid_, out_context_.new_session_id_))
+      .Times(1);
   InSequence seq;
   EXPECT_CALL(mock_connection_handler_observer,
               OnServiceEndedCallback(connection_key_, kMobileNav, kCommon));
@@ -753,7 +755,8 @@ TEST_F(ConnectionHandlerTest, UpdateDeviceList) {
 
   // New value that sets in OnDeviceListUpdated does not add
   EXPECT_CALL(mock_connection_handler_observer,
-              OnDeviceListUpdated(CheckDevList(map_with_unused_var))).Times(0);
+              OnDeviceListUpdated(CheckDevList(map_with_unused_var)))
+      .Times(0);
 
   connection_handler_->OnDeviceListUpdated(unused_info);
 }
@@ -784,7 +787,9 @@ TEST_F(ConnectionHandlerTest, StartTransportManager) {
   AddTestDeviceConnection();
   AddTestSession();
 
-  EXPECT_CALL(mock_transport_manager_, Visibility(true));
+  EXPECT_CALL(mock_transport_manager_,
+              PerformActionOnClients(
+                  transport_manager::TransportAction::kVisibilityOn));
   connection_handler_->StartTransportManager();
 }
 
@@ -1021,7 +1026,8 @@ TEST_F(ConnectionHandlerTest, CloseSessionWithMalformedMessage) {
   TestAsyncWaiter waiter;
   uint32_t times = 0;
   EXPECT_CALL(mock_protocol_handler_,
-              SendEndSession(uid_, out_context_.new_session_id_)).Times(0);
+              SendEndSession(uid_, out_context_.new_session_id_))
+      .Times(0);
 
   InSequence seq;
   EXPECT_CALL(mock_connection_handler_observer,
@@ -1061,7 +1067,8 @@ TEST_F(ConnectionHandlerTest, CloseConnectionSessionsWithMalformedMessage) {
   TestAsyncWaiter waiter;
   uint32_t times = 0;
   EXPECT_CALL(mock_protocol_handler_,
-              SendEndSession(uid_, out_context_.new_session_id_)).Times(0);
+              SendEndSession(uid_, out_context_.new_session_id_))
+      .Times(0);
 
   InSequence seq;
   EXPECT_CALL(mock_connection_handler_observer,
@@ -2063,7 +2070,8 @@ TEST_F(ConnectionHandlerTest, StartStopSecondarySession) {
                                            secondary_uid);
 
   EXPECT_CALL(mock_connection_handler_observer,
-              OnSecondaryTransportStartedCallback(device_handle_, _)).Times(1);
+              OnSecondaryTransportStartedCallback(device_handle_, _))
+      .Times(1);
 
   connection_handler_->OnSecondaryTransportStarted(
       uid_, secondary_uid, out_context_.new_session_id_);
@@ -2084,11 +2092,14 @@ TEST_F(ConnectionHandlerTest, StartStopSecondarySession) {
   connection_handler_->set_connection_handler_observer(
       &mock_connection_handler_observer);
   EXPECT_CALL(mock_connection_handler_observer,
-              OnSecondaryTransportEndedCallback(_)).Times(1);
+              OnSecondaryTransportEndedCallback(_))
+      .Times(1);
   EXPECT_CALL(mock_connection_handler_observer,
-              OnServiceEndedCallback(_, kAudio, _)).Times(1);
+              OnServiceEndedCallback(_, kAudio, _))
+      .Times(1);
   EXPECT_CALL(mock_connection_handler_observer,
-              OnServiceEndedCallback(_, kMobileNav, _)).Times(1);
+              OnServiceEndedCallback(_, kMobileNav, _))
+      .Times(1);
 
   connection_handler_->OnSecondaryTransportEnded(uid_, secondary_uid);
 
@@ -2120,7 +2131,8 @@ TEST_F(ConnectionHandlerTest, StopSecondarySession_NoService) {
                                            secondary_uid);
 
   EXPECT_CALL(mock_connection_handler_observer,
-              OnSecondaryTransportStartedCallback(device_handle_, _)).Times(1);
+              OnSecondaryTransportStartedCallback(device_handle_, _))
+      .Times(1);
   connection_handler_->OnSecondaryTransportStarted(
       uid_, secondary_uid, out_context_.new_session_id_);
 

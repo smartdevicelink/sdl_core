@@ -30,13 +30,13 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <string>
 #include <iostream>
-#include "gtest/gtest.h"
-#include "connection_handler/heartbeat_monitor.h"
+#include <string>
 #include "connection_handler/connection.h"
 #include "connection_handler/connection_handler.h"
+#include "connection_handler/heartbeat_monitor.h"
 #include "connection_handler/mock_connection_handler.h"
+#include "gtest/gtest.h"
 #include "utils/test_async_waiter.h"
 
 namespace {
@@ -44,14 +44,14 @@ const int32_t MILLISECONDS_IN_SECOND = 1000;
 const int32_t MICROSECONDS_IN_MILLISECONDS = 1000;
 const int32_t MICROSECONDS_IN_SECOND = 1000 * 1000;
 const uint32_t kTime_offset = 20u;
-}
+}  // namespace
 
 namespace test {
 namespace components {
 namespace connection_handler_test {
 
-using ::testing::DoAll;
 using ::testing::_;
+using ::testing::DoAll;
 using ::testing::Return;
 
 class HeartBeatMonitorTest : public testing::Test {

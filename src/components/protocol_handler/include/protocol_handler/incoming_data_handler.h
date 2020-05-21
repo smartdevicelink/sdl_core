@@ -34,9 +34,9 @@
 
 #include <map>
 #include <vector>
-#include "utils/macro.h"
 #include "protocol_handler/protocol_packet.h"
 #include "transport_manager/common.h"
+#include "utils/macro.h"
 
 namespace protocol_handler {
 

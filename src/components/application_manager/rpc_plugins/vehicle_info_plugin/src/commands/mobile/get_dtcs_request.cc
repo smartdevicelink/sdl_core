@@ -34,8 +34,8 @@
 #include "vehicle_info_plugin/commands/mobile/get_dtcs_request.h"
 
 #include "application_manager/application_impl.h"
-#include "interfaces/HMI_API.h"
 #include "application_manager/message_helper.h"
+#include "interfaces/HMI_API.h"
 
 namespace vehicle_info_plugin {
 using namespace application_manager;
@@ -44,15 +44,12 @@ namespace commands {
 
 GetDTCsRequest::GetDTCsRequest(
     const application_manager::commands::MessageSharedPtr& message,
-    ApplicationManager& application_manager,
-    rpc_service::RPCService& rpc_service,
-    HMICapabilities& hmi_capabilities,
-    policy::PolicyHandlerInterface& policy_handler)
+    const VehicleInfoCommandParams& params)
     : CommandRequestImpl(message,
-                         application_manager,
-                         rpc_service,
-                         hmi_capabilities,
-                         policy_handler) {}
+                         params.application_manager_,
+                         params.rpc_service_,
+                         params.hmi_capabilities_,
+                         params.policy_handler_) {}
 
 GetDTCsRequest::~GetDTCsRequest() {}
 
@@ -116,4 +113,4 @@ void GetDTCsRequest::on_event(const event_engine::Event& event) {
 
 }  // namespace commands
 
-}  // namespace application_manager
+}  // namespace vehicle_info_plugin

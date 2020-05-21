@@ -31,11 +31,11 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <string>
-#include <cstring>
-#include <algorithm>
-#include <vector>
 #include "sdl_rpc_plugin/commands/mobile/create_interaction_choice_set_request.h"
+#include <algorithm>
+#include <cstring>
+#include <string>
+#include <vector>
 
 #include "application_manager/application_impl.h"
 #include "application_manager/message_helper.h"
@@ -63,6 +63,7 @@ CreateInteractionChoiceSetRequest::CreateInteractionChoiceSetRequest(
     , choice_set_id_(0)
     , expected_chs_count_(0)
     , received_chs_count_(0)
+    , should_send_warnings_(false)
     , error_from_hmi_(false)
     , is_timed_out_(false) {}
 
@@ -80,7 +81,7 @@ void CreateInteractionChoiceSetRequest::Run() {
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     return;
   }
-  should_send_warnings = false;
+
   for (uint32_t i = 0;
        i < (*message_)[strings::msg_params][strings::choice_set].length();
        ++i) {
@@ -109,7 +110,7 @@ void CreateInteractionChoiceSetRequest::Run() {
       return;
     } else if (verification_result_image == Result::WARNINGS ||
                verification_result_secondary_image == Result::WARNINGS) {
-      should_send_warnings = true;
+      should_send_warnings_ = true;
       break;
     }
   }
@@ -217,9 +218,9 @@ bool CreateInteractionChoiceSetRequest::compareSynonyms(
                           CreateInteractionChoiceSetRequest::compareStr);
 
   if (it != vr_cmds_1->end()) {
-    LOG4CXX_INFO(logger_,
-                 "Incoming choice set has duplicated VR synonyms "
-                     << it->asString());
+    LOG4CXX_INFO(
+        logger_,
+        "Incoming choice set has duplicated VR synonyms " << it->asString());
     return true;
   }
 
@@ -331,9 +332,9 @@ void CreateInteractionChoiceSetRequest::SendVRAddCommandRequests(
 
     VRCommandInfo vr_command(vr_cmd_id);
     sent_commands_map_[vr_corr_id] = vr_command;
-    LOG4CXX_DEBUG(logger_,
-                  "VR_command sent corr_id " << vr_corr_id << " cmd_id "
-                                             << vr_corr_id);
+    LOG4CXX_DEBUG(
+        logger_,
+        "VR_command sent corr_id " << vr_corr_id << " cmd_id " << vr_corr_id);
   }
   expected_chs_count_ = chs_num;
   LOG4CXX_DEBUG(logger_, "expected_chs_count_ = " << expected_chs_count_);
@@ -465,7 +466,7 @@ void CreateInteractionChoiceSetRequest::DeleteChoices() {
 void CreateInteractionChoiceSetRequest::OnAllHMIResponsesReceived() {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  if (!error_from_hmi_ && should_send_warnings) {
+  if (!error_from_hmi_ && should_send_warnings_) {
     SendResponse(true, mobile_apis::Result::WARNINGS, kInvalidImageWarningInfo);
   } else if (!error_from_hmi_) {
     SendResponse(true, mobile_apis::Result::SUCCESS);
@@ -479,4 +480,4 @@ void CreateInteractionChoiceSetRequest::OnAllHMIResponsesReceived() {
 
 }  // namespace commands
 
-}  // namespace application_manager
+}  // namespace sdl_rpc_plugin

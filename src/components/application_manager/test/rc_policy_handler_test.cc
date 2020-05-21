@@ -30,34 +30,34 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <fstream>
 #include <string>
 #include <vector>
-#include <fstream>
 #include "gmock/gmock.h"
 
-#include "application_manager/policies/policy_handler.h"
-#include "application_manager/policies/delegates/app_permission_delegate.h"
-#include "policy/mock_cache_manager.h"
 #include "application_manager/mock_message_helper.h"
+#include "application_manager/policies/delegates/app_permission_delegate.h"
+#include "application_manager/policies/policy_handler.h"
 #include "connection_handler/mock_connection_handler_settings.h"
-#include "policy/policy_types.h"
-#include "policy/access_remote.h"
 #include "json/reader.h"
-#include "json/writer.h"
 #include "json/value.h"
+#include "json/writer.h"
+#include "policy/access_remote.h"
+#include "policy/mock_cache_manager.h"
+#include "policy/policy_types.h"
 #include "smart_objects/smart_object.h"
 
-#include "utils/custom_string.h"
-#include "interfaces/MOBILE_API.h"
-#include "policy/mock_policy_settings.h"
 #include "application_manager/mock_application.h"
+#include "application_manager/mock_application_manager.h"
+#include "application_manager/mock_event_dispatcher.h"
+#include "application_manager/policies/mock_policy_handler_observer.h"
+#include "connection_handler/mock_connection_handler.h"
+#include "interfaces/MOBILE_API.h"
+#include "policy/mock_policy_manager.h"
+#include "policy/mock_policy_settings.h"
 #include "policy/usage_statistics/mock_statistics_manager.h"
 #include "protocol_handler/mock_session_observer.h"
-#include "connection_handler/mock_connection_handler.h"
-#include "application_manager/mock_application_manager.h"
-#include "application_manager/policies/mock_policy_handler_observer.h"
-#include "application_manager/mock_event_dispatcher.h"
-#include "policy/mock_policy_manager.h"
+#include "utils/custom_string.h"
 
 namespace test {
 namespace components {
@@ -150,58 +150,6 @@ class RCPolicyHandlerTest : public ::testing::Test {
     ChangePolicyManagerToMock();
   }
 };
-
-TEST_F(RCPolicyHandlerTest,
-       SendMessageToSDK_RemoteControlInvalidMobileAppId_UNSUCCESS) {
-  // Precondition
-  BinaryMessage msg;
-  EnablePolicyAndPolicyManagerMock();
-
-  EXPECT_CALL(app_manager_, applications()).WillOnce(Return(app_set));
-  test_app.insert(mock_app_);
-
-  ON_CALL(*mock_app_, app_id()).WillByDefault(Return(kAppId1_));
-  ON_CALL(*mock_app_, hmi_level())
-      .WillByDefault(Return(mobile_apis::HMILevel::HMI_FULL));
-  EXPECT_CALL(*mock_app_, IsRegistered()).WillOnce(Return(true));
-
-  EXPECT_CALL(app_manager_, application(kAppId1_))
-      .WillRepeatedly(Return(mock_app_));
-  const std::string empty_mobile_app_id("");
-  EXPECT_CALL(*mock_app_, policy_app_id())
-      .WillOnce(Return(empty_mobile_app_id));
-
-  EXPECT_CALL(*mock_policy_manager_, GetUserConsentForDevice(_))
-      .WillOnce(Return(kDeviceAllowed));
-
-  EXPECT_CALL(mock_message_helper_, SendPolicySnapshotNotification(_, _, _, _))
-      .Times(0);
-  EXPECT_FALSE(policy_handler_.SendMessageToSDK(msg, kUrl_));
-}
-
-TEST_F(RCPolicyHandlerTest, SendMessageToSDK_RemoteControl_SUCCESS) {
-  BinaryMessage msg;
-  EnablePolicyAndPolicyManagerMock();
-  EXPECT_CALL(app_manager_, applications()).WillOnce(Return(app_set));
-  test_app.insert(mock_app_);
-
-  ON_CALL(*mock_app_, app_id()).WillByDefault(Return(kAppId1_));
-  ON_CALL(*mock_app_, hmi_level())
-      .WillByDefault(Return(mobile_apis::HMILevel::HMI_FULL));
-  EXPECT_CALL(*mock_app_, IsRegistered()).WillOnce(Return(true));
-
-  EXPECT_CALL(app_manager_, application(kAppId1_))
-      .WillRepeatedly(Return(mock_app_));
-
-  EXPECT_CALL(*mock_app_, policy_app_id()).WillOnce(Return(kPolicyAppId_));
-
-  EXPECT_CALL(*mock_policy_manager_, GetUserConsentForDevice(_))
-      .WillOnce(Return(kDeviceAllowed));
-
-  EXPECT_CALL(mock_message_helper_,
-              SendPolicySnapshotNotification(kAppId1_, _, kUrl_, _));
-  EXPECT_TRUE(policy_handler_.SendMessageToSDK(msg, kUrl_));
-}
 
 TEST_F(RCPolicyHandlerTest, OnUpdateHMILevel_InvalidApp_UNSUCCESS) {
   EnablePolicyAndPolicyManagerMock();

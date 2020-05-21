@@ -30,8 +30,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 #include "protocol_handler/incoming_data_handler.h"
-#include "utils/logger.h"
 #include "protocol/common.h"
+#include "utils/logger.h"
 
 namespace protocol_handler {
 

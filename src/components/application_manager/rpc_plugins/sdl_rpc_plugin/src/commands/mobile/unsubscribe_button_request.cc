@@ -72,7 +72,7 @@ void UnsubscribeButtonRequest::Run() {
       static_cast<mobile_apis::ButtonName::eType>(
           (*message_)[str::msg_params][str::button_name].asInt());
 
-  if (app->msg_version() <= utils::version_4_5 &&
+  if (app->msg_version() < utils::rpc_version_5 &&
       btn_id == mobile_apis::ButtonName::OK && app->is_media_application()) {
     bool ok_supported = CheckHMICapabilities(mobile_apis::ButtonName::OK);
     bool play_pause_supported =
@@ -94,7 +94,7 @@ void UnsubscribeButtonRequest::Run() {
 
   if (!app->UnsubscribeFromButton(
           static_cast<mobile_apis::ButtonName::eType>(btn_id))) {
-    LOG4CXX_ERROR(logger_, "App doesn't subscibe to button " << btn_id);
+    LOG4CXX_ERROR(logger_, "App doesn't subscribe to button " << btn_id);
     SendResponse(false, mobile_apis::Result::IGNORED);
     return;
   }
@@ -123,4 +123,4 @@ void UnsubscribeButtonRequest::SendUnsubscribeButtonNotification() {
 
 }  // namespace commands
 
-}  // namespace application_manager
+}  // namespace sdl_rpc_plugin

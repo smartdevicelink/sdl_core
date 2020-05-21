@@ -35,8 +35,8 @@
 
 #include "application_manager/application_impl.h"
 #include "application_manager/message_helper.h"
-#include "interfaces/MOBILE_API.h"
 #include "interfaces/HMI_API.h"
+#include "interfaces/MOBILE_API.h"
 #include "utils/helpers.h"
 
 namespace sdl_rpc_plugin {
@@ -204,8 +204,9 @@ void DeleteCommandRequest::on_event(const event_engine::Event& event) {
 
   if (!command) {
     LOG4CXX_ERROR(logger_,
-                  "Command id " << cmd_id << " not found for "
-                                             "application with connection key "
+                  "Command id " << cmd_id
+                                << " not found for "
+                                   "application with connection key "
                                 << connection_key());
     return;
   }
@@ -232,4 +233,4 @@ bool DeleteCommandRequest::IsPendingResponseExist() {
 
 }  // namespace commands
 
-}  // namespace application_manager
+}  // namespace sdl_rpc_plugin

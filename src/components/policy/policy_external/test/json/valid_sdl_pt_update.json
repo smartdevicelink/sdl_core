@@ -20,7 +20,13 @@
             "nicknames" : [ "SyncProxyTester" ],
             "priority" : "EMERGENCY",
             "steal_focus" : true,
-            "heart_beat_timeout_ms": 5000
+            "heart_beat_timeout_ms": 5000,
+            "app_services": {
+               "MEDIA": {
+                  "service_names" : ["SDL App", "SDL Music"],
+                  "handled_rpcs" : [{"function_id": 41}]
+               }
+            }
          },
          "default" : {
             "default_hmi" : "NONE",
@@ -1598,6 +1604,7 @@
                      "headLampStatus",
                      "instantFuelConsumption",
                      "fuelRange",
+                     "cloudAppVehicleID",
                      "odometer",
                      "tirePressure",
                      "vin",
@@ -1616,6 +1623,7 @@
                      "headLampStatus",
                      "instantFuelConsumption",
                      "fuelRange",
+                     "cloudAppVehicleID",
                      "odometer",
                      "tirePressure",
                      "vin",
@@ -1634,6 +1642,7 @@
                      "headLampStatus",
                      "instantFuelConsumption",
                      "fuelRange",
+                     "cloudAppVehicleID",
                      "odometer",
                      "tirePressure",
                      "wiperStatus"
@@ -1651,6 +1660,7 @@
                      "headLampStatus",
                      "instantFuelConsumption",
                      "fuelRange",
+                     "cloudAppVehicleID",
                      "odometer",
                      "tirePressure",
                      "wiperStatus"
