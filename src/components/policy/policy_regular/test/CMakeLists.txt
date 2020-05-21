@@ -50,6 +50,8 @@ file (GLOB POLICY_TEST_SOURCES
   ${CMAKE_CURRENT_SOURCE_DIR}/access_remote_impl_test.cc
   ${CMAKE_CURRENT_SOURCE_DIR}/sql_pt_representation_test.cc
   ${CMAKE_CURRENT_SOURCE_DIR}/update_status_manager_test.cc
+  ${CMAKE_CURRENT_SOURCE_DIR}/vehicle_data_item_type_test.cc
+  ${CMAKE_CURRENT_SOURCE_DIR}/shared_library_test.cc
 )
 
 set(LIBRARIES
