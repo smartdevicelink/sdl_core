@@ -464,16 +464,10 @@ HMICapabilitiesImpl::HMICapabilitiesImpl(ApplicationManager& app_mngr)
 }
 
 HMICapabilitiesImpl::~HMICapabilitiesImpl() {
-  delete ui_supported_languages_;
-  delete tts_supported_languages_;
-  delete vr_supported_languages_;
-  delete navigation_capability_;
-  delete phone_capability_;
-  delete video_streaming_capability_;
-  delete rc_capability_;
 }
 
 bool HMICapabilitiesImpl::VerifyImageType(const int32_t image_type) const {
+  sync_primitives::AutoReadLock lock(hmi_capabilities_lock_);
   auto capabilities = display_capabilities();
   if (!capabilities) {
     return false;
@@ -567,27 +561,26 @@ HMICapabilitiesImpl::active_tts_language() const {
 
 void HMICapabilitiesImpl::set_ui_supported_languages(
     const smart_objects::SmartObject& supported_languages) {
-  if (ui_supported_languages_) {
-    delete ui_supported_languages_;
-  }
-  ui_supported_languages_ = new smart_objects::SmartObject(supported_languages);
+  smart_objects::SmartObjectSPtr new_value =
+      std::make_shared<smart_objects::SmartObject>(supported_languages);
+  sync_primitives::AutoWriteLock lock(hmi_capabilities_lock_);
+  ui_supported_languages_.swap(new_value);
 }
 
 void HMICapabilitiesImpl::set_tts_supported_languages(
     const smart_objects::SmartObject& supported_languages) {
-  if (tts_supported_languages_) {
-    delete tts_supported_languages_;
-  }
-  tts_supported_languages_ =
-      new smart_objects::SmartObject(supported_languages);
+  smart_objects::SmartObjectSPtr new_value =
+      std::make_shared<smart_objects::SmartObject>(supported_languages);
+  sync_primitives::AutoWriteLock lock(hmi_capabilities_lock_);
+  tts_supported_languages_.swap(new_value);
 }
 
 void HMICapabilitiesImpl::set_vr_supported_languages(
     const smart_objects::SmartObject& supported_languages) {
-  if (vr_supported_languages_) {
-    delete vr_supported_languages_;
-  }
-  vr_supported_languages_ = new smart_objects::SmartObject(supported_languages);
+  smart_objects::SmartObjectSPtr new_value =
+      std::make_shared<smart_objects::SmartObject>(supported_languages);
+  sync_primitives::AutoWriteLock lock(hmi_capabilities_lock_);
+  vr_supported_languages_.swap(new_value);
 }
 
 void HMICapabilitiesImpl::set_display_capabilities(
@@ -597,12 +590,14 @@ void HMICapabilitiesImpl::set_display_capabilities(
           display_capabilities)) {
     smart_objects::SmartObjectSPtr new_value =
         std::make_shared<smart_objects::SmartObject>(display_capabilities);
+    sync_primitives::AutoWriteLock lock(hmi_capabilities_lock_);
     display_capabilities_.swap(new_value);
   }
 }
 
 void HMICapabilitiesImpl::set_system_display_capabilities(
     const smart_objects::SmartObject& display_capabilities) {
+  sync_primitives::AutoWriteLock lock(hmi_capabilities_lock_);
   system_display_capabilities_.reset(
       new smart_objects::SmartObject(display_capabilities));
 }
@@ -611,6 +606,7 @@ void HMICapabilitiesImpl::set_hmi_zone_capabilities(
     const smart_objects::SmartObject& hmi_zone_capabilities) {
   smart_objects::SmartObjectSPtr new_value =
       std::make_shared<smart_objects::SmartObject>(hmi_zone_capabilities);
+  sync_primitives::AutoWriteLock lock(hmi_capabilities_lock_);
   hmi_zone_capabilities_.swap(new_value);
 }
 
@@ -618,6 +614,7 @@ void HMICapabilitiesImpl::set_soft_button_capabilities(
     const smart_objects::SmartObject& soft_button_capabilities) {
   smart_objects::SmartObjectSPtr new_value =
       std::make_shared<smart_objects::SmartObject>(soft_button_capabilities);
+  sync_primitives::AutoWriteLock lock(hmi_capabilities_lock_);
   soft_buttons_capabilities_.swap(new_value);
 }
 
@@ -625,6 +622,7 @@ void HMICapabilitiesImpl::set_button_capabilities(
     const smart_objects::SmartObject& button_capabilities) {
   smart_objects::SmartObjectSPtr new_value =
       std::make_shared<smart_objects::SmartObject>(button_capabilities);
+  sync_primitives::AutoWriteLock lock(hmi_capabilities_lock_);
   button_capabilities_.swap(new_value);
 }
 
@@ -632,6 +630,7 @@ void HMICapabilitiesImpl::set_vr_capabilities(
     const smart_objects::SmartObject& vr_capabilities) {
   smart_objects::SmartObjectSPtr new_value =
       std::make_shared<smart_objects::SmartObject>(vr_capabilities);
+  sync_primitives::AutoWriteLock lock(hmi_capabilities_lock_);
   vr_capabilities_.swap(new_value);
 }
 
@@ -639,6 +638,7 @@ void HMICapabilitiesImpl::set_speech_capabilities(
     const smart_objects::SmartObject& speech_capabilities) {
   smart_objects::SmartObjectSPtr new_value =
       std::make_shared<smart_objects::SmartObject>(speech_capabilities);
+  sync_primitives::AutoWriteLock lock(hmi_capabilities_lock_);
   speech_capabilities_.swap(new_value);
 }
 
@@ -647,6 +647,7 @@ void HMICapabilitiesImpl::set_audio_pass_thru_capabilities(
   smart_objects::SmartObjectSPtr new_value =
       std::make_shared<smart_objects::SmartObject>(
           audio_pass_thru_capabilities);
+  sync_primitives::AutoWriteLock lock(hmi_capabilities_lock_);
   audio_pass_thru_capabilities_.swap(new_value);
 }
 
@@ -654,6 +655,7 @@ void HMICapabilitiesImpl::set_pcm_stream_capabilities(
     const smart_objects::SmartObject& pcm_stream_capabilities) {
   smart_objects::SmartObjectSPtr new_value =
       std::make_shared<smart_objects::SmartObject>(pcm_stream_capabilities);
+  sync_primitives::AutoWriteLock lock(hmi_capabilities_lock_);
   pcm_stream_capabilities_.swap(new_value);
 }
 
@@ -661,6 +663,7 @@ void HMICapabilitiesImpl::set_preset_bank_capabilities(
     const smart_objects::SmartObject& preset_bank_capabilities) {
   smart_objects::SmartObjectSPtr new_value =
       std::make_shared<smart_objects::SmartObject>(preset_bank_capabilities);
+  sync_primitives::AutoWriteLock lock(hmi_capabilities_lock_);
   preset_bank_capabilities_.swap(new_value);
 }
 
@@ -668,6 +671,7 @@ void HMICapabilitiesImpl::set_vehicle_type(
     const smart_objects::SmartObject& vehicle_type) {
   smart_objects::SmartObjectSPtr new_value =
       std::make_shared<smart_objects::SmartObject>(vehicle_type);
+  sync_primitives::AutoWriteLock lock(hmi_capabilities_lock_);
   vehicle_type_.swap(new_value);
 }
 
@@ -675,6 +679,7 @@ void HMICapabilitiesImpl::set_prerecorded_speech(
     const smart_objects::SmartObject& prerecorded_speech) {
   smart_objects::SmartObjectSPtr new_value =
       std::make_shared<smart_objects::SmartObject>(prerecorded_speech);
+  sync_primitives::AutoWriteLock lock(hmi_capabilities_lock_);
   prerecorded_speech_.swap(new_value);
 }
 
@@ -695,45 +700,42 @@ void HMICapabilitiesImpl::set_rc_supported(const bool supported) {
 
 void HMICapabilitiesImpl::set_navigation_capability(
     const smart_objects::SmartObject& navigation_capability) {
-  if (navigation_capability_) {
-    delete navigation_capability_;
-  }
-  navigation_capability_ =
-      new smart_objects::SmartObject(navigation_capability);
+  smart_objects::SmartObjectSPtr new_value =
+      std::make_shared<smart_objects::SmartObject>(navigation_capability);
+  sync_primitives::AutoWriteLock lock(hmi_capabilities_lock_);
+  navigation_capability_.swap(new_value);
 }
 
 void HMICapabilitiesImpl::set_phone_capability(
     const smart_objects::SmartObject& phone_capability) {
-  if (phone_capability_) {
-    delete phone_capability_;
-  }
-  phone_capability_ = new smart_objects::SmartObject(phone_capability);
+  smart_objects::SmartObjectSPtr new_value =
+      std::make_shared<smart_objects::SmartObject>(phone_capability);
+  sync_primitives::AutoWriteLock lock(hmi_capabilities_lock_);
+  phone_capability_.swap(new_value);
 }
 
 void HMICapabilitiesImpl::set_video_streaming_capability(
     const smart_objects::SmartObject& video_streaming_capability) {
-  if (video_streaming_capability_) {
-    delete video_streaming_capability_;
-  }
-  video_streaming_capability_ =
-      new smart_objects::SmartObject(video_streaming_capability);
+  smart_objects::SmartObjectSPtr new_value =
+      std::make_shared<smart_objects::SmartObject>(video_streaming_capability);
+  sync_primitives::AutoWriteLock lock(hmi_capabilities_lock_);
+  video_streaming_capability_.swap(new_value);
 }
 
 void HMICapabilitiesImpl::set_rc_capability(
     const smart_objects::SmartObject& rc_capability) {
-  if (rc_capability_) {
-    delete rc_capability_;
-  }
-  rc_capability_ = new smart_objects::SmartObject(rc_capability);
+  smart_objects::SmartObjectSPtr new_value =
+      std::make_shared<smart_objects::SmartObject>(rc_capability);
+  sync_primitives::AutoWriteLock lock(hmi_capabilities_lock_);
+  rc_capability_.swap(new_value);
 }
 
 void HMICapabilitiesImpl::set_seat_location_capability(
     const smart_objects::SmartObject& seat_location_capability) {
-  if (seat_location_capability_) {
-    delete seat_location_capability_;
-  }
-  seat_location_capability_ =
-      new smart_objects::SmartObject(seat_location_capability);
+  smart_objects::SmartObjectSPtr new_value =
+      std::make_shared<smart_objects::SmartObject>(seat_location_capability);
+  sync_primitives::AutoWriteLock lock(hmi_capabilities_lock_);
+  seat_location_capability_.swap(new_value);
 }
 
 void HMICapabilitiesImpl::Init(
@@ -774,81 +776,97 @@ bool HMICapabilitiesImpl::is_rc_cooperating() const {
   return is_rc_cooperating_;
 }
 
-const smart_objects::SmartObject* HMICapabilitiesImpl::ui_supported_languages()
-    const {
+const smart_objects::SmartObjectSPtr
+HMICapabilitiesImpl::ui_supported_languages() const {
+  sync_primitives::AutoReadLock lock(hmi_capabilities_lock_);
   return ui_supported_languages_;
 }
 
-const smart_objects::SmartObject* HMICapabilitiesImpl::vr_supported_languages()
-    const {
+const smart_objects::SmartObjectSPtr
+HMICapabilitiesImpl::vr_supported_languages() const {
+  sync_primitives::AutoReadLock lock(hmi_capabilities_lock_);
   return vr_supported_languages_;
 }
 
-const smart_objects::SmartObject* HMICapabilitiesImpl::tts_supported_languages()
-    const {
+const smart_objects::SmartObjectSPtr
+HMICapabilitiesImpl::tts_supported_languages() const {
+  sync_primitives::AutoReadLock lock(hmi_capabilities_lock_);
   return tts_supported_languages_;
 }
 
-const smart_objects::SmartObjectSPtr HMICapabilitiesImpl::display_capabilities()
-    const {
+const smart_objects::SmartObjectSPtr
+HMICapabilitiesImpl::display_capabilities() const {
+  sync_primitives::AutoReadLock lock(hmi_capabilities_lock_);
   return display_capabilities_;
 }
 
 const smart_objects::SmartObjectSPtr
 HMICapabilitiesImpl::system_display_capabilities() const {
+  sync_primitives::AutoReadLock lock(hmi_capabilities_lock_);
   return system_display_capabilities_;
 }
 
 const smart_objects::SmartObjectSPtr
 HMICapabilitiesImpl::hmi_zone_capabilities() const {
+  sync_primitives::AutoReadLock lock(hmi_capabilities_lock_);
   return hmi_zone_capabilities_;
 }
 
 const smart_objects::SmartObjectSPtr
 HMICapabilitiesImpl::soft_button_capabilities() const {
+  sync_primitives::AutoReadLock lock(hmi_capabilities_lock_);
   return soft_buttons_capabilities_;
 }
 
 const smart_objects::SmartObjectSPtr HMICapabilitiesImpl::button_capabilities()
     const {
+  sync_primitives::AutoReadLock lock(hmi_capabilities_lock_);
   return button_capabilities_;
 }
 
 const smart_objects::SmartObjectSPtr HMICapabilitiesImpl::speech_capabilities()
     const {
+  sync_primitives::AutoReadLock lock(hmi_capabilities_lock_);
   return speech_capabilities_;
 }
 
 const smart_objects::SmartObjectSPtr HMICapabilitiesImpl::vr_capabilities()
     const {
+  sync_primitives::AutoReadLock lock(hmi_capabilities_lock_);
   return vr_capabilities_;
 }
 
 const smart_objects::SmartObjectSPtr
 HMICapabilitiesImpl::audio_pass_thru_capabilities() const {
+  sync_primitives::AutoReadLock lock(hmi_capabilities_lock_);
   return audio_pass_thru_capabilities_;
 }
 
 const smart_objects::SmartObjectSPtr
 HMICapabilitiesImpl::pcm_stream_capabilities() const {
+  sync_primitives::AutoReadLock lock(hmi_capabilities_lock_);
   return pcm_stream_capabilities_;
 }
 
 const smart_objects::SmartObjectSPtr
 HMICapabilitiesImpl::preset_bank_capabilities() const {
+  sync_primitives::AutoReadLock lock(hmi_capabilities_lock_);
   return preset_bank_capabilities_;
 }
 
 bool HMICapabilitiesImpl::attenuated_supported() const {
+  sync_primitives::AutoReadLock lock(hmi_capabilities_lock_);
   return attenuated_supported_;
 }
 
 const smart_objects::SmartObjectSPtr HMICapabilitiesImpl::vehicle_type() const {
+  sync_primitives::AutoReadLock lock(hmi_capabilities_lock_);
   return vehicle_type_;
 }
 
 const smart_objects::SmartObjectSPtr HMICapabilitiesImpl::prerecorded_speech()
     const {
+  sync_primitives::AutoReadLock lock(hmi_capabilities_lock_);
   return prerecorded_speech_;
 }
 
@@ -868,27 +886,32 @@ bool HMICapabilitiesImpl::rc_supported() const {
   return is_rc_supported_;
 }
 
-const smart_objects::SmartObject* HMICapabilitiesImpl::navigation_capability()
-    const {
+const smart_objects::SmartObjectSPtr
+HMICapabilitiesImpl::navigation_capability() const {
+  sync_primitives::AutoReadLock lock(hmi_capabilities_lock_);
   return navigation_capability_;
 }
 
-const smart_objects::SmartObject* HMICapabilitiesImpl::phone_capability()
-    const {
+const smart_objects::SmartObjectSPtr
+HMICapabilitiesImpl::phone_capability() const {
+  sync_primitives::AutoReadLock lock(hmi_capabilities_lock_);
   return phone_capability_;
 }
 
-const smart_objects::SmartObject*
+const smart_objects::SmartObjectSPtr
 HMICapabilitiesImpl::video_streaming_capability() const {
+  sync_primitives::AutoReadLock lock(hmi_capabilities_lock_);
   return video_streaming_capability_;
 }
 
-const smart_objects::SmartObject* HMICapabilitiesImpl::rc_capability() const {
+const smart_objects::SmartObjectSPtr HMICapabilitiesImpl::rc_capability() const {
+  sync_primitives::AutoReadLock lock(hmi_capabilities_lock_);
   return rc_capability_;
 }
 
-const smart_objects::SmartObject*
+const smart_objects::SmartObjectSPtr
 HMICapabilitiesImpl::seat_location_capability() const {
+  sync_primitives::AutoReadLock lock(hmi_capabilities_lock_);
   return seat_location_capability_;
 }
 

@@ -40,6 +40,7 @@
 #include "json/json.h"
 #include "smart_objects/smart_object.h"
 #include "utils/macro.h"
+#include "utils/rwlock.h"
 
 namespace application_manager {
 class ApplicationManager;
@@ -140,7 +141,7 @@ class HMICapabilitiesImpl : public HMICapabilities {
    *
    * @return Currently supported UI languages
    */
-  const smart_objects::SmartObject* ui_supported_languages() const OVERRIDE;
+  const smart_objects::SmartObjectSPtr ui_supported_languages() const OVERRIDE;
 
   /*
    * @brief Sets supported UI languages
@@ -170,7 +171,7 @@ class HMICapabilitiesImpl : public HMICapabilities {
    *
    * @return Currently supported VR languages
    */
-  const smart_objects::SmartObject* vr_supported_languages() const OVERRIDE;
+  const smart_objects::SmartObjectSPtr vr_supported_languages() const OVERRIDE;
 
   /*
    * @brief Sets supported VR languages
@@ -200,7 +201,7 @@ class HMICapabilitiesImpl : public HMICapabilities {
    *
    * @return Currently supported TTS languages
    */
-  const smart_objects::SmartObject* tts_supported_languages() const OVERRIDE;
+  const smart_objects::SmartObjectSPtr tts_supported_languages() const OVERRIDE;
 
   /*
    * @brief Sets supported TTS languages
@@ -465,7 +466,7 @@ class HMICapabilitiesImpl : public HMICapabilities {
    *
    * @return NAVIGATION system capability
    */
-  const smart_objects::SmartObject* navigation_capability() const OVERRIDE;
+  const smart_objects::SmartObjectSPtr navigation_capability() const OVERRIDE;
 
   /*
    * @brief Interface used to store information regarding
@@ -483,7 +484,7 @@ class HMICapabilitiesImpl : public HMICapabilities {
    * @return PHONE_CALL system capability
    */
 
-  const smart_objects::SmartObject* phone_capability() const OVERRIDE;
+  const smart_objects::SmartObjectSPtr phone_capability() const OVERRIDE;
 
   /*
    * @brief Sets HMI's video streaming related capability information
@@ -498,17 +499,17 @@ class HMICapabilitiesImpl : public HMICapabilities {
    *
    * @return HMI's video streaming related capability information
    */
-  const smart_objects::SmartObject* video_streaming_capability() const OVERRIDE;
+  const smart_objects::SmartObjectSPtr video_streaming_capability() const OVERRIDE;
 
   void set_rc_capability(
       const smart_objects::SmartObject& rc_capability) OVERRIDE;
 
-  const smart_objects::SmartObject* rc_capability() const OVERRIDE;
+  const smart_objects::SmartObjectSPtr rc_capability() const OVERRIDE;
 
   void set_seat_location_capability(
       const smart_objects::SmartObject& seat_location_capability) OVERRIDE;
 
-  const smart_objects::SmartObject* seat_location_capability() const OVERRIDE;
+  const smart_objects::SmartObjectSPtr seat_location_capability() const OVERRIDE;
 
   void Init(resumption::LastStateWrapperPtr last_state_wrapper) OVERRIDE;
 
@@ -587,9 +588,9 @@ class HMICapabilitiesImpl : public HMICapabilities {
   hmi_apis::Common_Language::eType vr_language_;
   hmi_apis::Common_Language::eType tts_language_;
   smart_objects::SmartObjectSPtr vehicle_type_;
-  smart_objects::SmartObject* ui_supported_languages_;
-  smart_objects::SmartObject* tts_supported_languages_;
-  smart_objects::SmartObject* vr_supported_languages_;
+  smart_objects::SmartObjectSPtr ui_supported_languages_;
+  smart_objects::SmartObjectSPtr tts_supported_languages_;
+  smart_objects::SmartObjectSPtr vr_supported_languages_;
   /*
    * display_capabilities_ is deprecated and replaced by
    * system_display_capabilities_. For backward compatibility
@@ -611,14 +612,16 @@ class HMICapabilitiesImpl : public HMICapabilities {
   bool is_video_streaming_supported_;
   bool is_rc_supported_;
   std::string ccpu_version_;
-  smart_objects::SmartObject* navigation_capability_;
-  smart_objects::SmartObject* phone_capability_;
-  smart_objects::SmartObject* video_streaming_capability_;
-  smart_objects::SmartObject* rc_capability_;
-  smart_objects::SmartObject* seat_location_capability_;
+  smart_objects::SmartObjectSPtr navigation_capability_;
+  smart_objects::SmartObjectSPtr phone_capability_;
+  smart_objects::SmartObjectSPtr video_streaming_capability_;
+  smart_objects::SmartObjectSPtr rc_capability_;
+  smart_objects::SmartObjectSPtr seat_location_capability_;
 
   ApplicationManager& app_mngr_;
   HMILanguageHandler hmi_language_handler_;
+
+  mutable sync_primitives::RWLock hmi_capabilities_lock_;
 
   DISALLOW_COPY_AND_ASSIGN(HMICapabilitiesImpl);
 };
