@@ -92,6 +92,31 @@ errors::eType CArraySchemaItem::validate(
   return errors::OK;
 }
 
+bool CArraySchemaItem::filterInvalidEnums(
+    SmartObject& Object,
+    const utils::SemanticVersion& MessageVersion,
+    rpc::ValidationReport* report__) {
+  if (SmartType_Array == Object.getType()) {
+    int index = 0;
+    auto array = Object.asArray();
+    for (auto it = array->begin(); it != array->end();) {
+      std::stringstream strVal;
+      strVal << index;
+      if (mElementSchemaItem->filterInvalidEnums(
+              *it, MessageVersion, &report__->ReportSubobject(strVal.str()))) {
+        it = array->erase(it);
+      } else {
+        ++it;
+      }
+      index++;
+    }
+    if (array->empty()) {
+      return true;
+    }
+  }
+  return false;
+}
+
 void CArraySchemaItem::applySchema(
     SmartObject& Object,
     const bool remove_unknown_parameters,

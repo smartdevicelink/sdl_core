@@ -158,6 +158,31 @@ errors::eType CObjectSchemaItem::validate(
   return errors::OK;
 }
 
+bool CObjectSchemaItem::filterInvalidEnums(
+    SmartObject& Object,
+    const utils::SemanticVersion& MessageVersion,
+    rpc::ValidationReport* report__) {
+  for (const auto& key : Object.enumerate()) {
+    std::map<std::string, SMember>::const_iterator members_it =
+        mMembers.find(key);
+
+    if (mMembers.end() != members_it) {
+      const SMember* member =
+          GetCorrectMember(members_it->second, MessageVersion);
+      if (member->mSchemaItem->filterInvalidEnums(
+              Object[key], MessageVersion, &report__->ReportSubobject(key))) {
+        if (member->mIsMandatory) {
+          return true;
+        } else {
+          Object.erase(key);
+        }
+      }
+      continue;
+    }
+  }
+  return false;
+}
+
 void CObjectSchemaItem::applySchema(
     SmartObject& Object,
     const bool remove_unknown_parameters,
@@ -264,13 +289,7 @@ void CObjectSchemaItem::RemoveUnknownParams(
     if (mMembers.end() != members_it) {
       const SMember* member =
           GetCorrectMember(members_it->second, MessageVersion);
-      rpc::ValidationReport report("");
-      const bool is_invalid_enum =
-          TYPE_ENUM == member->mSchemaItem->GetType() &&
-          (member->mSchemaItem->validate(
-               Object.getElement(key), &report, MessageVersion, false) !=
-           errors::OK);
-      if (!member || member->mIsRemoved || is_invalid_enum) {
+      if (!member || member->mIsRemoved) {
         Object.erase(key);
       }
       continue;

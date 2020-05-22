@@ -51,6 +51,13 @@ bool ISchemaItem::hasDefaultValue(SmartObject& Object) {
   return false;
 }
 
+bool ISchemaItem::filterInvalidEnums(
+    SmartObject& Object,
+    const utils::SemanticVersion& MessageVersion,
+    rpc::ValidationReport* report__) {
+  return false;
+}
+
 void ISchemaItem::applySchema(SmartObject& Object,
                               const bool remove_unknown_parameters,
                               const utils::SemanticVersion& MessageVersion) {}

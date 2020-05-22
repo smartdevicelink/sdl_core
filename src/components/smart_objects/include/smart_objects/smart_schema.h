@@ -96,22 +96,22 @@ class CSmartSchema FINAL {
    * @brief Apply schema.
    *
    * @param Object Object to apply schema.
-   *
    * @param remove_unknown_parameters contains true if need to remove unknown
-   *parameters
-   * from smart object otherwise contains false.
+   * parameters from smart object, otherwise contains false.
+   * @param MessageVersion the version of the schema to be applied
    **/
   void applySchema(
       SmartObject& Object,
       const bool remove_unknown_parameters,
-      const utils::SemanticVersion& MessageVersion = utils::SemanticVersion());
+      const utils::SemanticVersion& MessageVersion = utils::SemanticVersion(),
+      rpc::ValidationReport* report__ = nullptr);
 
   /**
    * @brief The reverse SmartObject conversion using schema.
    *
    * @param object Object to convert.
    * @param remove_unknown_parameters contains true if need to remove unknown
-   *parameters
+   * parameters
    */
   // TODO(cpplint): Is this a non-const reference?
   // If so, make const or use a pointer.

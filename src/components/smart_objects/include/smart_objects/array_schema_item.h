@@ -80,13 +80,17 @@ class CArraySchemaItem : public ISchemaItem {
       const utils::SemanticVersion& MessageVersion = utils::SemanticVersion(),
       const bool allow_unknown_enums = false) OVERRIDE;
 
+  bool filterInvalidEnums(SmartObject& Object,
+                          const utils::SemanticVersion& MessageVersion,
+                          rpc::ValidationReport* report__) OVERRIDE;
+
   /**
    * @brief Apply schema.
    *
    * @param Object Object to apply schema.
    * @param remove_unknown_parameters contains true if need to remove unknown
-   *parameters
-   * from smart object otherwise contains false.
+   * parameters from smart object, otherwise contains false.
+   * @param MessageVersion the version of the schema to be applied
    **/
   void applySchema(SmartObject& Object,
                    const bool remove_unknown_parameters,

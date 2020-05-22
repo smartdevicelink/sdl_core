@@ -128,15 +128,17 @@ class TEnumSchemaItem : public CDefaultSchemaItem<EnumType> {
       const std::vector<ElementSignature>& signatures,
       const utils::SemanticVersion& MessageVersion);
 
+  bool filterInvalidEnums(SmartObject& Object,
+                          const utils::SemanticVersion& MessageVersion,
+                          rpc::ValidationReport* report__) OVERRIDE;
+
   /**
    * @brief Apply schema.
-   * This implementation checks if enumeration is represented as string
-   * and tries to convert it to integer according to element-to-string
-   * map.
+   *
    * @param Object Object to apply schema.
    * @param remove_unknown_parameters contains true if need to remove unknown
-   *parameters
-   * from smart object otherwise contains false.
+   * parameters from smart object, otherwise contains false.
+   * @param MessageVersion the version of the schema to be applied
    **/
   void applySchema(SmartObject& Object,
                    const bool remove_unknown_parameters,
@@ -313,6 +315,20 @@ const ElementSignature TEnumSchemaItem<EnumType>::getSignature(
   // Could not match msg version to element siganture
   ElementSignature ret;
   return ret;
+}
+
+template <typename EnumType>
+bool TEnumSchemaItem<EnumType>::filterInvalidEnums(
+    SmartObject& Object,
+    const utils::SemanticVersion& MessageVersion,
+    rpc::ValidationReport* report__) {
+  rpc::ValidationReport dummy_report("");
+  if (validate(Object, &dummy_report, MessageVersion, false) != errors::OK) {
+    std::string validation_info = Object.asString();
+    report__->set_validation_info(validation_info);
+    return true;
+  }
+  return false;
 }
 
 template <typename EnumType>

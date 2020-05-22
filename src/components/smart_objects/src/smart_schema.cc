@@ -59,8 +59,16 @@ ISchemaItemPtr CSmartSchema::getSchemaItem() {
 
 void CSmartSchema::applySchema(SmartObject& Object,
                                const bool remove_unknown_parameters,
-                               const utils::SemanticVersion& MessageVersion) {
+                               const utils::SemanticVersion& MessageVersion,
+                               rpc::ValidationReport* report__) {
   mSchemaItem->applySchema(Object, remove_unknown_parameters, MessageVersion);
+  if (remove_unknown_parameters) {
+    rpc::ValidationReport dummy_report("");
+    if (!report__) {
+      report__ = &dummy_report;
+    }
+    mSchemaItem->filterInvalidEnums(Object, MessageVersion, report__);
+  }
 }
 
 void CSmartSchema::unapplySchema(SmartObject& Object,

@@ -102,12 +102,26 @@ class ISchemaItem {
   virtual bool hasDefaultValue(SmartObject& Object);
 
   /**
+   * @brief Filter invalid enum values
+   *
+   * @param Object Object to check for invalid enum values
+   * @param MessageVersion the version of the schema to use for validation
+   * @param report__ object for reporting enums which were removed during the
+   * process
+   *
+   * @return true if the value being checked should be filtered, false otherwise
+   **/
+  virtual bool filterInvalidEnums(SmartObject& Object,
+                                  const utils::SemanticVersion& MessageVersion,
+                                  rpc::ValidationReport* report__);
+
+  /**
    * @brief Apply schema.
    *
    * @param Object Object to apply schema.
    * @param remove_unknown_parameters contains true if need to remove unknown
-   *parameters
-   * from smart object otherwise contains false.
+   * parameters from smart object, otherwise contains false.
+   * @param MessageVersion the version of the schema to be applied
    **/
   virtual void applySchema(
       ns_smart_device_link::ns_smart_objects::SmartObject& Object,
