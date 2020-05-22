@@ -102,28 +102,6 @@ void CArraySchemaItem::applySchema(
           Object[i], remove_unknown_parameters, MessageVersion);
     }
   }
-  if (remove_unknown_parameters) {
-    RemoveUnknownParams(Object, MessageVersion);
-  }
-}
-
-void CArraySchemaItem::RemoveUnknownParams(
-    SmartObject& Object, const utils::SemanticVersion& MessageVersion) {
-  if (SmartType_Array == Object.getType()) {
-    auto array = Object.asArray();
-    for (auto it = array->begin(); it != array->end();) {
-      rpc::ValidationReport report("");
-      const bool is_invalid_enum =
-          TYPE_ENUM == mElementSchemaItem->GetType() &&
-          (mElementSchemaItem->validate(*it, &report, MessageVersion, false) !=
-           errors::OK);
-      if (is_invalid_enum) {
-        it = array->erase(it);
-      } else {
-        ++it;
-      }
-    }
-  }
 }
 
 void CArraySchemaItem::unapplySchema(SmartObject& Object,
