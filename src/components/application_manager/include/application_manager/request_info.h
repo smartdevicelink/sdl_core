@@ -29,9 +29,9 @@
  * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
  * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
  * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
-* ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
-* POSSIBILITY OF SUCH DAMAGE.
-*/
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
+ */
 
 #ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_REQUEST_INFO_H_
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_REQUEST_INFO_H_
@@ -127,7 +127,7 @@ struct RequestInfo {
   }
   uint64_t hash();
   static uint64_t GenerateHash(uint32_t var1, uint32_t var2);
-  static uint32_t HmiConnectoinKey;
+  static uint32_t HmiConnectionKey;
 
  protected:
   RequestPtr request_;
@@ -268,9 +268,9 @@ class RequestInfoSet {
 };
 
 /**
-* @brief Structure used in std algorithms to determine amount of request
-* during time scale
-*/
+ * @brief Structure used in std algorithms to determine amount of request
+ * during time scale
+ */
 struct TimeScale {
   TimeScale(const date_time::TimeDuration& start,
             const date_time::TimeDuration& end,

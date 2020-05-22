@@ -33,10 +33,10 @@
 #ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_TEST_INCLUDE_TRANSPORT_MANAGER_MOCK_TRANSPORT_MANAGER_LISTENER_H_
 #define SRC_COMPONENTS_TRANSPORT_MANAGER_TEST_INCLUDE_TRANSPORT_MANAGER_MOCK_TRANSPORT_MANAGER_LISTENER_H_
 
-#include <vector>
 #include <gmock/gmock.h>
-#include "transport_manager/transport_manager_listener.h"
+#include <vector>
 #include "protocol/raw_message.h"
+#include "transport_manager/transport_manager_listener.h"
 
 namespace test {
 namespace components {
@@ -56,6 +56,9 @@ class MockTransportManagerListener : public TransportManagerListener {
   MOCK_METHOD1(OnDeviceRemoved, void(const DeviceInfo& device_info));
   MOCK_METHOD0(OnScanDevicesFinished, void());
   MOCK_METHOD1(OnScanDevicesFailed, void(const SearchDeviceError& error));
+  MOCK_METHOD2(OnConnectionPending,
+               void(const DeviceInfo& device_info,
+                    const ConnectionUID connection_id));
   MOCK_METHOD2(OnConnectionEstablished,
                void(const DeviceInfo& device_info,
                     const ConnectionUID connection_id));

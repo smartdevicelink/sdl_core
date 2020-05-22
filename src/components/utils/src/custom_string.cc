@@ -31,14 +31,14 @@
  */
 
 #include "utils/custom_string.h"
-#include <cwchar>
-#include <cstdlib>
+#include <string.h>
+#include <algorithm>
 #include <clocale>
+#include <cstdlib>
+#include <cwchar>
 #include <cwctype>
 #include <new>
-#include <algorithm>
 #include <vector>
-#include <string.h>
 #include "utils/logger.h"
 #include "utils/macro.h"
 
@@ -76,7 +76,7 @@ void ConvertWStringToLowerCase(std::wstring& str) {
   std::transform(str.begin(), str.end(), str.begin(), towlower);
   setlocale(LC_ALL, current_locale.c_str());
 }
-}
+}  // namespace
 
 namespace utils {
 namespace custom_string {

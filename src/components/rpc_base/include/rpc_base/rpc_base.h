@@ -57,7 +57,7 @@ const std::string omitted_validation_info = "should be omitted in ";
 const std::string required_validation_info = "is required in ";
 
 std::string PolicyTableTypeToString(const PolicyTableType pt_type);
-}
+}  // namespace policy_table_interface_base
 
 template <typename T>
 class Range;
@@ -172,6 +172,7 @@ class Boolean : public PrimitiveType {
   Boolean& operator=(bool new_val);
   operator bool() const;
   Json::Value ToJsonValue() const;
+  bool operator==(const Boolean& that);
 
  private:
   // Fields
@@ -233,6 +234,9 @@ class String : public PrimitiveType {
   String& operator=(const std::string& new_val);
   String& operator=(const String& new_val);
   bool operator==(const String& rhs) const;
+  bool operator==(const std::string& rhs) const;
+  bool operator!=(const String& rhs) const;
+  bool operator!=(const std::string& rhs) const;
   operator const std::string&() const;
   Json::Value ToJsonValue() const;
 
@@ -282,6 +286,7 @@ class Array : public std::vector<T>, public CompositeType {
   template <typename U>
   void push_back(const U& value);
   Json::Value ToJsonValue() const;
+  bool operator==(const Array& that);
 
   virtual bool is_valid() const;
   bool is_initialized() const;
@@ -394,6 +399,8 @@ class Optional {
   // Better than operator bool because bool can be implicitly
   // casted to integral types
   operator const void*() const;
+
+  bool operator==(const Optional<T>& that);
 
   bool is_valid() const;
   bool is_initialized() const;

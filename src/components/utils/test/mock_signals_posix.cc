@@ -30,9 +30,9 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "gtest/gtest.h"
-#include "gmock/gmock.h"
 #include "utils/mock_signals_posix.h"
+#include "gmock/gmock.h"
+#include "gtest/gtest.h"
 #include "utils/signals.h"
 
 namespace utils {

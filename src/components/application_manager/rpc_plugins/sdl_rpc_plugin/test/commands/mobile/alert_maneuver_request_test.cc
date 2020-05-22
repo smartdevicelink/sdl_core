@@ -35,20 +35,20 @@
 
 #include "gtest/gtest.h"
 
-#include "smart_objects/smart_object.h"
-#include "application_manager/smart_object_keys.h"
-#include "application_manager/commands/commands_test.h"
-#include "application_manager/commands/command_request_test.h"
 #include "application_manager/application.h"
-#include "application_manager/mock_application_manager.h"
-#include "application_manager/mock_application.h"
-#include "application_manager/mock_message_helper.h"
+#include "application_manager/commands/command_request_test.h"
+#include "application_manager/commands/commands_test.h"
 #include "application_manager/event_engine/event.h"
-#include "mobile/alert_maneuver_request.h"
-#include "interfaces/MOBILE_API.h"
-#include "application_manager/policies/policy_handler_interface.h"
-#include "application_manager/policies/mock_policy_handler_interface.h"
+#include "application_manager/mock_application.h"
+#include "application_manager/mock_application_manager.h"
 #include "application_manager/mock_hmi_interface.h"
+#include "application_manager/mock_message_helper.h"
+#include "application_manager/policies/mock_policy_handler_interface.h"
+#include "application_manager/policies/policy_handler_interface.h"
+#include "application_manager/smart_object_keys.h"
+#include "interfaces/MOBILE_API.h"
+#include "mobile/alert_maneuver_request.h"
+#include "smart_objects/smart_object.h"
 
 namespace test {
 namespace components {
@@ -60,9 +60,9 @@ using ::testing::_;
 using ::testing::Return;
 using ::testing::ReturnRef;
 namespace am = ::application_manager;
-using sdl_rpc_plugin::commands::AlertManeuverRequest;
 using am::commands::MessageSharedPtr;
 using am::event_engine::Event;
+using sdl_rpc_plugin::commands::AlertManeuverRequest;
 
 typedef std::shared_ptr<AlertManeuverRequest> CommandPtr;
 

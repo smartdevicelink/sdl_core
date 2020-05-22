@@ -36,7 +36,7 @@ namespace {
 bool BinaryDataPredicate(uint8_t i, uint8_t j) {
   return (i == j);
 }
-}
+}  // namespace
 
 namespace application_manager {
 
@@ -64,8 +64,8 @@ Message::Message(protocol_handler::MessagePriority priority)
     , binary_data_(NULL)
     , data_size_(0)
     , payload_size_(0)
-    , version_(
-          protocol_handler::MajorProtocolVersion::PROTOCOL_VERSION_UNKNOWN) {}
+    , version_(protocol_handler::MajorProtocolVersion::PROTOCOL_VERSION_UNKNOWN)
+    , is_message_encrypted_(false) {}
 
 Message::Message(const Message& message)
     : function_id_(0)
@@ -76,8 +76,8 @@ Message::Message(const Message& message)
     , binary_data_(NULL)
     , data_size_(0)
     , payload_size_(0)
-    , version_(
-          protocol_handler::MajorProtocolVersion::PROTOCOL_VERSION_UNKNOWN) {
+    , version_(protocol_handler::MajorProtocolVersion::PROTOCOL_VERSION_UNKNOWN)
+    , is_message_encrypted_(false) {
   *this = message;
 }
 
@@ -140,6 +140,10 @@ int32_t Message::correlation_id() const {
 
 int32_t Message::connection_key() const {
   return connection_key_;
+}
+
+bool Message::is_message_encrypted() const {
+  return is_message_encrypted_;
 }
 
 MessageType Message::type() const {
@@ -226,6 +230,10 @@ void Message::set_data_size(size_t data_size) {
 
 void Message::set_payload_size(size_t payload_size) {
   payload_size_ = payload_size;
+}
+
+void Message::set_message_encryption(const bool protection) {
+  is_message_encrypted_ = protection;
 }
 
 bool Message::is_sufficient_version(

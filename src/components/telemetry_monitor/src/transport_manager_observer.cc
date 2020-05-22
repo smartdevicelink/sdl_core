@@ -33,8 +33,8 @@
 
 #include <time.h>
 
-#include "telemetry_monitor/transport_manager_metric_wrapper.h"
 #include "telemetry_monitor/telemetry_monitor.h"
+#include "telemetry_monitor/transport_manager_metric_wrapper.h"
 
 namespace telemetry_monitor {
 

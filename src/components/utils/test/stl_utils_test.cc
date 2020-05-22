@@ -30,10 +30,10 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <vector>
-#include <map>
-#include "gtest/gtest.h"
 #include "utils/stl_utils.h"
+#include <map>
+#include <vector>
+#include "gtest/gtest.h"
 
 namespace test {
 namespace components {

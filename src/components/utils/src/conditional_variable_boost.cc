@@ -34,9 +34,9 @@
 #include <errno.h>
 #include <time.h>
 
+#include <boost/exception/diagnostic_information.hpp>
 #include "utils/lock.h"
 #include "utils/logger.h"
-#include <boost/exception/diagnostic_information.hpp>
 
 namespace {
 const long kNanosecondsPerSecond = 1000000000;

@@ -51,8 +51,8 @@ namespace mobile_result = mobile_apis::Result;
 
 using ::testing::_;
 
-using sdl_rpc_plugin::commands::UnregisterAppInterfaceRequest;
 using am::commands::MessageSharedPtr;
+using sdl_rpc_plugin::commands::UnregisterAppInterfaceRequest;
 
 typedef std::shared_ptr<UnregisterAppInterfaceRequest> CommandPtr;
 

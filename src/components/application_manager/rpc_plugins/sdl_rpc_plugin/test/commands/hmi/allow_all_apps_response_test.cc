@@ -30,13 +30,13 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "gtest/gtest.h"
 #include "hmi/allow_all_apps_response.h"
+#include "gtest/gtest.h"
 
-#include "smart_objects/smart_object.h"
 #include "application_manager/commands/command_impl.h"
 #include "application_manager/commands/commands_test.h"
 #include "application_manager/mock_application.h"
+#include "smart_objects/smart_object.h"
 namespace test {
 namespace components {
 namespace commands_test {
@@ -53,7 +53,7 @@ typedef std::shared_ptr<AllowAllAppsResponse> ResponsePtr;
 
 namespace {
 const bool kResponseIsAllowed = true;
-}  //
+}  // namespace
 
 class AllowAllAppsResponseTest
     : public CommandsTest<CommandsTestMocks::kIsNice> {};

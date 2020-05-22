@@ -32,12 +32,12 @@
 
 #include "telemetry_monitor/telemetry_monitor.h"
 
-#include <sys/socket.h>
-#include <sys/types.h>
-#include <sys/select.h>
-#include <sys/time.h>
-#include <netinet/in.h>
 #include <arpa/inet.h>
+#include <netinet/in.h>
+#include <sys/select.h>
+#include <sys/socket.h>
+#include <sys/time.h>
+#include <sys/types.h>
 #include <unistd.h>
 
 #include "transport_manager/transport_manager_default.h"

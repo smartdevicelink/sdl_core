@@ -44,7 +44,7 @@ static const size_t kCorrelationIdBits = 32;
 static const size_t kJsonSizeBits = 32;
 static const size_t PayloadHeaderBits =
     kRpcTypeBits + kRpcFunctionIdBits + kCorrelationIdBits + kJsonSizeBits;
-}
+}  // namespace
 
 namespace protocol_handler {
 

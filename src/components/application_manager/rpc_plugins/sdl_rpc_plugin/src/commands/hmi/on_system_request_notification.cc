@@ -32,10 +32,14 @@
 
 #include "application_manager/application_impl.h"
 
-#include "sdl_rpc_plugin/commands/hmi/on_system_request_notification.h"
 #include "application_manager/policies/policy_handler_interface.h"
 #include "interfaces/MOBILE_API.h"
+#include "sdl_rpc_plugin/commands/hmi/on_system_request_notification.h"
 #include "utils/macro.h"
+
+#ifdef EXTERNAL_PROPRIETARY_MODE
+#include "policy/ptu_retry_handler.h"
+#endif  // EXTERNAL_PROPRIETARY_MODE
 
 using policy::PolicyHandlerInterface;
 
@@ -67,6 +71,37 @@ void OnSystemRequestNotification::Run() {
   params[strings::function_id] =
       static_cast<int32_t>(mobile_apis::FunctionID::eType::OnSystemRequestID);
 
+  using namespace rpc::policy_table_interface_base;
+  const auto request_type =
+      static_cast<rpc::policy_table_interface_base::RequestType>(
+          (*message_)[strings::msg_params][strings::request_type].asUInt());
+
+#ifdef PROPRIETARY_MODE
+  if (RequestType::RT_PROPRIETARY == request_type) {
+    if (msg_params.keyExists(strings::url)) {
+      // For backward-compatibility, the URL is cached for retries if provided
+      // by HMI
+      policy_handler_.CacheRetryInfo(msg_params.keyExists(strings::app_id)
+                                         ? msg_params[strings::app_id].asUInt()
+                                         : 0,
+                                     msg_params[strings::url].asString());
+    } else {
+      // Clear cached retry info
+      policy_handler_.CacheRetryInfo(0, std::string());
+
+      // URL and app are chosen by Core for PROPRIETARY mode normally
+      uint32_t app_id = 0;
+      msg_params[strings::url] = policy_handler_.GetNextUpdateUrl(
+          policy::PTUIterationType::DefaultIteration, app_id);
+      if (0 == app_id) {
+        LOG4CXX_WARN(logger_,
+                     "Can't select application to forward OnSystemRequest.");
+        return;
+      }
+      msg_params[strings::app_id] = app_id;
+    }
+  }
+#endif
   // According to HMI API, this should be HMI unique id, but during processing
   // messages from HMI this param is replaced by connection key, so below it
   // will be treated as connection key
@@ -81,8 +116,7 @@ void OnSystemRequestNotification::Run() {
                   "Received OnSystemRequest without appID."
                   " One of registered apps will be used.");
     LOG4CXX_DEBUG(logger_, "Searching registered app to send OnSystemRequest.");
-    const PolicyHandlerInterface& policy_handler = policy_handler_;
-    const uint32_t selected_app_id = policy_handler.GetAppIdForSending();
+    const uint32_t selected_app_id = policy_handler_.GetAppIdForSending();
     if (0 == selected_app_id) {
       LOG4CXX_WARN(logger_,
                    "Can't select application to forward OnSystemRequest.");
@@ -116,9 +150,14 @@ void OnSystemRequestNotification::Run() {
                 "Sending request with application id " << app->policy_app_id());
 
   params[strings::connection_key] = app->app_id();
+
+  if (helpers::Compare<RequestType, helpers::EQ, helpers::ONE>(
+          request_type, RequestType::RT_PROPRIETARY, RequestType::RT_HTTP)) {
+    policy_handler_.OnSystemRequestReceived();
+  }
   SendNotificationToMobile(message_);
 }
 
 }  // namespace commands
 
-}  // namespace application_manager
+}  // namespace sdl_rpc_plugin

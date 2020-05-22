@@ -36,8 +36,8 @@
 
 #include "utils/logger.h"
 
-#include "utils/lock.h"
 #include "utils/date_time.h"
+#include "utils/lock.h"
 
 namespace protocol_handler {
 
@@ -259,6 +259,11 @@ RESULT_CODE MultiFrameBuilder::HandleConsecutiveFrame(
                         << ", frame: " << packet);
       return RESULT_FAIL;
     }
+  }
+
+  const bool packet_protection_flag = packet->protection_flag();
+  if (!assembling_frame->protection_flag() && packet_protection_flag) {
+    assembling_frame->set_protection_flag(packet_protection_flag);
   }
 
   assembling_frame->set_frame_data(new_frame_data);

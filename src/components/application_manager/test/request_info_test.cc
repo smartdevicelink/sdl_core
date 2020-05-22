@@ -31,10 +31,10 @@
  */
 
 #include "application_manager/request_info.h"
-#include "application_manager/mock_request.h"
 #include <iostream>
-#include <vector>
 #include <limits>
+#include <vector>
+#include "application_manager/mock_request.h"
 #include "gmock/gmock.h"
 
 namespace request_info = application_manager::request_controller;

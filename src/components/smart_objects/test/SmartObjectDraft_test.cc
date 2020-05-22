@@ -37,8 +37,8 @@
 
 #include "smart_objects/smart_object.h"
 
-using ::testing::ElementsAre;
 using ::testing::ContainerEq;
+using ::testing::ElementsAre;
 
 namespace test {
 namespace components {

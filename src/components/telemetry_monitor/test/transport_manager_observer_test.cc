@@ -30,11 +30,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "gtest/gtest.h"
-#include "telemetry_monitor/mock_telemetry_monitor.h"
-#include "protocol_handler/telemetry_observer.h"
-#include "telemetry_monitor/transport_manager_metric_wrapper.h"
 #include "telemetry_monitor/transport_manager_observer.h"
+#include "gtest/gtest.h"
+#include "protocol_handler/telemetry_observer.h"
+#include "telemetry_monitor/mock_telemetry_monitor.h"
+#include "telemetry_monitor/transport_manager_metric_wrapper.h"
 
 namespace test {
 namespace components {
@@ -47,7 +47,7 @@ TEST(TransportManagerObserverTest, MessageProcess) {
   MockTelemetryMonitor mock_telemetry_monitor;
   TransportManagerObserver tr_observer(&mock_telemetry_monitor);
   protocol_handler::RawMessage* ptr =
-      new ::protocol_handler::RawMessage(0, 0, NULL, 0);
+      new ::protocol_handler::RawMessage(0, 0, NULL, 0, false);
   tr_observer.StartRawMsg(ptr);
   EXPECT_CALL(mock_telemetry_monitor, SendMetric(_));
   tr_observer.StopRawMsg(ptr);

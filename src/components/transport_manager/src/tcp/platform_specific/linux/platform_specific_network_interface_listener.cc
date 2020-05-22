@@ -5,11 +5,11 @@
 #include <errno.h>
 #include <fcntl.h>
 #include <ifaddrs.h>
-#include <unistd.h>
 #include <net/if.h>
-#include <sys/types.h>
 #include <sys/select.h>
 #include <sys/socket.h>
+#include <sys/types.h>
+#include <unistd.h>
 
 #include <linux/netlink.h>
 #include <linux/rtnetlink.h>
@@ -105,7 +105,7 @@ PlatformSpecificNetworkInterfaceListener::
 
 bool PlatformSpecificNetworkInterfaceListener::Init() {
   LOG4CXX_AUTO_TRACE(logger_);
-
+  LOG4CXX_DEBUG(logger_, "Init socket: " << socket_);
   if (socket_ >= 0) {
     LOG4CXX_WARN(logger_, "Network interface listener is already initialized");
     return false;
@@ -151,7 +151,7 @@ bool PlatformSpecificNetworkInterfaceListener::Init() {
 
 void PlatformSpecificNetworkInterfaceListener::Deinit() {
   LOG4CXX_AUTO_TRACE(logger_);
-
+  LOG4CXX_DEBUG(logger_, "Deinit socket: " << socket_);
   if (socket_ >= 0) {
     close(socket_);
     socket_ = -1;
@@ -356,7 +356,7 @@ bool PlatformSpecificNetworkInterfaceListener::InitializeStatus() {
   }
 #endif  // BUILD_TESTS
 
-  struct ifaddrs* if_list, *interface;
+  struct ifaddrs *if_list, *interface;
   if (getifaddrs(&if_list) != 0) {
     LOG4CXX_WARN(logger_,
                  "getifaddr failed, interface status won't be available until "
@@ -421,9 +421,9 @@ bool PlatformSpecificNetworkInterfaceListener::UpdateStatus(
 
     switch (type) {
       case RTM_NEWLINK: {
-        LOG4CXX_DEBUG(logger_,
-                      "netlink event: interface " << ifname
-                                                  << " created or updated");
+        LOG4CXX_DEBUG(
+            logger_,
+            "netlink event: interface " << ifname << " created or updated");
         status.SetFlags(it->flags);
         break;
       }

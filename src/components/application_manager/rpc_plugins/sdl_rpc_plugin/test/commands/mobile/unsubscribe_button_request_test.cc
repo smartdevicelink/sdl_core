@@ -5,8 +5,8 @@
 
 #include "application_manager/commands/command_request_test.h"
 #include "application_manager/mock_application_manager.h"
-#include "application_manager/mock_message_helper.h"
 #include "application_manager/mock_hmi_capabilities.h"
+#include "application_manager/mock_message_helper.h"
 #include "mobile/unsubscribe_button_request.h"
 
 namespace test {
@@ -20,8 +20,8 @@ namespace mobile_result = mobile_apis::Result;
 
 using ::testing::_;
 
-using sdl_rpc_plugin::commands::UnsubscribeButtonRequest;
 using am::commands::MessageSharedPtr;
+using sdl_rpc_plugin::commands::UnsubscribeButtonRequest;
 
 typedef std::shared_ptr<UnsubscribeButtonRequest> CommandPtr;
 
@@ -70,7 +70,7 @@ TEST_F(UnsubscribeButtonRequestTest,
   MessageSharedPtr button_caps_ptr(CreateMessage(smart_objects::SmartType_Map));
   (*button_caps_ptr)[0][am::hmi_response::button_name] = kButtonId;
   EXPECT_CALL(mock_hmi_capabilities_, button_capabilities())
-      .WillOnce(Return(button_caps_ptr.get()));
+      .WillOnce(Return(button_caps_ptr));
 
   MockAppPtr mock_app(CreateMockApp());
   EXPECT_CALL(app_mngr_, application(kConnectionKey))
@@ -106,7 +106,7 @@ TEST_F(UnsubscribeButtonRequestTest,
 
   MessageSharedPtr button_caps_ptr(CreateMessage(smart_objects::SmartType_Map));
   EXPECT_CALL(mock_hmi_capabilities_, button_capabilities())
-      .WillOnce(Return(button_caps_ptr.get()));
+      .WillOnce(Return(button_caps_ptr));
 
   EXPECT_CALL(mock_rpc_service_,
               ManageMobileCommand(
@@ -129,7 +129,7 @@ TEST_F(UnsubscribeButtonRequestTest, Run_SUCCESS) {
   MessageSharedPtr button_caps_ptr(CreateMessage(smart_objects::SmartType_Map));
   (*button_caps_ptr)[0][am::hmi_response::button_name] = kButtonId;
   EXPECT_CALL(mock_hmi_capabilities_, button_capabilities())
-      .WillOnce(Return(button_caps_ptr.get()));
+      .WillOnce(Return(button_caps_ptr));
 
   MockAppPtr mock_app(CreateMockApp());
   EXPECT_CALL(app_mngr_, application(kConnectionKey))
@@ -139,9 +139,11 @@ TEST_F(UnsubscribeButtonRequestTest, Run_SUCCESS) {
 
   EXPECT_CALL(*mock_app, UnsubscribeFromButton(kButtonId))
       .WillOnce(Return(true));
-  EXPECT_CALL(mock_rpc_service_,
-              ManageHMICommand(HMIResultCodeIs(
-                  hmi_apis::FunctionID::Buttons_OnButtonSubscription)));
+  EXPECT_CALL(
+      mock_rpc_service_,
+      ManageHMICommand(
+          HMIResultCodeIs(hmi_apis::FunctionID::Buttons_OnButtonSubscription),
+          _));
   EXPECT_CALL(
       mock_rpc_service_,
       ManageMobileCommand(MobileResultCodeIs(mobile_result::SUCCESS), _));
@@ -170,7 +172,7 @@ TEST_F(UnsubscribeButtonRequestTest, Run_SUCCESS_Base_RPC_Version) {
       mobile_apis::ButtonName::PLAY_PAUSE;
 
   EXPECT_CALL(mock_hmi_capabilities_, button_capabilities())
-      .WillRepeatedly(Return(button_caps_ptr.get()));
+      .WillRepeatedly(Return(button_caps_ptr));
 
   MockAppPtr mock_app(CreateMockApp());
   EXPECT_CALL(app_mngr_, application(kConnectionKey))
@@ -182,9 +184,11 @@ TEST_F(UnsubscribeButtonRequestTest, Run_SUCCESS_Base_RPC_Version) {
   EXPECT_CALL(*mock_app,
               UnsubscribeFromButton(mobile_apis::ButtonName::PLAY_PAUSE))
       .WillOnce(Return(true));
-  EXPECT_CALL(mock_rpc_service_,
-              ManageHMICommand(HMIResultCodeIs(
-                  hmi_apis::FunctionID::Buttons_OnButtonSubscription)));
+  EXPECT_CALL(
+      mock_rpc_service_,
+      ManageHMICommand(
+          HMIResultCodeIs(hmi_apis::FunctionID::Buttons_OnButtonSubscription),
+          _));
   EXPECT_CALL(
       mock_rpc_service_,
       ManageMobileCommand(MobileResultCodeIs(mobile_result::SUCCESS), _));

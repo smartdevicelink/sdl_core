@@ -33,12 +33,12 @@
 #ifndef SRC_COMPONENTS_INCLUDE_APPLICATION_MANAGER_APPLICATION_MANAGER_SETTINGS_H_
 #define SRC_COMPONENTS_INCLUDE_APPLICATION_MANAGER_APPLICATION_MANAGER_SETTINGS_H_
 
-#include "application_manager/request_controller_settings.h"
 #include "application_manager/app_launch_settings.h"
+#include "application_manager/request_controller_settings.h"
 
 #include <stdint.h>
-#include <string>
 #include <map>
+#include <string>
 #include <vector>
 
 namespace application_manager {
@@ -72,7 +72,9 @@ class ApplicationManagerSettings : public RequestControlerSettings,
   virtual const std::string& tts_delimiter() const = 0;
   virtual const uint32_t& put_file_in_none() const = 0;
   virtual const std::string& sdl_version() const = 0;
+  virtual const std::string& vr_help_title() const = 0;
   virtual const std::vector<std::string>& time_out_promt() const = 0;
+  virtual const std::vector<std::string>& help_prompt() const = 0;
   virtual const std::string& hmi_capabilities_file_name() const = 0;
   virtual const std::string& video_server_type() const = 0;
   virtual const std::string& audio_server_type() const = 0;
@@ -83,8 +85,12 @@ class ApplicationManagerSettings : public RequestControlerSettings,
   virtual const std::string& named_audio_pipe_path() const = 0;
   virtual const std::string& video_stream_file() const = 0;
   virtual const std::string& audio_stream_file() const = 0;
+  virtual uint16_t period_for_consent_expiration() const = 0;
 
   virtual bool use_full_app_id() const = 0;
+  virtual uint32_t rpc_pass_through_timeout() const = 0;
+  virtual uint32_t cloud_app_retry_timeout() const = 0;
+  virtual uint16_t cloud_app_max_retry_attempts() const = 0;
   virtual bool use_db_for_resumption() const = 0;
   virtual const uint32_t& app_resumption_save_persistent_data_timeout()
       const = 0;
@@ -107,6 +113,8 @@ class ApplicationManagerSettings : public RequestControlerSettings,
   virtual const uint32_t& app_icons_amount_to_remove() const = 0;
   virtual const uint32_t& list_files_response_size() const = 0;
   virtual const std::string& plugins_folder() const = 0;
+  virtual const std::vector<std::string>& embedded_services() const = 0;
+  virtual const std::string hmi_origin_id() const = 0;
 };
 
 }  // namespace application_manager

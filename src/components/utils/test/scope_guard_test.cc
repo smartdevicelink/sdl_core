@@ -30,18 +30,18 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "gmock/gmock.h"
 #include "utils/scope_guard.h"
+#include "gmock/gmock.h"
 #include "utils/macro.h"
 
 namespace test {
 namespace components {
 namespace utils_test {
 
-using ::utils::ScopeGuard;
+using ::testing::Mock;
 using ::utils::MakeGuard;
 using ::utils::MakeObjGuard;
-using ::testing::Mock;
+using ::utils::ScopeGuard;
 
 class TestCalleeObject {
  public:
@@ -55,7 +55,7 @@ void dealloc(char* ptr) {
   delete ptr;
   ++call_with_param_count;
 }
-}
+}  // namespace
 
 TEST(ScopeGuardTest, CallFreeFunctionWithParam) {
   {
@@ -118,4 +118,4 @@ TEST(ScopeGuardTest, DismissCallObjectFunctionWithParam) {
 
 }  // namespace utils_test
 }  // namespace components
-}  // namesapce test
+}  // namespace test
