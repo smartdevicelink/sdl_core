@@ -102,7 +102,12 @@ void UnsubscribeVehicleDataRequest::Run() {
   };
 
   auto& ext = VehicleInfoAppExtension::ExtractVIExtension(*app);
-
+  // Fix for Invalid object usage
+  if (nullptr == &ext) {
+    LOG4CXX_ERROR(
+          logger_, "ExtractVIExtension is nullptr ");
+    return;
+  }
   const auto& param_names = (*message_)[strings::msg_params].enumerate();
   for (const auto& name : param_names) {
     const bool enabled = (*message_)[strings::msg_params][name].asBool();
@@ -269,6 +274,12 @@ bool UnsubscribeVehicleDataRequest::IsSomeoneSubscribedFor(
       return false;
     }
     auto& ext = VehicleInfoAppExtension::ExtractVIExtension(*app);
+    // Fix for Invalid object usage
+    if (nullptr == &ext) {
+      LOG4CXX_ERROR(
+            logger_, "ExtractVIExtension is nullptr ");
+      return false;
+    }
     return (ext.isSubscribedToVehicleInfo(param_name));
   };
 
@@ -323,6 +334,13 @@ bool UnsubscribeVehicleDataRequest::UnsubscribePendingVehicleData(
         CheckSubscriptionStatus(converted_item, msg_params);
     if (is_unsubscription_successful) {
       auto& ext = VehicleInfoAppExtension::ExtractVIExtension(*app);
+      // Fix for Invalid object usage
+      if (nullptr == &ext) {
+        LOG4CXX_ERROR(
+              logger_, "ExtractVIExtension is nullptr ");
+        vi_waiting_for_unsubscribe_.erase(vi_name);
+        continue;
+      }
       ext.unsubscribeFromVehicleInfo(vi_name);
       vi_waiting_for_unsubscribe_.erase(vi_name);
     }

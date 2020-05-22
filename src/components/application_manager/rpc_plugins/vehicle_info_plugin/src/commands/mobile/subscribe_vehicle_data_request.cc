@@ -221,6 +221,13 @@ bool SubscribeVehicleDataRequest::SubscribePendingVehicleData(
 
     if (is_subscription_successful) {
       auto& ext = VehicleInfoAppExtension::ExtractVIExtension(*app);
+      // Fix for Invalid object usage
+      if (nullptr == &ext) {
+        LOG4CXX_ERROR(
+              logger_, "ExtractVIExtension is nullptr ");
+        vi_name = vi_waiting_for_subscribe_.erase(vi_name);
+        continue;
+      }
       ext.subscribeToVehicleInfo(*vi_name);
       vi_name = vi_waiting_for_subscribe_.erase(vi_name);
     } else {
@@ -266,6 +273,10 @@ struct SubscribedToIVIPredicate {
   bool operator()(const ApplicationSharedPtr app) const {
     DCHECK_OR_RETURN(app, false);
     auto& ext = VehicleInfoAppExtension::ExtractVIExtension(*app);
+    // Fix for Invalid object usage
+    if (nullptr == &ext) {
+      return false;
+    }
     return ext.isSubscribedToVehicleInfo(vehicle_info_);
   }
 };
@@ -352,7 +363,12 @@ void SubscribeVehicleDataRequest::CheckVISubscriptions(
 
   auto rpc_spec_vehicle_data = MessageHelper::vehicle_data();
   auto& ext = VehicleInfoAppExtension::ExtractVIExtension(*app);
-
+  // Fix for Invalid object usage
+  if (nullptr == &ext) {
+    LOG4CXX_ERROR(
+              logger_, "ExtractVIExtension is nullptr ");
+    return;
+  }
   VehicleInfoSubscriptions::size_type items_to_subscribe = 0;
   auto item_names = (*message_)[strings::msg_params].enumerate();
   if (!is_interface_not_available) {

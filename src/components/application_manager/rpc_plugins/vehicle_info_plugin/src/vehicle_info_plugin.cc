@@ -125,6 +125,12 @@ void VehicleInfoPlugin::UnsubscribeFromRemovedVDItems() {
     auto applications = application_manager_->applications();
     for (auto& app : applications.GetData()) {
       auto& ext = VehicleInfoAppExtension::ExtractVIExtension(*app);
+      // iauto fix Null pointer object determines protection
+      if (nullptr == &ext) {
+        LOG4CXX_ERROR(
+              logger_, "ExtractVIExtension is nullptr ");
+        continue;
+      }
       auto subscription_names = ext.Subscriptions();
       for (auto& subscription_name : subscription_names) {
         if (custom_vehicle_data_manager_->IsRemovedCustomVehicleDataName(
@@ -185,6 +191,12 @@ application_manager::ApplicationSharedPtr FindAppSubscribedToIVI(
 
   for (auto& app : applications.GetData()) {
     auto& ext = VehicleInfoAppExtension::ExtractVIExtension(*app);
+    // iauto fix Null pointer object determines protection
+    if (nullptr == &ext) {
+      LOG4CXX_ERROR(
+            logger_, "ExtractVIExtension is nullptr ");
+      return application_manager::ApplicationSharedPtr();
+    }
     if (ext.isSubscribedToVehicleInfo(ivi_name)) {
       return app;
     }
@@ -242,6 +254,12 @@ smart_objects::SmartObjectSPtr VehicleInfoPlugin::GetUnsubscribeIVIRequest(
 void VehicleInfoPlugin::DeleteSubscriptions(
     application_manager::ApplicationSharedPtr app) {
   auto& ext = VehicleInfoAppExtension::ExtractVIExtension(*app);
+  // iauto fix Null pointer object determines protection
+  if (nullptr == &ext) {
+    LOG4CXX_ERROR(
+          logger_, "ExtractVIExtension is nullptr ");
+    return;
+  }
   auto subscriptions = ext.Subscriptions();
   std::vector<std::string> ivi_to_unsubscribe;
   for (auto& ivi : subscriptions) {

@@ -77,6 +77,12 @@ void OnVehicleDataNotification::Run() {
     auto subscribed_to_ivi_predicate = [&name](const ApplicationSharedPtr app) {
       DCHECK_OR_RETURN(app, false);
       auto& ext = VehicleInfoAppExtension::ExtractVIExtension(*app);
+      // Fix for Invalid object usage
+      if (nullptr == &ext) {
+        LOG4CXX_ERROR(
+              logger_, "ExtractVIExtension is nullptr ");
+        return false;
+      }
       return ext.isSubscribedToVehicleInfo(name);
     };
 
