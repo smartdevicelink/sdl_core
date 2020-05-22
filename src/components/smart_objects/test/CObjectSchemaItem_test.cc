@@ -521,6 +521,48 @@ TEST_F(ObjectSchemaItemTest, test_strings_to_enum_conversion) {
   }
 }
 
+TEST_F(ObjectSchemaItemTest, filter_unknown_enums_non_mandatory) {
+  SmartObject obj;
+  obj[S_PARAMS][S_FUNCTION_ID] = 1;
+  obj[S_PARAMS][S_CORRELATION_ID] = 0xFF;
+  obj[S_PARAMS][S_PROTOCOL_VERSION] = 2;
+  obj[S_MSG_PARAMS][Keys::RESULT_CODE] = "FUTURE";
+  obj[S_MSG_PARAMS][Keys::INFO] = "0123456789";
+
+  schema_item->applySchema(obj, false);
+  rpc::ValidationReport report("RPC");
+  EXPECT_FALSE(
+      schema_item->filterInvalidEnums(obj, utils::SemanticVersion(), &report));
+  EXPECT_NE(std::string(""), rpc::PrettyFormat(report));
+
+  // The unknown enum value was filtered. Validation should pass in this case
+  EXPECT_FALSE(obj[S_MSG_PARAMS].keyExists(Keys::RESULT_CODE));
+  report = rpc::ValidationReport("RPC");
+  EXPECT_EQ(errors::OK, schema_item->validate(obj, &report));
+  EXPECT_EQ(std::string(""), rpc::PrettyFormat(report));
+}
+
+TEST_F(ObjectSchemaItemTest, filter_unknown_enums_mandatory) {
+  SmartObject obj;
+  obj[S_PARAMS][S_FUNCTION_ID] = "FUTURE";
+  obj[S_PARAMS][S_CORRELATION_ID] = 0xFF;
+  obj[S_PARAMS][S_PROTOCOL_VERSION] = 2;
+
+  schema_item->applySchema(obj, false);
+  rpc::ValidationReport report("RPC");
+  EXPECT_TRUE(
+      schema_item->filterInvalidEnums(obj, utils::SemanticVersion(), &report));
+  EXPECT_NE(std::string(""), rpc::PrettyFormat(report));
+
+  // The invalid enum value was part of a mandatory structure, so it could not
+  // be filtered. Validation should fail in this case
+  EXPECT_TRUE(obj[S_PARAMS].keyExists(S_FUNCTION_ID));
+  report = rpc::ValidationReport("RPC");
+  EXPECT_EQ(errors::INVALID_VALUE, schema_item->validate(obj, &report));
+  EXPECT_NE(std::string(""), rpc::PrettyFormat(report));
+  printf("%s", rpc::PrettyFormat(report).c_str());
+}
+
 }  // namespace smart_object_test
 }  // namespace components
 }  // namespace test
@@ -529,20 +571,20 @@ namespace ns_smart_device_link {
 namespace ns_smart_objects {
 
 namespace FunctionID = test::components::smart_object_test::FunctionID;
-typedef EnumConversionHelper<FunctionID::eType> FunctionConvertor;
+typedef EnumConversionHelper<FunctionID::eType> FunctionConverter;
 
 template <>
-const FunctionConvertor::EnumToCStringMap
-    FunctionConvertor::enum_to_cstring_map_ =
-        FunctionConvertor::InitEnumToCStringMap();
+const FunctionConverter::EnumToCStringMap
+    FunctionConverter::enum_to_cstring_map_ =
+        FunctionConverter::InitEnumToCStringMap();
 
 template <>
-const FunctionConvertor::CStringToEnumMap
-    FunctionConvertor::cstring_to_enum_map_ =
-        FunctionConvertor::InitCStringToEnumMap();
+const FunctionConverter::CStringToEnumMap
+    FunctionConverter::cstring_to_enum_map_ =
+        FunctionConverter::InitCStringToEnumMap();
 
 template <>
-const char* const FunctionConvertor::cstring_values_[] = {"Function0",
+const char* const FunctionConverter::cstring_values_[] = {"Function0",
                                                           "Function1",
                                                           "Function2",
                                                           "Function3",
@@ -551,7 +593,7 @@ const char* const FunctionConvertor::cstring_values_[] = {"Function0",
                                                           "Function6"};
 
 template <>
-const FunctionID::eType FunctionConvertor::enum_values_[] = {
+const FunctionID::eType FunctionConverter::enum_values_[] = {
     FunctionID::Function0,
     FunctionID::Function1,
     FunctionID::Function2,
@@ -563,20 +605,20 @@ const FunctionID::eType FunctionConvertor::enum_values_[] = {
 // ----------------------------------------------------------------------------
 
 namespace ResultType = test::components::smart_object_test::ResultType;
-typedef EnumConversionHelper<ResultType::eType> ResultTypeConvertor;
+typedef EnumConversionHelper<ResultType::eType> ResultTypeConverter;
 
 template <>
-const ResultTypeConvertor::EnumToCStringMap
-    ResultTypeConvertor::enum_to_cstring_map_ =
-        ResultTypeConvertor::InitEnumToCStringMap();
+const ResultTypeConverter::EnumToCStringMap
+    ResultTypeConverter::enum_to_cstring_map_ =
+        ResultTypeConverter::InitEnumToCStringMap();
 
 template <>
-const ResultTypeConvertor::CStringToEnumMap
-    ResultTypeConvertor::cstring_to_enum_map_ =
-        ResultTypeConvertor::InitCStringToEnumMap();
+const ResultTypeConverter::CStringToEnumMap
+    ResultTypeConverter::cstring_to_enum_map_ =
+        ResultTypeConverter::InitCStringToEnumMap();
 
 template <>
-const char* const ResultTypeConvertor::cstring_values_[] = {
+const char* const ResultTypeConverter::cstring_values_[] = {
     "APPLICATION_NOT_REGISTERED",
     "SUCCESS",
     "TOO_MANY_PENDING_REQUESTS",
@@ -589,7 +631,7 @@ const char* const ResultTypeConvertor::cstring_values_[] = {
     "DISALLOWED"};
 
 template <>
-const ResultType::eType ResultTypeConvertor::enum_values_[] = {
+const ResultType::eType ResultTypeConverter::enum_values_[] = {
     ResultType::APPLICATION_NOT_REGISTERED,
     ResultType::SUCCESS,
     ResultType::TOO_MANY_PENDING_REQUESTS,
