@@ -652,6 +652,7 @@ void ProtocolHandlerImpl::SendEndServicePrivate(int32_t primary_connection_id,
 
 void ProtocolHandlerImpl::SendEndSession(int32_t connection_id,
                                          uint8_t session_id) {
+  LOG4CXX_AUTO_TRACE(logger_);
   // A session is always associated with a primary connection ID
   SendEndServicePrivate(
       connection_id, connection_id, session_id, SERVICE_TYPE_RPC);
@@ -661,6 +662,7 @@ void ProtocolHandlerImpl::SendEndService(int32_t primary_connection_id,
                                          int32_t connection_id,
                                          uint8_t session_id,
                                          uint8_t service_type) {
+  LOG4CXX_AUTO_TRACE(logger_);
   SendEndServicePrivate(
       primary_connection_id, connection_id, session_id, service_type);
 }

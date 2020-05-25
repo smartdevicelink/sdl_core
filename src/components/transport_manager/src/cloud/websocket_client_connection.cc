@@ -284,6 +284,7 @@ TransportAdapter::Error WebsocketClientConnection::Disconnect() {
 }
 
 void WebsocketClientConnection::Shutdown() {
+  LOG4CXX_AUTO_TRACE(logger_);
   shutdown_ = true;
 
   if (thread_delegate_) {
