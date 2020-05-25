@@ -29,17 +29,19 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "gtest/gtest.h"
 #include "policy/sql_pt_representation.h"
-#include "utils/file_system.h"
-#include "policy/sql_wrapper.h"
-#include "policy/mock_policy_settings.h"
 
-#include <string>
 #include <memory>
+#include <string>
 
-using testing::ReturnRef;
+#include "gtest/gtest.h"
+
+#include "policy/mock_policy_settings.h"
+#include "policy/sql_wrapper.h"
+#include "utils/file_system.h"
+
 using testing::NiceMock;
+using testing::ReturnRef;
 
 namespace test {
 namespace components {

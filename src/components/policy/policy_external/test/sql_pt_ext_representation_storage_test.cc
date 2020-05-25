@@ -29,20 +29,22 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "gtest/gtest.h"
 #include "policy/sql_pt_ext_representation.h"
-#include "policy/mock_policy_settings.h"
-#include "utils/shared_ptr.h"
-#include "utils/make_shared.h"
-#include "utils/file_system.h"
-#include "sqlite_wrapper/sql_query.h"
 
 #include <string>
 
+#include "gtest/gtest.h"
+
+#include "policy/mock_policy_settings.h"
+#include "sqlite_wrapper/sql_query.h"
+#include "utils/file_system.h"
+#include "utils/make_shared.h"
+#include "utils/shared_ptr.h"
+
 using namespace ::policy;
 
-using testing::ReturnRef;
 using testing::NiceMock;
+using testing::ReturnRef;
 
 namespace test {
 namespace components {

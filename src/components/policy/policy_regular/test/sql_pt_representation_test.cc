@@ -29,8 +29,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "policy/sql_pt_representation.h"
+
 #include <stdio.h>
 #include <sys/stat.h>
+
 #include <algorithm>
 #include <fstream>
 #include <memory>
@@ -38,6 +41,7 @@
 #include <vector>
 
 #include "gtest/gtest.h"
+
 #include "json/reader.h"
 #include "json/writer.h"
 #include "policy/driver_dbms.h"
@@ -45,12 +49,10 @@
 #include "policy/policy_table/enums.h"
 #include "policy/policy_table/types.h"
 #include "policy/policy_types.h"
-#include "policy/sql_pt_representation.h"
 #include "rpc_base/rpc_base.h"
-
+#include "sqlite_wrapper/sql_query.h"
 #include "utils/file_system.h"
 #include "utils/sqlite_wrapper/sql_database.h"
-#include "sqlite_wrapper/sql_query.h"
 
 namespace policy_table = rpc::policy_table_interface_base;
 using policy::CheckPermissionResult;
