@@ -547,6 +547,8 @@ TEST_F(ObjectSchemaItemTest, filter_unknown_enums_mandatory) {
   obj[S_PARAMS][S_FUNCTION_ID] = "FUTURE";
   obj[S_PARAMS][S_CORRELATION_ID] = 0xFF;
   obj[S_PARAMS][S_PROTOCOL_VERSION] = 2;
+  obj[S_MSG_PARAMS][Keys::RESULT_CODE] = 2;
+  obj[S_MSG_PARAMS][Keys::INFO] = "0123456789";
 
   schema_item->applySchema(obj, false);
   rpc::ValidationReport report("RPC");
