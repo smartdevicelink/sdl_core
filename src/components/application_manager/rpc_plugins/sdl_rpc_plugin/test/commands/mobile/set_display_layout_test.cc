@@ -157,7 +157,8 @@ TEST_F(SetDisplayLayoutRequestTest,
   MessageSharedPtr ui_command_result;
   EXPECT_CALL(
       mock_rpc_service_,
-      ManageMobileCommand(_, am::commands::Command::CommandSource::SOURCE_SDL))
+      ManageMobileCommand(
+          _, am::commands::Command::CommandSource::SOURCE_SDL, std::string()))
       .WillOnce(DoAll(SaveArg<0>(&ui_command_result), Return(true)));
 
   command->Init();
@@ -177,7 +178,8 @@ TEST_F(SetDisplayLayoutRequestTest, Run_InvalidApp_UNSUCCESS) {
   EXPECT_CALL(mock_rpc_service_,
               ManageMobileCommand(
                   MobileResultCodeIs(mobile_result::APPLICATION_NOT_REGISTERED),
-                  am::commands::Command::CommandSource::SOURCE_SDL));
+                  am::commands::Command::CommandSource::SOURCE_SDL,
+                  std::string()));
 
   command->Init();
   command->Run();
@@ -244,7 +246,8 @@ TEST_F(SetDisplayLayoutRequestTest, OnEvent_AppVersion_v6_WARNING) {
   EXPECT_CALL(
       mock_rpc_service_,
       ManageMobileCommand(MobileResultCodeIs(mobile_result::WARNINGS),
-                          am::commands::Command::CommandSource::SOURCE_SDL));
+                          am::commands::Command::CommandSource::SOURCE_SDL,
+                          std::string()));
 
   CommandPtr command(CreateCommand<SetDisplayLayoutRequest>(msg));
   MockAppPtr mock_app(CreateMockApp());
@@ -278,7 +281,8 @@ TEST_F(SetDisplayLayoutRequestTest, OnEvent_AppVersion_v5_SUCCESS) {
   EXPECT_CALL(
       mock_rpc_service_,
       ManageMobileCommand(MobileResultCodeIs(mobile_result::SUCCESS),
-                          am::commands::Command::CommandSource::SOURCE_SDL));
+                          am::commands::Command::CommandSource::SOURCE_SDL,
+                          std::string()));
 
   CommandPtr command(CreateCommand<SetDisplayLayoutRequest>(msg));
   MockAppPtr mock_app(CreateMockApp());

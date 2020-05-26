@@ -228,9 +228,11 @@ TEST_F(
           HMIResultCodeIs(hmi_apis::FunctionID::Buttons_ButtonPress), _))
       .Times(0);
   MessageSharedPtr command_result;
-  EXPECT_CALL(mock_rpc_service_,
-              ManageMobileCommand(
-                  MobileResultCodeIs(mobile_apis::Result::INVALID_DATA), _))
+  EXPECT_CALL(
+      mock_rpc_service_,
+      ManageMobileCommand(MobileResultCodeIs(mobile_apis::Result::INVALID_DATA),
+                          _,
+                          std::string()))
       .WillOnce(DoAll(SaveArg<0>(&command_result), Return(true)));
 
   // Act
@@ -267,7 +269,8 @@ TEST_F(ButtonPressRequestTest, OnEvent_ExpectSuccessfullResponseSentToMobile) {
 
   EXPECT_CALL(
       mock_rpc_service_,
-      ManageMobileCommand(MobileResultCodeIs(mobile_apis::Result::SUCCESS), _))
+      ManageMobileCommand(
+          MobileResultCodeIs(mobile_apis::Result::SUCCESS), _, std::string()))
       .WillOnce(Return(true));
 
   // Act
@@ -307,7 +310,9 @@ TEST_F(ButtonPressRequestTest,
 
   EXPECT_CALL(mock_rpc_service_,
               ManageMobileCommand(
-                  MobileResultCodeIs(mobile_apis::Result::GENERIC_ERROR), _))
+                  MobileResultCodeIs(mobile_apis::Result::GENERIC_ERROR),
+                  _,
+                  std::string()))
       .WillOnce(Return(false));
 
   // Act

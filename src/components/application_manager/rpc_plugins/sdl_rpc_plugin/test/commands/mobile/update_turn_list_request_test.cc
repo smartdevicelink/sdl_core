@@ -95,10 +95,11 @@ TEST_F(UpdateTurnListRequestTest, Run_ApplicationIsNotRegistered_UNSUCCESS) {
   EXPECT_CALL(app_mngr_, application(kConnectionKey))
       .WillOnce(Return(ApplicationSharedPtr()));
 
-  EXPECT_CALL(
-      mock_rpc_service_,
-      ManageMobileCommand(
-          MobileResultCodeIs(mobile_result::APPLICATION_NOT_REGISTERED), _));
+  EXPECT_CALL(mock_rpc_service_,
+              ManageMobileCommand(
+                  MobileResultCodeIs(mobile_result::APPLICATION_NOT_REGISTERED),
+                  _,
+                  std::string()));
 
   command_->Run();
 }
@@ -113,7 +114,8 @@ TEST_F(UpdateTurnListRequestTest, Run_InvalidNavigationText_UNSUCCESS) {
 
   EXPECT_CALL(
       mock_rpc_service_,
-      ManageMobileCommand(MobileResultCodeIs(mobile_result::INVALID_DATA), _));
+      ManageMobileCommand(
+          MobileResultCodeIs(mobile_result::INVALID_DATA), _, std::string()));
 
   command_->Run();
 }
@@ -131,7 +133,8 @@ TEST_F(UpdateTurnListRequestTest, Run_InvalidTurnIcon_UNSUCCESS) {
 
   EXPECT_CALL(
       mock_rpc_service_,
-      ManageMobileCommand(MobileResultCodeIs(mobile_result::INVALID_DATA), _));
+      ManageMobileCommand(
+          MobileResultCodeIs(mobile_result::INVALID_DATA), _, std::string()));
 
   command_->Run();
 }
@@ -157,7 +160,8 @@ TEST_F(UpdateTurnListRequestTest,
       .WillOnce(Return(kExpectedResult));
 
   EXPECT_CALL(mock_rpc_service_,
-              ManageMobileCommand(MobileResultCodeIs(kExpectedResult), _));
+              ManageMobileCommand(
+                  MobileResultCodeIs(kExpectedResult), _, std::string()));
 
   command_->Run();
 }
@@ -176,7 +180,8 @@ TEST_F(UpdateTurnListRequestTest, Run_NoTurnList_UNSUCCESS) {
 
   EXPECT_CALL(
       mock_rpc_service_,
-      ManageMobileCommand(MobileResultCodeIs(mobile_result::INVALID_DATA), _));
+      ManageMobileCommand(
+          MobileResultCodeIs(mobile_result::INVALID_DATA), _, std::string()));
 
   command_->Run();
 }
@@ -305,7 +310,7 @@ TEST_F(UpdateTurnListRequestTest, Run_ValidTurnList_WARNINGS) {
 
 TEST_F(UpdateTurnListRequestTest, OnEvent_UnknownEvent_UNSUCCESS) {
   Event event(hmi_apis::FunctionID::INVALID_ENUM);
-  EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(_, _)).Times(0);
+  EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(_, _, _)).Times(0);
 
   command_->on_event(event);
 }
@@ -323,7 +328,8 @@ TEST_F(UpdateTurnListRequestTest, OnEvent_UnsupportedResource_SUCCESS) {
   event.set_smart_object(*event_msg);
 
   EXPECT_CALL(mock_rpc_service_,
-              ManageMobileCommand(MobileResultCodeIs(mobile_response_code), _));
+              ManageMobileCommand(
+                  MobileResultCodeIs(mobile_response_code), _, std::string()));
 
   command_->on_event(event);
 }
@@ -342,7 +348,8 @@ TEST_F(UpdateTurnListRequestTest,
   event.set_smart_object(*event_msg);
 
   EXPECT_CALL(mock_rpc_service_,
-              ManageMobileCommand(MobileResultCodeIs(mobile_response_code), _));
+              ManageMobileCommand(
+                  MobileResultCodeIs(mobile_response_code), _, std::string()));
 
   command_->on_event(event);
 }

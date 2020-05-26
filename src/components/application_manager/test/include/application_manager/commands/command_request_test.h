@@ -95,7 +95,7 @@ class CommandRequestTest : public CommandsTest<kIsNice> {
   MessageSharedPtr CatchMobileCommandResult(CallableT delegate,
                                             bool call_return = true) {
     MessageSharedPtr result_msg;
-    EXPECT_CALL(this->mock_rpc_service_, ManageMobileCommand(_, _))
+    EXPECT_CALL(this->mock_rpc_service_, ManageMobileCommand(_, _, _))
         .WillOnce(DoAll(SaveArg<0>(&result_msg), Return(call_return)));
     delegate();
     return result_msg;

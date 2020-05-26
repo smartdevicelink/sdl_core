@@ -106,7 +106,7 @@ class SetMediaClockRequestTest
     EXPECT_CALL(*mock_app_, is_media_application()).WillOnce(Return(is_media));
     EXPECT_CALL(*mock_app_, app_id()).Times(0);
 
-    EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(_, _));
+    EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(_, _, _));
   }
 
   MockAppPtr mock_app_;
@@ -138,7 +138,8 @@ TEST_F(SetMediaClockRequestTest,
 
   EXPECT_CALL(
       mock_rpc_service_,
-      ManageMobileCommand(_, am::commands::Command::CommandSource::SOURCE_SDL))
+      ManageMobileCommand(
+          _, am::commands::Command::CommandSource::SOURCE_SDL, std::string()))
       .WillOnce(DoAll(SaveArg<0>(&ui_command_result), Return(true)));
 
   command->on_event(event);
@@ -272,7 +273,7 @@ TEST_F(SetMediaClockRequestTest, Run_UpdateCountDownWrongTime_Canceled) {
   EXPECT_CALL(*mock_app_, is_media_application()).WillOnce(Return(true));
   EXPECT_CALL(*mock_app_, app_id()).Times(0);
 
-  EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(_, _));
+  EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(_, _, _));
 
   command->Run();
 }
@@ -323,7 +324,7 @@ TEST_F(SetMediaClockRequestTest, Run_InvalidApp_Canceled) {
   EXPECT_CALL(*mock_app_, is_media_application()).Times(0);
   EXPECT_CALL(*mock_app_, app_id()).Times(0);
 
-  EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(_, _));
+  EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(_, _, _));
 
   command->Run();
 }
@@ -334,7 +335,7 @@ TEST_F(SetMediaClockRequestTest, OnEvent_Success) {
       hmi_apis::Common_Result::SUCCESS;
   (*msg)[am::strings::msg_params] = SmartObject(smart_objects::SmartType_Null);
 
-  EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(_, _));
+  EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(_, _, _));
 
   MockAppPtr app(CreateMockApp());
   EXPECT_CALL(app_mngr_, application(_)).WillRepeatedly(Return(app));
@@ -351,7 +352,7 @@ TEST_F(SetMediaClockRequestTest, OnEvent_Canceled) {
 
   std::shared_ptr<SetMediaClockRequest> command(
       CreateCommand<SetMediaClockRequest>(msg));
-  EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(_, _)).Times(0);
+  EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(_, _, _)).Times(0);
   Event event(hmi_apis::FunctionID::UI_Slider);
   event.set_smart_object(*msg);
 

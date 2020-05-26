@@ -117,7 +117,8 @@ TEST_F(DeleteWindowRequestTest,
   const auto result_code = mobile_apis::Result::APPLICATION_NOT_REGISTERED;
   EXPECT_CALL(mock_rpc_service_,
               ManageMobileCommand(CheckMessageToMobile(result_code, false),
-                                  Command::CommandSource::SOURCE_SDL))
+                                  Command::CommandSource::SOURCE_SDL,
+                                  std::string()))
       .WillOnce(Return(true));
   EXPECT_CALL(app_mngr_, application(kConnectionKey)).WillOnce(Return(nullptr));
 
@@ -132,7 +133,8 @@ TEST_F(DeleteWindowRequestTest,
   const auto result_code = mobile_apis::Result::INVALID_ID;
   EXPECT_CALL(mock_rpc_service_,
               ManageMobileCommand(CheckMessageToMobile(result_code, false),
-                                  Command::CommandSource::SOURCE_SDL))
+                                  Command::CommandSource::SOURCE_SDL,
+                                  std::string()))
       .WillOnce(Return(true));
 
   auto msg = CreateMsgParams();
@@ -149,7 +151,8 @@ TEST_F(DeleteWindowRequestTest,
   const auto result_code = mobile_apis::Result::INVALID_ID;
   EXPECT_CALL(mock_rpc_service_,
               ManageMobileCommand(CheckMessageToMobile(result_code, false),
-                                  Command::CommandSource::SOURCE_SDL))
+                                  Command::CommandSource::SOURCE_SDL,
+                                  std::string()))
       .WillOnce(Return(true));
   ON_CALL(*mock_app_, GetWindowIds()).WillByDefault(Return(am::WindowIds()));
 
@@ -204,7 +207,7 @@ TEST_F(DeleteWindowRequestTest,
 
 TEST_F(DeleteWindowRequestTest,
        OnEvent_InvalidFunctionId_MessageNotSendToMobile) {
-  EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(_, _)).Times(0);
+  EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(_, _, _)).Times(0);
   auto msg = CreateMsgParams();
   auto command = CreateCommand<DeleteWindowRequest>(msg);
   EXPECT_TRUE(command->Init());
@@ -217,7 +220,8 @@ TEST_F(DeleteWindowRequestTest,
   const auto result_code = mobile_apis::Result::APPLICATION_NOT_REGISTERED;
   EXPECT_CALL(mock_rpc_service_,
               ManageMobileCommand(CheckMessageToMobile(result_code, false),
-                                  Command::CommandSource::SOURCE_SDL))
+                                  Command::CommandSource::SOURCE_SDL,
+                                  std::string()))
       .WillOnce(Return(true));
   EXPECT_CALL(app_mngr_, application(kConnectionKey)).WillOnce(Return(nullptr));
 
@@ -233,7 +237,8 @@ TEST_F(DeleteWindowRequestTest,
   const auto result_code = mobile_apis::Result::GENERIC_ERROR;
   EXPECT_CALL(mock_rpc_service_,
               ManageMobileCommand(CheckMessageToMobile(result_code, false),
-                                  Command::CommandSource::SOURCE_SDL))
+                                  Command::CommandSource::SOURCE_SDL,
+                                  std::string()))
       .WillOnce(Return(true));
 
   auto msg = CreateMsgParams();
@@ -253,7 +258,8 @@ TEST_F(DeleteWindowRequestTest,
   const auto result_code = mobile_apis::Result::SUCCESS;
   EXPECT_CALL(mock_rpc_service_,
               ManageMobileCommand(CheckMessageToMobile(result_code, true),
-                                  Command::CommandSource::SOURCE_SDL))
+                                  Command::CommandSource::SOURCE_SDL,
+                                  std::string()))
       .WillOnce(Return(true));
   EXPECT_CALL(*mock_app_, UpdateHash()).Times(1);
   EXPECT_CALL(*mock_app_, RemoveHMIState(kTestWindowId, _)).Times(1);

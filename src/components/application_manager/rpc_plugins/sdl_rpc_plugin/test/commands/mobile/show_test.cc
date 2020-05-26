@@ -256,7 +256,7 @@ class ShowRequestTest : public CommandRequestTest<CommandsTestMocks::kIsNice> {
 
     EXPECT_CALL(app_mngr_, application(kConnectionKey))
         .WillOnce(Return(mock_app_));
-    EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(_, _));
+    EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(_, _, _));
     EXPECT_CALL(*mock_app_, app_id()).Times(0);
 
     EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_, _)).Times(0);
@@ -345,7 +345,8 @@ TEST_F(ShowRequestTest, OnEvent_UI_UNSUPPORTED_RESOURCE) {
   MessageSharedPtr vr_command_result;
   EXPECT_CALL(
       mock_rpc_service_,
-      ManageMobileCommand(_, am::commands::Command::CommandSource::SOURCE_SDL))
+      ManageMobileCommand(
+          _, am::commands::Command::CommandSource::SOURCE_SDL, std::string()))
       .WillOnce(DoAll(SaveArg<0>(&vr_command_result), Return(true)));
 
   command->on_event(event);
@@ -431,7 +432,7 @@ TEST_F(ShowRequestTest, Run_SoftButtonExists_Canceled) {
       .WillOnce(Return(mock_app_));
   EXPECT_CALL(mock_message_helper_, ProcessSoftButtons(msg_params, _, _, _))
       .WillOnce(Return(mobile_apis::Result::ABORTED));
-  EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(_, _));
+  EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(_, _, _));
 
   EXPECT_CALL(*mock_app_, app_id()).Times(0);
 
@@ -513,7 +514,7 @@ TEST_F(ShowRequestTest, Run_Graphic_Canceled) {
       .WillOnce(Return(mock_app_));
   EXPECT_CALL(mock_message_helper_, VerifyImage(graphic, _, _))
       .WillOnce(Return(mobile_apis::Result::INVALID_DATA));
-  EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(_, _));
+  EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(_, _, _));
   EXPECT_CALL(*mock_app_, app_id()).Times(0);
   EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_, _)).Times(0);
   EXPECT_CALL(*mock_app_, set_show_command(msg_params)).Times(0);
@@ -535,7 +536,7 @@ TEST_F(ShowRequestTest, Run_Graphic_WrongSyntax) {
   EXPECT_CALL(app_mngr_, application(kConnectionKey))
       .WillOnce(Return(mock_app_));
   EXPECT_CALL(mock_message_helper_, VerifyImage(_, _, _)).Times(0);
-  EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(_, _));
+  EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(_, _, _));
   EXPECT_CALL(*mock_app_, app_id()).Times(0);
 
   EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_, _)).Times(0);
@@ -611,7 +612,7 @@ TEST_F(ShowRequestTest, Run_SecondaryGraphic_Canceled) {
       .WillOnce(Return(mock_app_));
   EXPECT_CALL(mock_message_helper_, VerifyImage(graphic, _, _))
       .WillOnce(Return(mobile_apis::Result::INVALID_DATA));
-  EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(_, _));
+  EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(_, _, _));
   EXPECT_CALL(*mock_app_, app_id()).Times(0);
 
   EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_, _)).Times(0);
@@ -634,7 +635,7 @@ TEST_F(ShowRequestTest, Run_SecondaryGraphic_WrongSyntax) {
   EXPECT_CALL(app_mngr_, application(kConnectionKey))
       .WillOnce(Return(mock_app_));
   EXPECT_CALL(mock_message_helper_, VerifyImage(graphic, _, _)).Times(0);
-  EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(_, _));
+  EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(_, _, _));
   EXPECT_CALL(*mock_app_, app_id()).Times(0);
 
   EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_, _)).Times(0);
@@ -857,7 +858,8 @@ TEST_F(ShowRequestTest, Run_MainField1_MetadataTagWithNoFieldData) {
   MessageSharedPtr ui_command_result;
   EXPECT_CALL(
       mock_rpc_service_,
-      ManageMobileCommand(_, am::commands::Command::CommandSource::SOURCE_SDL))
+      ManageMobileCommand(
+          _, am::commands::Command::CommandSource::SOURCE_SDL, std::string()))
       .WillOnce(DoAll(SaveArg<0>(&ui_command_result), Return(true)));
 
   command->on_event(event);
@@ -998,7 +1000,7 @@ TEST_F(ShowRequestTest, Run_CustomPresets_WrongSyntax) {
 
   EXPECT_CALL(app_mngr_, application(kConnectionKey))
       .WillOnce(Return(mock_app_));
-  EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(_, _));
+  EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(_, _, _));
   EXPECT_CALL(*mock_app_, app_id()).Times(0);
 
   EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_, _)).Times(0);
@@ -1012,7 +1014,8 @@ TEST_F(ShowRequestTest,
   const auto result_code = mobile_apis::Result::APPLICATION_NOT_REGISTERED;
   EXPECT_CALL(mock_rpc_service_,
               ManageMobileCommand(CheckMessageToMobile(result_code, false),
-                                  Command::CommandSource::SOURCE_SDL))
+                                  Command::CommandSource::SOURCE_SDL,
+                                  std::string()))
       .WillOnce(Return(true));
   EXPECT_CALL(app_mngr_, application(kConnectionKey)).WillOnce(Return(nullptr));
 
@@ -1029,7 +1032,7 @@ TEST_F(ShowRequestTest, Run_EmptyParams_Canceled) {
 
   EXPECT_CALL(app_mngr_, application(kConnectionKey))
       .WillOnce(Return(mock_app_));
-  EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(_, _));
+  EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(_, _, _));
   EXPECT_CALL(*mock_app_, app_id()).Times(0);
   EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_, _)).Times(0);
   EXPECT_CALL(*mock_app_, set_show_command(_)).Times(0);
@@ -1043,7 +1046,8 @@ TEST_F(ShowRequestTest,
   const auto result_code = mobile_apis::Result::INVALID_ID;
   EXPECT_CALL(mock_rpc_service_,
               ManageMobileCommand(CheckMessageToMobile(result_code, false),
-                                  Command::CommandSource::SOURCE_SDL))
+                                  Command::CommandSource::SOURCE_SDL,
+                                  std::string()))
       .WillOnce(Return(true));
   EXPECT_CALL(app_mngr_, application(kConnectionKey))
       .WillOnce(Return(mock_app_));
@@ -1098,7 +1102,8 @@ TEST_F(ShowRequestTest,
   auto message_to_mobile = CreateMessage();
   EXPECT_CALL(
       mock_rpc_service_,
-      ManageMobileCommand(_, am::commands::Command::CommandSource::SOURCE_SDL))
+      ManageMobileCommand(
+          _, am::commands::Command::CommandSource::SOURCE_SDL, std::string()))
       .WillOnce(DoAll(SaveArg<0>(&message_to_mobile), Return(true)));
 
   ASSERT_TRUE(command->Init());
@@ -1130,7 +1135,8 @@ TEST_F(ShowRequestTest,
   auto message_to_mobile = CreateMessage();
   EXPECT_CALL(
       mock_rpc_service_,
-      ManageMobileCommand(_, am::commands::Command::CommandSource::SOURCE_SDL))
+      ManageMobileCommand(
+          _, am::commands::Command::CommandSource::SOURCE_SDL, std::string()))
       .WillOnce(DoAll(SaveArg<0>(&message_to_mobile), Return(true)));
 
   ASSERT_TRUE(command->Init());
@@ -1217,7 +1223,8 @@ TEST_F(ShowRequestTest, OnEvent_SuccessResultCode_ExpectSetWindowLayoutOnly) {
   EXPECT_CALL(mock_rpc_service_,
               ManageMobileCommand(
                   CheckMessageToMobile(mobile_apis::Result::SUCCESS, true),
-                  Command::CommandSource::SOURCE_SDL));
+                  Command::CommandSource::SOURCE_SDL,
+                  std::string()));
   EXPECT_CALL(app_mngr_, application(kConnectionKey))
       .WillOnce(Return(mock_app_));
 
@@ -1249,7 +1256,8 @@ TEST_F(ShowRequestTest,
   EXPECT_CALL(mock_rpc_service_,
               ManageMobileCommand(
                   CheckMessageToMobile(mobile_apis::Result::SUCCESS, true),
-                  Command::CommandSource::SOURCE_SDL));
+                  Command::CommandSource::SOURCE_SDL,
+                  std::string()));
   EXPECT_CALL(app_mngr_, application(kConnectionKey))
       .WillOnce(Return(mock_app_));
 
@@ -1283,7 +1291,8 @@ TEST_F(ShowRequestTest,
   EXPECT_CALL(mock_rpc_service_,
               ManageMobileCommand(
                   CheckMessageToMobile(mobile_apis::Result::SUCCESS, true),
-                  Command::CommandSource::SOURCE_SDL));
+                  Command::CommandSource::SOURCE_SDL,
+                  std::string()));
   EXPECT_CALL(app_mngr_, application(kConnectionKey))
       .WillOnce(Return(mock_app_));
 
@@ -1316,7 +1325,8 @@ TEST_F(ShowRequestTest,
   EXPECT_CALL(mock_rpc_service_,
               ManageMobileCommand(
                   CheckMessageToMobile(mobile_apis::Result::SUCCESS, true),
-                  Command::CommandSource::SOURCE_SDL));
+                  Command::CommandSource::SOURCE_SDL,
+                  std::string()));
   EXPECT_CALL(app_mngr_, application(kConnectionKey))
       .WillOnce(Return(mock_app_));
 
@@ -1340,7 +1350,9 @@ TEST_F(ShowRequestTest, OnEvent_SuccessResultCode_SUCCESS) {
   std::shared_ptr<ShowRequest> command(CreateCommand<ShowRequest>(msg));
   EXPECT_CALL(mock_rpc_service_,
               ManageMobileCommand(
-                  MobileResultCodeIs(mobile_apis::Result::eType::SUCCESS), _));
+                  MobileResultCodeIs(mobile_apis::Result::eType::SUCCESS),
+                  _,
+                  std::string()));
 
   Event event(hmi_apis::FunctionID::UI_Show);
   event.set_smart_object(*msg);
@@ -1358,7 +1370,7 @@ TEST_F(ShowRequestTest, OnEvent_WarningsResultCode_SUCCESS) {
   (*msg)[am::strings::msg_params] = SmartObject(smart_objects::SmartType_Map);
 
   std::shared_ptr<ShowRequest> command(CreateCommand<ShowRequest>(msg));
-  EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(_, _));
+  EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(_, _, _));
 
   Event event(hmi_apis::FunctionID::UI_Show);
   event.set_smart_object(*msg);
@@ -1378,7 +1390,7 @@ TEST_F(ShowRequestTest, OnEvent_WrongFunctionID_Canceled) {
       .WillByDefault(Return(mock_app_));
 
   std::shared_ptr<ShowRequest> command(CreateCommand<ShowRequest>(msg));
-  EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(_, _)).Times(0);
+  EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(_, _, _)).Times(0);
 
   Event event(hmi_apis::FunctionID::UI_Alert);
   event.set_smart_object(*msg);

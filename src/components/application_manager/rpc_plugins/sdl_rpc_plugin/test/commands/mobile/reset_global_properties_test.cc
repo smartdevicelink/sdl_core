@@ -111,7 +111,8 @@ TEST_F(ResetGlobalPropertiesRequestTest, Run_InvalidApp_UNSUCCESS) {
   MessageSharedPtr command_result;
   EXPECT_CALL(
       mock_rpc_service_,
-      ManageMobileCommand(_, am::commands::Command::CommandSource::SOURCE_SDL))
+      ManageMobileCommand(
+          _, am::commands::Command::CommandSource::SOURCE_SDL, std::string()))
       .WillOnce(DoAll(SaveArg<0>(&command_result), Return(true)));
 
   command_->Run();
@@ -293,7 +294,7 @@ TEST_F(ResetGlobalPropertiesRequestTest, Run_SUCCESS) {
 
 TEST_F(ResetGlobalPropertiesRequestTest, OnEvent_InvalidEventId_UNSUCCESS) {
   Event event(hmi_apis::FunctionID::INVALID_ENUM);
-  EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(_, _)).Times(0);
+  EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(_, _, _)).Times(0);
   command_->on_event(event);
 }
 
@@ -337,7 +338,8 @@ TEST_F(ResetGlobalPropertiesRequestTest,
   EXPECT_CALL(mock_rpc_service_,
               ManageMobileCommand(
                   MobileResultCodeIs(mobile_apis::Result::eType::SUCCESS),
-                  am::commands::Command::SOURCE_SDL));
+                  am::commands::Command::SOURCE_SDL,
+                  std::string()));
 
   command_->on_event(event);
 }
@@ -391,7 +393,8 @@ TEST_F(ResetGlobalPropertiesRequestTest,
   EXPECT_CALL(
       mock_rpc_service_,
       ManageMobileCommand(MobileResultCodeIs(mobile_apis::Result::WARNINGS),
-                          am::commands::Command::SOURCE_SDL));
+                          am::commands::Command::SOURCE_SDL,
+                          std::string()));
 
   command_->on_event(event);
 }
@@ -444,7 +447,8 @@ TEST_F(ResetGlobalPropertiesRequestTest, OnEvent_InvalidApp_NoHashUpdate) {
   EXPECT_CALL(mock_rpc_service_,
               ManageMobileCommand(
                   MobileResultCodeIs(mobile_apis::Result::eType::SUCCESS),
-                  am::commands::Command::SOURCE_SDL));
+                  am::commands::Command::SOURCE_SDL,
+                  std::string()));
 
   Event event(hmi_apis::FunctionID::UI_SetGlobalProperties);
   event.set_smart_object(*msg_);
@@ -514,7 +518,8 @@ TEST_F(ResetGlobalPropertiesRequestTest,
       mock_rpc_service_,
       ManageMobileCommand(
           MobileResponseIs(mobile_apis::Result::GENERIC_ERROR, info, false),
-          am::commands::Command::SOURCE_SDL));
+          am::commands::Command::SOURCE_SDL,
+          std::string()));
   command->onTimeOut();
 }
 
@@ -579,7 +584,8 @@ TEST_F(ResetGlobalPropertiesRequestTest,
       mock_rpc_service_,
       ManageMobileCommand(
           MobileResponseIs(mobile_apis::Result::GENERIC_ERROR, info, false),
-          am::commands::Command::SOURCE_SDL));
+          am::commands::Command::SOURCE_SDL,
+          std::string()));
   command_->onTimeOut();
 }
 
@@ -634,7 +640,8 @@ TEST_F(ResetGlobalPropertiesRequestTest,
       mock_rpc_service_,
       ManageMobileCommand(
           MobileResponseIs(mobile_apis::Result::GENERIC_ERROR, info, false),
-          am::commands::Command::SOURCE_SDL));
+          am::commands::Command::SOURCE_SDL,
+          std::string()));
   command_->onTimeOut();
 }
 

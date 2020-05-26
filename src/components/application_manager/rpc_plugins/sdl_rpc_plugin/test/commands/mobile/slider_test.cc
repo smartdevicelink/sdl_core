@@ -125,7 +125,8 @@ class SliderRequestTest
     EXPECT_CALL(
         mock_rpc_service_,
         ManageMobileCommand(MobileResultCodeIs(code),
-                            am::commands::Command::CommandSource::SOURCE_SDL));
+                            am::commands::Command::CommandSource::SOURCE_SDL,
+                            std::string()));
   }
 
   sync_primitives::Lock lock_;
@@ -159,7 +160,8 @@ TEST_F(SliderRequestTest, OnEvent_UI_UNSUPPORTED_RESOURCE) {
 
   EXPECT_CALL(
       mock_rpc_service_,
-      ManageMobileCommand(_, am::commands::Command::CommandSource::SOURCE_SDL))
+      ManageMobileCommand(
+          _, am::commands::Command::CommandSource::SOURCE_SDL, std::string()))
       .WillOnce(DoAll(SaveArg<0>(&ui_command_result), Return(true)));
 
   command->on_event(event);
@@ -292,7 +294,7 @@ TEST_F(SliderRequestTest, OnEvent_UI_OnResetTimeout_UNSUCCESS) {
 
 TEST_F(SliderRequestTest, OnEvent_UI_UnknownEventId_UNSUCCESS) {
   PreConditions();
-  EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(_, _)).Times(0);
+  EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(_, _, _)).Times(0);
 
   Event event(hmi_apis::FunctionID::INVALID_ENUM);
   event.set_smart_object(*msg_);

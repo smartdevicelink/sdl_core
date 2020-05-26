@@ -162,14 +162,18 @@ class RPCServiceImplTest : public ::testing::Test {
 TEST_F(RPCServiceImplTest, ManageMobileCommand_MessageIsNullPtr_False) {
   MessageSharedPtr message;
   EXPECT_FALSE(rpc_service_->ManageMobileCommand(
-      message, am::commands::Command::CommandSource::SOURCE_MOBILE));
+      message,
+      am::commands::Command::CommandSource::SOURCE_MOBILE,
+      std::string()));
 }
 
 TEST_F(RPCServiceImplTest, ManageMobileCommand_IsLowVoltage_False) {
   auto message = CreateMessage();
   ON_CALL(mock_app_mngr_, IsLowVoltage()).WillByDefault(Return(true));
   EXPECT_FALSE(rpc_service_->ManageMobileCommand(
-      message, am::commands::Command::CommandSource::SOURCE_MOBILE));
+      message,
+      am::commands::Command::CommandSource::SOURCE_MOBILE,
+      std::string()));
 }
 
 TEST_F(RPCServiceImplTest, ManageMobileCommand_AppInReconnectMode) {
@@ -191,7 +195,8 @@ TEST_F(RPCServiceImplTest, ManageMobileCommand_AppInReconnectMode) {
                       message))
       .WillOnce(Return());
 
-  EXPECT_TRUE(rpc_service_->ManageMobileCommand(message, source));
+  EXPECT_TRUE(
+      rpc_service_->ManageMobileCommand(message, source, std::string()));
 }
 
 TEST_F(RPCServiceImplTest,
@@ -219,7 +224,8 @@ TEST_F(RPCServiceImplTest,
   ON_CALL(mock_rpc_plugin_manager_, FindPluginToProcess(kFunctionId, source))
       .WillByDefault(Return(empty_plugin));
 
-  EXPECT_FALSE(rpc_service_->ManageMobileCommand(message, source));
+  EXPECT_FALSE(
+      rpc_service_->ManageMobileCommand(message, source, std::string()));
 }
 
 TEST_F(RPCServiceImplTest, ManageHMICommand_MessageIsNullPtr_False) {

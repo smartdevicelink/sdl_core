@@ -106,7 +106,8 @@ TEST_F(
       mock_rpc_service_,
       ManageMobileCommand(
           CheckMessageToMobile(),
-          ::application_manager::commands::Command::CommandSource::SOURCE_SDL))
+          ::application_manager::commands::Command::CommandSource::SOURCE_SDL,
+          std::string()))
       .WillOnce(Return(true));
 
   ASSERT_TRUE(command_->Init());
@@ -122,7 +123,7 @@ TEST_F(OnBCSystemCapabilityUpdatedNotificationFromHMITest,
   ApplicationSharedPtr app;  // Empty application shared pointer
 
   ON_CALL(app_mngr_, application(kAppId)).WillByDefault(Return(app));
-  EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(_, _)).Times(0);
+  EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(_, _, _)).Times(0);
 
   ASSERT_TRUE(command_->Init());
   command_->Run();
@@ -145,7 +146,8 @@ TEST_F(
       mock_rpc_service_,
       ManageMobileCommand(
           CheckMessageToMobile(),
-          ::application_manager::commands::Command::CommandSource::SOURCE_SDL))
+          ::application_manager::commands::Command::CommandSource::SOURCE_SDL,
+          std::string()))
       .WillOnce(Return(true));
 
   ASSERT_TRUE(command_->Init());

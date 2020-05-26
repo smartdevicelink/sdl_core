@@ -166,7 +166,8 @@ class AlertRequestTest : public CommandRequestTest<CommandsTestMocks::kIsNice> {
     EXPECT_CALL(
         mock_rpc_service_,
         ManageMobileCommand(MobileResultCodeIs(code),
-                            am::commands::Command::CommandSource::SOURCE_SDL));
+                            am::commands::Command::CommandSource::SOURCE_SDL,
+                            std::string()));
   }
 
   void ExpectManageHmiCommandTTSAndUI() {
@@ -204,7 +205,8 @@ TEST_F(AlertRequestTest, OnTimeout_GENERIC_ERROR) {
   MessageSharedPtr ui_command_result;
   EXPECT_CALL(
       mock_rpc_service_,
-      ManageMobileCommand(_, am::commands::Command::CommandSource::SOURCE_SDL))
+      ManageMobileCommand(
+          _, am::commands::Command::CommandSource::SOURCE_SDL, std::string()))
       .WillOnce(DoAll(SaveArg<0>(&ui_command_result), Return(true)));
 
   command->onTimeOut();
@@ -249,7 +251,8 @@ TEST_F(AlertRequestTest, OnEvent_UI_HmiSendSuccess_UNSUPPORTED_RESOURCE) {
   MessageSharedPtr ui_command_result;
   EXPECT_CALL(
       mock_rpc_service_,
-      ManageMobileCommand(_, am::commands::Command::CommandSource::SOURCE_SDL))
+      ManageMobileCommand(
+          _, am::commands::Command::CommandSource::SOURCE_SDL, std::string()))
       .WillOnce(DoAll(SaveArg<0>(&ui_command_result), Return(true)));
 
   command->on_event(event);
@@ -394,7 +397,7 @@ TEST_F(AlertRequestTest, Run_SUCCESS) {
 
 TEST_F(AlertRequestTest, OnEvent_InvalidEventId_UNSUCCESS) {
   Expectations();
-  EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(_, _)).Times(0);
+  EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(_, _, _)).Times(0);
 
   Event event(hmi_apis::FunctionID::INVALID_ENUM);
   event.set_smart_object(*msg_);

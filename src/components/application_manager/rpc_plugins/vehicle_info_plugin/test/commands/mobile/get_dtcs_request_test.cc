@@ -77,10 +77,11 @@ TEST_F(GetDTCsRequestTest, Run_ApplicationIsNotRegistered_UNSUCCESS) {
   EXPECT_CALL(app_mngr_, application(_))
       .WillOnce(Return(ApplicationSharedPtr()));
 
-  EXPECT_CALL(
-      mock_rpc_service_,
-      ManageMobileCommand(
-          MobileResultCodeIs(mobile_result::APPLICATION_NOT_REGISTERED), _));
+  EXPECT_CALL(mock_rpc_service_,
+              ManageMobileCommand(
+                  MobileResultCodeIs(mobile_result::APPLICATION_NOT_REGISTERED),
+                  _,
+                  std::string()));
 
   command->Run();
 }
@@ -110,7 +111,7 @@ TEST_F(GetDTCsRequestTest, OnEvent_UnknownEvent_UNSUCCESS) {
 
   Event event(hmi_apis::FunctionID::INVALID_ENUM);
 
-  EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(_, _)).Times(0);
+  EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(_, _, _)).Times(0);
 
   command->on_event(event);
 }
@@ -126,7 +127,8 @@ TEST_F(GetDTCsRequestTest, OnEvent_SUCCESS) {
 
   EXPECT_CALL(
       mock_rpc_service_,
-      ManageMobileCommand(MobileResultCodeIs(mobile_apis::Result::SUCCESS), _));
+      ManageMobileCommand(
+          MobileResultCodeIs(mobile_apis::Result::SUCCESS), _, std::string()));
 
   MockAppPtr app(CreateMockApp());
   EXPECT_CALL(app_mngr_, application(_)).WillRepeatedly(Return(app));

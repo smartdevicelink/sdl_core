@@ -91,7 +91,8 @@ TEST_F(
   EXPECT_CALL(
       mock_rpc_service_,
       ManageMobileCommand(MobileResultCodeIs(mobile_apis::Result::SUCCESS),
-                          Command::CommandSource::SOURCE_SDL));
+                          Command::CommandSource::SOURCE_SDL,
+                          std::string()));
 
   ASSERT_TRUE(command_->Init());
   command_->Run();
@@ -111,7 +112,8 @@ TEST_F(
   EXPECT_CALL(mock_rpc_service_,
               ManageMobileCommand(
                   MobileResultCodeIs(mobile_apis::Result::DATA_NOT_AVAILABLE),
-                  Command::CommandSource::SOURCE_SDL));
+                  Command::CommandSource::SOURCE_SDL,
+                  std::string()));
 
   ASSERT_TRUE(command_->Init());
   command_->Run();

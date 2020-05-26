@@ -165,7 +165,9 @@ TEST_F(ReleaseInteriorVehicleDataModuleRequestTest,
   EXPECT_CALL(
       mock_rpc_service_,
       ManageMobileCommand(
-          _, application_manager::commands::Command::CommandSource::SOURCE_SDL))
+          _,
+          application_manager::commands::Command::CommandSource::SOURCE_SDL,
+          std::string()))
       .WillOnce(DoAll(SaveArg<0>(&message_to_mobile), Return(true)));
 
   command_->Execute();
@@ -193,7 +195,9 @@ TEST_F(ReleaseInteriorVehicleDataModuleRequestTest,
   EXPECT_CALL(
       mock_rpc_service_,
       ManageMobileCommand(
-          _, application_manager::commands::Command::CommandSource::SOURCE_SDL))
+          _,
+          application_manager::commands::Command::CommandSource::SOURCE_SDL,
+          std::string()))
       .WillOnce(DoAll(SaveArg<0>(&message_to_mobile), Return(true)));
 
   command_->Execute();
@@ -222,7 +226,9 @@ TEST_F(ReleaseInteriorVehicleDataModuleRequestTest,
   EXPECT_CALL(
       mock_rpc_service_,
       ManageMobileCommand(
-          _, application_manager::commands::Command::CommandSource::SOURCE_SDL))
+          _,
+          application_manager::commands::Command::CommandSource::SOURCE_SDL,
+          std::string()))
       .WillOnce(DoAll(SaveArg<0>(&message_to_mobile), Return(true)));
 
   command_->Execute();

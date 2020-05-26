@@ -286,7 +286,8 @@ TEST_F(NotificationFromHMITest, SendNotificationToMobile_SUCCESS) {
   EXPECT_CALL(
       mock_rpc_service_,
       ManageMobileCommand(CheckMsgType(am::MessageType::kNotification),
-                          am::commands::Command::CommandSource::SOURCE_SDL));
+                          am::commands::Command::CommandSource::SOURCE_SDL,
+                          std::string()));
 
   command->SendNotificationToMobile(command_msg);
 }

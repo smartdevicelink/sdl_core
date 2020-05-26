@@ -296,7 +296,8 @@ TEST_F(
   MessageSharedPtr command_result;
   EXPECT_CALL(
       mock_rpc_service_,
-      ManageMobileCommand(MobileResultCodeIs(mobile_apis::Result::SUCCESS), _))
+      ManageMobileCommand(
+          MobileResultCodeIs(mobile_apis::Result::SUCCESS), _, std::string()))
       .WillOnce(DoAll(SaveArg<0>(&command_result), Return(true)));
 
   // Act
@@ -347,7 +348,8 @@ TEST_F(
       .WillOnce(Return(true));
   EXPECT_CALL(
       mock_rpc_service_,
-      ManageMobileCommand(MobileResultCodeIs(mobile_apis::Result::SUCCESS), _))
+      ManageMobileCommand(
+          MobileResultCodeIs(mobile_apis::Result::SUCCESS), _, std::string()))
       .WillOnce(Return(true));
 
   EXPECT_CALL(mock_interior_data_cache_, Remove(module));
@@ -399,7 +401,8 @@ TEST_F(GetInteriorVehicleDataRequestTest,
   MessageSharedPtr command_result;
   EXPECT_CALL(
       mock_rpc_service_,
-      ManageMobileCommand(MobileResultCodeIs(mobile_apis::Result::SUCCESS), _))
+      ManageMobileCommand(
+          MobileResultCodeIs(mobile_apis::Result::SUCCESS), _, std::string()))
       .WillOnce(DoAll(SaveArg<0>(&command_result), Return(true)));
 
   // Act
@@ -431,10 +434,11 @@ TEST_F(
 
   // Expectations
   EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_, _)).Times(0);
-  EXPECT_CALL(
-      mock_rpc_service_,
-      ManageMobileCommand(
-          MobileResultCodeIs(mobile_apis::Result::UNSUPPORTED_RESOURCE), _))
+  EXPECT_CALL(mock_rpc_service_,
+              ManageMobileCommand(
+                  MobileResultCodeIs(mobile_apis::Result::UNSUPPORTED_RESOURCE),
+                  _,
+                  std::string()))
       .WillOnce((Return(true)));
   // Act
   ASSERT_TRUE(command->Init());
@@ -456,9 +460,11 @@ TEST_F(
 
   // Expectations
   EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_, _)).Times(0);
-  EXPECT_CALL(mock_rpc_service_,
-              ManageMobileCommand(
-                  MobileResultCodeIs(mobile_apis::Result::DISALLOWED), _))
+  EXPECT_CALL(
+      mock_rpc_service_,
+      ManageMobileCommand(MobileResultCodeIs(mobile_apis::Result::DISALLOWED),
+                          _,
+                          std::string()))
       .WillOnce((Return(true)));
 
   // Act
@@ -491,7 +497,8 @@ TEST_F(GetInteriorVehicleDataRequestTest,
   // Expectations
   EXPECT_CALL(
       mock_rpc_service_,
-      ManageMobileCommand(MobileResultCodeIs(mobile_apis::Result::SUCCESS), _))
+      ManageMobileCommand(
+          MobileResultCodeIs(mobile_apis::Result::SUCCESS), _, std::string()))
       .WillOnce(Return(true));
 
   EXPECT_CALL(
@@ -538,7 +545,9 @@ TEST_F(GetInteriorVehicleDataRequestTest,
       .WillOnce(Return(true));
   EXPECT_CALL(mock_rpc_service_,
               ManageMobileCommand(
-                  MobileResultCodeIs(mobile_apis::Result::GENERIC_ERROR), _))
+                  MobileResultCodeIs(mobile_apis::Result::GENERIC_ERROR),
+                  _,
+                  std::string()))
       .WillOnce(Return(true));
 
   // Act
@@ -583,7 +592,9 @@ TEST_F(GetInteriorVehicleDataRequestTest,
       .WillOnce(Return(true));
   EXPECT_CALL(mock_rpc_service_,
               ManageMobileCommand(
-                  MobileResultCodeIs(mobile_apis::Result::GENERIC_ERROR), _))
+                  MobileResultCodeIs(mobile_apis::Result::GENERIC_ERROR),
+                  _,
+                  std::string()))
       .WillOnce(Return(true));
 
   EXPECT_CALL(mock_interior_data_cache_, Clear()).Times(0);
@@ -644,7 +655,8 @@ TEST_F(GetInteriorVehicleDataRequestTest,
       .WillOnce(Return(false));
   EXPECT_CALL(
       mock_rpc_service_,
-      ManageMobileCommand(MobileResultCodeIs(mobile_apis::Result::REJECTED), _))
+      ManageMobileCommand(
+          MobileResultCodeIs(mobile_apis::Result::REJECTED), _, std::string()))
       .WillOnce(Return(false));
   EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_, _)).Times(0);
 
@@ -694,7 +706,7 @@ TEST_F(GetInteriorVehicleDataRequestTest,
 
   // Expectations
   EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_, _)).WillOnce(Return(true));
-  EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(_, _))
+  EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(_, _, std::string()))
       .WillOnce(DoAll(SaveArg<0>(&message_to_mob), Return(true)));
 
   // Act
@@ -752,7 +764,7 @@ TEST_F(GetInteriorVehicleDataRequestTest,
 
   // Expectations
   EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_, _)).WillOnce(Return(true));
-  EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(_, _))
+  EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(_, _, std::string()))
       .WillOnce(DoAll(SaveArg<0>(&message_to_mob), Return(true)));
 
   // Act

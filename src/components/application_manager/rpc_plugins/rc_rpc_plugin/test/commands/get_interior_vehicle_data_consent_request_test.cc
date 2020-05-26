@@ -187,7 +187,7 @@ TEST_F(GetInteriorVehicleDataConsentRequestTest,
 
   EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_, _)).Times(0);
 
-  EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(_, _))
+  EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(_, _, std::string()))
       .WillOnce(DoAll(SaveArg<0>(&response_to_mobile), Return(true)));
 
   command_->Execute();
@@ -284,7 +284,7 @@ TEST_F(GetInteriorVehicleDataConsentRequestTest,
 
   auto response_to_mobile = CreateMessage();
 
-  EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(_, _))
+  EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(_, _, std::string()))
       .WillOnce(DoAll(SaveArg<0>(&response_to_mobile), Return(true)));
 
   command_->on_event(event_collection_is_absent);
@@ -306,7 +306,7 @@ TEST_F(GetInteriorVehicleDataConsentRequestTest,
 
   response_to_mobile = CreateMessage();
 
-  EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(_, _))
+  EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(_, _, std::string()))
       .WillOnce(DoAll(SaveArg<0>(&response_to_mobile), Return(true)));
 
   command_->on_event(event_collection_is_absent);
@@ -344,7 +344,7 @@ TEST_F(GetInteriorVehicleDataConsentRequestTest,
   event.set_smart_object(*event_message);
 
   auto response_to_mobile = CreateMessage();
-  EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(_, _))
+  EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(_, _, std::string()))
       .WillOnce(DoAll(SaveArg<0>(&response_to_mobile), Return(true)));
 
   command_->on_event(event);
@@ -386,7 +386,7 @@ TEST_F(GetInteriorVehicleDataConsentRequestTest,
   EXPECT_CALL(mock_rc_consent_manger_, SaveModuleConsents(kPolicyAppId, _, _));
 
   auto response_to_mobile = CreateMessage();
-  EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(_, _))
+  EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(_, _, std::string()))
       .WillOnce(DoAll(SaveArg<0>(&response_to_mobile), Return(true)));
 
   command_->on_event(event);

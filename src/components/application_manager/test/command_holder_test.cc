@@ -186,7 +186,8 @@ TEST_F(CommandHolderImplTest, Hold_Mobile_and_HMI_commands_ExpectReleased) {
   EXPECT_CALL(
       mock_rpc_service_,
       ManageMobileCommand(cmd_ptr_,
-                          am::commands::Command::CommandSource::SOURCE_MOBILE));
+                          am::commands::Command::CommandSource::SOURCE_MOBILE,
+                          std::string()));
   cmd_holder.Resume(mock_app_ptr_,
                     am::CommandHolder::CommandType::kMobileCommand);
 }

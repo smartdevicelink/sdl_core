@@ -108,9 +108,10 @@ class SpeakRequestTest : public CommandRequestTest<CommandsTestMocks::kIsNice> {
     EXPECT_CALL(mock_hmi_interfaces_, GetInterfaceState(_))
         .WillRepeatedly(Return(state));
 
-    EXPECT_CALL(mock_rpc_service_,
-                ManageMobileCommand(
-                    _, am::commands::Command::CommandSource::SOURCE_SDL))
+    EXPECT_CALL(
+        mock_rpc_service_,
+        ManageMobileCommand(
+            _, am::commands::Command::CommandSource::SOURCE_SDL, std::string()))
         .WillOnce(DoAll(SaveArg<0>(&response_to_mobile), Return(true)));
 
     command->on_event(event_tts);
@@ -145,7 +146,8 @@ TEST_F(SpeakRequestTest, OnEvent_SUCCESS_Expect_true) {
 
   EXPECT_CALL(
       mock_rpc_service_,
-      ManageMobileCommand(_, am::commands::Command::CommandSource::SOURCE_SDL))
+      ManageMobileCommand(
+          _, am::commands::Command::CommandSource::SOURCE_SDL, std::string()))
       .WillOnce(DoAll(SaveArg<0>(&response_to_mobile), Return(true)));
 
   command->on_event(event_tts);
@@ -188,10 +190,11 @@ TEST_F(SpeakRequestTest, Run_ApplicationIsNotRegistered) {
   ON_CALL(app_mngr_, application(_))
       .WillByDefault(Return(ApplicationSharedPtr()));
 
-  EXPECT_CALL(
-      mock_rpc_service_,
-      ManageMobileCommand(
-          MobileResultCodeIs(mobile_result::APPLICATION_NOT_REGISTERED), _));
+  EXPECT_CALL(mock_rpc_service_,
+              ManageMobileCommand(
+                  MobileResultCodeIs(mobile_result::APPLICATION_NOT_REGISTERED),
+                  _,
+                  std::string()));
 
   command->Run();
 }
@@ -205,7 +208,8 @@ TEST_F(SpeakRequestTest, Run_MsgWithWhiteSpace_InvalidData) {
 
   EXPECT_CALL(
       mock_rpc_service_,
-      ManageMobileCommand(MobileResultCodeIs(mobile_result::INVALID_DATA), _));
+      ManageMobileCommand(
+          MobileResultCodeIs(mobile_result::INVALID_DATA), _, std::string()));
 
   command->Run();
 }
@@ -219,7 +223,8 @@ TEST_F(SpeakRequestTest, Run_MsgWithIncorrectChar1_InvalidData) {
 
   EXPECT_CALL(
       mock_rpc_service_,
-      ManageMobileCommand(MobileResultCodeIs(mobile_result::INVALID_DATA), _));
+      ManageMobileCommand(
+          MobileResultCodeIs(mobile_result::INVALID_DATA), _, std::string()));
 
   command->Run();
 }
@@ -233,7 +238,8 @@ TEST_F(SpeakRequestTest, Run_MsgWithIncorrectChar2_InvalidData) {
 
   EXPECT_CALL(
       mock_rpc_service_,
-      ManageMobileCommand(MobileResultCodeIs(mobile_result::INVALID_DATA), _));
+      ManageMobileCommand(
+          MobileResultCodeIs(mobile_result::INVALID_DATA), _, std::string()));
 
   command->Run();
 }
@@ -247,7 +253,8 @@ TEST_F(SpeakRequestTest, Run_MsgWithIncorrectChar3_InvalidData) {
 
   EXPECT_CALL(
       mock_rpc_service_,
-      ManageMobileCommand(MobileResultCodeIs(mobile_result::INVALID_DATA), _));
+      ManageMobileCommand(
+          MobileResultCodeIs(mobile_result::INVALID_DATA), _, std::string()));
 
   command->Run();
 }
@@ -261,7 +268,8 @@ TEST_F(SpeakRequestTest, Run_MsgWithIncorrectChar4_InvalidData) {
 
   EXPECT_CALL(
       mock_rpc_service_,
-      ManageMobileCommand(MobileResultCodeIs(mobile_result::INVALID_DATA), _));
+      ManageMobileCommand(
+          MobileResultCodeIs(mobile_result::INVALID_DATA), _, std::string()));
 
   command->Run();
 }
@@ -275,7 +283,8 @@ TEST_F(SpeakRequestTest, Run_MsgWithIncorrectCharInfirstPlace_InvalidData) {
 
   EXPECT_CALL(
       mock_rpc_service_,
-      ManageMobileCommand(MobileResultCodeIs(mobile_result::INVALID_DATA), _));
+      ManageMobileCommand(
+          MobileResultCodeIs(mobile_result::INVALID_DATA), _, std::string()));
 
   command->Run();
 }
@@ -323,7 +332,7 @@ TEST_F(SpeakRequestTest, Run_MsgCorrect_Success) {
 TEST_F(SpeakRequestTest, OnEvent_WrongEventId_UNSUCCESS) {
   Event event(Event::EventID::INVALID_ENUM);
   CommandPtr command(CreateCommand<SpeakRequest>());
-  EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(_, _)).Times(0);
+  EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(_, _, _)).Times(0);
   command->on_event(event);
 }
 
@@ -344,7 +353,8 @@ TEST_F(SpeakRequestTest, OnEvent_TTS_Speak_SUCCESS) {
 
   EXPECT_CALL(
       mock_rpc_service_,
-      ManageMobileCommand(MobileResultCodeIs(mobile_result::SUCCESS), _));
+      ManageMobileCommand(
+          MobileResultCodeIs(mobile_result::SUCCESS), _, std::string()));
   command->on_event(event);
 }
 
@@ -362,7 +372,8 @@ TEST_F(SpeakRequestTest, OnEvent_TTS_SpeakWithWarning_WarningWithSuccess) {
 
   EXPECT_CALL(
       mock_rpc_service_,
-      ManageMobileCommand(MobileResultCodeIs(mobile_result::WARNINGS), _));
+      ManageMobileCommand(
+          MobileResultCodeIs(mobile_result::WARNINGS), _, std::string()));
   command->on_event(event);
 }
 

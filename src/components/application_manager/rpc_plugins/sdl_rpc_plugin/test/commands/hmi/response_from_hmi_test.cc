@@ -71,7 +71,7 @@ TEST_F(ResponseFromHMITest, SendResponseToMobile_SUCCESS) {
   ResponseFromHMIPtr command(CreateCommand<ResponseFromHMI>());
 
   MessageSharedPtr msg(CreateMessage(smart_objects::SmartType_Map));
-  EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(msg, _));
+  EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(msg, _, std::string()));
 
   command->SendResponseToMobile(msg, app_mngr_);
 

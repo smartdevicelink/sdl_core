@@ -124,7 +124,8 @@ TEST_F(DeleteFileRequestTest, Run_InvalidApp_UNSUCCESS) {
 
   EXPECT_CALL(
       mock_rpc_service_,
-      ManageMobileCommand(_, am::commands::Command::CommandSource::SOURCE_SDL));
+      ManageMobileCommand(
+          _, am::commands::Command::CommandSource::SOURCE_SDL, std::string()));
   EXPECT_CALL(app_mngr_, get_settings()).Times(0);
 
   command_->Run();
@@ -149,7 +150,8 @@ TEST_F(DeleteFileRequestTest, Run_HMILevelNone_UNSUCCESS) {
   EXPECT_CALL(
       mock_rpc_service_,
       ManageMobileCommand(CheckMessageResultCode(mobile_apis::Result::REJECTED),
-                          am::commands::Command::CommandSource::SOURCE_SDL));
+                          am::commands::Command::CommandSource::SOURCE_SDL,
+                          std::string()));
 
   command_->Run();
 }
@@ -183,7 +185,8 @@ TEST_F(DeleteFileRequestTest, Run_ValidFileName_SUCCESS) {
   EXPECT_CALL(
       mock_rpc_service_,
       ManageMobileCommand(CheckMessageResultCode(mobile_apis::Result::SUCCESS),
-                          am::commands::Command::CommandSource::SOURCE_SDL));
+                          am::commands::Command::CommandSource::SOURCE_SDL,
+                          std::string()));
 
   command_->Run();
 }
@@ -205,7 +208,8 @@ TEST_F(DeleteFileRequestTest, Run_InvalidFile_UNSUCCESS) {
   EXPECT_CALL(
       mock_rpc_service_,
       ManageMobileCommand(MobileResultCodeIs(mobile_apis::Result::REJECTED),
-                          am::commands::Command::CommandSource::SOURCE_SDL));
+                          am::commands::Command::CommandSource::SOURCE_SDL,
+                          std::string()));
   command_->Run();
 }
 

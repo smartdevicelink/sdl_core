@@ -47,10 +47,11 @@ TEST_F(UnsubscribeButtonRequestTest, Run_AppNotRegistered_UNSUCCESS) {
   EXPECT_CALL(app_mngr_, application(_))
       .WillOnce(Return(ApplicationSharedPtr()));
 
-  EXPECT_CALL(
-      mock_rpc_service_,
-      ManageMobileCommand(
-          MobileResultCodeIs(mobile_result::APPLICATION_NOT_REGISTERED), _));
+  EXPECT_CALL(mock_rpc_service_,
+              ManageMobileCommand(
+                  MobileResultCodeIs(mobile_result::APPLICATION_NOT_REGISTERED),
+                  _,
+                  std::string()));
 
   command->Run();
 }
@@ -82,7 +83,8 @@ TEST_F(UnsubscribeButtonRequestTest,
 
   EXPECT_CALL(
       mock_rpc_service_,
-      ManageMobileCommand(MobileResultCodeIs(mobile_result::IGNORED), _));
+      ManageMobileCommand(
+          MobileResultCodeIs(mobile_result::IGNORED), _, std::string()));
 
   command->Run();
 }
@@ -110,7 +112,9 @@ TEST_F(UnsubscribeButtonRequestTest,
 
   EXPECT_CALL(mock_rpc_service_,
               ManageMobileCommand(
-                  MobileResultCodeIs(mobile_result::UNSUPPORTED_RESOURCE), _));
+                  MobileResultCodeIs(mobile_result::UNSUPPORTED_RESOURCE),
+                  _,
+                  std::string()));
 
   command->Run();
 }
@@ -146,7 +150,8 @@ TEST_F(UnsubscribeButtonRequestTest, Run_SUCCESS) {
           _));
   EXPECT_CALL(
       mock_rpc_service_,
-      ManageMobileCommand(MobileResultCodeIs(mobile_result::SUCCESS), _));
+      ManageMobileCommand(
+          MobileResultCodeIs(mobile_result::SUCCESS), _, std::string()));
 
   EXPECT_CALL(*mock_app, UpdateHash());
   command->Init();
@@ -191,7 +196,8 @@ TEST_F(UnsubscribeButtonRequestTest, Run_SUCCESS_Base_RPC_Version) {
           _));
   EXPECT_CALL(
       mock_rpc_service_,
-      ManageMobileCommand(MobileResultCodeIs(mobile_result::SUCCESS), _));
+      ManageMobileCommand(
+          MobileResultCodeIs(mobile_result::SUCCESS), _, std::string()));
 
   EXPECT_CALL(*mock_app, UpdateHash());
   command->Init();

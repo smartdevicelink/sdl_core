@@ -65,10 +65,11 @@ TEST_F(UnregisterAppInterfaceRequestTest, Run_AppNotRegistered_UNSUCCESS) {
   EXPECT_CALL(app_mngr_, application(_))
       .WillOnce(Return(ApplicationSharedPtr()));
 
-  EXPECT_CALL(
-      mock_rpc_service_,
-      ManageMobileCommand(
-          MobileResultCodeIs(mobile_result::APPLICATION_NOT_REGISTERED), _));
+  EXPECT_CALL(mock_rpc_service_,
+              ManageMobileCommand(
+                  MobileResultCodeIs(mobile_result::APPLICATION_NOT_REGISTERED),
+                  _,
+                  std::string()));
 
   command->Run();
 }
@@ -97,15 +98,18 @@ TEST_F(UnregisterAppInterfaceRequestTest, Run_SUCCESS) {
   {
     ::testing::InSequence sequence;
 
-    EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(dummy_msg, _));
+    EXPECT_CALL(mock_rpc_service_,
+                ManageMobileCommand(dummy_msg, _, std::string()));
 
     EXPECT_CALL(app_mngr_,
                 UnregisterApplication(
                     kConnectionKey, mobile_apis::Result::SUCCESS, _, _));
 
-    EXPECT_CALL(mock_rpc_service_,
-                ManageMobileCommand(
-                    MobileResultCodeIs(mobile_apis::Result::SUCCESS), _));
+    EXPECT_CALL(
+        mock_rpc_service_,
+        ManageMobileCommand(MobileResultCodeIs(mobile_apis::Result::SUCCESS),
+                            _,
+                            std::string()));
   }
 
   command->Run();

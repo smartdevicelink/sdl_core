@@ -116,7 +116,7 @@ TEST_F(SubscribeWayPointsRequestTest, OnEvent_SUCCESS) {
     EXPECT_CALL(mock_message_helper_, HMIToMobileResult(result_code))
         .WillOnce(Return(mobile_apis::Result::SUCCESS));
 
-    EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(_, _));
+    EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(_, _, _));
     EXPECT_CALL(*app, UpdateHash());
   }
 
