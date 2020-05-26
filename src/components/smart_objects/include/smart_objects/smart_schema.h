@@ -99,6 +99,7 @@ class CSmartSchema FINAL {
    * @param remove_unknown_parameters contains true if need to remove unknown
    * parameters from smart object, otherwise contains false.
    * @param MessageVersion the version of the schema to be applied
+   * @param report__ object for reporting warnings during schema application
    **/
   void applySchema(
       SmartObject& Object,

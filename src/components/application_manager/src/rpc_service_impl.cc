@@ -115,7 +115,8 @@ EncryptionFlagCheckResult RPCServiceImpl::IsEncryptionRequired(
 
 bool RPCServiceImpl::ManageMobileCommand(
     const commands::MessageSharedPtr message,
-    commands::Command::CommandSource source) {
+    commands::Command::CommandSource source,
+    const std::string warning_info) {
   LOG4CXX_AUTO_TRACE(logger_);
 
   if (!message) {
@@ -243,6 +244,12 @@ bool RPCServiceImpl::ManageMobileCommand(
     if (app) {
       app_hmi_level =
           app->hmi_level(mobile_apis::PredefinedWindows::DEFAULT_WINDOW);
+    }
+
+    commands::CommandRequestImpl* request =
+        dynamic_cast<commands::CommandRequestImpl*>(command.get());
+    if (request != NULL) {
+      request->set_warning_info(warning_info);
     }
 
     // commands will be launched from request_ctrl

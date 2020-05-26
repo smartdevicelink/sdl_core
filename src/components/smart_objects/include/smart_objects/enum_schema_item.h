@@ -324,7 +324,8 @@ bool TEnumSchemaItem<EnumType>::filterInvalidEnums(
     rpc::ValidationReport* report__) {
   rpc::ValidationReport dummy_report("");
   if (validate(Object, &dummy_report, MessageVersion, false) != errors::OK) {
-    std::string validation_info = "Filtered invalid value - " + Object.asString();
+    std::string validation_info =
+        "Filtered invalid value - " + Object.asString();
     report__->set_validation_info(validation_info);
     return true;
   }

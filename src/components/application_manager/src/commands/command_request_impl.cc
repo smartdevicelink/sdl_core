@@ -318,7 +318,16 @@ void CommandRequestImpl::SendResponse(
   }
 
   response[strings::msg_params][strings::success] = success;
-  response[strings::msg_params][strings::result_code] = result_code;
+  if ((result_code == mobile_apis::Result::SUCCESS ||
+       result_code == mobile_apis::Result::WARNINGS) &&
+      !warning_info().empty()) {
+    response[strings::msg_params][strings::info] =
+        info ? std::string(info) + "\n" + warning_info() : warning_info();
+    response[strings::msg_params][strings::result_code] =
+        mobile_apis::Result::WARNINGS;
+  } else {
+    response[strings::msg_params][strings::result_code] = result_code;
+  }
 
   is_success_result_ = success;
 
@@ -549,6 +558,14 @@ uint32_t CommandRequestImpl::SendHMIRequest(
   return hmi_correlation_id;
 }
 
+void CommandRequestImpl::set_warning_info(const std::string info) {
+  warning_info_ = info;
+}
+
+std::string CommandRequestImpl::warning_info() const {
+  return warning_info_;
+}
+
 void CommandRequestImpl::CreateHMINotification(
     const hmi_apis::FunctionID::eType& function_id,
     const ns_smart::SmartObject& msg_params) const {
@@ -738,7 +755,7 @@ bool CommandRequestImpl::CheckHMICapabilities(
   return false;
 }
 
-void CommandRequestImpl::AddDissalowedParameterToInfoString(
+void CommandRequestImpl::AddDisallowedParameterToInfoString(
     std::string& info, const std::string& param) const {
   // prepare disallowed params enumeration for response info string
   if (info.empty()) {
@@ -755,12 +772,12 @@ void CommandRequestImpl::AddDisallowedParametersToInfo(
   RPCParams::const_iterator it =
       removed_parameters_permissions_.disallowed_params.begin();
   for (; it != removed_parameters_permissions_.disallowed_params.end(); ++it) {
-    AddDissalowedParameterToInfoString(info, (*it));
+    AddDisallowedParameterToInfoString(info, (*it));
   }
 
   it = removed_parameters_permissions_.undefined_params.begin();
   for (; it != removed_parameters_permissions_.undefined_params.end(); ++it) {
-    AddDissalowedParameterToInfoString(info, (*it));
+    AddDisallowedParameterToInfoString(info, (*it));
   }
 
   if (!info.empty()) {

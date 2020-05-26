@@ -120,8 +120,10 @@ class RPCServiceImpl : public RPCService,
 
   void Stop() OVERRIDE;
 
-  bool ManageMobileCommand(const commands::MessageSharedPtr message,
-                           commands::Command::CommandSource source) OVERRIDE;
+  bool ManageMobileCommand(
+      const commands::MessageSharedPtr message,
+      commands::Command::CommandSource source,
+      const std::string warning_info = std::string()) OVERRIDE;
   bool ManageHMICommand(const commands::MessageSharedPtr message,
                         commands::Command::CommandSource source =
                             commands::Command::SOURCE_HMI) OVERRIDE;
