@@ -193,8 +193,10 @@ class MockPolicyHandlerInterface : public policy::PolicyHandlerInterface {
 #ifndef EXTERNAL_PROPRIETARY_MODE
   MOCK_METHOD1(ChoosePTUApplication,
                uint32_t(const policy::PTUIterationType iteration_type));
-  MOCK_METHOD2(CacheRetryInfo,
-               void(const uint32_t app_id, const std::string url));
+  MOCK_METHOD3(CacheRetryInfo,
+               void(const uint32_t app_id,
+                    const std::string url,
+                    const std::string snapshot_path));
 #endif
   MOCK_CONST_METHOD0(GetAppIdForSending, uint32_t());
   MOCK_METHOD1(

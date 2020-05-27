@@ -610,23 +610,26 @@ void PolicyManagerImpl::GetUpdateUrls(const uint32_t service_type,
 
 bool PolicyManagerImpl::RequestPTUpdate(const PTUIterationType iteration_type) {
   LOG4CXX_AUTO_TRACE(logger_);
-  std::shared_ptr<policy_table::Table> policy_table_snapshot =
-      cache_->GenerateSnapshot();
-  if (!policy_table_snapshot) {
-    LOG4CXX_ERROR(logger_, "Failed to create snapshot of policy table");
-    return false;
+  BinaryMessage update;
+  if (PTUIterationType::DefaultIteration == iteration_type) {
+    std::shared_ptr<policy_table::Table> policy_table_snapshot =
+        cache_->GenerateSnapshot();
+    if (!policy_table_snapshot) {
+      LOG4CXX_ERROR(logger_, "Failed to create snapshot of policy table");
+      return false;
+    }
+
+    IsPTValid(policy_table_snapshot, policy_table::PT_SNAPSHOT);
+
+    Json::Value value = policy_table_snapshot->ToJsonValue();
+    Json::StreamWriterBuilder writer_builder;
+    writer_builder["indentation"] = "";
+    std::string message_string = Json::writeString(writer_builder, value);
+
+    LOG4CXX_DEBUG(logger_, "Snapshot contents is : " << message_string);
+
+    update = BinaryMessage(message_string.begin(), message_string.end());
   }
-
-  IsPTValid(policy_table_snapshot, policy_table::PT_SNAPSHOT);
-
-  Json::Value value = policy_table_snapshot->ToJsonValue();
-  Json::StreamWriterBuilder writer_builder;
-  writer_builder["indentation"] = "";
-  std::string message_string = Json::writeString(writer_builder, value);
-
-  LOG4CXX_DEBUG(logger_, "Snapshot contents is : " << message_string);
-
-  BinaryMessage update(message_string.begin(), message_string.end());
   ptu_requested_ = true;
   listener_->OnSnapshotCreated(update, iteration_type);
   return true;
