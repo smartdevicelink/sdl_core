@@ -298,7 +298,7 @@ void CommandRequestImpl::SendResponse(
     response[strings::msg_params] = *response_params;
   }
 
-  if (info && !info.empty()) {
+  if (info && *info != '\0') {
     response[strings::msg_params][strings::info] = std::string(info);
   }
 
@@ -322,7 +322,7 @@ void CommandRequestImpl::SendResponse(
        result_code == mobile_apis::Result::WARNINGS) &&
       !warning_info().empty()) {
     response[strings::msg_params][strings::info] =
-        (info && !info.empty()) ? std::string(info) + "\n" + warning_info()
+        (info && *info != '\0') ? std::string(info) + "\n" + warning_info()
                                 : warning_info();
     response[strings::msg_params][strings::result_code] =
         mobile_apis::Result::WARNINGS;
