@@ -2546,7 +2546,7 @@ void MessageHelper::SendPolicySnapshotNotification(
     LOG4CXX_WARN(logger_, "No service URLs");
   }
 
-  content[strings::params][strings::file_name] = snapshot_file_path;
+  content[strings::msg_params][strings::file_name] = snapshot_file_path;
 
   SendSystemRequestNotification(connection_key, content, app_mngr);
 }

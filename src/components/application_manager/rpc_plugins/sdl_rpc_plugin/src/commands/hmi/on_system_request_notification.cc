@@ -88,7 +88,8 @@ void OnSystemRequestNotification::Run() {
                                      msg_params[strings::file_name].asString());
     } else {
       // Clear cached retry info
-      policy_handler_.CacheRetryInfo();
+      policy_handler_.CacheRetryInfo(
+          0, std::string(), msg_params[strings::file_name].asString());
 
       // URL and app are chosen by Core for PROPRIETARY mode normally
       uint32_t app_id = 0;
