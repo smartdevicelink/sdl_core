@@ -190,6 +190,7 @@ mobile_apis::HMILevel::eType PhoneCallHmiState::hmi_level() const {
   }
 
   if (Compare<HMILevel::eType, EQ, ONE>(parent()->hmi_level(),
+                                        HMILevel::INVALID_ENUM,
                                         HMILevel::HMI_BACKGROUND,
                                         HMILevel::HMI_NONE)) {
     return parent()->hmi_level();
@@ -223,6 +224,7 @@ mobile_apis::HMILevel::eType DeactivateHMI::hmi_level() const {
   }
 
   if (Compare<HMILevel::eType, EQ, ONE>(parent()->hmi_level(),
+                                        HMILevel::INVALID_ENUM,
                                         HMILevel::HMI_BACKGROUND,
                                         HMILevel::HMI_NONE)) {
     return parent()->hmi_level();
@@ -247,7 +249,8 @@ mobile_apis::HMILevel::eType AudioSource::hmi_level() const {
 
   // Checking for NONE  is necessary to avoid issue during
   // calculation of HMI level during setting default HMI level
-  if (keep_context_ || HMILevel::HMI_NONE == parent()->hmi_level()) {
+  if (keep_context_ || HMILevel::HMI_NONE == parent()->hmi_level()
+    || HMILevel::INVALID_ENUM == parent()->hmi_level()) {
     return parent()->hmi_level();
   }
 
@@ -267,6 +270,7 @@ mobile_apis::HMILevel::eType EmbeddedNavi::hmi_level() const {
   }
 
   if (Compare<HMILevel::eType, EQ, ONE>(parent()->hmi_level(),
+                                        HMILevel::INVALID_ENUM,
                                         HMILevel::HMI_BACKGROUND,
                                         HMILevel::HMI_NONE)) {
     return parent()->hmi_level();
