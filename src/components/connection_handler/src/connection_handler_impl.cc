@@ -874,6 +874,18 @@ void ConnectionHandlerImpl::CreateWebEngineDevice() {
   transport_manager_.CreateWebEngineDevice();
 }
 
+bool ConnectionHandlerImpl::IsAppConnected(
+    const uint32_t connection_key) const {
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  transport_manager::ConnectionUID connection_handle = 0;
+  uint8_t session_id = 0;
+  PairFromKey(connection_key, &connection_handle, &session_id);
+
+  sync_primitives::AutoReadLock lock(connection_list_lock_);
+  return (nullptr != GetPrimaryConnection(connection_handle));
+}
+
 const std::string
 ConnectionHandlerImpl::TransportTypeProfileStringFromConnHandle(
     transport_manager::ConnectionUID connection_handle) const {

@@ -1645,6 +1645,8 @@ TEST_F(ApplicationManagerImplTest,
   file_system::CreateDirectory(kDirectoryName);
   const std::string full_icon_path = kDirectoryName + "/" + kAppId;
   ASSERT_TRUE(file_system::CreateFile(full_icon_path));
+  ON_CALL(mock_connection_handler_, IsAppConnected(kConnectionKey))
+      .WillByDefault(Return(true));
 
   smart_objects::SmartObject request_for_registration(
       smart_objects::SmartType_Map);
@@ -1785,6 +1787,8 @@ TEST_F(ApplicationManagerImplTest,
   EXPECT_CALL(*waiting_app, hybrid_app_preference())
       .WillOnce(ReturnRef(kHybridAppPreference));
   ON_CALL(*waiting_app, is_cloud_app()).WillByDefault(Return(true));
+  ON_CALL(mock_connection_handler_, IsAppConnected(kConnectionKey))
+      .WillByDefault(Return(true));
   EXPECT_CALL(*waiting_app, policy_app_id()).WillRepeatedly(Return(kAppId));
   app_manager_impl_->AddMockPendingApplication(waiting_app);
 
@@ -1849,6 +1853,8 @@ TEST_F(ApplicationManagerImplTest,
   EXPECT_CALL(*waiting_app, policy_app_id())
       .WillRepeatedly(Return("Fake" + kAppId));
   app_manager_impl_->AddMockPendingApplication(waiting_app);
+  ON_CALL(mock_connection_handler_, IsAppConnected(kConnectionKey))
+      .WillByDefault(Return(true));
 
   EXPECT_CALL(
       mock_session_observer_,
@@ -2026,6 +2032,29 @@ TEST_F(ApplicationManagerImplTest, AddAndRemoveQueryAppDevice_SUCCESS) {
   EXPECT_TRUE(app_manager_impl_->IsAppsQueriedFrom(device_handle));
   app_manager_impl_->RemoveDevice(device_handle);
   EXPECT_FALSE(app_manager_impl_->IsAppsQueriedFrom(device_handle));
+}
+
+TEST_F(
+    ApplicationManagerImplTest,
+    RegisterApplication_ApplicationMissingInConnections_DoNotAddApplicationToAppList) {
+  smart_objects::SmartObject request_for_registration(
+      smart_objects::SmartType_Map);
+
+  request_for_registration[strings::params][strings::connection_key] =
+      kConnectionKey;
+
+  const auto request_for_registration_ptr =
+      std::make_shared<smart_objects::SmartObject>(request_for_registration);
+  std::unique_ptr<plugin_manager::RPCPluginManager> rpc_plugin_manager(
+      new MockRPCPluginManager());
+  app_manager_impl_->SetPluginManager(rpc_plugin_manager);
+
+  ON_CALL(mock_connection_handler_, IsAppConnected(kConnectionKey))
+      .WillByDefault(Return(false));
+
+  EXPECT_CALL(*mock_policy_handler_, OnAddedNewApplicationToAppList(_, _))
+      .Times(0);
+  app_manager_impl_->RegisterApplication(request_for_registration_ptr);
 }
 
 }  // namespace application_manager_test

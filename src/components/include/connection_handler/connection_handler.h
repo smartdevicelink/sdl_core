@@ -325,6 +325,13 @@ class ConnectionHandler {
    */
   virtual void CreateWebEngineDevice() = 0;
 
+  /**
+   * @brief Checks if such an application is connected.
+   * @param connection_key Application's connection key.
+   * @return True if the application is connected.
+   **/
+  virtual bool IsAppConnected(const uint32_t connection_key) const = 0;
+
  protected:
   /**
    * \brief Destructor

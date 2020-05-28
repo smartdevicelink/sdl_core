@@ -757,6 +757,13 @@ ApplicationSharedPtr ApplicationManagerImpl::RegisterApplication(
   // Timer will be started after hmi level resumption.
   resume_controller().OnAppRegistrationStart(policy_app_id, device_mac);
 
+  if (!connection_handler_->IsAppConnected(connection_key)) {
+    LOG4CXX_DEBUG(logger_,
+                  "Application with connection_key " << connection_key
+                                                     << " is not connected");
+    return ApplicationSharedPtr();
+  }
+
   AddAppToRegisteredAppList(application);
 
   // Update cloud app information, in case any pending apps are unable to be
@@ -3275,6 +3282,12 @@ void ApplicationManagerImpl::UnregisterApplication(
       if (app_id == (*it_app)->app_id()) {
         app_to_remove = *it_app;
         applications_.erase(it_app++);
+        LOG4CXX_DEBUG(
+            logger_,
+            "App with app_id: " << app_id
+                                << " has been removed from registered "
+                                   "applications list. New list size: "
+                                << applications_.size());
         break;
       } else {
         ++it_app;
@@ -4555,7 +4568,9 @@ void ApplicationManagerImpl::AddAppToRegisteredAppList(
   LOG4CXX_DEBUG(
       logger_,
       "App with app_id: " << application->app_id()
-                          << " has been added to registered applications list");
+                          << " has been added to registered applications list. "
+                             "New list size: "
+                          << applications_.size());
   if (application_list_update_timer_.is_running() &&
       !registered_during_timer_execution_) {
     GetPolicyHandler().OnAddedNewApplicationToAppList(
