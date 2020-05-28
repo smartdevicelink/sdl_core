@@ -491,9 +491,23 @@ class MessageHelper {
    * @brief Send notification for Update of Policy Table
    * with PT Snapshot.
    * @param connection_key Id of application to send message to
+   * @param snapshot_file_path path to PT Snapshot
+   * @param url If empty string, no URL is provided
+   * @param timeout If -1 no timeout is provided
+   */
+  static void SendPolicySnapshotNotification(
+      uint32_t connection_key,
+      const std::string& snapshot_file_path,
+      const std::string& url,
+      ApplicationManager& app_mngr);
+
+  /*
+   * @brief Send notification for Update of Policy Table
+   * with PT Snapshot.
+   * @param connection_key Id of application to send message to
    * @param policy_data PT Snapshot
    * @param url If empty string, no URL is provided
-   * @param timeout If -1 no timeout is provdied
+   * @param timeout If -1 no timeout is provided
    */
   static void SendPolicySnapshotNotification(
       uint32_t connection_key,

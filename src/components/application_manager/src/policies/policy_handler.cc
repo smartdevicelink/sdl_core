@@ -449,9 +449,11 @@ uint32_t PolicyHandler::ChoosePTUApplication(
 }
 
 void PolicyHandler::CacheRetryInfo(const uint32_t app_id,
-                                   const std::string url) {
+                                   const std::string url,
+                                   const std::string snapshot_path) {
   last_ptu_app_id_ = app_id;
   retry_update_url_ = url;
+  policy_snapshot_path_ = snapshot_path;
 }
 #endif  // EXTERNAL_PROPRIETARY_MODE
 
@@ -1627,11 +1629,10 @@ void PolicyHandler::OnSnapshotCreated(const BinaryMessage& pt_string,
     uint32_t app_id_for_sending = 0;
     const std::string& url =
         GetNextUpdateUrl(PTUIterationType::RetryIteration, app_id_for_sending);
-    if (0 != url.length()) {
+    if (0 != url.length() && !policy_snapshot_path_.empty()) {
       MessageHelper::SendPolicySnapshotNotification(
-          app_id_for_sending, pt_string, url, application_manager_);
+          app_id_for_sending, policy_snapshot_path_, url, application_manager_);
     }
-
   } else {
     std::string policy_snapshot_full_path;
     if (!SaveSnapshot(pt_string, policy_snapshot_full_path)) {
