@@ -157,9 +157,7 @@ struct ServiceStatus {
       : service_type_(type), service_event_(event), reason_(reason) {}
 };
 
-class ApplicationManagerImplTest
-    : public ::testing::Test,
-      public ::testing::WithParamInterface<ServiceStatus> {
+class ApplicationManagerImplTest : public ::testing::Test {
  public:
   ApplicationManagerImplTest()
       : app_id_(0u)
@@ -351,9 +349,13 @@ class ApplicationManagerImplTest
       mock_statistics_manager_;
 };
 
+class ApplicationManagerImplTestWithServiceStatus
+    : public ::testing::WithParamInterface<ServiceStatus>,
+      public ApplicationManagerImplTest {};
+
 INSTANTIATE_TEST_CASE_P(
     ProcessServiceStatusUpdate_REQUEST_ACCEPTED,
-    ApplicationManagerImplTest,
+    ApplicationManagerImplTestWithServiceStatus,
     ::testing::Values(ServiceStatus(ServiceType::AUDIO,
                                     ServiceEvent::REQUEST_ACCEPTED,
                                     UpdateReasonOptional::EMPTY),
@@ -366,7 +368,7 @@ INSTANTIATE_TEST_CASE_P(
 
 INSTANTIATE_TEST_CASE_P(
     ProcessServiceStatusUpdate_REQUEST_RECEIVED,
-    ApplicationManagerImplTest,
+    ApplicationManagerImplTestWithServiceStatus,
     ::testing::Values(ServiceStatus(ServiceType::AUDIO,
                                     ServiceEvent::REQUEST_RECEIVED,
                                     UpdateReasonOptional::EMPTY),
@@ -379,7 +381,7 @@ INSTANTIATE_TEST_CASE_P(
 
 INSTANTIATE_TEST_CASE_P(
     ProcessServiceStatusUpdate_REQUEST_REJECTED,
-    ApplicationManagerImplTest,
+    ApplicationManagerImplTestWithServiceStatus,
     ::testing::Values(ServiceStatus(ServiceType::AUDIO,
                                     ServiceEvent::REQUEST_REJECTED,
                                     UpdateReasonOptional::EMPTY),
@@ -390,7 +392,7 @@ INSTANTIATE_TEST_CASE_P(
                                     ServiceEvent::REQUEST_REJECTED,
                                     UpdateReasonOptional::EMPTY)));
 
-TEST_P(ApplicationManagerImplTest,
+TEST_P(ApplicationManagerImplTestWithServiceStatus,
        ProcessServiceStatusUpdate_SendMessageToHMI) {
   smart_objects::SmartObjectSPtr notification_ =
       std::make_shared<smart_objects::SmartObject>(
@@ -2028,11 +2030,11 @@ TEST_F(ApplicationManagerImplTest, AddAndRemoveQueryAppDevice_SUCCESS) {
   EXPECT_FALSE(app_manager_impl_->IsAppsQueriedFrom(device_handle));
 }
 
-class ApplicationManagerImplTestWithParams
+class ApplicationManagerImplTestWithFunctionID
     : public ::testing::WithParamInterface<mobile_apis::FunctionID::eType>,
       public ApplicationManagerImplTest {};
 
-TEST_P(ApplicationManagerImplTestWithParams,
+TEST_P(ApplicationManagerImplTestWithFunctionID,
        UnsubscribeAppFromSoftButtons_SUCCESS) {
   AddMockApplication();
   commands::MessageSharedPtr response_message =
@@ -2057,7 +2059,7 @@ TEST_P(ApplicationManagerImplTestWithParams,
 
 INSTANTIATE_TEST_CASE_P(
     UnsubscribeAppFromSoftButtons,
-    ApplicationManagerImplTestWithParams,
+    ApplicationManagerImplTestWithFunctionID,
     ::testing::Values(mobile_apis::FunctionID::ScrollableMessageID,
                       mobile_apis::FunctionID::AlertID,
                       mobile_apis::FunctionID::AlertManeuverID,
