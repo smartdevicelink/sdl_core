@@ -848,7 +848,7 @@ class ApplicationManager {
 
   /**
    * @brief Unsubscribe application that specified in message from softbuttons.
-   * @param MessageSharedPtr - Response message recivied from HMI.
+   * @param MessageSharedPtr - Response message received from HMI.
    * @return bool - Result of unsubscribing process.
    */
   virtual bool UnsubscribeAppFromSoftButtons(

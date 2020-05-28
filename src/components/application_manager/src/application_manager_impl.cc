@@ -4817,13 +4817,13 @@ bool ApplicationManagerImpl::UnsubscribeAppFromSoftButtons(
   if (Result::REJECTED != result_code) {
     app->UnsubscribeFromSoftButtons(function_id);
     LOG4CXX_DEBUG(logger_,
-                  "Application has unsubscribed from softbusttons. FunctionID: "
+                  "Application has unsubscribed from softbuttons. FunctionID: "
                       << function_id << ", app_id:" << app->app_id());
     return true;
   }
   LOG4CXX_DEBUG(
       logger_,
-      "Application hasn't unsubscribed from softbusttons. FunctionID: "
+      "Application hasn't unsubscribed from softbuttons. FunctionID: "
           << function_id << ", app_id:" << app->app_id());
   return false;
 }
