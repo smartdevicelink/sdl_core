@@ -37,6 +37,7 @@
 #include "application_manager/event_engine/event.h"
 #include "application_manager/event_engine/event_dispatcher.h"
 #include "application_manager/event_engine/event_observer.h"
+#include "gmock/gmock.h"
 
 namespace test {
 namespace components {
@@ -58,6 +59,26 @@ class MockEventDispatcher
            ::application_manager::event_engine::EventObserver& observer));
   MOCK_METHOD1(
       remove_observer,
+      void(::application_manager::event_engine::EventObserver& observer));
+
+  MOCK_METHOD1(
+      raise_mobile_event,
+      void(const ::application_manager::event_engine::MobileEvent& event));
+  MOCK_METHOD3(
+      add_mobile_observer,
+      void(
+          const ::application_manager::event_engine::MobileEvent::MobileEventID&
+              event_id,
+          int32_t mobile_correlation_id,
+          ::application_manager::event_engine::EventObserver& observer));
+  MOCK_METHOD2(
+      remove_mobile_observer,
+      void(
+          const ::application_manager::event_engine::MobileEvent::MobileEventID&
+              event_id,
+          ::application_manager::event_engine::EventObserver& observer));
+  MOCK_METHOD1(
+      remove_mobile_observer,
       void(::application_manager::event_engine::EventObserver& observer));
 };
 

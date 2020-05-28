@@ -31,8 +31,9 @@
  */
 
 #include "vehicle_info_plugin/commands/hmi/vi_is_ready_request.h"
-#include "application_manager/rpc_service.h"
 #include "application_manager/message_helper.h"
+#include "application_manager/policies/policy_handler_interface.h"
+#include "application_manager/rpc_service.h"
 
 namespace vehicle_info_plugin {
 using namespace application_manager;
@@ -41,16 +42,13 @@ namespace commands {
 
 VIIsReadyRequest::VIIsReadyRequest(
     const application_manager::commands::MessageSharedPtr& message,
-    ApplicationManager& application_manager,
-    rpc_service::RPCService& rpc_service,
-    HMICapabilities& hmi_capabilities,
-    policy::PolicyHandlerInterface& policy_handle)
+    const VehicleInfoCommandParams& params)
     : RequestToHMI(message,
-                   application_manager,
-                   rpc_service,
-                   hmi_capabilities,
-                   policy_handle)
-    , EventObserver(application_manager.event_dispatcher()) {}
+                   params.application_manager_,
+                   params.rpc_service_,
+                   params.hmi_capabilities_,
+                   params.policy_handler_)
+    , EventObserver(application_manager_.event_dispatcher()) {}
 
 VIIsReadyRequest::~VIIsReadyRequest() {}
 
@@ -109,4 +107,4 @@ void VIIsReadyRequest::SendMessageToHMI() {
 
 }  // namespace commands
 
-}  // namespace application_manager
+}  // namespace vehicle_info_plugin

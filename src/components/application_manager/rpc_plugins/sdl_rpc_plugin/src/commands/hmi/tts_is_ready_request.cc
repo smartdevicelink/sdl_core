@@ -31,8 +31,8 @@
  */
 
 #include "sdl_rpc_plugin/commands/hmi/tts_is_ready_request.h"
-#include "application_manager/rpc_service.h"
 #include "application_manager/message_helper.h"
+#include "application_manager/rpc_service.h"
 
 namespace sdl_rpc_plugin {
 using namespace application_manager;
@@ -112,4 +112,4 @@ void TTSIsReadyRequest::SendMessageToHMI() {
 }
 }  // namespace commands
 
-}  // namespace application_manager
+}  // namespace sdl_rpc_plugin

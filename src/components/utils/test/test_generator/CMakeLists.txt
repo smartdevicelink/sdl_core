@@ -41,8 +41,8 @@ include_directories (
 
 set(XML_NAME ${CMAKE_SOURCE_DIR}/src/components/interfaces/MOBILE_API.xml)
 add_custom_target(generate_version
-  COMMAND ${INTEFRACE_GENERATOR_CMD} ${XML_NAME} "mobile_apis"
-  ${CMAKE_CURRENT_BINARY_DIR} "--parser-type" "sdlrpcv2"
+  COMMAND ${INTEFRACE_GENERATOR_CMD} "--source-xml" "${XML_NAME}" "--namespace" "mobile_apis"
+  "--output-dir" "${CMAKE_CURRENT_BINARY_DIR}" "--parser-type" "sdlrpcv2" "-y"
   DEPENDS ${INTERFACE_GENERATOR_DEPENDENCIES} ${XML_NAME}
   VERBATIM
 )

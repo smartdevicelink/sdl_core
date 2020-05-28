@@ -102,4 +102,17 @@ TimeCompare compareTime(const TimeDuration& time1, const TimeDuration& time2) {
   return EQUAL;
 }
 
+int64_t calculateAmountDaysFromDate(const std::time_t& start_date) {
+  const time_t current_date = std::time(NULL);
+
+  // std::difftime returns difference between two timepoints in seconds
+  const uint32_t diff_consent_and_current_dates = (static_cast<uint32_t>(
+      std::fabs(std::difftime(current_date, start_date))));
+
+  const uint32_t past_period_in_days =
+      diff_consent_and_current_dates / date_time::SECONDS_IN_DAY;
+
+  return past_period_in_days;
+}
+
 }  // namespace date_time

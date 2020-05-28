@@ -33,9 +33,9 @@
 #include "application_manager/usage_statistics.h"
 #include <memory>
 #include "gmock/gmock.h"
-#include "smart_objects/enum_schema_item.h"
-#include "policy/usage_statistics/mock_statistics_manager.h"
 #include "policy/usage_statistics/mock_app_stopwatch.h"
+#include "policy/usage_statistics/mock_statistics_manager.h"
+#include "smart_objects/enum_schema_item.h"
 
 namespace test {
 namespace components {

@@ -35,12 +35,12 @@
 
 #include "gtest/gtest.h"
 
-#include "smart_objects/smart_object.h"
-#include "application_manager/smart_object_keys.h"
-#include "application_manager/commands/commands_test.h"
 #include "application_manager/commands/command.h"
 #include "application_manager/commands/command_response_impl.h"
+#include "application_manager/commands/commands_test.h"
 #include "application_manager/mock_application.h"
+#include "application_manager/smart_object_keys.h"
+#include "smart_objects/smart_object.h"
 
 namespace test {
 namespace components {
@@ -50,8 +50,8 @@ namespace command_response_impl {
 namespace strings = ::application_manager::strings;
 namespace hmi_response = ::application_manager::hmi_response;
 
-using ::application_manager::commands::MessageSharedPtr;
 using ::application_manager::commands::CommandResponseImpl;
+using ::application_manager::commands::MessageSharedPtr;
 
 class CommandResponseImplTest
     : public CommandsTest<CommandsTestMocks::kIsNice> {};

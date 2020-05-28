@@ -355,11 +355,11 @@
                 "STATIC"
             ]
         },
-        "audioPassThruCapabilities": {
+        "audioPassThruCapabilities": [{
             "samplingRate": "44KHZ",
             "bitsPerSample": "RATE_8_BIT",
             "audioType": "PCM"
-        },
+        }],
         "pcmStreamCapabilities": {
             "samplingRate": "16KHZ",
             "bitsPerSample": "RATE_16_BIT",

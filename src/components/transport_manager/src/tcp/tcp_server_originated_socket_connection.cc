@@ -65,9 +65,9 @@ bool TcpServerOriginatedSocketConnection::Establish(ConnectError** error) {
 
   const int port = tcp_device->GetApplicationPort(application_handle());
   if (-1 == port) {
-    LOG4CXX_ERROR(logger_,
-                  "Application port for " << application_handle()
-                                          << " not found");
+    LOG4CXX_ERROR(
+        logger_,
+        "Application port for " << application_handle() << " not found");
     *error = new ConnectError();
     return false;
   }

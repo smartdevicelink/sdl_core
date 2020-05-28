@@ -30,8 +30,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "formatters/SmartFactoryTestHelper.h"
 #include "formatters/CSmartFactory.h"
+#include "formatters/SmartFactoryTestHelper.h"
 #include "gtest/gtest.h"
 
 namespace test {

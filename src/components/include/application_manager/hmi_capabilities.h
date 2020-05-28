@@ -28,21 +28,18 @@
  * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
-*/
+ */
 
 #ifndef SRC_COMPONENTS_INCLUDE_APPLICATION_MANAGER_HMI_CAPABILITIES_H_
 #define SRC_COMPONENTS_INCLUDE_APPLICATION_MANAGER_HMI_CAPABILITIES_H_
 
+#include "application_manager/hmi_language_handler.h"
 #include "interfaces/HMI_API.h"
 #include "interfaces/MOBILE_API.h"
 #include "json/json.h"
-#include "utils/macro.h"
-#include "application_manager/hmi_language_handler.h"
+#include "resumption/last_state_wrapper.h"
 #include "smart_objects/smart_object.h"
-
-namespace resumption {
-class LastState;
-}
+#include "utils/macro.h"
 
 namespace application_manager {
 class ApplicationManager;
@@ -56,16 +53,16 @@ class HMICapabilities {
   virtual ~HMICapabilities() {}
 
   /**
-     * @brief return component which follows for correctness of
-     * languages
-     * @return HMI language handler
-     */
+   * @brief return component which follows for correctness of
+   * languages
+   * @return HMI language handler
+   */
   virtual HMILanguageHandler& get_hmi_language_handler() = 0;
 
   /*
-   * @brief Checks is image type(Static/Dynamic) requested by
+   * @brief Checks if image type(Static/Dynamic) requested by
    * Mobile Device is supported on current HMI.
-   * @param image_type recieved type of image from Enum.
+   * @param image_type received type of image from Enum.
    * @return Bool true if supported
    */
   virtual bool VerifyImageType(const int32_t image_type) const = 0;
@@ -219,7 +216,7 @@ class HMICapabilities {
    *
    * @return Currently supported display capabilities
    */
-  virtual const smart_objects::SmartObject* display_capabilities() const = 0;
+  virtual const smart_objects::SmartObjectSPtr display_capabilities() const = 0;
 
   /*
    * @brief Sets supported display capabilities
@@ -230,11 +227,26 @@ class HMICapabilities {
       const smart_objects::SmartObject& display_capabilities) = 0;
 
   /*
+   * @brief Retrieves information about the display capability
+   * @return Currently supported display capability
+   */
+  virtual const smart_objects::SmartObjectSPtr system_display_capabilities()
+      const = 0;
+
+  /*
+   * @brief Sets supported display capability
+   * @param display_capabilities supported display capability
+   */
+  virtual void set_system_display_capabilities(
+      const smart_objects::SmartObject& display_capabilities) = 0;
+
+  /*
    * @brief Retrieves information about the HMI zone capabilities
    *
    * @return Currently supported HMI zone capabilities
    */
-  virtual const smart_objects::SmartObject* hmi_zone_capabilities() const = 0;
+  virtual const smart_objects::SmartObjectSPtr hmi_zone_capabilities()
+      const = 0;
 
   /*
    * @brief Sets supported HMI zone capabilities
@@ -249,7 +261,7 @@ class HMICapabilities {
    *
    * @return Currently supported SoftButton's capabilities
    */
-  virtual const smart_objects::SmartObject* soft_button_capabilities()
+  virtual const smart_objects::SmartObjectSPtr soft_button_capabilities()
       const = 0;
 
   /*
@@ -265,7 +277,7 @@ class HMICapabilities {
    *
    * @return Currently supported Button's capabilities
    */
-  virtual const smart_objects::SmartObject* button_capabilities() const = 0;
+  virtual const smart_objects::SmartObjectSPtr button_capabilities() const = 0;
 
   /*
    * @brief Sets supported Button's capabilities
@@ -288,7 +300,7 @@ class HMICapabilities {
    *
    * @return Currently supported speech capabilities
    */
-  virtual const smart_objects::SmartObject* speech_capabilities() const = 0;
+  virtual const smart_objects::SmartObjectSPtr speech_capabilities() const = 0;
 
   /*
    * @brief Sets supported VR capabilities
@@ -303,7 +315,7 @@ class HMICapabilities {
    *
    * @return Currently supported VR capabilities
    */
-  virtual const smart_objects::SmartObject* vr_capabilities() const = 0;
+  virtual const smart_objects::SmartObjectSPtr vr_capabilities() const = 0;
 
   /*
    * @brief Sets supported audio_pass_thru capabilities
@@ -318,7 +330,7 @@ class HMICapabilities {
    *
    * @return Currently supported audio_pass_thru capabilities
    */
-  virtual const smart_objects::SmartObject* audio_pass_thru_capabilities()
+  virtual const smart_objects::SmartObjectSPtr audio_pass_thru_capabilities()
       const = 0;
 
   /*
@@ -334,14 +346,15 @@ class HMICapabilities {
    *
    * @return Currently supported pcm_streaming capabilities
    */
-  virtual const smart_objects::SmartObject* pcm_stream_capabilities() const = 0;
+  virtual const smart_objects::SmartObjectSPtr pcm_stream_capabilities()
+      const = 0;
 
   /*
    * @brief Retrieves information about the preset bank capabilities
    *
    * @return Currently supported preset bank capabilities
    */
-  virtual const smart_objects::SmartObject* preset_bank_capabilities()
+  virtual const smart_objects::SmartObjectSPtr preset_bank_capabilities()
       const = 0;
 
   /*
@@ -365,14 +378,14 @@ class HMICapabilities {
    *
    * @param vehicle_type Cuurent vehicle information
    */
-  virtual const smart_objects::SmartObject* vehicle_type() const = 0;
+  virtual const smart_objects::SmartObjectSPtr vehicle_type() const = 0;
 
   /*
    * @brief Retrieves information about the prerecorded speech
    *
    * @return Currently supported prerecorded speech
    */
-  virtual const smart_objects::SmartObject* prerecorded_speech() const = 0;
+  virtual const smart_objects::SmartObjectSPtr prerecorded_speech() const = 0;
 
   /*
    * @brief Sets supported prerecorded speech
@@ -499,7 +512,26 @@ class HMICapabilities {
 
   virtual const smart_objects::SmartObject* rc_capability() const = 0;
 
+  /**
+   * @brief Sets available SeatLocation capabilities for further usage by
+   * RC functionality
+   * @param seat_location_capability capabilities to set
+   */
+  virtual void set_seat_location_capability(
+      const smart_objects::SmartObject& seat_location_capability) = 0;
+
+  /**
+   * @brief seat_location_capability Retrieves information regarding the
+   * seat location capability
+   * @return smart object of seat location capability
+   */
+  virtual const smart_objects::SmartObject* seat_location_capability()
+      const = 0;
+
+  DEPRECATED
   virtual void Init(resumption::LastState* last_state) = 0;
+
+  virtual void Init(resumption::LastStateWrapperPtr last_state_wrapper) = 0;
 
   /**
    * @brief Trigger waiting for response
@@ -525,6 +557,18 @@ class HMICapabilities {
   virtual void convert_json_languages_to_obj(
       const Json::Value& json_languages,
       smart_objects::SmartObject& languages) const = 0;
+
+  /*
+   * @brief function that converts a single entry of audio pass thru capability
+   *        to smart object
+   *
+   * @param capability json object that represents a single entry of audio pass
+   *        thru capability
+   * @param output_so the converted object
+   */
+  virtual void convert_audio_capability_to_obj(
+      const Json::Value& capability,
+      smart_objects::SmartObject& output_so) const = 0;
 };
 
 }  //  namespace application_manager

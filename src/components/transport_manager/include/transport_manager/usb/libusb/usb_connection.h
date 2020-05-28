@@ -37,8 +37,8 @@
 
 #include "utils/lock.h"
 
-#include "transport_manager/transport_adapter/transport_adapter_controller.h"
 #include "transport_manager/transport_adapter/connection.h"
+#include "transport_manager/transport_adapter/transport_adapter_controller.h"
 #include "transport_manager/usb/common.h"
 
 namespace transport_manager {
@@ -60,9 +60,9 @@ class UsbConnection : public Connection {
   virtual TransportAdapter::Error Disconnect();
 
  private:
-  void PopOutMessage();
+  TransportAdapter::Error PopOutMessage();
   bool PostInTransfer();
-  bool PostOutTransfer();
+  TransportAdapter::Error PostOutTransfer();
   void OnInTransfer(struct libusb_transfer*);
   void OnOutTransfer(struct libusb_transfer*);
   void Finalise();

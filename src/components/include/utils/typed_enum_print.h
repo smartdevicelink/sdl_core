@@ -33,8 +33,8 @@
 #ifndef SRC_COMPONENTS_INCLUDE_UTILS_TYPED_ENUM_PRINT_H_
 #define SRC_COMPONENTS_INCLUDE_UTILS_TYPED_ENUM_PRINT_H_
 
-#include <type_traits>
 #include <ostream>
+#include <type_traits>
 
 namespace utils {
 

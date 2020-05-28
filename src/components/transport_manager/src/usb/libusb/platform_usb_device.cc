@@ -83,5 +83,5 @@ std::string PlatformUsbDevice::GetSerialNumber() const {
   return GetDescString(device_descriptor_.iSerialNumber);
 }
 
-}  // namespace
-}  // namespace
+}  // namespace transport_adapter
+}  // namespace transport_manager

@@ -33,8 +33,8 @@
 #ifndef SRC_COMPONENTS_RPC_BASE_INCLUDE_RPC_BASE_VALIDATION_REPORT_H_
 #define SRC_COMPONENTS_RPC_BASE_INCLUDE_RPC_BASE_VALIDATION_REPORT_H_
 
-#include <string>
 #include <list>
+#include <string>
 
 namespace rpc {
 

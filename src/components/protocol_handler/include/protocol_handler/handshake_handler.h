@@ -57,7 +57,8 @@ class HandshakeHandler : public security_manager::SecurityManagerListener {
                    utils::SemanticVersion& full_version,
                    const SessionContext& context,
                    const uint8_t protocol_version,
-                   std::shared_ptr<BsonObject> payload);
+                   std::shared_ptr<BsonObject> payload,
+                   ServiceStatusUpdateHandler& service_status_update_handler);
 
   ~HandshakeHandler();
 
@@ -82,18 +83,39 @@ class HandshakeHandler : public security_manager::SecurityManagerListener {
    * @brief Notification about handshake failure
    * @return true on success notification handling or false otherwise
    */
-  bool OnHandshakeFailed() OVERRIDE;
+  bool OnGetSystemTimeFailed() OVERRIDE;
 
   /**
    * @brief Notification that certificate update is required.
    */
   void OnCertificateUpdateRequired() OVERRIDE;
 
+  bool OnPTUFailed() OVERRIDE;
+
+#ifdef EXTERNAL_PROPRIETARY_MODE
+  /**
+   * @brief OnCertDecryptFailed is called when certificate decryption fails in
+   * external flow
+   * @return since this callback is a part of SecurityManagerListener, bool
+   * return value is used to indicate whether listener instance can be deleted
+   * by calling entity. if true - listener can be deleted and removed from
+   * listeners by SecurityManager, false - listener retains its place within
+   * SecurityManager.
+   */
+  bool OnCertDecryptFailed() OVERRIDE;
+#endif
+
   /**
    * @brief Get connection key of this handler
    * @return connection key
    */
   uint32_t connection_key() const;
+
+  /**
+   * @brief Get primary connection key of this handler
+   * @return primary connection key
+   */
+  uint32_t primary_connection_key() const;
 
  private:
   /**
@@ -107,8 +129,21 @@ class HandshakeHandler : public security_manager::SecurityManagerListener {
   /**
    * @brief Performs related actions if handshake was failed
    * @param params set of params used in bson part of message
+   * @param service_status - service status to be sent to HMI
    */
-  void ProcessFailedHandshake(BsonObject& params);
+  void ProcessFailedHandshake(BsonObject& params, ServiceStatus service_status);
+
+  /**
+   * @brief Determines whether service can be protected
+   * @return true is service can be protected, otherwise - false
+   */
+  bool CanBeProtected() const;
+
+  /**
+   * @brief Determines whether service is already protected
+   * @return true is service is already protected, otherwise - false
+   */
+  bool IsAlreadyProtected() const;
 
   ProtocolHandlerImpl& protocol_handler_;
   SessionObserver& session_observer_;
@@ -116,6 +151,7 @@ class HandshakeHandler : public security_manager::SecurityManagerListener {
   utils::SemanticVersion full_version_;
   const uint8_t protocol_version_;
   std::shared_ptr<BsonObject> payload_;
+  ServiceStatusUpdateHandler& service_status_update_handler_;
 };
 
 }  // namespace protocol_handler

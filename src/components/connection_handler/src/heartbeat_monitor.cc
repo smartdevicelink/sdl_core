@@ -34,8 +34,8 @@
 #include <unistd.h>
 #include <utility>
 
-#include "utils/logger.h"
 #include "connection_handler/connection.h"
+#include "utils/logger.h"
 
 namespace connection_handler {
 
@@ -79,9 +79,9 @@ void HeartBeatMonitor::Process() {
 
 void HeartBeatMonitor::threadMain() {
   AutoLock main_lock(main_thread_lock_);
-  LOG4CXX_DEBUG(logger_,
-                "Start heart beat monitor. Timeout is "
-                    << default_heartbeat_timeout_);
+  LOG4CXX_DEBUG(
+      logger_,
+      "Start heart beat monitor. Timeout is " << default_heartbeat_timeout_);
   while (run_) {
     heartbeat_monitor_.WaitFor(main_lock, kDefaultCycleTimeout);
     Process();
@@ -94,9 +94,9 @@ void HeartBeatMonitor::AddSession(uint8_t session_id) {
   LOG4CXX_DEBUG(logger_, "Add session with id " << converted_session_id);
   AutoLock auto_lock(sessions_list_lock_);
   if (sessions_.end() != sessions_.find(session_id)) {
-    LOG4CXX_WARN(logger_,
-                 "Session with id: " << converted_session_id
-                                     << " already exists");
+    LOG4CXX_WARN(
+        logger_,
+        "Session with id: " << converted_session_id << " already exists");
     return;
   }
   sessions_.insert(

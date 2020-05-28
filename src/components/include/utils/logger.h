@@ -35,13 +35,13 @@
 
 #ifdef ENABLE_LOG
 #include <errno.h>
-#include <string.h>
-#include <sstream>
 #include <log4cxx/propertyconfigurator.h>
 #include <log4cxx/spi/loggingevent.h>
-#include "utils/push_log.h"
-#include "utils/logger_status.h"
+#include <string.h>
+#include <sstream>
 #include "utils/auto_trace.h"
+#include "utils/logger_status.h"
+#include "utils/push_log.h"
 #endif  // ENABLE_LOG
 
 #ifdef ENABLE_LOG
@@ -64,6 +64,11 @@
 // destroyed by exit()
 void deinit_logger();
 #define DEINIT_LOGGER() deinit_logger()
+
+// Logger thread deinitilization macro that need to stop the thread of handling
+// messages for the log4cxx
+#define DELETE_THREAD_LOGGER(logger_var) \
+  logger::delete_log_message_loop_thread(logger_var)
 
 // special macros to dump logs from queue
 // it's need, for example, when crash happend
@@ -121,15 +126,15 @@ log4cxx_time_t time_now();
 #define LOG4CXX_FATAL(loggerPtr, logEvent) \
   LOG_WITH_LEVEL(loggerPtr, ::log4cxx::Level::getFatal(), logEvent)
 
-#define LOG4CXX_ERROR_WITH_ERRNO(loggerPtr, message)                           \
-  LOG4CXX_ERROR(loggerPtr,                                                     \
-                message << ", error code " << errno << " (" << strerror(errno) \
-                        << ")")
+#define LOG4CXX_ERROR_WITH_ERRNO(loggerPtr, message) \
+  LOG4CXX_ERROR(                                     \
+      loggerPtr,                                     \
+      message << ", error code " << errno << " (" << strerror(errno) << ")")
 
-#define LOG4CXX_WARN_WITH_ERRNO(loggerPtr, message)                           \
-  LOG4CXX_WARN(loggerPtr,                                                     \
-               message << ", error code " << errno << " (" << strerror(errno) \
-                       << ")")
+#define LOG4CXX_WARN_WITH_ERRNO(loggerPtr, message) \
+  LOG4CXX_WARN(                                     \
+      loggerPtr,                                    \
+      message << ", error code " << errno << " (" << strerror(errno) << ")")
 
 #else  // ENABLE_LOG is OFF
 
@@ -140,6 +145,8 @@ log4cxx_time_t time_now();
 #define INIT_LOGGER(file_name, logs_enabled)
 
 #define DEINIT_LOGGER()
+
+#define DELETE_THREAD_LOGGER(logger_var)
 
 #define FLUSH_LOGGER()
 

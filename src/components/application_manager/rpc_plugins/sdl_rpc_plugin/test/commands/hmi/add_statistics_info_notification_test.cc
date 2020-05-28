@@ -30,15 +30,15 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "gtest/gtest.h"
 #include "hmi/add_statistics_info_notification.h"
+#include "gtest/gtest.h"
 
-#include "smart_objects/smart_object.h"
 #include "application_manager/commands/commands_test.h"
 #include "application_manager/mock_application.h"
-#include "application_manager/smart_object_keys.h"
-#include "application_manager/policies/policy_handler.h"
 #include "application_manager/policies/mock_policy_handler_interface.h"
+#include "application_manager/policies/policy_handler.h"
+#include "application_manager/smart_object_keys.h"
+#include "smart_objects/smart_object.h"
 
 namespace test {
 namespace components {
@@ -49,11 +49,11 @@ namespace add_statistics_info_notification {
 namespace am = ::application_manager;
 namespace strings = ::application_manager::strings;
 namespace hmi_notification = ::application_manager::hmi_notification;
-using am::commands::MessageSharedPtr;
-using sdl_rpc_plugin::commands::AddStatisticsInfoNotification;
 using am::commands::CommandImpl;
+using am::commands::MessageSharedPtr;
 using policy::PolicyHandler;
 using policy_test::MockPolicyHandlerInterface;
+using sdl_rpc_plugin::commands::AddStatisticsInfoNotification;
 using ::testing::_;
 using ::testing::Return;
 using ::testing::ReturnRef;

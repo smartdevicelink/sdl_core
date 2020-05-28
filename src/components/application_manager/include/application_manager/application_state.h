@@ -32,14 +32,21 @@
 
 #ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_APPLICATION_STATE_H_
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_APPLICATION_STATE_H_
+
+#include <map>
 #include <vector>
+
+#include "application_manager/hmi_state.h"
 #include "utils/lock.h"
 #include "utils/macro.h"
-#include "application_manager/hmi_state.h"
 
 namespace application_manager {
 
+typedef std::vector<WindowID> WindowIds;
 typedef std::vector<HmiStatePtr> HmiStates;
+typedef std::map<WindowID, HmiStates> HmiStatesMap;
+typedef std::vector<std::string> WindowNames;
+typedef std::map<WindowID, std::string> WindowNamesMap;
 
 /*
  * Class represents application state, i.e. current HMI level, audio streaming
@@ -63,97 +70,140 @@ class ApplicationState {
 
   /**
    * @brief Init state
+   * @param window_id window id for HMI state
+   * @param window_name name of inited window
    * @param state Initial state
    */
-  void InitState(HmiStatePtr state);
+  void InitState(const WindowID window_id,
+                 const std::string& window_name,
+                 HmiStatePtr state);
 
   /**
    * @brief Adds state to states storage
+   * @param window_id window id for HMI state
    * @param state State of application
    */
-  void AddState(HmiStatePtr state);
+  void AddState(const WindowID window_id, HmiStatePtr state);
 
   /**
    * @brief Removes state from states storage
+   * @param window_id window id for HMI state
    * @param state State of application
    */
-  void RemoveState(HmiState::StateID state);
+  void RemoveState(const WindowID window_id, HmiState::StateID state);
 
   /**
    * @brief Gets state by state id
+   * @param window_id window id for HMI state
    * @param state_id State id
    * @return Pointer to application state
    */
-  HmiStatePtr GetState(HmiState::StateID state_id) const;
+  HmiStatePtr GetState(const WindowID window_id,
+                       HmiState::StateID state_id) const;
+
+  /**
+   * @brief Gets the list of all states matches provided state id
+   * @param state_id state id to get
+   * @return list of all states matches provided state id
+   */
+  HmiStates GetStates(const HmiState::StateID state_id) const;
+
+  /**
+   * @brief Getter for a list of available application windows including the
+   * main
+   * @return list of available window ids
+   */
+  WindowIds GetWindowIds() const;
+
+  /**
+   * @brief Getter f0r a list of all existing window names
+   * @return list of available window names
+   */
+  WindowNames GetWindowNames() const;
 
  private:
   /**
    * @brief AddHMIState the function that will change application's
    * hmi state.
    *
-   * @param app_id id of the application whose hmi level should be changed.
+   * @param window_id window id for HMI state
    *
    * @param state new hmi state for certain application.
    */
-  void AddHMIState(HmiStatePtr state);
+  void AddHMIState(const WindowID window_id, HmiStatePtr state);
 
   /**
    * @brief RemoveHMIState the function that will turn back hmi_level after end
    * of some event
    *
-   * @param app_id id of the application whose hmi level should be changed.
+   * @param window_id window id for HMI state.
    *
    * @param state_id that should be removed
    */
-  void RemoveHMIState(HmiState::StateID state_id);
+  void RemoveHMIState(const WindowID window_id, HmiState::StateID state_id);
+
+  /**
+   * @brief RemoveWindowHMIStates removes all HMI states related to specified
+   * window
+   * @param window_id window ID to remove
+   */
+  void RemoveWindowHMIStates(const WindowID window_id);
 
   /**
    * @brief Removes postponed state
+   * @param window_id window id for HMI state
    */
-  void RemovePostponedState();
+  void RemovePostponedState(const WindowID window_id);
 
   /**
    * @brief Sets regular state of application
+   * @param window_id window id for HMI state
    * @param state State of application
    */
-  void SetRegularState(HmiStatePtr state);
+  void SetRegularState(const WindowID window_id, HmiStatePtr state);
 
   /**
-  * @brief Sets postponed state of application.
-  * This state could be set as regular later on
-  *
-  * @param state state to setup
-  */
-  void SetPostponedState(HmiStatePtr state);
+   * @brief Sets postponed state of application.
+   * This state could be set as regular later on
+   * @param window_id window id for HMI state
+   * @param state state to setup
+   */
+  void SetPostponedState(const WindowID window_id, HmiStatePtr state);
 
   /**
    * @brief HmiState of application within active events PhoneCall, TTS< etc ...
+   * @param window_id window id for HMI state
    * @return Active HmiState of application
    */
-  HmiStatePtr CurrentHmiState() const;
+  HmiStatePtr CurrentHmiState(const WindowID window_id) const;
 
   /**
    * @brief RegularHmiState of application without active events VR, TTS etc ...
+   * @param window_id window id for HMI state
    * @return HmiState of application
    */
-  HmiStatePtr RegularHmiState() const;
+  HmiStatePtr RegularHmiState(const WindowID window_id) const;
 
   /**
    * @brief PostponedHmiState returns postponed hmi state of application
    * if it's present
-   *
+   * @param window_id window id for HMI state
    * @return Postponed hmi state of application
    */
-  HmiStatePtr PostponedHmiState() const;
+  HmiStatePtr PostponedHmiState(const WindowID window_id) const;
 
   /**
    * @brief Active states of application
    */
-  HmiStates hmi_states_;
-  mutable sync_primitives::Lock hmi_states_lock_;
+  HmiStatesMap hmi_states_map_;
+
+  /**
+   * @brief hmi_states_map_lock_
+   */
+  mutable sync_primitives::Lock hmi_states_map_lock_;
 
   DISALLOW_COPY_AND_ASSIGN(ApplicationState);
 };
-}
+}  // namespace application_manager
 
 #endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_APPLICATION_STATE_H_

@@ -33,8 +33,8 @@
 
 #include "sdl_rpc_plugin/commands/mobile/on_hmi_status_notification.h"
 
-#include "application_manager/message_helper.h"
 #include "application_manager/message.h"
+#include "application_manager/message_helper.h"
 #include "interfaces/MOBILE_API.h"
 
 namespace sdl_rpc_plugin {
@@ -92,4 +92,4 @@ void OnHMIStatusNotification::Run() {
 
 }  // namespace commands
 
-}  // namespace application_manager
+}  // namespace sdl_rpc_plugin

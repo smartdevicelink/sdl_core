@@ -48,6 +48,7 @@ extern const char* video_service_transports;
 extern const char* tcp_ip_address;
 extern const char* tcp_port;
 extern const char* reason;
+extern const char* auth_token;
 
 }  // namespace strings
 

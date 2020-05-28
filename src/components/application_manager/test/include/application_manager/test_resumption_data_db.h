@@ -33,10 +33,10 @@
 #ifndef SRC_COMPONENTS_APPLICATION_MANAGER_TEST_INCLUDE_APPLICATION_MANAGER_TEST_RESUMPTION_DATA_DB_H_
 #define SRC_COMPONENTS_APPLICATION_MANAGER_TEST_INCLUDE_APPLICATION_MANAGER_TEST_RESUMPTION_DATA_DB_H_
 
-#include "utils/sqlite_wrapper/sql_database.h"
-#include "application_manager/resumption/resumption_data_db.h"
-#include "application_manager/mock_application_manager_settings.h"
 #include "application_manager/mock_application_manager.h"
+#include "application_manager/mock_application_manager_settings.h"
+#include "application_manager/resumption/resumption_data_db.h"
+#include "utils/sqlite_wrapper/sql_database.h"
 
 using ::resumption::ResumptionDataDB;
 

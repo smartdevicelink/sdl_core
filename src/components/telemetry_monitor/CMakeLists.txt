@@ -47,9 +47,11 @@ include_directories (
   ${COMPONENTS_DIR}/media_manager/include/
   ${COMPONENTS_DIR}/smart_objects/include/
   ${COMPONENTS_DIR}/config_profile/include/
+  ${COMPONENTS_DIR}/resumption/include
   ${JSONCPP_INCLUDE_DIRECTORY}
   ${CMAKE_BINARY_DIR}/src/components/
   ${LOG4CXX_INCLUDE_DIRECTORY}
+  ${BOOST_INCLUDE_DIR}
 )
 
 set(PATHS
@@ -62,7 +64,7 @@ set(LIBRARIES
   HMI_API
   MOBILE_API
   Utils
-  Policy
+  PolicyStatic
 )
 
 add_library("TelemetryMonitor" ${SOURCES})

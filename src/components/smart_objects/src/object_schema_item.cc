@@ -33,6 +33,7 @@
 
 #include <algorithm>
 
+#include "generated_msg_version.h"
 #include "smart_objects/always_false_schema_item.h"
 #include "smart_objects/smart_object.h"
 
@@ -40,21 +41,26 @@ namespace {
 const char connection_key[] = "connection_key";
 const char binary_data[] = "binary_data";
 const char app_id[] = "appID";
-}
+const utils::SemanticVersion kModuleVersion(application_manager::major_version,
+                                            application_manager::minor_version,
+                                            application_manager::patch_version);
+}  // namespace
 namespace ns_smart_device_link {
 namespace ns_smart_objects {
 
-CObjectSchemaItem::SMember::SMember()
-    : mSchemaItem(CAlwaysFalseSchemaItem::create()), mIsMandatory(true) {}
+SMember::SMember()
+    : mSchemaItem(CAlwaysFalseSchemaItem::create())
+    , mIsMandatory(true)
+    , mIsDeprecated(false)
+    , mIsRemoved(false) {}
 
-CObjectSchemaItem::SMember::SMember(
-    const ISchemaItemPtr SchemaItem,
-    const bool IsMandatory,
-    const std::string& Since,
-    const std::string& Until,
-    const bool IsDeprecated,
-    const bool IsRemoved,
-    const std::vector<CObjectSchemaItem::SMember>& history_vector)
+SMember::SMember(const ISchemaItemPtr SchemaItem,
+                 const bool IsMandatory,
+                 const std::string& Since,
+                 const std::string& Until,
+                 const bool IsDeprecated,
+                 const bool IsRemoved,
+                 const std::vector<SMember>& history_vector)
     : mSchemaItem(SchemaItem), mIsMandatory(IsMandatory) {
   if (Since.size() > 0) {
     utils::SemanticVersion since_struct(Since);
@@ -73,30 +79,22 @@ CObjectSchemaItem::SMember::SMember(
   mHistoryVector = history_vector;
 }
 
-bool CObjectSchemaItem::SMember::CheckHistoryFieldVersion(
+bool SMember::CheckHistoryFieldVersion(
     const utils::SemanticVersion& MessageVersion) const {
   if (MessageVersion.isValid()) {
     if (mSince != boost::none) {
       if (MessageVersion < mSince.get()) {
-        return false;  // Msg version predates `since` field
-      } else {
-        if (mUntil != boost::none && (MessageVersion >= mUntil.get())) {
-          return false;  // Msg version newer than `until` field
-        } else {
-          return true;  // Mobile msg version falls within specified version
-                        // range
-        }
+        return false;
       }
     }
-
-    if (mUntil != boost::none && (MessageVersion >= mUntil.get())) {
-      return false;  // Msg version newer than `until` field
-    } else {
-      return true;  // Mobile msg version falls within specified version range
+    if (mUntil != boost::none) {
+      if (MessageVersion >= mUntil.get()) {
+        return false;  // Msg version newer than `until` field
+      }
     }
   }
 
-  return true;  // Not enough version information. Default true.
+  return true;  // All checks passed. Return true.
 }
 
 std::shared_ptr<CObjectSchemaItem> CObjectSchemaItem::create(
@@ -107,12 +105,13 @@ std::shared_ptr<CObjectSchemaItem> CObjectSchemaItem::create(
 errors::eType CObjectSchemaItem::validate(
     const SmartObject& object,
     rpc::ValidationReport* report__,
-    const utils::SemanticVersion& MessageVersion) {
+    const utils::SemanticVersion& MessageVersion,
+    const bool allow_unknown_enums) {
   if (SmartType_Map != object.getType()) {
-    std::string validation_info = "Incorrect type, expected: " +
-                                  SmartObject::typeToString(SmartType_Map) +
-                                  ", got: " +
-                                  SmartObject::typeToString(object.getType());
+    std::string validation_info =
+        "Incorrect type, expected: " +
+        SmartObject::typeToString(SmartType_Map) +
+        ", got: " + SmartObject::typeToString(object.getType());
     report__->set_validation_info(validation_info);
     return errors::INVALID_VALUE;
   }
@@ -123,12 +122,12 @@ errors::eType CObjectSchemaItem::validate(
        ++it) {
     const std::string& key = it->first;
     const SMember& member = it->second;
-    const SMember& correct_member = GetCorrectMember(member, MessageVersion);
+    const SMember* correct_member = GetCorrectMember(member, MessageVersion);
 
     std::set<std::string>::const_iterator key_it = object_keys.find(key);
     if (object_keys.end() == key_it) {
-      if (correct_member.mIsMandatory == true &&
-          correct_member.mIsRemoved == false) {
+      if (correct_member && correct_member->mIsMandatory == true &&
+          correct_member->mIsRemoved == false) {
         std::string validation_info = "Missing mandatory parameter: " + key;
         report__->set_validation_info(validation_info);
         return errors::MISSING_MANDATORY_PARAMETER;
@@ -139,47 +138,57 @@ errors::eType CObjectSchemaItem::validate(
 
     errors::eType result = errors::OK;
     // Check if MessageVersion matches schema version
-    result = correct_member.mSchemaItem->validate(
-        field, &report__->ReportSubobject(key), MessageVersion);
+    if (correct_member) {
+      result =
+          correct_member->mSchemaItem->validate(field,
+                                                &report__->ReportSubobject(key),
+                                                MessageVersion,
+                                                allow_unknown_enums);
+    } else {
+      result = errors::ERROR;
+    }
+
     if (errors::OK != result) {
       return result;
     }
     object_keys.erase(key_it);
   }
+
   return errors::OK;
 }
 
 void CObjectSchemaItem::applySchema(
     SmartObject& Object,
-    const bool RemoveFakeParameters,
+    const bool remove_unknown_parameters,
     const utils::SemanticVersion& MessageVersion) {
   if (SmartType_Map != Object.getType()) {
     return;
   }
 
-  if (RemoveFakeParameters) {
+  if (remove_unknown_parameters) {
     RemoveFakeParams(Object, MessageVersion);
   }
 
   SmartObject default_value;
-  for (Members::const_iterator it = mMembers.begin(); it != mMembers.end();
-       ++it) {
-    const std::string& key = it->first;
-    const SMember& member = it->second;
+
+  for (const auto& item : mMembers) {
+    const std::string& key = item.first;
+    const SMember& member = item.second;
     if (!Object.keyExists(key)) {
       if (member.mSchemaItem->setDefaultValue(default_value)) {
         Object[key] = default_value;
         member.mSchemaItem->applySchema(
-            Object[key], RemoveFakeParameters, MessageVersion);
+            Object[key], remove_unknown_parameters, MessageVersion);
       }
     } else {
       member.mSchemaItem->applySchema(
-          Object[key], RemoveFakeParameters, MessageVersion);
+          Object[key], remove_unknown_parameters, MessageVersion);
     }
   }
 }
 
-void CObjectSchemaItem::unapplySchema(SmartObject& Object) {
+void CObjectSchemaItem::unapplySchema(SmartObject& Object,
+                                      const bool remove_unknown_parameters) {
   if (SmartType_Map != Object.getType()) {
     return;
   }
@@ -188,18 +197,17 @@ void CObjectSchemaItem::unapplySchema(SmartObject& Object) {
     const std::string& key = it->first;
     // move next to avoid wrong iterator on erase
     ++it;
-    if (mMembers.end() == mMembers.find(key)) {
+    if (mMembers.end() == mMembers.find(key) && remove_unknown_parameters) {
       // remove fake params
       Object.erase(key);
     }
   }
-
   for (Members::const_iterator it = mMembers.begin(); it != mMembers.end();
        ++it) {
     const std::string& key = it->first;
     const SMember& member = it->second;
     if (Object.keyExists(key)) {
-      member.mSchemaItem->unapplySchema(Object[key]);
+      member.mSchemaItem->unapplySchema(Object[key], remove_unknown_parameters);
     }
   }
 }
@@ -224,51 +232,63 @@ size_t CObjectSchemaItem::GetMemberSize() {
   return mMembers.size();
 }
 
+boost::optional<SMember&> CObjectSchemaItem::GetMemberSchemaItem(
+    const std::string& member_key) {
+  auto it = mMembers.find(member_key);
+
+  if (it != mMembers.end()) {
+    return boost::optional<SMember&>(it->second);
+  }
+  return boost::optional<SMember&>();
+}
+
+void CObjectSchemaItem::AddMemberSchemaItem(const std::string& member_key,
+                                            SMember& member) {
+  mMembers[member_key] = member;
+}
+
 CObjectSchemaItem::CObjectSchemaItem(const Members& members)
     : mMembers(members) {}
 
 void CObjectSchemaItem::RemoveFakeParams(
     SmartObject& Object, const utils::SemanticVersion& MessageVersion) {
-  for (SmartMap::const_iterator it = Object.map_begin();
-       it != Object.map_end();) {
-    const std::string& key = it->first;
+  for (const auto& key : Object.enumerate()) {
     std::map<std::string, SMember>::const_iterator members_it =
         mMembers.find(key);
-    if (mMembers.end() == members_it
-        // FIXME(EZamakhov): Remove illegal usage of filed in AM
-        &&
-        key.compare(connection_key) != 0 && key.compare(binary_data) != 0 &&
-        key.compare(app_id) != 0) {
-      ++it;
-      Object.erase(key);
 
-    } else if (mMembers.end() != members_it &&
-               GetCorrectMember(members_it->second, MessageVersion)
-                   .mIsRemoved) {
-      ++it;
+    if (mMembers.end() != members_it) {
+      const SMember* member =
+          GetCorrectMember(members_it->second, MessageVersion);
+      if (!member || member->mIsRemoved) {
+        Object.erase(key);
+      }
+      continue;
+    } else if (key.compare(connection_key) != 0 &&
+               key.compare(binary_data) != 0 && key.compare(app_id) != 0) {
       Object.erase(key);
-    } else {
-      ++it;
     }
   }
 }
 
-const CObjectSchemaItem::SMember& CObjectSchemaItem::GetCorrectMember(
+const SMember* CObjectSchemaItem::GetCorrectMember(
     const SMember& member, const utils::SemanticVersion& messageVersion) {
   // Check if member is the correct version
   if (member.CheckHistoryFieldVersion(messageVersion)) {
-    return member;
+    return &member;
   }
   // Check for history tag items
   if (!member.mHistoryVector.empty()) {
     for (uint i = 0; i < member.mHistoryVector.size(); i++) {
       if (member.mHistoryVector[i].CheckHistoryFieldVersion(messageVersion)) {
-        return member.mHistoryVector[i];
+        return &member.mHistoryVector[i];
       }
     }
   }
+
   // Return member as default
-  return member;
+  return (member.mSince != boost::none && member.mSince.get() > kModuleVersion)
+             ? &member
+             : nullptr;
 }
 
 }  // namespace ns_smart_objects

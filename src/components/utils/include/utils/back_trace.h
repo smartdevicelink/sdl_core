@@ -33,8 +33,8 @@
 #define SRC_COMPONENTS_UTILS_INCLUDE_UTILS_BACK_TRACE_H_
 
 #include <ostream>
-#include <vector>
 #include <string>
+#include <vector>
 #include "utils/threads/thread.h"
 
 namespace utils {

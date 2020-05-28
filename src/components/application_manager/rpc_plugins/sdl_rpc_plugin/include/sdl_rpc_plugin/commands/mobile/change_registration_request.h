@@ -38,8 +38,8 @@
 
 #include "application_manager/commands/command_request_impl.h"
 #include "application_manager/commands/pending.h"
-#include "utils/macro.h"
 #include "utils/custom_string.h"
+#include "utils/macro.h"
 
 namespace sdl_rpc_plugin {
 namespace app_mngr = application_manager;
@@ -123,11 +123,12 @@ class ChangeRegistrationRequest
   /**
    * @brief Check parameters (name, vr) for
    * coincidence with already known parameters of registered applications
-   *
+   * @param device_id device identifier
    * @return SUCCESS if there is no coincidence of app.name/VR synonyms,
    * otherwise appropriate error code returns
    */
-  mobile_apis::Result::eType CheckCoincidence();
+  mobile_apis::Result::eType CheckCoincidence(
+      const connection_handler::DeviceHandle& device_id);
 
   /**
    * @brief Checks if requested name is allowed by policy
@@ -146,11 +147,11 @@ class ChangeRegistrationRequest
                                  std::string& ResponseInfo);
 
   /**
-    * @brief Predicate for using with CheckCoincidence method to compare with VR
-    * synonym SO
-    *
-    * @return TRUE if there is coincidence of VR, otherwise FALSE
-    */
+   * @brief Predicate for using with CheckCoincidence method to compare with VR
+   * synonym SO
+   *
+   * @return TRUE if there is coincidence of VR, otherwise FALSE
+   */
   struct CoincidencePredicateVR {
     CoincidencePredicateVR(const custom_str::CustomString& newItem)
         : newItem_(newItem) {}
@@ -186,6 +187,6 @@ class ChangeRegistrationRequest
 };
 
 }  // namespace commands
-}  // namespace application_manager
+}  // namespace sdl_rpc_plugin
 
 #endif  // SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_MOBILE_CHANGE_REGISTRATION_REQUEST_H_

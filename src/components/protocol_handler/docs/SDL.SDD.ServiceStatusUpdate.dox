@@ -1,0 +1,116 @@
+/**
+\page service_status_update Service Status Update Detailed Design
+## Table of contents
+- \subpage service_status_update_intoduction
+  + \ref service_status_update_rationale                "1.1 Rationale"
+  + \ref service_status_update_scope                    "1.2 Scope"
+- \subpage service_status_update_detail_design
+  + \ref service_status_update_design_solutions         "2.1 Design solutions"
+  + \ref service_status_update_class_structure          "2.2 Class Structure"
+  + \ref service_status_update_sequence_diagram         "2.3 Sequence diagram"
+- \subpage service_status_update_data_structures
+  + \ref service_status_update_data_structure        "3.1 Data structures"
+- \subpage service_status_update_references_and_history
+  + \ref service_status_update_history                  "4.1 References"
+*/
+//-----------------------------------------------------------
+/**
+\page service_status_update_intoduction 1 Introduction
+The document is intended to support software developers, 
+maintenance and integration engineers with sufficient,
+detailed information concerning the design, development and
+deployment concepts, to accomplish their respective tasks without reliance on the authors.
+
+\anchor service_status_update_rationale
+## 1.1 Rationale
+ServiceStatusUpdateHandler and ServiceStatusUpdateHandlerListener classes are 
+implemented to provide adequate levels of abstraction when passing data between ProtocolHandler, 
+SecurityManager, ApplicationManager and PolicyHandler
+
+\anchor service_status_update_scope
+## 1.2 Scope
+ServiceStatusUpdateHandler is a part of protocol_handler namespace
+
+*/
+//-----------------------------------------------------------
+/**
+\page service_status_update_detail_design 2 Component detail design
+\anchor service_status_update_design_solutions
+### 2.1 Design solutions
+The following design approaches and patterns was used for ServiceStatusUpdateHandler:
+- Introducing extra layer to process data relevant only for ProtocolHandler or ApplicationManager
+  + ServiceStatusUpdateHandler converts ServiceStatus value relevant only for ProtocolHandler to 
+    HMI API values relevant only for ApplicationManager
+- [Builder design pattern](https://sourcemaking.com/design_patterns/builder)
+ used for construction of OnServiceUpdate notification object
+- [Observer design pattern]
+ used for notifying ApplicationManager of service update occured
+
+
+#### Design description
+protocol_handler::ServiceStatusUpdateHandler is an entity to establish data transfer between 
+ProtocolHandler and ApplicationManager about occuring service updates
+protocol_handler::ServiceStatusUpdateHandlerListener is an interface used
+to provide adequate level of abstraction between broadcasting and listening entity
+MessageHelper::ServiceStatusUpdateNotificationBuilder is an entity used 
+for flexible construction of OnServiceUpdate notification object
+
+\anchor service_status_update_class_structure
+### 2.2 Class Structure
+The following UML class diagram shows the component structure.
+![Service Status Update class diagram](ServiceStatusUpdate_classes.png)
+For more information about class diagram follow:
+- http://www.uml-diagrams.org/class-diagrams-overview.htqml
+- https://sourcemaking.com/uml/modeling-it-systems/structural-view/class-diagram
+
+\anchor service_status_update_sequence_diagram
+### 2.3 Sequence diagram
+The following UML sequence diagram shows the component dynamic behavior.
+For more information about sequence diagram follow:
+- http://www.uml-diagrams.org/sequence-diagrams.html
+- https://sourcemaking.com/uml/modeling-it-systems/external-view/use-case-sequence-diagram
+
+Service Status Update basic flow:
+![Basic flow](ServiceStatusUpdate_sequence.png)
+
+Service Status Update invalid certificate:
+![Invalid Cert](invalid_cert.png)
+
+Service Status Update PTU failed:
+![PTU Failed](ptu_failed.png)
+
+Service Status Update PTU failed (EXTERNAL_PROPRIETARY):
+![PTU Failed EXTERNAL_PROPRIETARY](PTU_for_EXTERNAL_PROPRIETARY.png)
+
+Service Status Update GetSystemTime failed:
+![GetSystemTime failed](invalid_time.png)
+*/
+
+//-----------------------------------------------------------
+/**
+\page service_status_update_data_structures 3 Component data and resources
+\anchor service_status_update_data_structure
+### 3.1 Element Data Structure
+The following data types are used by the ServiceStatusUpdateHandler:
+  - protocol_handler::ServiceStatus
+
+//-----------------------------------------------------------
+/**
+\page service_status_update_references_and_history 4 References and history
+\anchor service_status_update_history
+### 4.1 Document history
+Document change history
+
+| Version     | Date       | Author/Editor                          | Change description  |
+|-------------|------------|----------------------------------------|---------------------|
+| 0.1         | 02/21/2019 | [MKed](https://github.com/mked-luxoft) | Initial version from the previous [SDL SDD](https://adc.luxoft.com/confluence/pages/viewpage.action?pageId=279677125) |
+
+Document approve history
+
+| Version     | Date       | Author/Editor               | Change description  |
+|-------------|------------|-----------------------------|---------------------|
+| | | | |
+
+For more precise document change history follow github history -
+- https://github.com/smartdevicelink/sdl_core/commits/develop/src/components/protocol_handler/docs/SDL.SDD.ServiceStatusUpdate.dox
+*/

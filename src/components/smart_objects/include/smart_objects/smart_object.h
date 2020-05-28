@@ -33,15 +33,15 @@
 #ifndef SRC_COMPONENTS_SMART_OBJECTS_INCLUDE_SMART_OBJECTS_SMART_OBJECT_H_
 #define SRC_COMPONENTS_SMART_OBJECTS_INCLUDE_SMART_OBJECTS_SMART_OBJECT_H_
 
-#include <set>
-#include <string>
-#include <sstream>
-#include <vector>
 #include <map>
+#include <set>
+#include <sstream>
+#include <string>
+#include <vector>
 
+#include "rpc_base/validation_report.h"
 #include "smart_objects/smart_schema.h"
 #include "utils/custom_string.h"
-#include "rpc_base/validation_report.h"
 
 namespace ns_smart_device_link {
 namespace ns_smart_objects {
@@ -299,8 +299,8 @@ class SmartObject FINAL {
   bool operator==(const int64_t Value) const;
 
   /**
-    * @name Support of type: uint64_t
-    * @{
+   * @name Support of type: uint64_t
+   * @{
    **/
 
   /**
@@ -676,11 +676,16 @@ class SmartObject FINAL {
    *
    * @param report__ object for reporting errors during validation
    * @param messageVersion of the mobile app to check against RPC Spec Schema
+   * @param allow_unknown_enums
+   *   false - unknown enum values (left as string values after applySchema)
+   *   will be considered invalid.
+   *   true - such values will be considered valid.
    * @return Result of validation.
    */
   errors::eType validate(
       rpc::ValidationReport* report__,
-      const utils::SemanticVersion& MessageVersion = utils::SemanticVersion());
+      const utils::SemanticVersion& MessageVersion = utils::SemanticVersion(),
+      const bool allow_unknown_enums = false);
 
   /**
    * @brief Sets new schema

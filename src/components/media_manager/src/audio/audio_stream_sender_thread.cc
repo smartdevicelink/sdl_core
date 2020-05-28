@@ -35,20 +35,20 @@
 #include <unistd.h>
 #endif
 
-#include <string>
 #include <string.h>
-#include "application_manager/application_manager.h"
+#include <string>
 #include "application_manager/application_impl.h"
-#include "application_manager/rpc_service.h"
+#include "application_manager/application_manager.h"
 #include "application_manager/commands/command.h"
-#include "smart_objects/smart_object.h"
+#include "application_manager/message.h"
+#include "application_manager/rpc_service.h"
+#include "application_manager/smart_object_keys.h"
 #include "interfaces/MOBILE_API.h"
+#include "media_manager/audio/audio_stream_sender_thread.h"
+#include "media_manager/media_manager_settings.h"
+#include "smart_objects/smart_object.h"
 #include "utils/file_system.h"
 #include "utils/logger.h"
-#include "media_manager/media_manager_settings.h"
-#include "media_manager/audio/audio_stream_sender_thread.h"
-#include "application_manager/smart_object_keys.h"
-#include "application_manager/message.h"
 
 namespace media_manager {
 using sync_primitives::AutoLock;

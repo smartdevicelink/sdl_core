@@ -38,9 +38,9 @@
 #include <sys/procfs.h>
 #endif
 
-#include "utils/macro.h"
-#include <string>
 #include <iostream>
+#include <string>
+#include "utils/macro.h"
 
 #include "utils/logger.h"
 
@@ -171,6 +171,6 @@ class Resources {
    */
   static const char* proc;
 };
-}
+}  // namespace utils
 
 #endif  // SRC_COMPONENTS_UTILS_INCLUDE_UTILS_RESOURCE_USAGE_H_

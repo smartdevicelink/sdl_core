@@ -37,8 +37,8 @@
 #include <sched.h>
 #include <cstring>
 
-#include "transport_manager/usb/qnx/usb_connection.h"
 #include "transport_manager/transport_adapter/transport_adapter_impl.h"
+#include "transport_manager/usb/qnx/usb_connection.h"
 
 #include "utils/logger.h"
 
@@ -144,7 +144,7 @@ void UsbConnection::OnInTransfer(usbd_urb* urb) {
         device_uid_, app_handle_, DataReceiveError());
   } else {
     ::protocol_handler::RawMessagePtr msg(
-        new protocol_handler::RawMessage(0, 0, in_buffer_, len));
+        new protocol_handler::RawMessage(0, 0, in_buffer_, len, false));
     controller_->DataReceiveDone(device_uid_, app_handle_, msg);
   }
 
