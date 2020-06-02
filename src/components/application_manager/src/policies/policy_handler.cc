@@ -790,7 +790,7 @@ void PolicyHandler::OnSystemRequestReceived() const {
 }
 
 void PolicyHandler::TriggerPTUOnStartupIfRequired() {
-#ifndef EXTERNAL_PROPRIETARY_MODE
+#ifdef PROPRIETARY_MODE
   policy_manager_->TriggerPTUOnStartupIfRequired();
 #endif
 }
