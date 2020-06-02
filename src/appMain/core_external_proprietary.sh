@@ -47,7 +47,7 @@ function core_stop() {
   if [ -f "$CORE_PID_FILE" ]; then
     rm $CORE_PID_FILE
   fi 
-  return $RET
+  return $RESULT
 }
 
 function pm_install_dependencies() {

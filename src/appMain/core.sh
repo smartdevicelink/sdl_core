@@ -46,7 +46,7 @@ function core_stop() {
   if [ -f "$CORE_PID_FILE" ]; then
     rm $CORE_PID_FILE
   fi 
-  return $RET
+  return $RESULT
 }
 
 if [ x$1 == xstop ]; then
