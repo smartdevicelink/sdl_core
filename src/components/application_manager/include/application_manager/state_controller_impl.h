@@ -102,6 +102,12 @@ class StateControllerImpl : public event_engine::EventObserver,
       ApplicationSharedPtr app,
       const mobile_apis::HMILevel::eType default_level) OVERRIDE;
 
+  // EventObserver interface
+  void HandleOnEvent(const event_engine::Event& event) OVERRIDE;
+  void HandleOnEvent(const event_engine::MobileEvent& event) OVERRIDE;
+
+  void  OnTimeOutActivateAppRequest(const uint32_t hmi_app_id) OVERRIDE;
+
   void OnAppWindowAdded(
       ApplicationSharedPtr app,
       const WindowID window_id,
@@ -118,10 +124,6 @@ class StateControllerImpl : public event_engine::EventObserver,
                       HmiStatePtr new_state) OVERRIDE;
 
   bool IsStateActive(HmiState::StateID state_id) const OVERRIDE;
-
-  // EventObserver interface
-  void on_event(const event_engine::Event& event) OVERRIDE;
-  void on_event(const event_engine::MobileEvent& event) OVERRIDE;
 
   void ActivateDefaultWindow(ApplicationSharedPtr app) OVERRIDE;
   void ExitDefaultWindow(ApplicationSharedPtr app) OVERRIDE;

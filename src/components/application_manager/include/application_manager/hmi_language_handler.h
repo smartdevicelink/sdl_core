@@ -78,7 +78,7 @@ class HMILanguageHandler : public event_engine::EventObserver {
    */
   hmi_apis::Common_Language::eType get_language_for(Interface interface) const;
 
-  void on_event(const event_engine::Event& event) OVERRIDE;
+  void HandleOnEvent(const event_engine::Event& event) OVERRIDE;
 
   /**
    * @brief Trigger waiting for response

@@ -36,7 +36,7 @@
 
 #include <string>
 
-#include "application_manager/commands/command_request_impl.h"
+#include "application_manager/commands/request_from_mobile_impl.h"
 #include "utils/macro.h"
 
 namespace sdl_rpc_plugin {
@@ -47,7 +47,7 @@ namespace commands {
 /**
  * @brief DeleteCommandRequest command class
  **/
-class DeleteCommandRequest : public app_mngr::commands::CommandRequestImpl {
+class DeleteCommandRequest : public app_mngr::commands::RequestFromMobileImpl {
  public:
   /**
    * @brief DeleteCommandRequest class constructor

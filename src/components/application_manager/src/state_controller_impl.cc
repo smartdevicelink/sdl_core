@@ -706,9 +706,10 @@ void StateControllerImpl::UpdateAppWindowsStreamingState(
   }
 }
 
-void StateControllerImpl::on_event(const event_engine::MobileEvent& event) {}
 
-void StateControllerImpl::on_event(const event_engine::Event& event) {
+void StateControllerImpl::HandleOnEvent(const event_engine::MobileEvent& event) {}
+
+void StateControllerImpl::HandleOnEvent(const event_engine::Event& event) {
   using event_engine::Event;
   using smart_objects::SmartObject;
   using namespace hmi_apis;
@@ -1191,6 +1192,20 @@ bool StateControllerImpl::IsStateActive(HmiState::StateID state_id) const {
   return false;
 }
 
+void StateControllerImpl::OnTimeOutActivateAppRequest(const uint32_t hmi_app_id) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  LOG4CXX_INFO(logger_,
+      "TimeOut was received for"
+      "application with hmi_app_id = "
+      << hmi_app_id);
+//  lock_.Acquire();
+//  waiting_for_activate_.erase(hmi_app_id);
+//  lock_.Release();
+//  if (!waiting_for_applying_state_.empty() && waiting_for_activate_.empty()) {
+//    ProcessSavingHMIState();
+//  }
+}
+
 HmiStatePtr StateControllerImpl::CreateHmiState(
     std::shared_ptr<Application> app, HmiState::StateID state_id) const {
   using namespace utils;
@@ -1263,6 +1278,37 @@ mobile_apis::AudioStreamingState::eType StateControllerImpl::CalcAudioState(
                     << state);
   return state;
 }
+
+//void StateControllerImpl::ProcessSavingHMIState() {
+//  LOG4CXX_AUTO_TRACE(logger_);
+//  bool send_activate_app;
+//  HmiStatePtr state;
+//  ApplicationSharedPtr app;
+
+//  while (waiting_for_activate_.empty()) {
+//    {
+//      sync_primitives::AutoLock auto_lock(lock_);
+//      std::vector<DataForActivation>::iterator it =
+//          waiting_for_applying_state_.begin();
+//      if (waiting_for_applying_state_.end() == it) {
+//        LOG4CXX_WARN(logger_, "Doesn't contain any hmi state");
+//        return;
+//      }
+//      app = app_mngr_.application((it->app_id_));
+//      if (!app) {
+//        LOG4CXX_WARN(logger_, "Application with appID = " << it->app_id_
+//                                                 << " does not exist");
+//        waiting_for_applying_state_.erase(it);
+//        continue;
+//      }
+//      LOG4CXX_INFO(logger_, "Application with appID = " << it->app_id_ << "exist");
+//      send_activate_app = it->send_activate_app_;
+//      state = it->state_;
+//      waiting_for_applying_state_.erase(it);
+//    }
+//    SetRegularState(app, state, send_activate_app);
+//  }
+//}
 
 mobile_apis::VideoStreamingState::eType StateControllerImpl::CalcVideoState(
     ApplicationSharedPtr app,

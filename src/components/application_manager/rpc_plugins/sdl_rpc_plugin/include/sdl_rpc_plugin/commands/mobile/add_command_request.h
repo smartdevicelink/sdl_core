@@ -37,7 +37,7 @@
 #include <string>
 
 #include "application_manager/application.h"
-#include "application_manager/commands/command_request_impl.h"
+#include "application_manager/commands/request_from_mobile_impl.h"
 #include "utils/macro.h"
 
 namespace sdl_rpc_plugin {
@@ -48,7 +48,7 @@ namespace commands {
 /**
  * @brief AddCommandRequest command class
  **/
-class AddCommandRequest : public app_mngr::commands::CommandRequestImpl {
+class AddCommandRequest : public app_mngr::commands::RequestFromMobileImpl {
  public:
   /**
    * @brief AddCommandRequest class constructor
@@ -78,11 +78,7 @@ class AddCommandRequest : public app_mngr::commands::CommandRequestImpl {
    */
   void on_event(const app_mngr::event_engine::Event& event) FINAL;
 
-  /**
-   * @brief Function is called by RequestController when request execution time
-   * has exceed it's limit
-   */
-  void onTimeOut() FINAL;
+  void OnTimeOut() FINAL;
 
   /**
    * @brief Init sets hash update mode for request

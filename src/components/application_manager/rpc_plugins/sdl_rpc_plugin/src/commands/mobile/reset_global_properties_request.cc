@@ -50,11 +50,11 @@ ResetGlobalPropertiesRequest::ResetGlobalPropertiesRequest(
     app_mngr::rpc_service::RPCService& rpc_service,
     app_mngr::HMICapabilities& hmi_capabilities,
     policy::PolicyHandlerInterface& policy_handler)
-    : CommandRequestImpl(message,
-                         application_manager,
-                         rpc_service,
-                         hmi_capabilities,
-                         policy_handler)
+    : RequestFromMobileImpl(message,
+                        application_manager,
+                        rpc_service,
+                        hmi_capabilities,
+                        policy_handler)
     , ui_result_(hmi_apis::Common_Result::INVALID_ENUM)
     , tts_result_(hmi_apis::Common_Result::INVALID_ENUM) {}
 
@@ -305,6 +305,11 @@ void ResetGlobalPropertiesRequest::on_event(const event_engine::Event& event) {
                static_cast<mobile_apis::Result::eType>(result_code),
                response_info.empty() ? NULL : response_info.c_str(),
                &(message[strings::msg_params]));
+}
+
+void ResetGlobalPropertiesRequest::OnTimeOut() {
+  LOG4CXX_AUTO_TRACE(logger_);
+  RequestFromMobileImpl::OnTimeOut();
 }
 
 bool ResetGlobalPropertiesRequest::Init() {

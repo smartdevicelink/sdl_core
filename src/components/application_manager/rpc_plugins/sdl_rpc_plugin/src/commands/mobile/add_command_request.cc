@@ -53,11 +53,11 @@ AddCommandRequest::AddCommandRequest(
     rpc_service::RPCService& rpc_service,
     HMICapabilities& hmi_capabilities,
     policy::PolicyHandlerInterface& policy_handler)
-    : CommandRequestImpl(message,
-                         application_manager,
-                         rpc_service,
-                         hmi_capabilities,
-                         policy_handler)
+    : RequestFromMobileImpl(message,
+                        application_manager,
+                        rpc_service,
+                        hmi_capabilities,
+                        policy_handler)
     , send_ui_(false)
     , send_vr_(false)
     , is_ui_received_(false)
@@ -67,10 +67,10 @@ AddCommandRequest::AddCommandRequest(
 
 AddCommandRequest::~AddCommandRequest() {}
 
-void AddCommandRequest::onTimeOut() {
+void AddCommandRequest::OnTimeOut() {
   LOG4CXX_AUTO_TRACE(logger_);
   RemoveCommand();
-  CommandRequestImpl::onTimeOut();
+  RequestFromMobileImpl::OnTimeOut();
 }
 
 bool AddCommandRequest::Init() {
@@ -522,6 +522,21 @@ void AddCommandRequest::on_event(const event_engine::Event& event) {
 bool AddCommandRequest::IsPendingResponseExist() {
   return send_ui_ != is_ui_received_ || send_vr_ != is_vr_received_;
 }
+
+//uint32_t AddCommandRequest::CalcAppInternalConsecutiveNumber(
+//    ApplicationConstSharedPtr app) {
+//  LOG4CXX_AUTO_TRACE(logger_);
+//  const DataAccessor<CommandsMap> accessor = app->commands_map();
+//  const CommandsMap& commands = accessor.GetData();
+
+//  uint32_t last_command_number = 0;
+//  if (!commands.empty()) {
+//    CommandsMap::const_reverse_iterator commands_it = commands.rbegin();
+//    last_command_number = commands_it->first;
+//  }
+
+//  return last_command_number + 1;
+//}
 
 bool AddCommandRequest::IsWhiteSpaceExist() {
   LOG4CXX_AUTO_TRACE(logger_);

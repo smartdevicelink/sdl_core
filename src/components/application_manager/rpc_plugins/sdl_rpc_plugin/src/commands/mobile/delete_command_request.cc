@@ -50,11 +50,11 @@ DeleteCommandRequest::DeleteCommandRequest(
     rpc_service::RPCService& rpc_service,
     HMICapabilities& hmi_capabilities,
     policy::PolicyHandlerInterface& policy_handler)
-    : CommandRequestImpl(message,
-                         application_manager,
-                         rpc_service,
-                         hmi_capabilities,
-                         policy_handler)
+    : RequestFromMobileImpl(message,
+                        application_manager,
+                        rpc_service,
+                        hmi_capabilities,
+                        policy_handler)
     , is_ui_send_(false)
     , is_vr_send_(false)
     , is_ui_received_(false)

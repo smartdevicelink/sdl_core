@@ -122,7 +122,7 @@ void SystemTimeHandlerImpl::SendTimeRequest() {
   awaiting_get_system_time_ = true;
 }
 
-void SystemTimeHandlerImpl::on_event(
+void SystemTimeHandlerImpl::HandleOnEvent(
     const application_manager::event_engine::Event& event) {
   LOG4CXX_AUTO_TRACE(logger_);
   using namespace application_manager;

@@ -73,7 +73,7 @@ class ResumeCtrlImpl : public ResumeCtrl,
    * @brief Event, that raised if application get resumption response from HMI
    * @param event : event object, that contains smart_object with HMI message
    */
-  void on_event(const app_mngr::event_engine::Event& event) OVERRIDE;
+  void HandleOnEvent(const app_mngr::event_engine::Event& event) OVERRIDE;
 
   /**
    * @brief Save all applications info to the file system

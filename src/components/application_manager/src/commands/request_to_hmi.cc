@@ -65,7 +65,7 @@ RequestToHMI::RequestToHMI(const MessageSharedPtr& message,
                            rpc_service::RPCService& rpc_service,
                            HMICapabilities& hmi_capabilities,
                            policy::PolicyHandlerInterface& policy_handler)
-    : CommandImpl(message,
+    : CommandRequestImpl(message,
                   application_manager,
                   rpc_service,
                   hmi_capabilities,

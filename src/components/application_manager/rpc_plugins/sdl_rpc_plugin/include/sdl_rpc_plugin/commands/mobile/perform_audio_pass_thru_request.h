@@ -34,7 +34,8 @@
 #ifndef SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_MOBILE_PERFORM_AUDIO_PASS_THRU_REQUEST_H_
 #define SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_MOBILE_PERFORM_AUDIO_PASS_THRU_REQUEST_H_
 
-#include "application_manager/commands/command_request_impl.h"
+#include "application_manager/commands/request_from_mobile_impl.h"
+#include "utils/macro.h"
 #include "interfaces/MOBILE_API.h"
 #include "utils/macro.h"
 
@@ -47,7 +48,7 @@ namespace commands {
  * @brief PerformAudioPassThruRequest command class
  **/
 class PerformAudioPassThruRequest
-    : public app_mngr::commands::CommandRequestImpl {
+    : public app_mngr::commands::RequestFromMobileImpl {
  public:
   /**
    * @brief PerformAudioPassThruRequest class constructor
@@ -67,13 +68,6 @@ class PerformAudioPassThruRequest
   virtual ~PerformAudioPassThruRequest();
 
   /**
-   * @brief Function is called by RequestController when request execution time
-   * has exceed it's limit
-   *
-   */
-  virtual void onTimeOut();
-
-  /**
    * @brief Init required by command resources
    **/
   bool Init();
@@ -83,12 +77,14 @@ class PerformAudioPassThruRequest
    **/
   virtual void Run();
 
+  void on_event(const app_mngr::event_engine::Event& event) FINAL;
+
   /**
-   * @brief Interface method that is called whenever new event received
+   * @brief Function is called by RequestController when request execution time
+   * has exceed it's limit
    *
-   * @param event The received event
    */
-  void on_event(const app_mngr::event_engine::Event& event);
+  void OnTimeOut() FINAL;
 
  private:
   /**

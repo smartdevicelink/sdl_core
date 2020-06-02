@@ -49,7 +49,7 @@ namespace commands {
 RCCommandRequest::RCCommandRequest(
     const app_mngr::commands::MessageSharedPtr& message,
     const RCCommandParams& params)
-    : application_manager::commands::CommandRequestImpl(
+    : application_manager::commands::RequestFromMobileImpl(
           message,
           params.application_manager_,
           params.rpc_service_,
@@ -74,7 +74,7 @@ bool RCCommandRequest::IsInterfaceAvailable(
   return app_mngr::HmiInterfaces::STATE_NOT_AVAILABLE != state;
 }
 
-void RCCommandRequest::onTimeOut() {
+void RCCommandRequest::OnTimeOut() {
   LOG4CXX_AUTO_TRACE(logger_);
   const std::string module_type = ModuleType();
   SetResourceState(module_type, ResourceState::FREE);
@@ -85,7 +85,7 @@ void RCCommandRequest::onTimeOut() {
 bool RCCommandRequest::CheckDriverConsent() {
   LOG4CXX_AUTO_TRACE(logger_);
   app_mngr::ApplicationSharedPtr app =
-      application_manager_.application(CommandRequestImpl::connection_key());
+      application_manager_.application(connection_key());
 
   const std::string module_type = ModuleType();
   rc_rpc_plugin::TypeAccess access = CheckModule(module_type, app);
@@ -131,7 +131,7 @@ void RCCommandRequest::SendDisallowed(rc_rpc_plugin::TypeAccess access) {
 void RCCommandRequest::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
   app_mngr::ApplicationSharedPtr app =
-      application_manager_.application(CommandRequestImpl::connection_key());
+      application_manager_.application(connection_key());
 
   if (!IsInterfaceAvailable(app_mngr::HmiInterfaces::HMI_INTERFACE_RC)) {
     LOG4CXX_WARN(logger_, "HMI interface RC is not available");
@@ -224,10 +224,12 @@ void RCCommandRequest::on_event(const app_mngr::event_engine::Event& event) {
 void RCCommandRequest::ProcessAccessResponse(
     const app_mngr::event_engine::Event& event) {
   LOG4CXX_AUTO_TRACE(logger_);
-  app_mngr::ApplicationSharedPtr app =
-      application_manager_.application(CommandRequestImpl::connection_key());
+
+  auto app =
+      application_manager_.application(connection_key());
   const std::string module_type = ModuleType();
   const std::string module_id = ModuleId();
+
   if (!app) {
     LOG4CXX_ERROR(logger_, "NULL pointer.");
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED, "");
@@ -323,7 +325,7 @@ void RCCommandRequest::SendGetUserConsent(
     const smart_objects::SmartObject& module_ids) {
   LOG4CXX_AUTO_TRACE(logger_);
   app_mngr::ApplicationSharedPtr app =
-      application_manager_.application(CommandRequestImpl::connection_key());
+      application_manager_.application(connection_key());
   DCHECK(app);
   smart_objects::SmartObject msg_params =
       smart_objects::SmartObject(smart_objects::SmartType_Map);

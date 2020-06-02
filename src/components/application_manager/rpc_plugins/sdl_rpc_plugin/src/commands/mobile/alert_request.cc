@@ -53,11 +53,11 @@ AlertRequest::AlertRequest(
     rpc_service::RPCService& rpc_service,
     HMICapabilities& hmi_capabilities,
     policy::PolicyHandlerInterface& policy_handler)
-    : CommandRequestImpl(message,
-                         application_manager,
-                         rpc_service,
-                         hmi_capabilities,
-                         policy_handler)
+    : RequestFromMobileImpl(message,
+                        application_manager,
+                        rpc_service,
+                        hmi_capabilities,
+                        policy_handler)
     , awaiting_ui_alert_response_(false)
     , awaiting_tts_speak_response_(false)
     , awaiting_tts_stop_speaking_response_(false)
@@ -120,6 +120,18 @@ void AlertRequest::Run() {
   if (awaiting_tts_speak_response_) {
     SendSpeakRequest(app_id, tts_chunks_exists, length_tts_chunks);
   }
+}
+
+void AlertRequest::OnTimeOut() {
+  LOG4CXX_AUTO_TRACE(logger_);
+  if (false ==
+      (*message_)[strings::msg_params].keyExists(strings::soft_buttons)) {
+    RequestFromMobileImpl::OnTimeOut();
+    return;
+  }
+  LOG4CXX_INFO(logger_,
+      "Default timeout ignored. "
+      "AlertRequest with soft buttons wait timeout on HMI side");
 }
 
 void AlertRequest::on_event(const event_engine::Event& event) {

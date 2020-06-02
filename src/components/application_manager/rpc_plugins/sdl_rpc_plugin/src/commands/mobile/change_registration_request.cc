@@ -65,11 +65,11 @@ ChangeRegistrationRequest::ChangeRegistrationRequest(
     rpc_service::RPCService& rpc_service,
     HMICapabilities& hmi_capabilities,
     policy::PolicyHandlerInterface& policy_handler)
-    : CommandRequestImpl(message,
-                         application_manager,
-                         rpc_service,
-                         hmi_capabilities,
-                         policy_handler)
+    : RequestFromMobileImpl(message,
+                        application_manager,
+                        rpc_service,
+                        hmi_capabilities,
+                        policy_handler)
     , ui_result_(hmi_apis::Common_Result::INVALID_ENUM)
     , vr_result_(hmi_apis::Common_Result::INVALID_ENUM)
     , tts_result_(hmi_apis::Common_Result::INVALID_ENUM) {}

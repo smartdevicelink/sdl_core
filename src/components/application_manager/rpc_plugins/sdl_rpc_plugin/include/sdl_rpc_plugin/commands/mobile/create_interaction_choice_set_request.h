@@ -37,7 +37,7 @@
 #include <string>
 
 #include "application_manager/application.h"
-#include "application_manager/commands/command_request_impl.h"
+#include "application_manager/commands/request_from_mobile_impl.h"
 #include "application_manager/event_engine/event_observer.h"
 #include "interfaces/MOBILE_API.h"
 #include "utils/macro.h"
@@ -53,7 +53,7 @@ namespace commands {
  * @brief CreateInteractionChoiceSetRequest command class
  **/
 class CreateInteractionChoiceSetRequest
-    : public app_mngr::commands::CommandRequestImpl {
+    : public app_mngr::commands::RequestFromMobileImpl {
  public:
   /**
    * @brief CreateInteractionChoiceSetRequest class constructor
@@ -84,11 +84,7 @@ class CreateInteractionChoiceSetRequest
    */
   void on_event(const app_mngr::event_engine::Event& event) FINAL;
 
-  /**
-   * @brief Function is called by RequestController when request execution time
-   * has exceed it's limit
-   */
-  void onTimeOut() FINAL;
+  void OnTimeOut() FINAL;
 
   /**
    * @brief Init sets hash update mode for request

@@ -36,6 +36,7 @@
 
 #include <string>
 
+#include "application_manager/commands/request_from_mobile_impl.h"
 #include "application_manager/application.h"
 #include "application_manager/commands/command_request_impl.h"
 #include "utils/macro.h"
@@ -50,8 +51,7 @@ namespace commands {
 /**
  * @brief PerformInteractionRequest command class
  **/
-class PerformInteractionRequest
-    : public app_mngr::commands::CommandRequestImpl {
+class PerformInteractionRequest : public app_mngr::commands::RequestFromMobileImpl {
  public:
   /**
    * @brief PerformInteractionRequest class constructor
@@ -84,14 +84,9 @@ class PerformInteractionRequest
    *
    * @param event The received event
    */
-  virtual void on_event(const app_mngr::event_engine::Event& event);
+  void on_event(const app_mngr::event_engine::Event& event) OVERRIDE;
 
-  /*
-   * @brief Function is called by RequestController when request execution time
-   * has exceed it's limit
-   *
-   */
-  virtual void onTimeOut();
+  void OnTimeOut() FINAL;
 
  protected:
   /**

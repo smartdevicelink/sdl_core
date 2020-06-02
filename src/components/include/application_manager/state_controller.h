@@ -186,6 +186,12 @@ class StateController {
   virtual void OnVideoStreamingStarted(ApplicationConstSharedPtr app) = 0;
 
   /**
+   * @brief Notifies that activate application request finished by timeout.
+   * @param hmi_app_id contains HMI id of application.
+   */
+  virtual void OnTimeOutActivateAppRequest(const uint32_t hmi_app_id) = 0;
+
+  /**
    * @brief OnVideoStreamingStopped process video streaming stopped
    * @param app projection or navigation application stopping streaming
    */

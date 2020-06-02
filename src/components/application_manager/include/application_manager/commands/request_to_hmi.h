@@ -33,6 +33,7 @@
 #ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_REQUEST_TO_HMI_H_
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_REQUEST_TO_HMI_H_
 
+#include "application_manager/commands/command_request_impl.h"
 #include "application_manager/application_manager.h"
 #include "application_manager/commands/command_impl.h"
 
@@ -61,7 +62,7 @@ bool ChangeInterfaceState(ApplicationManager& application_manager,
                           const smart_objects::SmartObject& response_from_hmi,
                           HmiInterfaces::InterfaceID interface);
 
-class RequestToHMI : public CommandImpl {
+class RequestToHMI : public CommandRequestImpl {
  public:
   RequestToHMI(const MessageSharedPtr& message,
                ApplicationManager& application_manager,

@@ -49,8 +49,7 @@ NaviSetVideoConfigRequest::NaviSetVideoConfigRequest(
                    application_manager,
                    rpc_service,
                    hmi_capabilities,
-                   policy_handle)
-    , EventObserver(application_manager.event_dispatcher()) {}
+                   policy_handle) {}
 
 NaviSetVideoConfigRequest::~NaviSetVideoConfigRequest() {}
 
@@ -133,7 +132,7 @@ void NaviSetVideoConfigRequest::on_event(const event_engine::Event& event) {
   }
 }
 
-void NaviSetVideoConfigRequest::onTimeOut() {
+void NaviSetVideoConfigRequest::OnTimeOut() {
   LOG4CXX_WARN(logger_, "Timed out while waiting for SetVideoConfig response");
 
   ApplicationSharedPtr app =

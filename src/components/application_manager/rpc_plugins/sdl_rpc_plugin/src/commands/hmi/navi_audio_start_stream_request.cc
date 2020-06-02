@@ -51,7 +51,6 @@ AudioStartStreamRequest::AudioStartStreamRequest(
                    rpc_service,
                    hmi_capabilities,
                    policy_handle)
-    , EventObserver(application_manager.event_dispatcher())
     , retry_number_(0) {
   LOG4CXX_AUTO_TRACE(logger_);
   std::pair<uint32_t, int32_t> stream_retry =
@@ -138,7 +137,7 @@ void AudioStartStreamRequest::on_event(const event_engine::Event& event) {
   }
 }
 
-void AudioStartStreamRequest::onTimeOut() {
+void AudioStartStreamRequest::OnTimeOut() {
   LOG4CXX_AUTO_TRACE(logger_);
   RetryStartSession();
 }

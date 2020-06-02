@@ -36,7 +36,7 @@
 
 #include <strings.h>
 
-#include "application_manager/commands/command_request_impl.h"
+#include "application_manager/commands/request_from_mobile_impl.h"
 #include "application_manager/commands/pending.h"
 #include "utils/custom_string.h"
 #include "utils/macro.h"
@@ -51,8 +51,7 @@ namespace custom_str = utils::custom_string;
 /**
  * @brief ChangeRegistrationRequest command class
  **/
-class ChangeRegistrationRequest
-    : public app_mngr::commands::CommandRequestImpl {
+class ChangeRegistrationRequest : public app_mngr::commands::RequestFromMobileImpl {
  public:
   /**
    * @brief ChangeRegistrationRequest class constructor
@@ -80,7 +79,7 @@ class ChangeRegistrationRequest
    *
    * @param event The received event
    */
-  void on_event(const app_mngr::event_engine::Event& event);
+  void on_event(const app_mngr::event_engine::Event& event) OVERRIDE;
 
  private:
   /*

@@ -45,7 +45,7 @@ GetWayPointsRequest::GetWayPointsRequest(
     rpc_service::RPCService& rpc_service,
     HMICapabilities& hmi_capabilities,
     policy::PolicyHandlerInterface& policy_handler)
-    : CommandRequestImpl(message,
+    : RequestFromMobileImpl(message,
                          application_manager,
                          rpc_service,
                          hmi_capabilities,
@@ -76,6 +76,11 @@ void GetWayPointsRequest::Run() {
   SendHMIRequest(hmi_apis::FunctionID::Navigation_GetWayPoints,
                  msg_params.empty() ? NULL : &msg_params,
                  true);
+}
+
+void GetWayPointsRequest::OnTimeOut() {
+  LOG4CXX_AUTO_TRACE(logger_);
+  RequestFromMobileImpl::OnTimeOut();
 }
 
 void GetWayPointsRequest::on_event(const event_engine::Event& event) {

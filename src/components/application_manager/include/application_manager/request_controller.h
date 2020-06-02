@@ -50,6 +50,7 @@
 #include "application_manager/request_controller_settings.h"
 #include "application_manager/request_info.h"
 #include "application_manager/request_tracker.h"
+#include "application_manager/event_engine/event_dispatcher_impl.h"
 
 namespace application_manager {
 
@@ -62,6 +63,7 @@ namespace request_controller {
 class RequestController {
  public:
   /**
+<<<<<<< HEAD:src/components/application_manager/include/application_manager/request_controller.h
    * @brief Result code for addRequest
    */
   enum TResult {
@@ -84,10 +86,11 @@ class RequestController {
   // Methods
 
   /**
-   * @brief Class constructor
-   *
-   */
-  RequestController(const RequestControlerSettings& settings);
+  * @brief Class constructor
+  *
+  */
+  RequestController(const RequestControlerSettings& settings,
+                    event_engine::EventDispatcher& event_observer);
 
   /**
    * @brief Class destructor
@@ -310,6 +313,7 @@ class RequestController {
 
   bool is_low_voltage_;
   const RequestControlerSettings& settings_;
+  event_engine::EventDispatcher& event_dispatcher_;
   DISALLOW_COPY_AND_ASSIGN(RequestController);
 };
 

@@ -50,7 +50,7 @@ namespace commands {
 UnsubscribeVehicleDataRequest::UnsubscribeVehicleDataRequest(
     const application_manager::commands::MessageSharedPtr& message,
     const VehicleInfoCommandParams& params)
-    : CommandRequestImpl(message,
+    : RequestFromMobileImpl(message,
                          params.application_manager_,
                          params.rpc_service_,
                          params.hmi_capabilities_,
@@ -189,7 +189,7 @@ void UnsubscribeVehicleDataRequest::on_event(const event_engine::Event& event) {
   EndAwaitForInterface(HmiInterfaces::HMI_INTERFACE_VehicleInfo);
 
   ApplicationSharedPtr app =
-      application_manager_.application(CommandRequestImpl::connection_key());
+      application_manager_.application(RequestFromMobileImpl::connection_key());
 
   if (!app) {
     LOG4CXX_ERROR(logger_, "NULL pointer.");

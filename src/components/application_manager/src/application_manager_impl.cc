@@ -174,7 +174,7 @@ ApplicationManagerImpl::ApplicationManagerImpl(
     , connection_handler_(NULL)
     , policy_handler_(new policy::PolicyHandler(policy_settings, *this))
     , protocol_handler_(NULL)
-    , request_ctrl_(am_settings)
+    , request_ctrl_(am_settings, event_dispatcher_)
     , hmi_so_factory_(NULL)
     , mobile_so_factory_(NULL)
     , hmi_capabilities_(new HMICapabilitiesImpl(*this))

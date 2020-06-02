@@ -46,8 +46,7 @@ namespace commands {
 /**
  * @brief UpdateDeviceListRequest command class
  **/
-class UpdateDeviceListRequest : public app_mngr::commands::RequestToHMI,
-                                public app_mngr::event_engine::EventObserver {
+class UpdateDeviceListRequest : public app_mngr::commands::RequestToHMI {
  public:
   /**
    * @brief UpdateDeviceListRequest class constructor
@@ -76,7 +75,7 @@ class UpdateDeviceListRequest : public app_mngr::commands::RequestToHMI,
    * when HMI will be ready
    * @param event The received event
    */
-  virtual void on_event(const app_mngr::event_engine::Event& event);
+  void on_event(const app_mngr::event_engine::Event& event) OVERRIDE;
 
   /**
    * @brief Need to stop execution StopMethod if HMI did not started

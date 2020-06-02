@@ -103,7 +103,7 @@ class Command {
    * has exceed it's limit
    *
    */
-  virtual void onTimeOut() = 0;
+  virtual void HandleTimeOut() = 0;
 
   /**
    * @brief AllowedToTerminate tells if request controller is allowed

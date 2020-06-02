@@ -34,6 +34,7 @@
 #ifndef SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_MOBILE_UNSUBSCRIBE_VEHICLE_DATA_REQUEST_H_
 #define SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_MOBILE_UNSUBSCRIBE_VEHICLE_DATA_REQUEST_H_
 
+#include "application_manager/commands/request_from_mobile_impl.h"
 #include "application_manager/application.h"
 #include "application_manager/commands/command_request_impl.h"
 #include "utils/macro.h"
@@ -50,7 +51,7 @@ namespace commands {
  * @brief UnsubscribeVehicleDataRequest command class
  **/
 class UnsubscribeVehicleDataRequest
-    : public app_mngr::commands::CommandRequestImpl {
+    : public app_mngr::commands::RequestFromMobileImpl {
  public:
   /**
    * @brief UnsubscribeVehicleDataRequest class constructor
