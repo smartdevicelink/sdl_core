@@ -1296,23 +1296,25 @@ TEST_F(HMICapabilitiesTest, PrepareJsonValueForSaving_Success) {
 
 TEST_F(HMICapabilitiesTest,
        OnCapabilityInitialized_RespondToAllPendingRAIRequestsIfTheyHold) {
+  // Contains only UI capabilities
   const std::string hmi_capabilities_file = "hmi_capabilities_sc2.json";
   ON_CALL(mock_application_manager_settings_, hmi_capabilities_file_name())
       .WillByDefault(ReturnRef(hmi_capabilities_file));
 
+  // Initializes the UI capabilities with the default values
   hmi_capabilities_->Init(last_state_wrapper_);
 
+  ON_CALL(mock_app_mngr_, IsHMICooperating()).WillByDefault(Return(false));
+
+  // Sets isHMICooperating flag to true after all required
+  // capabilities are received from HMI
   EXPECT_CALL(mock_app_mngr_, SetHMICooperating(true));
-
-  // All pending RAI requests are responded
-  EXPECT_CALL(mock_app_mngr_, IsHMICooperating()).WillOnce(Return(true));
   hmi_capabilities_->UpdateRequestsRequiredForCapabilities(
       hmi_apis::FunctionID::UI_GetCapabilities);
-
-  // All pending RAI requests are hold, need respond them
-  EXPECT_CALL(mock_app_mngr_, IsHMICooperating()).WillOnce(Return(false));
   hmi_capabilities_->UpdateRequestsRequiredForCapabilities(
-      hmi_apis::FunctionID::UI_GetCapabilities);
+      hmi_apis::FunctionID::UI_GetLanguage);
+  hmi_capabilities_->UpdateRequestsRequiredForCapabilities(
+      hmi_apis::FunctionID::UI_GetSupportedLanguages);
 }
 
 TEST_F(

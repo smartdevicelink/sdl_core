@@ -1012,6 +1012,7 @@ struct JsonCapabilitiesGetter {
       return GetMainJsonMember(member_name);
     }
 
+    default_initialized_capabilities.insert(request_id);
     return Json::Value::null;
   }
 
