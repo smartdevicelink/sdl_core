@@ -3215,13 +3215,6 @@ void ApplicationManagerImpl::UnregisterApplication(
 
   GetAppServiceManager().UnpublishServices(app_id);
 
-  if (IsAppSubscribedForWayPoints(app_id)) {
-    UnsubscribeAppFromWayPoints(app_id);
-    if (!IsAnyAppSubscribedForWayPoints()) {
-      LOG4CXX_ERROR(logger_, "Send UnsubscribeWayPoints");
-      MessageHelper::SendUnsubscribedWayPoints(*this);
-    }
-  }
   EndNaviServices(app_id);
 
   {
@@ -3295,6 +3288,16 @@ void ApplicationManagerImpl::UnregisterApplication(
       resume_controller().SaveApplication(app_to_remove);
     } else {
       resume_controller().RemoveApplicationFromSaved(app_to_remove);
+    }
+
+    if (IsAppSubscribedForWayPoints(app_id)) {
+      UnsubscribeAppFromWayPoints(app_id);
+      if (!IsAnyAppSubscribedForWayPoints()) {
+        LOG4CXX_ERROR(logger_, "Send UnsubscribeWayPoints");
+        auto message = MessageHelper::CreateMessageWithFunctionID(
+            *this, hmi_apis::FunctionID::Navigation_UnsubscribeWayPoints);
+        GetRPCService().ManageHMICommand(message);
+      }
     }
 
     (hmi_capabilities_->get_hmi_language_handler())
