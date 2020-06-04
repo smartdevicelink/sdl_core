@@ -23,7 +23,6 @@ namespace transport_adapter {
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "TransportManager")
 
-static std::string GetInterfaceName(unsigned int if_index);
 static bool SetNonblocking(int s);
 
 bool InterfaceStatus::IsAvailable() const {
@@ -39,7 +38,7 @@ bool InterfaceStatus::HasIPAddress() const {
   return has_ipv4_ || has_ipv6_;
 }
 
-std::string InterfaceStatus::GetIPv4Address() const {
+const std::string InterfaceStatus::GetIPv4Address() const {
   char buf[INET_ADDRSTRLEN] = "";
   if (has_ipv4_ && IsAvailable()) {
     inet_ntop(AF_INET, &ipv4_address_, buf, sizeof(buf));
@@ -47,7 +46,7 @@ std::string InterfaceStatus::GetIPv4Address() const {
   return std::string(buf);
 }
 
-std::string InterfaceStatus::GetIPv6Address() const {
+const std::string InterfaceStatus::GetIPv6Address() const {
   char buf[INET6_ADDRSTRLEN] = "";
   if (has_ipv6_ && IsAvailable()) {
     inet_ntop(AF_INET6, &ipv6_address_, buf, sizeof(buf));
@@ -55,7 +54,7 @@ std::string InterfaceStatus::GetIPv6Address() const {
   return std::string(buf);
 }
 
-void InterfaceStatus::SetIPv4Address(struct in_addr* addr) {
+void InterfaceStatus::SetIPv4Address(const struct in_addr* addr) {
   if (addr == NULL) {
     has_ipv4_ = false;
   } else {
@@ -64,7 +63,7 @@ void InterfaceStatus::SetIPv4Address(struct in_addr* addr) {
   }
 }
 
-void InterfaceStatus::SetIPv6Address(struct in6_addr* addr) {
+void InterfaceStatus::SetIPv6Address(const struct in6_addr* addr) {
   if (addr == NULL) {
     has_ipv6_ = false;
   } else {
@@ -376,8 +375,13 @@ bool PlatformSpecificNetworkInterfaceListener::InitializeStatus() {
       continue;
     }
 
-    std::string ifname(interface->ifa_name);
-    InterfaceStatus& status = status_table_[ifname];
+    unsigned int index = if_nametoindex(interface->ifa_name);
+    if (index == 0) {
+      // network interface isn't found
+      continue;
+    }
+
+    InterfaceStatus& status = status_table_[index];
 
     switch (interface->ifa_addr->sa_family) {
       case AF_INET: {
@@ -395,6 +399,7 @@ bool PlatformSpecificNetworkInterfaceListener::InitializeStatus() {
       default:
         continue;
     }
+    status.SetName(std::string(interface->ifa_name));
     status.SetFlags(interface->ifa_flags);
   }
 
@@ -412,25 +417,22 @@ bool PlatformSpecificNetworkInterfaceListener::UpdateStatus(
   for (std::vector<EventParam>::iterator it = params.begin();
        it != params.end();
        ++it) {
-    std::string ifname = GetInterfaceName(it->if_index);
-    if (ifname.empty()) {
-      continue;
-    }
-
-    InterfaceStatus& status = status_table_[ifname];
-
+    InterfaceStatus& status = status_table_[it->if_index];
     switch (type) {
       case RTM_NEWLINK: {
+        const std::string& ifname = GetInterfaceName(it->if_index);
         LOG4CXX_DEBUG(
             logger_,
             "netlink event: interface " << ifname << " created or updated");
+        status.SetName(ifname);
         status.SetFlags(it->flags);
         break;
       }
       case RTM_DELLINK:
-        LOG4CXX_DEBUG(logger_,
-                      "netlink event: interface " << ifname << " removed");
-        status_table_.erase(ifname);
+        LOG4CXX_DEBUG(
+            logger_,
+            "netlink event: interface " << status.GetName() << " removed");
+        status_table_.erase(it->if_index);
         break;
       case RTM_NEWADDR: {
         sockaddr* addr = reinterpret_cast<sockaddr*>(&it->address);
@@ -439,14 +441,14 @@ bool PlatformSpecificNetworkInterfaceListener::UpdateStatus(
           status.SetIPv4Address(&addr_in->sin_addr);
           LOG4CXX_DEBUG(logger_,
                         "netlink event: IPv4 address of interface "
-                            << ifname << " updated to "
+                            << status.GetName() << " updated to "
                             << status.GetIPv4Address());
         } else if (addr->sa_family == AF_INET6) {
           sockaddr_in6* addr_in6 = reinterpret_cast<sockaddr_in6*>(addr);
           status.SetIPv6Address(&addr_in6->sin6_addr);
           LOG4CXX_DEBUG(logger_,
                         "netlink event: IPv6 address of interface "
-                            << ifname << " updated to "
+                            << status.GetName() << " updated to "
                             << status.GetIPv6Address());
         }
         break;
@@ -456,12 +458,12 @@ bool PlatformSpecificNetworkInterfaceListener::UpdateStatus(
         if (addr->sa_family == AF_INET) {
           LOG4CXX_DEBUG(logger_,
                         "netlink event: IPv4 address of interface "
-                            << ifname << " removed");
+                            << status.GetName() << " removed");
           status.SetIPv4Address(NULL);
         } else if (addr->sa_family == AF_INET6) {
           LOG4CXX_DEBUG(logger_,
                         "netlink event: IPv6 address of interface "
-                            << ifname << " removed");
+                            << status.GetName() << " removed");
           status.SetIPv6Address(NULL);
         }
         break;
@@ -484,9 +486,12 @@ void PlatformSpecificNetworkInterfaceListener::NotifyIPAddresses() {
   // note that if interface_name is empty (i.e. no interface is selected),
   // the IP addresses will be empty
   if (!interface_name.empty()) {
-    InterfaceStatusTable::iterator it = status_table_.find(interface_name);
+    InterfaceStatusTable::const_iterator it =
+        std::find_if(status_table_.begin(),
+                     status_table_.end(),
+                     NamePredicate(interface_name));
     if (status_table_.end() != it) {
-      InterfaceStatus& status = it->second;
+      const InterfaceStatus& status = it->second;
       ipv4_addr = status.GetIPv4Address();
       ipv6_addr = status.GetIPv6Address();
     }
@@ -514,14 +519,16 @@ const std::string PlatformSpecificNetworkInterfaceListener::SelectInterface() {
     return designated_interface_;
   }
 
-  InterfaceStatusTable::iterator it;
+  InterfaceStatusTable::const_iterator it;
 
   if (!selected_interface_.empty()) {
     // if current network interface is still available and has IP address, then
     // we use it
-    it = status_table_.find(selected_interface_);
+    it = std::find_if(status_table_.begin(),
+                      status_table_.end(),
+                      NamePredicate(selected_interface_));
     if (it != status_table_.end()) {
-      InterfaceStatus& status = it->second;
+      const InterfaceStatus& status = it->second;
       if (status.IsAvailable() && status.HasIPAddress()) {
         return selected_interface_;
       }
@@ -530,17 +537,17 @@ const std::string PlatformSpecificNetworkInterfaceListener::SelectInterface() {
 
   // pick a network interface that has IP address
   for (it = status_table_.begin(); it != status_table_.end(); ++it) {
-    InterfaceStatus& status = it->second;
+    const InterfaceStatus& status = it->second;
     // ignore loopback interfaces
     if (status.IsLoopback()) {
       continue;
     }
-    // if the interface has to be UP and RUNNING, and must have an IP address
+    // the interface has to be UP and RUNNING, and must have an IP address
     if (!(status.IsAvailable() && status.HasIPAddress())) {
       continue;
     }
 
-    selected_interface_ = it->first;
+    selected_interface_ = status.GetName();
     LOG4CXX_DEBUG(logger_,
                   "selecting network interface: " << selected_interface_);
     return selected_interface_;
@@ -618,17 +625,38 @@ void PlatformSpecificNetworkInterfaceListener::DumpTable() const {
                 "Number of network interfaces: " << status_table_.size());
 
   for (auto it = status_table_.begin(); it != status_table_.end(); ++it) {
-    const std::string ifname = it->first;
     const InterfaceStatus& status = it->second;
     UNUSED(status);
 
     LOG4CXX_DEBUG(
         logger_,
-        "  " << ifname << " : flags=" << status.GetFlags()
+        "  " << status.GetName() << " : flags=" << status.GetFlags()
              << " : available: " << (status.IsAvailable() ? "yes" : "no")
              << " IPv4: " << status.GetIPv4Address()
              << " IPv6: " << status.GetIPv6Address()
              << (status.IsLoopback() ? " (loopback)" : ""));
+  }
+}
+
+const std::string PlatformSpecificNetworkInterfaceListener::GetInterfaceName(
+    unsigned int if_index) const {
+#ifdef BUILD_TESTS
+  if (testing_) {
+    std::map<unsigned int, std::string>::const_iterator it =
+        dummy_name_map_.find(if_index);
+    if (it == dummy_name_map_.end()) {
+      return std::string();
+    }
+    return it->second;
+  }
+#endif  // BUILD_TESTS
+
+  char buf[IFNAMSIZ + 1] = "";
+  char* ret = if_indextoname(if_index, buf);
+  if (ret != NULL) {
+    return std::string(buf);
+  } else {
+    return std::string();
   }
 }
 
@@ -644,12 +672,6 @@ void PlatformSpecificNetworkInterfaceListener::ListenerThreadDelegate::
 void PlatformSpecificNetworkInterfaceListener::ListenerThreadDelegate::
     exitThreadMain() {
   parent_->StopLoop();
-}
-
-static std::string GetInterfaceName(unsigned int if_index) {
-  char buf[IFNAMSIZ + 1] = "";
-  if_indextoname(if_index, buf);
-  return std::string(buf);
 }
 
 static bool SetNonblocking(int s) {

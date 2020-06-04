@@ -86,6 +86,7 @@ TcpClientListener::TcpClientListener(TransportAdapterController* controller,
     , thread_(0)
     , socket_(-1)
     , thread_stop_requested_(false)
+    , remove_devices_on_terminate_(false)
     , designated_interface_(designated_interface) {
   pipe_fds_[0] = pipe_fds_[1] = -1;
   thread_ = threads::CreateThread("TcpClientListener",
@@ -107,7 +108,7 @@ TransportAdapter::Error TcpClientListener::Init() {
       return TransportAdapter::FAIL;
     }
   } else {
-    // Network interface is specified and we wiill listen only on the interface.
+    // Network interface is specified and we will listen only on the interface.
     // In this case, the server socket will be created once
     // NetworkInterfaceListener notifies the interface's IP address.
     LOG4CXX_INFO(logger_,
@@ -226,6 +227,7 @@ void TcpClientListener::Loop() {
   LOG4CXX_AUTO_TRACE(logger_);
   fd_set rfds;
   char dummy[16];
+  std::vector<DeviceUID> device_uid_list;
 
   while (!thread_stop_requested_) {
     FD_ZERO(&rfds);
@@ -323,10 +325,19 @@ void TcpClientListener::Loop() {
       if (TransportAdapter::OK != error) {
         LOG4CXX_ERROR(logger_,
                       "TCP connection::Start() failed with error: " << error);
+      } else {
+        device_uid_list.push_back(device->unique_device_id());
       }
     }
   }
 
+  if (remove_devices_on_terminate_) {
+    for (std::vector<DeviceUID>::iterator it = device_uid_list.begin();
+         it != device_uid_list.end();
+         ++it) {
+      controller_->DeviceDisconnected(*it, DisconnectDeviceError());
+    }
+  }
   LOG4CXX_INFO(logger_, "TCP server socket loop is terminated.");
 }
 
@@ -444,8 +455,7 @@ TransportAdapter::Error TcpClientListener::StartListeningThread() {
 
   if (pipe_fds_[0] < 0 || pipe_fds_[1] < 0) {
     // recreate the pipe every time, so that the thread loop will not get
-    // leftover
-    // data inside pipe after it is started
+    // leftover data inside pipe after it is started
     if (pipe(pipe_fds_) != 0) {
       LOG4CXX_ERROR_WITH_ERRNO(logger_, "Failed to create internal pipe");
       return TransportAdapter::FAIL;
@@ -534,6 +544,8 @@ bool TcpClientListener::StartOnNetworkInterface() {
       }
     }
 
+    remove_devices_on_terminate_ = true;
+
     if (TransportAdapter::OK != StartListeningThread()) {
       LOG4CXX_WARN(logger_, "Failed to start TCP client listener");
       return false;
@@ -558,6 +570,8 @@ bool TcpClientListener::StopOnNetworkInterface() {
       DestroyServerSocket(socket_);
       socket_ = -1;
     }
+
+    remove_devices_on_terminate_ = false;
 
     LOG4CXX_INFO(
         logger_,
