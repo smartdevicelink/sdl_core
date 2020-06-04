@@ -133,7 +133,9 @@ TEST_F(RequestTimeoutHandlerTest, OnEvent_OnResetTimeout_SUCCESS) {
       CreateCommand<SubscribeWayPointsRequest>();
   MockAppPtr mock_app = CreateMockApp();
   ON_CALL(app_mngr_, application(_)).WillByDefault(Return(mock_app));
-  ON_CALL(app_mngr_, IsAppSubscribedForWayPoints(_))
+  ON_CALL(app_mngr_,
+          IsAppSubscribedForWayPoints(
+              ::testing::Matcher<application_manager::ApplicationSharedPtr>(_)))
       .WillByDefault(Return(false));
   ON_CALL(app_mngr_, IsAnyAppSubscribedForWayPoints())
       .WillByDefault(Return(false));
@@ -180,7 +182,9 @@ TEST_F(RequestTimeoutHandlerTest, OnEvent_OnResetTimeout_MissedResetPeriod) {
       CreateCommand<SubscribeWayPointsRequest>();
   MockAppPtr mock_app = CreateMockApp();
   ON_CALL(app_mngr_, application(_)).WillByDefault(Return(mock_app));
-  ON_CALL(app_mngr_, IsAppSubscribedForWayPoints(_))
+  ON_CALL(app_mngr_,
+          IsAppSubscribedForWayPoints(
+              ::testing::Matcher<application_manager::ApplicationSharedPtr>(_)))
       .WillByDefault(Return(false));
   ON_CALL(app_mngr_, IsAnyAppSubscribedForWayPoints())
       .WillByDefault(Return(false));
