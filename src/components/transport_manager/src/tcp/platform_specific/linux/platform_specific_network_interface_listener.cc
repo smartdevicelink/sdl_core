@@ -429,9 +429,9 @@ bool PlatformSpecificNetworkInterfaceListener::UpdateStatus(
         break;
       }
       case RTM_DELLINK:
-        LOG4CXX_DEBUG(logger_,
-                      "netlink event: interface " << status.GetName()
-                                                  << " removed");
+        LOG4CXX_DEBUG(
+            logger_,
+            "netlink event: interface " << status.GetName() << " removed");
         status_table_.erase(it->if_index);
         break;
       case RTM_NEWADDR: {
