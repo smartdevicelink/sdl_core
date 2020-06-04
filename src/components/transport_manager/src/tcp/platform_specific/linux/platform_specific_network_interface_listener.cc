@@ -1,7 +1,5 @@
 #include "transport_manager/tcp/platform_specific/linux/platform_specific_network_interface_listener_impl.h"
 
-#include <algorithm>
-
 #include <arpa/inet.h>
 #include <asm/types.h>
 #include <errno.h>
