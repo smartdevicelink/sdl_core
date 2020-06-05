@@ -556,13 +556,11 @@ TEST_F(ObjectSchemaItemTest, filter_unknown_enums_mandatory) {
       schema_item->filterInvalidEnums(obj, utils::SemanticVersion(), &report));
   EXPECT_NE(std::string(""), rpc::PrettyFormat(report));
 
-  // The invalid enum value was part of a mandatory structure, so it could not
-  // be filtered. Validation should fail in this case
-  EXPECT_TRUE(obj[S_PARAMS].keyExists(S_FUNCTION_ID));
+  EXPECT_FALSE(obj[S_PARAMS].keyExists(S_FUNCTION_ID));
   report = rpc::ValidationReport("RPC");
-  EXPECT_EQ(errors::INVALID_VALUE, schema_item->validate(obj, &report));
+  EXPECT_EQ(errors::MISSING_MANDATORY_PARAMETER,
+            schema_item->validate(obj, &report));
   EXPECT_NE(std::string(""), rpc::PrettyFormat(report));
-  printf("%s", rpc::PrettyFormat(report).c_str());
 }
 
 }  // namespace smart_object_test
