@@ -189,10 +189,9 @@ class ChangeRegistrationRequestTest
 
     MessageSharedPtr response_to_mobile;
 
-    EXPECT_CALL(
-        mock_rpc_service_,
-        ManageMobileCommand(
-            _, am::commands::Command::CommandSource::SOURCE_SDL, std::string()))
+    EXPECT_CALL(mock_rpc_service_,
+                ManageMobileCommand(
+                    _, am::commands::Command::CommandSource::SOURCE_SDL))
         .WillOnce(DoAll(SaveArg<0>(&response_to_mobile), Return(true)));
 
     command->on_event(event_ui);
@@ -351,8 +350,7 @@ TEST_F(ChangeRegistrationRequestTest,
 
   EXPECT_CALL(
       mock_rpc_service_,
-      ManageMobileCommand(
-          _, am::commands::Command::CommandSource::SOURCE_SDL, std::string()))
+      ManageMobileCommand(_, am::commands::Command::CommandSource::SOURCE_SDL))
       .WillOnce(DoAll(SaveArg<0>(&response_to_mobile), Return(true)));
 
   command->on_event(event_ui);
@@ -399,8 +397,7 @@ TEST_F(ChangeRegistrationRequestTest,
 
   EXPECT_CALL(
       mock_rpc_service_,
-      ManageMobileCommand(
-          _, am::commands::Command::CommandSource::SOURCE_SDL, std::string()))
+      ManageMobileCommand(_, am::commands::Command::CommandSource::SOURCE_SDL))
       .WillOnce(DoAll(SaveArg<0>(&response_to_mobile), Return(true)));
   command->Run();
 
@@ -544,8 +541,7 @@ TEST_F(ChangeRegistrationRequestTest,
 
   EXPECT_CALL(
       mock_rpc_service_,
-      ManageMobileCommand(
-          _, am::commands::Command::CommandSource::SOURCE_SDL, std::string()))
+      ManageMobileCommand(_, am::commands::Command::CommandSource::SOURCE_SDL))
       .WillOnce(DoAll(SaveArg<0>(&response_to_mobile), Return(true)));
 
   command->on_event(event_vr);

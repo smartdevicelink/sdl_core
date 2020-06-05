@@ -242,8 +242,7 @@ class RegisterAppInterfaceRequestTest
 
     EXPECT_CALL(
         mock_rpc_service_,
-        ManageMobileCommand(
-            MobileResultCodeIs(response_result_code), _, std::string()));
+        ManageMobileCommand(MobileResultCodeIs(response_result_code), _));
 
     EXPECT_CALL(
         mock_rpc_service_,
@@ -375,9 +374,8 @@ TEST_F(RegisterAppInterfaceRequestTest, Run_MinimalData_SUCCESS) {
           HMIResultCodeIs(hmi_apis::FunctionID::Buttons_OnButtonSubscription),
           _))
       .WillOnce(Return(true));
-  EXPECT_CALL(
-      mock_rpc_service_,
-      ManageMobileCommand(_, am::commands::Command::SOURCE_SDL, std::string()))
+  EXPECT_CALL(mock_rpc_service_,
+              ManageMobileCommand(_, am::commands::Command::SOURCE_SDL))
       .Times(2);
   EXPECT_CALL(app_mngr_, SendDriverDistractionState(_));
   ASSERT_TRUE(command_->Init());
@@ -517,9 +515,8 @@ TEST_F(RegisterAppInterfaceRequestTest,
       ManageHMICommand(
           HMIResultCodeIs(hmi_apis::FunctionID::UI_ChangeRegistration), _))
       .WillOnce(Return(true));
-  EXPECT_CALL(
-      mock_rpc_service_,
-      ManageMobileCommand(_, am::commands::Command::SOURCE_SDL, std::string()))
+  EXPECT_CALL(mock_rpc_service_,
+              ManageMobileCommand(_, am::commands::Command::SOURCE_SDL))
       .Times(2);
   EXPECT_CALL(app_mngr_, SendDriverDistractionState(_));
   ASSERT_TRUE(command_->Init());
@@ -693,8 +690,7 @@ TEST_F(RegisterAppInterfaceRequestTest,
               ManageMobileCommand(
                   MobileResultCodeIs(
                       mobile_apis::Result::APPLICATION_REGISTERED_ALREADY),
-                  am::commands::Command::SOURCE_SDL,
-                  std::string()));
+                  am::commands::Command::SOURCE_SDL));
 
   ASSERT_TRUE(command_->Init());
   command_->Run();
@@ -784,9 +780,8 @@ TEST_F(RegisterAppInterfaceRequestTest,
       ManageHMICommand(
           HMIResultCodeIs(hmi_apis::FunctionID::UI_ChangeRegistration), _))
       .WillOnce(Return(true));
-  EXPECT_CALL(
-      mock_rpc_service_,
-      ManageMobileCommand(_, am::commands::Command::SOURCE_SDL, std::string()))
+  EXPECT_CALL(mock_rpc_service_,
+              ManageMobileCommand(_, am::commands::Command::SOURCE_SDL))
       .Times(2);
   EXPECT_CALL(app_mngr_, SendDriverDistractionState(_));
 

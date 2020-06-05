@@ -17,6 +17,10 @@ class MockRPCService : public application_manager::rpc_service::RPCService {
       ManageHMICommand,
       bool(const application_manager::commands::MessageSharedPtr message,
            application_manager::commands::Command::CommandSource source));
+  MOCK_METHOD2(
+      ManageMobileCommand,
+      bool(const application_manager::commands::MessageSharedPtr message,
+           application_manager::commands::Command::CommandSource origin));
   MOCK_METHOD3(
       ManageMobileCommand,
       bool(const application_manager::commands::MessageSharedPtr message,

@@ -98,7 +98,7 @@ class RPCPassingHandlerTest : public ::testing::Test {
 
     ON_CALL(mock_app_manager_, GetRPCService())
         .WillByDefault(ReturnRef(mock_rpc_service_));
-    ON_CALL(mock_rpc_service_, ManageMobileCommand(_, _, _))
+    ON_CALL(mock_rpc_service_, ManageMobileCommand(_, _))
         .WillByDefault(Return(true));
     ON_CALL(mock_rpc_service_, SendMessageToMobile(_, _))
         .WillByDefault(Return());
@@ -259,7 +259,7 @@ TEST_F(RPCPassingHandlerTest, RPCPassingTest_REQUEST_NoPassthrough) {
       IncreaseForwardedRequestTimeout(kConnectionKey_ASC, kCorrelationId))
       .Times(0);
   // Will return false since there are no active services to handle the rpc
-  EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(_, _, _)).Times(0);
+  EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(_, _)).Times(0);
   EXPECT_CALL(mock_rpc_service_, SendMessageToMobile(_, _)).Times(0);
 
   bool result = rpc_passing_handler_->RPCPassThrough(request);
@@ -285,7 +285,7 @@ TEST_F(RPCPassingHandlerTest, RPCPassingTest_RESPONSE_UnknownCorrelationID) {
 
   // Call RPCPassThrough with response smart object
   // Will return false since the correlation id does not exist in the map
-  EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(_, _, _)).Times(0);
+  EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(_, _)).Times(0);
   EXPECT_CALL(mock_rpc_service_, SendMessageToMobile(_, _)).Times(0);
 
   bool result = rpc_passing_handler_->RPCPassThrough(invalid_response);
@@ -349,8 +349,7 @@ TEST_F(RPCPassingHandlerTest,
   EXPECT_CALL(mock_app_manager_, GetRPCService());
   EXPECT_CALL(mock_rpc_service_,
               ManageMobileCommand(Pointee(forwarded_request),
-                                  am::commands::Command::SOURCE_MOBILE,
-                                  std::string()));
+                                  am::commands::Command::SOURCE_MOBILE));
 
   bool result = rpc_passing_handler_->RPCPassThrough(unsupported_response);
   EXPECT_EQ(result, true);
@@ -426,8 +425,7 @@ TEST_F(RPCPassingHandlerTest, RPCPassingTest_REQUEST_Timeout) {
   EXPECT_CALL(mock_app_manager_, GetRPCService()).Times(2);
   EXPECT_CALL(mock_rpc_service_,
               ManageMobileCommand(Pointee(request_params.message),
-                                  am::commands::Command::SOURCE_MOBILE,
-                                  std::string()))
+                                  am::commands::Command::SOURCE_MOBILE))
       .WillOnce(DoAll(NotifyTestAsyncWaiter(waiter), Return(true)));
 
   bool mobile_result =

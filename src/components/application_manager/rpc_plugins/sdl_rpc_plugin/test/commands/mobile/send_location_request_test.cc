@@ -148,9 +148,8 @@ class SendLocationRequestTest
     EXPECT_CALL(*mock_app_, hmi_app_id()).Times(0);
 
     EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_, _)).Times(0);
-    EXPECT_CALL(
-        mock_rpc_service_,
-        ManageMobileCommand(MobileResultCodeIs(result), _, std::string()));
+    EXPECT_CALL(mock_rpc_service_,
+                ManageMobileCommand(MobileResultCodeIs(result), _));
   }
 
   void AllowMandatoryFields() {
@@ -377,8 +376,7 @@ TEST_F(SendLocationRequestTest, OnEvent_Success) {
 
   EXPECT_CALL(
       mock_rpc_service_,
-      ManageMobileCommand(
-          MobileResultCodeIs(mobile_apis::Result::SUCCESS), _, std::string()))
+      ManageMobileCommand(MobileResultCodeIs(mobile_apis::Result::SUCCESS), _))
       .WillOnce(Return(false));
   command_->on_event(event);
 }
@@ -391,8 +389,7 @@ TEST_F(SendLocationRequestTest, OnEvent_Cancelled) {
 
   EXPECT_CALL(
       mock_rpc_service_,
-      ManageMobileCommand(
-          MobileResultCodeIs(mobile_apis::Result::SUCCESS), _, std::string()))
+      ManageMobileCommand(MobileResultCodeIs(mobile_apis::Result::SUCCESS), _))
       .Times(0);
   command_->on_event(event);
 }
@@ -413,11 +410,9 @@ TEST_F(SendLocationRequestTest, Run_MandatoryParamsDisallowed_InvalidData) {
   // 2nd one disallowed
   permissions.disallowed_params.insert(strings::latitude_degrees);
 
-  EXPECT_CALL(
-      mock_rpc_service_,
-      ManageMobileCommand(MobileResultCodeIs(mobile_apis::Result::INVALID_DATA),
-                          _,
-                          std::string()));
+  EXPECT_CALL(mock_rpc_service_,
+              ManageMobileCommand(
+                  MobileResultCodeIs(mobile_apis::Result::INVALID_DATA), _));
   command_->Run();
 }
 

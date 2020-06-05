@@ -145,8 +145,7 @@ TEST_F(SetAppIconRequestTest, OnEvent_UI_UNSUPPORTED_RESOURCE) {
   MessageSharedPtr ui_command_result;
   EXPECT_CALL(
       mock_rpc_service_,
-      ManageMobileCommand(
-          _, am::commands::Command::CommandSource::SOURCE_SDL, std::string()))
+      ManageMobileCommand(_, am::commands::Command::CommandSource::SOURCE_SDL))
       .WillOnce(DoAll(SaveArg<0>(&ui_command_result), Return(true)));
 
   req_vr->on_event(event);

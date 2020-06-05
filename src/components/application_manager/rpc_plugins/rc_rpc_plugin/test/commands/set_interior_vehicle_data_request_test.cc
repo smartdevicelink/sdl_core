@@ -241,8 +241,7 @@ TEST_F(
       mock_rpc_service_,
       ManageMobileCommand(test::components::commands_test::MobileResultCodeIs(
                               mobile_apis::Result::INVALID_DATA),
-                          application_manager::commands::Command::SOURCE_SDL,
-                          std::string()));
+                          application_manager::commands::Command::SOURCE_SDL));
 
   // Act
   std::shared_ptr<rc_rpc_plugin::commands::SetInteriorVehicleDataRequest>

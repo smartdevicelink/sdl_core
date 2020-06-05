@@ -173,8 +173,7 @@ TEST_F(CommandRequestImplTest, OnTimeOut_StateCompleted_UNSUCCESS) {
   // Second -- on destruction;
   EXPECT_CALL(event_dispatcher_, remove_observer(_)).Times(2);
 
-  EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(_, _, std::string()))
-      .Times(0);
+  EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(_, _)).Times(0);
 
   // If `command` already done, then state should change to `kCompleted`.
   command->set_current_state(RequestState::kCompleted);
@@ -198,8 +197,7 @@ TEST_F(CommandRequestImplTest, OnTimeOut_StateAwaitingHMIResponse_SUCCESS) {
 
   EXPECT_CALL(
       mock_rpc_service_,
-      ManageMobileCommand(
-          dummy_msg, Command::CommandSource::SOURCE_SDL, std::string()));
+      ManageMobileCommand(dummy_msg, Command::CommandSource::SOURCE_SDL));
 
   command->onTimeOut();
 
@@ -476,8 +474,7 @@ TEST_F(CommandRequestImplTest, SendResponse_TimedOut_UNSUCCESS) {
 
   command->set_current_state(RequestState::kTimedOut);
 
-  EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(_, _, std::string()))
-      .Times(0);
+  EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(_, _)).Times(0);
 
   // Args do not affect on anything in this case;
   command->SendResponse(true, kMobResultSuccess, NULL, NULL);
@@ -493,7 +490,7 @@ TEST_F(CommandRequestImplTest, SendResponse_SUCCESS) {
 
   MessageSharedPtr result;
 
-  EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(_, _, std::string()))
+  EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(_, _))
       .WillOnce(DoAll(SaveArg<0>(&result), Return(true)));
 
   // Args do not affect on anything in this case;
@@ -524,7 +521,7 @@ TEST_F(CommandRequestImplTest,
   ON_CALL(mock_message_helper_, vehicle_data())
       .WillByDefault(ReturnRef(vehicle_data));
 
-  EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(_, _, std::string()))
+  EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(_, _))
       .WillOnce(DoAll(SaveArg<0>(&result), Return(true)));
 
   command->SendResponse(true, kMobResultSuccess, NULL, NULL);
@@ -543,7 +540,7 @@ TEST_F(CommandRequestImplTest, HashUpdateAllowed_UpdateExpected) {
 
   MessageSharedPtr result;
 
-  EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(_, _, std::string()))
+  EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(_, _))
       .WillOnce(DoAll(SaveArg<0>(&result), Return(true)));
 
   const bool is_succeeded = true;
@@ -564,7 +561,7 @@ TEST_F(CommandRequestImplTest, HashUpdateDisallowed_HashUpdateNotExpected) {
 
   MessageSharedPtr result;
 
-  EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(_, _, std::string()))
+  EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(_, _))
       .WillOnce(DoAll(SaveArg<0>(&result), Return(true)));
 
   const bool is_succeeded = true;
@@ -583,7 +580,7 @@ TEST_F(CommandRequestImplTest, RequestFailed_HashUpdateNotExpected) {
 
   MessageSharedPtr result;
 
-  EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(_, _, std::string()))
+  EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(_, _))
       .WillOnce(DoAll(SaveArg<0>(&result), Return(true)));
 
   const bool is_succeeded = false;
@@ -602,7 +599,7 @@ TEST_F(CommandRequestImplTest, AppNotFound_HashUpdateNotExpected) {
 
   MessageSharedPtr result;
 
-  EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(_, _, std::string()))
+  EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(_, _))
       .WillOnce(DoAll(SaveArg<0>(&result), Return(true)));
 
   const bool is_succeeded = true;
@@ -628,7 +625,7 @@ TEST_F(CommandRequestImplTest, SendProviderRequest_ByServiceType) {
       .WillOnce(DoAll(SetArgReferee<2>(mock_app), SetArgReferee<3>(false)));
 
   MessageSharedPtr result;
-  EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(_, _, std::string()))
+  EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(_, _))
       .WillOnce(DoAll(SaveArg<0>(&result), Return(true)));
 
   MessageSharedPtr msg = CreateMessage();
@@ -657,7 +654,7 @@ TEST_F(CommandRequestImplTest, SendProviderRequest_ByProviderID) {
       .WillOnce(DoAll(SetArgReferee<2>(mock_app), SetArgReferee<3>(false)));
 
   MessageSharedPtr result;
-  EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(_, _, std::string()))
+  EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(_, _))
       .WillOnce(DoAll(SaveArg<0>(&result), Return(true)));
 
   MessageSharedPtr msg = CreateMessage();

@@ -1795,9 +1795,8 @@ TEST_F(ApplicationManagerImplTest,
                           _,
                           testing::An<connection_handler::DeviceHandle*>()))
       .WillOnce(DoAll(SetArgPointee<3u>(kDeviceId), Return(0)));
-  EXPECT_CALL(
-      *mock_rpc_service_,
-      ManageMobileCommand(_, commands::Command::SOURCE_SDL, std::string()))
+  EXPECT_CALL(*mock_rpc_service_,
+              ManageMobileCommand(_, commands::Command::SOURCE_SDL))
       .Times(0);
   smart_objects::SmartObject request_for_registration(
       smart_objects::SmartType_Map);
@@ -1858,9 +1857,8 @@ TEST_F(ApplicationManagerImplTest,
                           _,
                           testing::An<connection_handler::DeviceHandle*>()))
       .WillOnce(DoAll(SetArgPointee<3u>(kDeviceId), Return(0)));
-  EXPECT_CALL(
-      *mock_rpc_service_,
-      ManageMobileCommand(_, commands::Command::SOURCE_SDL, std::string()))
+  EXPECT_CALL(*mock_rpc_service_,
+              ManageMobileCommand(_, commands::Command::SOURCE_SDL))
       .WillOnce(Return(true));
   smart_objects::SmartObject request_for_registration(
       smart_objects::SmartType_Map);

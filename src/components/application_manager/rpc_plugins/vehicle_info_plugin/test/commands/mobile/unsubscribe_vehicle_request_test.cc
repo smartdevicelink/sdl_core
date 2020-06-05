@@ -118,11 +118,10 @@ TEST_F(UnsubscribeVehicleRequestTest, Run_AppNotRegistered_UNSUCCESS) {
   EXPECT_CALL(app_mngr_, application(_))
       .WillOnce(Return(ApplicationSharedPtr()));
 
-  EXPECT_CALL(mock_rpc_service_,
-              ManageMobileCommand(
-                  MobileResultCodeIs(mobile_result::APPLICATION_NOT_REGISTERED),
-                  _,
-                  std::string()));
+  EXPECT_CALL(
+      mock_rpc_service_,
+      ManageMobileCommand(
+          MobileResultCodeIs(mobile_result::APPLICATION_NOT_REGISTERED), _));
 
   command->Run();
 }
@@ -151,8 +150,7 @@ TEST_F(UnsubscribeVehicleRequestTest,
 
   EXPECT_CALL(
       mock_rpc_service_,
-      ManageMobileCommand(
-          MobileResultCodeIs(mobile_result::INVALID_DATA), _, std::string()));
+      ManageMobileCommand(MobileResultCodeIs(mobile_result::INVALID_DATA), _));
 
   command->Run();
 }
@@ -210,8 +208,7 @@ TEST_F(UnsubscribeVehicleRequestTest,
 
   EXPECT_CALL(
       mock_rpc_service_,
-      ManageMobileCommand(
-          MobileResultCodeIs(mobile_result::INVALID_DATA), _, std::string()));
+      ManageMobileCommand(MobileResultCodeIs(mobile_result::INVALID_DATA), _));
 
   MessageSharedPtr command_msg(CreateMessage(smart_objects::SmartType_Map));
   (*command_msg)[am::strings::params][am::strings::connection_key] =
@@ -237,8 +234,7 @@ TEST_F(UnsubscribeVehicleRequestTest,
 
   EXPECT_CALL(
       mock_rpc_service_,
-      ManageMobileCommand(
-          MobileResultCodeIs(mobile_result::IGNORED), _, std::string()));
+      ManageMobileCommand(MobileResultCodeIs(mobile_result::IGNORED), _));
 
   MessageSharedPtr command_msg(CreateMessage(smart_objects::SmartType_Map));
   (*command_msg)[am::strings::params][am::strings::connection_key] =
@@ -270,8 +266,7 @@ TEST_F(UnsubscribeVehicleRequestTest, Run_UnsubscribeDataDisabled_UNSUCCESS) {
 
   EXPECT_CALL(
       mock_rpc_service_,
-      ManageMobileCommand(
-          MobileResultCodeIs(mobile_result::INVALID_DATA), _, std::string()));
+      ManageMobileCommand(MobileResultCodeIs(mobile_result::INVALID_DATA), _));
 
   command->Run();
 }
@@ -298,8 +293,7 @@ TEST_F(UnsubscribeVehicleRequestTest, OnEvent_DataNotSubscribed_IGNORED) {
 
   EXPECT_CALL(
       mock_rpc_service_,
-      ManageMobileCommand(
-          MobileResultCodeIs(mobile_result::IGNORED), _, std::string()));
+      ManageMobileCommand(MobileResultCodeIs(mobile_result::IGNORED), _));
   command->Init();
   command->Run();
 
@@ -314,8 +308,7 @@ TEST_F(UnsubscribeVehicleRequestTest, OnEvent_DataNotSubscribed_IGNORED) {
 
   EXPECT_CALL(
       mock_rpc_service_,
-      ManageMobileCommand(
-          MobileResultCodeIs(mobile_result::IGNORED), _, std::string()));
+      ManageMobileCommand(MobileResultCodeIs(mobile_result::IGNORED), _));
   EXPECT_CALL(*mock_app_, UpdateHash());
 
   command->on_event(test_event);
@@ -347,8 +340,7 @@ TEST_F(UnsubscribeVehicleRequestTest, OnEvent_DataUnsubscribed_SUCCESS) {
 
   EXPECT_CALL(
       mock_rpc_service_,
-      ManageMobileCommand(
-          MobileResultCodeIs(mobile_result::SUCCESS), _, std::string()));
+      ManageMobileCommand(MobileResultCodeIs(mobile_result::SUCCESS), _));
 
   command->on_event(test_event);
 }

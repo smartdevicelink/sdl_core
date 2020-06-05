@@ -206,8 +206,7 @@ TEST_F(PerformInteractionRequestTest, OnTimeout_VR_GENERIC_ERROR) {
 
   EXPECT_CALL(
       mock_rpc_service_,
-      ManageMobileCommand(
-          _, am::commands::Command::CommandSource::SOURCE_SDL, std::string()))
+      ManageMobileCommand(_, am::commands::Command::CommandSource::SOURCE_SDL))
       .WillOnce(DoAll(SaveArg<0>(&vr_command_result), Return(true)));
   command->onTimeOut();
 
@@ -242,8 +241,7 @@ TEST_F(PerformInteractionRequestTest,
 
   EXPECT_CALL(
       mock_rpc_service_,
-      ManageMobileCommand(
-          _, am::commands::Command::CommandSource::SOURCE_SDL, std::string()))
+      ManageMobileCommand(_, am::commands::Command::CommandSource::SOURCE_SDL))
       .WillOnce(DoAll(SaveArg<0>(&response_to_mobile), Return(true)));
 
   command->on_event(event_ui);
@@ -287,8 +285,7 @@ TEST_F(PerformInteractionRequestTest,
   MessageSharedPtr response_to_mobile;
   EXPECT_CALL(
       mock_rpc_service_,
-      ManageMobileCommand(
-          _, am::commands::Command::CommandSource::SOURCE_SDL, std::string()))
+      ManageMobileCommand(_, am::commands::Command::CommandSource::SOURCE_SDL))
       .WillOnce(DoAll(SaveArg<0>(&response_to_mobile), Return(true)));
   command->on_event(event_ui);
 
@@ -331,8 +328,7 @@ TEST_F(PerformInteractionRequestTest,
 
   EXPECT_CALL(
       mock_rpc_service_,
-      ManageMobileCommand(
-          _, am::commands::Command::CommandSource::SOURCE_SDL, std::string()))
+      ManageMobileCommand(_, am::commands::Command::CommandSource::SOURCE_SDL))
       .WillOnce(DoAll(SaveArg<0>(&response_to_mobile), Return(true)));
 
   command->on_event(event_vr);
@@ -371,8 +367,7 @@ TEST_F(PerformInteractionRequestTest,
 
   EXPECT_CALL(
       mock_rpc_service_,
-      ManageMobileCommand(
-          _, am::commands::Command::CommandSource::SOURCE_SDL, std::string()))
+      ManageMobileCommand(_, am::commands::Command::CommandSource::SOURCE_SDL))
       .WillOnce(DoAll(SaveArg<0>(&response_to_mobile), Return(true)));
 
   command->on_event(event_vr);
@@ -414,8 +409,7 @@ TEST_F(
   MessageSharedPtr response_to_mobile;
   EXPECT_CALL(
       mock_rpc_service_,
-      ManageMobileCommand(
-          _, am::commands::Command::CommandSource::SOURCE_SDL, std::string()))
+      ManageMobileCommand(_, am::commands::Command::CommandSource::SOURCE_SDL))
       .WillOnce(DoAll(SaveArg<0>(&response_to_mobile), Return(true)));
 
   command->on_event(event_vr);
@@ -454,8 +448,7 @@ TEST_F(
   MessageSharedPtr response_to_mobile;
   EXPECT_CALL(
       mock_rpc_service_,
-      ManageMobileCommand(
-          _, am::commands::Command::CommandSource::SOURCE_SDL, std::string()))
+      ManageMobileCommand(_, am::commands::Command::CommandSource::SOURCE_SDL))
       .WillOnce(DoAll(SaveArg<0>(&response_to_mobile), Return(true)));
 
   MessageSharedPtr request_to_hmi;
@@ -503,8 +496,7 @@ TEST_F(
   MessageSharedPtr response_to_mobile;
   EXPECT_CALL(
       mock_rpc_service_,
-      ManageMobileCommand(
-          _, am::commands::Command::CommandSource::SOURCE_SDL, std::string()))
+      ManageMobileCommand(_, am::commands::Command::CommandSource::SOURCE_SDL))
       .WillOnce(DoAll(SaveArg<0>(&response_to_mobile), Return(true)));
 
   MessageSharedPtr request_to_hmi;
@@ -552,8 +544,7 @@ TEST_F(
   MessageSharedPtr response_to_mobile;
   EXPECT_CALL(
       mock_rpc_service_,
-      ManageMobileCommand(
-          _, am::commands::Command::CommandSource::SOURCE_SDL, std::string()))
+      ManageMobileCommand(_, am::commands::Command::CommandSource::SOURCE_SDL))
       .WillOnce(DoAll(SaveArg<0>(&response_to_mobile), Return(true)));
 
   MessageSharedPtr request_to_hmi;
@@ -601,8 +592,7 @@ TEST_F(
   MessageSharedPtr response_to_mobile;
   EXPECT_CALL(
       mock_rpc_service_,
-      ManageMobileCommand(
-          _, am::commands::Command::CommandSource::SOURCE_SDL, std::string()))
+      ManageMobileCommand(_, am::commands::Command::CommandSource::SOURCE_SDL))
       .WillOnce(DoAll(SaveArg<0>(&response_to_mobile), Return(true)));
 
   MessageSharedPtr request_to_hmi;
@@ -650,8 +640,7 @@ TEST_F(
   MessageSharedPtr response_to_mobile;
   EXPECT_CALL(
       mock_rpc_service_,
-      ManageMobileCommand(
-          _, am::commands::Command::CommandSource::SOURCE_SDL, std::string()))
+      ManageMobileCommand(_, am::commands::Command::CommandSource::SOURCE_SDL))
       .WillOnce(DoAll(SaveArg<0>(&response_to_mobile), Return(true)));
 
   MessageSharedPtr request_to_hmi;

@@ -119,7 +119,7 @@ TEST_F(SendHapticDataRequestTest, Run_DISALLOWED) {
 
   EXPECT_CALL(*mock_app_, mobile_projection_enabled()).WillOnce(Return(false));
 
-  EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(_, _, _))
+  EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(_, _))
       .WillOnce(Return(true));
 
   SendHapticDataRequestPtr command(CreateCommand<SendHapticDataRequest>(msg_));
@@ -132,8 +132,7 @@ TEST_F(SendHapticDataRequestTest, OnEvent_SUCCESS) {
   EXPECT_CALL(
       mock_rpc_service_,
       ManageMobileCommand(MobileResultCodeIs(mobile_apis::Result::SUCCESS),
-                          am::commands::Command::SOURCE_SDL,
-                          std::string()));
+                          am::commands::Command::SOURCE_SDL));
 
   (*msg_)[am::strings::msg_params] = 0;
   (*msg_)[am::strings::params][am::hmi_response::code] =

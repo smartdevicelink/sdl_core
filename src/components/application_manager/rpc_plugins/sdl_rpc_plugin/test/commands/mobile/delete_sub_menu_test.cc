@@ -159,8 +159,7 @@ TEST_F(DeleteSubMenuRequestTest, DISABLED_OnEvent_UI_UNSUPPORTED_RESOURCE) {
 
   EXPECT_CALL(
       mock_rpc_service_,
-      ManageMobileCommand(
-          _, am::commands::Command::CommandSource::SOURCE_SDL, std::string()))
+      ManageMobileCommand(_, am::commands::Command::CommandSource::SOURCE_SDL))
       .WillOnce(DoAll(SaveArg<0>(&ui_command_result), Return(true)));
 
   command->on_event(event);
@@ -189,8 +188,7 @@ TEST_F(DeleteSubMenuRequestTest, Run_InvalidApp_UNSUCCESS) {
       mock_rpc_service_,
       ManageMobileCommand(CheckMessageResultCode(
                               mobile_apis::Result::APPLICATION_NOT_REGISTERED),
-                          am::commands::Command::CommandSource::SOURCE_SDL,
-                          std::string()));
+                          am::commands::Command::CommandSource::SOURCE_SDL));
   EXPECT_CALL(*app_, FindSubMenu(_)).Times(0);
   command_->Run();
 }
@@ -207,8 +205,7 @@ TEST_F(DeleteSubMenuRequestTest, Run_FindSubMenuFalse_UNSUCCESS) {
   EXPECT_CALL(mock_rpc_service_,
               ManageMobileCommand(
                   CheckMessageResultCode(mobile_apis::Result::INVALID_ID),
-                  am::commands::Command::CommandSource::SOURCE_SDL,
-                  std::string()));
+                  am::commands::Command::CommandSource::SOURCE_SDL));
   EXPECT_CALL(*app_, app_id()).Times(0);
   command_->Run();
 }
@@ -296,8 +293,7 @@ TEST_F(DeleteSubMenuRequestTest, OnEvent_DeleteSubmenu_SUCCESS) {
   EXPECT_CALL(
       mock_rpc_service_,
       ManageMobileCommand(MobileResultCodeIs(mobile_apis::Result::SUCCESS),
-                          am::commands::Command::SOURCE_SDL,
-                          std::string()));
+                          am::commands::Command::SOURCE_SDL));
   EXPECT_CALL(*app_, UpdateHash());
 
   DeleteSubMenuRequestPtr command =
@@ -341,8 +337,7 @@ TEST_F(DeleteSubMenuRequestTest,
   EXPECT_CALL(
       mock_rpc_service_,
       ManageMobileCommand(MobileResultCodeIs(mobile_apis::Result::SUCCESS),
-                          am::commands::Command::SOURCE_SDL,
-                          std::string()));
+                          am::commands::Command::SOURCE_SDL));
   command_->on_event(event);
 }
 
@@ -369,8 +364,7 @@ TEST_F(DeleteSubMenuRequestTest,
   EXPECT_CALL(
       mock_rpc_service_,
       ManageMobileCommand(MobileResultCodeIs(mobile_apis::Result::SUCCESS),
-                          am::commands::Command::SOURCE_SDL,
-                          std::string()));
+                          am::commands::Command::SOURCE_SDL));
   command_->on_event(event);
 }
 

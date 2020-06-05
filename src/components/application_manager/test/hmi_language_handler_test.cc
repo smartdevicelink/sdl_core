@@ -170,7 +170,7 @@ TEST_F(HmiLanguageHandlerTest, OnEvent_AllLanguageIsReceivedAndSame_SUCCESS) {
   // will never be called.
   EXPECT_CALL(app_manager_, applications()).Times(0);
   EXPECT_CALL(app_manager_, GetRPCService()).Times(0);
-  EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(_, _, _)).Times(0);
+  EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(_, _)).Times(0);
   EXPECT_CALL(app_manager_, UnregisterApplication(_, _, _, _)).Times(0);
   Event tts_event(hmi_apis::FunctionID::TTS_GetLanguage);
   hmi_language_handler_->on_event(tts_event);
@@ -208,7 +208,7 @@ TEST_F(HmiLanguageHandlerTest, OnEvent_AllReceivedLanguagesMismatch_SUCCESS) {
   // app data will checked by `CheckApplication` method
   ON_CALL(app_manager_, applications()).WillByDefault(Return(data_accessor));
   EXPECT_CALL(app_manager_, GetRPCService()).Times(0);
-  EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(_, _, _)).Times(0);
+  EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(_, _)).Times(0);
   EXPECT_CALL(app_manager_, UnregisterApplication(_, _, _, _)).Times(0);
 
   Event tts_event(hmi_apis::FunctionID::TTS_GetLanguage);
@@ -325,8 +325,7 @@ TEST_F(HmiLanguageHandlerTest,
   // method, second time in `HandleWrongLanguageApp`.
   EXPECT_CALL(app_manager_, GetRPCService())
       .WillRepeatedly(ReturnRef(mock_rpc_service_));
-  EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(_, _, std::string()))
-      .Times(2);
+  EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(_, _)).Times(2);
   EXPECT_CALL(app_manager_, UnregisterApplication(_, _, _, _)).Times(1);
   hmi_language_handler_->on_event(event);
 }
@@ -355,7 +354,7 @@ TEST_F(HmiLanguageHandlerTest, OnUnregisterApp_SUCCESS) {
                          hmi_apis::Common_Language::eType::RU_RU,
                          hmi_apis::Common_Language::eType::RU_RU);
   EXPECT_CALL(app_manager_, GetRPCService()).Times(0);
-  EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(_, _, _)).Times(0);
+  EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(_, _)).Times(0);
   EXPECT_CALL(app_manager_, UnregisterApplication(_, _, _, _)).Times(0);
   hmi_language_handler_->on_event(event);
 }

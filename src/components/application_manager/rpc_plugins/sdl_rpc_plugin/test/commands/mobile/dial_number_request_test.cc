@@ -76,11 +76,10 @@ TEST_F(DialNumberRequestTest, Run_ApplicationIsNotRegistered_UNSUCCESS) {
   EXPECT_CALL(app_mngr_, application(_))
       .WillOnce(Return(ApplicationSharedPtr()));
 
-  EXPECT_CALL(mock_rpc_service_,
-              ManageMobileCommand(
-                  MobileResultCodeIs(mobile_result::APPLICATION_NOT_REGISTERED),
-                  _,
-                  std::string()));
+  EXPECT_CALL(
+      mock_rpc_service_,
+      ManageMobileCommand(
+          MobileResultCodeIs(mobile_result::APPLICATION_NOT_REGISTERED), _));
 
   command->Run();
 }
@@ -98,8 +97,7 @@ TEST_F(DialNumberRequestTest, Run_InvalidNumber_UNSUCCESS) {
 
   EXPECT_CALL(
       mock_rpc_service_,
-      ManageMobileCommand(
-          MobileResultCodeIs(mobile_result::INVALID_DATA), _, std::string()));
+      ManageMobileCommand(MobileResultCodeIs(mobile_result::INVALID_DATA), _));
 
   command->Run();
 }
@@ -117,8 +115,7 @@ TEST_F(DialNumberRequestTest, Run_EmptyNumber_UNSUCCESS) {
 
   EXPECT_CALL(
       mock_rpc_service_,
-      ManageMobileCommand(
-          MobileResultCodeIs(mobile_result::INVALID_DATA), _, std::string()));
+      ManageMobileCommand(MobileResultCodeIs(mobile_result::INVALID_DATA), _));
 
   command->Run();
 }
@@ -154,7 +151,7 @@ TEST_F(DialNumberRequestTest, OnEvent_UnknownEvent_UNSUCCESS) {
   EXPECT_CALL(app_mngr_, application(kConnectionKey)).WillOnce(Return(app));
 
   Event event(hmi_apis::FunctionID::INVALID_ENUM);
-  EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(_, _, _)).Times(0);
+  EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(_, _)).Times(0);
 
   command->on_event(event);
 }
@@ -175,8 +172,7 @@ TEST_F(DialNumberRequestTest, OnEvent_SUCCESS) {
       .WillByDefault(ReturnRef(mock_rpc_service_));
   EXPECT_CALL(
       mock_rpc_service_,
-      ManageMobileCommand(
-          MobileResultCodeIs(mobile_apis::Result::SUCCESS), _, std::string()));
+      ManageMobileCommand(MobileResultCodeIs(mobile_apis::Result::SUCCESS), _));
 
   MessageSharedPtr command_msg(CreateMessage(smart_objects::SmartType_Map));
   (*command_msg)[am::strings::params][am::strings::connection_key] =

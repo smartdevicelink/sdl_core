@@ -112,6 +112,11 @@ EncryptionFlagCheckResult RPCServiceImpl::IsEncryptionRequired(
              ? EncryptionFlagCheckResult::kSuccess_Protected
              : EncryptionFlagCheckResult::kSuccess_NotProtected;
 }
+bool RPCServiceImpl::ManageMobileCommand(
+    const commands::MessageSharedPtr message,
+    commands::Command::CommandSource source) {
+  return ManageMobileCommand(message, source, std::string());
+}
 
 bool RPCServiceImpl::ManageMobileCommand(
     const commands::MessageSharedPtr message,

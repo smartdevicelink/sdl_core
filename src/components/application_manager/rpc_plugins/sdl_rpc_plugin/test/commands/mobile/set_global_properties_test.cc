@@ -211,8 +211,7 @@ class SetGlobalPropertiesRequestTest
     EXPECT_CALL(mock_rpc_service_,
                 ManageMobileCommand(
                     MobileResultCodeIs(mobile_apis::Result::INVALID_DATA),
-                    am::commands::Command::SOURCE_SDL,
-                    std::string()));
+                    am::commands::Command::SOURCE_SDL));
   }
 
   void ExpectVerifyImageVrHelpSuccess(SmartObject& smart_obj) {
@@ -481,8 +480,7 @@ TEST_F(SetGlobalPropertiesRequestTest,
   MessageSharedPtr ui_command_result;
   EXPECT_CALL(
       mock_rpc_service_,
-      ManageMobileCommand(
-          _, am::commands::Command::CommandSource::SOURCE_SDL, std::string()))
+      ManageMobileCommand(_, am::commands::Command::CommandSource::SOURCE_SDL))
       .WillOnce(DoAll(SaveArg<0>(&ui_command_result), Return(true)));
   EXPECT_CALL(*mock_help_prompt_manager_,
               OnSetGlobalPropertiesReceived(_, true));
@@ -514,8 +512,7 @@ TEST_F(SetGlobalPropertiesRequestTest, OnEvent_SUCCESS_Expect_MessageNotSend) {
 
   EXPECT_CALL(
       mock_rpc_service_,
-      ManageMobileCommand(
-          _, am::commands::Command::CommandSource::SOURCE_SDL, std::string()))
+      ManageMobileCommand(_, am::commands::Command::CommandSource::SOURCE_SDL))
       .Times(0);
   command->on_event(event);
 }
@@ -547,8 +544,7 @@ TEST_F(SetGlobalPropertiesRequestTest,
   MessageSharedPtr response_to_mobile;
   EXPECT_CALL(
       mock_rpc_service_,
-      ManageMobileCommand(
-          _, am::commands::Command::CommandSource::SOURCE_SDL, std::string()))
+      ManageMobileCommand(_, am::commands::Command::CommandSource::SOURCE_SDL))
       .WillOnce(DoAll(SaveArg<0>(&response_to_mobile), Return(true)));
 
   command->Run();
@@ -1341,9 +1337,8 @@ TEST_F(SetGlobalPropertiesRequestTest, OnEvent_UIAndSuccessResultCode_SUCCESS) {
 
   EXPECT_CALL(mock_hmi_interfaces_, GetInterfaceState(_))
       .WillRepeatedly(Return(am::HmiInterfaces::STATE_NOT_AVAILABLE));
-  EXPECT_CALL(
-      mock_rpc_service_,
-      ManageMobileCommand(_, am::commands::Command::SOURCE_SDL, std::string()))
+  EXPECT_CALL(mock_rpc_service_,
+              ManageMobileCommand(_, am::commands::Command::SOURCE_SDL))
       .WillOnce(Return(true));
 
   command->on_event(event);
@@ -1376,9 +1371,8 @@ TEST_F(SetGlobalPropertiesRequestTest, OnEvent_UIAndWarningResultCode_SUCCESS) {
               OnSetGlobalPropertiesReceived(_, true));
   EXPECT_CALL(mock_hmi_interfaces_, GetInterfaceState(_))
       .WillRepeatedly(Return(am::HmiInterfaces::STATE_NOT_AVAILABLE));
-  EXPECT_CALL(
-      mock_rpc_service_,
-      ManageMobileCommand(_, am::commands::Command::SOURCE_SDL, std::string()))
+  EXPECT_CALL(mock_rpc_service_,
+              ManageMobileCommand(_, am::commands::Command::SOURCE_SDL))
       .WillOnce(Return(true));
 
   command->on_event(event);
@@ -1448,9 +1442,8 @@ TEST_F(SetGlobalPropertiesRequestTest,
   OnEventTTSSetupHelper(msg, command);
   EXPECT_CALL(mock_hmi_interfaces_, GetInterfaceState(_))
       .WillRepeatedly(Return(am::HmiInterfaces::STATE_NOT_AVAILABLE));
-  EXPECT_CALL(
-      mock_rpc_service_,
-      ManageMobileCommand(_, am::commands::Command::SOURCE_SDL, std::string()))
+  EXPECT_CALL(mock_rpc_service_,
+              ManageMobileCommand(_, am::commands::Command::SOURCE_SDL))
       .WillOnce(Return(true));
   EXPECT_CALL(*mock_help_prompt_manager_,
               OnSetGlobalPropertiesReceived(_, true));
@@ -1491,8 +1484,7 @@ TEST_F(SetGlobalPropertiesRequestTest,
   MessageSharedPtr ui_command_result;
   EXPECT_CALL(
       mock_rpc_service_,
-      ManageMobileCommand(
-          _, am::commands::Command::CommandSource::SOURCE_SDL, std::string()))
+      ManageMobileCommand(_, am::commands::Command::CommandSource::SOURCE_SDL))
       .WillOnce(DoAll(SaveArg<0>(&ui_command_result), Return(true)));
 
   EXPECT_CALL(app_mngr_, application(kConnectionKey))

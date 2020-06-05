@@ -148,8 +148,7 @@ TEST_F(ScrollableMessageRequestTest, OnEvent_UI_UNSUPPORTED_RESOURCE) {
 
   EXPECT_CALL(
       mock_rpc_service_,
-      ManageMobileCommand(
-          _, am::commands::Command::CommandSource::SOURCE_SDL, std::string()))
+      ManageMobileCommand(_, am::commands::Command::CommandSource::SOURCE_SDL))
       .WillOnce(DoAll(SaveArg<0>(&ui_command_result), Return(true)));
 
   command->on_event(event);
@@ -191,11 +190,10 @@ TEST_F(ScrollableMessageRequestTest, Run_ApplicationIsNotRegistered_UNSUCCESS) {
   EXPECT_CALL(app_mngr_, application(_))
       .WillOnce(Return(ApplicationSharedPtr()));
 
-  EXPECT_CALL(mock_rpc_service_,
-              ManageMobileCommand(
-                  MobileResultCodeIs(mobile_result::APPLICATION_NOT_REGISTERED),
-                  _,
-                  std::string()));
+  EXPECT_CALL(
+      mock_rpc_service_,
+      ManageMobileCommand(
+          MobileResultCodeIs(mobile_result::APPLICATION_NOT_REGISTERED), _));
   command_->Run();
 }
 
@@ -237,7 +235,7 @@ TEST_F(ScrollableMessageRequestTest, Run_SoftButtonProcessingResult_SUCCESS) {
 }
 
 TEST_F(ScrollableMessageRequestTest, OnEvent_ReceivedUnknownEvent_UNSUCCESS) {
-  EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(_, _, _)).Times(0);
+  EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(_, _)).Times(0);
   Event event(hmi_apis::FunctionID::INVALID_ENUM);
   command_->on_event(event);
 }
@@ -260,8 +258,7 @@ TEST_F(ScrollableMessageRequestTest,
 
   EXPECT_CALL(
       mock_rpc_service_,
-      ManageMobileCommand(
-          MobileResultCodeIs(mobile_apis::Result::SUCCESS), _, std::string()));
+      ManageMobileCommand(MobileResultCodeIs(mobile_apis::Result::SUCCESS), _));
   Event event(hmi_apis::FunctionID::UI_ScrollableMessage);
   event.set_smart_object(*msg_);
   command_->on_event(event);
@@ -272,11 +269,10 @@ TEST_F(ScrollableMessageRequestTest,
   (*msg_)[params][hmi_response::code] =
       hmi_apis::Common_Result::UNSUPPORTED_RESOURCE;
 
-  EXPECT_CALL(mock_rpc_service_,
-              ManageMobileCommand(
-                  MobileResultCodeIs(mobile_apis::Result::UNSUPPORTED_RESOURCE),
-                  _,
-                  std::string()));
+  EXPECT_CALL(
+      mock_rpc_service_,
+      ManageMobileCommand(
+          MobileResultCodeIs(mobile_apis::Result::UNSUPPORTED_RESOURCE), _));
   Event event(hmi_apis::FunctionID::UI_ScrollableMessage);
   event.set_smart_object(*msg_);
   command_->on_event(event);

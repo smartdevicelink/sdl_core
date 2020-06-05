@@ -181,8 +181,7 @@ TEST_F(CreateInteractionChoiceSetRequestTest, OnTimeout_GENERIC_ERROR) {
 
   EXPECT_CALL(
       mock_rpc_service_,
-      ManageMobileCommand(
-          _, am::commands::Command::CommandSource::SOURCE_SDL, std::string()))
+      ManageMobileCommand(_, am::commands::Command::CommandSource::SOURCE_SDL))
       .WillOnce(DoAll(SaveArg<0>(&vr_command_result), Return(true)));
 
   req_vr->onTimeOut();
@@ -242,8 +241,7 @@ TEST_F(CreateInteractionChoiceSetRequestTest, OnEvent_VR_UNSUPPORTED_RESOURCE) {
 
   EXPECT_CALL(
       mock_rpc_service_,
-      ManageMobileCommand(
-          _, am::commands::Command::CommandSource::SOURCE_SDL, std::string()))
+      ManageMobileCommand(_, am::commands::Command::CommandSource::SOURCE_SDL))
       .WillOnce(DoAll(SaveArg<0>(&vr_command_result), Return(true)));
 
   req_vr->on_event(event);
@@ -704,8 +702,7 @@ TEST_F(CreateInteractionChoiceSetRequestTest,
   EXPECT_CALL(mock_rpc_service_,
               ManageMobileCommand(
                   MobileResultCodeIs(mobile_apis::Result::GENERIC_ERROR),
-                  am::commands::Command::SOURCE_SDL,
-                  std::string()));
+                  am::commands::Command::SOURCE_SDL));
 
   EXPECT_CALL(app_mngr_, TerminateRequest(_, _, _));
   command_->onTimeOut();
@@ -750,7 +747,7 @@ TEST_F(CreateInteractionChoiceSetRequestTest,
 
   EXPECT_CALL(*mock_app_, RemoveChoiceSet(kChoiceSetId));
 
-  EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(_, _, _)).Times(0);
+  EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(_, _)).Times(0);
   EXPECT_CALL(app_mngr_, TerminateRequest(_, _, _));
   command_->onTimeOut();
 }
@@ -911,8 +908,7 @@ TEST_F(CreateInteractionChoiceSetRequestTest, Run_ErrorFromHmiFalse_UNSUCCESS) {
   EXPECT_CALL(mock_rpc_service_,
               ManageMobileCommand(
                   MobileResultCodeIs(mobile_apis::Result::GENERIC_ERROR),
-                  am::commands::Command::SOURCE_SDL,
-                  std::string()));
+                  am::commands::Command::SOURCE_SDL));
   EXPECT_CALL(app_mngr_, updateRequestTimeout(_, _, _)).Times(0);
   EXPECT_CALL(app_mngr_, TerminateRequest(_, _, _));
   event.set_smart_object(*message_);

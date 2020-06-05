@@ -203,7 +203,7 @@ TEST_F(SubscribeButtonRequestTest, Run_SUCCESS) {
       .WillOnce(DoAll(SaveArg<0>(&hmi_result_msg), Return(true)));
 
   MessageSharedPtr mobile_result_msg;
-  EXPECT_CALL(this->mock_rpc_service_, ManageMobileCommand(_, _, _))
+  EXPECT_CALL(this->mock_rpc_service_, ManageMobileCommand(_, _))
       .WillOnce(DoAll(SaveArg<0>(&mobile_result_msg), Return(true)));
   ASSERT_TRUE(command->Init());
   command->Run();
@@ -250,7 +250,7 @@ TEST_F(SubscribeButtonRequestTest, Run_NAV_SUCCESS) {
       .WillOnce(DoAll(SaveArg<0>(&hmi_result_msg), Return(true)));
 
   MessageSharedPtr mobile_result_msg;
-  EXPECT_CALL(this->mock_rpc_service_, ManageMobileCommand(_, _, _))
+  EXPECT_CALL(this->mock_rpc_service_, ManageMobileCommand(_, _))
       .WillOnce(DoAll(SaveArg<0>(&mobile_result_msg), Return(true)));
   ASSERT_TRUE(command->Init());
   command->Run();
@@ -299,7 +299,7 @@ TEST_F(SubscribeButtonRequestTest, Run_SUCCESS_App_Base_RPC_Version) {
       .WillOnce(DoAll(SaveArg<0>(&hmi_result_msg), Return(true)));
 
   MessageSharedPtr mobile_result_msg;
-  EXPECT_CALL(this->mock_rpc_service_, ManageMobileCommand(_, _, _))
+  EXPECT_CALL(this->mock_rpc_service_, ManageMobileCommand(_, _))
       .WillOnce(DoAll(SaveArg<0>(&mobile_result_msg), Return(true)));
   ASSERT_TRUE(command->Init());
   command->Run();

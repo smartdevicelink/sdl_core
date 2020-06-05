@@ -84,11 +84,10 @@ TEST_F(DiagnosticMessageRequestTest, Run_ApplicationIsNotRegistered_UNSUCCESS) {
   EXPECT_CALL(app_mngr_, application(kConnectionKey))
       .WillOnce(Return(ApplicationSharedPtr()));
 
-  EXPECT_CALL(mock_rpc_service_,
-              ManageMobileCommand(
-                  MobileResultCodeIs(mobile_result::APPLICATION_NOT_REGISTERED),
-                  _,
-                  std::string()));
+  EXPECT_CALL(
+      mock_rpc_service_,
+      ManageMobileCommand(
+          MobileResultCodeIs(mobile_result::APPLICATION_NOT_REGISTERED), _));
 
   command->Run();
 }
@@ -115,8 +114,7 @@ TEST_F(DiagnosticMessageRequestTest, Run_NotSupportedDiagnosticMode_UNSUCCESS) {
 
   EXPECT_CALL(
       mock_rpc_service_,
-      ManageMobileCommand(
-          MobileResultCodeIs(mobile_result::REJECTED), _, std::string()));
+      ManageMobileCommand(MobileResultCodeIs(mobile_result::REJECTED), _));
 
   command->Run();
 }
@@ -158,7 +156,7 @@ TEST_F(DiagnosticMessageRequestTest, OnEvent_UNSUCCESS) {
   DiagnosticMessageRequestPtr command(
       CreateCommandVI<DiagnosticMessageRequest>());
 
-  EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(_, _, _)).Times(0);
+  EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(_, _)).Times(0);
 
   command->on_event(event);
 }
@@ -177,8 +175,7 @@ TEST_F(DiagnosticMessageRequestTest, OnEvent_SUCCESS) {
 
   EXPECT_CALL(
       mock_rpc_service_,
-      ManageMobileCommand(
-          MobileResultCodeIs(mobile_result::SUCCESS), _, std::string()));
+      ManageMobileCommand(MobileResultCodeIs(mobile_result::SUCCESS), _));
 
   command->on_event(event);
 }

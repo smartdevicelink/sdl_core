@@ -191,8 +191,7 @@ TEST_F(DeleteCommandRequestTest,
   MessageSharedPtr vr_command_result;
   EXPECT_CALL(
       mock_rpc_service_,
-      ManageMobileCommand(
-          _, am::commands::Command::CommandSource::SOURCE_SDL, std::string()))
+      ManageMobileCommand(_, am::commands::Command::CommandSource::SOURCE_SDL))
       .WillOnce(DoAll(SaveArg<0>(&vr_command_result), Return(true)));
 
   EXPECT_CALL(*mock_app_, help_prompt_manager())

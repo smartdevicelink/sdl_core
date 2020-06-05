@@ -181,8 +181,7 @@ TEST_F(PerformAudioPassThruRequestTest, OnTimeout_GENERIC_ERROR) {
   MessageSharedPtr vr_command_result;
   EXPECT_CALL(
       mock_rpc_service_,
-      ManageMobileCommand(
-          _, am::commands::Command::CommandSource::SOURCE_SDL, std::string()))
+      ManageMobileCommand(_, am::commands::Command::CommandSource::SOURCE_SDL))
       .WillOnce(DoAll(SaveArg<0>(&vr_command_result), Return(true)));
 
   command->onTimeOut();
@@ -246,8 +245,7 @@ TEST_F(PerformAudioPassThruRequestTest,
       .WillRepeatedly(Return(true));
   EXPECT_CALL(
       mock_rpc_service_,
-      ManageMobileCommand(
-          _, am::commands::Command::CommandSource::SOURCE_SDL, std::string()))
+      ManageMobileCommand(_, am::commands::Command::CommandSource::SOURCE_SDL))
       .WillOnce(DoAll(SaveArg<0>(&response_to_mobile), Return(true)));
 
   EXPECT_CALL(mock_message_helper_,
@@ -396,7 +394,7 @@ TEST_F(PerformAudioPassThruRequestTest,
       .WillByDefault(Return(am::HmiInterfaces::HMI_INTERFACE_TTS));
   ON_CALL(mock_hmi_interfaces_, GetInterfaceState(_))
       .WillByDefault(Return(am::HmiInterfaces::STATE_AVAILABLE));
-  EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(_, _, _)).Times(0);
+  EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(_, _)).Times(0);
 
   CallOnEvent on_event_caller(*command_sptr_, event);
   MessageSharedPtr command_result = CatchHMICommandResult(on_event_caller);
@@ -757,7 +755,7 @@ TEST_F(PerformAudioPassThruRequestTest,
 
   // For setting current_state_ -> kCompleted
 
-  EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(_, _, _));
+  EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(_, _));
   command_sptr_->SendResponse(true, am::mobile_api::Result::SUCCESS);
   EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_, _)).Times(0);
 
@@ -823,9 +821,8 @@ TEST_F(PerformAudioPassThruRequestTest,
 
   // For setting current_state_ -> kCompleted
 
-  EXPECT_CALL(
-      mock_rpc_service_,
-      ManageMobileCommand(_, am::commands::Command::SOURCE_SDL, std::string()));
+  EXPECT_CALL(mock_rpc_service_,
+              ManageMobileCommand(_, am::commands::Command::SOURCE_SDL));
   command_sptr_->SendResponse(true, am::mobile_api::Result::SUCCESS);
 
   EXPECT_CALL(mock_rpc_service_,

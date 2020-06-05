@@ -92,11 +92,10 @@ TEST_F(GetVehicleDataRequestTest, Run_ApplicationIsNotRegistered_UNSUCCESS) {
   EXPECT_CALL(app_mngr_, application(_))
       .WillOnce(Return(ApplicationSharedPtr()));
 
-  EXPECT_CALL(mock_rpc_service_,
-              ManageMobileCommand(
-                  MobileResultCodeIs(mobile_result::APPLICATION_NOT_REGISTERED),
-                  _,
-                  std::string()));
+  EXPECT_CALL(
+      mock_rpc_service_,
+      ManageMobileCommand(
+          MobileResultCodeIs(mobile_result::APPLICATION_NOT_REGISTERED), _));
 
   command->Run();
 }
@@ -122,8 +121,7 @@ TEST_F(GetVehicleDataRequestTest, Run_TooHighFrequency_UNSUCCESS) {
 
   EXPECT_CALL(
       mock_rpc_service_,
-      ManageMobileCommand(
-          MobileResultCodeIs(mobile_result::REJECTED), _, std::string()));
+      ManageMobileCommand(MobileResultCodeIs(mobile_result::REJECTED), _));
 
   command->Run();
 }
@@ -148,8 +146,7 @@ TEST_F(GetVehicleDataRequestTest, Run_EmptyMsgParams_UNSUCCESS) {
 
   EXPECT_CALL(
       mock_rpc_service_,
-      ManageMobileCommand(
-          MobileResultCodeIs(mobile_result::INVALID_DATA), _, std::string()));
+      ManageMobileCommand(MobileResultCodeIs(mobile_result::INVALID_DATA), _));
 
   command->Run();
 }
@@ -179,8 +176,7 @@ TEST_F(GetVehicleDataRequestTest,
 
   EXPECT_CALL(
       mock_rpc_service_,
-      ManageMobileCommand(
-          MobileResultCodeIs(mobile_result::DISALLOWED), _, std::string()));
+      ManageMobileCommand(MobileResultCodeIs(mobile_result::DISALLOWED), _));
 
   command->Run();
 }
@@ -224,7 +220,7 @@ TEST_F(GetVehicleDataRequestTest, OnEvent_UnknownEvent_UNSUCCESS) {
 
   Event event(hmi_apis::FunctionID::INVALID_ENUM);
 
-  EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(_, _, _)).Times(0);
+  EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(_, _)).Times(0);
 
   command->on_event(event);
 }
@@ -255,8 +251,7 @@ TEST_F(GetVehicleDataRequestTest, OnEvent_DataNotAvailable_SUCCESS) {
   event.set_smart_object(*event_msg);
 
   EXPECT_CALL(mock_rpc_service_,
-              ManageMobileCommand(
-                  MobileResultCodeIs(mobile_response_code), _, std::string()));
+              ManageMobileCommand(MobileResultCodeIs(mobile_response_code), _));
 
   command->on_event(event);
 }

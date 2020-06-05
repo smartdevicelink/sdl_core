@@ -95,11 +95,9 @@ TEST_F(AddSubMenuRequestTest, Run_ImageVerificationFailed_EXPECT_INVALID_DATA) {
 
   EXPECT_CALL(mock_message_helper_, VerifyImage(image, _, _))
       .WillOnce(Return(mobile_apis::Result::INVALID_DATA));
-  EXPECT_CALL(
-      mock_rpc_service_,
-      ManageMobileCommand(MobileResultCodeIs(mobile_apis::Result::INVALID_DATA),
-                          _,
-                          std::string()));
+  EXPECT_CALL(mock_rpc_service_,
+              ManageMobileCommand(
+                  MobileResultCodeIs(mobile_apis::Result::INVALID_DATA), _));
   std::shared_ptr<AddSubMenuRequest> request_ptr =
       CreateCommand<AddSubMenuRequest>(msg);
 
@@ -132,8 +130,7 @@ TEST_F(AddSubMenuRequestTest, OnEvent_UI_UNSUPPORTED_RESOURCE) {
   MessageSharedPtr ui_command_result;
   EXPECT_CALL(
       mock_rpc_service_,
-      ManageMobileCommand(
-          _, am::commands::Command::CommandSource::SOURCE_SDL, std::string()))
+      ManageMobileCommand(_, am::commands::Command::CommandSource::SOURCE_SDL))
       .WillOnce(DoAll(SaveArg<0>(&ui_command_result), Return(true)));
   command->Init();
   command->on_event(event);

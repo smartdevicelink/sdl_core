@@ -168,8 +168,7 @@ TEST_F(HMIOnDriverDistractionNotificationTest,
               ManageMobileCommand(
                   CheckNotificationParams(
                       am::mobile_api::FunctionID::OnDriverDistractionID, state),
-                  Command::CommandSource::SOURCE_SDL,
-                  std::string()))
+                  Command::CommandSource::SOURCE_SDL))
       .WillOnce(DoAll(SaveArg<0>(&message_to_mobile), Return(true)));
   command->Run();
 
@@ -246,9 +245,8 @@ TEST_F(HMIOnDriverDistractionNotificationTest,
       .WillByDefault(GetArg4(&result));
 
   MessageSharedPtr command_result;
-  EXPECT_CALL(
-      mock_rpc_service_,
-      ManageMobileCommand(_, Command::CommandSource::SOURCE_SDL, std::string()))
+  EXPECT_CALL(mock_rpc_service_,
+              ManageMobileCommand(_, Command::CommandSource::SOURCE_SDL))
       .WillOnce(DoAll(SaveArg<0>(&command_result), Return(true)));
 
   command->Run();
@@ -296,8 +294,7 @@ TEST_F(HMIOnDriverDistractionNotificationTest,
               ManageMobileCommand(
                   CheckNotificationParams(
                       am::mobile_api::FunctionID::OnDriverDistractionID, state),
-                  Command::CommandSource::SOURCE_SDL,
-                  std::string()))
+                  Command::CommandSource::SOURCE_SDL))
       .WillOnce(DoAll(SaveArg<0>(&message_to_mobile), Return(true)));
   command->Run();
 
@@ -344,8 +341,7 @@ TEST_F(HMIOnDriverDistractionNotificationTest,
               ManageMobileCommand(
                   CheckNotificationParams(
                       am::mobile_api::FunctionID::OnDriverDistractionID, state),
-                  Command::CommandSource::SOURCE_SDL,
-                  std::string()))
+                  Command::CommandSource::SOURCE_SDL))
       .WillOnce(DoAll(SaveArg<0>(&message_to_mobile), Return(true)));
   command->Run();
 

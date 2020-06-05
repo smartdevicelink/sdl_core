@@ -58,10 +58,11 @@ class RPCService {
    * applies to requests from mobile.
    * @return true if command is executed, otherwise return false
    */
-  virtual bool ManageMobileCommand(
-      const commands::MessageSharedPtr message,
-      commands::Command::CommandSource source,
-      const std::string warning_info = std::string()) = 0;
+  virtual bool ManageMobileCommand(const commands::MessageSharedPtr message,
+                                   commands::Command::CommandSource source) = 0;
+  virtual bool ManageMobileCommand(const commands::MessageSharedPtr message,
+                                   commands::Command::CommandSource source,
+                                   const std::string warning_info) = 0;
 
   /**
    * @brief ManageHMICommand convert message to HMI command and execute it

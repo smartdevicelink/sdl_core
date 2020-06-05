@@ -68,7 +68,7 @@ class ReadDIDRequestTest
 TEST_F(ReadDIDRequestTest, OnEvent_WrongEventId_UNSUCCESS) {
   Event event(Event::EventID::INVALID_ENUM);
   std::shared_ptr<ReadDIDRequest> command(CreateCommandVI<ReadDIDRequest>());
-  EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(_, _, _)).Times(0);
+  EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(_, _)).Times(0);
   command->on_event(event);
 }
 
@@ -88,8 +88,7 @@ TEST_F(ReadDIDRequestTest, OnEvent_SUCCESS) {
   event.set_smart_object(*event_msg);
 
   EXPECT_CALL(mock_rpc_service_,
-              ManageMobileCommand(
-                  MobileResultCodeIs(mobile_response_code), _, std::string()));
+              ManageMobileCommand(MobileResultCodeIs(mobile_response_code), _));
 
   MockAppPtr app(CreateMockApp());
   EXPECT_CALL(app_mngr_, application(_)).WillRepeatedly(Return(app));
