@@ -115,7 +115,7 @@ bool CArraySchemaItem::filterInvalidEnums(
     // Mark this container as invalid if it is below the minimum size after
     // filtering
     size_t minSize;
-    if (mMinSize.getValue(minSize) && array->size() > minSize &&
+    if (mMinSize.getValue(minSize) && array->size() < minSize &&
         filtered_count > 0) {
       return true;
     }
