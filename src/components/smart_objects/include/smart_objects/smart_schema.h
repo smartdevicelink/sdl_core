@@ -64,7 +64,7 @@ class CSmartSchema FINAL {
    * @brief Validate smart object.
    *
    * @param Object Object to validate.
-   * @param report__ object for reporting errors during validation
+   * @param report object for reporting errors during validation
    * @param MessageVersion to check mobile RPC version against RPC Spec History
    * @param allow_unknown_enums
    *   false - unknown enum values (left as string values after applySchema)
@@ -74,7 +74,7 @@ class CSmartSchema FINAL {
    **/
   errors::eType validate(
       const SmartObject& Object,
-      rpc::ValidationReport* report__,
+      rpc::ValidationReport* report,
       const utils::SemanticVersion& messageVersion = utils::SemanticVersion(),
       const bool allow_unknown_enums = false) const;
 
@@ -99,13 +99,13 @@ class CSmartSchema FINAL {
    * @param remove_unknown_parameters contains true if need to remove unknown
    * parameters from smart object, otherwise contains false.
    * @param MessageVersion the version of the schema to be applied
-   * @param report__ object for reporting warnings during schema application
+   * @param report object for reporting warnings during schema application
    **/
   void applySchema(
       SmartObject& Object,
       const bool remove_unknown_parameters,
       const utils::SemanticVersion& MessageVersion = utils::SemanticVersion(),
-      rpc::ValidationReport* report__ = nullptr);
+      rpc::ValidationReport* report = nullptr);
 
   /**
    * @brief The reverse SmartObject conversion using schema.

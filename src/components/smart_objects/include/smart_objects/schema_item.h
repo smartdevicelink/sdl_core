@@ -68,7 +68,7 @@ class ISchemaItem {
    * @brief Validate smart object.
    *
    * @param Object Object to validate.
-   * @param report__ object for reporting errors during validation
+   * @param report object for reporting errors during validation
    * message if an error occurs
    * @param MessageVersion to check mobile RPC version against RPC Spec History
    * @param allow_unknown_enums
@@ -79,7 +79,7 @@ class ISchemaItem {
    **/
   virtual errors::eType validate(
       const SmartObject& Object,
-      rpc::ValidationReport* report__,
+      rpc::ValidationReport* report,
       const utils::SemanticVersion& MessageVersion = utils::SemanticVersion(),
       const bool allow_unknown_enums = false);
 
@@ -106,14 +106,14 @@ class ISchemaItem {
    *
    * @param Object Object to check for invalid enum values
    * @param MessageVersion the version of the schema to use for validation
-   * @param report__ object for reporting enums which were removed during the
+   * @param report object for reporting enums which were removed during the
    * process
    *
    * @return true if the value being checked should be filtered, false otherwise
    **/
   virtual bool filterInvalidEnums(SmartObject& Object,
                                   const utils::SemanticVersion& MessageVersion,
-                                  rpc::ValidationReport* report__);
+                                  rpc::ValidationReport* report);
 
   /**
    * @brief Apply schema.

@@ -106,7 +106,7 @@ class TEnumSchemaItem : public CDefaultSchemaItem<EnumType> {
   /**
    * @brief Validate smart object.
    * @param Object Object to validate.
-   * @param report__ object for reporting errors during validation
+   * @param report object for reporting errors during validation
    * @param MessageVersion to check mobile RPC version against RPC Spec History
    * @param allow_unknown_enums
    *   false - unknown enum values (left as string values after applySchema)
@@ -116,7 +116,7 @@ class TEnumSchemaItem : public CDefaultSchemaItem<EnumType> {
    **/
   errors::eType validate(
       const SmartObject& Object,
-      rpc::ValidationReport* report__,
+      rpc::ValidationReport* report,
       const utils::SemanticVersion& MessageVersion = utils::SemanticVersion(),
       const bool allow_unknown_enums = false) OVERRIDE;
   /**
@@ -130,7 +130,7 @@ class TEnumSchemaItem : public CDefaultSchemaItem<EnumType> {
 
   bool filterInvalidEnums(SmartObject& Object,
                           const utils::SemanticVersion& MessageVersion,
-                          rpc::ValidationReport* report__) OVERRIDE;
+                          rpc::ValidationReport* report) OVERRIDE;
 
   /**
    * @brief Apply schema.
@@ -321,12 +321,12 @@ template <typename EnumType>
 bool TEnumSchemaItem<EnumType>::filterInvalidEnums(
     SmartObject& Object,
     const utils::SemanticVersion& MessageVersion,
-    rpc::ValidationReport* report__) {
+    rpc::ValidationReport* report) {
   rpc::ValidationReport dummy_report("");
   if (validate(Object, &dummy_report, MessageVersion, false) != errors::OK) {
     std::string validation_info =
         "Filtered invalid value - " + Object.asString();
-    report__->set_validation_info(validation_info);
+    report->set_validation_info(validation_info);
     return true;
   }
   return false;
@@ -335,7 +335,7 @@ bool TEnumSchemaItem<EnumType>::filterInvalidEnums(
 template <typename EnumType>
 errors::eType TEnumSchemaItem<EnumType>::validate(
     const SmartObject& Object,
-    rpc::ValidationReport* report__,
+    rpc::ValidationReport* report,
     const utils::SemanticVersion& MessageVersion,
     const bool allow_unknown_enums) {
   if (SmartType_Integer != Object.getType()) {
@@ -351,7 +351,7 @@ errors::eType TEnumSchemaItem<EnumType>::validate(
           SmartObject::typeToString(SmartType_Integer) +
           " (enum), got: " + SmartObject::typeToString(Object.getType());
     }
-    report__->set_validation_info(validation_info);
+    report->set_validation_info(validation_info);
     return errors::INVALID_VALUE;
   }
 
@@ -362,7 +362,7 @@ errors::eType TEnumSchemaItem<EnumType>::validate(
     std::stringstream stream;
     stream << "Invalid enum value: " << Object.asInt();
     std::string validation_info = stream.str();
-    report__->set_validation_info(validation_info);
+    report->set_validation_info(validation_info);
     return errors::OUT_OF_RANGE;
   }
 
@@ -379,7 +379,7 @@ errors::eType TEnumSchemaItem<EnumType>::validate(
           std::string validation_info = "Enum value : " + Object.asString() +
                                         " removed for SyncMsgVersion " +
                                         MessageVersion.toString();
-          report__->set_validation_info(validation_info);
+          report->set_validation_info(validation_info);
           return errors::INVALID_VALUE;
         } else if (signature.mSince == boost::none &&
                    signature.mUntil == boost::none) {
@@ -387,7 +387,7 @@ errors::eType TEnumSchemaItem<EnumType>::validate(
           std::string validation_info = "Enum value : " + Object.asString() +
                                         " does not exist for SyncMsgVersion " +
                                         MessageVersion.toString();
-          report__->set_validation_info(validation_info);
+          report->set_validation_info(validation_info);
           return errors::INVALID_VALUE;
         }
       }

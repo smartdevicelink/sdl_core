@@ -37,7 +37,7 @@ namespace ns_smart_objects {
 
 errors::eType ISchemaItem::validate(
     const SmartObject& object,
-    rpc::ValidationReport* report__,
+    rpc::ValidationReport* report,
     const utils::SemanticVersion& MessageVersion,
     const bool allow_unknown_enums) {
   return errors::ERROR;
@@ -54,7 +54,7 @@ bool ISchemaItem::hasDefaultValue(SmartObject& Object) {
 bool ISchemaItem::filterInvalidEnums(
     SmartObject& Object,
     const utils::SemanticVersion& MessageVersion,
-    rpc::ValidationReport* report__) {
+    rpc::ValidationReport* report) {
   return false;
 }
 

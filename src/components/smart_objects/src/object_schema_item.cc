@@ -142,7 +142,7 @@ errors::eType CObjectSchemaItem::validate(
     if (correct_member) {
       result =
           correct_member->mSchemaItem->validate(field,
-                                                &report__->ReportSubobject(key),
+                                                &report->ReportSubobject(key),
                                                 MessageVersion,
                                                 allow_unknown_enums);
     } else {
@@ -161,7 +161,7 @@ errors::eType CObjectSchemaItem::validate(
 bool CObjectSchemaItem::filterInvalidEnums(
     SmartObject& Object,
     const utils::SemanticVersion& MessageVersion,
-    rpc::ValidationReport* report__) {
+    rpc::ValidationReport* report) {
   for (const auto& key : Object.enumerate()) {
     std::map<std::string, SMember>::const_iterator members_it =
         mMembers.find(key);
@@ -170,7 +170,7 @@ bool CObjectSchemaItem::filterInvalidEnums(
       const SMember* member =
           GetCorrectMember(members_it->second, MessageVersion);
       if (member->mSchemaItem->filterInvalidEnums(
-              Object[key], MessageVersion, &report__->ReportSubobject(key))) {
+              Object[key], MessageVersion, &report->ReportSubobject(key))) {
         if (member->mIsMandatory) {
           return true;
         } else {
