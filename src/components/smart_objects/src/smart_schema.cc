@@ -67,7 +67,7 @@ void CSmartSchema::applySchema(SmartObject& Object,
     if (!report) {
       report = &dummy_report;
     }
-    mSchemaItem->filterInvalidEnums(Object, MessageVersion, report__);
+    mSchemaItem->filterInvalidEnums(Object, MessageVersion, report);
   }
 }
 

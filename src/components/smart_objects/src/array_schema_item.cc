@@ -94,19 +94,29 @@ bool CArraySchemaItem::filterInvalidEnums(
     SmartObject& Object,
     const utils::SemanticVersion& MessageVersion,
     rpc::ValidationReport* report) {
+  int filtered_count = 0;
   if (SmartType_Array == Object.getType()) {
     int index = 0;
     auto array = Object.asArray();
     for (auto it = array->begin(); it != array->end();) {
       if (mElementSchemaItem->filterInvalidEnums(
-              *it, MessageVersion, &report->ReportSubobject(std::to_string(index)))) {
+              *it,
+              MessageVersion,
+              &report->ReportSubobject(std::to_string(index)))) {
+        // If filterInvalidEnums returns true, the checked element is now
+        // invalid and should be filtered
         it = array->erase(it);
+        filtered_count++;
       } else {
         ++it;
       }
       index++;
     }
-    if (array->empty()) {
+    // Mark this container as invalid if it is below the minimum size after
+    // filtering
+    size_t minSize;
+    if (mMinSize.getValue(minSize) && array->size() > minSize &&
+        filtered_count > 0) {
       return true;
     }
   }

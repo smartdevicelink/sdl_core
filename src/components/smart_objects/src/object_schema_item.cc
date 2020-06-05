@@ -105,7 +105,7 @@ std::shared_ptr<CObjectSchemaItem> CObjectSchemaItem::create(
 
 errors::eType CObjectSchemaItem::validate(
     const SmartObject& object,
-    rpc::ValidationReport* report__,
+    rpc::ValidationReport* report,
     const utils::SemanticVersion& MessageVersion,
     const bool allow_unknown_enums) {
   if (SmartType_Map != object.getType()) {
@@ -113,7 +113,7 @@ errors::eType CObjectSchemaItem::validate(
         "Incorrect type, expected: " +
         SmartObject::typeToString(SmartType_Map) +
         ", got: " + SmartObject::typeToString(object.getType());
-    report__->set_validation_info(validation_info);
+    report->set_validation_info(validation_info);
     return errors::INVALID_VALUE;
   }
 
@@ -130,7 +130,7 @@ errors::eType CObjectSchemaItem::validate(
       if (correct_member && correct_member->mIsMandatory == true &&
           correct_member->mIsRemoved == false) {
         std::string validation_info = "Missing mandatory parameter: " + key;
-        report__->set_validation_info(validation_info);
+        report->set_validation_info(validation_info);
         return errors::MISSING_MANDATORY_PARAMETER;
       }
       continue;
@@ -162,6 +162,7 @@ bool CObjectSchemaItem::filterInvalidEnums(
     SmartObject& Object,
     const utils::SemanticVersion& MessageVersion,
     rpc::ValidationReport* report) {
+  bool valid = true;
   for (const auto& key : Object.enumerate()) {
     std::map<std::string, SMember>::const_iterator members_it =
         mMembers.find(key);
@@ -171,16 +172,23 @@ bool CObjectSchemaItem::filterInvalidEnums(
           GetCorrectMember(members_it->second, MessageVersion);
       if (member->mSchemaItem->filterInvalidEnums(
               Object[key], MessageVersion, &report->ReportSubobject(key))) {
-        if (member->mIsMandatory) {
-          return true;
-        } else {
+        // The member is safe to filter if it is non-mandatory
+        if (!member->mIsMandatory) {
           Object.erase(key);
         }
+        // Object is no longer valid if the member is mandatory.
+        // To maintain the general structure of the message, only leaf nodes
+        // (individual enum values) should be filtered in this case.
+        else if (member->mSchemaItem->GetType() == TYPE_ENUM) {
+          valid = false;
+          Object.erase(key);
+        } else {
+          valid = false;
+        }
       }
-      continue;
     }
   }
-  return false;
+  return !valid;
 }
 
 void CObjectSchemaItem::applySchema(
