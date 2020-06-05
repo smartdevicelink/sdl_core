@@ -559,14 +559,6 @@ uint32_t CommandRequestImpl::SendHMIRequest(
   return hmi_correlation_id;
 }
 
-void CommandRequestImpl::set_warning_info(const std::string info) {
-  warning_info_ = info;
-}
-
-std::string CommandRequestImpl::warning_info() const {
-  return warning_info_;
-}
-
 void CommandRequestImpl::CreateHMINotification(
     const hmi_apis::FunctionID::eType& function_id,
     const ns_smart::SmartObject& msg_params) const {

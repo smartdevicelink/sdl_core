@@ -238,7 +238,6 @@ bool RPCServiceImpl::ManageMobileCommand(
 
   if (message_type == mobile_apis::messageType::request &&
       source == commands::Command::CommandSource::SOURCE_MOBILE) {
-    // commands will be launched from requesr_ctrl
     mobile_apis::HMILevel::eType app_hmi_level =
         mobile_apis::HMILevel::INVALID_ENUM;
     if (app) {
@@ -246,14 +245,9 @@ bool RPCServiceImpl::ManageMobileCommand(
           app->hmi_level(mobile_apis::PredefinedWindows::DEFAULT_WINDOW);
     }
 
-    commands::CommandRequestImpl* request =
-        dynamic_cast<commands::CommandRequestImpl*>(command.get());
-    if (request != NULL) {
-      request->set_warning_info(warning_info);
-    }
+    command->set_warning_info(warning_info);
 
     // commands will be launched from request_ctrl
-
     const request_controller::RequestController::TResult result =
         request_ctrl_.addMobileRequest(command, app_hmi_level);
 

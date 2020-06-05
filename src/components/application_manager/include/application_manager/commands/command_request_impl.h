@@ -232,18 +232,6 @@ class CommandRequestImpl : public CommandImpl,
   static bool IsHMIResultSuccess(
       const hmi_apis::Common_Result::eType result_code);
 
-  /**
-   * @brief Set warning info string, to be sent on a successful response
-   * @param info Warning info string
-   */
-  void set_warning_info(const std::string info);
-
-  /**
-   * @brief Returns warning info string
-   * @return Warning info string
-   */
-  std::string warning_info() const;
-
  protected:
   /**
    * @brief Checks message permissions and parameters according to policy table
@@ -426,12 +414,6 @@ class CommandRequestImpl : public CommandImpl,
    * it is value of 'success' field of appropriate response sent to mobile
    */
   bool is_success_result_;
-
-  /**
-   * @brief warning_info_ Defines a warning message to send in the case of a
-   * successful response
-   */
-  std::string warning_info_;
 
   /**
    * @brief Add information for the component of response in case of timeout
