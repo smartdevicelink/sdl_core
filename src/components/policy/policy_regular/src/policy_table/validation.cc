@@ -7,7 +7,7 @@ bool IsTypeInvalid(
     rpc::Enum<rpc::policy_table_interface_base::RequestType> request) {
   return !request.is_valid();
 }
-}
+}  // namespace
 
 namespace rpc {
 namespace policy_table_interface_base {
@@ -147,7 +147,6 @@ bool ApplicationPoliciesSection::Validate() const {
   return true;
 }
 
-#ifdef SDL_REMOTE_CONTROL
 bool ApplicationParams::ValidateModuleTypes() const {
   // moduleType is optional so see Optional<T>::is_valid()
   bool is_initialized = moduleType->is_initialized();
@@ -178,19 +177,30 @@ bool ApplicationParams::ValidateModuleTypes() const {
   return true;
 }
 
+bool AppServiceHandledRpc::Validate() const {
+  return true;
+}
+
+bool AppServiceInfo::Validate() const {
+  return true;
+}
+
 bool ApplicationParams::Validate() const {
   return ValidateModuleTypes();
 }
-#else   // SDL_REMOTE_CONTROL
-bool ApplicationParams::Validate() const {
-  return true;
-}
-#endif  // SDL_REMOTE_CONTROL
 
 bool RpcParameters::Validate() const {
   return true;
 }
 bool Rpcs::Validate() const {
+  return true;
+}
+
+bool EndpointProperty::Validate() const {
+  if (!version.is_valid()) {
+    return false;
+  }
+
   return true;
 }
 
@@ -216,6 +226,14 @@ bool ModuleConfig::Validate() const {
                     "Endpoint " << it_endpoints->first
                                 << "does not contain default group");
       return false;
+    }
+  }
+
+  if (endpoint_properties.is_initialized()) {
+    const auto& endpoint_property =
+        endpoint_properties->find(kDefaultOemMappingServiceName);
+    if (endpoint_properties->end() != endpoint_property) {
+      return (*endpoint_property).second.version.is_initialized();
     }
   }
 
@@ -264,6 +282,39 @@ bool UsageAndErrorCounts::Validate() const {
 
 bool DeviceParams::Validate() const {
   return true;
+}
+
+bool VehicleDataItem::Validate() const {
+  if (!ValidateNaming(std::string(name))) {
+    return false;
+  };
+
+  if (!ValidateNaming(std::string(key))) {
+    return false;
+  };
+
+  if (!ValidateTypes()) {
+    LOG4CXX_ERROR(
+        logger_,
+        "Unknown type: " << std::string(type) << " of " << std::string(key));
+    return false;
+  }
+  return true;
+}
+
+bool VehicleData::Validate() const {
+  const PolicyTableType policy_table_type = GetPolicyTableType();
+  bool result = true;
+  if (PT_SNAPSHOT == policy_table_type) {
+    result =
+        (!schema_items.is_initialized()) && schema_version.is_initialized();
+  }
+  if (PT_UPDATE == policy_table_type || PT_PRELOADED == policy_table_type) {
+    result =
+        (schema_version.is_initialized() && schema_items.is_initialized()) ||
+        (!schema_version.is_initialized() && !schema_items.is_initialized());
+  }
+  return result;
 }
 
 bool PolicyTable::Validate() const {

@@ -34,8 +34,8 @@
 #include <unistd.h>
 #include <utility>
 
-#include "utils/logger.h"
 #include "connection_handler/connection.h"
+#include "utils/logger.h"
 
 namespace connection_handler {
 
@@ -47,7 +47,6 @@ HeartBeatMonitor::HeartBeatMonitor(uint32_t heartbeat_timeout_mseconds,
                                    Connection* connection)
     : default_heartbeat_timeout_(heartbeat_timeout_mseconds)
     , connection_(connection)
-    , sessions_list_lock_(true)
     , run_(true) {}
 
 void HeartBeatMonitor::Process() {
@@ -80,9 +79,9 @@ void HeartBeatMonitor::Process() {
 
 void HeartBeatMonitor::threadMain() {
   AutoLock main_lock(main_thread_lock_);
-  LOG4CXX_DEBUG(logger_,
-                "Start heart beat monitor. Timeout is "
-                    << default_heartbeat_timeout_);
+  LOG4CXX_DEBUG(
+      logger_,
+      "Start heart beat monitor. Timeout is " << default_heartbeat_timeout_);
   while (run_) {
     heartbeat_monitor_.WaitFor(main_lock, kDefaultCycleTimeout);
     Process();
@@ -90,18 +89,20 @@ void HeartBeatMonitor::threadMain() {
 }
 
 void HeartBeatMonitor::AddSession(uint8_t session_id) {
-  LOG4CXX_DEBUG(logger_,
-                "Add session with id " << static_cast<int32_t>(session_id));
+  const uint32_t converted_session_id = static_cast<int32_t>(session_id);
+  UNUSED(converted_session_id);
+  LOG4CXX_DEBUG(logger_, "Add session with id " << converted_session_id);
   AutoLock auto_lock(sessions_list_lock_);
   if (sessions_.end() != sessions_.find(session_id)) {
-    LOG4CXX_WARN(logger_,
-                 "Session with id " << static_cast<int32_t>(session_id)
-                                    << " already exists");
+    LOG4CXX_WARN(
+        logger_,
+        "Session with id: " << converted_session_id << " already exists");
     return;
   }
   sessions_.insert(
       std::make_pair(session_id, SessionState(default_heartbeat_timeout_)));
-  LOG4CXX_INFO(logger_, "Start heartbeat for session " << session_id);
+  LOG4CXX_INFO(logger_,
+               "Start heartbeat for session: " << converted_session_id);
 }
 
 void HeartBeatMonitor::RemoveSession(uint8_t session_id) {
@@ -164,8 +165,8 @@ HeartBeatMonitor::SessionState::SessionState(
 void HeartBeatMonitor::SessionState::RefreshExpiration() {
   LOG4CXX_DEBUG(logger_, "Refresh expiration: " << heartbeat_timeout_mseconds_);
   using namespace date_time;
-  TimevalStruct time = DateTime::getCurrentTime();
-  DateTime::AddMilliseconds(time, heartbeat_timeout_mseconds_);
+  date_time::TimeDuration time = getCurrentTime();
+  AddMilliseconds(time, heartbeat_timeout_mseconds_);
   heartbeat_expiration_ = time;
 }
 
@@ -194,8 +195,8 @@ void HeartBeatMonitor::SessionState::KeepAlive() {
 }
 
 bool HeartBeatMonitor::SessionState::HasTimeoutElapsed() {
-  TimevalStruct now = date_time::DateTime::getCurrentTime();
-  return date_time::DateTime::Greater(now, heartbeat_expiration_);
+  date_time::TimeDuration now = date_time::getCurrentTime();
+  return date_time::Greater(now, heartbeat_expiration_);
 }
 
 }  // namespace connection_handler

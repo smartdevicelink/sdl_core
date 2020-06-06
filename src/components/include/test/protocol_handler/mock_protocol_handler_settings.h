@@ -60,6 +60,17 @@ class MockProtocolHandlerSettings
   MOCK_CONST_METHOD0(force_protected_service, const std::vector<int>&());
   MOCK_CONST_METHOD0(force_unprotected_service, const std::vector<int>&());
 #endif
+  MOCK_CONST_METHOD0(multiple_transports_enabled, const bool());
+  MOCK_CONST_METHOD0(secondary_transports_for_bluetooth,
+                     const std::vector<std::string>&());
+  MOCK_CONST_METHOD0(secondary_transports_for_usb,
+                     const std::vector<std::string>&());
+  MOCK_CONST_METHOD0(secondary_transports_for_wifi,
+                     const std::vector<std::string>&());
+  MOCK_CONST_METHOD0(audio_service_transports,
+                     const std::vector<std::string>&());
+  MOCK_CONST_METHOD0(video_service_transports,
+                     const std::vector<std::string>&());
 };
 
 }  // namespace protocol_handler_test

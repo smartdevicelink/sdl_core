@@ -30,10 +30,10 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "utils/custom_string.h"
 #include <iostream>
 #include <string>
 #include "gtest/gtest.h"
-#include "utils/custom_string.h"
 
 namespace custom_str = utils::custom_string;
 

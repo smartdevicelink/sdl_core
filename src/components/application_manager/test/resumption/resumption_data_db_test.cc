@@ -30,29 +30,30 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <string>
 #include <algorithm>
-#include "gtest/gtest.h"
+#include <string>
 #include "application_manager/mock_application.h"
 #include "application_manager/mock_application_manager_settings.h"
+#include "gtest/gtest.h"
 #include "interfaces/MOBILE_API.h"
 #include "utils/sqlite_wrapper/sql_database.h"
 #include "utils/sqlite_wrapper/sql_query.h"
-#include "utils/make_shared.h"
-#include "utils/file_system.h"
+
 #include "application_manager/resumption_data_test.h"
 #include "application_manager/test_resumption_data_db.h"
+#include "utils/file_system.h"
 
-#include "application_manager/resumption/resumption_sql_queries.h"
 #include "application_manager/resumption/resumption_data_db.h"
+#include "application_manager/resumption/resumption_sql_queries.h"
 
 namespace test {
 namespace components {
 namespace resumption_test {
 
+using application_manager_test::MockApplication;
+using ::testing::_;
 using ::testing::NiceMock;
 using ::testing::ReturnRef;
-using application_manager_test::MockApplication;
 
 namespace am = application_manager;
 using namespace file_system;
@@ -67,7 +68,7 @@ const std::string kPath =
 class ResumptionDataDBTest : public ResumptionDataTest {
  protected:
   void SetUp() OVERRIDE {
-    app_mock = utils::MakeShared<NiceMock<MockApplication> >();
+    app_mock = std::make_shared<NiceMock<MockApplication> >();
     policy_app_id_ = "test_policy_app_id";
     app_id_ = 10;
     is_audio_ = true;
@@ -122,7 +123,7 @@ class ResumptionDataDBTest : public ResumptionDataTest {
 
   void SetZeroIgnOffTime() {
     utils::dbms::SQLQuery query(test_db());
-    EXPECT_TRUE(query.Prepare(KUpdateLastIgnOffTime));
+    EXPECT_TRUE(query.Prepare(kUpdateLastIgnOffTime));
     query.Bind(0, 0);
     EXPECT_TRUE(query.Exec());
   }
@@ -343,7 +344,8 @@ void ResumptionDataDBTest::CheckCharacters(int64_t global_properties_key) {
     while (select_characters.Next()) {
       std::string character =
           (*keyboard_props_)[am::strings::limited_character_list]
-                            [characters_idx++].asString();
+                            [characters_idx++]
+                                .asString();
       EXPECT_EQ(character, select_characters.GetString(0));
     }
   }
@@ -391,16 +393,17 @@ void ResumptionDataDBTest::CheckCommandsData() {
       ++i;
       uint cmd = (*test_commands_map[i])[am::strings::cmd_id].asUInt();
       EXPECT_EQ(cmd, select_commands.GetUInteger(1));
-      std::string name =
-          (*test_commands_map[i])[am::strings::menu_params]
-                                 [am::strings::menu_name].asString();
+      std::string name = (*test_commands_map[i])[am::strings::menu_params]
+                                                [am::strings::menu_name]
+                                                    .asString();
       EXPECT_EQ(name, select_commands.GetString(2));
       int position = (*test_commands_map[i])[am::strings::menu_params]
-                                            [am::strings::position].asInt();
+                                            [am::strings::position]
+                                                .asInt();
       EXPECT_EQ(position, select_commands.GetInteger(4));
-      int parent_id =
-          (*test_commands_map[i])[am::strings::menu_params]
-                                 [am::hmi_request::parent_id].asInt();
+      int parent_id = (*test_commands_map[i])[am::strings::menu_params]
+                                             [am::hmi_request::parent_id]
+                                                 .asInt();
       EXPECT_EQ(parent_id, select_commands.GetInteger(3));
       std::string icon_name =
           (*test_commands_map[i])[am::strings::cmd_icon][am::strings::value]
@@ -408,7 +411,8 @@ void ResumptionDataDBTest::CheckCommandsData() {
       EXPECT_EQ(icon_name, select_commands.GetString(5));
 
       int icon_type = (*test_commands_map[i])[am::strings::cmd_icon]
-                                             [am::strings::image_type].asInt();
+                                             [am::strings::image_type]
+                                                 .asInt();
       EXPECT_EQ(icon_type, select_commands.GetInteger(6));
 
       j = 0;
@@ -460,12 +464,12 @@ void ResumptionDataDBTest::CheckChoiceSetData() {
       std::string menu_name =
           command[am::strings::choice_set][choice_idx][am::strings::menu_name]
               .asString();
-      std::string secondary_text =
-          command[am::strings::choice_set][choice_idx]
-                 [am::strings::secondary_text].asString();
-      std::string tertiary_text =
-          command[am::strings::choice_set][choice_idx]
-                 [am::strings::tertiary_text].asString();
+      std::string secondary_text = command[am::strings::choice_set][choice_idx]
+                                          [am::strings::secondary_text]
+                                              .asString();
+      std::string tertiary_text = command[am::strings::choice_set][choice_idx]
+                                         [am::strings::tertiary_text]
+                                             .asString();
 
       EXPECT_EQ(choice_id, select_choice_set.GetInteger(4));
       EXPECT_EQ(menu_name, select_choice_set.GetString(5));
@@ -477,12 +481,12 @@ void ResumptionDataDBTest::CheckChoiceSetData() {
       EXPECT_TRUE(select_image.Prepare(kSelectImage));
       select_image.Bind(0, select_choice_set.GetLongInt(8));
       EXPECT_TRUE(select_image.Exec());
-      std::string image_value =
-          command[am::strings::choice_set][choice_idx][am::strings::image]
-                 [am::strings::value].asString();
-      int image_type =
-          command[am::strings::choice_set][choice_idx][am::strings::image]
-                 [am::strings::image_type].asInt();
+      std::string image_value = command[am::strings::choice_set][choice_idx]
+                                       [am::strings::image][am::strings::value]
+                                           .asString();
+      int image_type = command[am::strings::choice_set][choice_idx]
+                              [am::strings::image][am::strings::image_type]
+                                  .asInt();
       EXPECT_EQ(image_value, select_image.GetString(1));
       EXPECT_EQ(image_type, select_image.GetInteger(0));
 
@@ -490,9 +494,9 @@ void ResumptionDataDBTest::CheckChoiceSetData() {
       EXPECT_TRUE(select_image.Prepare(kSelectImage));
       select_image.Bind(0, select_choice_set.GetLongInt(9));
       EXPECT_TRUE(select_image.Exec());
-      image_value =
-          command[am::strings::choice_set][choice_idx]
-                 [am::strings::secondary_image][am::strings::value].asString();
+      image_value = command[am::strings::choice_set][choice_idx]
+                           [am::strings::secondary_image][am::strings::value]
+                               .asString();
       image_type =
           command[am::strings::choice_set][choice_idx]
                  [am::strings::secondary_image][am::strings::image_type]
@@ -502,9 +506,9 @@ void ResumptionDataDBTest::CheckChoiceSetData() {
 
       vr_cmd_idx = 0;
     }
-    std::string vr_comm =
-        command[am::strings::choice_set][choice_idx][am::strings::vr_commands]
-               [vr_cmd_idx++].asString();
+    std::string vr_comm = command[am::strings::choice_set][choice_idx]
+                                 [am::strings::vr_commands][vr_cmd_idx++]
+                                     .asString();
     EXPECT_EQ(vr_comm, select_choice_set.GetString(10));
   }
 }
@@ -563,6 +567,7 @@ TEST_F(ResumptionDataDBTest, Init) {
 TEST_F(ResumptionDataDBTest, SaveApplication) {
   PrepareData();
   EXPECT_TRUE(res_db()->Init());
+  EXPECT_CALL(*mock_app_extension_, SaveResumptionData(_));
   res_db()->SaveApplication(app_mock);
   CheckSavedDB();
 }
@@ -570,6 +575,7 @@ TEST_F(ResumptionDataDBTest, SaveApplication) {
 TEST_F(ResumptionDataDBTest, RemoveApplicationFromSaved) {
   PrepareData();
   EXPECT_TRUE(res_db()->Init());
+  EXPECT_CALL(*mock_app_extension_, SaveResumptionData(_));
   res_db()->SaveApplication(app_mock);
   CheckSavedDB();
   EXPECT_TRUE(
@@ -584,6 +590,7 @@ TEST_F(ResumptionDataDBTest, RemoveApplicationFromSaved) {
 TEST_F(ResumptionDataDBTest, RemoveApplicationFromSaved_AppNotSaved) {
   PrepareData();
   EXPECT_TRUE(res_db()->Init());
+  EXPECT_CALL(*mock_app_extension_, SaveResumptionData(_));
   res_db()->SaveApplication(app_mock);
 
   sm::SmartObject saved_app;
@@ -595,6 +602,7 @@ TEST_F(ResumptionDataDBTest, RemoveApplicationFromSaved_AppNotSaved) {
 TEST_F(ResumptionDataDBTest, SavedApplicationTwice) {
   PrepareData();
   EXPECT_TRUE(res_db()->Init());
+  EXPECT_CALL(*mock_app_extension_, SaveResumptionData(_)).Times(2);
   res_db()->SaveApplication(app_mock);
   CheckSavedDB();
   res_db()->SaveApplication(app_mock);
@@ -604,6 +612,7 @@ TEST_F(ResumptionDataDBTest, SavedApplicationTwice) {
 TEST_F(ResumptionDataDBTest, SavedApplicationTwice_UpdateApp) {
   PrepareData();
   EXPECT_TRUE(res_db()->Init());
+  EXPECT_CALL(*mock_app_extension_, SaveResumptionData(_)).Times(2);
   res_db()->SaveApplication(app_mock);
   CheckSavedDB();
   (*vr_help_)[0][am::strings::position] = 2;
@@ -615,6 +624,7 @@ TEST_F(ResumptionDataDBTest, SavedApplicationTwice_UpdateApp) {
 TEST_F(ResumptionDataDBTest, IsApplicationSaved_ApplicationSaved) {
   PrepareData();
   EXPECT_TRUE(res_db()->Init());
+  EXPECT_CALL(*mock_app_extension_, SaveResumptionData(_));
   res_db()->SaveApplication(app_mock);
   ssize_t result = res_db()->IsApplicationSaved(policy_app_id_, kMacAddress_);
   EXPECT_EQ(0, result);
@@ -623,6 +633,7 @@ TEST_F(ResumptionDataDBTest, IsApplicationSaved_ApplicationSaved) {
 TEST_F(ResumptionDataDBTest, IsApplicationSaved_ApplicationRemoved) {
   PrepareData();
   EXPECT_TRUE(res_db()->Init());
+  EXPECT_CALL(*mock_app_extension_, SaveResumptionData(_));
   res_db()->SaveApplication(app_mock);
   EXPECT_TRUE(
       res_db()->RemoveApplicationFromSaved(policy_app_id_, kMacAddress_));
@@ -633,6 +644,7 @@ TEST_F(ResumptionDataDBTest, IsApplicationSaved_ApplicationRemoved) {
 TEST_F(ResumptionDataDBTest, GetSavedApplication) {
   PrepareData();
   EXPECT_TRUE(res_db()->Init());
+  EXPECT_CALL(*mock_app_extension_, SaveResumptionData(_));
   res_db()->SaveApplication(app_mock);
   CheckSavedDB();
 
@@ -654,6 +666,7 @@ TEST_F(ResumptionDataDBTest, GetSavedApplication_AppNotSaved) {
 TEST_F(ResumptionDataDBTest, GetDataForLoadResumeData) {
   PrepareData();
   EXPECT_TRUE(res_db()->Init());
+  EXPECT_CALL(*mock_app_extension_, SaveResumptionData(_));
   res_db()->SaveApplication(app_mock);
   CheckSavedDB();
   sm::SmartObject saved_app;
@@ -672,6 +685,7 @@ TEST_F(ResumptionDataDBTest, GetDataForLoadResumeData_AppRemove) {
 
   PrepareData();
   EXPECT_TRUE(res_db()->Init());
+  EXPECT_CALL(*mock_app_extension_, SaveResumptionData(_));
   res_db()->SaveApplication(app_mock);
   CheckSavedDB();
   EXPECT_TRUE(
@@ -683,6 +697,7 @@ TEST_F(ResumptionDataDBTest, GetDataForLoadResumeData_AppRemove) {
 TEST_F(ResumptionDataDBTest, UpdateHmiLevel) {
   PrepareData();
   EXPECT_TRUE(res_db()->Init());
+  EXPECT_CALL(*mock_app_extension_, SaveResumptionData(_));
   res_db()->SaveApplication(app_mock);
   CheckSavedDB();
   HMILevel::eType new_hmi_level = HMILevel::HMI_LIMITED;
@@ -694,6 +709,7 @@ TEST_F(ResumptionDataDBTest, UpdateHmiLevel) {
 TEST_F(ResumptionDataDBTest, IsHMIApplicationIdExist_AppIsSaved) {
   PrepareData();
   EXPECT_TRUE(res_db()->Init());
+  EXPECT_CALL(*mock_app_extension_, SaveResumptionData(_));
   res_db()->SaveApplication(app_mock);
   CheckSavedDB();
   EXPECT_TRUE(res_db()->IsHMIApplicationIdExist(hmi_app_id_));
@@ -702,6 +718,7 @@ TEST_F(ResumptionDataDBTest, IsHMIApplicationIdExist_AppIsSaved) {
 TEST_F(ResumptionDataDBTest, IsHMIApplicationIdExist_AppNotSaved) {
   PrepareData();
   EXPECT_TRUE(res_db()->Init());
+  EXPECT_CALL(*mock_app_extension_, SaveResumptionData(_));
   res_db()->SaveApplication(app_mock);
   CheckSavedDB();
   uint32_t new_hmi_app_id_ = hmi_app_id_ + 10;
@@ -711,6 +728,7 @@ TEST_F(ResumptionDataDBTest, IsHMIApplicationIdExist_AppNotSaved) {
 TEST_F(ResumptionDataDBTest, GetHMIApplicationID) {
   PrepareData();
   EXPECT_TRUE(res_db()->Init());
+  EXPECT_CALL(*mock_app_extension_, SaveResumptionData(_));
   res_db()->SaveApplication(app_mock);
   CheckSavedDB();
   EXPECT_EQ(hmi_app_id_,
@@ -720,6 +738,7 @@ TEST_F(ResumptionDataDBTest, GetHMIApplicationID) {
 TEST_F(ResumptionDataDBTest, GetHMIApplicationID_AppNotSaved) {
   PrepareData();
   EXPECT_TRUE(res_db()->Init());
+  EXPECT_CALL(*mock_app_extension_, SaveResumptionData(_));
   res_db()->SaveApplication(app_mock);
   CheckSavedDB();
   EXPECT_EQ(0u, res_db()->GetHMIApplicationID(policy_app_id_, "other_dev_id"));
@@ -729,6 +748,7 @@ TEST_F(ResumptionDataDBTest, OnSuspend) {
   PrepareData();
   EXPECT_TRUE(res_db()->Init());
   SetZeroIgnOffTime();
+  EXPECT_CALL(*mock_app_extension_, SaveResumptionData(_));
   res_db()->SaveApplication(app_mock);
   CheckSavedDB();
 
@@ -741,6 +761,7 @@ TEST_F(ResumptionDataDBTest, OnSuspendFourTimes) {
   PrepareData();
   EXPECT_TRUE(res_db()->Init());
   SetZeroIgnOffTime();
+  EXPECT_CALL(*mock_app_extension_, SaveResumptionData(_));
   res_db()->SaveApplication(app_mock);
   CheckSavedDB();
 
@@ -766,6 +787,7 @@ TEST_F(ResumptionDataDBTest, OnSuspendOnAwake) {
   EXPECT_TRUE(res_db()->Init());
   SetZeroIgnOffTime();
 
+  EXPECT_CALL(*mock_app_extension_, SaveResumptionData(_));
   res_db()->SaveApplication(app_mock);
   CheckSavedDB();
 
@@ -783,6 +805,7 @@ TEST_F(ResumptionDataDBTest, Awake_AppNotSuspended) {
   EXPECT_TRUE(res_db()->Init());
   SetZeroIgnOffTime();
 
+  EXPECT_CALL(*mock_app_extension_, SaveResumptionData(_));
   res_db()->SaveApplication(app_mock);
   CheckSavedDB();
 
@@ -796,6 +819,7 @@ TEST_F(ResumptionDataDBTest, TwiceAwake_AppNotSuspended) {
   EXPECT_TRUE(res_db()->Init());
   SetZeroIgnOffTime();
 
+  EXPECT_CALL(*mock_app_extension_, SaveResumptionData(_));
   res_db()->SaveApplication(app_mock);
   CheckSavedDB();
 
@@ -812,6 +836,7 @@ TEST_F(ResumptionDataDBTest, GetHashId) {
   PrepareData();
   EXPECT_TRUE(res_db()->Init());
 
+  EXPECT_CALL(*mock_app_extension_, SaveResumptionData(_));
   res_db()->SaveApplication(app_mock);
 
   std::string test_hash;
@@ -825,6 +850,7 @@ TEST_F(ResumptionDataDBTest, GetIgnOffTime_AfterSuspendAndAwake) {
   SetZeroIgnOffTime();
   uint32_t last_ign_off_time;
 
+  EXPECT_CALL(*mock_app_extension_, SaveResumptionData(_));
   res_db()->SaveApplication(app_mock);
 
   last_ign_off_time = res_db()->GetIgnOffTime();
@@ -848,6 +874,7 @@ TEST_F(ResumptionDataDBTest, DropAppResumptionData) {
   EXPECT_TRUE(res_db()->Init());
   SetZeroIgnOffTime();
 
+  EXPECT_CALL(*mock_app_extension_, SaveResumptionData(_));
   res_db()->SaveApplication(app_mock);
 
   EXPECT_TRUE(res_db()->DropAppDataResumption(kMacAddress_, policy_app_id_));

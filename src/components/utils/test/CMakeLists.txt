@@ -87,7 +87,7 @@ collect_sources(SOURCES "${CMAKE_CURRENT_SOURCE_DIR}" "${EXCLUDE_PATHS}")
 set(LIBRARIES
   gmock
   Utils
-  Policy
+  PolicyStatic
   ConfigProfile
 )
 

@@ -51,6 +51,12 @@ class MockClientConnectionListener
       StartListening,
       ::transport_manager::transport_adapter::TransportAdapter::Error());
   MOCK_METHOD0(
+      SuspendListening,
+      ::transport_manager::transport_adapter::TransportAdapter::Error());
+  MOCK_METHOD0(
+      ResumeListening,
+      ::transport_manager::transport_adapter::TransportAdapter::Error());
+  MOCK_METHOD0(
       StopListening,
       ::transport_manager::transport_adapter::TransportAdapter::Error());
 };

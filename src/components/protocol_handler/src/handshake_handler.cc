@@ -36,8 +36,9 @@
 
 #include "protocol_handler/protocol_handler_impl.h"
 #include "protocol_handler/protocol_packet.h"
-#include "security_manager/security_manager.h"
 #include "protocol_handler/session_observer.h"
+#include "security_manager/security_manager.h"
+#include "utils/helpers.h"
 
 namespace protocol_handler {
 
@@ -46,36 +47,18 @@ CREATE_LOGGERPTR_GLOBAL(logger_, "ProtocolHandler")
 HandshakeHandler::HandshakeHandler(
     ProtocolHandlerImpl& protocol_handler,
     SessionObserver& session_observer,
-    uint32_t connection_key,
-    ConnectionID connection_id,
-    uint8_t session_id,
-    uint8_t protocol_version,
-    uint32_t hash_id,
-    ServiceType service_type,
-    const std::vector<int>& force_protected_service,
-    const bool is_new_service,
-    ProtocolPacket::ProtocolVersion& full_version,
-    std::shared_ptr<uint8_t> payload)
-    : protocol_handler_(protocol_handler)
-    , session_observer_(session_observer)
-    , context_()
-    , full_version_(full_version)
-    , protocol_version_(protocol_version)
-    , payload_(payload) {}
-
-HandshakeHandler::HandshakeHandler(
-    ProtocolHandlerImpl& protocol_handler,
-    SessionObserver& session_observer,
-    ProtocolPacket::ProtocolVersion& full_version,
+    utils::SemanticVersion& full_version,
     const SessionContext& context,
     const uint8_t protocol_version,
-    std::shared_ptr<uint8_t> payload)
+    std::shared_ptr<BsonObject> payload,
+    ServiceStatusUpdateHandler& service_status_update_handler)
     : protocol_handler_(protocol_handler)
     , session_observer_(session_observer)
     , context_(context)
     , full_version_(full_version)
     , protocol_version_(protocol_version)
-    , payload_(payload) {}
+    , payload_(payload)
+    , service_status_update_handler_(service_status_update_handler) {}
 
 HandshakeHandler::~HandshakeHandler() {
   LOG4CXX_DEBUG(logger_, "Destroying of HandshakeHandler: " << this);
@@ -86,22 +69,67 @@ uint32_t HandshakeHandler::connection_key() const {
                                        context_.new_session_id_);
 }
 
+uint32_t HandshakeHandler::primary_connection_key() const {
+  return session_observer_.KeyFromPair(context_.primary_connection_id_,
+                                       context_.new_session_id_);
+}
+
 bool HandshakeHandler::GetPolicyCertificateData(std::string& data) const {
   return false;
 }
 
-void HandshakeHandler::OnCertificateUpdateRequired() {}
+void HandshakeHandler::OnCertificateUpdateRequired() {
+  LOG4CXX_AUTO_TRACE(logger_);
+}
+
+#if defined(EXTERNAL_PROPRIETARY_MODE) && defined(ENABLE_SECURITY)
+bool HandshakeHandler::OnCertDecryptFailed() {
+  LOG4CXX_AUTO_TRACE(logger_);
+  if (payload_) {
+    ProcessFailedHandshake(*payload_, ServiceStatus::CERT_INVALID);
+  }
+
+  return true;
+}
+#endif
+
+bool HandshakeHandler::OnGetSystemTimeFailed() {
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  if (payload_) {
+    ProcessFailedHandshake(*payload_, ServiceStatus::INVALID_TIME);
+  } else {
+    BsonObject params;
+    bson_object_initialize_default(&params);
+    ProcessFailedHandshake(params, ServiceStatus::INVALID_TIME);
+    bson_object_deinitialize(&params);
+  }
+
+  return true;
+}
+
+bool HandshakeHandler::OnPTUFailed() {
+  LOG4CXX_AUTO_TRACE(logger_);
+  if (payload_) {
+    ProcessFailedHandshake(*payload_, ServiceStatus::PTU_FAILED);
+  }
+
+  return true;
+}
 
 bool HandshakeHandler::OnHandshakeDone(
     uint32_t connection_key,
     security_manager::SSLContext::HandshakeResult result) {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  if (connection_key != this->connection_key()) {
+  LOG4CXX_DEBUG(logger_,
+                "OnHandshakeDone for service : " << context_.service_type_);
+
+  if (connection_key != this->primary_connection_key()) {
     LOG4CXX_DEBUG(logger_,
                   "Listener " << this
                               << " expects notification for connection id: "
-                              << this->connection_key()
+                              << this->primary_connection_key()
                               << ". Received notification for connection id "
                               << connection_key << " will be ignored");
     return false;
@@ -110,37 +138,45 @@ bool HandshakeHandler::OnHandshakeDone(
   const bool success =
       result == security_manager::SSLContext::Handshake_Result_Success;
 
-  BsonObject params;
   if (payload_) {
-    params = bson_object_from_bytes(payload_.get());
+    if (success) {
+      ProcessSuccessfulHandshake(connection_key, *payload_);
+    } else {
+      ProcessFailedHandshake(*payload_, ServiceStatus::CERT_INVALID);
+    }
   } else {
+    BsonObject params;
     bson_object_initialize_default(&params);
+    if (success) {
+      ProcessSuccessfulHandshake(connection_key, params);
+    } else {
+      ProcessFailedHandshake(params, ServiceStatus::CERT_INVALID);
+    }
+    bson_object_deinitialize(&params);
   }
 
-  if (success) {
-    ProcessSuccessfulHandshake(connection_key, params);
-  } else {
-    ProcessFailedHandshake(params);
-  }
-
-  bson_object_deinitialize(&params);
   return true;
+}
+
+bool HandshakeHandler::CanBeProtected() const {
+  const auto& force_unprotected =
+      protocol_handler_.get_settings().force_unprotected_service();
+
+  return !(helpers::in_range(force_unprotected, context_.service_type_));
+}
+
+bool HandshakeHandler::IsAlreadyProtected() const {
+  return (session_observer_.GetSSLContext(this->primary_connection_key(),
+                                          context_.service_type_) != NULL);
 }
 
 void HandshakeHandler::ProcessSuccessfulHandshake(const uint32_t connection_key,
                                                   BsonObject& params) {
   LOG4CXX_AUTO_TRACE(logger_);
-  const std::vector<int>& force_unprotected =
-      protocol_handler_.get_settings().force_unprotected_service();
 
-  const bool can_be_protected =
-      std::find(force_unprotected.begin(),
-                force_unprotected.end(),
-                context_.service_type_) == force_unprotected.end();
+  const bool is_service_already_protected = IsAlreadyProtected();
 
-  const bool is_service_already_protected =
-      session_observer_.GetSSLContext(connection_key, context_.service_type_) !=
-      NULL;
+  const bool can_be_protected = CanBeProtected();
 
   LOG4CXX_DEBUG(logger_,
                 "Service can be protected: " << can_be_protected
@@ -149,6 +185,10 @@ void HandshakeHandler::ProcessSuccessfulHandshake(const uint32_t connection_key,
 
   if (can_be_protected && !is_service_already_protected) {
     session_observer_.SetProtectionFlag(connection_key, context_.service_type_);
+    service_status_update_handler_.OnServiceUpdate(
+        this->connection_key(),
+        context_.service_type_,
+        ServiceStatus::SERVICE_ACCEPTED);
     protocol_handler_.SendStartSessionAck(context_.connection_id_,
                                           context_.new_session_id_,
                                           protocol_version_,
@@ -158,6 +198,10 @@ void HandshakeHandler::ProcessSuccessfulHandshake(const uint32_t connection_key,
                                           full_version_,
                                           params);
   } else {
+    service_status_update_handler_.OnServiceUpdate(
+        this->connection_key(),
+        context_.service_type_,
+        ServiceStatus::SERVICE_START_FAILED);
     protocol_handler_.SendStartSessionNAck(context_.connection_id_,
                                            context_.new_session_id_,
                                            protocol_version_,
@@ -165,7 +209,8 @@ void HandshakeHandler::ProcessSuccessfulHandshake(const uint32_t connection_key,
   }
 }
 
-void HandshakeHandler::ProcessFailedHandshake(BsonObject& params) {
+void HandshakeHandler::ProcessFailedHandshake(BsonObject& params,
+                                              ServiceStatus service_status) {
   LOG4CXX_AUTO_TRACE(logger_);
   LOG4CXX_DEBUG(logger_, "Handshake failed");
   const std::vector<int>& force_protected =
@@ -182,6 +227,10 @@ void HandshakeHandler::ProcessFailedHandshake(BsonObject& params) {
                                                << context_.is_new_service_);
 
   if (can_be_unprotected && context_.is_new_service_) {
+    service_status_update_handler_.OnServiceUpdate(
+        this->connection_key(),
+        context_.service_type_,
+        ServiceStatus::PROTECTION_DISABLED);
     protocol_handler_.SendStartSessionAck(context_.connection_id_,
                                           context_.new_session_id_,
                                           protocol_version_,
@@ -191,6 +240,8 @@ void HandshakeHandler::ProcessFailedHandshake(BsonObject& params) {
                                           full_version_,
                                           params);
   } else {
+    service_status_update_handler_.OnServiceUpdate(
+        this->connection_key(), context_.service_type_, service_status);
     protocol_handler_.SendStartSessionNAck(context_.connection_id_,
                                            context_.new_session_id_,
                                            protocol_version_,

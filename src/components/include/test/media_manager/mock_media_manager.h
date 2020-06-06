@@ -57,6 +57,7 @@ class MockMediaManager : public media_manager::MediaManager {
   MOCK_METHOD2(FramesProcessed,
                void(int32_t application_key, int32_t frame_number));
   MOCK_CONST_METHOD0(settings, const media_manager::MediaManagerSettings&());
+  MOCK_CONST_METHOD1(DataSizeToMilliseconds, uint32_t(uint64_t data_size));
 };
 
 }  // namespace media_manager_test

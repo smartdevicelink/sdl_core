@@ -33,9 +33,9 @@
 #define SRC_COMPONENTS_INCLUDE_TEST_TRANSPORT_MANAGER_MOCK_TRANSPORT_MANAGER_SETTINGS_H_
 
 #include "gmock/gmock.h"
+#include "mock_transport_manager_mme_settings.h"
 #include "protocol_handler/protocol_handler.h"
 #include "transport_manager/transport_manager_settings.h"
-#include "mock_transport_manager_mme_settings.h"
 
 namespace test {
 namespace components {
@@ -61,6 +61,23 @@ class MockTransportManagerSettings
   MOCK_CONST_METHOD0(iap_hub_connection_wait_timeout, uint32_t());
   MOCK_CONST_METHOD0(app_transport_change_timer, uint32_t());
   MOCK_CONST_METHOD0(app_transport_change_timer_addition, uint32_t());
+  MOCK_CONST_METHOD0(transport_manager_tcp_adapter_network_interface,
+                     std::string&());
+  MOCK_CONST_METHOD0(websocket_server_address, const std::string&());
+  MOCK_CONST_METHOD0(websocket_server_port, uint16_t());
+  MOCK_CONST_METHOD0(cloud_app_retry_timeout, uint32_t());
+  MOCK_CONST_METHOD0(cloud_app_max_retry_attempts, uint16_t());
+  MOCK_CONST_METHOD0(bluetooth_uuid, const uint8_t*());
+  MOCK_CONST_METHOD0(aoa_filter_manufacturer, const std::string&());
+  MOCK_CONST_METHOD0(aoa_filter_model_name, const std::string&());
+  MOCK_CONST_METHOD0(aoa_filter_description, const std::string&());
+  MOCK_CONST_METHOD0(aoa_filter_version, const std::string&());
+  MOCK_CONST_METHOD0(aoa_filter_uri, const std::string&());
+  MOCK_CONST_METHOD0(aoa_filter_serial_number, const std::string&());
+  MOCK_CONST_METHOD0(ws_server_cert_path, const std::string&());
+  MOCK_CONST_METHOD0(ws_server_key_path, const std::string&());
+  MOCK_CONST_METHOD0(ws_server_ca_cert_path, const std::string&());
+  MOCK_CONST_METHOD0(wss_server_supported, const bool());
 };
 
 }  // namespace transport_manager_test

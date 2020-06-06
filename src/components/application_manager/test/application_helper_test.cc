@@ -36,34 +36,38 @@
 
 #include "application_manager/mock_application_manager_settings.h"
 #include "application_manager/mock_message_helper.h"
-#include "policy/usage_statistics/mock_statistics_manager.h"
 #include "policy/mock_policy_settings.h"
+#include "policy/usage_statistics/mock_statistics_manager.h"
 
 #include "application_manager/application.h"
 #include "application_manager/application_impl.h"
 #include "application_manager/application_manager_impl.h"
-#include "application_manager/usage_statistics.h"
 #include "application_manager/helpers/application_helper.h"
 #include "application_manager/smart_object_keys.h"
-#include "interfaces/MOBILE_API.h"
+#include "application_manager/usage_statistics.h"
 #include "connection_handler/device.h"
+#include "interfaces/MOBILE_API.h"
 #include "smart_objects/smart_object.h"
 #include "utils/custom_string.h"
 #include "utils/macro.h"
-#include "utils/shared_ptr.h"
-#include "utils/make_shared.h"
+
+#include "media_manager/mock_media_manager.h"
+#include "resumption/last_state_wrapper_impl.h"
+#include "test/resumption/mock_last_state.h"
 
 namespace {
 const uint8_t expected_tread_pool_size = 2u;
 const uint8_t stop_streaming_timeout = 1u;
 const std::string kDirectoryName = "./test_storage";
 const std::vector<std::string> kTimeoutPrompt{"timeoutPrompt"};
-}
+}  // namespace
 
 namespace test {
 namespace components {
 namespace application_manager_test {
 
+using resumption_test::MockLastState;
+using test::components::media_manager_test::MockMediaManager;
 using testing::_;
 using ::testing::Mock;
 using ::testing::NiceMock;
@@ -112,13 +116,21 @@ class ApplicationHelperTest : public testing::Test {
     const connection_handler::DeviceHandle device_id = 1;
     const custom_str::CustomString app_name("");
 
-    app_impl_ = new ApplicationImpl(
+    const std::string path_to_plagin = "";
+    EXPECT_CALL(mock_application_manager_settings_, plugins_folder())
+        .WillOnce(ReturnRef(path_to_plagin));
+    mock_last_state_ = std::make_shared<MockLastState>();
+    last_state_wrapper_ =
+        std::make_shared<resumption::LastStateWrapperImpl>(mock_last_state_);
+    app_manager_impl_.Init(last_state_wrapper_, &mock_media_manager_);
+
+    app_impl_ = std::make_shared<ApplicationImpl>(
         application_id,
         policy_app_id,
         mac_address,
         device_id,
         app_name,
-        utils::MakeShared<usage_statistics_test::MockStatisticsManager>(),
+        std::make_shared<usage_statistics_test::MockStatisticsManager>(),
         app_manager_impl_);
   }
 
@@ -127,6 +139,9 @@ class ApplicationHelperTest : public testing::Test {
   NiceMock<MockPolicySettings> mock_policy_settings_;
 
   ApplicationManagerImpl app_manager_impl_;
+  MockMediaManager mock_media_manager_;
+  std::shared_ptr<MockLastState> mock_last_state_;
+  std::shared_ptr<resumption::LastStateWrapperImpl> last_state_wrapper_;
   ApplicationSharedPtr app_impl_;
 };
 
@@ -134,8 +149,6 @@ TEST_F(ApplicationHelperTest, RecallApplicationData_ExpectAppDataReset) {
   const uint32_t cmd_id = 1;
   const uint32_t menu_id = 2;
   const uint32_t choice_set_id = 3;
-  const mobile_apis::VehicleDataType::eType vi =
-      mobile_apis::VehicleDataType::VEHICLEDATA_ACCPEDAL;
   const mobile_apis::ButtonName::eType button = mobile_apis::ButtonName::AC;
 
   smart_objects::SmartObject cmd;
@@ -147,7 +160,7 @@ TEST_F(ApplicationHelperTest, RecallApplicationData_ExpectAppDataReset) {
   app_impl_->AddCommand(cmd_id, cmd[strings::msg_params]);
   app_impl_->AddSubMenu(menu_id, cmd[strings::menu_params]);
   app_impl_->AddChoiceSet(choice_set_id, cmd[strings::msg_params]);
-  EXPECT_TRUE(app_impl_->SubscribeToIVI(static_cast<uint32_t>(vi)));
+
   EXPECT_TRUE(app_impl_->SubscribeToButton(button));
 
   const std::string some_string = "some_string";
@@ -173,7 +186,6 @@ TEST_F(ApplicationHelperTest, RecallApplicationData_ExpectAppDataReset) {
   EXPECT_TRUE(NULL != app_impl_->FindSubMenu(menu_id));
   EXPECT_TRUE(NULL != app_impl_->FindChoiceSet(choice_set_id));
   EXPECT_TRUE(app_impl_->IsSubscribedToButton(button));
-  EXPECT_TRUE(app_impl_->IsSubscribedToIVI(static_cast<uint32_t>(vi)));
   auto help_prompt = app_impl_->help_prompt();
   EXPECT_TRUE(help_prompt->asString() == some_string);
   auto timeout_prompt = app_impl_->timeout_prompt();
@@ -198,7 +210,6 @@ TEST_F(ApplicationHelperTest, RecallApplicationData_ExpectAppDataReset) {
   EXPECT_FALSE(NULL != app_impl_->FindSubMenu(menu_id));
   EXPECT_FALSE(NULL != app_impl_->FindChoiceSet(choice_set_id));
   EXPECT_FALSE(app_impl_->IsSubscribedToButton(button));
-  EXPECT_FALSE(app_impl_->IsSubscribedToIVI(static_cast<uint32_t>(vi)));
   help_prompt = app_impl_->help_prompt();
   EXPECT_FALSE(help_prompt->asString() == some_string);
   timeout_prompt = app_impl_->timeout_prompt();
@@ -230,8 +241,6 @@ TEST_F(ApplicationHelperTest, RecallApplicationData_ExpectHMICleanupRequests) {
   app_impl_->AddCommand(cmd_id, cmd[strings::msg_params]);
   app_impl_->AddSubMenu(menu_id, cmd[strings::menu_params]);
   app_impl_->AddChoiceSet(choice_set_id, cmd[strings::msg_params]);
-  app_impl_->SubscribeToIVI(static_cast<uint32_t>(
-      mobile_apis::VehicleDataType::VEHICLEDATA_ACCPEDAL));
   app_impl_->SubscribeToButton(mobile_apis::ButtonName::AC);
 
   EXPECT_CALL(*mock_message_helper_, SendUnsubscribedWayPoints(_));
@@ -247,12 +256,10 @@ TEST_F(ApplicationHelperTest, RecallApplicationData_ExpectHMICleanupRequests) {
   EXPECT_CALL(*mock_message_helper_,
               SendUnsubscribeButtonNotification(_, _, _));
 
-  EXPECT_CALL(*mock_message_helper_, SendUnsubscribeIVIRequest(_, _, _));
-
   // Act
   application_manager::DeleteApplicationData(app_impl_, app_manager_impl_);
 }
 
-}  // application_manager_test
-}  // components
-}  // test
+}  // namespace application_manager_test
+}  // namespace components
+}  // namespace test

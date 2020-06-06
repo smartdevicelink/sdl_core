@@ -76,7 +76,7 @@ void HandlerInterface::CollectMethods() {
       assert(!"Unexpected function message type");
     }
   }
-  std::auto_ptr<CppClass::Method> destructor(
+  std::unique_ptr<CppClass::Method> destructor(
         new CppClass::Method(this, CppClass::kPublic,
                              "~"+name(), "",
                              CppFunction::kVirtual));
@@ -93,7 +93,7 @@ void HandlerInterface::AddFunctionMessageHandlers(
     message_ns.ForwardDeclare(Namespace::ForwardDeclaration(
                               Namespace::ForwardDeclaration::kStruct,
                               func_msg->name()));
-    std::auto_ptr<CppClass::Method> method(
+    std::unique_ptr<CppClass::Method> method(
         new CppClass::Method(
           this, CppClass::kPublic, "Handle" + func_msg->name(),
           "void", CppFunction::kVirtual | CppFunction::kAbstract));

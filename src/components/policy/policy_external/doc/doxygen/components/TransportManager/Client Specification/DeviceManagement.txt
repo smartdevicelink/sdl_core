@@ -1,11 +1,11 @@
 /** @page components_transportmanager_client_device_management Device Management
  *
- * As all requests to TransportManager are asynchronous, client must implement NsSmartDeviceLink::NsTransportManager::ITransportManagerDeviceListener
- * interface and add itself as a device listener with NsSmartDeviceLink::NsTransportManager::ITransportManager::addDeviceListener()
+ * As all requests to TransportManager are asynchronous, client must implement ns_smart_device_link::ns_transport_manager::ITransportManagerDeviceListener
+ * interface and add itself as a device listener with ns_smart_device_link::ns_transport_manager::ITransportManager::addDeviceListener()
  * in order to receive notifications.
- * Client of TransportManager may use NsSmartDeviceLink::NsTransportManager::ITransportManager::scanForNewDevices()
+ * Client of TransportManager may use ns_smart_device_link::ns_transport_manager::ITransportManager::scanForNewDevices()
  * to initiate device scan on all device adapters that support this feature. In order to get list of available
- * devices client must override NsSmartDeviceLink::NsTransportManager::ITransportManagerDeviceListener::onDeviceListUpdated().
+ * devices client must override ns_smart_device_link::ns_transport_manager::ITransportManagerDeviceListener::onDeviceListUpdated().
  * Each device adapter will perform scan independently from other device adapters and device list might be updated
  * several times (after each adapter that supports scanning finishes scanning operation). Device list might also be
  * updated without device scan request, e.g. if new client connects via TCP this device will be added to device list

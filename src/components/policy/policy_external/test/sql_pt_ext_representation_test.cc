@@ -29,29 +29,27 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <vector>
-#include <map>
-#include <algorithm>
-#include <utility>
-#include <string>
-#include <iterator>
-#include <iostream>
-#include "gtest/gtest.h"
 #include "policy/sql_pt_ext_representation.h"
-#include "utils/gen_hash.h"
-#include "utils/file_system.h"
-#include "sqlite_wrapper/sql_query.h"
-#include "rpc_base/rpc_base.h"
-#include "policy/policy_table/types.h"
+#include <algorithm>
+#include <iostream>
+#include <iterator>
+#include <map>
+#include <string>
+#include <utility>
+#include <vector>
+#include "gtest/gtest.h"
 #include "policy/mock_policy_settings.h"
-#include "utils/shared_ptr.h"
-#include "utils/make_shared.h"
+#include "policy/policy_table/types.h"
+#include "rpc_base/rpc_base.h"
+#include "sqlite_wrapper/sql_query.h"
+#include "utils/file_system.h"
+#include "utils/gen_hash.h"
 
 using namespace ::policy;
 namespace policy_table = rpc::policy_table_interface_base;
-using std::string;
 using std::map;
 using std::pair;
+using std::string;
 using std::vector;
 using testing::ReturnRef;
 
@@ -67,32 +65,24 @@ class SQLPTExtRepresentationTest : public ::testing::Test {
   SQLPTExtRepresentationTest() : reps_(NULL) {}
 
  protected:
-  SQLPTExtRepresentation* reps_;
+  std::shared_ptr<SQLPTExtRepresentation> reps_;
   policy_handler_test::MockPolicySettings policy_settings_;
-  static const string kDatabaseName;
   PermissionConsent perm_consent;
   FunctionalGroupPermission group1_perm;
   FunctionalGroupPermission group2_perm;
-  utils::dbms::SQLQuery* query_wrapper_;
-  static const bool in_memory_;
-  const std::string kAppStorageFolder = "storage_SQLPTExtRepresentationTest";
+  std::shared_ptr<utils::dbms::SQLQuery> query_wrapper_;
 
   void SetUp() OVERRIDE {
-    file_system::DeleteFile(kDatabaseName);
-    reps_ = new SQLPTExtRepresentation(in_memory_);
+    reps_ = std::make_shared<SQLPTExtRepresentation>(true);
     ASSERT_TRUE(reps_ != NULL);
-    ON_CALL(policy_settings_, app_storage_folder())
-        .WillByDefault(ReturnRef(kAppStorageFolder));
     ASSERT_EQ(SUCCESS, reps_->Init(&policy_settings_));
-    query_wrapper_ = new utils::dbms::SQLQuery(reps_->db());
+    query_wrapper_ = std::make_shared<utils::dbms::SQLQuery>(reps_->db());
     ASSERT_TRUE(query_wrapper_ != NULL);
   }
 
   void TearDown() OVERRIDE {
-    delete query_wrapper_;
     EXPECT_TRUE(reps_->Drop());
     EXPECT_TRUE(reps_->Close());
-    delete reps_;
   }
 
   void FillGroupPermission(
@@ -263,9 +253,6 @@ SQLPTExtRepresentationTest::GetDataInternal(
   return table.policy_table.functional_groupings;
 }
 
-const string SQLPTExtRepresentationTest::kDatabaseName = ":memory:";
-const bool SQLPTExtRepresentationTest::in_memory_ = true;
-
 ::testing::AssertionResult IsValid(const policy_table::Table& table) {
   if (table.is_valid()) {
     return ::testing::AssertionSuccess();
@@ -393,7 +380,7 @@ TEST_F(SQLPTExtRepresentationTest,
   ASSERT_TRUE(reps_->Save(update));
 
   // Act
-  utils::SharedPtr<policy_table::Table> snapshot = reps_->GenerateSnapshot();
+  std::shared_ptr<policy_table::Table> snapshot = reps_->GenerateSnapshot();
   snapshot->SetPolicyTableType(rpc::policy_table_interface_base::PT_SNAPSHOT);
 
   policy_table["module_meta"] = Json::Value(Json::objectValue);
@@ -1506,7 +1493,7 @@ TEST_F(SQLPTExtRepresentationTest, SaveUserConsentRecords_ExpectedSaved) {
 
   // Act
   EXPECT_TRUE(reps_->Save(original_table));
-  utils::SharedPtr<Table> loaded_table = reps_->GenerateSnapshot();
+  std::shared_ptr<Table> loaded_table = reps_->GenerateSnapshot();
 
   // GetData/GetKeyData methods do internal existence check - no need to do it
   // separately. In case of data is missing expectations will be violated.
@@ -1543,8 +1530,8 @@ TEST_F(SQLPTExtRepresentationTest, SaveFunctionalGroupings_ExpectedSaved) {
 
   const HmiLevel test_level_1 = HL_FULL;
   const HmiLevel test_level_2 = HL_LIMITED;
-  const policy_table::Parameter test_parameter_1 = P_GPS;
-  const policy_table::Parameter test_parameter_2 = P_SPEED;
+  const std::string test_parameter_1 = "P_GPS";
+  const std::string test_parameter_2 = "P_SPEED";
 
   Rpcs rpcs;
 
@@ -1580,7 +1567,7 @@ TEST_F(SQLPTExtRepresentationTest, SaveFunctionalGroupings_ExpectedSaved) {
   *another_rpcs.user_consent_prompt = another_user_consent_prompt;
 
   const HmiLevel test_level_3 = HL_BACKGROUND;
-  const policy_table::Parameter test_parameter_3 = P_BELTSTATUS;
+  const std::string test_parameter_3 = "P_BELTSTATUS";
 
   RpcParameters another_parameters;
   another_parameters.hmi_levels.push_back(test_level_3);
@@ -1591,7 +1578,7 @@ TEST_F(SQLPTExtRepresentationTest, SaveFunctionalGroupings_ExpectedSaved) {
 
   // Act
   EXPECT_TRUE(reps_->Save(original_table));
-  utils::SharedPtr<Table> loaded_table = reps_->GenerateSnapshot();
+  std::shared_ptr<Table> loaded_table = reps_->GenerateSnapshot();
 
   FunctionalGroupings loaded_groupings =
       GetData<Table, FunctionalGroupings>(*loaded_table);
@@ -1617,10 +1604,10 @@ TEST_F(SQLPTExtRepresentationTest, SaveFunctionalGroupings_ExpectedSaved) {
   EXPECT_TRUE(
       (IsKeyExist<HmiLevels>(loaded_parameters.hmi_levels, test_level_2)));
 
-  EXPECT_TRUE((
-      IsKeyExist<Parameters>(*loaded_parameters.parameters, test_parameter_1)));
-  EXPECT_TRUE((
-      IsKeyExist<Parameters>(*loaded_parameters.parameters, test_parameter_2)));
+  EXPECT_TRUE((IsKeyExist<Parameters, std::string>(
+      *loaded_parameters.parameters, test_parameter_1)));
+  EXPECT_TRUE((IsKeyExist<Parameters, std::string>(
+      *loaded_parameters.parameters, test_parameter_2)));
 
   Rpcs another_loaded_rpcs = GetKeyData<FunctionalGroupings, Rpcs>(
       loaded_groupings, another_group_name);
@@ -1639,8 +1626,8 @@ TEST_F(SQLPTExtRepresentationTest, SaveFunctionalGroupings_ExpectedSaved) {
   EXPECT_TRUE((IsKeyExist<HmiLevels>(another_loaded_parameters.hmi_levels,
                                      test_level_3)));
 
-  EXPECT_TRUE((IsKeyExist<Parameters>(*another_loaded_parameters.parameters,
-                                      test_parameter_3)));
+  EXPECT_TRUE((IsKeyExist<Parameters, std::string>(
+      *another_loaded_parameters.parameters, test_parameter_3)));
 }
 
 TEST_F(SQLPTExtRepresentationTest, JsonContentsExternalConsent_ExpectParsed) {

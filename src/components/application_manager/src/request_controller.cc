@@ -32,10 +32,10 @@
 
 #include "utils/logger.h"
 
-#include "application_manager/request_controller.h"
 #include "application_manager/commands/command_request_impl.h"
-#include "application_manager/commands/hmi/request_to_hmi.h"
-#include "utils/make_shared.h"
+#include "application_manager/commands/request_to_hmi.h"
+#include "application_manager/request_controller.h"
+
 #include "utils/timer_task_impl.h"
 
 namespace application_manager {
@@ -126,6 +126,12 @@ RequestController::TResult RequestController::CheckPosibilitytoAdd(
     return RequestController::TOO_MANY_REQUESTS;
   }
 
+  if (IsLowVoltage()) {
+    LOG4CXX_ERROR(logger_,
+                  "Impossible to add request due to Low Voltage is active");
+    return RequestController::INVALID_DATA;
+  }
+
   return SUCCESS;
 }
 
@@ -176,7 +182,7 @@ RequestController::TResult RequestController::addHMIRequest(
     const RequestPtr request) {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  if (!request.valid()) {
+  if (request.use_count() == 0) {
     LOG4CXX_ERROR(logger_, "HMI request pointer is invalid");
     return RequestController::INVALID_DATA;
   }
@@ -185,13 +191,20 @@ RequestController::TResult RequestController::addHMIRequest(
   const uint64_t timeout_in_mseconds =
       static_cast<uint64_t>(request->default_timeout());
   RequestInfoPtr request_info_ptr =
-      utils::MakeShared<HMIRequestInfo>(request, timeout_in_mseconds);
+      std::make_shared<HMIRequestInfo>(request, timeout_in_mseconds);
 
   if (0 == timeout_in_mseconds) {
     LOG4CXX_DEBUG(logger_,
                   "Default timeout was set to 0."
                   "RequestController will not track timeout of this request.");
   }
+
+  if (IsLowVoltage()) {
+    LOG4CXX_ERROR(logger_,
+                  "Impossible to add request due to Low Voltage is active");
+    return RequestController::INVALID_DATA;
+  }
+
   waiting_for_response_.Add(request_info_ptr);
   LOG4CXX_DEBUG(logger_,
                 "Waiting for response count:" << waiting_for_response_.Size());
@@ -202,6 +215,11 @@ RequestController::TResult RequestController::addHMIRequest(
 
 void RequestController::addNotification(const RequestPtr ptr) {
   LOG4CXX_AUTO_TRACE(logger_);
+  if (IsLowVoltage()) {
+    LOG4CXX_ERROR(
+        logger_, "Impossible to add notification due to Low Voltage is active");
+    return;
+  }
   notification_list_.push_back(ptr);
 }
 
@@ -274,7 +292,7 @@ void RequestController::OnMobileResponse(const uint32_t mobile_correlation_id,
 void RequestController::OnHMIResponse(const uint32_t correlation_id,
                                       const int32_t function_id) {
   LOG4CXX_AUTO_TRACE(logger_);
-  TerminateRequest(correlation_id, RequestInfo::HmiConnectoinKey, function_id);
+  TerminateRequest(correlation_id, RequestInfo::HmiConnectionKey, function_id);
 }
 
 void RequestController::terminateWaitingForExecutionAppRequests(
@@ -287,7 +305,7 @@ void RequestController::terminateWaitingForExecutionAppRequests(
   std::list<RequestPtr>::iterator request_it = mobile_request_list_.begin();
   while (mobile_request_list_.end() != request_it) {
     RequestPtr request = (*request_it);
-    if ((request.valid()) && (request->connection_key() == app_id)) {
+    if ((request.use_count() != 0) && (request->connection_key() == app_id)) {
       mobile_request_list_.erase(request_it++);
     } else {
       ++request_it;
@@ -321,7 +339,7 @@ void RequestController::terminateAppRequests(const uint32_t& app_id) {
 
 void RequestController::terminateAllHMIRequests() {
   LOG4CXX_AUTO_TRACE(logger_);
-  terminateWaitingForResponseAppRequests(RequestInfo::HmiConnectoinKey);
+  terminateWaitingForResponseAppRequests(RequestInfo::HmiConnectionKey);
 }
 
 void RequestController::terminateAllMobileRequests() {
@@ -401,17 +419,17 @@ void RequestController::TimeoutThread() {
       LOG4CXX_DEBUG(logger_,
                     "Timeout for "
                         << (RequestInfo::HMIRequest ==
-                                    probably_expired->requst_type()
+                                    probably_expired->request_type()
                                 ? "HMI"
                                 : "Mobile")
                         << " request id: " << probably_expired->requestId()
                         << " connection_key: " << probably_expired->app_id()
                         << " NOT expired");
-      const TimevalStruct current_time = date_time::DateTime::getCurrentTime();
-      const TimevalStruct end_time = probably_expired->end_time();
+      const date_time::TimeDuration current_time = date_time::getCurrentTime();
+      const date_time::TimeDuration end_time = probably_expired->end_time();
       if (current_time < end_time) {
-        const uint32_t msecs = static_cast<uint32_t>(
-            date_time::DateTime::getmSecs(end_time - current_time));
+        const uint32_t msecs =
+            static_cast<uint32_t>(date_time::getmSecs(end_time - current_time));
         LOG4CXX_DEBUG(logger_, "Sleep for " << msecs << " millisecs");
         timer_condition_.WaitFor(auto_lock, msecs);
       }
@@ -420,7 +438,7 @@ void RequestController::TimeoutThread() {
     LOG4CXX_INFO(logger_,
                  "Timeout for "
                      << (RequestInfo::HMIRequest ==
-                                 probably_expired->requst_type()
+                                 probably_expired->request_type()
                              ? "HMI"
                              : "Mobile")
                      << " request id: " << probably_expired->requestId()
@@ -430,7 +448,7 @@ void RequestController::TimeoutThread() {
     const uint32_t experied_app_id = probably_expired->app_id();
 
     probably_expired->request()->onTimeOut();
-    if (RequestInfo::HmiConnectoinKey == probably_expired->app_id()) {
+    if (RequestInfo::HmiConnectionKey == probably_expired->app_id()) {
       LOG4CXX_DEBUG(logger_,
                     "Erase HMI request: " << probably_expired->requestId());
       waiting_for_response_.RemoveRequest(probably_expired);
@@ -488,7 +506,7 @@ void RequestController::Worker::threadMain() {
 
     const uint32_t timeout_in_mseconds = request_ptr->default_timeout();
     RequestInfoPtr request_info_ptr =
-        utils::MakeShared<MobileRequestInfo>(request_ptr, timeout_in_mseconds);
+        std::make_shared<MobileRequestInfo>(request_ptr, timeout_in_mseconds);
 
     if (!request_controller_->waiting_for_response_.Add(request_info_ptr)) {
       commands::CommandRequestImpl* cmd_request =

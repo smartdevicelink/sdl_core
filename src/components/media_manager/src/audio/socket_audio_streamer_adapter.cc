@@ -30,8 +30,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <string>
 #include "media_manager/audio/socket_audio_streamer_adapter.h"
+#include <string>
 
 namespace {
 const std::string kHeader =

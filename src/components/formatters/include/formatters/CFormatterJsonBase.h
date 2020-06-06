@@ -35,42 +35,42 @@
 #ifndef SRC_COMPONENTS_FORMATTERS_INCLUDE_FORMATTERS_CFORMATTERJSONBASE_H_
 #define SRC_COMPONENTS_FORMATTERS_INCLUDE_FORMATTERS_CFORMATTERJSONBASE_H_
 
-#include "smart_objects/smart_object.h"
 #include "json/json.h"
+#include "smart_objects/smart_object.h"
 
-namespace NsSmartDeviceLink {
-namespace NsJSONHandler {
-namespace Formatters {
+namespace ns_smart_device_link {
+namespace ns_json_handler {
+namespace formatters {
 
 namespace meta_formatter_error_code {
 /**
-  * @brief Error codes of MetaFormatter represented as bitmask
-  **/
+ * @brief Error codes of MetaFormatter represented as bitmask
+ **/
 typedef long tMetaFormatterErrorCode;
 
 /**
-  * @brief OK, no error
-  */
+ * @brief OK, no error
+ */
 static const tMetaFormatterErrorCode kErrorOk = 0x0;
 
 /**
-  * @brief origin smart object is not function
-  */
+ * @brief origin smart object is not function
+ */
 static const tMetaFormatterErrorCode kErrorObjectIsNotFunction = 0x01;
 
 /**
-  * @brief smart shema describes object which is not function
-  */
+ * @brief smart schema describes object which is not function
+ */
 static const tMetaFormatterErrorCode kErrorSchemaIsNotFunction = 0x02;
 
 /**
-  * @brief result smart object has invalid type (SmartType_Invalid)
-  *        before passing to MetaFormatter, i.e. result object can not
-  *        be changed, i.e. result object can not be built
-  *
-  */
+ * @brief result smart object has invalid type (SmartType_Invalid)
+ *        before passing to MetaFormatter, i.e. result object can not
+ *        be changed, i.e. result object can not be built
+ *
+ */
 static const tMetaFormatterErrorCode kErrorFailedCreateObjectBySchema = 0x04;
-}
+}  // namespace meta_formatter_error_code
 
 /**
  * @brief The base class for all JSON based formatters.
@@ -99,21 +99,21 @@ class CFormatterJsonBase {
    */
   static void jsonValueToObj(
       const Json::Value& value,
-      NsSmartDeviceLink::NsSmartObjects::SmartObject& obj);
+      ns_smart_device_link::ns_smart_objects::SmartObject& obj);
 
   /**
-    * @brief The method constructs a JSON object from the input SmartObject
-    *
-    * @param obj Input SmartObject. Can contain a complex structure of objects.
-    * @param value The resulting JSON object. It has the same structure as the
-    *input SmartObject.
-    */
+   * @brief The method constructs a JSON object from the input SmartObject
+   *
+   * @param obj Input SmartObject. Can contain a complex structure of objects.
+   * @param value The resulting JSON object. It has the same structure as the
+   *input SmartObject.
+   */
   static void objToJsonValue(
-      const NsSmartDeviceLink::NsSmartObjects::SmartObject& obj,
+      const ns_smart_device_link::ns_smart_objects::SmartObject& obj,
       Json::Value& value);
 };
-}
-}
-}  // namespace NsSmartDeviceLink::NsJSONHandler::Formatters
+}  // namespace formatters
+}  // namespace ns_json_handler
+}  // namespace ns_smart_device_link
 
 #endif  // SRC_COMPONENTS_FORMATTERS_INCLUDE_FORMATTERS_CFORMATTERJSONBASE_H_

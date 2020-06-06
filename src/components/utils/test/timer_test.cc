@@ -30,12 +30,12 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "gtest/gtest.h"
 #include "utils/timer.h"
-#include "utils/mock_timer_task.h"
+#include "gtest/gtest.h"
 #include "utils/conditional_variable.h"
 #include "utils/lock.h"
 #include "utils/macro.h"
+#include "utils/mock_timer_task.h"
 #include "utils/timer_task_impl.h"
 
 namespace test {

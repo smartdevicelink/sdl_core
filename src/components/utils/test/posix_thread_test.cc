@@ -52,7 +52,7 @@ const char* threadName("test thread");
 const std::string test_thread_name("THREAD");
 sync_primitives::ConditionalVariable cond_var_;
 sync_primitives::Lock test_mutex_;
-};
+};  // namespace
 
 // ThreadDelegate successor
 class TestThreadDelegate : public threads::ThreadDelegate {

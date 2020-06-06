@@ -183,9 +183,6 @@ void CppInterfaceCodeGenerator::GenerateMessageFactories() {
   if (preferences_->generate_json) {
     ser_types[ser_types_count++] = MessageFactoryFunction::kJson;
   }
-  if (preferences_->generate_dbus) {
-    ser_types[ser_types_count++] = MessageFactoryFunction::kDbus;
-  }
 
   for (size_t i = 0; i < ser_types_count; ++i) {
     MessageFactoryFunction request_factory(interface_,

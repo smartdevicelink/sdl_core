@@ -33,8 +33,8 @@
 #include <string>
 
 #include "gmock/gmock.h"
-#include "utils/byte_order.h"
 #include "security_manager/security_query.h"
+#include "utils/byte_order.h"
 
 namespace test {
 namespace components {
