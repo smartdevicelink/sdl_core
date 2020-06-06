@@ -34,9 +34,9 @@
 
 #include "utils/logger.h"
 
+#include "transport_manager/transport_adapter/transport_adapter_event.h"
 #include "transport_manager/transport_adapter/transport_adapter_listener_impl.h"
 #include "transport_manager/transport_manager_impl.h"
-#include "transport_manager/transport_adapter/transport_adapter_event.h"
 
 namespace transport_manager {
 CREATE_LOGGERPTR_GLOBAL(logger_, "TransportManager")
@@ -108,6 +108,44 @@ void TransportAdapterListenerImpl::OnFindNewApplicationsRequest(
       0,
       ::protocol_handler::RawMessagePtr(),
       BaseErrorPtr());
+  if (transport_manager_ != NULL &&
+      transport_manager::E_SUCCESS !=
+          transport_manager_->ReceiveEventFromDevice(event)) {
+    LOG4CXX_WARN(logger_, "Failed to receive event from device");
+  }
+  LOG4CXX_TRACE(logger_, "exit");
+}
+
+void TransportAdapterListenerImpl::OnConnectionStatusUpdated(
+    const TransportAdapter* adapter) {
+  LOG4CXX_TRACE(logger_, "enter. adapter* " << adapter);
+  const TransportAdapterEvent event(EventTypeEnum::ON_CONNECTION_STATUS_UPDATED,
+                                    transport_adapter_,
+                                    "",
+                                    0,
+                                    ::protocol_handler::RawMessagePtr(),
+                                    BaseErrorPtr(new BaseError()));
+  if (transport_manager_ != NULL &&
+      transport_manager::E_SUCCESS !=
+          transport_manager_->ReceiveEventFromDevice(event)) {
+    LOG4CXX_WARN(logger_, "Failed to receive event from device");
+  }
+  LOG4CXX_TRACE(logger_, "exit");
+}
+
+void TransportAdapterListenerImpl::OnConnectPending(
+    const TransportAdapter* adapter,
+    const DeviceUID& device,
+    const ApplicationHandle& application_id) {
+  LOG4CXX_TRACE(logger_,
+                "enter adapter*: " << adapter << ", device: " << &device
+                                   << ", application_id: " << &application_id);
+  const TransportAdapterEvent event(EventTypeEnum::ON_CONNECT_PENDING,
+                                    transport_adapter_,
+                                    device,
+                                    application_id,
+                                    ::protocol_handler::RawMessagePtr(),
+                                    BaseErrorPtr(new BaseError()));
   if (transport_manager_ != NULL &&
       transport_manager::E_SUCCESS !=
           transport_manager_->ReceiveEventFromDevice(event)) {
@@ -275,7 +313,7 @@ void TransportAdapterListenerImpl::OnDataSendDone(
                                     device,
                                     app_id,
                                     data_container,
-                                    new BaseError());
+                                    std::make_shared<BaseError>());
   if (transport_manager_ != NULL &&
       transport_manager::E_SUCCESS !=
           transport_manager_->ReceiveEventFromDevice(event)) {
@@ -376,4 +414,23 @@ void TransportAdapterListenerImpl::OnTransportSwitchRequested(
     LOG4CXX_WARN(logger_, "Failed to receive event from device");
   }
 }
+
+void TransportAdapterListenerImpl::OnTransportConfigUpdated(
+    const transport_adapter::TransportAdapter* adapter) {
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  const TransportAdapterEvent event(EventTypeEnum::ON_TRANSPORT_CONFIG_UPDATED,
+                                    transport_adapter_,
+                                    "",
+                                    0,
+                                    ::protocol_handler::RawMessagePtr(),
+                                    BaseErrorPtr());
+
+  if (transport_manager_ != NULL &&
+      transport_manager::E_SUCCESS !=
+          transport_manager_->ReceiveEventFromDevice(event)) {
+    LOG4CXX_WARN(logger_, "Failed to receive event from device");
+  }
+}
+
 }  // namespace transport_manager

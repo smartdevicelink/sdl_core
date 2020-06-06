@@ -30,15 +30,16 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <cstring>
-#include <cstdio>
-#include <string>
 #include "sdl_rpc_plugin/commands/mobile/on_system_request_notification.h"
-#include "interfaces/MOBILE_API.h"
-#include "utils/file_system.h"
-#include "policy/policy_table/enums.h"
+#include <cstdio>
+#include <cstring>
+#include <string>
 #include "application_manager/application_manager.h"
 #include "application_manager/policies/policy_handler_interface.h"
+#include "interfaces/MOBILE_API.h"
+#include "policy/policy_table/enums.h"
+#include "utils/file_system.h"
+#include "utils/helpers.h"
 
 namespace sdl_rpc_plugin {
 using namespace application_manager;
@@ -65,10 +66,11 @@ void OnSystemRequestNotification::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
   using namespace application_manager;
   using namespace mobile_apis;
+  using namespace helpers;
 
   ApplicationSharedPtr app = application_manager_.application(connection_key());
 
-  if (!app.valid()) {
+  if (app.use_count() == 0) {
     LOG4CXX_ERROR(logger_,
                   "Application with connection key " << connection_key()
                                                      << " is not registered.");
@@ -84,8 +86,8 @@ void OnSystemRequestNotification::Run() {
           static_cast<rpc::policy_table_interface_base::RequestType>(
               request_type));
 
-  if (!policy_handler.IsRequestTypeAllowed(app->policy_app_id(),
-                                           request_type)) {
+  if (!policy_handler.IsRequestTypeAllowed(
+          app->device(), app->policy_app_id(), request_type)) {
     LOG4CXX_WARN(logger_,
                  "Request type " << stringified_request_type
                                  << " is not allowed by policies");
@@ -106,17 +108,34 @@ void OnSystemRequestNotification::Run() {
     }
   }
 
-  if (mobile_apis::RequestType::PROPRIETARY == request_type) {
+  LOG4CXX_DEBUG(logger_,
+                "Processing Request type : " << stringified_request_type);
+
+  const bool binary_data_is_required =
+      Compare<mobile_apis::RequestType::eType, EQ, ONE>(
+          request_type,
+          mobile_apis::RequestType::PROPRIETARY,
+          mobile_apis::RequestType::OEM_SPECIFIC);
+
+  BinaryMessage binary_data;
+  if (binary_data_is_required &&
+      (*message_)[strings::msg_params].keyExists(strings::file_name)) {
+    const std::string filename =
+        (*message_)[strings::msg_params][strings::file_name].asString();
+    file_system::ReadBinaryFile(filename, binary_data);
+  } else if ((*message_)[strings::params].keyExists(strings::binary_data)) {
+    // Binary data may already be attached to the message
+    binary_data = (*message_)[strings::params][strings::binary_data].asBinary();
+  }
+
+  if (mobile_apis::RequestType::OEM_SPECIFIC == request_type) {
+    (*message_)[strings::params][strings::binary_data] = binary_data;
+  } else if (mobile_apis::RequestType::PROPRIETARY == request_type) {
     /* According to requirements:
        "If the requestType = PROPRIETARY, add to mobile API fileType = JSON
         If the requestType = HTTP, add to mobile API fileType = BINARY"
-       Also in Genivi SDL we don't save the PT to file - we put it directly in
-       binary_data */
+       Also we don't save the PT to file - we put it directly in binary_data */
 
-    const std::string filename =
-        (*message_)[strings::msg_params][strings::file_name].asString();
-    BinaryMessage binary_data;
-    file_system::ReadBinaryFile(filename, binary_data);
 #if defined(PROPRIETARY_MODE)
     AddHeader(binary_data);
 #endif  // PROPRIETARY_MODE
@@ -131,6 +150,13 @@ void OnSystemRequestNotification::Run() {
     if ((*message_)[strings::msg_params].keyExists(strings::url)) {
       (*message_)[strings::msg_params][strings::timeout] =
           policy_handler.TimeoutExchangeSec();
+    }
+  } else if (mobile_apis::RequestType::LOCK_SCREEN_ICON_URL == request_type) {
+    if (!(*message_)[strings::msg_params].keyExists(strings::url) ||
+        (*message_)[strings::msg_params][strings::url].empty()) {
+      LOG4CXX_ERROR(logger_,
+                    "discarding LOCK_SCREEN_ICON_URL request without URL");
+      return;
     }
   }
 
@@ -226,4 +252,4 @@ size_t OnSystemRequestNotification::ParsePTString(
 
 }  // namespace commands
 
-}  // namespace application_manager
+}  // namespace sdl_rpc_plugin

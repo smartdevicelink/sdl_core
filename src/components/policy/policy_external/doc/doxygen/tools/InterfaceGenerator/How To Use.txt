@@ -1,6 +1,6 @@
 /*! \page tools_interfacegenerator_usage How to use InterfaceGenerator
 
-To run InterfaceGenerator the Python 2.7 interpreter should be installed. As input InterfaceGenerator requires full path to the source XML file, namespace to generate result code in, full path to the output directory where result source code C++ will be created and optionally explicit specification of parser type.
+To run InterfaceGenerator the Python 3.5+ interpreter should be installed. As input InterfaceGenerator requires full path to the source XML file, namespace to generate result code in, full path to the output directory where result source code C++ will be created and optionally explicit specification of parser type.
 
 Example1 (Run Generator.py to display help):
 

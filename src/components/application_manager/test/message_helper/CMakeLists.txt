@@ -40,6 +40,7 @@ set(LIBRARIES
     ApplicationManager
     MessageHelper
     jsoncpp
+    PolicyStatic
     connectionHandler
     MediaManager
     Resumption

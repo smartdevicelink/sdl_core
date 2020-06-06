@@ -32,35 +32,40 @@
 #include "smart_objects/smart_schema.h"
 #include "smart_objects/always_true_schema_item.h"
 
-namespace NsSmartDeviceLink {
-namespace NsSmartObjects {
+namespace ns_smart_device_link {
+namespace ns_smart_objects {
 
 CSmartSchema::CSmartSchema() : mSchemaItem(CAlwaysTrueSchemaItem::create()) {}
 
 CSmartSchema::CSmartSchema(const ISchemaItemPtr SchemaItem)
     : mSchemaItem(SchemaItem) {}
 
-Errors::eType CSmartSchema::validate(const SmartObject& Object) const {
-  rpc::ValidationReport report("RPC");
-  return validate(Object, &report);
-}
-
-Errors::eType CSmartSchema::validate(const SmartObject& object,
-                                     rpc::ValidationReport* report__) const {
-  return mSchemaItem->validate(object, report__);
+errors::eType CSmartSchema::validate(
+    const SmartObject& object,
+    rpc::ValidationReport* report__,
+    const utils::SemanticVersion& MessageVersion,
+    const bool allow_unknown_enums) const {
+  return mSchemaItem->validate(
+      object, report__, MessageVersion, allow_unknown_enums);
 }
 
 void CSmartSchema::setSchemaItem(const ISchemaItemPtr schemaItem) {
   mSchemaItem = schemaItem;
 }
 
-void CSmartSchema::applySchema(SmartObject& Object,
-                               const bool RemoveFakeParameters) {
-  mSchemaItem->applySchema(Object, RemoveFakeParameters);
+ISchemaItemPtr CSmartSchema::getSchemaItem() {
+  return mSchemaItem;
 }
 
-void CSmartSchema::unapplySchema(SmartObject& Object) {
-  mSchemaItem->unapplySchema(Object);
+void CSmartSchema::applySchema(SmartObject& Object,
+                               const bool remove_unknown_parameters,
+                               const utils::SemanticVersion& MessageVersion) {
+  mSchemaItem->applySchema(Object, remove_unknown_parameters, MessageVersion);
+}
+
+void CSmartSchema::unapplySchema(SmartObject& Object,
+                                 const bool remove_unknown_parameters) {
+  mSchemaItem->unapplySchema(Object, remove_unknown_parameters);
 }
 
 void CSmartSchema::BuildObjectBySchema(const SmartObject& pattern_object,
@@ -68,5 +73,5 @@ void CSmartSchema::BuildObjectBySchema(const SmartObject& pattern_object,
   mSchemaItem->BuildObjectBySchema(pattern_object, result_object);
 }
 
-}  // namespace NsSmartObjects
-}  // namespace NsSmartDeviceLink
+}  // namespace ns_smart_objects
+}  // namespace ns_smart_device_link

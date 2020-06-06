@@ -35,11 +35,11 @@
 
 #include "gtest/gtest.h"
 #include "mobile/on_way_point_change_notification.h"
-#include "utils/shared_ptr.h"
-#include "smart_objects/smart_object.h"
-#include "application_manager/smart_object_keys.h"
-#include "application_manager/commands/commands_test.h"
+
 #include "application_manager/commands/command_impl.h"
+#include "application_manager/commands/commands_test.h"
+#include "application_manager/smart_object_keys.h"
+#include "smart_objects/smart_object.h"
 #include "utils/helpers.h"
 
 namespace test {
@@ -56,7 +56,7 @@ using ::testing::Return;
 using am::commands::MessageSharedPtr;
 using sdl_rpc_plugin::commands::OnWayPointChangeNotification;
 
-typedef ::utils::SharedPtr<OnWayPointChangeNotification> NotificationPtr;
+typedef std::shared_ptr<OnWayPointChangeNotification> NotificationPtr;
 
 namespace {
 const uint32_t kAppId = 1u;
@@ -98,7 +98,7 @@ MATCHER(CheckMessageData, "") {
 
 TEST_F(OnWayPointChangeNotificationTest,
        Run_NotEmptyListOfAppsSubscribedForWayPoints_SUCCESS) {
-  std::set<int32_t> apps_subscribed_for_way_points;
+  std::set<uint32_t> apps_subscribed_for_way_points;
   apps_subscribed_for_way_points.insert(kAppId);
 
   EXPECT_CALL(app_mngr_, GetAppsSubscribedForWayPoints())

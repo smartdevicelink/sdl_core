@@ -33,8 +33,8 @@
 #include "sdl_rpc_plugin/commands/hmi/on_button_press_notification.h"
 
 #include "application_manager/application_impl.h"
-#include "utils/logger.h"
 #include "application_manager/event_engine/event.h"
+#include "utils/logger.h"
 
 namespace sdl_rpc_plugin {
 using namespace application_manager;
@@ -69,4 +69,4 @@ void OnButtonPressNotification::Run() {
 
 }  // namespace commands
 
-}  // namespace application_manager
+}  // namespace sdl_rpc_plugin

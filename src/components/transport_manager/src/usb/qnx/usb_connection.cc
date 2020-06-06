@@ -37,8 +37,8 @@
 #include <sched.h>
 #include <cstring>
 
-#include "transport_manager/usb/qnx/usb_connection.h"
 #include "transport_manager/transport_adapter/transport_adapter_impl.h"
+#include "transport_manager/usb/qnx/usb_connection.h"
 
 #include "utils/logger.h"
 
@@ -144,7 +144,7 @@ void UsbConnection::OnInTransfer(usbd_urb* urb) {
         device_uid_, app_handle_, DataReceiveError());
   } else {
     ::protocol_handler::RawMessagePtr msg(
-        new protocol_handler::RawMessage(0, 0, in_buffer_, len));
+        new protocol_handler::RawMessage(0, 0, in_buffer_, len, false));
     controller_->DataReceiveDone(device_uid_, app_handle_, msg);
   }
 
@@ -230,7 +230,7 @@ void UsbConnection::OnOutTransfer(usbd_urb* urb) {
     }
   }
 
-  if ((!disconnecting_) && current_out_message_.valid()) {
+  if ((!disconnecting_) && (current_out_message_.use_count() != 0)) {
     PostOutTransfer();
   } else {
     pending_out_transfer_ = false;
@@ -243,7 +243,7 @@ TransportAdapter::Error UsbConnection::SendData(
     return TransportAdapter::BAD_STATE;
   }
   sync_primitives::AutoLock locker(out_messages_mutex_);
-  if (current_out_message_.valid()) {
+  if (current_out_message_.use_count() != 0) {
     out_messages_.push_back(message);
   } else {
     current_out_message_ = message;

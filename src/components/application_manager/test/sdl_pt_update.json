@@ -20,7 +20,13 @@
             "nicknames" : [ "SyncProxyTester" ],
             "priority" : "EMERGENCY",
             "steal_focus" : true,
-            "watchdog_timer_ms" : 20000
+            "watchdog_timer_ms" : 20000,
+            "app_services": {
+               "MEDIA": {
+                  "service_names" : ["SDL App", "SDL Music"],
+                  "handled_rpcs" : [{"function_id": 41}]
+               }
+            }
          },
          "default" : {
             "default_hmi" : "NONE",
@@ -1433,6 +1439,7 @@
                   "parameters" : [
                      "accPedalPosition",
                      "beltStatus",
+                     "electronicParkBrakeStatus",
                      "driverBraking",
                      "myKey",
                      "prndl",
@@ -1445,6 +1452,7 @@
                   "parameters" : [
                      "accPedalPosition",
                      "beltStatus",
+                     "electronicParkBrakeStatus",
                      "driverBraking",
                      "myKey",
                      "prndl",
@@ -1457,6 +1465,7 @@
                   "parameters" : [
                      "accPedalPosition",
                      "beltStatus",
+                     "electronicParkBrakeStatus",
                      "driverBraking",
                      "myKey",
                      "prndl",
@@ -1469,6 +1478,7 @@
                   "parameters" : [
                      "accPedalPosition",
                      "beltStatus",
+                     "electronicParkBrakeStatus",
                      "driverBraking",
                      "myKey",
                      "prndl",
@@ -1596,6 +1606,7 @@
                      "headLampStatus",
                      "instantFuelConsumption",
                      "fuelRange",
+                     "cloudAppVehicleID",
                      "odometer",
                      "tirePressure",
                      "vin",
@@ -1614,6 +1625,7 @@
                      "headLampStatus",
                      "instantFuelConsumption",
                      "fuelRange",
+                     "cloudAppVehicleID",
                      "odometer",
                      "tirePressure",
                      "vin",
@@ -1632,6 +1644,7 @@
                      "headLampStatus",
                      "instantFuelConsumption",
                      "fuelRange",
+                     "cloudAppVehicleID",
                      "odometer",
                      "tirePressure",
                      "wiperStatus"
@@ -1649,6 +1662,7 @@
                      "headLampStatus",
                      "instantFuelConsumption",
                      "fuelRange",
+                     "cloudAppVehicleID",
                      "odometer",
                      "tirePressure",
                      "wiperStatus"

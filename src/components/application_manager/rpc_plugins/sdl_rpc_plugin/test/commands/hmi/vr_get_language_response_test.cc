@@ -30,13 +30,13 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "gtest/gtest.h"
 #include "hmi/vr_get_language_response.h"
-#include "application_manager/smart_object_keys.h"
 #include "application_manager/commands/commands_test.h"
-#include "application_manager/mock_hmi_capabilities.h"
-#include "application_manager/mock_event_dispatcher.h"
 #include "application_manager/mock_application_manager.h"
+#include "application_manager/mock_event_dispatcher.h"
+#include "application_manager/mock_hmi_capabilities.h"
+#include "application_manager/smart_object_keys.h"
+#include "gtest/gtest.h"
 
 namespace test {
 namespace components {
@@ -44,12 +44,11 @@ namespace commands_test {
 namespace hmi_commands_test {
 namespace vr_get_language_response {
 
-using utils::SharedPtr;
 using sdl_rpc_plugin::commands::VRGetLanguageResponse;
 using test::components::event_engine_test::MockEventDispatcher;
 using testing::_;
-using testing::ReturnRef;
 using ::testing::NiceMock;
+using testing::ReturnRef;
 
 namespace strings = application_manager::strings;
 namespace hmi_response = application_manager::hmi_response;
@@ -70,7 +69,7 @@ TEST_F(VRGetLanguageResponseTest, Run_LanguageSet_SUCCESS) {
   MessageSharedPtr msg = CreateMessage();
   (*msg)[strings::msg_params][hmi_response::language] = kLanguage;
 
-  SharedPtr<VRGetLanguageResponse> command(
+  std::shared_ptr<VRGetLanguageResponse> command(
       CreateCommand<VRGetLanguageResponse>(msg));
 
   EXPECT_CALL(mock_hmi_capabilities_, set_active_vr_language(kLanguage));
@@ -86,7 +85,7 @@ TEST_F(VRGetLanguageResponseTest, Run_LanguageSet_SUCCESS) {
 TEST_F(VRGetLanguageResponseTest, Run_LanguageNotSet_SUCCESS) {
   MessageSharedPtr msg = CreateMessage();
 
-  SharedPtr<VRGetLanguageResponse> command(
+  std::shared_ptr<VRGetLanguageResponse> command(
       CreateCommand<VRGetLanguageResponse>(msg));
 
   EXPECT_CALL(mock_hmi_capabilities_,

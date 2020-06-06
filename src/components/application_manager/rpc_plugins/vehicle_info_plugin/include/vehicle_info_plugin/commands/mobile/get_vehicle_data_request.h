@@ -36,11 +36,10 @@
 
 #include "application_manager/commands/command_request_impl.h"
 #include "utils/macro.h"
+#include "vehicle_info_plugin/vehicle_info_command_params.h"
 
 namespace vehicle_info_plugin {
 namespace app_mngr = application_manager;
-
-class SmartObject;
 
 namespace commands {
 
@@ -55,10 +54,7 @@ class GetVehicleDataRequest : public app_mngr::commands::CommandRequestImpl {
    * @param message Incoming SmartObject message
    **/
   GetVehicleDataRequest(const app_mngr::commands::MessageSharedPtr& message,
-                        app_mngr::ApplicationManager& application_manager,
-                        app_mngr::rpc_service::RPCService& rpc_service,
-                        app_mngr::HMICapabilities& hmi_capabilities,
-                        policy::PolicyHandlerInterface& policy_handler);
+                        const VehicleInfoCommandParams& params);
 
   /**
    * @brief GetVehicleDataRequest class destructor
@@ -73,26 +69,22 @@ class GetVehicleDataRequest : public app_mngr::commands::CommandRequestImpl {
  protected:
   virtual void on_event(const app_mngr::event_engine::Event& event);
 
-#ifdef HMI_DBUS_API
  private:
-  void SendRequestsToHmi(const int32_t app_id);
+  /**
+   * @brief CheckFrequency check if mobile does not spam SDL with frequent
+   * GetVehicleData requests
+   * @return
+   */
+  bool CheckFrequency(application_manager::Application& app);
 
-  struct HmiRequest {
-    hmi_apis::Common_Result::eType status;
-    bool complete;
-    smart_objects::SmartObject value;
-    const char* str;
-    hmi_apis::FunctionID::eType func_id;
-  };
+  std::set<std::string> pending_vehicle_data_;
 
-  typedef std::vector<HmiRequest> HmiRequests;
-  HmiRequests hmi_requests_;
-#endif  // #ifdef HMI_DBUS_API
+  CustomVehicleDataManager& custom_vehicle_data_manager_;
 
   DISALLOW_COPY_AND_ASSIGN(GetVehicleDataRequest);
 };
 
 }  // namespace commands
-}  // namespace application_manager
+}  // namespace vehicle_info_plugin
 
 #endif  // SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_MOBILE_GET_VEHICLE_DATA_REQUEST_H_

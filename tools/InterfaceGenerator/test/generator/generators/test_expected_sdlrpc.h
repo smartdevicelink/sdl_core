@@ -218,7 +218,7 @@ enum eType {
  *     param2 - value2
  *     param1 - value1
  */
-class Test : public NsSmartDeviceLink::NsJSONHandler::CSmartFactory<FunctionID::eType, messageType::eType, StructIdentifiers::eType> {
+class Test : public ns_smart_device_link::ns_json_handler::CSmartFactory<FunctionID::eType, messageType::eType, StructIdentifiers::eType> {
  public:
   /**
    * @brief Constructor.
@@ -229,7 +229,7 @@ class Test : public NsSmartDeviceLink::NsJSONHandler::CSmartFactory<FunctionID::
   /**
    * @brief Type that maps of struct IDs to schema items.
    */
-  typedef std::map<const StructIdentifiers::eType, NsSmartDeviceLink::NsSmartObjects::TSharedPtr<NsSmartDeviceLink::NsSmartObjects::ISchemaItem> > TStructsSchemaItems;
+  typedef std::map<const StructIdentifiers::eType, ns_smart_device_link::ns_smart_objects::TSharedPtr<ns_smart_device_link::ns_smart_objects::ISchemaItem> > TStructsSchemaItems;
 
   /**
    * @brief Helper that allows to make reference to struct
@@ -239,7 +239,7 @@ class Test : public NsSmartDeviceLink::NsJSONHandler::CSmartFactory<FunctionID::
    *
    * @return TSharedPtr of strucute
    */
-  static NsSmartDeviceLink::NsSmartObjects::TSharedPtr<NsSmartDeviceLink::NsSmartObjects::ISchemaItem> ProvideObjectSchemaItemForStruct(
+  static ns_smart_device_link::ns_smart_objects::TSharedPtr<ns_smart_device_link::ns_smart_objects::ISchemaItem> ProvideObjectSchemaItemForStruct(
         const TStructsSchemaItems &struct_schema_items,
         const StructIdentifiers::eType struct_id);
 
@@ -263,9 +263,9 @@ class Test : public NsSmartDeviceLink::NsJSONHandler::CSmartFactory<FunctionID::
   /**
    * @brief Method that generates schema for function Function1.
    *
-   * @return NsSmartDeviceLink::NsSmartObjects::CSmartSchema
+   * @return ns_smart_device_link::ns_smart_objects::CSmartSchema
    */
-  static NsSmartDeviceLink::NsSmartObjects::CSmartSchema InitFunction_name1_request(
+  static ns_smart_device_link::ns_smart_objects::CSmartSchema InitFunction_name1_request(
       const TStructsSchemaItems &struct_schema_items,
       const std::set<FunctionID::eType> &function_id_items,
       const std::set<messageType::eType> &message_type_items);
@@ -273,9 +273,9 @@ class Test : public NsSmartDeviceLink::NsJSONHandler::CSmartFactory<FunctionID::
   /**
    * @brief Method that generates schema for function Function2.
    *
-   * @return NsSmartDeviceLink::NsSmartObjects::CSmartSchema
+   * @return ns_smart_device_link::ns_smart_objects::CSmartSchema
    */
-  static NsSmartDeviceLink::NsSmartObjects::CSmartSchema InitFunction_val_1_response(
+  static ns_smart_device_link::ns_smart_objects::CSmartSchema InitFunction_val_1_response(
       const TStructsSchemaItems &struct_schema_items,
       const std::set<FunctionID::eType> &function_id_items,
       const std::set<messageType::eType> &message_type_items);
@@ -283,9 +283,9 @@ class Test : public NsSmartDeviceLink::NsJSONHandler::CSmartFactory<FunctionID::
   /**
    * @brief Method that generates schema for function Function2.
    *
-   * @return NsSmartDeviceLink::NsSmartObjects::CSmartSchema
+   * @return ns_smart_device_link::ns_smart_objects::CSmartSchema
    */
-  static NsSmartDeviceLink::NsSmartObjects::CSmartSchema InitFunction_val_2_notification(
+  static ns_smart_device_link::ns_smart_objects::CSmartSchema InitFunction_val_2_notification(
       const TStructsSchemaItems &struct_schema_items,
       const std::set<FunctionID::eType> &function_id_items,
       const std::set<messageType::eType> &message_type_items);
@@ -299,7 +299,7 @@ class Test : public NsSmartDeviceLink::NsJSONHandler::CSmartFactory<FunctionID::
    * @note Issue2
    * @note Issue3
    */
-  static NsSmartDeviceLink::NsSmartObjects::TSharedPtr<NsSmartDeviceLink::NsSmartObjects::ISchemaItem> InitStructSchemaItem_Struct1(
+  static ns_smart_device_link::ns_smart_objects::TSharedPtr<ns_smart_device_link::ns_smart_objects::ISchemaItem> InitStructSchemaItem_Struct1(
       const TStructsSchemaItems &struct_schema_items);
 
   /**
@@ -309,7 +309,7 @@ class Test : public NsSmartDeviceLink::NsJSONHandler::CSmartFactory<FunctionID::
    * @note Issue2
    * @note Issue3
    */
-  static NsSmartDeviceLink::NsSmartObjects::TSharedPtr<NsSmartDeviceLink::NsSmartObjects::ISchemaItem> InitStructSchemaItem_Struct2(
+  static ns_smart_device_link::ns_smart_objects::TSharedPtr<ns_smart_device_link::ns_smart_objects::ISchemaItem> InitStructSchemaItem_Struct2(
       const TStructsSchemaItems &struct_schema_items);
 };
 

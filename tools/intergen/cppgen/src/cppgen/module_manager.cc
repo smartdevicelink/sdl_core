@@ -105,12 +105,6 @@ ModuleManager::ModuleManager(const std::string& name,
     functions_source_.Include(
         CppFile::Header("rpc_base/rpc_base_json_inl.h", true));
   }
-  if (prefs.generate_dbus) {
-    structs_source_.Include(
-        CppFile::Header("rpc_base/rpc_base_dbus_inl.h", true));
-    functions_source_.Include(
-        CppFile::Header("rpc_base/rpc_base_dbus_inl.h", true));
-  }
 }
 
 ModuleManager::~ModuleManager() {

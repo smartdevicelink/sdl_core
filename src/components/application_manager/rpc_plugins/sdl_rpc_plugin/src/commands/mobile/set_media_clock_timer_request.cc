@@ -33,10 +33,10 @@
 
 #include "sdl_rpc_plugin/commands/mobile/set_media_clock_timer_request.h"
 
-#include "application_manager/message_helper.h"
 #include "application_manager/application_impl.h"
-#include "interfaces/MOBILE_API.h"
+#include "application_manager/message_helper.h"
 #include "interfaces/HMI_API.h"
+#include "interfaces/MOBILE_API.h"
 
 namespace sdl_rpc_plugin {
 using namespace application_manager;
@@ -163,4 +163,4 @@ bool SetMediaClockRequest::isDataValid() {
 
 }  // namespace commands
 
-}  // namespace application_manager
+}  // namespace sdl_rpc_plugin

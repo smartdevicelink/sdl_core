@@ -56,7 +56,7 @@ bool TcpServerOriginatedSocketConnection::Establish(ConnectError** error) {
   DCHECK(error);
   LOG4CXX_DEBUG(logger_, "error " << error);
   DeviceSptr device = controller()->FindDevice(device_handle());
-  if (!device.valid()) {
+  if (device.use_count() == 0) {
     LOG4CXX_ERROR(logger_, "Device " << device_handle() << " not found");
     *error = new ConnectError();
     return false;
@@ -65,9 +65,9 @@ bool TcpServerOriginatedSocketConnection::Establish(ConnectError** error) {
 
   const int port = tcp_device->GetApplicationPort(application_handle());
   if (-1 == port) {
-    LOG4CXX_ERROR(logger_,
-                  "Application port for " << application_handle()
-                                          << " not found");
+    LOG4CXX_ERROR(
+        logger_,
+        "Application port for " << application_handle() << " not found");
     *error = new ConnectError();
     return false;
   }

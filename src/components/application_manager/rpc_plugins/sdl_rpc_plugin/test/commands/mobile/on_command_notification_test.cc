@@ -34,12 +34,12 @@
 #include <string>
 
 #include "gtest/gtest.h"
-#include "utils/shared_ptr.h"
-#include "smart_objects/smart_object.h"
-#include "application_manager/smart_object_keys.h"
-#include "application_manager/commands/commands_test.h"
+
 #include "application_manager/commands/command_impl.h"
+#include "application_manager/commands/commands_test.h"
+#include "application_manager/smart_object_keys.h"
 #include "mobile/on_command_notification.h"
+#include "smart_objects/smart_object.h"
 
 namespace test {
 namespace components {
@@ -55,7 +55,7 @@ using ::testing::Return;
 using am::commands::MessageSharedPtr;
 using sdl_rpc_plugin::commands::OnCommandNotification;
 
-typedef ::utils::SharedPtr<OnCommandNotification> CommandPtr;
+typedef std::shared_ptr<OnCommandNotification> CommandPtr;
 
 namespace {
 const uint32_t kAppId = 1u;

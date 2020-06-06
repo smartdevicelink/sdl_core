@@ -30,14 +30,14 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <iostream>
 #include <pthread.h>
+#include <iostream>
 
 #include "gtest/gtest.h"
 
+#include "utils/conditional_variable.h"
 #include "utils/lock.h"
 #include "utils/macro.h"
-#include "utils/conditional_variable.h"
 
 namespace test {
 namespace components {
@@ -102,6 +102,7 @@ TEST_F(ConditionalVariableTest,
   cond_var_.WaitFor(test_lock, 2000);
   std::string last_value("changed again by thread 1");
   EXPECT_EQ(last_value, test_value_);
+  pthread_join(thread1, NULL);
 }
 
 TEST_F(ConditionalVariableTest,

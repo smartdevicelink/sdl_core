@@ -28,22 +28,18 @@
  * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
-*/
+ */
 
 #ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_HMI_CAPABILITIES_IMPL_H_
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_HMI_CAPABILITIES_IMPL_H_
 
 #include "application_manager/hmi_capabilities.h"
+#include "application_manager/hmi_language_handler.h"
 #include "interfaces/HMI_API.h"
 #include "interfaces/MOBILE_API.h"
 #include "json/json.h"
-#include "utils/macro.h"
-#include "application_manager/hmi_language_handler.h"
 #include "smart_objects/smart_object.h"
-
-namespace resumption {
-class LastState;
-}  // namespace resumption
+#include "utils/macro.h"
 
 namespace application_manager {
 class ApplicationManager;
@@ -219,7 +215,7 @@ class HMICapabilitiesImpl : public HMICapabilities {
    *
    * @return Currently supported display capabilities
    */
-  const smart_objects::SmartObject* display_capabilities() const OVERRIDE;
+  const smart_objects::SmartObjectSPtr display_capabilities() const OVERRIDE;
 
   /*
    * @brief Sets supported display capabilities
@@ -230,11 +226,25 @@ class HMICapabilitiesImpl : public HMICapabilities {
       const smart_objects::SmartObject& display_capabilities) OVERRIDE;
 
   /*
+   * @brief Retrieves information about the display capability
+   * @return Currently supported display capability
+   */
+  const smart_objects::SmartObjectSPtr system_display_capabilities()
+      const OVERRIDE;
+
+  /*
+   * @brief Sets supported display capability
+   * @param display_capabilities supported display capability
+   */
+  void set_system_display_capabilities(
+      const smart_objects::SmartObject& display_capabilities);
+
+  /*
    * @brief Retrieves information about the HMI zone capabilities
    *
    * @return Currently supported HMI zone capabilities
    */
-  const smart_objects::SmartObject* hmi_zone_capabilities() const OVERRIDE;
+  const smart_objects::SmartObjectSPtr hmi_zone_capabilities() const OVERRIDE;
 
   /*
    * @brief Sets supported HMI zone capabilities
@@ -249,7 +259,8 @@ class HMICapabilitiesImpl : public HMICapabilities {
    *
    * @return Currently supported SoftButton's capabilities
    */
-  const smart_objects::SmartObject* soft_button_capabilities() const OVERRIDE;
+  const smart_objects::SmartObjectSPtr soft_button_capabilities()
+      const OVERRIDE;
 
   /*
    * @brief Sets supported SoftButton's capabilities
@@ -264,7 +275,7 @@ class HMICapabilitiesImpl : public HMICapabilities {
    *
    * @return Currently supported Button's capabilities
    */
-  const smart_objects::SmartObject* button_capabilities() const OVERRIDE;
+  const smart_objects::SmartObjectSPtr button_capabilities() const OVERRIDE;
 
   /*
    * @brief Sets supported Button's capabilities
@@ -287,7 +298,7 @@ class HMICapabilitiesImpl : public HMICapabilities {
    *
    * @return Currently supported speech capabilities
    */
-  const smart_objects::SmartObject* speech_capabilities() const OVERRIDE;
+  const smart_objects::SmartObjectSPtr speech_capabilities() const OVERRIDE;
 
   /*
    * @brief Sets supported VR capabilities
@@ -302,7 +313,7 @@ class HMICapabilitiesImpl : public HMICapabilities {
    *
    * @return Currently supported VR capabilities
    */
-  const smart_objects::SmartObject* vr_capabilities() const OVERRIDE;
+  const smart_objects::SmartObjectSPtr vr_capabilities() const OVERRIDE;
 
   /*
    * @brief Sets supported audio_pass_thru capabilities
@@ -317,7 +328,7 @@ class HMICapabilitiesImpl : public HMICapabilities {
    *
    * @return Currently supported audio_pass_thru capabilities
    */
-  const smart_objects::SmartObject* audio_pass_thru_capabilities()
+  const smart_objects::SmartObjectSPtr audio_pass_thru_capabilities()
       const OVERRIDE;
 
   /*
@@ -333,14 +344,15 @@ class HMICapabilitiesImpl : public HMICapabilities {
    *
    * @return Currently supported pcm_streaming capabilities
    */
-  const smart_objects::SmartObject* pcm_stream_capabilities() const OVERRIDE;
+  const smart_objects::SmartObjectSPtr pcm_stream_capabilities() const OVERRIDE;
 
   /*
    * @brief Retrieves information about the preset bank capabilities
    *
    * @return Currently supported preset bank capabilities
    */
-  const smart_objects::SmartObject* preset_bank_capabilities() const OVERRIDE;
+  const smart_objects::SmartObjectSPtr preset_bank_capabilities()
+      const OVERRIDE;
 
   /*
    * @brief Sets supported preset bank capabilities
@@ -363,14 +375,14 @@ class HMICapabilitiesImpl : public HMICapabilities {
    *
    * @param vehicle_type Cuurent vehicle information
    */
-  const smart_objects::SmartObject* vehicle_type() const OVERRIDE;
+  const smart_objects::SmartObjectSPtr vehicle_type() const OVERRIDE;
 
   /*
    * @brief Retrieves information about the prerecorded speech
    *
    * @return Currently supported prerecorded speech
    */
-  const smart_objects::SmartObject* prerecorded_speech() const OVERRIDE;
+  const smart_objects::SmartObjectSPtr prerecorded_speech() const OVERRIDE;
 
   /*
    * @brief Sets supported prerecorded speech
@@ -493,6 +505,14 @@ class HMICapabilitiesImpl : public HMICapabilities {
 
   const smart_objects::SmartObject* rc_capability() const OVERRIDE;
 
+  void set_seat_location_capability(
+      const smart_objects::SmartObject& seat_location_capability) OVERRIDE;
+
+  const smart_objects::SmartObject* seat_location_capability() const OVERRIDE;
+
+  void Init(resumption::LastStateWrapperPtr last_state_wrapper) OVERRIDE;
+
+  DEPRECATED
   void Init(resumption::LastState* last_state) OVERRIDE;
 
   /*
@@ -542,6 +562,18 @@ class HMICapabilitiesImpl : public HMICapabilities {
       const Json::Value& json_languages,
       smart_objects::SmartObject& languages) const OVERRIDE;
 
+  /*
+   * @brief function that converts a single entry of audio pass thru capability
+   *        to smart object
+   *
+   * @param capability json object that represents a single entry of audio pass
+   *        thru capability
+   * @param output_so the converted object
+   */
+  void convert_audio_capability_to_obj(
+      const Json::Value& capability,
+      smart_objects::SmartObject& output_so) const OVERRIDE;
+
  private:
   bool is_vr_cooperating_;
   bool is_tts_cooperating_;
@@ -554,20 +586,26 @@ class HMICapabilitiesImpl : public HMICapabilities {
   hmi_apis::Common_Language::eType ui_language_;
   hmi_apis::Common_Language::eType vr_language_;
   hmi_apis::Common_Language::eType tts_language_;
-  smart_objects::SmartObject* vehicle_type_;
+  smart_objects::SmartObjectSPtr vehicle_type_;
   smart_objects::SmartObject* ui_supported_languages_;
   smart_objects::SmartObject* tts_supported_languages_;
   smart_objects::SmartObject* vr_supported_languages_;
-  smart_objects::SmartObject* display_capabilities_;
-  smart_objects::SmartObject* hmi_zone_capabilities_;
-  smart_objects::SmartObject* soft_buttons_capabilities_;
-  smart_objects::SmartObject* button_capabilities_;
-  smart_objects::SmartObject* preset_bank_capabilities_;
-  smart_objects::SmartObject* vr_capabilities_;
-  smart_objects::SmartObject* speech_capabilities_;
-  smart_objects::SmartObject* audio_pass_thru_capabilities_;
-  smart_objects::SmartObject* pcm_stream_capabilities_;
-  smart_objects::SmartObject* prerecorded_speech_;
+  /*
+   * display_capabilities_ is deprecated and replaced by
+   * system_display_capabilities_. For backward compatibility
+   * display_capabilities_ is not removed.
+   */
+  smart_objects::SmartObjectSPtr display_capabilities_;
+  smart_objects::SmartObjectSPtr system_display_capabilities_;
+  smart_objects::SmartObjectSPtr hmi_zone_capabilities_;
+  smart_objects::SmartObjectSPtr soft_buttons_capabilities_;
+  smart_objects::SmartObjectSPtr button_capabilities_;
+  smart_objects::SmartObjectSPtr preset_bank_capabilities_;
+  smart_objects::SmartObjectSPtr vr_capabilities_;
+  smart_objects::SmartObjectSPtr speech_capabilities_;
+  smart_objects::SmartObjectSPtr audio_pass_thru_capabilities_;
+  smart_objects::SmartObjectSPtr pcm_stream_capabilities_;
+  smart_objects::SmartObjectSPtr prerecorded_speech_;
   bool is_navigation_supported_;
   bool is_phone_call_supported_;
   bool is_video_streaming_supported_;
@@ -577,6 +615,7 @@ class HMICapabilitiesImpl : public HMICapabilities {
   smart_objects::SmartObject* phone_capability_;
   smart_objects::SmartObject* video_streaming_capability_;
   smart_objects::SmartObject* rc_capability_;
+  smart_objects::SmartObject* seat_location_capability_;
 
   ApplicationManager& app_mngr_;
   HMILanguageHandler hmi_language_handler_;

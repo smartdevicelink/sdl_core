@@ -61,6 +61,7 @@ include_directories (
   ${ENCRYPTION_INCLUDE_DIRECTORY}
   ${MESSAGE_BROKER_INCLUDE_DIRECTORY}
   ${LOG4CXX_INCLUDE_DIRECTORY}
+  ${BOOST_INCLUDE_DIR}
   ${BSON_INCLUDE_DIRECTORY}
 )
 
@@ -118,12 +119,6 @@ collect_sources(EVENT_ENGINE_SOURCES "${EVENT_ENGINE_PATHS}")
 
 collect_sources(POLICIES_SOURCES "${POLICIES_PATHS}")
 
-if (${HMI_JSON_API})
-  set (HMI_COMMANDS_SOURCES ${HMI_COMMANDS_SOURCES} ${HMI_COMMANDS_SOURCES_JSON})
-endif (${HMI_JSON_API})
-
-set (HMI_COMMANDS_SOURCES ${HMI_COMMANDS_SOURCES} ${HMI_COMMANDS_SOURCES_DBUS})
-
 set(EXCLUDE_PATHS
   ${EVENT_ENGINE_SOURCE_DIR}
   ${MESSAGE_HELPER_SOURCE_DIR}
@@ -147,6 +142,7 @@ set(LIBRARIES
   formatters
   dbms
   Utils
+  policy_struct
   bson -L${BSON_LIBS_DIRECTORY}
   emhashmap -L${EMHASHMAP_LIBS_DIRECTORY}
 )
@@ -164,7 +160,7 @@ add_library("AMEventEngine" ${EVENT_ENGINE_SOURCES})
 target_link_libraries("AMEventEngine" ${LIBRARIES})
 
 add_library("AMPolicyLibrary" ${POLICIES_MANAGER_SOURCES} )
-target_link_libraries("AMPolicyLibrary" ${LIBRARIES} AMEventEngine)
+target_link_libraries("AMPolicyLibrary" ${LIBRARIES} AMEventEngine policy_struct)
 
 add_library("SystemTimeLibrary" ${SYSTEM_TIME_SOURCES})
 target_link_libraries("SystemTimeLibrary" ${LIBRARIES} AMEventEngine)

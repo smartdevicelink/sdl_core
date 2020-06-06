@@ -35,6 +35,7 @@
 
 #include "application_manager/application_impl.h"
 #include "interfaces/MOBILE_API.h"
+#include "utils/semantic_version.h"
 
 namespace sdl_rpc_plugin {
 using namespace application_manager;
@@ -66,6 +67,10 @@ void OnButtonPressNotification::Run() {
   const bool is_app_id_exists =
       (*message_)[strings::msg_params].keyExists(strings::app_id);
   ApplicationSharedPtr app;
+  if (is_app_id_exists) {
+    app = application_manager_.application(
+        (*message_)[strings::msg_params][strings::app_id].asUInt());
+  }
 
   // CUSTOM_BUTTON notification
   if (static_cast<uint32_t>(mobile_apis::ButtonName::CUSTOM_BUTTON) == btn_id) {
@@ -75,13 +80,9 @@ void OnButtonPressNotification::Run() {
       return;
     }
 
-    app = application_manager_.application(
-        (*message_)[strings::msg_params][strings::app_id].asUInt());
-
     // custom_button_id is mandatory for CUSTOM_BUTTON notification
-    if (false ==
-        (*message_)[strings::msg_params].keyExists(
-            hmi_response::custom_button_id)) {
+    if (false == (*message_)[strings::msg_params].keyExists(
+                     hmi_response::custom_button_id)) {
       LOG4CXX_ERROR(logger_,
                     "CUSTOM_BUTTON OnButtonPress without custom_button_id.");
       return;
@@ -104,11 +105,14 @@ void OnButtonPressNotification::Run() {
     }
 
     // Send ButtonPress notification only in HMI_FULL or HMI_LIMITED mode
-    if ((mobile_api::HMILevel::HMI_FULL != app->hmi_level()) &&
-        (mobile_api::HMILevel::HMI_LIMITED != app->hmi_level())) {
+    const auto window_id = app->GetSoftButtonWindowID(custom_btn_id);
+    app->hmi_level(mobile_apis::PredefinedWindows::DEFAULT_WINDOW);
+    (*message_)[strings::msg_params][strings::window_id] = window_id;
+    const auto window_hmi_level = app->hmi_level(window_id);
+    if ((mobile_api::HMILevel::HMI_NONE == window_hmi_level)) {
       LOG4CXX_WARN(logger_,
-                   "CUSTOM_BUTTON OnButtonPress notification is allowed only "
-                       << "in FULL or LIMITED hmi level");
+                   "CUSTOM_BUTTON OnButtonPress notification is not allowed in "
+                   "NONE hmi level");
       return;
     }
 
@@ -129,8 +133,11 @@ void OnButtonPressNotification::Run() {
     }
 
     // Send ButtonPress notification only in HMI_FULL or HMI_LIMITED mode
-    if ((mobile_api::HMILevel::HMI_FULL != subscribed_app->hmi_level()) &&
-        (mobile_api::HMILevel::HMI_LIMITED != subscribed_app->hmi_level())) {
+    const mobile_apis::HMILevel::eType app_hmi_level =
+        subscribed_app->hmi_level(
+            mobile_apis::PredefinedWindows::DEFAULT_WINDOW);
+    if ((mobile_api::HMILevel::HMI_FULL != app_hmi_level) &&
+        (mobile_api::HMILevel::HMI_LIMITED != app_hmi_level)) {
       LOG4CXX_WARN(logger_,
                    "OnButtonPress notification is allowed only"
                        << "in FULL or LIMITED hmi level");
@@ -138,7 +145,7 @@ void OnButtonPressNotification::Run() {
     }
     // if "appID" is present, send it to named app only if its FULL or
     // LIMITED
-    if (app.valid()) {
+    if (app.use_count() != 0) {
       if (app->app_id() == subscribed_app->app_id()) {
         SendButtonPress(subscribed_app);
       }
@@ -156,7 +163,7 @@ void OnButtonPressNotification::SendButtonPress(ApplicationConstSharedPtr app) {
   }
 
   smart_objects::SmartObjectSPtr on_btn_press =
-      new smart_objects::SmartObject();
+      std::make_shared<smart_objects::SmartObject>();
 
   if (!on_btn_press) {
     LOG4CXX_ERROR(logger_, "OnButtonPress NULL pointer");
@@ -168,8 +175,16 @@ void OnButtonPressNotification::SendButtonPress(ApplicationConstSharedPtr app) {
   (*on_btn_press)[strings::params][strings::function_id] =
       static_cast<int32_t>(mobile_apis::FunctionID::eType::OnButtonPressID);
 
-  (*on_btn_press)[strings::msg_params][strings::button_name] =
-      (*message_)[strings::msg_params][hmi_response::button_name];
+  mobile_apis::ButtonName::eType btn_id =
+      static_cast<mobile_apis::ButtonName::eType>(
+          (*message_)[strings::msg_params][hmi_response::button_name].asInt());
+
+  if (btn_id == mobile_apis::ButtonName::PLAY_PAUSE &&
+      app->msg_version() < utils::rpc_version_5) {
+    btn_id = mobile_apis::ButtonName::OK;
+  }
+
+  (*on_btn_press)[strings::msg_params][strings::button_name] = btn_id;
   (*on_btn_press)[strings::msg_params][strings::button_press_mode] =
       (*message_)[strings::msg_params][hmi_response::button_mode];
 
@@ -177,6 +192,11 @@ void OnButtonPressNotification::SendButtonPress(ApplicationConstSharedPtr app) {
           hmi_response::custom_button_id)) {
     (*on_btn_press)[strings::msg_params][strings::custom_button_id] =
         (*message_)[strings::msg_params][strings::custom_button_id];
+  }
+
+  if ((*message_)[strings::msg_params].keyExists(strings::window_id)) {
+    (*on_btn_press)[strings::msg_params][strings::window_id] =
+        (*message_)[strings::msg_params][strings::window_id];
   }
 
   message_ = on_btn_press;
@@ -187,4 +207,4 @@ void OnButtonPressNotification::SendButtonPress(ApplicationConstSharedPtr app) {
 
 }  // namespace commands
 
-}  // namespace application_manager
+}  // namespace sdl_rpc_plugin

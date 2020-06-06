@@ -33,9 +33,9 @@
 #include "sdl_rpc_plugin/commands/hmi/on_vr_language_change_notification.h"
 
 #include "application_manager/application_impl.h"
-#include "application_manager/state_controller.h"
 #include "application_manager/message_helper.h"
 #include "application_manager/rpc_service.h"
+#include "application_manager/state_controller.h"
 #include "interfaces/MOBILE_API.h"
 
 namespace sdl_rpc_plugin {
@@ -83,7 +83,10 @@ void OnVRLanguageChangeNotification::Run() {
     if (static_cast<int32_t>(app->language()) !=
         (*message_)[strings::msg_params][strings::language].asInt()) {
       application_manager_.state_controller().SetRegularState(
-          app, mobile_api::HMILevel::HMI_NONE, false);
+          app,
+          mobile_apis::PredefinedWindows::DEFAULT_WINDOW,
+          mobile_apis::HMILevel::HMI_NONE,
+          false);
 
       rpc_service_.ManageMobileCommand(
           MessageHelper::GetOnAppInterfaceUnregisteredNotificationToMobile(
@@ -98,4 +101,4 @@ void OnVRLanguageChangeNotification::Run() {
 
 }  // namespace commands
 
-}  // namespace application_manager
+}  // namespace sdl_rpc_plugin

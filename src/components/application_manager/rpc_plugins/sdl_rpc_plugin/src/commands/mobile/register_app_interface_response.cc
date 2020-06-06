@@ -32,11 +32,10 @@
  */
 
 #include "sdl_rpc_plugin/commands/mobile/register_app_interface_response.h"
-#include "interfaces/MOBILE_API.h"
 #include "application_manager/application_manager.h"
 #include "application_manager/policies/policy_handler_interface.h"
 #include "connection_handler/connection_handler.h"
-#include "application_manager/policies/policy_handler_interface.h"
+#include "interfaces/MOBILE_API.h"
 
 namespace sdl_rpc_plugin {
 using namespace application_manager;
@@ -60,6 +59,40 @@ void RegisterAppInterfaceResponse::Run() {
     }
   }
 
+  application_manager::ApplicationSharedPtr app =
+      application_manager_.application(connection_key());
+
+  if (app && app->msg_version() < utils::rpc_version_5 &&
+      app->is_media_application() &&
+      (*message_)[strings::msg_params].keyExists(
+          hmi_response::button_capabilities)) {
+    const smart_objects::SmartObject& button_caps =
+        (*message_)[strings::msg_params][hmi_response::button_capabilities];
+    auto it = button_caps.asArray()->begin();
+    auto ok_btn_it = it;
+    bool ok_btn_exists = false;
+    bool play_pause_btn_exists = false;
+    for (; it != button_caps.asArray()->end(); ++it) {
+      smart_objects::SmartObject& so = *it;
+      int64_t current_id = so[strings::name].asInt();
+      if (current_id == -1) {
+        continue;
+      }
+      const mobile_apis::ButtonName::eType current_button =
+          static_cast<mobile_apis::ButtonName::eType>(current_id);
+      if (current_button == mobile_apis::ButtonName::PLAY_PAUSE) {
+        play_pause_btn_exists = true;
+        so[strings::name] = mobile_apis::ButtonName::OK;
+      } else if (current_button == mobile_apis::ButtonName::OK) {
+        ok_btn_exists = true;
+        ok_btn_it = it;
+      }
+    }
+    if (ok_btn_exists && play_pause_btn_exists) {
+      button_caps.asArray()->erase(ok_btn_it);
+    }
+  }
+
   SendResponse(success, result_code, last_message);
 
   if (mobile_apis::Result::SUCCESS != result_code) {
@@ -68,16 +101,14 @@ void RegisterAppInterfaceResponse::Run() {
 
   // Add registered application to the policy db right after response sent to
   // mobile to be able to check all other API according to app permissions
-  application_manager::ApplicationSharedPtr application =
-      application_manager_.application(connection_key());
-  if (!application) {
+  if (!app) {
     LOG4CXX_ERROR(logger_,
                   "Application with connection key " << connection_key()
                                                      << " is not registered.");
     return;
   }
 
-  SetHeartBeatTimeout(connection_key(), application->policy_app_id());
+  SetHeartBeatTimeout(connection_key(), app->policy_app_id());
 }
 
 void RegisterAppInterfaceResponse::SetHeartBeatTimeout(
@@ -96,4 +127,4 @@ void RegisterAppInterfaceResponse::SetHeartBeatTimeout(
 }
 
 }  // namespace commands
-}  // namespace application_manager
+}  // namespace sdl_rpc_plugin

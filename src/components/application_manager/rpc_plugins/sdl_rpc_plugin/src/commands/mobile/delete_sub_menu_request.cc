@@ -33,8 +33,8 @@
 
 #include "sdl_rpc_plugin/commands/mobile/delete_sub_menu_request.h"
 
-#include "application_manager/message_helper.h"
 #include "application_manager/application_impl.h"
+#include "application_manager/message_helper.h"
 #include "interfaces/HMI_API.h"
 #include "utils/helpers.h"
 
@@ -134,9 +134,11 @@ void DeleteSubMenuRequest::DeleteSubMenuUICommands(
         (*it->second)[strings::menu_params][hmi_request::parent_id].asInt()) {
       smart_objects::SmartObject msg_params =
           smart_objects::SmartObject(smart_objects::SmartType_Map);
+      const uint32_t cmd_id = (*it->second)[strings::cmd_id].asUInt();
       msg_params[strings::app_id] = app->app_id();
-      msg_params[strings::cmd_id] = (*it->second)[strings::cmd_id].asInt();
-      app->RemoveCommand((*it->second)[strings::cmd_id].asInt());
+      msg_params[strings::cmd_id] = cmd_id;
+      app->RemoveCommand(cmd_id);
+      app->help_prompt_manager().OnVrCommandDeleted(cmd_id, false);
       it = commands.begin();  // Can not relay on
                               // iterators after erase was called
 
@@ -198,4 +200,4 @@ bool DeleteSubMenuRequest::Init() {
 
 }  // namespace commands
 
-}  // namespace application_manager
+}  // namespace sdl_rpc_plugin

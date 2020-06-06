@@ -33,9 +33,9 @@
 #ifndef SRC_COMPONENTS_UTILS_INCLUDE_UTILS_LOG_MESSAGE_LOOP_THREAD_H_
 #define SRC_COMPONENTS_UTILS_INCLUDE_UTILS_LOG_MESSAGE_LOOP_THREAD_H_
 
-#include <string>
-#include <queue>
 #include <log4cxx/logger.h>
+#include <queue>
+#include <string>
 
 #include "utils/macro.h"
 #include "utils/threads/message_loop_thread.h"
@@ -56,18 +56,14 @@ typedef std::queue<LogMessage> LogMessageQueue;
 typedef threads::MessageLoopThread<LogMessageQueue>
     LogMessageLoopThreadTemplate;
 
-class LogMessageHandler : public LogMessageLoopThreadTemplate::Handler {
- public:
-  virtual void Handle(const LogMessage message) OVERRIDE;
-};
-
-class LogMessageLoopThread : public LogMessageLoopThreadTemplate {
+class LogMessageLoopThread : public LogMessageLoopThreadTemplate,
+                             public LogMessageLoopThreadTemplate::Handler {
  public:
   LogMessageLoopThread();
   ~LogMessageLoopThread();
+  void Handle(const LogMessage message) OVERRIDE;
 
  private:
-  LogMessageHandler* handler_;
   DISALLOW_COPY_AND_ASSIGN(LogMessageLoopThread);
 };
 

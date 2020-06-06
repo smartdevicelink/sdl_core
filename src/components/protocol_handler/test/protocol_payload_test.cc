@@ -33,10 +33,10 @@
 #include <gtest/gtest.h>
 #include <vector>
 
-#include "utils/macro.h"
-#include "utils/bitstream.h"
-#include "protocol_handler/protocol_payload.h"
 #include "protocol/common.h"
+#include "protocol_handler/protocol_payload.h"
+#include "utils/bitstream.h"
+#include "utils/macro.h"
 
 namespace test {
 namespace components {

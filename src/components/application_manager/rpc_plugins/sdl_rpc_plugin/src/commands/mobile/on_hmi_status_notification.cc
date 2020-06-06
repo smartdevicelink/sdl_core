@@ -33,8 +33,8 @@
 
 #include "sdl_rpc_plugin/commands/mobile/on_hmi_status_notification.h"
 
-#include "application_manager/message_helper.h"
 #include "application_manager/message.h"
+#include "application_manager/message_helper.h"
 #include "interfaces/MOBILE_API.h"
 
 namespace sdl_rpc_plugin {
@@ -61,7 +61,7 @@ void OnHMIStatusNotification::Run() {
   (*message_)[strings::params][strings::message_type] =
       static_cast<int32_t>(application_manager::MessageType::kNotification);
   ApplicationSharedPtr app = application_manager_.application(connection_key());
-  if (!app.valid()) {
+  if (app.use_count() == 0) {
     LOG4CXX_ERROR(logger_, "OnHMIStatusNotification application doesn't exist");
     return;
   }
@@ -78,17 +78,8 @@ void OnHMIStatusNotification::Run() {
   mobile_apis::HMILevel::eType hmi_level =
       static_cast<mobile_apis::HMILevel::eType>(
           (*message_)[strings::msg_params][strings::hmi_level].asInt());
-  if ((mobile_apis::HMILevel::HMI_BACKGROUND == hmi_level) ||
-      (mobile_apis::HMILevel::HMI_NONE == hmi_level)) {
-    if (!(app->tts_properties_in_none())) {
-      app->set_tts_properties_in_none(true);
-      LOG4CXX_INFO(logger_,
-                   "OnHMIStatusNotification::Send TTS GlobalProperties"
-                   " with empty array to HMI");
-      MessageHelper::SendTTSGlobalProperties(app, false, application_manager_);
-    }
-  } else if ((mobile_apis::HMILevel::HMI_FULL == hmi_level) ||
-             (mobile_apis::HMILevel::HMI_LIMITED == hmi_level)) {
+  if ((mobile_apis::HMILevel::HMI_FULL == hmi_level) ||
+      (mobile_apis::HMILevel::HMI_LIMITED == hmi_level)) {
     if (!(app->tts_properties_in_full())) {
       app->set_tts_properties_in_full(true);
       LOG4CXX_INFO(logger_,
@@ -101,4 +92,4 @@ void OnHMIStatusNotification::Run() {
 
 }  // namespace commands
 
-}  // namespace application_manager
+}  // namespace sdl_rpc_plugin

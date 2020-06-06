@@ -36,39 +36,42 @@
 #include <string>
 
 #include "application_manager/hmi_capabilities.h"
-#include "gtest/gtest.h"
-#include "smart_objects/smart_object.h"
 #include "application_manager/mock_message_helper.h"
-#include "smart_objects/enum_schema_item.h"
+#include "gtest/gtest.h"
 #include "interfaces/HMI_API.h"
-#include "utils/make_shared.h"
+#include "smart_objects/enum_schema_item.h"
+#include "smart_objects/smart_object.h"
+
 #include "application_manager/hmi_capabilities_for_testing.h"
-#include "utils/file_system.h"
 #include "application_manager/mock_application_manager.h"
 #include "application_manager/mock_application_manager_settings.h"
 #include "application_manager/mock_event_dispatcher.h"
 #include "application_manager/mock_rpc_service.h"
+#include "application_manager/resumption/resume_ctrl.h"
 #include "application_manager/state_controller.h"
 #include "resumption/last_state_impl.h"
-#include "application_manager/resumption/resume_ctrl.h"
+#include "resumption/last_state_wrapper_impl.h"
+#include "utils/file_system.h"
 
 namespace test {
 namespace components {
 namespace application_manager_test {
 
 using ::testing::_;
+using ::testing::AtLeast;
+using ::testing::InSequence;
+using ::testing::Invoke;
 using ::testing::Return;
 using ::testing::ReturnRef;
-using ::testing::AtLeast;
-using ::testing::Invoke;
-using ::testing::InSequence;
 
 using namespace application_manager;
 
 class HMICapabilitiesTest : public ::testing::Test {
  protected:
   HMICapabilitiesTest()
-      : last_state_("app_storage_folder", "app_info_data")
+      : last_state_wrapper_(std::make_shared<resumption::LastStateWrapperImpl>(
+            std::make_shared<resumption::LastStateImpl>("app_storage_folder",
+                                                        "app_info_storage")))
       , file_name_("hmi_capabilities.json") {}
   virtual void SetUp() OVERRIDE {
     EXPECT_CALL(app_mngr_, event_dispatcher())
@@ -76,14 +79,15 @@ class HMICapabilitiesTest : public ::testing::Test {
     EXPECT_CALL(app_mngr_, get_settings())
         .WillRepeatedly(ReturnRef(mock_application_manager_settings_));
     EXPECT_CALL(mock_application_manager_settings_,
-                hmi_capabilities_file_name()).WillOnce(ReturnRef(file_name_));
+                hmi_capabilities_file_name())
+        .WillOnce(ReturnRef(file_name_));
     EXPECT_CALL(mock_event_dispatcher, add_observer(_, _, _)).Times(1);
     EXPECT_CALL(mock_event_dispatcher, remove_observer(_)).Times(1);
     EXPECT_CALL(mock_application_manager_settings_, launch_hmi())
         .WillOnce(Return(false));
     hmi_capabilities_test =
-        utils::MakeShared<HMICapabilitiesForTesting>(app_mngr_);
-    hmi_capabilities_test->Init(&last_state_);
+        std::make_shared<HMICapabilitiesForTesting>(app_mngr_);
+    hmi_capabilities_test->Init(last_state_wrapper_);
   }
 
   void TearDown() OVERRIDE {
@@ -98,9 +102,9 @@ class HMICapabilitiesTest : public ::testing::Test {
   void SetCooperating();
   MockApplicationManager app_mngr_;
   event_engine_test::MockEventDispatcher mock_event_dispatcher;
-  resumption::LastStateImpl last_state_;
+  resumption::LastStateWrapperPtr last_state_wrapper_;
   MockApplicationManagerSettings mock_application_manager_settings_;
-  utils::SharedPtr<HMICapabilitiesForTesting> hmi_capabilities_test;
+  std::shared_ptr<HMICapabilitiesForTesting> hmi_capabilities_test;
   const std::string file_name_;
   application_manager_test::MockRPCService mock_rpc_service_;
 };
@@ -140,9 +144,9 @@ struct CStringComparator {
   }
 };
 
-typedef std::map<const char*,
-                 hmi_apis::Common_Language::eType,
-                 CStringComparator> CStringToEnumMap;
+typedef std::
+    map<const char*, hmi_apis::Common_Language::eType, CStringComparator>
+        CStringToEnumMap;
 
 CStringToEnumMap InitCStringToEnumMap() {
   size_t value = sizeof(cstring_values_) / sizeof(cstring_values_[0]);
@@ -255,7 +259,7 @@ TEST_F(HMICapabilitiesTest, LoadCapabilitiesFromFile) {
 
   // Count of buttons in json file
   const uint32_t btn_length = buttons_capabilities_so.length();
-  EXPECT_EQ(15u, btn_length);
+  EXPECT_EQ(16u, btn_length);
   for (uint32_t i = 0; i < btn_length; ++i) {
     EXPECT_TRUE((buttons_capabilities_so[i]).keyExists(strings::name));
     EXPECT_TRUE((buttons_capabilities_so[i]).keyExists("shortPressAvailable"));
@@ -335,15 +339,18 @@ TEST_F(HMICapabilitiesTest, LoadCapabilitiesFromFile) {
   // Check audio pass thru
   const smart_objects::SmartObject audio_pass_thru_capabilities_so =
       *(hmi_capabilities_test->audio_pass_thru_capabilities());
+  EXPECT_EQ(smart_objects::SmartType_Array,
+            audio_pass_thru_capabilities_so.getType());
+  EXPECT_EQ(1u, audio_pass_thru_capabilities_so.length());
   EXPECT_EQ(hmi_apis::Common_SamplingRate::RATE_44KHZ,
             static_cast<hmi_apis::Common_SamplingRate::eType>(
-                audio_pass_thru_capabilities_so["samplingRate"].asInt()));
+                audio_pass_thru_capabilities_so[0]["samplingRate"].asInt()));
   EXPECT_EQ(hmi_apis::Common_BitsPerSample::RATE_8_BIT,
             static_cast<hmi_apis::Common_BitsPerSample::eType>(
-                audio_pass_thru_capabilities_so["bitsPerSample"].asInt()));
+                audio_pass_thru_capabilities_so[0]["bitsPerSample"].asInt()));
   EXPECT_EQ(hmi_apis::Common_AudioType::PCM,
             static_cast<hmi_apis::Common_AudioType::eType>(
-                audio_pass_thru_capabilities_so["audioType"].asInt()));
+                audio_pass_thru_capabilities_so[0]["audioType"].asInt()));
 
   // Check hmi zone capabilities
   const smart_objects::SmartObject hmi_zone_capabilities_so =
@@ -407,7 +414,8 @@ TEST_F(HMICapabilitiesTest, LoadCapabilitiesFromFile) {
           .asInt());
   EXPECT_EQ(350,
             vs_capability_so[strings::preferred_resolution]
-                            [strings::resolution_height].asInt());
+                            [strings::resolution_height]
+                                .asInt());
   EXPECT_TRUE(vs_capability_so.keyExists(strings::max_bitrate));
   EXPECT_EQ(10000, vs_capability_so[strings::max_bitrate].asInt());
   EXPECT_TRUE(vs_capability_so.keyExists(strings::supported_formats));
@@ -454,7 +462,8 @@ TEST_F(HMICapabilitiesTest, LoadCapabilitiesFromFile) {
       rc_capability_so["climateControlCapabilities"][0]["fanSpeedAvailable"]
           .asBool());
   EXPECT_TRUE(rc_capability_so["climateControlCapabilities"][0]
-                              ["desiredTemperatureAvailable"].asBool());
+                              ["desiredTemperatureAvailable"]
+                                  .asBool());
   EXPECT_TRUE(
       rc_capability_so["climateControlCapabilities"][0]["acEnableAvailable"]
           .asBool());
@@ -506,9 +515,9 @@ TEST_F(HMICapabilitiesTest,
     EXPECT_TRUE(::file_system::DeleteFile("./app_info_data"));
   }
 
-  utils::SharedPtr<HMICapabilitiesForTesting> hmi_capabilities =
-      utils::MakeShared<HMICapabilitiesForTesting>(mock_app_mngr);
-  hmi_capabilities->Init(&last_state_);
+  std::shared_ptr<HMICapabilitiesForTesting> hmi_capabilities =
+      std::make_shared<HMICapabilitiesForTesting>(mock_app_mngr);
+  hmi_capabilities->Init(last_state_wrapper_);
 
   // Check system capabilities; only phone capability is available
   EXPECT_FALSE(hmi_capabilities->navigation_supported());
@@ -546,9 +555,9 @@ TEST_F(HMICapabilitiesTest,
     EXPECT_TRUE(::file_system::DeleteFile("./app_info_data"));
   }
 
-  utils::SharedPtr<HMICapabilitiesForTesting> hmi_capabilities =
-      utils::MakeShared<HMICapabilitiesForTesting>(mock_app_mngr);
-  hmi_capabilities->Init(&last_state_);
+  std::shared_ptr<HMICapabilitiesForTesting> hmi_capabilities =
+      std::make_shared<HMICapabilitiesForTesting>(mock_app_mngr);
+  hmi_capabilities->Init(last_state_wrapper_);
 
   // Check system capabilities; only navigation capability is valid, the other
   // two are empty
@@ -564,6 +573,59 @@ TEST_F(HMICapabilitiesTest,
   EXPECT_TRUE(navigation_capability_so.keyExists("getWayPointsEnabled"));
   EXPECT_TRUE(navigation_capability_so["sendLocationEnabled"].asBool());
   EXPECT_FALSE(navigation_capability_so["getWayPointsEnabled"].asBool());
+}
+
+TEST_F(HMICapabilitiesTest,
+       LoadCapabilitiesFromFileAndVerifyOldAudioPassThruCapabilities) {
+  MockApplicationManager mock_app_mngr;
+  event_engine_test::MockEventDispatcher mock_dispatcher;
+  MockApplicationManagerSettings mock_application_manager_settings;
+
+  const std::string hmi_capabilities_file = "hmi_capabilities_old_apt.json";
+
+  EXPECT_CALL(mock_app_mngr, event_dispatcher())
+      .WillOnce(ReturnRef(mock_dispatcher));
+  EXPECT_CALL(mock_app_mngr, get_settings())
+      .WillRepeatedly(ReturnRef(mock_application_manager_settings));
+  EXPECT_CALL(mock_application_manager_settings, hmi_capabilities_file_name())
+      .WillOnce(ReturnRef(hmi_capabilities_file));
+  EXPECT_CALL(mock_dispatcher, add_observer(_, _, _)).Times(1);
+  EXPECT_CALL(mock_dispatcher, remove_observer(_)).Times(1);
+  EXPECT_CALL(mock_application_manager_settings, launch_hmi())
+      .WillOnce(Return(false));
+  EXPECT_CALL(*(MockMessageHelper::message_helper_mock()),
+              CommonLanguageFromString(_))
+      .WillRepeatedly(Invoke(TestCommonLanguageFromString));
+
+  if (file_system::FileExists("./app_info_data")) {
+    EXPECT_TRUE(::file_system::DeleteFile("./app_info_data"));
+  }
+
+  std::shared_ptr<HMICapabilitiesForTesting> hmi_capabilities =
+      std::make_shared<HMICapabilitiesForTesting>(mock_app_mngr);
+  hmi_capabilities->Init(last_state_wrapper_);
+
+  // with old audio pass thru format, the object is an array containing a single
+  // object
+  smart_objects::SmartObjectSPtr audio_pass_thru_capabilities_so =
+      hmi_capabilities->audio_pass_thru_capabilities();
+  EXPECT_EQ(smart_objects::SmartType_Array,
+            audio_pass_thru_capabilities_so->getType());
+  EXPECT_EQ(1u, audio_pass_thru_capabilities_so->length());
+  smart_objects::SmartObject& first_element =
+      (*audio_pass_thru_capabilities_so)[0];
+  EXPECT_TRUE(first_element.keyExists("samplingRate"));
+  EXPECT_EQ(hmi_apis::Common_SamplingRate::RATE_22KHZ,
+            static_cast<hmi_apis::Common_SamplingRate::eType>(
+                first_element["samplingRate"].asInt()));
+  EXPECT_TRUE(first_element.keyExists("bitsPerSample"));
+  EXPECT_EQ(hmi_apis::Common_BitsPerSample::RATE_16_BIT,
+            static_cast<hmi_apis::Common_BitsPerSample::eType>(
+                first_element["bitsPerSample"].asInt()));
+  EXPECT_TRUE(first_element.keyExists("audioType"));
+  EXPECT_EQ(hmi_apis::Common_AudioType::PCM,
+            static_cast<hmi_apis::Common_AudioType::eType>(
+                first_element["audioType"].asInt()));
 }
 
 TEST_F(HMICapabilitiesTest, VerifyImageType) {
@@ -582,8 +644,9 @@ TEST_F(HMICapabilitiesTest, VerifyImageType) {
 void HMICapabilitiesTest::SetCooperating() {
   smart_objects::SmartObjectSPtr test_so;
   EXPECT_CALL(*(MockMessageHelper::message_helper_mock()),
-              CreateModuleInfoSO(_, _)).WillRepeatedly(Return(test_so));
-  EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_))
+              CreateModuleInfoSO(_, _))
+      .WillRepeatedly(Return(test_so));
+  EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_, _))
       .WillRepeatedly(Return(true));
 }
 

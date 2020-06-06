@@ -32,24 +32,13 @@
 #ifndef SRC_COMPONENTS_INCLUDE_UTILS_CONDITIONAL_VARIABLE_H_
 #define SRC_COMPONENTS_INCLUDE_UTILS_CONDITIONAL_VARIABLE_H_
 
-#if defined(OS_POSIX)
-#include <pthread.h>
-#else
-#error Please implement conditional variable for your OS
-#endif
 #include <stdint.h>
+#include <boost/thread/condition_variable.hpp>
 
+#include "utils/lock.h"
 #include "utils/macro.h"
 
 namespace sync_primitives {
-class AutoLock;
-class Lock;
-
-namespace impl {
-#if defined(OS_POSIX)
-typedef pthread_cond_t PlatformConditionalVariable;
-#endif
-}  // namespace impl
 
 /*
  * Conditional variable wrapper
@@ -82,11 +71,11 @@ class ConditionalVariable {
 
   // Wait forever or up to milliseconds time limit
   bool Wait(AutoLock& auto_lock);
-  bool Wait(Lock& lock);
+  bool Wait(BaseLock& lock);
   WaitStatus WaitFor(AutoLock& auto_lock, uint32_t milliseconds);
 
  private:
-  impl::PlatformConditionalVariable cond_var_;
+  boost::condition_variable_any cond_var_;
 
  private:
   DISALLOW_COPY_AND_ASSIGN(ConditionalVariable);

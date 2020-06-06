@@ -34,19 +34,18 @@
 #include <string>
 
 #include "gtest/gtest.h"
-#include "utils/shared_ptr.h"
-#include "smart_objects/smart_object.h"
-#include "application_manager/commands/commands_test.h"
-#include "application_manager/commands/command_request_test.h"
+
 #include "application_manager/application.h"
-#include "application_manager/mock_application_manager.h"
-#include "application_manager/mock_application.h"
-#include "application_manager/mock_message_helper.h"
-#include "interfaces/MOBILE_API.h"
-#include "interfaces/HMI_API.h"
-#include "application_manager/smart_object_keys.h"
 #include "application_manager/event_engine/event.h"
+#include "application_manager/mock_application.h"
+#include "application_manager/mock_application_manager.h"
+#include "application_manager/mock_message_helper.h"
+#include "application_manager/smart_object_keys.h"
+#include "interfaces/HMI_API.h"
+#include "interfaces/MOBILE_API.h"
+#include "smart_objects/smart_object.h"
 #include "vehicle_info_plugin/commands/mobile/read_did_request.h"
+#include "vehicle_info_plugin/commands/vi_command_request_test.h"
 
 namespace test {
 namespace components {
@@ -59,17 +58,16 @@ using ::testing::DoAll;
 using ::testing::Return;
 using ::testing::SaveArg;
 namespace am = ::application_manager;
-using vehicle_info_plugin::commands::ReadDIDRequest;
 using am::commands::MessageSharedPtr;
 using am::event_engine::Event;
-using ::utils::SharedPtr;
+using vehicle_info_plugin::commands::ReadDIDRequest;
 
 class ReadDIDRequestTest
-    : public CommandRequestTest<CommandsTestMocks::kIsNice> {};
+    : public VICommandRequestTest<CommandsTestMocks::kIsNice> {};
 
 TEST_F(ReadDIDRequestTest, OnEvent_WrongEventId_UNSUCCESS) {
   Event event(Event::EventID::INVALID_ENUM);
-  SharedPtr<ReadDIDRequest> command(CreateCommand<ReadDIDRequest>());
+  std::shared_ptr<ReadDIDRequest> command(CreateCommandVI<ReadDIDRequest>());
   EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(_, _)).Times(0);
   command->on_event(event);
 }
@@ -77,7 +75,7 @@ TEST_F(ReadDIDRequestTest, OnEvent_WrongEventId_UNSUCCESS) {
 TEST_F(ReadDIDRequestTest, OnEvent_SUCCESS) {
   Event event(Event::EventID::VehicleInfo_ReadDID);
 
-  SharedPtr<ReadDIDRequest> command(CreateCommand<ReadDIDRequest>());
+  std::shared_ptr<ReadDIDRequest> command(CreateCommandVI<ReadDIDRequest>());
 
   const hmi_apis::Common_Result::eType hmi_response_code =
       hmi_apis::Common_Result::SUCCESS;
@@ -99,10 +97,10 @@ TEST_F(ReadDIDRequestTest, OnEvent_SUCCESS) {
 }
 
 TEST_F(ReadDIDRequestTest, Run_AppNotRegistered_UNSUCCESS) {
-  SharedPtr<ReadDIDRequest> command(CreateCommand<ReadDIDRequest>());
+  std::shared_ptr<ReadDIDRequest> command(CreateCommandVI<ReadDIDRequest>());
 
   ON_CALL(app_mngr_, application(_))
-      .WillByDefault(Return(SharedPtr<am::Application>()));
+      .WillByDefault(Return(std::shared_ptr<am::Application>()));
 
   MessageSharedPtr result_msg(CatchMobileCommandResult(CallRun(*command)));
   EXPECT_EQ(mobile_apis::Result::APPLICATION_NOT_REGISTERED,
@@ -112,7 +110,7 @@ TEST_F(ReadDIDRequestTest, Run_AppNotRegistered_UNSUCCESS) {
 }
 
 TEST_F(ReadDIDRequestTest, Run_CommandLimitsExceeded_UNSUCCESS) {
-  SharedPtr<ReadDIDRequest> command(CreateCommand<ReadDIDRequest>());
+  std::shared_ptr<ReadDIDRequest> command(CreateCommandVI<ReadDIDRequest>());
 
   MockAppPtr app(CreateMockApp());
   ON_CALL(app_mngr_, application(_)).WillByDefault(Return(app));
@@ -128,7 +126,7 @@ TEST_F(ReadDIDRequestTest, Run_CommandLimitsExceeded_UNSUCCESS) {
 
 TEST_F(ReadDIDRequestTest, Run_EmptyDidLocation_UNSUCCESS) {
   MockAppPtr app(CreateMockApp());
-  SharedPtr<ReadDIDRequest> command(CreateCommand<ReadDIDRequest>());
+  std::shared_ptr<ReadDIDRequest> command(CreateCommandVI<ReadDIDRequest>());
 
   ON_CALL(app_mngr_, application(_)).WillByDefault(Return(app));
 
@@ -145,7 +143,7 @@ TEST_F(ReadDIDRequestTest, Run_SUCCESS) {
   MockAppPtr app(CreateMockApp());
   MessageSharedPtr msg(CreateMessage(smart_objects::SmartType_Map));
   (*msg)[am::strings::msg_params][am::strings::did_location]["SomeData"] = 0;
-  SharedPtr<ReadDIDRequest> command(CreateCommand<ReadDIDRequest>(msg));
+  std::shared_ptr<ReadDIDRequest> command(CreateCommandVI<ReadDIDRequest>(msg));
 
   ON_CALL(app_mngr_, application(_)).WillByDefault(Return(app));
 

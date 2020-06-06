@@ -34,8 +34,8 @@
 
 #include "application_manager/commands/commands_test.h"
 
-#include "application_manager/commands/notification_to_hmi.h"
 #include "application_manager/commands/command_notification_impl.h"
+#include "application_manager/commands/notification_to_hmi.h"
 
 namespace test {
 namespace components {
@@ -45,8 +45,8 @@ namespace simple_notifications_test {
 
 using namespace application_manager;
 
-using ::testing::Types;
 using commands::NotificationToHMI;
+using ::testing::Types;
 template <typename Command>
 class SimpleNotificationsTest
     : public CommandsTest<CommandsTestMocks::kIsNice> {
@@ -62,7 +62,8 @@ TYPED_TEST_CASE(SimpleNotificationsTest, CommandsList);
 TYPED_TEST(SimpleNotificationsTest, Run_SendMessageToHMI_SUCCESS) {
   typedef typename TestFixture::CommandType CommandType;
 
-  SharedPtr<CommandType> command = this->template CreateCommand<CommandType>();
+  std::shared_ptr<CommandType> command =
+      this->template CreateCommand<CommandType>();
 
   // Current implementation always return `true`
   EXPECT_TRUE(command->Init());

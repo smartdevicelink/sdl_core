@@ -39,8 +39,8 @@
 #include <libusb-1.0/libusb.h>
 
 #include "transport_manager/transport_adapter/transport_adapter.h"
-#include "transport_manager/usb/usb_control_transfer.h"
 #include "transport_manager/usb/libusb/platform_usb_device.h"
+#include "transport_manager/usb/usb_control_transfer.h"
 
 #include "utils/threads/thread.h"
 
@@ -76,6 +76,7 @@ class UsbHandler {
    public:
     explicit UsbHandlerDelegate(UsbHandler* handler);
     void threadMain() OVERRIDE;
+    void exitThreadMain() OVERRIDE;
 
    private:
     UsbHandler* handler_;

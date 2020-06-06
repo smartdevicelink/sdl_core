@@ -31,19 +31,18 @@
  */
 
 #include "gtest/gtest.h"
-#include "utils/shared_ptr.h"
-#include "application_manager/commands/commands_test.h"
-#include "application_manager/commands/command_request_test.h"
+
 #include "application_manager/application.h"
-#include "application_manager/mock_application_manager.h"
+#include "application_manager/commands/command_request_test.h"
+#include "application_manager/commands/commands_test.h"
 #include "application_manager/mock_application.h"
-#include "mobile/get_way_points_request.h"
-#include "application_manager/smart_object_keys.h"
-#include "application_manager/mock_message_helper.h"
-#include "interfaces/HMI_API.h"
-#include "interfaces/MOBILE_API.h"
+#include "application_manager/mock_application_manager.h"
 #include "application_manager/mock_hmi_interface.h"
 #include "application_manager/mock_message_helper.h"
+#include "application_manager/smart_object_keys.h"
+#include "interfaces/HMI_API.h"
+#include "interfaces/MOBILE_API.h"
+#include "mobile/get_way_points_request.h"
 
 namespace test {
 namespace components {
@@ -52,13 +51,13 @@ namespace mobile_commands_test {
 namespace get_way_points_request {
 
 using namespace mobile_apis::Result;
-using ::testing::Return;
-using ::testing::_;
-using sdl_rpc_plugin::commands::GetWayPointsRequest;
-using application_manager::MockMessageHelper;
 using application_manager::MockHmiInterfaces;
+using application_manager::MockMessageHelper;
+using sdl_rpc_plugin::commands::GetWayPointsRequest;
+using ::testing::_;
+using ::testing::Return;
 
-typedef SharedPtr<GetWayPointsRequest> CommandPtr;
+typedef std::shared_ptr<GetWayPointsRequest> CommandPtr;
 typedef mobile_apis::Result::eType MobileResult;
 typedef hmi_apis::Common_Result::eType HmiResult;
 
@@ -67,7 +66,7 @@ const uint32_t kCorrelationId = 2u;
 const uint32_t kAppId = 3u;
 const uint32_t kConnectionKey = kAppId;
 const std::string kMethodName = "Navigation.GetWayPoints";
-}
+}  // namespace
 
 class GetWayPointsRequestTest
     : public CommandRequestTest<CommandsTestMocks::kIsNice> {
@@ -75,7 +74,7 @@ class GetWayPointsRequestTest
   GetWayPointsRequestTest() : mock_app_(CreateMockApp()) {}
 
   void SetUp() OVERRIDE {
-    message_ = utils::MakeShared<SmartObject>(::smart_objects::SmartType_Map);
+    message_ = std::make_shared<SmartObject>(::smart_objects::SmartType_Map);
     (*message_)[am::strings::msg_params] =
         ::smart_objects::SmartObject(::smart_objects::SmartType_Map);
 
@@ -85,7 +84,7 @@ class GetWayPointsRequestTest
 
   MockAppPtr mock_app_;
   MessageSharedPtr message_;
-  utils::SharedPtr<GetWayPointsRequest> command_sptr_;
+  std::shared_ptr<GetWayPointsRequest> command_sptr_;
 };
 
 class GetWayPointsRequestOnEventTest
@@ -133,7 +132,7 @@ TEST_F(GetWayPointsRequestTest,
   (*message_)[am::strings::params][am::strings::connection_key] =
       kConnectionKey;
 
-  utils::SharedPtr<am::Application> null_application_sptr;
+  std::shared_ptr<am::Application> null_application_sptr;
   EXPECT_CALL(app_mngr_, application(kConnectionKey))
       .WillOnce(Return(null_application_sptr));
 
@@ -205,7 +204,7 @@ TEST_F(GetWayPointsRequestTest, OnEvent_DefaultCase) {
 
   EXPECT_CALL(app_mngr_, updateRequestTimeout(_, _, _)).Times(0);
 
-  EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_)).Times(0);
+  EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_, _)).Times(0);
 
   CallOnEvent caller(*command_sptr_, event);
   caller();

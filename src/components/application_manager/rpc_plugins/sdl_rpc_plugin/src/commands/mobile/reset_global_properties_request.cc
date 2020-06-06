@@ -36,8 +36,8 @@
 #include "application_manager/application_impl.h"
 #include "application_manager/message_helper.h"
 
-#include "interfaces/MOBILE_API.h"
 #include "interfaces/HMI_API.h"
+#include "interfaces/MOBILE_API.h"
 
 namespace sdl_rpc_plugin {
 using namespace application_manager;
@@ -161,7 +161,8 @@ void ResetGlobalPropertiesRequest::Run() {
       key_board_properties[hmi_request::limited_character_list] =
         limited_character_list;*/
 
-      key_board_properties[hmi_request::auto_complete_text] = "";
+      key_board_properties[hmi_request::auto_complete_list] =
+          smart_objects::SmartObject(smart_objects::SmartType_Array);
       msg_params[hmi_request::keyboard_properties] = key_board_properties;
     }
 
@@ -197,8 +198,21 @@ bool ResetGlobalPropertiesRequest::ResetHelpPromt(
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     return false;
   }
+  const std::vector<std::string>& help_prompt =
+      application_manager_.get_settings().help_prompt();
+
   smart_objects::SmartObject so_help_prompt =
       smart_objects::SmartObject(smart_objects::SmartType_Array);
+
+  for (size_t i = 0; i < help_prompt.size(); ++i) {
+    smart_objects::SmartObject help_prompt_item =
+        smart_objects::SmartObject(smart_objects::SmartType_Map);
+    help_prompt_item[strings::text] = help_prompt[i];
+    help_prompt_item[strings::type] =
+        hmi_apis::Common_SpeechCapabilities::SC_TEXT;
+    so_help_prompt[i] = help_prompt_item;
+  }
+
   app->set_help_prompt(so_help_prompt);
   return true;
 }
@@ -217,7 +231,7 @@ bool ResetGlobalPropertiesRequest::ResetTimeoutPromt(
   smart_objects::SmartObject so_time_out_promt =
       smart_objects::SmartObject(smart_objects::SmartType_Array);
 
-  for (uint32_t i = 0; i < time_out_promt.size(); ++i) {
+  for (size_t i = 0; i < time_out_promt.size(); ++i) {
     smart_objects::SmartObject timeoutPrompt =
         smart_objects::SmartObject(smart_objects::SmartType_Map);
     timeoutPrompt[strings::text] = time_out_promt[i];
@@ -237,8 +251,16 @@ bool ResetGlobalPropertiesRequest::ResetVrHelpTitleItems(
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     return false;
   }
+
+  const std::string& vr_help_title =
+      application_manager_.get_settings().vr_help_title();
+  smart_objects::SmartObject so_vr_help_title =
+      smart_objects::SmartObject(smart_objects::SmartType_String);
+  so_vr_help_title = vr_help_title;
+
   app->reset_vr_help_title();
   app->reset_vr_help();
+  app->set_vr_help_title(so_vr_help_title);
 
   return true;
 }
@@ -333,4 +355,4 @@ bool ResetGlobalPropertiesRequest::IsPendingResponseExist() {
 
 }  // namespace commands
 
-}  // namespace application_manager
+}  // namespace sdl_rpc_plugin

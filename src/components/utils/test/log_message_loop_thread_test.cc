@@ -30,9 +30,9 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "gtest/gtest.h"
-#include "gmock/gmock.h"
 #include "utils/log_message_loop_thread.h"
+#include "gmock/gmock.h"
+#include "gtest/gtest.h"
 #include "utils/logger_status.h"
 
 namespace test {
@@ -57,7 +57,7 @@ TEST(LogMessageLoopThread, DestroyLogMessage_loggerStatusDeletingLogger) {
   logger::logger_status = LoggerThreadNotCreated;
 }
 
-class MockLogMessageTest : public LogMessageHandler {
+class MockLogMessageTest : public LogMessageLoopThread {
  public:
   MOCK_CONST_METHOD1(Handle, void(const LogMessage message));
 };

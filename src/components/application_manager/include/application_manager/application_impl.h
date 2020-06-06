@@ -33,26 +33,28 @@
 #ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_APPLICATION_IMPL_H_
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_APPLICATION_IMPL_H_
 
+#include <stdint.h>
+#include <forward_list>
+#include <list>
 #include <map>
 #include <set>
-#include <vector>
 #include <utility>
-#include <list>
-#include <forward_list>
-#include <stdint.h>
+#include <vector>
 
-#include "utils/date_time.h"
+#include "application_manager/application.h"
 #include "application_manager/application_data_impl.h"
-#include "application_manager/usage_statistics.h"
+#include "application_manager/help_prompt_manager_impl.h"
 #include "application_manager/hmi_state.h"
+#include "application_manager/usage_statistics.h"
 #include "protocol_handler/protocol_handler.h"
 
+#include <atomic>
 #include "connection_handler/device.h"
-#include "utils/lock.h"
-#include "utils/atomic_object.h"
 #include "utils/custom_string.h"
-#include "utils/timer.h"
+#include "utils/date_time.h"
+#include "utils/lock.h"
 #include "utils/macro.h"
+#include "utils/timer.h"
 
 namespace usage_statistics {
 
@@ -89,15 +91,7 @@ class ApplicationImpl : public virtual Application,
       const std::string& mac_address,
       const connection_handler::DeviceHandle device_id,
       const custom_str::CustomString& app_name,
-      utils::SharedPtr<usage_statistics::StatisticsManager> statistics_manager,
-      ApplicationManager& application_manager);
-
-  DEPRECATED ApplicationImpl(
-      uint32_t application_id,
-      const std::string& policy_app_id,
-      const std::string& mac_address,
-      const custom_str::CustomString& app_name,
-      utils::SharedPtr<usage_statistics::StatisticsManager> statistics_manager,
+      std::shared_ptr<usage_statistics::StatisticsManager> statistics_manager,
       ApplicationManager& application_manager);
 
   ~ApplicationImpl();
@@ -145,7 +139,8 @@ class ApplicationImpl : public virtual Application,
   void StopStreamingForce(protocol_handler::ServiceType service_type);
   void StopStreaming(protocol_handler::ServiceType service_type);
   void SuspendStreaming(protocol_handler::ServiceType service_type);
-  void WakeUpStreaming(protocol_handler::ServiceType service_type);
+  void WakeUpStreaming(protocol_handler::ServiceType service_type,
+                       uint32_t timer_len = 0);
 
   virtual bool is_voice_communication_supported() const;
   virtual void set_voice_communication_supported(
@@ -164,17 +159,20 @@ class ApplicationImpl : public virtual Application,
   bool is_media_application() const;
   bool is_foreground() const OVERRIDE;
   void set_foreground(const bool is_foreground) OVERRIDE;
-  const mobile_apis::HMILevel::eType hmi_level() const;
+  const mobile_apis::HMILevel::eType hmi_level(
+      const WindowID window_id) const OVERRIDE;
   const uint32_t put_file_in_none_count() const;
   const uint32_t delete_file_in_none_count() const;
   const uint32_t list_files_in_none_count() const;
-  const mobile_api::SystemContext::eType system_context() const;
+  const mobile_api::SystemContext::eType system_context(
+      const WindowID window_id) const OVERRIDE;
   inline const mobile_apis::AudioStreamingState::eType audio_streaming_state()
       const;
   inline const mobile_apis::VideoStreamingState::eType video_streaming_state()
       const;
   const std::string& app_icon_path() const;
   connection_handler::DeviceHandle device() const;
+  connection_handler::DeviceHandle secondary_device() const;
   const std::string& mac_address() const OVERRIDE;
   const std::string& bundle_id() const OVERRIDE;
   void set_bundle_id(const std::string& bundle_id) OVERRIDE;
@@ -182,6 +180,8 @@ class ApplicationImpl : public virtual Application,
   bool tts_properties_in_none();
   void set_tts_properties_in_full(bool active);
   bool tts_properties_in_full();
+  void set_keep_context(bool keep_context);
+  bool keep_context();
   void set_version(const Version& ver);
   void set_name(const custom_str::CustomString& name);
   void set_is_media_application(bool is_media);
@@ -191,6 +191,7 @@ class ApplicationImpl : public virtual Application,
   bool set_app_icon_path(const std::string& path);
   void set_app_allowed(const bool allowed);
   void set_device(connection_handler::DeviceHandle device);
+  void set_secondary_device(connection_handler::DeviceHandle secondary_device);
   virtual uint32_t get_grammar_id() const;
   virtual void set_grammar_id(uint32_t value);
   bool is_audio() const OVERRIDE;
@@ -202,6 +203,24 @@ class ApplicationImpl : public virtual Application,
   virtual void set_is_resuming(bool is_resuming);
   virtual bool is_resuming() const;
 
+  /**
+   * @brief Remembers the HMI level which the app would resume into if high-
+   * bandwidth transport were available.
+   * @param level The HMI level which the app would resume into. Specify
+   * INVALID_ENUM to clear the state.
+   */
+  void set_deferred_resumption_hmi_level(
+      mobile_api::HMILevel::eType level) OVERRIDE;
+  /**
+   * @brief Returns the HMI level which the app would resume into if high-
+   * bandwidth transport were available.
+   *
+   * A value of INVALID_ENUM indicates that the app does not have deferred
+   * HMI level.
+   * @return HMI level which the app would resume into
+   */
+  mobile_api::HMILevel::eType deferred_resumption_hmi_level() const OVERRIDE;
+
   bool AddFile(const AppFile& file);
   bool UpdateFile(const AppFile& file);
   bool DeleteFile(const std::string& file_name);
@@ -212,6 +231,8 @@ class ApplicationImpl : public virtual Application,
   bool SubscribeToButton(mobile_apis::ButtonName::eType btn_name);
   bool IsSubscribedToButton(mobile_apis::ButtonName::eType btn_name);
   bool UnsubscribeFromButton(mobile_apis::ButtonName::eType btn_name);
+
+  WindowID GetSoftButtonWindowID(const uint32_t button_id) OVERRIDE;
 
   inline bool IsRegistered() const OVERRIDE;
 
@@ -247,6 +268,12 @@ class ApplicationImpl : public virtual Application,
 
   UsageStatistics& usage_report();
 
+  /**
+   * @brief Access to HelpPromptManager interface
+   * @return object for Handling VR help
+   */
+  HelpPromptManager& help_prompt_manager() OVERRIDE;
+
   bool AreCommandLimitsExceeded(mobile_apis::FunctionID::eType cmd_id,
                                 TLimitSource source);
   virtual void SubscribeToSoftButtons(int32_t cmd_id,
@@ -256,6 +283,9 @@ class ApplicationImpl : public virtual Application,
   virtual void UnsubscribeFromSoftButtons(int32_t cmd_id);
 
   virtual bool is_application_data_changed() const;
+
+  bool is_app_data_resumption_allowed() const OVERRIDE;
+  void set_app_data_resumption_allowance(const bool allowed) OVERRIDE;
 
   virtual void set_is_application_data_changed(bool state_application_data);
 
@@ -277,26 +307,35 @@ class ApplicationImpl : public virtual Application,
   /**
    * @brief SetInitialState sets initial HMI state for application on
    * registration
+   * @param window_id window id for HMI state
+   * @param window_name name of inited window
    * @param state Hmi state value
    */
-  void SetInitialState(HmiStatePtr state) FINAL;
+  void SetInitialState(const WindowID window_id,
+                       const std::string& window_name,
+                       HmiStatePtr state) FINAL;
 
   /**
-  * @brief SetRegularState set permanent state of application
-  *
-  * @param state state to setup
-  */
-  virtual void SetRegularState(HmiStatePtr state);
+   * @brief SetRegularState set permanent state of application
+   * @param window_id window id for HMI state
+   * @param state state to setup
+   */
+  void SetRegularState(const WindowID window_id, HmiStatePtr state) FINAL;
 
   /**
-  * @brief SetPostponedState sets postponed state to application.
-  * This state could be set as regular later
-  *
-  * @param state state to setup
-  */
-  virtual void SetPostponedState(HmiStatePtr state);
+   * @brief SetPostponedState sets postponed state to application.
+   * This state could be set as regular later
+   * @param window_id window id for HMI state
+   * @param state state to setup
+   */
+  void SetPostponedState(const WindowID window_id, HmiStatePtr state) FINAL;
 
-  virtual void RemovePostponedState();
+  /**
+   * @brief RemovePostponedState removes postponed state for application
+   * After removal, this state will not be set as regular later
+   * @param window_id window id for HMI state
+   */
+  void RemovePostponedState(const WindowID window_id) FINAL;
 
   /**
    * @brief AddHMIState the function that will change application's
@@ -306,7 +345,7 @@ class ApplicationImpl : public virtual Application,
    *
    * @param state new hmi state for certain application.
    */
-  virtual void AddHMIState(HmiStatePtr state);
+  void AddHMIState(const WindowID window_id, HmiStatePtr state) FINAL;
 
   /**
    * @brief RemoveHMIState the function that will turn back hmi_level after end
@@ -316,19 +355,32 @@ class ApplicationImpl : public virtual Application,
    *
    * @param state_id that should be removed
    */
-  virtual void RemoveHMIState(HmiState::StateID state_id);
+  void RemoveHMIState(const WindowID window_id,
+                      HmiState::StateID state_id) FINAL;
 
   /**
    * @brief HmiState of application within active events PhoneCall, TTS< etc ...
    * @return Active HmiState of application
    */
-  virtual const HmiStatePtr CurrentHmiState() const;
+  const HmiStatePtr CurrentHmiState(const WindowID window_i) const FINAL;
+
+  WindowNames GetWindowNames() const FINAL;
+
+  WindowIds GetWindowIds() const FINAL;
+
+  bool WindowIdExists(const WindowID window_id) const FINAL;
+
+  /**
+   * @brief Checks if app is allowed to change audio source
+   * @return True - if allowed, otherwise - False
+   */
+  virtual bool IsAllowedToChangeAudioSource() const;
 
   /**
    * @brief RegularHmiState of application without active events VR, TTS etc ...
    * @return HmiState of application
    */
-  virtual const HmiStatePtr RegularHmiState() const;
+  const HmiStatePtr RegularHmiState(const WindowID window_id) const FINAL;
 
   /**
    * @brief PostponedHmiState returns postponed hmi state of application
@@ -336,7 +388,7 @@ class ApplicationImpl : public virtual Application,
    *
    * @return Postponed hmi state of application
    */
-  virtual const HmiStatePtr PostponedHmiState() const;
+  const HmiStatePtr PostponedHmiState(const WindowID window_id) const FINAL;
 
   uint32_t audio_stream_retry_number() const;
 
@@ -363,6 +415,7 @@ class ApplicationImpl : public virtual Application,
    * @param system_context new system context
    */
   void set_system_context(
+      const WindowID window_id,
       const mobile_api::SystemContext::eType& system_context) OVERRIDE;
   /**
    * @brief Sets current audio streaming state
@@ -374,12 +427,84 @@ class ApplicationImpl : public virtual Application,
    * @brief Sets current HMI level
    * @param hmi_level new HMI level
    */
-  void set_hmi_level(const mobile_api::HMILevel::eType& hmi_level) OVERRIDE;
+  void set_hmi_level(const WindowID window_id,
+                     const mobile_api::HMILevel::eType& hmi_level) OVERRIDE;
 
   void PushMobileMessage(
       smart_objects::SmartObjectSPtr mobile_message) OVERRIDE;
 
   void SwapMobileMessageQueue(MobileMessageQueue& mobile_messages) OVERRIDE;
+
+  /**
+   * @brief Get cloud app endpoint for websocket connection
+   * @return cloud app endpoint
+   */
+  const std::string& cloud_app_endpoint() const OVERRIDE;
+
+  /**
+   * @brief Get cloud app auth token to be used in connection handshake after
+   * websocket open.
+   * @return cloud app auth token
+   */
+  const std::string& auth_token() const OVERRIDE;
+
+  /**
+   * @brief Get cloud app transport type. Defines the type of websocket
+   * connection used.
+   * @return cloud app transport type
+   */
+  const std::string& cloud_app_transport_type() const OVERRIDE;
+
+  /**
+   * @brief Get hybrid app preference. Defines behaviour for when a similar
+   * mobile and cloud app are connected simultaneously.
+   * @return hybrid app preference
+   */
+  const mobile_apis::HybridAppPreference::eType& hybrid_app_preference()
+      const OVERRIDE;
+
+  /**
+   * @brief Get cloud app certificate. Used for secured websocket connections.
+   * @return cloud app certificate.
+   */
+  const std::string& cloud_app_certificate() const OVERRIDE;
+
+  /**
+   * @brief Check whether the given application is a cloud app.
+   * @return true if the application is a cloud application, false otherwise.
+   */
+  bool is_cloud_app() const OVERRIDE;
+
+  /**
+   * @brief Set cloud app endpoint
+   */
+  void set_cloud_app_endpoint(const std::string& endpoint) OVERRIDE;
+
+  /**
+   * @brief Set cloud app auth token
+   */
+  void set_auth_token(const std::string& auth_token) OVERRIDE;
+
+  /**
+   * @brief Set cloud app transport type
+   */
+  void set_cloud_app_transport_type(const std::string& transport_type) OVERRIDE;
+
+  /**
+   * @brief Set hybrid app preference
+   */
+  void set_hybrid_app_preference(const mobile_apis::HybridAppPreference::eType&
+                                     hybrid_app_preference) OVERRIDE;
+
+  /**
+   * @brief Set cloud app certificate
+   */
+  void set_cloud_app_certificate(const std::string& certificate) OVERRIDE;
+
+  void set_user_location(
+      const smart_objects::SmartObject& user_location) OVERRIDE;
+
+  const smart_objects::SmartObject& get_user_location() const OVERRIDE;
 
  protected:
   /**
@@ -449,11 +574,14 @@ class ApplicationImpl : public virtual Application,
   bool audio_streaming_suspended_;
   sync_primitives::Lock video_streaming_suspended_lock_;
   sync_primitives::Lock audio_streaming_suspended_lock_;
+  sync_primitives::Lock streaming_stop_lock_;
 
   bool is_app_allowed_;
+  bool is_app_data_resumption_allowed_;
   bool has_been_activated_;
   bool tts_properties_in_none_;
   bool tts_properties_in_full_;
+  bool keep_context_;
   bool is_foreground_;
   bool is_application_data_changed_;
   uint32_t put_file_in_none_count_;
@@ -462,14 +590,18 @@ class ApplicationImpl : public virtual Application,
   std::string app_icon_path_;
   std::string mac_address_;
   connection_handler::DeviceHandle device_id_;
+  connection_handler::DeviceHandle secondary_device_id_;
   std::string bundle_id_;
   AppFilesMap app_files_;
   std::set<mobile_apis::ButtonName::eType> subscribed_buttons_;
   UsageStatistics usage_report_;
+  HelpPromptManagerImpl help_prompt_manager_impl_;
   protocol_handler::MajorProtocolVersion protocol_version_;
   bool is_voice_communication_application_;
-  sync_primitives::atomic_bool is_resuming_;
+  std::atomic_bool is_resuming_;
+  mobile_api::HMILevel::eType deferred_resumption_hmi_level_;
   bool is_hash_changed_during_suspend_;
+  smart_objects::SmartObject user_location_;
 
   uint32_t video_stream_retry_number_;
   uint32_t audio_stream_retry_number_;
@@ -480,10 +612,17 @@ class ApplicationImpl : public virtual Application,
 
   std::list<AppExtensionPtr> extensions_;
 
+  // Cloud app properties
+  std::string endpoint_;
+  std::string auth_token_;
+  std::string cloud_transport_type_;
+  mobile_apis::HybridAppPreference::eType hybrid_app_preference_;
+  std::string certificate_;
+
   /**
    * @brief Defines number per time in seconds limits
    */
-  typedef std::pair<TimevalStruct, uint32_t> TimeToNumberLimit;
+  typedef std::pair<date_time::TimeDuration, uint32_t> TimeToNumberLimit;
 
   /**
    * @brief Defines specific command number per time in seconds limits
@@ -526,7 +665,8 @@ uint32_t ApplicationImpl::app_id() const {
 const mobile_api::AudioStreamingState::eType
 ApplicationImpl::audio_streaming_state() const {
   using namespace mobile_apis;
-  const HmiStatePtr hmi_state = CurrentHmiState();
+  const HmiStatePtr hmi_state =
+      CurrentHmiState(mobile_apis::PredefinedWindows::DEFAULT_WINDOW);
   return hmi_state ? hmi_state->audio_streaming_state()
                    : AudioStreamingState::INVALID_ENUM;
 }
@@ -534,7 +674,8 @@ ApplicationImpl::audio_streaming_state() const {
 const mobile_api::VideoStreamingState::eType
 ApplicationImpl::video_streaming_state() const {
   using namespace mobile_apis;
-  const HmiStatePtr hmi_state = CurrentHmiState();
+  const HmiStatePtr hmi_state =
+      CurrentHmiState(mobile_apis::PredefinedWindows::DEFAULT_WINDOW);
   return hmi_state ? hmi_state->video_streaming_state()
                    : VideoStreamingState::INVALID_ENUM;
 }

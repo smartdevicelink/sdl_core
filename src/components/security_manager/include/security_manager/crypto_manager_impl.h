@@ -33,20 +33,19 @@
 #ifndef SRC_COMPONENTS_SECURITY_MANAGER_INCLUDE_SECURITY_MANAGER_CRYPTO_MANAGER_IMPL_H_
 #define SRC_COMPONENTS_SECURITY_MANAGER_INCLUDE_SECURITY_MANAGER_CRYPTO_MANAGER_IMPL_H_
 
-#include <stdint.h>
 #include <openssl/bio.h>
-#include <openssl/ssl.h>
 #include <openssl/err.h>
-#include <string>
+#include <openssl/ssl.h>
+#include <stdint.h>
 #include <map>
+#include <string>
 
 #include "security_manager/crypto_manager.h"
-#include "security_manager/ssl_context.h"
 #include "security_manager/security_manager_settings.h"
+#include "security_manager/ssl_context.h"
 
-#include "utils/macro.h"
 #include "utils/lock.h"
-#include "utils/shared_ptr.h"
+#include "utils/macro.h"
 
 namespace security_manager {
 class CryptoManagerImpl : public CryptoManager {
@@ -138,7 +137,7 @@ class CryptoManagerImpl : public CryptoManager {
 
  public:
   explicit CryptoManagerImpl(
-      const utils::SharedPtr<const CryptoManagerSettings> set);
+      const std::shared_ptr<const CryptoManagerSettings> set);
   ~CryptoManagerImpl();
 
   bool Init() OVERRIDE;
@@ -203,10 +202,11 @@ class CryptoManagerImpl : public CryptoManager {
    */
   bool SaveModuleKeyToFile(EVP_PKEY* key) const;
 
-  const utils::SharedPtr<const CryptoManagerSettings> settings_;
+  const std::shared_ptr<const CryptoManagerSettings> settings_;
   SSL_CTX* context_;
   static uint32_t instance_count_;
   static sync_primitives::Lock instance_lock_;
+  sync_primitives::Lock crypto_manager_lock_;
   DISALLOW_COPY_AND_ASSIGN(CryptoManagerImpl);
 };
 }  // namespace security_manager

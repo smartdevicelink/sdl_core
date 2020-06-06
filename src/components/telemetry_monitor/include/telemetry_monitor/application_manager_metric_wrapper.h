@@ -35,8 +35,8 @@
 
 #include <string>
 
-#include "telemetry_monitor/metric_wrapper.h"
 #include "telemetry_monitor/application_manager_observer.h"
+#include "telemetry_monitor/metric_wrapper.h"
 
 namespace telemetry_monitor {
 
@@ -44,9 +44,9 @@ class ApplicationManagerObserver;
 
 class ApplicationManagerMetricWrapper : public MetricWrapper {
  public:
-  utils::SharedPtr<application_manager::AMTelemetryObserver::MessageMetric>
+  std::shared_ptr<application_manager::AMTelemetryObserver::MessageMetric>
       message_metric;
   virtual Json::Value GetJsonMetric();
 };
-}
+}  // namespace telemetry_monitor
 #endif  // SRC_COMPONENTS_TELEMETRY_MONITOR_INCLUDE_TELEMETRY_MONITOR_APPLICATION_MANAGER_METRIC_WRAPPER_H_

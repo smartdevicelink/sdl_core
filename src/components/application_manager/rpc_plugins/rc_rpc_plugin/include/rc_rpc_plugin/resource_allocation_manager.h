@@ -30,13 +30,13 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_REMOTE_CONTROL_INCLUDE_REMOTE_CONTROL_RESOURCE_ALLOCATION_H
-#define SRC_COMPONENTS_REMOTE_CONTROL_INCLUDE_REMOTE_CONTROL_RESOURCE_ALLOCATION_H
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_RC_RPC_PLUGIN_INCLUDE_RC_RPC_PLUGIN_RESOURCE_ALLOCATION_MANAGER_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_RC_RPC_PLUGIN_INCLUDE_RC_RPC_PLUGIN_RESOURCE_ALLOCATION_MANAGER_H_
 #include <string>
 #include "utils/macro.h"
-#include "utils/shared_ptr.h"
-#include "interfaces/HMI_API.h"
+
 #include "application_manager/plugin_manager/rpc_plugin.h"
+#include "interfaces/HMI_API.h"
 #include "rc_rpc_plugin/rc_app_extension.h"
 
 namespace rc_rpc_plugin {
@@ -56,55 +56,97 @@ enum eType { FREE = 0, BUSY };
 }
 
 /**
+ * Defines triggers for OnRCStatus notification sending
+ */
+namespace NotificationTrigger {
+/**
+ * @brief The eType
+ * APP_REGISTRATION RC app registation event
+ * RC_STATE_CHANGING enabling/disabling RC on HMI event
+ * MODULE_ALLOCATION module allocation/deallocation event
+ */
+enum eType { APP_REGISTRATION = 0, MODULE_ALLOCATION, RC_STATE_CHANGING };
+}  // namespace NotificationTrigger
+
+/**
+ * Defines result of releasing specified module type resource.
+ */
+namespace ResourceReleasedState {
+/**
+ * NOT_ALLOCATED Module's resource is not allocated
+ * IS_ALLOCATED Module's resource is already allocated by
+ * different application
+ * IS_RELEASED Module's resource is released.
+ */
+enum eType { NOT_ALLOCATED = 0, IS_ALLOCATED, IS_RELEASED };
+}  // namespace ResourceReleasedState
+
+/**
+ * @brief ModuleUid uniquely identify a module
+ * moduleType + moduleID
+ */
+typedef std::pair<std::string, std::string> ModuleUid;
+
+/**
  * @brief Resources defines list of resources
  */
-typedef std::vector<std::string> Resources;
+typedef std::vector<ModuleUid> Resources;
 
 class ResourceAllocationManager {
  public:
   /**
    * @brief AcquireResource acquires resource by application
    * @param module_type resource to acquire
+   * @param module_id uuid of a resource
    * @param app_id application that acquire resource
    * @return ALLOWED if resource acquired \
    *         IN_USE  if resource already acquired
    *         ASK_DRIVER if driver confirmation is required
    */
   virtual AcquireResult::eType AcquireResource(const std::string& module_type,
+                                               const std::string& module_id,
                                                const uint32_t app_id) = 0;
 
   /**
    * @brief SetResourceState changes resource state. Resource must be acquired
    * beforehand.
    * @param module_type Resource to change its state
+   * @param module_id uuid of a resource
    * @param app_id Application aquired resource before
    * @param state State to set for resource
    */
   virtual void SetResourceState(const std::string& module_type,
+                                const std::string& module_id,
                                 const uint32_t app_id,
                                 const ResourceState::eType state) = 0;
 
   /**
    * @brief IsResourceFree check resource state
    * @param module_type Resource name
+   * @param module_id uuid of a resource
    * @return True if free, otherwise - false
    */
-  virtual bool IsResourceFree(const std::string& module_type) const = 0;
+  virtual bool IsResourceFree(const std::string& module_type,
+                              const std::string& module_id) const = 0;
 
   /**
    * @brief AcquireResource forces acquiring resource by application
    * @param module_type resource to acquire
+   * @param module_id uuid of a resource
    * @param app_id application that acquire resource
    */
   virtual void ForceAcquireResource(const std::string& module_type,
+                                    const std::string& module_id,
                                     const uint32_t app_id) = 0;
 
   /**
    * @brief OnDriverDisallowed callback for rejecting acquiring resource
    * @param module_type resource type
+   * @param module_id uuid of a resource
    * @param app_id application id
    */
   virtual void OnDriverDisallowed(const std::string& module_type,
+                                  const std::string& module_id,
                                   const uint32_t app_id) = 0;
 
   /**
@@ -141,11 +183,61 @@ class ResourceAllocationManager {
    */
   virtual void ResetAllAllocations() = 0;
 
-  virtual RCAppExtensionPtr GetApplicationExtention(
+  /**
+   * @brief Create and send OnRCStatusNotification to mobile and HMI
+   * @param event trigger for notification sending
+   * @param application - app that should receive notification
+   * in case of registration; in cases of RC enabling/disabling
+   * or module allocation - application is just empty shared ptr,
+   * because in these cases all registered RC apps should
+   * receive a notification
+   */
+  virtual void SendOnRCStatusNotifications(
+      NotificationTrigger::eType event,
       application_manager::ApplicationSharedPtr application) = 0;
+
+  virtual bool is_rc_enabled() const = 0;
+
+  virtual void set_rc_enabled(const bool value) = 0;
+
+  /**
+   * @brief ReleaseResource Releases resource acquired by application
+   * @param module_type Module name
+   * @param module_id uuid of a module
+   * @param application_id Application id
+   */
+  virtual ResourceReleasedState::eType ReleaseResource(
+      const std::string& module_type,
+      const std::string& module_id,
+      const uint32_t application_id) = 0;
+
+  /**
+   * @brief SetResourceAquired mark resourse as aquired and process logic of
+   * changing state of aquired resources
+   * @param module_type resource name
+   * @param module_id uuid of a resource
+   * @param app applicastion that aquire resource
+   */
+  virtual void SetResourceAcquired(const std::string& module_type,
+                                   const std::string& module_id,
+                                   const uint32_t app_id) = 0;
+
+  /**
+   * @brief Checks if specific resource is already aquired by specific
+   * application
+   * @param moduleUid Module resurce (module type + module ID)
+   * @param app_id Application ID which try to aquire resource
+   * @return true In case when resource is already aquired by specific
+   * application
+   * @return false In case when isn't aquired by specific
+   * application
+   */
+  virtual bool IsResourceAlreadyAcquiredByApp(
+      const rc_rpc_plugin::ModuleUid& moduleUid,
+      const uint32_t app_id) const = 0;
 
   virtual ~ResourceAllocationManager() {}
 };
 
 }  // namespace rc_rpc_plugin
-#endif  // SRC_COMPONENTS_REMOTE_CONTROL_INCLUDE_REMOTE_CONTROL_RESOURCE_ALLOCATION_H
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_RC_RPC_PLUGIN_INCLUDE_RC_RPC_PLUGIN_RESOURCE_ALLOCATION_MANAGER_H_

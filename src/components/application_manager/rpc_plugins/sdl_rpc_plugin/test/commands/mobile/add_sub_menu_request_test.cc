@@ -35,14 +35,14 @@
 
 #include "mobile/add_sub_menu_request.h"
 
-#include "gtest/gtest.h"
-#include "application_manager/commands/commands_test.h"
 #include "application_manager/commands/command_request_test.h"
-#include "application_manager/mock_application_manager.h"
-#include "application_manager/mock_application.h"
-#include "application_manager/mock_message_helper.h"
+#include "application_manager/commands/commands_test.h"
 #include "application_manager/event_engine/event.h"
+#include "application_manager/mock_application.h"
+#include "application_manager/mock_application_manager.h"
 #include "application_manager/mock_hmi_interface.h"
+#include "application_manager/mock_message_helper.h"
+#include "gtest/gtest.h"
 
 namespace test {
 namespace components {
@@ -51,13 +51,13 @@ namespace mobile_commands_test {
 namespace add_sub_menu_request {
 
 namespace am = ::application_manager;
-using sdl_rpc_plugin::commands::AddSubMenuRequest;
 using am::commands::MessageSharedPtr;
 using am::event_engine::Event;
+using sdl_rpc_plugin::commands::AddSubMenuRequest;
 using ::testing::_;
 using ::testing::Return;
 
-typedef SharedPtr<AddSubMenuRequest> AddSubMenuPtr;
+typedef std::shared_ptr<AddSubMenuRequest> AddSubMenuPtr;
 
 namespace {
 const uint32_t kConnectionKey = 2u;
@@ -98,7 +98,7 @@ TEST_F(AddSubMenuRequestTest, Run_ImageVerificationFailed_EXPECT_INVALID_DATA) {
   EXPECT_CALL(mock_rpc_service_,
               ManageMobileCommand(
                   MobileResultCodeIs(mobile_apis::Result::INVALID_DATA), _));
-  utils::SharedPtr<AddSubMenuRequest> request_ptr =
+  std::shared_ptr<AddSubMenuRequest> request_ptr =
       CreateCommand<AddSubMenuRequest>(msg);
 
   request_ptr->Run();
@@ -110,7 +110,7 @@ TEST_F(AddSubMenuRequestTest, OnEvent_UI_UNSUPPORTED_RESOURCE) {
   (*msg)[am::strings::params][am::strings::connection_key] = kConnectionKey;
   (*msg)[am::strings::msg_params][am::strings::menu_id] = menu_id;
 
-  utils::SharedPtr<AddSubMenuRequest> command =
+  std::shared_ptr<AddSubMenuRequest> command =
       CreateCommand<AddSubMenuRequest>(msg);
 
   ON_CALL(app_mngr_, application(kConnectionKey))

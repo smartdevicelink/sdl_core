@@ -40,8 +40,8 @@
 #include "protocol_handler/protocol_observer.h"
 #include "protocol_handler/session_observer.h"
 
-#include "security_manager/security_manager_listener.h"
 #include "application_manager/policies/policy_handler_observer.h"
+#include "security_manager/security_manager_listener.h"
 
 namespace security_manager {
 
@@ -166,13 +166,29 @@ class SecurityManager : public protocol_handler::ProtocolObserver,
   /**
    * @brief Notify all listeners that handshake was failed
    */
-  virtual void NotifyListenersOnHandshakeFailed() = 0;
+  virtual void NotifyListenersOnGetSystemTimeFailed() = 0;
+
+  virtual void ProcessFailedPTU() = 0;
+
+#ifdef EXTERNAL_PROPRIETARY_MODE
+  /**
+   * @brief ProcessFailedCertDecrypt is called to notify listeners that
+   * certificate decryption failed in the external flow
+   */
+  virtual void ProcessFailedCertDecrypt() = 0;
+#endif
 
   /**
    * @brief Check if policy certificate data is empty
    * @return true if policy certificate data is empty otherwise false
    */
   virtual bool IsPolicyCertificateDataEmpty() = 0;
+
+  /**
+   * @brief ResetPendingSystemTimeRequests resets waiting for system time
+   * requests flag
+   */
+  virtual void ResetPendingSystemTimeRequests() = 0;
 
   /**
    * \brief Add/Remove for SecurityManagerListener

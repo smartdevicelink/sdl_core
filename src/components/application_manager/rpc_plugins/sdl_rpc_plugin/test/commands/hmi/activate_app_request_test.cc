@@ -30,13 +30,12 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "gtest/gtest.h"
 #include "hmi/activate_app_request.h"
-#include "utils/shared_ptr.h"
-#include "smart_objects/smart_object.h"
 #include "application_manager/commands/command_impl.h"
 #include "application_manager/commands/commands_test.h"
 #include "application_manager/mock_application.h"
+#include "gtest/gtest.h"
+#include "smart_objects/smart_object.h"
 
 namespace test {
 namespace components {
@@ -45,17 +44,17 @@ namespace hmi_commands_test {
 namespace activate_app_request {
 
 using ::testing::_;
-using ::utils::SharedPtr;
+
 namespace am = ::application_manager;
 namespace strings = ::application_manager::strings;
+using am::commands::CommandImpl;
 using am::commands::MessageSharedPtr;
 using sdl_rpc_plugin::commands::ActivateAppRequest;
-using am::commands::CommandImpl;
 
 using ::test::components::application_manager_test::MockApplication;
 
-typedef SharedPtr<MockApplication> MockAppPtr;
-typedef ::utils::SharedPtr<ActivateAppRequest> ActivateAppRequestPtr;
+typedef std::shared_ptr<MockApplication> MockAppPtr;
+typedef std::shared_ptr<ActivateAppRequest> ActivateAppRequestPtr;
 
 MATCHER_P(CheckMessage, level, "") {
   return level ==

@@ -1,11 +1,11 @@
 /** @page components_transportmanager_client_data_transfer Data Transfer
  *
- * As all requests to TransportManager are asynchronous, client must implement NsSmartDeviceLink::NsTransportManager::ITransportManagerDataListener
- * interface and add itself as a data listener with NsSmartDeviceLink::NsTransportManager::ITransportManager::addDataListener()
+ * As all requests to TransportManager are asynchronous, client must implement ns_smart_device_link::ns_transport_manager::ITransportManagerDataListener
+ * interface and add itself as a data listener with ns_smart_device_link::ns_transport_manager::ITransportManager::addDataListener()
  * in order to receive notifications.
- * To send frame to remote device client must use NsSmartDeviceLink::NsTransportManager::ITransportManager::sendFrame() poviding connection handle,
+ * To send frame to remote device client must use ns_smart_device_link::ns_transport_manager::ITransportManager::sendFrame() poviding connection handle,
  * frame data, data size and user data. User data is an integer that is assigned to a frame and will be sent back to client when sending of frame
  * will be completed. Client may use this data to identify frame when send result will be reported. When sending of frame is completed
- * client is notified via NsSmartDeviceLink::NsTransportManager::ITransportManagerDataListener::onFrameSendCompleted(). When frame is received from a remote
- * device client is notified via NsSmartDeviceLink::NsTransportManager::ITransportManagerDataListener::onFrameReceived().
+ * client is notified via ns_smart_device_link::ns_transport_manager::ITransportManagerDataListener::onFrameSendCompleted(). When frame is received from a remote
+ * device client is notified via ns_smart_device_link::ns_transport_manager::ITransportManagerDataListener::onFrameReceived().
  */
