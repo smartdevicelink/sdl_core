@@ -95,10 +95,10 @@ int FindPairedDevs(std::vector<bdaddr_t>* result) {
     delete[] buffer;
     buffer = new char[1028];
   }
-  pclose(pipe);
-  LOG4CXX_TRACE(logger_, "exit with 0");
+  int status = pclose(pipe);
+  LOG4CXX_TRACE(logger_, "exit with " << status);
   delete[] buffer;
-  return 0;
+  return status;
 }
 }  //  namespace
 
@@ -225,7 +225,11 @@ void BluetoothDeviceScanner::DoInquiry() {
                                             &inquiry_info_list,
                                             IREQ_CACHE_FLUSH);
 
-  if (number_of_devices >= 0) {
+  if (number_of_devices < 0) {
+    LOG4CXX_DEBUG(logger_, "number_of_devices < 0");
+    controller_->SearchDeviceFailed(SearchDeviceError());
+  }
+  else {
     LOG4CXX_INFO(logger_,
                  "hci_inquiry: found " << number_of_devices << " devices");
     std::vector<bdaddr_t> found_devices(number_of_devices);
@@ -241,11 +245,6 @@ void BluetoothDeviceScanner::DoInquiry() {
 
   close(device_handle);
   delete[] inquiry_info_list;
-
-  if (number_of_devices < 0) {
-    LOG4CXX_DEBUG(logger_, "number_of_devices < 0");
-    controller_->SearchDeviceFailed(SearchDeviceError());
-  }
 }
 
 void BluetoothDeviceScanner::CheckSDLServiceOnDevices(
