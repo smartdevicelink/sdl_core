@@ -4661,7 +4661,7 @@ void ApplicationManagerImpl::SubscribeAppForWayPoints(uint32_t app_id) {
     smart_objects::SmartObjectSPtr way_point_notification_ =
         std::make_shared<smart_objects::SmartObject>(*way_points_data_);
     (*way_point_notification_)[strings::params][strings::connection_key] =
-        app->app_id();
+        app_id;
     GetRPCService().SendMessageToMobile(way_point_notification_);
   }
 }
