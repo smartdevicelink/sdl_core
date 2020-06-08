@@ -1,27 +1,23 @@
 #!/bin/bash
 cd $(dirname $0)
 DIR=$(pwd)
-PID_DIR=~/.sdl
 
-if [ ! -d "$PID_DIR" ]; then
-  mkdir $PID_DIR
-fi
-
-CORE_PID_FILE=${PID_DIR}/core.pid
-CORE_PROCESS_NAME=SDLCore
-PM_PID_FILE=${PID_DIR}/policy_manager.pid
+CORE_PID_FILE=${DIR}/core.pid
+CORE_APPLICATION_NAME=smartDeviceLinkCore
+PM_PID_FILE=${DIR}/policy_manager.pid
+PM_APPLICATION_NAME=sample_policy_manager.py
 
 function core_start() {
   if [ -f "$CORE_PID_FILE" ] && [ -n "$(ps -p $(cat $CORE_PID_FILE) -o pid=)" ]; then
     echo "Core is already running"
     return 1
-  elif [ -n "$(pgrep $CORE_PROCESS_NAME)" ]; then
+  elif [ -n "$(pgrep -f $CORE_APPLICATION_NAME)" ]; then
     echo "Core is already running outside of this script"
-    echo "This lingering instance can be stopped using the \"kill\" command"
+    echo "All instances of Core can be stopped using the \"kill\" command"
     return 2
   else
-    echo "Starting SmartDeviceLinkCore"
-    LD_LIBRARY_PATH=$DIR ${DIR}/smartDeviceLinkCore &
+    echo "Starting SmartDeviceLink Core"
+    LD_LIBRARY_PATH=$DIR ${DIR}/${CORE_APPLICATION_NAME} &
     CORE_PID=$!
     echo $CORE_PID > $CORE_PID_FILE
     return 0
@@ -31,7 +27,7 @@ function core_start() {
 function core_stop() {
   RESULT=1
   if [ -f "$CORE_PID_FILE" ] && [ -n "$(ps -p $(cat $CORE_PID_FILE) -o pid=)" ]; then
-    echo "Stopping SmartDeviceLinkCore"
+    echo "Stopping SmartDeviceLink Core"
     CORE_PID=$(cat $CORE_PID_FILE)
     kill $CORE_PID
 
@@ -62,10 +58,14 @@ function pm_start() {
   if [ -f "$PM_PID_FILE" ] && [ -n "$(ps -p $(cat $PM_PID_FILE) -o pid=)" ]; then
     echo "Policy Server is already running"
     return 1
+  elif [ -n "$(pgrep -f $PM_APPLICATION_NAME)" ]; then
+    echo "Policy Server is already running outside of this script"
+    echo "All instances of Core can be stopped using the \"kill\" command"
+    return 2
   else
     pm_install_dependencies
     echo "Starting Policy Manager"
-    python3 ${DIR}/sample_policy_manager.py --pack_port 8088 --unpack_port 8089 --add_http_header --encryption &
+    python3 ${DIR}/${PM_APPLICATION_NAME} --pack_port 8088 --unpack_port 8089 --add_http_header --encryption &
     PM_PID=$!
     echo $PM_PID > $PM_PID_FILE
     return 0
@@ -88,17 +88,17 @@ function pm_stop() {
   return $RESULT
 }
 
-if [ x$1 == xstop ]; then
+if [ "$1" == "stop" ]; then
   core_stop
-  if [ ! "$?" -eq 0 ]; then
+  if [ "$?" -ne 0 ]; then
     echo "Core is not running (or was started outside of this script)"
   fi
 
   pm_stop
-  if [ ! "$?" -eq 0 ]; then
+  if [ "$?" -ne 0 ]; then
     echo "Policy Server is not running (or was started outside of this script)"
   fi
-elif [ x$1 == xrestart ]; then
+elif [ "$1" == "restart" ]; then
   core_stop
   if [ "$?" -eq 0 ]; then
     core_start
@@ -112,15 +112,20 @@ elif [ x$1 == xrestart ]; then
   else
     echo "Policy Server is not running (or was started outside of this script)"
   fi
-elif [ x$1 == xstart ]; then
+elif [ "$1" == "start" ]; then
   core_start
   pm_start
-elif [ x$1 == xkill ]; then
+elif [ "$1" == "kill" ]; then
   core_stop
+  pkill -9 -f $CORE_APPLICATION_NAME
+  if [ "$?" -eq 0 ]; then
+    echo "Killed all lingering instances of SDL Core"
+  fi
+
   pm_stop
-  if [ -n "$(pgrep $CORE_PROCESS_NAME)" ]; then
-    echo "Killing all lingering instances of SDL Core"
-    killall -9 $CORE_PROCESS_NAME
+  pkill -9 -f $PM_APPLICATION_NAME
+  if [ "$?" -eq 0 ]; then
+    echo "Killed all lingering instances of the Policy Server"
   fi
 else
   echo "usage: core.sh [start/restart/stop/kill]"

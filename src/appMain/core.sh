@@ -1,26 +1,21 @@
 #!/bin/bash
 cd $(dirname $0)
 DIR=$(pwd)
-PID_DIR=~/.sdl
 
-if [ ! -d "$PID_DIR" ]; then
-  mkdir $PID_DIR
-fi
-
-CORE_PID_FILE=${PID_DIR}/core.pid
-CORE_PROCESS_NAME=SDLCore
+CORE_PID_FILE=${DIR}/core.pid
+CORE_APPLICATION_NAME=smartDeviceLinkCore
 
 function core_start() {
   if [ -f "$CORE_PID_FILE" ] && [ -n "$(ps -p $(cat $CORE_PID_FILE) -o pid=)" ]; then
     echo "Core is already running"
     return 1
-  elif [ -n "$(pgrep $CORE_PROCESS_NAME)" ]; then
+  elif [ -n "$(pgrep -f $CORE_APPLICATION_NAME)" ]; then
     echo "Core is already running outside of this script"
-    echo "This lingering instance can be stopped using the \"kill\" command"
+    echo "All instances of Core can be stopped using the \"kill\" command"
     return 2
   else
-    echo "Starting SmartDeviceLinkCore"
-    LD_LIBRARY_PATH=$DIR ${DIR}/smartDeviceLinkCore &
+    echo "Starting SmartDeviceLink Core"
+    LD_LIBRARY_PATH=$DIR ${DIR}/${CORE_APPLICATION_NAME} &
     CORE_PID=$!
     echo $CORE_PID > $CORE_PID_FILE
     return 0
@@ -30,7 +25,7 @@ function core_start() {
 function core_stop() {
   RESULT=1
   if [ -f "$CORE_PID_FILE" ] && [ -n "$(ps -p $(cat $CORE_PID_FILE) -o pid=)" ]; then
-    echo "Stopping SmartDeviceLinkCore"
+    echo "Stopping SmartDeviceLink Core"
     CORE_PID=$(cat $CORE_PID_FILE)
     kill $CORE_PID
 
@@ -49,25 +44,25 @@ function core_stop() {
   return $RESULT
 }
 
-if [ x$1 == xstop ]; then
+if [ "$1" == "stop" ]; then
   core_stop
-  if [ ! "$?" -eq 0 ]; then
+  if [ "$?" -ne 0 ]; then
     echo "Core is not running (or was started outside of this script)"
   fi
-elif [ x$1 == xrestart ]; then
+elif [ "$1" == "restart" ]; then
   core_stop
   if [ "$?" -eq 0 ]; then
     core_start
   else
     echo "Core is not running (or was started outside of this script)"
   fi
-elif [ x$1 == xstart ]; then
+elif [ "$1" == "start" ]; then
   core_start
-elif [ x$1 == xkill ]; then
+elif [ "$1" == "kill" ]; then
   core_stop
-  if [ -n "$(pgrep $CORE_PROCESS_NAME)" ]; then
-    echo "Killing all lingering instances of SDL Core"
-    killall -9 $CORE_PROCESS_NAME
+  pkill -9 -f $CORE_APPLICATION_NAME
+  if [ "$?" -eq 0 ]; then
+    echo "Killed all lingering instances of SDL Core"
   fi
 else
   echo "usage: core.sh [start/restart/stop/kill]"
