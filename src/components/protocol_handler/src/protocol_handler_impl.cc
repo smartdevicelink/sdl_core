@@ -1835,8 +1835,7 @@ void ProtocolHandlerImpl::NotifySessionStarted(
   }
 
   std::shared_ptr<BsonObject> start_session_ack_params(
-      new BsonObject(),
-      [](BsonObject* obj) {
+      new BsonObject(), [](BsonObject* obj) {
         bson_object_deinitialize(obj);
         delete obj;
       });
