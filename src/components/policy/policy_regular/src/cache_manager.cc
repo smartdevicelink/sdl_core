@@ -33,23 +33,27 @@
 #include "policy/cache_manager.h"
 
 #include <algorithm>
-#include <functional>
-#include <ctime>
+#include <boost/algorithm/string.hpp>
 #include <cmath>
+#include <ctime>
+#include <functional>
 #include <sstream>
 
-#include "utils/file_system.h"
-#include "utils/helpers.h"
+#include "interfaces/MOBILE_API.h"
+#include "json/json_features.h"
 #include "json/reader.h"
-#include "json/features.h"
 #include "json/writer.h"
-#include "utils/logger.h"
+#include "smart_objects/enum_schema_item.h"
 #include "utils/date_time.h"
+#include "utils/file_system.h"
 #include "utils/gen_hash.h"
+#include "utils/helpers.h"
+#include "utils/logger.h"
 #include "utils/macro.h"
 #include "utils/threads/thread.h"
 #include "utils/threads/thread_delegate.h"
 
+#include "policy/policy_helper.h"
 #include "policy/sql_pt_representation.h"
 
 namespace policy_table = rpc::policy_table_interface_base;
@@ -104,6 +108,7 @@ CacheManager::CacheManager()
     , pt_(new policy_table::Table)
     , backup_(new SQLPTRepresentation())
     , update_required(false)
+    , removed_custom_vd_items_()
     , settings_(nullptr) {
   LOG4CXX_AUTO_TRACE(logger_);
   backuper_ = new BackgroundBackuper(this);
@@ -122,6 +127,20 @@ CacheManager::~CacheManager() {
 const policy_table::Strings& CacheManager::GetGroups(const PTString& app_id) {
   sync_primitives::AutoLock auto_lock(cache_lock_);
   return pt_->policy_table.app_policies_section.apps[app_id].groups;
+}
+
+const policy_table::Strings CacheManager::GetPolicyAppIDs() const {
+  LOG4CXX_AUTO_TRACE(logger_);
+  sync_primitives::AutoLock auto_lock(cache_lock_);
+
+  const auto apps = pt_->policy_table.app_policies_section.apps;
+
+  policy_table::Strings policy_app_ids;
+  for (const auto& app : apps) {
+    policy_app_ids.push_back(app.first);
+  }
+
+  return policy_app_ids;
 }
 
 bool CacheManager::CanAppKeepContext(const std::string& app_id) const {
@@ -282,9 +301,56 @@ bool CacheManager::ApplyUpdate(const policy_table::Table& update_pt) {
   pt_->policy_table.consumer_friendly_messages.assign_if_valid(
       update_pt.policy_table.consumer_friendly_messages);
 
+  pt_->policy_table.module_config.endpoint_properties =
+      update_pt.policy_table.module_config.endpoint_properties;
+
+  // Apply update for vehicle data
+  if (update_pt.policy_table.vehicle_data.is_initialized()) {
+    policy_table::VehicleDataItems custom_items_before_apply;
+    if (pt_->policy_table.vehicle_data->schema_items.is_initialized()) {
+      custom_items_before_apply =
+          CollectCustomVDItems(*pt_->policy_table.vehicle_data->schema_items);
+    }
+
+    if (!update_pt.policy_table.vehicle_data->schema_items.is_initialized() ||
+        update_pt.policy_table.vehicle_data->schema_items->empty()) {
+      pt_->policy_table.vehicle_data->schema_items =
+          rpc::Optional<policy_table::VehicleDataItems>();
+    } else {
+      policy_table::VehicleDataItems custom_items = CollectCustomVDItems(
+          *update_pt.policy_table.vehicle_data->schema_items);
+
+      pt_->policy_table.vehicle_data->schema_version =
+          update_pt.policy_table.vehicle_data->schema_version;
+      pt_->policy_table.vehicle_data->schema_items =
+          rpc::Optional<policy_table::VehicleDataItems>(custom_items);
+    }
+
+    policy_table::VehicleDataItems custom_items_after_apply =
+        *pt_->policy_table.vehicle_data->schema_items;
+    const auto& items_diff = CalculateCustomVdItemsDiff(
+        custom_items_before_apply, custom_items_after_apply);
+    SetRemovedCustomVdItems(items_diff);
+  }
+
   ResetCalculatedPermissions();
   Backup();
   return true;
+}
+
+policy_table::VehicleDataItems CacheManager::CollectCustomVDItems(
+    const policy_table::VehicleDataItems& vd_items) {
+  policy_table::VehicleDataItems result_items;
+  for (auto& item : vd_items) {
+    const std::string i_name = "VEHICLEDATA_" + std::string(item.name);
+    const std::string vd_name = boost::to_upper_copy<std::string>(i_name);
+    const bool is_rpc_spec =
+        policy_table::EnumSchemaItemFactory::IsRPCSpecVehicleDataType(vd_name);
+    if (!is_rpc_spec) {
+      result_items.push_back(item);
+    }
+  }
+  return result_items;
 }
 
 void CacheManager::GetHMIAppTypeAfterUpdate(
@@ -512,14 +578,8 @@ void CacheManager::CheckPermissions(const policy_table::Strings& groups,
         if (rpc_param.hmi_levels.end() != hmi_iter) {
           result.hmi_level_permitted = PermitResult::kRpcAllowed;
 
-          policy_table::Parameters::const_iterator params_iter =
-              rpc_param.parameters->begin();
-          policy_table::Parameters::const_iterator params_iter_end =
-              rpc_param.parameters->end();
-
-          for (; params_iter != params_iter_end; ++params_iter) {
-            result.list_of_allowed_params.insert(
-                policy_table::EnumToJsonString(*params_iter));
+          for (const auto& param : *rpc_param.parameters) {
+            result.list_of_allowed_params.insert(std::string(param));
           }
         }
       }
@@ -666,24 +726,263 @@ bool CacheManager::SecondsBetweenRetries(std::vector<int>& seconds) {
   return true;
 }
 
-const policy::VehicleInfo CacheManager::GetVehicleInfo() const {
-  CACHE_MANAGER_CHECK(VehicleInfo());
+const std::vector<policy_table::VehicleDataItem>
+CacheManager::GetVehicleDataItems() const {
+  CACHE_MANAGER_CHECK(std::vector<policy_table::VehicleDataItem>());
+  sync_primitives::AutoLock auto_lock(cache_lock_);
+  if (pt_->policy_table.vehicle_data.is_initialized() &&
+      pt_->policy_table.vehicle_data->schema_items.is_initialized()) {
+    return *(pt_->policy_table.vehicle_data->schema_items);
+  }
+
+  return std::vector<policy_table::VehicleDataItem>();
+}
+
+std::vector<policy_table::VehicleDataItem>
+CacheManager::GetRemovedVehicleDataItems() const {
+  CACHE_MANAGER_CHECK(std::vector<policy_table::VehicleDataItem>());
+  return removed_custom_vd_items_;
+}
+
+Json::Value CacheManager::GetPolicyTableData() const {
+  return pt_->policy_table.ToJsonValue();
+}
+
+void CacheManager::GetEnabledCloudApps(
+    std::vector<std::string>& enabled_apps) const {
+#if !defined(CLOUD_APP_WEBSOCKET_TRANSPORT_SUPPORT)
+  enabled_apps.clear();
+  return;
+#else
+  const policy_table::ApplicationPolicies& policies =
+      pt_->policy_table.app_policies_section.apps;
+  for (policy_table::ApplicationPolicies::const_iterator it = policies.begin();
+       it != policies.end();
+       ++it) {
+    auto app_policy = (*it).second;
+    if (app_policy.enabled.is_initialized() && *app_policy.enabled) {
+      enabled_apps.push_back((*it).first);
+    }
+  }
+#endif  // CLOUD_APP_WEBSOCKET_TRANSPORT_SUPPORT
+}
+
+std::vector<std::string> CacheManager::GetEnabledLocalApps() const {
+#if !defined(WEBSOCKET_SERVER_TRANSPORT_SUPPORT)
+  return std::vector<std::string>();
+#else
+  std::vector<std::string> enabled_apps;
+  const policy_table::ApplicationPolicies& app_policies =
+      pt_->policy_table.app_policies_section.apps;
+  for (const auto& app_policies_item : app_policies) {
+    const auto app_policy = app_policies_item.second;
+    // Local (WebEngine) applications
+    // should not have "endpoint" field
+    if (app_policy.endpoint.is_initialized()) {
+      continue;
+    }
+    if (app_policy.enabled.is_initialized() && *app_policy.enabled) {
+      enabled_apps.push_back(app_policies_item.first);
+    }
+  }
+  return enabled_apps;
+#endif  // WEBSOCKET_SERVER_TRANSPORT_SUPPORT
+}
+
+bool CacheManager::GetAppProperties(const std::string& policy_app_id,
+                                    AppProperties& out_app_properties) const {
+  const policy_table::ApplicationPolicies& policies =
+      pt_->policy_table.app_policies_section.apps;
+  policy_table::ApplicationPolicies::const_iterator policy_iter =
+      policies.find(policy_app_id);
+  if (policies.end() != policy_iter) {
+    auto app_policy = (*policy_iter).second;
+    out_app_properties.endpoint = app_policy.endpoint.is_initialized()
+                                      ? *app_policy.endpoint
+                                      : std::string();
+    out_app_properties.auth_token = app_policy.auth_token.is_initialized()
+                                        ? *app_policy.auth_token
+                                        : std::string();
+    out_app_properties.transport_type =
+        app_policy.cloud_transport_type.is_initialized()
+            ? *app_policy.cloud_transport_type
+            : std::string();
+    out_app_properties.certificate = app_policy.certificate.is_initialized()
+                                         ? *app_policy.certificate
+                                         : std::string();
+    out_app_properties.hybrid_app_preference =
+        app_policy.hybrid_app_preference.is_initialized()
+            ? EnumToJsonString(*app_policy.hybrid_app_preference)
+            : std::string();
+    out_app_properties.enabled =
+        app_policy.enabled.is_initialized() && *app_policy.enabled;
+    return true;
+  }
+  return false;
+}
+
+void CacheManager::InitCloudApp(const std::string& policy_app_id) {
+  CACHE_MANAGER_CHECK_VOID();
+  sync_primitives::AutoLock auto_lock(cache_lock_);
+
+  policy_table::ApplicationPolicies& policies =
+      pt_->policy_table.app_policies_section.apps;
+  policy_table::ApplicationPolicies::const_iterator default_iter =
+      policies.find(kDefaultId);
+  policy_table::ApplicationPolicies::const_iterator app_iter =
+      policies.find(policy_app_id);
+
+  if (default_iter != policies.end()) {
+    if (app_iter == policies.end()) {
+      policies[policy_app_id] = policies[kDefaultId];
+    }
+  }
+  // Add cloud app specific policies
+
+  Backup();
+}
+
+void CacheManager::SetCloudAppEnabled(const std::string& policy_app_id,
+                                      const bool enabled) {
+  policy_table::ApplicationPolicies& policies =
+      pt_->policy_table.app_policies_section.apps;
+  policy_table::ApplicationPolicies::iterator policy_iter =
+      policies.find(policy_app_id);
+  if (policies.end() != policy_iter) {
+    *(*policy_iter).second.enabled = enabled;
+  }
+}
+
+void CacheManager::SetAppAuthToken(const std::string& policy_app_id,
+                                   const std::string& auth_token) {
+  policy_table::ApplicationPolicies& policies =
+      pt_->policy_table.app_policies_section.apps;
+  policy_table::ApplicationPolicies::iterator policy_iter =
+      policies.find(policy_app_id);
+  if (policies.end() != policy_iter) {
+    *(*policy_iter).second.auth_token = auth_token;
+  }
+}
+
+void CacheManager::SetAppCloudTransportType(
+    const std::string& policy_app_id, const std::string& cloud_transport_type) {
+  policy_table::ApplicationPolicies& policies =
+      pt_->policy_table.app_policies_section.apps;
+  policy_table::ApplicationPolicies::iterator policy_iter =
+      policies.find(policy_app_id);
+  if (policies.end() != policy_iter) {
+    *(*policy_iter).second.cloud_transport_type = cloud_transport_type;
+  }
+}
+
+void CacheManager::SetAppEndpoint(const std::string& policy_app_id,
+                                  const std::string& endpoint) {
+  policy_table::ApplicationPolicies& policies =
+      pt_->policy_table.app_policies_section.apps;
+  policy_table::ApplicationPolicies::iterator policy_iter =
+      policies.find(policy_app_id);
+  if (policies.end() != policy_iter) {
+    *(*policy_iter).second.endpoint = endpoint;
+  }
+}
+
+void CacheManager::SetAppNicknames(const std::string& policy_app_id,
+                                   const StringArray& nicknames) {
+  policy_table::ApplicationPolicies& policies =
+      pt_->policy_table.app_policies_section.apps;
+  policy_table::ApplicationPolicies::iterator policy_iter =
+      policies.find(policy_app_id);
+  if (policies.end() != policy_iter) {
+    (*(*policy_iter).second.nicknames) = nicknames;
+  }
+}
+
+void CacheManager::SetHybridAppPreference(
+    const std::string& policy_app_id,
+    const std::string& hybrid_app_preference) {
+  policy_table::HybridAppPreference value;
+  bool valid = EnumFromJsonString(hybrid_app_preference, &value);
+  policy_table::ApplicationPolicies& policies =
+      pt_->policy_table.app_policies_section.apps;
+  policy_table::ApplicationPolicies::iterator policy_iter =
+      policies.find(policy_app_id);
+  if (policies.end() != policy_iter && valid) {
+    *(*policy_iter).second.hybrid_app_preference = value;
+  }
+}
+
+void CacheManager::GetAppServiceParameters(
+    const std::string& policy_app_id,
+    policy_table::AppServiceParameters* app_service_parameters) const {
+  LOG4CXX_AUTO_TRACE(logger_);
+  const policy_table::ApplicationPolicies& policies =
+      pt_->policy_table.app_policies_section.apps;
+  policy_table::ApplicationPolicies::const_iterator policy_iter =
+      policies.find(policy_app_id);
+  if (policies.end() != policy_iter) {
+    auto app_policy = (*policy_iter).second;
+    if (app_policy.app_service_parameters.is_initialized()) {
+      *app_service_parameters = *(app_policy.app_service_parameters);
+    }
+  }
+}
+
+bool CacheManager::UnknownRPCPassthroughAllowed(
+    const std::string& policy_app_id) const {
+  const policy_table::ApplicationPolicies& policies =
+      pt_->policy_table.app_policies_section.apps;
+  policy_table::ApplicationPolicies::const_iterator policy_iter =
+      policies.find(policy_app_id);
+  if (policies.end() != policy_iter) {
+    const auto app_policy = (*policy_iter).second;
+    if (app_policy.allow_unknown_rpc_passthrough.is_initialized()) {
+      return *(app_policy.allow_unknown_rpc_passthrough);
+    }
+  }
+  return false;
+}
+
+const boost::optional<bool> CacheManager::LockScreenDismissalEnabledState()
+    const {
+  LOG4CXX_AUTO_TRACE(logger_);
+  boost::optional<bool> empty;
+  CACHE_MANAGER_CHECK(empty);
   sync_primitives::AutoLock auto_lock(cache_lock_);
   policy_table::ModuleConfig& module_config = pt_->policy_table.module_config;
-  VehicleInfo vehicle_info;
-  vehicle_info.vehicle_make = *module_config.vehicle_make;
-  vehicle_info.vehicle_model = *module_config.vehicle_model;
-  vehicle_info.vehicle_year = *module_config.vehicle_year;
-  LOG4CXX_DEBUG(
-      logger_,
-      "Vehicle info (make, model, year):" << vehicle_info.vehicle_make << ","
-                                          << vehicle_info.vehicle_model << ","
-                                          << vehicle_info.vehicle_year);
-  return vehicle_info;
+  if (module_config.lock_screen_dismissal_enabled.is_initialized()) {
+    LOG4CXX_TRACE(logger_,
+                  "state = " << *module_config.lock_screen_dismissal_enabled);
+    return boost::optional<bool>(*module_config.lock_screen_dismissal_enabled);
+  }
+  LOG4CXX_TRACE(logger_, "state = empty");
+  return empty;
+}
+
+const boost::optional<std::string>
+CacheManager::LockScreenDismissalWarningMessage(
+    const std::string& language) const {
+  LOG4CXX_AUTO_TRACE(logger_);
+  boost::optional<std::string> empty;
+  CACHE_MANAGER_CHECK(empty);
+
+  const std::string lock_screen_dismissal_warning_message =
+      "LockScreenDismissalWarning";
+  sync_primitives::AutoLock auto_lock(cache_lock_);
+
+  std::vector<std::string> msg_codes{lock_screen_dismissal_warning_message};
+
+  const auto messages = GetUserFriendlyMsg(msg_codes, language);
+
+  if (messages.empty() || messages[0].text_body.empty()) {
+    return empty;
+  }
+
+  return boost::optional<std::string>(messages[0].text_body);
 }
 
 std::vector<UserFriendlyMessage> CacheManager::GetUserFriendlyMsg(
-    const std::vector<std::string>& msg_codes, const std::string& language) {
+    const std::vector<std::string>& msg_codes,
+    const std::string& language) const {
   LOG4CXX_AUTO_TRACE(logger_);
   std::vector<UserFriendlyMessage> result;
   CACHE_MANAGER_CHECK(result);
@@ -729,22 +1028,36 @@ std::vector<UserFriendlyMessage> CacheManager::GetUserFriendlyMsg(
 
     UserFriendlyMessage msg;
     msg.message_code = *it;
+    msg.tts = *message_string.tts;
+    msg.label = *message_string.label;
+    msg.line1 = *message_string.line1;
+    msg.line2 = *message_string.line2;
+    msg.text_body = *message_string.textBody;
+
     result.push_back(msg);
   }
   return result;
 }
 
 void CacheManager::GetUpdateUrls(const uint32_t service_type,
-                                 EndpointUrls& out_end_points) {
-  std::stringstream service_type_stream;
-  service_type_stream << (service_type <= 9 ? "0x0" : "0x") << service_type;
-
-  const std::string service_type_str = service_type_stream.str();
-  GetUpdateUrls(service_type_str, out_end_points);
+                                 EndpointUrls& out_end_points) const {
+  auto find_hexademical =
+      [service_type](policy_table::ServiceEndpoints::value_type end_point) {
+        uint32_t decimal;
+        std::istringstream(end_point.first) >> std::hex >> decimal;
+        return end_point.first.compare(0, 2, "0x") == 0 &&
+               decimal == service_type;
+      };
+  auto& end_points = pt_->policy_table.module_config.endpoints;
+  const auto end_point =
+      std::find_if(end_points.begin(), end_points.end(), find_hexademical);
+  if (end_point != end_points.end()) {
+    GetUpdateUrls(end_point->first, out_end_points);
+  }
 }
 
 void CacheManager::GetUpdateUrls(const std::string& service_type,
-                                 EndpointUrls& out_end_points) {
+                                 EndpointUrls& out_end_points) const {
   LOG4CXX_AUTO_TRACE(logger_);
   CACHE_MANAGER_CHECK_VOID();
 
@@ -771,11 +1084,19 @@ void CacheManager::GetUpdateUrls(const std::string& service_type,
   }
 }
 
-std::string CacheManager::GetLockScreenIconUrl() const {
-  if (backup_) {
-    return backup_->GetLockScreenIconUrl();
+std::string CacheManager::GetIconUrl(const std::string& policy_app_id) const {
+  CACHE_MANAGER_CHECK(std::string());
+  std::string url;
+  const policy_table::ApplicationPolicies& policies =
+      pt_->policy_table.app_policies_section.apps;
+  policy_table::ApplicationPolicies::const_iterator policy_iter =
+      policies.find(policy_app_id);
+  if (policies.end() != policy_iter) {
+    auto app_policy = (*policy_iter).second;
+    url = app_policy.icon_url.is_initialized() ? *app_policy.icon_url
+                                               : std::string();
   }
-  return std::string("");
+  return url;
 }
 
 rpc::policy_table_interface_base::NumberOfNotificationsType
@@ -935,6 +1256,46 @@ void CacheManager::CheckSnapshotInitialization() {
   }
 }
 
+policy_table::VehicleDataItems CacheManager::CalculateCustomVdItemsDiff(
+    const policy_table::VehicleDataItems& items_before,
+    const policy_table::VehicleDataItems& items_after) const {
+  LOG4CXX_AUTO_TRACE(logger_);
+  if (items_before.empty()) {
+    LOG4CXX_DEBUG(logger_, "No custom VD items found in policy");
+    return policy_table::VehicleDataItems();
+  }
+
+  if (items_after.empty()) {
+    LOG4CXX_DEBUG(logger_,
+                  "All custom VD items were removed after policy update");
+    return items_before;
+  }
+
+  policy_table::VehicleDataItems removed_items;
+  for (auto& item_to_search : items_before) {
+    auto item_predicate =
+        [&item_to_search](const policy_table::VehicleDataItem& item_to_check) {
+          return item_to_search.name == item_to_check.name;
+        };
+
+    auto it =
+        std::find_if(items_after.begin(), items_after.end(), item_predicate);
+    if (items_after.end() == it) {
+      removed_items.push_back(item_to_search);
+    }
+  }
+
+  LOG4CXX_DEBUG(logger_,
+                "Found " << removed_items.size() << " removed VD items");
+  return removed_items;
+}
+
+void CacheManager::SetRemovedCustomVdItems(
+    const policy_table::VehicleDataItems& removed_items) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  removed_custom_vd_items_ = removed_items;
+}
+
 void CacheManager::PersistData() {
   LOG4CXX_AUTO_TRACE(logger_);
   if (backup_.use_count() != 0) {
@@ -1051,7 +1412,19 @@ std::shared_ptr<policy_table::Table> CacheManager::GenerateSnapshot() {
   snapshot_->policy_table.module_meta = pt_->policy_table.module_meta;
   snapshot_->policy_table.usage_and_error_counts =
       pt_->policy_table.usage_and_error_counts;
+  snapshot_->policy_table.usage_and_error_counts->app_level =
+      pt_->policy_table.usage_and_error_counts->app_level;
+  snapshot_->policy_table.usage_and_error_counts->mark_initialized();
+  snapshot_->policy_table.usage_and_error_counts->app_level->mark_initialized();
   snapshot_->policy_table.device_data = pt_->policy_table.device_data;
+
+  if (pt_->policy_table.vehicle_data.is_initialized()) {
+    snapshot_->policy_table.vehicle_data =
+        rpc::Optional<policy_table::VehicleData>();
+    snapshot_->policy_table.vehicle_data->mark_initialized();
+    snapshot_->policy_table.vehicle_data->schema_version =
+        pt_->policy_table.vehicle_data->schema_version;
+  }
 
   // Set policy table type to Snapshot
   snapshot_->SetPolicyTableType(
@@ -1436,7 +1809,13 @@ bool CacheManager::Init(const std::string& file_name,
       if (!result) {
         rpc::ValidationReport report("policy_table");
         snapshot->ReportErrors(&report);
+        LOG4CXX_DEBUG(logger_,
+                      "Validation report: " << rpc::PrettyFormat(report));
         return result;
+      }
+
+      if (!UnwrapAppPolicies(pt_->policy_table.app_policies_section.apps)) {
+        LOG4CXX_ERROR(logger_, "Cannot unwrap application policies");
       }
 
       backup_->UpdateDBVersion();
@@ -1496,13 +1875,16 @@ bool CacheManager::LoadFromFile(const std::string& file_name,
     return false;
   }
 
+  Json::CharReaderBuilder reader_builder;
+  Json::CharReaderBuilder::strictMode(&reader_builder.settings_);
+  auto reader =
+      std::unique_ptr<Json::CharReader>(reader_builder.newCharReader());
   Json::Value value;
-  Json::Reader reader(Json::Features::strictMode());
+  JSONCPP_STRING err;
   std::string json(json_string.begin(), json_string.end());
-  if (!reader.parse(json.c_str(), value)) {
-    LOG4CXX_FATAL(
-        logger_,
-        "Preloaded PT is corrupted: " << reader.getFormattedErrorMessages());
+  const size_t json_len = json.length();
+  if (!reader->parse(json.c_str(), json.c_str() + json_len, &value, &err)) {
+    LOG4CXX_FATAL(logger_, "Preloaded PT is corrupted: " << err);
     return false;
   }
 
@@ -1511,9 +1893,10 @@ bool CacheManager::LoadFromFile(const std::string& file_name,
 
   table = policy_table::Table(&value);
 
-  Json::StyledWriter s_writer;
+  Json::StreamWriterBuilder writer_builder;
   LOG4CXX_DEBUG(logger_, "PT out:");
-  LOG4CXX_DEBUG(logger_, s_writer.write(table.ToJsonValue()));
+  LOG4CXX_DEBUG(logger_,
+                Json::writeString(writer_builder, table.ToJsonValue()));
 
   MakeLowerCaseAppNames(table);
 
@@ -1686,6 +2069,7 @@ bool CacheManager::MergePreloadPT(const std::string& file_name) {
     MergeFG(new_table, current);
     MergeAP(new_table, current);
     MergeCFM(new_table, current);
+    MergeVD(new_table, current);
     Backup();
   }
   return true;
@@ -1717,8 +2101,9 @@ void CacheManager::MergeFG(const policy_table::PolicyTable& new_pt,
 void CacheManager::MergeAP(const policy_table::PolicyTable& new_pt,
                            policy_table::PolicyTable& pt) {
   LOG4CXX_AUTO_TRACE(logger_);
-  pt.app_policies_section.device = const_cast<policy_table::PolicyTable&>(
-                                       new_pt).app_policies_section.device;
+  pt.app_policies_section.device =
+      const_cast<policy_table::PolicyTable&>(new_pt)
+          .app_policies_section.device;
 
   pt.app_policies_section.apps[kDefaultId] =
       const_cast<policy_table::PolicyTable&>(new_pt)
@@ -1750,6 +2135,12 @@ void CacheManager::MergeCFM(const policy_table::PolicyTable& new_pt,
       }
     }
   }
+}
+
+void CacheManager::MergeVD(const policy_table::PolicyTable& new_pt,
+                           policy_table::PolicyTable& pt) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  pt.vehicle_data.assign_if_valid(new_pt.vehicle_data);
 }
 
 const PolicySettings& CacheManager::get_settings() const {
@@ -1815,6 +2206,48 @@ void CacheManager::BackgroundBackuper::DoBackup() {
   sync_primitives::AutoLock auto_lock(need_backup_lock_);
   new_data_available_ = true;
   backup_notifier_.NotifyOne();
+}
+
+EncryptionRequired CacheManager::GetAppEncryptionRequiredFlag(
+    const std::string& application) const {
+  LOG4CXX_AUTO_TRACE(logger_);
+  sync_primitives::AutoLock auto_lock(cache_lock_);
+
+  return pt_->policy_table.app_policies_section.apps[application]
+      .encryption_required;
+}
+
+EncryptionRequired CacheManager::GetFunctionalGroupingEncryptionRequiredFlag(
+    const std::string& functional_group) const {
+  LOG4CXX_AUTO_TRACE(logger_);
+  sync_primitives::AutoLock auto_lock(cache_lock_);
+
+  const auto& functional_groupings = pt_->policy_table.functional_groupings;
+
+  const auto& grouping_itr = functional_groupings.find(functional_group);
+  if (grouping_itr == functional_groupings.end()) {
+    LOG4CXX_WARN(logger_, "Group " << functional_group << " not found");
+    return EncryptionRequired(rpc::Boolean(false));
+  }
+
+  return (*grouping_itr).second.encryption_required;
+}
+
+void CacheManager::GetApplicationParams(
+    const std::string& application_name,
+    policy_table::ApplicationParams& application_params) const {
+  LOG4CXX_AUTO_TRACE(logger_);
+  sync_primitives::AutoLock auto_lock(cache_lock_);
+
+  const auto apps = pt_->policy_table.app_policies_section.apps;
+  const auto it = apps.find(application_name);
+  if (apps.end() == it) {
+    LOG4CXX_WARN(logger_,
+                 "Application " << application_name << " was not found");
+    return;
+  }
+
+  application_params = (*it).second;
 }
 
 }  // namespace policy

@@ -132,6 +132,6 @@ bool in_range(const Container& container,
   return std::find(container.begin(), container.end(), value) !=
          container.end();
 }
-}
+}  // namespace helpers
 
 #endif  // SRC_COMPONENTS_UTILS_INCLUDE_UTILS_HELPERS_H_

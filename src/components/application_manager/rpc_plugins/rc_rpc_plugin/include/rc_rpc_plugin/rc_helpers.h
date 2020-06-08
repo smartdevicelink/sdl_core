@@ -37,6 +37,7 @@
 #include <string>
 #include "application_manager/application.h"
 #include "rc_rpc_plugin/rc_app_extension.h"
+#include "rc_rpc_plugin/rc_rpc_types.h"
 
 namespace rc_rpc_plugin {
 class RCRPCPlugin;
@@ -49,26 +50,26 @@ class RCRPCPlugin;
 class RCHelpers {
  public:
   /**
-  * @brief GetModuleTypeToDataMapping get mapping of module type enum naming to
-  * actual module data filed name
-  * @return module mapping from enum naming to filed name
-  */
+   * @brief GetModuleTypeToDataMapping get mapping of module type enum naming to
+   * actual module data filed name
+   * @return module mapping from enum naming to filed name
+   */
   static const std::function<std::string(const std::string& module_type)>
   GetModuleTypeToDataMapping();
 
   /**
-  * @brief GetModuleTypeToDataMapping get mapping of module type enum naming to
-  * actual module capabilities key
-  * @return module mapping from enum naming to capabilities key
-  */
+   * @brief GetModuleTypeToDataMapping get mapping of module type enum naming to
+   * actual module capabilities key
+   * @return module mapping from enum naming to capabilities key
+   */
   static const std::function<std::string(const std::string& module_type)>
   GetModuleTypeToCapabilitiesMapping();
 
   /**
-   * @brief GetModulesList get list of all known modules
-   * @return vector contains all known modules
+   * @brief GetModuleTypesList get list of all known module types
+   * @return vector contains all known module types
    */
-  static const std::vector<std::string> GetModulesList();
+  static const std::vector<std::string> GetModuleTypesList();
 
   /**
    * @brief GetRCExtension extract RC extension from application
@@ -80,17 +81,95 @@ class RCHelpers {
       application_manager::Application& app);
 
   static smart_objects::SmartObjectSPtr CreateUnsubscribeRequestToHMI(
-      const std::string& module_type, const uint32_t correlation_id);
+      const ModuleUid& module, const uint32_t correlation_id);
+
+  static std::vector<application_manager::ApplicationSharedPtr>
+  AppsSubscribedToModule(application_manager::ApplicationManager& app_mngr,
+                         const ModuleUid& module);
 
   static std::vector<application_manager::ApplicationSharedPtr>
   AppsSubscribedToModuleType(application_manager::ApplicationManager& app_mngr,
                              const std::string& module_type);
 
   typedef std::map<application_manager::ApplicationSharedPtr,
-                   std::vector<std::string> > AppsModules;
-  static AppsModules GetApplicationsAllowedModules(
+                   std::vector<std::string> >
+      AppsModuleTypes;
+
+  static AppsModuleTypes GetApplicationsAllowedModuleTypes(
       application_manager::ApplicationManager& app_mngr);
+
+  typedef std::map<std::string, mobile_apis::ButtonName::eType> ButtonsMap;
+
+  static const std::vector<std::string> buttons_climate();
+
+  static const std::vector<std::string> buttons_radio();
+
+  static const ButtonsMap buttons_map();
+
+  static std::vector<std::string> GetModuleReadOnlyParams(
+      const std::string& module_type);
+
+  /**
+   * @brief Combines module ids and alloweds for these ids and fills vector with
+   * ModuleConsents
+   * @param module_type Module type as string
+   * @param module_ids Modules ids which needed consents from driver
+   * @param allowed Consents for modules
+   */
+  static rc_rpc_types::ModuleIdConsentVector FillModuleConsents(
+      const std::string& module_type,
+      const std::vector<std::string>& module_ids,
+      const std::vector<bool> allowed);
+
+  /**
+   * @brief Retrieves module ids from SmartObject.
+   * @param moduleIds Smartobject which contains collection of module ids
+   * @return Collection of module ids
+   */
+  static std::vector<std::string> RetrieveModuleIds(
+      const smart_objects::SmartObject& moduleIds);
+
+  /**
+   * @brief Retrieves module ids consents from SmartObject.
+   * @param moduleIds Smartobject which contains collection of module ids
+   * consents
+   * @return Collection of module ids consents.
+   */
+  static std::vector<bool> RetrieveModuleConsents(
+      const smart_objects::SmartObject& consents);
+
+  /**
+   * @brief RemoveRedundantGPSDataFromVIDataMsg removes redundant GPS data
+   * params from interior vehicle data response message if one contains radio
+   * station location data
+   * @param msg_params Params of the interior vehicle data response message
+   */
+  static void RemoveRedundantGPSDataFromIVDataMsg(
+      smart_objects::SmartObject& msg_params);
+
+  /**
+   * @brief MergeModuleData all keys and values from first parameter and
+   * update and append keys and values from the second
+   * @param data1 - initial data
+   * @param data2 - updated data
+   * @return updated data1 with data2 keys and values
+   */
+  static smart_objects::SmartObject MergeModuleData(
+      const smart_objects::SmartObject& data1,
+      const smart_objects::SmartObject& data2);
+
+  /**
+   * @brief MergeArray merge two arrays if their elements contain an `id`
+   * parameter
+   * @param data1 - initial data
+   * @param data2 - updated data
+   * @return updated data1 with any values in data2 if the arrays can be merged,
+   * otherwise data2
+   */
+  static smart_objects::SmartObject MergeArray(
+      const smart_objects::SmartObject& data1,
+      const smart_objects::SmartObject& data2);
 };
 
-}  // rc_rpc_plugin
+}  // namespace rc_rpc_plugin
 #endif  // SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_RC_RPC_PLUGIN_INCLUDE_RC_RPC_PLUGIN_RC_HELPERS_H_

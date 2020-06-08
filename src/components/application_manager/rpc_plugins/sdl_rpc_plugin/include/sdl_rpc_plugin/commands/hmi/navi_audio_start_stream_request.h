@@ -63,8 +63,8 @@ class AudioStartStreamRequest : public app_mngr::commands::RequestToHMI,
   virtual ~AudioStartStreamRequest();
 
   /**
- * @brief onTimeOut from requrst Controller
- */
+   * @brief onTimeOut from requrst Controller
+   */
   virtual void onTimeOut();
 
   /**
@@ -78,9 +78,9 @@ class AudioStartStreamRequest : public app_mngr::commands::RequestToHMI,
   virtual void on_event(const app_mngr::event_engine::Event& event);
 
   /**
- * @brief RetryStartSession resend HMI startSession request if needed.
- * If limit expired, set audio_stream_retry_number counter to 0
- */
+   * @brief RetryStartSession resend HMI startSession request if needed.
+   * If limit expired, set audio_stream_retry_number counter to 0
+   */
   void RetryStartSession();
 
  private:
@@ -90,6 +90,6 @@ class AudioStartStreamRequest : public app_mngr::commands::RequestToHMI,
 
 }  // namespace commands
 
-}  // namespace application_manager
+}  // namespace sdl_rpc_plugin
 
 #endif  // SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_HMI_NAVI_AUDIO_START_STREAM_REQUEST_H_

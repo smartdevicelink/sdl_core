@@ -32,11 +32,10 @@
  */
 
 #include "sdl_rpc_plugin/commands/mobile/register_app_interface_response.h"
-#include "interfaces/MOBILE_API.h"
 #include "application_manager/application_manager.h"
 #include "application_manager/policies/policy_handler_interface.h"
 #include "connection_handler/connection_handler.h"
-#include "application_manager/policies/policy_handler_interface.h"
+#include "interfaces/MOBILE_API.h"
 
 namespace sdl_rpc_plugin {
 using namespace application_manager;
@@ -128,4 +127,4 @@ void RegisterAppInterfaceResponse::SetHeartBeatTimeout(
 }
 
 }  // namespace commands
-}  // namespace application_manager
+}  // namespace sdl_rpc_plugin

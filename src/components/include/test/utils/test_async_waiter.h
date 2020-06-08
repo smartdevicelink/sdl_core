@@ -35,8 +35,8 @@
 
 #include <stdint.h>
 
-#include "utils/lock.h"
 #include "utils/conditional_variable.h"
+#include "utils/lock.h"
 
 namespace test {
 

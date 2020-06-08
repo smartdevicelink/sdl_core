@@ -30,9 +30,9 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "gtest/gtest.h"
-#include "formatters/create_smartSchema.h"
 #include "formatters/CFormatterJsonSDLRPCv2.h"
+#include "formatters/create_smartSchema.h"
+#include "gtest/gtest.h"
 
 namespace test {
 namespace components {

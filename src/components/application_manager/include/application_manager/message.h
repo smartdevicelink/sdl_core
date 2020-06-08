@@ -36,9 +36,9 @@
 #include <string>
 #include <vector>
 
+#include "protocol/common.h"
 #include "protocol/message_priority.h"
 #include "protocol/rpc_type.h"
-#include "protocol/common.h"
 #include "smart_objects/smart_object.h"
 
 namespace application_manager {
@@ -71,6 +71,12 @@ class Message {
   int32_t correlation_id() const;
   int32_t connection_key() const;
 
+  /**
+   * @brief retreives message's protection flag
+   * @return true if message is encrypted, otherwise returns false
+   */
+  bool is_message_encrypted() const;
+
   MessageType type() const;
   protocol_handler::MajorProtocolVersion protocol_version() const;
 
@@ -94,6 +100,13 @@ class Message {
   void set_smart_object(const smart_objects::SmartObject& object);
   void set_data_size(size_t data_size);
   void set_payload_size(size_t payload_size);
+
+  /**
+   * @brief sets message's protection flag
+   * @param  protection - bool value, if message is encrypted - true, otherwise
+   * - false
+   */
+  void set_message_encryption(const bool protection);
 
   static bool is_sufficient_version(
       protocol_handler::MajorProtocolVersion minVersion,
@@ -122,6 +135,8 @@ class Message {
   size_t data_size_;
   size_t payload_size_;
   protocol_handler::MajorProtocolVersion version_;
+
+  bool is_message_encrypted_;
 };
 
 typedef std::shared_ptr<application_manager::Message> MobileMessage;

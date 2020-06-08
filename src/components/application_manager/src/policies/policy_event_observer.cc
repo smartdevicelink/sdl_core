@@ -31,10 +31,10 @@
  */
 
 #include "application_manager/policies/policy_event_observer.h"
-#include "application_manager/smart_object_keys.h"
 #include "application_manager/policies/policy_handler.h"
-#include "utils/date_time.h"
+#include "application_manager/smart_object_keys.h"
 #include "smart_objects/smart_object.h"
+#include "utils/date_time.h"
 
 namespace policy {
 using namespace application_manager;
@@ -55,6 +55,8 @@ void PolicyEventObserver::set_policy_handler(
   policy_handler_ = policy_handler;
 }
 
+void PolicyEventObserver::on_event(const event_engine::MobileEvent& event) {}
+
 void PolicyEventObserver::on_event(const event_engine::Event& event) {
   sync_primitives::AutoLock auto_lock(policy_handler_lock_);
   if (!policy_handler_) {
@@ -66,11 +68,6 @@ void PolicyEventObserver::on_event(const event_engine::Event& event) {
     case hmi_apis::FunctionID::VehicleInfo_GetVehicleData: {
       ProcessOdometerEvent(message);
       unsubscribe_from_event(hmi_apis::FunctionID::VehicleInfo_GetVehicleData);
-      break;
-    }
-    case hmi_apis::FunctionID::BasicCommunication_OnReady: {
-      policy_handler_->OnSystemReady();
-      unsubscribe_from_event(hmi_apis::FunctionID::BasicCommunication_OnReady);
       break;
     }
     default: { break; }

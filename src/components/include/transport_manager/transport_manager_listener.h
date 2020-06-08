@@ -35,10 +35,10 @@
 
 #include <map>
 #include <vector>
-#include "transport_manager/common.h"
-#include "transport_manager/info.h"
-#include "transport_manager/error.h"
 #include "protocol/common.h"
+#include "transport_manager/common.h"
+#include "transport_manager/error.h"
+#include "transport_manager/info.h"
 
 namespace transport_manager {
 
@@ -57,8 +57,8 @@ class TransportManagerListener {
   virtual void OnDeviceListUpdated(const std::vector<DeviceInfo>&) = 0;
 
   /**
-  * @brief Reaction to "Find new applications" request
-  */
+   * @brief Reaction to "Find new applications" request
+   */
   virtual void OnFindNewApplicationsRequest() = 0;
 
   /**
@@ -100,6 +100,19 @@ class TransportManagerListener {
    */
   virtual void OnScanDevicesFailed(const SearchDeviceError& error) = 0;
 
+  /**
+   * @brief Reaction to the event, when the cloud connection status is updated.
+   */
+  virtual void OnConnectionStatusUpdated() = 0;
+
+  /**
+   * @brief Reaction to the event, when connection is pending.
+   *
+   * @param devcie_info Variable that hold information about device.
+   * @param connection_id connection unique identifier.
+   */
+  virtual void OnConnectionPending(const DeviceInfo& device_info,
+                                   const ConnectionUID connection_id) = 0;
   /**
    * @brief Reaction to the event, when connection is established.
    *

@@ -31,8 +31,8 @@
  */
 #include "sdl_rpc_plugin/commands/hmi/vr_get_supported_languages_response.h"
 
-#include "interfaces/MOBILE_API.h"
 #include "interfaces/HMI_API.h"
+#include "interfaces/MOBILE_API.h"
 
 namespace sdl_rpc_plugin {
 using namespace application_manager;
@@ -69,4 +69,4 @@ void VRGetSupportedLanguagesResponse::Run() {
 
 }  // namespace commands
 
-}  // namespace application_manager
+}  // namespace sdl_rpc_plugin

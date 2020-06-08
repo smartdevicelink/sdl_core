@@ -28,7 +28,7 @@
  * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
-*/
+ */
 
 #include "application_manager/help_prompt_manager_impl.h"
 
@@ -90,9 +90,9 @@ bool HelpPromptManagerImpl::AddCommand(
   const bool limit_exceeded =
       kLimitCommand <= GetCommandsCount(vr_commands_.end());
 
-  LOG4CXX_DEBUG(logger_,
-                "Will be added first command from array "
-                    << strings::vr_commands);
+  LOG4CXX_DEBUG(
+      logger_,
+      "Will be added first command from array " << strings::vr_commands);
 
   smart_objects::SmartObjectSPtr vr_item =
       std::make_shared<smart_objects::SmartObject>(commands.asArray()->front());

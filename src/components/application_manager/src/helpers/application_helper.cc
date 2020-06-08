@@ -1,9 +1,9 @@
-#include <vector>
-#include <string>
 #include "application_manager/helpers/application_helper.h"
+#include <string>
+#include <vector>
 #include "application_manager/message_helper.h"
-#include "utils/logger.h"
 #include "utils/file_system.h"
+#include "utils/logger.h"
 
 namespace {
 using namespace application_manager;

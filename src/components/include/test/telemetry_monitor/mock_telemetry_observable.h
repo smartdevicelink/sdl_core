@@ -33,9 +33,9 @@
 #ifndef SRC_COMPONENTS_INCLUDE_TEST_TELEMETRY_MONITOR_MOCK_TELEMETRY_OBSERVABLE_H_
 #define SRC_COMPONENTS_INCLUDE_TEST_TELEMETRY_MONITOR_MOCK_TELEMETRY_OBSERVABLE_H_
 
+#include "application_manager/telemetry_observer.h"
 #include "gmock/gmock.h"
 #include "telemetry_monitor/telemetry_observable.h"
-#include "application_manager/telemetry_observer.h"
 
 namespace test {
 namespace components {

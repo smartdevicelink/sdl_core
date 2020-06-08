@@ -34,10 +34,12 @@
 #ifndef SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_MOBILE_UNSUBSCRIBE_VEHICLE_DATA_REQUEST_H_
 #define SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_MOBILE_UNSUBSCRIBE_VEHICLE_DATA_REQUEST_H_
 
-#include "application_manager/commands/command_request_impl.h"
 #include "application_manager/application.h"
+#include "application_manager/commands/command_request_impl.h"
 #include "utils/macro.h"
+#include "vehicle_info_plugin/custom_vehicle_data_manager.h"
 #include "vehicle_info_plugin/vehicle_info_app_extension.h"
+#include "vehicle_info_plugin/vehicle_info_command_params.h"
 
 namespace vehicle_info_plugin {
 namespace app_mngr = application_manager;
@@ -57,10 +59,7 @@ class UnsubscribeVehicleDataRequest
    **/
   UnsubscribeVehicleDataRequest(
       const app_mngr::commands::MessageSharedPtr& message,
-      app_mngr::ApplicationManager& application_manager,
-      app_mngr::rpc_service::RPCService& rpc_service,
-      app_mngr::HMICapabilities& hmi_capabilities,
-      policy::PolicyHandlerInterface& policy_handler);
+      const VehicleInfoCommandParams& params);
 
   /**
    * @brief UnsubscribeVehicleDataRequest class destructor
@@ -91,7 +90,7 @@ class UnsubscribeVehicleDataRequest
    * @return true, if there are registered apps subscribed for VI parameter,
    * otherwise - false
    */
-  bool IsSomeoneSubscribedFor(const uint32_t param_id) const;
+  bool IsSomeoneSubscribedFor(const std::string& param_name) const;
 
   /**
    * @brief Adds VI parameters being unsubscribed by another or the same app to
@@ -101,20 +100,71 @@ class UnsubscribeVehicleDataRequest
   void AddAlreadyUnsubscribedVI(smart_objects::SmartObject& response) const;
 
   /**
+   * @brief Actual unsubscription from all pending vehicle data. To be called
+   * after successful HMI response
+   * @param app shared pointer to application, which initialized unsubscription
+   * @param msg_params 'message_params' response section reference
+   */
+  bool UnsubscribePendingVehicleData(
+      app_mngr::ApplicationSharedPtr app,
+      const smart_objects::SmartObject& msg_params);
+
+  /**
+   * @brief ConvertRequestToResponseName convert RPCSpec vehicle data names
+   * from hmi api to mobile api
+   * @param name mobile RPCSpec vehicle data name
+   * @return hmi RPCSpec vehicle data name
+   */
+  const std::string& ConvertRequestToResponseName(const std::string& name);
+
+  /**
+   * @brief ConvertResponseToRequestName convert RPCSpec vehicle data names
+   * from hmi api to mobile api
+   * @param name mobile RPCSpec vehicle data name
+   * @return hmi RPCSpec vehicle data name
+   */
+  const std::string& ConvertResponseToRequestName(const std::string& name);
+
+  /**
+   * @brief Appends data types for vehicle data in response to mobile
+   * @param msg_params 'message_parameters' response section reference
+   */
+  void AppendDataTypesToMobileResponse(
+      smart_objects::SmartObject& msg_params) const;
+
+  /**
+   * @brief Checks subscription status of certain vehicle_item
+   * @param key name of vehicle item to be checked
+   * @param msg_params 'message_parameters' response section reference
+   */
+  bool CheckSubscriptionStatus(std::string key,
+                               const smart_objects::SmartObject& msg_params);
+
+  smart_objects::SmartObject response_params_;
+
+  /**
    * @brief VI parameters which still being subscribed by another apps after
    * particular app had been unsubscribed from these parameters
    */
   VehicleInfoSubscriptions vi_still_subscribed_by_another_apps_;
 
   /**
-   * @brief VI parameters which had been unsubscribed already by particular app
+   * @brief VI parameters which had been unsubscribed already by particular
+   * app
    */
   VehicleInfoSubscriptions vi_already_unsubscribed_by_this_app_;
+
+  /**
+   * @brief VI parameters to be unsubscribed after HMI response
+   */
+  VehicleInfoSubscriptions vi_waiting_for_unsubscribe_;
+
+  CustomVehicleDataManager& custom_vehicle_data_manager_;
 
   DISALLOW_COPY_AND_ASSIGN(UnsubscribeVehicleDataRequest);
 };
 
 }  // namespace commands
-}  // namespace application_manager
+}  // namespace vehicle_info_plugin
 
 #endif  // SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_MOBILE_UNSUBSCRIBE_VEHICLE_DATA_REQUEST_H_

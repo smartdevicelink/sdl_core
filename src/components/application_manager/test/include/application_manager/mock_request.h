@@ -33,8 +33,8 @@
 #ifndef SRC_COMPONENTS_APPLICATION_MANAGER_TEST_INCLUDE_APPLICATION_MANAGER_MOCK_REQUEST_H_
 #define SRC_COMPONENTS_APPLICATION_MANAGER_TEST_INCLUDE_APPLICATION_MANAGER_MOCK_REQUEST_H_
 
-#include "gmock/gmock.h"
 #include "application_manager/commands/command.h"
+#include "gmock/gmock.h"
 
 namespace test {
 namespace components {
@@ -55,6 +55,7 @@ class MockRequest : public application_manager::commands::Command {
   MOCK_METHOD0(CleanUp, bool());
   MOCK_CONST_METHOD0(default_timeout, uint32_t());
   MOCK_CONST_METHOD0(function_id, int32_t());
+  MOCK_CONST_METHOD0(window_id, application_manager::WindowID());
   MOCK_METHOD0(onTimeOut, void());
   MOCK_METHOD0(AllowedToTerminate, bool());
   MOCK_METHOD1(SetAllowedToTerminate, void(bool is_allowed));

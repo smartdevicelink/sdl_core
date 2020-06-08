@@ -322,5 +322,5 @@ ObjScopeGuardImpl1<Obj, MemFun, P1> MakeObjGuard(Obj& obj,
                                                  const P1& p1) {
   return ObjScopeGuardImpl1<Obj, MemFun, P1>::MakeObjGuard(obj, memFun, p1);
 }
-}
+}  // namespace utils
 #endif  // SRC_COMPONENTS_INCLUDE_UTILS_SCOPE_GUARD_H_

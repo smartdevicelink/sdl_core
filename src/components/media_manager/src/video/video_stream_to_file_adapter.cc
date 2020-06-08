@@ -30,10 +30,10 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "utils/logger.h"
-#include "utils/file_system.h"
-#include "config_profile/profile.h"
 #include "media_manager/video/video_stream_to_file_adapter.h"
+#include "config_profile/profile.h"
+#include "utils/file_system.h"
+#include "utils/logger.h"
 
 namespace media_manager {
 

@@ -55,23 +55,23 @@ namespace threads {
 class PulseThreadDelegate : public ThreadDelegate {
  public:
   /**
-    * @brief default constructor
-    */
+   * @brief default constructor
+   */
   PulseThreadDelegate();
   virtual void threadMain();
   virtual void exitThreadMain();
 
  protected:
   /**
-    * @brief This method is to be implemented to arm events of interest
-    * @param event pointer to structure sigevent
-    * @return If this method returns true, thread is blocked on
+   * @brief This method is to be implemented to arm events of interest
+   * @param event pointer to structure sigevent
+   * @return If this method returns true, thread is blocked on
    * MsgReceivePulse() waiting for Pulse
-    */
+   */
   virtual bool ArmEvent(struct sigevent* event) = 0;
   /**
-    * @brief This method is invoked from threadMain() when Pulse comes
-    */
+   * @brief This method is invoked from threadMain() when Pulse comes
+   */
   virtual void OnPulse() = 0;
 
   /**
@@ -83,9 +83,9 @@ class PulseThreadDelegate : public ThreadDelegate {
   }
 
   /**
-    * Finalizes thread
-    * Can free resources
-    */
+   * Finalizes thread
+   * Can free resources
+   */
   virtual void Finalize() {}
 
  private:

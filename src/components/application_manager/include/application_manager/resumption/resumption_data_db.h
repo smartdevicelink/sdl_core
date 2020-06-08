@@ -838,6 +838,7 @@ class ResumptionDataDB : public ResumptionData {
   DISALLOW_COPY_AND_ASSIGN(ResumptionDataDB);
 
   utils::dbms::SQLDatabase* db_;
+  mutable sync_primitives::RecursiveLock resumption_lock_;
 };
 }  // namespace resumption
 

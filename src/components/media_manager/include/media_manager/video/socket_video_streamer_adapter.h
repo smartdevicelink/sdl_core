@@ -33,8 +33,8 @@
 #ifndef SRC_COMPONENTS_MEDIA_MANAGER_INCLUDE_MEDIA_MANAGER_VIDEO_SOCKET_VIDEO_STREAMER_ADAPTER_H_
 #define SRC_COMPONENTS_MEDIA_MANAGER_INCLUDE_MEDIA_MANAGER_VIDEO_SOCKET_VIDEO_STREAMER_ADAPTER_H_
 
-#include <string>
 #include <stdint.h>
+#include <string>
 
 #include "media_manager/socket_streamer_adapter.h"
 

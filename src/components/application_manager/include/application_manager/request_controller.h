@@ -34,21 +34,21 @@
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_REQUEST_CONTROLLER_H_
 
 #include <climits>
-#include <vector>
 #include <list>
+#include <vector>
 
 #include "utils/lock.h"
 
-#include "utils/threads/thread.h"
 #include "utils/conditional_variable.h"
+#include "utils/threads/thread.h"
 #include "utils/threads/thread_delegate.h"
 #include "utils/timer.h"
 
-#include "interfaces/MOBILE_API.h"
 #include "interfaces/HMI_API.h"
+#include "interfaces/MOBILE_API.h"
 
-#include "application_manager/request_info.h"
 #include "application_manager/request_controller_settings.h"
+#include "application_manager/request_info.h"
 #include "application_manager/request_tracker.h"
 
 namespace application_manager {
@@ -56,14 +56,14 @@ namespace application_manager {
 namespace request_controller {
 
 /**
-* @brief RequestController class is used to control currently active mobile
-* requests.
-*/
+ * @brief RequestController class is used to control currently active mobile
+ * requests.
+ */
 class RequestController {
  public:
   /**
-  * @brief Result code for addRequest
-  */
+   * @brief Result code for addRequest
+   */
   enum TResult {
     SUCCESS = 0,
     TOO_MANY_REQUESTS,
@@ -73,8 +73,8 @@ class RequestController {
   };
 
   /**
-  * @brief Thread pool state
-  */
+   * @brief Thread pool state
+   */
   enum TPoolState {
     UNDEFINED = 0,
     STARTED,
@@ -84,121 +84,121 @@ class RequestController {
   // Methods
 
   /**
-  * @brief Class constructor
-  *
-  */
+   * @brief Class constructor
+   *
+   */
   RequestController(const RequestControlerSettings& settings);
 
   /**
-  * @brief Class destructor
-  *
-  */
+   * @brief Class destructor
+   *
+   */
   virtual ~RequestController();
 
   /**
-  * @brief Initialize thread pool
-  *
-  */
+   * @brief Initialize thread pool
+   *
+   */
   void InitializeThreadpool();
 
   /**
-  * @brief Destroy thread pool
-  *
-  */
+   * @brief Destroy thread pool
+   *
+   */
   void DestroyThreadpool();
 
   /**
-  * @brief Check if max request amount wasn't exceed and adds request to queue.
-  *
-  * @param request     Active mobile request
-  * @param hmi_level   Current application hmi_level
-  *
-  * @return Result code
-  *
-  */
+   * @brief Check if max request amount wasn't exceed and adds request to queue.
+   *
+   * @param request     Active mobile request
+   * @param hmi_level   Current application hmi_level
+   *
+   * @return Result code
+   *
+   */
   TResult addMobileRequest(const RequestPtr request,
                            const mobile_apis::HMILevel::eType& hmi_level);
 
   /**
-  * @brief Store HMI request until response or timeout won't remove it
-  *
-  * @param request     Active hmi request
-  * @return Result code
-  *
-  */
+   * @brief Store HMI request until response or timeout won't remove it
+   *
+   * @param request     Active hmi request
+   * @return Result code
+   *
+   */
   TResult addHMIRequest(const RequestPtr request);
 
   /**
-  * @ Add notification to collection
-  *
-  * @param ptr Reference to shared pointer that point on hmi notification
-  */
+   * @ Add notification to collection
+   *
+   * @param ptr Reference to shared pointer that point on hmi notification
+   */
   void addNotification(const RequestPtr ptr);
 
   /**
-  * @brief Removes request from queue
-  *
-  * @param correlation_id Active request correlation ID,
-  * @param connection_key Active request connection key (0 for HMI requersts)
-  * @param function_id Active request  function id
-  * @param force_terminate if true, request controller will terminate
-  * even if not allowed by request
-  */
+   * @brief Removes request from queue
+   *
+   * @param correlation_id Active request correlation ID,
+   * @param connection_key Active request connection key (0 for HMI requersts)
+   * @param function_id Active request  function id
+   * @param force_terminate if true, request controller will terminate
+   * even if not allowed by request
+   */
   void TerminateRequest(const uint32_t correlation_id,
                         const uint32_t connection_key,
                         const int32_t function_id,
                         bool force_terminate = false);
 
   /**
-  * @brief Removes request from queue
-  *
-  * @param mobile_correlation_id Active mobile request correlation ID
-  *
-  */
+   * @brief Removes request from queue
+   *
+   * @param mobile_correlation_id Active mobile request correlation ID
+   *
+   */
   void OnMobileResponse(const uint32_t mobile_correlation_id,
                         const uint32_t connection_key,
                         const int32_t function_id);
 
   /**
-  * @brief Removes request from queue
-  *
-  * @param mobile_correlation_id Active mobile request correlation ID
-  *
-  */
+   * @brief Removes request from queue
+   *
+   * @param mobile_correlation_id Active mobile request correlation ID
+   *
+   */
   void OnHMIResponse(const uint32_t correlation_id, const int32_t function_id);
 
   /**
-  * @ Add notification to collection
-  *
-  * @param ptr Reference to shared pointer that point on hmi notification
-  */
+   * @ Add notification to collection
+   *
+   * @param ptr Reference to shared pointer that point on hmi notification
+   */
   void removeNotification(const commands::Command* notification);
 
   /**
-  * @brief Removes all requests from queue for specified application
-  *
-  * @param app_id Mobile application ID (app_id)
-  *
-  */
+   * @brief Removes all requests from queue for specified application
+   *
+   * @param app_id Mobile application ID (app_id)
+   *
+   */
   void terminateAppRequests(const uint32_t& app_id);
 
   /**
-  * @brief Terminates all requests from HMI
-  */
+   * @brief Terminates all requests from HMI
+   */
   void terminateAllHMIRequests();
 
   /**
-  * @brief Terminates all requests from Mobile
-  */
+   * @brief Terminates all requests from Mobile
+   */
   void terminateAllMobileRequests();
 
   /**
-  * @brief Updates request timeout
-  *
-  * @param app_id Connection key of application
-  * @param mobile_correlation_id Correlation ID of the mobile request
-  * @param new_timeout_value New timeout to be set in milliseconds
-  */
+   * @brief Updates request timeout
+   *
+   * @param app_id Connection key of application
+   * @param mobile_correlation_id Correlation ID of the mobile request
+   * @param new_timeout_value New timeout to be set in milliseconds
+   */
   void updateRequestTimeout(const uint32_t& app_id,
                             const uint32_t& mobile_correlation_id,
                             const uint32_t& new_timeout);
@@ -217,13 +217,13 @@ class RequestController {
 
  protected:
   /**
-  * @brief Timer callback which handles all request timeouts
-  */
+   * @brief Timer callback which handles all request timeouts
+   */
   void TimeoutThread();
 
   /**
-  * @brief Signal timer condition variable
-  */
+   * @brief Signal timer condition variable
+   */
   void NotifyTimer();
 
   void terminateWaitingForExecutionAppRequests(const uint32_t& app_id);
@@ -285,8 +285,8 @@ class RequestController {
   RequestTracker request_tracker_;
 
   /**
-  * @brief Set of HMI notifications with timeout.
-  */
+   * @brief Set of HMI notifications with timeout.
+   */
   std::list<RequestPtr> notification_list_;
 
   /**

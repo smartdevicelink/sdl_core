@@ -72,10 +72,10 @@ if [ "$?" -ne "0" ]; then
     exit 1
 fi
 
-# Auto update c++ files with clang-format-3.6
-CLANG_FORMAT=clang-format-3.6
+# Auto update c++ files with clang-format-6.0
+CLANG_FORMAT=clang-format-6.0
 # Verify clang-format
-CLANG_FORMAT_REQUIRED_VERSION=3.6
+CLANG_FORMAT_REQUIRED_VERSION=6.0
 CLANG_FORMAT_CURRENT_VERSION=$($CLANG_FORMAT -version)
 if [[ $CLANG_FORMAT_CURRENT_VERSION != *$CLANG_FORMAT_REQUIRED_VERSION* ]]
 then

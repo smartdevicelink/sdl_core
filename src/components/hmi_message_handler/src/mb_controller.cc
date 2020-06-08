@@ -337,8 +337,8 @@ bool CMessageBrokerController::addSubscriber(WebsocketSession* ws_session,
   bool result = true;
   sync_primitives::AutoLock lock(mSubscribersListLock);
   std::pair<std::multimap<std::string, WebsocketSession*>::iterator,
-            std::multimap<std::string, WebsocketSession*>::iterator> p =
-      mSubscribersList.equal_range(name);
+            std::multimap<std::string, WebsocketSession*>::iterator>
+      p = mSubscribersList.equal_range(name);
   if (p.first != p.second) {
     std::multimap<std::string, WebsocketSession*>::iterator itr;
     for (itr = p.first; itr != p.second; itr++) {
@@ -359,8 +359,8 @@ void CMessageBrokerController::deleteSubscriber(WebsocketSession* ws,
                                                 std::string name) {
   sync_primitives::AutoLock lock(mSubscribersListLock);
   std::pair<std::multimap<std::string, WebsocketSession*>::iterator,
-            std::multimap<std::string, WebsocketSession*>::iterator> p =
-      mSubscribersList.equal_range(name);
+            std::multimap<std::string, WebsocketSession*>::iterator>
+      p = mSubscribersList.equal_range(name);
   if (p.first != p.second) {
     std::multimap<std::string, WebsocketSession*>::iterator itr;
     for (itr = p.first; itr != p.second;) {
@@ -380,8 +380,8 @@ int CMessageBrokerController::getSubscribersFd(
 
   sync_primitives::AutoLock lock(mSubscribersListLock);
   std::pair<std::multimap<std::string, WebsocketSession*>::iterator,
-            std::multimap<std::string, WebsocketSession*>::iterator> p =
-      mSubscribersList.equal_range(name);
+            std::multimap<std::string, WebsocketSession*>::iterator>
+      p = mSubscribersList.equal_range(name);
   if (p.first != p.second) {
     std::multimap<std::string, WebsocketSession*>::iterator itr;
     for (itr = p.first; itr != p.second; itr++) {
@@ -501,4 +501,4 @@ void CMessageBrokerController::processInternalRequest(
 int CMessageBrokerController::getNextControllerId() {
   return 1000 * mControllersIdCounter++;
 }
-}
+}  // namespace hmi_message_handler

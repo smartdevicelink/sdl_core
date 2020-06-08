@@ -1,7 +1,7 @@
-#include "gmock/gmock.h"
-#include "utils/logger.h"
-#include "utils/custom_string.h"
 #include <iostream>
+#include "gmock/gmock.h"
+#include "utils/custom_string.h"
+#include "utils/logger.h"
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "SDLMain")
 int main(int argc, char** argv) {

@@ -36,7 +36,7 @@
 
 #include "application_manager/commands/command_response_impl.h"
 #include "utils/macro.h"
-
+#include "vehicle_info_plugin/vehicle_info_command_params.h"
 namespace vehicle_info_plugin {
 namespace app_mngr = application_manager;
 
@@ -53,10 +53,7 @@ class GetVehicleDataResponse : public app_mngr::commands::CommandResponseImpl {
    * @param message Incoming SmartObject message
    **/
   GetVehicleDataResponse(const app_mngr::commands::MessageSharedPtr& message,
-                         app_mngr::ApplicationManager& application_manager,
-                         app_mngr::rpc_service::RPCService& rpc_service,
-                         app_mngr::HMICapabilities& hmi_capabilities,
-                         policy::PolicyHandlerInterface& policy_handler);
+                         const VehicleInfoCommandParams& params);
 
   /**
    * @brief GetVehicleDataResponse class destructor
@@ -73,6 +70,6 @@ class GetVehicleDataResponse : public app_mngr::commands::CommandResponseImpl {
 };
 
 }  // namespace commands
-}  // namespace application_manager
+}  // namespace vehicle_info_plugin
 
 #endif  // SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_MOBILE_GET_VEHICLE_DATA_RESPONSE_H_

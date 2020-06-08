@@ -51,16 +51,16 @@ struct SemanticVersion {
 
   SemanticVersion(const std::string& versionString)
       : major_version_(0), minor_version_(0), patch_version_(0) {
-    unsigned int major_int, minor_int, patch_int;
-    int readElements = sscanf(
-        versionString.c_str(), "%u.%u.%u", &major_int, &minor_int, &patch_int);
-    if (readElements != 3) {
-      // LOG4CXX_WARN(logger_,
-      //             "Error while parsing version string: " << versionString);
-    } else {
-      major_version_ = static_cast<uint8_t>(major_int);
-      minor_version_ = static_cast<uint8_t>(minor_int);
-      patch_version_ = static_cast<uint8_t>(patch_int);
+    int readElements = sscanf(versionString.c_str(),
+                              "%hu.%hu.%hu",
+                              &major_version_,
+                              &minor_version_,
+                              &patch_version_);
+
+    if (readElements < 2) {
+      major_version_ = 0;
+      minor_version_ = 0;
+      patch_version_ = 0;
     }
   }
 
@@ -120,6 +120,6 @@ struct SemanticVersion {
 
 extern const SemanticVersion base_rpc_version;
 extern const SemanticVersion rpc_version_5;
-}
+}  // namespace utils
 
 #endif  // SRC_COMPONENTS_INCLUDE_UTILS_CALLABLE_H

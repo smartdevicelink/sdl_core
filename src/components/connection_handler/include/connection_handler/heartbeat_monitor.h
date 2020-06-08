@@ -35,11 +35,11 @@
 #include <stdint.h>
 #include <map>
 
+#include "utils/date_time.h"
+#include "utils/lock.h"
+#include "utils/macro.h"
 #include "utils/threads/thread.h"
 #include "utils/threads/thread_delegate.h"
-#include "utils/date_time.h"
-#include "utils/macro.h"
-#include "utils/lock.h"
 
 namespace connection_handler {
 
@@ -64,7 +64,7 @@ class HeartBeatMonitor : public threads::ThreadDelegate {
   void RemoveSession(uint8_t session_id);
 
   /**
-  * \brief Resets timer preventing session from being killed
+   * \brief Resets timer preventing session from being killed
    */
   void KeepAlive(uint8_t session_id);
 

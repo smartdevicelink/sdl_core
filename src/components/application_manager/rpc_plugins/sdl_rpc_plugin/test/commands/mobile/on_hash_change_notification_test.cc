@@ -32,12 +32,12 @@
 
 #include <string>
 
-#include "gtest/gtest.h"
-#include "mobile/on_hash_change_notification.h"
+#include "application_manager/commands/command_impl.h"
 #include "application_manager/mock_message_helper.h"
 #include "application_manager/smart_object_keys.h"
-#include "application_manager/commands/command_impl.h"
 #include "application_manager/test/include/application_manager/commands/commands_test.h"
+#include "gtest/gtest.h"
+#include "mobile/on_hash_change_notification.h"
 
 namespace test {
 namespace components {
@@ -47,13 +47,13 @@ namespace on_hash_change_notification {
 
 namespace strings = application_manager::strings;
 
-using sdl_rpc_plugin::commands::mobile::OnHashChangeNotification;
 using application_manager::MockMessageHelper;
 using application_manager::commands::CommandImpl;
+using sdl_rpc_plugin::commands::mobile::OnHashChangeNotification;
+using testing::_;
 using testing::Mock;
 using testing::Return;
 using testing::ReturnRef;
-using testing::_;
 
 class OnHashChangeNotificationTest
     : public CommandsTest<CommandsTestMocks::kIsNice> {};
