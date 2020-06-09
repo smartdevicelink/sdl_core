@@ -165,25 +165,27 @@ bool CObjectSchemaItem::filterInvalidEnums(
   bool valid = true;
   for (const auto& key : Object.enumerate()) {
     auto members_it = mMembers.find(key);
-    if (mMembers.end() != members_it) {
-      const SMember* member =
-          GetCorrectMember(members_it->second, MessageVersion);
+    if (mMembers.end() == members_it) {
+      // No members found for this key, skipping over
+      continue;
+    }
 
-      // Perform filtering recursively on this field
-      if (member->mSchemaItem->filterInvalidEnums(
-              Object[key], MessageVersion, &report->ReportSubobject(key))) {
-        // Object is no longer valid if the member is mandatory.
-        if (member->mIsMandatory) {
-          valid = false;
-        }
+    const SMember* member =
+        GetCorrectMember(members_it->second, MessageVersion);
+    // Perform filtering recursively on this field
+    if (member->mSchemaItem->filterInvalidEnums(
+            Object[key], MessageVersion, &report->ReportSubobject(key))) {
+      // Object is no longer valid if the member is mandatory.
+      if (member->mIsMandatory) {
+        valid = false;
+      }
 
-        // The member is safe to filter if it is non-mandatory, only leaf nodes
-        // (individual enum values) should be filtered otherwise.
-        bool should_erase = (member->mSchemaItem->GetType() == TYPE_ENUM ||
-                             !member->mIsMandatory);
-        if (should_erase) {
-          Object.erase(key);
-        }
+      // The member is safe to filter if it is non-mandatory, only leaf nodes
+      // (individual enum values) should be filtered otherwise.
+      bool should_erase = (member->mSchemaItem->GetType() == TYPE_ENUM ||
+                           !member->mIsMandatory);
+      if (should_erase) {
+        Object.erase(key);
       }
     }
   }
