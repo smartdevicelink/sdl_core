@@ -331,7 +331,7 @@ void RPCHandlerImpl::GetMessageVersion(
 bool RPCHandlerImpl::ConvertMessageToSO(
     const Message& message,
     ns_smart_device_link::ns_smart_objects::SmartObject& output,
-    std::string& warning_info,
+    std::string& out_warning_info,
     const bool allow_unknown_parameters,
     const bool validate_params) {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -395,7 +395,7 @@ bool RPCHandlerImpl::ConvertMessageToSO(
                         << output[jhs::S_PARAMS][jhs::S_FUNCTION_ID].asInt());
 
       // Populate any warning info generated during the validation process
-      warning_info = rpc::PrettyFormat(report);
+      out_warning_info = rpc::PrettyFormat(report);
 
       output[strings::params][strings::connection_key] =
           message.connection_key();
