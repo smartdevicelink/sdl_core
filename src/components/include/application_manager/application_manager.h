@@ -847,8 +847,8 @@ class ApplicationManager {
       const smart_objects::SmartObject& display_capabilities) = 0;
 
   /**
-   * @brief Unsubscribe application that specified in message from softbuttons.
-   * @param MessageSharedPtr - Response message received from HMI.
+   * @brief Unsubscribe application specified in message from softbuttons.
+   * @param response_message - Response message received from HMI.
    * @return bool - Result of unsubscribing process.
    */
   virtual bool UnsubscribeAppFromSoftButtons(

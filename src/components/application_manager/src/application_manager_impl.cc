@@ -4805,8 +4805,6 @@ bool ApplicationManagerImpl::UnsubscribeAppFromSoftButtons(
     const commands::MessageSharedPtr response) {
   using namespace mobile_apis;
 
-  const Result::eType result_code = static_cast<Result::eType>(
-      (*response)[strings::msg_params][strings::result_code].asUInt());
   const uint32_t connection_key =
       (*response)[strings::params][strings::connection_key].asUInt();
   const auto function_id = static_cast<FunctionID::eType>(

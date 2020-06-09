@@ -1126,13 +1126,8 @@ uint32_t ApplicationImpl::GetAvailableDiskSpace() {
 void ApplicationImpl::SubscribeToSoftButtons(
     int32_t cmd_id, const SoftButtonID& softbuttons_id) {
   sync_primitives::AutoLock lock(cmd_softbuttonid_lock_);
-  if (static_cast<int32_t>(mobile_apis::FunctionID::ScrollableMessageID) ==
-      cmd_id) {
-    CommandSoftButtonID::iterator it = cmd_softbuttonid_.find(cmd_id);
-    if (cmd_softbuttonid_.end() == it) {
-      cmd_softbuttonid_[cmd_id] = softbuttons_id;
-    }
-  } else {
+  CommandSoftButtonID::iterator it = cmd_softbuttonid_.find(cmd_id);
+  if (cmd_softbuttonid_.end() == it) {
     auto& soft_button_ids = cmd_softbuttonid_[cmd_id];
     for (auto& softbutton_item : softbuttons_id) {
       soft_button_ids.insert(softbutton_item);
