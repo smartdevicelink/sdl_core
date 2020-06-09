@@ -458,7 +458,7 @@ TEST(test_array_of_objects_with_unknown_enum, test_ArraySchemaItemTest) {
   EXPECT_EQ(std::string(""), rpc::PrettyFormat(report));
 }
 
-TEST(test_array_of_objects_with_unknown_optional_enum,
+TEST(test_array_of_objects_with_unknown_optional_enums,
      test_ArraySchemaItemTest) {
   using namespace ns_smart_device_link::ns_smart_objects;
   SmartObject obj;
@@ -495,6 +495,7 @@ TEST(test_array_of_objects_with_unknown_optional_enum,
       item->filterInvalidEnums(obj, utils::SemanticVersion(), &report));
   EXPECT_NE(std::string(""), rpc::PrettyFormat(report));
 
+  // Unknown sub-parameter values should be filtered, but not array elements
   EXPECT_EQ((size_t)3, obj.length());
   EXPECT_EQ(0, obj[0][Keys::MANDATORY_PARAM].asInt());
   EXPECT_FALSE(obj[0].keyExists(Keys::OPTIONAL_PARAM));

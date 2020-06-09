@@ -590,7 +590,7 @@ TEST_F(ObjectSchemaItemTest, filter_unknown_enums_non_mandatory_subparam) {
       schema_item->filterInvalidEnums(obj, utils::SemanticVersion(), &report));
   EXPECT_NE(std::string(""), rpc::PrettyFormat(report));
 
-  // The struct containing the unknown enum value was filtered.
+  // The unknown enum value was filtered.
   // Validation should pass in this case.
   ASSERT_TRUE(obj[S_PARAMS].keyExists(Keys::STRUCT));
   EXPECT_FALSE(obj[S_PARAMS][Keys::STRUCT].keyExists(Keys::OPTIONAL_PARAM));
