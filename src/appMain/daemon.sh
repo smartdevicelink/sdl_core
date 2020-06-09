@@ -138,5 +138,5 @@ elif [ "$COMMAND" == "kill" ]; then
     fi
   fi
 else
-  echo "usage: core.sh [start/restart/stop/kill] [use_sample_policy_manager?]"
+  echo "usage: daemon.sh [start/restart/stop/kill] [use_sample_policy_manager?]"
 fi
