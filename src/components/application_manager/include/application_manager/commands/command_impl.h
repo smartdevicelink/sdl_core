@@ -145,6 +145,8 @@ class CommandImpl : public Command {
    */
   void SetAllowedToTerminate(const bool allowed) OVERRIDE;
 
+  void OnUpdateTimeOut() OVERRIDE;
+
 #ifdef __QNX__
   /*
    * @brief Function is called by RequestController when message was sent to HMI

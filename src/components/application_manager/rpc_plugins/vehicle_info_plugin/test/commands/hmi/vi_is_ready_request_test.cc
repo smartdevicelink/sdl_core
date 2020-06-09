@@ -159,7 +159,7 @@ TEST_F(VIIsReadyRequestTest, Run_KeyAvailableEqualToTrue_StateAvailable) {
 
 TEST_F(VIIsReadyRequestTest, Run_HMIDoestRespond_SendMessageToHMIByTimeout) {
   ExpectSendMessagesToHMI();
-  command_->onTimeOut();
+  command_->OnTimeOut();
 }
 
 }  // namespace vi_is_ready_request

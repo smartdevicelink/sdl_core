@@ -72,10 +72,6 @@ PerformInteractionRequest::PerformInteractionRequest(
                         hmi_capabilities,
                         policy_handler)
     , interaction_mode_(mobile_apis::InteractionMode::INVALID_ENUM)
-    , ui_choice_id_received_(INVALID_CHOICE_ID)
-    , vr_choice_id_received_(INVALID_CHOICE_ID)
-    , ui_response_received_(false)
-    , vr_response_received_(false)
     , app_pi_was_active_before_(false)
     , vr_result_code_(hmi_apis::Common_Result::INVALID_ENUM)
     , ui_result_code_(hmi_apis::Common_Result::INVALID_ENUM) {
@@ -229,6 +225,10 @@ void PerformInteractionRequest::Run() {
   app->set_perform_interaction_layout(interaction_layout);
   // increment amount of active requests
   ++pi_requests_count_;
+
+  StartAwaitForInterface(HmiInterfaces::HMI_INTERFACE_VR);
+  StartAwaitForInterface(HmiInterfaces::HMI_INTERFACE_UI);
+
   SendVRPerformInteractionRequest(app);
   SendUIPerformInteractionRequest(app);
 }
@@ -247,7 +247,6 @@ void PerformInteractionRequest::on_event(const event_engine::Event& event) {
     case hmi_apis::FunctionID::UI_PerformInteraction: {
       LOG4CXX_DEBUG(logger_, "Received UI_PerformInteraction event");
       EndAwaitForInterface(HmiInterfaces::HMI_INTERFACE_UI);
-      ui_response_received_ = true;
 
       unsubscribe_from_event(hmi_apis::FunctionID::UI_PerformInteraction);
       ui_result_code_ = static_cast<hmi_apis::Common_Result::eType>(
@@ -259,7 +258,6 @@ void PerformInteractionRequest::on_event(const event_engine::Event& event) {
     case hmi_apis::FunctionID::VR_PerformInteraction: {
       LOG4CXX_DEBUG(logger_, "Received VR_PerformInteraction");
       EndAwaitForInterface(HmiInterfaces::HMI_INTERFACE_VR);
-      vr_response_received_ = true;
 
       unsubscribe_from_event(hmi_apis::FunctionID::VR_PerformInteraction);
       vr_result_code_ = static_cast<hmi_apis::Common_Result::eType>(
@@ -297,13 +295,14 @@ void PerformInteractionRequest::OnTimeOut() {
   switch (interaction_mode_) {
     case mobile_apis::InteractionMode::BOTH: {
       LOG4CXX_DEBUG(logger_, "Interaction Mode: BOTH");
-      if (true == vr_response_received_) {
+      if (!IsInterfaceAwaited(HmiInterfaces::HMI_INTERFACE_VR)) {
         unsubscribe_from_event(hmi_apis::FunctionID::UI_PerformInteraction);
         DisablePerformInteraction();
         RequestFromMobileImpl::OnTimeOut();
       } else {
         application_manager_.updateRequestTimeout(
             connection_key(), correlation_id(), default_timeout_);
+        set_current_state(RequestState::kAwaitingResponse);
       }
       break;
     }
@@ -364,7 +363,7 @@ bool PerformInteractionRequest::ProcessVRResponse(
     return false;
   }
 
-  if (!ui_response_received_ &&
+  if (!IsInterfaceAwaited(HmiInterfaces::HMI_INTERFACE_UI) &&
       InteractionMode::MANUAL_ONLY != interaction_mode_) {
     SendClosePopupRequestToHMI();
   }
@@ -1075,7 +1074,7 @@ bool PerformInteractionRequest::CheckChoiceIDFromRequest(
 
 const bool PerformInteractionRequest::HasHMIResponsesToWait() const {
   LOG4CXX_AUTO_TRACE(logger_);
-  return !ui_response_received_ || !vr_response_received_;
+  return !IsInterfaceAwaited(HmiInterfaces::HMI_INTERFACE_UI) || !IsInterfaceAwaited(HmiInterfaces::HMI_INTERFACE_VR);
 }
 
 void PerformInteractionRequest::SendBothModeResponse(

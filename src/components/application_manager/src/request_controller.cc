@@ -467,11 +467,11 @@ void RequestController::TimeoutThread() {
       if (probably_expired->requestId() == expired_request_id &&
           probably_expired->app_id() == expired_app_id) {
         LOG4CXX_DEBUG(logger_, "Expired request wasn't removed");
-       // waiting_for_response_.UnlockInfoSet();
+        //waiting_for_response_.UnlockInfoSet();
         break;
       }
     }
-   //s waiting_for_response_.UnlockInfoSet();
+  // waiting_for_response_.UnlockInfoSet();
   }
   LOG4CXX_DEBUG(
       logger_,

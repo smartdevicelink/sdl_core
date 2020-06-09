@@ -50,22 +50,9 @@ class MockRPCProtectionManager : public RPCProtectionManager {
                    const uint32_t function_id,
                    const uint32_t conrrelation_id));
 
-<<<<<<< HEAD:src/components/application_manager/test/include/application_manager/mock_rpc_protection_manager.h
   MOCK_CONST_METHOD2(IsInEncryptionNeededCache,
                      bool(const uint32_t app_id,
                           const uint32_t conrrelation_id));
-=======
-class ResetTimeoutHandlerImpl : public event_engine::EventObserver,
-                                public ResetTimeoutHandler {
- public:
-  ResetTimeoutHandlerImpl(ApplicationManager& application_manager);
-  void AddRequest(uint32_t hmi_correlation_id,
-                  uint32_t mob_correlation_id,
-                  uint32_t connection_key,
-                  uint32_t hmi_function_id) OVERRIDE;
-  void RemoveRequest(uint32_t hmi_correlation_id) OVERRIDE;
-  void HandleOnEvent(const event_engine::Event& event) OVERRIDE;
->>>>>>> 3d41cb528... SDLCORE-504: Add locking requests that are waiting responce into request set:src/components/application_manager/include/application_manager/reset_timeout_handler_impl.h
 
   MOCK_METHOD2(AddToEncryptionNeededCache,
                void(const uint32_t app_id, const uint32_t correlation_id));

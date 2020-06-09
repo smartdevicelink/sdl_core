@@ -172,7 +172,7 @@ TEST_F(VRIsReadyRequestTest, Run_KeyAvailableEqualToTrue_StateAvailable) {
 TEST_F(VRIsReadyRequestTest, Run_HMIDoestRespond_SendMessageToHMIByTimeout) {
   const bool is_send_message_by_timeout = true;
   ExpectSendMessagesToHMI(is_send_message_by_timeout);
-  command_->onTimeOut();
+  command_->OnTimeOut();
 }
 
 }  // namespace vr_is_ready_request

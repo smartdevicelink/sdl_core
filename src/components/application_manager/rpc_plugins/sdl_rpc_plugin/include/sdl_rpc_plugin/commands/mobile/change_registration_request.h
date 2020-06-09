@@ -74,12 +74,7 @@ class ChangeRegistrationRequest : public app_mngr::commands::RequestFromMobileIm
    **/
   virtual void Run();
 
-  /**
-   * @brief Interface method that is called whenever new event received
-   *
-   * @param event The received event
-   */
-  void on_event(const app_mngr::event_engine::Event& event) OVERRIDE;
+  void on_event(const app_mngr::event_engine::Event& event) FINAL;
 
  private:
   /*
@@ -102,13 +97,6 @@ class ChangeRegistrationRequest : public app_mngr::commands::RequestFromMobileIm
    * @return true if language supported by TTS, otherwise false
    */
   bool IsLanguageSupportedByTTS(const int32_t& hmi_display_lang);
-
-  /*
-   * @brief Check if there some not delivered hmi responses exist
-   *
-   * @return true if all responses received
-   */
-  bool IsPendingResponseExist();
 
   /**
    * @brief Checks change_registration params(ttsName, appname,
@@ -162,8 +150,6 @@ class ChangeRegistrationRequest : public app_mngr::commands::RequestFromMobileIm
 
     const custom_str::CustomString& newItem_;
   };
-
-  app_mngr::commands::Pending pending_requests_;
 
   hmi_apis::Common_Result::eType ui_result_;
   hmi_apis::Common_Result::eType vr_result_;

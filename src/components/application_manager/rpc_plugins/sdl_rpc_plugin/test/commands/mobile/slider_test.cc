@@ -60,6 +60,7 @@ using sdl_rpc_plugin::commands::SliderRequest;
 using ::testing::_;
 using ::testing::Return;
 using ::testing::ReturnRef;
+using app_mngr::commands::RequestFromMobileImpl;
 
 typedef std::shared_ptr<SliderRequest> CommandPtr;
 
@@ -182,13 +183,13 @@ TEST_F(SliderRequestTest, OnEvent_UI_UNSUPPORTED_RESOURCE) {
 
 class CallOnTimeOut {
  public:
-  CallOnTimeOut(CommandMobileImpl& command) : command_(command) {}
+  CallOnTimeOut(RequestFromMobileImpl& command) : command_(command) {}
 
   void operator()() {
-    command_.onTimeOut();
+    command_.OnTimeOut();
   }
 
-  CommandMobileImpl& command_;
+  RequestFromMobileImpl& command_;
 };
 
 TEST_F(SliderRequestTest, Init_SUCCESS) {

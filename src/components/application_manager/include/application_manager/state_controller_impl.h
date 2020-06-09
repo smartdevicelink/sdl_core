@@ -47,6 +47,14 @@
 
 namespace application_manager {
 
+struct DataForActivation {
+  DataForActivation(uint32_t app_id, HmiStatePtr state, bool send_activate_app)
+      : app_id_(app_id), state_(state), send_activate_app_(send_activate_app) {}
+  uint32_t app_id_;
+  HmiStatePtr state_;
+  bool send_activate_app_;
+};
+
 class StateControllerImpl : public event_engine::EventObserver,
                             public StateController {
  public:
@@ -403,6 +411,12 @@ class StateControllerImpl : public event_engine::EventObserver,
                              HmiState::StateID state_id) const;
 
   /**
+   * @brief Starts to process hmi states for applications that
+   * waiting for finishing of activate app.
+   */
+  void ProcessSavingHMIState();
+
+  /**
    * @brief Determines AudioStreamingState value
    * for application with HMI level specified.
    * @param app an application to calculate for
@@ -427,8 +441,13 @@ class StateControllerImpl : public event_engine::EventObserver,
   typedef std::list<HmiState::StateID> StateIDList;
   StateIDList active_states_;
   mutable sync_primitives::Lock active_states_lock_;
+
   std::map<uint32_t, HmiStatePtr> waiting_for_response_;
+  std::map<uint32_t, HmiStatePtr> waiting_for_activate_;
+  std::vector<DataForActivation> waiting_for_applying_state_;
+
   ApplicationManager& app_mngr_;
+  sync_primitives::Lock lock_;
 };
 }  // namespace application_manager
 

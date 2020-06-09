@@ -77,11 +77,6 @@ class CreateInteractionChoiceSetRequest
    **/
   void Run() FINAL;
 
-  /**
-   * @brief Interface method that is called whenever new event received
-   *
-   * @param event The received event
-   */
   void on_event(const app_mngr::event_engine::Event& event) FINAL;
 
   void OnTimeOut() FINAL;

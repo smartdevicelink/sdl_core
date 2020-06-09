@@ -71,11 +71,6 @@ class ResetGlobalPropertiesRequest
    **/
   void Run() FINAL;
 
-  /**
-   * @brief Interface method that is called whenever new event received
-   *
-   * @param event The received event
-   */
   void on_event(const app_mngr::event_engine::Event& event) FINAL;
 
   void OnTimeOut() FINAL;
@@ -129,13 +124,6 @@ class ResetGlobalPropertiesRequest
    */
   bool PrepareResponseParameters(mobile_apis::Result::eType& out_result_code,
                                  std::string& out_response_info);
-
-  /*
-   * @brief Check if there some not delivered hmi responses exist
-   *
-   * @return true if all responses received
-   */
-  bool IsPendingResponseExist();
 
   DISALLOW_COPY_AND_ASSIGN(ResetGlobalPropertiesRequest);
 

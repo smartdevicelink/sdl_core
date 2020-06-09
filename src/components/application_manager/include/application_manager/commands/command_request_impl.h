@@ -38,6 +38,8 @@
 #include "application_manager/smart_object_keys.h"
 #include "application_manager/hmi_interfaces.h"
 
+#include <memory>
+
 namespace application_manager {
 
 namespace commands {
@@ -50,6 +52,7 @@ class CommandRequestImpl : public CommandImpl,
   enum RequestState {
     kAwaitingResponse = 0,
     kTimedOut,
+    kHandlingResponse,
     kResponded
   };
 
@@ -159,8 +162,6 @@ class CommandRequestImpl : public CommandImpl,
   virtual void OnTimeOut();
 
   /**
-   * @brief Algorithm of handling on_event
-   * @param Event The received event
    */
   virtual void on_event(const event_engine::Event&);
 
@@ -233,6 +234,11 @@ class CommandRequestImpl : public CommandImpl,
    * @return true if pending responses exist, otherwise - false
    */
   bool IsPendingResponseExist() const;
+
+  /**
+   * @brief Checks if there some not delivered hmi responses exist
+   * @return true if pending responses exist, otherwise - false
+   */
 
   /**
    * @brief Parses mobile message and replaces mobile app id with HMI app id

@@ -79,12 +79,7 @@ class PerformInteractionRequest : public app_mngr::commands::RequestFromMobileIm
    **/
   virtual void Run();
 
-  /**
-   * @brief Interface method that is called whenever new event received
-   *
-   * @param event The received event
-   */
-  void on_event(const app_mngr::event_engine::Event& event) OVERRIDE;
+  void on_event(const app_mngr::event_engine::Event& event) FINAL;
 
   void OnTimeOut() FINAL;
 
@@ -272,11 +267,10 @@ class PerformInteractionRequest : public app_mngr::commands::RequestFromMobileIm
       smart_objects::SmartObject& msg_param) const;
 
   mobile_apis::InteractionMode::eType interaction_mode_;
+
   std::int32_t ui_choice_id_received_;
   std::int32_t vr_choice_id_received_;
 
-  bool ui_response_received_;
-  bool vr_response_received_;
   bool app_pi_was_active_before_;
   static uint32_t pi_requests_count_;
   hmi_apis::Common_Result::eType vr_result_code_;

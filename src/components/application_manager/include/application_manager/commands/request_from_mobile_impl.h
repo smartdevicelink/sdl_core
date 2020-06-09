@@ -288,27 +288,6 @@ class RequestFromMobileImpl : public CommandRequestImpl {
   const CommandParametersPermissions& parameters_permissions() const;
 
   /**
-   * @brief Adds interface to be awaited for by sdl request command
-     @param interface_id interface which SDL expects to response in given time
-  */
-  void StartAwaitForInterface(const HmiInterfaces::InterfaceID interface_id);
-
-  /**
-   * @brief Gets interface await state.
-   * @param interface_id interface which SDL awaits for response in given time
-   * @return true if SDL awaits for response from given interface in
-   * interface_id
-  */
-  bool IsInterfaceAwaited(const HmiInterfaces::InterfaceID& interface_id) const;
-
-  /**
-   * @brief Sets given HMI interface await status to false
-   * @param interface_id interface which SDL no longer awaits for response in
-   * given time
-   */
-  void EndAwaitForInterface(const HmiInterfaces::InterfaceID& interface_id);
-
-  /**
   * @brief This set stores all the interfaces which are awaited by SDL to
    * return a response on some request
    */

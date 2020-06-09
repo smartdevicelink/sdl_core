@@ -92,6 +92,7 @@ void application_manager::request_controller::RequestInfo::updateEndTime() {
 void RequestInfo::updateTimeOut(const uint64_t& timeout_msec) {
   timeout_msec_ = timeout_msec;
   updateEndTime();
+  request_->OnUpdateTimeOut();
 }
 
 bool RequestInfo::isExpired() {

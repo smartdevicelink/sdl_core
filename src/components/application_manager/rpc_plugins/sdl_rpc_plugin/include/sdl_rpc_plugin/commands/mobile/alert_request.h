@@ -113,7 +113,7 @@ class AlertRequest : public app_mngr::commands::RequestFromMobileImpl {
   /*
    * @brief Tells if there are sent requests without responses
    */
-  bool HasHmiResponsesToWait();
+  bool IsPendingResponseExist();
 
   /*
    * @brief Check if all strings have valid syntax in request

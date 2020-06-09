@@ -72,6 +72,7 @@ using ::testing::_;
 using ::testing::InSequence;
 using ::testing::Return;
 using namespace smart_objects;
+using  app_mngr::commands::RequestFromMobileImpl;
 
 namespace custom_str = utils::custom_string;
 namespace strings = ::application_manager::strings;
@@ -221,9 +222,9 @@ class AddCommandRequestTest
         mock_rpc_service_,
         ManageMobileCommand(response,
                             am::commands::Command::CommandSource::SOURCE_SDL));
-    std::shared_ptr<CommandMobileImpl> base_class_request =
-        static_cast<std::shared_ptr<CommandMobileImpl> >(request_ptr);
-    base_class_request->onTimeOut();
+    std::shared_ptr<RequestFromMobileImpl> base_class_request =
+        static_cast<std::shared_ptr<RequestFromMobileImpl> >(request_ptr);
+    base_class_request->OnTimeOut();
   }
 
   MessageSharedPtr msg_;
@@ -1092,10 +1093,10 @@ TEST_F(AddCommandRequestTest,
   EXPECT_CALL(mock_rpc_service_,
               ManageMobileCommand(
                   response, am::commands::Command::CommandSource::SOURCE_SDL));
-  std::shared_ptr<CommandMobileImpl> base_class_request =
-      static_cast<std::shared_ptr<CommandMobileImpl> >(
+  std::shared_ptr<RequestFromMobileImpl> base_class_request =
+      static_cast<std::shared_ptr<RequestFromMobileImpl> >(
           CreateCommand<AddCommandRequest>(msg_));
-  base_class_request->onTimeOut();
+  base_class_request->OnTimeOut();
 }
 
 TEST_F(AddCommandRequestTest, OnTimeOut_AppRemoveCommandCalled) {
@@ -1142,9 +1143,9 @@ TEST_F(AddCommandRequestTest, OnTimeOut_AppRemoveCommandCalled) {
   EXPECT_CALL(mock_rpc_service_,
               ManageMobileCommand(
                   response, am::commands::Command::CommandSource::SOURCE_SDL));
-  std::shared_ptr<CommandMobileImpl> base_class_request =
-      static_cast<std::shared_ptr<CommandMobileImpl> >(request_ptr);
-  base_class_request->onTimeOut();
+  std::shared_ptr<RequestFromMobileImpl> base_class_request =
+      static_cast<std::shared_ptr<RequestFromMobileImpl> >(request_ptr);
+  base_class_request->OnTimeOut();
 }
 
 }  // namespace add_command_request

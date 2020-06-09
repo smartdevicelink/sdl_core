@@ -63,7 +63,6 @@ namespace request_controller {
 class RequestController {
  public:
   /**
-<<<<<<< HEAD:src/components/application_manager/include/application_manager/request_controller.h
    * @brief Result code for addRequest
    */
   enum TResult {

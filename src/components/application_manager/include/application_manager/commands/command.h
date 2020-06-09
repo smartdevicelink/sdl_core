@@ -106,6 +106,20 @@ class Command {
   virtual void HandleTimeOut() = 0;
 
   /**
+   * @brief Function is called by RequestInfo when request controller
+   * updates request timeout
+   * Function sets request state to "AwaitingResponse"
+   */
+  virtual void OnUpdateTimeOut() = 0;
+
+#ifdef __QNX__
+  /*
+   * @brief Function is called by RequestController when message was sent to HMI
+   */
+  virtual void OnHMIMessageSent() = 0;
+#endif  // __QNX__
+
+  /**
    * @brief AllowedToTerminate tells if request controller is allowed
    * to terminate this command
    * @return

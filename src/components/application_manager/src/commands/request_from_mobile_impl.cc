@@ -237,13 +237,15 @@ void RequestFromMobileImpl::Run() {}
 void RequestFromMobileImpl::OnTimeOut() {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  //unsubscribe_from_all_events();
+  unsubscribe_from_all_mobile_events();
   smart_objects::SmartObjectSPtr response =
       MessageHelper::CreateNegativeResponse(connection_key(),
                                             function_id(),
                                             correlation_id(),
                                             mobile_api::Result::GENERIC_ERROR);
+
   AddTimeOutComponentInfoToMessage(*response);
+
   rpc_service_.ManageMobileCommand(response, SOURCE_SDL);
 }
 
@@ -259,9 +261,9 @@ void RequestFromMobileImpl::SendResponse(
         const std::vector<uint8_t> binary_data) {
   LOG4CXX_AUTO_TRACE(logger_);
   {
-    sync_primitives::AutoLock auto_lock(state_lock_);
+    sync_primitives::AutoLock auto_lock(*state_lock_);
     if (RequestState::kTimedOut == current_state_) {
-      // don't send response if request timeout expired
+      // Don't send response if request timeout is expired
       return;
     }
 
@@ -772,35 +774,6 @@ mobile_apis::Result::eType RequestFromMobileImpl::PrepareResultCodeForResponse(
 const CommandParametersPermissions&
 RequestFromMobileImpl::parameters_permissions() const {
   return parameters_permissions_;
-}
-
-void RequestFromMobileImpl::StartAwaitForInterface(
-    const HmiInterfaces::InterfaceID interface_id) {
-  sync_primitives::AutoLock lock(awaiting_response_interfaces_lock_);
-  awaiting_response_interfaces_.insert(interface_id);
-}
-
-bool RequestFromMobileImpl::IsInterfaceAwaited(
-    const HmiInterfaces::InterfaceID& interface_id) const {
-  sync_primitives::AutoLock lock(awaiting_response_interfaces_lock_);
-  std::set<HmiInterfaces::InterfaceID>::const_iterator it =
-      awaiting_response_interfaces_.find(interface_id);
-  return (it != awaiting_response_interfaces_.end());
-}
-
-void RequestFromMobileImpl::EndAwaitForInterface(
-    const HmiInterfaces::InterfaceID& interface_id) {
-  sync_primitives::AutoLock lock(awaiting_response_interfaces_lock_);
-  std::set<HmiInterfaces::InterfaceID>::const_iterator it =
-      awaiting_response_interfaces_.find(interface_id);
-  if (it != awaiting_response_interfaces_.end()) {
-    awaiting_response_interfaces_.erase(it);
-  } else {
-    LOG4CXX_WARN(logger_,
-                 "EndAwaitForInterface called on interface \
-                    which was not put into await state: "
-                     << interface_id);
-  }
 }
 
 void RequestFromMobileImpl::SendProviderRequest(

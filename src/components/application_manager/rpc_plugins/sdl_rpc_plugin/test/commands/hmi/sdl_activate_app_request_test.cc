@@ -489,10 +489,10 @@ TEST_F(SDLActivateAppRequestTest, OnTimeout_SUCCESS) {
 
   std::shared_ptr<SDLActivateAppRequest> command(
       CreateCommand<SDLActivateAppRequest>(msg));
-  ON_CALL(mock_event_dispatcher_, remove_observer(_, _));
+  //ON_CALL(mock_event_dispatcher_, remove_observer(_, *command));
   EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_, _)).WillOnce(Return(true));
 
-  command->onTimeOut();
+  command->OnTimeOut();
 }
 
 TEST_F(SDLActivateAppRequestTest, OnEvent_InvalidEventId_UNSUCCESS) {

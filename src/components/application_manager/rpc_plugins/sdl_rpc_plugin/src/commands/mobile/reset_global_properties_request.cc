@@ -125,8 +125,7 @@ void ResetGlobalPropertiesRequest::Run() {
 
   app->set_reset_global_properties_active(true);
 
-  if (vr_help_title_items || menu_name || menu_icon ||
-      is_key_board_properties) {
+  if (IsInterfaceAwaited(HmiInterfaces::HMI_INTERFACE_UI)) {
     smart_objects::SmartObject msg_params =
         smart_objects::SmartObject(smart_objects::SmartType_Map);
 
@@ -351,11 +350,6 @@ bool ResetGlobalPropertiesRequest::PrepareResponseParameters(
   }
 
   return result;
-}
-
-bool ResetGlobalPropertiesRequest::IsPendingResponseExist() {
-  return IsInterfaceAwaited(HmiInterfaces::HMI_INTERFACE_TTS) ||
-         IsInterfaceAwaited(HmiInterfaces::HMI_INTERFACE_UI);
 }
 
 }  // namespace commands

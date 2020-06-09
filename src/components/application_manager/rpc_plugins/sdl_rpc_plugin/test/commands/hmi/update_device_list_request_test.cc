@@ -156,12 +156,14 @@ TEST_F(UpdateDeviceListRequestTest, OnEvent_SUCCESS) {
 
   EXPECT_CALL(app_mngr_, event_dispatcher())
       .WillOnce(ReturnRef(mock_event_dispatcher_));
-  EXPECT_CALL(mock_event_dispatcher_, remove_observer(_, _));
-  EXPECT_CALL(mock_event_dispatcher_, remove_observer(_));
 
   UpdateDeviceListRequestPtr command(CreateCommand<UpdateDeviceListRequest>());
 
   command->on_event(event);
+
+  //EXPECT_CALL(mock_event_dispatcher_, remove_observer(_, *command));
+  EXPECT_CALL(mock_event_dispatcher_, remove_observer(_));
+
 }
 
 }  // namespace update_device_list_request

@@ -86,6 +86,8 @@ bool CommandImpl::CleanUp() {
 
 void CommandImpl::Run() {}
 
+void CommandImpl::OnUpdateTimeOut() {}
+
 uint32_t CommandImpl::default_timeout() const {
   return default_timeout_;
 }

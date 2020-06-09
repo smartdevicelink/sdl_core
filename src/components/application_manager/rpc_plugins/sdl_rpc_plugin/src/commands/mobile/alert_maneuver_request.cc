@@ -149,7 +149,10 @@ void AlertManeuverRequest::Run() {
         hmi_apis::Common_MethodName::ALERT_MANEUVER;
 
     StartAwaitForInterface(HmiInterfaces::HMI_INTERFACE_TTS);
-    SendHMIRequest(hmi_apis::FunctionID::TTS_Speak, &msg_params, true);
+    if (IsInterfaceAwaited(HmiInterfaces::HMI_INTERFACE_TTS)) {
+      SendHMIRequest(hmi_apis::FunctionID::TTS_Speak, &msg_params, true);
+      tts_speak_is_sent_ = true;
+    }
   }
 }
 
@@ -171,6 +174,7 @@ void AlertManeuverRequest::on_event(const event_engine::Event& event) {
     case hmi_apis::FunctionID::TTS_Speak: {
       LOG4CXX_INFO(logger_, "Received TTS_Speak event");
       EndAwaitForInterface(HmiInterfaces::HMI_INTERFACE_TTS);
+
       pending_requests_.Remove(event_id);
       tts_speak_result_code_ = static_cast<hmi_apis::Common_Result::eType>(
           message[strings::params][hmi_response::code].asInt());
@@ -192,12 +196,11 @@ void AlertManeuverRequest::on_event(const event_engine::Event& event) {
     }
   }
 
-  if (!pending_requests_.IsFinal(event_id)) {
-    LOG4CXX_DEBUG(logger_,
-                  "There are some pending responses from HMI."
-                  "AlertManeuverRequest still waiting.");
+  if (IsPendingResponseExist()) {
+    LOG4CXX_DEBUG(logger_, "Command still wating for HMI response");
     return;
   }
+
   std::string return_info;
   mobile_apis::Result::eType result_code;
   const bool result = PrepareResponseParameters(result_code, return_info);

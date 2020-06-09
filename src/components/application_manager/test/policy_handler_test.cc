@@ -198,7 +198,7 @@ class PolicyHandlerTest : public ::testing::Test {
 
   virtual void TearDown() OVERRIDE {
     Mock::VerifyAndClearExpectations(&mock_message_helper_);
-    ON_CALL(mock_event_dispatcher_, remove_observer(_, _));
+  //  ON_CALL(mock_event_dispatcher_, remove_observer(_, _));
   }
 
   void ChangePolicyManagerToMock() {
