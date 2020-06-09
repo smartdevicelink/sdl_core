@@ -65,6 +65,7 @@ namespace hmi_response = am::hmi_response;
 using am::commands::CommandImpl;
 using am::event_engine::Event;
 using sdl_rpc_plugin::commands::UpdateDeviceListRequest;
+using application_manager::event_engine::EventObserver;
 
 typedef std::shared_ptr<UpdateDeviceListRequest> UpdateDeviceListRequestPtr;
 
@@ -161,7 +162,7 @@ TEST_F(UpdateDeviceListRequestTest, OnEvent_SUCCESS) {
 
   command->on_event(event);
 
-  //EXPECT_CALL(mock_event_dispatcher_, remove_observer(_, *command));
+  EXPECT_CALL(mock_event_dispatcher_, remove_observer(_, testing::Matcher<EventObserver&>(_)));
   EXPECT_CALL(mock_event_dispatcher_, remove_observer(_));
 
 }

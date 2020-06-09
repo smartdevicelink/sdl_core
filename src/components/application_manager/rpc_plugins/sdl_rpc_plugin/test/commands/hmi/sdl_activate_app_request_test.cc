@@ -66,6 +66,7 @@ using testing::Mock;
 using ::testing::NiceMock;
 using testing::Return;
 using testing::ReturnRef;
+using application_manager::event_engine::EventObserver;
 
 namespace {
 const uint32_t kCorrelationID = 1u;
@@ -489,7 +490,7 @@ TEST_F(SDLActivateAppRequestTest, OnTimeout_SUCCESS) {
 
   std::shared_ptr<SDLActivateAppRequest> command(
       CreateCommand<SDLActivateAppRequest>(msg));
-  //ON_CALL(mock_event_dispatcher_, remove_observer(_, *command));
+  ON_CALL(mock_event_dispatcher_, remove_observer(_, testing::Matcher<EventObserver&>(_)));
   EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_, _)).WillOnce(Return(true));
 
   command->OnTimeOut();
