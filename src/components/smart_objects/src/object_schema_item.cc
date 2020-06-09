@@ -164,26 +164,25 @@ bool CObjectSchemaItem::filterInvalidEnums(
     rpc::ValidationReport* report) {
   bool valid = true;
   for (const auto& key : Object.enumerate()) {
-    std::map<std::string, SMember>::const_iterator members_it =
-        mMembers.find(key);
-
+    auto members_it = mMembers.find(key);
     if (mMembers.end() != members_it) {
       const SMember* member =
           GetCorrectMember(members_it->second, MessageVersion);
+
+      // Perform filtering recursively on this field
       if (member->mSchemaItem->filterInvalidEnums(
               Object[key], MessageVersion, &report->ReportSubobject(key))) {
-        // The member is safe to filter if it is non-mandatory
-        if (!member->mIsMandatory) {
-          Object.erase(key);
-        }
         // Object is no longer valid if the member is mandatory.
-        // To maintain the general structure of the message, only leaf nodes
-        // (individual enum values) should be filtered in this case.
-        else if (member->mSchemaItem->GetType() == TYPE_ENUM) {
+        if (member->mIsMandatory) {
           valid = false;
+        }
+
+        // The member is safe to filter if it is non-mandatory, only leaf nodes
+        // (individual enum values) should be filtered otherwise.
+        bool should_erase = (member->mSchemaItem->GetType() == TYPE_ENUM ||
+                             !member->mIsMandatory);
+        if (should_erase) {
           Object.erase(key);
-        } else {
-          valid = false;
         }
       }
     }
