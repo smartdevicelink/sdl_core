@@ -56,7 +56,6 @@ class MockRequest : public application_manager::commands::Command {
   MOCK_CONST_METHOD0(default_timeout, uint32_t());
   MOCK_CONST_METHOD0(function_id, int32_t());
   MOCK_CONST_METHOD0(window_id, application_manager::WindowID());
-  MOCK_METHOD0(onTimeOut, void());
   MOCK_METHOD0(HandleTimeOut, void());
   MOCK_METHOD0(OnUpdateTimeOut, void());
   MOCK_METHOD0(AllowedToTerminate, bool());

@@ -292,7 +292,7 @@ TEST_F(RequestControllerTestClass, OnTimer_SUCCESS) {
                        mock_request,
                        RequestInfo::RequestType::MobileRequest));
 
-  EXPECT_CALL(*mock_request, onTimeOut())
+  EXPECT_CALL(*mock_request, HandleTimeOut())
       .WillOnce(NotifyTestAsyncWaiter(&waiter));
 
   // Waiting for call of `onTimeOut` for `kTimeScale` seconds
