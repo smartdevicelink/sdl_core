@@ -579,22 +579,22 @@ TEST_F(ObjectSchemaItemTest, filter_unknown_enums_non_mandatory_subparam) {
   obj[S_PARAMS][S_FUNCTION_ID] = 1;
   obj[S_PARAMS][S_CORRELATION_ID] = 0xFF;
   obj[S_PARAMS][S_PROTOCOL_VERSION] = 2;
-  obj[S_PARAMS][Keys::STRUCT][Keys::OPTIONAL_PARAM] = "FUTURE";
-  obj[S_PARAMS][Keys::STRUCT][Keys::MANDATORY_PARAM] = 3;
+  obj[S_MSG_PARAMS][Keys::STRUCT][Keys::OPTIONAL_PARAM] = "FUTURE";
+  obj[S_MSG_PARAMS][Keys::STRUCT][Keys::MANDATORY_PARAM] = 1;
   obj[S_MSG_PARAMS][Keys::RESULT_CODE] = 2;
   obj[S_MSG_PARAMS][Keys::INFO] = "0123456789";
 
   schema_item->applySchema(obj, false);
   rpc::ValidationReport report("RPC");
-  EXPECT_TRUE(
+  EXPECT_FALSE(
       schema_item->filterInvalidEnums(obj, utils::SemanticVersion(), &report));
   EXPECT_NE(std::string(""), rpc::PrettyFormat(report));
 
   // The unknown enum value was filtered.
   // Validation should pass in this case.
-  ASSERT_TRUE(obj[S_PARAMS].keyExists(Keys::STRUCT));
-  EXPECT_FALSE(obj[S_PARAMS][Keys::STRUCT].keyExists(Keys::OPTIONAL_PARAM));
-  EXPECT_TRUE(obj[S_PARAMS][Keys::STRUCT].keyExists(Keys::MANDATORY_PARAM));
+  ASSERT_TRUE(obj[S_MSG_PARAMS].keyExists(Keys::STRUCT));
+  EXPECT_FALSE(obj[S_MSG_PARAMS][Keys::STRUCT].keyExists(Keys::OPTIONAL_PARAM));
+  EXPECT_TRUE(obj[S_MSG_PARAMS][Keys::STRUCT].keyExists(Keys::MANDATORY_PARAM));
   report = rpc::ValidationReport("RPC");
   EXPECT_EQ(errors::OK, schema_item->validate(obj, &report));
   EXPECT_EQ(std::string(""), rpc::PrettyFormat(report));
@@ -605,19 +605,19 @@ TEST_F(ObjectSchemaItemTest, filter_unknown_enums_mandatory_subparam) {
   obj[S_PARAMS][S_FUNCTION_ID] = 1;
   obj[S_PARAMS][S_CORRELATION_ID] = 0xFF;
   obj[S_PARAMS][S_PROTOCOL_VERSION] = 2;
-  obj[S_PARAMS][Keys::STRUCT][Keys::MANDATORY_PARAM] = "FUTURE";
+  obj[S_MSG_PARAMS][Keys::STRUCT][Keys::MANDATORY_PARAM] = "FUTURE";
   obj[S_MSG_PARAMS][Keys::RESULT_CODE] = 2;
   obj[S_MSG_PARAMS][Keys::INFO] = "0123456789";
 
   schema_item->applySchema(obj, false);
   rpc::ValidationReport report("RPC");
-  EXPECT_TRUE(
+  EXPECT_FALSE(
       schema_item->filterInvalidEnums(obj, utils::SemanticVersion(), &report));
   EXPECT_NE(std::string(""), rpc::PrettyFormat(report));
 
   // The struct containing the unknown enum value was filtered.
   // Validation should pass in this case.
-  EXPECT_FALSE(obj[S_PARAMS].keyExists(Keys::STRUCT));
+  EXPECT_FALSE(obj[S_MSG_PARAMS].keyExists(Keys::STRUCT));
   report = rpc::ValidationReport("RPC");
   EXPECT_EQ(errors::OK, schema_item->validate(obj, &report));
   EXPECT_EQ(std::string(""), rpc::PrettyFormat(report));

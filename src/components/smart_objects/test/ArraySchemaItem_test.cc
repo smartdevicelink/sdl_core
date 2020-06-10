@@ -430,7 +430,9 @@ TEST(test_array_of_objects_with_unknown_enum, test_ArraySchemaItemTest) {
   structMembersMap[Keys::MANDATORY_PARAM] =
       SMember(TEnumSchemaItem<ExampleEnum::eType>::create(enum_values), true);
 
-  ISchemaItemPtr item = CObjectSchemaItem::create(structMembersMap);
+  ISchemaItemPtr item =
+      CArraySchemaItem::create(CObjectSchemaItem::create(structMembersMap),
+                               TSchemaItemParameter<size_t>(1));
 
   SmartObject struct1;
   struct1[Keys::MANDATORY_PARAM] = "Value0";
@@ -473,16 +475,18 @@ TEST(test_array_of_objects_with_unknown_optional_enums,
   structMembersMap[Keys::MANDATORY_PARAM] =
       SMember(TEnumSchemaItem<ExampleEnum::eType>::create(enum_values), true);
 
-  ISchemaItemPtr item = CObjectSchemaItem::create(structMembersMap);
+  ISchemaItemPtr item =
+      CArraySchemaItem::create(CObjectSchemaItem::create(structMembersMap),
+                               TSchemaItemParameter<size_t>(1));
 
   SmartObject struct1;
   struct1[Keys::OPTIONAL_PARAM] = "Value10";
   struct1[Keys::MANDATORY_PARAM] = "Value0";
   SmartObject struct2;
-  struct1[Keys::OPTIONAL_PARAM] = "Value0";
+  struct2[Keys::OPTIONAL_PARAM] = "Value0";
   struct2[Keys::MANDATORY_PARAM] = "Value1";
   SmartObject struct3;
-  struct1[Keys::OPTIONAL_PARAM] = "Value12";
+  struct3[Keys::OPTIONAL_PARAM] = "Value12";
   struct3[Keys::MANDATORY_PARAM] = "Value2";
   obj[0] = struct1;
   obj[1] = struct2;
