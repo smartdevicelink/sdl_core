@@ -101,19 +101,17 @@ bool CArraySchemaItem::filterInvalidEnums(
   int index = 0;
   auto array = Object.asArray();
   size_t initial_size = array->size();
-  array->erase(
-      std::remove_if(
-          array->begin(),
-          array->end(),
-          [this, MessageVersion, report, &index](SmartObject& element) {
-            // If filterInvalidEnums returns true, the checked element
-            // is now invalid and should be filtered
-            return mElementSchemaItem->filterInvalidEnums(
-                element,
-                MessageVersion,
-                &report->ReportSubobject(std::to_string(index++)));
-          }),
-      array->end());
+  auto should_erase =
+      [this, MessageVersion, report, &index](SmartObject& element) {
+        // If filterInvalidEnums returns true, the checked element
+        // is now invalid and should be filtered
+        return mElementSchemaItem->filterInvalidEnums(
+            element,
+            MessageVersion,
+            &report->ReportSubobject(std::to_string(index++)));
+      };
+  array->erase(std::remove_if(array->begin(), array->end(), should_erase),
+               array->end());
 
   // Mark this container as invalid if it is below the minimum size after
   // filtering one or more elements
