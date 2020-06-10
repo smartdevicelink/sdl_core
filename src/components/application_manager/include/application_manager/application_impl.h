@@ -505,7 +505,7 @@ class ApplicationImpl : public virtual Application,
       const smart_objects::SmartObject& user_location) OVERRIDE;
 
   const smart_objects::SmartObject& get_user_location() const OVERRIDE;
-  
+
   /**
    * @brief Update internal state to indicate whether setup is running or not.
    *
