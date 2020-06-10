@@ -42,11 +42,11 @@ CSmartSchema::CSmartSchema(const ISchemaItemPtr SchemaItem)
 
 errors::eType CSmartSchema::validate(
     const SmartObject& object,
-    rpc::ValidationReport* report__,
+    rpc::ValidationReport* report,
     const utils::SemanticVersion& MessageVersion,
     const bool allow_unknown_enums) const {
   return mSchemaItem->validate(
-      object, report__, MessageVersion, allow_unknown_enums);
+      object, report, MessageVersion, allow_unknown_enums);
 }
 
 void CSmartSchema::setSchemaItem(const ISchemaItemPtr schemaItem) {
@@ -59,8 +59,16 @@ ISchemaItemPtr CSmartSchema::getSchemaItem() {
 
 void CSmartSchema::applySchema(SmartObject& Object,
                                const bool remove_unknown_parameters,
-                               const utils::SemanticVersion& MessageVersion) {
+                               const utils::SemanticVersion& MessageVersion,
+                               rpc::ValidationReport* report) {
   mSchemaItem->applySchema(Object, remove_unknown_parameters, MessageVersion);
+  if (remove_unknown_parameters) {
+    rpc::ValidationReport dummy_report("");
+    if (!report) {
+      report = &dummy_report;
+    }
+    mSchemaItem->filterInvalidEnums(Object, MessageVersion, report);
+  }
 }
 
 void CSmartSchema::unapplySchema(SmartObject& Object,

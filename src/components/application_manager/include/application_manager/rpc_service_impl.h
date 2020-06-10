@@ -122,6 +122,9 @@ class RPCServiceImpl : public RPCService,
 
   bool ManageMobileCommand(const commands::MessageSharedPtr message,
                            commands::Command::CommandSource source) OVERRIDE;
+  bool ManageMobileCommand(const commands::MessageSharedPtr message,
+                           commands::Command::CommandSource source,
+                           const std::string warning_info) OVERRIDE;
   bool ManageHMICommand(const commands::MessageSharedPtr message,
                         commands::Command::CommandSource source =
                             commands::Command::SOURCE_HMI) OVERRIDE;

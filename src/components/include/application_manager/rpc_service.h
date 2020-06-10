@@ -54,10 +54,16 @@ class RPCService {
    * @brief ManageMobileCommand convert message to mobile command and execute it
    * @param message pointer to received message
    * @param origin origin of command
+   * @param warning_info warning message to send on a successful response. Only
+   * applies to requests from mobile.
    * @return true if command is executed, otherwise return false
    */
   virtual bool ManageMobileCommand(const commands::MessageSharedPtr message,
                                    commands::Command::CommandSource source) = 0;
+  virtual bool ManageMobileCommand(const commands::MessageSharedPtr message,
+                                   commands::Command::CommandSource source,
+                                   const std::string warning_info) = 0;
+
   /**
    * @brief ManageHMICommand convert message to HMI command and execute it
    * @param message pointer to received message

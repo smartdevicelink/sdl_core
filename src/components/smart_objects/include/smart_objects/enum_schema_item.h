@@ -106,7 +106,7 @@ class TEnumSchemaItem : public CDefaultSchemaItem<EnumType> {
   /**
    * @brief Validate smart object.
    * @param Object Object to validate.
-   * @param report__ object for reporting errors during validation
+   * @param report object for reporting errors during validation
    * @param MessageVersion to check mobile RPC version against RPC Spec History
    * @param allow_unknown_enums
    *   false - unknown enum values (left as string values after applySchema)
@@ -116,7 +116,7 @@ class TEnumSchemaItem : public CDefaultSchemaItem<EnumType> {
    **/
   errors::eType validate(
       const SmartObject& Object,
-      rpc::ValidationReport* report__,
+      rpc::ValidationReport* report,
       const utils::SemanticVersion& MessageVersion = utils::SemanticVersion(),
       const bool allow_unknown_enums = false) OVERRIDE;
   /**
@@ -128,15 +128,17 @@ class TEnumSchemaItem : public CDefaultSchemaItem<EnumType> {
       const std::vector<ElementSignature>& signatures,
       const utils::SemanticVersion& MessageVersion);
 
+  bool filterInvalidEnums(SmartObject& Object,
+                          const utils::SemanticVersion& MessageVersion,
+                          rpc::ValidationReport* report) OVERRIDE;
+
   /**
    * @brief Apply schema.
-   * This implementation checks if enumeration is represented as string
-   * and tries to convert it to integer according to element-to-string
-   * map.
+   *
    * @param Object Object to apply schema.
    * @param remove_unknown_parameters contains true if need to remove unknown
-   *parameters
-   * from smart object otherwise contains false.
+   * parameters from smart object, otherwise contains false.
+   * @param MessageVersion the version of the schema to be applied
    **/
   void applySchema(SmartObject& Object,
                    const bool remove_unknown_parameters,
@@ -166,6 +168,7 @@ class TEnumSchemaItem : public CDefaultSchemaItem<EnumType> {
                       ElementSignatures);
   SmartType getSmartType() const OVERRIDE;
   EnumType getDefaultValue() const OVERRIDE;
+  TypeID GetType() OVERRIDE;
   /**
    * @brief Set of allowed enumeration elements.
    **/
@@ -315,9 +318,24 @@ const ElementSignature TEnumSchemaItem<EnumType>::getSignature(
 }
 
 template <typename EnumType>
+bool TEnumSchemaItem<EnumType>::filterInvalidEnums(
+    SmartObject& Object,
+    const utils::SemanticVersion& MessageVersion,
+    rpc::ValidationReport* report) {
+  rpc::ValidationReport dummy_report("");
+  if (validate(Object, &dummy_report, MessageVersion) != errors::OK) {
+    std::string validation_info =
+        "Ignored invalid value - " + Object.asString();
+    report->set_validation_info(validation_info);
+    return true;
+  }
+  return false;
+}
+
+template <typename EnumType>
 errors::eType TEnumSchemaItem<EnumType>::validate(
     const SmartObject& Object,
-    rpc::ValidationReport* report__,
+    rpc::ValidationReport* report,
     const utils::SemanticVersion& MessageVersion,
     const bool allow_unknown_enums) {
   if (SmartType_Integer != Object.getType()) {
@@ -333,7 +351,7 @@ errors::eType TEnumSchemaItem<EnumType>::validate(
           SmartObject::typeToString(SmartType_Integer) +
           " (enum), got: " + SmartObject::typeToString(Object.getType());
     }
-    report__->set_validation_info(validation_info);
+    report->set_validation_info(validation_info);
     return errors::INVALID_VALUE;
   }
 
@@ -344,7 +362,7 @@ errors::eType TEnumSchemaItem<EnumType>::validate(
     std::stringstream stream;
     stream << "Invalid enum value: " << Object.asInt();
     std::string validation_info = stream.str();
-    report__->set_validation_info(validation_info);
+    report->set_validation_info(validation_info);
     return errors::OUT_OF_RANGE;
   }
 
@@ -361,7 +379,7 @@ errors::eType TEnumSchemaItem<EnumType>::validate(
           std::string validation_info = "Enum value : " + Object.asString() +
                                         " removed for SyncMsgVersion " +
                                         MessageVersion.toString();
-          report__->set_validation_info(validation_info);
+          report->set_validation_info(validation_info);
           return errors::INVALID_VALUE;
         } else if (signature.mSince == boost::none &&
                    signature.mUntil == boost::none) {
@@ -369,7 +387,7 @@ errors::eType TEnumSchemaItem<EnumType>::validate(
           std::string validation_info = "Enum value : " + Object.asString() +
                                         " does not exist for SyncMsgVersion " +
                                         MessageVersion.toString();
-          report__->set_validation_info(validation_info);
+          report->set_validation_info(validation_info);
           return errors::INVALID_VALUE;
         }
       }
@@ -410,6 +428,11 @@ SmartType TEnumSchemaItem<EnumType>::getSmartType() const {
 template <typename EnumType>
 EnumType TEnumSchemaItem<EnumType>::getDefaultValue() const {
   return EnumType::INVALID_ENUM;
+}
+
+template <typename EnumType>
+TypeID TEnumSchemaItem<EnumType>::GetType() {
+  return TYPE_ENUM;
 }
 
 template <typename EnumType>
