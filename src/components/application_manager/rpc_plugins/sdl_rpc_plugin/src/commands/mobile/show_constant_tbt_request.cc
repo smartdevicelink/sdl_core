@@ -31,15 +31,15 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <cstring>
 #include "sdl_rpc_plugin/commands/mobile/show_constant_tbt_request.h"
+#include <cstring>
 
-#include "application_manager/policies/policy_handler.h"
 #include "application_manager/application_impl.h"
 #include "application_manager/message_helper.h"
+#include "application_manager/policies/policy_handler.h"
 #include "application_manager/policies/policy_handler_interface.h"
-#include "interfaces/MOBILE_API.h"
 #include "interfaces/HMI_API.h"
+#include "interfaces/MOBILE_API.h"
 
 namespace sdl_rpc_plugin {
 using namespace application_manager;
@@ -228,7 +228,8 @@ bool ShowConstantTBTRequest::IsWhiteSpaceExist() {
 
   if ((*message_)[strings::msg_params].keyExists(strings::next_turn_icon)) {
     str = (*message_)[strings::msg_params][strings::next_turn_icon]
-                     [strings::value].asCharArray();
+                     [strings::value]
+                         .asCharArray();
     if (!CheckSyntax(str)) {
       LOG4CXX_ERROR(logger_,
                     "Invalid next_turn_icon value syntax check failed");
@@ -289,4 +290,4 @@ bool ShowConstantTBTRequest::IsWhiteSpaceExist() {
 
 }  // namespace commands
 
-}  // namespace application_manager
+}  // namespace sdl_rpc_plugin

@@ -35,16 +35,16 @@
 
 #include "gtest/gtest.h"
 
-#include "smart_objects/smart_object.h"
-#include "application_manager/smart_object_keys.h"
-#include "application_manager/mock_message_helper.h"
 #include "application_manager/commands/command_impl.h"
 #include "application_manager/commands/commands_test.h"
+#include "application_manager/mock_message_helper.h"
+#include "application_manager/smart_object_keys.h"
 #include "mobile/on_app_interface_unregistered_notification.h"
 #include "mobile/on_audio_pass_thru_notification.h"
 #include "mobile/on_driver_distraction_notification.h"
 #include "mobile/on_language_change_notification.h"
 #include "mobile/on_permissions_change_notification.h"
+#include "smart_objects/smart_object.h"
 
 namespace test {
 namespace components {
@@ -56,8 +56,8 @@ namespace am = ::application_manager;
 namespace commands = sdl_rpc_plugin::commands;
 
 using ::testing::_;
-using ::testing::Types;
 using ::testing::Return;
+using ::testing::Types;
 
 template <class Command>
 class MobileNotificationCommandsTest

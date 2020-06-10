@@ -152,7 +152,7 @@ class DBMS {
 };
 #endif  // __QNX__
 
-}  // namespace policy
+}  // namespace policy_test
 }  // namespace components
 }  // namespace test
 

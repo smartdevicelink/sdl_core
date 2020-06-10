@@ -32,16 +32,16 @@
 
 #include <errno.h>
 #include <limits.h>
-#include <stddef.h>
-#include <signal.h>
 #include <pthread.h>
+#include <signal.h>
+#include <stddef.h>
 #include <algorithm>
 #include <functional>
 
-#include "utils/threads/thread.h"
 #include "utils/atomic.h"
-#include "utils/threads/thread_delegate.h"
 #include "utils/logger.h"
+#include "utils/threads/thread.h"
+#include "utils/threads/thread_delegate.h"
 
 #ifndef __QNXNTO__
 const int EOK = 0;
@@ -172,9 +172,9 @@ bool Thread::start(const ThreadOptions& options) {
   }
 
   if (isThreadRunning_) {
-    LOG4CXX_TRACE(logger_,
-                  "EXIT thread " << name_ << " #" << handle_
-                                 << " is already running");
+    LOG4CXX_TRACE(
+        logger_,
+        "EXIT thread " << name_ << " #" << handle_ << " is already running");
     return true;
   }
 

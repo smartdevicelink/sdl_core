@@ -35,12 +35,12 @@
 #ifndef SRC_COMPONENTS_FORMATTERS_INCLUDE_FORMATTERS_FORMATTER_JSON_RPC_H_
 #define SRC_COMPONENTS_FORMATTERS_INCLUDE_FORMATTERS_FORMATTER_JSON_RPC_H_
 
-#include <string>
 #include <sys/stat.h>
+#include <string>
 
-#include "smart_objects/smart_object.h"
-#include "smart_objects/enum_schema_item.h"
 #include "json/json.h"
+#include "smart_objects/enum_schema_item.h"
+#include "smart_objects/smart_object.h"
 
 #include "CFormatterJsonBase.h"
 #include "formatters/CSmartFactory.h"
@@ -105,11 +105,13 @@ class FormatterJsonRpc : public CFormatterJsonBase {
    *
    * @param obj Input SmartObject.
    * @param out_str Resulting JSON string.
-   *
+   * @param remove_unknown_parameters contains true if need to remove unknown
+   *parameters
    * @return true if success, false otherwise.
    */
   static bool ToString(const ns_smart_objects::SmartObject& obj,
-                       std::string& out_str);
+                       std::string& out_str,
+                       const bool remove_unknown_parameters = true);
 
   /**
    * @brief Creates a SmartObject from a JSON string.
@@ -276,11 +278,14 @@ int32_t FormatterJsonRpc::FromString(const std::string& str,
                                      ns_smart_objects::SmartObject& out) {
   int32_t result = kSuccess;
   try {
-    Json::Value root;
-    Json::Reader reader;
     namespace strings = ns_smart_device_link::ns_json_handler::strings;
+    Json::CharReaderBuilder reader_builder;
+    const std::unique_ptr<Json::CharReader> reader(
+        reader_builder.newCharReader());
+    Json::Value root;
+    const size_t json_len = str.length();
 
-    if (false == reader.parse(str, root)) {
+    if (!reader->parse(str.c_str(), str.c_str() + json_len, &root, nullptr)) {
       result = kParsingError | kMethodNotSpecified | kUnknownMethod |
                kUnknownMessageType;
     } else {

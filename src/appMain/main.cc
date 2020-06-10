@@ -30,29 +30,31 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <signal.h>
 #include <sys/stat.h>
 #include <unistd.h>
-#include <signal.h>
 #include <cstdio>
 #include <cstdlib>
-#include <memory>
-#include <vector>
-#include <string>
-#include <iostream>  // cpplint: Streams are highly discouraged.
 #include <fstream>   // cpplint: Streams are highly discouraged.
+#include <iostream>  // cpplint: Streams are highly discouraged.
+#include <memory>
+#include <string>
+#include <vector>
 
 // ----------------------------------------------------------------------------
 
+#ifdef ENABLE_LOG
 #include "utils/log_message_loop_thread.h"
+#endif  // ENABLE_LOG
 #include "utils/logger.h"
 
 #include "appMain/life_cycle_impl.h"
 #include "signal_handlers.h"
 
-#include "utils/signals.h"
-#include "utils/system.h"
 #include "config_profile/profile.h"
 #include "utils/appenders_loader.h"
+#include "utils/signals.h"
+#include "utils/system.h"
 
 #if defined(EXTENDED_MEDIA_MODE)
 #include <gst/gst.h>
@@ -86,7 +88,7 @@ bool InitHmi(std::string hmi_link) {
       .Execute();
 }
 #endif  // WEB_HMI
-}
+}  // namespace
 
 /**
  * \brief Entry point of the program.
@@ -133,7 +135,8 @@ int32_t main(int32_t argc, char** argv) {
   // Logger initialization
   INIT_LOGGER("log4cxx.properties", profile_instance.logs_enabled());
 
-  threads::Thread::SetNameForId(threads::Thread::CurrentId(), "MainThread");
+  threads::Thread::SetNameForId(threads::Thread::CurrentId(),
+                                "SDLCore");
 
   if (!utils::appenders_loader.Loaded()) {
     LOG4CXX_ERROR(logger_,

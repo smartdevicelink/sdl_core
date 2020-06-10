@@ -35,8 +35,8 @@
 
 #include <string>
 #include "gmock/gmock.h"
-#include "telemetry_monitor/telemetry_monitor.h"
 #include "telemetry_monitor/metric_wrapper.h"
+#include "telemetry_monitor/telemetry_monitor.h"
 
 namespace test {
 namespace components {
@@ -51,7 +51,7 @@ class MockTelemetryMonitor : public telemetry_monitor::TelemetryMonitor {
   MOCK_METHOD1(SendMetric,
                void(std::shared_ptr<telemetry_monitor::MetricWrapper> metric));
 };
-}  // namespace transport_manager_test
+}  // namespace telemetry_monitor_test
 }  // namespace components
 }  // namespace test
 #endif  // SRC_COMPONENTS_TELEMETRY_MONITOR_TEST_INCLUDE_TELEMETRY_MONITOR_MOCK_TELEMETRY_MONITOR_H_

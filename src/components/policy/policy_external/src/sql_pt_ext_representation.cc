@@ -29,15 +29,15 @@
  ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  POSSIBILITY OF SUCH DAMAGE.
  */
+#include "policy/sql_pt_ext_representation.h"
 #include <algorithm>
 #include <utility>
-#include "utils/logger.h"
-#include "policy/sql_pt_ext_representation.h"
-#include "policy/sql_wrapper.h"
-#include "policy/sql_pt_queries.h"
-#include "policy/sql_pt_ext_queries.h"
-#include "policy/policy_helper.h"
 #include "policy/cache_manager.h"
+#include "policy/policy_helper.h"
+#include "policy/sql_pt_ext_queries.h"
+#include "policy/sql_pt_queries.h"
+#include "policy/sql_wrapper.h"
+#include "utils/logger.h"
 
 namespace policy {
 
@@ -563,25 +563,23 @@ bool SQLPTExtRepresentation::GatherConsumerFriendlyMessages(
       msg.message_code = query.GetString(7);
 
       std::string language = query.GetString(6);
+      policy_table::Languages& languages =
+          (*messages->messages)[msg.message_code].languages;
+      policy_table::MessageString& specific_message = languages[language];
       if (!msg.tts.empty()) {
-        *(*messages->messages)[msg.message_code].languages[language].tts =
-            msg.tts;
+        *(specific_message).tts = msg.tts;
       }
       if (!msg.label.empty()) {
-        *(*messages->messages)[msg.message_code].languages[language].label =
-            msg.label;
+        *(specific_message).label = msg.label;
       }
       if (!msg.line1.empty()) {
-        *(*messages->messages)[msg.message_code].languages[language].line1 =
-            msg.line1;
+        *(specific_message).line1 = msg.line1;
       }
       if (!msg.line2.empty()) {
-        *(*messages->messages)[msg.message_code].languages[language].line2 =
-            msg.line2;
+        *(specific_message).line2 = msg.line2;
       }
       if (!msg.text_body.empty()) {
-        *(*messages->messages)[msg.message_code].languages[language].textBody =
-            msg.text_body;
+        *(specific_message).textBody = msg.text_body;
       }
     }
   } else {
@@ -675,6 +673,21 @@ bool SQLPTExtRepresentation::SaveApplicationPoliciesSection(
     return false;
   }
 
+  if (!query_delete.Exec(sql_pt::kDeleteAppServiceHandledRpcs)) {
+    LOG4CXX_WARN(logger_, "Incorrect delete from handled rpcs.");
+    return false;
+  }
+
+  if (!query_delete.Exec(sql_pt::kDeleteAppServiceNames)) {
+    LOG4CXX_WARN(logger_, "Incorrect delete from service names.");
+    return false;
+  }
+
+  if (!query_delete.Exec(sql_pt::kDeleteAppServiceTypes)) {
+    LOG4CXX_WARN(logger_, "Incorrect delete from handled service types.");
+    return false;
+  }
+
   // First, all predefined apps (e.g. default, pre_DataConsent) should be saved,
   // otherwise another app with the predefined permissions can get incorrect
   // permissions
@@ -729,6 +742,10 @@ bool SQLPTExtRepresentation::SaveSpecificAppPolicy(
     if (!SaveRequestSubType(app.first, *app.second.RequestSubType)) {
       return false;
     }
+    if (!SaveAppServiceParameters(app.first,
+                                  *app.second.app_service_parameters)) {
+      return false;
+    }
     // Stop saving other params, since predefined permissions already set
     return true;
   }
@@ -752,6 +769,34 @@ bool SQLPTExtRepresentation::SaveSpecificAppPolicy(
   app_query.Bind(5, app.second.is_null());
   app_query.Bind(6, *app.second.memory_kb);
   app_query.Bind(7, static_cast<int64_t>(*app.second.heart_beat_timeout_ms));
+  app.second.certificate.is_initialized()
+      ? app_query.Bind(8, *app.second.certificate)
+      : app_query.Bind(8);
+  app.second.hybrid_app_preference.is_initialized()
+      ? app_query.Bind(9,
+                       std::string(policy_table::EnumToJsonString(
+                           *app.second.hybrid_app_preference)))
+      : app_query.Bind(9);
+  app.second.endpoint.is_initialized()
+      ? app_query.Bind(10, *app.second.endpoint)
+      : app_query.Bind(10);
+  app.second.enabled.is_initialized() ? app_query.Bind(11, *app.second.enabled)
+                                      : app_query.Bind(11);
+  app.second.auth_token.is_initialized()
+      ? app_query.Bind(12, *app.second.auth_token)
+      : app_query.Bind(12);
+  app.second.cloud_transport_type.is_initialized()
+      ? app_query.Bind(13, *app.second.cloud_transport_type)
+      : app_query.Bind(13);
+  app.second.icon_url.is_initialized()
+      ? app_query.Bind(14, *app.second.icon_url)
+      : app_query.Bind(14);
+  app.second.allow_unknown_rpc_passthrough.is_initialized()
+      ? app_query.Bind(15, *app.second.allow_unknown_rpc_passthrough)
+      : app_query.Bind(15);
+  app.second.encryption_required.is_initialized()
+      ? app_query.Bind(16, *app.second.encryption_required)
+      : app_query.Bind(16);
 
   if (!app_query.Exec() || !app_query.Reset()) {
     LOG4CXX_WARN(logger_, "Incorrect insert into application.");
@@ -783,6 +828,11 @@ bool SQLPTExtRepresentation::SaveSpecificAppPolicy(
   }
 
   if (!SaveRequestSubType(app.first, *app.second.RequestSubType)) {
+    return false;
+  }
+
+  if (!SaveAppServiceParameters(app.first,
+                                *app.second.app_service_parameters)) {
     return false;
   }
 
@@ -873,31 +923,64 @@ bool SQLPTExtRepresentation::GatherApplicationPoliciesSection(
     params.steal_focus = query.GetBoolean(4);
     *params.memory_kb = query.GetInteger(5);
     *params.heart_beat_timeout_ms = query.GetUInteger(6);
+    if (!query.IsNull(7)) {
+      *params.certificate = query.GetString(7);
+    }
 
-    if (!GatherAppGroup(app_id, &params.groups)) {
+    // Read cloud app properties
+    policy_table::HybridAppPreference hap;
+    bool valid = policy_table::EnumFromJsonString(query.GetString(8), &hap);
+    if (valid) {
+      *params.hybrid_app_preference = hap;
+    }
+    *params.endpoint = query.GetString(9);
+    if (!query.IsNull(10)) {
+      *params.enabled = query.GetBoolean(10);
+    }
+    *params.auth_token = query.GetString(11);
+    *params.cloud_transport_type = query.GetString(12);
+    *params.icon_url = query.GetString(13);
+    *params.allow_unknown_rpc_passthrough = query.GetBoolean(14);
+    if (!query.IsNull(15)) {
+      *params.encryption_required = query.GetBoolean(15);
+    }
+    const auto& gather_app_id = ((*policies).apps[app_id].is_string())
+                                    ? (*policies).apps[app_id].get_string()
+                                    : app_id;
+    // Data should be gathered from db by  "default" key if application has
+    // default policies
+
+    if (!GatherAppGroup(gather_app_id, &params.groups)) {
       return false;
     }
 
     bool denied = false;
-    if (!GatherRemoteControlDenied(app_id, &denied)) {
+    if (!GatherRemoteControlDenied(gather_app_id, &denied)) {
       return false;
     }
     if (!denied) {
-      if (!GatherModuleType(app_id, &*params.moduleType)) {
+      if (!GatherModuleType(gather_app_id, &*params.moduleType)) {
         return false;
       }
     }
 
-    if (!GatherNickName(app_id, &*params.nicknames)) {
+    if (!GatherNickName(gather_app_id, &*params.nicknames)) {
       return false;
     }
-    if (!GatherAppType(app_id, &*params.AppHMIType)) {
+    if (!GatherAppType(gather_app_id, &*params.AppHMIType)) {
       return false;
     }
-    if (!GatherRequestType(app_id, &*params.RequestType)) {
+    if (!GatherRequestType(gather_app_id, &*params.RequestType)) {
       return false;
     }
-    GatherPreconsentedGroup(app_id, &*params.preconsented_groups);
+    if (!GatherRequestSubType(gather_app_id, &*params.RequestSubType)) {
+      return false;
+    }
+    if (!GatherAppServiceParameters(gather_app_id,
+                                    &*params.app_service_parameters)) {
+      return false;
+    }
+    GatherPreconsentedGroup(gather_app_id, &*params.preconsented_groups);
     (*policies).apps[app_id] = params;
   }
   return true;

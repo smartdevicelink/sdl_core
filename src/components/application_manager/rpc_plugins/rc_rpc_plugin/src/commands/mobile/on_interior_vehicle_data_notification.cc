@@ -31,9 +31,9 @@
  */
 
 #include "rc_rpc_plugin/commands/mobile/on_interior_vehicle_data_notification.h"
-#include "rc_rpc_plugin/rc_rpc_plugin.h"
-#include "rc_rpc_plugin/rc_module_constants.h"
 #include "rc_rpc_plugin/rc_helpers.h"
+#include "rc_rpc_plugin/rc_module_constants.h"
+#include "rc_rpc_plugin/rc_rpc_plugin.h"
 #include "smart_objects/enum_schema_item.h"
 #include "utils/macro.h"
 
@@ -50,31 +50,37 @@ OnInteriorVehicleDataNotification::OnInteriorVehicleDataNotification(
                                                   params.rpc_service_,
                                                   params.hmi_capabilities_,
                                                   params.policy_handler_)
-    , interior_data_cache_(params.interior_data_cache_) {}
+    , interior_data_cache_(params.interior_data_cache_)
+    , rc_capabilities_manager_(params.rc_capabilities_manager_) {}
 
 OnInteriorVehicleDataNotification::~OnInteriorVehicleDataNotification() {}
 
 void OnInteriorVehicleDataNotification::AddDataToCache(
-    const std::string& module_type) {
+    const ModuleUid& module) {
   const auto& data_mapping = RCHelpers::GetModuleTypeToDataMapping();
   const auto module_data =
       (*message_)[app_mngr::strings::msg_params][message_params::kModuleData]
-                 [data_mapping(module_type)];
-  interior_data_cache_.Add(module_type, module_data);
+                 [data_mapping(module.first)];
+  interior_data_cache_.Add(module, module_data);
 }
 
 void OnInteriorVehicleDataNotification::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
 
   const std::string module_type = ModuleType();
+  const std::string module_id = ModuleId();
+  const ModuleUid module(module_type, module_id);
+
   auto apps_subscribed =
-      RCHelpers::AppsSubscribedToModuleType(application_manager_, module_type);
+      RCHelpers::AppsSubscribedToModule(application_manager_, module);
   if (!apps_subscribed.empty()) {
-    AddDataToCache(module_type);
+    AddDataToCache(module);
   }
   typedef std::vector<application_manager::ApplicationSharedPtr> AppPtrs;
   AppPtrs apps = RCRPCPlugin::GetRCApplications(application_manager_);
 
+  RCHelpers::RemoveRedundantGPSDataFromIVDataMsg(
+      (*message_)[app_mngr::strings::msg_params]);
   for (AppPtrs::iterator it = apps.begin(); it != apps.end(); ++it) {
     DCHECK(*it);
     application_manager::Application& app = **it;
@@ -82,17 +88,36 @@ void OnInteriorVehicleDataNotification::Run() {
     const auto extension = RCHelpers::GetRCExtension(app);
     DCHECK(extension);
     LOG4CXX_TRACE(logger_,
-                  "Check subscription for "
-                      << app.app_id() << "and module type " << module_type);
-    if (extension->IsSubscibedToInteriorVehicleData(module_type)) {
+                  "Check subscription for " << app.app_id()
+                                            << "and module type " << module_type
+                                            << " " << module_id);
+
+    if (extension->IsSubscribedToInteriorVehicleData(module)) {
       (*message_)[app_mngr::strings::params]
                  [app_mngr::strings::connection_key] = app.app_id();
+
+      (*message_)[app_mngr::strings::msg_params][message_params::kModuleData]
+                 [message_params::kModuleId] = module_id;
+
       SendNotification();
     }
   }
 }
 
-std::string OnInteriorVehicleDataNotification::ModuleType() {
+std::string OnInteriorVehicleDataNotification::ModuleId() const {
+  LOG4CXX_AUTO_TRACE(logger_);
+  auto msg_params = (*message_)[app_mngr::strings::msg_params];
+  if (msg_params[message_params::kModuleData].keyExists(
+          message_params::kModuleId)) {
+    return msg_params[message_params::kModuleData][message_params::kModuleId]
+        .asString();
+  }
+  const std::string module_id =
+      rc_capabilities_manager_.GetDefaultModuleIdFromCapabilities(ModuleType());
+  return module_id;
+}
+
+std::string OnInteriorVehicleDataNotification::ModuleType() const {
   mobile_apis::ModuleType::eType module_type =
       static_cast<mobile_apis::ModuleType::eType>(
           (*message_)[app_mngr::strings::msg_params]

@@ -33,9 +33,9 @@
 #ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_IAP2_EMULATION_IAP2_TRANSPORT_ADAPTER_H_
 #define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_IAP2_EMULATION_IAP2_TRANSPORT_ADAPTER_H_
 
+#include "resumption/last_state_wrapper.h"
 #include "transport_manager/tcp/tcp_transport_adapter.h"
 #include "transport_manager/transport_manager_settings.h"
-#include "resumption/last_state.h"
 #include "utils/macro.h"
 #include "utils/threads/thread_delegate.h"
 
@@ -60,9 +60,14 @@ class IAP2BluetoothEmulationTransportAdapter : public TcpTransportAdapter {
    */
   IAP2BluetoothEmulationTransportAdapter(
       const uint16_t port,
-      resumption::LastState& last_state,
+      resumption::LastStateWrapperPtr last_state_wrapper,
       const TransportManagerSettings& settings);
 
+  DEPRECATED
+  IAP2BluetoothEmulationTransportAdapter(
+      const uint16_t port,
+      resumption::LastState& last_state_wrapper,
+      const TransportManagerSettings& settings);
   /**
    * @brief DeviceSwitched is called during switching from iAP2 Bluetooth to
    * iAP2 USB transport.
@@ -73,6 +78,15 @@ class IAP2BluetoothEmulationTransportAdapter : public TcpTransportAdapter {
    * @param device_handle Device handle of switched device
    */
   void DeviceSwitched(const DeviceUID& device_handle) OVERRIDE;
+
+  /**
+   * @brief Notification that transport's configuration is updated. This
+   * override is needed so that a OnTransportConfigUpdated is not sent to the
+   * mobile device for the emulated transport.
+   *
+   * @param new_config The new configuration of the transport
+   */
+  void TransportConfigUpdated(const TransportConfig& new_config) OVERRIDE;
 
  protected:
   /**
@@ -94,13 +108,20 @@ class IAP2USBEmulationTransportAdapter : public TcpTransportAdapter {
    * @param last_state LastState instance reference
    * @param settings Settings reference
    */
+  IAP2USBEmulationTransportAdapter(
+      const uint16_t port,
+      resumption::LastStateWrapperPtr last_state_wrapper,
+      const TransportManagerSettings& settings);
+
+  DEPRECATED
   IAP2USBEmulationTransportAdapter(const uint16_t port,
-                                   resumption::LastState& last_state,
-                                   const TransportManagerSettings& settings);
+                                   resumption::LastState&,
+                                   const TransportManagerSettings& settings) =
+      delete;
 
   /**
-    * Destructor
-    */
+   * Destructor
+   */
   ~IAP2USBEmulationTransportAdapter();
 
   /**
@@ -109,6 +130,15 @@ class IAP2USBEmulationTransportAdapter : public TcpTransportAdapter {
    * @param device_handle Device handle of switched device
    */
   void DeviceSwitched(const DeviceUID& device_handle) OVERRIDE;
+
+  /**
+   * @brief Notification that transport's configuration is updated. This
+   * override is needed so that a OnTransportConfigUpdated is not sent to the
+   * mobile device for the emulated transport.
+   *
+   * @param new_config The new configuration of the transport
+   */
+  void TransportConfigUpdated(const TransportConfig& new_config) OVERRIDE;
 
  protected:
   /**

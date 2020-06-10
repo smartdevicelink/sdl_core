@@ -30,24 +30,25 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "gtest/gtest.h"
 #include "transport_manager/tcp/tcp_transport_adapter.h"
-#include "resumption/last_state_impl.h"
+#include "gtest/gtest.h"
 #include "protocol/raw_message.h"
-#include "transport_manager/transport_adapter/connection.h"
-#include "transport_manager/transport_adapter/mock_transport_adapter_listener.h"
-#include "transport_manager/transport_adapter/mock_device.h"
-#include "transport_manager/transport_adapter/mock_connection.h"
-#include "transport_manager/tcp/mock_tcp_transport_adapter.h"
+#include "resumption/last_state_impl.h"
+#include "resumption/last_state_wrapper_impl.h"
 #include "transport_manager/mock_transport_manager_settings.h"
+#include "transport_manager/tcp/mock_tcp_transport_adapter.h"
+#include "transport_manager/transport_adapter/connection.h"
+#include "transport_manager/transport_adapter/mock_connection.h"
+#include "transport_manager/transport_adapter/mock_device.h"
+#include "transport_manager/transport_adapter/mock_transport_adapter_listener.h"
 
 namespace test {
 namespace components {
 namespace transport_manager_test {
 
+using ::testing::_;
 using ::testing::Return;
 using ::testing::ReturnRef;
-using ::testing::_;
 
 using namespace ::protocol_handler;
 using namespace ::transport_manager;
@@ -55,9 +56,13 @@ using namespace transport_manager::transport_adapter;
 
 class TcpAdapterTest : public ::testing::Test {
  protected:
-  TcpAdapterTest() : last_state_("app_storage_folder", "app_info_storage") {}
+  TcpAdapterTest() {
+    last_state_wrapper_ = std::make_shared<resumption::LastStateWrapperImpl>(
+        std::make_shared<resumption::LastStateImpl>("app_storage_folder",
+                                                    "app_info_storage"));
+  }
   MockTransportManagerSettings transport_manager_settings;
-  resumption::LastStateImpl last_state_;
+  std::shared_ptr<resumption::LastStateWrapperImpl> last_state_wrapper_;
   const uint32_t port = 12345;
   const std::string string_port = "12345";
   std::string network_interface = "";
@@ -72,7 +77,7 @@ class TcpAdapterTest : public ::testing::Test {
 TEST_F(TcpAdapterTest, StoreDataWithOneDeviceAndOneApplication) {
   // Prepare
   MockTCPTransportAdapter transport_adapter(
-      port, last_state_, transport_manager_settings);
+      port, last_state_wrapper_, transport_manager_settings);
   std::string uniq_id = "unique_device_name";
   std::shared_ptr<MockTCPDevice> mockdev =
       std::make_shared<MockTCPDevice>(port, uniq_id);
@@ -96,8 +101,9 @@ TEST_F(TcpAdapterTest, StoreDataWithOneDeviceAndOneApplication) {
   transport_adapter.CallStore();
 
   // Check that value is saved
-  Json::Value& tcp_dict =
-      last_state_.get_dictionary()["TransportManager"]["TcpAdapter"];
+  resumption::LastStateAccessor accessor = last_state_wrapper_->get_accessor();
+  const Json::Value dictionary = accessor.GetData().dictionary();
+  const Json::Value& tcp_dict = dictionary["TransportManager"]["TcpAdapter"];
 
   ASSERT_TRUE(tcp_dict.isObject());
   ASSERT_FALSE(tcp_dict["devices"].isNull());
@@ -112,7 +118,7 @@ TEST_F(TcpAdapterTest, StoreDataWithOneDeviceAndOneApplication) {
 TEST_F(TcpAdapterTest, StoreDataWithSeveralDevicesAndOneApplication) {
   // Prepare
   MockTCPTransportAdapter transport_adapter(
-      port, last_state_, transport_manager_settings);
+      port, last_state_wrapper_, transport_manager_settings);
   const uint32_t count_dev = 10;
   std::shared_ptr<MockTCPDevice> mockdev[count_dev];
   std::string uniq_id[count_dev];
@@ -148,8 +154,9 @@ TEST_F(TcpAdapterTest, StoreDataWithSeveralDevicesAndOneApplication) {
   transport_adapter.CallStore();
 
   // Check that values are saved
-  Json::Value& tcp_dict =
-      last_state_.get_dictionary()["TransportManager"]["TcpAdapter"];
+  resumption::LastStateAccessor accessor = last_state_wrapper_->get_accessor();
+  const Json::Value dictionary = accessor.GetData().dictionary();
+  const Json::Value& tcp_dict = dictionary["TransportManager"]["TcpAdapter"];
 
   ASSERT_TRUE(tcp_dict.isObject());
   ASSERT_FALSE(tcp_dict["devices"].isNull());
@@ -166,7 +173,7 @@ TEST_F(TcpAdapterTest, StoreDataWithSeveralDevicesAndOneApplication) {
 TEST_F(TcpAdapterTest, StoreDataWithSeveralDevicesAndSeveralApplications) {
   // Prepare
   MockTCPTransportAdapter transport_adapter(
-      port, last_state_, transport_manager_settings);
+      port, last_state_wrapper_, transport_manager_settings);
   const uint32_t count_dev = 10;
 
   std::shared_ptr<MockTCPDevice> mockdev[count_dev];
@@ -206,8 +213,9 @@ TEST_F(TcpAdapterTest, StoreDataWithSeveralDevicesAndSeveralApplications) {
   transport_adapter.CallStore();
 
   // Check that value is saved
-  Json::Value& tcp_dict =
-      last_state_.get_dictionary()["TransportManager"]["TcpAdapter"];
+  resumption::LastStateAccessor accessor = last_state_wrapper_->get_accessor();
+  const Json::Value dictionary = accessor.GetData().dictionary();
+  const Json::Value& tcp_dict = dictionary["TransportManager"]["TcpAdapter"];
 
   ASSERT_TRUE(tcp_dict.isObject());
   ASSERT_FALSE(tcp_dict["devices"].isNull());
@@ -225,7 +233,7 @@ TEST_F(TcpAdapterTest, StoreDataWithSeveralDevicesAndSeveralApplications) {
 TEST_F(TcpAdapterTest, StoreData_ConnectionNotExist_DataNotStored) {
   // Prepare
   MockTCPTransportAdapter transport_adapter(
-      port, last_state_, transport_manager_settings);
+      port, last_state_wrapper_, transport_manager_settings);
   std::string uniq_id = "unique_device_name";
   auto mockdev = std::make_shared<MockTCPDevice>(port, uniq_id);
   transport_adapter.AddDevice(mockdev);
@@ -243,26 +251,32 @@ TEST_F(TcpAdapterTest, StoreData_ConnectionNotExist_DataNotStored) {
   transport_adapter.CallStore();
 
   // Check that value is not saved
-  Json::Value& tcp_dict =
-      last_state_.get_dictionary()["TransportManager"]["TcpAdapter"]["devices"];
+  resumption::LastStateAccessor accessor = last_state_wrapper_->get_accessor();
+  const Json::Value dictionary = accessor.GetData().dictionary();
+  const Json::Value& tcp_dict =
+      dictionary["TransportManager"]["TcpAdapter"]["devices"];
 
   ASSERT_TRUE(tcp_dict.isNull());
 }
 
 TEST_F(TcpAdapterTest, RestoreData_DataNotStored) {
-  Json::Value& tcp_adapter_dictionary =
-      last_state_.get_dictionary()["TransportManager"]["TcpAdapter"];
-
-  tcp_adapter_dictionary = Json::Value();
+  {
+    resumption::LastStateAccessor accessor =
+        last_state_wrapper_->get_accessor();
+    Json::Value dictionary = accessor.GetData().dictionary();
+    Json::Value& tcp_dictionary = dictionary["TransportManager"]["TcpAdapter"];
+    tcp_dictionary = Json::Value();
+    accessor.GetMutableData().set_dictionary(dictionary);
+  }
   MockTCPTransportAdapter transport_adapter(
-      port, last_state_, transport_manager_settings);
+      port, last_state_wrapper_, transport_manager_settings);
   EXPECT_CALL(transport_adapter, Connect(_, _)).Times(0);
   EXPECT_TRUE(transport_adapter.CallRestore());
 }
 
 TEST_F(TcpAdapterTest, StoreDataWithOneDevice_RestoreData) {
   MockTCPTransportAdapter transport_adapter(
-      port, last_state_, transport_manager_settings);
+      port, last_state_wrapper_, transport_manager_settings);
   std::string uniq_id = "unique_device_name";
   std::shared_ptr<MockTCPDevice> mockdev =
       std::make_shared<MockTCPDevice>(port, uniq_id);
@@ -297,7 +311,7 @@ TEST_F(TcpAdapterTest, StoreDataWithOneDevice_RestoreData) {
 
 TEST_F(TcpAdapterTest, StoreDataWithSeveralDevices_RestoreData) {
   MockTCPTransportAdapter transport_adapter(
-      port, last_state_, transport_manager_settings);
+      port, last_state_wrapper_, transport_manager_settings);
   const uint32_t count_dev = 10;
 
   std::shared_ptr<MockTCPDevice> mockdev[count_dev];
@@ -350,8 +364,8 @@ TEST_F(TcpAdapterTest, StoreDataWithSeveralDevices_RestoreData) {
 TEST_F(TcpAdapterTest, NotifyTransportConfigUpdated) {
   MockTransportAdapterListener mock_adapter_listener;
 
-  MockTCPTransportAdapter transport_adapter(
-      port, last_state_, transport_manager_settings);
+  TcpTransportAdapter transport_adapter(
+      port, last_state_wrapper_, transport_manager_settings);
   transport_adapter.AddListener(&mock_adapter_listener);
 
   TransportConfig config;
@@ -359,14 +373,16 @@ TEST_F(TcpAdapterTest, NotifyTransportConfigUpdated) {
   config[tc_tcp_ip_address] = std::string("192.168.1.1");
   config[tc_tcp_port] = std::string("12345");
 
-  EXPECT_CALL(mock_adapter_listener, OnTransportConfigUpdated(_)).Times(1);
+  EXPECT_CALL(mock_adapter_listener,
+              OnTransportConfigUpdated(&transport_adapter))
+      .Times(1);
 
   transport_adapter.TransportConfigUpdated(config);
 }
 
 TEST_F(TcpAdapterTest, GetTransportConfiguration) {
   MockTCPTransportAdapter transport_adapter(
-      port, last_state_, transport_manager_settings);
+      port, last_state_wrapper_, transport_manager_settings);
 
   TransportConfig config;
   config[tc_enabled] = std::string("true");

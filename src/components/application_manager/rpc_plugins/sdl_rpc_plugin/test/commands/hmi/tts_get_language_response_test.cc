@@ -30,13 +30,12 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "gtest/gtest.h"
 #include "hmi/tts_get_language_response.h"
-#include "application_manager/smart_object_keys.h"
 #include "application_manager/commands/commands_test.h"
-#include "application_manager/mock_hmi_capabilities.h"
 #include "application_manager/mock_event_dispatcher.h"
-#include "application_manager/commands/commands_test.h"
+#include "application_manager/mock_hmi_capabilities.h"
+#include "application_manager/smart_object_keys.h"
+#include "gtest/gtest.h"
 
 namespace test {
 namespace components {

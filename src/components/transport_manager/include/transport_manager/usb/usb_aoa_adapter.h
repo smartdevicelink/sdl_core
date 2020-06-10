@@ -44,8 +44,13 @@ namespace transport_adapter {
 
 class UsbAoaAdapter : public TransportAdapterImpl {
  public:
-  UsbAoaAdapter(resumption::LastState& last_state,
+  UsbAoaAdapter(resumption::LastStateWrapperPtr last_state_wrapper,
                 const TransportManagerSettings& settings);
+
+  DEPRECATED
+  UsbAoaAdapter(resumption::LastState&,
+                const TransportManagerSettings& settings) = delete;
+
   virtual ~UsbAoaAdapter();
 
  protected:

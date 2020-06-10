@@ -81,8 +81,8 @@ class CustomString {
   CustomString(size_t n, char c);
 
   /**
-  * @brief Returns the length of the string, in terms of characters.
-  */
+   * @brief Returns the length of the string, in terms of characters.
+   */
   size_t size() const;
 
   /**

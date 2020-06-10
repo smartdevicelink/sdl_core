@@ -1,11 +1,11 @@
 #ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TCP_NETWORK_INTERFACE_LISTENER_IMPL_H_
 #define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TCP_NETWORK_INTERFACE_LISTENER_IMPL_H_
 
-#include <string>
 #include <memory>
+#include <string>
 
-#include "utils/macro.h"
 #include "transport_manager/tcp/network_interface_listener.h"
+#include "utils/macro.h"
 
 namespace transport_manager {
 namespace transport_adapter {

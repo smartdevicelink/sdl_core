@@ -31,13 +31,13 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <algorithm>
 #include "vehicle_info_plugin/commands/mobile/diagnostic_message_request.h"
+#include <algorithm>
 
 #include "application_manager/application_impl.h"
 
-#include "interfaces/HMI_API.h"
 #include "application_manager/message_helper.h"
+#include "interfaces/HMI_API.h"
 
 namespace vehicle_info_plugin {
 using namespace application_manager;
@@ -46,15 +46,12 @@ namespace commands {
 
 DiagnosticMessageRequest::DiagnosticMessageRequest(
     const application_manager::commands::MessageSharedPtr& message,
-    ApplicationManager& application_manager,
-    rpc_service::RPCService& rpc_service,
-    HMICapabilities& hmi_capabilities,
-    policy::PolicyHandlerInterface& policy_handler)
+    const VehicleInfoCommandParams& params)
     : CommandRequestImpl(message,
-                         application_manager,
-                         rpc_service,
-                         hmi_capabilities,
-                         policy_handler) {}
+                         params.application_manager_,
+                         params.rpc_service_,
+                         params.hmi_capabilities_,
+                         params.policy_handler_) {}
 
 DiagnosticMessageRequest::~DiagnosticMessageRequest() {}
 
@@ -127,4 +124,4 @@ void DiagnosticMessageRequest::on_event(const event_engine::Event& event) {
 
 }  // namespace commands
 
-}  // namespace application_manager
+}  // namespace vehicle_info_plugin

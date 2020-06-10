@@ -30,8 +30,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "gtest/gtest.h"
 #include "utils/back_trace.h"
+#include "gtest/gtest.h"
 
 namespace test {
 namespace components {

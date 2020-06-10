@@ -32,24 +32,23 @@
 
 #include <stdint.h>
 
-#include "gtest/gtest.h"
+#include "application_manager/mock_request.h"
 #include "application_manager/request_controller.h"
 #include "application_manager/request_info.h"
-#include "application_manager/mock_request.h"
+#include "gtest/gtest.h"
 
-#include "smart_objects/smart_object.h"
+#include "application_manager/application_impl.h"
 #include "application_manager/commands/command_request_impl.h"
 #include "application_manager/message_helper.h"
-#include "application_manager/application_impl.h"
+#include "smart_objects/smart_object.h"
 
-#include "application_manager/mock_application_manager.h"
 #include "application_manager/event_engine/event_dispatcher.h"
-#include "resumption/last_state.h"
-#include "application_manager/policies/policy_handler.h"
-#include "application_manager/state_controller.h"
-#include "application_manager/resumption/resume_ctrl.h"
-#include "application_manager/mock_request_controller_settings.h"
 #include "application_manager/mock_application_manager.h"
+#include "application_manager/mock_request_controller_settings.h"
+#include "application_manager/policies/policy_handler.h"
+#include "application_manager/resumption/resume_ctrl.h"
+#include "application_manager/state_controller.h"
+#include "resumption/last_state.h"
 #include "utils/test_async_waiter.h"
 
 namespace test {
@@ -59,10 +58,10 @@ namespace request_controller_test {
 using ::application_manager::request_controller::RequestController;
 using ::application_manager::request_controller::RequestInfo;
 
+using ::testing::_;
+using ::testing::NiceMock;
 using ::testing::Return;
 using ::testing::ReturnRef;
-using ::testing::NiceMock;
-using ::testing::_;
 
 typedef NiceMock<application_manager_test::MockRequest> MRequest;
 typedef std::shared_ptr<MRequest> RequestPtr;

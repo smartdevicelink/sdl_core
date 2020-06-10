@@ -32,18 +32,19 @@
 
 #include <stdint.h>
 
-#include "gtest/gtest.h"
 #include "application_manager/application_manager.h"
 #include "application_manager/hmi_language_handler.h"
-#include "application_manager/state_controller.h"
+#include "application_manager/mock_application.h"
 #include "application_manager/mock_application_manager.h"
 #include "application_manager/mock_event_dispatcher.h"
-#include "application_manager/mock_message_helper.h"
-#include "application_manager/resumption/resume_ctrl_impl.h"
 #include "application_manager/mock_hmi_capabilities.h"
-#include "application_manager/mock_application.h"
+#include "application_manager/mock_message_helper.h"
 #include "application_manager/mock_rpc_service.h"
+#include "application_manager/resumption/resume_ctrl_impl.h"
 #include "application_manager/smart_object_keys.h"
+#include "application_manager/state_controller.h"
+#include "gtest/gtest.h"
+#include "resumption/last_state_wrapper_impl.h"
 #include "test/resumption/mock_last_state.h"
 
 #include "utils/lock.h"
@@ -54,13 +55,13 @@ namespace hmi_language_handler {
 
 namespace am = ::application_manager;
 
-using am::event_engine::Event;
 using am::ApplicationSet;
+using am::event_engine::Event;
 
+using ::testing::_;
+using ::testing::NiceMock;
 using ::testing::Return;
 using ::testing::ReturnRef;
-using ::testing::NiceMock;
-using ::testing::_;
 
 typedef NiceMock<
     ::test::components::application_manager_test::MockApplicationManager>
@@ -135,7 +136,6 @@ class HmiLanguageHandlerTest : public ::testing::Test {
   MockEventDispatcher event_dispatcher_;
   std::shared_ptr<am::HMILanguageHandler> hmi_language_handler_;
   std::shared_ptr<sync_primitives::Lock> app_set_lock_;
-  resumption_test::MockLastState last_state_;
   MockRPCService mock_rpc_service_;
 };
 
@@ -155,9 +155,12 @@ TEST_F(HmiLanguageHandlerTest, OnEvent_AllLanguageIsReceivedAndSame_SUCCESS) {
 
   // Set up `active_*_language` and
   //`persisted_ui_language_` to be the same
+  auto mock_last_state = std::make_shared<resumption_test::MockLastState>();
+  std::shared_ptr<resumption::LastStateWrapperImpl> last_state_wrapper =
+      std::make_shared<resumption::LastStateWrapperImpl>(mock_last_state);
   Json::Value dictionary = Json::Value();
-  ON_CALL(last_state_, get_dictionary()).WillByDefault(ReturnRef(dictionary));
-  hmi_language_handler_->Init(&last_state_);
+  ON_CALL(*mock_last_state, dictionary()).WillByDefault(Return(dictionary));
+  hmi_language_handler_->Init(last_state_wrapper);
   InitHMICapabilitiesLanguages(hmi_apis::Common_Language::eType::EN_US,
                                hmi_apis::Common_Language::eType::EN_US,
                                hmi_apis::Common_Language::eType::EN_US);

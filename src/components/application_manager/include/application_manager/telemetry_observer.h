@@ -33,9 +33,9 @@
 #ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_TELEMETRY_OBSERVER_H_
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_TELEMETRY_OBSERVER_H_
 
-#include "smart_objects/smart_object.h"
 #include "application_manager/smart_object_keys.h"
 #include "json/json.h"
+#include "smart_objects/smart_object.h"
 
 #include "utils/date_time.h"
 
@@ -53,5 +53,5 @@ class AMTelemetryObserver {
   virtual void OnMessage(MessageMetricSharedPtr) = 0;
   virtual ~AMTelemetryObserver() {}
 };
-}  // application_manager
+}  // namespace application_manager
 #endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_TELEMETRY_OBSERVER_H_

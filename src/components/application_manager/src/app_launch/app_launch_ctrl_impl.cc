@@ -29,14 +29,14 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-#include <iterator>
+#include "application_manager/app_launch/app_launch_ctrl_impl.h"
 #include <algorithm>
+#include <iterator>
 #include <utility>
 #include <vector>
-#include "application_manager/app_launch/app_launch_ctrl_impl.h"
+#include "application_manager/application.h"
 #include "application_manager/resumption/resume_ctrl.h"
 #include "connection_handler/connection_handler.h"
-#include "application_manager/application.h"
 #include "utils/timer_task_impl.h"
 
 namespace app_launch {

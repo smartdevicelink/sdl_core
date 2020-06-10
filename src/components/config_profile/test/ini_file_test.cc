@@ -30,8 +30,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "gtest/gtest.h"
 #include "config_profile/ini_file.h"
+#include "gtest/gtest.h"
 #include "utils/file_system.h"
 
 namespace test {

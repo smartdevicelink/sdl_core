@@ -32,30 +32,30 @@
 
 #include "application_manager/mobile_message_handler.h"
 
-#include <string>
-#include <ctime>
 #include <algorithm>
+#include <ctime>
 #include <iterator>
+#include <string>
 #include <vector>
 
-#include "gmock/gmock.h"
 #include "application_manager/message.h"
+#include "gmock/gmock.h"
 #include "protocol/raw_message.h"
 
 namespace test {
 namespace components {
 namespace application_manager_test {
 
+using ::application_manager::Message;
+using ::application_manager::MobileMessage;
+using application_manager::MobileMessageHandler;
+using protocol_handler::MajorProtocolVersion;
+using protocol_handler::MessagePriority;
+using protocol_handler::PROTOCOL_HEADER_V2_SIZE;
 using protocol_handler::RawMessage;
 using protocol_handler::RawMessagePtr;
 using protocol_handler::ServiceType;
-using protocol_handler::MessagePriority;
-using protocol_handler::PROTOCOL_HEADER_V2_SIZE;
-using application_manager::MobileMessageHandler;
-using protocol_handler::MajorProtocolVersion;
 using ::testing::_;
-using ::application_manager::Message;
-using ::application_manager::MobileMessage;
 
 using testing::Return;
 
@@ -109,6 +109,7 @@ class MobileMessageHandlerTest : public testing::Test {
                                                 protocol_version,
                                                 &full_data[0],
                                                 full_size,
+                                                false,
                                                 ServiceType::kRpc,
                                                 payload_size);
 

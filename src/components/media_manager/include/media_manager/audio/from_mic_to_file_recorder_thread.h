@@ -33,8 +33,8 @@
 #ifndef SRC_COMPONENTS_MEDIA_MANAGER_INCLUDE_MEDIA_MANAGER_AUDIO_FROM_MIC_TO_FILE_RECORDER_THREAD_H_
 #define SRC_COMPONENTS_MEDIA_MANAGER_INCLUDE_MEDIA_MANAGER_AUDIO_FROM_MIC_TO_FILE_RECORDER_THREAD_H_
 
-#include <net/if.h>
 #include <gst/gst.h>
+#include <net/if.h>
 #include <string>
 
 #include "utils/lock.h"

@@ -73,11 +73,14 @@ class CFormatterJsonSDLRPCv2 : public CFormatterJsonBase {
    *
    * @param obj input SmartObject
    * @param outStr resulting JSON string
+   * @param remove_unknown_parameters contains true if need to remove unknown
+   *parameters
    * @return true if success, false otherwise
    */
   static bool toString(
       const ns_smart_device_link::ns_smart_objects::SmartObject& obj,
-      std::string& outStr);
+      std::string& outStr,
+      const bool remove_unknown_parameters = true);
 
   /**
    * @brief Creates a SmartObject from a JSON string.
@@ -128,12 +131,15 @@ class CFormatterJsonSDLRPCv2 : public CFormatterJsonBase {
    * @param schema Smart schema which describes 'fake' smart object to be
    *formatted
    * @param outStr Resulting JSON string
+   * @param remove_unknown_parameters contains true if need to remove unknown
+   *parameters
    * @return formatting error code
    */
   static tMetaFormatterErrorCode MetaFormatToString(
       const ns_smart_device_link::ns_smart_objects::SmartObject& object,
       const ns_smart_device_link::ns_smart_objects::CSmartSchema& schema,
-      std::string& outStr);
+      std::string& outStr,
+      const bool remove_unknown_parameters = true);
 };
 
 template <typename FunctionId, typename MessageType>
@@ -145,13 +151,16 @@ inline bool CFormatterJsonSDLRPCv2::fromString(
   bool result = true;
 
   try {
+    Json::CharReaderBuilder reader_builder;
+    const std::unique_ptr<Json::CharReader> reader(
+        reader_builder.newCharReader());
     Json::Value root;
-    Json::Reader reader;
-
+    const size_t json_len = str.length();
     namespace strings = ns_smart_device_link::ns_json_handler::strings;
-    bool result = reader.parse(str, root);
+    const bool result =
+        reader->parse(str.c_str(), str.c_str() + json_len, &root, nullptr);
 
-    if (true == result) {
+    if (result) {
       out[strings::S_PARAMS][strings::S_MESSAGE_TYPE] = messageType;
       out[strings::S_PARAMS][strings::S_FUNCTION_ID] = functionId;
       out[strings::S_PARAMS][strings::S_PROTOCOL_TYPE] = 0;
@@ -182,8 +191,8 @@ inline bool CFormatterJsonSDLRPCv2::fromString(
 
   return result;
 }
-}
-}
-}  // namespace ns_smart_device_link::ns_json_handler::formatters
+}  // namespace formatters
+}  // namespace ns_json_handler
+}  // namespace ns_smart_device_link
 
 #endif  // SRC_COMPONENTS_FORMATTERS_INCLUDE_FORMATTERS_CFORMATTERJSONSDLRPCV2_H_

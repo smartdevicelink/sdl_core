@@ -32,6 +32,7 @@
 
 #include "policy/update_status_manager.h"
 #include "policy/policy_listener.h"
+#include "policy/ptu_retry_handler.h"
 #include "utils/logger.h"
 
 namespace policy {
@@ -60,6 +61,7 @@ UpdateStatusManager::~UpdateStatusManager() {
 }
 
 void UpdateStatusManager::ProcessEvent(UpdateEvent event) {
+  LOG4CXX_AUTO_TRACE(logger_);
   sync_primitives::AutoLock lock(status_lock_);
   current_status_->ProcessEvent(this, event);
   last_processed_event_ = event;
@@ -87,6 +89,14 @@ void UpdateStatusManager::OnUpdateSentOut(uint32_t update_timeout) {
 
 void UpdateStatusManager::OnUpdateTimeoutOccurs() {
   LOG4CXX_AUTO_TRACE(logger_);
+
+  auto& ptu_retry_handler = listener_->ptu_retry_handler();
+
+  if (ptu_retry_handler.IsAllowedRetryCountExceeded()) {
+    ptu_retry_handler.RetrySequenceFailed();
+    return;
+  }
+
   ProcessEvent(kOnUpdateTimeout);
   DCHECK(update_status_thread_delegate_);
   update_status_thread_delegate_->updateTimeOut(0);  // Stop Timer
@@ -96,6 +106,12 @@ void UpdateStatusManager::OnValidUpdateReceived() {
   LOG4CXX_AUTO_TRACE(logger_);
   update_status_thread_delegate_->updateTimeOut(0);  // Stop Timer
   ProcessEvent(kOnValidUpdateReceived);
+}
+
+void UpdateStatusManager::ResetTimeout(uint32_t update_timeout) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  update_status_thread_delegate_->updateTimeOut(
+      update_timeout);  // Restart Timer
 }
 
 void UpdateStatusManager::OnWrongUpdateReceived() {
@@ -118,21 +134,29 @@ void UpdateStatusManager::OnResetRetrySequence() {
   ProcessEvent(kOnResetRetrySequence);
 }
 
-void UpdateStatusManager::OnNewApplicationAdded(const DeviceConsent consent) {
-  LOG4CXX_AUTO_TRACE(logger_);
-  if (kDeviceAllowed != consent) {
-    app_registered_from_non_consented_device_ = true;
-    return;
-  }
-  app_registered_from_non_consented_device_ = false;
-  ProcessEvent(kOnNewAppRegistered);
-}
-
-void UpdateStatusManager::OnPolicyInit(bool is_update_required) {
+void UpdateStatusManager::OnExistedApplicationAdded(
+    const bool is_update_required) {
   LOG4CXX_AUTO_TRACE(logger_);
   if (is_update_required) {
     current_status_.reset(new UpToDateStatus());
     ProcessEvent(kScheduleUpdate);
+  }
+}
+
+void UpdateStatusManager::OnNewApplicationAdded(const DeviceConsent consent) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  if (kDeviceAllowed != consent) {
+    LOG4CXX_DEBUG(logger_, "Application registered from non-consented device");
+    app_registered_from_non_consented_device_ = true;
+    return;
+  }
+  LOG4CXX_DEBUG(logger_, "Application registered from consented device");
+  app_registered_from_non_consented_device_ = false;
+  if (kOnResetRetrySequence == last_processed_event_) {
+    current_status_.reset(new UpToDateStatus());
+    ProcessEvent(kScheduleUpdate);
+  } else {
+    ProcessEvent(kOnNewAppRegistered);
   }
 }
 
@@ -152,10 +176,17 @@ bool UpdateStatusManager::IsUpdatePending() const {
 }
 
 void UpdateStatusManager::ScheduleUpdate() {
+  LOG4CXX_AUTO_TRACE(logger_);
   ProcessEvent(kScheduleUpdate);
 }
 
+void UpdateStatusManager::PendingUpdate() {
+  LOG4CXX_AUTO_TRACE(logger_);
+  ProcessEvent(kPendingUpdate);
+}
+
 void UpdateStatusManager::ScheduleManualUpdate() {
+  LOG4CXX_AUTO_TRACE(logger_);
   ProcessEvent(kScheduleManualUpdate);
 }
 
@@ -190,7 +221,10 @@ void UpdateStatusManager::DoTransition() {
   current_status_ = next_status_;
   next_status_.reset();
 
-  if (last_processed_event_ != kScheduleManualUpdate) {
+  const bool is_update_pending =
+      policy::StatusProcessingSnapshot == current_status_->get_status();
+
+  if (last_processed_event_ != kScheduleManualUpdate && !is_update_pending) {
     listener_->OnUpdateStatusChanged(current_status_->get_status_string());
   }
 

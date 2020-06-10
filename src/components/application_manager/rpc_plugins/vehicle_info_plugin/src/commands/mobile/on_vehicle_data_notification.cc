@@ -34,11 +34,11 @@
 #include "vehicle_info_plugin/commands/mobile/on_vehicle_data_notification.h"
 
 #include "application_manager/application_impl.h"
+#include "application_manager/helpers/application_helper.h"
 #include "application_manager/message_helper.h"
 #include "interfaces/MOBILE_API.h"
-#include "vehicle_info_plugin/vehicle_info_app_extension.h"
-#include "application_manager/helpers/application_helper.h"
 #include "utils/macro.h"
+#include "vehicle_info_plugin/vehicle_info_app_extension.h"
 
 namespace vehicle_info_plugin {
 using namespace application_manager;
@@ -47,90 +47,74 @@ namespace commands {
 
 OnVehicleDataNotification::OnVehicleDataNotification(
     const application_manager::commands::MessageSharedPtr& message,
-    ApplicationManager& application_manager,
-    app_mngr::rpc_service::RPCService& rpc_service,
-    app_mngr::HMICapabilities& hmi_capabilities,
-    policy::PolicyHandlerInterface& policy_handler)
+    const VehicleInfoCommandParams& params)
     : CommandNotificationImpl(message,
-                              application_manager,
-                              rpc_service,
-                              hmi_capabilities,
-                              policy_handler) {}
+                              params.application_manager_,
+                              params.rpc_service_,
+                              params.hmi_capabilities_,
+                              params.policy_handler_)
+    , custom_vehicle_data_manager_(params.custom_vehicle_data_manager_) {}
 
 OnVehicleDataNotification::~OnVehicleDataNotification() {}
 
 void OnVehicleDataNotification::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  std::vector<ApplicationSharedPtr> appNotification;
-  std::vector<ApplicationSharedPtr>::iterator appNotification_it =
-      appNotification.begin();
+  std::vector<ApplicationSharedPtr> notify_apps;
+  std::vector<ApplicationSharedPtr>::iterator notified_app_it =
+      notify_apps.begin();
   std::vector<smart_objects::SmartObject> appSO;
 
-  const VehicleData& vehicle_data = MessageHelper::vehicle_data();
-  VehicleData::const_iterator it = vehicle_data.begin();
+  custom_vehicle_data_manager_.CreateMobileMessageParams(
+      (*message_)[strings::msg_params]);
 
-  for (; vehicle_data.end() != it; ++it) {
-    if (true == (*message_)[strings::msg_params].keyExists(it->first)) {
-      LOG4CXX_ERROR(logger_, "vehicle_data nanme" << it->first);
-      auto vehicle_data_value =
-          (*message_)[strings::msg_params][it->first].asInt();
+  const auto& param_names = (*message_)[strings::msg_params].enumerate();
+  for (const auto& name : param_names) {
+    LOG4CXX_DEBUG(logger_, "vehicle_data name: " << name);
+    auto vehicle_data_value = (*message_)[strings::msg_params][name].asInt();
+    application_manager_.IviInfoUpdated(name, vehicle_data_value);
 
-      application_manager_.IviInfoUpdated(it->second, vehicle_data_value);
+    auto subscribed_to_ivi_predicate = [&name](const ApplicationSharedPtr app) {
+      DCHECK_OR_RETURN(app, false);
+      auto& ext = VehicleInfoAppExtension::ExtractVIExtension(*app);
+      return ext.isSubscribedToVehicleInfo(name);
+    };
 
-      auto subscribed_to_ivi_predicate = [&it](const ApplicationSharedPtr app) {
-        DCHECK_OR_RETURN(app, false);
-        auto& ext = VehicleInfoAppExtension::ExtractVIExtension(*app);
-        return ext.isSubscribedToVehicleInfo(it->second);
-      };
-
-      const std::vector<ApplicationSharedPtr>& applications =
-          application_manager::FindAllApps(application_manager_.applications(),
-                                           subscribed_to_ivi_predicate);
-
-      std::vector<ApplicationSharedPtr>::const_iterator app_it =
-          applications.begin();
-
-      for (; applications.end() != app_it; ++app_it) {
-        const ApplicationSharedPtr app = *app_it;
-        if (!app) {
-          LOG4CXX_ERROR(logger_, "NULL pointer");
-          continue;
-        }
-
-        appNotification_it =
-            find(appNotification.begin(), appNotification.end(), app);
-        if (appNotification_it == appNotification.end()) {
-          appNotification.push_back(app);
-          smart_objects::SmartObject msg_param =
-              smart_objects::SmartObject(smart_objects::SmartType_Map);
-          msg_param[it->first] = (*message_)[strings::msg_params][it->first];
-          appSO.push_back(msg_param);
-        } else {
-          size_t idx =
-              std::distance(appNotification.begin(), appNotification_it);
-          appSO[idx][it->first] = (*message_)[strings::msg_params][it->first];
-        }
+    const auto& applications = application_manager::FindAllApps(
+        application_manager_.applications(), subscribed_to_ivi_predicate);
+    for (const auto& app : applications) {
+      if (!app) {
+        LOG4CXX_ERROR(logger_, "NULL pointer");
+        continue;
+      }
+      notified_app_it = find(notify_apps.begin(), notify_apps.end(), app);
+      if (notified_app_it == notify_apps.end()) {
+        notify_apps.push_back(app);
+        smart_objects::SmartObject msg_param =
+            smart_objects::SmartObject(smart_objects::SmartType_Map);
+        msg_param[name] = (*message_)[strings::msg_params][name];
+        appSO.push_back(msg_param);
+      } else {
+        size_t idx = std::distance(notify_apps.begin(), notified_app_it);
+        appSO[idx][name] = (*message_)[strings::msg_params][name];
       }
     }
   }
 
-  LOG4CXX_DEBUG(
-      logger_,
-      "Number of Notifications to be send: " << appNotification.size());
+  LOG4CXX_DEBUG(logger_,
+                "Number of Notifications to be send: " << notify_apps.size());
 
-  for (size_t idx = 0; idx < appNotification.size(); idx++) {
+  for (size_t idx = 0; idx < notify_apps.size(); idx++) {
     LOG4CXX_INFO(logger_,
                  "Send OnVehicleData PRNDL notification to "
-                     << appNotification[idx]->name().c_str()
-                     << " application id " << appNotification[idx]->app_id());
+                     << notify_apps[idx]->name().c_str() << " application id "
+                     << notify_apps[idx]->app_id());
     (*message_)[strings::params][strings::connection_key] =
-        appNotification[idx]->app_id();
+        notify_apps[idx]->app_id();
     (*message_)[strings::msg_params] = appSO[idx];
     SendNotification();
   }
 }
 
 }  // namespace commands
-
-}  // namespace application_manager
+}  // namespace vehicle_info_plugin

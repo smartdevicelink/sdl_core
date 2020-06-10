@@ -38,18 +38,18 @@
 #include <bluetooth/bluetooth.h>
 #include <bluetooth/hci.h>
 #include <bluetooth/hci_lib.h>
+#include <bluetooth/rfcomm.h>
 #include <bluetooth/sdp.h>
 #include <bluetooth/sdp_lib.h>
-#include <bluetooth/rfcomm.h>
 #include <errno.h>
-#include <sys/types.h>
 #include <sys/socket.h>
 #include <sys/time.h>
+#include <sys/types.h>
 #include <unistd.h>
-#include <vector>
 #include <sstream>
-#include "transport_manager/bluetooth/bluetooth_transport_adapter.h"
+#include <vector>
 #include "transport_manager/bluetooth/bluetooth_device.h"
+#include "transport_manager/bluetooth/bluetooth_transport_adapter.h"
 
 #include "utils/logger.h"
 #include "utils/threads/thread.h"
@@ -133,7 +133,27 @@ BluetoothDeviceScanner::BluetoothDeviceScanner(
                                                    0xA8};
   sdp_uuid128_create(&smart_device_link_service_uuid_,
                      smart_device_link_service_uuid_data);
-  thread_ = threads::CreateThread("BT Device Scaner",
+  thread_ = threads::CreateThread("BT Device Scanner",
+                                  new BluetoothDeviceScannerDelegate(this));
+}
+
+BluetoothDeviceScanner::BluetoothDeviceScanner(
+    TransportAdapterController* controller,
+    bool auto_repeat_search,
+    int auto_repeat_pause_sec,
+    const uint8_t* smart_device_link_service_uuid_data)
+    : controller_(controller)
+    , thread_(NULL)
+    , shutdown_requested_(false)
+    , ready_(true)
+    , device_scan_requested_(false)
+    , device_scan_requested_lock_()
+    , device_scan_requested_cv_()
+    , auto_repeat_search_(auto_repeat_search)
+    , auto_repeat_pause_sec_(auto_repeat_pause_sec) {
+  sdp_uuid128_create(&smart_device_link_service_uuid_,
+                     smart_device_link_service_uuid_data);
+  thread_ = threads::CreateThread("BT Device Scanner",
                                   new BluetoothDeviceScannerDelegate(this));
 }
 

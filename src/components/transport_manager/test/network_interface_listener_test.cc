@@ -3,8 +3,8 @@
 #include <time.h>
 
 #include "gtest/gtest.h"
-#include "transport_manager/tcp/network_interface_listener_impl.h"
 #include "transport_manager/tcp/mock_tcp_client_listener.h"
+#include "transport_manager/tcp/network_interface_listener_impl.h"
 #include "utils/test_async_waiter.h"
 #include "utils/threads/thread.h"
 
@@ -15,7 +15,7 @@ namespace transport_manager_test {
 namespace {
 const long kThreadStartWaitMsec = 10;
 const uint32_t kStartNotificationTimeoutMsec = 500;
-}
+}  // namespace
 
 using ::testing::_;
 using ::testing::AtLeast;

@@ -28,7 +28,7 @@
  * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
-*/
+ */
 
 #ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_HELP_PROMPT_MANAGER_IMPL_H_
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_HELP_PROMPT_MANAGER_IMPL_H_
@@ -56,7 +56,7 @@ class HelpPromptManagerImpl : public HelpPromptManager {
  public:
   /**
    * @brief Container for buffering VR help commands
-  */
+   */
   typedef std::pair<uint32_t, smart_objects::SmartObjectSPtr> VRCommandPair;
   typedef std::vector<VRCommandPair> VRCommandPairs;
 
@@ -94,12 +94,12 @@ class HelpPromptManagerImpl : public HelpPromptManager {
                           const bool is_resumption) OVERRIDE;
 
   /**
-     * @brief Stop constructing vrHelp and/or helpPrompt if they are present in
-     * message
-     * @param msg containing GlobalProperties
-     * @param is_response determines is the request or response for the for
-     * the SetGlobalPropertiesRequest
-     */
+   * @brief Stop constructing vrHelp and/or helpPrompt if they are present in
+   * message
+   * @param msg containing GlobalProperties
+   * @param is_response determines is the request or response for the for
+   * the SetGlobalPropertiesRequest
+   */
   void OnSetGlobalPropertiesReceived(const smart_objects::SmartObject& msg,
                                      const bool is_response) OVERRIDE;
 
