@@ -521,7 +521,7 @@ bool StateControllerImpl::IsStateAvailable(ApplicationSharedPtr app,
     }
 
     if (IsTempStateActive(HmiState::StateID::STATE_ID_EMBEDDED_NAVI) &&
-        app->IsVideoApplication()) {
+        app->is_navi()) {
       LOG4CXX_DEBUG(logger_,
                     "Navi or projection app is not allowed to activate due"
                         << " to EMBEDDED_NAVI event is active");
