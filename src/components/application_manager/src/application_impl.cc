@@ -1347,14 +1347,16 @@ void ApplicationImpl::SetSetupInProgress(bool in_progress) {
   LOG4CXX_AUTO_TRACE(logger_);
 
   sync_primitives::AutoLock auto_lock(setup_in_progress_lock_);
-  bool previous_flag = setup_in_progress_;
   setup_in_progress_ = in_progress;
   LOG4CXX_DEBUG(logger_,
                 "setup_in_progress_ of app " << app_id_ << " updated to "
                                              << setup_in_progress_);
 
-  // unblock WaitForSetupDone() when the flag changes from true to false
-  if (previous_flag == true && setup_in_progress_ == false) {
+  // Unblock WaitForSetupDone() when the flag is false. In our use-case the
+  // method is unblocked when setup_in_progress_ changes from true to false.
+  // However, for safe, we always unblock it even if setup_in_progress_
+  // wasn't true.
+  if (!in_progress) {
     setup_in_progress_cond_.Broadcast();
   }
 }
