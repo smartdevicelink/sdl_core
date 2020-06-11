@@ -549,11 +549,23 @@ bool StateControllerImpl::IsStateAvailable(ApplicationSharedPtr app,
     return IsStateAvailableForResumption(app, state);
   }
 
-  if (IsTempStateActive(HmiState::StateID::STATE_ID_AUDIO_SOURCE) ||
-      IsTempStateActive(HmiState::StateID::STATE_ID_EMBEDDED_NAVI)) {
+  // fix: AUDIO_SOURCE actived, actived media app return false. other is ok.
+  if (IsTempStateActive(HmiState::StateID::STATE_ID_AUDIO_SOURCE) &&
+      app->is_media_application()) {
     if (HMILevel::HMI_FULL == state->hmi_level()) {
       LOG4CXX_DEBUG(logger_,
-                    "AUDIO_SOURCE or EMBEDDED_NAVI is active."
+                    "AUDIO_SOURCE is active."
+                        << " Requested state is not available");
+      return false;
+    }
+  }
+
+  // fix: EMBEDDED_NAVI actived, actived navi or project app return false. other is ok.
+  if (IsTempStateActive(HmiState::StateID::STATE_ID_EMBEDDED_NAVI) &&
+      (app->is_navi() || app->mobile_projection_enabled())) {
+    if (HMILevel::HMI_FULL == state->hmi_level()) {
+      LOG4CXX_DEBUG(logger_,
+                    "EMBEDDED_NAVI is active."
                         << " Requested state is not available");
       return false;
     }
