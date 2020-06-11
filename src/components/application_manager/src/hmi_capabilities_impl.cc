@@ -463,8 +463,7 @@ HMICapabilitiesImpl::HMICapabilitiesImpl(ApplicationManager& app_mngr)
   }
 }
 
-HMICapabilitiesImpl::~HMICapabilitiesImpl() {
-}
+HMICapabilitiesImpl::~HMICapabilitiesImpl() {}
 
 bool HMICapabilitiesImpl::VerifyImageType(const int32_t image_type) const {
   sync_primitives::AutoReadLock lock(hmi_capabilities_lock_);
@@ -794,8 +793,8 @@ HMICapabilitiesImpl::tts_supported_languages() const {
   return tts_supported_languages_;
 }
 
-const smart_objects::SmartObjectSPtr
-HMICapabilitiesImpl::display_capabilities() const {
+const smart_objects::SmartObjectSPtr HMICapabilitiesImpl::display_capabilities()
+    const {
   sync_primitives::AutoReadLock lock(hmi_capabilities_lock_);
   return display_capabilities_;
 }
@@ -892,8 +891,8 @@ HMICapabilitiesImpl::navigation_capability() const {
   return navigation_capability_;
 }
 
-const smart_objects::SmartObjectSPtr
-HMICapabilitiesImpl::phone_capability() const {
+const smart_objects::SmartObjectSPtr HMICapabilitiesImpl::phone_capability()
+    const {
   sync_primitives::AutoReadLock lock(hmi_capabilities_lock_);
   return phone_capability_;
 }
@@ -904,7 +903,8 @@ HMICapabilitiesImpl::video_streaming_capability() const {
   return video_streaming_capability_;
 }
 
-const smart_objects::SmartObjectSPtr HMICapabilitiesImpl::rc_capability() const {
+const smart_objects::SmartObjectSPtr HMICapabilitiesImpl::rc_capability()
+    const {
   sync_primitives::AutoReadLock lock(hmi_capabilities_lock_);
   return rc_capability_;
 }

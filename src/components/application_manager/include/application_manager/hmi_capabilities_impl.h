@@ -499,7 +499,8 @@ class HMICapabilitiesImpl : public HMICapabilities {
    *
    * @return HMI's video streaming related capability information
    */
-  const smart_objects::SmartObjectSPtr video_streaming_capability() const OVERRIDE;
+  const smart_objects::SmartObjectSPtr video_streaming_capability()
+      const OVERRIDE;
 
   void set_rc_capability(
       const smart_objects::SmartObject& rc_capability) OVERRIDE;
@@ -509,7 +510,8 @@ class HMICapabilitiesImpl : public HMICapabilities {
   void set_seat_location_capability(
       const smart_objects::SmartObject& seat_location_capability) OVERRIDE;
 
-  const smart_objects::SmartObjectSPtr seat_location_capability() const OVERRIDE;
+  const smart_objects::SmartObjectSPtr seat_location_capability()
+      const OVERRIDE;
 
   void Init(resumption::LastStateWrapperPtr last_state_wrapper) OVERRIDE;
 

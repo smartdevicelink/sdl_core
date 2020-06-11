@@ -140,7 +140,8 @@ class HMICapabilities {
    *
    * @return Currently supported UI languages
    */
-  virtual const smart_objects::SmartObjectSPtr ui_supported_languages() const = 0;
+  virtual const smart_objects::SmartObjectSPtr ui_supported_languages()
+      const = 0;
 
   /*
    * @brief Sets supported UI languages
@@ -170,7 +171,8 @@ class HMICapabilities {
    *
    * @return Currently supported VR languages
    */
-  virtual const smart_objects::SmartObjectSPtr vr_supported_languages() const = 0;
+  virtual const smart_objects::SmartObjectSPtr vr_supported_languages()
+      const = 0;
 
   /*
    * @brief Sets supported VR languages
@@ -201,7 +203,8 @@ class HMICapabilities {
    *
    * @return Currently supported TTS languages
    */
-  virtual const smart_objects::SmartObjectSPtr tts_supported_languages() const = 0;
+  virtual const smart_objects::SmartObjectSPtr tts_supported_languages()
+      const = 0;
 
   /*
    * @brief Sets supported TTS languages
@@ -464,11 +467,12 @@ class HMICapabilities {
       const smart_objects::SmartObject& navigation_capability) = 0;
 
   /*
-   * @brief Retrieves information regarding the navigation system capability
+   * @brief Retrieves information regarding the navigation system capabilityp
    *
    * @return NAVIGATION system capability
    */
-  virtual const smart_objects::SmartObjectSPtr navigation_capability() const = 0;
+  virtual const smart_objects::SmartObjectSPtr navigation_capability()
+      const = 0;
 
   /*
    * @brief Interface used to store information regarding
