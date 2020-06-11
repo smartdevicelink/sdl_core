@@ -274,6 +274,12 @@ void ApplicationImpl::SetRegularState(const WindowID window_id,
   state_.AddState(window_id, state);
 }
 
+void ApplicationImpl::SetCurrentState(const WindowID window_id,
+                                      HmiStatePtr state) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  state_.SetCurrentState(window_id, state);
+}
+
 void ApplicationImpl::RemovePostponedState(const WindowID window_id) {
   LOG4CXX_AUTO_TRACE(logger_);
   state_.RemoveState(window_id, HmiState::STATE_ID_POSTPONED);

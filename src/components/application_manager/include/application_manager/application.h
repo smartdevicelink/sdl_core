@@ -863,6 +863,13 @@ class Application : public virtual InitialApplicationData,
   virtual void SetRegularState(const WindowID window_id, HmiStatePtr state) = 0;
 
   /**
+   * @brief SetCurrentState set current state of application
+   * @param window_id window id for HMI state
+   * @param state state to setup
+   */
+  virtual void SetCurrentState(const WindowID window_id, HmiStatePtr state) = 0;
+
+  /**
    * @brief SetPostponedState sets postponed state to application.
    * This state could be set as regular later
    * @param window_id window id for HMI state

@@ -189,6 +189,9 @@ class MockApplication : public ::application_manager::Application {
                void(const application_manager::WindowID window_id,
                     const std::string& window_name,
                     application_manager::HmiStatePtr state));
+  MOCK_METHOD2(SetCurrentState,
+               void(const application_manager::WindowID window_id,
+                    application_manager::HmiStatePtr state));
   MOCK_METHOD2(SetRegularState,
                void(const application_manager::WindowID window_id,
                     application_manager::HmiStatePtr state));

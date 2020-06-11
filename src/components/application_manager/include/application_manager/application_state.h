@@ -116,10 +116,17 @@ class ApplicationState {
   WindowIds GetWindowIds() const;
 
   /**
-   * @brief Getter f0r a list of all existing window names
+   * @brief Getter for a list of all existing window names
    * @return list of available window names
    */
   WindowNames GetWindowNames() const;
+
+  /**
+   * @brief Overwrites current state of application
+   * @param window_id window id for HMI state
+   * @param state State of application
+   */
+  void SetCurrentState(const WindowID window_id, HmiStatePtr state);
 
  private:
   /**

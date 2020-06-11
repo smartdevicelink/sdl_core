@@ -625,7 +625,15 @@ void StateControllerImpl::SetupRegularHmiState(ApplicationSharedPtr app,
   old_state->set_video_streaming_state(curr_state->video_streaming_state());
   old_state->set_system_context(curr_state->system_context());
   old_state->set_window_type(curr_state->window_type());
+  
   app->SetRegularState(window_id, state);
+  HmiStatePtr new_state =
+      std::make_shared<HmiState>(app, app_mngr_, curr_state->state_id());
+  new_state->set_hmi_level(state->hmi_level());
+  new_state->set_audio_streaming_state(state->audio_streaming_state());
+  new_state->set_video_streaming_state(state->video_streaming_state());
+  new_state->set_system_context(state->system_context());
+  new_state->set_window_type(state->window_type());
 
   if (mobile_apis::PredefinedWindows::DEFAULT_WINDOW == window_id &&
       HMILevel::HMI_LIMITED == state->hmi_level() && app->is_resuming()) {
@@ -635,7 +643,10 @@ void StateControllerImpl::SetupRegularHmiState(ApplicationSharedPtr app,
     MessageHelper::SendOnResumeAudioSourceToHMI(app->app_id(), app_mngr_);
   }
 
-  HmiStatePtr new_state = app->CurrentHmiState(window_id);
+  if (curr_state->state_id() != HmiState::StateID::STATE_ID_REGULAR) {
+    app->SetCurrentState(window_id, new_state);
+  }
+
   OnStateChanged(app, window_id, old_state, new_state);
 }
 

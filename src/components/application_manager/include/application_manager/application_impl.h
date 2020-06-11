@@ -321,6 +321,7 @@ class ApplicationImpl : public virtual Application,
    * @param state state to setup
    */
   void SetRegularState(const WindowID window_id, HmiStatePtr state) FINAL;
+  void SetCurrentState(const WindowID window_id, HmiStatePtr state) FINAL;
 
   /**
    * @brief SetPostponedState sets postponed state to application.

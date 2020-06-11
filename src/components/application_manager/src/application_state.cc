@@ -250,6 +250,26 @@ void ApplicationState::RemovePostponedState(const WindowID window_id) {
   hmi_states.erase(postponed_state);
 }
 
+void ApplicationState::SetCurrentState(const WindowID window_id,
+                                       HmiStatePtr state) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  DCHECK_OR_RETURN_VOID(state);
+  sync_primitives::AutoLock auto_lock(hmi_states_map_lock_);
+  auto it_states = hmi_states_map_.find(window_id);
+  DCHECK_OR_RETURN_VOID(it_states != hmi_states_map_.end());
+
+  HmiStates& hmi_states = it_states->second;
+  DCHECK_OR_RETURN_VOID(!hmi_states.empty());
+
+  HmiStatePtr back_state = hmi_states.back();
+  DCHECK_OR_RETURN_VOID(
+      back_state->state_id() != HmiState::StateID::STATE_ID_POSTPONED);
+  if (back_state->state_id() != HmiState::StateID::STATE_ID_REGULAR) {
+    hmi_states.pop_back();
+    hmi_states.push_back(state);
+  }
+}
+
 void ApplicationState::SetRegularState(const WindowID window_id,
                                        HmiStatePtr state) {
   LOG4CXX_AUTO_TRACE(logger_);
