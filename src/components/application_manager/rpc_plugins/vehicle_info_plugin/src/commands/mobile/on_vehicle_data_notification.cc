@@ -79,8 +79,7 @@ void OnVehicleDataNotification::Run() {
       auto& ext = VehicleInfoAppExtension::ExtractVIExtension(*app);
       // Fix for Invalid object usage
       if (nullptr == &ext) {
-        LOG4CXX_ERROR(
-              logger_, "ExtractVIExtension is nullptr ");
+        LOG4CXX_ERROR(logger_, "ExtractVIExtension is nullptr");
         return false;
       }
       return ext.isSubscribedToVehicleInfo(name);

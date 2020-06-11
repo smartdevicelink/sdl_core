@@ -127,8 +127,7 @@ void VehicleInfoPlugin::UnsubscribeFromRemovedVDItems() {
       auto& ext = VehicleInfoAppExtension::ExtractVIExtension(*app);
       // iauto fix Null pointer object determines protection
       if (nullptr == &ext) {
-        LOG4CXX_ERROR(
-              logger_, "ExtractVIExtension is nullptr ");
+        LOG4CXX_ERROR(logger_, "ExtractVIExtension is nullptr");
         continue;
       }
       auto subscription_names = ext.Subscriptions();
@@ -193,8 +192,7 @@ application_manager::ApplicationSharedPtr FindAppSubscribedToIVI(
     auto& ext = VehicleInfoAppExtension::ExtractVIExtension(*app);
     // iauto fix Null pointer object determines protection
     if (nullptr == &ext) {
-      LOG4CXX_ERROR(
-            logger_, "ExtractVIExtension is nullptr ");
+      LOG4CXX_ERROR(logger_, "ExtractVIExtension is nullptr");
       return application_manager::ApplicationSharedPtr();
     }
     if (ext.isSubscribedToVehicleInfo(ivi_name)) {
@@ -256,8 +254,7 @@ void VehicleInfoPlugin::DeleteSubscriptions(
   auto& ext = VehicleInfoAppExtension::ExtractVIExtension(*app);
   // iauto fix Null pointer object determines protection
   if (nullptr == &ext) {
-    LOG4CXX_ERROR(
-          logger_, "ExtractVIExtension is nullptr ");
+    LOG4CXX_ERROR(logger_, "ExtractVIExtension is nullptr");
     return;
   }
   auto subscriptions = ext.Subscriptions();

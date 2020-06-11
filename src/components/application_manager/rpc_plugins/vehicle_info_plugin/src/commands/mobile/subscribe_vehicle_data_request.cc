@@ -223,8 +223,7 @@ bool SubscribeVehicleDataRequest::SubscribePendingVehicleData(
       auto& ext = VehicleInfoAppExtension::ExtractVIExtension(*app);
       // Fix for Invalid object usage
       if (nullptr == &ext) {
-        LOG4CXX_ERROR(
-              logger_, "ExtractVIExtension is nullptr ");
+        LOG4CXX_ERROR(logger_, "ExtractVIExtension is nullptr");
         vi_name = vi_waiting_for_subscribe_.erase(vi_name);
         continue;
       }
@@ -365,8 +364,7 @@ void SubscribeVehicleDataRequest::CheckVISubscriptions(
   auto& ext = VehicleInfoAppExtension::ExtractVIExtension(*app);
   // Fix for Invalid object usage
   if (nullptr == &ext) {
-    LOG4CXX_ERROR(
-              logger_, "ExtractVIExtension is nullptr ");
+    LOG4CXX_ERROR(logger_, "ExtractVIExtension is nullptr");
     return;
   }
   VehicleInfoSubscriptions::size_type items_to_subscribe = 0;
