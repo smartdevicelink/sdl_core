@@ -128,6 +128,9 @@ class RPCServiceImpl : public RPCService,
   bool ManageHMICommand(const commands::MessageSharedPtr message,
                         commands::Command::CommandSource source =
                             commands::Command::SOURCE_HMI) OVERRIDE;
+  bool ManageHMICommand(const commands::MessageSharedPtr message,
+                        commands::Command::CommandSource source,
+                        const std::string warning_info) OVERRIDE;
 
   // CALLED ON messages_to_hmi_ thread!
   void Handle(const impl::MessageToHmi message) OVERRIDE;
