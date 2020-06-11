@@ -2393,7 +2393,7 @@ void PolicyManagerImpl::SetDefaultHmiTypes(
 }
 
 struct HMITypeToInt {
-  int operator()(const policy_table::AppHMITypes::value_type item) {
+  int operator()(const policy_table::AppHMITypes::value_type item) const {
     return policy_table::AppHMIType(item);
   }
 };

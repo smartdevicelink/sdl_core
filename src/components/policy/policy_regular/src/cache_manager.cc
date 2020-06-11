@@ -93,7 +93,8 @@ struct PolicyTableUpdater {
       const policy_table::ApplicationParams& default_params)
       : default_params_(default_params) {}
 
-  void operator()(policy_table::ApplicationPolicies::value_type& pt_value) {
+  void operator()(
+      policy_table::ApplicationPolicies::value_type& pt_value) const {
     if (policy::kDefaultId == pt_value.second.get_string()) {
       pt_value.second = default_params_;
       pt_value.second.set_to_string(policy::kDefaultId);

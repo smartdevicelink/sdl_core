@@ -298,7 +298,7 @@ struct StateIDComparator {
   HmiState::StateID state_id_;
   explicit StateIDComparator(HmiState::StateID state_id)
       : state_id_(state_id) {}
-  bool operator()(const HmiStatePtr cur) {
+  bool operator()(const HmiStatePtr cur) const {
     return cur->state_id() == state_id_;
   }
 };
@@ -1147,7 +1147,7 @@ struct FindSoftButtonId {
   explicit FindSoftButtonId(const uint32_t soft_button_id)
       : soft_button_id_(soft_button_id) {}
 
-  bool operator()(const std::pair<uint32_t, WindowID>& element) {
+  bool operator()(const std::pair<uint32_t, WindowID>& element) const {
     return soft_button_id_ == element.first;
   }
 };

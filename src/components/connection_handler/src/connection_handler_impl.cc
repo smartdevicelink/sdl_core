@@ -219,7 +219,7 @@ namespace {
 struct DeviceFinder {
   explicit DeviceFinder(const std::string& device_uid)
       : device_uid_(device_uid) {}
-  bool operator()(const DeviceMap::value_type& device) {
+  bool operator()(const DeviceMap::value_type& device) const {
     return device_uid_ == device.second.mac_address();
   }
 
