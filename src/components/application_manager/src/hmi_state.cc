@@ -249,8 +249,8 @@ mobile_apis::HMILevel::eType AudioSource::hmi_level() const {
 
   // Checking for NONE  is necessary to avoid issue during
   // calculation of HMI level during setting default HMI level
-  if (keep_context_ || HMILevel::HMI_NONE == parent()->hmi_level()
-    || HMILevel::INVALID_ENUM == parent()->hmi_level()) {
+  if (keep_context_ || HMILevel::HMI_NONE == parent()->hmi_level() ||
+      HMILevel::INVALID_ENUM == parent()->hmi_level()) {
     return parent()->hmi_level();
   }
 
