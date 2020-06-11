@@ -166,7 +166,8 @@ struct LinkCollector
   typedef std::vector<policy_table::UserConsentRecords::key_type>
       ApplicationsIds;
 
-  LinkCollector(std::map<std::string, std::string>& links) : links_(links) {}
+  explicit LinkCollector(std::map<std::string, std::string>& links)
+      : links_(links) {}
 
   void operator()(const policy_table::DeviceData::value_type& value) {
     using namespace policy_table;
@@ -208,7 +209,8 @@ struct ExternalConsentConsentGroupAppender
 };
 
 struct DefaultPolicyUpdater {
-  DefaultPolicyUpdater(const policy_table::ApplicationParams& default_params)
+  explicit DefaultPolicyUpdater(
+      const policy_table::ApplicationParams& default_params)
       : default_params_(default_params) {}
 
   void operator()(policy_table::ApplicationPolicies::value_type& pt_value) {

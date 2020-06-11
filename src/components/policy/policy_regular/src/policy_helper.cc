@@ -54,7 +54,8 @@ bool CompareStrings(const StringsValueType& first,
 }
 
 struct CheckGroupName {
-  CheckGroupName(const policy::StringsValueType& value) : value_(value) {}
+  explicit CheckGroupName(const policy::StringsValueType& value)
+      : value_(value) {}
 
   bool operator()(const FunctionalGroupNames::value_type& value) {
     return value.second.second == std::string(value_);

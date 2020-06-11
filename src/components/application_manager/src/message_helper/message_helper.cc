@@ -107,7 +107,7 @@ bool ValidateSoftButtons(smart_objects::SmartObject& soft_buttons) {
 
 struct GroupsAppender
     : std::unary_function<void, const PermissionsList::value_type&> {
-  GroupsAppender(smart_objects::SmartObject& groups)
+  explicit GroupsAppender(smart_objects::SmartObject& groups)
       : groups_(groups), index_(0) {}
 
   void operator()(const PermissionsList::value_type& item) {
@@ -135,7 +135,7 @@ struct GroupsAppender
 struct ExternalConsentStatusAppender
     : std::unary_function<void,
                           const policy::ExternalConsentStatus::value_type&> {
-  ExternalConsentStatusAppender(smart_objects::SmartObject& status)
+  explicit ExternalConsentStatusAppender(smart_objects::SmartObject& status)
       : status_(status), index_(0) {}
 
   void operator()(const policy::ExternalConsentStatus::value_type& item) {
