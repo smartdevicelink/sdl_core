@@ -40,6 +40,7 @@ include_directories (
   ${COMPONENTS_DIR}/protocol_handler/include
   ${JSONCPP_INCLUDE_DIRECTORY}
   ${LOG4CXX_INCLUDE_DIRECTORY}
+  ${BOOST_INCLUDE_DIR}
   ${CMAKE_SOURCE_DIR}/src
 )
 
@@ -57,7 +58,10 @@ set(EXCLUDE_PATHS
   ${DBMS_PATHS}
 )
 
-set(LIBRARIES)
+set(LIBRARIES
+  encryption
+  jsoncpp
+)
 
 if(NOT BUILD_BACKTRACE_SUPPORT)
   list(APPEND EXCLUDE_PATHS

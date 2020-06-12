@@ -29,17 +29,17 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
+#include "media_manager/audio/a2dp_source_player_adapter.h"
 #include <net/if.h>
-#include <pulse/simple.h>
 #include <pulse/error.h>
+#include <pulse/simple.h>
 #include <string.h>
 #include <utility>
-#include "utils/threads/thread.h"
-#include "media_manager/audio/a2dp_source_player_adapter.h"
-#include "utils/lock.h"
-#include "utils/logger.h"
 #include "connection_handler/connection_handler_impl.h"
 #include "protocol_handler/session_observer.h"
+#include "utils/lock.h"
+#include "utils/logger.h"
+#include "utils/threads/thread.h"
 
 namespace media_manager {
 
@@ -60,7 +60,7 @@ class A2DPSourcePlayerAdapter::A2DPSourcePlayerThread
   // The Sample format to use
   static const pa_sample_spec sSampleFormat_;
 
-  pa_simple* s_in, *s_out;
+  pa_simple *s_in, *s_out;
   std::string device_;
   bool should_be_stopped_;
   sync_primitives::Lock should_be_stopped_lock_;
@@ -85,9 +85,9 @@ A2DPSourcePlayerAdapter::~A2DPSourcePlayerAdapter() {
 }
 
 void A2DPSourcePlayerAdapter::StartActivity(int32_t application_key) {
-  LOG4CXX_INFO(logger_,
-               "Starting a2dp playing music for " << application_key
-                                                  << " application.");
+  LOG4CXX_INFO(
+      logger_,
+      "Starting a2dp playing music for " << application_key << " application.");
   if (application_key != current_application_) {
     current_application_ = application_key;
 
@@ -110,9 +110,9 @@ void A2DPSourcePlayerAdapter::StartActivity(int32_t application_key) {
 }
 
 void A2DPSourcePlayerAdapter::StopActivity(int32_t application_key) {
-  LOG4CXX_INFO(logger_,
-               "Stopping 2dp playing for " << application_key
-                                           << " application.");
+  LOG4CXX_INFO(
+      logger_,
+      "Stopping 2dp playing for " << application_key << " application.");
   if (application_key != current_application_) {
     return;
   }

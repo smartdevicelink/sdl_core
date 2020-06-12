@@ -91,6 +91,6 @@ class System {
   std::vector<std::string> argv_;
 };
 
-}  // utils
+}  // namespace utils
 
 #endif  // SRC_COMPONENTS_UTILS_INCLUDE_UTILS_SYSTEM_H_

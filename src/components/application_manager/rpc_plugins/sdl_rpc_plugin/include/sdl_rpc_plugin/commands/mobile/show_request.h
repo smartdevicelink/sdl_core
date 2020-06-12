@@ -90,14 +90,39 @@ class ShowRequest : public app_mngr::commands::CommandRequestImpl {
                       int32_t field_index,
                       smart_objects::SmartObject& msg_params);
 
+  /**
+   * @brief Handle the template configuration information from the
+   * incoming mobile json message format for specified application
+   * @param app - application for which configuration should be checked
+   * @return True if template config can be successfully applied otherwise -
+   * false
+   */
+  bool CheckTemplateConfigurationForApp(application_manager::Application& app);
+
+  /**
+   * @brief Applies the template configuration which was set up beforehand
+   * @param result - result code on which template application is dependent
+   * @param app - application for which configuration should be applied
+   */
+  void ApplyTemplateConfigurationForApp(mobile_apis::Result::eType result,
+                                        application_manager::Application& app);
+
   mobile_apis::Result::eType core_result_code_;
   std::string core_response_info_;
+  app_mngr::WindowID current_window_id_;
+  smart_objects::SmartObject template_config_;
+  bool layout_change_required_;
+
+  // dcs - abbreviation of Day Color Scheme
+  bool dcs_change_required_;
+  // ncd - abbreviation of Night Color Scheme
+  bool ncs_change_required_;
 
   DISALLOW_COPY_AND_ASSIGN(ShowRequest);
 };
 
 }  // namespace commands
 
-}  // namespace application_manager
+}  // namespace sdl_rpc_plugin
 
 #endif  // SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_MOBILE_SHOW_REQUEST_H_

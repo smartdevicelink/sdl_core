@@ -30,27 +30,30 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <string>
 #include <algorithm>
+#include <string>
 
-#include "gtest/gtest.h"
-#include "application_manager/resumption/resume_ctrl_impl.h"
-#include "application_manager/usage_statistics.h"
-#include "application_manager/mock_application.h"
+#include "application_manager/application.h"
+#include "application_manager/application_manager_impl.h"
+#include "application_manager/display_capabilities_builder.h"
 #include "application_manager/mock_app_extension.h"
+#include "application_manager/mock_application.h"
 #include "application_manager/mock_help_prompt_manager.h"
 #include "application_manager/mock_resumption_data.h"
-#include "interfaces/MOBILE_API.h"
-#include "application_manager/application_manager_impl.h"
-#include "application_manager/application.h"
-#include "utils/data_accessor.h"
+#include "application_manager/mock_rpc_service.h"
+#include "application_manager/resumption/resume_ctrl_impl.h"
+#include "application_manager/usage_statistics.h"
 #include "config_profile/profile.h"
+#include "gtest/gtest.h"
+#include "interfaces/MOBILE_API.h"
+#include "utils/data_accessor.h"
 
-#include "application_manager/mock_message_helper.h"
 #include "application_manager/mock_application_manager.h"
 #include "application_manager/mock_application_manager_settings.h"
 #include "application_manager/mock_event_dispatcher.h"
+#include "application_manager/mock_message_helper.h"
 #include "application_manager/mock_state_controller.h"
+#include "application_manager/policies/mock_policy_handler_interface.h"
 
 namespace test {
 namespace components {
@@ -64,14 +67,20 @@ using ::testing::Eq;
 using ::testing::Mock;
 using ::testing::NiceMock;
 using ::testing::Return;
-using ::testing::ReturnRef;
-using ::testing::SetArgReferee;
 using ::testing::ReturnPointee;
+using ::testing::ReturnRef;
 using ::testing::SaveArg;
+using ::testing::SetArgReferee;
 using namespace application_manager_test;
 
 using namespace resumption;
 using namespace mobile_apis::HMILevel;
+
+namespace {
+const WindowID kDefaultWindowId =
+    mobile_apis::PredefinedWindows::DEFAULT_WINDOW;
+const int32_t kDefaultHmiAppId = 111;
+}  // namespace
 
 class ResumeCtrlTest : public ::testing::Test {
  protected:
@@ -120,6 +129,8 @@ class ResumeCtrlTest : public ::testing::Test {
     EXPECT_CALL(mock_app_mngr_, CheckResumptionRequiredTransportAvailable(_))
         .Times(AtLeast(0))
         .WillRepeatedly(Return(true));
+    ON_CALL(mock_app_mngr_, get_full_or_limited_application())
+        .WillByDefault(Return(ApplicationSharedPtr()));
 
     ON_CALL(mock_application_manager_settings_, use_db_for_resumption())
         .WillByDefault(Return(false));
@@ -153,19 +164,65 @@ class ResumeCtrlTest : public ::testing::Test {
     ON_CALL(*mock_app_, mac_address()).WillByDefault(ReturnRef(kMacAddress_));
     ON_CALL(*mock_app_, device()).WillByDefault(Return(kTestDevId_));
     ON_CALL(*mock_app_, app_id()).WillByDefault(Return(kTestAppId_));
+    ON_CALL(*mock_app_, is_cloud_app()).WillByDefault(Return(false));
+  }
+
+  smart_objects::SmartObjectSPtr CreateStubCreateWindowRequest(
+      const std::string window_name,
+      const WindowID window_id,
+      const mobile_apis::WindowType::eType window_type) const {
+    auto request = std::make_shared<smart_objects::SmartObject>(
+        smart_objects::SmartType_Map);
+    smart_objects::SmartObject msg_params(smart_objects::SmartType_Map);
+    smart_objects::SmartObject params(smart_objects::SmartType_Map);
+
+    params[strings::correlation_id] = window_id;
+
+    msg_params[strings::window_name] = window_name;
+    msg_params[strings::window_id] = window_id;
+    msg_params[strings::window_type] = window_type;
+    msg_params[strings::app_id] = kDefaultHmiAppId;
+
+    (*request)[strings::msg_params] = msg_params;
+    (*request)[strings::params] = params;
+
+    return request;
+  }
+
+  smart_objects::SmartObjectSPtr CreateStubCreateWindowResponse(
+      const int32_t correlation_id,
+      const hmi_apis::Common_Result::eType result_code) const {
+    auto response = std::make_shared<smart_objects::SmartObject>(
+        smart_objects::SmartType_Map);
+    smart_objects::SmartObject params(smart_objects::SmartType_Map);
+
+    params[strings::correlation_id] = correlation_id;
+    params[hmi_response::code] = result_code;
+
+    (*response)[strings::params] = params;
+
+    return response;
+  }
+
+  void SetupIsAppRevoked(const bool is_app_revoked) {
+    EXPECT_CALL(mock_app_mngr_, GetPolicyHandler())
+        .WillOnce(ReturnRef(mock_policy_handler_));
+    EXPECT_CALL(mock_policy_handler_, IsApplicationRevoked(_))
+        .WillOnce(Return(is_app_revoked));
   }
 
   NiceMock<event_engine_test::MockEventDispatcher> mock_event_dispatcher_;
-  application_manager_test::MockApplicationManagerSettings
+  NiceMock<application_manager_test::MockApplicationManagerSettings>
       mock_application_manager_settings_;
   NiceMock<application_manager_test::MockApplicationManager> mock_app_mngr_;
   std::shared_ptr<NiceMock<application_manager_test::MockAppExtension> >
       mock_app_extension_;
-  MockStateController mock_state_controller_;
+  NiceMock<MockStateController> mock_state_controller_;
   std::shared_ptr<ResumeCtrl> res_ctrl_;
   std::shared_ptr<NiceMock<resumption_test::MockResumptionData> > mock_storage_;
   std::shared_ptr<NiceMock<MockApplication> > mock_app_;
   std::shared_ptr<MockHelpPromptManager> mock_help_prompt_manager_;
+  policy_test::MockPolicyHandlerInterface mock_policy_handler_;
   application_manager::ApplicationConstSharedPtr const_app_;
   const uint32_t kTestAppId_;
   const std::string kTestPolicyAppId_;
@@ -184,6 +241,7 @@ class ResumeCtrlTest : public ::testing::Test {
   const std::string kNaviLowbandwidthLevel_;
   const std::string kProjectionLowbandwidthLevel_;
   const std::string kMediaLowbandwidthLevel_;
+  NiceMock<application_manager_test::MockRPCService> mock_rpc_service_;
 };
 
 /**
@@ -197,7 +255,6 @@ TEST_F(ResumeCtrlTest, StartResumption_AppWithGrammarId) {
 
   // Check RestoreApplicationData
   GetInfoFromApp();
-
   ON_CALL(mock_app_mngr_, GetDefaultHmiLevel(const_app_))
       .WillByDefault(Return(kDefaultTestLevel_));
   ON_CALL(*mock_storage_,
@@ -336,9 +393,9 @@ TEST_F(ResumeCtrlTest, StartResumption_AppWithCommands) {
   GetInfoFromApp();
   smart_objects::SmartObject test_application_commands;
   smart_objects::SmartObject test_commands;
-  const uint32_t count_of_commands = 20;
+  const uint32_t count_of_commands = 20u;
 
-  for (uint32_t i = 0; i < count_of_commands; ++i) {
+  for (uint32_t i = 0u; i < count_of_commands; ++i) {
     test_commands[application_manager::strings::cmd_id] = i;
     test_application_commands[i] = test_commands;
   }
@@ -360,10 +417,33 @@ TEST_F(ResumeCtrlTest, StartResumption_AppWithCommands) {
   ON_CALL(*mock_app_, help_prompt_manager())
       .WillByDefault(ReturnRef(*mock_help_prompt_manager_));
 
-  for (uint32_t i = 0; i < count_of_commands; ++i) {
-    EXPECT_CALL(*mock_app_, AddCommand(i, test_application_commands[i]));
-    EXPECT_CALL(*mock_help_prompt_manager_,
-                OnVrCommandAdded(i, test_application_commands[i], true));
+  std::vector<application_manager::CommandsMap> command_vec(count_of_commands);
+  for (uint32_t count = 0u; count < count_of_commands; ++count) {
+    for (uint32_t i = 0u; i < count; ++i) {
+      command_vec[count].insert(
+          std::pair<uint32_t, smart_objects::SmartObject*>(
+              i + 1, &test_application_commands[i]));
+    };
+  }
+
+  uint32_t comm_n = 0u;
+  ON_CALL(*mock_app_, commands_map())
+      .WillByDefault(testing::Invoke(
+          [&]() -> DataAccessor<application_manager::CommandsMap> {
+            DataAccessor<application_manager::CommandsMap> data_accessor(
+                command_vec[comm_n], app_set_lock_ptr_);
+            ++comm_n;
+            return data_accessor;
+          }));
+
+  for (uint32_t cmd_id = 0u, internal_id = 1u; cmd_id < count_of_commands;
+       ++cmd_id, ++internal_id) {
+    EXPECT_CALL(*mock_app_,
+                AddCommand(internal_id, test_application_commands[cmd_id]));
+
+    EXPECT_CALL(
+        *mock_help_prompt_manager_,
+        OnVrCommandAdded(cmd_id, test_application_commands[cmd_id], true));
   }
 
   smart_objects::SmartObjectList requests;
@@ -500,7 +580,8 @@ TEST_F(ResumeCtrlTest, StartResumption_AppWithSubscribeOnButtons) {
   EXPECT_CALL(*mock_app_extension_, ProcessResumption(test_subscriptions));
 
   EXPECT_CALL(*application_manager::MockMessageHelper::message_helper_mock(),
-              SendAllOnButtonSubscriptionNotificationsForApp(_, _)).Times(2);
+              SendAllOnButtonSubscriptionNotificationsForApp(_, _))
+      .Times(2);
 
   const bool res = res_ctrl_->StartResumption(mock_app_, kHash_);
   EXPECT_TRUE(res);
@@ -570,10 +651,229 @@ TEST_F(ResumeCtrlTest, StartResumption_AppWithSubscriptionToWayPoints) {
       mobile_apis::HMILevel::HMI_FULL;
   ON_CALL(mock_app_mngr_, GetDefaultHmiLevel(const_app_))
       .WillByDefault(Return(hmi_test_level));
-  EXPECT_CALL(mock_state_controller_, SetRegularState(_, hmi_test_level));
+  EXPECT_CALL(mock_state_controller_,
+              SetRegularState(_, kDefaultWindowId, hmi_test_level));
 
   const bool result = res_ctrl_->StartResumption(mock_app_, kHash_);
   EXPECT_TRUE(result);
+}
+
+TEST_F(ResumeCtrlTest,
+       RestoreAppWidgets_AppWithWidgets_SendCreateWindowRequests) {
+  using namespace smart_objects;
+  using namespace application_manager;
+  GetInfoFromApp();
+  const uint32_t count_of_widgets = 10u;
+
+  auto create_window_info_so = []() -> SmartObject {
+    SmartObject widgets_info(SmartType_Array);
+    for (uint32_t i = 0; i < count_of_widgets; ++i) {
+      SmartObject widget_info(SmartType_Map);
+      widget_info[strings::associated_service_type] = "ServiceType";
+      widget_info[strings::duplicate_updates_from_window_id] = 0;
+      widget_info[strings::window_name] =
+          std::string("Widget ") + std::to_string(i + 1);
+      widget_info[strings::window_type] =
+          static_cast<int32_t>(mobile_apis::WindowType::WIDGET);
+      widget_info[strings::window_id] = i + 1;
+      widgets_info[widgets_info.length()] = widget_info;
+    }
+    return widgets_info;
+  };
+
+  auto create_saved_app_so = [&create_window_info_so, this]() -> SmartObject {
+    smart_objects::SmartObject saved_app;
+    const auto test_app_widgets = create_window_info_so();
+    saved_app[strings::hash_id] = kHash_;
+    saved_app[strings::windows_info] = test_app_widgets;
+    saved_app[application_manager::strings::grammar_id] = kTestGrammarId_;
+    saved_app[application_manager::strings::hmi_level] = eType::HMI_FULL;
+    return saved_app;
+  };
+
+  const auto saved_app = create_saved_app_so();
+
+  const auto hmi_request = std::make_shared<smart_objects::SmartObject>(
+      smart_objects::SmartType_Map);
+  const auto hmi_requests =
+      smart_objects::SmartObjectList(count_of_widgets, hmi_request);
+
+  DisplayCapabilitiesBuilder builder(*mock_app_);
+  ON_CALL(*mock_app_, display_capabilities_builder())
+      .WillByDefault(ReturnRef(builder));
+  EXPECT_CALL(
+      *application_manager::MockMessageHelper::message_helper_mock(),
+      CreateUICreateWindowRequestsToHMI(_, _, saved_app[strings::windows_info]))
+      .WillOnce(Return(hmi_requests));
+
+  ON_CALL(mock_app_mngr_, GetRPCService())
+      .WillByDefault(ReturnRef(mock_rpc_service_));
+
+  EXPECT_CALL(mock_rpc_service_,
+              ManageHMICommand(_, commands::Command::SOURCE_SDL_TO_HMI))
+      .Times(count_of_widgets)
+      .WillRepeatedly(Return(true));
+
+  res_ctrl_->RestoreAppWidgets(mock_app_, saved_app);
+}
+
+TEST_F(ResumeCtrlTest,
+       RestoreWidgetsHMIState_AppWithWidgets_AddWidgetsInternally) {
+  const uint32_t count_of_widgets = 10u;
+
+  smart_objects::SmartObject saved_app;
+  saved_app[strings::hash_id] = kHash_;
+  saved_app[strings::windows_info] = smart_objects::SmartObject();
+  saved_app[application_manager::strings::grammar_id] = kTestGrammarId_;
+  saved_app[application_manager::strings::hmi_level] = eType::HMI_FULL;
+
+  ON_CALL(mock_app_mngr_, application_by_hmi_app(kDefaultHmiAppId))
+      .WillByDefault(Return(mock_app_));
+  DisplayCapabilitiesBuilder builder(*mock_app_);
+  ON_CALL(*mock_app_, display_capabilities_builder())
+      .WillByDefault(ReturnRef(builder));
+
+  smart_objects::SmartObjectList requests;
+  smart_objects::SmartObjectList responses;
+  for (uint32_t i = 0; i < count_of_widgets; ++i) {
+    const auto window_type = mobile_apis::WindowType::WIDGET;
+    const WindowID window_id = i + 1;
+    const auto window_name = std::string("Widget ") + std::to_string(window_id);
+    requests.push_back(
+        CreateStubCreateWindowRequest(window_name, window_id, window_type));
+    responses.push_back(CreateStubCreateWindowResponse(
+        window_id, hmi_apis::Common_Result::SUCCESS));
+    EXPECT_CALL(mock_app_mngr_, CreateRegularState(_, window_type, _, _, _, _))
+        .WillRepeatedly(Return(nullptr));
+    EXPECT_CALL(*mock_app_, SetInitialState(window_id, window_name, _));
+    EXPECT_CALL(mock_state_controller_,
+                OnAppWindowAdded(_, window_id, window_type, _));
+  }
+
+  EXPECT_CALL(*application_manager::MockMessageHelper::message_helper_mock(),
+              CreateUICreateWindowRequestsToHMI(_, _, _))
+      .WillOnce(Return(requests));
+
+  ON_CALL(mock_app_mngr_, GetRPCService())
+      .WillByDefault(ReturnRef(mock_rpc_service_));
+  EXPECT_CALL(mock_rpc_service_,
+              ManageHMICommand(_, commands::Command::SOURCE_SDL_TO_HMI))
+      .Times(count_of_widgets)
+      .WillRepeatedly(Return(true));
+  res_ctrl_->RestoreAppWidgets(mock_app_, saved_app);
+  for (const auto& response : responses) {
+    res_ctrl_->RestoreWidgetsHMIState(*response);
+  }
+}
+
+TEST_F(ResumeCtrlTest,
+       RestoreAppWidgets_AppWithoutWidgets_NoCreateWindowRqSent) {
+  smart_objects::SmartObject saved_app;
+  saved_app[strings::hash_id] = kHash_;
+  saved_app[application_manager::strings::grammar_id] = kTestGrammarId_;
+  saved_app[application_manager::strings::hmi_level] = eType::HMI_FULL;
+
+  EXPECT_CALL(*application_manager::MockMessageHelper::message_helper_mock(),
+              CreateUICreateWindowRequestsToHMI(_, _, _))
+      .Times(0);
+
+  res_ctrl_->RestoreAppWidgets(mock_app_, saved_app);
+}
+
+TEST_F(ResumeCtrlTest, RestoreWidgetsHMIState_HMIResponseWith_InvalidCorrId) {
+  smart_objects::SmartObject saved_app;
+  saved_app[strings::hash_id] = kHash_;
+  saved_app[strings::windows_info] = smart_objects::SmartObject();
+  saved_app[application_manager::strings::grammar_id] = kTestGrammarId_;
+  saved_app[application_manager::strings::hmi_level] = eType::HMI_FULL;
+
+  const int32_t invalid_corr_id = -1;
+  auto response = CreateStubCreateWindowResponse(
+      invalid_corr_id, hmi_apis::Common_Result::SUCCESS);
+
+  ON_CALL(mock_app_mngr_, application_by_hmi_app(kDefaultHmiAppId))
+      .WillByDefault(Return(mock_app_));
+
+  DisplayCapabilitiesBuilder builder(*mock_app_);
+  ON_CALL(*mock_app_, display_capabilities_builder())
+      .WillByDefault(ReturnRef(builder));
+
+  smart_objects::SmartObjectList requests;
+
+  const auto window_type = mobile_apis::WindowType::WIDGET;
+  const WindowID window_id = 1;
+  const auto window_name = std::string("Widget ") + std::to_string(window_id);
+  requests.push_back(
+      CreateStubCreateWindowRequest(window_name, window_id, window_type));
+
+  EXPECT_CALL(mock_app_mngr_, CreateRegularState(_, window_type, _, _, _, _))
+      .Times(0);
+  EXPECT_CALL(*mock_app_, SetInitialState(window_id, window_name, _)).Times(0);
+  EXPECT_CALL(mock_state_controller_,
+              OnAppWindowAdded(_, window_id, window_type, _))
+      .Times(0);
+
+  EXPECT_CALL(*application_manager::MockMessageHelper::message_helper_mock(),
+              CreateUICreateWindowRequestsToHMI(_, _, _))
+      .WillOnce(Return(requests));
+
+  ON_CALL(mock_app_mngr_, GetRPCService())
+      .WillByDefault(ReturnRef(mock_rpc_service_));
+  EXPECT_CALL(mock_rpc_service_,
+              ManageHMICommand(_, commands::Command::SOURCE_SDL_TO_HMI))
+      .WillRepeatedly(Return(true));
+  res_ctrl_->RestoreAppWidgets(mock_app_, saved_app);
+  res_ctrl_->RestoreWidgetsHMIState(*response);
+}
+
+TEST_F(ResumeCtrlTest, RestoreWidgetsHMIState_HMIResponseWith_Unsuccess) {
+  smart_objects::SmartObject saved_app;
+  saved_app[strings::hash_id] = kHash_;
+  saved_app[strings::windows_info] = smart_objects::SmartObject();
+  saved_app[application_manager::strings::grammar_id] = kTestGrammarId_;
+  saved_app[application_manager::strings::hmi_level] = eType::HMI_FULL;
+
+  const int32_t correlation_id = 1;
+  auto response = CreateStubCreateWindowResponse(
+      correlation_id, hmi_apis::Common_Result::GENERIC_ERROR);
+
+  ON_CALL(mock_app_mngr_, application_by_hmi_app(kDefaultHmiAppId))
+      .WillByDefault(Return(mock_app_));
+
+  DisplayCapabilitiesBuilder builder(*mock_app_);
+  smart_objects::SmartObject stub_window_info(smart_objects::SmartType_Null);
+  auto stub_resume_cb = [](Application&, const smart_objects::SmartObject&) {};
+  builder.InitBuilder(stub_resume_cb, stub_window_info);
+  ON_CALL(*mock_app_, display_capabilities_builder())
+      .WillByDefault(ReturnRef(builder));
+
+  smart_objects::SmartObjectList requests;
+  smart_objects::SmartObjectList responses;
+
+  const auto window_type = mobile_apis::WindowType::WIDGET;
+  const WindowID window_id = 1;
+  const auto window_name = std::string("Widget ") + std::to_string(window_id);
+  requests.push_back(
+      CreateStubCreateWindowRequest(window_name, window_id, window_type));
+
+  EXPECT_CALL(mock_app_mngr_, CreateRegularState(_, window_type, _, _, _, _))
+      .Times(0);
+  EXPECT_CALL(*mock_app_, SetInitialState(window_id, window_name, _)).Times(0);
+  EXPECT_CALL(mock_state_controller_,
+              OnAppWindowAdded(_, window_id, window_type, _))
+      .Times(0);
+
+  EXPECT_CALL(*application_manager::MockMessageHelper::message_helper_mock(),
+              CreateUICreateWindowRequestsToHMI(_, _, _))
+      .WillOnce(Return(requests));
+
+  ON_CALL(mock_app_mngr_, GetRPCService())
+      .WillByDefault(ReturnRef(mock_rpc_service_));
+  EXPECT_CALL(mock_rpc_service_,
+              ManageHMICommand(_, commands::Command::SOURCE_SDL_TO_HMI))
+      .WillRepeatedly(Return(true));
+  res_ctrl_->RestoreAppWidgets(mock_app_, saved_app);
+  res_ctrl_->RestoreWidgetsHMIState(*response);
 }
 
 TEST_F(ResumeCtrlTest, StartResumptionOnlyHMILevel) {
@@ -630,7 +930,8 @@ TEST_F(ResumeCtrlTest, StartAppHmiStateResumption_AppInFull) {
   DataAccessor<application_manager::CommandsMap> data_accessor(
       command, app_set_lock_ptr_);
 
-  EXPECT_CALL(mock_state_controller_, SetRegularState(_, restored_test_type))
+  EXPECT_CALL(mock_state_controller_,
+              SetRegularState(_, kDefaultWindowId, restored_test_type))
       .Times(AtLeast(1));
   GetInfoFromApp();
   EXPECT_CALL(mock_app_mngr_, GetDefaultHmiLevel(const_app_))
@@ -639,6 +940,9 @@ TEST_F(ResumeCtrlTest, StartAppHmiStateResumption_AppInFull) {
   ON_CALL(*mock_storage_,
           GetSavedApplication(kTestPolicyAppId_, kMacAddress_, _))
       .WillByDefault(DoAll(SetArgReferee<2>(saved_app), Return(true)));
+
+  const bool is_app_revoked = false;
+  SetupIsAppRevoked(is_app_revoked);
 
   EXPECT_CALL(*mock_storage_,
               RemoveApplicationFromSaved(kTestPolicyAppId_, kMacAddress_))
@@ -679,12 +983,16 @@ TEST_F(ResumeCtrlTest, StartAppHmiStateResumption_AppHasDeferredResumption) {
   saved_app[application_manager::strings::time_stamp] = time_stamp;
 
   // resume into deferred level instead of restored level
-  EXPECT_CALL(mock_state_controller_, SetRegularState(_, deferred_level))
+  EXPECT_CALL(mock_state_controller_,
+              SetRegularState(_, kDefaultWindowId, deferred_level))
       .Times(AtLeast(1));
   GetInfoFromApp();
   ON_CALL(*mock_storage_,
           GetSavedApplication(kTestPolicyAppId_, kMacAddress_, _))
       .WillByDefault(DoAll(SetArgReferee<2>(saved_app), Return(true)));
+
+  const bool is_app_revoked = false;
+  SetupIsAppRevoked(is_app_revoked);
 
   mobile_apis::HMILevel::eType app_deferred_level = deferred_level;
   EXPECT_CALL(*mock_app_, deferred_resumption_hmi_level())
@@ -714,12 +1022,16 @@ TEST_F(ResumeCtrlTest,
   saved_app[application_manager::strings::hmi_level] = restored_test_type;
   saved_app[application_manager::strings::time_stamp] = time_stamp;
 
-  EXPECT_CALL(mock_state_controller_, SetRegularState(_, eType::HMI_LIMITED))
+  EXPECT_CALL(mock_state_controller_,
+              SetRegularState(_, kDefaultWindowId, eType::HMI_LIMITED))
       .Times(AtLeast(1));
   GetInfoFromApp();
   ON_CALL(*mock_storage_,
           GetSavedApplication(kTestPolicyAppId_, kMacAddress_, _))
       .WillByDefault(DoAll(SetArgReferee<2>(saved_app), Return(true)));
+
+  const bool is_app_revoked = false;
+  SetupIsAppRevoked(is_app_revoked);
 
   EXPECT_CALL(mock_app_mngr_, CheckResumptionRequiredTransportAvailable(_))
       .WillOnce(Return(false));
@@ -758,12 +1070,16 @@ TEST_F(
 
   // in this test, it is expected that the app will resume into LIMITED, which
   // is the higher level among NONE and LIMITED
-  EXPECT_CALL(mock_state_controller_, SetRegularState(_, eType::HMI_LIMITED))
+  EXPECT_CALL(mock_state_controller_,
+              SetRegularState(_, kDefaultWindowId, eType::HMI_LIMITED))
       .Times(AtLeast(1));
   GetInfoFromApp();
   ON_CALL(*mock_storage_,
           GetSavedApplication(kTestPolicyAppId_, kMacAddress_, _))
       .WillByDefault(DoAll(SetArgReferee<2>(saved_app), Return(true)));
+
+  const bool is_app_revoked = false;
+  SetupIsAppRevoked(is_app_revoked);
 
   EXPECT_CALL(mock_app_mngr_, CheckResumptionRequiredTransportAvailable(_))
       .WillOnce(Return(false));
@@ -814,7 +1130,8 @@ TEST_F(ResumeCtrlTest, RestoreAppHMIState_RestoreHMILevelFull) {
   saved_app[application_manager::strings::grammar_id] = kTestGrammarId_;
   saved_app[application_manager::strings::hmi_level] = restored_test_type;
 
-  EXPECT_CALL(mock_state_controller_, SetRegularState(_, restored_test_type))
+  EXPECT_CALL(mock_state_controller_,
+              SetRegularState(_, kDefaultWindowId, restored_test_type))
       .Times(AtLeast(1));
   GetInfoFromApp();
   EXPECT_CALL(mock_app_mngr_, GetDefaultHmiLevel(const_app_))
@@ -826,7 +1143,6 @@ TEST_F(ResumeCtrlTest, RestoreAppHMIState_RestoreHMILevelFull) {
 
   ON_CALL(mock_app_mngr_, GetUserConsentForDevice("12345"))
       .WillByDefault(Return(policy::kDeviceAllowed));
-  EXPECT_CALL(*mock_app_, set_is_resuming(true));
 
   const bool res = res_ctrl_->RestoreAppHMIState(mock_app_);
   EXPECT_TRUE(res);
@@ -845,7 +1161,8 @@ TEST_F(ResumeCtrlTest, SetupDefaultHMILevel) {
   ON_CALL(mock_app_mngr_, GetDefaultHmiLevel(const_app_))
       .WillByDefault(Return(kDefaultTestLevel_));
 
-  EXPECT_CALL(mock_state_controller_, SetRegularState(_, kDefaultTestLevel_))
+  EXPECT_CALL(mock_state_controller_,
+              SetRegularState(_, kDefaultWindowId, kDefaultTestLevel_))
       .Times(AtLeast(1));
 
   res_ctrl_->SetupDefaultHMILevel(mock_app_);
@@ -874,7 +1191,8 @@ TEST_F(ResumeCtrlTest,
   EXPECT_CALL(*mock_app_, is_media_application()).WillRepeatedly(Return(false));
 
   // SetRegularState() should be called with kProjectionLowbandwidthLevel_
-  EXPECT_CALL(mock_state_controller_, SetRegularState(_, eType::HMI_NONE))
+  EXPECT_CALL(mock_state_controller_,
+              SetRegularState(_, kDefaultWindowId, eType::HMI_NONE))
       .Times(AtLeast(1));
 
   res_ctrl_->SetupDefaultHMILevel(mock_app_);
@@ -901,7 +1219,8 @@ TEST_F(ResumeCtrlTest, ApplicationResumptiOnTimer_AppInFull) {
   MockStateController state_controller;
   EXPECT_CALL(mock_app_mngr_, state_controller())
       .WillOnce(ReturnRef(state_controller));
-  EXPECT_CALL(state_controller, SetRegularState(_, restored_test_type))
+  EXPECT_CALL(state_controller,
+              SetRegularState(_, kDefaultWindowId, restored_test_type))
       .Times(AtLeast(1));
   GetInfoFromApp();
   EXPECT_CALL(mock_app_mngr_, GetDefaultHmiLevel(const_app_))
@@ -910,6 +1229,9 @@ TEST_F(ResumeCtrlTest, ApplicationResumptiOnTimer_AppInFull) {
   ON_CALL(*mock_storage_,
           GetSavedApplication(kTestPolicyAppId_, kMacAddress_, _))
       .WillByDefault(DoAll(SetArgReferee<2>(saved_app), Return(true)));
+
+  const bool is_app_revoked = false;
+  SetupIsAppRevoked(is_app_revoked);
 
   EXPECT_CALL(*mock_storage_,
               RemoveApplicationFromSaved(kTestPolicyAppId_, kMacAddress_))
@@ -929,8 +1251,8 @@ TEST_F(ResumeCtrlTest, SetAppHMIState_HMINone_WithoutCheckPolicy) {
 
   EXPECT_CALL(mock_app_mngr_, GetUserConsentForDevice("12345")).Times(0);
 
-  EXPECT_CALL(*mock_app_, set_is_resuming(true));
-  EXPECT_CALL(mock_state_controller_, SetRegularState(_, kDefaultTestLevel_))
+  EXPECT_CALL(mock_state_controller_,
+              SetRegularState(_, kDefaultWindowId, kDefaultTestLevel_))
       .Times(AtLeast(1));
   const bool res =
       res_ctrl_->SetAppHMIState(mock_app_, kDefaultTestLevel_, false);
@@ -942,8 +1264,8 @@ TEST_F(ResumeCtrlTest, SetAppHMIState_HMILimited_WithoutCheckPolicy) {
   GetInfoFromApp();
   EXPECT_CALL(mock_app_mngr_, GetUserConsentForDevice("12345")).Times(0);
 
-  EXPECT_CALL(*mock_app_, set_is_resuming(true));
-  EXPECT_CALL(mock_state_controller_, SetRegularState(_, test_type))
+  EXPECT_CALL(mock_state_controller_,
+              SetRegularState(_, kDefaultWindowId, test_type))
       .Times(AtLeast(1));
   const bool res = res_ctrl_->SetAppHMIState(mock_app_, test_type, false);
   EXPECT_TRUE(res);
@@ -956,8 +1278,8 @@ TEST_F(ResumeCtrlTest, SetAppHMIState_HMIFull_WithoutCheckPolicy) {
   EXPECT_CALL(mock_app_mngr_, GetDefaultHmiLevel(const_app_)).Times(0);
   EXPECT_CALL(mock_app_mngr_, GetUserConsentForDevice("12345")).Times(0);
 
-  EXPECT_CALL(*mock_app_, set_is_resuming(true));
-  EXPECT_CALL(mock_state_controller_, SetRegularState(_, test_type))
+  EXPECT_CALL(mock_state_controller_,
+              SetRegularState(_, kDefaultWindowId, test_type))
       .Times(AtLeast(1));
 
   const bool res = res_ctrl_->SetAppHMIState(mock_app_, test_type, false);
@@ -971,8 +1293,8 @@ TEST_F(ResumeCtrlTest, SetAppHMIState_HMIFull_WithPolicy_DevAllowed) {
   ON_CALL(mock_app_mngr_, GetUserConsentForDevice("12345"))
       .WillByDefault(Return(policy::kDeviceAllowed));
 
-  EXPECT_CALL(*mock_app_, set_is_resuming(true));
-  EXPECT_CALL(mock_state_controller_, SetRegularState(_, test_type))
+  EXPECT_CALL(mock_state_controller_,
+              SetRegularState(_, kDefaultWindowId, test_type))
       .Times(AtLeast(1));
 
   const bool res = res_ctrl_->SetAppHMIState(mock_app_, test_type, true);
@@ -986,10 +1308,10 @@ TEST_F(ResumeCtrlTest, SetAppHMIState_HMIFull_WithPolicy_DevDisallowed) {
   ON_CALL(mock_app_mngr_, GetUserConsentForDevice("12345"))
       .WillByDefault(Return(policy::kDeviceDisallowed));
 
-  EXPECT_CALL(*mock_app_, set_is_resuming(true));
   ON_CALL(mock_app_mngr_, GetDefaultHmiLevel(const_app_))
       .WillByDefault(Return(kDefaultTestLevel_));
-  EXPECT_CALL(mock_state_controller_, SetRegularState(_, kDefaultTestLevel_))
+  EXPECT_CALL(mock_state_controller_,
+              SetRegularState(_, kDefaultWindowId, kDefaultTestLevel_))
       .Times(AtLeast(1));
   const bool res = res_ctrl_->SetAppHMIState(mock_app_, test_type, true);
   EXPECT_FALSE(res);
@@ -1244,7 +1566,8 @@ TEST_F(
   DataAccessor<application_manager::CommandsMap> data_accessor(
       command, app_set_lock_ptr_);
 
-  EXPECT_CALL(mock_state_controller_, SetRegularState(_, restored_test_type))
+  EXPECT_CALL(mock_state_controller_,
+              SetRegularState(_, kDefaultWindowId, restored_test_type))
       .Times(AtLeast(1));
   GetInfoFromApp();
   EXPECT_CALL(mock_app_mngr_, GetDefaultHmiLevel(const_app_))
@@ -1253,6 +1576,9 @@ TEST_F(
   ON_CALL(*mock_storage_,
           GetSavedApplication(kTestPolicyAppId_, kMacAddress_, _))
       .WillByDefault(DoAll(SetArgReferee<2>(saved_app), Return(true)));
+
+  const bool is_app_revoked = false;
+  SetupIsAppRevoked(is_app_revoked);
 
   EXPECT_CALL(*mock_storage_,
               RemoveApplicationFromSaved(kTestPolicyAppId_, kMacAddress_))
@@ -1295,6 +1621,9 @@ TEST_F(
   ON_CALL(*mock_storage_,
           GetSavedApplication(kTestPolicyAppId_, kMacAddress_, _))
       .WillByDefault(DoAll(SetArgReferee<2>(saved_app), Return(true)));
+
+  const bool is_app_revoked = false;
+  SetupIsAppRevoked(is_app_revoked);
 
   ON_CALL(mock_app_mngr_, GetUserConsentForDevice("12345"))
       .WillByDefault(Return(policy::kDeviceAllowed));
@@ -1351,7 +1680,8 @@ TEST_F(
   DataAccessor<application_manager::CommandsMap> data_accessor(
       command, app_set_lock_ptr_);
 
-  EXPECT_CALL(mock_state_controller_, SetRegularState(_, restored_test_type))
+  EXPECT_CALL(mock_state_controller_,
+              SetRegularState(_, kDefaultWindowId, restored_test_type))
       .Times(AtLeast(1));
   GetInfoFromApp();
   EXPECT_CALL(mock_app_mngr_, GetDefaultHmiLevel(const_app_))
@@ -1360,6 +1690,9 @@ TEST_F(
   ON_CALL(*mock_storage_,
           GetSavedApplication(kTestPolicyAppId_, kMacAddress_, _))
       .WillByDefault(DoAll(SetArgReferee<2>(saved_app), Return(true)));
+
+  const bool is_app_revoked = false;
+  SetupIsAppRevoked(is_app_revoked);
 
   EXPECT_CALL(*mock_storage_,
               RemoveApplicationFromSaved(kTestPolicyAppId_, kMacAddress_))
@@ -1402,6 +1735,9 @@ TEST_F(
   ON_CALL(*mock_storage_,
           GetSavedApplication(kTestPolicyAppId_, kMacAddress_, _))
       .WillByDefault(DoAll(SetArgReferee<2>(saved_app), Return(true)));
+
+  const bool is_app_revoked = false;
+  SetupIsAppRevoked(is_app_revoked);
 
   ON_CALL(mock_app_mngr_, GetUserConsentForDevice("12345"))
       .WillByDefault(Return(policy::kDeviceAllowed));

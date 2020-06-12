@@ -34,10 +34,10 @@
 #define SRC_COMPONENTS_MEDIA_MANAGER_INCLUDE_MEDIA_MANAGER_AUDIO_A2DP_SOURCE_PLAYER_ADAPTER_H_
 
 #include <map>
-#include "protocol/common.h"
-#include "media_manager/media_adapter_impl.h"
-#include "utils/threads/thread_delegate.h"
 #include "connection_handler/connection_handler_impl.h"
+#include "media_manager/media_adapter_impl.h"
+#include "protocol/common.h"
+#include "utils/threads/thread_delegate.h"
 
 namespace protocol_handler {
 class SessionObserver;

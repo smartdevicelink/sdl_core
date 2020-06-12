@@ -79,5 +79,5 @@ class Optional {
   bool is_initialized_;
 };
 
-}  // utils utils
+}  // namespace utils
 #endif  // ERROR_OR_H

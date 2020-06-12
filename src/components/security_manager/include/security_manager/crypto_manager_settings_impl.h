@@ -1,8 +1,8 @@
 
 #ifndef SRC_COMPONENTS_SECURITY_MANAGER_INCLUDE_SECURITY_MANAGER_CRYPTO_MANAGER_SETTINGS_IMPL_H_
 #define SRC_COMPONENTS_SECURITY_MANAGER_INCLUDE_SECURITY_MANAGER_CRYPTO_MANAGER_SETTINGS_IMPL_H_
-#include "security_manager/security_manager_settings.h"
 #include "config_profile/profile.h"
+#include "security_manager/security_manager_settings.h"
 
 namespace security_manager {
 

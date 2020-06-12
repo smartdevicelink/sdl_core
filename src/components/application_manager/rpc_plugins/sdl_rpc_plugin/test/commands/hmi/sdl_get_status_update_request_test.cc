@@ -32,11 +32,11 @@
 
 #include <stdint.h>
 
-#include "gtest/gtest.h"
-#include "hmi/sdl_get_status_update_request.h"
+#include "application_manager/commands/command_request_test.h"
 #include "application_manager/mock_application.h"
 #include "application_manager/policies/mock_policy_handler_interface.h"
-#include "application_manager/commands/command_request_test.h"
+#include "gtest/gtest.h"
+#include "hmi/sdl_get_status_update_request.h"
 
 namespace test {
 namespace components {

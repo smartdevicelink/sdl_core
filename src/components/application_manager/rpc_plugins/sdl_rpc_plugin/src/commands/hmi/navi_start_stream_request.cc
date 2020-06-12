@@ -64,8 +64,9 @@ NaviStartStreamRequest::NaviStartStreamRequest(
 }
 
 NaviStartStreamRequest::~NaviStartStreamRequest() {
-  // unsubscribe_from_all_events() in EventObserver's destructor isn't enough;
-  // we must unsubscribe before this NaviStartStreamRequest instance is removed
+  // unsubscribe_from_all_hmi_events() in EventObserver's destructor isn't
+  // enough; we must unsubscribe before this NaviStartStreamRequest instance is
+  // removed
   unsubscribe_from_event(hmi_apis::FunctionID::Navigation_StartStream);
 }
 
@@ -79,9 +80,9 @@ void NaviStartStreamRequest::Run() {
   ApplicationSharedPtr app =
       application_manager_.application_by_hmi_app(application_id());
   if (!app) {
-    LOG4CXX_ERROR(logger_,
-                  "Applcation with hmi_app_id " << application_id()
-                                                << "does not exist");
+    LOG4CXX_ERROR(
+        logger_,
+        "Application with hmi_app_id " << application_id() << "does not exist");
     return;
   }
   SetAllowedToTerminate(false);
@@ -114,7 +115,7 @@ void NaviStartStreamRequest::on_event(const event_engine::Event& event) {
 
       if (hmi_apis::Common_Result::SUCCESS == code) {
         LOG4CXX_INFO(logger_, "NaviStartStreamResponse SUCCESS");
-        if (application_manager_.HMILevelAllowsStreaming(
+        if (application_manager_.HMIStateAllowsStreaming(
                 app->app_id(), ServiceType::kMobileNav)) {
           app->set_video_streaming_approved(true);
         } else {
@@ -172,11 +173,11 @@ void NaviStartStreamRequest::RetryStartSession() {
   }
 
   uint32_t curr_retry_number = app->video_stream_retry_number();
-  LOG4CXX_DEBUG(
-      logger_, "Retry number " << curr_retry_number << " of " << retry_number_);
 
-  if (curr_retry_number < retry_number_) {
-    LOG4CXX_DEBUG(logger_, "Send NaviStartStream retry");
+  if (curr_retry_number <= retry_number_) {
+    LOG4CXX_DEBUG(
+        logger_,
+        "Retry number " << curr_retry_number << " of " << retry_number_);
     MessageHelper::SendNaviStartStream(app->app_id(), application_manager_);
     app->set_video_stream_retry_number(++curr_retry_number);
   } else {
@@ -190,4 +191,4 @@ void NaviStartStreamRequest::RetryStartSession() {
 
 }  // namespace commands
 
-}  // namespace application_manager
+}  // namespace sdl_rpc_plugin

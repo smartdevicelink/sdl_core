@@ -100,7 +100,7 @@ class UsbControlTransferSequence {
   Transfers transfers_;
 };
 
-}  // namespace
-}  // namespace
+}  // namespace transport_adapter
+}  // namespace transport_manager
 
 #endif  // SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_USB_USB_CONTROL_TRANSFER_H_

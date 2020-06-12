@@ -30,10 +30,10 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "policy/update_status_manager.h"
 #include "gtest/gtest.h"
 #include "policy/mock_policy_listener.h"
 #include "policy/policy_manager_impl.h"
-#include "policy/update_status_manager.h"
 
 namespace test {
 namespace components {

@@ -33,19 +33,20 @@ Copyright (c) 2018, Ford Motor Company
 
 #include "sdl_rpc_plugin/commands/mobile/system_request.h"
 
-#include <vector>
-#include <string>
 #include <stdio.h>
 #include <algorithm>
 #include <sstream>
+#include <string>
+#include <vector>
 #include "application_manager/policies/policy_handler_interface.h"
-#include "interfaces/MOBILE_API.h"
-#include "utils/file_system.h"
-#include "policy/policy_table/enums.h"
 #include "formatters/CFormatterJsonBase.h"
+#include "interfaces/MOBILE_API.h"
 #include "json/json.h"
-#include "utils/helpers.h"
+#include "policy/policy_table/enums.h"
 #include "utils/custom_string.h"
+#include "utils/file_system.h"
+#include "utils/helpers.h"
+#include "utils/jsoncpp_reader_wrapper.h"
 
 namespace sdl_rpc_plugin {
 using namespace application_manager;
@@ -170,17 +171,18 @@ class QueryAppsDataValidator {
                            << "Package name length ["
                            << app_data[json::android][json::packageName]
                                   .asString()
-                                  .length() << "] exceeds max length ["
-                           << kPackageNameLengthMax << "]in json file.");
+                                  .length()
+                           << "] exceeds max length [" << kPackageNameLengthMax
+                           << "]in json file.");
           return false;
         }
       }
 
       // Languages verification
       if (!app_data[os_type].keyExists(json::languages)) {
-        LOG4CXX_WARN(logger_,
-                     kQueryAppsValidationFailedPrefix
-                         << "'languages' doesn't exist");
+        LOG4CXX_WARN(
+            logger_,
+            kQueryAppsValidationFailedPrefix << "'languages' doesn't exist");
         return false;
       }
       if (!ValidateLanguages(app_data[os_type][json::languages],
@@ -217,9 +219,9 @@ class QueryAppsDataValidator {
     ApplicationSharedPtr registered_app =
         manager_.application_by_policy_id(app_id);
     if (registered_app) {
-      LOG4CXX_INFO(logger_,
-                   "Application with the id: " << app_id
-                                               << " is already registered.");
+      LOG4CXX_INFO(
+          logger_,
+          "Application with the id: " << app_id << " is already registered.");
     }
     // And app name length
     const std::string appName(app_data[json::name].asString());
@@ -250,9 +252,9 @@ class QueryAppsDataValidator {
     for (size_t idx = 0; idx < languages_array_size; ++idx) {
       const smart_objects::SmartObject& language = languages.getElement(idx);
       if (smart_objects::SmartType_Map != language.getType()) {
-        LOG4CXX_WARN(logger_,
-                     kQueryAppsValidationFailedPrefix
-                         << "language is not a map.");
+        LOG4CXX_WARN(
+            logger_,
+            kQueryAppsValidationFailedPrefix << "language is not a map.");
         return false;
       }
       if (language.length() != 1) {
@@ -263,9 +265,9 @@ class QueryAppsDataValidator {
       }
       const std::string language_name = (*language.map_begin()).first;
       if (!language_name.length()) {
-        LOG4CXX_WARN(logger_,
-                     kQueryAppsValidationFailedPrefix
-                         << "language name is empty");
+        LOG4CXX_WARN(
+            logger_,
+            kQueryAppsValidationFailedPrefix << "language name is empty");
         return false;
       }
       // Verify default language defined
@@ -329,9 +331,9 @@ class QueryAppsDataValidator {
     const smart_objects::SmartArray* synonyms_array =
         language[language_name][json::vrSynonyms].asArray();
     if (!synonyms_array) {
-      LOG4CXX_WARN(logger_,
-                   kQueryAppsValidationFailedPrefix
-                       << "vrSynonyms is not array.");
+      LOG4CXX_WARN(
+          logger_,
+          kQueryAppsValidationFailedPrefix << "vrSynonyms is not array.");
       return false;
     }
     const size_t synonyms_array_size = synonyms_array->size();
@@ -421,7 +423,7 @@ class QueryAppsDataValidator {
 
   DISALLOW_COPY_AND_ASSIGN(QueryAppsDataValidator);
 };
-}
+}  // namespace
 
 namespace commands {
 
@@ -469,8 +471,8 @@ void SystemRequest::Run() {
           static_cast<rpc::policy_table_interface_base::RequestType>(
               request_type));
 
-  if (!policy_handler.IsRequestTypeAllowed(application->policy_app_id(),
-                                           request_type)) {
+  if (!policy_handler.IsRequestTypeAllowed(
+          application->device(), application->policy_app_id(), request_type)) {
     LOG4CXX_ERROR(logger_,
                   "RequestType " << stringified_request_type
                                  << " is DISALLOWED by policies");
@@ -511,7 +513,8 @@ void SystemRequest::Run() {
     return;
   }
 
-  if (!file_system::IsFileNameValid(file_name)) {
+  if (!file_system::IsFileNameValid(file_name) &&
+      mobile_apis::RequestType::ICON_URL != request_type) {
     const std::string err_msg = "Sync file name contains forbidden symbols.";
     LOG4CXX_ERROR(logger_, err_msg);
     SendResponse(false, mobile_apis::Result::INVALID_DATA, err_msg.c_str());
@@ -533,8 +536,22 @@ void SystemRequest::Run() {
   std::string binary_data_folder;
   if ((*message_)[strings::params].keyExists(strings::binary_data)) {
     binary_data = (*message_)[strings::params][strings::binary_data].asBinary();
-    binary_data_folder =
-        application_manager_.get_settings().system_files_path();
+    if (mobile_apis::RequestType::ICON_URL == request_type) {
+      binary_data_folder =
+          application_manager_.get_settings().app_icons_folder();
+      // Use the URL file name to identify the policy id.
+      // Save the icon file with the policy id as the name.
+      file_name = application_manager_.PolicyIDByIconUrl(file_name);
+      if (file_name.empty()) {
+        const std::string err_msg = "Invalid file name";
+        SendResponse(false, mobile_apis::Result::INVALID_DATA, err_msg.c_str());
+        return;
+      }
+      LOG4CXX_DEBUG(logger_, "Got ICON_URL Request. File name: " << file_name);
+    } else {
+      binary_data_folder =
+          application_manager_.get_settings().system_files_path();
+    }
   } else {
     binary_data_folder =
         application_manager_.get_settings().app_storage_folder();
@@ -581,6 +598,12 @@ void SystemRequest::Run() {
 
   LOG4CXX_DEBUG(logger_, "Binary data ok.");
 
+  if (mobile_apis::RequestType::ICON_URL == request_type) {
+    application_manager_.SetIconFileFromSystemRequest(file_name);
+    SendResponse(true, mobile_apis::Result::SUCCESS);
+    return;
+  }
+
   if (mobile_apis::RequestType::HTTP == request_type &&
       (*message_)[strings::msg_params].keyExists(strings::file_name)) {
     const std::string& file =
@@ -590,17 +613,21 @@ void SystemRequest::Run() {
     return;
   } else if (mobile_apis::RequestType::QUERY_APPS == request_type) {
     using namespace ns_smart_device_link::ns_json_handler::formatters;
+    application_manager_.OnQueryAppsRequest(application->device());
 
-    smart_objects::SmartObject sm_object;
-    Json::Reader reader;
+    utils::JsonReader reader;
     std::string json(binary_data.begin(), binary_data.end());
     Json::Value root;
-    if (!reader.parse(json.c_str(), root)) {
-      LOG4CXX_DEBUG(logger_, "Unable to parse query_app json file.");
+
+    if (!reader.parse(json, &root)) {
+      LOG4CXX_DEBUG(logger_, "Unable to parse query_app json file. ");
       return;
     }
 
+    smart_objects::SmartObject sm_object;
+
     CFormatterJsonBase::jsonValueToObj(root, sm_object);
+
     if (!ValidateQueryAppData(sm_object)) {
       SendResponse(false, mobile_apis::Result::GENERIC_ERROR);
       return;
@@ -678,9 +705,9 @@ void SystemRequest::on_event(const event_engine::Event& event) {
 bool SystemRequest::ValidateQueryAppData(
     smart_objects::SmartObject& data) const {
   if (!data.isValid()) {
-    LOG4CXX_ERROR(logger_,
-                  kQueryAppsValidationFailedPrefix
-                      << "QueryApps response is not valid.");
+    LOG4CXX_ERROR(
+        logger_,
+        kQueryAppsValidationFailedPrefix << "QueryApps response is not valid.");
     return false;
   }
   if (!data.keyExists(json::response)) {
@@ -697,4 +724,4 @@ bool SystemRequest::ValidateQueryAppData(
 
 }  // namespace commands
 
-}  // namespace application_manager
+}  // namespace sdl_rpc_plugin

@@ -31,43 +31,42 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef WEBSOCKET_SESSION_H
 #define WEBSOCKET_SESSION_H
 
-#include <iostream>
+#include <algorithm>
+#include <atomic>
+#include <boost/asio/bind_executor.hpp>
+#include <boost/asio/ip/tcp.hpp>
+#include <boost/asio/placeholders.hpp>
+#include <boost/asio/strand.hpp>
 #include <boost/beast/core.hpp>
 #include <boost/beast/websocket.hpp>
-#include <boost/asio/bind_executor.hpp>
-#include <boost/asio/strand.hpp>
-#include <boost/asio/placeholders.hpp>
-#include <boost/asio/ip/tcp.hpp>
 #include <boost/make_shared.hpp>
 #include <boost/thread/thread.hpp>
-#include <algorithm>
 #include <cstdlib>
 #include <functional>
 #include <iostream>
 #include <memory>
+#include <mutex>
+#include <queue>
 #include <string>
 #include <thread>
 #include <vector>
-#include <mutex>
-#include <queue>
 #include "json/json.h"
-#include "utils/macro.h"
 #include "utils/lock.h"
-#include <atomic>
-#include "utils/threads/thread.h"
-#include "utils/threads/message_loop_thread.h"
+#include "utils/macro.h"
 #include "utils/message_queue.h"
+#include "utils/threads/message_loop_thread.h"
+#include "utils/threads/thread.h"
 
 using namespace boost::beast::websocket;
 using ::utils::MessageQueue;
 
 #ifdef DEBUG_ON
 /**
-* \def DBG_MSG
-* \brief Debug message output with file name and line number.
-* \param x formatted debug message.
-* \return printf construction.
-*/
+ * \def DBG_MSG
+ * \brief Debug message output with file name and line number.
+ * \param x formatted debug message.
+ * \return printf construction.
+ */
 #define DBG_MSG(x)                      \
   printf("%s:%d ", __FILE__, __LINE__); \
   printf x
@@ -109,7 +108,7 @@ class WebsocketSession : public std::enable_shared_from_this<WebsocketSession> {
 
   void Recv(boost::system::error_code ec);
 
-  void Send(std::string& message, Json::Value& json_message);
+  void Send(const std::string& message, Json::Value& json_message);
 
   void SendFromQueue();
 
@@ -165,9 +164,8 @@ class WebsocketSession : public std::enable_shared_from_this<WebsocketSession> {
 
   int mControllersIdCurrent;
 
-  Json::Reader m_reader;
-  Json::FastWriter m_writer;
-  Json::FastWriter m_receiverWriter;
+  Json::StreamWriterBuilder m_writer;
+  Json::StreamWriterBuilder m_receiver_writer;
 
   sync_primitives::Lock queue_lock_;
   sync_primitives::Lock message_queue_lock_;
@@ -203,6 +201,6 @@ class WebsocketSession : public std::enable_shared_from_this<WebsocketSession> {
   threads::Thread* thread_;
 };
 
-}  // hmi_message_handler
+}  // namespace hmi_message_handler
 
 #endif /* WEBSOCKET_SESSION_H */

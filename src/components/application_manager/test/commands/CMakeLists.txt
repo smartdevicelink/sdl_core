@@ -58,7 +58,8 @@ set(LIBRARIES
   connectionHandler
   ApplicationManager
   jsoncpp
-  Policy
+  PolicyStatic
+  Resumption
 )
 
 create_test("commands_test" "${SOURCES}" "${LIBRARIES}")

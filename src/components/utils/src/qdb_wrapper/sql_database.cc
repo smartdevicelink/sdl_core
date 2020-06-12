@@ -30,8 +30,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <cstring>
 #include "qdb_wrapper/sql_database.h"
+#include <cstring>
 #include "utils/logger.h"
 
 namespace utils {

@@ -33,32 +33,32 @@
 #include <stdint.h>
 #include <string>
 
-#include "gtest/gtest.h"
-#include "smart_objects/smart_object.h"
-#include "application_manager/smart_object_keys.h"
 #include "application_manager/application.h"
+#include "application_manager/commands/commands_test.h"
+#include "application_manager/commands/response_from_hmi.h"
+#include "application_manager/mock_application_manager.h"
 #include "application_manager/mock_hmi_capabilities.h"
 #include "application_manager/mock_message_helper.h"
-#include "application_manager/mock_application_manager.h"
-#include "application_manager/commands/response_from_hmi.h"
-#include "hmi/get_system_info_response.h"
 #include "application_manager/policies/mock_policy_handler_interface.h"
-#include "application_manager/commands/commands_test.h"
+#include "application_manager/smart_object_keys.h"
+#include "gtest/gtest.h"
+#include "hmi/get_system_info_response.h"
+#include "smart_objects/smart_object.h"
 namespace test {
 namespace components {
 namespace commands_test {
 namespace hmi_commands_test {
 namespace get_system_info_response {
 
-using ::testing::Return;
 using ::testing::NiceMock;
+using ::testing::Return;
 namespace am = ::application_manager;
 namespace strings = ::application_manager::strings;
 namespace hmi_response = am::hmi_response;
+using am::commands::CommandImpl;
 using application_manager::commands::ResponseFromHMI;
 using sdl_rpc_plugin::commands::GetSystemInfoResponse;
 using sdl_rpc_plugin::commands::SystemInfo;
-using am::commands::CommandImpl;
 
 typedef std::shared_ptr<ResponseFromHMI> ResponseFromHMIPtr;
 typedef NiceMock<

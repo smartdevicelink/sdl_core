@@ -33,15 +33,14 @@
 #ifndef SRC_COMPONENTS_POLICY_POLICY_REGULAR_INCLUDE_POLICY_UPDATE_STATUS_MANAGER_H_
 #define SRC_COMPONENTS_POLICY_POLICY_REGULAR_INCLUDE_POLICY_UPDATE_STATUS_MANAGER_H_
 
-#include "policy/update_status_manager_interface.h"
 #include "policy/policy_types.h"
-#include "utils/lock.h"
-#include "utils/threads/thread.h"
-#include "utils/threads/thread_delegate.h"
+#include "policy/update_status_manager_interface.h"
 #include "utils/conditional_variable.h"
 #include "utils/lock.h"
 #include "utils/logger.h"
 #include "utils/macro.h"
+#include "utils/threads/thread.h"
+#include "utils/threads/thread_delegate.h"
 
 namespace policy {
 
@@ -150,6 +149,12 @@ class UpdateStatusManager : public UpdateStatusManagerInterface {
   void ScheduleUpdate();
 
   /**
+   * @brief PendingUpdate will change state from Update_Needed
+   * to Update_Pending
+   */
+  void PendingUpdate();
+
+  /**
    * @brief ScheduleUpdate allows to schedule next update.
    * It will change state to Update_Needed, that's is
    * and will not send any notifications about updating to HMI
@@ -216,6 +221,6 @@ class UpdateStatusManager : public UpdateStatusManagerInterface {
   bool app_registered_from_non_consented_device_;
   sync_primitives::Lock apps_search_in_progress_lock_;
 };
-}
+}  // namespace policy
 
 #endif  // SRC_COMPONENTS_POLICY_POLICY_REGULAR_INCLUDE_POLICY_UPDATE_STATUS_MANAGER_H_

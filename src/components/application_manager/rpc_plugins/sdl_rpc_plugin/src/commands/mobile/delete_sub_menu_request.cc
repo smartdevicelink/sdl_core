@@ -33,8 +33,8 @@
 
 #include "sdl_rpc_plugin/commands/mobile/delete_sub_menu_request.h"
 
-#include "application_manager/message_helper.h"
 #include "application_manager/application_impl.h"
+#include "application_manager/message_helper.h"
 #include "interfaces/HMI_API.h"
 #include "utils/helpers.h"
 
@@ -200,4 +200,4 @@ bool DeleteSubMenuRequest::Init() {
 
 }  // namespace commands
 
-}  // namespace application_manager
+}  // namespace sdl_rpc_plugin

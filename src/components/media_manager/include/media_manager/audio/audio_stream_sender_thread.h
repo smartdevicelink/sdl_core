@@ -34,11 +34,11 @@
 #define SRC_COMPONENTS_MEDIA_MANAGER_INCLUDE_MEDIA_MANAGER_AUDIO_AUDIO_STREAM_SENDER_THREAD_H_
 
 #include <string>
-#include "utils/macro.h"
-#include "utils/threads/thread_delegate.h"
+#include "smart_objects/smart_object.h"
 #include "utils/conditional_variable.h"
 #include "utils/lock.h"
-#include "smart_objects/smart_object.h"
+#include "utils/macro.h"
+#include "utils/threads/thread_delegate.h"
 
 namespace application_manager {
 class ApplicationManager;

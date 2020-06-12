@@ -32,14 +32,14 @@
 
 #include "transport_manager/iap2_emulation/iap2_transport_adapter.h"
 
-#include <sys/types.h>
-#include <sys/stat.h>
 #include <fcntl.h>
-#include <unistd.h>
 #include <stdio.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <unistd.h>
 
-#include "utils/threads/thread.h"
 #include "utils/file_system.h"
+#include "utils/threads/thread.h"
 
 namespace {
 static const mode_t mode = 0666;
@@ -54,9 +54,9 @@ CREATE_LOGGERPTR_GLOBAL(logger_, "IAP2Emulation");
 
 IAP2BluetoothEmulationTransportAdapter::IAP2BluetoothEmulationTransportAdapter(
     const uint16_t port,
-    resumption::LastState& last_state,
+    resumption::LastStateWrapperPtr last_state_wrapper,
     const TransportManagerSettings& settings)
-    : TcpTransportAdapter(port, last_state, settings) {}
+    : TcpTransportAdapter(port, last_state_wrapper, settings) {}
 
 void IAP2BluetoothEmulationTransportAdapter::DeviceSwitched(
     const DeviceUID& device_handle) {
@@ -76,9 +76,9 @@ void IAP2BluetoothEmulationTransportAdapter::TransportConfigUpdated(
 
 IAP2USBEmulationTransportAdapter::IAP2USBEmulationTransportAdapter(
     const uint16_t port,
-    resumption::LastState& last_state,
+    resumption::LastStateWrapperPtr last_state_wrapper,
     const TransportManagerSettings& settings)
-    : TcpTransportAdapter(port, last_state, settings), out_(0) {
+    : TcpTransportAdapter(port, last_state_wrapper, settings), out_(0) {
   auto delegate = new IAPSignalHandlerDelegate(*this);
   signal_handler_ = threads::CreateThread("iAP signal handler", delegate);
   signal_handler_->start();
@@ -182,5 +182,5 @@ void IAP2USBEmulationTransportAdapter::IAPSignalHandlerDelegate::
   run_flag_ = false;
   ThreadDelegate::exitThreadMain();
 }
-}
-}  // namespace transport_manager::transport_adapter
+}  // namespace transport_adapter
+}  // namespace transport_manager

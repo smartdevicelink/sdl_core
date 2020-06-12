@@ -43,20 +43,23 @@ CommandHolderImpl::CommandHolderImpl(ApplicationManager& app_manager)
 void CommandHolderImpl::Suspend(
     ApplicationSharedPtr application,
     CommandType type,
+    commands::Command::CommandSource source,
     std::shared_ptr<smart_objects::SmartObject> command) {
   LOG4CXX_AUTO_TRACE(logger_);
   DCHECK_OR_RETURN_VOID(application);
   LOG4CXX_DEBUG(logger_,
                 "Suspending command(s) for application: "
                     << application->policy_app_id());
-  sync_primitives::AutoLock lock(commands_lock_);
 
+  AppCommandInfo info = {command, source};
+
+  sync_primitives::AutoLock lock(commands_lock_);
   if (CommandType::kHmiCommand == type) {
-    app_hmi_commands_[application].push_back(command);
+    app_hmi_commands_[application].push_back(info);
     LOG4CXX_DEBUG(logger_,
                   "Suspended HMI command(s): " << app_hmi_commands_.size());
   } else {
-    app_mobile_commands_[application].push_back(command);
+    app_mobile_commands_[application].push_back(info);
     LOG4CXX_DEBUG(
         logger_,
         "Suspended mobile command(s): " << app_mobile_commands_.size());
@@ -113,8 +116,10 @@ void CommandHolderImpl::ResumeHmiCommand(ApplicationSharedPtr application) {
                 "Resuming HMI command(s): " << app_hmi_commands_.size());
 
   for (auto cmd : app_commands->second) {
-    (*cmd)[strings::msg_params][strings::app_id] = application->hmi_app_id();
-    app_manager_.GetRPCService().ManageHMICommand(cmd);
+    (*cmd.command_ptr_)[strings::msg_params][strings::app_id] =
+        application->hmi_app_id();
+    app_manager_.GetRPCService().ManageHMICommand(cmd.command_ptr_,
+                                                  cmd.command_source_);
   }
 
   app_hmi_commands_.erase(app_commands);
@@ -132,11 +137,12 @@ void CommandHolderImpl::ResumeMobileCommand(ApplicationSharedPtr application) {
                 "Resuming mobile command(s): " << app_mobile_commands_.size());
 
   for (auto cmd : app_commands->second) {
-    (*cmd)[strings::params][strings::connection_key] = application->app_id();
-    app_manager_.GetRPCService().ManageMobileCommand(
-        cmd, commands::Command::CommandSource::SOURCE_MOBILE);
+    (*cmd.command_ptr_)[strings::params][strings::connection_key] =
+        application->app_id();
+    app_manager_.GetRPCService().ManageMobileCommand(cmd.command_ptr_,
+                                                     cmd.command_source_);
   }
 
   app_mobile_commands_.erase(app_commands);
 }
-}  // application_manager
+}  // namespace application_manager

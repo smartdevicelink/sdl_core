@@ -30,8 +30,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "gtest/gtest.h"
 #include "formatters/generic_json_formatter.h"
+#include "gtest/gtest.h"
 
 namespace test {
 namespace components {
@@ -169,6 +169,6 @@ TEST(GenericJsonFormatter, FromString) {
       result.getElement("subobject").getElement("strField").asString().c_str());
 }
 
-}  // formatters
-}  // components
-}  // test
+}  // namespace formatters
+}  // namespace components
+}  // namespace test

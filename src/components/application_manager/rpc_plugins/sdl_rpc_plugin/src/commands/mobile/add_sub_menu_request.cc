@@ -33,8 +33,8 @@
 
 #include "sdl_rpc_plugin/commands/mobile/add_sub_menu_request.h"
 
-#include "application_manager/message_helper.h"
 #include "application_manager/application.h"
+#include "application_manager/message_helper.h"
 #include "utils/helpers.h"
 
 namespace sdl_rpc_plugin {
@@ -109,15 +109,28 @@ void AddSubMenuRequest::Run() {
   smart_objects::SmartObject msg_params =
       smart_objects::SmartObject(smart_objects::SmartType_Map);
 
+  if (received_msg_params.keyExists(strings::menu_layout)) {
+    auto menu_layout = static_cast<mobile_apis::MenuLayout::eType>(
+        received_msg_params[strings::menu_layout].asUInt());
+    if (app->menu_layout_supported(menu_layout)) {
+      msg_params[strings::menu_layout] =
+          received_msg_params[strings::menu_layout];
+    } else {
+      is_menu_layout_available_ = false;
+    }
+  }
+
   msg_params[strings::menu_id] = received_msg_params[strings::menu_id];
   if (received_msg_params.keyExists(strings::position)) {
     msg_params[strings::menu_params][strings::position] =
         received_msg_params[strings::position];
   }
+  if (received_msg_params.keyExists(strings::menu_icon)) {
+    msg_params[strings::menu_icon] = received_msg_params[strings::menu_icon];
+  }
   msg_params[strings::menu_params][strings::menu_name] =
       received_msg_params[strings::menu_name];
   msg_params[strings::app_id] = app->app_id();
-  msg_params[strings::menu_icon] = received_msg_params[strings::menu_icon];
 
   StartAwaitForInterface(HmiInterfaces::HMI_INTERFACE_UI);
   SendHMIRequest(hmi_apis::FunctionID::UI_AddSubMenu, &msg_params, true);
@@ -150,11 +163,22 @@ void AddSubMenuRequest::on_event(const event_engine::Event& event) {
         application->AddSubMenu(
             (*message_)[strings::msg_params][strings::menu_id].asInt(),
             (*message_)[strings::msg_params]);
+        response_info =
+            "The MenuLayout specified is unsupported, the "
+            "default MenuLayout will be used." +
+            response_info;
+        SendResponse(result,
+                     is_menu_layout_available_
+                         ? MessageHelper::HMIToMobileResult(result_code)
+                         : mobile_apis::Result::WARNINGS,
+                     is_menu_layout_available_ ? NULL : response_info.c_str(),
+                     &(message[strings::msg_params]));
+      } else {
+        SendResponse(result,
+                     MessageHelper::HMIToMobileResult(result_code),
+                     response_info.empty() ? NULL : response_info.c_str(),
+                     &(message[strings::msg_params]));
       }
-      SendResponse(result,
-                   MessageHelper::HMIToMobileResult(result_code),
-                   response_info.empty() ? NULL : response_info.c_str(),
-                   &(message[strings::msg_params]));
       break;
     }
     default: {
@@ -183,4 +207,4 @@ bool AddSubMenuRequest::CheckSubMenuName() {
 
 }  // namespace commands
 
-}  // namespace application_manager
+}  // namespace sdl_rpc_plugin

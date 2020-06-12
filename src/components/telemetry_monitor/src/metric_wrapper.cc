@@ -54,9 +54,9 @@ std::string MetricWrapper::GetStyledString() {
 Json::Value MetricWrapper::GetJsonMetric() {
   Json::Value result;
   if (resources) {
-    result[strings::stime] = resources->stime;
-    result[strings::utime] = resources->utime;
-    result[strings::memory] = resources->memory;
+    result[strings::stime] = static_cast<Json::Int64>(resources->stime);
+    result[strings::utime] = static_cast<Json::Int64>(resources->utime);
+    result[strings::memory] = static_cast<Json::Int64>(resources->memory);
   }
   return result;
 }
@@ -71,4 +71,4 @@ void MetricWrapper::Clear() {
 MetricWrapper::~MetricWrapper() {
   Clear();
 }
-}
+}  // namespace telemetry_monitor

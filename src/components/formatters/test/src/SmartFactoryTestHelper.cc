@@ -169,27 +169,24 @@ void CSmartFactoryTest::InitFunctionSchemes(
     const TStructsSchemaItems& struct_schema_items,
     const std::set<FunctionIdTest::eType>& function_id_items,
     const std::set<MessageTypeTest::eType>& message_type_items) {
-  CObjectSchemaItem::Members params_members;
-  params_members[S_FUNCTION_ID] = CObjectSchemaItem::SMember(
+  Members params_members;
+  params_members[S_FUNCTION_ID] = SMember(
       TEnumSchemaItem<FunctionIdTest::eType>::create(function_id_items), true);
-  params_members[S_MESSAGE_TYPE] = CObjectSchemaItem::SMember(
+  params_members[S_MESSAGE_TYPE] = SMember(
       TEnumSchemaItem<MessageTypeTest::eType>::create(message_type_items),
       true);
   params_members[S_PROTOCOL_VERSION] =
-      CObjectSchemaItem::SMember(TNumberSchemaItem<int>::create(), true);
+      SMember(TNumberSchemaItem<int>::create(), true);
   params_members[S_PROTOCOL_TYPE] =
-      CObjectSchemaItem::SMember(TNumberSchemaItem<int>::create(), true);
+      SMember(TNumberSchemaItem<int>::create(), true);
   params_members[S_CORRELATION_ID] =
-      CObjectSchemaItem::SMember(TNumberSchemaItem<int>::create(), true);
-  params_members[kCode] =
-      CObjectSchemaItem::SMember(TNumberSchemaItem<int>::create(), true);
-  params_members[kMessage] =
-      CObjectSchemaItem::SMember(CStringSchemaItem::create(), true);
+      SMember(TNumberSchemaItem<int>::create(), true);
+  params_members[kCode] = SMember(TNumberSchemaItem<int>::create(), true);
+  params_members[kMessage] = SMember(CStringSchemaItem::create(), true);
 
-  CObjectSchemaItem::Members root_members_map;
+  Members root_members_map;
   root_members_map[ns_smart_device_link::ns_json_handler::strings::S_PARAMS] =
-      CObjectSchemaItem::SMember(CObjectSchemaItem::create(params_members),
-                                 true);
+      SMember(CObjectSchemaItem::create(params_members), true);
 
   CSmartSchema error_response_schema(
       CObjectSchemaItem::create(root_members_map));
@@ -240,26 +237,26 @@ void CSmartFactoryTest::InitFunctionSchemes(
 CSmartSchema CSmartFactoryTest::InitFunction_Function1_request(
     const std::set<FunctionIdTest::eType>& function_id_items,
     const std::set<MessageTypeTest::eType>& message_type_items) {
-  CObjectSchemaItem::Members schema_members;
-  CObjectSchemaItem::Members params_members;
+  Members schema_members;
+  Members params_members;
 
-  params_members[S_FUNCTION_ID] = CObjectSchemaItem::SMember(
+  params_members[S_FUNCTION_ID] = SMember(
       TEnumSchemaItem<FunctionIdTest::eType>::create(function_id_items), true);
-  params_members[S_MESSAGE_TYPE] = CObjectSchemaItem::SMember(
+  params_members[S_MESSAGE_TYPE] = SMember(
       TEnumSchemaItem<MessageTypeTest::eType>::create(message_type_items),
       true);
   params_members[S_PROTOCOL_VERSION] =
-      CObjectSchemaItem::SMember(TNumberSchemaItem<int>::create(), true);
+      SMember(TNumberSchemaItem<int>::create(), true);
   params_members[S_PROTOCOL_TYPE] =
-      CObjectSchemaItem::SMember(TNumberSchemaItem<int>::create(), true);
+      SMember(TNumberSchemaItem<int>::create(), true);
   params_members[S_CORRELATION_ID] =
-      CObjectSchemaItem::SMember(TNumberSchemaItem<int>::create(), true);
+      SMember(TNumberSchemaItem<int>::create(), true);
 
-  CObjectSchemaItem::Members root_members_map;
-  root_members_map[S_MSG_PARAMS] = CObjectSchemaItem::SMember(
-      CObjectSchemaItem::create(schema_members), true);
-  root_members_map[S_PARAMS] = CObjectSchemaItem::SMember(
-      CObjectSchemaItem::create(params_members), true);
+  Members root_members_map;
+  root_members_map[S_MSG_PARAMS] =
+      SMember(CObjectSchemaItem::create(schema_members), true);
+  root_members_map[S_PARAMS] =
+      SMember(CObjectSchemaItem::create(params_members), true);
 
   return CSmartSchema(CObjectSchemaItem::create(root_members_map));
 }
@@ -272,31 +269,29 @@ CSmartSchema CSmartFactoryTest::InitFunction_Function1_response(
   std::shared_ptr<ISchemaItem> available_SchemaItem =
       CBoolSchemaItem::create(TSchemaItemParameter<bool>());
 
-  CObjectSchemaItem::Members schema_members;
+  Members schema_members;
 
-  schema_members["available"] =
-      CObjectSchemaItem::SMember(available_SchemaItem, true);
+  schema_members["available"] = SMember(available_SchemaItem, true);
 
-  CObjectSchemaItem::Members params_members;
-  params_members[S_FUNCTION_ID] = CObjectSchemaItem::SMember(
+  Members params_members;
+  params_members[S_FUNCTION_ID] = SMember(
       TEnumSchemaItem<FunctionIdTest::eType>::create(function_id_items), true);
-  params_members[S_MESSAGE_TYPE] = CObjectSchemaItem::SMember(
+  params_members[S_MESSAGE_TYPE] = SMember(
       TEnumSchemaItem<MessageTypeTest::eType>::create(message_type_items),
       true);
   params_members[S_PROTOCOL_VERSION] =
-      CObjectSchemaItem::SMember(TNumberSchemaItem<int>::create(), true);
+      SMember(TNumberSchemaItem<int>::create(), true);
   params_members[S_PROTOCOL_TYPE] =
-      CObjectSchemaItem::SMember(TNumberSchemaItem<int>::create(), true);
+      SMember(TNumberSchemaItem<int>::create(), true);
   params_members[S_CORRELATION_ID] =
-      CObjectSchemaItem::SMember(TNumberSchemaItem<int>::create(), true);
-  params_members[kCode] =
-      CObjectSchemaItem::SMember(TNumberSchemaItem<int>::create(), true);
+      SMember(TNumberSchemaItem<int>::create(), true);
+  params_members[kCode] = SMember(TNumberSchemaItem<int>::create(), true);
 
-  CObjectSchemaItem::Members root_members_map;
-  root_members_map[S_MSG_PARAMS] = CObjectSchemaItem::SMember(
-      CObjectSchemaItem::create(schema_members), true);
-  root_members_map[S_PARAMS] = CObjectSchemaItem::SMember(
-      CObjectSchemaItem::create(params_members), true);
+  Members root_members_map;
+  root_members_map[S_MSG_PARAMS] =
+      SMember(CObjectSchemaItem::create(schema_members), true);
+  root_members_map[S_PARAMS] =
+      SMember(CObjectSchemaItem::create(params_members), true);
 
   return CSmartSchema(CObjectSchemaItem::create(root_members_map));
 }
@@ -304,26 +299,26 @@ CSmartSchema CSmartFactoryTest::InitFunction_Function1_response(
 CSmartSchema CSmartFactoryTest::InitFunction_Function2_request(
     const std::set<FunctionIdTest::eType>& function_id_items,
     const std::set<MessageTypeTest::eType>& message_type_items) {
-  CObjectSchemaItem::Members schema_members;
+  Members schema_members;
 
-  CObjectSchemaItem::Members params_members;
-  params_members[S_FUNCTION_ID] = CObjectSchemaItem::SMember(
+  Members params_members;
+  params_members[S_FUNCTION_ID] = SMember(
       TEnumSchemaItem<FunctionIdTest::eType>::create(function_id_items), true);
-  params_members[S_MESSAGE_TYPE] = CObjectSchemaItem::SMember(
+  params_members[S_MESSAGE_TYPE] = SMember(
       TEnumSchemaItem<MessageTypeTest::eType>::create(message_type_items),
       true);
   params_members[S_PROTOCOL_VERSION] =
-      CObjectSchemaItem::SMember(TNumberSchemaItem<int>::create(), true);
+      SMember(TNumberSchemaItem<int>::create(), true);
   params_members[S_PROTOCOL_TYPE] =
-      CObjectSchemaItem::SMember(TNumberSchemaItem<int>::create(), true);
+      SMember(TNumberSchemaItem<int>::create(), true);
   params_members[S_CORRELATION_ID] =
-      CObjectSchemaItem::SMember(TNumberSchemaItem<int>::create(), true);
+      SMember(TNumberSchemaItem<int>::create(), true);
 
-  CObjectSchemaItem::Members root_members_map;
-  root_members_map[S_MSG_PARAMS] = CObjectSchemaItem::SMember(
-      CObjectSchemaItem::create(schema_members), true);
-  root_members_map[S_PARAMS] = CObjectSchemaItem::SMember(
-      CObjectSchemaItem::create(params_members), true);
+  Members root_members_map;
+  root_members_map[S_MSG_PARAMS] =
+      SMember(CObjectSchemaItem::create(schema_members), true);
+  root_members_map[S_PARAMS] =
+      SMember(CObjectSchemaItem::create(params_members), true);
 
   return CSmartSchema(CObjectSchemaItem::create(root_members_map));
 }
@@ -336,31 +331,29 @@ CSmartSchema CSmartFactoryTest::InitFunction_Function2_response(
   std::shared_ptr<ISchemaItem> available_SchemaItem =
       CBoolSchemaItem::create(TSchemaItemParameter<bool>());
 
-  CObjectSchemaItem::Members schema_members;
+  Members schema_members;
 
-  schema_members["available"] =
-      CObjectSchemaItem::SMember(available_SchemaItem, true);
+  schema_members["available"] = SMember(available_SchemaItem, true);
 
-  CObjectSchemaItem::Members params_members;
-  params_members[S_FUNCTION_ID] = CObjectSchemaItem::SMember(
+  Members params_members;
+  params_members[S_FUNCTION_ID] = SMember(
       TEnumSchemaItem<FunctionIdTest::eType>::create(function_id_items), true);
-  params_members[S_MESSAGE_TYPE] = CObjectSchemaItem::SMember(
+  params_members[S_MESSAGE_TYPE] = SMember(
       TEnumSchemaItem<MessageTypeTest::eType>::create(message_type_items),
       true);
   params_members[S_PROTOCOL_VERSION] =
-      CObjectSchemaItem::SMember(TNumberSchemaItem<int>::create(), true);
+      SMember(TNumberSchemaItem<int>::create(), true);
   params_members[S_PROTOCOL_TYPE] =
-      CObjectSchemaItem::SMember(TNumberSchemaItem<int>::create(), true);
+      SMember(TNumberSchemaItem<int>::create(), true);
   params_members[S_CORRELATION_ID] =
-      CObjectSchemaItem::SMember(TNumberSchemaItem<int>::create(), true);
-  params_members[kCode] =
-      CObjectSchemaItem::SMember(TNumberSchemaItem<int>::create(), true);
+      SMember(TNumberSchemaItem<int>::create(), true);
+  params_members[kCode] = SMember(TNumberSchemaItem<int>::create(), true);
 
-  CObjectSchemaItem::Members root_members_map;
-  root_members_map[S_MSG_PARAMS] = CObjectSchemaItem::SMember(
-      CObjectSchemaItem::create(schema_members), true);
-  root_members_map[S_PARAMS] = CObjectSchemaItem::SMember(
-      CObjectSchemaItem::create(params_members), true);
+  Members root_members_map;
+  root_members_map[S_MSG_PARAMS] =
+      SMember(CObjectSchemaItem::create(schema_members), true);
+  root_members_map[S_PARAMS] =
+      SMember(CObjectSchemaItem::create(params_members), true);
 
   return CSmartSchema(CObjectSchemaItem::create(root_members_map));
 }
@@ -368,26 +361,26 @@ CSmartSchema CSmartFactoryTest::InitFunction_Function2_response(
 CSmartSchema CSmartFactoryTest::InitFunction_Function3_request(
     const std::set<FunctionIdTest::eType>& function_id_items,
     const std::set<MessageTypeTest::eType>& message_type_items) {
-  CObjectSchemaItem::Members schema_members;
+  Members schema_members;
 
-  CObjectSchemaItem::Members params_members;
-  params_members[S_FUNCTION_ID] = CObjectSchemaItem::SMember(
+  Members params_members;
+  params_members[S_FUNCTION_ID] = SMember(
       TEnumSchemaItem<FunctionIdTest::eType>::create(function_id_items), true);
-  params_members[S_MESSAGE_TYPE] = CObjectSchemaItem::SMember(
+  params_members[S_MESSAGE_TYPE] = SMember(
       TEnumSchemaItem<MessageTypeTest::eType>::create(message_type_items),
       true);
   params_members[S_PROTOCOL_VERSION] =
-      CObjectSchemaItem::SMember(TNumberSchemaItem<int>::create(), true);
+      SMember(TNumberSchemaItem<int>::create(), true);
   params_members[S_PROTOCOL_TYPE] =
-      CObjectSchemaItem::SMember(TNumberSchemaItem<int>::create(), true);
+      SMember(TNumberSchemaItem<int>::create(), true);
   params_members[S_CORRELATION_ID] =
-      CObjectSchemaItem::SMember(TNumberSchemaItem<int>::create(), true);
+      SMember(TNumberSchemaItem<int>::create(), true);
 
-  CObjectSchemaItem::Members root_members_map;
-  root_members_map[S_MSG_PARAMS] = CObjectSchemaItem::SMember(
-      CObjectSchemaItem::create(schema_members), true);
-  root_members_map[S_PARAMS] = CObjectSchemaItem::SMember(
-      CObjectSchemaItem::create(params_members), true);
+  Members root_members_map;
+  root_members_map[S_MSG_PARAMS] =
+      SMember(CObjectSchemaItem::create(schema_members), true);
+  root_members_map[S_PARAMS] =
+      SMember(CObjectSchemaItem::create(params_members), true);
 
   return CSmartSchema(CObjectSchemaItem::create(root_members_map));
 }
@@ -402,31 +395,29 @@ CSmartSchema CSmartFactoryTest::InitFunction_Function3_response(
   std::shared_ptr<ISchemaItem> available_SchemaItem =
       CBoolSchemaItem::create(TSchemaItemParameter<bool>());
 
-  CObjectSchemaItem::Members schema_members;
+  Members schema_members;
 
-  schema_members["available"] =
-      CObjectSchemaItem::SMember(available_SchemaItem, true);
+  schema_members["available"] = SMember(available_SchemaItem, true);
 
-  CObjectSchemaItem::Members params_members;
-  params_members[S_FUNCTION_ID] = CObjectSchemaItem::SMember(
+  Members params_members;
+  params_members[S_FUNCTION_ID] = SMember(
       TEnumSchemaItem<FunctionIdTest::eType>::create(function_id_items), true);
-  params_members[S_MESSAGE_TYPE] = CObjectSchemaItem::SMember(
+  params_members[S_MESSAGE_TYPE] = SMember(
       TEnumSchemaItem<MessageTypeTest::eType>::create(message_type_items),
       true);
   params_members[S_PROTOCOL_VERSION] =
-      CObjectSchemaItem::SMember(TNumberSchemaItem<int>::create(), true);
+      SMember(TNumberSchemaItem<int>::create(), true);
   params_members[S_PROTOCOL_TYPE] =
-      CObjectSchemaItem::SMember(TNumberSchemaItem<int>::create(), true);
+      SMember(TNumberSchemaItem<int>::create(), true);
   params_members[S_CORRELATION_ID] =
-      CObjectSchemaItem::SMember(TNumberSchemaItem<int>::create(), true);
-  params_members[kCode] =
-      CObjectSchemaItem::SMember(TNumberSchemaItem<int>::create(), true);
+      SMember(TNumberSchemaItem<int>::create(), true);
+  params_members[kCode] = SMember(TNumberSchemaItem<int>::create(), true);
 
-  CObjectSchemaItem::Members root_members_map;
-  root_members_map[S_MSG_PARAMS] = CObjectSchemaItem::SMember(
-      CObjectSchemaItem::create(schema_members), true);
-  root_members_map[S_PARAMS] = CObjectSchemaItem::SMember(
-      CObjectSchemaItem::create(params_members), true);
+  Members root_members_map;
+  root_members_map[S_MSG_PARAMS] =
+      SMember(CObjectSchemaItem::create(schema_members), true);
+  root_members_map[S_PARAMS] =
+      SMember(CObjectSchemaItem::create(params_members), true);
 
   return CSmartSchema(CObjectSchemaItem::create(root_members_map));
 }
@@ -455,20 +446,19 @@ std::shared_ptr<ISchemaItem> CSmartFactoryTest::InitStructSchemaItem_Common_1(
       TNumberSchemaItem<int32_t>::create(TSchemaItemParameter<int32_t>(1),
                                          TSchemaItemParameter<int32_t>(500),
                                          TSchemaItemParameter<int32_t>());
-  CObjectSchemaItem::Members struct_members;
-  struct_members["image"] = CObjectSchemaItem::SMember(image_SchemaItem, false);
+  Members struct_members;
+  struct_members["image"] = SMember(image_SchemaItem, false);
 
-  CObjectSchemaItem::Members schema_members;
+  Members schema_members;
 
-  schema_members["text"] = CObjectSchemaItem::SMember(text_SchemaItem, true);
-  schema_members["position"] =
-      CObjectSchemaItem::SMember(position_SchemaItem, true);
+  schema_members["text"] = SMember(text_SchemaItem, true);
+  schema_members["position"] = SMember(position_SchemaItem, true);
 
-  CObjectSchemaItem::Members root_members_map;
-  root_members_map[""] = CObjectSchemaItem::SMember(
-      CObjectSchemaItem::create(struct_members), true);
-  root_members_map[""] = CObjectSchemaItem::SMember(
-      CObjectSchemaItem::create(schema_members), true);
+  Members root_members_map;
+  root_members_map[""] =
+      SMember(CObjectSchemaItem::create(struct_members), true);
+  root_members_map[""] =
+      SMember(CObjectSchemaItem::create(schema_members), true);
   return CObjectSchemaItem::create(schema_members);
 }
 
@@ -489,10 +479,9 @@ CSmartFactoryTest::InitStructSchemaItem_Common_2() {
                                          TSchemaItemParameter<int32_t>(500),
                                          TSchemaItemParameter<int32_t>());
 
-  CObjectSchemaItem::Members schema_members;
-  schema_members["text"] = CObjectSchemaItem::SMember(text_SchemaItem, true);
-  schema_members["position"] =
-      CObjectSchemaItem::SMember(position_SchemaItem, true);
+  Members schema_members;
+  schema_members["text"] = SMember(text_SchemaItem, true);
+  schema_members["position"] = SMember(position_SchemaItem, true);
 
   return CObjectSchemaItem::create(schema_members);
 }

@@ -33,10 +33,10 @@
 #ifndef SRC_COMPONENTS_APPLICATION_MANAGER_TEST_INCLUDE_APPLICATION_MANAGER_TEST_RESUMPTION_DATA_DB_H_
 #define SRC_COMPONENTS_APPLICATION_MANAGER_TEST_INCLUDE_APPLICATION_MANAGER_TEST_RESUMPTION_DATA_DB_H_
 
-#include "utils/sqlite_wrapper/sql_database.h"
-#include "application_manager/resumption/resumption_data_db.h"
-#include "application_manager/mock_application_manager_settings.h"
 #include "application_manager/mock_application_manager.h"
+#include "application_manager/mock_application_manager_settings.h"
+#include "application_manager/resumption/resumption_data_db.h"
+#include "utils/sqlite_wrapper/sql_database.h"
 
 using ::resumption::ResumptionDataDB;
 
@@ -44,13 +44,16 @@ namespace test {
 namespace components {
 namespace resumption_test {
 
+using ::testing::NiceMock;
+
 class TestResumptionDataDB : public ResumptionDataDB {
  public:
   utils::dbms::SQLDatabase* get_db_handle() {
     return db();
   }
 
-  application_manager_test::MockApplicationManager mock_application_manager_;
+  NiceMock<application_manager_test::MockApplicationManager>
+      mock_application_manager_;
   TestResumptionDataDB(DbStorage db_storage)
       : ResumptionDataDB(db_storage, mock_application_manager_) {}
 };
