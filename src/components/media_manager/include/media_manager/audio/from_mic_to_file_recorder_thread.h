@@ -85,6 +85,9 @@ class FromMicToFileRecorderThread : public threads::ThreadDelegate {
   void deinitArgs();
 
   void psleep(void* timeout);
+  // create_caps_string() creates a string which is fed to capsfilter's "caps"
+  // property. The string specifies audio format. example:
+  // "audio/x-raw,format=(string)S16LE,rate=44100,channels=1"
   std::string create_caps_string();
 
   class SleepThreadDelegate : public threads::ThreadDelegate {

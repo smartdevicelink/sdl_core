@@ -40,7 +40,7 @@
 namespace media_manager {
 
 /**
- * \brief Describes different sampling options for PerformAudioPassThru.
+ * @brief Describes different sampling options for PerformAudioPassThru.
  */
 typedef enum {
   /// Invalid sampling rate.
@@ -56,7 +56,7 @@ typedef enum {
 } SamplingRate;
 
 /**
- * \brief Describes different quality options for PerformAudioPassThru.
+ * @brief Describes different quality options for PerformAudioPassThru.
  */
 typedef enum {
   /// Invalid audio quality.
@@ -68,7 +68,7 @@ typedef enum {
 } AudioCaptureQuality;
 
 /**
- * \brief Describes different audio type options for PerformAudioPassThru.
+ * @brief Describes different audio type options for PerformAudioPassThru.
  */
 typedef enum {
   /// Invalid audio type.
