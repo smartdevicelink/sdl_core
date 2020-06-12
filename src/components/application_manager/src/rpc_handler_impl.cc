@@ -203,7 +203,7 @@ void RPCHandlerImpl::ProcessMessageFromHMI(
 
   LOG4CXX_DEBUG(logger_, "Converted message, trying to create hmi command");
   if (!app_manager_.GetRPCService().ManageHMICommand(
-          smart_object, commands::Command::SOURCE_SDL, warning_info)) {
+          smart_object, commands::Command::SOURCE_HMI, warning_info)) {
     LOG4CXX_ERROR(logger_, "Received command didn't run successfully");
   }
 }
