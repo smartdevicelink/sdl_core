@@ -260,22 +260,22 @@ TEST_F(ObjectSchemaItemTest, validation_invalid_param) {
   obj[S_MSG_PARAMS][Keys::SUCCESS] = 0xABC;
 
   report = rpc::ValidationReport("RPC");
-  EXPECT_EQ(errors::INVALID_VALUE, schema_item->validate(obj, &report));
+  EXPECT_EQ(errors::OUT_OF_RANGE, schema_item->validate(obj, &report));
   EXPECT_NE(std::string(""), rpc::PrettyFormat(report));
 
   obj[S_PARAMS][S_FUNCTION_ID] = 1;
   report = rpc::ValidationReport("RPC");
-  EXPECT_EQ(errors::INVALID_VALUE, schema_item->validate(obj, &report));
+  EXPECT_EQ(errors::OUT_OF_RANGE, schema_item->validate(obj, &report));
   EXPECT_NE(std::string(""), rpc::PrettyFormat(report));
 
   obj[S_PARAMS][S_CORRELATION_ID] = -0xFF1;
   report = rpc::ValidationReport("RPC");
-  EXPECT_EQ(errors::INVALID_VALUE, schema_item->validate(obj, &report));
+  EXPECT_EQ(errors::OUT_OF_RANGE, schema_item->validate(obj, &report));
   EXPECT_NE(std::string(""), rpc::PrettyFormat(report));
 
   obj[S_PARAMS][S_PROTOCOL_VERSION] = 2;
   report = rpc::ValidationReport("RPC");
-  EXPECT_EQ(errors::INVALID_VALUE, schema_item->validate(obj, &report));
+  EXPECT_EQ(errors::OUT_OF_RANGE, schema_item->validate(obj, &report));
   EXPECT_NE(std::string(""), rpc::PrettyFormat(report));
 
   obj[S_MSG_PARAMS][Keys::RESULT_CODE] = 1;
@@ -442,7 +442,7 @@ TEST_F(ObjectSchemaItemTest, validation_unexpected_param_remove) {
   EXPECT_FALSE(obj[S_MSG_PARAMS].keyExists(fake3));
   // Invalide state after enum convertion
   report = rpc::ValidationReport("RPC");
-  EXPECT_EQ(errors::INVALID_VALUE, schema_item->validate(obj, &report));
+  EXPECT_EQ(errors::OUT_OF_RANGE, schema_item->validate(obj, &report));
   EXPECT_NE(std::string(""), rpc::PrettyFormat(report));
 }
 
@@ -469,7 +469,7 @@ TEST_F(ObjectSchemaItemTest, validation_empty_params) {
   schema_item->unapplySchema(obj);
   // Invalide state after enum convertion
   report = rpc::ValidationReport("RPC");
-  EXPECT_EQ(errors::INVALID_VALUE, schema_item->validate(obj, &report));
+  EXPECT_EQ(errors::OUT_OF_RANGE, schema_item->validate(obj, &report));
   EXPECT_NE(std::string(""), rpc::PrettyFormat(report));
 }
 
