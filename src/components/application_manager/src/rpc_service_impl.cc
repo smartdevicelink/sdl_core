@@ -332,6 +332,12 @@ bool RPCServiceImpl::ManageMobileCommand(
 
 bool RPCServiceImpl::ManageHMICommand(const commands::MessageSharedPtr message,
                                       commands::Command::CommandSource source) {
+  return ManageHMICommand(message, source, std::string());
+}
+
+bool RPCServiceImpl::ManageHMICommand(const commands::MessageSharedPtr message,
+                                      commands::Command::CommandSource source,
+                                      const std::string warning_info) {
   LOG4CXX_AUTO_TRACE(logger_);
 
   if (!message) {
@@ -381,6 +387,7 @@ bool RPCServiceImpl::ManageHMICommand(const commands::MessageSharedPtr message,
 
   if (kRequest == message_type) {
     LOG4CXX_DEBUG(logger_, "ManageHMICommand");
+    command->set_warning_info(warning_info);
     request_ctrl_.addHMIRequest(command);
   }
 
