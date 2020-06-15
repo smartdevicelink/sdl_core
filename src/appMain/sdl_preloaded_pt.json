@@ -3919,6 +3919,30 @@
                     "since": "5.1"
                 },
                 {
+                    "name": "windowStatus",
+                    "params": [
+                        {
+                            "name": "location",
+                            "key": "OEM_REF_GRID",
+                            "type": "Grid",
+                            "mandatory": true
+                        },
+                        {
+                            "name": "state",
+                            "key": "OEM_REF_WND_STATE",
+                            "type": "WindowState",
+                            "mandatory": true
+                        }
+                    ],
+                    "key": "OEM_REF_WND_STATUS",
+                    "array": true,
+                    "type": "Struct",
+                    "mandatory": false,
+                    "minsize": 0,
+                    "maxsize": 100,
+                    "since": "6.2"
+                },
+                {
                     "name": "eCallInfo",
                     "params": [
                         {
