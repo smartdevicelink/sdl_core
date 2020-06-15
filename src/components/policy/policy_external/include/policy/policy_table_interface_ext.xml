@@ -50,6 +50,7 @@
         <element name="clusterModeStatus" />
         <element name="deviceStatus" />
         <element name="emergencyEvent" />
+        <element name="stabilityControlsStatus" />
         <element name="eCallInfo" />
         <element name="abs_State" />
         <element name="turnSignal" />

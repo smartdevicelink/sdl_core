@@ -211,6 +211,9 @@ std::pair<std::string, mobile_apis::VehicleDataType::eType>
         std::make_pair(
             strings::head_lamp_status,
             mobile_apis::VehicleDataType::VEHICLEDATA_HEADLAMPSTATUS),
+        std::make_pair(
+            strings::stability_controls_status,
+            mobile_apis::VehicleDataType::VEHICLEDATA_STABILITYCONTROLSSTATUS),
         std::make_pair(strings::e_call_info,
                        mobile_apis::VehicleDataType::VEHICLEDATA_ECALLINFO),
         std::make_pair(strings::airbag_status,
