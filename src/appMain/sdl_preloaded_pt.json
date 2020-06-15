@@ -3407,7 +3407,44 @@
                     "name": "prndl",
                     "key": "OEM_REF_PRNDL",
                     "type": "PRNDL",
-                    "mandatory": false
+                    "mandatory": false,
+                    "since": "1.0",
+                    "until": "6.2"
+                },
+                {
+                    "name": "prndl",
+                    "key": "OEM_REF_PRNDL",
+                    "type": "PRNDL",
+                    "mandatory": false,
+                    "deprecated": true,
+                    "since": "6.2"
+                },
+                {
+                    "name": "gearStatus",
+                    "params": [
+                        {
+                            "name": "userSelectedGear",
+                            "key": "OEM_REF_USER_GEAR",
+                            "type": "PRNDL",
+                            "mandatory": false
+                        },
+                        {
+                            "name": "actualGear",
+                            "key": "OEM_REF_ACT_GEAR",
+                            "type": "PRNDL",
+                            "mandatory": false
+                        },
+                        {
+                            "name": "transmissionType",
+                            "key": "OEM_REF_TR_TYPE",
+                            "type": "TransmissionType",
+                            "mandatory": false
+                        }
+                    ],
+                    "key": "OEM_REF_GEAR_STATUS",
+                    "type": "Struct",
+                    "mandatory": false,
+                    "since": "6.2"
                 },
                 {
                     "name": "tirePressure",
