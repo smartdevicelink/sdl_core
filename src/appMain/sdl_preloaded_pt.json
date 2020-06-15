@@ -4087,6 +4087,13 @@
                     "key": "OEM_REF_MY_KEY",
                     "type": "Struct",
                     "mandatory": false
+                },
+                {
+                    "name": "handsOffSteering",
+                    "key": "OEM_REF_HANDS_OFF_STRNG",
+                    "type": "Boolean",
+                    "mandatory": false,
+                    "since": "6.2"
                 }
             ]
         }
