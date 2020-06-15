@@ -436,6 +436,7 @@ const char* const haptic_rect_data = "hapticRectData";
 const char* const rect = "rect";
 const char* const x = "x";
 const char* const y = "y";
+const char* const preferred_fps = "preferredFPS";
 }  // namespace strings
 
 namespace json {

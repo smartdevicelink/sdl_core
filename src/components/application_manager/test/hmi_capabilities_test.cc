@@ -447,6 +447,7 @@ TEST_F(HMICapabilitiesTest, LoadCapabilitiesFromFile) {
       vs_capability_so.keyExists(strings::haptic_spatial_data_supported));
   EXPECT_TRUE(
       vs_capability_so[strings::haptic_spatial_data_supported].asBool());
+  EXPECT_TRUE(vs_capability_so.keyExists(strings::preferred_fps));
 
   EXPECT_TRUE(hmi_capabilities_test->video_streaming_supported());
 
