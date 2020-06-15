@@ -230,10 +230,11 @@ void SetGlobalPropertiesRequest::Run() {
     SendRCRequest(params, true);
   }
 
+  auto tts_params = smart_objects::SmartObject(smart_objects::SmartType_Map);
+
   // check TTS params
   if (is_help_prompt_present || is_timeout_prompt_present) {
     LOG4CXX_DEBUG(logger_, "TTS params presents");
-    auto tts_params = smart_objects::SmartObject(smart_objects::SmartType_Map);
 
     std::vector<std::string> invalid_params;
     if (is_help_prompt_present) {
@@ -270,6 +271,8 @@ void SetGlobalPropertiesRequest::Run() {
       }
     }
 
+    StartAwaitForInterface(HmiInterfaces::HMI_INTERFACE_TTS);
+
     if (!invalid_params.empty()) {
       std::string params_list = std::accumulate(
           std::begin(invalid_params),
@@ -283,12 +286,6 @@ void SetGlobalPropertiesRequest::Run() {
       SendResponse(false, mobile_apis::Result::FILE_NOT_FOUND, info.c_str());
       return;
     }
-
-    tts_params[strings::app_id] = app->app_id();
-    SendTTSRequest(tts_params, true);
-
-    auto& help_prompt_manager = app->help_prompt_manager();
-    help_prompt_manager.OnSetGlobalPropertiesReceived(tts_params, false);
   } else if (!is_ui_send_ && !is_rc_send_) {
     std::string response_info = "There are no parameters present in request.";
     if (!is_menu_layout_available_) {
@@ -296,6 +293,32 @@ void SetGlobalPropertiesRequest::Run() {
     }
     SendResponse(
         false, mobile_apis::Result::INVALID_DATA, response_info.c_str());
+  }
+
+  if (IsInterfaceAwaited(HmiInterfaces::HMI_INTERFACE_UI)) {
+    smart_objects::SmartObject ui_params =
+        smart_objects::SmartObject(smart_objects::SmartType_Map);
+
+    if (is_vr_help_title_present && is_vr_help_present) {
+      PrepareUIRequestVRHelpData(app, msg_params, ui_params);
+    }
+
+    PrepareUIRequestMenuAndKeyboardData(app, msg_params, ui_params);
+
+    ui_params[strings::app_id] = app->app_id();
+
+    SendUIRequest(ui_params, true);
+
+    auto& help_prompt_manager = app->help_prompt_manager();
+    help_prompt_manager.OnSetGlobalPropertiesReceived(ui_params, false);
+  }
+
+  if (IsInterfaceAwaited(HmiInterfaces::HMI_INTERFACE_TTS)) {
+    tts_params[strings::app_id] = app->app_id();
+    SendTTSRequest(tts_params, true);
+
+    auto& help_prompt_manager = app->help_prompt_manager();
+    help_prompt_manager.OnSetGlobalPropertiesReceived(tts_params, false);
   }
 }
 

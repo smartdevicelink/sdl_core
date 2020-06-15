@@ -293,6 +293,28 @@ void RequestFromMobileImpl::SendResponse(
   if (info) {
     response[strings::msg_params][strings::info] = std::string(info);
   }
+
+  // Add disallowed parameters and info from request back to response with
+  // appropriate
+  // reasons (VehicleData result codes)
+  if (result_code != mobile_apis::Result::APPLICATION_NOT_REGISTERED) {
+    const mobile_apis::FunctionID::eType& id =
+        static_cast<mobile_apis::FunctionID::eType>(function_id());
+    if ((id == mobile_apis::FunctionID::SubscribeVehicleDataID) ||
+        (id == mobile_apis::FunctionID::UnsubscribeVehicleDataID)) {
+      AddDisallowedParameters(response);
+      AddDisallowedParametersToInfo(response);
+    } else if (id == mobile_apis::FunctionID::GetVehicleDataID) {
+      AddDisallowedParametersToInfo(response);
+    }
+  }
+
+  response[strings::msg_params][strings::success] = success;
+  response[strings::msg_params][strings::result_code] = result_code;
+
+  is_success_result_ = success;
+
+  rpc_service_.ManageMobileCommand(result, SOURCE_SDL);
 }
 
 smart_objects::SmartObject CreateUnsupportedResourceResponse(
