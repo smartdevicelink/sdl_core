@@ -79,6 +79,12 @@
   </element>
 </enum>
 
+<enum name="CapacityUnit">
+    <element name="LITERS" />
+    <element name="KILOWATTHOURS" />
+    <element name="KILOGRAMS" />
+</enum>
+
 <enum name="PredefinedWindows">
   <element name="DEFAULT_WINDOW" value="0">
     <description>The default window is a main window pre-created on behalf of the app.</description>
@@ -856,14 +862,6 @@
     </element>
 </enum>
 
-<struct name="FuelRange">
-    <param name="type" type="Common.FuelType" mandatory="false"/>
-    <param name="range" type="Float" minvalue="0" maxvalue="10000" mandatory="false">
-        <description>
-            The estimate range in KM the vehicle can travel based on fuel level and consumption.
-        </description>
-    </param>
-</struct>
 
 <enum name="ComponentVolumeStatus">
   <description>The volume status of a vehicle component.</description>
@@ -886,6 +884,27 @@
   <description> The data is not supported.</description>
   </element>
 </enum>
+
+<struct name="FuelRange">
+    <param name="type" type="Common.FuelType" mandatory="false"/>
+    <param name="range" type="Float" minvalue="0" maxvalue="10000" mandatory="false">
+        <description>
+            The estimate range in KM the vehicle can travel based on fuel level and consumption.
+        </description>
+    </param>
+    <param name="level" type="Float" minvalue="-6" maxvalue="1000000" mandatory="false">
+       <description>The relative remaining capacity of this fuel type (percentage).</description>
+    </param>
+    <param name="levelState" type="Common.ComponentVolumeStatus" mandatory="false">
+        <description>The fuel level state</description>
+    </param>
+    <param name="capacity" type="Float" minvalue="0" maxvalue="1000000" mandatory="false">
+       <description>The absolute capacity of this fuel type.</description>
+    </param>
+    <param name="capacityUnit" type="Common.CapacityUnit" mandatory="false">
+       <description>The unit of the capacity of this fuel type such as liters for gasoline or kWh for batteries.</description>
+    </param>
+</struct>
 
 <enum name="TPMS">
   <element name="UNKNOWN">
@@ -6023,7 +6042,10 @@
       <description>The instantaneous fuel consumption in microlitres</description>
     </param>
     <param name="fuelRange" type="Boolean" mandatory="false">
-        <description>The estimate range in KM the vehicle can travel based on fuel level and consumption</description>
+      <description>
+        The fuel type, estimated range in KM, fuel level/capacity and fuel level state for the vehicle.
+        See struct FuelRange for details.
+      </description>
     </param>
     <param name="externalTemperature" type="Boolean" mandatory="false">
       <description>The external temperature in degrees celsius</description>
@@ -6116,7 +6138,10 @@
       <description>The instantaneous fuel consumption in microlitres</description>
     </param>
     <param name="fuelRange" type="Common.VehicleDataResult" mandatory="false">
-        <description>The estimate range in KM the vehicle can travel based on fuel level and consumption</description>
+      <description>
+        The fuel type, estimated range in KM, fuel level/capacity and fuel level state for the vehicle.
+        See struct FuelRange for details.
+      </description>
     </param>
     <param name="externalTemperature" type="Common.VehicleDataResult" mandatory="false">
       <description>The external temperature in degrees celsius.</description>
@@ -6215,7 +6240,10 @@
       <description>The instantaneous fuel consumption in microlitres</description>
     </param>
     <param name="fuelRange" type="Boolean" mandatory="false">
-        <description>The estimate range in KM the vehicle can travel based on fuel level and consumption</description>
+      <description>
+        The fuel type, estimated range in KM, fuel level/capacity and fuel level state for the vehicle.
+        See struct FuelRange for details.
+      </description>
     </param>
     <param name="externalTemperature" type="Boolean" mandatory="false">
       <description>The external temperature in degrees celsius.</description>
@@ -6308,7 +6336,10 @@
       <description>The instantaneous fuel consumption in microlitres</description>
     </param>
     <param name="fuelRange" type="Common.VehicleDataResult" mandatory="false">
-        <description>The estimate range in KM the vehicle can travel based on fuel level and consumption</description>
+      <description>
+        The fuel type, estimated range in KM, fuel level/capacity and fuel level state for the vehicle.
+        See struct FuelRange for details.
+      </description>
     </param>
     <param name="externalTemperature" type="Common.VehicleDataResult" mandatory="false">
       <description>The external temperature in degrees celsius</description>
@@ -6402,7 +6433,10 @@
       <description>The instantaneous fuel consumption in microlitres</description>
     </param>
     <param name="fuelRange" type="Boolean" mandatory="false">
-        <description>The estimate range in KM the vehicle can travel based on fuel level and consumption</description>
+      <description>
+        The fuel type, estimated range in KM, fuel level/capacity and fuel level state for the vehicle.
+        See struct FuelRange for details.
+      </description>
     </param>
     <param name="externalTemperature" type="Boolean" mandatory="false">
       <description>The external temperature in degrees celsius</description>
@@ -6498,7 +6532,10 @@
       <description>The instantaneous fuel consumption in microlitres</description>
     </param>
     <param name="fuelRange" type="Common.FuelRange" minsize="0" maxsize="100" array="true" mandatory="false">
-        <description>The estimate range in KM the vehicle can travel based on fuel level and consumption</description>
+      <description>
+        The fuel type, estimated range in KM, fuel level/capacity and fuel level state for the vehicle.
+        See struct FuelRange for details.
+      </description>
     </param>
     <param name="externalTemperature" type="Float" minvalue="-40" maxvalue="100" mandatory="false">
       <description>The external temperature in degrees celsius</description>
@@ -6595,7 +6632,10 @@
       <description>The instantaneous fuel consumption in microlitres</description>
     </param>
     <param name="fuelRange" type="Common.FuelRange" minsize="0" maxsize="100" array="true" mandatory="false">
-      <description>The estimate range in KM the vehicle can travel based on fuel level and consumption</description>
+      <description>
+        The fuel type, estimated range in KM, fuel level/capacity and fuel level state for the vehicle.
+        See struct FuelRange for details.
+      </description>
     </param>
     <param name="externalTemperature" type="Float" minvalue="-40" maxvalue="100" mandatory="false">
       <description>The external temperature in degrees celsius</description>
