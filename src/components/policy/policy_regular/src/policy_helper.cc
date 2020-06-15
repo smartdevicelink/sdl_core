@@ -102,25 +102,6 @@ bool CompareGroupName::operator()(
   return !(strcasecmp(gn_.c_str(), gn_compare.c_str()));
 }
 
-bool operator!=(const policy_table::ApplicationParams& first,
-                const policy_table::ApplicationParams& second) {
-  if (first.groups.size() != second.groups.size()) {
-    return true;
-  }
-  StringsConstItr it_first = first.groups.begin();
-  StringsConstItr it_first_end = first.groups.end();
-  StringsConstItr it_second = second.groups.begin();
-  StringsConstItr it_second_end = second.groups.end();
-  for (; it_first != it_first_end; ++it_first) {
-    CompareGroupName gp(*it_first);
-    StringsConstItr it = std::find_if(it_second, it_second_end, gp);
-    if (it_second_end == it) {
-      return true;
-    }
-  }
-  return false;
-}
-
 CheckAppPolicy::CheckAppPolicy(
     PolicyManagerImpl* pm,
     const std::shared_ptr<policy_table::Table> update,
@@ -1108,28 +1089,6 @@ FunctionalGroupIDs Merge(const FunctionalGroupIDs& first,
       std::distance(merged.begin(), std::unique(merged.begin(), merged.end())));
 
   return merged;
-}
-
-FunctionalGroupIDs FindSame(const FunctionalGroupIDs& first,
-                            const FunctionalGroupIDs& second) {
-  LOG4CXX_INFO(logger_, "Find same groups");
-  FunctionalGroupIDs first_copy(first);
-  FunctionalGroupIDs second_copy(second);
-
-  std::sort(first_copy.begin(), first_copy.end());
-  std::sort(second_copy.begin(), second_copy.end());
-
-  FunctionalGroupIDs same;
-  std::set_intersection(first_copy.begin(),
-                        first_copy.end(),
-                        second_copy.begin(),
-                        second_copy.end(),
-                        std::back_inserter(same));
-
-  same.resize(
-      std::distance(same.begin(), std::unique(same.begin(), same.end())));
-
-  return same;
 }
 
 bool UnwrapAppPolicies(policy_table::ApplicationPolicies& app_policies) {

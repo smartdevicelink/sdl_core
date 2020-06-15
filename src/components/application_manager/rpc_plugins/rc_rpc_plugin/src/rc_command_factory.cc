@@ -92,6 +92,7 @@ struct RCInvalidCommand {};
 template <>
 class RCCommandCreator<RCInvalidCommand> : public CommandCreator {
  public:
+  // cppcheck-suppress unusedFunction //Used in RCCommandCreatorFactory
   RCCommandCreator(const RCCommandParams& params) {
     UNUSED(params);
   }

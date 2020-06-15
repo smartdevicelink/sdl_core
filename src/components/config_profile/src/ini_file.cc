@@ -152,6 +152,7 @@ char* ini_read_value(const char* fname,
   return NULL;
 }
 
+// cppcheck-suppress unusedFunction //Used in unit tests
 char ini_write_value(const char* fname,
                      const char* chapter,
                      const char* item,

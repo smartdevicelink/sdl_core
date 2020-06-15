@@ -2593,6 +2593,7 @@ __attribute__((visibility("default"))) policy::PolicyManager* CreateManager() {
   return new policy::PolicyManagerImpl();
 }
 
+// cppcheck-suppress unusedFunction
 __attribute__((visibility("default"))) void DeleteManager(
     policy::PolicyManager* pm) {
   delete pm;

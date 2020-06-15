@@ -55,6 +55,7 @@ class RawMessageMatcher : public MatcherInterface<RawMessagePtr> {
  public:
   explicit RawMessageMatcher(RawMessagePtr ptr);
 
+  DEPRECATED
   virtual bool MatchAndExplain(const RawMessagePtr ptr,
                                MatchResultListener* listener) const;
   virtual void DescribeTo(std::ostream* os) const;

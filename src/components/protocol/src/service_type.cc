@@ -63,9 +63,4 @@ ServiceType ServiceTypeFromByte(uint8_t byte) {
   return valid_type ? type : kInvalidServiceType;
 }
 
-uint8_t ServiceTypeToByte(ServiceType type) {
-  DCHECK(IsValid(type));
-  return uint8_t(type);
-}
-
 }  // namespace protocol_handler

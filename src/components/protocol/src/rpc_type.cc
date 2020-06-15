@@ -62,11 +62,6 @@ RpcType RpcTypeFromByte(uint8_t byte) {
   return supported_type ? type : kRpcTypeReserved;
 }
 
-uint8_t RpcTypeToByte(RpcType type) {
-  DCHECK(IsSupported(type));
-  return uint8_t(type);
-}
-
 const char* RpcTypeToString(RpcType type) {
   switch (type) {
     case kRpcTypeRequest:
