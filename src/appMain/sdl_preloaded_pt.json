@@ -506,7 +506,8 @@
                             "myKey",
                             "prndl",
                             "rpm",
-                            "steeringWheelAngle"
+                            "steeringWheelAngle",
+                            "gearStatus"
                         ]
                     },
                     "OnVehicleData": {
@@ -523,7 +524,8 @@
                             "myKey",
                             "prndl",
                             "rpm",
-                            "steeringWheelAngle"
+                            "steeringWheelAngle",
+                            "gearStatus"
                         ]
                     },
                     "SubscribeVehicleData": {
@@ -540,7 +542,8 @@
                             "myKey",
                             "prndl",
                             "rpm",
-                            "steeringWheelAngle"
+                            "steeringWheelAngle",
+                            "gearStatus"
                         ]
                     },
                     "UnsubscribeVehicleData": {
@@ -557,7 +560,8 @@
                             "myKey",
                             "prndl",
                             "rpm",
-                            "steeringWheelAngle"
+                            "steeringWheelAngle",
+                            "gearStatus"
                         ]
                     }
                 }
