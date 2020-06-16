@@ -112,7 +112,7 @@ Connection::~Connection() {
             << static_cast<int>(session_it->first)
             << " from Session/Connection Map in Connection Destructor");
     connection_handler_->RemoveSession(session_it->first);
-    session_it++;
+    ++session_it;
   }
 
   session_map_.clear();
@@ -317,7 +317,7 @@ uint8_t Connection::RemoveSecondaryServices(
         removed_services_list.push_back(service_it->service_type);
         service_it = service_list.erase(service_it);
       } else {
-        service_it++;
+        ++service_it;
       }
     }
 

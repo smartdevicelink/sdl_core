@@ -953,7 +953,7 @@ void MessageHelper::CreateGetVehicleDataRequest(
       smart_objects::SmartObject(smart_objects::SmartType_Map);
   for (std::vector<std::string>::const_iterator it = params.begin();
        it != params.end();
-       it++) {
+       ++it) {
     (*request)[strings::msg_params][*it] = true;
   }
   app_mngr.GetRPCService().ManageHMICommand(request);

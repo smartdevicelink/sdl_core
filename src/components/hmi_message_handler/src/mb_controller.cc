@@ -147,7 +147,7 @@ void CMessageBrokerController::sendNotification(Json::Value& message) {
   int subscribersCount = getSubscribersFd(methodName, result);
   if (0 < subscribersCount) {
     std::vector<WebsocketSession*>::iterator it;
-    for (it = result.begin(); it != result.end(); it++) {
+    for (it = result.begin(); it != result.end(); ++it) {
       (*it)->sendJsonMessage(message);
     }
   } else {
@@ -284,7 +284,7 @@ void CMessageBrokerController::deleteController(WebsocketSession* ws_session) {
       if (it->second == ws_session) {
         mControllersList.erase(it++);
       } else {
-        it++;
+        ++it;
       }
     }
   }
@@ -338,7 +338,7 @@ bool CMessageBrokerController::addSubscriber(WebsocketSession* ws_session,
       p = mSubscribersList.equal_range(name);
   if (p.first != p.second) {
     std::multimap<std::string, WebsocketSession*>::iterator itr;
-    for (itr = p.first; itr != p.second; itr++) {
+    for (itr = p.first; itr != p.second; ++itr) {
       if (ws_session == itr->second) {
         result = false;
         LOG4CXX_ERROR(mb_logger_, ("Subscriber already exists!\n"));
@@ -380,7 +380,7 @@ int CMessageBrokerController::getSubscribersFd(
       p = mSubscribersList.equal_range(name);
   if (p.first != p.second) {
     std::multimap<std::string, WebsocketSession*>::iterator itr;
-    for (itr = p.first; itr != p.second; itr++) {
+    for (itr = p.first; itr != p.second; ++itr) {
       result.push_back(itr->second);
     }
   }

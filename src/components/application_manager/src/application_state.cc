@@ -205,8 +205,8 @@ void ApplicationState::RemoveHMIState(const WindowID window_id,
   DCHECK_OR_RETURN_VOID(hmi_states.begin() != it);
   HmiStates::iterator next = it;
   HmiStates::iterator prev = it;
-  next++;
-  prev--;
+  ++next;
+  --prev;
 
   if (next != hmi_states.end()) {
     HmiStatePtr next_state = *next;
