@@ -234,9 +234,6 @@ void CMessageBrokerController::exitReceivingThread() {
     LOG4CXX_ERROR(mb_logger_, str_err);
   }
   acceptor_.close(ec);
-  if (ec) {
-    std::string str_err = "ErrorMessage Close: " + ec.message();
-  }
   ioc_.stop();
 }
 
@@ -376,7 +373,6 @@ void CMessageBrokerController::deleteSubscriber(WebsocketSession* ws,
 int CMessageBrokerController::getSubscribersFd(
     std::string name, std::vector<WebsocketSession*>& result) {
   int res = 0;
-  std::map<std::string, WebsocketSession*>::iterator it;
 
   sync_primitives::AutoLock lock(mSubscribersListLock);
   std::pair<std::multimap<std::string, WebsocketSession*>::iterator,

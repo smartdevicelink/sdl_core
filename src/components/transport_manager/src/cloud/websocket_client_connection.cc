@@ -254,7 +254,6 @@ void WebsocketClientConnection::OnRead(boost::system::error_code ec,
     Shutdown();
     return;
   }
-  std::string data_str = boost::beast::buffers_to_string(buffer_.data());
 
   ssize_t size = (ssize_t)buffer_.size();
   const uint8_t* data = boost::asio::buffer_cast<const uint8_t*>(
