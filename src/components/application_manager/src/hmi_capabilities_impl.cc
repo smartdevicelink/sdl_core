@@ -924,10 +924,11 @@ bool HMICapabilitiesImpl::load_capabilities_from_file() {
 
       if (check_existing_json_member(ui, "language")) {
         const std::string lang = ui.get("language", "EN-US").asString();
-        set_active_ui_language(MessageHelper::CommonLanguageFromString(lang));
+        set_active_ui_language(
+            StringToEnum<hmi_apis::Common_Language::eType>(lang));
       } else {
         set_active_ui_language(
-            MessageHelper::CommonLanguageFromString("EN-US"));
+            StringToEnum<hmi_apis::Common_Language::eType>("EN-US"));
       }
 
       if (check_existing_json_member(ui, "languages")) {
@@ -1210,8 +1211,9 @@ bool HMICapabilitiesImpl::load_capabilities_from_file() {
               auto it = lights.asArray()->begin();
               for (; it != lights.asArray()->end(); ++it) {
                 smart_objects::SmartObject& light_name_so = (*it)["name"];
-                auto light_name = MessageHelper::CommonLightNameFromString(
-                    light_name_so.asString());
+                auto light_name =
+                    StringToEnum<hmi_apis::Common_LightName::eType>(
+                        light_name_so.asString());
                 light_name_so = light_name;
               }
             }
@@ -1238,10 +1240,11 @@ bool HMICapabilitiesImpl::load_capabilities_from_file() {
       Json::Value vr = root_json.get("VR", "");
       if (check_existing_json_member(vr, "language")) {
         const std::string lang = vr.get("language", "EN-US").asString();
-        set_active_vr_language(MessageHelper::CommonLanguageFromString(lang));
+        set_active_vr_language(
+            StringToEnum<hmi_apis::Common_Language::eType>(lang));
       } else {
         set_active_vr_language(
-            MessageHelper::CommonLanguageFromString("EN-US"));
+            StringToEnum<hmi_apis::Common_Language::eType>("EN-US"));
       }
 
       if (check_existing_json_member(vr, "languages")) {
@@ -1270,10 +1273,11 @@ bool HMICapabilitiesImpl::load_capabilities_from_file() {
 
       if (check_existing_json_member(tts, "language")) {
         const std::string lang = tts.get("language", "EN-US").asString();
-        set_active_tts_language(MessageHelper::CommonLanguageFromString(lang));
+        set_active_tts_language(
+            StringToEnum<hmi_apis::Common_Language::eType>(lang));
       } else {
         set_active_tts_language(
-            MessageHelper::CommonLanguageFromString("EN-US"));
+            StringToEnum<hmi_apis::Common_Language::eType>("EN-US"));
       }
 
       if (check_existing_json_member(tts, "languages")) {
@@ -1359,8 +1363,8 @@ void HMICapabilitiesImpl::convert_json_languages_to_obj(
     const Json::Value& json_languages,
     smart_objects::SmartObject& languages) const {
   for (uint32_t i = 0, j = 0; i < json_languages.size(); ++i) {
-    languages[j++] =
-        MessageHelper::CommonLanguageFromString(json_languages[i].asString());
+    languages[j++] = StringToEnum<hmi_apis::Common_Language::eType>(
+        json_languages[i].asString());
   }
 }
 

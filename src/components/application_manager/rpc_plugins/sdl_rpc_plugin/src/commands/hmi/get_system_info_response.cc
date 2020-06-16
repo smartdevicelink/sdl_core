@@ -81,7 +81,7 @@ const SystemInfo GetSystemInfoResponse::GetSystemInfo(
 
   const uint32_t lang_code =
       (*message_)[strings::msg_params]["language"].asUInt();
-  info.language = application_manager::MessageHelper::CommonLanguageToString(
+  info.language = application_manager::EnumToString(
       static_cast<hmi_apis::Common_Language::eType>(lang_code));
 
   hmi_capabilities_.set_ccpu_version(info.ccpu_version);

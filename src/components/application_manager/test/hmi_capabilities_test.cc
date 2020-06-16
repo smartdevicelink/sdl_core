@@ -157,37 +157,10 @@ CStringToEnumMap InitCStringToEnumMap() {
   return result;
 }
 
-bool StringToEnum(const char* str, hmi_apis::Common_Language::eType& value) {
-  size_t count_value = sizeof(cstring_values_) / sizeof(cstring_values_[0]);
-  CStringToEnumMap result;
-  for (size_t i = 0; i < count_value; ++i) {
-    result[cstring_values_[i]] = enum_values_[i];
-  }
-
-  CStringToEnumMap::const_iterator it = result.find(str);
-  if (it == result.end()) {
-    return false;
-  }
-  value = it->second;
-  return true;
-}
-
-hmi_apis::Common_Language::eType TestCommonLanguageFromString(
-    const std::string& language) {
-  hmi_apis::Common_Language::eType value;
-  if (StringToEnum(language.c_str(), value)) {
-    return value;
-  }
-  return hmi_apis::Common_Language::INVALID_ENUM;
-}
-
 TEST_F(HMICapabilitiesTest, LoadCapabilitiesFromFile) {
   const std::string hmi_capabilities_file = "hmi_capabilities.json";
   EXPECT_CALL(mock_application_manager_settings_, hmi_capabilities_file_name())
       .WillOnce(ReturnRef(hmi_capabilities_file));
-  EXPECT_CALL(*(MockMessageHelper::message_helper_mock()),
-              CommonLanguageFromString(_))
-      .WillRepeatedly(Invoke(TestCommonLanguageFromString));
 
   if (file_system::FileExists("./app_info_data")) {
     EXPECT_TRUE(::file_system::DeleteFile("./app_info_data"));
@@ -593,9 +566,6 @@ TEST_F(HMICapabilitiesTest,
   EXPECT_CALL(mock_dispatcher, remove_observer(_)).Times(1);
   EXPECT_CALL(mock_application_manager_settings, launch_hmi())
       .WillOnce(Return(false));
-  EXPECT_CALL(*(MockMessageHelper::message_helper_mock()),
-              CommonLanguageFromString(_))
-      .WillRepeatedly(Invoke(TestCommonLanguageFromString));
 
   if (file_system::FileExists("./app_info_data")) {
     EXPECT_TRUE(::file_system::DeleteFile("./app_info_data"));

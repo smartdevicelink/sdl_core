@@ -49,6 +49,7 @@
 #include "interfaces/MOBILE_API.h"
 #include "policy/policy_types.h"
 #include "protocol_handler/session_observer.h"
+#include "smart_objects/enum_schema_item.h"
 #include "smart_objects/smart_object.h"
 #include "transport_manager/common.h"
 #include "utils/macro.h"
@@ -67,6 +68,35 @@ namespace mobile_api = mobile_apis;
  * @param VehicleDataType Enum for vehicle data
  */
 typedef std::map<std::string, mobile_apis::VehicleDataType::eType> VehicleData;
+
+/**
+ * @brief Converts stringified value to enum value
+ * @param str stringified value
+ * @return Enum value if succedeed, otherwise -
+ * INVALID_ENUM
+ */
+template <typename T>
+T StringToEnum(const std::string& str) {
+  using namespace ns_smart_device_link::ns_smart_objects;
+  T enum_value;
+  EnumConversionHelper<T>::StringToEnum(str, &enum_value);
+  return enum_value;
+}
+
+/**
+ * @brief Converts enum value to string
+ * @param enum_value enum value
+ * @return stringified value for enum if succedeed, otherwise - empty string
+ */
+template <typename T>
+std::string EnumToString(T enum_value) {
+  using namespace ns_smart_device_link::ns_smart_objects;
+  const char* str = 0;
+  if (EnumConversionHelper<T>::EnumToCString(enum_value, &str)) {
+    return str;
+  }
+  return std::string();
+}
 
 /**
  * @brief MessageHelper class
@@ -151,40 +181,44 @@ class MessageHelper {
   static const VehicleData& vehicle_data();
 
   /**
+   * @deprecated Unused due to creation template EnumToString function
    * @brief Converts HMI Result enum value to string
    * @param hmi_result HMI Result enum value
    * @return stringified value for enum if succedeed, otherwise - empty string
    */
-  static std::string HMIResultToString(
+  DEPRECATED static std::string HMIResultToString(
       hmi_apis::Common_Result::eType hmi_result);
 
   /**
+   * @deprecated Unused due to creation template StringToEnum function
    * @brief Converts string to HMI Result enum value
    * @param hmi_result stringified value
    * @return HMI Result enum value if succedeed, otherwise - INVALID_ENUM
    * value
    */
-  static hmi_apis::Common_Result::eType HMIResultFromString(
+  DEPRECATED static hmi_apis::Common_Result::eType HMIResultFromString(
       const std::string& hmi_result);
 
   /**
+   * @deprecated Unused due to creation template EnumToString function
    * @brief Converts mobile Result enum value to string
    * @param mobile_result mobile Result enum value
    * @return stringified value for enum if succedeed, otherwise - empty string
    */
-  static std::string MobileResultToString(
+  DEPRECATED static std::string MobileResultToString(
       mobile_apis::Result::eType mobile_result);
 
   static std::string GetDeviceMacAddressForHandle(
       const transport_manager::DeviceHandle device_handle,
       const ApplicationManager& app_mngr);
   /**
+   * @deprecated Unused due to creation template StringToEnum function
    * @brief Converts string to mobile Result enum value
    * @param mobile_result stringified value
    * @return mobile Result enum value if succedeed, otherwise - INVALID_ENUM
    * value
    */
-  static mobile_api::Result::eType MobileResultFromString(
+  DEPRECATED static mobile_api::Result::eType MobileResultFromString(
       const std::string& mobile_result);
 
   /**
@@ -205,23 +239,25 @@ class MessageHelper {
       const mobile_api::Result::eType mobile_result);
 
   /**
+   * @deprecated Unused due to creation template StringToEnum function
    * @brief Convert string to HMI level, if possible
    * @param hmi_level Stringified HMI level
    * @return Appropriate enum from HMI level, or INVALID_ENUM, if conversiion
    * is not possible
    */
-  static mobile_api::HMILevel::eType StringToHMILevel(
+  DEPRECATED static mobile_api::HMILevel::eType StringToHMILevel(
       const std::string& hmi_level);
 
-  /*
+  /**
+   * @deprecated Unused due to creation template EnumToString function
    * @brief Used to obtain string representation of app's
    * HMI Level.
    * @param hmi_level Desired HMI Level
    */
-  static std::string StringifiedHMILevel(
+  DEPRECATED static std::string StringifiedHMILevel(
       const mobile_apis::HMILevel::eType hmi_level);
 
-  /*
+  /**
    * @brief Used to obtain function name by its id
    * @param function_id Function ID
    */
@@ -802,28 +838,32 @@ class MessageHelper {
   }
 
   static const uint32_t GetPriorityCode(const std::string& priority);
+
   /**
+   * @deprecated Unused due to creation template EnumToString function
    * @brief Convert common language to string representation
    * @param language Common language
    * @return Common language string representation
    */
-  static std::string CommonLanguageToString(
+  DEPRECATED static std::string CommonLanguageToString(
       hmi_apis::Common_Language::eType language);
 
   /**
+   * @deprecated Unused due to creation template EnumToString function
    * @brief Converts mobile language to string representation
    * @param language Mobile UI language
    * @return Mobile language string representation
    */
-  static std::string MobileLanguageToString(
+  DEPRECATED static std::string MobileLanguageToString(
       mobile_apis::Language::eType language);
 
   /**
+   * @deprecated Unused due to creation template StringToEnum function
    * @brief Converts string to mobile language enum value
    * @param language language as string
    * @return Mobile language enum value
    */
-  static mobile_apis::Language::eType MobileLanguageFromString(
+  DEPRECATED static mobile_apis::Language::eType MobileLanguageFromString(
       const std::string& language);
 
   /**
@@ -877,15 +917,16 @@ class MessageHelper {
                              const std::string& icon_path,
                              ApplicationManager& application_manager);
 
-  static hmi_apis::Common_Language::eType CommonLanguageFromString(
+  DEPRECATED static hmi_apis::Common_Language::eType CommonLanguageFromString(
       const std::string& language);
 
   /**
+   * @deprecated Unused due to creation template StringToEnum function
    * @brief CommonLightNameFromString convert string to LightName enum value
    * @param lightName string to convert
    * @return value LightName enum value
    */
-  static hmi_apis::Common_LightName::eType CommonLightNameFromString(
+  DEPRECATED static hmi_apis::Common_LightName::eType CommonLightNameFromString(
       const std::string& lightName);
 
   static smart_objects::SmartObjectSPtr

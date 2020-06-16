@@ -163,7 +163,7 @@ void DeleteCommandRequest::on_event(const event_engine::Event& event) {
           message[strings::params][hmi_response::code].asInt());
       LOG4CXX_DEBUG(logger_,
                     "Received UI_DeleteCommand event with result "
-                        << MessageHelper::HMIResultToString(ui_result_));
+                        << EnumToString(ui_result_));
       GetInfo(message, ui_info_);
       break;
     }
@@ -174,7 +174,7 @@ void DeleteCommandRequest::on_event(const event_engine::Event& event) {
           message[strings::params][hmi_response::code].asInt());
       LOG4CXX_DEBUG(logger_,
                     "Received VR_DeleteCommand event with result "
-                        << MessageHelper::HMIResultToString(vr_result_));
+                        << EnumToString(vr_result_));
       GetInfo(message, vr_info_);
       break;
     }
