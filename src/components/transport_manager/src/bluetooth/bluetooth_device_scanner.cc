@@ -136,6 +136,8 @@ BluetoothDeviceScanner::BluetoothDeviceScanner(
                      smart_device_link_service_uuid_data);
   thread_ = threads::CreateThread("BT Device Scanner",
                                   new BluetoothDeviceScannerDelegate(this));
+  inquiry_thread_ = threads::CreateThread(
+      "BT Device Inquiry", new BluetoothDeviceInquiryDelegate(this));
 }
 
 BluetoothDeviceScanner::BluetoothDeviceScanner(
@@ -157,6 +159,8 @@ BluetoothDeviceScanner::BluetoothDeviceScanner(
                      smart_device_link_service_uuid_data);
   thread_ = threads::CreateThread("BT Device Scanner",
                                   new BluetoothDeviceScannerDelegate(this));
+  inquiry_thread_ = threads::CreateThread(
+      "BT Device Inquiry", new BluetoothDeviceInquiryDelegate(this));
 }
 
 BluetoothDeviceScanner::~BluetoothDeviceScanner() {
@@ -436,10 +440,11 @@ void BluetoothDeviceScanner::Thread() {
   ready_ = true;
   if (auto_repeat_search_) {
     while (!shutdown_requested_) {
-      if (!inquiry_thread_ || !inquiry_thread_->is_running()) {
-        inquiry_thread_ = threads::CreateThread(
-            "BT Device Scanner", new BluetoothDeviceInquiryDelegate(this));
-        inquiry_thread_->start();
+      if (!inquiry_thread_->is_running()) {
+        if (!inquiry_thread_->start()) {
+          LOG4CXX_ERROR(logger_,
+                        "Bluetooth device inquiry thread start failed");
+        }
       }
     }
   } else {  // search only on demand
