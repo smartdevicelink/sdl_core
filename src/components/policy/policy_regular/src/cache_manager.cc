@@ -1316,8 +1316,6 @@ void CacheManager::PersistData() {
           copy_pt.policy_table.app_policies_section.apps.end();
 
       bool is_revoked = false;
-      bool is_default_policy;
-      bool is_predata_policy;
 
       for (; app_policy_iter != app_policy_iter_end; ++app_policy_iter) {
         const std::string app_id = (*app_policy_iter).first;
@@ -1328,7 +1326,7 @@ void CacheManager::PersistData() {
               copy_pt.policy_table.app_policies_section.apps[app_id].is_null();
         }
 
-        is_default_policy =
+        bool is_default_policy =
             copy_pt.policy_table.app_policies_section.apps.end() !=
                 copy_pt.policy_table.app_policies_section.apps.find(app_id) &&
             policy::kDefaultId ==
@@ -1336,7 +1334,7 @@ void CacheManager::PersistData() {
                     .get_string();
 
         // TODO(AOleynik): Remove this field from DB
-        is_predata_policy =
+        bool is_predata_policy =
             copy_pt.policy_table.app_policies_section.apps.end() !=
                 copy_pt.policy_table.app_policies_section.apps.find(app_id) &&
             policy::kPreDataConsentId ==

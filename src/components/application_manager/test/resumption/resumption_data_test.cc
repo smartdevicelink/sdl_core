@@ -340,11 +340,10 @@ void ResumptionDataTest::CheckTimeoutPrompt(
 
 void ResumptionDataTest::CheckVRHelp(sm::SmartObject& res_list) {
   std::string text;
-  int position;
   for (uint i = 0; i < kCountOfVrhelptitle_; ++i) {
     text = (*vr_help_)[i][am::strings::text].asString();
     EXPECT_EQ(text, res_list[i][am::strings::text].asString());
-    position = (*vr_help_)[i][am::strings::position].asInt();
+    int position = (*vr_help_)[i][am::strings::position].asInt();
     EXPECT_EQ(position, res_list[i][am::strings::position].asInt());
   }
 }
@@ -596,11 +595,10 @@ void ResumptionDataTest::SetChoiceSet() {
 
 void ResumptionDataTest::SetAppFiles() {
   am::AppFile test_file;
-  int file_types;
   for (uint i = 0; i < kCountOfFiles_; ++i) {
     char numb[12];
     std::snprintf(numb, 12, "%d", i);
-    file_types = i;
+    int file_types = i;
     test_file.is_persistent = true;
     test_file.is_download_complete = true;
     test_file.file_type = static_cast<FileType::eType>(file_types);

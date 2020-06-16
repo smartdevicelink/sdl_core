@@ -187,11 +187,9 @@ char ini_write_value(const char* fname,
 #if USE_MKSTEMP
   {
     const char* temp_str = "./";
-    int32_t fd = -1;
     if (temp_str) {
       snprintf(temp_fname, PATH_MAX, "%s/ini.XXXXXX", temp_str);
-
-      fd = mkstemp(temp_fname);
+      int32_t fd = mkstemp(temp_fname);
       if (-1 == fd) {
         fclose(rd_fp);
         return FALSE;
@@ -290,7 +288,6 @@ char ini_write_value(const char* fname,
 
 Ini_search_id ini_parse_line(const char* line, const char* tag, char* value) {
   const char* line_ptr;
-  char* temp_ptr;
   char temp_str[INI_LINE_LEN] = "";
   *temp_str = '\0';
 
@@ -333,7 +330,7 @@ Ini_search_id ini_parse_line(const char* line, const char* tag, char* value) {
       return INI_NOTHING;
 
     snprintf(temp_str, INI_LINE_LEN, "%s", line_ptr);
-    temp_ptr = strrchr(temp_str, ']');
+    char* temp_ptr = strrchr(temp_str, ']');
     if (NULL == temp_ptr) {
       return INI_NOTHING;
     } else {

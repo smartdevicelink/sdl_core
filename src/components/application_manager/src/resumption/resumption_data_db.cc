@@ -1787,7 +1787,6 @@ bool ResumptionDataDB::ExecInsertChoice(
      field "idimage" from table "choice" = 4
      field "idsecondaryImage" from table "choice" = 5*/
   int64_t image_primary_key = 0;
-  int64_t choice_primary_key = 0;
   size_t length_choice_array = choice_array.length();
   for (size_t i = 0; i < length_choice_array; ++i) {
     insert_choice.Bind(0, (choice_array[i][strings::choice_id]).asInt());
@@ -1820,7 +1819,7 @@ bool ResumptionDataDB::ExecInsertChoice(
       LOG4CXX_WARN(logger_, "Problem with execution insert_choice query");
       return false;
     }
-    choice_primary_key = insert_choice.LastInsertId();
+    int64_t choice_primary_key = insert_choice.LastInsertId();
 
     if ((!ExecInsertVrCommands(choice_primary_key,
                                choice_array[i][strings::vr_commands],
@@ -2115,7 +2114,6 @@ bool ResumptionDataDB::InsertCommandsData(
   }
   utils::dbms::SQLQuery query_insert_command(db());
   int64_t image_primary_key = 0;
-  int64_t command_primary_key = 0;
 
   if (!query_insert_command.Prepare(kInsertToCommand)) {
     LOG4CXX_WARN(logger_,
@@ -2155,7 +2153,7 @@ bool ResumptionDataDB::InsertCommandsData(
       LOG4CXX_WARN(logger_, "Incorrect insertion of command data to DB");
       return false;
     }
-    command_primary_key = query_insert_command.LastInsertId();
+    int64_t command_primary_key = query_insert_command.LastInsertId();
     if (commands[i].keyExists(strings::vr_commands)) {
       if (!ExecInsertVrCommands(command_primary_key,
                                 commands[i][strings::vr_commands],

@@ -165,14 +165,13 @@ bool CMessageBrokerController::isResponse(Json::Value& message) {
 }
 
 void CMessageBrokerController::sendResponse(Json::Value& message) {
-  WebsocketSession* ws;
   std::map<std::string, WebsocketSession*>::iterator it;
   sync_primitives::AutoLock request_lock(mRequestListLock);
 
   std::string id = message["id"].asString();
   it = mRequestList.find(id);
   if (it != mRequestList.end()) {
-    ws = it->second;
+    WebsocketSession* ws = it->second;
     ws->sendJsonMessage(message);
     mRequestList.erase(it);
   }
@@ -188,7 +187,6 @@ void CMessageBrokerController::sendJsonMessage(Json::Value& message) {
   }
 
   // Send request
-  WebsocketSession* ws;
   std::map<std::string, WebsocketSession*>::iterator it;
   std::string method = message["method"].asString();
   std::string component_name = GetComponentName(method);
@@ -196,7 +194,7 @@ void CMessageBrokerController::sendJsonMessage(Json::Value& message) {
   sync_primitives::AutoLock lock(mControllersListLock);
   it = mControllersList.find(component_name);
   if (it != mControllersList.end()) {
-    ws = it->second;
+    WebsocketSession* ws = it->second;
     ws->sendJsonMessage(message);
   }
 }
