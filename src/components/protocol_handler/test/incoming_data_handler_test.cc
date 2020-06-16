@@ -261,8 +261,8 @@ TEST_F(IncomingDataHandlerTest, MixedPayloadData_TwoConnections) {
   for (FrameList::const_iterator it = actual_frames.begin();
        it != actual_frames.end();
        ++it, ++it_exp) {
-    EXPECT_EQ(**it, **it_exp) << "Element number "
-                              << std::distance(mobile_packets.begin(), it_exp);
+    EXPECT_EQ(**it, **it_exp)
+        << "Element number " << std::distance(mobile_packets.begin(), it_exp);
   }
 }
 
