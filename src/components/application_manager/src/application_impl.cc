@@ -919,10 +919,7 @@ bool ApplicationImpl::AreCommandLimitsExceeded(
 
       limit.first = current;
       limit.second = 1;
-
       return false;
-
-      break;
     }
     // In case of policy table values, there is EVEN limitation for number of
     // commands per minute, e.g. 10 command per minute i.e. 1 command per 6 sec
@@ -960,7 +957,6 @@ bool ApplicationImpl::AreCommandLimitsExceeded(
       cmd_number_to_time_limits_[cmd_id] = {current, dummy_limit};
 
       return false;
-      break;
     }
     default: {
       LOG4CXX_WARN(logger_, "Limit source is not implemented.");

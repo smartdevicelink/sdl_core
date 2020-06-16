@@ -516,7 +516,6 @@ bool ChangeRegistrationRequest::IsLanguageSupportedByTTS(
   for (size_t i = 0; i < tts_languages->length(); ++i) {
     if (hmi_display_lang == tts_languages->getElement(i).asInt()) {
       return true;
-      break;
     }
   }
 

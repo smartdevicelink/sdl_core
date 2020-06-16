@@ -544,8 +544,7 @@ bool CheckAppPolicy::IsConsentRequired(const std::string& app_id,
     return false;
   }
 
-  bool is_preconsented = false;
-  return it->second.user_consent_prompt.is_initialized() && !is_preconsented;
+  return it->second.user_consent_prompt.is_initialized();
 }
 
 bool CheckAppPolicy::IsRequestTypeChanged(

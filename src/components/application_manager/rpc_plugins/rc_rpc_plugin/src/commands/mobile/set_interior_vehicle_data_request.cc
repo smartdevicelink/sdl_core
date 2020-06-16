@@ -103,8 +103,8 @@ mobile_apis::Result::eType PrepareResultCodeAndInfo(
   } else {
     info = "Accessing not supported module data.";
   }
-  return result_code;
   LOG4CXX_WARN(logger_, info);
+  return result_code;
 }
 
 void SetInteriorVehicleDataRequest::Execute() {

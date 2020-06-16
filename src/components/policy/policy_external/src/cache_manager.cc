@@ -1840,10 +1840,6 @@ bool CacheManager::GetPriority(const std::string& policy_app_id,
 
 void CacheManager::CheckSnapshotInitialization() {
   CACHE_MANAGER_CHECK_VOID();
-  if (!snapshot_) {
-    LOG4CXX_ERROR(logger_, "Snapshot pointer is not initialized");
-    return;
-  }
 
   *(snapshot_->policy_table.module_config.preloaded_pt) = false;
 

@@ -937,8 +937,7 @@ void FillNotificationData::UpdateParameters(
 
   // If 'parameters' section is omitted
   if (!in_parameters.is_initialized()) {
-    if (!does_require_user_consent_ ||
-        (does_require_user_consent_ && kAllowedKey == current_key_)) {
+    if (!does_require_user_consent_ || kAllowedKey == current_key_) {
       out_parameter.any_parameter_allowed = true;
     }
   }

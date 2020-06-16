@@ -1423,18 +1423,18 @@ void TransportManagerImpl::Handle(::protocol_handler::RawMessagePtr msg) {
   }
 
   TransportAdapter* transport_adapter = connection->transport_adapter;
-  LOG4CXX_DEBUG(logger_,
-                "Got adapter " << transport_adapter << "["
-                               << transport_adapter->GetDeviceType() << "]"
-                               << " by session id " << msg->connection_key());
 
-  if (NULL == transport_adapter) {
+  if (nullptr == transport_adapter) {
     std::string error_text = "Transport adapter is not found";
     LOG4CXX_ERROR(logger_, error_text);
     RaiseEvent(&TransportManagerListener::OnTMMessageSendFailed,
                DataSendError(error_text),
                msg);
   } else {
+    LOG4CXX_DEBUG(logger_,
+                  "Got adapter " << transport_adapter << "["
+                                 << transport_adapter->GetDeviceType() << "]"
+                                 << " by session id " << msg->connection_key());
     if (TransportAdapter::OK ==
         transport_adapter->SendData(
             connection->device, connection->application, msg)) {

@@ -59,7 +59,8 @@ static mobile_api::HMILevel::eType PickHigherHmiLevel(
     mobile_api::HMILevel::eType val1, mobile_api::HMILevel::eType val2);
 static mobile_api::HMILevel::eType PickLowerHmiLevel(
     mobile_api::HMILevel::eType val1, mobile_api::HMILevel::eType val2);
-static mobile_api::HMILevel::eType ConvertHmiLevelString(const std::string str);
+static mobile_api::HMILevel::eType ConvertHmiLevelString(
+    const std::string& str);
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "Resumption")
 
@@ -1356,7 +1357,7 @@ static mobile_api::HMILevel::eType PickLowerHmiLevel(
 }
 
 static mobile_api::HMILevel::eType ConvertHmiLevelString(
-    const std::string str) {
+    const std::string& str) {
   using namespace mobile_apis;
 
   if ("BACKGROUND" == str) {
@@ -1365,8 +1366,6 @@ static mobile_api::HMILevel::eType ConvertHmiLevelString(
     return HMILevel::HMI_FULL;
   } else if ("LIMITED" == str) {
     return HMILevel::HMI_LIMITED;
-  } else if ("NONE" == str) {
-    return HMILevel::HMI_NONE;
   } else {
     return HMILevel::HMI_NONE;
   }
