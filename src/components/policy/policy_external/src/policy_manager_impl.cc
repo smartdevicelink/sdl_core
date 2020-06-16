@@ -1829,13 +1829,12 @@ bool PolicyManagerImpl::IsNeedToUpdateExternalConsentStatus(
   ItemV difference_v;
   difference_v.resize(new_status_v.size() + existing_status_v.size());
 
-  ItemV::iterator ci = difference_v.begin();
-  ci = std::set_difference(new_status_v.begin(),
-                           new_status_v.end(),
-                           existing_status_v.begin(),
-                           existing_status_v.end(),
-                           difference_v.begin(),
-                           ConsentStatusComparatorFunc);
+  ItemV::iterator ci = std::set_difference(new_status_v.begin(),
+                                           new_status_v.end(),
+                                           existing_status_v.begin(),
+                                           existing_status_v.end(),
+                                           difference_v.begin(),
+                                           ConsentStatusComparatorFunc);
   difference_v.resize(ci - difference_v.begin());
 
   return !difference_v.empty();

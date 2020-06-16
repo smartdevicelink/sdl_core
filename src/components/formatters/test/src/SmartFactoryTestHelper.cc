@@ -456,8 +456,6 @@ std::shared_ptr<ISchemaItem> CSmartFactoryTest::InitStructSchemaItem_Common_1(
 
   Members root_members_map;
   root_members_map[""] =
-      SMember(CObjectSchemaItem::create(struct_members), true);
-  root_members_map[""] =
       SMember(CObjectSchemaItem::create(schema_members), true);
   return CObjectSchemaItem::create(schema_members);
 }

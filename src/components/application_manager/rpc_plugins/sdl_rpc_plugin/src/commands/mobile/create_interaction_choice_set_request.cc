@@ -236,9 +236,8 @@ bool CreateInteractionChoiceSetRequest::compareStr(
 bool CreateInteractionChoiceSetRequest::IsWhiteSpaceExist(
     const smart_objects::SmartObject& choice_set) {
   LOG4CXX_AUTO_TRACE(logger_);
-  const char* str = NULL;
 
-  str = choice_set[strings::menu_name].asCharArray();
+  const char* str = choice_set[strings::menu_name].asCharArray();
   if (!CheckSyntax(str)) {
     LOG4CXX_ERROR(logger_, "Invalid menu_name syntax check failed");
     return true;
@@ -319,8 +318,6 @@ void CreateInteractionChoiceSetRequest::SendVRAddCommandRequests(
 
     msg_params[strings::cmd_id] =
         choice_set[strings::choice_set][chs_num][strings::choice_id];
-    msg_params[strings::vr_commands] =
-        smart_objects::SmartObject(smart_objects::SmartType_Array);
     msg_params[strings::vr_commands] =
         choice_set[strings::choice_set][chs_num][strings::vr_commands];
 

@@ -3126,11 +3126,10 @@ void ApplicationManagerImpl::UnregisterAllApplications() {
   LOG4CXX_DEBUG(logger_, "Unregister reason  " << unregister_reason_);
 
   hmi_cooperating_ = false;
-  bool is_ignition_off = false;
   using namespace mobile_api::AppInterfaceUnregisteredReason;
   using namespace helpers;
 
-  is_ignition_off =
+  bool is_ignition_off =
       Compare<eType, EQ, ONE>(unregister_reason_, IGNITION_OFF, INVALID_ENUM);
 
   bool is_unexpected_disconnect = Compare<eType, NEQ, ALL>(

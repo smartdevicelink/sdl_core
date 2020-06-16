@@ -112,9 +112,7 @@ void UpdateTurnListRequest::Run() {
     }
   }
 
-  smart_objects::SmartObject msg_params =
-      smart_objects::SmartObject(smart_objects::SmartType_Map);
-  msg_params = (*message_)[strings::msg_params];
+  smart_objects::SmartObject msg_params = (*message_)[strings::msg_params];
 
   if ((*message_)[strings::msg_params].keyExists(strings::turn_list)) {
     if (!CheckTurnListArray()) {

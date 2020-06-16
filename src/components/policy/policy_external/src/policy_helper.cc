@@ -592,7 +592,6 @@ bool CheckAppPolicy::IsConsentRequired(const std::string& app_id,
     return false;
   }
 
-  bool is_preconsented = false;
   policy_table::Strings::value_type str(group_name);
   policy_table::Strings::iterator pre_begin =
       update_->policy_table.app_policies_section.apps[app_id]
@@ -603,7 +602,7 @@ bool CheckAppPolicy::IsConsentRequired(const std::string& app_id,
 
   policy_table::Strings::iterator it2 = std::find(pre_begin, pre_end, str);
 
-  is_preconsented = pre_end != it2;
+  bool is_preconsented = pre_end != it2;
 
   return it->second.user_consent_prompt.is_initialized() && !is_preconsented;
 }

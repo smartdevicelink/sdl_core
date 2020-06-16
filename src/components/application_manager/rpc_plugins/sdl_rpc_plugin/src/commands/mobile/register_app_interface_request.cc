@@ -1272,9 +1272,9 @@ bool RegisterAppInterfaceRequest::IsApplicationWithSameAppIdRegistered() {
 
 bool RegisterAppInterfaceRequest::IsWhiteSpaceExist() {
   LOG4CXX_AUTO_TRACE(logger_);
-  const char* str = NULL;
 
-  str = (*message_)[strings::msg_params][strings::app_name].asCharArray();
+  const char* str =
+      (*message_)[strings::msg_params][strings::app_name].asCharArray();
   if (!CheckSyntax(str)) {
     LOG4CXX_ERROR(logger_, "Invalid app_name syntax check failed");
     return true;

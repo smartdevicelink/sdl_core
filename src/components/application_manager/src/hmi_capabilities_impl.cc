@@ -1102,8 +1102,7 @@ bool HMICapabilitiesImpl::load_capabilities_from_file() {
       }
 
       if (check_existing_json_member(ui, "hmiZoneCapabilities")) {
-        smart_objects::SmartObject hmi_zone_capabilities_so =
-            smart_objects::SmartObject(smart_objects::SmartType_Array);
+        smart_objects::SmartObject hmi_zone_capabilities_so;
         hmi_zone_capabilities_so =
             hmi_zone_enum.find(ui.get("hmiZoneCapabilities", "").asString())
                 ->second;
