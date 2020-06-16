@@ -664,8 +664,7 @@
                             "cloudAppVehicleID",
                             "odometer",
                             "tirePressure",
-                            "wiperStatus",
-                            "handsOffSteering"
+                            "wiperStatus"
                         ]
                     }
                 }
