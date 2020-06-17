@@ -32,6 +32,7 @@
 
 #include "sdl_rpc_plugin/commands/hmi/sdl_get_user_friendly_message_request.h"
 #include "application_manager/message_helper.h"
+#include "application_manager/policies/policy_handler_interface.h"
 
 namespace sdl_rpc_plugin {
 using namespace application_manager;
@@ -68,7 +69,16 @@ void SDLGetUserFriendlyMessageRequest::Run() {
   smart_objects::SmartArray::const_iterator it = msg->begin();
   smart_objects::SmartArray::const_iterator it_end = msg->end();
   for (; it != it_end; ++it) {
-    msg_codes.push_back((*it).asString());
+    std::string str = (*it).asString();
+    if (!CheckSyntax(str)) {
+      LOG4CXX_WARN(logger_, "Invalid data");
+      SendErrorResponse(correlation_id(),
+                        static_cast<hmi_apis::FunctionID::eType>(function_id()),
+                        hmi_apis::Common_Result::INVALID_DATA,
+                        "invalid messageCode syntax");
+      return;
+    }
+    msg_codes.push_back(str);
   }
 
   std::string required_language;

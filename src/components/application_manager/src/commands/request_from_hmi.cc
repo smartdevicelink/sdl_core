@@ -90,11 +90,24 @@ void RequestFromHMI::SendResponse(
   FillCommonParametersOfSO(*message, correlation_id, function_id);
   (*message)[strings::params][strings::message_type] = MessageType::kResponse;
   (*message)[strings::params][hmi_response::code] = result_code;
-  (*message)[strings::msg_params][strings::success] = success;
-  (*message)[strings::msg_params][strings::result_code] = result_code;
 
   if (response_params) {
     (*message)[strings::msg_params] = *response_params;
+  }
+
+  (*message)[strings::msg_params][strings::success] = success;
+  if ((result_code == hmi_apis::Common_Result::SUCCESS ||
+       result_code == hmi_apis::Common_Result::WARNINGS) &&
+      !warning_info().empty()) {
+    bool has_info = (*message)[strings::params].keyExists(strings::error_msg);
+    (*message)[strings::params][strings::error_msg] =
+        has_info ? (*message)[strings::params][strings::error_msg].asString() +
+                       "\n" + warning_info()
+                 : warning_info();
+    (*message)[strings::msg_params][strings::result_code] =
+        mobile_apis::Result::WARNINGS;
+  } else {
+    (*message)[strings::msg_params][strings::result_code] = result_code;
   }
 
   rpc_service_.ManageHMICommand(message, source);
@@ -199,7 +212,7 @@ void RequestFromHMI::SendProviderRequest(
   if (hmi_destination) {
     LOG4CXX_DEBUG(logger_, "Sending Request to HMI Provider");
     application_manager_.IncreaseForwardedRequestTimeout(
-        application_manager::request_controller::RequestInfo::HmiConnectoinKey,
+        application_manager::request_controller::RequestInfo::HmiConnectionKey,
         correlation_id());
     SendHMIRequest(hmi_function_id, &(*msg)[strings::msg_params], use_events);
     return;
@@ -217,7 +230,7 @@ void RequestFromHMI::SendProviderRequest(
 
   LOG4CXX_DEBUG(logger_, "Sending Request to Mobile Provider");
   application_manager_.IncreaseForwardedRequestTimeout(
-      application_manager::request_controller::RequestInfo::HmiConnectoinKey,
+      application_manager::request_controller::RequestInfo::HmiConnectionKey,
       correlation_id());
   SendMobileRequest(
       mobile_function_id, app, &(*msg)[strings::msg_params], use_events);

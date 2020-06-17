@@ -175,7 +175,7 @@ TEST_F(ScrollableMessageRequestTest, Init_CorrectTimeout_SUCCESS) {
       mobile_apis::InteractionMode::MANUAL_ONLY;
   EXPECT_EQ(kDefaultTimeout_, command_->default_timeout());
   command_->Init();
-  EXPECT_EQ(kTimeOut, command_->default_timeout());
+  EXPECT_EQ(kTimeOut + kDefaultTimeout_, command_->default_timeout());
 }
 
 TEST_F(ScrollableMessageRequestTest, Init_CorrectTimeout_UNSUCCESS) {
@@ -183,7 +183,7 @@ TEST_F(ScrollableMessageRequestTest, Init_CorrectTimeout_UNSUCCESS) {
       mobile_apis::InteractionMode::MANUAL_ONLY;
   EXPECT_EQ(kDefaultTimeout_, command_->default_timeout());
   command_->Init();
-  EXPECT_EQ(kTimeOut, command_->default_timeout());
+  EXPECT_EQ(kDefaultTimeout_, command_->default_timeout());
 }
 
 TEST_F(ScrollableMessageRequestTest, Run_ApplicationIsNotRegistered_UNSUCCESS) {

@@ -62,7 +62,7 @@ ThreadedSocketConnection::ThreadedSocketConnection(
     , unexpected_disconnect_(false)
     , device_uid_(device_id)
     , app_handle_(app_handle)
-    , thread_(NULL) {
+    , thread_(nullptr) {
   const std::string thread_name = std::string("Socket ") + device_handle();
   thread_ = threads::CreateThread(thread_name.c_str(),
                                   new SocketConnectionDelegate(this));
@@ -70,7 +70,7 @@ ThreadedSocketConnection::ThreadedSocketConnection(
 
 ThreadedSocketConnection::~ThreadedSocketConnection() {
   LOG4CXX_AUTO_TRACE(logger_);
-  DCHECK(NULL == thread_);
+  DCHECK(nullptr == thread_);
 
   if (-1 != read_fd_) {
     close(read_fd_);
@@ -82,10 +82,12 @@ ThreadedSocketConnection::~ThreadedSocketConnection() {
 
 void ThreadedSocketConnection::StopAndJoinThread() {
   Disconnect();
-  thread_->join();
-  delete thread_->delegate();
-  threads::DeleteThread(thread_);
-  thread_ = NULL;
+  if (thread_) {
+    thread_->join();
+    delete thread_->delegate();
+    threads::DeleteThread(thread_);
+    thread_ = nullptr;
+  }
 }
 
 void ThreadedSocketConnection::Abort() {
@@ -167,16 +169,23 @@ TransportAdapter::Error ThreadedSocketConnection::Disconnect() {
   return Notify();
 }
 
+void ThreadedSocketConnection::Terminate() {
+  LOG4CXX_AUTO_TRACE(logger_);
+  StopAndJoinThread();
+}
+
 void ThreadedSocketConnection::threadMain() {
   LOG4CXX_AUTO_TRACE(logger_);
-  ConnectError* connect_error = NULL;
+  ConnectError* connect_error = nullptr;
   if (!Establish(&connect_error)) {
     LOG4CXX_ERROR(logger_, "Connection Establish failed");
     delete connect_error;
     Abort();
+  } else {
+    LOG4CXX_DEBUG(logger_, "Connection established");
+    controller_->ConnectDone(device_handle(), application_handle());
   }
-  LOG4CXX_DEBUG(logger_, "Connection established");
-  controller_->ConnectDone(device_handle(), application_handle());
+
   while (!terminate_flag_) {
     Transmit();
   }
@@ -304,7 +313,7 @@ bool ThreadedSocketConnection::Receive() {
           logger_,
           "Received " << bytes_read << " bytes for connection " << this);
       ::protocol_handler::RawMessagePtr frame(
-          new protocol_handler::RawMessage(0, 0, buffer, bytes_read));
+          new protocol_handler::RawMessage(0, 0, buffer, bytes_read, false));
       controller_->DataReceiveDone(
           device_handle(), application_handle(), frame);
     } else if (bytes_read < 0) {

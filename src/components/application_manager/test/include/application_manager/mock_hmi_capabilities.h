@@ -99,55 +99,64 @@ class MockHMICapabilities : public ::application_manager::HMICapabilities {
   MOCK_METHOD1(set_tts_supported_languages,
                void(const smart_objects::SmartObject& supported_languages));
 
-  MOCK_CONST_METHOD0(display_capabilities, const smart_objects::SmartObject*());
+  MOCK_CONST_METHOD0(display_capabilities,
+                     const smart_objects::SmartObjectSPtr());
   MOCK_METHOD1(set_display_capabilities,
                void(const smart_objects::SmartObject& display_capabilities));
 
+  MOCK_CONST_METHOD0(system_display_capabilities,
+                     const smart_objects::SmartObjectSPtr());
+  MOCK_METHOD1(set_system_display_capabilities,
+               void(const smart_objects::SmartObject& display_capabilities));
+
   MOCK_CONST_METHOD0(hmi_zone_capabilities,
-                     const smart_objects::SmartObject*());
+                     const smart_objects::SmartObjectSPtr());
   MOCK_METHOD1(set_hmi_zone_capabilities,
                void(const smart_objects::SmartObject& hmi_zone_capabilities));
 
   MOCK_CONST_METHOD0(soft_button_capabilities,
-                     const smart_objects::SmartObject*());
+                     const smart_objects::SmartObjectSPtr());
   MOCK_METHOD1(
       set_soft_button_capabilities,
       void(const smart_objects::SmartObject& soft_button_capabilities));
 
-  MOCK_CONST_METHOD0(button_capabilities, const smart_objects::SmartObject*());
+  MOCK_CONST_METHOD0(button_capabilities,
+                     const smart_objects::SmartObjectSPtr());
   MOCK_METHOD1(set_button_capabilities,
                void(const smart_objects::SmartObject& button_capabilities));
 
-  MOCK_CONST_METHOD0(speech_capabilities, const smart_objects::SmartObject*());
+  MOCK_CONST_METHOD0(speech_capabilities,
+                     const smart_objects::SmartObjectSPtr());
   MOCK_METHOD1(set_speech_capabilities,
                void(const smart_objects::SmartObject& speech_capabilities));
 
-  MOCK_CONST_METHOD0(vr_capabilities, const smart_objects::SmartObject*());
+  MOCK_CONST_METHOD0(vr_capabilities, const smart_objects::SmartObjectSPtr());
   MOCK_METHOD1(set_vr_capabilities,
                void(const smart_objects::SmartObject& vr_capabilities));
 
   MOCK_CONST_METHOD0(audio_pass_thru_capabilities,
-                     const smart_objects::SmartObject*());
+                     const smart_objects::SmartObjectSPtr());
   MOCK_METHOD1(
       set_audio_pass_thru_capabilities,
       void(const smart_objects::SmartObject& audio_pass_thru_capabilities));
 
   MOCK_CONST_METHOD0(pcm_stream_capabilities,
-                     const smart_objects::SmartObject*());
+                     const smart_objects::SmartObjectSPtr());
   MOCK_METHOD1(set_pcm_stream_capabilities,
                void(const smart_objects::SmartObject& pcm_stream_capabilities));
 
   MOCK_CONST_METHOD0(preset_bank_capabilities,
-                     const smart_objects::SmartObject*());
+                     const smart_objects::SmartObjectSPtr());
   MOCK_METHOD1(
       set_preset_bank_capabilities,
       void(const smart_objects::SmartObject& preset_bank_capabilities));
 
-  MOCK_CONST_METHOD0(vehicle_type, const smart_objects::SmartObject*());
+  MOCK_CONST_METHOD0(vehicle_type, const smart_objects::SmartObjectSPtr());
   MOCK_METHOD1(set_vehicle_type,
                void(const smart_objects::SmartObject& vehicle_type));
 
-  MOCK_CONST_METHOD0(prerecorded_speech, const smart_objects::SmartObject*());
+  MOCK_CONST_METHOD0(prerecorded_speech,
+                     const smart_objects::SmartObjectSPtr());
   MOCK_METHOD1(set_prerecorded_speech,
                void(const smart_objects::SmartObject& prerecorded_speech));
 
@@ -184,13 +193,25 @@ class MockHMICapabilities : public ::application_manager::HMICapabilities {
   MOCK_METHOD1(set_rc_capability,
                void(const smart_objects::SmartObject& rc_capability));
 
+<<<<<<< HEAD
   MOCK_CONST_METHOD0(driver_distraction_capability,
                      const smart_objects::SmartObject*());
   MOCK_METHOD1(
       set_driver_distraction_capability,
       void(const smart_objects::SmartObject& driver_distraction_capability));
 
+=======
+  MOCK_CONST_METHOD0(seat_location_capability,
+                     const smart_objects::SmartObject*());
+  MOCK_METHOD1(
+      set_seat_location_capability,
+      void(const smart_objects::SmartObject& seat_location_capability));
+
+  DEPRECATED
+>>>>>>> origin/develop
   MOCK_METHOD1(Init, void(resumption::LastState* last_state));
+
+  MOCK_METHOD1(Init, void(resumption::LastStateWrapperPtr last_state_wrapper));
 
   MOCK_CONST_METHOD0(ccpu_version, const std::string&());
   MOCK_METHOD1(set_ccpu_version, void(const std::string& ccpu_version));
@@ -207,6 +228,9 @@ class MockHMICapabilities : public ::application_manager::HMICapabilities {
   MOCK_CONST_METHOD2(convert_json_languages_to_obj,
                      void(const Json::Value& json_languages,
                           smart_objects::SmartObject& languages));
+  MOCK_CONST_METHOD2(convert_audio_capability_to_obj,
+                     void(const Json::Value& capability,
+                          smart_objects::SmartObject& output_so));
 };
 
 }  // namespace application_manager_test

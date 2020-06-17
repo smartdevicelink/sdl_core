@@ -35,6 +35,7 @@
 #include "gtest/gtest.h"
 #include "protocol/raw_message.h"
 #include "resumption/last_state_impl.h"
+#include "resumption/last_state_wrapper_impl.h"
 #include "transport_manager/common.h"
 #include "transport_manager/mock_telemetry_observer.h"
 #include "transport_manager/mock_transport_manager_impl.h"
@@ -79,9 +80,11 @@ class TransportManagerImplTest : public ::testing::Test {
             device_handle_, mac_address_, device_name_, connection_type_) {}
 
   void SetUp() OVERRIDE {
-    resumption::LastStateImpl last_state_("app_storage_folder",
-                                          "app_info_storage");
-    tm_.Init(last_state_);
+    std::shared_ptr<resumption::LastStateWrapperImpl> wrapper =
+        std::make_shared<resumption::LastStateWrapperImpl>(
+            std::make_shared<resumption::LastStateImpl>("app_storage_folder",
+                                                        "app_info_storage"));
+    tm_.Init(wrapper);
     mock_adapter_ = new MockTransportAdapter();
     tm_listener_ = std::make_shared<MockTransportManagerListener>();
 
@@ -101,7 +104,7 @@ class TransportManagerImplTest : public ::testing::Test {
     unsigned char data[kSize] = {
         0x20, 0x07, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
     test_message_ = std::make_shared<RawMessage>(
-        connection_key_, version_protocol_, data, kSize);
+        connection_key_, version_protocol_, data, kSize, false);
   }
 
   DeviceInfo ConstructDeviceInfo(const std::string& mac_address,
@@ -664,15 +667,23 @@ TEST_F(TransportManagerImplTest, RemoveDevice_DeviceWasAdded) {
 }
 
 TEST_F(TransportManagerImplTest, SetVisibilityOn_StartClientListening) {
-  EXPECT_CALL(*mock_adapter_, StartClientListening())
+  EXPECT_CALL(
+      *mock_adapter_,
+      ChangeClientListening(transport_manager::TransportAction::kVisibilityOn))
       .WillOnce(Return(TransportAdapter::OK));
-  EXPECT_EQ(::transport_manager::E_SUCCESS, tm_.Visibility(true));
+  EXPECT_EQ(::transport_manager::E_SUCCESS,
+            tm_.PerformActionOnClients(
+                transport_manager::TransportAction::kVisibilityOn));
 }
 
 TEST_F(TransportManagerImplTest, SetVisibilityOff_StopClientListening) {
-  EXPECT_CALL(*mock_adapter_, StopClientListening())
+  EXPECT_CALL(
+      *mock_adapter_,
+      ChangeClientListening(transport_manager::TransportAction::kVisibilityOff))
       .WillOnce(Return(TransportAdapter::OK));
-  EXPECT_EQ(::transport_manager::E_SUCCESS, tm_.Visibility(false));
+  EXPECT_EQ(::transport_manager::E_SUCCESS,
+            tm_.PerformActionOnClients(
+                transport_manager::TransportAction::kVisibilityOff));
 }
 
 TEST_F(TransportManagerImplTest, StopTransportManager) {
@@ -691,12 +702,14 @@ TEST_F(TransportManagerImplTest, StopTransportManager) {
 TEST_F(TransportManagerImplTest, Reinit) {
   EXPECT_CALL(*mock_adapter_, Terminate());
   EXPECT_CALL(*mock_adapter_, Init()).WillOnce(Return(TransportAdapter::OK));
+  tm_.Deinit();
   EXPECT_EQ(E_SUCCESS, tm_.Reinit());
 }
 
 TEST_F(TransportManagerImplTest, Reinit_InitAdapterFailed) {
   EXPECT_CALL(*mock_adapter_, Terminate());
   EXPECT_CALL(*mock_adapter_, Init()).WillOnce(Return(TransportAdapter::FAIL));
+  tm_.Deinit();
   EXPECT_EQ(E_ADAPTERS_FAIL, tm_.Reinit());
 }
 
@@ -940,12 +953,16 @@ TEST_F(TransportManagerImplTest, RemoveDevice_TMIsNotInitialized) {
 
 TEST_F(TransportManagerImplTest, Visibility_TMIsNotInitialized) {
   // Arrange
-  const bool visible = true;
+  const transport_manager::TransportAction action =
+      transport_manager::TransportAction::kVisibilityOn;
   // Check before Act
   UninitializeTM();
   // Act and Assert
-  EXPECT_CALL(*mock_adapter_, StartClientListening()).Times(0);
-  EXPECT_EQ(E_TM_IS_NOT_INITIALIZED, tm_.Visibility(visible));
+  EXPECT_CALL(
+      *mock_adapter_,
+      ChangeClientListening(transport_manager::TransportAction::kVisibilityOn))
+      .Times(0);
+  EXPECT_EQ(E_TM_IS_NOT_INITIALIZED, tm_.PerformActionOnClients(action));
 }
 
 TEST_F(TransportManagerImplTest, HandleMessage_ConnectionNotExist) {
@@ -971,16 +988,24 @@ TEST_F(TransportManagerImplTest, SearchDevices_TMIsNotInitialized) {
 }
 
 TEST_F(TransportManagerImplTest, SetVisibilityOn_TransportAdapterNotSupported) {
-  EXPECT_CALL(*mock_adapter_, StartClientListening())
+  EXPECT_CALL(
+      *mock_adapter_,
+      ChangeClientListening(transport_manager::TransportAction::kVisibilityOn))
       .WillOnce(Return(TransportAdapter::NOT_SUPPORTED));
-  EXPECT_EQ(E_SUCCESS, tm_.Visibility(true));
+  EXPECT_EQ(E_SUCCESS,
+            tm_.PerformActionOnClients(
+                transport_manager::TransportAction::kVisibilityOn));
 }
 
 TEST_F(TransportManagerImplTest,
        SetVisibilityOff_TransportAdapterNotSupported) {
-  EXPECT_CALL(*mock_adapter_, StopClientListening())
+  EXPECT_CALL(
+      *mock_adapter_,
+      ChangeClientListening(transport_manager::TransportAction::kVisibilityOff))
       .WillOnce(Return(TransportAdapter::NOT_SUPPORTED));
-  EXPECT_EQ(E_SUCCESS, tm_.Visibility(false));
+  EXPECT_EQ(E_SUCCESS,
+            tm_.PerformActionOnClients(
+                transport_manager::TransportAction::kVisibilityOff));
 }
 
 TEST_F(TransportManagerImplTest,

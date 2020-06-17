@@ -44,6 +44,10 @@ namespace application_manager {
 namespace plugin_manager {
 
 class RPCPluginManager {
+ protected:
+  typedef std::unique_ptr<RPCPlugin, std::function<void(RPCPlugin*)> >
+      RPCPluginPtr;
+
  public:
   virtual ~RPCPluginManager() {}
   /**
@@ -54,12 +58,6 @@ class RPCPluginManager {
    * @return amount of loaded plugins
    */
   virtual uint32_t LoadPlugins(const std::string& plugins_path) = 0;
-
-  /**
-   * @brief GetPlugins get list of plugins
-   * @return list of loaded plugins
-   */
-  virtual std::vector<RPCPluginPtr>& GetPlugins() = 0;
 
   /**
    * @brief FindPluginToProcess find plugin to process message

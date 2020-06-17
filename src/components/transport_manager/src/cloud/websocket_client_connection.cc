@@ -261,7 +261,7 @@ void WebsocketClientConnection::OnRead(boost::system::error_code ec,
       boost::beast::buffers_front(buffer_.data()));
 
   ::protocol_handler::RawMessagePtr frame(
-      new protocol_handler::RawMessage(0, 0, data, size));
+      new protocol_handler::RawMessage(0, 0, data, size, false));
 
   controller_->DataReceiveDone(device_uid_, app_handle_, frame);
 

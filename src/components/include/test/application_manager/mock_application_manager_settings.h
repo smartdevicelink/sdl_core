@@ -78,6 +78,8 @@ class MockApplicationManagerSettings
   MOCK_CONST_METHOD0(tts_delimiter, const std::string&());
   MOCK_CONST_METHOD0(put_file_in_none, const uint32_t&());
   MOCK_CONST_METHOD0(sdl_version, const std::string&());
+  MOCK_CONST_METHOD0(vr_help_title, const std::string&());
+  MOCK_CONST_METHOD0(help_prompt, const std::vector<std::string>&());
   MOCK_CONST_METHOD0(time_out_promt, const std::vector<std::string>&());
   MOCK_CONST_METHOD0(hmi_capabilities_file_name, const std::string&());
   MOCK_CONST_METHOD0(video_server_type, const std::string&());
@@ -89,6 +91,7 @@ class MockApplicationManagerSettings
   MOCK_CONST_METHOD0(named_audio_pipe_path, const std::string&());
   MOCK_CONST_METHOD0(video_stream_file, const std::string&());
   MOCK_CONST_METHOD0(audio_stream_file, const std::string&());
+  MOCK_CONST_METHOD0(period_for_consent_expiration, uint16_t());
   MOCK_CONST_METHOD0(use_full_app_id, bool());
   MOCK_CONST_METHOD0(cloud_app_retry_timeout, uint32_t());
   MOCK_CONST_METHOD0(cloud_app_max_retry_attempts, uint16_t());

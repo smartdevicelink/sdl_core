@@ -41,13 +41,19 @@ namespace rc_rpc_plugin_test {
 class MockResourceAllocationManager
     : public rc_rpc_plugin::ResourceAllocationManager {
  public:
-  MOCK_METHOD2(AcquireResource,
-               rc_rpc_plugin::AcquireResult::eType(
-                   const std::string& module_type, const uint32_t app_id));
-  MOCK_METHOD2(ForceAcquireResource,
-               void(const std::string& module_type, const uint32_t app_id));
-  MOCK_METHOD2(OnDriverDisallowed,
-               void(const std::string& module_type, const uint32_t app_id));
+  MOCK_METHOD3(
+      AcquireResource,
+      rc_rpc_plugin::AcquireResult::eType(const std::string& module_type,
+                                          const std::string& module_id,
+                                          const uint32_t app_id));
+  MOCK_METHOD3(ForceAcquireResource,
+               void(const std::string& module_type,
+                    const std::string& module_id,
+                    const uint32_t app_id));
+  MOCK_METHOD3(OnDriverDisallowed,
+               void(const std::string& module_type,
+                    const std::string& module_id,
+                    const uint32_t app_id));
   MOCK_METHOD2(OnApplicationEvent,
                void(application_manager::plugin_manager::ApplicationEvent event,
                     application_manager::ApplicationSharedPtr application));
@@ -56,17 +62,32 @@ class MockResourceAllocationManager
   MOCK_METHOD1(SetAccessMode,
                void(const hmi_apis::Common_RCAccessMode::eType access_mode));
   MOCK_CONST_METHOD0(GetAccessMode, hmi_apis::Common_RCAccessMode::eType());
-  MOCK_METHOD3(SetResourceState,
+  MOCK_METHOD4(SetResourceState,
                void(const std::string& module_type,
+                    const std::string& module_id,
                     const uint32_t app_id,
                     const rc_rpc_plugin::ResourceState::eType state));
-  MOCK_CONST_METHOD1(IsResourceFree, bool(const std::string& module_type));
+  MOCK_CONST_METHOD2(IsResourceFree,
+                     bool(const std::string& module_type,
+                          const std::string& module_id));
   MOCK_METHOD0(ResetAllAllocations, void());
   MOCK_METHOD2(SendOnRCStatusNotifications,
                void(rc_rpc_plugin::NotificationTrigger::eType,
                     application_manager::ApplicationSharedPtr application));
   MOCK_CONST_METHOD0(is_rc_enabled, bool());
   MOCK_METHOD1(set_rc_enabled, void(const bool value));
+  MOCK_METHOD3(ReleaseResource,
+               rc_rpc_plugin::ResourceReleasedState::eType(
+                   const std::string& module_type,
+                   const std::string& module_id,
+                   const uint32_t application_id));
+  MOCK_METHOD3(SetResourceAcquired,
+               void(const std::string& module_type,
+                    const std::string& module_id,
+                    const uint32_t app_id));
+  MOCK_CONST_METHOD2(IsResourceAlreadyAcquiredByApp,
+                     bool(const rc_rpc_plugin::ModuleUid& moduleUid,
+                          const uint32_t app_id));
 };
 
 }  // namespace rc_rpc_plugin_test

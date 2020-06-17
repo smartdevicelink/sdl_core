@@ -41,6 +41,7 @@
 #include "gtest/gtest.h"
 #include "interfaces/MOBILE_API.h"
 #include "resumption/last_state_impl.h"
+#include "resumption/last_state_wrapper_impl.h"
 
 namespace am = application_manager;
 using am::ApplicationSet;
@@ -80,7 +81,9 @@ class OnAppServiceDataNotificationTest
                 app_service_plugin_, *mock_app_))
       , apps_lock_(std::make_shared<sync_primitives::Lock>())
       , apps_da_(apps_, apps_lock_)
-      , last_state_("app_storage_folder", "app_info_storage")
+      , last_state_(std::make_shared<resumption::LastStateWrapperImpl>(
+            std::make_shared<resumption::LastStateImpl>("app_storage_folder",
+                                                        "app_info_storage")))
       , app_service_manager_(app_mngr_, last_state_) {
     ON_CALL(*mock_app_, app_id()).WillByDefault(Return(kAppId));
     ON_CALL(*mock_app_, is_remote_control_supported())
@@ -109,7 +112,7 @@ class OnAppServiceDataNotificationTest
   application_manager::ApplicationSet apps_;
   const std::shared_ptr<sync_primitives::Lock> apps_lock_;
   DataAccessor<application_manager::ApplicationSet> apps_da_;
-  resumption::LastStateImpl last_state_;
+  resumption::LastStateWrapperPtr last_state_;
   MockAppServiceManager app_service_manager_;
 };
 

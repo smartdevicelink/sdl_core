@@ -73,18 +73,15 @@ AlertRequest::~AlertRequest() {}
 
 bool AlertRequest::Init() {
   /* Timeout in milliseconds.
-     If omitted a standard value of 10000 milliseconds is used.*/
-  if ((*message_)[strings::msg_params].keyExists(strings::duration)) {
-    default_timeout_ =
-        (*message_)[strings::msg_params][strings::duration].asUInt();
-  } else {
-    const int32_t def_value = 5000;
-    default_timeout_ = def_value;
-  }
+    If omitted a standard value of 10000 milliseconds is used.*/
+  auto& msg_params = (*message_)[strings::msg_params];
+  uint32_t duration_timeout = msg_params[strings::duration].asUInt();
+
+  default_timeout_ += duration_timeout;
 
   // If soft buttons are present, SDL will not use initiate timeout tracking for
   // response.
-  if ((*message_)[strings::msg_params].keyExists(strings::soft_buttons)) {
+  if (msg_params.keyExists(strings::soft_buttons)) {
     LOG4CXX_INFO(logger_,
                  "Request contains soft buttons - request timeout "
                  "will be set to 0.");
@@ -251,7 +248,8 @@ bool AlertRequest::Validate(uint32_t app_id) {
     return false;
   }
 
-  if (mobile_apis::HMILevel::HMI_BACKGROUND == app->hmi_level() &&
+  if (mobile_apis::HMILevel::HMI_BACKGROUND ==
+          app->hmi_level(mobile_apis::PredefinedWindows::DEFAULT_WINDOW) &&
       app->AreCommandLimitsExceeded(
           static_cast<mobile_apis::FunctionID::eType>(function_id()),
           application_manager::TLimitSource::POLICY_TABLE)) {
@@ -321,6 +319,11 @@ void AlertRequest::SendAlertRequest(int32_t app_id) {
   msg_params[hmi_request::alert_strings] =
       smart_objects::SmartObject(smart_objects::SmartType_Array);
 
+  if ((*message_)[strings::msg_params].keyExists(strings::cancel_id)) {
+    msg_params[strings::cancel_id] =
+        (*message_)[strings::msg_params][strings::cancel_id].asInt();
+  }
+
   int32_t index = 0;
   if ((*message_)[strings::msg_params].keyExists(strings::alert_text1)) {
     msg_params[hmi_request::alert_strings][index][hmi_request::field_name] =
@@ -349,6 +352,10 @@ void AlertRequest::SendAlertRequest(int32_t app_id) {
         (*message_)[strings::msg_params][strings::soft_buttons];
     MessageHelper::SubscribeApplicationToSoftButton(
         (*message_)[strings::msg_params], app, function_id());
+    msg_params[strings::duration] = 0;
+  } else {
+    msg_params[strings::duration] =
+        (*message_)[strings::msg_params][strings::duration].asUInt();
   }
 
   if ((*message_)[strings::msg_params].keyExists(strings::alert_icon)) {
@@ -369,7 +376,6 @@ void AlertRequest::SendAlertRequest(int32_t app_id) {
 
   // app_id
   msg_params[strings::app_id] = app_id;
-  msg_params[strings::duration] = default_timeout_;
 
   // NAVI platform progressIndicator
   if ((*message_)[strings::msg_params].keyExists(strings::progress_indicator)) {

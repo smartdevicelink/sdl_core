@@ -57,9 +57,11 @@ class MockCacheManagerInterface : public ::policy::CacheManagerInterface {
                     const PTString& hmi_level,
                     const PTString& rpc,
                     CheckPermissionResult& result));
+  MOCK_CONST_METHOD0(pt, std::shared_ptr<policy_table::Table>());
   MOCK_METHOD0(IsPTPreloaded, bool());
   MOCK_METHOD0(IgnitionCyclesBeforeExchange, int());
   MOCK_METHOD1(KilometersBeforeExchange, int(int current));
+  MOCK_CONST_METHOD0(GetEnabledLocalApps, std::vector<std::string>());
   MOCK_CONST_METHOD1(GetPermissionsList, bool(StringArray& perm_list));
   MOCK_METHOD2(SetCountersPassedForSuccessfulUpdate,
                bool(Counters counter, int value));
@@ -75,17 +77,16 @@ class MockCacheManagerInterface : public ::policy::CacheManagerInterface {
   MOCK_METHOD0(TimeoutResponse, int());
   MOCK_METHOD1(SecondsBetweenRetries, bool(std::vector<int>& seconds));
   MOCK_CONST_METHOD1(IsDeviceConsentCached, bool(const std::string& device_id));
-  MOCK_CONST_METHOD0(GetVehicleInfo, const VehicleInfo());
+  MOCK_CONST_METHOD0(GetPolicyTableData, Json::Value());
+  MOCK_CONST_METHOD0(GetVehicleDataItems,
+                     const std::vector<policy_table::VehicleDataItem>());
+  MOCK_CONST_METHOD0(GetRemovedVehicleDataItems,
+                     std::vector<policy_table::VehicleDataItem>());
   MOCK_CONST_METHOD1(GetEnabledCloudApps,
                      void(std::vector<std::string>& enabled_apps));
-  MOCK_CONST_METHOD7(GetCloudAppParameters,
+  MOCK_CONST_METHOD2(GetAppProperties,
                      bool(const std::string& policy_app_id,
-                          bool& enabled,
-                          std::string& endpoint,
-                          std::string& certificate,
-                          std::string& auth_token,
-                          std::string& cloud_transport_type,
-                          std::string& hybrid_app_preference));
+                          AppProperties& out_app_properties));
   MOCK_METHOD1(InitCloudApp, void(const std::string& policy_app_id));
   MOCK_METHOD2(SetCloudAppEnabled,
                void(const std::string& policy_app_id, const bool enabled));
@@ -129,12 +130,12 @@ class MockCacheManagerInterface : public ::policy::CacheManagerInterface {
                          const std::vector<std::string>& msg_codes,
                          const std::string& language,
                          const std::string& active_hmi_language));
-  MOCK_METHOD2(GetUpdateUrls,
-               void(const std::string& service_type,
-                    EndpointUrls& out_end_points));
-  MOCK_METHOD2(GetUpdateUrls,
-               void(const uint32_t service_type, EndpointUrls& out_end_points));
-  MOCK_CONST_METHOD0(GetLockScreenIconUrl, std::string());
+  MOCK_CONST_METHOD2(GetUpdateUrls,
+                     void(const std::string& service_type,
+                          EndpointUrls& out_end_points));
+  MOCK_CONST_METHOD2(GetUpdateUrls,
+                     void(const uint32_t service_type,
+                          EndpointUrls& out_end_points));
   MOCK_CONST_METHOD1(GetIconUrl, std::string(const std::string& policy_app_id));
   MOCK_METHOD1(
       GetNotificationsNumber,
@@ -296,6 +297,19 @@ class MockCacheManagerInterface : public ::policy::CacheManagerInterface {
                      RequestType::State(const std::string& policy_app_id));
   MOCK_CONST_METHOD1(GetAppRequestSubTypesState,
                      RequestSubType::State(const std::string& policy_app_id));
+
+  MOCK_CONST_METHOD1(
+      GetAppEncryptionRequiredFlag,
+      rpc::Optional<rpc::Boolean>(const std::string& application_policy_name));
+
+  MOCK_CONST_METHOD1(
+      GetFunctionalGroupingEncryptionRequiredFlag,
+      rpc::Optional<rpc::Boolean>(const std::string& functional_group));
+
+  MOCK_CONST_METHOD2(GetApplicationParams,
+                     void(const std::string& application_name,
+                          policy_table::ApplicationParams& application_params));
+  MOCK_CONST_METHOD0(GetPolicyAppIDs, const policy_table::Strings());
 };
 
 }  // namespace policy_test

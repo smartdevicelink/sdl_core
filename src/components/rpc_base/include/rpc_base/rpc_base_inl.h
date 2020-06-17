@@ -138,6 +138,10 @@ inline Boolean::Boolean() : PrimitiveType(kUninitialized), value_(false) {}
 
 inline Boolean::Boolean(bool value) : PrimitiveType(kValid), value_(value) {}
 
+inline bool Boolean::operator==(const Boolean& that) {
+  return value_ == that.value_;
+}
+
 inline Boolean& Boolean::operator=(bool new_val) {
   value_ = new_val;
   value_state_ = kValid;
@@ -185,12 +189,14 @@ Integer<T, minval, maxval>& Integer<T, minval, maxval>::operator=(
 template <typename T, T minval, T maxval>
 Integer<T, minval, maxval>& Integer<T, minval, maxval>::operator++() {
   ++value_;
+  value_state_ = range_.Includes(value_) ? kValid : kInvalid;
   return *this;
 }
 
 template <typename T, T minval, T maxval>
 Integer<T, minval, maxval>& Integer<T, minval, maxval>::operator+=(int value) {
   value_ += value;
+  value_state_ = range_.Includes(value_) ? kValid : kInvalid;
   return *this;
 }
 
@@ -278,6 +284,21 @@ bool String<minlen, maxlen>::operator==(const String& rhs) const {
 }
 
 template <size_t minlen, size_t maxlen>
+bool String<minlen, maxlen>::operator==(const std::string& rhs) const {
+  return value_ == rhs;
+}
+
+template <size_t minlen, size_t maxlen>
+bool String<minlen, maxlen>::operator!=(const String& rhs) const {
+  return value_ != rhs.value_;
+}
+
+template <size_t minlen, size_t maxlen>
+bool String<minlen, maxlen>::operator!=(const std::string& rhs) const {
+  return value_ != rhs;
+}
+
+template <size_t minlen, size_t maxlen>
 String<minlen, maxlen>::operator const std::string&() const {
   return value_;
 }
@@ -360,6 +381,20 @@ bool Array<T, minsize, maxsize>::is_initialized() const {
     return true;
   }
   return false;
+}
+
+template <typename T, size_t minsize, size_t maxsize>
+bool Array<T, minsize, maxsize>::operator==(const Array& that) {
+  if (this->size() != that.size())
+    return false;
+
+  for (auto i = std::begin(*this), j = std::begin(that); i != std::end(*this);
+       ++i, ++j) {
+    if (!(*i == *j)) {
+      return false;
+    }
+  }
+  return true;
 }
 
 template <typename T, size_t minsize, size_t maxsize>
@@ -566,6 +601,11 @@ T* Optional<T>::operator->() {
 template <typename T>
 const T* Optional<T>::operator->() const {
   return &value_;
+}
+
+template <typename T>
+bool Optional<T>::operator==(const Optional<T>& that) {
+  return value_ == that.value_;
 }
 
 template <typename T>

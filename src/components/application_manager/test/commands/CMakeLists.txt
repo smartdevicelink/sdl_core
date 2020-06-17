@@ -58,7 +58,7 @@ set(LIBRARIES
   connectionHandler
   ApplicationManager
   jsoncpp
-  Policy
+  PolicyStatic
   Resumption
 )
 

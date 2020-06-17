@@ -126,8 +126,8 @@ MATCHER_P2(CheckNotificationParams, function_id, state, "") {
   return is_function_id_matched && is_state_matched;
 }
 
-ACTION_P(GetArg3, result) {
-  arg3 = *result;
+ACTION_P(GetArg4, result) {
+  arg4 = *result;
 }
 
 ACTION_P(SetMessage, lockScreenDismissalWarning) {
@@ -159,8 +159,8 @@ TEST_F(HMIOnDriverDistractionNotificationTest,
 
   policy::CheckPermissionResult result;
   result.hmi_level_permitted = policy::kRpcAllowed;
-  EXPECT_CALL(mock_policy_handler_interface_, CheckPermissions(_, _, _, _))
-      .WillOnce(GetArg3(&result));
+  EXPECT_CALL(mock_policy_handler_interface_, CheckPermissions(_, _, _, _, _))
+      .WillOnce(GetArg4(&result));
 
   MessageSharedPtr message_to_mobile(
       CreateMessage(smart_objects::SmartType_Map));
@@ -202,8 +202,9 @@ TEST_F(HMIOnDriverDistractionNotificationTest,
 
   policy::CheckPermissionResult result;
   result.hmi_level_permitted = policy::kRpcDisallowed;
-  EXPECT_CALL(mock_policy_handler_interface_, CheckPermissions(_, _, _, _))
-      .WillOnce(GetArg3(&result));
+  EXPECT_CALL(app_mngr_, GetPolicyHandler()).Times(3);
+  EXPECT_CALL(mock_policy_handler_interface_, CheckPermissions(_, _, _, _, _))
+      .WillOnce(GetArg4(&result));
 
   MessageSharedPtr pushed_message(CreateMessage(smart_objects::SmartType_Map));
   EXPECT_CALL(*mock_app_,
@@ -240,8 +241,8 @@ TEST_F(HMIOnDriverDistractionNotificationTest,
 
   policy::CheckPermissionResult result;
   result.hmi_level_permitted = policy::kRpcAllowed;
-  ON_CALL(mock_policy_handler_interface_, CheckPermissions(_, _, _, _))
-      .WillByDefault(GetArg3(&result));
+  ON_CALL(mock_policy_handler_interface_, CheckPermissions(_, _, _, _, _))
+      .WillByDefault(GetArg4(&result));
 
   MessageSharedPtr command_result;
   EXPECT_CALL(mock_rpc_service_,
@@ -284,11 +285,11 @@ TEST_F(HMIOnDriverDistractionNotificationTest,
 
   policy::CheckPermissionResult result;
   result.hmi_level_permitted = policy::kRpcAllowed;
-  EXPECT_CALL(mock_policy_handler_interface_, CheckPermissions(_, _, _, _))
-      .WillOnce(GetArg3(&result));
-
   MessageSharedPtr message_to_mobile(
       CreateMessage(smart_objects::SmartType_Map));
+  EXPECT_CALL(app_mngr_, GetPolicyHandler()).Times(2);
+  EXPECT_CALL(mock_policy_handler_interface_, CheckPermissions(_, _, _, _, _))
+      .WillOnce(GetArg4(&result));
   EXPECT_CALL(mock_rpc_service_,
               ManageMobileCommand(
                   CheckNotificationParams(
@@ -331,8 +332,8 @@ TEST_F(HMIOnDriverDistractionNotificationTest,
 
   policy::CheckPermissionResult result;
   result.hmi_level_permitted = policy::kRpcAllowed;
-  EXPECT_CALL(mock_policy_handler_interface_, CheckPermissions(_, _, _, _))
-      .WillOnce(GetArg3(&result));
+  EXPECT_CALL(mock_policy_handler_interface_, CheckPermissions(_, _, _, _, _))
+      .WillOnce(GetArg4(&result));
 
   MessageSharedPtr message_to_mobile(
       CreateMessage(smart_objects::SmartType_Map));

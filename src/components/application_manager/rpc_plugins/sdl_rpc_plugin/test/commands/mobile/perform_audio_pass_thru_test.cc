@@ -72,6 +72,8 @@ const std::string kCorrectDisplayText1 = "CorrectDisplayText1";
 const std::string kCorrectDisplayText2 = "CorrectDisplayText2";
 const std::string kFunctionId = "FunctionId";
 const uint32_t kTimeoutForTTSSpeak = 1u;
+const am::WindowID kDefaultWindowId =
+    mobile_apis::PredefinedWindows::DEFAULT_WINDOW;
 }  // namespace
 
 class PerformAudioPassThruRequestTest
@@ -109,7 +111,7 @@ class PerformAudioPassThruRequestTest
       msg_params_[field] = "prompt\\n";
     }
 
-    EXPECT_CALL(*application_sptr_, hmi_level())
+    EXPECT_CALL(*application_sptr_, hmi_level(kDefaultWindowId))
         .WillOnce(Return(am::mobile_api::HMILevel::HMI_FULL));
 
     CallRun caller(*command_sptr_);
@@ -206,7 +208,7 @@ TEST_F(PerformAudioPassThruRequestTest,
   (*mobile_request)[am::strings::msg_params][am::strings::initial_prompt] =
       initial_prompt;
 
-  EXPECT_CALL(*application_sptr_, hmi_level())
+  EXPECT_CALL(*application_sptr_, hmi_level(kDefaultWindowId))
       .WillOnce(Return(am::mobile_api::HMILevel::HMI_FULL));
   std::shared_ptr<PerformAudioPassThruRequest> command =
       CreateCommand<PerformAudioPassThruRequest>(mobile_request);
@@ -286,7 +288,7 @@ TEST_F(PerformAudioPassThruRequestTest,
 }
 
 TEST_F(PerformAudioPassThruRequestTest, Run_HmiLevelNone_Rejected) {
-  EXPECT_CALL(*application_sptr_, hmi_level())
+  EXPECT_CALL(*application_sptr_, hmi_level(kDefaultWindowId))
       .WillOnce(Return(am::mobile_api::HMILevel::HMI_NONE));
 
   CallRun caller(*command_sptr_);
@@ -319,7 +321,7 @@ TEST_F(PerformAudioPassThruRequestTest,
   // First we need to call SendSpeakRequest()
   // to enable the "is_active_tts_speak" key
 
-  EXPECT_CALL(*application_sptr_, hmi_level())
+  EXPECT_CALL(*application_sptr_, hmi_level(kDefaultWindowId))
       .WillOnce(Return(am::mobile_api::HMILevel::HMI_FULL));
 
   msg_params_[am::strings::initial_prompt][0][am::strings::text] =
@@ -407,7 +409,7 @@ TEST_F(PerformAudioPassThruRequestTest,
 
 TEST_F(PerformAudioPassThruRequestTest,
        Run_InitPromptCorrect_SpeakAndPerformAPTRequestsSendMuteTrue) {
-  EXPECT_CALL(*application_sptr_, hmi_level())
+  EXPECT_CALL(*application_sptr_, hmi_level(kDefaultWindowId))
       .WillOnce(Return(am::mobile_api::HMILevel::HMI_FULL));
 
   msg_params_[am::strings::initial_prompt][0][am::strings::text] =
@@ -481,7 +483,7 @@ TEST_F(PerformAudioPassThruRequestTest,
 
 TEST_F(PerformAudioPassThruRequestTest,
        Run_InitPromptCorrect_SpeakAndPerformAPTRequestsSendMuteFalse) {
-  EXPECT_CALL(*application_sptr_, hmi_level())
+  EXPECT_CALL(*application_sptr_, hmi_level(kDefaultWindowId))
       .WillOnce(Return(am::mobile_api::HMILevel::HMI_FULL));
 
   msg_params_[am::strings::initial_prompt][0][am::strings::text] =
@@ -536,7 +538,7 @@ TEST_F(PerformAudioPassThruRequestTest,
 TEST_F(
     PerformAudioPassThruRequestTest,
     Run_InitPromptEmpty_PerformAndRecordStartNotificationsAndStartRecording) {
-  EXPECT_CALL(*application_sptr_, hmi_level())
+  EXPECT_CALL(*application_sptr_, hmi_level(kDefaultWindowId))
       .WillOnce(Return(am::mobile_api::HMILevel::HMI_FULL));
 
   MessageSharedPtr start_record_result_msg;
@@ -766,7 +768,7 @@ TEST_F(PerformAudioPassThruRequestTest,
   EXPECT_CALL(app_mngr_, EndAudioPassThru(app_id)).WillOnce(Return(true));
   EXPECT_CALL(app_mngr_, StopAudioPassThru(_));
 
-  EXPECT_CALL(*application_sptr_, hmi_level())
+  EXPECT_CALL(*application_sptr_, hmi_level(kDefaultWindowId))
       .WillOnce(Return(am::mobile_api::HMILevel::HMI_FULL));
 
   msg_params_[am::strings::initial_prompt][0][am::strings::text] =

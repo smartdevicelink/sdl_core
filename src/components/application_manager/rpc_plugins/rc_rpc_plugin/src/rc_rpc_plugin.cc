@@ -35,7 +35,9 @@
 #include "rc_rpc_plugin/interior_data_cache_impl.h"
 #include "rc_rpc_plugin/interior_data_manager_impl.h"
 #include "rc_rpc_plugin/rc_app_extension.h"
+#include "rc_rpc_plugin/rc_capabilities_manager_impl.h"
 #include "rc_rpc_plugin/rc_command_factory.h"
+#include "rc_rpc_plugin/rc_consent_manager_impl.h"
 #include "rc_rpc_plugin/rc_helpers.h"
 #include "rc_rpc_plugin/resource_allocation_manager_impl.h"
 #include "utils/helpers.h"
@@ -49,24 +51,44 @@ bool RCRPCPlugin::Init(
     application_manager::ApplicationManager& app_manager,
     application_manager::rpc_service::RPCService& rpc_service,
     application_manager::HMICapabilities& hmi_capabilities,
-    policy::PolicyHandlerInterface& policy_handler) {
+    policy::PolicyHandlerInterface& policy_handler,
+    resumption::LastStateWrapperPtr last_state) {
+  rc_consent_manager_.reset(new rc_rpc_plugin::RCConsentManagerImpl(
+      last_state,
+      app_manager,
+      app_manager.get_settings().period_for_consent_expiration()));
   interior_data_cache_.reset(new InteriorDataCacheImpl());
   interior_data_manager_.reset(new InteriorDataManagerImpl(
       *this, *interior_data_cache_, app_manager, rpc_service));
-
-  resource_allocation_manager_.reset(
-      new ResourceAllocationManagerImpl(app_manager, rpc_service));
+  rc_capabilities_manager_.reset(
+      new RCCapabilitiesManagerImpl(hmi_capabilities));
+  resource_allocation_manager_.reset(new ResourceAllocationManagerImpl(
+      app_manager, rpc_service, *(rc_capabilities_manager_.get())));
   RCCommandParams params{app_manager,
                          rpc_service,
                          hmi_capabilities,
                          policy_handler,
                          *(resource_allocation_manager_.get()),
                          *(interior_data_cache_.get()),
-                         *(interior_data_manager_.get())};
+                         *(interior_data_manager_.get()),
+                         *(rc_capabilities_manager_.get()),
+                         *(rc_consent_manager_.get())};
   command_factory_.reset(new rc_rpc_plugin::RCCommandFactory(params));
   rpc_service_ = &rpc_service;
   app_mngr_ = &app_manager;
+
+  // Check all saved consents and remove expired
+  rc_consent_manager_->RemoveExpiredConsents();
+
   return true;
+}
+
+bool RCRPCPlugin::Init(application_manager::ApplicationManager&,
+                       application_manager::rpc_service::RPCService&,
+                       application_manager::HMICapabilities&,
+                       policy::PolicyHandlerInterface&,
+                       resumption::LastState&) {
+  return false;
 }
 
 bool RCRPCPlugin::IsAbleToProcess(
@@ -93,15 +115,23 @@ void RCRPCPlugin::OnPolicyEvent(
 void RCRPCPlugin::OnApplicationEvent(
     application_manager::plugin_manager::ApplicationEvent event,
     application_manager::ApplicationSharedPtr application) {
+  LOG4CXX_AUTO_TRACE(logger_);
   if (!application->is_remote_control_supported()) {
+    LOG4CXX_DEBUG(
+        logger_,
+        "Remote control is not supported for application with app_id: "
+            << application->app_id());
     return;
   }
   switch (event) {
     case plugins::kApplicationRegistered: {
-      application->AddExtension(
-          std::shared_ptr<RCAppExtension>(new RCAppExtension(kRCPluginID)));
-      resource_allocation_manager_->SendOnRCStatusNotifications(
-          NotificationTrigger::APP_REGISTRATION, application);
+      auto extension =
+          std::shared_ptr<RCAppExtension>(new RCAppExtension(kRCPluginID));
+      application->AddExtension(extension);
+      const auto driver_location =
+          rc_capabilities_manager_
+              ->GetDriverLocationFromSeatLocationCapability();
+      extension->SetUserLocation(driver_location);
       break;
     }
     case plugins::kApplicationExit: {
@@ -112,6 +142,17 @@ void RCRPCPlugin::OnApplicationEvent(
     case plugins::kApplicationUnregistered: {
       resource_allocation_manager_->OnApplicationEvent(event, application);
       interior_data_manager_->OnApplicationEvent(event, application);
+      break;
+    }
+    case plugins::kGlobalPropertiesUpdated: {
+      const auto user_location = application->get_user_location();
+      auto extension = RCHelpers::GetRCExtension(*application);
+      extension->SetUserLocation(user_location);
+      break;
+    }
+    case plugins::kRCStatusChanged: {
+      resource_allocation_manager_->SendOnRCStatusNotifications(
+          NotificationTrigger::APP_REGISTRATION, application);
       break;
     }
     default:
@@ -136,6 +177,14 @@ RCRPCPlugin::Apps RCRPCPlugin::GetRCApplications(
 
 }  // namespace rc_rpc_plugin
 
-extern "C" application_manager::plugin_manager::RPCPlugin* Create() {
+extern "C" __attribute__((visibility("default")))
+application_manager::plugin_manager::RPCPlugin*
+Create() {
   return new rc_rpc_plugin::RCRPCPlugin();
 }  // namespace rc_rpc_plugin
+
+extern "C" __attribute__((visibility("default"))) void Delete(
+    application_manager::plugin_manager::RPCPlugin* data) {
+  delete data;
+  DELETE_THREAD_LOGGER(rc_rpc_plugin::logger_);
+}

@@ -37,6 +37,7 @@
 #include "application_manager/plugin_manager/rpc_plugin_manager.h"
 #include "application_manager/policies/policy_handler_interface.h"
 #include "application_manager/rpc_service.h"
+#include "resumption/last_state_wrapper.h"
 #include "utils/optional.h"
 
 namespace application_manager {
@@ -55,20 +56,31 @@ class RPCPluginManagerImpl : public RPCPluginManager {
   RPCPluginManagerImpl(ApplicationManager& app_manager,
                        rpc_service::RPCService& rpc_service,
                        HMICapabilities& hmi_capabilities,
-                       policy::PolicyHandlerInterface& policy_handler);
+                       policy::PolicyHandlerInterface& policy_handler,
+                       resumption::LastStateWrapperPtr last_state);
+
+  DEPRECATED
+  RPCPluginManagerImpl(ApplicationManager& app_manager,
+                       rpc_service::RPCService& rpc_service,
+                       HMICapabilities& hmi_capabilities,
+                       policy::PolicyHandlerInterface& policy_handler,
+                       resumption::LastState& last_state);
 
   uint32_t LoadPlugins(const std::string& plugins_path) OVERRIDE;
-  std::vector<RPCPluginPtr>& GetPlugins() OVERRIDE;
+
   utils::Optional<RPCPlugin> FindPluginToProcess(
       const int32_t function_id,
       const commands::Command::CommandSource message_source) OVERRIDE;
 
  private:
+  RPCPluginPtr LoadPlugin(const std::string& full_plugin_path) const;
+
   std::vector<RPCPluginPtr> loaded_plugins_;
   ApplicationManager& app_manager_;
   rpc_service::RPCService& rpc_service_;
   HMICapabilities& hmi_capabilities_;
   policy::PolicyHandlerInterface& policy_handler_;
+  resumption::LastStateWrapperPtr last_state_;
 
   // RPCPluginManager interface
  public:

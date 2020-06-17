@@ -41,9 +41,9 @@ endif()
 
 if(FORCE_3RD_PARTY)
   if(NO_REBUILD_3RD_PARTY)
-  	message(FATAL_ERROR "Please don't turn on both FORCE_3RD_PARTY and NO_REBUILD_3RD_PARTY at the same time.")
+    message(FATAL_ERROR "Please don't turn on both FORCE_3RD_PARTY and NO_REBUILD_3RD_PARTY at the same time.")
   else()
-	set(FORCE_3RD_PARTY_LOGGER ON)
+    set(FORCE_3RD_PARTY_LOGGER ON)
   endif()
 endif()
 
@@ -55,13 +55,18 @@ if(ENABLE_LOG)
   if(NO_REBUILD_3RD_PARTY_LOGGER)
     message(STATUS "Not rebuilding logger.")
   else()
+    set(LOGGER_INSTALL_COMMAND make install)
+    if (${USE_DEFAULT_3RD_PARTY_PATH} STREQUAL "true")
+      set(LOGGER_INSTALL_COMMAND sudo make install)
+    endif()
     if(FORCE_3RD_PARTY_LOGGER)
       message(STATUS "Force to rebuild logger.")
 
       #build logger
       add_custom_target(3rd_party_logger
         make
-        WORKING_DIRECTORY ${3RD_PARTY_BINARY_DIRECTORY}
+        DEPENDS apr-util
+        WORKING_DIRECTORY ${3RD_PARTY_BINARY_DIRECTORY}/apache-log4cxx-cmake
       )
 
       #install logger
@@ -71,12 +76,15 @@ if(ENABLE_LOG)
         COMMAND /bin/bash -c \"USE_DEFAULT_3RD_PARTY_PATH=${USE_DEFAULT_3RD_PARTY_PATH}\;
                                if [ \\$$USE_DEFAULT_3RD_PARTY_PATH == "true" ]\; then
                                  sudo -k \;
-                                 sudo make install\;
-                               else
-                                 make install\;
-                               fi\"
+                               fi\;
+                               cd ${3RD_PARTY_BINARY_DIRECTORY}/apr-cmake\;
+                               ${LOGGER_INSTALL_COMMAND}\;
+                               cd ${3RD_PARTY_BINARY_DIRECTORY}/apr-util-cmake\;
+                               ${LOGGER_INSTALL_COMMAND}\;
+                               cd ${3RD_PARTY_BINARY_DIRECTORY}/apache-log4cxx-cmake\;
+                               ${LOGGER_INSTALL_COMMAND}\"
         DEPENDS 3rd_party_logger
-        WORKING_DIRECTORY ${3RD_PARTY_BINARY_DIRECTORY}
+        WORKING_DIRECTORY ${3RD_PARTY_BINARY_DIRECTORY}/apache-log4cxx-cmake
       )
     else()
       #build logger
@@ -94,17 +102,18 @@ if(ENABLE_LOG)
                                  fi\;
                                  if [ \\$$VAR1 != \\$$VAR2 ]\; then
                                    echo " Need to rebuild logger. " \;
-                                   cd ${3RD_PARTY_BINARY_DIRECTORY}\;
+                                   cd ${3RD_PARTY_BINARY_DIRECTORY}/apache-log4cxx-cmake\;
                                    make\;
                                  else
                                    echo " Logger is actual. " \;
                                  fi\;
                                else
                                  echo " Need to build logger. " \;
-                                 cd ${3RD_PARTY_BINARY_DIRECTORY}\;
+                                 cd ${3RD_PARTY_BINARY_DIRECTORY}/apache-log4cxx-cmake\;
                                  make\;
                                fi\"
-        WORKING_DIRECTORY ${3RD_PARTY_BINARY_DIRECTORY}
+        DEPENDS apr-util
+        WORKING_DIRECTORY ${3RD_PARTY_BINARY_DIRECTORY}/apache-log4cxx-build
       )
 
       #install logger
@@ -125,27 +134,29 @@ if(ENABLE_LOG)
                                  if [ \\$$VAR1 != \\$$VAR2 ]\; then
                                    USE_DEFAULT_3RD_PARTY_PATH=${USE_DEFAULT_3RD_PARTY_PATH}\;
                                    if [ \\$$USE_DEFAULT_3RD_PARTY_PATH == "true" ]\; then
-                                     cd ${3RD_PARTY_BINARY_DIRECTORY}\;
                                      sudo -k \;
-                                     sudo make install\;
-                                   else
-                                     cd ${3RD_PARTY_BINARY_DIRECTORY}\;
-                                     make install\;
                                    fi\;
+                                   cd ${3RD_PARTY_BINARY_DIRECTORY}/apr-cmake\;
+                                   ${LOGGER_INSTALL_COMMAND}\;
+                                   cd ${3RD_PARTY_BINARY_DIRECTORY}/apr-util-cmake\;
+                                   ${LOGGER_INSTALL_COMMAND}\;
+                                   cd ${3RD_PARTY_BINARY_DIRECTORY}/apache-log4cxx-cmake\;
+                                   ${LOGGER_INSTALL_COMMAND}\;
                                  fi\;
                                else
                                  USE_DEFAULT_3RD_PARTY_PATH=${USE_DEFAULT_3RD_PARTY_PATH}\;
                                  if [ \\$$USE_DEFAULT_3RD_PARTY_PATH == "true" ]\; then
-                                   cd ${3RD_PARTY_BINARY_DIRECTORY}\;
                                    sudo -k \;
-                                   sudo make install\;
-                                 else
-                                   cd ${3RD_PARTY_BINARY_DIRECTORY}\;
-                                   make install\;
                                  fi\;
+                                 cd ${3RD_PARTY_BINARY_DIRECTORY}/apr-cmake\;
+                                 ${LOGGER_INSTALL_COMMAND}\;
+                                 cd ${3RD_PARTY_BINARY_DIRECTORY}/apr-util-cmake\;
+                                 ${LOGGER_INSTALL_COMMAND}\;
+                                 cd ${3RD_PARTY_BINARY_DIRECTORY}/apache-log4cxx-cmake\;
+                                 ${LOGGER_INSTALL_COMMAND}\;
                                fi\"
         DEPENDS 3rd_party_logger
-        WORKING_DIRECTORY ${3RD_PARTY_BINARY_DIRECTORY}
+        WORKING_DIRECTORY ${3RD_PARTY_BINARY_DIRECTORY}/apache-log4cxx-build
       )
     endif()
 
@@ -238,8 +249,8 @@ add_custom_target(Boost) # empty target, Boost is already installed
 endif()
 
 add_custom_target(install-3rd_party
-  DEPENDS ${install-3rd_party_logger_var}
   DEPENDS libbson
   DEPENDS Boost
+  DEPENDS ${install-3rd_party_logger_var}
   WORKING_DIRECTORY ${3RD_PARTY_BINARY_DIRECTORY}
 )

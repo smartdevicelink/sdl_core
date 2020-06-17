@@ -1,9 +1,9 @@
 ### SDL CORE
 
-Copyright (C) 2018 SmartDeviceLink Consortium, Inc.
+Copyright (C) 2018 - 2020, SmartDeviceLink Consortium, Inc.
 
 #### License
-Copyright (c) 2017 - 2018, SmartDeviceLink Consortium, Inc.
+Copyright (c) 2017 - 2020, SmartDeviceLink Consortium, Inc.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -41,12 +41,11 @@ The third party software included and used by this project is:
 * The library is included in the Google Mock class generator
 * See [https://github.com/google/googletest/tree/master/googlemock](https://github.com/google/googletest/tree/master/googlemock)
 
-**json-cpp 0.6.0 rc2**
+**json-cpp 1.9.2**
 
-* Copyright (c) 2007-2010 Baptiste Lepilleur
-* Licensed under MIT License
-* The library is included in jsoncpp 3rd party static src folder
-* See [https://github.com/open-source-parsers/jsoncpp/releases/tag/svn-release-0.6.0-rc2](https://github.com/open-source-parsers/jsoncpp/releases/tag/svn-release-0.6.0-rc2)
+* Any copyright is dedicated to the Public Domain 
+* The library is included as a git submodule in jsoncpp 3rd party static src folder
+* See [https://github.com/open-source-parsers/jsoncpp/releases/tag/1.9.2](https://github.com/open-source-parsers/jsoncpp/releases/tag/1.9.2)
 
 **Apache log4cxx 0.10.0**
 

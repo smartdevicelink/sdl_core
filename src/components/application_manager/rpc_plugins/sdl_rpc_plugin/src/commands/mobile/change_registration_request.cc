@@ -37,6 +37,7 @@
 #include "application_manager/application_impl.h"
 #include "application_manager/application_manager.h"
 #include "application_manager/message_helper.h"
+#include "application_manager/policies/policy_handler_interface.h"
 #include "interfaces/HMI_API.h"
 #include "interfaces/MOBILE_API.h"
 
@@ -49,7 +50,7 @@ struct IsSameNickname {
   }
 
  private:
-  const custom_str::CustomString& app_id_;
+  const custom_str::CustomString app_id_;
 };
 }  // namespace
 
@@ -160,7 +161,7 @@ void ChangeRegistrationRequest::Run() {
     return;
   }
 
-  if (mobile_apis::Result::SUCCESS != CheckCoincidence()) {
+  if (mobile_apis::Result::SUCCESS != CheckCoincidence(app->device())) {
     SendResponse(false, mobile_apis::Result::DUPLICATE_NAME);
     return;
   }
@@ -578,36 +579,46 @@ bool ChangeRegistrationRequest::IsWhiteSpaceExist() {
   return false;
 }
 
-mobile_apis::Result::eType ChangeRegistrationRequest::CheckCoincidence() {
+mobile_apis::Result::eType ChangeRegistrationRequest::CheckCoincidence(
+    const connection_handler::DeviceHandle& device_id) {
   LOG4CXX_AUTO_TRACE(logger_);
 
   const smart_objects::SmartObject& msg_params =
       (*message_)[strings::msg_params];
 
-  ApplicationSet accessor = application_manager_.applications().GetData();
+  auto compare_tts_name = [](const smart_objects::SmartObject& obj_1,
+                             const smart_objects::SmartObject& obj_2) {
+    return obj_1[application_manager::strings::text]
+        .asCustomString()
+        .CompareIgnoreCase(
+            obj_2[application_manager::strings::text].asCustomString());
+  };
+
+  const auto& accessor = application_manager_.applications().GetData();
   custom_str::CustomString app_name;
-  uint32_t app_id = connection_key();
+  const uint32_t app_id = connection_key();
   if (msg_params.keyExists(strings::app_name)) {
     app_name = msg_params[strings::app_name].asCustomString();
   }
 
-  ApplicationSetConstIt it = accessor.begin();
-  for (; accessor.end() != it; ++it) {
-    if (app_id == (*it)->app_id()) {
+  for (const auto& app : accessor) {
+    if (app->device() != device_id) {
       continue;
     }
 
-    const custom_str::CustomString& cur_name = (*it)->name();
+    if (app->app_id() == app_id) {
+      continue;
+    }
+
+    const auto& cur_name = app->name();
     if (msg_params.keyExists(strings::app_name)) {
       if (app_name.CompareIgnoreCase(cur_name)) {
         LOG4CXX_ERROR(logger_, "Application name is known already.");
         return mobile_apis::Result::DUPLICATE_NAME;
       }
-
-      const smart_objects::SmartObject* vr = (*it)->vr_synonyms();
-      const std::vector<smart_objects::SmartObject>* curr_vr = NULL;
-      if (NULL != vr) {
-        curr_vr = vr->asArray();
+      const auto vr = app->vr_synonyms();
+      if (vr) {
+        const auto curr_vr = vr->asArray();
         CoincidencePredicateVR v(app_name);
 
         if (0 != std::count_if(curr_vr->begin(), curr_vr->end(), v)) {
@@ -617,18 +628,37 @@ mobile_apis::Result::eType ChangeRegistrationRequest::CheckCoincidence() {
       }
     }
 
-    // vr check
+    // VR check
     if (msg_params.keyExists(strings::vr_synonyms)) {
-      const std::vector<smart_objects::SmartObject>* new_vr =
-          msg_params[strings::vr_synonyms].asArray();
+      const auto new_vr = msg_params[strings::vr_synonyms].asArray();
 
       CoincidencePredicateVR v(cur_name);
       if (0 != std::count_if(new_vr->begin(), new_vr->end(), v)) {
         LOG4CXX_ERROR(logger_, "vr_synonyms duplicated with app_name .");
         return mobile_apis::Result::DUPLICATE_NAME;
       }
-    }  // end vr check
-  }    // application for end
+    }  // End vr check
+
+    // TTS check
+    if (msg_params.keyExists(strings::tts_name) && app->tts_name()) {
+      const auto tts_array = msg_params[strings::tts_name].asArray();
+      const auto tts_curr = app->tts_name()->asArray();
+      const auto& it_tts = std::find_first_of(tts_array->begin(),
+                                              tts_array->end(),
+                                              tts_curr->begin(),
+                                              tts_curr->end(),
+                                              compare_tts_name);
+      if (it_tts != tts_array->end()) {
+        LOG4CXX_ERROR(
+            logger_,
+            "TTS name: "
+                << (*it_tts)[strings::text].asCustomString().AsMBString()
+                << " is known already");
+        return mobile_apis::Result::DUPLICATE_NAME;
+      }
+    }  // End tts check
+
+  }  // Application for end
   return mobile_apis::Result::SUCCESS;
 }
 

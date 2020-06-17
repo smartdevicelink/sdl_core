@@ -83,7 +83,10 @@ void OnVRLanguageChangeNotification::Run() {
     if (static_cast<int32_t>(app->language()) !=
         (*message_)[strings::msg_params][strings::language].asInt()) {
       application_manager_.state_controller().SetRegularState(
-          app, mobile_api::HMILevel::HMI_NONE, false);
+          app,
+          mobile_apis::PredefinedWindows::DEFAULT_WINDOW,
+          mobile_apis::HMILevel::HMI_NONE,
+          false);
 
       rpc_service_.ManageMobileCommand(
           MessageHelper::GetOnAppInterfaceUnregisteredNotificationToMobile(

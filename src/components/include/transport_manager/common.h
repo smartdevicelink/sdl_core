@@ -43,6 +43,17 @@
 namespace transport_manager {
 
 /**
+ * @enum Actions that could
+ * be performed on connected clients.
+ */
+enum class TransportAction {
+  kVisibilityOn,
+  kVisibilityOff,
+  kListeningOn,
+  kListeningOff
+};
+
+/**
  * @enum Transport manager states.
  */
 enum {
@@ -57,6 +68,11 @@ enum {
 };
 
 enum ConnectionStatus { INVALID = -1, PENDING, RETRY, CONNECTED, CLOSING };
+
+namespace webengine_constants {
+const std::string kWebEngineConnectionType("WEBENGINE_WEBSOCKET");
+const std::string kWebEngineDeviceName("Web Engine");
+}  // namespace webengine_constants
 
 /**
  * @brief Type definition for variable that hold handle of device.

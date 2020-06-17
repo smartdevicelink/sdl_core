@@ -123,11 +123,6 @@ class PTRepresentation {
   virtual bool SecondsBetweenRetries(std::vector<int>* seconds) = 0;
 
   /**
-   * @brief Get information about vehicle
-   */
-  virtual const VehicleInfo GetVehicleInfo() const = 0;
-
-  /**
    * @brief Allows to update 'vin' field in module_meta table.
    *
    * @param new 'vin' value.
@@ -155,14 +150,6 @@ class PTRepresentation {
    * return them otherwise default URLs.
    */
   virtual EndpointUrls GetUpdateUrls(int service_type) = 0;
-
-  /**
-   * @brief GetLockScreenIcon allows to obtain lock screen icon url;
-   *
-   * @return url which point to the resourse where lock screen icon could be
-   *obtained.
-   */
-  virtual std::string GetLockScreenIconUrl() const = 0;
 
   /**
    * @brief Get allowed number of notifications

@@ -69,6 +69,19 @@ ApplicationSharedPtr FindPendingApp(
   return app;
 }
 
+template <class UnaryPredicate>
+ApplicationSharedPtr FindReregisterApp(
+    DataAccessor<ReregisterWaitList> accessor, UnaryPredicate finder) {
+  ReregisterWaitList::const_iterator begin = accessor.GetData().begin();
+  ReregisterWaitList::const_iterator end = accessor.GetData().end();
+  ReregisterWaitList::const_iterator it = std::find_if(begin, end, finder);
+  if (accessor.GetData().end() == it) {
+    return ApplicationSharedPtr();
+  }
+  ApplicationSharedPtr app = *it;
+  return app;
+}
+
 /**
  * Helper function for lookup through applications list and returning all
  * applications satisfying predicate logic

@@ -74,6 +74,10 @@ void StreamerAdapter::StartActivity(int32_t application_key) {
   current_application_ = application_key;
 }
 
+size_t StreamerAdapter::GetMsgQueueSize() {
+  return messages_.size();
+}
+
 void StreamerAdapter::StopActivity(int32_t application_key) {
   LOG4CXX_AUTO_TRACE(logger);
   if (!is_app_performing_activity(application_key)) {

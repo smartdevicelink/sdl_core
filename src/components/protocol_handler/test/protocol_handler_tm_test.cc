@@ -39,6 +39,7 @@
 #include "protocol_handler/mock_protocol_handler.h"
 #include "protocol_handler/mock_protocol_handler_settings.h"
 #include "protocol_handler/mock_protocol_observer.h"
+#include "protocol_handler/mock_service_status_update_handler_listener.h"
 #include "protocol_handler/mock_session_observer.h"
 #include "protocol_handler/protocol_handler.h"
 #include "protocol_handler/protocol_handler_impl.h"
@@ -108,6 +109,7 @@ using protocol_handler::PROTOCOL_VERSION_MAX;
 using protocol_handler::ProtocolHandlerImpl;
 using protocol_handler::RawMessage;
 using protocol_handler::RawMessagePtr;
+using protocol_handler::ServiceStatusUpdateHandler;
 using protocol_handler::ServiceType;
 // For TM states
 using test::components::security_manager_test::MockSystemTimeHandler;
@@ -139,6 +141,9 @@ using ::testing::SetArgPointee;
 using ::testing::SetArgReferee;
 
 typedef std::vector<uint8_t> UCharDataVector;
+typedef std::shared_ptr<
+    testing::NiceMock<MockServiceStatusUpdateHandlerListener> >
+    MockServiceStatusUpdateHandlerListenerPtr;
 
 // custom action to call a member function with 6 arguments
 ACTION_P4(InvokeMemberFuncWithArg2, ptr, memberFunc, a, b) {
@@ -174,6 +179,8 @@ class ProtocolHandlerImplTest : public ::testing::Test {
         .WillByDefault(Return(malformd_max_messages));
     ON_CALL(protocol_handler_settings_mock, multiframe_waiting_timeout())
         .WillByDefault(Return(multiframe_waiting_timeout));
+    ON_CALL(protocol_handler_settings_mock, max_supported_protocol_version())
+        .WillByDefault(Return(PROTOCOL_VERSION_MAX));
 #ifdef ENABLE_SECURITY
     ON_CALL(protocol_handler_settings_mock, force_protected_service())
         .WillByDefault(ReturnRefOfCopy(force_protected_services));
@@ -186,10 +193,17 @@ class ProtocolHandlerImplTest : public ::testing::Test {
                                 session_observer_mock,
                                 connection_handler_mock,
                                 transport_manager_mock));
+    std::unique_ptr<ServiceStatusUpdateHandler> service_status_update_handler_(
+        new ServiceStatusUpdateHandler(
+            &(*mock_service_status_update_handler_listener_)));
+    protocol_handler_impl->set_service_status_update_handler(
+        std::move(service_status_update_handler_));
     tm_listener = protocol_handler_impl.get();
   }
 
   void SetUp() OVERRIDE {
+    mock_service_status_update_handler_listener_ = std::make_shared<
+        testing::NiceMock<MockServiceStatusUpdateHandlerListener> >();
     InitProtocolHandlerImpl(0u, 0u);
     connection_id = 0xAu;
     session_id = 0xFFu;
@@ -390,6 +404,8 @@ class ProtocolHandlerImplTest : public ::testing::Test {
 
   testing::NiceMock<MockProtocolHandlerSettings> protocol_handler_settings_mock;
   std::shared_ptr<ProtocolHandlerImpl> protocol_handler_impl;
+  MockServiceStatusUpdateHandlerListenerPtr
+      mock_service_status_update_handler_listener_;
   TransportManagerListener* tm_listener;
   // Uniq connection
   ::transport_manager::ConnectionUID connection_id;
@@ -732,12 +748,11 @@ TEST_F(ProtocolHandlerImplTest,
   const uint8_t session_id1 = 1u;
   const ::transport_manager::ConnectionUID connection_id2 = 0xBu;
   const uint8_t session_id2 = 2u;
+  EXPECT_CALL(session_observer_mock, KeyFromPair(connection_id2, session_id2))
+      .WillRepeatedly(Return(connection_key));
 
 #ifdef ENABLE_SECURITY
   AddSecurityManager();
-
-  EXPECT_CALL(session_observer_mock, KeyFromPair(connection_id2, session_id2))
-      .WillOnce(Return(connection_key));
 
   EXPECT_CALL(session_observer_mock,
               GetSSLContext(connection_key, start_service))
@@ -1416,7 +1431,7 @@ TEST_F(ProtocolHandlerImplTest,
   services.push_back(0x0A);
   services.push_back(0x0B);
   EXPECT_CALL(protocol_handler_settings_mock, force_protected_service())
-      .WillOnce(ReturnRefOfCopy(services));
+      .WillRepeatedly(ReturnRefOfCopy(services));
 
   // call new SSLContext creation
   EXPECT_CALL(security_manager_mock, CreateSSLContext(connection_key, _))
@@ -3539,7 +3554,7 @@ TEST_F(ProtocolHandlerImplTest,
   // Expect check connection with ProtocolVersionUsed
   EXPECT_CALL(session_observer_mock,
               ProtocolVersionUsed(connection_id, session_id, _))
-      .WillOnce(Return(true));
+      .WillOnce(DoAll(SetArgReferee<2>(PROTOCOL_VERSION_1), Return(true)));
   // Expect send End Service
   EXPECT_CALL(transport_manager_mock,
               SendMessageToDevice(ExpectedMessage(FRAME_TYPE_CONTROL,
@@ -3578,7 +3593,7 @@ TEST_F(ProtocolHandlerImplTest, SendHeartBeat_Successful) {
   // Expect check connection with ProtocolVersionUsed
   EXPECT_CALL(session_observer_mock,
               ProtocolVersionUsed(connection_id, session_id, _))
-      .WillOnce(Return(true));
+      .WillOnce(DoAll(SetArgReferee<2>(PROTOCOL_VERSION_3), Return(true)));
   // Expect send HeartBeat
   EXPECT_CALL(
       transport_manager_mock,
@@ -3662,8 +3677,12 @@ TEST_F(ProtocolHandlerImplTest,
   const bool is_final = true;
   const uint32_t total_data_size = 1;
   UCharDataVector data(total_data_size);
-  RawMessagePtr message = std::make_shared<RawMessage>(
-      connection_key, PROTOCOL_VERSION_3, &data[0], total_data_size, kControl);
+  RawMessagePtr message = std::make_shared<RawMessage>(connection_key,
+                                                       PROTOCOL_VERSION_3,
+                                                       &data[0],
+                                                       total_data_size,
+                                                       false,
+                                                       kControl);
   // Expect getting pair from key from session observer
   EXPECT_CALL(session_observer_mock,
               PairFromKey(message->connection_key(), _, _))
@@ -3684,7 +3703,7 @@ TEST_F(ProtocolHandlerImplTest,
   times++;
 
   // Act
-  protocol_handler_impl->SendMessageToMobileApp(message, is_final);
+  protocol_handler_impl->SendMessageToMobileApp(message, false, is_final);
 
   EXPECT_TRUE(waiter->WaitFor(times, kAsyncExpectationsTimeout));
 }
@@ -3700,8 +3719,12 @@ TEST_F(ProtocolHandlerImplTest,
   const bool is_final = true;
   const uint32_t total_data_size = 1;
   UCharDataVector data(total_data_size);
-  RawMessagePtr message = std::make_shared<RawMessage>(
-      connection_key, PROTOCOL_VERSION_3, &data[0], total_data_size, kRpc);
+  RawMessagePtr message = std::make_shared<RawMessage>(connection_key,
+                                                       PROTOCOL_VERSION_3,
+                                                       &data[0],
+                                                       total_data_size,
+                                                       false,
+                                                       kRpc);
   // Expect getting pair from key from session observer
   EXPECT_CALL(session_observer_mock,
               PairFromKey(message->connection_key(), _, _))
@@ -3727,7 +3750,7 @@ TEST_F(ProtocolHandlerImplTest,
   times++;
 
   // Act
-  protocol_handler_impl->SendMessageToMobileApp(message, is_final);
+  protocol_handler_impl->SendMessageToMobileApp(message, false, is_final);
 
   EXPECT_TRUE(waiter->WaitFor(times, kAsyncExpectationsTimeout));
 }
@@ -3743,8 +3766,12 @@ TEST_F(ProtocolHandlerImplTest, SendMessageToMobileApp_SendMultiframeMessage) {
   const uint32_t total_data_size = MAXIMUM_FRAME_DATA_V2_SIZE * 2;
   UCharDataVector data(total_data_size);
   const uint8_t first_consecutive_frame = 0x01;
-  RawMessagePtr message = std::make_shared<RawMessage>(
-      connection_key, PROTOCOL_VERSION_3, &data[0], total_data_size, kBulk);
+  RawMessagePtr message = std::make_shared<RawMessage>(connection_key,
+                                                       PROTOCOL_VERSION_3,
+                                                       &data[0],
+                                                       total_data_size,
+                                                       false,
+                                                       kBulk);
   // Expect getting pair from key from session observer
   EXPECT_CALL(session_observer_mock,
               PairFromKey(message->connection_key(), _, _))
@@ -3782,7 +3809,7 @@ TEST_F(ProtocolHandlerImplTest, SendMessageToMobileApp_SendMultiframeMessage) {
   times++;
 
   // Act
-  protocol_handler_impl->SendMessageToMobileApp(message, is_final);
+  protocol_handler_impl->SendMessageToMobileApp(message, false, is_final);
 
   EXPECT_TRUE(waiter->WaitFor(times, kAsyncExpectationsTimeout));
 }

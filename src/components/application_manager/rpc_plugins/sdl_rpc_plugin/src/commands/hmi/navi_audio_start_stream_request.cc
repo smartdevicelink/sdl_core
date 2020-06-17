@@ -113,7 +113,7 @@ void AudioStartStreamRequest::on_event(const event_engine::Event& event) {
 
       if (hmi_apis::Common_Result::SUCCESS == code) {
         LOG4CXX_INFO(logger_, "StartAudioStream response SUCCESS");
-        if (application_manager_.HMILevelAllowsStreaming(app->app_id(),
+        if (application_manager_.HMIStateAllowsStreaming(app->app_id(),
                                                          ServiceType::kAudio)) {
           app->set_audio_streaming_approved(true);
         } else {
@@ -171,11 +171,11 @@ void AudioStartStreamRequest::RetryStartSession() {
   }
 
   uint32_t curr_retry_number = app->audio_stream_retry_number();
-  LOG4CXX_DEBUG(
-      logger_, "Retry number " << curr_retry_number << " of " << retry_number_);
 
-  if (curr_retry_number < retry_number_) {
-    LOG4CXX_DEBUG(logger_, "Send AudioStartStream retry");
+  if (curr_retry_number <= retry_number_) {
+    LOG4CXX_DEBUG(
+        logger_,
+        "Retry number " << curr_retry_number << " of " << retry_number_);
     MessageHelper::SendAudioStartStream(app->app_id(), application_manager_);
     app->set_audio_stream_retry_number(++curr_retry_number);
   } else {

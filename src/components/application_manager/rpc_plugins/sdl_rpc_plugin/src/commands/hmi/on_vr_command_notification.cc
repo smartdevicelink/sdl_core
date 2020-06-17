@@ -65,14 +65,17 @@ void OnVRCommandNotification::Run() {
       (*message_)[strings::msg_params][strings::cmd_id].asUInt();
   uint32_t max_cmd_id = application_manager_.get_settings().max_cmd_id();
 
-  // Check if this is one of standart VR commands (i.e. "Help")
+  // Check if this is one of standard VR commands (i.e. "Help")
   if (cmd_id > max_cmd_id + 1) {
     LOG4CXX_INFO(logger_, "Switched App");
     const uint32_t app_id = cmd_id - max_cmd_id;
     ApplicationSharedPtr app = application_manager_.application(app_id);
     if (app) {
       application_manager_.state_controller().SetRegularState(
-          app, mobile_apis::HMILevel::HMI_FULL, true);
+          app,
+          mobile_apis::PredefinedWindows::DEFAULT_WINDOW,
+          mobile_apis::HMILevel::HMI_FULL,
+          true);
     } else {
       LOG4CXX_ERROR(logger_, "Unable to find appication " << app_id);
     }

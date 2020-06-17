@@ -53,6 +53,20 @@ class PolicyHandlerObserver {
 
   virtual void OnPTUFinished(const bool ptu_result) {}
 
+  virtual void OnPTInited() {}
+
+  virtual void OnPTUTimeoutExceeded() {}
+
+#ifdef EXTERNAL_PROPRIETARY_MODE
+  /**
+   * @brief OnCertDecryptFinished is called when certificate decryption is
+   * finished in the external flow
+   * @param decrypt_result bool value indicating whether decryption was
+   * successful
+   */
+  virtual void OnCertDecryptFinished(const bool decrypt_result) {}
+#endif
+
   virtual ~PolicyHandlerObserver() {}
 };
 }  //  namespace policy

@@ -73,6 +73,8 @@ const uint32_t kDefaultTimeout = 1000u;
 const uint32_t kCorrelationId = 2u;
 const mobile_apis::FunctionID::eType kFunctionId =
     mobile_apis::FunctionID::AlertID;
+const am::WindowID kDefaultWindowId =
+    mobile_apis::PredefinedWindows::DEFAULT_WINDOW;
 }  // namespace
 
 class AlertRequestTest : public CommandRequestTest<CommandsTestMocks::kIsNice> {
@@ -138,9 +140,9 @@ class AlertRequestTest : public CommandRequestTest<CommandsTestMocks::kIsNice> {
         *mock_app_,
         AreCommandLimitsExceeded(kFunctionId, am::TLimitSource::POLICY_TABLE))
         .WillByDefault(Return(false));
-    ON_CALL(*mock_app_, hmi_level())
+    ON_CALL(*mock_app_, hmi_level(kDefaultWindowId))
         .WillByDefault(Return(mobile_apis::HMILevel::HMI_FULL));
-    ON_CALL(*mock_app_, hmi_level())
+    ON_CALL(*mock_app_, hmi_level(kDefaultWindowId))
         .WillByDefault(Return(mobile_apis::HMILevel::HMI_BACKGROUND));
   }
 
@@ -155,7 +157,8 @@ class AlertRequestTest : public CommandRequestTest<CommandsTestMocks::kIsNice> {
   }
 
   void ExpectCallHmiLevel(const mobile_apis::HMILevel::eType level) {
-    EXPECT_CALL(*mock_app_, hmi_level()).WillRepeatedly(Return(level));
+    EXPECT_CALL(*mock_app_, hmi_level(kDefaultWindowId))
+        .WillRepeatedly(Return(level));
   }
 
   void ExpectManageMobileCommandWithResultCode(

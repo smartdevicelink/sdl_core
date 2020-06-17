@@ -32,6 +32,7 @@
 
 #include "sdl_rpc_plugin/commands/hmi/sdl_get_list_of_permissions_request.h"
 #include "application_manager/application_manager.h"
+#include "application_manager/policies/policy_handler_interface.h"
 
 namespace sdl_rpc_plugin {
 using namespace application_manager;

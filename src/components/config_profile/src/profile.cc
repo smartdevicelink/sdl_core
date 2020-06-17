@@ -97,6 +97,7 @@ const char* kTransportRequiredForResumptionSection =
 const char* kLowBandwidthTransportResumptionLevelSection =
     "LowBandwidthTransportResumptionLevel";
 const char* kAppServicesSection = "AppServices";
+const char* kRCModuleConsentSection = "RCModuleConsent";
 
 const char* kSDLVersionKey = "SDLVersion";
 const char* kHmiCapabilitiesKey = "HMICapabilities";
@@ -156,6 +157,15 @@ const char* kMaxSupportedProtocolVersionKey = "MaxSupportedProtocolVersion";
 const char* kUseLastStateKey = "UseLastState";
 const char* kTCPAdapterPortKey = "TCPAdapterPort";
 const char* kTCPAdapterNetworkInterfaceKey = "TCPAdapterNetworkInterface";
+#ifdef WEBSOCKET_SERVER_TRANSPORT_SUPPORT
+const char* kWebSocketServerAddressKey = "WebSocketServerAddress";
+const char* kWebSocketServerPortKey = "WebSocketServerPort";
+#ifdef ENABLE_SECURITY
+const char* kWSServerCertificatePathKey = "WSServerCertificatePath";
+const char* kWSServerCACertificaePathKey = "WSServerCACertificatePath";
+const char* kWSServerKeyPathKey = "WSServerKeyPath";
+#endif  // ENABLE_SECURITY
+#endif  // WEBSOCKET_SERVER_TRANSPORT_SUPPORT
 const char* kCloudAppRetryTimeoutKey = "CloudAppRetryTimeout";
 const char* kCloudAppMaxRetryAttemptsKey = "CloudAppMaxRetryAttempts";
 const char* kServerPortKey = "ServerPort";
@@ -185,6 +195,12 @@ const char* kPendingRequestsAmoundKey = "PendingRequestsAmount";
 const char* kSupportedDiagModesKey = "SupportedDiagModes";
 const char* kTransportManagerDisconnectTimeoutKey = "DisconnectTimeout";
 const char* kBluetoothUUIDKey = "BluetoothUUID";
+const char* kAOAFilterManufacturerKey = "AOAFilterManufacturer";
+const char* kAOAFilterModelNameKey = "AOAFilterModelName";
+const char* kAOAFilterDescriptionKey = "AOAFilterDescription";
+const char* kAOAFilterVersionKey = "AOAFilterVersion";
+const char* kAOAFilterURIKey = "AOAFilterURI";
+const char* kAOAFilterSerialNumber = "AOAFilterSerialNumber";
 const char* kTTSDelimiterKey = "TTSDelimiter";
 const char* kRecordingFileNameKey = "RecordingFileName";
 const char* kRecordingFileSourceKey = "RecordingFileSource";
@@ -241,6 +257,7 @@ const char* kSecondaryTransportForWiFiKey = "SecondaryTransportForWiFi";
 const char* kAudioServiceTransportsKey = "AudioServiceTransports";
 const char* kVideoServiceTransportsKey = "VideoServiceTransports";
 const char* kRpcPassThroughTimeoutKey = "RpcPassThroughTimeout";
+const char* kPeriodForConsentExpirationKey = "PeriodForConsentExpiration";
 
 const char* kDefaultTransportRequiredForResumptionKey =
     "DefaultTransportRequiredForResumption";
@@ -297,6 +314,7 @@ const char* kDefaultPoliciesSnapshotFileName = "sdl_snapshot.json";
 const char* kDefaultHmiCapabilitiesFileName = "hmi_capabilities.json";
 const char* kDefaultPreloadedPTFileName = "sdl_preloaded_pt.json";
 const char* kDefaultServerAddress = "127.0.0.1";
+const char* kDefaultWebsocketServerAddress = "0.0.0.0";
 const char* kDefaultAppInfoFileName = "app_info.dat";
 const char* kDefaultSystemFilesPath = "/tmp/fs/mp/images/ivsu_cache";
 const char* kDefaultPluginsPath = "plugins";
@@ -326,6 +344,7 @@ const uint32_t kDefaultHubProtocolIndex = 0;
 const uint32_t kDefaultHeartBeatTimeout = 0;
 const uint16_t kDefaultMaxSupportedProtocolVersion = 5;
 const uint16_t kDefautTransportManagerTCPPort = 12345;
+const uint16_t kDefaultWebSocketServerPort = 2020;
 const uint16_t kDefaultCloudAppRetryTimeout = 1000;
 const uint16_t kDefaultCloudAppMaxRetryAttempts = 5;
 const uint16_t kDefaultServerPort = 8087;
@@ -397,6 +416,7 @@ const std::string kAllowedSymbols =
 const bool kDefaultMultipleTransportsEnabled = false;
 const char* kDefaultLowBandwidthResumptionLevel = "NONE";
 const uint32_t kDefaultRpcPassThroughTimeout = 10000;
+const uint16_t kDefaultPeriodForConsentExpiration = 30;
 const char* kDefaultHMIOriginId = "HMI_ID";
 const std::vector<uint8_t> kDefaultBluetoothUUID = {0x93,
                                                     0x6D,
@@ -414,6 +434,12 @@ const std::vector<uint8_t> kDefaultBluetoothUUID = {0x93,
                                                     0xC8,
                                                     0x22,
                                                     0xA8};
+const char* kDefaultAOAFilterManufacturer = "SDL";
+const char* kDefaultAOAFilterModelName = "Core";
+const char* kDefaultAOAFilterDescription = "SmartDeviceLink Core Component USB";
+const char* kDefaultAOAFilterVersion = "1.0";
+const char* kDefaultAOAFilterURI = "http://www.smartdevicelink.org";
+const char* kDefaultAOAFilterSerialNumber = "N000000";
 }  // namespace
 
 namespace profile {
@@ -480,6 +506,10 @@ Profile::Profile()
     , supported_diag_modes_()
     , system_files_path_(kDefaultSystemFilesPath)
     , transport_manager_tcp_adapter_port_(kDefautTransportManagerTCPPort)
+#ifdef WEBSOCKET_SERVER_TRANSPORT_SUPPORT
+    , websocket_server_address_(kDefaultWebsocketServerAddress)
+    , websocket_server_port_(kDefaultWebSocketServerPort)
+#endif
     , cloud_app_retry_timeout_(kDefaultCloudAppRetryTimeout)
     , cloud_app_max_retry_attempts_(kDefaultCloudAppMaxRetryAttempts)
     , tts_delimiter_(kDefaultTtsDelimiter)
@@ -530,7 +560,8 @@ Profile::Profile()
     , low_voltage_signal_offset_(kDefaultLowVoltageSignalOffset)
     , wake_up_signal_offset_(kDefaultWakeUpSignalOffset)
     , ignition_off_signal_offset_(kDefaultIgnitionOffSignalOffset)
-    , rpc_pass_through_timeout_(kDefaultRpcPassThroughTimeout) {
+    , rpc_pass_through_timeout_(kDefaultRpcPassThroughTimeout)
+    , period_for_consent_expiration_(kDefaultPeriodForConsentExpiration) {
   // SDL version
   ReadStringValue(
       &sdl_version_, kDefaultSDLVersion, kMainSection, kSDLVersionKey);
@@ -815,6 +846,33 @@ const std::string& Profile::transport_manager_tcp_adapter_network_interface()
   return transport_manager_tcp_adapter_network_interface_;
 }
 
+#ifdef WEBSOCKET_SERVER_TRANSPORT_SUPPORT
+const std::string& Profile::websocket_server_address() const {
+  return websocket_server_address_;
+}
+
+uint16_t Profile::websocket_server_port() const {
+  return websocket_server_port_;
+}
+#ifdef ENABLE_SECURITY
+const std::string& Profile::ws_server_cert_path() const {
+  return ws_server_cert_path_;
+}
+
+const std::string& Profile::ws_server_key_path() const {
+  return ws_server_key_path_;
+}
+
+const std::string& Profile::ws_server_ca_cert_path() const {
+  return ws_server_ca_cert_path_;
+}
+
+const bool Profile::wss_server_supported() const {
+  return is_wss_settings_setup_;
+}
+#endif  // ENABLE_SECURITY
+#endif  // WEBSOCKET_SERVER_TRANSPORT_SUPPORT
+
 uint32_t Profile::cloud_app_retry_timeout() const {
   return cloud_app_retry_timeout_;
 }
@@ -825,6 +883,30 @@ uint16_t Profile::cloud_app_max_retry_attempts() const {
 
 const uint8_t* Profile::bluetooth_uuid() const {
   return bluetooth_uuid_.data();
+}
+
+const std::string& Profile::aoa_filter_manufacturer() const {
+  return aoa_filter_manufacturer_;
+}
+
+const std::string& Profile::aoa_filter_model_name() const {
+  return aoa_filter_model_name_;
+}
+
+const std::string& Profile::aoa_filter_description() const {
+  return aoa_filter_description_;
+}
+
+const std::string& Profile::aoa_filter_version() const {
+  return aoa_filter_version_;
+}
+
+const std::string& Profile::aoa_filter_uri() const {
+  return aoa_filter_uri_;
+}
+
+const std::string& Profile::aoa_filter_serial_number() const {
+  return aoa_filter_serial_number_;
 }
 
 const std::string& Profile::tts_delimiter() const {
@@ -1110,6 +1192,10 @@ uint32_t Profile::rpc_pass_through_timeout() const {
   return rpc_pass_through_timeout_;
 }
 
+uint16_t Profile::period_for_consent_expiration() const {
+  return period_for_consent_expiration_;
+}
+
 const std::vector<std::string>& Profile::secondary_transports_for_bluetooth()
     const {
   return secondary_transports_for_bluetooth_;
@@ -1196,6 +1282,7 @@ void Profile::UpdateValues() {
 
   ReadStringValue(
       &cert_path_, "", kSecuritySection, kSecurityCertificatePathKey);
+
   ReadStringValue(
       &ca_cert_path_, "", kSecuritySection, kSecurityCACertificatePathKey);
 
@@ -1823,6 +1910,58 @@ void Profile::UpdateValues() {
   LOG_UPDATED_VALUE(transport_manager_tcp_adapter_network_interface_,
                     kTCPAdapterNetworkInterfaceKey,
                     kTransportManagerSection);
+#ifdef WEBSOCKET_SERVER_TRANSPORT_SUPPORT
+  // Websocket server address
+  ReadStringValue(&websocket_server_address_,
+                  kDefaultWebsocketServerAddress,
+                  kTransportManagerSection,
+                  kWebSocketServerAddressKey);
+
+  LOG_UPDATED_VALUE(websocket_server_address_,
+                    kWebSocketServerAddressKey,
+                    kTransportManagerSection);
+
+  // Websocket non-secured server port
+  ReadUIntValue(&websocket_server_port_,
+                kDefaultWebSocketServerPort,
+                kTransportManagerSection,
+                kWebSocketServerPortKey);
+
+  LOG_UPDATED_VALUE(websocket_server_port_,
+                    kWebSocketServerPortKey,
+                    kTransportManagerSection);
+
+#ifdef ENABLE_SECURITY
+  const bool is_ws_server_cert_setup =
+      ReadStringValue(&ws_server_cert_path_,
+                      "",
+                      kTransportManagerSection,
+                      kWSServerCertificatePathKey);
+
+  LOG_UPDATED_VALUE(ws_server_cert_path_,
+                    kWSServerCertificatePathKey,
+                    kTransportManagerSection);
+
+  const bool is_ws_server_key_setup = ReadStringValue(
+      &ws_server_key_path_, "", kTransportManagerSection, kWSServerKeyPathKey);
+
+  LOG_UPDATED_VALUE(
+      ws_server_key_path_, kWSServerKeyPathKey, kTransportManagerSection);
+
+  const bool is_ws_ca_cert_setup =
+      ReadStringValue(&ws_server_ca_cert_path_,
+                      "",
+                      kTransportManagerSection,
+                      kWSServerCACertificaePathKey);
+
+  LOG_UPDATED_VALUE(ws_server_ca_cert_path_,
+                    kWSServerCACertificaePathKey,
+                    kTransportManagerSection);
+
+  is_wss_settings_setup_ =
+      is_ws_server_cert_setup && is_ws_server_key_setup && is_ws_ca_cert_setup;
+#endif  // ENABLE_SECURITY
+#endif  // WEBSOCKET_SERVER_TRANSPORT_SUPPORT
 
   ReadUIntValue(&cloud_app_retry_timeout_,
                 kDefaultCloudAppRetryTimeout,
@@ -1848,6 +1987,57 @@ void Profile::UpdateValues() {
   if (!read_result || bluetooth_uuid_.size() != 16) {
     bluetooth_uuid_ = kDefaultBluetoothUUID;
   }
+
+  ReadStringValue(&aoa_filter_manufacturer_,
+                  kDefaultAOAFilterManufacturer,
+                  kTransportManagerSection,
+                  kAOAFilterManufacturerKey);
+
+  LOG_UPDATED_VALUE(aoa_filter_manufacturer_,
+                    kAOAFilterManufacturerKey,
+                    kTransportManagerSection);
+
+  ReadStringValue(&aoa_filter_model_name_,
+                  kDefaultAOAFilterModelName,
+                  kTransportManagerSection,
+                  kAOAFilterModelNameKey);
+
+  LOG_UPDATED_VALUE(
+      aoa_filter_model_name_, kAOAFilterModelNameKey, kTransportManagerSection);
+
+  ReadStringValue(&aoa_filter_description_,
+                  kDefaultAOAFilterDescription,
+                  kTransportManagerSection,
+                  kAOAFilterDescriptionKey);
+
+  LOG_UPDATED_VALUE(aoa_filter_description_,
+                    kAOAFilterDescriptionKey,
+                    kTransportManagerSection);
+
+  ReadStringValue(&aoa_filter_version_,
+                  kDefaultAOAFilterVersion,
+                  kTransportManagerSection,
+                  kAOAFilterVersionKey);
+
+  LOG_UPDATED_VALUE(
+      aoa_filter_version_, kAOAFilterVersionKey, kTransportManagerSection);
+
+  ReadStringValue(&aoa_filter_uri_,
+                  kDefaultAOAFilterURI,
+                  kTransportManagerSection,
+                  kAOAFilterURIKey);
+
+  LOG_UPDATED_VALUE(
+      aoa_filter_uri_, kAOAFilterURIKey, kTransportManagerSection);
+
+  ReadStringValue(&aoa_filter_serial_number_,
+                  kDefaultAOAFilterSerialNumber,
+                  kTransportManagerSection,
+                  kAOAFilterSerialNumber);
+
+  LOG_UPDATED_VALUE(aoa_filter_serial_number_,
+                    kAOAFilterSerialNumber,
+                    kTransportManagerSection);
 
   // Event MQ
   ReadStringValue(
@@ -2290,6 +2480,15 @@ void Profile::UpdateValues() {
   LOG_UPDATED_VALUE(rpc_pass_through_timeout_,
                     kRpcPassThroughTimeoutKey,
                     kAppServicesSection);
+
+  ReadUIntValue(&period_for_consent_expiration_,
+                kDefaultPeriodForConsentExpiration,
+                kRCModuleConsentSection,
+                kPeriodForConsentExpirationKey);
+
+  LOG_UPDATED_VALUE(period_for_consent_expiration_,
+                    kPeriodForConsentExpirationKey,
+                    kRCModuleConsentSection);
 
   {  // Secondary Transports and ServicesMap
     struct KeyPair {

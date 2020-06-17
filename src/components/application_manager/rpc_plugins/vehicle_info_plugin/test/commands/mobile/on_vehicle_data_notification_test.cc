@@ -43,6 +43,7 @@
 #include "smart_objects/smart_object.h"
 #include "utils/custom_string.h"
 #include "utils/helpers.h"
+#include "vehicle_info_plugin/commands/vi_commands_test.h"
 #include "vehicle_info_plugin/vehicle_info_app_extension.h"
 #include "vehicle_info_plugin/vehicle_info_plugin.h"
 
@@ -72,7 +73,7 @@ const utils::custom_string::CustomString kAppName("test_app");
 }  // namespace
 
 class OnVehicleDataNotificationTest
-    : public CommandsTest<CommandsTestMocks::kIsNice> {
+    : public VICommandsTest<CommandsTestMocks::kIsNice> {
  public:
   OnVehicleDataNotificationTest() : mock_app_(CreateMockApp()) {}
 
@@ -87,7 +88,37 @@ class OnVehicleDataNotificationTest
   MockAppPtr mock_app_;
 };
 
+MATCHER_P(SmartObjectCheck, checker, "") {
+  return checker(arg);
+}
+
 TEST_F(OnVehicleDataNotificationTest, OnVehicleDataNotification_SUCCESS) {
+  am::VehicleData vehicle_data;
+  vehicle_data.insert(am::VehicleData::value_type(
+      am::strings::gps, mobile_apis::VehicleDataType::VEHICLEDATA_GPS));
+  vehicle_data.insert(am::VehicleData::value_type(
+      am::strings::speed, mobile_apis::VehicleDataType::VEHICLEDATA_SPEED));
+  ON_CALL(mock_message_helper_, vehicle_data())
+      .WillByDefault(ReturnRef(vehicle_data));
+
+  application_manager::ApplicationSet apps;
+  apps.insert(mock_app_);
+  std::shared_ptr<sync_primitives::Lock> apps_lock =
+      std::make_shared<sync_primitives::Lock>();
+  ApplicationSetDA apps_da(apps, apps_lock);
+  ON_CALL(app_mngr_, applications()).WillByDefault(Return(apps_da));
+
+  vehicle_info_plugin::VehicleInfoPlugin vi_plugin;
+  VehicleInfoAppExtensionPtr vi_app_extention_ptr =
+      std::make_shared<vehicle_info_plugin::VehicleInfoAppExtension>(
+          vi_plugin, *mock_app_);
+  vi_app_extention_ptr->subscribeToVehicleInfo("gps");
+  vi_app_extention_ptr->subscribeToVehicleInfo("speed");
+  ON_CALL(*mock_app_,
+          QueryInterface(vehicle_info_plugin::VehicleInfoAppExtension::
+                             VehicleInfoAppExtensionUID))
+      .WillByDefault(Return(vi_app_extention_ptr));
+
   MessageSharedPtr message(CreateMessage(smart_objects::SmartType_Map));
   smart_objects::SmartObject gps_data;
   gps_data[am::strings::longitude_degrees] = 1.0;
@@ -97,37 +128,7 @@ TEST_F(OnVehicleDataNotificationTest, OnVehicleDataNotification_SUCCESS) {
   (*message)[am::strings::msg_params][am::strings::gps] = gps_data;
   (*message)[am::strings::msg_params][am::strings::speed] = 0;
 
-  NotificationPtr command(CreateCommand<OnVehicleDataNotification>(message));
-
-  vehicle_info_plugin::VehicleInfoPlugin vi_plugin;
-  VehicleInfoAppExtensionPtr vi_app_extention_ptr =
-      std::make_shared<vehicle_info_plugin::VehicleInfoAppExtension>(
-          vi_plugin, *mock_app_);
-  vi_app_extention_ptr->subscribeToVehicleInfo(
-      mobile_apis::VehicleDataType::VEHICLEDATA_GPS);
-  vi_app_extention_ptr->subscribeToVehicleInfo(
-      mobile_apis::VehicleDataType::VEHICLEDATA_SPEED);
-
-  EXPECT_CALL(*mock_app_,
-              QueryInterface(vehicle_info_plugin::VehicleInfoAppExtension::
-                                 VehicleInfoAppExtensionUID))
-      .WillOnce(Return(vi_app_extention_ptr));
-
-  application_manager::ApplicationSet apps;
-  apps.insert(mock_app_);
-  std::shared_ptr<sync_primitives::Lock> apps_lock =
-      std::make_shared<sync_primitives::Lock>();
-  ApplicationSetDA apps_da(apps, apps_lock);
-  EXPECT_CALL(app_mngr_, applications()).WillOnce(Return(apps_da));
-
-  am::VehicleData vehicle_data;
-  vehicle_data.insert(am::VehicleData::value_type(
-      am::strings::gps, mobile_apis::VehicleDataType::VEHICLEDATA_GPS));
-  vehicle_data.insert(am::VehicleData::value_type(
-      am::strings::gps, mobile_apis::VehicleDataType::VEHICLEDATA_SPEED));
-  EXPECT_CALL(mock_message_helper_, vehicle_data())
-      .WillOnce(ReturnRef(vehicle_data));
-
+  NotificationPtr command(CreateCommandVI<OnVehicleDataNotification>(message));
   EXPECT_CALL(mock_rpc_service_, SendMessageToMobile(message, _));
 
   command->Run();

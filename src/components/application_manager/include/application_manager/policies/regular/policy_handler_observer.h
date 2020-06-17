@@ -53,6 +53,8 @@ class PolicyHandlerObserver {
 
   virtual void OnPTUFinished(const bool ptu_result) {}
 
+  virtual void OnPTUTimeoutExceeded() {}
+
   virtual ~PolicyHandlerObserver() {}
 };
 }  //  namespace policy

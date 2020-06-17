@@ -45,6 +45,8 @@
 #include "application_manager/policies/policy_event_observer.h"
 #include "application_manager/policies/policy_handler_interface.h"
 #include "application_manager/policies/policy_handler_observer.h"
+
+#include "application_manager/policies/custom_vehicle_data_provider.h"
 #include "policy/policy_manager.h"
 #include "policy/policy_settings.h"
 #include "policy/usage_statistics/statistics_manager.h"
@@ -77,34 +79,45 @@ class PolicyHandler : public PolicyHandlerInterface,
   PolicyHandler(const policy::PolicySettings& get_settings,
                 application_manager::ApplicationManager& application_manager);
   virtual ~PolicyHandler();
+  PolicyEncryptionFlagGetterInterfaceSPtr PolicyEncryptionFlagGetter()
+      const OVERRIDE;
   bool LoadPolicyLibrary() OVERRIDE;
   bool PolicyEnabled() const OVERRIDE;
   bool InitPolicyTable() OVERRIDE;
   bool ResetPolicyTable() OVERRIDE;
   bool ClearUserConsent() OVERRIDE;
-  bool SendMessageToSDK(const BinaryMessage& pt_string,
-                        const std::string& url) OVERRIDE;
+  DEPRECATED bool SendMessageToSDK(const BinaryMessage& pt_string,
+                                   const std::string& url) OVERRIDE;
   bool ReceiveMessageFromSDK(const std::string& file,
                              const BinaryMessage& pt_string) OVERRIDE;
   bool UnloadPolicyLibrary() OVERRIDE;
-  virtual void OnPermissionsUpdated(const std::string& policy_app_id,
+
+  virtual void OnPermissionsUpdated(const std::string& device_id,
+                                    const std::string& policy_app_id,
                                     const Permissions& permissions,
                                     const HMILevel& default_hmi) OVERRIDE;
 
-  virtual void OnPermissionsUpdated(const std::string& policy_app_id,
+  virtual void OnPermissionsUpdated(const std::string& device_id,
+                                    const std::string& policy_app_id,
                                     const Permissions& permissions) OVERRIDE;
 
 #ifdef EXTERNAL_PROPRIETARY_MODE
   void OnSnapshotCreated(const BinaryMessage& pt_string,
                          const std::vector<int>& retry_delay_seconds,
                          uint32_t timeout_exchange) OVERRIDE;
+
+  PTURetryHandler& ptu_retry_handler() const OVERRIDE;
 #else   // EXTERNAL_PROPRIETARY_MODE
-  void OnSnapshotCreated(const BinaryMessage& pt_string) OVERRIDE;
+  void OnSnapshotCreated(const BinaryMessage& pt_string,
+                         const PTUIterationType iteration_type) OVERRIDE;
+  std::string GetNextUpdateUrl(const PTUIterationType iteration_type,
+                               uint32_t& app_id) OVERRIDE;
 #endif  // EXTERNAL_PROPRIETARY_MODE
   virtual bool GetPriority(const std::string& policy_app_id,
                            std::string* priority) const OVERRIDE;
   virtual void CheckPermissions(
       const application_manager::ApplicationSharedPtr app,
+      const application_manager::WindowID window_id,
       const PTString& rpc,
       const RPCParams& rpc_params,
       CheckPermissionResult& result) OVERRIDE;
@@ -113,12 +126,16 @@ class PolicyHandler : public PolicyHandlerInterface,
   virtual DeviceConsent GetUserConsentForDevice(
       const std::string& device_id) const OVERRIDE;
 
+  Json::Value GetPolicyTableData() const OVERRIDE;
+
   /**
    * @brief Sets HMI default type for specified application
+   * @param device_handle device identifier
    * @param application_id ID application
    * @param app_types list of HMI types
    */
-  void SetDefaultHmiTypes(const std::string& application_id,
+  void SetDefaultHmiTypes(const transport_manager::DeviceHandle& device_handle,
+                          const std::string& application_id,
                           const smart_objects::SmartObject* app_types) OVERRIDE;
 
   /**
@@ -168,6 +185,8 @@ class PolicyHandler : public PolicyHandlerInterface,
                          const std::string& policy_app_id,
                          const std::string& hmi_level) OVERRIDE;
 
+  void OnPTUTimeOut() OVERRIDE;
+
   /**
    * Gets all allowed module types
    * @param app_id unique identifier of application
@@ -177,16 +196,18 @@ class PolicyHandler : public PolicyHandlerInterface,
   bool GetModuleTypes(const std::string& policy_app_id,
                       std::vector<std::string>* modules) const OVERRIDE;
 
-  bool GetDefaultHmi(const std::string& policy_app_id,
+  bool GetDefaultHmi(const std::string& device_id,
+                     const std::string& policy_app_id,
                      std::string* default_hmi) const OVERRIDE;
   bool GetInitialAppData(const std::string& application_id,
                          StringArray* nicknames = NULL,
                          StringArray* app_hmi_types = NULL) OVERRIDE;
   void GetUpdateUrls(const std::string& service_type,
-                     EndpointUrls& out_end_points) OVERRIDE;
+                     EndpointUrls& out_end_points) const OVERRIDE;
   void GetUpdateUrls(const uint32_t service_type,
-                     EndpointUrls& out_end_points) OVERRIDE;
-  virtual std::string GetLockScreenIconUrl() const OVERRIDE;
+                     EndpointUrls& out_end_points) const OVERRIDE;
+  virtual std::string GetLockScreenIconUrl(
+      const std::string& policy_app_id = kDefaultId) const OVERRIDE;
   virtual std::string GetIconUrl(
       const std::string& policy_app_id) const OVERRIDE;
   uint32_t NextRetryTimeout() OVERRIDE;
@@ -203,7 +224,6 @@ class PolicyHandler : public PolicyHandlerInterface,
    */
   uint32_t TimeoutExchangeMSec() const OVERRIDE;
   void OnExceededTimeout() OVERRIDE;
-  void OnSystemReady() OVERRIDE;
   const boost::optional<bool> LockScreenDismissalEnabledState() const OVERRIDE;
   const boost::optional<std::string> LockScreenDismissalWarningMessage(
       const std::string& language) const OVERRIDE;
@@ -250,7 +270,8 @@ class PolicyHandler : public PolicyHandlerInterface,
    */
   void OnIgnitionCycleOver() OVERRIDE;
 
-  void OnPendingPermissionChange(const std::string& policy_app_id) OVERRIDE;
+  void OnPendingPermissionChange(const std::string& device_id,
+                                 const std::string& policy_app_id) OVERRIDE;
 
   /**
    * Initializes PT exchange at user request
@@ -301,6 +322,10 @@ class PolicyHandler : public PolicyHandlerInterface,
                               const PermissionConsent& permissions) OVERRIDE;
 #endif
 
+  void OnSystemRequestReceived() const OVERRIDE;
+
+  void TriggerPTUOnStartupIfRequired() OVERRIDE;
+
   /**
    * @brief Get appropriate message parameters and send them with response
    * to HMI
@@ -337,9 +362,11 @@ class PolicyHandler : public PolicyHandlerInterface,
   /**
    * @brief Update currently used device id in policies manager for given
    * application
+   * @param device_handle device identifier
    * @param policy_app_id Application id
    */
   std::string OnCurrentDeviceIdUpdateRequired(
+      const transport_manager::DeviceHandle& device_handle,
       const std::string& policy_app_id) OVERRIDE;
 
   /**
@@ -357,11 +384,6 @@ class PolicyHandler : public PolicyHandlerInterface,
   void OnGetSystemInfo(const std::string& ccpu_version,
                        const std::string& wers_country_code,
                        const std::string& language) OVERRIDE;
-
-  /**
-   * @brief Send request to HMI to get update on system parameters
-   */
-  virtual void OnSystemInfoUpdateRequired() OVERRIDE;
 
   /**
    * @brief Sends GetVehicleData request in case when Vechicle info is ready.
@@ -393,15 +415,33 @@ class PolicyHandler : public PolicyHandlerInterface,
    */
   void OnSystemError(int code) OVERRIDE;
 
-  /**
-   * @brief Chooses random application id to be used for snapshot sending
-   * considering HMI level
-   * @return Application id or 0, if there are no suitable applications
-   */
+#ifndef EXTERNAL_PROPRIETARY_MODE
+  uint32_t ChoosePTUApplication(
+      const PTUIterationType iteration_type =
+          PTUIterationType::DefaultIteration) OVERRIDE;
+  void CacheRetryInfo(const uint32_t app_id = 0,
+                      const std::string url = std::string(),
+                      const std::string snapshot_path = std::string()) OVERRIDE;
+#endif  // EXTERNAL_PROPRIETARY_MODE
+
   uint32_t GetAppIdForSending() const OVERRIDE;
+
+  /**
+   * @brief Add application to PTU queue if no application with
+   * the same app id exists
+   * @param new_app_id app id new application
+   */
+  void PushAppIdToPTUQueue(const uint32_t new_app_id);
+
+  /**
+   * @brief Remove the first application from applications queue
+   */
+  void PopAppIdFromPTUQueue();
 
   custom_str::CustomString GetAppName(
       const std::string& policy_app_id) OVERRIDE;
+
+  std::vector<std::string> GetApplicationPolicyIDs() const OVERRIDE;
 
   /**
    * @brief Get a list of enabled cloud applications
@@ -412,6 +452,13 @@ class PolicyHandler : public PolicyHandlerInterface,
       std::vector<std::string>& enabled_apps) const OVERRIDE;
 
   /**
+   * @brief Get a list of enabled local applications
+   * @return enabled_apps List filled with the policy app id of each enabled
+   * local application
+   */
+  std::vector<std::string> GetEnabledLocalApps() const OVERRIDE;
+
+  /**
    * @brief Checks if a given application is an enabled cloud application
    * @param policy_app_id Unique application id
    * @return true, if the application is an enabled cloud application,
@@ -420,33 +467,27 @@ class PolicyHandler : public PolicyHandlerInterface,
   const bool CheckCloudAppEnabled(
       const std::string& policy_app_id) const OVERRIDE;
 
-  /**
-   * @brief Get cloud app policy information, all fields that aren't set for a
-   * given app will be filled with empty strings
-   * @param policy_app_id Unique application id
-   * @param enabled Whether or not the app is enabled
-   * @param endpoint Filled with the endpoint used to connect to the cloud
-   * application
-   * @param certificate Filled with the certificate used to for creating a
-   * secure connection to the cloud application
-   * @param auth_token Filled with the token used for authentication when
-   * reconnecting to the cloud app
-   * @param cloud_transport_type Filled with the transport type used by the
-   * cloud application (ex. "WSS")
-   * @param hybrid_app_preference Filled with the hybrid app preference for the
-   * cloud application set by the user
-   */
-  bool GetCloudAppParameters(const std::string& policy_app_id,
-                             bool& enabled,
-                             std::string& endpoint,
-                             std::string& certificate,
-                             std::string& auth_token,
-                             std::string& cloud_transport_type,
-                             std::string& hybrid_app_preference) const OVERRIDE;
+  bool GetAppProperties(
+      const std::string& policy_app_id,
+      policy::AppProperties& out_app_properties) const OVERRIDE;
+
+  void OnAuthTokenUpdated(const std::string& policy_app_id,
+                          const std::string& auth_token) OVERRIDE;
+
+  void OnSetAppProperties(
+      const smart_objects::SmartObject& properties) OVERRIDE;
+
+  AppPropertiesState GetAppPropertiesStatus(
+      const smart_objects::SmartObject& properties,
+      const std::string& app_id) const OVERRIDE;
+
+  bool IsNewApplication(const std::string& policy_app_id) const OVERRIDE;
+
+  void OnLocalAppAdded() OVERRIDE;
 
   /**
-   * @brief Callback for when a SetCloudAppProperties message is received from a
-   * mobile app
+   * @brief Callback for when a SetCloudAppProperties message is received
+   * from a mobile app
    * @param message The SetCloudAppProperties message
    */
   void OnSetCloudAppProperties(
@@ -490,11 +531,11 @@ class PolicyHandler : public PolicyHandlerInterface,
 
   virtual void OnCertificateUpdated(
       const std::string& certificate_data) OVERRIDE;
+
 #ifdef EXTERNAL_PROPRIETARY_MODE
   void OnCertificateDecrypted(bool is_succeeded) OVERRIDE;
+  void ProcessCertDecryptFailed();
 #endif  // EXTERNAL_PROPRIETARY_MODE
-  void OnAuthTokenUpdated(const std::string& policy_app_id,
-                          const std::string& auth_token);
 
   virtual bool CanUpdate() OVERRIDE;
 
@@ -503,6 +544,10 @@ class PolicyHandler : public PolicyHandlerInterface,
 
   virtual void SendOnAppPermissionsChanged(
       const AppPermissions& permissions,
+      const std::string& device_id,
+      const std::string& policy_app_id) const OVERRIDE;
+
+  void SendOnAppPropertiesChangeNotification(
       const std::string& policy_app_id) const OVERRIDE;
 
   virtual void OnPTExchangeNeeded() OVERRIDE;
@@ -512,11 +557,13 @@ class PolicyHandler : public PolicyHandlerInterface,
   /**
    * @brief Allows to add new or update existed application during
    * registration process
+   * @param device_id device identifier
    * @param application_id The policy aplication id.
    * @param hmi_types list of hmi types
    * @return function that will notify update manager about new application
    */
   StatusNotifier AddApplication(
+      const std::string& device_id,
       const std::string& application_id,
       const rpc::policy_table_interface_base::AppHmiTypes& hmi_types) OVERRIDE;
 
@@ -555,22 +602,34 @@ class PolicyHandler : public PolicyHandlerInterface,
    */
   void OnAppsSearchCompleted(const bool trigger_ptu) OVERRIDE;
 
+  void OnAddedNewApplicationToAppList(const uint32_t new_app_id,
+                                      const std::string& policy_id) OVERRIDE;
+
+  /**
+   * @brief Queue applications for which PTU has not yet been completed
+   */
+  std::set<uint32_t> applications_ptu_queue_;
+
   /**
    * @brief OnAppRegisteredOnMobile allows to handle event when application were
    * succesfully registered on mobile device.
    * It will send OnAppPermissionSend notification and will try to start PTU.
    *
+   * @param device_id device identifier
    * @param application_id registered application.
    */
-  void OnAppRegisteredOnMobile(const std::string& application_id) OVERRIDE;
+  void OnAppRegisteredOnMobile(const std::string& device_id,
+                               const std::string& application_id) OVERRIDE;
 
   /**
    * @brief Checks if certain request type is allowed for application
+   * @param device_handle device identifier
    * @param policy_app_id Unique applicaion id
    * @param type Request type
    * @return true, if allowed, otherwise - false
    */
   bool IsRequestTypeAllowed(
+      const transport_manager::DeviceHandle& device_handle,
       const std::string& policy_app_id,
       mobile_apis::RequestType::eType type) const OVERRIDE;
 
@@ -602,10 +661,12 @@ class PolicyHandler : public PolicyHandlerInterface,
 
   /**
    * @brief Gets application request types
+   * @param device_id device identifier
    * @param policy_app_id Unique application id
    * @return request types
    */
   const std::vector<std::string> GetAppRequestTypes(
+      const transport_manager::DeviceHandle& device_id,
       const std::string& policy_app_id) const OVERRIDE;
 
   /**
@@ -615,12 +676,6 @@ class PolicyHandler : public PolicyHandlerInterface,
    */
   const std::vector<std::string> GetAppRequestSubTypes(
       const std::string& policy_app_id) const OVERRIDE;
-
-  /**
-   * @brief Gets vehicle information
-   * @return Structure with vehicle information
-   */
-  const VehicleInfo GetVehicleInfo() const OVERRIDE;
 
 #ifdef EXTERNAL_PROPRIETARY_MODE
   /**
@@ -655,6 +710,10 @@ class PolicyHandler : public PolicyHandlerInterface,
 
   virtual void OnPTUFinished(const bool ptu_result) OVERRIDE;
 
+  virtual void OnPTInited() OVERRIDE;
+
+  void StopRetrySequence() OVERRIDE;
+
   /**
    * @brief OnDeviceSwitching Notifies policy manager on device switch event so
    * policy permissions should be processed accordingly
@@ -663,6 +722,17 @@ class PolicyHandler : public PolicyHandlerInterface,
    */
   void OnDeviceSwitching(const std::string& device_id_from,
                          const std::string& device_id_to) FINAL;
+
+  // VehicleDataItemProvider interface :
+  /**
+   * @brief Gets vehicle data items
+   * @return Structure with vehicle data items
+   */
+  const std::vector<rpc::policy_table_interface_base::VehicleDataItem>
+  GetVehicleDataItems() const OVERRIDE;
+
+  std::vector<rpc::policy_table_interface_base::VehicleDataItem>
+  GetRemovedVehicleDataItems() const OVERRIDE;
 
   void OnLockScreenDismissalStateChanged() FINAL;
 
@@ -725,7 +795,7 @@ class PolicyHandler : public PolicyHandlerInterface,
   void UpdateHMILevel(application_manager::ApplicationSharedPtr app,
                       mobile_apis::HMILevel::eType level);
   std::vector<std::string> GetDevicesIds(
-      const std::string& policy_app_id) OVERRIDE;
+      const std::string& policy_app_id) const OVERRIDE;
 
   /**
    * @brief Sets days after epoch on successful policy update
@@ -812,7 +882,12 @@ class PolicyHandler : public PolicyHandlerInterface,
   std::vector<FunctionalGroupPermission> CollectAppPermissions(
       const uint32_t connection_key);
 
+ private:
   static const std::string kLibrary;
+
+  bool SendMessageToSDK(const BinaryMessage& pt_string,
+                        const std::string& url,
+                        const uint32_t app_id);
 
   /**
    * @brief Collects currently registered applications ids linked to their
@@ -823,9 +898,15 @@ class PolicyHandler : public PolicyHandlerInterface,
 
   mutable sync_primitives::RWLock policy_manager_lock_;
   std::shared_ptr<PolicyManager> policy_manager_;
-  void* dl_handle_;
   std::shared_ptr<PolicyEventObserver> event_observer_;
   uint32_t last_activated_app_id_;
+
+#ifndef EXTERNAL_PROPRIETARY_MODE
+  // PTU retry information
+  uint32_t last_ptu_app_id_;
+  std::string retry_update_url_;
+  std::string policy_snapshot_path_;
+#endif  // EXTERNAL_PROPRIETARY_MODE
 
   /**
    * @brief Contains device handles, which were sent for user consent to HMI
@@ -837,6 +918,7 @@ class PolicyHandler : public PolicyHandlerInterface,
   typedef std::list<PolicyHandlerObserver*> HandlersCollection;
   HandlersCollection listeners_;
   mutable sync_primitives::Lock listeners_lock_;
+  mutable sync_primitives::Lock app_id_queue_lock_;
 
   /**
    * @brief Application-to-device links are used for collecting their current
@@ -851,18 +933,21 @@ class PolicyHandler : public PolicyHandlerInterface,
   std::shared_ptr<StatisticManagerImpl> statistic_manager_impl_;
   const PolicySettings& settings_;
   application_manager::ApplicationManager& application_manager_;
+  std::string last_registered_policy_app_id_;
+
   friend class AppPermissionDelegate;
 
   /**
-   * @brief Checks if the application with the given policy
-   * application id is registered or it is default id
-   * @param app_idx Application idx from EndpointUrls vector
-   * @param urls EndpointUrls vector
+   * @brief Checks if an application is able to perform a PTU using the
+   * specified URL list
+   * @param app_id ID of application used for PTU
+   * @param app_data EndpointData struct with list of URLs
    * @return TRUE if the vector with URLs with given idx is not empty
-   * and is related to a registered application or these are default URLs,
+   * and is related to the provided application or if these are default URLs,
    * otherwise FALSE
    */
-  bool IsUrlAppIdValid(const uint32_t app_idx, const EndpointUrls& urls) const;
+  bool IsUrlAppIdValid(const std::string app_id,
+                       const EndpointData& app_data) const;
   DISALLOW_COPY_AND_ASSIGN(PolicyHandler);
 };
 

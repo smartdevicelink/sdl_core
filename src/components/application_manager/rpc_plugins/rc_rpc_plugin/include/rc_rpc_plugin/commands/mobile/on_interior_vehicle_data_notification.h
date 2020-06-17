@@ -53,13 +53,16 @@ class OnInteriorVehicleDataNotification
 
   void Run() OVERRIDE;
 
-  std::string ModuleType();
+  std::string ModuleType() const;
+
+  std::string ModuleId() const;
 
   ~OnInteriorVehicleDataNotification();
 
  private:
   InteriorDataCache& interior_data_cache_;
-  void AddDataToCache(const std::string& module_type);
+  RCCapabilitiesManager& rc_capabilities_manager_;
+  void AddDataToCache(const ModuleUid& module);
 };
 }  // namespace commands
 }  // namespace rc_rpc_plugin

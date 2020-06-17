@@ -34,7 +34,6 @@
 
 #include "gtest/gtest.h"
 
-#include "application_manager/commands/command_request_test.h"
 #include "application_manager/event_engine/event.h"
 #include "application_manager/hmi_interfaces.h"
 #include "application_manager/mock_application_manager.h"
@@ -44,6 +43,7 @@
 #include "application_manager/policies/mock_policy_handler_interface.h"
 #include "application_manager/smart_object_keys.h"
 #include "smart_objects/smart_object.h"
+#include "vehicle_info_plugin/commands/vi_command_request_test.h"
 
 namespace test {
 namespace components {
@@ -62,9 +62,9 @@ using vehicle_info_plugin::commands::VIIsReadyRequest;
 typedef std::shared_ptr<VIIsReadyRequest> VIIsReadyRequestPtr;
 
 class VIIsReadyRequestTest
-    : public CommandRequestTest<CommandsTestMocks::kIsNice> {
+    : public VICommandRequestTest<CommandsTestMocks::kIsNice> {
  public:
-  VIIsReadyRequestTest() : command_(CreateCommand<VIIsReadyRequest>()) {}
+  VIIsReadyRequestTest() : command_(CreateCommandVI<VIIsReadyRequest>()) {}
 
   void SetUpExpectations(bool is_vi_cooperating_available,
                          bool is_send_message_to_hmi,

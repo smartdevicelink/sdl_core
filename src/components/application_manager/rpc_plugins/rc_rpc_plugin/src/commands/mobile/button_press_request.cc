@@ -33,6 +33,7 @@
 #include "rc_rpc_plugin/commands/mobile/button_press_request.h"
 #include "interfaces/MOBILE_API.h"
 #include "json/json.h"
+#include "rc_rpc_plugin/rc_helpers.h"
 #include "rc_rpc_plugin/rc_module_constants.h"
 #include "smart_objects/enum_schema_item.h"
 #include "utils/helpers.h"
@@ -46,8 +47,6 @@ using namespace message_params;
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "RemoteControlModule")
 
-typedef std::map<std::string, mobile_apis::ButtonName::eType> ButtonsMap;
-
 ButtonPressRequest::ButtonPressRequest(
     const app_mngr::commands::MessageSharedPtr& message,
     const RCCommandParams& params)
@@ -55,147 +54,44 @@ ButtonPressRequest::ButtonPressRequest(
 
 ButtonPressRequest::~ButtonPressRequest() {}
 
-const std::vector<std::string> buttons_climate() {
-  std::vector<std::string> data;
-  data.push_back(enums_value::kACMax);
-  data.push_back(enums_value::kAC);
-  data.push_back(enums_value::kRecirculate);
-  data.push_back(enums_value::kFanUp);
-  data.push_back(enums_value::kFanDown);
-  data.push_back(enums_value::kTempUp);
-  data.push_back(enums_value::kTempDown);
-  data.push_back(enums_value::kDefrostMax);
-  data.push_back(enums_value::kDefrost);
-  data.push_back(enums_value::kDefrostRear);
-  data.push_back(enums_value::kUpperVent);
-  data.push_back(enums_value::kLowerVent);
-  return data;
+std::string ButtonPressRequest::GetButtonName() const {
+  mobile_apis::ButtonName::eType button_name =
+      static_cast<mobile_apis::ButtonName::eType>(
+          (*message_)[app_mngr::strings::msg_params]
+                     [message_params::kButtonName]
+                         .asUInt());
+  const char* str;
+  const bool ok = ns_smart_device_link::ns_smart_objects::EnumConversionHelper<
+      mobile_apis::ButtonName::eType>::EnumToCString(button_name, &str);
+  return ok ? str : "unknown";
 }
 
-const std::vector<std::string> buttons_radio() {
-  std::vector<std::string> data;
-  data.push_back(enums_value::kVolumeUp);
-  data.push_back(enums_value::kVolumeDown);
-  data.push_back(enums_value::kEject);
-  data.push_back(enums_value::kSource);
-  data.push_back(enums_value::kShuffle);
-  data.push_back(enums_value::kRepeat);
-  return data;
-}
-
-const ButtonsMap buttons_map() {
-  using namespace mobile_apis;
-
-  ButtonsMap buttons_map;
-  buttons_map[enums_value::kACMax] = ButtonName::AC_MAX;
-  buttons_map[enums_value::kAC] = ButtonName::AC;
-  buttons_map[enums_value::kRecirculate] = ButtonName::RECIRCULATE;
-  buttons_map[enums_value::kFanUp] = ButtonName::FAN_UP;
-  buttons_map[enums_value::kFanDown] = ButtonName::FAN_DOWN;
-  buttons_map[enums_value::kTempUp] = ButtonName::TEMP_UP;
-  buttons_map[enums_value::kTempDown] = ButtonName::TEMP_DOWN;
-  buttons_map[enums_value::kDefrostMax] = ButtonName::DEFROST_MAX;
-  buttons_map[enums_value::kDefrost] = ButtonName::DEFROST;
-  buttons_map[enums_value::kDefrostRear] = ButtonName::DEFROST_REAR;
-  buttons_map[enums_value::kUpperVent] = ButtonName::UPPER_VENT;
-  buttons_map[enums_value::kLowerVent] = ButtonName::LOWER_VENT;
-  buttons_map[enums_value::kVolumeUp] = ButtonName::VOLUME_UP;
-  buttons_map[enums_value::kVolumeDown] = ButtonName::VOLUME_DOWN;
-  buttons_map[enums_value::kEject] = ButtonName::EJECT;
-  buttons_map[enums_value::kSource] = ButtonName::SOURCE;
-  buttons_map[enums_value::kShuffle] = ButtonName::SHUFFLE;
-  buttons_map[enums_value::kRepeat] = ButtonName::REPEAT;
-
-  return buttons_map;
-}
-
-bool CheckIfButtonExistInRCCaps(
-    const smart_objects::SmartObject& rc_capabilities,
-    const mobile_apis::ButtonName::eType button) {
-  if (rc_capabilities.keyExists(strings::kbuttonCapabilities)) {
-    const smart_objects::SmartObject& button_caps =
-        rc_capabilities[strings::kbuttonCapabilities];
-    auto it = button_caps.asArray()->begin();
-    for (; it != button_caps.asArray()->end(); ++it) {
-      smart_objects::SmartObject& so = *it;
-      int64_t current_id = so[message_params::kName].asInt();
-      if (-1 == current_id) {
-        // capabilities received from HMI contains enum values
-        // capabilities loaded from file contains string values
-        // TODO : unificate capabilities storing
-        const std::string& bt_name = so[message_params::kName].asString();
-        static ButtonsMap btn_map = buttons_map();
-        current_id = btn_map[bt_name];
-      }
-      const mobile_apis::ButtonName::eType current_button =
-          static_cast<mobile_apis::ButtonName::eType>(current_id);
-      if (current_button == button) {
-        LOG4CXX_TRACE(
-            logger_,
-            "Button id " << current_button << " exist in capabilities");
-        return true;
-      }
-    }
-  }
-  LOG4CXX_TRACE(logger_,
-                "Button id " << button << " do not exist in capabilities");
-  return false;
-}
-
-bool CheckButtonName(const std::string& module_type,
-                     const std::string& button_name,
-                     const smart_objects::SmartObject* rc_capabilities) {
-  LOG4CXX_AUTO_TRACE(logger_);
-  if (rc_capabilities == NULL) {
-    LOG4CXX_ERROR(logger_, "No remote controll capabilities available");
-    return false;
-  }
-
-  if (enums_value::kRadio == module_type) {
-    if (!helpers::in_range(buttons_radio(), button_name)) {
-      LOG4CXX_WARN(logger_,
-                   "Trying to acceess climate button with module type radio");
-      return false;
-    }
-  }
-
-  if (enums_value::kClimate == module_type) {
-    if (!helpers::in_range(buttons_climate(), button_name)) {
-      LOG4CXX_WARN(logger_,
-                   "Trying to acceess radio button with module type climate");
-      return false;
-    }
-  }
-  return true;
-}
-
-void ButtonPressRequest::Execute() {
-  LOG4CXX_AUTO_TRACE(logger_);
-
-  const char* button_name;
-  ns_smart_device_link::ns_smart_objects::
-      EnumConversionHelper<mobile_apis::ButtonName::eType>::EnumToCString(
-          static_cast<mobile_apis::ButtonName::eType>(
-              (*message_)[app_mngr::strings::msg_params]
-                         [message_params::kButtonName]
-                             .asUInt()),
-          &button_name);
-
-  const std::string module_type = ModuleType();
-  static ButtonsMap btn_map = buttons_map();
+const mobile_apis::ButtonName::eType ButtonPressRequest::GetButtonId() const {
+  const auto button_name = GetButtonName();
+  static RCHelpers::ButtonsMap btn_map = RCHelpers::buttons_map();
   mobile_apis::ButtonName::eType button_id =
       mobile_apis::ButtonName::INVALID_ENUM;
   if (btn_map.end() != btn_map.find(button_name)) {
     button_id = btn_map[button_name];
   }
+  return button_id;
+}
 
-  const smart_objects::SmartObject* rc_capabilities =
-      hmi_capabilities_.rc_capability();
+void ButtonPressRequest::Execute() {
+  LOG4CXX_AUTO_TRACE(logger_);
+  const std::string module_type = ModuleType();
+
   const bool button_name_matches_module_type =
-      CheckButtonName(module_type, button_name, rc_capabilities);
-  const bool button_id_exist_in_caps =
-      rc_capabilities &&
-      CheckIfButtonExistInRCCaps(*rc_capabilities, button_id);
+      rc_capabilities_manager_.CheckButtonName(module_type, GetButtonName());
+
+  const std::string module_id = ModuleId();
+  const ModuleUid module(module_type, module_id);
+  const bool is_module_exists =
+      rc_capabilities_manager_.CheckIfModuleExistsInCapabilities(module);
+
+  const bool button_valid_by_caps =
+      is_module_exists &&
+      rc_capabilities_manager_.CheckIfButtonExistInRCCaps(GetButtonId());
 
   app_mngr::ApplicationSharedPtr app =
       application_manager_.application(connection_key());
@@ -203,7 +99,9 @@ void ButtonPressRequest::Execute() {
   (*message_)[app_mngr::strings::msg_params][app_mngr::strings::app_id] =
       app->app_id();
 
-  if (button_name_matches_module_type && button_id_exist_in_caps) {
+  if (button_name_matches_module_type && button_valid_by_caps) {
+    (*message_)[app_mngr::strings::msg_params][message_params::kModuleId] =
+        module_id;
     SendHMIRequest(hmi_apis::FunctionID::Buttons_ButtonPress,
                    &(*message_)[app_mngr::strings::msg_params],
                    true);
@@ -214,11 +112,12 @@ void ButtonPressRequest::Execute() {
                  mobile_apis::Result::INVALID_DATA,
                  "Request module type and button name mismatch!");
   } else {
-    LOG4CXX_WARN(logger_, "Requested button is not exists in capabilities!");
+    LOG4CXX_WARN(logger_,
+                 "Requested button or module does not exist in capabilities!");
     SetResourceState(module_type, ResourceState::FREE);
     SendResponse(false,
                  mobile_apis::Result::UNSUPPORTED_RESOURCE,
-                 "Requested button is not exists in capabilities!");
+                 "Requested button or module does not exist in capabilities!");
   }
 }
 
@@ -228,13 +127,15 @@ AcquireResult::eType ButtonPressRequest::AcquireResource(
   const std::string module_type = ModuleType();
   app_mngr::ApplicationSharedPtr app =
       application_manager_.application(CommandRequestImpl::connection_key());
-  return resource_allocation_manager_.AcquireResource(module_type,
-                                                      app->app_id());
+
+  return resource_allocation_manager_.AcquireResource(
+      module_type, ModuleId(), app->app_id());
 }
 
-bool ButtonPressRequest::IsResourceFree(const std::string& module_type) const {
+bool ButtonPressRequest::IsResourceFree(const std::string& module_type,
+                                        const std::string& module_id) const {
   LOG4CXX_AUTO_TRACE(logger_);
-  return resource_allocation_manager_.IsResourceFree(module_type);
+  return resource_allocation_manager_.IsResourceFree(module_type, module_id);
 }
 
 void ButtonPressRequest::SetResourceState(const std::string& module_type,
@@ -242,8 +143,9 @@ void ButtonPressRequest::SetResourceState(const std::string& module_type,
   LOG4CXX_AUTO_TRACE(logger_);
   app_mngr::ApplicationSharedPtr app =
       application_manager_.application(CommandRequestImpl::connection_key());
+
   resource_allocation_manager_.SetResourceState(
-      module_type, app->app_id(), state);
+      module_type, ModuleId(), app->app_id(), state);
 }
 
 void ButtonPressRequest::on_event(const app_mngr::event_engine::Event& event) {
@@ -270,13 +172,43 @@ void ButtonPressRequest::on_event(const app_mngr::event_engine::Event& event) {
     result = false;
     result_code = mobile_apis::Result::GENERIC_ERROR;
   }
+
+  const std::string module_type = ModuleType();
+  const std::string module_id = ModuleId();
+
+  const rc_rpc_types::ModuleUid resource{module_type, module_id};
+  auto app = application_manager_.application(connection_key());
+
+  if (!app) {
+    LOG4CXX_ERROR(logger_, "NULL pointer.");
+    SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED, "");
+    return;
+  }
+
+  const auto app_id = app->app_id();
+
+  bool is_resource_acquired = false;
+
+  if (result && !resource_allocation_manager_.IsResourceAlreadyAcquiredByApp(
+                    resource, app_id)) {
+    resource_allocation_manager_.SetResourceAcquired(
+        module_type, module_id, app_id);
+
+    is_resource_acquired = true;
+  }
+
   std::string response_info;
   GetInfo(message, response_info);
-  SetResourceState(ModuleType(), ResourceState::FREE);
   SendResponse(result, result_code, response_info.c_str());
+
+  if (is_resource_acquired) {
+    resource_allocation_manager_.SendOnRCStatusNotifications(
+        NotificationTrigger::MODULE_ALLOCATION,
+        std::shared_ptr<application_manager::Application>());
+  }
 }
 
-std::string ButtonPressRequest::ModuleType() {
+std::string ButtonPressRequest::ModuleType() const {
   mobile_apis::ModuleType::eType module_type =
       static_cast<mobile_apis::ModuleType::eType>(
           (*message_)[app_mngr::strings::msg_params]
@@ -286,6 +218,17 @@ std::string ButtonPressRequest::ModuleType() {
   const bool ok = ns_smart_device_link::ns_smart_objects::EnumConversionHelper<
       mobile_apis::ModuleType::eType>::EnumToCString(module_type, &str);
   return ok ? str : "unknown";
+}
+
+std::string ButtonPressRequest::ModuleId() const {
+  LOG4CXX_AUTO_TRACE(logger_);
+  auto msg_params = (*message_)[app_mngr::strings::msg_params];
+  if (msg_params.keyExists(message_params::kModuleId)) {
+    return msg_params[message_params::kModuleId].asString();
+  }
+  const std::string module_id =
+      rc_capabilities_manager_.GetDefaultModuleIdFromCapabilities(ModuleType());
+  return module_id;
 }
 
 }  // namespace commands

@@ -77,12 +77,12 @@ class UsbHandler::ControlTransferSequenceState {
 
 UsbHandler::UsbHandler()
     : shutdown_requested_(false)
-    , thread_(NULL)
+    , thread_(nullptr)
     , usb_device_listeners_()
     , devices_()
     , transfer_sequences_()
     , device_handles_to_close_()
-    , libusb_context_(NULL)
+    , libusb_context_(nullptr)
     , arrived_callback_handle_()
     , left_callback_handle_() {
   thread_ = threads::CreateThread("UsbHandler", new UsbHandlerDelegate(this));
@@ -90,20 +90,24 @@ UsbHandler::UsbHandler()
 
 UsbHandler::~UsbHandler() {
   shutdown_requested_ = true;
-  if (libusb_context_ != 0) {
+  LOG4CXX_INFO(logger_, "UsbHandler thread finished");
+
+  if (libusb_context_) {
+    // The libusb_hotplug_deregister_callback() wakes up blocking call of
+    // libusb_handle_events_completed() in the Thread() method of delegate
     libusb_hotplug_deregister_callback(libusb_context_,
                                        arrived_callback_handle_);
     libusb_hotplug_deregister_callback(libusb_context_, left_callback_handle_);
   }
-  thread_->stop();
-  LOG4CXX_INFO(logger_, "UsbHandler thread finished");
-  if (libusb_context_) {
-    libusb_exit(libusb_context_);
-    libusb_context_ = 0;
-  }
+
   thread_->join();
   delete thread_->delegate();
   threads::DeleteThread(thread_);
+
+  if (libusb_context_) {
+    libusb_exit(libusb_context_);
+    libusb_context_ = nullptr;
+  }
 }
 
 void UsbHandler::DeviceArrived(libusb_device* device_libusb) {
@@ -516,6 +520,12 @@ void UsbHandler::UsbHandlerDelegate::threadMain() {
   LOG4CXX_AUTO_TRACE(logger_);
   DCHECK(handler_);
   handler_->Thread();
+}
+
+void UsbHandler::UsbHandlerDelegate::exitThreadMain() {
+  LOG4CXX_AUTO_TRACE(logger_);
+  // Empty method required in order to avoid force delegate thread
+  // finishing by exitThreadMain() of the base class
 }
 
 }  // namespace transport_adapter

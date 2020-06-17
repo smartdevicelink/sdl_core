@@ -32,6 +32,7 @@
 
 #include "sdl_rpc_plugin/commands/hmi/sdl_activate_app_request.h"
 #include "application_manager/message_helper.h"
+#include "application_manager/policies/policy_handler_interface.h"
 #include "application_manager/state_controller.h"
 
 namespace sdl_rpc_plugin {
@@ -153,10 +154,6 @@ void SDLActivateAppRequest::Run() {
       application_manager_.application(application_id);
 
   if (!app_to_activate) {
-    LOG4CXX_WARN(
-        logger_,
-        "Can't find application within regular apps: " << application_id);
-
     // Here is the hack - in fact SDL gets hmi_app_id in appID field and
     // replaces it with connection_key only for normally registered apps, but
     // for apps_to_be_registered (waiting) it keeps original value (hmi_app_id)

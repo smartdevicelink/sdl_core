@@ -55,7 +55,12 @@ ShowRequest::ShowRequest(
                          rpc_service,
                          hmi_capabilities,
                          policy_handler)
-    , core_result_code_(mobile_apis::Result::INVALID_ENUM) {}
+    , core_result_code_(mobile_apis::Result::INVALID_ENUM)
+    , current_window_id_(mobile_apis::PredefinedWindows::DEFAULT_WINDOW)
+    , template_config_(smart_objects::SmartType::SmartType_Null)
+    , layout_change_required_(false)
+    , dcs_change_required_(false)
+    , ncs_change_required_(false) {}
 
 ShowRequest::~ShowRequest() {}
 
@@ -91,6 +96,137 @@ void ShowRequest::HandleMetadata(const char* field_id,
   } else {
     LOG4CXX_INFO(logger_,
                  "No metadata tagging provided for field: " << field_id);
+  }
+}
+
+bool ShowRequest::CheckTemplateConfigurationForApp(
+    application_manager::Application& app) {
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  if ((*message_)[strings::msg_params].keyExists(strings::window_id)) {
+    current_window_id_ =
+        (*message_)[strings::msg_params][strings::window_id].asInt();
+  }
+
+  const auto set_window_layout = [&app, this]() -> bool {
+    const auto new_template_layout =
+        template_config_[strings::template_layout].asString();
+    const auto old_template_layout = app.window_layout(current_window_id_);
+    LOG4CXX_DEBUG(logger_, "New layout: " << new_template_layout);
+    LOG4CXX_DEBUG(logger_, "Old layout: " << old_template_layout);
+
+    const bool layouts_equal = (new_template_layout == old_template_layout);
+
+    if (!new_template_layout.empty() && !layouts_equal) {
+      // Template switched, hence allow any color change
+      LOG4CXX_DEBUG(logger_,
+                    "Show Request: Setting new Layout: " << new_template_layout
+                                                         << " for window ID: "
+                                                         << current_window_id_);
+      layout_change_required_ = true;
+      return true;
+    }
+    LOG4CXX_DEBUG(logger_, "Show Request: No Layout Change");
+    return false;
+  };
+
+  const auto set_day_color_scheme = [&app, this]() -> bool {
+    if (!template_config_.keyExists(strings::day_color_scheme)) {
+      return false;
+    }
+    if (app.day_color_scheme(current_window_id_).getType() !=
+            smart_objects::SmartType_Null &&
+        template_config_[strings::day_color_scheme] !=
+            app.day_color_scheme(current_window_id_)) {
+      // Color scheme param exists and has been previously set,
+      // hence do not allow color change
+      LOG4CXX_DEBUG(logger_, "Day Color Scheme change is rejected");
+      return false;
+    }
+    LOG4CXX_DEBUG(logger_, "Day Color Scheme change is allowed");
+    dcs_change_required_ = true;
+
+    return true;
+  };
+
+  const auto set_night_color_scheme = [&app, this]() -> bool {
+    if (!template_config_.keyExists(strings::night_color_scheme)) {
+      return false;
+    }
+    if (app.night_color_scheme(current_window_id_).getType() !=
+            smart_objects::SmartType_Null &&
+        template_config_[strings::night_color_scheme] !=
+            app.night_color_scheme(current_window_id_)) {
+      // Color scheme param exists and has been previously set,
+      // hence do not allow color change
+      LOG4CXX_DEBUG(logger_, "Night Color Scheme change is rejected");
+      return false;
+    }
+    LOG4CXX_DEBUG(logger_, "Night Color Scheme Change is allowed");
+    ncs_change_required_ = true;
+
+    return true;
+  };
+
+  const bool set_layout_result = set_window_layout();
+
+  if (set_layout_result) {
+    set_day_color_scheme();
+    set_night_color_scheme();
+    return true;
+  }
+
+  if (!template_config_.keyExists(strings::night_color_scheme) &&
+      !template_config_.keyExists(strings::day_color_scheme)) {
+    // In case current layout was not changed and day and night color
+    // schemes are absent in mobile message SDL has to forward message
+    // to HMI with the only layout even it was not changed
+    return true;
+  }
+
+  const bool set_schemes_result =
+      (set_day_color_scheme() && set_night_color_scheme());
+
+  return set_schemes_result;
+}
+
+void ShowRequest::ApplyTemplateConfigurationForApp(
+    mobile_apis::Result::eType result, application_manager::Application& app) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  if (helpers::Compare<mobile_apis::Result::eType, helpers::EQ, helpers::ONE>(
+          result,
+          mobile_apis::Result::SUCCESS,
+          mobile_apis::Result::WARNINGS)) {
+    if (layout_change_required_) {
+      const std::string new_layout =
+          template_config_[strings::template_layout].asString();
+      LOG4CXX_DEBUG(logger_, "New layout : " << new_layout << " is applied");
+      app.set_window_layout(current_window_id_, new_layout);
+
+      if (template_config_.keyExists(strings::day_color_scheme)) {
+        app.set_day_color_scheme(current_window_id_,
+                                 template_config_[strings::day_color_scheme]);
+      }
+
+      if (template_config_.keyExists(strings::night_color_scheme)) {
+        app.set_night_color_scheme(
+            current_window_id_, template_config_[strings::night_color_scheme]);
+      }
+
+      return;
+    }
+
+    if (dcs_change_required_) {
+      LOG4CXX_DEBUG(logger_, "New day color scheme is applied");
+      app.set_day_color_scheme(current_window_id_,
+                               template_config_[strings::day_color_scheme]);
+    }
+
+    if (ncs_change_required_) {
+      LOG4CXX_DEBUG(logger_, "New night color scheme is applied");
+      app.set_night_color_scheme(current_window_id_,
+                                 template_config_[strings::night_color_scheme]);
+    }
   }
 }
 
@@ -272,13 +408,40 @@ void ShowRequest::Run() {
       app->UnsubscribeFromSoftButtons(function_id());
     } else {
       MessageHelper::SubscribeApplicationToSoftButton(
-          (*message_)[strings::msg_params], app, function_id());
+          (*message_)[strings::msg_params], app, function_id(), window_id());
     }
   }
 
   if ((*message_)[strings::msg_params].keyExists(strings::custom_presets)) {
     msg_params[strings::custom_presets] =
         (*message_)[strings::msg_params][strings::custom_presets];
+  }
+
+  if ((*message_)[strings::msg_params].keyExists(strings::window_id)) {
+    const auto window_id =
+        (*message_)[strings::msg_params][strings::window_id].asInt();
+    if (!app->WindowIdExists(window_id)) {
+      LOG4CXX_ERROR(logger_,
+                    "Window with id #" << window_id << " does not exist");
+      SendResponse(false, mobile_apis::Result::INVALID_ID);
+      return;
+    }
+    msg_params[strings::window_id] = window_id;
+  }
+
+  if ((*message_)[strings::msg_params].keyExists(
+          strings::template_configuration)) {
+    template_config_ =
+        (*message_)[strings::msg_params][strings::template_configuration];
+    const bool result = CheckTemplateConfigurationForApp(*app);
+    if (!result) {
+      const char* info(
+          "Color schemes can not be changed without a new template set");
+      SendResponse(false, mobile_apis::Result::REJECTED, info);
+      return;
+    }
+    msg_params[strings::template_configuration] =
+        (*message_)[strings::msg_params][strings::template_configuration];
   }
 
   StartAwaitForInterface(HmiInterfaces::HMI_INTERFACE_UI);
@@ -294,6 +457,13 @@ void ShowRequest::on_event(const event_engine::Event& event) {
   using namespace helpers;
 
   const smart_objects::SmartObject& message = event.smart_object();
+  ApplicationSharedPtr app = application_manager_.application(connection_key());
+
+  if (!app) {
+    LOG4CXX_ERROR(logger_, "Application is not registered");
+    SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
+    return;
+  }
 
   switch (event.id()) {
     case hmi_apis::FunctionID::UI_Show: {
@@ -313,6 +483,9 @@ void ShowRequest::on_event(const event_engine::Event& event) {
       }
       mobile_apis::Result::eType converted_result_code =
           MessageHelper::HMIToMobileResult(result_code);
+
+      ApplyTemplateConfigurationForApp(converted_result_code, *app);
+
       if (mobile_apis::Result::SUCCESS == converted_result_code &&
           mobile_apis::Result::INVALID_ENUM != core_result_code_) {
         converted_result_code = core_result_code_;

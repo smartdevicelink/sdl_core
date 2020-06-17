@@ -39,6 +39,8 @@
 #include "application_manager/plugin_manager/rpc_plugin.h"
 #include "rc_rpc_plugin/interior_data_cache.h"
 #include "rc_rpc_plugin/interior_data_manager.h"
+#include "rc_rpc_plugin/rc_capabilities_manager.h"
+#include "rc_rpc_plugin/rc_consent_manager.h"
 #include "rc_rpc_plugin/resource_allocation_manager.h"
 
 namespace rc_rpc_plugin {
@@ -58,7 +60,15 @@ class RCRPCPlugin : public plugins::RPCPlugin {
   bool Init(app_mngr::ApplicationManager& app_manager,
             app_mngr::rpc_service::RPCService& rpc_service,
             app_mngr::HMICapabilities& hmi_capabilities,
-            policy::PolicyHandlerInterface& policy_handler) OVERRIDE;
+            policy::PolicyHandlerInterface& policy_handler,
+            resumption::LastStateWrapperPtr last_state) OVERRIDE;
+
+  DEPRECATED
+  bool Init(app_mngr::ApplicationManager& app_manager,
+            app_mngr::rpc_service::RPCService& rpc_service,
+            app_mngr::HMICapabilities& hmi_capabilities,
+            policy::PolicyHandlerInterface& policy_handler,
+            resumption::LastState& last_state) OVERRIDE;
   /**
    * @param int32_t command id
    * @param CommandSource source
@@ -101,13 +111,16 @@ class RCRPCPlugin : public plugins::RPCPlugin {
  private:
   application_manager::rpc_service::RPCService* rpc_service_;
   application_manager::ApplicationManager* app_mngr_;
+  std::unique_ptr<rc_rpc_plugin::RCConsentManager> rc_consent_manager_;
   std::unique_ptr<application_manager::CommandFactory> command_factory_;
   std::unique_ptr<ResourceAllocationManager> resource_allocation_manager_;
   std::unique_ptr<InteriorDataCache> interior_data_cache_;
   std::unique_ptr<InteriorDataManager> interior_data_manager_;
+  std::unique_ptr<RCCapabilitiesManager> rc_capabilities_manager_;
 };
 }  // namespace rc_rpc_plugin
 
 extern "C" application_manager::plugin_manager::RPCPlugin* Create();
+extern "C" void Delete(application_manager::plugin_manager::RPCPlugin* data);
 
 #endif  // SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_RC_RPC_PLUGIN_INCLUDE_RC_RPC_PLUGIN_RC_RPC_PLUGIN_H_

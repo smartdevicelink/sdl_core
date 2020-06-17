@@ -114,6 +114,7 @@
         <param name="service_type" type="String" mandatory="false" />
         <param name="handled_rpcs" array="true"  mandatory="false" />
         <param name="allow_unknown_rpc_passthrough" type="Boolean" mandatory="false" />
+        <param name="encryption_required" type="Boolean" mandatory="false"/>
     </struct>
 
     <typedef name="HmiLevels" type="HmiLevel" array="true"
@@ -135,6 +136,7 @@
         <param name="user_consent_prompt" type="String" minlegth="1"
             maxlength="255" mandatory="false"/>
         <param name="rpcs" type="Rpc" null_values_allowed="true"/>
+        <param name="encryption_required" type="Boolean" mandatory="false"/>
     </struct>
     <!-- app_policies section end -->
 

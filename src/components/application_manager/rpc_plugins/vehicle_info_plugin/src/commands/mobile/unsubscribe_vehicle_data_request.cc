@@ -39,6 +39,7 @@
 #include "application_manager/smart_object_keys.h"
 #include "interfaces/HMI_API.h"
 #include "interfaces/MOBILE_API.h"
+#include "smart_objects/enum_schema_item.h"
 #include "utils/helpers.h"
 #include "vehicle_info_plugin/vehicle_info_app_extension.h"
 
@@ -48,15 +49,13 @@ namespace commands {
 
 UnsubscribeVehicleDataRequest::UnsubscribeVehicleDataRequest(
     const application_manager::commands::MessageSharedPtr& message,
-    ApplicationManager& application_manager,
-    app_mngr::rpc_service::RPCService& rpc_service,
-    app_mngr::HMICapabilities& hmi_capabilities,
-    policy::PolicyHandlerInterface& policy_handler)
+    const VehicleInfoCommandParams& params)
     : CommandRequestImpl(message,
-                         application_manager,
-                         rpc_service,
-                         hmi_capabilities,
-                         policy_handler) {}
+                         params.application_manager_,
+                         params.rpc_service_,
+                         params.hmi_capabilities_,
+                         params.policy_handler_)
+    , custom_vehicle_data_manager_(params.custom_vehicle_data_manager_) {}
 
 UnsubscribeVehicleDataRequest::~UnsubscribeVehicleDataRequest() {}
 
@@ -74,73 +73,72 @@ void UnsubscribeVehicleDataRequest::Run() {
   int32_t items_to_unsubscribe = 0;
   int32_t unsubscribed_items = 0;
 
-  const VehicleData& vehicle_data = MessageHelper::vehicle_data();
-  VehicleData::const_iterator it = vehicle_data.begin();
-
   smart_objects::SmartObject msg_params =
       smart_objects::SmartObject(smart_objects::SmartType_Map);
 
-  smart_objects::SmartObject response_params =
-      smart_objects::SmartObject(smart_objects::SmartType_Map);
+  response_params_ = smart_objects::SmartObject(smart_objects::SmartType_Map);
 
-  for (; vehicle_data.end() != it; ++it) {
-    const std::string& key_name = it->first;
-    if ((*message_)[strings::msg_params].keyExists(key_name)) {
-      bool is_key_enabled = (*message_)[strings::msg_params][key_name].asBool();
-      if (is_key_enabled) {
-        ++items_to_unsubscribe;
+  auto rpc_spec_vehicle_data = MessageHelper::vehicle_data();
+  std::set<std::string> custom_vehicle_data;
 
-        mobile_apis::VehicleDataType::eType key_type = it->second;
-        const auto is_subscribed =
-            VehicleInfoAppExtension::ExtractVIExtension(*app)
-                .isSubscribedToVehicleInfo(key_type);
-        if (!is_subscribed) {
-          ++unsubscribed_items;
-          vi_already_unsubscribed_by_this_app_.insert(key_type);
-          response_params[key_name][strings::data_type] = key_type;
-          response_params[key_name][strings::result_code] =
-              mobile_apis::VehicleDataResultCode::VDRC_DATA_NOT_SUBSCRIBED;
-          continue;
-        }
+  auto app_not_subscribed_response = [this](const std::string& key_name) {
+    LOG4CXX_DEBUG(logger_,
+                  "App with connection key "
+                      << connection_key()
+                      << " is not subscribed for VehicleData: " << key_name);
+    vi_already_unsubscribed_by_this_app_.insert(key_name);
+    response_params_[key_name][strings::result_code] =
+        mobile_apis::VehicleDataResultCode::VDRC_DATA_NOT_SUBSCRIBED;
+  };
 
-        if (!VehicleInfoAppExtension::ExtractVIExtension(*app)
-                 .unsubscribeFromVehicleInfo(it->second)) {
-          LOG4CXX_ERROR(logger_,
-                        "Unable to unsubscribe from "
-                        "VehicleDataType: "
-                            << key_type);
-          continue;
-        }
+  auto other_app_subscribed_response = [this](const std::string& key_name) {
+    LOG4CXX_DEBUG(logger_,
+                  "There are apps still subscribed for "
+                  "VehicleDataType: "
+                      << key_name);
+    vi_still_subscribed_by_another_apps_.insert(key_name);
+    response_params_[key_name][strings::result_code] =
+        mobile_apis::VehicleDataResultCode::VDRC_SUCCESS;
+  };
 
-        LOG4CXX_DEBUG(logger_,
-                      "Unsubscribed app with connection key "
-                          << connection_key()
-                          << " from VehicleDataType: " << key_type);
+  auto& ext = VehicleInfoAppExtension::ExtractVIExtension(*app);
 
-        ++unsubscribed_items;
-
-        if (IsSomeoneSubscribedFor(key_type)) {
-          LOG4CXX_DEBUG(logger_,
-                        "There are another apps still subscribed for "
-                        "VehicleDataType: "
-                            << key_type);
-
-          vi_still_subscribed_by_another_apps_.insert(key_type);
-          response_params[key_name][strings::data_type] = key_type;
-          response_params[key_name][strings::result_code] =
-              mobile_apis::VehicleDataResultCode::VDRC_SUCCESS;
-          continue;
-        }
-
-        msg_params[key_name] = is_key_enabled;
-      }
+  const auto& param_names = (*message_)[strings::msg_params].enumerate();
+  for (const auto& name : param_names) {
+    const bool enabled = (*message_)[strings::msg_params][name].asBool();
+    if (!enabled) {
+      continue;
     }
+
+    ++items_to_unsubscribe;
+
+    if (!(ext.isSubscribedToVehicleInfo(name))) {
+      app_not_subscribed_response(name);
+      continue;
+    }
+
+    LOG4CXX_DEBUG(logger_,
+                  "Unsubscribed app with connection key "
+                      << connection_key() << " from VehicleDataType: " << name);
+
+    ++unsubscribed_items;
+
+    if (IsSomeoneSubscribedFor(name)) {
+      other_app_subscribed_response(name);
+      ext.unsubscribeFromVehicleInfo(name);
+      continue;
+    }
+
+    vi_waiting_for_unsubscribe_.insert(name);
+    msg_params[name] = true;
   }
 
   bool is_everything_already_unsubscribed =
       static_cast<uint32_t>(items_to_unsubscribe) ==
       vi_still_subscribed_by_another_apps_.size() +
           vi_already_unsubscribed_by_this_app_.size();
+
+  AppendDataTypesToMobileResponse(response_params_);
 
   if (0 == items_to_unsubscribe) {
     if (HasDisallowedParams()) {
@@ -156,7 +154,7 @@ void UnsubscribeVehicleDataRequest::Run() {
     SendResponse(false,
                  mobile_apis::Result::IGNORED,
                  "Was not subscribed on any VehicleData.",
-                 &response_params);
+                 &response_params_);
     return;
   }
 
@@ -165,9 +163,9 @@ void UnsubscribeVehicleDataRequest::Run() {
       SendResponse(false,
                    mobile_apis::Result::IGNORED,
                    "Some provided VehicleData was not subscribed.",
-                   &response_params);
+                   &response_params_);
     } else {
-      SendResponse(true, mobile_apis::Result::SUCCESS, NULL, &response_params);
+      SendResponse(true, mobile_apis::Result::SUCCESS, NULL, &response_params_);
     }
     return;
   }
@@ -203,36 +201,56 @@ void UnsubscribeVehicleDataRequest::on_event(const event_engine::Event& event) {
           message[strings::params][hmi_response::code].asInt());
   std::string response_info;
   GetInfo(message, response_info);
-  const bool result = PrepareResultForMobileResponse(
+  bool result = PrepareResultForMobileResponse(
       hmi_result, HmiInterfaces::HMI_INTERFACE_VehicleInfo);
+
+  auto hmi_response_msg_params = message[strings::msg_params];
 
   mobile_apis::Result::eType result_code =
       MessageHelper::HMIToMobileResult(hmi_result);
+
+  custom_vehicle_data_manager_.CreateMobileMessageParams(
+      hmi_response_msg_params);
+
+  if (!vi_still_subscribed_by_another_apps_.empty() ||
+      !vi_already_unsubscribed_by_this_app_.empty()) {
+    AddAlreadyUnsubscribedVI(hmi_response_msg_params);
+  }
 
   if (result) {
     if (vi_already_unsubscribed_by_this_app_.size()) {
       result_code = mobile_apis::Result::IGNORED;
       response_info = "Some provided VehicleData was not subscribed.";
     }
+
+    for (const auto& param : hmi_response_msg_params.enumerate()) {
+      const auto converted_param = ConvertResponseToRequestName(param);
+      if (vi_waiting_for_unsubscribe_.end() ==
+          vi_waiting_for_unsubscribe_.find(converted_param)) {
+        hmi_response_msg_params.erase(param);
+      }
+    }
+
+    if (!UnsubscribePendingVehicleData(app, hmi_response_msg_params)) {
+      result = false;
+      result_code = mobile_apis::Result::GENERIC_ERROR;
+      response_info = "Unsubscription failed for some Vehicle data";
+      hmi_response_msg_params = smart_objects::SmartObject();
+    }
   }
 
-  if (!vi_still_subscribed_by_another_apps_.empty() ||
-      !vi_already_unsubscribed_by_this_app_.empty()) {
-    AddAlreadyUnsubscribedVI(
-        const_cast<smart_objects::SmartObject&>(message[strings::msg_params]));
+  AppendDataTypesToMobileResponse(hmi_response_msg_params);
+  for (const auto& key : hmi_response_msg_params.enumerate()) {
+    response_params_[key] = hmi_response_msg_params[key];
   }
 
-  if (result) {
-    SetAllowedToTerminate(false);
-  }
-  SendResponse(result,
-               result_code,
-               response_info.empty() ? NULL : response_info.c_str(),
-               &(message[strings::msg_params]));
-  if (result) {
-    application_manager_.TerminateRequest(
-        connection_key(), correlation_id(), function_id());
-  }
+  SendResponse(
+      result,
+      result_code,
+      response_info.empty() ? NULL : response_info.c_str(),
+      smart_objects::SmartType::SmartType_Null == response_params_.getType()
+          ? NULL
+          : &response_params_);
 }
 
 bool UnsubscribeVehicleDataRequest::Init() {
@@ -240,25 +258,23 @@ bool UnsubscribeVehicleDataRequest::Init() {
   return true;
 }
 
-struct SubscribedToIVIPredicate {
-  int32_t vehicle_info_;
-  SubscribedToIVIPredicate(int32_t vehicle_info)
-      : vehicle_info_(vehicle_info) {}
-  bool operator()(const ApplicationSharedPtr app) const {
-    DCHECK_OR_RETURN(app, false);
-    auto& ext = VehicleInfoAppExtension::ExtractVIExtension(*app);
-    return ext.isSubscribedToVehicleInfo(
-        static_cast<mobile_apis::VehicleDataType::eType>(vehicle_info_));
-  }
-};
-
 bool UnsubscribeVehicleDataRequest::IsSomeoneSubscribedFor(
-    const uint32_t param_id) const {
+    const std::string& param_name) const {
   LOG4CXX_AUTO_TRACE(logger_);
-  SubscribedToIVIPredicate finder(param_id);
+  const auto conn_key = connection_key();
+  auto subscribed_to_ivi = [&param_name,
+                            &conn_key](const ApplicationSharedPtr app) {
+    DCHECK_OR_RETURN(app, false);
+    if (conn_key == app->app_id()) {
+      return false;
+    }
+    auto& ext = VehicleInfoAppExtension::ExtractVIExtension(*app);
+    return (ext.isSubscribedToVehicleInfo(param_name));
+  };
+
   DataAccessor<ApplicationSet> accessor = application_manager_.applications();
   ApplicationSetConstIt it = std::find_if(
-      accessor.GetData().begin(), accessor.GetData().end(), finder);
+      accessor.GetData().begin(), accessor.GetData().end(), subscribed_to_ivi);
   return it != accessor.GetData().end();
 }
 
@@ -266,20 +282,92 @@ void UnsubscribeVehicleDataRequest::AddAlreadyUnsubscribedVI(
     smart_objects::SmartObject& response) const {
   LOG4CXX_AUTO_TRACE(logger_);
   using namespace mobile_apis;
-  VehicleInfoSubscriptions::const_iterator it_same_app =
-      vi_already_unsubscribed_by_this_app_.begin();
-  for (; vi_already_unsubscribed_by_this_app_.end() != it_same_app;
-       ++it_same_app) {
-    response[*it_same_app][strings::result_code] =
+
+  for (const auto& item : vi_already_unsubscribed_by_this_app_) {
+    response[item][strings::result_code] =
         VehicleDataResultCode::VDRC_DATA_NOT_SUBSCRIBED;
   }
 
-  VehicleInfoSubscriptions::const_iterator it_another_app =
-      vi_still_subscribed_by_another_apps_.begin();
-  for (; vi_still_subscribed_by_another_apps_.end() != it_another_app;
-       ++it_another_app) {
-    response[*it_another_app][strings::result_code] =
-        VehicleDataResultCode::VDRC_SUCCESS;
+  for (const auto& item : vi_still_subscribed_by_another_apps_) {
+    response[item][strings::result_code] = VehicleDataResultCode::VDRC_SUCCESS;
+  }
+}
+
+bool UnsubscribeVehicleDataRequest::CheckSubscriptionStatus(
+    std::string key, const smart_objects::SmartObject& msg_params) {
+  const auto unsubscribed_items = msg_params.enumerate();
+  if (unsubscribed_items.end() == unsubscribed_items.find(key)) {
+    LOG4CXX_WARN(logger_,
+                 key << " is waiting to be unsubscribed, but missing in "
+                        "vehicle response.");
+    return false;
+  }
+
+  auto res_code = msg_params[key][strings::result_code].asInt();
+  if (hmi_apis::Common_VehicleDataResultCode::VDRC_SUCCESS != res_code) {
+    LOG4CXX_WARN(logger_,
+                 "Unubscribing from " << key << " for " << connection_key()
+                                      << " failed.");
+    return false;
+  }
+  return true;
+}
+
+bool UnsubscribeVehicleDataRequest::UnsubscribePendingVehicleData(
+    ApplicationSharedPtr app, const smart_objects::SmartObject& msg_params) {
+  LOG4CXX_DEBUG(logger_, "Unsubscribing from all pending VehicleData");
+
+  for (const auto& vi_name : vi_waiting_for_unsubscribe_) {
+    const auto converted_item = ConvertRequestToResponseName(vi_name);
+    const bool is_unsubscription_successful =
+        CheckSubscriptionStatus(converted_item, msg_params);
+    if (is_unsubscription_successful) {
+      auto& ext = VehicleInfoAppExtension::ExtractVIExtension(*app);
+      ext.unsubscribeFromVehicleInfo(vi_name);
+      vi_waiting_for_unsubscribe_.erase(vi_name);
+    }
+  }
+  return vi_waiting_for_unsubscribe_.empty();
+}
+
+const std::string& UnsubscribeVehicleDataRequest::ConvertRequestToResponseName(
+    const std::string& name) {
+  static std::map<std::string, std::string> parameter_name_converion_map = {
+      {strings::cluster_mode_status, strings::cluster_modes}};
+  const auto converted_it = parameter_name_converion_map.find(name);
+  return parameter_name_converion_map.end() == converted_it
+             ? name
+             : converted_it->second;
+}
+
+const std::string& UnsubscribeVehicleDataRequest::ConvertResponseToRequestName(
+    const std::string& name) {
+  static std::map<std::string, std::string> parameter_name_converion_map = {
+      {strings::cluster_modes, strings::cluster_mode_status}};
+  const auto converted_it = parameter_name_converion_map.find(name);
+  return parameter_name_converion_map.end() == converted_it
+             ? name
+             : converted_it->second;
+}
+
+void UnsubscribeVehicleDataRequest::AppendDataTypesToMobileResponse(
+    smart_objects::SmartObject& msg_params) const {
+  using namespace smart_objects;
+
+  std::string oem_vehicle_data_type_str;
+  EnumConversionHelper<VehicleDataType>::EnumToString(
+      VehicleDataType::VEHICLEDATA_OEM_CUSTOM_DATA, &oem_vehicle_data_type_str);
+
+  const auto& rpc_spec_vehicle_data = MessageHelper::vehicle_data();
+  for (const auto& item : msg_params.enumerate()) {
+    const auto& rpc_spec_vehicle_data_item = rpc_spec_vehicle_data.find(item);
+    if (rpc_spec_vehicle_data.end() == rpc_spec_vehicle_data_item) {
+      msg_params[item][strings::data_type] = oem_vehicle_data_type_str;
+      msg_params[item][strings::oem_custom_data_type] =
+          custom_vehicle_data_manager_.GetVehicleDataItemType(item);
+    } else {
+      msg_params[item][strings::data_type] = rpc_spec_vehicle_data_item->second;
+    }
   }
 }
 

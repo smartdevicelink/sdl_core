@@ -94,7 +94,7 @@ void UnsubscribeButtonRequest::Run() {
 
   if (!app->UnsubscribeFromButton(
           static_cast<mobile_apis::ButtonName::eType>(btn_id))) {
-    LOG4CXX_ERROR(logger_, "App doesn't subscibe to button " << btn_id);
+    LOG4CXX_ERROR(logger_, "App doesn't subscribe to button " << btn_id);
     SendResponse(false, mobile_apis::Result::IGNORED);
     return;
   }

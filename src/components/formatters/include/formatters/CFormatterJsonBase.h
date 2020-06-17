@@ -59,7 +59,7 @@ static const tMetaFormatterErrorCode kErrorOk = 0x0;
 static const tMetaFormatterErrorCode kErrorObjectIsNotFunction = 0x01;
 
 /**
- * @brief smart shema describes object which is not function
+ * @brief smart schema describes object which is not function
  */
 static const tMetaFormatterErrorCode kErrorSchemaIsNotFunction = 0x02;
 

@@ -212,9 +212,19 @@ void MessageHelper::SendGetListOfPermissionsResponse(
 void MessageHelper::SendOnPermissionsChangeNotification(
     uint32_t connection_key,
     const policy::Permissions& permissions,
-    ApplicationManager& app_mngr) {
+    ApplicationManager& app_mngr,
+    const policy::EncryptionRequired require_encryption) {
   MockMessageHelper::message_helper_mock()->SendOnPermissionsChangeNotification(
-      connection_key, permissions, app_mngr);
+      connection_key, permissions, app_mngr, require_encryption);
+}
+
+void MessageHelper::SendPolicySnapshotNotification(
+    uint32_t connection_key,
+    const std::string& snapshot_file_path,
+    const std::string& url,
+    ApplicationManager& app_mngr) {
+  MockMessageHelper::message_helper_mock()->SendPolicySnapshotNotification(
+      connection_key, snapshot_file_path, url, app_mngr);
 }
 
 void MessageHelper::SendPolicySnapshotNotification(
@@ -258,10 +268,11 @@ smart_objects::SmartObjectSPtr MessageHelper::CreateMessageForHMI(
 }
 
 void MessageHelper::SendHMIStatusNotification(
-    const Application& application_impl,
+    ApplicationSharedPtr application,
+    const WindowID window_id,
     ApplicationManager& application_manager) {
   MockMessageHelper::message_helper_mock()->SendHMIStatusNotification(
-      application_impl, application_manager);
+      application, window_id, application_manager);
 }
 
 void MessageHelper::SendUpdateSDLResponse(const std::string& result,
@@ -408,6 +419,16 @@ mobile_apis::Result::eType MessageHelper::ProcessSoftButtons(
 void MessageHelper::SubscribeApplicationToSoftButton(
     smart_objects::SmartObject& message_params,
     ApplicationSharedPtr app,
+    int32_t function_id,
+    const WindowID window_id) {
+  return MockMessageHelper::message_helper_mock()
+      ->SubscribeApplicationToSoftButton(
+          message_params, app, function_id, window_id);
+}
+
+void MessageHelper::SubscribeApplicationToSoftButton(
+    smart_objects::SmartObject& message_params,
+    ApplicationSharedPtr app,
     int32_t function_id) {
   return MockMessageHelper::message_helper_mock()
       ->SubscribeApplicationToSoftButton(message_params, app, function_id);
@@ -473,6 +494,13 @@ bool MessageHelper::CreateHMIApplicationStruct(
       app, session_observer, policy_handler, output, app_mngr);
 }
 
+smart_objects::SmartObjectSPtr
+MessageHelper::CreateOnAppPropertiesChangeNotification(
+    const std::string& policy_app_id, ApplicationManager& app_mngr) {
+  return MockMessageHelper::message_helper_mock()
+      ->CreateOnAppPropertiesChangeNotification(policy_app_id, app_mngr);
+}
+
 void MessageHelper::SendOnAppUnregNotificationToHMI(
     ApplicationConstSharedPtr app,
     const bool is_unexpected_disconnect,
@@ -526,6 +554,12 @@ void MessageHelper::SendTTSGlobalProperties(ApplicationSharedPtr app,
 
 bool MessageHelper::PrintSmartObject(const smart_objects::SmartObject& object) {
   return MockMessageHelper::message_helper_mock()->PrintSmartObject(object);
+}
+
+WindowID MessageHelper::ExtractWindowIdFromSmartObject(
+    const smart_objects::SmartObject& s_map) {
+  return MockMessageHelper::message_helper_mock()
+      ->ExtractWindowIdFromSmartObject(s_map);
 }
 
 void MessageHelper::SendSetAppIcon(const uint32_t app_id,
@@ -595,4 +629,29 @@ void MessageHelper::BroadcastCapabilityUpdate(
       msg_params, app_mngr);
 }
 
+smart_objects::SmartObjectList MessageHelper::CreateUICreateWindowRequestsToHMI(
+    application_manager::ApplicationSharedPtr application,
+    ApplicationManager& app_mngr,
+    const smart_objects::SmartObject& windows_info) {
+  return MockMessageHelper::message_helper_mock()
+      ->CreateUICreateWindowRequestsToHMI(application, app_mngr, windows_info);
+}
+
+smart_objects::SmartObjectSPtr
+MessageHelper::CreateDisplayCapabilityUpdateToMobile(
+    const smart_objects::SmartObject& system_capabilities, Application& app) {
+  return MockMessageHelper::message_helper_mock()
+      ->CreateDisplayCapabilityUpdateToMobile(system_capabilities, app);
+}
+
+smart_objects::SmartObjectSPtr MessageHelper::CreateOnServiceUpdateNotification(
+    const hmi_apis::Common_ServiceType::eType service_type,
+    const hmi_apis::Common_ServiceEvent::eType service_event,
+    const hmi_apis::Common_ServiceStatusUpdateReason::eType
+        service_update_reason,
+    const uint32_t app_id) {
+  return MockMessageHelper::message_helper_mock()
+      ->CreateOnServiceUpdateNotification(
+          service_type, service_event, service_update_reason, app_id);
+}
 }  // namespace application_manager

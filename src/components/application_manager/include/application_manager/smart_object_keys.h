@@ -38,6 +38,8 @@ namespace application_manager {
 namespace strings {
 
 extern const char* params;
+extern const char* require_encryption;
+extern const char* protection;
 extern const char* message_type;
 extern const char* correlation_id;
 extern const char* function_id;
@@ -53,6 +55,7 @@ extern const char* info;
 extern const char* app_id;
 extern const char* full_app_id;
 extern const char* bundle_id;
+extern const char* window_id;
 extern const char* app_info;
 extern const char* app_launch;
 extern const char* app_launch_list;
@@ -111,11 +114,17 @@ extern const char* menu_icon;
 extern const char* keyboard_properties;
 extern const char* vr_commands;
 extern const char* position;
+extern const char* user_location;
 extern const char* num_ticks;
 extern const char* slider_footer;
 extern const char* menu_id;
 extern const char* menu_name;
+<<<<<<< HEAD
 extern const char* parent_id;
+=======
+extern const char* menu_layout;
+extern const char* menu_layouts_available;
+>>>>>>> origin/develop
 extern const char* interaction_choice_set_id;
 extern const char* interaction_choice_set_id_list;
 extern const char* choice_set;
@@ -131,6 +140,8 @@ extern const char* initial_prompt;
 extern const char* initial_text;
 extern const char* duration;
 extern const char* progress_indicator;
+extern const char* func_id;
+extern const char* cancel_id;
 extern const char* alert_type;
 extern const char* alert_icon;
 extern const char* play_tone;
@@ -169,9 +180,17 @@ extern const char* activate_app_hmi_level;
 extern const char* audio_streaming_state;
 extern const char* video_streaming_state;
 extern const char* system_context;
+extern const char* window_name;
+extern const char* window_type;
+extern const char* window_type_supported;
+extern const char* maximum_number_of_windows;
+extern const char* window_capabilities;
+extern const char* associated_service_type;
+extern const char* duplicate_updates_from_window_id;
 extern const char* speech_capabilities;
 extern const char* vr_capabilities;
 extern const char* audio_pass_thru_capabilities;
+extern const char* audio_pass_thru_capabilities_list;
 extern const char* pcm_stream_capabilities;
 extern const char* audio_pass_thru_icon;
 extern const char* way_points;
@@ -182,7 +201,11 @@ extern const char* navigation_capability;
 extern const char* phone_capability;
 extern const char* video_streaming_capability;
 extern const char* rc_capability;
+<<<<<<< HEAD
 extern const char* driver_distraction_capability;
+=======
+extern const char* seat_location_capability;
+>>>>>>> origin/develop
 extern const char* app_services_capabilities;
 extern const char* day_color_scheme;
 extern const char* night_color_scheme;
@@ -193,6 +216,8 @@ extern const char* red;
 extern const char* green;
 extern const char* blue;
 extern const char* display_layout;
+extern const char* template_configuration;
+extern const char* template_layout;
 extern const char* icon_resumed;
 extern const char* nicknames;
 extern const char* enabled;
@@ -202,6 +227,11 @@ extern const char* hybrid_app_preference;
 extern const char* is_cloud_application;
 extern const char* cloud_connection_status;
 extern const char* endpoint;
+extern const char* display_capabilities;
+extern const char* policy_type;
+extern const char* property;
+extern const char* displays;
+extern const char* seat_location;
 
 // PutFile
 extern const char* sync_file_name;
@@ -291,6 +321,7 @@ extern const char* e_call_info;
 extern const char* airbag_status;
 extern const char* emergency_event;
 extern const char* cluster_mode_status;
+extern const char* cluster_modes;
 extern const char* my_key;
 extern const char* help_prompt;
 extern const char* scroll_message_body;
@@ -310,6 +341,7 @@ extern const char* sdl_version;
 extern const char* system_software_version;
 extern const char* priority;
 extern const char* engine_oil_life;
+extern const char* oem_custom_data_type;
 
 // app services
 extern const char* app_service_manifest;
@@ -374,6 +406,8 @@ extern const char* ign_off_count;
 
 extern const char* global_ign_on_counter;
 
+extern const char* suspend_count;
+
 extern const char* connection_info;
 extern const char* is_download_complete;
 
@@ -410,6 +444,8 @@ extern const char* delivery_mode;
 
 extern const char* audio_streaming_indicator;
 
+extern const char* windows_info;
+
 // keys for default parameters loaded from hmi_capabilities.json:
 extern const char* const keyboard_properties_default;
 extern const char* const language_default;
@@ -442,6 +478,9 @@ extern const char* const resolution_height;
 extern const char* const max_bitrate;
 extern const char* const supported_formats;
 extern const char* const haptic_spatial_data_supported;
+extern const char* const diagonal_screen_size;
+extern const char* const pixel_per_inch;
+extern const char* const scale;
 extern const char* const haptic_rect_data;
 extern const char* const rect;
 extern const char* const x;
@@ -593,6 +632,9 @@ extern const char* policyfile;
 extern const char* is_active;
 extern const char* is_deactivated;
 extern const char* event_name;
+extern const char* service_type;
+extern const char* service_event;
+extern const char* reason;
 
 }  // namespace hmi_notification
 

@@ -139,8 +139,21 @@ TEST_F(ResetGlobalPropertiesRequestTest, Run_InvalidVrHelp_UNSUCCESS) {
       mobile_apis::GlobalProperty::KEYBOARDPROPERTIES;
 
   EXPECT_CALL(app_mngr_, RemoveAppFromTTSGlobalPropertiesList(kConnectionKey));
+  std::vector<std::string> help_prompt = {"help_prompt"};
+
+  EXPECT_CALL(app_mngr_settings_, help_prompt())
+      .WillOnce(ReturnRef(help_prompt));
+
+  smart_objects::SmartObject so_help_prompt =
+      smart_objects::SmartObject(smart_objects::SmartType_Map);
+  so_help_prompt[am::strings::text] = help_prompt[0];
+  so_help_prompt[am::strings::type] =
+      hmi_apis::Common_SpeechCapabilities::SC_TEXT;
+
   smart_objects::SmartObject so_prompt =
       smart_objects::SmartObject(smart_objects::SmartType_Array);
+  so_prompt[0] = so_help_prompt;
+
   EXPECT_CALL(*mock_app_, set_help_prompt(so_prompt));
 
   std::vector<std::string> time_out_prompt;
@@ -160,6 +173,15 @@ TEST_F(ResetGlobalPropertiesRequestTest, Run_InvalidVrHelp_UNSUCCESS) {
   so_time_out_prompt[0] = timeout_prompt;
 
   EXPECT_CALL(*mock_app_, set_timeout_prompt(so_time_out_prompt));
+
+  std::string vr_help_title("vr_help_title");
+  EXPECT_CALL(app_mngr_settings_, vr_help_title())
+      .WillOnce(ReturnRef(vr_help_title));
+
+  smart_objects::SmartObject so_vr_help_title =
+      smart_objects::SmartObject(smart_objects::SmartType_String);
+  so_vr_help_title = vr_help_title;
+  EXPECT_CALL(*mock_app_, set_vr_help_title(so_vr_help_title));
 
   EXPECT_CALL(*mock_app_, reset_vr_help_title());
   EXPECT_CALL(*mock_app_, reset_vr_help());
@@ -190,8 +212,21 @@ TEST_F(ResetGlobalPropertiesRequestTest, Run_SUCCESS) {
       mobile_apis::GlobalProperty::KEYBOARDPROPERTIES;
 
   EXPECT_CALL(app_mngr_, RemoveAppFromTTSGlobalPropertiesList(kConnectionKey));
+
+  std::vector<std::string> help_prompt = {"help_prompt"};
+
+  EXPECT_CALL(app_mngr_settings_, help_prompt())
+      .WillOnce(ReturnRef(help_prompt));
+
+  smart_objects::SmartObject so_help_prompt =
+      smart_objects::SmartObject(smart_objects::SmartType_Map);
+  so_help_prompt[am::strings::text] = help_prompt[0];
+  so_help_prompt[am::strings::type] =
+      hmi_apis::Common_SpeechCapabilities::SC_TEXT;
+
   smart_objects::SmartObject so_prompt =
       smart_objects::SmartObject(smart_objects::SmartType_Array);
+  so_prompt[0] = so_help_prompt;
   EXPECT_CALL(*mock_app_, set_help_prompt(so_prompt));
 
   std::vector<std::string> time_out_prompt;
@@ -212,6 +247,15 @@ TEST_F(ResetGlobalPropertiesRequestTest, Run_SUCCESS) {
 
   EXPECT_CALL(*mock_app_, set_timeout_prompt(so_time_out_prompt));
 
+  std::string vr_help_title("vr_help_title");
+  EXPECT_CALL(app_mngr_settings_, vr_help_title())
+      .WillOnce(ReturnRef(vr_help_title));
+
+  smart_objects::SmartObject so_vr_help_title =
+      smart_objects::SmartObject(smart_objects::SmartType_String);
+  so_vr_help_title = vr_help_title;
+  EXPECT_CALL(*mock_app_, set_vr_help_title(so_vr_help_title));
+
   EXPECT_CALL(*mock_app_, reset_vr_help_title());
   EXPECT_CALL(*mock_app_, reset_vr_help());
 
@@ -230,12 +274,8 @@ TEST_F(ResetGlobalPropertiesRequestTest, Run_SUCCESS) {
   EXPECT_CALL(*mock_app_,
               set_menu_title(msg_params[am::hmi_request::menu_title]));
 
-  const smart_objects::SmartObjectSPtr so_help_prompt =
-      std::make_shared<smart_objects::SmartObject>(
-          smart_objects::SmartType_Map);
-  EXPECT_CALL(*mock_app_, help_prompt()).WillOnce(Return(so_help_prompt.get()));
-  EXPECT_CALL(*mock_app_, timeout_prompt())
-      .WillOnce(Return(so_help_prompt.get()));
+  EXPECT_CALL(*mock_app_, help_prompt()).WillOnce(Return(&so_help_prompt));
+  EXPECT_CALL(*mock_app_, timeout_prompt()).WillOnce(Return(&so_help_prompt));
 
   EXPECT_CALL(
       mock_rpc_service_,
@@ -266,6 +306,15 @@ TEST_F(ResetGlobalPropertiesRequestTest,
 
   (*msg_)[am::strings::msg_params][am::strings::properties][0] =
       mobile_apis::GlobalProperty::VRHELPTITLE;
+
+  std::string vr_help_title("vr_help_title");
+  EXPECT_CALL(app_mngr_settings_, vr_help_title())
+      .WillOnce(ReturnRef(vr_help_title));
+
+  smart_objects::SmartObject so_vr_help_title =
+      smart_objects::SmartObject(smart_objects::SmartType_String);
+  so_vr_help_title = vr_help_title;
+  EXPECT_CALL(*mock_app_, set_vr_help_title(so_vr_help_title));
 
   EXPECT_CALL(*mock_app_, reset_vr_help_title());
   EXPECT_CALL(*mock_app_, reset_vr_help());
@@ -362,6 +411,15 @@ TEST_F(ResetGlobalPropertiesRequestTest, OnEvent_InvalidApp_NoHashUpdate) {
 
   (*msg_)[am::strings::msg_params][am::strings::properties][0] =
       mobile_apis::GlobalProperty::VRHELPTITLE;
+
+  std::string vr_help_title("vr_help_title");
+  EXPECT_CALL(app_mngr_settings_, vr_help_title())
+      .WillOnce(ReturnRef(vr_help_title));
+
+  smart_objects::SmartObject so_vr_help_title =
+      smart_objects::SmartObject(smart_objects::SmartType_String);
+  so_vr_help_title = vr_help_title;
+  EXPECT_CALL(*mock_app_, set_vr_help_title(so_vr_help_title));
 
   EXPECT_CALL(*mock_app_, reset_vr_help_title());
   EXPECT_CALL(*mock_app_, reset_vr_help());

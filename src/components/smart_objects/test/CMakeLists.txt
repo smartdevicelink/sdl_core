@@ -53,5 +53,11 @@ set(EXCLUDE_PATHS
   SmartObjectConvertionTime_test.cc
 )
 
+# Enable detect Double-free, invalid free
+# AddressSanitizer is a fast memory error detector. 
+# It consists of a compiler instrumentation module and a run-time library.
+set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -fno-omit-frame-pointer -fsanitize=address")
+set(CMAKE_LINKER_FLAGS_DEBUG "${CMAKE_LINKER_FLAGS_DEBUG} -fno-omit-frame-pointer -fsanitize=address")
+
 collect_sources(SOURCES "${CMAKE_CURRENT_SOURCE_DIR}" "${EXCLUDE_PATHS}")
 create_test(smart_object_test "${SOURCES}" "${LIBRARIES}")

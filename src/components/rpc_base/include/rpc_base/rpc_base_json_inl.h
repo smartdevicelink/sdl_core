@@ -164,7 +164,7 @@ Json::Value Integer<T, minval, maxval>::ToJsonValue() const {
 
 template <int64_t minnum, int64_t maxnum, int64_t minden, int64_t maxden>
 Float<minnum, maxnum, minden, maxden>::Float(const Json::Value* value)
-    : PrimitiveType(InitHelper(value, &Json::Value::isDouble)), value_() {
+    : PrimitiveType(InitHelper(value, &Json::Value::isNumeric)), value_() {
   if (is_valid()) {
     value_ = value->asDouble();
     value_state_ = range_.Includes(value_) ? kValid : kInvalid;
@@ -174,7 +174,7 @@ Float<minnum, maxnum, minden, maxden>::Float(const Json::Value* value)
 template <int64_t minnum, int64_t maxnum, int64_t minden, int64_t maxden>
 Float<minnum, maxnum, minden, maxden>::Float(const Json::Value* value,
                                              double def_value)
-    : PrimitiveType(InitHelper(value, &Json::Value::isDouble))
+    : PrimitiveType(InitHelper(value, &Json::Value::isNumeric))
     , value_(def_value) {
   if (!is_initialized()) {
     value_state_ = kValid;

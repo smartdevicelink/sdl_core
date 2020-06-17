@@ -46,6 +46,7 @@ include_directories(
   ${COMPONENTS_DIR}/security_manager/include/
   ${COMPONENTS_DIR}/application_manager/test/include/
   ${COMPONENTS_DIR}/application_manager/rpc_plugins/sdl_rpc_plugin/include/
+  ${COMPONENTS_DIR}/application_manager/rpc_plugins/vehicle_info_plugin/include/
   ${BSON_INCLUDE_DIRECTORY}
 )
 
@@ -68,6 +69,7 @@ set(testSources
   ${AM_TEST_DIR}/rpc_passing_handler_test.cc
   ${AM_TEST_DIR}/application_manager_impl_test.cc
   ${AM_TEST_DIR}/application_helper_test.cc
+  ${AM_TEST_DIR}/rpc_service_impl_test.cc
   ${AM_TEST_DIR}/command_holder_test.cc
 )
 
@@ -85,10 +87,13 @@ set (RequestController_SOURCES
   ${AM_TEST_DIR}/mock_message_helper.cc
 )
 
+set (RPCHandlerImplTest_SOURCES ${AM_TEST_DIR}/rpc_handler_impl_test.cc 
+                                ${AM_TEST_DIR}/mock_message_helper.cc)
+
 set(LIBRARIES
   Utils
   ApplicationManager
-  sdl_rpc_plugin
+  sdl_rpc_plugin_static
   jsoncpp
   Policy
   connectionHandler
@@ -143,6 +148,8 @@ create_test("help_prompt_manager_test" "${testSourcesHelpPromptManager}" "${LIBR
 
 create_test("request_controller_test" "${RequestController_SOURCES}" "${LIBRARIES}")
 
+create_test("rpc_handler_impl_test" "${RPCHandlerImplTest_SOURCES}" "${LIBRARIES}")
+
 set(ResumptionData_SOURCES
   ${AM_TEST_DIR}/resumption/resumption_data_test.cc
   ${AM_TEST_DIR}/resumption/resumption_data_db_test.cc
@@ -154,6 +161,7 @@ set(ResumptionData_SOURCES
 file(COPY hmi_capabilities.json DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 file(COPY hmi_capabilities_sc1.json DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 file(COPY hmi_capabilities_sc2.json DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+file(COPY hmi_capabilities_old_apt.json DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 file(COPY smartDeviceLink_test.ini DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 
 file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/resumption)

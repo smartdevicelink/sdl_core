@@ -54,6 +54,10 @@
 #include "transport_manager/transport_adapter/transport_adapter_event.h"
 #include "transport_manager/transport_manager_listener.h"
 #include "transport_manager/transport_manager_listener_empty.h"
+#ifdef WEBSOCKET_SERVER_TRANSPORT_SUPPORT
+#include "transport_manager/websocket_server/websocket_device.h"
+#include "transport_manager/websocket_server/websocket_server_transport_adapter.h"
+#endif
 #include "utils/timer_task_impl.h"
 
 using ::transport_manager::transport_adapter::TransportAdapter;
@@ -67,6 +71,7 @@ struct ConnectionFinder {
     return id_ == connection.id;
   }
 };
+
 }  // namespace
 
 namespace transport_manager {
@@ -100,7 +105,14 @@ TransportManagerImpl::TransportManagerImpl(
     , device_switch_timer_(
           "Device reconection timer",
           new timer::TimerTaskImpl<TransportManagerImpl>(
-              this, &TransportManagerImpl::ReconnectionTimeout)) {
+              this, &TransportManagerImpl::ReconnectionTimeout))
+    , events_processing_is_active_(true)
+    , events_processing_lock_()
+    , events_processing_cond_var_()
+    , web_engine_device_info_(0,
+                              "",
+                              webengine_constants::kWebEngineDeviceName,
+                              webengine_constants::kWebEngineConnectionType) {
   LOG4CXX_TRACE(logger_, "TransportManager has created");
 }
 
@@ -577,8 +589,18 @@ int TransportManagerImpl::SearchDevices() {
   return transport_adapter_search;
 }
 
+int TransportManagerImpl::Init(
+    resumption::LastStateWrapperPtr last_state_wrapper) {
+  // Last state wrapper required to initialize Transport adapters
+  UNUSED(last_state_wrapper);
+  LOG4CXX_TRACE(logger_, "enter");
+  is_initialized_ = true;
+  LOG4CXX_TRACE(logger_, "exit with E_SUCCESS");
+  return E_SUCCESS;
+}
+
 int TransportManagerImpl::Init(resumption::LastState& last_state) {
-  // Last state requred to initialize Transport adapters
+  // Last state required to initialize Transport adapters
   UNUSED(last_state);
   LOG4CXX_TRACE(logger_, "enter");
   is_initialized_ = true;
@@ -586,21 +608,36 @@ int TransportManagerImpl::Init(resumption::LastState& last_state) {
   return E_SUCCESS;
 }
 
-int TransportManagerImpl::Reinit() {
+void TransportManagerImpl::Deinit() {
   LOG4CXX_AUTO_TRACE(logger_);
   DisconnectAllDevices();
   TerminateAllAdapters();
   device_to_adapter_map_.clear();
   connection_id_counter_ = 0;
+}
+
+int TransportManagerImpl::Reinit() {
   int ret = InitAllAdapters();
   return ret;
 }
 
-int TransportManagerImpl::Visibility(const bool& on_off) const {
-  LOG4CXX_TRACE(logger_, "enter. On_off: " << &on_off);
-  TransportAdapter::Error ret;
+void TransportManagerImpl::StopEventsProcessing() {
+  LOG4CXX_AUTO_TRACE(logger_);
+  events_processing_is_active_ = false;
+}
 
-  LOG4CXX_DEBUG(logger_, "Visibility change requested to " << on_off);
+void TransportManagerImpl::StartEventsProcessing() {
+  LOG4CXX_AUTO_TRACE(logger_);
+  events_processing_is_active_ = true;
+  events_processing_cond_var_.Broadcast();
+}
+
+int TransportManagerImpl::PerformActionOnClients(
+    const TransportAction required_action) const {
+  LOG4CXX_TRACE(logger_,
+                "The following action requested: "
+                    << static_cast<int>(required_action)
+                    << " to be performed on connected clients");
   if (!is_initialized_) {
     LOG4CXX_ERROR(logger_, "TM is not initialized");
     LOG4CXX_TRACE(logger_,
@@ -609,26 +646,82 @@ int TransportManagerImpl::Visibility(const bool& on_off) const {
     return E_TM_IS_NOT_INITIALIZED;
   }
 
-  for (std::vector<TransportAdapter*>::const_iterator it =
-           transport_adapters_.begin();
-       it != transport_adapters_.end();
-       ++it) {
-    if (on_off) {
-      ret = (*it)->StartClientListening();
-    } else {
-      ret = (*it)->StopClientListening();
-    }
+  TransportAdapter::Error ret = TransportAdapter::Error::UNKNOWN;
+
+  for (auto adapter_ptr : transport_adapters_) {
+    ret = adapter_ptr->ChangeClientListening(required_action);
+
     if (TransportAdapter::Error::NOT_SUPPORTED == ret) {
       LOG4CXX_DEBUG(logger_,
-                    "Visibility change is not supported for adapter "
-                        << *it << "[" << (*it)->GetDeviceType() << "]");
+                    "Requested action on client is not supported for adapter "
+                        << adapter_ptr << "[" << adapter_ptr->GetDeviceType()
+                        << "]");
     }
   }
+
   LOG4CXX_TRACE(logger_, "exit with E_SUCCESS");
   return E_SUCCESS;
 }
 
-void TransportManagerImpl::UpdateDeviceList(TransportAdapter* ta) {
+void TransportManagerImpl::CreateWebEngineDevice() {
+#ifndef WEBSOCKET_SERVER_TRANSPORT_SUPPORT
+  LOG4CXX_TRACE(logger_, "Web engine support is disabled. Exiting function");
+#else
+  LOG4CXX_AUTO_TRACE(logger_);
+  auto web_socket_ta_iterator = std::find_if(
+      transport_adapters_.begin(),
+      transport_adapters_.end(),
+      [](const TransportAdapter* ta) {
+        return transport_adapter::DeviceType::WEBENGINE_WEBSOCKET ==
+               ta->GetDeviceType();
+      });
+
+  if (transport_adapters_.end() == web_socket_ta_iterator) {
+    LOG4CXX_WARN(logger_,
+                 "WebSocketServerTransportAdapter not found."
+                 "Impossible to create WebEngineDevice");
+    return;
+  }
+
+  auto web_socket_ta =
+      dynamic_cast<transport_adapter::WebSocketServerTransportAdapter*>(
+          *web_socket_ta_iterator);
+
+  if (!web_socket_ta) {
+    LOG4CXX_ERROR(logger_,
+                  "Unable to cast from Transport Adapter to "
+                  "WebSocketServerTransportAdapter."
+                  "Impossible to create WebEngineDevice");
+    return;
+  }
+
+  std::string unique_device_id = web_socket_ta->GetStoredDeviceID();
+
+  DeviceHandle device_handle = converter_.UidToHandle(
+      unique_device_id, webengine_constants::kWebEngineConnectionType);
+
+  web_engine_device_info_ =
+      DeviceInfo(device_handle,
+                 unique_device_id,
+                 webengine_constants::kWebEngineDeviceName,
+                 webengine_constants::kWebEngineConnectionType);
+
+  auto ws_device = std::make_shared<transport_adapter::WebSocketDevice>(
+      web_engine_device_info_.name(), web_engine_device_info_.mac_address());
+
+  ws_device->set_keep_on_disconnect(true);
+
+  web_socket_ta->AddDevice(ws_device);
+  OnDeviceListUpdated(web_socket_ta);
+#endif  // WEBSOCKET_SERVER_TRANSPORT_SUPPORT
+}
+
+const DeviceInfo& TransportManagerImpl::GetWebEngineDeviceInfo() const {
+  LOG4CXX_AUTO_TRACE(logger_);
+  return web_engine_device_info_;
+}
+
+bool TransportManagerImpl::UpdateDeviceList(TransportAdapter* ta) {
   LOG4CXX_TRACE(logger_, "enter. TransportAdapter: " << ta);
   std::set<DeviceInfo> old_devices;
   std::set<DeviceInfo> new_devices;
@@ -680,7 +773,9 @@ void TransportManagerImpl::UpdateDeviceList(TransportAdapter* ta) {
        ++it) {
     RaiseEvent(&TransportManagerListener::OnDeviceRemoved, *it);
   }
+
   LOG4CXX_TRACE(logger_, "exit");
+  return added_devices.size() + removed_devices.size() > 0;
 }
 
 void TransportManagerImpl::PostMessage(
@@ -829,9 +924,9 @@ void TransportManagerImpl::TryDeviceSwitch(
                                            IOSBTAdapterFinder());
 
   if (transport_adapters_.end() == ios_bt_adapter) {
-    LOG4CXX_WARN(
-        logger_,
-        "There is no iAP2 Bluetooth adapter found. Switching is not possible.");
+    LOG4CXX_WARN(logger_,
+                 "There is no iAP2 Bluetooth adapter found. Switching is not "
+                 "possible.");
     return;
   }
 
@@ -972,7 +1067,12 @@ void TransportManagerImpl::OnDeviceListUpdated(TransportAdapter* ta) {
     LOG4CXX_ERROR(logger_, "Device list update failed.");
     return;
   }
-  UpdateDeviceList(ta);
+
+  if (!UpdateDeviceList(ta)) {
+    LOG4CXX_DEBUG(logger_, "Device list was not changed");
+    return;
+  }
+
   std::vector<DeviceInfo> device_infos;
   device_list_lock_.AcquireForReading();
   for (DeviceInfoList::const_iterator it = device_list_.begin();
@@ -987,6 +1087,13 @@ void TransportManagerImpl::OnDeviceListUpdated(TransportAdapter* ta) {
 
 void TransportManagerImpl::Handle(TransportAdapterEvent event) {
   LOG4CXX_TRACE(logger_, "enter");
+
+  if (!events_processing_is_active_) {
+    LOG4CXX_DEBUG(logger_, "Waiting for events handling unlock");
+    sync_primitives::AutoLock auto_lock(events_processing_lock_);
+    events_processing_cond_var_.Wait(auto_lock);
+  }
+
   switch (event.event_type) {
     case EventTypeEnum::ON_SEARCH_DONE: {
       RaiseEvent(&TransportManagerListener::OnScanDevicesFinished);
@@ -1297,6 +1404,13 @@ void TransportManagerImpl::SetTelemetryObserver(TMTelemetryObserver* observer) {
 
 void TransportManagerImpl::Handle(::protocol_handler::RawMessagePtr msg) {
   LOG4CXX_TRACE(logger_, "enter");
+
+  if (!events_processing_is_active_) {
+    LOG4CXX_DEBUG(logger_, "Waiting for events handling unlock");
+    sync_primitives::AutoLock auto_lock(events_processing_lock_);
+    events_processing_cond_var_.Wait(auto_lock);
+  }
+
   sync_primitives::AutoReadLock lock(connections_lock_);
   ConnectionInternal* connection = GetConnection(msg->connection_key());
   if (connection == NULL) {

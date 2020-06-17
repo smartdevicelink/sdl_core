@@ -60,9 +60,9 @@ class UsbConnection : public Connection {
   virtual TransportAdapter::Error Disconnect();
 
  private:
-  void PopOutMessage();
+  TransportAdapter::Error PopOutMessage();
   bool PostInTransfer();
-  bool PostOutTransfer();
+  TransportAdapter::Error PostOutTransfer();
   void OnInTransfer(struct libusb_transfer*);
   void OnOutTransfer(struct libusb_transfer*);
   void Finalise();

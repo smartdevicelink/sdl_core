@@ -118,6 +118,15 @@ class CommandImpl : public Command {
   int32_t function_id() const OVERRIDE;
 
   /*
+   * @brief Retrieves Window ID
+   */
+  WindowID window_id() const OVERRIDE;
+
+  void set_warning_info(const std::string info) OVERRIDE;
+
+  std::string warning_info() const OVERRIDE;
+
+  /*
    * @brief Function is called by RequestController when request execution time
    * has exceed it's limit
    *
@@ -140,12 +149,44 @@ class CommandImpl : public Command {
    */
   void SetAllowedToTerminate(const bool allowed) OVERRIDE;
 
+  /**
+   * @brief Calculates command`s internal consecutive number
+   * for specified application used during resumption.
+   * This method is called when a new command is added.
+   * @param[in] app Application for wich a consecutive number is calculated
+   * @return internal consecutive number
+   */
+  static uint32_t CalcCommandInternalConsecutiveNumber(
+      application_manager::ApplicationConstSharedPtr app);
+
+  /**
+   * @brief Check syntax of string from mobile
+   * @param str - string that need to be checked
+   * @param allow_empty_string if true methods allow empty sting
+   * @return true if success otherwise return false
+   */
+  bool CheckSyntax(const std::string& str, bool allow_empty_line = false) const;
+
   // members
   static const int32_t hmi_protocol_type_;
   static const int32_t mobile_protocol_type_;
   static const int32_t protocol_version_;
 
  protected:
+  /**
+   * @brief Checks message permissions and parameters according to policy table
+   * permissions
+   * @param source The source of the command (used to determine if a response
+   * should be sent on failure)
+   * @return true if the RPC is allowed, false otherwise
+   */
+  bool CheckAllowedParameters(const Command::CommandSource source);
+
+  /**
+   * @brief Remove from current message parameters disallowed by policy table
+   */
+  void RemoveDisallowedParameters();
+
   /**
    * @brief Parses mobile message and replaces mobile app id with HMI app id
    * @param message Message to replace its ids
@@ -167,6 +208,15 @@ class CommandImpl : public Command {
   rpc_service::RPCService& rpc_service_;
   HMICapabilities& hmi_capabilities_;
   policy::PolicyHandlerInterface& policy_handler_;
+
+  /**
+   * @brief warning_info_ Defines a warning message to send in the case of a
+   * successful response
+   */
+  std::string warning_info_;
+
+  CommandParametersPermissions parameters_permissions_;
+  CommandParametersPermissions removed_parameters_permissions_;
 
 #ifdef ENABLE_LOG
   static log4cxx::LoggerPtr logger_;

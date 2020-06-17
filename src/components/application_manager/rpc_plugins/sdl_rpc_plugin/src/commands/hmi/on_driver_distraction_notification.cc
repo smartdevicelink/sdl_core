@@ -35,6 +35,7 @@
 
 #include "application_manager/application_impl.h"
 #include "application_manager/message_helper.h"
+#include "application_manager/policies/policy_handler_interface.h"
 #include "interfaces/HMI_API.h"
 #include "interfaces/MOBILE_API.h"
 
@@ -65,7 +66,11 @@ struct OnDriverDistractionProcessor {
       const RPCParams params;
       policy::CheckPermissionResult result;
       application_manager_.GetPolicyHandler().CheckPermissions(
-          application, stringified_function_id_, params, result);
+          application,
+          mobile_apis::PredefinedWindows::DEFAULT_WINDOW,
+          stringified_function_id_,
+          params,
+          result);
       auto& msg_params = message[strings::msg_params];
       const bool is_lock_screen_dismissal_exists = msg_params.keyExists(
           mobile_notification::lock_screen_dismissal_enabled);

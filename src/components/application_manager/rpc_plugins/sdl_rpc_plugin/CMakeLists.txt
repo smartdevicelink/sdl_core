@@ -51,21 +51,27 @@ collect_sources(APP_EXTENSIONS "${EXTENSIONS_SOURCE_DIR}")
 collect_sources(RPC_PLUGIN_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/src")
 
 set(LIBRARIES
+  ApplicationManager
   HMI_API
   MOBILE_API
-  ApplicationManager
+  MessageHelper
+  connectionHandler
   v4_protocol_v1_2_no_extra
   SmartObjects
   Utils
-  Policy
+  PolicyStatic
+  jsoncpp
 )
 
 if(ENABLE_LOG)
   list(APPEND LIBRARIES log4cxx -L${LOG4CXX_LIBS_DIRECTORY})
 endif()
 
-add_library("sdl_rpc_plugin" SHARED ${MOBILE_COMMANDS} ${HMI_COMMANDS} ${RPC_PLUGIN_SOURCES} ${APP_EXTENSIONS})
-target_link_libraries("sdl_rpc_plugin" ${LIBRARIES})
+add_library("sdl_rpc_plugin_static" ${MOBILE_COMMANDS} ${HMI_COMMANDS} ${RPC_PLUGIN_SOURCES} ${APP_EXTENSIONS})
+target_link_libraries("sdl_rpc_plugin_static" ${LIBRARIES})
+
+add_library("sdl_rpc_plugin" SHARED "src/sdl_rpc_plugin.cc")
+target_link_libraries("sdl_rpc_plugin" sdl_rpc_plugin_static)
 
 set(INSTALL_DESTINATION bin)
 

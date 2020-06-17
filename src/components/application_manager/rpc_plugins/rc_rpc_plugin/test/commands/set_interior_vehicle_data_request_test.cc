@@ -37,6 +37,8 @@
 #include "interfaces/MOBILE_API.h"
 #include "rc_rpc_plugin/mock/mock_interior_data_cache.h"
 #include "rc_rpc_plugin/mock/mock_interior_data_manager.h"
+#include "rc_rpc_plugin/mock/mock_rc_capabilities_manager.h"
+#include "rc_rpc_plugin/mock/mock_rc_consent_manager.h"
 #include "rc_rpc_plugin/mock/mock_resource_allocation_manager.h"
 #include "rc_rpc_plugin/rc_module_constants.h"
 #include "rc_rpc_plugin/rc_rpc_plugin.h"
@@ -71,9 +73,12 @@ class SetInteriorVehicleDataRequestTest
  public:
   SetInteriorVehicleDataRequestTest()
       : mock_app_(std::make_shared<NiceMock<MockApplication> >())
-      , rc_app_extention_(std::make_shared<RCAppExtension>(kModuleId)) {}
+      , rc_app_extention_(std::make_shared<RCAppExtension>(kModuleId))
+      , rc_capabilities_(smart_objects::SmartType::SmartType_Array) {}
 
   void SetUp() OVERRIDE {
+    smart_objects::SmartObject control_caps((smart_objects::SmartType_Array));
+    rc_capabilities_[strings::kradioControlCapabilities] = control_caps;
     ON_CALL(app_mngr_, hmi_interfaces())
         .WillByDefault(ReturnRef(mock_hmi_interfaces_));
     ON_CALL(
@@ -86,9 +91,9 @@ class SetInteriorVehicleDataRequestTest
         .WillByDefault(Return(rc_app_extention_));
 
     ON_CALL(*mock_app_, policy_app_id()).WillByDefault(Return(kPolicyAppId));
-    ON_CALL(mock_allocation_manager_, IsResourceFree(_))
+    ON_CALL(mock_allocation_manager_, IsResourceFree(_, _))
         .WillByDefault(Return(true));
-    ON_CALL(mock_allocation_manager_, AcquireResource(_, _))
+    ON_CALL(mock_allocation_manager_, AcquireResource(_, _, _))
         .WillByDefault(Return(AcquireResult::ALLOWED));
     ON_CALL(*mock_app_, app_id()).WillByDefault(Return(kAppId));
     ON_CALL(mock_policy_handler_,
@@ -96,8 +101,14 @@ class SetInteriorVehicleDataRequestTest
                          mobile_apis::AppHMIType::eType::REMOTE_CONTROL,
                          nullptr))
         .WillByDefault(Return(true));
+    ON_CALL(mock_hmi_capabilities_, rc_capability())
+        .WillByDefault(Return(&rc_capabilities_));
     ON_CALL(mock_allocation_manager_, is_rc_enabled())
         .WillByDefault(Return(true));
+    ON_CALL(mock_rc_capabilities_manager_, CheckIfModuleExistsInCapabilities(_))
+        .WillByDefault(Return(true));
+    ON_CALL(mock_rc_capabilities_manager_, GetModuleDataCapabilities(_, _))
+        .WillByDefault(Return(std::make_pair("", capabilitiesStatus::success)));
   }
 
   MessageSharedPtr CreateBasicMessage() {
@@ -121,7 +132,9 @@ class SetInteriorVehicleDataRequestTest
                            mock_policy_handler_,
                            mock_allocation_manager_,
                            mock_interior_data_cache_,
-                           mock_interior_data_manager_};
+                           mock_interior_data_manager_,
+                           mock_rc_capabilities_manager_,
+                           mock_rc_consent_manger_};
     return std::make_shared<Command>(msg ? msg : msg = CreateMessage(), params);
   }
 
@@ -134,6 +147,10 @@ class SetInteriorVehicleDataRequestTest
       mock_interior_data_manager_;
   std::shared_ptr<MockApplication> mock_app_;
   std::shared_ptr<RCAppExtension> rc_app_extention_;
+  testing::NiceMock<rc_rpc_plugin_test::MockRCCapabilitiesManager>
+      mock_rc_capabilities_manager_;
+  smart_objects::SmartObject rc_capabilities_;
+  testing::NiceMock<MockRCConsentManager> mock_rc_consent_manger_;
 };
 
 TEST_F(SetInteriorVehicleDataRequestTest,
@@ -153,18 +170,14 @@ TEST_F(SetInteriorVehicleDataRequestTest,
   EXPECT_CALL(mock_policy_handler_, CheckModule(kPolicyAppId, _))
       .WillOnce(Return(rc_rpc_plugin::TypeAccess::kAllowed));
 
-  EXPECT_CALL(mock_hmi_capabilities_, rc_capability())
-      .WillOnce(Return(nullptr));
-
   EXPECT_CALL(
       mock_rpc_service_,
       ManageHMICommand(
           HMIResultCodeIs(hmi_apis::FunctionID::RC_SetInteriorVehicleData), _))
       .WillOnce(Return(true));
   // Act
-  std::shared_ptr<rc_rpc_plugin::commands::SetInteriorVehicleDataRequest>
-      command = CreateRCCommand<
-          rc_rpc_plugin::commands::SetInteriorVehicleDataRequest>(
+  auto command =
+      CreateRCCommand<rc_rpc_plugin::commands::SetInteriorVehicleDataRequest>(
           mobile_message);
   ASSERT_TRUE(command->Init());
   command->Run();
@@ -189,9 +202,6 @@ TEST_F(
   // Expectations
   EXPECT_CALL(mock_policy_handler_, CheckModule(kPolicyAppId, _))
       .WillOnce(Return(rc_rpc_plugin::TypeAccess::kAllowed));
-
-  EXPECT_CALL(mock_hmi_capabilities_, rc_capability())
-      .WillOnce(Return(nullptr));
 
   EXPECT_CALL(app_mngr_, RemoveHMIFakeParameters(_, _));
 
@@ -260,9 +270,6 @@ TEST_F(SetInteriorVehicleDataRequestTest,
   EXPECT_CALL(mock_policy_handler_, CheckModule(kPolicyAppId, _))
       .WillOnce(Return(rc_rpc_plugin::TypeAccess::kAllowed));
 
-  EXPECT_CALL(mock_hmi_capabilities_, rc_capability())
-      .WillOnce(Return(nullptr));
-
   MessageSharedPtr message_from_mobile = CreateBasicMessage();
 
   EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_, _))
@@ -305,9 +312,6 @@ TEST_F(SetInteriorVehicleDataRequestTest,
   // Expectations
   EXPECT_CALL(mock_policy_handler_, CheckModule(kPolicyAppId, _))
       .WillOnce(Return(rc_rpc_plugin::TypeAccess::kAllowed));
-
-  EXPECT_CALL(mock_hmi_capabilities_, rc_capability())
-      .WillOnce(Return(nullptr));
 
   auto message_from_mobile = CreateBasicMessage();
 

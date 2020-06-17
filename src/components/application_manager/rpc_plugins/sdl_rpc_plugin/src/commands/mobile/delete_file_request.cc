@@ -68,7 +68,9 @@ void DeleteFileRequest::Run() {
     return;
   }
 
-  if ((mobile_api::HMILevel::HMI_NONE == application->hmi_level()) &&
+  if ((mobile_api::HMILevel::HMI_NONE ==
+       application->hmi_level(
+           mobile_apis::PredefinedWindows::DEFAULT_WINDOW)) &&
       (application_manager_.get_settings().delete_file_in_none() <=
        application->delete_file_in_none_count())) {
     // If application is in the HMI_NONE level the quantity of allowed

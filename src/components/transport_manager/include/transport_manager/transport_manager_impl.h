@@ -124,6 +124,9 @@ class TransportManagerImpl
    *
    * @return Code error.
    */
+  int Init(resumption::LastStateWrapperPtr last_state_wrapper) OVERRIDE;
+
+  DEPRECATED
   int Init(resumption::LastState& last_state) OVERRIDE;
 
   /**
@@ -131,6 +134,12 @@ class TransportManagerImpl
    * @return Error code
    */
   virtual int Reinit() OVERRIDE;
+
+  virtual void Deinit() OVERRIDE;
+
+  void StopEventsProcessing() OVERRIDE;
+
+  void StartEventsProcessing() OVERRIDE;
 
   /**
    * @brief Start scanning for new devices.
@@ -250,14 +259,12 @@ class TransportManagerImpl
    **/
   int RemoveDevice(const DeviceHandle device) OVERRIDE;
 
-  /**
-   * @brief Turns on or off visibility of SDL to mobile devices
-   * when visibility is ON (on_off = true) mobile devices are able to connect
-   * otherwise ((on_off = false)) SDL is not visible from outside
-   *
-   * @return Code error.
-   */
-  int Visibility(const bool& on_off) const OVERRIDE;
+  int PerformActionOnClients(
+      const TransportAction required_action) const OVERRIDE;
+
+  void CreateWebEngineDevice() OVERRIDE;
+
+  const DeviceInfo& GetWebEngineDeviceInfo() const OVERRIDE;
 
   /**
    * @brief OnDeviceListUpdated updates device list and sends appropriate
@@ -414,6 +421,12 @@ class TransportManagerImpl
   sync_primitives::Lock device_lock_;
   DeviceUID device_to_reconnect_;
 
+  std::atomic_bool events_processing_is_active_;
+  sync_primitives::Lock events_processing_lock_;
+  sync_primitives::ConditionalVariable events_processing_cond_var_;
+
+  DeviceInfo web_engine_device_info_;
+
   /**
    * @brief Adds new incoming connection to connections list
    * @param c New connection
@@ -512,8 +525,9 @@ class TransportManagerImpl
   /**
    * @brief Updates total device list with info from specific transport adapter.
    * @param ta Transport adapter
+   * @return True if device list has been changed, otherwise - false
    */
-  void UpdateDeviceList(TransportAdapter* ta);
+  bool UpdateDeviceList(TransportAdapter* ta);
 };  // class TransportManagerImpl
 }  // namespace transport_manager
 #endif  // SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_MANAGER_IMPL_H_

@@ -126,7 +126,7 @@ class RegisterAppInterfaceRequest
    *
    * @param app application with changed HMI status
    * @param resumption If true, resumption-related parameters will be sent to
-   *the HMI
+   * the HMI
    * @param need_restore_vr If resumption is true, whether or not VR commands
    *should be resumed
    **/
@@ -134,30 +134,39 @@ class RegisterAppInterfaceRequest
       app_mngr::ApplicationConstSharedPtr app,
       bool resumption = false,
       bool need_restore_vr = false);
-  /*
+
+  /**
    * @brief Check new ID along with known mobile application ID
    *
    * return TRUE if ID is known already, otherwise - FALSE
    */
   bool IsApplicationWithSameAppIdRegistered();
 
-  /*
+  /**
    * @brief Check new application parameters (name, tts, vr) for
    * coincidence with already known parameters of registered applications
-   * @param out_duplicate_apps In the case other apps was found with duplicate
-   * names, this field will be filled with a list of said apps
    *
-   * return SUCCESS if there is no coincidence of app.name/TTS/VR synonyms,
+   * @return SUCCESS if there is no coincidence of app.name/TTS/VR synonyms,
    * otherwise appropriate error code returns
    */
-  mobile_apis::Result::eType CheckCoincidence(
+  mobile_apis::Result::eType CheckCoincidence();
+
+  /**
+   * @brief Search for any apps with the same appName as the one being
+   * registered
+   * @param out_duplicate_apps To be filled with a list of all of the apps which
+   * have duplicate appNames to the app being registered (registered or pending)
+   *
+   * @return TRUE if at least one duplicate app was found, otherwise FALSE
+   */
+  bool GetDuplicateNames(
       std::vector<app_mngr::ApplicationSharedPtr>& out_duplicate_apps);
 
-  /*
+  /**
    * @brief Predicate for using with CheckCoincidence method to compare with VR
    * synonym SO
    *
-   * return TRUE if there is coincidence of VR, otherwise FALSE
+   * @return TRUE if there is coincidence of VR, otherwise FALSE
    */
   struct CoincidencePredicateVR {
     CoincidencePredicateVR(const custom_str::CustomString& newItem)
@@ -207,17 +216,31 @@ class RegisterAppInterfaceRequest
   void SendSubscribeCustomButtonNotification();
 
   /**
-   * @brief IsApplicationSwitched checks whether application is switched from
-   * another transport. If application id is found, but not in reconnection
+   * @brief IsApplicationSwitched checks whether application is switched
+   * from another transport. If application id is found, but not in reconnection
    * list, returns 'already registered' code. Otherwise - proceed with
    * switching.
    * @return True if application is detected as switched, otherwise false.
    */
   bool IsApplicationSwitched();
 
+  /**
+   * @brief Information about given Connection Key.
+   * @param key Unique key used by other components as session identifier
+   * @param device_id device identifier.
+   * @param mac_address uniq address
+   * @return false in case of error or true in case of success
+   */
+  bool GetDataOnSessionKey(
+      const uint32_t key,
+      connection_handler::DeviceHandle* device_id = nullptr,
+      std::string* mac_address = nullptr) const;
+
  private:
   std::string response_info_;
   mobile_apis::Result::eType result_code_;
+  connection_handler::DeviceHandle device_handle_;
+  std::string device_id_;
 
   policy::PolicyHandlerInterface& GetPolicyHandler();
   DISALLOW_COPY_AND_ASSIGN(RegisterAppInterfaceRequest);

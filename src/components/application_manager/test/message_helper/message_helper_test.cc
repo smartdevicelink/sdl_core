@@ -279,14 +279,21 @@ TEST(MessageHelperTestCreate,
 
   smart_objects::SmartObject& object = *smartObjectPtr;
 
+  const uint32_t app_id = 1u;
+  const std::string cmd_icon_value = "10";
+  const uint32_t cmd_id = 5u;
+  const uint32_t internal_id = 1u;
+
   object[strings::menu_params] = 1;
   object[strings::cmd_icon] = 1;
-  object[strings::cmd_icon][strings::value] = "10";
+  object[strings::cmd_icon][strings::value] = cmd_icon_value;
+  object[strings::cmd_id] = cmd_id;
 
-  vis.insert(std::pair<uint32_t, smart_objects::SmartObject*>(5, &object));
+  vis.insert(
+      std::pair<uint32_t, smart_objects::SmartObject*>(internal_id, &object));
 
   EXPECT_CALL(*appSharedMock, commands_map()).WillOnce(Return(data_accessor));
-  EXPECT_CALL(*appSharedMock, app_id()).WillOnce(Return(1u));
+  EXPECT_CALL(*appSharedMock, app_id()).WillOnce(Return(app_id));
   application_manager_test::MockApplicationManager mock_application_manager;
   smart_objects::SmartObjectList ptr =
       MessageHelper::CreateAddCommandRequestToHMI(appSharedMock,
@@ -299,14 +306,14 @@ TEST(MessageHelperTestCreate,
   int function_id = static_cast<int>(hmi_apis::FunctionID::UI_AddCommand);
 
   EXPECT_EQ(function_id, obj[strings::params][strings::function_id].asInt());
-  EXPECT_EQ(1u, obj[strings::msg_params][strings::app_id].asUInt());
-  EXPECT_EQ(5, obj[strings::msg_params][strings::cmd_id].asInt());
+  EXPECT_EQ(app_id, obj[strings::msg_params][strings::app_id].asUInt());
+  EXPECT_EQ(cmd_id, obj[strings::msg_params][strings::cmd_id].asUInt());
   EXPECT_EQ(object[strings::menu_params],
             obj[strings::msg_params][strings::menu_params]);
   EXPECT_EQ(object[strings::cmd_icon],
             obj[strings::msg_params][strings::cmd_icon]);
   EXPECT_EQ(
-      "10",
+      cmd_icon_value,
       obj[strings::msg_params][strings::cmd_icon][strings::value].asString());
 }
 
@@ -1082,6 +1089,27 @@ TEST_F(MessageHelperTest, SendNaviSetVideoConfigRequest) {
   EXPECT_EQ(640, msg_params[strings::config][strings::width].asInt());
   EXPECT_TRUE(msg_params[strings::config].keyExists(strings::height));
   EXPECT_EQ(480, msg_params[strings::config][strings::height].asInt());
+}
+
+TEST_F(MessageHelperTest, ExtractWindowIdFromSmartObject_SUCCESS) {
+  const WindowID window_id = 145;
+  smart_objects::SmartObject message(smart_objects::SmartType_Map);
+  message[strings::msg_params][strings::window_id] = window_id;
+  EXPECT_EQ(window_id,
+            MessageHelper::ExtractWindowIdFromSmartObject(
+                message[strings::msg_params]));
+}
+
+TEST_F(MessageHelperTest, ExtractWindowIdFromSmartObject_FromEmptyMessage) {
+  smart_objects::SmartObject message(smart_objects::SmartType_Map);
+  EXPECT_EQ(mobile_apis::PredefinedWindows::DEFAULT_WINDOW,
+            MessageHelper::ExtractWindowIdFromSmartObject(message));
+}
+
+TEST_F(MessageHelperTest, ExtractWindowIdFromSmartObject_FromWrongType) {
+  smart_objects::SmartObject message(smart_objects::SmartType_Array);
+  EXPECT_EQ(mobile_apis::PredefinedWindows::DEFAULT_WINDOW,
+            MessageHelper::ExtractWindowIdFromSmartObject(message));
 }
 
 }  // namespace application_manager_test

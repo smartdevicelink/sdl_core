@@ -162,9 +162,24 @@ class CacheManagerInterface {
   virtual bool SecondsBetweenRetries(std::vector<int>& seconds) = 0;
 
   /**
-   * @brief Get information about vehicle
+   * @brief Gets copy of current policy table data
+   * @return policy_table as json object
    */
-  virtual const VehicleInfo GetVehicleInfo() const = 0;
+  virtual Json::Value GetPolicyTableData() const = 0;
+
+  /**
+   * @brief Gets vehicle data items
+   * @return Structure with vehicle data items
+   */
+  virtual const std::vector<policy_table::VehicleDataItem> GetVehicleDataItems()
+      const = 0;
+
+  /**
+   * @brief Gets vehicle data items removed after the last PTU
+   * @return List of removed vehicle data items
+   */
+  virtual std::vector<policy_table::VehicleDataItem>
+  GetRemovedVehicleDataItems() const = 0;
 
   /**
    * @brief Get a list of enabled cloud applications
@@ -175,29 +190,21 @@ class CacheManagerInterface {
       std::vector<std::string>& enabled_apps) const = 0;
 
   /**
-   * @brief Get cloud app policy information, all fields that aren't set for a
-   * given app will be filled with empty strings
-   * @param policy_app_id Unique application id
-   * @param enabled Whether or not the app is enabled
-   * @param endpoint Filled with the endpoint used to connect to the cloud
-   * application
-   * @param certificate Filled with the certificate used to for creating a
-   * secure connection to the cloud application
-   * @param auth_token Filled with the token used for authentication when
-   * reconnecting to the cloud app
-   * @param cloud_transport_type Filled with the transport type used by the
-   * cloud application (ex. "WSS")
-   * @param hybrid_app_preference Filled with the hybrid app preference for the
-   * cloud application set by the user
+   * @brief Get a list of enabled local applications
+   * @return enabled_apps List filled with the policy app id of each enabled
+   * local application
    */
-  virtual bool GetCloudAppParameters(
-      const std::string& policy_app_id,
-      bool& enabled,
-      std::string& endpoint,
-      std::string& certificate,
-      std::string& auth_token,
-      std::string& cloud_transport_type,
-      std::string& hybrid_app_preference) const = 0;
+  virtual std::vector<std::string> GetEnabledLocalApps() const = 0;
+
+  /**
+   * @brief Get app policy information, all fields that aren't set for a
+   * given app will be filled with empty strings
+   * @param policy_app_id policy app id
+   * @param out_app_properties application properties
+   * @return true if application presents in database, otherwise - false
+   */
+  virtual bool GetAppProperties(const std::string& policy_app_id,
+                                AppProperties& out_app_properties) const = 0;
 
   /**
    * Initializes a new cloud application with default policies
@@ -317,18 +324,10 @@ class CacheManagerInterface {
    * return them otherwise default URLs.
    */
   virtual void GetUpdateUrls(const std::string& service_type,
-                             EndpointUrls& out_end_points) = 0;
+                             EndpointUrls& out_end_points) const = 0;
 
   virtual void GetUpdateUrls(const uint32_t service_type,
-                             EndpointUrls& out_end_points) = 0;
-
-  /**
-   * @brief GetLockScreenIcon allows to obtain lock screen icon url;
-   *
-   * @return url which point to the resourse where lock screen icon could be
-   *obtained.
-   */
-  virtual std::string GetLockScreenIconUrl() const = 0;
+                             EndpointUrls& out_end_points) const = 0;
 
   /**
    * @brief Get Icon Url used for showing a cloud apps icon before the intial
@@ -434,6 +433,12 @@ class CacheManagerInterface {
    */
   virtual bool GetFunctionalGroupings(
       policy_table::FunctionalGroupings& groups) = 0;
+
+  /**
+   * @brief Get policy app names from PT
+   * @return container of strings representing policy application names
+   */
+  virtual const policy_table::Strings GetPolicyAppIDs() const = 0;
 
   /**
    * Checks if the application is represented in policy table
@@ -953,6 +958,37 @@ class CacheManagerInterface {
    */
   virtual void OnDeviceSwitching(const std::string& device_id_from,
                                  const std::string& device_id_to) = 0;
+
+  /**
+   * @brief GetAppEncryptionRequiredFlag retrieves encryption required flag
+   * for
+   * given application
+   * @param application policy application name
+   * @return optional object containing encryption required flag
+   */
+  virtual rpc::Optional<rpc::Boolean> GetAppEncryptionRequiredFlag(
+      const std::string& application_policy_name) const = 0;
+
+  /**
+   * @brief GetFunctionalGroupingEncryptionRequiredFlag retrieves encryption
+   * required flag
+   * for
+   * given functional grouping
+   * @param functional_group policy functional group name
+   * @return optional object containing encryption required flag
+   */
+  virtual rpc::Optional<rpc::Boolean>
+  GetFunctionalGroupingEncryptionRequiredFlag(
+      const std::string& functional_group) const = 0;
+
+  /**
+   * @brief retreives application params
+   * @param application_name policy applicatoin name
+   * @param application_params application params
+   */
+  virtual void GetApplicationParams(
+      const std::string& application_name,
+      policy_table::ApplicationParams& application_params) const = 0;
 
 #ifdef BUILD_TESTS
   /**

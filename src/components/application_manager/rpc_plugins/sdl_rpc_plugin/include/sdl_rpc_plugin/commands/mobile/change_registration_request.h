@@ -123,11 +123,12 @@ class ChangeRegistrationRequest
   /**
    * @brief Check parameters (name, vr) for
    * coincidence with already known parameters of registered applications
-   *
+   * @param device_id device identifier
    * @return SUCCESS if there is no coincidence of app.name/VR synonyms,
    * otherwise appropriate error code returns
    */
-  mobile_apis::Result::eType CheckCoincidence();
+  mobile_apis::Result::eType CheckCoincidence(
+      const connection_handler::DeviceHandle& device_id);
 
   /**
    * @brief Checks if requested name is allowed by policy

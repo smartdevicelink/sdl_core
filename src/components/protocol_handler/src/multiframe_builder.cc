@@ -261,6 +261,11 @@ RESULT_CODE MultiFrameBuilder::HandleConsecutiveFrame(
     }
   }
 
+  const bool packet_protection_flag = packet->protection_flag();
+  if (!assembling_frame->protection_flag() && packet_protection_flag) {
+    assembling_frame->set_protection_flag(packet_protection_flag);
+  }
+
   assembling_frame->set_frame_data(new_frame_data);
 
   LOG4CXX_DEBUG(logger_,

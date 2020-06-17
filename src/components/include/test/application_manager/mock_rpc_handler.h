@@ -30,8 +30,10 @@ class MockRPCHandler : public application_manager::rpc_handler::RPCHandler {
   MOCK_METHOD1(OnErrorSending,
                void(std::shared_ptr<application_manager::Message> message));
 
+#ifdef TELEMETRY_MONITOR
   MOCK_METHOD1(SetTelemetryObserver,
                void(application_manager::AMTelemetryObserver* observer));
+#endif  // TELEMETRY_MONITOR
 };
 
 }  // namespace application_manager_test

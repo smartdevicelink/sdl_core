@@ -166,14 +166,6 @@ class CommandRequestImpl : public CommandImpl,
       const smart_objects::SmartObject* response_params = NULL,
       const std::vector<uint8_t> binary_data = std::vector<uint8_t>());
 
-  /**
-   * @brief Check syntax of string from mobile
-   * @param str - string that need to be checked
-   * @param allow_empty_string if true methods allow empty sting
-   * @return true if success otherwise return false
-   */
-  bool CheckSyntax(const std::string& str, bool allow_empty_line = false);
-
   void SendProviderRequest(
       const mobile_apis::FunctionID::eType& mobile_function_id,
       const hmi_apis::FunctionID::eType& hmi_function_id,
@@ -214,12 +206,33 @@ class CommandRequestImpl : public CommandImpl,
   mobile_apis::Result::eType GetMobileResultCode(
       const hmi_apis::Common_Result::eType& hmi_code) const;
 
+  /**
+   * @brief Checks Mobile result code for single RPC
+   * @param result_code contains result code from response to Mobile
+   * @return true if result code complies to successful result codes,
+   * false otherwise.
+   */
+  static bool IsMobileResultSuccess(
+      const mobile_apis::Result::eType result_code);
+
+  /**
+   * @brief Checks HMI result code for single RPC
+   * @param result_code contains result code from HMI response
+   * @return true if result code complies to successful result codes,
+   * false otherwise.
+   */
+  static bool IsHMIResultSuccess(
+      const hmi_apis::Common_Result::eType result_code);
+
  protected:
   /**
    * @brief Checks message permissions and parameters according to policy table
    * permissions
+   * @param source The source of the command (used to determine if a response
+   * should be sent on failure)
+   * @return true if the RPC is allowed, false otherwise
    */
-  bool CheckAllowedParameters();
+  bool CheckAllowedParameters(const Command::CommandSource source);
 
   /**
    * @brief Checks HMI capabilities for specified button support
@@ -228,11 +241,6 @@ class CommandRequestImpl : public CommandImpl,
    * otherwise returns false
    */
   bool CheckHMICapabilities(const mobile_apis::ButtonName::eType button) const;
-
-  /**
-   * @brief Remove from current message parameters disallowed by policy table
-   */
-  void RemoveDisallowedParameters();
 
   /**
    * @brief Adds disallowed parameters back to response with appropriate
@@ -247,14 +255,6 @@ class CommandRequestImpl : public CommandImpl,
    * @return true if any param was marked as disallowed
    */
   bool HasDisallowedParams() const;
-
-  /**
-   * @brief Checks result code from Mobile for single RPC
-   * @param result_code contains result code from Mobile response
-   * @return true if result code complies successful result codes,
-   * false otherwise.
-   */
-  bool IsMobileResultSuccess(mobile_apis::Result::eType result_code) const;
 
   /**
    * @brief Checks result code from HMI for single RPC
@@ -317,6 +317,16 @@ class CommandRequestImpl : public CommandImpl,
   bool IsResultCodeUnsupported(const ResponseInfo& first,
                                const ResponseInfo& second) const;
 
+  /**
+   * @brief CheckResult checks whether the overall result
+   * of the responses is successful
+   * @param first response
+   * @param second response
+   * @return true if the overall result is successful
+   * otherwise - false
+   */
+  bool CheckResult(const ResponseInfo& first, const ResponseInfo& second) const;
+
  protected:
   /**
    * @brief Returns policy parameters permissions
@@ -355,8 +365,6 @@ class CommandRequestImpl : public CommandImpl,
 
   RequestState current_state_;
   sync_primitives::Lock state_lock_;
-  CommandParametersPermissions parameters_permissions_;
-  CommandParametersPermissions removed_parameters_permissions_;
 
   /**
    * @brief hash_update_mode_ Defines whether request must update hash value of
@@ -372,7 +380,7 @@ class CommandRequestImpl : public CommandImpl,
    * @param info string with disallowed params enumeration
    * @param param disallowed param
    */
-  void AddDissalowedParameterToInfoString(std::string& info,
+  void AddDisallowedParameterToInfoString(std::string& info,
                                           const std::string& param) const;
 
   /**

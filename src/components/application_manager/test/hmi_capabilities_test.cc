@@ -50,6 +50,7 @@
 #include "application_manager/resumption/resume_ctrl.h"
 #include "application_manager/state_controller.h"
 #include "resumption/last_state_impl.h"
+#include "resumption/last_state_wrapper_impl.h"
 #include "utils/file_system.h"
 
 namespace test {
@@ -68,7 +69,9 @@ using namespace application_manager;
 class HMICapabilitiesTest : public ::testing::Test {
  protected:
   HMICapabilitiesTest()
-      : last_state_("app_storage_folder", "app_info_data")
+      : last_state_wrapper_(std::make_shared<resumption::LastStateWrapperImpl>(
+            std::make_shared<resumption::LastStateImpl>("app_storage_folder",
+                                                        "app_info_storage")))
       , file_name_("hmi_capabilities.json") {}
   virtual void SetUp() OVERRIDE {
     EXPECT_CALL(app_mngr_, event_dispatcher())
@@ -84,7 +87,7 @@ class HMICapabilitiesTest : public ::testing::Test {
         .WillOnce(Return(false));
     hmi_capabilities_test =
         std::make_shared<HMICapabilitiesForTesting>(app_mngr_);
-    hmi_capabilities_test->Init(&last_state_);
+    hmi_capabilities_test->Init(last_state_wrapper_);
   }
 
   void TearDown() OVERRIDE {
@@ -99,7 +102,7 @@ class HMICapabilitiesTest : public ::testing::Test {
   void SetCooperating();
   MockApplicationManager app_mngr_;
   event_engine_test::MockEventDispatcher mock_event_dispatcher;
-  resumption::LastStateImpl last_state_;
+  resumption::LastStateWrapperPtr last_state_wrapper_;
   MockApplicationManagerSettings mock_application_manager_settings_;
   std::shared_ptr<HMICapabilitiesForTesting> hmi_capabilities_test;
   const std::string file_name_;
@@ -336,15 +339,18 @@ TEST_F(HMICapabilitiesTest, LoadCapabilitiesFromFile) {
   // Check audio pass thru
   const smart_objects::SmartObject audio_pass_thru_capabilities_so =
       *(hmi_capabilities_test->audio_pass_thru_capabilities());
+  EXPECT_EQ(smart_objects::SmartType_Array,
+            audio_pass_thru_capabilities_so.getType());
+  EXPECT_EQ(1u, audio_pass_thru_capabilities_so.length());
   EXPECT_EQ(hmi_apis::Common_SamplingRate::RATE_44KHZ,
             static_cast<hmi_apis::Common_SamplingRate::eType>(
-                audio_pass_thru_capabilities_so["samplingRate"].asInt()));
+                audio_pass_thru_capabilities_so[0]["samplingRate"].asInt()));
   EXPECT_EQ(hmi_apis::Common_BitsPerSample::RATE_8_BIT,
             static_cast<hmi_apis::Common_BitsPerSample::eType>(
-                audio_pass_thru_capabilities_so["bitsPerSample"].asInt()));
+                audio_pass_thru_capabilities_so[0]["bitsPerSample"].asInt()));
   EXPECT_EQ(hmi_apis::Common_AudioType::PCM,
             static_cast<hmi_apis::Common_AudioType::eType>(
-                audio_pass_thru_capabilities_so["audioType"].asInt()));
+                audio_pass_thru_capabilities_so[0]["audioType"].asInt()));
 
   // Check hmi zone capabilities
   const smart_objects::SmartObject hmi_zone_capabilities_so =
@@ -511,7 +517,7 @@ TEST_F(HMICapabilitiesTest,
 
   std::shared_ptr<HMICapabilitiesForTesting> hmi_capabilities =
       std::make_shared<HMICapabilitiesForTesting>(mock_app_mngr);
-  hmi_capabilities->Init(&last_state_);
+  hmi_capabilities->Init(last_state_wrapper_);
 
   // Check system capabilities; only phone capability is available
   EXPECT_FALSE(hmi_capabilities->navigation_supported());
@@ -551,7 +557,7 @@ TEST_F(HMICapabilitiesTest,
 
   std::shared_ptr<HMICapabilitiesForTesting> hmi_capabilities =
       std::make_shared<HMICapabilitiesForTesting>(mock_app_mngr);
-  hmi_capabilities->Init(&last_state_);
+  hmi_capabilities->Init(last_state_wrapper_);
 
   // Check system capabilities; only navigation capability is valid, the other
   // two are empty
@@ -567,6 +573,59 @@ TEST_F(HMICapabilitiesTest,
   EXPECT_TRUE(navigation_capability_so.keyExists("getWayPointsEnabled"));
   EXPECT_TRUE(navigation_capability_so["sendLocationEnabled"].asBool());
   EXPECT_FALSE(navigation_capability_so["getWayPointsEnabled"].asBool());
+}
+
+TEST_F(HMICapabilitiesTest,
+       LoadCapabilitiesFromFileAndVerifyOldAudioPassThruCapabilities) {
+  MockApplicationManager mock_app_mngr;
+  event_engine_test::MockEventDispatcher mock_dispatcher;
+  MockApplicationManagerSettings mock_application_manager_settings;
+
+  const std::string hmi_capabilities_file = "hmi_capabilities_old_apt.json";
+
+  EXPECT_CALL(mock_app_mngr, event_dispatcher())
+      .WillOnce(ReturnRef(mock_dispatcher));
+  EXPECT_CALL(mock_app_mngr, get_settings())
+      .WillRepeatedly(ReturnRef(mock_application_manager_settings));
+  EXPECT_CALL(mock_application_manager_settings, hmi_capabilities_file_name())
+      .WillOnce(ReturnRef(hmi_capabilities_file));
+  EXPECT_CALL(mock_dispatcher, add_observer(_, _, _)).Times(1);
+  EXPECT_CALL(mock_dispatcher, remove_observer(_)).Times(1);
+  EXPECT_CALL(mock_application_manager_settings, launch_hmi())
+      .WillOnce(Return(false));
+  EXPECT_CALL(*(MockMessageHelper::message_helper_mock()),
+              CommonLanguageFromString(_))
+      .WillRepeatedly(Invoke(TestCommonLanguageFromString));
+
+  if (file_system::FileExists("./app_info_data")) {
+    EXPECT_TRUE(::file_system::DeleteFile("./app_info_data"));
+  }
+
+  std::shared_ptr<HMICapabilitiesForTesting> hmi_capabilities =
+      std::make_shared<HMICapabilitiesForTesting>(mock_app_mngr);
+  hmi_capabilities->Init(last_state_wrapper_);
+
+  // with old audio pass thru format, the object is an array containing a single
+  // object
+  smart_objects::SmartObjectSPtr audio_pass_thru_capabilities_so =
+      hmi_capabilities->audio_pass_thru_capabilities();
+  EXPECT_EQ(smart_objects::SmartType_Array,
+            audio_pass_thru_capabilities_so->getType());
+  EXPECT_EQ(1u, audio_pass_thru_capabilities_so->length());
+  smart_objects::SmartObject& first_element =
+      (*audio_pass_thru_capabilities_so)[0];
+  EXPECT_TRUE(first_element.keyExists("samplingRate"));
+  EXPECT_EQ(hmi_apis::Common_SamplingRate::RATE_22KHZ,
+            static_cast<hmi_apis::Common_SamplingRate::eType>(
+                first_element["samplingRate"].asInt()));
+  EXPECT_TRUE(first_element.keyExists("bitsPerSample"));
+  EXPECT_EQ(hmi_apis::Common_BitsPerSample::RATE_16_BIT,
+            static_cast<hmi_apis::Common_BitsPerSample::eType>(
+                first_element["bitsPerSample"].asInt()));
+  EXPECT_TRUE(first_element.keyExists("audioType"));
+  EXPECT_EQ(hmi_apis::Common_AudioType::PCM,
+            static_cast<hmi_apis::Common_AudioType::eType>(
+                first_element["audioType"].asInt()));
 }
 
 TEST_F(HMICapabilitiesTest, VerifyImageType) {

@@ -39,6 +39,8 @@
 #include "rc_rpc_plugin/commands/hmi/rc_on_remote_control_settings_notification.h"
 #include "rc_rpc_plugin/mock/mock_interior_data_cache.h"
 #include "rc_rpc_plugin/mock/mock_interior_data_manager.h"
+#include "rc_rpc_plugin/mock/mock_rc_capabilities_manager.h"
+#include "rc_rpc_plugin/mock/mock_rc_consent_manager.h"
 #include "rc_rpc_plugin/mock/mock_resource_allocation_manager.h"
 #include "rc_rpc_plugin/rc_module_constants.h"
 #include "rc_rpc_plugin/rc_rpc_plugin.h"
@@ -95,7 +97,9 @@ class RCOnRemoteControlSettingsNotificationTest
                            mock_policy_handler_,
                            mock_allocation_manager_,
                            mock_interior_data_cache_,
-                           mock_interior_data_manager_};
+                           mock_interior_data_manager_,
+                           mock_rc_capabilities_manager_,
+                           mock_rc_consent_manger_};
     return std::make_shared<Command>(msg ? msg : msg = CreateMessage(), params);
   }
 
@@ -107,6 +111,9 @@ class RCOnRemoteControlSettingsNotificationTest
       mock_interior_data_cache_;
   testing::NiceMock<rc_rpc_plugin_test::MockInteriorDataManager>
       mock_interior_data_manager_;
+  testing::NiceMock<rc_rpc_plugin_test::MockRCCapabilitiesManager>
+      mock_rc_capabilities_manager_;
+  testing::NiceMock<MockRCConsentManager> mock_rc_consent_manger_;
 };
 
 TEST_F(RCOnRemoteControlSettingsNotificationTest,
@@ -141,6 +148,7 @@ TEST_F(RCOnRemoteControlSettingsNotificationTest,
 
   EXPECT_CALL(mock_allocation_manager_, ResetAllAllocations());
   EXPECT_CALL(mock_interior_data_manager_, OnDisablingRC());
+  EXPECT_CALL(mock_rc_consent_manger_, RemoveAllConsents());
 
   // Act
   std::shared_ptr<

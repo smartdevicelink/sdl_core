@@ -47,7 +47,15 @@ class SDLRPCPlugin : public plugins::RPCPlugin {
   bool Init(app_mngr::ApplicationManager& app_manager,
             app_mngr::rpc_service::RPCService& rpc_service,
             app_mngr::HMICapabilities& hmi_capabilities,
-            policy::PolicyHandlerInterface& policy_handler) OVERRIDE;
+            policy::PolicyHandlerInterface& policy_handler,
+            resumption::LastStateWrapperPtr last_state) OVERRIDE;
+
+  DEPRECATED
+  bool Init(app_mngr::ApplicationManager& app_manager,
+            app_mngr::rpc_service::RPCService& rpc_service,
+            app_mngr::HMICapabilities& hmi_capabilities,
+            policy::PolicyHandlerInterface& policy_handler,
+            resumption::LastState& last_state) OVERRIDE;
 
   bool IsAbleToProcess(
       const int32_t function_id,
@@ -67,5 +75,5 @@ class SDLRPCPlugin : public plugins::RPCPlugin {
 }  // namespace sdl_rpc_plugin
 
 extern "C" application_manager::plugin_manager::RPCPlugin* Create();
-
+extern "C" void Delete(application_manager::plugin_manager::RPCPlugin* data);
 #endif  // SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_SDL_RPC_PLUGIN_H

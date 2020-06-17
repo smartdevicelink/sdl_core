@@ -49,7 +49,21 @@ bool AppServiceRpcPlugin::Init(
     application_manager::ApplicationManager& app_manager,
     application_manager::rpc_service::RPCService& rpc_service,
     application_manager::HMICapabilities& hmi_capabilities,
-    policy::PolicyHandlerInterface& policy_handler) {
+    policy::PolicyHandlerInterface& policy_handler,
+    resumption::LastStateWrapperPtr last_state) {
+  UNUSED(last_state);
+  application_manager_ = &app_manager;
+  command_factory_.reset(new app_service_rpc_plugin::AppServiceCommandFactory(
+      app_manager, rpc_service, hmi_capabilities, policy_handler));
+  return true;
+}
+
+bool AppServiceRpcPlugin::Init(app_mngr::ApplicationManager& app_manager,
+                               app_mngr::rpc_service::RPCService& rpc_service,
+                               app_mngr::HMICapabilities& hmi_capabilities,
+                               policy::PolicyHandlerInterface& policy_handler,
+                               resumption::LastState& last_state) {
+  UNUSED(last_state);
   application_manager_ = &app_manager;
   command_factory_.reset(new app_service_rpc_plugin::AppServiceCommandFactory(
       app_manager, rpc_service, hmi_capabilities, policy_handler));
@@ -93,6 +107,14 @@ void AppServiceRpcPlugin::DeleteSubscriptions(
 
 }  // namespace app_service_rpc_plugin
 
-extern "C" application_manager::plugin_manager::RPCPlugin* Create() {
+extern "C" __attribute__((visibility("default")))
+application_manager::plugin_manager::RPCPlugin*
+Create() {
   return new app_service_rpc_plugin::AppServiceRpcPlugin();
+}
+
+extern "C" __attribute__((visibility("default"))) void Delete(
+    application_manager::plugin_manager::RPCPlugin* data) {
+  delete data;
+  DELETE_THREAD_LOGGER(app_service_rpc_plugin::logger_);
 }

@@ -130,21 +130,21 @@ CSmartSchema XXX::YYY::ZZZ::Test::InitFunction_name1_request(
   // Function parameter param2.
   TSharedPtr<ISchemaItem> param2_SchemaItem = TEnumSchemaItem<Enum1::eType>::create(param2_allowed_enum_subset_values, TSchemaItemParameter<Enum1::eType>(name1));
 
-  std::map<std::string, CObjectSchemaItem::SMember> schema_members;
+  std::map<std::string, SMember> schema_members;
 
-  schema_members["param1"] = CObjectSchemaItem::SMember(param1_SchemaItem, true);
-  schema_members["param2"] = CObjectSchemaItem::SMember(param2_SchemaItem, true);
+  schema_members["param1"] = SMember(param1_SchemaItem, true);
+  schema_members["param2"] = SMember(param2_SchemaItem, true);
 
-  std::map<std::string, CObjectSchemaItem::SMember> params_members;
-  params_members[ns_smart_device_link::ns_json_handler::strings::S_FUNCTION_ID] = CObjectSchemaItem::SMember(TEnumSchemaItem<FunctionID::eType>::create(function_id_items), true);
-  params_members[ns_smart_device_link::ns_json_handler::strings::S_MESSAGE_TYPE] = CObjectSchemaItem::SMember(TEnumSchemaItem<messageType::eType>::create(message_type_items), true);
-  params_members[ns_smart_device_link::ns_json_handler::strings::S_PROTOCOL_VERSION] = CObjectSchemaItem::SMember(TNumberSchemaItem<int>::create(), true);
-  params_members[ns_smart_device_link::ns_json_handler::strings::S_PROTOCOL_TYPE] = CObjectSchemaItem::SMember(TNumberSchemaItem<int>::create(), true);
-  params_members[ns_smart_device_link::ns_json_handler::strings::S_CORRELATION_ID] = CObjectSchemaItem::SMember(TNumberSchemaItem<int>::create(), true);
+  std::map<std::string, SMember> params_members;
+  params_members[ns_smart_device_link::ns_json_handler::strings::S_FUNCTION_ID] = SMember(TEnumSchemaItem<FunctionID::eType>::create(function_id_items), true);
+  params_members[ns_smart_device_link::ns_json_handler::strings::S_MESSAGE_TYPE] = SMember(TEnumSchemaItem<messageType::eType>::create(message_type_items), true);
+  params_members[ns_smart_device_link::ns_json_handler::strings::S_PROTOCOL_VERSION] = SMember(TNumberSchemaItem<int>::create(), true);
+  params_members[ns_smart_device_link::ns_json_handler::strings::S_PROTOCOL_TYPE] = SMember(TNumberSchemaItem<int>::create(), true);
+  params_members[ns_smart_device_link::ns_json_handler::strings::S_CORRELATION_ID] = SMember(TNumberSchemaItem<int>::create(), true);
 
-  std::map<std::string, CObjectSchemaItem::SMember> root_members_map;
-  root_members_map[ns_smart_device_link::ns_json_handler::strings::S_MSG_PARAMS] = CObjectSchemaItem::SMember(CObjectSchemaItem::create(schema_members), true);
-  root_members_map[ns_smart_device_link::ns_json_handler::strings::S_PARAMS] = CObjectSchemaItem::SMember(CObjectSchemaItem::create(params_members), true);
+  std::map<std::string, SMember> root_members_map;
+  root_members_map[ns_smart_device_link::ns_json_handler::strings::S_MSG_PARAMS] = SMember(CObjectSchemaItem::create(schema_members), true);
+  root_members_map[ns_smart_device_link::ns_json_handler::strings::S_PARAMS] = SMember(CObjectSchemaItem::create(params_members), true);
 
   return CSmartSchema(CObjectSchemaItem::create(root_members_map));
 }
@@ -153,18 +153,18 @@ CSmartSchema XXX::YYY::ZZZ::Test::InitFunction_val_1_response(
     const TStructsSchemaItems &struct_schema_items,
     const std::set<FunctionID::eType> &function_id_items,
     const std::set<messageType::eType> &message_type_items) {
-  std::map<std::string, CObjectSchemaItem::SMember> schema_members;
+  std::map<std::string, SMember> schema_members;
 
-  std::map<std::string, CObjectSchemaItem::SMember> params_members;
-  params_members[ns_smart_device_link::ns_json_handler::strings::S_FUNCTION_ID] = CObjectSchemaItem::SMember(TEnumSchemaItem<FunctionID::eType>::create(function_id_items), true);
-  params_members[ns_smart_device_link::ns_json_handler::strings::S_MESSAGE_TYPE] = CObjectSchemaItem::SMember(TEnumSchemaItem<messageType::eType>::create(message_type_items), true);
-  params_members[ns_smart_device_link::ns_json_handler::strings::S_PROTOCOL_VERSION] = CObjectSchemaItem::SMember(TNumberSchemaItem<int>::create(), true);
-  params_members[ns_smart_device_link::ns_json_handler::strings::S_PROTOCOL_TYPE] = CObjectSchemaItem::SMember(TNumberSchemaItem<int>::create(), true);
-  params_members[ns_smart_device_link::ns_json_handler::strings::S_CORRELATION_ID] = CObjectSchemaItem::SMember(TNumberSchemaItem<int>::create(), true);
+  std::map<std::string, SMember> params_members;
+  params_members[ns_smart_device_link::ns_json_handler::strings::S_FUNCTION_ID] = SMember(TEnumSchemaItem<FunctionID::eType>::create(function_id_items), true);
+  params_members[ns_smart_device_link::ns_json_handler::strings::S_MESSAGE_TYPE] = SMember(TEnumSchemaItem<messageType::eType>::create(message_type_items), true);
+  params_members[ns_smart_device_link::ns_json_handler::strings::S_PROTOCOL_VERSION] = SMember(TNumberSchemaItem<int>::create(), true);
+  params_members[ns_smart_device_link::ns_json_handler::strings::S_PROTOCOL_TYPE] = SMember(TNumberSchemaItem<int>::create(), true);
+  params_members[ns_smart_device_link::ns_json_handler::strings::S_CORRELATION_ID] = SMember(TNumberSchemaItem<int>::create(), true);
 
-  std::map<std::string, CObjectSchemaItem::SMember> root_members_map;
-  root_members_map[ns_smart_device_link::ns_json_handler::strings::S_MSG_PARAMS] = CObjectSchemaItem::SMember(CObjectSchemaItem::create(schema_members), true);
-  root_members_map[ns_smart_device_link::ns_json_handler::strings::S_PARAMS] = CObjectSchemaItem::SMember(CObjectSchemaItem::create(params_members), true);
+  std::map<std::string, SMember> root_members_map;
+  root_members_map[ns_smart_device_link::ns_json_handler::strings::S_MSG_PARAMS] = SMember(CObjectSchemaItem::create(schema_members), true);
+  root_members_map[ns_smart_device_link::ns_json_handler::strings::S_PARAMS] = SMember(CObjectSchemaItem::create(params_members), true);
 
   return CSmartSchema(CObjectSchemaItem::create(root_members_map));
 }
@@ -173,17 +173,17 @@ CSmartSchema XXX::YYY::ZZZ::Test::InitFunction_val_2_notification(
     const TStructsSchemaItems &struct_schema_items,
     const std::set<FunctionID::eType> &function_id_items,
     const std::set<messageType::eType> &message_type_items) {
-  std::map<std::string, CObjectSchemaItem::SMember> schema_members;
+  std::map<std::string, SMember> schema_members;
 
-  std::map<std::string, CObjectSchemaItem::SMember> params_members;
-  params_members[ns_smart_device_link::ns_json_handler::strings::S_FUNCTION_ID] = CObjectSchemaItem::SMember(TEnumSchemaItem<FunctionID::eType>::create(function_id_items), true);
-  params_members[ns_smart_device_link::ns_json_handler::strings::S_MESSAGE_TYPE] = CObjectSchemaItem::SMember(TEnumSchemaItem<messageType::eType>::create(message_type_items), true);
-  params_members[ns_smart_device_link::ns_json_handler::strings::S_PROTOCOL_VERSION] = CObjectSchemaItem::SMember(TNumberSchemaItem<int>::create(), true);
-  params_members[ns_smart_device_link::ns_json_handler::strings::S_PROTOCOL_TYPE] = CObjectSchemaItem::SMember(TNumberSchemaItem<int>::create(), true);
+  std::map<std::string, SMember> params_members;
+  params_members[ns_smart_device_link::ns_json_handler::strings::S_FUNCTION_ID] = SMember(TEnumSchemaItem<FunctionID::eType>::create(function_id_items), true);
+  params_members[ns_smart_device_link::ns_json_handler::strings::S_MESSAGE_TYPE] = SMember(TEnumSchemaItem<messageType::eType>::create(message_type_items), true);
+  params_members[ns_smart_device_link::ns_json_handler::strings::S_PROTOCOL_VERSION] = SMember(TNumberSchemaItem<int>::create(), true);
+  params_members[ns_smart_device_link::ns_json_handler::strings::S_PROTOCOL_TYPE] = SMember(TNumberSchemaItem<int>::create(), true);
 
-  std::map<std::string, CObjectSchemaItem::SMember> root_members_map;
-  root_members_map[ns_smart_device_link::ns_json_handler::strings::S_MSG_PARAMS] = CObjectSchemaItem::SMember(CObjectSchemaItem::create(schema_members), true);
-  root_members_map[ns_smart_device_link::ns_json_handler::strings::S_PARAMS] = CObjectSchemaItem::SMember(CObjectSchemaItem::create(params_members), true);
+  std::map<std::string, SMember> root_members_map;
+  root_members_map[ns_smart_device_link::ns_json_handler::strings::S_MSG_PARAMS] = SMember(CObjectSchemaItem::create(schema_members), true);
+  root_members_map[ns_smart_device_link::ns_json_handler::strings::S_PARAMS] = SMember(CObjectSchemaItem::create(params_members), true);
 
   return CSmartSchema(CObjectSchemaItem::create(root_members_map));
 }
@@ -252,28 +252,28 @@ TSharedPtr<ISchemaItem> XXX::YYY::ZZZ::Test::InitStructSchemaItem_Struct1(
   // Struct member arrayOfEnum6.
   TSharedPtr<ISchemaItem> arrayOfEnum6_SchemaItem = CArraySchemaItem::create(TEnumSchemaItem<Enum_new4::eType>::create(sub3_allowed_enum_subset_values, TSchemaItemParameter<Enum_new4::eType>()), TSchemaItemParameter<size_t>(10), TSchemaItemParameter<size_t>(43));
 
-  std::map<std::string, CObjectSchemaItem::SMember> schema_members;
+  std::map<std::string, SMember> schema_members;
 
-  schema_members["intParam"] = CObjectSchemaItem::SMember(intParam_SchemaItem, true);
-  schema_members["doubleParam"] = CObjectSchemaItem::SMember(doubleParam_SchemaItem, false);
-  schema_members["boolParam"] = CObjectSchemaItem::SMember(boolParam_SchemaItem, true);
-  schema_members["structParam"] = CObjectSchemaItem::SMember(structParam_SchemaItem, true);
-  schema_members["enumParam"] = CObjectSchemaItem::SMember(enumParam_SchemaItem, true);
-  schema_members["enumParam1"] = CObjectSchemaItem::SMember(enumParam1_SchemaItem, true);
-  schema_members["enumSubset1"] = CObjectSchemaItem::SMember(enumSubset1_SchemaItem, false);
-  schema_members["arrayOfInt"] = CObjectSchemaItem::SMember(arrayOfInt_SchemaItem, false);
-  schema_members["arrayOfEnum1"] = CObjectSchemaItem::SMember(arrayOfEnum1_SchemaItem, false);
-  schema_members["arrayOfEnum3"] = CObjectSchemaItem::SMember(arrayOfEnum3_SchemaItem, true);
-  schema_members["arrayOfEnum4"] = CObjectSchemaItem::SMember(arrayOfEnum4_SchemaItem, true);
-  schema_members["arrayOfEnum5"] = CObjectSchemaItem::SMember(arrayOfEnum5_SchemaItem, true);
-  schema_members["arrayOfEnum6"] = CObjectSchemaItem::SMember(arrayOfEnum6_SchemaItem, true);
+  schema_members["intParam"] = SMember(intParam_SchemaItem, true);
+  schema_members["doubleParam"] = SMember(doubleParam_SchemaItem, false);
+  schema_members["boolParam"] = SMember(boolParam_SchemaItem, true);
+  schema_members["structParam"] = SMember(structParam_SchemaItem, true);
+  schema_members["enumParam"] = SMember(enumParam_SchemaItem, true);
+  schema_members["enumParam1"] = SMember(enumParam1_SchemaItem, true);
+  schema_members["enumSubset1"] = SMember(enumSubset1_SchemaItem, false);
+  schema_members["arrayOfInt"] = SMember(arrayOfInt_SchemaItem, false);
+  schema_members["arrayOfEnum1"] = SMember(arrayOfEnum1_SchemaItem, false);
+  schema_members["arrayOfEnum3"] = SMember(arrayOfEnum3_SchemaItem, true);
+  schema_members["arrayOfEnum4"] = SMember(arrayOfEnum4_SchemaItem, true);
+  schema_members["arrayOfEnum5"] = SMember(arrayOfEnum5_SchemaItem, true);
+  schema_members["arrayOfEnum6"] = SMember(arrayOfEnum6_SchemaItem, true);
 
   return CObjectSchemaItem::create(schema_members);
 }
 
 TSharedPtr<ISchemaItem> XXX::YYY::ZZZ::Test::InitStructSchemaItem_Struct2(
     const TStructsSchemaItems &struct_schema_items) {
-  std::map<std::string, CObjectSchemaItem::SMember> schema_members;
+  std::map<std::string, SMember> schema_members;
 
   return CObjectSchemaItem::create(schema_members);
 }

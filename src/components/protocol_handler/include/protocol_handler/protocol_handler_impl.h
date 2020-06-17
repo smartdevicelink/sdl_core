@@ -55,6 +55,7 @@
 #include "protocol_handler/protocol_handler_settings.h"
 #include "protocol_handler/protocol_observer.h"
 #include "protocol_handler/protocol_packet.h"
+#include "protocol_handler/service_status_update_handler.h"
 #include "protocol_handler/session_observer.h"
 #include "transport_manager/common.h"
 #include "transport_manager/transport_adapter/transport_adapter.h"
@@ -210,6 +211,16 @@ class ProtocolHandlerImpl
 
   void RemoveProtocolObserver(ProtocolObserver* observer) OVERRIDE;
 
+  void ProcessFailedPTU() OVERRIDE;
+
+#ifdef EXTERNAL_PROPRIETARY_MODE
+  /**
+   * @brief ProcessFailedCertDecrypt is called to notify security manager that
+   * certificate decryption failed in the external flow
+   */
+  void ProcessFailedCertDecrypt() OVERRIDE;
+#endif
+
 #ifdef ENABLE_SECURITY
   /**
    * \brief Sets pointer for SecurityManager layer for managing protection
@@ -219,6 +230,9 @@ class ProtocolHandlerImpl
   void set_security_manager(
       security_manager::SecurityManager* security_manager);
 #endif  // ENABLE_SECURITY
+
+  void set_service_status_update_handler(
+      std::unique_ptr<ServiceStatusUpdateHandler> handler);
 
   /**
    * \brief Stop all handling activity
@@ -230,7 +244,10 @@ class ProtocolHandlerImpl
    * \param message Message with params to be sent to Mobile App
    */
   void SendMessageToMobileApp(const RawMessagePtr message,
+                              bool needs_encryption,
                               bool final_message) OVERRIDE;
+
+  bool IsRPCServiceSecure(const uint32_t connection_key) const OVERRIDE;
 
   /**
    * \brief Sends number of processed frames in case of binary nav streaming
@@ -275,7 +292,7 @@ class ProtocolHandlerImpl
                       uint8_t session_id,
                       uint8_t service_type);
 
-  void NotifyOnFailedHandshake() OVERRIDE;
+  void NotifyOnGetSystemTimeFailed() OVERRIDE;
 
   // TODO(Ezamakhov): move Ack/Nack as interface for StartSessionHandler
   /**
@@ -433,9 +450,6 @@ class ProtocolHandlerImpl
   void NotifySessionStarted(const SessionContext& context,
                             std::vector<std::string>& rejected_params) OVERRIDE;
 
-  void OnAuthTokenUpdated(const std::string& policy_app_id,
-                          const std::string& auth_token) OVERRIDE;
-
 #ifdef BUILD_TESTS
   const impl::FromMobileQueue& get_from_mobile_queue() const {
     return raw_ford_messages_from_mobile_;
@@ -453,6 +467,8 @@ class ProtocolHandlerImpl
     tcp_port_ = tcp_port;
   }
 #endif
+
+  void OnAuthTokenUpdated(const std::string&, const std::string&) OVERRIDE;
 
  private:
   void SendEndServicePrivate(int32_t primary_connection_id,
@@ -520,10 +536,6 @@ class ProtocolHandlerImpl
   void OnTMMessageSendFailed(const transport_manager::DataSendError& error,
                              const RawMessagePtr message) OVERRIDE;
 
-  void OnConnectionPending(
-      const transport_manager::DeviceInfo& device_info,
-      const transport_manager::ConnectionUID connection_id) OVERRIDE;
-
   void OnConnectionEstablished(
       const transport_manager::DeviceInfo& device_info,
       const transport_manager::ConnectionUID connection_id) OVERRIDE;
@@ -534,6 +546,10 @@ class ProtocolHandlerImpl
   void OnUnexpectedDisconnect(
       const transport_manager::ConnectionUID connection_id,
       const transport_manager::CommunicationError& error) OVERRIDE;
+
+  void OnConnectionPending(
+      const transport_manager::DeviceInfo& device_info,
+      const transport_manager::ConnectionUID connection_id) OVERRIDE;
 
   /**
    * @brief Notifies that configuration of a transport has been updated.
@@ -569,6 +585,7 @@ class ProtocolHandlerImpl
                                      const uint8_t service_type,
                                      const size_t data_size,
                                      const uint8_t* data,
+                                     const bool needs_encryption,
                                      const bool is_final_message);
 
   /**
@@ -591,6 +608,7 @@ class ProtocolHandlerImpl
                                     const size_t data_size,
                                     const uint8_t* data,
                                     const size_t max_frame_size,
+                                    const bool needs_encryption,
                                     const bool is_final_message);
 
   /**
@@ -699,6 +717,12 @@ class ProtocolHandlerImpl
   const std::string TransportTypeFromTransport(
       const utils::custom_string::CustomString& transport) const;
 
+  const ServiceStatus ServiceDisallowedBySettings(
+      const ServiceType service_type,
+      const ConnectionID connection_id,
+      const uint8_t session_id,
+      const bool protection) const;
+
   const ProtocolHandlerSettings& settings_;
 
   /**
@@ -784,6 +808,8 @@ class ProtocolHandlerImpl
 
   sync_primitives::Lock start_session_frame_map_lock_;
   StartSessionFrameMap start_session_frame_map_;
+
+  std::unique_ptr<ServiceStatusUpdateHandler> service_status_update_handler_;
 
   // Map policy app id -> auth token
   sync_primitives::Lock auth_token_map_lock_;

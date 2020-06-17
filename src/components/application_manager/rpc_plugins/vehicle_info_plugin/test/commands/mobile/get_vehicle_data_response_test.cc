@@ -33,6 +33,8 @@
 #include "gtest/gtest.h"
 
 #include "application_manager/commands/commands_test.h"
+#include "vehicle_info_plugin/commands/vi_commands_test.h"
+
 #include "mobile/get_vehicle_data_response.h"
 #include "smart_objects/smart_object.h"
 
@@ -49,12 +51,12 @@ using vehicle_info_plugin::commands::GetVehicleDataResponse;
 typedef std::shared_ptr<GetVehicleDataResponse> GetVehicleDataResponsePtr;
 
 class GetVehicleDataResponseTest
-    : public CommandsTest<CommandsTestMocks::kIsNice> {};
+    : public VICommandsTest<CommandsTestMocks::kIsNice> {};
 
 TEST_F(GetVehicleDataResponseTest, GetVehicleDataResponse_SUCCESS) {
   MessageSharedPtr message(CreateMessage(smart_objects::SmartType_Map));
   GetVehicleDataResponsePtr command(
-      CreateCommand<GetVehicleDataResponse>(message));
+      CreateCommandVI<GetVehicleDataResponse>(message));
 
   EXPECT_CALL(mock_rpc_service_, SendMessageToMobile(message, _));
   command->Run();

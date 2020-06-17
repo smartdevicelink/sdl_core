@@ -33,6 +33,7 @@
 // POSSIBILITY OF SUCH DAMAGE.
 
 #include "formatters/generic_json_formatter.h"
+#include "utils/jsoncpp_reader_wrapper.h"
 
 namespace ns_smart_device_link {
 namespace ns_json_handler {
@@ -48,10 +49,10 @@ void GenericJsonFormatter::ToString(const ns_smart_objects::SmartObject& obj,
 bool GenericJsonFormatter::FromString(const std::string& str,
                                       ns_smart_objects::SmartObject& out) {
   Json::Value json_root;
-  Json::Reader reader;
-  bool result = reader.parse(str, json_root);
+  utils::JsonReader reader;
+  const bool result = reader.parse(str, &json_root);
 
-  if (true == result) {
+  if (result) {
     jsonValueToObj(json_root, out);
   }
 

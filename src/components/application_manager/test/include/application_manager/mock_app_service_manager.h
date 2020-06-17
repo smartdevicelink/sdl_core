@@ -37,6 +37,7 @@
 #include "application_manager/app_service_manager.h"
 #include "application_manager/commands/command.h"
 #include "application_manager/commands/command_impl.h"
+#include "application_manager/rpc_passing_handler.h"
 
 namespace test {
 namespace components {
@@ -45,7 +46,7 @@ namespace application_manager_test {
 class MockAppServiceManager : public application_manager::AppServiceManager {
  public:
   MockAppServiceManager(application_manager::ApplicationManager& app_manager,
-                        resumption::LastState& last_state)
+                        resumption::LastStateWrapperPtr last_state)
       : application_manager::AppServiceManager(app_manager, last_state) {}
   MOCK_METHOD3(
       PublishAppService,
@@ -86,6 +87,7 @@ class MockAppServiceManager : public application_manager::AppServiceManager {
                     const bool service_published));
   MOCK_METHOD1(UpdateNavigationCapabilities,
                bool(smart_objects::SmartObject& out_params));
+  MOCK_METHOD0(GetRPCPassingHandler, application_manager::RPCPassingHandler&());
 };
 
 }  // namespace application_manager_test

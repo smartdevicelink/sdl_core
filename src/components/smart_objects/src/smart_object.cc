@@ -734,16 +734,32 @@ void SmartObject::duplicate(const SmartObject& OtherObject) {
 void SmartObject::cleanup_data() {
   switch (m_type) {
     case SmartType_String:
-      delete m_data.str_value;
+      if (m_data.str_value) {
+        delete m_data.str_value;
+        m_data.str_value = nullptr;
+        m_type = SmartType_Null;
+      }
       break;
     case SmartType_Map:
-      delete m_data.map_value;
+      if (m_data.map_value) {
+        delete m_data.map_value;
+        m_data.map_value = nullptr;
+        m_type = SmartType_Null;
+      }
       break;
     case SmartType_Array:
-      delete m_data.array_value;
+      if (m_data.array_value) {
+        delete m_data.array_value;
+        m_data.array_value = nullptr;
+        m_type = SmartType_Null;
+      }
       break;
     case SmartType_Binary:
-      delete m_data.binary_value;
+      if (m_data.binary_value) {
+        delete m_data.binary_value;
+        m_data.binary_value = nullptr;
+        m_type = SmartType_Null;
+      }
       break;
     default:
       break;
@@ -876,11 +892,10 @@ bool SmartObject::isValid() const {
 }
 
 errors::eType SmartObject::validate(
-    rpc::ValidationReport* report__,
+    rpc::ValidationReport* report,
     const utils::SemanticVersion& MessageVersion,
     const bool allow_unknown_enums) {
-  return m_schema.validate(
-      *this, report__, MessageVersion, allow_unknown_enums);
+  return m_schema.validate(*this, report, MessageVersion, allow_unknown_enums);
 }
 
 void SmartObject::setSchema(const CSmartSchema& schema) {

@@ -1,0 +1,127 @@
+/**
+\page web_engine_support Web Engine Support Detailed Design
+## Table of contents
+- \subpage wes_intoduction
+  + \ref wes_rationale                "1.1 Rationale"
+  + \ref wes_scope                    "1.2 Scope"
+- \subpage wes_detail_design
+  + \ref wes_design_solutions         "2.1 Design solutions"
+  + \ref wes_class_structure          "2.2 Class Structure"
+  + \ref wes_sequence_diagram         "2.3 Sequence diagram"
+- \subpage wes_data_structures
+  + \ref wes_data_structure        "3.1 Data structures"
+- \subpage wes_references_and_history
+  + \ref wes_history                  "4.1 References"
+*/
+//-----------------------------------------------------------
+/**
+\page wes_intoduction 1 Introduction
+The document is intended to support software developers, 
+maintenance and integration engineers with sufficient,
+detailed information concerning the design, development and
+deployment concepts, to accomplish their respective tasks without reliance on the authors.
+
+\anchor wes_rationale
+## 1.1 Rationale
+Boost asio libraries were utilized to enable websocket server connection for web engine.
+To split responsibilities, the following entities were introduces to enable server connections:
+- WebSocketListener
+- WebSocketConnection
+- WebSocketSession
+- WebSocketSecureSession
+
+
+\anchor wes_scope
+## 1.2 Scope
+All aforementioned entities are part of transport_manager namespace
+
+*/
+//-----------------------------------------------------------
+/**
+\page wes_detail_design 2 Component detail design
+\anchor wes_design_solutions
+### 2.1 Design solutions
+
+- WebSocket server was implemented using several layers (e.g. WebSocketConnection, WebSocketSession, WebSocketSecureSession).
+- Utilizing boost::asio library to host a websocket server and establish websocket connections
+- Utilizing asynchronous programming to make all server calls nonblocking 
+- CRTP and template specialization to facilitate code reuse.
+
+
+
+#### Design description
+transport_manager::WebSocketListener is an entity that is responsible for creating and listening for connections.
+It includes creating boost library objects to establish a connection, deducing security parameters during its initialization,
+opening a port and accepting new connections.
+The following parameters are used to configure security connection: 
+- WSServerCertificatePath (path to websocket server certificate)
+- WSServerKeyPath (path to websocket server private key path)
+- WSServerCACertificatePath (path to CA certificate)
+
+SDL will run in WSS mode only if ALL these parameters are present and have valid values.
+To run SDL as a WS server, one should remove ALL these parameters from smartDeviceLink.ini file (including parameter KEY and VALUE).
+All other cases of parameter configuration (e.g. two of three params are set) are considered to be misconfiguration,
+and SDL will launch with no websocket server transport. 
+
+transport_manager::WebSocketConnection is a class that is used as an additional layer between WebSocketListener and WebSocketSession,
+with ability to hadle input/output errors.
+
+transport_manager::WebSocketSession is a class that represents the lowest layer of abstraction in regards of WS server connection. It is used to read
+data from socket to buffer and notifying its observers about connection events.
+
+transport_manager::WebSocketSecureSession is a class that inherits WebSocketSession with an additional role of supporting TLS handshake.
+
+\anchor wes_class_structure
+### 2.2 Class Structure
+The following UML class diagram shows the component structure:
+![Web Engine Support class diagram](WES_classes.png)
+For more information about class diagram follow:
+- http://www.uml-diagrams.org/class-diagrams-overview.htqml
+- https://sourcemaking.com/uml/modeling-it-systems/structural-view/class-diagram
+
+\anchor wes_sequence_diagram
+### 2.3 Sequence diagram
+The following UML sequence diagram shows the component dynamic behavior.
+For more information about sequence diagram follow:
+- http://www.uml-diagrams.org/sequence-diagrams.html
+- https://sourcemaking.com/uml/modeling-it-systems/external-view/use-case-sequence-diagram
+
+Establishing WebSocket connection:
+![WES Basic flow](WES_sequence.png)
+*/
+
+//-----------------------------------------------------------
+/**
+\page wes_data_structures 3 Component data and resources
+\anchor wes_data_structure
+### 3.1 Element Data Structure
+The following data types are used by WebSocketListener:
+ - transport_manager::TransportAdapterController
+ - boost::asio::io_context
+ - boost::ssl::context 
+ - boost::asio::tcp::acceptor
+ - boost::asio::tcp::socket
+ - boost::asio::thread_pool
+ - WebSocketConnection
+ - transport_manager::TransportManagerSettings
+
+//-----------------------------------------------------------
+/**
+\page wes_references_and_history 4 References and history
+\anchor wes_history
+### 4.1 Document history
+Document change history
+
+| Version     | Date       | Author/Editor                          | Change description  |
+|-------------|------------|----------------------------------------|---------------------|
+| 0.1         | 02/03/2020 | [MKed](https://github.com/mked-luxoft) | Initial version from the previous [SDL SDD](https://adc.luxoft.com/confluence/pages/viewpage.action?pageId=279677125) |
+
+Document approve history
+
+| Version     | Date       | Author/Editor               | Change description  |
+|-------------|------------|-----------------------------|---------------------|
+| | | | |
+
+For more precise document change history follow github history -
+- https://github.com/smartdevicelink/sdl_core/commits/develop/src/components/transport_manager/docs/SDL.SDD.WebEngineSupport.dox
+*/

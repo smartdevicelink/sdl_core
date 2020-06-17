@@ -65,6 +65,11 @@ void GetAppServiceDataRequest::Run() {
                       true);
 }
 
+bool GetAppServiceDataRequest::Init() {
+  hash_update_mode_ = HashUpdateMode::kDoHashUpdate;
+  return true;
+}
+
 void GetAppServiceDataRequest::HandleSubscribe() {
   std::string service_type =
       (*message_)[strings::msg_params][strings::service_type].asString();
