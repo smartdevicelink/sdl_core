@@ -252,7 +252,6 @@ class MockMessageHelper {
                                      const uint32_t correlation_id,
                                      uint32_t connection_key));
   MOCK_METHOD0(vehicle_data, const VehicleData&());
-  MOCK_METHOD1(SendStopAudioPathThru, bool(ApplicationManager& app_mngr));
   MOCK_METHOD1(StringifiedFunctionID,
                std::string(const mobile_apis::FunctionID::eType function_id));
   MOCK_METHOD2(SendUIChangeRegistrationRequestToHMI,
@@ -282,8 +281,10 @@ class MockMessageHelper {
                     const std::string& urlSchema,
                     const std::string& packageName,
                     ApplicationManager& app_man));
-  MOCK_METHOD1(SendUnsubscribedWayPoints, bool(ApplicationManager& app_mngr));
-
+  MOCK_METHOD2(
+      CreateMessageWithFunctionID,
+      smart_objects::SmartObjectSPtr(ApplicationManager& app_mngr,
+                                     hmi_apis::FunctionID::eType function_id));
   MOCK_METHOD2(SendQueryApps,
                void(const uint32_t connection_key,
                     ApplicationManager& app_man));

@@ -3332,8 +3332,11 @@ void ApplicationManagerImpl::UnregisterApplication(
   if (EndAudioPassThru(app_id)) {
     // May be better to put this code in MessageHelper?
     StopAudioPassThru(app_id);
-    MessageHelper::SendStopAudioPathThru(*this);
+    auto message = MessageHelper::CreateMessageWithFunctionID(
+        *this, hmi_apis::FunctionID::UI_EndAudioPassThru);
+    GetRPCService().ManageHMICommand(message);
   }
+
   auto on_app_unregistered =
       [app_to_remove](plugin_manager::RPCPlugin& plugin) {
         plugin.OnApplicationEvent(plugin_manager::kApplicationUnregistered,

@@ -617,20 +617,32 @@ class MessageHelper {
                                   bool available,
                                   ApplicationManager& app_mngr);
 
-  /*
+  /**
+   * @deprecated Deprecated in favor of method CreateMessageWithFunctionID
    * @brief Sends notification to HMI to stop audioPathThru
    *
    * @param connection_key  Application connection key
    *
    * @return TRUE on SUCCES otherwise return FALSE
    */
-  static bool SendStopAudioPathThru(ApplicationManager& app_mngr);
+  DEPRECATED static bool SendStopAudioPathThru(ApplicationManager& app_mngr);
 
   /**
+   * @deprecated Deprecated in favor of method CreateMessageWithFunctionID
    * @brief Sends UnsubscribeWayPoints request
    * @return true if UnsubscribedWayPoints is send otherwise false
    */
-  static bool SendUnsubscribedWayPoints(ApplicationManager& app_mngr);
+  DEPRECATED static bool SendUnsubscribedWayPoints(
+      ApplicationManager& app_mngr);
+
+  /**
+   * @brief Creates message to HMI to send corresponding command
+   * @param function_id Function ID of corresponding command
+   * @return Shared pointer to smart object with received function ID and other
+   * parameters, which are needed for creation message to HMI
+   */
+  static smart_objects::SmartObjectSPtr CreateMessageWithFunctionID(
+      ApplicationManager& app_mngr, hmi_apis::FunctionID::eType function_id);
 
   static smart_objects::SmartObjectSPtr CreateNegativeResponse(
       uint32_t connection_key,

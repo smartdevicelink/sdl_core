@@ -639,6 +639,8 @@ TEST_F(ResumeCtrlTest, StartResumption_AppWithSubscriptionToWayPoints) {
   saved_app[application_manager::strings::subscribed_for_way_points] = true;
   saved_app[application_manager::strings::time_stamp] = kTestTimeStamp_;
 
+  smart_objects::SmartObjectSPtr message_to_hmi;
+
   GetInfoFromApp();
   ON_CALL(*mock_storage_,
           GetSavedApplication(kTestPolicyAppId_, kMacAddress_, _))
@@ -647,6 +649,16 @@ TEST_F(ResumeCtrlTest, StartResumption_AppWithSubscriptionToWayPoints) {
   EXPECT_CALL(
       mock_app_mngr_,
       SubscribeAppForWayPoints(A<application_manager::ApplicationSharedPtr>()));
+  EXPECT_CALL(*application_manager::MockMessageHelper::message_helper_mock(),
+              CreateMessageWithFunctionID(
+                  _, hmi_apis::FunctionID::Navigation_SubscribeWayPoints))
+      .WillOnce(Return(message_to_hmi));
+  ON_CALL(mock_app_mngr_, GetRPCService())
+      .WillByDefault(ReturnRef(mock_rpc_service_));
+  EXPECT_CALL(mock_rpc_service_,
+              ManageHMICommand(message_to_hmi, commands::Command::SOURCE_HMI))
+      .WillOnce(Return(true));
+
   const mobile_apis::HMILevel::eType hmi_test_level =
       mobile_apis::HMILevel::HMI_FULL;
   ON_CALL(mock_app_mngr_, GetDefaultHmiLevel(const_app_))

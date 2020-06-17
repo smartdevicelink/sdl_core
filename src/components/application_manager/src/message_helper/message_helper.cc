@@ -2524,6 +2524,17 @@ bool MessageHelper::SendUnsubscribedWayPoints(ApplicationManager& app_mngr) {
   return app_mngr.GetRPCService().ManageHMICommand(result);
 }
 
+smart_objects::SmartObjectSPtr MessageHelper::CreateMessageWithFunctionID(
+    ApplicationManager& app_mngr, hmi_apis::FunctionID::eType function_id) {
+  LOG4CXX_TRACE(logger_, "MessageHelper::CreateMessageWithFunctionID");
+
+  smart_objects::SmartObjectSPtr result = CreateMessageForHMI(
+      hmi_apis::messageType::request, app_mngr.GetNextHMICorrelationID());
+
+  (*result)[strings::params][strings::function_id] = function_id;
+  return result;
+}
+
 void MessageHelper::SendPolicySnapshotNotification(
     uint32_t connection_key,
     const std::string& snapshot_file_path,

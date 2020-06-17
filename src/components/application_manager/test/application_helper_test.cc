@@ -204,7 +204,14 @@ TEST_F(ApplicationHelperTest, RecallApplicationData_ExpectAppDataReset) {
   EXPECT_TRUE(NULL != file_ptr);
   EXPECT_TRUE(file_ptr->file_name == filename);
 
+  smart_objects::SmartObjectSPtr message_to_hmi;
+  EXPECT_CALL(*mock_message_helper_,
+              CreateMessageWithFunctionID(
+                  _, hmi_apis::FunctionID::Navigation_UnsubscribeWayPoints))
+      .WillOnce(Return(message_to_hmi));
+
   // Act
+
   application_manager::DeleteApplicationData(app_impl_, app_manager_impl_);
   EXPECT_FALSE(NULL != app_impl_->FindCommand(cmd_id));
   EXPECT_FALSE(NULL != app_impl_->FindSubMenu(menu_id));
@@ -243,7 +250,11 @@ TEST_F(ApplicationHelperTest, RecallApplicationData_ExpectHMICleanupRequests) {
   app_impl_->AddChoiceSet(choice_set_id, cmd[strings::msg_params]);
   app_impl_->SubscribeToButton(mobile_apis::ButtonName::AC);
 
-  EXPECT_CALL(*mock_message_helper_, SendUnsubscribedWayPoints(_));
+  smart_objects::SmartObjectSPtr message_to_hmi;
+  EXPECT_CALL(*mock_message_helper_,
+              CreateMessageWithFunctionID(
+                  _, hmi_apis::FunctionID::Navigation_UnsubscribeWayPoints))
+      .WillOnce(Return(message_to_hmi));
 
   EXPECT_CALL(*mock_message_helper_, SendDeleteCommandRequest(_, _, _));
 

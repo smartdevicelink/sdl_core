@@ -914,6 +914,10 @@ void ResumeCtrlImpl::AddWayPointsSubscription(
         saved_app[strings::subscribed_for_way_points];
     if (true == subscribed_for_way_points_so.asBool()) {
       application_manager_.SubscribeAppForWayPoints(application);
+      auto message = MessageHelper::CreateMessageWithFunctionID(
+          application_manager_,
+          hmi_apis::FunctionID::Navigation_SubscribeWayPoints);
+      application_manager_.GetRPCService().ManageHMICommand(message);
     }
   }
 }

@@ -457,11 +457,6 @@ const VehicleData& MessageHelper::vehicle_data() {
   return MockMessageHelper::message_helper_mock()->vehicle_data();
 }
 
-bool MessageHelper::SendStopAudioPathThru(ApplicationManager& app_mngr) {
-  return MockMessageHelper::message_helper_mock()->SendStopAudioPathThru(
-      app_mngr);
-}
-
 std::string MessageHelper::StringifiedFunctionID(
     const mobile_apis::FunctionID::eType function_id) {
   return MockMessageHelper::message_helper_mock()->StringifiedFunctionID(
@@ -517,9 +512,10 @@ void MessageHelper::SendLaunchApp(const uint32_t connection_key,
       connection_key, urlSchema, packageName, app_man);
 }
 
-bool MessageHelper::SendUnsubscribedWayPoints(ApplicationManager& app_mngr) {
-  return MockMessageHelper::message_helper_mock()->SendUnsubscribedWayPoints(
-      app_mngr);
+smart_objects::SmartObjectSPtr MessageHelper::CreateMessageWithFunctionID(
+    ApplicationManager& app_mngr, hmi_apis::FunctionID::eType function_id) {
+  return MockMessageHelper::message_helper_mock()->CreateMessageWithFunctionID(
+      app_mngr, function_id);
 }
 
 void MessageHelper::SendQueryApps(const uint32_t connection_key,
