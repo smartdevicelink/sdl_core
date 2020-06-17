@@ -3,5 +3,4 @@
 	url = https://github.com/open-source-parsers/jsoncpp.git
 [submodule "tools/rpc_spec"]
 	path = tools/rpc_spec
-	url = https://github.com/ydementieiev/rpc_spec.git
-	branch = feature/fuel_info_related_vehicle_data
+	url = https://github.com/LuxoftSDL/rpc_spec.git
