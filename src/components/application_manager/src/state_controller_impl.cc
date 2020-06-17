@@ -560,7 +560,7 @@ bool StateControllerImpl::IsStateAvailable(ApplicationSharedPtr app,
     }
   }
 
-  // fix: EMBEDDED_NAVI actived, actived navi or project app return false. 
+  // fix: EMBEDDED_NAVI actived, actived navi or project app return false.
   // other is ok.
   if (IsTempStateActive(HmiState::StateID::STATE_ID_EMBEDDED_NAVI) &&
       (app->is_navi() || app->mobile_projection_enabled())) {
