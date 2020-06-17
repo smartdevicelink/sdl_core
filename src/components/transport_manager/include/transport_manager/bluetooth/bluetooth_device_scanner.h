@@ -122,14 +122,6 @@ class BluetoothDeviceScanner : public DeviceScanner {
     BluetoothDeviceScanner* scanner_;
   };
 
-  class BluetoothDeviceInquiryDelegate : public threads::ThreadDelegate {
-   public:
-    explicit BluetoothDeviceInquiryDelegate(BluetoothDeviceScanner* scanner);
-    void threadMain() OVERRIDE;
-
-   private:
-    BluetoothDeviceScanner* scanner_;
-  };
   typedef std::vector<uint8_t> RfcommChannelVector;
 
   /**
@@ -179,7 +171,6 @@ class BluetoothDeviceScanner : public DeviceScanner {
 
   TransportAdapterController* controller_;
   threads::Thread* thread_;
-  threads::Thread* inquiry_thread_;
 
   bool shutdown_requested_;
   bool ready_;

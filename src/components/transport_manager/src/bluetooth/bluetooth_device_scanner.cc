@@ -108,7 +108,6 @@ BluetoothDeviceScanner::BluetoothDeviceScanner(
     int auto_repeat_pause_sec)
     : controller_(controller)
     , thread_(NULL)
-    , inquiry_thread_(NULL)
     , shutdown_requested_(false)
     , ready_(true)
     , device_scan_requested_(false)
@@ -136,8 +135,6 @@ BluetoothDeviceScanner::BluetoothDeviceScanner(
                      smart_device_link_service_uuid_data);
   thread_ = threads::CreateThread("BT Device Scanner",
                                   new BluetoothDeviceScannerDelegate(this));
-  inquiry_thread_ = threads::CreateThread(
-      "BT Device Inquiry", new BluetoothDeviceInquiryDelegate(this));
 }
 
 BluetoothDeviceScanner::BluetoothDeviceScanner(
@@ -147,7 +144,6 @@ BluetoothDeviceScanner::BluetoothDeviceScanner(
     const uint8_t* smart_device_link_service_uuid_data)
     : controller_(controller)
     , thread_(NULL)
-    , inquiry_thread_(NULL)
     , shutdown_requested_(false)
     , ready_(true)
     , device_scan_requested_(false)
@@ -159,16 +155,9 @@ BluetoothDeviceScanner::BluetoothDeviceScanner(
                      smart_device_link_service_uuid_data);
   thread_ = threads::CreateThread("BT Device Scanner",
                                   new BluetoothDeviceScannerDelegate(this));
-  inquiry_thread_ = threads::CreateThread(
-      "BT Device Inquiry", new BluetoothDeviceInquiryDelegate(this));
 }
 
 BluetoothDeviceScanner::~BluetoothDeviceScanner() {
-  if (inquiry_thread_) {
-    inquiry_thread_->join();
-    delete inquiry_thread_->delegate();
-    threads::DeleteThread(inquiry_thread_);
-  }
   thread_->join();
   delete thread_->delegate();
   threads::DeleteThread(thread_);
@@ -410,12 +399,9 @@ void BluetoothDeviceScanner::Thread() {
   ready_ = true;
   if (auto_repeat_search_) {
     while (!shutdown_requested_) {
-      if (!inquiry_thread_->is_running()) {
-        if (!inquiry_thread_->start()) {
-          LOG4CXX_ERROR(logger_,
-                        "Bluetooth device inquiry thread start failed");
-        }
-      }
+      DoInquiry();
+      device_scan_requested_ = false;
+      TimedWaitForDeviceScanRequest();
     }
   } else {  // search only on demand
     while (true) {
@@ -470,13 +456,6 @@ void BluetoothDeviceScanner::Terminate() {
   LOG4CXX_AUTO_TRACE(logger_);
   shutdown_requested_ = true;
 
-  if (inquiry_thread_) {
-    LOG4CXX_INFO(logger_,
-                 "Waiting for bluetooth device inquiry thread termination");
-    inquiry_thread_->stop();
-    LOG4CXX_INFO(logger_, "Bluetooth device inquiry thread stopped");
-  }
-
   if (thread_) {
     {
       sync_primitives::AutoLock auto_lock(device_scan_requested_lock_);
@@ -521,18 +500,6 @@ void BluetoothDeviceScanner::BluetoothDeviceScannerDelegate::threadMain() {
   LOG4CXX_AUTO_TRACE(logger_);
   DCHECK(scanner_);
   scanner_->Thread();
-}
-
-BluetoothDeviceScanner::BluetoothDeviceInquiryDelegate::
-    BluetoothDeviceInquiryDelegate(BluetoothDeviceScanner* scanner)
-    : scanner_(scanner) {}
-
-void BluetoothDeviceScanner::BluetoothDeviceInquiryDelegate::threadMain() {
-  LOG4CXX_AUTO_TRACE(logger_);
-  DCHECK(scanner_);
-  scanner_->DoInquiry();
-  scanner_->device_scan_requested_ = false;
-  scanner_->TimedWaitForDeviceScanRequest();
 }
 
 }  // namespace transport_adapter
