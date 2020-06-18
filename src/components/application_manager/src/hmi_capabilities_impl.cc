@@ -450,11 +450,8 @@ HMICapabilitiesImpl::HMICapabilitiesImpl(ApplicationManager& app_mngr)
     , phone_capability_(NULL)
     , video_streaming_capability_(NULL)
     , rc_capability_(NULL)
-<<<<<<< HEAD
     , driver_distraction_capability_(NULL)
-=======
     , seat_location_capability_(NULL)
->>>>>>> origin/develop
     , app_mngr_(app_mngr)
     , hmi_language_handler_(app_mngr) {
   InitCapabilities();
@@ -737,7 +734,6 @@ void HMICapabilitiesImpl::set_rc_capability(
   rc_capability_ = new smart_objects::SmartObject(rc_capability);
 }
 
-<<<<<<< HEAD
 void HMICapabilitiesImpl::set_driver_distraction_capability(
     const smart_objects::SmartObject& driver_distraction_capability) {
   if (driver_distraction_capability_) {
@@ -747,9 +743,6 @@ void HMICapabilitiesImpl::set_driver_distraction_capability(
       new smart_objects::SmartObject(driver_distraction_capability);
 }
 
-void HMICapabilitiesImpl::Init(resumption::LastState* last_state) {
-  hmi_language_handler_.Init(last_state);
-=======
 void HMICapabilitiesImpl::set_seat_location_capability(
     const smart_objects::SmartObject& seat_location_capability) {
   if (seat_location_capability_) {
@@ -762,7 +755,6 @@ void HMICapabilitiesImpl::set_seat_location_capability(
 void HMICapabilitiesImpl::Init(
     resumption::LastStateWrapperPtr last_state_wrapper) {
   hmi_language_handler_.Init(last_state_wrapper);
->>>>>>> origin/develop
   if (false == load_capabilities_from_file()) {
     LOG4CXX_ERROR(logger_, "file hmi_capabilities.json was not loaded");
   } else {
@@ -916,13 +908,13 @@ const smart_objects::SmartObject* HMICapabilitiesImpl::rc_capability() const {
 }
 
 const smart_objects::SmartObject*
-<<<<<<< HEAD
 HMICapabilitiesImpl::driver_distraction_capability() const {
   return driver_distraction_capability_;
-=======
+}
+
+const smart_objects::SmartObject*
 HMICapabilitiesImpl::seat_location_capability() const {
   return seat_location_capability_;
->>>>>>> origin/develop
 }
 
 bool HMICapabilitiesImpl::load_capabilities_from_file() {
@@ -1255,7 +1247,6 @@ bool HMICapabilitiesImpl::load_capabilities_from_file() {
           }
         }
         if (check_existing_json_member(system_capabilities,
-<<<<<<< HEAD
                                        "driverDistractionCapability")) {
           Json::Value driver_distraction_capability =
               system_capabilities.get("driverDistractionCapability", "");
@@ -1266,7 +1257,8 @@ bool HMICapabilitiesImpl::load_capabilities_from_file() {
           if (!driver_distraction_capability_so.empty()) {
             set_driver_distraction_supported(true);
           }
-=======
+        }
+        if (check_existing_json_member(system_capabilities,
                                        "seatLocationCapability")) {
           Json::Value seat_location_capability =
               system_capabilities.get("seatLocationCapability", "");
@@ -1274,7 +1266,6 @@ bool HMICapabilitiesImpl::load_capabilities_from_file() {
           formatters::CFormatterJsonBase::jsonValueToObj(
               seat_location_capability, seat_location_capability_so);
           set_seat_location_capability(seat_location_capability_so);
->>>>>>> origin/develop
         }
       }
     }  // UI end

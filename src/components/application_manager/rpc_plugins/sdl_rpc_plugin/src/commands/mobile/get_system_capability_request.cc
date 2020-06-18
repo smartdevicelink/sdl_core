@@ -163,7 +163,6 @@ void GetSystemCapabilityRequest::Run() {
                              all_services);
       break;
     }
-<<<<<<< HEAD
     case mobile_apis::SystemCapabilityType::DRIVER_DISTRACTION:
       if (hmi_capabilities.driver_distraction_capability() &&
           hmi_capabilities.driver_distraction_supported()) {
@@ -175,7 +174,6 @@ void GetSystemCapabilityRequest::Run() {
         return;
       }
       break;
-=======
     case mobile_apis::SystemCapabilityType::DISPLAYS: {
       auto capabilities = hmi_capabilities.system_display_capabilities();
       if (app->display_capabilities()) {
@@ -192,7 +190,6 @@ void GetSystemCapabilityRequest::Run() {
                      [strings::display_capabilities] = *capabilities;
       break;
     }
->>>>>>> origin/develop
     default:  // Return unsupported resource
       SendResponse(false, mobile_apis::Result::UNSUPPORTED_RESOURCE);
       return;

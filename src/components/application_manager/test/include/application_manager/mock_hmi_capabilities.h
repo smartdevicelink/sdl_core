@@ -193,14 +193,12 @@ class MockHMICapabilities : public ::application_manager::HMICapabilities {
   MOCK_METHOD1(set_rc_capability,
                void(const smart_objects::SmartObject& rc_capability));
 
-<<<<<<< HEAD
   MOCK_CONST_METHOD0(driver_distraction_capability,
                      const smart_objects::SmartObject*());
   MOCK_METHOD1(
       set_driver_distraction_capability,
       void(const smart_objects::SmartObject& driver_distraction_capability));
 
-=======
   MOCK_CONST_METHOD0(seat_location_capability,
                      const smart_objects::SmartObject*());
   MOCK_METHOD1(
@@ -208,7 +206,6 @@ class MockHMICapabilities : public ::application_manager::HMICapabilities {
       void(const smart_objects::SmartObject& seat_location_capability));
 
   DEPRECATED
->>>>>>> origin/develop
   MOCK_METHOD1(Init, void(resumption::LastState* last_state));
 
   MOCK_METHOD1(Init, void(resumption::LastStateWrapperPtr last_state_wrapper));

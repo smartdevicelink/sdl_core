@@ -122,7 +122,6 @@ void UIGetCapabilitiesResponse::Run() {
                     [strings::video_streaming_capability]);
     }
     if (msg_params[strings::system_capabilities].keyExists(
-<<<<<<< HEAD
             strings::driver_distraction_capability)) {
       if (!msg_params[strings::system_capabilities]
                      [strings::driver_distraction_capability]
@@ -132,16 +131,16 @@ void UIGetCapabilitiesResponse::Run() {
                       [strings::driver_distraction_capability]);
         hmi_capabilities.set_driver_distraction_supported(true);
       }
-=======
+    }
+    if (msg_params[strings::system_capabilities].keyExists(
             strings::display_capabilities)) {
       hmi_capabilities.set_system_display_capabilities(
           msg_params[strings::system_capabilities]
                     [strings::display_capabilities]);
->>>>>>> origin/develop
     }
   }
 }
 
 }  // namespace commands
 
-}  // namespace sdl_rpc_plugin
+}  // namespace commands

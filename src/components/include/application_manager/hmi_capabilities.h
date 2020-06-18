@@ -528,14 +528,12 @@ class HMICapabilities {
 
   virtual const smart_objects::SmartObject* rc_capability() const = 0;
 
-<<<<<<< HEAD
   virtual void set_driver_distraction_capability(
       const smart_objects::SmartObject& rc_capability) = 0;
 
   virtual const smart_objects::SmartObject* driver_distraction_capability()
       const = 0;
 
-=======
   /**
    * @brief Sets available SeatLocation capabilities for further usage by
    * RC functionality
@@ -553,7 +551,6 @@ class HMICapabilities {
       const = 0;
 
   DEPRECATED
->>>>>>> origin/develop
   virtual void Init(resumption::LastState* last_state) = 0;
 
   virtual void Init(resumption::LastStateWrapperPtr last_state_wrapper) = 0;

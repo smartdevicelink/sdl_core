@@ -521,14 +521,12 @@ class HMICapabilitiesImpl : public HMICapabilities {
 
   const smart_objects::SmartObject* rc_capability() const OVERRIDE;
 
-<<<<<<< HEAD
   void set_driver_distraction_capability(
       const smart_objects::SmartObject& driver_distraction_capability) OVERRIDE;
 
   const smart_objects::SmartObject* driver_distraction_capability()
       const OVERRIDE;
 
-=======
   void set_seat_location_capability(
       const smart_objects::SmartObject& seat_location_capability) OVERRIDE;
 
@@ -537,7 +535,6 @@ class HMICapabilitiesImpl : public HMICapabilities {
   void Init(resumption::LastStateWrapperPtr last_state_wrapper) OVERRIDE;
 
   DEPRECATED
->>>>>>> origin/develop
   void Init(resumption::LastState* last_state) OVERRIDE;
 
   /*
@@ -641,11 +638,8 @@ class HMICapabilitiesImpl : public HMICapabilities {
   smart_objects::SmartObject* phone_capability_;
   smart_objects::SmartObject* video_streaming_capability_;
   smart_objects::SmartObject* rc_capability_;
-<<<<<<< HEAD
   smart_objects::SmartObject* driver_distraction_capability_;
-=======
   smart_objects::SmartObject* seat_location_capability_;
->>>>>>> origin/develop
 
   ApplicationManager& app_mngr_;
   HMILanguageHandler hmi_language_handler_;

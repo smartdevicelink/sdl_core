@@ -4099,12 +4099,9 @@
         <element name="VIDEO_STREAMING"/>
         <element name="REMOTE_CONTROL"/>
         <element name="APP_SERVICES" />
-<<<<<<< HEAD
-        <element name="DRIVER_DISTRACTION" />
-=======
         <element name="SEAT_LOCATION"/>
         <element name="DISPLAYS"/>
->>>>>>> origin/develop
+        <element name="DRIVER_DISTRACTION" />
     </enum>
 
     <struct name="SystemCapability">
@@ -4128,13 +4125,6 @@
             <description>Describes extended capabilities of the module's phone feature</description>
         </param>
         <param name="appServicesCapabilities" type="Common.AppServicesCapabilities" mandatory="false">
-<<<<<<< HEAD
-            <description>An array of currently available services. If this is an update to the capability the affected services will include an update reason in that item</description>
-        </param>
-        <param name="driverDistractionCapability" type="DriverDistractionCapability" mandatory="false" since="6.0">
-            <description>Describes capabilities when the driver is distracted</description>
-        </param>      
-=======
             <description>
               An array of currently available services.
               If this is an update to the capability the affected services will include
@@ -4145,6 +4135,9 @@
         <param name="seatLocationCapability" type="SeatLocationCapability" mandatory="false">
             <description>Contains information about the locations of each seat</description>
         </param>
+        <param name="driverDistractionCapability" type="DriverDistractionCapability" mandatory="false" since="6.0">
+            <description>Describes capabilities when the driver is distracted</description>
+        </param>      
     </struct>
     
     <enum name="HybridAppPreference">
@@ -4180,7 +4173,6 @@
             If omitted, Core won't attempt to connect as the app selection (activation) is managed outside of Core. Instead it uses a server implementation of the connection type and expects the app to connect.
           </description>
       </param>
->>>>>>> origin/develop
     </struct>
 
 </interface>

@@ -119,12 +119,9 @@ extern const char* num_ticks;
 extern const char* slider_footer;
 extern const char* menu_id;
 extern const char* menu_name;
-<<<<<<< HEAD
 extern const char* parent_id;
-=======
 extern const char* menu_layout;
 extern const char* menu_layouts_available;
->>>>>>> origin/develop
 extern const char* interaction_choice_set_id;
 extern const char* interaction_choice_set_id_list;
 extern const char* choice_set;
@@ -201,11 +198,8 @@ extern const char* navigation_capability;
 extern const char* phone_capability;
 extern const char* video_streaming_capability;
 extern const char* rc_capability;
-<<<<<<< HEAD
 extern const char* driver_distraction_capability;
-=======
 extern const char* seat_location_capability;
->>>>>>> origin/develop
 extern const char* app_services_capabilities;
 extern const char* day_color_scheme;
 extern const char* night_color_scheme;
