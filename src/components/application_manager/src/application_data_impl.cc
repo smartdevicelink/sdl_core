@@ -278,6 +278,11 @@ DynamicApplicationDataImpl::~DynamicApplicationDataImpl() {
   }
   sub_menu_.clear();
 
+  for (auto command : choice_set_map_) {
+    delete command.second;
+  }
+  choice_set_map_.clear();
+
   PerformChoiceSetMap::iterator it = performinteraction_choice_set_map_.begin();
   for (; performinteraction_choice_set_map_.end() != it; ++it) {
     PerformChoice::iterator choice_it =
