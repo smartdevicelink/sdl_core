@@ -283,6 +283,42 @@ class RegisterAppInterfaceRequestTest
                         mock_app)));
   }
 
+  void SetCommonPreconditionsToRegisterApplication() {
+    ON_CALL(app_mngr_, IsApplicationForbidden(_, _))
+        .WillByDefault(Return(false));
+    ON_CALL(mock_connection_handler_,
+            GetDataOnSessionKey(kConnectionKey, _, _, _))
+        .WillByDefault(DoAll(SetArgPointee<3>(kDeviceHandle), Return(0)));
+    ON_CALL(mock_session_observer_,
+            GetDataOnDeviceID(kDeviceHandle, _, _, _, _))
+        .WillByDefault(DoAll(SetArgPointee<3>(kMacAddress1), Return(0)));
+    ON_CALL(app_mngr_, reregister_application_by_policy_id(kAppId1))
+        .WillByDefault(Return(ApplicationSharedPtr()));
+    ON_CALL(app_mngr_, application(kMacAddress1, kAppId1))
+        .WillByDefault(Return(ApplicationSharedPtr()));
+    ON_CALL(app_mngr_, applications())
+        .WillByDefault(
+            Return(DataAccessor<am::ApplicationSet>(app_set_, lock_ptr_)));
+    ON_CALL(app_mngr_, pending_applications())
+        .WillByDefault(Return(DataAccessor<am::AppsWaitRegistrationSet>(
+            pending_app_set_, pending_lock_ptr_)));
+    ON_CALL(mock_policy_handler_, PolicyEnabled()).WillByDefault(Return(true));
+    ON_CALL(mock_policy_handler_, GetInitialAppData(kAppId1, _, _))
+        .WillByDefault(Return(true));
+    ON_CALL(mock_rpc_service_,
+            ManageHMICommand(
+                HMIResultCodeIs(
+                    hmi_apis::FunctionID::BasicCommunication_OnAppRegistered),
+                _))
+        .WillByDefault(Return(true));
+    ON_CALL(
+        mock_rpc_service_,
+        ManageHMICommand(
+            HMIResultCodeIs(hmi_apis::FunctionID::Buttons_OnButtonSubscription),
+            _))
+        .WillByDefault(Return(true));
+  }
+
   MessageSharedPtr msg_;
   std::shared_ptr<RegisterAppInterfaceRequest> command_;
 
@@ -784,6 +820,40 @@ TEST_F(RegisterAppInterfaceRequestTest,
               ManageMobileCommand(_, am::commands::Command::SOURCE_SDL))
       .Times(2);
   EXPECT_CALL(app_mngr_, SendDriverDistractionState(_));
+
+  ASSERT_TRUE(command_->Init());
+  command_->Run();
+}
+
+TEST_F(RegisterAppInterfaceRequestTest,
+       RegisterAppWith_WEB_VIEW_HMITypeSuccess) {
+  SetCommonPreconditionsToRegisterApplication();
+
+  InitBasicMessage();
+  (*msg_)[am::strings::msg_params][am::strings::app_hmi_type][0] =
+      mobile_apis::AppHMIType::WEB_VIEW;
+
+  MockAppPtr mock_app = CreateBasicMockedApp();
+  ON_CALL(app_mngr_, application(kConnectionKey))
+      .WillByDefault(Return(mock_app));
+  ON_CALL(app_mngr_, RegisterApplication(msg_)).WillByDefault(Return(mock_app));
+
+  policy::StatusNotifier notify_upd_manager =
+      std::make_shared<utils::CallNothing>();
+  ON_CALL(mock_policy_handler_, AddApplication(kMacAddress1, kAppId1, _))
+      .WillByDefault(Return(notify_upd_manager));
+
+  auto app =
+      std::static_pointer_cast<application_manager::Application>(mock_app);
+
+  EXPECT_CALL(*mock_app, set_webengine_projection_enabled(true));
+  EXPECT_CALL(app_mngr_, OnApplicationRegistered(app));
+  EXPECT_CALL(mock_policy_handler_,
+              OnAppRegisteredOnMobile(kMacAddress1, kAppId1));
+  EXPECT_CALL(mock_rpc_service_,
+              ManageMobileCommand(_, am::commands::Command::SOURCE_SDL))
+      .Times(2);
+  EXPECT_CALL(app_mngr_, SendDriverDistractionState(app));
 
   ASSERT_TRUE(command_->Init());
   command_->Run();
