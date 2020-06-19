@@ -93,6 +93,7 @@ const std::string kFullAppId = "test_app_id_long";
 const std::string kDummyString = "test_string";
 const std::vector<uint32_t> kDummyDiagModes;
 const utils::SemanticVersion mock_semantic_version(1, 0, 0);
+const connection_handler::DeviceHandle kHandle = 1;
 }  // namespace
 
 class RegisterAppInterfaceRequestTest
@@ -107,7 +108,8 @@ class RegisterAppInterfaceRequestTest
       , pending_lock_ptr_(std::make_shared<sync_primitives::Lock>())
       , mock_application_helper_(
             application_manager_test::MockApplicationHelper::
-                application_helper_mock()) {
+                application_helper_mock())
+      , notify_upd_manager_(std::make_shared<utils::CallNothing>()) {
     InitGetters();
     InitLanguage();
   }
@@ -319,6 +321,15 @@ class RegisterAppInterfaceRequestTest
         .WillByDefault(Return(true));
   }
 
+  void SetCommonPreconditionsToCheckWithPolicyData(MockAppPtr mock_app) {
+    ON_CALL(mock_policy_handler_, AddApplication(kMacAddress1, kAppId1, _))
+        .WillByDefault(Return(notify_upd_manager_));
+    ON_CALL(app_mngr_, application(kConnectionKey))
+        .WillByDefault(Return(mock_app));
+    ON_CALL(app_mngr_, RegisterApplication(msg_))
+        .WillByDefault(Return(mock_app));
+  }
+
   MessageSharedPtr msg_;
   std::shared_ptr<RegisterAppInterfaceRequest> command_;
 
@@ -348,6 +359,7 @@ class RegisterAppInterfaceRequestTest
   MockConnectionHandler mock_connection_handler_;
   MockSessionObserver mock_session_observer_;
   application_manager_test::MockApplicationHelper& mock_application_helper_;
+  policy::StatusNotifier notify_upd_manager_;
 };
 
 TEST_F(RegisterAppInterfaceRequestTest, Init_SUCCESS) {
@@ -365,11 +377,10 @@ TEST_F(RegisterAppInterfaceRequestTest, Run_MinimalData_SUCCESS) {
   EXPECT_CALL(app_mngr_, updateRequestTimeout(_, _, _));
   EXPECT_CALL(app_mngr_, IsApplicationForbidden(_, _)).WillOnce(Return(false));
 
-  connection_handler::DeviceHandle handle = 1;
   ON_CALL(mock_connection_handler_,
           GetDataOnSessionKey(kConnectionKey, _, _, _))
-      .WillByDefault(DoAll(SetArgPointee<3>(handle), Return(0)));
-  ON_CALL(mock_session_observer_, GetDataOnDeviceID(handle, _, _, _, _))
+      .WillByDefault(DoAll(SetArgPointee<3>(kHandle), Return(0)));
+  ON_CALL(mock_session_observer_, GetDataOnDeviceID(kHandle, _, _, _, _))
       .WillByDefault(DoAll(SetArgPointee<3>(kMacAddress1), Return(0)));
 
   MockAppPtr mock_app = CreateBasicMockedApp();
@@ -391,10 +402,8 @@ TEST_F(RegisterAppInterfaceRequestTest, Run_MinimalData_SUCCESS) {
   ON_CALL(mock_policy_handler_, PolicyEnabled()).WillByDefault(Return(true));
   ON_CALL(mock_policy_handler_, GetInitialAppData(kAppId1, _, _))
       .WillByDefault(Return(true));
-  policy::StatusNotifier notify_upd_manager =
-      std::make_shared<utils::CallNothing>();
   ON_CALL(mock_policy_handler_, AddApplication(kMacAddress1, kAppId1, _))
-      .WillByDefault(Return(notify_upd_manager));
+      .WillByDefault(Return(notify_upd_manager_));
 
   EXPECT_CALL(app_mngr_, RegisterApplication(msg_)).WillOnce(Return(mock_app));
 
@@ -452,10 +461,9 @@ TEST_F(RegisterAppInterfaceRequestTest,
   EXPECT_CALL(app_mngr_, updateRequestTimeout(_, _, _));
   EXPECT_CALL(app_mngr_, IsApplicationForbidden(_, _)).WillOnce(Return(false));
 
-  connection_handler::DeviceHandle handle = 1;
   ON_CALL(mock_connection_handler_,
           GetDataOnSessionKey(kConnectionKey, _, _, _))
-      .WillByDefault(DoAll(SetArgPointee<3>(handle), Return(0)));
+      .WillByDefault(DoAll(SetArgPointee<3>(kHandle), Return(0)));
   ON_CALL(mock_session_observer_, GetDataOnDeviceID(_, _, _, _, _))
       .WillByDefault(DoAll(SetArgPointee<3>(kMacAddress1), Return(0)));
 
@@ -514,10 +522,8 @@ TEST_F(RegisterAppInterfaceRequestTest,
   ON_CALL(mock_policy_handler_, PolicyEnabled()).WillByDefault(Return(true));
   ON_CALL(mock_policy_handler_, GetInitialAppData(kAppId1, _, _))
       .WillByDefault(Return(true));
-  policy::StatusNotifier notify_upd_manager =
-      std::make_shared<utils::CallNothing>();
   ON_CALL(mock_policy_handler_, AddApplication(kMacAddress1, kAppId1, _))
-      .WillByDefault(Return(notify_upd_manager));
+      .WillByDefault(Return(notify_upd_manager_));
 
   EXPECT_CALL(app_mngr_, RegisterApplication(msg_)).WillOnce(Return(mock_app));
 
@@ -779,10 +785,8 @@ TEST_F(RegisterAppInterfaceRequestTest,
   ON_CALL(mock_policy_handler_, PolicyEnabled()).WillByDefault(Return(true));
   ON_CALL(mock_policy_handler_, GetInitialAppData(kAppId1, _, _))
       .WillByDefault(Return(true));
-  policy::StatusNotifier notify_upd_manager =
-      std::make_shared<utils::CallNothing>();
   ON_CALL(mock_policy_handler_, AddApplication(kMacAddress2, kAppId1, _))
-      .WillByDefault(Return(notify_upd_manager));
+      .WillByDefault(Return(notify_upd_manager_));
 
   EXPECT_CALL(app_mngr_, RegisterApplication(msg_)).WillOnce(Return(mock_app2));
 
@@ -834,17 +838,13 @@ TEST_F(RegisterAppInterfaceRequestTest,
       mobile_apis::AppHMIType::WEB_VIEW;
 
   MockAppPtr mock_app = CreateBasicMockedApp();
-  ON_CALL(app_mngr_, application(kConnectionKey))
-      .WillByDefault(Return(mock_app));
-  ON_CALL(app_mngr_, RegisterApplication(msg_)).WillByDefault(Return(mock_app));
+  SetCommonPreconditionsToCheckWithPolicyData(mock_app);
+  std::vector<std::string> present_hmi_types_in_policy{"WEB_VIEW"};
+  ON_CALL(mock_policy_handler_, GetInitialAppData(kAppId1, _, _))
+      .WillByDefault(
+          DoAll(SetArgPointee<2>(present_hmi_types_in_policy), Return(true)));
 
-  policy::StatusNotifier notify_upd_manager =
-      std::make_shared<utils::CallNothing>();
-  ON_CALL(mock_policy_handler_, AddApplication(kMacAddress1, kAppId1, _))
-      .WillByDefault(Return(notify_upd_manager));
-
-  auto app =
-      std::static_pointer_cast<application_manager::Application>(mock_app);
+  auto app = std::static_pointer_cast<am::Application>(mock_app);
 
   EXPECT_CALL(*mock_app, set_webengine_projection_enabled(true));
   EXPECT_CALL(app_mngr_, OnApplicationRegistered(app));
@@ -857,6 +857,234 @@ TEST_F(RegisterAppInterfaceRequestTest,
 
   ASSERT_TRUE(command_->Init());
   command_->Run();
+}
+
+TEST_F(RegisterAppInterfaceRequestTest,
+       RegisterApp_WithoutAppHMITypes_SuccessfulRegistration) {
+  SetCommonPreconditionsToRegisterApplication();
+  InitBasicMessage();
+
+  MockAppPtr mock_app = CreateBasicMockedApp();
+  SetCommonPreconditionsToCheckWithPolicyData(mock_app);
+  std::vector<std::string> present_hmi_types_in_policy{"NAVIGATION"};
+  ON_CALL(mock_policy_handler_, GetInitialAppData(kAppId1, _, _))
+      .WillByDefault(
+          DoAll(SetArgPointee<2>(present_hmi_types_in_policy), Return(true)));
+
+  auto response_to_mobile = CreateMessage();
+  EXPECT_CALL(
+      mock_rpc_service_,
+      ManageMobileCommand(_, am::commands::Command::CommandSource::SOURCE_SDL))
+      .WillOnce(DoAll(SaveArg<0>(&response_to_mobile), Return(true)))
+      .WillOnce(Return(true));
+
+  ASSERT_TRUE(command_->Init());
+  command_->Run();
+
+  const auto result_code = static_cast<mobile_apis::Result::eType>(
+      (*response_to_mobile)[am::strings::msg_params][am::strings::result_code]
+          .asUInt());
+
+  EXPECT_EQ(mobile_apis::Result::SUCCESS, result_code);
+}
+
+TEST_F(
+    RegisterAppInterfaceRequestTest,
+    RegisterAppInterface_AppHMITypesDontExistInPTForSpecifiedApp_SuccessfulRegistration) {
+  SetCommonPreconditionsToRegisterApplication();
+  InitBasicMessage();
+  (*msg_)[am::strings::msg_params][am::strings::app_hmi_type][0] =
+      mobile_apis::AppHMIType::PROJECTION;
+  (*msg_)[am::strings::msg_params][am::strings::app_hmi_type][1] =
+      mobile_apis::AppHMIType::INFORMATION;
+  (*msg_)[am::strings::msg_params][am::strings::app_hmi_type][2] =
+      mobile_apis::AppHMIType::COMMUNICATION;
+  (*msg_)[am::strings::msg_params][am::strings::app_hmi_type][3] =
+      mobile_apis::AppHMIType::NAVIGATION;
+  (*msg_)[am::strings::msg_params][am::strings::app_hmi_type][4] =
+      mobile_apis::AppHMIType::MESSAGING;
+
+  MockAppPtr mock_app = CreateBasicMockedApp();
+  SetCommonPreconditionsToCheckWithPolicyData(mock_app);
+  std::vector<std::string> present_hmi_types_in_policy;
+  ON_CALL(mock_policy_handler_, GetInitialAppData(kAppId1, _, _))
+      .WillByDefault(
+          DoAll(SetArgPointee<2>(present_hmi_types_in_policy), Return(true)));
+
+  auto response_to_mobile = CreateMessage();
+  EXPECT_CALL(
+      mock_rpc_service_,
+      ManageMobileCommand(_, am::commands::Command::CommandSource::SOURCE_SDL))
+      .WillOnce(DoAll(SaveArg<0>(&response_to_mobile), Return(true)))
+      .WillOnce(Return(true));
+
+  ASSERT_TRUE(command_->Init());
+  command_->Run();
+
+  const auto result_code = static_cast<mobile_apis::Result::eType>(
+      (*response_to_mobile)[am::strings::msg_params][am::strings::result_code]
+          .asUInt());
+  EXPECT_EQ(mobile_apis::Result::SUCCESS, result_code);
+}
+
+TEST_F(
+    RegisterAppInterfaceRequestTest,
+    RegisterApp_AppHMITypeNotCoincidedWithCurrentNonEmptyDataStoredInPT_SuccessfulRegistrationWithWarning) {
+  SetCommonPreconditionsToRegisterApplication();
+  InitBasicMessage();
+  (*msg_)[am::strings::msg_params][am::strings::app_hmi_type][0] =
+      mobile_apis::AppHMIType::PROJECTION;
+  (*msg_)[am::strings::msg_params][am::strings::app_hmi_type][1] =
+      mobile_apis::AppHMIType::INFORMATION;
+  (*msg_)[am::strings::msg_params][am::strings::app_hmi_type][2] =
+      mobile_apis::AppHMIType::COMMUNICATION;
+  (*msg_)[am::strings::msg_params][am::strings::app_hmi_type][3] =
+      mobile_apis::AppHMIType::NAVIGATION;
+  (*msg_)[am::strings::msg_params][am::strings::app_hmi_type][4] =
+      mobile_apis::AppHMIType::MESSAGING;
+
+  MockAppPtr mock_app = CreateBasicMockedApp();
+  SetCommonPreconditionsToCheckWithPolicyData(mock_app);
+  std::vector<std::string> present_hmi_types_in_policy{"NAVIGATION"};
+  ON_CALL(mock_policy_handler_, GetInitialAppData(kAppId1, _, _))
+      .WillByDefault(
+          DoAll(SetArgPointee<2>(present_hmi_types_in_policy), Return(true)));
+
+  auto response_to_mobile = CreateMessage();
+  EXPECT_CALL(
+      mock_rpc_service_,
+      ManageMobileCommand(_, am::commands::Command::CommandSource::SOURCE_SDL))
+      .WillOnce(DoAll(SaveArg<0>(&response_to_mobile), Return(true)))
+      .WillOnce(Return(true));
+
+  ASSERT_TRUE(command_->Init());
+  command_->Run();
+
+  const auto result_code = static_cast<mobile_apis::Result::eType>(
+      (*response_to_mobile)[am::strings::msg_params][am::strings::result_code]
+          .asUInt());
+  EXPECT_EQ(mobile_apis::Result::WARNINGS, result_code);
+
+  // Regarding to requairements, response info string should contain all
+  // AppHMITypes that are not contained in the policy table.
+  std::vector<std::string> expected_app_hmi_types_in_info_string{
+      "PROJECTION", "INFORMATION", "COMMUNICATION", "MESSAGING"};
+
+  const std::string info_string_in_response =
+      (*response_to_mobile)[am::strings::msg_params][am::strings::info]
+          .asString();
+
+  for (const auto& app_hmi_type : expected_app_hmi_types_in_info_string) {
+    EXPECT_TRUE(info_string_in_response.find(app_hmi_type) != std::string::npos)
+        << "AppHMItype absent in the response string: " << app_hmi_type;
+  }
+}
+
+TEST_F(RegisterAppInterfaceRequestTest,
+       RegisterAppWithWebView_WebViewNotAllowedInPT_RejectRegistration) {
+  SetCommonPreconditionsToRegisterApplication();
+  InitBasicMessage();
+  (*msg_)[am::strings::msg_params][am::strings::app_hmi_type][0] =
+      mobile_apis::AppHMIType::WEB_VIEW;
+  (*msg_)[am::strings::msg_params][am::strings::app_hmi_type][1] =
+      mobile_apis::AppHMIType::INFORMATION;
+  (*msg_)[am::strings::msg_params][am::strings::app_hmi_type][2] =
+      mobile_apis::AppHMIType::COMMUNICATION;
+
+  MockAppPtr mock_app = CreateBasicMockedApp();
+  SetCommonPreconditionsToCheckWithPolicyData(mock_app);
+  std::vector<std::string> present_hmi_types_in_policy{"INFORMATION",
+                                                       "COMMUNICATION"};
+  ON_CALL(mock_policy_handler_, GetInitialAppData(kAppId1, _, _))
+      .WillByDefault(
+          DoAll(SetArgPointee<2>(present_hmi_types_in_policy), Return(true)));
+
+  EXPECT_CALL(*mock_app, set_webengine_projection_enabled(true)).Times(0);
+
+  auto response_to_mobile = CreateMessage();
+  EXPECT_CALL(
+      mock_rpc_service_,
+      ManageMobileCommand(_, am::commands::Command::CommandSource::SOURCE_SDL))
+      .WillOnce(DoAll(SaveArg<0>(&response_to_mobile), Return(true)));
+
+  ASSERT_TRUE(command_->Init());
+  command_->Run();
+
+  const auto result_code = static_cast<mobile_apis::Result::eType>(
+      (*response_to_mobile)[am::strings::msg_params][am::strings::result_code]
+          .asUInt());
+
+  EXPECT_EQ(mobile_apis::Result::DISALLOWED, result_code);
+}
+
+TEST_F(RegisterAppInterfaceRequestTest,
+       RegisterAppWithWebView_EmptyPT_RejectRegistration) {
+  SetCommonPreconditionsToRegisterApplication();
+  InitBasicMessage();
+  (*msg_)[am::strings::msg_params][am::strings::app_hmi_type][0] =
+      mobile_apis::AppHMIType::PROJECTION;
+  (*msg_)[am::strings::msg_params][am::strings::app_hmi_type][1] =
+      mobile_apis::AppHMIType::INFORMATION;
+  (*msg_)[am::strings::msg_params][am::strings::app_hmi_type][2] =
+      mobile_apis::AppHMIType::WEB_VIEW;
+  (*msg_)[am::strings::msg_params][am::strings::app_hmi_type][3] =
+      mobile_apis::AppHMIType::NAVIGATION;
+  (*msg_)[am::strings::msg_params][am::strings::app_hmi_type][4] =
+      mobile_apis::AppHMIType::MESSAGING;
+
+  MockAppPtr mock_app = CreateBasicMockedApp();
+  SetCommonPreconditionsToCheckWithPolicyData(mock_app);
+  std::vector<std::string> present_hmi_types_in_policy;
+  ON_CALL(mock_policy_handler_, GetInitialAppData(kAppId1, _, _))
+      .WillByDefault(
+          DoAll(SetArgPointee<2>(present_hmi_types_in_policy), Return(true)));
+
+  auto response_to_mobile = CreateMessage();
+  EXPECT_CALL(
+      mock_rpc_service_,
+      ManageMobileCommand(_, am::commands::Command::CommandSource::SOURCE_SDL))
+      .WillOnce(DoAll(SaveArg<0>(&response_to_mobile), Return(true)));
+
+  ASSERT_TRUE(command_->Init());
+  command_->Run();
+
+  const auto result_code = static_cast<mobile_apis::Result::eType>(
+      (*response_to_mobile)[am::strings::msg_params][am::strings::result_code]
+          .asUInt());
+  EXPECT_EQ(mobile_apis::Result::DISALLOWED, result_code);
+}
+
+TEST_F(RegisterAppInterfaceRequestTest,
+       RegisterAppWithWebViewOnly_WebViewNotAllowedInPT_RejectRegistration) {
+  SetCommonPreconditionsToRegisterApplication();
+  InitBasicMessage();
+  (*msg_)[am::strings::msg_params][am::strings::app_hmi_type][0] =
+      mobile_apis::AppHMIType::WEB_VIEW;
+
+  MockAppPtr mock_app = CreateBasicMockedApp();
+  SetCommonPreconditionsToCheckWithPolicyData(mock_app);
+  std::vector<std::string> present_hmi_types_in_policy{"INFORMATION",
+                                                       "COMMUNICATION"};
+  ON_CALL(mock_policy_handler_, GetInitialAppData(kAppId1, _, _))
+      .WillByDefault(
+          DoAll(SetArgPointee<2>(present_hmi_types_in_policy), Return(true)));
+
+  EXPECT_CALL(*mock_app, set_webengine_projection_enabled(true)).Times(0);
+
+  auto response_to_mobile = CreateMessage();
+  EXPECT_CALL(
+      mock_rpc_service_,
+      ManageMobileCommand(_, am::commands::Command::CommandSource::SOURCE_SDL))
+      .WillOnce(DoAll(SaveArg<0>(&response_to_mobile), Return(true)));
+
+  ASSERT_TRUE(command_->Init());
+  command_->Run();
+
+  const auto result_code = static_cast<mobile_apis::Result::eType>(
+      (*response_to_mobile)[am::strings::msg_params][am::strings::result_code]
+          .asUInt());
+
+  EXPECT_EQ(mobile_apis::Result::DISALLOWED, result_code);
 }
 
 }  // namespace register_app_interface_request
