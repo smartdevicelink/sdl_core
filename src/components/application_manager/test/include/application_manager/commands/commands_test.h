@@ -47,6 +47,7 @@
 #include "application_manager/test/include/application_manager/mock_application.h"
 #include "application_manager/test/include/application_manager/mock_hmi_interface.h"
 #include "application_manager/test/include/application_manager/mock_message_helper.h"
+#include "application_manager/mock_event_dispatcher.h"
 #include "test/application_manager/mock_application_manager_settings.h"
 namespace test {
 namespace components {
@@ -68,6 +69,7 @@ using ::test::components::application_manager_test::MockApplication;
 using ::test::components::application_manager_test::MockApplicationManager;
 using ::test::components::application_manager_test::
     MockApplicationManagerSettings;
+using ::test::components::event_engine_test::MockEventDispatcher;
 
 // Depending on the value type will be selected
 template <const bool kIf, class ThenT, class ElseT>
@@ -121,6 +123,7 @@ class CommandsTest : public ::testing::Test {
   std::shared_ptr<Command> CreateCommand(const uint32_t timeout,
                                          MessageSharedPtr& msg) {
     InitCommand(timeout);
+
     return std::make_shared<Command>((msg ? msg : msg = CreateMessage()),
                                      app_mngr_,
                                      mock_rpc_service_,
@@ -145,6 +148,12 @@ class CommandsTest : public ::testing::Test {
                                      mock_policy_handler_);
   }
 
+  void InitEventDispatcher() {
+    EXPECT_CALL(app_mngr_, event_dispatcher())
+        .WillOnce(ReturnRef(event_dispatcher_));
+    EXPECT_CALL(event_dispatcher_, remove_observer(_));
+  }
+
   enum { kDefaultTimeout_ = 100 };
 
   MockAppManager app_mngr_;
@@ -154,6 +163,7 @@ class CommandsTest : public ::testing::Test {
   testing::NiceMock<policy_test::MockPolicyHandlerInterface>
       mock_policy_handler_;
   MockAppManagerSettings app_mngr_settings_;
+  MockEventDispatcher event_dispatcher_;
   MOCK(am::MockHmiInterfaces) mock_hmi_interfaces_;
   am::MockMessageHelper& mock_message_helper_;
 

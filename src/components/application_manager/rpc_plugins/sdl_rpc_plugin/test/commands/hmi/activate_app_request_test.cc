@@ -97,6 +97,8 @@ TEST_F(ActivateAppRequestTest, Run_SUCCESS) {
   (*msg)[strings::msg_params][strings::activate_app_hmi_level] =
       mobile_apis::HMILevel::HMI_FULL;
 #endif
+  InitEventDispatcher();
+
   ActivateAppRequestPtr command(CreateCommand<ActivateAppRequest>(msg));
 
   EXPECT_CALL(app_mngr_, set_application_id(kCorrelationId, kAppId));

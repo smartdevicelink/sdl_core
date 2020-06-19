@@ -113,6 +113,8 @@ using event_engine_test::MockEventDispatcher;
 class RequestToHMITest : public CommandsTest<CommandsTestMocks::kIsNice> {};
 
 TEST_F(RequestToHMITest, BasicMethodsOverloads_SUCCESS) {
+
+  InitEventDispatcher();
   std::shared_ptr<am_commands::RequestToHMI> command(
       CreateCommand<am_commands::RequestToHMI>());
 
@@ -123,6 +125,8 @@ TEST_F(RequestToHMITest, BasicMethodsOverloads_SUCCESS) {
 }
 
 TEST_F(RequestToHMITest, SendRequest_SUCCESS) {
+  InitEventDispatcher();
+
   std::shared_ptr<am_commands::RequestToHMI> command(
       CreateCommand<am_commands::RequestToHMI>());
   EXPECT_CALL(mock_rpc_service_, SendMessageToHMI(NotNull()));
@@ -220,6 +224,8 @@ TYPED_TEST_CASE(RequestToHMICommandsTest3, RequestCommandsList3);
 TYPED_TEST(RequestToHMICommandsTest, Run_SendMessageToHMI_SUCCESS) {
   typedef typename TestFixture::CommandType CommandType;
 
+  this->InitEventDispatcher();
+
   std::shared_ptr<CommandType> command =
       this->template CreateCommand<CommandType>();
 
@@ -230,6 +236,8 @@ TYPED_TEST(RequestToHMICommandsTest, Run_SendMessageToHMI_SUCCESS) {
 
 TYPED_TEST(RequestToHMICommandsTest2, Run_SendMessageToHMI_SUCCESS) {
   typedef typename TestFixture::CommandType CommandType;
+
+  this->InitEventDispatcher();
 
   std::shared_ptr<CommandType> command =
       this->template CreateCommand<CommandType>();
