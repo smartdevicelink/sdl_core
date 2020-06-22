@@ -183,6 +183,7 @@ void AddCommandRequest::Run() {
           (*message_)[strings::msg_params][strings::cmd_icon];
     }
 
+   ui_is_sent_ = true;
     StartAwaitForInterface(HmiInterfaces::HMI_INTERFACE_UI);
   }
 
@@ -198,6 +199,7 @@ void AddCommandRequest::Run() {
     vr_msg_params[strings::type] = hmi_apis::Common_VRCommandType::Command;
     vr_msg_params[strings::grammar_id] = app->get_grammar_id();
 
+    vr_is_sent_ = true;
     StartAwaitForInterface(HmiInterfaces::HMI_INTERFACE_VR);
   }
 
@@ -332,7 +334,6 @@ void AddCommandRequest::on_event(const event_engine::Event& event) {
     case hmi_apis::FunctionID::UI_AddCommand: {
       LOG4CXX_INFO(logger_, "Received UI_AddCommand event");
       EndAwaitForInterface(HmiInterfaces::HMI_INTERFACE_UI);
-      is_ui_received_ = true;
       ui_result_ = static_cast<hmi_apis::Common_Result::eType>(
           message[strings::params][hmi_response::code].asInt());
       GetInfo(message, ui_info_);
@@ -344,7 +345,6 @@ void AddCommandRequest::on_event(const event_engine::Event& event) {
     case hmi_apis::FunctionID::VR_AddCommand: {
       LOG4CXX_INFO(logger_, "Received VR_AddCommand event");
       EndAwaitForInterface(HmiInterfaces::HMI_INTERFACE_VR);
-      is_vr_received_ = true;
       vr_result_ = static_cast<hmi_apis::Common_Result::eType>(
           message[strings::params][hmi_response::code].asInt());
       GetInfo(message, vr_info_);
@@ -605,11 +605,6 @@ void AddCommandRequest::RemoveCommand() {
 
   app->RemoveCommand(cmd_id);
 
-  if (BothSend() && !(is_vr_received_ || is_ui_received_)) {
-    // in case we have send bth UI and VR and no one respond
-    // we have nothing to remove from HMI so no DeleteCommand expected
-    return;
-  }
 
   if (BothSend() && IsInterfaceAwaited(HmiInterfaces::HMI_INTERFACE_VR)) {
     SendHMIRequest(hmi_apis::FunctionID::UI_DeleteCommand, &msg_params);

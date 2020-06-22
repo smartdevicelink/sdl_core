@@ -135,9 +135,6 @@ class AddCommandRequest : public app_mngr::commands::RequestFromMobileImpl {
    */
   const std::string GenerateMobileResponseInfo();
 
-  bool is_ui_received_;
-  bool is_vr_received_;
-
   std::string ui_info_;
   std::string vr_info_;
 
