@@ -4331,6 +4331,7 @@
     </function>
     <function name="OnFindApplications" messagetype="notification">
       <description>This method must be invoked by HMI to get list of registered apps.</description>
+      <description>DEPRECATED - This RPC is not implemented</description>
       <param name="deviceInfo" type="Common.DeviceInfo" mandatory="false">
         <description>The name and ID of the device the list of registered applications is required for.</description>
       </param>
