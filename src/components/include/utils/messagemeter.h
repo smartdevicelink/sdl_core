@@ -37,8 +37,11 @@
 #include <map>
 #include <set>
 #include "utils/date_time.h"
+#include "utils/lock.h"
 
 namespace utils {
+
+CREATE_LOGGERPTR_GLOBAL(logger_, "MessageMeter")
 /**
     @brief The MessageMeter class need to count message frequency
     Default time range value is 1 second
@@ -86,10 +89,13 @@ class MessageMeter {
   date_time::TimeDuration time_range() const;
 
  private:
+  size_t FrequencyImpl(const Id& id);
+
   date_time::TimeDuration time_range_;
   typedef std::multiset<date_time::TimeDuration> Timings;
   typedef std::map<Id, Timings> TimingMap;
   TimingMap timing_map_;
+  sync_primitives::Lock timing_map_lock_;
 };
 
 template <class Id>
@@ -99,22 +105,33 @@ MessageMeter<Id>::MessageMeter() {
 
 template <class Id>
 size_t MessageMeter<Id>::TrackMessage(const Id& id) {
+  LOG4CXX_AUTO_TRACE(logger_);
   return TrackMessages(id, 1);
 }
 
 template <class Id>
 size_t MessageMeter<Id>::TrackMessages(const Id& id, const size_t count) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  sync_primitives::AutoLock lock(timing_map_lock_);
   Timings& timings = timing_map_[id];
   const date_time::TimeDuration current_time = date_time::getCurrentTime();
   for (size_t i = 0; i < count; ++i) {
     // Adding to the end is amortized constant
     timings.insert(timings.end(), current_time);
   }
-  return Frequency(id);
+  return FrequencyImpl(id);
 }
 
 template <class Id>
 size_t MessageMeter<Id>::Frequency(const Id& id) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  sync_primitives::AutoLock lock(timing_map_lock_);
+  return FrequencyImpl(id);
+}
+
+template <class Id>
+size_t MessageMeter<Id>::FrequencyImpl(const Id& id) {
+  LOG4CXX_AUTO_TRACE(logger_);
   typename TimingMap::iterator it = timing_map_.find(id);
   if (it == timing_map_.end()) {
     return 0u;
@@ -131,21 +148,27 @@ size_t MessageMeter<Id>::Frequency(const Id& id) {
 
 template <class Id>
 void MessageMeter<Id>::RemoveIdentifier(const Id& id) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  sync_primitives::AutoLock lock(timing_map_lock_);
   timing_map_.erase(id);
 }
 
 template <class Id>
 void MessageMeter<Id>::ClearIdentifiers() {
+  LOG4CXX_AUTO_TRACE(logger_);
+  sync_primitives::AutoLock lock(timing_map_lock_);
   timing_map_.clear();
 }
 
 template <class Id>
 void MessageMeter<Id>::set_time_range(const size_t time_range_msecs) {
+  LOG4CXX_AUTO_TRACE(logger_);
   time_range_ = date_time::milliseconds(time_range_msecs);
 }
 template <class Id>
 void MessageMeter<Id>::set_time_range(
     const date_time::TimeDuration& time_range) {
+  LOG4CXX_AUTO_TRACE(logger_);
   time_range_ = time_range;
 }
 template <class Id>
