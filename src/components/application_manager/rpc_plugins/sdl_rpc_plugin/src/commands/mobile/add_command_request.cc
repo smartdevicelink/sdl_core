@@ -605,6 +605,12 @@ void AddCommandRequest::RemoveCommand() {
 
   app->RemoveCommand(cmd_id);
 
+  if (BothSend() && (IsInterfaceAwaited(HmiInterfaces::HMI_INTERFACE_VR)
+                     && IsInterfaceAwaited(HmiInterfaces::HMI_INTERFACE_UI))) {
+    // in case we have send bth UI and VR and no one respond
+    // we have nothing to remove from HMI so no DeleteCommand expected
+    return;
+  }
 
   if (BothSend() && IsInterfaceAwaited(HmiInterfaces::HMI_INTERFACE_VR)) {
     SendHMIRequest(hmi_apis::FunctionID::UI_DeleteCommand, &msg_params);
