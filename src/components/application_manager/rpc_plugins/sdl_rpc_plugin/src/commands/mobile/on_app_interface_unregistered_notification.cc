@@ -57,7 +57,17 @@ OnAppInterfaceUnregisteredNotification::
 void OnAppInterfaceUnregisteredNotification::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  SendNotification();
+  const bool final_message = IsFinalMessage();
+  SendNotification(final_message);
+}
+
+bool OnAppInterfaceUnregisteredNotification::IsFinalMessage() const {
+  using Reason = mobile_apis::AppInterfaceUnregisteredReason::eType;
+  const auto app = application_manager_.application(connection_key());
+  const auto reason = static_cast<Reason>(
+      (*message_)[strings::msg_params][strings::reason].asInt());
+  return app && app->webengine_projection_enabled() &&
+         Reason::RESOURCE_CONSTRAINT == reason;
 }
 }  // namespace commands
 }  // namespace sdl_rpc_plugin

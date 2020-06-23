@@ -35,6 +35,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <boost/asio/strand.hpp>
 #include <boost/beast/core.hpp>
 #include <boost/beast/websocket.hpp>
+#include <functional>
+
 #include "protocol/raw_message.h"
 #include "transport_manager/transport_adapter/transport_adapter.h"
 #include "utils/logger.h"
@@ -46,10 +48,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 namespace transport_manager {
 namespace transport_adapter {
 
-using DataReceiveCallback =
-    std::function<void(protocol_handler::RawMessagePtr)>;
-using DataWriteCallback = std::function<TransportAdapter::Error(
-    protocol_handler::RawMessagePtr message)>;
+using Message = ::protocol_handler::RawMessagePtr;
+using DataReceiveCallback = std::function<void(Message)>;
+using DataSendDoneCallback = DataReceiveCallback;
+using DataSendFailedCallback = DataReceiveCallback;
+using DataWriteCallback = DataReceiveCallback;
 using OnIOErrorCallback = std::function<void()>;
 
 using tcp = boost::asio::ip::tcp;  // from <boost/asio/ip/tcp.hpp>
@@ -69,12 +72,16 @@ class WebSocketSession
  public:
   WebSocketSession(boost::asio::ip::tcp::socket socket,
                    DataReceiveCallback data_receive,
+                   DataSendDoneCallback data_send_done,
+                   DataSendFailedCallback data_send_failed,
                    OnIOErrorCallback on_error);
 
 #ifdef ENABLE_SECURITY
   WebSocketSession(boost::asio::ip::tcp::socket socket,
                    ssl::context& ctx,
                    DataReceiveCallback data_receive,
+                   DataSendDoneCallback data_send_done,
+                   DataSendFailedCallback data_send_failed,
                    OnIOErrorCallback on_error);
 #endif  // ENABLE_SECURITY
 
@@ -84,8 +91,7 @@ class WebSocketSession
 
   virtual void AsyncRead(boost::system::error_code ec);
 
-  virtual TransportAdapter::Error WriteDown(
-      ::protocol_handler::RawMessagePtr message);
+  virtual void WriteDown(Message message);
 
   virtual void Read(boost::system::error_code ec,
                     std::size_t bytes_transferred);
@@ -98,6 +104,8 @@ class WebSocketSession
   boost::asio::strand<boost::asio::io_context::executor_type> strand_;
   boost::beast::flat_buffer buffer_;
   DataReceiveCallback data_receive_;
+  DataSendDoneCallback data_send_done_;
+  DataSendFailedCallback data_send_failed_;
   OnIOErrorCallback on_io_error_;
 };
 

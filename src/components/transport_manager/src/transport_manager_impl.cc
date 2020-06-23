@@ -1305,14 +1305,10 @@ void TransportManagerImpl::Handle(TransportAdapterEvent event) {
       // TODO(YK): start timer here to wait before notify caller
       // and remove unsent messages
       LOG4CXX_ERROR(logger_, "Transport adapter failed to send data");
-      // TODO(YK): potential error case -> thread unsafe
-      // update of message content
-      if (event.event_data.use_count() != 0) {
-        event.event_data->set_waiting(true);
-      } else {
-        LOG4CXX_DEBUG(logger_, "Data is invalid");
-      }
-      LOG4CXX_DEBUG(logger_, "eevent_type = ON_SEND_FAIL");
+      RaiseEvent(&TransportManagerListener::OnTMMessageSendFailed,
+                 DataSendError(),
+                 event.event_data);
+      LOG4CXX_DEBUG(logger_, "event_type = ON_SEND_FAIL");
       break;
     }
     case EventTypeEnum::ON_RECEIVED_DONE: {
@@ -1423,11 +1419,6 @@ void TransportManagerImpl::Handle(::protocol_handler::RawMessagePtr msg) {
   }
 
   TransportAdapter* transport_adapter = connection->transport_adapter;
-  LOG4CXX_DEBUG(logger_,
-                "Got adapter " << transport_adapter << "["
-                               << transport_adapter->GetDeviceType() << "]"
-                               << " by session id " << msg->connection_key());
-
   if (NULL == transport_adapter) {
     std::string error_text = "Transport adapter is not found";
     LOG4CXX_ERROR(logger_, error_text);
@@ -1435,6 +1426,10 @@ void TransportManagerImpl::Handle(::protocol_handler::RawMessagePtr msg) {
                DataSendError(error_text),
                msg);
   } else {
+    LOG4CXX_DEBUG(logger_,
+                  "Got adapter " << transport_adapter << "["
+                                 << transport_adapter->GetDeviceType() << "]"
+                                 << " by session id " << msg->connection_key());
     if (TransportAdapter::OK ==
         transport_adapter->SendData(
             connection->device, connection->application, msg)) {
