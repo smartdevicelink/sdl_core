@@ -239,7 +239,6 @@ void ChangeRegistrationRequest::Run() {
 
   if (HmiInterfaces::InterfaceState::STATE_NOT_AVAILABLE != ui_state) {
     SendUIRequest(app, msg_params, hmi_language);
-    //StartAwaitForInterface(HmiInterfaces::InterfaceID::HMI_INTERFACE_UI);
   }
 }
 
