@@ -239,6 +239,7 @@ void ChangeRegistrationRequest::Run() {
 
   if (HmiInterfaces::InterfaceState::STATE_NOT_AVAILABLE != ui_state) {
     SendUIRequest(app, msg_params, hmi_language);
+    //StartAwaitForInterface(HmiInterfaces::InterfaceID::HMI_INTERFACE_UI);
   }
 }
 
@@ -304,17 +305,13 @@ void ChangeRegistrationRequest::on_event(const event_engine::Event& event) {
       (*message_)[strings::msg_params][strings::language].asInt()));
   }
 
-  int32_t greates_result_code =
-   std::max(std::max(static_cast<int32_t>(ui_result_),
-    static_cast<int32_t>(vr_result_)),
-               static_cast<int32_t>(tts_result_));
-   const bool all_hmi_responses_success = hmi_apis::Common_Result::SUCCESS == ui_result_ &&
-         hmi_apis::Common_Result::SUCCESS == vr_result_ &&
-         hmi_apis::Common_Result::SUCCESS == tts_result_;
-   SendResponse(all_hmi_responses_success,
-    static_cast<mobile_apis::Result::eType>(greates_result_code),
-    NULL,
-    &(message[strings::msg_params]));
+   mobile_apis::Result::eType result_code = mobile_apis::Result::INVALID_ENUM;
+   std::string response_info;
+   const bool result = PrepareResponseParameters(result_code, response_info);
+   SendResponse(result,
+                result_code,
+                response_info.empty() ? NULL : response_info.c_str(),
+                &(message[strings::msg_params]));
 }
 
 namespace {
