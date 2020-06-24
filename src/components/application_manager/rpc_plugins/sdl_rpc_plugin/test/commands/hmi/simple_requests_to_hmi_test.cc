@@ -249,6 +249,8 @@ TYPED_TEST(RequestToHMICommandsTest2, Run_SendMessageToHMI_SUCCESS) {
 TYPED_TEST(RequestToHMICommandsTest3, Run_SendMessageToHMI_SUCCESS) {
   typedef typename TestFixture::CommandType CommandType;
 
+  EXPECT_CALL(this->event_dispatcher_, remove_observer(_));
+
   std::shared_ptr<CommandType> command =
       this->template CreateCommand<CommandType>();
   EXPECT_CALL(this->mock_rpc_service_, SendMessageToHMI(NotNull()));

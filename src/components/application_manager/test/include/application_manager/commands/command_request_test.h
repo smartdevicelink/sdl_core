@@ -120,7 +120,6 @@ class CommandRequestTest : public CommandsTest<kIsNice> {
     CommandsTest<kIsNice>::InitCommand(default_timeout);
     ON_CALL(CommandsTest<kIsNice>::app_mngr_, event_dispatcher())
         .WillByDefault(ReturnRef(event_dispatcher_));
-    EXPECT_CALL(event_dispatcher_, remove_observer(_));
   }
 };
 

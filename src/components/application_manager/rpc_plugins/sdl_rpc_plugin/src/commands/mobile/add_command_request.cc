@@ -184,7 +184,7 @@ void AddCommandRequest::Run() {
     }
 
    ui_is_sent_ = true;
-    StartAwaitForInterface(HmiInterfaces::HMI_INTERFACE_UI);
+   StartAwaitForInterface(HmiInterfaces::HMI_INTERFACE_UI);
   }
 
   smart_objects::SmartObject vr_msg_params =
