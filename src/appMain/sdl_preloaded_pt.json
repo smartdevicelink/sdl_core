@@ -4092,7 +4092,7 @@
                     "key": "OEM_REF_HANDS_OFF_STRNG",
                     "type": "Boolean",
                     "mandatory": false,
-                    "since": "6.2"
+                    "since": "7.0"
                 }
             ]
         }
