@@ -415,8 +415,9 @@ void CreateInteractionChoiceSetRequest::OnTimeOut() {
   LOG4CXX_AUTO_TRACE(logger_);
 
   if (!error_from_hmi_) {
-    RequestFromMobileImpl::OnTimeOut();
+    SendResponse(false, mobile_apis::Result::GENERIC_ERROR);
   }
+  RequestFromMobileImpl::OnTimeOut();
   DeleteChoices();
 
   // We have to keep request alive until receive all responses from HMI
