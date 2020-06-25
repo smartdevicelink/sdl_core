@@ -78,7 +78,7 @@ class UIIsReadyRequest : public app_mngr::commands::RequestToHMI,
   virtual void onTimeOut() OVERRIDE;
 
   /**
-   * @brief Send request to HMI for fetching of cappabilities
+   * @brief Send request to HMI for fetching of capabilities
    */
   void RequestCapabilities();
 

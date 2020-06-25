@@ -79,7 +79,7 @@ class VRIsReadyRequest : public app_mngr::commands::RequestToHMI,
   void onTimeOut() OVERRIDE;
 
   /**
-   * @brief Send request to HMI for fetching of cappabilities
+   * @brief Send request to HMI for fetching of capabilities
    */
   void RequestCapabilities();
 
