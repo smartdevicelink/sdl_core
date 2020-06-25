@@ -157,13 +157,13 @@ void VehicleInfoPlugin::UnsubscribeFromRemovedVDItems() {
 bool IsOtherAppAlreadySubscribedFor(
     const std::string& ivi_name,
     const application_manager::ApplicationManager& app_mngr,
-    const application_manager::Application& current_app) {
+    const uint32_t current_app_id) {
   auto applications = app_mngr.applications();
 
   for (auto& app : applications.GetData()) {
     auto& ext = VehicleInfoAppExtension::ExtractVIExtension(*app);
     if (ext.isSubscribedToVehicleInfo(ivi_name) &&
-        (app->app_id() != current_app.app_id())) {
+        (app->app_id() != current_app_id)) {
       return true;
     }
   }
@@ -175,7 +175,6 @@ void VehicleInfoPlugin::ProcessResumptionSubscription(
   LOG4CXX_AUTO_TRACE(logger_);
   smart_objects::SmartObject msg_params =
       smart_objects::SmartObject(smart_objects::SmartType_Map);
-  msg_params[strings::app_id] = app.app_id();
 
   const auto& subscriptions = ext.Subscriptions();
 
@@ -184,17 +183,18 @@ void VehicleInfoPlugin::ProcessResumptionSubscription(
     return;
   }
 
-  size_t initial_length = msg_params.length();
   for (auto& ivi : subscriptions) {
-    if (!IsOtherAppAlreadySubscribedFor(ivi, *application_manager_, app)) {
+    if (!IsOtherAppAlreadySubscribedFor(
+            ivi, *application_manager_, app.app_id())) {
       msg_params[ivi] = true;
     }
   }
 
-  if (msg_params.length() > initial_length) {
+  if (!msg_params.empty()) {
     auto request = application_manager::MessageHelper::CreateModuleInfoSO(
         hmi_apis::FunctionID::VehicleInfo_SubscribeVehicleData,
         *application_manager_);
+    msg_params[strings::app_id] = app.app_id();
     (*request)[strings::msg_params] = msg_params;
     application_manager_->GetRPCService().ManageHMICommand(request);
   }
