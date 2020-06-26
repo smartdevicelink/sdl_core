@@ -390,6 +390,12 @@ void InitCapabilities() {
       std::string("CID1SET"), hmi_apis::Common_CharacterSet::CID1SET));
   character_set_enum.insert(std::make_pair(
       std::string("CID2SET"), hmi_apis::Common_CharacterSet::CID2SET));
+  character_set_enum.insert(std::make_pair(
+      std::string("ASCII"), hmi_apis::Common_CharacterSet::ASCII));
+  character_set_enum.insert(std::make_pair(
+      std::string("ISO_8859_1"), hmi_apis::Common_CharacterSet::ISO_8859_1));
+  character_set_enum.insert(std::make_pair(
+      std::string("UTF_8"), hmi_apis::Common_CharacterSet::UTF_8));
 
   video_streaming_protocol_enum.insert(std::make_pair(
       std::string("RAW"), hmi_apis::Common_VideoStreamingProtocol::RAW));
