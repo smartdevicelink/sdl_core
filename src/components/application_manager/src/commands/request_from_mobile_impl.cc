@@ -238,6 +238,19 @@ void RequestFromMobileImpl::OnTimeOut() {
   LOG4CXX_AUTO_TRACE(logger_);
 
   unsubscribe_from_all_mobile_events();
+  unsubscribe_from_all_hmi_events();
+  {
+    // FIXME (dchmerev@luxoft.com): atomic_xchg fits better
+    sync_primitives::AutoLock auto_lock(state_lock_);
+    if (kResponded == current_state_) {
+      LOG4CXX_DEBUG(logger_, "current_state_ = kResponded");
+      // don't send timeout if request completed
+      return;
+    }
+
+    current_state_ = kTimedOut;
+  }
+
   smart_objects::SmartObjectSPtr response =
       MessageHelper::CreateNegativeResponse(connection_key(),
                                             function_id(),
