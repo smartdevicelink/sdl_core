@@ -1432,16 +1432,25 @@
 <enum name="CharacterSet">
   <description>The list of potential character sets</description>
   <element name="TYPE2SET">
-    <description>See [@TODO: create file ref]</description>
+    <description>See [@TODO: create file ref]. Note that this element is deprecated in the MOBILE API</description>
   </element>
   <element name="TYPE5SET">
-    <description>See [@TODO: create file ref]</description>
+    <description>See [@TODO: create file ref]. Note that this element is deprecated in the MOBILE API</description>
   </element>
   <element name="CID1SET">
-    <description>See [@TODO: create file ref]</description>
+    <description>See [@TODO: create file ref]. Note that this element is deprecated in the MOBILE API</description>
   </element>
   <element name="CID2SET">
-    <description>See [@TODO: create file ref]</description>
+    <description>See [@TODO: create file ref]. Note that this element is deprecated in the MOBILE API</description>
+  </element>
+  <element name="ASCII">
+    <description>ASCII as defined in https://en.wikipedia.org/wiki/ASCII as defined in codes 0-127. Non-printable characters such as tabs and back spaces are ignored</description>
+  </element>
+  <element name="ISO_8859_1">
+    <description>Latin-1, as defined in https://en.wikipedia.org/wiki/ISO/IEC_8859-1</description>
+  </element>
+  <element name="UTF_8">
+    <description>The UTF-8 character set that uses variable bytes per code point. See https://en.wikipedia.org/wiki/UTF-8 for more details. This is the preferred character set</description>
   </element>
 </enum>
 
@@ -2579,7 +2588,11 @@
     <description>The name that identifies the field. See TextFieldName.</description>
   </param>
   <param name="characterSet" type="Common.CharacterSet" mandatory="true">
-    <description>The character set that is supported in this field. See CharacterSet.</description>
+    <description>
+      The set of characters that are supported by this text field.
+      All text is sent in UTF-8 format, but not all systems may support all of the characters expressed by UTF-8.
+      All systems will support at least ASCII, but they may support more, either the LATIN-1 character set, or the full UTF-8 character set.
+    </description>
   </param>
   <param name="width" type="Integer" minvalue="1" maxvalue="500" mandatory="true">
     <description>The number of characters in one row of this field.</description>
