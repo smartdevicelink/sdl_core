@@ -338,6 +338,19 @@ class Thread {
    * @brief Used from worker thread to inform about its status.
    */
   volatile ThreadState thread_state_;
+
+#ifdef BUILD_TESTS
+  FRIEND_TEST(PosixThreadTest,
+              StartThreadWithNullPtrDelegate_ExpectThreadStateNone);
+  FRIEND_TEST(PosixThreadTest,
+              StartThreadExecutingThreadMain_ExpectThreadStateRunning);
+  FRIEND_TEST(
+      PosixThreadTest,
+      StartThreadExecutingThreadMainCallStopDelegate_ExpectThreadStateIdle);
+  FRIEND_TEST(
+      PosixThreadTest,
+      StartThreadExecutingThreadMainCallForceStop_ExpectThreadStateCompleted);
+#endif
 };
 
 }  // namespace threads
