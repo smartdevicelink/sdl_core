@@ -185,7 +185,7 @@ TransportAdapter::Error WebsocketClientConnection::Start() {
     wss_.binary(true);
   }
 #endif  // ENABLE_SECURITY
-  write_thread_->start(threads::ThreadOptions());
+  write_thread_->Start(threads::ThreadOptions());
   controller_->ConnectDone(device_uid_, app_handle_);
 
   // Start async read
@@ -288,7 +288,7 @@ void WebsocketClientConnection::Shutdown() {
 
   if (thread_delegate_) {
     thread_delegate_->SetShutdown();
-    write_thread_->join();
+    write_thread_->Stop(threads::Thread::kThreadSoftStop);
     delete thread_delegate_;
     thread_delegate_ = NULL;
     threads::DeleteThread(write_thread_);

@@ -89,12 +89,12 @@ Connection::Connection(ConnectionHandle connection_handle,
   heartbeat_monitor_ = new HeartBeatMonitor(heartbeat_timeout_, this);
   heart_beat_monitor_thread_ =
       threads::CreateThread("HeartBeatMonitor", heartbeat_monitor_);
-  heart_beat_monitor_thread_->start();
+  heart_beat_monitor_thread_->Start();
 }
 
 Connection::~Connection() {
   LOG4CXX_AUTO_TRACE(logger_);
-  heart_beat_monitor_thread_->join();
+  heart_beat_monitor_thread_->Stop(threads::Thread::kThreadSoftStop);
   delete heartbeat_monitor_;
   threads::DeleteThread(heart_beat_monitor_thread_);
 

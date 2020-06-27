@@ -113,14 +113,14 @@ CacheManager::CacheManager()
   LOG4CXX_AUTO_TRACE(logger_);
   backuper_ = new BackgroundBackuper(this);
   backup_thread_ = threads::CreateThread("Backup thread", backuper_);
-  backup_thread_->start();
+  backup_thread_->Start();
 }
 
 CacheManager::~CacheManager() {
   LOG4CXX_AUTO_TRACE(logger_);
   sync_primitives::AutoLock lock(backuper_locker_);
-  backup_thread_->join();
-  delete backup_thread_->delegate();
+  backup_thread_->Stop(threads::Thread::kThreadSoftStop);
+  delete backup_thread_->GetDelegate();
   threads::DeleteThread(backup_thread_);
 }
 
