@@ -1462,14 +1462,6 @@ HmiStatePtr ApplicationManagerImpl::CreateRegularState(
   return state;
 }
 
-// forward declaration
-static media_manager::SamplingRate ConvertSamplingRate(
-    mobile_apis::SamplingRate::eType mobile_value);
-static media_manager::AudioCaptureQuality ConvertBitsPerSample(
-    mobile_apis::BitsPerSample::eType mobile_value);
-static media_manager::AudioType ConvertAudioType(
-    mobile_apis::AudioType::eType mobile_value);
-
 void ApplicationManagerImpl::StartAudioPassThruThread(int32_t session_key,
                                                       int32_t correlation_id,
                                                       int32_t max_duration,
@@ -1483,11 +1475,9 @@ void ApplicationManagerImpl::StartAudioPassThruThread(int32_t session_key,
       session_key,
       get_settings().recording_file_name(),
       max_duration,
-      ConvertSamplingRate(
-          static_cast<mobile_apis::SamplingRate::eType>(sampling_rate)),
-      ConvertBitsPerSample(
-          static_cast<mobile_apis::BitsPerSample::eType>(bits_per_sample)),
-      ConvertAudioType(static_cast<mobile_apis::AudioType::eType>(audio_type)));
+      static_cast<mobile_apis::SamplingRate::eType>(sampling_rate),
+      static_cast<mobile_apis::BitsPerSample::eType>(bits_per_sample),
+      static_cast<mobile_apis::AudioType::eType>(audio_type));
 }
 
 void ApplicationManagerImpl::StopAudioPassThru(int32_t application_key) {
@@ -4830,49 +4820,6 @@ bool ApplicationManagerImpl::IsSOStructValid(
 
   LOG4CXX_ERROR(logger_, "Could not find struct id: " << struct_id);
   return false;
-}
-
-// Convert mobile_apis::SamplingRate::eType enum into
-// media_manager::SamplingRate enum
-static media_manager::SamplingRate ConvertSamplingRate(
-    mobile_apis::SamplingRate::eType mobile_value) {
-  switch (mobile_value) {
-    case mobile_apis::SamplingRate::SamplingRate_8KHZ:
-      return media_manager::SR_8KHZ;
-    case mobile_apis::SamplingRate::SamplingRate_16KHZ:
-      return media_manager::SR_16KHZ;
-    case mobile_apis::SamplingRate::SamplingRate_22KHZ:
-      return media_manager::SR_22KHZ;
-    case mobile_apis::SamplingRate::SamplingRate_44KHZ:
-      return media_manager::SR_44KHZ;
-    default:
-      return media_manager::SR_INVALID;
-  }
-}
-
-// Convert mobile_apis::BitsPerSample::eType enum into
-// media_manager::AudioCaptureQuality enum
-static media_manager::AudioCaptureQuality ConvertBitsPerSample(
-    mobile_apis::BitsPerSample::eType mobile_value) {
-  switch (mobile_value) {
-    case mobile_apis::BitsPerSample::BitsPerSample_8_BIT:
-      return media_manager::ACQ_8_BIT;
-    case mobile_apis::BitsPerSample::BitsPerSample_16_BIT:
-      return media_manager::ACQ_16_BIT;
-    default:
-      return media_manager::ACQ_INVALID;
-  }
-}
-
-// Convert mobile_apis::AudioType::eType enum into media_manager::AudioType enum
-static media_manager::AudioType ConvertAudioType(
-    mobile_apis::AudioType::eType mobile_value) {
-  switch (mobile_value) {
-    case mobile_apis::AudioType::PCM:
-      return media_manager::AT_PCM;
-    default:
-      return media_manager::AT_INVALID;
-  }
 }
 
 #ifdef BUILD_TESTS

@@ -32,6 +32,7 @@
 
 #include "media_manager/audio/from_mic_recorder_adapter.h"
 #include <string>
+#include "interfaces/MOBILE_API.h"
 #include "media_manager/audio/from_mic_to_file_recorder_thread.h"
 #include "utils/logger.h"
 #include "utils/threads/thread.h"
@@ -44,9 +45,9 @@ FromMicRecorderAdapter::FromMicRecorderAdapter()
     : recorder_thread_(NULL)
     , output_file_("default_recorded_audio.wav")
     , kDefaultDuration(1000)
-    , sampling_rate_(SR_INVALID)
-    , bits_per_sample_(ACQ_INVALID)
-    , audio_type_(AT_INVALID)
+    , sampling_rate_(mobile_apis::SamplingRate::INVALID_ENUM)
+    , bits_per_sample_(mobile_apis::BitsPerSample::INVALID_ENUM)
+    , audio_type_(mobile_apis::AudioType::INVALID_ENUM)
     , duration_(kDefaultDuration) {}
 
 FromMicRecorderAdapter::~FromMicRecorderAdapter() {
@@ -114,10 +115,11 @@ void FromMicRecorderAdapter::set_duration(int32_t duration) {
   duration_ = duration;
 }
 
-void FromMicRecorderAdapter::set_config(SamplingRate sampling_rate,
-                                        AudioCaptureQuality bits_per_sample,
-                                        AudioType audio_type,
-                                        int32_t duration) {
+void FromMicRecorderAdapter::set_config(
+    mobile_apis::SamplingRate::eType sampling_rate,
+    mobile_apis::BitsPerSample::eType bits_per_sample,
+    mobile_apis::AudioType::eType audio_type,
+    int32_t duration) {
   sampling_rate_ = sampling_rate;
   bits_per_sample_ = bits_per_sample;
   audio_type_ = audio_type;

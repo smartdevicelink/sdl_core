@@ -34,6 +34,7 @@
 #include <unistd.h>
 #include <cstring>
 #include <sstream>
+#include "interfaces/MOBILE_API.h"
 #include "utils/logger.h"
 
 namespace media_manager {
@@ -48,9 +49,9 @@ static const int kNumAudioChannels = 1;
 FromMicToFileRecorderThread::FromMicToFileRecorderThread(
     const std::string& output_file,
     int32_t duration,
-    SamplingRate sampling_rate,
-    AudioCaptureQuality bits_per_sample,
-    AudioType audio_type)
+    mobile_apis::SamplingRate::eType sampling_rate,
+    mobile_apis::BitsPerSample::eType bits_per_sample,
+    mobile_apis::AudioType::eType audio_type)
     : threads::ThreadDelegate()
     , argc_(5)
     , argv_(NULL)
@@ -301,11 +302,11 @@ std::string FromMicToFileRecorderThread::create_caps_string() {
   ss << "audio/x-raw";
 
   switch (bitsPerSample_) {
-    case ACQ_8_BIT:
+    case mobile_apis::BitsPerSample::BitsPerSample_8_BIT:
       // format is 8-bit unsigned
       ss << ",format=(string)U8";
       break;
-    case ACQ_16_BIT:
+    case mobile_apis::BitsPerSample::BitsPerSample_16_BIT:
       // format is 16-bit signed, in little endian
       ss << ",format=(string)S16LE";
       break;
@@ -315,16 +316,16 @@ std::string FromMicToFileRecorderThread::create_caps_string() {
   }
 
   switch (samplingRate_) {
-    case SR_8KHZ:
+    case mobile_apis::SamplingRate::SamplingRate_8KHZ:
       ss << ",rate=8000";
       break;
-    case SR_16KHZ:
+    case mobile_apis::SamplingRate::SamplingRate_16KHZ:
       ss << ",rate=16000";
       break;
-    case SR_22KHZ:
+    case mobile_apis::SamplingRate::SamplingRate_22KHZ:
       ss << ",rate=22050";
       break;
-    case SR_44KHZ:
+    case mobile_apis::SamplingRate::SamplingRate_44KHZ:
       ss << ",rate=44100";
       break;
     default:

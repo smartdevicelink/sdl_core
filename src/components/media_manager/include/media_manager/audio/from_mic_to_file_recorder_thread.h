@@ -37,8 +37,7 @@
 #include <net/if.h>
 #include <string>
 
-#include "media_manager/media_manager.h"
-
+#include "interfaces/MOBILE_API.h"
 #include "utils/lock.h"
 #include "utils/threads/thread.h"
 #include "utils/threads/thread_delegate.h"
@@ -47,11 +46,15 @@ namespace media_manager {
 
 class FromMicToFileRecorderThread : public threads::ThreadDelegate {
  public:
-  FromMicToFileRecorderThread(const std::string& output_file,
-                              int32_t duration,
-                              SamplingRate sampling_rate = SR_INVALID,
-                              AudioCaptureQuality bits_per_sample = ACQ_INVALID,
-                              AudioType audio_type = AT_INVALID);
+  FromMicToFileRecorderThread(
+      const std::string& output_file,
+      int32_t duration,
+      mobile_apis::SamplingRate::eType sampling_rate =
+          mobile_apis::SamplingRate::INVALID_ENUM,
+      mobile_apis::BitsPerSample::eType bits_per_sample =
+          mobile_apis::BitsPerSample::INVALID_ENUM,
+      mobile_apis::AudioType::eType audio_type =
+          mobile_apis::AudioType::INVALID_ENUM);
   ~FromMicToFileRecorderThread();
   void threadMain();
 
@@ -73,8 +76,8 @@ class FromMicToFileRecorderThread : public threads::ThreadDelegate {
   sync_primitives::Lock stopFlagLock_;
 
   std::string outputFileName_, durationString_;
-  SamplingRate samplingRate_;
-  AudioCaptureQuality bitsPerSample_;
+  mobile_apis::SamplingRate::eType samplingRate_;
+  mobile_apis::BitsPerSample::eType bitsPerSample_;
 
   typedef struct {
     GstElement* pipeline;

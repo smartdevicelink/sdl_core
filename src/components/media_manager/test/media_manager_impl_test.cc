@@ -331,7 +331,12 @@ TEST_F(MediaManagerImplTest,
     EXPECT_EQ(data[i], result[i]);
   }
   media_manager_impl_->StartMicrophoneRecording(
-      kApplicationKey, kOutputFile, kDuration, SR_8KHZ, ACQ_8_BIT, AT_PCM);
+      kApplicationKey,
+      kOutputFile,
+      kDuration,
+      mobile_apis::SamplingRate::SamplingRate_8KHZ,
+      mobile_apis::BitsPerSample::BitsPerSample_8_BIT,
+      mobile_apis::AudioType::PCM);
   EXPECT_TRUE(RemoveDirectory(kResourceFolder, true));
   EXPECT_TRUE(RemoveDirectory(kStorageFolder, true));
 }
@@ -342,7 +347,12 @@ TEST_F(MediaManagerImplTest,
   media_manager_impl_->set_mock_mic_listener(media_adapter_listener_mock_);
   EXPECT_FALSE(FileExists(kOutputFilePath));
   media_manager_impl_->StartMicrophoneRecording(
-      kApplicationKey, kOutputFile, kDuration, SR_8KHZ, ACQ_8_BIT, AT_PCM);
+      kApplicationKey,
+      kOutputFile,
+      kDuration,
+      mobile_apis::SamplingRate::SamplingRate_8KHZ,
+      mobile_apis::BitsPerSample::BitsPerSample_8_BIT,
+      mobile_apis::AudioType::PCM);
 }
 
 TEST_F(MediaManagerImplTest,
@@ -358,7 +368,12 @@ TEST_F(MediaManagerImplTest,
   media_manager_impl_->set_mock_mic_listener(media_adapter_listener_mock_);
   EXPECT_TRUE(FileExists(kOutputFilePath));
   media_manager_impl_->StartMicrophoneRecording(
-      kApplicationKey, kOutputFile, kDuration, SR_8KHZ, ACQ_8_BIT, AT_PCM);
+      kApplicationKey,
+      kOutputFile,
+      kDuration,
+      mobile_apis::SamplingRate::SamplingRate_8KHZ,
+      mobile_apis::BitsPerSample::BitsPerSample_8_BIT,
+      mobile_apis::AudioType::PCM);
   chmod(kOutputFilePath.c_str(), S_IWUSR);
   EXPECT_TRUE(RemoveDirectory(kStorageFolder, true));
 }

@@ -1203,13 +1203,14 @@ TEST_F(ApplicationManagerImplTest, StartStopAudioPassThru) {
   const int32_t bits_per_sample = 0;
   const int32_t audio_type = 0;
 
-  EXPECT_CALL(mock_media_manager,
-              StartMicrophoneRecording(app_id,
-                                       _,
-                                       max_duration,
-                                       media_manager::SR_8KHZ,
-                                       media_manager::ACQ_8_BIT,
-                                       media_manager::AT_PCM))
+  EXPECT_CALL(
+      mock_media_manager,
+      StartMicrophoneRecording(app_id,
+                               _,
+                               max_duration,
+                               mobile_apis::SamplingRate::SamplingRate_8KHZ,
+                               mobile_apis::BitsPerSample::BitsPerSample_8_BIT,
+                               mobile_apis::AudioType::PCM))
       .WillOnce(Return());
   EXPECT_CALL(mock_media_manager, StopMicrophoneRecording(app_id))
       .WillOnce(Return());
@@ -1291,13 +1292,14 @@ TEST_F(ApplicationManagerImplTest, UnregisterAnotherAppDuringAudioPassThru) {
   const int32_t bits_per_sample = 0;
   const int32_t audio_type = 0;
 
-  EXPECT_CALL(mock_media_manager,
-              StartMicrophoneRecording(app_id_2,
-                                       _,
-                                       max_duration,
-                                       media_manager::SR_8KHZ,
-                                       media_manager::ACQ_8_BIT,
-                                       media_manager::AT_PCM))
+  EXPECT_CALL(
+      mock_media_manager,
+      StartMicrophoneRecording(app_id_2,
+                               _,
+                               max_duration,
+                               mobile_apis::SamplingRate::SamplingRate_8KHZ,
+                               mobile_apis::BitsPerSample::BitsPerSample_8_BIT,
+                               mobile_apis::AudioType::PCM))
       .WillOnce(Return());
   EXPECT_CALL(mock_media_manager, StopMicrophoneRecording(app_id_2))
       .WillOnce(Return());

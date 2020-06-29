@@ -51,9 +51,9 @@ class MockMediaManager : public media_manager::MediaManager {
                void(int32_t application_key,
                     const std::string& outputFileName,
                     int32_t duration,
-                    media_manager::SamplingRate sampling_rate,
-                    media_manager::AudioCaptureQuality bits_per_sample,
-                    media_manager::AudioType audio_type));
+                    mobile_apis::SamplingRate::eType,
+                    mobile_apis::BitsPerSample::eType,
+                    mobile_apis::AudioType::eType));
   MOCK_METHOD1(StopMicrophoneRecording, void(int32_t application_key));
   MOCK_METHOD2(StartStreaming,
                void(int32_t application_key,

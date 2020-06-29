@@ -36,6 +36,7 @@
 #include "application_manager/application_manager.h"
 #include "application_manager/message_helper.h"
 #include "application_manager/smart_object_keys.h"
+#include "interfaces/MOBILE_API.h"
 #include "media_manager/audio/from_mic_recorder_listener.h"
 #include "media_manager/streamer_listener.h"
 #include "protocol_handler/protocol_handler.h"
@@ -211,18 +212,18 @@ void MediaManagerImpl::StartMicrophoneRecording(int32_t application_key,
   StartMicrophoneRecording(application_key,
                            output_file,
                            duration,
-                           SR_INVALID,
-                           ACQ_INVALID,
-                           AT_INVALID);
+                           mobile_apis::SamplingRate::INVALID_ENUM,
+                           mobile_apis::BitsPerSample::INVALID_ENUM,
+                           mobile_apis::AudioType::INVALID_ENUM);
 }
 
 void MediaManagerImpl::StartMicrophoneRecording(
     int32_t application_key,
     const std::string& output_file,
     int32_t duration,
-    SamplingRate sampling_rate,
-    AudioCaptureQuality bits_per_sample,
-    AudioType audio_type) {
+    mobile_apis::SamplingRate::eType sampling_rate,
+    mobile_apis::BitsPerSample::eType bits_per_sample,
+    mobile_apis::AudioType::eType audio_type) {
   LOG4CXX_INFO(logger_,
                "MediaManagerImpl::StartMicrophoneRecording to " << output_file);
   application_manager::ApplicationSharedPtr app =
