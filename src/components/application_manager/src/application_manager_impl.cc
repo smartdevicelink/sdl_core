@@ -1472,7 +1472,12 @@ void ApplicationManagerImpl::StartAudioPassThruThread(int32_t session_key,
   LOG4CXX_INFO(logger_, "START MICROPHONE RECORDER");
   DCHECK_OR_RETURN_VOID(media_manager_);
   media_manager_->StartMicrophoneRecording(
-      session_key, get_settings().recording_file_name(), max_duration);
+      session_key,
+      get_settings().recording_file_name(),
+      max_duration,
+      static_cast<mobile_apis::SamplingRate::eType>(sampling_rate),
+      static_cast<mobile_apis::BitsPerSample::eType>(bits_per_sample),
+      static_cast<mobile_apis::AudioType::eType>(audio_type));
 }
 
 void ApplicationManagerImpl::StopAudioPassThru(int32_t application_key) {
