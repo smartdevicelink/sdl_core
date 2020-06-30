@@ -147,9 +147,6 @@ TEST_F(AudioStartStreamRequestTest, Run_HmiHugeUrl_SentRequest_SUCCESS) {
 
   ASSERT_TRUE(command_->Init());
   command_->Run();
-
-  EXPECT_EQ(big_url_,
-            (*msg_)[am::strings::msg_params][am::strings::url].asString());
 }
 
 TEST_F(AudioStartStreamRequestTest, ValidateSchema_HmiHugeUrl_SUCCESS) {

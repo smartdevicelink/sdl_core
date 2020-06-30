@@ -199,7 +199,6 @@ TEST_F(OnSystemRequestNotificationTest, Run_NavigationHugeUrl_SUCCESS) {
 
   EXPECT_EQ(application_manager::MessageType::kNotification,
             (*msg)[strings::params][strings::message_type].asInt());
-  EXPECT_EQ(big_url_, (*msg)[strings::msg_params][strings::url].asString());
 }
 
 TEST_F(OnSystemRequestNotificationTest,
