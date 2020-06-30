@@ -142,6 +142,8 @@
 #include "sdl_rpc_plugin/commands/mobile/unsubscribe_way_points_response.h"
 #include "sdl_rpc_plugin/commands/mobile/update_turn_list_request.h"
 #include "sdl_rpc_plugin/commands/mobile/update_turn_list_response.h"
+#include "sdl_rpc_plugin/commands/mobile/on_update_file_notification.h"
+#include "sdl_rpc_plugin/commands/mobile/on_update_sub_menu_notification.h"
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "ApplicationManager")
 namespace sdl_rpc_plugin {
@@ -457,6 +459,12 @@ CommandCreator& MobileCommandFactory::get_notification_creator(
     }
     case mobile_apis::FunctionID::OnWayPointChangeID: {
       return factory.GetCreator<commands::OnWayPointChangeNotification>();
+    }
+    case mobile_apis::FunctionID::OnUpdateFileID: {
+      return factory.GetCreator<commands::OnUpdateFileNotification>();
+    }
+    case mobile_apis::FunctionID::OnUpdateSubMenuID: {
+      return factory.GetCreator<commands::OnUpdateSubMenuNotification>();
     }
     default: {}
   }

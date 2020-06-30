@@ -244,6 +244,8 @@
 #include "sdl_rpc_plugin/commands/hmi/ui_set_display_layout_response.h"
 #include "sdl_rpc_plugin/commands/hmi/ui_show_app_menu_request.h"
 #include "sdl_rpc_plugin/commands/hmi/ui_show_app_menu_response.h"
+#include "sdl_rpc_plugin/commands/hmi/on_ui_update_file_notification.h"
+#include "sdl_rpc_plugin/commands/hmi/on_ui_update_sub_menu_notification.h"
 
 #include "sdl_rpc_plugin/commands/hmi/bc_get_file_path_request.h"
 #include "sdl_rpc_plugin/commands/hmi/bc_get_file_path_response.h"
@@ -922,6 +924,12 @@ CommandCreator& HMICommandFactory::get_creator_factory(
     }
     case hmi_apis::FunctionID::BasicCommunication_OnAppPropertiesChange: {
       return factory.GetCreator<commands::OnAppPropertiesChangeNotification>();
+    }
+    case hmi_apis::FunctionID::BasicCommunication_OnUpdateFile: {
+      return factory.GetCreator<commands::OnUIUpdateFileNotification>();
+    }
+    case hmi_apis::FunctionID::BasicCommunication_OnUpdateSubMenu: {
+      return factory.GetCreator<commands::OnUIUpdateSubMenuNotification>();
     }
     default: { return factory.GetCreator<InvalidCommand>(); }
   }
