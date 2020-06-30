@@ -925,10 +925,10 @@ CommandCreator& HMICommandFactory::get_creator_factory(
     case hmi_apis::FunctionID::BasicCommunication_OnAppPropertiesChange: {
       return factory.GetCreator<commands::OnAppPropertiesChangeNotification>();
     }
-    case hmi_apis::FunctionID::BasicCommunication_OnUpdateFile: {
+    case hmi_apis::FunctionID::UI_OnUpdateFile: {
       return factory.GetCreator<commands::OnUIUpdateFileNotification>();
     }
-    case hmi_apis::FunctionID::BasicCommunication_OnUpdateSubMenu: {
+    case hmi_apis::FunctionID::UI_OnUpdateSubMenu: {
       return factory.GetCreator<commands::OnUIUpdateSubMenuNotification>();
     }
     default: { return factory.GetCreator<InvalidCommand>(); }
