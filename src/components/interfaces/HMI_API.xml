@@ -717,6 +717,9 @@
   <element name="alertIcon">
     <description>The image field for Alert</description>
   </element>
+  <element name="subMenuIcon">
+    <description>The image field for AddSubMenu.menuIcon</description>
+  </element>
 </enum>
 
 <enum name="TextAlignment">
@@ -3495,6 +3498,15 @@
     </param>
   </struct>
 
+  <struct name="DynamicUpdateCapabilities">
+    <param name="supportedDynamicImageFieldNames" type="ImageFieldName" array="true" mandatory="false" minsize="1">
+      <description>An array of ImageFieldName values for which the system supports sending OnFileUpdate notifications. If you send an Image struct for that image field with a name without having uploaded the image data using PutFile that matches that name, the system will request that you upload the data with PutFile at a later point when the HMI needs it. The HMI will then display the image in the appropriate field. If not sent, assume false.</description>
+    </param>
+
+    <param name="supportsDynamicSubMenus" type="Boolean" mandatory="false">
+      <description>If true, the head unit supports dynamic sub-menus by sending OnUpdateSubMenu notifications. If true, you should not send AddCommands that attach to a parentID for an AddSubMenu until OnUpdateSubMenu is received with the menuID. At that point, you should send all AddCommands with a parentID that match the menuID. If not set, assume false.</description>
+    </param>
+  </struct>
 
   <struct name="WindowTypeCapabilities">
     <param name="type" type="Common.WindowType" mandatory="true" />
@@ -3531,6 +3543,9 @@
     </param>
     <param name="menuLayoutsAvailable" type="Common.MenuLayout" array="true" minsize="1" maxsize="1000" mandatory="false">
       <description>An array of available menu layouts. If this parameter is not provided, only the `LIST` layout is assumed to be available</description>
+    </param>
+    <param name="dynamicUpdateCapabilities" type="DynamicUpdateCapabilities" mandatory="false">
+      <description>Contains the head unit's capabilities for dynamic updating features declaring if the module will send dynamic update RPCs.</description>
     </param>
   </struct>
 
@@ -5663,6 +5678,33 @@
   </function>
   <function name="SendHapticData" messagetype="response">
   </function>
+
+  <function name="OnUpdateFile" messagetype="notification">
+    <description>For the HMI to tell Core that a file needs to be retrieved from the app.</description>
+    <param name="appID" type="Integer" mandatory="true">
+      <description>ID of application related to this RPC.</description>
+    </param>
+    <param name="fileName" type="String" maxlength="255" mandatory="true">
+      <description>File reference name.</description>
+    </param>
+  </function>
+
+  <function name="OnUpdateSubMenu" messagetype="notification">
+    <description>For the HMI to tell Core that a submenu needs updating</description>
+
+    <param name="appID" type="Integer" mandatory="true">
+      <description>ID of application related to this RPC.</description>
+    </param>
+
+    <param name="menuID" type="Integer" minvalue="0" maxvalue="2000000000" mandatory="true">
+      <description>This menuID must match a menuID in the current menu structure</description>
+    </param>
+
+    <param name="updateSubCells" type="Boolean" mandatory="false">
+      <description>If not set, assume false. If true, the app should send AddCommands with parentIDs matching the menuID. These AddCommands will then be attached to the submenu and displayed if the submenu is selected.</description>
+    </param>
+  </function>
+
 </interface>
 
 <interface name="Navigation" version="1.5.0" date="2017-08-15">
