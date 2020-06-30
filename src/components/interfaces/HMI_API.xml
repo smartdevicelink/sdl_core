@@ -1432,16 +1432,16 @@
 <enum name="CharacterSet">
   <description>The list of potential character sets</description>
   <element name="TYPE2SET">
-    <description>See [@TODO: create file ref]. Note that this element is deprecated in the MOBILE API</description>
+    <description>Note that this element is deprecated in the MOBILE API</description>
   </element>
   <element name="TYPE5SET">
-    <description>See [@TODO: create file ref]. Note that this element is deprecated in the MOBILE API</description>
+    <description>Note that this element is deprecated in the MOBILE API</description>
   </element>
   <element name="CID1SET">
-    <description>See [@TODO: create file ref]. Note that this element is deprecated in the MOBILE API</description>
+    <description>Note that this element is deprecated in the MOBILE API</description>
   </element>
   <element name="CID2SET">
-    <description>See [@TODO: create file ref]. Note that this element is deprecated in the MOBILE API</description>
+    <description>Note that this element is deprecated in the MOBILE API</description>
   </element>
   <element name="ASCII">
     <description>ASCII as defined in https://en.wikipedia.org/wiki/ASCII as defined in codes 0-127. Non-printable characters such as tabs and back spaces are ignored</description>
