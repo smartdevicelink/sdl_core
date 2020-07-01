@@ -897,11 +897,8 @@ void ApplicationManagerImpl::RequestForInterfacesAvailability() {
                                         *this));
   rpc_service_->ManageHMICommand(is_rc_ready);
 
-  const auto default_initialized_capabilities =
-      hmi_capabilities_->GetRequestsRequiredForCapabilities();
-
-  if (helpers::in_range(default_initialized_capabilities,
-                        hmi_apis::FunctionID::Buttons_GetCapabilities)) {
+  if (hmi_capabilities_->IsRequestsRequiredForCapabilities(
+          hmi_apis::FunctionID::Buttons_GetCapabilities)) {
     std::shared_ptr<smart_objects::SmartObject> button_capabilities(
         MessageHelper::CreateModuleInfoSO(
             hmi_apis::FunctionID::Buttons_GetCapabilities, *this));

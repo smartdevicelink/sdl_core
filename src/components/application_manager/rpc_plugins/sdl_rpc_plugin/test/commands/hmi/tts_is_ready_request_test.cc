@@ -144,12 +144,18 @@ class TTSIsReadyRequestTest
   }
 
   void HMICapabilitiesExpectations() {
-    std::set<hmi_apis::FunctionID::eType> interfaces_to_update{
-        hmi_apis::FunctionID::TTS_GetLanguage,
-        hmi_apis::FunctionID::TTS_GetSupportedLanguages,
-        hmi_apis::FunctionID::TTS_GetCapabilities};
-    EXPECT_CALL(mock_hmi_capabilities_, GetRequestsRequiredForCapabilities())
-        .WillOnce(Return(interfaces_to_update));
+    EXPECT_CALL(mock_hmi_capabilities_,
+                IsRequestsRequiredForCapabilities(
+                    hmi_apis::FunctionID::TTS_GetLanguage))
+        .WillOnce(Return(true));
+    EXPECT_CALL(mock_hmi_capabilities_,
+                IsRequestsRequiredForCapabilities(
+                    hmi_apis::FunctionID::TTS_GetSupportedLanguages))
+        .WillOnce(Return(true));
+    EXPECT_CALL(mock_hmi_capabilities_,
+                IsRequestsRequiredForCapabilities(
+                    hmi_apis::FunctionID::TTS_GetCapabilities))
+        .WillOnce(Return(true));
   }
 
   TTSIsReadyRequestPtr command_;
@@ -231,12 +237,7 @@ TEST_F(TTSIsReadyRequestTest,
 
 TEST_F(TTSIsReadyRequestTest,
        Run_HMIDoestRespond_SendMessageToHMIByTimeout_CacheIsAbsent) {
-  std::set<hmi_apis::FunctionID::eType> interfaces_to_update{
-      hmi_apis::FunctionID::TTS_GetLanguage,
-      hmi_apis::FunctionID::TTS_GetSupportedLanguages,
-      hmi_apis::FunctionID::TTS_GetCapabilities};
-  EXPECT_CALL(mock_hmi_capabilities_, GetRequestsRequiredForCapabilities())
-      .WillOnce(Return(interfaces_to_update));
+  HMICapabilitiesExpectations();
   ExpectSendMessagesToHMI();
   ASSERT_TRUE(command_->Init());
 

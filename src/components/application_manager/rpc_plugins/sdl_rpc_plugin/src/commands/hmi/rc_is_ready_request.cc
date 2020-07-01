@@ -100,11 +100,8 @@ void RCIsReadyRequest::onTimeOut() {
 }
 
 void RCIsReadyRequest::RequestCapabilities() {
-  const auto default_initialized_capabilities =
-      hmi_capabilities_.GetRequestsRequiredForCapabilities();
-
-  if (helpers::in_range(default_initialized_capabilities,
-                        hmi_apis::FunctionID::RC_GetCapabilities)) {
+  if (hmi_capabilities_.IsRequestsRequiredForCapabilities(
+          hmi_apis::FunctionID::RC_GetCapabilities)) {
     std::shared_ptr<smart_objects::SmartObject> get_capabilities(
         MessageHelper::CreateModuleInfoSO(
             hmi_apis::FunctionID::RC_GetCapabilities, application_manager_));

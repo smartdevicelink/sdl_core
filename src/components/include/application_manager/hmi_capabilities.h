@@ -515,12 +515,13 @@ class HMICapabilities {
   virtual bool DeleteCachedCapabilitiesFile() const = 0;
 
   /**
-   * @brief Returns collection of requests that should be send to
-   * the HMI to get required HMI capabilities, that was missing in the cache
-   * @return set of function id's
+   * @brief Checks if request required for appropriate function id
+   * @param function_id function ID that required request to get appropriate hmi
+   * capabilities
+   * @return true if request required for capabilities, otherwise false
    */
-  virtual std::set<hmi_apis::FunctionID::eType>
-  GetRequestsRequiredForCapabilities() const = 0;
+  virtual bool IsRequestsRequiredForCapabilities(
+      hmi_apis::FunctionID::eType function_id) const = 0;
 
   /**
    * @brief Update collection of requests that should be send to
@@ -531,17 +532,14 @@ class HMICapabilities {
       hmi_apis::FunctionID::eType requested_interface) = 0;
 
   /**
-   * @brief Interface that checks for compliance new software version of the
-   * target with last received
-   * @param ccpu_version Received system/hmi software version
-   */
-  virtual bool MatchesCCPUVersion(const std::string& ccpu_version) const = 0;
-
-  /**
    * @brief Interface that update capabilities depending on ccpu_version
    * @param ccpu_version Received system/hmi software version
    */
   virtual void OnSoftwareVersionReceived(const std::string& ccpu_version) = 0;
+
+  /**
+   * @brief Interface that update cached hmi capabilities
+   */
 
   virtual void UpdateCachedCapabilities() = 0;
 };

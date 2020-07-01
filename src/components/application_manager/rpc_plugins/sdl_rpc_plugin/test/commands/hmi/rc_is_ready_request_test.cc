@@ -114,10 +114,10 @@ class RCIsReadyRequestTest
   }
 
   void HMICapabilitiesExpectations() {
-    std::set<hmi_apis::FunctionID::eType> interfaces_to_update{
-        hmi_apis::FunctionID::RC_GetCapabilities};
-    EXPECT_CALL(mock_hmi_capabilities_, GetRequestsRequiredForCapabilities())
-        .WillOnce(Return(interfaces_to_update));
+    EXPECT_CALL(mock_hmi_capabilities_,
+                IsRequestsRequiredForCapabilities(
+                    hmi_apis::FunctionID::RC_GetCapabilities))
+        .WillOnce(Return(true));
   }
 
   RCIsReadyRequestPtr command_;

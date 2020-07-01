@@ -126,11 +126,10 @@ class VIIsReadyRequestTest
   }
 
   void HMICapabilitiesExpectations() {
-    std::set<hmi_apis::FunctionID::eType> interfaces_to_update{
-        hmi_apis::FunctionID::VehicleInfo_GetVehicleType};
-
-    EXPECT_CALL(mock_hmi_capabilities_, GetRequestsRequiredForCapabilities())
-        .WillOnce(Return(interfaces_to_update));
+    EXPECT_CALL(mock_hmi_capabilities_,
+                IsRequestsRequiredForCapabilities(
+                    hmi_apis::FunctionID::VehicleInfo_GetVehicleType))
+        .WillOnce(Return(true));
   }
 
   VIIsReadyRequestPtr command_;
@@ -206,10 +205,7 @@ TEST_F(VIIsReadyRequestTest, Run_KeyAvailableEqualToTrue_StateAvailable) {
 }
 
 TEST_F(VIIsReadyRequestTest, Run_HMIDoestRespond_SendMessageToHMIByTimeout) {
-  std::set<hmi_apis::FunctionID::eType> interfaces_to_update{
-      hmi_apis::FunctionID::VehicleInfo_GetVehicleType};
-  EXPECT_CALL(mock_hmi_capabilities_, GetRequestsRequiredForCapabilities())
-      .WillOnce(Return(interfaces_to_update));
+  HMICapabilitiesExpectations();
   ExpectSendMessagesToHMI();
   ASSERT_TRUE(command_->Init());
 

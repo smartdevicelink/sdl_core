@@ -103,11 +103,8 @@ void TTSIsReadyRequest::onTimeOut() {
 }
 
 void TTSIsReadyRequest::RequestCapabilities() {
-  const auto default_initialized_capabilities =
-      hmi_capabilities_.GetRequestsRequiredForCapabilities();
-
-  if (helpers::in_range(default_initialized_capabilities,
-                        hmi_apis::FunctionID::TTS_GetLanguage)) {
+  if (hmi_capabilities_.IsRequestsRequiredForCapabilities(
+          hmi_apis::FunctionID::TTS_GetLanguage)) {
     std::shared_ptr<smart_objects::SmartObject> get_language(
         MessageHelper::CreateModuleInfoSO(hmi_apis::FunctionID::TTS_GetLanguage,
                                           application_manager_));
@@ -116,8 +113,8 @@ void TTSIsReadyRequest::RequestCapabilities() {
     rpc_service_.ManageHMICommand(get_language);
   }
 
-  if (helpers::in_range(default_initialized_capabilities,
-                        hmi_apis::FunctionID::TTS_GetSupportedLanguages)) {
+  if (hmi_capabilities_.IsRequestsRequiredForCapabilities(
+          hmi_apis::FunctionID::TTS_GetSupportedLanguages)) {
     std::shared_ptr<smart_objects::SmartObject> get_supported_languages(
         MessageHelper::CreateModuleInfoSO(
             hmi_apis::FunctionID::TTS_GetSupportedLanguages,
@@ -125,8 +122,8 @@ void TTSIsReadyRequest::RequestCapabilities() {
     rpc_service_.ManageHMICommand(get_supported_languages);
   }
 
-  if (helpers::in_range(default_initialized_capabilities,
-                        hmi_apis::FunctionID::TTS_GetCapabilities)) {
+  if (hmi_capabilities_.IsRequestsRequiredForCapabilities(
+          hmi_apis::FunctionID::TTS_GetCapabilities)) {
     std::shared_ptr<smart_objects::SmartObject> get_capabilities(
         MessageHelper::CreateModuleInfoSO(
             hmi_apis::FunctionID::TTS_GetCapabilities, application_manager_));

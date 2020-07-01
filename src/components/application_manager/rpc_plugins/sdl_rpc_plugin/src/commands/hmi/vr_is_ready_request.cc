@@ -102,11 +102,8 @@ void VRIsReadyRequest::onTimeOut() {
 }
 
 void VRIsReadyRequest::RequestCapabilities() {
-  const auto default_initialized_capabilities =
-      hmi_capabilities_.GetRequestsRequiredForCapabilities();
-
-  if (helpers::in_range(default_initialized_capabilities,
-                        hmi_apis::FunctionID::VR_GetLanguage)) {
+  if (hmi_capabilities_.IsRequestsRequiredForCapabilities(
+          hmi_apis::FunctionID::VR_GetLanguage)) {
     std::shared_ptr<smart_objects::SmartObject> get_language(
         MessageHelper::CreateModuleInfoSO(hmi_apis::FunctionID::VR_GetLanguage,
                                           application_manager_));
@@ -115,8 +112,8 @@ void VRIsReadyRequest::RequestCapabilities() {
     rpc_service_.ManageHMICommand(get_language);
   }
 
-  if (helpers::in_range(default_initialized_capabilities,
-                        hmi_apis::FunctionID::VR_GetSupportedLanguages)) {
+  if (hmi_capabilities_.IsRequestsRequiredForCapabilities(
+          hmi_apis::FunctionID::VR_GetSupportedLanguages)) {
     std::shared_ptr<smart_objects::SmartObject> get_supported_languages(
         MessageHelper::CreateModuleInfoSO(
             hmi_apis::FunctionID::VR_GetSupportedLanguages,
@@ -124,8 +121,8 @@ void VRIsReadyRequest::RequestCapabilities() {
     rpc_service_.ManageHMICommand(get_supported_languages);
   }
 
-  if (helpers::in_range(default_initialized_capabilities,
-                        hmi_apis::FunctionID::VR_GetCapabilities)) {
+  if (hmi_capabilities_.IsRequestsRequiredForCapabilities(
+          hmi_apis::FunctionID::VR_GetCapabilities)) {
     std::shared_ptr<smart_objects::SmartObject> get_capabilities(
         MessageHelper::CreateModuleInfoSO(
             hmi_apis::FunctionID::VR_GetCapabilities, application_manager_));

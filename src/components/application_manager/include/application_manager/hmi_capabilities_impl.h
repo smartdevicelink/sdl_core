@@ -238,13 +238,11 @@ class HMICapabilitiesImpl : public HMICapabilities {
 
   bool DeleteCachedCapabilitiesFile() const OVERRIDE;
 
-  std::set<hmi_apis::FunctionID::eType> GetRequestsRequiredForCapabilities()
-      const OVERRIDE;
+  bool IsRequestsRequiredForCapabilities(
+      hmi_apis::FunctionID::eType function_id) const OVERRIDE;
 
   void UpdateRequestsRequiredForCapabilities(
       hmi_apis::FunctionID::eType requested_interface) OVERRIDE;
-
-  bool MatchesCCPUVersion(const std::string& ccpu_version) const OVERRIDE;
 
   void OnSoftwareVersionReceived(const std::string& ccpu_version) OVERRIDE;
 
@@ -402,6 +400,14 @@ class HMICapabilitiesImpl : public HMICapabilities {
       const std::vector<std::string>& sections_to_update,
       const smart_objects::CSmartSchema& schema,
       Json::Value& out_node) const;
+
+  /**
+   * @brief Adds appropriate request IDs to the requested required collection
+   * according to an interface name
+   * @param interface_name An interface name which requests required to send to
+   * the HMI
+   */
+  void AddRequiredRequestsForCapabilities(const std::string& interface_name);
 
   bool is_vr_cooperating_;
   bool is_tts_cooperating_;

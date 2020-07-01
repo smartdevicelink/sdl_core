@@ -142,12 +142,18 @@ class UIIsReadyRequestTest
   }
 
   void HMICapabilitiesExpectations() {
-    std::set<hmi_apis::FunctionID::eType> interfaces_to_update{
-        hmi_apis::FunctionID::UI_GetLanguage,
-        hmi_apis::FunctionID::UI_GetSupportedLanguages,
-        hmi_apis::FunctionID::UI_GetCapabilities};
-    EXPECT_CALL(mock_hmi_capabilities_, GetRequestsRequiredForCapabilities())
-        .WillOnce(Return(interfaces_to_update));
+    EXPECT_CALL(
+        mock_hmi_capabilities_,
+        IsRequestsRequiredForCapabilities(hmi_apis::FunctionID::UI_GetLanguage))
+        .WillOnce(Return(true));
+    EXPECT_CALL(mock_hmi_capabilities_,
+                IsRequestsRequiredForCapabilities(
+                    hmi_apis::FunctionID::UI_GetSupportedLanguages))
+        .WillOnce(Return(true));
+    EXPECT_CALL(mock_hmi_capabilities_,
+                IsRequestsRequiredForCapabilities(
+                    hmi_apis::FunctionID::UI_GetCapabilities))
+        .WillOnce(Return(true));
   }
 
   UIIsReadyRequestPtr command_;
@@ -200,12 +206,7 @@ TEST_F(UIIsReadyRequestTest,
 }
 
 TEST_F(UIIsReadyRequestTest, OnTimeout_SUCCESS_CacheIsAbsent) {
-  std::set<hmi_apis::FunctionID::eType> interfaces_to_update{
-      hmi_apis::FunctionID::UI_GetLanguage,
-      hmi_apis::FunctionID::UI_GetSupportedLanguages,
-      hmi_apis::FunctionID::UI_GetCapabilities};
-  EXPECT_CALL(mock_hmi_capabilities_, GetRequestsRequiredForCapabilities())
-      .WillOnce(Return(interfaces_to_update));
+  HMICapabilitiesExpectations();
   ExpectSendMessagesToHMI();
   command_->onTimeOut();
 }
