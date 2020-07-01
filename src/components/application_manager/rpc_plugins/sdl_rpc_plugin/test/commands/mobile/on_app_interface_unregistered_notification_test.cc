@@ -116,7 +116,7 @@ TEST_F(OnAppInterfaceUnregisteredNotificationTest,
   (*message_)[am::strings::msg_params][am::strings::reason] =
       Reason::RESOURCE_CONSTRAINT;
 
-  CheckResponseParameters(false, false);
+  CheckResponseParameters(false, true);
 
   ASSERT_TRUE(command_->Init());
   command_->Run();
