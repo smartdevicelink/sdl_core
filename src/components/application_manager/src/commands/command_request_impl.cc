@@ -298,7 +298,7 @@ void CommandRequestImpl::SendResponse(
     response[strings::msg_params] = *response_params;
   }
 
-  if (info) {
+  if (info && *info != '\0') {
     response[strings::msg_params][strings::info] = std::string(info);
   }
 
@@ -318,7 +318,17 @@ void CommandRequestImpl::SendResponse(
   }
 
   response[strings::msg_params][strings::success] = success;
-  response[strings::msg_params][strings::result_code] = result_code;
+  if ((result_code == mobile_apis::Result::SUCCESS ||
+       result_code == mobile_apis::Result::WARNINGS) &&
+      !warning_info().empty()) {
+    response[strings::msg_params][strings::info] =
+        (info && *info != '\0') ? std::string(info) + "\n" + warning_info()
+                                : warning_info();
+    response[strings::msg_params][strings::result_code] =
+        mobile_apis::Result::WARNINGS;
+  } else {
+    response[strings::msg_params][strings::result_code] = result_code;
+  }
 
   is_success_result_ = success;
 
@@ -719,7 +729,7 @@ bool CommandRequestImpl::CheckHMICapabilities(
   return false;
 }
 
-void CommandRequestImpl::AddDissalowedParameterToInfoString(
+void CommandRequestImpl::AddDisallowedParameterToInfoString(
     std::string& info, const std::string& param) const {
   // prepare disallowed params enumeration for response info string
   if (info.empty()) {
@@ -736,12 +746,12 @@ void CommandRequestImpl::AddDisallowedParametersToInfo(
   RPCParams::const_iterator it =
       removed_parameters_permissions_.disallowed_params.begin();
   for (; it != removed_parameters_permissions_.disallowed_params.end(); ++it) {
-    AddDissalowedParameterToInfoString(info, (*it));
+    AddDisallowedParameterToInfoString(info, (*it));
   }
 
   it = removed_parameters_permissions_.undefined_params.begin();
   for (; it != removed_parameters_permissions_.undefined_params.end(); ++it) {
-    AddDissalowedParameterToInfoString(info, (*it));
+    AddDisallowedParameterToInfoString(info, (*it));
   }
 
   if (!info.empty()) {

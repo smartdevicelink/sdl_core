@@ -271,17 +271,40 @@ class ApplicationManagerImpl
 
   /**
    * @brief Checks if Application is subscribed for way points
+   * @param Application id
+   * @return true if Application is subscribed for way points
+   * otherwise false
+   */
+  bool IsAppSubscribedForWayPoints(uint32_t app_id) const OVERRIDE;
+
+  /**
+   * @brief Checks if Application is subscribed for way points
    * @param Application pointer
    * @return true if Application is subscribed for way points
    * otherwise false
    */
   bool IsAppSubscribedForWayPoints(ApplicationSharedPtr app) const OVERRIDE;
 
+  void SaveWayPointsMessage(
+      smart_objects::SmartObjectSPtr way_points_message) OVERRIDE;
+
+  /**
+   * @brief Subscribe Application for way points
+   * @param Application id
+   */
+  void SubscribeAppForWayPoints(uint32_t app_id) OVERRIDE;
+
   /**
    * @brief Subscribe Application for way points
    * @param Application pointer
    */
   void SubscribeAppForWayPoints(ApplicationSharedPtr app) OVERRIDE;
+
+  /**
+   * @brief Unsubscribe Application for way points
+   * @param Application id
+   */
+  void UnsubscribeAppFromWayPoints(uint32_t app_id) OVERRIDE;
 
   /**
    * @brief Unsubscribe Application for way points
@@ -1509,6 +1532,8 @@ class ApplicationManagerImpl
    * @brief Set AppIDs of subscribed apps for way points
    */
   std::set<uint32_t> subscribed_way_points_apps_list_;
+
+  smart_objects::SmartObjectSPtr way_points_data_;
 
   /**
    * @brief Map contains applications which

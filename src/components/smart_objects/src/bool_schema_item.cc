@@ -51,5 +51,9 @@ bool CBoolSchemaItem::getDefaultValue() const {
   return false;
 }
 
+TypeID CBoolSchemaItem::GetType() {
+  return TYPE_BOOLEAN;
+}
+
 }  // namespace ns_smart_objects
 }  // namespace ns_smart_device_link

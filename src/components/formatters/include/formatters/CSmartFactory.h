@@ -147,16 +147,18 @@ class CSmartFactory {
    * @brief Attach schema to the function SmartObject.
    *
    * @param object SmartObject to attach schema for.
-   *
    * @param remove_unknown_parameters contains true if need
    * to remove fake parameters from smart object otherwise contains false.
+   * @param MessageVersion the version of the schema to be applied
+   * @param report__ object for reporting warnings during schema application
    *
    * @return True if operation was successful or false otherwise.
    */
   bool attachSchema(
       ns_smart_device_link::ns_smart_objects::SmartObject& object,
       const bool remove_unknown_parameters,
-      const utils::SemanticVersion& MessageVersion = utils::SemanticVersion());
+      const utils::SemanticVersion& MessageVersion = utils::SemanticVersion(),
+      rpc::ValidationReport* report__ = nullptr);
 
   /**
    * @brief Attach schema to the struct SmartObject.
@@ -277,7 +279,8 @@ template <class FunctionIdEnum, class MessageTypeEnum, class StructIdEnum>
 bool CSmartFactory<FunctionIdEnum, MessageTypeEnum, StructIdEnum>::attachSchema(
     ns_smart_device_link::ns_smart_objects::SmartObject& object,
     const bool remove_unknown_parameters,
-    const utils::SemanticVersion& MessageVersion) {
+    const utils::SemanticVersion& MessageVersion,
+    rpc::ValidationReport* report__) {
   if (false == object.keyExists(strings::S_PARAMS))
     return false;
   if (false == object[strings::S_PARAMS].keyExists(strings::S_MESSAGE_TYPE))
@@ -305,7 +308,7 @@ bool CSmartFactory<FunctionIdEnum, MessageTypeEnum, StructIdEnum>::attachSchema(
   object.setSchema(schemaIterator->second);
 
   schemaIterator->second.applySchema(
-      object, remove_unknown_parameters, MessageVersion);
+      object, remove_unknown_parameters, MessageVersion, report__);
 
   return true;
 }

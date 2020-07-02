@@ -34,8 +34,10 @@
 #define SRC_COMPONENTS_INCLUDE_MEDIA_MANAGER_MEDIA_MANAGER_H_
 
 #include <string>
+#include "interfaces/MOBILE_API.h"  // see discussion in sdl_core PR #2184
 #include "media_manager/media_manager_settings.h"
 #include "protocol/service_type.h"
+#include "utils/macro.h"  // for "DEPRECATED"
 namespace media_manager {
 
 class MediaManager {
@@ -43,9 +45,17 @@ class MediaManager {
   virtual void PlayA2DPSource(int32_t application_key) = 0;
   virtual void StopA2DPSource(int32_t application_key) = 0;
 
-  virtual void StartMicrophoneRecording(int32_t application_key,
-                                        const std::string& outputFileName,
-                                        int32_t duration) = 0;
+  DEPRECATED virtual void StartMicrophoneRecording(
+      int32_t application_key,
+      const std::string& outputFileName,
+      int32_t duration) = 0;
+  virtual void StartMicrophoneRecording(
+      int32_t application_key,
+      const std::string& outputFileName,
+      int32_t duration,
+      mobile_apis::SamplingRate::eType sampling_rate,
+      mobile_apis::BitsPerSample::eType bits_per_sample,
+      mobile_apis::AudioType::eType audio_type) = 0;
   virtual void StopMicrophoneRecording(int32_t application_key) = 0;
 
   virtual void StartStreaming(int32_t application_key,

@@ -1472,7 +1472,12 @@ void ApplicationManagerImpl::StartAudioPassThruThread(int32_t session_key,
   LOG4CXX_INFO(logger_, "START MICROPHONE RECORDER");
   DCHECK_OR_RETURN_VOID(media_manager_);
   media_manager_->StartMicrophoneRecording(
-      session_key, get_settings().recording_file_name(), max_duration);
+      session_key,
+      get_settings().recording_file_name(),
+      max_duration,
+      static_cast<mobile_apis::SamplingRate::eType>(sampling_rate),
+      static_cast<mobile_apis::BitsPerSample::eType>(bits_per_sample),
+      static_cast<mobile_apis::AudioType::eType>(audio_type));
 }
 
 void ApplicationManagerImpl::StopAudioPassThru(int32_t application_key) {
@@ -3212,19 +3217,15 @@ void ApplicationManagerImpl::UnregisterApplication(
                             << "; is_resuming = " << is_resuming
                             << "; is_unexpected_disconnect = "
                             << is_unexpected_disconnect);
-  size_t subscribed_for_way_points_app_count = 0;
 
   GetAppServiceManager().UnpublishServices(app_id);
 
-  // SDL sends UnsubscribeWayPoints only for last application
-  {
-    sync_primitives::AutoLock lock(subscribed_way_points_apps_lock_);
-    subscribed_for_way_points_app_count =
-        subscribed_way_points_apps_list_.size();
-  }
-  if (1 == subscribed_for_way_points_app_count) {
-    LOG4CXX_ERROR(logger_, "Send UnsubscribeWayPoints");
-    MessageHelper::SendUnsubscribedWayPoints(*this);
+  if (IsAppSubscribedForWayPoints(app_id)) {
+    UnsubscribeAppFromWayPoints(app_id);
+    if (!IsAnyAppSubscribedForWayPoints()) {
+      LOG4CXX_ERROR(logger_, "Send UnsubscribeWayPoints");
+      MessageHelper::SendUnsubscribedWayPoints(*this);
+    }
   }
   EndNaviServices(app_id);
 
@@ -4635,39 +4636,62 @@ void ApplicationManagerImpl::ClearTTSGlobalPropertiesList() {
 }
 
 bool ApplicationManagerImpl::IsAppSubscribedForWayPoints(
-    ApplicationSharedPtr app) const {
+    uint32_t app_id) const {
   LOG4CXX_AUTO_TRACE(logger_);
   sync_primitives::AutoLock lock(subscribed_way_points_apps_lock_);
   LOG4CXX_DEBUG(logger_,
                 "There are applications subscribed: "
                     << subscribed_way_points_apps_list_.size());
-  if (subscribed_way_points_apps_list_.find(app->app_id()) ==
+  if (subscribed_way_points_apps_list_.find(app_id) ==
       subscribed_way_points_apps_list_.end()) {
     return false;
   }
   return true;
 }
 
-void ApplicationManagerImpl::SubscribeAppForWayPoints(
-    ApplicationSharedPtr app) {
+bool ApplicationManagerImpl::IsAppSubscribedForWayPoints(
+    ApplicationSharedPtr app) const {
+  return IsAppSubscribedForWayPoints(app->app_id());
+}
+
+void ApplicationManagerImpl::SubscribeAppForWayPoints(uint32_t app_id) {
   LOG4CXX_AUTO_TRACE(logger_);
   sync_primitives::AutoLock lock(subscribed_way_points_apps_lock_);
-  LOG4CXX_DEBUG(logger_, "Subscribing " << app->app_id());
-  subscribed_way_points_apps_list_.insert(app->app_id());
+  LOG4CXX_DEBUG(logger_, "Subscribing " << app_id);
+  subscribed_way_points_apps_list_.insert(app_id);
   LOG4CXX_DEBUG(logger_,
                 "There are applications subscribed: "
                     << subscribed_way_points_apps_list_.size());
+  if (way_points_data_) {
+    smart_objects::SmartObjectSPtr way_point_notification_ =
+        std::make_shared<smart_objects::SmartObject>(*way_points_data_);
+    (*way_point_notification_)[strings::params][strings::connection_key] =
+        app_id;
+    GetRPCService().SendMessageToMobile(way_point_notification_);
+  }
+}
+
+void ApplicationManagerImpl::SubscribeAppForWayPoints(
+    ApplicationSharedPtr app) {
+  SubscribeAppForWayPoints(app->app_id());
+}
+
+void ApplicationManagerImpl::UnsubscribeAppFromWayPoints(uint32_t app_id) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  sync_primitives::AutoLock lock(subscribed_way_points_apps_lock_);
+  LOG4CXX_DEBUG(logger_, "Unsubscribing " << app_id);
+  subscribed_way_points_apps_list_.erase(app_id);
+  LOG4CXX_DEBUG(logger_,
+                "There are applications subscribed: "
+                    << subscribed_way_points_apps_list_.size());
+  if (subscribed_way_points_apps_list_.empty()) {
+    way_points_data_.reset();
+  }
 }
 
 void ApplicationManagerImpl::UnsubscribeAppFromWayPoints(
     ApplicationSharedPtr app) {
-  LOG4CXX_AUTO_TRACE(logger_);
-  sync_primitives::AutoLock lock(subscribed_way_points_apps_lock_);
-  LOG4CXX_DEBUG(logger_, "Unsubscribing " << app->app_id());
-  subscribed_way_points_apps_list_.erase(app->app_id());
-  LOG4CXX_DEBUG(logger_,
-                "There are applications subscribed: "
-                    << subscribed_way_points_apps_list_.size());
+  UnsubscribeAppFromWayPoints(app->app_id());
 }
 
 bool ApplicationManagerImpl::IsAnyAppSubscribedForWayPoints() const {
@@ -4677,6 +4701,12 @@ bool ApplicationManagerImpl::IsAnyAppSubscribedForWayPoints() const {
                 "There are applications subscribed: "
                     << subscribed_way_points_apps_list_.size());
   return !subscribed_way_points_apps_list_.empty();
+}
+
+void ApplicationManagerImpl::SaveWayPointsMessage(
+    std::shared_ptr<smart_objects::SmartObject> way_points_message) {
+  sync_primitives::AutoLock lock(subscribed_way_points_apps_lock_);
+  way_points_data_ = way_points_message;
 }
 
 const std::set<uint32_t> ApplicationManagerImpl::GetAppsSubscribedForWayPoints()

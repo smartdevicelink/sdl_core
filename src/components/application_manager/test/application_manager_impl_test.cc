@@ -1198,14 +1198,19 @@ TEST_F(ApplicationManagerImplTest, StartStopAudioPassThru) {
 
   const uint32_t app_id = 65537;
   const int32_t max_duration = 1000;
-  // below are not used
   const int32_t correlation_id = 0;
   const int32_t sampling_rate = 0;
   const int32_t bits_per_sample = 0;
   const int32_t audio_type = 0;
 
-  EXPECT_CALL(mock_media_manager,
-              StartMicrophoneRecording(app_id, _, max_duration))
+  EXPECT_CALL(
+      mock_media_manager,
+      StartMicrophoneRecording(app_id,
+                               _,
+                               max_duration,
+                               mobile_apis::SamplingRate::SamplingRate_8KHZ,
+                               mobile_apis::BitsPerSample::BitsPerSample_8_BIT,
+                               mobile_apis::AudioType::PCM))
       .WillOnce(Return());
   EXPECT_CALL(mock_media_manager, StopMicrophoneRecording(app_id))
       .WillOnce(Return());
@@ -1282,14 +1287,19 @@ TEST_F(ApplicationManagerImplTest, UnregisterAnotherAppDuringAudioPassThru) {
   app_manager_impl_->AddMockApplication(mock_app_2);
 
   const int32_t max_duration = 1000;
-  // below are not used
   const int32_t correlation_id = 0;
   const int32_t sampling_rate = 0;
   const int32_t bits_per_sample = 0;
   const int32_t audio_type = 0;
 
-  EXPECT_CALL(mock_media_manager,
-              StartMicrophoneRecording(app_id_2, _, max_duration))
+  EXPECT_CALL(
+      mock_media_manager,
+      StartMicrophoneRecording(app_id_2,
+                               _,
+                               max_duration,
+                               mobile_apis::SamplingRate::SamplingRate_8KHZ,
+                               mobile_apis::BitsPerSample::BitsPerSample_8_BIT,
+                               mobile_apis::AudioType::PCM))
       .WillOnce(Return());
   EXPECT_CALL(mock_media_manager, StopMicrophoneRecording(app_id_2))
       .WillOnce(Return());
