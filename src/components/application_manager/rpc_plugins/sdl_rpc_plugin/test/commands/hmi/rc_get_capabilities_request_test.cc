@@ -86,7 +86,7 @@ TEST_F(RCGetCapabilitiesRequestTest, RUN_SendRequest_SUCCESS) {
 }
 
 TEST_F(RCGetCapabilitiesRequestTest,
-       onTimeOut_OnCapabilityInitialized_RemoveButtonsGetCapabilities) {
+       onTimeOut_OnCapabilityInitialized_RemoveRCGetCapabilities) {
   MessageSharedPtr command_msg(CreateMessage(smart_objects::SmartType_Map));
   RequestToHMIPtr command(CreateCommand<RCGetCapabilitiesRequest>(command_msg));
 

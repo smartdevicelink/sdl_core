@@ -61,7 +61,6 @@ typedef std::shared_ptr<RequestToHMI> RequestToHMIPtr;
 
 namespace {
 const uint32_t kConnectionKey = 2u;
-const std::string kStrNumber{"123"};
 }  // namespace
 
 class ButtonGetCapabilitiesRequestTest
@@ -69,7 +68,6 @@ class ButtonGetCapabilitiesRequestTest
  public:
   MessageSharedPtr CreateCommandMsg() {
     MessageSharedPtr command_msg(CreateMessage(smart_objects::SmartType_Map));
-    (*command_msg)[strings::msg_params][strings::number] = kStrNumber;
     (*command_msg)[strings::params][strings::connection_key] = kConnectionKey;
     return command_msg;
   }

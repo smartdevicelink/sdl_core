@@ -74,10 +74,7 @@ const std::string kVehicleType{"vehicle_type"};
 }  // namespace
 
 class VIGetVehicleTypeResponseTest
-    : public VICommandRequestTest<CommandsTestMocks::kIsNice> {
- public:
-  SmartObject capabilities_;
-};
+    : public VICommandRequestTest<CommandsTestMocks::kIsNice> {};
 
 TEST_F(VIGetVehicleTypeResponseTest,
        RUN_ResultCodeSuccess_ChangeHMICapabilities) {

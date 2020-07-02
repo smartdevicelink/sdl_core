@@ -2014,8 +2014,8 @@ TEST_F(PolicyManagerImplTest2, SetMetaInfo_SetCCPUVersion_SUCCESS) {
   const std::string wers_country_code = "wersCountryCode";
   const std::string language = "language";
 
-  manager->GetCache()->SetMetaInfo(ccpu_version, wers_country_code, language);
-  EXPECT_EQ(ccpu_version, (manager->GetCache())->GetCCPUVersionFromPT());
+  manager->SetSystemInfo(ccpu_version, wers_country_code, language);
+  EXPECT_EQ(ccpu_version, manager->GetCCPUVersionFromPT());
 }
 
 }  // namespace policy_test

@@ -362,7 +362,7 @@ class ApplicationManagerImplTest
       mock_statistics_manager_;
 };
 
-MATCHER_P(HMIResultCodeIs, result_code, "") {
+MATCHER_P(HMIFunctionIDIs, result_code, "") {
   return result_code == static_cast<hmi_apis::FunctionID::eType>(
                             (*arg)[application_manager::strings::params]
                                   [application_manager::strings::function_id]
@@ -2059,7 +2059,7 @@ TEST_F(
   for (auto request : expected_requests) {
     SetExpectationForCreateModuleInfoSO(request);
     EXPECT_CALL(*mock_rpc_service_,
-                ManageHMICommand(HMIResultCodeIs(request),
+                ManageHMICommand(HMIFunctionIDIs(request),
                                  commands::Command::SOURCE_HMI));
   }
 
