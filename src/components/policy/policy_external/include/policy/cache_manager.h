@@ -596,6 +596,10 @@ class CacheManager : public CacheManagerInterface {
   bool SetUserPermissionsForApp(const PermissionConsent& permissions,
                                 bool* out_app_permissions_changed);
 
+  /**
+   * @brief Set preloaded_pt flag value in policy table
+   * @param is_preloaded value to set
+   */
   void SetPreloadedPtFlag(const bool is_preloaded) OVERRIDE;
 
   /**

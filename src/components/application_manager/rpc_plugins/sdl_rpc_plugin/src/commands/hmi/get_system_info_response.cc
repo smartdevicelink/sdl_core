@@ -53,9 +53,8 @@ GetSystemInfoResponse::~GetSystemInfoResponse() {}
 
 void GetSystemInfoResponse::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
-  const hmi_apis::Common_Result::eType code =
-      static_cast<hmi_apis::Common_Result::eType>(
-          (*message_)[strings::params][hmi_response::code].asInt());
+  const auto code = static_cast<hmi_apis::Common_Result::eType>(
+      (*message_)[strings::params][hmi_response::code].asInt());
 
   hmi_capabilities_.set_ccpu_version(policy_handler_.GetCCPUVersionFromPT());
 
@@ -66,14 +65,15 @@ void GetSystemInfoResponse::Run() {
     return;
   }
 
-  const SystemInfo& info = GetSystemInfo(code);
+  const SystemInfo& info = GetSystemInfo();
 
   policy_handler_.OnGetSystemInfo(
       info.ccpu_version, info.wers_country_code, info.language);
+
+  hmi_capabilities_.OnSoftwareVersionReceived(info.ccpu_version);
 }
 
-const SystemInfo GetSystemInfoResponse::GetSystemInfo(
-    const hmi_apis::Common_Result::eType code) const {
+const SystemInfo GetSystemInfoResponse::GetSystemInfo() const {
   SystemInfo info;
 
   info.ccpu_version =
@@ -82,12 +82,9 @@ const SystemInfo GetSystemInfoResponse::GetSystemInfo(
   info.wers_country_code =
       (*message_)[strings::msg_params]["wersCountryCode"].asString();
 
-  const uint32_t lang_code =
-      (*message_)[strings::msg_params]["language"].asUInt();
-  info.language = application_manager::MessageHelper::CommonLanguageToString(
-      static_cast<hmi_apis::Common_Language::eType>(lang_code));
-
-  hmi_capabilities_.OnSoftwareVersionReceived(info.ccpu_version);
+  const auto lang_code = static_cast<hmi_apis::Common_Language::eType>(
+      (*message_)[strings::msg_params]["language"].asUInt());
+  info.language = MessageHelper::CommonLanguageToString(lang_code);
 
   return info;
 }

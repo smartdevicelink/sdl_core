@@ -76,6 +76,12 @@ void OnTTSLanguageChangeNotification::Run() {
                   "Failed to save TTS.OnLanguageChange response to cache");
   }
 
+  if (!hmi_capabilities_.SaveCachedCapabilitiesToFile(
+          hmi_interface::vr, sections_to_update, message_->getSchema())) {
+    LOG4CXX_ERROR(logger_,
+                  "Failed to save VR.OnLanguageChange response to cache");
+  }
+
   (*message_)[strings::msg_params][strings::hmi_display_language] =
       hmi_capabilities_.active_ui_language();
 

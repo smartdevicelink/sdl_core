@@ -70,8 +70,7 @@ void VRGetCapabilitiesResponse::Run() {
   std::vector<std::string> sections_to_update;
   if (msg_params.keyExists(strings::vr_capabilities)) {
     sections_to_update.push_back(strings::vr_capabilities);
-    hmi_capabilities_.set_vr_capabilities(
-        (*message_)[strings::msg_params][strings::vr_capabilities]);
+    hmi_capabilities_.set_vr_capabilities(msg_params[strings::vr_capabilities]);
   }
 
   if (!hmi_capabilities_.SaveCachedCapabilitiesToFile(

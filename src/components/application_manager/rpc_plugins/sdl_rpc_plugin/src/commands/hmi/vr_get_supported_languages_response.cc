@@ -72,8 +72,7 @@ void VRGetSupportedLanguagesResponse::Run() {
     if (!hmi_capabilities_.SaveCachedCapabilitiesToFile(
             hmi_interface::vr, sections_to_update, message_->getSchema())) {
       LOG4CXX_ERROR(
-          logger_,
-          "Failed to save TTS.GetSupportedLanguages response to cache");
+          logger_, "Failed to save VR.GetSupportedLanguages response to cache");
     }
   }
 }

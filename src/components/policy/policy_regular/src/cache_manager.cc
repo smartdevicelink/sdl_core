@@ -1344,9 +1344,9 @@ void CacheManager::PersistData() {
         backup_->SaveApplicationCustomData(
             app_id, is_revoked, is_default_policy, is_predata_policy);
         is_revoked = false;
-
-        backup_->SetMetaInfo(*(*copy_pt.policy_table.module_meta).ccpu_version);
       }
+
+      backup_->SetMetaInfo(*(*copy_pt.policy_table.module_meta).ccpu_version);
 
       // In case of extended policy the meta info should be backuped as well.
       backup_->WriteDb();

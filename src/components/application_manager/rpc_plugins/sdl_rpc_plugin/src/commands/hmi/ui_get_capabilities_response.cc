@@ -124,29 +124,27 @@ void UIGetCapabilitiesResponse::Run() {
   }
 
   if (msg_params.keyExists(strings::system_capabilities)) {
-    sections_to_update.push_back(strings::system_capabilities);
-    if (msg_params[strings::system_capabilities].keyExists(
-            strings::navigation_capability)) {
+    auto& system_capabilities_so = msg_params[strings::system_capabilities];
+
+    if (system_capabilities_so.keyExists(strings::navigation_capability)) {
+      sections_to_update.push_back(strings::navigation_capability);
       hmi_capabilities_.set_navigation_capability(
-          msg_params[strings::system_capabilities]
-                    [strings::navigation_capability]);
+          system_capabilities_so[strings::navigation_capability]);
     }
-    if (msg_params[strings::system_capabilities].keyExists(
-            strings::phone_capability)) {
+    if (system_capabilities_so.keyExists(strings::phone_capability)) {
+      sections_to_update.push_back(strings::phone_capability);
       hmi_capabilities_.set_phone_capability(
-          msg_params[strings::system_capabilities][strings::phone_capability]);
+          system_capabilities_so[strings::phone_capability]);
     }
-    if (msg_params[strings::system_capabilities].keyExists(
-            strings::video_streaming_capability)) {
+    if (system_capabilities_so.keyExists(strings::video_streaming_capability)) {
+      sections_to_update.push_back(strings::video_streaming_capability);
       hmi_capabilities_.set_video_streaming_capability(
-          msg_params[strings::system_capabilities]
-                    [strings::video_streaming_capability]);
+          system_capabilities_so[strings::video_streaming_capability]);
     }
-    if (msg_params[strings::system_capabilities].keyExists(
-            strings::display_capabilities)) {
+    if (system_capabilities_so.keyExists(strings::display_capabilities)) {
+      sections_to_update.push_back(strings::display_capabilities);
       hmi_capabilities_.set_system_display_capabilities(
-          msg_params[strings::system_capabilities]
-                    [strings::display_capabilities]);
+          system_capabilities_so[strings::display_capabilities]);
     }
   }
 
