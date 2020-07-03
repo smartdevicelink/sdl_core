@@ -109,7 +109,8 @@ class SetInteriorVehicleDataRequestTest
     ON_CALL(mock_rc_capabilities_manager_, CheckIfModuleExistsInCapabilities(_))
         .WillByDefault(Return(true));
     ON_CALL(mock_rc_capabilities_manager_, GetModuleDataCapabilities(_, _))
-        .WillByDefault(Return(std::make_pair("", capabilitiesStatus::success)));
+        .WillByDefault(
+            Return(std::make_pair("", capabilitiesStatus::kSuccess)));
   }
 
   MessageSharedPtr CreateBasicMessage() {
