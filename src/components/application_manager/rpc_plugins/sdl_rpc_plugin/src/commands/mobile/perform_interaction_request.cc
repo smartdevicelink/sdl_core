@@ -72,6 +72,8 @@ PerformInteractionRequest::PerformInteractionRequest(
                         hmi_capabilities,
                         policy_handler)
     , interaction_mode_(mobile_apis::InteractionMode::INVALID_ENUM)
+    , ui_choice_id_received_(INVALID_CHOICE_ID)
+    , vr_choice_id_received_(INVALID_CHOICE_ID)
     , app_pi_was_active_before_(false)
     , vr_result_code_(hmi_apis::Common_Result::INVALID_ENUM)
     , ui_result_code_(hmi_apis::Common_Result::INVALID_ENUM) {
@@ -363,7 +365,7 @@ bool PerformInteractionRequest::ProcessVRResponse(
     return false;
   }
 
-  if (!IsInterfaceAwaited(HmiInterfaces::HMI_INTERFACE_UI) &&
+  if (IsInterfaceAwaited(HmiInterfaces::HMI_INTERFACE_UI) &&
       InteractionMode::MANUAL_ONLY != interaction_mode_) {
     SendClosePopupRequestToHMI();
   }
@@ -1074,7 +1076,7 @@ bool PerformInteractionRequest::CheckChoiceIDFromRequest(
 
 const bool PerformInteractionRequest::HasHMIResponsesToWait() const {
   LOG4CXX_AUTO_TRACE(logger_);
-  return !IsInterfaceAwaited(HmiInterfaces::HMI_INTERFACE_UI) || !IsInterfaceAwaited(HmiInterfaces::HMI_INTERFACE_VR);
+  return IsInterfaceAwaited(HmiInterfaces::HMI_INTERFACE_UI) || IsInterfaceAwaited(HmiInterfaces::HMI_INTERFACE_VR);
 }
 
 void PerformInteractionRequest::SendBothModeResponse(
