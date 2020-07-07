@@ -287,14 +287,6 @@ class RequestFromMobileImpl : public CommandRequestImpl {
    */
   const CommandParametersPermissions& parameters_permissions() const;
 
-  /**
-  * @brief This set stores all the interfaces which are awaited by SDL to
-   * return a response on some request
-   */
-  std::set<HmiInterfaces::InterfaceID> awaiting_response_interfaces_;
-
-  mutable sync_primitives::Lock awaiting_response_interfaces_lock_;
-
   CommandParametersPermissions parameters_permissions_;
   CommandParametersPermissions removed_parameters_permissions_;
 
