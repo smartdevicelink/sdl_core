@@ -362,6 +362,24 @@ TEST_F(UIGetCapabilitiesResponseTest, SetSystemDisplayCapabilities_SUCCESS) {
   command->Run();
 }
 
+TEST_F(UIGetCapabilitiesResponseTest, SetPCMStreamCapabilities_SUCCESS) {
+  MessageSharedPtr command_msg = CreateCommandMsg();
+  (*command_msg)[strings::msg_params][strings::pcm_stream_capabilities] =
+      smart_objects::SmartObject(smart_objects::SmartType_Map);
+
+  ResponseFromHMIPtr command(
+      CreateCommand<UIGetCapabilitiesResponse>(command_msg));
+
+  const auto& pcm_capabilities_so =
+      (*command_msg)[strings::msg_params][strings::pcm_stream_capabilities];
+
+  EXPECT_CALL(mock_hmi_capabilities_,
+              set_pcm_stream_capabilities(pcm_capabilities_so));
+
+  ASSERT_TRUE(command->Init());
+  command->Run();
+}
+
 }  // namespace ui_get_capabilities_response
 }  // namespace hmi_commands_test
 }  // namespace commands_test
