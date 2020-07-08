@@ -2752,10 +2752,10 @@ void PolicyHandler::UpdateHMILevel(ApplicationSharedPtr app,
       // Set application hmi level
       application_manager_.ChangeAppsHMILevel(app->app_id(), level);
       // If hmi Level is full, it will be seted after ActivateApp response
-      MessageHelper::SendHMIStatusNotification(
-          app,
-          mobile_apis::PredefinedWindows::DEFAULT_WINDOW,
-          application_manager_);
+      auto notification = MessageHelper::CreateHMIStatusNotification(
+          app, mobile_apis::PredefinedWindows::DEFAULT_WINDOW);
+      application_manager_.GetRPCService().ManageMobileCommand(
+          notification, commands::Command::SOURCE_SDL);
     }
   }
 }
@@ -2798,10 +2798,10 @@ void PolicyHandler::OnUpdateHMIStatus(const std::string& device_id,
                    << app->app_id() << " to default hmi level " << level);
   // Set application hmi level
   application_manager_.ChangeAppsHMILevel(app->app_id(), level);
-  MessageHelper::SendHMIStatusNotification(
-      app,
-      mobile_apis::PredefinedWindows::DEFAULT_WINDOW,
-      application_manager_);
+  auto notification = MessageHelper::CreateHMIStatusNotification(
+      app, mobile_apis::PredefinedWindows::DEFAULT_WINDOW);
+  application_manager_.GetRPCService().ManageMobileCommand(
+      notification, commands::Command::SOURCE_SDL);
 }
 
 bool PolicyHandler::GetModuleTypes(const std::string& policy_app_id,
