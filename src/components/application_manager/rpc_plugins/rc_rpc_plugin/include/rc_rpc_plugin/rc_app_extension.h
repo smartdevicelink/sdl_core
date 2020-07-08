@@ -203,11 +203,13 @@ class RCAppExtension : public application_manager::AppExtension {
 
   // AppExtension interface
  public:
-  void SaveResumptionData(ns_smart_device_link::ns_smart_objects::SmartObject&
-                              resumption_data) OVERRIDE;
-  void ProcessResumption(
-      const ns_smart_device_link::ns_smart_objects::SmartObject&
-          resumption_data) OVERRIDE;
+  void SaveResumptionData(smart_objects::SmartObject& resumption_data) OVERRIDE;
+
+  void ProcessResumption(const smart_objects::SmartObject& saved_app,
+                         resumption::Subscriber subscriber) OVERRIDE;
+
+  void RevertResumption(
+      const smart_objects::SmartObject& subscriptions) OVERRIDE;
 };
 
 typedef std::shared_ptr<RCAppExtension> RCAppExtensionPtr;
