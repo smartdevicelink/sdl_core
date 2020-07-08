@@ -429,14 +429,6 @@ TEST_F(
   const size_t btn_length = buttons_capabilities_so.length();
   EXPECT_EQ(16ull, btn_length);
   for (size_t index = 0; index < btn_length; ++index) {
-    EXPECT_TRUE(
-        (buttons_capabilities_so[index])
-            .keyExists(rc_rpc_plugin::enums_value::kShortPressAvailable));
-    EXPECT_TRUE(
-        (buttons_capabilities_so[index])
-            .keyExists(rc_rpc_plugin::enums_value::kLongPressAvailable));
-    EXPECT_TRUE((buttons_capabilities_so[index])
-                    .keyExists(rc_rpc_plugin::enums_value::kUpDownAvailable));
     EXPECT_TRUE(buttons_capabilities_so
                     [index][rc_rpc_plugin::enums_value::kShortPressAvailable]
                         .asBool());
