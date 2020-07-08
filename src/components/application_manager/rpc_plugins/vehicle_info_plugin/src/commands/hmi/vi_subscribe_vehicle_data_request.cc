@@ -32,6 +32,7 @@
 
 #include "vehicle_info_plugin/commands/hmi/vi_subscribe_vehicle_data_request.h"
 #include "application_manager/message_helper.h"
+#include "application_manager/resumption/resume_ctrl.h"
 
 namespace vehicle_info_plugin {
 using namespace application_manager;
@@ -72,6 +73,14 @@ void VISubscribeVehicleDataRequest::Run() {
   }
 
   SendRequest();
+}
+
+void VISubscribeVehicleDataRequest::onTimeOut() {
+  auto& resume_ctrl = application_manager_.resume_controller();
+
+  resume_ctrl.HandleOnTimeOut(
+      correlation_id(),
+      static_cast<hmi_apis::FunctionID::eType>(function_id()));
 }
 
 }  // namespace commands
