@@ -75,6 +75,7 @@
 #include "sdl_rpc_plugin/commands/mobile/get_way_points_response.h"
 #include "sdl_rpc_plugin/commands/mobile/list_files_request.h"
 #include "sdl_rpc_plugin/commands/mobile/list_files_response.h"
+#include "sdl_rpc_plugin/commands/mobile/on_app_capability_updated_notification.h"
 #include "sdl_rpc_plugin/commands/mobile/on_app_interface_unregistered_notification.h"
 #include "sdl_rpc_plugin/commands/mobile/on_audio_pass_thru_notification.h"
 #include "sdl_rpc_plugin/commands/mobile/on_button_event_notification.h"
@@ -457,6 +458,10 @@ CommandCreator& MobileCommandFactory::get_notification_creator(
     }
     case mobile_apis::FunctionID::OnWayPointChangeID: {
       return factory.GetCreator<commands::OnWayPointChangeNotification>();
+    }
+    case mobile_apis::FunctionID::OnAppCapabilityUpdatedID: {
+      return factory
+          .GetCreator<commands::mobile::OnAppCapabilityUpdatedNotification>();
     }
     default: {}
   }
