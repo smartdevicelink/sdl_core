@@ -62,11 +62,13 @@ class SystemCapabilityAppExtension : public app_mngr_::AppExtension {
 
   SystemCapabilitySubscriptions Subscriptions();
 
-  void SaveResumptionData(ns_smart_device_link::ns_smart_objects::SmartObject&
-                              resumption_data) OVERRIDE;
+  void SaveResumptionData(smart_objects::SmartObject& resumption_data) OVERRIDE;
 
-  void ProcessResumption(
-      const smart_objects::SmartObject& resumption_data) OVERRIDE;
+  void ProcessResumption(const smart_objects::SmartObject& saved_app,
+                         resumption::Subscriber subscriber) OVERRIDE;
+
+  void RevertResumption(
+      const smart_objects::SmartObject& subscriptions) OVERRIDE;
 
   static const app_mngr_::AppExtensionUID SystemCapabilityAppExtensionUID;
 

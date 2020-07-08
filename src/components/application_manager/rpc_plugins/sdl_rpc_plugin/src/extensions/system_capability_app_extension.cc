@@ -53,7 +53,7 @@ SystemCapabilitySubscriptions SystemCapabilityAppExtension::Subscriptions() {
 }
 
 void SystemCapabilityAppExtension::SaveResumptionData(
-    ns_smart_device_link::ns_smart_objects::SmartObject& resumption_data) {
+    smart_objects::SmartObject& resumption_data) {
   LOG4CXX_AUTO_TRACE(logger_);
   const char* application_system_capability = "systemCapability";
 
@@ -68,19 +68,32 @@ void SystemCapabilityAppExtension::SaveResumptionData(
 }
 
 void SystemCapabilityAppExtension::ProcessResumption(
-    const smart_objects::SmartObject& resumption_data) {
+    const smart_objects::SmartObject& saved_app,
+    resumption::Subscriber subscriber) {
   LOG4CXX_AUTO_TRACE(logger_);
 
+  UNUSED(subscriber);
+
+  const smart_objects::SmartObject& subscriptions =
+      saved_app[application_manager::strings::application_subscriptions];
+
   const char* application_system_capability = "systemCapability";
-  if (resumption_data.keyExists(application_system_capability)) {
-    const smart_objects::SmartObject& subscriptions =
-        resumption_data[application_system_capability];
-    for (size_t i = 0; i < subscriptions.length(); ++i) {
-      SystemCapabilityType capability_type =
-          static_cast<SystemCapabilityType>((resumption_data[i]).asInt());
+  if (saved_app.keyExists(application_system_capability)) {
+    const auto& system_capability_subscriptions =
+        subscriptions[application_system_capability];
+    for (size_t i = 0; i < system_capability_subscriptions.length(); ++i) {
+      SystemCapabilityType capability_type = static_cast<SystemCapabilityType>(
+          (system_capability_subscriptions[i]).asInt());
       SubscribeTo(capability_type);
     }
   }
+}
+
+void SystemCapabilityAppExtension::RevertResumption(
+    const smart_objects::SmartObject& subscriptions) {
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  UNUSED(subscriptions);
 }
 
 SystemCapabilityAppExtension& SystemCapabilityAppExtension::ExtractExtension(
