@@ -31,6 +31,7 @@
  */
 
 #include "sdl_rpc_plugin/mobile_command_factory.h"
+
 #include "interfaces/MOBILE_API.h"
 #include "sdl_rpc_plugin/commands/mobile/add_command_request.h"
 #include "sdl_rpc_plugin/commands/mobile/add_command_response.h"
@@ -132,6 +133,8 @@
 #include "sdl_rpc_plugin/commands/mobile/subscribe_button_response.h"
 #include "sdl_rpc_plugin/commands/mobile/subscribe_way_points_request.h"
 #include "sdl_rpc_plugin/commands/mobile/subscribe_way_points_response.h"
+#include "sdl_rpc_plugin/commands/mobile/subtle_alert_request.h"
+#include "sdl_rpc_plugin/commands/mobile/subtle_alert_response.h"
 #include "sdl_rpc_plugin/commands/mobile/system_request.h"
 #include "sdl_rpc_plugin/commands/mobile/system_response.h"
 #include "sdl_rpc_plugin/commands/mobile/unregister_app_interface_request.h"
@@ -221,6 +224,11 @@ CommandCreator& MobileCommandFactory::get_command_creator(
       return mobile_api::messageType::request == message_type
                  ? factory.GetCreator<commands::AlertRequest>()
                  : factory.GetCreator<commands::AlertResponse>();
+    }
+    case mobile_apis::FunctionID::SubtleAlertID: {
+      return mobile_api::messageType::request == message_type
+                 ? factory.GetCreator<commands::SubtleAlertRequest>()
+                 : factory.GetCreator<commands::SubtleAlertResponse>();
     }
     case mobile_apis::FunctionID::SpeakID: {
       return mobile_api::messageType::request == message_type

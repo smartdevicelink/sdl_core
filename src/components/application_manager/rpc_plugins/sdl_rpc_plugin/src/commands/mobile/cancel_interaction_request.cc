@@ -66,6 +66,7 @@ void CancelInteractionRequest::Run() {
               function_id,
               mobile_apis::FunctionID::PerformInteractionID,
               mobile_apis::FunctionID::AlertID,
+              mobile_apis::FunctionID::SubtleAlertID,
               mobile_apis::FunctionID::ScrollableMessageID,
               mobile_apis::FunctionID::SliderID)) {
     LOG4CXX_ERROR(logger_, "Bad function ID" << function_id);

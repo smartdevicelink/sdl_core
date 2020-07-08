@@ -135,6 +135,8 @@
 #include "sdl_rpc_plugin/commands/hmi/ui_show_response.h"
 #include "sdl_rpc_plugin/commands/hmi/ui_slider_request.h"
 #include "sdl_rpc_plugin/commands/hmi/ui_slider_response.h"
+#include "sdl_rpc_plugin/commands/hmi/ui_subtle_alert_request.h"
+#include "sdl_rpc_plugin/commands/hmi/ui_subtle_alert_response.h"
 #include "sdl_rpc_plugin/commands/hmi/update_app_list_request.h"
 #include "sdl_rpc_plugin/commands/hmi/update_app_list_response.h"
 #include "sdl_rpc_plugin/commands/hmi/update_device_list_request.h"
@@ -510,6 +512,11 @@ CommandCreator& HMICommandFactory::get_creator_factory(
       return hmi_apis::messageType::request == message_type
                  ? factory.GetCreator<commands::UIAlertRequest>()
                  : factory.GetCreator<commands::UIAlertResponse>();
+    }
+    case hmi_apis::FunctionID::UI_SubtleAlert: {
+      return hmi_apis::messageType::request == message_type
+                 ? factory.GetCreator<commands::UISubtleAlertRequest>()
+                 : factory.GetCreator<commands::UISubtleAlertResponse>();
     }
     case hmi_apis::FunctionID::VR_IsReady: {
       return hmi_apis::messageType::request == message_type

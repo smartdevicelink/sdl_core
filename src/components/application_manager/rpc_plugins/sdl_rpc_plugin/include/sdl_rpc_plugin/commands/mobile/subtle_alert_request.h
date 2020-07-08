@@ -1,6 +1,5 @@
 /*
-
- Copyright (c) 2018, Ford Motor Company
+ Copyright (c) 2019, Ford Motor Company, Livio
  All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -14,9 +13,9 @@
  disclaimer in the documentation and/or other materials provided with the
  distribution.
 
- Neither the name of the Ford Motor Company nor the names of its contributors
- may be used to endorse or promote products derived from this software
- without specific prior written permission.
+ Neither the name of the the copyright holders nor the names of their
+ contributors may be used to endorse or promote products derived from this
+ software without specific prior written permission.
 
  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
@@ -31,14 +30,11 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_MOBILE_ALERT_REQUEST_H_
-#define SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_MOBILE_ALERT_REQUEST_H_
-
-#include <string>
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_MOBILE_SUBTLE_ALERT_REQUEST_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_MOBILE_SUBTLE_ALERT_REQUEST_H_
 
 #include "application_manager/commands/command_request_impl.h"
-#include "interfaces/MOBILE_API.h"
-#include "utils/macro.h"
+#include "sdl_rpc_plugin/sdl_rpc_plugin.h"
 
 namespace sdl_rpc_plugin {
 namespace app_mngr = application_manager;
@@ -46,25 +42,25 @@ namespace app_mngr = application_manager;
 namespace commands {
 
 /**
- * @brief AlertRequest command class
+ * @brief SubtleAlertRequest command class
  **/
-class AlertRequest : public app_mngr::commands::CommandRequestImpl {
+class SubtleAlertRequest : public app_mngr::commands::CommandRequestImpl {
  public:
   /**
-   * @brief AlertRequest class constructor
+   * @brief SubtleAlertRequest class constructor
    *
    * @param message Incoming SmartObject message
    **/
-  AlertRequest(const app_mngr::commands::MessageSharedPtr& message,
-               app_mngr::ApplicationManager& application_manager,
-               app_mngr::rpc_service::RPCService& rpc_service,
-               app_mngr::HMICapabilities& hmi_capabilities,
-               policy::PolicyHandlerInterface& policy_handler);
+  SubtleAlertRequest(const app_mngr::commands::MessageSharedPtr& message,
+                     app_mngr::ApplicationManager& application_manager,
+                     app_mngr::rpc_service::RPCService& rpc_service,
+                     app_mngr::HMICapabilities& hmi_capabilities,
+                     policy::PolicyHandlerInterface& policy_handle);
 
   /**
-   * @brief AlertRequest class destructor
+   * @brief SubtleAlertRequest class destructor
    **/
-  virtual ~AlertRequest();
+  virtual ~SubtleAlertRequest();
 
   /**
    * @brief Initialize request params
@@ -91,12 +87,13 @@ class AlertRequest : public app_mngr::commands::CommandRequestImpl {
    * @returns true if request is valid and should be processed
    */
   bool Validate(uint32_t app_id);
+
   /*
-   * @brief Sends UI Alert request
+   * @brief Sends UI SubtleAlert request
    *
    * @param app_id Id of application requested this RPC
    */
-  void SendAlertRequest(int32_t app_id);
+  void SendSubtleAlertRequest(int32_t app_id);
 
   /*
    * @brief Sends TTS Speak request
@@ -134,20 +131,21 @@ class AlertRequest : public app_mngr::commands::CommandRequestImpl {
   bool PrepareResponseParameters(mobile_apis::Result::eType& result_code,
                                  std::string& info);
 
-  bool awaiting_ui_alert_response_;
+  bool awaiting_ui_subtle_alert_response_;
   bool awaiting_tts_speak_response_;
   bool awaiting_tts_stop_speaking_response_;
-  bool is_ui_alert_sent_;
+  bool is_ui_subtle_alert_sent_;
   hmi_apis::Common_Result::eType alert_result_;
   smart_objects::SmartObject alert_response_params_;
   hmi_apis::Common_Result::eType tts_speak_result_;
   std::string ui_response_info_;
   std::string tts_response_info_;
 
-  DISALLOW_COPY_AND_ASSIGN(AlertRequest);
+  DISALLOW_COPY_AND_ASSIGN(SubtleAlertRequest);
 };
 
 }  // namespace commands
+
 }  // namespace sdl_rpc_plugin
 
-#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_MOBILE_ALERT_REQUEST_H_
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_MOBILE_SUBTLE_ALERT_REQUEST_H_

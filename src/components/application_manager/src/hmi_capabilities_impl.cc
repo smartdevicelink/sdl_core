@@ -341,6 +341,9 @@ void InitCapabilities() {
                      hmi_apis::Common_ImageFieldName::locationImage));
   image_field_name_enum.insert(std::make_pair(
       std::string("alertIcon"), hmi_apis::Common_ImageFieldName::alertIcon));
+  image_field_name_enum.insert(
+      std::make_pair(std::string("subtleAlertIcon"),
+                     hmi_apis::Common_ImageFieldName::subtleAlertIcon));
 
   file_type_enum.insert(std::make_pair(std::string("GRAPHIC_BMP"),
                                        hmi_apis::Common_FileType::GRAPHIC_BMP));
