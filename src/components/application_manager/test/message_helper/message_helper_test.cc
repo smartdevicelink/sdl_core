@@ -159,8 +159,10 @@ TEST(MessageHelperTestCreate,
   EXPECT_CALL(*mock_help_prompt_manager, GetSendingType())
       .WillRepeatedly(Return(HelpPromptManager::SendingType::kSendBoth));
 
+  application_manager_test::MockApplicationManager mock_application_manager;
   smart_objects::SmartObjectList ptr =
-      MessageHelper::CreateGlobalPropertiesRequestsToHMI(appSharedMock, 0u);
+      MessageHelper::CreateGlobalPropertiesRequestsToHMI(
+          appSharedMock, mock_application_manager);
 
   EXPECT_TRUE(ptr.empty());
 }
@@ -209,8 +211,10 @@ TEST(MessageHelperTestCreate,
   EXPECT_CALL(*mock_help_prompt_manager, GetSendingType())
       .WillRepeatedly(Return(HelpPromptManager::SendingType::kSendBoth));
 
+  application_manager_test::MockApplicationManager mock_application_manager;
   smart_objects::SmartObjectList ptr =
-      MessageHelper::CreateGlobalPropertiesRequestsToHMI(appSharedMock, 0u);
+      MessageHelper::CreateGlobalPropertiesRequestsToHMI(
+          appSharedMock, mock_application_manager);
 
   EXPECT_FALSE(ptr.empty());
 
@@ -399,9 +403,10 @@ TEST(MessageHelperTestCreate, CreateAddSubMenuRequestToHMI_SendObject_Equal) {
   EXPECT_CALL(*appSharedMock, sub_menu_map()).WillOnce(Return(data_accessor));
   EXPECT_CALL(*appSharedMock, app_id()).Times(AtLeast(1)).WillOnce(Return(1u));
 
-  const uint32_t cor_id = 0u;
+  application_manager_test::MockApplicationManager mock_application_manager;
   smart_objects::SmartObjectList ptr =
-      MessageHelper::CreateAddSubMenuRequestToHMI(appSharedMock, cor_id);
+      MessageHelper::CreateAddSubMenuRequestsToHMI(appSharedMock,
+                                                   mock_application_manager);
 
   EXPECT_FALSE(ptr.empty());
 
@@ -429,9 +434,10 @@ TEST(MessageHelperTestCreate,
 
   EXPECT_CALL(*appSharedMock, sub_menu_map()).WillOnce(Return(data_accessor));
 
-  const uint32_t cor_id = 0u;
+  application_manager_test::MockApplicationManager mock_application_manager;
   smart_objects::SmartObjectList ptr =
-      MessageHelper::CreateAddSubMenuRequestToHMI(appSharedMock, cor_id);
+      MessageHelper::CreateAddSubMenuRequestsToHMI(appSharedMock,
+                                                   mock_application_manager);
 
   EXPECT_TRUE(ptr.empty());
 }
