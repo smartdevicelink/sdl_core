@@ -191,6 +191,8 @@ const char* policy_type = "policyType";
 const char* property = "property";
 const char* displays = "displays";
 const char* seat_location = "seatLocation";
+const char* app_capability = "appCapability";
+const char* app_capability_type = "appCapabilityType";
 
 // PutFile
 const char* sync_file_name = "syncFileName";
