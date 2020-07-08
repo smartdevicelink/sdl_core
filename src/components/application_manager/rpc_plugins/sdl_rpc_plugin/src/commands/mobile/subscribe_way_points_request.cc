@@ -66,7 +66,7 @@ void SubscribeWayPointsRequest::Run() {
     return;
   }
 
-  if (application_manager_.IsAppSubscribedForWayPoints(app)) {
+  if (application_manager_.IsAppSubscribedForWayPoints(*app)) {
     SendResponse(false, mobile_apis::Result::IGNORED);
     return;
   }
