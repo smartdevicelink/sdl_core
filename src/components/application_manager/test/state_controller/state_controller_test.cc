@@ -1094,7 +1094,7 @@ class StateControllerImplTest : public ::testing::Test {
         SetRegularState(window_id, Truly(HmiStatesComparator(new_state))));
     if (!HmiStatesComparator(old_state)(new_state)) {
       EXPECT_CALL(message_helper_mock_,
-                  SendHMIStatusNotification(app, window_id, _));
+                  CreateHMIStatusNotification(app, window_id));
       if (kDefaultWindowId == window_id) {
         EXPECT_CALL(app_manager_mock_,
                     OnHMIStateChanged(app->app_id(), _, new_state));
@@ -1120,7 +1120,7 @@ class StateControllerImplTest : public ::testing::Test {
       am::HmiStatePtr state) {
     ON_CALL(*app_mock, RegularHmiState(window_id)).WillByDefault(Return(state));
     EXPECT_CALL(message_helper_mock_,
-                SendHMIStatusNotification(app, window_id, _))
+                CreateHMIStatusNotification(app, window_id))
         .Times(0);
     EXPECT_CALL(app_manager_mock_, OnHMIStateChanged(app->app_id(), _, _))
         .Times(0);
@@ -1364,7 +1364,6 @@ class StateControllerImplTest : public ::testing::Test {
 };
 
 TEST_F(StateControllerImplTest, OnStateChangedWithEqualStates) {
-  EXPECT_CALL(app_manager_mock_, SendHMIStatusNotification(_)).Times(0);
   EXPECT_CALL(app_manager_mock_, OnHMIStateChanged(_, _, _)).Times(0);
   EXPECT_CALL(*simple_app_ptr_, ResetDataInNone()).Times(0);
 
@@ -1381,9 +1380,8 @@ TEST_F(StateControllerImplTest, OnStateChangedWithDifferentStates) {
     for (uint32_t j = 0; j < valid_states_for_not_audio_app_.size(); ++j) {
       HmiStatesComparator comp(valid_states_for_not_audio_app_[i]);
       if (!comp(valid_states_for_not_audio_app_[j])) {
-        EXPECT_CALL(
-            message_helper_mock_,
-            SendHMIStatusNotification(simple_app_, kDefaultWindowId, _));
+        EXPECT_CALL(message_helper_mock_,
+                    CreateHMIStatusNotification(simple_app_, kDefaultWindowId));
         EXPECT_CALL(app_manager_mock_,
                     OnHMIStateChanged(simple_app_id_,
                                       valid_states_for_not_audio_app_[i],
@@ -1398,7 +1396,7 @@ TEST_F(StateControllerImplTest, OnStateChangedWithDifferentStates) {
                                     valid_states_for_not_audio_app_[i],
                                     valid_states_for_not_audio_app_[j]);
 
-        EXPECT_CALL(message_helper_mock_, SendHMIStatusNotification(_, _, _))
+        EXPECT_CALL(message_helper_mock_, CreateHMIStatusNotification(_, _))
             .Times(0);
         EXPECT_CALL(app_manager_mock_, OnHMIStateChanged(_, _, _)).Times(0);
         EXPECT_CALL(*simple_app_ptr_, ResetDataInNone()).Times(0);
@@ -1449,7 +1447,7 @@ TEST_F(StateControllerImplTest, MoveSimpleAppToValidStates) {
         .WillOnce(Return(initial_state))
         .WillOnce(Return(state_to_setup));
     EXPECT_CALL(message_helper_mock_,
-                SendHMIStatusNotification(simple_app_, kDefaultWindowId, _));
+                CreateHMIStatusNotification(simple_app_, kDefaultWindowId));
     EXPECT_CALL(app_manager_mock_,
                 OnHMIStateChanged(simple_app_id_,
                                   Truly(HmiStatesComparator(initial_state)),
@@ -1488,7 +1486,7 @@ TEST_F(StateControllerImplTest, MoveAudioNotResumeAppToValidStates) {
         .WillOnce(Return(initial_state))
         .WillOnce(Return(state_to_setup));
     EXPECT_CALL(message_helper_mock_,
-                SendHMIStatusNotification(audio_app, kDefaultWindowId, _));
+                CreateHMIStatusNotification(audio_app, kDefaultWindowId));
     EXPECT_CALL(app_manager_mock_,
                 OnHMIStateChanged(audio_app->app_id(), _, state_to_setup));
 
@@ -1542,8 +1540,6 @@ TEST_F(StateControllerImplTest, MoveAudioResumeAppToValidStates) {
     }
     EXPECT_CALL(app_manager_mock_, active_application())
         .WillRepeatedly(Return(am::ApplicationSharedPtr()));
-    EXPECT_CALL(app_manager_mock_, SendHMIStatusNotification(audio_app))
-        .Times(AtLeast(0));
     EXPECT_CALL(app_manager_mock_,
                 OnHMIStateChanged(audio_app->app_id(), _, state_to_setup))
         .Times(AtLeast(0));
@@ -2147,8 +2143,6 @@ TEST_F(StateControllerImplTest, SendEventBCActivateApp_HMIReceivesError) {
     EXPECT_CALL(*simple_app_ptr_, SetRegularState(kDefaultWindowId, _))
         .Times(0);
 
-    EXPECT_CALL(app_manager_mock_, SendHMIStatusNotification(simple_app_))
-        .Times(0);
     EXPECT_CALL(app_manager_mock_,
                 OnHMIStateChanged(simple_app_->app_id(), _, _))
         .Times(0);
@@ -2172,8 +2166,6 @@ TEST_F(StateControllerImplTest, ActivateAppInvalidCorrelationId) {
   EXPECT_CALL(app_manager_mock_, application_by_hmi_app(hmi_app_id))
       .WillOnce(Return(am::ApplicationSharedPtr()));
   EXPECT_CALL(*simple_app_ptr_, SetRegularState(kDefaultWindowId, _)).Times(0);
-  EXPECT_CALL(app_manager_mock_, SendHMIStatusNotification(simple_app_))
-      .Times(0);
   EXPECT_CALL(app_manager_mock_, OnHMIStateChanged(simple_app_->app_id(), _, _))
       .Times(0);
   SetBCActivateAppRequestToHMI(Common_HMILevel::FULL, corr_id);
@@ -3309,7 +3301,7 @@ TEST_F(StateControllerImplTest, OnApplicationRegisteredDifferentStates) {
 
   EXPECT_CALL(*simple_app_ptr_, ResetDataInNone()).Times(0);
   EXPECT_CALL(message_helper_mock_,
-              SendHMIStatusNotification(simple_app_, kDefaultWindowId, _));
+              CreateHMIStatusNotification(simple_app_, kDefaultWindowId));
   EXPECT_CALL(app_manager_mock_, OnHMIStateChanged(_, _, _));
 
   state_ctrl_->OnApplicationRegistered(simple_app_,
@@ -3360,7 +3352,6 @@ TEST_F(StateControllerImplTest, OnApplicationRegisteredEqualStates) {
       .WillRepeatedly(Return(default_state));
 
   EXPECT_CALL(*simple_app_ptr_, ResetDataInNone()).Times(0);
-  EXPECT_CALL(app_manager_mock_, SendHMIStatusNotification(_)).Times(0);
   EXPECT_CALL(app_manager_mock_, OnHMIStateChanged(_, _, _)).Times(0);
 
   state_ctrl_->OnApplicationRegistered(simple_app_,
@@ -3611,7 +3602,7 @@ TEST_F(
       SetRegularState(kCustomWindowId,
                       Truly(HmiStatesComparator(expected_window_state))));
   EXPECT_CALL(message_helper_mock_,
-              SendHMIStatusNotification(media_app_, kCustomWindowId, _));
+              CreateHMIStatusNotification(media_app_, kCustomWindowId));
 
   state_ctrl_->ActivateDefaultWindow(media_app_);
 }
@@ -3644,7 +3635,7 @@ TEST_F(StateControllerImplTest,
       SetRegularState(kCustomWindowId,
                       Truly(HmiStatesComparator(expected_window_state))));
   EXPECT_CALL(message_helper_mock_,
-              SendHMIStatusNotification(media_app_, kCustomWindowId, _));
+              CreateHMIStatusNotification(media_app_, kCustomWindowId));
 
   state_ctrl_->ExitDefaultWindow(media_app_);
 }
@@ -3680,7 +3671,7 @@ TEST_F(StateControllerImplTest,
       .WillOnce(Return(initial_state))
       .WillOnce(Return(expected_state));
   EXPECT_CALL(message_helper_mock_,
-              SendHMIStatusNotification(simple_app_, kCustomWindowId, _));
+              CreateHMIStatusNotification(simple_app_, kCustomWindowId));
   EXPECT_CALL(app_manager_mock_, OnHMIStateChanged(_, _, _)).Times(0);
 
   state_ctrl_->OnAppWindowAdded(simple_app_,

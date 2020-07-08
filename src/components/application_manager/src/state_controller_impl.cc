@@ -490,13 +490,13 @@ bool StateControllerImpl::IsResumptionAllowed(ApplicationSharedPtr app,
 }
 
 mobile_apis::HMILevel::eType StateControllerImpl::GetAvailableHmiLevel(
-    ApplicationSharedPtr app, mobile_apis::HMILevel::eType hmi_level) const {
+    ApplicationSharedPtr app,
+    mobile_apis::HMILevel::eType desired_hmi_level) const {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  mobile_apis::HMILevel::eType result = hmi_level;
-  LOG4CXX_DEBUG(logger_, "HMI Level: " << hmi_level);
+  mobile_apis::HMILevel::eType result = desired_hmi_level;
 
-  if (!IsStreamableHMILevel(hmi_level)) {
+  if (!IsStreamableHMILevel(desired_hmi_level)) {
     return result;
   }
 
@@ -504,8 +504,11 @@ mobile_apis::HMILevel::eType StateControllerImpl::GetAvailableHmiLevel(
   const bool does_audio_app_with_same_type_exist =
       app_mngr_.IsAppTypeExistsInFullOrLimited(app);
 
-  if (mobile_apis::HMILevel::HMI_LIMITED == hmi_level) {
+  if (mobile_apis::HMILevel::HMI_LIMITED == desired_hmi_level) {
     if (!is_audio_app || does_audio_app_with_same_type_exist) {
+      LOG4CXX_DEBUG(logger_,
+                    "Not audio application trying to resume in limited or "
+                    "audio application with the same type active");
       result = app_mngr_.GetDefaultHmiLevel(app);
     }
     return result;
@@ -516,6 +519,7 @@ mobile_apis::HMILevel::eType StateControllerImpl::GetAvailableHmiLevel(
       (active_app.use_count() != 0) && active_app->app_id() != app->app_id();
   if (is_audio_app) {
     if (does_audio_app_with_same_type_exist) {
+      LOG4CXX_DEBUG(logger_, "Audio application with the same type active");
       result = app_mngr_.GetDefaultHmiLevel(app);
     } else if (is_active_app_exist) {
       result = mobile_apis::HMILevel::HMI_LIMITED;
@@ -701,7 +705,10 @@ void StateControllerImpl::UpdateAppWindowsStreamingState(
       new_window_state->set_window_type(window_hmi_state->window_type());
       app->SetRegularState(window_id, new_window_state);
 
-      MessageHelper::SendHMIStatusNotification(app, window_id, app_mngr_);
+      auto notification =
+          MessageHelper::CreateHMIStatusNotification(app, window_id);
+      app_mngr_.GetRPCService().ManageMobileCommand(
+          notification, commands::Command::SOURCE_SDL);
     }
   }
 }
@@ -868,7 +875,10 @@ void StateControllerImpl::OnStateChanged(ApplicationSharedPtr app,
     return;
   }
 
-  MessageHelper::SendHMIStatusNotification(app, window_id, app_mngr_);
+  auto notification =
+      MessageHelper::CreateHMIStatusNotification(app, window_id);
+  app_mngr_.GetRPCService().ManageMobileCommand(notification,
+                                                commands::Command::SOURCE_SDL);
 
   if (mobile_apis::PredefinedWindows::DEFAULT_WINDOW != window_id) {
     LOG4CXX_DEBUG(logger_,
