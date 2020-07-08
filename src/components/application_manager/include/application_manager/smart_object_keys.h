@@ -224,6 +224,8 @@ extern const char* policy_type;
 extern const char* property;
 extern const char* displays;
 extern const char* seat_location;
+extern const char* app_capability;
+extern const char* app_capability_type;
 
 // PutFile
 extern const char* sync_file_name;
