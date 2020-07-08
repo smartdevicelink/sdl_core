@@ -78,7 +78,8 @@ ResumeCtrlImpl::ResumeCtrlImpl(ApplicationManager& application_manager)
     , launch_time_(time(nullptr))
     , low_voltage_time_(0)
     , wake_up_time_(0)
-    , application_manager_(application_manager) {}
+    , application_manager_(application_manager)
+    , resumption_data_processor_(application_manager) {}
 #ifdef BUILD_TESTS
 void ResumeCtrlImpl::set_resumption_storage(
     std::shared_ptr<ResumptionData> mock_storage) {
@@ -524,7 +525,8 @@ void ResumeCtrlImpl::StopSavePersistentDataTimer() {
 }
 
 bool ResumeCtrlImpl::StartResumption(ApplicationSharedPtr application,
-                                     const std::string& hash) {
+                                     const std::string& hash,
+                                     ResumptionCallBack callback) {
   LOG4CXX_AUTO_TRACE(logger_);
   DCHECK_OR_RETURN(application, false);
   LOG4CXX_DEBUG(
@@ -535,24 +537,22 @@ bool ResumeCtrlImpl::StartResumption(ApplicationSharedPtr application,
                           << " received hash = " << hash);
   application->set_is_resuming(true);
 
-  if (!application->is_cloud_app()) {
-    // Default HMI Level is already set before resumption in
-    // ApplicationManager::OnApplicationRegistered, and handling low bandwidth
-    // transports doesn't apply to cloud apps, so this step can be skipped for
-    // such apps
-    SetupDefaultHMILevel(application);
-  }
   smart_objects::SmartObject saved_app;
   const std::string& device_mac = application->mac_address();
   bool result = resumption_storage_->GetSavedApplication(
       application->policy_app_id(), device_mac, saved_app);
   if (result) {
     const std::string& saved_hash = saved_app[strings::hash_id].asString();
-    result = saved_hash == hash ? RestoreApplicationData(application) : false;
-    application->UpdateHash();
-    AddToResumptionTimerQueue(application->app_id());
+    result = saved_hash == hash ? RestoreApplicationData(application, callback)
+                                : false;
   }
   return result;
+}
+
+void ResumeCtrlImpl::HandleOnTimeOut(
+    const uint32_t cor_id, const hmi_apis::FunctionID::eType function_id) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  resumption_data_processor_.HandleOnTimeOut(cor_id, function_id);
 }
 
 bool ResumeCtrlImpl::StartResumptionOnlyHMILevel(
@@ -744,7 +744,8 @@ bool ResumeCtrlImpl::IsDeviceMacAddressEqual(
   return device_mac == saved_device_mac;
 }
 
-bool ResumeCtrlImpl::RestoreApplicationData(ApplicationSharedPtr application) {
+bool ResumeCtrlImpl::RestoreApplicationData(ApplicationSharedPtr application,
+                                            ResumptionCallBack callback) {
   LOG4CXX_AUTO_TRACE(logger_);
   DCHECK_OR_RETURN(application, false);
   LOG4CXX_DEBUG(logger_, "app_id : " << application->app_id());
@@ -757,13 +758,7 @@ bool ResumeCtrlImpl::RestoreApplicationData(ApplicationSharedPtr application) {
     if (saved_app.keyExists(strings::grammar_id)) {
       const uint32_t app_grammar_id = saved_app[strings::grammar_id].asUInt();
       application->set_grammar_id(app_grammar_id);
-      AddFiles(application, saved_app);
-      AddSubmenues(application, saved_app);
-      AddCommands(application, saved_app);
-      AddChoicesets(application, saved_app);
-      SetGlobalProperties(application, saved_app);
-      AddSubscriptions(application, saved_app);
-      AddWayPointsSubscription(application, saved_app);
+      resumption_data_processor_.Restore(application, saved_app, callback);
       result = true;
     } else {
       LOG4CXX_WARN(logger_,
@@ -795,154 +790,6 @@ void ResumeCtrlImpl::StartWaitingForDisplayCapabilitiesUpdate(
     windows_info = saved_app[strings::windows_info];
   }
   builder.InitBuilder(resume_callback, windows_info);
-}
-
-void ResumeCtrlImpl::AddFiles(ApplicationSharedPtr application,
-                              const smart_objects::SmartObject& saved_app) {
-  LOG4CXX_AUTO_TRACE(logger_);
-
-  if (saved_app.keyExists(strings::application_files)) {
-    const smart_objects::SmartObject& application_files =
-        saved_app[strings::application_files];
-    for (size_t i = 0; i < application_files.length(); ++i) {
-      const smart_objects::SmartObject& file_data = application_files[i];
-      const bool is_persistent =
-          file_data.keyExists(strings::persistent_file) &&
-          file_data[strings::persistent_file].asBool();
-      if (is_persistent) {
-        AppFile file;
-        file.is_persistent = is_persistent;
-        file.is_download_complete =
-            file_data[strings::is_download_complete].asBool();
-        file.file_name = file_data[strings::sync_file_name].asString();
-        file.file_type = static_cast<mobile_apis::FileType::eType>(
-            file_data[strings::file_type].asInt());
-        application->AddFile(file);
-      }
-    }
-  } else {
-    LOG4CXX_FATAL(logger_, "application_files section is not exists");
-  }
-}
-
-void ResumeCtrlImpl::AddSubmenues(ApplicationSharedPtr application,
-                                  const smart_objects::SmartObject& saved_app) {
-  LOG4CXX_AUTO_TRACE(logger_);
-
-  if (saved_app.keyExists(strings::application_submenus)) {
-    const smart_objects::SmartObject& app_submenus =
-        saved_app[strings::application_submenus];
-    for (size_t i = 0; i < app_submenus.length(); ++i) {
-      const smart_objects::SmartObject& submenu = app_submenus[i];
-      application->AddSubMenu(submenu[strings::menu_id].asUInt(), submenu);
-    }
-    ProcessHMIRequests(MessageHelper::CreateAddSubMenuRequestToHMI(
-        application, application_manager_.GetNextHMICorrelationID()));
-  } else {
-    LOG4CXX_FATAL(logger_, "application_submenus section is not exists");
-  }
-}
-
-void ResumeCtrlImpl::AddCommands(ApplicationSharedPtr application,
-                                 const smart_objects::SmartObject& saved_app) {
-  LOG4CXX_AUTO_TRACE(logger_);
-
-  if (saved_app.keyExists(strings::application_commands)) {
-    const smart_objects::SmartObject& app_commands =
-        saved_app[strings::application_commands];
-
-    for (size_t cmd_num = 0; cmd_num < app_commands.length(); ++cmd_num) {
-      const smart_objects::SmartObject& command = app_commands[cmd_num];
-      const uint32_t cmd_id = command[strings::cmd_id].asUInt();
-      const bool is_resumption = true;
-      application->AddCommand(
-          commands::CommandImpl::CalcCommandInternalConsecutiveNumber(
-              application),
-          command);
-      application->help_prompt_manager().OnVrCommandAdded(
-          cmd_id, command, is_resumption);
-    }
-
-    ProcessHMIRequests(MessageHelper::CreateAddCommandRequestToHMI(
-        application, application_manager_));
-  } else {
-    LOG4CXX_FATAL(logger_, "application_commands section is not exists");
-  }
-}
-
-void ResumeCtrlImpl::AddChoicesets(
-    ApplicationSharedPtr application,
-    const smart_objects::SmartObject& saved_app) {
-  LOG4CXX_AUTO_TRACE(logger_);
-
-  if (saved_app.keyExists(strings::application_choice_sets)) {
-    const smart_objects::SmartObject& app_choice_sets =
-        saved_app[strings::application_choice_sets];
-    for (size_t i = 0; i < app_choice_sets.length(); ++i) {
-      const smart_objects::SmartObject& choice_set = app_choice_sets[i];
-      const int32_t choice_set_id =
-          choice_set[strings::interaction_choice_set_id].asInt();
-      application->AddChoiceSet(choice_set_id, choice_set);
-    }
-    ProcessHMIRequests(MessageHelper::CreateAddVRCommandRequestFromChoiceToHMI(
-        application, application_manager_));
-  } else {
-    LOG4CXX_FATAL(logger_, "There is no any choicesets");
-  }
-}
-
-void ResumeCtrlImpl::SetGlobalProperties(
-    ApplicationSharedPtr application,
-    const smart_objects::SmartObject& saved_app) {
-  LOG4CXX_AUTO_TRACE(logger_);
-
-  if (saved_app.keyExists(strings::application_global_properties)) {
-    const smart_objects::SmartObject& properties_so =
-        saved_app[strings::application_global_properties];
-    application->load_global_properties(properties_so);
-    MessageHelper::SendGlobalPropertiesToHMI(application, application_manager_);
-  }
-}
-
-void ResumeCtrlImpl::AddWayPointsSubscription(
-    app_mngr::ApplicationSharedPtr application,
-    const smart_objects::SmartObject& saved_app) {
-  LOG4CXX_AUTO_TRACE(logger_);
-
-  if (saved_app.keyExists(strings::subscribed_for_way_points)) {
-    const smart_objects::SmartObject& subscribed_for_way_points_so =
-        saved_app[strings::subscribed_for_way_points];
-    if (true == subscribed_for_way_points_so.asBool()) {
-      application_manager_.SubscribeAppForWayPoints(application);
-    }
-  }
-}
-
-void ResumeCtrlImpl::AddSubscriptions(
-    ApplicationSharedPtr application,
-    const smart_objects::SmartObject& saved_app) {
-  LOG4CXX_AUTO_TRACE(logger_);
-  if (saved_app.keyExists(strings::application_subscriptions)) {
-    const smart_objects::SmartObject& subscriptions =
-        saved_app[strings::application_subscriptions];
-
-    if (subscriptions.keyExists(strings::application_buttons)) {
-      const smart_objects::SmartObject& subscriptions_buttons =
-          subscriptions[strings::application_buttons];
-      mobile_apis::ButtonName::eType btn;
-      for (size_t i = 0; i < subscriptions_buttons.length(); ++i) {
-        btn = static_cast<mobile_apis::ButtonName::eType>(
-            (subscriptions_buttons[i]).asInt());
-        application->SubscribeToButton(btn);
-      }
-    }
-    MessageHelper::SendAllOnButtonSubscriptionNotificationsForApp(
-        application, application_manager_);
-
-    for (auto& extension : application->Extensions()) {
-      extension->ProcessResumption(subscriptions);
-    }
-  }
 }
 
 bool ResumeCtrlImpl::CheckIgnCycleRestrictions(

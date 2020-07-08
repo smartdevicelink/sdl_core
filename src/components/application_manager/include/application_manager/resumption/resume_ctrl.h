@@ -59,6 +59,16 @@ class ResumeCtrl {
   virtual ~ResumeCtrl() {}
 
   /**
+   * @brief ResumptionCallBack Function signature to be called whe
+   * DataResumptionFinished
+   * @param result_code result code for sending to mobile
+   * @param info additional info for sending to mobile
+   */
+  typedef std::function<void(mobile_apis::Result::eType result_code,
+                             const std::string& info)>
+      ResumptionCallBack;
+
+  /**
    * @brief Save all applications info to the file system
    */
   virtual void SaveAllApplications() = 0;
@@ -178,7 +188,8 @@ class ResumeCtrl {
    * @return true if it was saved, otherwise return false
    */
   virtual bool StartResumption(app_mngr::ApplicationSharedPtr application,
-                               const std::string& hash) = 0;
+                               const std::string& hash,
+                               ResumptionCallBack callback) = 0;
   /**
    * @brief Start timer for resumption applications
    *        Does not restore D1-D5 data
@@ -194,6 +205,15 @@ class ResumeCtrl {
    * @param app_id ID of the app to resume
    */
   virtual void RetryResumption(const uint32_t app_id) = 0;
+
+  /**
+   * @brief Handle restored data when timeout appeared
+   * @param correlation_id - const int32_t
+   * @param function id hmi_apis::FunctionID::eType
+   */
+
+  virtual void HandleOnTimeOut(const uint32_t correlation_id,
+                               const hmi_apis::FunctionID::eType) = 0;
 
   /**
    * @brief Check if there are all files need for resumption
