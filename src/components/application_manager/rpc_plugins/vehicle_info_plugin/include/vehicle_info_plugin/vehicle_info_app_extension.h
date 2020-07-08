@@ -93,22 +93,15 @@ class VehicleInfoAppExtension : public app_mngr::AppExtension {
    * @brief Subscriptions get list of subscriptions for application extension
    * @return list of subscriptions for application extension
    */
-  VehicleInfoSubscriptions Subscriptions();
+  const VehicleInfoSubscriptions& Subscriptions();
 
-  /**
-   * @brief SaveResumptionData saves vehicle info data
-   * @param resumption_data plase to store resumption data
-   */
-  void SaveResumptionData(ns_smart_device_link::ns_smart_objects::SmartObject&
-                              resumption_data) OVERRIDE;
+  void SaveResumptionData(smart_objects::SmartObject& resumption_data) OVERRIDE;
 
-  /**
-   * @brief ProcessResumption load resumtion data back to plugin during
-   * resumption
-   * @param resumption_data resumption data
-   */
-  void ProcessResumption(
-      const smart_objects::SmartObject& resumption_data) OVERRIDE;
+  void ProcessResumption(const smart_objects::SmartObject& saved_app,
+                         resumption::Subscriber subscriber) OVERRIDE;
+
+  void RevertResumption(
+      const smart_objects::SmartObject& subscriptions) OVERRIDE;
 
   /**
    * @brief VehicleInfoAppExtensionUID unique identifier of VehicleInfo
