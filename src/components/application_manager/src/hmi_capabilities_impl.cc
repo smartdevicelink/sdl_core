@@ -1055,8 +1055,8 @@ JsonCapabilitiesGetter GetInterfaceGetter(
   auto interface_cache_node =
       json_root_getter.GetCachedJsonMember(interface_name);
 
-  return std::move(
-      JsonCapabilitiesGetter(interface_default_node, interface_cache_node));
+  JsonCapabilitiesGetter getter(interface_default_node, interface_cache_node);
+  return getter;
 }
 
 bool HMICapabilitiesImpl::LoadCapabilitiesFromFile() {
@@ -1779,14 +1779,14 @@ void HMICapabilitiesImpl::PrepareUiJsonValueForSaving(
                                         out_node);
     }
 
-    if (section_to_update == hmi_response::soft_button_capabilities) {
+    else if (section_to_update == hmi_response::soft_button_capabilities) {
       save_hmi_capability_field_to_json(hmi_response::soft_button_capabilities,
                                         schema,
                                         soft_button_capabilities(),
                                         out_node);
     }
 
-    if (section_to_update == strings::audio_pass_thru_capabilities) {
+    else if (section_to_update == strings::audio_pass_thru_capabilities) {
       smart_objects::SmartObjectSPtr audio_pass_thru_capabilities_so =
           audio_pass_thru_capabilities();
 
@@ -1805,22 +1805,22 @@ void HMICapabilitiesImpl::PrepareUiJsonValueForSaving(
       }
     }
 
-    if (section_to_update == strings::navigation) {
+    else if (section_to_update == strings::navigation) {
       out_node[strings::hmi_capabilities][strings::navigation] =
           navigation_supported();
     }
 
-    if (section_to_update == strings::phone_call) {
+    else if (section_to_update == strings::phone_call) {
       out_node[strings::hmi_capabilities][strings::phone_call] =
           phone_call_supported();
     }
 
-    if (section_to_update == strings::video_streaming) {
+    else if (section_to_update == strings::video_streaming) {
       out_node[strings::hmi_capabilities][strings::video_streaming] =
           video_streaming_supported();
     }
 
-    if (section_to_update == strings::navigation_capability) {
+    else if (section_to_update == strings::navigation_capability) {
       const auto navigation_capability_so = navigation_capability();
       if (navigation_capability_so) {
         (*system_capabilities)[strings::navigation_capability] =
@@ -1828,7 +1828,7 @@ void HMICapabilitiesImpl::PrepareUiJsonValueForSaving(
       }
     }
 
-    if (section_to_update == strings::phone_capability) {
+    else if (section_to_update == strings::phone_capability) {
       const auto phone_capability_so = phone_capability();
       if (phone_capability_so) {
         (*system_capabilities)[strings::phone_capability] =
@@ -1836,7 +1836,7 @@ void HMICapabilitiesImpl::PrepareUiJsonValueForSaving(
       }
     }
 
-    if (section_to_update == strings::video_streaming_capability) {
+    else if (section_to_update == strings::video_streaming_capability) {
       const auto video_streaming_capability_so = video_streaming_capability();
 
       if (video_streaming_capability_so) {
@@ -1845,7 +1845,7 @@ void HMICapabilitiesImpl::PrepareUiJsonValueForSaving(
       }
     }
 
-    if (section_to_update == strings::display_capabilities) {
+    else if (section_to_update == strings::display_capabilities) {
       const auto display_capabilities_so = display_capabilities();
 
       if (display_capabilities_so) {
@@ -1856,19 +1856,19 @@ void HMICapabilitiesImpl::PrepareUiJsonValueForSaving(
       }
     }
 
-    if (section_to_update == strings::pcm_stream_capabilities) {
+    else if (section_to_update == strings::pcm_stream_capabilities) {
       save_hmi_capability_field_to_json(strings::pcm_stream_capabilities,
                                         schema,
                                         pcm_stream_capabilities(),
                                         out_node);
     }
 
-    if (section_to_update == hmi_response::language) {
+    else if (section_to_update == hmi_response::language) {
       out_node[hmi_response::language] =
           MessageHelper::CommonLanguageToString(active_ui_language());
     }
 
-    if (section_to_update == hmi_response::languages) {
+    else if (section_to_update == hmi_response::languages) {
       save_hmi_capability_field_to_json(
           hmi_response::languages, schema, ui_supported_languages(), out_node);
     }
