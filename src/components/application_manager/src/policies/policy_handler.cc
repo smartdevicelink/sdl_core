@@ -790,7 +790,7 @@ void PolicyHandler::OnSystemRequestReceived() const {
 }
 
 void PolicyHandler::TriggerPTUOnStartupIfRequired() {
-#ifndef EXTERNAL_PROPRIETARY_MODE
+#ifdef PROPRIETARY_MODE
   policy_manager_->TriggerPTUOnStartupIfRequired();
 #endif
 }
@@ -1310,18 +1310,22 @@ void PolicyHandler::OnAllowSDLFunctionalityNotification(
 
 #ifdef EXTERNAL_PROPRIETARY_MODE
 
-      DataAccessor<ApplicationSet> accessor =
-          application_manager_.applications();
+      ApplicationSet applications;
+      {
+        DataAccessor<ApplicationSet> accessor =
+            application_manager_.applications();
+        applications = accessor.GetData();
+      }
       if (!is_allowed) {
         std::for_each(
-            accessor.GetData().begin(),
-            accessor.GetData().end(),
+            applications.begin(),
+            applications.end(),
             DeactivateApplication(device_handle,
                                   application_manager_.state_controller()));
       } else {
         std::for_each(
-            accessor.GetData().begin(),
-            accessor.GetData().end(),
+            applications.begin(),
+            applications.end(),
             SDLAlowedNotification(device_handle,
                                   policy_manager_.get(),
                                   application_manager_.state_controller()));

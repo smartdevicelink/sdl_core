@@ -1472,7 +1472,12 @@ void ApplicationManagerImpl::StartAudioPassThruThread(int32_t session_key,
   LOG4CXX_INFO(logger_, "START MICROPHONE RECORDER");
   DCHECK_OR_RETURN_VOID(media_manager_);
   media_manager_->StartMicrophoneRecording(
-      session_key, get_settings().recording_file_name(), max_duration);
+      session_key,
+      get_settings().recording_file_name(),
+      max_duration,
+      static_cast<mobile_apis::SamplingRate::eType>(sampling_rate),
+      static_cast<mobile_apis::BitsPerSample::eType>(bits_per_sample),
+      static_cast<mobile_apis::AudioType::eType>(audio_type));
 }
 
 void ApplicationManagerImpl::StopAudioPassThru(int32_t application_key) {
@@ -4657,6 +4662,13 @@ void ApplicationManagerImpl::SubscribeAppForWayPoints(uint32_t app_id) {
   LOG4CXX_DEBUG(logger_,
                 "There are applications subscribed: "
                     << subscribed_way_points_apps_list_.size());
+  if (way_points_data_) {
+    smart_objects::SmartObjectSPtr way_point_notification_ =
+        std::make_shared<smart_objects::SmartObject>(*way_points_data_);
+    (*way_point_notification_)[strings::params][strings::connection_key] =
+        app_id;
+    GetRPCService().SendMessageToMobile(way_point_notification_);
+  }
 }
 
 void ApplicationManagerImpl::SubscribeAppForWayPoints(
@@ -4672,6 +4684,9 @@ void ApplicationManagerImpl::UnsubscribeAppFromWayPoints(uint32_t app_id) {
   LOG4CXX_DEBUG(logger_,
                 "There are applications subscribed: "
                     << subscribed_way_points_apps_list_.size());
+  if (subscribed_way_points_apps_list_.empty()) {
+    way_points_data_.reset();
+  }
 }
 
 void ApplicationManagerImpl::UnsubscribeAppFromWayPoints(
@@ -4686,6 +4701,12 @@ bool ApplicationManagerImpl::IsAnyAppSubscribedForWayPoints() const {
                 "There are applications subscribed: "
                     << subscribed_way_points_apps_list_.size());
   return !subscribed_way_points_apps_list_.empty();
+}
+
+void ApplicationManagerImpl::SaveWayPointsMessage(
+    std::shared_ptr<smart_objects::SmartObject> way_points_message) {
+  sync_primitives::AutoLock lock(subscribed_way_points_apps_lock_);
+  way_points_data_ = way_points_message;
 }
 
 const std::set<uint32_t> ApplicationManagerImpl::GetAppsSubscribedForWayPoints()

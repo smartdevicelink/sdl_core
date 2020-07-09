@@ -128,6 +128,11 @@ void UIGetCapabilitiesResponse::Run() {
                     [strings::display_capabilities]);
     }
   }
+
+  if (msg_params.keyExists(strings::pcm_stream_capabilities)) {
+    hmi_capabilities.set_pcm_stream_capabilities(
+        msg_params[strings::pcm_stream_capabilities]);
+  }
 }
 
 }  // namespace commands

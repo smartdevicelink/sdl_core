@@ -108,8 +108,12 @@ void RPCHandlerImpl::ProcessMessageFromMobile(
     allow_unknown_parameters = true;
   }
 
-  if (!ConvertMessageToSO(
-          *message, *so_from_mobile, allow_unknown_parameters, !rpc_passing)) {
+  std::string warning_info;
+  if (!ConvertMessageToSO(*message,
+                          *so_from_mobile,
+                          warning_info,
+                          allow_unknown_parameters,
+                          !rpc_passing)) {
     LOG4CXX_ERROR(logger_, "Cannot create smart object from message");
     return;
   }
@@ -131,7 +135,7 @@ void RPCHandlerImpl::ProcessMessageFromMobile(
                                              commands::Command::SOURCE_MOBILE,
                                              message_type)) {
       // Since PassThrough failed, refiltering the message
-      if (!ConvertMessageToSO(*message, *so_from_mobile)) {
+      if (!ConvertMessageToSO(*message, *so_from_mobile, warning_info)) {
         LOG4CXX_ERROR(logger_, "Cannot create smart object from message");
         return;
       }
@@ -143,7 +147,7 @@ void RPCHandlerImpl::ProcessMessageFromMobile(
 #endif  // TELEMETRY_MONITOR
 
   if (!app_manager_.GetRPCService().ManageMobileCommand(
-          so_from_mobile, commands::Command::SOURCE_MOBILE)) {
+          so_from_mobile, commands::Command::SOURCE_MOBILE, warning_info)) {
     LOG4CXX_ERROR(logger_, "Received command didn't run successfully");
   }
 #ifdef TELEMETRY_MONITOR
@@ -176,7 +180,9 @@ void RPCHandlerImpl::ProcessMessageFromHMI(
     allow_unknown_parameters = true;
   }
 
-  if (!ConvertMessageToSO(*message, *smart_object, allow_unknown_parameters)) {
+  std::string warning_info;
+  if (!ConvertMessageToSO(
+          *message, *smart_object, warning_info, allow_unknown_parameters)) {
     if (application_manager::MessageType::kResponse ==
         (*smart_object)[strings::params][strings::message_type].asInt()) {
       (*smart_object).erase(strings::msg_params);
@@ -190,8 +196,14 @@ void RPCHandlerImpl::ProcessMessageFromHMI(
     }
   }
 
+  if (!warning_info.empty()) {
+    LOG4CXX_WARN(logger_,
+                 "Warning while parsing HMI message: " << warning_info);
+  }
+
   LOG4CXX_DEBUG(logger_, "Converted message, trying to create hmi command");
-  if (!app_manager_.GetRPCService().ManageHMICommand(smart_object)) {
+  if (!app_manager_.GetRPCService().ManageHMICommand(
+          smart_object, commands::Command::SOURCE_HMI, warning_info)) {
     LOG4CXX_ERROR(logger_, "Received command didn't run successfully");
   }
 }
@@ -320,6 +332,7 @@ void RPCHandlerImpl::GetMessageVersion(
 bool RPCHandlerImpl::ConvertMessageToSO(
     const Message& message,
     ns_smart_device_link::ns_smart_objects::SmartObject& output,
+    std::string& out_warning_info,
     const bool allow_unknown_parameters,
     const bool validate_params) {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -381,6 +394,9 @@ bool RPCHandlerImpl::ConvertMessageToSO(
       LOG4CXX_DEBUG(logger_,
                     "Convertion result for sdl object is true function_id "
                         << output[jhs::S_PARAMS][jhs::S_FUNCTION_ID].asInt());
+
+      // Populate any warning info generated during the validation process
+      out_warning_info = rpc::PrettyFormat(report);
 
       output[strings::params][strings::connection_key] =
           message.connection_key();
@@ -534,7 +550,7 @@ bool RPCHandlerImpl::ValidateRpcSO(smart_objects::SmartObject& message,
                                    rpc::ValidationReport& report_out,
                                    bool allow_unknown_parameters) {
   if (!mobile_so_factory().attachSchema(
-          message, !allow_unknown_parameters, msg_version) ||
+          message, !allow_unknown_parameters, msg_version, &report_out) ||
       message.validate(&report_out, msg_version, allow_unknown_parameters) !=
           smart_objects::errors::OK) {
     LOG4CXX_WARN(logger_, "Failed to parse string to smart object");

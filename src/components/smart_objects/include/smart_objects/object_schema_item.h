@@ -110,7 +110,7 @@ class CObjectSchemaItem : public ISchemaItem {
   /**
    * @brief Validate smart object.
    * @param Object Object to validate.
-   * @param report__ object for reporting errors during validation
+   * @param report object for reporting errors during validation
    * @param MessageVersion to check mobile RPC version against RPC Spec History
    * @param allow_unknown_enums
    *   false - unknown enum values (left as string values after applySchema)
@@ -120,15 +120,21 @@ class CObjectSchemaItem : public ISchemaItem {
    **/
   errors::eType validate(
       const SmartObject& Object,
-      rpc::ValidationReport* report__,
+      rpc::ValidationReport* report,
       const utils::SemanticVersion& MessageVersion = utils::SemanticVersion(),
       const bool allow_unknown_enums = false) OVERRIDE;
+
+  bool filterInvalidEnums(SmartObject& Object,
+                          const utils::SemanticVersion& MessageVersion,
+                          rpc::ValidationReport* report) OVERRIDE;
+
   /**
    * @brief Apply schema.
+   *
    * @param Object Object to apply schema.
    * @param remove_unknown_parameters contains true if need to remove unknown
-   *parameters
-   * from smart object otherwise contains false.
+   * parameters from smart object, otherwise contains false.
+   * @param MessageVersion the version of the schema to be applied
    **/
   void applySchema(SmartObject& Object,
                    const bool remove_unknown_parameters,
@@ -138,7 +144,7 @@ class CObjectSchemaItem : public ISchemaItem {
    * @brief Unapply schema.
    * @param Object Object to unapply schema.
    * @param remove_unknown_parameters contains true if need to remove unknown
-   *parameters
+   *                                  parameters
    **/
   void unapplySchema(SmartObject& Object,
                      const bool remove_unknown_parameters) OVERRIDE;
@@ -156,6 +162,8 @@ class CObjectSchemaItem : public ISchemaItem {
    */
   size_t GetMemberSize() OVERRIDE;
 
+  TypeID GetType() OVERRIDE;
+
   boost::optional<SMember&> GetMemberSchemaItem(
       const std::string& member_key) OVERRIDE;
 
@@ -171,25 +179,27 @@ class CObjectSchemaItem : public ISchemaItem {
   CObjectSchemaItem(const Members& Members);
 
   /**
-   * @brief Removes fake parameters from object.
-   * @param Object Object to remove fake parameters.
+   * @brief Removes unknown parameters from object.
+   * @param Object Object to remove unknown parameters.
+   * @param MessageVersion The version to check against for which parameters are
+   *                       unknown.
    **/
-  void RemoveFakeParams(SmartObject& Object,
-                        const utils::SemanticVersion& MessageVersion);
+  void RemoveUnknownParams(SmartObject& Object,
+                           const utils::SemanticVersion& MessageVersion);
 
   /**
    * @brief Returns the correct schema item based on message version.
    * @param member Schema member
    * @param MessageVersion Semantic Version of mobile message.
    * @return Pointer to correct schema item if item found or nullptr, if item
-   *was not found.
+   *         was not found.
    **/
   const SMember* GetCorrectMember(const SMember& member,
                                   const utils::SemanticVersion& messageVersion);
 
   /**
    * @brief Map of member name to SMember structure describing the object
-   *member.
+   *        member.
    **/
   Members mMembers;
   DISALLOW_COPY_AND_ASSIGN(CObjectSchemaItem);

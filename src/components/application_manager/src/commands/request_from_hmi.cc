@@ -96,7 +96,19 @@ void RequestFromHMI::SendResponse(
   }
 
   (*message)[strings::msg_params][strings::success] = success;
-  (*message)[strings::msg_params][strings::result_code] = result_code;
+  if ((result_code == hmi_apis::Common_Result::SUCCESS ||
+       result_code == hmi_apis::Common_Result::WARNINGS) &&
+      !warning_info().empty()) {
+    bool has_info = (*message)[strings::params].keyExists(strings::error_msg);
+    (*message)[strings::params][strings::error_msg] =
+        has_info ? (*message)[strings::params][strings::error_msg].asString() +
+                       "\n" + warning_info()
+                 : warning_info();
+    (*message)[strings::msg_params][strings::result_code] =
+        mobile_apis::Result::WARNINGS;
+  } else {
+    (*message)[strings::msg_params][strings::result_code] = result_code;
+  }
 
   rpc_service_.ManageHMICommand(message, source);
 }
