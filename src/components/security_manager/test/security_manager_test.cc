@@ -571,7 +571,7 @@ TEST_F(SecurityManagerTest, StartHandshake_SSLInternalError) {
  * Shall send InternallError on
  * getting SEND_HANDSHAKE_DATA with NULL data
  */
-TEST_F(SecurityManagerTest, ProccessHandshakeData_WrongDataSize) {
+TEST_F(SecurityManagerTest, ProcessHandshakeData_WrongDataSize) {
   SetMockCryptoManager();
   uint32_t connection_id = 0;
   uint8_t session_id = 0;
@@ -600,8 +600,7 @@ TEST_F(SecurityManagerTest, ProccessHandshakeData_WrongDataSize) {
  * getting SEND_HANDSHAKE_DATA from mobile side
  * for service which is not protected
  */
-TEST_F(SecurityManagerTest,
-       DISABLED_ProccessHandshakeData_ServiceNotProtected) {
+TEST_F(SecurityManagerTest, DISABLED_ProcessHandshakeData_ServiceNotProtected) {
   SetMockCryptoManager();
   // Expect InternalError with ERROR_ID
   uint32_t connection_id = 0;
@@ -649,7 +648,7 @@ TEST_F(SecurityManagerTest,
  * SEND_HANDSHAKE_DATA from mobile side with invalid handshake
  * data (DoHandshakeStep return NULL pointer)
  */
-TEST_F(SecurityManagerTest, ProccessHandshakeData_InvalidData) {
+TEST_F(SecurityManagerTest, ProcessHandshakeData_InvalidData) {
   SetMockCryptoManager();
 
   // Count handshake calls
@@ -732,7 +731,7 @@ TEST_F(SecurityManagerTest, ProccessHandshakeData_InvalidData) {
  * Shall send HandshakeData on getting SEND_HANDSHAKE_DATA from mobile side
  * with correct handshake data Check Fail and sussecc states
  */
-TEST_F(SecurityManagerTest, ProccessHandshakeData_Answer) {
+TEST_F(SecurityManagerTest, ProcessHandshakeData_Answer) {
   SetMockCryptoManager();
   // Count handshake calls
   const int handshake_emulates = 2;
@@ -808,7 +807,7 @@ TEST_F(SecurityManagerTest, ProccessHandshakeData_Answer) {
  * and return handshake data
  * Check Fail and sussecc states
  */
-TEST_F(SecurityManagerTest, ProccessHandshakeData_HandshakeFinished) {
+TEST_F(SecurityManagerTest, ProcessHandshakeData_HandshakeFinished) {
   SetMockCryptoManager();
   // Count handshake calls
   const int handshake_emulates = 6;

@@ -177,7 +177,7 @@ void ChangeRegistrationRequest::Run() {
                 IsLanguageSupportedByVR(language) &&
                 IsLanguageSupportedByTTS(language))) {
     LOG4CXX_ERROR(logger_, "Language is not supported");
-    SendResponse(false, mobile_apis::Result::REJECTED);
+    SendResponse(false, mobile_apis::Result::UNSUPPORTED_RESOURCE);
     return;
   }
 

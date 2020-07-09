@@ -1368,7 +1368,7 @@ bool PolicyManagerImpl::IsAllowedRetryCountExceeded() const {
   LOG4CXX_AUTO_TRACE(logger_);
   sync_primitives::AutoLock auto_lock(retry_sequence_lock_);
 
-  return retry_sequence_index_ > retry_sequence_seconds_.size();
+  return retry_sequence_index_ >= retry_sequence_seconds_.size();
 }
 
 void PolicyManagerImpl::IncrementRetryIndex() {

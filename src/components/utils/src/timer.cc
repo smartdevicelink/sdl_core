@@ -222,6 +222,5 @@ void timer::Timer::TimerDelegate::threadMain() {
 }
 
 void timer::Timer::TimerDelegate::exitThreadMain() {
-  sync_primitives::AutoLock auto_lock(state_lock_ref_);
   state_condition_.NotifyOne();
 }

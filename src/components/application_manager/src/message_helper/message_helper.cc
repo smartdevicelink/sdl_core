@@ -2526,6 +2526,33 @@ bool MessageHelper::SendUnsubscribedWayPoints(ApplicationManager& app_mngr) {
 
 void MessageHelper::SendPolicySnapshotNotification(
     uint32_t connection_key,
+    const std::string& snapshot_file_path,
+    const std::string& url,
+    ApplicationManager& app_mngr) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  smart_objects::SmartObject content(smart_objects::SmartType_Map);
+  const auto request_type =
+#if defined(PROPRIETARY_MODE) || defined(EXTERNAL_PROPRIETARY_MODE)
+      mobile_apis::RequestType::PROPRIETARY;
+#else
+      mobile_apis::RequestType::HTTP;
+#endif  // PROPRIETARY || EXTERNAL_PROPRIETARY_MODE
+
+  content[strings::msg_params][strings::request_type] = request_type;
+
+  if (!url.empty()) {
+    content[strings::msg_params][strings::url] = url;
+  } else {
+    LOG4CXX_WARN(logger_, "No service URLs");
+  }
+
+  content[strings::msg_params][strings::file_name] = snapshot_file_path;
+
+  SendSystemRequestNotification(connection_key, content, app_mngr);
+}
+
+void MessageHelper::SendPolicySnapshotNotification(
+    uint32_t connection_key,
     const std::vector<uint8_t>& policy_data,
     const std::string& url,
     ApplicationManager& app_mngr) {

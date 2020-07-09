@@ -44,7 +44,15 @@ include_directories(
   ${POLICY_MOCK_INCLUDE_PATH}/
 )
 
-collect_sources(SOURCES "${CMAKE_CURRENT_SOURCE_DIR}")
+file (GLOB POLICY_TEST_SOURCES
+  ${CMAKE_CURRENT_SOURCE_DIR}/cache_manager_test.cc
+  ${CMAKE_CURRENT_SOURCE_DIR}/policy_manager_impl_test.cc
+  ${CMAKE_CURRENT_SOURCE_DIR}/access_remote_impl_test.cc
+  ${CMAKE_CURRENT_SOURCE_DIR}/sql_pt_representation_test.cc
+  ${CMAKE_CURRENT_SOURCE_DIR}/update_status_manager_test.cc
+  ${CMAKE_CURRENT_SOURCE_DIR}/vehicle_data_item_type_test.cc
+  ${CMAKE_CURRENT_SOURCE_DIR}/shared_library_test.cc
+)
 
 set(LIBRARIES
   gmock
@@ -53,20 +61,9 @@ set(LIBRARIES
   UsageStatistics
 )
 
-create_test(policy_test "${SOURCES}" "${LIBRARIES}")
+create_test(policy_test "${POLICY_TEST_SOURCES}" "${LIBRARIES}")
 
-file(COPY valid_sdl_pt_update.json DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
-file(COPY sdl_preloaded_pt.json DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
-file(COPY PTU.json DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
-file(COPY PTU2.json DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
-file(COPY PTU3.json DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
-file(COPY PTU4.json DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
-file(COPY ptu_requestType.json DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
-file(COPY ptu2_requestType.json DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
-file(COPY log4cxx.properties DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
-file(COPY smartDeviceLink.ini DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
-file(COPY smartDeviceLink2.ini DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
-file(COPY smartDeviceLink3.ini DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
-file(COPY sdl_pt_first_update.json DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
-file(COPY sdl_pt_second_update.json DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
-file(COPY sdl_pt_update.json DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+#Copy actual sdl_preloaded_pt.json
+file(COPY ${CMAKE_SOURCE_DIR}/src/appMain/sdl_preloaded_pt.json DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/json/)
+file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/json/sdl_preloaded_pt_for_merge_initial.json DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/json/)
+file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/json/sdl_preloaded_pt_for_merge_latest.json DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/json/)

@@ -32,6 +32,7 @@ class NetworkInterfaceListenerTest : public ::testing::Test {
  protected:
   struct InterfaceEntry {
     const char* name;
+    const unsigned int index;
     const char* ipv4_address;
     const char* ipv6_address;
     unsigned int flags;
@@ -48,8 +49,9 @@ class NetworkInterfaceListenerTest : public ::testing::Test {
     delete interface_listener_impl_;
   }
 
-  void SetDummyInterfaceTable(struct InterfaceEntry* entries) {
+  void SetDummyInterfaceTable(const struct InterfaceEntry* entries) {
     InterfaceStatusTable dummy_table;
+    std::map<unsigned int, std::string> dummy_name_map;
 
     while (entries->name != NULL) {
       InterfaceStatus status;
@@ -63,13 +65,16 @@ class NetworkInterfaceListenerTest : public ::testing::Test {
         ASSERT_EQ(1, inet_pton(AF_INET6, entries->ipv6_address, &addr6));
         status.SetIPv6Address(&addr6);
       }
+      status.SetName(entries->name);
       status.SetFlags(entries->flags);
 
-      dummy_table.insert(std::make_pair(entries->name, status));
+      dummy_table.insert(std::make_pair(entries->index, status));
+      dummy_name_map[entries->index] = std::string(entries->name);
       entries++;
     }
 
     interface_listener_impl_->OverwriteStatusTable(dummy_table);
+    interface_listener_impl_->SetDummyNameMap(dummy_name_map);
   }
 
   void SleepFor(long msec) const {
@@ -108,8 +113,8 @@ TEST_F(NetworkInterfaceListenerTest, Start_success) {
   EXPECT_TRUE(interface_listener_impl_->Init());
 
   struct InterfaceEntry entries[] = {
-      {"dummy_int0", "1.2.3.4", NULL, IFF_UP | IFF_RUNNING},
-      {NULL, NULL, NULL, 0}};
+      {"dummy_int0", 1, "1.2.3.4", NULL, IFF_UP | IFF_RUNNING},
+      {NULL, 0, NULL, NULL, 0}};
   SetDummyInterfaceTable(entries);
 
   // after stated, it is expected that the listener notifies current IP address
@@ -198,11 +203,11 @@ TEST_F(NetworkInterfaceListenerTest, DesignatedInterface_IPAddressChanged) {
   EXPECT_TRUE(interface_listener_impl_->Init());
 
   struct InterfaceEntry entries1[] = {
-      {"dummy_int0", "1.2.3.4", NULL, IFF_UP | IFF_RUNNING},
-      {NULL, NULL, NULL, 0}};
+      {"dummy_int0", 1, "1.2.3.4", NULL, IFF_UP | IFF_RUNNING},
+      {NULL, 0, NULL, NULL, 0}};
   struct InterfaceEntry entries2[] = {
-      {"dummy_int0", "5.6.7.8", NULL, IFF_UP | IFF_RUNNING},
-      {NULL, NULL, NULL, 0}};
+      {"dummy_int0", 1, "5.6.7.8", NULL, IFF_UP | IFF_RUNNING},
+      {NULL, 0, NULL, NULL, 0}};
 
   SetDummyInterfaceTable(entries1);
 
@@ -230,13 +235,13 @@ TEST_F(NetworkInterfaceListenerTest, DesignatedInterface_IPAddressNotChanged) {
   EXPECT_TRUE(interface_listener_impl_->Init());
 
   struct InterfaceEntry entries1[] = {
-      {"dummy_int0", "1.2.3.4", NULL, IFF_UP | IFF_RUNNING},
-      {"dummy_int1", "10.10.10.12", NULL, IFF_UP | IFF_RUNNING},
-      {NULL, NULL, NULL, 0}};
+      {"dummy_int0", 1, "1.2.3.4", NULL, IFF_UP | IFF_RUNNING},
+      {"dummy_int1", 2, "10.10.10.12", NULL, IFF_UP | IFF_RUNNING},
+      {NULL, 0, NULL, NULL, 0}};
   struct InterfaceEntry entries2[] = {
-      {"dummy_int0", "1.2.3.4", NULL, IFF_UP | IFF_RUNNING},
-      {"dummy_int1", "172.16.23.30", NULL, IFF_UP | IFF_RUNNING},
-      {NULL, NULL, NULL, 0}};
+      {"dummy_int0", 1, "1.2.3.4", NULL, IFF_UP | IFF_RUNNING},
+      {"dummy_int1", 2, "172.16.23.30", NULL, IFF_UP | IFF_RUNNING},
+      {NULL, 0, NULL, NULL, 0}};
 
   SetDummyInterfaceTable(entries1);
 
@@ -261,13 +266,13 @@ TEST_F(NetworkInterfaceListenerTest, DesignatedInterface_GoesUnavailable) {
   EXPECT_TRUE(interface_listener_impl_->Init());
 
   struct InterfaceEntry entries1[] = {
-      {"dummy_int0", "1.2.3.4", "fdc2:12af:327a::1", IFF_UP | IFF_RUNNING},
-      {"dummy_int1", "10.10.10.12", NULL, IFF_UP | IFF_RUNNING},
-      {NULL, NULL, NULL, 0}};
+      {"dummy_int0", 1, "1.2.3.4", "fdc2:12af:327a::1", IFF_UP | IFF_RUNNING},
+      {"dummy_int1", 2, "10.10.10.12", NULL, IFF_UP | IFF_RUNNING},
+      {NULL, 0, NULL, NULL, 0}};
   struct InterfaceEntry entries2[] = {
-      {"dummy_int0", "1.2.3.4", "fdc2:12af:327a::1", IFF_UP},
-      {"dummy_int1", "10.10.10.12", NULL, IFF_UP | IFF_RUNNING},
-      {NULL, NULL, NULL, 0}};
+      {"dummy_int0", 1, "1.2.3.4", "fdc2:12af:327a::1", IFF_UP},
+      {"dummy_int1", 2, "10.10.10.12", NULL, IFF_UP | IFF_RUNNING},
+      {NULL, 0, NULL, NULL, 0}};
 
   SetDummyInterfaceTable(entries1);
 
@@ -292,12 +297,12 @@ TEST_F(NetworkInterfaceListenerTest, DesignatedInterface_Removed) {
   EXPECT_TRUE(interface_listener_impl_->Init());
 
   struct InterfaceEntry entries1[] = {
-      {"dummy_int0", "1.2.3.4", "fdc2:12af:327a::1", IFF_UP | IFF_RUNNING},
-      {"dummy_int1", "10.10.10.12", NULL, IFF_UP | IFF_RUNNING},
-      {NULL, NULL, NULL, 0}};
+      {"dummy_int0", 1, "1.2.3.4", "fdc2:12af:327a::1", IFF_UP | IFF_RUNNING},
+      {"dummy_int1", 2, "10.10.10.12", NULL, IFF_UP | IFF_RUNNING},
+      {NULL, 0, NULL, NULL, 0}};
   struct InterfaceEntry entries2[] = {
-      {"dummy_int1", "10.10.10.12", NULL, IFF_UP | IFF_RUNNING},
-      {NULL, NULL, NULL, 0}};
+      {"dummy_int1", 2, "10.10.10.12", NULL, IFF_UP | IFF_RUNNING},
+      {NULL, 0, NULL, NULL, 0}};
 
   SetDummyInterfaceTable(entries1);
 
@@ -322,12 +327,12 @@ TEST_F(NetworkInterfaceListenerTest, DesignatedInterface_Added) {
   EXPECT_TRUE(interface_listener_impl_->Init());
 
   struct InterfaceEntry entries1[] = {
-      {"dummy_int1", "10.10.10.12", NULL, IFF_UP | IFF_RUNNING},
-      {NULL, NULL, NULL, 0}};
+      {"dummy_int1", 1, "10.10.10.12", NULL, IFF_UP | IFF_RUNNING},
+      {NULL, 0, NULL, NULL, 0}};
   struct InterfaceEntry entries2[] = {
-      {"dummy_int1", "10.10.10.12", NULL, IFF_UP | IFF_RUNNING},
-      {"dummy_int0", "1.2.3.4", NULL, IFF_UP | IFF_RUNNING},
-      {NULL, NULL, NULL, 0}};
+      {"dummy_int1", 1, "10.10.10.12", NULL, IFF_UP | IFF_RUNNING},
+      {"dummy_int0", 2, "1.2.3.4", NULL, IFF_UP | IFF_RUNNING},
+      {NULL, 0, NULL, NULL, 0}};
 
   SetDummyInterfaceTable(entries1);
 
@@ -350,9 +355,13 @@ TEST_F(NetworkInterfaceListenerTest, AutoSelectInterface_SelectInterface) {
   EXPECT_TRUE(interface_listener_impl_->Init());
 
   struct InterfaceEntry entries[] = {
-      {"dummy_int1", "10.10.10.12", NULL, IFF_UP | IFF_RUNNING},
-      {"net_dummy2", "192.168.2.3", "fdc2:12af:327a::22", IFF_UP | IFF_RUNNING},
-      {NULL, NULL, NULL, 0}};
+      {"dummy_int1", 1, "10.10.10.12", NULL, IFF_UP | IFF_RUNNING},
+      {"net_dummy2",
+       2,
+       "192.168.2.3",
+       "fdc2:12af:327a::22",
+       IFF_UP | IFF_RUNNING},
+      {NULL, 0, NULL, NULL, 0}};
 
   SetDummyInterfaceTable(entries);
 
@@ -384,9 +393,13 @@ TEST_F(NetworkInterfaceListenerTest,
   EXPECT_TRUE(interface_listener_impl_->Init());
 
   struct InterfaceEntry entries[] = {
-      {"dummy_int1", "10.10.10.12", NULL, IFF_UP},
-      {"net_dummy2", "192.168.2.3", "fdc2:12af:327a::22", IFF_UP | IFF_RUNNING},
-      {NULL, NULL, NULL, 0}};
+      {"dummy_int1", 1, "10.10.10.12", NULL, IFF_UP},
+      {"net_dummy2",
+       2,
+       "192.168.2.3",
+       "fdc2:12af:327a::22",
+       IFF_UP | IFF_RUNNING},
+      {NULL, 0, NULL, NULL, 0}};
 
   SetDummyInterfaceTable(entries);
 
@@ -410,9 +423,9 @@ TEST_F(NetworkInterfaceListenerTest, AutoSelectInterface_SkipEmptyInterface) {
   EXPECT_TRUE(interface_listener_impl_->Init());
 
   struct InterfaceEntry entries[] = {
-      {"dummy_int1", "10.10.10.12", NULL, IFF_UP | IFF_RUNNING},
-      {"net_dummy2", NULL, NULL, IFF_UP | IFF_RUNNING},
-      {NULL, NULL, NULL, 0}};
+      {"dummy_int1", 1, "10.10.10.12", NULL, IFF_UP | IFF_RUNNING},
+      {"net_dummy2", 2, NULL, NULL, IFF_UP | IFF_RUNNING},
+      {NULL, 0, NULL, NULL, 0}};
 
   SetDummyInterfaceTable(entries);
 
@@ -435,10 +448,17 @@ TEST_F(NetworkInterfaceListenerTest,
   Init("");
   EXPECT_TRUE(interface_listener_impl_->Init());
 
-  struct InterfaceEntry entries[] = {
-      {"dummy_int1", "10.10.10.12", NULL, IFF_UP | IFF_RUNNING | IFF_LOOPBACK},
-      {"net_dummy2", "192.168.2.3", "fdc2:12af:327a::22", IFF_UP | IFF_RUNNING},
-      {NULL, NULL, NULL, 0}};
+  struct InterfaceEntry entries[] = {{"dummy_int1",
+                                      1,
+                                      "10.10.10.12",
+                                      NULL,
+                                      IFF_UP | IFF_RUNNING | IFF_LOOPBACK},
+                                     {"net_dummy2",
+                                      2,
+                                      "192.168.2.3",
+                                      "fdc2:12af:327a::22",
+                                      IFF_UP | IFF_RUNNING},
+                                     {NULL, 0, NULL, NULL, 0}};
 
   // dummy_int1 should not be selected
   struct InterfaceEntry* expected = &entries[1];
@@ -461,9 +481,12 @@ TEST_F(NetworkInterfaceListenerTest, AutoSelectInterface_DisableInterface) {
   Init("");
   EXPECT_TRUE(interface_listener_impl_->Init());
 
-  struct InterfaceEntry entries[] = {
-      {"net_dummy0", "192.168.2.3", "fdc2:12af:327a::22", IFF_UP | IFF_RUNNING},
-      {NULL, NULL, NULL, 0}};
+  struct InterfaceEntry entries[] = {{"net_dummy0",
+                                      1,
+                                      "192.168.2.3",
+                                      "fdc2:12af:327a::22",
+                                      IFF_UP | IFF_RUNNING},
+                                     {NULL, 0, NULL, NULL, 0}};
 
   EXPECT_CALL(mock_tcp_client_listener_, OnIPAddressUpdated(_, _)).Times(1);
   SetDummyInterfaceTable(entries);
@@ -487,9 +510,12 @@ TEST_F(NetworkInterfaceListenerTest, AutoSelectInterface_EnableInterface) {
   Init("");
   EXPECT_TRUE(interface_listener_impl_->Init());
 
-  struct InterfaceEntry entries[] = {
-      {"net_dummy0", "192.168.2.3", "fdc2:12af:327a::22", IFF_UP | IFF_RUNNING},
-      {NULL, NULL, NULL, 0}};
+  struct InterfaceEntry entries[] = {{"net_dummy0",
+                                      1,
+                                      "192.168.2.3",
+                                      "fdc2:12af:327a::22",
+                                      IFF_UP | IFF_RUNNING},
+                                     {NULL, 0, NULL, NULL, 0}};
 
   EXPECT_CALL(mock_tcp_client_listener_, OnIPAddressUpdated(_, _)).Times(1);
   SetDummyInterfaceTable(entries);
@@ -525,13 +551,17 @@ TEST_F(NetworkInterfaceListenerTest, AutoSelectInterface_SwitchInterface) {
   Init("");
   EXPECT_TRUE(interface_listener_impl_->Init());
 
-  struct InterfaceEntry entries[] = {
-      {"dummy_int1",
-       "10.10.10.12",
-       "fd53:ba79:241d:30c1::78",
-       IFF_UP | IFF_RUNNING},
-      {"net_dummy2", "192.168.2.3", "fdc2:12af:327a::22", IFF_UP | IFF_RUNNING},
-      {NULL, NULL, NULL, 0}};
+  struct InterfaceEntry entries[] = {{"dummy_int1",
+                                      1,
+                                      "10.10.10.12",
+                                      "fd53:ba79:241d:30c1::78",
+                                      IFF_UP | IFF_RUNNING},
+                                     {"net_dummy2",
+                                      2,
+                                      "192.168.2.3",
+                                      "fdc2:12af:327a::22",
+                                      IFF_UP | IFF_RUNNING},
+                                     {NULL, 0, NULL, NULL, 0}};
 
   EXPECT_CALL(mock_tcp_client_listener_, OnIPAddressUpdated(_, _)).Times(1);
   SetDummyInterfaceTable(entries);
