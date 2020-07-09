@@ -3913,10 +3913,24 @@
                 },
                 {
                     "name": "stabilityControlsStatus",
+                    "params": [
+                        {
+                            "name": "escSystem",
+                            "key": "OEM_REF_ESC_SYSTEM",
+                            "type": "VehicleDataStatus",
+                            "mandatory": false
+                        },
+                        {
+                            "name": "trailerSwayControl",
+                            "key": "OEM_REF_TRAIL_SW_CTRL",
+                            "type": "VehicleDataStatus",
+                            "mandatory": false
+                        }
+                    ],
                     "key": "OEM_REF_STAB_CTRLS_ST",
-                    "type": "StabilityControlsStatus",
+                    "type": "Struct",
                     "mandatory": false,
-                    "since": "6.2"
+                    "since": "7.0"
                 },
                 {
                     "name": "cloudAppVehicleID",
