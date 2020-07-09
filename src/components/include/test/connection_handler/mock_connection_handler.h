@@ -135,6 +135,7 @@ class MockConnectionHandler : public connection_handler::ConnectionHandler {
            const transport_manager::ConnectionUID secondary_connection_handle));
   MOCK_METHOD0(CreateWebEngineDevice, void());
   MOCK_CONST_METHOD0(GetWebEngineDeviceInfo, transport_manager::DeviceInfo&());
+  MOCK_CONST_METHOD1(IsAppConnected, bool(const uint32_t connection_key));
 };
 
 }  // namespace connection_handler_test

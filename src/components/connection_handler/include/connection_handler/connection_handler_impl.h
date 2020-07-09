@@ -610,6 +610,8 @@ class ConnectionHandlerImpl
 
   void CreateWebEngineDevice() OVERRIDE;
 
+  bool IsAppConnected(const uint32_t connection_key) const OVERRIDE;
+
  private:
   /**
    * \brief Disconnect application.
