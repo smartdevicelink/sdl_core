@@ -57,7 +57,7 @@ void OnUIUpdateSubMenuNotification::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
     // Prepare SmartObject for mobile factory
   (*message_)[strings::params][strings::function_id] = static_cast<int32_t>(
-      mobile_apis::FunctionID::OnUpdateFileID);
+      mobile_apis::FunctionID::OnUpdateSubMenuID);
 
   const auto app_id =
       (*message_)[strings::msg_params][strings::app_id].asUInt();
