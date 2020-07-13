@@ -74,6 +74,13 @@ class RequestToHMI : public CommandImpl {
   virtual void Run();
   void SendRequest();
 
+  /**
+   * @brief Sends request to HMI for fetching of capabilities according to the
+   * passed function ids
+   */
+  void RequestCapabilities(
+      const std::set<hmi_apis::FunctionID::eType>& requests_to_send_to_hmi);
+
   /*
    * @brief Retrieves application ID
    */

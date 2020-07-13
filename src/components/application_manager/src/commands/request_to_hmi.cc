@@ -31,6 +31,7 @@
  */
 
 #include "application_manager/commands/request_to_hmi.h"
+#include "application_manager/message_helper.h"
 #include "application_manager/rpc_service.h"
 
 namespace application_manager {
@@ -90,6 +91,31 @@ void RequestToHMI::SendRequest() {
   (*message_)[strings::params][strings::protocol_type] = hmi_protocol_type_;
   (*message_)[strings::params][strings::protocol_version] = protocol_version_;
   rpc_service_.SendMessageToHMI(message_);
+}
+
+void RequestToHMI::RequestCapabilities(
+    const std::set<hmi_apis::FunctionID::eType>& requests_to_send_to_hmi) {
+  LOG4CXX_DEBUG(logger_,
+                "There are " << requests_to_send_to_hmi.size()
+                             << " requests to send to the HMI");
+
+  for (const auto& function_id : requests_to_send_to_hmi) {
+    if (hmi_capabilities_.IsRequestsRequiredForCapabilities(function_id)) {
+      std::shared_ptr<smart_objects::SmartObject> request_so(
+          MessageHelper::CreateModuleInfoSO(function_id, application_manager_));
+
+      switch (function_id) {
+        case hmi_apis::FunctionID::UI_GetLanguage:
+        case hmi_apis::FunctionID::VR_GetLanguage:
+        case hmi_apis::FunctionID::TTS_GetLanguage:
+          hmi_capabilities_.set_handle_response_for(*request_so);
+          break;
+        default:
+          break;
+      }
+      rpc_service_.ManageHMICommand(request_so);
+    }
+  }
 }
 
 }  // namespace commands
