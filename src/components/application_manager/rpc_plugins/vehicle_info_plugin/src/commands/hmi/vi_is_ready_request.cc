@@ -31,7 +31,9 @@
  */
 
 #include "vehicle_info_plugin/commands/hmi/vi_is_ready_request.h"
-#include "application_manager/message_helper.h"
+
+#include <set>
+
 #include "application_manager/policies/policy_handler_interface.h"
 #include "application_manager/rpc_service.h"
 
@@ -84,7 +86,9 @@ void VIIsReadyRequest::on_event(const event_engine::Event& event) {
         return;
       }
 
-      RequestCapabilities();
+      std::set<hmi_apis::FunctionID::eType> request_to_send_to_hmi{
+          hmi_apis::FunctionID::VehicleInfo_GetVehicleType};
+      RequestCapabilities(request_to_send_to_hmi);
       break;
     }
     default: {
@@ -96,18 +100,9 @@ void VIIsReadyRequest::on_event(const event_engine::Event& event) {
 
 void VIIsReadyRequest::onTimeOut() {
   // Note(dtrunov): According to new requirment APPLINK-27956
-  RequestCapabilities();
-}
-
-void VIIsReadyRequest::RequestCapabilities() {
-  if (hmi_capabilities_.IsRequestsRequiredForCapabilities(
-          hmi_apis::FunctionID::VehicleInfo_GetVehicleType)) {
-    std::shared_ptr<smart_objects::SmartObject> get_type(
-        MessageHelper::CreateModuleInfoSO(
-            hmi_apis::FunctionID::VehicleInfo_GetVehicleType,
-            application_manager_));
-    rpc_service_.ManageHMICommand(get_type);
-  }
+  std::set<hmi_apis::FunctionID::eType> request_to_send_to_hmi{
+      hmi_apis::FunctionID::VehicleInfo_GetVehicleType};
+  RequestCapabilities(request_to_send_to_hmi);
 }
 
 }  // namespace commands

@@ -31,6 +31,9 @@
  */
 
 #include "sdl_rpc_plugin/commands/hmi/rc_is_ready_request.h"
+
+#include <set>
+
 #include "application_manager/rpc_service.h"
 
 namespace sdl_rpc_plugin {
@@ -84,7 +87,9 @@ void RCIsReadyRequest::on_event(const event_engine::Event& event) {
         return;
       }
 
-      RequestCapabilities();
+      std::set<hmi_apis::FunctionID::eType> request_to_send_to_hmi{
+          hmi_apis::FunctionID::RC_GetCapabilities};
+      RequestCapabilities(request_to_send_to_hmi);
       break;
     }
     default: {
@@ -96,17 +101,9 @@ void RCIsReadyRequest::on_event(const event_engine::Event& event) {
 
 void RCIsReadyRequest::onTimeOut() {
   // Note(dtrunov): According to new requirment APPLINK-27956
-  RequestCapabilities();
-}
-
-void RCIsReadyRequest::RequestCapabilities() {
-  if (hmi_capabilities_.IsRequestsRequiredForCapabilities(
-          hmi_apis::FunctionID::RC_GetCapabilities)) {
-    std::shared_ptr<smart_objects::SmartObject> get_capabilities(
-        MessageHelper::CreateModuleInfoSO(
-            hmi_apis::FunctionID::RC_GetCapabilities, application_manager_));
-    rpc_service_.ManageHMICommand(get_capabilities);
-  }
+  std::set<hmi_apis::FunctionID::eType> request_to_send_to_hmi{
+      hmi_apis::FunctionID::RC_GetCapabilities};
+  RequestCapabilities(request_to_send_to_hmi);
 }
 
 }  // namespace commands

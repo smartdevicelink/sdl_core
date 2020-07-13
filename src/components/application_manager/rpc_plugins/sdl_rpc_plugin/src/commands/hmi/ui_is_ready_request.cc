@@ -31,7 +31,6 @@
  */
 
 #include "sdl_rpc_plugin/commands/hmi/ui_is_ready_request.h"
-#include "application_manager/message_helper.h"
 #include "application_manager/rpc_service.h"
 
 namespace sdl_rpc_plugin {
@@ -51,7 +50,7 @@ UIIsReadyRequest::UIIsReadyRequest(
                    hmi_capabilities,
                    policy_handle)
     , EventObserver(application_manager.event_dispatcher()) {
-  requests_required_for_UI_capabilities_ = {
+  requests_required_for_ui_capabilities_ = {
       hmi_apis::FunctionID::UI_GetLanguage,
       hmi_apis::FunctionID::UI_GetSupportedLanguages,
       hmi_apis::FunctionID::UI_GetCapabilities};
@@ -78,7 +77,7 @@ void UIIsReadyRequest::on_event(const event_engine::Event& event) {
       hmi_capabilities.set_is_ui_cooperating(is_available);
       if (!app_mngr::commands::CheckAvailabilityHMIInterfaces(
               application_manager_, HmiInterfaces::HMI_INTERFACE_UI)) {
-        for (auto request_id : requests_required_for_UI_capabilities_) {
+        for (auto request_id : requests_required_for_ui_capabilities_) {
           hmi_capabilities_.UpdateRequestsRequiredForCapabilities(request_id);
         }
         LOG4CXX_INFO(logger_,
@@ -86,7 +85,7 @@ void UIIsReadyRequest::on_event(const event_engine::Event& event) {
         return;
       }
 
-      RequestCapabilities();
+      RequestCapabilities(requests_required_for_ui_capabilities_);
       break;
     }
     default: {
@@ -98,35 +97,7 @@ void UIIsReadyRequest::on_event(const event_engine::Event& event) {
 
 void UIIsReadyRequest::onTimeOut() {
   // Note(dtrunov): According to new requirment APPLINK-27956
-  RequestCapabilities();
-}
-
-void UIIsReadyRequest::RequestCapabilities() {
-  if (hmi_capabilities_.IsRequestsRequiredForCapabilities(
-          hmi_apis::FunctionID::UI_GetLanguage)) {
-    std::shared_ptr<smart_objects::SmartObject> get_language(
-        MessageHelper::CreateModuleInfoSO(hmi_apis::FunctionID::UI_GetLanguage,
-                                          application_manager_));
-    hmi_capabilities_.set_handle_response_for(*get_language);
-    rpc_service_.ManageHMICommand(get_language);
-  }
-
-  if (hmi_capabilities_.IsRequestsRequiredForCapabilities(
-          hmi_apis::FunctionID::UI_GetSupportedLanguages)) {
-    std::shared_ptr<smart_objects::SmartObject> get_supported_languages(
-        MessageHelper::CreateModuleInfoSO(
-            hmi_apis::FunctionID::UI_GetSupportedLanguages,
-            application_manager_));
-    rpc_service_.ManageHMICommand(get_supported_languages);
-  }
-
-  if (hmi_capabilities_.IsRequestsRequiredForCapabilities(
-          hmi_apis::FunctionID::UI_GetCapabilities)) {
-    std::shared_ptr<smart_objects::SmartObject> get_capabilities(
-        MessageHelper::CreateModuleInfoSO(
-            hmi_apis::FunctionID::UI_GetCapabilities, application_manager_));
-    rpc_service_.ManageHMICommand(get_capabilities);
-  }
+  RequestCapabilities(requests_required_for_ui_capabilities_);
 }
 
 }  // namespace commands

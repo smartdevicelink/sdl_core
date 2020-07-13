@@ -35,6 +35,8 @@
 
 #include "application_manager/commands/request_to_hmi.h"
 
+#include <set>
+
 namespace sdl_rpc_plugin {
 namespace app_mngr = application_manager;
 
@@ -77,14 +79,8 @@ class UIIsReadyRequest : public app_mngr::commands::RequestToHMI,
    */
   virtual void onTimeOut() OVERRIDE;
 
-  /**
-   * @brief Send request to HMI for fetching of capabilities
-   */
-  void RequestCapabilities();
-
  private:
-  std::vector<hmi_apis::FunctionID::eType>
-      requests_required_for_UI_capabilities_;
+  std::set<hmi_apis::FunctionID::eType> requests_required_for_ui_capabilities_;
 
   DISALLOW_COPY_AND_ASSIGN(UIIsReadyRequest);
 };

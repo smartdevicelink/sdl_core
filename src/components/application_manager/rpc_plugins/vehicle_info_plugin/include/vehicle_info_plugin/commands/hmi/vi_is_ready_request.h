@@ -75,11 +75,6 @@ class VIIsReadyRequest : public app_mngr::commands::RequestToHMI,
    */
   void onTimeOut() OVERRIDE;
 
-  /**
-   * @brief Send request to HMI for fetching of capabilities
-   */
-  void RequestCapabilities();
-
  private:
   DISALLOW_COPY_AND_ASSIGN(VIIsReadyRequest);
 };

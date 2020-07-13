@@ -31,7 +31,6 @@
  */
 
 #include "sdl_rpc_plugin/commands/hmi/tts_is_ready_request.h"
-#include "application_manager/message_helper.h"
 #include "application_manager/rpc_service.h"
 
 namespace sdl_rpc_plugin {
@@ -51,7 +50,7 @@ TTSIsReadyRequest::TTSIsReadyRequest(
                    hmi_capabilities,
                    policy_handler)
     , EventObserver(application_manager.event_dispatcher()) {
-  requests_required_for_TTS_capabilities_ = {
+  requests_required_for_tts_capabilities_ = {
       hmi_apis::FunctionID::TTS_GetLanguage,
       hmi_apis::FunctionID::TTS_GetSupportedLanguages,
       hmi_apis::FunctionID::TTS_GetCapabilities};
@@ -79,7 +78,7 @@ void TTSIsReadyRequest::on_event(const event_engine::Event& event) {
       hmi_capabilities.set_is_tts_cooperating(is_available);
       if (!app_mngr::commands::CheckAvailabilityHMIInterfaces(
               application_manager_, HmiInterfaces::HMI_INTERFACE_TTS)) {
-        for (auto request_id : requests_required_for_TTS_capabilities_) {
+        for (auto request_id : requests_required_for_tts_capabilities_) {
           hmi_capabilities_.UpdateRequestsRequiredForCapabilities(request_id);
         }
         LOG4CXX_INFO(logger_,
@@ -87,7 +86,7 @@ void TTSIsReadyRequest::on_event(const event_engine::Event& event) {
         return;
       }
 
-      RequestCapabilities();
+      RequestCapabilities(requests_required_for_tts_capabilities_);
       break;
     }
     default: {
@@ -99,36 +98,7 @@ void TTSIsReadyRequest::on_event(const event_engine::Event& event) {
 
 void TTSIsReadyRequest::onTimeOut() {
   // Note(dtrunov): According to new requirment  APPLINK-27956
-  RequestCapabilities();
-}
-
-void TTSIsReadyRequest::RequestCapabilities() {
-  if (hmi_capabilities_.IsRequestsRequiredForCapabilities(
-          hmi_apis::FunctionID::TTS_GetLanguage)) {
-    std::shared_ptr<smart_objects::SmartObject> get_language(
-        MessageHelper::CreateModuleInfoSO(hmi_apis::FunctionID::TTS_GetLanguage,
-                                          application_manager_));
-    HMICapabilities& hmi_capabilities = hmi_capabilities_;
-    hmi_capabilities.set_handle_response_for(*get_language);
-    rpc_service_.ManageHMICommand(get_language);
-  }
-
-  if (hmi_capabilities_.IsRequestsRequiredForCapabilities(
-          hmi_apis::FunctionID::TTS_GetSupportedLanguages)) {
-    std::shared_ptr<smart_objects::SmartObject> get_supported_languages(
-        MessageHelper::CreateModuleInfoSO(
-            hmi_apis::FunctionID::TTS_GetSupportedLanguages,
-            application_manager_));
-    rpc_service_.ManageHMICommand(get_supported_languages);
-  }
-
-  if (hmi_capabilities_.IsRequestsRequiredForCapabilities(
-          hmi_apis::FunctionID::TTS_GetCapabilities)) {
-    std::shared_ptr<smart_objects::SmartObject> get_capabilities(
-        MessageHelper::CreateModuleInfoSO(
-            hmi_apis::FunctionID::TTS_GetCapabilities, application_manager_));
-    rpc_service_.ManageHMICommand(get_capabilities);
-  }
+  RequestCapabilities(requests_required_for_tts_capabilities_);
 }
 }  // namespace commands
 

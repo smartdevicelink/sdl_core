@@ -50,7 +50,7 @@ VRIsReadyRequest::VRIsReadyRequest(
                    hmi_capabilities,
                    policy_handle)
     , EventObserver(application_manager.event_dispatcher()) {
-  requests_required_for_VR_capabilities_ = {
+  requests_required_for_vr_capabilities_ = {
       hmi_apis::FunctionID::VR_GetLanguage,
       hmi_apis::FunctionID::VR_GetSupportedLanguages,
       hmi_apis::FunctionID::VR_GetCapabilities};
@@ -78,7 +78,7 @@ void VRIsReadyRequest::on_event(const event_engine::Event& event) {
       hmi_capabilities.set_is_vr_cooperating(is_available);
       if (!app_mngr::commands::CheckAvailabilityHMIInterfaces(
               application_manager_, HmiInterfaces::HMI_INTERFACE_VR)) {
-        for (auto request_id : requests_required_for_VR_capabilities_) {
+        for (auto request_id : requests_required_for_vr_capabilities_) {
           hmi_capabilities_.UpdateRequestsRequiredForCapabilities(request_id);
         }
         LOG4CXX_INFO(logger_,
@@ -86,7 +86,7 @@ void VRIsReadyRequest::on_event(const event_engine::Event& event) {
         return;
       }
 
-      RequestCapabilities();
+      RequestCapabilities(requests_required_for_vr_capabilities_);
       break;
     }
     default: {
@@ -98,36 +98,7 @@ void VRIsReadyRequest::on_event(const event_engine::Event& event) {
 
 void VRIsReadyRequest::onTimeOut() {
   // Note(dtrunov): According to new requirment APPLINK-27956
-  RequestCapabilities();
-}
-
-void VRIsReadyRequest::RequestCapabilities() {
-  if (hmi_capabilities_.IsRequestsRequiredForCapabilities(
-          hmi_apis::FunctionID::VR_GetLanguage)) {
-    std::shared_ptr<smart_objects::SmartObject> get_language(
-        MessageHelper::CreateModuleInfoSO(hmi_apis::FunctionID::VR_GetLanguage,
-                                          application_manager_));
-    HMICapabilities& hmi_capabilities = hmi_capabilities_;
-    hmi_capabilities.set_handle_response_for(*get_language);
-    rpc_service_.ManageHMICommand(get_language);
-  }
-
-  if (hmi_capabilities_.IsRequestsRequiredForCapabilities(
-          hmi_apis::FunctionID::VR_GetSupportedLanguages)) {
-    std::shared_ptr<smart_objects::SmartObject> get_supported_languages(
-        MessageHelper::CreateModuleInfoSO(
-            hmi_apis::FunctionID::VR_GetSupportedLanguages,
-            application_manager_));
-    rpc_service_.ManageHMICommand(get_supported_languages);
-  }
-
-  if (hmi_capabilities_.IsRequestsRequiredForCapabilities(
-          hmi_apis::FunctionID::VR_GetCapabilities)) {
-    std::shared_ptr<smart_objects::SmartObject> get_capabilities(
-        MessageHelper::CreateModuleInfoSO(
-            hmi_apis::FunctionID::VR_GetCapabilities, application_manager_));
-    rpc_service_.ManageHMICommand(get_capabilities);
-  }
+  RequestCapabilities(requests_required_for_vr_capabilities_);
 }
 
 }  // namespace commands
