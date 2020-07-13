@@ -540,7 +540,6 @@ class HMICapabilities {
   /**
    * @brief Interface that update cached hmi capabilities
    */
-
   virtual void UpdateCachedCapabilities() = 0;
 };
 

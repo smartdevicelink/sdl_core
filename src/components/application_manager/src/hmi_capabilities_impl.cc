@@ -2088,6 +2088,12 @@ bool HMICapabilitiesImpl::SaveCachedCapabilitiesToFile(
     const smart_objects::CSmartSchema& schema) {
   LOG4CXX_AUTO_TRACE(logger_);
 
+  if (sections_to_update.empty()) {
+    LOG4CXX_DEBUG(logger_,
+                  "There is no one section to update in the cache file");
+    return true;
+  }
+
   const std::string cache_file_name =
       app_mngr_.get_settings().hmi_capabilities_cache_file_name();
   if (cache_file_name.empty()) {

@@ -1225,6 +1225,14 @@ TEST_F(
   EXPECT_TRUE(content_after_update.find(new_language) != std::string::npos);
 }
 
+TEST_F(
+    HMICapabilitiesTest,
+    SaveCachedCapabilitiesToFile_SectionToUpdateIsEmpty_SkipSaving_ReturnTrue) {
+  const std::vector<std::string> sections_to_update;
+  EXPECT_TRUE(hmi_capabilities_->SaveCachedCapabilitiesToFile(
+      "", sections_to_update, schema_));
+}
+
 TEST_F(HMICapabilitiesTest, PrepareJsonValueForSaving_Success) {
   const std::vector<std::string> sections_to_update{
       hmi_response::display_capabilities,
