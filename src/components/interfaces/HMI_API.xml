@@ -3557,7 +3557,7 @@
     </param>
   </struct>
 
-  <struct name="DriverDistractionCapability" >
+  <struct name="DriverDistractionCapability">
       <param name="menuLength" type="Integer" mandatory="false">
           <description>The number of items allowed in a Choice Set or Command menu while the driver is distracted</description>
       </param>
