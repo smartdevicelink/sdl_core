@@ -180,10 +180,7 @@ TEST_F(RequestFromMobileImplTest, WindowID_ExpectDefaultWindowID) {
 TEST_F(RequestFromMobileImplTest, OnTimeOut_StateCompleted_UNSUCCESS) {
   CommandPtr command = CreateCommand<URequestFromMobileImpl>();
 
-  // Should be called twice:
-  // First -- on `onTimeOut` method call
-  // Second -- on destruction;
-  EXPECT_CALL(event_dispatcher_, remove_observer(_)).Times(2);
+  EXPECT_CALL(event_dispatcher_, remove_observer(_));
 
   EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(_, _)).Times(0);
 
