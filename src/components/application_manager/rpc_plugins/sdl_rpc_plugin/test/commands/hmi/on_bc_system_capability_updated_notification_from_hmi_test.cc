@@ -67,8 +67,6 @@ MATCHER(CheckMessageToMobile, "") {
         (*arg)[strings::params][strings::connection_key] == kAppId;
   }
 
-  std::cout << is_function_id_matched << " " << app_id_exist << " "
-            << is_connection_key_correct << " " << std::endl;
   return is_function_id_matched && app_id_exist && is_connection_key_correct;
 }
 
@@ -173,28 +171,16 @@ TEST_F(
 
 TEST_F(
     OnBCSystemCapabilityUpdatedNotificationFromHMITest,
-    Run_AppRegisteredWithPresentedAppIdInMessage_SetVideoStreamingCapabilitiesToApp_SendMessageToMobile) {
-  SmartObject video_streaming_capability;
+    Run_SysCapTypeVideoStreaming_CapabilityIsAbsent_DoesntSetInHMICapabilities) {
+  smart_objects::SmartObject system_capability =
+      smart_objects::SmartObject(smart_objects::SmartType_Map);
 
-  (*message_)[am::strings::msg_params][strings::system_capability]
-             [am::strings::system_capability_type] =
-                 mobile_apis::SystemCapabilityType::VIDEO_STREAMING;
-  (*message_)[strings::msg_params][strings::app_id] = kAppId;
-  (*message_)[am::strings::msg_params][strings::system_capability]
-             [strings::video_streaming_capability] = video_streaming_capability;
-
-  ON_CALL(app_mngr_, application(kAppId)).WillByDefault(Return(mock_app_));
-
-  EXPECT_CALL(mock_hmi_capabilities_,
-              set_video_streaming_capability(video_streaming_capability));
-  EXPECT_CALL(
-      mock_rpc_service_,
-      ManageMobileCommand(
-          CheckMessageToMobile(),
-          ::application_manager::commands::Command::CommandSource::SOURCE_SDL))
-      .WillOnce(Return(true));
+  system_capability[strings::system_capability_type] =
+      mobile_apis::SystemCapabilityType::VIDEO_STREAMING;
 
   ASSERT_TRUE(command_->Init());
+  EXPECT_CALL(mock_hmi_capabilities_, set_video_streaming_capability(_))
+      .Times(0);
   command_->Run();
 }
 
