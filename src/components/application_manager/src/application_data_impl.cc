@@ -855,7 +855,7 @@ smart_objects::SmartObject* DynamicApplicationDataImpl::FindSubMenu(
 }
 
 bool DynamicApplicationDataImpl::IsSubMenuNameAlreadyExist(
-    const std::string& name, const int32_t parent_id) {
+    const std::string& name, const uint32_t parent_id) {
   sync_primitives::AutoLock lock(sub_menu_lock_ptr_);
   for (SubMenuMap::iterator it = sub_menu_.begin(); sub_menu_.end() != it;
        ++it) {
