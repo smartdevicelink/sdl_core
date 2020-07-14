@@ -564,6 +564,7 @@ class CodeGenerator(object):
             struct_name=struct.name,
             code=self._indent_code(
                 self._struct_impl_code_tempate.substitute(
+                    struct_name=struct.name,
                     schema_loc_decl=self._gen_schema_loc_decls(
                         struct.members.values(), processed_enums),
                     schema_items_decl=self._gen_schema_items_decls(
@@ -1783,11 +1784,9 @@ class CodeGenerator(object):
     _struct_schema_item_template = string.Template(
         u'''std::shared_ptr<ISchemaItem> struct_schema_item_${name} = '''
         u'''InitStructSchemaItem_${name}(struct_schema_items);\n'''
-        u'''struct_schema_items.insert(std::make_pair('''
-        u'''StructIdentifiers::${name}, struct_schema_item_${name}));\n'''
         u'''structs_schemes_.insert(std::make_pair('''
         u'''StructIdentifiers::${name}, CSmartSchema('''
-        u'''struct_schema_item_${name})));''')
+        u'''struct_schema_item_${name})));\n''')
 
     _function_schema_template = string.Template(
         u'''functions_schemes_.insert(std::make_pair(ns_smart_device_link::'''
@@ -1800,17 +1799,21 @@ class CodeGenerator(object):
     _struct_impl_template = string.Template(
         u'''std::shared_ptr<ISchemaItem> $namespace::$class_name::'''
         u'''InitStructSchemaItem_${struct_name}(\n'''
-        u'''    const TStructsSchemaItems &struct_schema_items) {\n'''
+        u'''    TStructsSchemaItems &struct_schema_items) {\n'''
         u'''$code'''
         u'''}\n''')
 
     _struct_impl_code_tempate = string.Template(
+        u'''Members '''
+        u'''schema_members;\n'''
+        u'''std::shared_ptr<ISchemaItem> struct_schema = CObjectSchemaItem::create(schema_members);\n'''
+        u'''struct_schema_items.insert(std::make_pair(StructIdentifiers::${struct_name}, CObjectSchemaItem::create(schema_members)));\n'''
+        u'''struct_schema_items[StructIdentifiers::${struct_name}] = struct_schema;\n\n'''
         u'''${schema_loc_decl}'''
         u'''${schema_items_decl}'''
-        u'''Members '''
-        u'''schema_members;\n\n'''
         u'''${schema_item_fill}'''
-        u'''return CObjectSchemaItem::create(schema_members);''')
+        u'''for(auto& member : schema_members) {struct_schema->AddMemberSchemaItem(member.first, member.second);}\n'''
+        u'''return struct_schema;''')
 
     _impl_code_loc_decl_enum_template = string.Template(
         u'''std::set<${type}::eType> ${var_name};''')
@@ -2006,7 +2009,7 @@ class CodeGenerator(object):
         u'''static '''
         u'''std::shared_ptr<ns_smart_device_link::ns_smart_objects::ISchemaItem> '''
         u'''InitStructSchemaItem_${struct_name}(\n'''
-        u'''    const TStructsSchemaItems &struct_schema_items);''')
+        u'''    TStructsSchemaItems &struct_schema_items);''')
 
     _class_comment_template = string.Template(
         u'''/**\n'''
