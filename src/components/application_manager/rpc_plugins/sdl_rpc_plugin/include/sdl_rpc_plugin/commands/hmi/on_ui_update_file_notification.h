@@ -43,7 +43,8 @@ namespace commands {
 /**
  * @brief OnUIUpdateFileNotification command class
  **/
-class OnUIUpdateFileNotification : public app_mngr::commands::NotificationFromHMI {
+class OnUIUpdateFileNotification
+    : public app_mngr::commands::NotificationFromHMI {
  public:
   /**
    * @brief OnUIUpdateFileNotification class constructor
@@ -73,6 +74,6 @@ class OnUIUpdateFileNotification : public app_mngr::commands::NotificationFromHM
 
 }  // namespace commands
 
-}  // namespace app_service_rpc_plugin
+}  // namespace sdl_rpc_plugin
 
 #endif  // SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_HMI_ON_UI_UPDATE_FILE_NOTIFICATION_H_

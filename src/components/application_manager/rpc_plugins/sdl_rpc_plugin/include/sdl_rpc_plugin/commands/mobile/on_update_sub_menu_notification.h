@@ -43,7 +43,8 @@ namespace commands {
 /**
  * @brief OnUpdateSubMenuNotification command class
  **/
-class OnUpdateSubMenuNotification : public app_mngr::commands::CommandNotificationImpl {
+class OnUpdateSubMenuNotification
+    : public app_mngr::commands::CommandNotificationImpl {
  public:
   /**
    * @brief OnUpdateSubMenuNotification class constructor

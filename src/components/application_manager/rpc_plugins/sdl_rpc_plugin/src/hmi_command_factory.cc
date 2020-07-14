@@ -230,6 +230,8 @@
 #include "sdl_rpc_plugin/commands/hmi/on_ui_language_change_notification.h"
 #include "sdl_rpc_plugin/commands/hmi/on_ui_reset_timeout_notification.h"
 #include "sdl_rpc_plugin/commands/hmi/on_ui_touch_event_notification.h"
+#include "sdl_rpc_plugin/commands/hmi/on_ui_update_file_notification.h"
+#include "sdl_rpc_plugin/commands/hmi/on_ui_update_sub_menu_notification.h"
 #include "sdl_rpc_plugin/commands/hmi/on_vr_command_notification.h"
 #include "sdl_rpc_plugin/commands/hmi/on_vr_language_change_notification.h"
 #include "sdl_rpc_plugin/commands/hmi/on_vr_started_notification.h"
@@ -244,8 +246,6 @@
 #include "sdl_rpc_plugin/commands/hmi/ui_set_display_layout_response.h"
 #include "sdl_rpc_plugin/commands/hmi/ui_show_app_menu_request.h"
 #include "sdl_rpc_plugin/commands/hmi/ui_show_app_menu_response.h"
-#include "sdl_rpc_plugin/commands/hmi/on_ui_update_file_notification.h"
-#include "sdl_rpc_plugin/commands/hmi/on_ui_update_sub_menu_notification.h"
 
 #include "sdl_rpc_plugin/commands/hmi/bc_get_file_path_request.h"
 #include "sdl_rpc_plugin/commands/hmi/bc_get_file_path_response.h"

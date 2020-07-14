@@ -46,25 +46,26 @@ OnUIUpdateSubMenuNotification::OnUIUpdateSubMenuNotification(
     app_mngr::HMICapabilities& hmi_capabilities,
     policy::PolicyHandlerInterface& policy_handler)
     : NotificationFromHMI(message,
-                         application_manager,
-                         rpc_service,
-                         hmi_capabilities,
-                         policy_handler) {}
+                          application_manager,
+                          rpc_service,
+                          hmi_capabilities,
+                          policy_handler) {}
 
 OnUIUpdateSubMenuNotification::~OnUIUpdateSubMenuNotification() {}
 
 void OnUIUpdateSubMenuNotification::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
-    // Prepare SmartObject for mobile factory
-  (*message_)[strings::params][strings::function_id] = static_cast<int32_t>(
-      mobile_apis::FunctionID::OnUpdateSubMenuID);
+  // Prepare SmartObject for mobile factory
+  (*message_)[strings::params][strings::function_id] =
+      static_cast<int32_t>(mobile_apis::FunctionID::OnUpdateSubMenuID);
 
   const auto app_id =
       (*message_)[strings::msg_params][strings::app_id].asUInt();
   auto app = application_manager_.application(app_id);
 
   if (!app) {
-    LOG4CXX_ERROR(logger_, "Application with app_id " << app_id << " is not registered");
+    LOG4CXX_ERROR(logger_,
+                  "Application with app_id " << app_id << " is not registered");
     return;
   }
 
@@ -77,4 +78,4 @@ void OnUIUpdateSubMenuNotification::Run() {
 }
 
 }  // namespace commands
-}  // namespace app_service_rpc_plugin
+}  // namespace sdl_rpc_plugin

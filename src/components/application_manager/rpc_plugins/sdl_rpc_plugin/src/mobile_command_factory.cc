@@ -91,6 +91,8 @@
 #include "sdl_rpc_plugin/commands/mobile/on_system_request_notification.h"
 #include "sdl_rpc_plugin/commands/mobile/on_tbt_client_state_notification.h"
 #include "sdl_rpc_plugin/commands/mobile/on_touch_event_notification.h"
+#include "sdl_rpc_plugin/commands/mobile/on_update_file_notification.h"
+#include "sdl_rpc_plugin/commands/mobile/on_update_sub_menu_notification.h"
 #include "sdl_rpc_plugin/commands/mobile/on_way_point_change_notification.h"
 #include "sdl_rpc_plugin/commands/mobile/perform_audio_pass_thru_request.h"
 #include "sdl_rpc_plugin/commands/mobile/perform_audio_pass_thru_response.h"
@@ -142,8 +144,6 @@
 #include "sdl_rpc_plugin/commands/mobile/unsubscribe_way_points_response.h"
 #include "sdl_rpc_plugin/commands/mobile/update_turn_list_request.h"
 #include "sdl_rpc_plugin/commands/mobile/update_turn_list_response.h"
-#include "sdl_rpc_plugin/commands/mobile/on_update_file_notification.h"
-#include "sdl_rpc_plugin/commands/mobile/on_update_sub_menu_notification.h"
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "ApplicationManager")
 namespace sdl_rpc_plugin {
