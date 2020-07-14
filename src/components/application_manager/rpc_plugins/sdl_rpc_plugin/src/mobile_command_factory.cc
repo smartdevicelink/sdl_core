@@ -75,6 +75,7 @@
 #include "sdl_rpc_plugin/commands/mobile/get_way_points_response.h"
 #include "sdl_rpc_plugin/commands/mobile/list_files_request.h"
 #include "sdl_rpc_plugin/commands/mobile/list_files_response.h"
+#include "sdl_rpc_plugin/commands/mobile/on_app_capability_updated_notification.h"
 #include "sdl_rpc_plugin/commands/mobile/on_app_interface_unregistered_notification.h"
 #include "sdl_rpc_plugin/commands/mobile/on_audio_pass_thru_notification.h"
 #include "sdl_rpc_plugin/commands/mobile/on_button_event_notification.h"
@@ -471,6 +472,10 @@ CommandCreator& MobileCommandFactory::get_notification_from_mobile_creator(
     case mobile_apis::FunctionID::OnHMIStatusID: {
       return factory.GetCreator<commands::OnHMIStatusNotificationFromMobile>();
     }
+    case mobile_apis::FunctionID::OnAppCapabilityUpdatedID: {
+      return factory
+          .GetCreator<commands::mobile::OnAppCapabilityUpdatedNotification>();
+    }
     default: {}
   }
   return factory.GetCreator<InvalidCommand>();
@@ -523,10 +528,12 @@ bool MobileCommandFactory::IsAbleToProcess(
     const int32_t function_id,
     const application_manager::commands::Command::CommandSource message_source)
     const {
+  LOG4CXX_AUTO_TRACE(logger_);
   auto id = static_cast<mobile_apis::FunctionID::eType>(function_id);
   return get_command_creator(id, mobile_apis::messageType::INVALID_ENUM)
              .CanBeCreated() ||
-         get_notification_creator(id).CanBeCreated();
+         get_notification_creator(id).CanBeCreated() ||
+         get_notification_from_mobile_creator(id).CanBeCreated();
 }
 
 CommandSharedPtr MobileCommandFactory::CreateCommand(
