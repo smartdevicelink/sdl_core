@@ -166,6 +166,13 @@
                             "NONE"
                         ]
                     },
+                    "OnAppCapabilityUpdated": {
+                        "hmi_levels": [
+                            "BACKGROUND",
+                            "FULL",
+                            "LIMITED"
+                        ]
+                    },
                     "OnAppInterfaceUnregistered": {
                         "hmi_levels": [
                             "BACKGROUND",
