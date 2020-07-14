@@ -71,6 +71,11 @@ class SetGlobalPropertiesRequest
    **/
   void Run() FINAL;
 
+  /**
+   * @brief Interface method that is called whenever new event received
+   *
+   * @param event The received event
+   */
   void on_event(const app_mngr::event_engine::Event& event) FINAL;
 
   /**
@@ -173,6 +178,13 @@ class SetGlobalPropertiesRequest
   static bool CheckVrHelpItemsOrder(const smart_objects::SmartObject& vr_help);
 
   /**
+   * @brief Check if there some not delivered hmi responses exist
+   *
+   * @return true if all responses received
+   */
+  bool IsPendingResponseExist();
+
+  /**
    * @brief Checks if request has at least one parameter
    *
    * @param params request parameters
@@ -200,18 +212,13 @@ class SetGlobalPropertiesRequest
                                  std::string& info);
 
   bool is_ui_send_;
+  bool is_tts_send_;
   bool is_rc_send_;
-//<<<<<<< HEAD
-//  bool is_ui_send_;
-//  bool is_tts_send_;
-//  bool is_rc_send_;
 
-//  bool is_ui_received_;
-//  bool is_tts_received_;
-//  bool is_rc_received_;
+  bool is_ui_received_;
+  bool is_tts_received_;
+  bool is_rc_received_;
 
-//=======
-//>>>>>>> 35a606815... SDLCORE-504: Fix requests state for requests with multiple interfaces
   hmi_apis::Common_Result::eType ui_result_;
   hmi_apis::Common_Result::eType tts_result_;
   hmi_apis::Common_Result::eType rc_result_;
