@@ -143,4 +143,4 @@ void UIGetCapabilitiesResponse::Run() {
 
 }  // namespace commands
 
-}  // namespace commands
+}  // namespace sdl_rpc_plugin

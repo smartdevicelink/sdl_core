@@ -164,8 +164,7 @@ void GetSystemCapabilityRequest::Run() {
       break;
     }
     case mobile_apis::SystemCapabilityType::DRIVER_DISTRACTION:
-      if (hmi_capabilities.driver_distraction_capability() &&
-          hmi_capabilities.driver_distraction_supported()) {
+      if (hmi_capabilities.driver_distraction_capability()) {
         response_params[strings::system_capability]
                        [strings::driver_distraction_capability] =
                            *hmi_capabilities.driver_distraction_capability();

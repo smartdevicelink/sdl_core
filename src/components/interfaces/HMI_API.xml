@@ -2817,7 +2817,7 @@
 <struct name="MenuParams">
   <param name="parentID" type="Integer" minvalue="0" maxvalue="2000000000" mandatory="false">
     <description>unique ID of the sub menu, the command must be added to.</description>
-    <description>If not provided, the command must be added to the top level of the in application menu.</description>
+    <description>If not provided or is 0, the command must be added to the top level of the in application menu.</description>
   </param>
   <param name="position" type="Integer" minvalue="0" maxvalue="1000" mandatory="false">
     <description>Position within the items that are at the top level of the in application menu.</description>

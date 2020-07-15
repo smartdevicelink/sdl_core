@@ -199,6 +199,7 @@ extern const char* phone_capability;
 extern const char* video_streaming_capability;
 extern const char* rc_capability;
 extern const char* driver_distraction_capability;
+extern const char* driver_distraction;
 extern const char* seat_location_capability;
 extern const char* app_services_capabilities;
 extern const char* day_color_scheme;

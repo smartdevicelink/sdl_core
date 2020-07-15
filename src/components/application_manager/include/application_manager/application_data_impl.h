@@ -195,7 +195,7 @@ class DynamicApplicationDataImpl : public virtual Application {
    * @brief Returns true if sub menu with such name already exist
    */
   bool IsSubMenuNameAlreadyExist(const std::string& name,
-                                 const int32_t parent_id);
+                                 const uint32_t parent_id);
 
   void SetWindowInfo(const WindowID window_id,
                      const smart_objects::SmartObject& window_info) OVERRIDE;
@@ -330,7 +330,7 @@ class DynamicApplicationDataImpl : public virtual Application {
   CommandsMap commands_;
   mutable std::shared_ptr<sync_primitives::RecursiveLock> commands_lock_ptr_;
   SubMenuMap sub_menu_;
-  mutable std::shared_ptr<sync_primitives::Lock> sub_menu_lock_ptr_;
+  mutable std::shared_ptr<sync_primitives::RecursiveLock> sub_menu_lock_ptr_;
   ChoiceSetMap choice_set_map_;
   mutable std::shared_ptr<sync_primitives::Lock> choice_set_map_lock_ptr_;
   PerformChoiceSetMap performinteraction_choice_set_map_;

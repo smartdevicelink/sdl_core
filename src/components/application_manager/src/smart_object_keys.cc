@@ -165,6 +165,7 @@ const char* navigation_capability = "navigationCapability";
 const char* phone_capability = "phoneCapability";
 const char* video_streaming_capability = "videoStreamingCapability";
 const char* driver_distraction_capability = "driverDistractionCapability";
+const char* driver_distraction = "driverDistraction";
 const char* rc_capability = "remoteControlCapability";
 const char* seat_location_capability = "seatLocationCapability";
 const char* app_services_capabilities = "appServicesCapabilities";
