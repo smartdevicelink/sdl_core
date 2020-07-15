@@ -411,12 +411,6 @@ class StateControllerImpl : public event_engine::EventObserver,
                              HmiState::StateID state_id) const;
 
   /**
-   * @brief Starts to process hmi states for applications that
-   * waiting for finishing of activate app.
-   */
-  void ProcessSavingHMIState();
-
-  /**
    * @brief Determines AudioStreamingState value
    * for application with HMI level specified.
    * @param app an application to calculate for

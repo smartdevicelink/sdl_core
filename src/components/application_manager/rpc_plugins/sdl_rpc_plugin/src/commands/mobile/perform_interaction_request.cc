@@ -87,6 +87,9 @@ PerformInteractionRequest::PerformInteractionRequest(
 PerformInteractionRequest::~PerformInteractionRequest() {}
 
 bool PerformInteractionRequest::Init() {
+  StartAwaitForInterface(HmiInterfaces::HMI_INTERFACE_VR);
+  StartAwaitForInterface(HmiInterfaces::HMI_INTERFACE_UI);
+
   /* Timeout in milliseconds.
      If omitted a standard value of 10000 milliseconds is used.*/
   const auto& msg_params = (*message_)[strings::msg_params];

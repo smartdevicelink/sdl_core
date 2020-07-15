@@ -147,13 +147,6 @@ class CommandImpl : public Command {
 
   void OnUpdateTimeOut() OVERRIDE;
 
-#ifdef __QNX__
-  /*
-   * @brief Function is called by RequestController when message was sent to HMI
-   */
-  void OnHMIMessageSent() OVERRIDE;
-#endif  // __QNX__
-
   /**
    * @brief Calculates command`s internal consecutive number
    * for specified application used during resumption.
