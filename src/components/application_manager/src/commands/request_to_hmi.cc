@@ -36,6 +36,38 @@
 
 namespace application_manager {
 
+namespace {
+static const std::set<hmi_apis::FunctionID::eType> tts_request_ids{
+    hmi_apis::FunctionID::TTS_GetLanguage,
+    hmi_apis::FunctionID::TTS_GetCapabilities,
+    hmi_apis::FunctionID::TTS_GetSupportedLanguages};
+
+static const std::set<hmi_apis::FunctionID::eType> vr_request_ids{
+    hmi_apis::FunctionID::VR_GetLanguage,
+    hmi_apis::FunctionID::VR_GetCapabilities,
+    hmi_apis::FunctionID::VR_GetSupportedLanguages};
+
+static const std::set<hmi_apis::FunctionID::eType> ui_request_ids{
+    hmi_apis::FunctionID::UI_GetLanguage,
+    hmi_apis::FunctionID::UI_GetCapabilities,
+    hmi_apis::FunctionID::UI_GetSupportedLanguages};
+
+static const std::set<hmi_apis::FunctionID::eType> rc_request_ids{
+    hmi_apis::FunctionID::RC_GetCapabilities};
+
+static const std::set<hmi_apis::FunctionID::eType> vehicle_info_request_ids{
+    hmi_apis::FunctionID::VehicleInfo_GetVehicleType};
+
+static std::map<std::string, std::set<hmi_apis::FunctionID::eType> >
+    interface_requests{
+        {std::string(hmi_interface::ui), ui_request_ids},
+        {std::string(hmi_interface::vr), vr_request_ids},
+        {std::string(hmi_interface::tts), tts_request_ids},
+        {std::string(hmi_interface::rc), rc_request_ids},
+        {std::string(hmi_interface::vehicle_info), vehicle_info_request_ids}};
+
+}  // namespace
+
 namespace commands {
 
 bool CheckAvailabilityHMIInterfaces(ApplicationManager& application_manager,
@@ -91,6 +123,32 @@ void RequestToHMI::SendRequest() {
   (*message_)[strings::params][strings::protocol_type] = hmi_protocol_type_;
   (*message_)[strings::params][strings::protocol_version] = protocol_version_;
   rpc_service_.SendMessageToHMI(message_);
+}
+
+void RequestToHMI::RequestInterfaceCapabilities(const char* interface_name) {
+  LOG4CXX_DEBUG(
+      logger_,
+      "Request capabilities for the " << interface_name << " interface");
+
+  const auto& request_ids = interface_requests[std::string(interface_name)];
+  RequestCapabilities(request_ids);
+}
+
+void RequestToHMI::UpdateRequestsRequiredForCapabilities(
+    const std::set<hmi_apis::FunctionID::eType>& requests_to_send_to_hmi) {
+  for (auto request_id : requests_to_send_to_hmi) {
+    hmi_capabilities_.UpdateRequestsRequiredForCapabilities(request_id);
+  }
+}
+
+void RequestToHMI::UpdateRequiredInterfaceCapabilitiesRequests(
+    const std::string& interface_name) {
+  LOG4CXX_DEBUG(
+      logger_,
+      "Update requests required for the " << interface_name << " interface");
+
+  const auto& request_ids = interface_requests[std::string(interface_name)];
+  UpdateRequestsRequiredForCapabilities(request_ids);
 }
 
 void RequestToHMI::RequestCapabilities(

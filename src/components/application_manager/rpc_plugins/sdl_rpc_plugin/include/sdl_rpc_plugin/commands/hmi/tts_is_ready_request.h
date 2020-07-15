@@ -80,8 +80,6 @@ class TTSIsReadyRequest : public app_mngr::commands::RequestToHMI,
   void onTimeOut() OVERRIDE;
 
  private:
-  std::set<hmi_apis::FunctionID::eType> requests_required_for_tts_capabilities_;
-
   DISALLOW_COPY_AND_ASSIGN(TTSIsReadyRequest);
 };
 

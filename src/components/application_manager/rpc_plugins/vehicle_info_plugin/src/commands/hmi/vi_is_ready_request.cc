@@ -86,9 +86,7 @@ void VIIsReadyRequest::on_event(const event_engine::Event& event) {
         return;
       }
 
-      std::set<hmi_apis::FunctionID::eType> request_to_send_to_hmi{
-          hmi_apis::FunctionID::VehicleInfo_GetVehicleType};
-      RequestCapabilities(request_to_send_to_hmi);
+      RequestInterfaceCapabilities(hmi_interface ::vehicle_info);
       break;
     }
     default: {
@@ -100,9 +98,7 @@ void VIIsReadyRequest::on_event(const event_engine::Event& event) {
 
 void VIIsReadyRequest::onTimeOut() {
   // Note(dtrunov): According to new requirment APPLINK-27956
-  std::set<hmi_apis::FunctionID::eType> request_to_send_to_hmi{
-      hmi_apis::FunctionID::VehicleInfo_GetVehicleType};
-  RequestCapabilities(request_to_send_to_hmi);
+  RequestInterfaceCapabilities(hmi_interface ::vehicle_info);
 }
 
 }  // namespace commands

@@ -80,8 +80,6 @@ class VRIsReadyRequest : public app_mngr::commands::RequestToHMI,
   void onTimeOut() OVERRIDE;
 
  private:
-  std::set<hmi_apis::FunctionID::eType> requests_required_for_vr_capabilities_;
-
   DISALLOW_COPY_AND_ASSIGN(VRIsReadyRequest);
 };
 

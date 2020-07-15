@@ -86,10 +86,7 @@ void RCIsReadyRequest::on_event(const event_engine::Event& event) {
                      "HmiInterfaces::HMI_INTERFACE_RC isn't available");
         return;
       }
-
-      std::set<hmi_apis::FunctionID::eType> request_to_send_to_hmi{
-          hmi_apis::FunctionID::RC_GetCapabilities};
-      RequestCapabilities(request_to_send_to_hmi);
+      RequestInterfaceCapabilities(hmi_interface::rc);
       break;
     }
     default: {
@@ -101,9 +98,7 @@ void RCIsReadyRequest::on_event(const event_engine::Event& event) {
 
 void RCIsReadyRequest::onTimeOut() {
   // Note(dtrunov): According to new requirment APPLINK-27956
-  std::set<hmi_apis::FunctionID::eType> request_to_send_to_hmi{
-      hmi_apis::FunctionID::RC_GetCapabilities};
-  RequestCapabilities(request_to_send_to_hmi);
+  RequestInterfaceCapabilities(hmi_interface::rc);
 }
 
 }  // namespace commands

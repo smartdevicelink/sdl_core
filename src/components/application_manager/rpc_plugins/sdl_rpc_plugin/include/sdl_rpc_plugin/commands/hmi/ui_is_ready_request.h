@@ -80,8 +80,6 @@ class UIIsReadyRequest : public app_mngr::commands::RequestToHMI,
   virtual void onTimeOut() OVERRIDE;
 
  private:
-  std::set<hmi_apis::FunctionID::eType> requests_required_for_ui_capabilities_;
-
   DISALLOW_COPY_AND_ASSIGN(UIIsReadyRequest);
 };
 
