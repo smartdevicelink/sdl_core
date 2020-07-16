@@ -50,7 +50,14 @@ SubtleAlertRequest::SubtleAlertRequest(
                          application_manager,
                          rpc_service,
                          hmi_capabilities,
-                         policy_handler) {}
+                         policy_handler)
+    , awaiting_ui_subtle_alert_response_(false)
+    , awaiting_tts_speak_response_(false)
+    , awaiting_tts_stop_speaking_response_(false)
+    , is_ui_subtle_alert_sent_(false)
+    , is_tts_stop_speaking_sent_(false)
+    , subtle_alert_result_(hmi_apis::Common_Result::INVALID_ENUM)
+    , tts_speak_result_(hmi_apis::Common_Result::INVALID_ENUM) {}
 
 SubtleAlertRequest::~SubtleAlertRequest() {}
 
@@ -133,12 +140,13 @@ void SubtleAlertRequest::on_event(const event_engine::Event& event) {
         awaiting_tts_stop_speaking_response_ = true;
         StartAwaitForInterface(HmiInterfaces::HMI_INTERFACE_TTS);
         SendHMIRequest(hmi_apis::FunctionID::TTS_StopSpeaking, NULL, true);
+        is_tts_stop_speaking_sent_ = true;
       }
-      alert_result_ = static_cast<hmi_apis::Common_Result::eType>(
+      subtle_alert_result_ = static_cast<hmi_apis::Common_Result::eType>(
           message[strings::params][hmi_response::code].asInt());
 
       // Mobile Alert request is successful when UI_SubtleAlert is successful
-      alert_response_params_ = message[strings::msg_params];
+      subtle_alert_response_params_ = message[strings::msg_params];
       GetInfo(message, ui_response_info_);
       break;
     }
@@ -176,13 +184,15 @@ void SubtleAlertRequest::on_event(const event_engine::Event& event) {
   SendResponse(result,
                result_code,
                info.empty() ? NULL : info.c_str(),
-               &alert_response_params_);
+               &subtle_alert_response_params_);
 }
 
 bool SubtleAlertRequest::PrepareResponseParameters(
     mobile_apis::Result::eType& result_code, std::string& info) {
   app_mngr::commands::ResponseInfo ui_subtle_alert_info(
-      alert_result_, HmiInterfaces::HMI_INTERFACE_UI, application_manager_);
+      subtle_alert_result_,
+      HmiInterfaces::HMI_INTERFACE_UI,
+      application_manager_);
   app_mngr::commands::ResponseInfo tts_alert_info(
       tts_speak_result_,
       HmiInterfaces::HMI_INTERFACE_TTS,
@@ -210,6 +220,27 @@ bool SubtleAlertRequest::PrepareResponseParameters(
                                           tts_alert_info,
                                           tts_response_info_);
     return result;
+  }
+  if ((ui_subtle_alert_info.is_ok || ui_subtle_alert_info.is_not_used) &&
+      tts_alert_info.is_unsupported_resource &&
+      HmiInterfaces::STATE_AVAILABLE == tts_alert_info.interface_state) {
+    tts_response_info_ = "Unsupported phoneme type sent in a prompt";
+    info = app_mngr::commands::MergeInfos(ui_subtle_alert_info,
+                                          ui_response_info_,
+                                          tts_alert_info,
+                                          tts_response_info_);
+    return result;
+  }
+  // Ignore TTS.Speak result if ABORTED due to TTS.StopSpeaking request
+  if (is_tts_stop_speaking_sent_ &&
+      hmi_apis::Common_Result::ABORTED == tts_alert_info.result_code) {
+    result_code =
+        MessageHelper::HMIToMobileResult(ui_subtle_alert_info.result_code);
+    info = app_mngr::commands::MergeInfos(ui_subtle_alert_info,
+                                          ui_response_info_,
+                                          tts_alert_info,
+                                          tts_response_info_);
+    return ui_subtle_alert_info.is_ok;
   }
   result_code =
       PrepareResultCodeForResponse(ui_subtle_alert_info, tts_alert_info);
@@ -334,7 +365,6 @@ void SubtleAlertRequest::SendSubtleAlertRequest(int32_t app_id) {
         (*message_)[strings::msg_params][strings::soft_buttons];
     MessageHelper::SubscribeApplicationToSoftButton(
         (*message_)[strings::msg_params], app, function_id());
-    msg_params[strings::duration] = 0;
   } else {
     msg_params[strings::duration] =
         (*message_)[strings::msg_params][strings::duration].asUInt();

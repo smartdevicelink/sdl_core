@@ -5055,11 +5055,11 @@
   </function>
 
   <function name="SubtleAlert" messagetype="request">
-    <description>Request from SDL to show an alert message on the display.</description>
+    <description>Request from SDL to show a subtle alert message on the display.</description>
     <param name="alertStrings" type="Common.TextFieldStruct" mandatory="true" array="true" minsize="0" maxsize="2">
       <description>Array of lines of alert text fields. See TextFieldStruct. Uses subtleAlertText1, subtleAlertText2.</description>
     </param>
-    <param name="alertIcon" type="Common.Image" mandatory="false" >
+    <param name="alertIcon" type="Common.Image" mandatory="false">
       <description>
         Image to be displayed for the corresponding alert. See Image. 
         If omitted, no (or the default if applicable) icon should be displayed.
@@ -5386,7 +5386,7 @@
     </param>
     <param name="functionID" type="Integer" mandatory="true">
       <description>
-        The ID of the type of interaction the developer wants to dismiss. Only values 10, (PerformInteractionID), 12 (AlertID), 25 (ScrollableMessageID), and 26 (SliderID) are permitted.
+        The ID of the type of interaction the developer wants to dismiss. Only values 10, (PerformInteractionID), 12 (AlertID), 25 (ScrollableMessageID), 26 (SliderID), and 64 (SubtleAlertID) are permitted.
       </description>
     </param>
     <param name="appID" type="Integer" mandatory="true">

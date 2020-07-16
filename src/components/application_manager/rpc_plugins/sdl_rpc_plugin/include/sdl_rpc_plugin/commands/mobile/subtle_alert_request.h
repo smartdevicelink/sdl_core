@@ -135,8 +135,9 @@ class SubtleAlertRequest : public app_mngr::commands::CommandRequestImpl {
   bool awaiting_tts_speak_response_;
   bool awaiting_tts_stop_speaking_response_;
   bool is_ui_subtle_alert_sent_;
-  hmi_apis::Common_Result::eType alert_result_;
-  smart_objects::SmartObject alert_response_params_;
+  bool is_tts_stop_speaking_sent_;
+  hmi_apis::Common_Result::eType subtle_alert_result_;
+  smart_objects::SmartObject subtle_alert_response_params_;
   hmi_apis::Common_Result::eType tts_speak_result_;
   std::string ui_response_info_;
   std::string tts_response_info_;
