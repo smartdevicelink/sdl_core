@@ -55,7 +55,14 @@ class IncomingDataHandlerTest : public ::testing::Test {
     some_data_size = 4;
     some_data2_size = 512;
     some_data = new uint8_t[some_data_size];
+    for (size_t i = 0; i < some_data_size; i++) {
+      // put some data in the buffer
+      some_data[i] = i % 256;
+    }
     some_data2 = new uint8_t[some_data2_size];
+    for (size_t i = 0; i < some_data2_size; i++) {
+      some_data2[i] = i % 256;
+    }
     protov1_message_id = 0x0;
     some_message_id = 0xABCDEF0;
     some_session_id = 0xFEDCBA0;
@@ -70,7 +77,7 @@ class IncomingDataHandlerTest : public ::testing::Test {
                    const uint32_t data_size) {
     actual_frames =
         data_handler.ProcessData(RawMessage(uid, 0, data, data_size, false),
-                                 &result_code,
+                                 result_code,
                                  &malformed_occurs);
   }
 
@@ -121,7 +128,7 @@ TEST_F(IncomingDataHandlerTest, DataForUnknownConnection) {
   size_t malformed_count = 0;
   actual_frames =
       data_handler.ProcessData(RawMessage(uid_unknown, 0, NULL, 0, false),
-                               &result_code,
+                               result_code,
                                &malformed_count);
   EXPECT_EQ(RESULT_FAIL, result_code);
   EXPECT_EQ(malformed_count, 0u);
@@ -130,7 +137,7 @@ TEST_F(IncomingDataHandlerTest, DataForUnknownConnection) {
   AppendPacketToTMData(ProtocolPacket());
   actual_frames = data_handler.ProcessData(
       RawMessage(uid_unknown, 0, tm_data.data(), tm_data.size(), false),
-      &result_code,
+      result_code,
       &malformed_count);
   EXPECT_EQ(RESULT_FAIL, result_code);
   EXPECT_EQ(malformed_count, 0u);
@@ -254,7 +261,6 @@ TEST_F(IncomingDataHandlerTest, MixedPayloadData_TwoConnections) {
   for (FrameList::const_iterator it = actual_frames.begin();
        it != actual_frames.end();
        ++it, ++it_exp) {
-    // TODO(EZamakhov): investigate valgrind warning (unitialized value)
     EXPECT_EQ(**it, **it_exp)
         << "Element number " << std::distance(mobile_packets.begin(), it_exp);
   }
@@ -1038,6 +1044,24 @@ TEST_F(
   EXPECT_EQ(RESULT_MALFORMED_OCCURS, result_code);
   EXPECT_EQ(1u, malformed_occurs);
   EXPECT_EQ(1u, actual_frames.size());
+}
+
+TEST_F(IncomingDataHandlerTest,
+       ProcessData_ProtocolVersionBiggerThanSupported_MalformedOccurs) {
+  header_validator.set_max_protocol_version_supported(PROTOCOL_VERSION_2);
+  const ProtocolPacket packet(uid1,
+                              PROTOCOL_VERSION_3,
+                              PROTECTION_OFF,
+                              FRAME_TYPE_CONTROL,
+                              kControl,
+                              FRAME_DATA_SINGLE,
+                              some_session_id,
+                              0u,
+                              some_message_id,
+                              NULL);
+  const auto raw_message_ptr = packet.serializePacket();
+  data_handler.ProcessData(*raw_message_ptr, result_code, &malformed_occurs);
+  EXPECT_EQ(RESULT_CODE::RESULT_MALFORMED_OCCURS, result_code);
 }
 
 // TODO(EZamakhov): add tests for handling 2+ connection data

@@ -58,6 +58,8 @@ class MockRequest : public application_manager::commands::Command {
   MOCK_CONST_METHOD0(window_id, application_manager::WindowID());
   MOCK_METHOD0(HandleTimeOut, void());
   MOCK_METHOD0(OnUpdateTimeOut, void());
+  MOCK_METHOD1(set_warning_info, void(const std::string info));
+  MOCK_CONST_METHOD0(warning_info, std::string());
   MOCK_METHOD0(AllowedToTerminate, bool());
   MOCK_METHOD1(SetAllowedToTerminate, void(bool is_allowed));
 

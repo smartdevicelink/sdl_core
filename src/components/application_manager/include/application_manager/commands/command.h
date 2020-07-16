@@ -98,6 +98,18 @@ class Command {
    */
   virtual WindowID window_id() const = 0;
 
+  /**
+   * @brief Set warning info string, to be sent on a successful response
+   * @param info Warning info string
+   */
+  virtual void set_warning_info(const std::string info) = 0;
+
+  /**
+   * @brief Returns warning info string
+   * @return Warning info string
+   */
+  virtual std::string warning_info() const = 0;
+
   /*
    * @brief Function is called by RequestController when request execution time
    * has exceed it's limit

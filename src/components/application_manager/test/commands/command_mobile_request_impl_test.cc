@@ -562,8 +562,8 @@ TEST_F(RequestFromMobileImplTest, HashUpdateAllowed_UpdateExpected) {
   EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(_, _))
       .WillOnce(DoAll(SaveArg<0>(&result), Return(true)));
 
-  const bool is_succedeed = true;
-  command->SendResponse(is_succedeed, kMobResultSuccess, NULL, NULL);
+  const bool is_succeeded = true;
+  command->SendResponse(is_succeeded, kMobResultSuccess, NULL, NULL);
 
   MockAppPtr mock_app = CreateMockApp();
   EXPECT_CALL(app_mngr_, application(_)).WillOnce(Return(mock_app));
@@ -583,8 +583,8 @@ TEST_F(RequestFromMobileImplTest, HashUpdateDisallowed_HashUpdateNotExpected) {
   EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(_, _))
       .WillOnce(DoAll(SaveArg<0>(&result), Return(true)));
 
-  const bool is_succedeed = true;
-  command->SendResponse(is_succedeed, kMobResultSuccess, NULL, NULL);
+  const bool is_succeeded = true;
+  command->SendResponse(is_succeeded, kMobResultSuccess, NULL, NULL);
 
   MockAppPtr mock_app = CreateMockApp();
   EXPECT_CALL(*mock_app, UpdateHash()).Times(0);
@@ -603,8 +603,8 @@ TEST_F(RequestFromMobileImplTest, RequestFailed_HashUpdateNotExpected) {
   EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(_, _))
       .WillOnce(DoAll(SaveArg<0>(&result), Return(true)));
 
-  const bool is_succedeed = false;
-  command->SendResponse(is_succedeed, kMobResultSuccess, NULL, NULL);
+  const bool is_succeeded = false;
+  command->SendResponse(is_succeeded, kMobResultSuccess, NULL, NULL);
 
   MockAppPtr mock_app = CreateMockApp();
   EXPECT_CALL(*mock_app, UpdateHash()).Times(0);
@@ -623,8 +623,8 @@ TEST_F(RequestFromMobileImplTest, AppNotFound_HashUpdateNotExpected) {
   EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(_, _))
       .WillOnce(DoAll(SaveArg<0>(&result), Return(true)));
 
-  const bool is_succedeed = true;
-  command->SendResponse(is_succedeed, kMobResultSuccess, NULL, NULL);
+  const bool is_succeeded = true;
+  command->SendResponse(is_succeeded, kMobResultSuccess, NULL, NULL);
 
   MockAppPtr mock_app = CreateMockApp();
   EXPECT_CALL(app_mngr_, application(_)).WillOnce(Return(MockAppPtr()));

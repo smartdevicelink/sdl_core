@@ -107,8 +107,8 @@ void SubscribeButtonRequest::Run() {
   app->SubscribeToButton(static_cast<mobile_apis::ButtonName::eType>(btn_id));
   SendSubscribeButtonNotification();
 
-  const bool is_succedeed = true;
-  SendResponse(is_succedeed, mobile_apis::Result::SUCCESS);
+  const bool is_succeeded = true;
+  SendResponse(is_succeeded, mobile_apis::Result::SUCCESS);
 }
 
 bool SubscribeButtonRequest::Init() {

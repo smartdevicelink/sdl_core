@@ -161,11 +161,9 @@ class CommandRequestImpl : public CommandImpl,
    */
   virtual void OnTimeOut();
 
-  /**
-   */
   virtual void on_event(const event_engine::Event&);
 
-//  void OnUpdateTimeOut() OVERRIDE;
+  void OnUpdateTimeOut() OVERRIDE;
 
 #ifdef __QNX__
   /*
@@ -188,15 +186,6 @@ class CommandRequestImpl : public CommandImpl,
   * If true, request controller will terminate request on response
   */
   void SetAllowedToTerminate(const bool allowed) OVERRIDE;
-
-  /**
-   * @brief Check syntax of string from mobile
-   * @param str - string that need to be checked
-   * @param allow_empty_string if true methods allow empty sting
-   * @return true if success otherwise return false
-   */
-  virtual bool CheckSyntax(const std::string& str,
-                           bool allow_empty_line = false);
 
  protected:
   /**

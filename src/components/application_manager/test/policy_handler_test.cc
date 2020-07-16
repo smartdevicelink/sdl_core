@@ -1859,7 +1859,9 @@ TEST_F(PolicyHandlerTest, DISABLED_OnSnapshotCreated_UrlAdded) {
       .WillOnce(ReturnRef(mock_session_observer));
   EXPECT_CALL(*mock_app_, device()).WillOnce(Return(0));
   EXPECT_CALL(app_manager_, applications()).WillOnce(Return(app_set));
-  EXPECT_CALL(mock_message_helper_, SendPolicySnapshotNotification(_, _, _, _));
+  EXPECT_CALL(mock_message_helper_,
+              SendPolicySnapshotNotification(
+                  _, testing::A<const std::vector<uint8_t>&>(), _, _));
   // Check expectations for get app id
   GetAppIDForSending();
   // Expectations

@@ -344,6 +344,14 @@ class ApplicationManager {
 
   /**
    * @brief Checks if Application is subscribed for way points
+   * @param Application id
+   * @return true if Application is subscribed for way points
+   * otherwise false
+   */
+  virtual bool IsAppSubscribedForWayPoints(uint32_t app_id) const = 0;
+
+  /**
+   * @brief Checks if Application is subscribed for way points
    * @param Application pointer
    * @return true if Application is subscribed for way points
    * otherwise false
@@ -352,9 +360,21 @@ class ApplicationManager {
 
   /**
    * @brief Subscribe Application for way points
+   * @param Application id
+   */
+  virtual void SubscribeAppForWayPoints(uint32_t id) = 0;
+
+  /**
+   * @brief Subscribe Application for way points
    * @param Application pointer
    */
   virtual void SubscribeAppForWayPoints(ApplicationSharedPtr app) = 0;
+
+  /**
+   * @brief Unsubscribe Application for way points
+   * @param Application id
+   */
+  virtual void UnsubscribeAppFromWayPoints(uint32_t app_id) = 0;
 
   /**
    * @brief Unsubscribe Application for way points
@@ -367,6 +387,13 @@ class ApplicationManager {
    * @return true if some app is subscribed otherwise false
    */
   virtual bool IsAnyAppSubscribedForWayPoints() const = 0;
+
+  /**
+   * @brief Save message after OnWayPointsChangeNotification reception
+   * @param way_points_message pointer to the smartobject
+   */
+  virtual void SaveWayPointsMessage(
+      smart_objects::SmartObjectSPtr way_points_message) = 0;
 
   /**
    * @brief Get subscribed for way points

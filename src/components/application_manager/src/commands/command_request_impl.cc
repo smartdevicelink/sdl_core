@@ -79,25 +79,6 @@ bool CommandRequestImpl::CleanUp() {
 
 void CommandRequestImpl::Run() {}
 
-bool CommandRequestImpl::CheckSyntax(const std::string& str,
-                                     bool allow_empty_line) {
-  if (std::string::npos != str.find_first_of("\t\n")) {
-    LOG4CXX_ERROR(logger_, "CheckSyntax failed! :" << str);
-    return false;
-  }
-  if (std::string::npos != str.find("\\n") ||
-      std::string::npos != str.find("\\t")) {
-    LOG4CXX_ERROR(logger_, "CheckSyntax failed! :" << str);
-    return false;
-  }
-  if (!allow_empty_line) {
-    if ((std::string::npos == str.find_first_not_of(' '))) {
-      return false;
-    }
-  }
-  return true;
-}
-
 uint32_t CommandRequestImpl::default_timeout() const {
   return CommandImpl::default_timeout();
 }
@@ -175,15 +156,14 @@ void CommandRequestImpl::on_event(const event_engine::MobileEvent&) {}
 
 void CommandRequestImpl::HandleTimeOut() {
   LOG4CXX_AUTO_TRACE(logger_);
-
-  {
-    sync_primitives::AutoLock auto_lock(*state_lock_);
-    if (helpers::Compare<RequestState, helpers::EQ, helpers::ONE>(
-            current_state(),
-            RequestState::kHandlingResponse,
-            RequestState::kResponded)) {
-      LOG4CXX_DEBUG(logger_, "Current request state = Responding/Responded");
-      return;
+    {
+      sync_primitives::AutoLock auto_lock(*state_lock_);
+      if (helpers::Compare<RequestState, helpers::EQ, helpers::ONE>(
+              current_state(),
+              RequestState::kHandlingResponse,
+              RequestState::kResponded)) {
+        LOG4CXX_DEBUG(logger_, "Current request state = Responding/Responded");
+        return;
     }
     set_current_state(RequestState::kTimedOut);
   }
@@ -245,10 +225,10 @@ void CommandRequestImpl::HandleOnEvent(const event_engine::Event& event) {
   }
 }
 
-//void CommandRequestImpl::OnUpdateTimeOut() {
-//  LOG4CXX_AUTO_TRACE(logger_);
-//  set_current_state(RequestState::kAwaitingResponse);
-//}
+void CommandRequestImpl::OnUpdateTimeOut() {
+  LOG4CXX_AUTO_TRACE(logger_);
+  set_current_state(RequestState::kAwaitingResponse);
+}
 
 void CommandRequestImpl::StartAwaitForInterface(
     const HmiInterfaces::InterfaceID& interface_id) {

@@ -375,8 +375,13 @@ class PolicyHandlerInterface : public VehicleDataItemProvider {
    * @param url The URL provided by the HMI to be used for performing PTU
    * retries. If empty, the existing cached URL will be cleared and Core will
    * choose which URLs to use on retry
+   * @param snapshot_path The PT snapshot path provided by the HMI. If empty,
+   * the existing cached snapshot path will be cleared.
    */
-  virtual void CacheRetryInfo(const uint32_t app_id, const std::string url) = 0;
+  virtual void CacheRetryInfo(
+      const uint32_t app_id = 0,
+      const std::string url = std::string(),
+      const std::string snapshot_path = std::string()) = 0;
 #endif  // EXTERNAL_PROPRIETARY_MODE
 
   /**

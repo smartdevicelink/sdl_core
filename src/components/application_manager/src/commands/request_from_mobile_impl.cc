@@ -267,16 +267,16 @@ void RequestFromMobileImpl::on_event(const event_engine::Event& event) {}
 void RequestFromMobileImpl::on_event(const event_engine::MobileEvent& event) {}
 
 void RequestFromMobileImpl::SendResponse(
-        const bool success,
-        const mobile_apis::Result::eType& result_code,
-        const char* info,
-        const smart_objects::SmartObject* response_params,
-        const std::vector<uint8_t> binary_data) {
+    const bool success,
+    const mobile_apis::Result::eType& result_code,
+    const char* info,
+    const smart_objects::SmartObject* response_params,
+    const std::vector<uint8_t> binary_data) {
   LOG4CXX_AUTO_TRACE(logger_);
   {
-    sync_primitives::AutoLock auto_lock(*state_lock_);
-    if (RequestState::kTimedOut == current_state_) {
-      // Don't send response if request timeout is expired
+    sync_primitives::AutoLock auto_lock(state_lock_);
+    if (kTimedOut == current_state_) {
+      // don't send response if request timeout expired
       return;
     }
 
@@ -303,14 +303,14 @@ void RequestFromMobileImpl::SendResponse(
     response[strings::msg_params] = *response_params;
   }
 
-  if (info) {
+  if (info && *info != '\0') {
     response[strings::msg_params][strings::info] = std::string(info);
   }
 
   // Add disallowed parameters and info from request back to response with
-  // appropriate
-  // reasons (VehicleData result codes)
-  if (result_code != mobile_apis::Result::APPLICATION_NOT_REGISTERED) {
+  // appropriate reasons (VehicleData result codes)
+  if (result_code != mobile_apis::Result::APPLICATION_NOT_REGISTERED &&
+      result_code != mobile_apis::Result::INVALID_DATA) {
     const mobile_apis::FunctionID::eType& id =
         static_cast<mobile_apis::FunctionID::eType>(function_id());
     if ((id == mobile_apis::FunctionID::SubscribeVehicleDataID) ||
@@ -323,7 +323,17 @@ void RequestFromMobileImpl::SendResponse(
   }
 
   response[strings::msg_params][strings::success] = success;
-  response[strings::msg_params][strings::result_code] = result_code;
+  if ((result_code == mobile_apis::Result::SUCCESS ||
+       result_code == mobile_apis::Result::WARNINGS) &&
+      !warning_info().empty()) {
+    response[strings::msg_params][strings::info] =
+        (info && *info != '\0') ? std::string(info) + "\n" + warning_info()
+                                : warning_info();
+    response[strings::msg_params][strings::result_code] =
+        mobile_apis::Result::WARNINGS;
+  } else {
+    response[strings::msg_params][strings::result_code] = result_code;
+  }
 
   is_success_result_ = success;
 

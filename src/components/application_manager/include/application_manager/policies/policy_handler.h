@@ -419,7 +419,9 @@ class PolicyHandler : public PolicyHandlerInterface,
   uint32_t ChoosePTUApplication(
       const PTUIterationType iteration_type =
           PTUIterationType::DefaultIteration) OVERRIDE;
-  void CacheRetryInfo(const uint32_t app_id, const std::string url) OVERRIDE;
+  void CacheRetryInfo(const uint32_t app_id = 0,
+                      const std::string url = std::string(),
+                      const std::string snapshot_path = std::string()) OVERRIDE;
 #endif  // EXTERNAL_PROPRIETARY_MODE
 
   uint32_t GetAppIdForSending() const OVERRIDE;
@@ -903,6 +905,7 @@ class PolicyHandler : public PolicyHandlerInterface,
   // PTU retry information
   uint32_t last_ptu_app_id_;
   std::string retry_update_url_;
+  std::string policy_snapshot_path_;
 #endif  // EXTERNAL_PROPRIETARY_MODE
 
   /**
