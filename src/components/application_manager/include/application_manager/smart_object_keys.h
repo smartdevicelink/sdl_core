@@ -475,6 +475,7 @@ extern const char* const haptic_spatial_data_supported;
 extern const char* const diagonal_screen_size;
 extern const char* const pixel_per_inch;
 extern const char* const scale;
+extern const char* const additional_video_streaming_capabilities;
 extern const char* const haptic_rect_data;
 extern const char* const rect;
 extern const char* const x;

@@ -686,16 +686,16 @@ TEST_F(
       800,
       vs_capability_so[strings::preferred_resolution][strings::resolution_width]
           .asInt());
-  EXPECT_EQ(350,
+  EXPECT_EQ(380,
             vs_capability_so[strings::preferred_resolution]
                             [strings::resolution_height]
                                 .asInt());
   EXPECT_TRUE(vs_capability_so.keyExists(strings::max_bitrate));
-  EXPECT_EQ(10000, vs_capability_so[strings::max_bitrate].asInt());
+  EXPECT_EQ(20000, vs_capability_so[strings::max_bitrate].asInt());
   EXPECT_TRUE(vs_capability_so.keyExists(strings::supported_formats));
   const size_t supported_formats_len =
       vs_capability_so[strings::supported_formats].length();
-  EXPECT_EQ(1ull, supported_formats_len);
+  EXPECT_EQ(5u, supported_formats_len);
 
   EXPECT_TRUE(vs_capability_so[strings::supported_formats][0].keyExists(
       strings::protocol));
@@ -710,8 +710,20 @@ TEST_F(
 
   EXPECT_TRUE(
       vs_capability_so.keyExists(strings::haptic_spatial_data_supported));
-  EXPECT_FALSE(
+  EXPECT_TRUE(
       vs_capability_so[strings::haptic_spatial_data_supported].asBool());
+  EXPECT_TRUE(vs_capability_so.keyExists(strings::diagonal_screen_size));
+  EXPECT_EQ(8, vs_capability_so[strings::diagonal_screen_size].asInt());
+  EXPECT_TRUE(vs_capability_so.keyExists(strings::pixel_per_inch));
+  EXPECT_EQ(96, vs_capability_so[strings::pixel_per_inch].asInt());
+  EXPECT_TRUE(vs_capability_so.keyExists(strings::scale));
+  EXPECT_EQ(1, vs_capability_so[strings::scale].asInt());
+  EXPECT_TRUE(vs_capability_so.keyExists(
+      strings::additional_video_streaming_capabilities));
+  const size_t additional_video_streaming_capabilities_len =
+      vs_capability_so[strings::additional_video_streaming_capabilities]
+          .length();
+  EXPECT_EQ(7u, additional_video_streaming_capabilities_len);
 
   EXPECT_TRUE(hmi_capabilities_->video_streaming_supported());
 }
