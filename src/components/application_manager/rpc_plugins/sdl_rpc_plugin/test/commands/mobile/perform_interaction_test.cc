@@ -192,6 +192,7 @@ TEST_F(PerformInteractionRequestTest, OnTimeout_VR_GENERIC_ERROR) {
   event.set_smart_object(*response_msg_vr);
 
   command->Init();
+  command->StartAwaitForInterfaces();
   command->on_event(event);
   MessageSharedPtr response_to_mobile =
       CreateMessage(smart_objects::SmartType_Map);
@@ -244,6 +245,8 @@ TEST_F(PerformInteractionRequestTest,
       ManageMobileCommand(_, am::commands::Command::CommandSource::SOURCE_SDL))
       .WillOnce(DoAll(SaveArg<0>(&response_to_mobile), Return(true)));
 
+  command->StartAwaitForInterfaces();
+
   command->on_event(event_ui);
   command->on_event(event_vr);
 
@@ -278,6 +281,8 @@ TEST_F(PerformInteractionRequestTest,
                   _, am::commands::Command::CommandSource::SOURCE_SDL_TO_HMI))
       .WillOnce(DoAll(SaveArg<0>(&request_to_hmi), Return(true)));
 
+  command->StartAwaitForInterfaces();
+
   command->on_event(event_vr);
   EXPECT_EQ(hmi_apis::FunctionID::UI_ClosePopUp,
             (*request_to_hmi)[strings::params][strings::function_id].asInt());
@@ -302,6 +307,8 @@ TEST_F(PerformInteractionRequestTest,
       CreateCommand<PerformInteractionRequest>(msg_from_mobile);
 
   ASSERT_TRUE(command->Init());
+
+  command->StartAwaitForInterfaces();
 
   MockAppPtr mock_app;
   EXPECT_CALL(app_mngr_, application(_)).WillRepeatedly(Return(mock_app));
@@ -349,6 +356,8 @@ TEST_F(PerformInteractionRequestTest,
 
   ASSERT_TRUE(command->Init());
 
+  command->StartAwaitForInterfaces();
+
   MockAppPtr mock_app;
   EXPECT_CALL(app_mngr_, application(_)).WillRepeatedly(Return(mock_app));
 
@@ -392,6 +401,8 @@ TEST_F(
 
   ASSERT_TRUE(command->Init());
 
+  command->StartAwaitForInterfaces();command->StartAwaitForInterfaces();
+
   MockAppPtr mock_app;
   EXPECT_CALL(app_mngr_, application(_)).WillRepeatedly(Return(mock_app));
 
@@ -433,6 +444,8 @@ TEST_F(
       CreateCommand<PerformInteractionRequest>(msg_from_mobile);
 
   ASSERT_TRUE(command->Init());
+
+  command->StartAwaitForInterfaces();
 
   MessageSharedPtr response_msg_vr =
       CreateHMIResponseMessage(hmi_apis::Common_Result::UNSUPPORTED_RESOURCE,
@@ -483,6 +496,8 @@ TEST_F(
 
   ASSERT_TRUE(command->Init());
 
+  command->StartAwaitForInterfaces();
+
   MessageSharedPtr response_msg_vr = CreateHMIResponseMessageWithChoiceID(
       hmi_apis::Common_Result::SUCCESS, "", kVrChoiceID);
   MessageSharedPtr response_msg_ui = CreateHMIResponseMessageWithChoiceID(
@@ -530,6 +545,8 @@ TEST_F(
       CreateCommand<PerformInteractionRequest>(msg_from_mobile);
 
   ASSERT_TRUE(command->Init());
+
+  command->StartAwaitForInterfaces();
 
   MessageSharedPtr response_msg_vr = CreateHMIResponseMessage(
       hmi_apis::Common_Result::WARNINGS, "WARNING MESSAGE");
@@ -579,6 +596,8 @@ TEST_F(
 
   ASSERT_TRUE(command->Init());
 
+  command->StartAwaitForInterfaces();
+
   MessageSharedPtr response_msg_vr =
       CreateHMIResponseMessage(hmi_apis::Common_Result::SUCCESS, "");
   am::event_engine::Event event_vr(hmi_apis::FunctionID::VR_PerformInteraction);
@@ -626,6 +645,8 @@ TEST_F(
       CreateCommand<PerformInteractionRequest>(msg_from_mobile);
 
   ASSERT_TRUE(command->Init());
+
+  command->StartAwaitForInterfaces();
 
   MessageSharedPtr response_msg_vr = CreateHMIResponseMessage(
       hmi_apis::Common_Result::UNSUPPORTED_RESOURCE, "VR error message");

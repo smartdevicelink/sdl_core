@@ -83,6 +83,8 @@ class PerformInteractionRequest : public app_mngr::commands::RequestFromMobileIm
 
   void OnTimeOut() FINAL;
 
+  void StartAwaitForInterfaces();
+
  protected:
   /**
    * @brief Prepare result code for sending to mobile application
