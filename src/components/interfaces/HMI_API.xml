@@ -5065,7 +5065,7 @@
         If omitted, no (or the default if applicable) icon should be displayed.
       </description>
     </param>
-    <param name="duration" type="Integer" mandatory="true" minvalue="3000" maxvalue="10000">
+    <param name="duration" type="Integer" mandatory="false" minvalue="3000" maxvalue="10000">
       <description>Timeout in milliseconds.</description>
     </param>
     <param name="softButtons" type="Common.SoftButton" mandatory="false" minsize="0" maxsize="2" array="true">
