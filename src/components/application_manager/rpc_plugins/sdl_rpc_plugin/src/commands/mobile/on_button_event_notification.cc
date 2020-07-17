@@ -139,8 +139,12 @@ void OnButtonEventNotification::Run() {
                        << "in FULL or LIMITED hmi level");
       continue;
     }
-    // if "app_id" absent send notification only in HMI_FULL mode
-    if (is_app_id_exists || subscribed_app->IsFullscreen()) {
+    // if OK button and "app_id" absent send notification only in HMI_FULL mode
+    // otherwise send to subscribed apps in limited
+    if (is_app_id_exists ||
+        (*message_)[strings::msg_params][strings::name].asInt() !=
+            hmi_apis::Common_ButtonName::OK ||
+        subscribed_app->IsFullscreen()) {
       SendButtonEvent(subscribed_app);
     }
   }
