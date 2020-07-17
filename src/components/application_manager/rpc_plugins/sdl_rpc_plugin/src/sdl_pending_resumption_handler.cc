@@ -52,16 +52,23 @@ SDLPendingResumptionHandler::CreateSubscriptionRequest() {
   return subscribe_waypoints_msg;
 }
 
+void SDLPendingResumptionHandler::ClearPendingRequestsMap() {
+  using namespace application_manager;
+
+  for (auto const& it : pending_requests_) {
+    const hmi_apis::FunctionID::eType timed_out_pending_request_fid =
+        static_cast<hmi_apis::FunctionID::eType>(
+            it.second[strings::params][strings::function_id].asInt());
+    unsubscribe_from_event(timed_out_pending_request_fid);
+  }
+
+  pending_requests_.clear();
+}
+
 void SDLPendingResumptionHandler::ClearPendingResumptionRequests() {
   LOG4CXX_AUTO_TRACE(logger_);
   using namespace application_manager;
-  const hmi_apis::FunctionID::eType timed_out_pending_request_fid =
-      static_cast<hmi_apis::FunctionID::eType>(
-          pending_requests_.begin()
-              ->second[strings::params][strings::function_id]
-              .asInt());
-  unsubscribe_from_event(timed_out_pending_request_fid);
-  pending_requests_.clear();
+  ClearPendingRequestsMap();
 
   if (!freezed_resumptions_.empty()) {
     ResumptionAwaitingHandling freezed_resumption =

@@ -56,6 +56,7 @@ class SDLPendingResumptionHandler
 
  private:
   smart_objects::SmartObjectSPtr CreateSubscriptionRequest();
+  void ClearPendingRequestsMap();
 
   struct ResumptionAwaitingHandling {
     const uint32_t app_id;
