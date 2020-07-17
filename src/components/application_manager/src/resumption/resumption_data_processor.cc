@@ -50,7 +50,10 @@ CREATE_LOGGERPTR_GLOBAL(logger_, "Resumption")
 ResumptionDataProcessor::ResumptionDataProcessor(
     app_mngr::ApplicationManager& application_manager)
     : event_engine::EventObserver(application_manager.event_dispatcher())
-    , application_manager_(application_manager) {}
+    , application_manager_(application_manager)
+    , resumption_status_lock_()
+    , register_callbacks_lock_()
+    , request_app_ids_lock_() {}
 
 ResumptionDataProcessor::~ResumptionDataProcessor() {}
 
@@ -74,9 +77,18 @@ void ResumptionDataProcessor::Restore(ApplicationSharedPtr application,
   SetGlobalProperties(application, saved_app);
   AddSubscriptions(application, saved_app);
 
-  if (!resumption_status_[application->app_id()]
-           .list_of_sent_requests.empty()) {
-    register_callbacks_[application->app_id()] = callback;
+  resumption_status_lock_.AcquireForReading();
+  const auto app_id = application->app_id();
+  bool is_requests_list_empty = true;
+  if (resumption_status_.find(app_id) != resumption_status_.end()) {
+    is_requests_list_empty =
+        resumption_status_[app_id].list_of_sent_requests.empty();
+  }
+  resumption_status_lock_.Release();
+
+  if (!is_requests_list_empty) {
+    sync_primitives::AutoWriteLock lock(register_callbacks_lock_);
+    register_callbacks_[app_id] = callback;
   } else {
     LOG4CXX_DEBUG(logger_, "No requests to HMI, resumption is successful");
     callback(mobile_apis::Result::SUCCESS, "Data resumption successful");
