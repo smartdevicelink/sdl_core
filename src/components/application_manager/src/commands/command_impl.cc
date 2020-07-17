@@ -113,7 +113,6 @@ uint32_t CommandImpl::connection_key() const {
   return (*message_)[strings::params][strings::connection_key].asUInt();
 }
 
-
 void CommandImpl::HandleTimeOut() {}
 
 void CommandImpl::set_warning_info(const std::string info) {

@@ -41,13 +41,13 @@
 
 #include "application_manager/mock_application_manager.h"
 #include "application_manager/mock_application_manager_settings.h"
+#include "application_manager/mock_event_dispatcher.h"
 #include "application_manager/mock_hmi_capabilities.h"
 #include "application_manager/mock_rpc_service.h"
 #include "application_manager/policies/mock_policy_handler_interface.h"
 #include "application_manager/test/include/application_manager/mock_application.h"
 #include "application_manager/test/include/application_manager/mock_hmi_interface.h"
 #include "application_manager/test/include/application_manager/mock_message_helper.h"
-#include "application_manager/mock_event_dispatcher.h"
 #include "test/application_manager/mock_application_manager_settings.h"
 namespace test {
 namespace components {

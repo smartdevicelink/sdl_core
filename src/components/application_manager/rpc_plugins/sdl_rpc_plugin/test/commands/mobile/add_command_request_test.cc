@@ -72,7 +72,7 @@ using ::testing::_;
 using ::testing::InSequence;
 using ::testing::Return;
 using namespace smart_objects;
-using  app_mngr::commands::RequestFromMobileImpl;
+using app_mngr::commands::RequestFromMobileImpl;
 
 namespace custom_str = utils::custom_string;
 namespace strings = ::application_manager::strings;
@@ -622,13 +622,13 @@ TEST_F(AddCommandRequestTest, OnEvent_BothSend_SUCCESS) {
       .WillRepeatedly(Return(DataAccessor<application_manager::CommandsMap>(
           commands_map, lock_ptr_)));
 
-  EXPECT_CALL(mock_rpc_service_,
-              ManageHMICommand(
-                  HMIResultCodeIs(hmi_apis::FunctionID::UI_AddCommand), _))
+  EXPECT_CALL(
+      mock_rpc_service_,
+      ManageHMICommand(HMIResultCodeIs(hmi_apis::FunctionID::UI_AddCommand), _))
       .WillOnce(Return(true));
-  EXPECT_CALL(mock_rpc_service_,
-              ManageHMICommand(
-                  HMIResultCodeIs(hmi_apis::FunctionID::VR_AddCommand), _))
+  EXPECT_CALL(
+      mock_rpc_service_,
+      ManageHMICommand(HMIResultCodeIs(hmi_apis::FunctionID::VR_AddCommand), _))
       .WillOnce(Return(true));
 
   EXPECT_CALL(*mock_app_, help_prompt_manager())

@@ -55,12 +55,12 @@ namespace am = application_manager;
 using am::MockMessageHelper;
 using am::commands::CommandImpl;
 using am::commands::MessageSharedPtr;
+using app_mngr::commands::RequestFromMobileImpl;
 using policy_test::MockPolicyHandlerInterface;
 using sdl_rpc_plugin::commands::SliderRequest;
 using ::testing::_;
 using ::testing::Return;
 using ::testing::ReturnRef;
-using app_mngr::commands::RequestFromMobileImpl;
 
 typedef std::shared_ptr<SliderRequest> CommandPtr;
 

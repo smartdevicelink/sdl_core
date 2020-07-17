@@ -56,10 +56,10 @@ CreateInteractionChoiceSetRequest::CreateInteractionChoiceSetRequest(
     HMICapabilities& hmi_capabilities,
     policy::PolicyHandlerInterface& policy_handler)
     : RequestFromMobileImpl(message,
-                        application_manager,
-                        rpc_service,
-                        hmi_capabilities,
-                        policy_handler)
+                            application_manager,
+                            rpc_service,
+                            hmi_capabilities,
+                            policy_handler)
     , choice_set_id_(0)
     , expected_chs_count_(0)
     , received_chs_count_(0)

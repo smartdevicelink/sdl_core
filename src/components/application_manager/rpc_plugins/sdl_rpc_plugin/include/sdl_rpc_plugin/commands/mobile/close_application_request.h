@@ -44,7 +44,8 @@ namespace commands {
 /**
  * @brief CloseApplicationRequest command class
  **/
-class CloseApplicationRequest : public app_mngr::commands::RequestFromMobileImpl {
+class CloseApplicationRequest
+    : public app_mngr::commands::RequestFromMobileImpl {
  public:
   /**
    * @brief CloseApplicationRequest class constructor

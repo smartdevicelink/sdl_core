@@ -84,7 +84,7 @@ class EventDispatcherImpl : public EventDispatcher {
   void raise_event(const Event& event) OVERRIDE;
 
   void remove_observer(const Event::EventID& event_id,
-                     const int32_t hmi_correlation_id) OVERRIDE;
+                       const int32_t hmi_correlation_id) OVERRIDE;
 
   /*
    * @brief Subscribe the observer to event

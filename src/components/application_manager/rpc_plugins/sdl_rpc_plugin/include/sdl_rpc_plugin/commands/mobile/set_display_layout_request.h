@@ -45,7 +45,8 @@ namespace commands {
 /**
  * @brief SetDisplayLayoutRequest command class
  **/
-class SetDisplayLayoutRequest : public app_mngr::commands::RequestFromMobileImpl {
+class SetDisplayLayoutRequest
+    : public app_mngr::commands::RequestFromMobileImpl {
  public:
   /**
    * @brief SetDisplayLayoutRequest class constructor

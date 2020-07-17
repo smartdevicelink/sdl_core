@@ -68,7 +68,7 @@ class EventDispatcher {
    * @param hmi_correlation_id  The event HMI correlation ID
    */
   virtual void remove_observer(const Event::EventID& event_id,
-                             const int32_t hmi_correlation_id) = 0;
+                               const int32_t hmi_correlation_id) = 0;
 
   /*
    * @brief Unsubscribes the observer from specific event

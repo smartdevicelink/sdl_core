@@ -706,8 +706,8 @@ void StateControllerImpl::UpdateAppWindowsStreamingState(
   }
 }
 
-
-void StateControllerImpl::HandleOnEvent(const event_engine::MobileEvent& event) {}
+void StateControllerImpl::HandleOnEvent(
+    const event_engine::MobileEvent& event) {}
 
 void StateControllerImpl::HandleOnEvent(const event_engine::Event& event) {
   using event_engine::Event;
@@ -1192,12 +1192,13 @@ bool StateControllerImpl::IsStateActive(HmiState::StateID state_id) const {
   return false;
 }
 
-void StateControllerImpl::OnTimeOutActivateAppRequest(const uint32_t hmi_app_id) {
+void StateControllerImpl::OnTimeOutActivateAppRequest(
+    const uint32_t hmi_app_id) {
   LOG4CXX_AUTO_TRACE(logger_);
   LOG4CXX_INFO(logger_,
-      "TimeOut was received for"
-      "application with hmi_app_id = "
-      << hmi_app_id);
+               "TimeOut was received for"
+               "application with hmi_app_id = "
+                   << hmi_app_id);
 }
 
 HmiStatePtr StateControllerImpl::CreateHmiState(

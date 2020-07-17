@@ -70,7 +70,7 @@ class DeleteCommandRequest : public app_mngr::commands::RequestFromMobileImpl {
    * @brief Execute command
    **/
   void Run() FINAL;
-  
+
   void on_event(const app_mngr::event_engine::Event& event) FINAL;
 
   /**

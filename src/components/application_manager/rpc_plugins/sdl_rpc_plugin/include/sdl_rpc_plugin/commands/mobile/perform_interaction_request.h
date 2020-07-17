@@ -36,9 +36,9 @@
 
 #include <string>
 
-#include "application_manager/commands/request_from_mobile_impl.h"
 #include "application_manager/application.h"
 #include "application_manager/commands/command_request_impl.h"
+#include "application_manager/commands/request_from_mobile_impl.h"
 #include "utils/macro.h"
 
 namespace sdl_rpc_plugin {
@@ -51,7 +51,8 @@ namespace commands {
 /**
  * @brief PerformInteractionRequest command class
  **/
-class PerformInteractionRequest : public app_mngr::commands::RequestFromMobileImpl {
+class PerformInteractionRequest
+    : public app_mngr::commands::RequestFromMobileImpl {
  public:
   /**
    * @brief PerformInteractionRequest class constructor

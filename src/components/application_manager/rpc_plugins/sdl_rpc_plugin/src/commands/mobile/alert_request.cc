@@ -54,10 +54,10 @@ AlertRequest::AlertRequest(
     HMICapabilities& hmi_capabilities,
     policy::PolicyHandlerInterface& policy_handler)
     : RequestFromMobileImpl(message,
-                        application_manager,
-                        rpc_service,
-                        hmi_capabilities,
-                        policy_handler)
+                            application_manager,
+                            rpc_service,
+                            hmi_capabilities,
+                            policy_handler)
     , awaiting_ui_alert_response_(false)
     , awaiting_tts_speak_response_(false)
     , awaiting_tts_stop_speaking_response_(false)
@@ -130,8 +130,8 @@ void AlertRequest::OnTimeOut() {
     return;
   }
   LOG4CXX_INFO(logger_,
-      "Default timeout ignored. "
-      "AlertRequest with soft buttons wait timeout on HMI side");
+               "Default timeout ignored. "
+               "AlertRequest with soft buttons wait timeout on HMI side");
 }
 
 void AlertRequest::on_event(const event_engine::Event& event) {

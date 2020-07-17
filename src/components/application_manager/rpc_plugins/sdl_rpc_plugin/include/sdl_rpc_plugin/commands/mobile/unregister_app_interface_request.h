@@ -58,10 +58,10 @@ class UnregisterAppInterfaceRequest
       app_mngr::HMICapabilities& hmi_capabilities,
       policy::PolicyHandlerInterface& policy_handler)
       : RequestFromMobileImpl(message,
-                          application_manager,
-                          rpc_service,
-                          hmi_capabilities,
-                          policy_handler) {}
+                              application_manager,
+                              rpc_service,
+                              hmi_capabilities,
+                              policy_handler) {}
 
   /**
    * \brief UnregisterAppInterfaceRequest class destructor

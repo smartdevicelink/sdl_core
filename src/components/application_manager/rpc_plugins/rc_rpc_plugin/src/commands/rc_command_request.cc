@@ -225,8 +225,7 @@ void RCCommandRequest::ProcessAccessResponse(
     const app_mngr::event_engine::Event& event) {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  auto app =
-      application_manager_.application(connection_key());
+  auto app = application_manager_.application(connection_key());
   const std::string module_type = ModuleType();
   const std::string module_id = ModuleId();
 

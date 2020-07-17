@@ -102,7 +102,7 @@ void DeleteCommandRequest::Run() {
   /* Need to set all flags before sending request to HMI
    * for correct processing this flags in method on_event */
   if ((*command).keyExists(strings::menu_params)) {
-   StartAwaitForInterface(HmiInterfaces::HMI_INTERFACE_UI);
+    StartAwaitForInterface(HmiInterfaces::HMI_INTERFACE_UI);
     SendHMIRequest(hmi_apis::FunctionID::UI_DeleteCommand, &msg_params, true);
   }
   // check vr params

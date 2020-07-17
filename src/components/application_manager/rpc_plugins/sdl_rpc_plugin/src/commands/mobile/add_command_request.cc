@@ -183,8 +183,8 @@ void AddCommandRequest::Run() {
           (*message_)[strings::msg_params][strings::cmd_icon];
     }
 
-   ui_is_sent_ = true;
-   StartAwaitForInterface(HmiInterfaces::HMI_INTERFACE_UI);
+    ui_is_sent_ = true;
+    StartAwaitForInterface(HmiInterfaces::HMI_INTERFACE_UI);
   }
 
   smart_objects::SmartObject vr_msg_params =
@@ -605,8 +605,8 @@ void AddCommandRequest::RemoveCommand() {
 
   app->RemoveCommand(cmd_id);
 
-  if (BothSend() && (IsInterfaceAwaited(HmiInterfaces::HMI_INTERFACE_VR)
-                     && IsInterfaceAwaited(HmiInterfaces::HMI_INTERFACE_UI))) {
+  if (BothSend() && (IsInterfaceAwaited(HmiInterfaces::HMI_INTERFACE_VR) &&
+                     IsInterfaceAwaited(HmiInterfaces::HMI_INTERFACE_UI))) {
     // in case we have send bth UI and VR and no one respond
     // we have nothing to remove from HMI so no DeleteCommand expected
     return;

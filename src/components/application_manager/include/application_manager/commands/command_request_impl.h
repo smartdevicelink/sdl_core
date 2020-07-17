@@ -28,15 +28,15 @@
 #ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_COMMAND_REQUEST_IMPL_H_
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_COMMAND_REQUEST_IMPL_H_
 
+#include "application_manager/application_manager.h"
 #include "application_manager/commands/command_impl.h"
+#include "application_manager/event_engine/event_observer.h"
+#include "application_manager/hmi_interfaces.h"
+#include "application_manager/smart_object_keys.h"
 #include "interfaces/HMI_API.h"
 #include "interfaces/MOBILE_API.h"
 #include "smart_objects/smart_object.h"
 #include "utils/lock.h"
-#include "application_manager/event_engine/event_observer.h"
-#include "application_manager/application_manager.h"
-#include "application_manager/smart_object_keys.h"
-#include "application_manager/hmi_interfaces.h"
 
 #include <memory>
 
@@ -74,8 +74,8 @@ class CommandRequestImpl : public CommandImpl,
   virtual ~CommandRequestImpl();
 
   /**
-    * @brief Checks command permissions according to policy table
-    */
+   * @brief Checks command permissions according to policy table
+   */
   bool CheckPermissions() OVERRIDE;
 
   void SendMobileRequest(const mobile_apis::FunctionID::eType& function_id,
@@ -83,22 +83,22 @@ class CommandRequestImpl : public CommandImpl,
                          bool use_events = false);
 
   /**
-    * @brief Checks Mobile result code for single RPC
-    * @param result_code contains result code from response to Mobile
-    * @return true if result code complies to successful result codes,
-    * false otherwise.
-    **/
-   static bool IsMobileResultSuccess(
-       const mobile_apis::Result::eType result_code);
+   * @brief Checks Mobile result code for single RPC
+   * @param result_code contains result code from response to Mobile
+   * @return true if result code complies to successful result codes,
+   * false otherwise.
+   **/
+  static bool IsMobileResultSuccess(
+      const mobile_apis::Result::eType result_code);
 
   /**
-    * @brief Checks HMI result code for single RPC
-    * @param result_code contains result code from HMI response
-    * @return true if result code complies to successful result codes,
-    * false otherwise.
-    **/
-   static bool IsHMIResultSuccess(
-       const hmi_apis::Common_Result::eType result_code);
+   * @brief Checks HMI result code for single RPC
+   * @param result_code contains result code from HMI response
+   * @return true if result code complies to successful result codes,
+   * false otherwise.
+   **/
+  static bool IsHMIResultSuccess(
+      const hmi_apis::Common_Result::eType result_code);
 
   /**
    * @brief Init required by command resources
@@ -125,8 +125,8 @@ class CommandRequestImpl : public CommandImpl,
   virtual void on_event(const event_engine::MobileEvent& event);
 
   /*
-  * @brief Retrieves correlation ID
-  */
+   * @brief Retrieves correlation ID
+   */
   uint32_t correlation_id() const OVERRIDE;
 
   /*
@@ -173,18 +173,19 @@ class CommandRequestImpl : public CommandImpl,
 #endif  // __QNX__
 
   /**
- * @brief AllowedToTerminate tells request Controller if it can terminate this
- * request by response.
- * By default, RequestCtrl should terminate all requests by their responses.
- *  If request need to terminate itself, it should override this function false
- * @return allowed_to_terminate_ value
- */
+   * @brief AllowedToTerminate tells request Controller if it can terminate this
+   * request by response.
+   * By default, RequestCtrl should terminate all requests by their responses.
+   *  If request need to terminate itself, it should override this function
+   * false
+   * @return allowed_to_terminate_ value
+   */
   bool AllowedToTerminate() OVERRIDE;
 
   /**
-  * @brief SetAllowedToTerminate set up allowed to terminate flag.
-  * If true, request controller will terminate request on response
-  */
+   * @brief SetAllowedToTerminate set up allowed to terminate flag.
+   * If true, request controller will terminate request on response
+   */
   void SetAllowedToTerminate(const bool allowed) OVERRIDE;
 
  protected:
@@ -212,10 +213,10 @@ class CommandRequestImpl : public CommandImpl,
   bool IsInterfaceAwaited(const HmiInterfaces::InterfaceID& interface_id) const;
 
   /**
-  * @brief Stops SDL awaiting from given HMI interface
-  * @param interface_id interface from which SDL no longer awaits
-  * for response in given time
-  */
+   * @brief Stops SDL awaiting from given HMI interface
+   * @param interface_id interface from which SDL no longer awaits
+   * for response in given time
+   */
   void EndAwaitForInterface(const HmiInterfaces::InterfaceID& interface_id);
 
   /**
@@ -234,16 +235,14 @@ class CommandRequestImpl : public CommandImpl,
    * @param message Message to replace its ids
    * @return True if replacement succeeded, otherwise - false
    */
-  bool ReplaceMobileWithHMIAppId(
-      smart_objects::SmartObject& message) OVERRIDE;
+  bool ReplaceMobileWithHMIAppId(smart_objects::SmartObject& message) OVERRIDE;
 
   /**
    * @brief Parses message from HMI and replaces HMI app id with mobile app id
    * @param message Message to replace its ids
    * @return True if replacement succeeded, otherwise - false
    */
-  bool ReplaceHMIWithMobileAppId(
-      smart_objects::SmartObject& message) OVERRIDE;
+  bool ReplaceHMIWithMobileAppId(smart_objects::SmartObject& message) OVERRIDE;
 
   /**
    * @brief Returns current state of request
@@ -258,7 +257,6 @@ class CommandRequestImpl : public CommandImpl,
    * kResponded
    */
   virtual void set_current_state(const RequestState state);
-
 
   /**
    * @brief This set stores all the interfaces which are awaited by SDL to
@@ -281,4 +279,4 @@ class CommandRequestImpl : public CommandImpl,
 
 }  // namespace commands
 }  // namespace application_manager
-#endif // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_COMMAND_REQUEST_IMPL_H_
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_COMMAND_REQUEST_IMPL_H_

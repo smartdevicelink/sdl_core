@@ -113,7 +113,6 @@ using event_engine_test::MockEventDispatcher;
 class RequestToHMITest : public CommandsTest<CommandsTestMocks::kIsNice> {};
 
 TEST_F(RequestToHMITest, BasicMethodsOverloads_SUCCESS) {
-
   InitEventDispatcher();
   std::shared_ptr<am_commands::RequestToHMI> command(
       CreateCommand<am_commands::RequestToHMI>());

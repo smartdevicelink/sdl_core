@@ -26,10 +26,10 @@
  */
 
 #include "application_manager/commands/command_request_impl.h"
+#include "application_manager/application_impl.h"
 #include "application_manager/message_helper.h"
 #include "application_manager/rpc_service.h"
 #include "smart_objects/smart_object.h"
-#include "application_manager/application_impl.h"
 
 #include "smart_objects/enum_schema_item.h"
 
@@ -42,7 +42,7 @@ struct AppExtensionPredicate {
     return app ? (app->QueryInterface(uid).use_count() != 0) : false;
   }
 };
-}
+}  // namespace
 
 namespace commands {
 
@@ -156,14 +156,14 @@ void CommandRequestImpl::on_event(const event_engine::MobileEvent&) {}
 
 void CommandRequestImpl::HandleTimeOut() {
   LOG4CXX_AUTO_TRACE(logger_);
-    {
-      sync_primitives::AutoLock auto_lock(*state_lock_);
-      if (helpers::Compare<RequestState, helpers::EQ, helpers::ONE>(
-              current_state(),
-              RequestState::kHandlingResponse,
-              RequestState::kResponded)) {
-        LOG4CXX_DEBUG(logger_, "Current request state = Responding/Responded");
-        return;
+  {
+    sync_primitives::AutoLock auto_lock(*state_lock_);
+    if (helpers::Compare<RequestState, helpers::EQ, helpers::ONE>(
+            current_state(),
+            RequestState::kHandlingResponse,
+            RequestState::kResponded)) {
+      LOG4CXX_DEBUG(logger_, "Current request state = Responding/Responded");
+      return;
     }
     set_current_state(RequestState::kTimedOut);
   }
@@ -270,4 +270,4 @@ void CommandRequestImpl::OnHMIMessageSent() {}
 #endif  // __QNX__
 
 }  // namespace commands
-} // namespace application_manager
+}  // namespace application_manager

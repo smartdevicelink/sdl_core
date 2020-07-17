@@ -35,7 +35,6 @@
 #define SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_MOBILE_PERFORM_AUDIO_PASS_THRU_REQUEST_H_
 
 #include "application_manager/commands/request_from_mobile_impl.h"
-#include "utils/macro.h"
 #include "interfaces/MOBILE_API.h"
 #include "utils/macro.h"
 

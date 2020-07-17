@@ -45,7 +45,8 @@ namespace commands {
 /**
  * @brief UnsubscribeButtonRequest command class
  **/
-class UnsubscribeButtonRequest : public app_mngr::commands::RequestFromMobileImpl {
+class UnsubscribeButtonRequest
+    : public app_mngr::commands::RequestFromMobileImpl {
  public:
   /**
    * @brief UnsubscribeButtonRequest class constructor

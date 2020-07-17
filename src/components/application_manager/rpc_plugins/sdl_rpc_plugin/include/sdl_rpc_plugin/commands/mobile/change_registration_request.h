@@ -36,8 +36,8 @@
 
 #include <strings.h>
 
-#include "application_manager/commands/request_from_mobile_impl.h"
 #include "application_manager/commands/pending.h"
+#include "application_manager/commands/request_from_mobile_impl.h"
 #include "utils/custom_string.h"
 #include "utils/macro.h"
 
@@ -51,7 +51,8 @@ namespace custom_str = utils::custom_string;
 /**
  * @brief ChangeRegistrationRequest command class
  **/
-class ChangeRegistrationRequest : public app_mngr::commands::RequestFromMobileImpl {
+class ChangeRegistrationRequest
+    : public app_mngr::commands::RequestFromMobileImpl {
  public:
   /**
    * @brief ChangeRegistrationRequest class constructor

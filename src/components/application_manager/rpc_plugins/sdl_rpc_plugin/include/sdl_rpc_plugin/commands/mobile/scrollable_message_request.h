@@ -46,7 +46,8 @@ namespace commands {
 /**
  * @brief scrollable message request command class
  **/
-class ScrollableMessageRequest : public app_mngr::commands::RequestFromMobileImpl {
+class ScrollableMessageRequest
+    : public app_mngr::commands::RequestFromMobileImpl {
  public:
   /**
    * @brief ScrollableMessageRequest class constructor

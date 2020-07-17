@@ -47,10 +47,10 @@
 #include "interfaces/HMI_API.h"
 #include "interfaces/MOBILE_API.h"
 
+#include "application_manager/event_engine/event_dispatcher_impl.h"
 #include "application_manager/request_controller_settings.h"
 #include "application_manager/request_info.h"
 #include "application_manager/request_tracker.h"
-#include "application_manager/event_engine/event_dispatcher_impl.h"
 
 namespace application_manager {
 
@@ -85,9 +85,9 @@ class RequestController {
   // Methods
 
   /**
-  * @brief Class constructor
-  *
-  */
+   * @brief Class constructor
+   *
+   */
   RequestController(const RequestControlerSettings& settings,
                     event_engine::EventDispatcher& event_observer);
 

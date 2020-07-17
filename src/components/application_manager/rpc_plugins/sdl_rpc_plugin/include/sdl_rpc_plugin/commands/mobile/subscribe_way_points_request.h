@@ -43,7 +43,8 @@ namespace commands {
 /**
  * @brief SubsribeWayPointsRequest command class
  **/
-class SubscribeWayPointsRequest : public app_mngr::commands::RequestFromMobileImpl {
+class SubscribeWayPointsRequest
+    : public app_mngr::commands::RequestFromMobileImpl {
  public:
   /**
    * \brief SubscribeWayPointsRequest class constructor

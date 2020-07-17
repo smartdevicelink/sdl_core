@@ -44,7 +44,8 @@ namespace commands {
 /**
  * @brief CancelInteractionRequest command class
  **/
-class CancelInteractionRequest : public app_mngr::commands::RequestFromMobileImpl {
+class CancelInteractionRequest
+    : public app_mngr::commands::RequestFromMobileImpl {
  public:
   /**
    * @brief CancelInteractionRequest class constructor

@@ -68,10 +68,10 @@ PutFileRequest::PutFileRequest(
     app_mngr::HMICapabilities& hmi_capabilities,
     policy::PolicyHandlerInterface& policy_handler)
     : RequestFromMobileImpl(message,
-                        application_manager,
-                        rpc_service,
-                        hmi_capabilities,
-                        policy_handler)
+                            application_manager,
+                            rpc_service,
+                            hmi_capabilities,
+                            policy_handler)
     , offset_(0)
     , sync_file_name_()
     , length_(0)

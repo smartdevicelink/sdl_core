@@ -44,7 +44,8 @@ namespace commands {
 /**
  * @brief PublishAppServiceRequest command class
  **/
-class PublishAppServiceRequest : public app_mngr::commands::RequestFromMobileImpl {
+class PublishAppServiceRequest
+    : public app_mngr::commands::RequestFromMobileImpl {
  public:
   /**
    * @brief PublishAppServiceRequest class constructor

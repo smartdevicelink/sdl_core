@@ -35,11 +35,11 @@
 #include <string>
 #include "utils/macro.h"
 
-#include "application_manager/commands/request_from_mobile_impl.h"
 #include "application_manager/app_service_manager.h"
 #include "application_manager/application_manager.h"
-#include "application_manager/rpc_service.h"
+#include "application_manager/commands/request_from_mobile_impl.h"
 #include "application_manager/message_helper.h"
+#include "application_manager/rpc_service.h"
 #include "smart_objects/smart_object.h"
 
 namespace application_manager {
@@ -111,7 +111,8 @@ const std::string CreateInfoForUnsupportedResult(
   }
 }
 
-bool RequestFromMobileImpl::CheckResultCode(const ResponseInfo& first, const ResponseInfo& second) const {
+bool RequestFromMobileImpl::CheckResultCode(const ResponseInfo& first,
+                                            const ResponseInfo& second) const {
   if (first.is_ok && second.is_unsupported_resource) {
     return true;
   }
@@ -357,7 +358,6 @@ smart_objects::SmartObject CreateUnsupportedResourceResponse(
   return response;
 }
 
-
 bool RequestFromMobileImpl::ProcessHMIInterfacesAvailability(
     const uint32_t hmi_correlation_id,
     const hmi_apis::FunctionID::eType& function_id) {
@@ -460,7 +460,8 @@ uint32_t RequestFromMobileImpl::SendHMIRequest(
 
 void RequestFromMobileImpl::CreateHMINotification(
     const hmi_apis::FunctionID::eType& function_id,
-    const ns_smart_device_link::ns_smart_objects::SmartObject& msg_params) const {
+    const ns_smart_device_link::ns_smart_objects::SmartObject& msg_params)
+    const {
   smart_objects::SmartObjectSPtr result =
       std::make_shared<smart_objects::SmartObject>();
   if (!result) {
@@ -612,8 +613,7 @@ bool RequestFromMobileImpl::CheckHMICapabilities(
     return false;
   }
 
-  const auto button_capabilities_so =
-      hmi_capabilities_.button_capabilities();
+  const auto button_capabilities_so = hmi_capabilities_.button_capabilities();
   if (!button_capabilities_so) {
     LOG4CXX_ERROR(logger_, "Invalid button capabilities object");
     return false;

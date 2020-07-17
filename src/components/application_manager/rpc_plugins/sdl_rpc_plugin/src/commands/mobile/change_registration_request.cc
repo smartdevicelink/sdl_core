@@ -44,7 +44,8 @@
 namespace {
 namespace custom_str = utils::custom_string;
 struct IsSameNickname {
-  IsSameNickname(const custom_str::CustomString& app_name) : app_name(app_name) {}
+  IsSameNickname(const custom_str::CustomString& app_name)
+      : app_name(app_name) {}
   bool operator()(const policy::StringArray::value_type& nickname) const {
     return app_name.CompareIgnoreCase(nickname.c_str());
   }
@@ -66,10 +67,10 @@ ChangeRegistrationRequest::ChangeRegistrationRequest(
     HMICapabilities& hmi_capabilities,
     policy::PolicyHandlerInterface& policy_handler)
     : RequestFromMobileImpl(message,
-                        application_manager,
-                        rpc_service,
-                        hmi_capabilities,
-                        policy_handler)
+                            application_manager,
+                            rpc_service,
+                            hmi_capabilities,
+                            policy_handler)
     , ui_result_(hmi_apis::Common_Result::INVALID_ENUM)
     , vr_result_(hmi_apis::Common_Result::INVALID_ENUM)
     , tts_result_(hmi_apis::Common_Result::INVALID_ENUM) {}
@@ -285,7 +286,7 @@ void ChangeRegistrationRequest::on_event(const event_engine::Event& event) {
   }
 
   ApplicationSharedPtr application =
-    application_manager_.application(connection_key());
+      application_manager_.application(connection_key());
 
   if (!application) {
     LOG4CXX_ERROR(logger_, "NULL pointer");
@@ -295,22 +296,22 @@ void ChangeRegistrationRequest::on_event(const event_engine::Event& event) {
   if (hmi_apis::Common_Result::SUCCESS == ui_result_) {
     application->set_ui_language(static_cast<mobile_api::Language::eType>(
         (*message_)[strings::msg_params][strings::hmi_display_language]
-           .asInt()));
+            .asInt()));
   }
 
   if (hmi_apis::Common_Result::SUCCESS == vr_result_ ||
-     hmi_apis::Common_Result::SUCCESS == tts_result_) {
+      hmi_apis::Common_Result::SUCCESS == tts_result_) {
     application->set_language(static_cast<mobile_api::Language::eType>(
-      (*message_)[strings::msg_params][strings::language].asInt()));
+        (*message_)[strings::msg_params][strings::language].asInt()));
   }
 
-   mobile_apis::Result::eType result_code = mobile_apis::Result::INVALID_ENUM;
-   std::string response_info;
-   const bool result = PrepareResponseParameters(result_code, response_info);
-   SendResponse(result,
-                result_code,
-                response_info.empty() ? NULL : response_info.c_str(),
-                &(message[strings::msg_params]));
+  mobile_apis::Result::eType result_code = mobile_apis::Result::INVALID_ENUM;
+  std::string response_info;
+  const bool result = PrepareResponseParameters(result_code, response_info);
+  SendResponse(result,
+               result_code,
+               response_info.empty() ? NULL : response_info.c_str(),
+               &(message[strings::msg_params]));
 }
 
 namespace {

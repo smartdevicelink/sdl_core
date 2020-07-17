@@ -52,10 +52,10 @@ RequestFromHMI::RequestFromHMI(const MessageSharedPtr& message,
                                HMICapabilities& hmi_capabilities,
                                policy::PolicyHandlerInterface& policy_handler)
     : CommandRequestImpl(message,
-                  application_manager,
-                  rpc_service,
-                  hmi_capabilities,
-                  policy_handler) {
+                         application_manager,
+                         rpc_service,
+                         hmi_capabilities,
+                         policy_handler) {
   // Replace HMI app id with Mobile connection id
   ReplaceHMIWithMobileAppId(*message);
 }

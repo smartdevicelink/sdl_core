@@ -35,9 +35,9 @@
 #include <string>
 
 #include "application_manager/commands/command_impl.h"
-#include "application_manager/commands/request_from_mobile_impl.h"
 #include "application_manager/commands/command_request_test.h"
 #include "application_manager/commands/commands_test.h"
+#include "application_manager/commands/request_from_mobile_impl.h"
 #include "gtest/gtest.h"
 #include "utils/lock.h"
 
@@ -70,7 +70,6 @@ using ::testing::Return;
 using ::testing::SaveArg;
 using ::testing::SetArgReferee;
 
-using am::commands::RequestFromMobileImpl;
 using am::ApplicationManager;
 using am::ApplicationSet;
 using am::CommandParametersPermissions;
@@ -79,6 +78,7 @@ using am::RPCParams;
 using am::commands::CommandImpl;
 using am::commands::CommandRequestImpl;
 using am::commands::MessageSharedPtr;
+using am::commands::RequestFromMobileImpl;
 using am::event_engine::EventObserver;
 using test::components::application_manager_test::MockAppServiceManager;
 
@@ -122,7 +122,7 @@ class RequestFromMobileImplTest
 
     const RequestState get_current_state() const {
       return am::commands::CommandRequestImpl::current_state();
-   }
+    }
 
     void change_current_state(const RequestState state) {
       am::commands::CommandRequestImpl::set_current_state(state);

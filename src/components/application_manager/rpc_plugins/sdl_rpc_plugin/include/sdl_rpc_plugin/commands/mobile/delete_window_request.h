@@ -45,8 +45,7 @@ namespace commands {
 /**
  * @brief CreateWindow request command class
  **/
-class DeleteWindowRequest : public app_mngr::commands::RequestFromMobileImpl
-{
+class DeleteWindowRequest : public app_mngr::commands::RequestFromMobileImpl {
  public:
   DeleteWindowRequest(const app_mngr::commands::MessageSharedPtr& message,
                       app_mngr::ApplicationManager& application_manager,

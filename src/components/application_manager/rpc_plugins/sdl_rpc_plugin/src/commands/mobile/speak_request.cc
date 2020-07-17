@@ -36,8 +36,8 @@
 
 #include "application_manager/application_impl.h"
 #include "application_manager/message_helper.h"
-#include "utils/helpers.h"
 #include "interfaces/HMI_API.h"
+#include "utils/helpers.h"
 
 namespace sdl_rpc_plugin {
 using namespace application_manager;
@@ -51,10 +51,10 @@ SpeakRequest::SpeakRequest(
     app_mngr::HMICapabilities& hmi_capabilities,
     policy::PolicyHandlerInterface& policy_handler)
     : RequestFromMobileImpl(message,
-                         application_manager,
-                         rpc_service,
-                         hmi_capabilities,
-                         policy_handler) {
+                            application_manager,
+                            rpc_service,
+                            hmi_capabilities,
+                            policy_handler) {
   subscribe_on_event(hmi_apis::FunctionID::TTS_OnResetTimeout);
 }
 

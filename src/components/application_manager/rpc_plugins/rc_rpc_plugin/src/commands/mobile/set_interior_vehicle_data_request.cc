@@ -373,7 +373,7 @@ AcquireResult::eType SetInteriorVehicleDataRequest::AcquireResource(
   LOG4CXX_AUTO_TRACE(logger_);
   const std::string module_type = ModuleType();
   app_mngr::ApplicationSharedPtr app =
-     application_manager_.application(RequestFromMobileImpl::connection_key());
+      application_manager_.application(RequestFromMobileImpl::connection_key());
 
   return resource_allocation_manager_.AcquireResource(
       module_type, ModuleId(), app->app_id());

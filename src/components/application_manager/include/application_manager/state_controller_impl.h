@@ -114,7 +114,7 @@ class StateControllerImpl : public event_engine::EventObserver,
   void HandleOnEvent(const event_engine::Event& event) OVERRIDE;
   void HandleOnEvent(const event_engine::MobileEvent& event) OVERRIDE;
 
-  void  OnTimeOutActivateAppRequest(const uint32_t hmi_app_id) OVERRIDE;
+  void OnTimeOutActivateAppRequest(const uint32_t hmi_app_id) OVERRIDE;
 
   void OnAppWindowAdded(
       ApplicationSharedPtr app,
