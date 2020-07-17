@@ -597,12 +597,24 @@ class CacheManager : public CacheManagerInterface {
                                 bool* out_app_permissions_changed);
 
   /**
+   * @brief Set preloaded_pt flag value in policy table
+   * @param is_preloaded value to set
+   */
+  void SetPreloadedPtFlag(const bool is_preloaded) OVERRIDE;
+
+  /**
    * @brief Records information about head unit system to PT
    * @return bool Success of operation
    */
   bool SetMetaInfo(const std::string& ccpu_version,
                    const std::string& wers_country_code,
                    const std::string& language);
+
+  /**
+   * @brief Get information about last ccpu_version from PT
+   * @return ccpu_version from PT
+   */
+  std::string GetCCPUVersionFromPT() const;
 
   /**
    * @brief Checks, if specific head unit is present in PT
