@@ -4204,10 +4204,9 @@
       </param>
       <param name="appID" type="Integer" mandatory="false">
         <description>
-                In case the ButtonName is CUSTOM_BUTTON or OK, HMI must include appID parameters to OnButtonPress notification sent to SDL.
                 If appID is not sent together with CUSTOM_BUTTON, this notification will be ignored by SDL.
                 If appID is present for OK button -> SDL transfers notification to the named app only if it is in FULL or LIMITED (ignores if app is in NONE or BACKGROUND).
-                If appID is omited for OK button -> SDL transfers notification to app in FULL
+                If appID is omitted for OK button -> SDL transfers notification to app in FULL
         </description>
       </param>
     </function>
@@ -4221,10 +4220,9 @@
         </param>
         <param name="appID" type="Integer" mandatory="false">
             <description>
-                In case the ButtonName is CUSTOM_BUTTON or OK, HMI must include appID parameters to OnButtonEvent notification sent to SDL.
                 If appID is not sent together with CUSTOM_BUTTON, this notification will be ignored by SDL.
                 If appID is present for OK button -> SDL transfers notification to the named app only if it is in FULL or LIMITED (ignores if app is in NONE or BACKGROUND).
-                If appID is omited for OK button -> SDL transfers notification to app in FULL
+                If appID is omitted for OK button -> SDL transfers notification to app in FULL
             </description>
         </param>
     </function>
