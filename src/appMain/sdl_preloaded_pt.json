@@ -91,6 +91,13 @@
                             "BACKGROUND"
                         ]
                     },
+                    "OnSubtleAlertPressed": {
+                        "hmi_levels": [
+                            "FULL",
+                            "LIMITED",
+                            "BACKGROUND"
+                        ]
+                    },
                     "ChangeRegistration": {
                         "hmi_levels": [
                             "BACKGROUND",
