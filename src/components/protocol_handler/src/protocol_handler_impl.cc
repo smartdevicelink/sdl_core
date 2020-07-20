@@ -61,7 +61,7 @@ std::string ConvertPacketDataToString(const uint8_t* data,
 
 const size_t kStackSize = 131072;
 
-utils::SemanticVersion default_protocol_version(5, 2, 0);
+utils::SemanticVersion default_protocol_version(5, 3, 0);
 utils::SemanticVersion min_multiple_transports_version(5, 1, 0);
 utils::SemanticVersion min_cloud_app_version(5, 2, 0);
 
