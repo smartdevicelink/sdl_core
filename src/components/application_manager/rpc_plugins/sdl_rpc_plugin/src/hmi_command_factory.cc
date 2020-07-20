@@ -231,6 +231,7 @@
 #include "sdl_rpc_plugin/commands/hmi/on_ui_keyboard_input_notification.h"
 #include "sdl_rpc_plugin/commands/hmi/on_ui_language_change_notification.h"
 #include "sdl_rpc_plugin/commands/hmi/on_ui_reset_timeout_notification.h"
+#include "sdl_rpc_plugin/commands/hmi/on_ui_subtle_alert_pressed_notification.h"
 #include "sdl_rpc_plugin/commands/hmi/on_ui_touch_event_notification.h"
 #include "sdl_rpc_plugin/commands/hmi/on_vr_command_notification.h"
 #include "sdl_rpc_plugin/commands/hmi/on_vr_language_change_notification.h"
@@ -929,6 +930,9 @@ CommandCreator& HMICommandFactory::get_creator_factory(
     }
     case hmi_apis::FunctionID::BasicCommunication_OnAppPropertiesChange: {
       return factory.GetCreator<commands::OnAppPropertiesChangeNotification>();
+    }
+    case hmi_apis::FunctionID::UI_OnSubtleAlertPressed: {
+      return factory.GetCreator<commands::OnUISubtleAlertPressedNotification>();
     }
     default: { return factory.GetCreator<InvalidCommand>(); }
   }
