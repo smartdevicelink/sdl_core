@@ -315,7 +315,8 @@ class ResumeCtrlImpl : public ResumeCtrl,
                               const std::string& device_id) const OVERRIDE;
 
   void StartWaitingForDisplayCapabilitiesUpdate(
-      app_mngr::ApplicationSharedPtr application) OVERRIDE;
+      app_mngr::ApplicationSharedPtr application,
+      const bool is_resume_app) OVERRIDE;
 
   /**
    * @brief geter for launch_time_

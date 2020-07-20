@@ -772,7 +772,7 @@ bool ResumeCtrlImpl::RestoreApplicationData(ApplicationSharedPtr application,
 }
 
 void ResumeCtrlImpl::StartWaitingForDisplayCapabilitiesUpdate(
-    app_mngr::ApplicationSharedPtr application) {
+    app_mngr::ApplicationSharedPtr application, const bool is_resume_app) {
   LOG4CXX_AUTO_TRACE(logger_);
   smart_objects::SmartObject saved_app(smart_objects::SmartType_Map);
   resumption_storage_->GetSavedApplication(
@@ -786,7 +786,7 @@ void ResumeCtrlImpl::StartWaitingForDisplayCapabilitiesUpdate(
   auto& builder = application->display_capabilities_builder();
 
   smart_objects::SmartObject windows_info(smart_objects::SmartType_Null);
-  if (saved_app.keyExists(strings::windows_info)) {
+  if (is_resume_app && saved_app.keyExists(strings::windows_info)) {
     windows_info = saved_app[strings::windows_info];
   }
   builder.InitBuilder(resume_callback, windows_info);

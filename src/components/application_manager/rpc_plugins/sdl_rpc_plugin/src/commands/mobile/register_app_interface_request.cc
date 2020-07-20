@@ -355,20 +355,6 @@ bool RegisterAppInterfaceRequest::ApplicationDataShouldBeResumed(
   application->set_app_data_resumption_allowance(true);
   application->set_is_resuming(true);
 
-  // In case application exist in resumption we need to send resumeVrgrammars
-  const bool is_app_saved_in_resumption = resumer.IsApplicationSaved(
-      application->policy_app_id(), application->mac_address());
-
-  // If app is in resuming state
-  // DisplayCapabilitiesBuilder has to collect all the information
-  // from incoming HMI notifications and send only one notification
-  // to mobile app, even if hash does not match, which means that app data
-  // will not be resumed, notification should be sent for default window as
-  // it will be resumed in any case
-  if (resumption || is_app_saved_in_resumption) {
-    resumer.StartWaitingForDisplayCapabilitiesUpdate(application);
-  }
-
   return true;
 }
 
@@ -513,6 +499,11 @@ void FinishSendingResponseToMobile(const smart_objects::SmartObject& msg_params,
   // Default HMI level should be set before any permissions validation, since
   // it relies on HMI level.
   app_manager.OnApplicationRegistered(application);
+
+  // Once HMI level is set we can safely forward system capabilities for the
+  // main window and it won't be blocked by policies
+  application->display_capabilities_builder().StopWaitingForWindow(
+      mobile_apis::PredefinedWindows::DEFAULT_WINDOW);
 
   if (notify_upd_manager) {
     (*notify_upd_manager)();
@@ -751,6 +742,17 @@ void RegisterAppInterfaceRequest::Run() {
 
   std::string add_info;
   const auto is_resumption_required = ApplicationDataShouldBeResumed(add_info);
+
+  auto& resume_ctrl = application_manager_.resume_controller();
+
+  // DisplayCapabilitiesBuilder has to collect all the information
+  // from incoming HMI notifications and send only one notification
+  // to mobile app, even if hash does not match, which means that app data
+  // will not be resumed, notification should be sent for default window as
+  // it will be resumed in any case
+  resume_ctrl.StartWaitingForDisplayCapabilitiesUpdate(application,
+                                                       is_resumption_required);
+
   SendOnAppRegisteredNotificationToHMI(
       application, is_resumption_required && !is_resumption_failed_);
 
@@ -769,7 +771,6 @@ void RegisterAppInterfaceRequest::Run() {
         connection_key(), correlation_id(), 0);
     sleep(1);
 
-    auto& resume_ctrl = application_manager_.resume_controller();
     const auto& msg_params = (*message_)[strings::msg_params];
     const auto& hash_id = msg_params[strings::hash_id].asString();
     LOG4CXX_WARN(logger_, "Start Data Resumption");

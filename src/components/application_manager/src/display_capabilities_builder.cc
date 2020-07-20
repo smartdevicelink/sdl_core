@@ -91,17 +91,62 @@ void DisplayCapabilitiesBuilder::UpdateDisplayCapabilities(
   *display_capabilities_ = incoming_display_capabilities;
   (*display_capabilities_)[0][strings::window_capabilities] = cur_window_caps;
 
-  if (window_ids_to_resume_.empty()) {
-    LOG4CXX_TRACE(logger_, "Invoking resume callback");
-    resume_callback_(owner_, *display_capabilities_);
-    display_capabilities_.reset();
-  }
-}  // namespace application_manager
+  InvokeCallbackFunction();
+}
 
 const smart_objects::SmartObjectSPtr
 DisplayCapabilitiesBuilder::display_capabilities() const {
   LOG4CXX_AUTO_TRACE(logger_);
   return display_capabilities_;
+}
+
+void DisplayCapabilitiesBuilder::InvokeCallbackFunction() {
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  if (!window_ids_to_resume_.empty()) {
+    LOG4CXX_DEBUG(logger_, "Still waiting for another windows capabilities");
+    return;
+  }
+
+  if (!display_capabilities_) {
+    LOG4CXX_DEBUG(logger_, "Cached display capabilities are not available");
+    return;
+  }
+
+  if (owner_.hmi_level(kDefaultWindowID) ==
+      mobile_apis::HMILevel::INVALID_ENUM) {
+    LOG4CXX_DEBUG(logger_, "Main window HMI level is not set yet");
+    return;
+  }
+
+  LOG4CXX_TRACE(logger_, "Invoking resume callback");
+  resume_callback_(owner_, *display_capabilities_);
+  display_capabilities_.reset();
+}
+
+bool DisplayCapabilitiesBuilder::IsWaitingForWindowCapabilities(
+    const smart_objects::SmartObject& incoming_display_capabilities) {
+  const auto& inc_window_caps =
+      incoming_display_capabilities[0][strings::window_capabilities];
+
+  sync_primitives::AutoLock lock(display_capabilities_lock_);
+  for (size_t i = 0; i < inc_window_caps.length(); ++i) {
+    const WindowID window_id =
+        inc_window_caps[i].keyExists(strings::window_id)
+            ? inc_window_caps[i][strings::window_id].asInt()
+            : kDefaultWindowID;
+    if (helpers::in_range(window_ids_to_resume_, window_id)) {
+      LOG4CXX_TRACE(
+          logger_,
+          "Application is waiting for capabilities for window " << window_id);
+      return true;
+    }
+  }
+
+  LOG4CXX_TRACE(
+      logger_,
+      "Application is not waiting for any of these windows capabilities");
+  return false;
 }
 
 void DisplayCapabilitiesBuilder::ResetDisplayCapabilities() {
@@ -117,12 +162,8 @@ void DisplayCapabilitiesBuilder::StopWaitingForWindow(
   LOG4CXX_DEBUG(logger_,
                 "Window id " << window_id << " will be erased due to failure");
   window_ids_to_resume_.erase(window_id);
-  if (window_ids_to_resume_.empty()) {
-    LOG4CXX_TRACE(logger_,
-                  window_id << " was the last window pending resumption. "
-                               "Invoking resume callback");
-    resume_callback_(owner_, *display_capabilities_);
-    display_capabilities_.reset();
-  }
+
+  InvokeCallbackFunction();
 }
+
 }  // namespace application_manager

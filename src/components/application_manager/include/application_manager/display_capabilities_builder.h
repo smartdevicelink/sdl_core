@@ -68,6 +68,16 @@ class DisplayCapabilitiesBuilder {
       const smart_objects::SmartObject& display_capabilities);
 
   /**
+   * @brief IsWaitingForWindowCapabilities checks wheter builder is waiting for
+   * a capabilities notification for at least one window or not
+   * @param incoming_display_capabilities capabilities to analyze
+   * @return true if builder is waiting for capabilities for at least one
+   * window, otherwise returns false
+   */
+  bool IsWaitingForWindowCapabilities(
+      const smart_objects::SmartObject& incoming_display_capabilities);
+
+  /**
    * @brief ResetDisplayCapabilities resets stored notification
    */
   void ResetDisplayCapabilities();
@@ -85,6 +95,12 @@ class DisplayCapabilitiesBuilder {
   const smart_objects::SmartObjectSPtr display_capabilities() const;
 
  private:
+  /**
+   * @brief InvokeCallbackFunction invokes callback function if all required
+   * criterias met
+   */
+  void InvokeCallbackFunction();
+
   smart_objects::SmartObjectSPtr display_capabilities_;
   typedef std::set<WindowID> WindowIDsToResume;
   WindowIDsToResume window_ids_to_resume_;

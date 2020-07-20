@@ -320,8 +320,15 @@ class ResumeCtrl {
   virtual int32_t GetSavedAppHmiLevel(const std::string& app_id,
                                       const std::string& device_id) const = 0;
 
+  /**
+   * @brief StartWaitingForDisplayCapabilitiesUpdate add application to
+   * capabilities builder waitlist
+   * @param application application to add
+   * @param is_resume_app flag to check whether app data should be resumed or
+   * not
+   */
   virtual void StartWaitingForDisplayCapabilitiesUpdate(
-      app_mngr::ApplicationSharedPtr application) = 0;
+      app_mngr::ApplicationSharedPtr application, const bool is_resume_app) = 0;
 
   virtual time_t LaunchTime() const = 0;
 
