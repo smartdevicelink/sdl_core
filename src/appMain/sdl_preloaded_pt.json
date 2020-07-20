@@ -3336,7 +3336,7 @@
                     "minvalue": -6,
                     "maxvalue": 106,
                     "deprecated": true,
-                    "since": "6.2"
+                    "since": "7.0"
                 },
                 {
                     "name": "fuelLevel_State",
@@ -3344,7 +3344,7 @@
                     "type": "ComponentVolumeStatus",
                     "mandatory": false,
                     "deprecated": true,
-                    "since": "6.2"
+                    "since": "7.0"
                 },
                 {
                     "name": "instantFuelConsumption",
@@ -3378,14 +3378,14 @@
                             "minvalue": -6,
                             "maxvalue": 1000000,
                             "mandatory": false,
-                            "since": "6.2"
+                            "since": "7.0"
                         },
                         {
                             "name": "levelState",
                             "key": "OEM_REF_FUEL_RAN_LVL_STATE",
                             "type": "ComponentVolumeStatus",
                             "mandatory": false,
-                            "since": "6.2"
+                            "since": "7.0"
                         },
                         {
                             "name": "capacity",
@@ -3394,14 +3394,14 @@
                             "minvalue": 0,
                             "maxvalue": 1000000,
                             "mandatory": false,
-                            "since": "6.2"
+                            "since": "7.0"
                         },
                         {
                             "name": "capacityUnit",
                             "key": "OEM_REF_FUEL_RAN_CAP_UNIT",
                             "type": "CapacityUnit",
                             "mandatory": false,
-                            "since": "6.2"
+                            "since": "7.0"
                         }
                     ],
                     "key": "OEM_REF_FUEL_RAN",
