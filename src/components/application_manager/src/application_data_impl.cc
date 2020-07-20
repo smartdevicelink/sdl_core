@@ -244,6 +244,21 @@ DynamicApplicationDataImpl::~DynamicApplicationDataImpl() {
     show_command_ = NULL;
   }
 
+  if (keyboard_props_) {
+    delete keyboard_props_;
+    keyboard_props_ = NULL;
+  }
+
+  if (menu_title_) {
+    delete menu_title_;
+    menu_title_ = NULL;
+  }
+
+  if (menu_icon_) {
+    delete menu_icon_;
+    menu_icon_ = NULL;
+  }
+
   if (tbt_show_command_) {
     delete tbt_show_command_;
     tbt_show_command_ = NULL;
@@ -262,6 +277,11 @@ DynamicApplicationDataImpl::~DynamicApplicationDataImpl() {
     delete sub_menu_it->second;
   }
   sub_menu_.clear();
+
+  for (auto command : choice_set_map_) {
+    delete command.second;
+  }
+  choice_set_map_.clear();
 
   PerformChoiceSetMap::iterator it = performinteraction_choice_set_map_.begin();
   for (; performinteraction_choice_set_map_.end() != it; ++it) {
@@ -568,28 +588,35 @@ void DynamicApplicationDataImpl::set_display_capabilities(
   display_capabilities_.reset(
       new smart_objects::SmartObject(display_capabilities));
 
-  auto has_window_id = [&tmp_window_capabilities](const WindowID window_id) {
+  auto get_window_index = [&tmp_window_capabilities](const WindowID window_id) {
     const auto tmp_window_capabilities_arr = tmp_window_capabilities.asArray();
     if (!tmp_window_capabilities_arr) {
-      return false;
+      return -1;
     }
 
+    int index = 0;
     for (auto element : *tmp_window_capabilities_arr) {
       if (element.keyExists(strings::window_id)) {
         if (window_id == element[strings::window_id].asInt())
-          return true;
+          return index;
       } else if (window_id == 0) {
-        return true;
+        return index;
       }
+      index++;
     }
-
-    return false;
+    return -1;
   };
 
   for (uint32_t i = 0; i < incoming_window_capabilities.length(); ++i) {
-    const auto window_id =
-        incoming_window_capabilities[i][strings::window_id].asInt();
-    if (!has_window_id(window_id)) {
+    int64_t window_id = 0;
+    if (incoming_window_capabilities[i].keyExists(strings::window_id)) {
+      window_id = incoming_window_capabilities[i][strings::window_id].asInt();
+    }
+    int found_index = get_window_index(window_id);
+    if (0 <= found_index) {
+      // Update the existing window capability
+      tmp_window_capabilities[found_index] = incoming_window_capabilities[i];
+    } else {
       tmp_window_capabilities[tmp_window_capabilities.length()] =
           incoming_window_capabilities[i];
     }

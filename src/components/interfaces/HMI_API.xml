@@ -628,7 +628,7 @@
     <description> Optional location address (if applicable) for SendLocation.</description>
   </element>
   <element name="phoneNumber">
-    <description> Optional hone number of intended location / establishment (if applicable) for SendLocation.</description>
+    <description> Optional phone number of intended location / establishment (if applicable) for SendLocation.</description>
   </element>
   <element name="timeToDestination"/>
     <!-- TO DO to be removed -->
@@ -4150,6 +4150,34 @@
         <element name="BOTH"/>
     </enum>
 
+    <struct name="AppProperties">
+      <param name="nicknames" type="String" minlength="0" maxlength="100" array="true" minsize="0" maxsize="100" mandatory="false">
+          <description>An array of app names an app is allowed to register with. If included in a SetAppProperties request, this value will overwrite the existing "nicknames" field in the app policies section of the policy table.</description>
+      </param>
+      <param name="policyAppID" type="String" maxlength="100" minlength="1" mandatory="true" />
+      <param name="enabled" type="Boolean" mandatory="false">
+          <description>If true, the app will be marked as "available" or "installed" and will be included in HMI RPC UpdateAppList.</description>
+      </param>
+      <param name="authToken" type="String" maxlength="65535" mandatory="false">
+          <description>Used to authenticate connection on app activation</description>
+      </param>
+      <param name="transportType" type="String" maxlength="100" mandatory="false">
+          <description>
+            Specifies the connection type Core should use. The Core role (server or client) is dependent of "endpoint" being specified.
+            See "endpoint" for details.
+          </description>
+      </param>
+      <param name="hybridAppPreference" type="Common.HybridAppPreference" mandatory="false">
+          <description>Specifies the user preference to use one specific app type or all available types</description>
+      </param>
+      <param name="endpoint" type="String" maxlength="65535" mandatory="false">
+          <description>
+            If specified, which Core uses a client implementation of the connection type and attempts to connect to the endpoint when this app is selected (activated).
+            If omitted, Core won't attempt to connect as the app selection (activation) is managed outside of Core. Instead it uses a server implementation of the connection type and expects the app to connect.
+          </description>
+      </param>
+    </struct>
+
 </interface>
 
 <interface name="Buttons" version="1.3.0" date="2017-07-18">
@@ -4322,6 +4350,7 @@
     </function>
     <function name="OnFindApplications" messagetype="notification">
       <description>This method must be invoked by HMI to get list of registered apps.</description>
+      <description>DEPRECATED - This RPC is not implemented</description>
       <param name="deviceInfo" type="Common.DeviceInfo" mandatory="false">
         <description>The name and ID of the device the list of registered applications is required for.</description>
       </param>
@@ -4669,59 +4698,17 @@
     </param>
   </function>
   
-  <struct name="AppProperties">
-    <param name="nicknames" type="String" minlength="0" maxlength="100" array="true" minsize="0" maxsize="100" mandatory="false">
-        <description>An array of app names an app is allowed to register with. If included in a SetAppProperties request, this value will overwrite the existing "nicknames" field in the app policies section of the policy table.</description>
-    </param>
-    <param name="policyAppID" type="String" maxlength="100" minlength="1" mandatory="true" />
-    <param name="enabled" type="Boolean" mandatory="false">
-        <description>If true, the app will be marked as "available" or "installed" and will be included in HMI RPC UpdateAppList.</description>
-    </param>
-    <param name="authToken" type="String" maxlength="65535" mandatory="false">
-        <description>Used to authenticate connection on app activation</description>
-    </param>
-    <param name="transportType" type="String" maxlength="100" mandatory="false">
-        <description>
-          Specifies the connection type Core should use. The Core role (server or client) is dependent of "endpoint" being specified.
-          See "endpoint" for details.
-        </description>
-    </param>
-    <param name="hybridAppPreference" type="Common.HybridAppPreference" mandatory="false">
-        <description>Specifies the user preference to use one specific app type or all available types</description>
-    </param>
-    <param name="endpoint" type="String" maxlength="65535" mandatory="false">
-        <description>
-          If specified, which Core uses a client implementation of the connection type and attempts to connect to the endpoint when this app is selected (activated).
-          If omitted, Core won't attempt to connect as the app selection (activation) is managed outside of Core. Instead it uses a server implementation of the connection type and expects the app to connect.
-        </description>
-    </param>
-  </struct>
-  
   <function name="SetAppProperties" messagetype="request">
     <description>
       HMI >SDL. RPC used to enable/disable an application and set authentication data
     </description>
-    <param name="properties" type="AppProperties" mandatory="true">
+    <param name="properties" type="Common.AppProperties" mandatory="true">
       <description>The new application properties</description>
     </param>
   </function> 
   
   <function name="SetAppProperties" messagetype="response">
     <description>The response to SetAppProperties</description>
-    <param name="success" type="Boolean" platform="documentation" mandatory="true">
-      <description>true if successful; false if failed</description>
-    </param>
-    <param name="resultCode" type="Common.Result" platform="documentation" mandatory="true">
-      <description>See Result</description>
-      <element name="SUCCESS"/>
-      <element name="INVALID_DATA"/>
-      <element name="OUT_OF_MEMORY"/>
-      <element name="TOO_MANY_PENDING_REQUESTS"/>
-      <element name="GENERIC_ERROR"/>
-      <element name="DISALLOWED"/>
-      <element name="WARNINGS"/>
-      <element name="DATA_NOT_AVAILABLE"/>
-    </param>
   </function>
   
   <function name="GetAppProperties" messagetype="request">
@@ -4729,29 +4716,17 @@
       HMI >SDL. RPC used to get the current properties of an application
     </description>
     <param name="policyAppID" type="String" maxlength="100" mandatory="false">
-      If specified the response will contain the properties of the specified app ID.
-      Otherwise if omitted all app properties will be returned at once.
+      <description>
+        If specified the response will contain the properties of the specified app ID.
+        Otherwise if omitted all app properties will be returned at once.
+      </description>
     </param>
   </function>
   
   <function name="GetAppProperties" messagetype="response">
     <description>The response to GetAppProperties</description>
-    <param name="properties" type="AppProperties" array="true" minsize="1" mandatory="false">
+    <param name="properties" type="Common.AppProperties" array="true" minsize="1" mandatory="false">
       <description>The requested application properties</description>
-    </param>
-    <param name="success" type="Boolean" platform="documentation" mandatory="true">
-      <description>true if successful; false if failed</description>
-    </param>
-    <param name="resultCode" type="Common.Result" platform="documentation" mandatory="true">
-      <description>See Result</description>
-      <element name="SUCCESS"/>
-      <element name="INVALID_DATA"/>
-      <element name="OUT_OF_MEMORY"/>
-      <element name="TOO_MANY_PENDING_REQUESTS"/>
-      <element name="GENERIC_ERROR"/>
-      <element name="DISALLOWED"/>
-      <element name="WARNINGS"/>
-      <element name="DATA_NOT_AVAILABLE"/>
     </param>
   </function>
   
@@ -4759,7 +4734,7 @@
     <description>
       SDL >HMI. RPC used to inform HMI about app properties change (such as auth token).
     </description>
-    <param name="properties" type="AppProperties" mandatory="true">
+    <param name="properties" type="Common.AppProperties" mandatory="true">
       <description>The new application properties</description>
     </param>
   </function>
@@ -5488,6 +5463,7 @@
     <param name="systemCapabilities" type="Common.SystemCapabilities" mandatory="false">
       <description>Specifies system capabilities. See SystemCapabilities</description>
     </param>
+    <param name="pcmStreamCapabilities" type="Common.AudioPassThruCapabilities" mandatory="false"/>
   </function>
   <function name="ChangeRegistration" messagetype="request">
     <description>Request from SmartDeviceLink to HMI to change language for app.</description>
@@ -6218,9 +6194,6 @@
     <description>
       This function is used to unsubscribe the notifications from the subscribeVehicleData function.
     </description>
-    <param name="appID" type="Integer" mandatory="true">
-      <description>ID of application that requested this RPC.</description>
-    </param>
     <param name="gps" type="Boolean" mandatory="false">
       <description>See GPSData</description>
     </param>

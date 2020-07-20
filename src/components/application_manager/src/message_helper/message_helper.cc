@@ -1316,9 +1316,18 @@ smart_objects::SmartObjectSPtr MessageHelper::CreateAppVrHelp(
     return NULL;
   }
   smart_objects::SmartObject& vr_help = *result;
-  vr_help[strings::vr_help_title] = app->name();
+  const smart_objects::SmartObject* vr_help_title = app->vr_help_title();
+  if (vr_help_title) {
+    vr_help[strings::vr_help_title] = vr_help_title->asString();
+  }
 
   int32_t index = 0;
+
+  smart_objects::SmartObject so_vr_help(smart_objects::SmartType_Map);
+  so_vr_help[strings::position] = index + 1;
+  so_vr_help[strings::text] = app->name();
+  vr_help[strings::vr_help][index++] = so_vr_help;
+
   if (app->vr_synonyms()) {
     smart_objects::SmartObject item(smart_objects::SmartType_Map);
     item[strings::text] = (*(app->vr_synonyms())).getElement(0);
@@ -2513,6 +2522,33 @@ bool MessageHelper::SendUnsubscribedWayPoints(ApplicationManager& app_mngr) {
       hmi_apis::FunctionID::Navigation_UnsubscribeWayPoints;
 
   return app_mngr.GetRPCService().ManageHMICommand(result);
+}
+
+void MessageHelper::SendPolicySnapshotNotification(
+    uint32_t connection_key,
+    const std::string& snapshot_file_path,
+    const std::string& url,
+    ApplicationManager& app_mngr) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  smart_objects::SmartObject content(smart_objects::SmartType_Map);
+  const auto request_type =
+#if defined(PROPRIETARY_MODE) || defined(EXTERNAL_PROPRIETARY_MODE)
+      mobile_apis::RequestType::PROPRIETARY;
+#else
+      mobile_apis::RequestType::HTTP;
+#endif  // PROPRIETARY || EXTERNAL_PROPRIETARY_MODE
+
+  content[strings::msg_params][strings::request_type] = request_type;
+
+  if (!url.empty()) {
+    content[strings::msg_params][strings::url] = url;
+  } else {
+    LOG4CXX_WARN(logger_, "No service URLs");
+  }
+
+  content[strings::msg_params][strings::file_name] = snapshot_file_path;
+
+  SendSystemRequestNotification(connection_key, content, app_mngr);
 }
 
 void MessageHelper::SendPolicySnapshotNotification(

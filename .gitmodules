@@ -1,6 +1,6 @@
 [submodule "src/3rd_party-static/jsoncpp"]
 	path = src/3rd_party-static/jsoncpp
-	url = https://github.com/open-source-parsers/jsoncpp.git
+	url = https://github.com/smartdevicelink/jsoncpp.git
 [submodule "tools/rpc_spec"]
 	path = tools/rpc_spec
 	url = https://github.com/LuxoftSDL/rpc_spec.git

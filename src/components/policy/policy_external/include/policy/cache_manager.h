@@ -290,14 +290,6 @@ class CacheManager : public CacheManagerInterface {
       const std::string& active_hmi_language) const;
 
   /**
-   * @brief GetLockScreenIcon allows to obtain lock screen icon url;
-   *
-   * @return url which point to the resourse where lock screen icon could be
-   *obtained.
-   */
-  virtual std::string GetLockScreenIconUrl() const;
-
-  /**
    * @brief Get Icon Url used for showing a cloud apps icon before the intial
    *registration
    *
@@ -311,11 +303,11 @@ class CacheManager : public CacheManagerInterface {
    * @param service_type If URLs for specific service are preset,
    * return them otherwise default URLs.
    */
-  virtual void GetUpdateUrls(const std::string& service_type,
-                             EndpointUrls& out_end_points);
+  void GetUpdateUrls(const std::string& service_type,
+                     EndpointUrls& out_end_points) const OVERRIDE;
 
-  virtual void GetUpdateUrls(const uint32_t service_type,
-                             EndpointUrls& out_end_points);
+  void GetUpdateUrls(const uint32_t service_type,
+                     EndpointUrls& out_end_points) const OVERRIDE;
 
   /**
    * @brief Gets allowed number of notifications
@@ -605,12 +597,24 @@ class CacheManager : public CacheManagerInterface {
                                 bool* out_app_permissions_changed);
 
   /**
+   * @brief Set preloaded_pt flag value in policy table
+   * @param is_preloaded value to set
+   */
+  void SetPreloadedPtFlag(const bool is_preloaded) OVERRIDE;
+
+  /**
    * @brief Records information about head unit system to PT
    * @return bool Success of operation
    */
   bool SetMetaInfo(const std::string& ccpu_version,
                    const std::string& wers_country_code,
                    const std::string& language);
+
+  /**
+   * @brief Get information about last ccpu_version from PT
+   * @return ccpu_version from PT
+   */
+  std::string GetCCPUVersionFromPT() const;
 
   /**
    * @brief Checks, if specific head unit is present in PT

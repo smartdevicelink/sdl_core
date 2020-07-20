@@ -135,7 +135,7 @@ int32_t main(int32_t argc, char** argv) {
   // Logger initialization
   INIT_LOGGER("log4cxx.properties", profile_instance.logs_enabled());
 
-  threads::Thread::SetNameForId(threads::Thread::CurrentId(), "MainThread");
+  threads::Thread::SetNameForId(threads::Thread::CurrentId(), "SDLCore");
 
   if (!utils::appenders_loader.Loaded()) {
     LOG4CXX_ERROR(logger_,

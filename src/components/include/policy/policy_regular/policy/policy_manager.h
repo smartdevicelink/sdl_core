@@ -97,13 +97,6 @@ class PolicyManager : public usage_statistics::StatisticsManager,
   virtual bool ResetPT(const std::string& file_name) = 0;
 
   /**
-   * @brief GetLockScreenIcon allows to obtain lock screen icon url;
-   * @return url which point to the resource where lock screen icon could be
-   *obtained.
-   */
-  virtual std::string GetLockScreenIconUrl() const = 0;
-
-  /**
    * @brief Get Icon Url used for showing a cloud apps icon before the initial
    *registration
    *
@@ -118,9 +111,9 @@ class PolicyManager : public usage_statistics::StatisticsManager,
    * @param out_end_points output vector of urls
    */
   virtual void GetUpdateUrls(const std::string& service_type,
-                             EndpointUrls& out_end_points) = 0;
+                             EndpointUrls& out_end_points) const = 0;
   virtual void GetUpdateUrls(const uint32_t service_type,
-                             EndpointUrls& out_end_points) = 0;
+                             EndpointUrls& out_end_points) const = 0;
 
   /**
    * @brief PTU is needed, for this PTS has to be formed and sent.
@@ -415,6 +408,12 @@ class PolicyManager : public usage_statistics::StatisticsManager,
   virtual void SetSystemLanguage(const std::string& language) = 0;
 
   /**
+   * @brief Set preloaded_pt flag value in policy table
+   * @param is_preloaded value to set
+   */
+  virtual void SetPreloadedPtFlag(const bool is_preloaded) = 0;
+
+  /**
    * @brief Set data from GetSystemInfo response to policy table
    * @param ccpu_version CCPU version
    * @param wers_country_code WERS country code
@@ -423,6 +422,12 @@ class PolicyManager : public usage_statistics::StatisticsManager,
   virtual void SetSystemInfo(const std::string& ccpu_version,
                              const std::string& wers_country_code,
                              const std::string& language) = 0;
+
+  /**
+   * @brief Get information about last ccpu_version from PT
+   * @return ccpu_version from PT
+   */
+  virtual std::string GetCCPUVersionFromPT() const = 0;
 
   /**
    * @brief Send OnPermissionsUpdated for choosen application
@@ -470,13 +475,6 @@ class PolicyManager : public usage_statistics::StatisticsManager,
    * @return true if app can steal focus, otherwise - false
    */
   virtual bool CanAppStealFocus(const std::string& app_id) const = 0;
-
-  /**
-   * @brief Runs necessary operations, which is depends on external system
-   * state, e.g. getting system-specific parameters which are need to be
-   * filled into policy table
-   */
-  virtual void OnSystemReady() = 0;
 
   /**
    * @brief Get number of notification by priority
@@ -814,6 +812,11 @@ class PolicyManager : public usage_statistics::StatisticsManager,
    * @brief Restart PTU timeout if PTU in UPDATING state
    */
   virtual void ResetTimeout() = 0;
+
+  /**
+   * @brief Trigger a PTU once on startup if it is required
+   */
+  virtual void TriggerPTUOnStartupIfRequired() = 0;
 
  protected:
   /**

@@ -47,6 +47,7 @@ include_directories(
   ${COMPONENTS_DIR}/application_manager/test/include/
   ${COMPONENTS_DIR}/application_manager/rpc_plugins/sdl_rpc_plugin/include/
   ${COMPONENTS_DIR}/application_manager/rpc_plugins/vehicle_info_plugin/include/
+  ${COMPONENTS_DIR}/application_manager/rpc_plugins/rc_rpc_plugin/include/
   ${BSON_INCLUDE_DIRECTORY}
 )
 
@@ -69,6 +70,7 @@ set(testSources
   ${AM_TEST_DIR}/rpc_passing_handler_test.cc
   ${AM_TEST_DIR}/application_manager_impl_test.cc
   ${AM_TEST_DIR}/application_helper_test.cc
+  ${AM_TEST_DIR}/rpc_service_impl_test.cc
   ${AM_TEST_DIR}/command_holder_test.cc
 )
 
@@ -157,7 +159,7 @@ set(ResumptionData_SOURCES
   ${AM_TEST_DIR}/mock_message_helper.cc
 )
 
-file(COPY hmi_capabilities.json DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+file(COPY ${CMAKE_SOURCE_DIR}/src/appMain/hmi_capabilities.json DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 file(COPY hmi_capabilities_sc1.json DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 file(COPY hmi_capabilities_sc2.json DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 file(COPY hmi_capabilities_old_apt.json DESTINATION ${CMAKE_CURRENT_BINARY_DIR})

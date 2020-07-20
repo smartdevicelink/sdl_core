@@ -268,10 +268,6 @@ void PolicyManagerImpl::CheckTriggers() {
   }
 }
 
-std::string PolicyManagerImpl::GetLockScreenIconUrl() const {
-  return cache_->GetLockScreenIconUrl();
-}
-
 std::string PolicyManagerImpl::GetIconUrl(
     const std::string& policy_app_id) const {
   return cache_->GetIconUrl(policy_app_id);
@@ -693,12 +689,12 @@ std::string PolicyManagerImpl::GetUpdateUrl(int service_type) {
 }
 
 void PolicyManagerImpl::GetUpdateUrls(const std::string& service_type,
-                                      EndpointUrls& out_end_points) {
+                                      EndpointUrls& out_end_points) const {
   LOG4CXX_AUTO_TRACE(logger_);
   cache_->GetUpdateUrls(service_type, out_end_points);
 }
 void PolicyManagerImpl::GetUpdateUrls(const uint32_t service_type,
-                                      EndpointUrls& out_end_points) {
+                                      EndpointUrls& out_end_points) const {
   LOG4CXX_AUTO_TRACE(logger_);
   cache_->GetUpdateUrls(service_type, out_end_points);
 }
@@ -755,7 +751,7 @@ void PolicyManagerImpl::StartPTExchange() {
     return;
   }
   LOG4CXX_INFO(logger_, "Policy want to  call RequestPTUpdate");
-  if (listener_ && listener_->CanUpdate()) {
+  if (listener_) {
     LOG4CXX_INFO(logger_, "Listener CanUpdate");
     if (update_status_manager_.IsUpdateRequired()) {
       update_status_manager_.PendingUpdate();
@@ -1372,7 +1368,7 @@ bool PolicyManagerImpl::IsAllowedRetryCountExceeded() const {
   LOG4CXX_AUTO_TRACE(logger_);
   sync_primitives::AutoLock auto_lock(retry_sequence_lock_);
 
-  return retry_sequence_index_ > retry_sequence_seconds_.size();
+  return retry_sequence_index_ >= retry_sequence_seconds_.size();
 }
 
 void PolicyManagerImpl::IncrementRetryIndex() {
@@ -1627,6 +1623,11 @@ void PolicyManagerImpl::SetSystemLanguage(const std::string& language) {
   cache_->SetSystemLanguage(language);
 }
 
+void PolicyManagerImpl::SetPreloadedPtFlag(const bool is_preloaded) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  cache_->SetPreloadedPtFlag(is_preloaded);
+}
+
 void PolicyManagerImpl::SetSystemInfo(const std::string& ccpu_version,
                                       const std::string& wers_country_code,
                                       const std::string& language) {
@@ -1634,11 +1635,9 @@ void PolicyManagerImpl::SetSystemInfo(const std::string& ccpu_version,
   cache_->SetMetaInfo(ccpu_version, wers_country_code, language);
 }
 
-void PolicyManagerImpl::OnSystemReady() {
-  // Update policy table for the first time with system information
-  if (!cache_->IsMetaInfoPresent()) {
-    listener()->OnSystemInfoUpdateRequired();
-  }
+std::string PolicyManagerImpl::GetCCPUVersionFromPT() const {
+  LOG4CXX_AUTO_TRACE(logger_);
+  return cache_->GetCCPUVersionFromPT();
 }
 
 uint32_t PolicyManagerImpl::GetNotificationsNumber(

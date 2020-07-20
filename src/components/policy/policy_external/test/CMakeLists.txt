@@ -48,16 +48,16 @@ set(testLibraries
 )
 
 file (GLOB POLICY_TEST_SOURCES
-  ${CMAKE_CURRENT_SOURCE_DIR}/policy_manager_impl_test_base.cc
-  *.cc)
-
-# Unbuildable
-list (REMOVE_ITEM POLICY_TEST_SOURCES
-  ${CMAKE_CURRENT_SOURCE_DIR}/policy_manager_impl_stress_test.cc)
+  ${CMAKE_CURRENT_SOURCE_DIR}/cache_manager_test.cc
+  ${CMAKE_CURRENT_SOURCE_DIR}/policy_manager_impl_test.cc
+  ${CMAKE_CURRENT_SOURCE_DIR}/sql_pt_ext_representation_test.cc
+  ${CMAKE_CURRENT_SOURCE_DIR}/sql_pt_representation_test.cc
+  ${CMAKE_CURRENT_SOURCE_DIR}/update_status_manager_test.cc
+  ${CMAKE_CURRENT_SOURCE_DIR}/shared_library_test.cc)
 
 create_test("policy_test" "${POLICY_TEST_SOURCES}" "${testLibraries}")
 
-#Additional test files (json)
-file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/json)
-file(GLOB JSON_TEST_FILES json/*.json)
-file(COPY ${JSON_TEST_FILES} DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/json)
+#Copy actual sdl_preloaded_pt.json
+file(COPY ${CMAKE_SOURCE_DIR}/src/appMain/sdl_preloaded_pt.json DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/json/)
+file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/json/sdl_preloaded_pt_for_merge_initial.json DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/json/)
+file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/json/sdl_preloaded_pt_for_merge_latest.json DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/json/)
