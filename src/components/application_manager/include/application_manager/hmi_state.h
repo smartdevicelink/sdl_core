@@ -400,7 +400,7 @@ class EmbeddedNavi : public HmiState {
   mobile_apis::HMILevel::eType hmi_level() const OVERRIDE;
   mobile_apis::AudioStreamingState::eType audio_streaming_state()
       const OVERRIDE {
-    return mobile_apis::AudioStreamingState::NOT_AUDIBLE;
+    return mobile_apis::AudioStreamingState::AUDIBLE;
   }
   mobile_apis::VideoStreamingState::eType video_streaming_state()
       const OVERRIDE {
