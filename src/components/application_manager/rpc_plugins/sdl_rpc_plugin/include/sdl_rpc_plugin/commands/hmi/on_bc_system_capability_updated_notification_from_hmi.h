@@ -87,6 +87,8 @@ class OnBCSystemCapabilityUpdatedNotificationFromHMI
   ProcessSystemDisplayCapabilitiesResult ProcessSystemDisplayCapabilities(
       const smart_objects::SmartObject& display_capabilities);
 
+  void RemoveAppIdFromNotification();
+
   DISALLOW_COPY_AND_ASSIGN(OnBCSystemCapabilityUpdatedNotificationFromHMI);
 };
 

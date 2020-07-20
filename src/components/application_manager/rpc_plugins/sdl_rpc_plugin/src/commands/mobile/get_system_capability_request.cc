@@ -193,11 +193,13 @@ void GetSystemCapabilityRequest::Run() {
       if ((*message_)[app_mngr::strings::msg_params][strings::subscribe]
               .asBool() == true) {
         LOG4CXX_DEBUG(logger_,
-                      "Subscribe to system capability: " << response_type);
+                      "Subscribe to system capability: "
+                          << response_type << " for app_id: " << app->app_id());
         ext.SubscribeTo(response_type);
       } else {
         LOG4CXX_DEBUG(logger_,
-                      "Unsubscribe from system capability: " << response_type);
+                      "Unsubscribe from system capability: "
+                          << response_type << " for app_id: " << app->app_id());
         ext.UnsubscribeFrom(response_type);
       }
     }
