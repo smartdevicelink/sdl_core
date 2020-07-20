@@ -337,8 +337,6 @@ class MessageHelper {
                                    ApplicationManager& app_mngr);
   static void SendShowConstantTBTRequestToHMI(ApplicationConstSharedPtr app,
                                               ApplicationManager& app_man);
-  static void SendAddCommandRequestToHMI(ApplicationConstSharedPtr app,
-                                         ApplicationManager& app_man);
   static smart_objects::SmartObjectList CreateAddCommandRequestToHMI(
       ApplicationConstSharedPtr app, ApplicationManager& app_mngr);
 
@@ -352,11 +350,6 @@ class MessageHelper {
    */
   static void SendUIChangeRegistrationRequestToHMI(
       ApplicationConstSharedPtr app, ApplicationManager& app_mngr);
-  static void SendAddVRCommandToHMI(
-      uint32_t cmd_id,
-      const smart_objects::SmartObject& vr_commands,
-      const uint32_t app_id,
-      ApplicationManager& app_mngr);
 
   static smart_objects::SmartObjectSPtr CreateAddVRCommandToHMI(
       uint32_t cmd_id,

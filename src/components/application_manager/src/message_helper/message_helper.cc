@@ -1559,20 +1559,6 @@ void MessageHelper::SendShowConstantTBTRequestToHMI(
   }
 }
 
-void MessageHelper::SendAddCommandRequestToHMI(ApplicationConstSharedPtr app,
-                                               ApplicationManager& app_man) {
-  if (!app) {
-    return;
-  }
-  smart_objects::SmartObjectList requests =
-      CreateAddCommandRequestToHMI(app, app_man);
-  for (smart_objects::SmartObjectList::iterator it = requests.begin();
-       it != requests.end();
-       ++it) {
-    DCHECK(app_man.GetRPCService().ManageHMICommand(*it));
-  }
-}
-
 smart_objects::SmartObjectList MessageHelper::CreateAddCommandRequestToHMI(
     ApplicationConstSharedPtr app, ApplicationManager& app_mngr) {
   smart_objects::SmartObjectList requests;
@@ -1589,42 +1575,44 @@ smart_objects::SmartObjectList MessageHelper::CreateAddCommandRequestToHMI(
     if ((*i->second).keyExists(strings::menu_params)) {
       smart_objects::SmartObjectSPtr ui_command = CreateMessageForHMI(
           hmi_apis::messageType::request, app_mngr.GetNextHMICorrelationID());
-      if (!ui_command) {
-        return requests;
+      if (ui_command) {
+        (*ui_command)[strings::params][strings::function_id] =
+            static_cast<int>(hmi_apis::FunctionID::UI_AddCommand);
+
+        smart_objects::SmartObject msg_params =
+            smart_objects::SmartObject(smart_objects::SmartType_Map);
+
+        if ((*i->second).keyExists(strings::cmd_id)) {
+          msg_params[strings::cmd_id] = (*i->second)[strings::cmd_id].asUInt();
+        } else {
+          LOG4CXX_ERROR(logger_, "Command ID is missing.");
+          continue;
+        }
+        msg_params[strings::menu_params] = (*i->second)[strings::menu_params];
+        msg_params[strings::app_id] = app->app_id();
+
+        if (((*i->second).keyExists(strings::cmd_icon)) &&
+            (0 < (*i->second)[strings::cmd_icon][strings::value].length())) {
+          msg_params[strings::cmd_icon] = (*i->second)[strings::cmd_icon];
+          msg_params[strings::cmd_icon][strings::value] =
+              (*i->second)[strings::cmd_icon][strings::value].asString();
+        }
+        (*ui_command)[strings::msg_params] = msg_params;
+        requests.push_back(ui_command);
       }
-
-      (*ui_command)[strings::params][strings::function_id] =
-          static_cast<int>(hmi_apis::FunctionID::UI_AddCommand);
-
-      smart_objects::SmartObject msg_params =
-          smart_objects::SmartObject(smart_objects::SmartType_Map);
-
-      if ((*i->second).keyExists(strings::cmd_id)) {
-        msg_params[strings::cmd_id] = (*i->second)[strings::cmd_id].asUInt();
-      } else {
-        LOG4CXX_ERROR(logger_, "Command ID is missing.");
-        continue;
-      }
-      msg_params[strings::menu_params] = (*i->second)[strings::menu_params];
-      msg_params[strings::app_id] = app->app_id();
-
-      if (((*i->second).keyExists(strings::cmd_icon)) &&
-          (0 < (*i->second)[strings::cmd_icon][strings::value].length())) {
-        msg_params[strings::cmd_icon] = (*i->second)[strings::cmd_icon];
-        msg_params[strings::cmd_icon][strings::value] =
-            (*i->second)[strings::cmd_icon][strings::value].asString();
-      }
-      (*ui_command)[strings::msg_params] = msg_params;
-      requests.push_back(ui_command);
     }
 
     // VR Interface
     if ((*i->second).keyExists(strings::vr_commands) &&
         (*i->second).keyExists(strings::cmd_id)) {
-      SendAddVRCommandToHMI((*i->second)[strings::cmd_id].asUInt(),
-                            (*i->second)[strings::vr_commands],
-                            app->app_id(),
-                            app_mngr);
+      auto vr_command =
+          CreateAddVRCommandToHMI((*i->second)[strings::cmd_id].asUInt(),
+                                  (*i->second)[strings::vr_commands],
+                                  app->app_id(),
+                                  app_mngr);
+      if (vr_command) {
+        requests.push_back(vr_command);
+      }
     }
   }
   return requests;
@@ -1721,16 +1709,6 @@ void MessageHelper::SendUIChangeRegistrationRequestToHMI(
       app_mngr.GetRPCService().ManageHMICommand(ui_command);
     }
   }
-}
-
-void MessageHelper::SendAddVRCommandToHMI(
-    const uint32_t cmd_id,
-    const smart_objects::SmartObject& vr_commands,
-    const uint32_t app_id,
-    ApplicationManager& app_mngr) {
-  smart_objects::SmartObjectSPtr request =
-      CreateAddVRCommandToHMI(cmd_id, vr_commands, app_id, app_mngr);
-  DCHECK(app_mngr.GetRPCService().ManageHMICommand(request));
 }
 
 smart_objects::SmartObjectSPtr MessageHelper::CreateAddVRCommandToHMI(
