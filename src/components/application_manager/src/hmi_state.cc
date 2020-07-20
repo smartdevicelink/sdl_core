@@ -268,12 +268,11 @@ mobile_apis::HMILevel::eType EmbeddedNavi::hmi_level() const {
 
   if (Compare<HMILevel::eType, EQ, ONE>(parent()->hmi_level(),
                                         HMILevel::HMI_BACKGROUND,
-                                        HMILevel::HMI_LIMITED,
                                         HMILevel::HMI_NONE)) {
     return parent()->hmi_level();
   }
 
-  return HMILevel::HMI_BACKGROUND;
+  return HMILevel::HMI_LIMITED;
 }
 
 namespace {
