@@ -377,7 +377,8 @@ class ProtocolHandlerImpl
   void SendStartSessionNAck(ConnectionID connection_id,
                             uint8_t session_id,
                             uint8_t protocol_version,
-                            uint8_t service_type);
+                            uint8_t service_type,
+                            const std::string reason = std::string());
 
   /**
    * \brief Sends fail of starting session to mobile application
@@ -391,7 +392,8 @@ class ProtocolHandlerImpl
                             uint8_t session_id,
                             uint8_t protocol_version,
                             uint8_t service_type,
-                            std::vector<std::string>& rejectedParams);
+                            std::vector<std::string>& rejectedParams,
+                            const std::string reason = std::string());
 
   /**
    * \brief Sends acknowledgement of end session/service to mobile application
@@ -420,7 +422,8 @@ class ProtocolHandlerImpl
   void SendEndSessionNAck(ConnectionID connection_id,
                           uint32_t session_id,
                           uint8_t protocol_version,
-                          uint8_t service_type);
+                          uint8_t service_type,
+                          const std::string reason = std::string());
   /**
    * \brief Sends fail of ending session to mobile application (variant for
    * Protocol v5)
@@ -435,7 +438,8 @@ class ProtocolHandlerImpl
                           uint32_t session_id,
                           uint8_t protocol_version,
                           uint8_t service_type,
-                          std::vector<std::string>& rejected_params);
+                          std::vector<std::string>& rejected_params,
+                          const std::string reason = std::string());
 
   SessionObserver& get_session_observer() OVERRIDE;
 
