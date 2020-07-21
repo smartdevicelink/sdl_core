@@ -245,7 +245,7 @@ TEST_F(ApplicationHelperTest, RecallApplicationData_ExpectHMICleanupRequests) {
 
   EXPECT_CALL(*mock_message_helper_, SendUnsubscribedWayPoints(_));
 
-  EXPECT_CALL(*mock_message_helper_, SendDeleteCommandRequest(_, _, _));
+  EXPECT_CALL(*mock_message_helper_, CreateDeleteCommandRequests(_, _, _));
 
   EXPECT_CALL(*mock_message_helper_, SendDeleteSubmenuRequest(_, _, _));
 
