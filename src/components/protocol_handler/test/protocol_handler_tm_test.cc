@@ -896,6 +896,12 @@ TEST_F(ProtocolHandlerImplTest,
   bson_object_initialize_default(&bson_nack_params);
   bson_object_put_array(
       &bson_nack_params, protocol_handler::strings::rejected_params, &bson_arr);
+  std::string reason =
+      "Session observer refused to create service of type " +
+      std::to_string(protocol_handler::ServiceType::kMobileNav);
+  bson_object_put_string(&bson_nack_params,
+                         protocol_handler::strings::reason,
+                         const_cast<char*>(reason.c_str()));
   std::vector<uint8_t> nack_params =
       CreateVectorFromBsonObject(&bson_nack_params);
   bson_object_deinitialize(&bson_nack_params);

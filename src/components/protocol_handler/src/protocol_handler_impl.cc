@@ -1858,7 +1858,7 @@ void ProtocolHandlerImpl::NotifySessionStarted(
                          protocol_version,
                          packet->service_type(),
                          rejected_params,
-                         "session_observer refused to create service of type " +
+                         "Session observer refused to create service of type " +
                              std::to_string(service_type));
     return;
   }
