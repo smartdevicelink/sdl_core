@@ -72,11 +72,13 @@ void VRIsReadyRequest::on_event(const event_engine::Event& event) {
       hmi_capabilities.set_is_vr_cooperating(is_available);
       if (!app_mngr::commands::CheckAvailabilityHMIInterfaces(
               application_manager_, HmiInterfaces::HMI_INTERFACE_VR)) {
+        UpdateRequiredInterfaceCapabilitiesRequests(hmi_interface::vr);
         LOG4CXX_INFO(logger_,
                      "HmiInterfaces::HMI_INTERFACE_VR isn't available");
         return;
       }
-      SendMessageToHMI();
+
+      RequestInterfaceCapabilities(hmi_interface::vr);
       break;
     }
     default: {
@@ -88,25 +90,7 @@ void VRIsReadyRequest::on_event(const event_engine::Event& event) {
 
 void VRIsReadyRequest::OnTimeOut() {
   // Note(dtrunov): According to new requirment APPLINK-27956
-  SendMessageToHMI();
-}
-
-void VRIsReadyRequest::SendMessageToHMI() {
-  std::shared_ptr<smart_objects::SmartObject> get_language(
-      MessageHelper::CreateModuleInfoSO(hmi_apis::FunctionID::VR_GetLanguage,
-                                        application_manager_));
-  HMICapabilities& hmi_capabilities = hmi_capabilities_;
-  hmi_capabilities.set_handle_response_for(*get_language);
-  rpc_service_.ManageHMICommand(get_language);
-  std::shared_ptr<smart_objects::SmartObject> get_all_languages(
-      MessageHelper::CreateModuleInfoSO(
-          hmi_apis::FunctionID::VR_GetSupportedLanguages,
-          application_manager_));
-  rpc_service_.ManageHMICommand(get_all_languages);
-  std::shared_ptr<smart_objects::SmartObject> get_capabilities(
-      MessageHelper::CreateModuleInfoSO(
-          hmi_apis::FunctionID::VR_GetCapabilities, application_manager_));
-  rpc_service_.ManageHMICommand(get_capabilities);
+  RequestInterfaceCapabilities(hmi_interface::vr);
 }
 
 }  // namespace commands

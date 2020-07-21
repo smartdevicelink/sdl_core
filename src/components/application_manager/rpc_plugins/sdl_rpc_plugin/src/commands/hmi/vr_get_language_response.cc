@@ -56,6 +56,17 @@ VRGetLanguageResponse::~VRGetLanguageResponse() {}
 void VRGetLanguageResponse::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
   using namespace hmi_apis;
+  const Common_Result::eType result_code = static_cast<Common_Result::eType>(
+      (*message_)[strings::params][hmi_response::code].asInt());
+
+  hmi_capabilities_.UpdateRequestsRequiredForCapabilities(
+      hmi_apis::FunctionID::VR_GetLanguage);
+
+  if (Common_Result::SUCCESS != result_code) {
+    LOG4CXX_DEBUG(logger_,
+                  "Request was not successful. Don't change HMI capabilities");
+    return;
+  }
 
   Common_Language::eType language = Common_Language::INVALID_ENUM;
 
@@ -66,6 +77,12 @@ void VRGetLanguageResponse::Run() {
   }
 
   hmi_capabilities_.set_active_vr_language(language);
+
+  std::vector<std::string> sections_to_update{hmi_response::language};
+  if (!hmi_capabilities_.SaveCachedCapabilitiesToFile(
+          hmi_interface::vr, sections_to_update, message_->getSchema())) {
+    LOG4CXX_ERROR(logger_, "Failed to save VR.GetLanguage response to cache");
+  }
 
   LOG4CXX_DEBUG(logger_,
                 "Raising event for function_id " << function_id()

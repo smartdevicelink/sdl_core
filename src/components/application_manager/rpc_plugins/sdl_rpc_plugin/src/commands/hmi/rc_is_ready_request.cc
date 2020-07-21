@@ -31,6 +31,9 @@
  */
 
 #include "sdl_rpc_plugin/commands/hmi/rc_is_ready_request.h"
+
+#include <set>
+
 #include "application_manager/rpc_service.h"
 
 namespace sdl_rpc_plugin {
@@ -76,11 +79,13 @@ void RCIsReadyRequest::on_event(const event_engine::Event& event) {
 
       if (!app_mngr::commands::CheckAvailabilityHMIInterfaces(
               application_manager_, HmiInterfaces::HMI_INTERFACE_RC)) {
+        hmi_capabilities_.UpdateRequestsRequiredForCapabilities(
+            hmi_apis::FunctionID::RC_GetCapabilities);
         LOG4CXX_INFO(logger_,
                      "HmiInterfaces::HMI_INTERFACE_RC isn't available");
         return;
       }
-      SendMessageToHMI();
+      RequestInterfaceCapabilities(hmi_interface::rc);
       break;
     }
     default: {
@@ -92,14 +97,7 @@ void RCIsReadyRequest::on_event(const event_engine::Event& event) {
 
 void RCIsReadyRequest::OnTimeOut() {
   // Note(dtrunov): According to new requirment APPLINK-27956
-  SendMessageToHMI();
-}
-
-void RCIsReadyRequest::SendMessageToHMI() {
-  std::shared_ptr<smart_objects::SmartObject> get_capabilities(
-      MessageHelper::CreateModuleInfoSO(
-          hmi_apis::FunctionID::RC_GetCapabilities, application_manager_));
-  rpc_service_.ManageHMICommand(get_capabilities);
+  RequestInterfaceCapabilities(hmi_interface::rc);
 }
 
 }  // namespace commands

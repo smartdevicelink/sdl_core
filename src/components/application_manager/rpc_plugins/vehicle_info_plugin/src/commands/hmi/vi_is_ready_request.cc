@@ -31,7 +31,9 @@
  */
 
 #include "vehicle_info_plugin/commands/hmi/vi_is_ready_request.h"
-#include "application_manager/message_helper.h"
+
+#include <set>
+
 #include "application_manager/policies/policy_handler_interface.h"
 #include "application_manager/rpc_service.h"
 
@@ -78,10 +80,12 @@ void VIIsReadyRequest::on_event(const event_engine::Event& event) {
         LOG4CXX_INFO(
             logger_,
             "HmiInterfaces::HMI_INTERFACE_VehicleInfo isn't available");
+        hmi_capabilities_.UpdateRequestsRequiredForCapabilities(
+            hmi_apis::FunctionID::VehicleInfo_GetVehicleType);
         return;
       }
-      SendMessageToHMI();
 
+      RequestInterfaceCapabilities(hmi_interface ::vehicle_info);
       break;
     }
     default: {
@@ -93,15 +97,7 @@ void VIIsReadyRequest::on_event(const event_engine::Event& event) {
 
 void VIIsReadyRequest::OnTimeOut() {
   // Note(dtrunov): According to new requirment APPLINK-27956
-  SendMessageToHMI();
-}
-
-void VIIsReadyRequest::SendMessageToHMI() {
-  std::shared_ptr<smart_objects::SmartObject> get_type(
-      MessageHelper::CreateModuleInfoSO(
-          hmi_apis::FunctionID::VehicleInfo_GetVehicleType,
-          application_manager_));
-  rpc_service_.ManageHMICommand(get_type);
+  RequestInterfaceCapabilities(hmi_interface ::vehicle_info);
 }
 
 }  // namespace commands

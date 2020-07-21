@@ -54,6 +54,12 @@ void VIGetVehicleTypeRequest::Run() {
   SendRequest();
 }
 
+void VIGetVehicleTypeRequest::OnTimeOut() {
+  LOG4CXX_AUTO_TRACE(logger_);
+  hmi_capabilities_.UpdateRequestsRequiredForCapabilities(
+      hmi_apis::FunctionID::VehicleInfo_GetVehicleType);
+}
+
 }  // namespace commands
 
 }  // namespace vehicle_info_plugin

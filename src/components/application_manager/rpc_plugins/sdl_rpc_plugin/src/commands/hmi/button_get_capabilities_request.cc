@@ -58,6 +58,12 @@ void ButtonGetCapabilitiesRequest::Run() {
   SendRequest();
 }
 
+void ButtonGetCapabilitiesRequest::OnTimeOut() {
+  LOG4CXX_AUTO_TRACE(logger_);
+  hmi_capabilities_.UpdateRequestsRequiredForCapabilities(
+      hmi_apis::FunctionID::Buttons_GetCapabilities);
+}
+
 }  // namespace commands
 
 }  // namespace sdl_rpc_plugin

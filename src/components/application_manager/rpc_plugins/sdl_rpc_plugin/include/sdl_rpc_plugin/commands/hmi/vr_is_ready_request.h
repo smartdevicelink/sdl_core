@@ -34,7 +34,8 @@
 #define SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_HMI_VR_IS_READY_REQUEST_H_
 
 #include "application_manager/commands/request_to_hmi.h"
-#include "application_manager/message_helper.h"
+
+#include <set>
 
 namespace sdl_rpc_plugin {
 namespace app_mngr = application_manager;
@@ -76,11 +77,6 @@ class VRIsReadyRequest : public app_mngr::commands::RequestToHMI {
    * @brief onTimeOut from requrst Controller
    */
   void OnTimeOut() OVERRIDE;
-
-  /**
-   * @brief Send request to HMI for fetching of cappabilities
-   */
-  void SendMessageToHMI();
 
  private:
   DISALLOW_COPY_AND_ASSIGN(VRIsReadyRequest);
