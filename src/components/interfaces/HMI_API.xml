@@ -6055,7 +6055,7 @@
       <description>See GearStatus</description>
     </param>
     <param name="prndl" type="Boolean" mandatory="false">
-      <description>See PRNDL</description>
+      <description>See PRNDL. This parameter is deprecated and it is now covered in `gearStatus`</description>
     </param>
     <param name="tirePressure" type="Boolean" mandatory="false">
       <description>See TireStatus</description>
@@ -6151,7 +6151,7 @@
       <description>See GearStatus</description>
     </param>
     <param name="prndl" type="Common.VehicleDataResult" mandatory="false">
-      <description>See PRNDL</description>
+      <description>See PRNDL. This parameter is deprecated and it is now covered in `gearStatus`</description>
     </param>
     <param name="tirePressure" type="Common.VehicleDataResult" mandatory="false">
       <description>See TireStatus</description>
@@ -6253,7 +6253,7 @@
       <description>See GearStatus</description>
     </param>
     <param name="prndl" type="Boolean" mandatory="false">
-      <description>See PRNDL</description>
+      <description>See PRNDL. This parameter is deprecated and it is now covered in `gearStatus`</description>
     </param>
     <param name="tirePressure" type="Boolean" mandatory="false">
       <description>See TireStatus</description>
@@ -6349,7 +6349,7 @@
       <description>See GearStatus</description>
     </param>
     <param name="prndl" type="Common.VehicleDataResult" mandatory="false">
-      <description>See PRNDL</description>
+      <description>See PRNDL. This parameter is deprecated and it is now covered in `gearStatus`</description>
     </param>
     <param name="tirePressure" type="Common.VehicleDataResult" mandatory="false">
       <description>See TireStatus</description>
@@ -6449,7 +6449,7 @@
       <description>See GearStatus</description>
     </param>
     <param name="prndl" type="Boolean" mandatory="false">
-      <description>See PRNDL</description>
+      <description>See PRNDL. This parameter is deprecated and it is now covered in `gearStatus`</description>
     </param>
     <param name="tirePressure" type="Boolean" mandatory="false">
       <description>See TireStatus</description>
@@ -6548,7 +6548,7 @@
       <description>See GearStatus</description>
     </param>
     <param name="prndl" type="Common.PRNDL" mandatory="false">
-      <description>See PRNDL</description>
+      <description>See PRNDL. This parameter is deprecated and it is now covered in `gearStatus`</description>
     </param>
     <param name="tirePressure" type="Common.TireStatus" mandatory="false">
       <description>See TireStatus</description>
@@ -6648,7 +6648,7 @@
       <description>See GearStatus</description>
     </param>
     <param name="prndl" type="Common.PRNDL" mandatory="false">
-      <description>See PRNDL</description>
+      <description>See PRNDL. This parameter is deprecated and it is now covered in `gearStatus`</description>
     </param>
     <param name="tirePressure" type="Common.TireStatus" mandatory="false">
       <description>See TireStatus</description>
