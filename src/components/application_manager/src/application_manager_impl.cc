@@ -354,16 +354,17 @@ ApplicationSharedPtr ApplicationManagerImpl::get_full_or_limited_application()
   return FindApp(accessor, FullOrLimitedAppPredicate);
 }
 
-bool LimitedAppPredicate(const ApplicationSharedPtr app) {
-  return app ? app->hmi_level(mobile_api::PredefinedWindows::DEFAULT_WINDOW) ==
-                   mobile_api::HMILevel::HMI_LIMITED
+bool LimitedMediaAppPredicate(const ApplicationSharedPtr app) {
+  return app ? (app->is_media_application() &&
+                app->hmi_level(mobile_api::PredefinedWindows::DEFAULT_WINDOW) ==
+                    mobile_api::HMILevel::HMI_LIMITED)
              : false;
 }
 
 ApplicationSharedPtr ApplicationManagerImpl::get_limited_media_application()
     const {
   DataAccessor<ApplicationSet> accessor = applications();
-  return FindApp(accessor, LimitedAppPredicate);
+  return FindApp(accessor, LimitedMediaAppPredicate);
 }
 
 bool LimitedNaviAppPredicate(const ApplicationSharedPtr app) {
