@@ -3409,7 +3409,7 @@
                     "type": "PRNDL",
                     "mandatory": false,
                     "since": "1.0",
-                    "until": "6.2"
+                    "until": "7.0"
                 },
                 {
                     "name": "prndl",
@@ -3417,7 +3417,7 @@
                     "type": "PRNDL",
                     "mandatory": false,
                     "deprecated": true,
-                    "since": "6.2"
+                    "since": "7.0"
                 },
                 {
                     "name": "gearStatus",
@@ -3444,7 +3444,7 @@
                     "key": "OEM_REF_GEAR_STATUS",
                     "type": "Struct",
                     "mandatory": false,
-                    "since": "6.2"
+                    "since": "7.0"
                 },
                 {
                     "name": "tirePressure",
