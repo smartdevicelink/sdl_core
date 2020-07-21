@@ -3412,14 +3412,6 @@
                     "until": "7.0"
                 },
                 {
-                    "name": "prndl",
-                    "key": "OEM_REF_PRNDL",
-                    "type": "PRNDL",
-                    "mandatory": false,
-                    "deprecated": true,
-                    "since": "7.0"
-                },
-                {
                     "name": "gearStatus",
                     "params": [
                         {
