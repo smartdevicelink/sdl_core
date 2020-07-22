@@ -4377,6 +4377,7 @@
     </function>
     <function name="OnFindApplications" messagetype="notification">
       <description>This method must be invoked by HMI to get list of registered apps.</description>
+      <description>DEPRECATED - This RPC is not implemented</description>
       <param name="deviceInfo" type="Common.DeviceInfo" mandatory="false">
         <description>The name and ID of the device the list of registered applications is required for.</description>
       </param>
@@ -5489,6 +5490,7 @@
     <param name="systemCapabilities" type="Common.SystemCapabilities" mandatory="false">
       <description>Specifies system capabilities. See SystemCapabilities</description>
     </param>
+    <param name="pcmStreamCapabilities" type="Common.AudioPassThruCapabilities" mandatory="false"/>
   </function>
   <function name="ChangeRegistration" messagetype="request">
     <description>Request from SmartDeviceLink to HMI to change language for app.</description>
@@ -6219,9 +6221,6 @@
     <description>
       This function is used to unsubscribe the notifications from the subscribeVehicleData function.
     </description>
-    <param name="appID" type="Integer" mandatory="true">
-      <description>ID of application that requested this RPC.</description>
-    </param>
     <param name="gps" type="Boolean" mandatory="false">
       <description>See GPSData</description>
     </param>

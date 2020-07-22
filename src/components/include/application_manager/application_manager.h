@@ -389,6 +389,13 @@ class ApplicationManager {
   virtual bool IsAnyAppSubscribedForWayPoints() const = 0;
 
   /**
+   * @brief Save message after OnWayPointsChangeNotification reception
+   * @param way_points_message pointer to the smartobject
+   */
+  virtual void SaveWayPointsMessage(
+      smart_objects::SmartObjectSPtr way_points_message) = 0;
+
+  /**
    * @brief Get subscribed for way points
    * @return reference to set of subscribed apps for way points
    */
@@ -505,7 +512,13 @@ class ApplicationManager {
 
   virtual void ConnectToDevice(const std::string& device_mac) = 0;
 
-  virtual void OnHMIStartedCooperation() = 0;
+  virtual void OnHMIReady() = 0;
+
+  /**
+   * @brief Send GetCapabilities requests for
+   * each interface (VR, TTS, UI etc) to HMI
+   */
+  virtual void RequestForInterfacesAvailability() = 0;
 
   virtual void DisconnectCloudApp(ApplicationSharedPtr app) = 0;
 
@@ -524,6 +537,13 @@ class ApplicationManager {
   GetCloudAppConnectionStatus(ApplicationConstSharedPtr app) const = 0;
 
   virtual bool IsHMICooperating() const = 0;
+
+  /*
+   * @brief Hold or respond to all pending RAI requests
+   * @param hmi_cooperating new state to be set
+   */
+  virtual void SetHMICooperating(const bool hmi_cooperating) = 0;
+
   /**
    * @brief Notifies all components interested in Vehicle Data update
    * i.e. new value of odometer etc and returns list of applications

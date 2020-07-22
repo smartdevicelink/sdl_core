@@ -285,6 +285,9 @@ class ApplicationManagerImpl
    */
   bool IsAppSubscribedForWayPoints(ApplicationSharedPtr app) const OVERRIDE;
 
+  void SaveWayPointsMessage(
+      smart_objects::SmartObjectSPtr way_points_message) OVERRIDE;
+
   /**
    * @brief Subscribe Application for way points
    * @param Application id
@@ -420,7 +423,10 @@ class ApplicationManagerImpl
   mobile_api::HMILevel::eType IsHmiLevelFullAllowed(ApplicationSharedPtr app);
 
   void ConnectToDevice(const std::string& device_mac) OVERRIDE;
-  void OnHMIStartedCooperation() OVERRIDE;
+
+  void OnHMIReady() OVERRIDE;
+
+  void RequestForInterfacesAvailability() OVERRIDE;
 
   void DisconnectCloudApp(ApplicationSharedPtr app) OVERRIDE;
 
@@ -954,6 +960,7 @@ class ApplicationManagerImpl
    */
   bool IsHMICooperating() const OVERRIDE;
 
+  void SetHMICooperating(const bool hmi_cooperating) OVERRIDE;
   /**
    * @brief Method used to send default app tts globalProperties
    * in case they were not provided from mobile side after defined time
@@ -1529,6 +1536,8 @@ class ApplicationManagerImpl
    * @brief Set AppIDs of subscribed apps for way points
    */
   std::set<uint32_t> subscribed_way_points_apps_list_;
+
+  smart_objects::SmartObjectSPtr way_points_data_;
 
   /**
    * @brief Map contains applications which

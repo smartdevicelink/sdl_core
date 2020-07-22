@@ -1368,7 +1368,7 @@ bool PolicyManagerImpl::IsAllowedRetryCountExceeded() const {
   LOG4CXX_AUTO_TRACE(logger_);
   sync_primitives::AutoLock auto_lock(retry_sequence_lock_);
 
-  return retry_sequence_index_ > retry_sequence_seconds_.size();
+  return retry_sequence_index_ >= retry_sequence_seconds_.size();
 }
 
 void PolicyManagerImpl::IncrementRetryIndex() {
@@ -1623,11 +1623,21 @@ void PolicyManagerImpl::SetSystemLanguage(const std::string& language) {
   cache_->SetSystemLanguage(language);
 }
 
+void PolicyManagerImpl::SetPreloadedPtFlag(const bool is_preloaded) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  cache_->SetPreloadedPtFlag(is_preloaded);
+}
+
 void PolicyManagerImpl::SetSystemInfo(const std::string& ccpu_version,
                                       const std::string& wers_country_code,
                                       const std::string& language) {
   LOG4CXX_AUTO_TRACE(logger_);
   cache_->SetMetaInfo(ccpu_version, wers_country_code, language);
+}
+
+std::string PolicyManagerImpl::GetCCPUVersionFromPT() const {
+  LOG4CXX_AUTO_TRACE(logger_);
+  return cache_->GetCCPUVersionFromPT();
 }
 
 uint32_t PolicyManagerImpl::GetNotificationsNumber(

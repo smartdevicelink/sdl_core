@@ -220,6 +220,15 @@ void MessageHelper::SendOnPermissionsChangeNotification(
 
 void MessageHelper::SendPolicySnapshotNotification(
     uint32_t connection_key,
+    const std::string& snapshot_file_path,
+    const std::string& url,
+    ApplicationManager& app_mngr) {
+  MockMessageHelper::message_helper_mock()->SendPolicySnapshotNotification(
+      connection_key, snapshot_file_path, url, app_mngr);
+}
+
+void MessageHelper::SendPolicySnapshotNotification(
+    uint32_t connection_key,
     const std::vector<uint8_t>& policy_data,
     const std::string& url,
     ApplicationManager& app_mngr) {

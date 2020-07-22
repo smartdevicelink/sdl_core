@@ -59,19 +59,40 @@ using sdl_rpc_plugin::commands::OnWayPointChangeNotification;
 typedef std::shared_ptr<OnWayPointChangeNotification> NotificationPtr;
 
 namespace {
-const uint32_t kAppId = 1u;
+const uint32_t kApp1Id = 1u;
+const uint32_t kApp2Id = 2u;
 }  // namespace
 
 class OnWayPointChangeNotificationTest
     : public CommandsTest<CommandsTestMocks::kIsNice> {
  public:
-  OnWayPointChangeNotificationTest()
-      : command_(CreateCommand<OnWayPointChangeNotification>()) {}
+  OnWayPointChangeNotificationTest() {}
+
+  void SetUp() OVERRIDE {
+    command_ = CreateCommand();
+  }
+
+  std::shared_ptr<OnWayPointChangeNotification> CreateCommand() {
+    InitCommand(CommandsTest<CommandsTestMocks::kIsNice>::kDefaultTimeout_);
+    message_ = CreateMessage();
+    return std::make_shared<OnWayPointChangeNotification>(
+        message_,
+        app_mngr_,
+        mock_rpc_service_,
+        mock_hmi_capabilities_,
+        mock_policy_handler_);
+  }
+
+  MessageSharedPtr CreateMessage(
+      const smart_objects::SmartType type = smart_objects::SmartType_Null) {
+    return std::make_shared<SmartObject>(type);
+  }
 
   NotificationPtr command_;
+  MessageSharedPtr message_;
 };
 
-MATCHER(CheckMessageData, "") {
+MATCHER_P(CheckMessageData, appID, "") {
   const bool kIsMobileProtocolTypeCorrect =
       (*arg)[am::strings::params][am::strings::protocol_type].asInt() ==
       am::commands::CommandImpl::mobile_protocol_type_;
@@ -86,7 +107,7 @@ MATCHER(CheckMessageData, "") {
 
   const bool kIsConnectionKeyCorrect =
       (*arg)[am::strings::params][am::strings::connection_key].asUInt() ==
-      kAppId;
+      appID;
 
   using namespace helpers;
   return Compare<bool, EQ, ALL>(true,
@@ -99,11 +120,42 @@ MATCHER(CheckMessageData, "") {
 TEST_F(OnWayPointChangeNotificationTest,
        Run_NotEmptyListOfAppsSubscribedForWayPoints_SUCCESS) {
   std::set<uint32_t> apps_subscribed_for_way_points;
-  apps_subscribed_for_way_points.insert(kAppId);
+  apps_subscribed_for_way_points.insert(kApp1Id);
 
   EXPECT_CALL(app_mngr_, GetAppsSubscribedForWayPoints())
       .WillOnce(Return(apps_subscribed_for_way_points));
-  EXPECT_CALL(mock_rpc_service_, SendMessageToMobile(CheckMessageData(), _));
+  EXPECT_CALL(mock_rpc_service_,
+              SendMessageToMobile(CheckMessageData(kApp1Id), _));
+
+  command_->Run();
+}
+
+TEST_F(OnWayPointChangeNotificationTest,
+       Run_StoreWayPointsDuringNotification_SUCCESS) {
+  std::set<uint32_t> apps_subscribed_for_way_points;
+  apps_subscribed_for_way_points.insert(kApp1Id);
+
+  EXPECT_CALL(app_mngr_, GetAppsSubscribedForWayPoints())
+      .WillOnce(Return(apps_subscribed_for_way_points));
+  EXPECT_CALL(mock_rpc_service_,
+              SendMessageToMobile(CheckMessageData(kApp1Id), _));
+  EXPECT_CALL(app_mngr_, SaveWayPointsMessage(message_));
+
+  command_->Run();
+}
+
+TEST_F(OnWayPointChangeNotificationTest,
+       Run_BroadcastingWayPointsToAllApps_SUCCESS) {
+  std::set<uint32_t> apps_subscribed_for_way_points;
+  apps_subscribed_for_way_points.insert(kApp1Id);
+  apps_subscribed_for_way_points.insert(kApp2Id);
+
+  EXPECT_CALL(app_mngr_, GetAppsSubscribedForWayPoints())
+      .WillOnce(Return(apps_subscribed_for_way_points));
+  EXPECT_CALL(mock_rpc_service_,
+              SendMessageToMobile(CheckMessageData(kApp1Id), _));
+  EXPECT_CALL(mock_rpc_service_,
+              SendMessageToMobile(CheckMessageData(kApp2Id), _));
 
   command_->Run();
 }
