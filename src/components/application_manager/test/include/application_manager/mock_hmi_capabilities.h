@@ -75,7 +75,7 @@ class MockHMICapabilities : public ::application_manager::HMICapabilities {
                void(const hmi_apis::Common_Language::eType language));
 
   MOCK_CONST_METHOD0(ui_supported_languages,
-                     const smart_objects::SmartObject*());
+                     const smart_objects::SmartObjectSPtr());
   MOCK_METHOD1(set_ui_supported_languages,
                void(const smart_objects::SmartObject& supported_languages));
 
@@ -85,7 +85,7 @@ class MockHMICapabilities : public ::application_manager::HMICapabilities {
                void(const hmi_apis::Common_Language::eType language));
 
   MOCK_CONST_METHOD0(vr_supported_languages,
-                     const smart_objects::SmartObject*());
+                     const smart_objects::SmartObjectSPtr());
   MOCK_METHOD1(set_vr_supported_languages,
                void(const smart_objects::SmartObject& supported_languages));
 
@@ -95,7 +95,7 @@ class MockHMICapabilities : public ::application_manager::HMICapabilities {
                void(const hmi_apis::Common_Language::eType language));
 
   MOCK_CONST_METHOD0(tts_supported_languages,
-                     const smart_objects::SmartObject*());
+                     const smart_objects::SmartObjectSPtr());
   MOCK_METHOD1(set_tts_supported_languages,
                void(const smart_objects::SmartObject& supported_languages));
 
@@ -173,25 +173,25 @@ class MockHMICapabilities : public ::application_manager::HMICapabilities {
   MOCK_METHOD1(set_rc_supported, void(const bool supported));
 
   MOCK_CONST_METHOD0(navigation_capability,
-                     const smart_objects::SmartObject*());
+                     const smart_objects::SmartObjectSPtr());
   MOCK_METHOD1(set_navigation_capability,
                void(const smart_objects::SmartObject& navigation_capability));
 
-  MOCK_CONST_METHOD0(phone_capability, const smart_objects::SmartObject*());
+  MOCK_CONST_METHOD0(phone_capability, const smart_objects::SmartObjectSPtr());
   MOCK_METHOD1(set_phone_capability,
                void(const smart_objects::SmartObject& phone_capability));
 
   MOCK_CONST_METHOD0(video_streaming_capability,
-                     const smart_objects::SmartObject*());
+                     const smart_objects::SmartObjectSPtr());
   MOCK_METHOD1(
       set_video_streaming_capability,
       void(const smart_objects::SmartObject& video_streaming_capability));
-  MOCK_CONST_METHOD0(rc_capability, const smart_objects::SmartObject*());
+  MOCK_CONST_METHOD0(rc_capability, const smart_objects::SmartObjectSPtr());
   MOCK_METHOD1(set_rc_capability,
                void(const smart_objects::SmartObject& rc_capability));
 
   MOCK_CONST_METHOD0(seat_location_capability,
-                     const smart_objects::SmartObject*());
+                     const smart_objects::SmartObjectSPtr());
   MOCK_METHOD1(
       set_seat_location_capability,
       void(const smart_objects::SmartObject& seat_location_capability));
@@ -203,22 +203,22 @@ class MockHMICapabilities : public ::application_manager::HMICapabilities {
 
   MOCK_CONST_METHOD0(ccpu_version, const std::string&());
   MOCK_METHOD1(set_ccpu_version, void(const std::string& ccpu_version));
+  MOCK_METHOD1(OnSoftwareVersionReceived,
+               void(const std::string& ccpu_version));
+  MOCK_METHOD0(UpdateCachedCapabilities, void());
   MOCK_METHOD0(get_hmi_language_handler,
                application_manager::HMILanguageHandler&());
   MOCK_METHOD1(set_handle_response_for,
                void(const smart_objects::SmartObject& request));
-
- protected:
-  MOCK_CONST_METHOD2(check_existing_json_member,
-                     bool(const Json::Value& json_member,
-                          const char* name_of_member));
-
-  MOCK_CONST_METHOD2(convert_json_languages_to_obj,
-                     void(const Json::Value& json_languages,
-                          smart_objects::SmartObject& languages));
-  MOCK_CONST_METHOD2(convert_audio_capability_to_obj,
-                     void(const Json::Value& capability,
-                          smart_objects::SmartObject& output_so));
+  MOCK_METHOD3(SaveCachedCapabilitiesToFile,
+               bool(const std::string& interface_name,
+                    const std::vector<std::string>& sections_to_update,
+                    const smart_objects::CSmartSchema& schema));
+  MOCK_CONST_METHOD0(DeleteCachedCapabilitiesFile, bool());
+  MOCK_CONST_METHOD1(IsRequestsRequiredForCapabilities,
+                     bool(hmi_apis::FunctionID::eType));
+  MOCK_METHOD1(UpdateRequestsRequiredForCapabilities,
+               void(hmi_apis::FunctionID::eType requested_interface));
 };
 
 }  // namespace application_manager_test

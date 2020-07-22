@@ -545,7 +545,7 @@ TEST_F(HMICommandsNotificationsTest, OnReadyNotificationEventDispatcher) {
   std::shared_ptr<Command> command =
       CreateCommand<OnReadyNotification>(message);
 
-  EXPECT_CALL(app_mngr_, OnHMIStartedCooperation());
+  EXPECT_CALL(app_mngr_, OnHMIReady());
   EXPECT_CALL(app_mngr_, event_dispatcher());
   EXPECT_CALL(mock_event_dispatcher_, raise_event(_))
       .WillOnce(GetEventId(&event_id));

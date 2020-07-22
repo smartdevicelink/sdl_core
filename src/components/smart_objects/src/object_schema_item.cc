@@ -35,6 +35,7 @@
 
 #include "generated_msg_version.h"
 #include "smart_objects/always_false_schema_item.h"
+#include "smart_objects/enum_schema_item.h"
 #include "smart_objects/smart_object.h"
 
 namespace {
@@ -104,7 +105,7 @@ std::shared_ptr<CObjectSchemaItem> CObjectSchemaItem::create(
 
 errors::eType CObjectSchemaItem::validate(
     const SmartObject& object,
-    rpc::ValidationReport* report__,
+    rpc::ValidationReport* report,
     const utils::SemanticVersion& MessageVersion,
     const bool allow_unknown_enums) {
   if (SmartType_Map != object.getType()) {
@@ -112,7 +113,7 @@ errors::eType CObjectSchemaItem::validate(
         "Incorrect type, expected: " +
         SmartObject::typeToString(SmartType_Map) +
         ", got: " + SmartObject::typeToString(object.getType());
-    report__->set_validation_info(validation_info);
+    report->set_validation_info(validation_info);
     return errors::INVALID_VALUE;
   }
 
@@ -129,7 +130,7 @@ errors::eType CObjectSchemaItem::validate(
       if (correct_member && correct_member->mIsMandatory == true &&
           correct_member->mIsRemoved == false) {
         std::string validation_info = "Missing mandatory parameter: " + key;
-        report__->set_validation_info(validation_info);
+        report->set_validation_info(validation_info);
         return errors::MISSING_MANDATORY_PARAMETER;
       }
       continue;
@@ -141,7 +142,7 @@ errors::eType CObjectSchemaItem::validate(
     if (correct_member) {
       result =
           correct_member->mSchemaItem->validate(field,
-                                                &report__->ReportSubobject(key),
+                                                &report->ReportSubobject(key),
                                                 MessageVersion,
                                                 allow_unknown_enums);
     } else {
@@ -157,16 +158,46 @@ errors::eType CObjectSchemaItem::validate(
   return errors::OK;
 }
 
+bool CObjectSchemaItem::filterInvalidEnums(
+    SmartObject& Object,
+    const utils::SemanticVersion& MessageVersion,
+    rpc::ValidationReport* report) {
+  bool valid = true;
+  for (const auto& key : Object.enumerate()) {
+    auto members_it = mMembers.find(key);
+    if (mMembers.end() == members_it) {
+      // No members found for this key, skipping over
+      continue;
+    }
+
+    const SMember* member =
+        GetCorrectMember(members_it->second, MessageVersion);
+    // Perform filtering recursively on this field
+    if (member->mSchemaItem->filterInvalidEnums(
+            Object[key], MessageVersion, &report->ReportSubobject(key))) {
+      // Object is no longer valid if the member is mandatory.
+      if (member->mIsMandatory) {
+        valid = false;
+      }
+
+      // The member is safe to filter if it is non-mandatory, only leaf nodes
+      // (individual enum values) should be filtered otherwise.
+      bool should_erase = (member->mSchemaItem->GetType() == TYPE_ENUM ||
+                           !member->mIsMandatory);
+      if (should_erase) {
+        Object.erase(key);
+      }
+    }
+  }
+  return !valid;
+}
+
 void CObjectSchemaItem::applySchema(
     SmartObject& Object,
     const bool remove_unknown_parameters,
     const utils::SemanticVersion& MessageVersion) {
   if (SmartType_Map != Object.getType()) {
     return;
-  }
-
-  if (remove_unknown_parameters) {
-    RemoveFakeParams(Object, MessageVersion);
   }
 
   SmartObject default_value;
@@ -184,6 +215,10 @@ void CObjectSchemaItem::applySchema(
       member.mSchemaItem->applySchema(
           Object[key], remove_unknown_parameters, MessageVersion);
     }
+  }
+
+  if (remove_unknown_parameters) {
+    RemoveUnknownParams(Object, MessageVersion);
   }
 }
 
@@ -232,6 +267,10 @@ size_t CObjectSchemaItem::GetMemberSize() {
   return mMembers.size();
 }
 
+TypeID CObjectSchemaItem::GetType() {
+  return TYPE_OBJECT;
+}
+
 boost::optional<SMember&> CObjectSchemaItem::GetMemberSchemaItem(
     const std::string& member_key) {
   auto it = mMembers.find(member_key);
@@ -250,7 +289,7 @@ void CObjectSchemaItem::AddMemberSchemaItem(const std::string& member_key,
 CObjectSchemaItem::CObjectSchemaItem(const Members& members)
     : mMembers(members) {}
 
-void CObjectSchemaItem::RemoveFakeParams(
+void CObjectSchemaItem::RemoveUnknownParams(
     SmartObject& Object, const utils::SemanticVersion& MessageVersion) {
   for (const auto& key : Object.enumerate()) {
     std::map<std::string, SMember>::const_iterator members_it =

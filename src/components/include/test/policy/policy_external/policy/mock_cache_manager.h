@@ -202,10 +202,12 @@ class MockCacheManagerInterface : public ::policy::CacheManagerInterface {
   MOCK_METHOD2(SetUserPermissionsForApp,
                bool(const PermissionConsent& permissions,
                     bool* out_app_permissions_changed));
+  MOCK_METHOD1(SetPreloadedPtFlag, void(const bool is_preloaded));
   MOCK_METHOD3(SetMetaInfo,
                bool(const std::string& ccpu_version,
                     const std::string& wers_country_code,
                     const std::string& language));
+  MOCK_CONST_METHOD0(GetCCPUVersionFromPT, std::string());
   MOCK_CONST_METHOD0(IsMetaInfoPresent, bool());
   MOCK_METHOD1(SetSystemLanguage, bool(const std::string& language));
   MOCK_METHOD1(Increment, void(usage_statistics::GlobalCounterId type));

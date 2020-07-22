@@ -480,6 +480,19 @@ extern const char* const x;
 extern const char* const y;
 }  // namespace strings
 
+namespace hmi_interface {
+extern const char* basic_communication;
+extern const char* buttons;
+extern const char* navigation;
+extern const char* sdl;
+extern const char* tts;
+extern const char* ui;
+extern const char* vr;
+extern const char* rc;
+extern const char* vehicle_info;
+extern const char* app_service;
+}  // namespace hmi_interface
+
 namespace json {
 extern const char* appId;
 extern const char* name;
@@ -591,6 +604,7 @@ extern const char* capabilities;
 extern const char* speech_capabilities;
 extern const char* prerecorded_speech_capabilities;
 extern const char* preset_bank_capabilities;
+extern const char* on_screen_presets_available;
 extern const char* allowed;
 extern const char* vehicle_type;
 extern const char* did_result;

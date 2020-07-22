@@ -33,7 +33,12 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "application_manager/hmi_capabilities_impl.h"
+
+#include <algorithm>
+#include <memory>
 #include <string>
+#include <vector>
 
 #include "application_manager/hmi_capabilities.h"
 #include "application_manager/mock_message_helper.h"
@@ -42,81 +47,57 @@
 #include "smart_objects/enum_schema_item.h"
 #include "smart_objects/smart_object.h"
 
-#include "application_manager/hmi_capabilities_for_testing.h"
 #include "application_manager/mock_application_manager.h"
 #include "application_manager/mock_application_manager_settings.h"
 #include "application_manager/mock_event_dispatcher.h"
 #include "application_manager/mock_rpc_service.h"
 #include "application_manager/resumption/resume_ctrl.h"
 #include "application_manager/state_controller.h"
+#include "rc_rpc_plugin/rc_module_constants.h"
 #include "resumption/last_state_impl.h"
 #include "resumption/last_state_wrapper_impl.h"
 #include "utils/file_system.h"
+#include "utils/jsoncpp_reader_wrapper.h"
 
 namespace test {
 namespace components {
 namespace application_manager_test {
 
+namespace {
+const std::string kAppInfoDataFile = "./app_info_data";
+const std::string kAppStorageFolder = "app_storage_folder";
+const std::string kAppInfoStorage = "app_info_storage";
+const std::string kHmiCapabilitiesDefaultFile = "hmi_capabilities.json";
+const std::string kHmiCapabilitiesCacheFile = "hmi_capabilities_cache.json";
+const uint32_t kEqualizerMaxChanelId = 10;
+}  // namespace
+
 using ::testing::_;
-using ::testing::AtLeast;
-using ::testing::InSequence;
 using ::testing::Invoke;
+using ::testing::NiceMock;
 using ::testing::Return;
 using ::testing::ReturnRef;
 
 using namespace application_manager;
 
-class HMICapabilitiesTest : public ::testing::Test {
- protected:
-  HMICapabilitiesTest()
-      : last_state_wrapper_(std::make_shared<resumption::LastStateWrapperImpl>(
-            std::make_shared<resumption::LastStateImpl>("app_storage_folder",
-                                                        "app_info_storage")))
-      , file_name_("hmi_capabilities.json") {}
-  virtual void SetUp() OVERRIDE {
-    EXPECT_CALL(app_mngr_, event_dispatcher())
-        .WillOnce(ReturnRef(mock_event_dispatcher));
-    EXPECT_CALL(app_mngr_, get_settings())
-        .WillRepeatedly(ReturnRef(mock_application_manager_settings_));
-    EXPECT_CALL(mock_application_manager_settings_,
-                hmi_capabilities_file_name())
-        .WillOnce(ReturnRef(file_name_));
-    EXPECT_CALL(mock_event_dispatcher, add_observer(_, _, _)).Times(1);
-    EXPECT_CALL(mock_event_dispatcher, remove_observer(_)).Times(1);
-    EXPECT_CALL(mock_application_manager_settings_, launch_hmi())
-        .WillOnce(Return(false));
-    hmi_capabilities_test =
-        std::make_shared<HMICapabilitiesForTesting>(app_mngr_);
-    hmi_capabilities_test->Init(last_state_wrapper_);
-  }
+typedef std::map<std::string, hmi_apis::Common_Language::eType>
+    LanguageCStringToEnumMap;
 
-  void TearDown() OVERRIDE {
-    hmi_capabilities_test.reset();
-  }
-  static void TearDownTestCase() {
-    if (file_system::FileExists("./app_info_data")) {
-      EXPECT_TRUE(::file_system::DeleteFile("./app_info_data"));
-    }
-  }
+typedef std::map<std::string, hmi_apis::Common_LightName::eType>
+    LightNameCStringToEnumMap;
 
-  void SetCooperating();
-  MockApplicationManager app_mngr_;
-  event_engine_test::MockEventDispatcher mock_event_dispatcher;
-  resumption::LastStateWrapperPtr last_state_wrapper_;
-  MockApplicationManagerSettings mock_application_manager_settings_;
-  std::shared_ptr<HMICapabilitiesForTesting> hmi_capabilities_test;
-  const std::string file_name_;
-  application_manager_test::MockRPCService mock_rpc_service_;
-};
+static LanguageCStringToEnumMap languages_map;
+static LightNameCStringToEnumMap light_names_map;
 
-const char* const cstring_values_[] = {
-    "EN_US", "ES_MX", "FR_CA", "DE_DE", "ES_ES", "EN_GB", "RU_RU", "TR_TR",
-    "PL_PL", "FR_FR", "IT_IT", "SV_SE", "PT_PT", "NL_NL", "EN_AU", "ZH_CN",
-    "ZH_TW", "JA_JP", "AR_SA", "KO_KR", "PT_BR", "CS_CZ", "DA_DK", "NO_NO",
-    "NL_BE", "EL_GR", "HU_HU", "FI_FI", "SK_SK", "EN_IN", "TH_TH", "EN_SA",
-    "HE_IL", "RO_RO", "UK_UA", "ID_ID", "VI_VN", "MS_MY", "HI_IN"};
+const std::vector<std::string> language_string_values{
+    {"EN-US"}, {"ES-MX"}, {"FR-CA"}, {"DE-DE"}, {"ES-ES"}, {"EN-GB"}, {"RU-RU"},
+    {"TR-TR"}, {"PL-PL"}, {"FR-FR"}, {"IT-IT"}, {"SV-SE"}, {"PT-PT"}, {"NL-NL"},
+    {"EN-AU"}, {"ZH-CN"}, {"ZH-TW"}, {"JA-JP"}, {"AR-SA"}, {"KO-KR"}, {"PT-BR"},
+    {"CS-CZ"}, {"DA-DK"}, {"NO-NO"}, {"NL-BE"}, {"EL-GR"}, {"HU-HU"}, {"FI-FI"},
+    {"SK-SK"}, {"EN-IN"}, {"TH-TH"}, {"EN-SA"}, {"HE-IL"}, {"RO-RO"}, {"UK-UA"},
+    {"ID-ID"}, {"VI-VN"}, {"MS-MY"}, {"HI-IN"}};
 
-const hmi_apis::Common_Language::eType enum_values_[] = {
+const std::vector<hmi_apis::Common_Language::eType> language_enum_values{
     hmi_apis::Common_Language::EN_US, hmi_apis::Common_Language::ES_MX,
     hmi_apis::Common_Language::FR_CA, hmi_apis::Common_Language::DE_DE,
     hmi_apis::Common_Language::ES_ES, hmi_apis::Common_Language::EN_GB,
@@ -138,142 +119,338 @@ const hmi_apis::Common_Language::eType enum_values_[] = {
     hmi_apis::Common_Language::VI_VN, hmi_apis::Common_Language::MS_MY,
     hmi_apis::Common_Language::HI_IN};
 
-struct CStringComparator {
-  bool operator()(const char* a, const char* b) {
-    return strcmp(a, b) < 0;
-  }
-};
+const std::vector<hmi_apis::Common_LightName::eType> light_name_enum_values{
+    hmi_apis::Common_LightName::eType::FRONT_LEFT_HIGH_BEAM,
+    hmi_apis::Common_LightName::eType::FRONT_RIGHT_HIGH_BEAM,
+    hmi_apis::Common_LightName::eType::FRONT_LEFT_LOW_BEAM,
+    hmi_apis::Common_LightName::eType::FRONT_RIGHT_LOW_BEAM,
+    hmi_apis::Common_LightName::eType::FRONT_LEFT_PARKING_LIGHT,
+    hmi_apis::Common_LightName::eType::FRONT_RIGHT_PARKING_LIGHT,
+    hmi_apis::Common_LightName::eType::FRONT_LEFT_FOG_LIGHT,
+    hmi_apis::Common_LightName::eType::FRONT_RIGHT_FOG_LIGHT,
+    hmi_apis::Common_LightName::eType::FRONT_LEFT_DAYTIME_RUNNING_LIGHT,
+    hmi_apis::Common_LightName::eType::FRONT_RIGHT_DAYTIME_RUNNING_LIGHT,
+    hmi_apis::Common_LightName::eType::FRONT_LEFT_TURN_LIGHT,
+    hmi_apis::Common_LightName::eType::FRONT_RIGHT_TURN_LIGHT,
+    hmi_apis::Common_LightName::eType::REAR_LEFT_FOG_LIGHT,
+    hmi_apis::Common_LightName::eType::REAR_RIGHT_FOG_LIGHT,
+    hmi_apis::Common_LightName::eType::REAR_LEFT_TAIL_LIGHT,
+    hmi_apis::Common_LightName::eType::REAR_RIGHT_TAIL_LIGHT,
+    hmi_apis::Common_LightName::eType::REAR_LEFT_BRAKE_LIGHT,
+    hmi_apis::Common_LightName::eType::REAR_RIGHT_BRAKE_LIGHT,
+    hmi_apis::Common_LightName::eType::REAR_LEFT_TURN_LIGHT,
+    hmi_apis::Common_LightName::eType::REAR_RIGHT_TURN_LIGHT,
+    hmi_apis::Common_LightName::eType::REAR_REGISTRATION_PLATE_LIGHT,
+    hmi_apis::Common_LightName::eType::HIGH_BEAMS,
+    hmi_apis::Common_LightName::eType::LOW_BEAMS,
+    hmi_apis::Common_LightName::eType::FOG_LIGHTS,
+    hmi_apis::Common_LightName::eType::RUNNING_LIGHTS,
+    hmi_apis::Common_LightName::eType::PARKING_LIGHTS,
+    hmi_apis::Common_LightName::eType::BRAKE_LIGHTS,
+    hmi_apis::Common_LightName::eType::REAR_REVERSING_LIGHTS,
+    hmi_apis::Common_LightName::eType::SIDE_MARKER_LIGHTS,
+    hmi_apis::Common_LightName::eType::LEFT_TURN_LIGHTS,
+    hmi_apis::Common_LightName::eType::RIGHT_TURN_LIGHTS,
+    hmi_apis::Common_LightName::eType::HAZARD_LIGHTS,
+    hmi_apis::Common_LightName::eType::REAR_CARGO_LIGHTS,
+    hmi_apis::Common_LightName::eType::REAR_TRUCK_BED_LIGHTS,
+    hmi_apis::Common_LightName::eType::REAR_TRAILER_LIGHTS,
+    hmi_apis::Common_LightName::eType::LEFT_SPOT_LIGHTS,
+    hmi_apis::Common_LightName::eType::RIGHT_SPOT_LIGHTS,
+    hmi_apis::Common_LightName::eType::LEFT_PUDDLE_LIGHTS,
+    hmi_apis::Common_LightName::eType::RIGHT_PUDDLE_LIGHTS,
+    hmi_apis::Common_LightName::eType::AMBIENT_LIGHTS,
+    hmi_apis::Common_LightName::eType::OVERHEAD_LIGHTS,
+    hmi_apis::Common_LightName::eType::READING_LIGHTS,
+    hmi_apis::Common_LightName::eType::TRUNK_LIGHTS,
+    hmi_apis::Common_LightName::eType::EXTERIOR_FRONT_LIGHTS,
+    hmi_apis::Common_LightName::eType::EXTERIOR_REAR_LIGHTS,
+    hmi_apis::Common_LightName::eType::EXTERIOR_LEFT_LIGHTS,
+    hmi_apis::Common_LightName::eType::EXTERIOR_RIGHT_LIGHTS,
+    hmi_apis::Common_LightName::eType::EXTERIOR_ALL_LIGHTS};
 
-typedef std::
-    map<const char*, hmi_apis::Common_Language::eType, CStringComparator>
-        CStringToEnumMap;
+const std::vector<std::string> light_name_string_values{
+    {"FRONT_LEFT_HIGH_BEAM"},
+    {"FRONT_RIGHT_HIGH_BEAM"},
+    {"FRONT_LEFT_LOW_BEAM"},
+    {"FRONT_RIGHT_LOW_BEAM"},
+    {"FRONT_LEFT_PARKING_LIGHT"},
+    {"FRONT_RIGHT_PARKING_LIGHT"},
+    {"FRONT_LEFT_FOG_LIGHT"},
+    {"FRONT_RIGHT_FOG_LIGHT"},
+    {"FRONT_LEFT_DAYTIME_RUNNING_LIGHT"},
+    {"FRONT_RIGHT_DAYTIME_RUNNING_LIGHT"},
+    {"FRONT_LEFT_TURN_LIGHT"},
+    {"FRONT_RIGHT_TURN_LIGHT"},
+    {"REAR_LEFT_FOG_LIGHT"},
+    {"REAR_RIGHT_FOG_LIGHT"},
+    {"REAR_LEFT_TAIL_LIGHT"},
+    {"REAR_RIGHT_TAIL_LIGHT"},
+    {"REAR_LEFT_BRAKE_LIGHT"},
+    {"REAR_RIGHT_BRAKE_LIGHT"},
+    {"REAR_LEFT_TURN_LIGHT"},
+    {"REAR_RIGHT_TURN_LIGHT"},
+    {"REAR_REGISTRATION_PLATE_LIGHT"},
+    {"HIGH_BEAMS"},
+    {"LOW_BEAMS"},
+    {"FOG_LIGHTS"},
+    {"RUNNING_LIGHTS"},
+    {"PARKING_LIGHTS"},
+    {"BRAKE_LIGHTS"},
+    {"REAR_REVERSING_LIGHTS"},
+    {"SIDE_MARKER_LIGHTS"},
+    {"LEFT_TURN_LIGHTS"},
+    {"RIGHT_TURN_LIGHTS"},
+    {"HAZARD_LIGHTS"},
+    {"REAR_CARGO_LIGHTS"},
+    {"REAR_TRUCK_BED_LIGHTS"},
+    {"REAR_TRAILER_LIGHTS"},
+    {"LEFT_SPOT_LIGHTS"},
+    {"RIGHT_SPOT_LIGHTS"},
+    {"LEFT_PUDDLE_LIGHTS"},
+    {"RIGHT_PUDDLE_LIGHTS"},
+    {"AMBIENT_LIGHTS"},
+    {"OVERHEAD_LIGHTS"},
+    {"READING_LIGHTS"},
+    {"TRUNK_LIGHTS"},
+    {"EXTERIOR_FRONT_LIGHTS"},
+    {"EXTERIOR_REAR_LIGHTS"},
+    {"EXTERIOR_LEFT_LIGHTS"},
+    {"EXTERIOR_RIGHT_LIGHTS"},
+    {"EXTERIOR_ALL_LIGHTS"}};
 
-CStringToEnumMap InitCStringToEnumMap() {
-  size_t value = sizeof(cstring_values_) / sizeof(cstring_values_[0]);
-  CStringToEnumMap result;
-  for (size_t i = 0; i < value; ++i) {
-    result[cstring_values_[i]] = enum_values_[i];
+void InitLightNameStringToEnumMap(
+    LightNameCStringToEnumMap& out_light_names_map) {
+  for (size_t i = 0; i < light_name_string_values.size(); ++i) {
+    out_light_names_map[light_name_string_values[i]] =
+        light_name_enum_values[i];
   }
-  return result;
 }
 
-bool StringToEnum(const char* str, hmi_apis::Common_Language::eType& value) {
-  size_t count_value = sizeof(cstring_values_) / sizeof(cstring_values_[0]);
-  CStringToEnumMap result;
-  for (size_t i = 0; i < count_value; ++i) {
-    result[cstring_values_[i]] = enum_values_[i];
-  }
-
-  CStringToEnumMap::const_iterator it = result.find(str);
-  if (it == result.end()) {
+bool LightNameStringToEnum(const std::string& light_name_str,
+                           hmi_apis::Common_LightName::eType& out_value) {
+  auto it = light_names_map.find(light_name_str);
+  if (it == light_names_map.end()) {
     return false;
   }
-  value = it->second;
+  out_value = it->second;
+  return true;
+}
+
+void InitLanguageStringToEnumMap(LanguageCStringToEnumMap& out_languages_map) {
+  for (size_t i = 0; i < language_string_values.size(); ++i) {
+    out_languages_map[language_string_values[i]] = language_enum_values[i];
+  }
+}
+
+bool LanguageStringToEnum(const std::string& language_str,
+                          hmi_apis::Common_Language::eType& out_value) {
+  LanguageCStringToEnumMap::const_iterator it =
+      languages_map.find(language_str);
+  if (it == languages_map.end()) {
+    return false;
+  }
+  out_value = it->second;
   return true;
 }
 
 hmi_apis::Common_Language::eType TestCommonLanguageFromString(
     const std::string& language) {
   hmi_apis::Common_Language::eType value;
-  if (StringToEnum(language.c_str(), value)) {
+  if (LanguageStringToEnum(language, value)) {
     return value;
   }
   return hmi_apis::Common_Language::INVALID_ENUM;
 }
 
-TEST_F(HMICapabilitiesTest, LoadCapabilitiesFromFile) {
-  const std::string hmi_capabilities_file = "hmi_capabilities.json";
-  EXPECT_CALL(mock_application_manager_settings_, hmi_capabilities_file_name())
-      .WillOnce(ReturnRef(hmi_capabilities_file));
-  EXPECT_CALL(*(MockMessageHelper::message_helper_mock()),
-              CommonLanguageFromString(_))
-      .WillRepeatedly(Invoke(TestCommonLanguageFromString));
-
-  if (file_system::FileExists("./app_info_data")) {
-    EXPECT_TRUE(::file_system::DeleteFile("./app_info_data"));
+hmi_apis::Common_LightName::eType TestCommonLightNameFromString(
+    const std::string& light_name_str) {
+  hmi_apis::Common_LightName::eType value;
+  if (LightNameStringToEnum(light_name_str, value)) {
+    return value;
   }
-  EXPECT_CALL(app_mngr_, IsSOStructValid(_, _)).WillOnce(Return(true));
+  return hmi_apis::Common_LightName::INVALID_ENUM;
+}
 
-  EXPECT_TRUE(hmi_capabilities_test->LoadCapabilitiesFromFile());
+bool IsLightNameExists(const hmi_apis::Common_LightName::eType& light_name) {
+  auto it = std::find(
+      light_name_enum_values.begin(), light_name_enum_values.end(), light_name);
+  return !(it == light_name_enum_values.end());
+}
 
-  // Check active languages
+class HMICapabilitiesTest : public ::testing::Test {
+ protected:
+  HMICapabilitiesTest()
+      : last_state_wrapper_(std::make_shared<resumption::LastStateWrapperImpl>(
+            std::make_shared<resumption::LastStateImpl>(kAppStorageFolder,
+                                                        kAppInfoStorage))) {
+    if (languages_map.empty()) {
+      InitLanguageStringToEnumMap(languages_map);
+    }
+    if (light_names_map.empty()) {
+      InitLightNameStringToEnumMap(light_names_map);
+    }
+  }
+
+  void SetUp() OVERRIDE {
+    ON_CALL(mock_app_mngr_, event_dispatcher())
+        .WillByDefault(ReturnRef(mock_event_dispatcher_));
+    ON_CALL(mock_app_mngr_, get_settings())
+        .WillByDefault(ReturnRef(mock_application_manager_settings_));
+    ON_CALL(mock_application_manager_settings_, hmi_capabilities_file_name())
+        .WillByDefault(ReturnRef(kHmiCapabilitiesDefaultFile));
+    ON_CALL(mock_application_manager_settings_,
+            hmi_capabilities_cache_file_name())
+        .WillByDefault(ReturnRef(kHmiCapabilitiesCacheFile));
+
+    hmi_capabilities_ = std::make_shared<HMICapabilitiesImpl>(mock_app_mngr_);
+  }
+
+  void TearDown() OVERRIDE {
+    DeleteFileIfExists(kHmiCapabilitiesCacheFile);
+    DeleteFileIfExists(kAppInfoDataFile);
+    hmi_capabilities_.reset();
+  }
+
+  void CreateFile(const std::string& file_name) {
+    file_system::CreateFile(file_name);
+    ASSERT_TRUE(file_system::FileExists(file_name));
+  }
+
+  void DeleteFileIfExists(const std::string& file_path) {
+    if (file_system::FileExists(file_path)) {
+      EXPECT_TRUE(::file_system::DeleteFile(file_path));
+    }
+  }
+
+  void SetUpLanguageAndLightCapabilitiesExpectation() {
+    ON_CALL(mock_app_mngr_, IsSOStructValid(_, _)).WillByDefault(Return(true));
+
+    EXPECT_CALL(*(MockMessageHelper::message_helper_mock()),
+                CommonLanguageFromString(_))
+        .WillRepeatedly(Invoke(TestCommonLanguageFromString));
+    EXPECT_CALL(*(MockMessageHelper::message_helper_mock()),
+                CommonLightNameFromString(_))
+        .WillRepeatedly(Invoke(TestCommonLightNameFromString));
+  }
+
+  std::shared_ptr<HMICapabilitiesImpl> hmi_capabilities_;
+  NiceMock<MockApplicationManager> mock_app_mngr_;
+  NiceMock<event_engine_test::MockEventDispatcher> mock_event_dispatcher_;
+  NiceMock<MockApplicationManagerSettings> mock_application_manager_settings_;
+  resumption::LastStateWrapperPtr last_state_wrapper_;
+  smart_objects::CSmartSchema schema_;
+};
+
+TEST_F(HMICapabilitiesTest,
+       Init_CheckActiveLanguages_SuccesSetupDefaultLanguages) {
+  SetUpLanguageAndLightCapabilitiesExpectation();
+  hmi_capabilities_->Init(last_state_wrapper_);
+
   EXPECT_EQ(hmi_apis::Common_Language::EN_US,
-            hmi_capabilities_test->active_ui_language());
-  EXPECT_EQ(hmi_apis::Common_Language::ES_MX,
-            hmi_capabilities_test->active_vr_language());
-  EXPECT_EQ(hmi_apis::Common_Language::DE_DE,
-            hmi_capabilities_test->active_tts_language());
+            hmi_capabilities_->active_ui_language());
+  EXPECT_EQ(hmi_apis::Common_Language::EN_US,
+            hmi_capabilities_->active_vr_language());
+  EXPECT_EQ(hmi_apis::Common_Language::EN_US,
+            hmi_capabilities_->active_tts_language());
+}
 
-  // Check UI languages
-  const smart_objects::SmartObject ui_supported_languages =
-      *(hmi_capabilities_test->ui_supported_languages());
+TEST_F(HMICapabilitiesTest,
+       LoadCapabilitiesFromFile_CheckUILanguages_SuccessLoadAndConvert) {
+  SetUpLanguageAndLightCapabilitiesExpectation();
+  hmi_capabilities_->Init(last_state_wrapper_);
+  const auto ui_supported_languages_so =
+      *(hmi_capabilities_->ui_supported_languages());
 
   EXPECT_EQ(hmi_apis::Common_Language::EN_US,
             static_cast<hmi_apis::Common_Language::eType>(
-                ui_supported_languages[0].asInt()));
+                ui_supported_languages_so[0].asInt()));
   EXPECT_EQ(hmi_apis::Common_Language::ES_MX,
             static_cast<hmi_apis::Common_Language::eType>(
-                ui_supported_languages[1].asInt()));
+                ui_supported_languages_so[1].asInt()));
   EXPECT_EQ(hmi_apis::Common_Language::FR_CA,
             static_cast<hmi_apis::Common_Language::eType>(
-                ui_supported_languages[2].asInt()));
+                ui_supported_languages_so[2].asInt()));
+}
 
-  // Check VR languages
-  const smart_objects::SmartObject vr_supported_languages =
-      *(hmi_capabilities_test->vr_supported_languages());
+TEST_F(HMICapabilitiesTest,
+       LoadCapabilitiesFromFile_CheckVRLanguages_SuccessLoadAndConvert) {
+  hmi_capabilities_->Init(last_state_wrapper_);
+  const auto vr_supported_languages_so =
+      *(hmi_capabilities_->vr_supported_languages());
 
-  EXPECT_EQ(hmi_apis::Common_Language::AR_SA,
-            static_cast<hmi_apis::Common_Language::eType>(
-                vr_supported_languages[0].asInt()));
   EXPECT_EQ(hmi_apis::Common_Language::EN_US,
             static_cast<hmi_apis::Common_Language::eType>(
-                vr_supported_languages[1].asInt()));
+                vr_supported_languages_so[0].asInt()));
   EXPECT_EQ(hmi_apis::Common_Language::ES_MX,
             static_cast<hmi_apis::Common_Language::eType>(
-                vr_supported_languages[2].asInt()));
-
-  // Check TTS languages
-  const smart_objects::SmartObject tts_supported_languages =
-      *(hmi_capabilities_test->tts_supported_languages());
-
-  EXPECT_EQ(hmi_apis::Common_Language::DA_DK,
+                vr_supported_languages_so[1].asInt()));
+  EXPECT_EQ(hmi_apis::Common_Language::FR_CA,
             static_cast<hmi_apis::Common_Language::eType>(
-                tts_supported_languages[0].asInt()));
-  EXPECT_EQ(hmi_apis::Common_Language::CS_CZ,
-            static_cast<hmi_apis::Common_Language::eType>(
-                tts_supported_languages[1].asInt()));
-  EXPECT_EQ(hmi_apis::Common_Language::KO_KR,
-            static_cast<hmi_apis::Common_Language::eType>(
-                tts_supported_languages[2].asInt()));
+                vr_supported_languages_so[2].asInt()));
+}
 
-  // Check TTS capabilities
-  const smart_objects::SmartObject tts_capabilities =
-      *(hmi_capabilities_test->speech_capabilities());
+TEST_F(
+    HMICapabilitiesTest,
+    LoadCapabilitiesFromFile_CheckTTSSupportedLanguages_SuccessLoadAndConvert) {
+  hmi_capabilities_->Init(last_state_wrapper_);
+  const auto tts_supported_languages_so =
+      *(hmi_capabilities_->tts_supported_languages());
+
+  EXPECT_EQ(hmi_apis::Common_Language::EN_US,
+            static_cast<hmi_apis::Common_Language::eType>(
+                tts_supported_languages_so[0].asInt()));
+  EXPECT_EQ(hmi_apis::Common_Language::ES_MX,
+            static_cast<hmi_apis::Common_Language::eType>(
+                tts_supported_languages_so[1].asInt()));
+  EXPECT_EQ(hmi_apis::Common_Language::FR_CA,
+            static_cast<hmi_apis::Common_Language::eType>(
+                tts_supported_languages_so[2].asInt()));
+}
+
+TEST_F(HMICapabilitiesTest,
+       LoadCapabilitiesFromFile_CheckSpeechCapabilities_SuccessLoadAndConvert) {
+  hmi_capabilities_->Init(last_state_wrapper_);
+  const auto tts_capabilities_so = *(hmi_capabilities_->speech_capabilities());
+
   EXPECT_EQ(hmi_apis::Common_SpeechCapabilities::SC_TEXT,
             static_cast<hmi_apis::Common_SpeechCapabilities::eType>(
-                tts_capabilities[0].asInt()));
+                tts_capabilities_so[0].asInt()));
+}
 
-  // Check button capabilities
-  const smart_objects::SmartObject buttons_capabilities_so =
-      *(hmi_capabilities_test->button_capabilities());
+TEST_F(
+    HMICapabilitiesTest,
+    LoadCapabilitiesFromFile_CheckUIButtonCapabilities_SuccessLoadAndConvert) {
+  hmi_capabilities_->Init(last_state_wrapper_);
+  const auto buttons_capabilities_so =
+      *(hmi_capabilities_->button_capabilities());
 
   // Count of buttons in json file
-  const uint32_t btn_length = buttons_capabilities_so.length();
-  EXPECT_EQ(16u, btn_length);
-  for (uint32_t i = 0; i < btn_length; ++i) {
-    EXPECT_TRUE((buttons_capabilities_so[i]).keyExists(strings::name));
-    EXPECT_TRUE((buttons_capabilities_so[i]).keyExists("shortPressAvailable"));
-    EXPECT_TRUE((buttons_capabilities_so[i]).keyExists("longPressAvailable"));
-    EXPECT_TRUE((buttons_capabilities_so[i]).keyExists("upDownAvailable"));
-    EXPECT_TRUE(buttons_capabilities_so[i]["shortPressAvailable"].asBool());
-    EXPECT_TRUE(buttons_capabilities_so[i]["longPressAvailable"].asBool());
-    EXPECT_TRUE(buttons_capabilities_so[i]["upDownAvailable"].asBool());
+  const size_t btn_length = buttons_capabilities_so.length();
+  EXPECT_EQ(16ull, btn_length);
+  for (size_t index = 0; index < btn_length; ++index) {
+    EXPECT_TRUE(buttons_capabilities_so
+                    [index][rc_rpc_plugin::enums_value::kShortPressAvailable]
+                        .asBool());
+    EXPECT_TRUE(
+        buttons_capabilities_so[index]
+                               [rc_rpc_plugin::enums_value::kLongPressAvailable]
+                                   .asBool());
+    EXPECT_TRUE(
+        buttons_capabilities_so[index]
+                               [rc_rpc_plugin::enums_value::kUpDownAvailable]
+                                   .asBool());
   }
-  const smart_objects::SmartObject display_capabilities_so =
-      *(hmi_capabilities_test->display_capabilities());
+}
 
-  // Check display type
-  EXPECT_EQ(hmi_apis::Common_DisplayType::GEN2_8_DMA,
+TEST_F(HMICapabilitiesTest,
+       LoadCapabilitiesFromFile_CheckDisplayType_SuccessLoadAndConvert) {
+  SetUpLanguageAndLightCapabilitiesExpectation();
+  hmi_capabilities_->Init(last_state_wrapper_);
+  const auto display_capabilities_so =
+      *(hmi_capabilities_->display_capabilities());
+
+  EXPECT_EQ(hmi_apis::Common_DisplayType::SDL_GENERIC,
             static_cast<hmi_apis::Common_DisplayType::eType>(
                 display_capabilities_so[hmi_response::display_type].asInt()));
 
@@ -281,51 +458,79 @@ TEST_F(HMICapabilitiesTest, LoadCapabilitiesFromFile) {
             display_capabilities_so[hmi_response::display_name].asString());
 
   EXPECT_TRUE(display_capabilities_so["graphicSupported"].asBool());
+}
 
-  // Check text fields
-  const uint32_t text_len =
-      display_capabilities_so[hmi_response::text_fields].length();
-  EXPECT_NE(0u, text_len);
-  for (uint32_t i = 0; i < text_len; ++i) {
-    EXPECT_TRUE((display_capabilities_so[hmi_response::text_fields][i])
-                    .keyExists(strings::name));
-    EXPECT_TRUE((display_capabilities_so[hmi_response::text_fields][i])
-                    .keyExists(strings::character_set));
-  }
+TEST_F(HMICapabilitiesTest,
+       LoadCapabilitiesFromFile_CheckImageFields_SuccessLoadAndConvert) {
+  SetUpLanguageAndLightCapabilitiesExpectation();
+  hmi_capabilities_->Init(last_state_wrapper_);
+  const auto display_capabilities_so =
+      *(hmi_capabilities_->display_capabilities());
 
-  // Check image fields
-  EXPECT_TRUE((display_capabilities_so).keyExists(hmi_response::image_fields));
-  const uint32_t img_len =
+  ASSERT_TRUE((display_capabilities_so).keyExists(hmi_response::image_fields));
+  const size_t img_len =
       display_capabilities_so[hmi_response::image_fields].length();
-  EXPECT_NE(0u, img_len);
-  for (uint32_t i = 0; i < img_len; ++i) {
-    EXPECT_TRUE((display_capabilities_so[hmi_response::image_fields][i])
+  EXPECT_NE(0ull, img_len);
+  for (size_t index = 0; index < img_len; ++index) {
+    EXPECT_TRUE((display_capabilities_so[hmi_response::image_fields][index])
                     .keyExists(strings::name));
-    EXPECT_TRUE((display_capabilities_so[hmi_response::image_fields][i])
-                    .keyExists(strings::image_type_supported));
-    if (display_capabilities_so[hmi_response::image_fields][i][strings::name] ==
-        hmi_apis::Common_ImageFieldName::locationImage) {
+
+    const hmi_apis::Common_ImageFieldName::eType field_name =
+        static_cast<hmi_apis::Common_ImageFieldName::eType>(
+            display_capabilities_so[hmi_response::image_fields][index]
+                                   [strings::name]
+                                       .asInt());
+
+    if ((field_name == hmi_apis::Common_ImageFieldName::locationImage) ||
+        (field_name == hmi_apis::Common_ImageFieldName::alertIcon)) {
+      EXPECT_TRUE((display_capabilities_so[hmi_response::image_fields][index])
+                      .keyExists(strings::image_type_supported));
       EXPECT_EQ(hmi_apis::Common_FileType::GRAPHIC_PNG,
                 static_cast<hmi_apis::Common_FileType::eType>(
-                    display_capabilities_so[hmi_response::image_fields][i]
+                    display_capabilities_so[hmi_response::image_fields][index]
                                            [strings::image_type_supported][0]
                                                .asInt()));
     }
   }
+}
 
-  // Check media clock formats
+TEST_F(HMICapabilitiesTest,
+       LoadCapabilitiesFromFile_CheckTextFields_SuccessLoadAndConvert) {
+  SetUpLanguageAndLightCapabilitiesExpectation();
+  hmi_capabilities_->Init(last_state_wrapper_);
+  const auto display_capabilities_so =
+      *(hmi_capabilities_->display_capabilities());
+
+  const size_t text_len =
+      display_capabilities_so[hmi_response::text_fields].length();
+  EXPECT_NE(0ull, text_len);
+  for (size_t index = 0; index < text_len; ++index) {
+    EXPECT_TRUE((display_capabilities_so[hmi_response::text_fields][index])
+                    .keyExists(strings::name));
+    EXPECT_TRUE((display_capabilities_so[hmi_response::text_fields][index])
+                    .keyExists(strings::character_set));
+  }
+}
+
+TEST_F(HMICapabilitiesTest,
+       LoadCapabilitiesFromFile_CheckMediaClockFormats_SuccessLoadAndConvert) {
+  SetUpLanguageAndLightCapabilitiesExpectation();
+  hmi_capabilities_->Init(last_state_wrapper_);
+  const auto display_capabilities_so =
+      *(hmi_capabilities_->display_capabilities());
+
   EXPECT_TRUE(
       (display_capabilities_so).keyExists(hmi_response::media_clock_formats));
-  const uint32_t media_length =
+  const size_t media_length =
       display_capabilities_so[hmi_response::media_clock_formats].length();
-  EXPECT_NE(0u, media_length);
-  for (uint32_t i = 0; i < media_length; ++i) {
+  EXPECT_NE(0ull, media_length);
+  for (size_t i = 0; i < media_length; ++i) {
     EXPECT_EQ(
         i,
         display_capabilities_so[hmi_response::media_clock_formats][i].asUInt());
   }
 
-  EXPECT_TRUE(
+  ASSERT_TRUE(
       (display_capabilities_so).keyExists(hmi_response::image_capabilities));
   EXPECT_EQ(hmi_apis::Common_ImageType::DYNAMIC,
             static_cast<hmi_apis::Common_ImageType::eType>(
@@ -336,9 +541,17 @@ TEST_F(HMICapabilitiesTest, LoadCapabilitiesFromFile) {
                 display_capabilities_so[hmi_response::image_capabilities][1]
                     .asInt()));
 
-  // Check audio pass thru
-  const smart_objects::SmartObject audio_pass_thru_capabilities_so =
-      *(hmi_capabilities_test->audio_pass_thru_capabilities());
+  // TemplatesAvailable parameter could be as empty array
+  ASSERT_TRUE(
+      display_capabilities_so.keyExists(hmi_response::templates_available));
+}
+
+TEST_F(HMICapabilitiesTest,
+       LoadCapabilitiesFromFile_CheckAudioPassThru_SuccessLoadAndConvert) {
+  hmi_capabilities_->Init(last_state_wrapper_);
+  const auto audio_pass_thru_capabilities_so =
+      *(hmi_capabilities_->audio_pass_thru_capabilities());
+
   EXPECT_EQ(smart_objects::SmartType_Array,
             audio_pass_thru_capabilities_so.getType());
   EXPECT_EQ(1u, audio_pass_thru_capabilities_so.length());
@@ -351,57 +564,118 @@ TEST_F(HMICapabilitiesTest, LoadCapabilitiesFromFile) {
   EXPECT_EQ(hmi_apis::Common_AudioType::PCM,
             static_cast<hmi_apis::Common_AudioType::eType>(
                 audio_pass_thru_capabilities_so[0]["audioType"].asInt()));
+}
 
-  // Check hmi zone capabilities
-  const smart_objects::SmartObject hmi_zone_capabilities_so =
-      *(hmi_capabilities_test->hmi_zone_capabilities());
+TEST_F(
+    HMICapabilitiesTest,
+    LoadCapabilitiesFromFile_CheckHmiZoneCapabilities_SuccessLoadAndConvert) {
+  hmi_capabilities_->Init(last_state_wrapper_);
+  const auto hmi_zone_capabilities_so =
+      *(hmi_capabilities_->hmi_zone_capabilities());
+
   EXPECT_EQ(hmi_apis::Common_HmiZoneCapabilities::FRONT,
             static_cast<hmi_apis::Common_HmiZoneCapabilities::eType>(
                 hmi_zone_capabilities_so.asInt()));
+}
 
-  const smart_objects::SmartObject soft_button_capabilities_so =
-      *(hmi_capabilities_test->soft_button_capabilities());
+TEST_F(
+    HMICapabilitiesTest,
+    LoadCapabilitiesFromFile_CheckSoftButtonCapabilities_SuccessLoadAndConvert) {
+  hmi_capabilities_->Init(last_state_wrapper_);
+  const auto& soft_button_capabilities_so =
+      *(hmi_capabilities_->soft_button_capabilities());
 
-  EXPECT_TRUE(soft_button_capabilities_so[0]["shortPressAvailable"].asBool());
-  EXPECT_TRUE(soft_button_capabilities_so[0]["longPressAvailable"].asBool());
-  EXPECT_TRUE(soft_button_capabilities_so[0]["upDownAvailable"].asBool());
-  EXPECT_TRUE(soft_button_capabilities_so[0]["imageSupported"].asBool());
+  const size_t soft_butons_length = soft_button_capabilities_so.length();
 
-  const smart_objects::SmartObject preset_bank_so =
-      *(hmi_capabilities_test->preset_bank_capabilities());
-  EXPECT_TRUE(preset_bank_so["onScreenPresetsAvailable"].asBool());
+  ASSERT_TRUE(soft_butons_length > 0);
 
-  // Check vehicle type
-  const smart_objects::SmartObject vehicle_type_so =
-      *(hmi_capabilities_test->vehicle_type());
+  for (size_t index = 0; index < soft_butons_length; ++index) {
+    EXPECT_TRUE(soft_button_capabilities_so[index].keyExists(
+        rc_rpc_plugin::enums_value::kShortPressAvailable));
+    EXPECT_EQ(smart_objects::SmartType::SmartType_Boolean,
+              soft_button_capabilities_so
+                  [index][rc_rpc_plugin::enums_value::kShortPressAvailable]
+                      .getType());
 
-  EXPECT_EQ("Ford", vehicle_type_so["make"].asString());
-  EXPECT_EQ("Fiesta", vehicle_type_so["model"].asString());
-  EXPECT_EQ("2013", vehicle_type_so["modelYear"].asString());
+    EXPECT_TRUE(soft_button_capabilities_so[index].keyExists(
+        rc_rpc_plugin::enums_value::kLongPressAvailable));
+    EXPECT_EQ(smart_objects::SmartType::SmartType_Boolean,
+              soft_button_capabilities_so
+                  [index][rc_rpc_plugin::enums_value::kLongPressAvailable]
+                      .getType());
+
+    EXPECT_TRUE(soft_button_capabilities_so[index].keyExists(
+        rc_rpc_plugin::enums_value::kUpDownAvailable));
+    EXPECT_EQ(smart_objects::SmartType::SmartType_Boolean,
+              soft_button_capabilities_so
+                  [index][rc_rpc_plugin::enums_value::kUpDownAvailable]
+                      .getType());
+
+    EXPECT_TRUE(soft_button_capabilities_so[index].keyExists(
+        hmi_response::image_supported));
+    EXPECT_EQ(smart_objects::SmartType::SmartType_Boolean,
+              soft_button_capabilities_so[index][hmi_response::image_supported]
+                  .getType());
+  }
+}
+
+TEST_F(
+    HMICapabilitiesTest,
+    LoadCapabilitiesFromFile_CheckPresetBankCapabilities_SuccessLoadAndConvert) {
+  hmi_capabilities_->Init(last_state_wrapper_);
+  const auto preset_bank_so = *(hmi_capabilities_->preset_bank_capabilities());
+
+  EXPECT_TRUE(
+      preset_bank_so.keyExists(hmi_response::on_screen_presets_available));
+  EXPECT_EQ(
+      smart_objects::SmartType::SmartType_Boolean,
+      preset_bank_so[hmi_response::on_screen_presets_available].getType());
+}
+
+TEST_F(HMICapabilitiesTest,
+       LoadCapabilitiesFromFile_CheckVehicleType_SuccessLoadAndConvert) {
+  hmi_capabilities_->Init(last_state_wrapper_);
+  const auto vehicle_type_so = *(hmi_capabilities_->vehicle_type());
+
+  EXPECT_EQ("SDL", vehicle_type_so["make"].asString());
+  EXPECT_EQ("Generic", vehicle_type_so["model"].asString());
+  EXPECT_EQ("2019", vehicle_type_so["modelYear"].asString());
   EXPECT_EQ("SE", vehicle_type_so["trim"].asString());
+}
 
-  // Check system capabilities
-  smart_objects::SmartObject navigation_capability_so =
-      *(hmi_capabilities_test->navigation_capability());
+TEST_F(
+    HMICapabilitiesTest,
+    LoadCapabilitiesFromFile_CheckNavigationCapabilities_SuccessLoadAndConvert) {
+  hmi_capabilities_->Init(last_state_wrapper_);
+  const auto navigation_capability_so =
+      *(hmi_capabilities_->navigation_capability());
 
   EXPECT_TRUE(navigation_capability_so.keyExists("sendLocationEnabled"));
   EXPECT_TRUE(navigation_capability_so.keyExists("getWayPointsEnabled"));
   EXPECT_TRUE(navigation_capability_so["sendLocationEnabled"].asBool());
   EXPECT_TRUE(navigation_capability_so["getWayPointsEnabled"].asBool());
 
-  // since we have navigation capabilities, the feature should be supported
-  EXPECT_TRUE(hmi_capabilities_test->navigation_supported());
+  // Since we have navigation capabilities, the feature should be supported
+  EXPECT_TRUE(hmi_capabilities_->navigation_supported());
+}
 
-  const smart_objects::SmartObject phone_capability_so =
-      *(hmi_capabilities_test->phone_capability());
+TEST_F(HMICapabilitiesTest,
+       LoadCapabilitiesFromFile_CheckPhoneCapability_SuccessLoadAndConvert) {
+  hmi_capabilities_->Init(last_state_wrapper_);
+  const auto phone_capability_so = *(hmi_capabilities_->phone_capability());
 
   EXPECT_TRUE(phone_capability_so.keyExists("dialNumberEnabled"));
   EXPECT_TRUE(phone_capability_so["dialNumberEnabled"].asBool());
 
-  EXPECT_TRUE(hmi_capabilities_test->phone_call_supported());
+  EXPECT_TRUE(hmi_capabilities_->phone_call_supported());
+}
 
-  const smart_objects::SmartObject vs_capability_so =
-      *(hmi_capabilities_test->video_streaming_capability());
+TEST_F(
+    HMICapabilitiesTest,
+    LoadCapabilitiesFromFile_CheckVideoStreamingCapability_SuccessLoadAndConvert) {
+  hmi_capabilities_->Init(last_state_wrapper_);
+  const auto vs_capability_so =
+      *(hmi_capabilities_->video_streaming_capability());
 
   EXPECT_TRUE(vs_capability_so.keyExists(strings::preferred_resolution));
   EXPECT_TRUE(vs_capability_so[strings::preferred_resolution].keyExists(
@@ -419,156 +693,312 @@ TEST_F(HMICapabilitiesTest, LoadCapabilitiesFromFile) {
   EXPECT_TRUE(vs_capability_so.keyExists(strings::max_bitrate));
   EXPECT_EQ(10000, vs_capability_so[strings::max_bitrate].asInt());
   EXPECT_TRUE(vs_capability_so.keyExists(strings::supported_formats));
-  const uint32_t supported_formats_len =
+  const size_t supported_formats_len =
       vs_capability_so[strings::supported_formats].length();
-  EXPECT_EQ(2u, supported_formats_len);
+  EXPECT_EQ(1ull, supported_formats_len);
+
   EXPECT_TRUE(vs_capability_so[strings::supported_formats][0].keyExists(
       strings::protocol));
   EXPECT_TRUE(vs_capability_so[strings::supported_formats][0].keyExists(
       strings::codec));
-  EXPECT_EQ(0,
+  EXPECT_EQ(hmi_apis::Common_VideoStreamingProtocol::RAW,
             vs_capability_so[strings::supported_formats][0][strings::protocol]
                 .asInt());
   EXPECT_EQ(
-      0,
+      hmi_apis::Common_VideoStreamingCodec::H264,
       vs_capability_so[strings::supported_formats][0][strings::codec].asInt());
-  EXPECT_TRUE(vs_capability_so[strings::supported_formats][1].keyExists(
-      strings::protocol));
-  EXPECT_TRUE(vs_capability_so[strings::supported_formats][1].keyExists(
-      strings::codec));
-  EXPECT_EQ(1,
-            vs_capability_so[strings::supported_formats][1][strings::protocol]
-                .asInt());
-  EXPECT_EQ(
-      2,
-      vs_capability_so[strings::supported_formats][1][strings::codec].asInt());
 
   EXPECT_TRUE(
       vs_capability_so.keyExists(strings::haptic_spatial_data_supported));
-  EXPECT_TRUE(
+  EXPECT_FALSE(
       vs_capability_so[strings::haptic_spatial_data_supported].asBool());
 
-  EXPECT_TRUE(hmi_capabilities_test->video_streaming_supported());
+  EXPECT_TRUE(hmi_capabilities_->video_streaming_supported());
+}
 
-  // Check remote control capabilites
-  const smart_objects::SmartObject rc_capability_so =
-      *(hmi_capabilities_test->rc_capability());
+TEST_F(
+    HMICapabilitiesTest,
+    LoadCapabilitiesFromFile_CheckRemoteControlCapabilites_SuccessLoadAndConvert) {
+  hmi_capabilities_->Init(last_state_wrapper_);
+  const auto rc_capability_so = *(hmi_capabilities_->rc_capability());
 
-  EXPECT_TRUE(rc_capability_so.keyExists("climateControlCapabilities"));
-  EXPECT_TRUE(rc_capability_so.keyExists("radioControlCapabilities"));
-  EXPECT_TRUE(rc_capability_so.keyExists("buttonCapabilities"));
+  ASSERT_TRUE(rc_capability_so.keyExists(
+      rc_rpc_plugin::strings::kclimateControlCapabilities));
+  const auto& climate_control_capabilities_so =
+      rc_capability_so[rc_rpc_plugin::strings::kclimateControlCapabilities][0];
+
+  EXPECT_TRUE(climate_control_capabilities_so
+                  [rc_rpc_plugin::strings::kFanSpeedAvailable]
+                      .asBool());
+  EXPECT_TRUE(climate_control_capabilities_so
+                  [rc_rpc_plugin::strings::kDesiredTemperatureAvailable]
+                      .asBool());
+  EXPECT_TRUE(climate_control_capabilities_so
+                  [rc_rpc_plugin::strings::kAcEnableAvailable]
+                      .asBool());
+  EXPECT_TRUE(climate_control_capabilities_so
+                  [rc_rpc_plugin::strings::kAcMaxEnableAvailable]
+                      .asBool());
+}
+
+TEST_F(
+    HMICapabilitiesTest,
+    LoadCapabilitiesFromFile_CheckRadioControlCapabilities_SuccessLoadAndConvert) {
+  hmi_capabilities_->Init(last_state_wrapper_);
+  const auto rc_capability_so = *(hmi_capabilities_->rc_capability());
+
+  ASSERT_TRUE(rc_capability_so.keyExists(
+      rc_rpc_plugin::strings::kradioControlCapabilities));
+  const auto& radio_control_capabilities_so =
+      rc_capability_so[rc_rpc_plugin::strings::kradioControlCapabilities][0];
+
+  EXPECT_EQ("radio", radio_control_capabilities_so["moduleName"].asString());
+
+  EXPECT_TRUE(radio_control_capabilities_so
+                  [rc_rpc_plugin::message_params::kAvailableHdChannelsAvailable]
+                      .asBool());
+  EXPECT_TRUE(radio_control_capabilities_so
+                  [rc_rpc_plugin::strings::kSignalChangeThresholdAvailable]
+                      .asBool());
+  EXPECT_TRUE(radio_control_capabilities_so
+                  [rc_rpc_plugin::strings::kSignalStrengthAvailable]
+                      .asBool());
+  EXPECT_TRUE(radio_control_capabilities_so
+                  [rc_rpc_plugin::strings::kHdRadioEnableAvailable]
+                      .asBool());
+  EXPECT_TRUE(radio_control_capabilities_so
+                  [rc_rpc_plugin::strings::kSiriusxmRadioAvailable]
+                      .asBool());
+  EXPECT_TRUE(
+      radio_control_capabilities_so[rc_rpc_plugin::strings::kSisDataAvailable]
+          .asBool());
+  EXPECT_TRUE(
+      radio_control_capabilities_so[rc_rpc_plugin::strings::kStateAvailable]
+          .asBool());
+  EXPECT_TRUE(
+      radio_control_capabilities_so[rc_rpc_plugin::strings::kRadioBandAvailable]
+          .asBool());
+  EXPECT_TRUE(radio_control_capabilities_so
+                  [rc_rpc_plugin::strings::kRadioFrequencyAvailable]
+                      .asBool());
+  EXPECT_TRUE(
+      radio_control_capabilities_so[rc_rpc_plugin::strings::kHdChannelAvailable]
+          .asBool());
+  EXPECT_TRUE(
+      radio_control_capabilities_so[rc_rpc_plugin::strings::kRdsDataAvailable]
+          .asBool());
+
+  ASSERT_TRUE(radio_control_capabilities_so.keyExists(
+      rc_rpc_plugin::message_params::kModuleInfo));
+  ASSERT_TRUE(
+      radio_control_capabilities_so[rc_rpc_plugin::message_params::kModuleInfo]
+          .keyExists(rc_rpc_plugin::message_params::kModuleId));
+}
+
+TEST_F(
+    HMICapabilitiesTest,
+    LoadCapabilitiesFromFile_CheckRCButtonCapabilities_SuccessLoadAndConvert) {
+  hmi_capabilities_->Init(last_state_wrapper_);
+  const auto rc_capability_so = *(hmi_capabilities_->rc_capability());
+
+  ASSERT_TRUE(
+      rc_capability_so.keyExists(rc_rpc_plugin::strings::kbuttonCapabilities));
+  const auto& button_capabilities_so =
+      rc_capability_so[rc_rpc_plugin::strings::kbuttonCapabilities];
+
+  const size_t button_capabilities_length = button_capabilities_so.length();
+
+  for (size_t index = 0; index < button_capabilities_length; ++index) {
+    ASSERT_TRUE(button_capabilities_so[index].keyExists("name"));
+
+    ASSERT_TRUE(button_capabilities_so[index].keyExists(
+        rc_rpc_plugin::enums_value::kLongPressAvailable));
+    EXPECT_EQ(
+        smart_objects::SmartType::SmartType_Boolean,
+        button_capabilities_so[index]
+                              [rc_rpc_plugin::enums_value::kLongPressAvailable]
+                                  .getType());
+    ASSERT_TRUE(button_capabilities_so[index].keyExists(
+        rc_rpc_plugin::enums_value::kShortPressAvailable));
+    EXPECT_EQ(
+        smart_objects::SmartType::SmartType_Boolean,
+        button_capabilities_so[index]
+                              [rc_rpc_plugin::enums_value::kShortPressAvailable]
+                                  .getType());
+
+    ASSERT_TRUE(button_capabilities_so[index].keyExists(
+        rc_rpc_plugin::enums_value::kUpDownAvailable));
+    EXPECT_EQ(
+        smart_objects::SmartType::SmartType_Boolean,
+        button_capabilities_so[index]
+                              [rc_rpc_plugin::enums_value::kUpDownAvailable]
+                                  .getType());
+  }
+}
+
+TEST_F(HMICapabilitiesTest,
+       LoadCapabilitiesFromFile_CheckAudioCapabilities_SuccessLoadAndConvert) {
+  hmi_capabilities_->Init(last_state_wrapper_);
+  const auto rc_capability_so = *(hmi_capabilities_->rc_capability());
+
+  EXPECT_TRUE(rc_capability_so.keyExists(
+      rc_rpc_plugin::strings::kaudioControlCapabilities));
+
+  const auto& audio_capabilities_so =
+      rc_capability_so[rc_rpc_plugin::strings::kaudioControlCapabilities][0];
+
+  EXPECT_TRUE(audio_capabilities_so.keyExists(
+      rc_rpc_plugin::message_params::kModuleInfo));
+
+  const auto& audio_cap_module_info =
+      audio_capabilities_so[rc_rpc_plugin::message_params::kModuleInfo];
+  EXPECT_TRUE(audio_cap_module_info.keyExists(
+      rc_rpc_plugin::message_params::kModuleId));
+  EXPECT_TRUE(audio_cap_module_info.keyExists(
+      rc_rpc_plugin::strings::kAllowMultipleAccess));
+  EXPECT_TRUE(
+      audio_cap_module_info[rc_rpc_plugin::strings::kAllowMultipleAccess]
+          .asBool());
 
   EXPECT_TRUE(
-      rc_capability_so["climateControlCapabilities"][0]["fanSpeedAvailable"]
-          .asBool());
-  EXPECT_TRUE(rc_capability_so["climateControlCapabilities"][0]
-                              ["desiredTemperatureAvailable"]
-                                  .asBool());
+      audio_capabilities_so[rc_rpc_plugin::strings::kSourceAvailable].asBool());
   EXPECT_TRUE(
-      rc_capability_so["climateControlCapabilities"][0]["acEnableAvailable"]
-          .asBool());
-  EXPECT_TRUE(
-      rc_capability_so["climateControlCapabilities"][0]["acMaxEnableAvailable"]
-          .asBool());
-
-  EXPECT_TRUE(
-      rc_capability_so["radioControlCapabilities"][0]["radioBandAvailable"]
-          .asBool());
-  EXPECT_TRUE(
-      rc_capability_so["radioControlCapabilities"][0]["radioFrequencyAvailable"]
-          .asBool());
-  EXPECT_TRUE(
-      rc_capability_so["radioControlCapabilities"][0]["hdChannelAvailable"]
-          .asBool());
-  EXPECT_TRUE(
-      rc_capability_so["radioControlCapabilities"][0]["rdsDataAvailable"]
-          .asBool());
-
-  EXPECT_TRUE(rc_capability_so["buttonCapabilities"][0]["shortPressAvailable"]
+      audio_capabilities_so[rc_rpc_plugin::strings::kVolumeAvailable].asBool());
+  EXPECT_TRUE(audio_capabilities_so[rc_rpc_plugin::strings::kEqualizerAvailable]
                   .asBool());
   EXPECT_TRUE(
-      rc_capability_so["buttonCapabilities"][0]["longPressAvailable"].asBool());
+      audio_capabilities_so[rc_rpc_plugin::strings::kKeepContextAvailable]
+          .asBool());
+  EXPECT_EQ(
+      kEqualizerMaxChanelId,
+      audio_capabilities_so[rc_rpc_plugin::strings::kEqualizerMaxChannelId]
+          .asInt());
+}
+
+TEST_F(HMICapabilitiesTest,
+       LoadCapabilitiesFromFile_CheckSeatCapabilities_SuccessLoadAndConvert) {
+  hmi_capabilities_->Init(last_state_wrapper_);
+  const auto rc_capability_so = *(hmi_capabilities_->rc_capability());
+
+  EXPECT_TRUE(rc_capability_so.keyExists(
+      rc_rpc_plugin::strings::kseatControlCapabilities));
+  const auto& seat_capabilities_so =
+      rc_capability_so[rc_rpc_plugin::strings::kseatControlCapabilities][0];
+
+  EXPECT_TRUE(seat_capabilities_so.keyExists(
+      rc_rpc_plugin::message_params::kModuleInfo));
+  const auto& seat_cap_module_info =
+      seat_capabilities_so[rc_rpc_plugin::message_params::kModuleInfo];
+  EXPECT_TRUE(
+      seat_cap_module_info.keyExists(rc_rpc_plugin::message_params::kModuleId));
+  EXPECT_TRUE(seat_cap_module_info.keyExists(
+      rc_rpc_plugin::strings::kAllowMultipleAccess));
   EXPECT_FALSE(
-      rc_capability_so["buttonCapabilities"][0]["upDownAvailable"].asBool());
+      seat_cap_module_info[rc_rpc_plugin::strings::kAllowMultipleAccess]
+          .asBool());
+}
+
+TEST_F(HMICapabilitiesTest,
+       LoadCapabilitiesFromFile_CheckLightCapabilities_SuccessLoadAndConvert) {
+  hmi_capabilities_->Init(last_state_wrapper_);
+  const auto rc_capability_so = *(hmi_capabilities_->rc_capability());
+
+  EXPECT_TRUE(rc_capability_so.keyExists(
+      rc_rpc_plugin::strings::klightControlCapabilities));
+  const auto& light_capabilities_so =
+      rc_capability_so[rc_rpc_plugin::strings::klightControlCapabilities];
+
+  EXPECT_TRUE(light_capabilities_so.keyExists(
+      rc_rpc_plugin::message_params::kModuleInfo));
+  const auto& light_cap_module_info =
+      light_capabilities_so[rc_rpc_plugin::message_params::kModuleInfo];
+  EXPECT_TRUE(light_cap_module_info.keyExists(
+      rc_rpc_plugin::message_params::kModuleId));
+  EXPECT_FALSE(
+      light_cap_module_info[rc_rpc_plugin::strings::kAllowMultipleAccess]
+          .asBool());
+
+  EXPECT_TRUE(light_capabilities_so.keyExists(
+      rc_rpc_plugin::strings::kSupportedLights));
+
+  const auto& supported_lights =
+      light_capabilities_so[rc_rpc_plugin::strings::kSupportedLights];
+
+  const size_t supported_lights_length = supported_lights.length();
+  for (size_t index = 0; index < supported_lights_length; ++index) {
+    EXPECT_TRUE(
+        IsLightNameExists(static_cast<hmi_apis::Common_LightName::eType>(
+            supported_lights[index]["name"].asInt())));
+    EXPECT_TRUE(supported_lights[index].keyExists(
+        rc_rpc_plugin::strings::kStatusAvailable));
+    EXPECT_TRUE(supported_lights[index].keyExists(
+        rc_rpc_plugin::strings::kDensityAvailable));
+    EXPECT_TRUE(supported_lights[index].keyExists(
+        rc_rpc_plugin::strings::kRGBColorSpaceAvailable));
+  }
+
+  EXPECT_TRUE(rc_capability_so.keyExists(
+      rc_rpc_plugin::strings::klightControlCapabilities));
+  const auto& light_ctrl_cap_so =
+      rc_capability_so[rc_rpc_plugin::strings::klightControlCapabilities];
+
+  EXPECT_TRUE(light_ctrl_cap_so.keyExists("moduleName"));
+  EXPECT_TRUE(
+      light_ctrl_cap_so.keyExists(rc_rpc_plugin::strings::kSupportedLights));
+  EXPECT_EQ(
+      smart_objects::SmartType::SmartType_Array,
+      light_ctrl_cap_so[rc_rpc_plugin::strings::kSupportedLights].getType());
+
+  const auto& supported_light_so =
+      light_ctrl_cap_so[rc_rpc_plugin::strings::kSupportedLights];
+
+  const size_t sup_lights_length = supported_light_so.length();
+
+  for (size_t index = 0; index < sup_lights_length; ++index) {
+    EXPECT_TRUE(
+        supported_light_so[index].keyExists(rc_rpc_plugin::strings::kName));
+  }
 }
 
 TEST_F(HMICapabilitiesTest,
        LoadCapabilitiesFromFileAndVerifyUnsupportedSystemCapabilities) {
-  MockApplicationManager mock_app_mngr;
-  event_engine_test::MockEventDispatcher mock_dispatcher;
-  MockApplicationManagerSettings mock_application_manager_settings;
-
   const std::string hmi_capabilities_file = "hmi_capabilities_sc1.json";
+  ON_CALL(mock_application_manager_settings_, hmi_capabilities_file_name())
+      .WillByDefault(ReturnRef(hmi_capabilities_file));
 
-  EXPECT_CALL(mock_app_mngr, event_dispatcher())
-      .WillOnce(ReturnRef(mock_dispatcher));
-  EXPECT_CALL(mock_app_mngr, get_settings())
-      .WillRepeatedly(ReturnRef(mock_application_manager_settings));
-  EXPECT_CALL(mock_application_manager_settings, hmi_capabilities_file_name())
-      .WillOnce(ReturnRef(hmi_capabilities_file));
-  EXPECT_CALL(mock_dispatcher, add_observer(_, _, _)).Times(1);
-  EXPECT_CALL(mock_dispatcher, remove_observer(_)).Times(1);
-  EXPECT_CALL(mock_application_manager_settings, launch_hmi())
-      .WillOnce(Return(false));
-
-  if (file_system::FileExists("./app_info_data")) {
-    EXPECT_TRUE(::file_system::DeleteFile("./app_info_data"));
-  }
-
-  std::shared_ptr<HMICapabilitiesForTesting> hmi_capabilities =
-      std::make_shared<HMICapabilitiesForTesting>(mock_app_mngr);
-  hmi_capabilities->Init(last_state_wrapper_);
+  hmi_capabilities_->Init(last_state_wrapper_);
 
   // Check system capabilities; only phone capability is available
-  EXPECT_FALSE(hmi_capabilities->navigation_supported());
-  EXPECT_TRUE(hmi_capabilities->phone_call_supported());
-  EXPECT_FALSE(hmi_capabilities->video_streaming_supported());
-  EXPECT_FALSE(hmi_capabilities->rc_supported());
+  EXPECT_FALSE(hmi_capabilities_->navigation_supported());
+  EXPECT_TRUE(hmi_capabilities_->phone_call_supported());
+  EXPECT_FALSE(hmi_capabilities_->video_streaming_supported());
+  EXPECT_FALSE(hmi_capabilities_->rc_supported());
 
   // verify phone capability
   const smart_objects::SmartObject phone_capability_so =
-      *(hmi_capabilities->phone_capability());
+      *(hmi_capabilities_->phone_capability());
   EXPECT_TRUE(phone_capability_so.keyExists("dialNumberEnabled"));
   EXPECT_TRUE(phone_capability_so["dialNumberEnabled"].asBool());
 }
 
 TEST_F(HMICapabilitiesTest,
        LoadCapabilitiesFromFileAndVerifyEmptySystemCapabilities) {
-  MockApplicationManager mock_app_mngr;
-  event_engine_test::MockEventDispatcher mock_dispatcher;
-  MockApplicationManagerSettings mock_application_manager_settings;
-
   const std::string hmi_capabilities_file = "hmi_capabilities_sc2.json";
+  ON_CALL(mock_application_manager_settings_, hmi_capabilities_file_name())
+      .WillByDefault(ReturnRef(hmi_capabilities_file));
 
-  EXPECT_CALL(mock_app_mngr, event_dispatcher())
-      .WillOnce(ReturnRef(mock_dispatcher));
-  EXPECT_CALL(mock_app_mngr, get_settings())
-      .WillRepeatedly(ReturnRef(mock_application_manager_settings));
-  EXPECT_CALL(mock_application_manager_settings, hmi_capabilities_file_name())
-      .WillOnce(ReturnRef(hmi_capabilities_file));
-  EXPECT_CALL(mock_dispatcher, add_observer(_, _, _)).Times(1);
-  EXPECT_CALL(mock_dispatcher, remove_observer(_)).Times(1);
-  EXPECT_CALL(mock_application_manager_settings, launch_hmi())
-      .WillOnce(Return(false));
-
-  if (file_system::FileExists("./app_info_data")) {
-    EXPECT_TRUE(::file_system::DeleteFile("./app_info_data"));
-  }
-
-  std::shared_ptr<HMICapabilitiesForTesting> hmi_capabilities =
-      std::make_shared<HMICapabilitiesForTesting>(mock_app_mngr);
-  hmi_capabilities->Init(last_state_wrapper_);
+  hmi_capabilities_->Init(last_state_wrapper_);
 
   // Check system capabilities; only navigation capability is valid, the other
   // two are empty
-  EXPECT_TRUE(hmi_capabilities->navigation_supported());
-  EXPECT_FALSE(hmi_capabilities->phone_call_supported());
-  EXPECT_FALSE(hmi_capabilities->video_streaming_supported());
-  EXPECT_FALSE(hmi_capabilities->rc_supported());
+  EXPECT_TRUE(hmi_capabilities_->navigation_supported());
+  EXPECT_FALSE(hmi_capabilities_->phone_call_supported());
+  EXPECT_FALSE(hmi_capabilities_->video_streaming_supported());
+  EXPECT_FALSE(hmi_capabilities_->rc_supported());
 
   // verify navigation capabilities
   smart_objects::SmartObject navigation_capability_so =
-      *(hmi_capabilities->navigation_capability());
+      *(hmi_capabilities_->navigation_capability());
   EXPECT_TRUE(navigation_capability_so.keyExists("sendLocationEnabled"));
   EXPECT_TRUE(navigation_capability_so.keyExists("getWayPointsEnabled"));
   EXPECT_TRUE(navigation_capability_so["sendLocationEnabled"].asBool());
@@ -577,41 +1007,23 @@ TEST_F(HMICapabilitiesTest,
 
 TEST_F(HMICapabilitiesTest,
        LoadCapabilitiesFromFileAndVerifyOldAudioPassThruCapabilities) {
-  MockApplicationManager mock_app_mngr;
-  event_engine_test::MockEventDispatcher mock_dispatcher;
-  MockApplicationManagerSettings mock_application_manager_settings;
-
   const std::string hmi_capabilities_file = "hmi_capabilities_old_apt.json";
+  ON_CALL(mock_application_manager_settings_, hmi_capabilities_file_name())
+      .WillByDefault(ReturnRef(hmi_capabilities_file));
 
-  EXPECT_CALL(mock_app_mngr, event_dispatcher())
-      .WillOnce(ReturnRef(mock_dispatcher));
-  EXPECT_CALL(mock_app_mngr, get_settings())
-      .WillRepeatedly(ReturnRef(mock_application_manager_settings));
-  EXPECT_CALL(mock_application_manager_settings, hmi_capabilities_file_name())
-      .WillOnce(ReturnRef(hmi_capabilities_file));
-  EXPECT_CALL(mock_dispatcher, add_observer(_, _, _)).Times(1);
-  EXPECT_CALL(mock_dispatcher, remove_observer(_)).Times(1);
-  EXPECT_CALL(mock_application_manager_settings, launch_hmi())
-      .WillOnce(Return(false));
   EXPECT_CALL(*(MockMessageHelper::message_helper_mock()),
               CommonLanguageFromString(_))
       .WillRepeatedly(Invoke(TestCommonLanguageFromString));
 
-  if (file_system::FileExists("./app_info_data")) {
-    EXPECT_TRUE(::file_system::DeleteFile("./app_info_data"));
-  }
-
-  std::shared_ptr<HMICapabilitiesForTesting> hmi_capabilities =
-      std::make_shared<HMICapabilitiesForTesting>(mock_app_mngr);
-  hmi_capabilities->Init(last_state_wrapper_);
+  hmi_capabilities_->Init(last_state_wrapper_);
 
   // with old audio pass thru format, the object is an array containing a single
   // object
   smart_objects::SmartObjectSPtr audio_pass_thru_capabilities_so =
-      hmi_capabilities->audio_pass_thru_capabilities();
+      hmi_capabilities_->audio_pass_thru_capabilities();
   EXPECT_EQ(smart_objects::SmartType_Array,
             audio_pass_thru_capabilities_so->getType());
-  EXPECT_EQ(1u, audio_pass_thru_capabilities_so->length());
+  EXPECT_EQ(1ull, audio_pass_thru_capabilities_so->length());
   smart_objects::SmartObject& first_element =
       (*audio_pass_thru_capabilities_so)[0];
   EXPECT_TRUE(first_element.keyExists("samplingRate"));
@@ -629,45 +1041,608 @@ TEST_F(HMICapabilitiesTest,
 }
 
 TEST_F(HMICapabilitiesTest, VerifyImageType) {
+  ON_CALL(mock_app_mngr_, IsSOStructValid(_, _)).WillByDefault(Return(true));
+
   const int32_t image_type = 1;
   smart_objects::SmartObject sm_obj;
-  EXPECT_CALL(app_mngr_, IsSOStructValid(_, _)).WillOnce(Return(true));
   sm_obj[hmi_response::image_capabilities][0] = image_type;
-  hmi_capabilities_test->set_display_capabilities(sm_obj);
+  hmi_capabilities_->set_display_capabilities(sm_obj);
 
-  EXPECT_TRUE(hmi_capabilities_test->VerifyImageType(image_type));
+  EXPECT_TRUE(hmi_capabilities_->VerifyImageType(image_type));
 
   const int32_t new_image_type = 2;
-  EXPECT_FALSE(hmi_capabilities_test->VerifyImageType(new_image_type));
-}
-
-void HMICapabilitiesTest::SetCooperating() {
-  smart_objects::SmartObjectSPtr test_so;
-  EXPECT_CALL(*(MockMessageHelper::message_helper_mock()),
-              CreateModuleInfoSO(_, _))
-      .WillRepeatedly(Return(test_so));
-  EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_, _))
-      .WillRepeatedly(Return(true));
+  EXPECT_FALSE(hmi_capabilities_->VerifyImageType(new_image_type));
 }
 
 TEST_F(HMICapabilitiesTest, SetVRCooperating) {
-  hmi_capabilities_test->set_is_vr_cooperating(true);
-  EXPECT_EQ(true, hmi_capabilities_test->is_vr_cooperating());
+  hmi_capabilities_->set_is_vr_cooperating(true);
+  EXPECT_TRUE(hmi_capabilities_->is_vr_cooperating());
 }
 
 TEST_F(HMICapabilitiesTest, SetTTSCooperating) {
-  hmi_capabilities_test->set_is_tts_cooperating(true);
-  EXPECT_EQ(true, hmi_capabilities_test->is_tts_cooperating());
+  hmi_capabilities_->set_is_tts_cooperating(true);
+  EXPECT_TRUE(hmi_capabilities_->is_tts_cooperating());
 }
 
 TEST_F(HMICapabilitiesTest, SetUICooperating) {
-  hmi_capabilities_test->set_is_ui_cooperating(true);
-  EXPECT_EQ(true, hmi_capabilities_test->is_ui_cooperating());
+  hmi_capabilities_->set_is_ui_cooperating(true);
+  EXPECT_TRUE(hmi_capabilities_->is_ui_cooperating());
 }
 
 TEST_F(HMICapabilitiesTest, SetIviCooperating) {
-  hmi_capabilities_test->set_is_ivi_cooperating(true);
-  EXPECT_EQ(true, hmi_capabilities_test->is_ivi_cooperating());
+  hmi_capabilities_->set_is_ivi_cooperating(true);
+  EXPECT_TRUE(hmi_capabilities_->is_ivi_cooperating());
+}
+
+TEST_F(
+    HMICapabilitiesTest,
+    UpdateCapabilitiesDependingOn_ccpuVersion_FromCacheForOld_RequestForNew) {
+  const std::string ccpu_version = "4.1.3.B_EB355B";
+  const std::string ccpu_version_new = "5.1.3.B_EB355B";
+  const std::string hmi_capabilities_invalid_file =
+      "hmi_capabilities_invalid_file.json";
+
+  ON_CALL(mock_application_manager_settings_, hmi_capabilities_file_name())
+      .WillByDefault(ReturnRef(hmi_capabilities_invalid_file));
+
+  EXPECT_CALL(mock_app_mngr_, SetHMICooperating(true));
+  EXPECT_CALL(mock_app_mngr_, RequestForInterfacesAvailability()).Times(2);
+
+  hmi_capabilities_->set_ccpu_version(ccpu_version);
+  hmi_capabilities_->OnSoftwareVersionReceived(ccpu_version);
+
+  EXPECT_EQ(ccpu_version, hmi_capabilities_->ccpu_version());
+
+  hmi_capabilities_->OnSoftwareVersionReceived(ccpu_version_new);
+  EXPECT_EQ(ccpu_version_new, hmi_capabilities_->ccpu_version());
+}
+
+TEST_F(HMICapabilitiesTest,
+       UpdateCapabilitiesForNew_ccpuVersion_DeleteCacheFile) {
+  MockApplicationManagerSettings mock_application_manager_settings;
+  const std::string ccpu_version = "4.1.3.B_EB355B";
+  const std::string ccpu_version_new = "5.1.3.B_EB355B";
+  const std::string hmi_capabilities_invalid_file =
+      "hmi_capabilities_invalid_file.json";
+
+  CreateFile(kHmiCapabilitiesCacheFile);
+
+  ON_CALL(mock_application_manager_settings_, hmi_capabilities_file_name())
+      .WillByDefault(ReturnRef(hmi_capabilities_invalid_file));
+
+  hmi_capabilities_->set_ccpu_version(ccpu_version);
+  hmi_capabilities_->OnSoftwareVersionReceived(ccpu_version_new);
+  EXPECT_EQ(ccpu_version_new, hmi_capabilities_->ccpu_version());
+
+  EXPECT_FALSE(file_system::FileExists(kHmiCapabilitiesCacheFile));
+}
+
+TEST_F(
+    HMICapabilitiesTest,
+    OnSoftwareVersionReceived_CcpuMatchNoPendingRequestsForCapability_SetHMICooperatingToTrue) {
+  // If local ccpu_version matches with the received ccpu_version from the HMI,
+  // and cache exists, SDL Core should check if hmi_cooperating is set to true
+  // if yes - SDL should respond to all pending RAI requests, if they exist.
+  // hmi_cooperting is set to true when no pending capability requests exist
+  const std::string ccpu_version = "4.1.3.B_EB355B";
+
+  hmi_capabilities_->set_ccpu_version(ccpu_version);
+
+  EXPECT_CALL(mock_app_mngr_, SetHMICooperating(true));
+
+  hmi_capabilities_->OnSoftwareVersionReceived(ccpu_version);
+}
+
+TEST_F(
+    HMICapabilitiesTest,
+    OnSoftwareVersionReceived_CcpuMatchHavePendingRequestsForCapability_NoSetHMICooperatingToTrue) {
+  // If local ccpu_version matches with the received ccpu_version from the HMI,
+  // and there is no cache, SDL Core should check if hmi_cooperating is set to
+  // true if no - SDL should suspend all RAI responses (if any) and wait for HMI
+  // responses with all required capabilities. The RAI responses (if any) could
+  // be handled only after hmi_cooperating is set to true, it is set when all
+  // capabilities responses are received from the HMI
+  const std::string ccpu_version = "4.1.3.B_EB355B";
+
+  // Init() is required to set pending capabilities requests to the HMI
+  hmi_capabilities_->Init(last_state_wrapper_);
+  hmi_capabilities_->set_ccpu_version(ccpu_version);
+
+  EXPECT_CALL(mock_app_mngr_, SetHMICooperating(true)).Times(0);
+
+  hmi_capabilities_->OnSoftwareVersionReceived(ccpu_version);
+}
+
+TEST_F(HMICapabilitiesTest,
+       CacheFileNameNotSpecified_NoNeedToSave_ReturnSuccess) {
+  const std::string hmi_capabilities_empty_file_name = "";
+  const std::vector<std::string> sections_to_update{hmi_response::language};
+
+  ON_CALL(mock_application_manager_settings_,
+          hmi_capabilities_cache_file_name())
+      .WillByDefault(ReturnRef(hmi_capabilities_empty_file_name));
+
+  EXPECT_TRUE(hmi_capabilities_->SaveCachedCapabilitiesToFile(
+      hmi_interface::tts, sections_to_update, schema_));
+}
+
+TEST_F(HMICapabilitiesTest, SaveCachedCapabilitiesToFile_ParseFile_Failed) {
+  const std::vector<std::string> sections_to_update{hmi_response::language};
+
+  file_system::CreateFile(kHmiCapabilitiesCacheFile);
+  EXPECT_TRUE(file_system::FileExists(kHmiCapabilitiesCacheFile));
+
+  EXPECT_FALSE(hmi_capabilities_->SaveCachedCapabilitiesToFile(
+      hmi_interface::tts, sections_to_update, schema_));
+}
+
+TEST_F(HMICapabilitiesTest,
+       SaveCachedCapabilitiesToFile_ParsedFieldsSave_Success) {
+  const std::vector<std::string> sections_to_update{
+      hmi_response::display_capabilities};
+  const std::string content_to_save = "{\"field\" : \"value\" }";
+
+  CreateFile(kHmiCapabilitiesCacheFile);
+
+  const std::vector<uint8_t> binary_data_to_save(content_to_save.begin(),
+                                                 content_to_save.end());
+  file_system::Write(kHmiCapabilitiesCacheFile, binary_data_to_save);
+
+  EXPECT_TRUE(hmi_capabilities_->SaveCachedCapabilitiesToFile(
+      hmi_interface::tts, sections_to_update, schema_));
+
+  std::string content_after_update;
+  EXPECT_TRUE(
+      file_system::ReadFile(kHmiCapabilitiesCacheFile, content_after_update));
+  EXPECT_NE(content_to_save, content_after_update);
+}
+
+TEST_F(
+    HMICapabilitiesTest,
+    SaveCachedCapabilitiesToFile_LanguageIsNotTheSameAsPersisted_SaveNewLanguageToCache) {
+  SetUpLanguageAndLightCapabilitiesExpectation();
+  const std::string new_language = "RU_RU";
+  ON_CALL(*(MockMessageHelper::message_helper_mock()),
+          CommonLanguageToString(_))
+      .WillByDefault(Return(new_language));
+
+  hmi_capabilities_->Init(last_state_wrapper_);
+  hmi_capabilities_->set_active_tts_language(hmi_apis::Common_Language::RU_RU);
+  const std::vector<std::string> sections_to_update{hmi_response::language};
+  const std::string content_to_save = "{\"TTS\": {\"language\":\"EN_US\"}}";
+
+  CreateFile(kHmiCapabilitiesCacheFile);
+  const std::vector<uint8_t> binary_data_to_save(content_to_save.begin(),
+                                                 content_to_save.end());
+  file_system::Write(kHmiCapabilitiesCacheFile, binary_data_to_save);
+
+  EXPECT_TRUE(hmi_capabilities_->SaveCachedCapabilitiesToFile(
+      hmi_interface::tts, sections_to_update, schema_));
+
+  std::string content_after_update;
+  ASSERT_TRUE(
+      file_system::ReadFile(kHmiCapabilitiesCacheFile, content_after_update));
+  EXPECT_TRUE(content_after_update.find(new_language) != std::string::npos);
+}
+
+TEST_F(
+    HMICapabilitiesTest,
+    SaveCachedCapabilitiesToFile_SectionToUpdateIsEmpty_SkipSaving_ReturnTrue) {
+  const std::vector<std::string> sections_to_update;
+  EXPECT_TRUE(hmi_capabilities_->SaveCachedCapabilitiesToFile(
+      "", sections_to_update, schema_));
+}
+
+TEST_F(HMICapabilitiesTest, PrepareJsonValueForSaving_Success) {
+  const std::vector<std::string> sections_to_update{
+      hmi_response::display_capabilities,
+      hmi_response::hmi_zone_capabilities,
+      hmi_response::soft_button_capabilities,
+      strings::audio_pass_thru_capabilities,
+      strings::hmi_capabilities,
+      strings::system_capabilities,
+      hmi_response::languages};
+
+  const std::vector<std::string> interfaces_name{
+      hmi_interface::tts,
+      hmi_interface::vr,
+      hmi_interface::ui,
+      hmi_interface::buttons,
+      hmi_interface::vehicle_info,
+      hmi_interface::rc,
+      hmi_response::speech_capabilities,
+      hmi_response::prerecorded_speech_capabilities,
+      hmi_response::button_capabilities,
+      hmi_response::preset_bank_capabilities};
+
+  smart_objects::SmartObject audio_capabilities_so(
+      smart_objects::SmartType_Array);
+  audio_capabilities_so[0][strings::sampling_rate] =
+      hmi_apis::Common_SamplingRate::RATE_44KHZ;
+  audio_capabilities_so[0][strings::bits_per_sample] =
+      hmi_apis::Common_BitsPerSample::RATE_8_BIT;
+  audio_capabilities_so[0][strings::audio_type] =
+      hmi_apis::Common_AudioType::PCM;
+
+  const std::string content_to_save = "{\"field\" : \"value\" }";
+  const std::vector<uint8_t> binary_data_to_save(content_to_save.begin(),
+                                                 content_to_save.end());
+
+  hmi_capabilities_->set_audio_pass_thru_capabilities(audio_capabilities_so);
+
+  CreateFile(kHmiCapabilitiesCacheFile);
+  file_system::Write(kHmiCapabilitiesCacheFile, binary_data_to_save);
+
+  for (size_t i = 0; i < interfaces_name.size(); ++i) {
+    EXPECT_TRUE(hmi_capabilities_->SaveCachedCapabilitiesToFile(
+        interfaces_name[i], sections_to_update, schema_));
+  }
+
+  std::string content_after_update;
+  EXPECT_TRUE(
+      file_system::ReadFile(kHmiCapabilitiesCacheFile, content_after_update));
+
+  Json::Value root_node;
+  utils::JsonReader reader;
+  ASSERT_TRUE(reader.parse(content_after_update, &root_node));
+
+  for (size_t i = 0; i < interfaces_name.size(); ++i) {
+    EXPECT_TRUE(static_cast<bool>(root_node[interfaces_name[i]]));
+  }
+  EXPECT_TRUE(
+      root_node[hmi_interface::ui][strings::audio_pass_thru_capabilities]
+          .isArray());
+}
+
+TEST_F(HMICapabilitiesTest,
+       OnCapabilityInitialized_RespondToAllPendingRAIRequestsIfTheyHold) {
+  SetUpLanguageAndLightCapabilitiesExpectation();
+
+  std::vector<hmi_apis::FunctionID::eType> requests_required{
+      hmi_apis::FunctionID::RC_GetCapabilities,
+      hmi_apis::FunctionID::VR_GetLanguage,
+      hmi_apis::FunctionID::VR_GetSupportedLanguages,
+      hmi_apis::FunctionID::VR_GetCapabilities,
+      hmi_apis::FunctionID::TTS_GetLanguage,
+      hmi_apis::FunctionID::TTS_GetSupportedLanguages,
+      hmi_apis::FunctionID::TTS_GetCapabilities,
+      hmi_apis::FunctionID::Buttons_GetCapabilities,
+      hmi_apis::FunctionID::VehicleInfo_GetVehicleType,
+      hmi_apis::FunctionID::UI_GetCapabilities,
+      hmi_apis::FunctionID::UI_GetLanguage,
+      hmi_apis::FunctionID::UI_GetSupportedLanguages};
+
+  // Contains only UI capabilities
+  const std::string hmi_capabilities_file = "hmi_capabilities_sc2.json";
+  ON_CALL(mock_application_manager_settings_, hmi_capabilities_file_name())
+      .WillByDefault(ReturnRef(hmi_capabilities_file));
+
+  // Initializes the UI capabilities with the default values
+  // Other interfaces are absent and appropriate requests should be sent
+  hmi_capabilities_->Init(last_state_wrapper_);
+
+  ON_CALL(mock_app_mngr_, IsHMICooperating()).WillByDefault(Return(false));
+
+  // Sets isHMICooperating flag to true after all required capabilities are
+  // received from HMI
+  EXPECT_CALL(mock_app_mngr_, SetHMICooperating(true));
+
+  for (const auto& request_id : requests_required) {
+    hmi_capabilities_->UpdateRequestsRequiredForCapabilities(request_id);
+  }
+}
+
+TEST_F(HMICapabilitiesTest,
+       OnlyUICapabilitiesInCacheFile_RequestRequiredForOtherInterfaces) {
+  SetUpLanguageAndLightCapabilitiesExpectation();
+
+  std::vector<hmi_apis::FunctionID::eType> requests_required{
+      hmi_apis::FunctionID::RC_GetCapabilities,
+      hmi_apis::FunctionID::VR_GetLanguage,
+      hmi_apis::FunctionID::VR_GetSupportedLanguages,
+      hmi_apis::FunctionID::VR_GetCapabilities,
+      hmi_apis::FunctionID::TTS_GetLanguage,
+      hmi_apis::FunctionID::TTS_GetSupportedLanguages,
+      hmi_apis::FunctionID::TTS_GetCapabilities,
+      hmi_apis::FunctionID::Buttons_GetCapabilities,
+      hmi_apis::FunctionID::VehicleInfo_GetVehicleType};
+
+  const std::string hmi_capabilities_cache_file =
+      "hmi_capabilities_cache_test.json";
+  CreateFile(hmi_capabilities_cache_file);
+  const std::string predefined_ui_capabilities =
+      "{\"UI\" : {\"language\" : "
+      "\"EN-US\",\"languages\":[],\"displayCapabilities\" : "
+      "{},\"audioPassThruCapabilities\":[],\"pcmStreamCapabilities\" : "
+      "{},\"hmiZoneCapabilities\": \"\",\"softButtonCapabilities\" : "
+      "[],\"systemCapabilities\" : {}}}";
+
+  const std::vector<uint8_t> binary_data_to_save(
+      predefined_ui_capabilities.begin(), predefined_ui_capabilities.end());
+
+  file_system::Write(hmi_capabilities_cache_file, binary_data_to_save);
+
+  ON_CALL(mock_application_manager_settings_,
+          hmi_capabilities_cache_file_name())
+      .WillByDefault(ReturnRef(hmi_capabilities_cache_file));
+
+  hmi_capabilities_->Init(last_state_wrapper_);
+
+  EXPECT_FALSE(hmi_capabilities_->IsRequestsRequiredForCapabilities(
+      hmi_apis::FunctionID::UI_GetLanguage));
+  EXPECT_FALSE(hmi_capabilities_->IsRequestsRequiredForCapabilities(
+      hmi_apis::FunctionID::UI_GetSupportedLanguages));
+  EXPECT_FALSE(hmi_capabilities_->IsRequestsRequiredForCapabilities(
+      hmi_apis::FunctionID::UI_GetCapabilities));
+
+  for (const auto& item : requests_required) {
+    EXPECT_TRUE(hmi_capabilities_->IsRequestsRequiredForCapabilities(item));
+  }
+
+  DeleteFileIfExists(hmi_capabilities_cache_file);
+}
+
+TEST_F(HMICapabilitiesTest,
+       OnlyRCCapabilitiesInCacheFile_RequestRequiredForOtherInterfaces) {
+  SetUpLanguageAndLightCapabilitiesExpectation();
+
+  std::vector<hmi_apis::FunctionID::eType> requests_required{
+      hmi_apis::FunctionID::UI_GetLanguage,
+      hmi_apis::FunctionID::UI_GetSupportedLanguages,
+      hmi_apis::FunctionID::UI_GetCapabilities,
+      hmi_apis::FunctionID::VR_GetLanguage,
+      hmi_apis::FunctionID::VR_GetSupportedLanguages,
+      hmi_apis::FunctionID::VR_GetCapabilities,
+      hmi_apis::FunctionID::TTS_GetLanguage,
+      hmi_apis::FunctionID::TTS_GetSupportedLanguages,
+      hmi_apis::FunctionID::TTS_GetCapabilities,
+      hmi_apis::FunctionID::Buttons_GetCapabilities,
+      hmi_apis::FunctionID::VehicleInfo_GetVehicleType};
+
+  const std::string hmi_capabilities_cache_file =
+      "hmi_capabilities_cache_test.json";
+  CreateFile(hmi_capabilities_cache_file);
+  const std::string predefined_rc_capabilities =
+      "{\"RC\" : {\"remoteControlCapability\" : {\"buttonCapabilities\": "
+      "[],\"climateControlCapabilities\": [],\"radioControlCapabilities\": "
+      "[],\"audioControlCapabilities\": [],\"seatControlCapabilities\": "
+      "[],\"lightControlCapabilities\": {},\"hmiSettingsControlCapabilities\": "
+      "{}},\"seatLocationCapability\": {}}}}";
+
+  const std::vector<uint8_t> binary_data_to_save(
+      predefined_rc_capabilities.begin(), predefined_rc_capabilities.end());
+
+  file_system::Write(hmi_capabilities_cache_file, binary_data_to_save);
+
+  ON_CALL(mock_application_manager_settings_,
+          hmi_capabilities_cache_file_name())
+      .WillByDefault(ReturnRef(hmi_capabilities_cache_file));
+
+  hmi_capabilities_->Init(last_state_wrapper_);
+
+  EXPECT_FALSE(hmi_capabilities_->IsRequestsRequiredForCapabilities(
+      hmi_apis::FunctionID::RC_GetCapabilities));
+
+  for (const auto& item : requests_required) {
+    EXPECT_TRUE(hmi_capabilities_->IsRequestsRequiredForCapabilities(item));
+  }
+}
+
+TEST_F(HMICapabilitiesTest,
+       OnlyVRCapabilitiesInCacheFile_RequestRequiredForOtherInterfaces) {
+  SetUpLanguageAndLightCapabilitiesExpectation();
+
+  std::vector<hmi_apis::FunctionID::eType> requests_required{
+      hmi_apis::FunctionID::UI_GetLanguage,
+      hmi_apis::FunctionID::UI_GetSupportedLanguages,
+      hmi_apis::FunctionID::RC_GetCapabilities,
+      hmi_apis::FunctionID::UI_GetCapabilities,
+      hmi_apis::FunctionID::TTS_GetLanguage,
+      hmi_apis::FunctionID::TTS_GetSupportedLanguages,
+      hmi_apis::FunctionID::TTS_GetCapabilities,
+      hmi_apis::FunctionID::Buttons_GetCapabilities,
+      hmi_apis::FunctionID::VehicleInfo_GetVehicleType};
+
+  const std::string hmi_capabilities_cache_file =
+      "hmi_capabilities_cache_test.json";
+  CreateFile(hmi_capabilities_cache_file);
+  const std::string predefined_vr_capabilities =
+      "{\"VR\": {\"vrCapabilities\": [],\"language\": \"\",\"languages\": []}}";
+
+  const std::vector<uint8_t> binary_data_to_save(
+      predefined_vr_capabilities.begin(), predefined_vr_capabilities.end());
+
+  file_system::Write(hmi_capabilities_cache_file, binary_data_to_save);
+
+  ON_CALL(mock_application_manager_settings_,
+          hmi_capabilities_cache_file_name())
+      .WillByDefault(ReturnRef(hmi_capabilities_cache_file));
+
+  hmi_capabilities_->Init(last_state_wrapper_);
+
+  EXPECT_FALSE(hmi_capabilities_->IsRequestsRequiredForCapabilities(
+      hmi_apis::FunctionID::VR_GetLanguage));
+  EXPECT_FALSE(hmi_capabilities_->IsRequestsRequiredForCapabilities(
+      hmi_apis::FunctionID::VR_GetSupportedLanguages));
+  EXPECT_FALSE(hmi_capabilities_->IsRequestsRequiredForCapabilities(
+      hmi_apis::FunctionID::VR_GetCapabilities));
+
+  for (const auto& item : requests_required) {
+    EXPECT_TRUE(hmi_capabilities_->IsRequestsRequiredForCapabilities(item));
+  }
+}
+
+TEST_F(HMICapabilitiesTest,
+       OnlyTTSCapabilitiesInCacheFile_RequestRequiredForOtherInterfaces) {
+  SetUpLanguageAndLightCapabilitiesExpectation();
+
+  std::vector<hmi_apis::FunctionID::eType> requests_required{
+      hmi_apis::FunctionID::UI_GetLanguage,
+      hmi_apis::FunctionID::UI_GetSupportedLanguages,
+      hmi_apis::FunctionID::UI_GetCapabilities,
+      hmi_apis::FunctionID::RC_GetCapabilities,
+      hmi_apis::FunctionID::VR_GetLanguage,
+      hmi_apis::FunctionID::VR_GetSupportedLanguages,
+      hmi_apis::FunctionID::VR_GetCapabilities,
+      hmi_apis::FunctionID::Buttons_GetCapabilities,
+      hmi_apis::FunctionID::VehicleInfo_GetVehicleType};
+
+  const std::string hmi_capabilities_cache_file =
+      "hmi_capabilities_cache_test.json";
+  CreateFile(hmi_capabilities_cache_file);
+  const std::string predefined_tts_capabilities =
+      "{\"TTS\": {\"speechCapabilities\": [],\"prerecordedSpeechCapabilities\" "
+      ": [],\"language\": \"\",\"languages\": "
+      "[]}}";
+
+  const std::vector<uint8_t> binary_data_to_save(
+      predefined_tts_capabilities.begin(), predefined_tts_capabilities.end());
+
+  file_system::Write(hmi_capabilities_cache_file, binary_data_to_save);
+
+  ON_CALL(mock_application_manager_settings_,
+          hmi_capabilities_cache_file_name())
+      .WillByDefault(ReturnRef(hmi_capabilities_cache_file));
+
+  hmi_capabilities_->Init(last_state_wrapper_);
+
+  EXPECT_FALSE(hmi_capabilities_->IsRequestsRequiredForCapabilities(
+      hmi_apis::FunctionID::TTS_GetLanguage));
+  EXPECT_FALSE(hmi_capabilities_->IsRequestsRequiredForCapabilities(
+      hmi_apis::FunctionID::TTS_GetSupportedLanguages));
+  EXPECT_FALSE(hmi_capabilities_->IsRequestsRequiredForCapabilities(
+      hmi_apis::FunctionID::TTS_GetCapabilities));
+
+  for (const auto& item : requests_required) {
+    EXPECT_TRUE(hmi_capabilities_->IsRequestsRequiredForCapabilities(item));
+  }
+}
+
+TEST_F(HMICapabilitiesTest,
+       OnlyButtonsSCapabilitiesInCacheFile_RequestRequiredForOtherInterfaces) {
+  SetUpLanguageAndLightCapabilitiesExpectation();
+
+  std::vector<hmi_apis::FunctionID::eType> requests_required{
+      hmi_apis::FunctionID::UI_GetLanguage,
+      hmi_apis::FunctionID::UI_GetSupportedLanguages,
+      hmi_apis::FunctionID::UI_GetCapabilities,
+      hmi_apis::FunctionID::RC_GetCapabilities,
+      hmi_apis::FunctionID::TTS_GetLanguage,
+      hmi_apis::FunctionID::TTS_GetSupportedLanguages,
+      hmi_apis::FunctionID::TTS_GetCapabilities,
+      hmi_apis::FunctionID::VR_GetLanguage,
+      hmi_apis::FunctionID::VR_GetSupportedLanguages,
+      hmi_apis::FunctionID::VR_GetCapabilities,
+      hmi_apis::FunctionID::VehicleInfo_GetVehicleType};
+
+  const std::string hmi_capabilities_cache_file =
+      "hmi_capabilities_cache_test.json";
+  CreateFile(hmi_capabilities_cache_file);
+  const std::string predefined_buttons_capabilities =
+      "{\"Buttons\": {\"capabilities\": [],\"presetBankCapabilities\": {}}}";
+
+  const std::vector<uint8_t> binary_data_to_save(
+      predefined_buttons_capabilities.begin(),
+      predefined_buttons_capabilities.end());
+
+  file_system::Write(hmi_capabilities_cache_file, binary_data_to_save);
+
+  ON_CALL(mock_application_manager_settings_,
+          hmi_capabilities_cache_file_name())
+      .WillByDefault(ReturnRef(hmi_capabilities_cache_file));
+
+  hmi_capabilities_->Init(last_state_wrapper_);
+
+  EXPECT_FALSE(hmi_capabilities_->IsRequestsRequiredForCapabilities(
+      hmi_apis::FunctionID::Buttons_GetCapabilities));
+
+  for (const auto& item : requests_required) {
+    EXPECT_TRUE(hmi_capabilities_->IsRequestsRequiredForCapabilities(item));
+  }
+}
+
+TEST_F(HMICapabilitiesTest,
+       OnlyVehicleInfoInCacheFile_RequestRequiredForOtherInterfaces) {
+  SetUpLanguageAndLightCapabilitiesExpectation();
+
+  std::vector<hmi_apis::FunctionID::eType> requests_required{
+      hmi_apis::FunctionID::UI_GetLanguage,
+      hmi_apis::FunctionID::UI_GetSupportedLanguages,
+      hmi_apis::FunctionID::UI_GetCapabilities,
+      hmi_apis::FunctionID::RC_GetCapabilities,
+      hmi_apis::FunctionID::TTS_GetLanguage,
+      hmi_apis::FunctionID::TTS_GetSupportedLanguages,
+      hmi_apis::FunctionID::TTS_GetCapabilities,
+      hmi_apis::FunctionID::VR_GetLanguage,
+      hmi_apis::FunctionID::VR_GetSupportedLanguages,
+      hmi_apis::FunctionID::VR_GetCapabilities,
+      hmi_apis::FunctionID::Buttons_GetCapabilities};
+
+  const std::string hmi_capabilities_cache_file =
+      "hmi_capabilities_cache_test.json";
+  CreateFile(hmi_capabilities_cache_file);
+  const std::string predefined_vi_capabilities =
+      "{\"VehicleInfo\": { \"vehicleType\" : {} }}";
+
+  const std::vector<uint8_t> binary_data_to_save(
+      predefined_vi_capabilities.begin(), predefined_vi_capabilities.end());
+
+  file_system::Write(hmi_capabilities_cache_file, binary_data_to_save);
+
+  ON_CALL(mock_application_manager_settings_,
+          hmi_capabilities_cache_file_name())
+      .WillByDefault(ReturnRef(hmi_capabilities_cache_file));
+
+  hmi_capabilities_->Init(last_state_wrapper_);
+
+  EXPECT_FALSE(hmi_capabilities_->IsRequestsRequiredForCapabilities(
+      hmi_apis::FunctionID::VehicleInfo_GetVehicleType));
+
+  for (const auto& item : requests_required) {
+    EXPECT_TRUE(hmi_capabilities_->IsRequestsRequiredForCapabilities(item));
+  }
+}
+
+TEST_F(
+    HMICapabilitiesTest,
+    ConvertJsonArrayToSoArray_ConvertPrerecordedSpeech_SuccessConvertFromStringToEnum) {
+  SetUpLanguageAndLightCapabilitiesExpectation();
+
+  CreateFile(kHmiCapabilitiesCacheFile);
+  const std::string prerecordedSpeechCapabilities =
+      "{ \"TTS\" :{"
+      "\"prerecordedSpeechCapabilities\" :["
+      "\"HELP_JINGLE\","
+      "\"INITIAL_JINGLE\","
+      "\"LISTEN_JINGLE\","
+      "\"POSITIVE_JINGLE\","
+      "\"NEGATIVE_JINGLE\"]}"
+      "}";
+
+  const std::vector<uint8_t> binary_data_to_save(
+      prerecordedSpeechCapabilities.begin(),
+      prerecordedSpeechCapabilities.end());
+  file_system::Write(kHmiCapabilitiesCacheFile, binary_data_to_save);
+
+  hmi_capabilities_->Init(last_state_wrapper_);
+
+  const auto tts_capabilities_so = *(hmi_capabilities_->prerecorded_speech());
+
+  EXPECT_EQ(hmi_apis::Common_PrerecordedSpeech::HELP_JINGLE,
+            static_cast<hmi_apis::Common_PrerecordedSpeech::eType>(
+                tts_capabilities_so[0].asInt()));
+  EXPECT_EQ(hmi_apis::Common_PrerecordedSpeech::INITIAL_JINGLE,
+            static_cast<hmi_apis::Common_PrerecordedSpeech::eType>(
+                tts_capabilities_so[1].asInt()));
+  EXPECT_EQ(hmi_apis::Common_PrerecordedSpeech::LISTEN_JINGLE,
+            static_cast<hmi_apis::Common_PrerecordedSpeech::eType>(
+                tts_capabilities_so[2].asInt()));
+  EXPECT_EQ(hmi_apis::Common_PrerecordedSpeech::POSITIVE_JINGLE,
+            static_cast<hmi_apis::Common_PrerecordedSpeech::eType>(
+                tts_capabilities_so[3].asInt()));
+  EXPECT_EQ(hmi_apis::Common_PrerecordedSpeech::NEGATIVE_JINGLE,
+            static_cast<hmi_apis::Common_PrerecordedSpeech::eType>(
+                tts_capabilities_so[4].asInt()));
 }
 
 }  // namespace application_manager_test

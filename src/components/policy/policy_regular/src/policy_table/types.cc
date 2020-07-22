@@ -1274,7 +1274,8 @@ ModuleMeta::ModuleMeta(const Json::Value* value__)
     , pt_exchanged_x_days_after_epoch(
           impl::ValueMember(value__, "pt_exchanged_x_days_after_epoch"))
     , ignition_cycles_since_last_exchange(
-          impl::ValueMember(value__, "ignition_cycles_since_last_exchange")) {}
+          impl::ValueMember(value__, "ignition_cycles_since_last_exchange"))
+    , ccpu_version(impl::ValueMember(value__, "ccpu_version")) {}
 
 Json::Value ModuleMeta::ToJsonValue() const {
   Json::Value result__(Json::objectValue);
@@ -1293,6 +1294,9 @@ bool ModuleMeta::is_valid() const {
   if (struct_empty()) {
     return initialization_state__ == kInitialized && Validate();
   }
+  if (!ccpu_version.is_valid()) {
+    return false;
+  }
   if (!pt_exchanged_at_odometer_x.is_valid()) {
     return false;
   }
@@ -1310,6 +1314,9 @@ bool ModuleMeta::is_initialized() const {
 }
 
 bool ModuleMeta::struct_empty() const {
+  if (ccpu_version.is_initialized()) {
+    return false;
+  }
   if (pt_exchanged_at_odometer_x.is_initialized()) {
     return false;
   }
@@ -1326,6 +1333,9 @@ bool ModuleMeta::struct_empty() const {
 void ModuleMeta::ReportErrors(rpc::ValidationReport* report__) const {
   if (struct_empty()) {
     rpc::CompositeType::ReportErrors(report__);
+  }
+  if (!ccpu_version.is_valid()) {
+    ccpu_version.ReportErrors(&report__->ReportSubobject("ccpu_version"));
   }
   if (!pt_exchanged_at_odometer_x.is_valid()) {
     pt_exchanged_at_odometer_x.ReportErrors(

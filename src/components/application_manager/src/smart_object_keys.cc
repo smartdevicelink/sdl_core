@@ -439,6 +439,19 @@ const char* const x = "x";
 const char* const y = "y";
 }  // namespace strings
 
+namespace hmi_interface {
+const char* basic_communication = "BasicCommunication";
+const char* buttons = "Buttons";
+const char* navigation = "Navigation";
+const char* sdl = "SDL";
+const char* tts = "TTS";
+const char* ui = "UI";
+const char* vr = "VR";
+const char* rc = "RC";
+const char* vehicle_info = "VehicleInfo";
+const char* app_service = "AppService";
+}  // namespace hmi_interface
+
 namespace json {
 const char* appId = "appId";
 const char* name = "name";
@@ -548,6 +561,7 @@ const char* capabilities = "capabilities";
 const char* speech_capabilities = "speechCapabilities";
 const char* prerecorded_speech_capabilities = "prerecordedSpeechCapabilities";
 const char* preset_bank_capabilities = "presetBankCapabilities";
+const char* on_screen_presets_available = "onScreenPresetsAvailable";
 const char* allowed = "allowed";
 const char* vehicle_type = "vehicleType";
 const char* did_result = "didResult";

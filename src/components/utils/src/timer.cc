@@ -65,8 +65,8 @@ timer::Timer::~Timer() {
   StopDelegate();
   single_shot_ = true;
 
-  DeleteThread(thread_);
   delegate_.reset();
+  DeleteThread(thread_);
   DCHECK(task_);
   delete task_;
   LOG4CXX_DEBUG(logger_, "Timer " << name_ << " has been destroyed");
@@ -222,6 +222,5 @@ void timer::Timer::TimerDelegate::threadMain() {
 }
 
 void timer::Timer::TimerDelegate::exitThreadMain() {
-  sync_primitives::AutoLock auto_lock(state_lock_ref_);
   state_condition_.NotifyOne();
 }

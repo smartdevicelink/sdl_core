@@ -205,7 +205,8 @@ class MockApplicationManager : public application_manager::ApplicationManager {
   MOCK_METHOD1(BeginAudioPassThru, bool(uint32_t app_id));
   MOCK_METHOD1(EndAudioPassThru, bool(uint32_t app_id));
   MOCK_METHOD1(ConnectToDevice, void(const std::string& device_mac));
-  MOCK_METHOD0(OnHMIStartedCooperation, void());
+  MOCK_METHOD0(OnHMIReady, void());
+  MOCK_METHOD0(RequestForInterfacesAvailability, void());
   MOCK_METHOD1(DisconnectCloudApp,
                void(application_manager::ApplicationSharedPtr app));
   MOCK_METHOD0(RefreshCloudAppInformation, void());
@@ -215,6 +216,7 @@ class MockApplicationManager : public application_manager::ApplicationManager {
   MOCK_METHOD1(PolicyIDByIconUrl, std::string(const std::string url));
   MOCK_METHOD1(SetIconFileFromSystemRequest, void(const std::string policy_id));
   MOCK_CONST_METHOD0(IsHMICooperating, bool());
+  MOCK_METHOD1(SetHMICooperating, void(const bool hmi_cooperating));
   MOCK_METHOD2(IviInfoUpdated,
                void(const std::string& vehicle_info, int value));
   MOCK_METHOD1(RegisterApplication,
@@ -338,14 +340,19 @@ class MockApplicationManager : public application_manager::ApplicationManager {
   MOCK_METHOD2(IsSOStructValid,
                bool(const hmi_apis::StructIdentifiers::eType struct_id,
                     const smart_objects::SmartObject& display_capabilities));
+  MOCK_CONST_METHOD1(IsAppSubscribedForWayPoints, bool(uint32_t));
   MOCK_CONST_METHOD1(IsAppSubscribedForWayPoints,
                      bool(application_manager::ApplicationSharedPtr));
+  MOCK_METHOD1(SubscribeAppForWayPoints, void(uint32_t));
   MOCK_METHOD1(SubscribeAppForWayPoints,
                void(application_manager::ApplicationSharedPtr));
+  MOCK_METHOD1(UnsubscribeAppFromWayPoints, void(uint32_t));
   MOCK_METHOD1(UnsubscribeAppFromWayPoints,
                void(application_manager::ApplicationSharedPtr));
   MOCK_CONST_METHOD0(IsAnyAppSubscribedForWayPoints, bool());
   MOCK_CONST_METHOD0(GetAppsSubscribedForWayPoints, const std::set<uint32_t>());
+  MOCK_METHOD1(SaveWayPointsMessage,
+               void(std::shared_ptr<smart_objects::SmartObject>));
   MOCK_CONST_METHOD1(
       WaitingApplicationByID,
       application_manager::ApplicationConstSharedPtr(const uint32_t));
