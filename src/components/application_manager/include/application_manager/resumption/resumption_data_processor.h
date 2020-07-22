@@ -114,6 +114,16 @@ class ResumptionDataProcessor : public app_mngr::event_engine::EventObserver {
 
  private:
   /**
+   * @brief Processes response message from HMI
+   * @param response reference to response message
+   * @param function_id function id of response
+   * @param corr_id correlation id of response
+   */
+  void ProcessResponseFromHMI(const smart_objects::SmartObject& response,
+                              const hmi_apis::FunctionID::eType function_id,
+                              const int32_t corr_id);
+
+  /**
    * @brief Revert the data to the state before Resumption
    * @param shared ptr to application
    */

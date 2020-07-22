@@ -686,6 +686,20 @@ class MessageHelper {
       int32_t result_code);
 
   /**
+   * @brief Creates negative response message from HMI using provided params
+   * @param function_id id of function
+   * @param correlation_id correlation id
+   * @param result_code result code
+   * @param info info message
+   * @return pointer to created message
+   */
+  static smart_objects::SmartObjectSPtr CreateNegativeResponseFromHmi(
+      const int32_t function_id,
+      const uint32_t correlation_id,
+      const int32_t result_code,
+      const std::string& info);
+
+  /**
    * @brief Get the full file path of an app file
    *
    * @param file_name The relative path of an application file
