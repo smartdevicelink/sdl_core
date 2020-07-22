@@ -1089,6 +1089,19 @@ class MessageHelper {
   static smart_objects::SmartObjectSPtr CreateDisplayCapabilityUpdateToMobile(
       const smart_objects::SmartObject& system_capabilities, Application& app);
 
+  /**
+   * @brief CreateUIDeleteWindowRequestToHMI creates request to delete specified
+   * window
+   * @param application reference to related application
+   * @param app_mngr reference to application manager instance
+   * @param window_id id of window to delete
+   * @return shared ptr to request SO
+   */
+  static smart_objects::SmartObjectSPtr CreateUIDeleteWindowRequestToHMI(
+      ApplicationSharedPtr application,
+      ApplicationManager& app_mngr,
+      const WindowID window_id);
+
  private:
   /**
    * @brief Allows to fill SO according to the  current permissions.

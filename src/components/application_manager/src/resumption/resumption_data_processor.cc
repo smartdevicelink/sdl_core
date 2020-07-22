@@ -29,6 +29,7 @@
 
 #include "application_manager/application_manager.h"
 #include "application_manager/commands/command_impl.h"
+#include "application_manager/display_capabilities_builder.h"
 #include "application_manager/event_engine/event_observer.h"
 #include "application_manager/message_helper.h"
 #include "application_manager/resumption/resumption_data_processor.h"
@@ -76,6 +77,7 @@ void ResumptionDataProcessor::Restore(ApplicationSharedPtr application,
   AddChoicesets(application, saved_app);
   SetGlobalProperties(application, saved_app);
   AddSubscriptions(application, saved_app);
+  AddWindows(application, saved_app);
 
   resumption_status_lock_.AcquireForReading();
   const auto app_id = application->app_id();
@@ -90,7 +92,9 @@ void ResumptionDataProcessor::Restore(ApplicationSharedPtr application,
     sync_primitives::AutoWriteLock lock(register_callbacks_lock_);
     register_callbacks_[app_id] = callback;
   } else {
-    LOG4CXX_DEBUG(logger_, "No requests to HMI, resumption is successful");
+    LOG4CXX_DEBUG(
+        logger_,
+        "No requests to HMI for " << app_id << " , resumption is successful");
     callback(mobile_apis::Result::SUCCESS, "Data resumption successful");
   }
 }
@@ -102,7 +106,8 @@ bool ResumptionDataProcessor::HasDataToRestore(
   const bool has_data_to_restore =
       !saved_app[strings::application_submenus].empty() ||
       !saved_app[strings::application_commands].empty() ||
-      !saved_app[strings::application_choice_sets].empty();
+      !saved_app[strings::application_choice_sets].empty() ||
+      !saved_app[strings::windows_info].empty();
 
   LOG4CXX_DEBUG(logger_,
                 std::boolalpha << "Application has data to restore: "
@@ -1041,8 +1046,8 @@ void ResumptionDataProcessor::CheckCreateWindowResponse(
   const auto window_type = static_cast<mobile_apis::WindowType::eType>(
       msg_params[strings::window_type].asInt());
 
-  // State should be initialized with INVALID_ENUM value to let state
-  // controller trigger OnHmiStatus notifiation sending
+  // State should be initialized with INVALID_ENUM value to let state controller
+  // trigger OnHmiStatus notifiation sending
   auto initial_state = application_manager_.CreateRegularState(
       application,
       window_type,
