@@ -30,7 +30,6 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <stdint.h>
 #include <string>
 
 #include "gtest/gtest.h"
