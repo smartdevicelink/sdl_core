@@ -64,8 +64,7 @@ static mobile_api::HMILevel::eType ConvertHmiLevelString(const std::string str);
 CREATE_LOGGERPTR_GLOBAL(logger_, "Resumption")
 
 ResumeCtrlImpl::ResumeCtrlImpl(ApplicationManager& application_manager)
-    : event_engine::EventObserver(application_manager.event_dispatcher())
-    , restore_hmi_level_timer_(
+    : restore_hmi_level_timer_(
           "RsmCtrlRstore",
           new timer::TimerTaskImpl<ResumeCtrlImpl>(
               this, &ResumeCtrlImpl::ApplicationResumptiOnTimer))
@@ -160,16 +159,6 @@ void ResumeCtrlImpl::SaveApplication(ApplicationSharedPtr application) {
   resumption_storage_->SaveApplication(application);
 }
 
-void ResumeCtrlImpl::on_event(const event_engine::Event& event) {
-  LOG4CXX_DEBUG(logger_, "Event received: " << event.id());
-
-  if (hmi_apis::FunctionID::UI_CreateWindow == event.id()) {
-    LOG4CXX_INFO(logger_, "Received UI_CreateWindow event");
-    const auto& response_message = event.smart_object();
-    RestoreWidgetsHMIState(response_message);
-  }
-}
-
 bool ResumeCtrlImpl::RestoreAppHMIState(ApplicationSharedPtr application) {
   using namespace mobile_apis;
   LOG4CXX_AUTO_TRACE(logger_);
@@ -218,14 +207,8 @@ bool ResumeCtrlImpl::RestoreAppHMIState(ApplicationSharedPtr application) {
       const bool app_exists_in_full_or_limited =
           application_manager_.get_full_or_limited_application().use_count() !=
           0;
-      const bool app_hmi_state_is_set =
-          SetAppHMIState(application, saved_hmi_level, true);
-      size_t restored_widgets = 0;
-      if (app_hmi_state_is_set &&
-          application->is_app_data_resumption_allowed()) {
-        restored_widgets = RestoreAppWidgets(application, saved_app);
-      }
-      if (0 == restored_widgets && app_exists_in_full_or_limited) {
+      SetAppHMIState(application, saved_hmi_level, true);
+      if (app_exists_in_full_or_limited) {
         LOG4CXX_DEBUG(logger_, "App exists in full or limited. Do not resume");
         return false;
       }
@@ -237,77 +220,6 @@ bool ResumeCtrlImpl::RestoreAppHMIState(ApplicationSharedPtr application) {
     LOG4CXX_ERROR(logger_, "Application not saved");
   }
   return result;
-}
-
-void ResumeCtrlImpl::RestoreWidgetsHMIState(
-    const smart_objects::SmartObject& response_message) {
-  LOG4CXX_AUTO_TRACE(logger_);
-  const auto correlation_id =
-      response_message[strings::params][strings::correlation_id].asInt();
-  const auto& request = requests_msg_.find(correlation_id);
-  if (requests_msg_.end() == request) {
-    LOG4CXX_ERROR(logger_,
-                  "Request UI_CreateWindow for correlation id: "
-                      << correlation_id << " not found");
-    return;
-  }
-
-  const auto& msg_params = (*request->second)[strings::msg_params];
-  const auto hmi_app_id = msg_params[strings::app_id].asInt();
-  auto application = application_manager_.application_by_hmi_app(hmi_app_id);
-  if (!application) {
-    LOG4CXX_ERROR(logger_,
-                  "Application is not registered by hmi id: " << hmi_app_id);
-    requests_msg_.erase(request);
-    return;
-  }
-  const WindowID window_id = msg_params[strings::window_id].asInt();
-
-  const auto result_code = static_cast<hmi_apis::Common_Result::eType>(
-      response_message[strings::params][hmi_response::code].asInt());
-  if (hmi_apis::Common_Result::SUCCESS != result_code) {
-    LOG4CXX_ERROR(logger_,
-                  "UI_CreateWindow for correlation id: "
-                      << correlation_id
-                      << " failed with code: " << result_code);
-    requests_msg_.erase(request);
-    auto& builder = application->display_capabilities_builder();
-    builder.StopWaitingForWindow(window_id);
-    return;
-  }
-
-  smart_objects::SmartObject window_info(smart_objects::SmartType_Map);
-  auto fill_optional_param = [&window_info,
-                              &msg_params](const std::string& key) {
-    if (msg_params.keyExists(key)) {
-      window_info[key] = msg_params[key].asString();
-    }
-  };
-  fill_optional_param(strings::associated_service_type);
-  fill_optional_param(strings::duplicate_updates_from_window_id);
-
-  const auto window_name = msg_params[strings::window_name].asString();
-  window_info[strings::window_name] = window_name;
-  application->SetWindowInfo(window_id, window_info);
-
-  const auto window_type = static_cast<mobile_apis::WindowType::eType>(
-      msg_params[strings::window_type].asInt());
-  // State should be initialized with INVALID_ENUM value to let state controller
-  // trigger OnHmiStatus notifiation sending
-  auto initial_state = application_manager_.CreateRegularState(
-      application,
-      window_type,
-      mobile_apis::HMILevel::INVALID_ENUM,
-      mobile_apis::AudioStreamingState::INVALID_ENUM,
-      mobile_apis::VideoStreamingState::INVALID_ENUM,
-      mobile_api::SystemContext::INVALID_ENUM);
-  application->SetInitialState(window_id, window_name, initial_state);
-
-  // Default HMI level for all windows except the main one is always NONE
-  application_manager_.state_controller().OnAppWindowAdded(
-      application, window_id, window_type, mobile_apis::HMILevel::HMI_NONE);
-
-  requests_msg_.erase(request);
 }
 
 void ResumeCtrlImpl::ProcessSystemCapabilityUpdated(
@@ -409,29 +321,6 @@ bool ResumeCtrlImpl::SetAppHMIState(
                                              << " got HMI level " << hmi_level);
 
   return true;
-}
-
-size_t ResumeCtrlImpl::RestoreAppWidgets(
-    application_manager::ApplicationSharedPtr application,
-    const smart_objects::SmartObject& saved_app) {
-  using namespace mobile_apis;
-  LOG4CXX_AUTO_TRACE(logger_);
-  DCHECK(application);
-  if (!saved_app.keyExists(strings::windows_info)) {
-    LOG4CXX_ERROR(logger_, "windows_info section does not exist");
-    return 0;
-  }
-  const auto& windows_info = saved_app[strings::windows_info];
-  auto request_list = MessageHelper::CreateUICreateWindowRequestsToHMI(
-      application, application_manager_, windows_info);
-
-  requests_msg_.clear();
-  for (auto& request : request_list) {
-    requests_msg_.insert(std::make_pair(
-        (*request)[strings::params][strings::correlation_id].asInt(), request));
-  }
-  ProcessHMIRequests(request_list);
-  return request_list.size();
 }
 
 bool ResumeCtrlImpl::IsHMIApplicationIdExist(uint32_t hmi_app_id) {
@@ -1012,36 +901,6 @@ time_t ResumeCtrlImpl::LaunchTime() const {
 
 time_t ResumeCtrlImpl::GetIgnOffTime() const {
   return resumption_storage_->GetIgnOffTime();
-}
-
-bool ResumeCtrlImpl::ProcessHMIRequest(smart_objects::SmartObjectSPtr request,
-                                       bool use_events) {
-  LOG4CXX_AUTO_TRACE(logger_);
-  if (use_events) {
-    const hmi_apis::FunctionID::eType function_id =
-        static_cast<hmi_apis::FunctionID::eType>(
-            (*request)[strings::function_id].asInt());
-
-    const int32_t hmi_correlation_id =
-        (*request)[strings::correlation_id].asInt();
-    subscribe_on_event(function_id, hmi_correlation_id);
-  }
-  if (!application_manager_.GetRPCService().ManageHMICommand(
-          request, commands::Command::SOURCE_SDL_TO_HMI)) {
-    LOG4CXX_ERROR(logger_, "Unable to send request");
-    return false;
-  }
-  return true;
-}
-
-void ResumeCtrlImpl::ProcessHMIRequests(
-    const smart_objects::SmartObjectList& requests) {
-  for (smart_objects::SmartObjectList::const_iterator it = requests.begin(),
-                                                      total = requests.end();
-       it != total;
-       ++it) {
-    ProcessHMIRequest(*it, true);
-  }
 }
 
 void ResumeCtrlImpl::AddToResumptionTimerQueue(const uint32_t app_id) {

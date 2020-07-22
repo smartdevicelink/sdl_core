@@ -107,13 +107,6 @@ class MockResumeCtrl : public resumption::ResumeCtrl {
                     bool check_policy));
   MOCK_CONST_METHOD0(LaunchTime, time_t());
 
-  MOCK_METHOD2(RestoreAppWidgets,
-               size_t(app_mngr::ApplicationSharedPtr application,
-                      const smart_objects::SmartObject& saved_app));
-
-  MOCK_METHOD1(RestoreWidgetsHMIState,
-               void(const smart_objects::SmartObject& response_message));
-
   MOCK_METHOD2(StartWaitingForDisplayCapabilitiesUpdate,
                void(application_manager::ApplicationSharedPtr application,
                     const bool is_resume_app));

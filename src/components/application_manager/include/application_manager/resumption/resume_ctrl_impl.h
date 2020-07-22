@@ -57,8 +57,7 @@ namespace resumption {
  * @brief Contains logic for storage/restore data of applications.
  */
 
-class ResumeCtrlImpl : public ResumeCtrl,
-                       public app_mngr::event_engine::EventObserver {
+class ResumeCtrlImpl : public ResumeCtrl {
  public:
   /**
    * @brief allows to create ResumeCtrlImpl object
@@ -69,12 +68,6 @@ class ResumeCtrlImpl : public ResumeCtrl,
    * @brief allows to destroy ResumeCtrlImpl object
    */
   ~ResumeCtrlImpl();
-
-  /**
-   * @brief Event, that raised if application get resumption response from HMI
-   * @param event : event object, that contains smart_object with HMI message
-   */
-  void on_event(const app_mngr::event_engine::Event& event) OVERRIDE;
 
   /**
    * @brief Save all applications info to the file system
@@ -93,9 +86,6 @@ class ResumeCtrlImpl : public ResumeCtrl,
    * @return true if success, otherwise return false
    */
   bool RestoreAppHMIState(app_mngr::ApplicationSharedPtr application) OVERRIDE;
-
-  void RestoreWidgetsHMIState(
-      const smart_objects::SmartObject& response_message) OVERRIDE;
 
   /**
    * @brief Set application HMI Level as stored in policy
@@ -117,15 +107,6 @@ class ResumeCtrlImpl : public ResumeCtrl,
   bool SetAppHMIState(app_mngr::ApplicationSharedPtr application,
                       const mobile_apis::HMILevel::eType hmi_level,
                       bool check_policy = true) OVERRIDE;
-
-  /**
-   * @brief RestoreAppWidgets add widgets for the application
-   * @param application application which will be resumed
-   * @param saved_app application specific section from backup file
-   */
-  size_t RestoreAppWidgets(
-      application_manager::ApplicationSharedPtr application,
-      const smart_objects::SmartObject& saved_app) OVERRIDE;
 
   /**
    * @brief Remove application from list of saved applications
@@ -488,21 +469,6 @@ class ResumeCtrlImpl : public ResumeCtrl,
    * @param ign_off_time - igition off time
    */
   void SetLastIgnOffTime(time_t ign_off_time);
-
-  /**
-   * @brief Process specified HMI request
-   * @param request Request to process
-   * @param use_events Process request events or not flag
-   * @return TRUE on success, otherwise FALSE
-   */
-  bool ProcessHMIRequest(smart_objects::SmartObjectSPtr request = NULL,
-                         bool use_events = false);
-
-  /**
-   * @brief Process list of HMI requests using ProcessHMIRequest method
-   * @param requests List of requests to process
-   */
-  void ProcessHMIRequests(const smart_objects::SmartObjectList& requests);
 
   void InsertToTimerQueue(uint32_t app_id, uint32_t time_stamp);
 
