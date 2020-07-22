@@ -79,12 +79,10 @@ void OnSystemCapabilityUpdatedNotification::Run() {
       }
       break;
     }
-    case mobile_apis::SystemCapabilityType::VIDEO_STREAMING:
-      if ((*message_)[strings::msg_params].keyExists(strings::app_id)) {
-        SendNotification();
-      }
+    case mobile_apis::SystemCapabilityType::VIDEO_STREAMING: {
+      SendNotification();
       return;
-      break;
+    }
     case mobile_apis::SystemCapabilityType::APP_SERVICES: {
       auto all_services =
           application_manager_.GetAppServiceManager().GetAllServiceRecords();
