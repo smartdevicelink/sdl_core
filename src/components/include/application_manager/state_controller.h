@@ -223,6 +223,20 @@ class StateController {
    * @param app pointer to application to be exited
    */
   virtual void ExitDefaultWindow(ApplicationSharedPtr app) = 0;
+
+  /**
+   * @brief ResumePostponedWindows resumes adding of all postponed windows for a
+   * specified application, if exists
+   * @param app_id id of application to check
+   */
+  virtual void ResumePostponedWindows(const uint32_t app_id) = 0;
+
+  /**
+   * @brief DropPostponedWindows drops all postponed windows for a specified
+   * application, if exists
+   * @param app_id id of application to check
+   */
+  virtual void DropPostponedWindows(const uint32_t app_id) = 0;
 };
 
 }  // namespace application_manager

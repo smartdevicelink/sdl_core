@@ -900,6 +900,48 @@ bool StateControllerImpl::IsTempStateActive(HmiState::StateID id) const {
   return helpers::in_range(active_states_, id);
 }
 
+void StateControllerImpl::ResumePostponedWindows(const uint32_t app_id) {
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  auto it_postponed_windows = postponed_app_widgets_.find(app_id);
+  if (it_postponed_windows != postponed_app_widgets_.end()) {
+    const WindowStatePairs& window_pairs = it_postponed_windows->second;
+    LOG4CXX_DEBUG(logger_,
+                  "Application " << app_id << " has " << window_pairs.size()
+                                 << " postponed windows. Restoring...");
+
+    auto application = app_mngr_.application(app_id);
+    if (!application) {
+      LOG4CXX_ERROR(logger_, "Application " << app_id << " is not registered");
+      postponed_app_widgets_.erase(it_postponed_windows);
+      return;
+    }
+
+    for (const WindowStatePair& pair : window_pairs) {
+      const WindowID window_id = pair.first;
+      HmiStatePtr postponed_state = pair.second;
+
+      OnAppWindowAdded(application,
+                       window_id,
+                       postponed_state->window_type(),
+                       postponed_state->hmi_level());
+    }
+
+    postponed_app_widgets_.erase(it_postponed_windows);
+  }
+}
+
+void StateControllerImpl::DropPostponedWindows(const uint32_t app_id) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  auto it_postponed_windows = postponed_app_widgets_.find(app_id);
+  if (it_postponed_windows != postponed_app_widgets_.end()) {
+    LOG4CXX_DEBUG(
+        logger_,
+        "Dropping postponed windows information for application " << app_id);
+    postponed_app_widgets_.erase(it_postponed_windows);
+  }
+}
+
 void StateControllerImpl::OnApplicationRegistered(
     ApplicationSharedPtr app,
     const mobile_apis::HMILevel::eType default_level) {
@@ -922,6 +964,26 @@ void StateControllerImpl::OnAppWindowAdded(
   namespace SystemContext = mobile_apis::SystemContext;
   LOG4CXX_AUTO_TRACE(logger_);
   DCHECK_OR_RETURN_VOID(app);
+
+  if (mobile_apis::WindowType::WIDGET == window_type) {
+    auto main_state =
+        app->CurrentHmiState(mobile_apis::PredefinedWindows::DEFAULT_WINDOW);
+    if (mobile_apis::HMILevel::INVALID_ENUM == main_state->hmi_level()) {
+      LOG4CXX_DEBUG(logger_,
+                    "Application " << app->app_id()
+                                   << " is not registered. Widget with ID: "
+                                   << window_id << " has been postponed");
+
+      HmiStatePtr postponed_state =
+          CreateHmiState(app, HmiState::StateID::STATE_ID_REGULAR);
+      postponed_state->set_window_type(window_type);
+      postponed_state->set_hmi_level(default_level);
+
+      WindowStatePair pair = std::make_pair(window_id, postponed_state);
+      postponed_app_widgets_[app->app_id()].push_back(pair);
+      return;
+    }
+  }
 
   {
     sync_primitives::AutoLock lck(active_states_lock_);
