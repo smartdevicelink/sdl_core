@@ -3923,7 +3923,7 @@
                     "params": [
                         {
                             "name": "location",
-                            "key": "OEM_REF_GRID",
+                            "key": "OEM_REF_WND_LOC",
                             "type": "Grid",
                             "mandatory": true
                         },
@@ -3940,7 +3940,7 @@
                     "mandatory": false,
                     "minsize": 0,
                     "maxsize": 100,
-                    "since": "6.2"
+                    "since": "7.0"
                 },
                 {
                     "name": "eCallInfo",
