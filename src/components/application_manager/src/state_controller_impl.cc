@@ -402,7 +402,11 @@ void StateControllerImpl::HmiLevelConflictResolver::operator()(
           result_audio_state,
           mobile_apis::AudioStreamingState::AUDIBLE,
           mobile_apis::AudioStreamingState::ATTENUATED)) {
-    result_hmi_level = mobile_apis::HMILevel::HMI_LIMITED;
+    result_hmi_level =
+        mobile_apis::PredefinedWindows::DEFAULT_WINDOW == window_id_ &&
+                applied_->IsFullscreen()
+            ? mobile_apis::HMILevel::HMI_LIMITED
+            : to_resolve_hmi_level;
   } else {
     result_hmi_level = mobile_apis::HMILevel::HMI_BACKGROUND;
   }
