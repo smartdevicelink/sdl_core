@@ -402,15 +402,14 @@ smart_objects::SmartObjectSPtr DynamicApplicationDataImpl::display_capabilities(
     const WindowID window_id) const {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  auto result_display_caps = std::make_shared<smart_objects::SmartObject>(
-      smart_objects::SmartType_Array);
-  const auto window_caps =
-      (*display_capabilities_)[0][strings::window_capabilities].asArray();
-  if (!window_caps) {
+  if (!display_capabilities_) {
     LOG4CXX_WARN(logger_, "Current window capabilities are empty");
     // SDL still needs to retreive display capabilities
     return display_capabilities_;
   }
+
+  const auto window_caps =
+      (*display_capabilities_)[0][strings::window_capabilities].asArray();
   auto find_res =
       std::find_if(window_caps->begin(),
                    window_caps->end(),
@@ -423,6 +422,10 @@ smart_objects::SmartObjectSPtr DynamicApplicationDataImpl::display_capabilities(
                    });
 
   DCHECK(find_res != window_caps->end());
+
+  auto result_display_caps = std::make_shared<smart_objects::SmartObject>(
+      smart_objects::SmartType_Array);
+
   const auto disp_caps_keys = (*display_capabilities_)[0].enumerate();
   for (const auto& key : disp_caps_keys) {
     if (strings::window_capabilities == key) {
@@ -629,6 +632,12 @@ void DynamicApplicationDataImpl::set_display_capabilities(
 void DynamicApplicationDataImpl::remove_window_capability(
     const WindowID window_id) {
   LOG4CXX_AUTO_TRACE(logger_);
+
+  if (!display_capabilities_) {
+    LOG4CXX_ERROR(logger_,
+                  "Application display capabilities are not available");
+    return;
+  }
 
   auto window_capabilities =
       (*display_capabilities_)[0][strings::window_capabilities].asArray();
