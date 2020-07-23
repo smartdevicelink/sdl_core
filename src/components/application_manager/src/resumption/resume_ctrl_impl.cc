@@ -231,7 +231,6 @@ void ResumeCtrlImpl::ProcessSystemCapabilityUpdated(
 
   application_manager_.GetRPCService().ManageMobileCommand(
       notification, commands::Command::SOURCE_SDL);
-  app.set_is_resuming(false);
 }
 
 bool ResumeCtrlImpl::SetupDefaultHMILevel(ApplicationSharedPtr application) {
