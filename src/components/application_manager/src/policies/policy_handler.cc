@@ -1018,12 +1018,22 @@ void PolicyHandler::OnSystemInfoChanged(const std::string& language) {
   policy_manager_->SetSystemLanguage(language);
 }
 
+void PolicyHandler::SetPreloadedPtFlag(const bool is_preloaded) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  policy_manager_->SetPreloadedPtFlag(is_preloaded);
+}
+
 void PolicyHandler::OnGetSystemInfo(const std::string& ccpu_version,
                                     const std::string& wers_country_code,
                                     const std::string& language) {
   LOG4CXX_AUTO_TRACE(logger_);
   POLICY_LIB_CHECK_VOID();
   policy_manager_->SetSystemInfo(ccpu_version, wers_country_code, language);
+}
+
+std::string PolicyHandler::GetCCPUVersionFromPT() const {
+  LOG4CXX_AUTO_TRACE(logger_);
+  return policy_manager_->GetCCPUVersionFromPT();
 }
 
 void PolicyHandler::OnVIIsReady() {
@@ -1310,18 +1320,22 @@ void PolicyHandler::OnAllowSDLFunctionalityNotification(
 
 #ifdef EXTERNAL_PROPRIETARY_MODE
 
-      DataAccessor<ApplicationSet> accessor =
-          application_manager_.applications();
+      ApplicationSet applications;
+      {
+        DataAccessor<ApplicationSet> accessor =
+            application_manager_.applications();
+        applications = accessor.GetData();
+      }
       if (!is_allowed) {
         std::for_each(
-            accessor.GetData().begin(),
-            accessor.GetData().end(),
+            applications.begin(),
+            applications.end(),
             DeactivateApplication(device_handle,
                                   application_manager_.state_controller()));
       } else {
         std::for_each(
-            accessor.GetData().begin(),
-            accessor.GetData().end(),
+            applications.begin(),
+            applications.end(),
             SDLAlowedNotification(device_handle,
                                   policy_manager_.get(),
                                   application_manager_.state_controller()));

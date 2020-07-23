@@ -149,8 +149,10 @@ void OnButtonPressNotification::Run() {
       if (app->app_id() == subscribed_app->app_id()) {
         SendButtonPress(subscribed_app);
       }
-    } else if (subscribed_app->IsFullscreen()) {
-      // if No "appID" - send it FULL apps only.
+    } else if (hmi_apis::Common_ButtonName::OK != btn_id ||
+               subscribed_app->IsFullscreen()) {
+      // if No "appID" and OK button - send it FULL apps only.
+      // if not OK button, send to LIMITED subscribed apps
       SendButtonPress(subscribed_app);
     }
   }
