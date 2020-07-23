@@ -408,20 +408,27 @@ smart_objects::SmartObjectSPtr DynamicApplicationDataImpl::display_capabilities(
     return display_capabilities_;
   }
 
+  smart_objects::SmartObject result_window_caps(
+      smart_objects::SmartType::SmartType_Map);
+
   const auto window_caps =
       (*display_capabilities_)[0][strings::window_capabilities].asArray();
-  auto find_res =
-      std::find_if(window_caps->begin(),
-                   window_caps->end(),
-                   [&window_id](const smart_objects::SmartObject& element) {
-                     if (window_id == element[strings::window_id].asInt()) {
-                       return true;
-                     }
+  if (window_caps) {
+    auto find_res =
+        std::find_if(window_caps->begin(),
+                     window_caps->end(),
+                     [&window_id](const smart_objects::SmartObject& element) {
+                       if (window_id == element[strings::window_id].asInt()) {
+                         return true;
+                       }
 
-                     return false;
-                   });
+                       return false;
+                     });
 
-  DCHECK(find_res != window_caps->end());
+    if (find_res != window_caps->end()) {
+      result_window_caps = *find_res;
+    }
+  }
 
   auto result_display_caps = std::make_shared<smart_objects::SmartObject>(
       smart_objects::SmartType_Array);
@@ -434,7 +441,8 @@ smart_objects::SmartObjectSPtr DynamicApplicationDataImpl::display_capabilities(
     (*result_display_caps)[0][key] = (*display_capabilities_)[0][key];
   }
 
-  (*result_display_caps)[0][strings::window_capabilities][0] = *find_res;
+  (*result_display_caps)[0][strings::window_capabilities][0] =
+      result_window_caps;
 
   return result_display_caps;
 }
