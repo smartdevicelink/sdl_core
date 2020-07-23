@@ -194,7 +194,7 @@ class MockHMICapabilities : public ::application_manager::HMICapabilities {
                void(const smart_objects::SmartObject& rc_capability));
 
   MOCK_CONST_METHOD0(driver_distraction_capability,
-                     const smart_objects::SmartObject*());
+                     const smart_objects::SmartObjectSPtr());
   MOCK_METHOD1(
       set_driver_distraction_capability,
       void(const smart_objects::SmartObject& driver_distraction_capability));

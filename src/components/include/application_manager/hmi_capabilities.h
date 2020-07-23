@@ -408,7 +408,6 @@ class HMICapabilities {
    */
   virtual bool rc_supported() const = 0;
 
-<<<<<<< HEAD
   /*
    * @brief Interface to store whether HMI supports driver distraction menu
    * limits
@@ -426,9 +425,6 @@ class HMICapabilities {
   virtual bool driver_distraction_supported() const = 0;
 
   /*
-=======
-  /**
->>>>>>> origin/develop
    * @brief Interface used to store information regarding
    * the navigation "System Capability"
    * @param navigation_capability contains information related
@@ -487,9 +483,9 @@ class HMICapabilities {
   virtual const smart_objects::SmartObjectSPtr rc_capability() const = 0;
 
   virtual void set_driver_distraction_capability(
-      const smart_objects::SmartObject& rc_capability) = 0;
+      const smart_objects::SmartObject& driver_distraction_capability) = 0;
 
-  virtual const smart_objects::SmartObject* driver_distraction_capability()
+  virtual const smart_objects::SmartObjectSPtr driver_distraction_capability()
       const = 0;
 
   /**

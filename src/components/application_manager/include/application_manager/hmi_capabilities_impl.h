@@ -194,7 +194,6 @@ class HMICapabilitiesImpl : public HMICapabilities {
 
   bool rc_supported() const OVERRIDE;
 
-<<<<<<< HEAD
   /*
    * @brief Interface to store whether HMI supports driver distraction menu
    * limits
@@ -218,8 +217,6 @@ class HMICapabilitiesImpl : public HMICapabilities {
    * @param navigation_capability contains information related
    * to the navigation system capability.
    */
-=======
->>>>>>> origin/develop
   void set_navigation_capability(
       const smart_objects::SmartObject& navigation_capability) OVERRIDE;
 
@@ -244,7 +241,7 @@ class HMICapabilitiesImpl : public HMICapabilities {
   void set_driver_distraction_capability(
       const smart_objects::SmartObject& driver_distraction_capability) OVERRIDE;
 
-  const smart_objects::SmartObject* driver_distraction_capability()
+  const smart_objects::SmartObjectSPtr driver_distraction_capability()
       const OVERRIDE;
 
   void set_seat_location_capability(
@@ -478,20 +475,12 @@ class HMICapabilitiesImpl : public HMICapabilities {
   bool is_rc_supported_;
   bool is_driver_distraction_supported_;
   std::string ccpu_version_;
-<<<<<<< HEAD
-  smart_objects::SmartObject* navigation_capability_;
-  smart_objects::SmartObject* phone_capability_;
-  smart_objects::SmartObject* video_streaming_capability_;
-  smart_objects::SmartObject* rc_capability_;
-  smart_objects::SmartObject* driver_distraction_capability_;
-  smart_objects::SmartObject* seat_location_capability_;
-=======
   smart_objects::SmartObjectSPtr navigation_capability_;
   smart_objects::SmartObjectSPtr phone_capability_;
   smart_objects::SmartObjectSPtr video_streaming_capability_;
   smart_objects::SmartObjectSPtr rc_capability_;
+  smart_objects::SmartObjectSPtr driver_distraction_capability_;
   smart_objects::SmartObjectSPtr seat_location_capability_;
->>>>>>> origin/develop
 
   ApplicationManager& app_mngr_;
   HMILanguageHandler hmi_language_handler_;

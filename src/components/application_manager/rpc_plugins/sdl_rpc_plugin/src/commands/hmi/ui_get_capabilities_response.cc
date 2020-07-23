@@ -141,29 +141,19 @@ void UIGetCapabilitiesResponse::Run() {
       hmi_capabilities_.set_video_streaming_capability(
           system_capabilities_so[strings::video_streaming_capability]);
     }
-<<<<<<< HEAD
-    if (msg_params[strings::system_capabilities].keyExists(
+    if (system_capabilities_so.keyExists(
             strings::driver_distraction_capability)) {
-      if (!msg_params[strings::system_capabilities]
-                     [strings::driver_distraction_capability]
-                         .empty()) {
-        hmi_capabilities.set_driver_distraction_capability(
-            msg_params[strings::system_capabilities]
-                      [strings::driver_distraction_capability]);
-        hmi_capabilities.set_driver_distraction_supported(true);
+      if (!system_capabilities_so[strings::driver_distraction_capability]
+               .empty()) {
+        hmi_capabilities_.set_driver_distraction_capability(
+            system_capabilities_so[strings::driver_distraction_capability]);
+        hmi_capabilities_.set_driver_distraction_supported(true);
       }
     }
-    if (msg_params[strings::system_capabilities].keyExists(
-            strings::display_capabilities)) {
-      hmi_capabilities.set_system_display_capabilities(
-          msg_params[strings::system_capabilities]
-                    [strings::display_capabilities]);
-=======
     if (system_capabilities_so.keyExists(strings::display_capabilities)) {
       sections_to_update.push_back(strings::display_capabilities);
       hmi_capabilities_.set_system_display_capabilities(
           system_capabilities_so[strings::display_capabilities]);
->>>>>>> origin/develop
     }
   }
 

@@ -765,11 +765,9 @@ void HMICapabilitiesImpl::set_rc_capability(
 
 void HMICapabilitiesImpl::set_driver_distraction_capability(
     const smart_objects::SmartObject& driver_distraction_capability) {
-  if (driver_distraction_capability_) {
-    delete driver_distraction_capability_;
-  }
-  driver_distraction_capability_ =
-      new smart_objects::SmartObject(driver_distraction_capability);
+  auto new_value = std::make_shared<smart_objects::SmartObject>(
+      driver_distraction_capability);
+  driver_distraction_capability_.swap(new_value);
 }
 
 void HMICapabilitiesImpl::set_seat_location_capability(
@@ -911,17 +909,12 @@ bool HMICapabilitiesImpl::rc_supported() const {
   return is_rc_supported_;
 }
 
-<<<<<<< HEAD
 bool HMICapabilitiesImpl::driver_distraction_supported() const {
   return is_driver_distraction_supported_;
 }
 
-const smart_objects::SmartObject* HMICapabilitiesImpl::navigation_capability()
-    const {
-=======
 const smart_objects::SmartObjectSPtr
 HMICapabilitiesImpl::navigation_capability() const {
->>>>>>> origin/develop
   return navigation_capability_;
 }
 
@@ -940,16 +933,12 @@ const smart_objects::SmartObjectSPtr HMICapabilitiesImpl::rc_capability()
   return rc_capability_;
 }
 
-<<<<<<< HEAD
-const smart_objects::SmartObject*
+const smart_objects::SmartObjectSPtr
 HMICapabilitiesImpl::driver_distraction_capability() const {
   return driver_distraction_capability_;
 }
 
-const smart_objects::SmartObject*
-=======
 const smart_objects::SmartObjectSPtr
->>>>>>> origin/develop
 HMICapabilitiesImpl::seat_location_capability() const {
   return seat_location_capability_;
 }
@@ -1453,6 +1442,18 @@ bool HMICapabilitiesImpl::LoadCapabilitiesFromFile() {
             set_video_streaming_supported(true);
           }
         }
+        if (JsonIsMemberSafe(ui_system_capabilities_node,
+                             strings::driver_distraction_capability)) {
+          Json::Value dd_capability = ui_system_capabilities_node.get(
+              strings::driver_distraction_capability, "");
+          smart_objects::SmartObject dd_capability_so;
+          formatters::CFormatterJsonBase::jsonValueToObj(dd_capability,
+                                                         dd_capability_so);
+          set_driver_distraction_capability(dd_capability_so);
+          if (!dd_capability_so.empty()) {
+            set_driver_distraction_supported(true);
+          }
+        }
       }
     } else {
       AddRequiredRequestsForCapabilities(hmi_interface::ui);
@@ -1492,27 +1493,6 @@ bool HMICapabilitiesImpl::LoadCapabilitiesFromFile() {
           set_rc_supported(true);
           set_rc_capability(rc_capability_so);
         }
-<<<<<<< HEAD
-        if (check_existing_json_member(system_capabilities,
-                                       "driverDistractionCapability")) {
-          Json::Value driver_distraction_capability =
-              system_capabilities.get("driverDistractionCapability", "");
-          smart_objects::SmartObject driver_distraction_capability_so;
-          formatters::CFormatterJsonBase::jsonValueToObj(
-              driver_distraction_capability, driver_distraction_capability_so);
-          set_driver_distraction_capability(driver_distraction_capability_so);
-          if (!driver_distraction_capability_so.empty()) {
-            set_driver_distraction_supported(true);
-          }
-        }
-        if (check_existing_json_member(system_capabilities,
-                                       "seatLocationCapability")) {
-          Json::Value seat_location_capability =
-              system_capabilities.get("seatLocationCapability", "");
-          smart_objects::SmartObject seat_location_capability_so;
-          formatters::CFormatterJsonBase::jsonValueToObj(
-              seat_location_capability, seat_location_capability_so);
-=======
       }
 
       auto seat_location_capabilitiy_node =
@@ -1527,7 +1507,6 @@ bool HMICapabilitiesImpl::LoadCapabilitiesFromFile() {
 
         if (!seat_location_capability_so.empty()) {
           set_rc_supported(true);
->>>>>>> origin/develop
           set_seat_location_capability(seat_location_capability_so);
         }
       }
