@@ -21,8 +21,18 @@
                 "EMERGENCY": 60,
                 "NAVIGATION": 15,
                 "PROJECTION": 15,
+                "VOICECOM": 20,
                 "COMMUNICATION": 6,
                 "NORMAL": 4,
+                "NONE": 0
+            },
+            "subtle_notifications_per_minute_by_priority": {
+                "EMERGENCY": 60,
+                "NAVIGATION": 20,
+                "PROJECTION": 20,
+                "VOICECOM": 30,
+                "COMMUNICATION": 15,
+                "NORMAL": 10,
                 "NONE": 0
             }
         },

@@ -123,8 +123,8 @@ class PolicyHandlerInterface : public VehicleDataItemProvider {
       const RPCParams& rpc_params,
       CheckPermissionResult& result) = 0;
 
-  virtual uint32_t GetNotificationsNumber(
-      const std::string& priority) const = 0;
+  virtual uint32_t GetNotificationsNumber(const std::string& priority,
+                                          const bool is_subtle) const = 0;
   virtual DeviceConsent GetUserConsentForDevice(
       const std::string& device_id) const = 0;
   virtual bool GetDefaultHmi(const std::string& device_id,

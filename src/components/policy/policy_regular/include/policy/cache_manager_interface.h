@@ -325,9 +325,10 @@ class CacheManagerInterface {
    * @brief Get allowed number of notifications
    * depending on application priority.
    * @param priority Priority of application
+   * @param is_subtle If true, get the number of allowed subtle notifications
    */
   virtual policy_table::NumberOfNotificationsType GetNotificationsNumber(
-      const std::string& priority) = 0;
+      const std::string& priority, const bool is_subtle) = 0;
 
   /**
    * @brief Get priority for given application

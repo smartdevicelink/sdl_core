@@ -137,9 +137,9 @@ class MockCacheManagerInterface : public ::policy::CacheManagerInterface {
                      void(const uint32_t service_type,
                           EndpointUrls& out_end_points));
   MOCK_CONST_METHOD1(GetIconUrl, std::string(const std::string& policy_app_id));
-  MOCK_METHOD1(
-      GetNotificationsNumber,
-      policy_table::NumberOfNotificationsType(const std::string& priority));
+  MOCK_METHOD2(GetNotificationsNumber,
+               policy_table::NumberOfNotificationsType(
+                   const std::string& priority, const bool is_subtle));
   MOCK_CONST_METHOD2(GetPriority,
                      bool(const std::string& policy_app_id,
                           std::string& priority));

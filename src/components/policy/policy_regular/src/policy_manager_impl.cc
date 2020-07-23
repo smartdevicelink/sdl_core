@@ -291,6 +291,12 @@ void FilterPolicyTable(
     FilterInvalidPriorityValues(
         module_config.notifications_per_minute_by_priority);
   }
+  if (module_config.is_initialized() &&
+      module_config.subtle_notifications_per_minute_by_priority
+          .is_initialized()) {
+    FilterInvalidPriorityValues(
+        module_config.subtle_notifications_per_minute_by_priority);
+  }
 
   if (pt.app_policies_section.is_initialized()) {
     policy_table::ApplicationPolicies& apps = pt.app_policies_section.apps;
@@ -1220,10 +1226,10 @@ void PolicyManagerImpl::SetSystemInfo(const std::string& ccpu_version,
   LOG4CXX_AUTO_TRACE(logger_);
 }
 
-uint32_t PolicyManagerImpl::GetNotificationsNumber(
-    const std::string& priority) const {
+uint32_t PolicyManagerImpl::GetNotificationsNumber(const std::string& priority,
+                                                   const bool is_subtle) const {
   LOG4CXX_AUTO_TRACE(logger_);
-  return cache_->GetNotificationsNumber(priority);
+  return cache_->GetNotificationsNumber(priority, is_subtle);
 }
 
 bool PolicyManagerImpl::ExceededIgnitionCycles() {

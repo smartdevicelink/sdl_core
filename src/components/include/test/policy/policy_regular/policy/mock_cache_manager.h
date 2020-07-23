@@ -106,9 +106,9 @@ class MockCacheManagerInterface : public CacheManagerInterface {
            policy_table::AppServiceParameters* app_service_parameters));
   MOCK_CONST_METHOD1(UnknownRPCPassthroughAllowed,
                      bool(const std::string& policy_app_id));
-  MOCK_METHOD1(
-      GetNotificationsNumber,
-      policy_table::NumberOfNotificationsType(const std::string& priority));
+  MOCK_METHOD2(GetNotificationsNumber,
+               policy_table::NumberOfNotificationsType(
+                   const std::string& priority, const bool is_subtle));
   MOCK_CONST_METHOD2(GetPriority,
                      bool(const std::string& policy_app_id,
                           std::string& priority));

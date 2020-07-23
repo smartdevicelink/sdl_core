@@ -1739,6 +1739,15 @@
             "NORMAL" : 4,
             "VOICECOMM" : 10
          },
+         "subtle_notifications_per_minute_by_priority": {
+            "COMMUNICATION": 15,
+            "EMERGENCY": 60,
+            "NAVIGATION": 20,
+            "PROJECTION": 20,
+            "NONE": 0,
+            "NORMAL": 10,
+            "VOICECOMM": 30
+         },
          "seconds_between_retries" : [ 1, 5, 25, 125, 625 ],
          "timeout_after_x_seconds" : 60,
          "vehicle_make" : "Stark Industries",

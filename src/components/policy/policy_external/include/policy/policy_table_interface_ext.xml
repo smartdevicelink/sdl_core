@@ -173,6 +173,7 @@
         <param name="seconds_between_retries" type="SecondsBetweenRetries" />
         <param name="endpoints" type="ServiceEndpoints" />
         <param name="notifications_per_minute_by_priority" type="NumberOfNotificationsPerMinute" />
+        <param name="subtle_notifications_per_minute_by_priority" type="NumberOfNotificationsPerMinute" />
         <param name="vehicle_make" type="String" maxlength="100"
             mandatory="false" />
         <param name="vehicle_model" type="String" maxlength="100"
