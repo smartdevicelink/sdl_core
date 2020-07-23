@@ -54,8 +54,6 @@ namespace transport_adapter {
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "TransportManager")
 
-BluetoothTransportAdapter::~BluetoothTransportAdapter() {}
-
 BluetoothTransportAdapter::BluetoothTransportAdapter(
     resumption::LastStateWrapperPtr last_state_wrapper,
     const TransportManagerSettings& settings)

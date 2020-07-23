@@ -75,12 +75,12 @@ class PolicyManagerImplTest : public ::testing::Test {
  public:
   PolicyManagerImplTest()
       : policy_manager_(nullptr)
-      , cache_manager_(nullptr)
+      , mock_cache_manager_(nullptr)
       , access_remote_(nullptr) {}
 
  protected:
   std::shared_ptr<PolicyManagerImpl> policy_manager_;
-  NiceMock<MockCacheManagerInterface>* cache_manager_;
+  NiceMock<MockCacheManagerInterface>* mock_cache_manager_;
   NiceMock<MockPolicyListener> listener_;
   NiceMock<policy_handler_test::MockPolicySettings> policy_settings_;
   std::shared_ptr<NiceMock<access_remote_test::MockAccessRemote> >
@@ -88,8 +88,8 @@ class PolicyManagerImplTest : public ::testing::Test {
 
   void SetUp() {
     policy_manager_ = std::make_shared<PolicyManagerImpl>();
-    cache_manager_ = new NiceMock<MockCacheManagerInterface>();
-    policy_manager_->set_cache_manager(cache_manager_);
+    mock_cache_manager_ = new NiceMock<MockCacheManagerInterface>();
+    policy_manager_->set_cache_manager(mock_cache_manager_);
     policy_manager_->set_listener(&listener_);
     access_remote_ =
         std::make_shared<NiceMock<access_remote_test::MockAccessRemote> >();
@@ -116,7 +116,8 @@ TEST_F(PolicyManagerImplTest, InitPT_NoAppStorageFolder_ReturnFalse) {
 
 TEST_F(PolicyManagerImplTest, InitPT_InitializationNotSuccessful_ReturnFalse) {
   file_system::CreateDirectory(kAppStorageFolder);
-  EXPECT_CALL(*cache_manager_, Init(kSdlPreloadedPtJson, &policy_settings_))
+  EXPECT_CALL(*mock_cache_manager_,
+              Init(kSdlPreloadedPtJson, &policy_settings_))
       .WillOnce(Return(false));
   EXPECT_FALSE(policy_manager_->InitPT(kSdlPreloadedPtJson, &policy_settings_));
   file_system::RemoveDirectory(kAppStorageFolder, true);
@@ -124,28 +125,29 @@ TEST_F(PolicyManagerImplTest, InitPT_InitializationNotSuccessful_ReturnFalse) {
 
 TEST_F(PolicyManagerImplTest, InitPT_InitializationIsSuccessful_ReturnTrue) {
   file_system::CreateDirectory(kAppStorageFolder);
-  EXPECT_CALL(*cache_manager_, Init(kSdlPreloadedPtJson, &policy_settings_))
+  EXPECT_CALL(*mock_cache_manager_,
+              Init(kSdlPreloadedPtJson, &policy_settings_))
       .WillOnce(Return(true));
   EXPECT_TRUE(policy_manager_->InitPT(kSdlPreloadedPtJson, &policy_settings_));
   file_system::RemoveDirectory(kAppStorageFolder, true);
 }
 
 TEST_F(PolicyManagerImplTest, ResetPT_NoRefreshRetrySequence_ReturnFalse) {
-  EXPECT_CALL(*cache_manager_, ResetCalculatedPermissions());
-  EXPECT_CALL(*cache_manager_, ResetPT(kSdlPreloadedPtJson))
+  EXPECT_CALL(*mock_cache_manager_, ResetCalculatedPermissions());
+  EXPECT_CALL(*mock_cache_manager_, ResetPT(kSdlPreloadedPtJson))
       .WillOnce(Return(false));
-  EXPECT_CALL(*cache_manager_, TimeoutResponse()).Times(0);
-  EXPECT_CALL(*cache_manager_, SecondsBetweenRetries(_)).Times(0);
+  EXPECT_CALL(*mock_cache_manager_, TimeoutResponse()).Times(0);
+  EXPECT_CALL(*mock_cache_manager_, SecondsBetweenRetries(_)).Times(0);
 
   EXPECT_FALSE(policy_manager_->ResetPT(kSdlPreloadedPtJson));
 }
 
 TEST_F(PolicyManagerImplTest, ResetPT_ExecuteRefreshRetrySequence_ReturnTrue) {
-  EXPECT_CALL(*cache_manager_, ResetCalculatedPermissions());
-  EXPECT_CALL(*cache_manager_, ResetPT(kSdlPreloadedPtJson))
+  EXPECT_CALL(*mock_cache_manager_, ResetCalculatedPermissions());
+  EXPECT_CALL(*mock_cache_manager_, ResetPT(kSdlPreloadedPtJson))
       .WillOnce(Return(true));
-  EXPECT_CALL(*cache_manager_, TimeoutResponse());
-  EXPECT_CALL(*cache_manager_, SecondsBetweenRetries(_));
+  EXPECT_CALL(*mock_cache_manager_, TimeoutResponse());
+  EXPECT_CALL(*mock_cache_manager_, SecondsBetweenRetries(_));
 
   EXPECT_TRUE(policy_manager_->ResetPT(kSdlPreloadedPtJson));
 }
@@ -154,7 +156,7 @@ TEST_F(PolicyManagerImplTest,
        AppNeedEncryption_EncryptionNotRequired_ReturnFalse) {
   EncryptionRequired encryption_required;
   *encryption_required = false;
-  EXPECT_CALL(*cache_manager_, GetAppEncryptionRequiredFlag(kValidAppId))
+  EXPECT_CALL(*mock_cache_manager_, GetAppEncryptionRequiredFlag(kValidAppId))
       .WillOnce(Return(encryption_required));
 
   EXPECT_FALSE(policy_manager_->AppNeedEncryption(kValidAppId));
@@ -163,7 +165,7 @@ TEST_F(PolicyManagerImplTest,
 TEST_F(PolicyManagerImplTest,
        AppNeedEncryption_EncryptionNotInitialized_ReturnTrue) {
   EncryptionRequired encryption_required;
-  EXPECT_CALL(*cache_manager_, GetAppEncryptionRequiredFlag(kValidAppId))
+  EXPECT_CALL(*mock_cache_manager_, GetAppEncryptionRequiredFlag(kValidAppId))
       .WillOnce(Return(encryption_required));
 
   EXPECT_TRUE(policy_manager_->AppNeedEncryption(kValidAppId));
@@ -171,7 +173,7 @@ TEST_F(PolicyManagerImplTest,
 
 TEST_F(PolicyManagerImplTest,
        FunctionGroupNeedEncryption_NoGroups_ReturnFalse) {
-  EXPECT_CALL(*cache_manager_, GetFunctionalGroupings(_));
+  EXPECT_CALL(*mock_cache_manager_, GetFunctionalGroupings(_));
   const std::string absent_group("Base-6");
 
   EXPECT_FALSE(policy_manager_->FunctionGroupNeedEncryption(absent_group));
@@ -184,7 +186,7 @@ TEST_F(PolicyManagerImplTest,
   const RPCParams params;
   CheckPermissionResult result;
 
-  EXPECT_CALL(*cache_manager_, IsApplicationRepresented(kValidAppId))
+  EXPECT_CALL(*mock_cache_manager_, IsApplicationRepresented(kValidAppId))
       .WillOnce(Return(false));
 
   policy_manager_->CheckPermissions(
@@ -200,7 +202,7 @@ TEST_F(PolicyManagerImplTest,
   CheckPermissionResult result;
   Strings groups;
 
-  ON_CALL(*cache_manager_, IsApplicationRepresented(kValidAppId))
+  ON_CALL(*mock_cache_manager_, IsApplicationRepresented(kValidAppId))
       .WillByDefault(Return(true));
   ON_CALL(*access_remote_, IsAppRemoteControl(_)).WillByDefault(Return(true));
   ON_CALL(*access_remote_, GetGroups(_)).WillByDefault(ReturnRef(groups));
@@ -218,10 +220,10 @@ TEST_F(PolicyManagerImplTest,
   CheckPermissionResult result;
   Strings groups;
 
-  ON_CALL(*cache_manager_, IsApplicationRepresented(kValidAppId))
+  ON_CALL(*mock_cache_manager_, IsApplicationRepresented(kValidAppId))
       .WillByDefault(Return(true));
-  ON_CALL(*cache_manager_, GetGroups(_)).WillByDefault(ReturnRef(groups));
-  ON_CALL(*cache_manager_, IsApplicationRevoked(kValidAppId))
+  ON_CALL(*mock_cache_manager_, GetGroups(_)).WillByDefault(ReturnRef(groups));
+  ON_CALL(*mock_cache_manager_, IsApplicationRevoked(kValidAppId))
       .WillByDefault(Return(true));
 
   policy_manager_->CheckPermissions(
@@ -238,10 +240,10 @@ TEST_F(PolicyManagerImplTest,
   CheckPermissionResult result;
   Strings groups;
 
-  ON_CALL(*cache_manager_, IsApplicationRepresented(kValidAppId))
+  ON_CALL(*mock_cache_manager_, IsApplicationRepresented(kValidAppId))
       .WillByDefault(Return(true));
-  ON_CALL(*cache_manager_, GetGroups(_)).WillByDefault(ReturnRef(groups));
-  ON_CALL(*cache_manager_, IsApplicationRevoked(kValidAppId))
+  ON_CALL(*mock_cache_manager_, GetGroups(_)).WillByDefault(ReturnRef(groups));
+  ON_CALL(*mock_cache_manager_, IsApplicationRevoked(kValidAppId))
       .WillByDefault(Return(true));
 
   policy_manager_->CheckPermissions(
@@ -255,7 +257,7 @@ TEST_F(
     GetPermissionsForApp_CannotGetPermissionsForRemoteDefaultApp_GetEmptyVector) {
   std::vector<FunctionalGroupPermission> permissions;
 
-  ON_CALL(*cache_manager_, IsDefaultPolicy(kValidAppId))
+  ON_CALL(*mock_cache_manager_, IsDefaultPolicy(kValidAppId))
       .WillByDefault(Return(true));
   ON_CALL(*access_remote_, IsAppRemoteControl(_)).WillByDefault(Return(true));
   EXPECT_CALL(*access_remote_,
@@ -272,12 +274,12 @@ TEST_F(
     GetPermissionsForApp_CannotGetFunctionalGroupsNamesForNotRemotePredataApp_GetEmptyVector) {
   std::vector<FunctionalGroupPermission> permissions;
 
-  ON_CALL(*cache_manager_, IsPredataPolicy(kValidAppId))
+  ON_CALL(*mock_cache_manager_, IsPredataPolicy(kValidAppId))
       .WillByDefault(Return(true));
-  ON_CALL(*cache_manager_,
+  ON_CALL(*mock_cache_manager_,
           GetPermissionsForApp(kDeviceNumber, kPreDataConsentId, _))
       .WillByDefault(Return(true));
-  EXPECT_CALL(*cache_manager_, GetFunctionalGroupNames(_))
+  EXPECT_CALL(*mock_cache_manager_, GetFunctionalGroupNames(_))
       .WillOnce(Return(false));
 
   policy_manager_->GetPermissionsForApp(
@@ -304,9 +306,9 @@ TEST_F(PolicyManagerImplTest, LoadPT_InvalidPT_ReturnkWrongPtReceived) {
   std::string json = root.toStyledString();
   BinaryMessage msg(json.begin(), json.end());
 
-  EXPECT_CALL(*cache_manager_, GetVehicleDataItems())
+  EXPECT_CALL(*mock_cache_manager_, GetVehicleDataItems())
       .WillOnce(Return(vehicle_items));
-  EXPECT_CALL(*cache_manager_, SaveUpdateRequired(false)).Times(0);
+  EXPECT_CALL(*mock_cache_manager_, SaveUpdateRequired(false)).Times(0);
   EXPECT_EQ(PolicyManager::PtProcessingResult::kWrongPtReceived,
             policy_manager_->LoadPT(kInValidFilename, msg));
 }
@@ -331,9 +333,10 @@ TEST_F(PolicyManagerImplTest,
   std::string json = root.toStyledString();
   BinaryMessage msg(json.begin(), json.end());
 
-  EXPECT_CALL(*cache_manager_, GetVehicleDataItems())
+  EXPECT_CALL(*mock_cache_manager_, GetVehicleDataItems())
       .WillOnce(Return(vehicle_items));
-  EXPECT_CALL(*cache_manager_, GenerateSnapshot()).WillOnce(Return(nullptr));
+  EXPECT_CALL(*mock_cache_manager_, GenerateSnapshot())
+      .WillOnce(Return(nullptr));
   EXPECT_EQ(PolicyManager::PtProcessingResult::kNewPtRequired,
             policy_manager_->LoadPT(kInValidFilename, msg));
 }
@@ -356,11 +359,11 @@ TEST_F(PolicyManagerImplTest, LoadPT_UpdateNotApplied_ReturnkNewPtRequired) {
   std::string json = root.toStyledString();
   BinaryMessage msg(json.begin(), json.end());
 
-  EXPECT_CALL(*cache_manager_, GetVehicleDataItems())
+  EXPECT_CALL(*mock_cache_manager_, GetVehicleDataItems())
       .WillOnce(Return(vehicle_items));
-  EXPECT_CALL(*cache_manager_, GenerateSnapshot())
+  EXPECT_CALL(*mock_cache_manager_, GenerateSnapshot())
       .WillOnce(Return(std::make_shared<policy_table::Table>(update)));
-  EXPECT_CALL(*cache_manager_, ApplyUpdate(_)).WillOnce(Return(false));
+  EXPECT_CALL(*mock_cache_manager_, ApplyUpdate(_)).WillOnce(Return(false));
   EXPECT_EQ(PolicyManager::PtProcessingResult::kNewPtRequired,
             policy_manager_->LoadPT(kInValidFilename, msg));
 }
@@ -383,11 +386,11 @@ TEST_F(PolicyManagerImplTest, LoadPT_NoHMIAppTypes_ReturnkSuccess) {
   std::string json = root.toStyledString();
   BinaryMessage msg(json.begin(), json.end());
 
-  ON_CALL(*cache_manager_, GetVehicleDataItems())
+  ON_CALL(*mock_cache_manager_, GetVehicleDataItems())
       .WillByDefault(Return(vehicle_items));
-  ON_CALL(*cache_manager_, GenerateSnapshot())
+  ON_CALL(*mock_cache_manager_, GenerateSnapshot())
       .WillByDefault(Return(std::make_shared<policy_table::Table>(update)));
-  ON_CALL(*cache_manager_, ApplyUpdate(_)).WillByDefault(Return(true));
+  ON_CALL(*mock_cache_manager_, ApplyUpdate(_)).WillByDefault(Return(true));
 
   EXPECT_EQ(PolicyManager::PtProcessingResult::kSuccess,
             policy_manager_->LoadPT(kInValidFilename, msg));
@@ -397,10 +400,10 @@ TEST_F(PolicyManagerImplTest,
        AddApplication_NewApplication_ReturnCallStatusChanges) {
   AppHmiTypes hmi_types;
 
-  ON_CALL(*cache_manager_, IsApplicationRepresented(kValidAppId))
+  ON_CALL(*mock_cache_manager_, IsApplicationRepresented(kValidAppId))
       .WillByDefault(Return(false));
 
-  EXPECT_CALL(*cache_manager_, IsPredataPolicy(kValidAppId)).Times(0);
+  EXPECT_CALL(*mock_cache_manager_, IsPredataPolicy(kValidAppId)).Times(0);
 
   policy_manager_->AddApplication(kDeviceNumber, kValidAppId, hmi_types);
 }
@@ -409,10 +412,10 @@ TEST_F(PolicyManagerImplTest,
        AddApplication_ExistedApplication_ReturnCallNothing) {
   AppHmiTypes hmi_types;
 
-  ON_CALL(*cache_manager_, IsApplicationRepresented(kValidAppId))
+  ON_CALL(*mock_cache_manager_, IsApplicationRepresented(kValidAppId))
       .WillByDefault(Return(true));
 
-  EXPECT_CALL(*cache_manager_, IsPredataPolicy(kValidAppId))
+  EXPECT_CALL(*mock_cache_manager_, IsPredataPolicy(kValidAppId))
       .WillOnce(Return(true));
 
   policy_manager_->AddApplication(kDeviceNumber, kValidAppId, hmi_types);
@@ -422,7 +425,8 @@ TEST_F(PolicyManagerImplTest,
        OnPTUFinished_PtuResultIskNewPtRequired_InvokeForcePTExchange) {
   const std::string initial_pt_status = policy_manager_->GetPolicyTableStatus();
 
-  EXPECT_CALL(*cache_manager_, GenerateSnapshot()).WillOnce(Return(nullptr));
+  EXPECT_CALL(*mock_cache_manager_, GenerateSnapshot())
+      .WillOnce(Return(nullptr));
 
   policy_manager_->OnPTUFinished(
       PolicyManager::PtProcessingResult::kNewPtRequired);
@@ -435,8 +439,8 @@ TEST_F(
     OnPTUFinished_PtuResultIskWrongPtReceived_NoPTExchangeAndNoRefreshRetrySequence) {
   const std::string initial_pt_status = policy_manager_->GetPolicyTableStatus();
 
-  EXPECT_CALL(*cache_manager_, TimeoutResponse()).Times(0);
-  EXPECT_CALL(*cache_manager_, SecondsBetweenRetries(_)).Times(0);
+  EXPECT_CALL(*mock_cache_manager_, TimeoutResponse()).Times(0);
+  EXPECT_CALL(*mock_cache_manager_, SecondsBetweenRetries(_)).Times(0);
 
   policy_manager_->OnPTUFinished(
       PolicyManager::PtProcessingResult::kWrongPtReceived);
@@ -448,8 +452,8 @@ TEST_F(PolicyManagerImplTest,
        OnPTUFinished_PtuResultIskSuccess_InvokeRefreshRetrySequence) {
   const std::string initial_pt_status = policy_manager_->GetPolicyTableStatus();
 
-  EXPECT_CALL(*cache_manager_, TimeoutResponse());
-  EXPECT_CALL(*cache_manager_, SecondsBetweenRetries(_));
+  EXPECT_CALL(*mock_cache_manager_, TimeoutResponse());
+  EXPECT_CALL(*mock_cache_manager_, SecondsBetweenRetries(_));
 
   policy_manager_->OnPTUFinished(PolicyManager::PtProcessingResult::kSuccess);
   const std::string final_pt_status = policy_manager_->GetPolicyTableStatus();
@@ -457,7 +461,8 @@ TEST_F(PolicyManagerImplTest,
 }
 
 TEST_F(PolicyManagerImplTest, RequestPTUpdate_SnapshotPtrIsNull_ReturnFalse) {
-  ON_CALL(*cache_manager_, GenerateSnapshot()).WillByDefault(Return(nullptr));
+  ON_CALL(*mock_cache_manager_, GenerateSnapshot())
+      .WillByDefault(Return(nullptr));
 
   EXPECT_FALSE(
       policy_manager_->RequestPTUpdate(PTUIterationType::DefaultIteration));
@@ -486,7 +491,8 @@ TEST_F(PolicyManagerImplTest, RequestPTUpdate_PTIsValid_PTIsUpdated) {
   snapshot->SetPolicyTableType(policy_table::PT_SNAPSHOT);
   ASSERT_TRUE(IsValid(*snapshot));
 
-  ON_CALL(*cache_manager_, GenerateSnapshot()).WillByDefault(Return(snapshot));
+  ON_CALL(*mock_cache_manager_, GenerateSnapshot())
+      .WillByDefault(Return(snapshot));
   EXPECT_CALL(listener_,
               OnSnapshotCreated(_, PTUIterationType::DefaultIteration));
   EXPECT_TRUE(
@@ -519,9 +525,10 @@ TEST_F(PolicyManagerImplTest,
        GetUserConsentForApp_NoPermissionsForApp_NoConsent) {
   std::vector<FunctionalGroupPermission> permissions;
 
-  ON_CALL(*cache_manager_, GetPermissionsForApp(kDeviceNumber, kValidAppId, _))
+  ON_CALL(*mock_cache_manager_,
+          GetPermissionsForApp(kDeviceNumber, kValidAppId, _))
       .WillByDefault(Return(false));
-  EXPECT_CALL(*cache_manager_, GetFunctionalGroupNames(_)).Times(0);
+  EXPECT_CALL(*mock_cache_manager_, GetFunctionalGroupNames(_)).Times(0);
 
   policy_manager_->GetUserConsentForApp(
       kDeviceNumber, kValidAppId, permissions);
@@ -532,9 +539,10 @@ TEST_F(PolicyManagerImplTest,
        GetUserConsentForApp_NoFunctionalGroupsNames_NoConsent) {
   std::vector<FunctionalGroupPermission> permissions;
 
-  ON_CALL(*cache_manager_, GetPermissionsForApp(kDeviceNumber, kValidAppId, _))
+  ON_CALL(*mock_cache_manager_,
+          GetPermissionsForApp(kDeviceNumber, kValidAppId, _))
       .WillByDefault(Return(true));
-  EXPECT_CALL(*cache_manager_, GetFunctionalGroupNames(_))
+  EXPECT_CALL(*mock_cache_manager_, GetFunctionalGroupNames(_))
       .WillOnce(Return(false));
 
   policy_manager_->GetUserConsentForApp(
@@ -552,7 +560,7 @@ TEST_F(PolicyManagerImplTest,
        GetInitialAppData_HandleValidPointers_ReturnTrue) {
   StringArray nicknames;
   StringArray app_hmi_types;
-  ON_CALL(*cache_manager_,
+  ON_CALL(*mock_cache_manager_,
           GetInitialAppData(kValidAppId, nicknames, app_hmi_types))
       .WillByDefault(Return(true));
 
@@ -562,15 +570,15 @@ TEST_F(PolicyManagerImplTest,
 
 TEST_F(PolicyManagerImplTest,
        GetAppPermissionsChanges_NoPermissionsChanges_GeneratePermissions) {
-  EXPECT_CALL(*cache_manager_, IsApplicationRevoked(kValidAppId));
-  EXPECT_CALL(*cache_manager_, GetPriority(kValidAppId, _));
+  EXPECT_CALL(*mock_cache_manager_, IsApplicationRevoked(kValidAppId));
+  EXPECT_CALL(*mock_cache_manager_, GetPriority(kValidAppId, _));
 
   policy_manager_->GetAppPermissionsChanges(kDeviceNumber, kValidAppId);
 }
 
 TEST_F(PolicyManagerImplTest, GetHMITypes_AppIsDefaultPolicy_ReturnFalse) {
   std::vector<int> app_types;
-  EXPECT_CALL(*cache_manager_, IsDefaultPolicy(kValidAppId))
+  EXPECT_CALL(*mock_cache_manager_, IsDefaultPolicy(kValidAppId))
       .WillOnce(Return(true));
 
   EXPECT_FALSE(policy_manager_->GetHMITypes(kValidAppId, &app_types));
@@ -578,7 +586,7 @@ TEST_F(PolicyManagerImplTest, GetHMITypes_AppIsDefaultPolicy_ReturnFalse) {
 
 TEST_F(PolicyManagerImplTest, GetHMITypes_NoHmiTypes_ReturnFalse) {
   std::vector<int> app_types;
-  EXPECT_CALL(*cache_manager_, GetHMITypes(kValidAppId))
+  EXPECT_CALL(*mock_cache_manager_, GetHMITypes(kValidAppId))
       .WillOnce(Return(nullptr));
   EXPECT_FALSE(policy_manager_->GetHMITypes(kValidAppId, &app_types));
 }
@@ -586,9 +594,23 @@ TEST_F(PolicyManagerImplTest, GetHMITypes_NoHmiTypes_ReturnFalse) {
 TEST_F(PolicyManagerImplTest, GetHMITypes_ValidHmiTypes_ReturnTrue) {
   std::vector<int> app_types;
   AppHMITypes hmi_types;
-  EXPECT_CALL(*cache_manager_, GetHMITypes(kValidAppId))
+  EXPECT_CALL(*mock_cache_manager_, GetHMITypes(kValidAppId))
       .WillOnce(Return(&hmi_types));
   EXPECT_TRUE(policy_manager_->GetHMITypes(kValidAppId, &app_types));
+}
+
+TEST_F(PolicyManagerImplTest, SetMetaInfo_SetCCPUVersion_SUCCESS) {
+  const std::string ccpu_version = "ccpu_version";
+  const std::string wers_country_code = "wersCountryCode";
+  const std::string language = "language";
+
+  EXPECT_CALL(*mock_cache_manager_,
+              SetMetaInfo(ccpu_version, wers_country_code, language));
+  policy_manager_->SetSystemInfo(ccpu_version, wers_country_code, language);
+
+  EXPECT_CALL(*mock_cache_manager_, GetCCPUVersionFromPT())
+      .WillOnce(Return(ccpu_version));
+  EXPECT_EQ(ccpu_version, policy_manager_->GetCCPUVersionFromPT());
 }
 
 }  // namespace policy_test
