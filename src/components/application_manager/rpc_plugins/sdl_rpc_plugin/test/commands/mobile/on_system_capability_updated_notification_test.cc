@@ -236,12 +236,12 @@ TEST_F(
 }
 
 TEST_F(OnSystemCapabilityUpdatedNotificationTest,
-       Run_VideoSteamingCapability_AppIdIsAbsent_NotSendMessageToMobile) {
+       Run_VideoSteamingCapability_AppIdIsAbsent_SendMessageToMobile) {
   (*message_)[am::strings::msg_params][strings::system_capability]
              [am::strings::system_capability_type] =
                  mobile_apis::SystemCapabilityType::VIDEO_STREAMING;
 
-  EXPECT_CALL(mock_rpc_service_, SendMessageToMobile(_, false)).Times(0);
+  EXPECT_CALL(mock_rpc_service_, SendMessageToMobile(message_, false));
 
   ASSERT_TRUE(command_->Init());
   command_->Run();
