@@ -532,6 +532,10 @@ TEST_F(ProtocolHandlerImplTest,
   times += call_times;
 
   // Expect send NAck
+  EXPECT_CALL(session_observer_mock,
+              ProtocolVersionUsed(_, _, An<utils::SemanticVersion&>()))
+      .Times(call_times);
+
   EXPECT_CALL(transport_manager_mock,
               SendMessageToDevice(ControlMessage(FRAME_DATA_START_SERVICE_NACK,
                                                  PROTECTION_OFF)))
@@ -618,6 +622,10 @@ TEST_F(ProtocolHandlerImplTest, StartSession_Protected_SessionObserverReject) {
   times += call_times;
 
   // Expect send NAck with encryption OFF
+  EXPECT_CALL(session_observer_mock,
+              ProtocolVersionUsed(_, _, An<utils::SemanticVersion&>()))
+      .Times(call_times);
+
   EXPECT_CALL(transport_manager_mock,
               SendMessageToDevice(ControlMessage(FRAME_DATA_START_SERVICE_NACK,
                                                  PROTECTION_OFF)))
@@ -837,6 +845,8 @@ TEST_F(ProtocolHandlerImplTest,
   rejected_param_list.push_back(protocol_handler::strings::video_codec);
 
   EXPECT_CALL(session_observer_mock,
+              ProtocolVersionUsed(_, _, An<utils::SemanticVersion&>()));
+  EXPECT_CALL(session_observer_mock,
               OnSessionStartedCallback(connection_id2,
                                        session_id2,
                                        start_service,
@@ -969,6 +979,8 @@ TEST_F(ProtocolHandlerImplTest, StartSession_Audio_RejectByTransportType) {
       .WillOnce(ReturnRef(video_service_transports));
 
   // Expect send Ack
+  EXPECT_CALL(session_observer_mock,
+              ProtocolVersionUsed(_, _, An<utils::SemanticVersion&>()));
   EXPECT_CALL(transport_manager_mock,
               SendMessageToDevice(ControlMessage(FRAME_DATA_START_SERVICE_NACK,
                                                  PROTECTION_OFF)))
@@ -1008,6 +1020,8 @@ TEST_F(ProtocolHandlerImplTest, StartSession_Video_RejectByTransportType) {
       .WillOnce(ReturnRef(video_service_transports));
 
   // Expect send Ack
+  EXPECT_CALL(session_observer_mock,
+              ProtocolVersionUsed(_, _, An<utils::SemanticVersion&>()));
   EXPECT_CALL(transport_manager_mock,
               SendMessageToDevice(ControlMessage(FRAME_DATA_START_SERVICE_NACK,
                                                  PROTECTION_OFF)))
@@ -1044,6 +1058,8 @@ TEST_F(ProtocolHandlerImplTest, EndSession_SessionObserverReject) {
 
   SetProtocolVersion2();
   // Expect send NAck
+  EXPECT_CALL(session_observer_mock,
+              ProtocolVersionUsed(_, _, An<utils::SemanticVersion&>()));
   EXPECT_CALL(transport_manager_mock,
               SendMessageToDevice(
                   ControlMessage(FRAME_DATA_END_SERVICE_NACK, PROTECTION_OFF)))
