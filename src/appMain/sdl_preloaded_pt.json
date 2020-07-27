@@ -3983,8 +3983,26 @@
                         },
                         {
                             "name": "state",
+                            "params": [
+                                {
+                                    "name": "approximatePosition",
+                                    "key": "OEM_REF_WND_STATE_APRPOS",
+                                    "type": "Integer",
+                                    "mandatory": true,
+                                    "minvalue": 0,
+                                    "maxvalue": 100
+                                },
+                                {
+                                    "name": "deviation",
+                                    "key": "OEM_REF_WND_STATE_DEV",
+                                    "type": "Integer",
+                                    "mandatory": true,
+                                    "minvalue": 0,
+                                    "maxvalue": 100
+                                }
+                            ],
                             "key": "OEM_REF_WND_STATE",
-                            "type": "WindowState",
+                            "type": "Struct",
                             "mandatory": true
                         }
                     ],
