@@ -103,6 +103,10 @@ class MockSessionObserver : public ::protocol_handler::SessionObserver {
                      bool(uint32_t connection_id,
                           uint8_t session_id,
                           uint8_t& protocol_version));
+  MOCK_CONST_METHOD3(ProtocolVersionUsed,
+                     bool(uint32_t connection_id,
+                          uint8_t session_id,
+                          utils::SemanticVersion& full_protocol_version));
   MOCK_CONST_METHOD2(SessionServiceExists,
                      bool(const uint32_t connection_key,
                           const protocol_handler::ServiceType& service_type));

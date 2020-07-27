@@ -1752,6 +1752,21 @@ void ConnectionHandlerImpl::BindProtocolVersionWithSession(
   }
 }
 
+void ConnectionHandlerImpl::BindProtocolVersionWithSession(
+    uint32_t connection_key,
+    const utils::SemanticVersion& full_protocol_version) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  uint32_t connection_handle = 0;
+  uint8_t session_id = 0;
+  PairFromKey(connection_key, &connection_handle, &session_id);
+
+  sync_primitives::AutoReadLock lock(connection_list_lock_);
+  auto connection = GetPrimaryConnection(connection_handle);
+  if (connection) {
+    connection->UpdateProtocolVersionSession(session_id, full_protocol_version);
+  }
+}
+
 bool ConnectionHandlerImpl::IsHeartBeatSupported(
     transport_manager::ConnectionUID connection_handle,
     uint8_t session_id) const {
@@ -1781,6 +1796,25 @@ bool ConnectionHandlerImpl::ProtocolVersionUsed(
              static_cast<uint32_t>(ending_connection_->connection_handle()) ==
                  connection_id) {
     return ending_connection_->ProtocolVersion(session_id, protocol_version);
+  }
+  return false;
+}
+
+bool ConnectionHandlerImpl::ProtocolVersionUsed(
+    uint32_t connection_id,
+    uint8_t session_id,
+    utils::SemanticVersion& full_protocol_version) const {
+  LOG4CXX_AUTO_TRACE(logger_);
+  sync_primitives::AutoReadLock lock(connection_list_lock_);
+  auto connection = GetPrimaryConnection(connection_id);
+
+  if (connection) {
+    return connection->ProtocolVersion(session_id, full_protocol_version);
+  } else if (ending_connection_ &&
+             static_cast<uint32_t>(ending_connection_->connection_handle()) ==
+                 connection_id) {
+    return ending_connection_->ProtocolVersion(session_id,
+                                               full_protocol_version);
   }
   return false;
 }

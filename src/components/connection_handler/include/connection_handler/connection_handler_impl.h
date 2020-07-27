@@ -490,6 +490,17 @@ class ConnectionHandlerImpl
                                       uint8_t protocol_version) OVERRIDE;
 
   /**
+   * @brief binds protocol version with session
+   *
+   * @param connection_key pair of connection and session id
+   * @param full_protocol_version contains full protocol version of registered
+   * application.
+   */
+  void BindProtocolVersionWithSession(
+      uint32_t connection_key,
+      const utils::SemanticVersion& full_protocol_version) OVERRIDE;
+
+  /**
    * \brief returns TRUE if session supports sending HEART BEAT ACK to mobile
    * side
    * \param  connection_handle Connection identifier whithin which session
@@ -511,6 +522,19 @@ class ConnectionHandlerImpl
   bool ProtocolVersionUsed(uint32_t connection_id,
                            uint8_t session_id,
                            uint8_t& protocol_version) const OVERRIDE;
+
+  /**
+   * @brief find protocol version which application supports
+   * @param connection_id id of connection
+   * @param session_id id of session
+   * @param full_protocol_version where to write the full protocol version
+   * output
+   * @return TRUE if session and connection exist otherwise returns FALSE
+   */
+  bool ProtocolVersionUsed(
+      uint32_t connection_id,
+      uint8_t session_id,
+      utils::SemanticVersion& full_protocol_version) const OVERRIDE;
 
   /**
    * \brief information about given Connection Key.

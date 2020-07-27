@@ -64,6 +64,7 @@ const size_t kStackSize = 131072;
 utils::SemanticVersion default_protocol_version(5, 3, 0);
 utils::SemanticVersion min_multiple_transports_version(5, 1, 0);
 utils::SemanticVersion min_cloud_app_version(5, 2, 0);
+utils::SemanticVersion min_reason_param_version(5, 3, 0);
 
 ProtocolHandlerImpl::ProtocolHandlerImpl(
     const ProtocolHandlerSettings& settings,
@@ -491,6 +492,16 @@ void ProtocolHandlerImpl::SendStartSessionNAck(
 
   uint8_t maxProtocolVersion = SupportedSDLProtocolVersion();
 
+  utils::SemanticVersion full_version;
+  session_observer_.ProtocolVersionUsed(
+      connection_id, session_id, full_version);
+  const utils::SemanticVersion& min_version =
+      (full_version.major_version_ < PROTOCOL_VERSION_5)
+          ? default_protocol_version
+          : ((full_version < default_protocol_version)
+                 ? full_version
+                 : default_protocol_version);
+
   if (protocol_version >= PROTOCOL_VERSION_5 &&
       maxProtocolVersion >= PROTOCOL_VERSION_5) {
     BsonObject payloadObj;
@@ -507,7 +518,7 @@ void ProtocolHandlerImpl::SendStartSessionNAck(
       bson_object_put_array(
           &payloadObj, strings::rejected_params, &rejectedParamsArr);
     }
-    if (!reason.empty()) {
+    if (!reason.empty() && min_version >= min_reason_param_version) {
       bson_object_put_string(
           &payloadObj, strings::reason, const_cast<char*>(reason.c_str()));
     }
@@ -564,6 +575,16 @@ void ProtocolHandlerImpl::SendEndSessionNAck(
 
   uint8_t maxProtocolVersion = SupportedSDLProtocolVersion();
 
+  utils::SemanticVersion full_version;
+  session_observer_.ProtocolVersionUsed(
+      connection_id, session_id, full_version);
+  const utils::SemanticVersion& min_version =
+      (full_version.major_version_ < PROTOCOL_VERSION_5)
+          ? default_protocol_version
+          : ((full_version < default_protocol_version)
+                 ? full_version
+                 : default_protocol_version);
+
   if (protocol_version >= PROTOCOL_VERSION_5 &&
       maxProtocolVersion >= PROTOCOL_VERSION_5) {
     BsonObject payloadObj;
@@ -581,7 +602,7 @@ void ProtocolHandlerImpl::SendEndSessionNAck(
       bson_object_put_array(
           &payloadObj, strings::rejected_params, &rejectedParamsArr);
     }
-    if (!reason.empty()) {
+    if (!reason.empty() && min_version >= min_reason_param_version) {
       bson_object_put_string(
           &payloadObj, strings::reason, const_cast<char*>(reason.c_str()));
     }
@@ -1924,6 +1945,11 @@ void ProtocolHandlerImpl::NotifySessionStarted(
           bson_object_get_string(&request_params, strings::protocol_version);
       std::string version_string(version_param == NULL ? "" : version_param);
       fullVersion = std::make_shared<utils::SemanticVersion>(version_string);
+
+      const auto connection_key = session_observer_.KeyFromPair(
+          packet->connection_id(), context.new_session_id_);
+      connection_handler_.BindProtocolVersionWithSession(connection_key,
+                                                         *fullVersion);
       // Constructed payloads added in Protocol v5
       if (fullVersion->major_version_ < PROTOCOL_VERSION_5) {
         rejected_params.push_back(std::string(strings::protocol_version));

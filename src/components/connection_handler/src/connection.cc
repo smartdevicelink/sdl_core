@@ -454,6 +454,34 @@ void Connection::UpdateProtocolVersionSession(uint8_t session_id,
   }
   Session& session = session_it->second;
   session.protocol_version = protocol_version;
+  if (session.full_protocol_version.major_version_ !=
+      session.protocol_version) {
+    session.full_protocol_version =
+        utils::SemanticVersion(protocol_version, 0, 0);
+  }
+}
+
+void Connection::UpdateProtocolVersionSession(
+    uint8_t session_id, const utils::SemanticVersion& full_protocol_version) {
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  if (!full_protocol_version.isValid()) {
+    LOG4CXX_WARN(logger_,
+                 "Invalid version: " << full_protocol_version.toString());
+    return;
+  }
+
+  sync_primitives::AutoLock lock(session_map_lock_);
+  SessionMap::iterator session_it = session_map_.find(session_id);
+  if (session_map_.end() == session_it) {
+    LOG4CXX_WARN(logger_, "Session not found in this connection!");
+    return;
+  }
+
+  Session& session = session_it->second;
+  session.protocol_version =
+      static_cast<uint8_t>(full_protocol_version.major_version_);
+  session.full_protocol_version = full_protocol_version;
 }
 
 bool Connection::SupportHeartBeat(uint8_t session_id) {
@@ -480,6 +508,19 @@ bool Connection::ProtocolVersion(uint8_t session_id,
     return false;
   }
   protocol_version = (session_it->second).protocol_version;
+  return true;
+}
+
+bool Connection::ProtocolVersion(
+    uint8_t session_id, utils::SemanticVersion& full_protocol_version) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  sync_primitives::AutoLock lock(session_map_lock_);
+  SessionMap::iterator session_it = session_map_.find(session_id);
+  if (session_map_.end() == session_it) {
+    LOG4CXX_WARN(logger_, "Session not found in this connection!");
+    return false;
+  }
+  full_protocol_version = (session_it->second).full_protocol_version;
   return true;
 }
 

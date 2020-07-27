@@ -2127,7 +2127,7 @@ TEST_F(ProtocolHandlerImplTest,
 
   // A TransportUpdateEvent is also issued after Start Service ACK. We don't
   // check it in this test case.
-  EXPECT_CALL(session_observer_mock, ProtocolVersionUsed(_, _, _))
+  EXPECT_CALL(session_observer_mock, ProtocolVersionUsed(_, _, An<uint8_t&>()))
       .WillRepeatedly(Return(false));
 
   VerifySecondaryTransportParamsInStartSessionAck(
@@ -2179,7 +2179,7 @@ TEST_F(ProtocolHandlerImplTest,
   std::vector<int32_t> expected_video_service_transports;
   expected_video_service_transports.push_back(1);
 
-  EXPECT_CALL(session_observer_mock, ProtocolVersionUsed(_, _, _))
+  EXPECT_CALL(session_observer_mock, ProtocolVersionUsed(_, _, An<uint8_t&>()))
       .WillRepeatedly(Return(false));
 
   VerifySecondaryTransportParamsInStartSessionAck(
@@ -2234,7 +2234,7 @@ TEST_F(ProtocolHandlerImplTest,
   std::vector<int32_t> expected_video_service_transports;
   expected_video_service_transports.push_back(2);
 
-  EXPECT_CALL(session_observer_mock, ProtocolVersionUsed(_, _, _))
+  EXPECT_CALL(session_observer_mock, ProtocolVersionUsed(_, _, An<uint8_t&>()))
       .WillRepeatedly(Return(false));
 
   VerifySecondaryTransportParamsInStartSessionAck(
@@ -2288,7 +2288,7 @@ TEST_F(
   std::vector<int32_t> expected_video_service_transports;
   expected_video_service_transports.push_back(2);
 
-  EXPECT_CALL(session_observer_mock, ProtocolVersionUsed(_, _, _))
+  EXPECT_CALL(session_observer_mock, ProtocolVersionUsed(_, _, An<uint8_t&>()))
       .WillRepeatedly(Return(false));
 
   VerifySecondaryTransportParamsInStartSessionAck(
@@ -2345,7 +2345,7 @@ TEST_F(ProtocolHandlerImplTest,
               SetSecondaryTransportID(_, kDisabledSecondary))
       .WillOnce(Return(dummy_st));
 
-  EXPECT_CALL(session_observer_mock, ProtocolVersionUsed(_, _, _))
+  EXPECT_CALL(session_observer_mock, ProtocolVersionUsed(_, _, An<uint8_t&>()))
       .WillRepeatedly(Return(false));
 
   VerifySecondaryTransportParamsInStartSessionAck(
@@ -2389,7 +2389,7 @@ TEST_F(ProtocolHandlerImplTest,
   expected_video_service_transports.push_back(1);
   expected_video_service_transports.push_back(2);
 
-  EXPECT_CALL(session_observer_mock, ProtocolVersionUsed(_, _, _))
+  EXPECT_CALL(session_observer_mock, ProtocolVersionUsed(_, _, An<uint8_t&>()))
       .WillRepeatedly(Return(false));
 
   VerifySecondaryTransportParamsInStartSessionAck(
@@ -2430,7 +2430,7 @@ TEST_F(
               SetSecondaryTransportID(_, kDisabledSecondary))
       .WillOnce(Return(dummy_st));
 
-  EXPECT_CALL(session_observer_mock, ProtocolVersionUsed(_, _, _))
+  EXPECT_CALL(session_observer_mock, ProtocolVersionUsed(_, _, An<uint8_t&>()))
       .WillRepeatedly(Return(false));
 
   VerifySecondaryTransportParamsInStartSessionAck(
@@ -2532,7 +2532,7 @@ TEST_F(ProtocolHandlerImplTest,
   // TransportEventUpdate frame. Enable ProtocolVersionUsed() call and verify
   // that transport_manager_mock will NOT receive another SendMessageToDevice()
   // call.
-  ON_CALL(session_observer_mock, ProtocolVersionUsed(_, _, _))
+  ON_CALL(session_observer_mock, ProtocolVersionUsed(_, _, An<uint8_t&>()))
       .WillByDefault(Return(true));
 
 #ifdef ENABLE_SECURITY
@@ -2591,7 +2591,7 @@ TEST_F(ProtocolHandlerImplTest, StartSessionAck_PrimaryTransportUSBHostMode) {
 
   // A TransportUpdateEvent is also issued after Start Service ACK. We don't
   // check it in this test case.
-  EXPECT_CALL(session_observer_mock, ProtocolVersionUsed(_, _, _))
+  EXPECT_CALL(session_observer_mock, ProtocolVersionUsed(_, _, An<uint8_t&>()))
       .WillRepeatedly(Return(false));
 
   VerifySecondaryTransportParamsInStartSessionAck(
@@ -2613,7 +2613,7 @@ TEST_F(ProtocolHandlerImplTest, StartSessionAck_CloudAppAuthTokenAvailable) {
 
   // A TransportUpdateEvent is also issued after Start Service ACK. We don't
   // check it in this test case.
-  EXPECT_CALL(session_observer_mock, ProtocolVersionUsed(_, _, _))
+  EXPECT_CALL(session_observer_mock, ProtocolVersionUsed(_, _, An<uint8_t&>()))
       .WillRepeatedly(Return(false));
 
   VerifyCloudAppParamsInStartSessionAck(policy_id, auth_token);
@@ -2694,7 +2694,7 @@ TEST_F(ProtocolHandlerImplTest,
       .WillOnce(DoAll(NotifyTestAsyncWaiter(&waiter), Return(E_SUCCESS)));
   times++;
 
-  EXPECT_CALL(session_observer_mock, ProtocolVersionUsed(_, _, _))
+  EXPECT_CALL(session_observer_mock, ProtocolVersionUsed(_, _, An<uint8_t&>()))
       .WillRepeatedly(
           DoAll(SetArgReferee<2>(PROTOCOL_VERSION_5), Return(true)));
 
@@ -2815,7 +2815,7 @@ TEST_F(ProtocolHandlerImplTest,
       .WillOnce(DoAll(NotifyTestAsyncWaiter(&waiter), Return(E_SUCCESS)));
   times++;
 
-  EXPECT_CALL(session_observer_mock, ProtocolVersionUsed(_, _, _))
+  EXPECT_CALL(session_observer_mock, ProtocolVersionUsed(_, _, An<uint8_t&>()))
       .WillRepeatedly(
           DoAll(SetArgReferee<2>(PROTOCOL_VERSION_5), Return(true)));
 
@@ -2896,7 +2896,7 @@ TEST_F(ProtocolHandlerImplTest,
       .WillOnce(Return(DataAccessor<SessionConnectionMap>(
           session_connection_map_, session_connection_map_lock_ptr_)));
 
-  EXPECT_CALL(session_observer_mock, ProtocolVersionUsed(_, _, _))
+  EXPECT_CALL(session_observer_mock, ProtocolVersionUsed(_, _, An<uint8_t&>()))
       .WillRepeatedly(
           DoAll(SetArgReferee<2>(PROTOCOL_VERSION_5), Return(true)));
 
@@ -2967,7 +2967,7 @@ TEST_F(ProtocolHandlerImplTest,
       .WillOnce(Return(DataAccessor<SessionConnectionMap>(
           session_connection_map_, session_connection_map_lock_ptr_)));
 
-  EXPECT_CALL(session_observer_mock, ProtocolVersionUsed(_, _, _))
+  EXPECT_CALL(session_observer_mock, ProtocolVersionUsed(_, _, An<uint8_t&>()))
       .WillRepeatedly(
           DoAll(SetArgReferee<2>(PROTOCOL_VERSION_5), Return(true)));
 
@@ -3017,7 +3017,7 @@ TEST_F(ProtocolHandlerImplTest, RegisterSecondaryTransport_SUCCESS) {
   transport_manager::ConnectionUID primary_connection_id = 123;
 
   EXPECT_CALL(session_observer_mock,
-              ProtocolVersionUsed(primary_connection_id, _, _))
+              ProtocolVersionUsed(primary_connection_id, _, An<uint8_t&>()))
       .WillRepeatedly(
           DoAll(SetArgReferee<2>(PROTOCOL_VERSION_5), Return(true)));
 
@@ -3052,7 +3052,7 @@ TEST_F(ProtocolHandlerImplTest, RegisterSecondaryTransport_FAILURE) {
   transport_manager::ConnectionUID primary_connection_id = 123;
 
   EXPECT_CALL(session_observer_mock,
-              ProtocolVersionUsed(primary_connection_id, _, _))
+              ProtocolVersionUsed(primary_connection_id, _, An<uint8_t&>()))
       .WillRepeatedly(
           DoAll(SetArgReferee<2>(PROTOCOL_VERSION_5), Return(true)));
 
@@ -3516,7 +3516,7 @@ TEST_F(ProtocolHandlerImplTest,
        SendEndServicePrivate_NoConnection_MessageNotSent) {
   // Expect check connection with ProtocolVersionUsed
   EXPECT_CALL(session_observer_mock,
-              ProtocolVersionUsed(connection_id, session_id, _))
+              ProtocolVersionUsed(connection_id, session_id, An<uint8_t&>()))
       .WillOnce(Return(false));
   // Expect not send End Service
   EXPECT_CALL(transport_manager_mock, SendMessageToDevice(_)).Times(0);
@@ -3535,7 +3535,7 @@ TEST_F(ProtocolHandlerImplTest,
 
   // Expect check connection with ProtocolVersionUsed
   EXPECT_CALL(session_observer_mock,
-              ProtocolVersionUsed(connection_id, session_id, _))
+              ProtocolVersionUsed(connection_id, session_id, An<uint8_t&>()))
       .WillOnce(Return(true));
   // Expect send End Service
   EXPECT_CALL(
@@ -3559,7 +3559,7 @@ TEST_F(ProtocolHandlerImplTest,
 
   // Expect check connection with ProtocolVersionUsed
   EXPECT_CALL(session_observer_mock,
-              ProtocolVersionUsed(connection_id, session_id, _))
+              ProtocolVersionUsed(connection_id, session_id, An<uint8_t&>()))
       .WillOnce(DoAll(SetArgReferee<2>(PROTOCOL_VERSION_1), Return(true)));
   // Expect send End Service
   EXPECT_CALL(transport_manager_mock,
@@ -3580,7 +3580,7 @@ TEST_F(ProtocolHandlerImplTest,
 TEST_F(ProtocolHandlerImplTest, SendHeartBeat_NoConnection_NotSent) {
   // Expect check connection with ProtocolVersionUsed
   EXPECT_CALL(session_observer_mock,
-              ProtocolVersionUsed(connection_id, session_id, _))
+              ProtocolVersionUsed(connection_id, session_id, An<uint8_t&>()))
       .WillOnce(Return(false));
   // Expect not send HeartBeat
   EXPECT_CALL(transport_manager_mock, SendMessageToDevice(_)).Times(0);
@@ -3598,7 +3598,7 @@ TEST_F(ProtocolHandlerImplTest, SendHeartBeat_Successful) {
 
   // Expect check connection with ProtocolVersionUsed
   EXPECT_CALL(session_observer_mock,
-              ProtocolVersionUsed(connection_id, session_id, _))
+              ProtocolVersionUsed(connection_id, session_id, An<uint8_t&>()))
       .WillOnce(DoAll(SetArgReferee<2>(PROTOCOL_VERSION_3), Return(true)));
   // Expect send HeartBeat
   EXPECT_CALL(
@@ -3623,7 +3623,8 @@ TEST_F(ProtocolHandlerImplTest, SendHeartBeatAck_Successful) {
 
   // Expect double check connection and protocol version with
   // ProtocolVersionUsed
-  EXPECT_CALL(session_observer_mock, ProtocolVersionUsed(connection_id, _, _))
+  EXPECT_CALL(session_observer_mock,
+              ProtocolVersionUsed(connection_id, _, An<uint8_t&>()))
       .WillRepeatedly(
           DoAll(SetArgReferee<2>(PROTOCOL_VERSION_3), Return(true)));
   // Expect send HeartBeatAck
@@ -3652,7 +3653,8 @@ TEST_F(ProtocolHandlerImplTest,
 
   // Expect two checks of connection and protocol version with
   // ProtocolVersionUsed
-  EXPECT_CALL(session_observer_mock, ProtocolVersionUsed(connection_id, _, _))
+  EXPECT_CALL(session_observer_mock,
+              ProtocolVersionUsed(connection_id, _, An<uint8_t&>()))
       .Times(2)
       .WillRepeatedly(
           DoAll(SetArgReferee<2>(PROTOCOL_VERSION_1), Return(true)));
@@ -3829,7 +3831,8 @@ TEST_F(ProtocolHandlerImplTest, SendServiceDataAck_PreVersion5) {
   EXPECT_CALL(session_observer_mock, PairFromKey(connection_key, _, _))
       .WillOnce(
           DoAll(SetArgPointee<1>(connection_id), SetArgPointee<2>(session_id)));
-  EXPECT_CALL(session_observer_mock, ProtocolVersionUsed(connection_id, _, _))
+  EXPECT_CALL(session_observer_mock,
+              ProtocolVersionUsed(connection_id, _, An<uint8_t&>()))
       .WillRepeatedly(
           DoAll(SetArgReferee<2>(PROTOCOL_VERSION_4), Return(true)));
 
@@ -3855,7 +3858,8 @@ TEST_F(ProtocolHandlerImplTest, SendServiceDataAck_AfterVersion5) {
   EXPECT_CALL(session_observer_mock, PairFromKey(connection_key, _, _))
       .WillOnce(
           DoAll(SetArgPointee<1>(connection_id), SetArgPointee<2>(session_id)));
-  EXPECT_CALL(session_observer_mock, ProtocolVersionUsed(connection_id, _, _))
+  EXPECT_CALL(session_observer_mock,
+              ProtocolVersionUsed(connection_id, _, An<uint8_t&>()))
       .WillRepeatedly(
           DoAll(SetArgReferee<2>(PROTOCOL_VERSION_5), Return(true)));
 

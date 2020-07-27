@@ -37,6 +37,8 @@
 #include <string>
 #include "transport_manager/transport_manager.h"
 #include "utils/macro.h"
+#include "utils/semantic_version.h"
+
 #ifdef ENABLE_SECURITY
 #include "security_manager/ssl_context.h"
 #endif  // ENABLE_SECURITY
@@ -266,6 +268,18 @@ class SessionObserver {
                                    uint8_t session_id,
                                    uint8_t& protocol_version) const = 0;
 
+  /**
+   * @brief returns protocol version which application supports
+   * @param connection_id id of connection
+   * @param session_id id of session
+   * @param full_protocol_version where to write the full protocol version
+   * output
+   * @return TRUE if session and connection exist otherwise returns FALSE
+   */
+  virtual bool ProtocolVersionUsed(
+      uint32_t connection_id,
+      uint8_t session_id,
+      utils::SemanticVersion& full_protocol_version) const = 0;
   /**
    * @brief Check if session contains service with specified service type
    * @param connection_key unique id of session to check

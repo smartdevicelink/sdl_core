@@ -96,6 +96,9 @@ class MockConnectionHandler : public connection_handler::ConnectionHandler {
                void(uint32_t connection_key, uint8_t session_id));
   MOCK_METHOD2(BindProtocolVersionWithSession,
                void(uint32_t connection_key, uint8_t protocol_version));
+  MOCK_METHOD2(BindProtocolVersionWithSession,
+               void(uint32_t connection_key,
+                    const utils::SemanticVersion& full_protocol_version));
   MOCK_CONST_METHOD4(GetDataOnSessionKey,
                      int32_t(uint32_t key,
                              uint32_t* app_id,
