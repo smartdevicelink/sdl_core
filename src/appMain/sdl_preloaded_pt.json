@@ -3923,8 +3923,62 @@
                     "params": [
                         {
                             "name": "location",
+                            "params": [
+                                {
+                                    "name": "col",
+                                    "key": "OEM_REF_WND_LOC_COL",
+                                    "type": "Integer",
+                                    "mandatory": true,
+                                    "minvalue": -1,
+                                    "maxvalue": 100
+                                },
+                                {
+                                    "name": "row",
+                                    "key": "OEM_REF_WND_LOC_ROW",
+                                    "type": "Integer",
+                                    "mandatory": true,
+                                    "minvalue": -1,
+                                    "maxvalue": 100
+                                },
+                                {
+                                    "name": "level",
+                                    "key": "OEM_REF_WND_LOC_LVL",
+                                    "type": "Integer",
+                                    "mandatory": false,
+                                    "defvalue" : 0,
+                                    "minvalue": -1,
+                                    "maxvalue": 100
+                                },
+                                {
+                                    "name": "colspan",
+                                    "key": "OEM_REF_WND_LOC_COLSPN",
+                                    "type": "Integer",
+                                    "mandatory": false,
+                                    "defvalue" : 1,
+                                    "minvalue": 1,
+                                    "maxvalue": 100
+                                },
+                                {
+                                    "name": "rowspan",
+                                    "key": "OEM_REF_WND_LOC_ROWSPN",
+                                    "type": "Integer",
+                                    "mandatory": false,
+                                    "defvalue" : 1,
+                                    "minvalue": 1,
+                                    "maxvalue": 100
+                                },
+                                {
+                                    "name": "levelspan",
+                                    "key": "OEM_REF_WND_LOC_LVLSPN",
+                                    "type": "Integer",
+                                    "mandatory": false,
+                                    "defvalue" : 1,
+                                    "minvalue": 1,
+                                    "maxvalue": 100
+                                }
+                            ],
                             "key": "OEM_REF_WND_LOC",
-                            "type": "Grid",
+                            "type": "Struct",
                             "mandatory": true
                         },
                         {
