@@ -370,29 +370,6 @@ std::vector<ResumptionRequest> GetAllFailedRequests(
   failed_requests.insert(
       failed_requests.end(), missed_requests.begin(), missed_requests.end());
   return failed_requests;
-
-void ResumptionDataProcessor::HandleOnTimeOut(
-    const uint32_t corr_id, const hmi_apis::FunctionID::eType function_id) {
-  LOG4CXX_AUTO_TRACE(logger_);
-  LOG4CXX_DEBUG(logger_,
-                "Handling timeout with corr id: "
-                    << corr_id << " and function_id: " << function_id);
-
-  auto error_response = MessageHelper::CreateNegativeResponseFromHmi(
-      function_id,
-      corr_id,
-      hmi_apis::Common_Result::GENERIC_ERROR,
-      std::string());
-  if (error_response) {
-    ProcessResponseFromHMI(*error_response, function_id, corr_id);
-  }
-}
-
-void ResumptionDataProcessor::on_event(const event_engine::Event& event) {
-  LOG4CXX_AUTO_TRACE(logger_);
-  LOG4CXX_DEBUG(logger_, "Handling response message from HMI");
-  ProcessResponseFromHMI(
-      event.smart_object(), event.id(), event.smart_object_correlation_id());
 }
 
 void ResumptionDataProcessor::RevertRestoredData(
@@ -1069,8 +1046,8 @@ void ResumptionDataProcessor::CheckCreateWindowResponse(
   const auto window_type = static_cast<mobile_apis::WindowType::eType>(
       msg_params[strings::window_type].asInt());
 
-  // State should be initialized with INVALID_ENUM value to let state controller
-  // trigger OnHmiStatus notifiation sending
+  // State should be initialized with INVALID_ENUM value to let state
+  // controller trigger OnHmiStatus notifiation sending
   auto initial_state = application_manager_.CreateRegularState(
       application,
       window_type,

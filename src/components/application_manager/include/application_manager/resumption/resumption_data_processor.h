@@ -277,12 +277,6 @@ class ResumptionDataProcessor : public app_mngr::event_engine::EventObserver {
   void DeleteWindowsSubscriptions(app_mngr::ApplicationSharedPtr application);
 
   /**
-   * @brief Deletting subscription for CreateWindow have been resumed
-   * @param shared ptr to application
-   */
-  void DeleteWindowsSubscriptions(app_mngr::ApplicationSharedPtr application);
-
-  /**
    * @brief Get button subscriptions that need to be resumed.
    * Since some subscriptions can be set by default during
    * app registration, this function is needed to discard subscriptions
