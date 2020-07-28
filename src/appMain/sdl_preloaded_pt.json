@@ -3408,7 +3408,7 @@
                     "key": "OEM_REF_PRNDL",
                     "type": "PRNDL",
                     "mandatory": false,
-                    "since": "1.0",
+                    "since": "2.0",
                     "until": "7.0"
                 },
                 {
