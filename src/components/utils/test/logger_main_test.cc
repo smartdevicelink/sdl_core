@@ -30,39 +30,35 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "utils/logger2.h"
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
+#include "utils/logger2.h"
 
 #include "utils/logger/log4cxxlogger.h"
-#include "utils/logger/logger_implementation.h"
-#include "utils/logger/std_logger.h"
+#include "utils/logger/logger_impl.h"
 
 namespace test {
 namespace components {
 namespace utils_test {
 
-//using namespace ::logger;
+// using namespace ::logger;
 using ::testing::_;
 
 class LoggerMainTest : public testing::Test {
  public:
-
 };
 
 CREATE_LOGGERPTR("main test")
 
 TEST(LoggerMainTest, Try_log) {
-  Log4CXXLogger logger("log4cxx.properties");
-  STDLogger std_logger;
+  logger::Log4CXXLogger logger("log4cxx.properties");
 
-  Logger<Log4CXXLogger::LocationInfo, Log4CXXLogger>::instance().Init(
+  logger::Logger<logger::Log4CXXLogger>::instance().Init(
       &logger);  // move logger_ to Logger instance
 
-
-
-  LOG_WITH_LEVEL2(LogLevel::DEBUG_LEVEL, "Hello");
-  LOG_WITH_LEVEL2(LogLevel::ERROR_LEVEL, "Hello");
+  LOG_WITH_LEVEL2(logger::LogLevel::DEBUG_LEVEL, "Hello");
+  LOG_WITH_LEVEL2(logger::LogLevel::ERROR_LEVEL, "Hello");
+  logger::Logger<logger::Log4CXXLogger>::instance().DeInit();
 }
 
 }  // namespace utils_test

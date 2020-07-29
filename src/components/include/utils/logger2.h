@@ -3,29 +3,30 @@
 #include <string>
 #include "utils/ilogger.h"
 
-// START Redefince for each paticular logger implementation
+namespace logger {
 class Log4CXXLogger;
-typedef Log4CXXLogger ExternalLogger;
-typedef log4cxx::spi::LocationInfo LocationInfo;
-#define LOCATTION_INFO LOG4CXX_LOCATION
+}
 
-typedef LogMessage<LocationInfo> LogMessageImpl;
+typedef logger::Log4CXXLogger ExternalLogger;
+
+#define LOCATTION_INFO LOG4CXX_LOCATION
 
 #define CREATE_LOGGERPTR(logger_name)      \
   namespace {                              \
   static std::string logger_(logger_name); \
   }
 
-#define LOG_WITH_LEVEL2(logLevel, logEvent)                             \
-  do {                                                                 \
-    auto location = LOCATTION_INFO;                                    \
-    LogMessageImpl message{logger_,                                    \
-                           logLevel,                                   \
-                           logEvent,                                   \
-                           std::chrono::high_resolution_clock::now(),  \
-                           location,                                   \
-                           std::this_thread::get_id()};                \
-    Logger<LocationInfo, ExternalLogger>::instance().PushLog(message); \
+#define LOG_WITH_LEVEL2(logLevel, logEvent)                               \
+  do {                                                                    \
+    auto location = LOCATTION_INFO;                                       \
+    logger::SDLLogMessage message{                                        \
+        logger_,                                                          \
+        logLevel,                                                         \
+        logEvent,                                                         \
+        std::chrono::high_resolution_clock::now(),                        \
+        logger::SDLLocationInfo{__FILE__, __PRETTY_FUNCTION__, __LINE__}, \
+        std::this_thread::get_id()};                                      \
+    logger::Logger<ExternalLogger>::instance().PushLog(message);          \
   } while (false)
 
 #undef LOG4CXX_TRACE
