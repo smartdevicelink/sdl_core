@@ -449,6 +449,10 @@ void RequestController::TimeoutThread() {
 
     probably_expired->request()->onTimeOut();
     if (RequestInfo::HmiConnectionKey == probably_expired->app_id()) {
+      const uint32_t function_id = probably_expired->request()->function_id();
+      event_dispatcher_.remove_observer(
+          static_cast<hmi_apis::FunctionID::eType>(function_id),
+          expired_request_id);
       LOG4CXX_DEBUG(logger_,
                     "Erase HMI request: " << probably_expired->requestId());
       waiting_for_response_.RemoveRequest(probably_expired);
