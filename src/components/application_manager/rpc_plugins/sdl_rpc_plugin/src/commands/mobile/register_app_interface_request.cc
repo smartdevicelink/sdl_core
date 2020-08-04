@@ -769,7 +769,6 @@ void RegisterAppInterfaceRequest::Run() {
   if (is_resumption_required) {
     application_manager_.updateRequestTimeout(
         connection_key(), correlation_id(), 0);
-    sleep(1);
 
     const auto& msg_params = (*message_)[strings::msg_params];
     const auto& hash_id = msg_params[strings::hash_id].asString();
