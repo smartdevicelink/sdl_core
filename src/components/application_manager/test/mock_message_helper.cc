@@ -589,18 +589,18 @@ std::string MessageHelper::GetDeviceMacAddressForHandle(
 
 smart_objects::SmartObjectSPtr MessageHelper::CreateDeleteUICommandRequest(
     smart_objects::SmartObject* cmd,
-    ApplicationSharedPtr application,
-    ApplicationManager& app_mngr) {
+    const uint32_t app_id,
+    const uint32_t corr_id) {
   return MockMessageHelper::message_helper_mock()->CreateDeleteUICommandRequest(
-      cmd, application, app_mngr);
+      cmd, app_id, corr_id);
 }
 
 smart_objects::SmartObjectSPtr MessageHelper::CreateDeleteVRCommandRequest(
     smart_objects::SmartObject* cmd,
     ApplicationSharedPtr application,
-    ApplicationManager& app_mngr) {
+    const uint32_t corr_id) {
   return MockMessageHelper::message_helper_mock()->CreateDeleteVRCommandRequest(
-      cmd, application, app_mngr);
+      cmd, application, corr_id);
 }
 
 void MessageHelper::SendDeleteSubmenuRequest(smart_objects::SmartObject* cmd,
@@ -709,5 +709,23 @@ smart_objects::SmartObjectSPtr MessageHelper::CreateOnServiceUpdateNotification(
   return MockMessageHelper::message_helper_mock()
       ->CreateOnServiceUpdateNotification(
           service_type, service_event, service_update_reason, app_id);
+}
+
+smart_objects::SmartObjectSPtr MessageHelper::CreateUIDeleteWindowRequestToHMI(
+    ApplicationSharedPtr application,
+    ApplicationManager& app_mngr,
+    const WindowID window_id) {
+  return MockMessageHelper::message_helper_mock()
+      ->CreateUIDeleteWindowRequestToHMI(application, app_mngr, window_id);
+}
+
+smart_objects::SmartObjectSPtr MessageHelper::CreateNegativeResponseFromHmi(
+    const int32_t function_id,
+    const uint32_t correlation_id,
+    const int32_t result_code,
+    const std::string& info) {
+  return MockMessageHelper::message_helper_mock()
+      ->CreateNegativeResponseFromHmi(
+          function_id, correlation_id, result_code, info);
 }
 }  // namespace application_manager

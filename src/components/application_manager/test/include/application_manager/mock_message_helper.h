@@ -346,13 +346,13 @@ class MockMessageHelper {
                std::string(const transport_manager::DeviceHandle device_handle,
                            const ApplicationManager& app_mngr));
   MOCK_METHOD3(CreateDeleteUICommandRequest,
-               smart_objects::SmartObject(smart_objects::SmartObject* cmd,
-                                          ApplicationSharedPtr application,
-                                          ApplicationManager& app_mngr));
+               smart_objects::SmartObjectSPtr(smart_objects::SmartObject* cmd,
+                                              const uint32_t app_id,
+                                              const uint32_t corr_id));
   MOCK_METHOD3(CreateDeleteVRCommandRequest,
-               smart_objects::SmartObject(smart_objects::SmartObject* cmd,
-                                          ApplicationSharedPtr application,
-                                          ApplicationManager& app_mngr));
+               smart_objects::SmartObjectSPtr(smart_objects::SmartObject* cmd,
+                                              ApplicationSharedPtr application,
+                                              const uint32_t corr_id));
   MOCK_METHOD3(SendDeleteSubmenuRequest,
                void(smart_objects::SmartObject* cmd,
                     ApplicationSharedPtr application,
@@ -390,6 +390,16 @@ class MockMessageHelper {
                    const hmi_apis::Common_ServiceStatusUpdateReason::eType
                        service_update_reason,
                    const uint32_t app_id));
+  MOCK_METHOD4(CreateNegativeResponseFromHmi,
+               smart_objects::SmartObjectSPtr(const int32_t function_id,
+                                              const uint32_t correlation_id,
+                                              const int32_t result_code,
+                                              const std::string& info));
+  MOCK_METHOD3(CreateUIDeleteWindowRequestToHMI,
+               smart_objects::SmartObjectSPtr(
+                   application_manager::ApplicationSharedPtr application,
+                   application_manager::ApplicationManager& app_mngr,
+                   const application_manager::WindowID window_id));
 
   static MockMessageHelper* message_helper_mock();
 };

@@ -963,7 +963,9 @@ class MessageHelper {
    * @return SmartObjectSPtr message to HMI
    */
   static smart_objects::SmartObjectSPtr CreateDeleteUICommandRequest(
-      smart_objects::SmartObject* cmd, uint32_t app_id, const uint32_t corr_id);
+      smart_objects::SmartObject* cmd,
+      const uint32_t app_id,
+      const uint32_t corr_id);
 
   /**
    * @brief CreateDeleteVRCommandRequest creates request to HMI to remove VR

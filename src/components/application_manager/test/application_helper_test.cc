@@ -243,9 +243,9 @@ TEST_F(ApplicationHelperTest, RecallApplicationData_ExpectHMICleanupRequests) {
   app_impl_->AddChoiceSet(choice_set_id, cmd[strings::msg_params]);
   app_impl_->SubscribeToButton(mobile_apis::ButtonName::AC);
 
-  EXPECT_CALL(*mock_message_helper_, SendUnsubscribedWayPoints(_));
+  EXPECT_CALL(*mock_message_helper_, CreateUnsubscribeWayPointsRequest(_));
 
-  EXPECT_CALL(*mock_message_helper_, CreateDeleteCommandRequests(_, _, _));
+  EXPECT_CALL(*mock_message_helper_, CreateDeleteVRCommandRequest(_, _, _));
 
   EXPECT_CALL(*mock_message_helper_, SendDeleteSubmenuRequest(_, _, _));
 
