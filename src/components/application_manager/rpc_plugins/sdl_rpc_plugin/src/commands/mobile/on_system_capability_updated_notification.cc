@@ -157,13 +157,6 @@ void OnSystemCapabilityUpdatedNotification::Run() {
       [&system_capability_type,
        &initial_connection_key](const ApplicationSharedPtr app) {
         DCHECK_OR_RETURN(app, false);
-        auto& ext = SystemCapabilityAppExtension::ExtractExtension(*app);
-        if (!ext.IsSubscribedTo(system_capability_type)) {
-          LOG4CXX_DEBUG(logger_,
-                        "App " << app->app_id()
-                               << " is not subscribed to this capability type");
-          return false;
-        }
 
         if (mobile_apis::SystemCapabilityType::DISPLAYS ==
                 system_capability_type &&
@@ -172,6 +165,27 @@ void OnSystemCapabilityUpdatedNotification::Run() {
                         "Display capabilities notification for app "
                             << initial_connection_key << " only");
           return app->app_id() == initial_connection_key;
+        }
+
+        auto ext_ptr = app->QueryInterface(
+            SystemCapabilityAppExtension::SystemCapabilityAppExtensionUID);
+
+        if (!ext_ptr) {
+          LOG4CXX_DEBUG(logger_,
+                        "App "
+                            << app->app_id()
+                            << " does not have SystemCapabilityAppExtension");
+          return false;
+        }
+
+        auto ext =
+            std::static_pointer_cast<SystemCapabilityAppExtension>(ext_ptr);
+
+        if (!ext->IsSubscribedTo(system_capability_type)) {
+          LOG4CXX_DEBUG(logger_,
+                        "App " << app->app_id()
+                               << " is not subscribed to this capability type");
+          return false;
         }
 
         LOG4CXX_DEBUG(logger_,
