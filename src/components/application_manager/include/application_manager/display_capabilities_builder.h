@@ -75,7 +75,7 @@ class DisplayCapabilitiesBuilder {
    * window, otherwise returns false
    */
   bool IsWaitingForWindowCapabilities(
-      const smart_objects::SmartObject& incoming_display_capabilities);
+      const smart_objects::SmartObject& incoming_display_capabilities) const;
 
   /**
    * @brief ResetDisplayCapabilities resets stored notification
@@ -94,6 +94,15 @@ class DisplayCapabilitiesBuilder {
    */
   const smart_objects::SmartObjectSPtr display_capabilities() const;
 
+  /**
+   * @brief IsWindowResumptionNeeded checks that is there a need for
+   * resumption of windows (except main window)
+   * @return true if data about windows to be resumed was saved in window_info,
+   * otherwise returns false
+   */
+
+  bool IsWindowResumptionNeeded() const;
+
  private:
   /**
    * @brief InvokeCallbackFunction invokes callback function if all required
@@ -106,7 +115,8 @@ class DisplayCapabilitiesBuilder {
   WindowIDsToResume window_ids_to_resume_;
   Application& owner_;
   ResumeCallback resume_callback_;
-  sync_primitives::Lock display_capabilities_lock_;
+  mutable sync_primitives::Lock display_capabilities_lock_;
+  bool is_widget_windows_resumption_;
 };
 }  // namespace application_manager
 #endif
