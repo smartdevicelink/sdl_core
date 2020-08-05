@@ -55,6 +55,8 @@ class SDLPendingResumptionHandler
   void ClearPendingResumptionRequests() OVERRIDE;
 
  private:
+  void RaiseFakeSuccfullResponse(smart_objects::SmartObject response,
+                                 int32_t corr_id);
   smart_objects::SmartObjectSPtr CreateSubscriptionRequest();
   void ClearPendingRequestsMap();
 
@@ -66,7 +68,7 @@ class SDLPendingResumptionHandler
   };
 
   typedef std::pair<SDLAppExtension, resumption::Subscriber> FreezedResumption;
-  std::queue<ResumptionAwaitingHandling> freezed_resumptions_;
+  std::vector<ResumptionAwaitingHandling> freezed_resumptions_;
   std::map<uint32_t, smart_objects::SmartObject> pending_requests_;
   std::queue<uint32_t> app_ids_;
 };

@@ -116,11 +116,22 @@ void SDLRPCPlugin::ProcessResumptionSubscription(
     SDLAppExtension& ext,
     resumption::Subscriber subscriber) {
   LOG4CXX_AUTO_TRACE(logger_);
-  application_manager::ApplicationSharedPtr application =
-      application_manager_->application(app.app_id());
+  LOG4CXX_DEBUG(
+      logger_,
+      "AKutsan app wants to subscribe for way points " << app.app_id());
   std::set<uint32_t> apps =
       application_manager_->GetAppsSubscribedForWayPoints();
-  application_manager_->SubscribeAppForWayPoints(application);
+  LOG4CXX_DEBUG(
+      logger_,
+      "AKutsan amount of apps already sybscribed for WP " << apps.size());
+  if (apps.size() > 0) {
+    LOG4CXX_DEBUG(logger_,
+                  "Subscription to waypoint already exist, no need to send "
+                  "request to HMI");
+    application_manager_->SubscribeAppForWayPoints(app.app_id());
+    return;
+  }
+
   pending_resumption_handler_->HandleResumptionSubscriptionRequest(
       ext, subscriber, app);
 }
