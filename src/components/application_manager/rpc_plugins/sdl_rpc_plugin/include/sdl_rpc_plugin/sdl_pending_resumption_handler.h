@@ -28,11 +28,11 @@
 #ifndef SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_PLUGIN_INCLUDE_SDL_PLUGIN_SDL_PENDING_RESUMPTION_HANDLER_H
 #define SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_PLUGIN_INCLUDE_SDL_PLUGIN_SDL_PENDING_RESUMPTION_HANDLER_H
 
+#include <queue>
 #include "application_manager/event_engine/event_observer.h"
 #include "application_manager/resumption/extension_pending_resumption_handler.h"
+#include "application_manager/resumption/resumption_data_processor.h"
 #include "sdl_rpc_plugin/sdl_app_extension.h"
-
-#include <queue>
 
 namespace sdl_rpc_plugin {
 
