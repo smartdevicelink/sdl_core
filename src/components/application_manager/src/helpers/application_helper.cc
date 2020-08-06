@@ -18,9 +18,10 @@ void DeleteWayPoints(ApplicationSharedPtr app,
 }
 
 void DeleteCommands(ApplicationSharedPtr app, ApplicationManager& app_manager) {
-  CommandsMap cmap = app->commands_map().GetData();
+  auto accessor = app->commands_map();
+  const auto& commands_map = accessor.GetData();
 
-  for (auto cmd : cmap) {
+  for (const auto& cmd : commands_map) {
     auto delete_UI_msg = MessageHelper::CreateDeleteUICommandRequest(
         cmd.second, app->app_id(), app_manager.GetNextHMICorrelationID());
     app_manager.GetRPCService().ManageHMICommand(delete_UI_msg);
@@ -35,9 +36,10 @@ void DeleteCommands(ApplicationSharedPtr app, ApplicationManager& app_manager) {
 }
 
 void DeleteSubmenus(ApplicationSharedPtr app, ApplicationManager& app_manager) {
-  SubMenuMap smap = app->sub_menu_map().GetData();
+  auto accessor = app->sub_menu_map();
+  const auto& sub_menu_map = accessor.GetData();
 
-  for (auto smenu : smap) {
+  for (const auto& smenu : sub_menu_map) {
     MessageHelper::SendDeleteSubmenuRequest(smenu.second, app, app_manager);
     app->RemoveSubMenu(smenu.first);
   }
@@ -45,9 +47,10 @@ void DeleteSubmenus(ApplicationSharedPtr app, ApplicationManager& app_manager) {
 
 void DeleteChoiceSets(ApplicationSharedPtr app,
                       ApplicationManager& app_manager) {
-  ChoiceSetMap csmap = app->choice_set_map().GetData();
+  auto accessor = app->choice_set_map();
+  const auto& choices = accessor.GetData();
 
-  for (auto choice : csmap) {
+  for (const auto& choice : choices) {
     MessageHelper::SendDeleteChoiceSetRequest(choice.second, app, app_manager);
     app->RemoveChoiceSet(choice.first);
   }

@@ -544,9 +544,10 @@ void ResumptionDataProcessor::DeleteSubmenues(
   auto failed_requests = GetAllFailedRequests(
       application->app_id(), resumption_status_, resumption_status_lock_);
 
-  auto smap = application->sub_menu_map().GetData();
+  auto accessor = application->sub_menu_map();
+  const auto& sub_menu_map = accessor.GetData();
 
-  for (auto smenu : smap) {
+  for (const auto& smenu : sub_menu_map) {
     auto failed_submenu_request =
         FindResumptionSubmenuRequest(smenu.first, failed_requests);
     if (!failed_submenu_request) {
@@ -621,14 +622,15 @@ void ResumptionDataProcessor::DeleteCommands(ApplicationSharedPtr application) {
   auto failed_requests = GetAllFailedRequests(
       application->app_id(), resumption_status_, resumption_status_lock_);
 
-  app_mngr::CommandsMap cmap = application->commands_map().GetData();
-
   auto is_vr_command_failed = [](const ResumptionRequest& failed_command) {
     return failed_command.message[strings::msg_params].keyExists(
         strings::vr_commands);
   };
 
-  for (auto cmd : cmap) {
+  auto accessor = application->commands_map();
+  const auto& commands_map = accessor.GetData();
+
+  for (const auto& cmd : commands_map) {
     auto failed_command =
         FindCommandResumptionRequest(cmd.first, failed_requests);
 
@@ -707,8 +709,9 @@ void ResumptionDataProcessor::DeleteChoicesets(
   auto failed_requests = GetAllFailedRequests(
       application->app_id(), resumption_status_, resumption_status_lock_);
 
-  auto choices = application->choice_set_map().GetData();
-  for (auto& choice : choices) {
+  auto accessor = application->choice_set_map();
+  const auto& choices = accessor.GetData();
+  for (const auto& choice : choices) {
     auto failed_choice_set =
         FindResumptionChoiceSetRequest(choice.first, failed_requests);
     if (!failed_choice_set) {

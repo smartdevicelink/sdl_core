@@ -329,14 +329,16 @@ class DynamicApplicationDataImpl : public virtual Application {
   CommandsMap commands_;
   mutable std::shared_ptr<sync_primitives::RecursiveLock> commands_lock_ptr_;
   SubMenuMap sub_menu_;
-  mutable std::shared_ptr<sync_primitives::Lock> sub_menu_lock_ptr_;
+  mutable std::shared_ptr<sync_primitives::RecursiveLock> sub_menu_lock_ptr_;
   ChoiceSetMap choice_set_map_;
-  mutable std::shared_ptr<sync_primitives::Lock> choice_set_map_lock_ptr_;
+  mutable std::shared_ptr<sync_primitives::RecursiveLock>
+      choice_set_map_lock_ptr_;
   PerformChoiceSetMap performinteraction_choice_set_map_;
   mutable std::shared_ptr<sync_primitives::RecursiveLock>
       performinteraction_choice_set_lock_ptr_;
   WindowParamsMap window_params_map_;
-  mutable std::shared_ptr<sync_primitives::Lock> window_params_map_lock_ptr_;
+  mutable std::shared_ptr<sync_primitives::RecursiveLock>
+      window_params_map_lock_ptr_;
   uint32_t is_perform_interaction_active_;
   bool is_reset_global_properties_active_;
   int32_t perform_interaction_mode_;
