@@ -3334,13 +3334,17 @@
                     "type": "Float",
                     "mandatory": false,
                     "minvalue": -6,
-                    "maxvalue": 106
+                    "maxvalue": 106,
+                    "deprecated": true,
+                    "since": "7.0"
                 },
                 {
                     "name": "fuelLevel_State",
                     "key": "OEM_REF_FUEL_LEV_ST",
                     "type": "ComponentVolumeStatus",
-                    "mandatory": false
+                    "mandatory": false,
+                    "deprecated": true,
+                    "since": "7.0"
                 },
                 {
                     "name": "instantFuelConsumption",
@@ -3366,6 +3370,38 @@
                             "mandatory": false,
                             "minvalue": 0,
                             "maxvalue": 10000
+                        },
+                        {
+                            "name": "level",
+                            "key": "OEM_REF_FUEL_RAN_LVL",
+                            "type": "Float",
+                            "minvalue": -6,
+                            "maxvalue": 1000000,
+                            "mandatory": false,
+                            "since": "7.0"
+                        },
+                        {
+                            "name": "levelState",
+                            "key": "OEM_REF_FUEL_RAN_LVL_STATE",
+                            "type": "ComponentVolumeStatus",
+                            "mandatory": false,
+                            "since": "7.0"
+                        },
+                        {
+                            "name": "capacity",
+                            "key": "OEM_REF_FUEL_RAN_CAP",
+                            "type": "Float",
+                            "minvalue": 0,
+                            "maxvalue": 1000000,
+                            "mandatory": false,
+                            "since": "7.0"
+                        },
+                        {
+                            "name": "capacityUnit",
+                            "key": "OEM_REF_FUEL_RAN_CAP_UNIT",
+                            "type": "CapacityUnit",
+                            "mandatory": false,
+                            "since": "7.0"
                         }
                     ],
                     "key": "OEM_REF_FUEL_RAN",
