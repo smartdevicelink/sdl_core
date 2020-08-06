@@ -189,6 +189,8 @@ std::pair<std::string, mobile_apis::VehicleDataType::eType>
                        mobile_apis::VehicleDataType::VEHICLEDATA_TURNSIGNAL),
         std::make_pair(strings::vin,
                        mobile_apis::VehicleDataType::VEHICLEDATA_VIN),
+        std::make_pair(strings::gearStatus,
+                       mobile_apis::VehicleDataType::VEHICLEDATA_GEARSTATUS),
         std::make_pair(strings::prndl,
                        mobile_apis::VehicleDataType::VEHICLEDATA_PRNDL),
         std::make_pair(strings::tire_pressure,

@@ -506,7 +506,8 @@
                             "myKey",
                             "prndl",
                             "rpm",
-                            "steeringWheelAngle"
+                            "steeringWheelAngle",
+                            "gearStatus"
                         ]
                     },
                     "OnVehicleData": {
@@ -523,7 +524,8 @@
                             "myKey",
                             "prndl",
                             "rpm",
-                            "steeringWheelAngle"
+                            "steeringWheelAngle",
+                            "gearStatus"
                         ]
                     },
                     "SubscribeVehicleData": {
@@ -540,7 +542,8 @@
                             "myKey",
                             "prndl",
                             "rpm",
-                            "steeringWheelAngle"
+                            "steeringWheelAngle",
+                            "gearStatus"
                         ]
                     },
                     "UnsubscribeVehicleData": {
@@ -557,7 +560,8 @@
                             "myKey",
                             "prndl",
                             "rpm",
-                            "steeringWheelAngle"
+                            "steeringWheelAngle",
+                            "gearStatus"
                         ]
                     }
                 }
@@ -3443,7 +3447,36 @@
                     "name": "prndl",
                     "key": "OEM_REF_PRNDL",
                     "type": "PRNDL",
-                    "mandatory": false
+                    "mandatory": false,
+                    "since": "2.0",
+                    "until": "7.0"
+                },
+                {
+                    "name": "gearStatus",
+                    "params": [
+                        {
+                            "name": "userSelectedGear",
+                            "key": "OEM_REF_USER_GEAR",
+                            "type": "PRNDL",
+                            "mandatory": false
+                        },
+                        {
+                            "name": "actualGear",
+                            "key": "OEM_REF_ACT_GEAR",
+                            "type": "PRNDL",
+                            "mandatory": false
+                        },
+                        {
+                            "name": "transmissionType",
+                            "key": "OEM_REF_TR_TYPE",
+                            "type": "TransmissionType",
+                            "mandatory": false
+                        }
+                    ],
+                    "key": "OEM_REF_GEAR_STATUS",
+                    "type": "Struct",
+                    "mandatory": false,
+                    "since": "7.0"
                 },
                 {
                     "name": "tirePressure",

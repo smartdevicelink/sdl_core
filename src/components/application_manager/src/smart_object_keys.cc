@@ -263,6 +263,7 @@ const char* cloud_app_vehicle_id = "cloudAppVehicleID";
 const char* external_temp = "externalTemperature";
 const char* turn_signal = "turnSignal";
 const char* vin = "vin";
+const char* gearStatus = "gearStatus";
 const char* prndl = "prndl";
 const char* tire_pressure = "tirePressure";
 const char* odometer = "odometer";

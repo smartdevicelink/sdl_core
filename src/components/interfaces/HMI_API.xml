@@ -945,6 +945,7 @@
     <description>No gear</description>
   </element>
   <element name="DRIVE">
+    <description>Regular Drive mode</description>
   </element>
   <element name="SPORT">
     <description>Drive Sport mode</description>
@@ -968,9 +969,41 @@
   </element>
   <element name="EIGHTH">
   </element>
+  <element name="NINTH">
+  </element>
+  <element name="TENTH">
+  </element>
   <element name="UNKNOWN">
   </element>
   <element name="FAULT">
+  </element>
+</enum>
+
+<enum name="TransmissionType">
+  <description>Type of transmission used in the vehicle.</description>
+  <element name="MANUAL">
+    <description>Manual transmission.</description>
+  </element>
+  <element name="AUTOMATIC">
+    <description>Automatic transmission.</description>
+  </element>
+  <element name="SEMI_AUTOMATIC">
+    <description>Semi automatic transmission.</description>
+  </element>
+  <element name="DUAL_CLUTCH">
+    <description>Dual clutch transmission.</description>
+  </element>
+  <element name="CONTINUOUSLY_VARIABLE">
+    <description>Continuously variable transmission(CVT).</description>
+  </element>
+  <element name="INFINITELY_VARIABLE">
+    <description>Infinitely variable transmission.</description>
+  </element>
+  <element name="ELECTRIC_VARIABLE">
+    <description>Electric variable transmission.</description>
+  </element>
+  <element name="DIRECT_DRIVE">
+    <description>Direct drive between engine and wheels.</description>
   </element>
 </enum>
 
@@ -1157,6 +1190,7 @@
   <element name="VEHICLEDATA_FUELCONSUMPTION" />
   <element name="VEHICLEDATA_EXTERNTEMP" />
   <element name="VEHICLEDATA_VIN" />
+  <element name="VEHICLEDATA_GEARSTATUS" />
   <element name="VEHICLEDATA_PRNDL" />
   <element name="VEHICLEDATA_TIREPRESSURE" />
   <element name="VEHICLEDATA_ODOMETER" />
@@ -4188,6 +4222,18 @@
       </param>
     </struct>
 
+    <struct name="GearStatus">
+      <param name="userSelectedGear" type="Common.PRNDL" mandatory="false">
+        <description>Gear position selected by the user i.e. Park, Drive, Reverse</description>
+      </param>
+      <param name="actualGear" type="Common.PRNDL" mandatory="false">
+        <description>Actual Gear in use by the transmission</description>
+      </param>
+      <param name="transmissionType" type="Common.TransmissionType" mandatory="false">
+        <description>Tells the transmission type</description>
+      </param>
+    </struct>
+
 </interface>
 
 <interface name="Buttons" version="1.3.0" date="2017-07-18">
@@ -6037,8 +6083,11 @@
     <param name="turnSignal" type="Boolean" mandatory="false">
         <description>See TurnSignal</description>
     </param>
+    <param name="gearStatus" type="Boolean" mandatory="false">
+      <description>See GearStatus</description>
+    </param>
     <param name="prndl" type="Boolean" mandatory="false">
-      <description>See PRNDL</description>
+      <description>See PRNDL. This parameter is deprecated and it is now covered in `gearStatus`</description>
     </param>
     <param name="tirePressure" type="Boolean" mandatory="false">
       <description>See TireStatus</description>
@@ -6136,8 +6185,11 @@
     <param name="turnSignal" type="Common.VehicleDataResult" mandatory="false">
         <description>See TurnSignal</description>
     </param>
+    <param name="gearStatus" type="Common.VehicleDataResult" mandatory="false">
+      <description>See GearStatus</description>
+    </param>
     <param name="prndl" type="Common.VehicleDataResult" mandatory="false">
-      <description>See PRNDL</description>
+      <description>See PRNDL. This parameter is deprecated and it is now covered in `gearStatus`</description>
     </param>
     <param name="tirePressure" type="Common.VehicleDataResult" mandatory="false">
       <description>See TireStatus</description>
@@ -6238,8 +6290,11 @@
     <param name="turnSignal" type="Boolean" mandatory="false">
         <description>See TurnSignal</description>
     </param>
+    <param name="gearStatus" type="Boolean" mandatory="false">
+      <description>See GearStatus</description>
+    </param>
     <param name="prndl" type="Boolean" mandatory="false">
-      <description>See PRNDL</description>
+      <description>See PRNDL. This parameter is deprecated and it is now covered in `gearStatus`</description>
     </param>
     <param name="tirePressure" type="Boolean" mandatory="false">
       <description>See TireStatus</description>
@@ -6337,8 +6392,11 @@
     <param name="turnSignal" type="Common.VehicleDataResult" mandatory="false">
         <description>See TurnSignal</description>
     </param>
+    <param name="gearStatus" type="Common.VehicleDataResult" mandatory="false">
+      <description>See GearStatus</description>
+    </param>
     <param name="prndl" type="Common.VehicleDataResult" mandatory="false">
-      <description>See PRNDL</description>
+      <description>See PRNDL. This parameter is deprecated and it is now covered in `gearStatus`</description>
     </param>
     <param name="tirePressure" type="Common.VehicleDataResult" mandatory="false">
       <description>See TireStatus</description>
@@ -6440,8 +6498,11 @@
     <param name="vin" type="Boolean" mandatory="false">
       <description>Vehicle identification number</description>
     </param>
+    <param name="gearStatus" type="Boolean" mandatory="false">
+      <description>See GearStatus</description>
+    </param>
     <param name="prndl" type="Boolean" mandatory="false">
-      <description>See PRNDL</description>
+      <description>See PRNDL. This parameter is deprecated and it is now covered in `gearStatus`</description>
     </param>
     <param name="tirePressure" type="Boolean" mandatory="false">
       <description>See TireStatus</description>
@@ -6542,8 +6603,11 @@
     <param name="vin" type="String" maxlength="17" mandatory="false">
       <description>Vehicle identification number</description>
     </param>
+    <param name="gearStatus" type="Common.GearStatus" mandatory="false">
+      <description>See GearStatus</description>
+    </param>
     <param name="prndl" type="Common.PRNDL" mandatory="false">
-      <description>See PRNDL</description>
+      <description>See PRNDL. This parameter is deprecated and it is now covered in `gearStatus`</description>
     </param>
     <param name="tirePressure" type="Common.TireStatus" mandatory="false">
       <description>See TireStatus</description>
@@ -6645,8 +6709,11 @@
     <param name="vin" type="String" maxlength="17" mandatory="false">
       <description>Vehicle identification number.</description>
     </param>
+    <param name="gearStatus" type="Common.GearStatus" mandatory="false">
+      <description>See GearStatus</description>
+    </param>
     <param name="prndl" type="Common.PRNDL" mandatory="false">
-      <description>See PRNDL</description>
+      <description>See PRNDL. This parameter is deprecated and it is now covered in `gearStatus`</description>
     </param>
     <param name="tirePressure" type="Common.TireStatus" mandatory="false">
       <description>See TireStatus</description>

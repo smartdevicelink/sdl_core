@@ -296,6 +296,7 @@ extern const char* cloud_app_vehicle_id;
 extern const char* external_temp;
 extern const char* turn_signal;
 extern const char* vin;
+extern const char* gearStatus;
 extern const char* prndl;
 extern const char* tire_pressure;
 extern const char* odometer;
