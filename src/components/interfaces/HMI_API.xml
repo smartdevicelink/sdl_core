@@ -1181,6 +1181,7 @@
   <element name="VEHICLEDATA_ELECTRONICPARKBRAKESTATUS" />
   <element name="VEHICLEDATA_CLOUDAPPVEHICLEID" />
   <element name="VEHICLEDATA_OEM_CUSTOM_DATA" />
+  <element name="VEHICLEDATA_STABILITYCONTROLSSTATUS" />
 </enum>
 
 <enum name="WiperStatus">
@@ -3238,6 +3239,15 @@
   <param name="middleRow1BuckleBelted" type="Common.VehicleDataEventStatus" mandatory="false">
     <description>See VehicleDataEventStatus.</description>
   </param>
+</struct>
+
+<struct name="StabilityControlsStatus">
+	<param name="escSystem" type="Common.VehicleDataStatus" mandatory="false">
+		<description>true if vehicle stability control is ON, else false</description>
+	</param>
+	<param name="trailerSwayControl" type="Common.VehicleDataStatus" mandatory="false">
+		<description>true if vehicle trailer sway control is ON, else false</description>
+	</param>
 </struct>
 
 <struct name="BodyInformation">
@@ -6072,6 +6082,9 @@
     <param name="cloudAppVehicleID" type="Boolean" mandatory="false">
       <description>Parameter used by cloud apps to identify a head unit</description>
     </param>
+    <param name="stabilityControlsStatus" type="Boolean" mandatory="false">
+	    <description>See StabilityControlsStatus</description>
+    </param>
 
         <!-- Ford Specific Data Items -->
     <param name="eCallInfo" type="Boolean" mandatory="false">
@@ -6167,6 +6180,9 @@
     </param>
     <param name="cloudAppVehicleID" type="Common.VehicleDataResult" mandatory="false">
       <description>Parameter used by cloud apps to identify a head unit</description>
+    </param>
+    <param name="stabilityControlsStatus" type="Common.VehicleDataResult" mandatory="false">
+	    <description>See StabilityControlsStatus</description>
     </param>
 
         <!-- Ford Specific Data Items -->
@@ -6267,6 +6283,9 @@
     <param name="cloudAppVehicleID" type="Boolean" mandatory="false">
       <description>Parameter used by cloud apps to identify a head unit</description>
     </param>
+    <param name="stabilityControlsStatus" type="Boolean" mandatory="false">
+	    <description>See StabilityControlsStatus</description>
+    </param>
 
         <!-- Ford Specific Data Items -->
     <param name="eCallInfo" type="Boolean" mandatory="false">
@@ -6362,6 +6381,9 @@
     </param>
     <param name="cloudAppVehicleID" type="Common.VehicleDataResult" mandatory="false">
       <description>Parameter used by cloud apps to identify a head unit</description>
+    </param>
+    <param name="stabilityControlsStatus" type="Common.VehicleDataResult" mandatory="false">
+	    <description>See StabilityControlsStatus</description>
     </param>
 
         <!-- Ford Specific Data Items -->
@@ -6463,6 +6485,9 @@
     <param name="cloudAppVehicleID" type="Boolean" mandatory="false">
       <description>Parameter used by cloud apps to identify a head unit</description>
     </param>
+    <param name="stabilityControlsStatus" type="Boolean" mandatory="false">
+	    <description>See StabilityControlsStatus</description>
+    </param>
 
         <!-- Ford Specific Data Items -->
     <param name="eCallInfo" type="Boolean" mandatory="false">
@@ -6561,6 +6586,9 @@
     </param>
     <param name="cloudAppVehicleID" type="String" mandatory="false">
       <description>Parameter used by cloud apps to identify a head unit</description>
+    </param>
+    <param name="stabilityControlsStatus" type="Common.StabilityControlsStatus" mandatory="false">
+	    <description>See StabilityControlsStatus</description>
     </param>
 
         <!-- Ford Specific Data Items -->
@@ -6661,6 +6689,9 @@
     </param>
     <param name="engineOilLife" type="Float" minvalue="0" maxvalue="100" mandatory="false">
       <description>The estimated percentage of remaining oil life of the engine.</description>
+    </param>
+    <param name="stabilityControlsStatus" type="Common.StabilityControlsStatus" mandatory="false">
+	    <description>See StabilityControlsStatus</description>
     </param>
 
         <!-- Ford Specific Data Items -->
