@@ -85,6 +85,21 @@ const VehicleInfoSubscriptions& VehicleInfoAppExtension::Subscriptions() {
   return subscribed_data_;
 }
 
+bool VehicleInfoAppExtension::AddPendingSubscription(
+    const std::string& vehicle_data) {
+  return pending_subscriptions_.insert(vehicle_data).second;
+}
+
+bool VehicleInfoAppExtension::RemovePendingSubscriptions() {
+  pending_subscriptions_.clear();
+  return true;
+}
+
+const VehicleInfoSubscriptions&
+VehicleInfoAppExtension::PendingSubscriptions() {
+  return pending_subscriptions_;
+}
+
 void VehicleInfoAppExtension::SaveResumptionData(
     smart_objects::SmartObject& resumption_data) {
   resumption_data[strings::application_vehicle_info] =

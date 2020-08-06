@@ -58,6 +58,8 @@ class VehicleInfoAppExtension : public app_mngr::AppExtension {
    */
   VehicleInfoAppExtension(VehicleInfoPlugin& plugin,
                           app_mngr::Application& app);
+  VehicleInfoAppExtension(const VehicleInfoAppExtension&) = delete;
+  VehicleInfoAppExtension& operator=(const VehicleInfoAppExtension&) = delete;
   virtual ~VehicleInfoAppExtension();
 
   /**
@@ -95,6 +97,16 @@ class VehicleInfoAppExtension : public app_mngr::AppExtension {
    */
   const VehicleInfoSubscriptions& Subscriptions();
 
+  bool AddPendingSubscription(const std::string& vehicle_data);
+
+  bool RemovePendingSubscriptions();
+
+  const VehicleInfoSubscriptions& PendingSubscriptions();
+
+  /**
+   * @brief SaveResumptionData saves vehicle info data
+   * @param resumption_data plase to store resumption data
+   */
   void SaveResumptionData(smart_objects::SmartObject& resumption_data) OVERRIDE;
 
   void ProcessResumption(const smart_objects::SmartObject& saved_app,
@@ -120,6 +132,7 @@ class VehicleInfoAppExtension : public app_mngr::AppExtension {
 
  private:
   VehicleInfoSubscriptions subscribed_data_;
+  VehicleInfoSubscriptions pending_subscriptions_;
   VehicleInfoPlugin& plugin_;
   app_mngr::Application& app_;
 };
