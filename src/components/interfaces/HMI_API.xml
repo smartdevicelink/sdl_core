@@ -79,6 +79,12 @@
   </element>
 </enum>
 
+<enum name="CapacityUnit">
+    <element name="LITERS" />
+    <element name="KILOWATTHOURS" />
+    <element name="KILOGRAMS" />
+</enum>
+
 <enum name="PredefinedWindows">
   <element name="DEFAULT_WINDOW" value="0">
     <description>The default window is a main window pre-created on behalf of the app.</description>
@@ -856,14 +862,6 @@
     </element>
 </enum>
 
-<struct name="FuelRange">
-    <param name="type" type="Common.FuelType" mandatory="false"/>
-    <param name="range" type="Float" minvalue="0" maxvalue="10000" mandatory="false">
-        <description>
-            The estimate range in KM the vehicle can travel based on fuel level and consumption.
-        </description>
-    </param>
-</struct>
 
 <enum name="ComponentVolumeStatus">
   <description>The volume status of a vehicle component.</description>
@@ -886,6 +884,27 @@
   <description> The data is not supported.</description>
   </element>
 </enum>
+
+<struct name="FuelRange">
+    <param name="type" type="Common.FuelType" mandatory="false"/>
+    <param name="range" type="Float" minvalue="0" maxvalue="10000" mandatory="false">
+        <description>
+            The estimate range in KM the vehicle can travel based on fuel level and consumption.
+        </description>
+    </param>
+    <param name="level" type="Float" minvalue="-6" maxvalue="1000000" mandatory="false">
+       <description>The relative remaining capacity of this fuel type (percentage).</description>
+    </param>
+    <param name="levelState" type="Common.ComponentVolumeStatus" mandatory="false">
+        <description>The fuel level state</description>
+    </param>
+    <param name="capacity" type="Float" minvalue="0" maxvalue="1000000" mandatory="false">
+       <description>The absolute capacity of this fuel type.</description>
+    </param>
+    <param name="capacityUnit" type="Common.CapacityUnit" mandatory="false">
+       <description>The unit of the capacity of this fuel type such as liters for gasoline or kWh for batteries.</description>
+    </param>
+</struct>
 
 <enum name="TPMS">
   <element name="UNKNOWN">
@@ -1196,6 +1215,7 @@
   <element name="VEHICLEDATA_ELECTRONICPARKBRAKESTATUS" />
   <element name="VEHICLEDATA_CLOUDAPPVEHICLEID" />
   <element name="VEHICLEDATA_OEM_CUSTOM_DATA" />
+  <element name="VEHICLEDATA_STABILITYCONTROLSSTATUS" />
 </enum>
 
 <enum name="WiperStatus">
@@ -3255,6 +3275,15 @@
   </param>
 </struct>
 
+<struct name="StabilityControlsStatus">
+	<param name="escSystem" type="Common.VehicleDataStatus" mandatory="false">
+		<description>true if vehicle stability control is ON, else false</description>
+	</param>
+	<param name="trailerSwayControl" type="Common.VehicleDataStatus" mandatory="false">
+		<description>true if vehicle trailer sway control is ON, else false</description>
+	</param>
+</struct>
+
 <struct name="BodyInformation">
   <param name="parkBrakeActive" type="Boolean" mandatory="true">
     <description>Must be true if the park brake is active</description>
@@ -4250,10 +4279,9 @@
       </param>
       <param name="appID" type="Integer" mandatory="false">
         <description>
-                In case the ButtonName is CUSTOM_BUTTON or OK, HMI must include appID parameters to OnButtonPress notification sent to SDL.
                 If appID is not sent together with CUSTOM_BUTTON, this notification will be ignored by SDL.
                 If appID is present for OK button -> SDL transfers notification to the named app only if it is in FULL or LIMITED (ignores if app is in NONE or BACKGROUND).
-                If appID is omited for OK button -> SDL transfers notification to app in FULL
+                If appID is omitted for OK button -> SDL transfers notification to app in FULL
         </description>
       </param>
     </function>
@@ -4267,10 +4295,9 @@
         </param>
         <param name="appID" type="Integer" mandatory="false">
             <description>
-                In case the ButtonName is CUSTOM_BUTTON or OK, HMI must include appID parameters to OnButtonEvent notification sent to SDL.
                 If appID is not sent together with CUSTOM_BUTTON, this notification will be ignored by SDL.
                 If appID is present for OK button -> SDL transfers notification to the named app only if it is in FULL or LIMITED (ignores if app is in NONE or BACKGROUND).
-                If appID is omited for OK button -> SDL transfers notification to app in FULL
+                If appID is omitted for OK button -> SDL transfers notification to app in FULL
             </description>
         </param>
     </function>
@@ -6036,16 +6063,19 @@
       <description>The number of revolutions per minute of the engine</description>
     </param>
     <param name="fuelLevel" type="Boolean" mandatory="false">
-      <description>The fuel level in the tank (percentage)</description>
+      <description>The fuel level in the tank (percentage). This parameter is deprecated starting RPC Spec 7.0, please see fuelRange</description>
     </param>
     <param name="fuelLevel_State" type="Boolean" mandatory="false">
-      <description>The fuel level state</description>
+      <description>The fuel level state. This parameter is deprecated starting RPC Spec 7.0, please see fuelRange</description>
     </param>
     <param name="instantFuelConsumption" type="Boolean" mandatory="false">
       <description>The instantaneous fuel consumption in microlitres</description>
     </param>
     <param name="fuelRange" type="Boolean" mandatory="false">
-        <description>The estimate range in KM the vehicle can travel based on fuel level and consumption</description>
+      <description>
+        The fuel type, estimated range in KM, fuel level/capacity and fuel level state for the vehicle.
+        See struct FuelRange for details.
+      </description>
     </param>
     <param name="externalTemperature" type="Boolean" mandatory="false">
       <description>The external temperature in degrees celsius</description>
@@ -6101,6 +6131,9 @@
     <param name="cloudAppVehicleID" type="Boolean" mandatory="false">
       <description>Parameter used by cloud apps to identify a head unit</description>
     </param>
+    <param name="stabilityControlsStatus" type="Boolean" mandatory="false">
+	    <description>See StabilityControlsStatus</description>
+    </param>
 
         <!-- Ford Specific Data Items -->
     <param name="eCallInfo" type="Boolean" mandatory="false">
@@ -6132,16 +6165,19 @@
       <description>The number of revolutions per minute of the engine</description>
     </param>
     <param name="fuelLevel" type="Common.VehicleDataResult" mandatory="false">
-      <description>The fuel level in the tank (percentage)</description>
+      <description>The fuel level in the tank (percentage). This parameter is deprecated starting RPC Spec 7.0, please see fuelRange</description>
     </param>
     <param name="fuelLevel_State" type="Common.VehicleDataResult" mandatory="false">
-      <description>The fuel level state</description>
+      <description>The fuel level state. This parameter is deprecated starting RPC Spec 7.0, please see fuelRange</description>
     </param>
     <param name="instantFuelConsumption" type="Common.VehicleDataResult" mandatory="false">
       <description>The instantaneous fuel consumption in microlitres</description>
     </param>
     <param name="fuelRange" type="Common.VehicleDataResult" mandatory="false">
-        <description>The estimate range in KM the vehicle can travel based on fuel level and consumption</description>
+      <description>
+        The fuel type, estimated range in KM, fuel level/capacity and fuel level state for the vehicle.
+        See struct FuelRange for details.
+      </description>
     </param>
     <param name="externalTemperature" type="Common.VehicleDataResult" mandatory="false">
       <description>The external temperature in degrees celsius.</description>
@@ -6196,6 +6232,9 @@
     </param>
     <param name="cloudAppVehicleID" type="Common.VehicleDataResult" mandatory="false">
       <description>Parameter used by cloud apps to identify a head unit</description>
+    </param>
+    <param name="stabilityControlsStatus" type="Common.VehicleDataResult" mandatory="false">
+	    <description>See StabilityControlsStatus</description>
     </param>
 
         <!-- Ford Specific Data Items -->
@@ -6231,16 +6270,19 @@
       <description>The number of revolutions per minute of the engine</description>
     </param>
     <param name="fuelLevel" type="Boolean" mandatory="false">
-      <description>The fuel level in the tank (percentage)</description>
+      <description>The fuel level in the tank (percentage). This parameter is deprecated starting RPC Spec 7.0, please see fuelRange</description>
     </param>
     <param name="fuelLevel_State" type="Boolean" mandatory="false">
-      <description>The fuel level state</description>
+      <description>The fuel level state. This parameter is deprecated starting RPC Spec 7.0, please see fuelRange</description>
     </param>
     <param name="instantFuelConsumption" type="Boolean" mandatory="false">
       <description>The instantaneous fuel consumption in microlitres</description>
     </param>
     <param name="fuelRange" type="Boolean" mandatory="false">
-        <description>The estimate range in KM the vehicle can travel based on fuel level and consumption</description>
+      <description>
+        The fuel type, estimated range in KM, fuel level/capacity and fuel level state for the vehicle.
+        See struct FuelRange for details.
+      </description>
     </param>
     <param name="externalTemperature" type="Boolean" mandatory="false">
       <description>The external temperature in degrees celsius.</description>
@@ -6296,6 +6338,9 @@
     <param name="cloudAppVehicleID" type="Boolean" mandatory="false">
       <description>Parameter used by cloud apps to identify a head unit</description>
     </param>
+    <param name="stabilityControlsStatus" type="Boolean" mandatory="false">
+	    <description>See StabilityControlsStatus</description>
+    </param>
 
         <!-- Ford Specific Data Items -->
     <param name="eCallInfo" type="Boolean" mandatory="false">
@@ -6327,16 +6372,19 @@
       <description>The number of revolutions per minute of the engine</description>
     </param>
     <param name="fuelLevel" type="Common.VehicleDataResult" mandatory="false">
-      <description>The fuel level in the tank (percentage)</description>
+      <description>The fuel level in the tank (percentage). This parameter is deprecated starting RPC Spec 7.0, please see fuelRange</description>
     </param>
     <param name="fuelLevel_State" type="Common.VehicleDataResult" mandatory="false">
-      <description>The fuel level state</description>
+      <description>The fuel level state. This parameter is deprecated starting RPC Spec 7.0, please see fuelRange</description>
     </param>
     <param name="instantFuelConsumption" type="Common.VehicleDataResult" mandatory="false">
       <description>The instantaneous fuel consumption in microlitres</description>
     </param>
     <param name="fuelRange" type="Common.VehicleDataResult" mandatory="false">
-        <description>The estimate range in KM the vehicle can travel based on fuel level and consumption</description>
+      <description>
+        The fuel type, estimated range in KM, fuel level/capacity and fuel level state for the vehicle.
+        See struct FuelRange for details.
+      </description>
     </param>
     <param name="externalTemperature" type="Common.VehicleDataResult" mandatory="false">
       <description>The external temperature in degrees celsius</description>
@@ -6392,6 +6440,9 @@
     <param name="cloudAppVehicleID" type="Common.VehicleDataResult" mandatory="false">
       <description>Parameter used by cloud apps to identify a head unit</description>
     </param>
+    <param name="stabilityControlsStatus" type="Common.VehicleDataResult" mandatory="false">
+	    <description>See StabilityControlsStatus</description>
+    </param>
 
         <!-- Ford Specific Data Items -->
     <param name="eCallInfo" type="Common.VehicleDataResult" mandatory="false">
@@ -6424,16 +6475,19 @@
       <description>The number of revolutions per minute of the engine</description>
     </param>
     <param name="fuelLevel" type="Boolean" mandatory="false">
-      <description>The fuel level in the tank (percentage)</description>
+      <description>The fuel level in the tank (percentage). This parameter is deprecated starting RPC Spec 7.0, please see fuelRange</description>
     </param>
     <param name="fuelLevel_State" type="Boolean" mandatory="false">
-      <description>The fuel level state</description>
+      <description>The fuel level state. This parameter is deprecated starting RPC Spec 7.0, please see fuelRange</description>
     </param>
     <param name="instantFuelConsumption" type="Boolean" mandatory="false">
       <description>The instantaneous fuel consumption in microlitres</description>
     </param>
     <param name="fuelRange" type="Boolean" mandatory="false">
-        <description>The estimate range in KM the vehicle can travel based on fuel level and consumption</description>
+      <description>
+        The fuel type, estimated range in KM, fuel level/capacity and fuel level state for the vehicle.
+        See struct FuelRange for details.
+      </description>
     </param>
     <param name="externalTemperature" type="Boolean" mandatory="false">
       <description>The external temperature in degrees celsius</description>
@@ -6492,6 +6546,9 @@
     <param name="cloudAppVehicleID" type="Boolean" mandatory="false">
       <description>Parameter used by cloud apps to identify a head unit</description>
     </param>
+    <param name="stabilityControlsStatus" type="Boolean" mandatory="false">
+	    <description>See StabilityControlsStatus</description>
+    </param>
 
         <!-- Ford Specific Data Items -->
     <param name="eCallInfo" type="Boolean" mandatory="false">
@@ -6523,16 +6580,19 @@
       <description>The number of revolutions per minute of the engine</description>
     </param>
     <param name="fuelLevel" type="Float" minvalue="-6" maxvalue="106" mandatory="false">
-      <description>The fuel level in the tank (percentage)</description>
+      <description>The fuel level in the tank (percentage). This parameter is deprecated starting RPC Spec 7.0, please see fuelRange</description>
     </param>
     <param name="fuelLevel_State" type="Common.ComponentVolumeStatus" mandatory="false">
-      <description>The fuel level state</description>
+      <description>The fuel level state. This parameter is deprecated starting RPC Spec 7.0, please see fuelRange</description>
     </param>
     <param name="instantFuelConsumption" type="Float" minvalue="0" maxvalue="25575" mandatory="false">
       <description>The instantaneous fuel consumption in microlitres</description>
     </param>
     <param name="fuelRange" type="Common.FuelRange" minsize="0" maxsize="100" array="true" mandatory="false">
-        <description>The estimate range in KM the vehicle can travel based on fuel level and consumption</description>
+      <description>
+        The fuel type, estimated range in KM, fuel level/capacity and fuel level state for the vehicle.
+        See struct FuelRange for details.
+      </description>
     </param>
     <param name="externalTemperature" type="Float" minvalue="-40" maxvalue="100" mandatory="false">
       <description>The external temperature in degrees celsius</description>
@@ -6591,6 +6651,9 @@
     <param name="cloudAppVehicleID" type="String" mandatory="false">
       <description>Parameter used by cloud apps to identify a head unit</description>
     </param>
+    <param name="stabilityControlsStatus" type="Common.StabilityControlsStatus" mandatory="false">
+	    <description>See StabilityControlsStatus</description>
+    </param>
 
         <!-- Ford Specific Data Items -->
     <param name="eCallInfo" type="Common.ECallInfo" mandatory="false">
@@ -6623,16 +6686,19 @@
       <description>The number of revolutions per minute of the engine</description>
     </param>
     <param name="fuelLevel" type="Float" minvalue="-6" maxvalue="106" mandatory="false">
-      <description>The fuel level in the tank (percentage)</description>
+      <description>The fuel level in the tank (percentage). This parameter is deprecated starting RPC Spec 7.0, please see fuelRange</description>
     </param>
     <param name="fuelLevel_State" type="Common.ComponentVolumeStatus" mandatory="false">
-      <description>The fuel level state</description>
+      <description>The fuel level state. This parameter is deprecated starting RPC Spec 7.0, please see fuelRange</description>
     </param>
     <param name="instantFuelConsumption" type="Float" minvalue="0" maxvalue="25575" mandatory="false">
       <description>The instantaneous fuel consumption in microlitres</description>
     </param>
     <param name="fuelRange" type="Common.FuelRange" minsize="0" maxsize="100" array="true" mandatory="false">
-      <description>The estimate range in KM the vehicle can travel based on fuel level and consumption</description>
+      <description>
+        The fuel type, estimated range in KM, fuel level/capacity and fuel level state for the vehicle.
+        See struct FuelRange for details.
+      </description>
     </param>
     <param name="externalTemperature" type="Float" minvalue="-40" maxvalue="100" mandatory="false">
       <description>The external temperature in degrees celsius</description>
@@ -6690,6 +6756,9 @@
     </param>
     <param name="engineOilLife" type="Float" minvalue="0" maxvalue="100" mandatory="false">
       <description>The estimated percentage of remaining oil life of the engine.</description>
+    </param>
+    <param name="stabilityControlsStatus" type="Common.StabilityControlsStatus" mandatory="false">
+	    <description>See StabilityControlsStatus</description>
     </param>
 
         <!-- Ford Specific Data Items -->
