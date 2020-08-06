@@ -30,6 +30,7 @@
  * POSSIBILITY OF SUCH DAMAGE. */
 
 #include "gtest/gtest.h"
+#include <boost/range/algorithm/set_algorithm.hpp>
 #include "test/application_manager/mock_application_manager.h"
 #include "application_manager/test/include/application_manager/mock_event_dispatcher.h"
 #include "application_manager/test/include/application_manager/mock_event_observer.h"
@@ -44,6 +45,8 @@ using namespace vehicle_info_plugin;
 using ::testing::NiceMock;
 using ::testing::Return;
 using ::testing::ReturnRef;
+using ::testing::SaveArg;
+using ::testing::DoAll;
 using ::testing::_;
 
 using application_manager::MockMessageHelper;
@@ -174,6 +177,54 @@ smart_objects::SmartObject CreateVDResponse(const hmi_apis::Common_Result::eType
   return message;
 }
 
+enum class ContainsPolicy {
+  Strict,
+  Nice
+};
+
+bool CheckThatMessageContainsVD(const smart_objects::SmartObject& message,
+                                const std::set<std::string>& vehicle_data,
+                                ContainsPolicy policy = ContainsPolicy::Strict) {
+  using namespace application_manager;
+  auto& msg_params = message[strings::msg_params];
+  auto keys = msg_params.enumerate();
+  std::set<std::string> missed;
+  boost::set_difference(vehicle_data,
+                        keys,
+                        std::inserter(missed, missed.end()));
+  if (missed.size() > 0) {
+    return false;
+  }
+  if (ContainsPolicy::Strict == policy) {
+    std::set<std::string> redundant;
+    boost::set_difference(keys,
+                          vehicle_data,
+                          std::inserter(redundant, redundant.end()));
+    if (redundant.size() > 0) {
+      return false;
+    }
+  }
+  return true;
+}
+
+
+/**
+ * @brief EventCheck check that event contains apropriate vehicle data,
+ * check that is matched correlation id,
+ * check that function id is correct
+ */
+MATCHER_P2(EventCheck, expected_corr_id,  vehicle_data, "") {
+  namespace strings = application_manager::strings;
+  const auto& response_message = arg.smart_object();
+  const bool vehicle_data_ok = CheckThatMessageContainsVD(response_message, vehicle_data);
+  const auto cid = response_message[strings::params][strings::correlation_id].asInt();
+  const bool cid_ok = (cid == expected_corr_id);
+  const auto fid= response_message[strings::params][strings::function_id].asInt();
+  const bool fid_ok = (fid == VehicleInfo_SubscribeVehicleData);
+  return fid_ok && cid_ok && vehicle_data_ok;
+}
+
+
 
 TEST_F(VehicleInfoPendingResumptionHandlerTest,
        NoSubscriptionNoAction) {
@@ -207,16 +258,31 @@ TEST_F(VehicleInfoPendingResumptionHandlerTest,
           ).WillByDefault(Return(request));
 
 
-  EXPECT_CALL(subscribe_catcher_, subscribe(_,_));
-  // TODO subscription data
-  EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_,_));
-  // TODO check hmi request
+  uint32_t subscribed_correlation_id;
+  resumption::ResumptionRequest resumption_request;
+  EXPECT_CALL(subscribe_catcher_, subscribe(_,_))
+      .WillOnce(DoAll(SaveArg<0>(&subscribed_correlation_id),
+                      SaveArg<1>(&resumption_request)));
+
+  smart_objects::SmartObjectSPtr message_to_hmi;
+  EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_,_))
+             .WillOnce(DoAll(SaveArg<0>(&message_to_hmi),
+                             Return(true)));
   resumption_handler_->HandleResumptionSubscriptionRequest(
         *ext,
         get_subscriber(),
         *mock_app
         );
-
+  EXPECT_EQ(resumption_request.request_ids.function_id,
+            VehicleInfo_SubscribeVehicleData);
+  EXPECT_TRUE(CheckThatMessageContainsVD(
+                resumption_request.message,
+                {"gps", "speed"}
+                ));
+  EXPECT_TRUE(CheckThatMessageContainsVD(
+                *message_to_hmi,
+                {"gps", "speed"}
+                ));
 }
 
 TEST_F(VehicleInfoPendingResumptionHandlerTest,
@@ -233,10 +299,15 @@ TEST_F(VehicleInfoPendingResumptionHandlerTest,
                              _)
           ).WillByDefault(Return(request));
 
-  EXPECT_CALL(subscribe_catcher_, subscribe(_,_));
-  // TODO save cid and fid of the subscription
+  uint32_t subscribed_correlation_id;
+  resumption::ResumptionRequest resumption_request;
+  EXPECT_CALL(subscribe_catcher_, subscribe(_,_))
+      .WillOnce(DoAll(SaveArg<0>(&subscribed_correlation_id),
+                      SaveArg<1>(&resumption_request)));
+
   EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_,_)).Times(1);
-  EXPECT_CALL(event_dispatcher_mock_, raise_event(_));
+
+
 
   const std::map<std::string, hmi_apis::Common_VehicleDataResultCode::eType>  subscriptions_result=
   {
@@ -254,7 +325,12 @@ TEST_F(VehicleInfoPendingResumptionHandlerTest,
         *mock_app
         );
 
-  // TODO check that raized the same fid and cid as subscribed
+
+  std::set<std::string> expected_data_in_event = {"gps", "speed"};
+  EXPECT_CALL(event_dispatcher_mock_,
+              raise_event(EventCheck(subscribed_correlation_id,
+                                     expected_data_in_event)));
+
   resumption_handler_->on_event(event);
   EXPECT_TRUE(ext->isSubscribedToVehicleInfo("gps"));
   EXPECT_TRUE(ext->isSubscribedToVehicleInfo("speed"));
@@ -275,25 +351,32 @@ TEST_F(VehicleInfoPendingResumptionHandlerTest,
                              _)
           ).WillByDefault(Return(request));
 
-  EXPECT_CALL(subscribe_catcher_, subscribe(_,_));
-  // TODO save cid and fid of the subscription
-  EXPECT_CALL(event_dispatcher_mock_, raise_event(_));
+  uint32_t subscribed_correlation_id;
+  resumption::ResumptionRequest resumption_request;
+  EXPECT_CALL(subscribe_catcher_, subscribe(_,_))
+      .WillOnce(DoAll(SaveArg<0>(&subscribed_correlation_id),
+                      SaveArg<1>(&resumption_request)));
+
   EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_,_)).Times(1);
   const std::map<std::string, hmi_apis::Common_VehicleDataResultCode::eType>  subscriptions_result=
   {
     {"gps", hmi_apis::Common_VehicleDataResultCode::VDRC_SUCCESS},
     {"speed", hmi_apis::Common_VehicleDataResultCode::VDRC_DATA_NOT_SUBSCRIBED},
   };
-
-  auto response = CreateVDResponse(hmi_apis::Common_Result::SUCCESS, subscriptions_result, corr_id);
-  application_manager::event_engine::Event event(
-      VehicleInfo_SubscribeVehicleData);
-  event.set_smart_object(response);
   resumption_handler_->HandleResumptionSubscriptionRequest(
         *ext,
         get_subscriber(),
         *mock_app
         );
+
+  auto response = CreateVDResponse(hmi_apis::Common_Result::SUCCESS, subscriptions_result, corr_id);
+  application_manager::event_engine::Event event(
+      VehicleInfo_SubscribeVehicleData);
+  event.set_smart_object(response);
+  std::set<std::string> expected_data_in_event = {"gps", "speed"};
+  EXPECT_CALL(event_dispatcher_mock_,
+              raise_event(EventCheck(subscribed_correlation_id,
+                                     expected_data_in_event)));
 
   // TODO check that raized the same fid and cid as subscribed
   resumption_handler_->on_event(event);
