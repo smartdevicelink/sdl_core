@@ -37,6 +37,8 @@
 #include "application_manager/message_helper.h"
 #include "application_manager/resumption/resumption_data_processor.h"
 #include "utils/helpers.h"
+#include "vehicle_info_plugin/custom_vehicle_data_manager.h"
+
 namespace vehicle_info_plugin {
 CREATE_LOGGERPTR_GLOBAL(logger_, "VehicleInfoPlugin")
 
@@ -114,8 +116,10 @@ std::set<std::string> SuccessfulSubscriptionsFromResponse(
 }
 
 VehicleInfoPendingResumptionHandler::VehicleInfoPendingResumptionHandler(
-    application_manager::ApplicationManager& application_manager)
-    : ExtensionPendingResumptionHandler(application_manager) {}
+    application_manager::ApplicationManager& application_manager,
+    CustomVehicleDataManager& custom_vehicle_data_manager)
+    : ExtensionPendingResumptionHandler(application_manager)
+    , custom_vehicle_data_manager_(custom_vehicle_data_manager) {}
 
 void VehicleInfoPendingResumptionHandler::ClearPendingResumptionRequests() {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -190,6 +194,7 @@ void VehicleInfoPendingResumptionHandler::ProcessNextPendingResumption(
 void VehicleInfoPendingResumptionHandler::TriggerPendingResumption() {
   LOG4CXX_AUTO_TRACE(logger_);
   if (pending_requests_.empty()) {
+    LOG4CXX_DEBUG(logger_, "No pending resumptions");
     return;
   }
   auto& next_pending = pending_requests_.front();
@@ -215,9 +220,14 @@ void VehicleInfoPendingResumptionHandler::on_event(
   }
 
   auto current_pending = pending_requests_.front();
-  pending_requests_.pop_front();
 
   auto response_message = event.smart_object();
+  smart_objects::SmartObject converted_msg_params(
+      response_message[strings::msg_params]);
+
+  custom_vehicle_data_manager_.CreateMobileMessageParams(converted_msg_params);
+  response_message[strings::msg_params] = converted_msg_params;
+  pending_requests_.pop_front();
 
   // workaround for existing scripts that do not send response for each
   // paticular data, but send only overal result
@@ -249,6 +259,10 @@ VehicleInfoPendingResumptionHandler::SubscribeToFakeRequest(
       fake_corr_id,
       hmi_apis::FunctionID::VehicleInfo_SubscribeVehicleData,
       *fake_request);
+  LOG4CXX_DEBUG(logger_,
+                "Subscribe subscriber "
+                    << app_id
+                    << " to fake request with corr id = " << fake_corr_id);
   subscriber(app_id, resumption_request);
   PendingSubscriptionsResumption pending_request(
       app_id, fake_corr_id, subscriptions);
@@ -391,14 +405,15 @@ void VehicleInfoPendingResumptionHandler::PendingSubscriptionsResumption::
   auto successful_subscriptions = SuccessfulSubscriptionsFromResponse(response);
 
   LOG4CXX_DEBUG(logger_,
-                "Requested data " << Stringify(requested_vehicle_data_));
+                "Requested data : " << Stringify(requested_vehicle_data_));
   LOG4CXX_DEBUG(logger_,
-                "Successful subscription in response "
+                "Successful subscription in response : "
                     << Stringify(successful_subscriptions));
 
   FillRestoredData(successful_subscriptions);
 
-  LOG4CXX_DEBUG(logger_, "Restored data " << Stringify(restored_vehicle_data_));
+  LOG4CXX_DEBUG(logger_,
+                "Restored data : " << Stringify(restored_vehicle_data_));
 
   FillSubscriptionResults();
 

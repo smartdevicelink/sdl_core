@@ -40,6 +40,7 @@
 #include "utils/optional.h"
 #include "vehicle_info_app_extension.h"
 namespace vehicle_info_plugin {
+class CustomVehicleDataManager;
 
 namespace app_mngr = application_manager;
 
@@ -47,7 +48,8 @@ class VehicleInfoPendingResumptionHandler
     : public resumption::ExtensionPendingResumptionHandler {
  public:
   VehicleInfoPendingResumptionHandler(
-      app_mngr::ApplicationManager& application_manager);
+      app_mngr::ApplicationManager& application_manager,
+      CustomVehicleDataManager& custom_vehicle_data_manager);
 
   void on_event(const app_mngr::event_engine::Event& event) OVERRIDE;
 
@@ -127,6 +129,7 @@ class VehicleInfoPendingResumptionHandler
 
   std::deque<PendingSubscriptionsResumption> pending_requests_;
 
+  CustomVehicleDataManager& custom_vehicle_data_manager_;
   sync_primitives::RecursiveLock lock_;
 };
 }  // namespace vehicle_info_plugin

@@ -36,7 +36,7 @@
 #include "application_manager/test/include/application_manager/mock_message_helper.h"
 #include "gtest/gtest.h"
 #include "test/application_manager/mock_application_manager.h"
-//#include "application_manager/mock_rpc_service.h"
+#include "vehicle_info_plugin/mock_custom_vehicle_data_manager.h"
 #include "vehicle_info_plugin/vehicle_info_pending_resumption_handler.h"
 
 namespace vehicle_info_plugin_test {
@@ -88,7 +88,7 @@ class VehicleInfoPendingResumptionHandlerTest : public ::testing::Test {
         .WillByDefault(ReturnRef(mock_rpc_service_));
     resumption_handler_.reset(
         new vehicle_info_plugin::VehicleInfoPendingResumptionHandler(
-            app_manager_mock_));
+            app_manager_mock_, custom_vehicle_data_manager_mock_));
   }
 
   MockAppPtr CreateApp(uint32_t app_id) {
@@ -122,6 +122,7 @@ class VehicleInfoPendingResumptionHandlerTest : public ::testing::Test {
   MockApplicationManager app_manager_mock_;
   MockEventDispatcher event_dispatcher_mock_;
   MockRPCService mock_rpc_service_;
+  MockCustomVehicleDataManager custom_vehicle_data_manager_mock_;
   vehicle_info_plugin::VehicleInfoPlugin plugin_;
 
   std::unique_ptr<vehicle_info_plugin::VehicleInfoPendingResumptionHandler>

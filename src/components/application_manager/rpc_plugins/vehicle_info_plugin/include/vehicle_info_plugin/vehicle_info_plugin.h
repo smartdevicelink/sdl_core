@@ -104,10 +104,10 @@ class VehicleInfoPlugin : public plugins::RPCPlugin {
   void DeleteSubscriptions(app_mngr::ApplicationSharedPtr app);
 
   std::unique_ptr<app_mngr::CommandFactory> command_factory_;
-  std::unique_ptr<CustomVehicleDataManager> custom_vehicle_data_manager_;
+  typedef std::shared_ptr<resumption::ExtensionPendingResumptionHandler>
+      ExtensionPendingResumptionHandlerSPtr;
   app_mngr::ApplicationManager* application_manager_;
-  using ExtensionPendingResumptionHandlerSPtr =
-      std::shared_ptr<resumption::ExtensionPendingResumptionHandler>;
+  std::unique_ptr<CustomVehicleDataManager> custom_vehicle_data_manager_;
   ExtensionPendingResumptionHandlerSPtr pending_resumption_handler_;
 };
 }  // namespace vehicle_info_plugin

@@ -59,10 +59,11 @@ bool VehicleInfoPlugin::Init(
     resumption::LastStateWrapperPtr last_state) {
   UNUSED(last_state);
   application_manager_ = &app_manager;
-  pending_resumption_handler_ =
-      std::make_shared<VehicleInfoPendingResumptionHandler>(app_manager);
   custom_vehicle_data_manager_.reset(
       new CustomVehicleDataManagerImpl(policy_handler, rpc_service));
+  pending_resumption_handler_ =
+      std::make_shared<VehicleInfoPendingResumptionHandler>(
+          app_manager, *custom_vehicle_data_manager_);
   command_factory_.reset(new vehicle_info_plugin::VehicleInfoCommandFactory(
       app_manager,
       rpc_service,
