@@ -63,7 +63,6 @@ void SDLPendingResumptionHandler::ClearPendingRequestsMap() {
     unsubscribe_from_event(timed_out_pending_request_fid);
     if (!app_ids_.empty()) {
       auto app_id = app_ids_.front();
-      LOG4CXX_DEBUG(logger_, "AKutsan pop" << app_id);
       app_ids_.pop();
     }
   }
@@ -107,7 +106,6 @@ void SDLPendingResumptionHandler::RaiseFakeSuccfullResponse(
       response[strings::params][strings::function_id].asInt());
   event_engine::Event event(fid);
   event.set_smart_object(response);
-  LOG4CXX_DEBUG(logger_, "AKutsan raise fake " << fid << " " << corr_id);
   event.raise(application_manager_.event_dispatcher());
 }
 
@@ -131,7 +129,6 @@ void SDLPendingResumptionHandler::on_event(
     return;
   }
   uint32_t app_id = app_ids_.front();
-  LOG4CXX_DEBUG(logger_, "AKutsan pop" << app_id);
   app_ids_.pop();
   auto app = application_manager_.application(app_id);
   if (!app) {
@@ -139,30 +136,21 @@ void SDLPendingResumptionHandler::on_event(
     return;
   }
 
-  LOG4CXX_DEBUG(
-      logger_,
-      "AKutsan HMI respond to WP "
-          << event.id() << " "
-          << event.smart_object()[strings::params][strings::correlation_id]
-                 .asInt());
-
   LOG4CXX_DEBUG(logger_,
                 "Received event with function id: "
                     << event.id() << " and correlation id: " << corr_id);
 
   if (resumption::IsResponseSuccessful(response)) {
     LOG4CXX_DEBUG(logger_, "Resumption of subscriptions is successful");
-    LOG4CXX_DEBUG(
-        logger_, "AKutsan Successfully subscribed app to WP " << app->app_id());
+
     application_manager_.SubscribeAppForWayPoints(app);
 
     unsubscribe_from_event(event.id());
-    LOG4CXX_DEBUG(logger_, "AKutsan unsubscribe from event " << event.id());
+
     for (auto& freezed_resumption : freezed_resumptions_) {
       auto corr_id = freezed_resumption.request_to_send_
                          .message[strings::params][strings::correlation_id]
                          .asInt();
-      LOG4CXX_DEBUG(logger_, "AKutsan  raize fake freezed responses");
       RaiseFakeSuccfullResponse(response, corr_id);
       application_manager_.SubscribeAppForWayPoints(freezed_resumption.app_id);
     }
@@ -177,8 +165,6 @@ void SDLPendingResumptionHandler::on_event(
 
     ResumptionAwaitingHandling freezed_resumption = freezed_resumptions_.back();
     freezed_resumptions_.pop_back();
-
-    //    auto request = CreateSubscriptionRequest();
     auto resumption_req = freezed_resumption.request_to_send_;
     const uint32_t cid =
         resumption_req.message[strings::params][strings::correlation_id]
@@ -220,8 +206,6 @@ void SDLPendingResumptionHandler::HandleResumptionSubscriptionRequest(
   auto resumption_request =
       MakeResumptionRequest(corr_id, function_id, *request);
   app_ids_.push(app.app_id());
-  LOG4CXX_DEBUG(logger_, "AKutsan push" << app.app_id());
-  LOG4CXX_DEBUG(logger_, "AKutsan subscribe subscriber for response WP ");
   subscriber(app.app_id(), resumption_request);
   if (pending_requests_.empty()) {
     LOG4CXX_DEBUG(logger_,
@@ -231,7 +215,7 @@ void SDLPendingResumptionHandler::HandleResumptionSubscriptionRequest(
     LOG4CXX_DEBUG(logger_,
                   "Sending request with function id: "
                       << function_id << " and correlation_id: " << corr_id);
-    LOG4CXX_DEBUG(logger_, "AKutsan will send request WP to HMI ");
+
     application_manager_.GetRPCService().ManageHMICommand(request);
     return;
   }
