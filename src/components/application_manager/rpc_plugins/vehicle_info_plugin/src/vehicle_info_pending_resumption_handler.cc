@@ -38,19 +38,29 @@
 #include "application_manager/resumption/resumption_data_processor.h"
 #include "utils/helpers.h"
 namespace vehicle_info_plugin {
+CREATE_LOGGERPTR_GLOBAL(logger_, "VehicleInfoPlugin")
 
 using hmi_apis::FunctionID::VehicleInfo_SubscribeVehicleData;
+
 uint32_t get_corr_id_from_message(const smart_objects::SmartObject& message) {
   using namespace application_manager;
   return message[strings::params][strings::correlation_id].asInt();
 }
-CREATE_LOGGERPTR_GLOBAL(logger_, "VehicleInfoPendingResumptionHandler")
+
+template <class T>
+std::string Stringify(const T& container) {
+  std::stringstream ss;
+  for (const auto& val : container) {
+    ss << val << " ";
+  }
+  return ss.str();
+}
 
 std::set<std::string> SubscriptionsFromResponse(
     const smart_objects::SmartObject& response,
     std::function<bool(const smart_objects::SmartObject& vehicle_data)>
         vehicle_data_check) {
-  using namespace application_manager;
+  namespace strings = application_manager::strings;
   std::set<std::string> result;
   const auto response_params = response[strings::msg_params];
   const auto response_keys = response_params.enumerate();
@@ -62,21 +72,34 @@ std::set<std::string> SubscriptionsFromResponse(
   return result;
 }
 
+bool IsResponseSuccessful(const smart_objects::SmartObject& response) {
+  namespace strings = application_manager::strings;
+  if (!response[strings::params].keyExists(strings::error_msg)) {
+    return true;
+  }
+  return false;
+}
+
+void FillResponseWithMissedVD(const std::set<std::string>& vehicle_data,
+                              smart_objects::SmartObject* response) {
+  DCHECK(response)
+  namespace strings = application_manager::strings;
+  auto& msg_params = (*response)[strings::msg_params];
+  for (const auto& vd : vehicle_data) {
+    smart_objects::SmartObject vd_result(smart_objects::SmartType_Map);
+    vd_result[strings::result_code] =
+        hmi_apis::Common_VehicleDataResultCode::VDRC_SUCCESS;
+    msg_params[vd] = vd_result;
+  }
+}
+
 std::set<std::string> SuccessfulSubscriptionsFromResponse(
     const smart_objects::SmartObject& response) {
   LOG4CXX_AUTO_TRACE(logger_);
   using namespace application_manager;
 
-  auto succesfull_response = [](const smart_objects::SmartObject& response) {
-    const auto result_code = static_cast<hmi_apis::Common_Result::eType>(
-        response[strings::params][application_manager::hmi_response::code]
-            .asInt());
-    return (result_code == hmi_apis::Common_Result::SUCCESS ||
-            result_code == hmi_apis::Common_Result::WARNINGS);
-  };
-
   std::set<std::string> result;
-  if (!succesfull_response(response)) {
+  if (!IsResponseSuccessful(response)) {
     return result;
   }
 
@@ -117,7 +140,7 @@ void VehicleInfoPendingResumptionHandler::RaiseFinishedPendingResumption(
       next_pending.subscription_results_, next_pending.fake_corr_id_);
   event_engine::Event event(VehicleInfo_SubscribeVehicleData);
   event.set_smart_object(fake_response);
-  LOG4CXX_DEBUG(logger_, "AKutsan raise fake ");
+  LOG4CXX_DEBUG(logger_, "Raize fake response for resumption data processor");
   event.raise(application_manager_.event_dispatcher());
 }
 
@@ -167,14 +190,24 @@ void VehicleInfoPendingResumptionHandler::on_event(
   LOG4CXX_AUTO_TRACE(logger_);
   using namespace application_manager;
   if (pending_requests_.empty()) {
-    LOG4CXX_DEBUG(logger_,
-                  "resumption handler is not waiting for any response");
+    LOG4CXX_DEBUG(logger_, "Not waiting for any response");
   }
 
   auto current_pending = pending_requests_.front();
   pending_requests_.pop_front();
 
   auto response_message = event.smart_object();
+
+  // workaround for existing scripts that do not send response for each
+  // paticular data, but send only overal result
+  const auto successful_subscriptions =
+      SuccessfulSubscriptionsFromResponse(response_message);
+  if (IsResponseSuccessful(response_message) &&
+      successful_subscriptions.empty()) {
+    FillResponseWithMissedVD(current_pending.requested_vehicle_data_,
+                             &response_message);
+  }
+
   current_pending.FillSubscriptionResults(response_message);
 
   RaiseFinishedPendingResumption(current_pending);
@@ -194,7 +227,7 @@ VehicleInfoPendingResumptionHandler::SubscribeToFakeRequest(
       fake_corr_id,
       hmi_apis::FunctionID::VehicleInfo_SubscribeVehicleData,
       *fake_request);
-  subscriber(fake_corr_id, resumption_request);
+  subscriber(app_id, resumption_request);
   PendingSubscriptionsResumption pending_request(
       app_id, fake_corr_id, *fake_request, subscriptions);
   return pending_request;
@@ -263,6 +296,10 @@ VehicleInfoPendingResumptionHandler::CreateFakeResponseFromHMI(
   smart_objects::SmartObject msg_params(smart_objects::SmartType_Map);
   for (const auto& subscription : subscriptions) {
     msg_params[subscription.first] = subscription.second;
+    LOG4CXX_DEBUG(logger_,
+                  "fake response data : "
+                      << subscription.first << " result = "
+                      << subscription.second[strings::result_code].asInt());
   }
 
   message[strings::msg_params] = msg_params;
@@ -278,7 +315,6 @@ bool VehicleInfoPendingResumptionHandler::PendingSubscriptionsResumption::
     DataWasRequested(const std::string& vd) const {
   bool result =
       (requested_vehicle_data_.end() != requested_vehicle_data_.find(vd));
-  LOG4CXX_DEBUG(logger_, "check : " << vd << " : " << result);
   return result;
 }
 
@@ -325,14 +361,16 @@ void VehicleInfoPendingResumptionHandler::PendingSubscriptionsResumption::
   using namespace application_manager;
 
   auto successful_subscriptions = SuccessfulSubscriptionsFromResponse(response);
-  for (auto suc : successful_subscriptions) {
-    LOG4CXX_DEBUG(logger_, "successful from response : " << suc);
-  }
+
+  LOG4CXX_DEBUG(logger_,
+                "Requested data " << Stringify(requested_vehicle_data_));
+  LOG4CXX_DEBUG(logger_,
+                "Successful subscription in response "
+                    << Stringify(successful_subscriptions));
+
   FillRestoredData(successful_subscriptions);
 
-  for (auto suc : restored_vehicle_data_) {
-    LOG4CXX_DEBUG(logger_, "restored_vehicle_data_ : " << suc);
-  }
+  LOG4CXX_DEBUG(logger_, "Restored data" << Stringify(restored_vehicle_data_));
 
   FillSubscriptionResults();
 
