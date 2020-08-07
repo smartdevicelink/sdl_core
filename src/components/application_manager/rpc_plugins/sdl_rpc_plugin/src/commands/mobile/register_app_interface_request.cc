@@ -1182,8 +1182,6 @@ mobile_apis::Result::eType RegisterAppInterfaceRequest::CheckWithPolicyData() {
   if (!app_hmi_types_in_policy.empty()) {
     result = ProcessingAppHMITypesPolicies(message, app_hmi_types_in_policy);
   }
-    }
-  }
 
   return result;
 }
@@ -1542,27 +1540,6 @@ RegisterAppInterfaceRequest::ProcessingAppHMITypesInMessage(
   return check_result ? mobile_apis::Result::DISALLOWED
                       : mobile_apis::Result::SUCCESS;
 }
-
-// mobile_apis::Result::eType
-// RegisterAppInterfaceRequest::ProcessingAppHMITypesInMessage(
-//    const smart_objects::SmartObject& message) {
-//  const bool app_hmi_types_exist =
-//      message[strings::msg_params].keyExists(strings::app_hmi_type);
-//  if (!app_hmi_types_exist) {
-//    return mobile_apis::Result::SUCCESS;
-//  }
-//  const std::string mobile_app_id =
-//      application_manager_.GetCorrectMobileIDFromMessage(message_);
-
-//  const auto& app_types_in_message =
-//      message[strings::msg_params][strings::app_hmi_type];
-//  const bool check_result = GetPolicyHandler().CheckHMIType(
-//      mobile_app_id, mobile_apis::AppHMIType::WEB_VIEW,
-//      &app_types_in_message);
-
-//  return check_result ? mobile_apis::Result::SUCCESS
-//                      : mobile_apis::Result::DISALLOWED;
-//}
 
 mobile_apis::Result::eType
 RegisterAppInterfaceRequest::ProcessingAppHMITypesPolicies(
