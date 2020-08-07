@@ -54,6 +54,7 @@ class VehicleInfoPendingResumptionHandler
   void HandleResumptionSubscriptionRequest(app_mngr::AppExtension& extension,
                                            resumption::Subscriber& subscriber,
                                            app_mngr::Application& app) OVERRIDE;
+  void ClearPendingResumptionRequests() OVERRIDE;
 
   std::map<std::string, bool> ExtractSubscribeResults(
       const smart_objects::SmartObject& response,
@@ -65,7 +66,6 @@ class VehicleInfoPendingResumptionHandler
   ns_smart_device_link::ns_smart_objects::SmartObject CreateFakeResponseFromHMI(
       const std::map<std::string, smart_objects::SmartObject>& subscriptions,
       const uint32_t fake_corrlation_id);
-  void ClearPendingResumptionRequests() OVERRIDE;
 
  private:
   void ProcessNextPendingResumption(
@@ -76,17 +76,13 @@ class VehicleInfoPendingResumptionHandler
     PendingSubscriptionsResumption(
         const uint32_t app_id,
         const uint32_t corr_id,
-        smart_objects::SmartObject request_message,
         const std::set<std::string>& requested_vehicle_data)
         : app_id_(app_id)
         , fake_corr_id_(corr_id)
         , requested_vehicle_data_(requested_vehicle_data) {}
-    uint32_t app_id_;
-    uint32_t fake_corr_id_;
-    std::set<std::string> requested_vehicle_data_;
-    std::set<std::string> restored_vehicle_data_;
 
-    std::map<std::string, smart_objects::SmartObject> subscription_results_;
+    PendingSubscriptionsResumption(const PendingSubscriptionsResumption& copy) =
+        default;
 
     bool Successfull() const;
 
@@ -98,15 +94,18 @@ class VehicleInfoPendingResumptionHandler
 
     void FillRestoredData(
         const std::set<std::string>& successful_subscriptions);
+
+    uint32_t app_id_;
+    uint32_t fake_corr_id_;
+    std::set<std::string> requested_vehicle_data_;
+    std::set<std::string> restored_vehicle_data_;
+    std::map<std::string, smart_objects::SmartObject> subscription_results_;
   };
 
   void SendHMIRequestForNotSubscribed(
       const PendingSubscriptionsResumption& next_pending);
   void RaiseFinishedPendingResumption(
       const PendingSubscriptionsResumption& next_pending);
-
-  std::deque<PendingSubscriptionsResumption> pending_requests_;
-
   /**
    * @brief SubscribeToFakeRequest will create fake subscription for subscriber
    * ( resumption_data_processor)
@@ -120,6 +119,10 @@ class VehicleInfoPendingResumptionHandler
       const uint32_t app,
       const std::set<std::string>& subscriptions,
       resumption::Subscriber& subscriber);
+
+  std::deque<PendingSubscriptionsResumption> pending_requests_;
+
+  sync_primitives::RecursiveLock lock_;
 };
 }  // namespace vehicle_info_plugin
 #endif  // SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_VEHICLE_INFO_PLUGIN_INCLUDE_VEHICLE_INFO_PLUGIN_PENDING_RESUMPTION_HANDLER_H

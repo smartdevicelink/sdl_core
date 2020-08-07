@@ -119,6 +119,7 @@ VehicleInfoPendingResumptionHandler::VehicleInfoPendingResumptionHandler(
 
 void VehicleInfoPendingResumptionHandler::ClearPendingResumptionRequests() {
   LOG4CXX_AUTO_TRACE(logger_);
+  sync_primitives::AutoLock lock(lock_);
   TriggerPendingResumption();
 }
 
@@ -128,6 +129,10 @@ void VehicleInfoPendingResumptionHandler::RaiseFinishedPendingResumption(
   using namespace application_manager;
 
   auto app = application_manager_.application(next_pending.app_id_);
+  if (!app) {
+    LOG4CXX_DEBUG(logger_, "Application not found " << next_pending.app_id_);
+    return;
+  }
   auto& ext = VehicleInfoAppExtension::ExtractVIExtension(*app);
   ext.RemovePendingSubscriptions();
   for (const auto& subscription : next_pending.restored_vehicle_data_) {
@@ -188,9 +193,11 @@ void VehicleInfoPendingResumptionHandler::TriggerPendingResumption() {
 void VehicleInfoPendingResumptionHandler::on_event(
     const application_manager::event_engine::Event& event) {
   LOG4CXX_AUTO_TRACE(logger_);
+  sync_primitives::AutoLock lock(lock_);
   using namespace application_manager;
   if (pending_requests_.empty()) {
     LOG4CXX_DEBUG(logger_, "Not waiting for any response");
+    return;
   }
 
   auto current_pending = pending_requests_.front();
@@ -229,7 +236,7 @@ VehicleInfoPendingResumptionHandler::SubscribeToFakeRequest(
       *fake_request);
   subscriber(app_id, resumption_request);
   PendingSubscriptionsResumption pending_request(
-      app_id, fake_corr_id, *fake_request, subscriptions);
+      app_id, fake_corr_id, subscriptions);
   return pending_request;
 }
 
@@ -238,6 +245,7 @@ void VehicleInfoPendingResumptionHandler::HandleResumptionSubscriptionRequest(
     resumption::Subscriber& subscriber,
     application_manager::Application& app) {
   LOG4CXX_AUTO_TRACE(logger_);
+  sync_primitives::AutoLock lock(lock_);
   UNUSED(extension);
   auto& ext = VehicleInfoAppExtension::ExtractVIExtension(app);
 
@@ -263,7 +271,7 @@ void VehicleInfoPendingResumptionHandler::HandleResumptionSubscriptionRequest(
 smart_objects::SmartObjectSPtr
 VehicleInfoPendingResumptionHandler::CreateSubscribeRequestToHMI(
     const std::set<std::string>& subscriptions) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  sync_primitives::AutoLock lock(lock_);
   using namespace application_manager;
   smart_objects::SmartObject msg_params =
       smart_objects::SmartObject(smart_objects::SmartType_Map);

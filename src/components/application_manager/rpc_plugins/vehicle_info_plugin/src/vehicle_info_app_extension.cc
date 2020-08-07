@@ -44,6 +44,8 @@ VehicleInfoAppExtension::VehicleInfoAppExtension(
     VehicleInfoPlugin& plugin, application_manager::Application& app)
     : app_mngr::AppExtension(
           VehicleInfoAppExtension::VehicleInfoAppExtensionUID)
+    , subscribed_data_lock_(std::make_shared<sync_primitives::Lock>())
+    , pending_subscriptions_lock_(std::make_shared<sync_primitives::Lock>())
     , plugin_(plugin)
     , app_(app) {
   LOG4CXX_AUTO_TRACE(logger_);
