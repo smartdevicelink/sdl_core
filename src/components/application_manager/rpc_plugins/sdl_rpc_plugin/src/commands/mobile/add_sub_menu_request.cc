@@ -94,7 +94,12 @@ void AddSubMenuRequest::Run() {
   const std::string& menu_name =
       received_msg_params[strings::menu_name].asString();
 
-  if (app->IsSubMenuNameAlreadyExist(menu_name)) {
+  const uint32_t parent_id =
+      received_msg_params.keyExists(strings::parent_id)
+          ? received_msg_params[strings::parent_id].asUInt()
+          : 0;
+
+  if (app->IsSubMenuNameAlreadyExist(menu_name, parent_id)) {
     LOG4CXX_ERROR(logger_, "Menu name " << menu_name << " is duplicated.");
     SendResponse(false, mobile_apis::Result::DUPLICATE_NAME);
     return;
@@ -130,6 +135,10 @@ void AddSubMenuRequest::Run() {
   }
   msg_params[strings::menu_params][strings::menu_name] =
       received_msg_params[strings::menu_name];
+  if (received_msg_params.keyExists(strings::parent_id)) {
+    msg_params[strings::menu_params][strings::parent_id] = parent_id;
+  }
+
   msg_params[strings::app_id] = app->app_id();
 
   StartAwaitForInterface(HmiInterfaces::HMI_INTERFACE_UI);

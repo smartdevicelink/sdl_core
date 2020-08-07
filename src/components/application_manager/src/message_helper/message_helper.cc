@@ -1881,6 +1881,10 @@ smart_objects::SmartObjectList MessageHelper::CreateAddSubMenuRequestToHMI(
         (*i->second)[strings::position];
     msg_params[strings::menu_params][strings::menu_name] =
         (*i->second)[strings::menu_name];
+    if ((*i->second).keyExists(strings::parent_id)) {
+      msg_params[strings::menu_params][strings::parent_id] =
+          (*i->second)[strings::parent_id];
+    }
     msg_params[strings::app_id] = app->app_id();
     (*ui_sub_menu)[strings::msg_params] = msg_params;
     if (((*i->second).keyExists(strings::menu_icon)) &&

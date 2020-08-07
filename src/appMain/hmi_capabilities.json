@@ -324,6 +324,10 @@
                 "diagonalScreenSize": 8,
                 "pixelPerInch": 117,
                 "scale": 1
+            },
+            "driverDistractionCapability": {
+                "menuLength": 10,
+                "subMenuDepth": 3
             }
         }
     },
