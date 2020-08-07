@@ -155,21 +155,38 @@ mobile_apis::VehicleDataType::eType ToVDType(const std::string& vd) {
   return mobile_apis::VehicleDataType::VEHICLEDATA_OEM_CUSTOM_DATA;
 }
 
-typedef std::map<std::string, hmi_apis::Common_VehicleDataResultCode::eType>
-    VDResponseMap;
-smart_objects::SmartObject CreateVDError(
-    const hmi_apis::Common_Result::eType common_result,
-    uint32_t correleation_id) {
+// smart_objects::SmartObject CreateVDError(
+//    const hmi_apis::Common_Result::eType common_result,
+//    uint32_t correleation_id) {
+//  namespace strings = application_manager::strings;
+//  namespace hmi_response = application_manager::hmi_response;
+//  smart_objects::SmartObject message(smart_objects::SmartType_Map);
+//  smart_objects::SmartObject params(smart_objects::SmartType_Map);
+//  params[strings::function_id] = VehicleInfo_SubscribeVehicleData;
+//  params[strings::message_type] = 1;  // MessageType::kResponse;
+//  params[strings::correlation_id] = correleation_id;
+//  params[strings::error_msg] = "error message";
+//  params[strings::protocol_type] = 1;  // HMI protocol type
+//  params[hmi_response::code] = common_result;
+//  return message;
+//}
+
+smart_objects::SmartObject CreateVDError(const uint32_t correlation_id,
+                                         const int32_t result_code,
+                                         const std::string& info) {
   namespace strings = application_manager::strings;
   namespace hmi_response = application_manager::hmi_response;
   smart_objects::SmartObject message(smart_objects::SmartType_Map);
-  smart_objects::SmartObject params(smart_objects::SmartType_Map);
-  params[strings::function_id] = VehicleInfo_SubscribeVehicleData;
-  params[strings::message_type] = 1;  // MessageType::kResponse;
-  params[strings::correlation_id] = correleation_id;
-  params[strings::error_msg] = "error message";
-  params[strings::protocol_type] = 1;  // HMI protocol type
-  params[hmi_response::code] = common_result;
+
+  message[strings::params][strings::function_id] =
+      VehicleInfo_SubscribeVehicleData;
+  message[strings::params][strings::protocol_type] = 1;
+  message[strings::params][strings::correlation_id] = correlation_id;
+
+  message[strings::params][strings::message_type] = 1;
+  message[strings::params][hmi_response::code] = result_code;
+  message[strings::params][strings::error_msg] = info;
+
   return message;
 }
 
@@ -299,10 +316,10 @@ TEST_F(VehicleInfoPendingResumptionHandlerTest,
           CreateModuleInfoSO(VehicleInfo_SubscribeVehicleData, _))
       .WillByDefault(Return(request));
 
-  uint32_t subscribed_correlation_id;
+  uint32_t subscribed_app_id;
   resumption::ResumptionRequest resumption_request;
   EXPECT_CALL(subscribe_catcher_, subscribe(_, _))
-      .WillOnce(DoAll(SaveArg<0>(&subscribed_correlation_id),
+      .WillOnce(DoAll(SaveArg<0>(&subscribed_app_id),
                       SaveArg<1>(&resumption_request)));
 
   EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_, _)).Times(1);
@@ -322,6 +339,8 @@ TEST_F(VehicleInfoPendingResumptionHandlerTest,
       *ext, get_subscriber(), *mock_app);
 
   std::set<std::string> expected_data_in_event = {"gps", "speed"};
+  const auto subscribed_correlation_id =
+      resumption_request.request_ids.correlation_id;
   EXPECT_CALL(event_dispatcher_mock_,
               raise_event(EventCheck(subscribed_correlation_id,
                                      expected_data_in_event)));
@@ -345,10 +364,10 @@ TEST_F(VehicleInfoPendingResumptionHandlerTest,
           CreateModuleInfoSO(VehicleInfo_SubscribeVehicleData, _))
       .WillByDefault(Return(request));
 
-  uint32_t subscribed_correlation_id;
+  uint32_t subscribed_app_id;
   resumption::ResumptionRequest resumption_request;
   EXPECT_CALL(subscribe_catcher_, subscribe(_, _))
-      .WillOnce(DoAll(SaveArg<0>(&subscribed_correlation_id),
+      .WillOnce(DoAll(SaveArg<0>(&subscribed_app_id),
                       SaveArg<1>(&resumption_request)));
 
   EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_, _)).Times(1);
@@ -367,6 +386,8 @@ TEST_F(VehicleInfoPendingResumptionHandlerTest,
       VehicleInfo_SubscribeVehicleData);
   event.set_smart_object(response);
   std::set<std::string> expected_data_in_event = {"gps", "speed"};
+  const auto subscribed_correlation_id =
+      resumption_request.request_ids.correlation_id;
   EXPECT_CALL(event_dispatcher_mock_,
               raise_event(EventCheck(subscribed_correlation_id,
                                      expected_data_in_event)));
@@ -435,14 +456,9 @@ TEST_F(VehicleInfoPendingResumptionHandlerTest,
   // TODO save cid and fid of the subscription
   EXPECT_CALL(event_dispatcher_mock_, raise_event(_));
   EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_, _)).Times(1);
-  const std::map<std::string, hmi_apis::Common_VehicleDataResultCode::eType>
-      subscriptions_result = {
-          {"gps", hmi_apis::Common_VehicleDataResultCode::VDRC_SUCCESS},
-          {"speed", hmi_apis::Common_VehicleDataResultCode::VDRC_SUCCESS},
-      };
 
-  auto response = CreateVDResponse(
-      hmi_apis::Common_Result::ABORTED, subscriptions_result, corr_id);
+  auto response =
+      CreateVDError(corr_id, hmi_apis::Common_Result::ABORTED, "error message");
   // TODO use error message type instead of result code
   application_manager::event_engine::Event event(
       VehicleInfo_SubscribeVehicleData);

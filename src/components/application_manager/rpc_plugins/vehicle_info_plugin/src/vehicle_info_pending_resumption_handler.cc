@@ -207,10 +207,11 @@ void VehicleInfoPendingResumptionHandler::on_event(
 
   // workaround for existing scripts that do not send response for each
   // paticular data, but send only overal result
-  const auto successful_subscriptions =
-      SuccessfulSubscriptionsFromResponse(response_message);
-  if (IsResponseSuccessful(response_message) &&
-      successful_subscriptions.empty()) {
+  //  const auto successful_subscriptions =
+  //      SuccessfulSubscriptionsFromResponse(response_message);
+  const auto vs_count_in_response =
+      response_message[application_manager::strings::msg_params].length();
+  if (IsResponseSuccessful(response_message) && vs_count_in_response == 0) {
     FillResponseWithMissedVD(current_pending.requested_vehicle_data_,
                              &response_message);
   }
