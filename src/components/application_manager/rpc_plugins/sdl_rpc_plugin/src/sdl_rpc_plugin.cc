@@ -117,10 +117,7 @@ void SDLRPCPlugin::ProcessResumptionSubscription(
     resumption::Subscriber subscriber) {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  std::set<uint32_t> apps =
-      application_manager_->GetAppsSubscribedForWayPoints();
-
-  if (apps.size() > 0) {
+  if (application_manager_->IsAnyAppSubscribedForWayPoints()) {
     LOG4CXX_DEBUG(logger_,
                   "Subscription to waypoint already exist, no need to send "
                   "request to HMI");
