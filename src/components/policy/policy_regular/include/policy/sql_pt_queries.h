@@ -142,6 +142,7 @@ extern const std::string kSelectDBVersion;
 extern const std::string kUpdateDBVersion;
 extern const std::string kSaveModuleMeta;
 extern const std::string kSelectModuleMeta;
+extern const std::string kUpdateMetaParams;
 extern const std::string kInsertVehicleDataItem;
 extern const std::string kSelectVehicleDataItem;
 extern const std::string kDeleteVehicleDataItems;

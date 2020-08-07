@@ -103,11 +103,11 @@ class ChangeRegistrationRequestTest
     (*supported_languages_)[0] =
         static_cast<int32_t>(mobile_apis::Language::EN_US);
     EXPECT_CALL(mock_hmi_capabilities_, ui_supported_languages())
-        .WillOnce(Return(supported_languages_.get()));
+        .WillOnce(Return(supported_languages_));
     EXPECT_CALL(mock_hmi_capabilities_, vr_supported_languages())
-        .WillOnce(Return(supported_languages_.get()));
+        .WillOnce(Return(supported_languages_));
     EXPECT_CALL(mock_hmi_capabilities_, tts_supported_languages())
-        .WillOnce(Return(supported_languages_.get()));
+        .WillOnce(Return(supported_languages_));
 
     EXPECT_CALL(app_mngr_, hmi_interfaces())
         .WillRepeatedly(ReturnRef(mock_hmi_interfaces_));
@@ -242,11 +242,11 @@ class ChangeRegistrationRequestTest
   void ExpectationsHmiCapabilities(
       smart_objects::SmartObjectSPtr supported_languages) {
     EXPECT_CALL(mock_hmi_capabilities_, ui_supported_languages())
-        .WillOnce(Return(supported_languages.get()));
+        .WillOnce(Return(supported_languages));
     EXPECT_CALL(mock_hmi_capabilities_, vr_supported_languages())
-        .WillOnce(Return(supported_languages.get()));
+        .WillOnce(Return(supported_languages));
     EXPECT_CALL(mock_hmi_capabilities_, tts_supported_languages())
-        .WillOnce(Return(supported_languages.get()));
+        .WillOnce(Return(supported_languages));
   }
 
   void ResultCommandExpectations(MessageSharedPtr msg,
@@ -381,11 +381,11 @@ TEST_F(ChangeRegistrationRequestTest,
   (*supported_languages_)[0] =
       static_cast<int32_t>(mobile_apis::Language::EN_US);
   EXPECT_CALL(mock_hmi_capabilities_, ui_supported_languages())
-      .WillOnce(Return(supported_languages_.get()));
+      .WillOnce(Return(supported_languages_));
   EXPECT_CALL(mock_hmi_capabilities_, vr_supported_languages())
-      .WillOnce(Return(supported_languages_.get()));
+      .WillOnce(Return(supported_languages_));
   EXPECT_CALL(mock_hmi_capabilities_, tts_supported_languages())
-      .WillOnce(Return(supported_languages_.get()));
+      .WillOnce(Return(supported_languages_));
 
   EXPECT_CALL(app_mngr_, hmi_interfaces())
       .WillRepeatedly(ReturnRef(mock_hmi_interfaces_));

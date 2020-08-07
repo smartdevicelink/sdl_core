@@ -106,7 +106,8 @@ class RCGetInteriorVehicleDataConsentTest
   RCGetInteriorVehicleDataConsentTest()
       : mock_app_(std::make_shared<NiceMock<MockApplication> >())
       , command_holder(app_mngr_)
-      , rc_capabilities_(smart_objects::SmartType::SmartType_Array)
+      , rc_capabilities_(std::make_shared<smart_objects::SmartObject>(
+            smart_objects::SmartType::SmartType_Array))
       , request_controller(mock_request_controler)
       , rpc_protection_manager_(
             std::make_shared<application_manager::MockRPCProtectionManager>())
@@ -124,7 +125,7 @@ class RCGetInteriorVehicleDataConsentTest
       , rpc_plugin(mock_rpc_plugin)
       , optional_mock_rpc_plugin(mock_rpc_plugin) {
     smart_objects::SmartObject control_caps((smart_objects::SmartType_Array));
-    rc_capabilities_[strings::kradioControlCapabilities] = control_caps;
+    (*rc_capabilities_)[strings::kradioControlCapabilities] = control_caps;
     ON_CALL(*mock_app_, app_id()).WillByDefault(Return(kAppId));
     ON_CALL(app_mngr_, hmi_interfaces())
         .WillByDefault(ReturnRef(mock_hmi_interfaces_));
@@ -143,7 +144,7 @@ class RCGetInteriorVehicleDataConsentTest
     ON_CALL(app_mngr_, hmi_capabilities())
         .WillByDefault(ReturnRef(mock_hmi_capabilities_));
     ON_CALL(mock_hmi_capabilities_, rc_capability())
-        .WillByDefault(Return(&rc_capabilities_));
+        .WillByDefault(Return(rc_capabilities_));
     ON_CALL(mock_policy_handler_,
             CheckHMIType(
                 _, mobile_apis::AppHMIType::eType::REMOTE_CONTROL, nullptr))
@@ -209,7 +210,7 @@ class RCGetInteriorVehicleDataConsentTest
       mock_interior_data_cache_;
   testing::NiceMock<rc_rpc_plugin_test::MockInteriorDataManager>
       mock_interior_data_manager_;
-  smart_objects::SmartObject rc_capabilities_;
+  smart_objects::SmartObjectSPtr rc_capabilities_;
   MockRPCPlugin mock_rpc_plugin;
   MockCommandFactory mock_command_factory;
   am::request_controller::RequestController request_controller;

@@ -1346,6 +1346,8 @@ void CacheManager::PersistData() {
         is_revoked = false;
       }
 
+      backup_->SetMetaInfo(*(*copy_pt.policy_table.module_meta).ccpu_version);
+
       // In case of extended policy the meta info should be backuped as well.
       backup_->WriteDb();
     }
@@ -1479,18 +1481,32 @@ int CacheManager::CountUnconsentedGroups(const std::string& policy_app_id,
   return result;
 }
 
+void CacheManager::SetPreloadedPtFlag(const bool is_preloaded) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  *(pt_->policy_table.module_config.preloaded_pt) = is_preloaded;
+  Backup();
+}
+
 bool CacheManager::SetMetaInfo(const std::string& ccpu_version,
                                const std::string& wers_country_code,
                                const std::string& language) {
   CACHE_MANAGER_CHECK(false);
   sync_primitives::AutoLock auto_lock(cache_lock_);
-
+  rpc::Optional<policy_table::ModuleMeta>& module_meta =
+      pt_->policy_table.module_meta;
+  *(module_meta->ccpu_version) = ccpu_version;
   // We have to set preloaded flag as false in policy table on any response
   // of GetSystemInfo (SDLAQ-CRS-2365)
-  *pt_->policy_table.module_config.preloaded_pt = false;
-
+  *(pt_->policy_table.module_config.preloaded_pt) = false;
   Backup();
   return true;
+}
+
+std::string CacheManager::GetCCPUVersionFromPT() const {
+  LOG4CXX_AUTO_TRACE(logger_);
+  rpc::Optional<policy_table::ModuleMeta>& module_meta =
+      pt_->policy_table.module_meta;
+  return *(module_meta->ccpu_version);
 }
 
 bool CacheManager::IsMetaInfoPresent() const {

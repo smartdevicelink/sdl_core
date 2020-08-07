@@ -119,6 +119,7 @@ extern const char* num_ticks;
 extern const char* slider_footer;
 extern const char* menu_id;
 extern const char* menu_name;
+extern const char* parent_id;
 extern const char* menu_layout;
 extern const char* menu_layouts_available;
 extern const char* interaction_choice_set_id;
@@ -197,6 +198,8 @@ extern const char* navigation_capability;
 extern const char* phone_capability;
 extern const char* video_streaming_capability;
 extern const char* rc_capability;
+extern const char* driver_distraction_capability;
+extern const char* driver_distraction;
 extern const char* seat_location_capability;
 extern const char* app_services_capabilities;
 extern const char* day_color_scheme;
@@ -296,6 +299,7 @@ extern const char* cloud_app_vehicle_id;
 extern const char* external_temp;
 extern const char* turn_signal;
 extern const char* vin;
+extern const char* gearStatus;
 extern const char* prndl;
 extern const char* tire_pressure;
 extern const char* odometer;
@@ -309,6 +313,7 @@ extern const char* head_lamp_status;
 extern const char* engine_torque;
 extern const char* acc_pedal_pos;
 extern const char* steering_wheel_angle;
+extern const char* stability_controls_status;
 extern const char* e_call_info;
 extern const char* airbag_status;
 extern const char* emergency_event;
@@ -334,6 +339,7 @@ extern const char* system_software_version;
 extern const char* priority;
 extern const char* engine_oil_life;
 extern const char* oem_custom_data_type;
+extern const char* window_status;
 extern const char* hands_off_steering;
 
 // app services
@@ -480,6 +486,19 @@ extern const char* const x;
 extern const char* const y;
 }  // namespace strings
 
+namespace hmi_interface {
+extern const char* basic_communication;
+extern const char* buttons;
+extern const char* navigation;
+extern const char* sdl;
+extern const char* tts;
+extern const char* ui;
+extern const char* vr;
+extern const char* rc;
+extern const char* vehicle_info;
+extern const char* app_service;
+}  // namespace hmi_interface
+
 namespace json {
 extern const char* appId;
 extern const char* name;
@@ -591,6 +610,7 @@ extern const char* capabilities;
 extern const char* speech_capabilities;
 extern const char* prerecorded_speech_capabilities;
 extern const char* preset_bank_capabilities;
+extern const char* on_screen_presets_available;
 extern const char* allowed;
 extern const char* vehicle_type;
 extern const char* did_result;

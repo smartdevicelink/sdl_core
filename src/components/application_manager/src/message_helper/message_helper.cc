@@ -189,6 +189,8 @@ std::pair<std::string, mobile_apis::VehicleDataType::eType>
                        mobile_apis::VehicleDataType::VEHICLEDATA_TURNSIGNAL),
         std::make_pair(strings::vin,
                        mobile_apis::VehicleDataType::VEHICLEDATA_VIN),
+        std::make_pair(strings::gearStatus,
+                       mobile_apis::VehicleDataType::VEHICLEDATA_GEARSTATUS),
         std::make_pair(strings::prndl,
                        mobile_apis::VehicleDataType::VEHICLEDATA_PRNDL),
         std::make_pair(strings::tire_pressure,
@@ -211,6 +213,9 @@ std::pair<std::string, mobile_apis::VehicleDataType::eType>
         std::make_pair(
             strings::head_lamp_status,
             mobile_apis::VehicleDataType::VEHICLEDATA_HEADLAMPSTATUS),
+        std::make_pair(
+            strings::stability_controls_status,
+            mobile_apis::VehicleDataType::VEHICLEDATA_STABILITYCONTROLSSTATUS),
         std::make_pair(strings::e_call_info,
                        mobile_apis::VehicleDataType::VEHICLEDATA_ECALLINFO),
         std::make_pair(strings::airbag_status,
@@ -239,6 +244,8 @@ std::pair<std::string, mobile_apis::VehicleDataType::eType>
                        mobile_apis::VehicleDataType::VEHICLEDATA_STEERINGWHEEL),
         std::make_pair(strings::engine_oil_life,
                        mobile_apis::VehicleDataType::VEHICLEDATA_ENGINEOILLIFE),
+        std::make_pair(strings::window_status,
+                       mobile_apis::VehicleDataType::VEHICLEDATA_WINDOWSTATUS),
         std::make_pair(
             strings::hands_off_steering,
             mobile_apis::VehicleDataType::VEHICLEDATA_HANDSOFFSTEERING)};
@@ -1110,8 +1117,7 @@ void MessageHelper::SendAllOnButtonSubscriptionNotificationsForApp(
     return;
   }
 
-  DataAccessor<ButtonSubscriptions> button_accessor = app->SubscribedButtons();
-  ButtonSubscriptions subscriptions = button_accessor.GetData();
+  const ButtonSubscriptions subscriptions = app->SubscribedButtons().GetData();
   ButtonSubscriptions::iterator it = subscriptions.begin();
   for (; subscriptions.end() != it; ++it) {
     SendOnButtonSubscriptionNotification(
@@ -1879,6 +1885,10 @@ smart_objects::SmartObjectList MessageHelper::CreateAddSubMenuRequestToHMI(
         (*i->second)[strings::position];
     msg_params[strings::menu_params][strings::menu_name] =
         (*i->second)[strings::menu_name];
+    if ((*i->second).keyExists(strings::parent_id)) {
+      msg_params[strings::menu_params][strings::parent_id] =
+          (*i->second)[strings::parent_id];
+    }
     msg_params[strings::app_id] = app->app_id();
     (*ui_sub_menu)[strings::msg_params] = msg_params;
     if (((*i->second).keyExists(strings::menu_icon)) &&
