@@ -242,9 +242,10 @@ std::pair<std::string, mobile_apis::VehicleDataType::eType>
                        mobile_apis::VehicleDataType::VEHICLEDATA_ACCPEDAL),
         std::make_pair(strings::steering_wheel_angle,
                        mobile_apis::VehicleDataType::VEHICLEDATA_STEERINGWHEEL),
-        std::make_pair(
-            strings::engine_oil_life,
-            mobile_apis::VehicleDataType::VEHICLEDATA_ENGINEOILLIFE)};
+        std::make_pair(strings::engine_oil_life,
+                       mobile_apis::VehicleDataType::VEHICLEDATA_ENGINEOILLIFE),
+        std::make_pair(strings::window_status,
+                       mobile_apis::VehicleDataType::VEHICLEDATA_WINDOWSTATUS)};
 
 const VehicleData MessageHelper::vehicle_data_(
     kVehicleDataInitializer,

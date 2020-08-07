@@ -592,7 +592,8 @@
                             "tirePressure",
                             "vin",
                             "wiperStatus",
-                            "stabilityControlsStatus"
+                            "stabilityControlsStatus",
+                            "windowStatus"
                         ]
                     },
                     "OnVehicleData": {
@@ -618,7 +619,8 @@
                             "tirePressure",
                             "vin",
                             "wiperStatus",
-                            "stabilityControlsStatus"
+                            "stabilityControlsStatus",
+                            "windowStatus"
                         ]
                     },
                     "SubscribeVehicleData": {
@@ -643,7 +645,8 @@
                             "odometer",
                             "tirePressure",
                             "wiperStatus",
-                            "stabilityControlsStatus"
+                            "stabilityControlsStatus",
+                            "windowStatus"
                         ]
                     },
                     "UnsubscribeVehicleData": {
@@ -668,7 +671,8 @@
                             "odometer",
                             "tirePressure",
                             "wiperStatus",
-                            "stabilityControlsStatus"
+                            "stabilityControlsStatus",
+                            "windowStatus"
                         ]
                     }
                 }
@@ -4007,6 +4011,102 @@
                     "type": "String",
                     "mandatory": false,
                     "since": "5.1"
+                },
+                {
+                    "name": "windowStatus",
+                    "params": [
+                        {
+                            "name": "location",
+                            "params": [
+                                {
+                                    "name": "col",
+                                    "key": "OEM_REF_WND_LOC_COL",
+                                    "type": "Integer",
+                                    "mandatory": true,
+                                    "minvalue": -1,
+                                    "maxvalue": 100
+                                },
+                                {
+                                    "name": "row",
+                                    "key": "OEM_REF_WND_LOC_ROW",
+                                    "type": "Integer",
+                                    "mandatory": true,
+                                    "minvalue": -1,
+                                    "maxvalue": 100
+                                },
+                                {
+                                    "name": "level",
+                                    "key": "OEM_REF_WND_LOC_LVL",
+                                    "type": "Integer",
+                                    "mandatory": false,
+                                    "defvalue" : 0,
+                                    "minvalue": -1,
+                                    "maxvalue": 100
+                                },
+                                {
+                                    "name": "colspan",
+                                    "key": "OEM_REF_WND_LOC_COLSPN",
+                                    "type": "Integer",
+                                    "mandatory": false,
+                                    "defvalue" : 1,
+                                    "minvalue": 1,
+                                    "maxvalue": 100
+                                },
+                                {
+                                    "name": "rowspan",
+                                    "key": "OEM_REF_WND_LOC_ROWSPN",
+                                    "type": "Integer",
+                                    "mandatory": false,
+                                    "defvalue" : 1,
+                                    "minvalue": 1,
+                                    "maxvalue": 100
+                                },
+                                {
+                                    "name": "levelspan",
+                                    "key": "OEM_REF_WND_LOC_LVLSPN",
+                                    "type": "Integer",
+                                    "mandatory": false,
+                                    "defvalue" : 1,
+                                    "minvalue": 1,
+                                    "maxvalue": 100
+                                }
+                            ],
+                            "key": "OEM_REF_WND_LOC",
+                            "type": "Struct",
+                            "mandatory": true
+                        },
+                        {
+                            "name": "state",
+                            "params": [
+                                {
+                                    "name": "approximatePosition",
+                                    "key": "OEM_REF_WND_STATE_APRPOS",
+                                    "type": "Integer",
+                                    "mandatory": true,
+                                    "minvalue": 0,
+                                    "maxvalue": 100
+                                },
+                                {
+                                    "name": "deviation",
+                                    "key": "OEM_REF_WND_STATE_DEV",
+                                    "type": "Integer",
+                                    "mandatory": true,
+                                    "minvalue": 0,
+                                    "maxvalue": 100
+                                }
+                            ],
+                            "key": "OEM_REF_WND_STATE",
+                            "type": "Struct",
+                            "mandatory": true
+                        }
+                    ],
+                    "key": "OEM_REF_WND_STATUS",
+                    "array": true,
+                    "type": "Struct",
+                    "mandatory": false,
+                    "minsize": 0,
+                    "maxsize": 100,
+                    "since": "7.0"
                 },
                 {
                     "name": "eCallInfo",
