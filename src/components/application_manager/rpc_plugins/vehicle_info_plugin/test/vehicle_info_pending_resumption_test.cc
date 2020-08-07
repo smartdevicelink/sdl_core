@@ -329,7 +329,7 @@ TEST_F(VehicleInfoPendingResumptionHandlerTest,
   resumption_handler_->on_event(event);
   EXPECT_TRUE(ext->isSubscribedToVehicleInfo("gps"));
   EXPECT_TRUE(ext->isSubscribedToVehicleInfo("speed"));
-  EXPECT_EQ(ext->PendingSubscriptions().size(), 0u);
+  EXPECT_EQ(ext->PendingSubscriptions().GetData().size(), 0u);
 }
 
 TEST_F(VehicleInfoPendingResumptionHandlerTest,
@@ -375,7 +375,7 @@ TEST_F(VehicleInfoPendingResumptionHandlerTest,
   resumption_handler_->on_event(event);
   EXPECT_TRUE(ext->isSubscribedToVehicleInfo("gps"));
   EXPECT_FALSE(ext->isSubscribedToVehicleInfo("speed"));
-  EXPECT_EQ(ext->PendingSubscriptions().size(), 0u);
+  EXPECT_EQ(ext->PendingSubscriptions().GetData().size(), 0u);
 }
 
 TEST_F(VehicleInfoPendingResumptionHandlerTest,
@@ -415,7 +415,7 @@ TEST_F(VehicleInfoPendingResumptionHandlerTest,
   resumption_handler_->on_event(event);
   EXPECT_FALSE(ext->isSubscribedToVehicleInfo("gps"));
   EXPECT_FALSE(ext->isSubscribedToVehicleInfo("speed"));
-  EXPECT_EQ(ext->PendingSubscriptions().size(), 0u);
+  EXPECT_EQ(ext->PendingSubscriptions().GetData().size(), 0u);
 }
 
 TEST_F(VehicleInfoPendingResumptionHandlerTest,
@@ -454,7 +454,7 @@ TEST_F(VehicleInfoPendingResumptionHandlerTest,
   resumption_handler_->on_event(event);
   EXPECT_FALSE(ext->isSubscribedToVehicleInfo("gps"));
   EXPECT_FALSE(ext->isSubscribedToVehicleInfo("speed"));
-  EXPECT_EQ(ext->PendingSubscriptions().size(), 0u);
+  EXPECT_EQ(ext->PendingSubscriptions().GetData().size(), 0u);
 }
 
 TEST_F(VehicleInfoPendingResumptionHandlerTest, TwoAppsOneSharedDataSuccess) {
@@ -494,8 +494,8 @@ TEST_F(VehicleInfoPendingResumptionHandlerTest, TwoAppsOneSharedDataSuccess) {
   resumption_handler_->on_event(event);
   EXPECT_TRUE(ext->isSubscribedToVehicleInfo("gps"));
   EXPECT_TRUE(ext2->isSubscribedToVehicleInfo("gps"));
-  EXPECT_EQ(ext->PendingSubscriptions().size(), 0u);
-  EXPECT_EQ(ext2->PendingSubscriptions().size(), 0u);
+  EXPECT_EQ(ext->PendingSubscriptions().GetData().size(), 0u);
+  EXPECT_EQ(ext2->PendingSubscriptions().GetData().size(), 0u);
 }
 
 TEST_F(VehicleInfoPendingResumptionHandlerTest,
@@ -541,8 +541,8 @@ TEST_F(VehicleInfoPendingResumptionHandlerTest,
   EXPECT_TRUE(ext->isSubscribedToVehicleInfo("speed"));
   EXPECT_TRUE(ext2->isSubscribedToVehicleInfo("gps"));
   EXPECT_TRUE(ext2->isSubscribedToVehicleInfo("speed"));
-  EXPECT_EQ(ext->PendingSubscriptions().size(), 0u);
-  EXPECT_EQ(ext2->PendingSubscriptions().size(), 0u);
+  EXPECT_EQ(ext->PendingSubscriptions().GetData().size(), 0u);
+  EXPECT_EQ(ext2->PendingSubscriptions().GetData().size(), 0u);
 }
 
 TEST_F(VehicleInfoPendingResumptionHandlerTest,
@@ -597,8 +597,8 @@ TEST_F(VehicleInfoPendingResumptionHandlerTest,
   resumption_handler_->on_event(second_event);
   EXPECT_FALSE(ext->isSubscribedToVehicleInfo("gps"));
   EXPECT_TRUE(ext2->isSubscribedToVehicleInfo("gps"));
-  EXPECT_EQ(ext->PendingSubscriptions().size(), 0u);
-  EXPECT_EQ(ext2->PendingSubscriptions().size(), 0u);
+  EXPECT_EQ(ext->PendingSubscriptions().GetData().size(), 0u);
+  EXPECT_EQ(ext2->PendingSubscriptions().GetData().size(), 0u);
 }
 
 }  // namespace vehicle_info_plugin_test

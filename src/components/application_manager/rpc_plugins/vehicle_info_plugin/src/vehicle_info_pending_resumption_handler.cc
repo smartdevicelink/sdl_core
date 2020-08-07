@@ -240,13 +240,15 @@ void VehicleInfoPendingResumptionHandler::HandleResumptionSubscriptionRequest(
   LOG4CXX_AUTO_TRACE(logger_);
   UNUSED(extension);
   auto& ext = VehicleInfoAppExtension::ExtractVIExtension(app);
-  const auto subscriptions = ext.PendingSubscriptions();
+
+  const auto subscriptions = ext.PendingSubscriptions().GetData();
   if (subscriptions.empty()) {
     LOG4CXX_DEBUG(logger_, "Subscriptions is empty");
     return;
   }
   auto pending_request =
       SubscribeToFakeRequest(app.app_id(), subscriptions, subscriber);
+
   pending_requests_.push_back(pending_request);
   LOG4CXX_DEBUG(
       logger_,

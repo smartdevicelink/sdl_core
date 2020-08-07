@@ -95,13 +95,13 @@ class VehicleInfoAppExtension : public app_mngr::AppExtension {
    * @brief Subscriptions get list of subscriptions for application extension
    * @return list of subscriptions for application extension
    */
-  const VehicleInfoSubscriptions& Subscriptions();
+  const DataAccessor<VehicleInfoSubscriptions> Subscriptions();
 
   bool AddPendingSubscription(const std::string& vehicle_data);
 
   bool RemovePendingSubscriptions();
 
-  const VehicleInfoSubscriptions& PendingSubscriptions();
+  const DataAccessor<VehicleInfoSubscriptions> PendingSubscriptions();
 
   /**
    * @brief SaveResumptionData saves vehicle info data
@@ -131,7 +131,10 @@ class VehicleInfoAppExtension : public app_mngr::AppExtension {
       application_manager::Application& app);
 
  private:
+  mutable std::shared_ptr<sync_primitives::Lock> subscribed_data_lock_;
   VehicleInfoSubscriptions subscribed_data_;
+
+  mutable std::shared_ptr<sync_primitives::Lock> pending_subscriptions_lock_;
   VehicleInfoSubscriptions pending_subscriptions_;
   VehicleInfoPlugin& plugin_;
   app_mngr::Application& app_;

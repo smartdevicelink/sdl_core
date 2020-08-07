@@ -132,7 +132,7 @@ void VehicleInfoPlugin::UnsubscribeFromRemovedVDItems() {
     for (auto& app : applications.GetData()) {
       auto& ext = VehicleInfoAppExtension::ExtractVIExtension(*app);
       auto subscription_names = ext.Subscriptions();
-      for (auto& subscription_name : subscription_names) {
+      for (auto& subscription_name : subscription_names.GetData()) {
         if (custom_vehicle_data_manager_->IsRemovedCustomVehicleDataName(
                 subscription_name)) {
           ext.unsubscribeFromVehicleInfo(subscription_name);
@@ -302,7 +302,7 @@ smart_objects::SmartObjectSPtr VehicleInfoPlugin::GetUnsubscribeIVIRequest(
 void VehicleInfoPlugin::DeleteSubscriptions(
     application_manager::ApplicationSharedPtr app) {
   auto& ext = VehicleInfoAppExtension::ExtractVIExtension(*app);
-  auto subscriptions = ext.Subscriptions();
+  auto subscriptions = ext.Subscriptions().GetData();
   std::vector<std::string> ivi_to_unsubscribe;
   for (auto& ivi : subscriptions) {
     ext.unsubscribeFromVehicleInfo(ivi);
