@@ -49,7 +49,7 @@ UISubtleAlertRequest::UISubtleAlertRequest(
                    hmi_capabilities,
                    policy_handler) {
   const auto& msg_params = (*message_)[strings::msg_params];
-  if (msg_params[strings::duration]) {
+  if (msg_params.keyExists(strings::duration)) {
     uint32_t request_timeout = msg_params[strings::duration].asUInt();
     default_timeout_ += request_timeout;
   } else {
