@@ -132,8 +132,8 @@ void VehicleInfoPlugin::UnsubscribeFromRemovedVDItems() {
     auto applications = application_manager_->applications();
     for (auto& app : applications.GetData()) {
       auto& ext = VehicleInfoAppExtension::ExtractVIExtension(*app);
-      auto subscription_names = ext.Subscriptions();
-      for (auto& subscription_name : subscription_names.GetData()) {
+      auto subscription_names = ext.Subscriptions().GetData();
+      for (auto& subscription_name : subscription_names) {
         if (custom_vehicle_data_manager_->IsRemovedCustomVehicleDataName(
                 subscription_name)) {
           ext.unsubscribeFromVehicleInfo(subscription_name);
