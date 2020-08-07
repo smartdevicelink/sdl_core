@@ -99,6 +99,8 @@ class VehicleInfoAppExtension : public app_mngr::AppExtension {
 
   bool AddPendingSubscription(const std::string& vehicle_data);
 
+  bool RemovePendingSubscription(const std::string& vehicle_data);
+
   bool RemovePendingSubscriptions();
 
   const DataAccessor<VehicleInfoSubscriptions> PendingSubscriptions();

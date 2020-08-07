@@ -100,6 +100,18 @@ bool VehicleInfoAppExtension::AddPendingSubscription(
   return pending_subscriptions_.insert(vehicle_data).second;
 }
 
+bool VehicleInfoAppExtension::RemovePendingSubscription(
+    const std::string& vehicle_data) {
+  LOG4CXX_DEBUG(logger_, vehicle_data);
+  sync_primitives::AutoLock lock(*pending_subscriptions_lock_);
+  auto it = pending_subscriptions_.find(vehicle_data);
+  if (it != pending_subscriptions_.end()) {
+    pending_subscriptions_.erase(it);
+    return true;
+  }
+  return false;
+}
+
 bool VehicleInfoAppExtension::RemovePendingSubscriptions() {
   sync_primitives::AutoLock lock(*pending_subscriptions_lock_);
   pending_subscriptions_.clear();

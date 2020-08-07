@@ -166,6 +166,13 @@ void VehicleInfoPlugin::ProcessResumptionSubscription(
     resumption::Subscriber subscriber) {
   LOG4CXX_AUTO_TRACE(logger_);
 
+  auto pending = ext.PendingSubscriptions().GetData();
+  for (const auto& ivi : pending) {
+    if (IsSubscribedAppExist(ivi)) {
+      ext.RemovePendingSubscription(ivi);
+      ext.subscribeToVehicleInfo(ivi);
+    }
+  }
   pending_resumption_handler_->HandleResumptionSubscriptionRequest(
       ext, subscriber, app);
 }
