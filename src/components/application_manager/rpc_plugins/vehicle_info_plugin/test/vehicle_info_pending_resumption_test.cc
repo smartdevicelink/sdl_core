@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018, Ford Motor Company
+ * Copyright (c) 2020, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -135,8 +135,8 @@ smart_objects::SmartObjectSPtr CreateVDRequest(const uint32_t corr_id) {
       std::make_shared<smart_objects::SmartObject>(
           smart_objects::SmartType_Map);
   smart_objects::SmartObject& object = *request;
-  object[strings::params][strings::message_type] =
-      static_cast<int>(0);  // request
+  const auto message_type_request = 0;
+  object[strings::params][strings::message_type] = message_type_request;
   object[strings::params][strings::function_id] =
       static_cast<int>(VehicleInfo_SubscribeVehicleData);
 
@@ -156,22 +156,6 @@ mobile_apis::VehicleDataType::eType ToVDType(const std::string& vd) {
   return mobile_apis::VehicleDataType::VEHICLEDATA_OEM_CUSTOM_DATA;
 }
 
-// smart_objects::SmartObject CreateVDError(
-//    const hmi_apis::Common_Result::eType common_result,
-//    uint32_t correleation_id) {
-//  namespace strings = application_manager::strings;
-//  namespace hmi_response = application_manager::hmi_response;
-//  smart_objects::SmartObject message(smart_objects::SmartType_Map);
-//  smart_objects::SmartObject params(smart_objects::SmartType_Map);
-//  params[strings::function_id] = VehicleInfo_SubscribeVehicleData;
-//  params[strings::message_type] = 1;  // MessageType::kResponse;
-//  params[strings::correlation_id] = correleation_id;
-//  params[strings::error_msg] = "error message";
-//  params[strings::protocol_type] = 1;  // HMI protocol type
-//  params[hmi_response::code] = common_result;
-//  return message;
-//}
-
 smart_objects::SmartObject CreateVDError(const uint32_t correlation_id,
                                          const int32_t result_code,
                                          const std::string& info) {
@@ -181,10 +165,12 @@ smart_objects::SmartObject CreateVDError(const uint32_t correlation_id,
 
   message[strings::params][strings::function_id] =
       VehicleInfo_SubscribeVehicleData;
-  message[strings::params][strings::protocol_type] = 1;
+  const auto hmi_protocol_type = 1;
+  message[strings::params][strings::protocol_type] = hmi_protocol_type;
   message[strings::params][strings::correlation_id] = correlation_id;
 
-  message[strings::params][strings::message_type] = 1;
+  const auto message_type_response = 1;
+  message[strings::params][strings::message_type] = message_type_response;
   message[strings::params][hmi_response::code] = result_code;
   message[strings::params][strings::error_msg] = info;
 
@@ -202,9 +188,11 @@ smart_objects::SmartObject CreateVDResponse(
   smart_objects::SmartObject message(smart_objects::SmartType_Map);
   smart_objects::SmartObject params(smart_objects::SmartType_Map);
   params[strings::function_id] = VehicleInfo_SubscribeVehicleData;
-  params[strings::message_type] = 1;  // MessageType::kResponse;
+  const auto message_type_response = 1;
+  params[strings::message_type] = message_type_response;
   params[strings::correlation_id] = correleation_id;
-  params[strings::protocol_type] = 1;  // HMI protocol type
+  const auto hmi_protocol_type = 1;
+  params[strings::protocol_type] = hmi_protocol_type;
   params[hmi_response::code] = common_result;
   message[strings::params] = params;
   smart_objects::SmartObject msg_params(smart_objects::SmartType_Map);

@@ -395,6 +395,11 @@ class MockMessageHelper {
                                               const uint32_t correlation_id,
                                               const int32_t result_code,
                                               const std::string& info));
+
+  MOCK_METHOD3(CreateResponseMessageFromHmi,
+               smart_objects::SmartObjectSPtr(const int32_t function_id,
+                                              const uint32_t correlation_id,
+                                              const int32_t result_code));
   MOCK_METHOD3(CreateUIDeleteWindowRequestToHMI,
                smart_objects::SmartObjectSPtr(
                    application_manager::ApplicationSharedPtr application,

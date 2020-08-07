@@ -90,7 +90,11 @@ class VehicleInfoPendingResumptionHandler
     PendingSubscriptionsResumption(const PendingSubscriptionsResumption& copy) =
         default;
 
-    bool Successfull() const;
+    /**
+     * @brief IsSuccessfullyDone check if SDL restored all required data or not
+     * @return
+     */
+    bool IsSuccessfullyDone() const;
 
     bool DataWasRequested(const std::string& vd) const;
     std::set<std::string> NotSubscribedData() const;
@@ -109,16 +113,23 @@ class VehicleInfoPendingResumptionHandler
     std::map<std::string, smart_objects::SmartObject> subscription_results_;
   };
 
-  void SendHMIRequestForNotSubscribed(
-      const PendingSubscriptionsResumption& next_pending);
-  void RaiseFinishedPendingResumption(
-      const PendingSubscriptionsResumption& next_pending);
+  void SendHMIRequestForNotSubscribed(const PendingSubscriptionsResumption& pending_resumption);
+  void RaiseFinishedPendingResumption(const PendingSubscriptionsResumption& pending_resumption);
   /**
    * @brief SubscribeToFakeRequest will create fake subscription for subscriber
    * ( resumption_data_processor)
+   * Fake request is required only for subscriber subscription.
+   * This request will not be sen't to HMI so it named as fake request.
+   * Fake request contains all data that need to be resumed for the application
+   * When HMI will resopond for any VehicleDara request, PendingSubscriptionsResumption
+   * will go throw all pending resumptions and fill it will received subscriptions.
+   * If certain pending resumption will take all requested subscriptions PendingSubscriptionsResumption
+   * will take this fake request correaltion id and create fake response based on it.
+   * Within fake response it will notify subscriber about resumption status.
+   *
    * @param app_id applicaiton to pass into subscriber
    * @param subscriptions list of requested subscriptions
-   * @param subscriber function to subscribe caller for ready resumption
+   * @param subscriber function to subscribe caller for finished resumption
    * @return pending_resumption with information about fake correlation id for
    * subscriber, list of vehicle data to subscribe
    */

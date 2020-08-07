@@ -2490,6 +2490,27 @@ smart_objects::SmartObjectSPtr MessageHelper::CreateNegativeResponseFromHmi(
   return message;
 }
 
+smart_objects::SmartObjectSPtr MessageHelper::CreateResponseMessageFromHmi(
+    const int32_t function_id,
+    const uint32_t correlation_id,
+    const int32_t result_code) {
+  smart_objects::SmartObject params(smart_objects::SmartType_Map);
+  params[strings::function_id] = function_id;
+  params[strings::message_type] = MessageType::kResponse;
+  params[strings::correlation_id] = correlation_id;
+  params[strings::protocol_type] = commands::CommandImpl::hmi_protocol_type_;
+  params[hmi_response::code] = result_code;
+
+  smart_objects::SmartObjectSPtr response =
+      std::make_shared<smart_objects::SmartObject>(
+          smart_objects::SmartType_Map);
+  auto& message = *response;
+  message[strings::params] = params;
+  message[strings::msg_params] =
+      smart_objects::SmartObject(smart_objects::SmartType_Map);
+  return response;
+}
+
 smart_objects::SmartObjectSPtr MessageHelper::CreateOnServiceUpdateNotification(
     const hmi_apis::Common_ServiceType::eType service_type,
     const hmi_apis::Common_ServiceEvent::eType service_event,

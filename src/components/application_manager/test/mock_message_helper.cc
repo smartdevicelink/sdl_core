@@ -728,4 +728,12 @@ smart_objects::SmartObjectSPtr MessageHelper::CreateNegativeResponseFromHmi(
       ->CreateNegativeResponseFromHmi(
           function_id, correlation_id, result_code, info);
 }
+
+smart_objects::SmartObjectSPtr MessageHelper::CreateResponseMessageFromHmi(
+    const int32_t function_id,
+    const uint32_t correlation_id,
+    const int32_t result_code) {
+  return MockMessageHelper::message_helper_mock()->CreateResponseMessageFromHmi(
+      function_id, correlation_id, result_code);
+}
 }  // namespace application_manager
