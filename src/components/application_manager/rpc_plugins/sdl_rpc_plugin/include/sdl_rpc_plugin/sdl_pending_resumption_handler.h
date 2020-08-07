@@ -55,8 +55,25 @@ class SDLPendingResumptionHandler
   void ClearPendingResumptionRequests() OVERRIDE;
 
  private:
-  void RaiseFakeSuccfullResponse(smart_objects::SmartObject response,
-                                 int32_t corr_id);
+  /**
+   * @brief RaiseFakeSuccessfulResponse raize event for the subscriber that
+   * contains emulated successful response from HMI To avoid double subscription
+   * SDLPendingResumptionHandler freezes sending requests to HMI. But
+   * subscriber() function need to be called to provide information that some
+   * data need to be resumed. So if pending request exists, SDL creates
+   * preliminary requests to HMI, subscribe the subscriber to this request but
+   * do not send it to HMI. It freezes this requests to precess the one by one
+   * when a response to the current request will be received When SDL receives a
+   * response from HMI it may satisfy some frozen requests. If it does SDL will
+   * create faked HMI response(based on the real one with corr_id replacement)
+   * and raize event. So that subscriber::on_event will be called with an
+   * appropriate response to the request that SDL was not sent to HMI.
+   * @param response message that will be raised with corr_id replacement
+   * @param corr_id correlation id that will be replaced in response to notify
+   * the subscriber
+   */
+  void RaiseFakeSuccessfulResponse(smart_objects::SmartObject response,
+                                   int32_t corr_id);
   smart_objects::SmartObjectSPtr CreateSubscriptionRequest();
   void ClearPendingRequestsMap();
 
