@@ -1,5 +1,5 @@
 /*
- Copyright (c) 2019, Ford Motor Company, Livio
+ Copyright (c) 2020, Ford Motor Company, Livio
  All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -34,6 +34,7 @@
 
 namespace sdl_rpc_plugin {
 using namespace application_manager;
+
 namespace commands {
 
 UISubtleAlertRequest::UISubtleAlertRequest(
@@ -46,7 +47,15 @@ UISubtleAlertRequest::UISubtleAlertRequest(
                    application_manager,
                    rpc_service,
                    hmi_capabilities,
-                   policy_handler) {}
+                   policy_handler) {
+  const auto& msg_params = (*message_)[strings::msg_params];
+  if (msg_params[strings::duration]) {
+    uint32_t request_timeout = msg_params[strings::duration].asUInt();
+    default_timeout_ += request_timeout;
+  } else {
+    default_timeout_ = 0;
+  }
+}
 
 UISubtleAlertRequest::~UISubtleAlertRequest() {}
 

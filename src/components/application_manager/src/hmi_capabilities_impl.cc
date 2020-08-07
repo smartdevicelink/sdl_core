@@ -278,6 +278,15 @@ void InitCapabilities() {
                      hmi_apis::Common_TextFieldName::addressLines));
   text_fields_enum_name.insert(std::make_pair(
       std::string("phoneNumber"), hmi_apis::Common_TextFieldName::phoneNumber));
+  text_fields_enum_name.insert(
+      std::make_pair(std::string("subtleAlertText1"),
+                     hmi_apis::Common_TextFieldName::subtleAlertText1));
+  text_fields_enum_name.insert(
+      std::make_pair(std::string("subtleAlertText2"),
+                     hmi_apis::Common_TextFieldName::subtleAlertText2));
+  text_fields_enum_name.insert(std::make_pair(
+      std::string("subtleAlertSoftButtonText"),
+      hmi_apis::Common_TextFieldName::subtleAlertSoftButtonText));
   text_fields_enum_name.insert(std::make_pair(
       std::string("turnText"), hmi_apis::Common_TextFieldName::turnText));
   text_fields_enum_name.insert(std::make_pair(

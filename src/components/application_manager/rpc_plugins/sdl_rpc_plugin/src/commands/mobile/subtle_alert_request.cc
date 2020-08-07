@@ -1,5 +1,5 @@
 /*
- Copyright (c) 2019, Ford Motor Company, Livio
+ Copyright (c) 2020, Ford Motor Company, Livio
  All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -34,17 +34,17 @@
 
 #include "application_manager/application_impl.h"
 #include "application_manager/message_helper.h"
-#include "interfaces/MOBILE_API.h"
 
 namespace sdl_rpc_plugin {
 using namespace application_manager;
+
 namespace commands {
 
 SubtleAlertRequest::SubtleAlertRequest(
     const application_manager::commands::MessageSharedPtr& message,
     ApplicationManager& application_manager,
-    app_mngr::rpc_service::RPCService& rpc_service,
-    app_mngr::HMICapabilities& hmi_capabilities,
+    rpc_service::RPCService& rpc_service,
+    HMICapabilities& hmi_capabilities,
     policy::PolicyHandlerInterface& policy_handler)
     : CommandRequestImpl(message,
                          application_manager,
@@ -57,7 +57,10 @@ SubtleAlertRequest::SubtleAlertRequest(
     , is_ui_subtle_alert_sent_(false)
     , is_tts_stop_speaking_sent_(false)
     , subtle_alert_result_(hmi_apis::Common_Result::INVALID_ENUM)
-    , tts_speak_result_(hmi_apis::Common_Result::INVALID_ENUM) {}
+    , tts_speak_result_(hmi_apis::Common_Result::INVALID_ENUM) {
+  subscribe_on_event(hmi_apis::FunctionID::UI_OnResetTimeout);
+  subscribe_on_event(hmi_apis::FunctionID::TTS_OnResetTimeout);
+}
 
 SubtleAlertRequest::~SubtleAlertRequest() {}
 
@@ -202,7 +205,7 @@ bool SubtleAlertRequest::PrepareResponseParameters(
       PrepareResultForMobileResponse(ui_subtle_alert_info, tts_alert_info);
 
   /* result=false if UI interface is ok and TTS interface = UNSUPPORTED_RESOURCE
-   * and sdl receive TTS.IsReady=true or SDL doesn't receive responce for
+   * and sdl receive TTS.IsReady=true or SDL doesn't receive response for
    * TTS.IsReady.
    */
   if (result && ui_subtle_alert_info.is_ok &&
@@ -211,16 +214,6 @@ bool SubtleAlertRequest::PrepareResponseParameters(
     result = false;
   }
   result_code = mobile_apis::Result::WARNINGS;
-  if ((ui_subtle_alert_info.is_ok || ui_subtle_alert_info.is_not_used) &&
-      tts_alert_info.is_unsupported_resource &&
-      HmiInterfaces::STATE_AVAILABLE == tts_alert_info.interface_state) {
-    tts_response_info_ = "Unsupported phoneme type sent in a prompt";
-    info = app_mngr::commands::MergeInfos(ui_subtle_alert_info,
-                                          ui_response_info_,
-                                          tts_alert_info,
-                                          tts_response_info_);
-    return result;
-  }
   if ((ui_subtle_alert_info.is_ok || ui_subtle_alert_info.is_not_used) &&
       tts_alert_info.is_unsupported_resource &&
       HmiInterfaces::STATE_AVAILABLE == tts_alert_info.interface_state) {
@@ -299,8 +292,7 @@ bool SubtleAlertRequest::Validate(uint32_t app_id) {
   // check if mandatory params(alertText1 and TTSChunk) specified
   if ((!(*message_)[strings::msg_params].keyExists(strings::alert_text1)) &&
       (!(*message_)[strings::msg_params].keyExists(strings::alert_text2)) &&
-      (!(*message_)[strings::msg_params].keyExists(strings::tts_chunks) &&
-       (1 > (*message_)[strings::msg_params][strings::tts_chunks].length()))) {
+      (!(*message_)[strings::msg_params].keyExists(strings::tts_chunks))) {
     LOG4CXX_ERROR(logger_, "Mandatory parameters are missing");
     SendResponse(false,
                  mobile_apis::Result::INVALID_DATA,

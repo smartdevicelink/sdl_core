@@ -1,5 +1,5 @@
 /*
- Copyright (c) 2019, Ford Motor Company, Livio
+ Copyright (c) 2020, Ford Motor Company, Livio
  All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -34,6 +34,7 @@
 
 namespace sdl_rpc_plugin {
 using namespace application_manager;
+
 namespace commands {
 
 OnUISubtleAlertPressedNotification::OnUISubtleAlertPressedNotification(
