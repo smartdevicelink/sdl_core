@@ -40,6 +40,7 @@
         <element name="beltStatus" />
         <element name="electronicParkBrakeStatus" />
         <element name="driverBraking" />
+        <element name="gearStatus" />
         <element name="prndl" />
         <element name="rpm" />
         <element name="steeringWheelAngle" />
@@ -50,6 +51,7 @@
         <element name="clusterModeStatus" />
         <element name="deviceStatus" />
         <element name="emergencyEvent" />
+        <element name="stabilityControlsStatus" />
         <element name="eCallInfo" />
         <element name="abs_State" />
         <element name="turnSignal" />

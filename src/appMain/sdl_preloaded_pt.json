@@ -506,7 +506,8 @@
                             "myKey",
                             "prndl",
                             "rpm",
-                            "steeringWheelAngle"
+                            "steeringWheelAngle",
+                            "gearStatus"
                         ]
                     },
                     "OnVehicleData": {
@@ -523,7 +524,8 @@
                             "myKey",
                             "prndl",
                             "rpm",
-                            "steeringWheelAngle"
+                            "steeringWheelAngle",
+                            "gearStatus"
                         ]
                     },
                     "SubscribeVehicleData": {
@@ -540,7 +542,8 @@
                             "myKey",
                             "prndl",
                             "rpm",
-                            "steeringWheelAngle"
+                            "steeringWheelAngle",
+                            "gearStatus"
                         ]
                     },
                     "UnsubscribeVehicleData": {
@@ -557,7 +560,8 @@
                             "myKey",
                             "prndl",
                             "rpm",
-                            "steeringWheelAngle"
+                            "steeringWheelAngle",
+                            "gearStatus"
                         ]
                     }
                 }
@@ -587,7 +591,8 @@
                             "odometer",
                             "tirePressure",
                             "vin",
-                            "wiperStatus"
+                            "wiperStatus",
+                            "stabilityControlsStatus"
                         ]
                     },
                     "OnVehicleData": {
@@ -612,7 +617,8 @@
                             "odometer",
                             "tirePressure",
                             "vin",
-                            "wiperStatus"
+                            "wiperStatus",
+                            "stabilityControlsStatus"
                         ]
                     },
                     "SubscribeVehicleData": {
@@ -636,7 +642,8 @@
                             "cloudAppVehicleID",
                             "odometer",
                             "tirePressure",
-                            "wiperStatus"
+                            "wiperStatus",
+                            "stabilityControlsStatus"
                         ]
                     },
                     "UnsubscribeVehicleData": {
@@ -660,7 +667,8 @@
                             "cloudAppVehicleID",
                             "odometer",
                             "tirePressure",
-                            "wiperStatus"
+                            "wiperStatus",
+                            "stabilityControlsStatus"
                         ]
                     }
                 }
@@ -3334,13 +3342,17 @@
                     "type": "Float",
                     "mandatory": false,
                     "minvalue": -6,
-                    "maxvalue": 106
+                    "maxvalue": 106,
+                    "deprecated": true,
+                    "since": "7.0"
                 },
                 {
                     "name": "fuelLevel_State",
                     "key": "OEM_REF_FUEL_LEV_ST",
                     "type": "ComponentVolumeStatus",
-                    "mandatory": false
+                    "mandatory": false,
+                    "deprecated": true,
+                    "since": "7.0"
                 },
                 {
                     "name": "instantFuelConsumption",
@@ -3366,6 +3378,38 @@
                             "mandatory": false,
                             "minvalue": 0,
                             "maxvalue": 10000
+                        },
+                        {
+                            "name": "level",
+                            "key": "OEM_REF_FUEL_RAN_LVL",
+                            "type": "Float",
+                            "minvalue": -6,
+                            "maxvalue": 1000000,
+                            "mandatory": false,
+                            "since": "7.0"
+                        },
+                        {
+                            "name": "levelState",
+                            "key": "OEM_REF_FUEL_RAN_LVL_STATE",
+                            "type": "ComponentVolumeStatus",
+                            "mandatory": false,
+                            "since": "7.0"
+                        },
+                        {
+                            "name": "capacity",
+                            "key": "OEM_REF_FUEL_RAN_CAP",
+                            "type": "Float",
+                            "minvalue": 0,
+                            "maxvalue": 1000000,
+                            "mandatory": false,
+                            "since": "7.0"
+                        },
+                        {
+                            "name": "capacityUnit",
+                            "key": "OEM_REF_FUEL_RAN_CAP_UNIT",
+                            "type": "CapacityUnit",
+                            "mandatory": false,
+                            "since": "7.0"
                         }
                     ],
                     "key": "OEM_REF_FUEL_RAN",
@@ -3403,7 +3447,36 @@
                     "name": "prndl",
                     "key": "OEM_REF_PRNDL",
                     "type": "PRNDL",
-                    "mandatory": false
+                    "mandatory": false,
+                    "since": "2.0",
+                    "until": "7.0"
+                },
+                {
+                    "name": "gearStatus",
+                    "params": [
+                        {
+                            "name": "userSelectedGear",
+                            "key": "OEM_REF_USER_GEAR",
+                            "type": "PRNDL",
+                            "mandatory": false
+                        },
+                        {
+                            "name": "actualGear",
+                            "key": "OEM_REF_ACT_GEAR",
+                            "type": "PRNDL",
+                            "mandatory": false
+                        },
+                        {
+                            "name": "transmissionType",
+                            "key": "OEM_REF_TR_TYPE",
+                            "type": "TransmissionType",
+                            "mandatory": false
+                        }
+                    ],
+                    "key": "OEM_REF_GEAR_STATUS",
+                    "type": "Struct",
+                    "mandatory": false,
+                    "since": "7.0"
                 },
                 {
                     "name": "tirePressure",
@@ -3906,6 +3979,27 @@
                     "type": "ElectronicParkBrakeStatus",
                     "mandatory": false,
                     "since": "5.0"
+                },
+                {
+                    "name": "stabilityControlsStatus",
+                    "params": [
+                        {
+                            "name": "escSystem",
+                            "key": "OEM_REF_ESC_SYSTEM",
+                            "type": "VehicleDataStatus",
+                            "mandatory": false
+                        },
+                        {
+                            "name": "trailerSwayControl",
+                            "key": "OEM_REF_TRAIL_SW_CTRL",
+                            "type": "VehicleDataStatus",
+                            "mandatory": false
+                        }
+                    ],
+                    "key": "OEM_REF_STAB_CTRLS_ST",
+                    "type": "Struct",
+                    "mandatory": false,
+                    "since": "7.0"
                 },
                 {
                     "name": "cloudAppVehicleID",
