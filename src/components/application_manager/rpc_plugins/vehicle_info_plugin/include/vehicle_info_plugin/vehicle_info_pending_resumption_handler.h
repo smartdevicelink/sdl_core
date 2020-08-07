@@ -56,6 +56,9 @@ class VehicleInfoPendingResumptionHandler
                                            app_mngr::Application& app) OVERRIDE;
   void ClearPendingResumptionRequests() OVERRIDE;
 
+  void HandleOnTimeOut(const uint32_t correlation_id,
+                       const hmi_apis::FunctionID::eType);
+
   std::map<std::string, bool> ExtractSubscribeResults(
       const smart_objects::SmartObject& response,
       const smart_objects::SmartObject& request) const;
