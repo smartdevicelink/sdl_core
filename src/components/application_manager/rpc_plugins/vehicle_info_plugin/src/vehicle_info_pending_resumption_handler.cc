@@ -167,12 +167,18 @@ void VehicleInfoPendingResumptionHandler::ProcessNextPendingResumption(
     return;
   }
   auto& pending = pending_requests_.front();
+  if (pending.waiting_for_hmi_response_) {
+    LOG4CXX_DEBUG(logger_,
+                  "Requests was already sent to HMI for " << pending.app_id_);
+    return;
+  }
   const auto successful_subscriptions =
       SuccessfulSubscriptionsFromResponse(response_message);
   pending.FillRestoredData(successful_subscriptions);
 
   if (!pending.Successfull()) {
     SendHMIRequestForNotSubscribed(pending);
+    pending.waiting_for_hmi_response_ = true;
     return;
   }
   auto copy = pending;
@@ -186,8 +192,16 @@ void VehicleInfoPendingResumptionHandler::TriggerPendingResumption() {
   if (pending_requests_.empty()) {
     return;
   }
-  auto next_pending = pending_requests_.front();
+  auto& next_pending = pending_requests_.front();
+  if (next_pending.waiting_for_hmi_response_) {
+    LOG4CXX_DEBUG(logger_,
+                  "Pending resumption for  "
+                      << next_pending.app_id_
+                      << " is already waiting for HMI response");
+    return;
+  }
   SendHMIRequestForNotSubscribed(next_pending);
+  next_pending.waiting_for_hmi_response_ = true;
 }
 
 void VehicleInfoPendingResumptionHandler::on_event(
@@ -247,6 +261,7 @@ void VehicleInfoPendingResumptionHandler::HandleResumptionSubscriptionRequest(
     application_manager::Application& app) {
   LOG4CXX_AUTO_TRACE(logger_);
   sync_primitives::AutoLock lock(lock_);
+  LOG4CXX_TRACE(logger_, "app id " << app.app_id());
   UNUSED(extension);
   auto& ext = VehicleInfoAppExtension::ExtractVIExtension(app);
 
@@ -255,6 +270,8 @@ void VehicleInfoPendingResumptionHandler::HandleResumptionSubscriptionRequest(
     LOG4CXX_DEBUG(logger_, "Subscriptions is empty");
     return;
   }
+  LOG4CXX_TRACE(logger_,
+                "resume subscriptions to : " << Stringify(subscriptions));
   auto pending_request =
       SubscribeToFakeRequest(app.app_id(), subscriptions, subscriber);
 
@@ -381,7 +398,7 @@ void VehicleInfoPendingResumptionHandler::PendingSubscriptionsResumption::
 
   FillRestoredData(successful_subscriptions);
 
-  LOG4CXX_DEBUG(logger_, "Restored data" << Stringify(restored_vehicle_data_));
+  LOG4CXX_DEBUG(logger_, "Restored data " << Stringify(restored_vehicle_data_));
 
   FillSubscriptionResults();
 

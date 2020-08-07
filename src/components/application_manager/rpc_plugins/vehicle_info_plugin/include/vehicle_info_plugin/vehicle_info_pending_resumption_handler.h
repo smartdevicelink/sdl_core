@@ -79,6 +79,7 @@ class VehicleInfoPendingResumptionHandler
         const std::set<std::string>& requested_vehicle_data)
         : app_id_(app_id)
         , fake_corr_id_(corr_id)
+        , waiting_for_hmi_response_(false)
         , requested_vehicle_data_(requested_vehicle_data) {}
 
     PendingSubscriptionsResumption(const PendingSubscriptionsResumption& copy) =
@@ -97,6 +98,7 @@ class VehicleInfoPendingResumptionHandler
 
     uint32_t app_id_;
     uint32_t fake_corr_id_;
+    bool waiting_for_hmi_response_;
     std::set<std::string> requested_vehicle_data_;
     std::set<std::string> restored_vehicle_data_;
     std::map<std::string, smart_objects::SmartObject> subscription_results_;
