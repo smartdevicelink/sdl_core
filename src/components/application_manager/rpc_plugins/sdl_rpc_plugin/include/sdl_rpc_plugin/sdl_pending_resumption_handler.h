@@ -28,7 +28,9 @@
 #ifndef SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_PLUGIN_INCLUDE_SDL_PLUGIN_SDL_PENDING_RESUMPTION_HANDLER_H
 #define SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_PLUGIN_INCLUDE_SDL_PLUGIN_SDL_PENDING_RESUMPTION_HANDLER_H
 
+#include <map>
 #include <queue>
+#include <vector>
 #include "application_manager/event_engine/event_observer.h"
 #include "application_manager/resumption/extension_pending_resumption_handler.h"
 #include "application_manager/resumption/resumption_data_processor.h"
@@ -73,7 +75,7 @@ class SDLPendingResumptionHandler
    * the subscriber
    */
   void RaiseFakeSuccessfulResponse(smart_objects::SmartObject response,
-                                   int32_t corr_id);
+                                   const int32_t corr_id);
   smart_objects::SmartObjectSPtr CreateSubscriptionRequest();
   void ClearPendingRequestsMap();
 

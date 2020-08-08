@@ -87,9 +87,6 @@ void VISubscribeVehicleDataRequest::onTimeOut() {
       std::string("Timed out"));
   timeout_event.set_smart_object(*error_response);
   timeout_event.raise(application_manager_.event_dispatcher());
-  //  resume_ctrl.HandleOnTimeOut(
-  //      correlation_id(),
-  //      static_cast<hmi_apis::FunctionID::eType>(function_id()));
 }
 
 }  // namespace commands

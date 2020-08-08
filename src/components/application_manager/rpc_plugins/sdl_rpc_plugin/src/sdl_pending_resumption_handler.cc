@@ -99,7 +99,7 @@ void SDLPendingResumptionHandler::ClearPendingResumptionRequests() {
 
 void SDLPendingResumptionHandler::RaiseFakeSuccessfulResponse(
     ns_smart_device_link::ns_smart_objects::SmartObject response,
-    int32_t corr_id) {
+    const int32_t corr_id) {
   using namespace application_manager;
   response[strings::params][strings::correlation_id] = corr_id;
   auto fid = static_cast<hmi_apis::FunctionID::eType>(

@@ -704,7 +704,6 @@ class MessageHelper {
    * @param function_id id of function
    * @param correlation_id correlation id
    * @param result_code result code
-   * @param info info message
    * @return pointer to created message
    */
   static smart_objects::SmartObjectSPtr CreateResponseMessageFromHmi(

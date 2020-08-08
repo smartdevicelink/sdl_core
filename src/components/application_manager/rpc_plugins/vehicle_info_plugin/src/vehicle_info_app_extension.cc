@@ -112,10 +112,9 @@ bool VehicleInfoAppExtension::RemovePendingSubscription(
   return false;
 }
 
-bool VehicleInfoAppExtension::RemovePendingSubscriptions() {
+void VehicleInfoAppExtension::RemovePendingSubscriptions() {
   sync_primitives::AutoLock lock(*pending_subscriptions_lock_);
   pending_subscriptions_.clear();
-  return true;
 }
 
 const DataAccessor<VehicleInfoSubscriptions>
