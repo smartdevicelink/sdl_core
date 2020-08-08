@@ -221,6 +221,11 @@ class AddCommandRequestTest
         mock_rpc_service_,
         ManageMobileCommand(response,
                             am::commands::Command::CommandSource::SOURCE_SDL));
+
+    resumprion_test::MockResumeCtrl mock_resume_ctrl;
+    EXPECT_CALL(app_mngr_, resume_controller())
+        .WillOnce(ReturnRef(mock_resume_ctrl));
+    EXPECT_CALL(mock_resume_ctrl, HandleOnTimeOut(_, _));
     std::shared_ptr<CommandRequestImpl> base_class_request =
         static_cast<std::shared_ptr<CommandRequestImpl> >(request_ptr);
     base_class_request->onTimeOut();
@@ -1092,6 +1097,12 @@ TEST_F(AddCommandRequestTest,
   EXPECT_CALL(mock_rpc_service_,
               ManageMobileCommand(
                   response, am::commands::Command::CommandSource::SOURCE_SDL));
+
+  resumprion_test::MockResumeCtrl mock_resume_ctrl;
+  EXPECT_CALL(app_mngr_, resume_controller())
+      .WillOnce(ReturnRef(mock_resume_ctrl));
+  EXPECT_CALL(mock_resume_ctrl, HandleOnTimeOut(_, _));
+
   std::shared_ptr<CommandRequestImpl> base_class_request =
       static_cast<std::shared_ptr<CommandRequestImpl> >(
           CreateCommand<AddCommandRequest>(msg_));
@@ -1142,6 +1153,12 @@ TEST_F(AddCommandRequestTest, OnTimeOut_AppRemoveCommandCalled) {
   EXPECT_CALL(mock_rpc_service_,
               ManageMobileCommand(
                   response, am::commands::Command::CommandSource::SOURCE_SDL));
+
+  resumprion_test::MockResumeCtrl mock_resume_ctrl;
+  EXPECT_CALL(app_mngr_, resume_controller())
+      .WillOnce(ReturnRef(mock_resume_ctrl));
+  EXPECT_CALL(mock_resume_ctrl, HandleOnTimeOut(_, _));
+
   std::shared_ptr<CommandRequestImpl> base_class_request =
       static_cast<std::shared_ptr<CommandRequestImpl> >(request_ptr);
   base_class_request->onTimeOut();
