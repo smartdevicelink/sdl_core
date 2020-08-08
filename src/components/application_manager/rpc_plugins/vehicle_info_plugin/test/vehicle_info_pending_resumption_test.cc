@@ -72,63 +72,6 @@ class SubscribeCatcher {
                void(const int32_t, const resumption::ResumptionRequest));
 };
 
-class VehicleInfoPendingResumptionHandlerTest : public ::testing::Test {
-  // using namespace vehicle_info_plugin;
- public:
-  VehicleInfoPendingResumptionHandlerTest()
-      : mock_message_helper_(
-            *application_manager::MockMessageHelper::message_helper_mock())
-
-  {}
-
-  void SetUp() OVERRIDE {
-    ON_CALL(app_manager_mock_, event_dispatcher())
-        .WillByDefault(ReturnRef(event_dispatcher_mock_));
-    ON_CALL(app_manager_mock_, GetRPCService())
-        .WillByDefault(ReturnRef(mock_rpc_service_));
-    resumption_handler_.reset(
-        new vehicle_info_plugin::VehicleInfoPendingResumptionHandler(
-            app_manager_mock_, custom_vehicle_data_manager_mock_));
-  }
-
-  MockAppPtr CreateApp(uint32_t app_id) {
-    auto mock_app = std::make_shared<MockApplication>();
-
-    ON_CALL(app_manager_mock_, application(app_id))
-        .WillByDefault(Return(mock_app));
-    ON_CALL(*mock_app, app_id()).WillByDefault(Return(app_id));
-    return mock_app;
-  }
-
-  VehicleInfoAppExtensionPtr CreateExtension(MockApplication& app) {
-    auto ext_ptr = std::make_shared<VehicleInfoAppExtension>(plugin_, app);
-    ON_CALL(app,
-            QueryInterface(VehicleInfoAppExtension::VehicleInfoAppExtensionUID))
-        .WillByDefault(Return(ext_ptr));
-    return ext_ptr;
-  }
-
-  resumption::Subscriber& get_subscriber() {
-    static resumption::Subscriber subscriber =
-        [this](const int32_t corr_id,
-               const resumption::ResumptionRequest resumption_request) {
-          this->subscribe_catcher_.subscribe(corr_id, resumption_request);
-        };
-    return subscriber;
-  }
-
-  SubscribeCatcher subscribe_catcher_;
-  MockMessageHelper& mock_message_helper_;
-  MockApplicationManager app_manager_mock_;
-  MockEventDispatcher event_dispatcher_mock_;
-  MockRPCService mock_rpc_service_;
-  MockCustomVehicleDataManager custom_vehicle_data_manager_mock_;
-  vehicle_info_plugin::VehicleInfoPlugin plugin_;
-
-  std::unique_ptr<vehicle_info_plugin::VehicleInfoPendingResumptionHandler>
-      resumption_handler_;
-};
-
 smart_objects::SmartObjectSPtr CreateVDRequest(const uint32_t corr_id) {
   using namespace application_manager;
   smart_objects::SmartObjectSPtr request =
@@ -177,6 +120,29 @@ smart_objects::SmartObject CreateVDError(const uint32_t correlation_id,
   return message;
 }
 
+smart_objects::SmartObjectSPtr CreateHMIResponseMessage(
+    const hmi_apis::Common_Result::eType common_result,
+    uint32_t correlation_id) {
+  namespace strings = application_manager::strings;
+  namespace hmi_response = application_manager::hmi_response;
+  smart_objects::SmartObject params(smart_objects::SmartType_Map);
+  params[strings::function_id] = VehicleInfo_SubscribeVehicleData;
+  params[strings::message_type] = application_manager::MessageType::kResponse;
+  params[strings::correlation_id] = correlation_id;
+  const auto hmi_protocol_type = 1;
+  params[strings::protocol_type] = hmi_protocol_type;
+  params[hmi_response::code] = common_result;
+
+  smart_objects::SmartObjectSPtr response =
+      std::make_shared<smart_objects::SmartObject>(
+          smart_objects::SmartType_Map);
+  auto& message = *response;
+  message[strings::params] = params;
+  message[strings::msg_params] =
+      smart_objects::SmartObject(smart_objects::SmartType_Map);
+  return response;
+}
+
 typedef std::map<std::string, hmi_apis::Common_VehicleDataResultCode::eType>
     VDResponseMap;
 smart_objects::SmartObject CreateVDResponse(
@@ -185,16 +151,7 @@ smart_objects::SmartObject CreateVDResponse(
     uint32_t correleation_id) {
   namespace strings = application_manager::strings;
   namespace hmi_response = application_manager::hmi_response;
-  smart_objects::SmartObject message(smart_objects::SmartType_Map);
-  smart_objects::SmartObject params(smart_objects::SmartType_Map);
-  params[strings::function_id] = VehicleInfo_SubscribeVehicleData;
-  const auto message_type_response = 1;
-  params[strings::message_type] = message_type_response;
-  params[strings::correlation_id] = correleation_id;
-  const auto hmi_protocol_type = 1;
-  params[strings::protocol_type] = hmi_protocol_type;
-  params[hmi_response::code] = common_result;
-  message[strings::params] = params;
+
   smart_objects::SmartObject msg_params(smart_objects::SmartType_Map);
   for (const auto& subscription : subscriptions_result) {
     smart_objects::SmartObject subscription_result(
@@ -203,8 +160,9 @@ smart_objects::SmartObject CreateVDResponse(
     subscription_result[strings::result_code] = subscription.second;
     msg_params[subscription.first] = subscription_result;
   }
-  message[strings::msg_params] = msg_params;
-  return message;
+  auto response = CreateHMIResponseMessage(common_result, correleation_id);
+  (*response)[strings::msg_params] = msg_params;
+  return *response;
 }
 
 enum class ContainsPolicy { Strict, Nice };
@@ -251,6 +209,87 @@ MATCHER_P2(EventCheck, expected_corr_id, vehicle_data, "") {
   const bool fid_ok = (fid == VehicleInfo_SubscribeVehicleData);
   return fid_ok && cid_ok && vehicle_data_ok;
 }
+
+// Replace correlation id in the message shared pointer with argument specified
+// in template
+ACTION_TEMPLATE(ReplaceCorrelationId,
+                HAS_1_TEMPLATE_PARAMS(int, k),
+                AND_1_VALUE_PARAMS(pointer)) {
+  namespace strings = application_manager::strings;
+  (**pointer)[strings::params][strings::correlation_id] =
+      ::std::tr1::get<k>(args);
+}
+
+class VehicleInfoPendingResumptionHandlerTest : public ::testing::Test {
+  // using namespace vehicle_info_plugin;
+ public:
+  VehicleInfoPendingResumptionHandlerTest()
+      : mock_message_helper_(
+            *application_manager::MockMessageHelper::message_helper_mock())
+
+  {}
+
+  void SetUp() OVERRIDE {
+    ON_CALL(app_manager_mock_, event_dispatcher())
+        .WillByDefault(ReturnRef(event_dispatcher_mock_));
+    ON_CALL(app_manager_mock_, GetRPCService())
+        .WillByDefault(ReturnRef(mock_rpc_service_));
+    resumption_handler_.reset(
+        new vehicle_info_plugin::VehicleInfoPendingResumptionHandler(
+            app_manager_mock_, custom_vehicle_data_manager_mock_));
+    MessageHelperResponseCreateExpectation();
+  }
+
+  void MessageHelperResponseCreateExpectation() {
+    const int default_corr_id = 0;
+    static auto response = CreateHMIResponseMessage(
+        hmi_apis::Common_Result::SUCCESS, default_corr_id);
+
+    ON_CALL(mock_message_helper_,
+            CreateResponseMessageFromHmi(VehicleInfo_SubscribeVehicleData,
+                                         _,
+                                         hmi_apis::Common_Result::SUCCESS))
+        .WillByDefault(
+            DoAll(ReplaceCorrelationId<1>(&response), Return(response)));
+  }
+
+  MockAppPtr CreateApp(uint32_t app_id) {
+    auto mock_app = std::make_shared<MockApplication>();
+
+    ON_CALL(app_manager_mock_, application(app_id))
+        .WillByDefault(Return(mock_app));
+    ON_CALL(*mock_app, app_id()).WillByDefault(Return(app_id));
+    return mock_app;
+  }
+
+  VehicleInfoAppExtensionPtr CreateExtension(MockApplication& app) {
+    auto ext_ptr = std::make_shared<VehicleInfoAppExtension>(plugin_, app);
+    ON_CALL(app,
+            QueryInterface(VehicleInfoAppExtension::VehicleInfoAppExtensionUID))
+        .WillByDefault(Return(ext_ptr));
+    return ext_ptr;
+  }
+
+  resumption::Subscriber& get_subscriber() {
+    static resumption::Subscriber subscriber =
+        [this](const int32_t corr_id,
+               const resumption::ResumptionRequest resumption_request) {
+          this->subscribe_catcher_.subscribe(corr_id, resumption_request);
+        };
+    return subscriber;
+  }
+
+  SubscribeCatcher subscribe_catcher_;
+  MockMessageHelper& mock_message_helper_;
+  MockApplicationManager app_manager_mock_;
+  MockEventDispatcher event_dispatcher_mock_;
+  MockRPCService mock_rpc_service_;
+  NiceMock<MockCustomVehicleDataManager> custom_vehicle_data_manager_mock_;
+  vehicle_info_plugin::VehicleInfoPlugin plugin_;
+
+  std::unique_ptr<vehicle_info_plugin::VehicleInfoPendingResumptionHandler>
+      resumption_handler_;
+};
 
 TEST_F(VehicleInfoPendingResumptionHandlerTest, NoSubscriptionNoAction) {
   auto mock_app = CreateApp(1);
@@ -377,6 +416,7 @@ TEST_F(VehicleInfoPendingResumptionHandlerTest,
   std::set<std::string> expected_data_in_event = {"gps", "speed"};
   const auto subscribed_correlation_id =
       resumption_request.request_ids.correlation_id;
+
   EXPECT_CALL(event_dispatcher_mock_,
               raise_event(EventCheck(subscribed_correlation_id,
                                      expected_data_in_event)));
@@ -401,8 +441,12 @@ TEST_F(VehicleInfoPendingResumptionHandlerTest,
           CreateModuleInfoSO(VehicleInfo_SubscribeVehicleData, _))
       .WillByDefault(Return(request));
 
-  EXPECT_CALL(subscribe_catcher_, subscribe(_, _));
-  // TODO save cid and fid of the subscription
+  uint32_t subscribed_app_id;
+  resumption::ResumptionRequest resumption_request;
+  EXPECT_CALL(subscribe_catcher_, subscribe(_, _))
+      .WillOnce(DoAll(SaveArg<0>(&subscribed_app_id),
+                      SaveArg<1>(&resumption_request)));
+
   EXPECT_CALL(event_dispatcher_mock_, raise_event(_));
   EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_, _)).Times(1);
   const std::map<std::string, hmi_apis::Common_VehicleDataResultCode::eType>
@@ -441,8 +485,12 @@ TEST_F(VehicleInfoPendingResumptionHandlerTest,
           CreateModuleInfoSO(VehicleInfo_SubscribeVehicleData, _))
       .WillByDefault(Return(request));
 
-  EXPECT_CALL(subscribe_catcher_, subscribe(_, _));
-  // TODO save cid and fid of the subscription
+  uint32_t subscribed_app_id;
+  resumption::ResumptionRequest resumption_request;
+  EXPECT_CALL(subscribe_catcher_, subscribe(_, _))
+      .WillOnce(DoAll(SaveArg<0>(&subscribed_app_id),
+                      SaveArg<1>(&resumption_request)));
+
   EXPECT_CALL(event_dispatcher_mock_, raise_event(_));
   EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_, _)).Times(1);
 
