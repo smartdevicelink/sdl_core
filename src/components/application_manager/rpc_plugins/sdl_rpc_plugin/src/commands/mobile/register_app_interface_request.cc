@@ -1585,9 +1585,7 @@ RegisterAppInterfaceRequest::ProcessingAppHMITypesPolicies(
     std::for_each(
         app_types_in_message.begin(), app_types_in_message.end(), checker);
     if (!log.empty()) {
-      result = log.find("WEB_VIEW") != std::string::npos
-                   ? mobile_apis::Result::DISALLOWED
-                   : mobile_apis::Result::WARNINGS;
+      result = ProcessingAppHMITypesInMessage(message);
 
       if (mobile_apis::Result::DISALLOWED == result) {
         response_info_ =
