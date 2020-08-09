@@ -126,29 +126,31 @@ struct AppHMITypeInserter {
 };
 
 struct CheckMissedTypes {
-  CheckMissedTypes(const std::string& policy_app_id,
-                   policy::PolicyHandlerInterface& polic_handler,
+  CheckMissedTypes(const policy::StringArray& policy_app_types,
                    std::string& log)
-      : policy_app_id_(policy_app_id)
-      , polic_handler_(polic_handler)
-      , log_(log) {}
+      : policy_app_types_(policy_app_types), log_(log) {}
 
   bool operator()(const smart_objects::SmartArray::value_type& value) {
-    auto hmi_type_to_check =
-        static_cast<mobile_apis::AppHMIType::eType>(value.asInt());
-    bool result =
-        polic_handler_.CheckHMIType(policy_app_id_, hmi_type_to_check, nullptr);
-    if (!result) {
-      auto stringified = AppHMITypeToString(hmi_type_to_check);
-      log_ += stringified;
-      log_ += ",";
+    std::string app_type_str = AppHMITypeToString(
+        static_cast<mobile_apis::AppHMIType::eType>(value.asInt()));
+    if (!app_type_str.empty()) {
+      policy::StringArray::const_iterator it = policy_app_types_.begin();
+      policy::StringArray::const_iterator it_end = policy_app_types_.end();
+      for (; it != it_end; ++it) {
+        if (app_type_str == *it) {
+          return true;
+        }
+      }
     }
+
+    log_ += app_type_str;
+    log_ += ",";
+
     return true;
   }
 
  private:
-  const std::string& policy_app_id_;
-  policy::PolicyHandlerInterface& polic_handler_;
+  const policy::StringArray& policy_app_types_;
   std::string& log_;
 };
 
@@ -1533,43 +1535,24 @@ RegisterAppInterfaceRequest::ProcessingAppHMITypesInMessage(
   const bool app_hmi_types_exist =
       message[strings::msg_params].keyExists(strings::app_hmi_type);
 
+  const auto result = mobile_apis::Result::SUCCESS;
+
   if (!app_hmi_types_exist) {
-    return mobile_apis::Result::SUCCESS;
+    return result;
   }
 
   auto app_types_in_message =
-      message[strings::msg_params][strings::app_hmi_type];
+      *(message[strings::msg_params][strings::app_hmi_type].asArray());
 
-  auto app_types_in_message_array = *(app_types_in_message.asArray());
+  auto it = std::find(app_types_in_message.begin(),
+                      app_types_in_message.end(),
+                      mobile_apis::AppHMIType::WEB_VIEW);
+  if (app_types_in_message.end() != it) {
+    return mobile_apis::Result::DISALLOWED;
+  }
 
-  const bool check_result = (app_types_in_message_array.end() !=
-                             std::find(app_types_in_message_array.begin(),
-                                       app_types_in_message_array.end(),
-                                       mobile_apis::AppHMIType::WEB_VIEW));
-  return check_result ? mobile_apis::Result::DISALLOWED
-                      : mobile_apis::Result::SUCCESS;
+  return result;
 }
-
-// mobile_apis::Result::eType
-// RegisterAppInterfaceRequest::ProcessingAppHMITypesInMessage(
-//    const smart_objects::SmartObject& message) {
-//  const bool app_hmi_types_exist =
-//      message[strings::msg_params].keyExists(strings::app_hmi_type);
-//  if (!app_hmi_types_exist) {
-//    return mobile_apis::Result::SUCCESS;
-//  }
-//  const std::string mobile_app_id =
-//      application_manager_.GetCorrectMobileIDFromMessage(message_);
-
-//  const auto& app_types_in_message =
-//      message[strings::msg_params][strings::app_hmi_type];
-//  const bool check_result = GetPolicyHandler().CheckHMIType(
-//      mobile_app_id, mobile_apis::AppHMIType::WEB_VIEW,
-//      &app_types_in_message);
-
-//  return check_result ? mobile_apis::Result::SUCCESS
-//                      : mobile_apis::Result::DISALLOWED;
-//}
 
 mobile_apis::Result::eType
 RegisterAppInterfaceRequest::ProcessingAppHMITypesPolicies(
@@ -1585,10 +1568,8 @@ RegisterAppInterfaceRequest::ProcessingAppHMITypesPolicies(
     auto app_types_in_message =
         *(message[strings::msg_params][strings::app_hmi_type].asArray());
 
-    const std::string mobile_app_id =
-        application_manager_.GetCorrectMobileIDFromMessage(message_);
     std::string log;
-    CheckMissedTypes checker(mobile_app_id, GetPolicyHandler(), log);
+    CheckMissedTypes checker(app_hmi_types_in_policy, log);
     std::for_each(
         app_types_in_message.begin(), app_types_in_message.end(), checker);
     if (!log.empty()) {
