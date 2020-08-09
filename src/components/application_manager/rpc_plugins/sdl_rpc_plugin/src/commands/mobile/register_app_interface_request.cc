@@ -1181,7 +1181,14 @@ mobile_apis::Result::eType RegisterAppInterfaceRequest::CheckWithPolicyData() {
   // If AppHMIType is not included in policy - allow any type
   if (!app_hmi_types_in_policy.empty()) {
     result = ProcessingAppHMITypesPolicies(message, app_hmi_types_in_policy);
-  }
+  } else {
+    result = ProcessingAppHMITypesInMessage(message);
+    if (mobile_apis::Result::DISALLOWED == result) {
+      response_info_ =
+          "WEB_VIEW AppHmiType is absent in application policies, because they "
+          "are empty";
+      LOG4CXX_DEBUG(logger_, response_info_);
+      return result;
     }
   }
 
