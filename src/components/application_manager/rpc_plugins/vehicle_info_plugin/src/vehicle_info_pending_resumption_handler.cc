@@ -120,7 +120,7 @@ VehicleInfoPendingResumptionHandler::VehicleInfoPendingResumptionHandler(
     : ExtensionPendingResumptionHandler(application_manager)
     , custom_vehicle_data_manager_(custom_vehicle_data_manager) {}
 
-void VehicleInfoPendingResumptionHandler::ClearPendingResumptionRequests() {
+void VehicleInfoPendingResumptionHandler::OnResumptionRevert() {
   LOG4CXX_AUTO_TRACE(logger_);
   sync_primitives::AutoLock lock(pending_resumption_lock_);
   TriggerPendingResumption();
