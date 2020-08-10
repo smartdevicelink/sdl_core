@@ -308,17 +308,9 @@ class CacheManagerInterface {
    * return them otherwise default URLs.
    */
   virtual void GetUpdateUrls(const std::string& service_type,
-                             EndpointUrls& out_end_points) = 0;
+                             EndpointUrls& out_end_points) const = 0;
   virtual void GetUpdateUrls(const uint32_t service_type,
-                             EndpointUrls& out_end_points) = 0;
-
-  /**
-   * @brief GetLockScreenIcon allows to obtain lock screen icon url;
-   *
-   * @return url which point to the resourse where lock screen icon could be
-   *obtained.
-   */
-  virtual std::string GetLockScreenIconUrl() const = 0;
+                             EndpointUrls& out_end_points) const = 0;
 
   /**
    * @brief Get Icon Url used for showing a cloud apps icon before the intial
@@ -587,12 +579,24 @@ class CacheManagerInterface {
       const PermissionConsent& permissions) = 0;
 
   /**
+   * @brief Set preloaded_pt flag value in policy table
+   * @param is_preloaded value to set
+   */
+  virtual void SetPreloadedPtFlag(const bool is_preloaded) = 0;
+
+  /**
    * @brief Records information about head unit system to PT
    * @return bool Success of operation
    */
   virtual bool SetMetaInfo(const std::string& ccpu_version,
                            const std::string& wers_country_code,
                            const std::string& language) = 0;
+
+  /**
+   * @brief Get information about last ccpu_version from PT
+   * @return ccpu_version from PT
+   */
+  virtual std::string GetCCPUVersionFromPT() const = 0;
 
   /**
    * @brief Checks, if specific head unit is present in PT

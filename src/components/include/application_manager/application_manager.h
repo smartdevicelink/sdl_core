@@ -344,6 +344,14 @@ class ApplicationManager {
 
   /**
    * @brief Checks if Application is subscribed for way points
+   * @param Application id
+   * @return true if Application is subscribed for way points
+   * otherwise false
+   */
+  virtual bool IsAppSubscribedForWayPoints(uint32_t app_id) const = 0;
+
+  /**
+   * @brief Checks if Application is subscribed for way points
    * @param Application pointer
    * @return true if Application is subscribed for way points
    * otherwise false
@@ -352,9 +360,21 @@ class ApplicationManager {
 
   /**
    * @brief Subscribe Application for way points
+   * @param Application id
+   */
+  virtual void SubscribeAppForWayPoints(uint32_t id) = 0;
+
+  /**
+   * @brief Subscribe Application for way points
    * @param Application pointer
    */
   virtual void SubscribeAppForWayPoints(ApplicationSharedPtr app) = 0;
+
+  /**
+   * @brief Unsubscribe Application for way points
+   * @param Application id
+   */
+  virtual void UnsubscribeAppFromWayPoints(uint32_t app_id) = 0;
 
   /**
    * @brief Unsubscribe Application for way points
@@ -367,6 +387,13 @@ class ApplicationManager {
    * @return true if some app is subscribed otherwise false
    */
   virtual bool IsAnyAppSubscribedForWayPoints() const = 0;
+
+  /**
+   * @brief Save message after OnWayPointsChangeNotification reception
+   * @param way_points_message pointer to the smartobject
+   */
+  virtual void SaveWayPointsMessage(
+      smart_objects::SmartObjectSPtr way_points_message) = 0;
 
   /**
    * @brief Get subscribed for way points
@@ -485,7 +512,13 @@ class ApplicationManager {
 
   virtual void ConnectToDevice(const std::string& device_mac) = 0;
 
-  virtual void OnHMIStartedCooperation() = 0;
+  virtual void OnHMIReady() = 0;
+
+  /**
+   * @brief Send GetCapabilities requests for
+   * each interface (VR, TTS, UI etc) to HMI
+   */
+  virtual void RequestForInterfacesAvailability() = 0;
 
   virtual void DisconnectCloudApp(ApplicationSharedPtr app) = 0;
 
@@ -504,6 +537,13 @@ class ApplicationManager {
   GetCloudAppConnectionStatus(ApplicationConstSharedPtr app) const = 0;
 
   virtual bool IsHMICooperating() const = 0;
+
+  /*
+   * @brief Hold or respond to all pending RAI requests
+   * @param hmi_cooperating new state to be set
+   */
+  virtual void SetHMICooperating(const bool hmi_cooperating) = 0;
+
   /**
    * @brief Notifies all components interested in Vehicle Data update
    * i.e. new value of odometer etc and returns list of applications
@@ -785,11 +825,16 @@ class ApplicationManager {
   virtual bool CanAppStream(
       uint32_t app_id, protocol_handler::ServiceType service_type) const = 0;
 
+  DEPRECATED
+  virtual void ForbidStreaming(uint32_t app_id) = 0;
+
   /**
    * @brief ForbidStreaming forbid the stream over the certain application.
    * @param app_id the application's id which should stop streaming.
+   * @param service_type Service type to check
    */
-  virtual void ForbidStreaming(uint32_t app_id) = 0;
+  virtual void ForbidStreaming(uint32_t app_id,
+                               protocol_handler::ServiceType service_type) = 0;
 
   /**
    * @brief Called when application completes streaming configuration

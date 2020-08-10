@@ -287,20 +287,22 @@ void PerformAudioPassThruRequest::SendPerformAudioPassThruRequest() {
   msg_params[hmi_request::audio_pass_display_texts] =
       smart_objects::SmartObject(smart_objects::SmartType_Array);
 
+  int32_t index = 0;
   if ((*message_)[str::msg_params].keyExists(str::audio_pass_display_text1)) {
-    msg_params[hmi_request::audio_pass_display_texts][0]
+    msg_params[hmi_request::audio_pass_display_texts][index]
               [hmi_request::field_name] = static_cast<int32_t>(
                   hmi_apis::Common_TextFieldName::audioPassThruDisplayText1);
-    msg_params[hmi_request::audio_pass_display_texts][0]
+    msg_params[hmi_request::audio_pass_display_texts][index]
               [hmi_request::field_text] =
                   (*message_)[str::msg_params][str::audio_pass_display_text1];
+    ++index;
   }
 
   if ((*message_)[str::msg_params].keyExists(str::audio_pass_display_text2)) {
-    msg_params[hmi_request::audio_pass_display_texts][1]
+    msg_params[hmi_request::audio_pass_display_texts][index]
               [hmi_request::field_name] = static_cast<int32_t>(
                   hmi_apis::Common_TextFieldName::audioPassThruDisplayText2);
-    msg_params[hmi_request::audio_pass_display_texts][1]
+    msg_params[hmi_request::audio_pass_display_texts][index]
               [hmi_request::field_text] =
                   (*message_)[str::msg_params][str::audio_pass_display_text2];
   }

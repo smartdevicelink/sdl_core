@@ -525,8 +525,9 @@ class TransportManagerImpl
   /**
    * @brief Updates total device list with info from specific transport adapter.
    * @param ta Transport adapter
+   * @return True if device list has been changed, otherwise - false
    */
-  void UpdateDeviceList(TransportAdapter* ta);
+  bool UpdateDeviceList(TransportAdapter* ta);
 };  // class TransportManagerImpl
 }  // namespace transport_manager
 #endif  // SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_MANAGER_IMPL_H_

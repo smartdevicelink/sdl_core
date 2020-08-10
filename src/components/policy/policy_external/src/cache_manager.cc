@@ -1737,7 +1737,7 @@ std::vector<UserFriendlyMessage> CacheManager::GetUserFriendlyMsg(
 }
 
 void CacheManager::GetUpdateUrls(const uint32_t service_type,
-                                 EndpointUrls& out_end_points) {
+                                 EndpointUrls& out_end_points) const {
   auto find_hexademical =
       [service_type](policy_table::ServiceEndpoints::value_type end_point) {
         uint32_t decimal;
@@ -1754,7 +1754,7 @@ void CacheManager::GetUpdateUrls(const uint32_t service_type,
 }
 
 void CacheManager::GetUpdateUrls(const std::string& service_type,
-                                 EndpointUrls& out_end_points) {
+                                 EndpointUrls& out_end_points) const {
   LOG4CXX_AUTO_TRACE(logger_);
   CACHE_MANAGER_CHECK_VOID();
 
@@ -1779,13 +1779,6 @@ void CacheManager::GetUpdateUrls(const std::string& service_type,
       out_end_points.push_back(data);
     }
   }
-}
-
-std::string CacheManager::GetLockScreenIconUrl() const {
-  if (backup_) {
-    return backup_->GetLockScreenIconUrl();
-  }
-  return std::string("");
 }
 
 std::string CacheManager::GetIconUrl(const std::string& policy_app_id) const {
@@ -2282,6 +2275,12 @@ int CacheManager::CountUnconsentedGroups(const std::string& policy_app_id,
   return result;
 }
 
+void CacheManager::SetPreloadedPtFlag(const bool is_preloaded) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  *pt_->policy_table.module_config.preloaded_pt = is_preloaded;
+  Backup();
+}
+
 bool CacheManager::SetMetaInfo(const std::string& ccpu_version,
                                const std::string& wers_country_code,
                                const std::string& language) {
@@ -2298,6 +2297,13 @@ bool CacheManager::SetMetaInfo(const std::string& ccpu_version,
 
   Backup();
   return true;
+}
+
+std::string CacheManager::GetCCPUVersionFromPT() const {
+  LOG4CXX_AUTO_TRACE(logger_);
+  rpc::Optional<policy_table::ModuleMeta>& module_meta =
+      pt_->policy_table.module_meta;
+  return *(module_meta->ccpu_version);
 }
 
 bool CacheManager::IsMetaInfoPresent() const {

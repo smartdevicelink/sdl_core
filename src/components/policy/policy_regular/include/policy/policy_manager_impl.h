@@ -172,16 +172,9 @@ class PolicyManagerImpl : public PolicyManager {
    * @param out_end_points output vector of urls
    */
   void GetUpdateUrls(const uint32_t service_type,
-                     EndpointUrls& out_end_points) OVERRIDE;
+                     EndpointUrls& out_end_points) const OVERRIDE;
   void GetUpdateUrls(const std::string& service_type,
-                     EndpointUrls& out_end_points) OVERRIDE;
-
-  /**
-   * @brief GetLockScreenIcon allows to obtain lock screen icon url;
-   * @return url which point to the resourse where lock screen icon could be
-   *obtained.
-   */
-  std::string GetLockScreenIconUrl() const OVERRIDE;
+                     EndpointUrls& out_end_points) const OVERRIDE;
 
   /**
    * @brief Get Icon Url used for showing a cloud apps icon before the intial
@@ -458,12 +451,9 @@ class PolicyManagerImpl : public PolicyManager {
                      const std::string& wers_country_code,
                      const std::string& language) OVERRIDE;
 
-  /**
-   * @brief Runs necessary operations, which is depends on external system
-   * state, e.g. getting system-specific parameters which are need to be
-   * filled into policy table
-   */
-  void OnSystemReady() OVERRIDE;
+  void SetPreloadedPtFlag(const bool is_preloaded) OVERRIDE;
+
+  std::string GetCCPUVersionFromPT() const OVERRIDE;
 
   /**
    * @brief Get number of notification by priority
@@ -810,6 +800,11 @@ class PolicyManagerImpl : public PolicyManager {
    */
   AppIdURL RetrySequenceUrl(const struct RetrySequenceURL& rs,
                             const EndpointUrls& urls) const OVERRIDE;
+
+  /**
+   * @brief Trigger a PTU once on startup if it is required
+   */
+  virtual void TriggerPTUOnStartupIfRequired() OVERRIDE;
 
 #ifdef BUILD_TESTS
   /**

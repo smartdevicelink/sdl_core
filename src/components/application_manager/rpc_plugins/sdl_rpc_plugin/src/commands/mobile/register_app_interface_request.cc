@@ -551,13 +551,16 @@ RegisterAppInterfaceRequest::GetLockScreenIconUrlNotification(
   (*message)[strings::msg_params][strings::request_type] =
       mobile_apis::RequestType::LOCK_SCREEN_ICON_URL;
   (*message)[strings::msg_params][strings::url] =
-      GetPolicyHandler().GetLockScreenIconUrl();
+      GetPolicyHandler().GetLockScreenIconUrl(app->policy_app_id());
   return message;
 }
 
 void FillVRRelatedFields(smart_objects::SmartObject& response_params,
                          const HMICapabilities& hmi_capabilities) {
-  response_params[strings::language] = hmi_capabilities.active_vr_language();
+  auto active_vr_lang = hmi_capabilities.active_vr_language();
+  if (hmi_apis::Common_Language::INVALID_ENUM != active_vr_lang) {
+    response_params[strings::language] = active_vr_lang;
+  }
   auto vr_capabilities = hmi_capabilities.vr_capabilities();
   if (vr_capabilities) {
     response_params[strings::vr_capabilities] = *vr_capabilities;
@@ -574,7 +577,10 @@ void FillVIRelatedFields(smart_objects::SmartObject& response_params,
 
 void FillTTSRelatedFields(smart_objects::SmartObject& response_params,
                           const HMICapabilities& hmi_capabilities) {
-  response_params[strings::language] = hmi_capabilities.active_tts_language();
+  auto active_tts_lang = hmi_capabilities.active_tts_language();
+  if (hmi_apis::Common_Language::INVALID_ENUM != active_tts_lang) {
+    response_params[strings::language] = active_tts_lang;
+  }
   auto speech_capabilities = hmi_capabilities.speech_capabilities();
   if (speech_capabilities) {
     response_params[strings::speech_capabilities] = *speech_capabilities;
@@ -587,8 +593,10 @@ void FillTTSRelatedFields(smart_objects::SmartObject& response_params,
 
 void FillUIRelatedFields(smart_objects::SmartObject& response_params,
                          const HMICapabilities& hmi_capabilities) {
-  response_params[strings::hmi_display_language] =
-      hmi_capabilities.active_ui_language();
+  auto active_ui_lang = hmi_capabilities.active_ui_language();
+  if (hmi_apis::Common_Language::INVALID_ENUM != active_ui_lang) {
+    response_params[strings::hmi_display_language] = active_ui_lang;
+  }
 
   auto display_capabilities = hmi_capabilities.display_capabilities();
   if (display_capabilities) {
@@ -669,6 +677,8 @@ void FillUIRelatedFields(smart_objects::SmartObject& response_params,
   response_params[strings::hmi_capabilities][strings::displays] = true;
   response_params[strings::hmi_capabilities][strings::seat_location] =
       hmi_capabilities.seat_location_capability() ? true : false;
+  response_params[strings::hmi_capabilities][strings::driver_distraction] =
+      hmi_capabilities.driver_distraction_supported();
 }
 
 void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile(

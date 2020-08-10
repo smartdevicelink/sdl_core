@@ -107,6 +107,9 @@ void TelemetryMonitor::Stop() {
   if (thread_) {
     thread_->stop();
     thread_->join();
+    if (thread_->delegate()) {
+      streamer_.reset();
+    }
     threads::DeleteThread(thread_);
   }
   thread_ = NULL;

@@ -130,12 +130,12 @@ class MockCacheManagerInterface : public ::policy::CacheManagerInterface {
                          const std::vector<std::string>& msg_codes,
                          const std::string& language,
                          const std::string& active_hmi_language));
-  MOCK_METHOD2(GetUpdateUrls,
-               void(const std::string& service_type,
-                    EndpointUrls& out_end_points));
-  MOCK_METHOD2(GetUpdateUrls,
-               void(const uint32_t service_type, EndpointUrls& out_end_points));
-  MOCK_CONST_METHOD0(GetLockScreenIconUrl, std::string());
+  MOCK_CONST_METHOD2(GetUpdateUrls,
+                     void(const std::string& service_type,
+                          EndpointUrls& out_end_points));
+  MOCK_CONST_METHOD2(GetUpdateUrls,
+                     void(const uint32_t service_type,
+                          EndpointUrls& out_end_points));
   MOCK_CONST_METHOD1(GetIconUrl, std::string(const std::string& policy_app_id));
   MOCK_METHOD1(
       GetNotificationsNumber,
@@ -202,10 +202,12 @@ class MockCacheManagerInterface : public ::policy::CacheManagerInterface {
   MOCK_METHOD2(SetUserPermissionsForApp,
                bool(const PermissionConsent& permissions,
                     bool* out_app_permissions_changed));
+  MOCK_METHOD1(SetPreloadedPtFlag, void(const bool is_preloaded));
   MOCK_METHOD3(SetMetaInfo,
                bool(const std::string& ccpu_version,
                     const std::string& wers_country_code,
                     const std::string& language));
+  MOCK_CONST_METHOD0(GetCCPUVersionFromPT, std::string());
   MOCK_CONST_METHOD0(IsMetaInfoPresent, bool());
   MOCK_METHOD1(SetSystemLanguage, bool(const std::string& language));
   MOCK_METHOD1(Increment, void(usage_statistics::GlobalCounterId type));

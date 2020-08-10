@@ -96,7 +96,8 @@ class GetInteriorVehicleDataRequestTest
       , rc_app_extention2_(std::make_shared<RCAppExtension>(kModuleId))
       , apps_lock_(std::make_shared<sync_primitives::Lock>())
       , apps_da_(apps_, apps_lock_)
-      , rc_capabilities_(smart_objects::SmartType::SmartType_Array) {
+      , rc_capabilities_(std::make_shared<smart_objects::SmartObject>(
+            smart_objects::SmartType::SmartType_Array)) {
     ON_CALL(*mock_app_, app_id()).WillByDefault(Return(kAppId));
     ON_CALL(*mock_app2_, app_id()).WillByDefault(Return(kAppId2));
     ON_CALL(*mock_app_, is_remote_control_supported())
@@ -131,7 +132,7 @@ class GetInteriorVehicleDataRequestTest
     frequency.first = max_request_in_time_frame;
     frequency.second = time_frame_of_allowed_requests;
     smart_objects::SmartObject control_caps((smart_objects::SmartType_Array));
-    rc_capabilities_[strings::kradioControlCapabilities] = control_caps;
+    (*rc_capabilities_)[strings::kradioControlCapabilities] = control_caps;
     ON_CALL(app_mngr_, get_settings())
         .WillByDefault(ReturnRef(app_mngr_settings_));
     ON_CALL(app_mngr_settings_, get_interior_vehicle_data_frequency())
@@ -151,7 +152,7 @@ class GetInteriorVehicleDataRequestTest
     ON_CALL(app_mngr_, hmi_capabilities())
         .WillByDefault(ReturnRef(mock_hmi_capabilities_));
     ON_CALL(mock_hmi_capabilities_, rc_capability())
-        .WillByDefault(Return(&rc_capabilities_));
+        .WillByDefault(Return(rc_capabilities_));
     ON_CALL(mock_policy_handler_,
             CheckHMIType(
                 _, mobile_apis::AppHMIType::eType::REMOTE_CONTROL, nullptr))
@@ -195,7 +196,7 @@ class GetInteriorVehicleDataRequestTest
   DataAccessor<application_manager::ApplicationSet> apps_da_;
   testing::NiceMock<rc_rpc_plugin_test::MockRCCapabilitiesManager>
       mock_rc_capabilities_manager_;
-  smart_objects::SmartObject rc_capabilities_;
+  smart_objects::SmartObjectSPtr rc_capabilities_;
   testing::NiceMock<MockRCConsentManager> mock_rc_consent_manger_;
 };
 

@@ -50,6 +50,7 @@ class CommandNotificationFromMobileImpl : public CommandImpl {
       policy::PolicyHandlerInterface& policy_handler);
   virtual ~CommandNotificationFromMobileImpl();
   virtual bool Init();
+  bool CheckPermissions() OVERRIDE;
   virtual bool CleanUp();
   virtual void Run();
   void SendNotification();

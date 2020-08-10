@@ -271,17 +271,40 @@ class ApplicationManagerImpl
 
   /**
    * @brief Checks if Application is subscribed for way points
+   * @param Application id
+   * @return true if Application is subscribed for way points
+   * otherwise false
+   */
+  bool IsAppSubscribedForWayPoints(uint32_t app_id) const OVERRIDE;
+
+  /**
+   * @brief Checks if Application is subscribed for way points
    * @param Application pointer
    * @return true if Application is subscribed for way points
    * otherwise false
    */
   bool IsAppSubscribedForWayPoints(ApplicationSharedPtr app) const OVERRIDE;
 
+  void SaveWayPointsMessage(
+      smart_objects::SmartObjectSPtr way_points_message) OVERRIDE;
+
+  /**
+   * @brief Subscribe Application for way points
+   * @param Application id
+   */
+  void SubscribeAppForWayPoints(uint32_t app_id) OVERRIDE;
+
   /**
    * @brief Subscribe Application for way points
    * @param Application pointer
    */
   void SubscribeAppForWayPoints(ApplicationSharedPtr app) OVERRIDE;
+
+  /**
+   * @brief Unsubscribe Application for way points
+   * @param Application id
+   */
+  void UnsubscribeAppFromWayPoints(uint32_t app_id) OVERRIDE;
 
   /**
    * @brief Unsubscribe Application for way points
@@ -400,7 +423,10 @@ class ApplicationManagerImpl
   mobile_api::HMILevel::eType IsHmiLevelFullAllowed(ApplicationSharedPtr app);
 
   void ConnectToDevice(const std::string& device_mac) OVERRIDE;
-  void OnHMIStartedCooperation() OVERRIDE;
+
+  void OnHMIReady() OVERRIDE;
+
+  void RequestForInterfacesAvailability() OVERRIDE;
 
   void DisconnectCloudApp(ApplicationSharedPtr app) OVERRIDE;
 
@@ -834,11 +860,11 @@ class ApplicationManagerImpl
    */
   void EndNaviServices(uint32_t app_id) OVERRIDE;
 
-  /**
-   * @brief ForbidStreaming forbid the stream over the certain application.
-   * @param app_id the application's id which should stop streaming.
-   */
+  DEPRECATED
   void ForbidStreaming(uint32_t app_id) OVERRIDE;
+
+  void ForbidStreaming(uint32_t app_id,
+                       protocol_handler::ServiceType service_type) OVERRIDE;
 
   /**
    * @brief Called when application completes streaming configuration
@@ -934,6 +960,7 @@ class ApplicationManagerImpl
    */
   bool IsHMICooperating() const OVERRIDE;
 
+  void SetHMICooperating(const bool hmi_cooperating) OVERRIDE;
   /**
    * @brief Method used to send default app tts globalProperties
    * in case they were not provided from mobile side after defined time
@@ -1510,6 +1537,8 @@ class ApplicationManagerImpl
    */
   std::set<uint32_t> subscribed_way_points_apps_list_;
 
+  smart_objects::SmartObjectSPtr way_points_data_;
+
   /**
    * @brief Map contains applications which
    * will send TTS global properties to HMI after timeout
@@ -1579,6 +1608,7 @@ class ApplicationManagerImpl
   NaviServiceStatusMap navi_service_status_;
   sync_primitives::Lock navi_service_status_lock_;
   std::deque<uint32_t> navi_app_to_stop_;
+  sync_primitives::Lock navi_app_to_stop_lock_;
   std::deque<uint32_t> navi_app_to_end_stream_;
   uint32_t navi_close_app_timeout_;
   uint32_t navi_end_stream_timeout_;

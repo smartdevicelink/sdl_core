@@ -246,7 +246,7 @@ TEST_F(MediaManagerImplTest,
   const ServiceType audio_type = ServiceType::kAudio;
   EXPECT_CALL(app_mngr_, CanAppStream(kConnectionKey, audio_type))
       .WillOnce(Return(false));
-  EXPECT_CALL(app_mngr_, ForbidStreaming(kConnectionKey));
+  EXPECT_CALL(app_mngr_, ForbidStreaming(kConnectionKey, audio_type));
   EmulateMobileMessage(audio_type);
 }
 
@@ -255,7 +255,7 @@ TEST_F(MediaManagerImplTest,
   const ServiceType video_type = ServiceType::kMobileNav;
   EXPECT_CALL(app_mngr_, CanAppStream(kConnectionKey, video_type))
       .WillOnce(Return(false));
-  EXPECT_CALL(app_mngr_, ForbidStreaming(kConnectionKey));
+  EXPECT_CALL(app_mngr_, ForbidStreaming(kConnectionKey, video_type));
   EmulateMobileMessage(video_type);
 }
 
@@ -331,7 +331,12 @@ TEST_F(MediaManagerImplTest,
     EXPECT_EQ(data[i], result[i]);
   }
   media_manager_impl_->StartMicrophoneRecording(
-      kApplicationKey, kOutputFile, kDuration);
+      kApplicationKey,
+      kOutputFile,
+      kDuration,
+      mobile_apis::SamplingRate::SamplingRate_8KHZ,
+      mobile_apis::BitsPerSample::BitsPerSample_8_BIT,
+      mobile_apis::AudioType::PCM);
   EXPECT_TRUE(RemoveDirectory(kResourceFolder, true));
   EXPECT_TRUE(RemoveDirectory(kStorageFolder, true));
 }
@@ -342,7 +347,12 @@ TEST_F(MediaManagerImplTest,
   media_manager_impl_->set_mock_mic_listener(media_adapter_listener_mock_);
   EXPECT_FALSE(FileExists(kOutputFilePath));
   media_manager_impl_->StartMicrophoneRecording(
-      kApplicationKey, kOutputFile, kDuration);
+      kApplicationKey,
+      kOutputFile,
+      kDuration,
+      mobile_apis::SamplingRate::SamplingRate_8KHZ,
+      mobile_apis::BitsPerSample::BitsPerSample_8_BIT,
+      mobile_apis::AudioType::PCM);
 }
 
 TEST_F(MediaManagerImplTest,
@@ -358,7 +368,12 @@ TEST_F(MediaManagerImplTest,
   media_manager_impl_->set_mock_mic_listener(media_adapter_listener_mock_);
   EXPECT_TRUE(FileExists(kOutputFilePath));
   media_manager_impl_->StartMicrophoneRecording(
-      kApplicationKey, kOutputFile, kDuration);
+      kApplicationKey,
+      kOutputFile,
+      kDuration,
+      mobile_apis::SamplingRate::SamplingRate_8KHZ,
+      mobile_apis::BitsPerSample::BitsPerSample_8_BIT,
+      mobile_apis::AudioType::PCM);
   chmod(kOutputFilePath.c_str(), S_IWUSR);
   EXPECT_TRUE(RemoveDirectory(kStorageFolder, true));
 }

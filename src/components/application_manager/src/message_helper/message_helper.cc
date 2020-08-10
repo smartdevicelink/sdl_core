@@ -189,6 +189,8 @@ std::pair<std::string, mobile_apis::VehicleDataType::eType>
                        mobile_apis::VehicleDataType::VEHICLEDATA_TURNSIGNAL),
         std::make_pair(strings::vin,
                        mobile_apis::VehicleDataType::VEHICLEDATA_VIN),
+        std::make_pair(strings::gearStatus,
+                       mobile_apis::VehicleDataType::VEHICLEDATA_GEARSTATUS),
         std::make_pair(strings::prndl,
                        mobile_apis::VehicleDataType::VEHICLEDATA_PRNDL),
         std::make_pair(strings::tire_pressure,
@@ -211,6 +213,9 @@ std::pair<std::string, mobile_apis::VehicleDataType::eType>
         std::make_pair(
             strings::head_lamp_status,
             mobile_apis::VehicleDataType::VEHICLEDATA_HEADLAMPSTATUS),
+        std::make_pair(
+            strings::stability_controls_status,
+            mobile_apis::VehicleDataType::VEHICLEDATA_STABILITYCONTROLSSTATUS),
         std::make_pair(strings::e_call_info,
                        mobile_apis::VehicleDataType::VEHICLEDATA_ECALLINFO),
         std::make_pair(strings::airbag_status,
@@ -237,9 +242,13 @@ std::pair<std::string, mobile_apis::VehicleDataType::eType>
                        mobile_apis::VehicleDataType::VEHICLEDATA_ACCPEDAL),
         std::make_pair(strings::steering_wheel_angle,
                        mobile_apis::VehicleDataType::VEHICLEDATA_STEERINGWHEEL),
+        std::make_pair(strings::engine_oil_life,
+                       mobile_apis::VehicleDataType::VEHICLEDATA_ENGINEOILLIFE),
+        std::make_pair(strings::window_status,
+                       mobile_apis::VehicleDataType::VEHICLEDATA_WINDOWSTATUS),
         std::make_pair(
-            strings::engine_oil_life,
-            mobile_apis::VehicleDataType::VEHICLEDATA_ENGINEOILLIFE)};
+            strings::hands_off_steering,
+            mobile_apis::VehicleDataType::VEHICLEDATA_HANDSOFFSTEERING)};
 
 const VehicleData MessageHelper::vehicle_data_(
     kVehicleDataInitializer,
@@ -1108,8 +1117,7 @@ void MessageHelper::SendAllOnButtonSubscriptionNotificationsForApp(
     return;
   }
 
-  DataAccessor<ButtonSubscriptions> button_accessor = app->SubscribedButtons();
-  ButtonSubscriptions subscriptions = button_accessor.GetData();
+  const ButtonSubscriptions subscriptions = app->SubscribedButtons().GetData();
   ButtonSubscriptions::iterator it = subscriptions.begin();
   for (; subscriptions.end() != it; ++it) {
     SendOnButtonSubscriptionNotification(
@@ -1316,9 +1324,18 @@ smart_objects::SmartObjectSPtr MessageHelper::CreateAppVrHelp(
     return NULL;
   }
   smart_objects::SmartObject& vr_help = *result;
-  vr_help[strings::vr_help_title] = app->name();
+  const smart_objects::SmartObject* vr_help_title = app->vr_help_title();
+  if (vr_help_title) {
+    vr_help[strings::vr_help_title] = vr_help_title->asString();
+  }
 
   int32_t index = 0;
+
+  smart_objects::SmartObject so_vr_help(smart_objects::SmartType_Map);
+  so_vr_help[strings::position] = index + 1;
+  so_vr_help[strings::text] = app->name();
+  vr_help[strings::vr_help][index++] = so_vr_help;
+
   if (app->vr_synonyms()) {
     smart_objects::SmartObject item(smart_objects::SmartType_Map);
     item[strings::text] = (*(app->vr_synonyms())).getElement(0);
@@ -1868,6 +1885,10 @@ smart_objects::SmartObjectList MessageHelper::CreateAddSubMenuRequestToHMI(
         (*i->second)[strings::position];
     msg_params[strings::menu_params][strings::menu_name] =
         (*i->second)[strings::menu_name];
+    if ((*i->second).keyExists(strings::parent_id)) {
+      msg_params[strings::menu_params][strings::parent_id] =
+          (*i->second)[strings::parent_id];
+    }
     msg_params[strings::app_id] = app->app_id();
     (*ui_sub_menu)[strings::msg_params] = msg_params;
     if (((*i->second).keyExists(strings::menu_icon)) &&
@@ -2503,6 +2524,33 @@ bool MessageHelper::SendUnsubscribedWayPoints(ApplicationManager& app_mngr) {
       hmi_apis::FunctionID::Navigation_UnsubscribeWayPoints;
 
   return app_mngr.GetRPCService().ManageHMICommand(result);
+}
+
+void MessageHelper::SendPolicySnapshotNotification(
+    uint32_t connection_key,
+    const std::string& snapshot_file_path,
+    const std::string& url,
+    ApplicationManager& app_mngr) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  smart_objects::SmartObject content(smart_objects::SmartType_Map);
+  const auto request_type =
+#if defined(PROPRIETARY_MODE) || defined(EXTERNAL_PROPRIETARY_MODE)
+      mobile_apis::RequestType::PROPRIETARY;
+#else
+      mobile_apis::RequestType::HTTP;
+#endif  // PROPRIETARY || EXTERNAL_PROPRIETARY_MODE
+
+  content[strings::msg_params][strings::request_type] = request_type;
+
+  if (!url.empty()) {
+    content[strings::msg_params][strings::url] = url;
+  } else {
+    LOG4CXX_WARN(logger_, "No service URLs");
+  }
+
+  content[strings::msg_params][strings::file_name] = snapshot_file_path;
+
+  SendSystemRequestNotification(connection_key, content, app_mngr);
 }
 
 void MessageHelper::SendPolicySnapshotNotification(
