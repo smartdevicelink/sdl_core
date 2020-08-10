@@ -62,7 +62,6 @@ void SDLPendingResumptionHandler::ClearPendingRequestsMap() {
             it.second[strings::params][strings::function_id].asInt());
     unsubscribe_from_event(timed_out_pending_request_fid);
     if (!app_ids_.empty()) {
-      auto app_id = app_ids_.front();
       app_ids_.pop();
     }
   }
