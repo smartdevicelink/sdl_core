@@ -507,7 +507,8 @@
                             "prndl",
                             "rpm",
                             "steeringWheelAngle",
-                            "gearStatus"
+                            "gearStatus",
+                            "handsOffSteering"
                         ]
                     },
                     "OnVehicleData": {
@@ -525,7 +526,8 @@
                             "prndl",
                             "rpm",
                             "steeringWheelAngle",
-                            "gearStatus"
+                            "gearStatus",
+                            "handsOffSteering"
                         ]
                     },
                     "SubscribeVehicleData": {
@@ -543,7 +545,8 @@
                             "prndl",
                             "rpm",
                             "steeringWheelAngle",
-                            "gearStatus"
+                            "gearStatus",
+                            "handsOffSteering"
                         ]
                     },
                     "UnsubscribeVehicleData": {
@@ -561,7 +564,8 @@
                             "prndl",
                             "rpm",
                             "steeringWheelAngle",
-                            "gearStatus"
+                            "gearStatus",
+                            "handsOffSteering"
                         ]
                     }
                 }
@@ -4276,6 +4280,13 @@
                     "key": "OEM_REF_MY_KEY",
                     "type": "Struct",
                     "mandatory": false
+                },
+                {
+                    "name": "handsOffSteering",
+                    "key": "OEM_REF_HANDS_OFF_STRNG",
+                    "type": "Boolean",
+                    "mandatory": false,
+                    "since": "7.0"
                 }
             ]
         }

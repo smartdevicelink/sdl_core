@@ -59,6 +59,7 @@
         <element name="tirePressureValue" />
         <element name="tpms" />
         <element name="cloudAppVehicleID" />
+        <element name="handsOffSteering" />
     </enum>
 
     <enum name="AppHMIType">

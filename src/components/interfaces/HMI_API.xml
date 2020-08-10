@@ -1217,6 +1217,7 @@
   <element name="VEHICLEDATA_OEM_CUSTOM_DATA" />
   <element name="VEHICLEDATA_STABILITYCONTROLSSTATUS" />
   <element name="VEHICLEDATA_WINDOWSTATUS"/>
+  <element name="VEHICLEDATA_HANDSOFFSTEERING"/>
 </enum>
 
 <enum name="WiperStatus">
@@ -6169,6 +6170,9 @@
     <param name="windowStatus" type="Boolean" mandatory="false">
       <description>See WindowStatus</description>
     </param>
+    <param name="handsOffSteering" type="Boolean" mandatory="false">
+      <description>To indicate whether driver hands are off the steering wheel</description>
+    </param>
 
         <!-- Ford Specific Data Items -->
     <param name="eCallInfo" type="Boolean" mandatory="false">
@@ -6273,6 +6277,9 @@
     </param>
     <param name="windowStatus" type="Common.VehicleDataResult" mandatory="false">
       <description>See WindowStatus</description>
+    </param>
+    <param name="handsOffSteering" type="Common.VehicleDataResult" mandatory="false">
+      <description>To indicate whether driver hands are off the steering wheel</description>
     </param>
 
         <!-- Ford Specific Data Items -->
@@ -6382,6 +6389,9 @@
     <param name="windowStatus" type="Boolean" mandatory="false">
       <description>See WindowStatus</description>
     </param>
+    <param name="handsOffSteering" type="Boolean" mandatory="false">
+      <description>To indicate whether driver hands are off the steering wheel</description>
+    </param>
 
         <!-- Ford Specific Data Items -->
     <param name="eCallInfo" type="Boolean" mandatory="false">
@@ -6486,6 +6496,9 @@
     </param>
     <param name="windowStatus" type="Common.VehicleDataResult" mandatory="false">
       <description>See WindowStatus</description>
+    </param>
+    <param name="handsOffSteering" type="Common.VehicleDataResult" mandatory="false">
+      <description>To indicate whether driver hands are off the steering wheel</description>
     </param>
 
         <!-- Ford Specific Data Items -->
@@ -6596,6 +6609,9 @@
     <param name="windowStatus" type="Boolean" mandatory="false">
       <description>See WindowStatus</description>
     </param>
+    <param name="handsOffSteering" type="Boolean" mandatory="false">
+      <description>To indicate whether driver hands are off the steering wheel</description>
+    </param>
 
         <!-- Ford Specific Data Items -->
     <param name="eCallInfo" type="Boolean" mandatory="false">
@@ -6703,6 +6719,9 @@
     </param>
     <param name="windowStatus" type="Common.WindowStatus" array="true" minsize="0" maxsize="100" mandatory="false">
       <description>See WindowStatus</description>
+    </param>
+    <param name="handsOffSteering" type="Boolean" mandatory="false">
+      <description>To indicate whether driver hands are off the steering wheel</description>
     </param>
 
         <!-- Ford Specific Data Items -->
@@ -6812,6 +6831,9 @@
     </param>
     <param name="windowStatus" type="Common.WindowStatus" array="true" minsize="0" maxsize="100" mandatory="false">
       <description>See WindowStatus</description>
+    </param>
+    <param name="handsOffSteering" type="Boolean" mandatory="false">
+      <description>To indicate whether driver hands are off the steering wheel</description>
     </param>
 
         <!-- Ford Specific Data Items -->

@@ -245,7 +245,10 @@ std::pair<std::string, mobile_apis::VehicleDataType::eType>
         std::make_pair(strings::engine_oil_life,
                        mobile_apis::VehicleDataType::VEHICLEDATA_ENGINEOILLIFE),
         std::make_pair(strings::window_status,
-                       mobile_apis::VehicleDataType::VEHICLEDATA_WINDOWSTATUS)};
+                       mobile_apis::VehicleDataType::VEHICLEDATA_WINDOWSTATUS),
+        std::make_pair(
+            strings::hands_off_steering,
+            mobile_apis::VehicleDataType::VEHICLEDATA_HANDSOFFSTEERING)};
 
 const VehicleData MessageHelper::vehicle_data_(
     kVehicleDataInitializer,
