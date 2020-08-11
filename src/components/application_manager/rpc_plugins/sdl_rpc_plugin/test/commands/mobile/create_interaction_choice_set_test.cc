@@ -44,6 +44,7 @@
 #include "application_manager/mock_hmi_capabilities.h"
 #include "application_manager/mock_hmi_interface.h"
 #include "application_manager/mock_message_helper.h"
+#include "application_manager/mock_resume_ctrl.h"
 #include "application_manager/smart_object_keys.h"
 #include "gtest/gtest.h"
 #include "smart_objects/smart_object.h"
@@ -184,7 +185,7 @@ TEST_F(CreateInteractionChoiceSetRequestTest, OnTimeout_GENERIC_ERROR) {
       ManageMobileCommand(_, am::commands::Command::CommandSource::SOURCE_SDL))
       .WillOnce(DoAll(SaveArg<0>(&vr_command_result), Return(true)));
 
-  resumprion_test::MockResumeCtrl mock_resume_ctrl;
+  resumption_test::MockResumeCtrl mock_resume_ctrl;
   EXPECT_CALL(app_mngr_, resume_controller())
       .WillOnce(ReturnRef(mock_resume_ctrl));
   EXPECT_CALL(mock_resume_ctrl, HandleOnTimeOut(_, _));
@@ -709,7 +710,7 @@ TEST_F(CreateInteractionChoiceSetRequestTest,
                   MobileResultCodeIs(mobile_apis::Result::GENERIC_ERROR),
                   am::commands::Command::SOURCE_SDL));
 
-  resumprion_test::MockResumeCtrl mock_resume_ctrl;
+  resumption_test::MockResumeCtrl mock_resume_ctrl;
   EXPECT_CALL(app_mngr_, resume_controller())
       .WillOnce(ReturnRef(mock_resume_ctrl));
   EXPECT_CALL(mock_resume_ctrl, HandleOnTimeOut(_, _));
@@ -758,7 +759,7 @@ TEST_F(CreateInteractionChoiceSetRequestTest,
   EXPECT_CALL(*mock_app_, RemoveChoiceSet(kChoiceSetId));
 
   EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(_, _)).Times(0);
-  resumprion_test::MockResumeCtrl mock_resume_ctrl;
+  resumption_test::MockResumeCtrl mock_resume_ctrl;
   EXPECT_CALL(app_mngr_, resume_controller())
       .WillOnce(ReturnRef(mock_resume_ctrl));
   EXPECT_CALL(mock_resume_ctrl, HandleOnTimeOut(_, _));
@@ -809,7 +810,7 @@ TEST_F(CreateInteractionChoiceSetRequestTest, OnTimeOut_InvalidApp_UNSUCCESS) {
   EXPECT_CALL(app_mngr_, application(kConnectionKey))
       .WillOnce(Return(invalid_app));
   EXPECT_CALL(*mock_app_, RemoveChoiceSet(_)).Times(0);
-  resumprion_test::MockResumeCtrl mock_resume_ctrl;
+  resumption_test::MockResumeCtrl mock_resume_ctrl;
   EXPECT_CALL(app_mngr_, resume_controller())
       .WillOnce(ReturnRef(mock_resume_ctrl));
   EXPECT_CALL(mock_resume_ctrl, HandleOnTimeOut(_, _));
@@ -853,7 +854,7 @@ TEST_F(CreateInteractionChoiceSetRequestTest,
   FillMessageFieldsItem2(message_);
 
   EXPECT_CALL(app_mngr_, updateRequestTimeout(_, _, _)).Times(0);
-  resumprion_test::MockResumeCtrl mock_resume_ctrl;
+  resumption_test::MockResumeCtrl mock_resume_ctrl;
   EXPECT_CALL(app_mngr_, resume_controller())
       .WillOnce(ReturnRef(mock_resume_ctrl));
   EXPECT_CALL(mock_resume_ctrl, HandleOnTimeOut(_, _));

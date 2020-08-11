@@ -38,7 +38,7 @@
 
 namespace test {
 namespace components {
-namespace resumprion_test {
+namespace resumption_test {
 
 class MockResumeCtrl : public resumption::ResumeCtrl {
  public:
@@ -118,7 +118,7 @@ class MockResumeCtrl : public resumption::ResumeCtrl {
 #endif  // BUILD_TESTS
 };
 
-}  // namespace resumprion_test
+}  // namespace resumption_test
 }  // namespace components
 }  // namespace test
 

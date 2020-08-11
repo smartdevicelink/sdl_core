@@ -957,7 +957,7 @@ TEST_F(HMICommandsNotificationsTest,
       kCorrelationId_;
   MessageSharedPtr temp_message = CreateMessage();
 
-  resumprion_test::MockResumeCtrl mock_resume_ctrl;
+  resumption_test::MockResumeCtrl mock_resume_ctrl;
   EXPECT_CALL(app_mngr_, resume_controller())
       .WillOnce(ReturnRef(mock_resume_ctrl));
   EXPECT_CALL(mock_resume_ctrl, OnSuspend());

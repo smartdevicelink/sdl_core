@@ -323,7 +323,7 @@ class RegisterAppInterfaceRequestTest
   typedef IsNiceMock<policy_test::MockPolicyHandlerInterface,
                      kMocksAreNice>::Result MockPolicyHandlerInterface;
 
-  typedef IsNiceMock<resumprion_test::MockResumeCtrl, kMocksAreNice>::Result
+  typedef IsNiceMock<resumption_test::MockResumeCtrl, kMocksAreNice>::Result
       MockResumeCtrl;
 
   typedef IsNiceMock<connection_handler_test::MockConnectionHandler,
