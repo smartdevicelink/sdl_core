@@ -30,14 +30,16 @@
  * POSSIBILITY OF SUCH DAMAGE. */
 
 #include <boost/range/algorithm/set_algorithm.hpp>
-#include "application_manager/test/include/application_manager/mock_application.h"
-#include "application_manager/test/include/application_manager/mock_event_dispatcher.h"
-#include "application_manager/test/include/application_manager/mock_event_observer.h"
-#include "application_manager/test/include/application_manager/mock_message_helper.h"
+#include "application_manager/mock_application.h"
+#include "application_manager/mock_application_manager.h"
+#include "application_manager/mock_event_dispatcher.h"
+#include "application_manager/mock_event_observer.h"
+#include "application_manager/mock_message_helper.h"
+#include "application_manager/mock_rpc_service.h"
 #include "gtest/gtest.h"
-#include "test/application_manager/mock_application_manager.h"
 #include "vehicle_info_plugin/mock_custom_vehicle_data_manager.h"
 #include "vehicle_info_plugin/vehicle_info_pending_resumption_handler.h"
+#include "vehicle_info_plugin/vehicle_info_plugin.h"
 
 namespace vehicle_info_plugin_test {
 using namespace vehicle_info_plugin;
