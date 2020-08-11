@@ -69,7 +69,7 @@ void SDLPendingResumptionHandler::ClearPendingRequestsMap() {
   pending_requests_.clear();
 }
 
-void SDLPendingResumptionHandler::ClearPendingResumptionRequests() {
+void SDLPendingResumptionHandler::OnResumptionRevert() {
   LOG4CXX_AUTO_TRACE(logger_);
   using namespace application_manager;
   ClearPendingRequestsMap();

@@ -184,7 +184,7 @@ void VehicleInfoPlugin::RevertResumption(
   LOG4CXX_AUTO_TRACE(logger_);
   UNUSED(app);
 
-  pending_resumption_handler_->ClearPendingResumptionRequests();
+  pending_resumption_handler_->OnResumptionRevert();
 
   std::set<std::string> subscriptions_to_revert;
   for (auto& ivi_data : list_of_subscriptions) {

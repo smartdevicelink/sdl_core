@@ -54,7 +54,7 @@ class SDLPendingResumptionHandler
       resumption::Subscriber& subscriber,
       application_manager::Application& app) OVERRIDE;
 
-  void ClearPendingResumptionRequests() OVERRIDE;
+  void OnResumptionRevert() OVERRIDE;
 
  private:
   /**
