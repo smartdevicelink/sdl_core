@@ -207,7 +207,7 @@ void SDLPendingResumptionHandler::HandleResumptionSubscriptionRequest(
   auto resumption_request =
       MakeResumptionRequest(corr_id, function_id, *request);
   app_ids_.push(app.app_id());
-  subscriber(app.app_id(), resumption_request);
+
   if (pending_requests_.empty()) {
     LOG4CXX_DEBUG(logger_,
                   "There are no pending requests for app_id: " << app.app_id());
@@ -218,13 +218,14 @@ void SDLPendingResumptionHandler::HandleResumptionSubscriptionRequest(
                       << function_id << " and correlation_id: " << corr_id);
 
     application_manager_.GetRPCService().ManageHMICommand(request);
-    return;
+  } else {
+    LOG4CXX_DEBUG(logger_,
+                  "There are pending requests. Freeze resumption for app id "
+                      << app.app_id() << " corr id = " << corr_id);
+    ResumptionAwaitingHandling frozen_res{
+        app.app_id(), ext, subscriber, resumption_request};
+    freezed_resumptions_.push_back(frozen_res);
   }
-  LOG4CXX_DEBUG(logger_,
-                "There are pending requests for app_id: " << app.app_id());
-
-  ResumptionAwaitingHandling frozen_res = {
-      app.app_id(), ext, subscriber, resumption_request};
-  freezed_resumptions_.push_back(frozen_res);
+  subscriber(app.app_id(), resumption_request);
 }
 }  // namespace sdl_rpc_plugin
