@@ -108,6 +108,7 @@ void SDLPendingResumptionHandler::RaiseFakeSuccessfulResponse(
       response[strings::params][strings::function_id].asInt());
   event_engine::Event event(fid);
   event.set_smart_object(response);
+  LOG4CXX_TRACE(logger_, "Raise fake response for subscriber. corr_id : " << corr_id);
   event.raise(application_manager_.event_dispatcher());
 }
 
@@ -119,9 +120,13 @@ void SDLPendingResumptionHandler::on_event(
   const smart_objects::SmartObject& response = event.smart_object();
   const uint32_t corr_id = event.smart_object_correlation_id();
 
+  LOG4CXX_TRACE(logger_,
+                "Received event with function id: "
+                    << event.id() << " and correlation id: " << corr_id);
+
   smart_objects::SmartObject pending_request;
   if (pending_requests_.find(corr_id) == pending_requests_.end()) {
-    LOG4CXX_DEBUG(logger_, "corr id" << corr_id << " NOT found");
+    LOG4CXX_DEBUG(logger_, "corr id " << corr_id << " NOT found");
     return;
   }
   pending_request = pending_requests_[corr_id];
@@ -134,20 +139,14 @@ void SDLPendingResumptionHandler::on_event(
   app_ids_.pop();
   auto app = application_manager_.application(app_id);
   if (!app) {
-    LOG4CXX_ERROR(logger_, "Application NOT found");
+    LOG4CXX_ERROR(logger_, "Application not found " << app_id);
     return;
   }
-
-  LOG4CXX_DEBUG(logger_,
-                "Received event with function id: "
-                    << event.id() << " and correlation id: " << corr_id);
 
   if (resumption::IsResponseSuccessful(response)) {
     LOG4CXX_DEBUG(logger_, "Resumption of subscriptions is successful");
 
     application_manager_.SubscribeAppForWayPoints(app);
-
-    unsubscribe_from_event(event.id());
 
     for (auto& freezed_resumption : freezed_resumptions_) {
       auto corr_id = freezed_resumption.request_to_send_
