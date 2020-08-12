@@ -72,8 +72,11 @@ void SDLPendingResumptionHandler::ClearPendingRequestsMap() {
 void SDLPendingResumptionHandler::OnResumptionRevert() {
   LOG4CXX_AUTO_TRACE(logger_);
   using namespace application_manager;
-  ClearPendingRequestsMap();
 
+  if (!pending_requests_.empty()) {
+    LOG4CXX_DEBUG(logger_, "Still waiting for some response");
+    return;
+  }
   if (!freezed_resumptions_.empty()) {
     ResumptionAwaitingHandling freezed_resumption = freezed_resumptions_.back();
     freezed_resumptions_.pop_back();
