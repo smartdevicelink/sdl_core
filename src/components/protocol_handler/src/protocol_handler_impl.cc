@@ -61,10 +61,10 @@ std::string ConvertPacketDataToString(const uint8_t* data,
 
 const size_t kStackSize = 131072;
 
-utils::SemanticVersion default_protocol_version(5, 3, 0);
-utils::SemanticVersion min_multiple_transports_version(5, 1, 0);
-utils::SemanticVersion min_cloud_app_version(5, 2, 0);
-utils::SemanticVersion min_reason_param_version(5, 3, 0);
+const utils::SemanticVersion default_protocol_version(5, 3, 0);
+const utils::SemanticVersion min_multiple_transports_version(5, 1, 0);
+const utils::SemanticVersion min_cloud_app_version(5, 2, 0);
+const utils::SemanticVersion min_reason_param_version(5, 3, 0);
 
 ProtocolHandlerImpl::ProtocolHandlerImpl(
     const ProtocolHandlerSettings& settings,
@@ -313,13 +313,14 @@ void ProtocolHandlerImpl::SendStartSessionAck(
                                &params, strings::hash_id)));
 
       // Minimum protocol version supported by both
-      utils::SemanticVersion* min_version =
+      const utils::SemanticVersion& min_version =
           (full_version.major_version_ < PROTOCOL_VERSION_5)
-              ? &default_protocol_version
-              : utils::SemanticVersion::min(full_version,
-                                            default_protocol_version);
+              ? default_protocol_version
+              : ((full_version < default_protocol_version)
+                     ? full_version
+                     : default_protocol_version);
       char protocol_version_string[256];
-      strncpy(protocol_version_string, (*min_version).toString().c_str(), 255);
+      strncpy(protocol_version_string, (min_version).toString().c_str(), 255);
 
       const bool protocol_ver_written = bson_object_put_string(
           &params, strings::protocol_version, protocol_version_string);
@@ -336,7 +337,7 @@ void ProtocolHandlerImpl::SendStartSessionAck(
       std::vector<std::string> secondaryTransports;
       std::vector<int32_t> audioServiceTransports;
       std::vector<int32_t> videoServiceTransports;
-      if (*min_version >= min_multiple_transports_version) {
+      if (min_version >= min_multiple_transports_version) {
         if (ParseSecondaryTransportConfiguration(connection_id,
                                                  secondaryTransports,
                                                  audioServiceTransports,
@@ -417,7 +418,7 @@ void ProtocolHandlerImpl::SendStartSessionAck(
 
       std::string policy_app_id =
           connection_handler_.GetCloudAppID(connection_id);
-      if (*min_version >= min_cloud_app_version && !policy_app_id.empty()) {
+      if (min_version >= min_cloud_app_version && !policy_app_id.empty()) {
         sync_primitives::AutoLock lock(auth_token_map_lock_);
         auto it = auth_token_map_.find(policy_app_id);
         if (it != auth_token_map_.end()) {

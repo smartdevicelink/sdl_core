@@ -208,11 +208,10 @@ void HandshakeHandler::ProcessSuccessfulHandshake(const uint32_t connection_key,
       if (can_be_protected && is_already_protected) {
         return "Service is already protected";
       } else if (!can_be_protected && is_already_protected) {
-        return "Service can be protected but is not already protected";
-      } else if (!can_be_protected && !is_already_protected) {
+        return "Service cannot be protected but is already protected";
+      } else {  // !can_be_protected && !is_already_protected
         return "Service cannot be protected";
       }
-      return std::string();
     };
     protocol_handler_.SendStartSessionNAck(
         context_.connection_id_,
@@ -257,27 +256,23 @@ void HandshakeHandler::ProcessFailedHandshake(BsonObject& params,
     service_status_update_handler_.OnServiceUpdate(
         this->connection_key(), context_.service_type_, service_status);
 
-    auto gen_reason_msg =
-        [](const ServiceStatus service_status) -> std::string {
-      switch (service_status) {
-        case ServiceStatus::PTU_FAILED:
-          return "Policy Table Update failed";
-        case ServiceStatus::CERT_INVALID:
-          return "Invalid certificate";
-        case ServiceStatus::INVALID_TIME:
-          return "Failed to get system time";
-        case ServiceStatus::UNSECURE_START_FAILED:
-          return "Unsecure start failed";
-        default:
-          return "Unknown cause of failure";
-      }
-    };
+    std::string reason_msg =
+        (service_status == ServiceStatus::PTU_FAILED)
+            ? "Policy Table Update failed"
+            : (service_status == ServiceStatus::CERT_INVALID)
+                  ? "Invalid certificate"
+                  : (service_status == ServiceStatus::INVALID_TIME)
+                        ? "Failed to get system time"
+                        : (service_status ==
+                           ServiceStatus::UNSECURE_START_FAILED)
+                              ? "Unsecure start failed"
+                              : "Unknown cause of failure";
 
     protocol_handler_.SendStartSessionNAck(context_.connection_id_,
                                            context_.new_session_id_,
                                            protocol_version_,
                                            context_.service_type_,
-                                           gen_reason_msg(service_status));
+                                           reason_msg);
   }
 }
 
