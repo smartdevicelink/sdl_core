@@ -79,6 +79,12 @@
   </element>
 </enum>
 
+<enum name="CapacityUnit">
+    <element name="LITERS" />
+    <element name="KILOWATTHOURS" />
+    <element name="KILOGRAMS" />
+</enum>
+
 <enum name="PredefinedWindows">
   <element name="DEFAULT_WINDOW" value="0">
     <description>The default window is a main window pre-created on behalf of the app.</description>
@@ -859,14 +865,6 @@
     </element>
 </enum>
 
-<struct name="FuelRange">
-    <param name="type" type="Common.FuelType" mandatory="false"/>
-    <param name="range" type="Float" minvalue="0" maxvalue="10000" mandatory="false">
-        <description>
-            The estimate range in KM the vehicle can travel based on fuel level and consumption.
-        </description>
-    </param>
-</struct>
 
 <enum name="ComponentVolumeStatus">
   <description>The volume status of a vehicle component.</description>
@@ -889,6 +887,27 @@
   <description> The data is not supported.</description>
   </element>
 </enum>
+
+<struct name="FuelRange">
+    <param name="type" type="Common.FuelType" mandatory="false"/>
+    <param name="range" type="Float" minvalue="0" maxvalue="10000" mandatory="false">
+        <description>
+            The estimate range in KM the vehicle can travel based on fuel level and consumption.
+        </description>
+    </param>
+    <param name="level" type="Float" minvalue="-6" maxvalue="1000000" mandatory="false">
+       <description>The relative remaining capacity of this fuel type (percentage).</description>
+    </param>
+    <param name="levelState" type="Common.ComponentVolumeStatus" mandatory="false">
+        <description>The fuel level state</description>
+    </param>
+    <param name="capacity" type="Float" minvalue="0" maxvalue="1000000" mandatory="false">
+       <description>The absolute capacity of this fuel type.</description>
+    </param>
+    <param name="capacityUnit" type="Common.CapacityUnit" mandatory="false">
+       <description>The unit of the capacity of this fuel type such as liters for gasoline or kWh for batteries.</description>
+    </param>
+</struct>
 
 <enum name="TPMS">
   <element name="UNKNOWN">
@@ -929,6 +948,7 @@
     <description>No gear</description>
   </element>
   <element name="DRIVE">
+    <description>Regular Drive mode</description>
   </element>
   <element name="SPORT">
     <description>Drive Sport mode</description>
@@ -952,9 +972,41 @@
   </element>
   <element name="EIGHTH">
   </element>
+  <element name="NINTH">
+  </element>
+  <element name="TENTH">
+  </element>
   <element name="UNKNOWN">
   </element>
   <element name="FAULT">
+  </element>
+</enum>
+
+<enum name="TransmissionType">
+  <description>Type of transmission used in the vehicle.</description>
+  <element name="MANUAL">
+    <description>Manual transmission.</description>
+  </element>
+  <element name="AUTOMATIC">
+    <description>Automatic transmission.</description>
+  </element>
+  <element name="SEMI_AUTOMATIC">
+    <description>Semi automatic transmission.</description>
+  </element>
+  <element name="DUAL_CLUTCH">
+    <description>Dual clutch transmission.</description>
+  </element>
+  <element name="CONTINUOUSLY_VARIABLE">
+    <description>Continuously variable transmission(CVT).</description>
+  </element>
+  <element name="INFINITELY_VARIABLE">
+    <description>Infinitely variable transmission.</description>
+  </element>
+  <element name="ELECTRIC_VARIABLE">
+    <description>Electric variable transmission.</description>
+  </element>
+  <element name="DIRECT_DRIVE">
+    <description>Direct drive between engine and wheels.</description>
   </element>
 </enum>
 
@@ -1141,6 +1193,7 @@
   <element name="VEHICLEDATA_FUELCONSUMPTION" />
   <element name="VEHICLEDATA_EXTERNTEMP" />
   <element name="VEHICLEDATA_VIN" />
+  <element name="VEHICLEDATA_GEARSTATUS" />
   <element name="VEHICLEDATA_PRNDL" />
   <element name="VEHICLEDATA_TIREPRESSURE" />
   <element name="VEHICLEDATA_ODOMETER" />
@@ -1165,6 +1218,9 @@
   <element name="VEHICLEDATA_ELECTRONICPARKBRAKESTATUS" />
   <element name="VEHICLEDATA_CLOUDAPPVEHICLEID" />
   <element name="VEHICLEDATA_OEM_CUSTOM_DATA" />
+  <element name="VEHICLEDATA_STABILITYCONTROLSSTATUS" />
+  <element name="VEHICLEDATA_WINDOWSTATUS"/>
+  <element name="VEHICLEDATA_HANDSOFFSTEERING"/>
 </enum>
 
 <enum name="WiperStatus">
@@ -1674,6 +1730,21 @@
     </param>
     <param name="levelspan" type="Integer" mandatory="false" defvalue="1" minvalue="1" maxvalue="100">
     </param>
+</struct>
+
+<struct name="WindowState">
+  <param name="approximatePosition" type="Integer" minvalue="0" maxvalue="100" mandatory="true">
+    <description>The approximate percentage that the window is open - 0 being fully closed, 100 being fully open</description>
+  </param>
+  <param name="deviation" type="Integer" minvalue="0" maxvalue="100" mandatory="true">
+    <description>The percentage deviation of the approximatePosition. e.g. If the approximatePosition is 50 and the deviation is 10, then the window's location is somewhere between 40 and 60.</description>
+  </param>
+</struct>
+
+<struct name="WindowStatus">
+  <description>Describes the status of a window of a door/liftgate etc.</description>
+  <param name="location" type="Common.Grid" mandatory="true"/>
+  <param name="state" type="Common.WindowState" mandatory="true"/>      
 </struct>
 
 <struct name="ModuleInfo">
@@ -2820,7 +2891,7 @@
 <struct name="MenuParams">
   <param name="parentID" type="Integer" minvalue="0" maxvalue="2000000000" mandatory="false">
     <description>unique ID of the sub menu, the command must be added to.</description>
-    <description>If not provided, the command must be added to the top level of the in application menu.</description>
+    <description>If not provided or 0, the command must be added to the top level of the in application menu.</description>
   </param>
   <param name="position" type="Integer" minvalue="0" maxvalue="1000" mandatory="false">
     <description>Position within the items that are at the top level of the in application menu.</description>
@@ -3224,6 +3295,15 @@
   </param>
 </struct>
 
+<struct name="StabilityControlsStatus">
+	<param name="escSystem" type="Common.VehicleDataStatus" mandatory="false">
+		<description>true if vehicle stability control is ON, else false</description>
+	</param>
+	<param name="trailerSwayControl" type="Common.VehicleDataStatus" mandatory="false">
+		<description>true if vehicle trailer sway control is ON, else false</description>
+	</param>
+</struct>
+
 <struct name="BodyInformation">
   <param name="parkBrakeActive" type="Boolean" mandatory="true">
     <description>Must be true if the park brake is active</description>
@@ -3572,6 +3652,15 @@
     </param>
   </struct>
 
+  <struct name="DriverDistractionCapability">
+      <param name="menuLength" type="Integer" mandatory="false">
+          <description>The number of items allowed in a Choice Set or Command menu while the driver is distracted</description>
+      </param>
+      <param name="subMenuDepth" type="Integer" minvalue="1" mandatory="false">
+          <description>The depth of submenus allowed when the driver is distracted. e.g. 3 == top level menu -> submenu -> submenu; 1 == top level menu only</description>
+      </param>
+  </struct>
+
   <struct name="SystemCapabilities">
       <param name="navigationCapability" type="NavigationCapability" mandatory="false">
       </param>
@@ -3579,6 +3668,9 @@
       </param>
       <param name="videoStreamingCapability" type="VideoStreamingCapability" mandatory="false">
       </param>
+      <param name="driverDistractionCapability" type="DriverDistractionCapability" mandatory="false">
+        <description>Describes capabilities when the driver is distracted</description>
+    </param>
   </struct>
 
   <struct name="RemoteControlCapabilities">
@@ -4104,6 +4196,7 @@
         <element name="APP_SERVICES" />
         <element name="SEAT_LOCATION"/>
         <element name="DISPLAYS"/>
+        <element name="DRIVER_DISTRACTION" />
     </enum>
 
     <struct name="SystemCapability">
@@ -4137,6 +4230,9 @@
         <param name="seatLocationCapability" type="SeatLocationCapability" mandatory="false">
             <description>Contains information about the locations of each seat</description>
         </param>
+        <param name="driverDistractionCapability" type="DriverDistractionCapability" mandatory="false" since="6.0">
+            <description>Describes capabilities when the driver is distracted</description>
+        </param>      
     </struct>
     
     <enum name="HybridAppPreference">
@@ -4171,6 +4267,18 @@
             If specified, which Core uses a client implementation of the connection type and attempts to connect to the endpoint when this app is selected (activated).
             If omitted, Core won't attempt to connect as the app selection (activation) is managed outside of Core. Instead it uses a server implementation of the connection type and expects the app to connect.
           </description>
+      </param>
+    </struct>
+
+    <struct name="GearStatus">
+      <param name="userSelectedGear" type="Common.PRNDL" mandatory="false">
+        <description>Gear position selected by the user i.e. Park, Drive, Reverse</description>
+      </param>
+      <param name="actualGear" type="Common.PRNDL" mandatory="false">
+        <description>Actual Gear in use by the transmission</description>
+      </param>
+      <param name="transmissionType" type="Common.TransmissionType" mandatory="false">
+        <description>Tells the transmission type</description>
       </param>
     </struct>
 
@@ -4494,7 +4602,7 @@
           This parameter is filled for supporting OEM proprietary data exchanges.
         </description>
       </param>
-      <param name="url" type="String" maxlength="1000" minlength="1" mandatory="false">
+      <param name="url" type="String" minlength="1" mandatory="false">
         <description>Optional array of URL(s) for HTTP requests.</description>
       </param>
       <param name="fileType" type="Common.FileType" mandatory="false">
@@ -5253,7 +5361,7 @@
       <description>ID of the sub menu to be added. Unique for the application.</description>
     </param>
     <param name="menuParams" type="Common.MenuParams" mandatory="true">
-      <description>Position and name of menu to be added. 'parent' field is omitted for this RPC.  </description>
+      <description>Position, parentID, and name of menu to be added.</description>
     </param>
     <param name="menuIcon" type="Common.Image" mandatory="false">
       <description>The image field for AddSubMenu</description>
@@ -5845,7 +5953,7 @@
   </function>
   <function name="StartStream" messagetype="request">
     <description>Request from SmartDeviceLinkCore to HMI to start playing video streaming.</description>
-    <param name="url" type="String" minlength="21" maxlength="500" mandatory="true">
+    <param name="url" type="String" minlength="21" mandatory="true">
       <description>URL that HMI start playing.</description>
     </param>
     <param name="appID" type="Integer" mandatory="true">
@@ -5864,7 +5972,7 @@
   </function>
   <function name="StartAudioStream" messagetype="request">
     <description>Request from SmartDeviceLinkCore to HMI to start playing audio streaming.</description>
-    <param name="url" type="String" minlength="21" maxlength="500" mandatory="true">
+    <param name="url" type="String" minlength="21" mandatory="true">
       <description>URL that HMI start playing.</description>
     </param>
     <param name="appID" type="Integer" mandatory="true">
@@ -6030,16 +6138,19 @@
       <description>The number of revolutions per minute of the engine</description>
     </param>
     <param name="fuelLevel" type="Boolean" mandatory="false">
-      <description>The fuel level in the tank (percentage)</description>
+      <description>The fuel level in the tank (percentage). This parameter is deprecated starting RPC Spec 7.0, please see fuelRange</description>
     </param>
     <param name="fuelLevel_State" type="Boolean" mandatory="false">
-      <description>The fuel level state</description>
+      <description>The fuel level state. This parameter is deprecated starting RPC Spec 7.0, please see fuelRange</description>
     </param>
     <param name="instantFuelConsumption" type="Boolean" mandatory="false">
       <description>The instantaneous fuel consumption in microlitres</description>
     </param>
     <param name="fuelRange" type="Boolean" mandatory="false">
-        <description>The estimate range in KM the vehicle can travel based on fuel level and consumption</description>
+      <description>
+        The fuel type, estimated range in KM, fuel level/capacity and fuel level state for the vehicle.
+        See struct FuelRange for details.
+      </description>
     </param>
     <param name="externalTemperature" type="Boolean" mandatory="false">
       <description>The external temperature in degrees celsius</description>
@@ -6047,8 +6158,11 @@
     <param name="turnSignal" type="Boolean" mandatory="false">
         <description>See TurnSignal</description>
     </param>
+    <param name="gearStatus" type="Boolean" mandatory="false">
+      <description>See GearStatus</description>
+    </param>
     <param name="prndl" type="Boolean" mandatory="false">
-      <description>See PRNDL</description>
+      <description>See PRNDL. This parameter is deprecated and it is now covered in `gearStatus`</description>
     </param>
     <param name="tirePressure" type="Boolean" mandatory="false">
       <description>See TireStatus</description>
@@ -6092,6 +6206,15 @@
     <param name="cloudAppVehicleID" type="Boolean" mandatory="false">
       <description>Parameter used by cloud apps to identify a head unit</description>
     </param>
+    <param name="stabilityControlsStatus" type="Boolean" mandatory="false">
+	    <description>See StabilityControlsStatus</description>
+    </param>
+    <param name="windowStatus" type="Boolean" mandatory="false">
+      <description>See WindowStatus</description>
+    </param>
+    <param name="handsOffSteering" type="Boolean" mandatory="false">
+      <description>To indicate whether driver hands are off the steering wheel</description>
+    </param>
 
         <!-- Ford Specific Data Items -->
     <param name="eCallInfo" type="Boolean" mandatory="false">
@@ -6123,16 +6246,19 @@
       <description>The number of revolutions per minute of the engine</description>
     </param>
     <param name="fuelLevel" type="Common.VehicleDataResult" mandatory="false">
-      <description>The fuel level in the tank (percentage)</description>
+      <description>The fuel level in the tank (percentage). This parameter is deprecated starting RPC Spec 7.0, please see fuelRange</description>
     </param>
     <param name="fuelLevel_State" type="Common.VehicleDataResult" mandatory="false">
-      <description>The fuel level state</description>
+      <description>The fuel level state. This parameter is deprecated starting RPC Spec 7.0, please see fuelRange</description>
     </param>
     <param name="instantFuelConsumption" type="Common.VehicleDataResult" mandatory="false">
       <description>The instantaneous fuel consumption in microlitres</description>
     </param>
     <param name="fuelRange" type="Common.VehicleDataResult" mandatory="false">
-        <description>The estimate range in KM the vehicle can travel based on fuel level and consumption</description>
+      <description>
+        The fuel type, estimated range in KM, fuel level/capacity and fuel level state for the vehicle.
+        See struct FuelRange for details.
+      </description>
     </param>
     <param name="externalTemperature" type="Common.VehicleDataResult" mandatory="false">
       <description>The external temperature in degrees celsius.</description>
@@ -6140,8 +6266,11 @@
     <param name="turnSignal" type="Common.VehicleDataResult" mandatory="false">
         <description>See TurnSignal</description>
     </param>
+    <param name="gearStatus" type="Common.VehicleDataResult" mandatory="false">
+      <description>See GearStatus</description>
+    </param>
     <param name="prndl" type="Common.VehicleDataResult" mandatory="false">
-      <description>See PRNDL</description>
+      <description>See PRNDL. This parameter is deprecated and it is now covered in `gearStatus`</description>
     </param>
     <param name="tirePressure" type="Common.VehicleDataResult" mandatory="false">
       <description>See TireStatus</description>
@@ -6184,6 +6313,15 @@
     </param>
     <param name="cloudAppVehicleID" type="Common.VehicleDataResult" mandatory="false">
       <description>Parameter used by cloud apps to identify a head unit</description>
+    </param>
+    <param name="stabilityControlsStatus" type="Common.VehicleDataResult" mandatory="false">
+	    <description>See StabilityControlsStatus</description>
+    </param>
+    <param name="windowStatus" type="Common.VehicleDataResult" mandatory="false">
+      <description>See WindowStatus</description>
+    </param>
+    <param name="handsOffSteering" type="Common.VehicleDataResult" mandatory="false">
+      <description>To indicate whether driver hands are off the steering wheel</description>
     </param>
 
         <!-- Ford Specific Data Items -->
@@ -6219,16 +6357,19 @@
       <description>The number of revolutions per minute of the engine</description>
     </param>
     <param name="fuelLevel" type="Boolean" mandatory="false">
-      <description>The fuel level in the tank (percentage)</description>
+      <description>The fuel level in the tank (percentage). This parameter is deprecated starting RPC Spec 7.0, please see fuelRange</description>
     </param>
     <param name="fuelLevel_State" type="Boolean" mandatory="false">
-      <description>The fuel level state</description>
+      <description>The fuel level state. This parameter is deprecated starting RPC Spec 7.0, please see fuelRange</description>
     </param>
     <param name="instantFuelConsumption" type="Boolean" mandatory="false">
       <description>The instantaneous fuel consumption in microlitres</description>
     </param>
     <param name="fuelRange" type="Boolean" mandatory="false">
-        <description>The estimate range in KM the vehicle can travel based on fuel level and consumption</description>
+      <description>
+        The fuel type, estimated range in KM, fuel level/capacity and fuel level state for the vehicle.
+        See struct FuelRange for details.
+      </description>
     </param>
     <param name="externalTemperature" type="Boolean" mandatory="false">
       <description>The external temperature in degrees celsius.</description>
@@ -6236,8 +6377,11 @@
     <param name="turnSignal" type="Boolean" mandatory="false">
         <description>See TurnSignal</description>
     </param>
+    <param name="gearStatus" type="Boolean" mandatory="false">
+      <description>See GearStatus</description>
+    </param>
     <param name="prndl" type="Boolean" mandatory="false">
-      <description>See PRNDL</description>
+      <description>See PRNDL. This parameter is deprecated and it is now covered in `gearStatus`</description>
     </param>
     <param name="tirePressure" type="Boolean" mandatory="false">
       <description>See TireStatus</description>
@@ -6281,6 +6425,15 @@
     <param name="cloudAppVehicleID" type="Boolean" mandatory="false">
       <description>Parameter used by cloud apps to identify a head unit</description>
     </param>
+    <param name="stabilityControlsStatus" type="Boolean" mandatory="false">
+	    <description>See StabilityControlsStatus</description>
+    </param>
+    <param name="windowStatus" type="Boolean" mandatory="false">
+      <description>See WindowStatus</description>
+    </param>
+    <param name="handsOffSteering" type="Boolean" mandatory="false">
+      <description>To indicate whether driver hands are off the steering wheel</description>
+    </param>
 
         <!-- Ford Specific Data Items -->
     <param name="eCallInfo" type="Boolean" mandatory="false">
@@ -6312,16 +6465,19 @@
       <description>The number of revolutions per minute of the engine</description>
     </param>
     <param name="fuelLevel" type="Common.VehicleDataResult" mandatory="false">
-      <description>The fuel level in the tank (percentage)</description>
+      <description>The fuel level in the tank (percentage). This parameter is deprecated starting RPC Spec 7.0, please see fuelRange</description>
     </param>
     <param name="fuelLevel_State" type="Common.VehicleDataResult" mandatory="false">
-      <description>The fuel level state</description>
+      <description>The fuel level state. This parameter is deprecated starting RPC Spec 7.0, please see fuelRange</description>
     </param>
     <param name="instantFuelConsumption" type="Common.VehicleDataResult" mandatory="false">
       <description>The instantaneous fuel consumption in microlitres</description>
     </param>
     <param name="fuelRange" type="Common.VehicleDataResult" mandatory="false">
-        <description>The estimate range in KM the vehicle can travel based on fuel level and consumption</description>
+      <description>
+        The fuel type, estimated range in KM, fuel level/capacity and fuel level state for the vehicle.
+        See struct FuelRange for details.
+      </description>
     </param>
     <param name="externalTemperature" type="Common.VehicleDataResult" mandatory="false">
       <description>The external temperature in degrees celsius</description>
@@ -6329,8 +6485,11 @@
     <param name="turnSignal" type="Common.VehicleDataResult" mandatory="false">
         <description>See TurnSignal</description>
     </param>
+    <param name="gearStatus" type="Common.VehicleDataResult" mandatory="false">
+      <description>See GearStatus</description>
+    </param>
     <param name="prndl" type="Common.VehicleDataResult" mandatory="false">
-      <description>See PRNDL</description>
+      <description>See PRNDL. This parameter is deprecated and it is now covered in `gearStatus`</description>
     </param>
     <param name="tirePressure" type="Common.VehicleDataResult" mandatory="false">
       <description>See TireStatus</description>
@@ -6374,6 +6533,15 @@
     <param name="cloudAppVehicleID" type="Common.VehicleDataResult" mandatory="false">
       <description>Parameter used by cloud apps to identify a head unit</description>
     </param>
+    <param name="stabilityControlsStatus" type="Common.VehicleDataResult" mandatory="false">
+	    <description>See StabilityControlsStatus</description>
+    </param>
+    <param name="windowStatus" type="Common.VehicleDataResult" mandatory="false">
+      <description>See WindowStatus</description>
+    </param>
+    <param name="handsOffSteering" type="Common.VehicleDataResult" mandatory="false">
+      <description>To indicate whether driver hands are off the steering wheel</description>
+    </param>
 
         <!-- Ford Specific Data Items -->
     <param name="eCallInfo" type="Common.VehicleDataResult" mandatory="false">
@@ -6406,16 +6574,19 @@
       <description>The number of revolutions per minute of the engine</description>
     </param>
     <param name="fuelLevel" type="Boolean" mandatory="false">
-      <description>The fuel level in the tank (percentage)</description>
+      <description>The fuel level in the tank (percentage). This parameter is deprecated starting RPC Spec 7.0, please see fuelRange</description>
     </param>
     <param name="fuelLevel_State" type="Boolean" mandatory="false">
-      <description>The fuel level state</description>
+      <description>The fuel level state. This parameter is deprecated starting RPC Spec 7.0, please see fuelRange</description>
     </param>
     <param name="instantFuelConsumption" type="Boolean" mandatory="false">
       <description>The instantaneous fuel consumption in microlitres</description>
     </param>
     <param name="fuelRange" type="Boolean" mandatory="false">
-        <description>The estimate range in KM the vehicle can travel based on fuel level and consumption</description>
+      <description>
+        The fuel type, estimated range in KM, fuel level/capacity and fuel level state for the vehicle.
+        See struct FuelRange for details.
+      </description>
     </param>
     <param name="externalTemperature" type="Boolean" mandatory="false">
       <description>The external temperature in degrees celsius</description>
@@ -6426,8 +6597,11 @@
     <param name="vin" type="Boolean" mandatory="false">
       <description>Vehicle identification number</description>
     </param>
+    <param name="gearStatus" type="Boolean" mandatory="false">
+      <description>See GearStatus</description>
+    </param>
     <param name="prndl" type="Boolean" mandatory="false">
-      <description>See PRNDL</description>
+      <description>See PRNDL. This parameter is deprecated and it is now covered in `gearStatus`</description>
     </param>
     <param name="tirePressure" type="Boolean" mandatory="false">
       <description>See TireStatus</description>
@@ -6471,6 +6645,15 @@
     <param name="cloudAppVehicleID" type="Boolean" mandatory="false">
       <description>Parameter used by cloud apps to identify a head unit</description>
     </param>
+    <param name="stabilityControlsStatus" type="Boolean" mandatory="false">
+	    <description>See StabilityControlsStatus</description>
+    </param>
+    <param name="windowStatus" type="Boolean" mandatory="false">
+      <description>See WindowStatus</description>
+    </param>
+    <param name="handsOffSteering" type="Boolean" mandatory="false">
+      <description>To indicate whether driver hands are off the steering wheel</description>
+    </param>
 
         <!-- Ford Specific Data Items -->
     <param name="eCallInfo" type="Boolean" mandatory="false">
@@ -6502,16 +6685,19 @@
       <description>The number of revolutions per minute of the engine</description>
     </param>
     <param name="fuelLevel" type="Float" minvalue="-6" maxvalue="106" mandatory="false">
-      <description>The fuel level in the tank (percentage)</description>
+      <description>The fuel level in the tank (percentage). This parameter is deprecated starting RPC Spec 7.0, please see fuelRange</description>
     </param>
     <param name="fuelLevel_State" type="Common.ComponentVolumeStatus" mandatory="false">
-      <description>The fuel level state</description>
+      <description>The fuel level state. This parameter is deprecated starting RPC Spec 7.0, please see fuelRange</description>
     </param>
     <param name="instantFuelConsumption" type="Float" minvalue="0" maxvalue="25575" mandatory="false">
       <description>The instantaneous fuel consumption in microlitres</description>
     </param>
     <param name="fuelRange" type="Common.FuelRange" minsize="0" maxsize="100" array="true" mandatory="false">
-        <description>The estimate range in KM the vehicle can travel based on fuel level and consumption</description>
+      <description>
+        The fuel type, estimated range in KM, fuel level/capacity and fuel level state for the vehicle.
+        See struct FuelRange for details.
+      </description>
     </param>
     <param name="externalTemperature" type="Float" minvalue="-40" maxvalue="100" mandatory="false">
       <description>The external temperature in degrees celsius</description>
@@ -6522,8 +6708,11 @@
     <param name="vin" type="String" maxlength="17" mandatory="false">
       <description>Vehicle identification number</description>
     </param>
+    <param name="gearStatus" type="Common.GearStatus" mandatory="false">
+      <description>See GearStatus</description>
+    </param>
     <param name="prndl" type="Common.PRNDL" mandatory="false">
-      <description>See PRNDL</description>
+      <description>See PRNDL. This parameter is deprecated and it is now covered in `gearStatus`</description>
     </param>
     <param name="tirePressure" type="Common.TireStatus" mandatory="false">
       <description>See TireStatus</description>
@@ -6566,6 +6755,15 @@
     </param>
     <param name="cloudAppVehicleID" type="String" mandatory="false">
       <description>Parameter used by cloud apps to identify a head unit</description>
+    </param>
+    <param name="stabilityControlsStatus" type="Common.StabilityControlsStatus" mandatory="false">
+	    <description>See StabilityControlsStatus</description>
+    </param>
+    <param name="windowStatus" type="Common.WindowStatus" array="true" minsize="0" maxsize="100" mandatory="false">
+      <description>See WindowStatus</description>
+    </param>
+    <param name="handsOffSteering" type="Boolean" mandatory="false">
+      <description>To indicate whether driver hands are off the steering wheel</description>
     </param>
 
         <!-- Ford Specific Data Items -->
@@ -6599,16 +6797,19 @@
       <description>The number of revolutions per minute of the engine</description>
     </param>
     <param name="fuelLevel" type="Float" minvalue="-6" maxvalue="106" mandatory="false">
-      <description>The fuel level in the tank (percentage)</description>
+      <description>The fuel level in the tank (percentage). This parameter is deprecated starting RPC Spec 7.0, please see fuelRange</description>
     </param>
     <param name="fuelLevel_State" type="Common.ComponentVolumeStatus" mandatory="false">
-      <description>The fuel level state</description>
+      <description>The fuel level state. This parameter is deprecated starting RPC Spec 7.0, please see fuelRange</description>
     </param>
     <param name="instantFuelConsumption" type="Float" minvalue="0" maxvalue="25575" mandatory="false">
       <description>The instantaneous fuel consumption in microlitres</description>
     </param>
     <param name="fuelRange" type="Common.FuelRange" minsize="0" maxsize="100" array="true" mandatory="false">
-      <description>The estimate range in KM the vehicle can travel based on fuel level and consumption</description>
+      <description>
+        The fuel type, estimated range in KM, fuel level/capacity and fuel level state for the vehicle.
+        See struct FuelRange for details.
+      </description>
     </param>
     <param name="externalTemperature" type="Float" minvalue="-40" maxvalue="100" mandatory="false">
       <description>The external temperature in degrees celsius</description>
@@ -6619,8 +6820,11 @@
     <param name="vin" type="String" maxlength="17" mandatory="false">
       <description>Vehicle identification number.</description>
     </param>
+    <param name="gearStatus" type="Common.GearStatus" mandatory="false">
+      <description>See GearStatus</description>
+    </param>
     <param name="prndl" type="Common.PRNDL" mandatory="false">
-      <description>See PRNDL</description>
+      <description>See PRNDL. This parameter is deprecated and it is now covered in `gearStatus`</description>
     </param>
     <param name="tirePressure" type="Common.TireStatus" mandatory="false">
       <description>See TireStatus</description>
@@ -6663,6 +6867,15 @@
     </param>
     <param name="engineOilLife" type="Float" minvalue="0" maxvalue="100" mandatory="false">
       <description>The estimated percentage of remaining oil life of the engine.</description>
+    </param>
+    <param name="stabilityControlsStatus" type="Common.StabilityControlsStatus" mandatory="false">
+	    <description>See StabilityControlsStatus</description>
+    </param>
+    <param name="windowStatus" type="Common.WindowStatus" array="true" minsize="0" maxsize="100" mandatory="false">
+      <description>See WindowStatus</description>
+    </param>
+    <param name="handsOffSteering" type="Boolean" mandatory="false">
+      <description>To indicate whether driver hands are off the steering wheel</description>
     </param>
 
         <!-- Ford Specific Data Items -->
