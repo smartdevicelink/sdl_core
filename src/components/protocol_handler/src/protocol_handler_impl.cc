@@ -536,7 +536,7 @@ void ProtocolHandlerImpl::SendStartSessionNAck(
                     << connection_id << " for service_type "
                     << static_cast<int32_t>(service_type) << " session_id "
                     << static_cast<int32_t>(session_id)
-                    << ((!reason.empty()) ? " reason \"" + reason + "\"" : ""));
+                    << (reason.empty() ? "" : " reason \"" + reason + "\""));
 }
 
 void ProtocolHandlerImpl::SendEndSessionNAck(ConnectionID connection_id,
@@ -620,7 +620,7 @@ void ProtocolHandlerImpl::SendEndSessionNAck(
                     << connection_id << " for service_type "
                     << static_cast<int32_t>(service_type) << " session_id "
                     << static_cast<int32_t>(session_id)
-                    << ((!reason.empty()) ? " reason \"" + reason + "\"" : ""));
+                    << (reason.empty() ? "" : " reason \"" + reason + "\""));
 }
 
 SessionObserver& ProtocolHandlerImpl::get_session_observer() {
