@@ -502,13 +502,6 @@ void ProtocolHandlerImpl::SendStartSessionNAck(
     return;
   }
 
-  const utils::SemanticVersion& min_version =
-      (full_version.major_version_ < PROTOCOL_VERSION_5)
-          ? default_protocol_version
-          : ((full_version < default_protocol_version)
-                 ? full_version
-                 : default_protocol_version);
-
   if (protocol_version >= PROTOCOL_VERSION_5 &&
       maxProtocolVersion >= PROTOCOL_VERSION_5) {
     BsonObject payloadObj;
@@ -525,7 +518,7 @@ void ProtocolHandlerImpl::SendStartSessionNAck(
       bson_object_put_array(
           &payloadObj, strings::rejected_params, &rejectedParamsArr);
     }
-    if (!reason.empty() && min_version >= min_reason_param_version) {
+    if (!reason.empty() && full_version >= min_reason_param_version) {
       bson_object_put_string(
           &payloadObj, strings::reason, const_cast<char*>(reason.c_str()));
     }
@@ -590,12 +583,6 @@ void ProtocolHandlerImpl::SendEndSessionNAck(
                                 << session_id << "no longer exist(s).");
     return;
   }
-  const utils::SemanticVersion& min_version =
-      (full_version.major_version_ < PROTOCOL_VERSION_5)
-          ? default_protocol_version
-          : ((full_version < default_protocol_version)
-                 ? full_version
-                 : default_protocol_version);
 
   if (protocol_version >= PROTOCOL_VERSION_5 &&
       maxProtocolVersion >= PROTOCOL_VERSION_5) {
@@ -614,7 +601,7 @@ void ProtocolHandlerImpl::SendEndSessionNAck(
       bson_object_put_array(
           &payloadObj, strings::rejected_params, &rejectedParamsArr);
     }
-    if (!reason.empty() && min_version >= min_reason_param_version) {
+    if (!reason.empty() && full_version >= min_reason_param_version) {
       bson_object_put_string(
           &payloadObj, strings::reason, const_cast<char*>(reason.c_str()));
     }
