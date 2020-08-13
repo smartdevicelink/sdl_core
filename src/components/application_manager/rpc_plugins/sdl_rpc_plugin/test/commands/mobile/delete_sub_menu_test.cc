@@ -98,7 +98,9 @@ class DeleteSubMenuRequestTest
  public:
   DeleteSubMenuRequestTest()
       : commands_lock_(std::make_shared<sync_primitives::Lock>())
+      , sub_menu_lock_(std::make_shared<sync_primitives::RecursiveLock>())
       , accessor_(commands_map_, commands_lock_)
+      , sub_menu_accessor_(sub_menu_map_, sub_menu_lock_)
       , message_(CreateMessage())
       , command_(CreateCommand<DeleteSubMenuRequest>(message_))
       , mock_help_prompt_manager_(
@@ -106,8 +108,11 @@ class DeleteSubMenuRequestTest
       , app_(CreateMockApp()) {}
 
   am::CommandsMap commands_map_;
+  am::SubMenuMap sub_menu_map_;
   mutable std::shared_ptr<sync_primitives::Lock> commands_lock_;
+  mutable std::shared_ptr<sync_primitives::RecursiveLock> sub_menu_lock_;
   DataAccessor<am::CommandsMap> accessor_;
+  DataAccessor<am::SubMenuMap> sub_menu_accessor_;
 
   MessageSharedPtr message_;
   DeleteSubMenuRequestPtr command_;
@@ -266,6 +271,17 @@ TEST_F(DeleteSubMenuRequestTest, OnEvent_DeleteSubmenu_SUCCESS) {
   commands_map_.insert(
       std::make_pair(0, &((*message_)[am::strings::msg_params])));
 
+  smart_objects::SmartObjectSPtr smartObjectPtr =
+      std::make_shared<smart_objects::SmartObject>();
+
+  smart_objects::SmartObject& object = *smartObjectPtr;
+
+  object[am::strings::position] = 1;
+  object[am::strings::menu_name] = "SubMenu";
+
+  sub_menu_map_.insert(
+      std::pair<uint32_t, smart_objects::SmartObject*>(5, &object));
+  EXPECT_CALL(*app_, sub_menu_map()).WillRepeatedly(Return(sub_menu_accessor_));
   EXPECT_CALL(app_mngr_, application(_)).WillRepeatedly(Return(app_));
 
   InSequence seq;
@@ -330,6 +346,7 @@ TEST_F(DeleteSubMenuRequestTest,
       std::make_pair(0, &((*message_)[am::strings::msg_params])));
 
   EXPECT_CALL(app_mngr_, application(_)).WillRepeatedly(Return(app_));
+  EXPECT_CALL(*app_, sub_menu_map()).WillRepeatedly(Return(sub_menu_accessor_));
   EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_, _)).Times(0);
   EXPECT_CALL(*app_, commands_map()).Times(2).WillRepeatedly(Return(accessor_));
   EXPECT_CALL(*app_, RemoveCommand(_)).Times(0);
@@ -357,6 +374,7 @@ TEST_F(DeleteSubMenuRequestTest,
       std::make_pair(0, &((*message_)[am::strings::msg_params])));
 
   EXPECT_CALL(app_mngr_, application(_)).WillRepeatedly(Return(app_));
+  EXPECT_CALL(*app_, sub_menu_map()).WillRepeatedly(Return(sub_menu_accessor_));
   EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_, _)).Times(0);
   EXPECT_CALL(*app_, commands_map()).Times(2).WillRepeatedly(Return(accessor_));
   EXPECT_CALL(*app_, RemoveCommand(_)).Times(0);
