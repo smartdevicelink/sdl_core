@@ -34,6 +34,7 @@
 #include "application_manager/application_impl.h"
 #include "application_manager/rpc_service.h"
 #include "interfaces/MOBILE_API.h"
+#include "utils/file_system.h"
 
 namespace sdl_rpc_plugin {
 using namespace application_manager;
@@ -74,6 +75,12 @@ void OnUIUpdateFileNotification::Run() {
   (*message_)[strings::params][strings::connection_key] =
       (*message_)[strings::msg_params][strings::app_id];
   (*message_)[strings::msg_params].erase(strings::app_id);
+
+  // Parse fileName in case the full path was sent by the HMI
+  auto fileName =
+      (*message_)[strings::msg_params][strings::file_name].asString();
+  (*message_)[strings::msg_params][strings::file_name] =
+      file_system::GetFileName(fileName);
 
   SendNotificationToMobile(message_);
 }
