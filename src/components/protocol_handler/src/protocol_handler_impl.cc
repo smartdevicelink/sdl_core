@@ -1646,7 +1646,9 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessageEndSession(
       SendEndSessionNAck(connection_id,
                          current_session_id,
                          packet.protocol_version(),
-                         service_type);
+                         service_type,
+                         "Refused to end session for service of type " +
+                             std::to_string(service_type));
     }
   }
   return RESULT_OK;

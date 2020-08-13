@@ -373,12 +373,13 @@ class ProtocolHandlerImpl
    * \param session_id ID of session to be sent to mobile application
    * \param protocol_version Version of protocol used for communication
    * \param service_type Type of session: RPC or BULK Data. RPC by default
+   * \param reason String stating the reason for the rejecting the start service
    */
   void SendStartSessionNAck(ConnectionID connection_id,
                             uint8_t session_id,
                             uint8_t protocol_version,
                             uint8_t service_type,
-                            const std::string reason = std::string());
+                            const std::string reason);
 
   /**
    * \brief Sends fail of starting session to mobile application
@@ -387,13 +388,14 @@ class ProtocolHandlerImpl
    * \param protocol_version Version of protocol used for communication
    * \param service_type Type of session: RPC or BULK Data. RPC by default
    * \param rejected_params List of rejected params to send in payload
+   * \param reason String stating the reason for the rejecting the start service
    */
   void SendStartSessionNAck(ConnectionID connection_id,
                             uint8_t session_id,
                             uint8_t protocol_version,
                             uint8_t service_type,
                             std::vector<std::string>& rejectedParams,
-                            const std::string reason = std::string());
+                            const std::string reason);
 
   /**
    * \brief Sends acknowledgement of end session/service to mobile application
@@ -418,12 +420,13 @@ class ProtocolHandlerImpl
    * \param session_id ID of session ment to be ended
    * \param protocol_version Version of protocol used for communication
    * \param service_type Type of session: RPC or BULK Data. RPC by default
+   * \param reason String stating the reason for the rejecting the end service
    */
   void SendEndSessionNAck(ConnectionID connection_id,
                           uint32_t session_id,
                           uint8_t protocol_version,
                           uint8_t service_type,
-                          const std::string reason = std::string());
+                          const std::string reason);
   /**
    * \brief Sends fail of ending session to mobile application (variant for
    * Protocol v5)
@@ -433,13 +436,14 @@ class ProtocolHandlerImpl
    * \param protocol_version Version of protocol used for communication
    * \param service_type Type of session: RPC or BULK Data. RPC by default
    * \param rejected_params List of rejected params to send in payload
+   * \param reason String stating the reason for the rejecting the end service
    */
   void SendEndSessionNAck(ConnectionID connection_id,
                           uint32_t session_id,
                           uint8_t protocol_version,
                           uint8_t service_type,
                           std::vector<std::string>& rejected_params,
-                          const std::string reason = std::string());
+                          const std::string reason);
 
   SessionObserver& get_session_observer() OVERRIDE;
 
