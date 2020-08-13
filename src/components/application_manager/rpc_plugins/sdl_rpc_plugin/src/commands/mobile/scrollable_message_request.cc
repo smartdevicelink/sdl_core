@@ -46,6 +46,8 @@ using namespace application_manager;
 
 namespace commands {
 
+SDL_CREATE_LOG_VARIABLE("Commands")
+
 ScrollableMessageRequest::ScrollableMessageRequest(
     const application_manager::commands::MessageSharedPtr& message,
     ApplicationManager& application_manager,
@@ -73,12 +75,12 @@ bool ScrollableMessageRequest::Init() {
 }
 
 void ScrollableMessageRequest::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
 
   ApplicationSharedPtr app = application_manager_.application(connection_key());
 
   if (!app) {
-    LOG4CXX_ERROR(logger_, "Application is not registered");
+    SDL_LOG_ERROR("Application is not registered");
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     return;
   }
@@ -92,7 +94,7 @@ void ScrollableMessageRequest::Run() {
                                         application_manager_);
 
   if (mobile_apis::Result::SUCCESS != processing_result) {
-    LOG4CXX_ERROR(logger_, "Wrong soft buttons parameters!");
+    SDL_LOG_ERROR("Wrong soft buttons parameters!");
     SendResponse(false, processing_result);
     return;
   }
@@ -125,18 +127,18 @@ void ScrollableMessageRequest::Run() {
 }
 
 void ScrollableMessageRequest::on_event(const event_engine::Event& event) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   const smart_objects::SmartObject& message = event.smart_object();
 
   switch (event.id()) {
     case hmi_apis::FunctionID::UI_OnResetTimeout: {
-      LOG4CXX_INFO(logger_, "Received UI_OnResetTimeout event");
+      SDL_LOG_INFO("Received UI_OnResetTimeout event");
       application_manager_.updateRequestTimeout(
           connection_key(), correlation_id(), default_timeout());
       break;
     }
     case hmi_apis::FunctionID::UI_ScrollableMessage: {
-      LOG4CXX_INFO(logger_, "Received UI_ScrollableMessage event");
+      SDL_LOG_INFO("Received UI_ScrollableMessage event");
       EndAwaitForInterface(HmiInterfaces::HMI_INTERFACE_UI);
 
       hmi_apis::Common_Result::eType result_code =
@@ -155,7 +157,7 @@ void ScrollableMessageRequest::on_event(const event_engine::Event& event) {
       break;
     }
     default: {
-      LOG4CXX_ERROR(logger_, "Received unknown event" << event.id());
+      SDL_LOG_ERROR("Received unknown event" << event.id());
       break;
     }
   }

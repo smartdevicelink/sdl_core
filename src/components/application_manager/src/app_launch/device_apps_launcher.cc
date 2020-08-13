@@ -12,7 +12,7 @@
 #include "utils/timer_task_impl.h"
 
 namespace app_launch {
-CREATE_LOGGERPTR_GLOBAL(logger_, "AppLaunch")
+SDL_CREATE_LOG_VARIABLE("AppLaunch")
 
 typedef std::pair<std::string, std::vector<ApplicationDataPtr> > AppsOnDevice;
 typedef std::shared_ptr<AppsOnDevice> AppsOnDevicePtr;
@@ -58,9 +58,8 @@ class Launcher {
           device_launcher_.settings().wait_time_between_apps(),
           timer::kSingleShot);
     } else {
-      LOG4CXX_DEBUG(
-          logger_,
-          "All Apps on " << apps_on_device_->first << " postponed launched");
+      SDL_LOG_DEBUG("All Apps on " << apps_on_device_->first
+                                   << " postponed launched");
       device_launcher_.StopLaunchingAppsOnDevice(apps_on_device_->first);
     }
   }
@@ -135,9 +134,8 @@ bool DeviceAppsLauncherImpl::LauncherFinder::operator()(
 bool DeviceAppsLauncherImpl::LaunchAppsOnDevice(
     const std::string& device_mac,
     const std::vector<ApplicationDataPtr>& applications_to_launch) {
-  LOG4CXX_AUTO_TRACE(logger_);
-  LOG4CXX_DEBUG(logger_,
-                "On Device " << device_mac << " will be launched "
+  SDL_LOG_AUTO_TRACE();
+  SDL_LOG_DEBUG("On Device " << device_mac << " will be launched "
                              << applications_to_launch.size() << " apps");
   AppsOnDevicePtr apps_on_device =
       std::make_shared<AppsOnDevice>(device_mac, applications_to_launch);
@@ -153,7 +151,7 @@ bool DeviceAppsLauncherImpl::LaunchAppsOnDevice(
 
 bool DeviceAppsLauncherImpl::StopLaunchingAppsOnDevice(
     const std::string& device_mac) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   sync_primitives::AutoLock lock(launchers_lock_);
   const Launchers::iterator it = std::find_if(works_launchers_.begin(),
                                               works_launchers_.end(),

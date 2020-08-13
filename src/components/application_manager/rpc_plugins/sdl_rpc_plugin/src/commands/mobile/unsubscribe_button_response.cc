@@ -39,6 +39,8 @@ using namespace application_manager;
 
 namespace commands {
 
+SDL_CREATE_LOG_VARIABLE("Commands")
+
 UnsubscribeButtonResponse::UnsubscribeButtonResponse(
     const application_manager::commands::MessageSharedPtr& message,
     ApplicationManager& application_manager,
@@ -54,12 +56,12 @@ UnsubscribeButtonResponse::UnsubscribeButtonResponse(
 UnsubscribeButtonResponse::~UnsubscribeButtonResponse() {}
 
 void UnsubscribeButtonResponse::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
 
   // check if response false
   if (true == (*message_)[strings::msg_params].keyExists(strings::success)) {
     if ((*message_)[strings::msg_params][strings::success].asBool() == false) {
-      LOG4CXX_ERROR(logger_, "Success = false");
+      SDL_LOG_ERROR("Success = false");
       SendResponse(false);
       return;
     }

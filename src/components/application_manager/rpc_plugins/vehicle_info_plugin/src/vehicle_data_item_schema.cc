@@ -4,7 +4,7 @@
 namespace vehicle_info_plugin {
 
 #ifdef ENABLE_LOG
-CREATE_LOGGERPTR_LOCAL(vehicle_data_logger, "VehicleDataItemSchema");
+SDL_CREATE_LOG_VARIABLE("VehicleDataItemSchema");
 #endif  // ENABLE_LOG
 
 VehicleDataItemSchema::VehicleDataItemSchema(PolicyDataItem& policy_item,
@@ -153,7 +153,7 @@ smart_objects::ISchemaItemPtr VehicleDataItemSchema::GetPODTypeSchema(
 
   std::string error_msg = std::string("Invalid POD type provided: ") +
                           std::string(policy_item.type);
-  LOG4CXX_ERROR(vehicle_data_logger, error_msg.c_str());
+  SDL_LOG_ERROR(error_msg.c_str());
   return nullptr;
 }
 
@@ -168,7 +168,7 @@ smart_objects::ISchemaItemPtr VehicleDataItemSchema::getEnumSchema(
     const std::string& type_name) const {
   auto enum_schema = policy_table::EnumSchemaItemFactory::Get(type_name);
   if (!enum_schema) {
-    LOG4CXX_ERROR(vehicle_data_logger, "NULL pointer: " << type_name);
+    SDL_LOG_ERROR("NULL pointer: " << type_name);
   }
   return enum_schema;
 }

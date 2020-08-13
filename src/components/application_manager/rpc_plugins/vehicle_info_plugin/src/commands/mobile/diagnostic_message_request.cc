@@ -44,6 +44,8 @@ using namespace application_manager;
 
 namespace commands {
 
+SDL_CREATE_LOG_VARIABLE("Commands")
+
 DiagnosticMessageRequest::DiagnosticMessageRequest(
     const application_manager::commands::MessageSharedPtr& message,
     const VehicleInfoCommandParams& params)
@@ -56,12 +58,12 @@ DiagnosticMessageRequest::DiagnosticMessageRequest(
 DiagnosticMessageRequest::~DiagnosticMessageRequest() {}
 
 void DiagnosticMessageRequest::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
 
   ApplicationSharedPtr app = application_manager_.application(connection_key());
 
   if (!app) {
-    LOG4CXX_ERROR(logger_, "Application is not registered.");
+    SDL_LOG_ERROR("Application is not registered.");
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     return;
   }
@@ -77,8 +79,7 @@ void DiagnosticMessageRequest::Run() {
   if (supported_diag_modes.end() == std::find(supported_diag_modes.begin(),
                                               supported_diag_modes.end(),
                                               msg_diagnostic_mode)) {
-    LOG4CXX_ERROR(logger_,
-                  "Received diagnostic mode " << msg_diagnostic_mode
+    SDL_LOG_ERROR("Received diagnostic mode " << msg_diagnostic_mode
                                               << " is not supported.");
     SendResponse(false,
                  mobile_apis::Result::REJECTED,
@@ -96,7 +97,7 @@ void DiagnosticMessageRequest::Run() {
 }
 
 void DiagnosticMessageRequest::on_event(const event_engine::Event& event) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   const smart_objects::SmartObject& message = event.smart_object();
 
   switch (event.id()) {
@@ -116,7 +117,7 @@ void DiagnosticMessageRequest::on_event(const event_engine::Event& event) {
       break;
     }
     default: {
-      LOG4CXX_ERROR(logger_, "Received unknown event" << event.id());
+      SDL_LOG_ERROR("Received unknown event" << event.id());
       return;
     }
   }

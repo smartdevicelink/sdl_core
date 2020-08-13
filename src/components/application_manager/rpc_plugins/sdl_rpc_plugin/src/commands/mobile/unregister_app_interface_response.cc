@@ -38,8 +38,10 @@ using namespace application_manager;
 
 namespace commands {
 
+SDL_CREATE_LOG_VARIABLE("Commands")
+
 void UnregisterAppInterfaceResponse::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
 
   SendResponse((*message_)[strings::msg_params][strings::success].asBool());
 }

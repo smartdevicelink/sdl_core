@@ -40,7 +40,7 @@
 #include "vehicle_info_plugin/vehicle_info_command_factory.h"
 
 namespace vehicle_info_plugin {
-CREATE_LOGGERPTR_GLOBAL(logger_, "VehicleInfoPlugin")
+SDL_CREATE_LOG_VARIABLE("VehicleInfoPlugin")
 
 namespace strings = application_manager::strings;
 namespace plugins = application_manager::plugin_manager;
@@ -117,7 +117,7 @@ void VehicleInfoPlugin::OnApplicationEvent(
 }
 
 void VehicleInfoPlugin::UnsubscribeFromRemovedVDItems() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   typedef std::vector<std::string> StringsVector;
 
   auto get_items_to_unsubscribe = [this]() -> StringsVector {
@@ -131,10 +131,9 @@ void VehicleInfoPlugin::UnsubscribeFromRemovedVDItems() {
                 subscription_name)) {
           ext.unsubscribeFromVehicleInfo(subscription_name);
           if (!helpers::in_range(output_items_list, subscription_name)) {
-            LOG4CXX_DEBUG(logger_,
-                          "Vehicle data item "
-                              << subscription_name
-                              << " has been removed by policy");
+            SDL_LOG_DEBUG("Vehicle data item "
+                          << subscription_name
+                          << " has been removed by policy");
             output_items_list.push_back(subscription_name);
           }
         }
@@ -146,7 +145,7 @@ void VehicleInfoPlugin::UnsubscribeFromRemovedVDItems() {
   const StringsVector items_to_unsubscribe = get_items_to_unsubscribe();
 
   if (items_to_unsubscribe.empty()) {
-    LOG4CXX_DEBUG(logger_, "There is no data to unsubscribe");
+    SDL_LOG_DEBUG("There is no data to unsubscribe");
     return;
   }
 
@@ -172,14 +171,14 @@ bool IsOtherAppAlreadySubscribedFor(
 
 void VehicleInfoPlugin::ProcessResumptionSubscription(
     application_manager::Application& app, VehicleInfoAppExtension& ext) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   smart_objects::SmartObject msg_params =
       smart_objects::SmartObject(smart_objects::SmartType_Map);
 
   const auto& subscriptions = ext.Subscriptions();
 
   if (subscriptions.empty()) {
-    LOG4CXX_DEBUG(logger_, "No vehicle data to subscribe. Exiting");
+    SDL_LOG_DEBUG("No vehicle data to subscribe. Exiting");
     return;
   }
 
@@ -216,7 +215,7 @@ application_manager::ApplicationSharedPtr FindAppSubscribedToIVI(
 
 smart_objects::SmartObjectSPtr VehicleInfoPlugin::GetUnsubscribeIVIRequest(
     const std::vector<std::string>& ivi_names) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   using namespace smart_objects;
 
   auto msg_params = smart_objects::SmartObject(smart_objects::SmartType_Map);

@@ -41,7 +41,7 @@
 
 namespace utils {
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "MessageMeter")
+SDL_CREATE_LOG_VARIABLE("MessageMeter")
 /**
     @brief The MessageMeter class need to count message frequency
     Default time range value is 1 second
@@ -105,13 +105,13 @@ MessageMeter<Id>::MessageMeter() {
 
 template <class Id>
 size_t MessageMeter<Id>::TrackMessage(const Id& id) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   return TrackMessages(id, 1);
 }
 
 template <class Id>
 size_t MessageMeter<Id>::TrackMessages(const Id& id, const size_t count) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   sync_primitives::AutoLock lock(timing_map_lock_);
   Timings& timings = timing_map_[id];
   const date_time::TimeDuration current_time = date_time::getCurrentTime();
@@ -124,14 +124,14 @@ size_t MessageMeter<Id>::TrackMessages(const Id& id, const size_t count) {
 
 template <class Id>
 size_t MessageMeter<Id>::Frequency(const Id& id) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   sync_primitives::AutoLock lock(timing_map_lock_);
   return FrequencyImpl(id);
 }
 
 template <class Id>
 size_t MessageMeter<Id>::FrequencyImpl(const Id& id) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   typename TimingMap::iterator it = timing_map_.find(id);
   if (it == timing_map_.end()) {
     return 0u;
@@ -148,27 +148,27 @@ size_t MessageMeter<Id>::FrequencyImpl(const Id& id) {
 
 template <class Id>
 void MessageMeter<Id>::RemoveIdentifier(const Id& id) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   sync_primitives::AutoLock lock(timing_map_lock_);
   timing_map_.erase(id);
 }
 
 template <class Id>
 void MessageMeter<Id>::ClearIdentifiers() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   sync_primitives::AutoLock lock(timing_map_lock_);
   timing_map_.clear();
 }
 
 template <class Id>
 void MessageMeter<Id>::set_time_range(const size_t time_range_msecs) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   time_range_ = date_time::milliseconds(time_range_msecs);
 }
 template <class Id>
 void MessageMeter<Id>::set_time_range(
     const date_time::TimeDuration& time_range) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   time_range_ = time_range;
 }
 template <class Id>

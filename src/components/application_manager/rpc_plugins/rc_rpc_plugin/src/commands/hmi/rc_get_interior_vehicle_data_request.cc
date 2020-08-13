@@ -36,6 +36,8 @@
 namespace rc_rpc_plugin {
 namespace commands {
 
+SDL_CREATE_LOG_VARIABLE("Commands")
+
 RCGetInteriorVehicleDataRequest::RCGetInteriorVehicleDataRequest(
     const app_mngr::commands::MessageSharedPtr& message,
     const RCCommandParams& params)
@@ -48,7 +50,7 @@ RCGetInteriorVehicleDataRequest::RCGetInteriorVehicleDataRequest(
 RCGetInteriorVehicleDataRequest::~RCGetInteriorVehicleDataRequest() {}
 
 void RCGetInteriorVehicleDataRequest::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   SendRequest();
 }
 

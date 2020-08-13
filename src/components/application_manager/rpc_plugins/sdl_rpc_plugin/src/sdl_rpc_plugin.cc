@@ -39,7 +39,7 @@ namespace sdl_rpc_plugin {
 namespace app_mngr = application_manager;
 namespace plugins = application_manager::plugin_manager;
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "SdlRPCPlugin")
+SDL_CREATE_LOG_VARIABLE("SdlRPCPlugin")
 
 bool SDLRPCPlugin::Init(app_mngr::ApplicationManager& app_manager,
                         app_mngr::rpc_service::RPCService& rpc_service,
@@ -90,7 +90,7 @@ void SDLRPCPlugin::OnApplicationEvent(
     // Processing automatic subscription to SystemCapabilities for DISPLAY type
     const auto capability_type =
         mobile_apis::SystemCapabilityType::eType::DISPLAYS;
-    LOG4CXX_DEBUG(logger_, "Subscription to DISPLAYS capability is enabled");
+    SDL_LOG_DEBUG("Subscription to DISPLAYS capability is enabled");
     sys_cap_ext_ptr->SubscribeTo(capability_type);
   } else if (plugins::ApplicationEvent::kDeleteApplicationData == event) {
     ClearSubscriptions(application);

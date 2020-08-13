@@ -39,13 +39,13 @@
 
 namespace sync_primitives {
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "Utils")
+SDL_CREATE_LOG_VARIABLE("Utils")
 
 Lock::Lock() : lock_taken_(0) {}
 
 Lock::~Lock() {
   if (lock_taken_ > 0) {
-    LOG4CXX_FATAL(logger_, "Destroying non-released regular mutex " << &mutex_);
+    SDL_LOG_FATAL("Destroying non-released regular mutex " << &mutex_);
   }
 }
 
@@ -69,7 +69,7 @@ bool Lock::Try() {
 
 void Lock::AssertFreeAndMarkTaken() {
   if (lock_taken_ != 0) {
-    LOG4CXX_FATAL(logger_, "Locking already taken not recursive mutex");
+    SDL_LOG_FATAL("Locking already taken not recursive mutex");
     NOTREACHED();
   }
   lock_taken_++;
@@ -77,7 +77,7 @@ void Lock::AssertFreeAndMarkTaken() {
 
 void Lock::AssertTakenAndMarkFree() {
   if (lock_taken_ == 0) {
-    LOG4CXX_FATAL(logger_, "Unlocking a mutex that is not taken");
+    SDL_LOG_FATAL("Unlocking a mutex that is not taken");
     NOTREACHED();
   }
   lock_taken_--;
@@ -89,8 +89,7 @@ RecursiveLock::RecursiveLock() : lock_taken_(0) {}
 
 RecursiveLock::~RecursiveLock() {
   if (lock_taken_ > 0) {
-    LOG4CXX_FATAL(logger_,
-                  "Destroying non-released recursive mutex " << &mutex_);
+    SDL_LOG_FATAL("Destroying non-released recursive mutex " << &mutex_);
   }
 }
 
@@ -118,7 +117,7 @@ void RecursiveLock::AssertFreeAndMarkTaken() {
 
 void RecursiveLock::AssertTakenAndMarkFree() {
   if (lock_taken_ == 0) {
-    LOG4CXX_FATAL(logger_, "Unlocking a recursive mutex that is not taken");
+    SDL_LOG_FATAL("Unlocking a recursive mutex that is not taken");
     NOTREACHED();
   }
   lock_taken_--;

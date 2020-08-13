@@ -37,6 +37,8 @@ using namespace application_manager;
 
 namespace commands {
 
+SDL_CREATE_LOG_VARIABLE("Commands")
+
 OnNaviWayPointChangeNotification::OnNaviWayPointChangeNotification(
     const application_manager::commands::MessageSharedPtr& message,
     ApplicationManager& app_man,
@@ -49,7 +51,7 @@ OnNaviWayPointChangeNotification::OnNaviWayPointChangeNotification(
 OnNaviWayPointChangeNotification::~OnNaviWayPointChangeNotification() {}
 
 void OnNaviWayPointChangeNotification::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
 
   // prepare SmartObject for mobile factory
   (*message_)[strings::params][strings::function_id] =

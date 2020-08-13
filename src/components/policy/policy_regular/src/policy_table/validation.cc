@@ -12,7 +12,7 @@ bool IsTypeInvalid(
 namespace rpc {
 namespace policy_table_interface_base {
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "Policy")
+SDL_CREATE_LOG_VARIABLE("Policy")
 
 void RemoveInvalidTypes(RequestTypes& types) {
   types.erase(std::remove_if(types.begin(), types.end(), &IsTypeInvalid),
@@ -30,13 +30,13 @@ bool ApplicationPoliciesSection::Validate() const {
 
   // Default and PreData policies are mandatory
   if (apps.end() == it_default_policy || apps.end() == it_pre_data_policy) {
-    LOG4CXX_ERROR(logger_, "Default or preData policy is not present.");
+    SDL_LOG_ERROR("Default or preData policy is not present.");
     return false;
   }
 
   // Device policy is mandatory
   if (!device.is_initialized()) {
-    LOG4CXX_ERROR(logger_, "Device policy is not present.");
+    SDL_LOG_ERROR("Device policy is not present.");
     return false;
   }
 
@@ -45,17 +45,15 @@ bool ApplicationPoliciesSection::Validate() const {
     return true;
   }
 
-  LOG4CXX_TRACE(logger_, "Checking app Request Types...");
+  SDL_LOG_TRACE("Checking app Request Types...");
   if (!it_default_policy->second.RequestType.is_valid()) {
-    LOG4CXX_WARN(logger_,
-                 "Default policy RequestTypes are not valid. Will be cleaned.");
+    SDL_LOG_WARN("Default policy RequestTypes are not valid. Will be cleaned.");
     RemoveInvalidTypes(*it_default_policy->second.RequestType);
     // If preloaded does not have valid default types - validation fails
     // Otherwise default will be empty, i.e. all types allowed
     if (PT_PRELOADED == pt_type) {
       if (it_default_policy->second.RequestType->empty()) {
-        LOG4CXX_ERROR(
-            logger_,
+        SDL_LOG_ERROR(
             "Default policy RequestTypes empty after clean-up. Exiting.");
         return false;
       }
@@ -78,46 +76,43 @@ bool ApplicationPoliciesSection::Validate() const {
 
     if (PT_PRELOADED == pt_type) {
       if (!is_request_type_valid) {
-        LOG4CXX_WARN(logger_,
-                     "App policy RequestTypes are not valid. Will be cleaned.");
+        SDL_LOG_WARN("App policy RequestTypes are not valid. Will be cleaned.");
         RemoveInvalidTypes(*app_params.RequestType);
         if (app_params.RequestType->empty()) {
-          LOG4CXX_ERROR(
-              logger_,
+          SDL_LOG_ERROR(
               "App policy RequestTypes empty after clean-up. Exiting.");
           return false;
         }
       }
     } else {
       if (is_request_type_omitted) {
-        LOG4CXX_WARN(logger_,
-                     "App policy RequestTypes omitted."
-                     " Will be replaced with default.");
+        SDL_LOG_WARN(
+            "App policy RequestTypes omitted."
+            " Will be replaced with default.");
         app_params.RequestType = apps[kDefaultApp].RequestType;
         ++iter;
         continue;
       }
       if (!is_request_type_valid) {
-        LOG4CXX_WARN(logger_,
-                     "App policy RequestTypes are invalid. Will be cleaned.");
+        SDL_LOG_WARN("App policy RequestTypes are invalid. Will be cleaned.");
         RemoveInvalidTypes(*app_params.RequestType);
         if (app_params.RequestType->empty()) {
-          LOG4CXX_WARN(logger_,
-                       "App policy RequestTypes empty after clean-up."
-                       " Will be replaced with default.");
+          SDL_LOG_WARN(
+              "App policy RequestTypes empty after clean-up."
+              " Will be replaced with default.");
           app_params.RequestType = apps[kDefaultApp].RequestType;
           ++iter;
           continue;
         }
       }
       if (is_request_type_empty) {
-        LOG4CXX_WARN(logger_, "App policy RequestTypes empty.");
+        SDL_LOG_WARN("App policy RequestTypes empty.");
       }
     }
     ++iter;
   }
 
-  LOG4CXX_TRACE(logger_, "Checking app Request SubTypes...");
+  SDL_LOG_TRACE("Checking app Request SubTypes...");
   iter = apps.begin();
   while (iter != end_iter) {
     if (it_default_policy == iter || it_pre_data_policy == iter) {
@@ -129,9 +124,9 @@ bool ApplicationPoliciesSection::Validate() const {
         !app_params.RequestSubType.is_initialized();
 
     if (is_request_subtype_omitted) {
-      LOG4CXX_WARN(logger_,
-                   "App policy RequestSubTypes omitted."
-                   " Will be replaced with default.");
+      SDL_LOG_WARN(
+          "App policy RequestSubTypes omitted."
+          " Will be replaced with default.");
       app_params.RequestSubType = apps[kDefaultApp].RequestSubType;
       ++iter;
       continue;
@@ -139,7 +134,7 @@ bool ApplicationPoliciesSection::Validate() const {
 
     const bool is_request_subtype_empty = app_params.RequestSubType->empty();
     if (is_request_subtype_empty) {
-      LOG4CXX_WARN(logger_, "App policy RequestSubTypes empty.");
+      SDL_LOG_WARN("App policy RequestSubTypes empty.");
     }
     ++iter;
   }
@@ -222,8 +217,7 @@ bool ModuleConfig::Validate() const {
        ++it_endpoints) {
     const URLList& endpoint_list = it_endpoints->second;
     if (endpoint_list.end() == endpoint_list.find(kDefaultApp)) {
-      LOG4CXX_ERROR(logger_,
-                    "Endpoint " << it_endpoints->first
+      SDL_LOG_ERROR("Endpoint " << it_endpoints->first
                                 << "does not contain default group");
       return false;
     }
@@ -294,8 +288,8 @@ bool VehicleDataItem::Validate() const {
   };
 
   if (!ValidateTypes()) {
-    LOG4CXX_ERROR(
-        logger_,
+    SDL_LOG_ERROR(
+
         "Unknown type: " << std::string(type) << " of " << std::string(key));
     return false;
   }

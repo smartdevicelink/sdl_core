@@ -37,6 +37,8 @@
 namespace rc_rpc_plugin {
 namespace commands {
 
+SDL_CREATE_LOG_VARIABLE("Commands")
+
 GetInteriorVehicleDataResponse::GetInteriorVehicleDataResponse(
     const app_mngr::commands::MessageSharedPtr& message,
     const RCCommandParams& params)
@@ -49,7 +51,7 @@ GetInteriorVehicleDataResponse::GetInteriorVehicleDataResponse(
 GetInteriorVehicleDataResponse::~GetInteriorVehicleDataResponse() {}
 
 void GetInteriorVehicleDataResponse::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
 
   RCHelpers::RemoveRedundantGPSDataFromIVDataMsg(
       (*message_)[app_mngr::strings::msg_params]);

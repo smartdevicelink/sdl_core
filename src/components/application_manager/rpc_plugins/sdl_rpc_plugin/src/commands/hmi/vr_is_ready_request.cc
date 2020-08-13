@@ -38,6 +38,8 @@ using namespace application_manager;
 
 namespace commands {
 
+SDL_CREATE_LOG_VARIABLE("Commands")
+
 VRIsReadyRequest::VRIsReadyRequest(
     const application_manager::commands::MessageSharedPtr& message,
     ApplicationManager& application_manager,
@@ -54,17 +56,17 @@ VRIsReadyRequest::VRIsReadyRequest(
 VRIsReadyRequest::~VRIsReadyRequest() {}
 
 void VRIsReadyRequest::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   subscribe_on_event(hmi_apis::FunctionID::VR_IsReady, correlation_id());
   SendRequest();
 }
 
 void VRIsReadyRequest::on_event(const event_engine::Event& event) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   const smart_objects::SmartObject& message = event.smart_object();
   switch (event.id()) {
     case hmi_apis::FunctionID::VR_IsReady: {
-      LOG4CXX_DEBUG(logger_, "Received VR_IsReady event");
+      SDL_LOG_DEBUG("Received VR_IsReady event");
       unsubscribe_from_event(hmi_apis::FunctionID::VR_IsReady);
       const bool is_available = app_mngr::commands::ChangeInterfaceState(
           application_manager_, message, HmiInterfaces::HMI_INTERFACE_VR);
@@ -74,8 +76,7 @@ void VRIsReadyRequest::on_event(const event_engine::Event& event) {
       if (!app_mngr::commands::CheckAvailabilityHMIInterfaces(
               application_manager_, HmiInterfaces::HMI_INTERFACE_VR)) {
         UpdateRequiredInterfaceCapabilitiesRequests(hmi_interface::vr);
-        LOG4CXX_INFO(logger_,
-                     "HmiInterfaces::HMI_INTERFACE_VR isn't available");
+        SDL_LOG_INFO("HmiInterfaces::HMI_INTERFACE_VR isn't available");
         return;
       }
 
@@ -83,7 +84,7 @@ void VRIsReadyRequest::on_event(const event_engine::Event& event) {
       break;
     }
     default: {
-      LOG4CXX_ERROR(logger_, "Received unknown event" << event.id());
+      SDL_LOG_ERROR("Received unknown event" << event.id());
       return;
     }
   }

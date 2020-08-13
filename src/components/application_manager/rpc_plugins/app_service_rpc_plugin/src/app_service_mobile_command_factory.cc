@@ -50,7 +50,7 @@
 #include "app_service_rpc_plugin/commands/mobile/unpublish_app_service_request.h"
 #include "app_service_rpc_plugin/commands/mobile/unpublish_app_service_response.h"
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "AppServiceRpcPlugin")
+SDL_CREATE_LOG_VARIABLE("AppServiceRpcPlugin")
 
 namespace app_service_rpc_plugin {
 namespace strings = app_mngr::strings;
@@ -64,7 +64,7 @@ AppServiceMobileCommandFactory::AppServiceMobileCommandFactory(
     , rpc_service_(rpc_service)
     , hmi_capabilities_(hmi_capabilities)
     , policy_handler_(policy_handler) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
 }
 
 app_mngr::CommandSharedPtr AppServiceMobileCommandFactory::CreateCommand(
@@ -88,9 +88,8 @@ app_mngr::CommandSharedPtr AppServiceMobileCommandFactory::CreateCommand(
   }
 
   UNUSED(message_type_str);
-  LOG4CXX_DEBUG(logger_,
-                "HMICommandFactory::CreateCommand function_id: "
-                    << function_id << ", message type: " << message_type_str);
+  SDL_LOG_DEBUG("HMICommandFactory::CreateCommand function_id: "
+                << function_id << ", message type: " << message_type_str);
 
   return buildCommandCreator(function_id, message_type, source).create(message);
 }
@@ -170,7 +169,7 @@ app_mngr::CommandCreator& AppServiceMobileCommandFactory::buildCommandCreator(
       }
       break;
     default:
-      LOG4CXX_WARN(logger_, "Unsupported function_id: " << function_id);
+      SDL_LOG_WARN("Unsupported function_id: " << function_id);
   }
   return factory.GetCreator<app_mngr::InvalidCommand>();
 }

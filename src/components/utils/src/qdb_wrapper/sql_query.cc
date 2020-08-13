@@ -41,7 +41,7 @@
 namespace utils {
 namespace dbms {
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "Utils")
+SDL_CREATE_LOG_VARIABLE("Utils")
 
 class SetBindInteger {
  public:
@@ -111,7 +111,7 @@ bool SQLQuery::Prepare(const std::string& query) {
   query_ = query;
   statement_ = qdb_stmt_init(db_->conn(), query.c_str(), query.length() + 1);
   if (statement_ == -1) {
-    LOG4CXX_DEBUG(logger_, "Prepare error: " << strerror(errno));
+    SDL_LOG_DEBUG("Prepare error: " << strerror(errno));
     error_ = Error::ERROR;
     return false;
   }

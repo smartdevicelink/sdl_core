@@ -41,7 +41,7 @@
 
 namespace application_manager {
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "SystemTimeHandler")
+SDL_CREATE_LOG_VARIABLE("SystemTimeHandler")
 
 SystemTimeHandlerImpl::SystemTimeHandlerImpl(
     ApplicationManager& application_manager)
@@ -51,66 +51,65 @@ SystemTimeHandlerImpl::SystemTimeHandlerImpl(
     , last_time_(0)
     , system_time_listener_(NULL)
     , app_manager_(application_manager) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   subscribe_on_event(
       hmi_apis::FunctionID::BasicCommunication_OnSystemTimeReady);
 }
 
 SystemTimeHandlerImpl::~SystemTimeHandlerImpl() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   unsubscribe_from_all_hmi_events();
 }
 
 void SystemTimeHandlerImpl::DoSystemTimeQuery() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   using namespace application_manager;
 
   sync_primitives::AutoLock lock(state_lock_);
   if (!utc_time_can_be_received_) {
-    LOG4CXX_INFO(logger_,
-                 "Navi module is not yet ready."
-                     << "Will process request once it became ready.");
+    SDL_LOG_INFO("Navi module is not yet ready."
+                 << "Will process request once it became ready.");
     return;
   }
   SendTimeRequest();
 }
 
 void SystemTimeHandlerImpl::DoSubscribe(utils::SystemTimeListener* listener) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   DCHECK(listener);
   sync_primitives::AutoLock lock(system_time_listener_lock_);
   system_time_listener_ = listener;
 }
 
 void SystemTimeHandlerImpl::ResetPendingSystemTimeRequests() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   unsubscribe_from_event(
       hmi_apis::FunctionID::BasicCommunication_GetSystemTime);
   awaiting_get_system_time_ = false;
 }
 
 void SystemTimeHandlerImpl::DoUnsubscribe(utils::SystemTimeListener* listener) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   sync_primitives::AutoLock lock(system_time_listener_lock_);
   system_time_listener_ = NULL;
 }
 
 time_t SystemTimeHandlerImpl::FetchSystemTime() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   return last_time_;
 }
 
 bool SystemTimeHandlerImpl::utc_time_can_be_received() const {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   sync_primitives::AutoLock lock(state_lock_);
   return utc_time_can_be_received_;
 }
 
 void SystemTimeHandlerImpl::SendTimeRequest() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
 
   if (awaiting_get_system_time_) {
-    LOG4CXX_WARN(logger_, "Another GetSystemTime request in progress. Skipped");
+    SDL_LOG_WARN("Another GetSystemTime request in progress. Skipped");
     return;
   }
 
@@ -124,7 +123,7 @@ void SystemTimeHandlerImpl::SendTimeRequest() {
 
 void SystemTimeHandlerImpl::on_event(
     const application_manager::event_engine::Event& event) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   using namespace application_manager;
   using namespace hmi_apis::FunctionID;
   switch (event.id()) {
@@ -135,13 +134,13 @@ void SystemTimeHandlerImpl::on_event(
       ProcessSystemTimeResponse(event);
       break;
     default:
-      LOG4CXX_ERROR(logger_, "Unknown Event received");
+      SDL_LOG_ERROR("Unknown Event received");
       break;
   }
 }
 
 void SystemTimeHandlerImpl::ProcessSystemTimeReadyNotification() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   sync_primitives::AutoLock lock(state_lock_);
   utc_time_can_be_received_ = true;
   unsubscribe_from_event(
@@ -150,7 +149,7 @@ void SystemTimeHandlerImpl::ProcessSystemTimeReadyNotification() {
 
 void SystemTimeHandlerImpl::ProcessSystemTimeResponse(
     const application_manager::event_engine::Event& event) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   const smart_objects::SmartObject& message = event.smart_object();
 
   const auto result = static_cast<hmi_apis::Common_Result::eType>(

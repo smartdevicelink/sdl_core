@@ -39,6 +39,8 @@ namespace sdl_rpc_plugin {
 using namespace application_manager;
 namespace commands {
 
+SDL_CREATE_LOG_VARIABLE("Commands")
+
 OnHMIStatusNotificationFromMobile::OnHMIStatusNotificationFromMobile(
     const application_manager::commands::MessageSharedPtr& message,
     ApplicationManager& application_manager,
@@ -54,15 +56,15 @@ OnHMIStatusNotificationFromMobile::OnHMIStatusNotificationFromMobile(
 OnHMIStatusNotificationFromMobile::~OnHMIStatusNotificationFromMobile() {}
 
 void OnHMIStatusNotificationFromMobile::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
 
   (*message_)[strings::params][strings::message_type] =
       static_cast<int32_t>(application_manager::MessageType::kNotification);
   ApplicationSharedPtr app = application_manager_.application(connection_key());
 
   if (app.use_count() == 0) {
-    LOG4CXX_ERROR(
-        logger_, "OnHMIStatusNotificationFromMobile application doesn't exist");
+    SDL_LOG_ERROR(
+        "OnHMIStatusNotificationFromMobile application doesn't exist");
     return;
   }
 
@@ -79,9 +81,8 @@ void OnHMIStatusNotificationFromMobile::Run() {
   bool is_apps_requested_before =
       application_manager_.IsAppsQueriedFrom(handle);
 
-  LOG4CXX_DEBUG(logger_,
-                "Mobile HMI state notication came for connection key:"
-                    << connection_key() << " and handle: " << handle);
+  SDL_LOG_DEBUG("Mobile HMI state notication came for connection key:"
+                << connection_key() << " and handle: " << handle);
 
   if (!is_apps_requested_before &&
       Message::is_sufficient_version(
@@ -96,10 +97,10 @@ void OnHMIStatusNotificationFromMobile::Run() {
   }
 
   if (is_apps_requested_before) {
-    LOG4CXX_DEBUG(logger_,
-                  "Remote apps list had been requested already "
-                  " for handle: "
-                      << handle);
+    SDL_LOG_DEBUG(
+        "Remote apps list had been requested already "
+        " for handle: "
+        << handle);
 
     if (Message::is_sufficient_version(
             protocol_handler::MajorProtocolVersion::PROTOCOL_VERSION_4,

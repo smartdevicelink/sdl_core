@@ -37,6 +37,8 @@ using namespace application_manager;
 
 namespace commands {
 
+SDL_CREATE_LOG_VARIABLE("Commands")
+
 SDLPolicyUpdate::SDLPolicyUpdate(
     const application_manager::commands::MessageSharedPtr& message,
     ApplicationManager& application_manager,
@@ -52,13 +54,13 @@ SDLPolicyUpdate::SDLPolicyUpdate(
 SDLPolicyUpdate::~SDLPolicyUpdate() {}
 
 void SDLPolicyUpdate::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
 #if defined(PROPRIETARY_MODE) || defined(EXTERNAL_PROPRIETARY_MODE)
   SendRequest();
 #else
-  LOG4CXX_WARN(logger_,
-               "This RPC is part of extended policy flow."
-               "Please re-build with extended policy mode enabled.");
+  SDL_LOG_WARN(
+      "This RPC is part of extended policy flow."
+      "Please re-build with extended policy mode enabled.");
 #endif
 }
 

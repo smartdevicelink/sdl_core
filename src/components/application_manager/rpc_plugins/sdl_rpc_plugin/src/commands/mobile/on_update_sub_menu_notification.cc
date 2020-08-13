@@ -54,7 +54,7 @@ OnUpdateSubMenuNotification::OnUpdateSubMenuNotification(
 OnUpdateSubMenuNotification::~OnUpdateSubMenuNotification() {}
 
 void OnUpdateSubMenuNotification::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   SendNotification();
 }
 

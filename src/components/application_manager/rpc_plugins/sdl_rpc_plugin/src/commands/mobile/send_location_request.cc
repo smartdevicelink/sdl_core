@@ -40,6 +40,8 @@ using namespace application_manager;
 
 namespace commands {
 
+SDL_CREATE_LOG_VARIABLE("Commands")
+
 SendLocationRequest::SendLocationRequest(
     const application_manager::commands::MessageSharedPtr& message,
     ApplicationManager& application_manager,
@@ -57,14 +59,13 @@ SendLocationRequest::~SendLocationRequest() {}
 void SendLocationRequest::Run() {
   using namespace hmi_apis;
   using smart_objects::SmartObject;
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
 
   ApplicationSharedPtr app = application_manager_.application(connection_key());
 
   if (!app) {
-    LOG4CXX_ERROR(logger_,
-                  "An application with connection key "
-                      << connection_key() << " is not registered.");
+    SDL_LOG_ERROR("An application with connection key "
+                  << connection_key() << " is not registered.");
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     return;
   }
@@ -98,7 +99,7 @@ void SendLocationRequest::Run() {
   }
 
   if (IsWhiteSpaceExist()) {
-    LOG4CXX_ERROR(logger_, "Strings contain invalid characters");
+    SDL_LOG_ERROR("Strings contain invalid characters");
     SendResponse(false, mobile_apis::Result::INVALID_DATA);
     return;
   }
@@ -112,7 +113,7 @@ void SendLocationRequest::Run() {
   }
 
   if (!CheckFieldsCompatibility()) {
-    LOG4CXX_ERROR(logger_, "CheckFieldsCompatibility failed");
+    SDL_LOG_ERROR("CheckFieldsCompatibility failed");
     SendResponse(false, mobile_apis::Result::INVALID_DATA);
     return;
   }
@@ -125,7 +126,7 @@ void SendLocationRequest::Run() {
         app,
         application_manager_);
     if (mobile_apis::Result::INVALID_DATA == verification_result) {
-      LOG4CXX_ERROR(logger_, "VerifyImage INVALID_DATA!");
+      SDL_LOG_ERROR("VerifyImage INVALID_DATA!");
       SendResponse(false, verification_result);
       return;
     }
@@ -140,11 +141,11 @@ void SendLocationRequest::Run() {
 }
 
 void SendLocationRequest::on_event(const event_engine::Event& event) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   using namespace hmi_apis;
   const smart_objects::SmartObject& message = event.smart_object();
   if (hmi_apis::FunctionID::Navigation_SendLocation == event.id()) {
-    LOG4CXX_INFO(logger_, "Received Navigation_SendLocation event");
+    SDL_LOG_INFO("Received Navigation_SendLocation event");
     EndAwaitForInterface(HmiInterfaces::HMI_INTERFACE_Navigation);
     const Common_Result::eType result_code = static_cast<Common_Result::eType>(
         message[strings::params][hmi_response::code].asInt());
@@ -158,7 +159,7 @@ void SendLocationRequest::on_event(const event_engine::Event& event) {
                  &(message[strings::params]));
     return;
   }
-  LOG4CXX_ERROR(logger_, "Received unknown event" << event.id());
+  SDL_LOG_ERROR("Received unknown event" << event.id());
 }
 
 bool SendLocationRequest::CheckFieldsCompatibility() {
@@ -172,14 +173,12 @@ bool SendLocationRequest::CheckFieldsCompatibility() {
   const bool address_exist = msg_params.keyExists(strings::address);
 
   if (latitude_degrees_exist ^ longitude_degrees_exist) {
-    LOG4CXX_DEBUG(logger_,
-                  "latitude and longitude should be provided only in pair");
+    SDL_LOG_DEBUG("latitude and longitude should be provided only in pair");
     return false;
   }
 
   if (!address_exist && !longitude_degrees_exist && !latitude_degrees_exist) {
-    LOG4CXX_DEBUG(logger_,
-                  "address or latitude/longtitude should should be provided");
+    SDL_LOG_DEBUG("address or latitude/longtitude should should be provided");
     return false;
   }
   return true;
@@ -194,7 +193,7 @@ void insert_if_contains(
 }
 
 bool SendLocationRequest::IsWhiteSpaceExist() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   std::vector<utils::custom_string::CustomString> fields_to_check;
   const smart_objects::SmartObject& msg_params =
       (*message_)[strings::msg_params];
@@ -232,8 +231,7 @@ bool SendLocationRequest::IsWhiteSpaceExist() {
   for (; it != fields_to_check.end(); ++it) {
     const std::string& str = it->AsMBString();
     if (!CheckSyntax(str, false)) {
-      LOG4CXX_ERROR(logger_,
-                    "string '" << str << "'' contains invalid characters");
+      SDL_LOG_ERROR("string '" << str << "'' contains invalid characters");
       return true;
     }
   }
@@ -250,7 +248,7 @@ bool SendLocationRequest::CheckHMICapabilities(
 
   const HMICapabilities& hmi_capabilities = hmi_capabilities_;
   if (!hmi_capabilities.is_ui_cooperating()) {
-    LOG4CXX_ERROR(logger_, "UI is not supported.");
+    SDL_LOG_ERROR("UI is not supported.");
     return false;
   }
 
@@ -273,7 +271,7 @@ bool SendLocationRequest::CheckHMICapabilities(
   }
 
   if (!fields_names.empty()) {
-    LOG4CXX_ERROR(logger_, "Some fields are not supported by capabilities");
+    SDL_LOG_ERROR("Some fields are not supported by capabilities");
     return false;
   }
   return true;

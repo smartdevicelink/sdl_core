@@ -52,17 +52,16 @@ struct StateIDComparator {
 
 namespace application_manager {
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "ApplicationManager")
+SDL_CREATE_LOG_VARIABLE("ApplicationManager")
 
 ApplicationState::ApplicationState() {}
 
 void ApplicationState::InitState(const WindowID window_id,
                                  const std::string& window_name,
                                  HmiStatePtr state) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   DCHECK_OR_RETURN_VOID(state);
-  LOG4CXX_DEBUG(logger_,
-                "Initing state " << state << " for window " << window_id
+  SDL_LOG_DEBUG("Initing state " << state << " for window " << window_id
                                  << " with name " << window_name);
   {
     sync_primitives::AutoLock auto_lock(hmi_states_map_lock_);
@@ -72,7 +71,7 @@ void ApplicationState::InitState(const WindowID window_id,
 }
 
 void ApplicationState::AddState(const WindowID window_id, HmiStatePtr state) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   DCHECK_OR_RETURN_VOID(state);
   switch (state->state_id()) {
     case HmiState::StateID::STATE_ID_REGULAR:
@@ -82,8 +81,7 @@ void ApplicationState::AddState(const WindowID window_id, HmiStatePtr state) {
       SetPostponedState(window_id, state);
       return;
     case HmiState::StateID::STATE_ID_CURRENT:
-      LOG4CXX_ERROR(logger_,
-                    "State of type '" << state << "' can't be added for window "
+      SDL_LOG_ERROR("State of type '" << state << "' can't be added for window "
                                       << window_id);
       return;
     default:
@@ -96,14 +94,13 @@ void ApplicationState::AddState(const WindowID window_id, HmiStatePtr state) {
 
 void ApplicationState::RemoveState(const WindowID window_id,
                                    HmiState::StateID state) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   DCHECK_OR_RETURN_VOID(state);
   switch (state) {
     case HmiState::StateID::STATE_ID_CURRENT:
     case HmiState::StateID::STATE_ID_REGULAR:
       if (mobile_apis::PredefinedWindows::DEFAULT_WINDOW == window_id) {
-        LOG4CXX_ERROR(logger_,
-                      "State of type '" << state
+        SDL_LOG_ERROR("State of type '" << state
                                         << "' can't be removed for window "
                                         << window_id);
         return;
@@ -124,20 +121,19 @@ HmiStatePtr ApplicationState::GetState(const WindowID window_id,
                                        HmiState::StateID state_id) const {
   switch (state_id) {
     case HmiState::StateID::STATE_ID_REGULAR:
-      LOG4CXX_DEBUG(logger_, "Getting regular state for window " << window_id);
+      SDL_LOG_DEBUG("Getting regular state for window " << window_id);
       return RegularHmiState(window_id);
     case HmiState::StateID::STATE_ID_POSTPONED:
-      LOG4CXX_DEBUG(logger_,
-                    "Getting postponed state for window " << window_id);
+      SDL_LOG_DEBUG("Getting postponed state for window " << window_id);
       return PostponedHmiState(window_id);
     default:
-      LOG4CXX_DEBUG(logger_, "Getting current state for window " << window_id);
+      SDL_LOG_DEBUG("Getting current state for window " << window_id);
       return CurrentHmiState(window_id);
   }
 }
 
 HmiStates ApplicationState::GetStates(const HmiState::StateID state_id) const {
-  LOG4CXX_DEBUG(logger_, "Collecting all states of type " << state_id);
+  SDL_LOG_DEBUG("Collecting all states of type " << state_id);
 
   HmiStates hmi_states;
   sync_primitives::AutoLock auto_lock(hmi_states_map_lock_);
@@ -149,7 +145,7 @@ HmiStates ApplicationState::GetStates(const HmiState::StateID state_id) const {
 }
 
 WindowIds ApplicationState::GetWindowIds() const {
-  LOG4CXX_DEBUG(logger_, "Collecting available window ID's");
+  SDL_LOG_DEBUG("Collecting available window ID's");
 
   WindowIds window_ids;
   std::string stringified_window_ids;
@@ -161,14 +157,13 @@ WindowIds ApplicationState::GetWindowIds() const {
                               std::to_string(hmi_state_pair.first);
   }
 
-  LOG4CXX_DEBUG(logger_,
-                "Existing window IDs: [" + stringified_window_ids + "]");
+  SDL_LOG_DEBUG("Existing window IDs: [" + stringified_window_ids + "]");
   return window_ids;
 }
 
 void ApplicationState::AddHMIState(const WindowID window_id,
                                    HmiStatePtr state) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   DCHECK_OR_RETURN_VOID(state);
   sync_primitives::AutoLock auto_lock(hmi_states_map_lock_);
   HmiStates& hmi_states = hmi_states_map_[window_id];
@@ -176,11 +171,9 @@ void ApplicationState::AddHMIState(const WindowID window_id,
                                         hmi_states.end(),
                                         StateIDComparator(state->state_id()));
   if (hmi_states.end() != it) {
-    LOG4CXX_WARN(logger_,
-                 "Hmi state with ID " << state->state_id()
-                                      << "has been already applied for window "
-                                      << window_id
-                                      << " of this application. Ignoring");
+    SDL_LOG_WARN("Hmi state with ID "
+                 << state->state_id() << "has been already applied for window "
+                 << window_id << " of this application. Ignoring");
     return;
   }
 
@@ -189,14 +182,13 @@ void ApplicationState::AddHMIState(const WindowID window_id,
 
 void ApplicationState::RemoveHMIState(const WindowID window_id,
                                       HmiState::StateID state_id) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   sync_primitives::AutoLock auto_lock(hmi_states_map_lock_);
   HmiStates& hmi_states = hmi_states_map_[window_id];
   HmiStates::iterator it = std::find_if(
       hmi_states.begin(), hmi_states.end(), StateIDComparator(state_id));
   if (hmi_states.end() == it) {
-    LOG4CXX_ERROR(logger_,
-                  "Unsuccesful remove HmiState: " << state_id << " for window "
+    SDL_LOG_ERROR("Unsuccesful remove HmiState: " << state_id << " for window "
                                                   << window_id);
     return;
   }
@@ -218,12 +210,11 @@ void ApplicationState::RemoveHMIState(const WindowID window_id,
 }
 
 void ApplicationState::RemoveWindowHMIStates(const WindowID window_id) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   DCHECK_OR_RETURN_VOID(mobile_apis::PredefinedWindows::DEFAULT_WINDOW !=
                         window_id);
 
-  LOG4CXX_DEBUG(logger_,
-                "Removing HMI states for window with id #" << window_id);
+  SDL_LOG_DEBUG("Removing HMI states for window with id #" << window_id);
   {
     sync_primitives::AutoLock auto_lock(hmi_states_map_lock_);
     hmi_states_map_.erase(window_id);
@@ -231,7 +222,7 @@ void ApplicationState::RemoveWindowHMIStates(const WindowID window_id) {
 }
 
 void ApplicationState::RemovePostponedState(const WindowID window_id) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   sync_primitives::AutoLock auto_lock(hmi_states_map_lock_);
   HmiStates& hmi_states = hmi_states_map_[window_id];
   DCHECK_OR_RETURN_VOID(!hmi_states.empty());
@@ -242,8 +233,7 @@ void ApplicationState::RemovePostponedState(const WindowID window_id) {
       std::find_if(hmi_states.begin(), hmi_states.end(), finder);
 
   if (hmi_states.end() == postponed_state) {
-    LOG4CXX_ERROR(logger_,
-                  "No postponed state is set for window " << window_id);
+    SDL_LOG_ERROR("No postponed state is set for window " << window_id);
     return;
   }
 
@@ -252,7 +242,7 @@ void ApplicationState::RemovePostponedState(const WindowID window_id) {
 
 void ApplicationState::SetRegularState(const WindowID window_id,
                                        HmiStatePtr state) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   DCHECK_OR_RETURN_VOID(state);
   DCHECK_OR_RETURN_VOID(state->state_id() ==
                         HmiState::StateID::STATE_ID_REGULAR);
@@ -285,7 +275,7 @@ void ApplicationState::SetRegularState(const WindowID window_id,
 
 void ApplicationState::SetPostponedState(const WindowID window_id,
                                          HmiStatePtr state) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   DCHECK_OR_RETURN_VOID(state);
   DCHECK_OR_RETURN_VOID(state->state_id() ==
                         HmiState::StateID::STATE_ID_POSTPONED);

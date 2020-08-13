@@ -881,7 +881,8 @@ class PolicyManager : public usage_statistics::StatisticsManager,
 
 }  // namespace policy
 
-extern "C" policy::PolicyManager* CreateManager();
+extern "C" policy::PolicyManager* CreateManager(
+    logger::Logger* logger_instance);
 extern "C" void DeleteManager(policy::PolicyManager*);
 
 #endif  // SRC_COMPONENTS_INCLUDE_POLICY_POLICY_EXTERNAL_POLICY_POLICY_MANAGER_H_

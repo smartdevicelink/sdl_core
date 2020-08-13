@@ -34,7 +34,7 @@
 
 namespace app_launch {
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "AppLaunch")
+SDL_CREATE_LOG_VARIABLE("AppLaunch")
 
 AppLaunchDataImpl::AppLaunchDataImpl(const AppLaunchSettings& settings)
     : settings_(settings)
@@ -43,24 +43,24 @@ AppLaunchDataImpl::AppLaunchDataImpl(const AppLaunchSettings& settings)
 AppLaunchDataImpl::~AppLaunchDataImpl() {}
 
 bool AppLaunchDataImpl::AddApplicationData(const ApplicationData& app_data) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   bool retVal = true;
 
   if (app_data.device_mac_.empty() == false &&
       app_data.mobile_app_id_.empty() == false &&
       app_data.bundle_id_.empty() == false) {
     if (IsAppDataAlreadyExisted(app_data)) {
-      LOG4CXX_INFO(logger_, "This application data already existed");
+      SDL_LOG_INFO("This application data already existed");
       retVal &= RefreshAppSessionTime(app_data);
     } else {
       if (GetCurentNumberOfAppData() >= get_max_number_iOS_devs()) {
-        LOG4CXX_INFO(logger_,
-                     "Max number of application data have. It will be deleted "
-                     "the oldest one");
+        SDL_LOG_INFO(
+            "Max number of application data have. It will be deleted "
+            "the oldest one");
         retVal &= DeleteOldestAppData();
       }
       retVal &= AddNewAppData(app_data);
-      LOG4CXX_INFO(logger_, "Added new application data to DB");
+      SDL_LOG_INFO("Added new application data to DB");
     }
   } else {
     retVal = false;
@@ -70,11 +70,11 @@ bool AppLaunchDataImpl::AddApplicationData(const ApplicationData& app_data) {
 
 std::vector<ApplicationDataPtr> AppLaunchDataImpl::GetApplicationDataByDevice(
     const std::string& dev_mac) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   std::vector<ApplicationDataPtr> apps = GetAppDataByDevMac(dev_mac);
 
   if (apps.empty()) {
-    LOG4CXX_DEBUG(logger_, "No application founded by mac" << dev_mac);
+    SDL_LOG_DEBUG("No application founded by mac" << dev_mac);
   }
 
   return apps;

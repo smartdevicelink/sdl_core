@@ -2,11 +2,12 @@
 
 #include "application_manager/plugin_manager/rpc_plugin_manager_impl.h"
 #include "utils/file_system.h"
+#include "utils/ilogger.h"
 
 namespace application_manager {
 namespace plugin_manager {
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "PluginManager")
+SDL_CREATE_LOG_VARIABLE("PluginManager")
 
 RPCPluginManagerImpl::RPCPluginManagerImpl(
     ApplicationManager& app_manager,
@@ -37,7 +38,7 @@ T GetFuncFromLib(void* dl_handle, const std::string& function_name) {
       reinterpret_cast<T>(dlsym(dl_handle, function_name.c_str()));
   char* error_string = dlerror();
   if (nullptr != error_string) {
-    LOG4CXX_ERROR(logger_, "Failed to export symbols : " << error_string);
+    SDL_LOG_ERROR("Failed to export symbols : " << error_string);
     return nullptr;
   }
   return exported_func;
@@ -46,22 +47,21 @@ T GetFuncFromLib(void* dl_handle, const std::string& function_name) {
 RPCPluginManagerImpl::RPCPluginPtr RPCPluginManagerImpl::LoadPlugin(
     const std::string& full_plugin_path) const {
   if (!IsLibraryFile(full_plugin_path)) {
-    LOG4CXX_DEBUG(logger_, "Skip loading " << full_plugin_path);
+    SDL_LOG_DEBUG("Skip loading " << full_plugin_path);
     return RPCPluginPtr(nullptr, [](RPCPlugin*) {});
   }
 
   void* plugin_dll = dlopen(full_plugin_path.c_str(), RTLD_LAZY);
   if (nullptr == plugin_dll) {
-    LOG4CXX_ERROR(
-        logger_,
-        "Failed to open dll " << full_plugin_path << " : " << dlerror());
+    SDL_LOG_ERROR("Failed to open dll " << full_plugin_path << " : "
+                                        << dlerror());
     return RPCPluginPtr(nullptr, [](RPCPlugin*) {});
   }
 
   typedef RPCPlugin* (*Create)(logger::Logger*);
   Create create_plugin = GetFuncFromLib<Create>(plugin_dll, "Create");
   if (!create_plugin) {
-    LOG4CXX_ERROR(logger_, "No Create function in " << full_plugin_path);
+    SDL_LOG_ERROR("No Create function in " << full_plugin_path);
     dlclose(plugin_dll);
     return RPCPluginPtr(nullptr, [](RPCPlugin*) {});
   }
@@ -69,13 +69,13 @@ RPCPluginManagerImpl::RPCPluginPtr RPCPluginManagerImpl::LoadPlugin(
   typedef void (*Delete)(RPCPlugin*);
   Delete delete_plugin = GetFuncFromLib<Delete>(plugin_dll, "Delete");
   if (!delete_plugin) {
-    LOG4CXX_ERROR(logger_, "No Delete function in " << full_plugin_path);
+    SDL_LOG_ERROR("No Delete function in " << full_plugin_path);
     dlclose(plugin_dll);
     return RPCPluginPtr(nullptr, [](RPCPlugin*) {});
   }
 
   auto plugin_destroyer = [delete_plugin, plugin_dll](RPCPlugin* plugin) {
-    LOG4CXX_DEBUG(logger_, "Delete plugin " << plugin->PluginName());
+    SDL_LOG_DEBUG("Delete plugin " << plugin->PluginName());
     delete_plugin(plugin);
     dlclose(plugin_dll);
     return RPCPluginPtr(nullptr, [](RPCPlugin*) {});
@@ -85,7 +85,7 @@ RPCPluginManagerImpl::RPCPluginPtr RPCPluginManagerImpl::LoadPlugin(
 }
 
 uint32_t RPCPluginManagerImpl::LoadPlugins(const std::string& plugins_path) {
-  LOG4CXX_INFO(logger_, "Loading plugins from " << plugins_path);
+  SDL_LOG_INFO("Loading plugins from " << plugins_path);
   std::vector<std::string> plugin_files = file_system::ListFiles(plugins_path);
   for (auto& plugin_file : plugin_files) {
     std::string full_name = plugins_path + '/' + plugin_file;
@@ -93,9 +93,8 @@ uint32_t RPCPluginManagerImpl::LoadPlugins(const std::string& plugins_path) {
     if (!plugin) {
       continue;
     }
-    LOG4CXX_DEBUG(
-        logger_,
-        "Loaded " << plugin->PluginName() << " plugin from " << full_name);
+    SDL_LOG_DEBUG("Loaded " << plugin->PluginName() << " plugin from "
+                            << full_name);
     if (plugin->Init(app_manager_,
                      rpc_service_,
                      hmi_capabilities_,
@@ -103,8 +102,7 @@ uint32_t RPCPluginManagerImpl::LoadPlugins(const std::string& plugins_path) {
                      last_state_)) {
       loaded_plugins_.push_back(std::move(plugin));
     } else {
-      LOG4CXX_ERROR(logger_,
-                    "Initialisation of " << plugin->PluginName()
+      SDL_LOG_ERROR("Initialisation of " << plugin->PluginName()
                                          << " plugin from " << full_name
                                          << " failed");
     }

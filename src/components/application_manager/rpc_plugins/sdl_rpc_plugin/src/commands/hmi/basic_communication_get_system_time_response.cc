@@ -33,11 +33,13 @@
 #include "sdl_rpc_plugin/commands/hmi/basic_communication_get_system_time_response.h"
 #include "utils/logger.h"
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "Commands")
+SDL_CREATE_LOG_VARIABLE("Commands")
 
 namespace sdl_rpc_plugin {
 using namespace application_manager;
 namespace commands {
+
+SDL_CREATE_LOG_VARIABLE("Commands")
 
 BasicCommunicationGetSystemTimeResponse::
     BasicCommunicationGetSystemTimeResponse(
@@ -53,7 +55,7 @@ BasicCommunicationGetSystemTimeResponse::
                       policy_handler) {}
 
 void BasicCommunicationGetSystemTimeResponse::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
 
   event_engine::Event event(
       hmi_apis::FunctionID::BasicCommunication_GetSystemTime);

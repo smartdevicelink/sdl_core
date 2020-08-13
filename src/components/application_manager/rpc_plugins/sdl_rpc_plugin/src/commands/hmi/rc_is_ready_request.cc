@@ -41,6 +41,8 @@ using namespace application_manager;
 
 namespace commands {
 
+SDL_CREATE_LOG_VARIABLE("Commands")
+
 RCIsReadyRequest::RCIsReadyRequest(
     const application_manager::commands::MessageSharedPtr& message,
     ApplicationManager& application_manager,
@@ -57,17 +59,17 @@ RCIsReadyRequest::RCIsReadyRequest(
 RCIsReadyRequest::~RCIsReadyRequest() {}
 
 void RCIsReadyRequest::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   subscribe_on_event(hmi_apis::FunctionID::RC_IsReady, correlation_id());
   SendRequest();
 }
 
 void RCIsReadyRequest::on_event(const event_engine::Event& event) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   const smart_objects::SmartObject& message = event.smart_object();
   switch (event.id()) {
     case hmi_apis::FunctionID::RC_IsReady: {
-      LOG4CXX_DEBUG(logger_, "Received RC_IsReady event");
+      SDL_LOG_DEBUG("Received RC_IsReady event");
       unsubscribe_from_event(hmi_apis::FunctionID::RC_IsReady);
       const bool is_available = app_mngr::commands::ChangeInterfaceState(
           application_manager_, message, HmiInterfaces::HMI_INTERFACE_RC);
@@ -82,15 +84,14 @@ void RCIsReadyRequest::on_event(const event_engine::Event& event) {
               application_manager_, HmiInterfaces::HMI_INTERFACE_RC)) {
         hmi_capabilities_.UpdateRequestsRequiredForCapabilities(
             hmi_apis::FunctionID::RC_GetCapabilities);
-        LOG4CXX_INFO(logger_,
-                     "HmiInterfaces::HMI_INTERFACE_RC isn't available");
+        SDL_LOG_INFO("HmiInterfaces::HMI_INTERFACE_RC isn't available");
         return;
       }
       RequestInterfaceCapabilities(hmi_interface::rc);
       break;
     }
     default: {
-      LOG4CXX_ERROR(logger_, "Received unknown event" << event.id());
+      SDL_LOG_ERROR("Received unknown event" << event.id());
       return;
     }
   }

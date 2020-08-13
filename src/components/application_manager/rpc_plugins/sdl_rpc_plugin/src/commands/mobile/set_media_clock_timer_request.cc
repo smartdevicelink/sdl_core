@@ -43,6 +43,8 @@ using namespace application_manager;
 
 namespace commands {
 
+SDL_CREATE_LOG_VARIABLE("Commands")
+
 SetMediaClockRequest::SetMediaClockRequest(
     const application_manager::commands::MessageSharedPtr& message,
     ApplicationManager& application_manager,
@@ -58,18 +60,18 @@ SetMediaClockRequest::SetMediaClockRequest(
 SetMediaClockRequest::~SetMediaClockRequest() {}
 
 void SetMediaClockRequest::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
 
   ApplicationSharedPtr app = application_manager_.application(connection_key());
 
   if (!app) {
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
-    LOG4CXX_ERROR(logger_, "Application is not registered");
+    SDL_LOG_ERROR("Application is not registered");
     return;
   }
 
   if (!app->is_media_application()) {
-    LOG4CXX_ERROR(logger_, "Application is not media application");
+    SDL_LOG_ERROR("Application is not media application");
     SendResponse(false, mobile_apis::Result::REJECTED);
     return;
   }
@@ -90,7 +92,7 @@ void SetMediaClockRequest::Run() {
 }
 
 void SetMediaClockRequest::on_event(const event_engine::Event& event) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   const smart_objects::SmartObject& message = event.smart_object();
 
   switch (event.id()) {
@@ -111,7 +113,7 @@ void SetMediaClockRequest::on_event(const event_engine::Event& event) {
       break;
     }
     default: {
-      LOG4CXX_ERROR(logger_, "Received unknown event" << event.id());
+      SDL_LOG_ERROR("Received unknown event" << event.id());
       return;
     }
   }
@@ -126,7 +128,7 @@ bool SetMediaClockRequest::isDataValid() {
   if (update_mode == mobile_apis::UpdateMode::COUNTUP ||
       update_mode == mobile_apis::UpdateMode::COUNTDOWN) {
     if (!msg_params.keyExists(strings::start_time)) {
-      LOG4CXX_INFO(logger_, "Invalid data");
+      SDL_LOG_INFO("Invalid data");
       return false;
     }
 
@@ -151,13 +153,13 @@ bool SetMediaClockRequest::isDataValid() {
            (update_mode == mobile_apis::UpdateMode::COUNTDOWN)) ||
           ((end_time_in_seconds < start_time_in_seconds) &&
            (update_mode == mobile_apis::UpdateMode::COUNTUP))) {
-        LOG4CXX_INFO(logger_, "Invalid data");
+        SDL_LOG_INFO("Invalid data");
         return false;
       }
     }
   }
 
-  LOG4CXX_INFO(logger_, "Data is valid");
+  SDL_LOG_INFO("Data is valid");
   return true;
 }
 

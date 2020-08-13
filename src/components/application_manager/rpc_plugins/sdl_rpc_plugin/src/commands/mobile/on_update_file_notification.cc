@@ -54,7 +54,7 @@ OnUpdateFileNotification::OnUpdateFileNotification(
 OnUpdateFileNotification::~OnUpdateFileNotification() {}
 
 void OnUpdateFileNotification::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   SendNotification();
 }
 

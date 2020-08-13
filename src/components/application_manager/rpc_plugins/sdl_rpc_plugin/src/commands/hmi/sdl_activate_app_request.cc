@@ -82,6 +82,8 @@ struct SendLaunchApp
 };
 }  // namespace
 
+SDL_CREATE_LOG_VARIABLE("Commands")
+
 SDLActivateAppRequest::SDLActivateAppRequest(
     const application_manager::commands::MessageSharedPtr& message,
     ApplicationManager& application_manager,
@@ -99,12 +101,11 @@ SDLActivateAppRequest::~SDLActivateAppRequest() {}
 uint32_t SDLActivateAppRequest::app_id() const {
   using namespace strings;
   if (!(*message_).keyExists(msg_params)) {
-    LOG4CXX_DEBUG(logger_, msg_params << " section is absent in the message.");
+    SDL_LOG_DEBUG(msg_params << " section is absent in the message.");
     return 0;
   }
   if (!(*message_)[msg_params].keyExists(strings::app_id)) {
-    LOG4CXX_DEBUG(logger_,
-                  strings::app_id << " section is absent in the message.");
+    SDL_LOG_DEBUG(strings::app_id << " section is absent in the message.");
     return 0;
   }
   return (*message_)[msg_params][strings::app_id].asUInt();
@@ -112,22 +113,22 @@ uint32_t SDLActivateAppRequest::app_id() const {
 
 #ifdef EXTERNAL_PROPRIETARY_MODE
 void SDLActivateAppRequest::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   using namespace hmi_apis::FunctionID;
 
   ApplicationConstSharedPtr app =
       application_manager_.WaitingApplicationByID(app_id());
   if (application_manager_.state_controller().IsStateActive(
           HmiState::STATE_ID_DEACTIVATE_HMI)) {
-    LOG4CXX_DEBUG(logger_,
-                  "DeactivateHmi state is active. "
-                  "Sends response with result code REJECTED");
+    SDL_LOG_DEBUG(
+        "DeactivateHmi state is active. "
+        "Sends response with result code REJECTED");
     SendErrorResponse(correlation_id(),
                       static_cast<eType>(function_id()),
                       hmi_apis::Common_Result::REJECTED,
                       "HMIDeactivate is active");
   } else if (app && !app->IsRegistered() && app->is_cloud_app()) {
-    LOG4CXX_DEBUG(logger_, "Starting cloud application.");
+    SDL_LOG_DEBUG("Starting cloud application.");
     const ApplicationManagerSettings& settings =
         application_manager_.get_settings();
     uint32_t total_retry_timeout = (settings.cloud_app_retry_timeout() *
@@ -144,7 +145,7 @@ void SDLActivateAppRequest::Run() {
 
 #else  // EXTERNAL_PROPRIETARY_MODE
 void SDLActivateAppRequest::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   using namespace hmi_apis::FunctionID;
   using namespace hmi_apis::Common_Result;
 
@@ -162,22 +163,20 @@ void SDLActivateAppRequest::Run() {
         application_manager_.WaitingApplicationByID(application_id);
 
     if (!app_to_activate) {
-      LOG4CXX_WARN(
-          logger_,
+      SDL_LOG_WARN(
           "Can't find application within waiting apps: " << application_id);
       return;
     }
   }
 
-  LOG4CXX_DEBUG(logger_,
-                "Found application to activate. Application id is "
-                    << app_to_activate->app_id());
+  SDL_LOG_DEBUG("Found application to activate. Application id is "
+                << app_to_activate->app_id());
 
   if (application_manager_.state_controller().IsStateActive(
           HmiState::StateID::STATE_ID_DEACTIVATE_HMI)) {
-    LOG4CXX_WARN(logger_,
-                 "DeactivateHmi state is active. "
-                 "Sends response with result code REJECTED");
+    SDL_LOG_WARN(
+        "DeactivateHmi state is active. "
+        "Sends response with result code REJECTED");
     SendErrorResponse(correlation_id(),
                       static_cast<hmi_apis::FunctionID::eType>(function_id()),
                       hmi_apis::Common_Result::REJECTED,
@@ -186,11 +185,11 @@ void SDLActivateAppRequest::Run() {
   }
 
   if (app_to_activate->IsRegistered()) {
-    LOG4CXX_DEBUG(logger_, "Application is registered. Activating.");
+    SDL_LOG_DEBUG("Application is registered. Activating.");
     policy_handler_.OnActivateApp(application_id, correlation_id());
     return;
   } else if (app_to_activate->is_cloud_app()) {
-    LOG4CXX_DEBUG(logger_, "Starting cloud application.");
+    SDL_LOG_DEBUG("Starting cloud application.");
     const ApplicationManagerSettings& settings =
         application_manager_.get_settings();
     uint32_t total_retry_timeout = (settings.cloud_app_retry_timeout() *
@@ -208,29 +207,29 @@ void SDLActivateAppRequest::Run() {
   V4ProtoApps v4_proto_apps = get_v4_proto_apps(device_handle);
 
   if (!foreground_v4_app && v4_proto_apps.empty()) {
-    LOG4CXX_ERROR(logger_,
-                  "Can't find regular foreground app with the same "
-                  "connection id:"
-                      << device_handle);
+    SDL_LOG_ERROR(
+        "Can't find regular foreground app with the same "
+        "connection id:"
+        << device_handle);
     SendErrorResponse(
         correlation_id(), SDL_ActivateApp, NO_APPS_REGISTERED, "");
     return;
   }
 
-  LOG4CXX_DEBUG(logger_,
-                "Application is not registered yet. "
-                "Sending launch request.");
+  SDL_LOG_DEBUG(
+      "Application is not registered yet. "
+      "Sending launch request.");
 
   if (foreground_v4_app) {
-    LOG4CXX_DEBUG(logger_, "Sending request to foreground application.");
+    SDL_LOG_DEBUG("Sending request to foreground application.");
     MessageHelper::SendLaunchApp(foreground_v4_app->app_id(),
                                  app_to_activate->SchemaUrl(),
                                  app_to_activate->PackageName(),
                                  application_manager_);
   } else {
-    LOG4CXX_DEBUG(logger_,
-                  "No preffered (foreground) application is found. "
-                  "Sending request to all v4 applications.");
+    SDL_LOG_DEBUG(
+        "No preffered (foreground) application is found. "
+        "Sending request to all v4 applications.");
     std::for_each(v4_proto_apps.begin(),
                   v4_proto_apps.end(),
                   SendLaunchApp(app_to_activate, application_manager_));
@@ -266,8 +265,8 @@ void SDLActivateAppRequest::on_event(const event_engine::Event& event) {
   ApplicationSharedPtr app =
       application_manager_.application_by_hmi_app(hmi_application_id);
   if (!app) {
-    LOG4CXX_ERROR(
-        logger_, "Application not found by HMI app id: " << hmi_application_id);
+    SDL_LOG_ERROR(
+        "Application not found by HMI app id: " << hmi_application_id);
     return;
   }
   policy_handler_.OnActivateApp(app->app_id(), correlation_id());
@@ -277,16 +276,15 @@ uint32_t SDLActivateAppRequest::hmi_app_id(
     const smart_objects::SmartObject& so) const {
   using namespace strings;
   if (!so.keyExists(params)) {
-    LOG4CXX_DEBUG(logger_, params << " section is absent in the message.");
+    SDL_LOG_DEBUG(params << " section is absent in the message.");
     return 0;
   }
   if (!so[msg_params].keyExists(application)) {
-    LOG4CXX_DEBUG(logger_, application << " section is absent in the message.");
+    SDL_LOG_DEBUG(application << " section is absent in the message.");
     return 0;
   }
   if (!so[msg_params][application].keyExists(strings::app_id)) {
-    LOG4CXX_DEBUG(logger_,
-                  strings::app_id << " section is absent in the message.");
+    SDL_LOG_DEBUG(strings::app_id << " section is absent in the message.");
     return 0;
   }
   return so[msg_params][application][strings::app_id].asUInt();

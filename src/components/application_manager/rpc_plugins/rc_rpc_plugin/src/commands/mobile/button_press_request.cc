@@ -45,7 +45,7 @@ namespace commands {
 using namespace json_keys;
 using namespace message_params;
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "RemoteControlModule")
+SDL_CREATE_LOG_VARIABLE("Commands")
 
 ButtonPressRequest::ButtonPressRequest(
     const app_mngr::commands::MessageSharedPtr& message,
@@ -78,7 +78,7 @@ const mobile_apis::ButtonName::eType ButtonPressRequest::GetButtonId() const {
 }
 
 void ButtonPressRequest::Execute() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   const std::string module_type = ModuleType();
 
   const bool button_name_matches_module_type =
@@ -106,14 +106,13 @@ void ButtonPressRequest::Execute() {
                    &(*message_)[app_mngr::strings::msg_params],
                    true);
   } else if (!button_name_matches_module_type) {
-    LOG4CXX_WARN(logger_, "Request module type and button name mismatch!");
+    SDL_LOG_WARN("Request module type and button name mismatch!");
     SetResourceState(module_type, ResourceState::FREE);
     SendResponse(false,
                  mobile_apis::Result::INVALID_DATA,
                  "Request module type and button name mismatch!");
   } else {
-    LOG4CXX_WARN(logger_,
-                 "Requested button or module does not exist in capabilities!");
+    SDL_LOG_WARN("Requested button or module does not exist in capabilities!");
     SetResourceState(module_type, ResourceState::FREE);
     SendResponse(false,
                  mobile_apis::Result::UNSUPPORTED_RESOURCE,
@@ -123,7 +122,7 @@ void ButtonPressRequest::Execute() {
 
 AcquireResult::eType ButtonPressRequest::AcquireResource(
     const app_mngr::commands::MessageSharedPtr& message) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   const std::string module_type = ModuleType();
   app_mngr::ApplicationSharedPtr app =
       application_manager_.application(CommandRequestImpl::connection_key());
@@ -134,13 +133,13 @@ AcquireResult::eType ButtonPressRequest::AcquireResource(
 
 bool ButtonPressRequest::IsResourceFree(const std::string& module_type,
                                         const std::string& module_id) const {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   return resource_allocation_manager_.IsResourceFree(module_type, module_id);
 }
 
 void ButtonPressRequest::SetResourceState(const std::string& module_type,
                                           const ResourceState::eType state) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   app_mngr::ApplicationSharedPtr app =
       application_manager_.application(CommandRequestImpl::connection_key());
 
@@ -149,7 +148,7 @@ void ButtonPressRequest::SetResourceState(const std::string& module_type,
 }
 
 void ButtonPressRequest::on_event(const app_mngr::event_engine::Event& event) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   RCCommandRequest::on_event(event);
 
   if (hmi_apis::FunctionID::Buttons_ButtonPress != event.id()) {
@@ -180,7 +179,7 @@ void ButtonPressRequest::on_event(const app_mngr::event_engine::Event& event) {
   auto app = application_manager_.application(connection_key());
 
   if (!app) {
-    LOG4CXX_ERROR(logger_, "NULL pointer.");
+    SDL_LOG_ERROR("NULL pointer.");
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED, "");
     return;
   }
@@ -221,7 +220,7 @@ std::string ButtonPressRequest::ModuleType() const {
 }
 
 std::string ButtonPressRequest::ModuleId() const {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   auto msg_params = (*message_)[app_mngr::strings::msg_params];
   if (msg_params.keyExists(message_params::kModuleId)) {
     return msg_params[message_params::kModuleId].asString();

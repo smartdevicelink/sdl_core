@@ -44,6 +44,8 @@ using namespace application_manager;
 
 namespace commands {
 
+SDL_CREATE_LOG_VARIABLE("Commands")
+
 ResetGlobalPropertiesRequest::ResetGlobalPropertiesRequest(
     const application_manager::commands::MessageSharedPtr& message,
     ApplicationManager& application_manager,
@@ -61,14 +63,14 @@ ResetGlobalPropertiesRequest::ResetGlobalPropertiesRequest(
 ResetGlobalPropertiesRequest::~ResetGlobalPropertiesRequest() {}
 
 void ResetGlobalPropertiesRequest::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
 
   uint32_t app_id =
       (*message_)[strings::params][strings::connection_key].asUInt();
   ApplicationSharedPtr app = application_manager_.application(app_id);
 
   if (!app) {
-    LOG4CXX_ERROR(logger_, "No application associated with session key");
+    SDL_LOG_ERROR("No application associated with session key");
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     return;
   }
@@ -77,7 +79,7 @@ void ResetGlobalPropertiesRequest::Run() {
       (*message_)[strings::msg_params][strings::properties].length();
   // if application waits for sending ttsGlobalProperties need to remove this
   // application from tts_global_properties_app_list_
-  LOG4CXX_INFO(logger_, "RemoveAppFromTTSGlobalPropertiesList");
+  SDL_LOG_INFO("RemoveAppFromTTSGlobalPropertiesList");
   application_manager_.RemoveAppFromTTSGlobalPropertiesList(app_id);
 
   bool helpt_promt = false;
@@ -194,7 +196,7 @@ void ResetGlobalPropertiesRequest::Run() {
 bool ResetGlobalPropertiesRequest::ResetHelpPromt(
     application_manager::ApplicationSharedPtr app) {
   if (!app) {
-    LOG4CXX_ERROR(logger_, "Null pointer");
+    SDL_LOG_ERROR("Null pointer");
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     return false;
   }
@@ -220,7 +222,7 @@ bool ResetGlobalPropertiesRequest::ResetHelpPromt(
 bool ResetGlobalPropertiesRequest::ResetTimeoutPromt(
     application_manager::ApplicationSharedPtr const app) {
   if (!app) {
-    LOG4CXX_ERROR(logger_, "Null pointer");
+    SDL_LOG_ERROR("Null pointer");
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     return false;
   }
@@ -247,7 +249,7 @@ bool ResetGlobalPropertiesRequest::ResetTimeoutPromt(
 bool ResetGlobalPropertiesRequest::ResetVrHelpTitleItems(
     application_manager::ApplicationSharedPtr const app) {
   if (!app) {
-    LOG4CXX_ERROR(logger_, "Null pointer");
+    SDL_LOG_ERROR("Null pointer");
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     return false;
   }
@@ -266,12 +268,12 @@ bool ResetGlobalPropertiesRequest::ResetVrHelpTitleItems(
 }
 
 void ResetGlobalPropertiesRequest::on_event(const event_engine::Event& event) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   const smart_objects::SmartObject& message = event.smart_object();
 
   switch (event.id()) {
     case hmi_apis::FunctionID::UI_SetGlobalProperties: {
-      LOG4CXX_INFO(logger_, "Received UI_SetGlobalProperties event");
+      SDL_LOG_INFO("Received UI_SetGlobalProperties event");
       EndAwaitForInterface(HmiInterfaces::HMI_INTERFACE_UI);
       ui_result_ = static_cast<hmi_apis::Common_Result::eType>(
           message[strings::params][hmi_response::code].asInt());
@@ -279,7 +281,7 @@ void ResetGlobalPropertiesRequest::on_event(const event_engine::Event& event) {
       break;
     }
     case hmi_apis::FunctionID::TTS_SetGlobalProperties: {
-      LOG4CXX_INFO(logger_, "Received TTS_SetGlobalProperties event");
+      SDL_LOG_INFO("Received TTS_SetGlobalProperties event");
       EndAwaitForInterface(HmiInterfaces::HMI_INTERFACE_TTS);
       tts_result_ = static_cast<hmi_apis::Common_Result::eType>(
           message[strings::params][hmi_response::code].asInt());
@@ -287,13 +289,13 @@ void ResetGlobalPropertiesRequest::on_event(const event_engine::Event& event) {
       break;
     }
     default: {
-      LOG4CXX_ERROR(logger_, "Received unknown event" << event.id());
+      SDL_LOG_ERROR("Received unknown event" << event.id());
       return;
     }
   }
 
   if (IsPendingResponseExist()) {
-    LOG4CXX_DEBUG(logger_, "Waiting for remaining responses");
+    SDL_LOG_DEBUG("Waiting for remaining responses");
     return;
   }
 
@@ -315,7 +317,7 @@ bool ResetGlobalPropertiesRequest::Init() {
 bool ResetGlobalPropertiesRequest::PrepareResponseParameters(
     mobile_apis::Result::eType& out_result_code,
     std::string& out_response_info) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   using namespace helpers;
 
   bool result = false;

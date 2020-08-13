@@ -149,7 +149,7 @@
 #include "sdl_rpc_plugin/commands/mobile/update_turn_list_request.h"
 #include "sdl_rpc_plugin/commands/mobile/update_turn_list_response.h"
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "ApplicationManager")
+SDL_CREATE_LOG_VARIABLE("ApplicationManager")
 namespace sdl_rpc_plugin {
 using namespace application_manager;
 
@@ -560,8 +560,7 @@ CommandSharedPtr MobileCommandFactory::CreateCommand(
       static_cast<mobile_apis::FunctionID::eType>(
           (*message)[strings::params][strings::function_id].asInt());
 
-  LOG4CXX_DEBUG(
-      logger_,
+  SDL_LOG_DEBUG(
       "MobileCommandFactory::CreateCommand function_id: " << function_id);
 
   return get_creator_factory(function_id, message_type, source).create(message);

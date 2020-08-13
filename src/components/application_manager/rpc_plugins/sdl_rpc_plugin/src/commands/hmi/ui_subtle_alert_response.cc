@@ -52,7 +52,7 @@ UISubtleAlertResponse::UISubtleAlertResponse(
 UISubtleAlertResponse::~UISubtleAlertResponse() {}
 
 void UISubtleAlertResponse::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
 
   event_engine::Event event(hmi_apis::FunctionID::UI_SubtleAlert);
   event.set_smart_object(*message_);
