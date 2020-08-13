@@ -77,7 +77,6 @@ class SDLPendingResumptionHandler
   void RaiseFakeSuccessfulResponse(smart_objects::SmartObject response,
                                    const int32_t corr_id);
   smart_objects::SmartObjectSPtr CreateSubscriptionRequest();
-  void ClearPendingRequestsMap();
 
   struct ResumptionAwaitingHandling {
     const uint32_t app_id;
