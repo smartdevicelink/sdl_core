@@ -58,7 +58,7 @@ RPCPluginManagerImpl::RPCPluginPtr RPCPluginManagerImpl::LoadPlugin(
     return RPCPluginPtr(nullptr, [](RPCPlugin*) {});
   }
 
-  typedef RPCPlugin* (*Create)();
+  typedef RPCPlugin* (*Create)(logger::Logger*);
   Create create_plugin = GetFuncFromLib<Create>(plugin_dll, "Create");
   if (!create_plugin) {
     LOG4CXX_ERROR(logger_, "No Create function in " << full_plugin_path);
@@ -80,7 +80,7 @@ RPCPluginManagerImpl::RPCPluginPtr RPCPluginManagerImpl::LoadPlugin(
     dlclose(plugin_dll);
     return RPCPluginPtr(nullptr, [](RPCPlugin*) {});
   };
-  RPCPlugin* plugin = create_plugin();
+  RPCPlugin* plugin = create_plugin(&logger::Logger::instance());
   return RPCPluginPtr(plugin, plugin_destroyer);
 }
 

@@ -39,7 +39,8 @@ typedef enum {
   LoggerThreadNotCreated,
   CreatingLoggerThread,
   LoggerThreadCreated,
-  DeletingLoggerThread
+  DeletingLoggerThread,
+  LoggerThreadIsNotUsed
 } LoggerStatus;
 
 // this variable is only changed when creating and deleting logger thread

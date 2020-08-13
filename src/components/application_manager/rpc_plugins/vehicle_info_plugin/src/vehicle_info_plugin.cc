@@ -284,12 +284,12 @@ void VehicleInfoPlugin::DeleteSubscriptions(
 
 extern "C" __attribute__((visibility("default")))
 application_manager::plugin_manager::RPCPlugin*
-Create() {
+Create(logger::Logger* logger_instance) {
+  logger::Logger::instance(logger_instance);
   return new vehicle_info_plugin::VehicleInfoPlugin();
 }
 
 extern "C" __attribute__((visibility("default"))) void Delete(
     application_manager::plugin_manager::RPCPlugin* data) {
   delete data;
-  DELETE_THREAD_LOGGER(vehicle_info_plugin::logger_);
 }

@@ -179,12 +179,12 @@ RCRPCPlugin::Apps RCRPCPlugin::GetRCApplications(
 
 extern "C" __attribute__((visibility("default")))
 application_manager::plugin_manager::RPCPlugin*
-Create() {
+Create(logger::Logger* logger_instance) {
+  logger::Logger::instance(logger_instance);
   return new rc_rpc_plugin::RCRPCPlugin();
 }  // namespace rc_rpc_plugin
 
 extern "C" __attribute__((visibility("default"))) void Delete(
     application_manager::plugin_manager::RPCPlugin* data) {
   delete data;
-  DELETE_THREAD_LOGGER(rc_rpc_plugin::logger_);
 }

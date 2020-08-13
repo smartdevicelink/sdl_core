@@ -42,10 +42,11 @@
 #include <vector>
 
 // ----------------------------------------------------------------------------
-
 #ifdef ENABLE_LOG
-#include "utils/log_message_loop_thread.h"
+#include "utils/logger/log4cxxlogger.h"
+#include "utils/logger/logger_impl.h"
 #endif  // ENABLE_LOG
+
 #include "utils/logger.h"
 
 #include "appMain/life_cycle_impl.h"
@@ -103,6 +104,12 @@ int32_t main(int32_t argc, char** argv) {
     exit(EXIT_FAILURE);
   }
 
+#ifdef ENABLE_LOG
+  auto logger_impl =
+      std::unique_ptr<logger::LoggerImpl>(new logger::LoggerImpl());
+  logger::Logger::instance(logger_impl.get());
+#endif  // ENABLE_LOG
+
   // --------------------------------------------------------------------------
   // Components initialization
   profile::Profile profile_instance;
@@ -131,9 +138,15 @@ int32_t main(int32_t argc, char** argv) {
     exit(EXIT_FAILURE);
   }
 
-  // --------------------------------------------------------------------------
-  // Logger initialization
-  INIT_LOGGER("log4cxx.properties", profile_instance.logs_enabled());
+#ifdef ENABLE_LOG
+  if (profile_instance.logs_enabled()) {
+    // Logger initialization
+    // Redefine for each paticular logger implementation
+    auto logger = std::unique_ptr<logger::Log4CXXLogger>(
+        new logger::Log4CXXLogger("log4cxx.properties"));
+    logger_impl->Init(std::move(logger));
+  }
+#endif
 
   threads::Thread::SetNameForId(threads::Thread::CurrentId(), "SDLCore");
 

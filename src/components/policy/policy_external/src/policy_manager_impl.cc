@@ -2605,12 +2605,13 @@ const std::vector<std::string> PolicyManagerImpl::GetRPCsForFunctionGroup(
 
 }  //  namespace policy
 
-__attribute__((visibility("default"))) policy::PolicyManager* CreateManager() {
+__attribute__((visibility("default"))) policy::PolicyManager* CreateManager(
+    logger::Logger* logger_instance) {
+  logger::Logger::instance(logger_instance);
   return new policy::PolicyManagerImpl();
 }
 
 __attribute__((visibility("default"))) void DeleteManager(
     policy::PolicyManager* pm) {
   delete pm;
-  DELETE_THREAD_LOGGER(policy::logger_);
 }

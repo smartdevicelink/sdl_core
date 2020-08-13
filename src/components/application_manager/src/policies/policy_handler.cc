@@ -350,7 +350,7 @@ bool PolicyHandler::CreateManager() {
     return false;
   }
 
-  typedef PolicyManager* (*CreateManager)();
+  typedef PolicyManager* (*CreateManager)(logger::Logger*);
   typedef void (*DeleteManager)(PolicyManager*);
   CreateManager create_manager =
       reinterpret_cast<CreateManager>(dlsym(policy_handle, "CreateManager"));
@@ -364,8 +364,8 @@ bool PolicyHandler::CreateManager() {
   };
   char* error_string = dlerror();
   if (NULL == error_string) {
-    policy_manager_ =
-        std::shared_ptr<PolicyManager>(create_manager(), policy_destroyer);
+    policy_manager_ = std::shared_ptr<PolicyManager>(
+        create_manager(&logger::Logger::instance()), policy_destroyer);
   } else {
     LOG4CXX_WARN(logger_, error_string);
     dlclose(policy_handle);

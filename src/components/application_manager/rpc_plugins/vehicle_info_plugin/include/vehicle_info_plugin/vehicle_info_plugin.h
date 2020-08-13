@@ -90,6 +90,7 @@ class VehicleInfoPlugin : public plugins::RPCPlugin {
 };
 }  // namespace vehicle_info_plugin
 
-extern "C" application_manager::plugin_manager::RPCPlugin* Create();
+extern "C" application_manager::plugin_manager::RPCPlugin* Create(
+    logger::Logger* logger_instances);
 extern "C" void Delete(application_manager::plugin_manager::RPCPlugin* data);
 #endif  // SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_VEHICLE_INFO_PLUGIN_INCLUDE_VEHICLE_INFO_PLUGIN_VEHICLE_INFO_PLUGIN_H

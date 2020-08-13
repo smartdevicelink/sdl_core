@@ -109,12 +109,12 @@ void AppServiceRpcPlugin::DeleteSubscriptions(
 
 extern "C" __attribute__((visibility("default")))
 application_manager::plugin_manager::RPCPlugin*
-Create() {
+Create(logger::Logger* logger_instance) {
+  logger::Logger::instance(logger_instance);
   return new app_service_rpc_plugin::AppServiceRpcPlugin();
 }
 
 extern "C" __attribute__((visibility("default"))) void Delete(
     application_manager::plugin_manager::RPCPlugin* data) {
   delete data;
-  DELETE_THREAD_LOGGER(app_service_rpc_plugin::logger_);
 }

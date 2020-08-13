@@ -106,12 +106,12 @@ void SDLRPCPlugin::ClearSubscriptions(app_mngr::ApplicationSharedPtr app) {
 
 extern "C" __attribute__((visibility("default")))
 application_manager::plugin_manager::RPCPlugin*
-Create() {
+Create(logger::Logger* logger_instance) {
+  logger::Logger::instance(logger_instance);
   return new sdl_rpc_plugin::SDLRPCPlugin();
 }
 
 extern "C" __attribute__((visibility("default"))) void Delete(
     application_manager::plugin_manager::RPCPlugin* data) {
   delete data;
-  DELETE_THREAD_LOGGER(sdl_rpc_plugin::logger_);
 }
