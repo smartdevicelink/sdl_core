@@ -494,8 +494,14 @@ void ProtocolHandlerImpl::SendStartSessionNAck(
   uint8_t maxProtocolVersion = SupportedSDLProtocolVersion();
 
   utils::SemanticVersion full_version;
-  session_observer_.ProtocolVersionUsed(
-      connection_id, session_id, full_version);
+  if (!session_observer_.ProtocolVersionUsed(
+          connection_id, session_id, full_version)) {
+    LOG4CXX_WARN(logger_,
+                 "Connection: " << connection_id << " and/or session: "
+                                << session_id << "no longer exist(s).");
+    return;
+  }
+
   const utils::SemanticVersion& min_version =
       (full_version.major_version_ < PROTOCOL_VERSION_5)
           ? default_protocol_version
@@ -577,8 +583,13 @@ void ProtocolHandlerImpl::SendEndSessionNAck(
   uint8_t maxProtocolVersion = SupportedSDLProtocolVersion();
 
   utils::SemanticVersion full_version;
-  session_observer_.ProtocolVersionUsed(
-      connection_id, session_id, full_version);
+  if (!session_observer_.ProtocolVersionUsed(
+          connection_id, session_id, full_version)) {
+    LOG4CXX_WARN(logger_,
+                 "Connection: " << connection_id << " and/or session: "
+                                << session_id << "no longer exist(s).");
+    return;
+  }
   const utils::SemanticVersion& min_version =
       (full_version.major_version_ < PROTOCOL_VERSION_5)
           ? default_protocol_version
