@@ -68,7 +68,7 @@ void ResumptionDataJson::SaveApplication(
   const mobile_apis::HMILevel::eType hmi_level =
       application->hmi_level(mobile_apis::PredefinedWindows::DEFAULT_WINDOW);
   const bool is_subscribed_for_way_points =
-      application_manager_.IsAppSubscribedForWayPoints(application);
+      application_manager_.IsAppSubscribedForWayPoints(*application);
 
   Json::Value tmp;
   resumption::LastStateAccessor accessor = last_state_wrapper_->get_accessor();
