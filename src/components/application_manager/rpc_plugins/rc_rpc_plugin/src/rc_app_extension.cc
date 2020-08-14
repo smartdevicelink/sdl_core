@@ -81,11 +81,14 @@ bool RCAppExtension::IsSubscribedToInteriorVehicleData(
 }
 
 void RCAppExtension::SaveResumptionData(
-    ns_smart_device_link::ns_smart_objects::SmartObject& resumption_data) {}
+    smart_objects::SmartObject& resumption_data) {}
 
 void RCAppExtension::ProcessResumption(
-    const ns_smart_device_link::ns_smart_objects::SmartObject&
-        resumption_data) {}
+    const smart_objects::SmartObject& saved_app,
+    resumption::Subscriber subscriber) {}
+
+void RCAppExtension::RevertResumption(
+    const smart_objects::SmartObject& subscriptions) {}
 
 std::set<ModuleUid> RCAppExtension::InteriorVehicleDataSubscriptions() const {
   return subscribed_interior_vehicle_data_;
