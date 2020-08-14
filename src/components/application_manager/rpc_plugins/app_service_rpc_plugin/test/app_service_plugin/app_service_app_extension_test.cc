@@ -40,7 +40,8 @@ namespace {
 const std::string kAppServiceType1 = "AppServiceType1";
 const std::string kAppServiceType2 = "AppServiceType2";
 const std::string kResumptionDataKey = "kResumptionDataKey";
-const std::string kAppServiceInfoKey = "appService";
+const std::string kAppServiceInfoKey =
+    application_manager::hmi_interface::app_service;
 }  // namespace
 
 namespace test {
@@ -195,9 +196,11 @@ TEST_F(AppServiceAppExtensionTest, ProcessResumption_SUCCESS) {
       smart_objects::SmartObject(kAppServiceType2));
 
   smart_objects::SmartObject resumption_data;
-  resumption_data[kAppServiceInfoKey] = app_service_data;
+  resumption_data[application_manager::strings::application_subscriptions]
+                 [kAppServiceInfoKey] = app_service_data;
 
-  app_service_app_extension_->ProcessResumption(resumption_data);
+  resumption::Subscriber subscriber;
+  app_service_app_extension_->ProcessResumption(resumption_data, subscriber);
 
   for (const auto& app_service_type : {kAppServiceType1, kAppServiceType2}) {
     EXPECT_TRUE(

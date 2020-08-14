@@ -32,6 +32,7 @@
 
 #include "app_service_rpc_plugin/app_service_app_extension.h"
 #include "app_service_rpc_plugin/app_service_rpc_plugin.h"
+#include "application_manager/include/application_manager/smart_object_keys.h"
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "AppServiceRpcPlugin")
 
@@ -86,27 +87,42 @@ AppServiceSubscriptions AppServiceAppExtension::Subscriptions() {
 
 void AppServiceAppExtension::SaveResumptionData(
     smart_objects::SmartObject& resumption_data) {
-  const char* app_service_info = "appService";
-  resumption_data[app_service_info] =
+  resumption_data[app_mngr::hmi_interface::app_service] =
       smart_objects::SmartObject(smart_objects::SmartType_Array);
   int i = 0;
   for (const auto& subscription : subscribed_data_) {
-    resumption_data[app_service_info][i] = subscription;
+    resumption_data[app_mngr::hmi_interface::app_service][i] = subscription;
     i++;
   }
 }
 
 void AppServiceAppExtension::ProcessResumption(
-    const smart_objects::SmartObject& resumption_data) {
-  const char* app_service_info = "appService";
-  if (resumption_data.keyExists(app_service_info)) {
+    const smart_objects::SmartObject& saved_app,
+    resumption::Subscriber subscriber) {
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  UNUSED(subscriber);
+
+  const auto& subscriptions =
+      saved_app[application_manager::strings::application_subscriptions];
+
+  if (subscriptions.keyExists(app_mngr::hmi_interface::app_service)) {
     const smart_objects::SmartObject& subscriptions_app_services =
-        resumption_data[app_service_info];
+        subscriptions[app_mngr::hmi_interface::app_service];
     for (size_t i = 0; i < subscriptions_app_services.length(); ++i) {
       std::string service_type = subscriptions_app_services[i].asString();
       SubscribeToAppService(service_type);
     }
   }
+}
+
+void AppServiceAppExtension::RevertResumption(
+    const smart_objects::SmartObject& subscriptions) {
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  UNUSED(subscriptions);
+  // ToDo: implementation is blocked by
+  // https://github.com/smartdevicelink/sdl_core/issues/3470
 }
 
 AppServiceAppExtension& AppServiceAppExtension::ExtractASExtension(
