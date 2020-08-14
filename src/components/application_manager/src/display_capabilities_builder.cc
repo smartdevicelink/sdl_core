@@ -29,8 +29,10 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-
 #include "application_manager/display_capabilities_builder.h"
+
+#include <algorithm>
+
 #include "application_manager/message_helper.h"
 #include "application_manager/smart_object_keys.h"
 namespace application_manager {
@@ -40,7 +42,7 @@ CREATE_LOGGERPTR_GLOBAL(logger_, "DisplayCapabilitiesBuilder")
 const WindowID kDefaultWindowID = 0;
 
 DisplayCapabilitiesBuilder::DisplayCapabilitiesBuilder(Application& application)
-    : owner_(application) {
+    : owner_(application), is_widget_windows_resumption_(false) {
   LOG4CXX_AUTO_TRACE(logger_);
 }
 
@@ -51,6 +53,8 @@ void DisplayCapabilitiesBuilder::InitBuilder(
   sync_primitives::AutoLock lock(display_capabilities_lock_);
   resume_callback_ = resume_callback;
   window_ids_to_resume_.insert(kDefaultWindowID);
+  is_widget_windows_resumption_ = !windows_info.empty();
+
   for (size_t i = 0; i < windows_info.length(); ++i) {
     auto window_id = windows_info[i][strings::window_id].asInt();
     LOG4CXX_DEBUG(logger_,
@@ -91,12 +95,8 @@ void DisplayCapabilitiesBuilder::UpdateDisplayCapabilities(
   *display_capabilities_ = incoming_display_capabilities;
   (*display_capabilities_)[0][strings::window_capabilities] = cur_window_caps;
 
-  if (window_ids_to_resume_.empty()) {
-    LOG4CXX_TRACE(logger_, "Invoking resume callback");
-    resume_callback_(owner_, *display_capabilities_);
-    display_capabilities_.reset();
-  }
-}  // namespace application_manager
+  InvokeCallbackFunction();
+}
 
 const smart_objects::SmartObjectSPtr
 DisplayCapabilitiesBuilder::display_capabilities() const {
@@ -104,25 +104,93 @@ DisplayCapabilitiesBuilder::display_capabilities() const {
   return display_capabilities_;
 }
 
+bool DisplayCapabilitiesBuilder::IsWindowResumptionNeeded() const {
+  return is_widget_windows_resumption_;
+}
+
+void DisplayCapabilitiesBuilder::InvokeCallbackFunction() {
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  if (!window_ids_to_resume_.empty()) {
+    LOG4CXX_DEBUG(logger_, "Still waiting for another windows capabilities");
+    return;
+  }
+
+  if (!display_capabilities_) {
+    LOG4CXX_DEBUG(logger_, "Cached display capabilities are not available");
+    return;
+  }
+
+  if (owner_.hmi_level(kDefaultWindowID) ==
+      mobile_apis::HMILevel::INVALID_ENUM) {
+    LOG4CXX_DEBUG(logger_, "Main window HMI level is not set yet");
+    return;
+  }
+
+  LOG4CXX_TRACE(logger_, "Invoking resume callback");
+  resume_callback_(owner_, *display_capabilities_);
+  display_capabilities_.reset();
+}
+
+bool DisplayCapabilitiesBuilder::IsWaitingForWindowCapabilities(
+    const smart_objects::SmartObject& incoming_display_capabilities) const {
+  const auto& inc_window_caps =
+      incoming_display_capabilities[0][strings::window_capabilities];
+
+  sync_primitives::AutoLock lock(display_capabilities_lock_);
+  for (size_t i = 0; i < inc_window_caps.length(); ++i) {
+    const WindowID window_id =
+        inc_window_caps[i].keyExists(strings::window_id)
+            ? inc_window_caps[i][strings::window_id].asInt()
+            : kDefaultWindowID;
+    if (helpers::in_range(window_ids_to_resume_, window_id)) {
+      LOG4CXX_TRACE(
+          logger_,
+          "Application is waiting for capabilities for window " << window_id);
+      return true;
+    }
+  }
+
+  LOG4CXX_TRACE(
+      logger_,
+      "Application is not waiting for any of these windows capabilities");
+  return false;
+}
+
 void DisplayCapabilitiesBuilder::ResetDisplayCapabilities() {
   LOG4CXX_AUTO_TRACE(logger_);
   sync_primitives::AutoLock lock(display_capabilities_lock_);
-  display_capabilities_.reset();
+  for (auto& window_id : window_ids_to_resume_) {
+    if (kDefaultWindowID != window_id) {
+      window_ids_to_resume_.erase(window_id);
+    }
+  }
+
+  if (display_capabilities_) {
+    auto* cur_window_caps_ptr =
+        (*display_capabilities_)[0][strings::window_capabilities].asArray();
+    if (cur_window_caps_ptr) {
+      for (auto it = cur_window_caps_ptr->begin();
+           it != cur_window_caps_ptr->end();) {
+        if ((*it).keyExists(strings::window_id) &&
+            (*it)[strings::window_id].asInt() != kDefaultWindowID) {
+          it = cur_window_caps_ptr->erase(it);
+        } else {
+          ++it;
+        }
+      }
+    }
+  }
 }
 
 void DisplayCapabilitiesBuilder::StopWaitingForWindow(
     const WindowID window_id) {
   LOG4CXX_AUTO_TRACE(logger_);
   sync_primitives::AutoLock lock(display_capabilities_lock_);
-  LOG4CXX_DEBUG(logger_,
-                "Window id " << window_id << " will be erased due to failure");
+  LOG4CXX_DEBUG(logger_, "Window id " << window_id << " will be erased");
   window_ids_to_resume_.erase(window_id);
-  if (window_ids_to_resume_.empty()) {
-    LOG4CXX_TRACE(logger_,
-                  window_id << " was the last window pending resumption. "
-                               "Invoking resume callback");
-    resume_callback_(owner_, *display_capabilities_);
-    display_capabilities_.reset();
-  }
+
+  InvokeCallbackFunction();
 }
+
 }  // namespace application_manager
