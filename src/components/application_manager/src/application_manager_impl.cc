@@ -354,16 +354,17 @@ ApplicationSharedPtr ApplicationManagerImpl::get_full_or_limited_application()
   return FindApp(accessor, FullOrLimitedAppPredicate);
 }
 
-bool LimitedAppPredicate(const ApplicationSharedPtr app) {
-  return app ? app->hmi_level(mobile_api::PredefinedWindows::DEFAULT_WINDOW) ==
-                   mobile_api::HMILevel::HMI_LIMITED
+bool LimitedMediaAppPredicate(const ApplicationSharedPtr app) {
+  return app ? (app->is_media_application() &&
+                app->hmi_level(mobile_api::PredefinedWindows::DEFAULT_WINDOW) ==
+                    mobile_api::HMILevel::HMI_LIMITED)
              : false;
 }
 
 ApplicationSharedPtr ApplicationManagerImpl::get_limited_media_application()
     const {
   DataAccessor<ApplicationSet> accessor = applications();
-  return FindApp(accessor, LimitedAppPredicate);
+  return FindApp(accessor, LimitedMediaAppPredicate);
 }
 
 bool LimitedNaviAppPredicate(const ApplicationSharedPtr app) {
@@ -1741,7 +1742,7 @@ void ApplicationManagerImpl::SwitchApplication(ApplicationSharedPtr app,
                                       << ". Changing device id to "
                                       << device_id);
 
-  bool is_subscribed_to_way_points = IsAppSubscribedForWayPoints(app);
+  bool is_subscribed_to_way_points = IsAppSubscribedForWayPoints(*app);
   if (is_subscribed_to_way_points) {
     UnsubscribeAppFromWayPoints(app);
   }
@@ -3228,13 +3229,6 @@ void ApplicationManagerImpl::UnregisterApplication(
 
   GetAppServiceManager().UnpublishServices(app_id);
 
-  if (IsAppSubscribedForWayPoints(app_id)) {
-    UnsubscribeAppFromWayPoints(app_id);
-    if (!IsAnyAppSubscribedForWayPoints()) {
-      LOG4CXX_ERROR(logger_, "Send UnsubscribeWayPoints");
-      MessageHelper::SendUnsubscribedWayPoints(*this);
-    }
-  }
   EndNaviServices(app_id);
 
   {
@@ -3308,6 +3302,16 @@ void ApplicationManagerImpl::UnregisterApplication(
       resume_controller().SaveApplication(app_to_remove);
     } else {
       resume_controller().RemoveApplicationFromSaved(app_to_remove);
+    }
+
+    if (IsAppSubscribedForWayPoints(app_id)) {
+      UnsubscribeAppFromWayPoints(app_id);
+      if (!IsAnyAppSubscribedForWayPoints()) {
+        LOG4CXX_DEBUG(logger_, "Send UnsubscribeWayPoints");
+        auto request = MessageHelper::CreateUnsubscribeWayPointsRequest(
+            GetNextHMICorrelationID());
+        rpc_service_->ManageHMICommand(request);
+      }
     }
 
     (hmi_capabilities_->get_hmi_language_handler())
@@ -3856,6 +3860,73 @@ void ApplicationManagerImpl::ProcessApp(const uint32_t app_id,
   LOG4CXX_TRACE(logger_, "No actions required for app " << app_id);
 }
 
+bool ApplicationManagerImpl::ResetHelpPromt(ApplicationSharedPtr app) const {
+  if (!app) {
+    LOG4CXX_ERROR(logger_, "Null pointer");
+    return false;
+  }
+  const std::vector<std::string>& help_prompt = get_settings().help_prompt();
+
+  smart_objects::SmartObject so_help_prompt =
+      smart_objects::SmartObject(smart_objects::SmartType_Array);
+
+  for (size_t i = 0; i < help_prompt.size(); ++i) {
+    smart_objects::SmartObject help_prompt_item =
+        smart_objects::SmartObject(smart_objects::SmartType_Map);
+    help_prompt_item[strings::text] = help_prompt[i];
+    help_prompt_item[strings::type] =
+        hmi_apis::Common_SpeechCapabilities::SC_TEXT;
+    so_help_prompt[i] = help_prompt_item;
+  }
+
+  app->set_help_prompt(so_help_prompt);
+  return true;
+}
+
+bool ApplicationManagerImpl::ResetTimeoutPromt(ApplicationSharedPtr app) const {
+  if (!app) {
+    LOG4CXX_ERROR(logger_, "Null pointer");
+    return false;
+  }
+
+  const std::vector<std::string>& time_out_promt =
+      get_settings().time_out_promt();
+
+  smart_objects::SmartObject so_time_out_promt =
+      smart_objects::SmartObject(smart_objects::SmartType_Array);
+
+  for (uint32_t i = 0; i < time_out_promt.size(); ++i) {
+    smart_objects::SmartObject timeoutPrompt =
+        smart_objects::SmartObject(smart_objects::SmartType_Map);
+    timeoutPrompt[strings::text] = time_out_promt[i];
+    timeoutPrompt[strings::type] = hmi_apis::Common_SpeechCapabilities::SC_TEXT;
+    so_time_out_promt[i] = timeoutPrompt;
+  }
+
+  app->set_timeout_prompt(so_time_out_promt);
+
+  return true;
+}
+
+bool ApplicationManagerImpl::ResetVrHelpTitleItems(
+    ApplicationSharedPtr app) const {
+  if (!app) {
+    LOG4CXX_ERROR(logger_, "Null pointer");
+    return false;
+  }
+
+  const std::string& vr_help_title = get_settings().vr_help_title();
+  smart_objects::SmartObject so_vr_help_title =
+      smart_objects::SmartObject(smart_objects::SmartType_String);
+  so_vr_help_title = vr_help_title;
+
+  app->reset_vr_help_title();
+  app->reset_vr_help();
+  app->set_vr_help_title(so_vr_help_title);
+
+  return true;
+}
+
 void ApplicationManagerImpl::StartEndStreamTimer(const uint32_t app_id) {
   LOG4CXX_DEBUG(logger_, "Start end stream timer for app " << app_id);
   navi_app_to_end_stream_.push_back(app_id);
@@ -4188,6 +4259,107 @@ void ApplicationManagerImpl::RemoveAppFromTTSGlobalPropertiesList(
     }
   }
   tts_global_properties_app_list_lock_.Release();
+}
+
+ResetGlobalPropertiesResult ApplicationManagerImpl::ResetGlobalProperties(
+    const smart_objects::SmartObject& global_properties_ids,
+    const uint32_t app_id) {
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  ApplicationSharedPtr application =
+      ApplicationManagerImpl::application(app_id);
+  // if application waits for sending ttsGlobalProperties need to remove this
+  // application from tts_global_properties_app_list_
+  LOG4CXX_DEBUG(logger_, "RemoveAppFromTTSGlobalPropertiesList");
+  RemoveAppFromTTSGlobalPropertiesList(app_id);
+
+  ResetGlobalPropertiesResult result;
+
+  for (size_t i = 0; i < global_properties_ids.length(); ++i) {
+    mobile_apis::GlobalProperty::eType global_property =
+        static_cast<mobile_apis::GlobalProperty::eType>(
+            global_properties_ids[i].asInt());
+    switch (global_property) {
+      case mobile_apis::GlobalProperty::HELPPROMPT: {
+        result.help_prompt = ResetHelpPromt(application);
+        break;
+      }
+      case mobile_apis::GlobalProperty::TIMEOUTPROMPT: {
+        result.timeout_prompt = ResetTimeoutPromt(application);
+        break;
+      }
+      case mobile_apis::GlobalProperty::VRHELPTITLE:
+      case mobile_apis::GlobalProperty::VRHELPITEMS: {
+        if (0 == result.number_of_reset_vr) {
+          result.number_of_reset_vr++;
+          result.vr_help_title_items = ResetVrHelpTitleItems(application);
+        }
+        break;
+      }
+      case mobile_apis::GlobalProperty::MENUNAME: {
+        result.menu_name = true;
+        break;
+      }
+      case mobile_apis::GlobalProperty::MENUICON: {
+        result.menu_icon = true;
+        break;
+      }
+      case mobile_apis::GlobalProperty::KEYBOARDPROPERTIES: {
+        result.keyboard_properties = true;
+        break;
+      }
+      default: {
+        LOG4CXX_TRACE(logger_, "Unknown global property: " << global_property);
+        break;
+      }
+    }
+  }
+
+  return result;
+}
+
+ResetGlobalPropertiesResult
+ApplicationManagerImpl::ResetAllApplicationGlobalProperties(
+    const uint32_t app_id) {
+  const smart_objects::SmartObjectSPtr application_gl_props =
+      CreateAllAppGlobalPropsIDList(app_id);
+  return ResetGlobalProperties(*application_gl_props, app_id);
+}
+
+const smart_objects::SmartObjectSPtr
+ApplicationManagerImpl::CreateAllAppGlobalPropsIDList(
+    const uint32_t app_id) const {
+  auto global_properties = std::make_shared<smart_objects::SmartObject>(
+      smart_objects::SmartType_Array);
+  using namespace mobile_apis;
+
+  ApplicationConstSharedPtr application =
+      ApplicationManagerImpl::application(app_id);
+  int32_t i = 0;
+
+  if (application->help_prompt()) {
+    (*global_properties)[i++] = GlobalProperty::HELPPROMPT;
+  }
+  if (application->timeout_prompt()) {
+    (*global_properties)[i++] = GlobalProperty::TIMEOUTPROMPT;
+  }
+  if (application->vr_help_title()) {
+    (*global_properties)[i++] = GlobalProperty::VRHELPTITLE;
+  }
+  if (application->vr_help()) {
+    (*global_properties)[i++] = GlobalProperty::VRHELPITEMS;
+  }
+  if (application->menu_title()) {
+    (*global_properties)[i++] = GlobalProperty::MENUNAME;
+  }
+  if (application->menu_icon()) {
+    (*global_properties)[i++] = GlobalProperty::MENUICON;
+  }
+  if (application->keyboard_props()) {
+    (*global_properties)[i++] = GlobalProperty::KEYBOARDPROPERTIES;
+  }
+
+  return global_properties;
 }
 
 mobile_apis::AppHMIType::eType ApplicationManagerImpl::StringToAppHMIType(
@@ -4662,8 +4834,8 @@ bool ApplicationManagerImpl::IsAppSubscribedForWayPoints(
 }
 
 bool ApplicationManagerImpl::IsAppSubscribedForWayPoints(
-    ApplicationSharedPtr app) const {
-  return IsAppSubscribedForWayPoints(app->app_id());
+    Application& app) const {
+  return IsAppSubscribedForWayPoints(app.app_id());
 }
 
 void ApplicationManagerImpl::SubscribeAppForWayPoints(uint32_t app_id) {
