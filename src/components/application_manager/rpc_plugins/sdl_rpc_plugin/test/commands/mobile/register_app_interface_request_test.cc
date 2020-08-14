@@ -80,6 +80,7 @@ using sdl_rpc_plugin::commands::RegisterAppInterfaceRequest;
 namespace {
 const uint32_t kConnectionKey = 1u;
 const uint32_t kConnectionKey2 = 2u;
+const uint32_t kDefaultTimeout = 0u;
 const connection_handler::DeviceHandle kDeviceHandle = 3u;
 const hmi_apis::Common_Language::eType kHmiLanguage =
     hmi_apis::Common_Language::EN_US;
@@ -348,6 +349,11 @@ TEST_F(RegisterAppInterfaceRequestTest, Init_SUCCESS) {
   EXPECT_TRUE(command_->Init());
 }
 
+TEST_F(RegisterAppInterfaceRequestTest, DefaultTimeout_CheckIfZero_SUCCESS) {
+  command_->Init();
+  EXPECT_EQ(command_->default_timeout(), kDefaultTimeout);
+}
+
 TEST_F(RegisterAppInterfaceRequestTest, Run_MinimalData_SUCCESS) {
   InitBasicMessage();
   (*msg_)[am::strings::msg_params][am::strings::hash_id] = kAppId1;
@@ -356,7 +362,6 @@ TEST_F(RegisterAppInterfaceRequestTest, Run_MinimalData_SUCCESS) {
       .WillOnce(Return(true))
       .WillOnce(Return(false));
   ON_CALL(app_mngr_, IsHMICooperating()).WillByDefault(Return(false));
-  EXPECT_CALL(app_mngr_, updateRequestTimeout(_, _, _));
   EXPECT_CALL(app_mngr_, IsApplicationForbidden(_, _)).WillOnce(Return(false));
 
   connection_handler::DeviceHandle handle = 1;
@@ -448,7 +453,6 @@ TEST_F(RegisterAppInterfaceRequestTest,
       .WillOnce(Return(true))
       .WillOnce(Return(false));
   ON_CALL(app_mngr_, IsHMICooperating()).WillByDefault(Return(false));
-  EXPECT_CALL(app_mngr_, updateRequestTimeout(_, _, _));
   EXPECT_CALL(app_mngr_, IsApplicationForbidden(_, _)).WillOnce(Return(false));
 
   connection_handler::DeviceHandle handle = 1;
@@ -756,7 +760,6 @@ TEST_F(RegisterAppInterfaceRequestTest,
       .WillOnce(Return(true))
       .WillOnce(Return(false));
   ON_CALL(app_mngr_, IsHMICooperating()).WillByDefault(Return(false));
-  EXPECT_CALL(app_mngr_, updateRequestTimeout(kConnectionKey2, _, _));
   EXPECT_CALL(app_mngr_, IsApplicationForbidden(kConnectionKey2, kAppId1))
       .WillOnce(Return(false));
 

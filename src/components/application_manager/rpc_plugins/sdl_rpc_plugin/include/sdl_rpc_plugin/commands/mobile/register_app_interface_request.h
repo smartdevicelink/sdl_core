@@ -71,17 +71,19 @@ class RegisterAppInterfaceRequest
   /**
    * @brief RegisterAppInterfaceRequest class destructor
    **/
-  virtual ~RegisterAppInterfaceRequest();
+  ~RegisterAppInterfaceRequest();
 
   /**
    * @brief Init required by command resources
    **/
-  virtual bool Init();
+  bool Init() FINAL;
 
   /**
    * @brief Execute command
    **/
-  virtual void Run();
+  void Run() FINAL;
+
+  uint32_t default_timeout() const FINAL;
 
  private:
   /**

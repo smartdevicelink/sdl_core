@@ -199,6 +199,13 @@ bool RegisterAppInterfaceRequest::Init() {
   return true;
 }
 
+uint32_t RegisterAppInterfaceRequest::default_timeout() const {
+  // As RAI request does not depend on any HMI response there is no need to
+  // track any timeout for it. RAI request will be removed from
+  // RequestController queue upon RAI response which will be sent anyway
+  return 0;
+}
+
 void RegisterAppInterfaceRequest::WaitForHMIIsReady() {
   while (!application_manager_.IsStopping() &&
          !application_manager_.IsHMICooperating()) {
@@ -208,8 +215,6 @@ void RegisterAppInterfaceRequest::WaitForHMIIsReady() {
                       << ", correlation_id=" << correlation_id()
                       << ", default_timeout=" << default_timeout()
                       << ", thread=" << pthread_self());
-    application_manager_.updateRequestTimeout(
-        connection_key(), correlation_id(), default_timeout());
     sleep(1);
     // TODO(DK): timer_->StartWait(1);
   }
@@ -767,9 +772,6 @@ void RegisterAppInterfaceRequest::Run() {
   application_manager_.ApplyFunctorForEachPlugin(on_app_registered);
 
   if (is_resumption_required) {
-    application_manager_.updateRequestTimeout(
-        connection_key(), correlation_id(), 0);
-
     const auto& msg_params = (*message_)[strings::msg_params];
     const auto& hash_id = msg_params[strings::hash_id].asString();
     LOG4CXX_WARN(logger_, "Start Data Resumption");
