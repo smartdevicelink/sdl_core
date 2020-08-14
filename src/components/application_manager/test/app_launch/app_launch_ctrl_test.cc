@@ -162,7 +162,7 @@ class AppLaunchCtrlTest : public ::testing::Test {
   NiceMock<am_test::MockApplicationManager> app_mngr_mock_;
   NiceMock<app_launch_test::AppLaunchDataMock> app_launch_data_mock_;
   NiceMock<ch_test::MockConnectionHandler> connection_handler_mock_;
-  NiceMock<resumprion_test::MockResumeCtrl> resume_ctrl_mock_;
+  NiceMock<resumption_test::MockResumeCtrl> resume_ctrl_mock_;
   NiceMock<app_launch_test::MockAppLaunchSettings> settings_;
   std::unique_ptr<app_launch::AppLaunchCtrlImpl> app_launch_ctrl_;
 };

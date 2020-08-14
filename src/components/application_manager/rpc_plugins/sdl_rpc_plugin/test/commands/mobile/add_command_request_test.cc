@@ -48,6 +48,7 @@
 #include "application_manager/mock_help_prompt_manager.h"
 #include "application_manager/mock_hmi_interface.h"
 #include "application_manager/mock_message_helper.h"
+#include "application_manager/mock_resume_ctrl.h"
 #include "application_manager/smart_object_keys.h"
 #include "smart_objects/smart_object.h"
 #include "utils/custom_string.h"
@@ -221,6 +222,11 @@ class AddCommandRequestTest
         mock_rpc_service_,
         ManageMobileCommand(response,
                             am::commands::Command::CommandSource::SOURCE_SDL));
+
+    resumption_test::MockResumeCtrl mock_resume_ctrl;
+    EXPECT_CALL(app_mngr_, resume_controller())
+        .WillOnce(ReturnRef(mock_resume_ctrl));
+    EXPECT_CALL(mock_resume_ctrl, HandleOnTimeOut(_, _));
     std::shared_ptr<CommandRequestImpl> base_class_request =
         static_cast<std::shared_ptr<CommandRequestImpl> >(request_ptr);
     base_class_request->onTimeOut();
@@ -1092,6 +1098,12 @@ TEST_F(AddCommandRequestTest,
   EXPECT_CALL(mock_rpc_service_,
               ManageMobileCommand(
                   response, am::commands::Command::CommandSource::SOURCE_SDL));
+
+  resumption_test::MockResumeCtrl mock_resume_ctrl;
+  EXPECT_CALL(app_mngr_, resume_controller())
+      .WillOnce(ReturnRef(mock_resume_ctrl));
+  EXPECT_CALL(mock_resume_ctrl, HandleOnTimeOut(_, _));
+
   std::shared_ptr<CommandRequestImpl> base_class_request =
       static_cast<std::shared_ptr<CommandRequestImpl> >(
           CreateCommand<AddCommandRequest>(msg_));
@@ -1142,6 +1154,12 @@ TEST_F(AddCommandRequestTest, OnTimeOut_AppRemoveCommandCalled) {
   EXPECT_CALL(mock_rpc_service_,
               ManageMobileCommand(
                   response, am::commands::Command::CommandSource::SOURCE_SDL));
+
+  resumption_test::MockResumeCtrl mock_resume_ctrl;
+  EXPECT_CALL(app_mngr_, resume_controller())
+      .WillOnce(ReturnRef(mock_resume_ctrl));
+  EXPECT_CALL(mock_resume_ctrl, HandleOnTimeOut(_, _));
+
   std::shared_ptr<CommandRequestImpl> base_class_request =
       static_cast<std::shared_ptr<CommandRequestImpl> >(request_ptr);
   base_class_request->onTimeOut();
