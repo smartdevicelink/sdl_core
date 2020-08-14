@@ -98,11 +98,13 @@ class RegisterAppInterfaceRequest
    * @brief Prepares and sends RegisterAppInterface response to mobile
    * considering application type
    * @param app_type Type of application
+   * @param status_notifier pointer to status notifier callback function
+   * @param add_info - additional information to be sent to mobile app
    **/
-  void SendRegisterAppInterfaceResponseToMobile(ApplicationType app_type);
-
-  smart_objects::SmartObjectSPtr GetLockScreenIconUrlNotification(
-      const uint32_t connection_key, app_mngr::ApplicationSharedPtr app);
+  void SendRegisterAppInterfaceResponseToMobile(
+      ApplicationType app_type,
+      policy::StatusNotifier status_notifier,
+      const std::string& add_info);
 
   /**
    * @brief SendChangeRegistration send ChangeRegistration on HMI
@@ -127,13 +129,9 @@ class RegisterAppInterfaceRequest
    * @param app application with changed HMI status
    * @param resumption If true, resumption-related parameters will be sent to
    * the HMI
-   * @param need_restore_vr If resumption is true, whether or not VR commands
-   *should be resumed
    **/
   void SendOnAppRegisteredNotificationToHMI(
-      app_mngr::ApplicationConstSharedPtr app,
-      bool resumption = false,
-      bool need_restore_vr = false);
+      app_mngr::ApplicationConstSharedPtr app, bool resumption);
 
   /**
    * @brief Check new ID along with known mobile application ID
@@ -236,9 +234,62 @@ class RegisterAppInterfaceRequest
       connection_handler::DeviceHandle* device_id = nullptr,
       std::string* mac_address = nullptr) const;
 
- private:
+  /**
+   * @brief WaitForHMIIsReady blocking function. Waits for HMI be ready for
+   * requests processing
+   */
+  void WaitForHMIIsReady();
+
+  /**
+   * @brief FillApplicationParams set app application attributes from the RAI
+   * request
+   * @param application applicaiton to fill params
+   */
+  void FillApplicationParams(
+      application_manager::ApplicationSharedPtr application);
+
+  /**
+   * @brief SetupAppDeviceInfo add applicaiton device information to policies
+   * @param application applicaiton to process
+   */
+  void SetupAppDeviceInfo(
+      application_manager::ApplicationSharedPtr application);
+
+  /**
+   * @brief ApplicationDataShouldBeResumed check if application data should be
+   * resumed
+   * @return true if app data should be resumed, otherwise returns false
+   */
+  bool ApplicationDataShouldBeResumed(std::string& add_info);
+
+  /**
+   * @brief CalculateFinalResultCode calculates the final result code
+   * considering all previous conditions
+   * @return calculated result code
+   */
+  mobile_apis::Result::eType CalculateFinalResultCode() const;
+
+  /**
+   * @brief AddApplicationDataToPolicy adds specified application to policy
+   * database and returns a callback with extra actions to be done if required
+   * @param application pointer to application to add
+   * @return callback with extra actions after adding specified application
+   */
+  policy::StatusNotifier AddApplicationDataToPolicy(
+      application_manager::ApplicationSharedPtr application);
+
+  /**
+   * @brief CheckLanguage check if language in RAI matches hmi_capabilities
+   * Setup result_code variable in case of does not match
+   */
+  void CheckLanguage();
+
   std::string response_info_;
-  mobile_apis::Result::eType result_code_;
+  bool are_tts_chunks_invalid_;
+  bool are_hmi_types_invalid_;
+  bool is_resumption_failed_;
+  bool is_wrong_language_;
+
   connection_handler::DeviceHandle device_handle_;
   std::string device_id_;
 
