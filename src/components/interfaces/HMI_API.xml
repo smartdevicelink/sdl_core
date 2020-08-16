@@ -4743,6 +4743,8 @@
     <param name="appCapability" type="Common.AppCapability" mandatory="true">
         <description>The app capability that has been updated</description>
     </param>
+    <param name="appID" type="Integer" mandatory="true">
+    </param>
   </function>
 </interface>
 

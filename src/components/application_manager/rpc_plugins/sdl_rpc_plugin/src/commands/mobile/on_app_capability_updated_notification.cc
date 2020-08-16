@@ -53,6 +53,16 @@ OnAppCapabilityUpdatedNotification::~OnAppCapabilityUpdatedNotification() {}
 
 void OnAppCapabilityUpdatedNotification::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
+  app_mngr::ApplicationSharedPtr app =
+      application_manager_.application(connection_key());
+
+  if (!app) {
+    LOG4CXX_ERROR(logger_, "No application associated with session key");
+    return;
+  }
+
+  (*message_)[app_mngr::strings::msg_params][app_mngr::strings::app_id] =
+      app->app_id();
 
   SendNotificationToHMI(
       hmi_apis::FunctionID::BasicCommunication_OnAppCapabilityUpdated);

@@ -52,6 +52,7 @@ typedef std::shared_ptr<OnAppCapabilityUpdatedNotification>
 namespace strings = application_manager::strings;
 namespace {
 const uint32_t kConnectionKey = 1u;
+const uint32_t kAppId = 2u;
 }  // namespace
 
 MATCHER_P(CheckAppCapability, app_capability, "") {
@@ -121,6 +122,10 @@ TEST_F(OnAppCapabilityUpdatedNotificationTest, Run_ManageHMICommand_SUCCESS) {
   (*message_)[strings::msg_params][strings::app_capability] = app_capability;
 
   ASSERT_TRUE(command_->Init());
+
+  ON_CALL(app_mngr_, application(kConnectionKey))
+      .WillByDefault(Return(mock_app_));
+  ON_CALL(*mock_app_, app_id()).WillByDefault(Return(kAppId));
 
   EXPECT_CALL(mock_rpc_service_,
               ManageHMICommand(CheckAppCapability(app_capability),
