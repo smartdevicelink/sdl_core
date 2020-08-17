@@ -98,6 +98,7 @@ class VehicleInfoPlugin : public plugins::RPCPlugin {
 
  private:
   bool IsSubscribedAppExist(const std::string& ivi);
+  bool IsAnyPendingSubscriptionExist(const std::string& ivi);
   void UnsubscribeFromRemovedVDItems();
   smart_objects::SmartObjectSPtr GetUnsubscribeIVIRequest(
       const std::vector<std::string>& ivi_names);

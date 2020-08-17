@@ -188,7 +188,8 @@ void VehicleInfoPlugin::RevertResumption(
 
   std::set<std::string> subscriptions_to_revert;
   for (auto& ivi_data : list_of_subscriptions) {
-    if (!IsSubscribedAppExist(ivi_data)) {
+    if (!IsSubscribedAppExist(ivi_data) &&
+        !IsAnyPendingSubscriptionExist(ivi_data)) {
       subscriptions_to_revert.insert(ivi_data);
     }
   }
@@ -243,6 +244,20 @@ bool VehicleInfoPlugin::IsSubscribedAppExist(const std::string& ivi) {
       return true;
     }
   }
+  return false;
+}
+
+bool VehicleInfoPlugin::IsAnyPendingSubscriptionExist(const std::string& ivi) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  auto apps_accessor = application_manager_->applications();
+
+  for (auto& app : apps_accessor.GetData()) {
+    auto& ext = VehicleInfoAppExtension::ExtractVIExtension(*app);
+    if (ext.isPendingSubscriptionToVehicleInfo(ivi)) {
+      return true;
+    }
+  }
+
   return false;
 }
 

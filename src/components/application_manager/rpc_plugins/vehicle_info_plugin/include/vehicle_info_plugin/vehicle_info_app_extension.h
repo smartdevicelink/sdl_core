@@ -92,6 +92,16 @@ class VehicleInfoAppExtension : public app_mngr::AppExtension {
   bool isSubscribedToVehicleInfo(const std::string& vehicle_data_type) const;
 
   /**
+   * @brief isPendingSubscriptionToVehicleInfo checks if there any extension
+   * with pending subscription to vehicle data
+   * @param vehicle_data vehicle data to check
+   * @return true if extension is subscribed to this vehicle_data, otherwise
+   * returns false
+   */
+  bool isPendingSubscriptionToVehicleInfo(
+      const std::string& vehicle_data) const;
+
+  /**
    * @brief Subscriptions get list of subscriptions for application extension
    * @return list of subscriptions for application extension
    */

@@ -87,6 +87,14 @@ bool VehicleInfoAppExtension::isSubscribedToVehicleInfo(
   return subscribed_data_.find(vehicle_data) != subscribed_data_.end();
 }
 
+bool VehicleInfoAppExtension::isPendingSubscriptionToVehicleInfo(
+    const std::string& vehicle_data) const {
+  LOG4CXX_DEBUG(logger_, vehicle_data);
+  sync_primitives::AutoLock lock(*pending_subscriptions_lock_);
+  return pending_subscriptions_.find(vehicle_data) !=
+         pending_subscriptions_.end();
+}
+
 const DataAccessor<VehicleInfoSubscriptions>
 VehicleInfoAppExtension::Subscriptions() {
   DataAccessor<VehicleInfoSubscriptions> data_accessor(subscribed_data_,
