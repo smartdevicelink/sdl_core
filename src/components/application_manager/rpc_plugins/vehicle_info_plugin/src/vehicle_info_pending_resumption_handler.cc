@@ -215,25 +215,29 @@ void VehicleInfoPendingResumptionHandler::on_event(
     return;
   }
 
-  auto current_pending = pending_requests_.front();
-
   auto response_message = event.smart_object();
   smart_objects::SmartObject converted_msg_params(
       response_message[strings::msg_params]);
 
   custom_vehicle_data_manager_.CreateMobileMessageParams(converted_msg_params);
   response_message[strings::msg_params] = converted_msg_params;
-  pending_requests_.pop_front();
 
   const auto vs_count_in_response =
       response_message[application_manager::strings::msg_params].length();
+
   if (resumption::IsResponseSuccessful(response_message) &&
       vs_count_in_response == 0) {
-    FillResponseWithMissedVD(current_pending.requested_vehicle_data_,
-                             &response_message);
+    const auto& requested_vd =
+        pending_requests_.front().requested_vehicle_data_;
+    FillResponseWithMissedVD(requested_vd, &response_message);
   }
 
-  current_pending.FillSubscriptionResults(response_message);
+  for (auto& pending : pending_requests_) {
+    pending.FillSubscriptionResults(response_message);
+  }
+
+  auto current_pending = pending_requests_.front();
+  pending_requests_.pop_front();
 
   RaiseFinishedPendingResumption(current_pending);
 
