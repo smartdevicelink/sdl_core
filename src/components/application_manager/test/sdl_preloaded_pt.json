@@ -377,7 +377,8 @@
                         "odometer",
                         "tirePressure",
                         "vin",
-                        "wiperStatus"]
+                        "wiperStatus",
+                        "stabilityControlsStatus"]
                     },
                     "OnVehicleData": {
                         "hmi_levels": ["BACKGROUND",
@@ -398,7 +399,8 @@
                         "odometer",
                         "tirePressure",
                         "vin",
-                        "wiperStatus"]
+                        "wiperStatus",
+                        "stabilityControlsStatus"]
                     },
                     "SubscribeVehicleData": {
                         "hmi_levels": ["BACKGROUND",
@@ -418,7 +420,8 @@
                         "cloudAppVehicleID",
                         "odometer",
                         "tirePressure",
-                        "wiperStatus"]
+                        "wiperStatus",
+                        "stabilityControlsStatus"]
                     },
                     "UnsubscribeVehicleData": {
                         "hmi_levels": ["BACKGROUND",
@@ -438,7 +441,8 @@
                         "cloudAppVehicleID",
                         "odometer",
                         "tirePressure",
-                        "wiperStatus"]
+                        "wiperStatus",
+                        "stabilityControlsStatus"]
                     }
                 }
             },

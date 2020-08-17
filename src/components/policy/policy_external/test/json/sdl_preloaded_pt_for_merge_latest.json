@@ -2056,7 +2056,8 @@
               "myKey",
               "prndl",
               "rpm",
-              "steeringWheelAngle"
+              "steeringWheelAngle",
+              "handsOffSteering"
             ]
           },
           "OnVehicleData" :
@@ -2071,7 +2072,8 @@
               "myKey",
               "prndl",
               "rpm",
-              "steeringWheelAngle"
+              "steeringWheelAngle",
+              "handsOffSteering"
             ]
           },
           "SubscribeVehicleData" :
@@ -2086,7 +2088,8 @@
               "myKey",
               "prndl",
               "rpm",
-              "steeringWheelAngle"
+              "steeringWheelAngle",
+              "handsOffSteering"
             ]
           },
           "UnsubscribeVehicleData" :
@@ -2101,7 +2104,8 @@
               "myKey",
               "prndl",
               "rpm",
-              "steeringWheelAngle"
+              "steeringWheelAngle",
+              "handsOffSteering"
             ]
           }
         },

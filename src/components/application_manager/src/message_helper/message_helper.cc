@@ -189,6 +189,8 @@ std::pair<std::string, mobile_apis::VehicleDataType::eType>
                        mobile_apis::VehicleDataType::VEHICLEDATA_TURNSIGNAL),
         std::make_pair(strings::vin,
                        mobile_apis::VehicleDataType::VEHICLEDATA_VIN),
+        std::make_pair(strings::gearStatus,
+                       mobile_apis::VehicleDataType::VEHICLEDATA_GEARSTATUS),
         std::make_pair(strings::prndl,
                        mobile_apis::VehicleDataType::VEHICLEDATA_PRNDL),
         std::make_pair(strings::tire_pressure,
@@ -211,6 +213,9 @@ std::pair<std::string, mobile_apis::VehicleDataType::eType>
         std::make_pair(
             strings::head_lamp_status,
             mobile_apis::VehicleDataType::VEHICLEDATA_HEADLAMPSTATUS),
+        std::make_pair(
+            strings::stability_controls_status,
+            mobile_apis::VehicleDataType::VEHICLEDATA_STABILITYCONTROLSSTATUS),
         std::make_pair(strings::e_call_info,
                        mobile_apis::VehicleDataType::VEHICLEDATA_ECALLINFO),
         std::make_pair(strings::airbag_status,
@@ -237,9 +242,13 @@ std::pair<std::string, mobile_apis::VehicleDataType::eType>
                        mobile_apis::VehicleDataType::VEHICLEDATA_ACCPEDAL),
         std::make_pair(strings::steering_wheel_angle,
                        mobile_apis::VehicleDataType::VEHICLEDATA_STEERINGWHEEL),
+        std::make_pair(strings::engine_oil_life,
+                       mobile_apis::VehicleDataType::VEHICLEDATA_ENGINEOILLIFE),
+        std::make_pair(strings::window_status,
+                       mobile_apis::VehicleDataType::VEHICLEDATA_WINDOWSTATUS),
         std::make_pair(
-            strings::engine_oil_life,
-            mobile_apis::VehicleDataType::VEHICLEDATA_ENGINEOILLIFE)};
+            strings::hands_off_steering,
+            mobile_apis::VehicleDataType::VEHICLEDATA_HANDSOFFSTEERING)};
 
 const VehicleData MessageHelper::vehicle_data_(
     kVehicleDataInitializer,
@@ -1876,6 +1885,10 @@ smart_objects::SmartObjectList MessageHelper::CreateAddSubMenuRequestToHMI(
         (*i->second)[strings::position];
     msg_params[strings::menu_params][strings::menu_name] =
         (*i->second)[strings::menu_name];
+    if ((*i->second).keyExists(strings::parent_id)) {
+      msg_params[strings::menu_params][strings::parent_id] =
+          (*i->second)[strings::parent_id];
+    }
     msg_params[strings::app_id] = app->app_id();
     (*ui_sub_menu)[strings::msg_params] = msg_params;
     if (((*i->second).keyExists(strings::menu_icon)) &&
@@ -2365,25 +2378,20 @@ void MessageHelper::SendNaviStartStream(const int32_t app_id,
   (*start_stream)[strings::params][strings::function_id] =
       hmi_apis::FunctionID::Navigation_StartStream;
 
-  char url[100] = {'\0'};
+  std::string url;
   if ("socket" == app_mngr.get_settings().video_server_type()) {
-    snprintf(url,
-             sizeof(url) / sizeof(url[0]),
-             "http://%s:%d",
-             app_mngr.get_settings().server_address().c_str(),
-             app_mngr.get_settings().video_streaming_port());
+    auto const port = app_mngr.get_settings().video_streaming_port();
+    url = "http://";
+    url += app_mngr.get_settings().server_address();
+    url += ":";
+    url += std::to_string(port);
   } else if ("pipe" == app_mngr.get_settings().video_server_type()) {
-    snprintf(url,
-             sizeof(url) / sizeof(url[0]),
-             "%s",
-             app_mngr.get_settings().named_video_pipe_path().c_str());
+    url.reserve(PATH_MAX);
+    url.insert(
+        0, app_mngr.get_settings().named_video_pipe_path(), 0, PATH_MAX - 1);
   } else {
-    int snprintf_result =
-        snprintf(url,
-                 sizeof(url) / sizeof(url[0]),
-                 "%s",
-                 app_mngr.get_settings().video_stream_file().c_str());
-    DCHECK(snprintf_result);
+    url.reserve(PATH_MAX);
+    url.insert(0, app_mngr.get_settings().video_stream_file(), 0, PATH_MAX - 1);
   }
 
   (*start_stream)[strings::msg_params][strings::app_id] = app_id;
@@ -2422,25 +2430,20 @@ void MessageHelper::SendAudioStartStream(const int32_t app_id,
   (*start_stream)[strings::params][strings::function_id] =
       hmi_apis::FunctionID::Navigation_StartAudioStream;
 
-  char url[100] = {'\0'};
+  std::string url;
   if ("socket" == app_mngr.get_settings().audio_server_type()) {
-    snprintf(url,
-             sizeof(url) / sizeof(url[0]),
-             "http://%s:%d",
-             app_mngr.get_settings().server_address().c_str(),
-             app_mngr.get_settings().audio_streaming_port());
+    auto const port = app_mngr.get_settings().audio_streaming_port();
+    url = "http://";
+    url += app_mngr.get_settings().server_address();
+    url += ":";
+    url += std::to_string(port);
   } else if ("pipe" == app_mngr.get_settings().audio_server_type()) {
-    snprintf(url,
-             sizeof(url) / sizeof(url[0]),
-             "%s",
-             app_mngr.get_settings().named_audio_pipe_path().c_str());
+    url.reserve(PATH_MAX);
+    url.insert(
+        0, app_mngr.get_settings().named_audio_pipe_path(), 0, PATH_MAX - 1);
   } else {
-    int snprintf_result =
-        snprintf(url,
-                 sizeof(url) / sizeof(url[0]),
-                 "%s",
-                 app_mngr.get_settings().audio_stream_file().c_str());
-    DCHECK(snprintf_result);
+    url.reserve(PATH_MAX);
+    url.insert(0, app_mngr.get_settings().audio_stream_file(), 0, PATH_MAX - 1);
   }
 
   (*start_stream)[strings::msg_params][strings::app_id] = app_id;
