@@ -1,6 +1,5 @@
 /*
-
- Copyright (c) 2018, Ford Motor Company
+ Copyright (c) 2020, Ford Motor Company, Livio
  All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -14,9 +13,9 @@
  disclaimer in the documentation and/or other materials provided with the
  distribution.
 
- Neither the name of the Ford Motor Company nor the names of its contributors
- may be used to endorse or promote products derived from this software
- without specific prior written permission.
+ Neither the name of the the copyright holders nor the names of their
+ contributors may be used to endorse or promote products derived from this
+ software without specific prior written permission.
 
  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
@@ -31,23 +30,17 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "sdl_rpc_plugin/commands/mobile/alert_request.h"
-
-#include <string.h>
+#include "sdl_rpc_plugin/commands/mobile/subtle_alert_request.h"
 
 #include "application_manager/application_impl.h"
 #include "application_manager/message_helper.h"
-
-#include "application_manager/policies/policy_handler.h"
-#include "smart_objects/smart_object.h"
-#include "utils/helpers.h"
 
 namespace sdl_rpc_plugin {
 using namespace application_manager;
 
 namespace commands {
 
-AlertRequest::AlertRequest(
+SubtleAlertRequest::SubtleAlertRequest(
     const application_manager::commands::MessageSharedPtr& message,
     ApplicationManager& application_manager,
     rpc_service::RPCService& rpc_service,
@@ -58,19 +51,20 @@ AlertRequest::AlertRequest(
                          rpc_service,
                          hmi_capabilities,
                          policy_handler)
-    , awaiting_ui_alert_response_(false)
+    , awaiting_ui_subtle_alert_response_(false)
     , awaiting_tts_speak_response_(false)
     , awaiting_tts_stop_speaking_response_(false)
-    , is_ui_alert_sent_(false)
-    , alert_result_(hmi_apis::Common_Result::INVALID_ENUM)
+    , is_ui_subtle_alert_sent_(false)
+    , is_tts_stop_speaking_sent_(false)
+    , subtle_alert_result_(hmi_apis::Common_Result::INVALID_ENUM)
     , tts_speak_result_(hmi_apis::Common_Result::INVALID_ENUM) {
   subscribe_on_event(hmi_apis::FunctionID::UI_OnResetTimeout);
   subscribe_on_event(hmi_apis::FunctionID::TTS_OnResetTimeout);
 }
 
-AlertRequest::~AlertRequest() {}
+SubtleAlertRequest::~SubtleAlertRequest() {}
 
-bool AlertRequest::Init() {
+bool SubtleAlertRequest::Init() {
   /* Timeout in milliseconds.
     If omitted a standard value of 10000 milliseconds is used.*/
   auto& msg_params = (*message_)[strings::msg_params];
@@ -90,7 +84,7 @@ bool AlertRequest::Init() {
   return true;
 }
 
-void AlertRequest::Run() {
+void SubtleAlertRequest::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
 
   uint32_t app_id =
@@ -109,19 +103,15 @@ void AlertRequest::Run() {
         (*message_)[strings::msg_params][strings::tts_chunks].length();
   }
 
-  if ((tts_chunks_exists && length_tts_chunks) ||
-      ((*message_)[strings::msg_params].keyExists(strings::play_tone) &&
-       (*message_)[strings::msg_params][strings::play_tone].asBool())) {
-    awaiting_tts_speak_response_ = true;
-  }
+  awaiting_tts_speak_response_ = (tts_chunks_exists && length_tts_chunks);
 
-  SendAlertRequest(app_id);
+  SendSubtleAlertRequest(app_id);
   if (awaiting_tts_speak_response_) {
     SendSpeakRequest(app_id, tts_chunks_exists, length_tts_chunks);
   }
 }
 
-void AlertRequest::on_event(const event_engine::Event& event) {
+void SubtleAlertRequest::on_event(const event_engine::Event& event) {
   LOG4CXX_AUTO_TRACE(logger_);
   const smart_objects::SmartObject& message = event.smart_object();
 
@@ -133,17 +123,17 @@ void AlertRequest::on_event(const event_engine::Event& event) {
                    " or TTS_OnResetTimeout event"
                        << awaiting_tts_speak_response_ << " "
                        << awaiting_tts_stop_speaking_response_ << " "
-                       << awaiting_ui_alert_response_);
+                       << awaiting_ui_subtle_alert_response_);
       application_manager_.updateRequestTimeout(
           connection_key(), correlation_id(), default_timeout());
       break;
     }
-    case hmi_apis::FunctionID::UI_Alert: {
-      LOG4CXX_INFO(logger_, "Received UI_Alert event");
+    case hmi_apis::FunctionID::UI_SubtleAlert: {
+      LOG4CXX_INFO(logger_, "Received UI_SubtleAlert event");
       // Unsubscribe from event to avoid unwanted messages
       EndAwaitForInterface(HmiInterfaces::HMI_INTERFACE_UI);
-      unsubscribe_from_event(hmi_apis::FunctionID::UI_Alert);
-      awaiting_ui_alert_response_ = false;
+      unsubscribe_from_event(hmi_apis::FunctionID::UI_SubtleAlert);
+      awaiting_ui_subtle_alert_response_ = false;
       HmiInterfaces::InterfaceState ui_interface_state =
           application_manager_.hmi_interfaces().GetInterfaceState(
               HmiInterfaces::HMI_INTERFACE_UI);
@@ -153,12 +143,13 @@ void AlertRequest::on_event(const event_engine::Event& event) {
         awaiting_tts_stop_speaking_response_ = true;
         StartAwaitForInterface(HmiInterfaces::HMI_INTERFACE_TTS);
         SendHMIRequest(hmi_apis::FunctionID::TTS_StopSpeaking, NULL, true);
+        is_tts_stop_speaking_sent_ = true;
       }
-      alert_result_ = static_cast<hmi_apis::Common_Result::eType>(
+      subtle_alert_result_ = static_cast<hmi_apis::Common_Result::eType>(
           message[strings::params][hmi_response::code].asInt());
 
-      // Mobile Alert request is successful when UI_Alert is successful
-      alert_response_params_ = message[strings::msg_params];
+      // Mobile Alert request is successful when UI_SubtleAlert is successful
+      subtle_alert_response_params_ = message[strings::msg_params];
       GetInfo(message, ui_response_info_);
       break;
     }
@@ -196,48 +187,68 @@ void AlertRequest::on_event(const event_engine::Event& event) {
   SendResponse(result,
                result_code,
                info.empty() ? NULL : info.c_str(),
-               &alert_response_params_);
+               &subtle_alert_response_params_);
 }
 
-bool AlertRequest::PrepareResponseParameters(
+bool SubtleAlertRequest::PrepareResponseParameters(
     mobile_apis::Result::eType& result_code, std::string& info) {
-  app_mngr::commands::ResponseInfo ui_alert_info(
-      alert_result_, HmiInterfaces::HMI_INTERFACE_UI, application_manager_);
+  app_mngr::commands::ResponseInfo ui_subtle_alert_info(
+      subtle_alert_result_,
+      HmiInterfaces::HMI_INTERFACE_UI,
+      application_manager_);
   app_mngr::commands::ResponseInfo tts_alert_info(
       tts_speak_result_,
       HmiInterfaces::HMI_INTERFACE_TTS,
       application_manager_);
 
-  bool result = PrepareResultForMobileResponse(ui_alert_info, tts_alert_info);
+  bool result =
+      PrepareResultForMobileResponse(ui_subtle_alert_info, tts_alert_info);
 
   /* result=false if UI interface is ok and TTS interface = UNSUPPORTED_RESOURCE
-   * and sdl receive TTS.IsReady=true or SDL doesn't receive responce for
+   * and sdl receive TTS.IsReady=true or SDL doesn't receive response for
    * TTS.IsReady.
    */
-  if (result && ui_alert_info.is_ok && tts_alert_info.is_unsupported_resource &&
+  if (result && ui_subtle_alert_info.is_ok &&
+      tts_alert_info.is_unsupported_resource &&
       HmiInterfaces::STATE_NOT_AVAILABLE != tts_alert_info.interface_state) {
     result = false;
   }
   result_code = mobile_apis::Result::WARNINGS;
-  if ((ui_alert_info.is_ok || ui_alert_info.is_not_used) &&
+  if ((ui_subtle_alert_info.is_ok || ui_subtle_alert_info.is_not_used) &&
       tts_alert_info.is_unsupported_resource &&
       HmiInterfaces::STATE_AVAILABLE == tts_alert_info.interface_state) {
     tts_response_info_ = "Unsupported phoneme type sent in a prompt";
-    info = app_mngr::commands::MergeInfos(
-        ui_alert_info, ui_response_info_, tts_alert_info, tts_response_info_);
+    info = app_mngr::commands::MergeInfos(ui_subtle_alert_info,
+                                          ui_response_info_,
+                                          tts_alert_info,
+                                          tts_response_info_);
     return result;
   }
-  result_code = PrepareResultCodeForResponse(ui_alert_info, tts_alert_info);
-  info = app_mngr::commands::MergeInfos(
-      ui_alert_info, ui_response_info_, tts_alert_info, tts_response_info_);
-  // Mobile Alert request is successful when UI_Alert is successful
-  if (is_ui_alert_sent_ && !ui_alert_info.is_ok) {
+  // Ignore TTS.Speak result if ABORTED due to TTS.StopSpeaking request
+  if (is_tts_stop_speaking_sent_ &&
+      hmi_apis::Common_Result::ABORTED == tts_alert_info.result_code) {
+    result_code =
+        MessageHelper::HMIToMobileResult(ui_subtle_alert_info.result_code);
+    info = app_mngr::commands::MergeInfos(ui_subtle_alert_info,
+                                          ui_response_info_,
+                                          tts_alert_info,
+                                          tts_response_info_);
+    return ui_subtle_alert_info.is_ok;
+  }
+  result_code =
+      PrepareResultCodeForResponse(ui_subtle_alert_info, tts_alert_info);
+  info = app_mngr::commands::MergeInfos(ui_subtle_alert_info,
+                                        ui_response_info_,
+                                        tts_alert_info,
+                                        tts_response_info_);
+  // Mobile Alert request is successful when UI_SubtleAlert is successful
+  if (is_ui_subtle_alert_sent_ && !ui_subtle_alert_info.is_ok) {
     return false;
   }
   return result;
 }
 
-bool AlertRequest::Validate(uint32_t app_id) {
+bool SubtleAlertRequest::Validate(uint32_t app_id) {
   LOG4CXX_AUTO_TRACE(logger_);
   ApplicationSharedPtr app = application_manager_.application(app_id);
 
@@ -252,8 +263,10 @@ bool AlertRequest::Validate(uint32_t app_id) {
       app->AreCommandLimitsExceeded(
           static_cast<mobile_apis::FunctionID::eType>(function_id()),
           application_manager::TLimitSource::POLICY_TABLE)) {
-    LOG4CXX_ERROR(logger_, "Alert frequency is too high.");
-    SendResponse(false, mobile_apis::Result::REJECTED);
+    LOG4CXX_ERROR(logger_, "SubtleAlert frequency is too high.");
+    SendResponse(false,
+                 mobile_apis::Result::REJECTED,
+                 "SubtleAlert frequency is too high.");
     return false;
   }
 
@@ -279,8 +292,7 @@ bool AlertRequest::Validate(uint32_t app_id) {
   // check if mandatory params(alertText1 and TTSChunk) specified
   if ((!(*message_)[strings::msg_params].keyExists(strings::alert_text1)) &&
       (!(*message_)[strings::msg_params].keyExists(strings::alert_text2)) &&
-      (!(*message_)[strings::msg_params].keyExists(strings::tts_chunks) &&
-       (1 > (*message_)[strings::msg_params][strings::tts_chunks].length()))) {
+      (!(*message_)[strings::msg_params].keyExists(strings::tts_chunks))) {
     LOG4CXX_ERROR(logger_, "Mandatory parameters are missing");
     SendResponse(false,
                  mobile_apis::Result::INVALID_DATA,
@@ -308,7 +320,7 @@ bool AlertRequest::Validate(uint32_t app_id) {
   return true;
 }
 
-void AlertRequest::SendAlertRequest(int32_t app_id) {
+void SubtleAlertRequest::SendSubtleAlertRequest(int32_t app_id) {
   LOG4CXX_AUTO_TRACE(logger_);
   ApplicationSharedPtr app = application_manager_.application(app_id);
 
@@ -326,23 +338,17 @@ void AlertRequest::SendAlertRequest(int32_t app_id) {
   int32_t index = 0;
   if ((*message_)[strings::msg_params].keyExists(strings::alert_text1)) {
     msg_params[hmi_request::alert_strings][index][hmi_request::field_name] =
-        hmi_apis::Common_TextFieldName::alertText1;
+        hmi_apis::Common_TextFieldName::subtleAlertText1;
     msg_params[hmi_request::alert_strings][index][hmi_request::field_text] =
         (*message_)[strings::msg_params][strings::alert_text1];
     index++;
   }
   if ((*message_)[strings::msg_params].keyExists(strings::alert_text2)) {
     msg_params[hmi_request::alert_strings][index][hmi_request::field_name] =
-        hmi_apis::Common_TextFieldName::alertText2;
+        hmi_apis::Common_TextFieldName::subtleAlertText2;
     msg_params[hmi_request::alert_strings][index][hmi_request::field_text] =
         (*message_)[strings::msg_params][strings::alert_text2];
     index++;
-  }
-  if ((*message_)[strings::msg_params].keyExists(strings::alert_text3)) {
-    msg_params[hmi_request::alert_strings][index][hmi_request::field_name] =
-        hmi_apis::Common_TextFieldName::alertText3;
-    msg_params[hmi_request::alert_strings][index][hmi_request::field_text] =
-        (*message_)[strings::msg_params][strings::alert_text3];
   }
 
   // softButtons
@@ -351,7 +357,6 @@ void AlertRequest::SendAlertRequest(int32_t app_id) {
         (*message_)[strings::msg_params][strings::soft_buttons];
     MessageHelper::SubscribeApplicationToSoftButton(
         (*message_)[strings::msg_params], app, function_id());
-    msg_params[strings::duration] = 0;
   } else {
     msg_params[strings::duration] =
         (*message_)[strings::msg_params][strings::duration].asUInt();
@@ -376,12 +381,6 @@ void AlertRequest::SendAlertRequest(int32_t app_id) {
   // app_id
   msg_params[strings::app_id] = app_id;
 
-  // NAVI platform progressIndicator
-  if ((*message_)[strings::msg_params].keyExists(strings::progress_indicator)) {
-    msg_params[strings::progress_indicator] =
-        (*message_)[strings::msg_params][strings::progress_indicator];
-  }
-
   // PASA Alert type
   msg_params[strings::alert_type] = hmi_apis::Common_AlertType::UI;
   if (awaiting_tts_speak_response_) {
@@ -391,16 +390,16 @@ void AlertRequest::SendAlertRequest(int32_t app_id) {
   // check out if there are alert strings or soft buttons
   if (msg_params[hmi_request::alert_strings].length() > 0 ||
       msg_params.keyExists(hmi_request::soft_buttons)) {
-    awaiting_ui_alert_response_ = true;
-    is_ui_alert_sent_ = true;
+    awaiting_ui_subtle_alert_response_ = true;
+    is_ui_subtle_alert_sent_ = true;
     StartAwaitForInterface(HmiInterfaces::HMI_INTERFACE_UI);
-    SendHMIRequest(hmi_apis::FunctionID::UI_Alert, &msg_params, true);
+    SendHMIRequest(hmi_apis::FunctionID::UI_SubtleAlert, &msg_params, true);
   }
 }
 
-void AlertRequest::SendSpeakRequest(int32_t app_id,
-                                    bool tts_chunks_exists,
-                                    size_t length_tts_chunks) {
+void SubtleAlertRequest::SendSpeakRequest(int32_t app_id,
+                                          bool tts_chunks_exists,
+                                          size_t length_tts_chunks) {
   LOG4CXX_AUTO_TRACE(logger_);
   using namespace hmi_apis;
   using namespace smart_objects;
@@ -412,17 +411,13 @@ void AlertRequest::SendSpeakRequest(int32_t app_id,
     msg_params[hmi_request::tts_chunks] =
         (*message_)[strings::msg_params][strings::tts_chunks];
   }
-  if ((*message_)[strings::msg_params].keyExists(strings::play_tone) &&
-      (*message_)[strings::msg_params][strings::play_tone].asBool()) {
-    msg_params[strings::play_tone] = true;
-  }
   msg_params[strings::app_id] = app_id;
-  msg_params[hmi_request::speak_type] = Common_MethodName::ALERT;
+  msg_params[hmi_request::speak_type] = Common_MethodName::SUBTLE_ALERT;
   StartAwaitForInterface(HmiInterfaces::HMI_INTERFACE_TTS);
   SendHMIRequest(FunctionID::TTS_Speak, &msg_params, true);
 }
 
-bool AlertRequest::CheckStrings() {
+bool SubtleAlertRequest::CheckStrings() {
   LOG4CXX_AUTO_TRACE(logger_);
   const char* str = NULL;
 
@@ -442,14 +437,6 @@ bool AlertRequest::CheckStrings() {
     }
   }
 
-  if ((*message_)[strings::msg_params].keyExists(strings::alert_text3)) {
-    str = (*message_)[strings::msg_params][strings::alert_text3].asCharArray();
-    if (!CheckSyntax(str)) {
-      LOG4CXX_ERROR(logger_, "Invalid alert_text_3 syntax check failed");
-      return false;
-    }
-  }
-
   if ((*message_)[strings::msg_params].keyExists(strings::tts_chunks)) {
     smart_objects::SmartObject& tts_chunks_array =
         (*message_)[strings::msg_params][strings::tts_chunks];
@@ -464,12 +451,11 @@ bool AlertRequest::CheckStrings() {
   return true;
 }
 
-bool AlertRequest::HasHmiResponsesToWait() {
+bool SubtleAlertRequest::HasHmiResponsesToWait() {
   LOG4CXX_AUTO_TRACE(logger_);
-  return awaiting_ui_alert_response_ || awaiting_tts_speak_response_ ||
+  return awaiting_ui_subtle_alert_response_ || awaiting_tts_speak_response_ ||
          awaiting_tts_stop_speaking_response_;
 }
 
 }  // namespace commands
-
 }  // namespace sdl_rpc_plugin

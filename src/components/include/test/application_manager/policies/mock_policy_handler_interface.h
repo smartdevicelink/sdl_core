@@ -100,8 +100,9 @@ class MockPolicyHandlerInterface : public policy::PolicyHandlerInterface {
                     const policy::PTString& rpc,
                     const application_manager::RPCParams& rpc_params,
                     policy::CheckPermissionResult& result));
-  MOCK_CONST_METHOD1(GetNotificationsNumber,
-                     uint32_t(const std::string& priority));
+  MOCK_CONST_METHOD2(GetNotificationsNumber,
+                     uint32_t(const std::string& priority,
+                              const bool is_subtle));
   MOCK_CONST_METHOD1(GetUserConsentForDevice,
                      policy::DeviceConsent(const std::string& device_id));
   MOCK_CONST_METHOD3(GetDefaultHmi,
