@@ -301,28 +301,6 @@ const uint32_t MessageHelper::GetPriorityCode(const std::string& priority) {
   return static_cast<uint32_t>(hmi_apis::Common_AppPriority::INVALID_ENUM);
 }
 
-hmi_apis::Common_Language::eType MessageHelper::CommonLanguageFromString(
-    const std::string& language) {
-  using namespace ns_smart_device_link::ns_smart_objects;
-  hmi_apis::Common_Language::eType value;
-  if (EnumConversionHelper<hmi_apis::Common_Language::eType>::StringToEnum(
-          language, &value)) {
-    return value;
-  }
-  return hmi_apis::Common_Language::INVALID_ENUM;
-}
-
-hmi_apis::Common_LightName::eType MessageHelper::CommonLightNameFromString(
-    const std::string& lightName) {
-  using namespace ns_smart_device_link::ns_smart_objects;
-  hmi_apis::Common_LightName::eType value;
-  if (EnumConversionHelper<hmi_apis::Common_LightName::eType>::StringToEnum(
-          lightName, &value)) {
-    return value;
-  }
-  return hmi_apis::Common_LightName::INVALID_ENUM;
-}
-
 std::string MessageHelper::GetDeviceMacAddressForHandle(
     const transport_manager::DeviceHandle device_handle,
     const ApplicationManager& app_mngr) {
@@ -331,26 +309,6 @@ std::string MessageHelper::GetDeviceMacAddressForHandle(
       device_handle, NULL, NULL, &device_mac_address);
   LOG4CXX_DEBUG(logger_, "result : " << device_handle);
   return device_mac_address;
-}
-
-std::string MessageHelper::CommonLanguageToString(
-    hmi_apis::Common_Language::eType language) {
-  using namespace ns_smart_device_link::ns_smart_objects;
-  const char* str = 0;
-  if (EnumConversionHelper<hmi_apis::Common_Language::eType>::EnumToCString(
-          language, &str)) {
-    return str ? str : "";
-  }
-  return std::string();
-}
-
-std::string MessageHelper::MobileLanguageToString(
-    mobile_apis::Language::eType language) {
-  using namespace ns_smart_device_link::ns_smart_objects;
-  const char* str = 0;
-  EnumConversionHelper<mobile_apis::Language::eType>::EnumToCString(language,
-                                                                    &str);
-  return str ? str : std::string();
 }
 
 smart_objects::SmartObjectSPtr MessageHelper::CreateMessageForHMI(
@@ -748,66 +706,22 @@ const VehicleData& MessageHelper::vehicle_data() {
   return vehicle_data_;
 }
 
-std::string MessageHelper::HMIResultToString(
-    hmi_apis::Common_Result::eType hmi_result) {
-  using namespace ns_smart_device_link::ns_smart_objects;
-  const char* str = 0;
-  if (EnumConversionHelper<hmi_apis::Common_Result::eType>::EnumToCString(
-          hmi_result, &str)) {
-    return str;
-  }
-  return std::string();
-}
-
-hmi_apis::Common_Result::eType MessageHelper::HMIResultFromString(
-    const std::string& hmi_result) {
-  using namespace ns_smart_device_link::ns_smart_objects;
-  hmi_apis::Common_Result::eType value;
-  if (EnumConversionHelper<hmi_apis::Common_Result::eType>::StringToEnum(
-          hmi_result, &value)) {
-    return value;
-  }
-  return hmi_apis::Common_Result::INVALID_ENUM;
-}
-
-std::string MessageHelper::MobileResultToString(
-    mobile_apis::Result::eType mobile_result) {
-  using namespace ns_smart_device_link::ns_smart_objects;
-  const char* str = 0;
-  if (EnumConversionHelper<mobile_apis::Result::eType>::EnumToCString(
-          mobile_result, &str)) {
-    return str;
-  }
-  return std::string();
-}
-
-mobile_apis::Result::eType MessageHelper::MobileResultFromString(
-    const std::string& mobile_result) {
-  using namespace ns_smart_device_link::ns_smart_objects;
-  mobile_apis::Result::eType value;
-  if (EnumConversionHelper<mobile_apis::Result::eType>::StringToEnum(
-          mobile_result, &value)) {
-    return value;
-  }
-  return mobile_apis::Result::INVALID_ENUM;
-}
-
 mobile_apis::Result::eType MessageHelper::HMIToMobileResult(
     const hmi_apis::Common_Result::eType hmi_result) {
-  const std::string result = HMIResultToString(hmi_result);
+  const std::string result = EnumToString(hmi_result);
   if (result.empty()) {
     return mobile_api::Result::INVALID_ENUM;
   }
-  return MobileResultFromString(result);
+  return StringToEnum<mobile_apis::Result::eType>(result);
 }
 
 hmi_apis::Common_Result::eType MessageHelper::MobileToHMIResult(
     const mobile_apis::Result::eType mobile_result) {
-  const std::string result = MobileResultToString(mobile_result);
+  const std::string result = EnumToString(mobile_result);
   if (result.empty()) {
     return hmi_apis::Common_Result::INVALID_ENUM;
   }
-  return HMIResultFromString(result);
+  return StringToEnum<hmi_apis::Common_Result::eType>(result);
 }
 
 void MessageHelper::SendHMIStatusNotification(
@@ -903,28 +817,6 @@ void MessageHelper::SendActivateAppToHMI(
   }
 
   application_manager.GetRPCService().ManageHMICommand(message);
-}
-
-mobile_apis::HMILevel::eType MessageHelper::StringToHMILevel(
-    const std::string& hmi_level) {
-  using namespace ns_smart_device_link::ns_smart_objects;
-  mobile_apis::HMILevel::eType value;
-  if (EnumConversionHelper<mobile_apis::HMILevel::eType>::StringToEnum(
-          hmi_level, &value)) {
-    return value;
-  }
-  return mobile_apis::HMILevel::INVALID_ENUM;
-}
-
-std::string MessageHelper::StringifiedHMILevel(
-    const mobile_apis::HMILevel::eType hmi_level) {
-  using namespace ns_smart_device_link::ns_smart_objects;
-  const char* str = 0;
-  if (EnumConversionHelper<mobile_apis::HMILevel::eType>::EnumToCString(
-          hmi_level, &str)) {
-    return str;
-  }
-  return std::string();
 }
 
 std::string MessageHelper::StringifiedFunctionID(
