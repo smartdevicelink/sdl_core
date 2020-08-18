@@ -3138,7 +3138,6 @@ void ApplicationManagerImpl::SendOnSDLClose() {
 void ApplicationManagerImpl::UnregisterAllApplications() {
   LOG4CXX_DEBUG(logger_, "Unregister reason  " << unregister_reason_);
   SetHMICooperating(false);
-  bool is_ignition_off = false;
 
   using namespace mobile_api::AppInterfaceUnregisteredReason;
   using namespace helpers;

@@ -1360,8 +1360,8 @@ bool HMICapabilitiesImpl::LoadCapabilitiesFromFile() {
                                        hmi_apis::FunctionID::UI_GetCapabilities,
                                        requests_required_for_capabilities_);
       if (!ui_hmi_zone_capabilities_node.isNull()) {
-        smart_objects::SmartObject hmi_zone_capabilities_so =
-            smart_objects::SmartObject(smart_objects::SmartType_Array);
+        smart_objects::SmartObject hmi_zone_capabilities_so(
+            smart_objects::SmartType_Array);
         hmi_zone_capabilities_so =
             hmi_zone_enum.find(ui_hmi_zone_capabilities_node.asString())
                 ->second;
