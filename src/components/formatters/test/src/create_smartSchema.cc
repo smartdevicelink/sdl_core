@@ -139,6 +139,7 @@ const AppTypeTest::eType
         test::components::formatters::AppTypeTest::MEDIA,
 };
 
+#ifdef BUILD_TESTS
 // cppcheck-suppress unusedFunction //Used in unit tests
 CSmartSchema initObjectSchema() {
   std::set<TestType::eType> resultCode_allowedEnumSubsetValues;
@@ -402,6 +403,7 @@ CSmartSchema initSchemaForMetaFormatter() {
       SMember(CObjectSchemaItem::create(paramsMembersMap), true);
   return CSmartSchema(CObjectSchemaItem::create(rootMembersMap));
 };
+#endif  // BUILD_TESTS
 
 }  // namespace formatters
 }  // namespace components

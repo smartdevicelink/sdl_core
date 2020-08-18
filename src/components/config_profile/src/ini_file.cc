@@ -152,6 +152,7 @@ char* ini_read_value(const char* fname,
   return NULL;
 }
 
+#ifdef BUILD_TESTS
 // cppcheck-suppress unusedFunction //Used in unit tests
 char ini_write_value(const char* fname,
                      const char* chapter,
@@ -285,6 +286,7 @@ char ini_write_value(const char* fname,
 
   return (value_written);
 }
+#endif  // BUILD_TESTS
 
 Ini_search_id ini_parse_line(const char* line, const char* tag, char* value) {
   const char* line_ptr;
