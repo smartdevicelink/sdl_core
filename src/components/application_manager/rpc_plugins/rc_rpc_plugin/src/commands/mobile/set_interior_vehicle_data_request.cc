@@ -84,22 +84,24 @@ mobile_apis::Result::eType PrepareResultCodeAndInfo(
       mobile_apis::Result::UNSUPPORTED_RESOURCE;
   if (message_params::kLightState == module_data_capabilities.first) {
     switch (module_data_capabilities.second) {
-      case capabilitiesStatus::missedLightName:
+      case capabilitiesStatus::kMissedLightName:
         info = "The requested LightName is not supported by the vehicle.";
         break;
-      case capabilitiesStatus::missedParam:
+      case capabilitiesStatus::kMissedParam:
         info =
             "The requested parameter of the given LightName is not supported "
             "by the vehicle.";
         break;
-      case capabilitiesStatus::readOnly:
+      case capabilitiesStatus::kReadOnly:
         info = "The requested parameter is read-only.";
         result_code = mobile_apis::Result::READ_ONLY;
         break;
       default:
         break;
     }
-
+  } else if (module_data_capabilities.second ==
+             capabilitiesStatus::kInvalidStatus) {
+    info = "The RC Capability is not available";
   } else {
     info = "Accessing not supported module data.";
   }
@@ -133,7 +135,7 @@ void SetInteriorVehicleDataRequest::Execute() {
         rc_capabilities_manager_.GetModuleDataCapabilities(module_data,
                                                            module_id);
 
-    if (capabilitiesStatus::success != module_data_capabilities.second) {
+    if (capabilitiesStatus::kSuccess != module_data_capabilities.second) {
       SetResourceState(ModuleType(), ResourceState::FREE);
       std::string info;
       mobile_apis::Result::eType result =
@@ -152,14 +154,14 @@ void SetInteriorVehicleDataRequest::Execute() {
       return;
     }
 
-    module_data_capabilities = std::make_pair("", capabilitiesStatus::success);
+    module_data_capabilities = std::make_pair("", capabilitiesStatus::kSuccess);
 
     if (rc_capabilities_manager_.AreReadOnlyParamsPresent(
             module_data, module_type, module_data_capabilities)) {
       LOG4CXX_DEBUG(logger_, "Request module type has READ ONLY parameters");
 
       if (enums_value::kLight == module_data_capabilities.first &&
-          capabilitiesStatus::success != module_data_capabilities.second) {
+          capabilitiesStatus::kSuccess != module_data_capabilities.second) {
         SetResourceState(ModuleType(), ResourceState::FREE);
         SendResponse(
             false,

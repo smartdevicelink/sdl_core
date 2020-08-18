@@ -50,15 +50,8 @@ CMessageBrokerController::CMessageBrokerController(const std::string& address,
 }
 
 CMessageBrokerController::~CMessageBrokerController() {
-  boost::system::error_code ec;
-  socket_.close();
-  acceptor_.close(ec);
-  if (ec) {
-    std::string str_err = "ErrorMessage Close: " + ec.message();
-    LOG4CXX_ERROR(mb_logger_, str_err);
-  }
-  shutdown_ = true;
-  ioc_.stop();
+  shutdown_.exchange(true);
+  CloseConnection();
 }
 
 bool CMessageBrokerController::StartListener() {
@@ -114,9 +107,8 @@ void CMessageBrokerController::WaitForConnection() {
 
 void CMessageBrokerController::StartSession(boost::system::error_code ec) {
   if (ec) {
-    std::string str_err = "ErrorMessage: " + ec.message();
-    LOG4CXX_ERROR(mb_logger_, str_err);
-    ioc_.stop();
+    LOG4CXX_ERROR(mb_logger_, "ErrorMessage: " << ec.message());
+    CloseConnection();
     return;
   }
   if (shutdown_) {
@@ -214,7 +206,8 @@ bool CMessageBrokerController::Connect() {
 }
 
 void CMessageBrokerController::exitReceivingThread() {
-  shutdown_ = true;
+  shutdown_.exchange(true);
+
   mConnectionListLock.Acquire();
   std::vector<std::shared_ptr<hmi_message_handler::WebsocketSession> >::iterator
       it;
@@ -223,16 +216,7 @@ void CMessageBrokerController::exitReceivingThread() {
     it = mConnectionList.erase(it);
   }
   mConnectionListLock.Release();
-
-  boost::system::error_code ec;
-  socket_.close();
-  acceptor_.cancel(ec);
-  if (ec) {
-    std::string str_err = "ErrorMessage Cancel: " + ec.message();
-    LOG4CXX_ERROR(mb_logger_, str_err);
-  }
-  acceptor_.close(ec);
-  ioc_.stop();
+  CloseConnection();
 }
 
 std::string CMessageBrokerController::getMethodName(std::string& method) {
@@ -494,5 +478,28 @@ void CMessageBrokerController::processInternalRequest(
 
 int CMessageBrokerController::getNextControllerId() {
   return 1000 * mControllersIdCounter++;
+}
+
+void CMessageBrokerController::CloseConnection() {
+  if (!ioc_.stopped()) {
+    boost::system::error_code ec;
+
+    acceptor_.cancel(ec);
+    if (ec) {
+      LOG4CXX_ERROR(mb_logger_, "Acceptor cancel error: " << ec.message());
+    }
+
+    acceptor_.close(ec);
+    if (ec) {
+      LOG4CXX_ERROR(mb_logger_, "Acceptor close error: " << ec.message());
+    }
+
+    socket_.close(ec);
+    if (ec) {
+      LOG4CXX_ERROR(mb_logger_, "Socket close error : " << ec.message());
+    }
+
+    ioc_.stop();
+  }
 }
 }  // namespace hmi_message_handler

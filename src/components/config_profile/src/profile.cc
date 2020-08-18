@@ -101,6 +101,7 @@ const char* kRCModuleConsentSection = "RCModuleConsent";
 
 const char* kSDLVersionKey = "SDLVersion";
 const char* kHmiCapabilitiesKey = "HMICapabilities";
+const char* kHmiCapabilitiesCacheFileKey = "HMICapabilitiesCacheFile";
 const char* kPathToSnapshotKey = "PathToSnapshot";
 const char* kPreloadedPTKey = "PreloadedPT";
 const char* kAttemptsToOpenPolicyDBKey = "AttemptsToOpenPolicyDB";
@@ -472,6 +473,7 @@ Profile::Profile()
     , stop_streaming_timeout_(kDefaultStopStreamingTimeout)
     , time_testing_port_(kDefaultTimeTestingPort)
     , hmi_capabilities_file_name_(kDefaultHmiCapabilitiesFileName)
+    , hmi_capabilities_cache_file_name_()
     , help_prompt_()
     , time_out_promt_()
     , min_tread_stack_size_(threads::Thread::kMinStackSize)
@@ -648,6 +650,10 @@ size_t Profile::maximum_video_payload_size() const {
 
 const std::string& Profile::hmi_capabilities_file_name() const {
   return hmi_capabilities_file_name_;
+}
+
+const std::string& Profile::hmi_capabilities_cache_file_name() const {
+  return hmi_capabilities_cache_file_name_;
 }
 
 const std::string& Profile::server_address() const {
@@ -1335,6 +1341,21 @@ void Profile::UpdateValues() {
 
   LOG_UPDATED_VALUE(app_storage_folder_, kAppStorageFolderKey, kMainSection);
 
+  // HMI capabilities cache file
+  ReadStringValue(&hmi_capabilities_cache_file_name_,
+                  "",
+                  kMainSection,
+                  kHmiCapabilitiesCacheFileKey);
+
+  if (!hmi_capabilities_cache_file_name_.empty()) {
+    hmi_capabilities_cache_file_name_ =
+        app_storage_folder_ + "/" + hmi_capabilities_cache_file_name_;
+  }
+
+  LOG_UPDATED_VALUE(hmi_capabilities_cache_file_name_,
+                    kHmiCapabilitiesCacheFileKey,
+                    kMainSection);
+
   // Application resourse folder
   ReadStringValue(&app_resource_folder_,
                   file_system::CurrentWorkingDirectory().c_str(),
@@ -1531,7 +1552,8 @@ void Profile::UpdateValues() {
                   kMediaManagerSection,
                   kNamedVideoPipePathKey);
 
-  named_video_pipe_path_ = app_storage_folder_ + "/" + named_video_pipe_path_;
+  named_video_pipe_path_ = app_storage_folder_ + "/" +
+                           std::string(named_video_pipe_path_, 0, NAME_MAX);
 
   LOG_UPDATED_VALUE(
       named_video_pipe_path_, kNamedVideoPipePathKey, kMediaManagerSection);
@@ -1542,7 +1564,8 @@ void Profile::UpdateValues() {
                   kMediaManagerSection,
                   kNamedAudioPipePathKey);
 
-  named_audio_pipe_path_ = app_storage_folder_ + "/" + named_audio_pipe_path_;
+  named_audio_pipe_path_ = app_storage_folder_ + "/" +
+                           std::string(named_audio_pipe_path_, 0, NAME_MAX);
 
   LOG_UPDATED_VALUE(
       named_audio_pipe_path_, kNamedAudioPipePathKey, kMediaManagerSection);
@@ -1551,7 +1574,8 @@ void Profile::UpdateValues() {
   ReadStringValue(
       &video_stream_file_, "", kMediaManagerSection, kVideoStreamFileKey);
 
-  video_stream_file_ = app_storage_folder_ + "/" + video_stream_file_;
+  video_stream_file_ =
+      app_storage_folder_ + "/" + std::string(video_stream_file_, 0, NAME_MAX);
 
   LOG_UPDATED_VALUE(
       video_stream_file_, kVideoStreamFileKey, kMediaManagerSection);
@@ -1560,7 +1584,8 @@ void Profile::UpdateValues() {
   ReadStringValue(
       &audio_stream_file_, "", kMediaManagerSection, kAudioStreamFileKey);
 
-  audio_stream_file_ = app_storage_folder_ + "/" + audio_stream_file_;
+  audio_stream_file_ =
+      app_storage_folder_ + "/" + std::string(audio_stream_file_, 0, NAME_MAX);
 
   LOG_UPDATED_VALUE(
       audio_stream_file_, kAudioStreamFileKey, kMediaManagerSection);

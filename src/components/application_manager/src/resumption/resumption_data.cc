@@ -148,20 +148,23 @@ smart_objects::SmartObject ResumptionData::GetApplicationSubscriptions(
   }
   LOG4CXX_DEBUG(logger_, "app_id:" << application->app_id());
 
-  DataAccessor<ButtonSubscriptions> button_accessor =
-      application->SubscribedButtons();
+  {
+    DataAccessor<ButtonSubscriptions> button_accessor =
+        application->SubscribedButtons();
 
-  const ButtonSubscriptions& button_subscriptions = button_accessor.GetData();
+    const ButtonSubscriptions& button_subscriptions = button_accessor.GetData();
 
-  LOG4CXX_DEBUG(logger_, "SubscribedButtons:" << button_subscriptions.size());
-  Append(button_subscriptions.begin(),
-         button_subscriptions.end(),
-         strings::application_buttons,
-         subscriptions);
+    LOG4CXX_DEBUG(logger_, "SubscribedButtons:" << button_subscriptions.size());
+    Append(button_subscriptions.begin(),
+           button_subscriptions.end(),
+           strings::application_buttons,
+           subscriptions);
+  }
 
   for (auto extension : application->Extensions()) {
     extension->SaveResumptionData(subscriptions);
   }
+
   return subscriptions;
 }
 

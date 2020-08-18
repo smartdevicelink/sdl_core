@@ -61,7 +61,6 @@ AlertRequest::AlertRequest(
     , awaiting_ui_alert_response_(false)
     , awaiting_tts_speak_response_(false)
     , awaiting_tts_stop_speaking_response_(false)
-    , is_alert_succeeded_(false)
     , is_ui_alert_sent_(false)
     , alert_result_(hmi_apis::Common_Result::INVALID_ENUM)
     , tts_speak_result_(hmi_apis::Common_Result::INVALID_ENUM) {
@@ -258,7 +257,7 @@ bool AlertRequest::Validate(uint32_t app_id) {
     return false;
   }
 
-  if (!CheckStringsOfAlertRequest()) {
+  if (!CheckStrings()) {
     SendResponse(false, mobile_apis::Result::INVALID_DATA);
     return false;
   }
@@ -421,7 +420,7 @@ void AlertRequest::SendSpeakRequest(int32_t app_id,
   SendHMIRequest(FunctionID::TTS_Speak, &msg_params, true);
 }
 
-bool AlertRequest::CheckStringsOfAlertRequest() {
+bool AlertRequest::CheckStrings() {
   LOG4CXX_AUTO_TRACE(logger_);
   const char* str = NULL;
 
