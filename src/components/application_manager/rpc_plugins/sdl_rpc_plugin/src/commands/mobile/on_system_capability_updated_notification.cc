@@ -234,7 +234,7 @@ void OnSystemCapabilityUpdatedNotification::Run() {
         msg_params[strings::system_capability][strings::display_capabilities] =
             *capabilities;
       } break;
-      default: {}
+      default: { LOG4CXX_ERROR(logger_, "Unknown system capability type"); }
     }
 
     LOG4CXX_INFO(logger_,
