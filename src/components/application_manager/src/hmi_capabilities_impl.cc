@@ -1788,8 +1788,8 @@ bool HMICapabilitiesImpl::AllFieldsSaved(
           GetActiveLanguageForInterface(interface_name);
       const auto json_language = interface_node[hmi_response::language];
 
-      if (active_language !=
-          MessageHelper::CommonLanguageFromString(json_language.asString())) {
+      if (active_language != StringToEnum<hmi_apis::Common_Language::eType>(
+                                 json_language.asString())) {
         LOG4CXX_DEBUG(logger_,
                       "Active " << interface_name
                                 << " language is not the same as the persisted "
@@ -1920,8 +1920,7 @@ void HMICapabilitiesImpl::PrepareUiJsonValueForSaving(
     }
 
     else if (section_to_update == hmi_response::language) {
-      out_node[hmi_response::language] =
-          MessageHelper::CommonLanguageToString(active_ui_language());
+      out_node[hmi_response::language] = EnumToString(active_ui_language());
     }
 
     else if (section_to_update == hmi_response::languages) {
@@ -1944,8 +1943,7 @@ void HMICapabilitiesImpl::PrepareVrJsonValueForSaving(
 
   for (const auto& section_to_update : sections_to_update) {
     if (section_to_update == hmi_response::language) {
-      out_node[hmi_response::language] =
-          MessageHelper::CommonLanguageToString(active_vr_language());
+      out_node[hmi_response::language] = EnumToString(active_vr_language());
     }
 
     if (section_to_update == hmi_response::languages) {
@@ -1968,8 +1966,7 @@ void HMICapabilitiesImpl::PrepareTtsJsonValueForSaving(
 
   for (const auto& section_to_update : sections_to_update) {
     if (section_to_update == hmi_response::language) {
-      out_node[hmi_response::language] =
-          MessageHelper::CommonLanguageToString(active_tts_language());
+      out_node[hmi_response::language] = EnumToString(active_tts_language());
     }
 
     if (section_to_update == hmi_response::languages) {
