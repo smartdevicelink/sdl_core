@@ -149,6 +149,8 @@ class CMessageBrokerController
   int getNextControllerId();
 
  private:
+  void CloseConnection();
+
   boost::asio::io_context ioc_;
   const std::string& address_;
   uint16_t port_;

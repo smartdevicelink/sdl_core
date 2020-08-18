@@ -534,16 +534,16 @@ TEST_F(ApplicationImplTest, AreCommandLimitsExceeded_LimitFromPT) {
   EXPECT_CALL(policy_interface, GetPriority(policy_app_id, _))
       .WillRepeatedly(Return(false));
 
-  EXPECT_CALL(policy_interface, GetNotificationsNumber(_))
+  EXPECT_CALL(policy_interface, GetNotificationsNumber(_, false))
       .WillOnce(Return(cmd_limit));
   EXPECT_FALSE(app_impl->AreCommandLimitsExceeded(FunctionID::ReadDIDID,
                                                   TLimitSource::POLICY_TABLE));
 
-  EXPECT_CALL(policy_interface, GetNotificationsNumber(_))
+  EXPECT_CALL(policy_interface, GetNotificationsNumber(_, false))
       .WillOnce(Return(cmd_limit));
   EXPECT_FALSE(app_impl->AreCommandLimitsExceeded(FunctionID::GetVehicleDataID,
                                                   TLimitSource::POLICY_TABLE));
-  EXPECT_CALL(policy_interface, GetNotificationsNumber(_))
+  EXPECT_CALL(policy_interface, GetNotificationsNumber(_, false))
       .WillRepeatedly(Return(0));
   EXPECT_TRUE(app_impl->AreCommandLimitsExceeded(FunctionID::ReadDIDID,
                                                  TLimitSource::POLICY_TABLE));

@@ -720,7 +720,9 @@ ModuleConfig::ModuleConfig(
     const SecondsBetweenRetries& seconds_between_retries,
     const ServiceEndpoints& endpoints,
     const ServiceEndpointProperties& endpoint_properties,
-    const NumberOfNotificationsPerMinute& notifications_per_minute_by_priority)
+    const NumberOfNotificationsPerMinute& notifications_per_minute_by_priority,
+    const NumberOfNotificationsPerMinute&
+        subtle_notifications_per_minute_by_priority)
     : CompositeType(kUninitialized)
     , exchange_after_x_ignition_cycles(exchange_after_x_ignition_cycles)
     , exchange_after_x_kilometers(exchange_after_x_kilometers)
@@ -729,8 +731,9 @@ ModuleConfig::ModuleConfig(
     , seconds_between_retries(seconds_between_retries)
     , endpoints(endpoints)
     , endpoint_properties(endpoint_properties)
-    , notifications_per_minute_by_priority(
-          notifications_per_minute_by_priority) {}
+    , notifications_per_minute_by_priority(notifications_per_minute_by_priority)
+    , subtle_notifications_per_minute_by_priority(
+          subtle_notifications_per_minute_by_priority) {}
 
 ModuleConfig::~ModuleConfig() {}
 
@@ -752,6 +755,8 @@ ModuleConfig::ModuleConfig(const Json::Value* value__)
     , endpoint_properties(impl::ValueMember(value__, "endpoint_properties"))
     , notifications_per_minute_by_priority(
           impl::ValueMember(value__, "notifications_per_minute_by_priority"))
+    , subtle_notifications_per_minute_by_priority(impl::ValueMember(
+          value__, "subtle_notifications_per_minute_by_priority"))
     , vehicle_make(impl::ValueMember(value__, "vehicle_make"))
     , vehicle_model(impl::ValueMember(value__, "vehicle_model"))
     , vehicle_year(impl::ValueMember(value__, "vehicle_year"))
@@ -772,6 +777,8 @@ void ModuleConfig::SafeCopyFrom(const ModuleConfig& from) {
   endpoint_properties = from.endpoint_properties;
   notifications_per_minute_by_priority =
       from.notifications_per_minute_by_priority;
+  subtle_notifications_per_minute_by_priority =
+      from.subtle_notifications_per_minute_by_priority;
 
   lock_screen_dismissal_enabled = from.lock_screen_dismissal_enabled;
 
@@ -801,6 +808,9 @@ Json::Value ModuleConfig::ToJsonValue() const {
   impl::WriteJsonField("endpoint_properties", endpoint_properties, &result__);
   impl::WriteJsonField("notifications_per_minute_by_priority",
                        notifications_per_minute_by_priority,
+                       &result__);
+  impl::WriteJsonField("subtle_notifications_per_minute_by_priority",
+                       subtle_notifications_per_minute_by_priority,
                        &result__);
   impl::WriteJsonField("vehicle_make", vehicle_make, &result__);
   impl::WriteJsonField("vehicle_model", vehicle_model, &result__);
@@ -842,6 +852,9 @@ bool ModuleConfig::is_valid() const {
     return false;
   }
   if (!notifications_per_minute_by_priority.is_valid()) {
+    return false;
+  }
+  if (!subtle_notifications_per_minute_by_priority.is_valid()) {
     return false;
   }
   if (!lock_screen_dismissal_enabled.is_valid()) {
@@ -906,6 +919,9 @@ bool ModuleConfig::struct_empty() const {
   if (notifications_per_minute_by_priority.is_initialized()) {
     return false;
   }
+  if (subtle_notifications_per_minute_by_priority.is_initialized()) {
+    return false;
+  }
   if (lock_screen_dismissal_enabled.is_initialized()) {
     return false;
   }
@@ -968,6 +984,11 @@ void ModuleConfig::ReportErrors(rpc::ValidationReport* report__) const {
     notifications_per_minute_by_priority.ReportErrors(
         &report__->ReportSubobject("notifications_per_minute_by_priority"));
   }
+  if (!subtle_notifications_per_minute_by_priority.is_valid()) {
+    subtle_notifications_per_minute_by_priority.ReportErrors(
+        &report__->ReportSubobject(
+            "subtle_notifications_per_minute_by_priority"));
+  }
   if (!lock_screen_dismissal_enabled.is_valid()) {
     lock_screen_dismissal_enabled.ReportErrors(
         &report__->ReportSubobject("lock_screen_dismissal_enabled"));
@@ -1012,6 +1033,7 @@ void ModuleConfig::SetPolicyTableType(PolicyTableType pt_type) {
   endpoints.SetPolicyTableType(pt_type);
   endpoint_properties.SetPolicyTableType(pt_type);
   notifications_per_minute_by_priority.SetPolicyTableType(pt_type);
+  subtle_notifications_per_minute_by_priority.SetPolicyTableType(pt_type);
   lock_screen_dismissal_enabled.SetPolicyTableType(pt_type);
   vehicle_make.SetPolicyTableType(pt_type);
   vehicle_model.SetPolicyTableType(pt_type);
@@ -1274,7 +1296,8 @@ ModuleMeta::ModuleMeta(const Json::Value* value__)
     , pt_exchanged_x_days_after_epoch(
           impl::ValueMember(value__, "pt_exchanged_x_days_after_epoch"))
     , ignition_cycles_since_last_exchange(
-          impl::ValueMember(value__, "ignition_cycles_since_last_exchange")) {}
+          impl::ValueMember(value__, "ignition_cycles_since_last_exchange"))
+    , ccpu_version(impl::ValueMember(value__, "ccpu_version")) {}
 
 Json::Value ModuleMeta::ToJsonValue() const {
   Json::Value result__(Json::objectValue);
@@ -1293,6 +1316,9 @@ bool ModuleMeta::is_valid() const {
   if (struct_empty()) {
     return initialization_state__ == kInitialized && Validate();
   }
+  if (!ccpu_version.is_valid()) {
+    return false;
+  }
   if (!pt_exchanged_at_odometer_x.is_valid()) {
     return false;
   }
@@ -1310,6 +1336,9 @@ bool ModuleMeta::is_initialized() const {
 }
 
 bool ModuleMeta::struct_empty() const {
+  if (ccpu_version.is_initialized()) {
+    return false;
+  }
   if (pt_exchanged_at_odometer_x.is_initialized()) {
     return false;
   }
@@ -1326,6 +1355,9 @@ bool ModuleMeta::struct_empty() const {
 void ModuleMeta::ReportErrors(rpc::ValidationReport* report__) const {
   if (struct_empty()) {
     rpc::CompositeType::ReportErrors(report__);
+  }
+  if (!ccpu_version.is_valid()) {
+    ccpu_version.ReportErrors(&report__->ReportSubobject("ccpu_version"));
   }
   if (!pt_exchanged_at_odometer_x.is_valid()) {
     pt_exchanged_at_odometer_x.ReportErrors(

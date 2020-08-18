@@ -716,9 +716,9 @@ TEST_F(PolicyHandlerTest, GetNotificationsNumber) {
   // Arrange
   EnablePolicyAndPolicyManagerMock();
   // Check expectations
-  EXPECT_CALL(*mock_policy_manager_, GetNotificationsNumber(priority_));
+  EXPECT_CALL(*mock_policy_manager_, GetNotificationsNumber(priority_, false));
   // Act
-  policy_handler_.GetNotificationsNumber(priority_);
+  policy_handler_.GetNotificationsNumber(priority_, false);
 }
 
 TEST_F(PolicyHandlerTest, GetUserConsentForDevice) {

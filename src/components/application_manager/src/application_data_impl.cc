@@ -205,7 +205,7 @@ DynamicApplicationDataImpl::DynamicApplicationDataImpl()
     , commands_()
     , commands_lock_ptr_(std::make_shared<sync_primitives::RecursiveLock>())
     , sub_menu_()
-    , sub_menu_lock_ptr_(std::make_shared<sync_primitives::Lock>())
+    , sub_menu_lock_ptr_(std::make_shared<sync_primitives::RecursiveLock>())
     , choice_set_map_()
     , choice_set_map_lock_ptr_(std::make_shared<sync_primitives::Lock>())
     , performinteraction_choice_set_map_()
@@ -855,12 +855,13 @@ smart_objects::SmartObject* DynamicApplicationDataImpl::FindSubMenu(
 }
 
 bool DynamicApplicationDataImpl::IsSubMenuNameAlreadyExist(
-    const std::string& name) {
+    const std::string& name, const uint32_t parent_id) {
   sync_primitives::AutoLock lock(sub_menu_lock_ptr_);
   for (SubMenuMap::iterator it = sub_menu_.begin(); sub_menu_.end() != it;
        ++it) {
     smart_objects::SmartObject* menu = it->second;
-    if ((*menu)[strings::menu_name] == name) {
+    if ((*menu)[strings::menu_name].asString() == name &&
+        (*menu)[strings::parent_id].asInt() == parent_id) {
       return true;
     }
   }

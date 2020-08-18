@@ -628,6 +628,8 @@ void FillUIRelatedFields(smart_objects::SmartObject& response_params,
   response_params[strings::hmi_capabilities][strings::displays] = true;
   response_params[strings::hmi_capabilities][strings::seat_location] =
       hmi_capabilities.seat_location_capability() ? true : false;
+  response_params[strings::hmi_capabilities][strings::driver_distraction] =
+      hmi_capabilities.driver_distraction_supported();
 }
 
 void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile(
