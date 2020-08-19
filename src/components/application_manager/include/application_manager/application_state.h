@@ -45,6 +45,7 @@ namespace application_manager {
 typedef std::vector<WindowID> WindowIds;
 typedef std::vector<HmiStatePtr> HmiStates;
 typedef std::map<WindowID, HmiStates> HmiStatesMap;
+typedef std::map<WindowID, HmiStatePtr> HmiStateMap;
 typedef std::vector<std::string> WindowNames;
 typedef std::map<WindowID, std::string> WindowNamesMap;
 
@@ -143,6 +144,15 @@ class ApplicationState {
   void RemoveHMIState(const WindowID window_id, HmiState::StateID state_id);
 
   /**
+   * @brief EraseHMIState safely erases an HMI State from a window's HMIStates
+   * list
+   *
+   * @param hmi_states HMI States list.
+   * @param it Iterator pointing to element to be removed.
+   */
+  void EraseHMIState(HmiStates& hmi_states, HmiStates::iterator it);
+
+  /**
    * @brief RemoveWindowHMIStates removes all HMI states related to specified
    * window
    * @param window_id window ID to remove
@@ -196,6 +206,11 @@ class ApplicationState {
    * @brief Active states of application
    */
   HmiStatesMap hmi_states_map_;
+
+  /**
+   * @brief Postponed states of application
+   */
+  HmiStateMap postponed_states_map_;
 
   /**
    * @brief hmi_states_map_lock_

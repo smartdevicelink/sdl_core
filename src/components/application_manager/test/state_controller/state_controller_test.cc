@@ -3011,6 +3011,8 @@ TEST_F(StateControllerImplTest,
   EXPECT_CALL(*simple_app_ptr_, keep_context()).WillOnce(Return(true));
   EXPECT_CALL(*simple_app_ptr_, IsAudioApplication())
       .WillRepeatedly(Return(true));
+  EXPECT_CALL(*simple_app_ptr_, is_media_application())
+      .WillRepeatedly(Return(true));
   EXPECT_CALL(*simple_app_ptr_, CurrentHmiState(kDefaultWindowId))
       .WillOnce(Return(FullAudibleState()));
   EXPECT_CALL(*simple_app_ptr_, set_keep_context(false));
@@ -3044,6 +3046,8 @@ TEST_F(StateControllerImplTest, OnEventChangedAudioSourceAppToBackground) {
   event.set_smart_object(msg);
 
   EXPECT_CALL(*simple_app_ptr_, IsAudioApplication())
+      .WillRepeatedly(Return(true));
+  EXPECT_CALL(*simple_app_ptr_, is_media_application())
       .WillRepeatedly(Return(true));
   EXPECT_CALL(*simple_app_ptr_, CurrentHmiState(kDefaultWindowId))
       .WillOnce(Return(LimitedState()));
