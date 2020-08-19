@@ -52,8 +52,8 @@ ResumptionRequest ExtensionPendingResumptionHandler::MakeResumptionRequest(
     const smart_objects::SmartObject& message) {
   LOG4CXX_AUTO_TRACE(logger_);
   resumption::ResumptionRequest resumption_request;
-  resumption_request.request_ids.correlation_id = corr_id;
-  resumption_request.request_ids.function_id = function_id;
+  resumption_request.request_id.correlation_id = corr_id;
+  resumption_request.request_id.function_id = function_id;
   resumption_request.message = message;
   return resumption_request;
 }
