@@ -91,7 +91,10 @@ bool IsResponseCodeSuccess(
       Compare<hmi_apis::Common_Result::eType, EQ, ONE>(
           response_code,
           hmi_apis::Common_Result::SUCCESS,
-          hmi_apis::Common_Result::WARNINGS);
+          hmi_apis::Common_Result::WARNINGS,
+          hmi_apis::Common_Result::WRONG_LANGUAGE,
+          hmi_apis::Common_Result::RETRY,
+          hmi_apis::Common_Result::SAVED);
   return is_result_success;
 }
 
