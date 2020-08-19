@@ -664,7 +664,8 @@ uint32_t ConnectionHandlerImpl::OnSessionEndedCallback(
     const transport_manager::ConnectionUID connection_handle,
     const uint8_t session_id,
     uint32_t* hashCode,
-    const protocol_handler::ServiceType& service_type) {
+    const protocol_handler::ServiceType& service_type,
+    std::string* err_reason) {
   LOG4CXX_AUTO_TRACE(logger_);
 
   // In case this is a Session running on a Secondary Transport, we need to
@@ -680,6 +681,9 @@ uint32_t ConnectionHandlerImpl::OnSessionEndedCallback(
       LOG4CXX_WARN(logger_,
                    "OnSessionEndedCallback could not find Session in the "
                    "Session/Connection Map!");
+      if (err_reason) {
+        *err_reason = "Could not find Session in the Session/Connection Map!";
+      }
     } else {
       LOG4CXX_INFO(logger_,
                    "OnSessionEndedCallback found session "
@@ -698,6 +702,9 @@ uint32_t ConnectionHandlerImpl::OnSessionEndedCallback(
   if (connection_list_.end() == it) {
     LOG4CXX_WARN(logger_, "Unknown connection!");
     connection_list_lock_.Release();
+    if (err_reason) {
+      *err_reason = "Could not find Connection in the Connection Map!";
+    }
     return 0;
   }
   std::pair<int32_t, Connection*> connection_item = *it;
@@ -719,6 +726,11 @@ uint32_t ConnectionHandlerImpl::OnSessionEndedCallback(
             logger_,
             "Wrong hash_id for session " << static_cast<uint32_t>(session_id));
         *hashCode = protocol_handler::HASH_ID_WRONG;
+
+        if (err_reason) {
+          *err_reason = "Wrong hash_id for session " +
+                        std::to_string(static_cast<uint32_t>(session_id));
+        }
         return 0;
       }
     }
@@ -726,6 +738,10 @@ uint32_t ConnectionHandlerImpl::OnSessionEndedCallback(
       LOG4CXX_WARN(
           logger_,
           "Couldn't remove session " << static_cast<uint32_t>(session_id));
+      if (err_reason) {
+        *err_reason = "Couldn't remove session " +
+                      std::to_string(static_cast<uint32_t>(session_id));
+      }
       return 0;
     }
   } else {
@@ -736,6 +752,10 @@ uint32_t ConnectionHandlerImpl::OnSessionEndedCallback(
       LOG4CXX_WARN(
           logger_,
           "Couldn't remove service " << static_cast<uint32_t>(service_type));
+      if (err_reason) {
+        *err_reason = "Couldn't remove service " +
+                      std::to_string(static_cast<uint32_t>(service_type));
+      }
       return 0;
     }
   }

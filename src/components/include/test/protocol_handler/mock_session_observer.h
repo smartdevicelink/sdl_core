@@ -65,6 +65,20 @@ class MockSessionObserver : public ::protocol_handler::SessionObserver {
                const uint8_t sessionId,
                uint32_t* hashCode,
                const protocol_handler::ServiceType& service_type));
+  MOCK_METHOD5(
+      OnSessionEndedCallback,
+      uint32_t(const transport_manager::ConnectionUID connection_handle,
+               const uint8_t sessionId,
+               const uint32_t& hashCode,
+               const protocol_handler::ServiceType& service_type,
+               std::string* err_reason));
+  MOCK_METHOD5(
+      OnSessionEndedCallback,
+      uint32_t(const transport_manager::ConnectionUID connection_handle,
+               const uint8_t sessionId,
+               uint32_t* hashCode,
+               const protocol_handler::ServiceType& service_type,
+               std::string* err_reason));
   MOCK_METHOD1(OnApplicationFloodCallBack,
                void(const uint32_t& connection_key));
   MOCK_METHOD1(OnMalformedMessageCallback,

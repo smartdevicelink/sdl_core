@@ -247,13 +247,16 @@ class ConnectionHandlerImpl
    * \param hashCode Hash used only in second version of SmartDeviceLink
    * protocol. (Set to HASH_ID_WRONG if the hash is incorrect)
    * If not equal to hash assigned to session on start then operation fails.
-   * \return uint32_t 0 if operation fails, session key otherwise
+   * \param err_reason where to write reason for the End Session failure if the
+   * operation fails \return uint32_t 0 if operation fails, session key
+   * otherwise
    */
   uint32_t OnSessionEndedCallback(
       const transport_manager::ConnectionUID connection_handle,
       const uint8_t session_id,
       uint32_t* hashCode,
-      const protocol_handler::ServiceType& service_type) OVERRIDE;
+      const protocol_handler::ServiceType& service_type,
+      std::string* err_reason = nullptr) OVERRIDE;
 
   /**
    * \brief Callback function used by ProtocolHandler

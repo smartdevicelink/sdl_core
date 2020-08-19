@@ -1613,8 +1613,9 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessageEndSession(
   const ServiceType service_type = ServiceTypeFromByte(packet.service_type());
 
   const ConnectionID connection_id = packet.connection_id();
+  std::string err_reason;
   const uint32_t session_key = session_observer_.OnSessionEndedCallback(
-      connection_id, current_session_id, &hash_id, service_type);
+      connection_id, current_session_id, &hash_id, service_type, &err_reason);
 
   // TODO(EZamakhov): add clean up output queue (for removed service)
   if (session_key != 0) {
@@ -1638,15 +1639,13 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessageEndSession(
                          packet.protocol_version(),
                          service_type,
                          rejectedParams,
-                         "Refused to end session for service of type " +
-                             std::to_string(service_type));
+                         err_reason);
     } else {
       SendEndSessionNAck(connection_id,
                          current_session_id,
                          packet.protocol_version(),
                          service_type,
-                         "Refused to end session for service of type " +
-                             std::to_string(service_type));
+                         err_reason);
     }
   }
   return RESULT_OK;
