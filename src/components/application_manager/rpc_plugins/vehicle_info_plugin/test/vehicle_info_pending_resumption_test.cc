@@ -326,7 +326,7 @@ TEST_F(VehicleInfoPendingResumptionHandlerTest,
       .WillOnce(DoAll(SaveArg<0>(&message_to_hmi), Return(true)));
   resumption_handler_->HandleResumptionSubscriptionRequest(
       *ext, get_subscriber(), *mock_app);
-  EXPECT_EQ(resumption_request.request_ids.function_id,
+  EXPECT_EQ(resumption_request.request_id.function_id,
             VehicleInfo_SubscribeVehicleData);
   EXPECT_TRUE(
       CheckThatMessageContainsVD(resumption_request.message, {"gps", "speed"}));
@@ -370,7 +370,7 @@ TEST_F(VehicleInfoPendingResumptionHandlerTest,
 
   std::set<std::string> expected_data_in_event = {"gps", "speed"};
   const auto subscribed_correlation_id =
-      resumption_request.request_ids.correlation_id;
+      resumption_request.request_id.correlation_id;
   EXPECT_CALL(event_dispatcher_mock_,
               raise_event(EventCheck(subscribed_correlation_id,
                                      expected_data_in_event)));
@@ -417,7 +417,7 @@ TEST_F(VehicleInfoPendingResumptionHandlerTest,
   event.set_smart_object(response);
   std::set<std::string> expected_data_in_event = {"gps", "speed"};
   const auto subscribed_correlation_id =
-      resumption_request.request_ids.correlation_id;
+      resumption_request.request_id.correlation_id;
 
   EXPECT_CALL(event_dispatcher_mock_,
               raise_event(EventCheck(subscribed_correlation_id,
