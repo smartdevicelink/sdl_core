@@ -145,6 +145,7 @@ void UIGetCapabilitiesResponse::Run() {
             strings::driver_distraction_capability)) {
       if (!system_capabilities_so[strings::driver_distraction_capability]
                .empty()) {
+        sections_to_update.push_back(strings::driver_distraction_capability);
         hmi_capabilities_.set_driver_distraction_capability(
             system_capabilities_so[strings::driver_distraction_capability]);
         hmi_capabilities_.set_driver_distraction_supported(true);
