@@ -1105,11 +1105,12 @@ CacheManager::GetNotificationsNumber(const std::string& priority,
   CACHE_MANAGER_CHECK(0);
 
   sync_primitives::AutoLock auto_lock(cache_lock_);
-  const auto& nnpm = is_subtle
-                         ? pt_->policy_table.module_config
-                               .subtle_notifications_per_minute_by_priority
-                         : pt_->policy_table.module_config
-                               .notifications_per_minute_by_priority;
+  const auto& module_config = pt_->policy_table.module_config;
+  const auto& nnpm =
+      is_subtle && module_config.subtle_notifications_per_minute_by_priority
+                       .is_initialized()
+          ? *module_config.subtle_notifications_per_minute_by_priority
+          : module_config.notifications_per_minute_by_priority;
 
   auto priority_iter = nnpm.find(priority);
 
