@@ -42,10 +42,10 @@ namespace resumption {
 namespace app_mngr = application_manager;
 
 /**
- * @brief The ResumptionRequestIDs struct contains fields, needed during
+ * @brief The ResumptionRequestID struct contains fields, needed during
  * processing events, related to responses from HMI to each resumption request
  */
-struct ResumptionRequestIDs {
+struct ResumptionRequestID {
   hmi_apis::FunctionID::eType function_id;
   int32_t correlation_id;
 
@@ -53,7 +53,7 @@ struct ResumptionRequestIDs {
    * @brief This operator is needed for correct iteration through map, which
    * contains keys with type ResumptionRequestID
    */
-  bool operator<(const ResumptionRequestIDs& other) const;
+  bool operator<(const ResumptionRequestID& other) const;
 };
 
 /**
@@ -61,7 +61,7 @@ struct ResumptionRequestIDs {
  * processing event, and request message
  */
 struct ResumptionRequest {
-  ResumptionRequestIDs request_ids;
+  ResumptionRequestID request_id;
   smart_objects::SmartObject message;
 };
 
@@ -105,6 +105,8 @@ class ResumptionDataProcessor : public app_mngr::event_engine::EventObserver {
    * @brief Running resumption data process from saved_app to application.
    * @param application application which will be resumed
    * @param saved_app application specific section from backup file
+   * @param callback function signature to be called when
+   * data resumption will be finished
    */
   void Restore(app_mngr::ApplicationSharedPtr application,
                smart_objects::SmartObject& saved_app,
@@ -119,10 +121,11 @@ class ResumptionDataProcessor : public app_mngr::event_engine::EventObserver {
 
   /**
    * @brief Handle restored data when timeout appeared
-   * @param application id - const int32_t
+   * @param correlation_id Correlation ID from event
+   * @param function_id Function ID from event
    */
   void HandleOnTimeOut(const uint32_t correlation_id,
-                       const hmi_apis::FunctionID::eType);
+                       const hmi_apis::FunctionID::eType function_id);
 
  private:
   /**
@@ -227,8 +230,8 @@ class ResumptionDataProcessor : public app_mngr::event_engine::EventObserver {
   /**
    * @brief Process specified HMI message
    * @param request Message to process
-   * @param use_events flag to specify should message events be processed or
-   * not
+   * @param subscribe_on_response flag to specify should message events be
+   * processed or not
    * @return TRUE on success, otherwise FALSE
    */
   void ProcessMessageToHMI(smart_objects::SmartObjectSPtr request,
@@ -440,7 +443,7 @@ class ResumptionDataProcessor : public app_mngr::event_engine::EventObserver {
   /**
    * @brief A map of sent requests and corresponding app_id
    */
-  std::map<ResumptionRequestIDs, std::uint32_t> request_app_ids_;
+  std::map<ResumptionRequestID, std::uint32_t> request_app_ids_;
   sync_primitives::RWLock request_app_ids_lock_;
 };
 

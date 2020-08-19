@@ -48,6 +48,11 @@ namespace commands = app_mngr::commands;
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "Resumption")
 
+bool ResumptionRequestID::operator<(const ResumptionRequestID& other) const {
+  return correlation_id < other.correlation_id ||
+         function_id < other.function_id;
+}
+
 ResumptionDataProcessor::ResumptionDataProcessor(
     app_mngr::ApplicationManager& application_manager)
     : event_engine::EventObserver(application_manager.event_dispatcher())
@@ -179,18 +184,13 @@ bool ResumptionDataProcessor::HasSubscriptionsToRestore(
   return has_subscriptions_to_restore;
 }
 
-bool ResumptionRequestIDs::operator<(const ResumptionRequestIDs& other) const {
-  return correlation_id < other.correlation_id ||
-         function_id < other.function_id;
-}
-
 utils::Optional<uint32_t> ResumptionDataProcessor::GetAppIdWaitingForResponse(
     const hmi_apis::FunctionID::eType function_id, const int32_t corr_id) {
   LOG4CXX_AUTO_TRACE(logger_);
 
   auto predicate =
       [function_id,
-       corr_id](const std::pair<ResumptionRequestIDs, std::uint32_t>& item) {
+       corr_id](const std::pair<ResumptionRequestID, std::uint32_t>& item) {
         return item.first.function_id == function_id &&
                item.first.correlation_id == corr_id;
       };
@@ -200,10 +200,6 @@ utils::Optional<uint32_t> ResumptionDataProcessor::GetAppIdWaitingForResponse(
       std::find_if(request_app_ids_.begin(), request_app_ids_.end(), predicate);
 
   if (app_id_ptr == request_app_ids_.end()) {
-    LOG4CXX_ERROR(logger_,
-                  "application id for correlation id "
-                      << corr_id << " and function id: " << function_id
-                      << " was not found.");
     return utils::Optional<uint32_t>::OptionalEmpty::EMPTY;
   }
   return utils::Optional<uint32_t>(app_id_ptr->second);
@@ -229,14 +225,11 @@ utils::Optional<ResumptionRequest> ResumptionDataProcessor::GetRequest(
       std::find_if(list_of_sent_requests.begin(),
                    list_of_sent_requests.end(),
                    [function_id, corr_id](const ResumptionRequest& request) {
-                     return request.request_ids.correlation_id == corr_id &&
-                            request.request_ids.function_id == function_id;
+                     return request.request_id.correlation_id == corr_id &&
+                            request.request_id.function_id == function_id;
                    });
 
   if (list_of_sent_requests.end() == request_iter) {
-    LOG4CXX_ERROR(logger_,
-                  "Request with function id " << function_id << " and corr id "
-                                              << corr_id << " not found");
     return utils::Optional<ResumptionRequest>::OptionalEmpty::EMPTY;
   }
   return utils::Optional<ResumptionRequest>(*request_iter);
@@ -258,12 +251,12 @@ void ResumptionDataProcessor::ProcessResumptionStatus(
   }
 
   if (hmi_apis::FunctionID::VehicleInfo_SubscribeVehicleData ==
-      found_request.request_ids.function_id) {
+      found_request.request_id.function_id) {
     CheckVehicleDataResponse(found_request.message, response, status);
   }
 
   if (hmi_apis::FunctionID::UI_CreateWindow ==
-      found_request.request_ids.function_id) {
+      found_request.request_id.function_id) {
     CheckCreateWindowResponse(found_request.message, response);
   }
 }
@@ -279,18 +272,14 @@ bool ResumptionDataProcessor::IsResumptionFinished(
       std::find_if(list_of_sent_requests.begin(),
                    list_of_sent_requests.end(),
                    [found_request](const ResumptionRequest& request) {
-                     return request.request_ids.correlation_id ==
-                                found_request.request_ids.correlation_id &&
-                            request.request_ids.function_id ==
-                                found_request.request_ids.function_id;
+                     return request.request_id.correlation_id ==
+                                found_request.request_id.correlation_id &&
+                            request.request_id.function_id ==
+                                found_request.request_id.function_id;
                    });
   list_of_sent_requests.erase(request_iter);
 
   if (!list_of_sent_requests.empty()) {
-    LOG4CXX_DEBUG(logger_,
-                  "Resumption app "
-                      << app_id << " not finished . Amount of requests left : "
-                      << list_of_sent_requests.size());
     return false;
   }
   return true;
@@ -303,7 +292,6 @@ ResumptionDataProcessor::GetResumptionCallback(const uint32_t app_id) {
   sync_primitives::AutoReadLock lock(register_callbacks_lock_);
   auto it = register_callbacks_.find(app_id);
   if (it == register_callbacks_.end()) {
-    LOG4CXX_WARN(logger_, "Callback for app_id: " << app_id << " not found");
     return utils::Optional<
         ResumeCtrl::ResumptionCallBack>::OptionalEmpty::EMPTY;
   }
@@ -347,6 +335,10 @@ void ResumptionDataProcessor::ProcessResponseFromHMI(
 
   auto found_app_id = GetAppIdWaitingForResponse(function_id, corr_id);
   if (!found_app_id) {
+    LOG4CXX_ERROR(logger_,
+                  "Application id for correlation id "
+                      << corr_id << " and function id: " << function_id
+                      << " was not found, such response is not expected.");
     return;
   }
   const uint32_t app_id = *found_app_id;
@@ -354,6 +346,9 @@ void ResumptionDataProcessor::ProcessResponseFromHMI(
 
   auto found_request = GetRequest(app_id, function_id, corr_id);
   if (!found_request) {
+    LOG4CXX_ERROR(logger_,
+                  "Request with function id " << function_id << " and corr id "
+                                              << corr_id << " not found");
     return;
   }
   auto request = *found_request;
@@ -361,11 +356,16 @@ void ResumptionDataProcessor::ProcessResponseFromHMI(
   ProcessResumptionStatus(app_id, response, request);
 
   if (!IsResumptionFinished(app_id, request)) {
+    LOG4CXX_DEBUG(logger_,
+                  "Resumption app "
+                      << app_id
+                      << " not finished. Some requests are still waited");
     return;
   }
 
   auto found_callback = GetResumptionCallback(app_id);
   if (!found_callback) {
+    LOG4CXX_ERROR(logger_, "Callback for app_id: " << app_id << " not found");
     return;
   }
   auto callback = *found_callback;
@@ -456,17 +456,17 @@ void ResumptionDataProcessor::SubscribeToResponse(
   LOG4CXX_AUTO_TRACE(logger_);
   LOG4CXX_DEBUG(logger_,
                 "App " << app_id << " subscribe on "
-                       << request.request_ids.function_id << " "
-                       << request.request_ids.correlation_id);
-  subscribe_on_event(request.request_ids.function_id,
-                     request.request_ids.correlation_id);
+                       << request.request_id.function_id << " "
+                       << request.request_id.correlation_id);
+  subscribe_on_event(request.request_id.function_id,
+                     request.request_id.correlation_id);
 
   resumption_status_lock_.AcquireForWriting();
   resumption_status_[app_id].list_of_sent_requests.push_back(request);
   resumption_status_lock_.Release();
 
   request_app_ids_lock_.AcquireForWriting();
-  request_app_ids_.insert(std::make_pair(request.request_ids, app_id));
+  request_app_ids_.insert(std::make_pair(request.request_id, app_id));
   request_app_ids_lock_.Release();
 }
 
@@ -484,8 +484,8 @@ void ResumptionDataProcessor::ProcessMessageToHMI(
         (*message)[strings::msg_params][strings::app_id].asInt();
 
     ResumptionRequest wait_for_response;
-    wait_for_response.request_ids.correlation_id = hmi_correlation_id;
-    wait_for_response.request_ids.function_id = function_id;
+    wait_for_response.request_id.correlation_id = hmi_correlation_id;
+    wait_for_response.request_id.function_id = function_id;
     wait_for_response.message = *message;
 
     SubscribeToResponse(app_id, wait_for_response);
@@ -584,7 +584,7 @@ utils::Optional<ResumptionRequest> FindResumptionSubmenuRequest(
       [menu_id](const ResumptionRequest& request) {
         auto& msg_params = request.message[strings::msg_params];
         if (hmi_apis::FunctionID::UI_AddSubMenu ==
-            request.request_ids.function_id) {
+            request.request_id.function_id) {
           uint32_t failed_menu_id = msg_params[strings::menu_id].asUInt();
           return failed_menu_id == menu_id;
         }
@@ -655,11 +655,11 @@ utils::Optional<ResumptionRequest> FindCommandResumptionRequest(
       [command_id](const ResumptionRequest& request) {
         auto& msg_params = request.message[strings::msg_params];
         const bool is_vr_command = hmi_apis::FunctionID::VR_AddCommand ==
-                                       request.request_ids.function_id &&
+                                       request.request_id.function_id &&
                                    hmi_apis::Common_VRCommandType::Command ==
                                        msg_params[strings::type].asInt();
         const bool is_ui_command = hmi_apis::FunctionID::UI_AddCommand ==
-                                   request.request_ids.function_id;
+                                   request.request_id.function_id;
 
         if (is_vr_command || is_ui_command) {
           uint32_t cmd_id = msg_params[strings::cmd_id].asUInt();
