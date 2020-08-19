@@ -534,7 +534,8 @@ TEST_F(ProtocolHandlerImplTest,
   // Expect send NAck
   EXPECT_CALL(session_observer_mock,
               ProtocolVersionUsed(_, _, An<utils::SemanticVersion&>()))
-      .Times(call_times);
+      .Times(call_times)
+      .WillRepeatedly(Return(true));
 
   EXPECT_CALL(transport_manager_mock,
               SendMessageToDevice(ControlMessage(FRAME_DATA_START_SERVICE_NACK,
@@ -624,7 +625,8 @@ TEST_F(ProtocolHandlerImplTest, StartSession_Protected_SessionObserverReject) {
   // Expect send NAck with encryption OFF
   EXPECT_CALL(session_observer_mock,
               ProtocolVersionUsed(_, _, An<utils::SemanticVersion&>()))
-      .Times(call_times);
+      .Times(call_times)
+      .WillRepeatedly(Return(true));
 
   EXPECT_CALL(transport_manager_mock,
               SendMessageToDevice(ControlMessage(FRAME_DATA_START_SERVICE_NACK,
@@ -845,7 +847,8 @@ TEST_F(ProtocolHandlerImplTest,
   rejected_param_list.push_back(protocol_handler::strings::video_codec);
 
   EXPECT_CALL(session_observer_mock,
-              ProtocolVersionUsed(_, _, An<utils::SemanticVersion&>()));
+              ProtocolVersionUsed(_, _, An<utils::SemanticVersion&>()))
+      .WillOnce(Return(true));
   EXPECT_CALL(session_observer_mock,
               OnSessionStartedCallback(connection_id2,
                                        session_id2,
@@ -906,12 +909,6 @@ TEST_F(ProtocolHandlerImplTest,
   bson_object_initialize_default(&bson_nack_params);
   bson_object_put_array(
       &bson_nack_params, protocol_handler::strings::rejected_params, &bson_arr);
-  std::string reason =
-      "Session observer refused to create service of type " +
-      std::to_string(protocol_handler::ServiceType::kMobileNav);
-  bson_object_put_string(&bson_nack_params,
-                         protocol_handler::strings::reason,
-                         const_cast<char*>(reason.c_str()));
   std::vector<uint8_t> nack_params =
       CreateVectorFromBsonObject(&bson_nack_params);
   bson_object_deinitialize(&bson_nack_params);
@@ -980,7 +977,8 @@ TEST_F(ProtocolHandlerImplTest, StartSession_Audio_RejectByTransportType) {
 
   // Expect send Ack
   EXPECT_CALL(session_observer_mock,
-              ProtocolVersionUsed(_, _, An<utils::SemanticVersion&>()));
+              ProtocolVersionUsed(_, _, An<utils::SemanticVersion&>()))
+      .WillRepeatedly(Return(true));
   EXPECT_CALL(transport_manager_mock,
               SendMessageToDevice(ControlMessage(FRAME_DATA_START_SERVICE_NACK,
                                                  PROTECTION_OFF)))
@@ -1021,7 +1019,9 @@ TEST_F(ProtocolHandlerImplTest, StartSession_Video_RejectByTransportType) {
 
   // Expect send Ack
   EXPECT_CALL(session_observer_mock,
-              ProtocolVersionUsed(_, _, An<utils::SemanticVersion&>()));
+              ProtocolVersionUsed(_, _, An<utils::SemanticVersion&>()))
+      .WillRepeatedly(Return(true));
+
   EXPECT_CALL(transport_manager_mock,
               SendMessageToDevice(ControlMessage(FRAME_DATA_START_SERVICE_NACK,
                                                  PROTECTION_OFF)))
@@ -1048,8 +1048,11 @@ TEST_F(ProtocolHandlerImplTest, EndSession_SessionObserverReject) {
 
   // Expect ConnectionHandler check
   EXPECT_CALL(session_observer_mock,
-              OnSessionEndedCallback(
-                  connection_id, session_id, An<uint32_t*>(), service))
+              OnSessionEndedCallback(connection_id,
+                                     session_id,
+                                     An<uint32_t*>(),
+                                     service,
+                                     An<std::string*>()))
       .
       // reject session start
       WillOnce(
@@ -1059,7 +1062,9 @@ TEST_F(ProtocolHandlerImplTest, EndSession_SessionObserverReject) {
   SetProtocolVersion2();
   // Expect send NAck
   EXPECT_CALL(session_observer_mock,
-              ProtocolVersionUsed(_, _, An<utils::SemanticVersion&>()));
+              ProtocolVersionUsed(_, _, An<utils::SemanticVersion&>()))
+      .WillRepeatedly(Return(true));
+
   EXPECT_CALL(transport_manager_mock,
               SendMessageToDevice(
                   ControlMessage(FRAME_DATA_END_SERVICE_NACK, PROTECTION_OFF)))
@@ -1084,8 +1089,11 @@ TEST_F(ProtocolHandlerImplTest, EndSession_Success) {
 
   // Expect ConnectionHandler check
   EXPECT_CALL(session_observer_mock,
-              OnSessionEndedCallback(
-                  connection_id, session_id, An<uint32_t*>(), service))
+              OnSessionEndedCallback(connection_id,
+                                     session_id,
+                                     An<uint32_t*>(),
+                                     service,
+                                     An<std::string*>()))
       .
       // return sessions start success
       WillOnce(DoAll(NotifyTestAsyncWaiter(waiter), Return(connection_key)));

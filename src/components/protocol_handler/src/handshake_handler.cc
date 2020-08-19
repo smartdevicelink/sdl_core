@@ -263,10 +263,7 @@ void HandshakeHandler::ProcessFailedHandshake(BsonObject& params,
                   ? "Invalid certificate"
                   : (service_status == ServiceStatus::INVALID_TIME)
                         ? "Failed to get system time"
-                        : (service_status ==
-                           ServiceStatus::UNSECURE_START_FAILED)
-                              ? "Unsecure start failed"
-                              : "Unknown cause of failure";
+                        : "Unknown cause of failure";
 
     protocol_handler_.SendStartSessionNAck(context_.connection_id_,
                                            context_.new_session_id_,
