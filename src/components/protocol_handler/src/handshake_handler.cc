@@ -203,22 +203,14 @@ void HandshakeHandler::ProcessSuccessfulHandshake(const uint32_t connection_key,
         context_.service_type_,
         ServiceStatus::SERVICE_START_FAILED);
 
-    auto gen_reason_msg = [](const bool can_be_protected,
-                             const bool is_already_protected) -> std::string {
-      if (can_be_protected && is_already_protected) {
-        return "Service is already protected";
-      } else if (!can_be_protected && is_already_protected) {
-        return "Service cannot be protected but is already protected";
-      } else {  // !can_be_protected && !is_already_protected
-        return "Service cannot be protected";
-      }
-    };
     protocol_handler_.SendStartSessionNAck(
         context_.connection_id_,
         context_.new_session_id_,
         protocol_version_,
         context_.service_type_,
-        gen_reason_msg(can_be_protected, is_service_already_protected));
+        (can_be_protected && is_service_already_protected)
+            ? "Service is already protected"
+            : "Service cannot be protected");
   }
 }
 
