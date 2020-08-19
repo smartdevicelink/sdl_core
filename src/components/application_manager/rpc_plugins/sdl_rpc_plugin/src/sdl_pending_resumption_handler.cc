@@ -53,6 +53,48 @@ SDLPendingResumptionHandler::CreateSubscriptionRequest() {
   return subscribe_waypoints_msg;
 }
 
+void SDLPendingResumptionHandler::HandleResumptionSubscriptionRequest(
+    application_manager::AppExtension& extension,
+    resumption::Subscriber& subscriber,
+    application_manager::Application& app) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  SDLAppExtension& ext = dynamic_cast<SDLAppExtension&>(extension);
+  smart_objects::SmartObjectSPtr request = CreateSubscriptionRequest();
+  smart_objects::SmartObject& request_ref = *request;
+  const auto function_id = static_cast<hmi_apis::FunctionID::eType>(
+      request_ref[application_manager::strings::params]
+                 [application_manager::strings::function_id]
+                     .asInt());
+  const uint32_t corr_id =
+      request_ref[application_manager::strings::params]
+                 [application_manager::strings::correlation_id]
+                     .asUInt();
+
+  auto resumption_request =
+      MakeResumptionRequest(corr_id, function_id, *request);
+  app_ids_.push(app.app_id());
+
+  if (pending_requests_.empty()) {
+    LOG4CXX_DEBUG(logger_,
+                  "There are no pending requests for app_id: " << app.app_id());
+    pending_requests_[corr_id] = request_ref;
+    subscribe_on_event(function_id, corr_id);
+    LOG4CXX_DEBUG(logger_,
+                  "Sending request with function id: "
+                      << function_id << " and correlation_id: " << corr_id);
+
+    application_manager_.GetRPCService().ManageHMICommand(request);
+  } else {
+    LOG4CXX_DEBUG(logger_,
+                  "There are pending requests. Freeze resumption for app id "
+                      << app.app_id() << " corr id = " << corr_id);
+    ResumptionAwaitingHandling frozen_res{
+        app.app_id(), ext, subscriber, resumption_request};
+    freezed_resumptions_.push_back(frozen_res);
+  }
+  subscriber(app.app_id(), resumption_request);
+}
+
 void SDLPendingResumptionHandler::OnResumptionRevert() {
   LOG4CXX_AUTO_TRACE(logger_);
   using namespace application_manager;
@@ -113,7 +155,7 @@ void SDLPendingResumptionHandler::on_event(
 
   smart_objects::SmartObject pending_request;
   if (pending_requests_.find(corr_id) == pending_requests_.end()) {
-    LOG4CXX_DEBUG(logger_, "corr id " << corr_id << " NOT found");
+    LOG4CXX_ERROR(logger_, "corr id " << corr_id << " NOT found");
     return;
   }
   pending_request = pending_requests_[corr_id];
@@ -172,47 +214,5 @@ void SDLPendingResumptionHandler::on_event(
                   "Sending request with fid: " << fid << " and cid: " << cid);
     application_manager_.GetRPCService().ManageHMICommand(request);
   }
-}
-
-void SDLPendingResumptionHandler::HandleResumptionSubscriptionRequest(
-    application_manager::AppExtension& extension,
-    resumption::Subscriber& subscriber,
-    application_manager::Application& app) {
-  LOG4CXX_AUTO_TRACE(logger_);
-  SDLAppExtension& ext = dynamic_cast<SDLAppExtension&>(extension);
-  smart_objects::SmartObjectSPtr request = CreateSubscriptionRequest();
-  smart_objects::SmartObject& request_ref = *request;
-  const auto function_id = static_cast<hmi_apis::FunctionID::eType>(
-      request_ref[application_manager::strings::params]
-                 [application_manager::strings::function_id]
-                     .asInt());
-  const uint32_t corr_id =
-      request_ref[application_manager::strings::params]
-                 [application_manager::strings::correlation_id]
-                     .asUInt();
-
-  auto resumption_request =
-      MakeResumptionRequest(corr_id, function_id, *request);
-  app_ids_.push(app.app_id());
-
-  if (pending_requests_.empty()) {
-    LOG4CXX_DEBUG(logger_,
-                  "There are no pending requests for app_id: " << app.app_id());
-    pending_requests_[corr_id] = request_ref;
-    subscribe_on_event(function_id, corr_id);
-    LOG4CXX_DEBUG(logger_,
-                  "Sending request with function id: "
-                      << function_id << " and correlation_id: " << corr_id);
-
-    application_manager_.GetRPCService().ManageHMICommand(request);
-  } else {
-    LOG4CXX_DEBUG(logger_,
-                  "There are pending requests. Freeze resumption for app id "
-                      << app.app_id() << " corr id = " << corr_id);
-    ResumptionAwaitingHandling frozen_res{
-        app.app_id(), ext, subscriber, resumption_request};
-    freezed_resumptions_.push_back(frozen_res);
-  }
-  subscriber(app.app_id(), resumption_request);
 }
 }  // namespace sdl_rpc_plugin
