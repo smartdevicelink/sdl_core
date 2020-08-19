@@ -1100,17 +1100,20 @@ std::string CacheManager::GetIconUrl(const std::string& policy_app_id) const {
 }
 
 rpc::policy_table_interface_base::NumberOfNotificationsType
-CacheManager::GetNotificationsNumber(const std::string& priority) {
+CacheManager::GetNotificationsNumber(const std::string& priority,
+                                     const bool is_subtle) {
   CACHE_MANAGER_CHECK(0);
-  typedef rpc::policy_table_interface_base::NumberOfNotificationsPerMinute NNPM;
 
   sync_primitives::AutoLock auto_lock(cache_lock_);
-  const NNPM& nnpm =
-      pt_->policy_table.module_config.notifications_per_minute_by_priority;
+  const auto& nnpm = is_subtle
+                         ? pt_->policy_table.module_config
+                               .subtle_notifications_per_minute_by_priority
+                         : pt_->policy_table.module_config
+                               .notifications_per_minute_by_priority;
 
-  NNPM::const_iterator priority_iter = nnpm.find(priority);
+  auto priority_iter = nnpm.find(priority);
 
-  const rpc::policy_table_interface_base::NumberOfNotificationsType result =
+  const uint32_t result =
       (nnpm.end() != priority_iter ? (*priority_iter).second : 0u);
   return result;
 }
@@ -1346,6 +1349,8 @@ void CacheManager::PersistData() {
         is_revoked = false;
       }
 
+      backup_->SetMetaInfo(*(*copy_pt.policy_table.module_meta).ccpu_version);
+
       // In case of extended policy the meta info should be backuped as well.
       backup_->WriteDb();
     }
@@ -1479,18 +1484,32 @@ int CacheManager::CountUnconsentedGroups(const std::string& policy_app_id,
   return result;
 }
 
+void CacheManager::SetPreloadedPtFlag(const bool is_preloaded) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  *(pt_->policy_table.module_config.preloaded_pt) = is_preloaded;
+  Backup();
+}
+
 bool CacheManager::SetMetaInfo(const std::string& ccpu_version,
                                const std::string& wers_country_code,
                                const std::string& language) {
   CACHE_MANAGER_CHECK(false);
   sync_primitives::AutoLock auto_lock(cache_lock_);
-
+  rpc::Optional<policy_table::ModuleMeta>& module_meta =
+      pt_->policy_table.module_meta;
+  *(module_meta->ccpu_version) = ccpu_version;
   // We have to set preloaded flag as false in policy table on any response
   // of GetSystemInfo (SDLAQ-CRS-2365)
-  *pt_->policy_table.module_config.preloaded_pt = false;
-
+  *(pt_->policy_table.module_config.preloaded_pt) = false;
   Backup();
   return true;
+}
+
+std::string CacheManager::GetCCPUVersionFromPT() const {
+  LOG4CXX_AUTO_TRACE(logger_);
+  rpc::Optional<policy_table::ModuleMeta>& module_meta =
+      pt_->policy_table.module_meta;
+  return *(module_meta->ccpu_version);
 }
 
 bool CacheManager::IsMetaInfoPresent() const {

@@ -269,6 +269,17 @@ class ApplicationManagerImplTest
     ASSERT_TRUE(mock_app_ptr_.get());
   }
 
+  void SetExpectationForCreateModuleInfoSO(
+      const hmi_apis::FunctionID::eType function_id) {
+    smart_objects::SmartObject sm_object(smart_objects::SmartType_Map);
+    sm_object[strings::params][strings::function_id] =
+        static_cast<int>(function_id);
+    auto sptr = std::make_shared<smart_objects::SmartObject>(sm_object);
+
+    ON_CALL(*mock_message_helper_, CreateModuleInfoSO(function_id, _))
+        .WillByDefault(Return(sptr));
+  }
+
   application_manager::commands::MessageSharedPtr CreateCloseAppMessage() {
     using namespace application_manager;
 
@@ -350,6 +361,13 @@ class ApplicationManagerImplTest
   std::shared_ptr<NiceMock<usage_statistics_test::MockStatisticsManager> >
       mock_statistics_manager_;
 };
+
+MATCHER_P(HMIFunctionIDIs, result_code, "") {
+  return result_code == static_cast<hmi_apis::FunctionID::eType>(
+                            (*arg)[application_manager::strings::params]
+                                  [application_manager::strings::function_id]
+                                      .asInt());
+}
 
 INSTANTIATE_TEST_CASE_P(
     ProcessServiceStatusUpdate_REQUEST_ACCEPTED,
@@ -1198,14 +1216,19 @@ TEST_F(ApplicationManagerImplTest, StartStopAudioPassThru) {
 
   const uint32_t app_id = 65537;
   const int32_t max_duration = 1000;
-  // below are not used
   const int32_t correlation_id = 0;
   const int32_t sampling_rate = 0;
   const int32_t bits_per_sample = 0;
   const int32_t audio_type = 0;
 
-  EXPECT_CALL(mock_media_manager,
-              StartMicrophoneRecording(app_id, _, max_duration))
+  EXPECT_CALL(
+      mock_media_manager,
+      StartMicrophoneRecording(app_id,
+                               _,
+                               max_duration,
+                               mobile_apis::SamplingRate::SamplingRate_8KHZ,
+                               mobile_apis::BitsPerSample::BitsPerSample_8_BIT,
+                               mobile_apis::AudioType::PCM))
       .WillOnce(Return());
   EXPECT_CALL(mock_media_manager, StopMicrophoneRecording(app_id))
       .WillOnce(Return());
@@ -1282,14 +1305,19 @@ TEST_F(ApplicationManagerImplTest, UnregisterAnotherAppDuringAudioPassThru) {
   app_manager_impl_->AddMockApplication(mock_app_2);
 
   const int32_t max_duration = 1000;
-  // below are not used
   const int32_t correlation_id = 0;
   const int32_t sampling_rate = 0;
   const int32_t bits_per_sample = 0;
   const int32_t audio_type = 0;
 
-  EXPECT_CALL(mock_media_manager,
-              StartMicrophoneRecording(app_id_2, _, max_duration))
+  EXPECT_CALL(
+      mock_media_manager,
+      StartMicrophoneRecording(app_id_2,
+                               _,
+                               max_duration,
+                               mobile_apis::SamplingRate::SamplingRate_8KHZ,
+                               mobile_apis::BitsPerSample::BitsPerSample_8_BIT,
+                               mobile_apis::AudioType::PCM))
       .WillOnce(Return());
   EXPECT_CALL(mock_media_manager, StopMicrophoneRecording(app_id_2))
       .WillOnce(Return());
@@ -2026,6 +2054,26 @@ TEST_F(ApplicationManagerImplTest, AddAndRemoveQueryAppDevice_SUCCESS) {
   EXPECT_TRUE(app_manager_impl_->IsAppsQueriedFrom(device_handle));
   app_manager_impl_->RemoveDevice(device_handle);
   EXPECT_FALSE(app_manager_impl_->IsAppsQueriedFrom(device_handle));
+}
+
+TEST_F(
+    ApplicationManagerImplTest,
+    RequestForInterfacesAvailability_AllRequestsWillBeSuccessfullyRequested) {
+  std::vector<hmi_apis::FunctionID::eType> expected_requests{
+      hmi_apis::FunctionID::VehicleInfo_IsReady,
+      hmi_apis::FunctionID::VR_IsReady,
+      hmi_apis::FunctionID::TTS_IsReady,
+      hmi_apis::FunctionID::UI_IsReady,
+      hmi_apis::FunctionID::RC_IsReady};
+
+  for (auto request : expected_requests) {
+    SetExpectationForCreateModuleInfoSO(request);
+    EXPECT_CALL(*mock_rpc_service_,
+                ManageHMICommand(HMIFunctionIDIs(request),
+                                 commands::Command::SOURCE_HMI));
+  }
+
+  app_manager_impl_->RequestForInterfacesAvailability();
 }
 
 }  // namespace application_manager_test

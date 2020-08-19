@@ -92,7 +92,13 @@ RCCapabilitiesManagerImpl::GetDefaultModuleIdFromCapabilitiesArray(
 const std::string RCCapabilitiesManagerImpl::GetDefaultModuleIdFromCapabilities(
     const std::string& module_type) const {
   LOG4CXX_AUTO_TRACE(logger_);
-  auto rc_capabilities = *(hmi_capabilities_.rc_capability());
+  auto rc_capabilities_ptr = hmi_capabilities_.rc_capability();
+  if (!rc_capabilities_ptr) {
+    LOG4CXX_WARN(logger_, "RC capability is not initialized");
+    return std::string();
+  }
+
+  auto rc_capabilities = *rc_capabilities_ptr;
   const auto& mapping = RCHelpers::GetModuleTypeToCapabilitiesMapping();
   if (!rc_capabilities.keyExists(mapping(module_type))) {
     LOG4CXX_WARN(
@@ -165,7 +171,14 @@ const bool RCCapabilitiesManagerImpl::CheckModuleIdWithCapabilities(
 bool RCCapabilitiesManagerImpl::CheckIfModuleExistsInCapabilities(
     const ModuleUid& module) const {
   LOG4CXX_AUTO_TRACE(logger_);
-  auto rc_capabilities = *(hmi_capabilities_.rc_capability());
+
+  auto rc_capabilities_ptr = hmi_capabilities_.rc_capability();
+  if (!rc_capabilities_ptr) {
+    LOG4CXX_WARN(logger_, "RC capability is not initialized");
+    return false;
+  }
+
+  auto rc_capabilities = *rc_capabilities_ptr;
   const auto& mapping = RCHelpers::GetModuleTypeToCapabilitiesMapping();
   const auto& resource_list = GetResources();
   bool is_module_type_valid = false;
@@ -252,7 +265,13 @@ void RCCapabilitiesManagerImpl::GetResourcesFromCapabilitiesArray(
 const std::vector<ModuleUid> RCCapabilitiesManagerImpl::GetResources() const {
   LOG4CXX_AUTO_TRACE(logger_);
   std::vector<ModuleUid> resources;
-  auto rc_capabilities = *(hmi_capabilities_.rc_capability());
+  auto rc_capabilities_ptr = hmi_capabilities_.rc_capability();
+  if (!rc_capabilities_ptr) {
+    LOG4CXX_WARN(logger_, "RC capability is not initialized");
+    return resources;
+  }
+
+  auto rc_capabilities = *rc_capabilities_ptr;
   const auto& control_caps_list = GetCapabilitiesList();
   for (const auto& capability_key : control_caps_list) {
     if (rc_capabilities.keyExists(capability_key)) {
@@ -272,7 +291,14 @@ const std::vector<ModuleUid> RCCapabilitiesManagerImpl::GetResources() const {
 const std::string RCCapabilitiesManagerImpl::GetModuleIdForSeatLocation(
     const mobile_apis::SupportedSeat::eType id) const {
   LOG4CXX_AUTO_TRACE(logger_);
-  auto rc_capabilities = *(hmi_capabilities_.rc_capability());
+
+  auto rc_capabilities_ptr = hmi_capabilities_.rc_capability();
+  if (!rc_capabilities_ptr) {
+    LOG4CXX_WARN(logger_, "RC capability is not initialized.");
+    return std::string();
+  }
+
+  auto rc_capabilities = *rc_capabilities_ptr;
   const auto seat_capabilities =
       rc_capabilities[strings::kseatControlCapabilities];
   if (seat_capabilities.length() > 0) {
@@ -294,7 +320,13 @@ const std::string RCCapabilitiesManagerImpl::GetModuleIdForSeatLocation(
 
 bool RCCapabilitiesManagerImpl::CheckIfButtonExistInRCCaps(
     const mobile_apis::ButtonName::eType button) const {
-  auto rc_capabilities = *(hmi_capabilities_.rc_capability());
+  auto rc_capabilities_ptr = hmi_capabilities_.rc_capability();
+  if (!rc_capabilities_ptr) {
+    LOG4CXX_WARN(logger_, "RC capability is not initialized");
+    return false;
+  }
+
+  auto rc_capabilities = *rc_capabilities_ptr;
   if (rc_capabilities.keyExists(strings::kbuttonCapabilities)) {
     const smart_objects::SmartObject& button_caps =
         rc_capabilities[strings::kbuttonCapabilities];
@@ -453,14 +485,20 @@ ModuleTypeCapability RCCapabilitiesManagerImpl::GetModuleDataCapabilities(
     const smart_objects::SmartObject& module_data,
     const std::string& module_id) const {
   LOG4CXX_AUTO_TRACE(logger_);
-  auto rc_capabilities = *(hmi_capabilities_.rc_capability());
+  auto rc_capabilities_ptr = hmi_capabilities_.rc_capability();
+  if (!rc_capabilities_ptr) {
+    LOG4CXX_WARN(logger_, "RC capability is not initialized");
+    return {std::string(), capabilitiesStatus::kInvalidStatus};
+  }
+
+  auto rc_capabilities = *rc_capabilities_ptr;
 
   const auto& all_module_types = RCHelpers::GetModuleTypesList();
   const auto& get_module_data_key = RCHelpers::GetModuleTypeToDataMapping();
   const auto& get_capabilities_key =
       RCHelpers::GetModuleTypeToCapabilitiesMapping();
   ModuleTypeCapability module_data_capabilities =
-      std::make_pair("", capabilitiesStatus::missedParam);
+      std::make_pair("", capabilitiesStatus::kMissedParam);
 
   for (const auto& module_type : all_module_types) {
     const auto module_data_key = get_module_data_key(module_type);
@@ -501,13 +539,13 @@ ModuleTypeCapability RCCapabilitiesManagerImpl::GetControlDataCapabilities(
     }
     if (message_params::kLightState == request_parameter) {
       ModuleTypeCapability light_capability =
-          std::make_pair("", capabilitiesStatus::success);
+          std::make_pair("", capabilitiesStatus::kSuccess);
 
       for (auto& light_data : *(control_data[request_parameter].asArray())) {
         light_capability = GetLightNameCapabilities(
             capabilities[strings::kSupportedLights], light_data);
 
-        if (capabilitiesStatus::success != light_capability.second) {
+        if (capabilitiesStatus::kSuccess != light_capability.second) {
           return light_capability;
         }
       }
@@ -517,7 +555,7 @@ ModuleTypeCapability RCCapabilitiesManagerImpl::GetControlDataCapabilities(
     if (message_params::kBand == request_parameter) {
       ModuleTypeCapability radio_capability = GetRadioBandByCapabilities(
           capabilities, control_data[request_parameter]);
-      if (capabilitiesStatus::success != radio_capability.second) {
+      if (capabilitiesStatus::kSuccess != radio_capability.second) {
         return radio_capability;
       }
     }
@@ -528,12 +566,12 @@ ModuleTypeCapability RCCapabilitiesManagerImpl::GetControlDataCapabilities(
                           request_parameter,
                           mobile_apis::Result::UNSUPPORTED_RESOURCE);
 
-    if (capabilitiesStatus::success != status_item_capability) {
+    if (capabilitiesStatus::kSuccess != status_item_capability) {
       return std::make_pair("", status_item_capability);
     }
   }
 
-  return std::make_pair("", capabilitiesStatus::success);
+  return std::make_pair("", capabilitiesStatus::kSuccess);
 }
 
 capabilitiesStatus RCCapabilitiesManagerImpl::GetItemCapability(
@@ -547,7 +585,7 @@ capabilitiesStatus RCCapabilitiesManagerImpl::GetItemCapability(
     LOG4CXX_DEBUG(
         logger_,
         "Parameter " << request_parameter << " doesn't exist in capabilities.");
-    return capabilitiesStatus::missedParam;
+    return capabilitiesStatus::kMissedParam;
   }
 
   const std::string& caps_key = it->second;
@@ -561,7 +599,7 @@ capabilitiesStatus RCCapabilitiesManagerImpl::GetItemCapability(
     LOG4CXX_DEBUG(logger_,
                   "Capability " << caps_key
                                 << " is missed in RemoteControl capabilities");
-    return capabilitiesStatus::missedParam;
+    return capabilitiesStatus::kMissedParam;
   }
 
   if (!capabilities[caps_key].asBool()) {
@@ -569,14 +607,14 @@ capabilitiesStatus RCCapabilitiesManagerImpl::GetItemCapability(
                   "Capability "
                       << caps_key
                       << " is switched off in RemoteControl capabilities");
-    capabilitiesStatus status = capabilitiesStatus::missedParam;
+    capabilitiesStatus status = capabilitiesStatus::kMissedParam;
     if (mobile_apis::Result::READ_ONLY == switched_off_result) {
-      status = capabilitiesStatus::readOnly;
+      status = capabilitiesStatus::kReadOnly;
     }
     return status;
   }
 
-  return capabilitiesStatus::success;
+  return capabilitiesStatus::kSuccess;
 }
 
 ModuleTypeCapability RCCapabilitiesManagerImpl::GetLightDataCapabilities(
@@ -598,13 +636,13 @@ ModuleTypeCapability RCCapabilitiesManagerImpl::GetLightDataCapabilities(
                           request_parameter,
                           mobile_apis::Result::READ_ONLY);
 
-    if (capabilitiesStatus::success != status_item_capability) {
+    if (capabilitiesStatus::kSuccess != status_item_capability) {
       return std::make_pair(message_params::kLightState,
                             status_item_capability);
     }
   }
 
-  return std::make_pair("", capabilitiesStatus::success);
+  return std::make_pair("", capabilitiesStatus::kSuccess);
 }
 
 ModuleTypeCapability RCCapabilitiesManagerImpl::GetLightNameCapabilities(
@@ -619,7 +657,7 @@ ModuleTypeCapability RCCapabilitiesManagerImpl::GetLightNameCapabilities(
   }
   LOG4CXX_DEBUG(logger_, "There is no such light name in capabilities");
   return std::make_pair(message_params::kLightState,
-                        capabilitiesStatus::missedLightName);
+                        capabilitiesStatus::kMissedLightName);
 }
 
 ModuleTypeCapability RCCapabilitiesManagerImpl::GetRadioBandByCapabilities(
@@ -634,7 +672,7 @@ ModuleTypeCapability RCCapabilitiesManagerImpl::GetRadioBandByCapabilities(
                         << strings::kSiriusxmRadioAvailable
                         << " is missed in RemoteControl capabilities");
       return std::make_pair(strings::kSiriusxmRadioAvailable,
-                            capabilitiesStatus::missedParam);
+                            capabilitiesStatus::kMissedParam);
     }
     if (!capabilities_status[strings::kSiriusxmRadioAvailable].asBool()) {
       LOG4CXX_DEBUG(logger_,
@@ -642,10 +680,10 @@ ModuleTypeCapability RCCapabilitiesManagerImpl::GetRadioBandByCapabilities(
                         << strings::kSiriusxmRadioAvailable
                         << " is switched off in RemoteControl capabilities");
       return std::make_pair(strings::kSiriusxmRadioAvailable,
-                            capabilitiesStatus::missedParam);
+                            capabilitiesStatus::kMissedParam);
     }
   }
-  return std::make_pair("", capabilitiesStatus::success);
+  return std::make_pair("", capabilitiesStatus::kSuccess);
 }
 
 const smart_objects::SmartObject& RCCapabilitiesManagerImpl::ControlDataForType(
@@ -729,7 +767,7 @@ bool RCCapabilitiesManagerImpl::AreReadOnlyParamsPresent(
 
     if (result) {
       module_data_capabilities =
-          std::make_pair(module_type, capabilitiesStatus::readOnly);
+          std::make_pair(module_type, capabilitiesStatus::kReadOnly);
     }
     return result;
   }
@@ -869,7 +907,13 @@ Grid RCCapabilitiesManagerImpl::GetModuleServiceAreaFromControlCapability(
 
 Grid RCCapabilitiesManagerImpl::GetModuleServiceArea(
     const ModuleUid& module) const {
-  auto rc_capabilities = *(hmi_capabilities_.rc_capability());
+  auto rc_capabilities_ptr = hmi_capabilities_.rc_capability();
+  if (!rc_capabilities_ptr) {
+    LOG4CXX_WARN(logger_, "RC capability is not initialized");
+    return Grid();
+  }
+
+  auto rc_capabilities = *rc_capabilities_ptr;
   const auto& mapping = RCHelpers::GetModuleTypeToCapabilitiesMapping();
   const auto& module_type = module.first;
   const auto& capabilities_key = mapping(module_type);
@@ -903,7 +947,13 @@ bool RCCapabilitiesManagerImpl::IsMultipleAccessAllowedInControlCaps(
 
 bool RCCapabilitiesManagerImpl::IsMultipleAccessAllowed(
     const ModuleUid& module) const {
-  auto rc_capabilities = *(hmi_capabilities_.rc_capability());
+  auto rc_capabilities_ptr = hmi_capabilities_.rc_capability();
+  if (!rc_capabilities_ptr) {
+    LOG4CXX_ERROR(logger_, "RC capability is not initialized");
+    return false;
+  }
+
+  auto rc_capabilities = *rc_capabilities_ptr;
   const auto& mapping = RCHelpers::GetModuleTypeToCapabilitiesMapping();
   const auto& module_type = module.first;
   const auto& capabilities_key = mapping(module_type);

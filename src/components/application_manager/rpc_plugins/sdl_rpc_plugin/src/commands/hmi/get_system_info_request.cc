@@ -59,6 +59,11 @@ void GetSystemInfoRequest::Run() {
   SendRequest();
 }
 
+void GetSystemInfoRequest::onTimeOut() {
+  LOG4CXX_AUTO_TRACE(logger_);
+  hmi_capabilities_.UpdateCachedCapabilities();
+}
+
 }  // namespace commands
 
 }  // namespace sdl_rpc_plugin

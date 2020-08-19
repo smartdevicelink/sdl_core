@@ -157,8 +157,8 @@ void RCCommandRequest::Run() {
                  "Remote control is disabled by user");
     return;
   }
-  auto rc_capabilities = hmi_capabilities_.rc_capability();
-  if (!rc_capabilities || rc_capabilities->empty()) {
+  auto rc_capability = hmi_capabilities_.rc_capability();
+  if (!rc_capability || rc_capability->empty()) {
     LOG4CXX_WARN(logger_, "Accessing not supported module: " << ModuleType());
     SetResourceState(ModuleType(), ResourceState::FREE);
     SendResponse(false,

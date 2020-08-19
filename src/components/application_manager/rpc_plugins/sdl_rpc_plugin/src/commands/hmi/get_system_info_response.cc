@@ -53,38 +53,38 @@ GetSystemInfoResponse::~GetSystemInfoResponse() {}
 
 void GetSystemInfoResponse::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
-  const hmi_apis::Common_Result::eType code =
-      static_cast<hmi_apis::Common_Result::eType>(
-          (*message_)[strings::params][hmi_response::code].asInt());
+  const auto code = static_cast<hmi_apis::Common_Result::eType>(
+      (*message_)[strings::params][hmi_response::code].asInt());
 
-  const SystemInfo& info = GetSystemInfo(code);
-
-  // We have to set preloaded flag as false in policy table on any response
-  // of GetSystemInfo (SDLAQ-CRS-2365)
-  policy_handler_.OnGetSystemInfo(
-      info.ccpu_version, info.wers_country_code, info.language);
-}
-
-const SystemInfo GetSystemInfoResponse::GetSystemInfo(
-    const hmi_apis::Common_Result::eType code) const {
-  SystemInfo info;
+  hmi_capabilities_.set_ccpu_version(policy_handler_.GetCCPUVersionFromPT());
 
   if (hmi_apis::Common_Result::SUCCESS != code) {
     LOG4CXX_WARN(logger_, "GetSystemError returns an error code " << code);
-    return info;
+    hmi_capabilities_.UpdateCachedCapabilities();
+    policy_handler_.SetPreloadedPtFlag(false);
+    return;
   }
+
+  const SystemInfo& info = GetSystemInfo();
+
+  policy_handler_.OnGetSystemInfo(
+      info.ccpu_version, info.wers_country_code, info.language);
+
+  hmi_capabilities_.OnSoftwareVersionReceived(info.ccpu_version);
+}
+
+const SystemInfo GetSystemInfoResponse::GetSystemInfo() const {
+  SystemInfo info;
+
   info.ccpu_version =
       (*message_)[strings::msg_params]["ccpu_version"].asString();
 
   info.wers_country_code =
       (*message_)[strings::msg_params]["wersCountryCode"].asString();
 
-  const uint32_t lang_code =
-      (*message_)[strings::msg_params]["language"].asUInt();
-  info.language = application_manager::MessageHelper::CommonLanguageToString(
-      static_cast<hmi_apis::Common_Language::eType>(lang_code));
-
-  hmi_capabilities_.set_ccpu_version(info.ccpu_version);
+  const auto lang_code = static_cast<hmi_apis::Common_Language::eType>(
+      (*message_)[strings::msg_params]["language"].asUInt());
+  info.language = MessageHelper::CommonLanguageToString(lang_code);
 
   return info;
 }
