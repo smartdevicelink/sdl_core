@@ -933,16 +933,14 @@ CommandCreator& HMICommandFactory::get_creator_factory(
     case hmi_apis::FunctionID::BasicCommunication_OnAppPropertiesChange: {
       return factory.GetCreator<commands::OnAppPropertiesChangeNotification>();
     }
-<<<<<<< HEAD
     case hmi_apis::FunctionID::UI_OnUpdateFile: {
       return factory.GetCreator<commands::OnUIUpdateFileNotification>();
     }
     case hmi_apis::FunctionID::UI_OnUpdateSubMenu: {
       return factory.GetCreator<commands::OnUIUpdateSubMenuNotification>();
-=======
+    }
     case hmi_apis::FunctionID::UI_OnSubtleAlertPressed: {
       return factory.GetCreator<commands::OnUISubtleAlertPressedNotification>();
->>>>>>> origin/develop
     }
     default: { return factory.GetCreator<InvalidCommand>(); }
   }

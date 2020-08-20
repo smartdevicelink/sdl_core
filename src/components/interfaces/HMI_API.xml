@@ -732,13 +732,11 @@
   <element name="alertIcon">
     <description>The image field for Alert</description>
   </element>
-<<<<<<< HEAD
   <element name="subMenuIcon">
     <description>The image field for AddSubMenu.menuIcon</description>
-=======
+  </element>
   <element name="subtleAlertIcon">
     <description>The image of the subtle alert; applies to `SubtleAlert` `alertIcon`</description>
->>>>>>> origin/develop
   </element>
 </enum>
 

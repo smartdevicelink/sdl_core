@@ -469,16 +469,14 @@ CommandCreator& MobileCommandFactory::get_notification_creator(
     case mobile_apis::FunctionID::OnWayPointChangeID: {
       return factory.GetCreator<commands::OnWayPointChangeNotification>();
     }
-<<<<<<< HEAD
     case mobile_apis::FunctionID::OnUpdateFileID: {
       return factory.GetCreator<commands::OnUpdateFileNotification>();
     }
     case mobile_apis::FunctionID::OnUpdateSubMenuID: {
       return factory.GetCreator<commands::OnUpdateSubMenuNotification>();
-=======
+    }
     case mobile_apis::FunctionID::OnSubtleAlertPressedID: {
       return factory.GetCreator<commands::OnSubtleAlertPressedNotification>();
->>>>>>> origin/develop
     }
     default: {}
   }
