@@ -73,7 +73,8 @@ class SetInteriorVehicleDataRequestTest
  public:
   SetInteriorVehicleDataRequestTest()
       : mock_app_(std::make_shared<NiceMock<MockApplication> >())
-      , rc_app_extention_(std::make_shared<RCAppExtension>(kModuleId))
+      , rc_app_extention_(
+            std::make_shared<RCAppExtension>(kModuleId, rc_plugin_, *mock_app_))
       , rc_capabilities_(std::make_shared<smart_objects::SmartObject>(
             smart_objects::SmartType::SmartType_Array)) {}
 
@@ -148,6 +149,7 @@ class SetInteriorVehicleDataRequestTest
   testing::NiceMock<rc_rpc_plugin_test::MockInteriorDataManager>
       mock_interior_data_manager_;
   std::shared_ptr<MockApplication> mock_app_;
+  RCRPCPlugin rc_plugin_;
   std::shared_ptr<RCAppExtension> rc_app_extention_;
   testing::NiceMock<rc_rpc_plugin_test::MockRCCapabilitiesManager>
       mock_rc_capabilities_manager_;

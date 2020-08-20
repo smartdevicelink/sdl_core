@@ -119,7 +119,8 @@ class RCGetInteriorVehicleDataConsentTest
                      rpc_protection_manager_,
                      hmi_so_factory_,
                      mobile_so_factoy_)
-      , rc_app_extention_(std::make_shared<RCAppExtension>(kPluginID))
+      , rc_app_extention_(
+            std::make_shared<RCAppExtension>(kPluginID, rc_plugin_, *mock_app_))
       , mock_rpc_plugin_manager(
             std::make_shared<NiceMock<MockRPCPluginManager> >())
       , rpc_plugin(mock_rpc_plugin)
@@ -217,6 +218,7 @@ class RCGetInteriorVehicleDataConsentTest
   std::shared_ptr<application_manager::MockRPCProtectionManager>
       rpc_protection_manager_;
   am::rpc_service::RPCServiceImpl rpc_service_;
+  RCRPCPlugin rc_plugin_;
   std::shared_ptr<RCAppExtension> rc_app_extention_;
   std::shared_ptr<am::plugin_manager::MockRPCPluginManager>
       mock_rpc_plugin_manager;

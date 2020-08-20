@@ -74,7 +74,8 @@ class OnInteriorVehicleDataNotificationTest
  public:
   OnInteriorVehicleDataNotificationTest()
       : mock_app_(std::make_shared<NiceMock<MockApplication> >())
-      , rc_app_extention_(std::make_shared<RCAppExtension>(kModuleId))
+      , rc_app_extention_(
+            std::make_shared<RCAppExtension>(kModuleId, rc_plugin_, *mock_app_))
       , apps_lock_(std::make_shared<sync_primitives::Lock>())
       , apps_da_(apps_, apps_lock_) {
     ON_CALL(*mock_app_, app_id()).WillByDefault(Return(kAppId));
@@ -120,6 +121,7 @@ class OnInteriorVehicleDataNotificationTest
 
  protected:
   std::shared_ptr<MockApplication> mock_app_;
+  RCRPCPlugin rc_plugin_;
   std::shared_ptr<RCAppExtension> rc_app_extention_;
   testing::NiceMock<rc_rpc_plugin_test::MockResourceAllocationManager>
       mock_allocation_manager_;

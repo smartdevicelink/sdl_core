@@ -82,8 +82,8 @@ class ButtonPressRequestTest
       : rc_capabilities_(std::make_shared<smart_objects::SmartObject>(
             smart_objects::SmartType_Map))
       , mock_app_(std::make_shared<NiceMock<MockApplication> >())
-      , rc_app_extention_(
-            std::make_shared<rc_rpc_plugin::RCAppExtension>(kModuleId)) {}
+      , rc_app_extention_(std::make_shared<rc_rpc_plugin::RCAppExtension>(
+            kModuleId, rc_plugin_, *mock_app_)) {}
 
   void SetUp() OVERRIDE {
     smart_objects::SmartObject control_caps((smart_objects::SmartType_Array));
@@ -143,6 +143,7 @@ class ButtonPressRequestTest
  protected:
   smart_objects::SmartObjectSPtr rc_capabilities_;
   std::shared_ptr<MockApplication> mock_app_;
+  RCRPCPlugin rc_plugin_;
   std::shared_ptr<rc_rpc_plugin::RCAppExtension> rc_app_extention_;
   test::components::policy_test::MockPolicyHandlerInterface
       mock_policy_handler_;

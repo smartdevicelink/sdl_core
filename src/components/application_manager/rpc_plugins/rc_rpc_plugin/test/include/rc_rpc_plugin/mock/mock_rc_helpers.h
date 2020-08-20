@@ -54,9 +54,11 @@ class MockRCHelpers {
   MOCK_METHOD1(
       GetRCExtension,
       rc_rpc_plugin::RCAppExtensionPtr(application_manager::Application&));
-  MOCK_METHOD2(CreateUnsubscribeRequestToHMI,
-               smart_objects::SmartObjectSPtr(const rc_rpc_plugin::ModuleUid&,
-                                              const uint32_t));
+  MOCK_METHOD3(
+      CreateGetInteriorVDRequestToHMI,
+      smart_objects::SmartObjectSPtr(const rc_rpc_plugin::ModuleUid&,
+                                     const uint32_t,
+                                     const RCHelpers::GetInteriorData action));
   MOCK_METHOD2(AppsSubscribedToModule,
                std::vector<application_manager::ApplicationSharedPtr>(
                    application_manager::ApplicationManager&,
@@ -88,6 +90,9 @@ class MockRCHelpers {
       MergeModuleData,
       smart_objects::SmartObject(const smart_objects::SmartObject& data1,
                                  const smart_objects::SmartObject& data2));
+
+  MOCK_METHOD1(IsResponseSuccessful,
+               bool(const smart_objects::SmartObject& response));
 
   static MockRCHelpers* rc_helpers_mock();
 };
