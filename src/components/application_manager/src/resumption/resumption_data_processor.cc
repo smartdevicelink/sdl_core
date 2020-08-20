@@ -317,7 +317,8 @@ bool ResumptionDataProcessor::IsResumptionSuccessful(const uint32_t app_id) {
   sync_primitives::AutoWriteLock lock(resumption_status_lock_);
   ApplicationResumptionStatus& status = resumption_status_[app_id];
   return status.error_requests.empty() &&
-         status.unsuccessful_vehicle_data_subscriptions_.empty();
+         status.unsuccessful_vehicle_data_subscriptions_.empty() &&
+         status.unsuccesfull_module_subscriptions_.empty();
 }
 
 void ResumptionDataProcessor::EraseAppResumptionData(
@@ -1141,7 +1142,18 @@ void ResumptionDataProcessor::CheckModuleDataSubscription(
   const ModuleUid responsed_module{responsed_module_type_str,
                                    responsed_module_id};
 
-  if (requested_module == responsed_module) {
+  bool is_successful_subscribed = false;
+  if (response[application_manager::strings::msg_params].keyExists(
+          rc_rpc_plugin::message_params::kIsSubscribed)) {
+    is_successful_subscribed =
+        response[application_manager::strings::msg_params]
+                [rc_rpc_plugin::message_params::kIsSubscribed]
+                    .asBool();
+  }
+
+  const bool is_the_same_module = requested_module == responsed_module;
+
+  if (is_the_same_module && is_successful_subscribed) {
     LOG4CXX_TRACE(logger_,
                   "Module [" << requested_module.first << ":"
                              << requested_module.second
