@@ -569,9 +569,9 @@ void SQLPTRepresentation::GatherModuleConfig(
                  "Incorrect select statement for subtle notifications");
   } else {
     while (subtle_notifications.Next()) {
-      config->subtle_notifications_per_minute_by_priority[subtle_notifications
-                                                              .GetString(0)] =
-          subtle_notifications.GetInteger(1);
+      (*config->subtle_notifications_per_minute_by_priority)
+          [subtle_notifications.GetString(0)] =
+              subtle_notifications.GetInteger(1);
     }
   }
   utils::dbms::SQLQuery seconds(db());
@@ -1546,7 +1546,7 @@ bool SQLPTRepresentation::SaveModuleConfig(
   }
 
   if (!SaveNumberOfSubtleNotificationsPerMinute(
-          config.subtle_notifications_per_minute_by_priority)) {
+          *config.subtle_notifications_per_minute_by_priority)) {
     return false;
   }
 
