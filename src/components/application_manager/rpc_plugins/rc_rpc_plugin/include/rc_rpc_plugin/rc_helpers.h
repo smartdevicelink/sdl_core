@@ -80,8 +80,12 @@ class RCHelpers {
   static RCAppExtensionPtr GetRCExtension(
       application_manager::Application& app);
 
-  static smart_objects::SmartObjectSPtr CreateUnsubscribeRequestToHMI(
-      const ModuleUid& module, const uint32_t correlation_id);
+  enum GetInteriorData { SUBSCRIBE, UNSUBSCRIBE };
+
+  static smart_objects::SmartObjectSPtr CreateGetInteriorVDRequestToHMI(
+      const ModuleUid& module,
+      const uint32_t correlation_id,
+      const GetInteriorData action);
 
   static std::vector<application_manager::ApplicationSharedPtr>
   AppsSubscribedToModule(application_manager::ApplicationManager& app_mngr,
@@ -169,6 +173,13 @@ class RCHelpers {
   static smart_objects::SmartObject MergeArray(
       const smart_objects::SmartObject& data1,
       const smart_objects::SmartObject& data2);
+
+  /**
+   * @brief Determines the success of the response
+   * judging from message type received from HMI
+   * @param response from HMI
+   */
+  static bool IsResponseSuccessful(const smart_objects::SmartObject& response);
 };
 
 }  // namespace rc_rpc_plugin
