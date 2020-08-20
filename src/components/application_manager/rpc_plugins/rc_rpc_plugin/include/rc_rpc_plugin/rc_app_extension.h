@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018, Ford Motor Company
+ * Copyright (c) 2020, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -36,7 +36,9 @@
 #include <memory>
 #include <set>
 #include <string>
+
 #include "application_manager/app_extension.h"
+#include "application_manager/application.h"
 #include "utils/macro.h"
 
 namespace rc_rpc_plugin {
@@ -137,9 +139,13 @@ struct Grid {
   }
 };
 
+class RCRPCPlugin;
+
 class RCAppExtension : public application_manager::AppExtension {
  public:
-  explicit RCAppExtension(application_manager::AppExtensionUID uid);
+  explicit RCAppExtension(application_manager::AppExtensionUID uid,
+                          RCRPCPlugin& plugin,
+                          application_manager::Application& application);
   ~RCAppExtension();
 
   /**
@@ -197,9 +203,22 @@ class RCAppExtension : public application_manager::AppExtension {
   void SetUserLocation(const Grid& grid);
 
  private:
+  /**
+   * @brief Checks if the application's pointer is valid and update the
+   * application's hash in this case
+   */
+  void UpdateHash();
+
   std::set<ModuleUid> subscribed_interior_vehicle_data_;
 
   Grid user_location_;
+
+  RCRPCPlugin& plugin_;
+
+  /**
+   * ApplicationSharedPtr needed for updating application's hash
+   */
+  application_manager::Application& application_;
 
   // AppExtension interface
  public:
@@ -209,7 +228,7 @@ class RCAppExtension : public application_manager::AppExtension {
                          resumption::Subscriber subscriber) OVERRIDE;
 
   void RevertResumption(
-      const smart_objects::SmartObject& subscriptions) OVERRIDE;
+      const smart_objects::SmartObject& subscriptions_so) OVERRIDE;
 };
 
 typedef std::shared_ptr<RCAppExtension> RCAppExtensionPtr;
