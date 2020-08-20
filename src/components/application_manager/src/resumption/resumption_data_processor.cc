@@ -33,6 +33,7 @@
 #include "application_manager/event_engine/event_observer.h"
 #include "application_manager/message_helper.h"
 #include "application_manager/resumption/resumption_data_processor.h"
+#include "application_manager/rpc_plugins/rc_rpc_plugin/include/rc_rpc_plugin/rc_module_constants.h"
 #include "application_manager/smart_object_keys.h"
 
 namespace resumption {
@@ -45,8 +46,17 @@ using app_mngr::MessageHelper;
 namespace strings = app_mngr::strings;
 namespace event_engine = app_mngr::event_engine;
 namespace commands = app_mngr::commands;
+namespace message_params = rc_rpc_plugin::message_params;
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "Resumption")
+std::map<hmi_apis::Common_ModuleType::eType, std::string>
+    module_types_str_mapping{
+        {hmi_apis::Common_ModuleType::eType::CLIMATE, {"CLIMATE"}},
+        {hmi_apis::Common_ModuleType::eType::RADIO, {"RADIO"}},
+        {hmi_apis::Common_ModuleType::eType::SEAT, {"SEAT"}},
+        {hmi_apis::Common_ModuleType::eType::AUDIO, {"AUDIO"}},
+        {hmi_apis::Common_ModuleType::eType::LIGHT, {"LIGHT"}},
+        {hmi_apis::Common_ModuleType::eType::HMI_SETTINGS, {"HMI_SETTINGS"}}};
 
 bool ResumptionRequestID::operator<(const ResumptionRequestID& other) const {
   return correlation_id < other.correlation_id ||
@@ -258,6 +268,11 @@ void ResumptionDataProcessor::ProcessResumptionStatus(
   if (hmi_apis::FunctionID::UI_CreateWindow ==
       found_request.request_id.function_id) {
     CheckCreateWindowResponse(found_request.message, response);
+  }
+
+  if (hmi_apis::FunctionID::RC_GetInteriorVehicleData ==
+      found_request.request_id.function_id) {
+    CheckModuleDataSubscription(found_request.message, response, status);
   }
 }
 
@@ -1007,15 +1022,39 @@ void ResumptionDataProcessor::DeletePluginsSubscriptions(
   }
 
   const ApplicationResumptionStatus& status = it->second;
-  smart_objects::SmartObject extension_subscriptions;
+  smart_objects::SmartObject extension_vd_subscriptions;
   for (auto ivi : status.successful_vehicle_data_subscriptions_) {
     LOG4CXX_DEBUG(logger_, "ivi " << ivi << " should be deleted");
-    extension_subscriptions[ivi] = true;
+    extension_vd_subscriptions[ivi] = true;
+  }
+
+  smart_objects::SmartObject extension_modules_subscriptions(
+      smart_objects::SmartType_Map);
+
+  if (!status.succesfull_module_subscriptions_.empty()) {
+    extension_modules_subscriptions[message_params::kModuleData] =
+        new smart_objects::SmartObject(smart_objects::SmartType_Array);
+
+    auto& module_data_so =
+        extension_modules_subscriptions[message_params::kModuleData];
+
+    uint32_t index = 0;
+    for (const auto& module : status.succesfull_module_subscriptions_) {
+      module_data_so[index] =
+          new smart_objects::SmartObject(smart_objects::SmartType_Map);
+      module_data_so[index][message_params::kModuleType] = module.first;
+      module_data_so[index][message_params::kModuleId] = module.second;
+      index++;
+    }
+
+    extension_vd_subscriptions[message_params::kModuleData] =
+        extension_modules_subscriptions[message_params::kModuleData];
   }
   resumption_status_lock_.Release();
 
-  for (auto& extension : application->Extensions()) {
-    extension->RevertResumption(extension_subscriptions);
+  auto extenstions = application->Extensions();
+  for (auto& extension : extenstions) {
+    extension->RevertResumption(extension_vd_subscriptions);
   }
 }
 
@@ -1059,6 +1098,61 @@ void ResumptionDataProcessor::CheckVehicleDataResponse(
       LOG4CXX_TRACE(logger_, "ivi " << ivi << " was successfuly subscribed");
       status.successful_vehicle_data_subscriptions_.push_back(ivi);
     }
+  }
+}
+
+void ResumptionDataProcessor::CheckModuleDataSubscription(
+    const ns_smart_device_link::ns_smart_objects::SmartObject& request,
+    const ns_smart_device_link::ns_smart_objects::SmartObject& response,
+    ApplicationResumptionStatus& status) {
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  const auto& msg_params__so = request[strings::msg_params];
+  const auto requested_module_type =
+      msg_params__so[message_params::kModuleType].asString();
+  const auto requested_module_id =
+      msg_params__so[message_params::kModuleId].asString();
+  const ModuleUid requested_module{requested_module_type, requested_module_id};
+
+  if (!IsResponseSuccessful(response)) {
+    LOG4CXX_TRACE(logger_, "Module data subscription request NOT succesfull");
+    status.unsuccesfull_module_subscriptions_.push_back(requested_module);
+    return;
+  }
+
+  const auto& responsed_module_data_so =
+      response[strings::msg_params][message_params::kModuleData];
+
+  if (0 == responsed_module_data_so.length()) {
+    LOG4CXX_TRACE(logger_, "Module data subscription request not succesfull");
+    status.unsuccesfull_module_subscriptions_.push_back(requested_module);
+    return;
+  }
+
+  const auto responsed_module_type_int =
+      static_cast<hmi_apis::Common_ModuleType::eType>(
+          responsed_module_data_so[message_params::kModuleType].asUInt());
+
+  const auto responsed_module_type_str =
+      module_types_str_mapping[responsed_module_type_int];
+
+  const auto responsed_module_id =
+      responsed_module_data_so[message_params::kModuleId].asString();
+  const ModuleUid responsed_module{responsed_module_type_str,
+                                   responsed_module_id};
+
+  if (requested_module == responsed_module) {
+    LOG4CXX_TRACE(logger_,
+                  "Module [" << requested_module.first << ":"
+                             << requested_module.second
+                             << "] was successfuly subscribed");
+    status.succesfull_module_subscriptions_.push_back(requested_module);
+  } else {
+    LOG4CXX_TRACE(logger_,
+                  "Module [" << requested_module.first << ":"
+                             << requested_module.second
+                             << "] was NOT successfuly subscribed");
+    status.unsuccesfull_module_subscriptions_.push_back(requested_module);
   }
 }
 

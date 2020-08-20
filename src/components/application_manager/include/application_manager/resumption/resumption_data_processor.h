@@ -34,6 +34,7 @@
 #include "application_manager/application.h"
 #include "application_manager/event_engine/event_observer.h"
 #include "application_manager/resumption/resume_ctrl.h"
+#include "application_manager/rpc_plugins/rc_rpc_plugin/include/rc_rpc_plugin/rc_rpc_types.h"
 #include "smart_objects/smart_object.h"
 #include "utils/rwlock.h"
 
@@ -45,6 +46,8 @@ namespace app_mngr = application_manager;
  * @brief The ResumptionRequestID struct contains fields, needed during
  * processing events, related to responses from HMI to each resumption request
  */
+using ModuleUid = rc_rpc_plugin::rc_rpc_types::ModuleUid;
+
 struct ResumptionRequestID {
   hmi_apis::FunctionID::eType function_id;
   int32_t correlation_id;
@@ -75,6 +78,8 @@ struct ApplicationResumptionStatus {
   std::vector<ResumptionRequest> successful_requests;
   std::vector<std::string> unsuccessful_vehicle_data_subscriptions_;
   std::vector<std::string> successful_vehicle_data_subscriptions_;
+  std::vector<ModuleUid> succesfull_module_subscriptions_;
+  std::vector<ModuleUid> unsuccesfull_module_subscriptions_;
 };
 
 /**
@@ -388,6 +393,10 @@ class ResumptionDataProcessor : public app_mngr::event_engine::EventObserver {
   void CheckVehicleDataResponse(const smart_objects::SmartObject& request,
                                 const smart_objects::SmartObject& response,
                                 ApplicationResumptionStatus& status);
+
+  void CheckModuleDataSubscription(const smart_objects::SmartObject& request,
+                                   const smart_objects::SmartObject& response,
+                                   ApplicationResumptionStatus& status);
 
   /**
    * @brief Checks whether CreateWindow response successful or not and handles
