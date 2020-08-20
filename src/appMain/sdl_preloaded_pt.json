@@ -422,6 +422,20 @@
                             "LIMITED",
                             "BACKGROUND"
                         ]
+                    },
+                    "OnUpdateFile": {
+                        "hmi_levels": [
+                            "FULL",
+                            "LIMITED",
+                            "BACKGROUND"
+                        ]
+                    },
+                    "OnUpdateSubMenu": {
+                        "hmi_levels": [
+                            "FULL",
+                            "LIMITED",
+                            "BACKGROUND"
+                        ]
                     }
                 }
             },
