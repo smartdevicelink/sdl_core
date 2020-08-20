@@ -1233,7 +1233,7 @@ void ApplicationImpl::set_hmi_level(
   DCHECK_OR_RETURN_VOID(app)
   application_manager_.state_controller().SetRegularState(
       app, window_id, new_hmi_level);
-  LOG4CXX_INFO(logger_, "hmi_level = " << new_hmi_level);
+  LOG4CXX_DEBUG(logger_, "hmi_level = " << new_hmi_level);
   usage_report_.RecordHmiStateChanged(new_hmi_level);
 }
 
@@ -1244,12 +1244,14 @@ AppExtensionPtr ApplicationImpl::QueryInterface(AppExtensionUID uid) {
       return (*it);
     }
   }
-
   return AppExtensionPtr();
 }
 
 bool ApplicationImpl::AddExtension(AppExtensionPtr extension) {
   if (!QueryInterface(extension->uid())) {
+    LOG4CXX_TRACE(logger_,
+                  "Add extenstion to add id" << app_id() << " with uid "
+                                             << extension->uid());
     extensions_.push_back(extension);
     return true;
   }
