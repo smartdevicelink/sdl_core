@@ -4256,7 +4256,7 @@
         <param name="seatLocationCapability" type="SeatLocationCapability" mandatory="false">
             <description>Contains information about the locations of each seat</description>
         </param>
-        <param name="driverDistractionCapability" type="DriverDistractionCapability" mandatory="false" since="6.0">
+        <param name="driverDistractionCapability" type="DriverDistractionCapability" mandatory="false">
             <description>Describes capabilities when the driver is distracted</description>
         </param>      
     </struct>
