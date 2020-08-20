@@ -250,6 +250,20 @@ class SQLPTRepresentationTest : protected SQLPTRepresentation,
         Json::Value(5);
     module_config["notifications_per_minute_by_priority"]["none"] =
         Json::Value(6);
+    module_config["subtle_notifications_per_minute_by_priority"] =
+        Json::Value(Json::objectValue);
+    module_config["subtle_notifications_per_minute_by_priority"]["emergency"] =
+        Json::Value(7);
+    module_config["subtle_notifications_per_minute_by_priority"]["navigation"] =
+        Json::Value(8);
+    module_config["subtle_notifications_per_minute_by_priority"]["VOICECOMM"] =
+        Json::Value(9);
+    module_config["subtle_notifications_per_minute_by_priority"]
+                 ["communication"] = Json::Value(10);
+    module_config["subtle_notifications_per_minute_by_priority"]["normal"] =
+        Json::Value(11);
+    module_config["subtle_notifications_per_minute_by_priority"]["none"] =
+        Json::Value(12);
     module_config["vehicle_make"] = Json::Value("");
     module_config["vehicle_model"] = Json::Value("");
     module_config["vehicle_year"] = Json::Value("");
@@ -589,8 +603,8 @@ TEST_F(SQLPTRepresentationTest,
   ASSERT_TRUE(reps->RefreshDB());
   // Check PT structure destroyed and tables number is 0
 
-  // There are 37 tables in the database, now.
-  const int32_t total_tables_number = 37;
+  // There are 38 tables in the database, now.
+  const int32_t total_tables_number = 38;
   ASSERT_EQ(total_tables_number, FetchOneInt(query_select));
 
   const std::string query_select_count_of_iap_buffer_full =
@@ -1879,6 +1893,7 @@ TEST_F(SQLPTRepresentationTest, Save_SetPolicyTableThenSave_ExpectSavedToPT) {
   EXPECT_EQ(0u, config.seconds_between_retries.size());
   EXPECT_EQ(0u, config.endpoints.size());
   EXPECT_EQ(0u, config.notifications_per_minute_by_priority.size());
+  EXPECT_EQ(0u, (*config.subtle_notifications_per_minute_by_priority).size());
 
   policy_table::ConsumerFriendlyMessages messages;
   GatherConsumerFriendlyMessages(&messages);
@@ -1986,6 +2001,19 @@ TEST_F(SQLPTRepresentationTest, Save_SetPolicyTableThenSave_ExpectSavedToPT) {
   ASSERT_EQ(4, config.notifications_per_minute_by_priority["communication"]);
   ASSERT_EQ(5, config.notifications_per_minute_by_priority["normal"]);
   ASSERT_EQ(6, config.notifications_per_minute_by_priority["none"]);
+  ASSERT_EQ(6u, (*config.subtle_notifications_per_minute_by_priority).size());
+  ASSERT_EQ(7,
+            (*config.subtle_notifications_per_minute_by_priority)["emergency"]);
+  ASSERT_EQ(
+      8, (*config.subtle_notifications_per_minute_by_priority)["navigation"]);
+  ASSERT_EQ(9,
+            (*config.subtle_notifications_per_minute_by_priority)["VOICECOMM"]);
+  ASSERT_EQ(
+      10,
+      (*config.subtle_notifications_per_minute_by_priority)["communication"]);
+  ASSERT_EQ(11,
+            (*config.subtle_notifications_per_minute_by_priority)["normal"]);
+  ASSERT_EQ(12, (*config.subtle_notifications_per_minute_by_priority)["none"]);
   EXPECT_EQ(1u, config.endpoints.size());
   policy_table::ServiceEndpoints& service_endpoints = config.endpoints;
   EXPECT_EQ("0x00", service_endpoints.begin()->first);

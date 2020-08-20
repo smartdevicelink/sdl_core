@@ -488,10 +488,11 @@ class PolicyManager : public usage_statistics::StatisticsManager,
   /**
    * @brief Get number of notification by priority
    * @param priority Specified priority
+   * @param is_subtle If true, get the number of allowed subtle notifications
    * @return notification number
    */
-  virtual uint32_t GetNotificationsNumber(
-      const std::string& priority) const = 0;
+  virtual uint32_t GetNotificationsNumber(const std::string& priority,
+                                          const bool is_subtle) const = 0;
 
   /**
    * @brief Allows to update Vehicle Identification Number in policy table.

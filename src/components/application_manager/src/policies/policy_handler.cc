@@ -1759,10 +1759,10 @@ void PolicyHandler::CheckPermissions(
       device_id, app->policy_app_id(), hmi_level, rpc, rpc_params, result);
 }
 
-uint32_t PolicyHandler::GetNotificationsNumber(
-    const std::string& priority) const {
+uint32_t PolicyHandler::GetNotificationsNumber(const std::string& priority,
+                                               const bool is_subtle) const {
   POLICY_LIB_CHECK_OR_RETURN(0);
-  return policy_manager_->GetNotificationsNumber(priority);
+  return policy_manager_->GetNotificationsNumber(priority, is_subtle);
 }
 
 DeviceConsent PolicyHandler::GetUserConsentForDevice(

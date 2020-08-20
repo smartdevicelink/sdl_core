@@ -122,7 +122,8 @@ class PolicyHandler : public PolicyHandlerInterface,
       const RPCParams& rpc_params,
       CheckPermissionResult& result) OVERRIDE;
 
-  uint32_t GetNotificationsNumber(const std::string& priority) const OVERRIDE;
+  uint32_t GetNotificationsNumber(const std::string& priority,
+                                  const bool is_subtle = false) const OVERRIDE;
   virtual DeviceConsent GetUserConsentForDevice(
       const std::string& device_id) const OVERRIDE;
 

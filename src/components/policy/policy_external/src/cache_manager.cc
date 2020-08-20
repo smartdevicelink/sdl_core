@@ -1797,15 +1797,19 @@ std::string CacheManager::GetIconUrl(const std::string& policy_app_id) const {
 }
 
 rpc::policy_table_interface_base::NumberOfNotificationsType
-CacheManager::GetNotificationsNumber(const std::string& priority) {
+CacheManager::GetNotificationsNumber(const std::string& priority,
+                                     const bool is_subtle) {
   CACHE_MANAGER_CHECK(0);
-  typedef rpc::policy_table_interface_base::NumberOfNotificationsPerMinute NNPM;
 
   sync_primitives::AutoLock auto_lock(cache_lock_);
-  const NNPM& nnpm =
-      pt_->policy_table.module_config.notifications_per_minute_by_priority;
+  const auto& module_config = pt_->policy_table.module_config;
+  const auto& nnpm =
+      is_subtle && module_config.subtle_notifications_per_minute_by_priority
+                       .is_initialized()
+          ? *module_config.subtle_notifications_per_minute_by_priority
+          : module_config.notifications_per_minute_by_priority;
 
-  NNPM::const_iterator priority_iter = nnpm.find(priority);
+  auto priority_iter = nnpm.find(priority);
 
   const uint32_t result =
       (nnpm.end() != priority_iter ? (*priority_iter).second : 0);
