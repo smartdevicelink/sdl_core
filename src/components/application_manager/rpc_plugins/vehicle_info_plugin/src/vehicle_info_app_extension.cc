@@ -175,7 +175,19 @@ void VehicleInfoAppExtension::RevertResumption(
   LOG4CXX_AUTO_TRACE(logger_);
 
   unsubscribeFromVehicleInfo();
-  plugin_.RevertResumption(app_, subscriptions.enumerate());
+
+  std::set<std::string> ivi_subscriptions_to_revert;
+  const auto ivi_subscriptions_keys = subscriptions.enumerate();
+  for (const auto& key : ivi_subscriptions_keys) {
+    // Only boolean keys in subscriptions list are true vehicle data
+    // subscriptions
+    if (smart_objects::SmartType::SmartType_Boolean ==
+        subscriptions.getElement(key).getType()) {
+      ivi_subscriptions_to_revert.insert(key);
+    }
+  }
+
+  plugin_.RevertResumption(app_, ivi_subscriptions_to_revert);
 }
 
 VehicleInfoAppExtension& VehicleInfoAppExtension::ExtractVIExtension(
