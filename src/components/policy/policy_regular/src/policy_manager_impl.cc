@@ -295,7 +295,7 @@ void FilterPolicyTable(
       module_config.subtle_notifications_per_minute_by_priority
           .is_initialized()) {
     FilterInvalidPriorityValues(
-        module_config.subtle_notifications_per_minute_by_priority);
+        *module_config.subtle_notifications_per_minute_by_priority);
   }
 
   if (pt.app_policies_section.is_initialized()) {

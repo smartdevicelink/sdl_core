@@ -830,9 +830,7 @@ ModuleConfig::ModuleConfig(
     const SecondsBetweenRetries& seconds_between_retries,
     const ServiceEndpoints& endpoints,
     const ServiceEndpointProperties& endpoint_properties,
-    const NumberOfNotificationsPerMinute& notifications_per_minute_by_priority,
-    const NumberOfNotificationsPerMinute&
-        subtle_notifications_per_minute_by_priority)
+    const NumberOfNotificationsPerMinute& notifications_per_minute_by_priority)
     : CompositeType(kUninitialized)
     , exchange_after_x_ignition_cycles(exchange_after_x_ignition_cycles)
     , exchange_after_x_kilometers(exchange_after_x_kilometers)
@@ -841,9 +839,8 @@ ModuleConfig::ModuleConfig(
     , seconds_between_retries(seconds_between_retries)
     , endpoints(endpoints)
     , endpoint_properties(endpoint_properties)
-    , notifications_per_minute_by_priority(notifications_per_minute_by_priority)
-    , subtle_notifications_per_minute_by_priority(
-          subtle_notifications_per_minute_by_priority) {}
+    , notifications_per_minute_by_priority(
+          notifications_per_minute_by_priority) {}
 
 ModuleConfig::~ModuleConfig() {}
 
@@ -884,10 +881,10 @@ void ModuleConfig::SafeCopyFrom(const ModuleConfig& from) {
   endpoint_properties = from.endpoint_properties;
   notifications_per_minute_by_priority =
       from.notifications_per_minute_by_priority;
-  subtle_notifications_per_minute_by_priority =
-      from.subtle_notifications_per_minute_by_priority;
   lock_screen_dismissal_enabled = from.lock_screen_dismissal_enabled;
 
+  subtle_notifications_per_minute_by_priority.assign_if_valid(
+      from.subtle_notifications_per_minute_by_priority);
   certificate.assign_if_valid(from.certificate);
   vehicle_make.assign_if_valid(from.vehicle_make);
   vehicle_model.assign_if_valid(from.vehicle_model);

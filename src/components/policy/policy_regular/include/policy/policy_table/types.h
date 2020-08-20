@@ -323,7 +323,8 @@ struct ModuleConfig : CompositeType {
   ServiceEndpoints endpoints;
   Optional<ServiceEndpointProperties> endpoint_properties;
   NumberOfNotificationsPerMinute notifications_per_minute_by_priority;
-  NumberOfNotificationsPerMinute subtle_notifications_per_minute_by_priority;
+  Optional<NumberOfNotificationsPerMinute>
+      subtle_notifications_per_minute_by_priority;
   Optional<String<1, 100> > vehicle_make;
   Optional<String<1, 100> > vehicle_model;
   Optional<String<4, 4> > vehicle_year;
@@ -343,9 +344,7 @@ struct ModuleConfig : CompositeType {
                const ServiceEndpoints& endpoints,
                const ServiceEndpointProperties& endpoint_properties,
                const NumberOfNotificationsPerMinute&
-                   notifications_per_minute_by_priority,
-               const NumberOfNotificationsPerMinute&
-                   subtle_notifications_per_minute_by_priority);
+                   notifications_per_minute_by_priority);
   ~ModuleConfig();
   explicit ModuleConfig(const Json::Value* value__);
   void SafeCopyFrom(const ModuleConfig& from);
