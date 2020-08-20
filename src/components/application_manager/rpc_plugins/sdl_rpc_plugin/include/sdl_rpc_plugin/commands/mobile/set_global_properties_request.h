@@ -82,6 +82,8 @@ class SetGlobalPropertiesRequest
    */
   bool Init() FINAL;
 
+  void onTimeOut() OVERRIDE;
+
   /**
    * @brief Prepares total result for mobile according to three results:
    * ui_properties_result, tts_properties_result, rc_properties_result.
