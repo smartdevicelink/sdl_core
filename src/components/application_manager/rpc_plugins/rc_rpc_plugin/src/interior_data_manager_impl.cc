@@ -50,6 +50,13 @@ void InteriorDataManagerImpl::OnDisablingRC() {
   }
 }
 
+void InteriorDataManagerImpl::OnResumptionRevert(
+    const std::set<ModuleUid>& subscriptions) {
+  for (const auto& module : subscriptions) {
+    UnsubscribeFromInteriorVehicleData(module);
+  }
+}
+
 void InteriorDataManagerImpl::StoreRequestToHMITime(const ModuleUid& module) {
   LOG4CXX_AUTO_TRACE(logger_);
   sync_primitives::AutoLock autolock(requests_to_hmi_history_lock_);
@@ -126,8 +133,10 @@ void InteriorDataManagerImpl::UpdateHMISubscriptionsOnAppUnregistered(
 void InteriorDataManagerImpl::UnsubscribeFromInteriorVehicleData(
     const ModuleUid& module) {
   cache_.Remove(module);
-  auto unsubscribe_request = RCHelpers::CreateUnsubscribeRequestToHMI(
-      module, app_mngr_.GetNextHMICorrelationID());
+  auto unsubscribe_request = RCHelpers::CreateGetInteriorVDRequestToHMI(
+      module,
+      app_mngr_.GetNextHMICorrelationID(),
+      RCHelpers::GetInteriorData::UNSUBSCRIBE);
   LOG4CXX_DEBUG(logger_,
                 "Send Unsubscribe from module type: " << module.first << " id: "
                                                       << module.second);
@@ -140,8 +149,10 @@ void InteriorDataManagerImpl::UnsubscribeFromInteriorVehicleDataOfType(
 
   for (const auto& module : modules) {
     cache_.Remove(module);
-    auto unsubscribe_request = RCHelpers::CreateUnsubscribeRequestToHMI(
-        module, app_mngr_.GetNextHMICorrelationID());
+    auto unsubscribe_request = RCHelpers::CreateGetInteriorVDRequestToHMI(
+        module,
+        app_mngr_.GetNextHMICorrelationID(),
+        RCHelpers::GetInteriorData::UNSUBSCRIBE);
     LOG4CXX_DEBUG(logger_,
                   "Send Unsubscribe from module type: "
                       << module.first << " id: " << module.second);
