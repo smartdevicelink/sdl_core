@@ -121,17 +121,26 @@ void GetInteriorVehicleDataRequest::ProcessResponseToMobileFromCache(
   LOG4CXX_DEBUG(logger_,
                 "kSubscribe exist" << request_msg_params.keyExists(
                     message_params::kSubscribe));
+
+  mobile_apis::Result::eType result_code = mobile_apis::Result::SUCCESS;
   if (request_msg_params.keyExists(message_params::kSubscribe)) {
     response_msg_params[message_params::kIsSubscribed] =
         request_msg_params[message_params::kSubscribe].asBool();
     if (request_msg_params[message_params::kSubscribe].asBool()) {
       auto extension = RCHelpers::GetRCExtension(*app);
       DCHECK(extension);
-      extension->SubscribeToInteriorVehicleData(module);
+      const bool is_app_already_subscribed =
+          extension->IsSubscribedToInteriorVehicleData(module);
+      if (is_app_already_subscribed) {
+        response_msg_params[app_mngr::strings::info] =
+            "App is already subscribed to the provided module";
+        result_code = mobile_apis::Result::WARNINGS;
+      } else {
+        extension->SubscribeToInteriorVehicleData(module);
+      }
     }
   }
-  SendResponse(
-      true, mobile_apis::Result::SUCCESS, nullptr, &response_msg_params);
+  SendResponse(true, result_code, nullptr, &response_msg_params);
   if (AppShouldBeUnsubscribed()) {
     auto extension = RCHelpers::GetRCExtension(*app);
     DCHECK(extension);
