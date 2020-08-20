@@ -37,6 +37,7 @@
 
 #include "application_manager/command_factory.h"
 #include "application_manager/plugin_manager/rpc_plugin.h"
+#include "application_manager/resumption/extension_pending_resumption_handler.h"
 #include "rc_rpc_plugin/interior_data_cache.h"
 #include "rc_rpc_plugin/interior_data_manager.h"
 #include "rc_rpc_plugin/rc_capabilities_manager.h"
@@ -102,6 +103,35 @@ class RCRPCPlugin : public plugins::RPCPlugin {
   void OnApplicationEvent(plugins::ApplicationEvent event,
                           app_mngr::ApplicationSharedPtr application) OVERRIDE;
 
+  /**
+   * @brief ProcessResumptionSubscription send Subscribe vehicle data requests
+   * to HMI
+   * @param app application for subscription
+   * @param ext application extension
+   * @param subscriber callback for subscription
+   */
+  void ProcessResumptionSubscription(app_mngr::Application& app,
+                                     RCAppExtension& ext,
+                                     resumption::Subscriber subscriber);
+
+  /**
+   * @brief Reverts resumption data, clears all pending resumption and sends
+   * ubsubscribe vehicle data request to a HMI
+   * @param subscriptions Module data that SDL should unsubscribe off
+   */
+  void RevertResumption(const std::set<ModuleUid>& subscriptions);
+
+  /**
+   * @brief IsAnotherAppsSubscribedOnTheSameModule check if any app exept passed
+   * is subscribed to the module
+   * @param module module to check
+   * @param app_id app to ignore subscription
+   * @return  true is any app expect passed subscribed to module, otherwise
+   * false
+   */
+  bool IsAnotherAppsSubscribedOnTheSameModule(
+      const rc_rpc_types::ModuleUid& module, const uint32_t app_id);
+
   static const uint32_t kRCPluginID = 153;
 
   typedef std::vector<application_manager::ApplicationSharedPtr> Apps;
@@ -117,6 +147,9 @@ class RCRPCPlugin : public plugins::RPCPlugin {
   std::unique_ptr<InteriorDataCache> interior_data_cache_;
   std::unique_ptr<InteriorDataManager> interior_data_manager_;
   std::unique_ptr<RCCapabilitiesManager> rc_capabilities_manager_;
+  using ExtensionPendingResumptionHandlerSPtr =
+      std::shared_ptr<resumption::ExtensionPendingResumptionHandler>;
+  ExtensionPendingResumptionHandlerSPtr pending_resumption_handler_;
 };
 }  // namespace rc_rpc_plugin
 
