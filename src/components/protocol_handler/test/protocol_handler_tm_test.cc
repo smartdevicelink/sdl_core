@@ -3901,8 +3901,8 @@ TEST_F(ProtocolHandlerImplTest, SendServiceDataAck_AfterVersion5) {
 }
 
 /*
- * ProtocolHandler shall send NAck with a reason param when starting a
- * video/audio service if the service type is disallowed by the settings
+ * ProtocolHandler shall send StartServiceNAK with a reason param when starting
+ * a video/audio service if the service type is disallowed by the settings
  */
 TEST_F(ProtocolHandlerImplTest, StartSession_NACKReason_DisallowedBySettings) {
   const ServiceType service_type = kMobileNav;
@@ -3938,6 +3938,7 @@ TEST_F(ProtocolHandlerImplTest, StartSession_NACKReason_DisallowedBySettings) {
 
   BsonObject bson_nack_params;
   bson_object_initialize_default(&bson_nack_params);
+  // NAK reason param
   std::string reason = "Service type: " + std::to_string(service_type) +
                        " disallowed by settings";
   bson_object_put_string(&bson_nack_params,
@@ -3964,11 +3965,11 @@ TEST_F(ProtocolHandlerImplTest, StartSession_NACKReason_DisallowedBySettings) {
 }
 
 /*
- * ProtocolHandler shall send NAck with a reason param on session_observer
- * rejection Check protection flag OFF for all services from kControl to kBulk
+ * ProtocolHandler shall send StartServiceNAK with a reason param on
+ * session_observer rejection Check protection flag OFF for all services from
+ * kControl to kBulk
  */
 TEST_F(ProtocolHandlerImplTest, StartSession_NACKReason_SessionObserverReject) {
-  using namespace protocol_handler;
   const int call_times = 5;
   const utils::SemanticVersion min_reason_param_version(5, 3, 0);
 
@@ -4014,15 +4015,16 @@ TEST_F(ProtocolHandlerImplTest, StartSession_NACKReason_SessionObserverReject) {
       WillRepeatedly(
           DoAll(NotifyTestAsyncWaiter(&waiter),
                 SaveArg<2>(&service_type),
-                InvokeMemberFuncWithArg2(protocol_handler_impl.get(),
-                                         &ProtocolHandler::NotifySessionStarted,
-                                         GetSessionContext(connection_id,
-                                                           NEW_SESSION_ID,
-                                                           SESSION_START_REJECT,
-                                                           service_type,
-                                                           HASH_ID_WRONG,
-                                                           PROTECTION_OFF),
-                                         ByRef(empty_rejected_param_))));
+                InvokeMemberFuncWithArg2(
+                    protocol_handler_impl.get(),
+                    &protocol_handler::ProtocolHandler::NotifySessionStarted,
+                    GetSessionContext(connection_id,
+                                      NEW_SESSION_ID,
+                                      SESSION_START_REJECT,
+                                      service_type,
+                                      protocol_handler::HASH_ID_WRONG,
+                                      PROTECTION_OFF),
+                    ByRef(empty_rejected_param_))));
   times += call_times;
 
   // Expect send NAck
@@ -4037,6 +4039,7 @@ TEST_F(ProtocolHandlerImplTest, StartSession_NACKReason_SessionObserverReject) {
   for (const ServiceType& service_type : service_types) {
     BsonObject bson_nack_params;
     bson_object_initialize_default(&bson_nack_params);
+    // NAK reason param
     std::string reason = "Session observer refused to create service of type " +
                          std::to_string(service_type);
     bson_object_put_string(&bson_nack_params,
@@ -4063,6 +4066,87 @@ TEST_F(ProtocolHandlerImplTest, StartSession_NACKReason_SessionObserverReject) {
   times += call_times;
 
   EXPECT_TRUE(waiter.WaitFor(times, kAsyncExpectationsTimeout));
+}
+
+/*
+ * ProtocolHandler shall send EndServiceNAK with a reason param if
+ * OnSessionEndedCallback returns an 0
+ */
+TEST_F(ProtocolHandlerImplTest,
+       EndSession_NACKReason_OnSessionEndedCallbackFailed) {
+  const utils::SemanticVersion min_reason_param_version(5, 3, 0);
+  std::string err_reason =
+      "Wrong hash_id for session " + std::to_string(session_id);
+  std::shared_ptr<TestAsyncWaiter> waiter = std::make_shared<TestAsyncWaiter>();
+  uint32_t times = 0;
+
+  AddSession(waiter, times);
+  const ServiceType service_type = kRpc;
+
+#ifdef ENABLE_SECURITY
+  AddSecurityManager();
+
+  EXPECT_CALL(session_observer_mock,
+              GetSSLContext(connection_key, service_type))
+      .WillOnce(ReturnNull());
+#endif  // ENABLE_SECURITY
+
+  // Expect ConnectionHandler check
+  EXPECT_CALL(session_observer_mock,
+              OnSessionEndedCallback(connection_id,
+                                     session_id,
+                                     An<uint32_t*>(),
+                                     service_type,
+                                     An<std::string*>()))
+      .
+      // reject session start
+      WillOnce(DoAll(NotifyTestAsyncWaiter(waiter),
+                     SetArgPointee<4>(err_reason),
+                     Return(SESSION_START_REJECT)));
+  times++;
+
+  // Expect send NAck
+  EXPECT_CALL(session_observer_mock,
+              ProtocolVersionUsed(_, _, An<utils::SemanticVersion&>()))
+      .WillOnce(
+          DoAll(SetArgReferee<2>(min_reason_param_version), Return(true)));
+
+  std::vector<std::string> rejected_param_list;
+  rejected_param_list.push_back(protocol_handler::strings::hash_id);
+
+  BsonObject bson_nack_params;
+  bson_object_initialize_default(&bson_nack_params);
+  // Rejected params
+  BsonArray bson_arr;
+  bson_array_initialize(&bson_arr, 1);
+  bson_array_add_string(&bson_arr,
+                        const_cast<char*>(protocol_handler::strings::hash_id));
+  bson_object_put_array(
+      &bson_nack_params, protocol_handler::strings::rejected_params, &bson_arr);
+  // NAK reason param
+  bson_object_put_string(&bson_nack_params,
+                         protocol_handler::strings::reason,
+                         const_cast<char*>(err_reason.c_str()));
+
+  std::vector<uint8_t> nack_params =
+      CreateVectorFromBsonObject(&bson_nack_params);
+  bson_object_deinitialize(&bson_nack_params);
+
+  EXPECT_CALL(transport_manager_mock,
+              SendMessageToDevice(ControlMessage(FRAME_DATA_END_SERVICE_NACK,
+                                                 PROTECTION_OFF,
+                                                 connection_id,
+                                                 Eq(nack_params))))
+      .WillOnce(DoAll(NotifyTestAsyncWaiter(waiter), Return(E_SUCCESS)));
+  times++;
+
+  SendControlMessage(PROTECTION_OFF,
+                     service_type,
+                     session_id,
+                     FRAME_DATA_END_SERVICE,
+                     PROTOCOL_VERSION_5);
+
+  EXPECT_TRUE(waiter->WaitFor(times, kAsyncExpectationsTimeout));
 }
 
 }  // namespace protocol_handler_test
