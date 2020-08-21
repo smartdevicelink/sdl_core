@@ -59,7 +59,7 @@ WebSocketConnection<WebSocketSession<> >::WebSocketConnection(
           &message_queue_,
           [this](Message frame) { session_->WriteDown(frame); }))
     , thread_(threads::CreateThread("WS Async Send", thread_delegate_)) {
-  thread_->start(threads::ThreadOptions());
+  thread_->Start(threads::ThreadOptions());
 }
 
 #ifdef ENABLE_SECURITY
@@ -85,7 +85,7 @@ WebSocketConnection<WebSocketSecureSession<> >::WebSocketConnection(
           &message_queue_,
           [this](Message frame) { session_->WriteDown(frame); }))
     , thread_(threads::CreateThread("WS Async Send", thread_delegate_)) {
-  thread_->start(threads::ThreadOptions());
+  thread_->Start(threads::ThreadOptions());
 }
 template class WebSocketConnection<WebSocketSecureSession<> >;
 #endif  // ENABLE_SECURITY
@@ -168,7 +168,7 @@ void WebSocketConnection<Session>::Shutdown() {
   if (thread_delegate_) {
     session_->Shutdown();
     thread_delegate_->SetShutdown();
-    thread_->join();
+    thread_->Stop(threads::Thread::kThreadSoftStop);
     delete thread_delegate_;
     thread_delegate_ = nullptr;
     threads::DeleteThread(thread_);

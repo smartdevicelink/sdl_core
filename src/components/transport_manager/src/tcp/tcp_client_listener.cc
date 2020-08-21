@@ -156,7 +156,7 @@ bool TcpClientListener::IsInitialised() const {
 TcpClientListener::~TcpClientListener() {
   LOG4CXX_AUTO_TRACE(logger_);
   StopListening();
-  delete thread_->delegate();
+  delete thread_->GetDelegate();
   threads::DeleteThread(thread_);
   Terminate();
   delete interface_listener_;
@@ -467,7 +467,7 @@ TransportAdapter::Error TcpClientListener::StartListeningThread() {
 
   thread_stop_requested_ = false;
 
-  if (!thread_->start()) {
+  if (!thread_->Start()) {
     return TransportAdapter::FAIL;
   }
   return TransportAdapter::OK;
@@ -479,7 +479,7 @@ TransportAdapter::Error TcpClientListener::StopListeningThread() {
   // StopListening() can be called from multiple threads
   sync_primitives::AutoLock auto_lock(start_stop_lock_);
 
-  thread_->join();
+  thread_->Stop(threads::Thread::kThreadStopDelegate);
 
   close(pipe_fds_[1]);
   pipe_fds_[1] = -1;

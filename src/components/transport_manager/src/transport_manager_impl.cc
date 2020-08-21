@@ -296,7 +296,7 @@ int TransportManagerImpl::Disconnect(const ConnectionUID cid) {
     const uint32_t disconnect_timeout =
       get_settings().transport_manager_disconnect_timeout();
     if (disconnect_timeout > 0) {
-      connection->timer->start(disconnect_timeout);
+      connection->timer->Start(disconnect_timeout);
     }
   } else {
     connection->transport_adapter->Disconnect(connection->device,

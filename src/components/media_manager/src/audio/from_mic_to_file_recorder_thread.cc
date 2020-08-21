@@ -69,8 +69,8 @@ FromMicToFileRecorderThread::FromMicToFileRecorderThread(
 FromMicToFileRecorderThread::~FromMicToFileRecorderThread() {
   LOG4CXX_AUTO_TRACE(logger_);
   if (sleepThread_) {
-    sleepThread_->join();
-    delete sleepThread_->delegate();
+    sleepThread_->Stop(threads::Thread::kThreadSoftStop);
+    delete sleepThread_->GetDelegate();
     threads::DeleteThread(sleepThread_);
   }
 }
@@ -276,7 +276,7 @@ void FromMicToFileRecorderThread::threadMain() {
 
     sleepThread_ =
         threads::CreateThread("SleepThread", new SleepThreadDelegate(timeout));
-    sleepThread_->start();
+    sleepThread_->Start();
   }
 
   loop = g_main_loop_new(NULL, FALSE);
