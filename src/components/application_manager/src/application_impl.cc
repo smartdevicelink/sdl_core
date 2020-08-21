@@ -106,6 +106,7 @@ ApplicationImpl::ApplicationImpl(
     , is_navi_(false)
     , is_remote_control_supported_(false)
     , mobile_projection_enabled_(false)
+    , webengine_projection_enabled_(false)
     , video_streaming_approved_(false)
     , audio_streaming_approved_(false)
     , video_streaming_allowed_(false)
@@ -199,33 +200,39 @@ bool ApplicationImpl::is_audio() const {
 }
 
 void ApplicationImpl::ChangeSupportingAppHMIType() {
-  is_navi_ = false;
-  is_voice_communication_application_ = false;
-  mobile_projection_enabled_ = false;
+  set_is_navi(false);
+  set_voice_communication_supported(false);
+  set_mobile_projection_enabled(false);
+  set_webengine_projection_enabled(false);
   const smart_objects::SmartObject& array_app_types = *app_types_;
   uint32_t lenght_app_types = array_app_types.length();
 
   for (uint32_t i = 0; i < lenght_app_types; ++i) {
-    if (mobile_apis::AppHMIType::NAVIGATION ==
-        static_cast<mobile_apis::AppHMIType::eType>(
-            array_app_types[i].asUInt())) {
-      is_navi_ = true;
-    }
-    if (mobile_apis::AppHMIType::COMMUNICATION ==
-        static_cast<mobile_apis::AppHMIType::eType>(
-            array_app_types[i].asUInt())) {
-      is_voice_communication_application_ = true;
-    }
-    if (mobile_apis::AppHMIType::PROJECTION ==
-        static_cast<mobile_apis::AppHMIType::eType>(
-            array_app_types[i].asUInt())) {
-      mobile_projection_enabled_ = true;
+    const auto app_hmi_type = static_cast<mobile_apis::AppHMIType::eType>(
+        array_app_types[i].asUInt());
+
+    switch (app_hmi_type) {
+      case mobile_apis::AppHMIType::NAVIGATION:
+        set_is_navi(true);
+        break;
+      case mobile_apis::AppHMIType::COMMUNICATION:
+        set_voice_communication_supported(true);
+        break;
+      case mobile_apis::AppHMIType::PROJECTION:
+        set_mobile_projection_enabled(true);
+        break;
+      case mobile_apis::AppHMIType::WEB_VIEW:
+        set_webengine_projection_enabled(true);
+        break;
+      default:
+        break;
     }
   }
 }
 
-void ApplicationImpl::set_is_navi(bool allow) {
-  is_navi_ = allow;
+void ApplicationImpl::set_is_navi(bool option) {
+  LOG4CXX_TRACE(logger_, "option " << std::boolalpha << option);
+  is_navi_ = option;
 }
 
 bool ApplicationImpl::is_remote_control_supported() const {
@@ -240,9 +247,9 @@ bool ApplicationImpl::is_voice_communication_supported() const {
   return is_voice_communication_application_;
 }
 
-void ApplicationImpl::set_voice_communication_supported(
-    bool is_voice_communication_supported) {
-  is_voice_communication_application_ = is_voice_communication_supported;
+void ApplicationImpl::set_voice_communication_supported(bool option) {
+  LOG4CXX_TRACE(logger_, "option " << std::boolalpha << option);
+  is_voice_communication_application_ = option;
 }
 
 bool ApplicationImpl::IsAudioApplication() const {
@@ -286,12 +293,21 @@ void ApplicationImpl::SetPostponedState(const WindowID window_id,
 }
 
 void ApplicationImpl::set_mobile_projection_enabled(bool option) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOG4CXX_TRACE(logger_, "option " << std::boolalpha << option);
   mobile_projection_enabled_ = option;
 }
 
 bool ApplicationImpl::mobile_projection_enabled() const {
   return mobile_projection_enabled_;
+}
+
+void ApplicationImpl::set_webengine_projection_enabled(const bool option) {
+  LOG4CXX_TRACE(logger_, "option " << std::boolalpha << option);
+  webengine_projection_enabled_ = option;
+}
+
+bool ApplicationImpl::webengine_projection_enabled() const {
+  return webengine_projection_enabled_;
 }
 
 struct StateIDComparator {
@@ -457,8 +473,9 @@ void ApplicationImpl::set_name(const custom_str::CustomString& name) {
   app_name_ = name;
 }
 
-void ApplicationImpl::set_is_media_application(bool is_media) {
-  is_media_ = is_media;
+void ApplicationImpl::set_is_media_application(bool option) {
+  LOG4CXX_TRACE(logger_, "option " << std::boolalpha << option);
+  is_media_ = option;
 }
 
 bool IsTTSState(const HmiStatePtr state) {

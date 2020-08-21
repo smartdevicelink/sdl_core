@@ -652,6 +652,7 @@ void ProtocolHandlerImpl::SendEndServicePrivate(int32_t primary_connection_id,
 
 void ProtocolHandlerImpl::SendEndSession(int32_t connection_id,
                                          uint8_t session_id) {
+  LOG4CXX_AUTO_TRACE(logger_);
   // A session is always associated with a primary connection ID
   SendEndServicePrivate(
       connection_id, connection_id, session_id, SERVICE_TYPE_RPC);
@@ -661,6 +662,7 @@ void ProtocolHandlerImpl::SendEndService(int32_t primary_connection_id,
                                          int32_t connection_id,
                                          uint8_t session_id,
                                          uint8_t service_type) {
+  LOG4CXX_AUTO_TRACE(logger_);
   SendEndServicePrivate(
       primary_connection_id, connection_id, session_id, service_type);
 }
@@ -1106,6 +1108,24 @@ void ProtocolHandlerImpl::OnTMMessageSendFailed(
                                    << "bytes failed, connection_key "
                                    << message->connection_key()
                                    << "Error_text: " << error.text());
+
+  uint32_t connection_handle = 0;
+  uint8_t session_id = 0;
+
+  session_observer_.PairFromKey(
+      message->connection_key(), &connection_handle, &session_id);
+
+  const auto connection_it = std::find(ready_to_close_connections_.begin(),
+                                       ready_to_close_connections_.end(),
+                                       connection_handle);
+  if (ready_to_close_connections_.end() != connection_it) {
+    ready_to_close_connections_.erase(connection_it);
+  }
+
+  const auto last_message_it = sessions_last_message_id_.find(session_id);
+  if (sessions_last_message_id_.end() != last_message_it) {
+    sessions_last_message_id_.erase(last_message_it);
+  }
 }
 
 void ProtocolHandlerImpl::OnConnectionPending(

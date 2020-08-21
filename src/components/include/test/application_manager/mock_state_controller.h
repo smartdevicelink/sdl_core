@@ -108,6 +108,9 @@ class MockStateController : public am::StateController {
   MOCK_CONST_METHOD1(IsStateActive, bool(am::HmiState::StateID state_id));
   MOCK_METHOD1(ActivateDefaultWindow, void(am::ApplicationSharedPtr app));
   MOCK_METHOD1(ExitDefaultWindow, void(am::ApplicationSharedPtr app));
+  MOCK_METHOD2(DeactivateApp,
+               void(am::ApplicationSharedPtr app,
+                    const am::WindowID window_id));
 };
 
 }  // namespace application_manager_test

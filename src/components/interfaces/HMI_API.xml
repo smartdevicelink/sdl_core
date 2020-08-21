@@ -340,6 +340,7 @@
   <element name="SYSTEM" />
   <element name="PROJECTION" />
   <element name="REMOTE_CONTROL" />
+  <element name="WEB_VIEW" />
 </enum>
 
 <enum name="CloudConnectionStatus">
@@ -539,6 +540,9 @@
   </element>
   <element name="CLOSE_CLOUD_CONNECTION">
     <description>By getting this value, SDL puts the named app to NONE HMILevel. Used by the HMI to close a cloud app connection.</description>
+  </element>
+  <element name="RESOURCE_CONSTRAINT">
+    <description>By getting this value, SDL should unregister the application to allow the HMI to close the application.</description>
   </element>
 </enum>
 
