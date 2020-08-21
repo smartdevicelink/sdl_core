@@ -951,7 +951,10 @@ bool ApplicationImpl::AreCommandLimitsExceeded(
           application_manager_.GetPolicyHandler();
       std::string priority;
       policy_handler.GetPriority(policy_app_id(), &priority);
-      uint32_t cmd_limit = policy_handler.GetNotificationsNumber(priority);
+      const bool is_subtle_alert =
+          (cmd_id == mobile_apis::FunctionID::SubtleAlertID);
+      uint32_t cmd_limit =
+          policy_handler.GetNotificationsNumber(priority, is_subtle_alert);
 
       if (0 == cmd_limit) {
         return true;

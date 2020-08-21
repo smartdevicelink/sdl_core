@@ -40,6 +40,7 @@
         <element name="beltStatus" />
         <element name="electronicParkBrakeStatus" />
         <element name="driverBraking" />
+        <element name="gearStatus" />
         <element name="prndl" />
         <element name="rpm" />
         <element name="steeringWheelAngle" />
@@ -50,6 +51,7 @@
         <element name="clusterModeStatus" />
         <element name="deviceStatus" />
         <element name="emergencyEvent" />
+        <element name="stabilityControlsStatus" />
         <element name="eCallInfo" />
         <element name="abs_State" />
         <element name="turnSignal" />
@@ -57,6 +59,7 @@
         <element name="tirePressureValue" />
         <element name="tpms" />
         <element name="cloudAppVehicleID" />
+        <element name="handsOffSteering" />
     </enum>
 
     <enum name="AppHMIType">
@@ -173,6 +176,8 @@
         <param name="seconds_between_retries" type="SecondsBetweenRetries" />
         <param name="endpoints" type="ServiceEndpoints" />
         <param name="notifications_per_minute_by_priority" type="NumberOfNotificationsPerMinute" />
+        <param name="subtle_notifications_per_minute_by_priority" type="NumberOfNotificationsPerMinute"
+            mandatory="false" />
         <param name="vehicle_make" type="String" maxlength="100"
             mandatory="false" />
         <param name="vehicle_model" type="String" maxlength="100"

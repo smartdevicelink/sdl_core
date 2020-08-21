@@ -122,23 +122,28 @@ TEST_F(CacheManagerTest,
   *pt_ = CreateCustomPT(string_table);
 
   std::string priority = "EMERGENCY";
-  uint32_t notif_number = cache_manager_->GetNotificationsNumber(priority);
+  uint32_t notif_number =
+      cache_manager_->GetNotificationsNumber(priority, false);
   EXPECT_EQ(1u, notif_number);
 
   priority = "NAVIGATION";
-  notif_number = cache_manager_->GetNotificationsNumber(priority);
+  notif_number = cache_manager_->GetNotificationsNumber(priority, false);
   EXPECT_EQ(2u, notif_number);
 
   priority = "VOICECOM";
-  notif_number = cache_manager_->GetNotificationsNumber(priority);
+  notif_number = cache_manager_->GetNotificationsNumber(priority, false);
   EXPECT_EQ(3u, notif_number);
 
+  priority = "COMMUNICATION";
+  notif_number = cache_manager_->GetNotificationsNumber(priority, false);
+  EXPECT_EQ(4u, notif_number);
+
   priority = "NORMAL";
-  notif_number = cache_manager_->GetNotificationsNumber(priority);
+  notif_number = cache_manager_->GetNotificationsNumber(priority, false);
   EXPECT_EQ(5u, notif_number);
 
   priority = "NONE";
-  notif_number = cache_manager_->GetNotificationsNumber(priority);
+  notif_number = cache_manager_->GetNotificationsNumber(priority, false);
   EXPECT_EQ(6u, notif_number);
 }
 
@@ -162,8 +167,124 @@ TEST_F(CacheManagerTest, GetNotificationsNumber_PriorityNotExist_ReturnZero) {
   *pt_ = CreateCustomPT(string_table);
 
   std::string priority = "OTHER_PRIORITY";
-  uint32_t notif_number = cache_manager_->GetNotificationsNumber(priority);
+  uint32_t notif_number =
+      cache_manager_->GetNotificationsNumber(priority, false);
   EXPECT_EQ(0u, notif_number);
+}
+
+TEST_F(CacheManagerTest,
+       GetNotificationsNumber_Subtle_PriorityExists_ReturnNumberFromPT) {
+  std::string string_table(
+      "{"
+      "\"policy_table\": {"
+      "\"module_config\": {"
+      "\"subtle_notifications_per_minute_by_priority\": {"
+      "\"EMERGENCY\": 7,"
+      "\"NAVIGATION\": 8,"
+      "\"VOICECOM\": 9,"
+      "\"COMMUNICATION\": 10,"
+      "\"NORMAL\": 11,"
+      "\"NONE\": 12"
+      "}"
+      "}"
+      "}"
+      "}");
+  *pt_ = CreateCustomPT(string_table);
+
+  std::string priority = "EMERGENCY";
+  uint32_t notif_number =
+      cache_manager_->GetNotificationsNumber(priority, true);
+  EXPECT_EQ(7u, notif_number);
+
+  priority = "NAVIGATION";
+  notif_number = cache_manager_->GetNotificationsNumber(priority, true);
+  EXPECT_EQ(8u, notif_number);
+
+  priority = "VOICECOM";
+  notif_number = cache_manager_->GetNotificationsNumber(priority, true);
+  EXPECT_EQ(9u, notif_number);
+
+  priority = "COMMUNICATION";
+  notif_number = cache_manager_->GetNotificationsNumber(priority, true);
+  EXPECT_EQ(10u, notif_number);
+
+  priority = "NORMAL";
+  notif_number = cache_manager_->GetNotificationsNumber(priority, true);
+  EXPECT_EQ(11u, notif_number);
+
+  priority = "NONE";
+  notif_number = cache_manager_->GetNotificationsNumber(priority, true);
+  EXPECT_EQ(12u, notif_number);
+}
+
+TEST_F(CacheManagerTest,
+       GetNotificationsNumber_Subtle_PriorityNotExist_ReturnZero) {
+  const std::string string_table(
+      "{"
+      "\"policy_table\": {"
+      "\"module_config\": {"
+      "\"subtle_notifications_per_minute_by_priority\": {"
+      "\"EMERGENCY\": 7,"
+      "\"NAVIGATION\": 8,"
+      "\"VOICECOM\": 9,"
+      "\"COMMUNICATION\": 10,"
+      "\"NORMAL\": 11,"
+      "\"NONE\": 12"
+      "}"
+      "}"
+      "}"
+      "}");
+  *pt_ = CreateCustomPT(string_table);
+
+  const std::string priority = "OTHER_PRIORITY";
+  uint32_t notif_number =
+      cache_manager_->GetNotificationsNumber(priority, true);
+  EXPECT_EQ(0u, notif_number);
+}
+
+TEST_F(CacheManagerTest,
+       GetNotificationsNumber_Subtle_FieldNotPresent_UseFallback) {
+  const std::string string_table(
+      "{"
+      "\"policy_table\": {"
+      "\"module_config\": {"
+      "\"notifications_per_minute_by_priority\": {"
+      "\"EMERGENCY\": 1,"
+      "\"NAVIGATION\": 2,"
+      "\"VOICECOM\": 3,"
+      "\"COMMUNICATION\": 4,"
+      "\"NORMAL\": 5,"
+      "\"NONE\": 6"
+      "}"
+      "}"
+      "}"
+      "}");
+  *pt_ = CreateCustomPT(string_table);
+
+  std::string priority = "EMERGENCY";
+  uint32_t notif_number =
+      cache_manager_->GetNotificationsNumber(priority, true);
+  EXPECT_EQ(1u, notif_number);
+
+  priority = "NAVIGATION";
+  notif_number = cache_manager_->GetNotificationsNumber(priority, true);
+  EXPECT_EQ(2u, notif_number);
+
+  priority = "VOICECOM";
+  notif_number = cache_manager_->GetNotificationsNumber(priority, true);
+  EXPECT_EQ(3u, notif_number);
+
+  priority = "COMMUNICATION";
+  notif_number = cache_manager_->GetNotificationsNumber(priority, true);
+  EXPECT_EQ(4u, notif_number);
+
+  priority = "NORMAL";
+  notif_number = cache_manager_->GetNotificationsNumber(priority, true);
+  EXPECT_EQ(5u, notif_number);
+
+  priority = "NONE";
+  notif_number = cache_manager_->GetNotificationsNumber(priority, true);
+  EXPECT_EQ(6u, notif_number);
 }
 
 TEST_F(CacheManagerTest, HeartBeatTimeout_ValueInitialized_ReturnValue) {

@@ -493,6 +493,7 @@ void SQLPTRepresentation::GatherModuleMeta(
     *meta->pt_exchanged_at_odometer_x = query.GetInteger(0);
     *meta->pt_exchanged_x_days_after_epoch = query.GetInteger(1);
     *meta->ignition_cycles_since_last_exchange = query.GetInteger(2);
+    *meta->ccpu_version = query.GetString(4);
   }
 }
 
@@ -548,6 +549,17 @@ void SQLPTRepresentation::GatherModuleConfig(
     while (notifications.Next()) {
       config->notifications_per_minute_by_priority[notifications.GetString(0)] =
           notifications.GetInteger(1);
+    }
+  }
+  utils::dbms::SQLQuery subtle_notifications(db());
+  if (!subtle_notifications.Prepare(sql_pt::kSelectSubtleNotificationsPerMin)) {
+    LOG4CXX_WARN(logger_,
+                 "Incorrect select statement for subtle notifications");
+  } else {
+    while (subtle_notifications.Next()) {
+      (*config->subtle_notifications_per_minute_by_priority)
+          [subtle_notifications.GetString(0)] =
+              subtle_notifications.GetInteger(1);
     }
   }
   utils::dbms::SQLQuery seconds(db());
@@ -704,6 +716,23 @@ bool SQLPTRepresentation::GatherConsumerFriendlyMessages(
     LOG4CXX_WARN(logger_, "Incorrect statement for select friendly messages.");
   }
 
+  return true;
+}
+
+bool SQLPTRepresentation::SetMetaInfo(const std::string& ccpu_version) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  utils::dbms::SQLQuery query(db());
+  if (!query.Prepare(sql_pt::kUpdateMetaParams)) {
+    LOG4CXX_WARN(logger_, "Incorrect statement for insert to module meta.");
+    return false;
+  }
+
+  query.Bind(0, ccpu_version);
+
+  if (!query.Exec() || !query.Reset()) {
+    LOG4CXX_WARN(logger_, "Incorrect insert to module meta.");
+    return false;
+  }
   return true;
 }
 
@@ -1462,6 +1491,11 @@ bool SQLPTRepresentation::SaveModuleConfig(
     return false;
   }
 
+  if (!SaveNumberOfSubtleNotificationsPerMinute(
+          *config.subtle_notifications_per_minute_by_priority)) {
+    return false;
+  }
+
   if (!SaveServiceEndpoints(config.endpoints)) {
     return false;
   }
@@ -1687,6 +1721,28 @@ bool SQLPTRepresentation::SaveNumberOfNotificationsPerMinute(
     const policy_table::NumberOfNotificationsPerMinute& notifications) {
   utils::dbms::SQLQuery query(db());
   if (!query.Prepare(sql_pt::kInsertNotificationsByPriority)) {
+    LOG4CXX_WARN(logger_,
+                 "Incorrect insert statement for notifications by priority.");
+    return false;
+  }
+
+  policy_table::NumberOfNotificationsPerMinute::const_iterator it;
+  for (it = notifications.begin(); it != notifications.end(); ++it) {
+    query.Bind(0, it->first);
+    query.Bind(1, it->second);
+    if (!query.Exec() || !query.Reset()) {
+      LOG4CXX_WARN(logger_, "Incorrect insert into notifications by priority.");
+      return false;
+    }
+  }
+
+  return true;
+}
+
+bool SQLPTRepresentation::SaveNumberOfSubtleNotificationsPerMinute(
+    const policy_table::NumberOfNotificationsPerMinute& notifications) {
+  utils::dbms::SQLQuery query(db());
+  if (!query.Prepare(sql_pt::kInsertSubtleNotificationsByPriority)) {
     LOG4CXX_WARN(logger_,
                  "Incorrect insert statement for notifications by priority.");
     return false;

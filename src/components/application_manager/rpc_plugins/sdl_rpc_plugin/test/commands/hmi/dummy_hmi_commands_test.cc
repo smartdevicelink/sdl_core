@@ -30,13 +30,18 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "application_manager/commands/command_request_test.h"
-
 #include <stdint.h>
+
 #include <string>
 #include <vector>
-#include "gtest/gtest.h"
 
+#include "application_manager/commands/command_request_test.h"
+#include "application_manager/commands/commands_test.h"
+#include "application_manager/mock_application.h"
+#include "application_manager/mock_application_manager.h"
+#include "application_manager/mock_application_manager_settings.h"
+#include "application_manager/mock_event_dispatcher.h"
+#include "gtest/gtest.h"
 #include "hmi/activate_app_request.h"
 #include "hmi/activate_app_response.h"
 #include "hmi/add_statistics_info_notification.h"
@@ -200,6 +205,8 @@
 #include "hmi/ui_show_response.h"
 #include "hmi/ui_slider_request.h"
 #include "hmi/ui_slider_response.h"
+#include "hmi/ui_subtle_alert_request.h"
+#include "hmi/ui_subtle_alert_response.h"
 #include "hmi/update_app_list_request.h"
 #include "hmi/update_app_list_response.h"
 #include "hmi/update_device_list_request.h"
@@ -222,12 +229,6 @@
 #include "hmi/vr_is_ready_response.h"
 #include "hmi/vr_perform_interaction_request.h"
 #include "hmi/vr_perform_interaction_response.h"
-
-#include "application_manager/commands/commands_test.h"
-#include "application_manager/mock_application.h"
-#include "application_manager/mock_application_manager.h"
-#include "application_manager/mock_application_manager_settings.h"
-#include "application_manager/mock_event_dispatcher.h"
 
 namespace am = application_manager;
 
@@ -499,7 +500,9 @@ typedef Types<commands::AllowAllAppsRequest,
               commands::AllowAppRequest,
               commands::AllowAppResponse,
               commands::BCGetFilePathRequest,
-              commands::BCGetFilePathResponse>
+              commands::BCGetFilePathResponse,
+              commands::UISubtleAlertResponse,
+              commands::UISubtleAlertRequest>
     HMICommandsListFifth;
 
 TYPED_TEST_CASE(HMICommandsTestFirst, HMICommandsListFirst);
