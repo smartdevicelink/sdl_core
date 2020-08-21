@@ -203,14 +203,13 @@ void HandshakeHandler::ProcessSuccessfulHandshake(const uint32_t connection_key,
         context_.service_type_,
         ServiceStatus::SERVICE_START_FAILED);
 
-    protocol_handler_.SendStartSessionNAck(
-        context_.connection_id_,
-        context_.new_session_id_,
-        protocol_version_,
-        context_.service_type_,
-        (can_be_protected && is_service_already_protected)
-            ? "Service is already protected"
-            : "Service cannot be protected");
+    protocol_handler_.SendStartSessionNAck(context_.connection_id_,
+                                           context_.new_session_id_,
+                                           protocol_version_,
+                                           context_.service_type_,
+                                           (is_service_already_protected)
+                                               ? "Service is already protected"
+                                               : "Service cannot be protected");
   }
 }
 
