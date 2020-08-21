@@ -3970,7 +3970,10 @@ TEST_F(ProtocolHandlerImplTest, StartSession_NACKReason_DisallowedBySettings) {
  * kControl to kBulk
  */
 TEST_F(ProtocolHandlerImplTest, StartSession_NACKReason_SessionObserverReject) {
-  const int call_times = 5;
+  const std::vector<ServiceType> service_types{
+      kControl, kRpc, kAudio, kMobileNav, kBulk};
+
+  const int call_times = service_types.size();
   const utils::SemanticVersion min_reason_param_version(5, 3, 0);
 
   AddConnection();
@@ -4034,8 +4037,6 @@ TEST_F(ProtocolHandlerImplTest, StartSession_NACKReason_SessionObserverReject) {
       .WillRepeatedly(
           DoAll(SetArgReferee<2>(min_reason_param_version), Return(true)));
 
-  std::vector<ServiceType> service_types{
-      kControl, kRpc, kAudio, kMobileNav, kBulk};
   for (const ServiceType& service_type : service_types) {
     BsonObject bson_nack_params;
     bson_object_initialize_default(&bson_nack_params);
