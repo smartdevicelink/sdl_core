@@ -33,6 +33,7 @@
 #include "application_manager/commands/request_to_hmi.h"
 #include "application_manager/message_helper.h"
 #include "application_manager/rpc_service.h"
+#include "utils/helpers.h"
 
 namespace application_manager {
 
@@ -77,19 +78,59 @@ bool CheckAvailabilityHMIInterfaces(ApplicationManager& application_manager,
   return HmiInterfaces::STATE_NOT_AVAILABLE != state;
 }
 
+bool IsResponseCodeSuccess(
+    const smart_objects::SmartObject& response_from_hmi) {
+  auto response_code = static_cast<hmi_apis::Common_Result::eType>(
+      response_from_hmi[strings::params][hmi_response::code].asInt());
+
+  using helpers::Compare;
+  using helpers::EQ;
+  using helpers::ONE;
+
+  const bool is_result_success =
+      Compare<hmi_apis::Common_Result::eType, EQ, ONE>(
+          response_code,
+          hmi_apis::Common_Result::SUCCESS,
+          hmi_apis::Common_Result::WARNINGS,
+          hmi_apis::Common_Result::WRONG_LANGUAGE,
+          hmi_apis::Common_Result::RETRY,
+          hmi_apis::Common_Result::SAVED);
+  return is_result_success;
+}
+
 bool ChangeInterfaceState(ApplicationManager& application_manager,
                           const smart_objects::SmartObject& response_from_hmi,
                           HmiInterfaces::InterfaceID interface) {
   if (response_from_hmi[strings::msg_params].keyExists(strings::available)) {
     const bool is_available =
         response_from_hmi[strings::msg_params][strings::available].asBool();
-    const HmiInterfaces::InterfaceState interface_state =
-        is_available ? HmiInterfaces::STATE_AVAILABLE
-                     : HmiInterfaces::STATE_NOT_AVAILABLE;
-    application_manager.hmi_interfaces().SetInterfaceState(interface,
-                                                           interface_state);
-    return is_available;
+
+    if (!is_available) {
+      application_manager.hmi_interfaces().SetInterfaceState(
+          interface, HmiInterfaces::STATE_NOT_AVAILABLE);
+      return false;
+    }
+
+    // Process response with result
+    if (response_from_hmi[strings::params].keyExists(hmi_response::code) &&
+        !IsResponseCodeSuccess(response_from_hmi)) {
+      application_manager.hmi_interfaces().SetInterfaceState(
+          interface, HmiInterfaces::STATE_NOT_AVAILABLE);
+      return false;
+    }
+
+    application_manager.hmi_interfaces().SetInterfaceState(
+        interface, HmiInterfaces::STATE_AVAILABLE);
+    return true;
   }
+
+  // Process response with error
+  if (response_from_hmi[strings::params].keyExists(strings::error_msg)) {
+    application_manager.hmi_interfaces().SetInterfaceState(
+        interface, HmiInterfaces::STATE_NOT_AVAILABLE);
+    return false;
+  }
+
   return false;
 }
 

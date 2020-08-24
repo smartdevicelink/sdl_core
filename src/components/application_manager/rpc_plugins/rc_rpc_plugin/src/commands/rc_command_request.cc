@@ -137,7 +137,7 @@ void RCCommandRequest::Run() {
     LOG4CXX_WARN(logger_, "HMI interface RC is not available");
     SendResponse(false,
                  mobile_apis::Result::UNSUPPORTED_RESOURCE,
-                 "Remote control is not supported by system");
+                 "RC is not supported by system");
     return;
   }
   LOG4CXX_TRACE(logger_, "RC interface is available!");
