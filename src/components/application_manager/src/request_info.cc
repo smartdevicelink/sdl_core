@@ -120,7 +120,7 @@ RequestInfoSet::~RequestInfoSet() {
   sync_primitives::AutoLock lock(pending_requests_lock_);
   auto it = time_sorted_pending_requests_.begin();
   while (!time_sorted_pending_requests_.empty()) {
-    RemoveRequest(*it);
+    Erase(*it);
     it = time_sorted_pending_requests_.begin();
   }
 }
