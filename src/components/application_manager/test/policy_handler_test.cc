@@ -729,9 +729,9 @@ TEST_F(PolicyHandlerTest, GetNotificationsNumber) {
   // Arrange
   EnablePolicyAndPolicyManagerMock();
   // Check expectations
-  EXPECT_CALL(*mock_policy_manager_, GetNotificationsNumber(priority_));
+  EXPECT_CALL(*mock_policy_manager_, GetNotificationsNumber(priority_, false));
   // Act
-  policy_handler_.GetNotificationsNumber(priority_);
+  policy_handler_.GetNotificationsNumber(priority_, false);
 }
 
 TEST_F(PolicyHandlerTest, GetUserConsentForDevice) {
@@ -1859,7 +1859,9 @@ TEST_F(PolicyHandlerTest, DISABLED_OnSnapshotCreated_UrlAdded) {
       .WillOnce(ReturnRef(mock_session_observer));
   EXPECT_CALL(*mock_app_, device()).WillOnce(Return(0));
   EXPECT_CALL(app_manager_, applications()).WillOnce(Return(app_set));
-  EXPECT_CALL(mock_message_helper_, SendPolicySnapshotNotification(_, _, _, _));
+  EXPECT_CALL(mock_message_helper_,
+              SendPolicySnapshotNotification(
+                  _, testing::A<const std::vector<uint8_t>&>(), _, _));
   // Check expectations for get app id
   GetAppIDForSending();
   // Expectations

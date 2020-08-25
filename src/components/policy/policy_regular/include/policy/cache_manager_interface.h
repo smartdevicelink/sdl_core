@@ -325,9 +325,10 @@ class CacheManagerInterface {
    * @brief Get allowed number of notifications
    * depending on application priority.
    * @param priority Priority of application
+   * @param is_subtle If true, get the number of allowed subtle notifications
    */
   virtual policy_table::NumberOfNotificationsType GetNotificationsNumber(
-      const std::string& priority) = 0;
+      const std::string& priority, const bool is_subtle) = 0;
 
   /**
    * @brief Get priority for given application
@@ -579,12 +580,24 @@ class CacheManagerInterface {
       const PermissionConsent& permissions) = 0;
 
   /**
+   * @brief Set preloaded_pt flag value in policy table
+   * @param is_preloaded value to set
+   */
+  virtual void SetPreloadedPtFlag(const bool is_preloaded) = 0;
+
+  /**
    * @brief Records information about head unit system to PT
    * @return bool Success of operation
    */
   virtual bool SetMetaInfo(const std::string& ccpu_version,
                            const std::string& wers_country_code,
                            const std::string& language) = 0;
+
+  /**
+   * @brief Get information about last ccpu_version from PT
+   * @return ccpu_version from PT
+   */
+  virtual std::string GetCCPUVersionFromPT() const = 0;
 
   /**
    * @brief Checks, if specific head unit is present in PT

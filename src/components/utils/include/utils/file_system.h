@@ -297,6 +297,14 @@ bool CopyFile(const std::string& src, const std::string& dst);
  */
 bool MoveFile(const std::string& src, const std::string& dst);
 
+/**
+ * @brief Get filename from full path
+ *
+ * @param full_path Source file path
+ * @return parsed filename
+ */
+std::string GetFileName(const std::string& full_path);
+
 }  // namespace file_system
 
 #endif  // SRC_COMPONENTS_UTILS_INCLUDE_UTILS_FILE_SYSTEM_H_

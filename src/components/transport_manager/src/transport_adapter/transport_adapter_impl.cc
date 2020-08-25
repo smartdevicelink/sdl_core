@@ -521,6 +521,7 @@ DeviceSptr TransportAdapterImpl::GetWebEngineDevice() const {
 }
 
 DeviceSptr TransportAdapterImpl::AddDevice(DeviceSptr device) {
+  LOG4CXX_AUTO_TRACE(logger_);
   LOG4CXX_TRACE(logger_, "enter. device: " << device);
   DeviceSptr existing_device;
   bool same_device_found = false;
@@ -530,7 +531,7 @@ DeviceSptr TransportAdapterImpl::AddDevice(DeviceSptr device) {
     existing_device = i->second;
     if (device->IsSameAs(existing_device.get())) {
       same_device_found = true;
-      LOG4CXX_DEBUG(logger_, "device " << device << "already exists");
+      LOG4CXX_DEBUG(logger_, "Device " << device << " already exists");
       break;
     }
   }
@@ -539,7 +540,7 @@ DeviceSptr TransportAdapterImpl::AddDevice(DeviceSptr device) {
   }
   devices_mutex_.Release();
   if (same_device_found) {
-    LOG4CXX_TRACE(logger_, "exit with TRUE. Condition: same_device_found");
+    LOG4CXX_TRACE(logger_, "Exit with TRUE. Condition: same_device_found");
     return existing_device;
   } else {
     device->set_connection_status(ConnectionStatus::PENDING);
@@ -677,6 +678,7 @@ void TransportAdapterImpl::ConnectionCreated(
     ConnectionSPtr connection,
     const DeviceUID& device_id,
     const ApplicationHandle& app_handle) {
+  LOG4CXX_AUTO_TRACE(logger_);
   LOG4CXX_TRACE(logger_,
                 "enter connection:" << connection
                                     << ", device_id: " << &device_id
@@ -692,6 +694,7 @@ void TransportAdapterImpl::ConnectionCreated(
 
 void TransportAdapterImpl::DeviceDisconnected(
     const DeviceUID& device_handle, const DisconnectDeviceError& error) {
+  LOG4CXX_AUTO_TRACE(logger_);
   const DeviceUID device_uid = device_handle;
   LOG4CXX_TRACE(
       logger_,
@@ -730,6 +733,7 @@ void TransportAdapterImpl::DeviceDisconnected(
 
 bool TransportAdapterImpl::IsSingleApplication(
     const DeviceUID& device_uid, const ApplicationHandle& app_uid) {
+  LOG4CXX_AUTO_TRACE(logger_);
   sync_primitives::AutoReadLock locker(connections_lock_);
   for (ConnectionMap::const_iterator it = connections_.begin();
        it != connections_.end();
@@ -749,6 +753,7 @@ bool TransportAdapterImpl::IsSingleApplication(
 
 void TransportAdapterImpl::DisconnectDone(const DeviceUID& device_handle,
                                           const ApplicationHandle& app_handle) {
+  LOG4CXX_AUTO_TRACE(logger_);
   const DeviceUID device_uid = device_handle;
   const ApplicationHandle app_uid = app_handle;
   LOG4CXX_TRACE(
@@ -775,6 +780,7 @@ void TransportAdapterImpl::DisconnectDone(const DeviceUID& device_handle,
   RemoveConnection(device_uid, app_uid);
 
   if (device_disconnected) {
+    LOG4CXX_DEBUG(logger_, "Removing device...");
     RemoveDevice(device_uid);
   }
 
@@ -1026,6 +1032,7 @@ void TransportAdapterImpl::RemoveFinalizedConnection(
 
 void TransportAdapterImpl::RemoveConnection(
     const DeviceUID& device_id, const ApplicationHandle& app_handle) {
+  LOG4CXX_AUTO_TRACE(logger_);
   ConnectionSPtr connection;
   connections_lock_.AcquireForWriting();
   ConnectionMap::const_iterator it =
@@ -1071,6 +1078,7 @@ ApplicationList TransportAdapterImpl::GetApplicationList(
 
 void TransportAdapterImpl::ConnectionFinished(
     const DeviceUID& device_id, const ApplicationHandle& app_handle) {
+  LOG4CXX_AUTO_TRACE(logger_);
   LOG4CXX_TRACE(
       logger_,
       "enter. device_id: " << &device_id << ", app_handle: " << &app_handle);
@@ -1088,6 +1096,7 @@ void TransportAdapterImpl::ConnectionAborted(
     const DeviceUID& device_id,
     const ApplicationHandle& app_handle,
     const CommunicationError& error) {
+  LOG4CXX_AUTO_TRACE(logger_);
   ConnectionFinished(device_id, app_handle);
   for (TransportAdapterListenerList::iterator it = listeners_.begin();
        it != listeners_.end();
@@ -1192,6 +1201,7 @@ bool TransportAdapterImpl::ToBeAutoConnected(DeviceSptr device) const {
 }
 
 bool TransportAdapterImpl::ToBeAutoDisconnected(DeviceSptr device) const {
+  LOG4CXX_AUTO_TRACE(logger_);
   return true;
 }
 

@@ -122,7 +122,8 @@ class PolicyHandler : public PolicyHandlerInterface,
       const RPCParams& rpc_params,
       CheckPermissionResult& result) OVERRIDE;
 
-  uint32_t GetNotificationsNumber(const std::string& priority) const OVERRIDE;
+  uint32_t GetNotificationsNumber(const std::string& priority,
+                                  const bool is_subtle = false) const OVERRIDE;
   virtual DeviceConsent GetUserConsentForDevice(
       const std::string& device_id) const OVERRIDE;
 
@@ -385,6 +386,10 @@ class PolicyHandler : public PolicyHandlerInterface,
                        const std::string& wers_country_code,
                        const std::string& language) OVERRIDE;
 
+  void SetPreloadedPtFlag(const bool is_preloaded) OVERRIDE;
+
+  std::string GetCCPUVersionFromPT() const OVERRIDE;
+
   /**
    * @brief Sends GetVehicleData request in case when Vechicle info is ready.
    */
@@ -419,7 +424,9 @@ class PolicyHandler : public PolicyHandlerInterface,
   uint32_t ChoosePTUApplication(
       const PTUIterationType iteration_type =
           PTUIterationType::DefaultIteration) OVERRIDE;
-  void CacheRetryInfo(const uint32_t app_id, const std::string url) OVERRIDE;
+  void CacheRetryInfo(const uint32_t app_id = 0,
+                      const std::string url = std::string(),
+                      const std::string snapshot_path = std::string()) OVERRIDE;
 #endif  // EXTERNAL_PROPRIETARY_MODE
 
   uint32_t GetAppIdForSending() const OVERRIDE;
@@ -903,6 +910,7 @@ class PolicyHandler : public PolicyHandlerInterface,
   // PTU retry information
   uint32_t last_ptu_app_id_;
   std::string retry_update_url_;
+  std::string policy_snapshot_path_;
 #endif  // EXTERNAL_PROPRIETARY_MODE
 
   /**

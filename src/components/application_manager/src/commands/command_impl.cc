@@ -111,6 +111,14 @@ uint32_t CommandImpl::connection_key() const {
   return (*message_)[strings::params][strings::connection_key].asUInt();
 }
 
+void CommandImpl::set_warning_info(const std::string info) {
+  warning_info_ = info;
+}
+
+std::string CommandImpl::warning_info() const {
+  return warning_info_;
+}
+
 void CommandImpl::onTimeOut() {}
 
 bool CommandImpl::AllowedToTerminate() {
@@ -328,6 +336,25 @@ uint32_t CommandImpl::CalcCommandInternalConsecutiveNumber(
   }
 
   return last_command_number + 1;
+}
+
+bool CommandImpl::CheckSyntax(const std::string& str,
+                              bool allow_empty_line) const {
+  if (std::string::npos != str.find_first_of("\t\n")) {
+    LOG4CXX_ERROR(logger_, "CheckSyntax failed! :" << str);
+    return false;
+  }
+  if (std::string::npos != str.find("\\n") ||
+      std::string::npos != str.find("\\t")) {
+    LOG4CXX_ERROR(logger_, "CheckSyntax failed! :" << str);
+    return false;
+  }
+  if (!allow_empty_line) {
+    if ((std::string::npos == str.find_first_not_of(' '))) {
+      return false;
+    }
+  }
+  return true;
 }
 
 }  // namespace commands

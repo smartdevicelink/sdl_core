@@ -81,16 +81,16 @@ IAP2USBEmulationTransportAdapter::IAP2USBEmulationTransportAdapter(
     : TcpTransportAdapter(port, last_state_wrapper, settings), out_(0) {
   auto delegate = new IAPSignalHandlerDelegate(*this);
   signal_handler_ = threads::CreateThread("iAP signal handler", delegate);
-  signal_handler_->start();
+  signal_handler_->Start();
   const auto result = mkfifo(out_signals_channel, mode);
   UNUSED(result);
   LOG4CXX_DEBUG(logger_, "Out signals channel creation result: " << result);
 }
 
 IAP2USBEmulationTransportAdapter::~IAP2USBEmulationTransportAdapter() {
-  signal_handler_->join();
-  auto delegate = signal_handler_->delegate();
-  signal_handler_->set_delegate(NULL);
+  signal_handler_->Stop(threads::Thread::kThreadSoftStop);
+  auto delegate = signal_handler_->GetDelegate();
+  signal_handler_->SetDelegate(NULL);
   delete delegate;
   threads::DeleteThread(signal_handler_);
   LOG4CXX_DEBUG(logger_, "Out close result: " << close(out_));

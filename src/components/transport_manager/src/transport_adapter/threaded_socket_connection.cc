@@ -83,8 +83,8 @@ ThreadedSocketConnection::~ThreadedSocketConnection() {
 void ThreadedSocketConnection::StopAndJoinThread() {
   Disconnect();
   if (thread_) {
-    thread_->join();
-    delete thread_->delegate();
+    thread_->Stop(threads::Thread::kThreadSoftStop);
+    delete thread_->GetDelegate();
     threads::DeleteThread(thread_);
     thread_ = nullptr;
   }
@@ -115,7 +115,7 @@ TransportAdapter::Error ThreadedSocketConnection::Start() {
     return TransportAdapter::FAIL;
   }
 
-  if (!thread_->start()) {
+  if (!thread_->Start()) {
     LOG4CXX_ERROR(logger_, "thread creation failed");
     return TransportAdapter::FAIL;
   }
