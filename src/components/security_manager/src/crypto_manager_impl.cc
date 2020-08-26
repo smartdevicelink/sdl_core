@@ -103,7 +103,7 @@ CryptoManagerImpl::CryptoManagerImpl(
 CryptoManagerImpl::~CryptoManagerImpl() {
   SDL_LOG_AUTO_TRACE();
   sync_primitives::AutoLock lock(instance_lock_);
-  SDL_LOG_DEBUG("Deinitilization");
+  SDL_LOG_DEBUG("Deinitialization");
   if (!context_) {
     SDL_LOG_WARN("Manager is not initialized");
   } else {
