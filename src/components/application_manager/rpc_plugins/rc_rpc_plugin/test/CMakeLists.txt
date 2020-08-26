@@ -46,6 +46,8 @@ ${CMAKE_CURRENT_SOURCE_DIR}/rc_consent_manager_impl_test.cc
 ${CMAKE_CURRENT_SOURCE_DIR}/grid_test.cc
 ${CMAKE_CURRENT_SOURCE_DIR}/rc_helpers_test.cc
 ${CMAKE_CURRENT_SOURCE_DIR}/rc_app_extension_test.cc
+${CMAKE_CURRENT_SOURCE_DIR}/rc_penfing_resumption_handler_test.cc
+${COMPONENTS_DIR}/application_manager/test/mock_message_helper.cc
 )
 
 set(RC_COMMANDS_TEST_DIR ${CMAKE_CURRENT_SOURCE_DIR}/commands)
