@@ -59,7 +59,7 @@ void SDLPolicyUpdate::Run() {
   SendRequest();
 #else
   SDL_LOG_WARN(
-      "This RPC is part of extended policy flow."
+      "This RPC is part of extended policy flow. "
       "Please re-build with extended policy mode enabled.");
 #endif
 }

@@ -71,7 +71,7 @@ char* SplitToAddr(char* dev_list_entry) {
 }
 
 int FindPairedDevs(std::vector<bdaddr_t>* result) {
-  SDL_LOG_TRACE("enter. result adress: " << result);
+  SDL_LOG_TRACE("enter. result address: " << result);
   DCHECK(result != NULL);
 
   const char* cmd = "bt-device -l";

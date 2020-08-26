@@ -138,7 +138,7 @@ void OnButtonPressNotification::Run() {
             mobile_apis::PredefinedWindows::DEFAULT_WINDOW);
     if ((mobile_api::HMILevel::HMI_FULL != app_hmi_level) &&
         (mobile_api::HMILevel::HMI_LIMITED != app_hmi_level)) {
-      SDL_LOG_WARN("OnButtonPress notification is allowed only"
+      SDL_LOG_WARN("OnButtonPress notification is allowed only "
                    << "in FULL or LIMITED hmi level");
       continue;
     }

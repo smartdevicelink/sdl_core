@@ -95,9 +95,8 @@ void ConnectionHandlerImpl::Stop() {
 
 void ConnectionHandlerImpl::set_connection_handler_observer(
     ConnectionHandlerObserver* observer) {
-  SDL_LOG_DEBUG(
-
-      "ConnectionHandlerImpl::set_connection_handler_observer() " << observer);
+  SDL_LOG_DEBUG("ConnectionHandlerImpl::set_connection_handler_observer() "
+                << observer);
   sync_primitives::AutoWriteLock write_lock(connection_handler_observer_lock_);
   if (!observer) {
     SDL_LOG_WARN("Set Null pointer to observer.");
@@ -107,9 +106,8 @@ void ConnectionHandlerImpl::set_connection_handler_observer(
 
 void ConnectionHandlerImpl::set_protocol_handler(
     protocol_handler::ProtocolHandler* protocol_handler) {
-  SDL_LOG_DEBUG(
-
-      "ConnectionHandlerImpl::set_protocol_handler()" << protocol_handler);
+  SDL_LOG_DEBUG("ConnectionHandlerImpl::set_protocol_handler() "
+                << protocol_handler);
   if (!protocol_handler) {
     SDL_LOG_WARN("Set Null pointer to protocol handler.");
   }

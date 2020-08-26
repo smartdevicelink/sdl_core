@@ -39,8 +39,6 @@ namespace sdl_rpc_plugin {
 using namespace application_manager;
 namespace commands {
 
-SDL_CREATE_LOG_VARIABLE("Commands")
-
 BasicCommunicationGetSystemTimeResponse::
     BasicCommunicationGetSystemTimeResponse(
         const application_manager::commands::MessageSharedPtr& message,

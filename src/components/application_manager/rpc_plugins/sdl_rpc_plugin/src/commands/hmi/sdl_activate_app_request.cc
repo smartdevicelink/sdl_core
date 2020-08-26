@@ -209,7 +209,7 @@ void SDLActivateAppRequest::Run() {
   if (!foreground_v4_app && v4_proto_apps.empty()) {
     SDL_LOG_ERROR(
         "Can't find regular foreground app with the same "
-        "connection id:"
+        "connection id: "
         << device_handle);
     SendErrorResponse(
         correlation_id(), SDL_ActivateApp, NO_APPS_REGISTERED, "");

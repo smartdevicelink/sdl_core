@@ -71,7 +71,7 @@ void OnCommandNotification::Run() {
       (*message_)[strings::msg_params][strings::cmd_id].asUInt();
 
   if (!app->FindCommand(cmd_id)) {
-    SDL_LOG_ERROR(" No applications found for the command " << cmd_id);
+    SDL_LOG_ERROR("No applications found for the command " << cmd_id);
     return;
   }
 

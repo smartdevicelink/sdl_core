@@ -159,7 +159,7 @@ void SendLocationRequest::on_event(const event_engine::Event& event) {
                  &(message[strings::params]));
     return;
   }
-  SDL_LOG_ERROR("Received unknown event" << event.id());
+  SDL_LOG_ERROR("Received unknown event " << event.id());
 }
 
 bool SendLocationRequest::CheckFieldsCompatibility() {

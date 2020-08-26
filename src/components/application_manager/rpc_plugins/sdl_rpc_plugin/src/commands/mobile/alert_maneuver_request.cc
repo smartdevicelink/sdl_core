@@ -186,16 +186,16 @@ void AlertManeuverRequest::on_event(const event_engine::Event& event) {
       break;
     }
     default: {
-      SDL_LOG_ERROR("Received unknown event" << event.id());
+      SDL_LOG_ERROR("Received unknown event " << event.id());
       SendResponse(
-          false, mobile_apis::Result::INVALID_ENUM, "Received unknown event");
+          false, mobile_apis::Result::INVALID_ENUM, "Received unknown event ");
       return;
     }
   }
 
   if (!pending_requests_.IsFinal(event_id)) {
     SDL_LOG_DEBUG(
-        "There are some pending responses from HMI."
+        "There are some pending responses from HMI. "
         "AlertManeuverRequest still waiting.");
     return;
   }

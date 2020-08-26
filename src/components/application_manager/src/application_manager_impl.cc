@@ -582,7 +582,7 @@ ApplicationSharedPtr ApplicationManagerImpl::RegisterApplication(
           device_id, NULL, NULL, &device_mac, &connection_type) == -1) {
     SDL_LOG_DEBUG("Failed to extract device mac for id " << device_id);
   } else {
-    SDL_LOG_DEBUG("Device mac for id" << device_id << " is " << device_mac);
+    SDL_LOG_DEBUG("Device mac for id " << device_id << " is " << device_mac);
   }
 
   SDL_LOG_DEBUG("Restarting application list update timer");
@@ -780,7 +780,7 @@ bool ApplicationManagerImpl::ActivateApplication(ApplicationSharedPtr app) {
   SDL_LOG_AUTO_TRACE();
   DCHECK_OR_RETURN(app, false);
 
-  SDL_LOG_DEBUG("Activating application with id:" << app->app_id());
+  SDL_LOG_DEBUG("Activating application with id: " << app->app_id());
 
   // Remove from resumption if app was activated by user
   resume_controller().OnAppActivated(app);
@@ -1254,7 +1254,7 @@ void ApplicationManagerImpl::CreatePendingLocalApplication(
       policy_app_id, &nicknames, &app_hmi_types);
 
   if (nicknames.empty()) {
-    SDL_LOG_ERROR("Cloud/Web App " << policy_app_id << "missing nickname");
+    SDL_LOG_ERROR("Cloud/Web App " << policy_app_id << " missing nickname");
     return;
   }
 
@@ -2675,7 +2675,7 @@ mobile_apis::MOBILE_API& ApplicationManagerImpl::mobile_so_factory() {
   if (!mobile_so_factory_) {
     mobile_so_factory_ = new mobile_apis::MOBILE_API;
     if (!mobile_so_factory_) {
-      SDL_LOG_ERROR("Out of memory.");
+      SDL_LOG_ERROR("Out of memory");
       NOTREACHED();
     }
   }

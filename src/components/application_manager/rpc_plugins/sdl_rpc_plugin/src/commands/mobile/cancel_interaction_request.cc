@@ -71,7 +71,7 @@ void CancelInteractionRequest::Run() {
               mobile_apis::FunctionID::SubtleAlertID,
               mobile_apis::FunctionID::ScrollableMessageID,
               mobile_apis::FunctionID::SliderID)) {
-    SDL_LOG_ERROR("Bad function ID" << function_id);
+    SDL_LOG_ERROR("Bad function ID " << function_id);
     SendResponse(false, mobile_apis::Result::INVALID_ID);
     return;
   }
@@ -92,7 +92,7 @@ void CancelInteractionRequest::on_event(const event_engine::Event& event) {
   SDL_LOG_AUTO_TRACE();
 
   if (event.id() != hmi_apis::FunctionID::UI_CancelInteraction) {
-    SDL_LOG_ERROR("Received unknown event" << event.id());
+    SDL_LOG_ERROR("Received unknown event " << event.id());
     return;
   }
 

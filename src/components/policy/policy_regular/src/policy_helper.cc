@@ -687,7 +687,7 @@ bool CheckAppPolicy::IsEncryptionRequiredFlagChanged(
       -> rpc::Optional<rpc::Boolean> {
     auto it = policies.find(policy_app_id);
     if (policies.end() == it) {
-      SDL_LOG_WARN("App is not present in policies" << policy_app_id);
+      SDL_LOG_WARN("App is not present in policies " << policy_app_id);
       return rpc::Optional<rpc::Boolean>(false);
     }
     return it->second.encryption_required;
@@ -699,7 +699,7 @@ bool CheckAppPolicy::IsEncryptionRequiredFlagChanged(
     policy_table::Strings result;
     auto it = policies.find(policy_app_id);
     if (policies.end() == it) {
-      SDL_LOG_WARN("App is not present in policies" << policy_app_id);
+      SDL_LOG_WARN("App is not present in policies " << policy_app_id);
       return result;
     }
     auto& groups = it->second.groups;

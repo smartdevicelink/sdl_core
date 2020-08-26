@@ -68,7 +68,7 @@ void NaviSetVideoConfigRequest::Run() {
       application_manager_.application_by_hmi_app(application_id());
   if (!app) {
     SDL_LOG_ERROR("Application with hmi_app_id " << application_id()
-                                                 << "does not exist");
+                                                 << " does not exist");
     return;
   }
 
@@ -127,7 +127,7 @@ void NaviSetVideoConfigRequest::on_event(const event_engine::Event& event) {
       break;
     }
     default:
-      SDL_LOG_ERROR("Received unknown event" << event.id());
+      SDL_LOG_ERROR("Received unknown event " << event.id());
       break;
   }
 }

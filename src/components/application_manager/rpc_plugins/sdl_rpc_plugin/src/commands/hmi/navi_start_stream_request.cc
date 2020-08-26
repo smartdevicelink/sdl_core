@@ -82,7 +82,7 @@ void NaviStartStreamRequest::Run() {
       application_manager_.application_by_hmi_app(application_id());
   if (!app) {
     SDL_LOG_ERROR("Application with hmi_app_id " << application_id()
-                                                 << "does not exist");
+                                                 << " does not exist");
     return;
   }
   SetAllowedToTerminate(false);
@@ -126,13 +126,13 @@ void NaviStartStreamRequest::on_event(const event_engine::Event& event) {
         break;
       }
       if (hmi_apis::Common_Result::REJECTED == code) {
-        SDL_LOG_INFO("StartStream response REJECTED ");
+        SDL_LOG_INFO("StartStream response REJECTED");
         RetryStartSession();
         break;
       }
     }
     default: {
-      SDL_LOG_ERROR("Received unknown event" << event.id());
+      SDL_LOG_ERROR("Received unknown event " << event.id());
       return;
     }
   }

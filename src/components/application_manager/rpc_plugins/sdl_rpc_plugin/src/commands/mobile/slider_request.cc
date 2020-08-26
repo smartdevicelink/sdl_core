@@ -144,7 +144,7 @@ void SliderRequest::on_event(const event_engine::Event& event) {
   }
 
   if (event_id != FunctionID::UI_Slider) {
-    SDL_LOG_ERROR("Received unknown event" << event.id());
+    SDL_LOG_ERROR("Received unknown event " << event.id());
     return;
   }
 

@@ -691,7 +691,7 @@ void PolicyHandler::OnAppPermissionConsentInternal(
       // permissions should be set only for coincident to registered apps
       if (app.use_count() == 0) {
         SDL_LOG_WARN(
-            "Invalid pointer to application was passed."
+            "Invalid pointer to application was passed. "
             "Permissions setting skipped.");
         continue;
       }
@@ -708,7 +708,7 @@ void PolicyHandler::OnAppPermissionConsentInternal(
 
       if (device_params.device_mac_address != app->mac_address()) {
         SDL_LOG_WARN(
-            "Device_id of application is changed."
+            "Device_id of application is changed. "
             "Permissions setting skipped.");
         continue;
       }

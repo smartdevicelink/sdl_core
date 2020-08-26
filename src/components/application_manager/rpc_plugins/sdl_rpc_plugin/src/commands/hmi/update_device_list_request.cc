@@ -88,7 +88,7 @@ void UpdateDeviceListRequest::on_event(const event_engine::Event& event) {
       break;
     };
     default: {
-      SDL_LOG_ERROR("Unknown event ");
+      SDL_LOG_ERROR("Unknown event " << event.id());
       break;
     };
   }

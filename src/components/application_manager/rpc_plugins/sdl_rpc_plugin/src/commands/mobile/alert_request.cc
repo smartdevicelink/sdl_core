@@ -132,7 +132,7 @@ void AlertRequest::on_event(const event_engine::Event& event) {
     case hmi_apis::FunctionID::UI_OnResetTimeout: {
       SDL_LOG_INFO(
           "Received UI_OnResetTimeout event "
-          " or TTS_OnResetTimeout event"
+          " or TTS_OnResetTimeout event "
           << awaiting_tts_speak_response_ << " "
           << awaiting_tts_stop_speaking_response_ << " "
           << awaiting_ui_alert_response_);
@@ -184,7 +184,7 @@ void AlertRequest::on_event(const event_engine::Event& event) {
       break;
     }
     default: {
-      SDL_LOG_ERROR("Received unknown event" << event.id());
+      SDL_LOG_ERROR("Received unknown event " << event.id());
       return;
     }
   }

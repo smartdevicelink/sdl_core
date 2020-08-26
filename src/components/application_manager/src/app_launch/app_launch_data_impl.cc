@@ -74,7 +74,7 @@ std::vector<ApplicationDataPtr> AppLaunchDataImpl::GetApplicationDataByDevice(
   std::vector<ApplicationDataPtr> apps = GetAppDataByDevMac(dev_mac);
 
   if (apps.empty()) {
-    SDL_LOG_DEBUG("No application founded by mac" << dev_mac);
+    SDL_LOG_DEBUG("No application found by device mac " << dev_mac);
   }
 
   return apps;

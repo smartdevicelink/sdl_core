@@ -696,7 +696,7 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile(
   resumption::ResumeCtrl& resumer = application_manager_.resume_controller();
 
   if (!application) {
-    SDL_LOG_ERROR("There is no application for such connection key" << key);
+    SDL_LOG_ERROR("There is no application for such connection key " << key);
     SDL_LOG_DEBUG("Need to start resume data persistent timer");
     resumer.OnAppRegistrationEnd();
     return;
@@ -951,7 +951,7 @@ void RegisterAppInterfaceRequest::SendChangeRegistration(
     msg_params[strings::app_id] = app_id;
     SendHMIRequest(function_id, &msg_params);
   } else {
-    SDL_LOG_DEBUG("Interface " << interface << "is not avaliable");
+    SDL_LOG_DEBUG("Interface " << interface << " is not available");
   }
 }
 

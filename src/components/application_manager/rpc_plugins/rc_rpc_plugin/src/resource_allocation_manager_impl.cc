@@ -67,7 +67,7 @@ AcquireResult::eType ResourceAllocationManagerImpl::AcquireResource(
   const application_manager::ApplicationSharedPtr acquiring_app =
       app_mngr_.application(app_id);
   if (!acquiring_app) {
-    SDL_LOG_WARN("App with app_id: " << app_id << "does not exist!");
+    SDL_LOG_WARN("App with app_id: " << app_id << " does not exist!");
     return AcquireResult::IN_USE;
   }
 
@@ -372,7 +372,7 @@ bool ResourceAllocationManagerImpl::IsResourceAlreadyAcquiredByApp(
     SDL_LOG_DEBUG("Resource "
                   << moduleUid.first
                   << " is already allocated by app:" << allocation->second
-                  << ". Asquire has been asked for app:" << app_id);
+                  << ". Acquire has been asked for app:" << app_id);
     return false;
   }
 

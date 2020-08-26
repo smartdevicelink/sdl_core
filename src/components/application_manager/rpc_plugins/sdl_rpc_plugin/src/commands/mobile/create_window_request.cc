@@ -198,7 +198,7 @@ void CreateWindowRequest::on_event(const event_engine::Event& event) {
   SDL_LOG_AUTO_TRACE();
 
   if (hmi_apis::FunctionID::UI_CreateWindow != event.id()) {
-    SDL_LOG_ERROR("Received unknown event" << event.id());
+    SDL_LOG_ERROR("Received unknown event " << event.id());
     return;
   }
 

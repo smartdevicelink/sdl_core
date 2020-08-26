@@ -68,7 +68,7 @@ void SystemTimeHandlerImpl::DoSystemTimeQuery() {
   sync_primitives::AutoLock lock(state_lock_);
   if (!utc_time_can_be_received_) {
     SDL_LOG_INFO("Navi module is not yet ready."
-                 << "Will process request once it became ready.");
+                 << " Will process request once it became ready.");
     return;
   }
   SendTimeRequest();

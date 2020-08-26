@@ -429,7 +429,7 @@ SSLContext::HandshakeResult CryptoManagerImpl::SSLContextImpl::DoHandshakeStep(
     sync_primitives::AutoLock locker(bio_locker);
 
     if (SSL_is_init_finished(connection_)) {
-      SDL_LOG_DEBUG("SSL initilization is finished");
+      SDL_LOG_DEBUG("SSL initialization is finished");
       is_handshake_pending_ = false;
       return Handshake_Result_Success;
     }
@@ -486,7 +486,7 @@ bool CryptoManagerImpl::SSLContextImpl::Decrypt(const uint8_t* const in_data,
   SDL_LOG_AUTO_TRACE();
   sync_primitives::AutoLock locker(bio_locker);
   if (!SSL_is_init_finished(connection_)) {
-    SDL_LOG_ERROR("SSL initilization is not finished");
+    SDL_LOG_ERROR("SSL initialization is not finished");
     return false;
   }
 
@@ -508,7 +508,7 @@ bool CryptoManagerImpl::SSLContextImpl::Decrypt(const uint8_t* const in_data,
     // TODO(EZamakhov): investigate BIO_read return 0, -1 and -2 meanings
     if (len <= 0) {
       // Reset filter and connection deinitilization instead
-      SDL_LOG_ERROR("Read error occured. Read data lenght : " << len);
+      SDL_LOG_ERROR("Read error occurred. Read data length: " << len);
       BIO_ctrl(bioFilter_, BIO_CTRL_RESET, 0, NULL);
       return false;
     }

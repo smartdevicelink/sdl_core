@@ -98,7 +98,7 @@ void SubscribeVehicleDataRequest::on_event(const event_engine::Event& event) {
   const smart_objects::SmartObject& message = event.smart_object();
 
   if (hmi_apis::FunctionID::VehicleInfo_SubscribeVehicleData != event.id()) {
-    SDL_LOG_ERROR("Received unknown event.");
+    SDL_LOG_ERROR("Received unknown event " << event.id());
     return;
   }
   EndAwaitForInterface(HmiInterfaces::HMI_INTERFACE_VehicleInfo);

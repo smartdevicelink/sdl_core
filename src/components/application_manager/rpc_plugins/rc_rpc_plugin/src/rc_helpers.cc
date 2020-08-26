@@ -138,7 +138,7 @@ RCHelpers::GetModuleTypeToDataMapping() {
         {enums_value::kHmiSettings, message_params::kHmiSettingsControlData}};
     auto it = mapping.find(module_type);
     if (mapping.end() == it) {
-      SDL_LOG_ERROR("Unknown module type" << module_type);
+      SDL_LOG_ERROR("Unknown module type " << module_type);
       return std::string();
     }
     return it->second;
@@ -159,7 +159,7 @@ RCHelpers::GetModuleTypeToCapabilitiesMapping() {
         {enums_value::kHmiSettings, strings::khmiSettingsControlCapabilities}};
     auto it = mapping.find(module_type);
     if (mapping.end() == it) {
-      SDL_LOG_ERROR("Unknown module type" << module_type);
+      SDL_LOG_ERROR("Unknown module type " << module_type);
       return std::string();
     }
     return it->second;

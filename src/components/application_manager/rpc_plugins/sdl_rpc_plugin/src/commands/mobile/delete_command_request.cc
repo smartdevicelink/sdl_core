@@ -179,7 +179,7 @@ void DeleteCommandRequest::on_event(const event_engine::Event& event) {
       break;
     }
     default: {
-      SDL_LOG_ERROR("Received unknown event" << event.id());
+      SDL_LOG_ERROR("Received unknown event " << event.id());
       return;
     }
   }

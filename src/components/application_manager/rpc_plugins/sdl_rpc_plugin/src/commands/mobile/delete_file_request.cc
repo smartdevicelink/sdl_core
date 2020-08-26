@@ -77,7 +77,7 @@ void DeleteFileRequest::Run() {
        application->delete_file_in_none_count())) {
     // If application is in the HMI_NONE level the quantity of allowed
     // DeleteFile request is limited by the configuration profile
-    SDL_LOG_ERROR("Too many requests from the app with HMILevel HMI_NONE ");
+    SDL_LOG_ERROR("Too many requests from the app with HMILevel HMI_NONE");
     SendResponse(false, mobile_apis::Result::REJECTED);
     return;
   }

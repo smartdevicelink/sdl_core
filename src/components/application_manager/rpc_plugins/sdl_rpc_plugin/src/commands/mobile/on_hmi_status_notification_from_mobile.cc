@@ -81,7 +81,7 @@ void OnHMIStatusNotificationFromMobile::Run() {
   bool is_apps_requested_before =
       application_manager_.IsAppsQueriedFrom(handle);
 
-  SDL_LOG_DEBUG("Mobile HMI state notication came for connection key:"
+  SDL_LOG_DEBUG("Mobile HMI state notification came for connection key: "
                 << connection_key() << " and handle: " << handle);
 
   if (!is_apps_requested_before &&
@@ -99,7 +99,7 @@ void OnHMIStatusNotificationFromMobile::Run() {
   if (is_apps_requested_before) {
     SDL_LOG_DEBUG(
         "Remote apps list had been requested already "
-        " for handle: "
+        "for handle: "
         << handle);
 
     if (Message::is_sufficient_version(

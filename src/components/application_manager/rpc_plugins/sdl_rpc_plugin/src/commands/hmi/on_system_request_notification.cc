@@ -141,7 +141,7 @@ void OnSystemRequestNotification::Run() {
       policy_handler_.GetUserConsentForDevice(device_mac)) {
     SDL_LOG_WARN("Application "
                  << app->policy_app_id()
-                 << " is registered from non-consented device."
+                 << " is registered from non-consented device. "
                     "Can't forward notification to application.");
     return;
   }
