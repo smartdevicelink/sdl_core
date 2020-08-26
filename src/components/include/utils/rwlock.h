@@ -180,32 +180,34 @@ class AutoWriteLock {
  * @brief Unlocks read-write lock which locked on read
  */
 class AutoReadUnlock {
-  public:
-    explicit AutoReadUnlock (RWLock& rwlock) : rwlock_(rwlock) {
-      rwlock_.Release();
-    }
-    ~AutoReadUnlock() {
-      rwlock_.AcquireForReading();
-    }
-  private:
-    RWLock& rwlock_;
-    DISALLOW_COPY_AND_ASSIGN(AutoReadUnlock);
+ public:
+  explicit AutoReadUnlock(RWLock& rwlock) : rwlock_(rwlock) {
+    rwlock_.Release();
+  }
+  ~AutoReadUnlock() {
+    rwlock_.AcquireForReading();
+  }
+
+ private:
+  RWLock& rwlock_;
+  DISALLOW_COPY_AND_ASSIGN(AutoReadUnlock);
 };
 
 /**
  * @brief Unlocks read-write lock which locked on write
  */
 class AutoWriteUnlock {
-  public:
-    explicit AutoWriteUnlock (RWLock& rwlock) : rwlock_(rwlock) {
-      rwlock_.Release();
-    }
-    ~AutoWriteUnlock() {
-      rwlock_.AcquireForWriting();
-    }
-  private:
-    RWLock& rwlock_;
-    DISALLOW_COPY_AND_ASSIGN(AutoWriteUnlock);
+ public:
+  explicit AutoWriteUnlock(RWLock& rwlock) : rwlock_(rwlock) {
+    rwlock_.Release();
+  }
+  ~AutoWriteUnlock() {
+    rwlock_.AcquireForWriting();
+  }
+
+ private:
+  RWLock& rwlock_;
+  DISALLOW_COPY_AND_ASSIGN(AutoWriteUnlock);
 };
 
 }  // namespace sync_primitives
