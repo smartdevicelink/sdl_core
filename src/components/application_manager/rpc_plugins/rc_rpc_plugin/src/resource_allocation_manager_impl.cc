@@ -107,7 +107,7 @@ AcquireResult::eType ResourceAllocationManagerImpl::AcquireResource(
       acquiring_app->hmi_level(mobile_apis::PredefinedWindows::DEFAULT_WINDOW);
 
   if (mobile_apis::HMILevel::HMI_FULL != acquiring_app_hmi_level) {
-    SDL_LOG_DEBUG("Aquiring resources is not allowed in HMI level: "
+    SDL_LOG_DEBUG("Acquiring resources is not allowed in HMI level: "
                   << acquiring_app_hmi_level << ". App: " << app_id
                   << " is disallowed to acquire " << module_type << " "
                   << module_id);
