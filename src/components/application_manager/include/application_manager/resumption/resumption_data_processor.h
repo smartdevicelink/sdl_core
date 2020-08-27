@@ -78,8 +78,8 @@ struct ApplicationResumptionStatus {
   std::vector<ResumptionRequest> successful_requests;
   std::vector<std::string> unsuccessful_vehicle_data_subscriptions_;
   std::vector<std::string> successful_vehicle_data_subscriptions_;
-  std::vector<ModuleUid> succesfull_module_subscriptions_;
-  std::vector<ModuleUid> unsuccesfull_module_subscriptions_;
+  std::vector<ModuleUid> successful_module_subscriptions_;
+  std::vector<ModuleUid> unsuccessful_module_subscriptions_;
 };
 
 /**
