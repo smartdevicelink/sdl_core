@@ -318,7 +318,7 @@ bool ResumptionDataProcessor::IsResumptionSuccessful(const uint32_t app_id) {
   ApplicationResumptionStatus& status = resumption_status_[app_id];
   return status.error_requests.empty() &&
          status.unsuccessful_vehicle_data_subscriptions_.empty() &&
-         status.unsuccesfull_module_subscriptions_.empty();
+         status.unsuccessful_module_subscriptions_.empty();
 }
 
 void ResumptionDataProcessor::EraseAppResumptionData(
@@ -1032,7 +1032,7 @@ void ResumptionDataProcessor::DeletePluginsSubscriptions(
   smart_objects::SmartObject extension_modules_subscriptions(
       smart_objects::SmartType_Map);
 
-  if (!status.succesfull_module_subscriptions_.empty()) {
+  if (!status.successful_module_subscriptions_.empty()) {
     extension_modules_subscriptions[message_params::kModuleData] =
         new smart_objects::SmartObject(smart_objects::SmartType_Array);
 
@@ -1040,7 +1040,7 @@ void ResumptionDataProcessor::DeletePluginsSubscriptions(
         extension_modules_subscriptions[message_params::kModuleData];
 
     uint32_t index = 0;
-    for (const auto& module : status.succesfull_module_subscriptions_) {
+    for (const auto& module : status.successful_module_subscriptions_) {
       module_data_so[index] =
           new smart_objects::SmartObject(smart_objects::SmartType_Map);
       module_data_so[index][message_params::kModuleType] = module.first;
@@ -1074,7 +1074,7 @@ void ResumptionDataProcessor::CheckVehicleDataResponse(
   const auto request_keys = request[strings::msg_params].enumerate();
 
   if (!IsResponseSuccessful(response)) {
-    LOG4CXX_TRACE(logger_, "Vehicle data request not succesfull");
+    LOG4CXX_TRACE(logger_, "Vehicle data request not successful");
     for (const auto key : request_keys) {
       status.unsuccessful_vehicle_data_subscriptions_.push_back(key);
     }
@@ -1108,44 +1108,44 @@ void ResumptionDataProcessor::CheckModuleDataSubscription(
     ApplicationResumptionStatus& status) {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  const auto& msg_params__so = request[strings::msg_params];
+  const auto& msg_params_so = request[strings::msg_params];
   const auto requested_module_type =
-      msg_params__so[message_params::kModuleType].asString();
+      msg_params_so[message_params::kModuleType].asString();
   const auto requested_module_id =
-      msg_params__so[message_params::kModuleId].asString();
+      msg_params_so[message_params::kModuleId].asString();
   const ModuleUid requested_module{requested_module_type, requested_module_id};
 
   if (!IsResponseSuccessful(response)) {
-    LOG4CXX_TRACE(logger_, "Module data subscription request NOT succesfull");
-    status.unsuccesfull_module_subscriptions_.push_back(requested_module);
+    LOG4CXX_TRACE(logger_, "Module data subscription request NOT successful");
+    status.unsuccessful_module_subscriptions_.push_back(requested_module);
     return;
   }
 
-  const auto& responsed_module_data_so =
+  const auto& response_module_data_so =
       response[strings::msg_params][message_params::kModuleData];
 
-  if (0 == responsed_module_data_so.length()) {
-    LOG4CXX_TRACE(logger_, "Module data subscription request not succesfull");
-    status.unsuccesfull_module_subscriptions_.push_back(requested_module);
+  if (0 == response_module_data_so.length()) {
+    LOG4CXX_TRACE(logger_, "Module data subscription request not successful");
+    status.unsuccessful_module_subscriptions_.push_back(requested_module);
     return;
   }
 
   const auto responsed_module_type_int =
       static_cast<hmi_apis::Common_ModuleType::eType>(
-          responsed_module_data_so[message_params::kModuleType].asUInt());
+          response_module_data_so[message_params::kModuleType].asUInt());
 
   const auto responsed_module_type_str =
       module_types_str_mapping[responsed_module_type_int];
 
-  const auto responsed_module_id =
-      responsed_module_data_so[message_params::kModuleId].asString();
+  const auto response_module_id =
+      response_module_data_so[message_params::kModuleId].asString();
   const ModuleUid responsed_module{responsed_module_type_str,
-                                   responsed_module_id};
+                                   response_module_id};
 
-  bool is_successful_subscribed = false;
+  bool is_subscribe_success = false;
   if (response[application_manager::strings::msg_params].keyExists(
           rc_rpc_plugin::message_params::kIsSubscribed)) {
-    is_successful_subscribed =
+    is_subscribe_success =
         response[application_manager::strings::msg_params]
                 [rc_rpc_plugin::message_params::kIsSubscribed]
                     .asBool();
@@ -1153,18 +1153,18 @@ void ResumptionDataProcessor::CheckModuleDataSubscription(
 
   const bool is_the_same_module = requested_module == responsed_module;
 
-  if (is_the_same_module && is_successful_subscribed) {
+  if (is_the_same_module && is_subscribe_success) {
     LOG4CXX_TRACE(logger_,
                   "Module [" << requested_module.first << ":"
                              << requested_module.second
                              << "] was successfuly subscribed");
-    status.succesfull_module_subscriptions_.push_back(requested_module);
+    status.successful_module_subscriptions_.push_back(requested_module);
   } else {
     LOG4CXX_TRACE(logger_,
                   "Module [" << requested_module.first << ":"
                              << requested_module.second
                              << "] was NOT successfuly subscribed");
-    status.unsuccesfull_module_subscriptions_.push_back(requested_module);
+    status.unsuccessful_module_subscriptions_.push_back(requested_module);
   }
 }
 
