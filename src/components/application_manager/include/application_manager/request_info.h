@@ -180,10 +180,9 @@ typedef std::set<RequestInfoPtr, RequestInfoHashComparator>
  */
 class RequestInfoSet {
  public:
-
   /**
-  * @brief destructor
-  */
+   * @brief destructor
+   */
   ~RequestInfoSet();
 
   /*
