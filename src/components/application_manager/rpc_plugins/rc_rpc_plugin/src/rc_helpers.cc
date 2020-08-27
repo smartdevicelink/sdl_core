@@ -185,7 +185,7 @@ RCAppExtensionPtr RCHelpers::GetRCExtension(
 smart_objects::SmartObjectSPtr RCHelpers::CreateGetInteriorVDRequestToHMI(
     const ModuleUid& module,
     const uint32_t correlation_id,
-    const GetInteriorData action) {
+    const InteriorDataAction action) {
   using namespace smart_objects;
   namespace commands = application_manager::commands;
   namespace am_strings = application_manager::strings;
@@ -202,7 +202,10 @@ smart_objects::SmartObjectSPtr RCHelpers::CreateGetInteriorVDRequestToHMI(
   params[am_strings::correlation_id] = correlation_id;
   params[am_strings::function_id] =
       hmi_apis::FunctionID::RC_GetInteriorVehicleData;
-  msg_params[message_params::kSubscribe] = (SUBSCRIBE == action) ? true : false;
+  if (NONE != action) {
+    msg_params[message_params::kSubscribe] =
+        (SUBSCRIBE == action) ? true : false;
+  }
   msg_params[message_params::kModuleType] = module.first;
   msg_params[message_params::kModuleId] = module.second;
   return message;

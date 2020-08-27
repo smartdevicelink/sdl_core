@@ -80,12 +80,12 @@ class RCHelpers {
   static RCAppExtensionPtr GetRCExtension(
       application_manager::Application& app);
 
-  enum GetInteriorData { SUBSCRIBE, UNSUBSCRIBE };
+  enum InteriorDataAction { SUBSCRIBE, UNSUBSCRIBE, NONE };
 
   static smart_objects::SmartObjectSPtr CreateGetInteriorVDRequestToHMI(
       const ModuleUid& module,
       const uint32_t correlation_id,
-      const GetInteriorData action);
+      const InteriorDataAction action);
 
   static std::vector<application_manager::ApplicationSharedPtr>
   AppsSubscribedToModule(application_manager::ApplicationManager& app_mngr,
