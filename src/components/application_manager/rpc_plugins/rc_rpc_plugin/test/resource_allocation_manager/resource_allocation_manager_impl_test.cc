@@ -407,7 +407,7 @@ TEST_F(RAManagerTest, AppUnregistered_ReleaseResource) {
       mock_app_mngr_, mock_rpc_service_, mock_rc_capabilities_manager_);
   ra_manager.SetAccessMode(hmi_apis::Common_RCAccessMode::eType::AUTO_DENY);
 
-  RCAppExtensionPtr rc_extention_ptr = std::make_shared<RCAppExtension>(
+  RCAppExtensionPtr rc_extension_ptr = std::make_shared<RCAppExtension>(
       application_manager::AppExtensionUID(
           rc_rpc_plugin::RCRPCPlugin::kRCPluginID),
       rc_plugin_,
@@ -483,14 +483,14 @@ TEST_F(RAManagerTest, AppsDisallowed_ReleaseAllResources) {
 
   EXPECT_CALL(mock_app_mngr_, applications()).WillRepeatedly(Return(apps_da));
 
-  RCAppExtensionPtr rc_extention_ptr = std::make_shared<RCAppExtension>(
+  RCAppExtensionPtr rc_extension_ptr = std::make_shared<RCAppExtension>(
       application_manager::AppExtensionUID(
           rc_rpc_plugin::RCRPCPlugin::kRCPluginID),
       rc_plugin_,
       *mock_app_1_);
 
   EXPECT_CALL(*mock_app_1_, QueryInterface(RCRPCPlugin::kRCPluginID))
-      .WillRepeatedly(Return(rc_extention_ptr));
+      .WillRepeatedly(Return(rc_extension_ptr));
 
   // Act
   ra_manager.OnPolicyEvent(
@@ -516,7 +516,7 @@ TEST_F(RAManagerTest, AppGotRevokedModulesWithPTU_ReleaseRevokedResource) {
   EXPECT_CALL(mock_app_mngr_, application(kAppId1))
       .WillRepeatedly(Return(mock_app_1_));
 
-  RCAppExtensionPtr rc_extention_ptr =
+  RCAppExtensionPtr rc_extension_ptr =
       std::make_shared<rc_rpc_plugin::RCAppExtension>(
           application_manager::AppExtensionUID(
               rc_rpc_plugin::RCRPCPlugin::kRCPluginID),
@@ -524,7 +524,7 @@ TEST_F(RAManagerTest, AppGotRevokedModulesWithPTU_ReleaseRevokedResource) {
           *mock_app_1_);
 
   EXPECT_CALL(*mock_app_1_, QueryInterface(RCRPCPlugin::kRCPluginID))
-      .WillRepeatedly(Return(rc_extention_ptr));
+      .WillRepeatedly(Return(rc_extension_ptr));
 
   ON_CALL(*mock_app_1_, is_remote_control_supported())
       .WillByDefault(Return(true));

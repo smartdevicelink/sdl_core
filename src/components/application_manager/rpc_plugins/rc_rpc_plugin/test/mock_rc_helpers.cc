@@ -63,7 +63,7 @@ smart_objects::SmartObjectSPtr
 rc_rpc_plugin::RCHelpers::CreateGetInteriorVDRequestToHMI(
     const ModuleUid& module,
     const uint32_t correlation_id,
-    const RCHelpers::GetInteriorData action) {
+    const RCHelpers::InteriorDataAction action) {
   return MockRCHelpers::rc_helpers_mock()->CreateGetInteriorVDRequestToHMI(
       module, correlation_id, action);
 }

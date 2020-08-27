@@ -54,11 +54,11 @@ class MockRCHelpers {
   MOCK_METHOD1(
       GetRCExtension,
       rc_rpc_plugin::RCAppExtensionPtr(application_manager::Application&));
-  MOCK_METHOD3(
-      CreateGetInteriorVDRequestToHMI,
-      smart_objects::SmartObjectSPtr(const rc_rpc_plugin::ModuleUid&,
-                                     const uint32_t,
-                                     const RCHelpers::GetInteriorData action));
+  MOCK_METHOD3(CreateGetInteriorVDRequestToHMI,
+               smart_objects::SmartObjectSPtr(
+                   const rc_rpc_plugin::ModuleUid&,
+                   const uint32_t,
+                   const RCHelpers::InteriorDataAction action));
   MOCK_METHOD2(AppsSubscribedToModule,
                std::vector<application_manager::ApplicationSharedPtr>(
                    application_manager::ApplicationManager&,

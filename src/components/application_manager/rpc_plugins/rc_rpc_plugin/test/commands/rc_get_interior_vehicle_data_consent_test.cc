@@ -119,7 +119,7 @@ class RCGetInteriorVehicleDataConsentTest
                      rpc_protection_manager_,
                      hmi_so_factory_,
                      mobile_so_factoy_)
-      , rc_app_extention_(
+      , rc_app_extension_(
             std::make_shared<RCAppExtension>(kPluginID, rc_plugin_, *mock_app_))
       , mock_rpc_plugin_manager(
             std::make_shared<NiceMock<MockRPCPluginManager> >())
@@ -137,7 +137,7 @@ class RCGetInteriorVehicleDataConsentTest
                                   InterfaceState::STATE_AVAILABLE));
     ON_CALL(app_mngr_, application(kAppId)).WillByDefault(Return(mock_app_));
     ON_CALL(*mock_app_, QueryInterface(RCRPCPlugin::kRCPluginID))
-        .WillByDefault(Return(rc_app_extention_));
+        .WillByDefault(Return(rc_app_extension_));
     testing::NiceMock<rc_rpc_plugin_test::MockInteriorDataCache>
         mock_interior_data_cache_;
     ON_CALL(app_mngr_, GetPolicyHandler())
@@ -219,7 +219,7 @@ class RCGetInteriorVehicleDataConsentTest
       rpc_protection_manager_;
   am::rpc_service::RPCServiceImpl rpc_service_;
   RCRPCPlugin rc_plugin_;
-  std::shared_ptr<RCAppExtension> rc_app_extention_;
+  std::shared_ptr<RCAppExtension> rc_app_extension_;
   std::shared_ptr<am::plugin_manager::MockRPCPluginManager>
       mock_rpc_plugin_manager;
   utils::Optional<RPCPlugin> rpc_plugin;
