@@ -519,24 +519,24 @@ void PerformInteractionRequest::SendUIPerformInteractionRequest(
   }
   int32_t index_array_of_vr_help = 0;
   for (size_t i = 0; i < choice_set_id_list.length(); ++i) {
-    smart_objects::SmartObject* choice_set =
+    smart_objects::SmartObject choice_set =
         app->FindChoiceSet(choice_set_id_list[i].asInt());
-    if (choice_set) {
+    if (smart_objects::SmartType_Null != choice_set.getType()) {
       // save perform interaction choice set
       app->AddPerformInteractionChoiceSet(
-          correlation_id(), choice_set_id_list[i].asInt(), *choice_set);
-      for (size_t j = 0; j < (*choice_set)[strings::choice_set].length(); ++j) {
+          correlation_id(), choice_set_id_list[i].asInt(), choice_set);
+      for (size_t j = 0; j < choice_set[strings::choice_set].length(); ++j) {
         if (mobile_apis::InteractionMode::VR_ONLY != mode) {
           size_t index = msg_params[strings::choice_set].length();
           msg_params[strings::choice_set][index] =
-              (*choice_set)[strings::choice_set][j];
+              choice_set[strings::choice_set][j];
           // vrCommands should be added via VR.AddCommand only
           msg_params[strings::choice_set][index].erase(strings::vr_commands);
         }
         if (mobile_apis::InteractionMode::MANUAL_ONLY != mode &&
             !is_vr_help_item) {
           smart_objects::SmartObject& vr_commands =
-              (*choice_set)[strings::choice_set][j][strings::vr_commands];
+              choice_set[strings::choice_set][j][strings::vr_commands];
           if (0 < vr_commands.length()) {
             // copy only first synonym
             smart_objects::SmartObject item(smart_objects::SmartType_Map);
@@ -581,14 +581,14 @@ void PerformInteractionRequest::SendVRPerformInteractionRequest(
 
     int32_t grammar_id_index = 0;
     for (uint32_t i = 0; i < choice_list.length(); ++i) {
-      smart_objects::SmartObject* choice_set =
+      smart_objects::SmartObject choice_set =
           app->FindChoiceSet(choice_list[i].asInt());
-      if (!choice_set) {
+      if (smart_objects::SmartType_Null != choice_set.getType()) {
         LOG4CXX_WARN(logger_, "Couldn't found choiceset");
         continue;
       }
       msg_params[strings::grammar_id][grammar_id_index++] =
-          (*choice_set)[strings::grammar_id].asUInt();
+          choice_set[strings::grammar_id].asUInt();
     }
   }
 
@@ -614,14 +614,14 @@ void PerformInteractionRequest::SendVRPerformInteractionRequest(
     }
     int32_t index = 0;
     for (uint32_t i = 0; i < choice_list.length(); ++i) {
-      smart_objects::SmartObject* choice_set =
+      smart_objects::SmartObject choice_set =
           app->FindChoiceSet(choice_list[i].asInt());
 
-      if (choice_set) {
-        for (uint32_t j = 0; j < (*choice_set)[strings::choice_set].length();
+      if (smart_objects::SmartType_Null != choice_set.getType()) {
+        for (uint32_t j = 0; j < choice_set[strings::choice_set].length();
              ++j) {
           smart_objects::SmartObject& vr_commands =
-              (*choice_set)[strings::choice_set][j][strings::vr_commands];
+              choice_set[strings::choice_set][j][strings::vr_commands];
           if (0 < vr_commands.length()) {
             // copy only first synonym
             smart_objects::SmartObject item(smart_objects::SmartType_Map);
@@ -710,11 +710,11 @@ bool PerformInteractionRequest::CheckChoiceSetMenuNames(
 
   for (size_t i = 0; i < choice_list.length(); ++i) {
     // choice_set contains SmartObject msg_params
-    smart_objects::SmartObject* i_choice_set =
+    smart_objects::SmartObject i_choice_set =
         app->FindChoiceSet(choice_list[i].asInt());
 
     for (size_t j = 0; j < choice_list.length(); ++j) {
-      smart_objects::SmartObject* j_choice_set =
+      smart_objects::SmartObject j_choice_set =
           app->FindChoiceSet(choice_list[j].asInt());
 
       if (i == j) {
@@ -722,7 +722,8 @@ bool PerformInteractionRequest::CheckChoiceSetMenuNames(
         continue;
       }
 
-      if (!i_choice_set || !j_choice_set) {
+      if ((smart_objects::SmartType_Null == i_choice_set.getType()) ||
+          (smart_objects::SmartType_Null == j_choice_set.getType())) {
         LOG4CXX_ERROR(logger_, "Invalid ID");
         SendResponse(false, mobile_apis::Result::INVALID_ID);
         return false;
@@ -730,13 +731,13 @@ bool PerformInteractionRequest::CheckChoiceSetMenuNames(
 
       size_t ii = 0;
       size_t jj = 0;
-      for (; ii < (*i_choice_set)[strings::choice_set].length(); ++ii) {
-        for (; jj < (*j_choice_set)[strings::choice_set].length(); ++jj) {
+      for (; ii < i_choice_set[strings::choice_set].length(); ++ii) {
+        for (; jj < j_choice_set[strings::choice_set].length(); ++jj) {
           const std::string& ii_menu_name =
-              (*i_choice_set)[strings::choice_set][ii][strings::menu_name]
+              i_choice_set[strings::choice_set][ii][strings::menu_name]
                   .asString();
           const std::string& jj_menu_name =
-              (*j_choice_set)[strings::choice_set][jj][strings::menu_name]
+              j_choice_set[strings::choice_set][jj][strings::menu_name]
                   .asString();
 
           if (ii_menu_name == jj_menu_name) {
@@ -763,11 +764,11 @@ bool PerformInteractionRequest::CheckChoiceSetVRSynonyms(
 
   for (size_t i = 0; i < choice_list.length(); ++i) {
     // choice_set contains SmartObject msg_params
-    smart_objects::SmartObject* i_choice_set =
+    smart_objects::SmartObject i_choice_set =
         app->FindChoiceSet(choice_list[i].asInt());
 
     for (size_t j = 0; j < choice_list.length(); ++j) {
-      smart_objects::SmartObject* j_choice_set =
+      smart_objects::SmartObject j_choice_set =
           app->FindChoiceSet(choice_list[j].asInt());
 
       if (i == j) {
@@ -775,7 +776,8 @@ bool PerformInteractionRequest::CheckChoiceSetVRSynonyms(
         continue;
       }
 
-      if ((!i_choice_set) || (!j_choice_set)) {
+      if ((smart_objects::SmartType_Null == i_choice_set.getType()) ||
+          (smart_objects::SmartType_Null == j_choice_set.getType())) {
         LOG4CXX_ERROR(logger_, "Invalid ID");
         SendResponse(false, mobile_apis::Result::INVALID_ID);
         return false;
@@ -783,11 +785,11 @@ bool PerformInteractionRequest::CheckChoiceSetVRSynonyms(
 
       size_t ii = 0;
       size_t jj = 0;
-      for (; ii < (*i_choice_set)[strings::choice_set].length(); ++ii) {
-        for (; jj < (*j_choice_set)[strings::choice_set].length(); ++jj) {
-          if (!((*i_choice_set)[strings::choice_set][ii].keyExists(
+      for (; ii < i_choice_set[strings::choice_set].length(); ++ii) {
+        for (; jj < j_choice_set[strings::choice_set].length(); ++jj) {
+          if (!(i_choice_set[strings::choice_set][ii].keyExists(
                     strings::vr_commands) &&
-                (*j_choice_set)[strings::choice_set][jj].keyExists(
+                j_choice_set[strings::choice_set][jj].keyExists(
                     strings::vr_commands))) {
             LOG4CXX_DEBUG(logger_,
                           "One or both sets has missing vr commands, skipping "
@@ -796,10 +798,10 @@ bool PerformInteractionRequest::CheckChoiceSetVRSynonyms(
           }
           // choice_set pointer contains SmartObject msg_params
           smart_objects::SmartObject& ii_vr_commands =
-              (*i_choice_set)[strings::choice_set][ii][strings::vr_commands];
+              i_choice_set[strings::choice_set][ii][strings::vr_commands];
 
           smart_objects::SmartObject& jj_vr_commands =
-              (*j_choice_set)[strings::choice_set][jj][strings::vr_commands];
+              j_choice_set[strings::choice_set][jj][strings::vr_commands];
 
           for (size_t iii = 0; iii < ii_vr_commands.length(); ++iii) {
             for (size_t jjj = 0; jjj < jj_vr_commands.length(); ++jjj) {
@@ -1003,13 +1005,11 @@ bool PerformInteractionRequest::CheckChoiceSetListVRCommands(
   const smart_objects::SmartObject& choice_set_id_list =
       (*message_)[strings::msg_params][strings::interaction_choice_set_id_list];
 
-  smart_objects::SmartObject* choice_set = nullptr;
-
   for (size_t i = 0; i < choice_set_id_list.length(); ++i) {
-    choice_set = app->FindChoiceSet(choice_set_id_list[i].asInt());
+    auto choice_set = app->FindChoiceSet(choice_set_id_list[i].asInt());
 
     // this should never ever happen since this was already checked
-    if (choice_set == nullptr) {
+    if (smart_objects::SmartType_Null == choice_set.getType()) {
       LOG4CXX_ERROR(
           logger_,
           "Couldn't find choiceset_id = " << choice_set_id_list[i].asInt());
@@ -1018,7 +1018,7 @@ bool PerformInteractionRequest::CheckChoiceSetListVRCommands(
     }
 
     const smart_objects::SmartObject& choices_list =
-        (*choice_set)[strings::choice_set];
+        choice_set[strings::choice_set];
     auto vr_status = MessageHelper::CheckChoiceSetVRCommands(choices_list);
 
     // if not all choices have vr commands
@@ -1043,21 +1043,20 @@ bool PerformInteractionRequest::CheckChoiceIDFromRequest(
 
   size_t choice_list_length = 0;
   std::set<uint32_t> choice_id_set;
-  smart_objects::SmartObject* choice_set = 0;
   std::pair<std::set<uint32_t>::iterator, bool> ins_res;
 
   for (size_t i = 0; i < choice_set_id_list_length; ++i) {
-    choice_set = app->FindChoiceSet(choice_set_id_list[i].asInt());
-    if (!choice_set) {
+    auto choice_set = app->FindChoiceSet(choice_set_id_list[i].asInt());
+    if (smart_objects::SmartType_Null == choice_set.getType()) {
       LOG4CXX_ERROR(
           logger_,
           "Couldn't find choiceset_id = " << choice_set_id_list[i].asInt());
       return false;
     }
 
-    choice_list_length = (*choice_set)[strings::choice_set].length();
+    choice_list_length = choice_set[strings::choice_set].length();
     const smart_objects::SmartObject& choices_list =
-        (*choice_set)[strings::choice_set];
+        choice_set[strings::choice_set];
     for (size_t k = 0; k < choice_list_length; ++k) {
       ins_res =
           choice_id_set.insert(choices_list[k][strings::choice_id].asInt());

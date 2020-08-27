@@ -68,7 +68,9 @@ void OnCommandNotification::Run() {
   const uint32_t cmd_id =
       (*message_)[strings::msg_params][strings::cmd_id].asUInt();
 
-  if (!app->FindCommand(cmd_id)) {
+  const auto command = app->FindCommand(cmd_id);
+
+  if (smart_objects::SmartType_Null == command.getType()) {
     LOG4CXX_ERROR(logger_, " No applications found for the command " << cmd_id);
     return;
   }

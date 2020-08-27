@@ -119,7 +119,9 @@ void CreateInteractionChoiceSetRequest::Run() {
       (*message_)[strings::msg_params][strings::interaction_choice_set_id]
           .asInt();
 
-  if (app->FindChoiceSet(choice_set_id_)) {
+  const auto choice_set = app->FindChoiceSet(choice_set_id_);
+
+  if (smart_objects::SmartType_Null != choice_set.getType()) {
     LOG4CXX_ERROR(logger_,
                   "Choice set with id " << choice_set_id_ << " is not found.");
     SendResponse(false, Result::INVALID_ID);

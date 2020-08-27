@@ -79,13 +79,7 @@ void DeleteCommandRequest::Run() {
   const int32_t cmd_id =
       (*message_)[strings::msg_params][strings::cmd_id].asInt();
 
-  smart_objects::SmartObject command;
-  {
-    smart_objects::SmartObject* command_ptr = application->FindCommand(cmd_id);
-    if (command_ptr) {
-      command = *command_ptr;
-    }
-  }
+  smart_objects::SmartObject command = application->FindCommand(cmd_id);
 
   if (smart_objects::SmartType::SmartType_Null == command.getType()) {
     LOG4CXX_ERROR(logger_, "Command with id " << cmd_id << " is not found.");
@@ -206,7 +200,9 @@ void DeleteCommandRequest::on_event(const event_engine::Event& event) {
 
   const uint32_t cmd_id = msg_params[strings::cmd_id].asUInt();
 
-  if (!application->FindCommand(cmd_id)) {
+  const auto command = application->FindCommand(cmd_id);
+
+  if (smart_objects::SmartType_Null == command.getType()) {
     LOG4CXX_ERROR(logger_,
                   "Command id " << cmd_id
                                 << " not found for "

@@ -89,7 +89,10 @@ void ShowAppMenuRequest::Run() {
   const auto& received_msg_params = (*message_)[strings::msg_params];
   if (received_msg_params.keyExists(strings::menu_id)) {
     const int32_t menu_id = received_msg_params[strings::menu_id].asInt();
-    if (!app->FindSubMenu(menu_id)) {
+
+    const auto sub_menu = app->FindSubMenu(menu_id);
+
+    if (smart_objects::SmartType_Null == sub_menu.getType()) {
       LOG4CXX_ERROR(logger_, "Menu with id " << menu_id << " is not found.");
       SendResponse(false, mobile_apis::Result::INVALID_ID);
       return;
