@@ -386,20 +386,20 @@ void GetInteriorVehicleDataRequest::ProccessSubscription(
     const std::string module_id = ModuleId();
     const ModuleUid module(module_type, module_id);
 
-    if (response_subscribe) {
+    if (response_subscribe &&
+        !extension->IsSubscribedToInteriorVehicleData(module)) {
       LOG4CXX_DEBUG(logger_,
                     "SubscribeToInteriorVehicleData " << app->app_id() << " "
                                                       << module_type << " "
                                                       << module_id);
       extension->SubscribeToInteriorVehicleData(module);
-    } else {
-      if (extension->IsSubscribedToInteriorVehicleData(module)) {
-        LOG4CXX_DEBUG(logger_,
-                      "UnsubscribeFromInteriorVehicleData "
-                          << app->app_id() << " [" << module_type << ":"
-                          << module_id << "]");
-        extension->UnsubscribeFromInteriorVehicleData(module);
-      }
+    } else if (!response_subscribe &&
+               extension->IsSubscribedToInteriorVehicleData(module)) {
+      LOG4CXX_DEBUG(logger_,
+                    "UnsubscribeFromInteriorVehicleData "
+                        << app->app_id() << " [" << module_type << ":"
+                        << module_id << "]");
+      extension->UnsubscribeFromInteriorVehicleData(module);
     }
   }
 }
