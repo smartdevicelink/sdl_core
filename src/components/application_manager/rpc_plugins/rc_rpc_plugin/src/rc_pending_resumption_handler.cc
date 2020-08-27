@@ -327,7 +327,7 @@ smart_objects::SmartObjectSPtr
 RCPendingResumptionHandler::CreateSubscriptionRequest(
     const ModuleUid& module, const uint32_t correlation_id) {
   auto request = RCHelpers::CreateGetInteriorVDRequestToHMI(
-      module, correlation_id, RCHelpers::GetInteriorData::SUBSCRIBE);
+      module, correlation_id, RCHelpers::InteriorDataAction::SUBSCRIBE);
   return request;
 }
 
