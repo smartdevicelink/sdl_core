@@ -169,8 +169,7 @@ class ResumeCtrl {
    *        Restore D1-D5 data
    * @param application that is need to be restored
    * @param hash stored hash value for this app
-   * @param callback Function signature to be called when
-   * data resumption will be finished
+   * @param callback Function to be called when data resumption will be finished
    * @return true if it was saved, otherwise return false
    */
   virtual bool StartResumption(app_mngr::ApplicationSharedPtr application,
