@@ -295,6 +295,12 @@ class HmiState {
   bool is_navi_app() const;
 
   /**
+   * @brief is_projection_app check if app is projection
+   * @return true if app is projection, otherwise return false
+   */
+  bool is_projection_app() const;
+
+  /**
    * @brief is_media_app check if app is media
    * @return true if media_app, otherwise return false
    */

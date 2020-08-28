@@ -81,6 +81,12 @@ bool HmiState::is_navi_app() const {
   return app ? app->is_navi() : false;
 }
 
+bool HmiState::is_projection_app() const {
+  const ApplicationSharedPtr app =
+      app_mngr_.application_by_hmi_app(hmi_app_id_);
+  return app ? app->mobile_projection_enabled() : false;
+}
+
 bool HmiState::is_media_app() const {
   const ApplicationSharedPtr app =
       app_mngr_.application_by_hmi_app(hmi_app_id_);
@@ -270,7 +276,7 @@ mobile_apis::HMILevel::eType AudioSource::hmi_level() const {
   }
 
   auto expected = HMILevel::HMI_BACKGROUND;
-  if (is_navi_app()) {
+  if (is_navi_app() || is_projection_app() || is_voice_communication_app()) {
     expected = HMILevel::HMI_LIMITED;
   }
 
@@ -279,8 +285,9 @@ mobile_apis::HMILevel::eType AudioSource::hmi_level() const {
 
 mobile_apis::AudioStreamingState::eType AudioSource::audio_streaming_state()
     const {
-  return is_media_app() ? mobile_apis::AudioStreamingState::NOT_AUDIBLE
-                        : parent()->audio_streaming_state();
+  return is_media_app() && !is_navi_app()
+             ? mobile_apis::AudioStreamingState::NOT_AUDIBLE
+             : parent()->audio_streaming_state();
 }
 
 mobile_apis::VideoStreamingState::eType AudioSource::video_streaming_state()
@@ -297,7 +304,8 @@ mobile_apis::HMILevel::eType AudioSource::max_hmi_level() const {
   }
 
   auto expected = HMILevel::HMI_FULL;
-  if (!keep_context_ && is_media_app()) {
+  if (!keep_context_ && is_media_app() && !is_navi_app() &&
+      !is_projection_app()) {
     expected = HMILevel::HMI_BACKGROUND;
   }
 
@@ -308,15 +316,15 @@ mobile_apis::AudioStreamingState::eType AudioSource::max_audio_streaming_state()
     const {
   auto parent_max = parent() ? parent()->max_audio_streaming_state()
                              : mobile_apis::AudioStreamingState::AUDIBLE;
-  return is_media_app() ? mobile_apis::AudioStreamingState::NOT_AUDIBLE
-                        : parent_max;
+  return is_media_app() && !is_navi_app()
+             ? mobile_apis::AudioStreamingState::NOT_AUDIBLE
+             : parent_max;
 }
 
 mobile_apis::VideoStreamingState::eType AudioSource::max_video_streaming_state()
     const {
-  auto parent_max = parent() ? parent()->max_video_streaming_state()
-                             : mobile_apis::VideoStreamingState::STREAMABLE;
-  return parent_max;
+  return parent() ? parent()->max_video_streaming_state()
+                  : mobile_apis::VideoStreamingState::STREAMABLE;
 }
 
 EmbeddedNavi::EmbeddedNavi(std::shared_ptr<Application> app,
@@ -331,8 +339,7 @@ mobile_apis::AudioStreamingState::eType EmbeddedNavi::audio_streaming_state()
 
 mobile_apis::VideoStreamingState::eType EmbeddedNavi::video_streaming_state()
     const {
-  return is_navi_app() ? mobile_apis::VideoStreamingState::NOT_STREAMABLE
-                       : parent()->video_streaming_state();
+  return mobile_apis::VideoStreamingState::NOT_STREAMABLE;
 }
 
 mobile_apis::HMILevel::eType EmbeddedNavi::hmi_level() const {
@@ -344,7 +351,7 @@ mobile_apis::HMILevel::eType EmbeddedNavi::hmi_level() const {
   }
 
   auto expected = HMILevel::HMI_BACKGROUND;
-  if (is_media_app() || is_voice_communication_app()) {
+  if ((is_media_app() || is_voice_communication_app()) && !is_navi_app()) {
     expected = HMILevel::HMI_LIMITED;
   }
 
