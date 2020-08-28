@@ -207,7 +207,7 @@ void RCAppExtension::RevertResumption(
   const auto app_id = application_.app_id();
   auto no_apps_subscribed = [app_id,
                              this](const rc_rpc_plugin::ModuleUid& module) {
-    if (plugin_.IsAnotherAppsSubscribedOnTheSameModule(module, app_id)) {
+    if (plugin_.IsOtherAppsSubscribed(module, app_id)) {
       LOG4CXX_DEBUG(logger_,
                     "Some other app except " << app_id
                                              << " is already subscribed to "
