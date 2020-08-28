@@ -223,6 +223,15 @@ class StateController {
    * @param app pointer to application to be exited
    */
   virtual void ExitDefaultWindow(ApplicationSharedPtr app) = 0;
+
+  /**
+   * @brief Sets BACKGROUND or LIMITED hmi level to application
+   * depends on application type
+   * @param window_id ID of app window to deactivate
+   * @param app Application to deactivate
+   */
+  virtual void DeactivateApp(ApplicationSharedPtr app,
+                             const WindowID window_id) = 0;
 };
 
 }  // namespace application_manager

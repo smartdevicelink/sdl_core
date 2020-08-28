@@ -113,7 +113,7 @@ class ApplicationImpl : public virtual Application,
   inline bool is_navi() const {
     return is_navi_;
   }
-  void set_is_navi(bool allow);
+  void set_is_navi(bool option);
 
   virtual bool is_remote_control_supported() const;
 
@@ -122,6 +122,9 @@ class ApplicationImpl : public virtual Application,
   void set_mobile_projection_enabled(bool option);
 
   bool mobile_projection_enabled() const;
+
+  void set_webengine_projection_enabled(const bool option) OVERRIDE;
+  bool webengine_projection_enabled() const OVERRIDE;
 
   bool video_streaming_approved() const;
   void set_video_streaming_approved(bool state);
@@ -143,8 +146,7 @@ class ApplicationImpl : public virtual Application,
                        uint32_t timer_len = 0);
 
   virtual bool is_voice_communication_supported() const;
-  virtual void set_voice_communication_supported(
-      bool is_voice_communication_supported);
+  virtual void set_voice_communication_supported(bool option);
   inline bool app_allowed() const;
   bool has_been_activated() const;
   bool set_activated(bool is_active);
@@ -184,7 +186,7 @@ class ApplicationImpl : public virtual Application,
   bool keep_context();
   void set_version(const Version& ver);
   void set_name(const custom_str::CustomString& name);
-  void set_is_media_application(bool is_media);
+  void set_is_media_application(bool option);
   void increment_put_file_in_none_count();
   void increment_delete_file_in_none_count();
   void increment_list_files_in_none_count();
@@ -565,6 +567,7 @@ class ApplicationImpl : public virtual Application,
   bool is_navi_;
   bool is_remote_control_supported_;
   bool mobile_projection_enabled_;
+  bool webengine_projection_enabled_;
 
   bool video_streaming_approved_;
   bool audio_streaming_approved_;

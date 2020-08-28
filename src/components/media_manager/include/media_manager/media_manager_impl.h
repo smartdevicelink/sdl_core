@@ -36,6 +36,7 @@
 #include <chrono>
 #include <map>
 #include <string>
+#include "interfaces/MOBILE_API.h"
 #include "media_manager/media_adapter_impl.h"
 #include "media_manager/media_adapter_listener.h"
 #include "media_manager/media_manager.h"
@@ -62,9 +63,17 @@ class MediaManagerImpl : public MediaManager,
   virtual void PlayA2DPSource(int32_t application_key);
   virtual void StopA2DPSource(int32_t application_key);
 
-  virtual void StartMicrophoneRecording(int32_t application_key,
-                                        const std::string& outputFileName,
-                                        int32_t duration);
+  DEPRECATED virtual void StartMicrophoneRecording(
+      int32_t application_key,
+      const std::string& outputFileName,
+      int32_t duration);
+  virtual void StartMicrophoneRecording(
+      int32_t application_key,
+      const std::string& outputFileName,
+      int32_t duration,
+      mobile_apis::SamplingRate::eType sampling_rate,
+      mobile_apis::BitsPerSample::eType bits_per_sample,
+      mobile_apis::AudioType::eType audio_type);
   virtual void StopMicrophoneRecording(int32_t application_key);
 
   virtual void StartStreaming(int32_t application_key,

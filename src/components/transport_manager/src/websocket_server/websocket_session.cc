@@ -41,11 +41,15 @@ template <>
 WebSocketSession<tcp::socket&>::WebSocketSession(
     boost::asio::ip::tcp::socket socket,
     DataReceiveCallback data_receive,
+    DataSendDoneCallback data_send_done,
+    DataSendFailedCallback data_send_failed,
     OnIOErrorCallback on_error)
     : socket_(std::move(socket))
     , ws_(socket_)
     , strand_(ws_.get_executor())
     , data_receive_(data_receive)
+    , data_send_done_(data_send_done)
+    , data_send_failed_(data_send_failed)
     , on_io_error_(on_error) {
   ws_.binary(true);
 }
@@ -56,11 +60,15 @@ WebSocketSession<ssl::stream<tcp::socket&> >::WebSocketSession(
     boost::asio::ip::tcp::socket socket,
     ssl::context& ctx,
     DataReceiveCallback data_receive,
+    DataSendDoneCallback data_send_done,
+    DataSendFailedCallback data_send_failed,
     OnIOErrorCallback on_error)
     : socket_(std::move(socket))
     , ws_(socket_, ctx)
     , strand_(ws_.get_executor())
     , data_receive_(data_receive)
+    , data_send_done_(data_send_done)
+    , data_send_failed_(data_send_failed)
     , on_io_error_(on_error) {
   ws_.binary(true);
 }
@@ -98,17 +106,17 @@ void WebSocketSession<ExecutorType>::AsyncRead(boost::system::error_code ec) {
 }
 
 template <typename ExecutorType>
-TransportAdapter::Error WebSocketSession<ExecutorType>::WriteDown(
-    ::protocol_handler::RawMessagePtr message) {
+void WebSocketSession<ExecutorType>::WriteDown(Message message) {
   boost::system::error_code ec;
   ws_.write(boost::asio::buffer(message->data(), message->data_size()), ec);
 
   if (ec) {
     LOG4CXX_ERROR(ws_logger_, "A system error has occurred: " << ec.message());
-    return TransportAdapter::FAIL;
+    data_send_failed_(message);
+    on_io_error_();
+    return;
   }
-
-  return TransportAdapter::OK;
+  data_send_done_(message);
 }
 
 template <typename ExecutorType>
@@ -131,8 +139,8 @@ void WebSocketSession<ExecutorType>::Read(boost::system::error_code ec,
                 "Msg: " << boost::beast::buffers_to_string(buffer_.data())
                         << " Size: " << size;);
 
-  ::protocol_handler::RawMessagePtr frame(
-      new protocol_handler::RawMessage(0, 0, data, size, false));
+  auto frame =
+      std::make_shared<protocol_handler::RawMessage>(0, 0, data, size, false);
 
   data_receive_(frame);
 

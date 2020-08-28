@@ -205,7 +205,7 @@ DynamicApplicationDataImpl::DynamicApplicationDataImpl()
     , commands_()
     , commands_lock_ptr_(std::make_shared<sync_primitives::RecursiveLock>())
     , sub_menu_()
-    , sub_menu_lock_ptr_(std::make_shared<sync_primitives::Lock>())
+    , sub_menu_lock_ptr_(std::make_shared<sync_primitives::RecursiveLock>())
     , choice_set_map_()
     , choice_set_map_lock_ptr_(std::make_shared<sync_primitives::Lock>())
     , performinteraction_choice_set_map_()
@@ -244,6 +244,21 @@ DynamicApplicationDataImpl::~DynamicApplicationDataImpl() {
     show_command_ = NULL;
   }
 
+  if (keyboard_props_) {
+    delete keyboard_props_;
+    keyboard_props_ = NULL;
+  }
+
+  if (menu_title_) {
+    delete menu_title_;
+    menu_title_ = NULL;
+  }
+
+  if (menu_icon_) {
+    delete menu_icon_;
+    menu_icon_ = NULL;
+  }
+
   if (tbt_show_command_) {
     delete tbt_show_command_;
     tbt_show_command_ = NULL;
@@ -262,6 +277,11 @@ DynamicApplicationDataImpl::~DynamicApplicationDataImpl() {
     delete sub_menu_it->second;
   }
   sub_menu_.clear();
+
+  for (auto command : choice_set_map_) {
+    delete command.second;
+  }
+  choice_set_map_.clear();
 
   PerformChoiceSetMap::iterator it = performinteraction_choice_set_map_.begin();
   for (; performinteraction_choice_set_map_.end() != it; ++it) {
@@ -837,12 +857,13 @@ smart_objects::SmartObject DynamicApplicationDataImpl::FindSubMenu(
 }
 
 bool DynamicApplicationDataImpl::IsSubMenuNameAlreadyExist(
-    const std::string& name) {
+    const std::string& name, const uint32_t parent_id) {
   sync_primitives::AutoLock lock(sub_menu_lock_ptr_);
   for (SubMenuMap::iterator it = sub_menu_.begin(); sub_menu_.end() != it;
        ++it) {
     smart_objects::SmartObject* menu = it->second;
-    if ((*menu)[strings::menu_name] == name) {
+    if ((*menu)[strings::menu_name].asString() == name &&
+        (*menu)[strings::parent_id].asInt() == parent_id) {
       return true;
     }
   }

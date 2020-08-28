@@ -60,7 +60,7 @@ LowVoltageSignalsHandler::LowVoltageSignalsHandler(
     , cpid_(-1) {
   sigemptyset(&lv_mask_);
   sigaddset(&lv_mask_, SIGLOWVOLTAGE_);
-  signals_handler_thread_->start();
+  signals_handler_thread_->Start();
 }
 
 sigset_t LowVoltageSignalsHandler::LowVoltageSignalsMask() const {
@@ -81,7 +81,7 @@ int LowVoltageSignalsHandler::ignition_off_signo() const {
 
 void LowVoltageSignalsHandler::Destroy() {
   if (signals_handler_thread_) {
-    signals_handler_thread_->join();
+    signals_handler_thread_->Stop(threads::Thread::kThreadSoftStop);
   }
   notifications_delegate_.reset();
   threads::DeleteThread(signals_handler_thread_);

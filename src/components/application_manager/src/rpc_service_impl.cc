@@ -112,10 +112,16 @@ EncryptionFlagCheckResult RPCServiceImpl::IsEncryptionRequired(
              ? EncryptionFlagCheckResult::kSuccess_Protected
              : EncryptionFlagCheckResult::kSuccess_NotProtected;
 }
-
 bool RPCServiceImpl::ManageMobileCommand(
     const commands::MessageSharedPtr message,
     commands::Command::CommandSource source) {
+  return ManageMobileCommand(message, source, std::string());
+}
+
+bool RPCServiceImpl::ManageMobileCommand(
+    const commands::MessageSharedPtr message,
+    commands::Command::CommandSource source,
+    const std::string warning_info) {
   LOG4CXX_AUTO_TRACE(logger_);
 
   if (!message) {
@@ -237,7 +243,6 @@ bool RPCServiceImpl::ManageMobileCommand(
 
   if (message_type == mobile_apis::messageType::request &&
       source == commands::Command::CommandSource::SOURCE_MOBILE) {
-    // commands will be launched from requesr_ctrl
     mobile_apis::HMILevel::eType app_hmi_level =
         mobile_apis::HMILevel::INVALID_ENUM;
     if (app) {
@@ -245,8 +250,9 @@ bool RPCServiceImpl::ManageMobileCommand(
           app->hmi_level(mobile_apis::PredefinedWindows::DEFAULT_WINDOW);
     }
 
-    // commands will be launched from request_ctrl
+    command->set_warning_info(warning_info);
 
+    // commands will be launched from request_ctrl
     const request_controller::RequestController::TResult result =
         request_ctrl_.addMobileRequest(command, app_hmi_level);
 
@@ -326,6 +332,12 @@ bool RPCServiceImpl::ManageMobileCommand(
 
 bool RPCServiceImpl::ManageHMICommand(const commands::MessageSharedPtr message,
                                       commands::Command::CommandSource source) {
+  return ManageHMICommand(message, source, std::string());
+}
+
+bool RPCServiceImpl::ManageHMICommand(const commands::MessageSharedPtr message,
+                                      commands::Command::CommandSource source,
+                                      const std::string warning_info) {
   LOG4CXX_AUTO_TRACE(logger_);
 
   if (!message) {
@@ -375,6 +387,7 @@ bool RPCServiceImpl::ManageHMICommand(const commands::MessageSharedPtr message,
 
   if (kRequest == message_type) {
     LOG4CXX_DEBUG(logger_, "ManageHMICommand");
+    command->set_warning_info(warning_info);
     request_ctrl_.addHMIRequest(command);
   }
 

@@ -191,7 +191,14 @@ TEST_F(HMIMessageHandlerImplTest, SendMessageToHMI_Success) {
 }
 
 TEST(WebsocketSessionTest, SendMessage_UnpreparedConnection_WithoutFall) {
-  ::testing::FLAGS_gtest_death_test_style = "threadsafe";
+  // Value "threadsafe" is preferable for this case, but as workaround for
+  // possible bug in gcc compiler value "fast" was set. Because of this warning
+  // message is appeared.
+
+  // ToDo: set value "threadsafe", if current version of gcc can handle
+  // this value correctly without causing of core dump.
+
+  ::testing::FLAGS_gtest_death_test_style = "fast";
 
   auto send_message = []() {
     auto message =
