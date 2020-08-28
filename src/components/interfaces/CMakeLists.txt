@@ -28,6 +28,19 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
+# Copy RPC spec submodule files to interfaces directory
+if(EXISTS ${CMAKE_SOURCE_DIR}/tools/rpc_spec/)
+  execute_process(COMMAND ${CMAKE_COMMAND} -E copy_if_different
+                  ${CMAKE_SOURCE_DIR}/tools/rpc_spec/MOBILE_API.xml
+                  ${CMAKE_CURRENT_SOURCE_DIR}/MOBILE_API.xml)
+  execute_process(COMMAND ${CMAKE_COMMAND} -E copy_if_different
+                  ${CMAKE_SOURCE_DIR}/tools/rpc_spec/MOBILE_API.xsd
+                  ${CMAKE_CURRENT_SOURCE_DIR}/MOBILE_API.xsd)
+else ()
+  message( FATAL_ERROR "Missing the RPC Spec submodule" )
+  message( FATAL_ERROR "Please run `git submodule update --init` in the SDL Core source directory" )
+endif ()
+
 include(${CMAKE_SOURCE_DIR}/tools/cmake/helpers/generators.cmake)
 
 include_directories (

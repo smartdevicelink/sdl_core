@@ -159,26 +159,30 @@ void UsbConnection::OnInTransfer(libusb_transfer* transfer) {
   LOG4CXX_TRACE(logger_, "exit");
 }
 
-void UsbConnection::PopOutMessage() {
+TransportAdapter::Error UsbConnection::PopOutMessage() {
   LOG4CXX_TRACE(logger_, "enter");
   bytes_sent_ = 0;
+  auto error_code = TransportAdapter::OK;
   if (out_messages_.empty()) {
     current_out_message_.reset();
   } else {
     current_out_message_ = out_messages_.front();
     out_messages_.pop_front();
-    PostOutTransfer();
+    error_code = PostOutTransfer();
   }
   LOG4CXX_TRACE(logger_, "exit");
+  return error_code;
 }
 
-bool UsbConnection::PostOutTransfer() {
+TransportAdapter::Error UsbConnection::PostOutTransfer() {
   LOG4CXX_TRACE(logger_, "enter");
   out_transfer_ = libusb_alloc_transfer(0);
-  if (0 == out_transfer_) {
+  if (nullptr == out_transfer_) {
     LOG4CXX_ERROR(logger_, "libusb_alloc_transfer failed");
-    LOG4CXX_TRACE(logger_, "exit with FALSE. Condition: 0 == out_transfer_");
-    return false;
+    LOG4CXX_TRACE(logger_,
+                  "exit with TransportAdapter::BAD_STATE. Condition: nullptr "
+                  "== out_transfer_");
+    return TransportAdapter::BAD_STATE;
   }
   libusb_fill_bulk_transfer(out_transfer_,
                             device_handle_,
@@ -192,43 +196,50 @@ bool UsbConnection::PostOutTransfer() {
   if (LIBUSB_SUCCESS != libusb_ret) {
     LOG4CXX_ERROR(
         logger_,
-        "libusb_submit_transfer failed: " << libusb_error_name(libusb_ret)
-                                          << ". Abort connection.");
-    AbortConnection();
+        "libusb_submit_transfer failed: " << libusb_error_name(libusb_ret));
     LOG4CXX_TRACE(logger_,
-                  "exit with FALSE. Condition: "
+                  "exit with TransportAdapter::FAIL. Condition: "
                       << "LIBUSB_SUCCESS != libusb_fill_bulk_transfer");
-    return false;
+    return TransportAdapter::FAIL;
   }
-  LOG4CXX_TRACE(logger_, "exit with TRUE");
-  return true;
+  LOG4CXX_TRACE(logger_, "exit with TransportAdapter::OK");
+  return TransportAdapter::OK;
 }
 
 void UsbConnection::OnOutTransfer(libusb_transfer* transfer) {
   LOG4CXX_TRACE(logger_, "enter with  Libusb_transfer*: " << transfer);
-  sync_primitives::AutoLock locker(out_messages_mutex_);
-  if (transfer->status == LIBUSB_TRANSFER_COMPLETED) {
-    bytes_sent_ += transfer->actual_length;
-    if (bytes_sent_ == current_out_message_->data_size()) {
-      LOG4CXX_DEBUG(
+  auto error_code = TransportAdapter::OK;
+  {
+    sync_primitives::AutoLock locker(out_messages_mutex_);
+    if (LIBUSB_TRANSFER_COMPLETED == transfer->status) {
+      bytes_sent_ += transfer->actual_length;
+      if (current_out_message_->data_size() == bytes_sent_) {
+        LOG4CXX_DEBUG(
+            logger_,
+            "USB out transfer, data sent: " << current_out_message_.get());
+        controller_->DataSendDone(
+            device_uid_, app_handle_, current_out_message_);
+        error_code = PopOutMessage();
+      }
+    } else {
+      LOG4CXX_ERROR(
           logger_,
-          "USB out transfer, data sent: " << current_out_message_.get());
-      controller_->DataSendDone(device_uid_, app_handle_, current_out_message_);
-      PopOutMessage();
+          "USB out transfer failed: " << libusb_error_name(transfer->status));
+      controller_->DataSendFailed(
+          device_uid_, app_handle_, current_out_message_, DataSendError());
+      error_code = PopOutMessage();
     }
-  } else {
-    LOG4CXX_ERROR(
-        logger_,
-        "USB out transfer failed: " << libusb_error_name(transfer->status));
-    controller_->DataSendFailed(
-        device_uid_, app_handle_, current_out_message_, DataSendError());
-    PopOutMessage();
+    if (current_out_message_.use_count() == 0) {
+      libusb_free_transfer(transfer);
+      out_transfer_ = nullptr;
+      waiting_out_transfer_cancel_ = false;
+    }
   }
-  if (current_out_message_.use_count() == 0) {
-    libusb_free_transfer(transfer);
-    out_transfer_ = NULL;
-    waiting_out_transfer_cancel_ = false;
+
+  if (TransportAdapter::FAIL == error_code) {
+    AbortConnection();
   }
+
   LOG4CXX_TRACE(logger_, "exit");
 }
 
@@ -241,22 +252,35 @@ TransportAdapter::Error UsbConnection::SendData(
                       << "disconnecting_");
     return TransportAdapter::BAD_STATE;
   }
-  sync_primitives::AutoLock locker(out_messages_mutex_);
-  if (current_out_message_.use_count() != 0) {
-    out_messages_.push_back(message);
-  } else {
-    current_out_message_ = message;
-    if (!PostOutTransfer()) {
-      controller_->DataSendFailed(
-          device_uid_, app_handle_, message, DataSendError());
-      LOG4CXX_TRACE(
-          logger_,
-          "exit with TransportAdapter::FAIL. Condition: !PostOutTransfer()");
-      return TransportAdapter::FAIL;
+
+  auto process_message = [this, &message]() {
+    sync_primitives::AutoLock locker(out_messages_mutex_);
+    if (current_out_message_.use_count() == 0) {
+      current_out_message_ = message;
+      return PostOutTransfer();
     }
+    out_messages_.push_back(message);
+    return TransportAdapter::OK;
+  };
+
+  auto error_code = process_message();
+
+  if (TransportAdapter::OK == error_code) {
+    LOG4CXX_TRACE(logger_, "exit with TransportAdapter::OK.");
+    return TransportAdapter::OK;
   }
-  LOG4CXX_TRACE(logger_, "exit with TransportAdapter::OK.");
-  return TransportAdapter::OK;
+
+  controller_->DataSendFailed(
+      device_uid_, app_handle_, message, DataSendError());
+
+  if (TransportAdapter::FAIL == error_code) {
+    AbortConnection();
+  }
+
+  LOG4CXX_TRACE(logger_,
+                "exit with TransportAdapter::FAIL. PostOutTransfer сondition: "
+                    << error_code);
+  return TransportAdapter::FAIL;
 }
 
 void UsbConnection::Finalise() {
@@ -293,9 +317,9 @@ void UsbConnection::Finalise() {
 
 void UsbConnection::AbortConnection() {
   LOG4CXX_TRACE(logger_, "enter");
+  Finalise();
   controller_->ConnectionAborted(
       device_uid_, app_handle_, CommunicationError());
-  Disconnect();
   LOG4CXX_TRACE(logger_, "exit");
 }
 

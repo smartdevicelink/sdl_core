@@ -36,6 +36,7 @@
 #include "application_manager/application_manager.h"
 #include "application_manager/message_helper.h"
 #include "application_manager/smart_object_keys.h"
+#include "interfaces/MOBILE_API.h"
 #include "media_manager/audio/from_mic_recorder_listener.h"
 #include "media_manager/streamer_listener.h"
 #include "protocol_handler/protocol_handler.h"
@@ -208,6 +209,21 @@ void MediaManagerImpl::StopA2DPSource(int32_t application_key) {
 void MediaManagerImpl::StartMicrophoneRecording(int32_t application_key,
                                                 const std::string& output_file,
                                                 int32_t duration) {
+  StartMicrophoneRecording(application_key,
+                           output_file,
+                           duration,
+                           mobile_apis::SamplingRate::INVALID_ENUM,
+                           mobile_apis::BitsPerSample::INVALID_ENUM,
+                           mobile_apis::AudioType::INVALID_ENUM);
+}
+
+void MediaManagerImpl::StartMicrophoneRecording(
+    int32_t application_key,
+    const std::string& output_file,
+    int32_t duration,
+    mobile_apis::SamplingRate::eType sampling_rate,
+    mobile_apis::BitsPerSample::eType bits_per_sample,
+    mobile_apis::AudioType::eType audio_type) {
   LOG4CXX_INFO(logger_,
                "MediaManagerImpl::StartMicrophoneRecording to " << output_file);
   application_manager::ApplicationSharedPtr app =
@@ -223,7 +239,7 @@ void MediaManagerImpl::StartMicrophoneRecording(int32_t application_key,
     (static_cast<FromMicRecorderAdapter*>(from_mic_recorder_))
         ->set_output_file(file_path);
     (static_cast<FromMicRecorderAdapter*>(from_mic_recorder_))
-        ->set_duration(duration);
+        ->set_config(sampling_rate, bits_per_sample, audio_type, duration);
     from_mic_recorder_->StartActivity(application_key);
   }
 #else
@@ -313,9 +329,11 @@ void MediaManagerImpl::OnMessageReceived(
   }
 
   if (!application_manager_.CanAppStream(streaming_app_id, service_type)) {
-    application_manager_.ForbidStreaming(streaming_app_id);
+    application_manager_.ForbidStreaming(streaming_app_id, service_type);
     LOG4CXX_ERROR(logger_,
-                  "The application trying to stream when it should not.");
+                  "The application is trying to stream when it should not."
+                  " service type: "
+                      << service_type);
     return;
   }
 

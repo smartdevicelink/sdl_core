@@ -44,7 +44,7 @@ AsyncRunner::AsyncRunner(const std::string& thread_name)
     : executor_(new AsyncRunnerDelegate) {
   LOG4CXX_AUTO_TRACE(logger_);
   thread_ = threads::CreateThread(thread_name.c_str(), executor_);
-  thread_->start();
+  thread_->Start();
 }
 
 void AsyncRunner::AsyncRun(ThreadDelegate* delegate) {
@@ -54,12 +54,12 @@ void AsyncRunner::AsyncRun(ThreadDelegate* delegate) {
 
 void AsyncRunner::Stop() {
   LOG4CXX_AUTO_TRACE(logger_);
-  thread_->join();
+  thread_->Stop(threads::Thread::kThreadStopDelegate);
 }
 
 AsyncRunner::~AsyncRunner() {
   LOG4CXX_AUTO_TRACE(logger_);
-  thread_->join();
+  thread_->Stop(threads::Thread::kThreadSoftStop);
   delete executor_;
   threads::DeleteThread(thread_);
 }

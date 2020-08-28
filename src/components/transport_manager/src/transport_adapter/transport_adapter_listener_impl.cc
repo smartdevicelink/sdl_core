@@ -203,6 +203,7 @@ void TransportAdapterListenerImpl::OnDisconnectDone(
     const TransportAdapter* adapter,
     const DeviceUID& device,
     const ApplicationHandle& app_id) {
+  LOG4CXX_AUTO_TRACE(logger_);
   LOG4CXX_TRACE(logger_,
                 "enter. adapter: " << adapter << ", device: " << &device
                                    << ", application_id: " << &app_id);
@@ -245,7 +246,9 @@ void TransportAdapterListenerImpl::OnDisconnectFailed(
 }
 
 void TransportAdapterListenerImpl::OnDisconnectDeviceDone(
-    const TransportAdapter* adapter, const DeviceUID& device) {}
+    const TransportAdapter* adapter, const DeviceUID& device) {
+  LOG4CXX_AUTO_TRACE(logger_);
+}
 
 void TransportAdapterListenerImpl::OnDisconnectDeviceFailed(
     const TransportAdapter* adapter,

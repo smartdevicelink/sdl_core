@@ -117,16 +117,9 @@ class PolicyManager : public usage_statistics::StatisticsManager,
    * @return vector of urls
    */
   virtual void GetUpdateUrls(const uint32_t service_type,
-                             EndpointUrls& out_end_points) = 0;
+                             EndpointUrls& out_end_points) const = 0;
   virtual void GetUpdateUrls(const std::string& service_type,
-                             EndpointUrls& out_end_points) = 0;
-
-  /**
-   * @brief GetLockScreenIcon allows to obtain lock screen icon url;
-   * @return url which point to the resource where lock screen icon could be
-   *obtained.
-   */
-  virtual std::string GetLockScreenIconUrl() const = 0;
+                             EndpointUrls& out_end_points) const = 0;
 
   /**
    * @brief Get Icon Url used for showing a cloud apps icon before the initial
@@ -424,6 +417,12 @@ class PolicyManager : public usage_statistics::StatisticsManager,
   virtual void SetSystemLanguage(const std::string& language) = 0;
 
   /**
+   * @brief Set preloaded_pt flag value in policy table
+   * @param is_preloaded value to set
+   */
+  virtual void SetPreloadedPtFlag(const bool is_preloaded) = 0;
+
+  /**
    * @brief Set data from GetSystemInfo response to policy table
    * @param ccpu_version CCPU version
    * @param wers_country_code WERS country code
@@ -432,6 +431,12 @@ class PolicyManager : public usage_statistics::StatisticsManager,
   virtual void SetSystemInfo(const std::string& ccpu_version,
                              const std::string& wers_country_code,
                              const std::string& language) = 0;
+
+  /**
+   * @brief Get information about last ccpu_version from PT
+   * @return ccpu_version from PT
+   */
+  virtual std::string GetCCPUVersionFromPT() const = 0;
 
   /**
    * @brief Send OnPermissionsUpdated for choosen application
@@ -481,19 +486,13 @@ class PolicyManager : public usage_statistics::StatisticsManager,
   virtual bool CanAppStealFocus(const std::string& app_id) const = 0;
 
   /**
-   * @brief Runs necessary operations, which is depends on external system
-   * state, e.g. getting system-specific parameters which are need to be
-   * filled into policy table
-   */
-  virtual void OnSystemReady() = 0;
-
-  /**
    * @brief Get number of notification by priority
    * @param priority Specified priority
+   * @param is_subtle If true, get the number of allowed subtle notifications
    * @return notification number
    */
-  virtual uint32_t GetNotificationsNumber(
-      const std::string& priority) const = 0;
+  virtual uint32_t GetNotificationsNumber(const std::string& priority,
+                                          const bool is_subtle) const = 0;
 
   /**
    * @brief Allows to update Vehicle Identification Number in policy table.
@@ -532,6 +531,12 @@ class PolicyManager : public usage_statistics::StatisticsManager,
    * @param trigger_ptu contains true if PTU should be triggered
    */
   virtual void OnAppsSearchCompleted(const bool trigger_ptu) = 0;
+
+  /**
+   * @brief Change applications count ready for PTU
+   * @param new_app_count new applications count for PTU
+   */
+  virtual void UpdatePTUReadyAppsCount(const uint32_t new_app_count) = 0;
 
   /**
    * @brief OnAppRegisteredOnMobile allows to handle event when application were
@@ -602,6 +607,13 @@ class PolicyManager : public usage_statistics::StatisticsManager,
   virtual Json::Value GetPolicyTableData() const = 0;
 
   /**
+   * @brief Get a list of policy app ids
+   * @return apps list filled with the policy app ids of each
+   * application
+   */
+  virtual const std::vector<std::string> GetApplicationPolicyIDs() const = 0;
+
+  /**
    * @brief Get a list of enabled cloud applications
    * @param enabled_apps List filled with the policy app id of each enabled
    * cloud application
@@ -610,29 +622,21 @@ class PolicyManager : public usage_statistics::StatisticsManager,
       std::vector<std::string>& enabled_apps) const = 0;
 
   /**
-   * @brief Get cloud app policy information, all fields that aren't set for a
+   * @brief Get app policy information, all fields that aren't set for a
    * given app will be filled with empty strings
-   * @param policy_app_id Unique application id
-   * @param enabled Whether or not the app is enabled
-   * @param endpoint Filled with the endpoint used to connect to the cloud
-   * application
-   * @param certificate Filled with the certificate used to for creating a
-   * secure connection to the cloud application
-   * @param auth_token Filled with the token used for authentication when
-   * reconnecting to the cloud app
-   * @param cloud_transport_type Filled with the transport type used by the
-   * cloud application (ex. "WSS")
-   * @param hybrid_app_preference Filled with the hybrid app preference for the
-   * cloud application set by the user
+   * @param policy_app_id policy app id
+   * @param out_app_properties application properties
+   * @return true if application presents in database, otherwise - false
    */
-  virtual bool GetCloudAppParameters(
-      const std::string& policy_app_id,
-      bool& enabled,
-      std::string& endpoint,
-      std::string& certificate,
-      std::string& auth_token,
-      std::string& cloud_transport_type,
-      std::string& hybrid_app_preference) const = 0;
+  virtual bool GetAppProperties(const std::string& policy_app_id,
+                                AppProperties& out_app_properties) const = 0;
+
+  /**
+   * @brief Get a list of enabled local applications
+   * @return enabled_apps List filled with the policy app id of each enabled
+   * local application
+   */
+  virtual std::vector<std::string> GetEnabledLocalApps() const = 0;
 
   /**
    * @ brief Initialize new cloud app in the policy table
@@ -736,12 +740,13 @@ class PolicyManager : public usage_statistics::StatisticsManager,
   virtual const PolicySettings& get_settings() const = 0;
 
   /**
+   * @deprecated Unused in EXTERNAL_PROPRIETARY policies
    * @brief Finds the next URL that must be sent on OnSystemRequest retry
    * @param urls vector of vectors that contain urls for each application
    * @return Pair of policy application id and application url id from the
    * urls vector
    */
-  virtual AppIdURL GetNextUpdateUrl(const EndpointUrls& urls) = 0;
+  DEPRECATED virtual AppIdURL GetNextUpdateUrl(const EndpointUrls& urls) = 0;
 
   /**
    * @brief Assigns new HMI types for specified application
@@ -778,6 +783,12 @@ class PolicyManager : public usage_statistics::StatisticsManager,
    */
   virtual void SendAppPermissionsChanged(const std::string& device_id,
                                          const std::string& application_id) = 0;
+  /**
+   * @brief Send OnAppPropertiesChangeNotification to the HMI
+   * @param policy_app_id policy app id
+   */
+  virtual void SendOnAppPropertiesChangeNotification(
+      const std::string& policy_app_id) const = 0;
 
   /**
    * @brief Gets all allowed module types
@@ -829,6 +840,18 @@ class PolicyManager : public usage_statistics::StatisticsManager,
    * @return ExternalConsent status
    */
   virtual ExternalConsentStatus GetExternalConsentStatus() = 0;
+
+  /**
+   * @brief OnLocalAppAdded triggers PTU
+   */
+  virtual void OnLocalAppAdded() = 0;
+
+  /**
+   * @brief Check if certain application already in policy db.
+   * @param policy application id.
+   * @return true if application presents false otherwise.
+   */
+  virtual bool IsNewApplication(const std::string& application_id) const = 0;
 
   /**
    * @brief Restart PTU timeout if PTU in UPDATING state

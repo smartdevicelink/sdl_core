@@ -70,7 +70,7 @@ typedef std::shared_ptr<VIGetVehicleDataResponse> VIGetVehicleDataResponsePtr;
 namespace {
 const uint32_t kConnectionKey = 2u;
 const uint32_t kCorrelationId = 1u;
-const std::string kStrNumber = "123";
+const std::string kStrNumber{"123"};
 }  // namespace
 
 class VIGetVehicleDataResponseTest
@@ -97,10 +97,12 @@ TEST_F(VIGetVehicleDataResponseTest, RUN_SUCCESS) {
       .WillOnce(ReturnRef(mock_event_dispatcher));
   EXPECT_CALL(mock_event_dispatcher, raise_event(_));
 
+  ASSERT_TRUE(command->Init());
   command->Run();
 }
 
-TEST_F(VIGetVehicleDataResponseTest, ErrorResponse_SUCCESS) {
+TEST_F(VIGetVehicleDataResponseTest,
+       ErrorResponse_OnVehicleDataUpdated_NotCalled) {
   MessageSharedPtr command_msg(CreateMessage(smart_objects::SmartType_Map));
   (*command_msg)[strings::msg_params][strings::number] = kStrNumber;
   (*command_msg)[strings::params][strings::connection_key] = kConnectionKey;
@@ -108,7 +110,7 @@ TEST_F(VIGetVehicleDataResponseTest, ErrorResponse_SUCCESS) {
       hmi_apis::messageType::error_response;
   (*command_msg)[strings::params][strings::data][strings::slider_position] = 1;
   (*command_msg)[strings::params][hmi_response::code] =
-      hmi_apis::Common_Result::SUCCESS;
+      hmi_apis::Common_Result::ABORTED;
   (*command_msg)[strings::params][strings::correlation_id] = kCorrelationId;
   (*command_msg)[am::strings::params][am::strings::error_msg] = "test_error";
   (*command_msg)[am::strings::params][am::strings::protocol_type] =
@@ -116,33 +118,18 @@ TEST_F(VIGetVehicleDataResponseTest, ErrorResponse_SUCCESS) {
   (*command_msg)[strings::params][strings::protocol_version] =
       am::commands::CommandImpl::protocol_version_;
 
-  smart_objects::SmartObject result(smart_objects::SmartType_Map);
-  result[strings::msg_params] = (*command_msg)[strings::params][strings::data];
-  result[strings::params][hmi_response::code] =
-      (*command_msg)[strings::params][hmi_response::code];
-  result[strings::params][strings::correlation_id] =
-      (*command_msg)[strings::params][strings::correlation_id];
-  result[strings::params][strings::error_msg] =
-      (*command_msg)[strings::params][strings::error_msg];
-  result[strings::params][strings::message_type] =
-      (*command_msg)[strings::params][strings::message_type];
-  result[strings::params][strings::protocol_type] =
-      (*command_msg)[strings::params][strings::protocol_type];
-  result[strings::params][strings::protocol_version] =
-      (*command_msg)[strings::params][strings::protocol_version];
-
   VIGetVehicleDataResponsePtr command(
       CreateCommandVI<VIGetVehicleDataResponse>(command_msg));
 
-  am::event_engine::Event event(
-      hmi_apis::FunctionID::VehicleInfo_GetVehicleData);
-  event.set_smart_object(result);
+  EXPECT_CALL(mock_policy_handler_, OnVehicleDataUpdated(*command_msg))
+      .Times(0);
 
   MockEventDispatcher mock_event_dispatcher;
   EXPECT_CALL(app_mngr_, event_dispatcher())
       .WillOnce(ReturnRef(mock_event_dispatcher));
   EXPECT_CALL(mock_event_dispatcher, raise_event(_));
 
+  ASSERT_TRUE(command->Init());
   command->Run();
 }
 

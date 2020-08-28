@@ -283,13 +283,6 @@ class TransportAdapterImpl : public TransportAdapter,
    */
   void SearchDeviceFailed(const SearchDeviceError& error) OVERRIDE;
 
-  /**
-   * @brief Add device to the container(map), if container doesn't hold it yet.
-   *
-   * @param device Smart pointer to the device.
-   *
-   * @return Smart pointer to the device.
-   */
   DeviceSptr AddDevice(DeviceSptr device) OVERRIDE;
 
   /**
@@ -517,6 +510,12 @@ class TransportAdapterImpl : public TransportAdapter,
   TMTelemetryObserver* GetTelemetryObserver() OVERRIDE;
 #endif  // TELEMETRY_MONITOR
 
+  /**
+   * @brief GetWebEngineDevice
+   * @return shared pointer to WebEngine device
+   */
+  DeviceSptr GetWebEngineDevice() const OVERRIDE;
+
  protected:
   /**
    * @brief Store adapter state where applicable
@@ -581,6 +580,16 @@ class TransportAdapterImpl : public TransportAdapter,
    * otherwise an empty string
    */
   DeviceUID GetNextRetryDevice();
+
+  /**
+   * @brief Remove a connection from the list without triggering
+   *the connection's destructor inside of a list lock
+   *
+   * @param device_handle Device unique identifier.
+   * @param app_handle Handle of application.
+   */
+  void RemoveConnection(const DeviceUID& device_id,
+                        const ApplicationHandle& app_handle);
 
   /**
    * @brief Remove specified device

@@ -112,12 +112,19 @@ const uint32_t kConnectionKey = 1232u;
 const std::string kAppName = "appName";
 const WindowID kDefaultWindowId =
     mobile_apis::PredefinedWindows::DEFAULT_WINDOW;
+const std::vector<std::string> kEnabledLocalApps = {"localAppId"};
 
 typedef hmi_apis::Common_ServiceStatusUpdateReason::eType
     ServiceStatusUpdateReason;
 typedef hmi_apis::Common_ServiceType::eType ServiceType;
 typedef hmi_apis::Common_ServiceEvent::eType ServiceEvent;
 typedef utils::Optional<ServiceStatusUpdateReason> UpdateReasonOptional;
+
+const std::string kPolicyAppID = "test policy id";
+transport_manager::DeviceInfo kDeviceInfo(1,
+                                          "mac",
+                                          "name",
+                                          "WEB_ENGINE_DEVICE");
 
 #if defined(CLOUD_APP_WEBSOCKET_TRANSPORT_SUPPORT)
 // Cloud application params
@@ -130,6 +137,12 @@ const mobile_api::HybridAppPreference::eType kHybridAppPreference =
     mobile_api::HybridAppPreference::CLOUD;
 const std::string kHybridAppPreferenceStr = "CLOUD";
 const bool kEnabled = true;
+const policy::AppProperties app_properties(kEndpoint2,
+                                           kCertificate,
+                                           kEnabled,
+                                           kAuthToken,
+                                           kTransportType,
+                                           kHybridAppPreferenceStr);
 #endif  // CLOUD_APP_WEBSOCKET_TRANSPORT_SUPPORT
 }  // namespace
 
@@ -222,6 +235,8 @@ class ApplicationManagerImplTest
             smart_objects::SmartType_Map)));
     ON_CALL(*mock_policy_handler_, GetStatisticManager())
         .WillByDefault(Return(mock_statistics_manager_));
+    ON_CALL(*mock_policy_handler_, GetEnabledLocalApps())
+        .WillByDefault(Return(kEnabledLocalApps));
   }
 
   void CreateAppManager() {
@@ -252,6 +267,17 @@ class ApplicationManagerImplTest
     app_manager_impl_->SetMockPolicyHandler(mock_policy_handler_);
     ASSERT_TRUE(app_manager_impl_.get());
     ASSERT_TRUE(mock_app_ptr_.get());
+  }
+
+  void SetExpectationForCreateModuleInfoSO(
+      const hmi_apis::FunctionID::eType function_id) {
+    smart_objects::SmartObject sm_object(smart_objects::SmartType_Map);
+    sm_object[strings::params][strings::function_id] =
+        static_cast<int>(function_id);
+    auto sptr = std::make_shared<smart_objects::SmartObject>(sm_object);
+
+    ON_CALL(*mock_message_helper_, CreateModuleInfoSO(function_id, _))
+        .WillByDefault(Return(sptr));
   }
 
   application_manager::commands::MessageSharedPtr CreateCloseAppMessage() {
@@ -311,6 +337,47 @@ class ApplicationManagerImplTest
   void AddCloudAppToPendingDeviceMap();
   void CreatePendingApplication();
 #endif
+
+  void ExpectedHmiState(
+      const ApplicationSharedPtr wep_app,
+      const WindowID main_window_id,
+      const mobile_apis::HMILevel::eType hmi_level,
+      const mobile_apis::VideoStreamingState::eType vss,
+      const mobile_apis::AudioStreamingState::eType audio_str_st,
+      const mobile_apis::SystemContext::eType system_ctx) {
+    EXPECT_EQ(hmi_level, wep_app->hmi_level(main_window_id));
+    EXPECT_EQ(vss, wep_app->video_streaming_state());
+    EXPECT_EQ(audio_str_st, wep_app->audio_streaming_state());
+    EXPECT_EQ(system_ctx, wep_app->system_context(main_window_id));
+  }
+
+  smart_objects::SmartObjectSPtr CreateRAI(const std::string app_hmi_type,
+                                           const bool is_media_application) {
+    smart_objects::SmartObject rai(smart_objects::SmartType_Map);
+    smart_objects::SmartObject& params = rai[strings::msg_params];
+    params[strings::app_id] = kAppId;
+    params[strings::language_desired] = mobile_api::Language::EN_US;
+    params[strings::hmi_display_language_desired] = mobile_api::Language::EN_US;
+
+    rai[strings::params][strings::connection_key] = kConnectionKey;
+    rai[strings::msg_params][strings::app_name] = kAppName;
+    rai[strings::msg_params][strings::app_hmi_type] = app_hmi_type;
+    rai[strings::msg_params][strings::is_media_application] =
+        is_media_application;
+    rai[strings::msg_params][strings::sync_msg_version]
+       [strings::minor_version] = APIVersion::kAPIV2;
+    rai[strings::msg_params][strings::sync_msg_version]
+       [strings::major_version] = APIVersion::kAPIV6;
+
+    rai[strings::params][strings::protocol_version] =
+        protocol_handler::MajorProtocolVersion::PROTOCOL_VERSION_2;
+
+    const auto rai_ptr = std::make_shared<smart_objects::SmartObject>(rai);
+    return rai_ptr;
+  }
+
+  void CreatePendingLocalApplication(const std::string& policy_app_id);
+
   uint32_t app_id_;
   NiceMock<policy_test::MockPolicySettings> mock_policy_settings_;
   std::shared_ptr<NiceMock<resumption_test::MockResumptionData> > mock_storage_;
@@ -332,6 +399,13 @@ class ApplicationManagerImplTest
   std::shared_ptr<NiceMock<usage_statistics_test::MockStatisticsManager> >
       mock_statistics_manager_;
 };
+
+MATCHER_P(HMIFunctionIDIs, result_code, "") {
+  return result_code == static_cast<hmi_apis::FunctionID::eType>(
+                            (*arg)[application_manager::strings::params]
+                                  [application_manager::strings::function_id]
+                                      .asInt());
+}
 
 INSTANTIATE_TEST_CASE_P(
     ProcessServiceStatusUpdate_REQUEST_ACCEPTED,
@@ -1180,14 +1254,19 @@ TEST_F(ApplicationManagerImplTest, StartStopAudioPassThru) {
 
   const uint32_t app_id = 65537;
   const int32_t max_duration = 1000;
-  // below are not used
   const int32_t correlation_id = 0;
   const int32_t sampling_rate = 0;
   const int32_t bits_per_sample = 0;
   const int32_t audio_type = 0;
 
-  EXPECT_CALL(mock_media_manager,
-              StartMicrophoneRecording(app_id, _, max_duration))
+  EXPECT_CALL(
+      mock_media_manager,
+      StartMicrophoneRecording(app_id,
+                               _,
+                               max_duration,
+                               mobile_apis::SamplingRate::SamplingRate_8KHZ,
+                               mobile_apis::BitsPerSample::BitsPerSample_8_BIT,
+                               mobile_apis::AudioType::PCM))
       .WillOnce(Return());
   EXPECT_CALL(mock_media_manager, StopMicrophoneRecording(app_id))
       .WillOnce(Return());
@@ -1249,7 +1328,9 @@ TEST_F(ApplicationManagerImplTest, UnregisterAnotherAppDuringAudioPassThru) {
   EXPECT_CALL(*mock_app_2, device()).WillRepeatedly(Return(0));
   EXPECT_CALL(*mock_app_2, mac_address())
       .WillRepeatedly(ReturnRef(dummy_mac_address));
-  EXPECT_CALL(*mock_app_2, policy_app_id()).WillRepeatedly(Return(""));
+  const std::string app2_policy_id = "app2_policy_id";
+  EXPECT_CALL(*mock_app_2, policy_app_id())
+      .WillRepeatedly(Return(app2_policy_id));
   EXPECT_CALL(*mock_app_2, protocol_version())
       .WillRepeatedly(
           Return(protocol_handler::MajorProtocolVersion::PROTOCOL_VERSION_4));
@@ -1262,14 +1343,19 @@ TEST_F(ApplicationManagerImplTest, UnregisterAnotherAppDuringAudioPassThru) {
   app_manager_impl_->AddMockApplication(mock_app_2);
 
   const int32_t max_duration = 1000;
-  // below are not used
   const int32_t correlation_id = 0;
   const int32_t sampling_rate = 0;
   const int32_t bits_per_sample = 0;
   const int32_t audio_type = 0;
 
-  EXPECT_CALL(mock_media_manager,
-              StartMicrophoneRecording(app_id_2, _, max_duration))
+  EXPECT_CALL(
+      mock_media_manager,
+      StartMicrophoneRecording(app_id_2,
+                               _,
+                               max_duration,
+                               mobile_apis::SamplingRate::SamplingRate_8KHZ,
+                               mobile_apis::BitsPerSample::BitsPerSample_8_BIT,
+                               mobile_apis::AudioType::PCM))
       .WillOnce(Return());
   EXPECT_CALL(mock_media_manager, StopMicrophoneRecording(app_id_2))
       .WillOnce(Return());
@@ -1285,6 +1371,9 @@ TEST_F(ApplicationManagerImplTest, UnregisterAnotherAppDuringAudioPassThru) {
                                                 bits_per_sample,
                                                 audio_type);
   }
+
+  std::vector<std::string> enabled_apps = {app2_policy_id};
+  EXPECT_CALL(*mock_rpc_service_, ManageHMICommand(_, _)).Times(1);
 
   // while running APT, app 1 is unregistered
   app_manager_impl_->UnregisterApplication(
@@ -1668,14 +1757,8 @@ void ApplicationManagerImplTest::AddCloudAppToPendingDeviceMap() {
   std::vector<std::string> enabled_apps{"1234"};
   EXPECT_CALL(*mock_policy_handler_, GetEnabledCloudApps(_))
       .WillOnce(SetArgReferee<0>(enabled_apps));
-  EXPECT_CALL(*mock_policy_handler_, GetCloudAppParameters(_, _, _, _, _, _, _))
-      .WillOnce(DoAll(SetArgReferee<1>(kEnabled),
-                      SetArgReferee<2>(kEndpoint2),
-                      SetArgReferee<3>(kCertificate),
-                      SetArgReferee<4>(kAuthToken),
-                      SetArgReferee<5>(kTransportType),
-                      SetArgReferee<6>(kHybridAppPreferenceStr),
-                      Return(true)));
+  EXPECT_CALL(*mock_policy_handler_, GetAppProperties(_, _))
+      .WillOnce(DoAll(SetArgReferee<1>(app_properties), Return(true)));
 
   std::vector<std::string> nicknames{"CloudApp"};
   EXPECT_CALL(*mock_policy_handler_, GetInitialAppData(_, _, _))
@@ -1700,14 +1783,8 @@ void ApplicationManagerImplTest::CreatePendingApplication() {
   EXPECT_CALL(*mock_policy_handler_, GetStatisticManager())
       .WillOnce(Return(std::shared_ptr<usage_statistics::StatisticsManager>(
           new usage_statistics_test::MockStatisticsManager())));
-  EXPECT_CALL(*mock_policy_handler_, GetCloudAppParameters(_, _, _, _, _, _, _))
-      .WillOnce(DoAll(SetArgReferee<1>(kEnabled),
-                      SetArgReferee<2>(kEndpoint2),
-                      SetArgReferee<3>(kCertificate),
-                      SetArgReferee<4>(kAuthToken),
-                      SetArgReferee<5>(kTransportType),
-                      SetArgReferee<6>(kHybridAppPreferenceStr),
-                      Return(true)));
+  EXPECT_CALL(*mock_policy_handler_, GetAppProperties(_, _))
+      .WillOnce(DoAll(SetArgReferee<1>(app_properties), Return(true)));
   // Expect Update app list
   EXPECT_CALL(*mock_rpc_service_, ManageHMICommand(_, _)).Times(1);
   app_manager_impl_->CreatePendingApplication(1, device_info, 1);
@@ -1737,14 +1814,8 @@ TEST_F(ApplicationManagerImplTest, SetPendingState) {
 
   EXPECT_CALL(*mock_policy_handler_, GetEnabledCloudApps(_))
       .WillOnce(SetArgReferee<0>(enabled_apps));
-  EXPECT_CALL(*mock_policy_handler_, GetCloudAppParameters(_, _, _, _, _, _, _))
-      .WillOnce(DoAll(SetArgReferee<1>(kEnabled),
-                      SetArgReferee<2>(kEndpoint2),
-                      SetArgReferee<3>(kCertificate),
-                      SetArgReferee<4>(kAuthToken),
-                      SetArgReferee<5>(kTransportType),
-                      SetArgReferee<6>(kHybridAppPreferenceStr),
-                      Return(true)));
+  EXPECT_CALL(*mock_policy_handler_, GetAppProperties(_, _))
+      .WillOnce(DoAll(SetArgReferee<1>(app_properties), Return(true)));
 
   std::vector<std::string> nicknames{"CloudApp"};
   EXPECT_CALL(*mock_policy_handler_, GetInitialAppData(_, _, _))
@@ -1887,14 +1958,8 @@ TEST_F(ApplicationManagerImplTest, PolicyIDByIconUrl_Success) {
   std::vector<std::string> enabled_apps{"1234"};
   EXPECT_CALL(*mock_policy_handler_, GetEnabledCloudApps(_))
       .WillOnce(SetArgReferee<0>(enabled_apps));
-  EXPECT_CALL(*mock_policy_handler_, GetCloudAppParameters(_, _, _, _, _, _, _))
-      .WillOnce(DoAll(SetArgReferee<1>(kEnabled),
-                      SetArgReferee<2>(kEndpoint2),
-                      SetArgReferee<3>(kCertificate),
-                      SetArgReferee<4>(kAuthToken),
-                      SetArgReferee<5>(kTransportType),
-                      SetArgReferee<6>(kHybridAppPreferenceStr),
-                      Return(true)));
+  EXPECT_CALL(*mock_policy_handler_, GetAppProperties(_, _))
+      .WillOnce(DoAll(SetArgReferee<1>(app_properties), Return(true)));
 
   std::vector<std::string> nicknames{"CloudApp"};
   EXPECT_CALL(*mock_policy_handler_, GetInitialAppData(_, _, _))
@@ -1936,8 +2001,286 @@ TEST_F(ApplicationManagerImplTest, SetIconFileFromSystemRequest_Success) {
   app_manager_impl_->SetIconFileFromSystemRequest("1234");
   EXPECT_TRUE(file_system::RemoveDirectory(kDirectoryName, true));
 }
-
 #endif  // CLOUD_APP_WEBSOCKET_TRANSPORT_SUPPORT
+
+void ApplicationManagerImplTest::CreatePendingLocalApplication(
+    const std::string& policy_app_id) {
+  // CreatePendingApplication
+  std::vector<std::string> nicknames{"PendingApplication"};
+  EXPECT_CALL(*mock_policy_handler_, GetInitialAppData(policy_app_id, _, _))
+      .WillOnce(DoAll(SetArgPointee<1>(nicknames), Return(true)));
+  EXPECT_CALL(mock_connection_handler_, GetWebEngineDeviceInfo())
+      .WillOnce(ReturnRef(kDeviceInfo));
+  EXPECT_CALL(*mock_policy_handler_, GetStatisticManager())
+      .WillOnce(Return(std::shared_ptr<usage_statistics::StatisticsManager>(
+          new usage_statistics_test::MockStatisticsManager())));
+  EXPECT_CALL(*mock_policy_handler_, GetAppProperties(_, _))
+      .WillOnce(DoAll(SetArgReferee<1>(app_properties), Return(true)));
+  // Expect NO Update app list
+  EXPECT_CALL(*mock_rpc_service_, ManageHMICommand(_, _)).Times(0);
+  app_manager_impl_->CreatePendingLocalApplication(policy_app_id);
+  AppsWaitRegistrationSet app_list =
+      app_manager_impl_->AppsWaitingForRegistration().GetData();
+  EXPECT_EQ(1u, app_list.size());
+}
+
+TEST_F(ApplicationManagerImplTest, CreatePendingApplicationByPolicyAppID) {
+  CreatePendingLocalApplication(kPolicyAppID);
+}
+
+TEST_F(ApplicationManagerImplTest, RemoveExistingPendingApplication_SUCCESS) {
+  CreatePendingLocalApplication(kPolicyAppID);
+  auto app_list = app_manager_impl_->AppsWaitingForRegistration().GetData();
+  ASSERT_EQ(1u, app_list.size());
+
+  app_manager_impl_->RemovePendingApplication(kPolicyAppID);
+  app_list = app_manager_impl_->AppsWaitingForRegistration().GetData();
+  EXPECT_TRUE(app_list.empty());
+}
+
+TEST_F(ApplicationManagerImplTest,
+       RemovePendingApplicationFromEmptyList_NoAppRemoved_SUCCESS) {
+  auto app_list = app_manager_impl_->AppsWaitingForRegistration().GetData();
+  ASSERT_TRUE(app_list.empty());
+
+  app_manager_impl_->RemovePendingApplication(kPolicyAppID);
+  app_list = app_manager_impl_->AppsWaitingForRegistration().GetData();
+  EXPECT_TRUE(app_list.empty());
+}
+
+TEST_F(
+    ApplicationManagerImplTest,
+    OnWebEngineDeviceCreated_NoEnabledLocalApps_PendingApplicationNotCreatedAndNoUpdateAppList) {
+  std::vector<std::string> enabled_apps;
+  EXPECT_CALL(*mock_policy_handler_, GetEnabledLocalApps())
+      .WillOnce(Return(enabled_apps));
+  EXPECT_CALL(*mock_rpc_service_, ManageHMICommand(_, _)).Times(0);
+
+  app_manager_impl_->OnWebEngineDeviceCreated();
+
+  auto app_list = app_manager_impl_->AppsWaitingForRegistration().GetData();
+  EXPECT_TRUE(app_list.empty());
+}
+
+TEST_F(
+    ApplicationManagerImplTest,
+    OnWebEngineDeviceCreated_PendingApplicationCreatedAndUpdateAppListSentToHMI) {
+  std::vector<std::string> enabled_apps = {"app1"};
+  std::vector<std::string> nicknames{"PendingApplication"};
+
+  EXPECT_CALL(*mock_policy_handler_, GetEnabledLocalApps())
+      .WillOnce(Return(enabled_apps));
+  EXPECT_CALL(*mock_rpc_service_, ManageHMICommand(_, _)).Times(1);
+  EXPECT_CALL(*mock_policy_handler_, GetAppProperties(_, _))
+      .WillOnce(DoAll(SetArgReferee<1>(app_properties), Return(true)));
+  EXPECT_CALL(*mock_policy_handler_, GetInitialAppData(_, _, _))
+      .WillOnce(DoAll(SetArgPointee<1>(nicknames), Return(true)));
+  EXPECT_CALL(mock_connection_handler_, GetWebEngineDeviceInfo())
+      .WillOnce(ReturnRef(kDeviceInfo));
+
+  app_manager_impl_->OnWebEngineDeviceCreated();
+
+  auto app_list = app_manager_impl_->AppsWaitingForRegistration().GetData();
+  EXPECT_EQ(1u, app_list.size());
+}
+
+TEST_F(
+    ApplicationManagerImplTest,
+    RegisterApplication_WEPNonMediaAppRegisterActivateDeactivateExit_EXPECT_CORRECT_HMI_STATES) {
+  using namespace mobile_apis;
+  EXPECT_CALL(
+      mock_session_observer_,
+      GetDataOnSessionKey(kConnectionKey,
+                          _,
+                          _,
+                          testing::An<connection_handler::DeviceHandle*>()))
+      .WillOnce(DoAll(SetArgPointee<3u>(kDeviceId), Return(0)));
+
+  const std::string app_hmi_type{"WEB_VIEW"};
+  const bool is_media_app = false;
+  const auto rai_ptr = CreateRAI(app_hmi_type, is_media_app);
+
+  std::unique_ptr<plugin_manager::RPCPluginManager> rpc_plugin_manager(
+      new MockRPCPluginManager());
+  app_manager_impl_->SetPluginManager(rpc_plugin_manager);
+  auto wep_nonmedia_app = app_manager_impl_->RegisterApplication(rai_ptr);
+  wep_nonmedia_app->set_is_media_application(false);
+
+  EXPECT_EQ(protocol_handler::MajorProtocolVersion::PROTOCOL_VERSION_2,
+            wep_nonmedia_app->protocol_version());
+  EXPECT_EQ(APIVersion::kAPIV2,
+            wep_nonmedia_app->version().min_supported_api_version);
+  EXPECT_EQ(APIVersion::kAPIV6,
+            wep_nonmedia_app->version().max_supported_api_version);
+
+  // Initial HMI level, audio, video streaming states and system context
+  // set after app registration
+  ExpectedHmiState(wep_nonmedia_app,
+                   kDefaultWindowId,
+                   HMILevel::INVALID_ENUM,
+                   VideoStreamingState::INVALID_ENUM,
+                   AudioStreamingState::INVALID_ENUM,
+                   SystemContext::SYSCTXT_MAIN);
+
+  // Const shared ptr is required for OnAppActivated due to its signature
+  ApplicationConstSharedPtr const_wep_app = wep_nonmedia_app;
+  EXPECT_CALL(*mock_app_service_manager_, OnAppActivated(const_wep_app));
+
+  // Activate Webengine projection non-media app
+  // to check its audio & video streaming states in FULL Hmi level
+  app_manager_impl_->ActivateApplication(wep_nonmedia_app);
+
+  // WEP non-media app should be always not_streamable
+  // and not_audible even in FULL HMI Level
+  ExpectedHmiState(wep_nonmedia_app,
+                   kDefaultWindowId,
+                   HMILevel::HMI_FULL,
+                   VideoStreamingState::NOT_STREAMABLE,
+                   AudioStreamingState::NOT_AUDIBLE,
+                   SystemContext::SYSCTXT_MAIN);
+
+  // Deactivate Webengine projection non-media app
+  // to check its new HMI level and audio & video streaming states
+  app_manager_impl_->state_controller().DeactivateApp(wep_nonmedia_app,
+                                                      kDefaultWindowId);
+
+  // WEP non-media app should be deactivated to BACKGROUND
+  // WEP non-media app should be not audible and not streamable
+  // in BACKGROUND HMI Level
+
+  ExpectedHmiState(wep_nonmedia_app,
+                   kDefaultWindowId,
+                   HMILevel::HMI_BACKGROUND,
+                   VideoStreamingState::NOT_STREAMABLE,
+                   AudioStreamingState::NOT_AUDIBLE,
+                   SystemContext::SYSCTXT_MAIN);
+
+  // Exit of Webengine projection non-media app
+  // to check its new HMI level and audio & video streaming states
+  app_manager_impl_->state_controller().ExitDefaultWindow(wep_nonmedia_app);
+  // WEP non-media app should be deactivated to NONE
+  // WEP non-media app should be not audible and not streamable
+  // in NONE HMI Level
+  ExpectedHmiState(wep_nonmedia_app,
+                   kDefaultWindowId,
+                   HMILevel::HMI_NONE,
+                   VideoStreamingState::NOT_STREAMABLE,
+                   AudioStreamingState::NOT_AUDIBLE,
+                   SystemContext::SYSCTXT_MAIN);
+}
+
+TEST_F(
+    ApplicationManagerImplTest,
+    RegisterApplication_WEPMediaAppRegisterActivateDeactivateExit_EXPECT_CORRECT_HMI_STATES) {
+  using namespace mobile_apis;
+
+  EXPECT_CALL(
+      mock_session_observer_,
+      GetDataOnSessionKey(kConnectionKey,
+                          _,
+                          _,
+                          testing::An<connection_handler::DeviceHandle*>()))
+      .WillOnce(DoAll(SetArgPointee<3u>(kDeviceId), Return(0)));
+
+  const std::string app_hmi_type{"WEB_VIEW"};
+  const bool is_media_app = true;
+  const auto rai_ptr = CreateRAI(app_hmi_type, is_media_app);
+
+  std::unique_ptr<plugin_manager::RPCPluginManager> rpc_plugin_manager(
+      new MockRPCPluginManager());
+  app_manager_impl_->SetPluginManager(rpc_plugin_manager);
+  auto wep_media_app = app_manager_impl_->RegisterApplication(rai_ptr);
+  wep_media_app->set_is_media_application(true);
+
+  EXPECT_EQ(protocol_handler::MajorProtocolVersion::PROTOCOL_VERSION_2,
+            wep_media_app->protocol_version());
+  EXPECT_EQ(APIVersion::kAPIV2,
+            wep_media_app->version().min_supported_api_version);
+  EXPECT_EQ(APIVersion::kAPIV6,
+            wep_media_app->version().max_supported_api_version);
+
+  // Initial HMI level, audio, video streaming states and system context
+  // set after app registration
+  ExpectedHmiState(wep_media_app,
+                   kDefaultWindowId,
+                   HMILevel::INVALID_ENUM,
+                   VideoStreamingState::INVALID_ENUM,
+                   AudioStreamingState::INVALID_ENUM,
+                   SystemContext::SYSCTXT_MAIN);
+
+  // Const shared ptr is required for OnAppActivated due to its signature
+  ApplicationConstSharedPtr const_wep_app = wep_media_app;
+  EXPECT_CALL(*mock_app_service_manager_, OnAppActivated(const_wep_app));
+
+  // Activate Webengine projection media app
+  // to check its audio & video streaming states in FULL Hmi level
+  app_manager_impl_->ActivateApplication(wep_media_app);
+
+  // WEP media app should be always not_streamable
+  // but audible even in FULL HMI Level
+  ExpectedHmiState(wep_media_app,
+                   kDefaultWindowId,
+                   HMILevel::HMI_FULL,
+                   VideoStreamingState::NOT_STREAMABLE,
+                   AudioStreamingState::AUDIBLE,
+                   SystemContext::SYSCTXT_MAIN);
+
+  // Deactivate Webengine projection media app
+  // to check its new HMI level and audio & video streaming states
+  app_manager_impl_->state_controller().DeactivateApp(wep_media_app,
+                                                      kDefaultWindowId);
+
+  // WEP media app should be deactivated to LIMITED
+  // WEP media app should be audible but not streamable in LIMITED HMI Level
+  ExpectedHmiState(wep_media_app,
+                   kDefaultWindowId,
+                   HMILevel::HMI_LIMITED,
+                   VideoStreamingState::NOT_STREAMABLE,
+                   AudioStreamingState::AUDIBLE,
+                   SystemContext::SYSCTXT_MAIN);
+
+  // Exit of Webengine projection media app
+  // to check its new HMI level and audio & video streaming states
+  app_manager_impl_->state_controller().ExitDefaultWindow(wep_media_app);
+  // WEP media app should be exited to NONE
+  ExpectedHmiState(wep_media_app,
+                   kDefaultWindowId,
+                   HMILevel::HMI_NONE,
+                   VideoStreamingState::NOT_STREAMABLE,
+                   AudioStreamingState::NOT_AUDIBLE,
+                   SystemContext::SYSCTXT_MAIN);
+}
+
+TEST_F(ApplicationManagerImplTest, AddAndRemoveQueryAppDevice_SUCCESS) {
+  const connection_handler::DeviceHandle device_handle = 1u;
+  ASSERT_FALSE(app_manager_impl_->IsAppsQueriedFrom(device_handle));
+
+  app_manager_impl_->OnQueryAppsRequest(device_handle);
+  EXPECT_TRUE(app_manager_impl_->IsAppsQueriedFrom(device_handle));
+  app_manager_impl_->RemoveDevice(device_handle);
+  EXPECT_FALSE(app_manager_impl_->IsAppsQueriedFrom(device_handle));
+}
+
+TEST_F(
+    ApplicationManagerImplTest,
+    RequestForInterfacesAvailability_AllRequestsWillBeSuccessfullyRequested) {
+  std::vector<hmi_apis::FunctionID::eType> expected_requests{
+      hmi_apis::FunctionID::VehicleInfo_IsReady,
+      hmi_apis::FunctionID::VR_IsReady,
+      hmi_apis::FunctionID::TTS_IsReady,
+      hmi_apis::FunctionID::UI_IsReady,
+      hmi_apis::FunctionID::RC_IsReady};
+
+  for (auto request : expected_requests) {
+    SetExpectationForCreateModuleInfoSO(request);
+    EXPECT_CALL(*mock_rpc_service_,
+                ManageHMICommand(HMIFunctionIDIs(request),
+                                 commands::Command::SOURCE_HMI));
+  }
+
+  app_manager_impl_->RequestForInterfacesAvailability();
+}
+
 }  // namespace application_manager_test
 }  // namespace components
 }  // namespace test

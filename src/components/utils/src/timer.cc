@@ -134,7 +134,7 @@ void timer::Timer::StartThread() {
 
   DCHECK_OR_RETURN_VOID(thread_);
   if (!thread_->IsCurrentThread()) {
-    thread_->start();
+    thread_->Start();
   }
 }
 
@@ -148,7 +148,7 @@ void timer::Timer::StopThread() {
     delegate_->set_finalized_flag(true);
     {
       sync_primitives::AutoUnlock auto_unlock(state_lock_);
-      thread_->join();
+      thread_->Stop(threads::Thread::kThreadStopDelegate);
     }
     delegate_->set_finalized_flag(false);
   }
@@ -222,6 +222,5 @@ void timer::Timer::TimerDelegate::threadMain() {
 }
 
 void timer::Timer::TimerDelegate::exitThreadMain() {
-  sync_primitives::AutoLock auto_lock(state_lock_ref_);
   state_condition_.NotifyOne();
 }

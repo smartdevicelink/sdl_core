@@ -86,6 +86,9 @@ class MockPolicyHandlerInterface : public policy::PolicyHandlerInterface {
   MOCK_METHOD2(OnSnapshotCreated,
                void(const policy::BinaryMessage& pt_string,
                     const policy::PTUIterationType iteration_type));
+  MOCK_METHOD2(GetNextUpdateUrl,
+               std::string(const policy::PTUIterationType iteration_type,
+                           uint32_t& app_id));
 #endif  // EXTERNAL_PROPRIETARY_MODE
 
   MOCK_CONST_METHOD2(GetPriority,
@@ -97,8 +100,9 @@ class MockPolicyHandlerInterface : public policy::PolicyHandlerInterface {
                     const policy::PTString& rpc,
                     const application_manager::RPCParams& rpc_params,
                     policy::CheckPermissionResult& result));
-  MOCK_CONST_METHOD1(GetNotificationsNumber,
-                     uint32_t(const std::string& priority));
+  MOCK_CONST_METHOD2(GetNotificationsNumber,
+                     uint32_t(const std::string& priority,
+                              const bool is_subtle));
   MOCK_CONST_METHOD1(GetUserConsentForDevice,
                      policy::DeviceConsent(const std::string& device_id));
   MOCK_CONST_METHOD3(GetDefaultHmi,
@@ -114,17 +118,17 @@ class MockPolicyHandlerInterface : public policy::PolicyHandlerInterface {
                bool(const std::string& application_id,
                     policy::StringArray* nicknames));
   MOCK_METHOD1(GetInitialAppData, bool(const std::string& application_id));
-  MOCK_METHOD2(GetUpdateUrls,
-               void(const uint32_t service_type,
-                    policy::EndpointUrls& end_points));
-  MOCK_CONST_METHOD0(GetLockScreenIconUrl, std::string());
+  MOCK_CONST_METHOD2(GetUpdateUrls,
+                     void(const uint32_t service_type,
+                          policy::EndpointUrls& end_points));
+  MOCK_CONST_METHOD1(GetLockScreenIconUrl,
+                     std::string(const std::string& policy_app_id));
   MOCK_CONST_METHOD1(GetIconUrl, std::string(const std::string& policy_app_id));
   MOCK_METHOD0(ResetRetrySequence, void());
   MOCK_METHOD0(NextRetryTimeout, uint32_t());
   MOCK_CONST_METHOD0(TimeoutExchangeSec, uint32_t());
   MOCK_CONST_METHOD0(TimeoutExchangeMSec, uint32_t());
   MOCK_METHOD0(OnExceededTimeout, void());
-  MOCK_METHOD0(OnSystemReady, void());
   MOCK_CONST_METHOD0(LockScreenDismissalEnabledState,
                      const boost::optional<bool>());
   MOCK_CONST_METHOD1(LockScreenDismissalWarningMessage,
@@ -177,17 +181,26 @@ class MockPolicyHandlerInterface : public policy::PolicyHandlerInterface {
                std::string(const transport_manager::DeviceHandle& device_handle,
                            const std::string& policy_app_id));
   MOCK_METHOD1(OnSystemInfoChanged, void(const std::string& language));
+  MOCK_METHOD1(SetPreloadedPtFlag, void(const bool is_preloaded));
   MOCK_METHOD3(OnGetSystemInfo,
                void(const std::string& ccpu_version,
                     const std::string& wers_country_code,
                     const std::string& language));
-  MOCK_METHOD0(OnSystemInfoUpdateRequired, void());
+  MOCK_CONST_METHOD0(GetCCPUVersionFromPT, std::string());
   MOCK_METHOD0(OnVIIsReady, void());
   MOCK_METHOD1(OnVehicleDataUpdated,
                void(const smart_objects::SmartObject& message));
   MOCK_METHOD1(RemoveDevice, void(const std::string& device_id));
   MOCK_METHOD1(AddStatisticsInfo, void(int type));
   MOCK_METHOD1(OnSystemError, void(int code));
+#ifndef EXTERNAL_PROPRIETARY_MODE
+  MOCK_METHOD1(ChoosePTUApplication,
+               uint32_t(const policy::PTUIterationType iteration_type));
+  MOCK_METHOD3(CacheRetryInfo,
+               void(const uint32_t app_id,
+                    const std::string url,
+                    const std::string snapshot_path));
+#endif
   MOCK_CONST_METHOD0(GetAppIdForSending, uint32_t());
   MOCK_METHOD1(
       GetAppName,
@@ -206,7 +219,10 @@ class MockPolicyHandlerInterface : public policy::PolicyHandlerInterface {
                      void(const policy::AppPermissions& permissions,
                           const std::string& device_id,
                           const std::string& policy_app_id));
+  MOCK_CONST_METHOD1(SendOnAppPropertiesChangeNotification,
+                     void(const std::string& policy_app_id));
   MOCK_METHOD0(OnPTExchangeNeeded, void());
+  MOCK_METHOD0(TriggerPTUOnStartupIfRequired, void());
   MOCK_METHOD1(GetAvailableApps, void(std::queue<std::string>& apps));
   MOCK_METHOD3(
       AddApplication,
@@ -219,6 +235,8 @@ class MockPolicyHandlerInterface : public policy::PolicyHandlerInterface {
   MOCK_CONST_METHOD1(HeartBeatTimeout, uint32_t(const std::string& app_id));
   MOCK_METHOD0(OnAppsSearchStarted, void());
   MOCK_METHOD1(OnAppsSearchCompleted, void(const bool trigger_ptu));
+  MOCK_METHOD2(OnAddedNewApplicationToAppList,
+               void(const uint32_t new_app_id, const std::string& policy_id));
   MOCK_METHOD2(OnAppRegisteredOnMobile,
                void(const std::string& device_id,
                     const std::string& application_id));
@@ -242,18 +260,24 @@ class MockPolicyHandlerInterface : public policy::PolicyHandlerInterface {
                      const std::vector<std::string>(
                          const transport_manager::DeviceHandle& device_handle,
                          const std::string& policy_app_id));
+  MOCK_CONST_METHOD0(GetApplicationPolicyIDs, std::vector<std::string>());
   MOCK_CONST_METHOD1(GetEnabledCloudApps,
                      void(std::vector<std::string>& enabled_apps));
   MOCK_CONST_METHOD1(CheckCloudAppEnabled,
                      const bool(const std::string& policy_app_id));
-  MOCK_CONST_METHOD7(GetCloudAppParameters,
+  MOCK_CONST_METHOD0(GetEnabledLocalApps, std::vector<std::string>());
+  MOCK_CONST_METHOD2(GetAppProperties,
                      bool(const std::string& policy_app_id,
-                          bool& enabled,
-                          std::string& endpoint,
-                          std::string& certificate,
-                          std::string& auth_token,
-                          std::string& cloud_transport_type,
-                          std::string& hybrid_app_preference));
+                          policy::AppProperties& out_app_properties));
+
+  MOCK_METHOD1(OnSetAppProperties,
+               void(const smart_objects::SmartObject& message));
+  MOCK_CONST_METHOD2(
+      GetAppPropertiesStatus,
+      AppPropertiesState(const smart_objects::SmartObject& properties,
+                         const std::string& app_id));
+  MOCK_CONST_METHOD1(IsNewApplication, bool(const std::string& application_id));
+  MOCK_METHOD0(OnLocalAppAdded, void());
   MOCK_METHOD1(OnSetCloudAppProperties,
                void(const smart_objects::SmartObject& message));
   MOCK_CONST_METHOD2(
@@ -291,9 +315,9 @@ class MockPolicyHandlerInterface : public policy::PolicyHandlerInterface {
 #endif  // ENABLE_SECURITY
   MOCK_CONST_METHOD0(get_settings, const policy::PolicySettings&());
   MOCK_CONST_METHOD0(RemoteAppsUrl, const std::string());
-  MOCK_METHOD2(GetUpdateUrls,
-               void(const std::string& service_type,
-                    policy::EndpointUrls& end_points));
+  MOCK_CONST_METHOD2(GetUpdateUrls,
+                     void(const std::string& service_type,
+                          policy::EndpointUrls& end_points));
 
   MOCK_METHOD3(OnUpdateHMILevel,
                void(const std::string& device_id,
@@ -316,6 +340,7 @@ class MockPolicyHandlerInterface : public policy::PolicyHandlerInterface {
                void(const std::string& device_id,
                     const std::string& policy_app_id,
                     const std::string& hmi_level));
+  MOCK_METHOD0(OnPTUTimeOut, void());
   MOCK_CONST_METHOD2(GetModuleTypes,
                      bool(const std::string& policy_app_id,
                           std::vector<std::string>* modules));

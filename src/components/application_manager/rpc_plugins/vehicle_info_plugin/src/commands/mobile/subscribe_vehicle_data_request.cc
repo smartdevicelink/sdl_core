@@ -36,6 +36,8 @@
 #include "utils/helpers.h"
 #include "vehicle_info_plugin/vehicle_info_app_extension.h"
 
+namespace VD_ResultCode = hmi_apis::Common_VehicleDataResultCode;
+
 namespace vehicle_info_plugin {
 using namespace application_manager;
 namespace commands {
@@ -189,9 +191,8 @@ bool SubscribeVehicleDataRequest::CheckSubscriptionStatus(
   }
 
   auto res_code = msg_params[vi_name][strings::result_code].asInt();
-  if (hmi_apis::Common_VehicleDataResultCode::VDRC_SUCCESS != res_code &&
-      hmi_apis::Common_VehicleDataResultCode::VDRC_DATA_ALREADY_SUBSCRIBED !=
-          res_code) {
+  if (VD_ResultCode::VDRC_SUCCESS != res_code &&
+      VD_ResultCode::VDRC_DATA_ALREADY_SUBSCRIBED != res_code) {
     LOG4CXX_WARN(logger_,
                  "Subscription to " << vi_name << " for " << connection_key()
                                     << " failed.");
@@ -201,20 +202,39 @@ bool SubscribeVehicleDataRequest::CheckSubscriptionStatus(
 }
 
 bool SubscribeVehicleDataRequest::SubscribePendingVehicleData(
-    ApplicationSharedPtr app, const smart_objects::SmartObject& msg_params) {
+    ApplicationSharedPtr app, smart_objects::SmartObject& msg_params) {
   LOG4CXX_DEBUG(logger_, "Subscribing to all pending VehicleData");
 
-  for (const auto& vi_name : vi_waiting_for_subscribe_) {
+  std::set<hmi_apis::Common_VehicleDataResultCode::eType> skiped_result_codes(
+      {VD_ResultCode::VDRC_TRUNCATED_DATA,
+       VD_ResultCode::VDRC_DISALLOWED,
+       VD_ResultCode::VDRC_USER_DISALLOWED,
+       VD_ResultCode::VDRC_INVALID_ID,
+       VD_ResultCode::VDRC_DATA_NOT_AVAILABLE,
+       VD_ResultCode::VDRC_DATA_NOT_SUBSCRIBED,
+       VD_ResultCode::VDRC_IGNORED});
+
+  for (auto vi_name = vi_waiting_for_subscribe_.begin();
+       vi_name != vi_waiting_for_subscribe_.end();) {
     const bool is_subscription_successful = CheckSubscriptionStatus(
-        ConvertRequestToResponseName(vi_name), msg_params);
+        ConvertRequestToResponseName(*vi_name), msg_params);
 
     if (is_subscription_successful) {
       auto& ext = VehicleInfoAppExtension::ExtractVIExtension(*app);
-      ext.subscribeToVehicleInfo(vi_name);
-      vi_waiting_for_subscribe_.erase(vi_name);
+      ext.subscribeToVehicleInfo(*vi_name);
+      vi_name = vi_waiting_for_subscribe_.erase(vi_name);
+    } else {
+      auto res_code =
+          static_cast<hmi_apis::Common_VehicleDataResultCode::eType>(
+              msg_params[*vi_name][strings::result_code].asInt());
+      if (skiped_result_codes.find(res_code) != skiped_result_codes.end()) {
+        msg_params[*vi_name][strings::result_code] = res_code;
+        vi_name = vi_waiting_for_subscribe_.erase(vi_name);
+      } else {
+        ++vi_name;
+      }
     }
   }
-
   return vi_waiting_for_subscribe_.empty();
 }
 
@@ -267,8 +287,8 @@ void SubscribeVehicleDataRequest::CheckVISubscriptions(
     smart_objects::SmartObject& out_response_params,
     smart_objects::SmartObject& out_request_params,
     bool& out_result) {
-  const bool is_interface_not_available =
-      (HmiInterfaces::STATE_NOT_AVAILABLE ==
+  const bool is_interface_available =
+      (HmiInterfaces::STATE_NOT_AVAILABLE !=
        application_manager_.hmi_interfaces().GetInterfaceState(
            HmiInterfaces::HMI_INTERFACE_VehicleInfo));
 
@@ -335,7 +355,7 @@ void SubscribeVehicleDataRequest::CheckVISubscriptions(
 
   VehicleInfoSubscriptions::size_type items_to_subscribe = 0;
   auto item_names = (*message_)[strings::msg_params].enumerate();
-  if (!is_interface_not_available) {
+  if (is_interface_available) {
     for (const auto& name : item_names) {
       auto enabled = (*message_)[strings::msg_params][name].asBool();
       if (!enabled) {
@@ -366,6 +386,9 @@ void SubscribeVehicleDataRequest::CheckVISubscriptions(
   if (0 == items_to_subscribe) {
     if (HasDisallowedParams()) {
       out_result_code = mobile_apis::Result::DISALLOWED;
+    } else if (!is_interface_available) {
+      out_result_code = mobile_apis::Result::UNSUPPORTED_RESOURCE;
+      out_info = "VehicleInfo is not supported by system";
     } else {
       out_result_code = mobile_apis::Result::INVALID_DATA;
       out_info = "No data in the request";
@@ -374,7 +397,7 @@ void SubscribeVehicleDataRequest::CheckVISubscriptions(
     return;
   }
 
-  if (0 == subscribed_items && !is_interface_not_available) {
+  if (0 == subscribed_items && is_interface_available) {
     out_result_code = mobile_apis::Result::IGNORED;
     out_info = "Already subscribed on provided VehicleData.";
     out_result = false;

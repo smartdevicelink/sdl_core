@@ -185,7 +185,6 @@ class SQLPTRepresentation : public virtual PTRepresentation {
       const policy_table::AppServiceParameters& app_service_parameters);
 
  public:
-  virtual std::string GetLockScreenIconUrl() const;
   bool UpdateRequired() const;
   void SaveUpdateRequired(bool value);
 
@@ -250,6 +249,8 @@ class SQLPTRepresentation : public virtual PTRepresentation {
   bool SaveSecondsBetweenRetries(
       const policy_table::SecondsBetweenRetries& seconds);
   bool SaveNumberOfNotificationsPerMinute(
+      const policy_table::NumberOfNotificationsPerMinute& notifications);
+  bool SaveNumberOfSubtleNotificationsPerMinute(
       const policy_table::NumberOfNotificationsPerMinute& notifications);
   bool SaveMessageType(const std::string& type);
   bool SaveLanguage(const std::string& code);

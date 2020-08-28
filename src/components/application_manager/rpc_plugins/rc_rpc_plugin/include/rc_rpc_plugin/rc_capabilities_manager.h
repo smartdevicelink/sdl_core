@@ -37,7 +37,13 @@
 
 namespace rc_rpc_plugin {
 
-enum capabilitiesStatus { success, missedLightName, missedParam, readOnly };
+enum capabilitiesStatus {
+  kInvalidStatus,
+  kSuccess,
+  kMissedLightName,
+  kMissedParam,
+  kReadOnly
+};
 typedef std::pair<std::string, capabilitiesStatus> ModuleTypeCapability;
 
 class RCCapabilitiesManager {

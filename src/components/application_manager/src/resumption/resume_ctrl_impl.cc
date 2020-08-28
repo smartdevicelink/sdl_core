@@ -468,6 +468,7 @@ void ResumeCtrlImpl::OnSuspend() {
 
 void ResumeCtrlImpl::OnIgnitionOff() {
   LOG4CXX_AUTO_TRACE(logger_);
+  DCHECK_OR_RETURN_VOID(resumption_storage_);
   if (!application_manager_.IsLowVoltage()) {
     resumption_storage_->IncrementIgnOffCount();
     resumption_storage_->ResetGlobalIgnOnCount();
@@ -629,15 +630,19 @@ bool ResumeCtrlImpl::StartAppHmiStateResumption(
     LOG4CXX_DEBUG(logger_, "No applicable HMI level found for resuming");
     return false;
   }
-
   const bool is_resume_allowed_by_low_voltage =
       CheckLowVoltageRestrictions(saved_app);
 
   const bool is_hmi_level_allowed_by_ign_cycle =
       CheckIgnCycleRestrictions(saved_app);
 
-  const bool restore_hmi_level_allowed =
-      is_resume_allowed_by_low_voltage && is_hmi_level_allowed_by_ign_cycle;
+  const bool is_app_revoked =
+      application_manager_.GetPolicyHandler().IsApplicationRevoked(
+          application->policy_app_id());
+
+  const bool restore_hmi_level_allowed = is_resume_allowed_by_low_voltage &&
+                                         is_hmi_level_allowed_by_ign_cycle &&
+                                         !is_app_revoked;
 
   if (restore_hmi_level_allowed) {
     LOG4CXX_INFO(logger_,
@@ -726,6 +731,7 @@ void ResumeCtrlImpl::SaveDataOnTimer() {
 
 void ResumeCtrlImpl::FinalPersistData() {
   LOG4CXX_AUTO_TRACE(logger_);
+  DCHECK_OR_RETURN_VOID(resumption_storage_);
   StopSavePersistentDataTimer();
   SaveAllApplications();
   resumption_storage_->Persist();

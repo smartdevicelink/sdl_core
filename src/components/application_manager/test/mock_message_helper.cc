@@ -220,6 +220,15 @@ void MessageHelper::SendOnPermissionsChangeNotification(
 
 void MessageHelper::SendPolicySnapshotNotification(
     uint32_t connection_key,
+    const std::string& snapshot_file_path,
+    const std::string& url,
+    ApplicationManager& app_mngr) {
+  MockMessageHelper::message_helper_mock()->SendPolicySnapshotNotification(
+      connection_key, snapshot_file_path, url, app_mngr);
+}
+
+void MessageHelper::SendPolicySnapshotNotification(
+    uint32_t connection_key,
     const std::vector<uint8_t>& policy_data,
     const std::string& url,
     ApplicationManager& app_mngr) {
@@ -483,6 +492,13 @@ bool MessageHelper::CreateHMIApplicationStruct(
     ApplicationManager& app_mngr) {
   return MockMessageHelper::message_helper_mock()->CreateHMIApplicationStruct(
       app, session_observer, policy_handler, output, app_mngr);
+}
+
+smart_objects::SmartObjectSPtr
+MessageHelper::CreateOnAppPropertiesChangeNotification(
+    const std::string& policy_app_id, ApplicationManager& app_mngr) {
+  return MockMessageHelper::message_helper_mock()
+      ->CreateOnAppPropertiesChangeNotification(policy_app_id, app_mngr);
 }
 
 void MessageHelper::SendOnAppUnregNotificationToHMI(

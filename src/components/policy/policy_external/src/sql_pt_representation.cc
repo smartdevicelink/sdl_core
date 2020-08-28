@@ -101,28 +101,6 @@ SQLPTRepresentation::~SQLPTRepresentation() {
   delete db_;
 }
 
-std::string SQLPTRepresentation::GetLockScreenIconUrl() const {
-  utils::dbms::SQLQuery query(db());
-  std::string ret;
-  if (query.Prepare(sql_pt::kSelectLockScreenIcon)) {
-    query.Bind(0, std::string("lock_screen_icon_url"));
-    query.Bind(1, std::string("default"));
-
-    if (!query.Exec()) {
-      LOG4CXX_WARN(logger_, "Incorrect select from notifications by priority.");
-      return ret;
-    }
-
-    if (!query.IsNull(0)) {
-      ret = query.GetString(0);
-    }
-
-  } else {
-    LOG4CXX_WARN(logger_, "Invalid select endpoints statement.");
-  }
-  return ret;
-}
-
 void SQLPTRepresentation::CheckPermissions(const PTString& app_id,
                                            const PTString& hmi_level,
                                            const PTString& rpc,
@@ -583,6 +561,17 @@ void SQLPTRepresentation::GatherModuleConfig(
     while (notifications.Next()) {
       config->notifications_per_minute_by_priority[notifications.GetString(0)] =
           notifications.GetInteger(1);
+    }
+  }
+  utils::dbms::SQLQuery subtle_notifications(db());
+  if (!subtle_notifications.Prepare(sql_pt::kSelectSubtleNotificationsPerMin)) {
+    LOG4CXX_WARN(logger_,
+                 "Incorrect select statement for subtle notifications");
+  } else {
+    while (subtle_notifications.Next()) {
+      (*config->subtle_notifications_per_minute_by_priority)
+          [subtle_notifications.GetString(0)] =
+              subtle_notifications.GetInteger(1);
     }
   }
   utils::dbms::SQLQuery seconds(db());
@@ -1556,6 +1545,11 @@ bool SQLPTRepresentation::SaveModuleConfig(
     return false;
   }
 
+  if (!SaveNumberOfSubtleNotificationsPerMinute(
+          *config.subtle_notifications_per_minute_by_priority)) {
+    return false;
+  }
+
   if (!SaveServiceEndpoints(config.endpoints)) {
     return false;
   }
@@ -1864,6 +1858,28 @@ bool SQLPTRepresentation::SaveNumberOfNotificationsPerMinute(
     const policy_table::NumberOfNotificationsPerMinute& notifications) {
   utils::dbms::SQLQuery query(db());
   if (!query.Prepare(sql_pt::kInsertNotificationsByPriority)) {
+    LOG4CXX_WARN(logger_,
+                 "Incorrect insert statement for notifications by priority.");
+    return false;
+  }
+
+  policy_table::NumberOfNotificationsPerMinute::const_iterator it;
+  for (it = notifications.begin(); it != notifications.end(); ++it) {
+    query.Bind(0, it->first);
+    query.Bind(1, it->second);
+    if (!query.Exec() || !query.Reset()) {
+      LOG4CXX_WARN(logger_, "Incorrect insert into notifications by priority.");
+      return false;
+    }
+  }
+
+  return true;
+}
+
+bool SQLPTRepresentation::SaveNumberOfSubtleNotificationsPerMinute(
+    const policy_table::NumberOfNotificationsPerMinute& notifications) {
+  utils::dbms::SQLQuery query(db());
+  if (!query.Prepare(sql_pt::kInsertSubtleNotificationsByPriority)) {
     LOG4CXX_WARN(logger_,
                  "Incorrect insert statement for notifications by priority.");
     return false;

@@ -67,7 +67,18 @@ void InsertUnique(K value, T* array) {
 const std::string SQLPTRepresentation::kDatabaseName = "policy";
 
 SQLPTRepresentation::SQLPTRepresentation()
-    : db_(new utils::dbms::SQLDatabase(kDatabaseName)) {}
+    : db_(new utils::dbms::SQLDatabase(kDatabaseName)) {
+  is_in_memory = false;
+}
+
+SQLPTRepresentation::SQLPTRepresentation(bool in_memory) {
+  is_in_memory = in_memory;
+  if (in_memory) {
+    db_ = new utils::dbms::SQLDatabase();
+  } else {
+    db_ = new utils::dbms::SQLDatabase(kDatabaseName);
+  }
+}
 
 SQLPTRepresentation::~SQLPTRepresentation() {
   db_->Close();
@@ -241,28 +252,6 @@ EndpointUrls SQLPTRepresentation::GetUpdateUrls(int service_type) {
   return ret;
 }
 
-std::string SQLPTRepresentation::GetLockScreenIconUrl() const {
-  utils::dbms::SQLQuery query(db());
-  std::string ret;
-  if (query.Prepare(sql_pt::kSelectLockScreenIcon)) {
-    query.Bind(0, std::string("lock_screen_icon_url"));
-    query.Bind(1, std::string("default"));
-
-    if (!query.Exec()) {
-      LOG4CXX_WARN(logger_, "Incorrect select from notifications by priority.");
-      return ret;
-    }
-
-    if (!query.IsNull(0)) {
-      ret = query.GetString(0);
-    }
-
-  } else {
-    LOG4CXX_WARN(logger_, "Invalid select endpoints statement.");
-  }
-  return ret;
-}
-
 int SQLPTRepresentation::GetNotificationsNumber(const std::string& priority) {
   LOG4CXX_AUTO_TRACE(logger_);
   utils::dbms::SQLQuery query(db());
@@ -321,10 +310,14 @@ InitResult SQLPTRepresentation::Init(const PolicySettings* settings) {
 #ifdef BUILD_TESTS
   open_counter_ = 0;
 #endif  // BUILD_TESTS
-  std::string path = get_settings().app_storage_folder();
-  if (!path.empty()) {
-    db_->set_path(path + "/");
+
+  if (!is_in_memory) {
+    const std::string& path = get_settings().app_storage_folder();
+    if (!path.empty()) {
+      db_->set_path(path + "/");
+    }
   }
+
   if (!db_->Open()) {
     LOG4CXX_ERROR(logger_, "Failed opening database.");
     LOG4CXX_INFO(logger_, "Starting opening retries.");
@@ -357,13 +350,12 @@ InitResult SQLPTRepresentation::Init(const PolicySettings* settings) {
       return InitResult::FAIL;
     }
   }
-#ifndef __QNX__
+
   if (!db_->IsReadWrite()) {
     LOG4CXX_ERROR(logger_, "There are no read/write permissions for database");
     return InitResult::FAIL;
   }
 
-#endif  // __QNX__
   utils::dbms::SQLQuery check_pages(db());
   if (!check_pages.Prepare(sql_pt::kCheckPgNumber) || !check_pages.Next()) {
     LOG4CXX_WARN(logger_, "Incorrect pragma for page counting.");
@@ -501,6 +493,7 @@ void SQLPTRepresentation::GatherModuleMeta(
     *meta->pt_exchanged_at_odometer_x = query.GetInteger(0);
     *meta->pt_exchanged_x_days_after_epoch = query.GetInteger(1);
     *meta->ignition_cycles_since_last_exchange = query.GetInteger(2);
+    *meta->ccpu_version = query.GetString(4);
   }
 }
 
@@ -556,6 +549,17 @@ void SQLPTRepresentation::GatherModuleConfig(
     while (notifications.Next()) {
       config->notifications_per_minute_by_priority[notifications.GetString(0)] =
           notifications.GetInteger(1);
+    }
+  }
+  utils::dbms::SQLQuery subtle_notifications(db());
+  if (!subtle_notifications.Prepare(sql_pt::kSelectSubtleNotificationsPerMin)) {
+    LOG4CXX_WARN(logger_,
+                 "Incorrect select statement for subtle notifications");
+  } else {
+    while (subtle_notifications.Next()) {
+      (*config->subtle_notifications_per_minute_by_priority)
+          [subtle_notifications.GetString(0)] =
+              subtle_notifications.GetInteger(1);
     }
   }
   utils::dbms::SQLQuery seconds(db());
@@ -712,6 +716,23 @@ bool SQLPTRepresentation::GatherConsumerFriendlyMessages(
     LOG4CXX_WARN(logger_, "Incorrect statement for select friendly messages.");
   }
 
+  return true;
+}
+
+bool SQLPTRepresentation::SetMetaInfo(const std::string& ccpu_version) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  utils::dbms::SQLQuery query(db());
+  if (!query.Prepare(sql_pt::kUpdateMetaParams)) {
+    LOG4CXX_WARN(logger_, "Incorrect statement for insert to module meta.");
+    return false;
+  }
+
+  query.Bind(0, ccpu_version);
+
+  if (!query.Exec() || !query.Reset()) {
+    LOG4CXX_WARN(logger_, "Incorrect insert to module meta.");
+    return false;
+  }
   return true;
 }
 
@@ -1470,6 +1491,11 @@ bool SQLPTRepresentation::SaveModuleConfig(
     return false;
   }
 
+  if (!SaveNumberOfSubtleNotificationsPerMinute(
+          *config.subtle_notifications_per_minute_by_priority)) {
+    return false;
+  }
+
   if (!SaveServiceEndpoints(config.endpoints)) {
     return false;
   }
@@ -1695,6 +1721,28 @@ bool SQLPTRepresentation::SaveNumberOfNotificationsPerMinute(
     const policy_table::NumberOfNotificationsPerMinute& notifications) {
   utils::dbms::SQLQuery query(db());
   if (!query.Prepare(sql_pt::kInsertNotificationsByPriority)) {
+    LOG4CXX_WARN(logger_,
+                 "Incorrect insert statement for notifications by priority.");
+    return false;
+  }
+
+  policy_table::NumberOfNotificationsPerMinute::const_iterator it;
+  for (it = notifications.begin(); it != notifications.end(); ++it) {
+    query.Bind(0, it->first);
+    query.Bind(1, it->second);
+    if (!query.Exec() || !query.Reset()) {
+      LOG4CXX_WARN(logger_, "Incorrect insert into notifications by priority.");
+      return false;
+    }
+  }
+
+  return true;
+}
+
+bool SQLPTRepresentation::SaveNumberOfSubtleNotificationsPerMinute(
+    const policy_table::NumberOfNotificationsPerMinute& notifications) {
+  utils::dbms::SQLQuery query(db());
+  if (!query.Prepare(sql_pt::kInsertSubtleNotificationsByPriority)) {
     LOG4CXX_WARN(logger_,
                  "Incorrect insert statement for notifications by priority.");
     return false;
@@ -2422,13 +2470,7 @@ const int32_t SQLPTRepresentation::GetDBVersion() const {
 }
 
 utils::dbms::SQLDatabase* SQLPTRepresentation::db() const {
-#ifdef __QNX__
-  utils::dbms::SQLDatabase* db = new utils::dbms::SQLDatabase(kDatabaseName);
-  db->Open();
-  return db;
-#else
   return db_;
-#endif
 }
 
 bool SQLPTRepresentation::CopyApplication(const std::string& source,

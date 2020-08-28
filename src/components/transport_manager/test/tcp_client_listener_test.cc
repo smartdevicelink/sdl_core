@@ -42,6 +42,7 @@
 #include "transport_manager/tcp/tcp_client_listener.h"
 #include "transport_manager/transport_adapter/mock_device.h"
 #include "transport_manager/transport_adapter/mock_transport_adapter.h"
+#include "transport_manager/transport_adapter/mock_transport_adapter_controller.h"
 #include "transport_manager/transport_adapter/transport_adapter_controller.h"
 
 #include "utils/test_async_waiter.h"
@@ -61,67 +62,6 @@ namespace {
 const long kThreadStartWaitMsec = 10;
 const uint32_t kConnectionCreatedTimeoutMsec = 200;
 }  // namespace
-
-class MockTransportAdapterController : public TransportAdapterController {
- public:
-  MOCK_METHOD1(AddDevice, DeviceSptr(DeviceSptr device));
-  MOCK_METHOD0(AckDevices, void());
-  MOCK_METHOD1(SearchDeviceDone, void(const DeviceVector& devices));
-  MOCK_METHOD1(SearchDeviceFailed, void(const SearchDeviceError& error));
-  MOCK_CONST_METHOD1(FindDevice, DeviceSptr(const DeviceUID& device_handle));
-  MOCK_CONST_METHOD2(FindPendingConnection,
-                     ConnectionSPtr(const DeviceUID& device_handle,
-                                    const ApplicationHandle& app_handle));
-  MOCK_METHOD3(ConnectionCreated,
-               void(ConnectionSPtr connection,
-                    const DeviceUID& device_handle,
-                    const ApplicationHandle& app_handle));
-  MOCK_METHOD2(ConnectPending,
-               void(const DeviceUID& device_handle,
-                    const ApplicationHandle& app_handle));
-  MOCK_METHOD2(ConnectDone,
-               void(const DeviceUID& device_handle,
-                    const ApplicationHandle& app_handle));
-  MOCK_METHOD3(ConnectFailed,
-               void(const DeviceUID& device_handle,
-                    const ApplicationHandle& app_handle,
-                    const ConnectError& error));
-  MOCK_METHOD2(ConnectionFinished,
-               void(const DeviceUID& device_handle,
-                    const ApplicationHandle& app_handle));
-  MOCK_METHOD3(ConnectionAborted,
-               void(const DeviceUID& device_handle,
-                    const ApplicationHandle& app_handle,
-                    const CommunicationError& error));
-  MOCK_METHOD2(DisconnectDone,
-               void(const DeviceUID& device_handle,
-                    const ApplicationHandle& app_handle));
-  MOCK_METHOD3(DataReceiveDone,
-               void(const DeviceUID& device_handle,
-                    const ApplicationHandle& app_handle,
-                    const ::protocol_handler::RawMessagePtr message));
-  MOCK_METHOD3(DataReceiveFailed,
-               void(const DeviceUID& device_handle,
-                    const ApplicationHandle& app_handle,
-                    const DataReceiveError& error));
-  MOCK_METHOD3(DataSendDone,
-               void(const DeviceUID& device_handle,
-                    const ApplicationHandle& app_handle,
-                    const ::protocol_handler::RawMessagePtr message));
-  MOCK_METHOD4(DataSendFailed,
-               void(const DeviceUID& device_handle,
-                    const ApplicationHandle& app_handle,
-                    const ::protocol_handler::RawMessagePtr message,
-                    const DataSendError& error));
-  MOCK_METHOD0(FindNewApplicationsRequest, void());
-  MOCK_METHOD1(ApplicationListUpdated, void(const DeviceUID& device_handle));
-  MOCK_METHOD2(DeviceDisconnected,
-               void(const DeviceUID& device_handle,
-                    const DisconnectDeviceError& error));
-  MOCK_METHOD1(TransportConfigUpdated,
-               void(const transport_manager::transport_adapter::TransportConfig&
-                        new_config));
-};
 
 class MockNetworkInterfaceListener : public NetworkInterfaceListener {
  public:
@@ -226,9 +166,9 @@ TEST_P(TcpClientListenerTest, StartListening) {
   SleepFor(kThreadStartWaitMsec);
 
   if (InterfaceNameSpecified()) {
-    EXPECT_FALSE(tcp_client_listener_->thread()->is_running());
+    EXPECT_FALSE(tcp_client_listener_->thread()->IsRunning());
   } else {
-    EXPECT_TRUE(tcp_client_listener_->thread()->is_running());
+    EXPECT_TRUE(tcp_client_listener_->thread()->IsRunning());
   }
 
   // Stop() and Deinit() will be called during destructor
@@ -260,7 +200,7 @@ TEST_P(TcpClientListenerTest, StopListening) {
   EXPECT_CALL(*interface_listener_mock_, Stop()).WillOnce(Return(true));
 
   EXPECT_EQ(TransportAdapter::OK, tcp_client_listener_->StopListening());
-  EXPECT_FALSE(tcp_client_listener_->thread()->is_running());
+  EXPECT_FALSE(tcp_client_listener_->thread()->IsRunning());
 
   EXPECT_CALL(*interface_listener_mock_, Deinit()).Times(1);
 }
@@ -370,7 +310,7 @@ TEST_P(TcpClientListenerTest, OnIPAddressUpdated_ValidIPv4Address) {
 
     SleepFor(kThreadStartWaitMsec);
 
-    EXPECT_TRUE(tcp_client_listener_->thread()->is_running());
+    EXPECT_TRUE(tcp_client_listener_->thread()->IsRunning());
   }
 
   EXPECT_CALL(*interface_listener_mock_, Stop()).WillOnce(Return(true));
@@ -417,7 +357,7 @@ TEST_P(TcpClientListenerTest, OnIPAddressUpdated_IPv4Address_changed) {
 
     SleepFor(kThreadStartWaitMsec);
 
-    EXPECT_TRUE(tcp_client_listener_->thread()->is_running());
+    EXPECT_TRUE(tcp_client_listener_->thread()->IsRunning());
   }
 
   EXPECT_CALL(*interface_listener_mock_, Stop()).WillOnce(Return(true));
@@ -463,7 +403,7 @@ TEST_P(TcpClientListenerTest, OnIPAddressUpdated_IPv4Address_same) {
 
     SleepFor(kThreadStartWaitMsec);
 
-    EXPECT_TRUE(tcp_client_listener_->thread()->is_running());
+    EXPECT_TRUE(tcp_client_listener_->thread()->IsRunning());
   }
 
   EXPECT_CALL(*interface_listener_mock_, Stop()).WillOnce(Return(true));
@@ -510,7 +450,7 @@ TEST_P(TcpClientListenerTest, OnIPAddressUpdated_IPv4Address_disabled) {
 
     SleepFor(kThreadStartWaitMsec);
 
-    EXPECT_FALSE(tcp_client_listener_->thread()->is_running());
+    EXPECT_FALSE(tcp_client_listener_->thread()->IsRunning());
   }
 
   EXPECT_CALL(*interface_listener_mock_, Stop()).WillOnce(Return(true));
@@ -569,7 +509,7 @@ TEST_P(TcpClientListenerTest, OnIPAddressUpdated_IPv4Address_reenabled) {
 
     SleepFor(kThreadStartWaitMsec);
 
-    EXPECT_TRUE(tcp_client_listener_->thread()->is_running());
+    EXPECT_TRUE(tcp_client_listener_->thread()->IsRunning());
   }
 
   EXPECT_CALL(*interface_listener_mock_, Stop()).WillOnce(Return(true));
@@ -599,7 +539,7 @@ TEST_P(TcpClientListenerTest, OnIPAddressUpdated_EmptyIPv4Address) {
 
     SleepFor(kThreadStartWaitMsec);
 
-    EXPECT_FALSE(tcp_client_listener_->thread()->is_running());
+    EXPECT_FALSE(tcp_client_listener_->thread()->IsRunning());
   }
 
   EXPECT_CALL(*interface_listener_mock_, Stop()).WillOnce(Return(true));

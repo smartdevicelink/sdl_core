@@ -58,7 +58,6 @@ class PolicyListener {
   virtual std::string OnCurrentDeviceIdUpdateRequired(
       const transport_manager::DeviceHandle& device_handle,
       const std::string& policy_app_id) = 0;
-  virtual void OnSystemInfoUpdateRequired() = 0;
   virtual custom_str::CustomString GetAppName(
       const std::string& policy_app_id) = 0;
   virtual void OnUpdateHMIAppType(
@@ -108,6 +107,13 @@ class PolicyListener {
       const std::string& policy_app_id) const = 0;
 
   /**
+   * @brief Send OnAppPropertiesChangeNotification to the HMI
+   * @param policy_app_id policy app id
+   */
+  virtual void SendOnAppPropertiesChangeNotification(
+      const std::string& policy_app_id) const = 0;
+
+  /**
    * @brief GetAvailableApps allows to obtain list of registered applications.
    */
   virtual void GetAvailableApps(std::queue<std::string>&) = 0;
@@ -121,7 +127,8 @@ class PolicyListener {
   virtual void OnCertificateUpdated(const std::string& certificate_data) = 0;
 
   /**
-   * @brief OnPTUTimeOut the callback which signals if PTU timeout occured
+   * @brief OnPTUTimeOut the callback which is performed when PTU timeout
+   * occurred
    */
   virtual void OnPTUTimeOut() = 0;
 

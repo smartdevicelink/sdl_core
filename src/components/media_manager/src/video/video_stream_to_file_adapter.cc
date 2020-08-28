@@ -51,16 +51,16 @@ VideoStreamToFileAdapter::~VideoStreamToFileAdapter() {
   if ((0 != current_application_) && (is_ready_)) {
     StopActivity(current_application_);
   }
-  thread_->join();
-  delete thread_->delegate();
+  thread_->Stop(threads::Thread::kThreadSoftStop);
+  delete thread_->GetDelegate();
   threads::DeleteThread(thread_);
 }
 
 void VideoStreamToFileAdapter::Init() {
-  if (thread_->is_running()) {
+  if (thread_->IsRunning()) {
     LOG4CXX_DEBUG(logger, "Start sending thread");
     const size_t kStackSize = 16384;
-    thread_->start(threads::ThreadOptions(kStackSize));
+    thread_->Start(threads::ThreadOptions(kStackSize));
   } else {
     LOG4CXX_WARN(logger, "thread is already running");
   }

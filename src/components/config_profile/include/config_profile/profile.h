@@ -212,6 +212,12 @@ class Profile : public protocol_handler::ProtocolHandlerSettings,
   const std::string& hmi_capabilities_file_name() const;
 
   /**
+   * @brief Returns hmi capabilities cache file name
+   * @return hmi capabilities cache file name
+   */
+  const std::string& hmi_capabilities_cache_file_name() const;
+
+  /**
    * @brief Returns help promt vector
    */
   const std::vector<std::string>& help_prompt() const;
@@ -412,6 +418,40 @@ class Profile : public protocol_handler::ProtocolHandlerSettings,
    */
   const std::string& transport_manager_tcp_adapter_network_interface()
       const OVERRIDE;
+
+#ifdef WEBSOCKET_SERVER_TRANSPORT_SUPPORT
+  /**
+   * @brief Returns websocket server address
+   */
+  const std::string& websocket_server_address() const OVERRIDE;
+
+  /**
+   * @brief Returns port for websocket server
+   */
+  uint16_t websocket_server_port() const OVERRIDE;
+#ifdef ENABLE_SECURITY
+  /**
+   * @brief Returns ws server certificate path to pem file
+   */
+  const std::string& ws_server_cert_path() const OVERRIDE;
+
+  /**
+   * @brief Returns ws server CA certificate path to pem file
+   */
+  const std::string& ws_server_ca_cert_path() const OVERRIDE;
+
+  /**
+   * @brief Returns ws server key path to pem file
+   */
+  const std::string& ws_server_key_path() const OVERRIDE;
+
+  /**
+   * @brief Returns bool flag indicating whether WSS settings were setup
+   * correctly
+   */
+  const bool wss_server_supported() const OVERRIDE;
+#endif  // ENABLE_SECURITY
+#endif  // WEBSOCKET_SERVER_TRANSPORT_SUPPORT
 
   /**
    * @brief Returns retry timeout for cloud app connections
@@ -951,6 +991,7 @@ class Profile : public protocol_handler::ProtocolHandlerSettings,
   uint32_t stop_streaming_timeout_;
   uint16_t time_testing_port_;
   std::string hmi_capabilities_file_name_;
+  std::string hmi_capabilities_cache_file_name_;
   std::vector<std::string> help_prompt_;
   std::vector<std::string> time_out_promt_;
   std::vector<std::string> vr_commands_;
@@ -991,6 +1032,16 @@ class Profile : public protocol_handler::ProtocolHandlerSettings,
   std::string system_files_path_;
   uint16_t transport_manager_tcp_adapter_port_;
   std::string transport_manager_tcp_adapter_network_interface_;
+#ifdef WEBSOCKET_SERVER_TRANSPORT_SUPPORT
+  std::string websocket_server_address_;
+  uint16_t websocket_server_port_;
+#ifdef ENABLE_SECURITY
+  std::string ws_server_cert_path_;
+  std::string ws_server_ca_cert_path_;
+  std::string ws_server_key_path_;
+  bool is_wss_settings_setup_;
+#endif  // ENABLE_SECURITY
+#endif  // WEBSOCKET_SERVER_TRANSPORT_SUPPORT
   uint32_t cloud_app_retry_timeout_;
   uint16_t cloud_app_max_retry_attempts_;
   std::vector<uint8_t> bluetooth_uuid_;

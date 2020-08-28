@@ -128,12 +128,12 @@ void SecurityManagerImpl::Handle(const SecurityMessage message) {
   }
   switch (message->get_header().query_id) {
     case SecurityQuery::SEND_HANDSHAKE_DATA:
-      if (!ProccessHandshakeData(message)) {
-        LOG4CXX_ERROR(logger_, "Proccess HandshakeData failed");
+      if (!ProcessHandshakeData(message)) {
+        LOG4CXX_ERROR(logger_, "Process HandshakeData failed");
       }
       break;
     case SecurityQuery::SEND_INTERNAL_ERROR:
-      if (!ProccessInternalError(message)) {
+      if (!ProcessInternalError(message)) {
         LOG4CXX_ERROR(logger_, "Processing income InternalError failed");
       }
       break;
@@ -515,7 +515,7 @@ bool SecurityManagerImpl::IsPolicyCertificateDataEmpty() {
   return false;
 }
 
-bool SecurityManagerImpl::ProccessHandshakeData(
+bool SecurityManagerImpl::ProcessHandshakeData(
     const SecurityMessage& inMessage) {
   LOG4CXX_INFO(logger_, "SendHandshakeData processing");
   DCHECK(inMessage);
@@ -556,11 +556,11 @@ bool SecurityManagerImpl::ProccessHandshakeData(
                                   &out_data_size);
   if (handshake_result == SSLContext::Handshake_Result_AbnormalFail) {
     // Do not return handshake data on AbnormalFail or null returned values
-    const std::string erorr_text(sslContext->LastError());
+    const std::string error_text(sslContext->LastError());
     LOG4CXX_ERROR(logger_,
-                  "SendHandshakeData: Handshake failed: " << erorr_text);
+                  "SendHandshakeData: Handshake failed: " << error_text);
     SendInternalError(
-        connection_key, ERROR_SSL_INVALID_DATA, erorr_text, seqNumber);
+        connection_key, ERROR_SSL_INVALID_DATA, error_text, seqNumber);
     NotifyListenersOnHandshakeDone(connection_key,
                                    SSLContext::Handshake_Result_Fail);
     // no handshake data to send
@@ -584,25 +584,29 @@ bool SecurityManagerImpl::ProccessHandshakeData(
   return true;
 }
 
-bool SecurityManagerImpl::ProccessInternalError(
+bool SecurityManagerImpl::ProcessInternalError(
     const SecurityMessage& inMessage) {
-  LOG4CXX_INFO(logger_,
-               "Received InternalError with Json message"
-                   << inMessage->get_json_message());
-  Json::Value root;
   std::string str = inMessage->get_json_message();
+  const uint32_t connection_key = inMessage->get_connection_key();
+  LOG4CXX_INFO(logger_, "Received InternalError with Json message" << str);
+  Json::Value root;
   utils::JsonReader reader;
 
   if (!reader.parse(str, &root)) {
     LOG4CXX_DEBUG(logger_, "Json parsing fails.");
     return false;
   }
+  uint8_t id = root[kErrId].asInt();
   LOG4CXX_DEBUG(logger_,
-                "Received InternalError id "
-                    << root[kErrId].asString()
-                    << ", text: " << root[kErrText].asString());
+                "Received InternalError id " << std::to_string(id) << ", text: "
+                                             << root[kErrText].asString());
+  if (ERROR_SSL_INVALID_DATA == id || ERROR_NOT_SUPPORTED == id) {
+    NotifyListenersOnHandshakeDone(connection_key,
+                                   SSLContext::Handshake_Result_Fail);
+  }
   return true;
 }
+
 void SecurityManagerImpl::SendHandshakeBinData(const uint32_t connection_key,
                                                const uint8_t* const data,
                                                const size_t data_size,
@@ -619,11 +623,11 @@ void SecurityManagerImpl::SendHandshakeBinData(const uint32_t connection_key,
 
 void SecurityManagerImpl::SendInternalError(const uint32_t connection_key,
                                             const uint8_t& error_id,
-                                            const std::string& erorr_text,
+                                            const std::string& error_text,
                                             const uint32_t seq_number) {
   Json::Value value;
   value[kErrId] = error_id;
-  value[kErrText] = erorr_text;
+  value[kErrText] = error_text;
   const std::string error_str = value.toStyledString();
   SecurityQuery::QueryHeader header(
       SecurityQuery::NOTIFICATION,
@@ -642,7 +646,7 @@ void SecurityManagerImpl::SendInternalError(const uint32_t connection_key,
   SendQuery(query, connection_key);
   LOG4CXX_DEBUG(logger_,
                 "Sent Internal error id " << static_cast<int>(error_id)
-                                          << " : \"" << erorr_text << "\".");
+                                          << " : \"" << error_text << "\".");
 }
 
 void SecurityManagerImpl::SendQuery(const SecurityQuery& query,

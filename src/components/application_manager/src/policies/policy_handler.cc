@@ -141,7 +141,7 @@ struct HMILevelPredicate
 
 }  // namespace
 
-#define POLICY_LIB_CHECK(return_value)                                      \
+#define POLICY_LIB_CHECK_OR_RETURN(return_value)                            \
   {                                                                         \
     sync_primitives::AutoReadLock lock(policy_manager_lock_);               \
     if (!policy_manager_) {                                                 \
@@ -299,9 +299,14 @@ PolicyHandler::PolicyHandler(const PolicySettings& settings,
                              ApplicationManager& application_manager)
     : AsyncRunner("PolicyHandler async runner thread")
     , last_activated_app_id_(0)
+#ifndef EXTERNAL_PROPRIETARY_MODE
+    , last_ptu_app_id_(0)
+#endif  // EXTERNAL_PROPRIETARY_MODE
     , statistic_manager_impl_(std::make_shared<StatisticManagerImpl>(this))
     , settings_(settings)
-    , application_manager_(application_manager) {}
+    , application_manager_(application_manager)
+    , last_registered_policy_app_id_(std::string()) {
+}
 
 PolicyHandler::~PolicyHandler() {}
 
@@ -374,11 +379,7 @@ const PolicySettings& PolicyHandler::get_settings() const {
 
 bool PolicyHandler::InitPolicyTable() {
   LOG4CXX_AUTO_TRACE(logger_);
-  POLICY_LIB_CHECK(false);
-  // Subscribing to notification for system readiness to be able to get system
-  // info necessary for policy table
-  event_observer_->subscribe_on_event(
-      hmi_apis::FunctionID::BasicCommunication_OnReady);
+  POLICY_LIB_CHECK_OR_RETURN(false);
   std::string preloaded_file = get_settings().preloaded_pt_file();
   if (file_system::FileExists(preloaded_file)) {
     const bool pt_inited =
@@ -402,13 +403,17 @@ void PolicyHandler::OnPTInited() {
 
 void PolicyHandler::StopRetrySequence() {
   LOG4CXX_AUTO_TRACE(logger_);
-
+  POLICY_LIB_CHECK_VOID();
+#ifndef EXTERNAL_PROPRIETARY_MODE
+  // Clear cached PTU app
+  last_ptu_app_id_ = 0;
+#endif  // EXTERNAL_PROPRIETARY_MODE
   policy_manager_->StopRetrySequence();
 }
 
 bool PolicyHandler::ResetPolicyTable() {
   LOG4CXX_TRACE(logger_, "Reset policy table.");
-  POLICY_LIB_CHECK(false);
+  POLICY_LIB_CHECK_OR_RETURN(false);
   std::string preloaded_file = get_settings().preloaded_pt_file();
   if (file_system::FileExists(preloaded_file)) {
     return policy_manager_->ResetPT(preloaded_file);
@@ -419,13 +424,43 @@ bool PolicyHandler::ResetPolicyTable() {
 
 bool PolicyHandler::ClearUserConsent() {
   LOG4CXX_AUTO_TRACE(logger_);
-  POLICY_LIB_CHECK(false);
+  POLICY_LIB_CHECK_OR_RETURN(false);
   return policy_manager_->ResetUserConsent();
 }
 
+#ifndef EXTERNAL_PROPRIETARY_MODE
+uint32_t PolicyHandler::ChoosePTUApplication(
+    const PTUIterationType iteration_type) {
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  // Return the previous app chosen if this is a retry for a PTU in progress
+  if (iteration_type == PTUIterationType::RetryIteration &&
+      last_ptu_app_id_ != 0) {
+    ApplicationSharedPtr app =
+        application_manager_.application(last_ptu_app_id_);
+    if (app && app->IsRegistered()) {
+      LOG4CXX_INFO(logger_, "Previously chosen application exists, returning");
+      return last_ptu_app_id_;
+    }
+  }
+
+  last_ptu_app_id_ = GetAppIdForSending();
+  return last_ptu_app_id_;
+}
+
+void PolicyHandler::CacheRetryInfo(const uint32_t app_id,
+                                   const std::string url,
+                                   const std::string snapshot_path) {
+  last_ptu_app_id_ = app_id;
+  retry_update_url_ = url;
+  policy_snapshot_path_ = snapshot_path;
+}
+#endif  // EXTERNAL_PROPRIETARY_MODE
+
 uint32_t PolicyHandler::GetAppIdForSending() const {
   LOG4CXX_AUTO_TRACE(logger_);
-  POLICY_LIB_CHECK(0);
+  POLICY_LIB_CHECK_OR_RETURN(0);
+
   // fix ApplicationSet access crash
   const ApplicationSet accessor = application_manager_.applications().GetData();
 
@@ -440,11 +475,10 @@ uint32_t PolicyHandler::GetAppIdForSending() const {
                 "Number of apps with different from NONE level: "
                     << apps_without_none_level.size());
 
-  uint32_t choosen_app_id =
-      ChooseRandomAppForPolicyUpdate(apps_without_none_level);
+  uint32_t app_id = ChooseRandomAppForPolicyUpdate(apps_without_none_level);
 
-  if (choosen_app_id) {
-    return choosen_app_id;
+  if (app_id) {
+    return app_id;
   }
 
   Applications apps_with_none_level;
@@ -463,6 +497,26 @@ uint32_t PolicyHandler::GetAppIdForSending() const {
   }
 
   return ChooseRandomAppForPolicyUpdate(apps_with_none_level);
+}
+
+void PolicyHandler::PushAppIdToPTUQueue(const uint32_t app_id) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  POLICY_LIB_CHECK_VOID();
+  sync_primitives::AutoLock lock(app_id_queue_lock_);
+  const auto result = applications_ptu_queue_.insert(app_id);
+  if (result.second) {
+    policy_manager_->UpdatePTUReadyAppsCount(applications_ptu_queue_.size());
+  }
+}
+
+void PolicyHandler::PopAppIdFromPTUQueue() {
+  LOG4CXX_AUTO_TRACE(logger_);
+  POLICY_LIB_CHECK_VOID();
+  sync_primitives::AutoLock lock(app_id_queue_lock_);
+  if (applications_ptu_queue_.size() > 0) {
+    applications_ptu_queue_.erase(applications_ptu_queue_.begin());
+    policy_manager_->UpdatePTUReadyAppsCount(applications_ptu_queue_.size());
+  }
 }
 
 #ifdef EXTERNAL_PROPRIETARY_MODE
@@ -548,6 +602,15 @@ void PolicyHandler::SendOnAppPermissionsChanged(
       app->app_id(), permissions, application_manager_);
 }
 
+void PolicyHandler::SendOnAppPropertiesChangeNotification(
+    const std::string& policy_app_id) const {
+  LOG4CXX_AUTO_TRACE(logger_);
+  const auto notification =
+      MessageHelper::CreateOnAppPropertiesChangeNotification(
+          policy_app_id, application_manager_);
+  application_manager_.GetRPCService().ManageHMICommand(notification);
+}
+
 void PolicyHandler::OnPTExchangeNeeded() {
   LOG4CXX_AUTO_TRACE(logger_);
   POLICY_LIB_CHECK_VOID();
@@ -576,7 +639,7 @@ StatusNotifier PolicyHandler::AddApplication(
     const std::string& device_id,
     const std::string& application_id,
     const rpc::policy_table_interface_base::AppHmiTypes& hmi_types) {
-  POLICY_LIB_CHECK(std::make_shared<utils::CallNothing>());
+  POLICY_LIB_CHECK_OR_RETURN(std::make_shared<utils::CallNothing>());
   return policy_manager_->AddApplication(device_id, application_id, hmi_types);
 }
 
@@ -691,7 +754,7 @@ void policy::PolicyHandler::SetDaysAfterEpoch() {
 
 #ifdef ENABLE_SECURITY
 std::string PolicyHandler::RetrieveCertificate() const {
-  POLICY_LIB_CHECK(std::string(""));
+  POLICY_LIB_CHECK_OR_RETURN(std::string(""));
   return policy_manager_->RetrieveCertificate();
 }
 #endif  // ENABLE_SECURITY
@@ -726,6 +789,12 @@ void PolicyHandler::OnSystemRequestReceived() const {
   policy_manager_->ResetTimeout();
 }
 
+void PolicyHandler::TriggerPTUOnStartupIfRequired() {
+#ifdef PROPRIETARY_MODE
+  policy_manager_->TriggerPTUOnStartupIfRequired();
+#endif
+}
+
 void PolicyHandler::GetRegisteredLinks(
     std::map<std::string, std::string>& out_links) const {
   DataAccessor<ApplicationSet> accessor = application_manager_.applications();
@@ -739,7 +808,7 @@ void PolicyHandler::GetRegisteredLinks(
 std::vector<policy::FunctionalGroupPermission>
 PolicyHandler::CollectRegisteredAppsPermissions() {
   LOG4CXX_AUTO_TRACE(logger_);
-  POLICY_LIB_CHECK(std::vector<policy::FunctionalGroupPermission>());
+  POLICY_LIB_CHECK_OR_RETURN(std::vector<policy::FunctionalGroupPermission>());
   // If no specific app was passed, get permissions for all currently registered
   // applications
   sync_primitives::AutoLock lock(app_to_device_link_lock_);
@@ -760,9 +829,11 @@ PolicyHandler::CollectRegisteredAppsPermissions() {
 
 std::vector<FunctionalGroupPermission> PolicyHandler::CollectAppPermissions(
     const uint32_t connection_key) {
+  std::vector<FunctionalGroupPermission> group_permissions;
+  POLICY_LIB_CHECK_OR_RETURN(group_permissions);
+
   // Single app only
   ApplicationSharedPtr app = application_manager_.application(connection_key);
-  std::vector<FunctionalGroupPermission> group_permissions;
 
   if (NULL == app.get() || app.use_count() == 0) {
     LOG4CXX_WARN(logger_,
@@ -840,6 +911,7 @@ void PolicyHandler::LinkAppsToDevice() {
 bool PolicyHandler::IsAppSuitableForPolicyUpdate(
     const Applications::value_type value) const {
   LOG4CXX_AUTO_TRACE(logger_);
+  POLICY_LIB_CHECK_OR_RETURN(false);
 
   if (!value->IsRegistered()) {
     LOG4CXX_DEBUG(
@@ -946,6 +1018,11 @@ void PolicyHandler::OnSystemInfoChanged(const std::string& language) {
   policy_manager_->SetSystemLanguage(language);
 }
 
+void PolicyHandler::SetPreloadedPtFlag(const bool is_preloaded) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  policy_manager_->SetPreloadedPtFlag(is_preloaded);
+}
+
 void PolicyHandler::OnGetSystemInfo(const std::string& ccpu_version,
                                     const std::string& wers_country_code,
                                     const std::string& language) {
@@ -954,10 +1031,9 @@ void PolicyHandler::OnGetSystemInfo(const std::string& ccpu_version,
   policy_manager_->SetSystemInfo(ccpu_version, wers_country_code, language);
 }
 
-void PolicyHandler::OnSystemInfoUpdateRequired() {
+std::string PolicyHandler::GetCCPUVersionFromPT() const {
   LOG4CXX_AUTO_TRACE(logger_);
-  POLICY_LIB_CHECK_VOID();
-  MessageHelper::SendGetSystemInfoRequest(application_manager_);
+  return policy_manager_->GetCCPUVersionFromPT();
 }
 
 void PolicyHandler::OnVIIsReady() {
@@ -1076,10 +1152,16 @@ void PolicyHandler::OnPendingPermissionChange(
 
 bool PolicyHandler::SendMessageToSDK(const BinaryMessage& pt_string,
                                      const std::string& url) {
-  LOG4CXX_AUTO_TRACE(logger_);
-  POLICY_LIB_CHECK(false);
-
   const uint32_t app_id = GetAppIdForSending();
+  return SendMessageToSDK(pt_string, url, app_id);
+}
+
+bool PolicyHandler::SendMessageToSDK(const BinaryMessage& pt_string,
+                                     const std::string& url,
+                                     const uint32_t app_id) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  POLICY_LIB_CHECK_OR_RETURN(false);
+
   ApplicationSharedPtr app = application_manager_.application(app_id);
 
   if (!app) {
@@ -1114,7 +1196,7 @@ bool PolicyHandler::SendMessageToSDK(const BinaryMessage& pt_string,
 
 bool PolicyHandler::ReceiveMessageFromSDK(const std::string& file,
                                           const BinaryMessage& pt_string) {
-  POLICY_LIB_CHECK(false);
+  POLICY_LIB_CHECK_OR_RETURN(false);
 
   const auto load_pt_result = policy_manager_->LoadPT(file, pt_string);
 
@@ -1129,6 +1211,10 @@ bool PolicyHandler::ReceiveMessageFromSDK(const std::string& file,
     policy_manager_->CleanupUnpairedDevices();
     SetDaysAfterEpoch();
     policy_manager_->OnPTUFinished(load_pt_result);
+#ifndef EXTERNAL_PROPRIETARY_MODE
+    // Clean up retry information
+    last_ptu_app_id_ = 0;
+#endif  // EXTERNAL_PROPRIETARY_MODE
 
     uint32_t correlation_id = application_manager_.GetNextHMICorrelationID();
     event_observer_->subscribe_on_event(
@@ -1234,18 +1320,22 @@ void PolicyHandler::OnAllowSDLFunctionalityNotification(
 
 #ifdef EXTERNAL_PROPRIETARY_MODE
 
-      DataAccessor<ApplicationSet> accessor =
-          application_manager_.applications();
+      ApplicationSet applications;
+      {
+        DataAccessor<ApplicationSet> accessor =
+            application_manager_.applications();
+        applications = accessor.GetData();
+      }
       if (!is_allowed) {
         std::for_each(
-            accessor.GetData().begin(),
-            accessor.GetData().end(),
+            applications.begin(),
+            applications.end(),
             DeactivateApplication(device_handle,
                                   application_manager_.state_controller()));
       } else {
         std::for_each(
-            accessor.GetData().begin(),
-            accessor.GetData().end(),
+            applications.begin(),
+            applications.end(),
             SDLAlowedNotification(device_handle,
                                   policy_manager_.get(),
                                   application_manager_.state_controller()));
@@ -1480,6 +1570,8 @@ void PolicyHandler::OnPermissionsUpdated(const std::string& device_id,
                                          const std::string& policy_app_id,
                                          const Permissions& permissions) {
   LOG4CXX_AUTO_TRACE(logger_);
+  POLICY_LIB_CHECK_VOID();
+
   ApplicationSharedPtr app =
       application_manager_.application(device_id, policy_app_id);
   if (app.use_count() == 0) {
@@ -1500,11 +1592,13 @@ void PolicyHandler::OnPermissionsUpdated(const std::string& device_id,
                     << policy_app_id << " and connection_key "
                     << app->app_id());
 }
-#ifndef EXTERNAL_PROPRIETARY_MODE
+
 void PolicyHandler::OnPTUTimeOut() {
+  PopAppIdFromPTUQueue();
+#ifndef EXTERNAL_PROPRIETARY_MODE
   application_manager_.protocol_handler().ProcessFailedPTU();
-}
 #endif
+}
 
 bool PolicyHandler::SaveSnapshot(const BinaryMessage& pt_string,
                                  std::string& snap_path) {
@@ -1546,21 +1640,21 @@ void PolicyHandler::OnSnapshotCreated(const BinaryMessage& pt_string,
   LOG4CXX_AUTO_TRACE(logger_);
   POLICY_LIB_CHECK_VOID();
 #ifdef PROPRIETARY_MODE
-  std::string policy_snapshot_full_path;
-  if (!SaveSnapshot(pt_string, policy_snapshot_full_path)) {
-    LOG4CXX_ERROR(logger_, "Snapshot processing skipped.");
-    return;
-  }
-
   if (PTUIterationType::RetryIteration == iteration_type) {
-    uint32_t app_id_for_sending = GetAppIdForSending();
-
-    if (0 != app_id_for_sending) {
+    uint32_t app_id_for_sending = 0;
+    const std::string& url =
+        GetNextUpdateUrl(PTUIterationType::RetryIteration, app_id_for_sending);
+    if (0 != url.length() && !policy_snapshot_path_.empty()) {
       MessageHelper::SendPolicySnapshotNotification(
-          app_id_for_sending, pt_string, std::string(), application_manager_);
+          app_id_for_sending, policy_snapshot_path_, url, application_manager_);
+    }
+  } else {
+    std::string policy_snapshot_full_path;
+    if (!SaveSnapshot(pt_string, policy_snapshot_full_path)) {
+      LOG4CXX_ERROR(logger_, "Snapshot processing skipped.");
+      return;
     }
 
-  } else {
     MessageHelper::SendPolicyUpdate(
         policy_snapshot_full_path,
         TimeoutExchangeSec(),
@@ -1568,28 +1662,75 @@ void PolicyHandler::OnSnapshotCreated(const BinaryMessage& pt_string,
         application_manager_);
   }
 #else   // PROPRIETARY_MODE
-  LOG4CXX_ERROR(logger_, "HTTP policy");
-  EndpointUrls urls;
-  policy_manager_->GetUpdateUrls("0x07", urls);
+  LOG4CXX_INFO(logger_, "HTTP policy");
 
-  if (urls.empty()) {
-    LOG4CXX_ERROR(logger_, "Service URLs are empty! NOT sending PT to mobile!");
-    return;
+  uint32_t app_id_for_sending = 0;
+  const std::string& url = GetNextUpdateUrl(iteration_type, app_id_for_sending);
+  if (0 != url.length()) {
+    SendMessageToSDK(pt_string, url, app_id_for_sending);
   }
-
-  AppIdURL app_url = policy_manager_->GetNextUpdateUrl(urls);
-  while (!IsUrlAppIdValid(app_url.first, urls)) {
-    app_url = policy_manager_->GetNextUpdateUrl(urls);
-  }
-  const std::string& url = urls[app_url.first].url[app_url.second];
-  SendMessageToSDK(pt_string, url);
 #endif  // PROPRIETARY_MODE
+}
+
+std::string PolicyHandler::GetNextUpdateUrl(
+    const PTUIterationType iteration_type, uint32_t& app_id) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  POLICY_LIB_CHECK_OR_RETURN(std::string());
+  app_id = ChoosePTUApplication(iteration_type);
+
+  if (0 == app_id) {
+    return std::string();
+  }
+
+  // Use cached URL for retries if it was provided by the HMI
+  if (PTUIterationType::RetryIteration == iteration_type &&
+      !retry_update_url_.empty()) {
+    return retry_update_url_;
+  }
+
+  EndpointUrls endpoint_urls;
+  policy_manager_->GetUpdateUrls("0x07", endpoint_urls);
+
+  if (endpoint_urls.empty()) {
+    LOG4CXX_ERROR(logger_, "Service URLs are empty!");
+    return std::string();
+  }
+
+  auto get_ptu_app = [this](AppIdURL app_url, uint32_t& app_id) {
+    if (app_url.first == 0 && app_url.second == 0) {
+      // We've looped past the end of the list, choose new application
+      app_id = ChoosePTUApplication(PTUIterationType::DefaultIteration);
+      if (0 == app_id) {
+        return ApplicationSharedPtr();
+      }
+    }
+    return application_manager_.application(app_id);
+  };
+
+  AppIdURL app_url = policy_manager_->GetNextUpdateUrl(endpoint_urls);
+  ApplicationSharedPtr app = get_ptu_app(app_url, app_id);
+  if (!app) {
+    LOG4CXX_ERROR(logger_, "No available applications for PTU!");
+    return std::string();
+  }
+  EndpointData& data = endpoint_urls[app_url.first];
+  while (!IsUrlAppIdValid(app->policy_app_id(), data)) {
+    app_url = policy_manager_->GetNextUpdateUrl(endpoint_urls);
+    app = get_ptu_app(app_url, app_id);
+    if (!app) {
+      LOG4CXX_ERROR(logger_, "No available applications for PTU!");
+      return std::string();
+    }
+    data = endpoint_urls[app_url.first];
+  }
+  const std::string& url = data.url[app_url.second];
+  return url;
 }
 #endif  // EXTERNAL_PROPRIETARY_MODE
 
 bool PolicyHandler::GetPriority(const std::string& policy_app_id,
                                 std::string* priority) const {
-  POLICY_LIB_CHECK(false);
+  POLICY_LIB_CHECK_OR_RETURN(false);
   return policy_manager_->GetPriority(policy_app_id, priority);
 }
 
@@ -1619,61 +1760,92 @@ void PolicyHandler::CheckPermissions(
       device_id, app->policy_app_id(), hmi_level, rpc, rpc_params, result);
 }
 
-uint32_t PolicyHandler::GetNotificationsNumber(
-    const std::string& priority) const {
-  POLICY_LIB_CHECK(0);
-  return policy_manager_->GetNotificationsNumber(priority);
+uint32_t PolicyHandler::GetNotificationsNumber(const std::string& priority,
+                                               const bool is_subtle) const {
+  POLICY_LIB_CHECK_OR_RETURN(0);
+  return policy_manager_->GetNotificationsNumber(priority, is_subtle);
 }
 
 DeviceConsent PolicyHandler::GetUserConsentForDevice(
     const std::string& device_id) const {
-  POLICY_LIB_CHECK(kDeviceDisallowed);
+  POLICY_LIB_CHECK_OR_RETURN(kDeviceDisallowed);
   return policy_manager_->GetUserConsentForDevice(device_id);
 }
 
 Json::Value PolicyHandler::GetPolicyTableData() const {
+  POLICY_LIB_CHECK_OR_RETURN(Json::Value());
   return policy_manager_->GetPolicyTableData();
 }
 
 bool PolicyHandler::GetDefaultHmi(const std::string& device_id,
                                   const std::string& policy_app_id,
                                   std::string* default_hmi) const {
-  POLICY_LIB_CHECK(false);
+  POLICY_LIB_CHECK_OR_RETURN(false);
   return policy_manager_->GetDefaultHmi(device_id, policy_app_id, default_hmi);
 }
 
 bool PolicyHandler::GetInitialAppData(const std::string& application_id,
                                       StringArray* nicknames,
                                       StringArray* app_hmi_types) {
-  POLICY_LIB_CHECK(false);
+  POLICY_LIB_CHECK_OR_RETURN(false);
   return policy_manager_->GetInitialAppData(
       application_id, nicknames, app_hmi_types);
 }
 
 void PolicyHandler::GetUpdateUrls(const std::string& service_type,
-                                  EndpointUrls& out_end_points) {
+                                  EndpointUrls& out_end_points) const {
   POLICY_LIB_CHECK_VOID();
   policy_manager_->GetUpdateUrls(service_type, out_end_points);
 }
 
 void PolicyHandler::GetUpdateUrls(const uint32_t service_type,
-                                  EndpointUrls& out_end_points) {
+                                  EndpointUrls& out_end_points) const {
   POLICY_LIB_CHECK_VOID();
   policy_manager_->GetUpdateUrls(service_type, out_end_points);
 }
 
-std::string PolicyHandler::GetLockScreenIconUrl() const {
-  POLICY_LIB_CHECK(std::string(""));
-  return policy_manager_->GetLockScreenIconUrl();
+std::string PolicyHandler::GetLockScreenIconUrl(
+    const std::string& policy_app_id) const {
+  const std::string default_url;
+  POLICY_LIB_CHECK_OR_RETURN(default_url);
+
+  EndpointUrls endpoints;
+  policy_manager_->GetUpdateUrls("lock_screen_icon_url", endpoints);
+
+  auto it_specific =
+      std::find_if(endpoints.begin(),
+                   endpoints.end(),
+                   [&policy_app_id](const EndpointData& endpoint) {
+                     return endpoint.app_id == policy_app_id;
+                   });
+
+  if (endpoints.end() != it_specific && !it_specific->url.empty()) {
+    LOG4CXX_DEBUG(logger_,
+                  "Specific app URL will be used for " << policy_app_id);
+    return it_specific->url.front();
+  }
+
+  auto it_default = std::find_if(
+      endpoints.begin(), endpoints.end(), [](const EndpointData& endpoint) {
+        return endpoint.app_id == kDefaultId;
+      });
+
+  if (endpoints.end() != it_default && !it_default->url.empty()) {
+    LOG4CXX_DEBUG(logger_, "Default URL will be used for " << policy_app_id);
+    return it_default->url.front();
+  }
+
+  LOG4CXX_ERROR(logger_, "Can't find URL for " << policy_app_id);
+  return std::string();
 }
 
 std::string PolicyHandler::GetIconUrl(const std::string& policy_app_id) const {
-  POLICY_LIB_CHECK(std::string(""));
+  POLICY_LIB_CHECK_OR_RETURN(std::string(""));
   return policy_manager_->GetIconUrl(policy_app_id);
 }
 
 uint32_t PolicyHandler::NextRetryTimeout() {
-  POLICY_LIB_CHECK(0);
+  POLICY_LIB_CHECK_OR_RETURN(0);
   LOG4CXX_AUTO_TRACE(logger_);
   return policy_manager_->NextRetryTimeout();
 }
@@ -1683,7 +1855,7 @@ uint32_t PolicyHandler::TimeoutExchangeSec() const {
 }
 
 uint32_t PolicyHandler::TimeoutExchangeMSec() const {
-  POLICY_LIB_CHECK(0);
+  POLICY_LIB_CHECK_OR_RETURN(0);
   return policy_manager_->TimeoutExchangeMSec();
 }
 
@@ -1698,21 +1870,16 @@ void PolicyHandler::OnExceededTimeout() {
   policy_manager_->OnExceededTimeout();
 }
 
-void PolicyHandler::OnSystemReady() {
-  POLICY_LIB_CHECK_VOID();
-  policy_manager_->OnSystemReady();
-}
-
 const boost::optional<bool> PolicyHandler::LockScreenDismissalEnabledState()
     const {
-  POLICY_LIB_CHECK(boost::optional<bool>());
+  POLICY_LIB_CHECK_OR_RETURN(boost::optional<bool>());
   return policy_manager_->LockScreenDismissalEnabledState();
 }
 
 const boost::optional<std::string>
 PolicyHandler::LockScreenDismissalWarningMessage(
     const std::string& language) const {
-  POLICY_LIB_CHECK(boost::optional<std::string>());
+  POLICY_LIB_CHECK_OR_RETURN(boost::optional<std::string>());
   return policy_manager_->LockScreenDismissalWarningMessage(language);
 }
 
@@ -1914,6 +2081,8 @@ void PolicyHandler::OnPTUFinished(const bool ptu_result) {
   LOG4CXX_AUTO_TRACE(logger_);
   sync_primitives::AutoLock lock(listeners_lock_);
 
+  PopAppIdFromPTUQueue();
+
   std::for_each(
       listeners_.begin(),
       listeners_.end(),
@@ -1945,7 +2114,7 @@ void PolicyHandler::RemoveDevice(const std::string& device_id) {
 
 bool PolicyHandler::IsApplicationRevoked(const std::string& app_id) {
   LOG4CXX_AUTO_TRACE(logger_);
-  POLICY_LIB_CHECK(false);
+  POLICY_LIB_CHECK_OR_RETURN(false);
 
   return policy_manager_->IsApplicationRevoked(app_id);
 }
@@ -1957,12 +2126,12 @@ void PolicyHandler::OnUpdateRequestSentToMobile() {
 }
 
 bool PolicyHandler::CheckKeepContext(const std::string& policy_app_id) const {
-  POLICY_LIB_CHECK(false);
+  POLICY_LIB_CHECK_OR_RETURN(false);
   return policy_manager_->CanAppKeepContext(policy_app_id);
 }
 
 bool PolicyHandler::CheckStealFocus(const std::string& policy_app_id) const {
-  POLICY_LIB_CHECK(false);
+  POLICY_LIB_CHECK_OR_RETURN(false);
   return policy_manager_->CanAppStealFocus(policy_app_id);
 }
 
@@ -1985,47 +2154,208 @@ bool PolicyHandler::CheckSystemAction(
   return false;
 }
 
+std::vector<std::string> PolicyHandler::GetApplicationPolicyIDs() const {
+  POLICY_LIB_CHECK_OR_RETURN(std::vector<std::string>());
+  const auto all_policy_ids = policy_manager_->GetApplicationPolicyIDs();
+  std::vector<std::string> policy_app_ids;
+
+  std::copy_if(
+      all_policy_ids.begin(),
+      all_policy_ids.end(),
+      std::back_inserter(policy_app_ids),
+      [](std::string id) {
+        return helpers::Compare<std::string, helpers::NEQ, helpers::ALL>(
+            id, kDefaultId, kPreDataConsentId, kDeviceId);
+      });
+
+  return policy_app_ids;
+}
+
 void PolicyHandler::GetEnabledCloudApps(
     std::vector<std::string>& enabled_apps) const {
   POLICY_LIB_CHECK_VOID();
   policy_manager_->GetEnabledCloudApps(enabled_apps);
 }
 
-bool PolicyHandler::GetCloudAppParameters(
-    const std::string& policy_app_id,
-    bool& enabled,
-    std::string& endpoint,
-    std::string& certificate,
-    std::string& auth_token,
-    std::string& cloud_transport_type,
-    std::string& hybrid_app_preference) const {
-  POLICY_LIB_CHECK(false);
-  return policy_manager_->GetCloudAppParameters(policy_app_id,
-                                                enabled,
-                                                endpoint,
-                                                certificate,
-                                                auth_token,
-                                                cloud_transport_type,
-                                                hybrid_app_preference);
+bool PolicyHandler::GetAppProperties(const std::string& policy_app_id,
+                                     AppProperties& out_app_properties) const {
+  POLICY_LIB_CHECK_OR_RETURN(false);
+  return policy_manager_->GetAppProperties(policy_app_id, out_app_properties);
+}
+
+std::vector<std::string> PolicyHandler::GetEnabledLocalApps() const {
+  POLICY_LIB_CHECK_OR_RETURN(std::vector<std::string>());
+  return policy_manager_->GetEnabledLocalApps();
 }
 
 const bool PolicyHandler::CheckCloudAppEnabled(
     const std::string& policy_app_id) const {
-  POLICY_LIB_CHECK(false);
-  bool enabled = false;
-  std::string endpoint;
-  std::string auth_token;
-  std::string certificate;
-  std::string cloud_transport_type;
-  std::string hybrid_app_preference;
-  policy_manager_->GetCloudAppParameters(policy_app_id,
-                                         enabled,
-                                         endpoint,
-                                         certificate,
-                                         auth_token,
-                                         cloud_transport_type,
-                                         hybrid_app_preference);
-  return enabled;
+  POLICY_LIB_CHECK_OR_RETURN(false);
+  AppProperties out_app_properties;
+  policy_manager_->GetAppProperties(policy_app_id, out_app_properties);
+  return out_app_properties.enabled;
+}
+
+PolicyHandler::AppPropertiesState PolicyHandler::GetAppPropertiesStatus(
+    const smart_objects::SmartObject& properties,
+    const std::string& app_id) const {
+  LOG4CXX_AUTO_TRACE(logger_);
+  POLICY_LIB_CHECK_OR_RETURN(AppPropertiesState::NO_CHANGES);
+
+  AppProperties app_properties;
+  policy_manager_->GetAppProperties(app_id, app_properties);
+
+  policy::StringArray nicknames;
+  policy::StringArray app_hmi_types;
+  policy_manager_->GetInitialAppData(app_id, &nicknames, &app_hmi_types);
+
+  if (properties.keyExists(strings::enabled) &&
+      app_properties.enabled != properties[strings::enabled].asBool()) {
+    LOG4CXX_DEBUG(logger_,
+                  "\"enabled\" was changed from: "
+                      << app_properties.enabled
+                      << " to: " << properties[strings::enabled].asBool());
+    return AppPropertiesState::ENABLED_FLAG_SWITCH;
+  }
+  if (properties.keyExists(strings::auth_token) &&
+      app_properties.auth_token != properties[strings::auth_token].asString()) {
+    LOG4CXX_DEBUG(logger_,
+                  "\"auth_token\" was changed from: "
+                      << app_properties.auth_token
+                      << " to: " << properties[strings::auth_token].asString());
+    return AppPropertiesState::AUTH_TOKEN_CHANGED;
+  }
+  if (properties.keyExists(strings::transport_type) &&
+      app_properties.transport_type !=
+          properties[strings::transport_type].asString()) {
+    LOG4CXX_DEBUG(logger_,
+                  "\"transport_type\" was changed from: "
+                      << app_properties.transport_type << " to: "
+                      << properties[strings::transport_type].asString());
+    return AppPropertiesState::TRANSPORT_TYPE_CHANGED;
+  }
+
+  if (properties.keyExists(strings::cloud_transport_type) &&
+      app_properties.transport_type !=
+          properties[strings::cloud_transport_type].asString()) {
+    LOG4CXX_DEBUG(logger_,
+                  "\"transport_type\" was changed from: "
+                      << app_properties.transport_type << " to: "
+                      << properties[strings::cloud_transport_type].asString());
+    return AppPropertiesState::TRANSPORT_TYPE_CHANGED;
+  }
+
+  if (properties.keyExists(strings::endpoint) &&
+      app_properties.endpoint != properties[strings::endpoint].asString()) {
+    LOG4CXX_DEBUG(logger_,
+                  "\"endpoint\" was changed from: "
+                      << app_properties.endpoint
+                      << " to: " << properties[strings::endpoint].asString());
+    return AppPropertiesState::ENDPOINT_CHANGED;
+  }
+  if (properties.keyExists(strings::nicknames)) {
+    const smart_objects::SmartArray* nicknames_array =
+        properties[strings::nicknames].asArray();
+
+    if (nicknames_array->size() != nicknames.size()) {
+      return AppPropertiesState::NICKNAMES_CHANGED;
+    }
+
+    smart_objects::SmartArray::const_iterator it_begin =
+        nicknames_array->begin();
+    smart_objects::SmartArray::const_iterator it_end = nicknames_array->end();
+    for (; it_begin != it_end; ++it_begin) {
+      const auto result =
+          std::find(nicknames.begin(), nicknames.end(), (*it_begin).asString());
+      if (nicknames.end() == result) {
+        LOG4CXX_DEBUG(logger_,
+                      "\"nicknames\" were changed, new value: "
+                          << (*it_begin).asString());
+        return AppPropertiesState::NICKNAMES_CHANGED;
+      }
+    }
+  }
+  if (properties.keyExists(strings::hybrid_app_preference)) {
+    auto value = static_cast<mobile_apis::HybridAppPreference::eType>(
+        properties[strings::hybrid_app_preference].asUInt());
+    std::string hybrid_app_preference_str;
+    smart_objects::EnumConversionHelper<
+        mobile_apis::HybridAppPreference::eType>::
+        EnumToString(value, &hybrid_app_preference_str);
+    if (app_properties.hybrid_app_preference != hybrid_app_preference_str) {
+      LOG4CXX_DEBUG(
+          logger_,
+          "\"hybrid_app_preference\" was changed from: "
+              << app_properties.hybrid_app_preference << " to: "
+              << properties[strings::hybrid_app_preference].asString());
+      return AppPropertiesState::HYBRYD_APP_PROPERTIES_CHANGED;
+    }
+  }
+  return AppPropertiesState::NO_CHANGES;
+}
+
+bool PolicyHandler::IsNewApplication(const std::string& policy_app_id) const {
+  POLICY_LIB_CHECK_OR_RETURN(false);
+  return policy_manager_->IsNewApplication(policy_app_id);
+}
+
+void PolicyHandler::OnSetAppProperties(
+    const smart_objects::SmartObject& properties) {
+  POLICY_LIB_CHECK_VOID();
+
+  const auto policy_app_id(properties[strings::policy_app_id].asString());
+  policy_manager_->InitCloudApp(policy_app_id);
+
+  bool auth_token_update = false;
+  if (properties.keyExists(strings::enabled)) {
+    const bool enabled = properties[strings::enabled].asBool();
+    policy_manager_->SetCloudAppEnabled(policy_app_id, enabled);
+  }
+  if (properties.keyExists(strings::auth_token)) {
+    const std::string auth_token = properties[strings::auth_token].asString();
+    policy_manager_->SetAppAuthToken(policy_app_id, auth_token);
+    auth_token_update = true;
+  }
+  if (properties.keyExists(strings::transport_type)) {
+    policy_manager_->SetAppCloudTransportType(
+        policy_app_id, properties[strings::transport_type].asString());
+  }
+  if (properties.keyExists(strings::endpoint)) {
+    policy_manager_->SetAppEndpoint(policy_app_id,
+                                    properties[strings::endpoint].asString());
+  }
+  if (properties.keyExists(strings::nicknames)) {
+    StringArray nicknames;
+    const smart_objects::SmartObject& nicknames_array =
+        properties[strings::nicknames];
+    for (size_t i = 0; i < nicknames_array.length(); ++i) {
+      nicknames.push_back(nicknames_array[i].asString());
+    }
+    policy_manager_->SetAppNicknames(policy_app_id, nicknames);
+  }
+  if (properties.keyExists(strings::hybrid_app_preference)) {
+    std::string hybrid_app_preference;
+
+    auto value = static_cast<mobile_apis::HybridAppPreference::eType>(
+        properties[strings::hybrid_app_preference].asUInt());
+    smart_objects::EnumConversionHelper<
+        mobile_apis::HybridAppPreference::eType>::
+        EnumToString(value, &hybrid_app_preference);
+    policy_manager_->SetHybridAppPreference(policy_app_id,
+                                            hybrid_app_preference);
+  }
+
+  if (auth_token_update) {
+    AppProperties app_properties;
+    if (policy_manager_->GetAppProperties(policy_app_id, app_properties)) {
+      OnAuthTokenUpdated(policy_app_id, app_properties.auth_token);
+    }
+  }
+}
+
+void PolicyHandler::OnLocalAppAdded() {
+  POLICY_LIB_CHECK_VOID();
+  policy_manager_->OnLocalAppAdded();
 }
 
 void PolicyHandler::OnSetCloudAppProperties(
@@ -2088,9 +2418,8 @@ void PolicyHandler::OnSetCloudAppProperties(
   if (properties.keyExists(strings::hybrid_app_preference)) {
     std::string hybrid_app_preference;
 
-    mobile_apis::HybridAppPreference::eType value =
-        static_cast<mobile_apis::HybridAppPreference::eType>(
-            properties[strings::hybrid_app_preference].asUInt());
+    auto value = static_cast<mobile_apis::HybridAppPreference::eType>(
+        properties[strings::hybrid_app_preference].asUInt());
     smart_objects::EnumConversionHelper<
         mobile_apis::HybridAppPreference::eType>::
         EnumToString(value, &hybrid_app_preference);
@@ -2099,13 +2428,10 @@ void PolicyHandler::OnSetCloudAppProperties(
   }
 
   if (auth_token_update) {
-    bool enabled;
-    std::string end, cert, ctt, hap;
-    std::string auth_token;
+    AppProperties app_properties;
 
-    policy_manager_->GetCloudAppParameters(
-        policy_app_id, enabled, end, cert, auth_token, ctt, hap);
-    OnAuthTokenUpdated(policy_app_id, auth_token);
+    policy_manager_->GetAppProperties(policy_app_id, app_properties);
+    OnAuthTokenUpdated(policy_app_id, app_properties.auth_token);
   }
 }
 
@@ -2180,18 +2506,18 @@ bool PolicyHandler::CheckAppServiceParameters(
 bool PolicyHandler::UnknownRPCPassthroughAllowed(
     const std::string& policy_app_id) const {
   LOG4CXX_AUTO_TRACE(logger_);
-  POLICY_LIB_CHECK(false);
+  POLICY_LIB_CHECK_OR_RETURN(false);
   return policy_manager_->UnknownRPCPassthroughAllowed(policy_app_id);
 }
 
 uint32_t PolicyHandler::HeartBeatTimeout(const std::string& app_id) const {
-  POLICY_LIB_CHECK(0);
+  POLICY_LIB_CHECK_OR_RETURN(0);
   return policy_manager_->HeartBeatTimeout(app_id);
 }
 
 const std::string PolicyHandler::RemoteAppsUrl() const {
   const std::string default_url;
-  POLICY_LIB_CHECK(default_url);
+  POLICY_LIB_CHECK_OR_RETURN(default_url);
   EndpointUrls endpoints;
   policy_manager_->GetUpdateUrls("queryAppsUrl", endpoints);
   if (endpoints.empty() || endpoints[0].url.empty()) {
@@ -2202,13 +2528,23 @@ const std::string PolicyHandler::RemoteAppsUrl() const {
 }
 
 void PolicyHandler::OnAppsSearchStarted() {
-  POLICY_LIB_CHECK();
+  POLICY_LIB_CHECK_VOID();
   policy_manager_->OnAppsSearchStarted();
 }
 
 void PolicyHandler::OnAppsSearchCompleted(const bool trigger_ptu) {
-  POLICY_LIB_CHECK();
+  POLICY_LIB_CHECK_VOID();
   policy_manager_->OnAppsSearchCompleted(trigger_ptu);
+}
+
+void PolicyHandler::OnAddedNewApplicationToAppList(
+    const uint32_t new_app_id, const std::string& policy_id) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  if (policy_id == last_registered_policy_app_id_) {
+    return;
+  }
+  last_registered_policy_app_id_ = policy_id;
+  PushAppIdToPTUQueue(new_app_id);
 }
 
 void PolicyHandler::OnAppRegisteredOnMobile(const std::string& device_id,
@@ -2219,13 +2555,13 @@ void PolicyHandler::OnAppRegisteredOnMobile(const std::string& device_id,
 
 RequestType::State PolicyHandler::GetAppRequestTypeState(
     const std::string& policy_app_id) const {
-  POLICY_LIB_CHECK(RequestType::State::UNAVAILABLE);
+  POLICY_LIB_CHECK_OR_RETURN(RequestType::State::UNAVAILABLE);
   return policy_manager_->GetAppRequestTypesState(policy_app_id);
 }
 
 RequestSubType::State PolicyHandler::GetAppRequestSubTypeState(
     const std::string& policy_app_id) const {
-  POLICY_LIB_CHECK(RequestSubType::State::UNAVAILABLE);
+  POLICY_LIB_CHECK_OR_RETURN(RequestSubType::State::UNAVAILABLE);
   return policy_manager_->GetAppRequestSubTypesState(policy_app_id);
 }
 
@@ -2233,7 +2569,7 @@ bool PolicyHandler::IsRequestTypeAllowed(
     const transport_manager::DeviceHandle& device_id,
     const std::string& policy_app_id,
     mobile_apis::RequestType::eType type) const {
-  POLICY_LIB_CHECK(false);
+  POLICY_LIB_CHECK_OR_RETURN(false);
   using namespace mobile_apis;
 
   const std::string stringified_type = RequestTypeToString(type);
@@ -2274,7 +2610,7 @@ bool PolicyHandler::IsRequestTypeAllowed(
 bool PolicyHandler::IsRequestSubTypeAllowed(
     const std::string& policy_app_id,
     const std::string& request_subtype) const {
-  POLICY_LIB_CHECK(false);
+  POLICY_LIB_CHECK_OR_RETURN(false);
   using namespace mobile_apis;
 
   if (request_subtype.empty()) {
@@ -2311,7 +2647,7 @@ bool PolicyHandler::IsRequestSubTypeAllowed(
 const std::vector<std::string> PolicyHandler::GetAppRequestTypes(
     const transport_manager::DeviceHandle& device_handle,
     const std::string& policy_app_id) const {
-  POLICY_LIB_CHECK(std::vector<std::string>());
+  POLICY_LIB_CHECK_OR_RETURN(std::vector<std::string>());
 #ifdef EXTERNAL_PROPRIETARY_MODE
   return policy_manager_->GetAppRequestTypes(device_handle, policy_app_id);
 #else
@@ -2321,75 +2657,72 @@ const std::vector<std::string> PolicyHandler::GetAppRequestTypes(
 
 const std::vector<std::string> PolicyHandler::GetAppRequestSubTypes(
     const std::string& policy_app_id) const {
-  POLICY_LIB_CHECK(std::vector<std::string>());
+  POLICY_LIB_CHECK_OR_RETURN(std::vector<std::string>());
   return policy_manager_->GetAppRequestSubTypes(policy_app_id);
 }
 
 const std::vector<policy_table::VehicleDataItem>
 policy::PolicyHandler::GetVehicleDataItems() const {
-  POLICY_LIB_CHECK(std::vector<policy_table::VehicleDataItem>());
+  POLICY_LIB_CHECK_OR_RETURN(std::vector<policy_table::VehicleDataItem>());
   return policy_manager_->GetVehicleDataItems();
 }
 
 std::vector<rpc::policy_table_interface_base::VehicleDataItem>
 policy::PolicyHandler::GetRemovedVehicleDataItems() const {
+  POLICY_LIB_CHECK_OR_RETURN(std::vector<policy_table::VehicleDataItem>());
   return policy_manager_->GetRemovedVehicleDataItems();
 }
 
 #ifdef EXTERNAL_PROPRIETARY_MODE
 const MetaInfo PolicyHandler::GetMetaInfo() const {
-  POLICY_LIB_CHECK(MetaInfo());
+  POLICY_LIB_CHECK_OR_RETURN(MetaInfo());
   return policy_manager_->GetMetaInfo();
 }
 #endif  // EXTERNAL_PROPRIETARY_MODE
 
 void PolicyHandler::Increment(usage_statistics::GlobalCounterId type) {
-  POLICY_LIB_CHECK();
+  POLICY_LIB_CHECK_VOID();
   policy_manager_->Increment(type);
 }
 
 void PolicyHandler::Increment(const std::string& app_id,
                               usage_statistics::AppCounterId type) {
-  POLICY_LIB_CHECK();
+  POLICY_LIB_CHECK_VOID();
   policy_manager_->Increment(app_id, type);
 }
 
 void PolicyHandler::Set(const std::string& app_id,
                         usage_statistics::AppInfoId type,
                         const std::string& value) {
-  POLICY_LIB_CHECK();
+  POLICY_LIB_CHECK_VOID();
   policy_manager_->Set(app_id, type, value);
 }
 
 void PolicyHandler::Add(const std::string& app_id,
                         usage_statistics::AppStopwatchId type,
                         int32_t timespan_seconds) {
-  POLICY_LIB_CHECK();
+  POLICY_LIB_CHECK_VOID();
   policy_manager_->Add(app_id, type, timespan_seconds);
 }
 
-bool PolicyHandler::IsUrlAppIdValid(const uint32_t app_idx,
-                                    const EndpointUrls& urls) const {
-  const EndpointData& app_data = urls[app_idx];
-  const std::vector<std::string> app_urls = app_data.url;
-  const ApplicationSharedPtr app =
-      application_manager_.application_by_policy_id(app_data.app_id);
-
+bool PolicyHandler::IsUrlAppIdValid(const std::string app_id,
+                                    const EndpointData& app_data) const {
   if (policy::kDefaultId == app_data.app_id) {
     return true;
   }
 
-  if (app_urls.empty()) {
+  const std::vector<std::string> app_urls = app_data.url;
+  if (app_urls.empty() || app_id != app_data.app_id) {
     return false;
   }
 
-  const auto devices_ids = GetDevicesIds(app_data.app_id);
-  LOG4CXX_TRACE(logger_,
-                "Count devices: " << devices_ids.size()
-                                  << " for app_id: " << app_data.app_id);
+  const auto devices_ids = GetDevicesIds(app_id);
+  LOG4CXX_TRACE(
+      logger_,
+      "Count devices: " << devices_ids.size() << " for app_id: " << app_id);
   for (const auto& device_id : devices_ids) {
-    ApplicationSharedPtr app =
-        application_manager_.application(device_id, app_data.app_id);
+    const ApplicationSharedPtr app =
+        application_manager_.application(device_id, app_id);
     if (app && (app->IsRegistered())) {
       return true;
     }
@@ -2430,7 +2763,7 @@ void PolicyHandler::UpdateHMILevel(ApplicationSharedPtr app,
 
 bool PolicyHandler::CheckModule(const PTString& app_id,
                                 const PTString& module) {
-  POLICY_LIB_CHECK(false);
+  POLICY_LIB_CHECK_OR_RETURN(false);
   return policy_manager_->CheckModule(app_id, module);
 }
 
@@ -2475,7 +2808,7 @@ void PolicyHandler::OnUpdateHMIStatus(const std::string& device_id,
 bool PolicyHandler::GetModuleTypes(const std::string& policy_app_id,
                                    std::vector<std::string>* modules) const {
   LOG4CXX_AUTO_TRACE(logger_);
-  POLICY_LIB_CHECK(false);
+  POLICY_LIB_CHECK_OR_RETURN(false);
   return policy_manager_->GetModuleTypes(policy_app_id, modules);
 }
 
@@ -2500,7 +2833,7 @@ bool PolicyHandler::CheckHMIType(const std::string& application_id,
                                  mobile_apis::AppHMIType::eType hmi,
                                  const smart_objects::SmartObject* app_types) {
   LOG4CXX_AUTO_TRACE(logger_);
-  POLICY_LIB_CHECK(false);
+  POLICY_LIB_CHECK_OR_RETURN(false);
   std::vector<int> policy_hmi_types;
   bool ret = policy_manager_->GetHMITypes(application_id, &policy_hmi_types);
 

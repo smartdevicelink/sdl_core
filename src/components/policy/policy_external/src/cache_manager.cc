@@ -284,8 +284,8 @@ CacheManager::CacheManager(bool in_memory)
 CacheManager::~CacheManager() {
   LOG4CXX_AUTO_TRACE(logger_);
   sync_primitives::AutoLock lock(backuper_locker_);
-  backup_thread_->join();
-  delete backup_thread_->delegate();
+  backup_thread_->Stop(threads::Thread::kThreadSoftStop);
+  delete backup_thread_->GetDelegate();
   threads::DeleteThread(backup_thread_);
 }
 
@@ -1471,38 +1471,58 @@ void CacheManager::GetEnabledCloudApps(
 #endif  // CLOUD_APP_WEBSOCKET_TRANSPORT_SUPPORT
 }
 
-bool CacheManager::GetCloudAppParameters(
-    const std::string& policy_app_id,
-    bool& enabled,
-    std::string& endpoint,
-    std::string& certificate,
-    std::string& auth_token,
-    std::string& cloud_transport_type,
-    std::string& hybrid_app_preference) const {
+bool CacheManager::GetAppProperties(const std::string& policy_app_id,
+                                    AppProperties& out_app_properties) const {
   const policy_table::ApplicationPolicies& policies =
       pt_->policy_table.app_policies_section.apps;
   policy_table::ApplicationPolicies::const_iterator policy_iter =
       policies.find(policy_app_id);
   if (policies.end() != policy_iter) {
     auto app_policy = (*policy_iter).second;
-    endpoint = app_policy.endpoint.is_initialized() ? *app_policy.endpoint
-                                                    : std::string();
-    auth_token = app_policy.auth_token.is_initialized() ? *app_policy.auth_token
-                                                        : std::string();
-    cloud_transport_type = app_policy.cloud_transport_type.is_initialized()
-                               ? *app_policy.cloud_transport_type
-                               : std::string();
-    certificate = app_policy.certificate.is_initialized()
-                      ? *app_policy.certificate
-                      : std::string();
-    hybrid_app_preference =
+    out_app_properties.endpoint = app_policy.endpoint.is_initialized()
+                                      ? *app_policy.endpoint
+                                      : std::string();
+    out_app_properties.auth_token = app_policy.auth_token.is_initialized()
+                                        ? *app_policy.auth_token
+                                        : std::string();
+    out_app_properties.transport_type =
+        app_policy.cloud_transport_type.is_initialized()
+            ? *app_policy.cloud_transport_type
+            : std::string();
+    out_app_properties.certificate = app_policy.certificate.is_initialized()
+                                         ? *app_policy.certificate
+                                         : std::string();
+    out_app_properties.hybrid_app_preference =
         app_policy.hybrid_app_preference.is_initialized()
             ? EnumToJsonString(*app_policy.hybrid_app_preference)
             : std::string();
-    enabled = app_policy.enabled.is_initialized() && *app_policy.enabled;
+    out_app_properties.enabled =
+        app_policy.enabled.is_initialized() && *app_policy.enabled;
     return true;
   }
   return false;
+}
+
+std::vector<std::string> CacheManager::GetEnabledLocalApps() const {
+#if !defined(WEBSOCKET_SERVER_TRANSPORT_SUPPORT)
+  return std::vector<std::string>();
+#else
+  std::vector<std::string> enabled_apps;
+  const policy_table::ApplicationPolicies& app_policies =
+      pt_->policy_table.app_policies_section.apps;
+  for (const auto& app_policies_item : app_policies) {
+    const auto app_policy = app_policies_item.second;
+    // Local (WebEngine) applications
+    // should not have "endpoint" field
+    if (app_policy.endpoint.is_initialized()) {
+      continue;
+    }
+    if (app_policy.enabled.is_initialized() && *app_policy.enabled) {
+      enabled_apps.push_back(app_policies_item.first);
+    }
+  }
+  return enabled_apps;
+#endif  // WEBSOCKET_SERVER_TRANSPORT_SUPPORT
 }
 
 void CacheManager::InitCloudApp(const std::string& policy_app_id) {
@@ -1717,7 +1737,7 @@ std::vector<UserFriendlyMessage> CacheManager::GetUserFriendlyMsg(
 }
 
 void CacheManager::GetUpdateUrls(const uint32_t service_type,
-                                 EndpointUrls& out_end_points) {
+                                 EndpointUrls& out_end_points) const {
   auto find_hexademical =
       [service_type](policy_table::ServiceEndpoints::value_type end_point) {
         uint32_t decimal;
@@ -1734,7 +1754,7 @@ void CacheManager::GetUpdateUrls(const uint32_t service_type,
 }
 
 void CacheManager::GetUpdateUrls(const std::string& service_type,
-                                 EndpointUrls& out_end_points) {
+                                 EndpointUrls& out_end_points) const {
   LOG4CXX_AUTO_TRACE(logger_);
   CACHE_MANAGER_CHECK_VOID();
 
@@ -1761,13 +1781,6 @@ void CacheManager::GetUpdateUrls(const std::string& service_type,
   }
 }
 
-std::string CacheManager::GetLockScreenIconUrl() const {
-  if (backup_) {
-    return backup_->GetLockScreenIconUrl();
-  }
-  return std::string("");
-}
-
 std::string CacheManager::GetIconUrl(const std::string& policy_app_id) const {
   CACHE_MANAGER_CHECK(std::string());
   std::string url;
@@ -1784,15 +1797,19 @@ std::string CacheManager::GetIconUrl(const std::string& policy_app_id) const {
 }
 
 rpc::policy_table_interface_base::NumberOfNotificationsType
-CacheManager::GetNotificationsNumber(const std::string& priority) {
+CacheManager::GetNotificationsNumber(const std::string& priority,
+                                     const bool is_subtle) {
   CACHE_MANAGER_CHECK(0);
-  typedef rpc::policy_table_interface_base::NumberOfNotificationsPerMinute NNPM;
 
   sync_primitives::AutoLock auto_lock(cache_lock_);
-  const NNPM& nnpm =
-      pt_->policy_table.module_config.notifications_per_minute_by_priority;
+  const auto& module_config = pt_->policy_table.module_config;
+  const auto& nnpm =
+      is_subtle && module_config.subtle_notifications_per_minute_by_priority
+                       .is_initialized()
+          ? *module_config.subtle_notifications_per_minute_by_priority
+          : module_config.notifications_per_minute_by_priority;
 
-  NNPM::const_iterator priority_iter = nnpm.find(priority);
+  auto priority_iter = nnpm.find(priority);
 
   const uint32_t result =
       (nnpm.end() != priority_iter ? (*priority_iter).second : 0);
@@ -2262,6 +2279,12 @@ int CacheManager::CountUnconsentedGroups(const std::string& policy_app_id,
   return result;
 }
 
+void CacheManager::SetPreloadedPtFlag(const bool is_preloaded) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  *pt_->policy_table.module_config.preloaded_pt = is_preloaded;
+  Backup();
+}
+
 bool CacheManager::SetMetaInfo(const std::string& ccpu_version,
                                const std::string& wers_country_code,
                                const std::string& language) {
@@ -2278,6 +2301,13 @@ bool CacheManager::SetMetaInfo(const std::string& ccpu_version,
 
   Backup();
   return true;
+}
+
+std::string CacheManager::GetCCPUVersionFromPT() const {
+  LOG4CXX_AUTO_TRACE(logger_);
+  rpc::Optional<policy_table::ModuleMeta>& module_meta =
+      pt_->policy_table.module_meta;
+  return *(module_meta->ccpu_version);
 }
 
 bool CacheManager::IsMetaInfoPresent() const {
@@ -2628,6 +2658,10 @@ bool CacheManager::Init(const std::string& file_name,
       result &= snapshot->is_valid();
       LOG4CXX_DEBUG(logger_,
                     "Check if snapshot valid: " << std::boolalpha << result);
+
+      if (!UnwrapAppPolicies(pt_->policy_table.app_policies_section.apps)) {
+        LOG4CXX_ERROR(logger_, "Cannot unwrap application policies");
+      }
 
       if (result) {
         backup_->UpdateDBVersion();
@@ -3122,7 +3156,7 @@ void CacheManager::InitBackupThread() {
   LOG4CXX_AUTO_TRACE(logger_);
   backuper_ = new BackgroundBackuper(this);
   backup_thread_ = threads::CreateThread("Backup thread", backuper_);
-  backup_thread_->start();
+  backup_thread_->Start();
 }
 
 const PolicySettings& CacheManager::get_settings() const {

@@ -54,6 +54,10 @@
 #include "transport_manager/transport_adapter/transport_adapter_event.h"
 #include "transport_manager/transport_manager_listener.h"
 #include "transport_manager/transport_manager_listener_empty.h"
+#ifdef WEBSOCKET_SERVER_TRANSPORT_SUPPORT
+#include "transport_manager/websocket_server/websocket_device.h"
+#include "transport_manager/websocket_server/websocket_server_transport_adapter.h"
+#endif
 #include "utils/timer_task_impl.h"
 
 using ::transport_manager::transport_adapter::TransportAdapter;
@@ -104,7 +108,11 @@ TransportManagerImpl::TransportManagerImpl(
               this, &TransportManagerImpl::ReconnectionTimeout))
     , events_processing_is_active_(true)
     , events_processing_lock_()
-    , events_processing_cond_var_() {
+    , events_processing_cond_var_()
+    , web_engine_device_info_(0,
+                              "",
+                              webengine_constants::kWebEngineDeviceName,
+                              webengine_constants::kWebEngineConnectionType) {
   LOG4CXX_TRACE(logger_, "TransportManager has created");
 }
 
@@ -288,7 +296,7 @@ int TransportManagerImpl::Disconnect(const ConnectionUID cid) {
     const uint32_t disconnect_timeout =
       get_settings().transport_manager_disconnect_timeout();
     if (disconnect_timeout > 0) {
-      connection->timer->start(disconnect_timeout);
+      connection->timer->Start(disconnect_timeout);
     }
   } else {
     connection->transport_adapter->Disconnect(connection->device,
@@ -655,7 +663,65 @@ int TransportManagerImpl::PerformActionOnClients(
   return E_SUCCESS;
 }
 
-void TransportManagerImpl::UpdateDeviceList(TransportAdapter* ta) {
+void TransportManagerImpl::CreateWebEngineDevice() {
+#ifndef WEBSOCKET_SERVER_TRANSPORT_SUPPORT
+  LOG4CXX_TRACE(logger_, "Web engine support is disabled. Exiting function");
+#else
+  LOG4CXX_AUTO_TRACE(logger_);
+  auto web_socket_ta_iterator = std::find_if(
+      transport_adapters_.begin(),
+      transport_adapters_.end(),
+      [](const TransportAdapter* ta) {
+        return transport_adapter::DeviceType::WEBENGINE_WEBSOCKET ==
+               ta->GetDeviceType();
+      });
+
+  if (transport_adapters_.end() == web_socket_ta_iterator) {
+    LOG4CXX_WARN(logger_,
+                 "WebSocketServerTransportAdapter not found."
+                 "Impossible to create WebEngineDevice");
+    return;
+  }
+
+  auto web_socket_ta =
+      dynamic_cast<transport_adapter::WebSocketServerTransportAdapter*>(
+          *web_socket_ta_iterator);
+
+  if (!web_socket_ta) {
+    LOG4CXX_ERROR(logger_,
+                  "Unable to cast from Transport Adapter to "
+                  "WebSocketServerTransportAdapter."
+                  "Impossible to create WebEngineDevice");
+    return;
+  }
+
+  std::string unique_device_id = web_socket_ta->GetStoredDeviceID();
+
+  DeviceHandle device_handle = converter_.UidToHandle(
+      unique_device_id, webengine_constants::kWebEngineConnectionType);
+
+  web_engine_device_info_ =
+      DeviceInfo(device_handle,
+                 unique_device_id,
+                 webengine_constants::kWebEngineDeviceName,
+                 webengine_constants::kWebEngineConnectionType);
+
+  auto ws_device = std::make_shared<transport_adapter::WebSocketDevice>(
+      web_engine_device_info_.name(), web_engine_device_info_.mac_address());
+
+  ws_device->set_keep_on_disconnect(true);
+
+  web_socket_ta->AddDevice(ws_device);
+  OnDeviceListUpdated(web_socket_ta);
+#endif  // WEBSOCKET_SERVER_TRANSPORT_SUPPORT
+}
+
+const DeviceInfo& TransportManagerImpl::GetWebEngineDeviceInfo() const {
+  LOG4CXX_AUTO_TRACE(logger_);
+  return web_engine_device_info_;
+}
+
+bool TransportManagerImpl::UpdateDeviceList(TransportAdapter* ta) {
   LOG4CXX_TRACE(logger_, "enter. TransportAdapter: " << ta);
   std::set<DeviceInfo> old_devices;
   std::set<DeviceInfo> new_devices;
@@ -707,7 +773,9 @@ void TransportManagerImpl::UpdateDeviceList(TransportAdapter* ta) {
        ++it) {
     RaiseEvent(&TransportManagerListener::OnDeviceRemoved, *it);
   }
+
   LOG4CXX_TRACE(logger_, "exit");
+  return added_devices.size() + removed_devices.size() > 0;
 }
 
 void TransportManagerImpl::PostMessage(
@@ -856,9 +924,9 @@ void TransportManagerImpl::TryDeviceSwitch(
                                            IOSBTAdapterFinder());
 
   if (transport_adapters_.end() == ios_bt_adapter) {
-    LOG4CXX_WARN(
-        logger_,
-        "There is no iAP2 Bluetooth adapter found. Switching is not possible.");
+    LOG4CXX_WARN(logger_,
+                 "There is no iAP2 Bluetooth adapter found. Switching is not "
+                 "possible.");
     return;
   }
 
@@ -999,7 +1067,12 @@ void TransportManagerImpl::OnDeviceListUpdated(TransportAdapter* ta) {
     LOG4CXX_ERROR(logger_, "Device list update failed.");
     return;
   }
-  UpdateDeviceList(ta);
+
+  if (!UpdateDeviceList(ta)) {
+    LOG4CXX_DEBUG(logger_, "Device list was not changed");
+    return;
+  }
+
   std::vector<DeviceInfo> device_infos;
   device_list_lock_.AcquireForReading();
   for (DeviceInfoList::const_iterator it = device_list_.begin();
@@ -1232,14 +1305,10 @@ void TransportManagerImpl::Handle(TransportAdapterEvent event) {
       // TODO(YK): start timer here to wait before notify caller
       // and remove unsent messages
       LOG4CXX_ERROR(logger_, "Transport adapter failed to send data");
-      // TODO(YK): potential error case -> thread unsafe
-      // update of message content
-      if (event.event_data.use_count() != 0) {
-        event.event_data->set_waiting(true);
-      } else {
-        LOG4CXX_DEBUG(logger_, "Data is invalid");
-      }
-      LOG4CXX_DEBUG(logger_, "eevent_type = ON_SEND_FAIL");
+      RaiseEvent(&TransportManagerListener::OnTMMessageSendFailed,
+                 DataSendError(),
+                 event.event_data);
+      LOG4CXX_DEBUG(logger_, "event_type = ON_SEND_FAIL");
       break;
     }
     case EventTypeEnum::ON_RECEIVED_DONE: {
@@ -1350,11 +1419,6 @@ void TransportManagerImpl::Handle(::protocol_handler::RawMessagePtr msg) {
   }
 
   TransportAdapter* transport_adapter = connection->transport_adapter;
-  LOG4CXX_DEBUG(logger_,
-                "Got adapter " << transport_adapter << "["
-                               << transport_adapter->GetDeviceType() << "]"
-                               << " by session id " << msg->connection_key());
-
   if (NULL == transport_adapter) {
     std::string error_text = "Transport adapter is not found";
     LOG4CXX_ERROR(logger_, error_text);
@@ -1362,6 +1426,10 @@ void TransportManagerImpl::Handle(::protocol_handler::RawMessagePtr msg) {
                DataSendError(error_text),
                msg);
   } else {
+    LOG4CXX_DEBUG(logger_,
+                  "Got adapter " << transport_adapter << "["
+                                 << transport_adapter->GetDeviceType() << "]"
+                                 << " by session id " << msg->connection_key());
     if (TransportAdapter::OK ==
         transport_adapter->SendData(
             connection->device, connection->application, msg)) {

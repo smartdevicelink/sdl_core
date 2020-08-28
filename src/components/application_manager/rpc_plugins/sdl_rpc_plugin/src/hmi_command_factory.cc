@@ -135,6 +135,8 @@
 #include "sdl_rpc_plugin/commands/hmi/ui_show_response.h"
 #include "sdl_rpc_plugin/commands/hmi/ui_slider_request.h"
 #include "sdl_rpc_plugin/commands/hmi/ui_slider_response.h"
+#include "sdl_rpc_plugin/commands/hmi/ui_subtle_alert_request.h"
+#include "sdl_rpc_plugin/commands/hmi/ui_subtle_alert_response.h"
 #include "sdl_rpc_plugin/commands/hmi/update_app_list_request.h"
 #include "sdl_rpc_plugin/commands/hmi/update_app_list_response.h"
 #include "sdl_rpc_plugin/commands/hmi/update_device_list_request.h"
@@ -229,7 +231,10 @@
 #include "sdl_rpc_plugin/commands/hmi/on_ui_keyboard_input_notification.h"
 #include "sdl_rpc_plugin/commands/hmi/on_ui_language_change_notification.h"
 #include "sdl_rpc_plugin/commands/hmi/on_ui_reset_timeout_notification.h"
+#include "sdl_rpc_plugin/commands/hmi/on_ui_subtle_alert_pressed_notification.h"
 #include "sdl_rpc_plugin/commands/hmi/on_ui_touch_event_notification.h"
+#include "sdl_rpc_plugin/commands/hmi/on_ui_update_file_notification.h"
+#include "sdl_rpc_plugin/commands/hmi/on_ui_update_sub_menu_notification.h"
 #include "sdl_rpc_plugin/commands/hmi/on_vr_command_notification.h"
 #include "sdl_rpc_plugin/commands/hmi/on_vr_language_change_notification.h"
 #include "sdl_rpc_plugin/commands/hmi/on_vr_started_notification.h"
@@ -255,6 +260,12 @@
 
 #include "sdl_rpc_plugin/commands/hmi/on_bc_system_capability_updated_notification.h"
 #include "sdl_rpc_plugin/commands/hmi/on_bc_system_capability_updated_notification_from_hmi.h"
+
+#include "sdl_rpc_plugin/commands/hmi/bc_get_app_properties_request.h"
+#include "sdl_rpc_plugin/commands/hmi/bc_get_app_properties_response.h"
+#include "sdl_rpc_plugin/commands/hmi/bc_set_app_properties_request.h"
+#include "sdl_rpc_plugin/commands/hmi/bc_set_app_properties_response.h"
+#include "sdl_rpc_plugin/commands/hmi/on_app_properties_change_notification.h"
 
 namespace sdl_rpc_plugin {
 using namespace application_manager;
@@ -504,6 +515,11 @@ CommandCreator& HMICommandFactory::get_creator_factory(
       return hmi_apis::messageType::request == message_type
                  ? factory.GetCreator<commands::UIAlertRequest>()
                  : factory.GetCreator<commands::UIAlertResponse>();
+    }
+    case hmi_apis::FunctionID::UI_SubtleAlert: {
+      return hmi_apis::messageType::request == message_type
+                 ? factory.GetCreator<commands::UISubtleAlertRequest>()
+                 : factory.GetCreator<commands::UISubtleAlertResponse>();
     }
     case hmi_apis::FunctionID::VR_IsReady: {
       return hmi_apis::messageType::request == message_type
@@ -903,6 +919,28 @@ CommandCreator& HMICommandFactory::get_creator_factory(
                            OnBCSystemCapabilityUpdatedNotificationFromHMI>()
                  : factory.GetCreator<
                        commands::OnBCSystemCapabilityUpdatedNotification>();
+    }
+    case hmi_apis::FunctionID::BasicCommunication_GetAppProperties: {
+      return hmi_apis::messageType::request == message_type
+                 ? factory.GetCreator<commands::BCGetAppPropertiesRequest>()
+                 : factory.GetCreator<commands::BCGetAppPropertiesResponse>();
+    }
+    case hmi_apis::FunctionID::BasicCommunication_SetAppProperties: {
+      return hmi_apis::messageType::request == message_type
+                 ? factory.GetCreator<commands::BCSetAppPropertiesRequest>()
+                 : factory.GetCreator<commands::BCSetAppPropertiesResponse>();
+    }
+    case hmi_apis::FunctionID::BasicCommunication_OnAppPropertiesChange: {
+      return factory.GetCreator<commands::OnAppPropertiesChangeNotification>();
+    }
+    case hmi_apis::FunctionID::UI_OnUpdateFile: {
+      return factory.GetCreator<commands::OnUIUpdateFileNotification>();
+    }
+    case hmi_apis::FunctionID::UI_OnUpdateSubMenu: {
+      return factory.GetCreator<commands::OnUIUpdateSubMenuNotification>();
+    }
+    case hmi_apis::FunctionID::UI_OnSubtleAlertPressed: {
+      return factory.GetCreator<commands::OnUISubtleAlertPressedNotification>();
     }
     default: { return factory.GetCreator<InvalidCommand>(); }
   }

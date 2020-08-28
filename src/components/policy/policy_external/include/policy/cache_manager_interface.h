@@ -190,29 +190,21 @@ class CacheManagerInterface {
       std::vector<std::string>& enabled_apps) const = 0;
 
   /**
-   * @brief Get cloud app policy information, all fields that aren't set for a
-   * given app will be filled with empty strings
-   * @param policy_app_id Unique application id
-   * @param enabled Whether or not the app is enabled
-   * @param endpoint Filled with the endpoint used to connect to the cloud
-   * application
-   * @param certificate Filled with the certificate used to for creating a
-   * secure connection to the cloud application
-   * @param auth_token Filled with the token used for authentication when
-   * reconnecting to the cloud app
-   * @param cloud_transport_type Filled with the transport type used by the
-   * cloud application (ex. "WSS")
-   * @param hybrid_app_preference Filled with the hybrid app preference for the
-   * cloud application set by the user
+   * @brief Get a list of enabled local applications
+   * @return enabled_apps List filled with the policy app id of each enabled
+   * local application
    */
-  virtual bool GetCloudAppParameters(
-      const std::string& policy_app_id,
-      bool& enabled,
-      std::string& endpoint,
-      std::string& certificate,
-      std::string& auth_token,
-      std::string& cloud_transport_type,
-      std::string& hybrid_app_preference) const = 0;
+  virtual std::vector<std::string> GetEnabledLocalApps() const = 0;
+
+  /**
+   * @brief Get app policy information, all fields that aren't set for a
+   * given app will be filled with empty strings
+   * @param policy_app_id policy app id
+   * @param out_app_properties application properties
+   * @return true if application presents in database, otherwise - false
+   */
+  virtual bool GetAppProperties(const std::string& policy_app_id,
+                                AppProperties& out_app_properties) const = 0;
 
   /**
    * Initializes a new cloud application with default policies
@@ -332,18 +324,10 @@ class CacheManagerInterface {
    * return them otherwise default URLs.
    */
   virtual void GetUpdateUrls(const std::string& service_type,
-                             EndpointUrls& out_end_points) = 0;
+                             EndpointUrls& out_end_points) const = 0;
 
   virtual void GetUpdateUrls(const uint32_t service_type,
-                             EndpointUrls& out_end_points) = 0;
-
-  /**
-   * @brief GetLockScreenIcon allows to obtain lock screen icon url;
-   *
-   * @return url which point to the resourse where lock screen icon could be
-   *obtained.
-   */
-  virtual std::string GetLockScreenIconUrl() const = 0;
+                             EndpointUrls& out_end_points) const = 0;
 
   /**
    * @brief Get Icon Url used for showing a cloud apps icon before the intial
@@ -358,9 +342,10 @@ class CacheManagerInterface {
    * @brief Get allowed number of notifications
    * depending on application priority.
    * @param priority Priority of application
+   * @param is_subtle If true, get the number of allowed subtle notifications
    */
   virtual policy_table::NumberOfNotificationsType GetNotificationsNumber(
-      const std::string& priority) = 0;
+      const std::string& priority, const bool is_subtle) = 0;
 
   /**
    * @brief Get priority for given application
@@ -654,12 +639,24 @@ class CacheManagerInterface {
                                         bool* out_app_permissions_changed) = 0;
 
   /**
+   * @brief Set preloaded_pt flag value in policy table
+   * @param is_preloaded value to set
+   */
+  virtual void SetPreloadedPtFlag(const bool is_preloaded) = 0;
+
+  /**
    * @brief Records information about head unit system to PT
    * @return bool Success of operation
    */
   virtual bool SetMetaInfo(const std::string& ccpu_version,
                            const std::string& wers_country_code,
                            const std::string& language) = 0;
+
+  /**
+   * @brief Get information about last ccpu_version from PT
+   * @return ccpu_version from PT
+   */
+  virtual std::string GetCCPUVersionFromPT() const = 0;
 
   /**
    * @brief Checks, if specific head unit is present in PT

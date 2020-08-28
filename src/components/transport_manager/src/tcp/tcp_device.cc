@@ -46,7 +46,7 @@ TcpDevice::TcpDevice(const in_addr_t& in_addr, const std::string& name)
   LOG4CXX_AUTO_TRACE(logger_);
 }
 
-#if defined(BUILD_TESTS)
+#if defined(ENABLE_IAP2EMULATION)
 TcpDevice::TcpDevice(const in_addr_t& in_addr,
                      const std::string& device_uid,
                      const std::string& transport_switch_id)
@@ -61,14 +61,14 @@ TcpDevice::TcpDevice(const in_addr_t& in_addr,
       logger_,
       "Device parameters: " << device_uid << " / " << transport_switch_id);
 }
-#endif  // BUILD_TESTS
+#endif  // ENABLE_IAP2EMULATION
 
 bool TcpDevice::IsSameAs(const Device* other) const {
   LOG4CXX_AUTO_TRACE(logger_);
   LOG4CXX_DEBUG(logger_, "Device: " << other);
-  const TcpDevice* other_tcp_device = static_cast<const TcpDevice*>(other);
+  const TcpDevice* other_tcp_device = dynamic_cast<const TcpDevice*>(other);
 
-  if (other_tcp_device->in_addr_ == in_addr_) {
+  if (other_tcp_device && other_tcp_device->in_addr_ == in_addr_) {
     LOG4CXX_TRACE(
         logger_,
         "exit with TRUE. Condition: other_tcp_device->in_addr_ == in_addr_");
