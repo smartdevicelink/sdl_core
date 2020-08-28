@@ -105,10 +105,10 @@ class DisplayCapabilitiesBuilder {
 
  private:
   /**
-   * @brief InvokeCallbackFunction invokes callback function if all required
-   * criterias met
+   * @brief InvokeResumeCallback invokes resume callback function if all
+   * required criterias met
    */
-  void InvokeCallbackFunction();
+  void InvokeResumeCallback();
 
   smart_objects::SmartObjectSPtr display_capabilities_;
   typedef std::set<WindowID> WindowIDsToResume;
