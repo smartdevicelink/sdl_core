@@ -540,8 +540,7 @@ class SmartObjectConvertionTimeTest : public ::testing::Test {
     printf("\n Object without enum.\n");
     calculateConvertionTime(srcObj, dstObj);
   }
-
-}  // namespace smart_object_test
+};
 }  // namespace smart_object_test
 }  // namespace components
 
