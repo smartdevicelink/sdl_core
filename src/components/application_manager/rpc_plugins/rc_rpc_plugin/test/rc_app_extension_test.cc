@@ -153,8 +153,6 @@ TEST_F(RcAppExtensionTest, SaveResumptionData_SUCCESS) {
   const std::string module2_id = "357a3918-9f35-4d86-a8b6-60cd4308d76f";
   ModuleUid module2{module2_type, module2_id};
 
-  std::set<ModuleUid> module_data{module1, module2};
-
   EXPECT_CALL(*mock_app_, UpdateHash()).Times(2);
   rc_app_extension_->SubscribeToInteriorVehicleData(module1);
   rc_app_extension_->SubscribeToInteriorVehicleData(module2);
@@ -167,23 +165,30 @@ TEST_F(RcAppExtensionTest, SaveResumptionData_SUCCESS) {
 
   rc_app_extension_->SaveResumptionData(subscription_so);
 
-  const uint32_t lenght = subscription_so[message_params::kModuleData].length();
+  const auto module_data =
+      subscription_so[message_params::kModuleData].asArray();
 
-  EXPECT_EQ(lenght, subscriptions.size());
+  EXPECT_NE(nullptr, module_data);
 
-  for (uint32_t index = 0; index < lenght; ++index) {
-    auto module_so = subscription_so[message_params::kModuleData][index];
-    const auto module_type = module_so[message_params::kModuleType].asString();
-    const auto module_id = module_so[message_params::kModuleId].asString();
+  EXPECT_EQ(module_data->size(), subscriptions.size());
 
-    ModuleUid module{module_type, module_id};
+  auto module_info_so =
+      smart_objects::SmartObject(smart_objects::SmartType_Map);
+  module_info_so[message_params::kModuleType] = module1.first;
+  module_info_so[message_params::kModuleId] = module1.second;
 
-    auto found_module =
-        std::find(subscriptions.begin(), subscriptions.end(), module);
+  auto found_module =
+      std::find(module_data->begin(), module_data->end(), module_info_so);
 
-    EXPECT_EQ(module_type, found_module->first);
-    EXPECT_EQ(module_id, found_module->second);
-  }
+  EXPECT_NE(found_module, module_data->end());
+
+  module_info_so[message_params::kModuleType] = module2.first;
+  module_info_so[message_params::kModuleId] = module2.second;
+
+  found_module =
+      std::find(module_data->begin(), module_data->end(), module_info_so);
+
+  EXPECT_NE(found_module, module_data->end());
 }
 
 }  // namespace rc_app_extension_test
