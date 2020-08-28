@@ -93,6 +93,8 @@
 #include "sdl_rpc_plugin/commands/mobile/on_system_request_notification.h"
 #include "sdl_rpc_plugin/commands/mobile/on_tbt_client_state_notification.h"
 #include "sdl_rpc_plugin/commands/mobile/on_touch_event_notification.h"
+#include "sdl_rpc_plugin/commands/mobile/on_update_file_notification.h"
+#include "sdl_rpc_plugin/commands/mobile/on_update_sub_menu_notification.h"
 #include "sdl_rpc_plugin/commands/mobile/on_way_point_change_notification.h"
 #include "sdl_rpc_plugin/commands/mobile/perform_audio_pass_thru_request.h"
 #include "sdl_rpc_plugin/commands/mobile/perform_audio_pass_thru_response.h"
@@ -466,6 +468,12 @@ CommandCreator& MobileCommandFactory::get_notification_creator(
     }
     case mobile_apis::FunctionID::OnWayPointChangeID: {
       return factory.GetCreator<commands::OnWayPointChangeNotification>();
+    }
+    case mobile_apis::FunctionID::OnUpdateFileID: {
+      return factory.GetCreator<commands::OnUpdateFileNotification>();
+    }
+    case mobile_apis::FunctionID::OnUpdateSubMenuID: {
+      return factory.GetCreator<commands::OnUpdateSubMenuNotification>();
     }
     case mobile_apis::FunctionID::OnSubtleAlertPressedID: {
       return factory.GetCreator<commands::OnSubtleAlertPressedNotification>();

@@ -65,9 +65,9 @@ void TelemetryMonitor::Start() {
 
 void TelemetryMonitor::set_streamer(std::shared_ptr<Streamer> streamer) {
   LOG4CXX_AUTO_TRACE(logger_);
-  if (thread_ && !thread_->is_running()) {
+  if (thread_ && !thread_->IsRunning()) {
+    thread_->SetDelegate(streamer_.get());
     streamer_ = streamer;
-    thread_->set_delegate(streamer_.get());
   } else {
     LOG4CXX_ERROR(logger_, "Unable to replace streamer if it is active");
   }
@@ -99,15 +99,14 @@ void TelemetryMonitor::Init(
   protocol_handler->SetTelemetryObserver(&ph_observer);
 
   DCHECK_OR_RETURN_VOID(thread_);
-  thread_->start(threads::ThreadOptions());
+  thread_->Start(threads::ThreadOptions());
 }
 
 void TelemetryMonitor::Stop() {
   LOG4CXX_AUTO_TRACE(logger_);
   if (thread_) {
-    thread_->stop();
-    thread_->join();
-    if (thread_->delegate()) {
+    thread_->Stop(threads::Thread::kThreadSoftStop);
+    if (thread_->GetDelegate()) {
       streamer_.reset();
     }
     threads::DeleteThread(thread_);

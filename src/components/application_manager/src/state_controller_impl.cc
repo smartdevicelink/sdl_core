@@ -88,7 +88,10 @@ void StateControllerImpl::SetRegularState(ApplicationSharedPtr app,
     return;
   }
 
-  if (app->is_resuming() && !IsResumptionAllowed(app, state)) {
+  const bool app_is_resuming = app->is_resuming();
+  const bool is_resumption_allowed = IsResumptionAllowed(app, state);
+
+  if (app_is_resuming && !is_resumption_allowed) {
     return;
   }
 
@@ -333,15 +336,15 @@ void StateControllerImpl::HmiLevelConflictResolver::operator()(
   DCHECK_OR_RETURN_VOID(state_to_resolve);
 
   // If applied HMI state is FULL:
-  // - all NOT audio/video applications becomes BACKGROUND
+  // - all NOT audio/video applications become BACKGROUND
   // - all audio/video applications with other app type
-  //  (navi, vc, media, projection) in FULL becomes LIMMITED
-  // - all audio/video applications with same app type becomes BACKGROUND
+  //  (navi, vc, media, projection) in FULL become LIMITED
+  // - all audio/video applications with the same app type become BACKGROUND
   //
   // If applied HMI state is LIMITED:
-  // - all NOT audio/video applications saves their's HMI states
-  // - all applications with other app types saves their's HMI states
-  // - all audio/video applications with same app type becomes BACKGROUND
+  // - all NOT audio/video applications saves their HMI states
+  // - all applications with the other app types saves their HMI states
+  // - all audio/video applications with the same app type become BACKGROUND
 
   if (!IsStreamableHMILevel(state_->hmi_level())) {
     LOG4CXX_DEBUG(logger_,
@@ -478,10 +481,14 @@ bool StateControllerImpl::IsResumptionAllowed(ApplicationSharedPtr app,
     return false;
   }
 
+  const bool is_navi_app = app->is_navi();
+  const bool is_mob_projection_app = app->mobile_projection_enabled();
+  const bool is_wep_app = app->webengine_projection_enabled();
+
   if (IsTempStateActive(HmiState::StateID::STATE_ID_EMBEDDED_NAVI) &&
-      (app->is_navi() || app->mobile_projection_enabled())) {
+      (is_navi_app || is_mob_projection_app || is_wep_app)) {
     LOG4CXX_DEBUG(logger_,
-                  "Resumption for navi or projection app is not allowed. "
+                  "Resumption for navi and projection apps is not allowed. "
                       << "EMBEDDED_NAVI event is active");
     return false;
   }
@@ -895,7 +902,7 @@ void StateControllerImpl::OnApplicationRegistered(
     const mobile_apis::HMILevel::eType default_level) {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  // After app registration HMI level should be set for DEFAUL_WINDOW only
+  // After app registration HMI level should be set for DEFAULT_WINDOW only
   OnAppWindowAdded(app,
                    mobile_apis::PredefinedWindows::DEFAULT_WINDOW,
                    mobile_apis::WindowType::MAIN,
@@ -1268,7 +1275,8 @@ mobile_apis::VideoStreamingState::eType StateControllerImpl::CalcVideoState(
     ApplicationSharedPtr app,
     const mobile_apis::HMILevel::eType hmi_level) const {
   auto state = mobile_apis::VideoStreamingState::NOT_STREAMABLE;
-  if (IsStreamableHMILevel(hmi_level) && app->IsVideoApplication()) {
+
+  if (app->IsVideoApplication() && IsStreamableHMILevel(hmi_level)) {
     state = mobile_apis::VideoStreamingState::STREAMABLE;
   }
 

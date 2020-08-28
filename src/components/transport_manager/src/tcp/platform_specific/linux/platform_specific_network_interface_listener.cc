@@ -98,7 +98,7 @@ PlatformSpecificNetworkInterfaceListener::
   Stop();
   Deinit();
 
-  delete thread_->delegate();
+  delete thread_->GetDelegate();
   threads::DeleteThread(thread_);
 }
 
@@ -173,12 +173,12 @@ bool PlatformSpecificNetworkInterfaceListener::Start() {
     return false;
   }
 
-  if (thread_->is_running()) {
+  if (thread_->IsRunning()) {
     LOG4CXX_WARN(logger_, "Interface listener is already started");
     return false;
   }
 
-  if (!thread_->start()) {
+  if (!thread_->Start()) {
     LOG4CXX_ERROR(logger_, "Failed to start interface listener");
     return false;
   }
@@ -190,12 +190,12 @@ bool PlatformSpecificNetworkInterfaceListener::Start() {
 bool PlatformSpecificNetworkInterfaceListener::Stop() {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  if (!thread_->is_running()) {
+  if (!thread_->IsRunning()) {
     LOG4CXX_DEBUG(logger_, "interface listener is not running");
     return false;
   }
 
-  thread_->join();
+  thread_->Stop(threads::Thread::kThreadStopDelegate);
 
   LOG4CXX_INFO(logger_, "Network interface listener stopped");
   return true;

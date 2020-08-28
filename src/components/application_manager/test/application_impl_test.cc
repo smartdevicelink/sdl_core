@@ -597,6 +597,7 @@ TEST_F(ApplicationImplTest, ChangeSupportingAppHMIType_TypeNotNaviNotVoice) {
   EXPECT_FALSE(app_impl->is_navi());
   EXPECT_FALSE(app_impl->is_voice_communication_supported());
   EXPECT_FALSE(app_impl->mobile_projection_enabled());
+  EXPECT_FALSE(app_impl->webengine_projection_enabled());
 
   app_impl->set_app_types(type_media);
   app_impl->ChangeSupportingAppHMIType();
@@ -604,6 +605,7 @@ TEST_F(ApplicationImplTest, ChangeSupportingAppHMIType_TypeNotNaviNotVoice) {
   EXPECT_FALSE(app_impl->is_navi());
   EXPECT_FALSE(app_impl->is_voice_communication_supported());
   EXPECT_FALSE(app_impl->mobile_projection_enabled());
+  EXPECT_FALSE(app_impl->webengine_projection_enabled());
 }
 
 TEST_F(ApplicationImplTest, ChangeSupportingAppHMIType_TypeIsVoice) {
@@ -613,6 +615,7 @@ TEST_F(ApplicationImplTest, ChangeSupportingAppHMIType_TypeIsVoice) {
   EXPECT_FALSE(app_impl->is_navi());
   EXPECT_FALSE(app_impl->is_voice_communication_supported());
   EXPECT_FALSE(app_impl->mobile_projection_enabled());
+  EXPECT_FALSE(app_impl->webengine_projection_enabled());
 
   app_impl->set_app_types(type_comm);
   app_impl->ChangeSupportingAppHMIType();
@@ -620,6 +623,7 @@ TEST_F(ApplicationImplTest, ChangeSupportingAppHMIType_TypeIsVoice) {
   EXPECT_FALSE(app_impl->is_navi());
   EXPECT_TRUE(app_impl->is_voice_communication_supported());
   EXPECT_FALSE(app_impl->mobile_projection_enabled());
+  EXPECT_FALSE(app_impl->webengine_projection_enabled());
 }
 
 TEST_F(ApplicationImplTest, ChangeSupportingAppHMIType_TypeIsNavi) {
@@ -629,6 +633,7 @@ TEST_F(ApplicationImplTest, ChangeSupportingAppHMIType_TypeIsNavi) {
   EXPECT_FALSE(app_impl->is_navi());
   EXPECT_FALSE(app_impl->is_voice_communication_supported());
   EXPECT_FALSE(app_impl->mobile_projection_enabled());
+  EXPECT_FALSE(app_impl->webengine_projection_enabled());
 
   app_impl->set_app_types(type_navi);
   app_impl->ChangeSupportingAppHMIType();
@@ -636,6 +641,71 @@ TEST_F(ApplicationImplTest, ChangeSupportingAppHMIType_TypeIsNavi) {
   EXPECT_TRUE(app_impl->is_navi());
   EXPECT_FALSE(app_impl->is_voice_communication_supported());
   EXPECT_FALSE(app_impl->mobile_projection_enabled());
+  EXPECT_FALSE(app_impl->webengine_projection_enabled());
+}
+
+TEST_F(ApplicationImplTest, ChangeSupportingAppHMIType_TypeIsWebView) {
+  smart_objects::SmartObject app_types;
+  app_types[0] = mobile_apis::AppHMIType::WEB_VIEW;
+
+  EXPECT_FALSE(app_impl->is_navi());
+  EXPECT_FALSE(app_impl->is_voice_communication_supported());
+  EXPECT_FALSE(app_impl->mobile_projection_enabled());
+  EXPECT_FALSE(app_impl->webengine_projection_enabled());
+
+  app_impl->set_app_types(app_types);
+  app_impl->ChangeSupportingAppHMIType();
+
+  EXPECT_FALSE(app_impl->is_navi());
+  EXPECT_FALSE(app_impl->is_voice_communication_supported());
+  EXPECT_FALSE(app_impl->mobile_projection_enabled());
+  EXPECT_TRUE(app_impl->webengine_projection_enabled());
+}
+
+TEST_F(ApplicationImplTest,
+       ChangeSupportingAppHMIType_TypeFromWebViewToProjection) {
+  smart_objects::SmartObject app_types;
+  app_types[0] = mobile_apis::AppHMIType::WEB_VIEW;
+
+  EXPECT_FALSE(app_impl->mobile_projection_enabled());
+  EXPECT_FALSE(app_impl->webengine_projection_enabled());
+
+  app_impl->set_app_types(app_types);
+  app_impl->ChangeSupportingAppHMIType();
+
+  EXPECT_FALSE(app_impl->mobile_projection_enabled());
+  EXPECT_TRUE(app_impl->webengine_projection_enabled());
+
+  app_types[0] = mobile_apis::AppHMIType::PROJECTION;
+
+  app_impl->set_app_types(app_types);
+  app_impl->ChangeSupportingAppHMIType();
+
+  EXPECT_FALSE(app_impl->webengine_projection_enabled());
+  EXPECT_TRUE(app_impl->mobile_projection_enabled());
+}
+
+TEST_F(ApplicationImplTest,
+       ChangeSupportingAppHMIType_TypeFromProjectionToWebView) {
+  smart_objects::SmartObject app_types;
+  app_types[0] = mobile_apis::AppHMIType::PROJECTION;
+
+  EXPECT_FALSE(app_impl->mobile_projection_enabled());
+  EXPECT_FALSE(app_impl->webengine_projection_enabled());
+
+  app_impl->set_app_types(app_types);
+  app_impl->ChangeSupportingAppHMIType();
+
+  EXPECT_FALSE(app_impl->webengine_projection_enabled());
+  EXPECT_TRUE(app_impl->mobile_projection_enabled());
+
+  app_types[0] = mobile_apis::AppHMIType::WEB_VIEW;
+
+  app_impl->set_app_types(app_types);
+  app_impl->ChangeSupportingAppHMIType();
+
+  EXPECT_FALSE(app_impl->mobile_projection_enabled());
+  EXPECT_TRUE(app_impl->webengine_projection_enabled());
 }
 
 TEST_F(ApplicationImplTest, ChangeSupportingAppHMIType_TypeIsNaviAndVoice) {
@@ -647,6 +717,7 @@ TEST_F(ApplicationImplTest, ChangeSupportingAppHMIType_TypeIsNaviAndVoice) {
   EXPECT_FALSE(app_impl->is_navi());
   EXPECT_FALSE(app_impl->is_voice_communication_supported());
   EXPECT_FALSE(app_impl->mobile_projection_enabled());
+  EXPECT_FALSE(app_impl->webengine_projection_enabled());
 
   app_impl->set_app_types(app_types);
   app_impl->ChangeSupportingAppHMIType();
@@ -654,6 +725,7 @@ TEST_F(ApplicationImplTest, ChangeSupportingAppHMIType_TypeIsNaviAndVoice) {
   EXPECT_TRUE(app_impl->is_navi());
   EXPECT_TRUE(app_impl->is_voice_communication_supported());
   EXPECT_FALSE(app_impl->mobile_projection_enabled());
+  EXPECT_FALSE(app_impl->webengine_projection_enabled());
 }
 
 TEST_F(ApplicationImplTest,
@@ -667,6 +739,7 @@ TEST_F(ApplicationImplTest,
   EXPECT_FALSE(app_impl->is_navi());
   EXPECT_FALSE(app_impl->is_voice_communication_supported());
   EXPECT_FALSE(app_impl->mobile_projection_enabled());
+  EXPECT_FALSE(app_impl->webengine_projection_enabled());
 
   app_impl->set_app_types(app_types);
   app_impl->ChangeSupportingAppHMIType();
@@ -674,6 +747,7 @@ TEST_F(ApplicationImplTest,
   EXPECT_TRUE(app_impl->is_navi());
   EXPECT_TRUE(app_impl->is_voice_communication_supported());
   EXPECT_TRUE(app_impl->mobile_projection_enabled());
+  EXPECT_FALSE(app_impl->webengine_projection_enabled());
 }
 
 TEST_F(ApplicationImplTest, UpdateHash_AppMngrNotSuspended) {

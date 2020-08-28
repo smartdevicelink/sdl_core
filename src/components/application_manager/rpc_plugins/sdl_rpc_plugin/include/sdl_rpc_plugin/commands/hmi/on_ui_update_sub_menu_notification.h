@@ -1,6 +1,5 @@
 /*
-
- Copyright (c) 2018, Ford Motor Company
+ Copyright (c) 2020, Ford Motor Company, Livio
  All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -14,9 +13,9 @@
  disclaimer in the documentation and/or other materials provided with the
  distribution.
 
- Neither the name of the Ford Motor Company nor the names of its contributors
- may be used to endorse or promote products derived from this software
- without specific prior written permission.
+ Neither the name of the the copyright holders nor the names of their
+ contributors may be used to endorse or promote products derived from this
+ software without specific prior written permission.
 
  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
@@ -31,11 +30,10 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_MOBILE_ON_APP_INTERFACE_UNREGISTERED_NOTIFICATION_H_
-#define SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_MOBILE_ON_APP_INTERFACE_UNREGISTERED_NOTIFICATION_H_
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_HMI_ON_UI_UPDATE_SUB_MENU_NOTIFICATION_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_HMI_ON_UI_UPDATE_SUB_MENU_NOTIFICATION_H_
 
-#include "application_manager/commands/command_notification_impl.h"
-#include "utils/macro.h"
+#include "application_manager/commands/notification_from_hmi.h"
 
 namespace sdl_rpc_plugin {
 namespace app_mngr = application_manager;
@@ -43,27 +41,27 @@ namespace app_mngr = application_manager;
 namespace commands {
 
 /**
- * @brief OnAppInterfaceUnregisteredNotification class
+ * @brief OnUiUpdateSubMenuNotification command class
  **/
-class OnAppInterfaceUnregisteredNotification
-    : public app_mngr::commands::CommandNotificationImpl {
+class OnUIUpdateSubMenuNotification
+    : public app_mngr::commands::NotificationFromHMI {
  public:
   /**
-   * @brief OnAppInterfaceUnregisteredNotification class constructor
+   * @brief OnUIUpdateSubMenuNotification class constructor
    *
    * @param message Incoming SmartObject message
    **/
-  OnAppInterfaceUnregisteredNotification(
+  OnUIUpdateSubMenuNotification(
       const app_mngr::commands::MessageSharedPtr& message,
       app_mngr::ApplicationManager& application_manager,
       app_mngr::rpc_service::RPCService& rpc_service,
       app_mngr::HMICapabilities& hmi_capabilities,
-      policy::PolicyHandlerInterface& policy_handler);
+      policy::PolicyHandlerInterface& policy_handle);
 
   /**
-   * @brief OnAppInterfaceUnregisteredNotification class destructor
+   * @brief OnUIUpdateSubMenuNotification class destructor
    **/
-  virtual ~OnAppInterfaceUnregisteredNotification();
+  virtual ~OnUIUpdateSubMenuNotification();
 
   /**
    * @brief Execute command
@@ -71,16 +69,11 @@ class OnAppInterfaceUnregisteredNotification
   virtual void Run();
 
  private:
-  /**
-   * @brief Check whether a connection to mobile must be closed after sending
-   * this message
-   **/
-  bool IsFinalMessage() const;
-
-  DISALLOW_COPY_AND_ASSIGN(OnAppInterfaceUnregisteredNotification);
+  DISALLOW_COPY_AND_ASSIGN(OnUIUpdateSubMenuNotification);
 };
 
 }  // namespace commands
+
 }  // namespace sdl_rpc_plugin
 
-#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_MOBILE_ON_APP_INTERFACE_UNREGISTERED_NOTIFICATION_H_
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_HMI_ON_UI_UPDATE_SUB_MENU_NOTIFICATION_H_

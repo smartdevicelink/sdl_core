@@ -1897,6 +1897,16 @@ void HMICapabilitiesImpl::PrepareUiJsonValueForSaving(
       }
     }
 
+    else if (section_to_update == strings::driver_distraction_capability) {
+      const auto driver_distraction_capability_so =
+          driver_distraction_capability();
+
+      if (driver_distraction_capability_so) {
+        (*system_capabilities)[strings::driver_distraction_capability] =
+            *driver_distraction_capability_so;
+      }
+    }
+
     else if (section_to_update == strings::display_capabilities) {
       const auto display_capabilities_so = display_capabilities();
 

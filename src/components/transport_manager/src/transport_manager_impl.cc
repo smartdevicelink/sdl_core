@@ -296,7 +296,7 @@ int TransportManagerImpl::Disconnect(const ConnectionUID cid) {
     const uint32_t disconnect_timeout =
       get_settings().transport_manager_disconnect_timeout();
     if (disconnect_timeout > 0) {
-      connection->timer->start(disconnect_timeout);
+      connection->timer->Start(disconnect_timeout);
     }
   } else {
     connection->transport_adapter->Disconnect(connection->device,
@@ -1305,14 +1305,10 @@ void TransportManagerImpl::Handle(TransportAdapterEvent event) {
       // TODO(YK): start timer here to wait before notify caller
       // and remove unsent messages
       LOG4CXX_ERROR(logger_, "Transport adapter failed to send data");
-      // TODO(YK): potential error case -> thread unsafe
-      // update of message content
-      if (event.event_data.use_count() != 0) {
-        event.event_data->set_waiting(true);
-      } else {
-        LOG4CXX_DEBUG(logger_, "Data is invalid");
-      }
-      LOG4CXX_DEBUG(logger_, "eevent_type = ON_SEND_FAIL");
+      RaiseEvent(&TransportManagerListener::OnTMMessageSendFailed,
+                 DataSendError(),
+                 event.event_data);
+      LOG4CXX_DEBUG(logger_, "event_type = ON_SEND_FAIL");
       break;
     }
     case EventTypeEnum::ON_RECEIVED_DONE: {

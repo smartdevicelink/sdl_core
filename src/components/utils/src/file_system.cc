@@ -571,3 +571,8 @@ bool file_system::MoveFile(const std::string& src, const std::string& dst) {
   }
   return true;
 }
+
+std::string file_system::GetFileName(const std::string& full_path) {
+  fs::path p(full_path);
+  return p.filename().string();
+}
