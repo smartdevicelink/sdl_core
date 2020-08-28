@@ -74,7 +74,7 @@ struct ResetGlobalPropertiesResult {
   bool menu_name;
   bool menu_icon;
   bool keyboard_properties;
-  int number_of_reset_vr;
+  bool vr_has_been_reset;
 
   ResetGlobalPropertiesResult()
       : help_prompt(false)
@@ -83,7 +83,7 @@ struct ResetGlobalPropertiesResult {
       , menu_name(false)
       , menu_icon(false)
       , keyboard_properties(false)
-      , number_of_reset_vr(0) {}
+      , vr_has_been_reset(false) {}
 
   bool HasUIPropertiesReset() const {
     return vr_help_title_items || menu_name || menu_icon || keyboard_properties;
@@ -1007,7 +1007,7 @@ class MessageHelper {
 
   /**
    * @brief SendDeleteSubmenuRequest sends UI/VR requests to HMI to remove
-   * submenues-related data depending on command parameters
+   * submenus-related data depending on command parameters
    * @param cmd Command data
    * @param application Application owning the commmand data
    * @param app_mngr Application manager
@@ -1085,7 +1085,7 @@ class MessageHelper {
 
   /**
    * @brief CreateMessageForHMI Creates HMI message with prepared header
-   * acccoring to message type
+   * according to message type
    * @param function_id function id
    * @param correlation_id Correlation id
    * @return HMI message object with filled header
