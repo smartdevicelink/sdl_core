@@ -377,17 +377,17 @@ bool RCHelpers::IsResponseSuccessful(
   const bool is_correct_message_type =
       hmi_apis::messageType::response == message_type;
 
-  bool is_successful_subscribed = false;
+  bool is_subscribe_successful = false;
 
   if (response[application_manager::strings::msg_params].keyExists(
           rc_rpc_plugin::message_params::kIsSubscribed)) {
-    is_successful_subscribed =
+    is_subscribe_successful =
         response[application_manager::strings::msg_params]
                 [rc_rpc_plugin::message_params::kIsSubscribed]
                     .asBool();
   }
 
-  return is_correct_message_type && is_successful_subscribed;
+  return is_correct_message_type && is_subscribe_successful;
 }
 
 }  // namespace rc_rpc_plugin
