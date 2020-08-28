@@ -202,7 +202,7 @@ void RCAppExtension::RevertResumption(
                   "Requested to unsubscribe module_type  "
                       << module.first << "module_id: " << module.second);
   }
-  std::set<rc_rpc_plugin::ModuleUid> not_subscribed_by_other_apps;
+  std::set<rc_rpc_plugin::ModuleUid> to_be_unsubscribed;
 
   const auto app_id = application_.app_id();
   auto no_apps_subscribed = [app_id,
@@ -219,11 +219,10 @@ void RCAppExtension::RevertResumption(
   };
   std::copy_if(module_subscriptions.begin(),
                module_subscriptions.end(),
-               std::inserter(not_subscribed_by_other_apps,
-                             not_subscribed_by_other_apps.end()),
+               std::inserter(to_be_unsubscribed, to_be_unsubscribed.end()),
                no_apps_subscribed);
 
-  plugin_.RevertResumption(not_subscribed_by_other_apps);
+  plugin_.RevertResumption(to_be_unsubscribed);
 }
 
 std::set<ModuleUid> RCAppExtension::InteriorVehicleDataSubscriptions() const {
