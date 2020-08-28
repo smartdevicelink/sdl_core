@@ -75,8 +75,9 @@ bool SubtleAlertRequest::Init() {
   // If soft buttons are present, SDL will not use initiate timeout tracking for
   // response.
   if (msg_params.keyExists(strings::soft_buttons)) {
-    SDL_LOG_INFO("Request contains soft buttons - request timeout "
-                 "will be set to 0.");
+    SDL_LOG_INFO(
+        "Request contains soft buttons - request timeout "
+        "will be set to 0.");
     default_timeout_ = 0;
   }
 
@@ -117,11 +118,12 @@ void SubtleAlertRequest::on_event(const event_engine::Event& event) {
   switch (event.id()) {
     case hmi_apis::FunctionID::TTS_OnResetTimeout:
     case hmi_apis::FunctionID::UI_OnResetTimeout: {
-      SDL_LOG_INFO("Received UI_OnResetTimeout event "
-                   " or TTS_OnResetTimeout event"
-                       << awaiting_tts_speak_response_ << " "
-                       << awaiting_tts_stop_speaking_response_ << " "
-                       << awaiting_ui_subtle_alert_response_);
+      SDL_LOG_INFO(
+          "Received UI_OnResetTimeout event "
+          " or TTS_OnResetTimeout event"
+          << awaiting_tts_speak_response_ << " "
+          << awaiting_tts_stop_speaking_response_ << " "
+          << awaiting_ui_subtle_alert_response_);
       application_manager_.updateRequestTimeout(
           connection_key(), correlation_id(), default_timeout());
       break;
@@ -305,7 +307,8 @@ bool SubtleAlertRequest::Validate(uint32_t app_id) {
         MessageHelper::VerifyTtsFiles(tts_chunks, app, application_manager_);
 
     if (mobile_apis::Result::FILE_NOT_FOUND == verification_result) {
-     SDL_LOG_ERROR("MessageHelper::VerifyTtsFiles return " << verification_result);
+      SDL_LOG_ERROR("MessageHelper::VerifyTtsFiles return "
+                    << verification_result);
       SendResponse(false,
                    mobile_apis::Result::FILE_NOT_FOUND,
                    "One or more files needed for tts_chunks are not present");

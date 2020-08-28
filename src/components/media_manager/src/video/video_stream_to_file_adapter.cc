@@ -83,7 +83,8 @@ void VideoStreamToFileAdapter::SendData(
 void VideoStreamToFileAdapter::StartActivity(int32_t application_key) {
   SDL_LOG_INFO("VideoStreamToFileAdapter::StartActivity " << application_key);
   if (application_key == current_application_) {
-    SDL_LOG_WARN("Already running video stream to file for " << application_key);
+    SDL_LOG_WARN("Already running video stream to file for "
+                 << application_key);
     return;
   }
 
@@ -100,7 +101,8 @@ void VideoStreamToFileAdapter::StartActivity(int32_t application_key) {
 void VideoStreamToFileAdapter::StopActivity(int32_t application_key) {
   SDL_LOG_INFO("VideoStreamToFileAdapter::StopActivity " << application_key);
   if (application_key != current_application_) {
-    SDL_LOG_WARN("Performing activity for another key " << current_application_);
+    SDL_LOG_WARN("Performing activity for another key "
+                 << current_application_);
     return;
   }
 

@@ -98,8 +98,8 @@ void* Thread::threadFunc(void* arg) {
     SDL_LOG_DEBUG("Thread #" << pthread_self() << " iteration");
     thread->state_cond_.Wait(thread->state_lock_);
     SDL_LOG_DEBUG("Thread #"
-                      << pthread_self() << " execute. "
-                      << "thread_command_ = " << thread->thread_command_);
+                  << pthread_self() << " execute. "
+                  << "thread_command_ = " << thread->thread_command_);
 
     switch (thread->thread_command_) {
       case kThreadCommandRun:
@@ -180,7 +180,8 @@ bool Thread::Start(const ThreadOptions& options) {
   }
 
   if (kThreadStateRunning == thread_state_) {
-    SDL_LOG_TRACE("EXIT thread " << name_ << " #" << handle_ << " is already running");
+    SDL_LOG_TRACE("EXIT thread " << name_ << " #" << handle_
+                                 << " is already running");
     return true;
   }
 
@@ -194,8 +195,8 @@ bool Thread::Start(const ThreadOptions& options) {
 
     if (EOK != pthread_result) {
       SDL_LOG_ERROR("Couldn't create thread "
-                        << name_ << ". Error code = " << pthread_result
-                        << " (\"" << strerror(pthread_result) << "\")");
+                    << name_ << ". Error code = " << pthread_result << " (\""
+                    << strerror(pthread_result) << "\")");
       handle_ = 0;
       thread_state_ = kThreadStateError;
       return false;
@@ -209,7 +210,8 @@ bool Thread::Start(const ThreadOptions& options) {
   }
 
   if (kThreadCommandFinalize == thread_command_) {
-    SDL_LOG_DEBUG("Thread " << name_ << " #" << handle_ << " waiting finalize.");
+    SDL_LOG_DEBUG("Thread " << name_ << " #" << handle_
+                            << " waiting finalize.");
     return false;
   }
 
@@ -234,7 +236,8 @@ bool Thread::Stop(const ThreadStopOption stop_option) {
   thread_command_ = kThreadCommandNone;  // cancel all active commands
 
   if (!handle_ && kThreadStateError != thread_state_) {
-    SDL_LOG_WARN("Thread " << name_ << ": can't stopped,thread is not run handle_: "
+    SDL_LOG_WARN(
+        "Thread " << name_ << ": can't stopped,thread is not run handle_: "
                   << handle_ << " thread_state_ is: " << thread_state_);
     return false;
   }
@@ -265,7 +268,8 @@ bool Thread::Stop(const ThreadStopOption stop_option) {
       break;
   }
 
-  SDL_LOG_DEBUG("Is thread stopped #" << handle_ << " \"" << name_ << " \": " << result);
+  SDL_LOG_DEBUG("Is thread stopped #" << handle_ << " \"" << name_
+                                      << " \": " << result);
   return result;
 }
 
@@ -289,7 +293,8 @@ void Thread::Join(const ThreadJoinOption join_option) {
     return;
   }
 
-  SDL_LOG_DEBUG("Waiting for #" << handle_ << " to finished thread #" << pthread_self());
+  SDL_LOG_DEBUG("Waiting for #" << handle_ << " to finished thread #"
+                                << pthread_self());
 
   pthread_join(handle_, NULL);
 }
@@ -324,14 +329,15 @@ pthread_attr_t Thread::SetThreadCreationAttributes(
   }
 
   if (!thread_options->is_joinable()) {
-    SDL_LOG_WARN("Set state detach attribute, undefined behavior possible with "
-                 "this attribute");
+    SDL_LOG_WARN(
+        "Set state detach attribute, undefined behavior possible with "
+        "this attribute");
     pthread_result =
         pthread_attr_setdetachstate(&attributes, PTHREAD_CREATE_DETACHED);
     if (pthread_result != EOK) {
-     SDL_LOG_WARN("Couldn't set detach state attribute. Error code = "
-                       << pthread_result << " (\"" << strerror(pthread_result)
-                       << "\")");
+      SDL_LOG_WARN("Couldn't set detach state attribute. Error code = "
+                   << pthread_result << " (\"" << strerror(pthread_result)
+                   << "\")");
       thread_options->is_joinable(false);
     }
   }

@@ -71,8 +71,8 @@ void CommandNotificationImpl::SendNotification(const bool final_message) {
   (*message_)[strings::params][strings::message_type] =
       static_cast<int32_t>(application_manager::MessageType::kNotification);
 
-  SDL_LOG_INFO(
-      "SendNotification: final_message = " << std::boolalpha << final_message);
+  SDL_LOG_INFO("SendNotification: final_message = " << std::boolalpha
+                                                    << final_message);
   MessageHelper::PrintSmartObject(*message_);
 
   rpc_service_.SendMessageToMobile(message_, final_message);

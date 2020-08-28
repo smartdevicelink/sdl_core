@@ -1059,8 +1059,8 @@ ApplicationList TransportAdapterImpl::GetApplicationList(
 void TransportAdapterImpl::ConnectionFinished(
     const DeviceUID& device_id, const ApplicationHandle& app_handle) {
   SDL_LOG_AUTO_TRACE();
-  SDL_LOG_TRACE(
-      "enter. device_id: " << &device_id << ", app_handle: " << &app_handle);
+  SDL_LOG_TRACE("enter. device_id: " << &device_id
+                                     << ", app_handle: " << &app_handle);
   connections_lock_.AcquireForReading();
   ConnectionMap::iterator it =
       connections_.find(std::make_pair(device_id, app_handle));

@@ -542,8 +542,7 @@ void SQLPTRepresentation::GatherModuleConfig(
   }
   utils::dbms::SQLQuery subtle_notifications(db());
   if (!subtle_notifications.Prepare(sql_pt::kSelectSubtleNotificationsPerMin)) {
-    SDL_LOG_WARN(
-                 "Incorrect select statement for subtle notifications");
+    SDL_LOG_WARN("Incorrect select statement for subtle notifications");
   } else {
     while (subtle_notifications.Next()) {
       (*config->subtle_notifications_per_minute_by_priority)
@@ -1723,8 +1722,7 @@ bool SQLPTRepresentation::SaveNumberOfSubtleNotificationsPerMinute(
     const policy_table::NumberOfNotificationsPerMinute& notifications) {
   utils::dbms::SQLQuery query(db());
   if (!query.Prepare(sql_pt::kInsertSubtleNotificationsByPriority)) {
-    SDL_LOG_WARN(
-                 "Incorrect insert statement for notifications by priority.");
+    SDL_LOG_WARN("Incorrect insert statement for notifications by priority.");
     return false;
   }
 
@@ -1733,7 +1731,7 @@ bool SQLPTRepresentation::SaveNumberOfSubtleNotificationsPerMinute(
     query.Bind(0, it->first);
     query.Bind(1, it->second);
     if (!query.Exec() || !query.Reset()) {
-      SDL_LOG_WARN( "Incorrect insert into notifications by priority.");
+      SDL_LOG_WARN("Incorrect insert into notifications by priority.");
       return false;
     }
   }
