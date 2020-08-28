@@ -180,8 +180,8 @@ void RCRPCPlugin::RevertResumption(const std::set<ModuleUid>& subscriptions) {
   pending_resumption_handler_->OnResumptionRevert();
 }
 
-bool RCRPCPlugin::IsAnotherAppsSubscribedOnTheSameModule(
-    const rc_rpc_types::ModuleUid& module, const uint32_t app_id) {
+bool RCRPCPlugin::IsOtherAppsSubscribed(const rc_rpc_types::ModuleUid& module,
+                                        const uint32_t app_id) {
   auto get_subscriptions = [](application_manager::ApplicationSharedPtr app) {
     std::set<ModuleUid> result;
     auto rc_app_extension = RCHelpers::GetRCExtension(*app);

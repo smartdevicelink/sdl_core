@@ -116,21 +116,21 @@ class RCRPCPlugin : public plugins::RPCPlugin {
 
   /**
    * @brief Reverts resumption data, clears all pending resumption and sends
-   * ubsubscribe vehicle data request to a HMI
+   * unsubscribe interior vehicle data requests to HMI
    * @param subscriptions Module data that SDL should unsubscribe off
    */
   void RevertResumption(const std::set<ModuleUid>& subscriptions);
 
   /**
-   * @brief IsAnotherAppsSubscribedOnTheSameModule check if any app exept passed
-   * is subscribed to the module
+   * @brief IsOtherAppsSubscribed check if any app except passed is subscribed
+   * to a given module
    * @param module module to check
    * @param app_id app to ignore subscription
-   * @return  true is any app expect passed subscribed to module, otherwise
+   * @return true if any app except passed is subscribed to module, otherwise
    * false
    */
-  bool IsAnotherAppsSubscribedOnTheSameModule(
-      const rc_rpc_types::ModuleUid& module, const uint32_t app_id);
+  bool IsOtherAppsSubscribed(const rc_rpc_types::ModuleUid& module,
+                             const uint32_t app_id);
 
   static const uint32_t kRCPluginID = 153;
 
