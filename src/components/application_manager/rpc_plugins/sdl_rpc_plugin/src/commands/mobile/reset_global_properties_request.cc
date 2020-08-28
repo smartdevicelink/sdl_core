@@ -61,7 +61,53 @@ ResetGlobalPropertiesRequest::ResetGlobalPropertiesRequest(
 ResetGlobalPropertiesRequest::~ResetGlobalPropertiesRequest() {}
 
 void ResetGlobalPropertiesRequest::Run() {
-  ResetGlobalProperties();
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  uint32_t app_id =
+      (*message_)[strings::params][strings::connection_key].asUInt();
+  ApplicationSharedPtr app = application_manager_.application(app_id);
+
+  if (!app) {
+    LOG4CXX_ERROR(logger_, "No application associated with session key");
+    SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
+    return;
+  }
+
+  const auto& global_properties =
+      (*message_)[strings::msg_params][strings::properties];
+
+  auto reset_global_props_result =
+      application_manager_.ResetGlobalProperties(global_properties, app_id);
+
+  if (reset_global_props_result.HasUIPropertiesReset()) {
+    StartAwaitForInterface(HmiInterfaces::HMI_INTERFACE_UI);
+  }
+
+  if (reset_global_props_result.HasTTSPropertiesReset()) {
+    StartAwaitForInterface(HmiInterfaces::HMI_INTERFACE_TTS);
+  }
+
+  app->set_reset_global_properties_active(true);
+
+  if (reset_global_props_result.HasUIPropertiesReset()) {
+    // create ui request
+    smart_objects::SmartObjectSPtr msg_params =
+        MessageHelper::CreateUIResetGlobalPropertiesRequest(
+            reset_global_props_result, app);
+    if (msg_params.get()) {
+      SendHMIRequest(
+          hmi_apis::FunctionID::UI_SetGlobalProperties, msg_params.get(), true);
+    }
+  }
+
+  if (reset_global_props_result.HasTTSPropertiesReset()) {
+    smart_objects::SmartObjectSPtr msg_params =
+        MessageHelper::CreateTTSResetGlobalPropertiesRequest(
+            reset_global_props_result, app);
+
+    SendHMIRequest(
+        hmi_apis::FunctionID::TTS_SetGlobalProperties, msg_params.get(), true);
+  }
 }
 
 void ResetGlobalPropertiesRequest::on_event(const event_engine::Event& event) {
@@ -150,56 +196,6 @@ bool ResetGlobalPropertiesRequest::PrepareResponseParameters(
 bool ResetGlobalPropertiesRequest::IsPendingResponseExist() {
   return IsInterfaceAwaited(HmiInterfaces::HMI_INTERFACE_TTS) ||
          IsInterfaceAwaited(HmiInterfaces::HMI_INTERFACE_UI);
-}
-
-void ResetGlobalPropertiesRequest::ResetGlobalProperties() {
-  LOG4CXX_AUTO_TRACE(logger_);
-
-  uint32_t app_id =
-      (*message_)[strings::params][strings::connection_key].asUInt();
-  ApplicationSharedPtr app = application_manager_.application(app_id);
-
-  if (!app) {
-    LOG4CXX_ERROR(logger_, "No application associated with session key");
-    SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
-    return;
-  }
-
-  const auto& global_properties =
-      (*message_)[strings::msg_params][strings::properties];
-
-  auto reset_global_props_result =
-      application_manager_.ResetGlobalProperties(global_properties, app_id);
-
-  if (reset_global_props_result.HasUIPropertiesReset()) {
-    StartAwaitForInterface(HmiInterfaces::HMI_INTERFACE_UI);
-  }
-
-  if (reset_global_props_result.HasTTSPropertiesReset()) {
-    StartAwaitForInterface(HmiInterfaces::HMI_INTERFACE_TTS);
-  }
-
-  app->set_reset_global_properties_active(true);
-
-  if (reset_global_props_result.HasUIPropertiesReset()) {
-    // create ui request
-    smart_objects::SmartObjectSPtr msg_params =
-        MessageHelper::CreateUIResetGlobalPropertiesRequest(
-            reset_global_props_result, app);
-    if (msg_params.get()) {
-      SendHMIRequest(
-          hmi_apis::FunctionID::UI_SetGlobalProperties, msg_params.get(), true);
-    }
-  }
-
-  if (reset_global_props_result.HasTTSPropertiesReset()) {
-    smart_objects::SmartObjectSPtr msg_params =
-        MessageHelper::CreateTTSResetGlobalPropertiesRequest(
-            reset_global_props_result, app);
-
-    SendHMIRequest(
-        hmi_apis::FunctionID::TTS_SetGlobalProperties, msg_params.get(), true);
-  }
 }
 
 }  // namespace commands

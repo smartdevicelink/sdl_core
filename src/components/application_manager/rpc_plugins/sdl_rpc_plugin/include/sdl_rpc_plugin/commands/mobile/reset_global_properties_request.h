@@ -101,12 +101,6 @@ class ResetGlobalPropertiesRequest
    */
   bool IsPendingResponseExist();
 
-  /*
-   * @brief ResetGlobalProperties gets global properties data from message_
-   * and passes it to ApplicationManager::ResetGlobalProperties
-   */
-  void ResetGlobalProperties();
-
   DISALLOW_COPY_AND_ASSIGN(ResetGlobalPropertiesRequest);
 
   hmi_apis::Common_Result::eType ui_result_;
