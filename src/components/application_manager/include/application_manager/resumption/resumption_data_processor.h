@@ -24,8 +24,8 @@
  ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  POSSIBILITY OF SUCH DAMAGE.
  */
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_RESUMPTION_RESUMPTION_PROCESS_
-#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_RESUMPTION_RESUMPTION_PROCESS_
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_RESUMPTION_RESUMPTION_DATA_PROCESSOR_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_RESUMPTION_RESUMPTION_DATA_PROCESSOR_H_
 
 #include <functional>
 #include <map>
@@ -261,19 +261,19 @@ class ResumptionDataProcessor : public app_mngr::event_engine::EventObserver {
                   const smart_objects::SmartObject& saved_app);
 
   /**
-   * @brief AddSubmenues allows to add sub-menus for the application
+   * @brief AddSubmenus allows to add sub-menus for the application
    * which should be resumed
    * @param application application which will be resumed
    * @param saved_app application specific section from backup file
    */
-  void AddSubmenues(app_mngr::ApplicationSharedPtr application,
-                    const smart_objects::SmartObject& saved_app);
+  void AddSubmenus(app_mngr::ApplicationSharedPtr application,
+                   const smart_objects::SmartObject& saved_app);
 
   /**
    * @brief Deleting sub-menus that have been resumed
    * @param shared ptr to application
    */
-  void DeleteSubmenues(app_mngr::ApplicationSharedPtr application);
+  void DeleteSubmenus(app_mngr::ApplicationSharedPtr application);
 
   /**
    * @brief AddCommands allows to add commands for the application
@@ -401,30 +401,12 @@ class ResumptionDataProcessor : public app_mngr::event_engine::EventObserver {
 
   /**
    * @brief Determines whether application has saved data, including
-   * submenues, commands and choice sets, to restore. This does not include
-   * global properties and subscriptions
+   * submenus, commands, choice sets, global properties, subscriptions to
+   * restore.
    * @param saved_app smart object containing saved app data
    * @return bool value stating whether app has mentioned data to restore
    */
   bool HasDataToRestore(const smart_objects::SmartObject& saved_app) const;
-
-  /**
-   * @brief Determines whether application has saved global properties
-   * to restore
-   * @param saved_app smart object containing saved app data
-   * @return bool value stating whether app has mentioned data to restore
-   */
-  bool HasGlobalPropertiesToRestore(
-      const smart_objects::SmartObject& saved_app) const;
-
-  /**
-   * @brief Determines whether application has saved subscriptions
-   * to restore
-   * @param saved_app smart object containing saved app data
-   * @return bool value stating whether app has mentioned data to restore
-   */
-  bool HasSubscriptionsToRestore(
-      const smart_objects::SmartObject& saved_app) const;
 
   app_mngr::ApplicationManager& application_manager_;
 
@@ -449,4 +431,4 @@ class ResumptionDataProcessor : public app_mngr::event_engine::EventObserver {
 
 }  // namespace resumption
 
-#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_RESUMPTION_RESUMPTION_PROCESS_
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_RESUMPTION_RESUMPTION_DATA_PROCESSOR_H_

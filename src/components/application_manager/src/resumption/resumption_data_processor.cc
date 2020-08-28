@@ -68,16 +68,14 @@ void ResumptionDataProcessor::Restore(ApplicationSharedPtr application,
                                       ResumeCtrl::ResumptionCallBack callback) {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  if (!HasDataToRestore(saved_app) &&
-      !HasGlobalPropertiesToRestore(saved_app) &&
-      !HasSubscriptionsToRestore(saved_app)) {
+  if (!HasDataToRestore(saved_app)) {
     LOG4CXX_DEBUG(logger_, "No data to restore, resumption is successful");
     callback(mobile_apis::Result::SUCCESS, "Data resumption succesful");
     return;
   }
 
   AddFiles(application, saved_app);
-  AddSubmenues(application, saved_app);
+  AddSubmenus(application, saved_app);
   AddCommands(application, saved_app);
   AddChoicesets(application, saved_app);
   SetGlobalProperties(application, saved_app);
@@ -108,80 +106,74 @@ bool ResumptionDataProcessor::HasDataToRestore(
     const smart_objects::SmartObject& saved_app) const {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  const bool has_data_to_restore =
-      !saved_app[strings::application_submenus].empty() ||
-      !saved_app[strings::application_commands].empty() ||
-      !saved_app[strings::application_choice_sets].empty() ||
-      !saved_app[strings::windows_info].empty();
+  auto has_data_to_restore = [&saved_app]() -> bool {
+    return !saved_app[strings::application_files].empty() ||
+           !saved_app[strings::application_submenus].empty() ||
+           !saved_app[strings::application_commands].empty() ||
+           !saved_app[strings::application_choice_sets].empty() ||
+           !saved_app[strings::windows_info].empty();
+  };
 
-  LOG4CXX_DEBUG(logger_,
-                std::boolalpha << "Application has data to restore: "
-                               << has_data_to_restore);
+  auto has_gp_to_restore = [&saved_app]() -> bool {
+    const smart_objects::SmartObject& global_properties =
+        saved_app[strings::application_global_properties];
 
-  return has_data_to_restore;
-}
+    return !global_properties[strings::help_prompt].empty() ||
+           !global_properties[strings::keyboard_properties].empty() ||
+           !global_properties[strings::menu_icon].empty() ||
+           !global_properties[strings::menu_title].empty() ||
+           !global_properties[strings::timeout_prompt].empty() ||
+           !global_properties[strings::vr_help].empty() ||
+           !global_properties[strings::vr_help_title].empty();
+  };
 
-bool ResumptionDataProcessor::HasGlobalPropertiesToRestore(
-    const smart_objects::SmartObject& saved_app) const {
-  LOG4CXX_AUTO_TRACE(logger_);
+  auto has_subscriptions_to_restore = [&saved_app]() -> bool {
+    const smart_objects::SmartObject& subscriptions =
+        saved_app[strings::application_subscriptions];
 
-  const smart_objects::SmartObject& global_properties =
-      saved_app[strings::application_global_properties];
+    const bool has_ivi_subscriptions =
+        !subscriptions[strings::application_vehicle_info].empty();
 
-  const bool has_gl_props_to_restore =
-      !global_properties[strings::help_prompt].empty() ||
-      !global_properties[strings::keyboard_properties].empty() ||
-      !global_properties[strings::menu_icon].empty() ||
-      !global_properties[strings::menu_title].empty() ||
-      !global_properties[strings::timeout_prompt].empty() ||
-      !global_properties[strings::vr_help].empty() ||
-      !global_properties[strings::vr_help_title].empty();
+    const bool has_button_subscriptions =
+        !subscriptions[strings::application_buttons].empty() &&
+        !(subscriptions[strings::application_buttons].length() == 1 &&
+          static_cast<hmi_apis::Common_ButtonName::eType>(
+              subscriptions[strings::application_buttons][0].asInt()) ==
+              hmi_apis::Common_ButtonName::CUSTOM_BUTTON);
 
-  LOG4CXX_DEBUG(logger_,
-                std::boolalpha
-                    << "Application has global properties to restore: "
-                    << has_gl_props_to_restore);
+    const bool has_waypoints_subscriptions =
+        subscriptions[strings::subscribed_for_way_points].asBool();
 
-  return has_gl_props_to_restore;
-}
+    const bool has_appservice_subscriptions =
+        subscriptions.keyExists(app_mngr::hmi_interface::app_service) &&
+        !subscriptions[app_mngr::hmi_interface::app_service].empty();
 
-bool ResumptionDataProcessor::HasSubscriptionsToRestore(
-    const smart_objects::SmartObject& saved_app) const {
-  LOG4CXX_AUTO_TRACE(logger_);
+    const bool has_system_capability_subscriptions =
+        subscriptions.keyExists(strings::system_capability) &&
+        !subscriptions[strings::system_capability].empty();
 
-  const smart_objects::SmartObject& subscriptions =
-      saved_app[strings::application_subscriptions];
+    return has_ivi_subscriptions || has_button_subscriptions ||
+           has_waypoints_subscriptions || has_appservice_subscriptions ||
+           has_system_capability_subscriptions;
+  };
 
-  const bool has_ivi_subscriptions =
-      !subscriptions[strings::application_vehicle_info].empty();
+  if (has_data_to_restore()) {
+    LOG4CXX_DEBUG(logger_, "Application has data to restore");
+    return true;
+  }
 
-  const bool has_button_subscriptions =
-      !(subscriptions[strings::application_buttons].length() == 1 &&
-        static_cast<hmi_apis::Common_ButtonName::eType>(
-            subscriptions[strings::application_buttons][0].asInt()) ==
-            hmi_apis::Common_ButtonName::CUSTOM_BUTTON);
+  if (has_gp_to_restore()) {
+    LOG4CXX_DEBUG(logger_, "Application has global properties to restore");
+    return true;
+  }
 
-  const bool has_waypoints_subscriptions =
-      subscriptions[strings::subscribed_for_way_points].asBool();
+  if (has_subscriptions_to_restore()) {
+    LOG4CXX_DEBUG(logger_, "Application has subscriptions to restore");
+    return true;
+  }
 
-  const bool has_appservice_subscriptions =
-      subscriptions.keyExists(app_mngr::hmi_interface::app_service) &&
-      !subscriptions[app_mngr::hmi_interface::app_service].empty();
-
-  const bool has_system_capability_subscriptions =
-      subscriptions.keyExists(strings::system_capability) &&
-      !subscriptions[strings::system_capability].empty();
-
-  const bool has_subscriptions_to_restore =
-      has_ivi_subscriptions || has_button_subscriptions ||
-      has_waypoints_subscriptions || has_appservice_subscriptions ||
-      has_system_capability_subscriptions;
-
-  LOG4CXX_DEBUG(logger_,
-                std::boolalpha << "Application has subscriptions to restore: "
-                               << has_subscriptions_to_restore);
-
-  return has_subscriptions_to_restore;
+  LOG4CXX_DEBUG(logger_, "Application does not have any data to restore");
+  return false;
 }
 
 utils::Optional<uint32_t> ResumptionDataProcessor::GetAppIdWaitingForResponse(
@@ -211,7 +203,7 @@ utils::Optional<ResumptionRequest> ResumptionDataProcessor::GetRequest(
     const int32_t corr_id) {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  sync_primitives::AutoWriteLock lock(resumption_status_lock_);
+  sync_primitives::AutoReadLock lock(resumption_status_lock_);
   std::vector<ResumptionRequest>& list_of_sent_requests =
       resumption_status_[app_id].list_of_sent_requests;
 
@@ -279,10 +271,7 @@ bool ResumptionDataProcessor::IsResumptionFinished(
                    });
   list_of_sent_requests.erase(request_iter);
 
-  if (!list_of_sent_requests.empty()) {
-    return false;
-  }
-  return true;
+  return list_of_sent_requests.empty();
 }
 
 utils::Optional<ResumeCtrl::ResumptionCallBack>
@@ -299,8 +288,13 @@ ResumptionDataProcessor::GetResumptionCallback(const uint32_t app_id) {
 }
 
 bool ResumptionDataProcessor::IsResumptionSuccessful(const uint32_t app_id) {
-  sync_primitives::AutoWriteLock lock(resumption_status_lock_);
-  ApplicationResumptionStatus& status = resumption_status_[app_id];
+  sync_primitives::AutoReadLock lock(resumption_status_lock_);
+  auto it = resumption_status_.find(app_id);
+  if (resumption_status_.end() == it) {
+    return false;
+  }
+
+  const ApplicationResumptionStatus& status = it->second;
   return status.error_requests.empty() &&
          status.unsuccessful_vehicle_data_subscriptions_.empty();
 }
@@ -435,7 +429,7 @@ void ResumptionDataProcessor::RevertRestoredData(
     ApplicationSharedPtr application) {
   LOG4CXX_AUTO_TRACE(logger_);
   LOG4CXX_DEBUG(logger_, "Reverting for app: " << application->app_id());
-  DeleteSubmenues(application);
+  DeleteSubmenus(application);
   DeleteCommands(application);
   DeleteChoicesets(application);
   DeleteGlobalProperties(application);
@@ -552,7 +546,7 @@ void ResumptionDataProcessor::AddWindows(
   ProcessMessagesToHMI(request_list);
 }
 
-void ResumptionDataProcessor::AddSubmenues(
+void ResumptionDataProcessor::AddSubmenus(
     ApplicationSharedPtr application,
     const smart_objects::SmartObject& saved_app) {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -596,8 +590,7 @@ utils::Optional<ResumptionRequest> FindResumptionSubmenuRequest(
   return Optional<ResumptionRequest>::OptionalEmpty::EMPTY;
 }
 
-void ResumptionDataProcessor::DeleteSubmenues(
-    ApplicationSharedPtr application) {
+void ResumptionDataProcessor::DeleteSubmenus(ApplicationSharedPtr application) {
   LOG4CXX_AUTO_TRACE(logger_);
 
   auto failed_requests = GetAllFailedRequests(
@@ -1020,10 +1013,7 @@ void ResumptionDataProcessor::DeletePluginsSubscriptions(
 }
 
 bool IsResponseSuccessful(const smart_objects::SmartObject& response) {
-  if (!response[strings::params].keyExists(strings::error_msg)) {
-    return true;
-  }
-  return false;
+  return !response[strings::params].keyExists(strings::error_msg);
 }
 
 void ResumptionDataProcessor::CheckVehicleDataResponse(
@@ -1034,7 +1024,7 @@ void ResumptionDataProcessor::CheckVehicleDataResponse(
   const auto request_keys = request[strings::msg_params].enumerate();
 
   if (!IsResponseSuccessful(response)) {
-    LOG4CXX_TRACE(logger_, "Vehicle data request not succesfull");
+    LOG4CXX_TRACE(logger_, "Vehicle data request not successful");
     for (const auto key : request_keys) {
       status.unsuccessful_vehicle_data_subscriptions_.push_back(key);
     }
@@ -1107,7 +1097,7 @@ void ResumptionDataProcessor::CheckCreateWindowResponse(
       msg_params[strings::window_type].asInt());
 
   // State should be initialized with INVALID_ENUM value to let state
-  // controller trigger OnHmiStatus notifiation sending
+  // controller trigger OnHmiStatus notification sending
   auto initial_state = application_manager_.CreateRegularState(
       application,
       window_type,
