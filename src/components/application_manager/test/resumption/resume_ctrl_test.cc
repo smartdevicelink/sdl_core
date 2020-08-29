@@ -264,16 +264,6 @@ TEST_F(ResumeCtrlTest, StartResumption_AppWithGrammarId) {
           GetSavedApplication(kTestPolicyAppId_, kMacAddress_, _))
       .WillByDefault(DoAll(SetArgReferee<2>(saved_app), Return(true)));
 
-  smart_objects::SmartObjectList requests;
-  EXPECT_CALL(*application_manager::MockMessageHelper::message_helper_mock(),
-              CreateAddCommandRequestToHMI(_, _))
-      .WillRepeatedly(Return(requests));
-  EXPECT_CALL(*application_manager::MockMessageHelper::message_helper_mock(),
-              CreateAddVRCommandRequestFromChoiceToHMI(_))
-      .WillRepeatedly(Return(requests));
-  std::list<application_manager::AppExtensionPtr> extensions;
-  extensions.insert(extensions.begin(), mock_app_extension_);
-  EXPECT_CALL(*mock_app_, Extensions()).WillOnce(ReturnRef(extensions));
   EXPECT_CALL(*mock_app_, set_grammar_id(kTestGrammarId_));
 
   const bool res = res_ctrl_->StartResumption(mock_app_, kHash_, callback_);
@@ -551,6 +541,9 @@ TEST_F(ResumeCtrlTest, StartResumption_AppWithChoiceSet) {
 TEST_F(ResumeCtrlTest, StartResumption_AppWithGlobalProperties) {
   // Prepare Data
   smart_objects::SmartObject test_global_properties;
+  test_global_properties[application_manager::strings::vr_help_title] =
+      "VR help title";
+
   smart_objects::SmartObject saved_app;
   saved_app[application_manager::strings::hash_id] = kHash_;
   saved_app[application_manager::strings::grammar_id] = kTestGrammarId_;
