@@ -180,6 +180,11 @@ typedef std::set<RequestInfoPtr, RequestInfoHashComparator>
  */
 class RequestInfoSet {
  public:
+  /**
+   * @brief destructor
+   */
+  ~RequestInfoSet();
+
   /*
    * @brief Add requests into colletion by log(n) time
    * @param request_info - request to add
