@@ -104,7 +104,7 @@ class AddCommandRequestTest
  public:
   AddCommandRequestTest()
       : msg_(CreateMessage())
-      , smart_obj_(smart_objects::SmartType_Map)
+      , smart_obj_(smart_objects::SmartType_Null)
       , default_app_name_("test_default_app_name_")
       , lock_ptr_(std::make_shared<sync_primitives::Lock>())
       , mock_help_prompt_manager_(
@@ -181,8 +181,9 @@ class AddCommandRequestTest
     EXPECT_CALL(*mock_app_, commands_map())
         .WillRepeatedly(Return(DataAccessor<application_manager::CommandsMap>(
             commands_map, lock_ptr_)));
+    SmartObject sub_menu(SmartType_Map);
     EXPECT_CALL(*mock_app_, FindSubMenu(kSecondParentId))
-        .WillOnce(Return(smart_obj_));
+        .WillOnce(Return(sub_menu));
     {
       InSequence dummy;
 
@@ -357,8 +358,9 @@ TEST_F(AddCommandRequestTest, Run_CommandIDAlreadyExists_EXPECT_INVALID_ID) {
   SmartObject& image = msg_params[cmd_icon];
   EXPECT_CALL(mock_message_helper_, VerifyImage(image, _, _))
       .WillOnce(Return(mobile_apis::Result::SUCCESS));
-  SmartObject invalid_so(smart_objects::SmartType_Null);
-  EXPECT_CALL(*mock_app_, FindCommand(kCmdId)).WillOnce(Return(invalid_so));
+  SmartObject existing_cmd_so(smart_objects::SmartType_Map);
+  EXPECT_CALL(*mock_app_, FindCommand(kCmdId))
+      .WillOnce(Return(existing_cmd_so));
 
   EXPECT_CALL(mock_rpc_service_,
               ManageMobileCommand(
@@ -440,8 +442,9 @@ TEST_F(AddCommandRequestTest,
   EXPECT_CALL(*mock_app_, commands_map())
       .WillRepeatedly(Return(DataAccessor<application_manager::CommandsMap>(
           commands_map, lock_ptr_)));
+  SmartObject sub_menu(SmartType_Map);
   EXPECT_CALL(*mock_app_, FindSubMenu(kSecondParentId))
-      .WillOnce(Return(smart_obj_));
+      .WillOnce(Return(sub_menu));
 
   EXPECT_CALL(mock_rpc_service_,
               ManageMobileCommand(
@@ -484,8 +487,9 @@ TEST_F(AddCommandRequestTest,
   EXPECT_CALL(*mock_app_, commands_map())
       .WillRepeatedly(Return(DataAccessor<application_manager::CommandsMap>(
           commands_map, lock_ptr_)));
+  SmartObject sub_menu(SmartType_Map);
   EXPECT_CALL(*mock_app_, FindSubMenu(kSecondParentId))
-      .WillOnce(Return(smart_obj_));
+      .WillOnce(Return(sub_menu));
   {
     InSequence dummy;
 
@@ -1111,8 +1115,9 @@ TEST_F(AddCommandRequestTest, OnTimeOut_AppRemoveCommandCalled) {
   EXPECT_CALL(*mock_app_, commands_map())
       .WillRepeatedly(Return(DataAccessor<application_manager::CommandsMap>(
           commands_map, lock_ptr_)));
+  SmartObject sub_menu(SmartType_Map);
   EXPECT_CALL(*mock_app_, FindSubMenu(kSecondParentId))
-      .WillOnce(Return(smart_obj_));
+      .WillOnce(Return(sub_menu));
   {
     InSequence dummy;
     EXPECT_CALL(mock_rpc_service_,

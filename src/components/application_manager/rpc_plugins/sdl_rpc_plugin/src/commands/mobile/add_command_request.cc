@@ -115,7 +115,7 @@ void AddCommandRequest::Run() {
 
   const auto command = app->FindCommand(command_id);
 
-  if (smart_objects::SmartType_Null == command.getType()) {
+  if (smart_objects::SmartType_Null != command.getType()) {
     LOG4CXX_ERROR(logger_, "INVALID_ID");
     SendResponse(false, mobile_apis::Result::INVALID_ID);
     return;
