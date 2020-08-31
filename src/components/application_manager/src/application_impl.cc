@@ -615,6 +615,9 @@ void ApplicationImpl::StopStreaming(
 void ApplicationImpl::StopNaviStreaming() {
   SDL_LOG_AUTO_TRACE();
   video_stream_suspend_timer_.Stop();
+  application_manager_.OnAppStreaming(app_id(),
+                                      protocol_handler::ServiceType::kMobileNav,
+                                      StreamingState::kStopped);
   MessageHelper::SendNaviStopStream(app_id(), application_manager_);
   set_video_streaming_approved(false);
   set_video_stream_retry_number(0);
@@ -623,6 +626,9 @@ void ApplicationImpl::StopNaviStreaming() {
 void ApplicationImpl::StopAudioStreaming() {
   SDL_LOG_AUTO_TRACE();
   audio_stream_suspend_timer_.Stop();
+  application_manager_.OnAppStreaming(app_id(),
+                                      protocol_handler::ServiceType::kAudio,
+                                      StreamingState::kStopped);
   MessageHelper::SendAudioStopStream(app_id(), application_manager_);
   set_audio_streaming_approved(false);
   set_audio_stream_retry_number(0);
@@ -633,14 +639,17 @@ void ApplicationImpl::SuspendStreaming(
   using namespace protocol_handler;
   SDL_LOG_AUTO_TRACE();
 
-  if (ServiceType::kMobileNav == service_type) {
+  if (ServiceType::kMobileNav == service_type && !video_streaming_suspended_) {
     video_stream_suspend_timer_.Stop();
-    application_manager_.OnAppStreaming(app_id(), service_type, false);
+    application_manager_.OnAppStreaming(
+        app_id(), service_type, StreamingState::kSuspended);
     sync_primitives::AutoLock lock(video_streaming_suspended_lock_);
     video_streaming_suspended_ = true;
-  } else if (ServiceType::kAudio == service_type) {
+  } else if (ServiceType::kAudio == service_type &&
+             !audio_streaming_suspended_) {
     audio_stream_suspend_timer_.Stop();
-    application_manager_.OnAppStreaming(app_id(), service_type, false);
+    application_manager_.OnAppStreaming(
+        app_id(), service_type, StreamingState::kSuspended);
     sync_primitives::AutoLock lock(audio_streaming_suspended_lock_);
     audio_streaming_suspended_ = true;
   }
@@ -661,7 +670,8 @@ void ApplicationImpl::WakeUpStreaming(
     {  // reduce the range of video_streaming_suspended_lock_
       sync_primitives::AutoLock lock(video_streaming_suspended_lock_);
       if (video_streaming_suspended_) {
-        application_manager_.OnAppStreaming(app_id(), service_type, true);
+        application_manager_.OnAppStreaming(
+            app_id(), service_type, StreamingState::kStarted);
         application_manager_.ProcessOnDataStreamingNotification(
             service_type, app_id(), true);
         video_streaming_suspended_ = false;
@@ -674,7 +684,8 @@ void ApplicationImpl::WakeUpStreaming(
     {  // reduce the range of audio_streaming_suspended_lock_
       sync_primitives::AutoLock lock(audio_streaming_suspended_lock_);
       if (audio_streaming_suspended_) {
-        application_manager_.OnAppStreaming(app_id(), service_type, true);
+        application_manager_.OnAppStreaming(
+            app_id(), service_type, StreamingState::kStarted);
         application_manager_.ProcessOnDataStreamingNotification(
             service_type, app_id(), true);
         audio_streaming_suspended_ = false;
