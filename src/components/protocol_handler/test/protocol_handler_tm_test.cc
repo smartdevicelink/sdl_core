@@ -179,6 +179,8 @@ class ProtocolHandlerImplTest : public ::testing::Test {
         .WillByDefault(Return(malformd_max_messages));
     ON_CALL(protocol_handler_settings_mock, multiframe_waiting_timeout())
         .WillByDefault(Return(multiframe_waiting_timeout));
+    ON_CALL(protocol_handler_settings_mock, max_supported_protocol_version())
+        .WillByDefault(Return(PROTOCOL_VERSION_MAX));
 #ifdef ENABLE_SECURITY
     ON_CALL(protocol_handler_settings_mock, force_protected_service())
         .WillByDefault(ReturnRefOfCopy(force_protected_services));
@@ -3552,7 +3554,7 @@ TEST_F(ProtocolHandlerImplTest,
   // Expect check connection with ProtocolVersionUsed
   EXPECT_CALL(session_observer_mock,
               ProtocolVersionUsed(connection_id, session_id, _))
-      .WillOnce(Return(true));
+      .WillOnce(DoAll(SetArgReferee<2>(PROTOCOL_VERSION_1), Return(true)));
   // Expect send End Service
   EXPECT_CALL(transport_manager_mock,
               SendMessageToDevice(ExpectedMessage(FRAME_TYPE_CONTROL,
@@ -3591,7 +3593,7 @@ TEST_F(ProtocolHandlerImplTest, SendHeartBeat_Successful) {
   // Expect check connection with ProtocolVersionUsed
   EXPECT_CALL(session_observer_mock,
               ProtocolVersionUsed(connection_id, session_id, _))
-      .WillOnce(Return(true));
+      .WillOnce(DoAll(SetArgReferee<2>(PROTOCOL_VERSION_3), Return(true)));
   // Expect send HeartBeat
   EXPECT_CALL(
       transport_manager_mock,

@@ -116,6 +116,15 @@ FakeRequestInfo::FakeRequestInfo(uint32_t app_id, uint32_t correaltion_id) {
   correlation_id_ = correaltion_id;
 }
 
+RequestInfoSet::~RequestInfoSet() {
+  sync_primitives::AutoLock lock(pending_requests_lock_);
+  auto it = time_sorted_pending_requests_.begin();
+  while (!time_sorted_pending_requests_.empty()) {
+    Erase(*it);
+    it = time_sorted_pending_requests_.begin();
+  }
+}
+
 bool RequestInfoSet::Add(RequestInfoPtr request_info) {
   DCHECK_OR_RETURN(request_info, false);
   LOG4CXX_DEBUG(

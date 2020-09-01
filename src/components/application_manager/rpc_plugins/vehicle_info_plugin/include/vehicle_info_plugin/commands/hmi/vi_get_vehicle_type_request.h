@@ -59,10 +59,9 @@ class VIGetVehicleTypeRequest : public app_mngr::commands::RequestToHMI {
    **/
   virtual ~VIGetVehicleTypeRequest();
 
-  /**
-   * @brief Execute command
-   **/
-  virtual void Run();
+  void Run() OVERRIDE;
+
+  void onTimeOut() OVERRIDE;
 
  private:
   DISALLOW_COPY_AND_ASSIGN(VIGetVehicleTypeRequest);

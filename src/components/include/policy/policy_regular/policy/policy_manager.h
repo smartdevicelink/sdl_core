@@ -408,6 +408,12 @@ class PolicyManager : public usage_statistics::StatisticsManager,
   virtual void SetSystemLanguage(const std::string& language) = 0;
 
   /**
+   * @brief Set preloaded_pt flag value in policy table
+   * @param is_preloaded value to set
+   */
+  virtual void SetPreloadedPtFlag(const bool is_preloaded) = 0;
+
+  /**
    * @brief Set data from GetSystemInfo response to policy table
    * @param ccpu_version CCPU version
    * @param wers_country_code WERS country code
@@ -416,6 +422,12 @@ class PolicyManager : public usage_statistics::StatisticsManager,
   virtual void SetSystemInfo(const std::string& ccpu_version,
                              const std::string& wers_country_code,
                              const std::string& language) = 0;
+
+  /**
+   * @brief Get information about last ccpu_version from PT
+   * @return ccpu_version from PT
+   */
+  virtual std::string GetCCPUVersionFromPT() const = 0;
 
   /**
    * @brief Send OnPermissionsUpdated for choosen application
@@ -467,10 +479,11 @@ class PolicyManager : public usage_statistics::StatisticsManager,
   /**
    * @brief Get number of notification by priority
    * @param priority Specified priority
+   * @param is_subtle If true, get the number of allowed subtle notifications
    * @return notification number
    */
-  virtual uint32_t GetNotificationsNumber(
-      const std::string& priority) const = 0;
+  virtual uint32_t GetNotificationsNumber(const std::string& priority,
+                                          const bool is_subtle) const = 0;
 
   /**
    * @brief Allows to update Vehicle Identification Number in policy table.

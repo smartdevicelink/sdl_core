@@ -29,6 +29,8 @@
 // POSSIBILITY OF SUCH DAMAGE.
 
 #include "smart_objects/array_schema_item.h"
+
+#include "smart_objects/enum_schema_item.h"
 #include "smart_objects/smart_object.h"
 
 namespace ns_smart_device_link {
@@ -44,7 +46,7 @@ std::shared_ptr<CArraySchemaItem> CArraySchemaItem::create(
 
 errors::eType CArraySchemaItem::validate(
     const SmartObject& Object,
-    rpc::ValidationReport* report__,
+    rpc::ValidationReport* report,
     const utils::SemanticVersion& MessageVersion,
     const bool allow_unknown_enums) {
   if (SmartType_Array != Object.getType()) {
@@ -52,7 +54,7 @@ errors::eType CArraySchemaItem::validate(
         "Incorrect type, expected: " +
         SmartObject::typeToString(SmartType_Array) +
         ", got: " + SmartObject::typeToString(Object.getType());
-    report__->set_validation_info(validation_info);
+    report->set_validation_info(validation_info);
     return errors::INVALID_VALUE;
   }
   size_t sizeLimit;
@@ -63,7 +65,7 @@ errors::eType CArraySchemaItem::validate(
     stream << "Got array of size: " << array_len
            << ", minimum allowed: " << sizeLimit;
     std::string validation_info = stream.str();
-    report__->set_validation_info(validation_info);
+    report->set_validation_info(validation_info);
     return errors::OUT_OF_RANGE;
   }
   if (mMaxSize.getValue(sizeLimit) && (array_len > sizeLimit)) {
@@ -71,23 +73,51 @@ errors::eType CArraySchemaItem::validate(
     stream << "Got array of size: " << array_len
            << ", maximum allowed: " << sizeLimit;
     std::string validation_info = stream.str();
-    report__->set_validation_info(validation_info);
+    report->set_validation_info(validation_info);
     return errors::OUT_OF_RANGE;
   }
 
   for (size_t i = 0u; i < array_len; ++i) {
-    std::stringstream strVal;
-    strVal << i;
-    const errors::eType result =
-        mElementSchemaItem->validate(Object.getElement(i),
-                                     &report__->ReportSubobject(strVal.str()),
-                                     MessageVersion,
-                                     allow_unknown_enums);
+    const errors::eType result = mElementSchemaItem->validate(
+        Object.getElement(i),
+        &report->ReportSubobject(std::to_string(i)),
+        MessageVersion,
+        allow_unknown_enums);
     if (errors::OK != result) {
       return result;
     }
   }
   return errors::OK;
+}
+
+bool CArraySchemaItem::filterInvalidEnums(
+    SmartObject& Object,
+    const utils::SemanticVersion& MessageVersion,
+    rpc::ValidationReport* report) {
+  if (SmartType_Array != Object.getType()) {
+    return false;
+  }
+
+  int index = 0;
+  auto array = Object.asArray();
+  size_t initial_size = array->size();
+  auto should_erase =
+      [this, MessageVersion, report, &index](SmartObject& element) {
+        // If filterInvalidEnums returns true, the checked element
+        // is now invalid and should be filtered
+        return mElementSchemaItem->filterInvalidEnums(
+            element,
+            MessageVersion,
+            &report->ReportSubobject(std::to_string(index++)));
+      };
+  array->erase(std::remove_if(array->begin(), array->end(), should_erase),
+               array->end());
+
+  // Mark this container as invalid if it is below the minimum size after
+  // filtering one or more elements
+  size_t min_size;
+  return array->size() < initial_size && mMinSize.getValue(min_size) &&
+         array->size() < min_size;
 }
 
 void CArraySchemaItem::applySchema(
@@ -125,6 +155,10 @@ void CArraySchemaItem::BuildObjectBySchema(const SmartObject& pattern_object,
   }
   // empty array
   result_object = SmartObject(SmartType_Array);
+}
+
+TypeID CArraySchemaItem::GetType() {
+  return TYPE_ARRAY;
 }
 
 CArraySchemaItem::CArraySchemaItem(const ISchemaItemPtr ElementSchemaItem,

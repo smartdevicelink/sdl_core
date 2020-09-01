@@ -48,14 +48,14 @@ UpdateStatusManager::UpdateStatusManager()
   update_status_thread_delegate_ = new UpdateThreadDelegate(this);
   thread_ = threads::CreateThread("UpdateStatusThread",
                                   update_status_thread_delegate_);
-  thread_->start();
+  thread_->Start();
 }
 
 UpdateStatusManager::~UpdateStatusManager() {
   LOG4CXX_AUTO_TRACE(logger_);
   DCHECK(update_status_thread_delegate_);
   DCHECK(thread_);
-  thread_->join();
+  thread_->Stop(threads::Thread::kThreadSoftStop);
   delete update_status_thread_delegate_;
   threads::DeleteThread(thread_);
 }

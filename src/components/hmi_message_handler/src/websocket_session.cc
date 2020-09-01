@@ -49,7 +49,7 @@ WebsocketSession::WebsocketSession(boost::asio::ip::tcp::socket socket,
     , thread_delegate_(new LoopThreadDelegate(&message_queue_, this))
     , thread_(threads::CreateThread("WS Async Send", thread_delegate_)) {
   m_writer["indentation"] = "";
-  thread_->start(threads::ThreadOptions());
+  thread_->Start(threads::ThreadOptions());
 }
 
 WebsocketSession::~WebsocketSession() {}
@@ -64,7 +64,7 @@ void WebsocketSession::Accept() {
 void WebsocketSession::Shutdown() {
   shutdown_ = true;
   thread_delegate_->SetShutdown();
-  thread_->join();
+  thread_->Stop(threads::Thread::kThreadSoftStop);
   delete thread_delegate_;
   threads::DeleteThread(thread_);
 }

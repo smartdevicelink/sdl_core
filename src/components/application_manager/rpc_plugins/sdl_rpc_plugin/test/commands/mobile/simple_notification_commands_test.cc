@@ -39,7 +39,6 @@
 #include "application_manager/commands/commands_test.h"
 #include "application_manager/mock_message_helper.h"
 #include "application_manager/smart_object_keys.h"
-#include "mobile/on_app_interface_unregistered_notification.h"
 #include "mobile/on_audio_pass_thru_notification.h"
 #include "mobile/on_driver_distraction_notification.h"
 #include "mobile/on_language_change_notification.h"
@@ -66,8 +65,7 @@ class MobileNotificationCommandsTest
   typedef Command CommandType;
 };
 
-typedef Types<commands::OnAppInterfaceUnregisteredNotification,
-              commands::OnAudioPassThruNotification,
+typedef Types<commands::OnAudioPassThruNotification,
               commands::OnLanguageChangeNotification,
               commands::OnPermissionsChangeNotification,
               commands::mobile::OnDriverDistractionNotification>
