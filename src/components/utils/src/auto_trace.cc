@@ -37,32 +37,28 @@ namespace logger {
 
 AutoTrace::AutoTrace(const std::string& component, const LocationInfo& location)
     : component_(component), location_(location) {
-  if (logger::logger_status != logger::DeletingLoggerThread) {
-    if (logger::Logger::instance().IsEnabledFor(
-            component_, logger::LogLevel::TRACE_LEVEL)) {
-      logger::LogMessage message{component_,
-                                 LogLevel::TRACE_LEVEL,
-                                 "Enter",
-                                 std::chrono::high_resolution_clock::now(),
-                                 location_,
-                                 std::this_thread::get_id()};
-      logger::Logger::instance().PushLog(message);
-    }
+  if (logger::Logger::instance().IsEnabledFor(component_,
+                                              logger::LogLevel::TRACE_LEVEL)) {
+    logger::LogMessage message{component_,
+                               LogLevel::TRACE_LEVEL,
+                               "Enter",
+                               std::chrono::high_resolution_clock::now(),
+                               location_,
+                               std::this_thread::get_id()};
+    logger::Logger::instance().PushLog(message);
   }
 }
 
 AutoTrace::~AutoTrace() {
-  if (logger::logger_status != logger::DeletingLoggerThread) {
-    if (logger::Logger::instance().IsEnabledFor(
-            component_, logger::LogLevel::TRACE_LEVEL)) {
-      logger::LogMessage message{component_,
-                                 LogLevel::TRACE_LEVEL,
-                                 "Exit",
-                                 std::chrono::high_resolution_clock::now(),
-                                 location_,
-                                 std::this_thread::get_id()};
-      logger::Logger::instance().PushLog(message);
-    }
+  if (logger::Logger::instance().IsEnabledFor(component_,
+                                              logger::LogLevel::TRACE_LEVEL)) {
+    logger::LogMessage message{component_,
+                               LogLevel::TRACE_LEVEL,
+                               "Exit",
+                               std::chrono::high_resolution_clock::now(),
+                               location_,
+                               std::this_thread::get_id()};
+    logger::Logger::instance().PushLog(message);
   }
 }
 
