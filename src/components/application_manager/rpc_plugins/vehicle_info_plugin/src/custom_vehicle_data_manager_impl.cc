@@ -45,7 +45,7 @@
 #include "utils/helpers.h"
 #include "utils/optional.h"
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "VehicleInfoPlugin")
+SDL_CREATE_LOG_VARIABLE("VehicleInfoPlugin")
 
 namespace vehicle_info_plugin {
 
@@ -64,7 +64,7 @@ CustomVehicleDataManagerImpl::CustomVehicleDataManagerImpl(
 
 std::string CustomVehicleDataManagerImpl::GetVehicleDataItemType(
     const std::string& vehicle_data_item_name) const {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   const auto& schema = FindSchemaByNameNonRecursive(vehicle_data_item_name);
 
   return schema.is_initialized() ? std::string(schema->type)
@@ -86,7 +86,7 @@ bool CustomVehicleDataManagerImpl::IsRemovedCustomVehicleDataName(
 void CustomVehicleDataManagerImpl::CreateMobileMessageParams(
     smart_objects::SmartObject& msg_params) {
   using namespace application_manager;
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
 
   typedef std::function<smart_objects::SmartObject(
       const smart_objects::SmartObject& input_params,
@@ -105,7 +105,7 @@ void CustomVehicleDataManagerImpl::CreateMobileMessageParams(
                         ? FindSchemaByKeyRecursive(key)
                         : FindSchemaByKeyNonRecursive(key);
       if (!schema.is_initialized()) {
-        LOG4CXX_DEBUG(logger_, "Schema for: " << key << " cannot be found");
+        SDL_LOG_DEBUG("Schema for: " << key << " cannot be found");
         continue;
       }
 
@@ -208,7 +208,7 @@ const OptionalDataItem FindSchema(
     const std::vector<policy_table::VehicleDataItem>& oem_items,
     SearchMethod search_method,
     Comparer comparer) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
 
   std::vector<policy_table::VehicleDataItem> items;
   for (const auto& item : oem_items) {
@@ -495,7 +495,7 @@ void CustomVehicleDataManagerImpl::UpdateVehicleDataItems() {
 void CustomVehicleDataManagerImpl::OnPolicyEvent(
     plugin_manager::PolicyEvent policy_event) {
   using namespace plugin_manager;
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
 
   switch (policy_event) {
     case kApplicationPolicyUpdated:
@@ -510,7 +510,7 @@ void CustomVehicleDataManagerImpl::OnPolicyEvent(
 const OptionalDataItem
 CustomVehicleDataManagerImpl::FindSchemaByNameNonRecursive(
     const std::string& name) const {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
 
   auto& oem_items = vehicle_data_provider_.GetVehicleDataItems();
   auto compare_by_name = [&name](const policy_table::VehicleDataItem& item) {
@@ -523,7 +523,7 @@ CustomVehicleDataManagerImpl::FindSchemaByNameNonRecursive(
 const OptionalDataItem
 CustomVehicleDataManagerImpl::FindRemovedSchemaByNameNonRecursive(
     const std::string& name) const {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
 
   const auto& removed_oem_items =
       vehicle_data_provider_.GetRemovedVehicleDataItems();
@@ -537,7 +537,7 @@ CustomVehicleDataManagerImpl::FindRemovedSchemaByNameNonRecursive(
 
 const OptionalDataItem CustomVehicleDataManagerImpl::FindSchemaByNameRecursive(
     const std::string& name) const {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
 
   auto& oem_items = vehicle_data_provider_.GetVehicleDataItems();
   auto compare_by_name = [&name](const policy_table::VehicleDataItem& item) {
@@ -550,7 +550,7 @@ const OptionalDataItem CustomVehicleDataManagerImpl::FindSchemaByNameRecursive(
 const OptionalDataItem
 CustomVehicleDataManagerImpl::FindSchemaByKeyNonRecursive(
     const std::string& key) const {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
 
   auto& oem_items = vehicle_data_provider_.GetVehicleDataItems();
   auto compare_by_key = [&key](const policy_table::VehicleDataItem& item) {
@@ -562,7 +562,7 @@ CustomVehicleDataManagerImpl::FindSchemaByKeyNonRecursive(
 
 const OptionalDataItem CustomVehicleDataManagerImpl::FindSchemaByKeyRecursive(
     const std::string& key) const {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
 
   auto& oem_items = vehicle_data_provider_.GetVehicleDataItems();
   auto compare_by_key = [&key](const policy_table::VehicleDataItem& item) {

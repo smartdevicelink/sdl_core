@@ -39,6 +39,8 @@ using namespace application_manager;
 
 namespace commands {
 
+SDL_CREATE_LOG_VARIABLE("Commands")
+
 NaviAlertManeuverResponse::NaviAlertManeuverResponse(
     const application_manager::commands::MessageSharedPtr& message,
     ApplicationManager& application_manager,
@@ -54,7 +56,7 @@ NaviAlertManeuverResponse::NaviAlertManeuverResponse(
 NaviAlertManeuverResponse::~NaviAlertManeuverResponse() {}
 
 void NaviAlertManeuverResponse::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
 
   event_engine::Event event(hmi_apis::FunctionID::Navigation_AlertManeuver);
   event.set_smart_object(*message_);

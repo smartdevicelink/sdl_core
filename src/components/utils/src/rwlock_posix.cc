@@ -35,23 +35,23 @@
 
 namespace sync_primitives {
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "Utils")
+SDL_CREATE_LOG_VARIABLE("Utils")
 
 RWLock::RWLock() {
   if (pthread_rwlock_init(&rwlock_, 0) != 0) {
-    LOG4CXX_ERROR(logger_, "Failed to initialize rwlock");
+    SDL_LOG_ERROR("Failed to initialize rwlock");
   }
 }
 
 RWLock::~RWLock() {
   if (pthread_rwlock_destroy(&rwlock_) != 0) {
-    LOG4CXX_ERROR(logger_, "Failed to destroy rwlock");
+    SDL_LOG_ERROR("Failed to destroy rwlock");
   }
 }
 
 bool RWLock::AcquireForReading() {
   if (pthread_rwlock_rdlock(&rwlock_) != 0) {
-    LOG4CXX_ERROR(logger_, "Failed to acquire rwlock for reading");
+    SDL_LOG_ERROR("Failed to acquire rwlock for reading");
     return false;
   }
   return true;
@@ -59,7 +59,7 @@ bool RWLock::AcquireForReading() {
 
 bool RWLock::TryAcquireForReading() {
   if (pthread_rwlock_tryrdlock(&rwlock_) != 0) {
-    LOG4CXX_ERROR(logger_, "Failed to acquire rwlock for reading");
+    SDL_LOG_ERROR("Failed to acquire rwlock for reading");
     return false;
   }
   return true;
@@ -67,7 +67,7 @@ bool RWLock::TryAcquireForReading() {
 
 bool RWLock::AcquireForWriting() {
   if (pthread_rwlock_wrlock(&rwlock_) != 0) {
-    LOG4CXX_ERROR(logger_, "Failed to acquire rwlock for writing");
+    SDL_LOG_ERROR("Failed to acquire rwlock for writing");
     return false;
   }
   return true;
@@ -75,7 +75,7 @@ bool RWLock::AcquireForWriting() {
 
 bool RWLock::TryAcquireForWriting() {
   if (pthread_rwlock_trywrlock(&rwlock_) != 0) {
-    LOG4CXX_ERROR(logger_, "Failed to acquire rwlock for writing");
+    SDL_LOG_ERROR("Failed to acquire rwlock for writing");
     return false;
   }
   return true;
@@ -83,7 +83,7 @@ bool RWLock::TryAcquireForWriting() {
 
 bool RWLock::Release() {
   if (pthread_rwlock_unlock(&rwlock_) != 0) {
-    LOG4CXX_ERROR(logger_, "Failed to release rwlock");
+    SDL_LOG_ERROR("Failed to release rwlock");
     return false;
   }
   return true;

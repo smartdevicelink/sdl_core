@@ -42,7 +42,7 @@
 
 namespace protocol_handler {
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "ProtocolHandler")
+SDL_CREATE_LOG_VARIABLE("ProtocolHandler")
 
 HandshakeHandler::HandshakeHandler(
     ProtocolHandlerImpl& protocol_handler,
@@ -61,7 +61,7 @@ HandshakeHandler::HandshakeHandler(
     , service_status_update_handler_(service_status_update_handler) {}
 
 HandshakeHandler::~HandshakeHandler() {
-  LOG4CXX_DEBUG(logger_, "Destroying of HandshakeHandler: " << this);
+  SDL_LOG_DEBUG("Destroying of HandshakeHandler: " << this);
 }
 
 uint32_t HandshakeHandler::connection_key() const {
@@ -79,12 +79,12 @@ bool HandshakeHandler::GetPolicyCertificateData(std::string& data) const {
 }
 
 void HandshakeHandler::OnCertificateUpdateRequired() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
 }
 
 #if defined(EXTERNAL_PROPRIETARY_MODE) && defined(ENABLE_SECURITY)
 bool HandshakeHandler::OnCertDecryptFailed() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   if (payload_) {
     ProcessFailedHandshake(*payload_, ServiceStatus::CERT_INVALID);
   }
@@ -94,7 +94,7 @@ bool HandshakeHandler::OnCertDecryptFailed() {
 #endif
 
 bool HandshakeHandler::OnGetSystemTimeFailed() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
 
   if (payload_) {
     ProcessFailedHandshake(*payload_, ServiceStatus::INVALID_TIME);
@@ -109,7 +109,7 @@ bool HandshakeHandler::OnGetSystemTimeFailed() {
 }
 
 bool HandshakeHandler::OnPTUFailed() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   if (payload_) {
     ProcessFailedHandshake(*payload_, ServiceStatus::PTU_FAILED);
   }
@@ -120,14 +120,12 @@ bool HandshakeHandler::OnPTUFailed() {
 bool HandshakeHandler::OnHandshakeDone(
     uint32_t connection_key,
     security_manager::SSLContext::HandshakeResult result) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
 
-  LOG4CXX_DEBUG(logger_,
-                "OnHandshakeDone for service : " << context_.service_type_);
+  SDL_LOG_DEBUG("OnHandshakeDone for service : " << context_.service_type_);
 
   if (connection_key != this->primary_connection_key()) {
-    LOG4CXX_DEBUG(logger_,
-                  "Listener " << this
+    SDL_LOG_DEBUG("Listener " << this
                               << " expects notification for connection id: "
                               << this->primary_connection_key()
                               << ". Received notification for connection id "
@@ -172,14 +170,13 @@ bool HandshakeHandler::IsAlreadyProtected() const {
 
 void HandshakeHandler::ProcessSuccessfulHandshake(const uint32_t connection_key,
                                                   BsonObject& params) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
 
   const bool is_service_already_protected = IsAlreadyProtected();
 
   const bool can_be_protected = CanBeProtected();
 
-  LOG4CXX_DEBUG(logger_,
-                "Service can be protected: " << can_be_protected
+  SDL_LOG_DEBUG("Service can be protected: " << can_be_protected
                                              << " and service was protected: "
                                              << is_service_already_protected);
 
@@ -211,8 +208,8 @@ void HandshakeHandler::ProcessSuccessfulHandshake(const uint32_t connection_key,
 
 void HandshakeHandler::ProcessFailedHandshake(BsonObject& params,
                                               ServiceStatus service_status) {
-  LOG4CXX_AUTO_TRACE(logger_);
-  LOG4CXX_DEBUG(logger_, "Handshake failed");
+  SDL_LOG_AUTO_TRACE();
+  SDL_LOG_DEBUG("Handshake failed");
   const std::vector<int>& force_protected =
       protocol_handler_.get_settings().force_protected_service();
 
@@ -221,8 +218,7 @@ void HandshakeHandler::ProcessFailedHandshake(BsonObject& params,
                 force_protected.end(),
                 context_.service_type_) == force_protected.end();
 
-  LOG4CXX_DEBUG(logger_,
-                "Service can be unprotected: " << can_be_unprotected
+  SDL_LOG_DEBUG("Service can be unprotected: " << can_be_unprotected
                                                << " and this is a new service: "
                                                << context_.is_new_service_);
 

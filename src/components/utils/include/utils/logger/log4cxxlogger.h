@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Ford Motor Company
+ * Copyright (c) 2020, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,27 +30,24 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "utils/log_message_loop_thread.h"
-#include "utils/logger_status.h"
+#pragma once
+
+#include <log4cxx/logger.h>
+#include "utils/ilogger.h"
 
 namespace logger {
 
-void LogMessageLoopThread::Handle(const LogMessage message) {
-  message.logger->forcedLog(message.level,
-                            message.entry,
-                            message.timeStamp,
-                            message.location,
-                            message.threadName);
-}
+class Log4CXXLogger : public ThirdPartyLoggerInterface {
+ public:
+  Log4CXXLogger(const std::string& filename);
+  void Init() override;
+  void DeInit() override;
+  bool IsEnabledFor(const std::string& component,
+                    LogLevel log_level) const override;
+  void PushLog(const LogMessage& log_message) override;
 
-LogMessageLoopThread::LogMessageLoopThread()
-    : LogMessageLoopThreadTemplate("Logger", this) {}
-
-LogMessageLoopThread::~LogMessageLoopThread() {
-  // we'll have to drop messages
-  // while deleting logger thread
-  logger_status = DeletingLoggerThread;
-  LogMessageLoopThreadTemplate::Shutdown();
-}
+ private:
+  std::string filename_;
+};
 
 }  // namespace logger

@@ -66,9 +66,6 @@
 #include "utils/lock.h"
 
 #include "encryption/hashing.h"
-#ifdef ENABLE_LOG
-#include "utils/push_log.h"
-#endif
 
 namespace test {
 namespace components {
@@ -180,9 +177,6 @@ class ApplicationManagerImplTest
                 NiceMock<usage_statistics_test::MockStatisticsManager> >())
 
   {
-#ifdef ENABLE_LOG
-    logger::create_log_message_loop_thread();
-#endif
     Mock::VerifyAndClearExpectations(mock_message_helper_);
   }
   ~ApplicationManagerImplTest() OVERRIDE {

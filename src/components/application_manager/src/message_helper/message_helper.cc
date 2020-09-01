@@ -68,7 +68,7 @@
 #include "formatters/formatter_json_rpc.h"
 #include "json/json.h"
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "ApplicationManager")
+SDL_CREATE_LOG_VARIABLE("ApplicationManager")
 
 namespace application_manager {
 
@@ -257,7 +257,7 @@ const VehicleData MessageHelper::vehicle_data_(
 smart_objects::SmartObjectSPtr MessageHelper::CreateNotification(
     mobile_apis::FunctionID::eType function_id, uint32_t app_id) {
   using smart_objects::SmartObject;
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   smart_objects::SmartObjectSPtr object(
       new SmartObject(smart_objects::SmartType_Map));
   (*object)[strings::params][strings::message_type] =
@@ -278,7 +278,7 @@ MessageHelper::CreateHMINotification(hmi_apis::FunctionID::eType function_id) {
   using smart_objects::SmartObject;
   using smart_objects::SmartObjectSPtr;
   using smart_objects::SmartType_Map;
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   SmartObjectSPtr notification_ptr =
       std::make_shared<SmartObject>(SmartType_Map);
   SmartObject& notification = *notification_ptr;
@@ -329,7 +329,7 @@ std::string MessageHelper::GetDeviceMacAddressForHandle(
   std::string device_mac_address = "";
   app_mngr.connection_handler().get_session_observer().GetDataOnDeviceID(
       device_handle, NULL, NULL, &device_mac_address);
-  LOG4CXX_DEBUG(logger_, "result : " << device_handle);
+  SDL_LOG_DEBUG("result : " << device_handle);
   return device_mac_address;
 }
 
@@ -372,7 +372,7 @@ smart_objects::SmartObjectSPtr MessageHelper::CreateMessageForHMI(
 smart_objects::SmartObjectSPtr
 MessageHelper::CreateDisplayCapabilityUpdateToMobile(
     const smart_objects::SmartObject& display_capabilities, Application& app) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   auto message = std::make_shared<smart_objects::SmartObject>(
       smart_objects::SmartType_Map);
 
@@ -398,7 +398,7 @@ MessageHelper::CreateDisplayCapabilityUpdateToMobile(
 
 void MessageHelper::BroadcastCapabilityUpdate(
     smart_objects::SmartObject& msg_params, ApplicationManager& app_mngr) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   smart_objects::SmartObject message(smart_objects::SmartType_Map);
 
   message[strings::params][strings::message_type] = MessageType::kNotification;
@@ -444,7 +444,7 @@ smart_objects::SmartObject MessageHelper::CreateAppServiceCapabilities(
 
 smart_objects::SmartObjectSPtr MessageHelper::CreateHashUpdateNotification(
     const uint32_t app_id) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   smart_objects::SmartObjectSPtr message =
       std::make_shared<smart_objects::SmartObject>(
           smart_objects::SmartType_Map);
@@ -491,17 +491,17 @@ void MessageHelper::SendGetSystemTimeRequest(const uint32_t correlation_id,
 
 void MessageHelper::SendHashUpdateNotification(const uint32_t app_id,
                                                ApplicationManager& app_mngr) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   ApplicationSharedPtr app = app_mngr.application(app_id);
   if (!app) {
-    LOG4CXX_ERROR(logger_, "Application not found by appID");
+    SDL_LOG_ERROR("Application not found by appID");
     return;
   }
   smart_objects::SmartObjectSPtr so = CreateHashUpdateNotification(app_id);
   PrintSmartObject(*so);
   if (!app_mngr.GetRPCService().ManageMobileCommand(
           so, commands::Command::SOURCE_SDL)) {
-    LOG4CXX_ERROR(logger_, "Failed to send HashUpdate notification.");
+    SDL_LOG_ERROR("Failed to send HashUpdate notification.");
     return;
   }
   app_mngr.resume_controller().ApplicationsDataUpdated();
@@ -511,7 +511,7 @@ smart_objects::SmartObjectSPtr
 MessageHelper::GetOnAppInterfaceUnregisteredNotificationToMobile(
     int32_t connection_key,
     mobile_api::AppInterfaceUnregisteredReason::eType reason) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
 
   smart_objects::SmartObjectSPtr notification =
       std::make_shared<smart_objects::SmartObject>();
@@ -533,7 +533,7 @@ MessageHelper::GetOnAppInterfaceUnregisteredNotificationToMobile(
 void MessageHelper::SendDeleteCommandRequest(smart_objects::SmartObject* cmd,
                                              ApplicationSharedPtr application,
                                              ApplicationManager& app_mngr) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   DCHECK_OR_RETURN_VOID(cmd);
   using namespace smart_objects;
   SmartObject msg_params = SmartObject(smart_objects::SmartType_Map);
@@ -576,7 +576,7 @@ void MessageHelper::SendDeleteCommandRequest(smart_objects::SmartObject* cmd,
 void MessageHelper::SendDeleteSubmenuRequest(smart_objects::SmartObject* cmd,
                                              ApplicationSharedPtr application,
                                              ApplicationManager& app_mngr) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   DCHECK_OR_RETURN_VOID(cmd);
   using namespace smart_objects;
 
@@ -632,7 +632,7 @@ void MessageHelper::SendDeleteSubmenuRequest(smart_objects::SmartObject* cmd,
 void MessageHelper::SendDeleteChoiceSetRequest(smart_objects::SmartObject* cmd,
                                                ApplicationSharedPtr application,
                                                ApplicationManager& app_mngr) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   DCHECK_OR_RETURN_VOID(cmd);
   using namespace smart_objects;
 
@@ -663,7 +663,7 @@ void MessageHelper::SendDeleteChoiceSetRequest(smart_objects::SmartObject* cmd,
 
 void MessageHelper::SendResetPropertiesRequest(ApplicationSharedPtr application,
                                                ApplicationManager& app_mngr) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   using namespace smart_objects;
 
   {
@@ -814,11 +814,11 @@ void MessageHelper::SendHMIStatusNotification(
     ApplicationSharedPtr application,
     const WindowID window_id,
     ApplicationManager& application_manager) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   smart_objects::SmartObjectSPtr notification =
       std::make_shared<smart_objects::SmartObject>();
   if (!notification) {
-    LOG4CXX_ERROR(logger_, "Failed to create smart object");
+    SDL_LOG_ERROR("Failed to create smart object");
     return;
   }
   smart_objects::SmartObject& message = *notification;
@@ -858,7 +858,7 @@ void MessageHelper::SendActivateAppToHMI(
   application_manager::ApplicationConstSharedPtr app =
       application_manager.application(app_id);
   if (!app) {
-    LOG4CXX_WARN(logger_, "Invalid app_id: " << app_id);
+    SDL_LOG_WARN("Invalid app_id: " << app_id);
     return;
   }
 
@@ -929,7 +929,7 @@ std::string MessageHelper::StringifiedHMILevel(
 
 std::string MessageHelper::StringifiedFunctionID(
     mobile_apis::FunctionID::eType function_id) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   using namespace ns_smart_device_link::ns_smart_objects;
   const char* str = 0;
   if (EnumConversionHelper<mobile_apis::FunctionID::eType>::EnumToCString(
@@ -947,7 +947,7 @@ void MessageHelper::CreateGetVehicleDataRequest(
     const uint32_t correlation_id,
     const std::vector<std::string>& params,
     ApplicationManager& app_mngr) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   smart_objects::SmartObjectSPtr request =
       std::make_shared<smart_objects::SmartObject>();
 
@@ -975,7 +975,7 @@ smart_objects::SmartObjectSPtr MessageHelper::CreateBlockedByPoliciesResponse(
     mobile_apis::Result::eType result,
     const uint32_t correlation_id,
     uint32_t connection_key) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   smart_objects::SmartObjectSPtr response =
       std::make_shared<smart_objects::SmartObject>();
 
@@ -999,7 +999,7 @@ smart_objects::SmartObjectSPtr MessageHelper::CreateDeviceListSO(
     const connection_handler::DeviceMap& devices,
     const policy::PolicyHandlerInterface& policy_handler,
     ApplicationManager& app_mngr) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   smart_objects::SmartObjectSPtr device_list_so =
       std::make_shared<smart_objects::SmartObject>(
           smart_objects::SmartType_Map);
@@ -1033,7 +1033,7 @@ smart_objects::SmartObjectSPtr MessageHelper::CreateDeviceListSO(
 
 smart_objects::SmartObjectSPtr MessageHelper::CreateModuleInfoSO(
     uint32_t function_id, ApplicationManager& app_mngr) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   smart_objects::SmartObjectSPtr module_info =
       std::make_shared<smart_objects::SmartObject>(
           smart_objects::SmartType_Map);
@@ -1049,7 +1049,7 @@ smart_objects::SmartObjectSPtr MessageHelper::CreateModuleInfoSO(
 
 smart_objects::SmartObjectSPtr MessageHelper::CreateSetAppIcon(
     const std::string& path_to_icon, uint32_t app_id) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   smart_objects::SmartObjectSPtr set_icon =
       std::make_shared<smart_objects::SmartObject>(
           smart_objects::SmartType_Map);
@@ -1075,12 +1075,12 @@ void MessageHelper::SendOnButtonSubscriptionNotification(
     ApplicationManager& app_mngr) {
   using namespace smart_objects;
   using namespace hmi_apis;
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
 
   SmartObjectSPtr notification_ptr =
       std::make_shared<SmartObject>(SmartType_Map);
   if (!notification_ptr) {
-    LOG4CXX_ERROR(logger_, "Memory allocation failed.");
+    SDL_LOG_ERROR("Memory allocation failed.");
     return;
   }
   SmartObject& notification = *notification_ptr;
@@ -1101,7 +1101,7 @@ void MessageHelper::SendOnButtonSubscriptionNotification(
   notification[strings::msg_params] = msg_params;
 
   if (!app_mngr.GetRPCService().ManageHMICommand(notification_ptr)) {
-    LOG4CXX_ERROR(logger_, "Unable to send HMI notification");
+    SDL_LOG_ERROR("Unable to send HMI notification");
   }
 }
 
@@ -1110,10 +1110,10 @@ void MessageHelper::SendAllOnButtonSubscriptionNotificationsForApp(
   using namespace smart_objects;
   using namespace hmi_apis;
   using namespace mobile_apis;
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
 
   if (app.use_count() == 0) {
-    LOG4CXX_ERROR(logger_, "Invalid application pointer ");
+    SDL_LOG_ERROR("Invalid application pointer ");
     return;
   }
 
@@ -1157,7 +1157,7 @@ void MessageHelper::SendSetAppIcon(
 
 void MessageHelper::SendAppDataToHMI(ApplicationConstSharedPtr app,
                                      ApplicationManager& app_man) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   if (app) {
     SendSetAppIcon(app->app_id(), app->app_icon_path(), app_man);
     SendGlobalPropertiesToHMI(app, app_man);
@@ -1168,7 +1168,7 @@ void MessageHelper::SendAppDataToHMI(ApplicationConstSharedPtr app,
 void MessageHelper::SendGlobalPropertiesToHMI(ApplicationConstSharedPtr app,
                                               ApplicationManager& app_mngr) {
   if (app.use_count() == 0) {
-    LOG4CXX_ERROR(logger_, "Invalid application");
+    SDL_LOG_ERROR("Invalid application");
     return;
   }
 
@@ -1184,11 +1184,11 @@ void MessageHelper::SendGlobalPropertiesToHMI(ApplicationConstSharedPtr app,
 smart_objects::SmartObjectList
 MessageHelper::CreateGlobalPropertiesRequestsToHMI(
     ApplicationConstSharedPtr app, const uint32_t correlation_id) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
 
   smart_objects::SmartObjectList requests;
   if (app.use_count() == 0) {
-    LOG4CXX_ERROR(logger_, "Invalid application");
+    SDL_LOG_ERROR("Invalid application");
     return requests;
   }
 
@@ -1274,7 +1274,7 @@ MessageHelper::CreateGlobalPropertiesRequestsToHMI(
 void MessageHelper::SendTTSGlobalProperties(ApplicationSharedPtr app,
                                             bool default_help_prompt,
                                             ApplicationManager& app_man) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   if (!app) {
     return;
   }
@@ -1361,7 +1361,7 @@ smart_objects::SmartObjectList MessageHelper::CreateShowRequestToHMI(
     ApplicationConstSharedPtr app, const uint32_t correlation_id) {
   smart_objects::SmartObjectList requests;
   if (!app) {
-    LOG4CXX_ERROR(logger_, "Invalid application");
+    SDL_LOG_ERROR("Invalid application");
     return requests;
   }
 
@@ -1430,7 +1430,7 @@ smart_objects::SmartObjectList MessageHelper::CreateAddCommandRequestToHMI(
     ApplicationConstSharedPtr app, ApplicationManager& app_mngr) {
   smart_objects::SmartObjectList requests;
   if (!app) {
-    LOG4CXX_ERROR(logger_, "Invalid application");
+    SDL_LOG_ERROR("Invalid application");
     return requests;
   }
 
@@ -1455,7 +1455,7 @@ smart_objects::SmartObjectList MessageHelper::CreateAddCommandRequestToHMI(
       if ((*i->second).keyExists(strings::cmd_id)) {
         msg_params[strings::cmd_id] = (*i->second)[strings::cmd_id].asUInt();
       } else {
-        LOG4CXX_ERROR(logger_, "Command ID is missing.");
+        SDL_LOG_ERROR("Command ID is missing.");
         continue;
       }
       msg_params[strings::menu_params] = (*i->second)[strings::menu_params];
@@ -1488,7 +1488,7 @@ MessageHelper::CreateAddVRCommandRequestFromChoiceToHMI(
     ApplicationConstSharedPtr app, ApplicationManager& app_mngr) {
   smart_objects::SmartObjectList requests;
   if (!app) {
-    LOG4CXX_ERROR(logger_, "Invalid application");
+    SDL_LOG_ERROR("Invalid application");
     return requests;
   }
 
@@ -1558,7 +1558,7 @@ smart_objects::SmartObjectSPtr MessageHelper::CreateChangeRegistration(
 void MessageHelper::SendUIChangeRegistrationRequestToHMI(
     ApplicationConstSharedPtr app, ApplicationManager& app_mngr) {
   if (app.use_count() == 0) {
-    LOG4CXX_ERROR(logger_, "Application is not valid");
+    SDL_LOG_ERROR("Application is not valid");
     return;
   }
 
@@ -1622,7 +1622,7 @@ smart_objects::SmartObjectSPtr MessageHelper::CreateUICreateWindowRequestToHMI(
     ApplicationSharedPtr application,
     ApplicationManager& app_mngr,
     const smart_objects::SmartObject& window_info) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   auto ui_request = CreateMessageForHMI(hmi_apis::messageType::request,
                                         app_mngr.GetNextHMICorrelationID());
 
@@ -1693,8 +1693,7 @@ bool MessageHelper::CreateDeviceInfo(
   if (-1 ==
       session_observer.GetDataOnDeviceID(
           device_handle, &device_name, NULL, &mac_address, &transport_type)) {
-    LOG4CXX_ERROR(logger_,
-                  "Failed to extract information for device " << device_handle);
+    SDL_LOG_ERROR("Failed to extract information for device " << device_handle);
   }
 
   smart_objects::SmartObject& device_info_map = *output;
@@ -1724,7 +1723,7 @@ bool MessageHelper::CreateHMIApplicationStruct(
   SmartObject& message = *output;
 
   if (!app) {
-    LOG4CXX_WARN(logger_, "Application is not valid");
+    SDL_LOG_WARN("Application is not valid");
     return false;
   }
 
@@ -1848,7 +1847,7 @@ bool MessageHelper::CreateHMIApplicationStruct(
 void MessageHelper::SendAddSubMenuRequestToHMI(ApplicationConstSharedPtr app,
                                                ApplicationManager& app_mngr) {
   if (app.use_count() == 0) {
-    LOG4CXX_ERROR(logger_, "Invalid application");
+    SDL_LOG_ERROR("Invalid application");
     return;
   }
 
@@ -1929,7 +1928,7 @@ void MessageHelper::SendOnAppUnregNotificationToHMI(
 smart_objects::SmartObjectSPtr
 MessageHelper::CreateOnAppPropertiesChangeNotification(
     const std::string& policy_app_id, ApplicationManager& app_mngr) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   smart_objects::SmartObjectSPtr notification =
       std::make_shared<smart_objects::SmartObject>(
           smart_objects::SmartType_Map);
@@ -1985,8 +1984,7 @@ smart_objects::SmartObjectSPtr MessageHelper::GetBCActivateAppRequestToHMI(
     ApplicationManager& app_mngr) {
   DCHECK_OR_RETURN(app, smart_objects::SmartObjectSPtr());
   if (hmi_apis::Common_HMILevel::NONE == level) {
-    LOG4CXX_WARN(logger_,
-                 "BC.ActivateApp cannot be used to deactivate an application");
+    SDL_LOG_WARN("BC.ActivateApp cannot be used to deactivate an application");
     return NULL;
   }
 
@@ -2044,11 +2042,11 @@ smart_objects::SmartObjectSPtr MessageHelper::GetBCCloseApplicationRequestToHMI(
 
 void MessageHelper::SendOnResumeAudioSourceToHMI(const uint32_t app_id,
                                                  ApplicationManager& app_mngr) {
-  LOG4CXX_WARN(logger_, "SendOnResumeAudioSourceToHMI app_id: " << app_id);
+  SDL_LOG_WARN("SendOnResumeAudioSourceToHMI app_id: " << app_id);
   application_manager::ApplicationConstSharedPtr app =
       app_mngr.application(app_id);
   if (!app) {
-    LOG4CXX_WARN(logger_, "Invalid app_id: " << app_id);
+    SDL_LOG_WARN("Invalid app_id: " << app_id);
     return;
   }
 
@@ -2159,7 +2157,7 @@ void MessageHelper::SendGetUserFriendlyMessageResponse(
     const std::vector<policy::UserFriendlyMessage>& msg,
     const uint32_t correlation_id,
     ApplicationManager& app_mngr) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   smart_objects::SmartObjectSPtr message =
       std::make_shared<smart_objects::SmartObject>(
           smart_objects::SmartType_Map);
@@ -2324,7 +2322,7 @@ smart_objects::SmartObjectSPtr MessageHelper::CreateOnServiceUpdateNotification(
     const hmi_apis::Common_ServiceStatusUpdateReason::eType
         service_update_reason,
     const uint32_t app_id) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   auto notification = MessageHelper::CreateHMINotification(
       hmi_apis::FunctionID::BasicCommunication_OnServiceUpdate);
 
@@ -2350,7 +2348,7 @@ void MessageHelper::SendNaviSetVideoConfig(
     int32_t app_id,
     ApplicationManager& app_mngr,
     const smart_objects::SmartObject& video_params) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   smart_objects::SmartObjectSPtr request = CreateMessageForHMI(
       hmi_apis::messageType::request, app_mngr.GetNextHMICorrelationID());
   if (!request) {
@@ -2368,7 +2366,7 @@ void MessageHelper::SendNaviSetVideoConfig(
 
 void MessageHelper::SendNaviStartStream(const int32_t app_id,
                                         ApplicationManager& app_mngr) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   smart_objects::SmartObjectSPtr start_stream = CreateMessageForHMI(
       hmi_apis::messageType::request, app_mngr.GetNextHMICorrelationID());
   if (!start_stream) {
@@ -2402,7 +2400,7 @@ void MessageHelper::SendNaviStartStream(const int32_t app_id,
 
 void MessageHelper::SendNaviStopStream(const int32_t app_id,
                                        ApplicationManager& app_mngr) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   smart_objects::SmartObjectSPtr stop_stream = CreateMessageForHMI(
       hmi_apis::messageType::request, app_mngr.GetNextHMICorrelationID());
   if (!stop_stream) {
@@ -2419,7 +2417,7 @@ void MessageHelper::SendNaviStopStream(const int32_t app_id,
 
 void MessageHelper::SendAudioStartStream(const int32_t app_id,
                                          ApplicationManager& app_mngr) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   smart_objects::SmartObjectSPtr start_stream = CreateMessageForHMI(
       hmi_apis::messageType::request, app_mngr.GetNextHMICorrelationID());
 
@@ -2454,7 +2452,7 @@ void MessageHelper::SendAudioStartStream(const int32_t app_id,
 
 void MessageHelper::SendAudioStopStream(const int32_t app_id,
                                         ApplicationManager& app_mngr) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   smart_objects::SmartObjectSPtr stop_stream = CreateMessageForHMI(
       hmi_apis::messageType::request, app_mngr.GetNextHMICorrelationID());
 
@@ -2503,7 +2501,7 @@ void MessageHelper::SendOnDataStreaming(
 }
 
 bool MessageHelper::SendStopAudioPathThru(ApplicationManager& app_mngr) {
-  LOG4CXX_INFO(logger_, "MessageHelper::SendAudioStopAudioPathThru");
+  SDL_LOG_INFO("MessageHelper::SendAudioStopAudioPathThru");
 
   smart_objects::SmartObjectSPtr result = CreateMessageForHMI(
       hmi_apis::messageType::request, app_mngr.GetNextHMICorrelationID());
@@ -2515,7 +2513,7 @@ bool MessageHelper::SendStopAudioPathThru(ApplicationManager& app_mngr) {
 }
 
 bool MessageHelper::SendUnsubscribedWayPoints(ApplicationManager& app_mngr) {
-  LOG4CXX_INFO(logger_, "MessageHelper::SendUnsubscribedWayPoints");
+  SDL_LOG_INFO("MessageHelper::SendUnsubscribedWayPoints");
 
   smart_objects::SmartObjectSPtr result = CreateMessageForHMI(
       hmi_apis::messageType::request, app_mngr.GetNextHMICorrelationID());
@@ -2531,7 +2529,7 @@ void MessageHelper::SendPolicySnapshotNotification(
     const std::string& snapshot_file_path,
     const std::string& url,
     ApplicationManager& app_mngr) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   smart_objects::SmartObject content(smart_objects::SmartType_Map);
   const auto request_type =
 #if defined(PROPRIETARY_MODE) || defined(EXTERNAL_PROPRIETARY_MODE)
@@ -2545,7 +2543,7 @@ void MessageHelper::SendPolicySnapshotNotification(
   if (!url.empty()) {
     content[strings::msg_params][strings::url] = url;
   } else {
-    LOG4CXX_WARN(logger_, "No service URLs");
+    SDL_LOG_WARN("No service URLs");
   }
 
   content[strings::msg_params][strings::file_name] = snapshot_file_path;
@@ -2572,7 +2570,7 @@ void MessageHelper::SendPolicySnapshotNotification(
     content[strings::msg_params][strings::url] =
         url;  // Doesn't work with mobile_notification::syncp_url ("URL")
   } else {
-    LOG4CXX_WARN(logger_, "No service URLs");
+    SDL_LOG_WARN("No service URLs");
   }
 
   content[strings::params][strings::binary_data] =
@@ -2660,7 +2658,7 @@ void MessageHelper::SendOnPermissionsChangeNotification(
     const policy::Permissions& permissions,
     ApplicationManager& app_mngr,
     const policy::EncryptionRequired encryprion_required) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   smart_objects::SmartObject content(smart_objects::SmartType_Map);
 
   content[strings::params][strings::function_id] =
@@ -2938,7 +2936,7 @@ void MessageHelper::SendUpdateSDLResponse(const std::string& result,
 
 void MessageHelper::SendOnStatusUpdate(const std::string& status,
                                        ApplicationManager& app_mngr) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   smart_objects::SmartObjectSPtr message =
       std::make_shared<smart_objects::SmartObject>(
           smart_objects::SmartType_Map);
@@ -2951,7 +2949,7 @@ void MessageHelper::SendOnStatusUpdate(const std::string& status,
   (*message)[strings::params][strings::message_type] =
       MessageType::kNotification;
 
-  LOG4CXX_DEBUG(logger_, "Sending new status:" << status);
+  SDL_LOG_DEBUG("Sending new status:" << status);
   (*message)[strings::msg_params]["status"] = status;
 
   app_mngr.GetRPCService().ManageHMICommand(message);
@@ -2980,7 +2978,7 @@ mobile_apis::Result::eType MessageHelper::VerifyImageFiles(
       mobile_apis::Result::eType res =
           VerifyImageFiles(message[i], app, app_mngr);
       if (mobile_apis::Result::SUCCESS != res) {
-        LOG4CXX_DEBUG(logger_, "VerifyImageFiles result:" << res);
+        SDL_LOG_DEBUG("VerifyImageFiles result:" << res);
         return res;
       }
     }
@@ -2991,8 +2989,7 @@ mobile_apis::Result::eType MessageHelper::VerifyImageFiles(
           VerifyImage(message, app, app_mngr);
 
       if (mobile_apis::Result::SUCCESS != verification_result) {
-        LOG4CXX_DEBUG(logger_,
-                      "VerifyImageFiles result:" << verification_result);
+        SDL_LOG_DEBUG("VerifyImageFiles result:" << verification_result);
         return verification_result;  // exit point
       }
     } else {
@@ -3005,7 +3002,7 @@ mobile_apis::Result::eType MessageHelper::VerifyImageFiles(
           mobile_apis::Result::eType res =
               VerifyImageFiles(message[*key], app, app_mngr);
           if (mobile_apis::Result::SUCCESS != res) {
-            LOG4CXX_DEBUG(logger_, "VerifyImageFiles result:" << res);
+            SDL_LOG_DEBUG("VerifyImageFiles result:" << res);
             return res;
           }
         }
@@ -3165,9 +3162,9 @@ bool MessageHelper::VerifyString(const std::string& str) {
       (std::string::npos != str.find("\\n")) ||
       (std::string::npos != str.find("\\t")) ||
       (std::string::npos == str.find_first_not_of(' '))) {
-    LOG4CXX_ERROR(logger_,
-                  "MessageHelper::VerifyString"
-                  "string contains incorrect character");
+    SDL_LOG_ERROR(
+        "MessageHelper::VerifyString"
+        "string contains incorrect character");
     return false;
   }
   return true;
@@ -3297,7 +3294,7 @@ void MessageHelper::SubscribeApplicationToSoftButton(
     smart_objects::SmartObject& message_params,
     ApplicationSharedPtr app,
     int32_t function_id) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   SubscribeApplicationToSoftButton(
       message_params,
       app,
@@ -3310,7 +3307,7 @@ bool MessageHelper::PrintSmartObject(const smart_objects::SmartObject& object) {
   Json::Value tmp;
   namespace Formatters = ns_smart_device_link::ns_json_handler::formatters;
   Formatters::CFormatterJsonBase::objToJsonValue(object, tmp);
-  LOG4CXX_DEBUG(logger_, "SMART OBJECT: " << tmp.toStyledString());
+  SDL_LOG_DEBUG("SMART OBJECT: " << tmp.toStyledString());
 #endif
   return true;
 }

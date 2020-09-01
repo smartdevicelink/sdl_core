@@ -36,6 +36,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 using namespace boost::beast::websocket;
 namespace hmi_message_handler {
 
+SDL_CREATE_LOG_VARIABLE("HMIMessageHandler")
+
 WebsocketSession::WebsocketSession(boost::asio::ip::tcp::socket socket,
                                    CMessageBrokerController* controller)
     : ws_(std::move(socket))
@@ -80,7 +82,7 @@ void WebsocketSession::Recv(boost::system::error_code ec) {
 
   if (ec) {
     std::string str_err = "ErrorMessage: " + ec.message();
-    LOG4CXX_ERROR(ws_logger_, str_err);
+    SDL_LOG_ERROR(str_err);
     shutdown_ = true;
     thread_delegate_->SetShutdown();
     controller_->deleteController(this);
@@ -121,7 +123,7 @@ void WebsocketSession::Read(boost::system::error_code ec,
   boost::ignore_unused(bytes_transferred);
   if (ec) {
     std::string str_err = "ErrorMessage: " + ec.message();
-    LOG4CXX_ERROR(ws_logger_, str_err);
+    SDL_LOG_ERROR(str_err);
     shutdown_ = true;
     thread_delegate_->SetShutdown();
     controller_->deleteController(this);
@@ -136,7 +138,7 @@ void WebsocketSession::Read(boost::system::error_code ec,
   Json::Value root;
 
   if (!reader.parse(data, &root)) {
-    LOG4CXX_ERROR(ws_logger_, "Invalid JSON Message.");
+    SDL_LOG_ERROR("Invalid JSON Message.");
     return;
   }
 
@@ -179,8 +181,7 @@ void WebsocketSession::onMessageReceived(Json::Value message) {
           if (message.isMember("result") && message["result"].isInt()) {
             mControllersIdStart = message["result"].asInt();
           } else {
-            LOG4CXX_ERROR(ws_logger_,
-                          "Not possible to initialize mControllersIdStart!");
+            SDL_LOG_ERROR("Not possible to initialize mControllersIdStart!");
           }
         } else if ("MB.subscribeTo" == method ||
                    "MB.unregisterComponent" == method ||
@@ -190,8 +191,7 @@ void WebsocketSession::onMessageReceived(Json::Value message) {
           controller_->processResponse(method, message);
         }
       } else {
-        LOG4CXX_ERROR(ws_logger_,
-                      "Request with id: " + id + " has not been found!");
+        SDL_LOG_ERROR("Request with id: " + id + " has not been found!");
       }
     } else {
       std::string method = message["method"].asString();
@@ -205,7 +205,7 @@ void WebsocketSession::onMessageReceived(Json::Value message) {
       }
     }
   } else {
-    LOG4CXX_ERROR(ws_logger_, "Message contains wrong data!\n");
+    SDL_LOG_ERROR("Message contains wrong data!\n");
     sendJsonMessage(error);
   }
 }
@@ -314,8 +314,7 @@ void WebsocketSession::LoopThreadDelegate::DrainQueue() {
     boost::system::error_code ec;
     handler_.ws_.write(boost::asio::buffer(*message_ptr), ec);
     if (ec) {
-      LOG4CXX_ERROR(ws_logger_,
-                    "A system error has occurred: " << ec.message());
+      SDL_LOG_ERROR("A system error has occurred: " << ec.message());
     }
   }
 }

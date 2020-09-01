@@ -39,6 +39,8 @@ namespace application_manager {
 
 namespace commands {
 
+SDL_CREATE_LOG_VARIABLE("Commands")
+
 CommandNotificationImpl::CommandNotificationImpl(
     const MessageSharedPtr& message,
     ApplicationManager& application_manager,
@@ -69,9 +71,8 @@ void CommandNotificationImpl::SendNotification(const bool final_message) {
   (*message_)[strings::params][strings::message_type] =
       static_cast<int32_t>(application_manager::MessageType::kNotification);
 
-  LOG4CXX_INFO(
-      logger_,
-      "SendNotification: final_message = " << std::boolalpha << final_message);
+  SDL_LOG_INFO("SendNotification: final_message = " << std::boolalpha
+                                                    << final_message);
   MessageHelper::PrintSmartObject(*message_);
 
   rpc_service_.SendMessageToMobile(message_, final_message);

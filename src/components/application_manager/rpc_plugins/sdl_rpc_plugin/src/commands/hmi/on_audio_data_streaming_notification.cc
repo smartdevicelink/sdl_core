@@ -37,6 +37,8 @@ using namespace application_manager;
 
 namespace commands {
 
+SDL_CREATE_LOG_VARIABLE("Commands")
+
 OnAudioDataStreamingNotification::OnAudioDataStreamingNotification(
     const application_manager::commands::MessageSharedPtr& message,
     ApplicationManager& application_manager,
@@ -52,7 +54,7 @@ OnAudioDataStreamingNotification::OnAudioDataStreamingNotification(
 OnAudioDataStreamingNotification::~OnAudioDataStreamingNotification() {}
 
 void OnAudioDataStreamingNotification::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   SendNotification();
 }
 

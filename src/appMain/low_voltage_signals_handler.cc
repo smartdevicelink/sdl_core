@@ -46,7 +46,7 @@
 
 namespace main_namespace {
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "LowVoltageSignalsHandler")
+SDL_CREATE_LOG_VARIABLE("LowVoltageSignalsHandler")
 
 LowVoltageSignalsHandler::LowVoltageSignalsHandler(
     LifeCycle& life_cycle, const LowVoltageSignalsOffset& offset_data)
@@ -93,22 +93,21 @@ LowVoltageSignalsHandler::~LowVoltageSignalsHandler() {
 
 void LowVoltageSignalsHandler::HandleSignal(const int signo) {
   if (SIGLOWVOLTAGE_ == signo) {
-    LOG4CXX_DEBUG(logger_, "Received LOW_VOLTAGE signal");
+    SDL_LOG_DEBUG("Received LOW_VOLTAGE signal");
 
     life_cycle_.LowVoltage();
     cpid_ = utils::Signals::Fork();
 
     if (0 > cpid_) {
-      LOG4CXX_FATAL(logger_,
-                    "Error due fork() call. Error: " << strerror(errno));
+      SDL_LOG_FATAL("Error due fork() call. Error: " << strerror(errno));
       utils::Signals::ExitProcess(EXIT_FAILURE);
     }
 
     if (0 != cpid_) {
       // In Parent process
-      LOG4CXX_DEBUG(logger_, "Child PID: " << cpid_);
+      SDL_LOG_DEBUG("Child PID: " << cpid_);
       utils::Signals::WaitPid(cpid_, nullptr, 0);
-      LOG4CXX_DEBUG(logger_, "Child process: " << cpid_ << " is stopped");
+      SDL_LOG_DEBUG("Child process: " << cpid_ << " is stopped");
       life_cycle_.WakeUp();
     } else {
       // In Child process
@@ -148,8 +147,7 @@ void NotificationThreadDelegate::threadMain() {
         low_voltage_signals_handler_.LowVoltageSignalsMask();
     const int err = sigwait(&lv_mask, &signo);
     if (0 != err) {
-      LOG4CXX_ERROR(
-          logger_,
+      SDL_LOG_ERROR(
           "Sigwait() error! Signals set contains an invalid signal number!");
       continue;
     }
@@ -158,7 +156,7 @@ void NotificationThreadDelegate::threadMain() {
 }
 
 void NotificationThreadDelegate::exitThreadMain() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   ThreadDelegate::exitThreadMain();
 }
 

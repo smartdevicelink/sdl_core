@@ -105,11 +105,11 @@ void CleanupAppFiles(ApplicationSharedPtr app) {
 
 namespace application_manager {
 
-CREATE_LOGGERPTR_GLOBAL(logger, "ApplicationManager")
+SDL_CREATE_LOG_VARIABLE("ApplicationManager")
 
 void DeleteApplicationData(ApplicationSharedPtr app,
                            ApplicationManager& app_manager) {
-  LOG4CXX_AUTO_TRACE(logger);
+  SDL_LOG_AUTO_TRACE();
   DCHECK_OR_RETURN_VOID(app);
 
   DeleteWayPoints(app, app_manager);

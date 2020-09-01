@@ -38,6 +38,8 @@ using namespace application_manager;
 
 namespace commands {
 
+SDL_CREATE_LOG_VARIABLE("Commands")
+
 VIDiagnosticMessageResponse::VIDiagnosticMessageResponse(
     const application_manager::commands::MessageSharedPtr& message,
     const VehicleInfoCommandParams& params)
@@ -50,7 +52,7 @@ VIDiagnosticMessageResponse::VIDiagnosticMessageResponse(
 VIDiagnosticMessageResponse::~VIDiagnosticMessageResponse() {}
 
 void VIDiagnosticMessageResponse::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
 
   event_engine::Event event(
       hmi_apis::FunctionID::VehicleInfo_DiagnosticMessage);

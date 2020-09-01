@@ -33,7 +33,7 @@
 #include "vehicle_info_plugin/vehicle_info_app_extension.h"
 #include "vehicle_info_plugin/vehicle_info_plugin.h"
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "VehicleInfoPlugin")
+SDL_CREATE_LOG_VARIABLE("VehicleInfoPlugin")
 
 namespace vehicle_info_plugin {
 
@@ -45,22 +45,22 @@ VehicleInfoAppExtension::VehicleInfoAppExtension(
           VehicleInfoAppExtension::VehicleInfoAppExtensionUID)
     , plugin_(plugin)
     , app_(app) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
 }
 
 VehicleInfoAppExtension::~VehicleInfoAppExtension() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
 }
 
 bool VehicleInfoAppExtension::subscribeToVehicleInfo(
     const std::string& vehicle_data) {
-  LOG4CXX_DEBUG(logger_, vehicle_data);
+  SDL_LOG_DEBUG(vehicle_data);
   return subscribed_data_.insert(vehicle_data).second;
 }
 
 bool VehicleInfoAppExtension::unsubscribeFromVehicleInfo(
     const std::string& vehicle_data) {
-  LOG4CXX_DEBUG(logger_, vehicle_data);
+  SDL_LOG_DEBUG(vehicle_data);
   auto it = subscribed_data_.find(vehicle_data);
   if (it != subscribed_data_.end()) {
     subscribed_data_.erase(it);
@@ -70,13 +70,13 @@ bool VehicleInfoAppExtension::unsubscribeFromVehicleInfo(
 }
 
 void VehicleInfoAppExtension::unsubscribeFromVehicleInfo() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   subscribed_data_.clear();
 }
 
 bool VehicleInfoAppExtension::isSubscribedToVehicleInfo(
     const std::string& vehicle_data) const {
-  LOG4CXX_DEBUG(logger_, vehicle_data);
+  SDL_LOG_DEBUG(vehicle_data);
   return subscribed_data_.find(vehicle_data) != subscribed_data_.end();
 }
 

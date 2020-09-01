@@ -40,7 +40,7 @@ namespace policy {
 using namespace application_manager;
 class PolicyHandler;
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "PolicyHandler")
+SDL_CREATE_LOG_VARIABLE("PolicyHandler")
 
 PolicyEventObserver::PolicyEventObserver(
     policy::PolicyHandlerInterface* const policy_handler,
@@ -49,9 +49,9 @@ PolicyEventObserver::PolicyEventObserver(
 
 void PolicyEventObserver::set_policy_handler(
     PolicyHandlerInterface* const policy_handler) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   sync_primitives::AutoLock auto_lock(policy_handler_lock_);
-  LOG4CXX_DEBUG(logger_, "Set policy handler " << policy_handler);
+  SDL_LOG_DEBUG("Set policy handler " << policy_handler);
   policy_handler_ = policy_handler;
 }
 
