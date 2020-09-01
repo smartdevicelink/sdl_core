@@ -40,6 +40,8 @@ namespace app_mngr = application_manager;
 
 namespace commands {
 
+SDL_CREATE_LOG_VARIABLE("Commands")
+
 ShowAppMenuRequest::ShowAppMenuRequest(
     const app_mngr::commands::MessageSharedPtr& message,
     app_mngr::ApplicationManager& application_manager,
@@ -56,14 +58,13 @@ ShowAppMenuRequest::~ShowAppMenuRequest() {}
 
 void ShowAppMenuRequest::Run() {
   using namespace app_mngr;
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
 
   ApplicationSharedPtr app = application_manager_.application(connection_key());
 
   if (!app) {
-    LOG4CXX_ERROR(
-        logger_,
-        "Application with id " << connection_key() << " is not registered.");
+    SDL_LOG_ERROR("Application with id " << connection_key()
+                                         << " is not registered.");
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     return;
   }
@@ -76,9 +77,8 @@ void ShowAppMenuRequest::Run() {
           app->system_context(mobile_apis::PredefinedWindows::DEFAULT_WINDOW),
           mobile_apis::SystemContext::SYSCTXT_MAIN,
           mobile_apis::SystemContext::SYSCTXT_MENU)) {
-    LOG4CXX_ERROR(
-        logger_,
-        "Application with id " << connection_key() << " is not activated.");
+    SDL_LOG_ERROR("Application with id " << connection_key()
+                                         << " is not activated.");
     SendResponse(false, mobile_apis::Result::REJECTED);
     return;
   }
@@ -90,7 +90,7 @@ void ShowAppMenuRequest::Run() {
   if (received_msg_params.keyExists(strings::menu_id)) {
     const int32_t menu_id = received_msg_params[strings::menu_id].asInt();
     if (!app->FindSubMenu(menu_id)) {
-      LOG4CXX_ERROR(logger_, "Menu with id " << menu_id << " is not found.");
+      SDL_LOG_ERROR("Menu with id " << menu_id << " is not found.");
       SendResponse(false, mobile_apis::Result::INVALID_ID);
       return;
     }
@@ -103,7 +103,7 @@ void ShowAppMenuRequest::Run() {
 
 void ShowAppMenuRequest::on_event(const app_mngr::event_engine::Event& event) {
   using namespace app_mngr;
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   const smart_objects::SmartObject& message = event.smart_object();
 
   switch (event.id()) {
@@ -120,8 +120,7 @@ void ShowAppMenuRequest::on_event(const app_mngr::event_engine::Event& event) {
           application_manager_.application(connection_key());
 
       if (!app) {
-        LOG4CXX_ERROR(logger_,
-                      "Application with id " << connection_key()
+        SDL_LOG_ERROR("Application with id " << connection_key()
                                              << " is not registered.");
         return;
       }
@@ -133,7 +132,7 @@ void ShowAppMenuRequest::on_event(const app_mngr::event_engine::Event& event) {
       break;
     }
     default: {
-      LOG4CXX_ERROR(logger_, "Received unknown event: " << event.id());
+      SDL_LOG_ERROR("Received unknown event: " << event.id());
       return;
     }
   }

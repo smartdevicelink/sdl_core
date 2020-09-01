@@ -47,7 +47,7 @@ std::map<std::string, hmi_apis::Common_RCAccessMode::eType> access_modes{
     {enums_value::kAskDriver, hmi_apis::Common_RCAccessMode::ASK_DRIVER}};
 }
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "RemoteControlModule")
+SDL_CREATE_LOG_VARIABLE("Commands")
 
 RCOnRemoteControlSettingsNotification::RCOnRemoteControlSettingsNotification(
     const app_mngr::commands::MessageSharedPtr& message,
@@ -89,18 +89,17 @@ std::string AccessModeToString(
 }
 
 void RCOnRemoteControlSettingsNotification::DisallowRCFunctionality() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   interior_data_manager_.OnDisablingRC();
 }
 
 void RCOnRemoteControlSettingsNotification::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
 
   if (!(*message_)[app_mngr::strings::msg_params].keyExists(
           message_params::kAllowed)) {
-    LOG4CXX_DEBUG(logger_,
-                  "Notification is ignored due to \"allow\" parameter absense");
-    LOG4CXX_DEBUG(logger_, "RC Functionality remains unchanged");
+    SDL_LOG_DEBUG("Notification is ignored due to \"allow\" parameter absense");
+    SDL_LOG_DEBUG("RC Functionality remains unchanged");
     return;
   }
 
@@ -110,7 +109,7 @@ void RCOnRemoteControlSettingsNotification::Run() {
   if (is_allowed) {
     hmi_apis::Common_RCAccessMode::eType access_mode =
         hmi_apis::Common_RCAccessMode::INVALID_ENUM;
-    LOG4CXX_DEBUG(logger_, "Allowing RC Functionality");
+    SDL_LOG_DEBUG("Allowing RC Functionality");
     resource_allocation_manager_.set_rc_enabled(true);
     if ((*message_)[app_mngr::strings::msg_params].keyExists(
             message_params::kAccessMode)) {
@@ -118,18 +117,16 @@ void RCOnRemoteControlSettingsNotification::Run() {
           (*message_)[app_mngr::strings::msg_params]
                      [message_params::kAccessMode]
                          .asUInt());
-      LOG4CXX_DEBUG(
-          logger_,
+      SDL_LOG_DEBUG(
           "Setting up access mode : " << AccessModeToString(access_mode));
     } else {
       access_mode = resource_allocation_manager_.GetAccessMode();
-      LOG4CXX_DEBUG(logger_,
-                    "No access mode received. Using last known: "
-                        << AccessModeToString(access_mode));
+      SDL_LOG_DEBUG("No access mode received. Using last known: "
+                    << AccessModeToString(access_mode));
     }
     resource_allocation_manager_.SetAccessMode(access_mode);
   } else {
-    LOG4CXX_DEBUG(logger_, "Disallowing RC Functionality");
+    SDL_LOG_DEBUG("Disallowing RC Functionality");
     DisallowRCFunctionality();
     resource_allocation_manager_.ResetAllAllocations();
     resource_allocation_manager_.set_rc_enabled(false);

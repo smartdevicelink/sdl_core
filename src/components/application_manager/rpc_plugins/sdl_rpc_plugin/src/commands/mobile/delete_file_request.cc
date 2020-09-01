@@ -42,6 +42,8 @@ using namespace application_manager;
 
 namespace commands {
 
+SDL_CREATE_LOG_VARIABLE("Commands")
+
 DeleteFileRequest::DeleteFileRequest(
     const application_manager::commands::MessageSharedPtr& message,
     ApplicationManager& application_manager,
@@ -57,14 +59,14 @@ DeleteFileRequest::DeleteFileRequest(
 DeleteFileRequest::~DeleteFileRequest() {}
 
 void DeleteFileRequest::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
 
   ApplicationSharedPtr application =
       application_manager_.application(connection_key());
 
   if (!application) {
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
-    LOG4CXX_ERROR(logger_, "Application is not registered");
+    SDL_LOG_ERROR("Application is not registered");
     return;
   }
 
@@ -75,8 +77,7 @@ void DeleteFileRequest::Run() {
        application->delete_file_in_none_count())) {
     // If application is in the HMI_NONE level the quantity of allowed
     // DeleteFile request is limited by the configuration profile
-    LOG4CXX_ERROR(logger_,
-                  "Too many requests from the app with HMILevel HMI_NONE ");
+    SDL_LOG_ERROR("Too many requests from the app with HMILevel HMI_NONE");
     SendResponse(false, mobile_apis::Result::REJECTED);
     return;
   }
@@ -86,7 +87,7 @@ void DeleteFileRequest::Run() {
 
   if (!file_system::IsFileNameValid(sync_file_name)) {
     const std::string err_msg = "Sync file name contains forbidden symbols.";
-    LOG4CXX_ERROR(logger_, err_msg);
+    SDL_LOG_ERROR(err_msg);
     SendResponse(false, mobile_apis::Result::INVALID_DATA, err_msg.c_str());
     return;
   }

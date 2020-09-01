@@ -43,6 +43,8 @@ namespace app_service_rpc_plugin {
 using namespace application_manager;
 namespace commands {
 
+SDL_CREATE_LOG_VARIABLE("Commands")
+
 PublishAppServiceRequest::PublishAppServiceRequest(
     const application_manager::commands::MessageSharedPtr& message,
     ApplicationManager& application_manager,
@@ -58,8 +60,8 @@ PublishAppServiceRequest::PublishAppServiceRequest(
 PublishAppServiceRequest::~PublishAppServiceRequest() {}
 
 void PublishAppServiceRequest::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
-  LOG4CXX_DEBUG(logger_, "Received a PublishAppService " << connection_key());
+  SDL_LOG_AUTO_TRACE();
+  SDL_LOG_DEBUG("Received a PublishAppService " << connection_key());
   MessageHelper::PrintSmartObject(*message_);
 
   smart_objects::SmartObject response_params =

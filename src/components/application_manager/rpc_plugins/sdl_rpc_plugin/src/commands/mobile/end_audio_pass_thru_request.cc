@@ -39,6 +39,8 @@ using namespace application_manager;
 
 namespace commands {
 
+SDL_CREATE_LOG_VARIABLE("Commands")
+
 EndAudioPassThruRequest::EndAudioPassThruRequest(
     const application_manager::commands::MessageSharedPtr& message,
     ApplicationManager& application_manager,
@@ -54,14 +56,14 @@ EndAudioPassThruRequest::EndAudioPassThruRequest(
 EndAudioPassThruRequest::~EndAudioPassThruRequest() {}
 
 void EndAudioPassThruRequest::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
 
   StartAwaitForInterface(HmiInterfaces::HMI_INTERFACE_UI);
   SendHMIRequest(hmi_apis::FunctionID::UI_EndAudioPassThru, NULL, true);
 }
 
 void EndAudioPassThruRequest::on_event(const event_engine::Event& event) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   const smart_objects::SmartObject& message = event.smart_object();
 
   switch (event.id()) {
@@ -89,7 +91,7 @@ void EndAudioPassThruRequest::on_event(const event_engine::Event& event) {
       break;
     }
     default: {
-      LOG4CXX_ERROR(logger_, "Received unknown event" << event.id());
+      SDL_LOG_ERROR("Received unknown event " << event.id());
       return;
     }
   }

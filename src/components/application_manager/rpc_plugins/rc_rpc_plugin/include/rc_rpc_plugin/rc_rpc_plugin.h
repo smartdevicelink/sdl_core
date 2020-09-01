@@ -42,6 +42,7 @@
 #include "rc_rpc_plugin/rc_capabilities_manager.h"
 #include "rc_rpc_plugin/rc_consent_manager.h"
 #include "rc_rpc_plugin/resource_allocation_manager.h"
+#include "utils/ilogger.h"
 
 namespace rc_rpc_plugin {
 namespace plugins = application_manager::plugin_manager;
@@ -120,7 +121,8 @@ class RCRPCPlugin : public plugins::RPCPlugin {
 };
 }  // namespace rc_rpc_plugin
 
-extern "C" application_manager::plugin_manager::RPCPlugin* Create();
+extern "C" application_manager::plugin_manager::RPCPlugin* Create(
+    logger::Logger* logger_instance);
 extern "C" void Delete(application_manager::plugin_manager::RPCPlugin* data);
 
 #endif  // SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_RC_RPC_PLUGIN_INCLUDE_RC_RPC_PLUGIN_RC_RPC_PLUGIN_H_

@@ -132,7 +132,7 @@ struct AppIconInfo {
       : endpoint(ws_endpoint), pending_request(pending) {}
 };
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "ApplicationManager")
+SDL_CREATE_LOG_VARIABLE("ApplicationManager")
 typedef std::shared_ptr<timer::Timer> TimerSPtr;
 
 class ApplicationManagerImpl
@@ -1256,14 +1256,12 @@ class ApplicationManagerImpl
   void PrepareApplicationListSO(ApplicationList app_list,
                                 smart_objects::SmartObject& applications,
                                 ApplicationManager& app_mngr) {
-    CREATE_LOGGERPTR_LOCAL(logger_, "ApplicationManager");
-
     smart_objects::SmartArray* app_array = applications.asArray();
     uint32_t app_count = NULL == app_array ? 0 : app_array->size();
     typename ApplicationList::const_iterator it;
     for (it = app_list.begin(); it != app_list.end(); ++it) {
       if (it->use_count() == 0) {
-        LOG4CXX_ERROR(logger_, "Application not found ");
+        SDL_LOG_ERROR("Application not found");
         continue;
       }
 
@@ -1277,12 +1275,12 @@ class ApplicationManagerImpl
                                                     app_mngr)) {
         applications[app_count++] = hmi_application;
       } else {
-        LOG4CXX_DEBUG(logger_, "Can't CreateHMIApplicationStruct ");
+        SDL_LOG_DEBUG("Can't CreateHMIApplicationStruct");
       }
     }
 
     if (0 == app_count) {
-      LOG4CXX_WARN(logger_, "Empty applications list");
+      SDL_LOG_WARN("Empty applications list");
     }
   }
 

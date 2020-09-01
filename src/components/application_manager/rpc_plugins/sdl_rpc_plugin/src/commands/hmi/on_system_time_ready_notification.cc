@@ -40,6 +40,8 @@ using namespace application_manager;
 
 namespace commands {
 
+SDL_CREATE_LOG_VARIABLE("Commands")
+
 OnSystemTimeReadyNotification::OnSystemTimeReadyNotification(
     const application_manager::commands::MessageSharedPtr& message,
     ApplicationManager& app_man,

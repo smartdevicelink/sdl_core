@@ -1,7 +1,7 @@
 #include "sdl_rpc_plugin/extensions/system_capability_app_extension.h"
 
 namespace sdl_rpc_plugin {
-CREATE_LOGGERPTR_GLOBAL(logger_, "GetSystemCapabilitiesAppExtension")
+SDL_CREATE_LOG_VARIABLE("GetSystemCapabilitiesAppExtension")
 
 namespace app_mngr_ = application_manager;
 const app_mngr_::AppExtensionUID
@@ -18,16 +18,14 @@ SystemCapabilityAppExtension::~SystemCapabilityAppExtension() {}
 
 bool SystemCapabilityAppExtension::SubscribeTo(
     const SystemCapabilityType system_capability_type) {
-  LOG4CXX_INFO(logger_,
-               "Subscribing to System Capability " << system_capability_type);
+  SDL_LOG_INFO("Subscribing to System Capability " << system_capability_type);
   return subscribed_data_.insert(system_capability_type).second;
 }
 
 bool SystemCapabilityAppExtension::UnsubscribeFrom(
     const SystemCapabilityType system_capability_type) {
-  LOG4CXX_INFO(
-      logger_,
-      "Unsubscribing from System Capability " << system_capability_type);
+  SDL_LOG_INFO("Unsubscribing from System Capability "
+               << system_capability_type);
   auto it = subscribed_data_.find(system_capability_type);
   if (it != subscribed_data_.end()) {
     subscribed_data_.erase(it);
@@ -37,13 +35,13 @@ bool SystemCapabilityAppExtension::UnsubscribeFrom(
 }
 
 void SystemCapabilityAppExtension::UnsubscribeFromAll() {
-  LOG4CXX_INFO(logger_, "Unsubscribing from ALL System Capabilities");
+  SDL_LOG_INFO("Unsubscribing from ALL System Capabilities");
   subscribed_data_.clear();
 }
 
 bool SystemCapabilityAppExtension::IsSubscribedTo(
     const SystemCapabilityType system_capability_type) const {
-  LOG4CXX_DEBUG(logger_, system_capability_type);
+  SDL_LOG_DEBUG(system_capability_type);
   return subscribed_data_.find(system_capability_type) !=
          subscribed_data_.end();
 }
@@ -54,7 +52,7 @@ SystemCapabilitySubscriptions SystemCapabilityAppExtension::Subscriptions() {
 
 void SystemCapabilityAppExtension::SaveResumptionData(
     ns_smart_device_link::ns_smart_objects::SmartObject& resumption_data) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   const char* application_system_capability = "systemCapability";
 
   resumption_data[application_system_capability] =
@@ -69,7 +67,7 @@ void SystemCapabilityAppExtension::SaveResumptionData(
 
 void SystemCapabilityAppExtension::ProcessResumption(
     const smart_objects::SmartObject& resumption_data) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
 
   const char* application_system_capability = "systemCapability";
   if (resumption_data.keyExists(application_system_capability)) {
@@ -85,7 +83,7 @@ void SystemCapabilityAppExtension::ProcessResumption(
 
 SystemCapabilityAppExtension& SystemCapabilityAppExtension::ExtractExtension(
     app_mngr_::Application& app) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   auto ext_ptr = app.QueryInterface(
       SystemCapabilityAppExtension::SystemCapabilityAppExtensionUID);
   DCHECK(ext_ptr);

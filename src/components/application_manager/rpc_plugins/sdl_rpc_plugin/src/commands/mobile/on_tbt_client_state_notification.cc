@@ -41,6 +41,8 @@ using namespace application_manager;
 
 namespace commands {
 
+SDL_CREATE_LOG_VARIABLE("Commands")
+
 OnTBTClientStateNotification::OnTBTClientStateNotification(
     const application_manager::commands::MessageSharedPtr& message,
     ApplicationManager& application_manager,
@@ -56,7 +58,7 @@ OnTBTClientStateNotification::OnTBTClientStateNotification(
 OnTBTClientStateNotification::~OnTBTClientStateNotification() {}
 
 void OnTBTClientStateNotification::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
 
   (*message_)[strings::params][strings::message_type] =
       static_cast<int32_t>(application_manager::MessageType::kNotification);

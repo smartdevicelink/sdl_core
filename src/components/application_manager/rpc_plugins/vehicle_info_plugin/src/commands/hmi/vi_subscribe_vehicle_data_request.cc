@@ -38,6 +38,8 @@ using namespace application_manager;
 
 namespace commands {
 
+SDL_CREATE_LOG_VARIABLE("Commands")
+
 VISubscribeVehicleDataRequest::VISubscribeVehicleDataRequest(
     const application_manager::commands::MessageSharedPtr& message,
     const VehicleInfoCommandParams& params)
@@ -51,7 +53,7 @@ VISubscribeVehicleDataRequest::VISubscribeVehicleDataRequest(
 VISubscribeVehicleDataRequest::~VISubscribeVehicleDataRequest() {}
 
 void VISubscribeVehicleDataRequest::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   const auto& rpc_spec_vehicle_data = MessageHelper::vehicle_data();
   auto& msg_params = (*message_)[strings::msg_params];
 

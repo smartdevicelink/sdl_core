@@ -194,6 +194,29 @@ class HMICapabilitiesImpl : public HMICapabilities {
 
   bool rc_supported() const OVERRIDE;
 
+  /*
+   * @brief Interface to store whether HMI supports driver distraction menu
+   * limits
+   *
+   * @param supported Indicates whether driver distraction menu limits is
+   * supported by HMI
+   */
+  void set_driver_distraction_supported(const bool supported) OVERRIDE;
+
+  /*
+   * @brief Retrieves whether HMI supports driver distraction menu limits
+   *
+   * @return TRUE if it supported, otherwise FALSE
+   */
+  bool driver_distraction_supported() const OVERRIDE;
+
+  /*
+   * @brief Interface used to store information regarding
+   * the navigation "System Capability"
+   *
+   * @param navigation_capability contains information related
+   * to the navigation system capability.
+   */
   void set_navigation_capability(
       const smart_objects::SmartObject& navigation_capability) OVERRIDE;
 
@@ -214,6 +237,12 @@ class HMICapabilitiesImpl : public HMICapabilities {
       const smart_objects::SmartObject& rc_capability) OVERRIDE;
 
   const smart_objects::SmartObjectSPtr rc_capability() const OVERRIDE;
+
+  void set_driver_distraction_capability(
+      const smart_objects::SmartObject& driver_distraction_capability) OVERRIDE;
+
+  const smart_objects::SmartObjectSPtr driver_distraction_capability()
+      const OVERRIDE;
 
   void set_seat_location_capability(
       const smart_objects::SmartObject& seat_location_capability) OVERRIDE;
@@ -444,11 +473,13 @@ class HMICapabilitiesImpl : public HMICapabilities {
   bool is_phone_call_supported_;
   bool is_video_streaming_supported_;
   bool is_rc_supported_;
+  bool is_driver_distraction_supported_;
   std::string ccpu_version_;
   smart_objects::SmartObjectSPtr navigation_capability_;
   smart_objects::SmartObjectSPtr phone_capability_;
   smart_objects::SmartObjectSPtr video_streaming_capability_;
   smart_objects::SmartObjectSPtr rc_capability_;
+  smart_objects::SmartObjectSPtr driver_distraction_capability_;
   smart_objects::SmartObjectSPtr seat_location_capability_;
 
   ApplicationManager& app_mngr_;

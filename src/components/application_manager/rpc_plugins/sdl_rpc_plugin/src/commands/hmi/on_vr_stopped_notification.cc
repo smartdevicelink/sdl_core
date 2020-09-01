@@ -37,6 +37,8 @@ using namespace application_manager;
 
 namespace commands {
 
+SDL_CREATE_LOG_VARIABLE("Commands")
+
 OnVRStoppedNotification::OnVRStoppedNotification(
     const application_manager::commands::MessageSharedPtr& message,
     ApplicationManager& application_manager,
@@ -52,7 +54,7 @@ OnVRStoppedNotification::OnVRStoppedNotification(
 OnVRStoppedNotification::~OnVRStoppedNotification() {}
 
 void OnVRStoppedNotification::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
 
   event_engine::Event event(hmi_apis::FunctionID::VR_Stopped);
   event.set_smart_object(*message_);

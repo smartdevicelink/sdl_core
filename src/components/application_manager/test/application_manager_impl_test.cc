@@ -66,9 +66,6 @@
 #include "utils/lock.h"
 
 #include "encryption/hashing.h"
-#ifdef ENABLE_LOG
-#include "utils/push_log.h"
-#endif
 
 namespace test {
 namespace components {
@@ -180,9 +177,6 @@ class ApplicationManagerImplTest
                 NiceMock<usage_statistics_test::MockStatisticsManager> >())
 
   {
-#ifdef ENABLE_LOG
-    logger::create_log_message_loop_thread();
-#endif
     Mock::VerifyAndClearExpectations(mock_message_helper_);
   }
   ~ApplicationManagerImplTest() OVERRIDE {
@@ -337,6 +331,44 @@ class ApplicationManagerImplTest
   void AddCloudAppToPendingDeviceMap();
   void CreatePendingApplication();
 #endif
+
+  void ExpectedHmiState(
+      const ApplicationSharedPtr wep_app,
+      const WindowID main_window_id,
+      const mobile_apis::HMILevel::eType hmi_level,
+      const mobile_apis::VideoStreamingState::eType vss,
+      const mobile_apis::AudioStreamingState::eType audio_str_st,
+      const mobile_apis::SystemContext::eType system_ctx) {
+    EXPECT_EQ(hmi_level, wep_app->hmi_level(main_window_id));
+    EXPECT_EQ(vss, wep_app->video_streaming_state());
+    EXPECT_EQ(audio_str_st, wep_app->audio_streaming_state());
+    EXPECT_EQ(system_ctx, wep_app->system_context(main_window_id));
+  }
+
+  smart_objects::SmartObjectSPtr CreateRAI(const std::string app_hmi_type,
+                                           const bool is_media_application) {
+    smart_objects::SmartObject rai(smart_objects::SmartType_Map);
+    smart_objects::SmartObject& params = rai[strings::msg_params];
+    params[strings::app_id] = kAppId;
+    params[strings::language_desired] = mobile_api::Language::EN_US;
+    params[strings::hmi_display_language_desired] = mobile_api::Language::EN_US;
+
+    rai[strings::params][strings::connection_key] = kConnectionKey;
+    rai[strings::msg_params][strings::app_name] = kAppName;
+    rai[strings::msg_params][strings::app_hmi_type] = app_hmi_type;
+    rai[strings::msg_params][strings::is_media_application] =
+        is_media_application;
+    rai[strings::msg_params][strings::sync_msg_version]
+       [strings::minor_version] = APIVersion::kAPIV2;
+    rai[strings::msg_params][strings::sync_msg_version]
+       [strings::major_version] = APIVersion::kAPIV6;
+
+    rai[strings::params][strings::protocol_version] =
+        protocol_handler::MajorProtocolVersion::PROTOCOL_VERSION_2;
+
+    const auto rai_ptr = std::make_shared<smart_objects::SmartObject>(rai);
+    return rai_ptr;
+  }
 
   void CreatePendingLocalApplication(const std::string& policy_app_id);
 
@@ -2044,6 +2076,173 @@ TEST_F(
 
   auto app_list = app_manager_impl_->AppsWaitingForRegistration().GetData();
   EXPECT_EQ(1u, app_list.size());
+}
+
+TEST_F(
+    ApplicationManagerImplTest,
+    RegisterApplication_WEPNonMediaAppRegisterActivateDeactivateExit_EXPECT_CORRECT_HMI_STATES) {
+  using namespace mobile_apis;
+  EXPECT_CALL(
+      mock_session_observer_,
+      GetDataOnSessionKey(kConnectionKey,
+                          _,
+                          _,
+                          testing::An<connection_handler::DeviceHandle*>()))
+      .WillOnce(DoAll(SetArgPointee<3u>(kDeviceId), Return(0)));
+
+  const std::string app_hmi_type{"WEB_VIEW"};
+  const bool is_media_app = false;
+  const auto rai_ptr = CreateRAI(app_hmi_type, is_media_app);
+
+  std::unique_ptr<plugin_manager::RPCPluginManager> rpc_plugin_manager(
+      new MockRPCPluginManager());
+  app_manager_impl_->SetPluginManager(rpc_plugin_manager);
+  auto wep_nonmedia_app = app_manager_impl_->RegisterApplication(rai_ptr);
+  wep_nonmedia_app->set_is_media_application(false);
+
+  EXPECT_EQ(protocol_handler::MajorProtocolVersion::PROTOCOL_VERSION_2,
+            wep_nonmedia_app->protocol_version());
+  EXPECT_EQ(APIVersion::kAPIV2,
+            wep_nonmedia_app->version().min_supported_api_version);
+  EXPECT_EQ(APIVersion::kAPIV6,
+            wep_nonmedia_app->version().max_supported_api_version);
+
+  // Initial HMI level, audio, video streaming states and system context
+  // set after app registration
+  ExpectedHmiState(wep_nonmedia_app,
+                   kDefaultWindowId,
+                   HMILevel::INVALID_ENUM,
+                   VideoStreamingState::INVALID_ENUM,
+                   AudioStreamingState::INVALID_ENUM,
+                   SystemContext::SYSCTXT_MAIN);
+
+  // Const shared ptr is required for OnAppActivated due to its signature
+  ApplicationConstSharedPtr const_wep_app = wep_nonmedia_app;
+  EXPECT_CALL(*mock_app_service_manager_, OnAppActivated(const_wep_app));
+
+  // Activate Webengine projection non-media app
+  // to check its audio & video streaming states in FULL Hmi level
+  app_manager_impl_->ActivateApplication(wep_nonmedia_app);
+
+  // WEP non-media app should be always not_streamable
+  // and not_audible even in FULL HMI Level
+  ExpectedHmiState(wep_nonmedia_app,
+                   kDefaultWindowId,
+                   HMILevel::HMI_FULL,
+                   VideoStreamingState::NOT_STREAMABLE,
+                   AudioStreamingState::NOT_AUDIBLE,
+                   SystemContext::SYSCTXT_MAIN);
+
+  // Deactivate Webengine projection non-media app
+  // to check its new HMI level and audio & video streaming states
+  app_manager_impl_->state_controller().DeactivateApp(wep_nonmedia_app,
+                                                      kDefaultWindowId);
+
+  // WEP non-media app should be deactivated to BACKGROUND
+  // WEP non-media app should be not audible and not streamable
+  // in BACKGROUND HMI Level
+
+  ExpectedHmiState(wep_nonmedia_app,
+                   kDefaultWindowId,
+                   HMILevel::HMI_BACKGROUND,
+                   VideoStreamingState::NOT_STREAMABLE,
+                   AudioStreamingState::NOT_AUDIBLE,
+                   SystemContext::SYSCTXT_MAIN);
+
+  // Exit of Webengine projection non-media app
+  // to check its new HMI level and audio & video streaming states
+  app_manager_impl_->state_controller().ExitDefaultWindow(wep_nonmedia_app);
+  // WEP non-media app should be deactivated to NONE
+  // WEP non-media app should be not audible and not streamable
+  // in NONE HMI Level
+  ExpectedHmiState(wep_nonmedia_app,
+                   kDefaultWindowId,
+                   HMILevel::HMI_NONE,
+                   VideoStreamingState::NOT_STREAMABLE,
+                   AudioStreamingState::NOT_AUDIBLE,
+                   SystemContext::SYSCTXT_MAIN);
+}
+
+TEST_F(
+    ApplicationManagerImplTest,
+    RegisterApplication_WEPMediaAppRegisterActivateDeactivateExit_EXPECT_CORRECT_HMI_STATES) {
+  using namespace mobile_apis;
+
+  EXPECT_CALL(
+      mock_session_observer_,
+      GetDataOnSessionKey(kConnectionKey,
+                          _,
+                          _,
+                          testing::An<connection_handler::DeviceHandle*>()))
+      .WillOnce(DoAll(SetArgPointee<3u>(kDeviceId), Return(0)));
+
+  const std::string app_hmi_type{"WEB_VIEW"};
+  const bool is_media_app = true;
+  const auto rai_ptr = CreateRAI(app_hmi_type, is_media_app);
+
+  std::unique_ptr<plugin_manager::RPCPluginManager> rpc_plugin_manager(
+      new MockRPCPluginManager());
+  app_manager_impl_->SetPluginManager(rpc_plugin_manager);
+  auto wep_media_app = app_manager_impl_->RegisterApplication(rai_ptr);
+  wep_media_app->set_is_media_application(true);
+
+  EXPECT_EQ(protocol_handler::MajorProtocolVersion::PROTOCOL_VERSION_2,
+            wep_media_app->protocol_version());
+  EXPECT_EQ(APIVersion::kAPIV2,
+            wep_media_app->version().min_supported_api_version);
+  EXPECT_EQ(APIVersion::kAPIV6,
+            wep_media_app->version().max_supported_api_version);
+
+  // Initial HMI level, audio, video streaming states and system context
+  // set after app registration
+  ExpectedHmiState(wep_media_app,
+                   kDefaultWindowId,
+                   HMILevel::INVALID_ENUM,
+                   VideoStreamingState::INVALID_ENUM,
+                   AudioStreamingState::INVALID_ENUM,
+                   SystemContext::SYSCTXT_MAIN);
+
+  // Const shared ptr is required for OnAppActivated due to its signature
+  ApplicationConstSharedPtr const_wep_app = wep_media_app;
+  EXPECT_CALL(*mock_app_service_manager_, OnAppActivated(const_wep_app));
+
+  // Activate Webengine projection media app
+  // to check its audio & video streaming states in FULL Hmi level
+  app_manager_impl_->ActivateApplication(wep_media_app);
+
+  // WEP media app should be always not_streamable
+  // but audible even in FULL HMI Level
+  ExpectedHmiState(wep_media_app,
+                   kDefaultWindowId,
+                   HMILevel::HMI_FULL,
+                   VideoStreamingState::NOT_STREAMABLE,
+                   AudioStreamingState::AUDIBLE,
+                   SystemContext::SYSCTXT_MAIN);
+
+  // Deactivate Webengine projection media app
+  // to check its new HMI level and audio & video streaming states
+  app_manager_impl_->state_controller().DeactivateApp(wep_media_app,
+                                                      kDefaultWindowId);
+
+  // WEP media app should be deactivated to LIMITED
+  // WEP media app should be audible but not streamable in LIMITED HMI Level
+  ExpectedHmiState(wep_media_app,
+                   kDefaultWindowId,
+                   HMILevel::HMI_LIMITED,
+                   VideoStreamingState::NOT_STREAMABLE,
+                   AudioStreamingState::AUDIBLE,
+                   SystemContext::SYSCTXT_MAIN);
+
+  // Exit of Webengine projection media app
+  // to check its new HMI level and audio & video streaming states
+  app_manager_impl_->state_controller().ExitDefaultWindow(wep_media_app);
+  // WEP media app should be exited to NONE
+  ExpectedHmiState(wep_media_app,
+                   kDefaultWindowId,
+                   HMILevel::HMI_NONE,
+                   VideoStreamingState::NOT_STREAMABLE,
+                   AudioStreamingState::NOT_AUDIBLE,
+                   SystemContext::SYSCTXT_MAIN);
 }
 
 TEST_F(ApplicationManagerImplTest, AddAndRemoveQueryAppDevice_SUCCESS) {

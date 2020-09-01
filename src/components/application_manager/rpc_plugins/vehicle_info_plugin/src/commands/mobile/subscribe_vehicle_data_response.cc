@@ -40,6 +40,8 @@ namespace vehicle_info_plugin {
 using namespace application_manager;
 namespace commands {
 
+SDL_CREATE_LOG_VARIABLE("Commands")
+
 SubscribeVehicleDataResponse::SubscribeVehicleDataResponse(
     const application_manager::commands::MessageSharedPtr& message,
     const VehicleInfoCommandParams& params)
@@ -52,7 +54,7 @@ SubscribeVehicleDataResponse::SubscribeVehicleDataResponse(
 SubscribeVehicleDataResponse::~SubscribeVehicleDataResponse() {}
 
 void SubscribeVehicleDataResponse::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   rpc_service_.SendMessageToMobile(message_);
 }
 

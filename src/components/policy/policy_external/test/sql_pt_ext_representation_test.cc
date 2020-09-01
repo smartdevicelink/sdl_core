@@ -306,6 +306,20 @@ TEST_F(SQLPTExtRepresentationTest,
       Json::Value(5);
   module_config["notifications_per_minute_by_priority"]["none"] =
       Json::Value(6);
+  module_config["subtle_notifications_per_minute_by_priority"] =
+      Json::Value(Json::objectValue);
+  module_config["subtle_notifications_per_minute_by_priority"]["emergency"] =
+      Json::Value(7);
+  module_config["subtle_notifications_per_minute_by_priority"]["navigation"] =
+      Json::Value(8);
+  module_config["subtle_notifications_per_minute_by_priority"]["VOICECOMM"] =
+      Json::Value(9);
+  module_config["subtle_notifications_per_minute_by_priority"]
+               ["communication"] = Json::Value(10);
+  module_config["subtle_notifications_per_minute_by_priority"]["normal"] =
+      Json::Value(11);
+  module_config["subtle_notifications_per_minute_by_priority"]["none"] =
+      Json::Value(12);
   module_config["vehicle_make"] = Json::Value("MakeT");
   module_config["vehicle_model"] = Json::Value("ModelT");
   module_config["vehicle_year"] = Json::Value("2014");

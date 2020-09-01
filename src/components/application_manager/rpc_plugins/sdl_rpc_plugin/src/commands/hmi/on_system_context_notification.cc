@@ -40,6 +40,8 @@ namespace sdl_rpc_plugin {
 using namespace application_manager;
 namespace commands {
 
+SDL_CREATE_LOG_VARIABLE("Commands")
+
 OnSystemContextNotification::OnSystemContextNotification(
     const application_manager::commands::MessageSharedPtr& message,
     ApplicationManager& application_manager,
@@ -55,7 +57,7 @@ OnSystemContextNotification::OnSystemContextNotification(
 OnSystemContextNotification::~OnSystemContextNotification() {}
 
 void OnSystemContextNotification::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
 
   mobile_api::SystemContext::eType system_context =
       static_cast<mobile_api::SystemContext::eType>(
@@ -93,7 +95,7 @@ void OnSystemContextNotification::Run() {
     application_manager_.state_controller().SetRegularState(
         app, window_id, system_context);
   } else {
-    LOG4CXX_ERROR(logger_, "Application does not exist");
+    SDL_LOG_ERROR("Application does not exist");
   }
 }
 
