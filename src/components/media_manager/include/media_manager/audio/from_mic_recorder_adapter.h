@@ -34,6 +34,7 @@
 #define SRC_COMPONENTS_MEDIA_MANAGER_INCLUDE_MEDIA_MANAGER_AUDIO_FROM_MIC_RECORDER_ADAPTER_H_
 
 #include <string>
+#include "interfaces/MOBILE_API.h"
 #include "media_manager/media_adapter_impl.h"
 
 namespace threads {
@@ -52,12 +53,19 @@ class FromMicRecorderAdapter : public MediaAdapterImpl {
   void StopActivity(int32_t application_key);
   bool is_app_performing_activity(int32_t application_key) const;
   void set_output_file(const std::string& output_file);
-  void set_duration(int32_t duration);
+  DEPRECATED void set_duration(int32_t duration);
+  void set_config(mobile_apis::SamplingRate::eType sampling_rate,
+                  mobile_apis::BitsPerSample::eType bits_per_sample,
+                  mobile_apis::AudioType::eType audio_type,
+                  int32_t duration);
 
  private:
   threads::Thread* recorder_thread_;
   std::string output_file_;
   const int32_t kDefaultDuration;
+  mobile_apis::SamplingRate::eType sampling_rate_;
+  mobile_apis::BitsPerSample::eType bits_per_sample_;
+  mobile_apis::AudioType::eType audio_type_;
   int32_t duration_;
   DISALLOW_COPY_AND_ASSIGN(FromMicRecorderAdapter);
 };

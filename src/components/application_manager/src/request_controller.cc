@@ -83,7 +83,7 @@ void RequestController::InitializeThreadpool() {
   for (uint32_t i = 0; i < pool_size_; i++) {
     snprintf(name, sizeof(name) / sizeof(name[0]), "AM Pool %d", i);
     pool_.push_back(threads::CreateThread(name, new Worker(this)));
-    pool_[i]->start();
+    pool_[i]->Start();
     LOG4CXX_DEBUG(logger_, "Request thread initialized: " << name);
   }
 }
@@ -98,8 +98,8 @@ void RequestController::DestroyThreadpool() {
   }
   for (size_t i = 0; i < pool_.size(); i++) {
     threads::Thread* thread = pool_[i];
-    thread->join();
-    delete thread->delegate();
+    thread->Stop(threads::Thread::kThreadSoftStop);
+    delete thread->GetDelegate();
     threads::DeleteThread(thread);
   }
   pool_.clear();

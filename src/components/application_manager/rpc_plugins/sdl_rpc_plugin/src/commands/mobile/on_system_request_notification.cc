@@ -118,10 +118,14 @@ void OnSystemRequestNotification::Run() {
           mobile_apis::RequestType::OEM_SPECIFIC);
 
   BinaryMessage binary_data;
-  if (binary_data_is_required) {
+  if (binary_data_is_required &&
+      (*message_)[strings::msg_params].keyExists(strings::file_name)) {
     const std::string filename =
         (*message_)[strings::msg_params][strings::file_name].asString();
     file_system::ReadBinaryFile(filename, binary_data);
+  } else if ((*message_)[strings::params].keyExists(strings::binary_data)) {
+    // Binary data may already be attached to the message
+    binary_data = (*message_)[strings::params][strings::binary_data].asBinary();
   }
 
   if (mobile_apis::RequestType::OEM_SPECIFIC == request_type) {

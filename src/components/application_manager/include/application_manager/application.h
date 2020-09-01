@@ -369,7 +369,8 @@ class DynamicApplicationData {
   /*
    * @brief Returns true if sub menu with such name already exist
    */
-  virtual bool IsSubMenuNameAlreadyExist(const std::string& name) = 0;
+  virtual bool IsSubMenuNameAlreadyExist(const std::string& name,
+                                         const uint32_t parent_id) = 0;
 
   /*
    * @brief Adds a interaction choice set to the application
@@ -608,6 +609,9 @@ class Application : public virtual InitialApplicationData,
 
   virtual void set_mobile_projection_enabled(bool option) = 0;
   virtual bool mobile_projection_enabled() const = 0;
+
+  virtual void set_webengine_projection_enabled(const bool option) = 0;
+  virtual bool webengine_projection_enabled() const = 0;
 
   virtual bool video_streaming_approved() const = 0;
   virtual void set_video_streaming_approved(bool state) = 0;

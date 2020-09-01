@@ -67,6 +67,10 @@ void OnButtonPressNotification::Run() {
   const bool is_app_id_exists =
       (*message_)[strings::msg_params].keyExists(strings::app_id);
   ApplicationSharedPtr app;
+  if (is_app_id_exists) {
+    app = application_manager_.application(
+        (*message_)[strings::msg_params][strings::app_id].asUInt());
+  }
 
   // CUSTOM_BUTTON notification
   if (static_cast<uint32_t>(mobile_apis::ButtonName::CUSTOM_BUTTON) == btn_id) {
@@ -75,9 +79,6 @@ void OnButtonPressNotification::Run() {
       LOG4CXX_ERROR(logger_, "CUSTOM_BUTTON OnButtonPress without app_id.");
       return;
     }
-
-    app = application_manager_.application(
-        (*message_)[strings::msg_params][strings::app_id].asUInt());
 
     // custom_button_id is mandatory for CUSTOM_BUTTON notification
     if (false == (*message_)[strings::msg_params].keyExists(
@@ -148,8 +149,10 @@ void OnButtonPressNotification::Run() {
       if (app->app_id() == subscribed_app->app_id()) {
         SendButtonPress(subscribed_app);
       }
-    } else if (subscribed_app->IsFullscreen()) {
-      // if No "appID" - send it FULL apps only.
+    } else if (hmi_apis::Common_ButtonName::OK != btn_id ||
+               subscribed_app->IsFullscreen()) {
+      // if No "appID" and OK button - send it FULL apps only.
+      // if not OK button, send to LIMITED subscribed apps
       SendButtonPress(subscribed_app);
     }
   }

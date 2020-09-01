@@ -1605,6 +1605,7 @@ void ConnectionHandlerImpl::CloseConnectionSessions(
 }
 
 void ConnectionHandlerImpl::SendEndService(uint32_t key, uint8_t service_type) {
+  LOG4CXX_AUTO_TRACE(logger_);
   if (protocol_handler_) {
     uint32_t connection_handle = 0;
     uint8_t session_id = 0;

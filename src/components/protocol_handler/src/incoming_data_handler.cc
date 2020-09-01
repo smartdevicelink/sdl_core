@@ -50,10 +50,9 @@ static const size_t MIN_HEADER_SIZE =
 
 ProtocolFramePtrList IncomingDataHandler::ProcessData(
     const RawMessage& tm_message,
-    RESULT_CODE* result,
+    RESULT_CODE& out_result,
     size_t* malformed_occurrence) {
   LOG4CXX_AUTO_TRACE(logger_);
-  DCHECK(result);
   DCHECK(malformed_occurrence);
   const transport_manager::ConnectionUID connection_id =
       tm_message.connection_key();
@@ -61,7 +60,7 @@ ProtocolFramePtrList IncomingDataHandler::ProcessData(
   const size_t tm_message_size = tm_message.data_size();
   if (tm_message_size == 0 || data == NULL) {
     LOG4CXX_WARN(logger_, "Wrong raw message " << tm_message_size << " bytes");
-    *result = RESULT_FAIL;
+    out_result = RESULT_FAIL;
     return ProtocolFramePtrList();
   }
   LOG4CXX_INFO(logger_,
@@ -70,7 +69,7 @@ ProtocolFramePtrList IncomingDataHandler::ProcessData(
   ConnectionsDataMap::iterator it = connections_data_.find(connection_id);
   if (connections_data_.end() == it) {
     LOG4CXX_WARN(logger_, "ProcessData requested for unknown connection");
-    *result = RESULT_FAIL;
+    out_result = RESULT_FAIL;
     return ProtocolFramePtrList();
   }
   std::vector<uint8_t>& connection_data = it->second;
@@ -80,7 +79,7 @@ ProtocolFramePtrList IncomingDataHandler::ProcessData(
                                                   << connection_data.size());
   ProtocolFramePtrList out_frames;
   *malformed_occurrence = 0;
-  *result = CreateFrame(
+  out_result = CreateFrame(
       connection_data, out_frames, *malformed_occurrence, connection_id);
   LOG4CXX_DEBUG(logger_,
                 "New data size for connection " << connection_id << " is "
@@ -89,7 +88,7 @@ ProtocolFramePtrList IncomingDataHandler::ProcessData(
     LOG4CXX_INFO(logger_,
                  "Created and passed " << out_frames.size() << " packets");
   } else {
-    if (RESULT_DEFERRED == *result) {
+    if (RESULT_DEFERRED == out_result) {
       LOG4CXX_DEBUG(
           logger_,
           "No packets have been created. Waiting next portion of data.");
@@ -98,9 +97,9 @@ ProtocolFramePtrList IncomingDataHandler::ProcessData(
     }
   }
   if (*malformed_occurrence > 0u || last_portion_of_data_was_malformed_) {
-    *result = RESULT_MALFORMED_OCCURS;
+    out_result = RESULT_MALFORMED_OCCURS;
   } else {
-    *result = RESULT_OK;
+    out_result = RESULT_OK;
   }
   return out_frames;
 }

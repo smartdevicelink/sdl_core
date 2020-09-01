@@ -150,6 +150,7 @@ class TcpClientListener : public ClientConnectionListener {
   threads::Thread* thread_;
   int socket_;
   bool thread_stop_requested_;
+  bool remove_devices_on_terminate_;
   int pipe_fds_[2];
   NetworkInterfaceListener* interface_listener_;
   const std::string designated_interface_;
