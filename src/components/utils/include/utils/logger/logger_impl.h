@@ -53,23 +53,13 @@ using LoopThreadPtr = std::unique_ptr<T, std::function<void(T*)> >;
 class LogMessageLoopThread : public LogMessageLoopThreadTemplate,
                              public LogMessageLoopThreadTemplate::Handler {
  public:
-  LogMessageLoopThread(std::function<void(LogMessage)> handler)
-      : LogMessageLoopThreadTemplate("Logger", this), force_log_(handler) {}
+  LogMessageLoopThread(std::function<void(LogMessage)> handler);
 
-  void Push(const LogMessage& message) {
-    PostMessage(message);
-  }
+  void Push(const LogMessage& message);
 
-  void Handle(const LogMessage message) {
-    force_log_(message);
-  }
+  void Handle(const LogMessage message);
 
-  ~LogMessageLoopThread() {
-    // we'll have to drop messages
-    // while deleting logger thread
-    logger::logger_status = logger::DeletingLoggerThread;
-    LogMessageLoopThreadTemplate::Shutdown();
-  }
+  ~LogMessageLoopThread();
 
  private:
   std::function<void(LogMessage)> force_log_;

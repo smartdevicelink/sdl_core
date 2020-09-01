@@ -111,4 +111,23 @@ Logger& Logger::instance(Logger* pre_init) {
   return *instance_;
 }
 
+LogMessageLoopThread::LogMessageLoopThread(
+    std::function<void(LogMessage)> handler)
+    : LogMessageLoopThreadTemplate("Logger", this), force_log_(handler) {}
+
+void LogMessageLoopThread::Push(const LogMessage& message) {
+  PostMessage(message);
+}
+
+void LogMessageLoopThread::Handle(const LogMessage message) {
+  force_log_(message);
+}
+
+LogMessageLoopThread::~LogMessageLoopThread() {
+  // we'll have to drop messages
+  // while deleting logger thread
+  logger::logger_status = logger::DeletingLoggerThread;
+  LogMessageLoopThreadTemplate::Shutdown();
+}
+
 }  // namespace logger
