@@ -61,6 +61,9 @@ class MockMediaManager : public media_manager::MediaManager {
   MOCK_METHOD2(StopStreaming,
                void(int32_t application_key,
                     protocol_handler::ServiceType service_type));
+  MOCK_METHOD2(SuspendStreaming,
+               void(int32_t application_key,
+                    protocol_handler::ServiceType service_type));
   MOCK_METHOD2(FramesProcessed,
                void(int32_t application_key, int32_t frame_number));
   MOCK_CONST_METHOD0(settings, const media_manager::MediaManagerSettings&());

@@ -3601,9 +3601,8 @@ void ApplicationManagerImpl::OnAppStreaming(
     case Application::StreamingState::kSuspended: {
       // Don't stop activity in media_manager_ in that case
       // Just cancel the temporary streaming state
-      if (protocol_handler::ServiceType::kMobileNav == service_type) {
-        state_ctrl_.OnVideoStreamingStopped(app);
-      }
+      state_ctrl_.OnVideoStreamingStopped(app);
+      media_manager_->SuspendStreaming(app_id, service_type);
       break;
     }
   }

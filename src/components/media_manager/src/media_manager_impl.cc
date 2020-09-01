@@ -298,10 +298,26 @@ void MediaManagerImpl::StopStreaming(
     int32_t application_key, protocol_handler::ServiceType service_type) {
   SDL_LOG_AUTO_TRACE();
 
-  stream_data_size_ = 0ull;
-
   if (streamer_[service_type]) {
     streamer_[service_type]->StopActivity(application_key);
+  }
+}
+
+void MediaManagerImpl::SuspendStreaming(
+    int32_t application_key, protocol_handler::ServiceType service_type) {
+  SDL_LOG_AUTO_TRACE();
+  using namespace application_manager;
+  using namespace protocol_handler;
+
+  const auto app = application_manager_.application(application_key);
+  if (app) {
+    // Reset playback time and stream size when audio file has been played
+    if (ServiceType::kAudio == service_type &&
+        "socket" == settings().audio_server_type()) {
+      stream_data_size_ = 0ull;
+      socket_audio_stream_start_time_ =
+          std::chrono::system_clock::from_time_t(0);
+    }
   }
 }
 
