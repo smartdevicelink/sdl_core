@@ -183,6 +183,36 @@ class RCAppExtension : public application_manager::AppExtension {
   std::set<ModuleUid> InteriorVehicleDataSubscriptions() const;
 
   /**
+   * @brief AddPendingSubscription adds pending subscription
+   * @param module interior data specification(zone, data type)
+   * @return true in case of pending subscription is successful added, otherwise
+   * false
+   */
+  bool AddPendingSubscription(const ModuleUid& module);
+
+  /**
+   * @brief RemovePendingSubscription removes some particular pending
+   * subscription
+   * @param module interior data specification(zone, data type)
+   */
+  void RemovePendingSubscription(const ModuleUid& module);
+
+  /**
+   * @brief RemovePendingSubscriptions removes all pending subscriptions
+   */
+  void RemovePendingSubscriptions();
+
+  /**
+   * @brief PendingSubscriptions list of preliminary subscriptoins
+   * That will be moved to subscriptions as soon as HMI will respond with
+   * success.
+   * Used for resumption to keep list of preliminary subscriptions and wait for
+   * HMI response
+   * @return list of preliminary subscriptions
+   */
+  std::set<ModuleUid> PendingSubscriptions();
+
+  /**
    * @brief GetUserLocation
    * @return grid of user location
    */
@@ -210,6 +240,8 @@ class RCAppExtension : public application_manager::AppExtension {
   void UpdateHash();
 
   std::set<ModuleUid> subscribed_interior_vehicle_data_;
+
+  std::set<ModuleUid> pending_subscriptions_;
 
   Grid user_location_;
 

@@ -217,7 +217,7 @@ TEST_F(RCPendingResumptionHandlerTest,
   auto rc_app_ext = CreateExtension(*mock_app);
 
   ModuleUid module_uid{kModuleType_1, kModuleId_1};
-  rc_app_ext->SubscribeToInteriorVehicleData(module_uid);
+  rc_app_ext->AddPendingSubscription(module_uid);
 
   EXPECT_CALL(app_manager_mock_, GetNextHMICorrelationID())
       .WillOnce(Return(kAppId_1));
@@ -236,10 +236,10 @@ TEST_F(RCPendingResumptionHandlerTest,
   auto rc_app_ext = CreateExtension(*mock_app);
 
   ModuleUid module_uid_1 = {kModuleType_1, kModuleId_1};
-  rc_app_ext->SubscribeToInteriorVehicleData(module_uid_1);
+  rc_app_ext->AddPendingSubscription(module_uid_1);
 
   ModuleUid module_uid_2 = {kModuleType_2, kModuleId_2};
-  rc_app_ext->SubscribeToInteriorVehicleData(module_uid_2);
+  rc_app_ext->AddPendingSubscription(module_uid_2);
 
   {
     InSequence in_sequence;
@@ -266,7 +266,7 @@ TEST_F(RCPendingResumptionHandlerTest,
   auto rc_app_ext = CreateExtension(*mock_app);
 
   ModuleUid module_uid = {kModuleType_1, kModuleId_1};
-  rc_app_ext->SubscribeToInteriorVehicleData(module_uid);
+  rc_app_ext->AddPendingSubscription(module_uid);
 
   auto subscribe = get_subscriber();
 
@@ -280,7 +280,7 @@ TEST_F(RCPendingResumptionHandlerTest,
       *rc_app_ext, subscribe, *mock_app);
 
   auto rc_app_ext_2 = CreateExtension(*mock_app);
-  rc_app_ext_2->SubscribeToInteriorVehicleData(module_uid);
+  rc_app_ext_2->AddPendingSubscription(module_uid);
 
   EXPECT_CALL(app_manager_mock_, GetNextHMICorrelationID());
   EXPECT_CALL(subscribe_catcher_, subscribe(kAppId_1, _));
@@ -296,7 +296,7 @@ TEST_F(RCPendingResumptionHandlerTest,
   auto rc_app_ext = CreateExtension(*mock_app);
 
   ModuleUid module_uid_1 = {kModuleType_1, kModuleId_1};
-  rc_app_ext->SubscribeToInteriorVehicleData(module_uid_1);
+  rc_app_ext->AddPendingSubscription(module_uid_1);
 
   auto subscribe = get_subscriber();
 
@@ -311,8 +311,8 @@ TEST_F(RCPendingResumptionHandlerTest,
 
   auto rc_app_ext_2 = CreateExtension(*mock_app);
   ModuleUid module_uid_2 = {kModuleType_2, kModuleId_2};
-  rc_app_ext_2->SubscribeToInteriorVehicleData(module_uid_1);
-  rc_app_ext_2->SubscribeToInteriorVehicleData(module_uid_2);
+  rc_app_ext_2->AddPendingSubscription(module_uid_1);
+  rc_app_ext_2->AddPendingSubscription(module_uid_2);
 
   {
     InSequence in_sequence;
@@ -336,7 +336,7 @@ TEST_F(RCPendingResumptionHandlerTest,
   auto rc_app_ext = CreateExtension(*mock_app_1);
 
   ModuleUid module_uid = {kModuleType_1, kModuleId_1};
-  rc_app_ext->SubscribeToInteriorVehicleData(module_uid);
+  rc_app_ext->AddPendingSubscription(module_uid);
 
   auto subscribe = get_subscriber();
 
@@ -352,7 +352,7 @@ TEST_F(RCPendingResumptionHandlerTest,
   auto mock_app_2 = CreateApp(kAppId_2);
   auto rc_app_ext_2 = CreateExtension(*mock_app_2);
 
-  rc_app_ext_2->SubscribeToInteriorVehicleData(module_uid);
+  rc_app_ext_2->AddPendingSubscription(module_uid);
 
   EXPECT_CALL(app_manager_mock_, GetNextHMICorrelationID())
       .WillOnce(Return(kAppId_2));
@@ -382,7 +382,7 @@ TEST_F(RCPendingResumptionHandlerTest,
   auto rc_app_ext = CreateExtension(*mock_app_1);
 
   ModuleUid module_uid = {kModuleType_1, kModuleId_1};
-  rc_app_ext->SubscribeToInteriorVehicleData(module_uid);
+  rc_app_ext->AddPendingSubscription(module_uid);
 
   auto subscribe = get_subscriber();
 
@@ -397,7 +397,7 @@ TEST_F(RCPendingResumptionHandlerTest,
   auto mock_app_2 = CreateApp(kAppId_2);
   auto rc_app_ext_2 = CreateExtension(*mock_app_2);
 
-  rc_app_ext_2->SubscribeToInteriorVehicleData(module_uid);
+  rc_app_ext_2->AddPendingSubscription(module_uid);
 
   EXPECT_CALL(app_manager_mock_, GetNextHMICorrelationID())
       .WillOnce(Return(kAppId_2));

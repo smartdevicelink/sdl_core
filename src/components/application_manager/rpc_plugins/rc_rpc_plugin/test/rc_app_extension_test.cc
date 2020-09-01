@@ -65,12 +65,12 @@ class RcAppExtensionTest : public testing::Test {
   rc_rpc_plugin::RCAppExtensionPtr rc_app_extension_;
 };
 
-TEST_F(RcAppExtensionTest, SubscribeToInteriorVehicleData_AppUpdateHash) {
+TEST_F(RcAppExtensionTest, SubscribeToInteriorVehicleData_AppDoesntUpdateHash) {
   const std::string module_type = "CLIMATE";
   const std::string module_id = "9cb963f3-c5e8-41cb-b001-19421cc16552";
   rc_rpc_plugin::ModuleUid module{module_type, module_id};
 
-  EXPECT_CALL(*mock_app_, UpdateHash());
+  EXPECT_CALL(*mock_app_, UpdateHash()).Times(0);
 
   rc_app_extension_->SubscribeToInteriorVehicleData(module);
   EXPECT_TRUE(rc_app_extension_->IsSubscribedToInteriorVehicleData(module));
@@ -79,15 +79,16 @@ TEST_F(RcAppExtensionTest, SubscribeToInteriorVehicleData_AppUpdateHash) {
   EXPECT_EQ(1ull, subscription.size());
 }
 
-TEST_F(RcAppExtensionTest, UnsubscribeFromInteriorVehicleData_AppUpdateHash) {
+TEST_F(RcAppExtensionTest,
+       UnsubscribeFromInteriorVehicleData_AppDoesntUpdateHash) {
   const std::string module_type = "CLIMATE";
   const std::string module_id = "9cb963f3-c5e8-41cb-b001-19421cc16552";
   rc_rpc_plugin::ModuleUid module{module_type, module_id};
 
-  EXPECT_CALL(*mock_app_, UpdateHash());
+  EXPECT_CALL(*mock_app_, UpdateHash()).Times(0);
   rc_app_extension_->SubscribeToInteriorVehicleData(module);
 
-  EXPECT_CALL(*mock_app_, UpdateHash());
+  EXPECT_CALL(*mock_app_, UpdateHash()).Times(0);
   rc_app_extension_->UnsubscribeFromInteriorVehicleData(module);
 
   EXPECT_FALSE(rc_app_extension_->IsSubscribedToInteriorVehicleData(module));
@@ -97,7 +98,7 @@ TEST_F(RcAppExtensionTest, UnsubscribeFromInteriorVehicleData_AppUpdateHash) {
 }
 
 TEST_F(RcAppExtensionTest,
-       UnsubscribeFromInteriorVehicleDataOfType_AppUpdateHash) {
+       UnsubscribeFromInteriorVehicleDataOfType_AppDoesntUpdateHash) {
   const std::string module1_type = "CLIMATE";
   const std::string module1_id = "9cb963f3-c5e8-41cb-b001-19421cc16552";
   rc_rpc_plugin::ModuleUid module1{module1_type, module1_id};
@@ -106,7 +107,7 @@ TEST_F(RcAppExtensionTest,
   const std::string module2_id = "357a3918-9f35-4d86-a8b6-60cd4308d76f";
   rc_rpc_plugin::ModuleUid module2{module2_type, module2_id};
 
-  EXPECT_CALL(*mock_app_, UpdateHash()).Times(2);
+  EXPECT_CALL(*mock_app_, UpdateHash()).Times(0);
   rc_app_extension_->SubscribeToInteriorVehicleData(module1);
   rc_app_extension_->SubscribeToInteriorVehicleData(module2);
 
@@ -130,7 +131,7 @@ TEST_F(RcAppExtensionTest,
 
   const std::string module2_type = "RADIO";
 
-  EXPECT_CALL(*mock_app_, UpdateHash());
+  EXPECT_CALL(*mock_app_, UpdateHash()).Times(0);
   rc_app_extension_->SubscribeToInteriorVehicleData(module);
 
   EXPECT_CALL(*mock_app_, UpdateHash()).Times(0);
@@ -153,7 +154,7 @@ TEST_F(RcAppExtensionTest, SaveResumptionData_SUCCESS) {
   const std::string module2_id = "357a3918-9f35-4d86-a8b6-60cd4308d76f";
   ModuleUid module2{module2_type, module2_id};
 
-  EXPECT_CALL(*mock_app_, UpdateHash()).Times(2);
+  EXPECT_CALL(*mock_app_, UpdateHash()).Times(0);
   rc_app_extension_->SubscribeToInteriorVehicleData(module1);
   rc_app_extension_->SubscribeToInteriorVehicleData(module2);
 

@@ -41,6 +41,12 @@ void RCPendingResumptionHandler::on_event(
                   << " module type: " << module_uid.first
                   << " module id: " << module_uid.second);
 
+    auto app = application_manager_.application(app_id);
+    if (app) {
+      auto rc_app_extension = RCHelpers::GetRCExtension(*app);
+      rc_app_extension->SubscribeToInteriorVehicleData(module_uid);
+    }
+
     if (response[am_strings::msg_params].keyExists(
             message_params::kModuleData)) {
       const auto module_data =
@@ -58,11 +64,6 @@ void RCPendingResumptionHandler::on_event(
                   << " module type: " << module_uid.first
                   << " module id: " << module_uid.second);
 
-    auto app = application_manager_.application(app_id);
-    if (app) {
-      auto rc_app_extension = RCHelpers::GetRCExtension(*app);
-      rc_app_extension->UnsubscribeFromInteriorVehicleData(module_uid);
-    }
     ProcessNextPausedResumption(module_uid);
   }
 }
@@ -85,7 +86,8 @@ void RCPendingResumptionHandler::HandleResumptionSubscriptionRequest(
   sync_primitives::AutoLock lock(pending_resumption_lock_);
 
   auto rc_extension = RCHelpers::GetRCExtension(app);
-  auto subscriptions = rc_extension->InteriorVehicleDataSubscriptions();
+  auto subscriptions = rc_extension->PendingSubscriptions();
+  rc_extension->RemovePendingSubscriptions();
   SDL_LOG_TRACE("app id " << app.app_id() << " " << Stringify(subscriptions));
 
   std::vector<ModuleUid> ignored;
@@ -96,6 +98,7 @@ void RCPendingResumptionHandler::HandleResumptionSubscriptionRequest(
         IsOtherAppsSubscribed(app.app_id(), subscription);
     bool is_pending_response = IsPendingForResponse(subscription);
     if (is_another_app_subscribed && !is_pending_response) {
+      rc_extension->SubscribeToInteriorVehicleData(subscription);
       ignored.push_back(subscription);
     } else if (is_pending_response) {
       already_pending.push_back(subscription);
@@ -156,11 +159,13 @@ void RCPendingResumptionHandler::HandleSuccessfulResponse(
     auto& queue_freezed = it->second;
     while (!queue_freezed.empty()) {
       const auto& resumption_request = queue_freezed.front();
-      cid = resumption_request
-                .message[app_mngr::strings::params]
-                        [app_mngr::strings::correlation_id]
-                .asInt();
+      cid = resumption_request.correlation_id();
       RaiseEventForResponse(response, cid);
+      auto app = application_manager_.application(resumption_request.app_id);
+      if (app) {
+        auto rc_app_extension = RCHelpers::GetRCExtension(*app);
+        rc_app_extension->SubscribeToInteriorVehicleData(module_uid);
+      }
       queue_freezed.pop();
     }
     paused_resumptions_.erase(it);

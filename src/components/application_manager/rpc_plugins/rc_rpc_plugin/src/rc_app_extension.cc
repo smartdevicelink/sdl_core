@@ -78,13 +78,11 @@ RCAppExtension::RCAppExtension(application_manager::AppExtensionUID uid,
 
 void RCAppExtension::SubscribeToInteriorVehicleData(const ModuleUid& module) {
   subscribed_interior_vehicle_data_.insert(module);
-  UpdateHash();
 }
 
 void RCAppExtension::UnsubscribeFromInteriorVehicleData(
     const ModuleUid& module) {
   subscribed_interior_vehicle_data_.erase(module);
-  UpdateHash();
 }
 
 void RCAppExtension::UnsubscribeFromInteriorVehicleDataOfType(
@@ -106,7 +104,6 @@ void RCAppExtension::UnsubscribeFromInteriorVehicleDataOfType(
 
 void RCAppExtension::UnsubscribeFromInteriorVehicleData() {
   subscribed_interior_vehicle_data_.clear();
-  UpdateHash();
 }
 
 bool RCAppExtension::IsSubscribedToInteriorVehicleDataOfType(
@@ -187,7 +184,7 @@ void RCAppExtension::ProcessResumption(
     ModuleUid module{module_type, module_id};
     SDL_LOG_TRACE("app id " << application_.app_id() << " type : "
                             << module_type << " id <" << module_id);
-    SubscribeToInteriorVehicleData(module);
+    AddPendingSubscription(module);
   }
 
   plugin_.ProcessResumptionSubscription(application_, *this, subscriber);
@@ -197,7 +194,7 @@ void RCAppExtension::RevertResumption(
     const smart_objects::SmartObject& resumption_data) {
   SDL_LOG_AUTO_TRACE();
 
-  subscribed_interior_vehicle_data_.clear();
+  UnsubscribeFromInteriorVehicleData();
 
   const auto module_subscriptions =
       ConvertSmartObjectToModuleCollection(resumption_data);
@@ -230,6 +227,22 @@ void RCAppExtension::RevertResumption(
 
 std::set<ModuleUid> RCAppExtension::InteriorVehicleDataSubscriptions() const {
   return subscribed_interior_vehicle_data_;
+}
+
+bool RCAppExtension::AddPendingSubscription(const ModuleUid& module) {
+  return pending_subscriptions_.insert(module).second;
+}
+
+void RCAppExtension::RemovePendingSubscription(const ModuleUid& module) {
+  pending_subscriptions_.erase(module);
+}
+
+void RCAppExtension::RemovePendingSubscriptions() {
+  pending_subscriptions_.clear();
+}
+
+std::set<ModuleUid> RCAppExtension::PendingSubscriptions() {
+  return pending_subscriptions_;
 }
 
 Grid RCAppExtension::GetUserLocation() const {

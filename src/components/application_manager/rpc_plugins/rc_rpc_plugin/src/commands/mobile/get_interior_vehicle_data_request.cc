@@ -135,6 +135,7 @@ void GetInteriorVehicleDataRequest::ProcessResponseToMobileFromCache(
         result_code = mobile_apis::Result::WARNINGS;
       } else {
         extension->SubscribeToInteriorVehicleData(module);
+        app->UpdateHash();
       }
     }
   }
@@ -144,6 +145,7 @@ void GetInteriorVehicleDataRequest::ProcessResponseToMobileFromCache(
     DCHECK(extension);
     if (extension->IsSubscribedToInteriorVehicleData(module)) {
       extension->UnsubscribeFromInteriorVehicleData(module);
+      app->UpdateHash();
     }
   }
 }
@@ -388,6 +390,8 @@ void GetInteriorVehicleDataRequest::ProccessSubscription(
                     << app->app_id() << " " << module_type << " " << module_id);
       extension->UnsubscribeFromInteriorVehicleData(module);
     }
+
+    app->UpdateHash();
   }
 }
 
