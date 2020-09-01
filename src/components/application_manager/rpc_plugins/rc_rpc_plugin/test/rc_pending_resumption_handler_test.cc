@@ -29,6 +29,7 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE. */
 
+#include "rc_rpc_plugin/rc_pending_resumption_handler.h"
 #include "application_manager/mock_application.h"
 #include "application_manager/mock_event_dispatcher.h"
 #include "application_manager/mock_message_helper.h"
@@ -38,7 +39,6 @@
 #include "mock_application_manager.h"
 #include "rc_rpc_plugin/interior_data_cache_impl.h"
 #include "rc_rpc_plugin/rc_module_constants.h"
-#include "rc_rpc_plugin/rc_pending_resumption_handler.h"
 #include "rc_rpc_plugin/rc_rpc_plugin.h"
 
 namespace rc_rpc_plugin_test {
