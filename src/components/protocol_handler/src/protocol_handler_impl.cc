@@ -104,6 +104,8 @@ ProtocolHandlerImpl::ProtocolHandlerImpl(
       get_settings().maximum_audio_payload_size());
   protocol_header_validator_.set_max_video_payload_size(
       get_settings().maximum_video_payload_size());
+  protocol_header_validator_.set_max_protocol_version_supported(
+      get_settings().max_supported_protocol_version());
   incoming_data_handler_.set_validator(&protocol_header_validator_);
 
   const size_t& message_frequency_count =
@@ -650,6 +652,7 @@ void ProtocolHandlerImpl::SendEndServicePrivate(int32_t primary_connection_id,
 
 void ProtocolHandlerImpl::SendEndSession(int32_t connection_id,
                                          uint8_t session_id) {
+  LOG4CXX_AUTO_TRACE(logger_);
   // A session is always associated with a primary connection ID
   SendEndServicePrivate(
       connection_id, connection_id, session_id, SERVICE_TYPE_RPC);
@@ -659,6 +662,7 @@ void ProtocolHandlerImpl::SendEndService(int32_t primary_connection_id,
                                          int32_t connection_id,
                                          uint8_t session_id,
                                          uint8_t service_type) {
+  LOG4CXX_AUTO_TRACE(logger_);
   SendEndServicePrivate(
       primary_connection_id, connection_id, session_id, service_type);
 }
@@ -976,17 +980,17 @@ void ProtocolHandlerImpl::OnTMMessageReceived(const RawMessagePtr tm_message) {
   size_t malformed_occurs = 0u;
   const ProtocolFramePtrList protocol_frames =
       incoming_data_handler_.ProcessData(
-          *tm_message, &result, &malformed_occurs);
-  LOG4CXX_DEBUG(logger_, "Proccessed " << protocol_frames.size() << " frames");
+          *tm_message, result, &malformed_occurs);
+  LOG4CXX_DEBUG(logger_, "Processed " << protocol_frames.size() << " frames");
   if (result != RESULT_OK) {
     if (result == RESULT_MALFORMED_OCCURS) {
       LOG4CXX_WARN(
           logger_,
           "Malformed message occurs, connection id " << connection_key);
       if (!get_settings().malformed_message_filtering()) {
-        LOG4CXX_DEBUG(logger_, "Malformed message filterign disabled");
+        LOG4CXX_DEBUG(logger_, "Malformed message filtering disabled");
         session_observer_.OnMalformedMessageCallback(connection_key);
-        // For tracking only malformed occurrence check outpute
+        // For tracking only malformed occurrence check output
       } else {
         if (malformed_occurs > 0) {
           TrackMalformedMessage(connection_key, malformed_occurs);
@@ -1104,6 +1108,24 @@ void ProtocolHandlerImpl::OnTMMessageSendFailed(
                                    << "bytes failed, connection_key "
                                    << message->connection_key()
                                    << "Error_text: " << error.text());
+
+  uint32_t connection_handle = 0;
+  uint8_t session_id = 0;
+
+  session_observer_.PairFromKey(
+      message->connection_key(), &connection_handle, &session_id);
+
+  const auto connection_it = std::find(ready_to_close_connections_.begin(),
+                                       ready_to_close_connections_.end(),
+                                       connection_handle);
+  if (ready_to_close_connections_.end() != connection_it) {
+    ready_to_close_connections_.erase(connection_it);
+  }
+
+  const auto last_message_it = sessions_last_message_id_.find(session_id);
+  if (sessions_last_message_id_.end() != last_message_it) {
+    sessions_last_message_id_.erase(last_message_it);
+  }
 }
 
 void ProtocolHandlerImpl::OnConnectionPending(
@@ -1833,7 +1855,10 @@ void ProtocolHandlerImpl::NotifySessionStarted(
   }
 
   std::shared_ptr<BsonObject> start_session_ack_params(
-      new BsonObject(), [](BsonObject* obj) { bson_object_deinitialize(obj); });
+      new BsonObject(), [](BsonObject* obj) {
+        bson_object_deinitialize(obj);
+        delete obj;
+      });
   bson_object_initialize_default(start_session_ack_params.get());
   // when video service is successfully started, copy input parameters
   // ("width", "height", "videoProtocol", "videoCodec") to the ACK packet

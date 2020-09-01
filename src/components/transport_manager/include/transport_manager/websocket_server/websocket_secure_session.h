@@ -45,7 +45,9 @@ class WebSocketSecureSession : public WebSocketSession<ExecutorType> {
   WebSocketSecureSession(tcp::socket,
                          ssl::context& ctx,
                          DataReceiveCallback data_receive,
-                         OnIOErrorCallback on_errror);
+                         DataSendDoneCallback data_send_done,
+                         DataSendFailedCallback data_send_failed,
+                         OnIOErrorCallback on_error);
 
   void AsyncAccept() OVERRIDE;
   virtual void AsyncHandshake(boost::system::error_code ec);

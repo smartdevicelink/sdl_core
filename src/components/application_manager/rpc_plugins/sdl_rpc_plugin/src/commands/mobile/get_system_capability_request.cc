@@ -163,6 +163,16 @@ void GetSystemCapabilityRequest::Run() {
                              all_services);
       break;
     }
+    case mobile_apis::SystemCapabilityType::DRIVER_DISTRACTION:
+      if (hmi_capabilities.driver_distraction_capability()) {
+        response_params[strings::system_capability]
+                       [strings::driver_distraction_capability] =
+                           *hmi_capabilities.driver_distraction_capability();
+      } else {
+        SendResponse(false, mobile_apis::Result::DATA_NOT_AVAILABLE);
+        return;
+      }
+      break;
     case mobile_apis::SystemCapabilityType::DISPLAYS: {
       auto capabilities = hmi_capabilities.system_display_capabilities();
       if (app->display_capabilities()) {

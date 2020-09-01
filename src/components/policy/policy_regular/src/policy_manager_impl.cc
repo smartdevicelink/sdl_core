@@ -291,6 +291,12 @@ void FilterPolicyTable(
     FilterInvalidPriorityValues(
         module_config.notifications_per_minute_by_priority);
   }
+  if (module_config.is_initialized() &&
+      module_config.subtle_notifications_per_minute_by_priority
+          .is_initialized()) {
+    FilterInvalidPriorityValues(
+        *module_config.subtle_notifications_per_minute_by_priority);
+  }
 
   if (pt.app_policies_section.is_initialized()) {
     policy_table::ApplicationPolicies& apps = pt.app_policies_section.apps;
@@ -610,23 +616,26 @@ void PolicyManagerImpl::GetUpdateUrls(const uint32_t service_type,
 
 bool PolicyManagerImpl::RequestPTUpdate(const PTUIterationType iteration_type) {
   LOG4CXX_AUTO_TRACE(logger_);
-  std::shared_ptr<policy_table::Table> policy_table_snapshot =
-      cache_->GenerateSnapshot();
-  if (!policy_table_snapshot) {
-    LOG4CXX_ERROR(logger_, "Failed to create snapshot of policy table");
-    return false;
+  BinaryMessage update;
+  if (PTUIterationType::DefaultIteration == iteration_type) {
+    std::shared_ptr<policy_table::Table> policy_table_snapshot =
+        cache_->GenerateSnapshot();
+    if (!policy_table_snapshot) {
+      LOG4CXX_ERROR(logger_, "Failed to create snapshot of policy table");
+      return false;
+    }
+
+    IsPTValid(policy_table_snapshot, policy_table::PT_SNAPSHOT);
+
+    Json::Value value = policy_table_snapshot->ToJsonValue();
+    Json::StreamWriterBuilder writer_builder;
+    writer_builder["indentation"] = "";
+    std::string message_string = Json::writeString(writer_builder, value);
+
+    LOG4CXX_DEBUG(logger_, "Snapshot contents is : " << message_string);
+
+    update = BinaryMessage(message_string.begin(), message_string.end());
   }
-
-  IsPTValid(policy_table_snapshot, policy_table::PT_SNAPSHOT);
-
-  Json::Value value = policy_table_snapshot->ToJsonValue();
-  Json::StreamWriterBuilder writer_builder;
-  writer_builder["indentation"] = "";
-  std::string message_string = Json::writeString(writer_builder, value);
-
-  LOG4CXX_DEBUG(logger_, "Snapshot contents is : " << message_string);
-
-  BinaryMessage update(message_string.begin(), message_string.end());
   ptu_requested_ = true;
   listener_->OnSnapshotCreated(update, iteration_type);
   return true;
@@ -713,6 +722,11 @@ void PolicyManagerImpl::UpdatePTUReadyAppsCount(const uint32_t new_app_count) {
 void PolicyManagerImpl::OnAppRegisteredOnMobile(
     const std::string& device_id, const std::string& application_id) {
   if (application_id != last_registered_policy_app_id_) {
+    if (last_registered_policy_app_id_.empty()) {
+      LOG4CXX_DEBUG(logger_, "Stopping update after first app is registered");
+      // ResetRetrySequence(ResetRetryCountType::kResetInternally);
+      StopRetrySequence();
+    }
     StartPTExchange();
     last_registered_policy_app_id_ = application_id;
   }
@@ -1206,16 +1220,27 @@ std::string& PolicyManagerImpl::GetCurrentDeviceId(
 
 void PolicyManagerImpl::SetSystemLanguage(const std::string& language) {}
 
+void PolicyManagerImpl::SetPreloadedPtFlag(const bool is_preloaded) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  cache_->SetPreloadedPtFlag(is_preloaded);
+}
+
 void PolicyManagerImpl::SetSystemInfo(const std::string& ccpu_version,
                                       const std::string& wers_country_code,
                                       const std::string& language) {
   LOG4CXX_AUTO_TRACE(logger_);
+  cache_->SetMetaInfo(ccpu_version, wers_country_code, language);
 }
 
-uint32_t PolicyManagerImpl::GetNotificationsNumber(
-    const std::string& priority) const {
+std::string PolicyManagerImpl::GetCCPUVersionFromPT() const {
   LOG4CXX_AUTO_TRACE(logger_);
-  return cache_->GetNotificationsNumber(priority);
+  return cache_->GetCCPUVersionFromPT();
+}
+
+uint32_t PolicyManagerImpl::GetNotificationsNumber(const std::string& priority,
+                                                   const bool is_subtle) const {
+  LOG4CXX_AUTO_TRACE(logger_);
+  return cache_->GetNotificationsNumber(priority, is_subtle);
 }
 
 bool PolicyManagerImpl::ExceededIgnitionCycles() {
@@ -1865,6 +1890,13 @@ bool PolicyManagerImpl::FunctionGroupNeedEncryption(
   return grouping.encryption_required.is_initialized()
              ? *grouping.encryption_required
              : false;
+}
+
+void PolicyManagerImpl::TriggerPTUOnStartupIfRequired() {
+  LOG4CXX_AUTO_TRACE(logger_);
+  if (ignition_check) {
+    StartPTExchange();
+  }
 }
 
 const std::string PolicyManagerImpl::GetPolicyFunctionName(

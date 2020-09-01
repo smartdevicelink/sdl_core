@@ -449,9 +449,11 @@ uint32_t PolicyHandler::ChoosePTUApplication(
 }
 
 void PolicyHandler::CacheRetryInfo(const uint32_t app_id,
-                                   const std::string url) {
+                                   const std::string url,
+                                   const std::string snapshot_path) {
   last_ptu_app_id_ = app_id;
   retry_update_url_ = url;
+  policy_snapshot_path_ = snapshot_path;
 }
 #endif  // EXTERNAL_PROPRIETARY_MODE
 
@@ -787,6 +789,12 @@ void PolicyHandler::OnSystemRequestReceived() const {
   policy_manager_->ResetTimeout();
 }
 
+void PolicyHandler::TriggerPTUOnStartupIfRequired() {
+#ifdef PROPRIETARY_MODE
+  policy_manager_->TriggerPTUOnStartupIfRequired();
+#endif
+}
+
 void PolicyHandler::GetRegisteredLinks(
     std::map<std::string, std::string>& out_links) const {
   DataAccessor<ApplicationSet> accessor = application_manager_.applications();
@@ -1010,12 +1018,22 @@ void PolicyHandler::OnSystemInfoChanged(const std::string& language) {
   policy_manager_->SetSystemLanguage(language);
 }
 
+void PolicyHandler::SetPreloadedPtFlag(const bool is_preloaded) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  policy_manager_->SetPreloadedPtFlag(is_preloaded);
+}
+
 void PolicyHandler::OnGetSystemInfo(const std::string& ccpu_version,
                                     const std::string& wers_country_code,
                                     const std::string& language) {
   LOG4CXX_AUTO_TRACE(logger_);
   POLICY_LIB_CHECK_VOID();
   policy_manager_->SetSystemInfo(ccpu_version, wers_country_code, language);
+}
+
+std::string PolicyHandler::GetCCPUVersionFromPT() const {
+  LOG4CXX_AUTO_TRACE(logger_);
+  return policy_manager_->GetCCPUVersionFromPT();
 }
 
 void PolicyHandler::OnVIIsReady() {
@@ -1302,18 +1320,22 @@ void PolicyHandler::OnAllowSDLFunctionalityNotification(
 
 #ifdef EXTERNAL_PROPRIETARY_MODE
 
-      DataAccessor<ApplicationSet> accessor =
-          application_manager_.applications();
+      ApplicationSet applications;
+      {
+        DataAccessor<ApplicationSet> accessor =
+            application_manager_.applications();
+        applications = accessor.GetData();
+      }
       if (!is_allowed) {
         std::for_each(
-            accessor.GetData().begin(),
-            accessor.GetData().end(),
+            applications.begin(),
+            applications.end(),
             DeactivateApplication(device_handle,
                                   application_manager_.state_controller()));
       } else {
         std::for_each(
-            accessor.GetData().begin(),
-            accessor.GetData().end(),
+            applications.begin(),
+            applications.end(),
             SDLAlowedNotification(device_handle,
                                   policy_manager_.get(),
                                   application_manager_.state_controller()));
@@ -1621,11 +1643,10 @@ void PolicyHandler::OnSnapshotCreated(const BinaryMessage& pt_string,
     uint32_t app_id_for_sending = 0;
     const std::string& url =
         GetNextUpdateUrl(PTUIterationType::RetryIteration, app_id_for_sending);
-    if (0 != url.length()) {
+    if (0 != url.length() && !policy_snapshot_path_.empty()) {
       MessageHelper::SendPolicySnapshotNotification(
-          app_id_for_sending, pt_string, url, application_manager_);
+          app_id_for_sending, policy_snapshot_path_, url, application_manager_);
     }
-
   } else {
     std::string policy_snapshot_full_path;
     if (!SaveSnapshot(pt_string, policy_snapshot_full_path)) {
@@ -1738,10 +1759,10 @@ void PolicyHandler::CheckPermissions(
       device_id, app->policy_app_id(), hmi_level, rpc, rpc_params, result);
 }
 
-uint32_t PolicyHandler::GetNotificationsNumber(
-    const std::string& priority) const {
+uint32_t PolicyHandler::GetNotificationsNumber(const std::string& priority,
+                                               const bool is_subtle) const {
   POLICY_LIB_CHECK_OR_RETURN(0);
-  return policy_manager_->GetNotificationsNumber(priority);
+  return policy_manager_->GetNotificationsNumber(priority, is_subtle);
 }
 
 DeviceConsent PolicyHandler::GetUserConsentForDevice(

@@ -287,8 +287,8 @@ void SubscribeVehicleDataRequest::CheckVISubscriptions(
     smart_objects::SmartObject& out_response_params,
     smart_objects::SmartObject& out_request_params,
     bool& out_result) {
-  const bool is_interface_not_available =
-      (HmiInterfaces::STATE_NOT_AVAILABLE ==
+  const bool is_interface_available =
+      (HmiInterfaces::STATE_NOT_AVAILABLE !=
        application_manager_.hmi_interfaces().GetInterfaceState(
            HmiInterfaces::HMI_INTERFACE_VehicleInfo));
 
@@ -355,7 +355,7 @@ void SubscribeVehicleDataRequest::CheckVISubscriptions(
 
   VehicleInfoSubscriptions::size_type items_to_subscribe = 0;
   auto item_names = (*message_)[strings::msg_params].enumerate();
-  if (!is_interface_not_available) {
+  if (is_interface_available) {
     for (const auto& name : item_names) {
       auto enabled = (*message_)[strings::msg_params][name].asBool();
       if (!enabled) {
@@ -386,6 +386,9 @@ void SubscribeVehicleDataRequest::CheckVISubscriptions(
   if (0 == items_to_subscribe) {
     if (HasDisallowedParams()) {
       out_result_code = mobile_apis::Result::DISALLOWED;
+    } else if (!is_interface_available) {
+      out_result_code = mobile_apis::Result::UNSUPPORTED_RESOURCE;
+      out_info = "VehicleInfo is not supported by system";
     } else {
       out_result_code = mobile_apis::Result::INVALID_DATA;
       out_info = "No data in the request";
@@ -394,7 +397,7 @@ void SubscribeVehicleDataRequest::CheckVISubscriptions(
     return;
   }
 
-  if (0 == subscribed_items && !is_interface_not_available) {
+  if (0 == subscribed_items && is_interface_available) {
     out_result_code = mobile_apis::Result::IGNORED;
     out_info = "Already subscribed on provided VehicleData.";
     out_result = false;

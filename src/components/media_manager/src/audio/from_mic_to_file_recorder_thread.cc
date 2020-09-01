@@ -34,6 +34,7 @@
 #include <unistd.h>
 #include <cstring>
 #include <sstream>
+#include "interfaces/MOBILE_API.h"
 #include "utils/logger.h"
 
 namespace media_manager {
@@ -46,23 +47,30 @@ GMainLoop* FromMicToFileRecorderThread::loop = NULL;
 static const int kNumAudioChannels = 1;
 
 FromMicToFileRecorderThread::FromMicToFileRecorderThread(
-    const std::string& output_file, int32_t duration)
+    const std::string& output_file,
+    int32_t duration,
+    mobile_apis::SamplingRate::eType sampling_rate,
+    mobile_apis::BitsPerSample::eType bits_per_sample,
+    mobile_apis::AudioType::eType audio_type)
     : threads::ThreadDelegate()
     , argc_(5)
     , argv_(NULL)
     , oKey_("-o")
     , tKey_("-t")
     , sleepThread_(NULL)
-    , outputFileName_(output_file) {
+    , outputFileName_(output_file)
+    , samplingRate_(sampling_rate)
+    , bitsPerSample_(bits_per_sample) {
   LOG4CXX_AUTO_TRACE(logger_);
   set_record_duration(duration);
+  // audio_type is not used as we always employ LPCM
 }
 
 FromMicToFileRecorderThread::~FromMicToFileRecorderThread() {
   LOG4CXX_AUTO_TRACE(logger_);
   if (sleepThread_) {
-    sleepThread_->join();
-    delete sleepThread_->delegate();
+    sleepThread_->Stop(threads::Thread::kThreadSoftStop);
+    delete sleepThread_->GetDelegate();
     threads::DeleteThread(sleepThread_);
   }
 }
@@ -205,9 +213,11 @@ void FromMicToFileRecorderThread::threadMain() {
   wavenc = gst_element_factory_make("wavenc", "wavenc0");
   filesink = gst_element_factory_make("filesink", "filesink0");
 
-  // create a capability to downmix the recorded audio to monaural
-  audiocaps = gst_caps_new_simple(
-      "audio/x-raw", "channels", G_TYPE_INT, kNumAudioChannels, NULL);
+  // Create a capability to specify audio format. It also downmixes the recorded
+  // audio to monaural.
+  std::string caps_string = create_caps_string();
+  LOG4CXX_DEBUG(logger_, "Using audio caps: " << caps_string);
+  audiocaps = gst_caps_from_string(caps_string.c_str());
 
   // Assert that all the elements were created
   if (!alsasrc || !audioconvert || !capsfilter || !wavenc || !filesink ||
@@ -266,7 +276,7 @@ void FromMicToFileRecorderThread::threadMain() {
 
     sleepThread_ =
         threads::CreateThread("SleepThread", new SleepThreadDelegate(timeout));
-    sleepThread_->start();
+    sleepThread_->Start();
   }
 
   loop = g_main_loop_new(NULL, FALSE);
@@ -283,6 +293,49 @@ void FromMicToFileRecorderThread::threadMain() {
   deinitArgs();
 
   loop = NULL;
+}
+
+std::string FromMicToFileRecorderThread::create_caps_string() {
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  std::stringstream ss;
+  ss << "audio/x-raw";
+
+  switch (bitsPerSample_) {
+    case mobile_apis::BitsPerSample::BitsPerSample_8_BIT:
+      // format is 8-bit unsigned
+      ss << ",format=(string)U8";
+      break;
+    case mobile_apis::BitsPerSample::BitsPerSample_16_BIT:
+      // format is 16-bit signed, in little endian
+      ss << ",format=(string)S16LE";
+      break;
+    default:
+      // do not specify the format; use system default
+      break;
+  }
+
+  switch (samplingRate_) {
+    case mobile_apis::SamplingRate::SamplingRate_8KHZ:
+      ss << ",rate=8000";
+      break;
+    case mobile_apis::SamplingRate::SamplingRate_16KHZ:
+      ss << ",rate=16000";
+      break;
+    case mobile_apis::SamplingRate::SamplingRate_22KHZ:
+      ss << ",rate=22050";
+      break;
+    case mobile_apis::SamplingRate::SamplingRate_44KHZ:
+      ss << ",rate=44100";
+      break;
+    default:
+      // do not specify the sampling rate; use system default
+      break;
+  }
+
+  ss << ",channels=" << kNumAudioChannels;
+
+  return ss.str();
 }
 
 FromMicToFileRecorderThread::SleepThreadDelegate::SleepThreadDelegate(

@@ -633,15 +633,17 @@ TEST_F(TransportManagerImplTest, SendMessageToDevice_SendDone) {
   EXPECT_TRUE(waiter.WaitFor(1, kAsyncExpectationsTimeout));
 }
 
-TEST_F(TransportManagerImplTest, SendMessageFailed_GetHandleSendFailed) {
+TEST_F(
+    TransportManagerImplTest,
+    SendMessageToDevice_AdapterSendDataOkAndOnSendFailEvent_OnTMMessageSendFailed) {
   // Arrange
   HandleConnection();
 
   TestAsyncWaiter waiter;
   EXPECT_CALL(*mock_adapter_,
               SendData(mac_address_, application_id_, test_message_))
-      .WillOnce(DoAll(NotifyTestAsyncWaiter(&waiter),
-                      Return(TransportAdapter::FAIL)));
+      .WillOnce(
+          DoAll(NotifyTestAsyncWaiter(&waiter), Return(TransportAdapter::OK)));
 
 #ifdef TELEMETRY_MONITOR
   EXPECT_CALL(mock_metric_observer_, StartRawMsg(test_message_.get()));

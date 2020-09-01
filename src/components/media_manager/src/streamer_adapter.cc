@@ -47,7 +47,7 @@ StreamerAdapter::~StreamerAdapter() {
   if (streamer_) {
     streamer_->Close();
   }
-  thread_->join();
+  thread_->Stop(threads::Thread::kThreadSoftStop);
   delete streamer_;
   threads::DeleteThread(thread_);
 }
@@ -64,7 +64,7 @@ void StreamerAdapter::StartActivity(int32_t application_key) {
 
   DCHECK(thread_);
   const size_t kStackSize = 16384;
-  thread_->start(threads::ThreadOptions(kStackSize));
+  thread_->Start(threads::ThreadOptions(kStackSize));
 
   for (std::set<MediaListenerPtr>::iterator it = media_listeners_.begin();
        media_listeners_.end() != it;
@@ -87,8 +87,8 @@ void StreamerAdapter::StopActivity(int32_t application_key) {
     return;
   }
 
-  DCHECK(thread_);
-  thread_->stop();
+  DCHECK(streamer_);
+  streamer_->exitThreadMain();
 
   for (std::set<MediaListenerPtr>::iterator it = media_listeners_.begin();
        media_listeners_.end() != it;
