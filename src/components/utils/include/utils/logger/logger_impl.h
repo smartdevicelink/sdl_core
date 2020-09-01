@@ -48,7 +48,7 @@ typedef threads::MessageLoopThread<LogMessageQueue>
     LogMessageLoopThreadTemplate;
 
 template <typename T>
-using LoopTreadPtr = std::unique_ptr<T, std::function<void(T*)> >;
+using LoopThreadPtr = std::unique_ptr<T, std::function<void(T*)> >;
 
 class LogMessageLoopThread : public LogMessageLoopThreadTemplate,
                              public LogMessageLoopThreadTemplate::Handler {
@@ -87,7 +87,7 @@ class LoggerImpl : public Logger, public LoggerInitializer {
   void PushLog(const LogMessage& log_message) override;
 
   std::unique_ptr<ThirdPartyLoggerInterface> impl_;
-  LoopTreadPtr<LogMessageLoopThread> loop_thread_;
+  LoopThreadPtr<LogMessageLoopThread> loop_thread_;
   bool use_message_loop_thread_;
 };
 

@@ -55,7 +55,7 @@ void LoggerImpl::Init(std::unique_ptr<ThirdPartyLoggerInterface>&& impl) {
     };
 
     if (!loop_thread_) {
-      loop_thread_ = LoopTreadPtr<LogMessageLoopThread>(
+      loop_thread_ = LoopThreadPtr<LogMessageLoopThread>(
           new LogMessageLoopThread(
               [this](LogMessage message) { impl_->PushLog(message); }),
           deinit_logger);
