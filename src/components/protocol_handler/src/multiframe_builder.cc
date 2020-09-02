@@ -58,6 +58,7 @@ void MultiFrameBuilder::set_waiting_timeout(
 
 bool MultiFrameBuilder::AddConnection(const ConnectionID connection_id) {
   SDL_LOG_DEBUG("Adding connection_id: " << connection_id);
+  sync_primitives::AutoLock lock(multiframes_map_lock_);
   SDL_LOG_DEBUG("Current state is: " << multiframes_map_);
   const MultiFrameMap::const_iterator it = multiframes_map_.find(connection_id);
   if (it != multiframes_map_.end()) {
@@ -70,6 +71,7 @@ bool MultiFrameBuilder::AddConnection(const ConnectionID connection_id) {
 
 bool MultiFrameBuilder::RemoveConnection(const ConnectionID connection_id) {
   SDL_LOG_DEBUG("Removing connection_id: " << connection_id);
+  sync_primitives::AutoLock lock(multiframes_map_lock_);
   SDL_LOG_DEBUG("Current state is: " << multiframes_map_);
   const MultiFrameMap::iterator it = multiframes_map_.find(connection_id);
   if (it == multiframes_map_.end()) {
@@ -88,6 +90,7 @@ bool MultiFrameBuilder::RemoveConnection(const ConnectionID connection_id) {
 
 ProtocolFramePtrList MultiFrameBuilder::PopMultiframes() {
   SDL_LOG_AUTO_TRACE();
+  sync_primitives::AutoLock lock(multiframes_map_lock_);
   SDL_LOG_DEBUG("Current state is: " << multiframes_map_);
   SDL_LOG_DEBUG("Current multiframe map size is: " << multiframes_map_.size());
   ProtocolFramePtrList outpute_frame_list;
@@ -140,7 +143,6 @@ ProtocolFramePtrList MultiFrameBuilder::PopMultiframes() {
 RESULT_CODE MultiFrameBuilder::AddFrame(const ProtocolFramePtr packet) {
   SDL_LOG_AUTO_TRACE();
   SDL_LOG_DEBUG("Handling frame: " << packet);
-  SDL_LOG_DEBUG("Current state is: " << multiframes_map_);
   if (!packet) {
     SDL_LOG_ERROR("Skip empty frame");
     return RESULT_FAIL;
@@ -161,6 +163,7 @@ RESULT_CODE MultiFrameBuilder::AddFrame(const ProtocolFramePtr packet) {
 
 RESULT_CODE MultiFrameBuilder::HandleFirstFrame(const ProtocolFramePtr packet) {
   DCHECK_OR_RETURN(packet->frame_type() == FRAME_TYPE_FIRST, RESULT_FAIL);
+  sync_primitives::AutoLock lock(multiframes_map_lock_);
   SDL_LOG_DEBUG("Waiting : " << multiframes_map_);
   SDL_LOG_DEBUG("Handling FIRST frame: " << packet);
   if (packet->payload_size() != 0u) {
@@ -201,6 +204,7 @@ RESULT_CODE MultiFrameBuilder::HandleFirstFrame(const ProtocolFramePtr packet) {
 RESULT_CODE MultiFrameBuilder::HandleConsecutiveFrame(
     const ProtocolFramePtr packet) {
   DCHECK_OR_RETURN(packet->frame_type() == FRAME_TYPE_CONSECUTIVE, RESULT_FAIL);
+  sync_primitives::AutoLock lock(multiframes_map_lock_);
   SDL_LOG_DEBUG("Handling CONSECUTIVE frame: " << packet);
 
   const ConnectionID connection_id = packet->connection_id();

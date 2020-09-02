@@ -40,6 +40,7 @@
 
 #include "protocol_handler/protocol_packet.h"
 #include "utils/date_time.h"
+#include "utils/lock.h"
 
 /**
  *\namespace protocol_handlerHandler
@@ -125,6 +126,7 @@ class MultiFrameBuilder {
   //  Map of frames with last frame data for messages received in multiple
   //  frames.
   MultiFrameMap multiframes_map_;
+  sync_primitives::Lock multiframes_map_lock_;
   int64_t consecutive_frame_wait_msecs_;
 };
 

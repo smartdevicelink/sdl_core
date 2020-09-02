@@ -1447,6 +1447,7 @@ void PolicyHandler::OnActivateApp(uint32_t connection_key,
   // In this case we need to activate application
   if (false == permissions.appRevoked && true == permissions.isSDLAllowed) {
     SDL_LOG_INFO("Application will be activated");
+    sync_primitives::AutoReadUnlock unlock(policy_manager_lock_);
     if (application_manager_.ActivateApplication(app)) {
       last_activated_app_id_ = 0;
     }
