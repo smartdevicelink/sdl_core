@@ -68,9 +68,9 @@ void SDLAppExtension::ProcessResumption(
 }
 
 void SDLAppExtension::RevertResumption(
-    const smart_objects::SmartObject& subscriptions) {
+    const smart_objects::SmartObject& resumption_data) {
   LOG4CXX_AUTO_TRACE(logger_);
-  UNUSED(subscriptions);
+  UNUSED(resumption_data);
 
   plugin_.RevertResumption(app_);
 }

@@ -104,7 +104,7 @@ class AppServiceAppExtension : public app_mngr::AppExtension {
                          resumption::Subscriber subscriber) OVERRIDE;
 
   void RevertResumption(
-      const smart_objects::SmartObject& subscriptions) OVERRIDE;
+      const smart_objects::SmartObject& resumption_data) OVERRIDE;
 
   /**
    * @brief ExtractVIExtension utility function to extract application extension

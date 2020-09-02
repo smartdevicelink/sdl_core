@@ -1040,15 +1040,20 @@ void ResumptionDataProcessor::DeletePluginsSubscriptions(
       module_data_so[index][message_params::kModuleId] = module.second;
       index++;
     }
-
-    extension_vd_subscriptions[message_params::kModuleData] =
-        extension_modules_subscriptions[message_params::kModuleData];
   }
+
+  smart_objects::SmartObject resumption_data_to_revert(
+      smart_objects::SmartType_Map);
+  resumption_data_to_revert[application_manager::hmi_interface::vehicle_info] =
+      extension_vd_subscriptions;
+  resumption_data_to_revert[application_manager::hmi_interface::rc] =
+      extension_modules_subscriptions;
+
   resumption_status_lock_.Release();
 
   auto extensions = application->Extensions();
   for (auto& extension : extensions) {
-    extension->RevertResumption(extension_vd_subscriptions);
+    extension->RevertResumption(resumption_data_to_revert);
   }
 }
 

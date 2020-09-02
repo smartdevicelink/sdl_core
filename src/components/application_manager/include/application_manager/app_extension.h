@@ -74,10 +74,11 @@ class AppExtension {
 
   /**
    * @brief RevertResumption Method called by SDL during revert resumption.
-   * @param subscriptions Subscriptions from which must discard. Expected that
-   * SO contains the map of "IVI data" keys and "subscription bool flag" values
+   * @param resumption_data Resumption data in the SmartObject representation
+   * that contains subscription (VehicleInfo, RemoteControl, etc.)
    */
-  virtual void RevertResumption(const ns_smart::SmartObject& subscriptions) = 0;
+  virtual void RevertResumption(
+      const ns_smart::SmartObject& resumption_data) = 0;
 
  private:
   const AppExtensionUID kUid_;

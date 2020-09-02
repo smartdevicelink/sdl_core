@@ -43,10 +43,17 @@ CREATE_LOGGERPTR_GLOBAL(logger_, "RemoteControlModule")
 
 namespace {
 std::set<rc_rpc_plugin::ModuleUid> ConvertSmartObjectToModuleCollection(
-    const smart_objects::SmartObject& subscriptions) {
+    const smart_objects::SmartObject& resumption_data) {
   using namespace rc_rpc_plugin;
 
-  const auto& module_data = subscriptions[message_params::kModuleData];
+  if (!resumption_data.keyExists(application_manager::hmi_interface::rc)) {
+    LOG4CXX_DEBUG(logger_, "No resumption module data subscription to revert");
+    return {};
+  }
+
+  const auto& module_data =
+      resumption_data[application_manager::hmi_interface::rc]
+                     [message_params::kModuleData];
 
   std::set<rc_rpc_plugin::ModuleUid> module_collection;
 
@@ -189,13 +196,13 @@ void RCAppExtension::ProcessResumption(
 }
 
 void RCAppExtension::RevertResumption(
-    const smart_objects::SmartObject& subscriptions_so) {
+    const smart_objects::SmartObject& resumption_data) {
   LOG4CXX_AUTO_TRACE(logger_);
 
   subscribed_interior_vehicle_data_.clear();
 
   const auto module_subscriptions =
-      ConvertSmartObjectToModuleCollection(subscriptions_so);
+      ConvertSmartObjectToModuleCollection(resumption_data);
 
   for (auto& module : module_subscriptions) {
     LOG4CXX_TRACE(logger_,

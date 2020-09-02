@@ -117,10 +117,10 @@ void AppServiceAppExtension::ProcessResumption(
 }
 
 void AppServiceAppExtension::RevertResumption(
-    const smart_objects::SmartObject& subscriptions) {
+    const smart_objects::SmartObject& resumption_data) {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  UNUSED(subscriptions);
+  UNUSED(resumption_data);
   // ToDo: implementation is blocked by
   // https://github.com/smartdevicelink/sdl_core/issues/3470
 }
