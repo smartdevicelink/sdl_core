@@ -33,7 +33,7 @@
 #include "app_service_rpc_plugin/app_service_app_extension.h"
 #include "app_service_rpc_plugin/app_service_rpc_plugin.h"
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "AppServiceRpcPlugin")
+SDL_CREATE_LOG_VARIABLE("AppServiceRpcPlugin")
 
 namespace app_service_rpc_plugin {
 
@@ -44,22 +44,22 @@ AppServiceAppExtension::AppServiceAppExtension(
     : app_mngr::AppExtension(AppServiceAppExtensionUID)
     , plugin_(plugin)
     , app_(app) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
 }
 
 AppServiceAppExtension::~AppServiceAppExtension() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
 }
 
 bool AppServiceAppExtension::SubscribeToAppService(
     const std::string app_service_type) {
-  LOG4CXX_DEBUG(logger_, "Subscribe to app service: " << app_service_type);
+  SDL_LOG_DEBUG("Subscribe to app service: " << app_service_type);
   return subscribed_data_.insert(app_service_type).second;
 }
 
 bool AppServiceAppExtension::UnsubscribeFromAppService(
     const std::string app_service_type) {
-  LOG4CXX_DEBUG(logger_, app_service_type);
+  SDL_LOG_DEBUG(app_service_type);
   auto it = subscribed_data_.find(app_service_type);
   if (it != subscribed_data_.end()) {
     subscribed_data_.erase(it);
@@ -69,14 +69,13 @@ bool AppServiceAppExtension::UnsubscribeFromAppService(
 }
 
 void AppServiceAppExtension::UnsubscribeFromAppService() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   subscribed_data_.clear();
 }
 
 bool AppServiceAppExtension::IsSubscribedToAppService(
     const std::string app_service_type) const {
-  LOG4CXX_DEBUG(logger_,
-                "isSubscribedToAppService for type: " << app_service_type);
+  SDL_LOG_DEBUG("isSubscribedToAppService for type: " << app_service_type);
   return subscribed_data_.find(app_service_type) != subscribed_data_.end();
 }
 

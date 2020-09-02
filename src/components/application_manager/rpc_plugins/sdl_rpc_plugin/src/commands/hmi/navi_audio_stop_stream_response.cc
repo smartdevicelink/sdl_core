@@ -36,6 +36,8 @@ using namespace application_manager;
 
 namespace commands {
 
+SDL_CREATE_LOG_VARIABLE("Commands")
+
 AudioStopStreamResponse::AudioStopStreamResponse(
     const application_manager::commands::MessageSharedPtr& message,
     ApplicationManager& application_manager,
@@ -51,7 +53,7 @@ AudioStopStreamResponse::AudioStopStreamResponse(
 AudioStopStreamResponse::~AudioStopStreamResponse() {}
 
 void AudioStopStreamResponse::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
 }
 
 }  // namespace commands

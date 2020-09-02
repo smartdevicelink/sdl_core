@@ -36,7 +36,7 @@
 
 namespace protocol_handler {
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "ProtocolHandler")
+SDL_CREATE_LOG_VARIABLE("ProtocolHandler")
 
 namespace {
 // Check if provided service value is one of the specified
@@ -58,7 +58,7 @@ ServiceType ServiceTypeFromByte(uint8_t byte) {
   ServiceType type = ServiceType(byte);
   const bool valid_type = IsValid(type);
   if (!valid_type) {
-    LOG4CXX_INFO(logger_, "Invalid service type: " << int32_t(byte));
+    SDL_LOG_INFO("Invalid service type: " << int32_t(byte));
   }
   return valid_type ? type : kInvalidServiceType;
 }

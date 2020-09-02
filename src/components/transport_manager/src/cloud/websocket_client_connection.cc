@@ -40,7 +40,7 @@
 
 namespace transport_manager {
 namespace transport_adapter {
-CREATE_LOGGERPTR_GLOBAL(logger_, "TransportManager")
+SDL_CREATE_LOG_VARIABLE("TransportManager")
 
 WebsocketClientConnection::WebsocketClientConnection(
     const DeviceUID& device_uid,
@@ -80,7 +80,7 @@ void WebsocketClientConnection::AddCertificateAuthority(
 #endif  // ENABLE_SECURITY
 
 TransportAdapter::Error WebsocketClientConnection::Start() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   DeviceSptr device = controller_->FindDevice(device_uid_);
   CloudDevice* cloud_device = static_cast<CloudDevice*>(device.get());
   CloudWebsocketTransportAdapter* cloud_ta =
@@ -90,23 +90,20 @@ TransportAdapter::Error WebsocketClientConnection::Start() {
   auto const port = cloud_device->GetPort();
   boost::system::error_code ec;
 
-  LOG4CXX_DEBUG(logger_, "Cloud app endpoint: " << cloud_properties.endpoint);
-  LOG4CXX_DEBUG(logger_,
-                "Cloud app certificate: " << cloud_properties.certificate);
-  LOG4CXX_DEBUG(
-      logger_,
+  SDL_LOG_DEBUG("Cloud app endpoint: " << cloud_properties.endpoint);
+  SDL_LOG_DEBUG("Cloud app certificate: " << cloud_properties.certificate);
+  SDL_LOG_DEBUG(
       "Cloud app authentication token: " << cloud_properties.auth_token);
-  LOG4CXX_DEBUG(
-      logger_,
+  SDL_LOG_DEBUG(
+
       "Cloud app transport type: " << cloud_properties.cloud_transport_type);
-  LOG4CXX_DEBUG(logger_,
-                "Cloud app hybrid app preference: "
-                    << cloud_properties.hybrid_app_preference);
+  SDL_LOG_DEBUG("Cloud app hybrid app preference: "
+                << cloud_properties.hybrid_app_preference);
 
   auto const results = resolver_.resolve(host, port, ec);
   if (ec) {
     std::string str_err = "ErrorMessage: " + ec.message();
-    LOG4CXX_ERROR(logger_, "Could not resolve host/port: " << str_err);
+    SDL_LOG_ERROR("Could not resolve host/port: " << str_err);
     return TransportAdapter::FAIL;
   }
 
@@ -123,9 +120,8 @@ TransportAdapter::Error WebsocketClientConnection::Start() {
 
   if (ec) {
     std::string str_err = "ErrorMessage: " + ec.message();
-    LOG4CXX_ERROR(logger_,
-                  "Could not connect to websocket: " << host << ":" << port);
-    LOG4CXX_ERROR(logger_, str_err);
+    SDL_LOG_ERROR("Could not connect to websocket: " << host << ":" << port);
+    SDL_LOG_ERROR(str_err);
     return TransportAdapter::FAIL;
   }
 
@@ -135,10 +131,9 @@ TransportAdapter::Error WebsocketClientConnection::Start() {
 
     if (ec) {
       std::string str_err = "ErrorMessage: " + ec.message();
-      LOG4CXX_ERROR(logger_,
-                    "Failed to add certificate authority: "
-                        << cloud_properties.certificate);
-      LOG4CXX_ERROR(logger_, str_err);
+      SDL_LOG_ERROR("Failed to add certificate authority: "
+                    << cloud_properties.certificate);
+      SDL_LOG_ERROR(str_err);
       Shutdown();
       return TransportAdapter::FAIL;
     }
@@ -148,10 +143,9 @@ TransportAdapter::Error WebsocketClientConnection::Start() {
 
     if (ec) {
       std::string str_err = "ErrorMessage: " + ec.message();
-      LOG4CXX_ERROR(logger_,
-                    "Could not complete SSL Handshake failed with host/port: "
-                        << host << ":" << port);
-      LOG4CXX_ERROR(logger_, str_err);
+      SDL_LOG_ERROR("Could not complete SSL Handshake failed with host/port: "
+                    << host << ":" << port);
+      SDL_LOG_ERROR(str_err);
       Shutdown();
       return TransportAdapter::FAIL;
     }
@@ -169,10 +163,10 @@ TransportAdapter::Error WebsocketClientConnection::Start() {
 #endif  // ENABLE_SECURITY
   if (ec) {
     std::string str_err = "ErrorMessage: " + ec.message();
-    LOG4CXX_ERROR(
-        logger_,
+    SDL_LOG_ERROR(
+
         "Could not complete handshake with host/port: " << host << ":" << port);
-    LOG4CXX_ERROR(logger_, str_err);
+    SDL_LOG_ERROR(str_err);
     return TransportAdapter::FAIL;
   }
 
@@ -185,7 +179,7 @@ TransportAdapter::Error WebsocketClientConnection::Start() {
     wss_.binary(true);
   }
 #endif  // ENABLE_SECURITY
-  write_thread_->start(threads::ThreadOptions());
+  write_thread_->Start(threads::ThreadOptions());
   controller_->ConnectDone(device_uid_, app_handle_);
 
   // Start async read
@@ -208,8 +202,8 @@ TransportAdapter::Error WebsocketClientConnection::Start() {
 
   boost::asio::post(io_pool_, [&]() { ioc_.run(); });
 
-  LOG4CXX_DEBUG(
-      logger_,
+  SDL_LOG_DEBUG(
+
       "Successfully started websocket connection @: " << host << ":" << port);
   return TransportAdapter::OK;
 }
@@ -221,7 +215,7 @@ void WebsocketClientConnection::Recv(boost::system::error_code ec) {
 
   if (ec) {
     std::string str_err = "ErrorMessage: " + ec.message();
-    LOG4CXX_ERROR(logger_, str_err);
+    SDL_LOG_ERROR(str_err);
     Shutdown();
     return;
   }
@@ -248,7 +242,7 @@ void WebsocketClientConnection::OnRead(boost::system::error_code ec,
   boost::ignore_unused(bytes_transferred);
   if (ec) {
     std::string str_err = "ErrorMessage: " + ec.message();
-    LOG4CXX_ERROR(logger_, str_err);
+    SDL_LOG_ERROR(str_err);
     ws_.lowest_layer().close();
     ioc_.stop();
     Shutdown();
@@ -271,24 +265,25 @@ void WebsocketClientConnection::OnRead(boost::system::error_code ec,
 
 TransportAdapter::Error WebsocketClientConnection::SendData(
     ::protocol_handler::RawMessagePtr message) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   sync_primitives::AutoLock auto_lock(frames_to_send_mutex_);
   message_queue_.push(message);
   return TransportAdapter::OK;
 }
 
 TransportAdapter::Error WebsocketClientConnection::Disconnect() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   Shutdown();
   return TransportAdapter::OK;
 }
 
 void WebsocketClientConnection::Shutdown() {
+  SDL_LOG_AUTO_TRACE();
   shutdown_ = true;
 
   if (thread_delegate_) {
     thread_delegate_->SetShutdown();
-    write_thread_->join();
+    write_thread_->Stop(threads::Thread::kThreadSoftStop);
     delete thread_delegate_;
     thread_delegate_ = NULL;
     threads::DeleteThread(write_thread_);
@@ -337,7 +332,7 @@ void WebsocketClientConnection::LoopThreadDelegate::DrainQueue() {
       }
 #endif  // ENABLE_SECURITY
       if (ec) {
-        LOG4CXX_ERROR(logger_, "Error writing to websocket");
+        SDL_LOG_ERROR("Error writing to websocket");
         handler_.controller_->DataSendFailed(handler_.device_uid_,
                                              handler_.app_handle_,
                                              message_ptr,

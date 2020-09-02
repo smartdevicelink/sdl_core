@@ -34,7 +34,7 @@
 
 namespace resumption {
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "Resumption")
+SDL_CREATE_LOG_VARIABLE("Resumption")
 
 LastStateWrapperImpl::LastStateWrapperImpl(
     std::shared_ptr<LastState> last_state)
@@ -42,7 +42,7 @@ LastStateWrapperImpl::LastStateWrapperImpl(
     , lock_(std::make_shared<sync_primitives::Lock>()) {}
 
 LastStateAccessor LastStateWrapperImpl::get_accessor() const {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   return MutableDataAccessor<LastState>(*last_state_, lock_);
 }
 

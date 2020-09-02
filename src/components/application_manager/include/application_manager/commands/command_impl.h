@@ -218,10 +218,6 @@ class CommandImpl : public Command {
   CommandParametersPermissions parameters_permissions_;
   CommandParametersPermissions removed_parameters_permissions_;
 
-#ifdef ENABLE_LOG
-  static log4cxx::LoggerPtr logger_;
-#endif  // ENABLE_LOG
-
  private:
   DISALLOW_COPY_AND_ASSIGN(CommandImpl);
 };

@@ -174,7 +174,7 @@ class DynamicApplicationDataImpl : public virtual Application {
    * @brief Finds command with the specified command id
    * @param[in] cmd_id Command id
    */
-  smart_objects::SmartObject* FindCommand(const uint32_t cmd_id);
+  smart_objects::SmartObject FindCommand(const uint32_t cmd_id) OVERRIDE;
 
   /*
    * @brief Adds a menu to the application
@@ -189,7 +189,7 @@ class DynamicApplicationDataImpl : public virtual Application {
   /*
    * @brief Finds menu with the specified id
    */
-  smart_objects::SmartObject* FindSubMenu(uint32_t menu_id) const;
+  smart_objects::SmartObject FindSubMenu(uint32_t menu_id) const OVERRIDE;
 
   /*
    * @brief Returns true if sub menu with such name already exist
@@ -223,7 +223,7 @@ class DynamicApplicationDataImpl : public virtual Application {
    *
    * @param choice_set_id Unique ID of the interaction choice set
    */
-  smart_objects::SmartObject* FindChoiceSet(uint32_t choice_set_id);
+  smart_objects::SmartObject FindChoiceSet(uint32_t choice_set_id) OVERRIDE;
 
   /*
    * @brief Adds perform interaction choice set to the application

@@ -54,6 +54,15 @@
                 "NORMAL": 4,
                 "NONE": 0
             },
+            "subtle_notifications_per_minute_by_priority": {
+                "EMERGENCY": 60,
+                "NAVIGATION": 20,
+                "PROJECTION": 20,
+                "VOICECOM": 30,
+                "COMMUNICATION": 15,
+                "NORMAL": 10,
+                "NONE": 0
+            },
             "lock_screen_dismissal_enabled": true
         },
         "functional_groupings": {
@@ -82,6 +91,20 @@
                         "hmi_levels": [
                             "FULL",
                             "LIMITED"
+                        ]
+                    },
+                    "SubtleAlert": {
+                        "hmi_levels": [
+                            "FULL",
+                            "LIMITED",
+                            "BACKGROUND"
+                        ]
+                    },
+                    "OnSubtleAlertPressed": {
+                        "hmi_levels": [
+                            "FULL",
+                            "LIMITED",
+                            "BACKGROUND"
                         ]
                     },
                     "ChangeRegistration": {
@@ -394,6 +417,20 @@
                         ]
                     },
                     "CloseApplication": {
+                        "hmi_levels": [
+                            "FULL",
+                            "LIMITED",
+                            "BACKGROUND"
+                        ]
+                    },
+                    "OnUpdateFile": {
+                        "hmi_levels": [
+                            "FULL",
+                            "LIMITED",
+                            "BACKGROUND"
+                        ]
+                    },
+                    "OnUpdateSubMenu": {
                         "hmi_levels": [
                             "FULL",
                             "LIMITED",

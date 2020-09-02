@@ -42,6 +42,7 @@ namespace {
 const char connection_key[] = "connection_key";
 const char binary_data[] = "binary_data";
 const char app_id[] = "appID";
+const char msg_params[] = "msg_params";
 const utils::SemanticVersion kModuleVersion(application_manager::major_version,
                                             application_manager::minor_version,
                                             application_manager::patch_version);
@@ -132,6 +133,14 @@ errors::eType CObjectSchemaItem::validate(
         std::string validation_info = "Missing mandatory parameter: " + key;
         report->set_validation_info(validation_info);
         return errors::MISSING_MANDATORY_PARAMETER;
+      } else if (key.compare(msg_params) == 0) {
+        // If the message params struct was filtered, that means that the
+        // app's version is too low to use the message.
+        std::string validation_info =
+            "Function is not available for SyncMsgVersion " +
+            MessageVersion.toString();
+        report->set_validation_info(validation_info);
+        return errors::INVALID_VALUE;
       }
       continue;
     }

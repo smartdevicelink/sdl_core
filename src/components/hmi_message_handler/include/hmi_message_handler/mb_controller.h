@@ -58,8 +58,6 @@ using namespace boost::beast::websocket;
 
 namespace hmi_message_handler {
 
-CREATE_LOGGERPTR_GLOBAL(mb_logger_, "HMIMessageHandler")
-
 enum ErrorCode {
   CONTROLLER_EXISTS = -32000,
   SUBSCRIBTION_EXISTS = -32001,

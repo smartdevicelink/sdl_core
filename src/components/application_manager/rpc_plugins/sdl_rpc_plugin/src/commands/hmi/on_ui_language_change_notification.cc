@@ -42,6 +42,8 @@ using namespace application_manager;
 
 namespace commands {
 
+SDL_CREATE_LOG_VARIABLE("Commands")
+
 OnUILanguageChangeNotification::OnUILanguageChangeNotification(
     const application_manager::commands::MessageSharedPtr& message,
     ApplicationManager& application_manager,
@@ -57,7 +59,7 @@ OnUILanguageChangeNotification::OnUILanguageChangeNotification(
 OnUILanguageChangeNotification::~OnUILanguageChangeNotification() {}
 
 void OnUILanguageChangeNotification::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
 
   hmi_capabilities_.set_active_ui_language(
       static_cast<hmi_apis::Common_Language::eType>(
@@ -66,8 +68,7 @@ void OnUILanguageChangeNotification::Run() {
   std::vector<std::string> sections_to_update{hmi_response::language};
   if (!hmi_capabilities_.SaveCachedCapabilitiesToFile(
           hmi_interface::ui, sections_to_update, message_->getSchema())) {
-    LOG4CXX_ERROR(logger_,
-                  "Failed to save UI.OnLanguageChange response to cache");
+    SDL_LOG_ERROR("Failed to save UI.OnLanguageChange response to cache");
   }
 
   (*message_)[strings::msg_params][strings::hmi_display_language] =

@@ -78,11 +78,8 @@ if(ENABLE_LOG)
   )
 else()
   list(APPEND EXCLUDE_PATHS
-    push_log.cc
-    log_message_loop_thread.cc
-    logger_status.cc
     auto_trace.cc
-    logger.cc
+    logger/log4cxxlogger.cc
   )
 endif()
 

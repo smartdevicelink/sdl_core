@@ -39,6 +39,8 @@ using namespace application_manager;
 
 namespace commands {
 
+SDL_CREATE_LOG_VARIABLE("Commands")
+
 UpdateSDLRequest::UpdateSDLRequest(
     const application_manager::commands::MessageSharedPtr& message,
     ApplicationManager& application_manager,
@@ -54,7 +56,7 @@ UpdateSDLRequest::UpdateSDLRequest(
 UpdateSDLRequest::~UpdateSDLRequest() {}
 
 void UpdateSDLRequest::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
 
   policy_handler_.PTExchangeAtUserRequest(
       (*message_)[strings::params][strings::correlation_id].asInt());
