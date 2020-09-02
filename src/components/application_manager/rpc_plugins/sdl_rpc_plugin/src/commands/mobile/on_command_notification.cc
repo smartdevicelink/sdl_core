@@ -39,7 +39,6 @@ namespace sdl_rpc_plugin {
 using namespace application_manager;
 
 namespace commands {
-
 SDL_CREATE_LOG_VARIABLE("Commands")
 
 OnCommandNotification::OnCommandNotification(
@@ -70,8 +69,10 @@ void OnCommandNotification::Run() {
   const uint32_t cmd_id =
       (*message_)[strings::msg_params][strings::cmd_id].asUInt();
 
-  if (!app->FindCommand(cmd_id)) {
-    SDL_LOG_ERROR("No applications found for the command " << cmd_id);
+  const auto command = app->FindCommand(cmd_id);
+
+  if (smart_objects::SmartType_Null == command.getType()) {
+    SDL_LOG_ERROR(" No applications found for the command " << cmd_id);
     return;
   }
 

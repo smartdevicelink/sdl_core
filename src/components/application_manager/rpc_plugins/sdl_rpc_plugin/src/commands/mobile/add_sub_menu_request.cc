@@ -87,8 +87,11 @@ void AddSubMenuRequest::Run() {
   }
 
   const int32_t menu_id = received_msg_params[strings::menu_id].asInt();
-  if (app->FindSubMenu(menu_id)) {
-    SDL_LOG_ERROR("Menu with id " << menu_id << " is not found.");
+
+  const auto sub_menu = app->FindSubMenu(menu_id);
+
+  if (smart_objects::SmartType_Null != sub_menu.getType()) {
+    SDL_LOG_ERROR("Menu with id " << menu_id << " already exists.");
     SendResponse(false, mobile_apis::Result::INVALID_ID);
     return;
   }
@@ -193,7 +196,7 @@ void AddSubMenuRequest::on_event(const event_engine::Event& event) {
       break;
     }
     default: {
-      SDL_LOG_ERROR("Received unknown event " << event.id());
+      SDL_LOG_ERROR("Received unknown event" << event.id());
       return;
     }
   }

@@ -81,9 +81,9 @@ void DeleteCommandRequest::Run() {
   const int32_t cmd_id =
       (*message_)[strings::msg_params][strings::cmd_id].asInt();
 
-  smart_objects::SmartObject* command = application->FindCommand(cmd_id);
+  smart_objects::SmartObject command = application->FindCommand(cmd_id);
 
-  if (!command) {
+  if (smart_objects::SmartType::SmartType_Null == command.getType()) {
     SDL_LOG_ERROR("Command with id " << cmd_id << " is not found.");
     SendResponse(false, mobile_apis::Result::INVALID_ID);
     return;
@@ -98,20 +98,20 @@ void DeleteCommandRequest::Run() {
 
   // we should specify amount of required responses in the 1st request
   uint32_t chaining_counter = 0;
-  if ((*command).keyExists(strings::menu_params)) {
+  if (command.keyExists(strings::menu_params)) {
     ++chaining_counter;
   }
 
-  if ((*command).keyExists(strings::vr_commands)) {
+  if (command.keyExists(strings::vr_commands)) {
     ++chaining_counter;
   }
   /* Need to set all flags before sending request to HMI
    * for correct processing this flags in method on_event */
-  if ((*command).keyExists(strings::menu_params)) {
+  if (command.keyExists(strings::menu_params)) {
     is_ui_send_ = true;
   }
   // check vr params
-  if ((*command).keyExists(strings::vr_commands)) {
+  if (command.keyExists(strings::vr_commands)) {
     is_vr_send_ = true;
   }
   if (is_ui_send_) {
@@ -179,7 +179,7 @@ void DeleteCommandRequest::on_event(const event_engine::Event& event) {
       break;
     }
     default: {
-      SDL_LOG_ERROR("Received unknown event " << event.id());
+      SDL_LOG_ERROR("Received unknown event" << event.id());
       return;
     }
   }
@@ -200,9 +200,9 @@ void DeleteCommandRequest::on_event(const event_engine::Event& event) {
 
   const uint32_t cmd_id = msg_params[strings::cmd_id].asUInt();
 
-  smart_objects::SmartObject* command = application->FindCommand(cmd_id);
+  const auto command = application->FindCommand(cmd_id);
 
-  if (!command) {
+  if (smart_objects::SmartType_Null == command.getType()) {
     SDL_LOG_ERROR("Command id " << cmd_id
                                 << " not found for "
                                    "application with connection key "
