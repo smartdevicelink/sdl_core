@@ -40,6 +40,8 @@ using namespace application_manager;
 
 namespace commands {
 
+SDL_CREATE_LOG_VARIABLE("Commands")
+
 UpdateTurnListResponse::UpdateTurnListResponse(
     const application_manager::commands::MessageSharedPtr& message,
     ApplicationManager& application_manager,
@@ -55,7 +57,7 @@ UpdateTurnListResponse::UpdateTurnListResponse(
 UpdateTurnListResponse::~UpdateTurnListResponse() {}
 
 void UpdateTurnListResponse::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
 
   rpc_service_.SendMessageToMobile(message_);
 }

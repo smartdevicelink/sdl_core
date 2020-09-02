@@ -38,7 +38,7 @@
 #include "application_manager/smart_object_keys.h"
 
 namespace app_service_rpc_plugin {
-CREATE_LOGGERPTR_GLOBAL(logger_, "AppServiceRpcPlugin")
+SDL_CREATE_LOG_VARIABLE("AppServiceRpcPlugin")
 
 namespace strings = application_manager::strings;
 namespace plugins = application_manager::plugin_manager;
@@ -109,12 +109,12 @@ void AppServiceRpcPlugin::DeleteSubscriptions(
 
 extern "C" __attribute__((visibility("default")))
 application_manager::plugin_manager::RPCPlugin*
-Create() {
+Create(logger::Logger* logger_instance) {
+  logger::Logger::instance(logger_instance);
   return new app_service_rpc_plugin::AppServiceRpcPlugin();
 }
 
 extern "C" __attribute__((visibility("default"))) void Delete(
     application_manager::plugin_manager::RPCPlugin* data) {
   delete data;
-  DELETE_THREAD_LOGGER(app_service_rpc_plugin::logger_);
 }

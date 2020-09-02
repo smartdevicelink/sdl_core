@@ -40,6 +40,8 @@ using namespace application_manager;
 
 namespace commands {
 
+SDL_CREATE_LOG_VARIABLE("Commands")
+
 TTSSpeakResponse::TTSSpeakResponse(
     const application_manager::commands::MessageSharedPtr& message,
     ApplicationManager& application_manager,
@@ -55,7 +57,7 @@ TTSSpeakResponse::TTSSpeakResponse(
 TTSSpeakResponse::~TTSSpeakResponse() {}
 
 void TTSSpeakResponse::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
 
   event_engine::Event event(hmi_apis::FunctionID::TTS_Speak);
   event.set_smart_object(*message_);

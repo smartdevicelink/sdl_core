@@ -38,6 +38,8 @@ using namespace application_manager;
 
 namespace commands {
 
+SDL_CREATE_LOG_VARIABLE("Commands")
+
 OnSubtleAlertPressedNotification::OnSubtleAlertPressedNotification(
     const application_manager::commands::MessageSharedPtr& message,
     ApplicationManager& application_manager,
@@ -53,13 +55,13 @@ OnSubtleAlertPressedNotification::OnSubtleAlertPressedNotification(
 OnSubtleAlertPressedNotification::~OnSubtleAlertPressedNotification() {}
 
 void OnSubtleAlertPressedNotification::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
 
   ApplicationSharedPtr app = application_manager_.application(
       (*message_)[strings::msg_params][strings::app_id].asInt());
 
   if (!app) {
-    LOG4CXX_ERROR(logger_, "No application associated with session key");
+    SDL_LOG_ERROR("No application associated with session key");
     return;
   }
 

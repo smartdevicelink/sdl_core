@@ -53,15 +53,13 @@
 namespace {
 #define LOG_UPDATED_VALUE(value, key, section)                              \
   {                                                                         \
-    LOG4CXX_INFO(logger_,                                                   \
-                 "Setting value '" << value << "' for key '" << key         \
+    SDL_LOG_INFO("Setting value '" << value << "' for key '" << key         \
                                    << "' in section '" << section << "'."); \
   }
 
 #define LOG_UPDATED_BOOL_VALUE(value, key, section)                            \
   {                                                                            \
-    LOG4CXX_INFO(logger_,                                                      \
-                 "Setting value '" << std::boolalpha << value << "' for key '" \
+    SDL_LOG_INFO("Setting value '" << std::boolalpha << value << "' for key '" \
                                    << key << "' in section '" << section       \
                                    << "'.");                                   \
   }
@@ -445,7 +443,7 @@ const char* kDefaultAOAFilterSerialNumber = "N000000";
 
 namespace profile {
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "Profile")
+SDL_CREATE_LOG_VARIABLE("Profile")
 
 Profile::Profile()
     : sdl_version_(kDefaultSDLVersion)
@@ -1247,7 +1245,7 @@ const std::string Profile::hmi_origin_id() const {
 }
 
 void Profile::UpdateValues() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
 
   // SDL version
   ReadStringValue(
@@ -2853,7 +2851,7 @@ bool Profile::StringToNumber(const std::string& input, uint64_t& output) const {
 
 bool Profile::IsRelativePath(const std::string& path) {
   if (path.empty()) {
-    LOG4CXX_ERROR(logger_, "Empty path passed.");
+    SDL_LOG_ERROR("Empty path passed.");
     return false;
   }
   return '/' != path[0];

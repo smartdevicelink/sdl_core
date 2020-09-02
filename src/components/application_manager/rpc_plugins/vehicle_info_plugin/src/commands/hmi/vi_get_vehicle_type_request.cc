@@ -37,6 +37,8 @@ using namespace application_manager;
 
 namespace commands {
 
+SDL_CREATE_LOG_VARIABLE("Commands")
+
 VIGetVehicleTypeRequest::VIGetVehicleTypeRequest(
     const application_manager::commands::MessageSharedPtr& message,
     const VehicleInfoCommandParams& params)
@@ -49,13 +51,13 @@ VIGetVehicleTypeRequest::VIGetVehicleTypeRequest(
 VIGetVehicleTypeRequest::~VIGetVehicleTypeRequest() {}
 
 void VIGetVehicleTypeRequest::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
 
   SendRequest();
 }
 
 void VIGetVehicleTypeRequest::onTimeOut() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   hmi_capabilities_.UpdateRequestsRequiredForCapabilities(
       hmi_apis::FunctionID::VehicleInfo_GetVehicleType);
 }

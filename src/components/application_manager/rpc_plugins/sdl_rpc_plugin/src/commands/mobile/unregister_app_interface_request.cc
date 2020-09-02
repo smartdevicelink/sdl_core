@@ -40,12 +40,14 @@ using namespace application_manager;
 
 namespace commands {
 
+SDL_CREATE_LOG_VARIABLE("Commands")
+
 void UnregisterAppInterfaceRequest::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
 
   if (!application_manager_.application(connection_key())) {
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
-    LOG4CXX_ERROR(logger_, "Application is not registered");
+    SDL_LOG_ERROR("Application is not registered");
     return;
   }
 

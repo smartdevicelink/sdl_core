@@ -37,7 +37,7 @@
 #include "utils/logger.h"
 
 namespace application_manager {
-CREATE_LOGGERPTR_GLOBAL(logger_, "ApplicationManager")
+SDL_CREATE_LOG_VARIABLE("ApplicationManager")
 
 namespace {
 struct CommandIdComparator {
@@ -400,14 +400,14 @@ DynamicApplicationDataImpl::display_capabilities() const {
 
 smart_objects::SmartObjectSPtr DynamicApplicationDataImpl::display_capabilities(
     const WindowID window_id) const {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
 
   auto result_display_caps = std::make_shared<smart_objects::SmartObject>(
       smart_objects::SmartType_Array);
   const auto window_caps =
       (*display_capabilities_)[0][strings::window_capabilities].asArray();
   if (!window_caps) {
-    LOG4CXX_WARN(logger_, "Current window capabilities are empty");
+    SDL_LOG_WARN("Current window capabilities are empty");
     // SDL still needs to retreive display capabilities
     return display_capabilities_;
   }
@@ -566,7 +566,7 @@ void DynamicApplicationDataImpl::set_night_color_scheme(
 }
 
 void DynamicApplicationDataImpl::set_display_layout(const std::string& layout) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   using namespace mobile_apis::PredefinedWindows;
   smart_objects::SmartObject template_config(smart_objects::SmartType_Map);
   template_config[strings::template_layout] = layout;
@@ -575,7 +575,7 @@ void DynamicApplicationDataImpl::set_display_layout(const std::string& layout) {
 
 void DynamicApplicationDataImpl::set_display_capabilities(
     const smart_objects::SmartObject& display_capabilities) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   const auto& incoming_window_capabilities =
       display_capabilities[0][strings::window_capabilities];
 
@@ -628,7 +628,7 @@ void DynamicApplicationDataImpl::set_display_capabilities(
 
 void DynamicApplicationDataImpl::remove_window_capability(
     const WindowID window_id) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
 
   auto window_capabilities =
       (*display_capabilities_)[0][strings::window_capabilities].asArray();
@@ -645,9 +645,8 @@ void DynamicApplicationDataImpl::remove_window_capability(
     }
   }
 
-  LOG4CXX_WARN(
-      logger_,
-      "No window id " << window_id << " found in display capabilities");
+  SDL_LOG_WARN("No window id " << window_id
+                               << " found in display capabilities");
 }
 
 bool DynamicApplicationDataImpl::menu_layout_supported(
@@ -682,7 +681,7 @@ bool DynamicApplicationDataImpl::menu_layout_supported(
 
 void DynamicApplicationDataImpl::set_window_layout(const WindowID window_id,
                                                    const std::string& layout) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   smart_objects::SmartObject template_config(smart_objects::SmartType_Map);
 
   template_config[strings::template_layout] = layout;
@@ -691,21 +690,21 @@ void DynamicApplicationDataImpl::set_window_layout(const WindowID window_id,
 
 void DynamicApplicationDataImpl::set_day_color_scheme(
     const WindowID window_id, const smart_objects::SmartObject& color_scheme) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   DCHECK(color_scheme.getType() == smart_objects::SmartType_Map);
   window_templates_[window_id][strings::day_color_scheme] = color_scheme;
 }
 
 void DynamicApplicationDataImpl::set_night_color_scheme(
     const WindowID window_id, const smart_objects::SmartObject& color_scheme) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   DCHECK(color_scheme.getType() == smart_objects::SmartType_Map);
   window_templates_[window_id][strings::night_color_scheme] = color_scheme;
 }
 
 std::string DynamicApplicationDataImpl::window_layout(
     const WindowID window_id) const {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   AppWindowsTemplates::const_iterator window_template_it =
       window_templates_.find(window_id);
 
@@ -722,7 +721,7 @@ std::string DynamicApplicationDataImpl::window_layout(
 
 smart_objects::SmartObject DynamicApplicationDataImpl::day_color_scheme(
     const WindowID window_id) const {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   AppWindowsTemplates::const_iterator window_template_it =
       window_templates_.find(window_id);
 
@@ -739,7 +738,7 @@ smart_objects::SmartObject DynamicApplicationDataImpl::day_color_scheme(
 
 smart_objects::SmartObject DynamicApplicationDataImpl::night_color_scheme(
     const WindowID window_id) const {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   AppWindowsTemplates::const_iterator window_template_it =
       window_templates_.find(window_id);
 
@@ -765,7 +764,7 @@ void DynamicApplicationDataImpl::SetGlobalProperties(
       (this->*callback)(param);
     }
   } else {
-    LOG4CXX_WARN(logger_, "Invalid or Null smart object");
+    SDL_LOG_WARN("Invalid or Null smart object");
   }
 }
 
@@ -776,11 +775,10 @@ void DynamicApplicationDataImpl::AddCommand(
   CommandsMap::const_iterator it = commands_.find(internal_id);
   if (commands_.end() == it) {
     commands_[internal_id] = new smart_objects::SmartObject(command);
-    LOG4CXX_DEBUG(logger_,
-                  "Command with internal number "
-                      << internal_id << " and id "
-                      << (*commands_[internal_id])[strings::cmd_id].asUInt()
-                      << " is added.");
+    SDL_LOG_DEBUG("Command with internal number "
+                  << internal_id << " and id "
+                  << (*commands_[internal_id])[strings::cmd_id].asUInt()
+                  << " is added.");
   }
 }
 
@@ -793,16 +791,14 @@ void DynamicApplicationDataImpl::RemoveCommand(const uint32_t cmd_id) {
 
   if (it != commands_.end()) {
     delete it->second;
-    LOG4CXX_DEBUG(logger_,
-                  "Command with internal number " << (it->first) << " and id "
+    SDL_LOG_DEBUG("Command with internal number " << (it->first) << " and id "
                                                   << cmd_id << " is removed.");
     commands_.erase(it);
 
     return;
   }
-  LOG4CXX_WARN(
-      logger_,
-      "Command with id " << cmd_id << " is not found. Removal skipped.");
+  SDL_LOG_WARN("Command with id " << cmd_id
+                                  << " is not found. Removal skipped.");
 }
 
 smart_objects::SmartObject* DynamicApplicationDataImpl::FindCommand(
@@ -814,8 +810,7 @@ smart_objects::SmartObject* DynamicApplicationDataImpl::FindCommand(
       find_if(commands_.begin(), commands_.end(), is_id_equal);
 
   if (it != commands_.end()) {
-    LOG4CXX_DEBUG(logger_,
-                  "Command with internal number " << (it->first) << " and id "
+    SDL_LOG_DEBUG("Command with internal number " << (it->first) << " and id "
                                                   << cmd_id << " is found.");
     return it->second;
   }
@@ -876,7 +871,7 @@ DynamicApplicationDataImpl::window_optional_params_map() const {
 
 void DynamicApplicationDataImpl::SetWindowInfo(
     const WindowID window_id, const smart_objects::SmartObject& window_info) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   const auto it = window_params_map_.find(window_id);
   if (window_params_map_.end() == it) {
     window_params_map_[window_id] =
@@ -886,12 +881,12 @@ void DynamicApplicationDataImpl::SetWindowInfo(
 
 DisplayCapabilitiesBuilder&
 DynamicApplicationDataImpl::display_capabilities_builder() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   return display_capabilities_builder_;
 }
 
 void DynamicApplicationDataImpl::RemoveWindowInfo(const WindowID window_id) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   window_params_map_.erase(window_id);
 }
 

@@ -39,7 +39,7 @@ namespace sdl_rpc_plugin {
 namespace app_mngr = application_manager;
 namespace plugins = application_manager::plugin_manager;
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "SdlRPCPlugin")
+SDL_CREATE_LOG_VARIABLE("SdlRPCPlugin")
 
 bool SDLRPCPlugin::Init(app_mngr::ApplicationManager& app_manager,
                         app_mngr::rpc_service::RPCService& rpc_service,
@@ -90,7 +90,7 @@ void SDLRPCPlugin::OnApplicationEvent(
     // Processing automatic subscription to SystemCapabilities for DISPLAY type
     const auto capability_type =
         mobile_apis::SystemCapabilityType::eType::DISPLAYS;
-    LOG4CXX_DEBUG(logger_, "Subscription to DISPLAYS capability is enabled");
+    SDL_LOG_DEBUG("Subscription to DISPLAYS capability is enabled");
     sys_cap_ext_ptr->SubscribeTo(capability_type);
   } else if (plugins::ApplicationEvent::kDeleteApplicationData == event) {
     ClearSubscriptions(application);
@@ -106,12 +106,12 @@ void SDLRPCPlugin::ClearSubscriptions(app_mngr::ApplicationSharedPtr app) {
 
 extern "C" __attribute__((visibility("default")))
 application_manager::plugin_manager::RPCPlugin*
-Create() {
+Create(logger::Logger* logger_instance) {
+  logger::Logger::instance(logger_instance);
   return new sdl_rpc_plugin::SDLRPCPlugin();
 }
 
 extern "C" __attribute__((visibility("default"))) void Delete(
     application_manager::plugin_manager::RPCPlugin* data) {
   delete data;
-  DELETE_THREAD_LOGGER(sdl_rpc_plugin::logger_);
 }

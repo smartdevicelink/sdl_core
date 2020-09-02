@@ -37,8 +37,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 namespace transport_manager {
 namespace transport_adapter {
 
-CREATE_LOGGERPTR_GLOBAL(wss_logger_, "WebSocketSecureSession")
-
 template <typename ExecutorType = ssl::stream<tcp::socket&> >
 class WebSocketSecureSession : public WebSocketSession<ExecutorType> {
  public:

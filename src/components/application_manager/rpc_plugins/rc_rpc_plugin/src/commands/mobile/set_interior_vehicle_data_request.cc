@@ -45,7 +45,7 @@ namespace commands {
 
 using namespace json_keys;
 using namespace message_params;
-CREATE_LOGGERPTR_GLOBAL(logger_, "RemoteControlModule")
+SDL_CREATE_LOG_VARIABLE("Commands")
 
 SetInteriorVehicleDataRequest::SetInteriorVehicleDataRequest(
     const app_mngr::commands::MessageSharedPtr& message,
@@ -62,7 +62,7 @@ SetInteriorVehicleDataRequest::~SetInteriorVehicleDataRequest() {}
  */
 bool ClearUnrelatedModuleData(const std::string& module_type,
                               smart_objects::SmartObject& module_data) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   const auto& all_module_types = RCHelpers::GetModuleTypesList();
   const auto& data_mapping = RCHelpers::GetModuleTypeToDataMapping();
   bool module_type_and_data_match = false;
@@ -106,11 +106,11 @@ mobile_apis::Result::eType PrepareResultCodeAndInfo(
     info = "Accessing not supported module data.";
   }
   return result_code;
-  LOG4CXX_WARN(logger_, info);
+  SDL_LOG_WARN(info);
 }
 
 void SetInteriorVehicleDataRequest::Execute() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
 
   smart_objects::SmartObject& module_data =
       (*message_)[app_mngr::strings::msg_params][message_params::kModuleData];
@@ -120,8 +120,7 @@ void SetInteriorVehicleDataRequest::Execute() {
     const std::string module_id = ModuleId();
     const ModuleUid module(module_type, module_id);
     if (!rc_capabilities_manager_.CheckIfModuleExistsInCapabilities(module)) {
-      LOG4CXX_WARN(logger_,
-                   "Accessing not supported module: " << module_type << " "
+      SDL_LOG_WARN("Accessing not supported module: " << module_type << " "
                                                       << module_id);
       SetResourceState(ModuleType(), ResourceState::FREE);
       SendResponse(false,
@@ -146,7 +145,7 @@ void SetInteriorVehicleDataRequest::Execute() {
 
     if (rc_capabilities_manager_.AreAllParamsReadOnly(module_data,
                                                       module_type)) {
-      LOG4CXX_WARN(logger_, "All request params in module type are READ ONLY!");
+      SDL_LOG_WARN("All request params in module type are READ ONLY!");
       SetResourceState(ModuleType(), ResourceState::FREE);
       SendResponse(false,
                    mobile_apis::Result::READ_ONLY,
@@ -158,7 +157,7 @@ void SetInteriorVehicleDataRequest::Execute() {
 
     if (rc_capabilities_manager_.AreReadOnlyParamsPresent(
             module_data, module_type, module_data_capabilities)) {
-      LOG4CXX_DEBUG(logger_, "Request module type has READ ONLY parameters");
+      SDL_LOG_DEBUG("Request module type has READ ONLY parameters");
 
       if (enums_value::kLight == module_data_capabilities.first &&
           capabilitiesStatus::kSuccess != module_data_capabilities.second) {
@@ -170,7 +169,7 @@ void SetInteriorVehicleDataRequest::Execute() {
         return;
       }
 
-      LOG4CXX_DEBUG(logger_, "Cutting-off READ ONLY parameters... ");
+      SDL_LOG_DEBUG("Cutting-off READ ONLY parameters... ");
 
       CutOffReadOnlyParams(module_data);
     }
@@ -190,7 +189,7 @@ void SetInteriorVehicleDataRequest::Execute() {
 
     if (app_wants_to_set_audio_src) {
       if (!app->IsAllowedToChangeAudioSource()) {
-        LOG4CXX_WARN(logger_, "App is not allowed to change audio source");
+        SDL_LOG_WARN("App is not allowed to change audio source");
         SetResourceState(ModuleType(), ResourceState::FREE);
         SendResponse(false,
                      mobile_apis::Result::REJECTED,
@@ -210,7 +209,7 @@ void SetInteriorVehicleDataRequest::Execute() {
                    &(*message_)[app_mngr::strings::msg_params],
                    true);
   } else {
-    LOG4CXX_WARN(logger_, "Request module type & data mismatch!");
+    SDL_LOG_WARN("Request module type & data mismatch!");
     SetResourceState(ModuleType(), ResourceState::FREE);
     SendResponse(false,
                  mobile_apis::Result::INVALID_DATA,
@@ -220,7 +219,7 @@ void SetInteriorVehicleDataRequest::Execute() {
 
 void SetInteriorVehicleDataRequest::on_event(
     const app_mngr::event_engine::Event& event) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   RCCommandRequest::on_event(event);
 
   if (hmi_apis::FunctionID::RC_SetInteriorVehicleData != event.id()) {
@@ -244,10 +243,8 @@ void SetInteriorVehicleDataRequest::on_event(
 
   if (result) {
     if (!IsModuleIdProvided(hmi_response)) {
-      LOG4CXX_WARN(logger_,
-                   "conditional mandatory parameter "
-                       << message_params::kModuleId
-                       << " missed in hmi response");
+      SDL_LOG_WARN("conditional mandatory parameter "
+                   << message_params::kModuleId << " missed in hmi response");
       result = false;
       result_code = mobile_apis::Result::GENERIC_ERROR;
     }
@@ -265,7 +262,7 @@ void SetInteriorVehicleDataRequest::on_event(
     auto app = application_manager_.application(connection_key());
 
     if (!app) {
-      LOG4CXX_ERROR(logger_, "NULL pointer.");
+      SDL_LOG_ERROR("NULL pointer.");
       SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED, "");
       return;
     }
@@ -298,7 +295,7 @@ void SetInteriorVehicleDataRequest::on_event(
 
 void SetInteriorVehicleDataRequest::CheckAudioSource(
     const smart_objects::SmartObject& audio_data) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   if (audio_data.keyExists(message_params::kSource)) {
     application_manager_.set_current_audio_source(
         audio_data[message_params::kSource].asUInt());
@@ -307,7 +304,7 @@ void SetInteriorVehicleDataRequest::CheckAudioSource(
 
 void SetInteriorVehicleDataRequest::CutOffReadOnlyParams(
     smart_objects::SmartObject& module_data) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   const std::string module_type = ModuleType();
   const auto& module_type_params =
       rc_capabilities_manager_.ControlDataForType(module_data, module_type);
@@ -319,9 +316,8 @@ void SetInteriorVehicleDataRequest::CutOffReadOnlyParams(
     for (; it != equalizer_settings.asArray()->end(); ++it) {
       if (it->keyExists(message_params::kChannelName)) {
         it->erase(message_params::kChannelName);
-        LOG4CXX_DEBUG(logger_,
-                      "Cutting-off READ ONLY parameter: "
-                          << message_params::kChannelName);
+        SDL_LOG_DEBUG("Cutting-off READ ONLY parameter: "
+                      << message_params::kChannelName);
       }
     }
   }
@@ -332,13 +328,13 @@ void SetInteriorVehicleDataRequest::CutOffReadOnlyParams(
   for (const auto& param : ro_params) {
     if (module_type_params.keyExists(param)) {
       module_data[data_mapping(module_type)].erase(param);
-      LOG4CXX_DEBUG(logger_, "Cutting-off READ ONLY parameter: " << param);
+      SDL_LOG_DEBUG("Cutting-off READ ONLY parameter: " << param);
     }
   }
 }
 
 std::string SetInteriorVehicleDataRequest::ModuleType() const {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   mobile_apis::ModuleType::eType module_type =
       static_cast<mobile_apis::ModuleType::eType>(
           (*message_)[app_mngr::strings::msg_params]
@@ -351,7 +347,7 @@ std::string SetInteriorVehicleDataRequest::ModuleType() const {
 }
 
 std::string SetInteriorVehicleDataRequest::ModuleId() const {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   auto msg_params = (*message_)[app_mngr::strings::msg_params];
   if (msg_params[message_params::kModuleData].keyExists(
           message_params::kModuleId)) {
@@ -372,7 +368,7 @@ std::string SetInteriorVehicleDataRequest::ModuleId() const {
 
 AcquireResult::eType SetInteriorVehicleDataRequest::AcquireResource(
     const app_mngr::commands::MessageSharedPtr& message) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   const std::string module_type = ModuleType();
   app_mngr::ApplicationSharedPtr app =
       application_manager_.application(CommandRequestImpl::connection_key());
@@ -388,7 +384,7 @@ bool SetInteriorVehicleDataRequest::IsResourceFree(
 
 void SetInteriorVehicleDataRequest::SetResourceState(
     const std::string& module_type, const ResourceState::eType state) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   app_mngr::ApplicationSharedPtr app =
       application_manager_.application(CommandRequestImpl::connection_key());
   resource_allocation_manager_.SetResourceState(

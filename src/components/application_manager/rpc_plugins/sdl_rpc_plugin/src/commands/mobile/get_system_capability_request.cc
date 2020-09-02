@@ -42,6 +42,8 @@ using namespace application_manager;
 
 namespace commands {
 
+SDL_CREATE_LOG_VARIABLE("Commands")
+
 GetSystemCapabilityRequest::GetSystemCapabilityRequest(
     const application_manager::commands::MessageSharedPtr& message,
     ApplicationManager& application_manager,
@@ -57,18 +59,18 @@ GetSystemCapabilityRequest::GetSystemCapabilityRequest(
 GetSystemCapabilityRequest::~GetSystemCapabilityRequest() {}
 
 void GetSystemCapabilityRequest::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
 
   ApplicationSharedPtr app = application_manager_.application(connection_key());
 
   if (!app) {
-    LOG4CXX_ERROR(logger_, "Application is not registered");
+    SDL_LOG_ERROR("Application is not registered");
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     return;
   }
 
   if ((*message_)[strings::msg_params].empty()) {
-    LOG4CXX_ERROR(logger_, strings::msg_params << " is empty.");
+    SDL_LOG_ERROR(strings::msg_params << " is empty.");
     SendResponse(false, mobile_apis::Result::INVALID_DATA);
     return;
   }
@@ -181,7 +183,7 @@ void GetSystemCapabilityRequest::Run() {
 
       if (!capabilities) {
         SendResponse(false, mobile_apis::Result::DATA_NOT_AVAILABLE);
-        LOG4CXX_INFO(logger_, "system_display_capabilities are not available");
+        SDL_LOG_INFO("system_display_capabilities are not available");
         return;
       }
 
@@ -202,12 +204,10 @@ void GetSystemCapabilityRequest::Run() {
       auto& ext = SystemCapabilityAppExtension::ExtractExtension(*app);
       if ((*message_)[app_mngr::strings::msg_params][strings::subscribe]
               .asBool() == true) {
-        LOG4CXX_DEBUG(logger_,
-                      "Subscribe to system capability: " << response_type);
+        SDL_LOG_DEBUG("Subscribe to system capability: " << response_type);
         ext.SubscribeTo(response_type);
       } else {
-        LOG4CXX_DEBUG(logger_,
-                      "Unsubscribe from system capability: " << response_type);
+        SDL_LOG_DEBUG("Unsubscribe from system capability: " << response_type);
         ext.UnsubscribeFrom(response_type);
       }
     }
@@ -224,7 +224,7 @@ void GetSystemCapabilityRequest::Run() {
 }
 
 void GetSystemCapabilityRequest::on_event(const event_engine::Event& event) {
-  LOG4CXX_INFO(logger_, "GetSystemCapabilityRequest on_event");
+  SDL_LOG_INFO("GetSystemCapabilityRequest on_event");
 }
 
 }  // namespace commands
