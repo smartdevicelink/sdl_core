@@ -581,10 +581,10 @@ void PerformInteractionRequest::SendVRPerformInteractionRequest(
 
     int32_t grammar_id_index = 0;
     for (uint32_t i = 0; i < choice_list.length(); ++i) {
-      smart_objects::SmartObject choice_set =
-          app->FindChoiceSet(choice_list[i].asInt());
-      if (smart_objects::SmartType_Null != choice_set.getType()) {
-        LOG4CXX_WARN(logger_, "Couldn't found choiceset");
+      const auto choice_id = choice_list[i].asInt();
+      smart_objects::SmartObject choice_set = app->FindChoiceSet(choice_id);
+      if (smart_objects::SmartType_Null == choice_set.getType()) {
+        LOG4CXX_WARN(logger_, "Couldn't found choiceset : " << choice_id);
         continue;
       }
       msg_params[strings::grammar_id][grammar_id_index++] =
