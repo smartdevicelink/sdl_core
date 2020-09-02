@@ -38,6 +38,8 @@ using namespace application_manager;
 
 namespace commands {
 
+SDL_CREATE_LOG_VARIABLE("Commands")
+
 ButtonGetCapabilitiesResponse::ButtonGetCapabilitiesResponse(
     const application_manager::commands::MessageSharedPtr& message,
     ApplicationManager& application_manager,
@@ -53,7 +55,7 @@ ButtonGetCapabilitiesResponse::ButtonGetCapabilitiesResponse(
 ButtonGetCapabilitiesResponse::~ButtonGetCapabilitiesResponse() {}
 
 void ButtonGetCapabilitiesResponse::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   const hmi_apis::Common_Result::eType code =
       static_cast<hmi_apis::Common_Result::eType>(
           (*message_)[strings::params][hmi_response::code].asInt());
@@ -62,7 +64,7 @@ void ButtonGetCapabilitiesResponse::Run() {
       hmi_apis::FunctionID::Buttons_GetCapabilities);
 
   if (hmi_apis::Common_Result::SUCCESS != code) {
-    LOG4CXX_ERROR(logger_, "Error is returned. Capabilities won't be updated.");
+    SDL_LOG_ERROR("Error is returned. Capabilities won't be updated.");
     return;
   }
 
@@ -81,8 +83,7 @@ void ButtonGetCapabilitiesResponse::Run() {
 
   if (!hmi_capabilities_.SaveCachedCapabilitiesToFile(
           hmi_interface::buttons, sections_to_update, message_->getSchema())) {
-    LOG4CXX_ERROR(logger_,
-                  "Failed to save Buttons.GetCapabilities response to cache");
+    SDL_LOG_ERROR("Failed to save Buttons.GetCapabilities response to cache");
   }
 }
 

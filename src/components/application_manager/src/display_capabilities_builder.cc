@@ -37,19 +37,19 @@
 #include "application_manager/smart_object_keys.h"
 namespace application_manager {
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "DisplayCapabilitiesBuilder")
+SDL_CREATE_LOG_VARIABLE("DisplayCapabilitiesBuilder")
 
 const WindowID kDefaultWindowID = 0;
 
 DisplayCapabilitiesBuilder::DisplayCapabilitiesBuilder(Application& application)
     : owner_(application), is_widget_windows_resumption_(false) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
 }
 
 void DisplayCapabilitiesBuilder::InitBuilder(
     DisplayCapabilitiesBuilder::ResumeCallback resume_callback,
     const smart_objects::SmartObject& windows_info) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   sync_primitives::AutoLock lock(display_capabilities_lock_);
   resume_callback_ = resume_callback;
   window_ids_to_resume_.insert(kDefaultWindowID);
@@ -57,15 +57,14 @@ void DisplayCapabilitiesBuilder::InitBuilder(
 
   for (size_t i = 0; i < windows_info.length(); ++i) {
     auto window_id = windows_info[i][strings::window_id].asInt();
-    LOG4CXX_DEBUG(logger_,
-                  "Inserting " << window_id << " to waiting container");
+    SDL_LOG_DEBUG("Inserting " << window_id << " to waiting container");
     window_ids_to_resume_.insert(window_id);
   }
 }
 
 void DisplayCapabilitiesBuilder::UpdateDisplayCapabilities(
     const smart_objects::SmartObject& incoming_display_capabilities) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   using namespace smart_objects;
   sync_primitives::AutoLock lock(display_capabilities_lock_);
 
@@ -87,7 +86,7 @@ void DisplayCapabilitiesBuilder::UpdateDisplayCapabilities(
             : kDefaultWindowID;
     if (window_ids_to_resume_.end() != window_ids_to_resume_.find(window_id)) {
       cur_window_caps[cur_window_caps.length()] = inc_window_caps[i];
-      LOG4CXX_DEBUG(logger_, "Stop waiting for: " << window_id);
+      SDL_LOG_DEBUG("Stop waiting for: " << window_id);
       window_ids_to_resume_.erase(window_id);
     }
   }
@@ -100,7 +99,7 @@ void DisplayCapabilitiesBuilder::UpdateDisplayCapabilities(
 
 const smart_objects::SmartObjectSPtr
 DisplayCapabilitiesBuilder::display_capabilities() const {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   return display_capabilities_;
 }
 
@@ -109,25 +108,25 @@ bool DisplayCapabilitiesBuilder::IsWindowResumptionNeeded() const {
 }
 
 void DisplayCapabilitiesBuilder::InvokeResumeCallback() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
 
   if (!window_ids_to_resume_.empty()) {
-    LOG4CXX_DEBUG(logger_, "Still waiting for another windows capabilities");
+    SDL_LOG_DEBUG("Still waiting for another windows capabilities");
     return;
   }
 
   if (!display_capabilities_) {
-    LOG4CXX_DEBUG(logger_, "Cached display capabilities are not available");
+    SDL_LOG_DEBUG("Cached display capabilities are not available");
     return;
   }
 
   if (owner_.hmi_level(kDefaultWindowID) ==
       mobile_apis::HMILevel::INVALID_ENUM) {
-    LOG4CXX_DEBUG(logger_, "Main window HMI level is not set yet");
+    SDL_LOG_DEBUG("Main window HMI level is not set yet");
     return;
   }
 
-  LOG4CXX_TRACE(logger_, "Invoking resume callback");
+  SDL_LOG_TRACE("Invoking resume callback");
   resume_callback_(owner_, *display_capabilities_);
   display_capabilities_.reset();
 }
@@ -144,21 +143,19 @@ bool DisplayCapabilitiesBuilder::IsWaitingForWindowCapabilities(
             ? inc_window_caps[i][strings::window_id].asInt()
             : kDefaultWindowID;
     if (helpers::in_range(window_ids_to_resume_, window_id)) {
-      LOG4CXX_TRACE(
-          logger_,
-          "Application is waiting for capabilities for window " << window_id);
+      SDL_LOG_TRACE("Application is waiting for capabilities for window "
+                    << window_id);
       return true;
     }
   }
 
-  LOG4CXX_TRACE(
-      logger_,
+  SDL_LOG_TRACE(
       "Application is not waiting for any of these windows capabilities");
   return false;
 }
 
 void DisplayCapabilitiesBuilder::ResetDisplayCapabilities() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   sync_primitives::AutoLock lock(display_capabilities_lock_);
   for (auto& window_id : window_ids_to_resume_) {
     if (kDefaultWindowID != window_id) {
@@ -185,9 +182,9 @@ void DisplayCapabilitiesBuilder::ResetDisplayCapabilities() {
 
 void DisplayCapabilitiesBuilder::StopWaitingForWindow(
     const WindowID window_id) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   sync_primitives::AutoLock lock(display_capabilities_lock_);
-  LOG4CXX_DEBUG(logger_, "Window id " << window_id << " will be erased");
+  SDL_LOG_DEBUG("Window id " << window_id << " will be erased");
   window_ids_to_resume_.erase(window_id);
 
   InvokeResumeCallback();

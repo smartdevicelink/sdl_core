@@ -52,7 +52,7 @@
  */
 namespace connection_handler {
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "ConnectionHandler")
+SDL_CREATE_LOG_VARIABLE("ConnectionHandler")
 
 Service* Session::FindService(
     const protocol_handler::ServiceType& service_type) {
@@ -83,18 +83,18 @@ Connection::Connection(ConnectionHandle connection_handle,
     , connection_device_handle_(connection_device_handle)
     , primary_connection_handle_(0)
     , heartbeat_timeout_(heartbeat_timeout) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   DCHECK(connection_handler_);
 
   heartbeat_monitor_ = new HeartBeatMonitor(heartbeat_timeout_, this);
   heart_beat_monitor_thread_ =
       threads::CreateThread("HeartBeatMonitor", heartbeat_monitor_);
-  heart_beat_monitor_thread_->start();
+  heart_beat_monitor_thread_->Start();
 }
 
 Connection::~Connection() {
-  LOG4CXX_AUTO_TRACE(logger_);
-  heart_beat_monitor_thread_->join();
+  SDL_LOG_AUTO_TRACE();
+  heart_beat_monitor_thread_->Stop(threads::Thread::kThreadSoftStop);
   delete heartbeat_monitor_;
   threads::DeleteThread(heart_beat_monitor_thread_);
 
@@ -106,11 +106,9 @@ Connection::~Connection() {
   sync_primitives::AutoLock lock(session_map_lock_);
   SessionMap::iterator session_it = session_map_.begin();
   while (session_it != session_map_.end()) {
-    LOG4CXX_INFO(
-        logger_,
-        "Removed Session ID "
-            << static_cast<int>(session_it->first)
-            << " from Session/Connection Map in Connection Destructor");
+    SDL_LOG_INFO("Removed Session ID "
+                 << static_cast<int>(session_it->first)
+                 << " from Session/Connection Map in Connection Destructor");
     connection_handler_->RemoveSession(session_it->first);
     session_it++;
   }
@@ -120,7 +118,7 @@ Connection::~Connection() {
 
 uint32_t Connection::AddNewSession(
     const transport_manager::ConnectionUID connection_handle) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
 
   // NESTED LOCK: make sure to lock session_map_lock_ then ConnectionHandler's
   // session_connection_map_lock_ptr_ (which will be taken in AddSession)
@@ -144,7 +142,7 @@ uint32_t Connection::AddNewSession(
 }
 
 uint32_t Connection::RemoveSession(uint8_t session_id) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
 
   // Again, a NESTED lock, but it follows the rules.
   sync_primitives::AutoLock lock(session_map_lock_);
@@ -155,7 +153,7 @@ uint32_t Connection::RemoveSession(uint8_t session_id) {
 
   SessionMap::iterator it = session_map_.find(session_id);
   if (session_map_.end() == it) {
-    LOG4CXX_WARN(logger_, "Session not found in this connection!");
+    SDL_LOG_WARN("Session not found in this connection!");
     return 0;
   }
   heartbeat_monitor_->RemoveSession(session_id);
@@ -171,12 +169,11 @@ bool Connection::AddNewService(uint8_t session_id,
   // Ignore wrong services
   if (protocol_handler::kControl == service_type ||
       protocol_handler::kInvalidServiceType == service_type) {
-    LOG4CXX_WARN(logger_, "Wrong service " << static_cast<int>(service_type));
+    SDL_LOG_WARN("Wrong service " << static_cast<int>(service_type));
     return false;
   }
 
-  LOG4CXX_DEBUG(logger_,
-                "Add service " << service_type << " for session "
+  SDL_LOG_DEBUG("Add service " << service_type << " for session "
                                << static_cast<uint32_t>(session_id)
                                << " using connection ID "
                                << static_cast<uint32_t>(connection_id));
@@ -184,7 +181,7 @@ bool Connection::AddNewService(uint8_t session_id,
 
   SessionMap::iterator session_it = session_map_.find(session_id);
   if (session_it == session_map_.end()) {
-    LOG4CXX_WARN(logger_, "Session not found in this connection!");
+    SDL_LOG_WARN("Session not found in this connection!");
     return false;
   }
   Session& session = session_it->second;
@@ -195,9 +192,9 @@ bool Connection::AddNewService(uint8_t session_id,
               service_type,
               protocol_handler::ServiceType::kAudio,
               protocol_handler::ServiceType::kMobileNav)) {
-    LOG4CXX_WARN(logger_,
-                 "Audio and video services are disallowed for protocol version "
-                 "2 or lower");
+    SDL_LOG_WARN(
+        "Audio and video services are disallowed for protocol version "
+        "2 or lower");
     return false;
   }
 
@@ -206,15 +203,13 @@ bool Connection::AddNewService(uint8_t session_id,
   if (service) {
 #ifdef ENABLE_SECURITY
     if (!request_protection) {
-      LOG4CXX_WARN(logger_,
-                   "Session " << static_cast<int>(session_id)
+      SDL_LOG_WARN("Session " << static_cast<int>(session_id)
                               << " already has unprotected service "
                               << static_cast<int>(service_type));
       return false;
     }
     if (service->is_protected_) {
-      LOG4CXX_WARN(logger_,
-                   "Session " << static_cast<int>(session_id)
+      SDL_LOG_WARN("Session " << static_cast<int>(session_id)
                               << " already has protected service "
                               << static_cast<int>(service_type));
       return false;
@@ -247,15 +242,14 @@ bool Connection::RemoveService(uint8_t session_id,
                                protocol_handler::ServiceType service_type) {
   // Ignore wrong and required for Session services
   if (is_incorrect_for_remove_service(service_type)) {
-    LOG4CXX_WARN(logger_,
-                 "Could not remove service " << static_cast<int>(service_type));
+    SDL_LOG_WARN("Could not remove service " << static_cast<int>(service_type));
     return false;
   }
   sync_primitives::AutoLock lock(session_map_lock_);
 
   SessionMap::iterator session_it = session_map_.find(session_id);
   if (session_map_.end() == session_it) {
-    LOG4CXX_WARN(logger_, "Session not found in this connection!");
+    SDL_LOG_WARN("Session not found in this connection!");
     return false;
   }
 
@@ -263,8 +257,7 @@ bool Connection::RemoveService(uint8_t session_id,
   ServiceList::iterator service_it =
       find(service_list.begin(), service_list.end(), service_type);
   if (service_list.end() == service_it) {
-    LOG4CXX_WARN(logger_,
-                 "Session " << session_id
+    SDL_LOG_WARN("Session " << session_id
                             << " didn't established"
                                " service "
                             << service_type);
@@ -277,14 +270,13 @@ bool Connection::RemoveService(uint8_t session_id,
 uint8_t Connection::RemoveSecondaryServices(
     transport_manager::ConnectionUID secondary_connection_handle,
     std::list<protocol_handler::ServiceType>& removed_services_list) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
 
   uint8_t found_session_id = 0;
   sync_primitives::AutoLock lock(session_map_lock_);
 
-  LOG4CXX_INFO(logger_,
-               "RemoveSecondaryServices looking for services on Connection ID "
-                   << static_cast<int>(secondary_connection_handle));
+  SDL_LOG_INFO("RemoveSecondaryServices looking for services on Connection ID "
+               << static_cast<int>(secondary_connection_handle));
 
   // Walk the SessionMap in the primary connection, and for each
   // Session, we walk its ServiceList, looking for all the services
@@ -292,9 +284,8 @@ uint8_t Connection::RemoveSecondaryServices(
   for (SessionMap::iterator session_it = session_map_.begin();
        session_map_.end() != session_it;
        ++session_it) {
-    LOG4CXX_INFO(logger_,
-                 "RemoveSecondaryServices found session ID "
-                     << static_cast<int>(session_it->first));
+    SDL_LOG_INFO("RemoveSecondaryServices found session ID "
+                 << static_cast<int>(session_it->first));
 
     // Now, for each session, walk the its ServiceList, looking for services
     // that were using secondary)_connection_handle. If we find such a service,
@@ -302,17 +293,14 @@ uint8_t Connection::RemoveSecondaryServices(
     ServiceList& service_list = session_it->second.service_list;
     ServiceList::iterator service_it = service_list.begin();
     for (; service_it != service_list.end();) {
-      LOG4CXX_INFO(logger_,
-                   "RemoveSecondaryServices found service ID "
-                       << static_cast<int>(service_it->service_type));
+      SDL_LOG_INFO("RemoveSecondaryServices found service ID "
+                   << static_cast<int>(service_it->service_type));
       if (service_it->connection_id == secondary_connection_handle) {
         found_session_id = session_it->first;
 
-        LOG4CXX_INFO(logger_,
-                     "RemoveSecondaryServices removing Service "
-                         << static_cast<int>(service_it->service_type)
-                         << " in session "
-                         << static_cast<int>(found_session_id));
+        SDL_LOG_INFO("RemoveSecondaryServices removing Service "
+                     << static_cast<int>(service_it->service_type)
+                     << " in session " << static_cast<int>(found_session_id));
 
         removed_services_list.push_back(service_it->service_type);
         service_it = service_list.erase(service_it);
@@ -337,7 +325,7 @@ int Connection::SetSSLContext(uint8_t session_id,
   sync_primitives::AutoLock lock(session_map_lock_);
   SessionMap::iterator session_it = session_map_.find(session_id);
   if (session_it == session_map_.end()) {
-    LOG4CXX_WARN(logger_, "Session not found in this connection!");
+    SDL_LOG_WARN("Session not found in this connection!");
     return security_manager::SecurityManager::ERROR_INTERNAL;
   }
   Session& session = session_it->second;
@@ -348,11 +336,11 @@ int Connection::SetSSLContext(uint8_t session_id,
 security_manager::SSLContext* Connection::GetSSLContext(
     const uint8_t session_id,
     const protocol_handler::ServiceType& service_type) const {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   sync_primitives::AutoLock lock(session_map_lock_);
   SessionMap::const_iterator session_it = session_map_.find(session_id);
   if (session_it == session_map_.end()) {
-    LOG4CXX_WARN(logger_, "Session not found in this connection!");
+    SDL_LOG_WARN("Session not found in this connection!");
     return NULL;
   }
   const Session& session = session_it->second;
@@ -361,29 +349,29 @@ security_manager::SSLContext* Connection::GetSSLContext(
     return session.ssl_context;
   const Service* service = session.FindService(service_type);
   if (!service) {
-    LOG4CXX_WARN(logger_, "Service not found in this session!");
+    SDL_LOG_WARN("Service not found in this session!");
     return NULL;
   }
   if (!service->is_protected_)
     return NULL;
-  LOG4CXX_TRACE(logger_, "SSLContext is " << session.ssl_context);
+  SDL_LOG_TRACE("SSLContext is " << session.ssl_context);
   return session.ssl_context;
 }
 
 void Connection::SetProtectionFlag(
     const uint8_t session_id,
     const protocol_handler::ServiceType& service_type) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   sync_primitives::AutoLock lock(session_map_lock_);
   SessionMap::iterator session_it = session_map_.find(session_id);
   if (session_it == session_map_.end()) {
-    LOG4CXX_WARN(logger_, "Session not found in this connection!");
+    SDL_LOG_WARN("Session not found in this connection!");
     return;
   }
   Session& session = session_it->second;
   Service* service = session.FindService(service_type);
   if (!service) {
-    LOG4CXX_WARN(logger_, "Service not found in this session!");
+    SDL_LOG_WARN("Service not found in this session!");
     return;
   }
   service->is_protected_ = true;
@@ -404,12 +392,12 @@ void Connection::SetProtectionFlag(
 bool Connection::SessionServiceExists(
     const uint8_t session_id,
     const protocol_handler::ServiceType& service_type) const {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   sync_primitives::AutoLock lock(session_map_lock_);
 
   SessionMap::const_iterator session_it = session_map_.find(session_id);
   if (session_it == session_map_.end()) {
-    LOG4CXX_WARN(logger_, "Session not found in this connection!");
+    SDL_LOG_WARN("Session not found in this connection!");
     return false;
   }
 
@@ -449,7 +437,7 @@ void Connection::UpdateProtocolVersionSession(uint8_t session_id,
   sync_primitives::AutoLock lock(session_map_lock_);
   SessionMap::iterator session_it = session_map_.find(session_id);
   if (session_map_.end() == session_it) {
-    LOG4CXX_WARN(logger_, "Session not found in this connection!");
+    SDL_LOG_WARN("Session not found in this connection!");
     return;
   }
   Session& session = session_it->second;
@@ -457,11 +445,11 @@ void Connection::UpdateProtocolVersionSession(uint8_t session_id,
 }
 
 bool Connection::SupportHeartBeat(uint8_t session_id) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   sync_primitives::AutoLock lock(session_map_lock_);
   SessionMap::iterator session_it = session_map_.find(session_id);
   if (session_map_.end() == session_it) {
-    LOG4CXX_WARN(logger_, "Session not found in this connection!");
+    SDL_LOG_WARN("Session not found in this connection!");
     return false;
   }
   Session& session = session_it->second;
@@ -472,11 +460,11 @@ bool Connection::SupportHeartBeat(uint8_t session_id) {
 
 bool Connection::ProtocolVersion(uint8_t session_id,
                                  uint8_t& protocol_version) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   sync_primitives::AutoLock lock(session_map_lock_);
   SessionMap::iterator session_it = session_map_.find(session_id);
   if (session_map_.end() == session_it) {
-    LOG4CXX_WARN(logger_, "Session not found in this connection!");
+    SDL_LOG_WARN("Session not found in this connection!");
     return false;
   }
   protocol_version = (session_it->second).protocol_version;

@@ -225,6 +225,15 @@ class StateController {
   virtual void ExitDefaultWindow(ApplicationSharedPtr app) = 0;
 
   /**
+   * @brief Sets BACKGROUND or LIMITED hmi level to application
+   * depends on application type
+   * @param window_id ID of app window to deactivate
+   * @param app Application to deactivate
+   */
+  virtual void DeactivateApp(ApplicationSharedPtr app,
+                             const WindowID window_id) = 0;
+
+  /**
    * @brief ResumePostponedWindows resumes adding of all postponed windows for a
    * specified application, if exists
    * @param app_id id of application to check

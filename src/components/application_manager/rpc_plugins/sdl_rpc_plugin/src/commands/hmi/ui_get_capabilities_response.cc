@@ -36,6 +36,8 @@ using namespace application_manager;
 
 namespace commands {
 
+SDL_CREATE_LOG_VARIABLE("Commands")
+
 UIGetCapabilitiesResponse::UIGetCapabilitiesResponse(
     const application_manager::commands::MessageSharedPtr& message,
     ApplicationManager& application_manager,
@@ -51,7 +53,7 @@ UIGetCapabilitiesResponse::UIGetCapabilitiesResponse(
 UIGetCapabilitiesResponse::~UIGetCapabilitiesResponse() {}
 
 void UIGetCapabilitiesResponse::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
 
   const auto result_code = static_cast<hmi_apis::Common_Result::eType>(
       (*message_)[strings::params][hmi_response::code].asInt());
@@ -60,8 +62,7 @@ void UIGetCapabilitiesResponse::Run() {
       hmi_apis::FunctionID::UI_GetCapabilities);
 
   if (hmi_apis::Common_Result::SUCCESS != result_code) {
-    LOG4CXX_DEBUG(logger_,
-                  "Request was not successful. Don't change HMI capabilities");
+    SDL_LOG_DEBUG("Request was not successful. Don't change HMI capabilities");
     return;
   }
 
@@ -145,6 +146,7 @@ void UIGetCapabilitiesResponse::Run() {
             strings::driver_distraction_capability)) {
       if (!system_capabilities_so[strings::driver_distraction_capability]
                .empty()) {
+        sections_to_update.push_back(strings::driver_distraction_capability);
         hmi_capabilities_.set_driver_distraction_capability(
             system_capabilities_so[strings::driver_distraction_capability]);
         hmi_capabilities_.set_driver_distraction_supported(true);
@@ -165,8 +167,7 @@ void UIGetCapabilitiesResponse::Run() {
 
   if (!hmi_capabilities_.SaveCachedCapabilitiesToFile(
           hmi_interface::ui, sections_to_update, message_->getSchema())) {
-    LOG4CXX_ERROR(logger_,
-                  "Failed to save UI.GetCapabilities response to cache");
+    SDL_LOG_ERROR("Failed to save UI.GetCapabilities response to cache");
   }
 }
 

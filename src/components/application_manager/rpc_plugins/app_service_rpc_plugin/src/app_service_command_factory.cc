@@ -32,7 +32,7 @@
 
 #include "app_service_rpc_plugin/app_service_command_factory.h"
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "AppServiceRpcPlugin")
+SDL_CREATE_LOG_VARIABLE("AppServiceRpcPlugin")
 
 namespace app_service_rpc_plugin {
 
@@ -45,11 +45,11 @@ AppServiceCommandFactory::AppServiceCommandFactory(
           application_manager, rpc_service, hmi_capabilities, policy_handler))
     , mobile_command_factory_(new AppServiceMobileCommandFactory(
           application_manager, rpc_service, hmi_capabilities, policy_handler)) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
 }
 
 AppServiceCommandFactory::~AppServiceCommandFactory() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
 }
 
 app_mngr::CommandSharedPtr AppServiceCommandFactory::CreateCommand(
@@ -66,8 +66,7 @@ app_mngr::CommandSharedPtr AppServiceCommandFactory::CreateCommand(
 bool AppServiceCommandFactory::IsAbleToProcess(
     const int32_t function_id,
     const commands::Command::CommandSource source) const {
-  LOG4CXX_DEBUG(logger_,
-                "AppServiceCommandFactory::IsAbleToProcess" << function_id
+  SDL_LOG_DEBUG("AppServiceCommandFactory::IsAbleToProcess" << function_id
                                                             << " " << source);
   return (commands::Command::SOURCE_HMI == source ||
           commands::Command::SOURCE_SDL_TO_HMI == source)

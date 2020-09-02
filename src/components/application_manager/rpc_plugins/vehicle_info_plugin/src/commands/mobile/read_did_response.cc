@@ -39,6 +39,8 @@ using namespace application_manager;
 
 namespace commands {
 
+SDL_CREATE_LOG_VARIABLE("Commands")
+
 ReadDIDResponse::ReadDIDResponse(
     const application_manager::commands::MessageSharedPtr& message,
     const VehicleInfoCommandParams& params)
@@ -51,7 +53,7 @@ ReadDIDResponse::ReadDIDResponse(
 ReadDIDResponse::~ReadDIDResponse() {}
 
 void ReadDIDResponse::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
 
   rpc_service_.SendMessageToMobile(message_);
 }

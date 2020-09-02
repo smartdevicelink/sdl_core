@@ -41,7 +41,7 @@
 #include "rc_rpc_plugin/rc_module_constants.h"
 #include "smart_objects/enum_schema_item.h"
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "RemoteControlModule")
+SDL_CREATE_LOG_VARIABLE("Commands")
 
 namespace rc_rpc_plugin {
 namespace commands {
@@ -75,7 +75,7 @@ bool RCCommandRequest::IsInterfaceAvailable(
 }
 
 void RCCommandRequest::onTimeOut() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   const std::string module_type = ModuleType();
   SetResourceState(module_type, ResourceState::FREE);
   SendResponse(
@@ -83,7 +83,7 @@ void RCCommandRequest::onTimeOut() {
 }
 
 bool RCCommandRequest::CheckDriverConsent() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   app_mngr::ApplicationSharedPtr app =
       application_manager_.application(CommandRequestImpl::connection_key());
 
@@ -108,14 +108,14 @@ rc_rpc_plugin::TypeAccess RCCommandRequest::CheckModule(
 
 bool RCCommandRequest::IsModuleIdProvided(
     const smart_objects::SmartObject& hmi_response) const {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   return hmi_response[app_mngr::strings::msg_params]
                      [message_params::kModuleData]
                          .keyExists(message_params::kModuleId);
 }
 
 void RCCommandRequest::SendDisallowed(rc_rpc_plugin::TypeAccess access) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   std::string info;
   if (rc_rpc_plugin::kDisallowed == access) {
     info = disallowed_info_.empty()
@@ -124,33 +124,33 @@ void RCCommandRequest::SendDisallowed(rc_rpc_plugin::TypeAccess access) {
   } else {
     return;
   }
-  LOG4CXX_ERROR(logger_, info);
+  SDL_LOG_ERROR(info);
   SendResponse(false, mobile_apis::Result::DISALLOWED, info.c_str());
 }
 
 void RCCommandRequest::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   app_mngr::ApplicationSharedPtr app =
       application_manager_.application(CommandRequestImpl::connection_key());
 
   if (!IsInterfaceAvailable(app_mngr::HmiInterfaces::HMI_INTERFACE_RC)) {
-    LOG4CXX_WARN(logger_, "HMI interface RC is not available");
+    SDL_LOG_WARN("HMI interface RC is not available");
     SendResponse(false,
                  mobile_apis::Result::UNSUPPORTED_RESOURCE,
-                 "Remote control is not supported by system");
+                 "RC is not supported by system");
     return;
   }
-  LOG4CXX_TRACE(logger_, "RC interface is available!");
+  SDL_LOG_TRACE("RC interface is available!");
   if (!policy_handler_.CheckHMIType(
           app->policy_app_id(),
           mobile_apis::AppHMIType::eType::REMOTE_CONTROL,
           app->app_types())) {
-    LOG4CXX_WARN(logger_, "Application has no remote control functions");
+    SDL_LOG_WARN("Application has no remote control functions");
     SendResponse(false, mobile_apis::Result::DISALLOWED, "");
     return;
   }
   if (!resource_allocation_manager_.is_rc_enabled()) {
-    LOG4CXX_WARN(logger_, "Remote control is disabled by user");
+    SDL_LOG_WARN("Remote control is disabled by user");
     SetResourceState(ModuleType(), ResourceState::FREE);
     SendResponse(false,
                  mobile_apis::Result::USER_DISALLOWED,
@@ -159,7 +159,7 @@ void RCCommandRequest::Run() {
   }
   auto rc_capability = hmi_capabilities_.rc_capability();
   if (!rc_capability || rc_capability->empty()) {
-    LOG4CXX_WARN(logger_, "Accessing not supported module: " << ModuleType());
+    SDL_LOG_WARN("Accessing not supported module: " << ModuleType());
     SetResourceState(ModuleType(), ResourceState::FREE);
     SendResponse(false,
                  mobile_apis::Result::UNSUPPORTED_RESOURCE,
@@ -178,12 +178,12 @@ void RCCommandRequest::Run() {
 }
 
 bool RCCommandRequest::AcquireResources() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   const std::string module_type = ModuleType();
   const std::string module_id = ModuleId();
 
   if (!IsResourceFree(module_type, module_id)) {
-    LOG4CXX_WARN(logger_, "Resource is busy.");
+    SDL_LOG_WARN("Resource is busy.");
     SendResponse(false, mobile_apis::Result::IN_USE, "");
     return false;
   }
@@ -211,7 +211,7 @@ bool RCCommandRequest::AcquireResources() {
 }
 
 void RCCommandRequest::on_event(const app_mngr::event_engine::Event& event) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
 
   if (event.id() == hmi_apis::FunctionID::RC_GetInteriorVehicleDataConsent) {
     ProcessAccessResponse(event);
@@ -223,13 +223,13 @@ void RCCommandRequest::on_event(const app_mngr::event_engine::Event& event) {
 
 void RCCommandRequest::ProcessAccessResponse(
     const app_mngr::event_engine::Event& event) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   app_mngr::ApplicationSharedPtr app =
       application_manager_.application(CommandRequestImpl::connection_key());
   const std::string module_type = ModuleType();
   const std::string module_id = ModuleId();
   if (!app) {
-    LOG4CXX_ERROR(logger_, "NULL pointer.");
+    SDL_LOG_ERROR("NULL pointer.");
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED, "");
     return;
   }
@@ -275,7 +275,7 @@ void RCCommandRequest::ProcessConsentResult(const bool is_allowed,
                                             const std::string& module_type,
                                             const std::string& module_id,
                                             const uint32_t app_id) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   if (is_allowed) {
     SetResourceState(module_type, ResourceState::BUSY);
     Execute();  // run child's logic
@@ -293,7 +293,7 @@ void RCCommandRequest::ProcessConsentResult(const bool is_allowed,
 
 void RCCommandRequest::ProcessAskDriverMode(const std::string& module_type,
                                             const std::string& module_id) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   auto app =
       application_manager_.application(CommandRequestImpl::connection_key());
   const std::string policy_app_id = app->policy_app_id();
@@ -321,7 +321,7 @@ void RCCommandRequest::ProcessAskDriverMode(const std::string& module_type,
 void RCCommandRequest::SendGetUserConsent(
     const std::string& module_type,
     const smart_objects::SmartObject& module_ids) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   app_mngr::ApplicationSharedPtr app =
       application_manager_.application(CommandRequestImpl::connection_key());
   DCHECK(app);

@@ -36,6 +36,8 @@ using namespace application_manager;
 
 namespace commands {
 
+SDL_CREATE_LOG_VARIABLE("Commands")
+
 AudioStopStreamRequest::AudioStopStreamRequest(
     const application_manager::commands::MessageSharedPtr& message,
     ApplicationManager& application_manager,
@@ -51,10 +53,10 @@ AudioStopStreamRequest::AudioStopStreamRequest(
 AudioStopStreamRequest::~AudioStopStreamRequest() {}
 
 void AudioStopStreamRequest::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   if (!app_mngr::commands::CheckAvailabilityHMIInterfaces(
           application_manager_, HmiInterfaces::HMI_INTERFACE_Navigation)) {
-    LOG4CXX_INFO(logger_, "Interface Navi is not supported by system");
+    SDL_LOG_INFO("Interface Navi is not supported by system");
     return;
   }
   SendRequest();

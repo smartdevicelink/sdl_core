@@ -46,6 +46,8 @@ namespace application_manager {
 
 namespace commands {
 
+SDL_CREATE_LOG_VARIABLE("Commands")
+
 RequestFromHMI::RequestFromHMI(const MessageSharedPtr& message,
                                ApplicationManager& application_manager,
                                rpc_service::RPCService& rpc_service,
@@ -143,7 +145,7 @@ void RequestFromHMI::FillCommonParametersOfSO(
 
 bool RequestFromHMI::IsMobileResultSuccess(
     mobile_apis::Result::eType result_code) const {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   using namespace helpers;
   return Compare<mobile_apis::Result::eType, EQ, ONE>(
       result_code,
@@ -157,7 +159,7 @@ bool RequestFromHMI::IsMobileResultSuccess(
 bool RequestFromHMI::IsHMIResultSuccess(
     hmi_apis::Common_Result::eType result_code,
     HmiInterfaces::InterfaceID interface) const {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   using namespace helpers;
   if (Compare<hmi_apis::Common_Result::eType, EQ, ONE>(
           result_code,
@@ -183,7 +185,7 @@ void RequestFromHMI::SendProviderRequest(
     const hmi_apis::FunctionID::eType& hmi_function_id,
     const smart_objects::SmartObject* msg,
     bool use_events) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   bool hmi_destination = false;
   ApplicationSharedPtr app;
   // Default error code and error message
@@ -210,7 +212,7 @@ void RequestFromHMI::SendProviderRequest(
   }
 
   if (hmi_destination) {
-    LOG4CXX_DEBUG(logger_, "Sending Request to HMI Provider");
+    SDL_LOG_DEBUG("Sending Request to HMI Provider");
     application_manager_.IncreaseForwardedRequestTimeout(
         application_manager::request_controller::RequestInfo::HmiConnectionKey,
         correlation_id());
@@ -219,7 +221,7 @@ void RequestFromHMI::SendProviderRequest(
   }
 
   if (!app) {
-    LOG4CXX_DEBUG(logger_, "Invalid App Provider pointer");
+    SDL_LOG_DEBUG("Invalid App Provider pointer");
     SendErrorResponse(correlation_id(),
                       static_cast<hmi_apis::FunctionID::eType>(function_id()),
                       error_code,
@@ -228,7 +230,7 @@ void RequestFromHMI::SendProviderRequest(
     return;
   }
 
-  LOG4CXX_DEBUG(logger_, "Sending Request to Mobile Provider");
+  SDL_LOG_DEBUG("Sending Request to Mobile Provider");
   application_manager_.IncreaseForwardedRequestTimeout(
       application_manager::request_controller::RequestInfo::HmiConnectionKey,
       correlation_id());
@@ -263,14 +265,13 @@ void RequestFromHMI::SendMobileRequest(
   }
 
   if (use_events) {
-    LOG4CXX_DEBUG(logger_,
-                  "RequestFromHMI subscribe_on_event "
-                      << function_id << " " << mobile_correlation_id);
+    SDL_LOG_DEBUG("RequestFromHMI subscribe_on_event "
+                  << function_id << " " << mobile_correlation_id);
     subscribe_on_event(function_id, mobile_correlation_id);
   }
   if (!rpc_service_.ManageMobileCommand(
           result, commands::Command::CommandSource::SOURCE_SDL)) {
-    LOG4CXX_ERROR(logger_, "Unable to send request to mobile");
+    SDL_LOG_ERROR("Unable to send request to mobile");
   }
 }
 
@@ -296,25 +297,24 @@ void RequestFromHMI::SendHMIRequest(
   }
 
   if (use_events) {
-    LOG4CXX_DEBUG(logger_,
-                  "RequestFromHMI subscribe_on_event " << function_id << " "
+    SDL_LOG_DEBUG("RequestFromHMI subscribe_on_event " << function_id << " "
                                                        << hmi_correlation_id);
     subscribe_on_event(function_id, hmi_correlation_id);
   }
   if (ProcessHMIInterfacesAvailability(hmi_correlation_id, function_id)) {
     if (!rpc_service_.ManageHMICommand(
             result, commands::Command::CommandSource::SOURCE_SDL_TO_HMI)) {
-      LOG4CXX_ERROR(logger_, "Unable to send request");
+      SDL_LOG_ERROR("Unable to send request");
     }
   } else {
-    LOG4CXX_DEBUG(logger_, "Interface is not available");
+    SDL_LOG_DEBUG("Interface is not available");
   }
 }
 
 bool RequestFromHMI::ProcessHMIInterfacesAvailability(
     const uint32_t hmi_correlation_id,
     const hmi_apis::FunctionID::eType& function_id) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   HmiInterfaces& hmi_interfaces = application_manager_.hmi_interfaces();
   HmiInterfaces::InterfaceID interface =
       hmi_interfaces.GetInterfaceFromFunction(function_id);

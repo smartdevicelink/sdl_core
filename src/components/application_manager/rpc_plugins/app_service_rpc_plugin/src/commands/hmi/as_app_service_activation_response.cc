@@ -36,6 +36,8 @@ namespace app_service_rpc_plugin {
 using namespace application_manager;
 namespace commands {
 
+SDL_CREATE_LOG_VARIABLE("Commands")
+
 ASAppServiceActivationResponse::ASAppServiceActivationResponse(
     const application_manager::commands::MessageSharedPtr& message,
     ApplicationManager& application_manager,
@@ -51,7 +53,7 @@ ASAppServiceActivationResponse::ASAppServiceActivationResponse(
 ASAppServiceActivationResponse::~ASAppServiceActivationResponse() {}
 
 void ASAppServiceActivationResponse::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   rpc_service_.SendMessageToHMI(message_);
 }
 

@@ -44,6 +44,8 @@ using namespace application_manager;
 
 namespace commands {
 
+SDL_CREATE_LOG_VARIABLE("Commands")
+
 OnExitApplicationNotification::OnExitApplicationNotification(
     const application_manager::commands::MessageSharedPtr& message,
     ApplicationManager& application_manager,
@@ -59,7 +61,7 @@ OnExitApplicationNotification::OnExitApplicationNotification(
 OnExitApplicationNotification::~OnExitApplicationNotification() {}
 
 void OnExitApplicationNotification::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
 
   using namespace mobile_apis;
   using namespace hmi_apis;
@@ -68,7 +70,7 @@ void OnExitApplicationNotification::Run() {
   ApplicationSharedPtr app_impl = application_manager_.application(app_id);
 
   if (app_impl.use_count() == 0) {
-    LOG4CXX_ERROR(logger_, "Application does not exist");
+    SDL_LOG_ERROR("Application does not exist");
     return;
   }
 
@@ -112,9 +114,17 @@ void OnExitApplicationNotification::Run() {
       break;
     }
 #endif  // CLOUD_APP_WEBSOCKET_TRANSPORT_SUPPORT
+    case Common_ApplicationExitReason::RESOURCE_CONSTRAINT: {
+      const auto message =
+          MessageHelper::GetOnAppInterfaceUnregisteredNotificationToMobile(
+              app_id, AppInterfaceUnregisteredReason::RESOURCE_CONSTRAINT);
+      SendNotificationToMobile(message);
+      application_manager_.UnregisterApplication(app_id, Result::SUCCESS);
+      return;
+    }
 
     default: {
-      LOG4CXX_WARN(logger_, "Unhandled reason");
+      SDL_LOG_WARN("Unhandled reason");
       return;
     }
   }

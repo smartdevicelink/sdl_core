@@ -292,13 +292,8 @@ class CacheManager : public CacheManagerInterface {
    */
   virtual std::string GetIconUrl(const std::string& policy_app_id) const;
 
-  /**
-   * @brief Get allowed number of notifications
-   * depending on application priority.
-   * @param priority Priority of application
-   */
   virtual rpc::policy_table_interface_base::NumberOfNotificationsType
-  GetNotificationsNumber(const std::string& priority);
+  GetNotificationsNumber(const std::string& priority, const bool is_subtle);
 
   /**
    * @brief Get priority for given application

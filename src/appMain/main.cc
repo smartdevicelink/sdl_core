@@ -42,10 +42,11 @@
 #include <vector>
 
 // ----------------------------------------------------------------------------
-
 #ifdef ENABLE_LOG
-#include "utils/log_message_loop_thread.h"
+#include "utils/logger/log4cxxlogger.h"
+#include "utils/logger/logger_impl.h"
 #endif  // ENABLE_LOG
+
 #include "utils/logger.h"
 
 #include "appMain/life_cycle_impl.h"
@@ -62,7 +63,7 @@
 
 #include "media_manager/media_manager_impl.h"
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "SDLMain")
+SDL_CREATE_LOG_VARIABLE("SDLMain")
 
 namespace {
 
@@ -79,7 +80,7 @@ const std::string kLocalHostAddress = "127.0.0.1";
 bool InitHmi(std::string hmi_link) {
   struct stat sb;
   if (stat(hmi_link.c_str(), &sb) == -1) {
-    LOG4CXX_FATAL(logger_, "HMI index file " << hmi_link << " doesn't exist!");
+    SDL_LOG_FATAL("HMI index file " << hmi_link << " doesn't exist!");
     return false;
   }
   return utils::System(kBrowser, kBrowserName)
@@ -102,6 +103,12 @@ int32_t main(int32_t argc, char** argv) {
     // Can't use internal logger here
     exit(EXIT_FAILURE);
   }
+
+#ifdef ENABLE_LOG
+  auto logger_impl =
+      std::unique_ptr<logger::LoggerImpl>(new logger::LoggerImpl());
+  logger::Logger::instance(logger_impl.get());
+#endif  // ENABLE_LOG
 
   // --------------------------------------------------------------------------
   // Components initialization
@@ -131,57 +138,61 @@ int32_t main(int32_t argc, char** argv) {
     exit(EXIT_FAILURE);
   }
 
-  // --------------------------------------------------------------------------
-  // Logger initialization
-  INIT_LOGGER("log4cxx.properties", profile_instance.logs_enabled());
+#ifdef ENABLE_LOG
+  if (profile_instance.logs_enabled()) {
+    // Logger initialization
+    // Redefine for each paticular logger implementation
+    auto logger = std::unique_ptr<logger::Log4CXXLogger>(
+        new logger::Log4CXXLogger("log4cxx.properties"));
+    logger_impl->Init(std::move(logger));
+  }
+#endif
 
   threads::Thread::SetNameForId(threads::Thread::CurrentId(), "SDLCore");
 
   if (!utils::appenders_loader.Loaded()) {
-    LOG4CXX_ERROR(logger_,
-                  "Appenders plugin not loaded, file logging disabled");
+    SDL_LOG_ERROR("Appenders plugin not loaded, file logging disabled");
   }
 
-  LOG4CXX_INFO(logger_, "Application started!");
-  LOG4CXX_INFO(logger_, "SDL version: " << profile_instance.sdl_version());
+  SDL_LOG_INFO("Application started!");
+  SDL_LOG_INFO("SDL version: " << profile_instance.sdl_version());
 
   // Check if no error values were read from config file
   if (profile_instance.ErrorOccured()) {
-    LOG4CXX_FATAL(logger_, profile_instance.ErrorDescription());
-    FLUSH_LOGGER();
-    DEINIT_LOGGER();
+    SDL_LOG_FATAL(profile_instance.ErrorDescription());
+    SDL_DEINIT_LOGGER();
     exit(EXIT_FAILURE);
   }
 
   // --------------------------------------------------------------------------
   // Components initialization
   if (!life_cycle->StartComponents()) {
-    LOG4CXX_FATAL(logger_, "Failed to start components");
+    SDL_LOG_FATAL("Failed to start components");
     life_cycle->StopComponents();
-    DEINIT_LOGGER();
+    SDL_DEINIT_LOGGER();
     exit(EXIT_FAILURE);
   }
-  LOG4CXX_INFO(logger_, "Components Started");
+  SDL_LOG_INFO("Components Started");
 
   // --------------------------------------------------------------------------
   // Third-Party components initialization.
 
   if (!life_cycle->InitMessageSystem()) {
-    LOG4CXX_FATAL(logger_, "Failed to init message system");
+    SDL_LOG_FATAL("Failed to init message system");
     life_cycle->StopComponents();
-    DEINIT_LOGGER();
+    SDL_DEINIT_LOGGER();
     _exit(EXIT_FAILURE);
   }
-  LOG4CXX_INFO(logger_, "InitMessageBroker successful");
+  SDL_LOG_INFO("InitMessageBroker successful");
   if (profile_instance.launch_hmi()) {
     if (profile_instance.server_address() == kLocalHostAddress) {
-      LOG4CXX_INFO(logger_, "Start HMI on localhost");
+      SDL_LOG_INFO("Start HMI on localhost");
 
 #ifdef WEB_HMI
       if (!InitHmi(profile_instance.link_to_web_hmi())) {
-        LOG4CXX_INFO(logger_, "InitHmi successful");
+        SDL_LOG_INFO("InitHmi successful");
       } else {
-        LOG4CXX_WARN(logger_, "Failed to init HMI");
+        SDL_LOG_WARN("Failed to init HMI");
       }
 #endif
     }
@@ -189,12 +200,12 @@ int32_t main(int32_t argc, char** argv) {
   // --------------------------------------------------------------------------
 
   life_cycle->Run();
-  LOG4CXX_INFO(logger_, "Stop SDL due to caught signal");
+  SDL_LOG_INFO("Stop SDL due to caught signal");
 
   life_cycle->StopComponents();
-  LOG4CXX_INFO(logger_, "Application has been stopped successfuly");
+  SDL_LOG_INFO("Application has been stopped successfuly");
 
-  DEINIT_LOGGER();
+  SDL_DEINIT_LOGGER();
 
   return EXIT_SUCCESS;
 }

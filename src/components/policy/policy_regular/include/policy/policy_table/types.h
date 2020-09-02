@@ -323,6 +323,8 @@ struct ModuleConfig : CompositeType {
   ServiceEndpoints endpoints;
   Optional<ServiceEndpointProperties> endpoint_properties;
   NumberOfNotificationsPerMinute notifications_per_minute_by_priority;
+  Optional<NumberOfNotificationsPerMinute>
+      subtle_notifications_per_minute_by_priority;
   Optional<String<1, 100> > vehicle_make;
   Optional<String<1, 100> > vehicle_model;
   Optional<String<4, 4> > vehicle_year;

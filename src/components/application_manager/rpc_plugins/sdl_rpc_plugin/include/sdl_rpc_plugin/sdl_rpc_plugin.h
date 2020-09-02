@@ -35,6 +35,7 @@
 #include "application_manager/command_factory.h"
 #include "application_manager/plugin_manager/rpc_plugin.h"
 #include "application_manager/resumption/extension_pending_resumption_handler.h"
+#include "utils/ilogger.h"
 
 namespace sdl_rpc_plugin {
 namespace app_mngr = application_manager;
@@ -105,6 +106,7 @@ class SDLRPCPlugin : public plugins::RPCPlugin {
 };
 }  // namespace sdl_rpc_plugin
 
-extern "C" application_manager::plugin_manager::RPCPlugin* Create();
+extern "C" application_manager::plugin_manager::RPCPlugin* Create(
+    logger::Logger* logger_instances);
 extern "C" void Delete(application_manager::plugin_manager::RPCPlugin* data);
 #endif  // SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_SDL_RPC_PLUGIN_H

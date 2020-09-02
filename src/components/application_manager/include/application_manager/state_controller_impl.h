@@ -125,6 +125,8 @@ class StateControllerImpl : public event_engine::EventObserver,
 
   void ActivateDefaultWindow(ApplicationSharedPtr app) OVERRIDE;
   void ExitDefaultWindow(ApplicationSharedPtr app) OVERRIDE;
+  void DeactivateApp(ApplicationSharedPtr app,
+                     const WindowID window_id) OVERRIDE;
 
   void ResumePostponedWindows(const uint32_t app_id) OVERRIDE;
 
@@ -276,13 +278,6 @@ class StateControllerImpl : public event_engine::EventObserver,
    * @param ID state identifier
    */
   void TempStateStopped(HmiState::StateID ID);
-
-  /**
-   * @brief Sets BACKGROUND or LIMITED hmi level to application
-   * depends on application type
-   * @param app Application to deactivate
-   */
-  void DeactivateApp(ApplicationSharedPtr app, const WindowID window_id);
 
   /**
    * Function to remove temporary HmiState for application

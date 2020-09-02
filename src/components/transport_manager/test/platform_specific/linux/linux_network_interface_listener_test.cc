@@ -129,7 +129,7 @@ TEST_F(NetworkInterfaceListenerTest, Start_success) {
   // the "isThreadRunning_" flag of the thread will be update slightly later
   SleepFor(kThreadStartWaitMsec);
 
-  EXPECT_TRUE(interface_listener_impl_->GetThread()->is_running());
+  EXPECT_TRUE(interface_listener_impl_->GetThread()->IsRunning());
 
   EXPECT_TRUE(waiter.WaitFor(1, kStartNotificationTimeoutMsec));
 
@@ -166,7 +166,7 @@ TEST_F(NetworkInterfaceListenerTest, Stop_success) {
   EXPECT_TRUE(interface_listener_impl_->Stop());
   SleepFor(kThreadStartWaitMsec);
 
-  EXPECT_FALSE(interface_listener_impl_->GetThread()->is_running());
+  EXPECT_FALSE(interface_listener_impl_->GetThread()->IsRunning());
 
   Deinit();
 }

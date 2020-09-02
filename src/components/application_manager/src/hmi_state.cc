@@ -40,7 +40,7 @@
 
 namespace application_manager {
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "HmiState")
+SDL_CREATE_LOG_VARIABLE("HmiState")
 
 HmiState::HmiState(std::shared_ptr<Application> app,
                    const ApplicationManager& app_mngr,
@@ -53,7 +53,7 @@ HmiState::HmiState(std::shared_ptr<Application> app,
     , audio_streaming_state_(mobile_apis::AudioStreamingState::INVALID_ENUM)
     , video_streaming_state_(mobile_apis::VideoStreamingState::INVALID_ENUM)
     , system_context_(mobile_apis::SystemContext::INVALID_ENUM) {
-  LOG4CXX_DEBUG(logger_, *this);
+  SDL_LOG_DEBUG(*this);
 }
 
 HmiState::HmiState(std::shared_ptr<Application> app,
@@ -66,7 +66,7 @@ HmiState::HmiState(std::shared_ptr<Application> app,
     , audio_streaming_state_(mobile_apis::AudioStreamingState::INVALID_ENUM)
     , video_streaming_state_(mobile_apis::VideoStreamingState::INVALID_ENUM)
     , system_context_(mobile_apis::SystemContext::INVALID_ENUM) {
-  LOG4CXX_DEBUG(logger_, *this);
+  SDL_LOG_DEBUG(*this);
 }
 
 void HmiState::set_parent(HmiStatePtr parent) {

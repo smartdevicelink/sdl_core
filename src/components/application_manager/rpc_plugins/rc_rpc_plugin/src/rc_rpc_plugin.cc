@@ -43,7 +43,7 @@
 #include "utils/helpers.h"
 
 namespace rc_rpc_plugin {
-CREATE_LOGGERPTR_GLOBAL(logger_, "RemoteControlModule");
+SDL_CREATE_LOG_VARIABLE("RemoteControlModule");
 
 namespace plugins = application_manager::plugin_manager;
 
@@ -115,12 +115,11 @@ void RCRPCPlugin::OnPolicyEvent(
 void RCRPCPlugin::OnApplicationEvent(
     application_manager::plugin_manager::ApplicationEvent event,
     application_manager::ApplicationSharedPtr application) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   if (!application->is_remote_control_supported()) {
-    LOG4CXX_DEBUG(
-        logger_,
+    SDL_LOG_DEBUG(
         "Remote control is not supported for application with app_id: "
-            << application->app_id());
+        << application->app_id());
     return;
   }
   switch (event) {
@@ -179,12 +178,12 @@ RCRPCPlugin::Apps RCRPCPlugin::GetRCApplications(
 
 extern "C" __attribute__((visibility("default")))
 application_manager::plugin_manager::RPCPlugin*
-Create() {
+Create(logger::Logger* logger_instance) {
+  logger::Logger::instance(logger_instance);
   return new rc_rpc_plugin::RCRPCPlugin();
 }  // namespace rc_rpc_plugin
 
 extern "C" __attribute__((visibility("default"))) void Delete(
     application_manager::plugin_manager::RPCPlugin* data) {
   delete data;
-  DELETE_THREAD_LOGGER(rc_rpc_plugin::logger_);
 }

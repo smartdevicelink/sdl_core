@@ -47,6 +47,8 @@ using namespace application_manager;
 
 namespace commands {
 
+SDL_CREATE_LOG_VARIABLE("Commands")
+
 namespace str = strings;
 
 GetVehicleDataRequest::GetVehicleDataRequest(
@@ -62,12 +64,12 @@ GetVehicleDataRequest::GetVehicleDataRequest(
 GetVehicleDataRequest::~GetVehicleDataRequest() {}
 
 void GetVehicleDataRequest::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
 
   auto app = application_manager_.application(connection_key());
 
   if (!app) {
-    LOG4CXX_ERROR(logger_, "No such application : " << connection_key());
+    SDL_LOG_ERROR("No such application : " << connection_key());
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     return;
   }
@@ -110,7 +112,7 @@ void GetVehicleDataRequest::Run() {
 }
 
 void GetVehicleDataRequest::on_event(const event_engine::Event& event) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   smart_objects::SmartObject message = event.smart_object();
 
   switch (event.id()) {
@@ -178,7 +180,7 @@ void GetVehicleDataRequest::on_event(const event_engine::Event& event) {
       break;
     }
     default: {
-      LOG4CXX_ERROR(logger_, "Received unknown event" << event.id());
+      SDL_LOG_ERROR("Received unknown event " << event.id());
       return;
     }
   }
@@ -188,7 +190,7 @@ bool GetVehicleDataRequest::CheckFrequency(Application& app) {
   if (app.AreCommandLimitsExceeded(
           static_cast<mobile_apis::FunctionID::eType>(function_id()),
           application_manager::TLimitSource::CONFIG_FILE)) {
-    LOG4CXX_ERROR(logger_, "GetVehicleData frequency is too high.");
+    SDL_LOG_ERROR("GetVehicleData frequency is too high.");
     return false;
   }
   return true;
