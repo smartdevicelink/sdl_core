@@ -171,19 +171,10 @@ void ApplicationState::AddHMIState(const WindowID window_id,
                                         hmi_states.end(),
                                         StateIDComparator(state->state_id()));
   if (hmi_states.end() != it) {
-<<<<<<< HEAD
-    LOG4CXX_WARN(logger_,
-                 "Hmi state with ID " << state->state_id()
-                                      << "has been already applied for window "
-                                      << window_id
-                                      << " of this application. Overwriting");
-    EraseHMIState(hmi_states, it);
-=======
     SDL_LOG_WARN("Hmi state with ID "
                  << state->state_id() << "has been already applied for window "
-                 << window_id << " of this application. Ignoring");
-    return;
->>>>>>> origin/develop
+                 << window_id << " of this application. Overwriting");
+    EraseHMIState(hmi_states, it);
   }
 
   if (!hmi_states.empty()) {
@@ -246,24 +237,9 @@ void ApplicationState::RemoveWindowHMIStates(const WindowID window_id) {
 void ApplicationState::RemovePostponedState(const WindowID window_id) {
   SDL_LOG_AUTO_TRACE();
   sync_primitives::AutoLock auto_lock(hmi_states_map_lock_);
-<<<<<<< HEAD
   size_t deleted_elements = postponed_states_map_.erase(window_id);
   if (0 == deleted_elements) {
-    LOG4CXX_ERROR(logger_,
-                  "No postponed state is set for window " << window_id);
-=======
-  HmiStates& hmi_states = hmi_states_map_[window_id];
-  DCHECK_OR_RETURN_VOID(!hmi_states.empty());
-
-  StateIDComparator finder(HmiState::StateID::STATE_ID_POSTPONED);
-
-  HmiStates::iterator postponed_state =
-      std::find_if(hmi_states.begin(), hmi_states.end(), finder);
-
-  if (hmi_states.end() == postponed_state) {
     SDL_LOG_ERROR("No postponed state is set for window " << window_id);
-    return;
->>>>>>> origin/develop
   }
 }
 
