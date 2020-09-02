@@ -37,6 +37,8 @@ using namespace application_manager;
 
 namespace commands {
 
+SDL_CREATE_LOG_VARIABLE("Commands")
+
 VRGetLanguageRequest::VRGetLanguageRequest(
     const application_manager::commands::MessageSharedPtr& message,
     ApplicationManager& application_manager,
@@ -52,13 +54,13 @@ VRGetLanguageRequest::VRGetLanguageRequest(
 VRGetLanguageRequest::~VRGetLanguageRequest() {}
 
 void VRGetLanguageRequest::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
 
   SendRequest();
 }
 
 void VRGetLanguageRequest::onTimeOut() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   hmi_capabilities_.UpdateRequestsRequiredForCapabilities(
       hmi_apis::FunctionID::VR_GetLanguage);
 }

@@ -39,6 +39,8 @@ namespace sdl_rpc_plugin {
 using namespace application_manager;
 namespace commands {
 
+SDL_CREATE_LOG_VARIABLE("Commands")
+
 OnUIUpdateSubMenuNotification::OnUIUpdateSubMenuNotification(
     const application_manager::commands::MessageSharedPtr& message,
     ApplicationManager& application_manager,
@@ -54,7 +56,7 @@ OnUIUpdateSubMenuNotification::OnUIUpdateSubMenuNotification(
 OnUIUpdateSubMenuNotification::~OnUIUpdateSubMenuNotification() {}
 
 void OnUIUpdateSubMenuNotification::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   // Prepare SmartObject for mobile factory
   (*message_)[strings::params][strings::function_id] =
       static_cast<int32_t>(mobile_apis::FunctionID::OnUpdateSubMenuID);
@@ -64,8 +66,7 @@ void OnUIUpdateSubMenuNotification::Run() {
   auto app = application_manager_.application(app_id);
 
   if (!app) {
-    LOG4CXX_ERROR(logger_,
-                  "Application with app_id " << app_id << " is not registered");
+    SDL_LOG_ERROR("Application with app_id " << app_id << " is not registered");
     return;
   }
 

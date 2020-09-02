@@ -37,6 +37,8 @@ using namespace application_manager;
 
 namespace commands {
 
+SDL_CREATE_LOG_VARIABLE("Commands")
+
 UIChangeRegistrationRequest::UIChangeRegistrationRequest(
     const application_manager::commands::MessageSharedPtr& message,
     ApplicationManager& application_manager,
@@ -52,7 +54,7 @@ UIChangeRegistrationRequest::UIChangeRegistrationRequest(
 UIChangeRegistrationRequest::~UIChangeRegistrationRequest() {}
 
 void UIChangeRegistrationRequest::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
 
   SendRequest();
 }

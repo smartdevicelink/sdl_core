@@ -71,6 +71,8 @@ static std::map<std::string, std::set<hmi_apis::FunctionID::eType> >
 
 namespace commands {
 
+SDL_CREATE_LOG_VARIABLE("Commands")
+
 bool CheckAvailabilityHMIInterfaces(ApplicationManager& application_manager,
                                     HmiInterfaces::InterfaceID interface) {
   const HmiInterfaces::InterfaceState state =
@@ -167,9 +169,8 @@ void RequestToHMI::SendRequest() {
 }
 
 void RequestToHMI::RequestInterfaceCapabilities(const char* interface_name) {
-  LOG4CXX_DEBUG(
-      logger_,
-      "Request capabilities for the " << interface_name << " interface");
+  SDL_LOG_DEBUG("Request capabilities for the " << interface_name
+                                                << " interface");
 
   const auto& request_ids = interface_requests[std::string(interface_name)];
   RequestCapabilities(request_ids);
@@ -184,9 +185,8 @@ void RequestToHMI::UpdateRequestsRequiredForCapabilities(
 
 void RequestToHMI::UpdateRequiredInterfaceCapabilitiesRequests(
     const std::string& interface_name) {
-  LOG4CXX_DEBUG(
-      logger_,
-      "Update requests required for the " << interface_name << " interface");
+  SDL_LOG_DEBUG("Update requests required for the " << interface_name
+                                                    << " interface");
 
   const auto& request_ids = interface_requests[std::string(interface_name)];
   UpdateRequestsRequiredForCapabilities(request_ids);
@@ -194,8 +194,7 @@ void RequestToHMI::UpdateRequiredInterfaceCapabilitiesRequests(
 
 void RequestToHMI::RequestCapabilities(
     const std::set<hmi_apis::FunctionID::eType>& requests_to_send_to_hmi) {
-  LOG4CXX_DEBUG(logger_,
-                "There are " << requests_to_send_to_hmi.size()
+  SDL_LOG_DEBUG("There are " << requests_to_send_to_hmi.size()
                              << " requests to send to the HMI");
 
   for (const auto& function_id : requests_to_send_to_hmi) {

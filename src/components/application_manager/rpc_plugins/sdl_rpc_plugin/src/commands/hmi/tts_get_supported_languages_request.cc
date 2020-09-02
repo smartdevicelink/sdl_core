@@ -37,6 +37,8 @@ using namespace application_manager;
 
 namespace commands {
 
+SDL_CREATE_LOG_VARIABLE("Commands")
+
 TTSGetSupportedLanguagesRequest::TTSGetSupportedLanguagesRequest(
     const application_manager::commands::MessageSharedPtr& message,
     ApplicationManager& application_manager,
@@ -52,13 +54,13 @@ TTSGetSupportedLanguagesRequest::TTSGetSupportedLanguagesRequest(
 TTSGetSupportedLanguagesRequest::~TTSGetSupportedLanguagesRequest() {}
 
 void TTSGetSupportedLanguagesRequest::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
 
   SendRequest();
 }
 
 void TTSGetSupportedLanguagesRequest::onTimeOut() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   hmi_capabilities_.UpdateRequestsRequiredForCapabilities(
       hmi_apis::FunctionID::TTS_GetSupportedLanguages);
 }

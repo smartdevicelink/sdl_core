@@ -6,7 +6,7 @@
 #include "rc_rpc_plugin/rc_rpc_plugin.h"
 
 namespace rc_rpc_plugin {
-CREATE_LOGGERPTR_GLOBAL(logger_, "RemoteControlModule");
+SDL_CREATE_LOG_VARIABLE("RemoteControlModule");
 
 const std::vector<std::string> RCHelpers::buttons_climate() {
   std::vector<std::string> data;
@@ -138,7 +138,7 @@ RCHelpers::GetModuleTypeToDataMapping() {
         {enums_value::kHmiSettings, message_params::kHmiSettingsControlData}};
     auto it = mapping.find(module_type);
     if (mapping.end() == it) {
-      LOG4CXX_ERROR(logger_, "Unknown module type" << module_type);
+      SDL_LOG_ERROR("Unknown module type " << module_type);
       return std::string();
     }
     return it->second;
@@ -159,7 +159,7 @@ RCHelpers::GetModuleTypeToCapabilitiesMapping() {
         {enums_value::kHmiSettings, strings::khmiSettingsControlCapabilities}};
     auto it = mapping.find(module_type);
     if (mapping.end() == it) {
-      LOG4CXX_ERROR(logger_, "Unknown module type" << module_type);
+      SDL_LOG_ERROR("Unknown module type " << module_type);
       return std::string();
     }
     return it->second;
@@ -175,7 +175,7 @@ const std::vector<std::string> RCHelpers::GetModuleTypesList() {
 
 RCAppExtensionPtr RCHelpers::GetRCExtension(
     application_manager::Application& app) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   auto extension_interface = app.QueryInterface(RCRPCPlugin::kRCPluginID);
   auto extension =
       std::static_pointer_cast<RCAppExtension>(extension_interface);
@@ -257,7 +257,7 @@ void RCHelpers::RemoveRedundantGPSDataFromIVDataMsg(
   using namespace message_params;
   using namespace application_manager::strings;
 
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   if (!msg_params.keyExists(kModuleData)) {
     return;
   }

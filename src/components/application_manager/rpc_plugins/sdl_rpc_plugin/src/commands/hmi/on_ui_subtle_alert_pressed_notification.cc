@@ -37,6 +37,8 @@ using namespace application_manager;
 
 namespace commands {
 
+SDL_CREATE_LOG_VARIABLE("Commands")
+
 OnUISubtleAlertPressedNotification::OnUISubtleAlertPressedNotification(
     const application_manager::commands::MessageSharedPtr& message,
     ApplicationManager& application_manager,
@@ -52,7 +54,7 @@ OnUISubtleAlertPressedNotification::OnUISubtleAlertPressedNotification(
 OnUISubtleAlertPressedNotification::~OnUISubtleAlertPressedNotification() {}
 
 void OnUISubtleAlertPressedNotification::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
 
   (*message_)[strings::params][strings::function_id] = static_cast<int32_t>(
       mobile_apis::FunctionID::eType::OnSubtleAlertPressedID);

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Ford Motor Company
+ * Copyright (c) 2020, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,29 +30,57 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "utils/logger.h"
-#include <apr_time.h>
-#include "utils/log_message_loop_thread.h"
+#ifndef SRC_COMPONENTS_UTILS_INCLUDE_UTILS_LOGGER_LOGGER_IMPL_H_
+#define SRC_COMPONENTS_UTILS_INCLUDE_UTILS_LOGGER_LOGGER_IMPL_H_
+
+#include "utils/ilogger.h"
+
+#include <functional>
+
 #include "utils/logger_status.h"
+#include "utils/threads/message_loop_thread.h"
 
-void deinit_logger() {
-  CREATE_LOGGERPTR_LOCAL(logger_, "Utils")
-  LOG4CXX_DEBUG(logger_, "Logger deinitialization");
-  logger::set_logs_enabled(false);
-  log4cxx::LoggerPtr rootLogger = log4cxx::Logger::getRootLogger();
-  logger::delete_log_message_loop_thread(rootLogger);
-  log4cxx::spi::LoggerRepositoryPtr repository =
-      rootLogger->getLoggerRepository();
-  log4cxx::LoggerList loggers = repository->getCurrentLoggers();
-  for (log4cxx::LoggerList::iterator i = loggers.begin(); i != loggers.end();
-       ++i) {
-    log4cxx::LoggerPtr logger = *i;
-    logger->removeAllAppenders();
-  }
-  rootLogger->removeAllAppenders();
-  logger::logger_status = logger::LoggerThreadNotCreated;
-}
+namespace logger {
 
-log4cxx_time_t time_now() {
-  return apr_time_now();
-}
+typedef std::queue<LogMessage> LogMessageQueue;
+
+typedef threads::MessageLoopThread<LogMessageQueue>
+    LogMessageLoopThreadTemplate;
+
+template <typename T>
+using LoopThreadPtr = std::unique_ptr<T, std::function<void(T*)> >;
+
+class LogMessageLoopThread : public LogMessageLoopThreadTemplate,
+                             public LogMessageLoopThreadTemplate::Handler {
+ public:
+  LogMessageLoopThread(std::function<void(LogMessage)> handler);
+
+  void Push(const LogMessage& message);
+
+  void Handle(const LogMessage message);
+
+  ~LogMessageLoopThread();
+
+ private:
+  std::function<void(LogMessage)> force_log_;
+};
+
+class LoggerImpl : public Logger, public LoggerInitializer {
+ public:
+  LoggerImpl(bool use_message_loop_thread = true);
+  void Init(std::unique_ptr<ThirdPartyLoggerInterface>&& impl) override;
+  void DeInit() override;
+  void Flush() override;
+
+  bool IsEnabledFor(const std::string& component,
+                    LogLevel log_level) const override;
+  void PushLog(const LogMessage& log_message) override;
+
+  std::unique_ptr<ThirdPartyLoggerInterface> impl_;
+  LoopThreadPtr<LogMessageLoopThread> loop_thread_;
+  bool use_message_loop_thread_;
+};
+
+}  // namespace logger
+
+#endif  // SRC_COMPONENTS_UTILS_INCLUDE_UTILS_LOGGER_LOGGER_IMPL_H_

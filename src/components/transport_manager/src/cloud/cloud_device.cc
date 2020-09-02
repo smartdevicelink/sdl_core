@@ -37,7 +37,7 @@
 
 namespace transport_manager {
 namespace transport_adapter {
-CREATE_LOGGERPTR_GLOBAL(logger_, "TransportManager")
+SDL_CREATE_LOG_VARIABLE("TransportManager")
 
 CloudDevice::CloudDevice(std::string& host,
                          std::string& port,
@@ -53,7 +53,7 @@ CloudDevice::CloudDevice(CloudAppEndpoint& endpoint, std::string& name)
     : Device(name, std::string(name)), endpoint_(endpoint) {}
 
 bool CloudDevice::IsSameAs(const Device* other) const {
-  LOG4CXX_TRACE(logger_, "enter. device: " << other);
+  SDL_LOG_TRACE("enter. device: " << other);
 
   const CloudDevice* other_cloud_device =
       dynamic_cast<const CloudDevice*>(other);

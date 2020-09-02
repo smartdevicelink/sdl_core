@@ -37,6 +37,8 @@ namespace app_mngr = application_manager;
 
 namespace commands {
 
+SDL_CREATE_LOG_VARIABLE("Commands")
+
 UIShowAppMenuRequest::UIShowAppMenuRequest(
     const app_mngr::commands::MessageSharedPtr& message,
     app_mngr::ApplicationManager& application_manager,
@@ -52,7 +54,7 @@ UIShowAppMenuRequest::UIShowAppMenuRequest(
 UIShowAppMenuRequest::~UIShowAppMenuRequest() {}
 
 void UIShowAppMenuRequest::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
 
   SendRequest();
 }
