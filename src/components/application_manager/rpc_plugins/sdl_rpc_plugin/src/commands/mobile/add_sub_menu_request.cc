@@ -89,7 +89,7 @@ void AddSubMenuRequest::Run() {
   const auto sub_menu = app->FindSubMenu(menu_id);
 
   if (smart_objects::SmartType_Null != sub_menu.getType()) {
-    LOG4CXX_ERROR(logger_, "Menu with id " << menu_id << " is not found.");
+    LOG4CXX_ERROR(logger_, "Menu with id " << menu_id << " already exists.");
     SendResponse(false, mobile_apis::Result::INVALID_ID);
     return;
   }
