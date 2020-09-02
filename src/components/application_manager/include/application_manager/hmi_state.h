@@ -319,6 +319,48 @@ class HmiState {
    */
   bool is_mobile_projection_app() const;
 
+  /**
+   * @brief parent_hmi_level
+   * @return return hmi level for parent state if available, otherwise return
+   * HMI_NONE
+   */
+  mobile_apis::HMILevel::eType parent_hmi_level() const;
+
+  /**
+   * @brief parent_max_hmi_level
+   * @return return maximum hmi level for parent state if available, otherwise
+   * return HMI_FULL
+   */
+  mobile_apis::HMILevel::eType parent_max_hmi_level() const;
+
+  /**
+   * @brief parent_audio_state
+   * @return return audio streaming state for parent state if available,
+   * otherwise return NOT_AUDIBLE
+   */
+  mobile_apis::AudioStreamingState::eType parent_audio_state() const;
+
+  /**
+   * @brief parent_max_audio_state
+   * @return return maximum audio streaming state for parent state if available,
+   * otherwise return AUDIBLE
+   */
+  mobile_apis::AudioStreamingState::eType parent_max_audio_state() const;
+
+  /**
+   * @brief parent_video_state
+   * @return return video streaming state for parent state if available,
+   * otherwise return NOT_STREAMABLE
+   */
+  mobile_apis::VideoStreamingState::eType parent_video_state() const;
+
+  /**
+   * @brief parent_max_video_state
+   * @return return maximum video streaming statefor parent state if available,
+   * otherwise return STREAMABLE
+   */
+  mobile_apis::VideoStreamingState::eType parent_max_video_state() const;
+
  private:
   void operator=(const HmiState&);
 };

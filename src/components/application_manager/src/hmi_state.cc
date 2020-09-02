@@ -105,6 +105,42 @@ bool HmiState::is_mobile_projection_app() const {
   return app ? app->mobile_projection_enabled() : false;
 }
 
+mobile_apis::HMILevel::eType HmiState::parent_hmi_level() const {
+  using namespace mobile_apis;
+  return parent() ? parent()->hmi_level() : HMILevel::HMI_NONE;
+}
+
+mobile_apis::HMILevel::eType HmiState::parent_max_hmi_level() const {
+  using namespace mobile_apis;
+  return parent() ? parent()->max_hmi_level() : HMILevel::HMI_FULL;
+}
+
+mobile_apis::AudioStreamingState::eType HmiState::parent_audio_state() const {
+  using namespace mobile_apis;
+  return parent() ? parent()->audio_streaming_state()
+                  : AudioStreamingState::NOT_AUDIBLE;
+}
+
+mobile_apis::AudioStreamingState::eType HmiState::parent_max_audio_state()
+    const {
+  using namespace mobile_apis;
+  return parent() ? parent()->max_audio_streaming_state()
+                  : AudioStreamingState::AUDIBLE;
+}
+
+mobile_apis::VideoStreamingState::eType HmiState::parent_video_state() const {
+  using namespace mobile_apis;
+  return parent() ? parent()->video_streaming_state()
+                  : VideoStreamingState::NOT_STREAMABLE;
+}
+
+mobile_apis::VideoStreamingState::eType HmiState::parent_max_video_state()
+    const {
+  using namespace mobile_apis;
+  return parent() ? parent()->max_video_streaming_state()
+                  : VideoStreamingState::STREAMABLE;
+}
+
 mobile_apis::WindowType::eType HmiState::window_type() const {
   return window_type_;
 }
@@ -141,8 +177,7 @@ mobile_apis::AudioStreamingState::eType TTSHmiState::audio_streaming_state()
 
   if (Compare<HMILevel::eType, EQ, ONE>(
           hmi_level(), HMILevel::HMI_FULL, HMILevel::HMI_LIMITED)) {
-    return std::max(parent()->audio_streaming_state(),
-                    max_audio_streaming_state());
+    return std::max(parent_audio_state(), max_audio_streaming_state());
   }
   return AudioStreamingState::NOT_AUDIBLE;
 }
@@ -152,9 +187,7 @@ mobile_apis::AudioStreamingState::eType TTSHmiState::max_audio_streaming_state()
   using namespace mobile_apis;
 
   if (app_mngr_.is_attenuated_supported()) {
-    auto parent_max = parent() ? parent()->max_audio_streaming_state()
-                               : AudioStreamingState::AUDIBLE;
-    return std::max(parent_max, AudioStreamingState::ATTENUATED);
+    return std::max(parent_max_audio_state(), AudioStreamingState::ATTENUATED);
   }
   return AudioStreamingState::NOT_AUDIBLE;
 }
@@ -165,8 +198,7 @@ VideoStreamingHmiState::VideoStreamingHmiState(
 
 mobile_apis::VideoStreamingState::eType
 VideoStreamingHmiState::video_streaming_state() const {
-  return std::max(parent()->video_streaming_state(),
-                  max_video_streaming_state());
+  return std::max(parent_video_state(), max_video_streaming_state());
 }
 
 mobile_apis::VideoStreamingState::eType
@@ -175,9 +207,7 @@ VideoStreamingHmiState::max_video_streaming_state() const {
   const ApplicationSharedPtr app =
       app_mngr_.application_by_hmi_app(hmi_app_id_);
   if (app && app->IsVideoApplication()) {
-    auto parent_max = parent() ? parent()->max_video_streaming_state()
-                               : VideoStreamingState::STREAMABLE;
-    return std::max(parent_max, VideoStreamingState::STREAMABLE);
+    return std::max(parent_max_video_state(), VideoStreamingState::STREAMABLE);
   }
 
   return VideoStreamingState::NOT_STREAMABLE;
@@ -191,8 +221,7 @@ NaviStreamingHmiState::NaviStreamingHmiState(std::shared_ptr<Application> app,
 
 mobile_apis::AudioStreamingState::eType
 NaviStreamingHmiState::audio_streaming_state() const {
-  return std::max(parent()->audio_streaming_state(),
-                  max_audio_streaming_state());
+  return std::max(parent_audio_state(), max_audio_streaming_state());
 }
 
 mobile_apis::AudioStreamingState::eType
@@ -205,9 +234,7 @@ NaviStreamingHmiState::max_audio_streaming_state() const {
                    : AudioStreamingState::NOT_AUDIBLE;
   }
 
-  auto parent_max = parent() ? parent()->max_audio_streaming_state()
-                             : AudioStreamingState::AUDIBLE;
-  return std::max(expected, parent_max);
+  return std::max(expected, parent_max_audio_state());
 }
 
 PhoneCallHmiState::PhoneCallHmiState(std::shared_ptr<Application> app,
@@ -215,16 +242,15 @@ PhoneCallHmiState::PhoneCallHmiState(std::shared_ptr<Application> app,
     : HmiState(app, app_mngr, STATE_ID_PHONE_CALL) {}
 
 mobile_apis::HMILevel::eType PhoneCallHmiState::hmi_level() const {
-  return std::max(parent()->hmi_level(), max_hmi_level());
+  return std::max(parent_hmi_level(), max_hmi_level());
 }
 
 mobile_apis::HMILevel::eType PhoneCallHmiState::max_hmi_level() const {
   using namespace helpers;
   using namespace mobile_apis;
 
-  auto parent_max = parent() ? parent()->max_hmi_level() : HMILevel::HMI_FULL;
   if (WindowType::WIDGET == window_type()) {
-    return std::max(HMILevel::HMI_FULL, parent_max);
+    return std::max(HMILevel::HMI_FULL, parent_max_hmi_level());
   }
 
   auto expected = HMILevel::HMI_FULL;
@@ -234,7 +260,7 @@ mobile_apis::HMILevel::eType PhoneCallHmiState::max_hmi_level() const {
     expected = HMILevel::HMI_BACKGROUND;
   }
 
-  return std::max(expected, parent_max);
+  return std::max(expected, parent_max_hmi_level());
 }
 
 SafetyModeHmiState::SafetyModeHmiState(std::shared_ptr<Application> app,
@@ -246,19 +272,18 @@ DeactivateHMI::DeactivateHMI(std::shared_ptr<Application> app,
     : HmiState(app, app_mngr, STATE_ID_DEACTIVATE_HMI) {}
 
 mobile_apis::HMILevel::eType DeactivateHMI::hmi_level() const {
-  return std::max(parent()->hmi_level(), max_hmi_level());
+  return std::max(parent_hmi_level(), max_hmi_level());
 }
 
 mobile_apis::HMILevel::eType DeactivateHMI::max_hmi_level() const {
   using namespace helpers;
   using namespace mobile_apis;
 
-  auto parent_max = parent() ? parent()->max_hmi_level() : HMILevel::HMI_FULL;
   if (WindowType::WIDGET == window_type()) {
-    return std::max(HMILevel::HMI_FULL, parent_max);
+    return std::max(HMILevel::HMI_FULL, parent_max_hmi_level());
   }
 
-  return std::max(HMILevel::HMI_BACKGROUND, parent_max);
+  return std::max(HMILevel::HMI_BACKGROUND, parent_max_hmi_level());
 }
 
 AudioSource::AudioSource(std::shared_ptr<Application> app,
@@ -272,7 +297,7 @@ mobile_apis::HMILevel::eType AudioSource::hmi_level() const {
   using namespace mobile_apis;
 
   if (WindowType::WIDGET == window_type() || keep_context_) {
-    return std::max(parent()->hmi_level(), max_hmi_level());
+    return std::max(parent_hmi_level(), max_hmi_level());
   }
 
   auto expected = HMILevel::HMI_BACKGROUND;
@@ -280,27 +305,26 @@ mobile_apis::HMILevel::eType AudioSource::hmi_level() const {
     expected = HMILevel::HMI_LIMITED;
   }
 
-  return std::max(std::max(expected, max_hmi_level()), parent()->hmi_level());
+  return std::max(std::max(expected, max_hmi_level()), parent_hmi_level());
 }
 
 mobile_apis::AudioStreamingState::eType AudioSource::audio_streaming_state()
     const {
   return is_media_app() && !is_navi_app()
              ? mobile_apis::AudioStreamingState::NOT_AUDIBLE
-             : parent()->audio_streaming_state();
+             : parent_audio_state();
 }
 
 mobile_apis::VideoStreamingState::eType AudioSource::video_streaming_state()
     const {
-  return parent()->video_streaming_state();
+  return parent_video_state();
 }
 
 mobile_apis::HMILevel::eType AudioSource::max_hmi_level() const {
   using namespace mobile_apis;
 
-  auto parent_max = parent() ? parent()->max_hmi_level() : HMILevel::HMI_FULL;
   if (WindowType::WIDGET == window_type()) {
-    return std::max(HMILevel::HMI_FULL, parent_max);
+    return std::max(HMILevel::HMI_FULL, parent_max_hmi_level());
   }
 
   auto expected = HMILevel::HMI_FULL;
@@ -309,16 +333,14 @@ mobile_apis::HMILevel::eType AudioSource::max_hmi_level() const {
     expected = HMILevel::HMI_BACKGROUND;
   }
 
-  return std::max(expected, parent_max);
+  return std::max(expected, parent_max_hmi_level());
 }
 
 mobile_apis::AudioStreamingState::eType AudioSource::max_audio_streaming_state()
     const {
-  auto parent_max = parent() ? parent()->max_audio_streaming_state()
-                             : mobile_apis::AudioStreamingState::AUDIBLE;
   return is_media_app() && !is_navi_app()
              ? mobile_apis::AudioStreamingState::NOT_AUDIBLE
-             : parent_max;
+             : parent_max_audio_state();
 }
 
 mobile_apis::VideoStreamingState::eType AudioSource::max_video_streaming_state()
@@ -334,7 +356,7 @@ EmbeddedNavi::EmbeddedNavi(std::shared_ptr<Application> app,
 mobile_apis::AudioStreamingState::eType EmbeddedNavi::audio_streaming_state()
     const {
   return is_navi_app() ? mobile_apis::AudioStreamingState::NOT_AUDIBLE
-                       : parent()->audio_streaming_state();
+                       : parent_audio_state();
 }
 
 mobile_apis::VideoStreamingState::eType EmbeddedNavi::video_streaming_state()
@@ -347,7 +369,7 @@ mobile_apis::HMILevel::eType EmbeddedNavi::hmi_level() const {
   using namespace helpers;
 
   if (WindowType::WIDGET == window_type()) {
-    return std::max(parent()->hmi_level(), max_hmi_level());
+    return std::max(parent_hmi_level(), max_hmi_level());
   }
 
   auto expected = HMILevel::HMI_BACKGROUND;
@@ -355,32 +377,27 @@ mobile_apis::HMILevel::eType EmbeddedNavi::hmi_level() const {
     expected = HMILevel::HMI_LIMITED;
   }
 
-  return std::max(std::max(expected, max_hmi_level()), parent()->hmi_level());
+  return std::max(std::max(expected, max_hmi_level()), parent_hmi_level());
 }
 
 mobile_apis::AudioStreamingState::eType
 EmbeddedNavi::max_audio_streaming_state() const {
-  auto parent_max = parent() ? parent()->max_audio_streaming_state()
-                             : mobile_apis::AudioStreamingState::AUDIBLE;
   return is_navi_app() ? mobile_apis::AudioStreamingState::NOT_AUDIBLE
-                       : parent_max;
+                       : parent_max_audio_state();
 }
 
 mobile_apis::VideoStreamingState::eType
 EmbeddedNavi::max_video_streaming_state() const {
-  auto parent_max = parent() ? parent()->max_video_streaming_state()
-                             : mobile_apis::VideoStreamingState::STREAMABLE;
   return is_navi_app() ? mobile_apis::VideoStreamingState::NOT_STREAMABLE
-                       : parent_max;
+                       : parent_max_video_state();
 }
 
 mobile_apis::HMILevel::eType EmbeddedNavi::max_hmi_level() const {
   using namespace mobile_apis;
   using namespace helpers;
 
-  auto parent_max = parent() ? parent()->max_hmi_level() : HMILevel::HMI_FULL;
   if (WindowType::WIDGET == window_type()) {
-    return std::max(HMILevel::HMI_FULL, parent_max);
+    return std::max(HMILevel::HMI_FULL, parent_max_hmi_level());
   }
 
   auto expected = HMILevel::HMI_FULL;
@@ -388,7 +405,7 @@ mobile_apis::HMILevel::eType EmbeddedNavi::max_hmi_level() const {
     expected = HMILevel::HMI_BACKGROUND;
   }
 
-  return std::max(expected, parent_max);
+  return std::max(expected, parent_max_hmi_level());
 }
 
 namespace {
