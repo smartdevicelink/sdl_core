@@ -208,14 +208,19 @@ class ApplicationState {
   HmiStatesMap hmi_states_map_;
 
   /**
+   * @brief hmi_states_map_lock_
+   */
+  mutable sync_primitives::Lock hmi_states_map_lock_;
+
+  /**
    * @brief Postponed states of application
    */
   HmiStateMap postponed_states_map_;
 
   /**
-   * @brief hmi_states_map_lock_
+   * @brief postponed_states_map_lock_
    */
-  mutable sync_primitives::Lock hmi_states_map_lock_;
+  mutable sync_primitives::Lock postponed_states_map_lock_;
 
   DISALLOW_COPY_AND_ASSIGN(ApplicationState);
 };

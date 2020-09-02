@@ -236,7 +236,7 @@ void ApplicationState::RemoveWindowHMIStates(const WindowID window_id) {
 
 void ApplicationState::RemovePostponedState(const WindowID window_id) {
   SDL_LOG_AUTO_TRACE();
-  sync_primitives::AutoLock auto_lock(hmi_states_map_lock_);
+  sync_primitives::AutoLock auto_lock(postponed_states_map_lock_);
   size_t deleted_elements = postponed_states_map_.erase(window_id);
   if (0 == deleted_elements) {
     SDL_LOG_ERROR("No postponed state is set for window " << window_id);
@@ -277,7 +277,7 @@ void ApplicationState::SetPostponedState(const WindowID window_id,
   DCHECK_OR_RETURN_VOID(state->state_id() ==
                         HmiState::StateID::STATE_ID_POSTPONED);
 
-  sync_primitives::AutoLock auto_lock(hmi_states_map_lock_);
+  sync_primitives::AutoLock auto_lock(postponed_states_map_lock_);
   postponed_states_map_[window_id] = state;
 }
 
@@ -312,7 +312,7 @@ HmiStatePtr ApplicationState::RegularHmiState(const WindowID window_id) const {
 
 HmiStatePtr ApplicationState::PostponedHmiState(
     const WindowID window_id) const {
-  sync_primitives::AutoLock auto_lock(hmi_states_map_lock_);
+  sync_primitives::AutoLock auto_lock(postponed_states_map_lock_);
 
   auto it = postponed_states_map_.find(window_id);
   return it != postponed_states_map_.end() ? it->second : HmiStatePtr();
