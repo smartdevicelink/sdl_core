@@ -67,7 +67,7 @@ void RCPendingResumptionHandler::on_event(
       auto rc_app_extension = RCHelpers::GetRCExtension(*app);
       rc_app_extension->UnsubscribeFromInteriorVehicleData(module_uid);
     }
-    ProcessNextFreezedResumption(module_uid);
+    ProcessNextPausedResumption(module_uid);
   }
 }
 
@@ -117,7 +117,7 @@ void RCPendingResumptionHandler::HandleResumptionSubscriptionRequest(
     const auto subscription_request =
         CreateSubscriptionRequest(subscription, cid);
     const auto fid = GetFunctionId(*subscription_request);
-    freezed_resumptions_[subscription].push(
+    paused_resumptions_[subscription].push(
         {app.app_id(), *subscription_request});
     const auto resumption_request =
         MakeResumptionRequest(cid, fid, *subscription_request);
@@ -157,8 +157,8 @@ void RCPendingResumptionHandler::HandleSuccessfulResponse(
   auto& response = event.smart_object();
   auto cid = event.smart_object_correlation_id();
 
-  const auto& it = freezed_resumptions_.find(module_uid);
-  if (it != freezed_resumptions_.end()) {
+  const auto& it = paused_resumptions_.find(module_uid);
+  if (it != paused_resumptions_.end()) {
     LOG4CXX_DEBUG(logger_, "Freezed resumptions found");
     auto& queue_freezed = it->second;
     while (!queue_freezed.empty()) {
@@ -170,30 +170,30 @@ void RCPendingResumptionHandler::HandleSuccessfulResponse(
       RaiseEventForResponse(response, cid);
       queue_freezed.pop();
     }
-    freezed_resumptions_.erase(it);
+    paused_resumptions_.erase(it);
   }
 }
 
-void RCPendingResumptionHandler::ProcessNextFreezedResumption(
+void RCPendingResumptionHandler::ProcessNextPausedResumption(
     const ModuleUid& module_uid) {
   LOG4CXX_AUTO_TRACE(logger_);
 
   auto pop_front_freezed_resumptions = [this](const ModuleUid& module_uid) {
-    const auto& it = freezed_resumptions_.find(module_uid);
-    if (it == freezed_resumptions_.end()) {
-      return std::shared_ptr<QueueFreezedResumptions::value_type>(nullptr);
+    const auto& it = paused_resumptions_.find(module_uid);
+    if (it == paused_resumptions_.end()) {
+      return std::shared_ptr<PendingRequestQueue::value_type>(nullptr);
     }
     auto& queue_freezed = it->second;
     if (queue_freezed.empty()) {
-      freezed_resumptions_.erase(it);
-      return std::shared_ptr<QueueFreezedResumptions::value_type>(nullptr);
+      paused_resumptions_.erase(it);
+      return std::shared_ptr<PendingRequestQueue::value_type>(nullptr);
     }
     auto freezed_resumption =
-        std::make_shared<QueueFreezedResumptions::value_type>(
+        std::make_shared<PendingRequestQueue::value_type>(
             queue_freezed.front());
     queue_freezed.pop();
     if (queue_freezed.empty()) {
-      freezed_resumptions_.erase(it);
+      paused_resumptions_.erase(it);
     }
     return freezed_resumption;
   };
