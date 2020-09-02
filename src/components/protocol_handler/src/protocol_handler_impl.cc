@@ -1818,7 +1818,9 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessageRegisterSecondaryTransport(
 }
 
 void ProtocolHandlerImpl::NotifySessionStarted(
-    const SessionContext& context, std::vector<std::string>& rejected_params) {
+    const SessionContext& context,
+    std::vector<std::string>& rejected_params,
+    const std::string err_reason) {
   SDL_LOG_AUTO_TRACE();
 
   ProtocolFramePtr packet;
@@ -1852,8 +1854,7 @@ void ProtocolHandlerImpl::NotifySessionStarted(
                          protocol_version,
                          packet->service_type(),
                          rejected_params,
-                         "Session observer refused to create service of type " +
-                             std::to_string(service_type));
+                         err_reason);
     return;
   }
 

@@ -165,11 +165,15 @@ uint32_t Connection::RemoveSession(uint8_t session_id) {
 bool Connection::AddNewService(uint8_t session_id,
                                protocol_handler::ServiceType service_type,
                                const bool request_protection,
-                               transport_manager::ConnectionUID connection_id) {
+                               transport_manager::ConnectionUID connection_id,
+                               std::string* err_reason) {
   // Ignore wrong services
   if (protocol_handler::kControl == service_type ||
       protocol_handler::kInvalidServiceType == service_type) {
     SDL_LOG_WARN("Wrong service " << static_cast<int>(service_type));
+    if (err_reason) {
+      *err_reason = "Wrong service type " + std::to_string(service_type);
+    }
     return false;
   }
 
@@ -182,6 +186,11 @@ bool Connection::AddNewService(uint8_t session_id,
   SessionMap::iterator session_it = session_map_.find(session_id);
   if (session_it == session_map_.end()) {
     SDL_LOG_WARN("Session not found in this connection!");
+    if (err_reason) {
+      *err_reason = "Session " + std::to_string(session_id) +
+                    " not found for connection " +
+                    std::to_string(connection_id);
+    }
     return false;
   }
   Session& session = session_it->second;
@@ -206,12 +215,22 @@ bool Connection::AddNewService(uint8_t session_id,
       SDL_LOG_WARN("Session " << static_cast<int>(session_id)
                               << " already has unprotected service "
                               << static_cast<int>(service_type));
+      if (err_reason) {
+        *err_reason = "Session " + std::to_string(session_id) +
+                      " already has an unprotected service of type " +
+                      std::to_string(service_type);
+      }
       return false;
     }
     if (service->is_protected_) {
       SDL_LOG_WARN("Session " << static_cast<int>(session_id)
                               << " already has protected service "
                               << static_cast<int>(service_type));
+      if (err_reason) {
+        *err_reason = "Session " + std::to_string(session_id) +
+                      " already has a protected service of type " +
+                      std::to_string(service_type);
+      }
       return false;
     }
     // For unproteced service could be start protection

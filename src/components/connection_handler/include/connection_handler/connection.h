@@ -188,7 +188,8 @@ class Connection {
   bool AddNewService(uint8_t session_id,
                      protocol_handler::ServiceType service_type,
                      const bool is_protected,
-                     transport_manager::ConnectionUID connection_id);
+                     transport_manager::ConnectionUID connection_id,
+                     std::string* err_reason = nullptr);
   /**
    * @brief Removes service from session
    * @param session_id session ID

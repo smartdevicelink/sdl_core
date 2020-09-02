@@ -457,7 +457,11 @@ void ConnectionHandlerImpl::OnSessionStartedCallback(
 
 #ifdef ENABLE_SECURITY
   if (!AllowProtection(get_settings(), service_type, is_protected)) {
-    protocol_handler_->NotifySessionStarted(context, rejected_params);
+    protocol_handler_->NotifySessionStarted(
+        context,
+        rejected_params,
+        "Service of type " + std::to_string(service_type) + " cannot be " +
+            (is_protected ? "protected" : "unprotected"));
     return;
   }
 #endif  // ENABLE_SECURITY
@@ -466,7 +470,10 @@ void ConnectionHandlerImpl::OnSessionStartedCallback(
       connection_list_.find(primary_connection_handle);
   if (connection_list_.end() == it) {
     SDL_LOG_ERROR("Unknown connection!");
-    protocol_handler_->NotifySessionStarted(context, rejected_params);
+    protocol_handler_->NotifySessionStarted(
+        context,
+        rejected_params,
+        "Unknown connection " + std::to_string(primary_connection_handle));
     return;
   }
 
@@ -479,21 +486,33 @@ void ConnectionHandlerImpl::OnSessionStartedCallback(
         connection->AddNewSession(primary_connection_handle);
     if (0 == context.new_session_id_) {
       SDL_LOG_ERROR("Couldn't start new session!");
-      protocol_handler_->NotifySessionStarted(context, rejected_params);
+      protocol_handler_->NotifySessionStarted(
+          context, rejected_params, "Unable to create new session");
       return;
     }
     context.hash_id_ =
         KeyFromPair(primary_connection_handle, context.new_session_id_);
   } else {  // Could be create new service or protected exists one
-    if (!connection->AddNewService(
-            session_id, service_type, is_protected, connection_handle)) {
+    std::string err_reason;
+    if (!connection->AddNewService(session_id,
+                                   service_type,
+                                   is_protected,
+                                   connection_handle,
+                                   &err_reason)) {
       SDL_LOG_ERROR("Couldn't establish "
 #ifdef ENABLE_SECURITY
                     << (is_protected ? "protected" : "non-protected")
 #endif  // ENABLE_SECURITY
                     << " service " << static_cast<int>(service_type)
                     << " for session " << static_cast<int>(session_id));
-      protocol_handler_->NotifySessionStarted(context, rejected_params);
+
+      protocol_handler_->NotifySessionStarted(
+          context,
+          rejected_params,
+          "Cannot start " +
+              std::string(is_protected ? "a protected" : " an unprotected") +
+              " service of type " + std::to_string(service_type) + ". " +
+              err_reason);
       return;
     }
     context.new_session_id_ = session_id;
