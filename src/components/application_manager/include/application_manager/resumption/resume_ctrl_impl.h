@@ -329,7 +329,7 @@ class ResumeCtrlImpl : public ResumeCtrl {
   /**
    * @brief restores saved data of application
    * @param application contains application for which restores data
-   * @param callback lambda callback, which contains logic for sending response
+   * @param callback callback, which contains logic for sending response
    * to mobile and updating hash
    * @return true if success, otherwise return false
    */

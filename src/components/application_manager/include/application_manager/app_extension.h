@@ -74,7 +74,8 @@ class AppExtension {
 
   /**
    * @brief RevertResumption Method called by SDL during revert resumption.
-   * @param subscriptions Subscriptions from which must discard
+   * @param subscriptions Subscriptions from which must discard. Expected that
+   * SO contains the map of "IVI data" keys and "subscription bool flag" values
    */
   virtual void RevertResumption(const ns_smart::SmartObject& subscriptions) = 0;
 

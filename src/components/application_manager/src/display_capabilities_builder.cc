@@ -95,7 +95,7 @@ void DisplayCapabilitiesBuilder::UpdateDisplayCapabilities(
   *display_capabilities_ = incoming_display_capabilities;
   (*display_capabilities_)[0][strings::window_capabilities] = cur_window_caps;
 
-  InvokeCallbackFunction();
+  InvokeResumeCallback();
 }
 
 const smart_objects::SmartObjectSPtr
@@ -108,7 +108,7 @@ bool DisplayCapabilitiesBuilder::IsWindowResumptionNeeded() const {
   return is_widget_windows_resumption_;
 }
 
-void DisplayCapabilitiesBuilder::InvokeCallbackFunction() {
+void DisplayCapabilitiesBuilder::InvokeResumeCallback() {
   LOG4CXX_AUTO_TRACE(logger_);
 
   if (!window_ids_to_resume_.empty()) {
@@ -190,7 +190,7 @@ void DisplayCapabilitiesBuilder::StopWaitingForWindow(
   LOG4CXX_DEBUG(logger_, "Window id " << window_id << " will be erased");
   window_ids_to_resume_.erase(window_id);
 
-  InvokeCallbackFunction();
+  InvokeResumeCallback();
 }
 
 }  // namespace application_manager

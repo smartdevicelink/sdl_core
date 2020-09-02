@@ -30,8 +30,8 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_VEHICLE_INFO_PLUGIN_INCLUDE_VEHICLE_INFO_PLUGIN_PENDING_RESUMPTION_HANDLER_H
-#define SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_VEHICLE_INFO_PLUGIN_INCLUDE_VEHICLE_INFO_PLUGIN_PENDING_RESUMPTION_HANDLER_H
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_VEHICLE_INFO_PLUGIN_INCLUDE_VEHICLE_INFO_PLUGIN_VEHICLE_INFO_PENDING_RESUMPTION_HANDLER_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_VEHICLE_INFO_PLUGIN_INCLUDE_VEHICLE_INFO_PLUGIN_VEHICLE_INFO_PENDING_RESUMPTION_HANDLER_H_
 #include <queue>
 #include "application_manager/event_engine/event_observer.h"
 #include "application_manager/resumption/extension_pending_resumption_handler.h"
@@ -126,7 +126,7 @@ class VehicleInfoPendingResumptionHandler
    * Fake request is required only for subscriber subscription.
    * This request will not be sen't to HMI so it named as fake request.
    * Fake request contains all data that need to be resumed for the application
-   * When HMI will resopond for any VehicleDara request,
+   * When HMI will respond for any VehicleData request,
    * PendingSubscriptionsResumption will go through all pending resumptions and
    * fill them with received subscriptions. If certain pending resumption will
    * take all requested subscriptions PendingSubscriptionsResumption will take
@@ -150,4 +150,4 @@ class VehicleInfoPendingResumptionHandler
   sync_primitives::RecursiveLock pending_resumption_lock_;
 };
 }  // namespace vehicle_info_plugin
-#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_VEHICLE_INFO_PLUGIN_INCLUDE_VEHICLE_INFO_PLUGIN_PENDING_RESUMPTION_HANDLER_H
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_VEHICLE_INFO_PLUGIN_INCLUDE_VEHICLE_INFO_PLUGIN_VEHICLE_INFO_PENDING_RESUMPTION_HANDLER_H_

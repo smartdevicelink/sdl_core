@@ -1352,7 +1352,7 @@ class ApplicationManagerImpl
 
   /**
    * @brief Sets default value of the HELPPROMT global property
-   * to the first vrCommand of each Command Menu registered in application
+   * to the first vrCommand of the Command Menu registered in application
    *
    * @param app Registered application
    * @param is_timeout_promp Flag indicating that timeout prompt
@@ -1364,7 +1364,7 @@ class ApplicationManagerImpl
 
   /**
    * @brief  Sets default value of the TIMEOUTPROMT global property
-   * to the first vrCommand of each Command Menu registered in application
+   * to the first vrCommand of the Command Menu registered in application
    *
    * @param app Registered application
    *

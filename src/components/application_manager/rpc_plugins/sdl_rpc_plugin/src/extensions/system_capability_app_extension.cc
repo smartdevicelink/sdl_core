@@ -77,7 +77,7 @@ void SystemCapabilityAppExtension::ProcessResumption(
   UNUSED(subscriber);
 
   const smart_objects::SmartObject& subscriptions =
-      saved_app[application_manager::strings::application_subscriptions];
+      saved_app[strings::application_subscriptions];
 
   if (saved_app.keyExists(strings::system_capability)) {
     const auto& system_capability_subscriptions =
@@ -94,6 +94,8 @@ void SystemCapabilityAppExtension::RevertResumption(
     const smart_objects::SmartObject& subscriptions) {
   LOG4CXX_AUTO_TRACE(logger_);
 
+  // No need to revert subscriptions here when an app gets RESUME_FAILED
+  // System capability subscriptions should still be active
   UNUSED(subscriptions);
 }
 

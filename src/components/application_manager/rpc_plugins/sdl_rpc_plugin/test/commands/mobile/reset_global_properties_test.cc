@@ -155,7 +155,7 @@ TEST_F(ResetGlobalPropertiesRequestTest, Run_SUCCESS) {
   result.menu_name = true;
   result.menu_icon = true;
   result.keyboard_properties = true;
-  result.number_of_reset_vr = 1;
+  result.vr_has_been_reset = true;
 
   ON_CALL(app_mngr_, ResetGlobalProperties(_, _)).WillByDefault(Return(result));
 

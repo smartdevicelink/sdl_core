@@ -25,8 +25,8 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_PLUGIN_INCLUDE_SDL_PLUGIN_SDL_PENDING_RESUMPTION_HANDLER_H
-#define SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_PLUGIN_INCLUDE_SDL_PLUGIN_SDL_PENDING_RESUMPTION_HANDLER_H
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_SDL_PENDING_RESUMPTION_HANDLER_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_SDL_PENDING_RESUMPTION_HANDLER_H_
 
 #include <map>
 #include <queue>
@@ -58,7 +58,7 @@ class SDLPendingResumptionHandler
 
  private:
   /**
-   * @brief RaiseFakeSuccessfulResponse raize event for the subscriber that
+   * @brief RaiseFakeSuccessfulResponse raise event for the subscriber that
    * contains emulated successful response from HMI To avoid double subscription
    * SDLPendingResumptionHandler freezes sending requests to HMI. But
    * subscriber() function need to be called to provide information that some
@@ -68,7 +68,7 @@ class SDLPendingResumptionHandler
    * when a response to the current request will be received When SDL receives a
    * response from HMI it may satisfy some frozen requests. If it does SDL will
    * create faked HMI response(based on the real one with corr_id replacement)
-   * and raize event. So that subscriber::on_event will be called with an
+   * and raise event. So that subscriber::on_event will be called with an
    * appropriate response to the request that SDL was not sent to HMI.
    * @param response message that will be raised with corr_id replacement
    * @param corr_id correlation id that will be replaced in response to notify
@@ -86,10 +86,10 @@ class SDLPendingResumptionHandler
   };
 
   typedef std::pair<SDLAppExtension, resumption::Subscriber> FreezedResumption;
-  std::vector<ResumptionAwaitingHandling> freezed_resumptions_;
+  std::vector<ResumptionAwaitingHandling> frozen_resumptions_;
   std::map<uint32_t, smart_objects::SmartObject> pending_requests_;
   std::queue<uint32_t> app_ids_;
 };
 }  // namespace sdl_rpc_plugin
 
-#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_PLUGIN_INCLUDE_SDL_PLUGIN_SDL_PENDING_RESUMPTION_HANDLER_H
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_SDL_PENDING_RESUMPTION_HANDLER_H_

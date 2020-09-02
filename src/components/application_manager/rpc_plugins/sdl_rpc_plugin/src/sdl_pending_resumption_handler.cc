@@ -90,7 +90,7 @@ void SDLPendingResumptionHandler::HandleResumptionSubscriptionRequest(
                       << app.app_id() << " corr id = " << corr_id);
     ResumptionAwaitingHandling frozen_res{
         app.app_id(), ext, subscriber, resumption_request};
-    freezed_resumptions_.push_back(frozen_res);
+    frozen_resumptions_.push_back(frozen_res);
   }
   subscriber(app.app_id(), resumption_request);
 }
@@ -104,9 +104,9 @@ void SDLPendingResumptionHandler::OnResumptionRevert() {
     return;
   }
 
-  if (!freezed_resumptions_.empty()) {
-    ResumptionAwaitingHandling freezed_resumption = freezed_resumptions_.back();
-    freezed_resumptions_.pop_back();
+  if (!frozen_resumptions_.empty()) {
+    ResumptionAwaitingHandling freezed_resumption = frozen_resumptions_.back();
+    frozen_resumptions_.pop_back();
 
     auto request = std::make_shared<smart_objects::SmartObject>(
         freezed_resumption.request_to_send_.message);
@@ -177,24 +177,24 @@ void SDLPendingResumptionHandler::on_event(
 
     application_manager_.SubscribeAppForWayPoints(app);
 
-    for (auto& freezed_resumption : freezed_resumptions_) {
+    for (auto& freezed_resumption : frozen_resumptions_) {
       auto corr_id = freezed_resumption.request_to_send_
                          .message[strings::params][strings::correlation_id]
                          .asInt();
       RaiseFakeSuccessfulResponse(response, corr_id);
       application_manager_.SubscribeAppForWayPoints(freezed_resumption.app_id);
     }
-    freezed_resumptions_.clear();
+    frozen_resumptions_.clear();
   } else {
     LOG4CXX_DEBUG(logger_, "Resumption of subscriptions is NOT successful");
 
-    if (freezed_resumptions_.empty()) {
+    if (frozen_resumptions_.empty()) {
       LOG4CXX_DEBUG(logger_, "freezed resumptions is empty");
       return;
     }
 
-    ResumptionAwaitingHandling freezed_resumption = freezed_resumptions_.back();
-    freezed_resumptions_.pop_back();
+    ResumptionAwaitingHandling freezed_resumption = frozen_resumptions_.back();
+    frozen_resumptions_.pop_back();
     auto resumption_req = freezed_resumption.request_to_send_;
     const uint32_t cid =
         resumption_req.message[strings::params][strings::correlation_id]

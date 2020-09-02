@@ -4290,8 +4290,8 @@ ResetGlobalPropertiesResult ApplicationManagerImpl::ResetGlobalProperties(
       }
       case mobile_apis::GlobalProperty::VRHELPTITLE:
       case mobile_apis::GlobalProperty::VRHELPITEMS: {
-        if (0 == result.number_of_reset_vr) {
-          result.number_of_reset_vr++;
+        if (!result.vr_has_been_reset) {
+          result.vr_has_been_reset = true;
           result.vr_help_title_items = ResetVrHelpTitleItems(application);
         }
         break;

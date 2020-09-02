@@ -342,21 +342,21 @@ bool RegisterAppInterfaceRequest::ApplicationDataShouldBeResumed(
   }
 
   if (!resumer.CheckApplicationHash(application, hash_id)) {
-    LOG4CXX_WARN(logger_, "Hash from RAI does not match to saved resume data.");
     add_info = "Hash from RAI does not match to saved resume data.";
+    LOG4CXX_WARN(logger_, add_info);
     is_resumption_failed_ = true;
     return false;
   }
 
   if (!resumer.CheckPersistenceFilesForResumption(application)) {
-    LOG4CXX_WARN(logger_, "Persistent data is missing.");
     add_info = "Persistent data is missing.";
+    LOG4CXX_WARN(logger_, add_info);
     is_resumption_failed_ = true;
     return false;
   }
 
-  LOG4CXX_WARN(logger_, "Resume succeeded.");
   add_info = "Resume succeeded.";
+  LOG4CXX_DEBUG(logger_, add_info);
   application->set_app_data_resumption_allowance(true);
   application->set_is_resuming(true);
 
@@ -425,7 +425,7 @@ void RegisterAppInterfaceRequest::CheckLanguage() {
             << msg_params[strings::language_desired].asInt()
             << " , active VR language code is "
             << hmi_capabilities_.active_vr_language()
-            << ", UI language code is "
+            << ", UI language desired code is "
             << msg_params[strings::hmi_display_language_desired].asInt()
             << " , active UI language code is "
             << hmi_capabilities_.active_ui_language());
@@ -519,7 +519,7 @@ void FinishSendingResponseToMobile(const smart_objects::SmartObject& msg_params,
   };
   app_manager.ApplyFunctorForEachPlugin(send_rc_status);
 
-  // Start PTU after successfull registration
+  // Start PTU after successful registration
   // Sends OnPermissionChange notification to mobile right after RAI response
   // and HMI level set-up
   policy_handler.OnAppRegisteredOnMobile(application->mac_address(),

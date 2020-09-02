@@ -34,6 +34,7 @@
 #include <string.h>
 #include <algorithm>
 #include <numeric>
+#include "application_manager/resumption/resume_ctrl.h"
 
 #include "application_manager/message_helper.h"
 #include "interfaces/HMI_API.h"
@@ -416,6 +417,18 @@ void SetGlobalPropertiesRequest::on_event(const event_engine::Event& event) {
 bool SetGlobalPropertiesRequest::Init() {
   hash_update_mode_ = HashUpdateMode::kDoHashUpdate;
   return true;
+}
+
+void SetGlobalPropertiesRequest::onTimeOut() {
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  CommandRequestImpl::onTimeOut();
+
+  auto& resume_ctrl = application_manager_.resume_controller();
+
+  resume_ctrl.HandleOnTimeOut(
+      correlation_id(),
+      static_cast<hmi_apis::FunctionID::eType>(function_id()));
 }
 
 bool SetGlobalPropertiesRequest::PrepareResponseParameters(

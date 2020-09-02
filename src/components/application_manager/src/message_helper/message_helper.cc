@@ -391,30 +391,30 @@ smart_objects::SmartObjectSPtr
 MessageHelper::CreateTTSResetGlobalPropertiesRequest(
     const ResetGlobalPropertiesResult& reset_result,
     const ApplicationSharedPtr application) {
-  smart_objects::SmartObjectSPtr ui_reset_global_prop_request =
+  smart_objects::SmartObjectSPtr tts_reset_global_prop_request =
       std::make_shared<smart_objects::SmartObject>(
           smart_objects::SmartType_Map);
 
   if (reset_result.help_prompt) {
-    (*ui_reset_global_prop_request)[strings::help_prompt] =
+    (*tts_reset_global_prop_request)[strings::help_prompt] =
         *(application->help_prompt());
   }
 
   if (reset_result.timeout_prompt) {
-    (*ui_reset_global_prop_request)[strings::timeout_prompt] =
+    (*tts_reset_global_prop_request)[strings::timeout_prompt] =
         *(application->timeout_prompt());
   }
 
-  (*ui_reset_global_prop_request)[strings::app_id] = application->app_id();
+  (*tts_reset_global_prop_request)[strings::app_id] = application->app_id();
 
-  return ui_reset_global_prop_request;
+  return tts_reset_global_prop_request;
 }
 
 smart_objects::SmartObjectSPtr
 MessageHelper::CreateUIResetGlobalPropertiesRequest(
     const ResetGlobalPropertiesResult& reset_result,
     const ApplicationSharedPtr application) {
-  smart_objects::SmartObjectSPtr tts_reset_global_prop_request =
+  smart_objects::SmartObjectSPtr ui_reset_global_prop_request =
       std::make_shared<smart_objects::SmartObject>(
           smart_objects::SmartType_Map);
 
@@ -424,13 +424,13 @@ MessageHelper::CreateUIResetGlobalPropertiesRequest(
       LOG4CXX_WARN(logger_, "Failed to create vr_help");
       return smart_objects::SmartObjectSPtr();
     } else {
-      tts_reset_global_prop_request = vr_help;
+      ui_reset_global_prop_request = vr_help;
     }
   }
   if (reset_result.menu_name) {
-    (*tts_reset_global_prop_request)[hmi_request::menu_title] = "";
+    (*ui_reset_global_prop_request)[hmi_request::menu_title] = "";
     application->set_menu_title(
-        (*tts_reset_global_prop_request)[hmi_request::menu_title]);
+        (*ui_reset_global_prop_request)[hmi_request::menu_title]);
   }
 
   if (reset_result.keyboard_properties) {
@@ -444,13 +444,13 @@ MessageHelper::CreateUIResetGlobalPropertiesRequest(
         smart_objects::SmartObject(smart_objects::SmartType_Array);
 
     key_board_properties[strings::auto_complete_text] = "";
-    (*tts_reset_global_prop_request)[hmi_request::keyboard_properties] =
+    (*ui_reset_global_prop_request)[hmi_request::keyboard_properties] =
         key_board_properties;
   }
 
-  (*tts_reset_global_prop_request)[strings::app_id] = application->app_id();
+  (*ui_reset_global_prop_request)[strings::app_id] = application->app_id();
 
-  return tts_reset_global_prop_request;
+  return ui_reset_global_prop_request;
 }
 
 smart_objects::SmartObjectSPtr
@@ -1234,10 +1234,6 @@ MessageHelper::CreateOnButtonSubscriptionNotification(
   LOG4CXX_AUTO_TRACE(logger_);
   SmartObjectSPtr notification_ptr =
       std::make_shared<SmartObject>(SmartType_Map);
-  if (!notification_ptr) {
-    LOG4CXX_ERROR(logger_, "Memory allocation failed.");
-    return SmartObjectSPtr(nullptr);
-  }
   SmartObject& notification = *notification_ptr;
   SmartObject msg_params = SmartObject(SmartType_Map);
   msg_params[strings::app_id] = app_id;
