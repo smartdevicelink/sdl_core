@@ -43,6 +43,8 @@ using namespace application_manager;
 
 namespace commands {
 
+SDL_CREATE_LOG_VARIABLE("Commands")
+
 ReadDIDRequest::ReadDIDRequest(
     const application_manager::commands::MessageSharedPtr& message,
     const VehicleInfoCommandParams& params)
@@ -55,19 +57,18 @@ ReadDIDRequest::ReadDIDRequest(
 ReadDIDRequest::~ReadDIDRequest() {}
 
 void ReadDIDRequest::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
 
   uint32_t app_id =
       (*message_)[strings::params][strings::connection_key].asUInt();
 
   ApplicationSharedPtr app = application_manager_.application(app_id);
-  LOG4CXX_INFO(
-      logger_,
+  SDL_LOG_INFO(
       "Correlation_id :"
-          << (*message_)[strings::params][strings::correlation_id].asUInt());
+      << (*message_)[strings::params][strings::correlation_id].asUInt());
 
   if (!app) {
-    LOG4CXX_ERROR(logger_, "An application is not registered.");
+    SDL_LOG_ERROR("An application is not registered.");
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     return;
   }
@@ -75,13 +76,13 @@ void ReadDIDRequest::Run() {
   if (app->AreCommandLimitsExceeded(
           static_cast<mobile_apis::FunctionID::eType>(function_id()),
           application_manager::TLimitSource::CONFIG_FILE)) {
-    LOG4CXX_ERROR(logger_, "ReadDID frequency is too high.");
+    SDL_LOG_ERROR("ReadDID frequency is too high.");
     SendResponse(false, mobile_apis::Result::REJECTED);
     return;
   }
 
   if ((*message_)[strings::msg_params][strings::did_location].empty()) {
-    LOG4CXX_ERROR(logger_, "INVALID_DATA");
+    SDL_LOG_ERROR("INVALID_DATA");
     SendResponse(false, mobile_apis::Result::INVALID_DATA);
     return;
   }
@@ -99,7 +100,7 @@ void ReadDIDRequest::Run() {
 }
 
 void ReadDIDRequest::on_event(const event_engine::Event& event) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   const smart_objects::SmartObject& message = event.smart_object();
 
   switch (event.id()) {
@@ -120,7 +121,7 @@ void ReadDIDRequest::on_event(const event_engine::Event& event) {
       break;
     }
     default: {
-      LOG4CXX_ERROR(logger_, "Received unknown event" << event.id());
+      SDL_LOG_ERROR("Received unknown event " << event.id());
       return;
     }
   }

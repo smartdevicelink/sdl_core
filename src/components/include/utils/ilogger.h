@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, Ford Motor Company
+ * Copyright (c) 2020, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,49 +30,61 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "utils/log_message_loop_thread.h"
-#include "gmock/gmock.h"
-#include "gtest/gtest.h"
-#include "utils/logger_status.h"
+#pragma once
 
-namespace test {
-namespace components {
-namespace utils_test {
+#include <chrono>
+#include <string>
+#include <thread>
 
-using namespace ::logger;
-using ::testing::_;
+namespace logger {
 
-TEST(LogMessageLoopThread, DestroyLogMessage_loggerStatusDeletingLogger) {
-  logger::logger_status = CreatingLoggerThread;
-  LogMessageLoopThread* loop_thread = new LogMessageLoopThread();
-  // assert
-  EXPECT_EQ(CreatingLoggerThread, logger::logger_status);
-
-  // act
-  delete loop_thread;
-
-  // assert
-  EXPECT_EQ(DeletingLoggerThread, logger::logger_status);
-
-  logger::logger_status = LoggerThreadNotCreated;
-}
-
-class MockLogMessageTest : public LogMessageLoopThread {
- public:
-  MOCK_CONST_METHOD1(Handle, void(const LogMessage message));
+enum class LogLevel {
+  TRACE_LEVEL,
+  DEBUG_LEVEL,
+  INFO_LEVEL,
+  WARNING_LEVEL,
+  ERROR_LEVEL,
+  FATAL_LEVEL
 };
 
-TEST(LogMessageLoopThread, HandleNeverCalled) {
-  logger::logger_status = CreatingLoggerThread;
+struct LocationInfo {
+  std::string file_name;
+  std::string function_name;
+  int line_number;
+};
 
-  MockLogMessageTest mmock;
-  EXPECT_CALL(mmock, Handle(_)).Times(0);
-  LogMessageLoopThread* loop_thread = new LogMessageLoopThread();
+typedef std::chrono::high_resolution_clock::time_point TimePoint;
 
-  delete loop_thread;
-  logger::logger_status = LoggerThreadNotCreated;
-}
+struct LogMessage {
+  std::string component_;  // <- component_name
+  LogLevel log_level_;
+  std::string log_event_;
+  TimePoint timestamp_;
+  LocationInfo location_;
+  std::thread::id thread_id_;
+};
 
-}  // namespace utils_test
-}  // namespace components
-}  // namespace test
+class Logger {
+ public:
+  virtual bool IsEnabledFor(const std::string& component,
+                            LogLevel log_level) const = 0;
+  virtual void DeInit() = 0;
+  virtual void Flush() = 0;
+  virtual void PushLog(const LogMessage& log_message) = 0;
+  static Logger& instance(Logger* pre_init = nullptr);
+};
+
+class ThirdPartyLoggerInterface {
+ public:
+  virtual void Init() = 0;
+  virtual void DeInit() = 0;
+  virtual bool IsEnabledFor(const std::string& component,
+                            LogLevel log_level) const = 0;
+  virtual void PushLog(const LogMessage& log_message) = 0;
+};
+
+class LoggerInitializer {
+ public:
+  virtual void Init(std::unique_ptr<ThirdPartyLoggerInterface>&& impl) = 0;
+};
+}  // namespace logger

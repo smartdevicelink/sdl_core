@@ -33,7 +33,7 @@
 #include "vehicle_info_plugin/vehicle_info_app_extension.h"
 #include "vehicle_info_plugin/vehicle_info_plugin.h"
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "VehicleInfoPlugin")
+SDL_CREATE_LOG_VARIABLE("VehicleInfoPlugin")
 
 namespace vehicle_info_plugin {
 namespace strings = application_manager::strings;
@@ -48,23 +48,23 @@ VehicleInfoAppExtension::VehicleInfoAppExtension(
     , pending_subscriptions_lock_(std::make_shared<sync_primitives::Lock>())
     , plugin_(plugin)
     , app_(app) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
 }
 
 VehicleInfoAppExtension::~VehicleInfoAppExtension() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
 }
 
 bool VehicleInfoAppExtension::subscribeToVehicleInfo(
     const std::string& vehicle_data) {
-  LOG4CXX_DEBUG(logger_, vehicle_data);
+  SDL_LOG_DEBUG(vehicle_data);
   sync_primitives::AutoLock lock(*subscribed_data_lock_);
   return subscribed_data_.insert(vehicle_data).second;
 }
 
 bool VehicleInfoAppExtension::unsubscribeFromVehicleInfo(
     const std::string& vehicle_data) {
-  LOG4CXX_DEBUG(logger_, vehicle_data);
+  SDL_LOG_DEBUG(vehicle_data);
   sync_primitives::AutoLock lock(*subscribed_data_lock_);
   auto it = subscribed_data_.find(vehicle_data);
   if (it != subscribed_data_.end()) {
@@ -75,21 +75,21 @@ bool VehicleInfoAppExtension::unsubscribeFromVehicleInfo(
 }
 
 void VehicleInfoAppExtension::unsubscribeFromVehicleInfo() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   sync_primitives::AutoLock lock(*subscribed_data_lock_);
   subscribed_data_.clear();
 }
 
 bool VehicleInfoAppExtension::isSubscribedToVehicleInfo(
     const std::string& vehicle_data) const {
-  LOG4CXX_DEBUG(logger_, vehicle_data);
+  SDL_LOG_DEBUG(vehicle_data);
   sync_primitives::AutoLock lock(*subscribed_data_lock_);
   return subscribed_data_.find(vehicle_data) != subscribed_data_.end();
 }
 
 bool VehicleInfoAppExtension::isPendingSubscriptionToVehicleInfo(
     const std::string& vehicle_data) const {
-  LOG4CXX_DEBUG(logger_, vehicle_data);
+  SDL_LOG_DEBUG(vehicle_data);
   sync_primitives::AutoLock lock(*pending_subscriptions_lock_);
   return pending_subscriptions_.find(vehicle_data) !=
          pending_subscriptions_.end();
@@ -110,7 +110,7 @@ bool VehicleInfoAppExtension::AddPendingSubscription(
 
 bool VehicleInfoAppExtension::RemovePendingSubscription(
     const std::string& vehicle_data) {
-  LOG4CXX_DEBUG(logger_, vehicle_data);
+  SDL_LOG_DEBUG(vehicle_data);
   sync_primitives::AutoLock lock(*pending_subscriptions_lock_);
   auto it = pending_subscriptions_.find(vehicle_data);
   if (it != pending_subscriptions_.end()) {
@@ -145,10 +145,10 @@ void VehicleInfoAppExtension::SaveResumptionData(
 void VehicleInfoAppExtension::ProcessResumption(
     const smart_objects::SmartObject& saved_app,
     resumption::Subscriber subscriber) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
 
   if (!saved_app.keyExists(strings::application_subscriptions)) {
-    LOG4CXX_DEBUG(logger_, "application_subscriptions section is not exists");
+    SDL_LOG_DEBUG("application_subscriptions section is not exists");
     return;
   }
 
@@ -156,7 +156,7 @@ void VehicleInfoAppExtension::ProcessResumption(
       saved_app[strings::application_subscriptions];
 
   if (!resumption_data.keyExists(strings::application_vehicle_info)) {
-    LOG4CXX_DEBUG(logger_, "application_vehicle_info section is not exists");
+    SDL_LOG_DEBUG("application_vehicle_info section is not exists");
     return;
   }
 
@@ -172,13 +172,13 @@ void VehicleInfoAppExtension::ProcessResumption(
 
 void VehicleInfoAppExtension::RevertResumption(
     const smart_objects::SmartObject& resumption_data) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
 
   unsubscribeFromVehicleInfo();
 
   if (!resumption_data.keyExists(
           application_manager::hmi_interface::vehicle_info)) {
-    LOG4CXX_DEBUG(logger_, "No resumption vahicle data subscription to revert");
+    SDL_LOG_DEBUG("No resumption vahicle data subscription to revert");
     return;
   }
   const auto& resumption_vd_data =

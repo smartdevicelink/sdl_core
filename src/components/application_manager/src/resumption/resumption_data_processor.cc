@@ -48,7 +48,7 @@ namespace event_engine = app_mngr::event_engine;
 namespace commands = app_mngr::commands;
 namespace message_params = rc_rpc_plugin::message_params;
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "Resumption")
+SDL_CREATE_LOG_VARIABLE("Resumption")
 std::map<hmi_apis::Common_ModuleType::eType, std::string>
     module_types_str_mapping{
         {hmi_apis::Common_ModuleType::eType::CLIMATE, {"CLIMATE"}},
@@ -76,10 +76,10 @@ ResumptionDataProcessor::~ResumptionDataProcessor() {}
 void ResumptionDataProcessor::Restore(ApplicationSharedPtr application,
                                       smart_objects::SmartObject& saved_app,
                                       ResumeCtrl::ResumptionCallBack callback) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
 
   if (!HasDataToRestore(saved_app)) {
-    LOG4CXX_DEBUG(logger_, "No data to restore, resumption is successful");
+    SDL_LOG_DEBUG("No data to restore, resumption is successful");
     callback(mobile_apis::Result::SUCCESS, "Data resumption succesful");
     return;
   }
@@ -105,16 +105,15 @@ void ResumptionDataProcessor::Restore(ApplicationSharedPtr application,
     sync_primitives::AutoWriteLock lock(register_callbacks_lock_);
     register_callbacks_[app_id] = callback;
   } else {
-    LOG4CXX_DEBUG(
-        logger_,
-        "No requests to HMI for " << app_id << " , resumption is successful");
+    SDL_LOG_DEBUG("No requests to HMI for " << app_id
+                                            << " , resumption is successful");
     callback(mobile_apis::Result::SUCCESS, "Data resumption successful");
   }
 }
 
 bool ResumptionDataProcessor::HasDataToRestore(
     const smart_objects::SmartObject& saved_app) const {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
 
   auto has_data_to_restore = [&saved_app]() -> bool {
     return !saved_app[strings::application_files].empty() ||
@@ -168,27 +167,27 @@ bool ResumptionDataProcessor::HasDataToRestore(
   };
 
   if (has_data_to_restore()) {
-    LOG4CXX_DEBUG(logger_, "Application has data to restore");
+    SDL_LOG_DEBUG("Application has data to restore");
     return true;
   }
 
   if (has_gp_to_restore()) {
-    LOG4CXX_DEBUG(logger_, "Application has global properties to restore");
+    SDL_LOG_DEBUG("Application has global properties to restore");
     return true;
   }
 
   if (has_subscriptions_to_restore()) {
-    LOG4CXX_DEBUG(logger_, "Application has subscriptions to restore");
+    SDL_LOG_DEBUG("Application has subscriptions to restore");
     return true;
   }
 
-  LOG4CXX_DEBUG(logger_, "Application does not have any data to restore");
+  SDL_LOG_DEBUG("Application does not have any data to restore");
   return false;
 }
 
 utils::Optional<uint32_t> ResumptionDataProcessor::GetAppIdWaitingForResponse(
     const hmi_apis::FunctionID::eType function_id, const int32_t corr_id) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
 
   auto predicate =
       [function_id,
@@ -211,15 +210,14 @@ utils::Optional<ResumptionRequest> ResumptionDataProcessor::GetRequest(
     const uint32_t app_id,
     const hmi_apis::FunctionID::eType function_id,
     const int32_t corr_id) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
 
   sync_primitives::AutoReadLock lock(resumption_status_lock_);
   std::vector<ResumptionRequest>& list_of_sent_requests =
       resumption_status_[app_id].list_of_sent_requests;
 
   if (resumption_status_.find(app_id) == resumption_status_.end()) {
-    LOG4CXX_ERROR(logger_,
-                  "No resumption status info found for app_id: " << app_id);
+    SDL_LOG_ERROR("No resumption status info found for app_id: " << app_id);
     return utils::Optional<ResumptionRequest>::OptionalEmpty::EMPTY;
   }
 
@@ -241,7 +239,7 @@ void ResumptionDataProcessor::ProcessResumptionStatus(
     const uint32_t app_id,
     const smart_objects::SmartObject& response,
     const ResumptionRequest& found_request) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
 
   sync_primitives::AutoWriteLock lock(resumption_status_lock_);
   ApplicationResumptionStatus& status = resumption_status_[app_id];
@@ -270,7 +268,7 @@ void ResumptionDataProcessor::ProcessResumptionStatus(
 
 bool ResumptionDataProcessor::IsResumptionFinished(
     const uint32_t app_id, const ResumptionRequest& found_request) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
 
   sync_primitives::AutoWriteLock lock(resumption_status_lock_);
   auto& list_of_sent_requests =
@@ -291,7 +289,7 @@ bool ResumptionDataProcessor::IsResumptionFinished(
 
 utils::Optional<ResumeCtrl::ResumptionCallBack>
 ResumptionDataProcessor::GetResumptionCallback(const uint32_t app_id) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
 
   sync_primitives::AutoReadLock lock(register_callbacks_lock_);
   auto it = register_callbacks_.find(app_id);
@@ -319,7 +317,7 @@ void ResumptionDataProcessor::EraseAppResumptionData(
     const uint32_t app_id,
     const hmi_apis::FunctionID::eType function_id,
     const int32_t corr_id) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
 
   resumption_status_lock_.AcquireForWriting();
   resumption_status_.erase(app_id);
@@ -338,26 +336,23 @@ void ResumptionDataProcessor::ProcessResponseFromHMI(
     const smart_objects::SmartObject& response,
     const hmi_apis::FunctionID::eType function_id,
     const int32_t corr_id) {
-  LOG4CXX_AUTO_TRACE(logger_);
-  LOG4CXX_TRACE(logger_,
-                "Now processing event with function id: "
-                    << function_id << " correlation id: " << corr_id);
+  SDL_LOG_AUTO_TRACE();
+  SDL_LOG_TRACE("Now processing event with function id: "
+                << function_id << " correlation id: " << corr_id);
 
   auto found_app_id = GetAppIdWaitingForResponse(function_id, corr_id);
   if (!found_app_id) {
-    LOG4CXX_ERROR(logger_,
-                  "Application id for correlation id "
-                      << corr_id << " and function id: " << function_id
-                      << " was not found, such response is not expected.");
+    SDL_LOG_ERROR("Application id for correlation id "
+                  << corr_id << " and function id: " << function_id
+                  << " was not found, such response is not expected.");
     return;
   }
   const uint32_t app_id = *found_app_id;
-  LOG4CXX_DEBUG(logger_, "app_id is: " << app_id);
+  SDL_LOG_DEBUG("app_id is: " << app_id);
 
   auto found_request = GetRequest(app_id, function_id, corr_id);
   if (!found_request) {
-    LOG4CXX_ERROR(logger_,
-                  "Request with function id " << function_id << " and corr id "
+    SDL_LOG_ERROR("Request with function id " << function_id << " and corr id "
                                               << corr_id << " not found");
     return;
   }
@@ -366,26 +361,24 @@ void ResumptionDataProcessor::ProcessResponseFromHMI(
   ProcessResumptionStatus(app_id, response, request);
 
   if (!IsResumptionFinished(app_id, request)) {
-    LOG4CXX_DEBUG(logger_,
-                  "Resumption app "
-                      << app_id
-                      << " not finished. Some requests are still waited");
+    SDL_LOG_DEBUG("Resumption app "
+                  << app_id << " not finished. Some requests are still waited");
     return;
   }
 
   auto found_callback = GetResumptionCallback(app_id);
   if (!found_callback) {
-    LOG4CXX_ERROR(logger_, "Callback for app_id: " << app_id << " not found");
+    SDL_LOG_ERROR("Callback for app_id: " << app_id << " not found");
     return;
   }
   auto callback = *found_callback;
 
   if (IsResumptionSuccessful(app_id)) {
-    LOG4CXX_DEBUG(logger_, "Resumption for app " << app_id << " successful");
+    SDL_LOG_DEBUG("Resumption for app " << app_id << " successful");
     callback(mobile_apis::Result::SUCCESS, "Data resumption successful");
     application_manager_.state_controller().ResumePostponedWindows(app_id);
   } else {
-    LOG4CXX_ERROR(logger_, "Resumption for app " << app_id << " failed");
+    SDL_LOG_ERROR("Resumption for app " << app_id << " failed");
     callback(mobile_apis::Result::RESUME_FAILED, "Data resumption failed");
     RevertRestoredData(application_manager_.application(app_id));
     application_manager_.state_controller().DropPostponedWindows(app_id);
@@ -396,10 +389,9 @@ void ResumptionDataProcessor::ProcessResponseFromHMI(
 
 void ResumptionDataProcessor::HandleOnTimeOut(
     const uint32_t corr_id, const hmi_apis::FunctionID::eType function_id) {
-  LOG4CXX_AUTO_TRACE(logger_);
-  LOG4CXX_DEBUG(logger_,
-                "Handling timeout with corr id: "
-                    << corr_id << " and function_id: " << function_id);
+  SDL_LOG_AUTO_TRACE();
+  SDL_LOG_DEBUG("Handling timeout with corr id: "
+                << corr_id << " and function_id: " << function_id);
 
   auto error_response = MessageHelper::CreateNegativeResponseFromHmi(
       function_id,
@@ -410,13 +402,12 @@ void ResumptionDataProcessor::HandleOnTimeOut(
 }
 
 void ResumptionDataProcessor::on_event(const event_engine::Event& event) {
-  LOG4CXX_AUTO_TRACE(logger_);
-  LOG4CXX_DEBUG(
-      logger_,
+  SDL_LOG_AUTO_TRACE();
+  SDL_LOG_DEBUG(
       "Handling response message from HMI "
-          << event.id() << " "
-          << event.smart_object()[strings::params][strings::correlation_id]
-                 .asInt());
+      << event.id() << " "
+      << event.smart_object()[strings::params][strings::correlation_id]
+             .asInt());
   ProcessResponseFromHMI(
       event.smart_object(), event.id(), event.smart_object_correlation_id());
 }
@@ -443,8 +434,8 @@ std::vector<ResumptionRequest> GetAllFailedRequests(
 
 void ResumptionDataProcessor::RevertRestoredData(
     ApplicationSharedPtr application) {
-  LOG4CXX_AUTO_TRACE(logger_);
-  LOG4CXX_DEBUG(logger_, "Reverting for app: " << application->app_id());
+  SDL_LOG_AUTO_TRACE();
+  SDL_LOG_DEBUG("Reverting for app: " << application->app_id());
   DeleteSubmenus(application);
   DeleteCommands(application);
   DeleteChoicesets(application);
@@ -463,9 +454,8 @@ void ResumptionDataProcessor::RevertRestoredData(
 
 void ResumptionDataProcessor::SubscribeToResponse(
     const int32_t app_id, const ResumptionRequest& request) {
-  LOG4CXX_AUTO_TRACE(logger_);
-  LOG4CXX_DEBUG(logger_,
-                "App " << app_id << " subscribe on "
+  SDL_LOG_AUTO_TRACE();
+  SDL_LOG_DEBUG("App " << app_id << " subscribe on "
                        << request.request_id.function_id << " "
                        << request.request_id.correlation_id);
   subscribe_on_event(request.request_id.function_id,
@@ -482,7 +472,7 @@ void ResumptionDataProcessor::SubscribeToResponse(
 
 void ResumptionDataProcessor::ProcessMessageToHMI(
     smart_objects::SmartObjectSPtr message, bool subscribe_on_response) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   if (subscribe_on_response) {
     auto function_id = static_cast<hmi_apis::FunctionID::eType>(
         (*message)[strings::params][strings::function_id].asInt());
@@ -501,13 +491,13 @@ void ResumptionDataProcessor::ProcessMessageToHMI(
     SubscribeToResponse(app_id, wait_for_response);
   }
   if (!application_manager_.GetRPCService().ManageHMICommand(message)) {
-    LOG4CXX_ERROR(logger_, "Unable to send request");
+    SDL_LOG_ERROR("Unable to send request");
   }
 }
 
 void ResumptionDataProcessor::ProcessMessagesToHMI(
     const smart_objects::SmartObjectList& messages) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   for (const auto& message : messages) {
     const bool is_request_message =
         application_manager::MessageType::kRequest ==
@@ -520,9 +510,9 @@ void ResumptionDataProcessor::ProcessMessagesToHMI(
 void ResumptionDataProcessor::AddFiles(
     app_mngr::ApplicationSharedPtr application,
     const smart_objects::SmartObject& saved_app) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   if (!saved_app.keyExists(strings::application_files)) {
-    LOG4CXX_ERROR(logger_, "application_files section is not exists");
+    SDL_LOG_ERROR("application_files section is not exists");
     return;
   }
 
@@ -548,10 +538,10 @@ void ResumptionDataProcessor::AddFiles(
 void ResumptionDataProcessor::AddWindows(
     application_manager::ApplicationSharedPtr application,
     const ns_smart_device_link::ns_smart_objects::SmartObject& saved_app) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
 
   if (!saved_app.keyExists(strings::windows_info)) {
-    LOG4CXX_ERROR(logger_, "windows_info section does not exist");
+    SDL_LOG_ERROR("windows_info section does not exist");
     return;
   }
 
@@ -565,10 +555,10 @@ void ResumptionDataProcessor::AddWindows(
 void ResumptionDataProcessor::AddSubmenus(
     ApplicationSharedPtr application,
     const smart_objects::SmartObject& saved_app) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
 
   if (!saved_app.keyExists(strings::application_submenus)) {
-    LOG4CXX_ERROR(logger_, "application_submenus section is not exists");
+    SDL_LOG_ERROR("application_submenus section is not exists");
     return;
   }
 
@@ -607,7 +597,7 @@ utils::Optional<ResumptionRequest> FindResumptionSubmenuRequest(
 }
 
 void ResumptionDataProcessor::DeleteSubmenus(ApplicationSharedPtr application) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
 
   auto failed_requests = GetAllFailedRequests(
       application->app_id(), resumption_status_, resumption_status_lock_);
@@ -629,9 +619,9 @@ void ResumptionDataProcessor::DeleteSubmenus(ApplicationSharedPtr application) {
 void ResumptionDataProcessor::AddCommands(
     ApplicationSharedPtr application,
     const smart_objects::SmartObject& saved_app) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   if (!saved_app.keyExists(strings::application_commands)) {
-    LOG4CXX_ERROR(logger_, "application_commands section is not exists");
+    SDL_LOG_ERROR("application_commands section is not exists");
     return;
   }
 
@@ -685,7 +675,7 @@ utils::Optional<ResumptionRequest> FindCommandResumptionRequest(
 }
 
 void ResumptionDataProcessor::DeleteCommands(ApplicationSharedPtr application) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
 
   auto failed_requests = GetAllFailedRequests(
       application->app_id(), resumption_status_, resumption_status_lock_);
@@ -710,16 +700,14 @@ void ResumptionDataProcessor::DeleteCommands(ApplicationSharedPtr application) {
   for (const auto& cmd : commands_map) {
     const auto cmd_id = extract_cmd_id(cmd.second);
     if (0 == cmd_id) {
-      LOG4CXX_ERROR(logger_,
-                    "Can't extract cmd_id for command with internal number: "
-                        << cmd.first);
+      SDL_LOG_ERROR("Can't extract cmd_id for command with internal number: "
+                    << cmd.first);
       continue;
     }
 
     auto failed_command = FindCommandResumptionRequest(cmd_id, failed_requests);
 
-    LOG4CXX_DEBUG(logger_,
-                  std::boolalpha << "Command with internal ID: " << cmd.first
+    SDL_LOG_DEBUG(std::boolalpha << "Command with internal ID: " << cmd.first
                                  << " and cmdID: " << cmd_id << " was failed: "
                                  << static_cast<bool>(failed_command));
     if (!failed_command || (!is_vr_command_failed(*failed_command))) {
@@ -748,9 +736,9 @@ void ResumptionDataProcessor::DeleteCommands(ApplicationSharedPtr application) {
 void ResumptionDataProcessor::AddChoicesets(
     ApplicationSharedPtr application,
     const smart_objects::SmartObject& saved_app) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   if (!saved_app.keyExists(strings::application_choice_sets)) {
-    LOG4CXX_ERROR(logger_, "There is no any choicesets");
+    SDL_LOG_ERROR("There is no any choicesets");
     return;
   }
 
@@ -793,7 +781,7 @@ utils::Optional<ResumptionRequest> FindResumptionChoiceSetRequest(
 
 void ResumptionDataProcessor::DeleteChoicesets(
     ApplicationSharedPtr application) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
 
   auto failed_requests = GetAllFailedRequests(
       application->app_id(), resumption_status_, resumption_status_lock_);
@@ -814,10 +802,9 @@ void ResumptionDataProcessor::DeleteChoicesets(
 void ResumptionDataProcessor::SetGlobalProperties(
     ApplicationSharedPtr application,
     const smart_objects::SmartObject& saved_app) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   if (!saved_app.keyExists(strings::application_global_properties)) {
-    LOG4CXX_DEBUG(logger_,
-                  "application_global_properties section is not exists");
+    SDL_LOG_DEBUG("application_global_properties section is not exists");
     return;
   }
 
@@ -831,7 +818,7 @@ void ResumptionDataProcessor::SetGlobalProperties(
 
 void ResumptionDataProcessor::DeleteGlobalProperties(
     ApplicationSharedPtr application) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   const uint32_t app_id = application->app_id();
   const auto result =
       application_manager_.ResetAllApplicationGlobalProperties(app_id);
@@ -889,7 +876,7 @@ void ResumptionDataProcessor::DeleteGlobalProperties(
 void ResumptionDataProcessor::AddSubscriptions(
     ApplicationSharedPtr application,
     const smart_objects::SmartObject& saved_app) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
 
   AddButtonsSubscriptions(application, saved_app);
   AddPluginsSubscriptions(application, saved_app);
@@ -898,10 +885,10 @@ void ResumptionDataProcessor::AddSubscriptions(
 void ResumptionDataProcessor::AddButtonsSubscriptions(
     ApplicationSharedPtr application,
     const smart_objects::SmartObject& saved_app) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
 
   if (!saved_app.keyExists(strings::application_subscriptions)) {
-    LOG4CXX_DEBUG(logger_, "application_subscriptions section is not exists");
+    SDL_LOG_DEBUG("application_subscriptions section is not exists");
     return;
   }
 
@@ -943,7 +930,7 @@ ButtonSubscriptions ResumptionDataProcessor::GetButtonSubscriptionsToResume(
 void ResumptionDataProcessor::AddPluginsSubscriptions(
     ApplicationSharedPtr application,
     const smart_objects::SmartObject& saved_app) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
 
   for (auto& extension : application->Extensions()) {
     extension->ProcessResumption(
@@ -956,14 +943,14 @@ void ResumptionDataProcessor::AddPluginsSubscriptions(
 
 void ResumptionDataProcessor::DeleteSubscriptions(
     ApplicationSharedPtr application) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   DeleteButtonsSubscriptions(application);
   DeletePluginsSubscriptions(application);
 }
 
 void ResumptionDataProcessor::DeleteButtonsSubscriptions(
     ApplicationSharedPtr application) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   const ButtonSubscriptions button_subscriptions =
       application->SubscribedButtons().GetData();
   for (auto& btn : button_subscriptions) {
@@ -981,7 +968,7 @@ void ResumptionDataProcessor::DeleteButtonsSubscriptions(
 
 void ResumptionDataProcessor::DeleteWindowsSubscriptions(
     ApplicationSharedPtr application) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
 
   const auto window_ids = application->GetWindowIds();
   for (const auto& window_id : window_ids) {
@@ -990,7 +977,7 @@ void ResumptionDataProcessor::DeleteWindowsSubscriptions(
       continue;
     }
 
-    LOG4CXX_DEBUG(logger_, "Reverting CreateWindow for: " << window_id);
+    SDL_LOG_DEBUG("Reverting CreateWindow for: " << window_id);
 
     auto delete_request = MessageHelper::CreateUIDeleteWindowRequestToHMI(
         application, application_manager_, window_id);
@@ -1006,7 +993,7 @@ void ResumptionDataProcessor::DeleteWindowsSubscriptions(
 
 void ResumptionDataProcessor::DeletePluginsSubscriptions(
     application_manager::ApplicationSharedPtr application) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
 
   resumption_status_lock_.AcquireForReading();
   auto it = resumption_status_.find(application->app_id());
@@ -1018,7 +1005,7 @@ void ResumptionDataProcessor::DeletePluginsSubscriptions(
   const ApplicationResumptionStatus& status = it->second;
   smart_objects::SmartObject extension_vd_subscriptions;
   for (auto ivi : status.successful_vehicle_data_subscriptions_) {
-    LOG4CXX_DEBUG(logger_, "ivi " << ivi << " should be deleted");
+    SDL_LOG_DEBUG("ivi " << ivi << " should be deleted");
     extension_vd_subscriptions[ivi] = true;
   }
 
@@ -1065,11 +1052,11 @@ void ResumptionDataProcessor::CheckVehicleDataResponse(
     const smart_objects::SmartObject& request,
     const smart_objects::SmartObject& response,
     ApplicationResumptionStatus& status) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   const auto request_keys = request[strings::msg_params].enumerate();
 
   if (!IsResponseSuccessful(response)) {
-    LOG4CXX_TRACE(logger_, "Vehicle data request not successful");
+    SDL_LOG_TRACE("Vehicle data request not successful");
     for (const auto key : request_keys) {
       status.unsuccessful_vehicle_data_subscriptions_.push_back(key);
     }
@@ -1086,12 +1073,11 @@ void ResumptionDataProcessor::CheckVehicleDataResponse(
             ? kSuccess
             : response_params[ivi][strings::result_code].asInt();
     if (kSuccess != vd_result_code) {
-      LOG4CXX_TRACE(logger_,
-                    "ivi " << ivi << " was NOT successfuly subscribed");
+      SDL_LOG_TRACE("ivi " << ivi << " was NOT successfuly subscribed");
 
       status.unsuccessful_vehicle_data_subscriptions_.push_back(ivi);
     } else {
-      LOG4CXX_TRACE(logger_, "ivi " << ivi << " was successfuly subscribed");
+      SDL_LOG_TRACE("ivi " << ivi << " was successfuly subscribed");
       status.successful_vehicle_data_subscriptions_.push_back(ivi);
     }
   }
@@ -1101,7 +1087,7 @@ void ResumptionDataProcessor::CheckModuleDataSubscription(
     const ns_smart_device_link::ns_smart_objects::SmartObject& request,
     const ns_smart_device_link::ns_smart_objects::SmartObject& response,
     ApplicationResumptionStatus& status) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
 
   const auto& msg_params_so = request[strings::msg_params];
   const auto requested_module_type =
@@ -1111,7 +1097,7 @@ void ResumptionDataProcessor::CheckModuleDataSubscription(
   const ModuleUid requested_module{requested_module_type, requested_module_id};
 
   if (!IsResponseSuccessful(response)) {
-    LOG4CXX_TRACE(logger_, "Module data subscription request NOT successful");
+    SDL_LOG_TRACE("Module data subscription request NOT successful");
     status.unsuccessful_module_subscriptions_.push_back(requested_module);
     return;
   }
@@ -1120,7 +1106,7 @@ void ResumptionDataProcessor::CheckModuleDataSubscription(
       response[strings::msg_params][message_params::kModuleData];
 
   if (0 == response_module_data_so.length()) {
-    LOG4CXX_TRACE(logger_, "Module data subscription request not successful");
+    SDL_LOG_TRACE("Module data subscription request not successful");
     status.unsuccessful_module_subscriptions_.push_back(requested_module);
     return;
   }
@@ -1149,14 +1135,12 @@ void ResumptionDataProcessor::CheckModuleDataSubscription(
   const bool is_the_same_module = requested_module == responsed_module;
 
   if (is_the_same_module && is_subscribe_success) {
-    LOG4CXX_TRACE(logger_,
-                  "Module [" << requested_module.first << ":"
+    SDL_LOG_TRACE("Module [" << requested_module.first << ":"
                              << requested_module.second
                              << "] was successfuly subscribed");
     status.successful_module_subscriptions_.push_back(requested_module);
   } else {
-    LOG4CXX_TRACE(logger_,
-                  "Module [" << requested_module.first << ":"
+    SDL_LOG_TRACE("Module [" << requested_module.first << ":"
                              << requested_module.second
                              << "] was NOT successfuly subscribed");
     status.unsuccessful_module_subscriptions_.push_back(requested_module);
@@ -1166,7 +1150,7 @@ void ResumptionDataProcessor::CheckModuleDataSubscription(
 void ResumptionDataProcessor::CheckCreateWindowResponse(
     const smart_objects::SmartObject& request,
     const smart_objects::SmartObject& response) const {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   const auto correlation_id =
       response[strings::params][strings::correlation_id].asInt();
 
@@ -1175,15 +1159,13 @@ void ResumptionDataProcessor::CheckCreateWindowResponse(
 
   auto application = application_manager_.application(app_id);
   if (!application) {
-    LOG4CXX_ERROR(logger_,
-                  "Application is not registered by hmi id: " << app_id);
+    SDL_LOG_ERROR("Application is not registered by hmi id: " << app_id);
     return;
   }
 
   const auto window_id = msg_params[strings::window_id].asInt();
   if (!IsResponseSuccessful(response)) {
-    LOG4CXX_ERROR(logger_,
-                  "UI_CreateWindow for correlation id: " << correlation_id
+    SDL_LOG_ERROR("UI_CreateWindow for correlation id: " << correlation_id
                                                          << " has failed");
     auto& builder = application->display_capabilities_builder();
     builder.ResetDisplayCapabilities();

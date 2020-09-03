@@ -110,6 +110,9 @@ class MockStateController : public am::StateController {
   MOCK_METHOD1(ExitDefaultWindow, void(am::ApplicationSharedPtr app));
   MOCK_METHOD1(ResumePostponedWindows, void(const uint32_t app_id));
   MOCK_METHOD1(DropPostponedWindows, void(const uint32_t app_id));
+  MOCK_METHOD2(DeactivateApp,
+               void(am::ApplicationSharedPtr app,
+                    const am::WindowID window_id));
 };
 
 }  // namespace application_manager_test

@@ -28,7 +28,7 @@
 #include "sdl_rpc_plugin/sdl_app_extension.h"
 #include "sdl_rpc_plugin/sdl_rpc_plugin.h"
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "SDLAppExtension")
+SDL_CREATE_LOG_VARIABLE("SDLAppExtension")
 
 namespace sdl_rpc_plugin {
 namespace strings = application_manager::strings;
@@ -39,11 +39,11 @@ SDLAppExtension::SDLAppExtension(SDLRPCPlugin& plugin,
     : app_mngr::AppExtension(SDLAppExtension::SDLAppExtensionUID)
     , plugin_(plugin)
     , app_(app) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
 }
 
 SDLAppExtension::~SDLAppExtension() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
 }
 
 void SDLAppExtension::SaveResumptionData(
@@ -54,10 +54,10 @@ void SDLAppExtension::SaveResumptionData(
 void SDLAppExtension::ProcessResumption(
     const smart_objects::SmartObject& saved_app,
     resumption::Subscriber subscriber) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
 
   if (!saved_app.keyExists(strings::subscribed_for_way_points)) {
-    LOG4CXX_ERROR(logger_, "subscribed_for_way_points section does not exist");
+    SDL_LOG_ERROR("subscribed_for_way_points section does not exist");
     return;
   }
   const bool subscribed_for_way_points =
@@ -69,7 +69,7 @@ void SDLAppExtension::ProcessResumption(
 
 void SDLAppExtension::RevertResumption(
     const smart_objects::SmartObject& resumption_data) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   UNUSED(resumption_data);
 
   plugin_.RevertResumption(app_);

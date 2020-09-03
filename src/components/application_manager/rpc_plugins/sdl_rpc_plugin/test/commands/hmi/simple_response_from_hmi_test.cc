@@ -79,6 +79,7 @@
 #include "hmi/ui_set_media_clock_timer_response.h"
 #include "hmi/ui_show_response.h"
 #include "hmi/ui_slider_response.h"
+#include "hmi/ui_subtle_alert_response.h"
 #include "hmi/update_app_list_response.h"
 #include "hmi/update_device_list_response.h"
 #include "hmi/vr_add_command_response.h"
@@ -148,6 +149,8 @@ typedef Types<
                 hmi_apis::FunctionID::UI_AddSubMenu>,
     CommandData<sdl_rpc_plugin::commands::UIAlertResponse,
                 hmi_apis::FunctionID::UI_Alert>,
+    CommandData<sdl_rpc_plugin::commands::UISubtleAlertResponse,
+                hmi_apis::FunctionID::UI_SubtleAlert>,
     CommandData<sdl_rpc_plugin::commands::UIChangeRegistratioResponse,
                 hmi_apis::FunctionID::UI_ChangeRegistration>,
     CommandData<sdl_rpc_plugin::commands::UIDeleteCommandResponse,

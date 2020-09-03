@@ -859,6 +859,8 @@ ModuleConfig::ModuleConfig(const Json::Value* value__)
     , endpoint_properties(impl::ValueMember(value__, "endpoint_properties"))
     , notifications_per_minute_by_priority(
           impl::ValueMember(value__, "notifications_per_minute_by_priority"))
+    , subtle_notifications_per_minute_by_priority(impl::ValueMember(
+          value__, "subtle_notifications_per_minute_by_priority"))
     , vehicle_make(impl::ValueMember(value__, "vehicle_make"))
     , vehicle_model(impl::ValueMember(value__, "vehicle_model"))
     , vehicle_year(impl::ValueMember(value__, "vehicle_year"))
@@ -882,6 +884,8 @@ void ModuleConfig::SafeCopyFrom(const ModuleConfig& from) {
       from.notifications_per_minute_by_priority;
   lock_screen_dismissal_enabled = from.lock_screen_dismissal_enabled;
 
+  subtle_notifications_per_minute_by_priority.assign_if_valid(
+      from.subtle_notifications_per_minute_by_priority);
   certificate.assign_if_valid(from.certificate);
   vehicle_make.assign_if_valid(from.vehicle_make);
   vehicle_model.assign_if_valid(from.vehicle_model);
@@ -909,6 +913,9 @@ Json::Value ModuleConfig::ToJsonValue() const {
   impl::WriteJsonField("endpoint_properties", endpoint_properties, &result__);
   impl::WriteJsonField("notifications_per_minute_by_priority",
                        notifications_per_minute_by_priority,
+                       &result__);
+  impl::WriteJsonField("subtle_notifications_per_minute_by_priority",
+                       subtle_notifications_per_minute_by_priority,
                        &result__);
   impl::WriteJsonField("vehicle_make", vehicle_make, &result__);
   impl::WriteJsonField("vehicle_model", vehicle_model, &result__);
@@ -953,6 +960,9 @@ bool ModuleConfig::is_valid() const {
     return false;
   }
   if (!notifications_per_minute_by_priority.is_valid()) {
+    return false;
+  }
+  if (!subtle_notifications_per_minute_by_priority.is_valid()) {
     return false;
   }
   if (!vehicle_make.is_valid()) {
@@ -1019,6 +1029,9 @@ bool ModuleConfig::struct_empty() const {
   if (notifications_per_minute_by_priority.is_initialized()) {
     return false;
   }
+  if (subtle_notifications_per_minute_by_priority.is_initialized()) {
+    return false;
+  }
   if (lock_screen_dismissal_enabled.is_initialized()) {
     return false;
   }
@@ -1079,6 +1092,11 @@ void ModuleConfig::ReportErrors(rpc::ValidationReport* report__) const {
   if (!notifications_per_minute_by_priority.is_valid()) {
     notifications_per_minute_by_priority.ReportErrors(
         &report__->ReportSubobject("notifications_per_minute_by_priority"));
+  }
+  if (!subtle_notifications_per_minute_by_priority.is_valid()) {
+    subtle_notifications_per_minute_by_priority.ReportErrors(
+        &report__->ReportSubobject(
+            "subtle_notifications_per_minute_by_priority"));
   }
   if (!lock_screen_dismissal_enabled.is_valid()) {
     lock_screen_dismissal_enabled.ReportErrors(
@@ -1143,6 +1161,7 @@ void ModuleConfig::SetPolicyTableType(PolicyTableType pt_type) {
   endpoints.SetPolicyTableType(pt_type);
   endpoint_properties.SetPolicyTableType(pt_type);
   notifications_per_minute_by_priority.SetPolicyTableType(pt_type);
+  subtle_notifications_per_minute_by_priority.SetPolicyTableType(pt_type);
   lock_screen_dismissal_enabled.SetPolicyTableType(pt_type);
   vehicle_make.SetPolicyTableType(pt_type);
   vehicle_model.SetPolicyTableType(pt_type);

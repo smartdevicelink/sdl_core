@@ -52,7 +52,7 @@
 #include "vehicle_info_plugin/commands/mobile/unsubscribe_vehicle_data_request.h"
 #include "vehicle_info_plugin/commands/mobile/unsubscribe_vehicle_data_response.h"
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "VehicleInfoPlugin")
+SDL_CREATE_LOG_VARIABLE("VehicleInfoPlugin")
 
 namespace vehicle_info_plugin {
 namespace strings = app_mngr::strings;
@@ -108,7 +108,7 @@ struct VehicleInfoCommandCreatorFactory {
 
   template <typename VehicleInfoCommandType>
   application_manager::CommandCreator& GetCreator() {
-    LOG4CXX_AUTO_TRACE(logger_);
+    SDL_LOG_AUTO_TRACE();
     static VehicleInfoCommandCreator<VehicleInfoCommandType> res(params_);
     return res;
   }
@@ -126,7 +126,7 @@ VehicleInfoMobileCommandFactory::VehicleInfoMobileCommandFactory(
     , hmi_capabilities_(hmi_capabilities)
     , policy_handler_(policy_handler)
     , custom_vehicle_data_manager_(custom_vehicle_data_manager) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
 }
 
 app_mngr::CommandSharedPtr VehicleInfoMobileCommandFactory::CreateCommand(
@@ -150,9 +150,8 @@ app_mngr::CommandSharedPtr VehicleInfoMobileCommandFactory::CreateCommand(
   }
 
   UNUSED(message_type_str);
-  LOG4CXX_DEBUG(logger_,
-                "HMICommandFactory::CreateCommand function_id: "
-                    << function_id << ", message type: " << message_type_str);
+  SDL_LOG_DEBUG("HMICommandFactory::CreateCommand function_id: "
+                << function_id << ", message type: " << message_type_str);
 
   return get_creator_factory(function_id, message_type, source).create(message);
 }

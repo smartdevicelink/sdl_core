@@ -237,6 +237,30 @@ class RegisterAppInterfaceRequest
       std::string* mac_address = nullptr) const;
 
   /**
+   * @brief Processes AppHMITypes in the received message from mobile and in the
+   * policy table
+   * @param message A message from mobile that could contain AppHMIType
+   * collection
+   * @param app_hmi_types_in_policy AppHMITypes that describes in the policy
+   * table for the app that sent the message
+   * @return Result of processing
+   */
+  mobile_apis::Result::eType ProcessingAppHMITypesPolicies(
+      smart_objects::SmartObject& message,
+      policy::StringArray& app_hmi_types_in_policy);
+
+  /**
+   * @brief Processes AppHMITypes in the received message
+   * @param message A message received from the mobile
+   * @param info Info in a string representation that should be added to the
+   * response info
+   * @param log A log in a string represenation that could contain the
+   * AppHMITypes that are absent in the policy table.
+   */
+  mobile_apis::Result::eType ProcessingAppHMITypesInMessage(
+      const smart_objects::SmartObject& message);
+
+  /**
    * @brief WaitForHMIIsReady blocking function. Waits for HMI be ready for
    * requests processing
    */

@@ -38,7 +38,7 @@ namespace resumption {
 
 namespace app_mngr = application_manager;
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "ExtensionPenndingResumptionHandler")
+SDL_CREATE_LOG_VARIABLE("ExtensionPenndingResumptionHandler")
 
 ExtensionPendingResumptionHandler::ExtensionPendingResumptionHandler(
     app_mngr::ApplicationManager& application_manager)
@@ -50,7 +50,7 @@ ResumptionRequest ExtensionPendingResumptionHandler::MakeResumptionRequest(
     const uint32_t corr_id,
     const hmi_apis::FunctionID::eType function_id,
     const smart_objects::SmartObject& message) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   resumption::ResumptionRequest resumption_request;
   resumption_request.request_id.correlation_id = corr_id;
   resumption_request.request_id.function_id = function_id;

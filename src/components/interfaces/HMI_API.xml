@@ -340,6 +340,7 @@
   <element name="SYSTEM" />
   <element name="PROJECTION" />
   <element name="REMOTE_CONTROL" />
+  <element name="WEB_VIEW" />
 </enum>
 
 <enum name="CloudConnectionStatus">
@@ -540,6 +541,9 @@
   <element name="CLOSE_CLOUD_CONNECTION">
     <description>By getting this value, SDL puts the named app to NONE HMILevel. Used by the HMI to close a cloud app connection.</description>
   </element>
+  <element name="RESOURCE_CONSTRAINT">
+    <description>By getting this value, SDL should unregister the application to allow the HMI to close the application.</description>
+  </element>
 </enum>
 
 <enum name="TextFieldName">
@@ -629,6 +633,15 @@
   </element>
   <element name="phoneNumber">
     <description> Optional phone number of intended location / establishment (if applicable) for SendLocation.</description>
+  </element>
+  <element name="subtleAlertText1">
+    <description>The first line of the subtle alert text field; applies to `SubtleAlert` `alertText1`</description>
+  </element>
+  <element name="subtleAlertText2">
+    <description>The second line of the subtle alert text field; applies to `SubtleAlert` `alertText2`</description>
+  </element>
+  <element name="subtleAlertSoftButtonText">
+    <description>A text field in the soft button of a subtle alert; applies to `SubtleAlert` `softButtons`</description>
   </element>
   <element name="timeToDestination"/>
     <!-- TO DO to be removed -->
@@ -722,6 +735,12 @@
   </element>
   <element name="alertIcon">
     <description>The image field for Alert</description>
+  </element>
+  <element name="subMenuIcon">
+    <description>The image field for AddSubMenu.menuIcon</description>
+  </element>
+  <element name="subtleAlertIcon">
+    <description>The image of the subtle alert; applies to `SubtleAlert` `alertIcon`</description>
   </element>
 </enum>
 
@@ -1488,16 +1507,25 @@
 <enum name="CharacterSet">
   <description>The list of potential character sets</description>
   <element name="TYPE2SET">
-    <description>See [@TODO: create file ref]</description>
+    <description>Note that this element is deprecated in the MOBILE API</description>
   </element>
   <element name="TYPE5SET">
-    <description>See [@TODO: create file ref]</description>
+    <description>Note that this element is deprecated in the MOBILE API</description>
   </element>
   <element name="CID1SET">
-    <description>See [@TODO: create file ref]</description>
+    <description>Note that this element is deprecated in the MOBILE API</description>
   </element>
   <element name="CID2SET">
-    <description>See [@TODO: create file ref]</description>
+    <description>Note that this element is deprecated in the MOBILE API</description>
+  </element>
+  <element name="ASCII">
+    <description>ASCII as defined in https://en.wikipedia.org/wiki/ASCII as defined in codes 0-127. Non-printable characters such as tabs and back spaces are ignored</description>
+  </element>
+  <element name="ISO_8859_1">
+    <description>Latin-1, as defined in https://en.wikipedia.org/wiki/ISO/IEC_8859-1</description>
+  </element>
+  <element name="UTF_8">
+    <description>The UTF-8 character set that uses variable bytes per code point. See https://en.wikipedia.org/wiki/UTF-8 for more details. This is the preferred character set</description>
   </element>
 </enum>
 
@@ -1515,6 +1543,7 @@
 <enum name="MethodName">
   <description>Defines the type of the request which causes text-to-speech prompt</description>
   <element name="ALERT" />
+  <element name="SUBTLE_ALERT" />
   <element name="SPEAK" />
   <element name="AUDIO_PASS_THRU" />
   <element name="ALERT_MANEUVER" />
@@ -2650,7 +2679,11 @@
     <description>The name that identifies the field. See TextFieldName.</description>
   </param>
   <param name="characterSet" type="Common.CharacterSet" mandatory="true">
-    <description>The character set that is supported in this field. See CharacterSet.</description>
+    <description>
+      The set of characters that are supported by this text field.
+      All text is sent in UTF-8 format, but not all systems may support all of the characters expressed by UTF-8.
+      All systems will support at least ASCII, but they may support more, either the LATIN-1 character set, or the full UTF-8 character set.
+    </description>
   </param>
   <param name="width" type="Integer" minvalue="1" maxvalue="500" mandatory="true">
     <description>The number of characters in one row of this field.</description>
@@ -3575,6 +3608,15 @@
     </param>
   </struct>
 
+  <struct name="DynamicUpdateCapabilities">
+    <param name="supportedDynamicImageFieldNames" type="ImageFieldName" array="true" mandatory="false" minsize="1">
+      <description>An array of ImageFieldName values for which the system supports sending OnFileUpdate notifications. If you send an Image struct for that image field with a name without having uploaded the image data using PutFile that matches that name, the system will request that you upload the data with PutFile at a later point when the HMI needs it. The HMI will then display the image in the appropriate field. If not sent, assume false.</description>
+    </param>
+
+    <param name="supportsDynamicSubMenus" type="Boolean" mandatory="false">
+      <description>If true, the head unit supports dynamic sub-menus by sending OnUpdateSubMenu notifications. If true, you should not send AddCommands that attach to a parentID for an AddSubMenu until OnUpdateSubMenu is received with the menuID. At that point, you should send all AddCommands with a parentID that match the menuID. If not set, assume false.</description>
+    </param>
+  </struct>
 
   <struct name="WindowTypeCapabilities">
     <param name="type" type="Common.WindowType" mandatory="true" />
@@ -3611,6 +3653,9 @@
     </param>
     <param name="menuLayoutsAvailable" type="Common.MenuLayout" array="true" minsize="1" maxsize="1000" mandatory="false">
       <description>An array of available menu layouts. If this parameter is not provided, only the `LIST` layout is assumed to be available</description>
+    </param>
+    <param name="dynamicUpdateCapabilities" type="DynamicUpdateCapabilities" mandatory="false">
+      <description>Contains the head unit's capabilities for dynamic updating features declaring if the module will send dynamic update RPCs.</description>
     </param>
   </struct>
 
@@ -4215,7 +4260,7 @@
         <param name="seatLocationCapability" type="SeatLocationCapability" mandatory="false">
             <description>Contains information about the locations of each seat</description>
         </param>
-        <param name="driverDistractionCapability" type="DriverDistractionCapability" mandatory="false" since="6.0">
+        <param name="driverDistractionCapability" type="DriverDistractionCapability" mandatory="false">
             <description>Describes capabilities when the driver is distracted</description>
         </param>      
     </struct>
@@ -5147,6 +5192,51 @@
     </param>
   </function>
 
+  <function name="SubtleAlert" messagetype="request">
+    <description>Request from SDL to show a subtle alert message on the display.</description>
+    <param name="alertStrings" type="Common.TextFieldStruct" mandatory="true" array="true" minsize="0" maxsize="2">
+      <description>Array of lines of alert text fields. See TextFieldStruct. Uses subtleAlertText1, subtleAlertText2.</description>
+    </param>
+    <param name="alertIcon" type="Common.Image" mandatory="false">
+      <description>
+        Image to be displayed for the corresponding alert. See Image. 
+        If omitted, no (or the default if applicable) icon should be displayed.
+      </description>
+    </param>
+    <param name="duration" type="Integer" mandatory="false" minvalue="3000" maxvalue="10000">
+      <description>Timeout in milliseconds.</description>
+    </param>
+    <param name="softButtons" type="Common.SoftButton" mandatory="false" minsize="0" maxsize="2" array="true">
+      <description>App defined SoftButtons</description>
+    </param>
+    <param name="alertType" type="Common.AlertType" mandatory="true">
+      <description>Defines if only UI or BOTH portions of the Alert request are being sent to HMI Side</description>
+    </param>
+    <param name="appID" type="Integer" mandatory="true">
+      <description>ID of application requested this RPC.</description>
+    </param>
+    <param name="cancelID" type="Integer" mandatory="false">
+      <description>
+        An ID for this specific alert to allow cancellation through the `CancelInteraction` RPC.
+      </description>
+    </param>
+  </function>
+
+  <function name="SubtleAlert" messagetype="response">
+    <param name="tryAgainTime" type="Integer" mandatory="false" minvalue="0" maxvalue="2000000000">
+      <description>Amount of time (in milliseconds) that SDL must wait before resending an alert. Must be provided if another system event or overlay currently has a higher priority than this alert.</description>
+    </param>
+  </function>
+
+  <function name="OnSubtleAlertPressed" messagetype="notification">
+    <description>
+      Sent when the alert itself is touched (outside of a soft button). Touching (or otherwise selecting) the alert should open the app before sending this notification.
+    </description>
+    <param name="appID" type="Integer" mandatory="true">
+      <description>ID of application that is related to this RPC.</description>
+    </param>
+  </function>
+
   <function name="SetDisplayLayout" messagetype="request">
     <description>This RPC is deprecated. Use Show RPC to change layout.</description>
     <param name="displayLayout" type="String" maxlength="500" mandatory="true">
@@ -5434,7 +5524,7 @@
     </param>
     <param name="functionID" type="Integer" mandatory="true">
       <description>
-        The ID of the type of interaction the developer wants to dismiss. Only values 10, (PerformInteractionID), 12 (AlertID), 25 (ScrollableMessageID), and 26 (SliderID) are permitted.
+        The ID of the type of interaction the developer wants to dismiss. Only values 10, (PerformInteractionID), 12 (AlertID), 25 (ScrollableMessageID), 26 (SliderID), and 64 (SubtleAlertID) are permitted.
       </description>
     </param>
     <param name="appID" type="Integer" mandatory="true">
@@ -5771,6 +5861,33 @@
   </function>
   <function name="SendHapticData" messagetype="response">
   </function>
+
+  <function name="OnUpdateFile" messagetype="notification">
+    <description>For the HMI to tell Core that a file needs to be retrieved from the app.</description>
+    <param name="appID" type="Integer" mandatory="true">
+      <description>ID of application related to this RPC.</description>
+    </param>
+    <param name="fileName" type="String" maxlength="255" mandatory="true">
+      <description>File reference name.</description>
+    </param>
+  </function>
+
+  <function name="OnUpdateSubMenu" messagetype="notification">
+    <description>For the HMI to tell Core that a submenu needs updating</description>
+
+    <param name="appID" type="Integer" mandatory="true">
+      <description>ID of application related to this RPC.</description>
+    </param>
+
+    <param name="menuID" type="Integer" minvalue="0" maxvalue="2000000000" mandatory="true">
+      <description>This menuID must match a menuID in the current menu structure</description>
+    </param>
+
+    <param name="updateSubCells" type="Boolean" mandatory="false">
+      <description>If not set, assume false. If true, the app should send AddCommands with parentIDs matching the menuID. These AddCommands will then be attached to the submenu and displayed if the submenu is selected.</description>
+    </param>
+  </function>
+
 </interface>
 
 <interface name="Navigation" version="1.5.0" date="2017-08-15">

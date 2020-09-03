@@ -42,7 +42,7 @@ namespace sdl_rpc_plugin {
 namespace app_mngr = application_manager;
 namespace plugins = application_manager::plugin_manager;
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "SdlRPCPlugin")
+SDL_CREATE_LOG_VARIABLE("SdlRPCPlugin")
 
 SDLRPCPlugin::SDLRPCPlugin()
     : application_manager_(nullptr), pending_resumption_handler_(nullptr) {}
@@ -92,7 +92,7 @@ void SDLRPCPlugin::OnPolicyEvent(plugins::PolicyEvent event) {}
 void SDLRPCPlugin::OnApplicationEvent(
     plugins::ApplicationEvent event,
     app_mngr::ApplicationSharedPtr application) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   if (plugins::ApplicationEvent::kApplicationRegistered == event) {
     application->AddExtension(
         std::make_shared<SDLAppExtension>(*this, *application));
@@ -103,7 +103,7 @@ void SDLRPCPlugin::OnApplicationEvent(
     // Processing automatic subscription to SystemCapabilities for DISPLAY type
     const auto capability_type =
         mobile_apis::SystemCapabilityType::eType::DISPLAYS;
-    LOG4CXX_DEBUG(logger_, "Subscription to DISPLAYS capability is enabled");
+    SDL_LOG_DEBUG("Subscription to DISPLAYS capability is enabled");
     sys_cap_ext_ptr->SubscribeTo(capability_type);
 
   } else if (plugins::ApplicationEvent::kDeleteApplicationData == event) {
@@ -115,12 +115,12 @@ void SDLRPCPlugin::ProcessResumptionSubscription(
     application_manager::Application& app,
     SDLAppExtension& ext,
     resumption::Subscriber subscriber) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
 
   if (application_manager_->IsAnyAppSubscribedForWayPoints()) {
-    LOG4CXX_DEBUG(logger_,
-                  "Subscription to waypoint already exist, no need to send "
-                  "request to HMI");
+    SDL_LOG_DEBUG(
+        "Subscription to waypoint already exist, no need to send "
+        "request to HMI");
     application_manager_->SubscribeAppForWayPoints(app.app_id());
     return;
   }
@@ -137,14 +137,14 @@ void SDLRPCPlugin::SaveResumptionData(
 }
 
 void SDLRPCPlugin::RevertResumption(application_manager::Application& app) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
 
   pending_resumption_handler_->OnResumptionRevert();
 
   if (application_manager_->IsAppSubscribedForWayPoints(app)) {
     application_manager_->UnsubscribeAppFromWayPoints(app.app_id());
     if (!application_manager_->IsAnyAppSubscribedForWayPoints()) {
-      LOG4CXX_DEBUG(logger_, "Send UnsubscribeWayPoints");
+      SDL_LOG_DEBUG("Send UnsubscribeWayPoints");
       auto request =
           application_manager::MessageHelper::CreateUnsubscribeWayPointsRequest(
               application_manager_->GetNextHMICorrelationID());
@@ -162,12 +162,12 @@ void SDLRPCPlugin::ClearSubscriptions(app_mngr::ApplicationSharedPtr app) {
 
 extern "C" __attribute__((visibility("default")))
 application_manager::plugin_manager::RPCPlugin*
-Create() {
+Create(logger::Logger* logger_instance) {
+  logger::Logger::instance(logger_instance);
   return new sdl_rpc_plugin::SDLRPCPlugin();
 }
 
 extern "C" __attribute__((visibility("default"))) void Delete(
     application_manager::plugin_manager::RPCPlugin* data) {
   delete data;
-  DELETE_THREAD_LOGGER(sdl_rpc_plugin::logger_);
 }

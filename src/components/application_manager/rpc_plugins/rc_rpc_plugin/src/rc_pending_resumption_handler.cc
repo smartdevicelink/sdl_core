@@ -5,7 +5,7 @@
 
 namespace rc_rpc_plugin {
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "RemoteControlModule")
+SDL_CREATE_LOG_VARIABLE("RemoteControlModule")
 
 RCPendingResumptionHandler::RCPendingResumptionHandler(
     application_manager::ApplicationManager& application_manager,
@@ -16,19 +16,17 @@ RCPendingResumptionHandler::RCPendingResumptionHandler(
 
 void RCPendingResumptionHandler::on_event(
     const application_manager::event_engine::Event& event) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   namespace am_strings = application_manager::strings;
   sync_primitives::AutoLock lock(pending_resumption_lock_);
   const auto cid = event.smart_object_correlation_id();
-  LOG4CXX_TRACE(logger_,
-                "Received event with function id: "
-                    << event.id() << " and correlation id: " << cid);
+  SDL_LOG_TRACE("Received event with function id: "
+                << event.id() << " and correlation id: " << cid);
 
   const auto request_optional = GetPendingRequest(cid);
   const auto app_id_optional = GetPendingApp(cid);
   if (!request_optional) {
-    LOG4CXX_ERROR(logger_,
-                  "Not waiting for message with correlation id: " << cid);
+    SDL_LOG_ERROR("Not waiting for message with correlation id: " << cid);
     return;
   }
 
@@ -39,10 +37,9 @@ void RCPendingResumptionHandler::on_event(
 
   auto& response = event.smart_object();
   if (RCHelpers::IsResponseSuccessful(response)) {
-    LOG4CXX_DEBUG(logger_,
-                  "Resumption of subscriptions is successful"
-                      << " module type: " << module_uid.first
-                      << " module id: " << module_uid.second);
+    SDL_LOG_DEBUG("Resumption of subscriptions is successful"
+                  << " module type: " << module_uid.first
+                  << " module id: " << module_uid.second);
 
     if (response[am_strings::msg_params].keyExists(
             message_params::kModuleData)) {
@@ -57,10 +54,9 @@ void RCPendingResumptionHandler::on_event(
 
     HandleSuccessfulResponse(event, module_uid);
   } else {
-    LOG4CXX_DEBUG(logger_,
-                  "Resumption of subscriptions is NOT successful"
-                      << " module type: " << module_uid.first
-                      << " module id: " << module_uid.second);
+    SDL_LOG_DEBUG("Resumption of subscriptions is NOT successful"
+                  << " module type: " << module_uid.first
+                  << " module id: " << module_uid.second);
 
     auto app = application_manager_.application(app_id);
     if (app) {
@@ -85,13 +81,12 @@ void RCPendingResumptionHandler::HandleResumptionSubscriptionRequest(
     resumption::Subscriber& subscriber,
     application_manager::Application& app) {
   UNUSED(extension);
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   sync_primitives::AutoLock lock(pending_resumption_lock_);
 
   auto rc_extension = RCHelpers::GetRCExtension(app);
   auto subscriptions = rc_extension->InteriorVehicleDataSubscriptions();
-  LOG4CXX_TRACE(logger_,
-                "app id " << app.app_id() << " " << Stringify(subscriptions));
+  SDL_LOG_TRACE("app id " << app.app_id() << " " << Stringify(subscriptions));
 
   std::vector<ModuleUid> ignored;
   std::vector<ModuleUid> already_pending;
@@ -108,9 +103,9 @@ void RCPendingResumptionHandler::HandleResumptionSubscriptionRequest(
       need_to_subscribe.push_back(subscription);
     }
   }
-  LOG4CXX_TRACE(logger_, "ignored: " << Stringify(ignored));
-  LOG4CXX_TRACE(logger_, "already_pending: " << Stringify(already_pending));
-  LOG4CXX_TRACE(logger_, "need_to_subscribe: " << Stringify(need_to_subscribe));
+  SDL_LOG_TRACE("ignored: " << Stringify(ignored));
+  SDL_LOG_TRACE("already_pending: " << Stringify(already_pending));
+  SDL_LOG_TRACE("need_to_subscribe: " << Stringify(need_to_subscribe));
 
   for (auto subscription : already_pending) {
     const auto cid = application_manager_.GetNextHMICorrelationID();
@@ -122,10 +117,9 @@ void RCPendingResumptionHandler::HandleResumptionSubscriptionRequest(
     const auto resumption_request =
         MakeResumptionRequest(cid, fid, *subscription_request);
     subscriber(app.app_id(), resumption_request);
-    LOG4CXX_DEBUG(logger_,
-                  "Freezed request with correlation_id: "
-                      << cid << " module type: " << subscription.first
-                      << " module id: " << subscription.second);
+    SDL_LOG_DEBUG("Freezed request with correlation_id: "
+                  << cid << " module type: " << subscription.first
+                  << " module id: " << subscription.second);
   }
 
   for (auto module : need_to_subscribe) {
@@ -137,29 +131,28 @@ void RCPendingResumptionHandler::HandleResumptionSubscriptionRequest(
     AddPendingRequest(app.app_id(), *subscription_request);
     subscribe_on_event(fid, cid);
     subscriber(app.app_id(), resumption_request);
-    LOG4CXX_DEBUG(logger_,
-                  "Sending request with correlation id: "
-                      << cid << " module type: " << module.first
-                      << " module id: " << module.second);
+    SDL_LOG_DEBUG("Sending request with correlation id: "
+                  << cid << " module type: " << module.first
+                  << " module id: " << module.second);
     application_manager_.GetRPCService().ManageHMICommand(subscription_request);
   }
 }
 
 void RCPendingResumptionHandler::OnResumptionRevert() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
 }
 
 void RCPendingResumptionHandler::HandleSuccessfulResponse(
     const application_manager::event_engine::Event& event,
     const ModuleUid& module_uid) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
 
   auto& response = event.smart_object();
   auto cid = event.smart_object_correlation_id();
 
   const auto& it = paused_resumptions_.find(module_uid);
   if (it != paused_resumptions_.end()) {
-    LOG4CXX_DEBUG(logger_, "Freezed resumptions found");
+    SDL_LOG_DEBUG("Freezed resumptions found");
     auto& queue_freezed = it->second;
     while (!queue_freezed.empty()) {
       const auto& resumption_request = queue_freezed.front();
@@ -176,7 +169,7 @@ void RCPendingResumptionHandler::HandleSuccessfulResponse(
 
 void RCPendingResumptionHandler::ProcessNextPausedResumption(
     const ModuleUid& module_uid) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
 
   auto pop_front_freezed_resumptions = [this](const ModuleUid& module_uid) {
     const auto& it = paused_resumptions_.find(module_uid);
@@ -199,7 +192,7 @@ void RCPendingResumptionHandler::ProcessNextPausedResumption(
 
   auto freezed_resumption = pop_front_freezed_resumptions(module_uid);
   if (!freezed_resumption) {
-    LOG4CXX_DEBUG(logger_, "No freezed resumptions found");
+    SDL_LOG_DEBUG("No freezed resumptions found");
     return;
   }
 
@@ -213,10 +206,9 @@ void RCPendingResumptionHandler::ProcessNextPausedResumption(
           .asInt();
   subscribe_on_event(fid, cid);
   AddPendingRequest(resumption_request.app_id, *subscription_request);
-  LOG4CXX_DEBUG(logger_,
-                "Sending request with correlation id: "
-                    << cid << " module type: " << module_uid.first
-                    << " module id: " << module_uid.second);
+  SDL_LOG_DEBUG("Sending request with correlation id: "
+                << cid << " module type: " << module_uid.first
+                << " module id: " << module_uid.second);
   application_manager_.GetRPCService().ManageHMICommand(subscription_request);
 }
 
@@ -264,8 +256,7 @@ bool RCPendingResumptionHandler::IsOtherAppsSubscribed(
   std::set<uint32_t> subscribed_apps;
   for (auto& app : application_manager_.applications().GetData()) {
     if (app_subscribed(app)) {
-      LOG4CXX_DEBUG(logger_,
-                    "APP " << app->app_id() << " subscribed "
+      SDL_LOG_DEBUG("APP " << app->app_id() << " subscribed "
                            << module_uid.first << " " << module_uid.second);
       subscribed_apps.insert(app->app_id());
     }
@@ -308,8 +299,7 @@ void RCPendingResumptionHandler::RemovePendingRequest(const uint32_t corr_id) {
   const auto it = std::find_if(
       pending_requests_.begin(), pending_requests_.end(), corr_id_match);
   if (it == pending_requests_.end()) {
-    LOG4CXX_WARN(logger_,
-                 "Pending request with corr_id " << corr_id << " not found");
+    SDL_LOG_WARN("Pending request with corr_id " << corr_id << " not found");
     return;
   }
   pending_requests_.erase(it);

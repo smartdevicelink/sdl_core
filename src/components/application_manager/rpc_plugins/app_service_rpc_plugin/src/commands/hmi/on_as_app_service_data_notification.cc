@@ -41,6 +41,8 @@ namespace app_service_rpc_plugin {
 using namespace application_manager;
 namespace commands {
 
+SDL_CREATE_LOG_VARIABLE("Commands")
+
 OnASAppServiceDataNotification::OnASAppServiceDataNotification(
     const application_manager::commands::MessageSharedPtr& message,
     ApplicationManager& application_manager,
@@ -156,8 +158,7 @@ void OnASAppServiceDataNotification::GetNavigationImagePaths(
 bool OnASAppServiceDataNotification::ValidateParams(
     smart_objects::SmartObject& message_params) {
   if (!message_params.keyExists(strings::service_data)) {
-    LOG4CXX_DEBUG(logger_,
-                  "OASD notification received without any service data");
+    SDL_LOG_DEBUG("OASD notification received without any service data");
     return false;
   }
   smart_objects::SmartObject& service_data =
@@ -168,8 +169,7 @@ bool OnASAppServiceDataNotification::ValidateParams(
   auto service =
       application_manager_.GetAppServiceManager().FindServiceByID(service_id);
   if (!service) {
-    LOG4CXX_ERROR(logger_,
-                  "OASD notification received with an unpublished service ID");
+    SDL_LOG_ERROR("OASD notification received with an unpublished service ID");
     return false;
   }
 
@@ -179,8 +179,7 @@ bool OnASAppServiceDataNotification::ValidateParams(
           service_type, &service_type_value)) {
     auto app = application_manager_.application(service->connection_key);
     if (!app) {
-      LOG4CXX_ERROR(logger_,
-                    "Failed to find service provider for OASD message");
+      SDL_LOG_ERROR("Failed to find service provider for OASD message");
       return false;
     }
 
@@ -204,8 +203,8 @@ bool OnASAppServiceDataNotification::ValidateParams(
 }
 
 void OnASAppServiceDataNotification::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
-  LOG4CXX_DEBUG(logger_, "Sending AS data to HMI");
+  SDL_LOG_AUTO_TRACE();
+  SDL_LOG_DEBUG("Sending AS data to HMI");
   if (ValidateParams((*message_)[strings::msg_params])) {
     SendNotification();
   }

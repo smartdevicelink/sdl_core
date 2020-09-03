@@ -39,6 +39,8 @@
 namespace rc_rpc_plugin {
 namespace commands {
 
+SDL_CREATE_LOG_VARIABLE("Commands")
+
 RCGetInteriorVehicleDataRequest::RCGetInteriorVehicleDataRequest(
     const app_mngr::commands::MessageSharedPtr& message,
     const RCCommandParams& params)
@@ -51,13 +53,12 @@ RCGetInteriorVehicleDataRequest::RCGetInteriorVehicleDataRequest(
 RCGetInteriorVehicleDataRequest::~RCGetInteriorVehicleDataRequest() {}
 
 void RCGetInteriorVehicleDataRequest::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   SendRequest();
 }
 
 void RCGetInteriorVehicleDataRequest::onTimeOut() {
-  LOG4CXX_TRACE(logger_,
-                "function_id: " << function_id()
+  SDL_LOG_TRACE("function_id: " << function_id()
                                 << " correlation_id: " << correlation_id());
   using namespace application_manager;
   event_engine::Event timeout_event(

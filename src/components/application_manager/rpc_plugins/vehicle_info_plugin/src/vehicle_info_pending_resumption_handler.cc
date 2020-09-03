@@ -40,7 +40,7 @@
 #include "vehicle_info_plugin/custom_vehicle_data_manager.h"
 
 namespace vehicle_info_plugin {
-CREATE_LOGGERPTR_GLOBAL(logger_, "VehicleInfoPlugin")
+SDL_CREATE_LOG_VARIABLE("VehicleInfoPlugin")
 
 using hmi_apis::FunctionID::VehicleInfo_SubscribeVehicleData;
 
@@ -91,7 +91,7 @@ void FillResponseWithMissedVD(
 VehicleInfoPendingResumptionHandler::VehicleDataList
 SuccessfulSubscriptionsFromResponse(
     const smart_objects::SmartObject& response) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   using namespace application_manager;
 
   VehicleInfoPendingResumptionHandler::VehicleDataList result;
@@ -116,27 +116,25 @@ VehicleInfoPendingResumptionHandler::VehicleInfoPendingResumptionHandler(
     , custom_vehicle_data_manager_(custom_vehicle_data_manager) {}
 
 void VehicleInfoPendingResumptionHandler::OnResumptionRevert() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   sync_primitives::AutoLock lock(pending_resumption_lock_);
   TriggerPendingResumption();
 }
 
 void VehicleInfoPendingResumptionHandler::RaiseFinishedPendingResumption(
     const PendingSubscriptionsResumption& pending_resumption) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   using namespace application_manager;
 
   auto app = application_manager_.application(pending_resumption.app_id_);
   if (!app) {
-    LOG4CXX_DEBUG(logger_,
-                  "Application not found " << pending_resumption.app_id_);
+    SDL_LOG_DEBUG("Application not found " << pending_resumption.app_id_);
     return;
   }
   auto& ext = VehicleInfoAppExtension::ExtractVIExtension(*app);
   ext.RemovePendingSubscriptions();
   for (const auto& subscription : pending_resumption.restored_vehicle_data_) {
-    LOG4CXX_DEBUG(logger_,
-                  "Subscribe " << app->app_id() << "  to " << subscription);
+    SDL_LOG_DEBUG("Subscribe " << app->app_id() << "  to " << subscription);
     ext.subscribeToVehicleInfo(subscription);
   }
 
@@ -145,13 +143,13 @@ void VehicleInfoPendingResumptionHandler::RaiseFinishedPendingResumption(
                                 pending_resumption.fake_corr_id_);
   event_engine::Event event(VehicleInfo_SubscribeVehicleData);
   event.set_smart_object(fake_response);
-  LOG4CXX_DEBUG(logger_, "Raise fake response for resumption data processor");
+  SDL_LOG_DEBUG("Raise fake response for resumption data processor");
   event.raise(application_manager_.event_dispatcher());
 }
 
 void VehicleInfoPendingResumptionHandler::SendHMIRequestForNotSubscribed(
     const PendingSubscriptionsResumption& pending_resumption) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   const auto remaining_subscriptions = pending_resumption.NotSubscribedData();
   auto request = CreateSubscribeRequestToHMI(remaining_subscriptions);
   const auto corr_id = get_corr_id_from_message(*request);
@@ -161,15 +159,14 @@ void VehicleInfoPendingResumptionHandler::SendHMIRequestForNotSubscribed(
 
 void VehicleInfoPendingResumptionHandler::ProcessNextPendingResumption(
     const smart_objects::SmartObject& response_message) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   if (pending_requests_.empty()) {
-    LOG4CXX_DEBUG(logger_, "No more pending resumptions");
+    SDL_LOG_DEBUG("No more pending resumptions");
     return;
   }
   auto& pending = pending_requests_.front();
   if (pending.waiting_for_hmi_response_) {
-    LOG4CXX_DEBUG(logger_,
-                  "Requests was already sent to HMI for " << pending.app_id_);
+    SDL_LOG_DEBUG("Requests was already sent to HMI for " << pending.app_id_);
     return;
   }
   const auto successful_subscriptions =
@@ -188,17 +185,16 @@ void VehicleInfoPendingResumptionHandler::ProcessNextPendingResumption(
 }
 
 void VehicleInfoPendingResumptionHandler::TriggerPendingResumption() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   if (pending_requests_.empty()) {
-    LOG4CXX_DEBUG(logger_, "No pending resumptions");
+    SDL_LOG_DEBUG("No pending resumptions");
     return;
   }
   auto& pending_resumption = pending_requests_.front();
   if (pending_resumption.waiting_for_hmi_response_) {
-    LOG4CXX_DEBUG(logger_,
-                  "Pending resumption for  "
-                      << pending_resumption.app_id_
-                      << " is already waiting for HMI response");
+    SDL_LOG_DEBUG("Pending resumption for  "
+                  << pending_resumption.app_id_
+                  << " is already waiting for HMI response");
     return;
   }
   SendHMIRequestForNotSubscribed(pending_resumption);
@@ -207,11 +203,11 @@ void VehicleInfoPendingResumptionHandler::TriggerPendingResumption() {
 
 void VehicleInfoPendingResumptionHandler::on_event(
     const application_manager::event_engine::Event& event) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   sync_primitives::AutoLock lock(pending_resumption_lock_);
   using namespace application_manager;
   if (pending_requests_.empty()) {
-    LOG4CXX_DEBUG(logger_, "Not waiting for any response");
+    SDL_LOG_DEBUG("Not waiting for any response");
     return;
   }
 
@@ -249,17 +245,16 @@ VehicleInfoPendingResumptionHandler::SubscribeToFakeRequest(
     const uint32_t app_id,
     const VehicleDataList& subscriptions,
     resumption::Subscriber& subscriber) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   const auto fake_request = CreateSubscribeRequestToHMI(subscriptions);
   const auto fake_corr_id = get_corr_id_from_message(*fake_request);
   auto resumption_request = MakeResumptionRequest(
       fake_corr_id,
       hmi_apis::FunctionID::VehicleInfo_SubscribeVehicleData,
       *fake_request);
-  LOG4CXX_DEBUG(logger_,
-                "Subscribe subscriber "
-                    << app_id
-                    << " to fake request with corr id = " << fake_corr_id);
+  SDL_LOG_DEBUG("Subscribe subscriber "
+                << app_id
+                << " to fake request with corr id = " << fake_corr_id);
   subscriber(app_id, resumption_request);
   PendingSubscriptionsResumption pending_request(
       app_id, fake_corr_id, subscriptions);
@@ -270,25 +265,23 @@ void VehicleInfoPendingResumptionHandler::HandleResumptionSubscriptionRequest(
     application_manager::AppExtension& extension,
     resumption::Subscriber& subscriber,
     application_manager::Application& app) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   sync_primitives::AutoLock lock(pending_resumption_lock_);
-  LOG4CXX_TRACE(logger_, "app id " << app.app_id());
+  SDL_LOG_TRACE("app id " << app.app_id());
   UNUSED(extension);
   auto& ext = VehicleInfoAppExtension::ExtractVIExtension(app);
 
   const auto subscriptions = ext.PendingSubscriptions().GetData();
   if (subscriptions.empty()) {
-    LOG4CXX_DEBUG(logger_, "Subscriptions is empty");
+    SDL_LOG_DEBUG("Subscriptions is empty");
     return;
   }
-  LOG4CXX_TRACE(logger_,
-                "resume subscriptions to : " << Stringify(subscriptions));
+  SDL_LOG_TRACE("resume subscriptions to : " << Stringify(subscriptions));
   auto pending_request =
       SubscribeToFakeRequest(app.app_id(), subscriptions, subscriber);
 
   pending_requests_.push_back(pending_request);
-  LOG4CXX_DEBUG(
-      logger_,
+  SDL_LOG_DEBUG(
       "Add to pending resumptins corr_id = " << pending_request.fake_corr_id_);
   if (pending_requests_.size() == 1) {
     TriggerPendingResumption();
@@ -321,7 +314,7 @@ smart_objects::SmartObject
 VehicleInfoPendingResumptionHandler::CreateFakeResponseFromHMI(
     const std::map<std::string, smart_objects::SmartObject>& subscriptions,
     const uint32_t fake_corrlation_id) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   namespace strings = application_manager::strings;
 
   auto response =
@@ -333,10 +326,9 @@ VehicleInfoPendingResumptionHandler::CreateFakeResponseFromHMI(
   smart_objects::SmartObject msg_params(smart_objects::SmartType_Map);
   for (const auto& subscription : subscriptions) {
     msg_params[subscription.first] = subscription.second;
-    LOG4CXX_DEBUG(logger_,
-                  "fake response data : "
-                      << subscription.first << " result = "
-                      << subscription.second[strings::result_code].asInt());
+    SDL_LOG_DEBUG("fake response data : "
+                  << subscription.first << " result = "
+                  << subscription.second[strings::result_code].asInt());
   }
 
   message[strings::msg_params] = msg_params;
@@ -395,21 +387,18 @@ void VehicleInfoPendingResumptionHandler::PendingSubscriptionsResumption::
 
 void VehicleInfoPendingResumptionHandler::PendingSubscriptionsResumption::
     FillSubscriptionResults(const smart_objects::SmartObject& response) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   using namespace application_manager;
 
   auto successful_subscriptions = SuccessfulSubscriptionsFromResponse(response);
 
-  LOG4CXX_DEBUG(logger_,
-                "Requested data : " << Stringify(requested_vehicle_data_));
-  LOG4CXX_DEBUG(logger_,
-                "Successful subscription in response : "
-                    << Stringify(successful_subscriptions));
+  SDL_LOG_DEBUG("Requested data : " << Stringify(requested_vehicle_data_));
+  SDL_LOG_DEBUG("Successful subscription in response : "
+                << Stringify(successful_subscriptions));
 
   FillRestoredData(successful_subscriptions);
 
-  LOG4CXX_DEBUG(logger_,
-                "Restored data : " << Stringify(restored_vehicle_data_));
+  SDL_LOG_DEBUG("Restored data : " << Stringify(restored_vehicle_data_));
 
   FillSubscriptionResults();
 

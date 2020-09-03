@@ -21,7 +21,7 @@
 namespace transport_manager {
 namespace transport_adapter {
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "TransportManager")
+SDL_CREATE_LOG_VARIABLE("TransportManager")
 
 static bool SetNonblocking(int s);
 
@@ -93,31 +93,31 @@ PlatformSpecificNetworkInterfaceListener::
 
 PlatformSpecificNetworkInterfaceListener::
     ~PlatformSpecificNetworkInterfaceListener() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
 
   Stop();
   Deinit();
 
-  delete thread_->delegate();
+  delete thread_->GetDelegate();
   threads::DeleteThread(thread_);
 }
 
 bool PlatformSpecificNetworkInterfaceListener::Init() {
-  LOG4CXX_AUTO_TRACE(logger_);
-  LOG4CXX_DEBUG(logger_, "Init socket: " << socket_);
+  SDL_LOG_AUTO_TRACE();
+  SDL_LOG_DEBUG("Init socket: " << socket_);
   if (socket_ >= 0) {
-    LOG4CXX_WARN(logger_, "Network interface listener is already initialized");
+    SDL_LOG_WARN("Network interface listener is already initialized");
     return false;
   }
 
   socket_ = socket(PF_NETLINK, SOCK_RAW, NETLINK_ROUTE);
   if (socket_ == -1) {
-    LOG4CXX_ERROR_WITH_ERRNO(logger_, "Failed to create netlink socket");
+    SDL_LOG_ERROR_WITH_ERRNO("Failed to create netlink socket");
     return false;
   }
 
   if (!SetNonblocking(socket_)) {
-    LOG4CXX_WARN(logger_, "Failed to configure netlink socket to non-blocking");
+    SDL_LOG_WARN("Failed to configure netlink socket to non-blocking");
   }
 
   struct sockaddr_nl addr;
@@ -128,29 +128,29 @@ bool PlatformSpecificNetworkInterfaceListener::Init() {
   addr.nl_groups = RTMGRP_LINK | RTMGRP_IPV4_IFADDR | RTMGRP_IPV6_IFADDR;
 
   if (bind(socket_, reinterpret_cast<sockaddr*>(&addr), sizeof(addr)) != 0) {
-    LOG4CXX_ERROR_WITH_ERRNO(logger_, "Failed to bind netlink socket");
+    SDL_LOG_ERROR_WITH_ERRNO("Failed to bind netlink socket");
     close(socket_);
     socket_ = -1;
     return false;
   }
 
   if (pipe(pipe_fds_) != 0) {
-    LOG4CXX_ERROR_WITH_ERRNO(logger_, "Failed to create internal pipe");
+    SDL_LOG_ERROR_WITH_ERRNO("Failed to create internal pipe");
     close(socket_);
     socket_ = -1;
     return false;
   }
 
   if (!SetNonblocking(pipe_fds_[0])) {
-    LOG4CXX_WARN(logger_, "Failed to configure pipe to non-blocking");
+    SDL_LOG_WARN("Failed to configure pipe to non-blocking");
   }
 
   return true;
 }
 
 void PlatformSpecificNetworkInterfaceListener::Deinit() {
-  LOG4CXX_AUTO_TRACE(logger_);
-  LOG4CXX_DEBUG(logger_, "Deinit socket: " << socket_);
+  SDL_LOG_AUTO_TRACE();
+  SDL_LOG_DEBUG("Deinit socket: " << socket_);
   if (socket_ >= 0) {
     close(socket_);
     socket_ = -1;
@@ -166,43 +166,43 @@ void PlatformSpecificNetworkInterfaceListener::Deinit() {
 }
 
 bool PlatformSpecificNetworkInterfaceListener::Start() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
 
   if (socket_ < 0) {
-    LOG4CXX_WARN(logger_, "Interface listener is not initialized");
+    SDL_LOG_WARN("Interface listener is not initialized");
     return false;
   }
 
-  if (thread_->is_running()) {
-    LOG4CXX_WARN(logger_, "Interface listener is already started");
+  if (thread_->IsRunning()) {
+    SDL_LOG_WARN("Interface listener is already started");
     return false;
   }
 
-  if (!thread_->start()) {
-    LOG4CXX_ERROR(logger_, "Failed to start interface listener");
+  if (!thread_->Start()) {
+    SDL_LOG_ERROR("Failed to start interface listener");
     return false;
   }
 
-  LOG4CXX_INFO(logger_, "Network interface listener started");
+  SDL_LOG_INFO("Network interface listener started");
   return true;
 }
 
 bool PlatformSpecificNetworkInterfaceListener::Stop() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
 
-  if (!thread_->is_running()) {
-    LOG4CXX_DEBUG(logger_, "interface listener is not running");
+  if (!thread_->IsRunning()) {
+    SDL_LOG_DEBUG("interface listener is not running");
     return false;
   }
 
-  thread_->join();
+  thread_->Stop(threads::Thread::kThreadStopDelegate);
 
-  LOG4CXX_INFO(logger_, "Network interface listener stopped");
+  SDL_LOG_INFO("Network interface listener stopped");
   return true;
 }
 
 void PlatformSpecificNetworkInterfaceListener::Loop() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
 
   // Initialize status_table_ by acquiring a list of interfaces and their
   // current statuses. Also we will notify an event to the listener if IP
@@ -227,8 +227,7 @@ void PlatformSpecificNetworkInterfaceListener::Loop() {
       if (errno == EINTR) {
         continue;
       } else {
-        LOG4CXX_WARN(logger_,
-                     "select failed for netlink. Aborting interface listener.");
+        SDL_LOG_WARN("select failed for netlink. Aborting interface listener.");
         break;
       }
     }
@@ -239,17 +238,15 @@ void PlatformSpecificNetworkInterfaceListener::Loop() {
       ret = read(pipe_fds_[0], buf, sizeof(buf));
       if (ret < 0) {
         if (errno != EINTR && errno != EAGAIN && errno != EWOULDBLOCK) {
-          LOG4CXX_WARN(
-              logger_,
+          SDL_LOG_WARN(
               "Failed to read from pipe. Aborting interface listener.");
           break;
         }
       } else if (ret == 0) {
-        LOG4CXX_WARN(logger_,
-                     "Pipe disconnected. Aborting interface listener.");
+        SDL_LOG_WARN("Pipe disconnected. Aborting interface listener.");
         break;
       } else {
-        LOG4CXX_DEBUG(logger_, "received terminating event through pipe");
+        SDL_LOG_DEBUG("received terminating event through pipe");
         break;
       }
     }
@@ -265,14 +262,13 @@ void PlatformSpecificNetworkInterfaceListener::Loop() {
       ret = recv(socket_, buf, sizeof(buf), 0);
       if (ret < 0) {
         if (errno != EINTR && errno != EAGAIN && errno != EWOULDBLOCK) {
-          LOG4CXX_WARN(logger_,
-                       "Failed to read from netlink socket. Aborting interface "
-                       "listener.");
+          SDL_LOG_WARN(
+              "Failed to read from netlink socket. Aborting interface "
+              "listener.");
           break;
         }
       } else if (ret == 0) {
-        LOG4CXX_WARN(
-            logger_,
+        SDL_LOG_WARN(
             "Netlink socket disconnected. Aborting interface listener.");
         break;
       } else {
@@ -283,7 +279,7 @@ void PlatformSpecificNetworkInterfaceListener::Loop() {
         // time so we use for-loop to go through.
         for (; NLMSG_OK(header, len); header = NLMSG_NEXT(header, len)) {
           if (header->nlmsg_type == NLMSG_ERROR) {
-            LOG4CXX_WARN(logger_, "received error event from netlink");
+            SDL_LOG_WARN("received error event from netlink");
             break;
           }
 
@@ -325,20 +321,20 @@ void PlatformSpecificNetworkInterfaceListener::Loop() {
 }
 
 bool PlatformSpecificNetworkInterfaceListener::StopLoop() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
 
-  LOG4CXX_INFO(logger_, "Stopping network interface listener");
+  SDL_LOG_INFO("Stopping network interface listener");
 
   if (pipe_fds_[1] < 0) {
-    LOG4CXX_WARN(logger_, "StopLoop called in invalid state");
+    SDL_LOG_WARN("StopLoop called in invalid state");
     return false;
   }
 
   char dummy[1] = {0};
   int ret = write(pipe_fds_[1], dummy, sizeof(dummy));
   if (ret <= 0) {
-    LOG4CXX_WARN_WITH_ERRNO(
-        logger_, "Failed to send stop message to interface listener");
+    SDL_LOG_WARN_WITH_ERRNO(
+        "Failed to send stop message to interface listener");
     return false;
   }
 
@@ -346,7 +342,7 @@ bool PlatformSpecificNetworkInterfaceListener::StopLoop() {
 }
 
 bool PlatformSpecificNetworkInterfaceListener::InitializeStatus() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
 
 #ifdef BUILD_TESTS
   if (testing_) {
@@ -357,9 +353,9 @@ bool PlatformSpecificNetworkInterfaceListener::InitializeStatus() {
 
   struct ifaddrs *if_list, *interface;
   if (getifaddrs(&if_list) != 0) {
-    LOG4CXX_WARN(logger_,
-                 "getifaddr failed, interface status won't be available until "
-                 "a change occurs");
+    SDL_LOG_WARN(
+        "getifaddr failed, interface status won't be available until "
+        "a change occurs");
     return false;
   }
 
@@ -405,14 +401,14 @@ bool PlatformSpecificNetworkInterfaceListener::InitializeStatus() {
 
   freeifaddrs(if_list);
 
-  LOG4CXX_DEBUG(logger_, "Successfully acquired network interface status");
+  SDL_LOG_DEBUG("Successfully acquired network interface status");
   DumpTable();
   return true;
 }
 
 bool PlatformSpecificNetworkInterfaceListener::UpdateStatus(
     uint16_t type, std::vector<EventParam>& params) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
 
   for (std::vector<EventParam>::iterator it = params.begin();
        it != params.end();
@@ -421,16 +417,16 @@ bool PlatformSpecificNetworkInterfaceListener::UpdateStatus(
     switch (type) {
       case RTM_NEWLINK: {
         const std::string& ifname = GetInterfaceName(it->if_index);
-        LOG4CXX_DEBUG(
-            logger_,
+        SDL_LOG_DEBUG(
+
             "netlink event: interface " << ifname << " created or updated");
         status.SetName(ifname);
         status.SetFlags(it->flags);
         break;
       }
       case RTM_DELLINK:
-        LOG4CXX_DEBUG(
-            logger_,
+        SDL_LOG_DEBUG(
+
             "netlink event: interface " << status.GetName() << " removed");
         status_table_.erase(it->if_index);
         break;
@@ -439,37 +435,33 @@ bool PlatformSpecificNetworkInterfaceListener::UpdateStatus(
         if (addr->sa_family == AF_INET) {
           sockaddr_in* addr_in = reinterpret_cast<sockaddr_in*>(addr);
           status.SetIPv4Address(&addr_in->sin_addr);
-          LOG4CXX_DEBUG(logger_,
-                        "netlink event: IPv4 address of interface "
-                            << status.GetName() << " updated to "
-                            << status.GetIPv4Address());
+          SDL_LOG_DEBUG("netlink event: IPv4 address of interface "
+                        << status.GetName() << " updated to "
+                        << status.GetIPv4Address());
         } else if (addr->sa_family == AF_INET6) {
           sockaddr_in6* addr_in6 = reinterpret_cast<sockaddr_in6*>(addr);
           status.SetIPv6Address(&addr_in6->sin6_addr);
-          LOG4CXX_DEBUG(logger_,
-                        "netlink event: IPv6 address of interface "
-                            << status.GetName() << " updated to "
-                            << status.GetIPv6Address());
+          SDL_LOG_DEBUG("netlink event: IPv6 address of interface "
+                        << status.GetName() << " updated to "
+                        << status.GetIPv6Address());
         }
         break;
       }
       case RTM_DELADDR: {
         sockaddr* addr = reinterpret_cast<sockaddr*>(&it->address);
         if (addr->sa_family == AF_INET) {
-          LOG4CXX_DEBUG(logger_,
-                        "netlink event: IPv4 address of interface "
-                            << status.GetName() << " removed");
+          SDL_LOG_DEBUG("netlink event: IPv4 address of interface "
+                        << status.GetName() << " removed");
           status.SetIPv4Address(NULL);
         } else if (addr->sa_family == AF_INET6) {
-          LOG4CXX_DEBUG(logger_,
-                        "netlink event: IPv6 address of interface "
-                            << status.GetName() << " removed");
+          SDL_LOG_DEBUG("netlink event: IPv6 address of interface "
+                        << status.GetName() << " removed");
           status.SetIPv6Address(NULL);
         }
         break;
       }
       default:
-        LOG4CXX_WARN(logger_, "Unsupported netlink event (" << type << ")");
+        SDL_LOG_WARN("Unsupported netlink event (" << type << ")");
         break;
     }
   }
@@ -477,7 +469,7 @@ bool PlatformSpecificNetworkInterfaceListener::UpdateStatus(
 }
 
 void PlatformSpecificNetworkInterfaceListener::NotifyIPAddresses() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
 
   std::string ipv4_addr;
   std::string ipv6_addr;
@@ -498,11 +490,9 @@ void PlatformSpecificNetworkInterfaceListener::NotifyIPAddresses() {
   }
 
   if (notified_ipv4_addr_ != ipv4_addr || notified_ipv6_addr_ != ipv6_addr) {
-    LOG4CXX_INFO(logger_,
-                 "IP address updated: \"" << notified_ipv4_addr_ << "\" -> \""
-                                          << ipv4_addr << "\", \""
-                                          << notified_ipv6_addr_ << "\" -> \""
-                                          << ipv6_addr << "\"");
+    SDL_LOG_INFO("IP address updated: \""
+                 << notified_ipv4_addr_ << "\" -> \"" << ipv4_addr << "\", \""
+                 << notified_ipv6_addr_ << "\" -> \"" << ipv6_addr << "\"");
 
     notified_ipv4_addr_ = ipv4_addr;
     notified_ipv6_addr_ = ipv6_addr;
@@ -513,7 +503,7 @@ void PlatformSpecificNetworkInterfaceListener::NotifyIPAddresses() {
 }
 
 const std::string PlatformSpecificNetworkInterfaceListener::SelectInterface() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
 
   if (!designated_interface_.empty()) {
     return designated_interface_;
@@ -548,8 +538,7 @@ const std::string PlatformSpecificNetworkInterfaceListener::SelectInterface() {
     }
 
     selected_interface_ = status.GetName();
-    LOG4CXX_DEBUG(logger_,
-                  "selecting network interface: " << selected_interface_);
+    SDL_LOG_DEBUG("selecting network interface: " << selected_interface_);
     return selected_interface_;
   }
 
@@ -560,7 +549,7 @@ const std::string PlatformSpecificNetworkInterfaceListener::SelectInterface() {
 std::vector<PlatformSpecificNetworkInterfaceListener::EventParam>
 PlatformSpecificNetworkInterfaceListener::ParseIFAddrMessage(
     struct ifaddrmsg* message, unsigned int size) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
 
   std::vector<EventParam> params;
 
@@ -577,8 +566,7 @@ PlatformSpecificNetworkInterfaceListener::ParseIFAddrMessage(
     if (message->ifa_family == AF_INET) {
       // make sure the size of data is >= 4 bytes
       if (RTA_PAYLOAD(attr) < sizeof(struct in_addr)) {
-        LOG4CXX_DEBUG(logger_,
-                      "Invalid netlink event: insufficient IPv4 address data");
+        SDL_LOG_DEBUG("Invalid netlink event: insufficient IPv4 address data");
         continue;
       }
 
@@ -594,8 +582,7 @@ PlatformSpecificNetworkInterfaceListener::ParseIFAddrMessage(
     } else if (message->ifa_family == AF_INET6) {
       // make sure the size of data is >= 16 bytes
       if (RTA_PAYLOAD(attr) < sizeof(struct in6_addr)) {
-        LOG4CXX_DEBUG(logger_,
-                      "Invalid netlink event: insufficient IPv6 address data");
+        SDL_LOG_DEBUG("Invalid netlink event: insufficient IPv6 address data");
         continue;
       }
 
@@ -609,8 +596,7 @@ PlatformSpecificNetworkInterfaceListener::ParseIFAddrMessage(
       sockaddr->sin6_addr = *ipv6_addr;
 
     } else {
-      LOG4CXX_WARN(logger_,
-                   "Unsupported family (" << message->ifa_family << ")");
+      SDL_LOG_WARN("Unsupported family (" << message->ifa_family << ")");
       continue;
     }
 
@@ -621,20 +607,18 @@ PlatformSpecificNetworkInterfaceListener::ParseIFAddrMessage(
 }
 
 void PlatformSpecificNetworkInterfaceListener::DumpTable() const {
-  LOG4CXX_DEBUG(logger_,
-                "Number of network interfaces: " << status_table_.size());
+  SDL_LOG_DEBUG("Number of network interfaces: " << status_table_.size());
 
   for (auto it = status_table_.begin(); it != status_table_.end(); ++it) {
     const InterfaceStatus& status = it->second;
     UNUSED(status);
 
-    LOG4CXX_DEBUG(
-        logger_,
-        "  " << status.GetName() << " : flags=" << status.GetFlags()
-             << " : available: " << (status.IsAvailable() ? "yes" : "no")
-             << " IPv4: " << status.GetIPv4Address()
-             << " IPv6: " << status.GetIPv6Address()
-             << (status.IsLoopback() ? " (loopback)" : ""));
+    SDL_LOG_DEBUG("  " << status.GetName() << " : flags=" << status.GetFlags()
+                       << " : available: "
+                       << (status.IsAvailable() ? "yes" : "no")
+                       << " IPv4: " << status.GetIPv4Address()
+                       << " IPv6: " << status.GetIPv6Address()
+                       << (status.IsLoopback() ? " (loopback)" : ""));
   }
 }
 
@@ -677,14 +661,13 @@ void PlatformSpecificNetworkInterfaceListener::ListenerThreadDelegate::
 static bool SetNonblocking(int s) {
   int prev_flag = fcntl(s, F_GETFL, 0);
   if (prev_flag == -1) {
-    LOG4CXX_ERROR_WITH_ERRNO(logger_, "Failed to acquire socket flag");
+    SDL_LOG_ERROR_WITH_ERRNO("Failed to acquire socket flag");
     return false;
   }
 
   int ret = fcntl(s, F_SETFL, prev_flag | O_NONBLOCK);
   if (ret == -1) {
-    LOG4CXX_ERROR_WITH_ERRNO(logger_,
-                             "Failed to configure socket to non-blocking");
+    SDL_LOG_ERROR_WITH_ERRNO("Failed to configure socket to non-blocking");
     return false;
   }
 

@@ -39,7 +39,7 @@
 #include "smart_objects/smart_object.h"
 #include "utils/logger.h"
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "RemoteControlModule")
+SDL_CREATE_LOG_VARIABLE("RemoteControlModule")
 
 namespace {
 std::set<rc_rpc_plugin::ModuleUid> ConvertSmartObjectToModuleCollection(
@@ -47,7 +47,7 @@ std::set<rc_rpc_plugin::ModuleUid> ConvertSmartObjectToModuleCollection(
   using namespace rc_rpc_plugin;
 
   if (!resumption_data.keyExists(application_manager::hmi_interface::rc)) {
-    LOG4CXX_DEBUG(logger_, "No resumption module data subscription to revert");
+    SDL_LOG_DEBUG("No resumption module data subscription to revert");
     return {};
   }
 
@@ -130,10 +130,10 @@ bool RCAppExtension::IsSubscribedToInteriorVehicleData(
 
 void RCAppExtension::SaveResumptionData(
     smart_objects::SmartObject& resumption_data) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
 
   if (subscribed_interior_vehicle_data_.empty()) {
-    LOG4CXX_DEBUG(logger_, "Subscribed modules data is absent");
+    SDL_LOG_DEBUG("Subscribed modules data is absent");
     return;
   }
 
@@ -143,8 +143,7 @@ void RCAppExtension::SaveResumptionData(
 
   uint32_t index = 0;
   for (const auto& module_uid : subscribed_interior_vehicle_data_) {
-    LOG4CXX_DEBUG(logger_,
-                  "Save module: [" << module_uid.first << ":"
+    SDL_LOG_DEBUG("Save module: [" << module_uid.first << ":"
                                    << module_uid.second << "]");
     auto module_info_so =
         smart_objects::SmartObject(smart_objects::SmartType_Map);
@@ -157,12 +156,12 @@ void RCAppExtension::SaveResumptionData(
 void RCAppExtension::ProcessResumption(
     const smart_objects::SmartObject& saved_app,
     resumption::Subscriber subscriber) {
-  LOG4CXX_AUTO_TRACE(logger_);
-  LOG4CXX_TRACE(logger_, "app id : " << application_.app_id());
+  SDL_LOG_AUTO_TRACE();
+  SDL_LOG_TRACE("app id : " << application_.app_id());
 
   if (!saved_app.keyExists(
           application_manager::strings::application_subscriptions)) {
-    LOG4CXX_DEBUG(logger_, "application_subscriptions section does not exist");
+    SDL_LOG_DEBUG("application_subscriptions section does not exist");
     return;
   }
 
@@ -170,14 +169,14 @@ void RCAppExtension::ProcessResumption(
       saved_app[application_manager::strings::application_subscriptions];
 
   if (!resumption_data.keyExists(message_params::kModuleData)) {
-    LOG4CXX_DEBUG(logger_, "kModuleData section does not exist");
+    SDL_LOG_DEBUG("kModuleData section does not exist");
     return;
   }
 
   auto& module_data = resumption_data[message_params::kModuleData];
 
   if (0 == module_data.length()) {
-    LOG4CXX_WARN(logger_, "Subscribed modules data is absent");
+    SDL_LOG_WARN("Subscribed modules data is absent");
     return;
   }
 
@@ -186,8 +185,7 @@ void RCAppExtension::ProcessResumption(
     const auto module_id = module_so[message_params::kModuleId].asString();
 
     ModuleUid module{module_type, module_id};
-    LOG4CXX_TRACE(logger_,
-                  "app id " << application_.app_id() << " type : "
+    SDL_LOG_TRACE("app id " << application_.app_id() << " type : "
                             << module_type << " id <" << module_id);
     SubscribeToInteriorVehicleData(module);
   }
@@ -197,7 +195,7 @@ void RCAppExtension::ProcessResumption(
 
 void RCAppExtension::RevertResumption(
     const smart_objects::SmartObject& resumption_data) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
 
   subscribed_interior_vehicle_data_.clear();
 
@@ -205,9 +203,8 @@ void RCAppExtension::RevertResumption(
       ConvertSmartObjectToModuleCollection(resumption_data);
 
   for (auto& module : module_subscriptions) {
-    LOG4CXX_TRACE(logger_,
-                  "Requested to unsubscribe module_type  "
-                      << module.first << "module_id: " << module.second);
+    SDL_LOG_TRACE("Requested to unsubscribe module_type  "
+                  << module.first << "module_id: " << module.second);
   }
   std::set<rc_rpc_plugin::ModuleUid> to_be_unsubscribed;
 
@@ -215,8 +212,7 @@ void RCAppExtension::RevertResumption(
   auto no_apps_subscribed = [app_id,
                              this](const rc_rpc_plugin::ModuleUid& module) {
     if (plugin_.IsOtherAppsSubscribed(module, app_id)) {
-      LOG4CXX_DEBUG(logger_,
-                    "Some other app except " << app_id
+      SDL_LOG_DEBUG("Some other app except " << app_id
                                              << " is already subscribed to "
                                              << " module_type  " << module.first
                                              << "module_id: " << module.second);

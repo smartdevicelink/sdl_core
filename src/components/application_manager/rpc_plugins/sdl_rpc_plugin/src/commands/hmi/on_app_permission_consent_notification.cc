@@ -112,6 +112,8 @@ using namespace application_manager;
 
 namespace commands {
 
+SDL_CREATE_LOG_VARIABLE("Commands")
+
 OnAppPermissionConsentNotification::OnAppPermissionConsentNotification(
     const application_manager::commands::MessageSharedPtr& message,
     ApplicationManager& application_manager,
@@ -127,7 +129,7 @@ OnAppPermissionConsentNotification::OnAppPermissionConsentNotification(
 OnAppPermissionConsentNotification::~OnAppPermissionConsentNotification() {}
 
 void OnAppPermissionConsentNotification::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   smart_objects::SmartObject& msg_params = (*message_)[strings::msg_params];
 
   uint32_t connection_key = 0;

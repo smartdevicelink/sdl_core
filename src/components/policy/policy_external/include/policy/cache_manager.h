@@ -309,13 +309,8 @@ class CacheManager : public CacheManagerInterface {
   void GetUpdateUrls(const uint32_t service_type,
                      EndpointUrls& out_end_points) const OVERRIDE;
 
-  /**
-   * @brief Gets allowed number of notifications
-   * depending on application priority.
-   * @param priority Priority of application
-   */
   virtual rpc::policy_table_interface_base::NumberOfNotificationsType
-  GetNotificationsNumber(const std::string& priority);
+  GetNotificationsNumber(const std::string& priority, const bool is_subtle);
 
   /**
    * @brief Gets priority for given application

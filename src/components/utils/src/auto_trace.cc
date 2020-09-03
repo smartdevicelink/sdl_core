@@ -30,36 +30,39 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <apr_time.h>
-#include <log4cxx/spi/loggingevent.h>
-
 #include "utils/auto_trace.h"
-#include "utils/push_log.h"
+#include "utils/logger.h"
 
 namespace logger {
 
-AutoTrace::AutoTrace(log4cxx::LoggerPtr logger,
-                     const log4cxx::spi::LocationInfo& location)
-    : logger_(logger), location_(location) {
-  if (logger::logs_enabled() && logger_->isTraceEnabled()) {
-    push_log(logger_,
-             ::log4cxx::Level::getTrace(),
-             "Enter",
-             apr_time_now(),
-             location_,
-             ::log4cxx::spi::LoggingEvent::getCurrentThreadName());
+AutoTrace::AutoTrace(const std::string& component, const LocationInfo& location)
+    : component_(component), location_(location) {
+  if (logger::logger_status != logger::DeletingLoggerThread) {
+    if (logger::Logger::instance().IsEnabledFor(
+            component_, logger::LogLevel::TRACE_LEVEL)) {
+      logger::LogMessage message{component_,
+                                 LogLevel::TRACE_LEVEL,
+                                 "Enter",
+                                 std::chrono::high_resolution_clock::now(),
+                                 location_,
+                                 std::this_thread::get_id()};
+      logger::Logger::instance().PushLog(message);
+    }
   }
 }
 
 AutoTrace::~AutoTrace() {
-  if (logger::logs_enabled() && logger_->isTraceEnabled()) {
-    push_log(logger_,
-             ::log4cxx::Level::getTrace(),
-             "Exit",
-             apr_time_now(),
-             location_,  // the location corresponds rather to creation of
-                         // autotrace object than to deletion
-             ::log4cxx::spi::LoggingEvent::getCurrentThreadName());
+  if (logger::logger_status != logger::DeletingLoggerThread) {
+    if (logger::Logger::instance().IsEnabledFor(
+            component_, logger::LogLevel::TRACE_LEVEL)) {
+      logger::LogMessage message{component_,
+                                 LogLevel::TRACE_LEVEL,
+                                 "Exit",
+                                 std::chrono::high_resolution_clock::now(),
+                                 location_,
+                                 std::this_thread::get_id()};
+      logger::Logger::instance().PushLog(message);
+    }
   }
 }
 
