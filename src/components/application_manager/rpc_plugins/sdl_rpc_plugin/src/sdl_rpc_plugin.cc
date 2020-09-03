@@ -35,7 +35,7 @@
 #include "application_manager/plugin_manager/plugin_keys.h"
 #include "sdl_rpc_plugin/extensions/system_capability_app_extension.h"
 #include "sdl_rpc_plugin/sdl_command_factory.h"
-#include "sdl_rpc_plugin/sdl_pending_resumption_handler.h"
+#include "sdl_rpc_plugin/waypoints_pending_resumption_handler.h"
 #include "sdl_rpc_plugin/waypoints_app_extension.h"
 
 namespace sdl_rpc_plugin {
@@ -55,7 +55,7 @@ bool SDLRPCPlugin::Init(app_mngr::ApplicationManager& app_manager,
   UNUSED(last_state);
   application_manager_ = &app_manager;
   pending_resumption_handler_ =
-      std::make_shared<SDLPendingResumptionHandler>(app_manager);
+      std::make_shared<WayPointsPendingResumptionHandler>(app_manager);
   command_factory_.reset(new sdl_rpc_plugin::SDLCommandFactory(
       app_manager, rpc_service, hmi_capabilities, policy_handler));
   return true;

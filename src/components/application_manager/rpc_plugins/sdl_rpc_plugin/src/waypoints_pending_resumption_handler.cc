@@ -25,7 +25,7 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "sdl_rpc_plugin/sdl_pending_resumption_handler.h"
+#include "sdl_rpc_plugin/waypoints_pending_resumption_handler.h"
 #include "application_manager/event_engine/event.h"
 #include "application_manager/event_engine/event_observer.h"
 #include "application_manager/message_helper.h"
@@ -36,12 +36,12 @@ namespace sdl_rpc_plugin {
 
 SDL_CREATE_LOG_VARIABLE("SdlRPCPlugin")
 
-SDLPendingResumptionHandler::SDLPendingResumptionHandler(
+WayPointsPendingResumptionHandler::WayPointsPendingResumptionHandler(
     application_manager::ApplicationManager& application_manager)
     : PendingResumptionHandler(application_manager) {}
 
 smart_objects::SmartObjectSPtr
-SDLPendingResumptionHandler::CreateSubscriptionRequest() {
+WayPointsPendingResumptionHandler::CreateSubscriptionRequest() {
   SDL_LOG_AUTO_TRACE();
   auto subscribe_waypoints_msg =
       application_manager::MessageHelper::CreateMessageForHMI(
@@ -53,7 +53,7 @@ SDLPendingResumptionHandler::CreateSubscriptionRequest() {
   return subscribe_waypoints_msg;
 }
 
-void SDLPendingResumptionHandler::HandleResumptionSubscriptionRequest(
+void WayPointsPendingResumptionHandler::HandleResumptionSubscriptionRequest(
     application_manager::AppExtension& extension,
     application_manager::Application& app) {
   SDL_LOG_AUTO_TRACE();
@@ -82,7 +82,7 @@ void SDLPendingResumptionHandler::HandleResumptionSubscriptionRequest(
 
     application_manager_.GetRPCService().ManageHMICommand(request);
   } else {
-    SDL_LOG_DEBUG("There are pending requests. Freeze resumption for app id "
+    SDL_LOG_DEBUG("There are pending requests. Frozen resumption for app id "
                   << app.app_id() << " corr id = " << corr_id);
     ResumptionAwaitingHandling frozen_res{
         app.app_id(), ext, resumption_request};
@@ -92,7 +92,7 @@ void SDLPendingResumptionHandler::HandleResumptionSubscriptionRequest(
                                                   resumption_request);
 }
 
-void SDLPendingResumptionHandler::OnResumptionRevert() {
+void WayPointsPendingResumptionHandler::OnResumptionRevert() {
   SDL_LOG_AUTO_TRACE();
   using namespace application_manager;
 
@@ -102,11 +102,11 @@ void SDLPendingResumptionHandler::OnResumptionRevert() {
   }
 
   if (!frozen_resumptions_.empty()) {
-    ResumptionAwaitingHandling freezed_resumption = frozen_resumptions_.back();
+    ResumptionAwaitingHandling frozen_resumption = frozen_resumptions_.back();
     frozen_resumptions_.pop_back();
 
     auto request = std::make_shared<smart_objects::SmartObject>(
-        freezed_resumption.request_to_send_.message);
+        frozen_resumption.request_to_send_.message);
     const uint32_t cid =
         (*request)[strings::params][strings::correlation_id].asUInt();
     const auto fid = static_cast<hmi_apis::FunctionID::eType>(
@@ -121,7 +121,7 @@ void SDLPendingResumptionHandler::OnResumptionRevert() {
   }
 }
 
-void SDLPendingResumptionHandler::RaiseFakeSuccessfulResponse(
+void WayPointsPendingResumptionHandler::RaiseFakeSuccessfulResponse(
     ns_smart_device_link::ns_smart_objects::SmartObject response,
     const int32_t corr_id) {
   using namespace application_manager;
@@ -135,7 +135,7 @@ void SDLPendingResumptionHandler::RaiseFakeSuccessfulResponse(
   event.raise(application_manager_.event_dispatcher());
 }
 
-void SDLPendingResumptionHandler::on_event(
+void WayPointsPendingResumptionHandler::on_event(
     const application_manager::event_engine::Event& event) {
   using namespace application_manager;
   SDL_LOG_AUTO_TRACE();
@@ -170,25 +170,25 @@ void SDLPendingResumptionHandler::on_event(
 
     application_manager_.SubscribeAppForWayPoints(app);
 
-    for (auto& freezed_resumption : frozen_resumptions_) {
-      auto corr_id = freezed_resumption.request_to_send_
+    for (auto& frozen_resumption : frozen_resumptions_) {
+      auto corr_id = frozen_resumption.request_to_send_
                          .message[strings::params][strings::correlation_id]
                          .asInt();
       RaiseFakeSuccessfulResponse(response, corr_id);
-      application_manager_.SubscribeAppForWayPoints(freezed_resumption.app_id);
+      application_manager_.SubscribeAppForWayPoints(frozen_resumption.app_id);
     }
     frozen_resumptions_.clear();
   } else {
     SDL_LOG_DEBUG("Resumption of subscriptions is NOT successful");
 
     if (frozen_resumptions_.empty()) {
-      SDL_LOG_DEBUG("freezed resumptions is empty");
+      SDL_LOG_DEBUG("frozen resumptions list is empty");
       return;
     }
 
-    ResumptionAwaitingHandling freezed_resumption = frozen_resumptions_.back();
+    ResumptionAwaitingHandling frozen_resumption = frozen_resumptions_.back();
     frozen_resumptions_.pop_back();
-    auto resumption_req = freezed_resumption.request_to_send_;
+    auto resumption_req = frozen_resumption.request_to_send_;
     const uint32_t cid =
         resumption_req.message[strings::params][strings::correlation_id]
             .asInt();

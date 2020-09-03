@@ -40,10 +40,10 @@ namespace sdl_rpc_plugin {
 
 namespace app_mngr = application_manager;
 
-class SDLPendingResumptionHandler
+class WayPointsPendingResumptionHandler
     : public resumption::PendingResumptionHandler {
  public:
-  SDLPendingResumptionHandler(
+  WayPointsPendingResumptionHandler(
       app_mngr::ApplicationManager& application_manager);
 
   // EventObserver interface
@@ -59,7 +59,7 @@ class SDLPendingResumptionHandler
   /**
    * @brief RaiseFakeSuccessfulResponse raise event for the subscriber that
    * contains emulated successful response from HMI To avoid double subscription
-   * SDLPendingResumptionHandler freezes sending requests to HMI. But
+   * WayPointsPendingResumptionHandler freezes sending requests to HMI. But
    * resumption_data_processor().SubscribeOnResponse() need to be called to
    * provide information that some data need to be resumed. So if pending
    * request exists, SDL creates preliminary requests to HMI, subscribe the
