@@ -188,9 +188,8 @@ void RCPendingResumptionHandler::ProcessNextPausedResumption(
       paused_resumptions_.erase(it);
       return std::shared_ptr<PendingRequestQueue::value_type>(nullptr);
     }
-    auto freezed_resumption =
-        std::make_shared<PendingRequestQueue::value_type>(
-            queue_freezed.front());
+    auto freezed_resumption = std::make_shared<PendingRequestQueue::value_type>(
+        queue_freezed.front());
     queue_freezed.pop();
     if (queue_freezed.empty()) {
       paused_resumptions_.erase(it);
