@@ -106,7 +106,7 @@ class DisplayCapabilitiesBuilder {
  private:
   /**
    * @brief InvokeResumeCallback invokes resume callback function if all
-   * required criterias met
+   * required criteria is met
    */
   void InvokeResumeCallback();
 
