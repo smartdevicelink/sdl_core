@@ -37,10 +37,7 @@
 namespace logger {
 
 LoggerImpl::LoggerImpl(bool use_message_loop_thread)
-    : impl_(nullptr), use_message_loop_thread_(use_message_loop_thread) {
-  if (!use_message_loop_thread_)
-    logger::logger_status = LoggerThreadIsNotUsed;
-}
+    : impl_(nullptr), use_message_loop_thread_(use_message_loop_thread) {}
 
 void LoggerImpl::Init(std::unique_ptr<ThirdPartyLoggerInterface>&& impl) {
   assert(impl_ == nullptr);
@@ -51,7 +48,6 @@ void LoggerImpl::Init(std::unique_ptr<ThirdPartyLoggerInterface>&& impl) {
   if (use_message_loop_thread_) {
     auto deinit_logger = [](LogMessageLoopThread* logMsgThread) {
       delete logMsgThread;
-      logger::logger_status = logger::LoggerThreadNotCreated;
     };
 
     if (!loop_thread_) {
@@ -60,14 +56,12 @@ void LoggerImpl::Init(std::unique_ptr<ThirdPartyLoggerInterface>&& impl) {
               [this](LogMessage message) { impl_->PushLog(message); }),
           deinit_logger);
     }
-    logger::logger_status = logger::LoggerThreadCreated;
   }
 }
 
 void LoggerImpl::DeInit() {
   if (use_message_loop_thread_) {
     Flush();
-    logger::logger_status = logger::LoggerThreadNotCreated;
     loop_thread_.reset();
   }
 
@@ -77,12 +71,10 @@ void LoggerImpl::DeInit() {
 }
 
 void LoggerImpl::Flush() {
-  if (use_message_loop_thread_ &&
-      (logger::LoggerThreadCreated == logger::logger_status)) {
-    logger::LoggerStatus old_status = logger::logger_status;
-    logger::logger_status = logger::DeletingLoggerThread;
-    loop_thread_->WaitDumpQueue();
-    logger::logger_status = old_status;
+  if (use_message_loop_thread_) {
+    if (loop_thread_) {
+      loop_thread_->WaitDumpQueue();
+    }
   }
 }
 
@@ -93,9 +85,10 @@ bool LoggerImpl::IsEnabledFor(const std::string& component,
 
 void LoggerImpl::PushLog(const LogMessage& log_message) {
   if (impl_) {
-    if (use_message_loop_thread_ &&
-        (logger::LoggerThreadCreated == logger::logger_status)) {
-      loop_thread_->Push(log_message);
+    if (use_message_loop_thread_) {
+      if (loop_thread_) {
+        loop_thread_->Push(log_message);
+      }
     } else {
       impl_->PushLog(log_message);
     }
@@ -126,7 +119,6 @@ void LogMessageLoopThread::Handle(const LogMessage message) {
 LogMessageLoopThread::~LogMessageLoopThread() {
   // we'll have to drop messages
   // while deleting logger thread
-  logger::logger_status = logger::DeletingLoggerThread;
   LogMessageLoopThreadTemplate::Shutdown();
 }
 
