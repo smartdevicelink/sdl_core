@@ -25,33 +25,33 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "sdl_rpc_plugin/sdl_app_extension.h"
+#include "sdl_rpc_plugin/waypoints_app_extension.h"
 #include "sdl_rpc_plugin/sdl_rpc_plugin.h"
 
-SDL_CREATE_LOG_VARIABLE("SDLAppExtension")
+SDL_CREATE_LOG_VARIABLE("WayPointsAppExtension")
 
 namespace sdl_rpc_plugin {
 namespace strings = application_manager::strings;
-unsigned SDLAppExtension::SDLAppExtensionUID = 138;
+unsigned WayPointsAppExtension::WayPointsAppExtensionUID = 138;
 
-SDLAppExtension::SDLAppExtension(SDLRPCPlugin& plugin,
-                                 application_manager::Application& app)
-    : app_mngr::AppExtension(SDLAppExtension::SDLAppExtensionUID)
+WayPointsAppExtension::WayPointsAppExtension(
+    SDLRPCPlugin& plugin, application_manager::Application& app)
+    : app_mngr::AppExtension(WayPointsAppExtension::WayPointsAppExtensionUID)
     , plugin_(plugin)
     , app_(app) {
   SDL_LOG_AUTO_TRACE();
 }
 
-SDLAppExtension::~SDLAppExtension() {
+WayPointsAppExtension::~WayPointsAppExtension() {
   SDL_LOG_AUTO_TRACE();
 }
 
-void SDLAppExtension::SaveResumptionData(
+void WayPointsAppExtension::SaveResumptionData(
     smart_objects::SmartObject& resumption_data) {
   plugin_.SaveResumptionData(app_, resumption_data);
 }
 
-void SDLAppExtension::ProcessResumption(
+void WayPointsAppExtension::ProcessResumption(
     const smart_objects::SmartObject& saved_app) {
   SDL_LOG_AUTO_TRACE();
 
@@ -66,7 +66,7 @@ void SDLAppExtension::ProcessResumption(
   }
 }
 
-void SDLAppExtension::RevertResumption(
+void WayPointsAppExtension::RevertResumption(
     const smart_objects::SmartObject& subscriptions) {
   SDL_LOG_AUTO_TRACE();
   UNUSED(subscriptions);

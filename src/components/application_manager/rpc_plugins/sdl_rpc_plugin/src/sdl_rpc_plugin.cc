@@ -34,9 +34,9 @@
 #include "application_manager/message_helper.h"
 #include "application_manager/plugin_manager/plugin_keys.h"
 #include "sdl_rpc_plugin/extensions/system_capability_app_extension.h"
-#include "sdl_rpc_plugin/sdl_app_extension.h"
 #include "sdl_rpc_plugin/sdl_command_factory.h"
 #include "sdl_rpc_plugin/sdl_pending_resumption_handler.h"
+#include "sdl_rpc_plugin/waypoints_app_extension.h"
 
 namespace sdl_rpc_plugin {
 namespace app_mngr = application_manager;
@@ -95,7 +95,7 @@ void SDLRPCPlugin::OnApplicationEvent(
   SDL_LOG_AUTO_TRACE();
   if (plugins::ApplicationEvent::kApplicationRegistered == event) {
     application->AddExtension(
-        std::make_shared<SDLAppExtension>(*this, *application));
+        std::make_shared<WayPointsAppExtension>(*this, *application));
 
     auto sys_cap_ext_ptr =
         std::make_shared<SystemCapabilityAppExtension>(*this, *application);
@@ -112,7 +112,7 @@ void SDLRPCPlugin::OnApplicationEvent(
 }
 
 void SDLRPCPlugin::ProcessResumptionSubscription(
-    application_manager::Application& app, SDLAppExtension& ext) {
+    application_manager::Application& app, WayPointsAppExtension& ext) {
   SDL_LOG_AUTO_TRACE();
 
   if (application_manager_->IsAnyAppSubscribedForWayPoints()) {

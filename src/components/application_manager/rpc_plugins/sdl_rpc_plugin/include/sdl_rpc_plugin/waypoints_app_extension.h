@@ -25,8 +25,8 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_SDL_APP_EXTENSION_H
-#define SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_SDL_APP_EXTENSION_H
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_WAYPOINTS_APP_EXTENSION_H
+#define SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_WAYPOINTS_APP_EXTENSION_H
 
 #include <application_manager/application_manager.h>
 
@@ -38,15 +38,15 @@ namespace app_mngr = application_manager;
 /**
  * @brief Intended to handle subscriptions on way points
  */
-class SDLAppExtension : public app_mngr::AppExtension {
+class WayPointsAppExtension : public app_mngr::AppExtension {
  public:
   /**
-   * @brief SDLAppExtension constructor
+   * @brief WayPointsAppExtension constructor
    * @param plugin sdl info plugin
    * @param app application that contains this plugin
    */
-  SDLAppExtension(SDLRPCPlugin& plugin, app_mngr::Application& app);
-  virtual ~SDLAppExtension();
+  WayPointsAppExtension(SDLRPCPlugin& plugin, app_mngr::Application& app);
+  virtual ~WayPointsAppExtension();
 
   void SaveResumptionData(smart_objects::SmartObject& resumption_data) OVERRIDE;
 
@@ -56,14 +56,14 @@ class SDLAppExtension : public app_mngr::AppExtension {
       const smart_objects::SmartObject& subscriptions) OVERRIDE;
 
   /**
-   * @brief SDLAppExtensionUID unique identifier of VehicleInfo
+   * @brief WayPointsAppExtensionUID unique identifier of waypoints
    * aplication extension
    */
-  static unsigned SDLAppExtensionUID;
+  static unsigned WayPointsAppExtensionUID;
 
  private:
   SDLRPCPlugin& plugin_;
   app_mngr::Application& app_;
 };
 }  // namespace sdl_rpc_plugin
-#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_SDL_APP_EXTENSION_H
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_WAYPOINTS_APP_EXTENSION_H

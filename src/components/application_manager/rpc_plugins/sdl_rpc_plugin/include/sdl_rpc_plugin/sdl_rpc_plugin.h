@@ -34,7 +34,7 @@
 #define SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_SDL_RPC_PLUGIN_H
 #include "application_manager/command_factory.h"
 #include "application_manager/plugin_manager/rpc_plugin.h"
-#include "application_manager/resumption/extension_pending_resumption_handler.h"
+#include "application_manager/resumption/pending_resumption_handler.h"
 #include "utils/ilogger.h"
 
 namespace sdl_rpc_plugin {
@@ -42,7 +42,7 @@ namespace app_mngr = application_manager;
 namespace plugins = application_manager::plugin_manager;
 
 class SystemCapabilityAppExtension;
-class SDLAppExtension;
+class WayPointsAppExtension;
 
 class SDLRPCPlugin : public plugins::RPCPlugin {
   // RPCPlugin interface
@@ -66,10 +66,9 @@ class SDLRPCPlugin : public plugins::RPCPlugin {
    * to HMI
    * @param app application for subscription
    * @param ext application extension
-   * @param subscriber callback for subscription
    */
   void ProcessResumptionSubscription(application_manager::Application& app,
-                                     SDLAppExtension& ext);
+                                     WayPointsAppExtension& ext);
 
   /**
    * @brief Revert the data to the state before Resumption.
@@ -99,9 +98,9 @@ class SDLRPCPlugin : public plugins::RPCPlugin {
 
   std::unique_ptr<application_manager::CommandFactory> command_factory_;
   application_manager::ApplicationManager* application_manager_;
-  using ExtensionPendingResumptionHandlerSPtr =
-      std::shared_ptr<resumption::ExtensionPendingResumptionHandler>;
-  ExtensionPendingResumptionHandlerSPtr pending_resumption_handler_;
+  using PendingResumptionHandlerSPtr =
+      std::shared_ptr<resumption::PendingResumptionHandler>;
+  PendingResumptionHandlerSPtr pending_resumption_handler_;
 };
 }  // namespace sdl_rpc_plugin
 
