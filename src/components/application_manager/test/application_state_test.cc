@@ -297,7 +297,7 @@ TEST_F(ApplicationStateTest, InitState_GetRegularState) {
   EXPECT_EQ(initial_state_, curr_state);
 }
 
-TEST_F(ApplicationStateTest, AddPosponedState_DeletePosponedState) {
+TEST_F(ApplicationStateTest, AddPostponedState_DeletePosponedState) {
   // Precondition
   StateID init_state = StateID::STATE_ID_REGULAR;
   initial_state_ = std::make_shared<HmiState>(
