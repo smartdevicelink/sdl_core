@@ -45,6 +45,7 @@
 #include "application_manager/mock_resume_ctrl.h"
 #include "application_manager/mock_rpc_plugin_manager.h"
 #include "application_manager/policies/mock_policy_handler_interface.h"
+#include "application_manager/resumption/resumption_data_processor.h"
 #include "application_manager/smart_object_keys.h"
 #include "connection_handler/mock_connection_handler.h"
 #include "gtest/gtest.h"

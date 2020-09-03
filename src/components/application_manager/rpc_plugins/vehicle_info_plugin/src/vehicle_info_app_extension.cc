@@ -143,8 +143,7 @@ void VehicleInfoAppExtension::SaveResumptionData(
 }
 
 void VehicleInfoAppExtension::ProcessResumption(
-    const smart_objects::SmartObject& saved_app,
-    resumption::Subscriber subscriber) {
+    const smart_objects::SmartObject& saved_app) {
   SDL_LOG_AUTO_TRACE();
 
   if (!saved_app.keyExists(strings::application_subscriptions)) {
@@ -166,7 +165,7 @@ void VehicleInfoAppExtension::ProcessResumption(
     AddPendingSubscription(ivi.asString());
   }
   if (!subscriptions_ivi->empty()) {
-    plugin_.ProcessResumptionSubscription(app_, *this, subscriber);
+    plugin_.ProcessResumptionSubscription(app_, *this);
   }
 }
 

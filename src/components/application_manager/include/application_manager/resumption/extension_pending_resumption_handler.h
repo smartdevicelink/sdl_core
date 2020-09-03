@@ -62,7 +62,6 @@ class ExtensionPendingResumptionHandler
    */
   virtual void HandleResumptionSubscriptionRequest(
       app_mngr::AppExtension& extension,
-      Subscriber& subscriber,
       application_manager::Application& app) = 0;
 
   /**
@@ -70,6 +69,8 @@ class ExtensionPendingResumptionHandler
    * resumption is failed for current application.
    */
   virtual void OnResumptionRevert() = 0;
+
+  resumption::ResumptionDataProcessor& resumption_data_processor();
 
  protected:
   /**

@@ -80,8 +80,7 @@ class VehicleInfoPlugin : public plugins::RPCPlugin {
    * @param subscriber callback for subscription
    */
   void ProcessResumptionSubscription(app_mngr::Application& app,
-                                     VehicleInfoAppExtension& ext,
-                                     resumption::Subscriber subscriber);
+                                     VehicleInfoAppExtension& ext);
 
   /**
    * @brief Revert the data to the state before Resumption.

@@ -161,9 +161,7 @@ void VehicleInfoPlugin::UnsubscribeFromRemovedVDItems() {
 }
 
 void VehicleInfoPlugin::ProcessResumptionSubscription(
-    application_manager::Application& app,
-    VehicleInfoAppExtension& ext,
-    resumption::Subscriber subscriber) {
+    application_manager::Application& app, VehicleInfoAppExtension& ext) {
   SDL_LOG_AUTO_TRACE();
 
   auto pending = ext.PendingSubscriptions().GetData();
@@ -173,8 +171,7 @@ void VehicleInfoPlugin::ProcessResumptionSubscription(
       ext.subscribeToVehicleInfo(ivi);
     }
   }
-  pending_resumption_handler_->HandleResumptionSubscriptionRequest(
-      ext, subscriber, app);
+  pending_resumption_handler_->HandleResumptionSubscriptionRequest(ext, app);
 }
 
 void VehicleInfoPlugin::RevertResumption(

@@ -46,6 +46,11 @@ ExtensionPendingResumptionHandler::ExtensionPendingResumptionHandler(
           application_manager.event_dispatcher())
     , application_manager_(application_manager) {}
 
+resumption::ResumptionDataProcessor&
+ExtensionPendingResumptionHandler::resumption_data_processor() {
+  return application_manager_.resume_controller().resumption_data_processor();
+}
+
 ResumptionRequest ExtensionPendingResumptionHandler::MakeResumptionRequest(
     const uint32_t corr_id,
     const hmi_apis::FunctionID::eType function_id,

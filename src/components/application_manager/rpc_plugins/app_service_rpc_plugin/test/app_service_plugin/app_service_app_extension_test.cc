@@ -199,8 +199,8 @@ TEST_F(AppServiceAppExtensionTest, ProcessResumption_SUCCESS) {
   resumption_data[application_manager::strings::application_subscriptions]
                  [kAppServiceInfoKey] = app_service_data;
 
-  resumption::Subscriber subscriber;
-  app_service_app_extension_->ProcessResumption(resumption_data, subscriber);
+//  resumption::Subscriber subscriber;
+  app_service_app_extension_->ProcessResumption(resumption_data);
 
   for (const auto& app_service_type : {kAppServiceType1, kAppServiceType2}) {
     EXPECT_TRUE(

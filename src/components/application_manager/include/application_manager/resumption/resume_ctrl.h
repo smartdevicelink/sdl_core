@@ -46,6 +46,7 @@ typedef std::shared_ptr<const Application> ApplicationConstSharedPtr;
 namespace app_mngr = application_manager;
 
 namespace resumption {
+class ResumptionDataProcessor;
 
 /**
  * @brief Contains logic for storage/restore data of applications.
@@ -318,6 +319,7 @@ class ResumeCtrl {
 
   virtual time_t LaunchTime() const = 0;
 
+  virtual ResumptionDataProcessor& resumption_data_processor() = 0;
 #ifdef BUILD_TESTS
   virtual void set_resumption_storage(
       std::shared_ptr<ResumptionData> mock_storage) = 0;

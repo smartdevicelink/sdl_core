@@ -100,8 +100,7 @@ class AppServiceAppExtension : public app_mngr::AppExtension {
   void SaveResumptionData(ns_smart_device_link::ns_smart_objects::SmartObject&
                               resumption_data) OVERRIDE;
 
-  void ProcessResumption(const smart_objects::SmartObject& saved_app,
-                         resumption::Subscriber subscriber) OVERRIDE;
+  void ProcessResumption(const smart_objects::SmartObject& saved_app) OVERRIDE;
 
   void RevertResumption(
       const smart_objects::SmartObject& subscriptions) OVERRIDE;

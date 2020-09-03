@@ -40,7 +40,7 @@
 
 namespace resumption {
 struct ResumptionRequest;
-using Subscriber = std::function<void(const int32_t, const ResumptionRequest)>;
+class ResumptionDataProcessor;
 }  // namespace resumption
 
 namespace application_manager {
@@ -69,8 +69,8 @@ class AppExtension {
    * @param resumption_data list of resumption data
    * @param subscriber callbacks for subscribing
    */
-  virtual void ProcessResumption(const ns_smart::SmartObject& resumption_data,
-                                 resumption::Subscriber subscriber) = 0;
+  virtual void ProcessResumption(
+      const ns_smart::SmartObject& resumption_data) = 0;
 
   /**
    * @brief RevertResumption Method called by SDL during revert resumption.

@@ -112,9 +112,7 @@ void SDLRPCPlugin::OnApplicationEvent(
 }
 
 void SDLRPCPlugin::ProcessResumptionSubscription(
-    application_manager::Application& app,
-    SDLAppExtension& ext,
-    resumption::Subscriber subscriber) {
+    application_manager::Application& app, SDLAppExtension& ext) {
   SDL_LOG_AUTO_TRACE();
 
   if (application_manager_->IsAnyAppSubscribedForWayPoints()) {
@@ -125,8 +123,7 @@ void SDLRPCPlugin::ProcessResumptionSubscription(
     return;
   }
 
-  pending_resumption_handler_->HandleResumptionSubscriptionRequest(
-      ext, subscriber, app);
+  pending_resumption_handler_->HandleResumptionSubscriptionRequest(ext, app);
 }
 
 void SDLRPCPlugin::SaveResumptionData(

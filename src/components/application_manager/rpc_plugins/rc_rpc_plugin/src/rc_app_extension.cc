@@ -84,8 +84,7 @@ void RCAppExtension::SaveResumptionData(
     smart_objects::SmartObject& resumption_data) {}
 
 void RCAppExtension::ProcessResumption(
-    const smart_objects::SmartObject& saved_app,
-    resumption::Subscriber subscriber) {}
+    const smart_objects::SmartObject& saved_app) {}
 
 void RCAppExtension::RevertResumption(
     const smart_objects::SmartObject& subscriptions) {}

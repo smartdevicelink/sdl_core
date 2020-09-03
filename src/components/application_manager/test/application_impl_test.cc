@@ -47,6 +47,7 @@
 #include "application_manager/mock_resume_ctrl.h"
 #include "application_manager/policies/mock_policy_handler_interface.h"
 #include "application_manager/resumption/resume_ctrl.h"
+#include "application_manager/resumption/resumption_data_processor.h"
 #include "application_manager/state_controller.h"
 #include "policy/usage_statistics/mock_statistics_manager.h"
 #include "resumption/last_state.h"

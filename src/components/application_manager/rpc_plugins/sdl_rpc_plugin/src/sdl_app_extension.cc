@@ -52,8 +52,7 @@ void SDLAppExtension::SaveResumptionData(
 }
 
 void SDLAppExtension::ProcessResumption(
-    const smart_objects::SmartObject& saved_app,
-    resumption::Subscriber subscriber) {
+    const smart_objects::SmartObject& saved_app) {
   SDL_LOG_AUTO_TRACE();
 
   if (!saved_app.keyExists(strings::subscribed_for_way_points)) {
@@ -63,7 +62,7 @@ void SDLAppExtension::ProcessResumption(
   const bool subscribed_for_way_points =
       saved_app[strings::subscribed_for_way_points].asBool();
   if (subscribed_for_way_points) {
-    plugin_.ProcessResumptionSubscription(app_, *this, subscriber);
+    plugin_.ProcessResumptionSubscription(app_, *this);
   }
 }
 

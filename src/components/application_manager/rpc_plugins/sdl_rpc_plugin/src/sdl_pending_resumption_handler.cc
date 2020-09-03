@@ -55,7 +55,6 @@ SDLPendingResumptionHandler::CreateSubscriptionRequest() {
 
 void SDLPendingResumptionHandler::HandleResumptionSubscriptionRequest(
     application_manager::AppExtension& extension,
-    resumption::Subscriber& subscriber,
     application_manager::Application& app) {
   SDL_LOG_AUTO_TRACE();
   SDLAppExtension& ext = dynamic_cast<SDLAppExtension&>(extension);
@@ -86,10 +85,11 @@ void SDLPendingResumptionHandler::HandleResumptionSubscriptionRequest(
     SDL_LOG_DEBUG("There are pending requests. Freeze resumption for app id "
                   << app.app_id() << " corr id = " << corr_id);
     ResumptionAwaitingHandling frozen_res{
-        app.app_id(), ext, subscriber, resumption_request};
+        app.app_id(), ext, resumption_request};
     frozen_resumptions_.push_back(frozen_res);
   }
-  subscriber(app.app_id(), resumption_request);
+  resumption_data_processor().SubscribeToResponse(app.app_id(),
+                                                  resumption_request);
 }
 
 void SDLPendingResumptionHandler::OnResumptionRevert() {

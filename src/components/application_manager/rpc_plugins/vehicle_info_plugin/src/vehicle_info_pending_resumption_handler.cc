@@ -242,9 +242,7 @@ void VehicleInfoPendingResumptionHandler::on_event(
 
 VehicleInfoPendingResumptionHandler::PendingSubscriptionsResumption
 VehicleInfoPendingResumptionHandler::SubscribeToFakeRequest(
-    const uint32_t app_id,
-    const VehicleDataList& subscriptions,
-    resumption::Subscriber& subscriber) {
+    const uint32_t app_id, const VehicleDataList& subscriptions) {
   SDL_LOG_AUTO_TRACE();
   const auto fake_request = CreateSubscribeRequestToHMI(subscriptions);
   const auto fake_corr_id = get_corr_id_from_message(*fake_request);
@@ -255,7 +253,7 @@ VehicleInfoPendingResumptionHandler::SubscribeToFakeRequest(
   SDL_LOG_DEBUG("Subscribe subscriber "
                 << app_id
                 << " to fake request with corr id = " << fake_corr_id);
-  subscriber(app_id, resumption_request);
+  resumption_data_processor().SubscribeToResponse(app_id, resumption_request);
   PendingSubscriptionsResumption pending_request(
       app_id, fake_corr_id, subscriptions);
   return pending_request;
@@ -263,7 +261,6 @@ VehicleInfoPendingResumptionHandler::SubscribeToFakeRequest(
 
 void VehicleInfoPendingResumptionHandler::HandleResumptionSubscriptionRequest(
     application_manager::AppExtension& extension,
-    resumption::Subscriber& subscriber,
     application_manager::Application& app) {
   SDL_LOG_AUTO_TRACE();
   sync_primitives::AutoLock lock(pending_resumption_lock_);
@@ -277,8 +274,7 @@ void VehicleInfoPendingResumptionHandler::HandleResumptionSubscriptionRequest(
     return;
   }
   SDL_LOG_TRACE("resume subscriptions to : " << Stringify(subscriptions));
-  auto pending_request =
-      SubscribeToFakeRequest(app.app_id(), subscriptions, subscriber);
+  auto pending_request = SubscribeToFakeRequest(app.app_id(), subscriptions);
 
   pending_requests_.push_back(pending_request);
   SDL_LOG_DEBUG(

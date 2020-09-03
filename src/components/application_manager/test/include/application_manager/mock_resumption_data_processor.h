@@ -30,36 +30,35 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_INCLUDE_TEST_APPLICATION_MANAGER_MOCK_APP_EXTENSION_H_
-#define SRC_COMPONENTS_INCLUDE_TEST_APPLICATION_MANAGER_MOCK_APP_EXTENSION_H_
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_TEST_INCLUDE_APPLICATION_MANAGER_MOCK_RESUMPTION_DATA_PROCESSOR_H
+#define SRC_COMPONENTS_APPLICATION_MANAGER_TEST_INCLUDE_APPLICATION_MANAGER_MOCK_RESUMPTION_DATA_PROCESSOR_H
 
-#include "application_manager/app_extension.h"
+#include "application_manager/application.h"
+#include "application_manager/resumption/resume_ctrl.h"
+#include "application_manager/resumption/resumption_data_processor.h"
+
 #include "gmock/gmock.h"
 
 namespace test {
 namespace components {
-namespace application_manager_test {
+namespace resumption_test {
 
-namespace {
-static unsigned MockAppExtensionUID = 123;
-}  // namespace
-
-class MockAppExtension : public application_manager::AppExtension {
+class MockResumptionDataProcessor : public resumption::ResumptionDataProcessor {
  public:
-  MockAppExtension() : AppExtension(MockAppExtensionUID) {}
-  MOCK_METHOD1(SaveResumptionData,
-               void(ns_smart_device_link::ns_smart_objects::SmartObject&
-                        resumption_data));
-  MOCK_METHOD1(ProcessResumption,
-               void(const ns_smart_device_link::ns_smart_objects::SmartObject&
-                        resumption_data));
-  MOCK_METHOD1(RevertResumption,
-               void(const ns_smart_device_link::ns_smart_objects::SmartObject&
-                        subscriptions));
+  MOCK_METHOD3(Restore,
+               void(application_manager::ApplicationSharedPtr application,
+                    smart_objects::SmartObject& saved_app,
+                    resumption::ResumeCtrl::ResumptionCallBack callback));
+  MOCK_METHOD2(HandleOnTimeOut,
+               void(const uint32_t correlation_id,
+                    const hmi_apis::FunctionID::eType function_id));
+  MOCK_METHOD2(SubscribeToResponse,
+               void(const int32_t app_id,
+                    const resumption::ResumptionRequest& request));
 };
 
-}  // namespace application_manager_test
+}  // namespace resumption_test
 }  // namespace components
 }  // namespace test
 
-#endif  // SRC_COMPONENTS_INCLUDE_TEST_APPLICATION_MANAGER_MOCK_APP_EXTENSION_H_
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_TEST_INCLUDE_APPLICATION_MANAGER_MOCK_RESUMPTION_DATA_PROCESSOR_H

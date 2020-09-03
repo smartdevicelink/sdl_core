@@ -629,7 +629,7 @@ TEST_F(ResumeCtrlTest, StartResumption_AppWithSubscribeOnButtons) {
 
   EXPECT_CALL(*mock_app_, Extensions()).WillOnce(ReturnRef(extensions));
 
-  EXPECT_CALL(*mock_app_extension_, ProcessResumption(saved_app, _));
+  EXPECT_CALL(*mock_app_extension_, ProcessResumption(saved_app));
   EXPECT_CALL(*application_manager::MockMessageHelper::message_helper_mock(),
               CreateOnButtonSubscriptionNotificationsForApp(_, _, _));
 
@@ -676,7 +676,7 @@ TEST_F(ResumeCtrlTest, StartResumption_AppWithSubscriptionToIVI) {
 
   EXPECT_CALL(*mock_app_, Extensions()).WillOnce(ReturnRef(extensions));
 
-  EXPECT_CALL(*mock_app_extension_, ProcessResumption(saved_app, _));
+  EXPECT_CALL(*mock_app_extension_, ProcessResumption(saved_app));
   const bool res = res_ctrl_->StartResumption(mock_app_, kHash_, callback_);
   EXPECT_TRUE(res);
 }
@@ -700,7 +700,7 @@ TEST_F(ResumeCtrlTest,
               CreateSubscribeWayPointsMessageToHMI(_))
       .WillRepeatedly(Return(subscribe_waypoints_msg));
   std::list<application_manager::AppExtensionPtr> extensions;
-  // It will work only for SDLAppExtension, need to rework this test
+  // It will work only for WayPointsAppExtension, need to rework this test
   extensions.insert(extensions.begin(), mock_app_extension_);
   EXPECT_CALL(*mock_app_, Extensions()).WillOnce(ReturnRef(extensions));
 

@@ -110,6 +110,8 @@ class MockResumeCtrl : public resumption::ResumeCtrl {
   MOCK_METHOD2(StartWaitingForDisplayCapabilitiesUpdate,
                void(application_manager::ApplicationSharedPtr application,
                     const bool is_resume_app));
+  MOCK_METHOD0(resumption_data_processor,
+               resumption::ResumptionDataProcessor&());
 
 #ifdef BUILD_TESTS
   MOCK_METHOD1(set_resumption_storage,

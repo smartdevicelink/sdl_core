@@ -64,8 +64,7 @@ class SystemCapabilityAppExtension : public app_mngr_::AppExtension {
 
   void SaveResumptionData(smart_objects::SmartObject& resumption_data) OVERRIDE;
 
-  void ProcessResumption(const smart_objects::SmartObject& saved_app,
-                         resumption::Subscriber subscriber) OVERRIDE;
+  void ProcessResumption(const smart_objects::SmartObject& saved_app) OVERRIDE;
 
   void RevertResumption(
       const smart_objects::SmartObject& subscriptions) OVERRIDE;

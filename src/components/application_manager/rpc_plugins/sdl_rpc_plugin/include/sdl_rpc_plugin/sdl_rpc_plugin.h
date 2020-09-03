@@ -69,8 +69,7 @@ class SDLRPCPlugin : public plugins::RPCPlugin {
    * @param subscriber callback for subscription
    */
   void ProcessResumptionSubscription(application_manager::Application& app,
-                                     SDLAppExtension& ext,
-                                     resumption::Subscriber subscriber);
+                                     SDLAppExtension& ext);
 
   /**
    * @brief Revert the data to the state before Resumption.

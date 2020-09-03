@@ -55,7 +55,6 @@ class VehicleInfoPendingResumptionHandler
   void on_event(const app_mngr::event_engine::Event& event) OVERRIDE;
 
   void HandleResumptionSubscriptionRequest(app_mngr::AppExtension& extension,
-                                           resumption::Subscriber& subscriber,
                                            app_mngr::Application& app) OVERRIDE;
   void OnResumptionRevert() OVERRIDE;
 
@@ -140,9 +139,7 @@ class VehicleInfoPendingResumptionHandler
    * subscriber, list of vehicle data to subscribe
    */
   PendingSubscriptionsResumption SubscribeToFakeRequest(
-      const uint32_t app,
-      const VehicleDataList& subscriptions,
-      resumption::Subscriber& subscriber);
+      const uint32_t app, const VehicleDataList& subscriptions);
 
   std::deque<PendingSubscriptionsResumption> pending_requests_;
 

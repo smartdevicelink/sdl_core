@@ -51,7 +51,6 @@ class SDLPendingResumptionHandler
 
   void HandleResumptionSubscriptionRequest(
       app_mngr::AppExtension& extension,
-      resumption::Subscriber& subscriber,
       application_manager::Application& app) OVERRIDE;
 
   void OnResumptionRevert() OVERRIDE;
@@ -61,15 +60,16 @@ class SDLPendingResumptionHandler
    * @brief RaiseFakeSuccessfulResponse raise event for the subscriber that
    * contains emulated successful response from HMI To avoid double subscription
    * SDLPendingResumptionHandler freezes sending requests to HMI. But
-   * subscriber() function need to be called to provide information that some
-   * data need to be resumed. So if pending request exists, SDL creates
-   * preliminary requests to HMI, subscribe the subscriber to this request but
-   * do not send it to HMI. It freezes this requests to precess the one by one
-   * when a response to the current request will be received When SDL receives a
-   * response from HMI it may satisfy some frozen requests. If it does SDL will
-   * create faked HMI response(based on the real one with corr_id replacement)
-   * and raise event. So that subscriber::on_event will be called with an
-   * appropriate response to the request that SDL was not sent to HMI.
+   * resumption_data_processor().SubscribeOnResponse() need to be called to
+   * provide information that some data need to be resumed. So if pending
+   * request exists, SDL creates preliminary requests to HMI, subscribe the
+   * subscriber to this request but do not send it to HMI. It freezes this
+   * requests to precess the one by one when a response to the current request
+   * will be received When SDL receives a response from HMI it may satisfy some
+   * frozen requests. If it does SDL will create faked HMI response(based on the
+   * real one with corr_id replacement) and raise event. So that
+   * subscriber::on_event will be called with an appropriate response to the
+   * request that SDL was not sent to HMI.
    * @param response message that will be raised with corr_id replacement
    * @param corr_id correlation id that will be replaced in response to notify
    * the subscriber
@@ -81,11 +81,9 @@ class SDLPendingResumptionHandler
   struct ResumptionAwaitingHandling {
     const uint32_t app_id;
     SDLAppExtension& ext;
-    resumption::Subscriber subscriber;
     resumption::ResumptionRequest request_to_send_;
   };
 
-  typedef std::pair<SDLAppExtension, resumption::Subscriber> FreezedResumption;
   std::vector<ResumptionAwaitingHandling> frozen_resumptions_;
   std::map<uint32_t, smart_objects::SmartObject> pending_requests_;
   std::queue<uint32_t> app_ids_;
