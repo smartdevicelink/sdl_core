@@ -112,7 +112,7 @@ SuccessfulSubscriptionsFromResponse(
 VehicleInfoPendingResumptionHandler::VehicleInfoPendingResumptionHandler(
     application_manager::ApplicationManager& application_manager,
     CustomVehicleDataManager& custom_vehicle_data_manager)
-    : ExtensionPendingResumptionHandler(application_manager)
+    : PendingResumptionHandler(application_manager)
     , custom_vehicle_data_manager_(custom_vehicle_data_manager) {}
 
 void VehicleInfoPendingResumptionHandler::OnResumptionRevert() {
@@ -265,8 +265,7 @@ void VehicleInfoPendingResumptionHandler::HandleResumptionSubscriptionRequest(
   SDL_LOG_AUTO_TRACE();
   sync_primitives::AutoLock lock(pending_resumption_lock_);
   SDL_LOG_TRACE("app id " << app.app_id());
-  UNUSED(extension);
-  auto& ext = VehicleInfoAppExtension::ExtractVIExtension(app);
+  auto& ext = dynamic_cast<VehicleInfoAppExtension&>(extension);
 
   const auto subscriptions = ext.PendingSubscriptions().GetData();
   if (subscriptions.empty()) {

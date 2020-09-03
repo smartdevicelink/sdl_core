@@ -34,7 +34,7 @@
 #define SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_VEHICLE_INFO_PLUGIN_INCLUDE_VEHICLE_INFO_PLUGIN_VEHICLE_INFO_PENDING_RESUMPTION_HANDLER_H_
 #include <queue>
 #include "application_manager/event_engine/event_observer.h"
-#include "application_manager/resumption/extension_pending_resumption_handler.h"
+#include "application_manager/resumption/pending_resumption_handler.h"
 #include "application_manager/resumption/resumption_data_processor.h"
 
 #include "utils/optional.h"
@@ -45,7 +45,7 @@ class CustomVehicleDataManager;
 namespace app_mngr = application_manager;
 
 class VehicleInfoPendingResumptionHandler
-    : public resumption::ExtensionPendingResumptionHandler {
+    : public resumption::PendingResumptionHandler {
  public:
   typedef std::set<std::string> VehicleDataList;
   VehicleInfoPendingResumptionHandler(

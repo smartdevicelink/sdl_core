@@ -32,16 +32,16 @@
 #include <queue>
 #include <vector>
 #include "application_manager/event_engine/event_observer.h"
-#include "application_manager/resumption/extension_pending_resumption_handler.h"
+#include "application_manager/resumption/pending_resumption_handler.h"
 #include "application_manager/resumption/resumption_data_processor.h"
-#include "sdl_rpc_plugin/sdl_app_extension.h"
+#include "sdl_rpc_plugin/waypoints_app_extension.h"
 
 namespace sdl_rpc_plugin {
 
 namespace app_mngr = application_manager;
 
 class SDLPendingResumptionHandler
-    : public resumption::ExtensionPendingResumptionHandler {
+    : public resumption::PendingResumptionHandler {
  public:
   SDLPendingResumptionHandler(
       app_mngr::ApplicationManager& application_manager);
@@ -80,7 +80,7 @@ class SDLPendingResumptionHandler
 
   struct ResumptionAwaitingHandling {
     const uint32_t app_id;
-    SDLAppExtension& ext;
+    WayPointsAppExtension& ext;
     resumption::ResumptionRequest request_to_send_;
   };
 

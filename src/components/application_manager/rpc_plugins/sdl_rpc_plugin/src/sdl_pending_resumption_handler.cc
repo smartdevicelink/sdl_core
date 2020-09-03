@@ -38,7 +38,7 @@ SDL_CREATE_LOG_VARIABLE("SdlRPCPlugin")
 
 SDLPendingResumptionHandler::SDLPendingResumptionHandler(
     application_manager::ApplicationManager& application_manager)
-    : ExtensionPendingResumptionHandler(application_manager) {}
+    : PendingResumptionHandler(application_manager) {}
 
 smart_objects::SmartObjectSPtr
 SDLPendingResumptionHandler::CreateSubscriptionRequest() {
@@ -57,7 +57,7 @@ void SDLPendingResumptionHandler::HandleResumptionSubscriptionRequest(
     application_manager::AppExtension& extension,
     application_manager::Application& app) {
   SDL_LOG_AUTO_TRACE();
-  SDLAppExtension& ext = dynamic_cast<SDLAppExtension&>(extension);
+  WayPointsAppExtension& ext = dynamic_cast<WayPointsAppExtension&>(extension);
   smart_objects::SmartObjectSPtr request = CreateSubscriptionRequest();
   smart_objects::SmartObject& request_ref = *request;
   const auto function_id = static_cast<hmi_apis::FunctionID::eType>(

@@ -30,7 +30,7 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "application_manager/resumption/extension_pending_resumption_handler.h"
+#include "application_manager/resumption/pending_resumption_handler.h"
 #include "application_manager/resumption/resumption_data_processor.h"
 #include "smart_objects/smart_object.h"
 
@@ -38,20 +38,20 @@ namespace resumption {
 
 namespace app_mngr = application_manager;
 
-SDL_CREATE_LOG_VARIABLE("ExtensionPenndingResumptionHandler")
+SDL_CREATE_LOG_VARIABLE("PendingResumptionHandler")
 
-ExtensionPendingResumptionHandler::ExtensionPendingResumptionHandler(
+PendingResumptionHandler::PendingResumptionHandler(
     app_mngr::ApplicationManager& application_manager)
     : application_manager::event_engine::EventObserver(
           application_manager.event_dispatcher())
     , application_manager_(application_manager) {}
 
 resumption::ResumptionDataProcessor&
-ExtensionPendingResumptionHandler::resumption_data_processor() {
+PendingResumptionHandler::resumption_data_processor() {
   return application_manager_.resume_controller().resumption_data_processor();
 }
 
-ResumptionRequest ExtensionPendingResumptionHandler::MakeResumptionRequest(
+ResumptionRequest PendingResumptionHandler::MakeResumptionRequest(
     const uint32_t corr_id,
     const hmi_apis::FunctionID::eType function_id,
     const smart_objects::SmartObject& message) {

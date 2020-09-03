@@ -34,7 +34,7 @@
 #define SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_VEHICLE_INFO_PLUGIN_INCLUDE_VEHICLE_INFO_PLUGIN_VEHICLE_INFO_PLUGIN_H
 
 #include "application_manager/command_factory.h"
-#include "application_manager/resumption/extension_pending_resumption_handler.h"
+#include "application_manager/resumption/pending_resumption_handler.h"
 #include "vehicle_info_plugin/custom_vehicle_data_manager.h"
 
 namespace vehicle_info_plugin {
@@ -104,11 +104,11 @@ class VehicleInfoPlugin : public plugins::RPCPlugin {
   void DeleteSubscriptions(app_mngr::ApplicationSharedPtr app);
 
   std::unique_ptr<app_mngr::CommandFactory> command_factory_;
-  typedef std::shared_ptr<resumption::ExtensionPendingResumptionHandler>
-      ExtensionPendingResumptionHandlerSPtr;
+  typedef std::shared_ptr<resumption::PendingResumptionHandler>
+      PendingResumptionHandlerSPtr;
   app_mngr::ApplicationManager* application_manager_;
   std::unique_ptr<CustomVehicleDataManager> custom_vehicle_data_manager_;
-  ExtensionPendingResumptionHandlerSPtr pending_resumption_handler_;
+  PendingResumptionHandlerSPtr pending_resumption_handler_;
 };
 }  // namespace vehicle_info_plugin
 
