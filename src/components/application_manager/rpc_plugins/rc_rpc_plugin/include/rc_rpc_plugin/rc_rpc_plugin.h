@@ -109,7 +109,6 @@ class RCRPCPlugin : public plugins::RPCPlugin {
    * to HMI
    * @param app application for subscription
    * @param ext application extension
-   * @param subscriber callback for subscription
    */
   void ProcessResumptionSubscription(app_mngr::Application& app,
                                      RCAppExtension& ext);
