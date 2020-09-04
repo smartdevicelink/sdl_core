@@ -157,9 +157,9 @@ void RCPendingResumptionHandler::HandleSuccessfulResponse(
   const auto& it = paused_resumptions_.find(module_uid);
   if (it != paused_resumptions_.end()) {
     SDL_LOG_DEBUG("Paused resumptions found");
-    auto& queue_freezed = it->second;
-    while (!queue_freezed.empty()) {
-      const auto& resumption_request = queue_freezed.front();
+    auto& queue_paused = it->second;
+    while (!queue_paused.empty()) {
+      const auto& resumption_request = queue_paused.front();
       cid = resumption_request.correlation_id();
       RaiseEventForResponse(response, cid);
       auto app = application_manager_.application(resumption_request.app_id);
@@ -167,7 +167,7 @@ void RCPendingResumptionHandler::HandleSuccessfulResponse(
         auto rc_app_extension = RCHelpers::GetRCExtension(*app);
         rc_app_extension->SubscribeToInteriorVehicleData(module_uid);
       }
-      queue_freezed.pop();
+      queue_paused.pop();
     }
     paused_resumptions_.erase(it);
   }
