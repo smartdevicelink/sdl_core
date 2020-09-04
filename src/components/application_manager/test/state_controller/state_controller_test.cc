@@ -920,9 +920,12 @@ class StateControllerImplTest : public ::testing::Test {
     valid_state_ids_.push_back(am::HmiState::StateID::STATE_ID_SAFETY_MODE);
     valid_state_ids_.push_back(am::HmiState::StateID::STATE_ID_NAVI_STREAMING);
 
-    valid_non_navi_state_ids_.push_back(am::HmiState::StateID::STATE_ID_VR_SESSION);
-    valid_non_navi_state_ids_.push_back(am::HmiState::StateID::STATE_ID_TTS_SESSION);
-    valid_non_navi_state_ids_.push_back(am::HmiState::StateID::STATE_ID_PHONE_CALL);
+    valid_non_navi_state_ids_.push_back(
+        am::HmiState::StateID::STATE_ID_VR_SESSION);
+    valid_non_navi_state_ids_.push_back(
+        am::HmiState::StateID::STATE_ID_TTS_SESSION);
+    valid_non_navi_state_ids_.push_back(
+        am::HmiState::StateID::STATE_ID_PHONE_CALL);
     valid_non_navi_state_ids_.push_back(
         am::HmiState::StateID::STATE_ID_SAFETY_MODE);
   }
@@ -2535,7 +2538,7 @@ TEST_F(StateControllerImplTest,
 TEST_F(StateControllerImplTest, SetNaviStreamingStateForNonMediaApplication) {
   am::HmiStatePtr state_navi_streaming =
       std::make_shared<am::NaviStreamingHmiState>(simple_app_,
-                                                   app_manager_mock_);
+                                                  app_manager_mock_);
   TestSetState(simple_app_,
                state_navi_streaming,
                APP_TYPE_NON_MEDIA,
