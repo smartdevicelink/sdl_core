@@ -71,6 +71,11 @@ class UsbHandler {
   void SubmitControlTransfer(ControlTransferSequenceState* sequence_state);
   friend void UsbTransferSequenceCallback(libusb_transfer* transfer);
 
+  void RequestStopThread();
+  void DeregisterHotplugCallbacks();
+  void JoinAndDeleteThread();
+  void InvokeLibusbExit();
+
  private:
   class UsbHandlerDelegate : public threads::ThreadDelegate {
    public:
