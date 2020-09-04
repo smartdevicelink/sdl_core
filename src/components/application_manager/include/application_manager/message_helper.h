@@ -60,7 +60,41 @@ class PolicyHandlerInterface;
 namespace application_manager {
 namespace mobile_api = mobile_apis;
 
-/*
+/**
+ * @brief ResetGlobalPropertiesResult
+ * contains flags indicating success of
+ * ResetGlobalProperties operation.
+ * Used in MessageHelper functions
+ * to construct relevant requests
+ **/
+struct ResetGlobalPropertiesResult {
+  bool help_prompt;
+  bool timeout_prompt;
+  bool vr_help_title_items;
+  bool menu_name;
+  bool menu_icon;
+  bool keyboard_properties;
+  bool vr_has_been_reset;
+
+  ResetGlobalPropertiesResult()
+      : help_prompt(false)
+      , timeout_prompt(false)
+      , vr_help_title_items(false)
+      , menu_name(false)
+      , menu_icon(false)
+      , keyboard_properties(false)
+      , vr_has_been_reset(false) {}
+
+  bool HasUIPropertiesReset() const {
+    return vr_help_title_items || menu_name || menu_icon || keyboard_properties;
+  }
+
+  bool HasTTSPropertiesReset() const {
+    return timeout_prompt || help_prompt;
+  }
+};
+
+/**
  * @brief Typedef for VehicleData
  *
  * @param const char* Name of the parameter in mobile request
@@ -142,7 +176,7 @@ class MessageHelper {
   static void SendGetSystemTimeRequest(const uint32_t correlation_id,
                                        ApplicationManager& app_mngr);
 
-  /*
+  /**
    * @brief Retrieve vehicle data map for param name in mobile request
    * to VehicleDataType
    *
@@ -213,7 +247,7 @@ class MessageHelper {
   static mobile_api::HMILevel::eType StringToHMILevel(
       const std::string& hmi_level);
 
-  /*
+  /**
    * @brief Used to obtain string representation of app's
    * HMI Level.
    * @param hmi_level Desired HMI Level
@@ -221,7 +255,7 @@ class MessageHelper {
   static std::string StringifiedHMILevel(
       const mobile_apis::HMILevel::eType hmi_level);
 
-  /*
+  /**
    * @brief Used to obtain function name by its id
    * @param function_id Function ID
    */
@@ -234,7 +268,7 @@ class MessageHelper {
       const uint32_t correlation_id,
       uint32_t connection_key);
 
-  /*
+  /**
    * @brief Prepare GetDeviceListResponse
    *
    *
@@ -254,6 +288,10 @@ class MessageHelper {
 
   /**
    * @brief Sends button subscription notification
+   * @param app_id Application ID
+   * @param button Enum with button name
+   * @param is_subscribed true if subscribed, false otherwise
+   * @param app_mngr reference to application manager
    */
   static void SendOnButtonSubscriptionNotification(
       const uint32_t app_id,
@@ -262,18 +300,46 @@ class MessageHelper {
       ApplicationManager& app_mngr);
 
   /**
+   * @brief Creates button subscription notification
+   * @param app_id Application ID
+   * @param button Enum with button name
+   * @param is_subscribed true if subscribed, false otherwise
+   * @return notification message in SmartObject format
+   */
+  static smart_objects::SmartObjectSPtr CreateOnButtonSubscriptionNotification(
+      const uint32_t app_id,
+      const hmi_apis::Common_ButtonName::eType button,
+      const bool is_subscribed);
+
+  /**
    * @brief Sends button subscription notifications for all buttons
    * that application is subscribed on
+   * @param app shared pointer to application instance
+   * @param app_mngr reference to application manager
    */
   static void SendAllOnButtonSubscriptionNotificationsForApp(
       ApplicationConstSharedPtr app, ApplicationManager& app_mngr);
+
+  /**
+   * @brief Creates button subscription notifications for buttons
+   * that application is subscribed on
+   * @param app shared pointer to application instance
+   * @param app_mngr reference to application manager
+   * @param button_subscriptions collection of subscribed buttons
+   * @return list of notification messages in SmartObject format
+   */
+  static smart_objects::SmartObjectList
+  CreateOnButtonSubscriptionNotificationsForApp(
+      ApplicationConstSharedPtr app,
+      ApplicationManager& app_mngr,
+      const ButtonSubscriptions& button_subscriptions);
 
   static void SendAppDataToHMI(ApplicationConstSharedPtr app,
                                ApplicationManager& app_man);
   static void SendGlobalPropertiesToHMI(ApplicationConstSharedPtr app,
                                         ApplicationManager& app_mngr);
   static smart_objects::SmartObjectList CreateGlobalPropertiesRequestsToHMI(
-      ApplicationConstSharedPtr app, const uint32_t correlation_id);
+      ApplicationConstSharedPtr app, ApplicationManager& app_mngr);
 
   static smart_objects::SmartObjectSPtr CreateAppVrHelp(
       ApplicationConstSharedPtr app);
@@ -284,8 +350,6 @@ class MessageHelper {
                                    ApplicationManager& app_mngr);
   static void SendShowConstantTBTRequestToHMI(ApplicationConstSharedPtr app,
                                               ApplicationManager& app_man);
-  static void SendAddCommandRequestToHMI(ApplicationConstSharedPtr app,
-                                         ApplicationManager& app_man);
   static smart_objects::SmartObjectList CreateAddCommandRequestToHMI(
       ApplicationConstSharedPtr app, ApplicationManager& app_mngr);
 
@@ -299,11 +363,6 @@ class MessageHelper {
    */
   static void SendUIChangeRegistrationRequestToHMI(
       ApplicationConstSharedPtr app, ApplicationManager& app_mngr);
-  static void SendAddVRCommandToHMI(
-      uint32_t cmd_id,
-      const smart_objects::SmartObject& vr_commands,
-      const uint32_t app_id,
-      ApplicationManager& app_mngr);
 
   static smart_objects::SmartObjectSPtr CreateAddVRCommandToHMI(
       uint32_t cmd_id,
@@ -335,7 +394,7 @@ class MessageHelper {
       ApplicationManager& app_mngr,
       const smart_objects::SmartObject& windows_info);
 
-  /*
+  /**
    * @brief Create Common.DeviceInfo struct from device handle
    * @param device_handle device handle of the app
    * @param session_observer instance of SessionObserver to retrieve device
@@ -353,7 +412,7 @@ class MessageHelper {
       ApplicationManager& app_mngr,
       smart_objects::SmartObject* output);
 
-  /*
+  /**
    * @brief Create Common.HMIApplication struct application instance
    * @param app : applicaton instace
    * @param output smart object to store Common.HMIApplication struct
@@ -368,10 +427,10 @@ class MessageHelper {
 
   static void SendAddSubMenuRequestToHMI(ApplicationConstSharedPtr app,
                                          ApplicationManager& app_mngr);
-  static smart_objects::SmartObjectList CreateAddSubMenuRequestToHMI(
-      ApplicationConstSharedPtr app, const uint32_t correlation_id);
+  static smart_objects::SmartObjectList CreateAddSubMenuRequestsToHMI(
+      ApplicationConstSharedPtr app, ApplicationManager& app_mngr);
 
-  /*
+  /**
    * @brief Creates BasicCommunication.OnAppUnregistered notification
    * @param app Application instance
    * @param is_unexpected_disconnect
@@ -459,7 +518,7 @@ class MessageHelper {
       ApplicationManager& app_mngr);
 #endif  // EXTERNAL_PROPRIETARY_MODE
 
-  /*
+  /**
    * @brief Sends SetVideoConfig request to HMI to negotiate video parameters
    *
    * @param app_id       the application which will start video streaming
@@ -471,7 +530,7 @@ class MessageHelper {
       ApplicationManager& app_mngr,
       const smart_objects::SmartObject& video_params);
 
-  /*
+  /**
    * @brief Sends notification to HMI to start video streaming
    *
    * @param connection_key  Application connection key
@@ -479,7 +538,7 @@ class MessageHelper {
    */
   static void SendNaviStartStream(int32_t app_id, ApplicationManager& app_mngr);
 
-  /*
+  /**
    * @brief Sends notification to HMI to stop video streaming
    *
    * @param connection_key  Application connection key
@@ -487,7 +546,7 @@ class MessageHelper {
    */
   static void SendNaviStopStream(int32_t app_id, ApplicationManager& app_mngr);
 
-  /*
+  /**
    * @brief Send notification for Update of Policy Table
    * with PT Snapshot.
    * @param connection_key Id of application to send message to
@@ -501,7 +560,7 @@ class MessageHelper {
       const std::string& url,
       ApplicationManager& app_mngr);
 
-  /*
+  /**
    * @brief Send notification for Update of Policy Table
    * with PT Snapshot.
    * @param connection_key Id of application to send message to
@@ -541,7 +600,7 @@ class MessageHelper {
   static void SendQueryApps(const uint32_t connection_key,
                             ApplicationManager& app_man);
 
-  /*
+  /**
    * @brief Send notification to mobile on application permissions update
    * @param connection_key Id of application to send message to
    * @param permissions updated permissions for application
@@ -554,7 +613,7 @@ class MessageHelper {
       ApplicationManager& app_mngr,
       const policy::EncryptionRequired encryprion_required);
 
-  /*
+  /**
    * @brief Send notification to HMI on application permissions update
    * @param connection_key Id of application to send message to
    * @param permissions updated permissions for application
@@ -595,7 +654,7 @@ class MessageHelper {
    */
   static void SendGetSystemInfoRequest(ApplicationManager& app_mngr);
 
-  /*
+  /**
    * @brief Sends notification to HMI to start audio streaming
    *
    * @param connection_key  Application connection key
@@ -604,7 +663,7 @@ class MessageHelper {
   static void SendAudioStartStream(int32_t app_id,
                                    ApplicationManager& app_mngr);
 
-  /*
+  /**
    * @brief Sends notification to HMI to stop audio streaming
    *
    * @param connection_key  Application connection key
@@ -616,8 +675,7 @@ class MessageHelper {
   static void SendOnDataStreaming(protocol_handler::ServiceType service,
                                   bool available,
                                   ApplicationManager& app_mngr);
-
-  /*
+  /**
    * @brief Sends notification to HMI to stop audioPathThru
    *
    * @param connection_key  Application connection key
@@ -627,16 +685,44 @@ class MessageHelper {
   static bool SendStopAudioPathThru(ApplicationManager& app_mngr);
 
   /**
-   * @brief Sends UnsubscribeWayPoints request
-   * @return true if UnsubscribedWayPoints is send otherwise false
+   * @brief Creates UnsubscribeWayPoints request
+   * @param correlation_id  Correlation ID
+   * @return request Request to HMI
    */
-  static bool SendUnsubscribedWayPoints(ApplicationManager& app_mngr);
+  static smart_objects::SmartObjectSPtr CreateUnsubscribeWayPointsRequest(
+      const uint32_t correlation_id);
 
   static smart_objects::SmartObjectSPtr CreateNegativeResponse(
       uint32_t connection_key,
       int32_t function_id,
       const uint32_t correlation_id,
       int32_t result_code);
+
+  /**
+   * @brief Creates negative response message from HMI using provided params
+   * @param function_id id of function
+   * @param correlation_id correlation id
+   * @param result_code result code
+   * @param info info message
+   * @return pointer to created message
+   */
+  static smart_objects::SmartObjectSPtr CreateNegativeResponseFromHmi(
+      const int32_t function_id,
+      const uint32_t correlation_id,
+      const int32_t result_code,
+      const std::string& info);
+
+  /**
+   * @brief Creates negative response message from HMI using provided params
+   * @param function_id id of function
+   * @param correlation_id correlation id
+   * @param result_code result code
+   * @return pointer to created message
+   */
+  static smart_objects::SmartObjectSPtr CreateResponseMessageFromHmi(
+      const int32_t function_id,
+      const uint32_t correlation_id,
+      const int32_t result_code);
 
   /**
    * @brief Get the full file path of an app file
@@ -680,7 +766,7 @@ class MessageHelper {
                              ApplicationConstSharedPtr app,
                              ApplicationManager& app_mngr);
 
-  /*
+  /**
    * @brief Verify image and add image file full path
    *
    * @param SmartObject with image
@@ -710,7 +796,7 @@ class MessageHelper {
   static ChoiceSetVRCommandsStatus CheckChoiceSetVRCommands(
       const smart_objects::SmartObject& choice_set);
 
-  /*
+  /**
    * @brief Finds "Image" structure in request and verify image file presence
    *                      in Core.
    *
@@ -746,7 +832,7 @@ class MessageHelper {
       const policy::PolicyHandlerInterface& policy_handler,
       ApplicationManager& app_mngr);
 
-  /*
+  /**
    * @brief subscribe application to softbutton
    *
    * @param message_params contains data of request
@@ -763,7 +849,7 @@ class MessageHelper {
       int32_t function_id,
       const WindowID window_id);
 
-  /*
+  /**
    * @brief subscribe application to softbutton
    *
    * @param message_params contains data of request
@@ -894,19 +980,34 @@ class MessageHelper {
       mobile_api::AppInterfaceUnregisteredReason::eType reason);
 
   /**
-   * @brief SendDeleteCommandRequest sends requests to HMI to remove UI/VR
+   * @brief CreateDeleteUICommandRequest creates request to HMI to remove UI
+   * command data depending on command parameters
+   * @param cmd Command data
+   * @param app_id ID of application owning the command data
+   * @param corr_id Correlation ID
+   * @return SmartObjectSPtr message to HMI
+   */
+  static smart_objects::SmartObjectSPtr CreateDeleteUICommandRequest(
+      smart_objects::SmartObject* cmd,
+      const uint32_t app_id,
+      const uint32_t corr_id);
+
+  /**
+   * @brief CreateDeleteVRCommandRequest creates request to HMI to remove VR
    * command data depending on command parameters
    * @param cmd Command data
    * @param application Application owning the command data
-   * @param app_mngr Application manager
+   * @param corr_id Correlation ID
+   * @return SmartObjectSPtr message to HMI
    */
-  static void SendDeleteCommandRequest(smart_objects::SmartObject* cmd,
-                                       ApplicationSharedPtr application,
-                                       ApplicationManager& app_mngr);
+  static smart_objects::SmartObjectSPtr CreateDeleteVRCommandRequest(
+      smart_objects::SmartObject* cmd,
+      ApplicationSharedPtr application,
+      const uint32_t corr_id);
 
   /**
    * @brief SendDeleteSubmenuRequest sends UI/VR requests to HMI to remove
-   * submenues-related data depending on command parameters
+   * submenus-related data depending on command parameters
    * @param cmd Command data
    * @param application Application owning the commmand data
    * @param app_mngr Application manager
@@ -951,12 +1052,10 @@ class MessageHelper {
    * @brief Sends HMI status notification to mobile
    * @param application application with changed HMI status
    * @param window_id id of affected window
-   * @param application_manager reference to application manager
+   * @return SmartObjectSPtr with notification about HMI status
    **/
-  static void SendHMIStatusNotification(
-      ApplicationSharedPtr application,
-      const WindowID window_id,
-      ApplicationManager& application_manager);
+  static smart_objects::SmartObjectSPtr CreateHMIStatusNotification(
+      ApplicationSharedPtr application, const WindowID window_id);
 
   /**
    * @brief SendActivateAppToHMI Sends BasicCommunication.ActivateApp request to
@@ -981,7 +1080,41 @@ class MessageHelper {
    * @return HMI message object with filled header
    */
   static smart_objects::SmartObjectSPtr CreateMessageForHMI(
-      hmi_apis::messageType::eType message_type, const uint32_t correlation_id);
+      const hmi_apis::messageType::eType message_type,
+      const uint32_t correlation_id);
+
+  /**
+   * @brief CreateMessageForHMI Creates HMI message with prepared header
+   * according to message type
+   * @param function_id function id
+   * @param correlation_id Correlation id
+   * @return HMI message object with filled header
+   */
+  static smart_objects::SmartObjectSPtr CreateMessageForHMI(
+      const hmi_apis::FunctionID::eType function_id,
+      const uint32_t correlation_id);
+
+  /**
+   * @brief CreateUIResetGlobalPropertiesRequest Creates request
+   * to reset global properties for UI
+   * @param struct containing result of global properties reset procedure
+   * @param application which properties are to be reset
+   * @return filled smart object with relevant request data
+   */
+  static smart_objects::SmartObjectSPtr CreateUIResetGlobalPropertiesRequest(
+      const ResetGlobalPropertiesResult& reset_result,
+      const ApplicationSharedPtr application);
+
+  /**
+   * @brief CreateTTSResetGlobalPropertiesRequest Creates request
+   * to reset global properties for TTS
+   * @param struct containing result of global properties reset procedure
+   * @param application which properties are to be reset
+   * @return filled smart object with relevant request data
+   */
+  static smart_objects::SmartObjectSPtr CreateTTSResetGlobalPropertiesRequest(
+      const ResetGlobalPropertiesResult& reset_result,
+      const ApplicationSharedPtr application);
 
   static smart_objects::SmartObject CreateAppServiceCapabilities(
       std::vector<smart_objects::SmartObject>& all_services);
@@ -998,6 +1131,19 @@ class MessageHelper {
    */
   static smart_objects::SmartObjectSPtr CreateDisplayCapabilityUpdateToMobile(
       const smart_objects::SmartObject& system_capabilities, Application& app);
+
+  /**
+   * @brief CreateUIDeleteWindowRequestToHMI creates request to delete specified
+   * window
+   * @param application reference to related application
+   * @param app_mngr reference to application manager instance
+   * @param window_id id of window to delete
+   * @return shared ptr to request SO
+   */
+  static smart_objects::SmartObjectSPtr CreateUIDeleteWindowRequestToHMI(
+      ApplicationSharedPtr application,
+      ApplicationManager& app_mngr,
+      const WindowID window_id);
 
  private:
   /**

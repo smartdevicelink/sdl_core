@@ -402,7 +402,11 @@ void StateControllerImpl::HmiLevelConflictResolver::operator()(
           result_audio_state,
           mobile_apis::AudioStreamingState::AUDIBLE,
           mobile_apis::AudioStreamingState::ATTENUATED)) {
-    result_hmi_level = mobile_apis::HMILevel::HMI_LIMITED;
+    result_hmi_level =
+        mobile_apis::PredefinedWindows::DEFAULT_WINDOW == window_id_ &&
+                applied_->IsFullscreen()
+            ? mobile_apis::HMILevel::HMI_LIMITED
+            : to_resolve_hmi_level;
   } else {
     result_hmi_level = mobile_apis::HMILevel::HMI_BACKGROUND;
   }
@@ -490,13 +494,13 @@ bool StateControllerImpl::IsResumptionAllowed(ApplicationSharedPtr app,
 }
 
 mobile_apis::HMILevel::eType StateControllerImpl::GetAvailableHmiLevel(
-    ApplicationSharedPtr app, mobile_apis::HMILevel::eType hmi_level) const {
+    ApplicationSharedPtr app,
+    mobile_apis::HMILevel::eType desired_hmi_level) const {
   SDL_LOG_AUTO_TRACE();
 
-  mobile_apis::HMILevel::eType result = hmi_level;
-  SDL_LOG_DEBUG("HMI Level: " << hmi_level);
+  mobile_apis::HMILevel::eType result = desired_hmi_level;
 
-  if (!IsStreamableHMILevel(hmi_level)) {
+  if (!IsStreamableHMILevel(desired_hmi_level)) {
     return result;
   }
 
@@ -504,8 +508,11 @@ mobile_apis::HMILevel::eType StateControllerImpl::GetAvailableHmiLevel(
   const bool does_audio_app_with_same_type_exist =
       app_mngr_.IsAppTypeExistsInFullOrLimited(app);
 
-  if (mobile_apis::HMILevel::HMI_LIMITED == hmi_level) {
+  if (mobile_apis::HMILevel::HMI_LIMITED == desired_hmi_level) {
     if (!is_audio_app || does_audio_app_with_same_type_exist) {
+      SDL_LOG_DEBUG(
+          "Not audio application trying to resume in limited or "
+          "audio application with the same type active");
       result = app_mngr_.GetDefaultHmiLevel(app);
     }
     return result;
@@ -516,6 +523,7 @@ mobile_apis::HMILevel::eType StateControllerImpl::GetAvailableHmiLevel(
       (active_app.use_count() != 0) && active_app->app_id() != app->app_id();
   if (is_audio_app) {
     if (does_audio_app_with_same_type_exist) {
+      SDL_LOG_DEBUG("Audio application with the same type active");
       result = app_mngr_.GetDefaultHmiLevel(app);
     } else if (is_active_app_exist) {
       result = mobile_apis::HMILevel::HMI_LIMITED;
@@ -698,7 +706,10 @@ void StateControllerImpl::UpdateAppWindowsStreamingState(
       new_window_state->set_window_type(window_hmi_state->window_type());
       app->SetRegularState(window_id, new_window_state);
 
-      MessageHelper::SendHMIStatusNotification(app, window_id, app_mngr_);
+      auto notification =
+          MessageHelper::CreateHMIStatusNotification(app, window_id);
+      app_mngr_.GetRPCService().ManageMobileCommand(
+          notification, commands::Command::SOURCE_SDL);
     }
   }
 }
@@ -862,7 +873,10 @@ void StateControllerImpl::OnStateChanged(ApplicationSharedPtr app,
     return;
   }
 
-  MessageHelper::SendHMIStatusNotification(app, window_id, app_mngr_);
+  auto notification =
+      MessageHelper::CreateHMIStatusNotification(app, window_id);
+  app_mngr_.GetRPCService().ManageMobileCommand(notification,
+                                                commands::Command::SOURCE_SDL);
 
   if (mobile_apis::PredefinedWindows::DEFAULT_WINDOW != window_id) {
     SDL_LOG_DEBUG(
@@ -882,6 +896,46 @@ void StateControllerImpl::OnStateChanged(ApplicationSharedPtr app,
 bool StateControllerImpl::IsTempStateActive(HmiState::StateID id) const {
   sync_primitives::AutoLock autolock(active_states_lock_);
   return helpers::in_range(active_states_, id);
+}
+
+void StateControllerImpl::ResumePostponedWindows(const uint32_t app_id) {
+  SDL_LOG_AUTO_TRACE();
+
+  auto it_postponed_windows = postponed_app_widgets_.find(app_id);
+  if (it_postponed_windows != postponed_app_widgets_.end()) {
+    const WindowStatePairs& window_pairs = it_postponed_windows->second;
+    SDL_LOG_DEBUG("Application " << app_id << " has " << window_pairs.size()
+                                 << " postponed windows. Restoring...");
+
+    auto application = app_mngr_.application(app_id);
+    if (!application) {
+      SDL_LOG_ERROR("Application " << app_id << " is not registered");
+      postponed_app_widgets_.erase(it_postponed_windows);
+      return;
+    }
+
+    for (const WindowStatePair& pair : window_pairs) {
+      const WindowID window_id = pair.first;
+      HmiStatePtr postponed_state = pair.second;
+
+      OnAppWindowAdded(application,
+                       window_id,
+                       postponed_state->window_type(),
+                       postponed_state->hmi_level());
+    }
+
+    postponed_app_widgets_.erase(it_postponed_windows);
+  }
+}
+
+void StateControllerImpl::DropPostponedWindows(const uint32_t app_id) {
+  SDL_LOG_AUTO_TRACE();
+  auto it_postponed_windows = postponed_app_widgets_.find(app_id);
+  if (it_postponed_windows != postponed_app_widgets_.end()) {
+    SDL_LOG_DEBUG("Dropping postponed windows information for application "
+                  << app_id);
+    postponed_app_widgets_.erase(it_postponed_windows);
+  }
 }
 
 void StateControllerImpl::OnApplicationRegistered(
@@ -906,6 +960,25 @@ void StateControllerImpl::OnAppWindowAdded(
   namespace SystemContext = mobile_apis::SystemContext;
   SDL_LOG_AUTO_TRACE();
   DCHECK_OR_RETURN_VOID(app);
+
+  if (mobile_apis::WindowType::WIDGET == window_type) {
+    auto main_state =
+        app->CurrentHmiState(mobile_apis::PredefinedWindows::DEFAULT_WINDOW);
+    if (mobile_apis::HMILevel::INVALID_ENUM == main_state->hmi_level()) {
+      SDL_LOG_DEBUG("Application " << app->app_id()
+                                   << " is not registered. Widget with ID: "
+                                   << window_id << " has been postponed");
+
+      HmiStatePtr postponed_state =
+          CreateHmiState(app, HmiState::StateID::STATE_ID_REGULAR);
+      postponed_state->set_window_type(window_type);
+      postponed_state->set_hmi_level(default_level);
+
+      WindowStatePair pair = std::make_pair(window_id, postponed_state);
+      postponed_app_widgets_[app->app_id()].push_back(pair);
+      return;
+    }
+  }
 
   {
     sync_primitives::AutoLock lck(active_states_lock_);

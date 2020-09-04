@@ -31,6 +31,7 @@
  */
 
 #include "sdl_rpc_plugin/commands/hmi/ui_add_command_request.h"
+#include "application_manager/resumption/resume_ctrl.h"
 
 namespace sdl_rpc_plugin {
 using namespace application_manager;
@@ -57,6 +58,14 @@ void UIAddCommandRequest::Run() {
   SDL_LOG_AUTO_TRACE();
 
   SendRequest();
+}
+
+void UIAddCommandRequest::onTimeOut() {
+  auto& resume_ctrl = application_manager_.resume_controller();
+
+  resume_ctrl.HandleOnTimeOut(
+      correlation_id(),
+      static_cast<hmi_apis::FunctionID::eType>(function_id()));
 }
 
 }  // namespace commands

@@ -47,6 +47,7 @@
 #include "application_manager/mock_resume_ctrl.h"
 #include "application_manager/policies/mock_policy_handler_interface.h"
 #include "application_manager/resumption/resume_ctrl.h"
+#include "application_manager/resumption/resumption_data_processor.h"
 #include "application_manager/state_controller.h"
 #include "policy/usage_statistics/mock_statistics_manager.h"
 #include "resumption/last_state.h"
@@ -753,7 +754,7 @@ TEST_F(ApplicationImplTest, UpdateHash_AppMngrNotSuspended) {
   EXPECT_CALL(*MockMessageHelper::message_helper_mock(),
               SendHashUpdateNotification(app_id, _))
       .Times(1);
-  resumprion_test::MockResumeCtrl mock_resume_ctrl;
+  resumption_test::MockResumeCtrl mock_resume_ctrl;
   EXPECT_CALL(mock_application_manager_, resume_controller())
       .WillOnce(ReturnRef(mock_resume_ctrl));
   EXPECT_CALL(mock_resume_ctrl, is_suspended()).WillOnce(Return(false));
@@ -766,7 +767,7 @@ TEST_F(ApplicationImplTest, UpdateHash_AppMngrSuspended) {
   EXPECT_CALL(*MockMessageHelper::message_helper_mock(),
               SendHashUpdateNotification(app_id, _))
       .Times(0);
-  resumprion_test::MockResumeCtrl mock_resume_ctrl;
+  resumption_test::MockResumeCtrl mock_resume_ctrl;
   EXPECT_CALL(mock_application_manager_, resume_controller())
       .WillOnce(ReturnRef(mock_resume_ctrl));
   EXPECT_CALL(mock_resume_ctrl, is_suspended()).WillOnce(Return(true));

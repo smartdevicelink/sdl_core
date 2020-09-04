@@ -77,7 +77,7 @@ class UIIsReadyRequest : public app_mngr::commands::RequestToHMI,
   /**
    * @brief onTimeOut from requrst Controller
    */
-  virtual void onTimeOut() OVERRIDE;
+  void onTimeOut() OVERRIDE;
 
  private:
   DISALLOW_COPY_AND_ASSIGN(UIIsReadyRequest);

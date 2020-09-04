@@ -207,12 +207,14 @@ DynamicApplicationDataImpl::DynamicApplicationDataImpl()
     , sub_menu_()
     , sub_menu_lock_ptr_(std::make_shared<sync_primitives::RecursiveLock>())
     , choice_set_map_()
-    , choice_set_map_lock_ptr_(std::make_shared<sync_primitives::Lock>())
+    , choice_set_map_lock_ptr_(
+          std::make_shared<sync_primitives::RecursiveLock>())
     , performinteraction_choice_set_map_()
     , performinteraction_choice_set_lock_ptr_(
           std::make_shared<sync_primitives::RecursiveLock>())
     , window_params_map_()
-    , window_params_map_lock_ptr_(std::make_shared<sync_primitives::Lock>())
+    , window_params_map_lock_ptr_(
+          std::make_shared<sync_primitives::RecursiveLock>())
     , is_perform_interaction_active_(false)
     , is_reset_global_properties_active_(false)
     , perform_interaction_mode_(-1)
@@ -402,27 +404,33 @@ smart_objects::SmartObjectSPtr DynamicApplicationDataImpl::display_capabilities(
     const WindowID window_id) const {
   SDL_LOG_AUTO_TRACE();
 
-  auto result_display_caps = std::make_shared<smart_objects::SmartObject>(
-      smart_objects::SmartType_Array);
-  const auto window_caps =
-      (*display_capabilities_)[0][strings::window_capabilities].asArray();
-  if (!window_caps) {
+  if (!display_capabilities_) {
     SDL_LOG_WARN("Current window capabilities are empty");
     // SDL still needs to retreive display capabilities
     return display_capabilities_;
   }
-  auto find_res =
-      std::find_if(window_caps->begin(),
-                   window_caps->end(),
-                   [&window_id](const smart_objects::SmartObject& element) {
-                     if (window_id == element[strings::window_id].asInt()) {
-                       return true;
-                     }
 
-                     return false;
-                   });
+  smart_objects::SmartObject result_window_caps(
+      smart_objects::SmartType::SmartType_Map);
 
-  DCHECK(find_res != window_caps->end());
+  const auto window_caps =
+      (*display_capabilities_)[0][strings::window_capabilities].asArray();
+  if (window_caps) {
+    auto find_res = std::find_if(
+        window_caps->begin(),
+        window_caps->end(),
+        [&window_id](const smart_objects::SmartObject& element) {
+          return (window_id == element[strings::window_id].asInt());
+        });
+
+    if (find_res != window_caps->end()) {
+      result_window_caps = *find_res;
+    }
+  }
+
+  auto result_display_caps = std::make_shared<smart_objects::SmartObject>(
+      smart_objects::SmartType_Array);
+
   const auto disp_caps_keys = (*display_capabilities_)[0].enumerate();
   for (const auto& key : disp_caps_keys) {
     if (strings::window_capabilities == key) {
@@ -431,7 +439,8 @@ smart_objects::SmartObjectSPtr DynamicApplicationDataImpl::display_capabilities(
     (*result_display_caps)[0][key] = (*display_capabilities_)[0][key];
   }
 
-  (*result_display_caps)[0][strings::window_capabilities][0] = *find_res;
+  (*result_display_caps)[0][strings::window_capabilities][0] =
+      result_window_caps;
 
   return result_display_caps;
 }
@@ -629,6 +638,11 @@ void DynamicApplicationDataImpl::set_display_capabilities(
 void DynamicApplicationDataImpl::remove_window_capability(
     const WindowID window_id) {
   SDL_LOG_AUTO_TRACE();
+
+  if (!display_capabilities_) {
+    SDL_LOG_ERROR("Application display capabilities are not available");
+    return;
+  }
 
   auto window_capabilities =
       (*display_capabilities_)[0][strings::window_capabilities].asArray();

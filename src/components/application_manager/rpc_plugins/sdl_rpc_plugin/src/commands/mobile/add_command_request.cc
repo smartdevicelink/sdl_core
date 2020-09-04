@@ -36,6 +36,7 @@
 
 #include "application_manager/application.h"
 #include "application_manager/message_helper.h"
+#include "application_manager/resumption/resume_ctrl.h"
 #include "utils/custom_string.h"
 #include "utils/file_system.h"
 #include "utils/helpers.h"

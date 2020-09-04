@@ -157,12 +157,6 @@ void OnSystemCapabilityUpdatedNotification::Run() {
       [&system_capability_type,
        &initial_connection_key](const ApplicationSharedPtr app) {
         DCHECK_OR_RETURN(app, false);
-        auto& ext = SystemCapabilityAppExtension::ExtractExtension(*app);
-        if (!ext.IsSubscribedTo(system_capability_type)) {
-          SDL_LOG_DEBUG("App " << app->app_id()
-                               << " is not subscribed to this capability type");
-          return false;
-        }
 
         if (mobile_apis::SystemCapabilityType::DISPLAYS ==
                 system_capability_type &&
@@ -170,6 +164,25 @@ void OnSystemCapabilityUpdatedNotification::Run() {
           SDL_LOG_DEBUG("Display capabilities notification for app "
                         << initial_connection_key << " only");
           return app->app_id() == initial_connection_key;
+        }
+
+        auto ext_ptr = app->QueryInterface(
+            SystemCapabilityAppExtension::SystemCapabilityAppExtensionUID);
+
+        if (!ext_ptr) {
+          SDL_LOG_DEBUG("App "
+                        << app->app_id()
+                        << " does not have SystemCapabilityAppExtension");
+          return false;
+        }
+
+        auto ext =
+            std::static_pointer_cast<SystemCapabilityAppExtension>(ext_ptr);
+
+        if (!ext->IsSubscribedTo(system_capability_type)) {
+          SDL_LOG_DEBUG("App " << app->app_id()
+                               << " is not subscribed to this capability type");
+          return false;
         }
 
         SDL_LOG_DEBUG("App " << app->app_id()
@@ -203,12 +216,13 @@ void OnSystemCapabilityUpdatedNotification::Run() {
     if (mobile_apis::SystemCapabilityType::DISPLAYS == system_capability_type) {
       SDL_LOG_DEBUG("Using common display capabilities");
       auto capabilities = hmi_capabilities_.system_display_capabilities();
-      if (app->is_resuming() && app->is_app_data_resumption_allowed()) {
+
+      auto& builder = app->display_capabilities_builder();
+      if (app->is_resuming() && builder.IsWindowResumptionNeeded()) {
         SDL_LOG_DEBUG("Application "
                       << app->app_id()
                       << " is resuming. Providing cached capabilities");
-        auto display_caps =
-            app->display_capabilities_builder().display_capabilities();
+        auto display_caps = builder.display_capabilities();
         capabilities = display_caps;
       } else if (app->display_capabilities()) {
         SDL_LOG_DEBUG("Application " << app->app_id()
