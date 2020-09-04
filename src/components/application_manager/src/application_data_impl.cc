@@ -815,7 +815,7 @@ void DynamicApplicationDataImpl::RemoveCommand(const uint32_t cmd_id) {
                                   << " is not found. Removal skipped.");
 }
 
-smart_objects::SmartObject* DynamicApplicationDataImpl::FindCommand(
+smart_objects::SmartObject DynamicApplicationDataImpl::FindCommand(
     const uint32_t cmd_id) {
   sync_primitives::AutoLock lock(commands_lock_ptr_);
 
@@ -826,10 +826,11 @@ smart_objects::SmartObject* DynamicApplicationDataImpl::FindCommand(
   if (it != commands_.end()) {
     SDL_LOG_DEBUG("Command with internal number " << (it->first) << " and id "
                                                   << cmd_id << " is found.");
-    return it->second;
+    smart_objects::SmartObject command(*it->second);
+    return command;
   }
 
-  return NULL;
+  return smart_objects::SmartObject(smart_objects::SmartType_Null);
 }
 
 // TODO(VS): Create common functions for processing collections
@@ -852,15 +853,16 @@ void DynamicApplicationDataImpl::RemoveSubMenu(uint32_t menu_id) {
   }
 }
 
-smart_objects::SmartObject* DynamicApplicationDataImpl::FindSubMenu(
+smart_objects::SmartObject DynamicApplicationDataImpl::FindSubMenu(
     uint32_t menu_id) const {
   sync_primitives::AutoLock lock(sub_menu_lock_ptr_);
   SubMenuMap::const_iterator it = sub_menu_.find(menu_id);
   if (it != sub_menu_.end()) {
-    return it->second;
+    smart_objects::SmartObject sub_menu(*it->second);
+    return sub_menu;
   }
 
-  return NULL;
+  return smart_objects::SmartObject(smart_objects::SmartType_Null);
 }
 
 bool DynamicApplicationDataImpl::IsSubMenuNameAlreadyExist(
@@ -923,15 +925,16 @@ void DynamicApplicationDataImpl::RemoveChoiceSet(uint32_t choice_set_id) {
   }
 }
 
-smart_objects::SmartObject* DynamicApplicationDataImpl::FindChoiceSet(
+smart_objects::SmartObject DynamicApplicationDataImpl::FindChoiceSet(
     uint32_t choice_set_id) {
   sync_primitives::AutoLock lock(choice_set_map_lock_ptr_);
   ChoiceSetMap::const_iterator it = choice_set_map_.find(choice_set_id);
   if (it != choice_set_map_.end()) {
-    return it->second;
+    smart_objects::SmartObject choice_set(*it->second);
+    return choice_set;
   }
 
-  return NULL;
+  return smart_objects::SmartObject(smart_objects::SmartType_Null);
 }
 
 void DynamicApplicationDataImpl::AddPerformInteractionChoiceSet(

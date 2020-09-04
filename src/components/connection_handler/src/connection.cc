@@ -165,11 +165,15 @@ uint32_t Connection::RemoveSession(uint8_t session_id) {
 bool Connection::AddNewService(uint8_t session_id,
                                protocol_handler::ServiceType service_type,
                                const bool request_protection,
-                               transport_manager::ConnectionUID connection_id) {
+                               transport_manager::ConnectionUID connection_id,
+                               std::string* err_reason) {
   // Ignore wrong services
   if (protocol_handler::kControl == service_type ||
       protocol_handler::kInvalidServiceType == service_type) {
     SDL_LOG_WARN("Wrong service " << static_cast<int>(service_type));
+    if (err_reason) {
+      *err_reason = "Wrong service type " + std::to_string(service_type);
+    }
     return false;
   }
 
@@ -182,6 +186,11 @@ bool Connection::AddNewService(uint8_t session_id,
   SessionMap::iterator session_it = session_map_.find(session_id);
   if (session_it == session_map_.end()) {
     SDL_LOG_WARN("Session not found in this connection!");
+    if (err_reason) {
+      *err_reason = "Session " + std::to_string(session_id) +
+                    " not found for connection " +
+                    std::to_string(connection_id);
+    }
     return false;
   }
   Session& session = session_it->second;
@@ -206,12 +215,22 @@ bool Connection::AddNewService(uint8_t session_id,
       SDL_LOG_WARN("Session " << static_cast<int>(session_id)
                               << " already has unprotected service "
                               << static_cast<int>(service_type));
+      if (err_reason) {
+        *err_reason = "Session " + std::to_string(session_id) +
+                      " already has an unprotected service of type " +
+                      std::to_string(service_type);
+      }
       return false;
     }
     if (service->is_protected_) {
       SDL_LOG_WARN("Session " << static_cast<int>(session_id)
                               << " already has protected service "
                               << static_cast<int>(service_type));
+      if (err_reason) {
+        *err_reason = "Session " + std::to_string(session_id) +
+                      " already has a protected service of type " +
+                      std::to_string(service_type);
+      }
       return false;
     }
     // For unproteced service could be start protection
@@ -442,6 +461,33 @@ void Connection::UpdateProtocolVersionSession(uint8_t session_id,
   }
   Session& session = session_it->second;
   session.protocol_version = protocol_version;
+  if (session.full_protocol_version.major_version_ !=
+      session.protocol_version) {
+    session.full_protocol_version =
+        utils::SemanticVersion(protocol_version, 0, 0);
+  }
+}
+
+void Connection::UpdateProtocolVersionSession(
+    uint8_t session_id, const utils::SemanticVersion& full_protocol_version) {
+  SDL_LOG_AUTO_TRACE();
+
+  if (!full_protocol_version.isValid()) {
+    SDL_LOG_WARN("Invalid version: " << full_protocol_version.toString());
+    return;
+  }
+
+  sync_primitives::AutoLock lock(session_map_lock_);
+  SessionMap::iterator session_it = session_map_.find(session_id);
+  if (session_map_.end() == session_it) {
+    SDL_LOG_WARN("Session not found in this connection!");
+    return;
+  }
+
+  Session& session = session_it->second;
+  session.protocol_version =
+      static_cast<uint8_t>(full_protocol_version.major_version_);
+  session.full_protocol_version = full_protocol_version;
 }
 
 bool Connection::SupportHeartBeat(uint8_t session_id) {
@@ -468,6 +514,19 @@ bool Connection::ProtocolVersion(uint8_t session_id,
     return false;
   }
   protocol_version = (session_it->second).protocol_version;
+  return true;
+}
+
+bool Connection::ProtocolVersion(
+    uint8_t session_id, utils::SemanticVersion& full_protocol_version) {
+  SDL_LOG_AUTO_TRACE();
+  sync_primitives::AutoLock lock(session_map_lock_);
+  SessionMap::iterator session_it = session_map_.find(session_id);
+  if (session_map_.end() == session_it) {
+    SDL_LOG_WARN("Session not found in this connection!");
+    return false;
+  }
+  full_protocol_version = (session_it->second).full_protocol_version;
   return true;
 }
 

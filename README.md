@@ -1,5 +1,7 @@
 [![Slack Status](http://sdlslack.herokuapp.com/badge.svg)](http://slack.smartdevicelink.com)
-[![Build Status](http://opensdl-jenkins.luxoft.com:8080/view/develop/job/develop_nightly_coverage/badge/icon)](http://opensdl-jenkins.luxoft.com:8080/view/develop/job/develop_nightly_coverage/)
+[![Build Status](https://opensdl-jenkins.prjdmz.luxoft.com/job/develop_nightly_coverage/badge/icon?subject=UT%20coverage%20build)](https://opensdl-jenkins.prjdmz.luxoft.com/job/develop_nightly_coverage/)
+[![Build Status](https://opensdl-jenkins.prjdmz.luxoft.com/view/Smokes/job/Develop_TCP_ATF_Smoke_P/badge/icon?subject=Smoke%20tests)](https://opensdl-jenkins.prjdmz.luxoft.com/view/Smokes/job/Develop_TCP_ATF_Smoke_P/)
+[![Build Status](https://opensdl-jenkins.prjdmz.luxoft.com/job/Develop_SDL_Checkstyle/badge/icon?subject=Coding%20style)](https://opensdl-jenkins.prjdmz.luxoft.com/job/Develop_SDL_Checkstyle/)
 
 # SmartDeviceLink (SDL)
 
@@ -18,7 +20,7 @@ Pull Requests Welcome!
 ## Environment
 Currently supported:
 * Ubuntu Linux 16.04 with GCC 5.4.x
-* Ubuntu Linux 18.04 with GCC 7.3.x
+* Ubuntu Linux 18.04 with GCC 7.5.x
 * [C++11 standard](https://github.com/smartdevicelink/sdl_evolution/issues/132)
 
 ## Getting Started

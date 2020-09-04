@@ -65,8 +65,9 @@ void DeleteInteractionChoiceSetRequest::Run() {
   ApplicationSharedPtr app = application_manager_.application(connection_key());
 
   if (!app) {
-    SDL_LOG_ERROR("No application associated with connection key "
-                  << connection_key());
+    SDL_LOG_ERROR(
+
+        "No application associated with connection key " << connection_key());
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     return;
   }
@@ -75,7 +76,9 @@ void DeleteInteractionChoiceSetRequest::Run() {
       (*message_)[strings::msg_params][strings::interaction_choice_set_id]
           .asInt();
 
-  if (!app->FindChoiceSet(choice_set_id)) {
+  const auto choice_set = app->FindChoiceSet(choice_set_id);
+
+  if (smart_objects::SmartType_Null == choice_set.getType()) {
     SDL_LOG_ERROR("Choice set with id " << choice_set_id << " is not found.");
     SendResponse(false, mobile_apis::Result::INVALID_ID);
     return;
@@ -142,9 +145,9 @@ void DeleteInteractionChoiceSetRequest::SendVrDeleteCommand(
       (*message_)[strings::msg_params][strings::interaction_choice_set_id]
           .asUInt();
 
-  smart_objects::SmartObject* choice_set = app->FindChoiceSet(choice_set_id);
+  smart_objects::SmartObject choice_set = app->FindChoiceSet(choice_set_id);
 
-  if (!choice_set) {
+  if (smart_objects::SmartType_Null == choice_set.getType()) {
     SDL_LOG_ERROR("Choice set with id " << choice_set_id << " is not found.");
     return;
   }
@@ -153,10 +156,10 @@ void DeleteInteractionChoiceSetRequest::SendVrDeleteCommand(
       smart_objects::SmartObject(smart_objects::SmartType_Map);
   msg_params[strings::app_id] = app->app_id();
   msg_params[strings::type] = hmi_apis::Common_VRCommandType::Choice;
-  msg_params[strings::grammar_id] = (*choice_set)[strings::grammar_id];
-  choice_set = &((*choice_set)[strings::choice_set]);
-  for (uint32_t i = 0; i < (*choice_set).length(); ++i) {
-    msg_params[strings::cmd_id] = (*choice_set)[i][strings::choice_id];
+  msg_params[strings::grammar_id] = choice_set[strings::grammar_id];
+  choice_set = choice_set[strings::choice_set];
+  for (uint32_t i = 0; i < choice_set.length(); ++i) {
+    msg_params[strings::cmd_id] = choice_set[i][strings::choice_id];
     SendHMIRequest(hmi_apis::FunctionID::VR_DeleteCommand, &msg_params);
   }
 }

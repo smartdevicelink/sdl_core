@@ -74,7 +74,9 @@ void DeleteSubMenuRequest::Run() {
   const int32_t menu_id =
       (*message_)[strings::msg_params][strings::menu_id].asInt();
 
-  if (!app->FindSubMenu(menu_id)) {
+  const auto sub_menu = app->FindSubMenu(menu_id);
+
+  if (smart_objects::SmartType_Null == sub_menu.getType()) {
     SDL_LOG_ERROR("Menu with id " << menu_id << " is not found.");
     SendResponse(false, mobile_apis::Result::INVALID_ID);
     return;
@@ -155,7 +157,6 @@ void DeleteSubMenuRequest::DeleteSubMenuUICommands(
     ApplicationSharedPtr const app, uint32_t parentID) {
   SDL_LOG_AUTO_TRACE();
   SDL_LOG_DEBUG("Delete UI Commands with Parent ID: " << parentID);
-
   const DataAccessor<CommandsMap> accessor(app->commands_map());
   const CommandsMap& commands = accessor.GetData();
   CommandsMap::const_iterator it = commands.begin();
@@ -230,7 +231,7 @@ void DeleteSubMenuRequest::on_event(const event_engine::Event& event) {
       break;
     }
     default: {
-      SDL_LOG_ERROR("Received unknown event " << event.id());
+      SDL_LOG_ERROR("Received unknown event" << event.id());
       return;
     }
   }
