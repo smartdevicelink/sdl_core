@@ -120,7 +120,7 @@ void RCPendingResumptionHandler::HandleResumptionSubscriptionRequest(
         MakeResumptionRequest(cid, fid, *subscription_request);
     resumption_data_processor().SubscribeToResponse(app.app_id(),
                                                     resumption_request);
-    SDL_LOG_DEBUG("Freezed request with correlation_id: "
+    SDL_LOG_DEBUG("Paused request with correlation_id: "
                   << cid << " module type: " << subscription.first
                   << " module id: " << subscription.second);
   }
@@ -156,7 +156,7 @@ void RCPendingResumptionHandler::HandleSuccessfulResponse(
 
   const auto& it = paused_resumptions_.find(module_uid);
   if (it != paused_resumptions_.end()) {
-    SDL_LOG_DEBUG("Freezed resumptions found");
+    SDL_LOG_DEBUG("Paused resumptions found");
     auto& queue_freezed = it->second;
     while (!queue_freezed.empty()) {
       const auto& resumption_request = queue_freezed.front();
@@ -177,32 +177,32 @@ void RCPendingResumptionHandler::ProcessNextPausedResumption(
     const ModuleUid& module_uid) {
   SDL_LOG_AUTO_TRACE();
 
-  auto pop_front_freezed_resumptions = [this](const ModuleUid& module_uid) {
+  auto pop_front_paused_resumptions = [this](const ModuleUid& module_uid) {
     const auto& it = paused_resumptions_.find(module_uid);
     if (it == paused_resumptions_.end()) {
       return std::shared_ptr<PendingRequestQueue::value_type>(nullptr);
     }
-    auto& queue_freezed = it->second;
-    if (queue_freezed.empty()) {
+    auto& queue_paused = it->second;
+    if (queue_paused.empty()) {
       paused_resumptions_.erase(it);
       return std::shared_ptr<PendingRequestQueue::value_type>(nullptr);
     }
-    auto freezed_resumption = std::make_shared<PendingRequestQueue::value_type>(
-        queue_freezed.front());
-    queue_freezed.pop();
-    if (queue_freezed.empty()) {
+    auto paused_resumption =
+        std::make_shared<PendingRequestQueue::value_type>(queue_paused.front());
+    queue_paused.pop();
+    if (queue_paused.empty()) {
       paused_resumptions_.erase(it);
     }
-    return freezed_resumption;
+    return paused_resumption;
   };
 
-  auto freezed_resumption = pop_front_freezed_resumptions(module_uid);
-  if (!freezed_resumption) {
-    SDL_LOG_DEBUG("No freezed resumptions found");
+  auto paused_resumption = pop_front_paused_resumptions(module_uid);
+  if (!paused_resumption) {
+    SDL_LOG_DEBUG("No paused resumptions found");
     return;
   }
 
-  auto& resumption_request = *freezed_resumption;
+  auto& resumption_request = *paused_resumption;
   auto subscription_request =
       std::make_shared<smart_objects::SmartObject>(resumption_request.message);
   const auto fid = GetFunctionId(*subscription_request);

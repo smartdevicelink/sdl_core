@@ -148,7 +148,7 @@ class RCPendingResumptionHandler : public resumption::PendingResumptionHandler {
                          const smart_objects::SmartObject request_so);
 
   /**
-   * @brief QueueFreezedResumptions contains subscription request,
+   * @brief PendingRequestQueue contains subscription request,
    * which will be sent to the HMI in the case that a previous resumption
    * attempt for the same module was not successful
    */
