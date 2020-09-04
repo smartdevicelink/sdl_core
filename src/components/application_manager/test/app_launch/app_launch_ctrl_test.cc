@@ -37,6 +37,7 @@
 #include "application_manager/mock_application.h"
 #include "application_manager/mock_application_manager.h"
 #include "application_manager/mock_resume_ctrl.h"
+#include "application_manager/resumption/resumption_data_processor.h"
 #include "connection_handler/mock_connection_handler.h"
 #include "gtest/gtest.h"
 #include "utils/macro.h"

@@ -305,6 +305,8 @@ class ResumeCtrlImpl : public ResumeCtrl {
    */
   void StartSavePersistentDataTimer() OVERRIDE;
 
+  ResumptionDataProcessor& resumption_data_processor();
+
 #ifdef BUILD_TESTS
   void set_resumption_storage(
       std::shared_ptr<ResumptionData> mock_storage) OVERRIDE;
@@ -537,7 +539,7 @@ class ResumeCtrlImpl : public ResumeCtrl {
   time_t wake_up_time_;
   std::shared_ptr<ResumptionData> resumption_storage_;
   application_manager::ApplicationManager& application_manager_;
-  ResumptionDataProcessor resumption_data_processor_;
+  std::unique_ptr<ResumptionDataProcessor> resumption_data_processor_;
   /**
    *@brief Mapping correlation id to request
    *wait for on event response from HMI to resume HMI Level

@@ -163,13 +163,10 @@ void RCRPCPlugin::OnApplicationEvent(
 }
 
 void RCRPCPlugin::ProcessResumptionSubscription(
-    application_manager::Application& app,
-    RCAppExtension& ext,
-    resumption::Subscriber subscriber) {
+    application_manager::Application& app, RCAppExtension& ext) {
   SDL_LOG_AUTO_TRACE();
 
-  pending_resumption_handler_->HandleResumptionSubscriptionRequest(
-      ext, subscriber, app);
+  pending_resumption_handler_->HandleResumptionSubscriptionRequest(ext, app);
 }
 
 void RCRPCPlugin::RevertResumption(const std::set<ModuleUid>& subscriptions) {

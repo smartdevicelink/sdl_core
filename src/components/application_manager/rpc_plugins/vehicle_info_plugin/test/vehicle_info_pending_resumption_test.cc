@@ -35,6 +35,8 @@
 #include "application_manager/mock_event_dispatcher.h"
 #include "application_manager/mock_event_observer.h"
 #include "application_manager/mock_message_helper.h"
+#include "application_manager/mock_resume_ctrl.h"
+#include "application_manager/mock_resumption_data_processor.h"
 #include "application_manager/mock_rpc_service.h"
 #include "gtest/gtest.h"
 #include "vehicle_info_plugin/mock_custom_vehicle_data_manager.h"
@@ -52,6 +54,8 @@ using ::testing::ReturnRef;
 using ::testing::SaveArg;
 
 using application_manager::MockMessageHelper;
+using test::components::resumption_test::MockResumeCtrl;
+using test::components::resumption_test::MockResumptionDataProcessor;
 typedef NiceMock< ::test::components::event_engine_test::MockEventDispatcher>
     MockEventDispatcher;
 typedef NiceMock< ::test::components::event_engine_test::MockEventObserver>
@@ -67,12 +71,6 @@ typedef std::shared_ptr<MockApplication> MockAppPtr;
 typedef std::shared_ptr<vehicle_info_plugin::VehicleInfoAppExtension>
     VehicleInfoAppExtensionPtr;
 using hmi_apis::FunctionID::VehicleInfo_SubscribeVehicleData;
-
-class SubscribeCatcher {
- public:
-  MOCK_METHOD2(subscribe,
-               void(const int32_t, const resumption::ResumptionRequest));
-};
 
 smart_objects::SmartObjectSPtr CreateVDRequest(const uint32_t corr_id) {
   using namespace application_manager;
@@ -236,6 +234,11 @@ class VehicleInfoPendingResumptionHandlerTest : public ::testing::Test {
         .WillByDefault(ReturnRef(event_dispatcher_mock_));
     ON_CALL(app_manager_mock_, GetRPCService())
         .WillByDefault(ReturnRef(mock_rpc_service_));
+    ON_CALL(app_manager_mock_, resume_controller())
+        .WillByDefault(ReturnRef(resume_ctrl_mock_));
+    ON_CALL(resume_ctrl_mock_, resumption_data_processor())
+        .WillByDefault(ReturnRef(resumption_data_processor_mock_));
+
     resumption_handler_.reset(
         new vehicle_info_plugin::VehicleInfoPendingResumptionHandler(
             app_manager_mock_, custom_vehicle_data_manager_mock_));
@@ -272,18 +275,10 @@ class VehicleInfoPendingResumptionHandlerTest : public ::testing::Test {
     return ext_ptr;
   }
 
-  resumption::Subscriber& get_subscriber() {
-    static resumption::Subscriber subscriber =
-        [this](const int32_t corr_id,
-               const resumption::ResumptionRequest resumption_request) {
-          this->subscribe_catcher_.subscribe(corr_id, resumption_request);
-        };
-    return subscriber;
-  }
-
-  SubscribeCatcher subscribe_catcher_;
   MockMessageHelper& mock_message_helper_;
   MockApplicationManager app_manager_mock_;
+  MockResumeCtrl resume_ctrl_mock_;
+  MockResumptionDataProcessor resumption_data_processor_mock_;
   MockEventDispatcher event_dispatcher_mock_;
   MockRPCService mock_rpc_service_;
   NiceMock<MockCustomVehicleDataManager> custom_vehicle_data_manager_mock_;
@@ -297,10 +292,9 @@ TEST_F(VehicleInfoPendingResumptionHandlerTest, NoSubscriptionNoAction) {
   auto mock_app = CreateApp(1);
   auto ext_ptr = CreateExtension(*mock_app);
 
-  EXPECT_CALL(subscribe_catcher_, subscribe(_, _)).Times(0);
-  resumption::Subscriber& subscribe = get_subscriber();
-  resumption_handler_->HandleResumptionSubscriptionRequest(
-      *ext_ptr, subscribe, *mock_app);
+  EXPECT_CALL(resumption_data_processor_mock_, SubscribeToResponse(_, _))
+      .Times(0);
+  resumption_handler_->HandleResumptionSubscriptionRequest(*ext_ptr, *mock_app);
 }
 
 TEST_F(VehicleInfoPendingResumptionHandlerTest,
@@ -315,17 +309,14 @@ TEST_F(VehicleInfoPendingResumptionHandlerTest,
           CreateModuleInfoSO(VehicleInfo_SubscribeVehicleData, _))
       .WillByDefault(Return(request));
 
-  uint32_t subscribed_correlation_id;
   resumption::ResumptionRequest resumption_request;
-  EXPECT_CALL(subscribe_catcher_, subscribe(_, _))
-      .WillOnce(DoAll(SaveArg<0>(&subscribed_correlation_id),
-                      SaveArg<1>(&resumption_request)));
+  EXPECT_CALL(resumption_data_processor_mock_, SubscribeToResponse(_, _))
+      .WillOnce(SaveArg<1>(&resumption_request));
 
   smart_objects::SmartObjectSPtr message_to_hmi;
   EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_, _))
       .WillOnce(DoAll(SaveArg<0>(&message_to_hmi), Return(true)));
-  resumption_handler_->HandleResumptionSubscriptionRequest(
-      *ext, get_subscriber(), *mock_app);
+  resumption_handler_->HandleResumptionSubscriptionRequest(*ext, *mock_app);
   EXPECT_EQ(resumption_request.request_id.function_id,
             VehicleInfo_SubscribeVehicleData);
   EXPECT_TRUE(
@@ -346,11 +337,9 @@ TEST_F(VehicleInfoPendingResumptionHandlerTest,
           CreateModuleInfoSO(VehicleInfo_SubscribeVehicleData, _))
       .WillByDefault(Return(request));
 
-  uint32_t subscribed_app_id;
   resumption::ResumptionRequest resumption_request;
-  EXPECT_CALL(subscribe_catcher_, subscribe(_, _))
-      .WillOnce(DoAll(SaveArg<0>(&subscribed_app_id),
-                      SaveArg<1>(&resumption_request)));
+  EXPECT_CALL(resumption_data_processor_mock_, SubscribeToResponse(_, _))
+      .WillOnce(SaveArg<1>(&resumption_request));
 
   EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_, _)).Times(1);
 
@@ -365,8 +354,7 @@ TEST_F(VehicleInfoPendingResumptionHandlerTest,
   application_manager::event_engine::Event event(
       VehicleInfo_SubscribeVehicleData);
   event.set_smart_object(response);
-  resumption_handler_->HandleResumptionSubscriptionRequest(
-      *ext, get_subscriber(), *mock_app);
+  resumption_handler_->HandleResumptionSubscriptionRequest(*ext, *mock_app);
 
   std::set<std::string> expected_data_in_event = {"gps", "speed"};
   const auto subscribed_correlation_id =
@@ -394,12 +382,9 @@ TEST_F(VehicleInfoPendingResumptionHandlerTest,
           CreateModuleInfoSO(VehicleInfo_SubscribeVehicleData, _))
       .WillByDefault(Return(request));
 
-  uint32_t subscribed_app_id;
   resumption::ResumptionRequest resumption_request;
-  EXPECT_CALL(subscribe_catcher_, subscribe(_, _))
-      .WillOnce(DoAll(SaveArg<0>(&subscribed_app_id),
-                      SaveArg<1>(&resumption_request)));
-
+  EXPECT_CALL(resumption_data_processor_mock_, SubscribeToResponse(_, _))
+      .WillOnce(SaveArg<1>(&resumption_request));
   EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_, _)).Times(1);
   const std::map<std::string, hmi_apis::Common_VehicleDataResultCode::eType>
       subscriptions_result = {
@@ -407,8 +392,7 @@ TEST_F(VehicleInfoPendingResumptionHandlerTest,
           {"speed",
            hmi_apis::Common_VehicleDataResultCode::VDRC_DATA_NOT_SUBSCRIBED},
       };
-  resumption_handler_->HandleResumptionSubscriptionRequest(
-      *ext, get_subscriber(), *mock_app);
+  resumption_handler_->HandleResumptionSubscriptionRequest(*ext, *mock_app);
 
   auto response = CreateVDResponse(
       hmi_apis::Common_Result::SUCCESS, subscriptions_result, corr_id);
@@ -443,12 +427,9 @@ TEST_F(VehicleInfoPendingResumptionHandlerTest,
           CreateModuleInfoSO(VehicleInfo_SubscribeVehicleData, _))
       .WillByDefault(Return(request));
 
-  uint32_t subscribed_app_id;
   resumption::ResumptionRequest resumption_request;
-  EXPECT_CALL(subscribe_catcher_, subscribe(_, _))
-      .WillOnce(DoAll(SaveArg<0>(&subscribed_app_id),
-                      SaveArg<1>(&resumption_request)));
-
+  EXPECT_CALL(resumption_data_processor_mock_, SubscribeToResponse(_, _))
+      .WillOnce(SaveArg<1>(&resumption_request));
   EXPECT_CALL(event_dispatcher_mock_, raise_event(_));
   EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_, _)).Times(1);
   const std::map<std::string, hmi_apis::Common_VehicleDataResultCode::eType>
@@ -464,8 +445,7 @@ TEST_F(VehicleInfoPendingResumptionHandlerTest,
   application_manager::event_engine::Event event(
       VehicleInfo_SubscribeVehicleData);
   event.set_smart_object(response);
-  resumption_handler_->HandleResumptionSubscriptionRequest(
-      *ext, get_subscriber(), *mock_app);
+  resumption_handler_->HandleResumptionSubscriptionRequest(*ext, *mock_app);
 
   // TODO check that raized the same fid and cid as subscribed
   resumption_handler_->on_event(event);
@@ -487,11 +467,9 @@ TEST_F(VehicleInfoPendingResumptionHandlerTest,
           CreateModuleInfoSO(VehicleInfo_SubscribeVehicleData, _))
       .WillByDefault(Return(request));
 
-  uint32_t subscribed_app_id;
   resumption::ResumptionRequest resumption_request;
-  EXPECT_CALL(subscribe_catcher_, subscribe(_, _))
-      .WillOnce(DoAll(SaveArg<0>(&subscribed_app_id),
-                      SaveArg<1>(&resumption_request)));
+  EXPECT_CALL(resumption_data_processor_mock_, SubscribeToResponse(_, _))
+      .WillOnce(SaveArg<1>(&resumption_request));
 
   EXPECT_CALL(event_dispatcher_mock_, raise_event(_));
   EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_, _)).Times(1);
@@ -502,8 +480,7 @@ TEST_F(VehicleInfoPendingResumptionHandlerTest,
   application_manager::event_engine::Event event(
       VehicleInfo_SubscribeVehicleData);
   event.set_smart_object(response);
-  resumption_handler_->HandleResumptionSubscriptionRequest(
-      *ext, get_subscriber(), *mock_app);
+  resumption_handler_->HandleResumptionSubscriptionRequest(*ext, *mock_app);
 
   // TODO check that raized the same fid and cid as subscribed
   resumption_handler_->on_event(event);
@@ -526,7 +503,9 @@ TEST_F(VehicleInfoPendingResumptionHandlerTest, TwoAppsOneSharedDataSuccess) {
           CreateModuleInfoSO(VehicleInfo_SubscribeVehicleData, _))
       .WillByDefault(Return(request));
 
-  EXPECT_CALL(subscribe_catcher_, subscribe(_, _)).Times(2);
+  EXPECT_CALL(resumption_data_processor_mock_, SubscribeToResponse(_, _))
+      .Times(2);
+
   // TODO save cid and fid of the subscription
   EXPECT_CALL(event_dispatcher_mock_, raise_event(_)).Times(2);
   EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_, _)).Times(1);
@@ -541,10 +520,8 @@ TEST_F(VehicleInfoPendingResumptionHandlerTest, TwoAppsOneSharedDataSuccess) {
   application_manager::event_engine::Event event(
       VehicleInfo_SubscribeVehicleData);
   event.set_smart_object(response);
-  resumption_handler_->HandleResumptionSubscriptionRequest(
-      *ext, get_subscriber(), *mock_app);
-  resumption_handler_->HandleResumptionSubscriptionRequest(
-      *ext2, get_subscriber(), *mock_app2);
+  resumption_handler_->HandleResumptionSubscriptionRequest(*ext, *mock_app);
+  resumption_handler_->HandleResumptionSubscriptionRequest(*ext2, *mock_app2);
   // TODO check that raized the same fid and cid as subscribed
   resumption_handler_->on_event(event);
   EXPECT_TRUE(ext->isSubscribedToVehicleInfo("gps"));
@@ -570,7 +547,9 @@ TEST_F(VehicleInfoPendingResumptionHandlerTest,
           CreateModuleInfoSO(VehicleInfo_SubscribeVehicleData, _))
       .WillByDefault(Return(request));
 
-  EXPECT_CALL(subscribe_catcher_, subscribe(_, _)).Times(2);
+  EXPECT_CALL(resumption_data_processor_mock_, SubscribeToResponse(_, _))
+      .Times(2);
+
   // TODO save cid and fid of the subscription
   EXPECT_CALL(event_dispatcher_mock_, raise_event(_)).Times(2);
   EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_, _)).Times(1);
@@ -586,10 +565,8 @@ TEST_F(VehicleInfoPendingResumptionHandlerTest,
   application_manager::event_engine::Event event(
       VehicleInfo_SubscribeVehicleData);
   event.set_smart_object(response);
-  resumption_handler_->HandleResumptionSubscriptionRequest(
-      *ext, get_subscriber(), *mock_app);
-  resumption_handler_->HandleResumptionSubscriptionRequest(
-      *ext2, get_subscriber(), *mock_app2);
+  resumption_handler_->HandleResumptionSubscriptionRequest(*ext, *mock_app);
+  resumption_handler_->HandleResumptionSubscriptionRequest(*ext2, *mock_app2);
   // TODO check that raized the same fid and cid as subscribed
   resumption_handler_->on_event(event);
   EXPECT_TRUE(ext->isSubscribedToVehicleInfo("gps"));
@@ -615,7 +592,9 @@ TEST_F(VehicleInfoPendingResumptionHandlerTest,
           CreateModuleInfoSO(VehicleInfo_SubscribeVehicleData, _))
       .WillByDefault(Return(request));
 
-  EXPECT_CALL(subscribe_catcher_, subscribe(_, _)).Times(2);
+  EXPECT_CALL(resumption_data_processor_mock_, SubscribeToResponse(_, _))
+      .Times(2);
+
   // TODO save cid and fid of the subscription
   EXPECT_CALL(event_dispatcher_mock_, raise_event(_)).Times(2);
   EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_, _)).Times(2);
@@ -631,10 +610,8 @@ TEST_F(VehicleInfoPendingResumptionHandlerTest,
   application_manager::event_engine::Event event(
       VehicleInfo_SubscribeVehicleData);
   event.set_smart_object(response);
-  resumption_handler_->HandleResumptionSubscriptionRequest(
-      *ext, get_subscriber(), *mock_app);
-  resumption_handler_->HandleResumptionSubscriptionRequest(
-      *ext2, get_subscriber(), *mock_app2);
+  resumption_handler_->HandleResumptionSubscriptionRequest(*ext, *mock_app);
+  resumption_handler_->HandleResumptionSubscriptionRequest(*ext2, *mock_app2);
   // TODO check that raized the same fid and cid as subscribed
   resumption_handler_->on_event(event);
 

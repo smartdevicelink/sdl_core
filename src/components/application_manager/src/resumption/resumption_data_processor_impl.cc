@@ -32,7 +32,7 @@
 #include "application_manager/display_capabilities_builder.h"
 #include "application_manager/event_engine/event_observer.h"
 #include "application_manager/message_helper.h"
-#include "application_manager/resumption/resumption_data_processor.h"
+#include "application_manager/resumption/resumption_data_processor_impl.h"
 #include "application_manager/rpc_plugins/rc_rpc_plugin/include/rc_rpc_plugin/rc_module_constants.h"
 #include "application_manager/smart_object_keys.h"
 
@@ -63,7 +63,7 @@ bool ResumptionRequestID::operator<(const ResumptionRequestID& other) const {
          function_id < other.function_id;
 }
 
-ResumptionDataProcessor::ResumptionDataProcessor(
+ResumptionDataProcessorImpl::ResumptionDataProcessorImpl(
     app_mngr::ApplicationManager& application_manager)
     : event_engine::EventObserver(application_manager.event_dispatcher())
     , application_manager_(application_manager)
@@ -71,11 +71,12 @@ ResumptionDataProcessor::ResumptionDataProcessor(
     , register_callbacks_lock_()
     , request_app_ids_lock_() {}
 
-ResumptionDataProcessor::~ResumptionDataProcessor() {}
+ResumptionDataProcessorImpl::~ResumptionDataProcessorImpl() {}
 
-void ResumptionDataProcessor::Restore(ApplicationSharedPtr application,
-                                      smart_objects::SmartObject& saved_app,
-                                      ResumeCtrl::ResumptionCallBack callback) {
+void ResumptionDataProcessorImpl::Restore(
+    ApplicationSharedPtr application,
+    smart_objects::SmartObject& saved_app,
+    ResumeCtrl::ResumptionCallBack callback) {
   SDL_LOG_AUTO_TRACE();
 
   if (!HasDataToRestore(saved_app)) {
@@ -111,7 +112,7 @@ void ResumptionDataProcessor::Restore(ApplicationSharedPtr application,
   }
 }
 
-bool ResumptionDataProcessor::HasDataToRestore(
+bool ResumptionDataProcessorImpl::HasDataToRestore(
     const smart_objects::SmartObject& saved_app) const {
   SDL_LOG_AUTO_TRACE();
 
@@ -185,7 +186,8 @@ bool ResumptionDataProcessor::HasDataToRestore(
   return false;
 }
 
-utils::Optional<uint32_t> ResumptionDataProcessor::GetAppIdWaitingForResponse(
+utils::Optional<uint32_t>
+ResumptionDataProcessorImpl::GetAppIdWaitingForResponse(
     const hmi_apis::FunctionID::eType function_id, const int32_t corr_id) {
   SDL_LOG_AUTO_TRACE();
 
@@ -206,7 +208,7 @@ utils::Optional<uint32_t> ResumptionDataProcessor::GetAppIdWaitingForResponse(
   return utils::Optional<uint32_t>(app_id_ptr->second);
 }
 
-utils::Optional<ResumptionRequest> ResumptionDataProcessor::GetRequest(
+utils::Optional<ResumptionRequest> ResumptionDataProcessorImpl::GetRequest(
     const uint32_t app_id,
     const hmi_apis::FunctionID::eType function_id,
     const int32_t corr_id) {
@@ -235,7 +237,7 @@ utils::Optional<ResumptionRequest> ResumptionDataProcessor::GetRequest(
   return utils::Optional<ResumptionRequest>(*request_iter);
 }
 
-void ResumptionDataProcessor::ProcessResumptionStatus(
+void ResumptionDataProcessorImpl::ProcessResumptionStatus(
     const uint32_t app_id,
     const smart_objects::SmartObject& response,
     const ResumptionRequest& found_request) {
@@ -266,7 +268,7 @@ void ResumptionDataProcessor::ProcessResumptionStatus(
   }
 }
 
-bool ResumptionDataProcessor::IsResumptionFinished(
+bool ResumptionDataProcessorImpl::IsResumptionFinished(
     const uint32_t app_id, const ResumptionRequest& found_request) {
   SDL_LOG_AUTO_TRACE();
 
@@ -288,7 +290,7 @@ bool ResumptionDataProcessor::IsResumptionFinished(
 }
 
 utils::Optional<ResumeCtrl::ResumptionCallBack>
-ResumptionDataProcessor::GetResumptionCallback(const uint32_t app_id) {
+ResumptionDataProcessorImpl::GetResumptionCallback(const uint32_t app_id) {
   SDL_LOG_AUTO_TRACE();
 
   sync_primitives::AutoReadLock lock(register_callbacks_lock_);
@@ -300,7 +302,8 @@ ResumptionDataProcessor::GetResumptionCallback(const uint32_t app_id) {
   return utils::Optional<ResumeCtrl::ResumptionCallBack>(it->second);
 }
 
-bool ResumptionDataProcessor::IsResumptionSuccessful(const uint32_t app_id) {
+bool ResumptionDataProcessorImpl::IsResumptionSuccessful(
+    const uint32_t app_id) {
   sync_primitives::AutoReadLock lock(resumption_status_lock_);
   auto it = resumption_status_.find(app_id);
   if (resumption_status_.end() == it) {
@@ -313,7 +316,7 @@ bool ResumptionDataProcessor::IsResumptionSuccessful(const uint32_t app_id) {
          status.unsuccessful_module_subscriptions_.empty();
 }
 
-void ResumptionDataProcessor::EraseAppResumptionData(
+void ResumptionDataProcessorImpl::EraseAppResumptionData(
     const uint32_t app_id,
     const hmi_apis::FunctionID::eType function_id,
     const int32_t corr_id) {
@@ -332,7 +335,7 @@ void ResumptionDataProcessor::EraseAppResumptionData(
   register_callbacks_lock_.Release();
 }
 
-void ResumptionDataProcessor::ProcessResponseFromHMI(
+void ResumptionDataProcessorImpl::ProcessResponseFromHMI(
     const smart_objects::SmartObject& response,
     const hmi_apis::FunctionID::eType function_id,
     const int32_t corr_id) {
@@ -387,7 +390,7 @@ void ResumptionDataProcessor::ProcessResponseFromHMI(
   EraseAppResumptionData(app_id, function_id, corr_id);
 }
 
-void ResumptionDataProcessor::HandleOnTimeOut(
+void ResumptionDataProcessorImpl::HandleOnTimeOut(
     const uint32_t corr_id, const hmi_apis::FunctionID::eType function_id) {
   SDL_LOG_AUTO_TRACE();
   SDL_LOG_DEBUG("Handling timeout with corr id: "
@@ -401,7 +404,7 @@ void ResumptionDataProcessor::HandleOnTimeOut(
   ProcessResponseFromHMI(*error_response, function_id, corr_id);
 }
 
-void ResumptionDataProcessor::on_event(const event_engine::Event& event) {
+void ResumptionDataProcessorImpl::on_event(const event_engine::Event& event) {
   SDL_LOG_AUTO_TRACE();
   SDL_LOG_DEBUG(
       "Handling response message from HMI "
@@ -432,7 +435,7 @@ std::vector<ResumptionRequest> GetAllFailedRequests(
   return failed_requests;
 }
 
-void ResumptionDataProcessor::RevertRestoredData(
+void ResumptionDataProcessorImpl::RevertRestoredData(
     ApplicationSharedPtr application) {
   SDL_LOG_AUTO_TRACE();
   SDL_LOG_DEBUG("Reverting for app: " << application->app_id());
@@ -452,7 +455,7 @@ void ResumptionDataProcessor::RevertRestoredData(
   register_callbacks_lock_.Release();
 }
 
-void ResumptionDataProcessor::SubscribeToResponse(
+void ResumptionDataProcessorImpl::SubscribeToResponse(
     const int32_t app_id, const ResumptionRequest& request) {
   SDL_LOG_AUTO_TRACE();
   SDL_LOG_DEBUG("App " << app_id << " subscribe on "
@@ -470,7 +473,7 @@ void ResumptionDataProcessor::SubscribeToResponse(
   request_app_ids_lock_.Release();
 }
 
-void ResumptionDataProcessor::ProcessMessageToHMI(
+void ResumptionDataProcessorImpl::ProcessMessageToHMI(
     smart_objects::SmartObjectSPtr message, bool subscribe_on_response) {
   SDL_LOG_AUTO_TRACE();
   if (subscribe_on_response) {
@@ -495,7 +498,7 @@ void ResumptionDataProcessor::ProcessMessageToHMI(
   }
 }
 
-void ResumptionDataProcessor::ProcessMessagesToHMI(
+void ResumptionDataProcessorImpl::ProcessMessagesToHMI(
     const smart_objects::SmartObjectList& messages) {
   SDL_LOG_AUTO_TRACE();
   for (const auto& message : messages) {
@@ -507,7 +510,7 @@ void ResumptionDataProcessor::ProcessMessagesToHMI(
   }
 }
 
-void ResumptionDataProcessor::AddFiles(
+void ResumptionDataProcessorImpl::AddFiles(
     app_mngr::ApplicationSharedPtr application,
     const smart_objects::SmartObject& saved_app) {
   SDL_LOG_AUTO_TRACE();
@@ -535,7 +538,7 @@ void ResumptionDataProcessor::AddFiles(
   }
 }
 
-void ResumptionDataProcessor::AddWindows(
+void ResumptionDataProcessorImpl::AddWindows(
     application_manager::ApplicationSharedPtr application,
     const ns_smart_device_link::ns_smart_objects::SmartObject& saved_app) {
   SDL_LOG_AUTO_TRACE();
@@ -552,7 +555,7 @@ void ResumptionDataProcessor::AddWindows(
   ProcessMessagesToHMI(request_list);
 }
 
-void ResumptionDataProcessor::AddSubmenus(
+void ResumptionDataProcessorImpl::AddSubmenus(
     ApplicationSharedPtr application,
     const smart_objects::SmartObject& saved_app) {
   SDL_LOG_AUTO_TRACE();
@@ -596,7 +599,8 @@ utils::Optional<ResumptionRequest> FindResumptionSubmenuRequest(
   return Optional<ResumptionRequest>::OptionalEmpty::EMPTY;
 }
 
-void ResumptionDataProcessor::DeleteSubmenus(ApplicationSharedPtr application) {
+void ResumptionDataProcessorImpl::DeleteSubmenus(
+    ApplicationSharedPtr application) {
   SDL_LOG_AUTO_TRACE();
 
   auto failed_requests = GetAllFailedRequests(
@@ -616,7 +620,7 @@ void ResumptionDataProcessor::DeleteSubmenus(ApplicationSharedPtr application) {
   }
 }
 
-void ResumptionDataProcessor::AddCommands(
+void ResumptionDataProcessorImpl::AddCommands(
     ApplicationSharedPtr application,
     const smart_objects::SmartObject& saved_app) {
   SDL_LOG_AUTO_TRACE();
@@ -674,7 +678,8 @@ utils::Optional<ResumptionRequest> FindCommandResumptionRequest(
   return Optional<ResumptionRequest>::OptionalEmpty::EMPTY;
 }
 
-void ResumptionDataProcessor::DeleteCommands(ApplicationSharedPtr application) {
+void ResumptionDataProcessorImpl::DeleteCommands(
+    ApplicationSharedPtr application) {
   SDL_LOG_AUTO_TRACE();
 
   auto failed_requests = GetAllFailedRequests(
@@ -733,7 +738,7 @@ void ResumptionDataProcessor::DeleteCommands(ApplicationSharedPtr application) {
   }
 }
 
-void ResumptionDataProcessor::AddChoicesets(
+void ResumptionDataProcessorImpl::AddChoicesets(
     ApplicationSharedPtr application,
     const smart_objects::SmartObject& saved_app) {
   SDL_LOG_AUTO_TRACE();
@@ -779,7 +784,7 @@ utils::Optional<ResumptionRequest> FindResumptionChoiceSetRequest(
   return Optional<ResumptionRequest>::OptionalEmpty::EMPTY;
 }
 
-void ResumptionDataProcessor::DeleteChoicesets(
+void ResumptionDataProcessorImpl::DeleteChoicesets(
     ApplicationSharedPtr application) {
   SDL_LOG_AUTO_TRACE();
 
@@ -799,7 +804,7 @@ void ResumptionDataProcessor::DeleteChoicesets(
   }
 }
 
-void ResumptionDataProcessor::SetGlobalProperties(
+void ResumptionDataProcessorImpl::SetGlobalProperties(
     ApplicationSharedPtr application,
     const smart_objects::SmartObject& saved_app) {
   SDL_LOG_AUTO_TRACE();
@@ -816,7 +821,7 @@ void ResumptionDataProcessor::SetGlobalProperties(
       application, application_manager_));
 }
 
-void ResumptionDataProcessor::DeleteGlobalProperties(
+void ResumptionDataProcessorImpl::DeleteGlobalProperties(
     ApplicationSharedPtr application) {
   SDL_LOG_AUTO_TRACE();
   const uint32_t app_id = application->app_id();
@@ -873,7 +878,7 @@ void ResumptionDataProcessor::DeleteGlobalProperties(
   }
 }
 
-void ResumptionDataProcessor::AddSubscriptions(
+void ResumptionDataProcessorImpl::AddSubscriptions(
     ApplicationSharedPtr application,
     const smart_objects::SmartObject& saved_app) {
   SDL_LOG_AUTO_TRACE();
@@ -882,7 +887,7 @@ void ResumptionDataProcessor::AddSubscriptions(
   AddPluginsSubscriptions(application, saved_app);
 }
 
-void ResumptionDataProcessor::AddButtonsSubscriptions(
+void ResumptionDataProcessorImpl::AddButtonsSubscriptions(
     ApplicationSharedPtr application,
     const smart_objects::SmartObject& saved_app) {
   SDL_LOG_AUTO_TRACE();
@@ -914,7 +919,7 @@ void ResumptionDataProcessor::AddButtonsSubscriptions(
   }
 }
 
-ButtonSubscriptions ResumptionDataProcessor::GetButtonSubscriptionsToResume(
+ButtonSubscriptions ResumptionDataProcessorImpl::GetButtonSubscriptionsToResume(
     ApplicationSharedPtr application) const {
   ButtonSubscriptions button_subscriptions =
       application->SubscribedButtons().GetData();
@@ -927,28 +932,24 @@ ButtonSubscriptions ResumptionDataProcessor::GetButtonSubscriptionsToResume(
   return button_subscriptions;
 }
 
-void ResumptionDataProcessor::AddPluginsSubscriptions(
+void ResumptionDataProcessorImpl::AddPluginsSubscriptions(
     ApplicationSharedPtr application,
     const smart_objects::SmartObject& saved_app) {
   SDL_LOG_AUTO_TRACE();
 
   for (auto& extension : application->Extensions()) {
-    extension->ProcessResumption(
-        saved_app,
-        [this](const int32_t app_id, const ResumptionRequest request) {
-          this->SubscribeToResponse(app_id, request);
-        });
+    extension->ProcessResumption(saved_app);
   }
 }
 
-void ResumptionDataProcessor::DeleteSubscriptions(
+void ResumptionDataProcessorImpl::DeleteSubscriptions(
     ApplicationSharedPtr application) {
   SDL_LOG_AUTO_TRACE();
   DeleteButtonsSubscriptions(application);
   DeletePluginsSubscriptions(application);
 }
 
-void ResumptionDataProcessor::DeleteButtonsSubscriptions(
+void ResumptionDataProcessorImpl::DeleteButtonsSubscriptions(
     ApplicationSharedPtr application) {
   SDL_LOG_AUTO_TRACE();
   const ButtonSubscriptions button_subscriptions =
@@ -966,7 +967,7 @@ void ResumptionDataProcessor::DeleteButtonsSubscriptions(
   }
 }
 
-void ResumptionDataProcessor::DeleteWindowsSubscriptions(
+void ResumptionDataProcessorImpl::DeleteWindowsSubscriptions(
     ApplicationSharedPtr application) {
   SDL_LOG_AUTO_TRACE();
 
@@ -991,7 +992,7 @@ void ResumptionDataProcessor::DeleteWindowsSubscriptions(
   }
 }
 
-void ResumptionDataProcessor::DeletePluginsSubscriptions(
+void ResumptionDataProcessorImpl::DeletePluginsSubscriptions(
     application_manager::ApplicationSharedPtr application) {
   SDL_LOG_AUTO_TRACE();
 
@@ -1048,7 +1049,7 @@ bool IsResponseSuccessful(const smart_objects::SmartObject& response) {
   return !response[strings::params].keyExists(strings::error_msg);
 }
 
-void ResumptionDataProcessor::CheckVehicleDataResponse(
+void ResumptionDataProcessorImpl::CheckVehicleDataResponse(
     const smart_objects::SmartObject& request,
     const smart_objects::SmartObject& response,
     ApplicationResumptionStatus& status) {
@@ -1083,7 +1084,7 @@ void ResumptionDataProcessor::CheckVehicleDataResponse(
   }
 }
 
-void ResumptionDataProcessor::CheckModuleDataSubscription(
+void ResumptionDataProcessorImpl::CheckModuleDataSubscription(
     const ns_smart_device_link::ns_smart_objects::SmartObject& request,
     const ns_smart_device_link::ns_smart_objects::SmartObject& response,
     ApplicationResumptionStatus& status) {
@@ -1147,7 +1148,7 @@ void ResumptionDataProcessor::CheckModuleDataSubscription(
   }
 }
 
-void ResumptionDataProcessor::CheckCreateWindowResponse(
+void ResumptionDataProcessorImpl::CheckCreateWindowResponse(
     const smart_objects::SmartObject& request,
     const smart_objects::SmartObject& response) const {
   SDL_LOG_AUTO_TRACE();

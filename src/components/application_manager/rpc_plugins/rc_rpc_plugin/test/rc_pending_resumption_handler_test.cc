@@ -33,6 +33,8 @@
 #include "application_manager/mock_application.h"
 #include "application_manager/mock_event_dispatcher.h"
 #include "application_manager/mock_message_helper.h"
+#include "application_manager/mock_resume_ctrl.h"
+#include "application_manager/mock_resumption_data_processor.h"
 #include "application_manager/mock_rpc_service.h"
 #include "application_manager/smart_object_keys.h"
 #include "gtest/gtest.h"
@@ -54,6 +56,8 @@ using ::testing::SaveArg;
 using rc_rpc_plugin::ModuleUid;
 
 using application_manager::MockMessageHelper;
+using test::components::resumption_test::MockResumeCtrl;
+using test::components::resumption_test::MockResumptionDataProcessor;
 typedef NiceMock< ::test::components::event_engine_test::MockEventDispatcher>
     MockEventDispatcher;
 
@@ -77,12 +81,6 @@ const std::string kModuleId_2 = "357a3918-9f35-4d86-a8b6-60cd4308d76f";
 const uint32_t kRCPluginID = rc_rpc_plugin::RCRPCPlugin::kRCPluginID;
 const auto kSourceHMI = application_manager::commands::Command::SOURCE_HMI;
 }  // namespace
-
-class SubscribeCatcher {
- public:
-  MOCK_METHOD2(subscribe,
-               void(const int32_t, const resumption::ResumptionRequest));
-};
 
 /**
  * @brief EventCheck check that event contains apropriate data,
@@ -129,6 +127,10 @@ class RCPendingResumptionHandlerTest : public ::testing::Test {
         .WillByDefault(Return(kCorrelationId));
     ON_CALL(app_manager_mock_, applications())
         .WillByDefault(Return(applications_));
+    ON_CALL(app_manager_mock_, resume_controller())
+        .WillByDefault(ReturnRef(resume_ctrl_mock_));
+    ON_CALL(resume_ctrl_mock_, resumption_data_processor())
+        .WillByDefault(ReturnRef(resumption_data_processor_mock_));
     resumption_handler_.reset(new rc_rpc_plugin::RCPendingResumptionHandler(
         app_manager_mock_, cache_));
   }
@@ -175,21 +177,13 @@ class RCPendingResumptionHandlerTest : public ::testing::Test {
     return rc_app_ext;
   }
 
-  resumption::Subscriber get_subscriber() {
-    resumption::Subscriber subscriber =
-        [this](const int32_t corr_id,
-               const resumption::ResumptionRequest resumption_request) {
-          this->subscribe_catcher_.subscribe(corr_id, resumption_request);
-        };
-    return subscriber;
-  }
-
  protected:
-  SubscribeCatcher subscribe_catcher_;
   application_manager::ApplicationSet application_set_;
   std::shared_ptr<sync_primitives::Lock> applications_lock_;
   DataAccessor<application_manager::ApplicationSet> applications_;
   MockMessageHelper& mock_message_helper_;
+  MockResumeCtrl resume_ctrl_mock_;
+  MockResumptionDataProcessor resumption_data_processor_mock_;
   MockApplicationManager app_manager_mock_;
   MockEventDispatcher event_dispatcher_mock_;
   MockRPCService mock_rpc_service_;
@@ -203,12 +197,12 @@ TEST_F(RCPendingResumptionHandlerTest, HandleResumptionNoSubscriptionNoAction) {
   auto mock_app = CreateApp(kAppId_1);
   auto rc_app_ext = CreateExtension(*mock_app);
 
-  EXPECT_CALL(subscribe_catcher_, subscribe(_, _)).Times(0);
+  EXPECT_CALL(resumption_data_processor_mock_, SubscribeToResponse(_, _))
+      .Times(0);
   EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_, _)).Times(0);
 
-  auto subscribe = get_subscriber();
-  resumption_handler_->HandleResumptionSubscriptionRequest(
-      *rc_app_ext, subscribe, *mock_app);
+  resumption_handler_->HandleResumptionSubscriptionRequest(*rc_app_ext,
+                                                           *mock_app);
 }
 
 TEST_F(RCPendingResumptionHandlerTest,
@@ -221,13 +215,13 @@ TEST_F(RCPendingResumptionHandlerTest,
 
   EXPECT_CALL(app_manager_mock_, GetNextHMICorrelationID())
       .WillOnce(Return(kAppId_1));
-  EXPECT_CALL(subscribe_catcher_, subscribe(kAppId_1, _));
+  EXPECT_CALL(resumption_data_processor_mock_,
+              SubscribeToResponse(kAppId_1, _));
   EXPECT_CALL(mock_rpc_service_,
               ManageHMICommand(MessageCheck(kAppId_1), kSourceHMI));
 
-  auto subscribe = get_subscriber();
-  resumption_handler_->HandleResumptionSubscriptionRequest(
-      *rc_app_ext, subscribe, *mock_app);
+  resumption_handler_->HandleResumptionSubscriptionRequest(*rc_app_ext,
+                                                           *mock_app);
 }
 
 TEST_F(RCPendingResumptionHandlerTest,
@@ -245,19 +239,20 @@ TEST_F(RCPendingResumptionHandlerTest,
     InSequence in_sequence;
     EXPECT_CALL(app_manager_mock_, GetNextHMICorrelationID())
         .WillOnce(Return(kAppId_1));
-    EXPECT_CALL(subscribe_catcher_, subscribe(kAppId_1, _));
+    EXPECT_CALL(resumption_data_processor_mock_,
+                SubscribeToResponse(kAppId_1, _));
     EXPECT_CALL(mock_rpc_service_,
                 ManageHMICommand(MessageCheck(kAppId_1), kSourceHMI));
     EXPECT_CALL(app_manager_mock_, GetNextHMICorrelationID())
         .WillOnce(Return(kAppId_2));
-    EXPECT_CALL(subscribe_catcher_, subscribe(kAppId_1, _));
+    EXPECT_CALL(resumption_data_processor_mock_,
+                SubscribeToResponse(kAppId_1, _));
     EXPECT_CALL(mock_rpc_service_,
                 ManageHMICommand(MessageCheck(kAppId_2), kSourceHMI));
   }
 
-  auto subscribe = get_subscriber();
-  resumption_handler_->HandleResumptionSubscriptionRequest(
-      *rc_app_ext, subscribe, *mock_app);
+  resumption_handler_->HandleResumptionSubscriptionRequest(*rc_app_ext,
+                                                           *mock_app);
 }
 
 TEST_F(RCPendingResumptionHandlerTest,
@@ -268,26 +263,26 @@ TEST_F(RCPendingResumptionHandlerTest,
   ModuleUid module_uid = {kModuleType_1, kModuleId_1};
   rc_app_ext->AddPendingSubscription(module_uid);
 
-  auto subscribe = get_subscriber();
-
   EXPECT_CALL(app_manager_mock_, GetNextHMICorrelationID())
       .WillOnce(Return(kAppId_1));
-  EXPECT_CALL(subscribe_catcher_, subscribe(kAppId_1, _));
+  EXPECT_CALL(resumption_data_processor_mock_,
+              SubscribeToResponse(kAppId_1, _));
   EXPECT_CALL(mock_rpc_service_,
               ManageHMICommand(MessageCheck(kAppId_1), kSourceHMI));
 
-  resumption_handler_->HandleResumptionSubscriptionRequest(
-      *rc_app_ext, subscribe, *mock_app);
+  resumption_handler_->HandleResumptionSubscriptionRequest(*rc_app_ext,
+                                                           *mock_app);
 
   auto rc_app_ext_2 = CreateExtension(*mock_app);
   rc_app_ext_2->AddPendingSubscription(module_uid);
 
   EXPECT_CALL(app_manager_mock_, GetNextHMICorrelationID());
-  EXPECT_CALL(subscribe_catcher_, subscribe(kAppId_1, _));
+  EXPECT_CALL(resumption_data_processor_mock_,
+              SubscribeToResponse(kAppId_1, _));
   EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_, _)).Times(0);
 
-  resumption_handler_->HandleResumptionSubscriptionRequest(
-      *rc_app_ext_2, subscribe, *mock_app);
+  resumption_handler_->HandleResumptionSubscriptionRequest(*rc_app_ext_2,
+                                                           *mock_app);
 }
 
 TEST_F(RCPendingResumptionHandlerTest,
@@ -298,16 +293,15 @@ TEST_F(RCPendingResumptionHandlerTest,
   ModuleUid module_uid_1 = {kModuleType_1, kModuleId_1};
   rc_app_ext->AddPendingSubscription(module_uid_1);
 
-  auto subscribe = get_subscriber();
-
   EXPECT_CALL(app_manager_mock_, GetNextHMICorrelationID())
       .WillOnce(Return(kAppId_1));
-  EXPECT_CALL(subscribe_catcher_, subscribe(kAppId_1, _));
+  EXPECT_CALL(resumption_data_processor_mock_,
+              SubscribeToResponse(kAppId_1, _));
   EXPECT_CALL(mock_rpc_service_,
               ManageHMICommand(MessageCheck(kAppId_1), kSourceHMI));
 
-  resumption_handler_->HandleResumptionSubscriptionRequest(
-      *rc_app_ext, subscribe, *mock_app);
+  resumption_handler_->HandleResumptionSubscriptionRequest(*rc_app_ext,
+                                                           *mock_app);
 
   auto rc_app_ext_2 = CreateExtension(*mock_app);
   ModuleUid module_uid_2 = {kModuleType_2, kModuleId_2};
@@ -318,16 +312,18 @@ TEST_F(RCPendingResumptionHandlerTest,
     InSequence in_sequence;
     EXPECT_CALL(app_manager_mock_, GetNextHMICorrelationID())
         .WillOnce(Return(kAppId_1));
-    EXPECT_CALL(subscribe_catcher_, subscribe(kAppId_1, _));
+    EXPECT_CALL(resumption_data_processor_mock_,
+                SubscribeToResponse(kAppId_1, _));
     EXPECT_CALL(app_manager_mock_, GetNextHMICorrelationID())
         .WillOnce(Return(kAppId_2));
-    EXPECT_CALL(subscribe_catcher_, subscribe(kAppId_1, _));
+    EXPECT_CALL(resumption_data_processor_mock_,
+                SubscribeToResponse(kAppId_1, _));
     EXPECT_CALL(mock_rpc_service_,
                 ManageHMICommand(MessageCheck(kAppId_2), kSourceHMI));
   }
 
-  resumption_handler_->HandleResumptionSubscriptionRequest(
-      *rc_app_ext_2, subscribe, *mock_app);
+  resumption_handler_->HandleResumptionSubscriptionRequest(*rc_app_ext_2,
+                                                           *mock_app);
 }
 
 TEST_F(RCPendingResumptionHandlerTest,
@@ -338,16 +334,15 @@ TEST_F(RCPendingResumptionHandlerTest,
   ModuleUid module_uid = {kModuleType_1, kModuleId_1};
   rc_app_ext->AddPendingSubscription(module_uid);
 
-  auto subscribe = get_subscriber();
-
   EXPECT_CALL(app_manager_mock_, GetNextHMICorrelationID())
       .WillOnce(Return(kAppId_1));
-  EXPECT_CALL(subscribe_catcher_, subscribe(kAppId_1, _));
+  EXPECT_CALL(resumption_data_processor_mock_,
+              SubscribeToResponse(kAppId_1, _));
   EXPECT_CALL(mock_rpc_service_,
               ManageHMICommand(MessageCheck(kAppId_1), kSourceHMI));
 
-  resumption_handler_->HandleResumptionSubscriptionRequest(
-      *rc_app_ext, subscribe, *mock_app_1);
+  resumption_handler_->HandleResumptionSubscriptionRequest(*rc_app_ext,
+                                                           *mock_app_1);
 
   auto mock_app_2 = CreateApp(kAppId_2);
   auto rc_app_ext_2 = CreateExtension(*mock_app_2);
@@ -356,11 +351,12 @@ TEST_F(RCPendingResumptionHandlerTest,
 
   EXPECT_CALL(app_manager_mock_, GetNextHMICorrelationID())
       .WillOnce(Return(kAppId_2));
-  EXPECT_CALL(subscribe_catcher_, subscribe(kAppId_2, _));
+  EXPECT_CALL(resumption_data_processor_mock_,
+              SubscribeToResponse(kAppId_2, _));
   EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_, _)).Times(0);
 
-  resumption_handler_->HandleResumptionSubscriptionRequest(
-      *rc_app_ext_2, subscribe, *mock_app_2);
+  resumption_handler_->HandleResumptionSubscriptionRequest(*rc_app_ext_2,
+                                                           *mock_app_2);
 
   auto response =
       CreateHMIResponseMessage(application_manager::MessageType::kResponse,
@@ -384,15 +380,14 @@ TEST_F(RCPendingResumptionHandlerTest,
   ModuleUid module_uid = {kModuleType_1, kModuleId_1};
   rc_app_ext->AddPendingSubscription(module_uid);
 
-  auto subscribe = get_subscriber();
-
   EXPECT_CALL(app_manager_mock_, GetNextHMICorrelationID())
       .WillOnce(Return(kAppId_1));
-  EXPECT_CALL(subscribe_catcher_, subscribe(kAppId_1, _));
+  EXPECT_CALL(resumption_data_processor_mock_,
+              SubscribeToResponse(kAppId_1, _));
   EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_, _));
 
-  resumption_handler_->HandleResumptionSubscriptionRequest(
-      *rc_app_ext, subscribe, *mock_app_1);
+  resumption_handler_->HandleResumptionSubscriptionRequest(*rc_app_ext,
+                                                           *mock_app_1);
 
   auto mock_app_2 = CreateApp(kAppId_2);
   auto rc_app_ext_2 = CreateExtension(*mock_app_2);
@@ -401,11 +396,12 @@ TEST_F(RCPendingResumptionHandlerTest,
 
   EXPECT_CALL(app_manager_mock_, GetNextHMICorrelationID())
       .WillOnce(Return(kAppId_2));
-  EXPECT_CALL(subscribe_catcher_, subscribe(kAppId_2, _));
+  EXPECT_CALL(resumption_data_processor_mock_,
+              SubscribeToResponse(kAppId_2, _));
   EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_, _)).Times(0);
 
-  resumption_handler_->HandleResumptionSubscriptionRequest(
-      *rc_app_ext_2, subscribe, *mock_app_2);
+  resumption_handler_->HandleResumptionSubscriptionRequest(*rc_app_ext_2,
+                                                           *mock_app_2);
 
   auto response =
       CreateHMIResponseMessage(application_manager::MessageType::kErrorResponse,

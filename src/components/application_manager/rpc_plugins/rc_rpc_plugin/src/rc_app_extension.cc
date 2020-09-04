@@ -151,8 +151,7 @@ void RCAppExtension::SaveResumptionData(
 }
 
 void RCAppExtension::ProcessResumption(
-    const smart_objects::SmartObject& saved_app,
-    resumption::Subscriber subscriber) {
+    const smart_objects::SmartObject& saved_app) {
   SDL_LOG_AUTO_TRACE();
   SDL_LOG_TRACE("app id : " << application_.app_id());
 
@@ -187,7 +186,7 @@ void RCAppExtension::ProcessResumption(
     AddPendingSubscription(module);
   }
 
-  plugin_.ProcessResumptionSubscription(application_, *this, subscriber);
+  plugin_.ProcessResumptionSubscription(application_, *this);
 }
 
 void RCAppExtension::RevertResumption(

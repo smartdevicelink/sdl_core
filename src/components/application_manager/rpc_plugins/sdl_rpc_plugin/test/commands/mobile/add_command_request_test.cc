@@ -49,6 +49,7 @@
 #include "application_manager/mock_hmi_interface.h"
 #include "application_manager/mock_message_helper.h"
 #include "application_manager/mock_resume_ctrl.h"
+#include "application_manager/resumption/resumption_data_processor.h"
 #include "application_manager/smart_object_keys.h"
 #include "smart_objects/smart_object.h"
 #include "utils/custom_string.h"

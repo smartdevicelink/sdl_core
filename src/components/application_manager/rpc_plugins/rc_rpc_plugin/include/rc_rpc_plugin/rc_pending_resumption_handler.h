@@ -3,7 +3,7 @@
 #include <map>
 #include <queue>
 #include "application_manager/event_engine/event_observer.h"
-#include "application_manager/resumption/extension_pending_resumption_handler.h"
+#include "application_manager/resumption/pending_resumption_handler.h"
 #include "application_manager/resumption/resumption_data_processor.h"
 #include "application_manager/rpc_service.h"
 #include "rc_rpc_plugin/interior_data_cache.h"
@@ -16,8 +16,7 @@ namespace rc_rpc_plugin {
  * responsibility to avoid duplication of subscription requests to HMI
  * if multiple applications are registering
  */
-class RCPendingResumptionHandler
-    : public resumption::ExtensionPendingResumptionHandler {
+class RCPendingResumptionHandler : public resumption::PendingResumptionHandler {
  public:
   RCPendingResumptionHandler(
       application_manager::ApplicationManager& application_manager,
@@ -27,7 +26,6 @@ class RCPendingResumptionHandler
 
   void HandleResumptionSubscriptionRequest(
       application_manager::AppExtension& extension,
-      resumption::Subscriber& subscriber,
       application_manager::Application& app) override;
 
   void OnResumptionRevert() override;

@@ -68,11 +68,8 @@ void SystemCapabilityAppExtension::SaveResumptionData(
 }
 
 void SystemCapabilityAppExtension::ProcessResumption(
-    const smart_objects::SmartObject& saved_app,
-    resumption::Subscriber subscriber) {
+    const smart_objects::SmartObject& saved_app) {
   SDL_LOG_AUTO_TRACE();
-
-  UNUSED(subscriber);
 
   const smart_objects::SmartObject& subscriptions =
       saved_app[strings::application_subscriptions];

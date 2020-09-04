@@ -10,7 +10,7 @@ SDL_CREATE_LOG_VARIABLE("RemoteControlModule")
 RCPendingResumptionHandler::RCPendingResumptionHandler(
     application_manager::ApplicationManager& application_manager,
     InteriorDataCache& interior_data_cache)
-    : ExtensionPendingResumptionHandler(application_manager)
+    : PendingResumptionHandler(application_manager)
     , rpc_service_(application_manager.GetRPCService())
     , interior_data_cache_(interior_data_cache) {}
 
@@ -79,7 +79,6 @@ std::string Stringify(RCModulesCollection& collection) {
 
 void RCPendingResumptionHandler::HandleResumptionSubscriptionRequest(
     application_manager::AppExtension& extension,
-    resumption::Subscriber& subscriber,
     application_manager::Application& app) {
   UNUSED(extension);
   SDL_LOG_AUTO_TRACE();
@@ -119,7 +118,8 @@ void RCPendingResumptionHandler::HandleResumptionSubscriptionRequest(
         {app.app_id(), *subscription_request});
     const auto resumption_request =
         MakeResumptionRequest(cid, fid, *subscription_request);
-    subscriber(app.app_id(), resumption_request);
+    resumption_data_processor().SubscribeToResponse(app.app_id(),
+                                                    resumption_request);
     SDL_LOG_DEBUG("Freezed request with correlation_id: "
                   << cid << " module type: " << subscription.first
                   << " module id: " << subscription.second);
@@ -133,7 +133,8 @@ void RCPendingResumptionHandler::HandleResumptionSubscriptionRequest(
         MakeResumptionRequest(cid, fid, *subscription_request);
     AddPendingRequest(app.app_id(), *subscription_request);
     subscribe_on_event(fid, cid);
-    subscriber(app.app_id(), resumption_request);
+    resumption_data_processor().SubscribeToResponse(app.app_id(),
+                                                    resumption_request);
     SDL_LOG_DEBUG("Sending request with correlation id: "
                   << cid << " module type: " << module.first
                   << " module id: " << module.second);

@@ -25,46 +25,52 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_SDL_APP_EXTENSION_H
-#define SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_SDL_APP_EXTENSION_H
+#include "sdl_rpc_plugin/waypoints_app_extension.h"
+#include "sdl_rpc_plugin/sdl_rpc_plugin.h"
 
-#include <application_manager/application_manager.h>
+SDL_CREATE_LOG_VARIABLE("WayPointsAppExtension")
 
 namespace sdl_rpc_plugin {
-class SDLRPCPlugin;
+namespace strings = application_manager::strings;
+unsigned WayPointsAppExtension::WayPointsAppExtensionUID = 138;
 
-namespace app_mngr = application_manager;
+WayPointsAppExtension::WayPointsAppExtension(
+    SDLRPCPlugin& plugin, application_manager::Application& app)
+    : app_mngr::AppExtension(WayPointsAppExtension::WayPointsAppExtensionUID)
+    , plugin_(plugin)
+    , app_(app) {
+  SDL_LOG_AUTO_TRACE();
+}
 
-/**
- * @brief Intended to handle subscriptions on way points
- */
-class SDLAppExtension : public app_mngr::AppExtension {
- public:
-  /**
-   * @brief SDLAppExtension constructor
-   * @param plugin sdl info plugin
-   * @param app application that contains this plugin
-   */
-  SDLAppExtension(SDLRPCPlugin& plugin, app_mngr::Application& app);
-  virtual ~SDLAppExtension();
+WayPointsAppExtension::~WayPointsAppExtension() {
+  SDL_LOG_AUTO_TRACE();
+}
 
-  void SaveResumptionData(smart_objects::SmartObject& resumption_data) OVERRIDE;
+void WayPointsAppExtension::SaveResumptionData(
+    smart_objects::SmartObject& resumption_data) {
+  plugin_.SaveResumptionData(app_, resumption_data);
+}
 
-  void ProcessResumption(const smart_objects::SmartObject& saved_app,
-                         resumption::Subscriber subscriber) OVERRIDE;
+void WayPointsAppExtension::ProcessResumption(
+    const smart_objects::SmartObject& saved_app) {
+  SDL_LOG_AUTO_TRACE();
 
-  void RevertResumption(
-      const smart_objects::SmartObject& resumption_data) OVERRIDE;
+  if (!saved_app.keyExists(strings::subscribed_for_way_points)) {
+    SDL_LOG_ERROR("subscribed_for_way_points section does not exist");
+    return;
+  }
+  const bool subscribed_for_way_points =
+      saved_app[strings::subscribed_for_way_points].asBool();
+  if (subscribed_for_way_points) {
+    plugin_.ProcessResumptionSubscription(app_, *this);
+  }
+}
 
-  /**
-   * @brief SDLAppExtensionUID unique identifier of VehicleInfo
-   * aplication extension
-   */
-  static unsigned SDLAppExtensionUID;
+void WayPointsAppExtension::RevertResumption(
+    const smart_objects::SmartObject& resumption_data) {
+  SDL_LOG_AUTO_TRACE();
+  UNUSED(resumption_data);
 
- private:
-  SDLRPCPlugin& plugin_;
-  app_mngr::Application& app_;
-};
+  plugin_.RevertResumption(app_);
+}
 }  // namespace sdl_rpc_plugin
-#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_SDL_APP_EXTENSION_H

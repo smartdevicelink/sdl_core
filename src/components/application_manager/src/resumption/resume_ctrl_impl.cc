@@ -43,6 +43,7 @@
 #include "application_manager/policies/policy_handler.h"
 #include "application_manager/resumption/resumption_data_db.h"
 #include "application_manager/resumption/resumption_data_json.h"
+#include "application_manager/resumption/resumption_data_processor_impl.h"
 #include "application_manager/state_controller.h"
 #include "connection_handler/connection.h"
 #include "connection_handler/connection_handler_impl.h"
@@ -78,7 +79,8 @@ ResumeCtrlImpl::ResumeCtrlImpl(ApplicationManager& application_manager)
     , low_voltage_time_(0)
     , wake_up_time_(0)
     , application_manager_(application_manager)
-    , resumption_data_processor_(application_manager) {}
+    , resumption_data_processor_(
+          new ResumptionDataProcessorImpl(application_manager)) {}
 #ifdef BUILD_TESTS
 void ResumeCtrlImpl::set_resumption_storage(
     std::shared_ptr<ResumptionData> mock_storage) {
@@ -397,6 +399,10 @@ void ResumeCtrlImpl::StartSavePersistentDataTimer() {
   }
 }
 
+ResumptionDataProcessor& ResumeCtrlImpl::resumption_data_processor() {
+  return *resumption_data_processor_;
+}
+
 void ResumeCtrlImpl::StopSavePersistentDataTimer() {
   SDL_LOG_AUTO_TRACE();
   if (save_persistent_data_timer_.is_running()) {
@@ -431,7 +437,7 @@ bool ResumeCtrlImpl::StartResumption(ApplicationSharedPtr application,
 void ResumeCtrlImpl::HandleOnTimeOut(
     const uint32_t cor_id, const hmi_apis::FunctionID::eType function_id) {
   SDL_LOG_AUTO_TRACE();
-  resumption_data_processor_.HandleOnTimeOut(cor_id, function_id);
+  resumption_data_processor_->HandleOnTimeOut(cor_id, function_id);
 }
 
 bool ResumeCtrlImpl::StartResumptionOnlyHMILevel(
@@ -632,7 +638,7 @@ bool ResumeCtrlImpl::RestoreApplicationData(ApplicationSharedPtr application,
     if (saved_app.keyExists(strings::grammar_id)) {
       const uint32_t app_grammar_id = saved_app[strings::grammar_id].asUInt();
       application->set_grammar_id(app_grammar_id);
-      resumption_data_processor_.Restore(application, saved_app, callback);
+      resumption_data_processor_->Restore(application, saved_app, callback);
       result = true;
     } else {
       SDL_LOG_WARN("Saved data of application does not contain grammar_id");

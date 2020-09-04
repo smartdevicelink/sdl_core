@@ -30,8 +30,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_RESUMPTION_EXTENSION_PENDING_RESUMPTION_HANDLER_H
-#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_RESUMPTION_EXTENSION_PENDING_RESUMPTION_HANDLER_H
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_RESUMPTION_PENDING_RESUMPTION_HANDLER_H
+#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_RESUMPTION_PENDING_RESUMPTION_HANDLER_H
 #include "application_manager/app_extension.h"
 #include "application_manager/application_manager.h"
 #include "application_manager/event_engine/event_observer.h"
@@ -41,17 +41,16 @@ namespace resumption {
 namespace app_mngr = application_manager;
 
 /**
- * @brief The ExtensionPendingResumptionHandler class
- * responsibility to avoid duplication of subscription requests to HMI
- * if multiple applications are registering
+ * @brief The PendingResumptionHandler class responsibility to avoid
+ * duplication of subscription requests to HMI if multiple applications
+ * are registering
  */
-class ExtensionPendingResumptionHandler
+class PendingResumptionHandler
     : public application_manager::event_engine::EventObserver {
  public:
-  ExtensionPendingResumptionHandler(
-      app_mngr::ApplicationManager& application_manager);
+  PendingResumptionHandler(app_mngr::ApplicationManager& application_manager);
 
-  virtual ~ExtensionPendingResumptionHandler() {}
+  virtual ~PendingResumptionHandler() {}
 
   /**
    * @brief HandleResumptionSubscriptionRequest handles all subscriptions
@@ -62,7 +61,6 @@ class ExtensionPendingResumptionHandler
    */
   virtual void HandleResumptionSubscriptionRequest(
       app_mngr::AppExtension& extension,
-      Subscriber& subscriber,
       application_manager::Application& app) = 0;
 
   /**
@@ -70,6 +68,8 @@ class ExtensionPendingResumptionHandler
    * resumption is failed for current application.
    */
   virtual void OnResumptionRevert() = 0;
+
+  resumption::ResumptionDataProcessor& resumption_data_processor();
 
  protected:
   /**
@@ -88,4 +88,4 @@ class ExtensionPendingResumptionHandler
 };
 }  //  namespace resumption
 
-#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_RESUMPTION_EXTENSION_PENDING_RESUMPTION_HANDLER_H
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_RESUMPTION_PENDING_RESUMPTION_HANDLER_H
