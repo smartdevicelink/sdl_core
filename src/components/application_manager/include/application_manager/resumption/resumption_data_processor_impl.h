@@ -52,6 +52,8 @@ struct ApplicationResumptionStatus {
   std::vector<ResumptionRequest> successful_requests;
   std::vector<std::string> unsuccessful_vehicle_data_subscriptions_;
   std::vector<std::string> successful_vehicle_data_subscriptions_;
+  std::vector<ModuleUid> successful_module_subscriptions_;
+  std::vector<ModuleUid> unsuccessful_module_subscriptions_;
 };
 
 /**
@@ -338,6 +340,10 @@ class ResumptionDataProcessorImpl
   void CheckVehicleDataResponse(const smart_objects::SmartObject& request,
                                 const smart_objects::SmartObject& response,
                                 ApplicationResumptionStatus& status);
+
+  void CheckModuleDataSubscription(const smart_objects::SmartObject& request,
+                                   const smart_objects::SmartObject& response,
+                                   ApplicationResumptionStatus& status);
 
   /**
    * @brief Checks whether CreateWindow response successful or not and handles

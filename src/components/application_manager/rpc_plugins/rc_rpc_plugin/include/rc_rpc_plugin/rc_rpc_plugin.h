@@ -37,6 +37,7 @@
 
 #include "application_manager/command_factory.h"
 #include "application_manager/plugin_manager/rpc_plugin.h"
+#include "application_manager/resumption/pending_resumption_handler.h"
 #include "rc_rpc_plugin/interior_data_cache.h"
 #include "rc_rpc_plugin/interior_data_manager.h"
 #include "rc_rpc_plugin/rc_capabilities_manager.h"
@@ -103,6 +104,33 @@ class RCRPCPlugin : public plugins::RPCPlugin {
   void OnApplicationEvent(plugins::ApplicationEvent event,
                           app_mngr::ApplicationSharedPtr application) OVERRIDE;
 
+  /**
+   * @brief ProcessResumptionSubscription send Subscribe vehicle data requests
+   * to HMI
+   * @param app application for subscription
+   * @param ext application extension
+   */
+  void ProcessResumptionSubscription(app_mngr::Application& app,
+                                     RCAppExtension& ext);
+
+  /**
+   * @brief Reverts resumption data, clears all pending resumption and sends
+   * unsubscribe interior vehicle data requests to HMI
+   * @param subscriptions Module data that SDL should unsubscribe off
+   */
+  void RevertResumption(const std::set<ModuleUid>& subscriptions);
+
+  /**
+   * @brief IsOtherAppsSubscribed check if any app except passed is subscribed
+   * to a given module
+   * @param module module to check
+   * @param app_id app to ignore subscription
+   * @return true if any app except passed is subscribed to module, otherwise
+   * false
+   */
+  bool IsOtherAppsSubscribed(const rc_rpc_types::ModuleUid& module,
+                             const uint32_t app_id);
+
   static const uint32_t kRCPluginID = 153;
 
   typedef std::vector<application_manager::ApplicationSharedPtr> Apps;
@@ -118,6 +146,9 @@ class RCRPCPlugin : public plugins::RPCPlugin {
   std::unique_ptr<InteriorDataCache> interior_data_cache_;
   std::unique_ptr<InteriorDataManager> interior_data_manager_;
   std::unique_ptr<RCCapabilitiesManager> rc_capabilities_manager_;
+  using PendingResumptionHandlerSPtr =
+      std::shared_ptr<resumption::PendingResumptionHandler>;
+  PendingResumptionHandlerSPtr pending_resumption_handler_;
 };
 }  // namespace rc_rpc_plugin
 

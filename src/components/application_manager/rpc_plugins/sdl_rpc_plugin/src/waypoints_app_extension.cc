@@ -67,9 +67,9 @@ void WayPointsAppExtension::ProcessResumption(
 }
 
 void WayPointsAppExtension::RevertResumption(
-    const smart_objects::SmartObject& subscriptions) {
+    const smart_objects::SmartObject& resumption_data) {
   SDL_LOG_AUTO_TRACE();
-  UNUSED(subscriptions);
+  UNUSED(resumption_data);
 
   plugin_.RevertResumption(app_);
 }

@@ -33,6 +33,7 @@
 #include "application_manager/event_engine/event_observer.h"
 #include "application_manager/message_helper.h"
 #include "application_manager/resumption/resumption_data_processor_impl.h"
+#include "application_manager/rpc_plugins/rc_rpc_plugin/include/rc_rpc_plugin/rc_module_constants.h"
 #include "application_manager/smart_object_keys.h"
 
 namespace resumption {
@@ -45,8 +46,17 @@ using app_mngr::MessageHelper;
 namespace strings = app_mngr::strings;
 namespace event_engine = app_mngr::event_engine;
 namespace commands = app_mngr::commands;
+namespace message_params = rc_rpc_plugin::message_params;
 
 SDL_CREATE_LOG_VARIABLE("Resumption")
+std::map<hmi_apis::Common_ModuleType::eType, std::string>
+    module_types_str_mapping{
+        {hmi_apis::Common_ModuleType::eType::CLIMATE, {"CLIMATE"}},
+        {hmi_apis::Common_ModuleType::eType::RADIO, {"RADIO"}},
+        {hmi_apis::Common_ModuleType::eType::SEAT, {"SEAT"}},
+        {hmi_apis::Common_ModuleType::eType::AUDIO, {"AUDIO"}},
+        {hmi_apis::Common_ModuleType::eType::LIGHT, {"LIGHT"}},
+        {hmi_apis::Common_ModuleType::eType::HMI_SETTINGS, {"HMI_SETTINGS"}}};
 
 bool ResumptionRequestID::operator<(const ResumptionRequestID& other) const {
   return correlation_id < other.correlation_id ||
@@ -251,6 +261,11 @@ void ResumptionDataProcessorImpl::ProcessResumptionStatus(
       found_request.request_id.function_id) {
     CheckCreateWindowResponse(found_request.message, response);
   }
+
+  if (hmi_apis::FunctionID::RC_GetInteriorVehicleData ==
+      found_request.request_id.function_id) {
+    CheckModuleDataSubscription(found_request.message, response, status);
+  }
 }
 
 bool ResumptionDataProcessorImpl::IsResumptionFinished(
@@ -297,7 +312,8 @@ bool ResumptionDataProcessorImpl::IsResumptionSuccessful(
 
   const ApplicationResumptionStatus& status = it->second;
   return status.error_requests.empty() &&
-         status.unsuccessful_vehicle_data_subscriptions_.empty();
+         status.unsuccessful_vehicle_data_subscriptions_.empty() &&
+         status.unsuccessful_module_subscriptions_.empty();
 }
 
 void ResumptionDataProcessorImpl::EraseAppResumptionData(
@@ -988,15 +1004,44 @@ void ResumptionDataProcessorImpl::DeletePluginsSubscriptions(
   }
 
   const ApplicationResumptionStatus& status = it->second;
-  smart_objects::SmartObject extension_subscriptions;
+  smart_objects::SmartObject extension_vd_subscriptions;
   for (auto ivi : status.successful_vehicle_data_subscriptions_) {
     SDL_LOG_DEBUG("ivi " << ivi << " should be deleted");
-    extension_subscriptions[ivi] = true;
+    extension_vd_subscriptions[ivi] = true;
   }
+
+  smart_objects::SmartObject extension_modules_subscriptions(
+      smart_objects::SmartType_Map);
+
+  if (!status.successful_module_subscriptions_.empty()) {
+    extension_modules_subscriptions[message_params::kModuleData] =
+        new smart_objects::SmartObject(smart_objects::SmartType_Array);
+
+    auto& module_data_so =
+        extension_modules_subscriptions[message_params::kModuleData];
+
+    uint32_t index = 0;
+    for (const auto& module : status.successful_module_subscriptions_) {
+      module_data_so[index] =
+          new smart_objects::SmartObject(smart_objects::SmartType_Map);
+      module_data_so[index][message_params::kModuleType] = module.first;
+      module_data_so[index][message_params::kModuleId] = module.second;
+      index++;
+    }
+  }
+
+  smart_objects::SmartObject resumption_data_to_revert(
+      smart_objects::SmartType_Map);
+  resumption_data_to_revert[application_manager::hmi_interface::vehicle_info] =
+      extension_vd_subscriptions;
+  resumption_data_to_revert[application_manager::hmi_interface::rc] =
+      extension_modules_subscriptions;
+
   resumption_status_lock_.Release();
 
-  for (auto& extension : application->Extensions()) {
-    extension->RevertResumption(extension_subscriptions);
+  auto extensions = application->Extensions();
+  for (auto& extension : extensions) {
+    extension->RevertResumption(resumption_data_to_revert);
   }
 }
 
@@ -1036,6 +1081,70 @@ void ResumptionDataProcessorImpl::CheckVehicleDataResponse(
       SDL_LOG_TRACE("ivi " << ivi << " was successfuly subscribed");
       status.successful_vehicle_data_subscriptions_.push_back(ivi);
     }
+  }
+}
+
+void ResumptionDataProcessorImpl::CheckModuleDataSubscription(
+    const ns_smart_device_link::ns_smart_objects::SmartObject& request,
+    const ns_smart_device_link::ns_smart_objects::SmartObject& response,
+    ApplicationResumptionStatus& status) {
+  SDL_LOG_AUTO_TRACE();
+
+  const auto& msg_params_so = request[strings::msg_params];
+  const auto requested_module_type =
+      msg_params_so[message_params::kModuleType].asString();
+  const auto requested_module_id =
+      msg_params_so[message_params::kModuleId].asString();
+  const ModuleUid requested_module{requested_module_type, requested_module_id};
+
+  if (!IsResponseSuccessful(response)) {
+    SDL_LOG_TRACE("Module data subscription request NOT successful");
+    status.unsuccessful_module_subscriptions_.push_back(requested_module);
+    return;
+  }
+
+  const auto& response_module_data_so =
+      response[strings::msg_params][message_params::kModuleData];
+
+  if (0 == response_module_data_so.length()) {
+    SDL_LOG_TRACE("Module data subscription request not successful");
+    status.unsuccessful_module_subscriptions_.push_back(requested_module);
+    return;
+  }
+
+  const auto responsed_module_type_int =
+      static_cast<hmi_apis::Common_ModuleType::eType>(
+          response_module_data_so[message_params::kModuleType].asUInt());
+
+  const auto responsed_module_type_str =
+      module_types_str_mapping[responsed_module_type_int];
+
+  const auto response_module_id =
+      response_module_data_so[message_params::kModuleId].asString();
+  const ModuleUid responsed_module{responsed_module_type_str,
+                                   response_module_id};
+
+  bool is_subscribe_success = false;
+  if (response[application_manager::strings::msg_params].keyExists(
+          rc_rpc_plugin::message_params::kIsSubscribed)) {
+    is_subscribe_success =
+        response[application_manager::strings::msg_params]
+                [rc_rpc_plugin::message_params::kIsSubscribed]
+                    .asBool();
+  }
+
+  const bool is_the_same_module = requested_module == responsed_module;
+
+  if (is_the_same_module && is_subscribe_success) {
+    SDL_LOG_TRACE("Module [" << requested_module.first << ":"
+                             << requested_module.second
+                             << "] was successfuly subscribed");
+    status.successful_module_subscriptions_.push_back(requested_module);
+  } else {
+    SDL_LOG_TRACE("Module [" << requested_module.first << ":"
+                             << requested_module.second
+                             << "] was NOT successfuly subscribed");
+    status.unsuccessful_module_subscriptions_.push_back(requested_module);
   }
 }
 

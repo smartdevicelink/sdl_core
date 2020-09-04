@@ -119,21 +119,34 @@ void GetInteriorVehicleDataRequest::ProcessResponseToMobileFromCache(
   const auto& request_msg_params = (*message_)[app_mngr::strings::msg_params];
   SDL_LOG_DEBUG("kSubscribe exist"
                 << request_msg_params.keyExists(message_params::kSubscribe));
+
+  mobile_apis::Result::eType result_code = mobile_apis::Result::SUCCESS;
   if (request_msg_params.keyExists(message_params::kSubscribe)) {
     response_msg_params[message_params::kIsSubscribed] =
         request_msg_params[message_params::kSubscribe].asBool();
     if (request_msg_params[message_params::kSubscribe].asBool()) {
       auto extension = RCHelpers::GetRCExtension(*app);
       DCHECK(extension);
-      extension->SubscribeToInteriorVehicleData(module);
+      const bool is_app_already_subscribed =
+          extension->IsSubscribedToInteriorVehicleData(module);
+      if (is_app_already_subscribed) {
+        response_msg_params[app_mngr::strings::info] =
+            "App is already subscribed to the provided module";
+        result_code = mobile_apis::Result::WARNINGS;
+      } else {
+        extension->SubscribeToInteriorVehicleData(module);
+        app->UpdateHash();
+      }
     }
   }
-  SendResponse(
-      true, mobile_apis::Result::SUCCESS, nullptr, &response_msg_params);
+  SendResponse(true, result_code, nullptr, &response_msg_params);
   if (AppShouldBeUnsubscribed()) {
     auto extension = RCHelpers::GetRCExtension(*app);
     DCHECK(extension);
-    extension->UnsubscribeFromInteriorVehicleData(module);
+    if (extension->IsSubscribedToInteriorVehicleData(module)) {
+      extension->UnsubscribeFromInteriorVehicleData(module);
+      app->UpdateHash();
+    }
   }
 }
 
@@ -255,6 +268,9 @@ void GetInteriorVehicleDataRequest::on_event(
     const ModuleUid module(module_type, module_id);
 
     if (TheLastAppShouldBeUnsubscribed(app)) {
+      SDL_LOG_DEBUG("Removing module: [" << module.first << ":" << module.second
+                                         << "] "
+                                         << "from cache");
       interior_data_cache_.Remove(module);
     }
     ProccessSubscription(hmi_response);
@@ -363,15 +379,19 @@ void GetInteriorVehicleDataRequest::ProccessSubscription(
     const std::string module_id = ModuleId();
     const ModuleUid module(module_type, module_id);
 
-    if (response_subscribe) {
+    if (response_subscribe &&
+        !extension->IsSubscribedToInteriorVehicleData(module)) {
       SDL_LOG_DEBUG("SubscribeToInteriorVehicleData "
                     << app->app_id() << " " << module_type << " " << module_id);
       extension->SubscribeToInteriorVehicleData(module);
-    } else {
+    } else if (!response_subscribe &&
+               extension->IsSubscribedToInteriorVehicleData(module)) {
       SDL_LOG_DEBUG("UnsubscribeFromInteriorVehicleData "
                     << app->app_id() << " " << module_type << " " << module_id);
       extension->UnsubscribeFromInteriorVehicleData(module);
     }
+
+    app->UpdateHash();
   }
 }
 

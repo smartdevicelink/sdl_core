@@ -1254,12 +1254,13 @@ AppExtensionPtr ApplicationImpl::QueryInterface(AppExtensionUID uid) {
       return (*it);
     }
   }
-
   return AppExtensionPtr();
 }
 
 bool ApplicationImpl::AddExtension(AppExtensionPtr extension) {
   if (!QueryInterface(extension->uid())) {
+    SDL_LOG_TRACE("Add extenstion to add id" << app_id() << " with uid "
+                                             << extension->uid());
     extensions_.push_back(extension);
     return true;
   }

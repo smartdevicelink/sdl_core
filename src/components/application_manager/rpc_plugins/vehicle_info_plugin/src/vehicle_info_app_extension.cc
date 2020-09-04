@@ -170,11 +170,31 @@ void VehicleInfoAppExtension::ProcessResumption(
 }
 
 void VehicleInfoAppExtension::RevertResumption(
-    const smart_objects::SmartObject& subscriptions) {
+    const smart_objects::SmartObject& resumption_data) {
   SDL_LOG_AUTO_TRACE();
 
   unsubscribeFromVehicleInfo();
-  plugin_.RevertResumption(app_, subscriptions.enumerate());
+
+  if (!resumption_data.keyExists(
+          application_manager::hmi_interface::vehicle_info)) {
+    SDL_LOG_DEBUG("No resumption vahicle data subscription to revert");
+    return;
+  }
+  const auto& resumption_vd_data =
+      resumption_data[application_manager::hmi_interface::vehicle_info];
+
+  std::set<std::string> ivi_subscriptions_to_revert;
+  const auto ivi_subscriptions_keys = resumption_vd_data.enumerate();
+  for (const auto& key : ivi_subscriptions_keys) {
+    // Only boolean keys in subscriptions list are true vehicle data
+    // subscriptions
+    if (smart_objects::SmartType::SmartType_Boolean ==
+        resumption_vd_data.getElement(key).getType()) {
+      ivi_subscriptions_to_revert.insert(key);
+    }
+  }
+
+  plugin_.RevertResumption(app_, ivi_subscriptions_to_revert);
 }
 
 VehicleInfoAppExtension& VehicleInfoAppExtension::ExtractVIExtension(

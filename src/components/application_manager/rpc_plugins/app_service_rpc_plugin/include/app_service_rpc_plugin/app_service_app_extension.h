@@ -103,7 +103,7 @@ class AppServiceAppExtension : public app_mngr::AppExtension {
   void ProcessResumption(const smart_objects::SmartObject& saved_app) OVERRIDE;
 
   void RevertResumption(
-      const smart_objects::SmartObject& subscriptions) OVERRIDE;
+      const smart_objects::SmartObject& resumption_data) OVERRIDE;
 
   /**
    * @brief ExtractVIExtension utility function to extract application extension
