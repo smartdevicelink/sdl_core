@@ -61,9 +61,10 @@ std::string ConvertPacketDataToString(const uint8_t* data,
 
 const size_t kStackSize = 131072;
 
-utils::SemanticVersion default_protocol_version(5, 2, 0);
-utils::SemanticVersion min_multiple_transports_version(5, 1, 0);
-utils::SemanticVersion min_cloud_app_version(5, 2, 0);
+const utils::SemanticVersion default_protocol_version(5, 3, 0);
+const utils::SemanticVersion min_multiple_transports_version(5, 1, 0);
+const utils::SemanticVersion min_cloud_app_version(5, 2, 0);
+const utils::SemanticVersion min_reason_param_version(5, 3, 0);
 
 ProtocolHandlerImpl::ProtocolHandlerImpl(
     const ProtocolHandlerSettings& settings,
@@ -306,13 +307,14 @@ void ProtocolHandlerImpl::SendStartSessionAck(
                            bson_object_get_int32(&params, strings::hash_id)));
 
       // Minimum protocol version supported by both
-      utils::SemanticVersion* min_version =
+      const utils::SemanticVersion& min_version =
           (full_version.major_version_ < PROTOCOL_VERSION_5)
-              ? &default_protocol_version
-              : utils::SemanticVersion::min(full_version,
-                                            default_protocol_version);
+              ? default_protocol_version
+              : ((full_version < default_protocol_version)
+                     ? full_version
+                     : default_protocol_version);
       char protocol_version_string[256];
-      strncpy(protocol_version_string, (*min_version).toString().c_str(), 255);
+      strncpy(protocol_version_string, (min_version).toString().c_str(), 255);
 
       const bool protocol_ver_written = bson_object_put_string(
           &params, strings::protocol_version, protocol_version_string);
@@ -328,7 +330,7 @@ void ProtocolHandlerImpl::SendStartSessionAck(
       std::vector<std::string> secondaryTransports;
       std::vector<int32_t> audioServiceTransports;
       std::vector<int32_t> videoServiceTransports;
-      if (*min_version >= min_multiple_transports_version) {
+      if (min_version >= min_multiple_transports_version) {
         if (ParseSecondaryTransportConfiguration(connection_id,
                                                  secondaryTransports,
                                                  audioServiceTransports,
@@ -407,7 +409,7 @@ void ProtocolHandlerImpl::SendStartSessionAck(
 
       std::string policy_app_id =
           connection_handler_.GetCloudAppID(connection_id);
-      if (*min_version >= min_cloud_app_version && !policy_app_id.empty()) {
+      if (min_version >= min_cloud_app_version && !policy_app_id.empty()) {
         sync_primitives::AutoLock lock(auth_token_map_lock_);
         auto it = auth_token_map_.find(policy_app_id);
         if (it != auth_token_map_.end()) {
@@ -448,13 +450,15 @@ void ProtocolHandlerImpl::SendStartSessionAck(
 void ProtocolHandlerImpl::SendStartSessionNAck(ConnectionID connection_id,
                                                uint8_t session_id,
                                                uint8_t protocol_version,
-                                               uint8_t service_type) {
+                                               uint8_t service_type,
+                                               const std::string reason) {
   std::vector<std::string> rejectedParams;
   SendStartSessionNAck(connection_id,
                        session_id,
                        protocol_version,
                        service_type,
-                       rejectedParams);
+                       rejectedParams,
+                       reason);
 }
 
 void ProtocolHandlerImpl::SendStartSessionNAck(
@@ -462,7 +466,8 @@ void ProtocolHandlerImpl::SendStartSessionNAck(
     uint8_t session_id,
     uint8_t protocol_version,
     uint8_t service_type,
-    std::vector<std::string>& rejectedParams) {
+    std::vector<std::string>& rejectedParams,
+    const std::string reason) {
   SDL_LOG_AUTO_TRACE();
 
   ProtocolFramePtr ptr(
@@ -478,20 +483,34 @@ void ProtocolHandlerImpl::SendStartSessionNAck(
 
   uint8_t maxProtocolVersion = SupportedSDLProtocolVersion();
 
+  utils::SemanticVersion full_version;
+  if (!session_observer_.ProtocolVersionUsed(
+          connection_id, session_id, full_version)) {
+    SDL_LOG_WARN("Connection: " << connection_id << " and/or session: "
+                                << session_id << "no longer exist(s).");
+    return;
+  }
+
   if (protocol_version >= PROTOCOL_VERSION_5 &&
-      maxProtocolVersion >= PROTOCOL_VERSION_5 && rejectedParams.size() > 0) {
+      maxProtocolVersion >= PROTOCOL_VERSION_5) {
     BsonObject payloadObj;
     bson_object_initialize_default(&payloadObj);
-    BsonArray rejectedParamsArr;
-    bson_array_initialize(&rejectedParamsArr, rejectedParams.size());
-    for (std::string param : rejectedParams) {
-      char paramPtr[256];
-      strncpy(paramPtr, param.c_str(), sizeof(paramPtr));
-      paramPtr[sizeof(paramPtr) - 1] = '\0';
-      bson_array_add_string(&rejectedParamsArr, paramPtr);
+    if (rejectedParams.size() > 0) {
+      BsonArray rejectedParamsArr;
+      bson_array_initialize(&rejectedParamsArr, rejectedParams.size());
+      for (std::string param : rejectedParams) {
+        char paramPtr[256];
+        strncpy(paramPtr, param.c_str(), sizeof(paramPtr));
+        paramPtr[sizeof(paramPtr) - 1] = '\0';
+        bson_array_add_string(&rejectedParamsArr, paramPtr);
+      }
+      bson_object_put_array(
+          &payloadObj, strings::rejected_params, &rejectedParamsArr);
     }
-    bson_object_put_array(
-        &payloadObj, strings::rejected_params, &rejectedParamsArr);
+    if (!reason.empty() && full_version >= min_reason_param_version) {
+      bson_object_put_string(
+          &payloadObj, strings::reason, const_cast<char*>(reason.c_str()));
+    }
     uint8_t* payloadBytes = bson_object_to_bytes(&payloadObj);
     ptr->set_data(payloadBytes, bson_object_size(&payloadObj));
     free(payloadBytes);
@@ -504,19 +523,22 @@ void ProtocolHandlerImpl::SendStartSessionNAck(
   SDL_LOG_DEBUG("SendStartSessionNAck() for connection "
                 << connection_id << " for service_type "
                 << static_cast<int32_t>(service_type) << " session_id "
-                << static_cast<int32_t>(session_id));
+                << static_cast<int32_t>(session_id)
+                << (reason.empty() ? "" : " reason \"" + reason + "\""));
 }
 
 void ProtocolHandlerImpl::SendEndSessionNAck(ConnectionID connection_id,
                                              uint32_t session_id,
                                              uint8_t protocol_version,
-                                             uint8_t service_type) {
+                                             uint8_t service_type,
+                                             const std::string reason) {
   std::vector<std::string> rejectedParams;
   SendEndSessionNAck(connection_id,
                      session_id,
                      protocol_version,
                      service_type,
-                     rejectedParams);
+                     rejectedParams,
+                     reason);
 }
 
 void ProtocolHandlerImpl::SendEndSessionNAck(
@@ -524,7 +546,8 @@ void ProtocolHandlerImpl::SendEndSessionNAck(
     uint32_t session_id,
     uint8_t protocol_version,
     uint8_t service_type,
-    std::vector<std::string>& rejectedParams) {
+    std::vector<std::string>& rejectedParams,
+    const std::string reason) {
   SDL_LOG_AUTO_TRACE();
 
   ProtocolFramePtr ptr(
@@ -540,20 +563,35 @@ void ProtocolHandlerImpl::SendEndSessionNAck(
 
   uint8_t maxProtocolVersion = SupportedSDLProtocolVersion();
 
+  utils::SemanticVersion full_version;
+  if (!session_observer_.ProtocolVersionUsed(
+          connection_id, session_id, full_version)) {
+    SDL_LOG_WARN("Connection: " << connection_id << " and/or session: "
+                                << session_id << "no longer exist(s).");
+    return;
+  }
+
   if (protocol_version >= PROTOCOL_VERSION_5 &&
-      maxProtocolVersion >= PROTOCOL_VERSION_5 && rejectedParams.size() > 0) {
+      maxProtocolVersion >= PROTOCOL_VERSION_5) {
     BsonObject payloadObj;
     bson_object_initialize_default(&payloadObj);
-    BsonArray rejectedParamsArr;
-    bson_array_initialize(&rejectedParamsArr, rejectedParams.size());
-    for (std::string param : rejectedParams) {
-      char paramPtr[256];
-      strncpy(paramPtr, param.c_str(), sizeof(paramPtr));
-      paramPtr[sizeof(paramPtr) - 1] = '\0';
-      bson_array_add_string(&rejectedParamsArr, paramPtr);
+
+    if (rejectedParams.size() > 0) {
+      BsonArray rejectedParamsArr;
+      bson_array_initialize(&rejectedParamsArr, rejectedParams.size());
+      for (std::string param : rejectedParams) {
+        char paramPtr[256];
+        strncpy(paramPtr, param.c_str(), sizeof(paramPtr));
+        paramPtr[sizeof(paramPtr) - 1] = '\0';
+        bson_array_add_string(&rejectedParamsArr, paramPtr);
+      }
+      bson_object_put_array(
+          &payloadObj, strings::rejected_params, &rejectedParamsArr);
     }
-    bson_object_put_array(
-        &payloadObj, strings::rejected_params, &rejectedParamsArr);
+    if (!reason.empty() && full_version >= min_reason_param_version) {
+      bson_object_put_string(
+          &payloadObj, strings::reason, const_cast<char*>(reason.c_str()));
+    }
     uint8_t* payloadBytes = bson_object_to_bytes(&payloadObj);
     ptr->set_data(payloadBytes, bson_object_size(&payloadObj));
     free(payloadBytes);
@@ -566,7 +604,8 @@ void ProtocolHandlerImpl::SendEndSessionNAck(
   SDL_LOG_DEBUG("SendEndSessionNAck() for connection "
                 << connection_id << " for service_type "
                 << static_cast<int32_t>(service_type) << " session_id "
-                << static_cast<int32_t>(session_id));
+                << static_cast<int32_t>(session_id)
+                << (reason.empty() ? "" : " reason \"" + reason + "\""));
 }
 
 SessionObserver& ProtocolHandlerImpl::get_session_observer() {
@@ -1553,8 +1592,9 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessageEndSession(
   const ServiceType service_type = ServiceTypeFromByte(packet.service_type());
 
   const ConnectionID connection_id = packet.connection_id();
+  std::string err_reason;
   const uint32_t session_key = session_observer_.OnSessionEndedCallback(
-      connection_id, current_session_id, &hash_id, service_type);
+      connection_id, current_session_id, &hash_id, service_type, &err_reason);
 
   // TODO(EZamakhov): add clean up output queue (for removed service)
   if (session_key != 0) {
@@ -1576,12 +1616,14 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessageEndSession(
                          current_session_id,
                          packet.protocol_version(),
                          service_type,
-                         rejectedParams);
+                         rejectedParams,
+                         err_reason);
     } else {
       SendEndSessionNAck(connection_id,
                          current_session_id,
                          packet.protocol_version(),
-                         service_type);
+                         service_type,
+                         err_reason);
     }
   }
   return RESULT_OK;
@@ -1694,8 +1736,12 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessageStartSession(
                   << service_type << ", disallowed by settings.");
     service_status_update_handler_->OnServiceUpdate(
         connection_key, service_type, settings_check);
-    SendStartSessionNAck(
-        connection_id, session_id, protocol_version, service_type);
+    SendStartSessionNAck(connection_id,
+                         session_id,
+                         protocol_version,
+                         service_type,
+                         "Service type: " + std::to_string(service_type) +
+                             " disallowed by settings");
     return RESULT_OK;
   }
 
@@ -1772,7 +1818,9 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessageRegisterSecondaryTransport(
 }
 
 void ProtocolHandlerImpl::NotifySessionStarted(
-    const SessionContext& context, std::vector<std::string>& rejected_params) {
+    const SessionContext& context,
+    std::vector<std::string>& rejected_params,
+    const std::string err_reason) {
   SDL_LOG_AUTO_TRACE();
 
   ProtocolFramePtr packet;
@@ -1805,7 +1853,8 @@ void ProtocolHandlerImpl::NotifySessionStarted(
                          session_id,
                          protocol_version,
                          packet->service_type(),
-                         rejected_params);
+                         rejected_params,
+                         err_reason);
     return;
   }
 
@@ -1869,6 +1918,11 @@ void ProtocolHandlerImpl::NotifySessionStarted(
           bson_object_get_string(&request_params, strings::protocol_version);
       std::string version_string(version_param == NULL ? "" : version_param);
       fullVersion = std::make_shared<utils::SemanticVersion>(version_string);
+
+      const auto connection_key = session_observer_.KeyFromPair(
+          packet->connection_id(), context.new_session_id_);
+      connection_handler_.BindProtocolVersionWithSession(connection_key,
+                                                         *fullVersion);
       // Constructed payloads added in Protocol v5
       if (fullVersion->major_version_ < PROTOCOL_VERSION_5) {
         rejected_params.push_back(std::string(strings::protocol_version));
@@ -1922,7 +1976,8 @@ void ProtocolHandlerImpl::NotifySessionStarted(
                            packet->session_id(),
                            protocol_version,
                            packet->service_type(),
-                           rejected_params);
+                           rejected_params,
+                           "SSL Handshake failed due to rejected parameters");
     } else if (ssl_context->IsInitCompleted()) {
       // mark service as protected
       session_observer_.SetProtectionFlag(connection_key, service_type);
@@ -1955,7 +2010,8 @@ void ProtocolHandlerImpl::NotifySessionStarted(
                                packet->session_id(),
                                protocol_version,
                                packet->service_type(),
-                               rejected_params);
+                               rejected_params,
+                               "System time provider is not ready");
         }
       }
     }
@@ -1983,11 +2039,13 @@ void ProtocolHandlerImpl::NotifySessionStarted(
         connection_key,
         context.service_type_,
         ServiceStatus::SERVICE_START_FAILED);
-    SendStartSessionNAck(context.connection_id_,
-                         packet->session_id(),
-                         protocol_version,
-                         packet->service_type(),
-                         rejected_params);
+    SendStartSessionNAck(
+        context.connection_id_,
+        packet->session_id(),
+        protocol_version,
+        packet->service_type(),
+        rejected_params,
+        "Certain parameters in the StartService request were rejected");
   }
 }
 

@@ -86,7 +86,9 @@ void HandshakeHandler::OnCertificateUpdateRequired() {
 bool HandshakeHandler::OnCertDecryptFailed() {
   SDL_LOG_AUTO_TRACE();
   if (payload_) {
-    ProcessFailedHandshake(*payload_, ServiceStatus::CERT_INVALID);
+    ProcessFailedHandshake(*payload_,
+                           ServiceStatus::CERT_INVALID,
+                           "Failed to decrypt the certificate");
   }
 
   return true;
@@ -136,11 +138,34 @@ bool HandshakeHandler::OnHandshakeDone(
   const bool success =
       result == security_manager::SSLContext::Handshake_Result_Success;
 
+  auto getInvalidCertReason =
+      [](const security_manager::SSLContext::HandshakeResult& result) {
+        switch (result) {
+          case security_manager::SSLContext::Handshake_Result_CertExpired:
+            return "Certificate already expired";
+          case security_manager::SSLContext::Handshake_Result_NotYetValid:
+            return "Certificate is not yet valid";
+          case security_manager::SSLContext::Handshake_Result_CertNotSigned:
+            return "Certificate is not signed";
+          case security_manager::SSLContext::Handshake_Result_AppIDMismatch:
+            return "Trying to run handshake with wrong app id";
+          case security_manager::SSLContext::Handshake_Result_AppNameMismatch:
+            return "Trying to run handshake with wrong app name";
+          case security_manager::SSLContext::Handshake_Result_AbnormalFail:
+            return "Error occurred during handshake";
+          case security_manager::SSLContext::Handshake_Result_Fail:
+            return "";
+          default:
+            return "";
+        }
+      };
+
   if (payload_) {
     if (success) {
       ProcessSuccessfulHandshake(connection_key, *payload_);
     } else {
-      ProcessFailedHandshake(*payload_, ServiceStatus::CERT_INVALID);
+      ProcessFailedHandshake(
+          *payload_, ServiceStatus::CERT_INVALID, getInvalidCertReason(result));
     }
   } else {
     BsonObject params;
@@ -148,7 +173,8 @@ bool HandshakeHandler::OnHandshakeDone(
     if (success) {
       ProcessSuccessfulHandshake(connection_key, params);
     } else {
-      ProcessFailedHandshake(params, ServiceStatus::CERT_INVALID);
+      ProcessFailedHandshake(
+          params, ServiceStatus::CERT_INVALID, getInvalidCertReason(result));
     }
     bson_object_deinitialize(&params);
   }
@@ -199,15 +225,20 @@ void HandshakeHandler::ProcessSuccessfulHandshake(const uint32_t connection_key,
         this->connection_key(),
         context_.service_type_,
         ServiceStatus::SERVICE_START_FAILED);
+
     protocol_handler_.SendStartSessionNAck(context_.connection_id_,
                                            context_.new_session_id_,
                                            protocol_version_,
-                                           context_.service_type_);
+                                           context_.service_type_,
+                                           (is_service_already_protected)
+                                               ? "Service is already protected"
+                                               : "Service cannot be protected");
   }
 }
 
 void HandshakeHandler::ProcessFailedHandshake(BsonObject& params,
-                                              ServiceStatus service_status) {
+                                              ServiceStatus service_status,
+                                              std::string err_reason) {
   SDL_LOG_AUTO_TRACE();
   SDL_LOG_DEBUG("Handshake failed");
   const std::vector<int>& force_protected =
@@ -238,10 +269,22 @@ void HandshakeHandler::ProcessFailedHandshake(BsonObject& params,
   } else {
     service_status_update_handler_.OnServiceUpdate(
         this->connection_key(), context_.service_type_, service_status);
-    protocol_handler_.SendStartSessionNAck(context_.connection_id_,
-                                           context_.new_session_id_,
-                                           protocol_version_,
-                                           context_.service_type_);
+
+    std::string reason_msg =
+        (service_status == ServiceStatus::PTU_FAILED)
+            ? "Policy Table Update failed"
+            : (service_status == ServiceStatus::CERT_INVALID)
+                  ? "Invalid certificate"
+                  : (service_status == ServiceStatus::INVALID_TIME)
+                        ? "Failed to get system time"
+                        : "Unknown cause of failure";
+
+    protocol_handler_.SendStartSessionNAck(
+        context_.connection_id_,
+        context_.new_session_id_,
+        protocol_version_,
+        context_.service_type_,
+        reason_msg + (err_reason.empty() ? "" : ": " + err_reason));
   }
 }
 
