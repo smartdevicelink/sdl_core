@@ -37,6 +37,7 @@
 #define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_USB_LIBUSB_USB_HANDLER_H_
 
 #include <libusb-1.0/libusb.h>
+#include <atomic>
 
 #include "transport_manager/transport_adapter/transport_adapter.h"
 #include "transport_manager/usb/libusb/platform_usb_device.h"
@@ -87,7 +88,7 @@ class UsbHandler {
     UsbHandler* handler_;
   };
 
-  bool shutdown_requested_;
+  std::atomic<bool> shutdown_requested_;
   threads::Thread* thread_;
 
   friend class UsbDeviceListener;

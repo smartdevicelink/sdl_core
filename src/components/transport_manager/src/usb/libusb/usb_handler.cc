@@ -105,7 +105,7 @@ UsbHandler::~UsbHandler() {
 
 void UsbHandler::RequestStopThread() {
   SDL_LOG_AUTO_TRACE();
-  shutdown_requested_ = true;
+  shutdown_requested_.store(true);
 }
 
 void UsbHandler::DeregisterHotplugCallbacks() {
