@@ -32,6 +32,7 @@
 
 #include "vehicle_info_plugin/commands/hmi/vi_subscribe_vehicle_data_request.h"
 #include "application_manager/message_helper.h"
+#include "application_manager/resumption/resume_ctrl.h"
 
 namespace vehicle_info_plugin {
 using namespace application_manager;
@@ -74,6 +75,19 @@ void VISubscribeVehicleDataRequest::Run() {
   }
 
   SendRequest();
+}
+
+void VISubscribeVehicleDataRequest::onTimeOut() {
+  event_engine::Event timeout_event(
+      hmi_apis::FunctionID::VehicleInfo_SubscribeVehicleData);
+
+  auto error_response = MessageHelper::CreateNegativeResponseFromHmi(
+      function_id(),
+      correlation_id(),
+      hmi_apis::Common_Result::GENERIC_ERROR,
+      std::string("Timed out"));
+  timeout_event.set_smart_object(*error_response);
+  timeout_event.raise(application_manager_.event_dispatcher());
 }
 
 }  // namespace commands

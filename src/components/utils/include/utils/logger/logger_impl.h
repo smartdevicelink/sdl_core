@@ -37,7 +37,6 @@
 
 #include <functional>
 
-#include "utils/logger_status.h"
 #include "utils/threads/message_loop_thread.h"
 
 namespace logger {

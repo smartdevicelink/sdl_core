@@ -39,7 +39,6 @@ namespace sdl_rpc_plugin {
 namespace app_mngr = application_manager;
 
 namespace commands {
-
 SDL_CREATE_LOG_VARIABLE("Commands")
 
 ShowAppMenuRequest::ShowAppMenuRequest(
@@ -63,8 +62,9 @@ void ShowAppMenuRequest::Run() {
   ApplicationSharedPtr app = application_manager_.application(connection_key());
 
   if (!app) {
-    SDL_LOG_ERROR("Application with id " << connection_key()
-                                         << " is not registered.");
+    SDL_LOG_ERROR(
+
+        "Application with id " << connection_key() << " is not registered.");
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     return;
   }
@@ -77,8 +77,9 @@ void ShowAppMenuRequest::Run() {
           app->system_context(mobile_apis::PredefinedWindows::DEFAULT_WINDOW),
           mobile_apis::SystemContext::SYSCTXT_MAIN,
           mobile_apis::SystemContext::SYSCTXT_MENU)) {
-    SDL_LOG_ERROR("Application with id " << connection_key()
-                                         << " is not activated.");
+    SDL_LOG_ERROR(
+
+        "Application with id " << connection_key() << " is not activated.");
     SendResponse(false, mobile_apis::Result::REJECTED);
     return;
   }
@@ -89,7 +90,10 @@ void ShowAppMenuRequest::Run() {
   const auto& received_msg_params = (*message_)[strings::msg_params];
   if (received_msg_params.keyExists(strings::menu_id)) {
     const int32_t menu_id = received_msg_params[strings::menu_id].asInt();
-    if (!app->FindSubMenu(menu_id)) {
+
+    const auto sub_menu = app->FindSubMenu(menu_id);
+
+    if (smart_objects::SmartType_Null == sub_menu.getType()) {
       SDL_LOG_ERROR("Menu with id " << menu_id << " is not found.");
       SendResponse(false, mobile_apis::Result::INVALID_ID);
       return;

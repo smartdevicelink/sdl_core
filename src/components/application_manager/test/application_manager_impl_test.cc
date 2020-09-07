@@ -495,16 +495,16 @@ TEST_F(ApplicationManagerImplTest,
        SubscribeAppForWayPoints_ExpectSubscriptionApp) {
   auto app_ptr = std::static_pointer_cast<am::Application>(mock_app_ptr_);
   app_manager_impl_->SubscribeAppForWayPoints(app_ptr);
-  EXPECT_TRUE(app_manager_impl_->IsAppSubscribedForWayPoints(app_ptr));
+  EXPECT_TRUE(app_manager_impl_->IsAppSubscribedForWayPoints(*app_ptr));
 }
 
 TEST_F(ApplicationManagerImplTest,
        UnsubscribeAppForWayPoints_ExpectUnsubscriptionApp) {
   auto app_ptr = std::static_pointer_cast<am::Application>(mock_app_ptr_);
   app_manager_impl_->SubscribeAppForWayPoints(app_ptr);
-  EXPECT_TRUE(app_manager_impl_->IsAppSubscribedForWayPoints(app_ptr));
+  EXPECT_TRUE(app_manager_impl_->IsAppSubscribedForWayPoints(*app_ptr));
   app_manager_impl_->UnsubscribeAppFromWayPoints(app_ptr);
-  EXPECT_FALSE(app_manager_impl_->IsAppSubscribedForWayPoints(app_ptr));
+  EXPECT_FALSE(app_manager_impl_->IsAppSubscribedForWayPoints(*app_ptr));
   const std::set<uint32_t> result =
       app_manager_impl_->GetAppsSubscribedForWayPoints();
   EXPECT_TRUE(result.empty());
@@ -2116,6 +2116,14 @@ TEST_F(
                    AudioStreamingState::INVALID_ENUM,
                    SystemContext::SYSCTXT_MAIN);
 
+  smart_objects::SmartObjectSPtr notification =
+      std::make_shared<smart_objects::SmartObject>(
+          smart_objects::SmartType_Map);
+  EXPECT_CALL(*mock_message_helper_,
+              CreateHMIStatusNotification(_, kDefaultWindowId))
+      .WillOnce(Return(notification));
+  EXPECT_CALL(*mock_rpc_service_, ManageMobileCommand(notification, _));
+
   // Const shared ptr is required for OnAppActivated due to its signature
   ApplicationConstSharedPtr const_wep_app = wep_nonmedia_app;
   EXPECT_CALL(*mock_app_service_manager_, OnAppActivated(const_wep_app));
@@ -2133,6 +2141,11 @@ TEST_F(
                    AudioStreamingState::NOT_AUDIBLE,
                    SystemContext::SYSCTXT_MAIN);
 
+  EXPECT_CALL(*mock_message_helper_,
+              CreateHMIStatusNotification(_, kDefaultWindowId))
+      .WillOnce(Return(notification));
+  EXPECT_CALL(*mock_rpc_service_, ManageMobileCommand(notification, _));
+
   // Deactivate Webengine projection non-media app
   // to check its new HMI level and audio & video streaming states
   app_manager_impl_->state_controller().DeactivateApp(wep_nonmedia_app,
@@ -2148,6 +2161,11 @@ TEST_F(
                    VideoStreamingState::NOT_STREAMABLE,
                    AudioStreamingState::NOT_AUDIBLE,
                    SystemContext::SYSCTXT_MAIN);
+
+  EXPECT_CALL(*mock_message_helper_,
+              CreateHMIStatusNotification(_, kDefaultWindowId))
+      .WillOnce(Return(notification));
+  EXPECT_CALL(*mock_rpc_service_, ManageMobileCommand(notification, _));
 
   // Exit of Webengine projection non-media app
   // to check its new HMI level and audio & video streaming states
@@ -2206,6 +2224,14 @@ TEST_F(
   ApplicationConstSharedPtr const_wep_app = wep_media_app;
   EXPECT_CALL(*mock_app_service_manager_, OnAppActivated(const_wep_app));
 
+  smart_objects::SmartObjectSPtr notification =
+      std::make_shared<smart_objects::SmartObject>(
+          smart_objects::SmartType_Map);
+  EXPECT_CALL(*mock_message_helper_,
+              CreateHMIStatusNotification(_, kDefaultWindowId))
+      .WillOnce(Return(notification));
+  EXPECT_CALL(*mock_rpc_service_, ManageMobileCommand(notification, _));
+
   // Activate Webengine projection media app
   // to check its audio & video streaming states in FULL Hmi level
   app_manager_impl_->ActivateApplication(wep_media_app);
@@ -2218,6 +2244,11 @@ TEST_F(
                    VideoStreamingState::NOT_STREAMABLE,
                    AudioStreamingState::AUDIBLE,
                    SystemContext::SYSCTXT_MAIN);
+
+  EXPECT_CALL(*mock_message_helper_,
+              CreateHMIStatusNotification(_, kDefaultWindowId))
+      .WillOnce(Return(notification));
+  EXPECT_CALL(*mock_rpc_service_, ManageMobileCommand(notification, _));
 
   // Deactivate Webengine projection media app
   // to check its new HMI level and audio & video streaming states
@@ -2232,6 +2263,11 @@ TEST_F(
                    VideoStreamingState::NOT_STREAMABLE,
                    AudioStreamingState::AUDIBLE,
                    SystemContext::SYSCTXT_MAIN);
+
+  EXPECT_CALL(*mock_message_helper_,
+              CreateHMIStatusNotification(_, kDefaultWindowId))
+      .WillOnce(Return(notification));
+  EXPECT_CALL(*mock_rpc_service_, ManageMobileCommand(notification, _));
 
   // Exit of Webengine projection media app
   // to check its new HMI level and audio & video streaming states

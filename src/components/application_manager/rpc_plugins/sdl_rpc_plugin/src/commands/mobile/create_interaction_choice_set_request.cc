@@ -39,6 +39,7 @@
 
 #include "application_manager/application_impl.h"
 #include "application_manager/message_helper.h"
+#include "application_manager/resumption/resume_ctrl.h"
 #include "utils/gen_hash.h"
 #include "utils/helpers.h"
 
@@ -121,7 +122,9 @@ void CreateInteractionChoiceSetRequest::Run() {
       (*message_)[strings::msg_params][strings::interaction_choice_set_id]
           .asInt();
 
-  if (app->FindChoiceSet(choice_set_id_)) {
+  const auto choice_set = app->FindChoiceSet(choice_set_id_);
+
+  if (smart_objects::SmartType_Null != choice_set.getType()) {
     SDL_LOG_ERROR("Choice set with id " << choice_set_id_ << " is not found.");
     SendResponse(false, Result::INVALID_ID);
     return;
@@ -218,8 +221,9 @@ bool CreateInteractionChoiceSetRequest::compareSynonyms(
                           CreateInteractionChoiceSetRequest::compareStr);
 
   if (it != vr_cmds_1->end()) {
-    SDL_LOG_INFO("Incoming choice set has duplicated VR synonyms "
-                 << it->asString());
+    SDL_LOG_INFO(
+
+        "Incoming choice set has duplicated VR synonyms " << it->asString());
     return true;
   }
 
@@ -330,8 +334,9 @@ void CreateInteractionChoiceSetRequest::SendVRAddCommandRequests(
 
     VRCommandInfo vr_command(vr_cmd_id);
     sent_commands_map_[vr_corr_id] = vr_command;
-    SDL_LOG_DEBUG("VR_command sent corr_id " << vr_corr_id << " cmd_id "
-                                             << vr_corr_id);
+    SDL_LOG_DEBUG(
+
+        "VR_command sent corr_id " << vr_corr_id << " cmd_id " << vr_corr_id);
   }
   expected_chs_count_ = chs_num;
   SDL_LOG_DEBUG("expected_chs_count_ = " << expected_chs_count_);
@@ -414,6 +419,12 @@ void CreateInteractionChoiceSetRequest::onTimeOut() {
   }
   CommandRequestImpl::onTimeOut();
   DeleteChoices();
+
+  auto& resume_ctrl = application_manager_.resume_controller();
+
+  resume_ctrl.HandleOnTimeOut(
+      correlation_id(),
+      static_cast<hmi_apis::FunctionID::eType>(function_id()));
 
   // We have to keep request alive until receive all responses from HMI
   // according to SDLAQ-CRS-2976

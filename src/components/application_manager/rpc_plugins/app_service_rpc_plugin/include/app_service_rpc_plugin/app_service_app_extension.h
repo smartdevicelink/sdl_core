@@ -97,19 +97,12 @@ class AppServiceAppExtension : public app_mngr::AppExtension {
    */
   AppServiceSubscriptions Subscriptions();
 
-  /**
-   * @brief SaveResumptionData saves vehicle info data
-   * @param resumption_data plase to store resumption data
-   */
   void SaveResumptionData(ns_smart_device_link::ns_smart_objects::SmartObject&
                               resumption_data) OVERRIDE;
 
-  /**
-   * @brief ProcessResumption load resumtion data back to plugin during
-   * resumption
-   * @param resumption_data resumption data
-   */
-  void ProcessResumption(
+  void ProcessResumption(const smart_objects::SmartObject& saved_app) OVERRIDE;
+
+  void RevertResumption(
       const smart_objects::SmartObject& resumption_data) OVERRIDE;
 
   /**

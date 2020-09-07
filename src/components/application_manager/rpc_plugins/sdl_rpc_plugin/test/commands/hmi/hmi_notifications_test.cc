@@ -101,6 +101,7 @@
 #include "application_manager/mock_rpc_plugin_manager.h"
 #include "application_manager/mock_state_controller.h"
 #include "application_manager/policies/mock_policy_handler_interface.h"
+#include "application_manager/resumption/resumption_data_processor.h"
 #include "application_manager/smart_object_keys.h"
 #include "connection_handler/mock_connection_handler.h"
 #include "connection_handler/mock_connection_handler_settings.h"
@@ -975,7 +976,7 @@ TEST_F(HMICommandsNotificationsTest,
       kCorrelationId_;
   MessageSharedPtr temp_message = CreateMessage();
 
-  resumprion_test::MockResumeCtrl mock_resume_ctrl;
+  resumption_test::MockResumeCtrl mock_resume_ctrl;
   EXPECT_CALL(app_mngr_, resume_controller())
       .WillOnce(ReturnRef(mock_resume_ctrl));
   EXPECT_CALL(mock_resume_ctrl, OnSuspend());

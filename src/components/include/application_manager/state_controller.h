@@ -232,6 +232,20 @@ class StateController {
    */
   virtual void DeactivateApp(ApplicationSharedPtr app,
                              const WindowID window_id) = 0;
+
+  /**
+   * @brief ResumePostponedWindows resumes adding of all postponed windows for a
+   * specified application, if exists
+   * @param app_id id of application to check
+   */
+  virtual void ResumePostponedWindows(const uint32_t app_id) = 0;
+
+  /**
+   * @brief DropPostponedWindows drops all postponed windows for a specified
+   * application, if exists
+   * @param app_id id of application to check
+   */
+  virtual void DropPostponedWindows(const uint32_t app_id) = 0;
 };
 
 }  // namespace application_manager

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Ford Motor Company
+ * Copyright (c) 2018, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,24 +30,35 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_INCLUDE_UTILS_LOGGER_STATUS_H_
-#define SRC_COMPONENTS_INCLUDE_UTILS_LOGGER_STATUS_H_
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_TEST_INCLUDE_APPLICATION_MANAGER_MOCK_RESUMPTION_DATA_PROCESSOR_H
+#define SRC_COMPONENTS_APPLICATION_MANAGER_TEST_INCLUDE_APPLICATION_MANAGER_MOCK_RESUMPTION_DATA_PROCESSOR_H
 
-namespace logger {
+#include "application_manager/application.h"
+#include "application_manager/resumption/resume_ctrl.h"
+#include "application_manager/resumption/resumption_data_processor.h"
 
-typedef enum {
-  LoggerThreadNotCreated,
-  CreatingLoggerThread,
-  LoggerThreadCreated,
-  DeletingLoggerThread,
-  LoggerThreadIsNotUsed
-} LoggerStatus;
+#include "gmock/gmock.h"
 
-// this variable is only changed when creating and deleting logger thread
-// its reads and writes are believed to be atomic
-// thus it shall be considered thread safe
-extern volatile LoggerStatus logger_status;
+namespace test {
+namespace components {
+namespace resumption_test {
 
-}  // namespace logger
+class MockResumptionDataProcessor : public resumption::ResumptionDataProcessor {
+ public:
+  MOCK_METHOD3(Restore,
+               void(application_manager::ApplicationSharedPtr application,
+                    smart_objects::SmartObject& saved_app,
+                    resumption::ResumeCtrl::ResumptionCallBack callback));
+  MOCK_METHOD2(HandleOnTimeOut,
+               void(const uint32_t correlation_id,
+                    const hmi_apis::FunctionID::eType function_id));
+  MOCK_METHOD2(SubscribeToResponse,
+               void(const int32_t app_id,
+                    const resumption::ResumptionRequest& request));
+};
 
-#endif  // SRC_COMPONENTS_INCLUDE_UTILS_LOGGER_STATUS_H_
+}  // namespace resumption_test
+}  // namespace components
+}  // namespace test
+
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_TEST_INCLUDE_APPLICATION_MANAGER_MOCK_RESUMPTION_DATA_PROCESSOR_H

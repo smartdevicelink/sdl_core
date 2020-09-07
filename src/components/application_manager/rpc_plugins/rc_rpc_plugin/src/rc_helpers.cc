@@ -182,8 +182,10 @@ RCAppExtensionPtr RCHelpers::GetRCExtension(
   return extension;
 }
 
-smart_objects::SmartObjectSPtr RCHelpers::CreateUnsubscribeRequestToHMI(
-    const ModuleUid& module, const uint32_t correlation_id) {
+smart_objects::SmartObjectSPtr RCHelpers::CreateGetInteriorVDRequestToHMI(
+    const ModuleUid& module,
+    const uint32_t correlation_id,
+    const InteriorDataAction action) {
   using namespace smart_objects;
   namespace commands = application_manager::commands;
   namespace am_strings = application_manager::strings;
@@ -200,7 +202,10 @@ smart_objects::SmartObjectSPtr RCHelpers::CreateUnsubscribeRequestToHMI(
   params[am_strings::correlation_id] = correlation_id;
   params[am_strings::function_id] =
       hmi_apis::FunctionID::RC_GetInteriorVehicleData;
-  msg_params[message_params::kSubscribe] = false;
+  if (NONE != action) {
+    msg_params[message_params::kSubscribe] =
+        (SUBSCRIBE == action) ? true : false;
+  }
   msg_params[message_params::kModuleType] = module.first;
   msg_params[message_params::kModuleId] = module.second;
   return message;
@@ -365,6 +370,29 @@ smart_objects::SmartObject RCHelpers::MergeArray(
   }
 
   return result;
+}
+
+bool RCHelpers::IsResponseSuccessful(
+    const smart_objects::SmartObject& response) {
+  hmi_apis::messageType::eType message_type =
+      static_cast<hmi_apis::messageType::eType>(
+          response[application_manager::strings::params]
+                  [application_manager::strings::message_type]
+                      .asInt());
+  const bool is_correct_message_type =
+      hmi_apis::messageType::response == message_type;
+
+  bool is_subscribe_successful = false;
+
+  if (response[application_manager::strings::msg_params].keyExists(
+          rc_rpc_plugin::message_params::kIsSubscribed)) {
+    is_subscribe_successful =
+        response[application_manager::strings::msg_params]
+                [rc_rpc_plugin::message_params::kIsSubscribed]
+                    .asBool();
+  }
+
+  return is_correct_message_type && is_subscribe_successful;
 }
 
 }  // namespace rc_rpc_plugin

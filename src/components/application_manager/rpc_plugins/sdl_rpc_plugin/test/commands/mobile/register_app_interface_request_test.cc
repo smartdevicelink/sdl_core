@@ -43,7 +43,9 @@
 #include "application_manager/mock_hmi_capabilities.h"
 #include "application_manager/mock_hmi_interface.h"
 #include "application_manager/mock_resume_ctrl.h"
+#include "application_manager/mock_rpc_plugin_manager.h"
 #include "application_manager/policies/mock_policy_handler_interface.h"
+#include "application_manager/resumption/resumption_data_processor.h"
 #include "application_manager/smart_object_keys.h"
 #include "connection_handler/mock_connection_handler.h"
 #include "gtest/gtest.h"
@@ -73,11 +75,13 @@ using ::testing::SetArgPointee;
 namespace am = ::application_manager;
 
 using am::commands::MessageSharedPtr;
+using am::plugin_manager::MockRPCPluginManager;
 using sdl_rpc_plugin::commands::RegisterAppInterfaceRequest;
 
 namespace {
 const uint32_t kConnectionKey = 1u;
 const uint32_t kConnectionKey2 = 2u;
+const uint32_t kDefaultTimeout = 0u;
 const connection_handler::DeviceHandle kDeviceHandle = 3u;
 const hmi_apis::Common_Language::eType kHmiLanguage =
     hmi_apis::Common_Language::EN_US;
@@ -109,6 +113,10 @@ class RegisterAppInterfaceRequestTest
       , mock_application_helper_(
             application_manager_test::MockApplicationHelper::
                 application_helper_mock())
+      , mock_rpc_plugin_manager_(
+            std::make_shared<NiceMock<MockRPCPluginManager> >())
+      , message_helper_mock_(
+            *application_manager::MockMessageHelper::message_helper_mock())
       , notify_upd_manager_(std::make_shared<utils::CallNothing>()) {
     InitGetters();
     InitLanguage();
@@ -116,10 +124,21 @@ class RegisterAppInterfaceRequestTest
 
   void SetUp() OVERRIDE {
     testing::Mock::VerifyAndClearExpectations(&mock_application_helper_);
+    testing::Mock::VerifyAndClearExpectations(&message_helper_mock_);
+
+    ON_CALL(app_mngr_, GetPluginManager())
+        .WillByDefault(ReturnRef(*mock_rpc_plugin_manager_));
+
+    ON_CALL(app_mngr_, GetPolicyHandler())
+        .WillByDefault(ReturnRef(mock_policy_handler_));
+
+    ON_CALL(app_mngr_, GetRPCService())
+        .WillByDefault(ReturnRef(mock_rpc_service_));
   }
 
   void TearDown() OVERRIDE {
     testing::Mock::VerifyAndClearExpectations(&mock_application_helper_);
+    testing::Mock::VerifyAndClearExpectations(&message_helper_mock_);
   }
 
   void InitBasicMessage() {
@@ -152,6 +171,15 @@ class RegisterAppInterfaceRequestTest
     ON_CALL(*mock_app, policy_app_id()).WillByDefault(Return(kAppId1));
     ON_CALL(*mock_app, msg_version())
         .WillByDefault(ReturnRef(mock_semantic_version));
+    ON_CALL(*mock_app, protocol_version())
+        .WillByDefault(
+            Return(protocol_handler::MajorProtocolVersion::PROTOCOL_VERSION_5));
+
+    capabilities_builder_ptr_.reset(
+        new application_manager::DisplayCapabilitiesBuilder(*mock_app));
+    ON_CALL(*mock_app, display_capabilities_builder())
+        .WillByDefault(ReturnRef(*capabilities_builder_ptr_));
+
     return mock_app;
   }
 
@@ -281,6 +309,11 @@ class RegisterAppInterfaceRequestTest
             HMIResultCodeIs(hmi_apis::FunctionID::VR_ChangeRegistration), _))
         .Times(0);
 
+    auto notification = std::make_shared<smart_objects::SmartObject>();
+    ON_CALL(message_helper_mock_, CreateHMIStatusNotification(_, _))
+        .WillByDefault(Return(notification));
+    EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(notification, _));
+
     EXPECT_CALL(app_mngr_,
                 OnApplicationSwitched(
                     std::static_pointer_cast<application_manager::Application>(
@@ -345,7 +378,7 @@ class RegisterAppInterfaceRequestTest
   typedef IsNiceMock<policy_test::MockPolicyHandlerInterface,
                      kMocksAreNice>::Result MockPolicyHandlerInterface;
 
-  typedef IsNiceMock<resumprion_test::MockResumeCtrl, kMocksAreNice>::Result
+  typedef IsNiceMock<resumption_test::MockResumeCtrl, kMocksAreNice>::Result
       MockResumeCtrl;
 
   typedef IsNiceMock<connection_handler_test::MockConnectionHandler,
@@ -361,11 +394,21 @@ class RegisterAppInterfaceRequestTest
   MockConnectionHandler mock_connection_handler_;
   MockSessionObserver mock_session_observer_;
   application_manager_test::MockApplicationHelper& mock_application_helper_;
+  std::shared_ptr<am::plugin_manager::MockRPCPluginManager>
+      mock_rpc_plugin_manager_;
+  application_manager::MockMessageHelper& message_helper_mock_;
   policy::StatusNotifier notify_upd_manager_;
+  std::unique_ptr<application_manager::DisplayCapabilitiesBuilder>
+      capabilities_builder_ptr_;
 };
 
 TEST_F(RegisterAppInterfaceRequestTest, Init_SUCCESS) {
   EXPECT_TRUE(command_->Init());
+}
+
+TEST_F(RegisterAppInterfaceRequestTest, DefaultTimeout_CheckIfZero_SUCCESS) {
+  command_->Init();
+  EXPECT_EQ(command_->default_timeout(), kDefaultTimeout);
 }
 
 TEST_F(RegisterAppInterfaceRequestTest, Run_MinimalData_SUCCESS) {
@@ -376,7 +419,6 @@ TEST_F(RegisterAppInterfaceRequestTest, Run_MinimalData_SUCCESS) {
       .WillOnce(Return(true))
       .WillOnce(Return(false));
   ON_CALL(app_mngr_, IsHMICooperating()).WillByDefault(Return(false));
-  EXPECT_CALL(app_mngr_, updateRequestTimeout(_, _, _));
   EXPECT_CALL(app_mngr_, IsApplicationForbidden(_, _)).WillOnce(Return(false));
 
   ON_CALL(mock_connection_handler_,
@@ -398,8 +440,8 @@ TEST_F(RegisterAppInterfaceRequestTest, Run_MinimalData_SUCCESS) {
       .WillByDefault(Return(DataAccessor<am::AppsWaitRegistrationSet>(
           pending_app_set_, pending_lock_ptr_)));
 
-  EXPECT_CALL(app_mngr_, application(kConnectionKey))
-      .WillOnce(Return(mock_app));
+  ON_CALL(app_mngr_, application(kConnectionKey))
+      .WillByDefault(Return(mock_app));
 
   ON_CALL(mock_policy_handler_, PolicyEnabled()).WillByDefault(Return(true));
   ON_CALL(mock_policy_handler_, GetInitialAppData(kAppId1, _, _))
@@ -421,6 +463,11 @@ TEST_F(RegisterAppInterfaceRequestTest, Run_MinimalData_SUCCESS) {
           HMIResultCodeIs(hmi_apis::FunctionID::Buttons_OnButtonSubscription),
           _))
       .WillOnce(Return(true));
+
+  application_manager::DisplayCapabilitiesBuilder builder(*mock_app);
+  ON_CALL(*mock_app, display_capabilities_builder())
+      .WillByDefault(ReturnRef(builder));
+
   EXPECT_CALL(mock_rpc_service_,
               ManageMobileCommand(_, am::commands::Command::SOURCE_SDL))
       .Times(2);
@@ -460,7 +507,6 @@ TEST_F(RegisterAppInterfaceRequestTest,
       .WillOnce(Return(true))
       .WillOnce(Return(false));
   ON_CALL(app_mngr_, IsHMICooperating()).WillByDefault(Return(false));
-  EXPECT_CALL(app_mngr_, updateRequestTimeout(_, _, _));
   EXPECT_CALL(app_mngr_, IsApplicationForbidden(_, _)).WillOnce(Return(false));
 
   ON_CALL(mock_connection_handler_,
@@ -475,8 +521,8 @@ TEST_F(RegisterAppInterfaceRequestTest,
   EXPECT_CALL(app_mngr_, application(kMacAddress1, kAppId1))
       .WillRepeatedly(Return(ApplicationSharedPtr()));
 
-  EXPECT_CALL(app_mngr_, application(kConnectionKey))
-      .WillOnce(Return(mock_app));
+  ON_CALL(app_mngr_, application(kConnectionKey))
+      .WillByDefault(Return(mock_app));
 
   MessageSharedPtr expected_message =
       CreateMessage(smart_objects::SmartType_Map);
@@ -559,6 +605,11 @@ TEST_F(RegisterAppInterfaceRequestTest,
       ManageHMICommand(
           HMIResultCodeIs(hmi_apis::FunctionID::UI_ChangeRegistration), _))
       .WillOnce(Return(true));
+
+  application_manager::DisplayCapabilitiesBuilder builder(*mock_app);
+  ON_CALL(*mock_app, display_capabilities_builder())
+      .WillByDefault(ReturnRef(builder));
+
   EXPECT_CALL(mock_rpc_service_,
               ManageMobileCommand(_, am::commands::Command::SOURCE_SDL))
       .Times(2);
@@ -604,8 +655,8 @@ TEST_F(RegisterAppInterfaceRequestTest,
 
   EXPECT_CALL(mock_application_helper_, RecallApplicationData(_, _)).Times(0);
 
-  EXPECT_CALL(app_mngr_, application(kConnectionKey))
-      .WillRepeatedly(Return(mock_app));
+  ON_CALL(app_mngr_, application(kConnectionKey))
+      .WillByDefault(Return(mock_app));
 
   SetCommonExpectionsOnSwitchedApplication(mock_app,
                                            mobile_apis::Result::SUCCESS);
@@ -651,8 +702,8 @@ TEST_F(RegisterAppInterfaceRequestTest,
 
   EXPECT_CALL(app_mngr_, RegisterApplication(msg_)).Times(0);
 
-  EXPECT_CALL(app_mngr_, application(kConnectionKey))
-      .WillRepeatedly(Return(mock_app));
+  ON_CALL(app_mngr_, application(kConnectionKey))
+      .WillByDefault(Return(mock_app));
 
   SetCommonExpectionsOnSwitchedApplication(mock_app,
                                            mobile_apis::Result::RESUME_FAILED);
@@ -687,8 +738,8 @@ TEST_F(RegisterAppInterfaceRequestTest,
 
   EXPECT_CALL(app_mngr_, RegisterApplication(msg_)).Times(0);
 
-  EXPECT_CALL(app_mngr_, application(kConnectionKey))
-      .WillRepeatedly(Return(mock_app));
+  ON_CALL(app_mngr_, application(kConnectionKey))
+      .WillByDefault(Return(mock_app));
 
   SetCommonExpectionsOnSwitchedApplication(mock_app,
                                            mobile_apis::Result::RESUME_FAILED);
@@ -760,7 +811,6 @@ TEST_F(RegisterAppInterfaceRequestTest,
       .WillOnce(Return(true))
       .WillOnce(Return(false));
   ON_CALL(app_mngr_, IsHMICooperating()).WillByDefault(Return(false));
-  EXPECT_CALL(app_mngr_, updateRequestTimeout(kConnectionKey2, _, _));
   EXPECT_CALL(app_mngr_, IsApplicationForbidden(kConnectionKey2, kAppId1))
       .WillOnce(Return(false));
 
@@ -781,8 +831,8 @@ TEST_F(RegisterAppInterfaceRequestTest,
   EXPECT_CALL(app_mngr_, reregister_application_by_policy_id(kAppId1))
       .WillOnce(Return(ApplicationSharedPtr()));
 
-  EXPECT_CALL(app_mngr_, application(kConnectionKey2))
-      .WillOnce(Return(mock_app2));
+  ON_CALL(app_mngr_, application(kConnectionKey2))
+      .WillByDefault(Return(mock_app2));
 
   ON_CALL(mock_policy_handler_, PolicyEnabled()).WillByDefault(Return(true));
   ON_CALL(mock_policy_handler_, GetInitialAppData(kAppId1, _, _))
@@ -822,6 +872,11 @@ TEST_F(RegisterAppInterfaceRequestTest,
       ManageHMICommand(
           HMIResultCodeIs(hmi_apis::FunctionID::UI_ChangeRegistration), _))
       .WillOnce(Return(true));
+
+  application_manager::DisplayCapabilitiesBuilder builder(*mock_app2);
+  ON_CALL(*mock_app2, display_capabilities_builder())
+      .WillByDefault(ReturnRef(builder));
+
   EXPECT_CALL(mock_rpc_service_,
               ManageMobileCommand(_, am::commands::Command::SOURCE_SDL))
       .Times(2);

@@ -43,6 +43,7 @@
 #include "application_manager/policies/policy_handler.h"
 #include "application_manager/resumption/resumption_data_db.h"
 #include "application_manager/resumption/resumption_data_json.h"
+#include "application_manager/resumption/resumption_data_processor_impl.h"
 #include "application_manager/state_controller.h"
 #include "connection_handler/connection.h"
 #include "connection_handler/connection_handler_impl.h"
@@ -64,8 +65,7 @@ static mobile_api::HMILevel::eType ConvertHmiLevelString(const std::string str);
 SDL_CREATE_LOG_VARIABLE("Resumption")
 
 ResumeCtrlImpl::ResumeCtrlImpl(ApplicationManager& application_manager)
-    : event_engine::EventObserver(application_manager.event_dispatcher())
-    , restore_hmi_level_timer_(
+    : restore_hmi_level_timer_(
           "RsmCtrlRstore",
           new timer::TimerTaskImpl<ResumeCtrlImpl>(
               this, &ResumeCtrlImpl::ApplicationResumptiOnTimer))
@@ -78,7 +78,9 @@ ResumeCtrlImpl::ResumeCtrlImpl(ApplicationManager& application_manager)
     , launch_time_(time(nullptr))
     , low_voltage_time_(0)
     , wake_up_time_(0)
-    , application_manager_(application_manager) {}
+    , application_manager_(application_manager)
+    , resumption_data_processor_(
+          new ResumptionDataProcessorImpl(application_manager)) {}
 #ifdef BUILD_TESTS
 void ResumeCtrlImpl::set_resumption_storage(
     std::shared_ptr<ResumptionData> mock_storage) {
@@ -158,16 +160,6 @@ void ResumeCtrlImpl::SaveApplication(ApplicationSharedPtr application) {
   resumption_storage_->SaveApplication(application);
 }
 
-void ResumeCtrlImpl::on_event(const event_engine::Event& event) {
-  SDL_LOG_DEBUG("Event received: " << event.id());
-
-  if (hmi_apis::FunctionID::UI_CreateWindow == event.id()) {
-    SDL_LOG_INFO("Received UI_CreateWindow event");
-    const auto& response_message = event.smart_object();
-    RestoreWidgetsHMIState(response_message);
-  }
-}
-
 bool ResumeCtrlImpl::RestoreAppHMIState(ApplicationSharedPtr application) {
   using namespace mobile_apis;
   SDL_LOG_AUTO_TRACE();
@@ -213,14 +205,8 @@ bool ResumeCtrlImpl::RestoreAppHMIState(ApplicationSharedPtr application) {
       const bool app_exists_in_full_or_limited =
           application_manager_.get_full_or_limited_application().use_count() !=
           0;
-      const bool app_hmi_state_is_set =
-          SetAppHMIState(application, saved_hmi_level, true);
-      size_t restored_widgets = 0;
-      if (app_hmi_state_is_set &&
-          application->is_app_data_resumption_allowed()) {
-        restored_widgets = RestoreAppWidgets(application, saved_app);
-      }
-      if (0 == restored_widgets && app_exists_in_full_or_limited) {
+      SetAppHMIState(application, saved_hmi_level, true);
+      if (app_exists_in_full_or_limited) {
         SDL_LOG_DEBUG("App exists in full or limited. Do not resume");
         return false;
       }
@@ -234,73 +220,6 @@ bool ResumeCtrlImpl::RestoreAppHMIState(ApplicationSharedPtr application) {
   return result;
 }
 
-void ResumeCtrlImpl::RestoreWidgetsHMIState(
-    const smart_objects::SmartObject& response_message) {
-  SDL_LOG_AUTO_TRACE();
-  const auto correlation_id =
-      response_message[strings::params][strings::correlation_id].asInt();
-  const auto& request = requests_msg_.find(correlation_id);
-  if (requests_msg_.end() == request) {
-    SDL_LOG_ERROR("Request UI_CreateWindow for correlation id: "
-                  << correlation_id << " not found");
-    return;
-  }
-
-  const auto& msg_params = (*request->second)[strings::msg_params];
-  const auto hmi_app_id = msg_params[strings::app_id].asInt();
-  auto application = application_manager_.application_by_hmi_app(hmi_app_id);
-  if (!application) {
-    SDL_LOG_ERROR("Application is not registered by hmi id: " << hmi_app_id);
-    requests_msg_.erase(request);
-    return;
-  }
-  const WindowID window_id = msg_params[strings::window_id].asInt();
-
-  const auto result_code = static_cast<hmi_apis::Common_Result::eType>(
-      response_message[strings::params][hmi_response::code].asInt());
-  if (hmi_apis::Common_Result::SUCCESS != result_code) {
-    SDL_LOG_ERROR("UI_CreateWindow for correlation id: "
-                  << correlation_id << " failed with code: " << result_code);
-    requests_msg_.erase(request);
-    auto& builder = application->display_capabilities_builder();
-    builder.StopWaitingForWindow(window_id);
-    return;
-  }
-
-  smart_objects::SmartObject window_info(smart_objects::SmartType_Map);
-  auto fill_optional_param = [&window_info,
-                              &msg_params](const std::string& key) {
-    if (msg_params.keyExists(key)) {
-      window_info[key] = msg_params[key].asString();
-    }
-  };
-  fill_optional_param(strings::associated_service_type);
-  fill_optional_param(strings::duplicate_updates_from_window_id);
-
-  const auto window_name = msg_params[strings::window_name].asString();
-  window_info[strings::window_name] = window_name;
-  application->SetWindowInfo(window_id, window_info);
-
-  const auto window_type = static_cast<mobile_apis::WindowType::eType>(
-      msg_params[strings::window_type].asInt());
-  // State should be initialized with INVALID_ENUM value to let state controller
-  // trigger OnHmiStatus notifiation sending
-  auto initial_state = application_manager_.CreateRegularState(
-      application,
-      window_type,
-      mobile_apis::HMILevel::INVALID_ENUM,
-      mobile_apis::AudioStreamingState::INVALID_ENUM,
-      mobile_apis::VideoStreamingState::INVALID_ENUM,
-      mobile_api::SystemContext::INVALID_ENUM);
-  application->SetInitialState(window_id, window_name, initial_state);
-
-  // Default HMI level for all windows except the main one is always NONE
-  application_manager_.state_controller().OnAppWindowAdded(
-      application, window_id, window_type, mobile_apis::HMILevel::HMI_NONE);
-
-  requests_msg_.erase(request);
-}
-
 void ResumeCtrlImpl::ProcessSystemCapabilityUpdated(
     Application& app, const smart_objects::SmartObject& display_capabilities) {
   SDL_LOG_AUTO_TRACE();
@@ -310,7 +229,6 @@ void ResumeCtrlImpl::ProcessSystemCapabilityUpdated(
 
   application_manager_.GetRPCService().ManageMobileCommand(
       notification, commands::Command::SOURCE_SDL);
-  app.set_is_resuming(false);
 }
 
 bool ResumeCtrlImpl::SetupDefaultHMILevel(ApplicationSharedPtr application) {
@@ -399,29 +317,6 @@ bool ResumeCtrlImpl::SetAppHMIState(
   return true;
 }
 
-size_t ResumeCtrlImpl::RestoreAppWidgets(
-    application_manager::ApplicationSharedPtr application,
-    const smart_objects::SmartObject& saved_app) {
-  using namespace mobile_apis;
-  SDL_LOG_AUTO_TRACE();
-  DCHECK(application);
-  if (!saved_app.keyExists(strings::windows_info)) {
-    SDL_LOG_ERROR("windows_info section does not exist");
-    return 0;
-  }
-  const auto& windows_info = saved_app[strings::windows_info];
-  auto request_list = MessageHelper::CreateUICreateWindowRequestsToHMI(
-      application, application_manager_, windows_info);
-
-  requests_msg_.clear();
-  for (auto& request : request_list) {
-    requests_msg_.insert(std::make_pair(
-        (*request)[strings::params][strings::correlation_id].asInt(), request));
-  }
-  ProcessHMIRequests(request_list);
-  return request_list.size();
-}
-
 bool ResumeCtrlImpl::IsHMIApplicationIdExist(uint32_t hmi_app_id) {
   SDL_LOG_DEBUG("hmi_app_id :" << hmi_app_id);
   return resumption_storage_->IsHMIApplicationIdExist(hmi_app_id);
@@ -504,6 +399,10 @@ void ResumeCtrlImpl::StartSavePersistentDataTimer() {
   }
 }
 
+ResumptionDataProcessor& ResumeCtrlImpl::resumption_data_processor() {
+  return *resumption_data_processor_;
+}
+
 void ResumeCtrlImpl::StopSavePersistentDataTimer() {
   SDL_LOG_AUTO_TRACE();
   if (save_persistent_data_timer_.is_running()) {
@@ -512,7 +411,8 @@ void ResumeCtrlImpl::StopSavePersistentDataTimer() {
 }
 
 bool ResumeCtrlImpl::StartResumption(ApplicationSharedPtr application,
-                                     const std::string& hash) {
+                                     const std::string& hash,
+                                     ResumptionCallBack callback) {
   SDL_LOG_AUTO_TRACE();
   DCHECK_OR_RETURN(application, false);
   SDL_LOG_DEBUG(" Resume app_id = "
@@ -522,24 +422,22 @@ bool ResumeCtrlImpl::StartResumption(ApplicationSharedPtr application,
                 << " received hash = " << hash);
   application->set_is_resuming(true);
 
-  if (!application->is_cloud_app()) {
-    // Default HMI Level is already set before resumption in
-    // ApplicationManager::OnApplicationRegistered, and handling low bandwidth
-    // transports doesn't apply to cloud apps, so this step can be skipped for
-    // such apps
-    SetupDefaultHMILevel(application);
-  }
   smart_objects::SmartObject saved_app;
   const std::string& device_mac = application->mac_address();
   bool result = resumption_storage_->GetSavedApplication(
       application->policy_app_id(), device_mac, saved_app);
   if (result) {
     const std::string& saved_hash = saved_app[strings::hash_id].asString();
-    result = saved_hash == hash ? RestoreApplicationData(application) : false;
-    application->UpdateHash();
-    AddToResumptionTimerQueue(application->app_id());
+    result = saved_hash == hash ? RestoreApplicationData(application, callback)
+                                : false;
   }
   return result;
+}
+
+void ResumeCtrlImpl::HandleOnTimeOut(
+    const uint32_t cor_id, const hmi_apis::FunctionID::eType function_id) {
+  SDL_LOG_AUTO_TRACE();
+  resumption_data_processor_->HandleOnTimeOut(cor_id, function_id);
 }
 
 bool ResumeCtrlImpl::StartResumptionOnlyHMILevel(
@@ -726,7 +624,8 @@ bool ResumeCtrlImpl::IsDeviceMacAddressEqual(
   return device_mac == saved_device_mac;
 }
 
-bool ResumeCtrlImpl::RestoreApplicationData(ApplicationSharedPtr application) {
+bool ResumeCtrlImpl::RestoreApplicationData(ApplicationSharedPtr application,
+                                            ResumptionCallBack callback) {
   SDL_LOG_AUTO_TRACE();
   DCHECK_OR_RETURN(application, false);
   SDL_LOG_DEBUG("app_id : " << application->app_id());
@@ -739,13 +638,7 @@ bool ResumeCtrlImpl::RestoreApplicationData(ApplicationSharedPtr application) {
     if (saved_app.keyExists(strings::grammar_id)) {
       const uint32_t app_grammar_id = saved_app[strings::grammar_id].asUInt();
       application->set_grammar_id(app_grammar_id);
-      AddFiles(application, saved_app);
-      AddSubmenues(application, saved_app);
-      AddCommands(application, saved_app);
-      AddChoicesets(application, saved_app);
-      SetGlobalProperties(application, saved_app);
-      AddSubscriptions(application, saved_app);
-      AddWayPointsSubscription(application, saved_app);
+      resumption_data_processor_->Restore(application, saved_app, callback);
       result = true;
     } else {
       SDL_LOG_WARN("Saved data of application does not contain grammar_id");
@@ -758,7 +651,7 @@ bool ResumeCtrlImpl::RestoreApplicationData(ApplicationSharedPtr application) {
 }
 
 void ResumeCtrlImpl::StartWaitingForDisplayCapabilitiesUpdate(
-    app_mngr::ApplicationSharedPtr application) {
+    app_mngr::ApplicationSharedPtr application, const bool is_resume_app) {
   SDL_LOG_AUTO_TRACE();
   smart_objects::SmartObject saved_app(smart_objects::SmartType_Map);
   resumption_storage_->GetSavedApplication(
@@ -772,158 +665,10 @@ void ResumeCtrlImpl::StartWaitingForDisplayCapabilitiesUpdate(
   auto& builder = application->display_capabilities_builder();
 
   smart_objects::SmartObject windows_info(smart_objects::SmartType_Null);
-  if (saved_app.keyExists(strings::windows_info)) {
+  if (is_resume_app && saved_app.keyExists(strings::windows_info)) {
     windows_info = saved_app[strings::windows_info];
   }
   builder.InitBuilder(resume_callback, windows_info);
-}
-
-void ResumeCtrlImpl::AddFiles(ApplicationSharedPtr application,
-                              const smart_objects::SmartObject& saved_app) {
-  SDL_LOG_AUTO_TRACE();
-
-  if (saved_app.keyExists(strings::application_files)) {
-    const smart_objects::SmartObject& application_files =
-        saved_app[strings::application_files];
-    for (size_t i = 0; i < application_files.length(); ++i) {
-      const smart_objects::SmartObject& file_data = application_files[i];
-      const bool is_persistent =
-          file_data.keyExists(strings::persistent_file) &&
-          file_data[strings::persistent_file].asBool();
-      if (is_persistent) {
-        AppFile file;
-        file.is_persistent = is_persistent;
-        file.is_download_complete =
-            file_data[strings::is_download_complete].asBool();
-        file.file_name = file_data[strings::sync_file_name].asString();
-        file.file_type = static_cast<mobile_apis::FileType::eType>(
-            file_data[strings::file_type].asInt());
-        application->AddFile(file);
-      }
-    }
-  } else {
-    SDL_LOG_FATAL("application_files section is not exists");
-  }
-}
-
-void ResumeCtrlImpl::AddSubmenues(ApplicationSharedPtr application,
-                                  const smart_objects::SmartObject& saved_app) {
-  SDL_LOG_AUTO_TRACE();
-
-  if (saved_app.keyExists(strings::application_submenus)) {
-    const smart_objects::SmartObject& app_submenus =
-        saved_app[strings::application_submenus];
-    for (size_t i = 0; i < app_submenus.length(); ++i) {
-      const smart_objects::SmartObject& submenu = app_submenus[i];
-      application->AddSubMenu(submenu[strings::menu_id].asUInt(), submenu);
-    }
-    ProcessHMIRequests(MessageHelper::CreateAddSubMenuRequestToHMI(
-        application, application_manager_.GetNextHMICorrelationID()));
-  } else {
-    SDL_LOG_FATAL("application_submenus section is not exists");
-  }
-}
-
-void ResumeCtrlImpl::AddCommands(ApplicationSharedPtr application,
-                                 const smart_objects::SmartObject& saved_app) {
-  SDL_LOG_AUTO_TRACE();
-
-  if (saved_app.keyExists(strings::application_commands)) {
-    const smart_objects::SmartObject& app_commands =
-        saved_app[strings::application_commands];
-
-    for (size_t cmd_num = 0; cmd_num < app_commands.length(); ++cmd_num) {
-      const smart_objects::SmartObject& command = app_commands[cmd_num];
-      const uint32_t cmd_id = command[strings::cmd_id].asUInt();
-      const bool is_resumption = true;
-      application->AddCommand(
-          commands::CommandImpl::CalcCommandInternalConsecutiveNumber(
-              application),
-          command);
-      application->help_prompt_manager().OnVrCommandAdded(
-          cmd_id, command, is_resumption);
-    }
-
-    ProcessHMIRequests(MessageHelper::CreateAddCommandRequestToHMI(
-        application, application_manager_));
-  } else {
-    SDL_LOG_FATAL("application_commands section is not exists");
-  }
-}
-
-void ResumeCtrlImpl::AddChoicesets(
-    ApplicationSharedPtr application,
-    const smart_objects::SmartObject& saved_app) {
-  SDL_LOG_AUTO_TRACE();
-
-  if (saved_app.keyExists(strings::application_choice_sets)) {
-    const smart_objects::SmartObject& app_choice_sets =
-        saved_app[strings::application_choice_sets];
-    for (size_t i = 0; i < app_choice_sets.length(); ++i) {
-      const smart_objects::SmartObject& choice_set = app_choice_sets[i];
-      const int32_t choice_set_id =
-          choice_set[strings::interaction_choice_set_id].asInt();
-      application->AddChoiceSet(choice_set_id, choice_set);
-    }
-    ProcessHMIRequests(MessageHelper::CreateAddVRCommandRequestFromChoiceToHMI(
-        application, application_manager_));
-  } else {
-    SDL_LOG_FATAL("There is no any choicesets");
-  }
-}
-
-void ResumeCtrlImpl::SetGlobalProperties(
-    ApplicationSharedPtr application,
-    const smart_objects::SmartObject& saved_app) {
-  SDL_LOG_AUTO_TRACE();
-
-  if (saved_app.keyExists(strings::application_global_properties)) {
-    const smart_objects::SmartObject& properties_so =
-        saved_app[strings::application_global_properties];
-    application->load_global_properties(properties_so);
-    MessageHelper::SendGlobalPropertiesToHMI(application, application_manager_);
-  }
-}
-
-void ResumeCtrlImpl::AddWayPointsSubscription(
-    app_mngr::ApplicationSharedPtr application,
-    const smart_objects::SmartObject& saved_app) {
-  SDL_LOG_AUTO_TRACE();
-
-  if (saved_app.keyExists(strings::subscribed_for_way_points)) {
-    const smart_objects::SmartObject& subscribed_for_way_points_so =
-        saved_app[strings::subscribed_for_way_points];
-    if (true == subscribed_for_way_points_so.asBool()) {
-      application_manager_.SubscribeAppForWayPoints(application);
-    }
-  }
-}
-
-void ResumeCtrlImpl::AddSubscriptions(
-    ApplicationSharedPtr application,
-    const smart_objects::SmartObject& saved_app) {
-  SDL_LOG_AUTO_TRACE();
-  if (saved_app.keyExists(strings::application_subscriptions)) {
-    const smart_objects::SmartObject& subscriptions =
-        saved_app[strings::application_subscriptions];
-
-    if (subscriptions.keyExists(strings::application_buttons)) {
-      const smart_objects::SmartObject& subscriptions_buttons =
-          subscriptions[strings::application_buttons];
-      mobile_apis::ButtonName::eType btn;
-      for (size_t i = 0; i < subscriptions_buttons.length(); ++i) {
-        btn = static_cast<mobile_apis::ButtonName::eType>(
-            (subscriptions_buttons[i]).asInt());
-        application->SubscribeToButton(btn);
-      }
-    }
-    MessageHelper::SendAllOnButtonSubscriptionNotificationsForApp(
-        application, application_manager_);
-
-    for (auto& extension : application->Extensions()) {
-      extension->ProcessResumption(subscriptions);
-    }
-  }
 }
 
 bool ResumeCtrlImpl::CheckIgnCycleRestrictions(
@@ -1138,36 +883,6 @@ time_t ResumeCtrlImpl::LaunchTime() const {
 
 time_t ResumeCtrlImpl::GetIgnOffTime() const {
   return resumption_storage_->GetIgnOffTime();
-}
-
-bool ResumeCtrlImpl::ProcessHMIRequest(smart_objects::SmartObjectSPtr request,
-                                       bool use_events) {
-  SDL_LOG_AUTO_TRACE();
-  if (use_events) {
-    const hmi_apis::FunctionID::eType function_id =
-        static_cast<hmi_apis::FunctionID::eType>(
-            (*request)[strings::function_id].asInt());
-
-    const int32_t hmi_correlation_id =
-        (*request)[strings::correlation_id].asInt();
-    subscribe_on_event(function_id, hmi_correlation_id);
-  }
-  if (!application_manager_.GetRPCService().ManageHMICommand(
-          request, commands::Command::SOURCE_SDL_TO_HMI)) {
-    SDL_LOG_ERROR("Unable to send request");
-    return false;
-  }
-  return true;
-}
-
-void ResumeCtrlImpl::ProcessHMIRequests(
-    const smart_objects::SmartObjectList& requests) {
-  for (smart_objects::SmartObjectList::const_iterator it = requests.begin(),
-                                                      total = requests.end();
-       it != total;
-       ++it) {
-    ProcessHMIRequest(*it, true);
-  }
 }
 
 void ResumeCtrlImpl::AddToResumptionTimerQueue(const uint32_t app_id) {

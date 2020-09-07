@@ -34,6 +34,7 @@
 #define SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_SDL_RPC_PLUGIN_H
 #include "application_manager/command_factory.h"
 #include "application_manager/plugin_manager/rpc_plugin.h"
+#include "application_manager/resumption/pending_resumption_handler.h"
 #include "utils/ilogger.h"
 
 namespace sdl_rpc_plugin {
@@ -41,10 +42,12 @@ namespace app_mngr = application_manager;
 namespace plugins = application_manager::plugin_manager;
 
 class SystemCapabilityAppExtension;
+class WayPointsAppExtension;
 
 class SDLRPCPlugin : public plugins::RPCPlugin {
   // RPCPlugin interface
  public:
+  SDLRPCPlugin();
   bool Init(app_mngr::ApplicationManager& app_manager,
             app_mngr::rpc_service::RPCService& rpc_service,
             app_mngr::HMICapabilities& hmi_capabilities,
@@ -57,6 +60,28 @@ class SDLRPCPlugin : public plugins::RPCPlugin {
             app_mngr::HMICapabilities& hmi_capabilities,
             policy::PolicyHandlerInterface& policy_handler,
             resumption::LastState& last_state) OVERRIDE;
+
+  /**
+   * @brief ProcessResumptionSubscription send appropriate subscribe requests
+   * to HMI
+   * @param app application for subscription
+   * @param ext application extension
+   */
+  void ProcessResumptionSubscription(application_manager::Application& app,
+                                     WayPointsAppExtension& ext);
+
+  /**
+   * @brief Revert the data to the state before Resumption.
+   * @param app Application owning resumption data
+   **/
+  void RevertResumption(application_manager::Application& app);
+
+  /**
+   * @brief SaveResumptionData saves subscription data
+   * @param resumption_data plase to store resumption data
+   */
+  void SaveResumptionData(application_manager::Application& app,
+                          smart_objects::SmartObject& resumption_data);
 
   bool IsAbleToProcess(
       const int32_t function_id,
@@ -72,6 +97,10 @@ class SDLRPCPlugin : public plugins::RPCPlugin {
   void ClearSubscriptions(app_mngr::ApplicationSharedPtr app);
 
   std::unique_ptr<application_manager::CommandFactory> command_factory_;
+  application_manager::ApplicationManager* application_manager_;
+  using PendingResumptionHandlerSPtr =
+      std::shared_ptr<resumption::PendingResumptionHandler>;
+  PendingResumptionHandlerSPtr pending_resumption_handler_;
 };
 }  // namespace sdl_rpc_plugin
 

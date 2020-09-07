@@ -36,6 +36,7 @@
 
 #include "application_manager/application.h"
 #include "application_manager/message_helper.h"
+#include "application_manager/resumption/resume_ctrl.h"
 #include "utils/custom_string.h"
 #include "utils/file_system.h"
 #include "utils/helpers.h"
@@ -112,8 +113,12 @@ void AddCommandRequest::Run() {
     return;
   }
 
-  if (app->FindCommand(
-          (*message_)[strings::msg_params][strings::cmd_id].asUInt())) {
+  const auto command_id = static_cast<uint32_t>(
+      (*message_)[strings::msg_params][strings::cmd_id].asUInt());
+
+  const auto command = app->FindCommand(command_id);
+
+  if (smart_objects::SmartType_Null != command.getType()) {
     SDL_LOG_ERROR("INVALID_ID");
     SendResponse(false, mobile_apis::Result::INVALID_ID);
     return;
@@ -301,9 +306,9 @@ bool AddCommandRequest::CheckCommandParentId(ApplicationConstSharedPtr app) {
       (*message_)[strings::msg_params][strings::menu_params]
                  [hmi_request::parent_id]
                      .asInt();
-  smart_objects::SmartObject* parent = app->FindSubMenu(parent_id);
+  smart_objects::SmartObject parent = app->FindSubMenu(parent_id);
 
-  if (!parent) {
+  if (smart_objects::SmartType_Null == parent.getType()) {
     SDL_LOG_INFO(
         "AddCommandRequest::CheckCommandParentId received"
         " submenu doesn't exist");
@@ -359,7 +364,7 @@ void AddCommandRequest::on_event(const event_engine::Event& event) {
       break;
     }
     default: {
-      SDL_LOG_ERROR("Received unknown event " << event.id());
+      SDL_LOG_ERROR("Received unknown event" << event.id());
       return;
     }
   }

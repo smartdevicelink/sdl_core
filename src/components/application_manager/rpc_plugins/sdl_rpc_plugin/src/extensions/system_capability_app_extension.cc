@@ -1,9 +1,12 @@
 #include "sdl_rpc_plugin/extensions/system_capability_app_extension.h"
+#include "application_manager/smart_object_keys.h"
 
 namespace sdl_rpc_plugin {
 SDL_CREATE_LOG_VARIABLE("GetSystemCapabilitiesAppExtension")
 
 namespace app_mngr_ = application_manager;
+namespace strings = app_mngr::strings;
+
 const app_mngr_::AppExtensionUID
     SystemCapabilityAppExtension::SystemCapabilityAppExtensionUID = 200;
 
@@ -51,34 +54,44 @@ SystemCapabilitySubscriptions SystemCapabilityAppExtension::Subscriptions() {
 }
 
 void SystemCapabilityAppExtension::SaveResumptionData(
-    ns_smart_device_link::ns_smart_objects::SmartObject& resumption_data) {
+    smart_objects::SmartObject& resumption_data) {
   SDL_LOG_AUTO_TRACE();
-  const char* application_system_capability = "systemCapability";
 
-  resumption_data[application_system_capability] =
+  resumption_data[strings::system_capability] =
       smart_objects::SmartObject(smart_objects::SmartType_Array);
 
   int i = 0;
   for (const auto& subscription : subscribed_data_) {
-    resumption_data[application_system_capability][i] = subscription;
+    resumption_data[strings::system_capability][i] = subscription;
     i++;
   }
 }
 
 void SystemCapabilityAppExtension::ProcessResumption(
-    const smart_objects::SmartObject& resumption_data) {
+    const smart_objects::SmartObject& saved_app) {
   SDL_LOG_AUTO_TRACE();
 
-  const char* application_system_capability = "systemCapability";
-  if (resumption_data.keyExists(application_system_capability)) {
-    const smart_objects::SmartObject& subscriptions =
-        resumption_data[application_system_capability];
-    for (size_t i = 0; i < subscriptions.length(); ++i) {
-      SystemCapabilityType capability_type =
-          static_cast<SystemCapabilityType>((resumption_data[i]).asInt());
+  const smart_objects::SmartObject& subscriptions =
+      saved_app[strings::application_subscriptions];
+
+  if (saved_app.keyExists(strings::system_capability)) {
+    const auto& system_capability_subscriptions =
+        subscriptions[strings::system_capability];
+    for (size_t i = 0; i < system_capability_subscriptions.length(); ++i) {
+      SystemCapabilityType capability_type = static_cast<SystemCapabilityType>(
+          (system_capability_subscriptions[i]).asInt());
       SubscribeTo(capability_type);
     }
   }
+}
+
+void SystemCapabilityAppExtension::RevertResumption(
+    const smart_objects::SmartObject& subscriptions) {
+  SDL_LOG_AUTO_TRACE();
+
+  // No need to revert subscriptions here when an app gets RESUME_FAILED
+  // System capability subscriptions should still be active
+  UNUSED(subscriptions);
 }
 
 SystemCapabilityAppExtension& SystemCapabilityAppExtension::ExtractExtension(

@@ -1,5 +1,5 @@
 /*
- Copyright (c) 2018, Ford Motor Company
+ Copyright (c) 2020, Ford Motor Company
  All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -39,6 +39,7 @@
 #include "rc_rpc_plugin/rc_command_factory.h"
 #include "rc_rpc_plugin/rc_consent_manager_impl.h"
 #include "rc_rpc_plugin/rc_helpers.h"
+#include "rc_rpc_plugin/rc_pending_resumption_handler.h"
 #include "rc_rpc_plugin/resource_allocation_manager_impl.h"
 #include "utils/helpers.h"
 
@@ -76,6 +77,8 @@ bool RCRPCPlugin::Init(
   command_factory_.reset(new rc_rpc_plugin::RCCommandFactory(params));
   rpc_service_ = &rpc_service;
   app_mngr_ = &app_manager;
+  pending_resumption_handler_ = std::make_shared<RCPendingResumptionHandler>(
+      app_manager, *(interior_data_cache_.get()));
 
   // Check all saved consents and remove expired
   rc_consent_manager_->RemoveExpiredConsents();
@@ -124,9 +127,9 @@ void RCRPCPlugin::OnApplicationEvent(
   }
   switch (event) {
     case plugins::kApplicationRegistered: {
-      auto extension =
-          std::shared_ptr<RCAppExtension>(new RCAppExtension(kRCPluginID));
-      application->AddExtension(extension);
+      auto extension = std::shared_ptr<RCAppExtension>(
+          new RCAppExtension(kRCPluginID, *this, *application));
+      DCHECK_OR_RETURN_VOID(application->AddExtension(extension));
       const auto driver_location =
           rc_capabilities_manager_
               ->GetDriverLocationFromSeatLocationCapability();
@@ -157,6 +160,49 @@ void RCRPCPlugin::OnApplicationEvent(
     default:
       break;
   }
+}
+
+void RCRPCPlugin::ProcessResumptionSubscription(
+    application_manager::Application& app, RCAppExtension& ext) {
+  SDL_LOG_AUTO_TRACE();
+
+  pending_resumption_handler_->HandleResumptionSubscriptionRequest(ext, app);
+}
+
+void RCRPCPlugin::RevertResumption(const std::set<ModuleUid>& subscriptions) {
+  SDL_LOG_AUTO_TRACE();
+
+  interior_data_manager_->OnResumptionRevert(subscriptions);
+  pending_resumption_handler_->OnResumptionRevert();
+}
+
+bool RCRPCPlugin::IsOtherAppsSubscribed(const rc_rpc_types::ModuleUid& module,
+                                        const uint32_t app_id) {
+  auto get_subscriptions = [](application_manager::ApplicationSharedPtr app) {
+    std::set<ModuleUid> result;
+    auto rc_app_extension = RCHelpers::GetRCExtension(*app);
+    if (rc_app_extension) {
+      result = rc_app_extension->InteriorVehicleDataSubscriptions();
+    }
+    return result;
+  };
+
+  auto another_app_subscribed =
+      [app_id, module, &get_subscriptions](
+          application_manager::ApplicationSharedPtr app) {
+        if (app_id == app->app_id()) {
+          return false;
+        }
+        auto subscriptions = get_subscriptions(app);
+        auto it = subscriptions.find(module);
+        return subscriptions.end() != it;
+      };
+
+  auto accessor = app_mngr_->applications();
+  auto it = std::find_if(accessor.GetData().begin(),
+                         accessor.GetData().end(),
+                         another_app_subscribed);
+  return accessor.GetData().end() != it;
 }
 
 RCRPCPlugin::Apps RCRPCPlugin::GetRCApplications(
