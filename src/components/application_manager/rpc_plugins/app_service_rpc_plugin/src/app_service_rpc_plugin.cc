@@ -109,8 +109,8 @@ void AppServiceRpcPlugin::DeleteSubscriptions(
 
 using RPCPlugin = application_manager::plugin_manager::RPCPlugin;
 // cppcheck-suppress unusedFunction
-extern "C" __attribute__((visibility("default")))
-RPCPlugin* Create(logger::Logger* logger_instance) {
+extern "C" __attribute__((visibility("default"))) RPCPlugin* Create(
+    logger::Logger* logger_instance) {
   logger::Logger::instance(logger_instance);
   return new app_service_rpc_plugin::AppServiceRpcPlugin();
 }

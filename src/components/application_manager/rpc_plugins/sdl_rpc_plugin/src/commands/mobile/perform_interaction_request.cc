@@ -34,12 +34,12 @@
 #include "sdl_rpc_plugin/commands/mobile/perform_interaction_request.h"
 
 #include <string.h>
+
 #include <numeric>
 #include <string>
 
 #include "application_manager/application_impl.h"
 #include "application_manager/message_helper.h"
-
 #include "interfaces/HMI_API.h"
 #include "interfaces/MOBILE_API.h"
 #include "utils/custom_string.h"
@@ -1073,7 +1073,7 @@ const bool PerformInteractionRequest::HasHMIResponsesToWait() const {
 
 void PerformInteractionRequest::SendBothModeResponse(
     const smart_objects::SmartObject& msg_param) {
-  SDL_LOG_AUTO_TRACE();;
+  SDL_LOG_AUTO_TRACE();
 
   app_mngr::commands::ResponseInfo ui_perform_info(
       ui_result_code_, HmiInterfaces::HMI_INTERFACE_UI, application_manager_);
