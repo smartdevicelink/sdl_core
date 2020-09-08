@@ -203,7 +203,7 @@ TEST_F(DeleteSubMenuRequestTest, Run_FindSubMenuFalse_UNSUCCESS) {
   (*message_)[am::strings::params][am::strings::connection_key] =
       kConnectionKey;
 
-  smart_objects::SmartObject* invalid_sub_menu = NULL;
+  smart_objects::SmartObject invalid_sub_menu(smart_objects::SmartType_Null);
   EXPECT_CALL(app_mngr_, application(kConnectionKey)).WillOnce(Return(app_));
   EXPECT_CALL(*app_, FindSubMenu(kMenuId)).WillOnce(Return(invalid_sub_menu));
 
@@ -220,8 +220,8 @@ TEST_F(DeleteSubMenuRequestTest, Run_SendHMIRequest_SUCCESS) {
   (*message_)[am::strings::params][am::strings::connection_key] =
       kConnectionKey;
 
-  smart_objects::SmartObject* sub_menu =
-      &((*message_)[am::strings::msg_params][am::strings::menu_id]);
+  smart_objects::SmartObject sub_menu =
+      (*message_)[am::strings::msg_params][am::strings::menu_id];
   EXPECT_CALL(app_mngr_, application(kConnectionKey)).WillOnce(Return(app_));
   EXPECT_CALL(*app_, FindSubMenu(kMenuId)).WillOnce(Return(sub_menu));
 

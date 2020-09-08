@@ -41,7 +41,7 @@ namespace connection_handler {
 
 using namespace sync_primitives;
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "HeartBeatMonitor")
+SDL_CREATE_LOG_VARIABLE("HeartBeatMonitor")
 
 HeartBeatMonitor::HeartBeatMonitor(uint32_t heartbeat_timeout_mseconds,
                                    Connection* connection)
@@ -57,7 +57,7 @@ void HeartBeatMonitor::Process() {
     if (state.HasTimeoutElapsed()) {
       const uint8_t session_id = it->first;
       if (state.IsReadyToClose()) {
-        LOG4CXX_WARN(logger_, "Will close session");
+        SDL_LOG_WARN("Will close session");
         sessions_list_lock_.Release();
         RemoveSession(session_id);
         connection_->CloseSession(session_id);
@@ -65,9 +65,8 @@ void HeartBeatMonitor::Process() {
         it = sessions_.begin();
         continue;
       } else {
-        LOG4CXX_DEBUG(logger_,
-                      "Send heart beat into session with id "
-                          << static_cast<int32_t>(session_id));
+        SDL_LOG_DEBUG("Send heart beat into session with id "
+                      << static_cast<int32_t>(session_id));
         state.PrepareToClose();
         connection_->SendHeartBeat(it->first);
       }
@@ -79,8 +78,8 @@ void HeartBeatMonitor::Process() {
 
 void HeartBeatMonitor::threadMain() {
   AutoLock main_lock(main_thread_lock_);
-  LOG4CXX_DEBUG(
-      logger_,
+  SDL_LOG_DEBUG(
+
       "Start heart beat monitor. Timeout is " << default_heartbeat_timeout_);
   while (run_) {
     heartbeat_monitor_.WaitFor(main_lock, kDefaultCycleTimeout);
@@ -91,42 +90,37 @@ void HeartBeatMonitor::threadMain() {
 void HeartBeatMonitor::AddSession(uint8_t session_id) {
   const uint32_t converted_session_id = static_cast<int32_t>(session_id);
   UNUSED(converted_session_id);
-  LOG4CXX_DEBUG(logger_, "Add session with id " << converted_session_id);
+  SDL_LOG_DEBUG("Add session with id " << converted_session_id);
   AutoLock auto_lock(sessions_list_lock_);
   if (sessions_.end() != sessions_.find(session_id)) {
-    LOG4CXX_WARN(
-        logger_,
-        "Session with id: " << converted_session_id << " already exists");
+    SDL_LOG_WARN("Session with id: " << converted_session_id
+                                     << " already exists");
     return;
   }
   sessions_.insert(
       std::make_pair(session_id, SessionState(default_heartbeat_timeout_)));
-  LOG4CXX_INFO(logger_,
-               "Start heartbeat for session: " << converted_session_id);
+  SDL_LOG_INFO("Start heartbeat for session: " << converted_session_id);
 }
 
 void HeartBeatMonitor::RemoveSession(uint8_t session_id) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   AutoLock auto_lock(sessions_list_lock_);
 
-  LOG4CXX_DEBUG(logger_,
-                "Remove session with id " << static_cast<int>(session_id));
+  SDL_LOG_DEBUG("Remove session with id " << static_cast<int>(session_id));
 
   if (sessions_.erase(session_id) == 0) {
-    LOG4CXX_WARN(logger_,
-                 "Remove session with id " << static_cast<int>(session_id)
+    SDL_LOG_WARN("Remove session with id " << static_cast<int>(session_id)
                                            << " was unsuccessful");
   }
 }
 
 void HeartBeatMonitor::KeepAlive(uint8_t session_id) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   AutoLock auto_lock(sessions_list_lock_);
 
   if (sessions_.end() != sessions_.find(session_id)) {
-    LOG4CXX_INFO(logger_,
-                 "Resetting heart beat timer for session with id "
-                     << static_cast<int32_t>(session_id));
+    SDL_LOG_INFO("Resetting heart beat timer for session with id "
+                 << static_cast<int32_t>(session_id));
 
     sessions_[session_id].KeepAlive();
   }
@@ -136,7 +130,7 @@ void HeartBeatMonitor::exitThreadMain() {
   // FIXME (dchmerev@luxoft.com): thread requested to stop should stop as soon
   // as possible,
   // not running one more iteration before actual stop
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   AutoLock main_lock(main_thread_lock_);
   run_ = false;
   heartbeat_monitor_.NotifyOne();
@@ -144,8 +138,7 @@ void HeartBeatMonitor::exitThreadMain() {
 
 void HeartBeatMonitor::set_heartbeat_timeout_milliseconds(uint32_t timeout,
                                                           uint8_t session_id) {
-  LOG4CXX_DEBUG(logger_,
-                "Set new heart beat timeout " << timeout
+  SDL_LOG_DEBUG("Set new heart beat timeout " << timeout
                                               << "For session: " << session_id);
 
   AutoLock session_locker(sessions_list_lock_);
@@ -158,12 +151,12 @@ HeartBeatMonitor::SessionState::SessionState(
     uint32_t heartbeat_timeout_mseconds)
     : heartbeat_timeout_mseconds_(heartbeat_timeout_mseconds)
     , is_heartbeat_sent_(false) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   RefreshExpiration();
 }
 
 void HeartBeatMonitor::SessionState::RefreshExpiration() {
-  LOG4CXX_DEBUG(logger_, "Refresh expiration: " << heartbeat_timeout_mseconds_);
+  SDL_LOG_DEBUG("Refresh expiration: " << heartbeat_timeout_mseconds_);
   using namespace date_time;
   date_time::TimeDuration time = getCurrentTime();
   AddMilliseconds(time, heartbeat_timeout_mseconds_);
@@ -172,15 +165,14 @@ void HeartBeatMonitor::SessionState::RefreshExpiration() {
 
 void HeartBeatMonitor::SessionState::UpdateTimeout(
     uint32_t heartbeat_timeout_mseconds) {
-  LOG4CXX_DEBUG(logger_,
-                "Update timout with value " << heartbeat_timeout_mseconds_);
+  SDL_LOG_DEBUG("Update timout with value " << heartbeat_timeout_mseconds_);
   heartbeat_timeout_mseconds_ = heartbeat_timeout_mseconds;
   RefreshExpiration();
 }
 
 void HeartBeatMonitor::SessionState::PrepareToClose() {
   is_heartbeat_sent_ = true;
-  LOG4CXX_DEBUG(logger_, "Prepare to close");
+  SDL_LOG_DEBUG("Prepare to close");
   RefreshExpiration();
 }
 
@@ -189,7 +181,7 @@ bool HeartBeatMonitor::SessionState::IsReadyToClose() const {
 }
 
 void HeartBeatMonitor::SessionState::KeepAlive() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   is_heartbeat_sent_ = false;
   RefreshExpiration();
 }

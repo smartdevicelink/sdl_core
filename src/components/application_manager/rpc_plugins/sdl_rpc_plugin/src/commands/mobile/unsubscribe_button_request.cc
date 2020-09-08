@@ -41,6 +41,8 @@ using namespace application_manager;
 
 namespace commands {
 
+SDL_CREATE_LOG_VARIABLE("Commands")
+
 namespace str = strings;
 
 UnsubscribeButtonRequest::UnsubscribeButtonRequest(
@@ -58,12 +60,12 @@ UnsubscribeButtonRequest::UnsubscribeButtonRequest(
 UnsubscribeButtonRequest::~UnsubscribeButtonRequest() {}
 
 void UnsubscribeButtonRequest::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
 
   ApplicationSharedPtr app = application_manager_.application(connection_key());
 
   if (!app) {
-    LOG4CXX_ERROR(logger_, "APPLICATION_NOT_REGISTERED");
+    SDL_LOG_ERROR("APPLICATION_NOT_REGISTERED");
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     return;
   }
@@ -78,23 +80,22 @@ void UnsubscribeButtonRequest::Run() {
     bool play_pause_supported =
         CheckHMICapabilities(mobile_apis::ButtonName::PLAY_PAUSE);
     if (play_pause_supported) {
-      LOG4CXX_DEBUG(logger_, "Converting Legacy OK button to PLAY_PAUSE");
+      SDL_LOG_DEBUG("Converting Legacy OK button to PLAY_PAUSE");
       btn_id = mobile_apis::ButtonName::PLAY_PAUSE;
       (*message_)[str::msg_params][str::button_name] = btn_id;
     } else if (!ok_supported) {
-      LOG4CXX_ERROR(logger_, "OK button isn't allowed by HMI capabilities");
+      SDL_LOG_ERROR("OK button isn't allowed by HMI capabilities");
       SendResponse(false, mobile_apis::Result::UNSUPPORTED_RESOURCE);
     }
   } else if (!CheckHMICapabilities(btn_id)) {
-    LOG4CXX_ERROR(logger_,
-                  "Button " << btn_id << " isn't allowed by HMI capabilities");
+    SDL_LOG_ERROR("Button " << btn_id << " isn't allowed by HMI capabilities");
     SendResponse(false, mobile_apis::Result::UNSUPPORTED_RESOURCE);
     return;
   }
 
   if (!app->UnsubscribeFromButton(
           static_cast<mobile_apis::ButtonName::eType>(btn_id))) {
-    LOG4CXX_ERROR(logger_, "App doesn't subscribe to button " << btn_id);
+    SDL_LOG_ERROR("App doesn't subscribe to button " << btn_id);
     SendResponse(false, mobile_apis::Result::IGNORED);
     return;
   }

@@ -38,6 +38,8 @@ using namespace application_manager;
 
 namespace commands {
 
+SDL_CREATE_LOG_VARIABLE("Commands")
+
 SDLGetUserFriendlyMessageResponse::SDLGetUserFriendlyMessageResponse(
     const application_manager::commands::MessageSharedPtr& message,
     ApplicationManager& application_manager,
@@ -53,7 +55,7 @@ SDLGetUserFriendlyMessageResponse::SDLGetUserFriendlyMessageResponse(
 SDLGetUserFriendlyMessageResponse::~SDLGetUserFriendlyMessageResponse() {}
 
 void SDLGetUserFriendlyMessageResponse::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   (*message_)[strings::params][strings::protocol_type] = hmi_protocol_type_;
   (*message_)[strings::params][strings::protocol_version] = protocol_version_;
 

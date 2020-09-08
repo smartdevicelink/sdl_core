@@ -39,7 +39,7 @@
 namespace transport_manager {
 namespace transport_adapter {
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "TransportManager")
+SDL_CREATE_LOG_VARIABLE("TransportManager")
 
 PlatformUsbDevice::PlatformUsbDevice(
     uint8_t bus_number,
@@ -56,18 +56,17 @@ PlatformUsbDevice::PlatformUsbDevice(
     , libusb_device_(device_libusb) {}
 
 std::string PlatformUsbDevice::GetDescString(uint8_t index) const {
-  LOG4CXX_TRACE(logger_, "enter. index: " << int(index));
+  SDL_LOG_TRACE("enter. index: " << int(index));
   unsigned char buf[128];
   const int libusb_ret = libusb_get_string_descriptor_ascii(
       libusb_device_handle_, index, buf, sizeof(buf));
   if (libusb_ret < 0) {
-    LOG4CXX_ERROR(logger_,
-                  "Failed to get USB string descriptor: "
-                      << libusb_error_name(libusb_ret));
-    LOG4CXX_TRACE(logger_, "exit with empty string");
+    SDL_LOG_ERROR("Failed to get USB string descriptor: "
+                  << libusb_error_name(libusb_ret));
+    SDL_LOG_TRACE("exit with empty string");
     return "";
   }
-  LOG4CXX_TRACE(logger_, "exit");
+  SDL_LOG_TRACE("exit");
   return std::string(reinterpret_cast<char*>(buf));
 }
 

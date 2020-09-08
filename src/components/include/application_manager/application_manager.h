@@ -89,6 +89,7 @@ class Application;
 class AppServiceManager;
 class StateControllerImpl;
 struct CommandParametersPermissions;
+struct ResetGlobalPropertiesResult;
 using policy::RPCParams;
 typedef std::vector<ApplicationSharedPtr> AppSharedPtrs;
 struct ApplicationsSorter {
@@ -352,11 +353,11 @@ class ApplicationManager {
 
   /**
    * @brief Checks if Application is subscribed for way points
-   * @param Application pointer
+   * @param Application reference
    * @return true if Application is subscribed for way points
    * otherwise false
    */
-  virtual bool IsAppSubscribedForWayPoints(ApplicationSharedPtr app) const = 0;
+  virtual bool IsAppSubscribedForWayPoints(Application& app) const = 0;
 
   /**
    * @brief Subscribe Application for way points
@@ -584,6 +585,26 @@ class ApplicationManager {
   virtual bool IsStopping() const = 0;
 
   virtual void RemoveAppFromTTSGlobalPropertiesList(const uint32_t app_id) = 0;
+
+  /**
+   * @brief Resets application's global properties to default values
+   * @param global_properties_ids container with global properties IDs to reset
+   * @param app_id ID of app which properties to reset
+   * @return struct with flags indicating success global properties reset
+   */
+  virtual ResetGlobalPropertiesResult ResetGlobalProperties(
+      const smart_objects::SmartObject& global_properties_ids,
+      const uint32_t app_id) = 0;
+
+  /**
+   * @brief Resets all application's global properties to default values
+   * returning struct that indicates which properties have been
+   * successfully reset.
+   * @param app_id ID of app which properties to reset
+   * @return struct with flags indicating global properties reset
+   */
+  virtual ResetGlobalPropertiesResult ResetAllApplicationGlobalProperties(
+      const uint32_t app_id) = 0;
 
   virtual mobile_apis::Result::eType SaveBinary(
       const std::vector<uint8_t>& binary_data,

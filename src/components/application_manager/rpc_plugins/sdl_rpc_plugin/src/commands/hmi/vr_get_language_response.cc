@@ -39,6 +39,8 @@ using namespace application_manager;
 
 namespace commands {
 
+SDL_CREATE_LOG_VARIABLE("Commands")
+
 VRGetLanguageResponse::VRGetLanguageResponse(
     const application_manager::commands::MessageSharedPtr& message,
     ApplicationManager& application_manager,
@@ -54,7 +56,7 @@ VRGetLanguageResponse::VRGetLanguageResponse(
 VRGetLanguageResponse::~VRGetLanguageResponse() {}
 
 void VRGetLanguageResponse::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   using namespace hmi_apis;
   const Common_Result::eType result_code = static_cast<Common_Result::eType>(
       (*message_)[strings::params][hmi_response::code].asInt());
@@ -63,8 +65,7 @@ void VRGetLanguageResponse::Run() {
       hmi_apis::FunctionID::VR_GetLanguage);
 
   if (Common_Result::SUCCESS != result_code) {
-    LOG4CXX_DEBUG(logger_,
-                  "Request was not successful. Don't change HMI capabilities");
+    SDL_LOG_DEBUG("Request was not successful. Don't change HMI capabilities");
     return;
   }
 
@@ -81,13 +82,11 @@ void VRGetLanguageResponse::Run() {
   std::vector<std::string> sections_to_update{hmi_response::language};
   if (!hmi_capabilities_.SaveCachedCapabilitiesToFile(
           hmi_interface::vr, sections_to_update, message_->getSchema())) {
-    LOG4CXX_ERROR(logger_, "Failed to save VR.GetLanguage response to cache");
+    SDL_LOG_ERROR("Failed to save VR.GetLanguage response to cache");
   }
 
-  LOG4CXX_DEBUG(logger_,
-                "Raising event for function_id " << function_id()
-                                                 << " and correlation_id "
-                                                 << correlation_id());
+  SDL_LOG_DEBUG("Raising event for function_id "
+                << function_id() << " and correlation_id " << correlation_id());
   event_engine::Event event(FunctionID::VR_GetLanguage);
   event.set_smart_object(*message_);
   event.raise(application_manager_.event_dispatcher());

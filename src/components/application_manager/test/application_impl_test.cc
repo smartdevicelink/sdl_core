@@ -47,6 +47,7 @@
 #include "application_manager/mock_resume_ctrl.h"
 #include "application_manager/policies/mock_policy_handler_interface.h"
 #include "application_manager/resumption/resume_ctrl.h"
+#include "application_manager/resumption/resumption_data_processor.h"
 #include "application_manager/state_controller.h"
 #include "policy/usage_statistics/mock_statistics_manager.h"
 #include "resumption/last_state.h"
@@ -260,8 +261,8 @@ TEST_F(ApplicationImplTest, AddStates_RemoveNotLastNotFirstState) {
   app_impl->RemoveHMIState(kDefaultWindowId, state2->state_id());
   HmiStatePtr current_state = app_impl->CurrentHmiState(kDefaultWindowId);
   EXPECT_EQ(state3, current_state);
-  // HMI level is equal to parent hmi_level
-  EXPECT_EQ(HMILevel::HMI_FULL, current_state->hmi_level());
+  // HMI level is equal to state3 hmi_level
+  EXPECT_EQ(HMILevel::HMI_LIMITED, current_state->hmi_level());
   EXPECT_EQ(HmiState::STATE_ID_TTS_SESSION, current_state->state_id());
   EXPECT_EQ(state1, current_state->parent());
 }
@@ -270,10 +271,9 @@ TEST_F(ApplicationImplTest, AddStates_RemoveFirstState) {
   HmiStatePtr state1 = TestAddHmiState(HMILevel::HMI_FULL,
                                        HmiState::STATE_ID_PHONE_CALL,
                                        &ApplicationImpl::AddHMIState);
-  // Second state
-  TestAddHmiState(HMILevel::HMI_NONE,
-                  HmiState::STATE_ID_VIDEO_STREAMING,
-                  &ApplicationImpl::AddHMIState);
+  HmiStatePtr state2 = TestAddHmiState(HMILevel::HMI_NONE,
+                                       HmiState::STATE_ID_VIDEO_STREAMING,
+                                       &ApplicationImpl::AddHMIState);
   HmiStatePtr state3 = TestAddHmiState(HMILevel::HMI_LIMITED,
                                        HmiState::STATE_ID_TTS_SESSION,
                                        &ApplicationImpl::AddHMIState);
@@ -286,7 +286,7 @@ TEST_F(ApplicationImplTest, AddStates_RemoveFirstState) {
   // Last state does not have a parent
   EXPECT_EQ(HMILevel::HMI_LIMITED, current_state->hmi_level());
   EXPECT_EQ(HmiState::STATE_ID_TTS_SESSION, current_state->state_id());
-  EXPECT_EQ(nullptr, current_state->parent());
+  EXPECT_EQ(state2, current_state->parent());
 }
 
 TEST_F(ApplicationImplTest, SetRegularState_RemoveFirstState) {
@@ -307,7 +307,7 @@ TEST_F(ApplicationImplTest, SetRegularState_RemoveFirstState) {
   HmiStatePtr current_state = app_impl->CurrentHmiState(kDefaultWindowId);
   EXPECT_EQ(state3, current_state);
   // Last state has a parent
-  EXPECT_EQ(HMILevel::HMI_FULL, current_state->hmi_level());
+  EXPECT_EQ(HMILevel::HMI_LIMITED, current_state->hmi_level());
   EXPECT_EQ(HmiState::STATE_ID_TTS_SESSION, current_state->state_id());
   EXPECT_EQ(state2, current_state->parent());
 }
@@ -754,7 +754,7 @@ TEST_F(ApplicationImplTest, UpdateHash_AppMngrNotSuspended) {
   EXPECT_CALL(*MockMessageHelper::message_helper_mock(),
               SendHashUpdateNotification(app_id, _))
       .Times(1);
-  resumprion_test::MockResumeCtrl mock_resume_ctrl;
+  resumption_test::MockResumeCtrl mock_resume_ctrl;
   EXPECT_CALL(mock_application_manager_, resume_controller())
       .WillOnce(ReturnRef(mock_resume_ctrl));
   EXPECT_CALL(mock_resume_ctrl, is_suspended()).WillOnce(Return(false));
@@ -767,7 +767,7 @@ TEST_F(ApplicationImplTest, UpdateHash_AppMngrSuspended) {
   EXPECT_CALL(*MockMessageHelper::message_helper_mock(),
               SendHashUpdateNotification(app_id, _))
       .Times(0);
-  resumprion_test::MockResumeCtrl mock_resume_ctrl;
+  resumption_test::MockResumeCtrl mock_resume_ctrl;
   EXPECT_CALL(mock_application_manager_, resume_controller())
       .WillOnce(ReturnRef(mock_resume_ctrl));
   EXPECT_CALL(mock_resume_ctrl, is_suspended()).WillOnce(Return(true));

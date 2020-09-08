@@ -39,7 +39,7 @@
 
 namespace media_manager {
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "MediaManager")
+SDL_CREATE_LOG_VARIABLE("MediaManager")
 
 FromMicRecorderAdapter::FromMicRecorderAdapter()
     : recorder_thread_(NULL)
@@ -51,7 +51,7 @@ FromMicRecorderAdapter::FromMicRecorderAdapter()
     , duration_(kDefaultDuration) {}
 
 FromMicRecorderAdapter::~FromMicRecorderAdapter() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   if (recorder_thread_) {
     recorder_thread_->Stop(threads::Thread::kThreadSoftStop);
     delete recorder_thread_->GetDelegate();
@@ -60,10 +60,9 @@ FromMicRecorderAdapter::~FromMicRecorderAdapter() {
 }
 
 void FromMicRecorderAdapter::StartActivity(int32_t application_key) {
-  LOG4CXX_DEBUG(logger_, "Start with app " << application_key);
+  SDL_LOG_DEBUG("Start with app " << application_key);
   if (application_key == current_application_) {
-    LOG4CXX_WARN(logger_,
-                 "Running recording from mic for " << current_application_);
+    SDL_LOG_WARN("Running recording from mic for " << current_application_);
     return;
   }
 
@@ -85,11 +84,9 @@ void FromMicRecorderAdapter::StartActivity(int32_t application_key) {
 }
 
 void FromMicRecorderAdapter::StopActivity(int32_t application_key) {
-  LOG4CXX_INFO(logger_,
-               "FromMicRecorderAdapter::StopActivity " << application_key);
+  SDL_LOG_INFO("FromMicRecorderAdapter::StopActivity " << application_key);
   if (application_key != current_application_) {
-    LOG4CXX_WARN(logger_,
-                 "Running activity on other app key " << current_application_);
+    SDL_LOG_WARN("Running activity on other app key " << current_application_);
     return;
   }
 

@@ -39,6 +39,8 @@ using namespace application_manager;
 
 namespace commands {
 
+SDL_CREATE_LOG_VARIABLE("Commands")
+
 SDLGetStatusUpdateRequest::SDLGetStatusUpdateRequest(
     const application_manager::commands::MessageSharedPtr& message,
     ApplicationManager& application_manager,
@@ -54,7 +56,7 @@ SDLGetStatusUpdateRequest::SDLGetStatusUpdateRequest(
 SDLGetStatusUpdateRequest::~SDLGetStatusUpdateRequest() {}
 
 void SDLGetStatusUpdateRequest::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   policy_handler_.OnGetStatusUpdate(
       (*message_)[strings::params][strings::correlation_id].asUInt());
 }

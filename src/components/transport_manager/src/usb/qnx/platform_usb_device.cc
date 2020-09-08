@@ -41,7 +41,7 @@
 namespace transport_manager {
 namespace transport_adapter {
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "TransportManager")
+SDL_CREATE_LOG_VARIABLE("TransportManager")
 
 PlatformUsbDevice::PlatformUsbDevice(
     usbd_device_instance_t* instance,
@@ -58,7 +58,7 @@ PlatformUsbDevice::PlatformUsbDevice(
 std::string PlatformUsbDevice::GetDescString(uint8_t index) const {
   char* str = usbd_string(usbd_device_, index, 0);
   if (NULL == str) {
-    LOG4CXX_INFO(logger_, "Failed to get USB string descriptor");
+    SDL_LOG_INFO("Failed to get USB string descriptor");
     return "";
   }
   return std::string(str);

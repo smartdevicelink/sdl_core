@@ -348,7 +348,7 @@ class DynamicApplicationData {
   /*
    * @brief Finds command with the specified command id
    */
-  virtual smart_objects::SmartObject* FindCommand(uint32_t cmd_id) = 0;
+  virtual smart_objects::SmartObject FindCommand(uint32_t cmd_id) = 0;
 
   /*
    * @brief Adds a menu to the application
@@ -364,7 +364,7 @@ class DynamicApplicationData {
   /*
    * @brief Finds menu with the specified id
    */
-  virtual smart_objects::SmartObject* FindSubMenu(uint32_t menu_id) const = 0;
+  virtual smart_objects::SmartObject FindSubMenu(uint32_t menu_id) const = 0;
 
   /*
    * @brief Returns true if sub menu with such name already exist
@@ -407,7 +407,7 @@ class DynamicApplicationData {
    *
    * @param choice_set_id Unique ID of the interaction choice set
    */
-  virtual smart_objects::SmartObject* FindChoiceSet(uint32_t choice_set_id) = 0;
+  virtual smart_objects::SmartObject FindChoiceSet(uint32_t choice_set_id) = 0;
 
   /*
    * @brief Adds perform interaction choice set to the application

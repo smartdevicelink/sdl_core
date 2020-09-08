@@ -58,6 +58,8 @@ class VehicleInfoAppExtension : public app_mngr::AppExtension {
    */
   VehicleInfoAppExtension(VehicleInfoPlugin& plugin,
                           app_mngr::Application& app);
+  VehicleInfoAppExtension(const VehicleInfoAppExtension&) = delete;
+  VehicleInfoAppExtension& operator=(const VehicleInfoAppExtension&) = delete;
   virtual ~VehicleInfoAppExtension();
 
   /**
@@ -90,24 +92,60 @@ class VehicleInfoAppExtension : public app_mngr::AppExtension {
   bool isSubscribedToVehicleInfo(const std::string& vehicle_data_type) const;
 
   /**
+   * @brief isPendingSubscriptionToVehicleInfo checks if there any extension
+   * with pending subscription to vehicle data
+   * @param vehicle_data vehicle data to check
+   * @return true if extension is subscribed to this vehicle_data, otherwise
+   * returns false
+   */
+  bool isPendingSubscriptionToVehicleInfo(
+      const std::string& vehicle_data) const;
+
+  /**
    * @brief Subscriptions get list of subscriptions for application extension
    * @return list of subscriptions for application extension
    */
-  VehicleInfoSubscriptions Subscriptions();
+  const DataAccessor<VehicleInfoSubscriptions> Subscriptions();
+
+  /**
+   * @brief AddPendingSubscription add pending subscription
+   * @param vehicle_data subscription to add
+   * @return
+   */
+  bool AddPendingSubscription(const std::string& vehicle_data);
+
+  /**
+   * @brief RemovePendingSubscription remove some paticular pending subscription
+   * @param vehicle_data subscription to remove
+   * @return
+   */
+  bool RemovePendingSubscription(const std::string& vehicle_data);
+
+  /**
+   * @brief RemovePendingSubscriptions removed all pending subscriptions
+   * @return
+   */
+  void RemovePendingSubscriptions();
+
+  /**
+   * @brief PendingSubscriptions list of preliminary subscriptoins
+   * That will be moved to subscriptions as soon as HMI will respond with
+   * success.
+   * Used for resumption to keep list of preliminary subcriptions and wait for
+   * HMI response
+   * @return
+   */
+  const DataAccessor<VehicleInfoSubscriptions> PendingSubscriptions();
 
   /**
    * @brief SaveResumptionData saves vehicle info data
    * @param resumption_data plase to store resumption data
    */
-  void SaveResumptionData(ns_smart_device_link::ns_smart_objects::SmartObject&
-                              resumption_data) OVERRIDE;
+  void SaveResumptionData(smart_objects::SmartObject& resumption_data) OVERRIDE;
 
-  /**
-   * @brief ProcessResumption load resumtion data back to plugin during
-   * resumption
-   * @param resumption_data resumption data
-   */
-  void ProcessResumption(
+  void ProcessResumption(const smart_objects::SmartObject& saved_app) OVERRIDE;
+
+  void RevertResumption(
       const smart_objects::SmartObject& resumption_data) OVERRIDE;
 
   /**
@@ -126,7 +164,11 @@ class VehicleInfoAppExtension : public app_mngr::AppExtension {
       application_manager::Application& app);
 
  private:
+  mutable std::shared_ptr<sync_primitives::Lock> subscribed_data_lock_;
   VehicleInfoSubscriptions subscribed_data_;
+
+  mutable std::shared_ptr<sync_primitives::Lock> pending_subscriptions_lock_;
+  VehicleInfoSubscriptions pending_subscriptions_;
   VehicleInfoPlugin& plugin_;
   app_mngr::Application& app_;
 };
