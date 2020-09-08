@@ -1015,7 +1015,7 @@ struct JsonCapabilitiesGetter {
    * @param json_cache_node reference to cached JSON capabilities node
    */
   JsonCapabilitiesGetter(Json::Value& json_default_node,
-                         Json::Value& json_cache_node)
+                         const Json::Value& json_cache_node)
       : json_default_node_(json_default_node)
       , json_cache_node_(json_cache_node) {}
 

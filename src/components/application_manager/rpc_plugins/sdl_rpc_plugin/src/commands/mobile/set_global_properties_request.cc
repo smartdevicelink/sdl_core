@@ -291,7 +291,7 @@ void SetGlobalPropertiesRequest::Run() {
           std::begin(invalid_params),
           std::end(invalid_params),
           std::string(""),
-          [](std::string& first, std::string& second) {
+          [](std::string& first, const std::string& second) {
             return first.empty() ? second : first + ", " + second;
           });
       const std::string info =
