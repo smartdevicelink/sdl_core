@@ -748,7 +748,7 @@ bool CheckAppPolicy::IsEncryptionRequiredFlagChanged(
     return result;
   };
 
-  auto get_app_rpcs = [](const std::string group_name,
+  auto get_app_rpcs = [](const std::string& group_name,
                          const FunctionalGroupings& groups)
       -> rpc::Optional<policy_table::Rpcs> {
     auto it = groups.find(group_name);

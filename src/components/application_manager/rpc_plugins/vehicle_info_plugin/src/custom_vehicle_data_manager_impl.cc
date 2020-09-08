@@ -354,7 +354,8 @@ void CustomVehicleDataManagerImpl::UpdateVehicleDataItems() {
   };
 
   auto get_vehicle_data_history =
-      [&vehicle_data_items](std::string name) -> std::vector<VehicleDataItem> {
+      [&vehicle_data_items](
+          const std::string& name) -> std::vector<VehicleDataItem> {
     std::vector<VehicleDataItem> result;
     std::copy_if(
         vehicle_data_items.begin(),
