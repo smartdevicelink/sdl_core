@@ -111,10 +111,8 @@ void SetGlobalPropertiesRequest::Run() {
     return;
   }
 
-  mobile_apis::Result::eType verification_result = mobile_apis::Result::SUCCESS;
-
   if (msg_params.keyExists(strings::menu_icon)) {
-    verification_result = MessageHelper::VerifyImage(
+    mobile_apis::Result::eType verification_result = MessageHelper::VerifyImage(
         msg_params[strings::menu_icon], app, application_manager_);
     if (mobile_apis::Result::INVALID_DATA == verification_result) {
       SDL_LOG_ERROR("MessageHelper::VerifyImage return "
@@ -257,7 +255,7 @@ void SetGlobalPropertiesRequest::Run() {
     if (is_help_prompt_present) {
       smart_objects::SmartObject& help_prompt =
           (*message_)[strings::msg_params][strings::help_prompt];
-      verification_result =
+      mobile_apis::Result::eType verification_result =
           MessageHelper::VerifyTtsFiles(help_prompt, app, application_manager_);
 
       if (mobile_apis::Result::FILE_NOT_FOUND == verification_result) {
@@ -273,8 +271,9 @@ void SetGlobalPropertiesRequest::Run() {
     if (is_timeout_prompt_present) {
       smart_objects::SmartObject& timeout_prompt =
           (*message_)[strings::msg_params][strings::timeout_prompt];
-      verification_result = MessageHelper::VerifyTtsFiles(
-          timeout_prompt, app, application_manager_);
+      mobile_apis::Result::eType verification_result =
+          MessageHelper::VerifyTtsFiles(
+              timeout_prompt, app, application_manager_);
 
       if (mobile_apis::Result::FILE_NOT_FOUND == verification_result) {
         SDL_LOG_ERROR("MessageHelper::VerifyTtsFiles return "

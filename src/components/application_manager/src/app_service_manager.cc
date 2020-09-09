@@ -67,7 +67,7 @@ smart_objects::SmartObject AppServiceManager::PublishAppService(
     const bool mobile_service,
     const uint32_t connection_key) {
   SDL_LOG_AUTO_TRACE();
-  std::string str_to_hash = "";
+  std::string str_to_hash;
   std::string service_id = "";
 
   std::string service_type = manifest[strings::service_type].asString();

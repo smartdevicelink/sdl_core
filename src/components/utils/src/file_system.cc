@@ -465,7 +465,7 @@ bool file_system::ReadFile(const std::string& name, std::string& result) {
 const std::string file_system::ConvertPathForURL(const std::string& path) {
   SDL_LOG_AUTO_TRACE();
   const std::string reserved_symbols = "!#$&'()*+,:;=?@[] ";
-  size_t pos = std::string::npos;
+  size_t pos;
   std::string converted_path;
 
   for (const auto symbol : path) {

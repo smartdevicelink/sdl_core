@@ -339,15 +339,6 @@ CSmartSchema initSchemaForMetaFormatter() {
   ISchemaItemPtr majorVersion_SchemaItem = TNumberSchemaItem<int>::create();
   ISchemaItemPtr minorVersion_SchemaItem = TNumberSchemaItem<int>::create();
   ISchemaItemPtr patchVersion_SchemaItem = TNumberSchemaItem<int>::create();
-  ISchemaItemPtr syncMsg_SchemaItem =
-      CStringSchemaItem::create(TSchemaItemParameter<size_t>(0),
-                                TSchemaItemParameter<size_t>(1000),
-                                TSchemaItemParameter<std::string>());
-
-  ISchemaItemPtr syncMsgVersion_SchemaItem =
-      CArraySchemaItem::create(syncMsg_SchemaItem,
-                               TSchemaItemParameter<size_t>(0),
-                               TSchemaItemParameter<size_t>(1000));
 
   // Creation map for syncMsgVersion
   std::map<std::string, SMember> schemaSyncMsgVersionMap;

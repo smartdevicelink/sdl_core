@@ -4379,7 +4379,7 @@ void ApplicationManagerImpl::OnUpdateHMIAppType(
   std::vector<std::string> hmi_types_from_policy;
   smart_objects::SmartObject transform_app_hmi_types(
       smart_objects::SmartType_Array);
-  bool flag_diffirence_app_hmi_type = false;
+  bool flag_diffirence_app_hmi_type;
   DataAccessor<ApplicationSet> accessor(applications());
   for (ApplicationSetIt it = accessor.GetData().begin();
        it != accessor.GetData().end();

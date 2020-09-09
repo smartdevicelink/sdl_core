@@ -1335,8 +1335,6 @@ MessageHelper::CreateGlobalPropertiesRequestsToHMI(
     ApplicationConstSharedPtr app, ApplicationManager& app_mngr) {
   SDL_LOG_AUTO_TRACE();
 
-  uint32_t correlation_id = app_mngr.GetNextHMICorrelationID();
-
   smart_objects::SmartObjectList requests;
   if (app.use_count() == 0) {
     SDL_LOG_ERROR("Invalid application");
@@ -1396,7 +1394,7 @@ MessageHelper::CreateGlobalPropertiesRequestsToHMI(
 
   // TTS global properties
   if (can_send_vr && (app->help_prompt() || app->timeout_prompt())) {
-    correlation_id = app_mngr.GetNextHMICorrelationID();
+    uint32_t correlation_id = app_mngr.GetNextHMICorrelationID();
     smart_objects::SmartObjectSPtr tts_global_properties =
         CreateMessageForHMI(hmi_apis::messageType::request, correlation_id);
     if (!tts_global_properties) {

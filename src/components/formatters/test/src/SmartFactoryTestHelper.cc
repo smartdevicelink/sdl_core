@@ -432,13 +432,6 @@ std::shared_ptr<ISchemaItem> CSmartFactoryTest::InitStructSchemaItem_Common_1(
                                 TSchemaItemParameter<size_t>(500),
                                 TSchemaItemParameter<std::string>());
 
-  // Struct member image.
-  //
-  // Image struct
-  std::shared_ptr<ISchemaItem> image_SchemaItem =
-      ProvideObjectSchemaItemForStruct(struct_schema_items,
-                                       StructIdentifiersTest::Common_2);
-
   // Struct member position.
   //
   // Position to display item
@@ -446,17 +439,12 @@ std::shared_ptr<ISchemaItem> CSmartFactoryTest::InitStructSchemaItem_Common_1(
       TNumberSchemaItem<int32_t>::create(TSchemaItemParameter<int32_t>(1),
                                          TSchemaItemParameter<int32_t>(500),
                                          TSchemaItemParameter<int32_t>());
-  Members struct_members;
-  struct_members["image"] = SMember(image_SchemaItem, false);
 
   Members schema_members;
 
   schema_members["text"] = SMember(text_SchemaItem, true);
   schema_members["position"] = SMember(position_SchemaItem, true);
 
-  Members root_members_map;
-  root_members_map[""] =
-      SMember(CObjectSchemaItem::create(schema_members), true);
   return CObjectSchemaItem::create(schema_members);
 }
 
