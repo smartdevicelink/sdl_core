@@ -394,7 +394,7 @@ void StateControllerImpl::HmiLevelConflictResolver::operator()(
     result_video_state = mobile_apis::VideoStreamingState::STREAMABLE;
   }
 
-  mobile_apis::HMILevel::eType result_hmi_level = state_to_resolve->hmi_level();
+  mobile_apis::HMILevel::eType result_hmi_level;
 
   using namespace helpers;
   if (mobile_apis::VideoStreamingState::STREAMABLE == result_video_state ||

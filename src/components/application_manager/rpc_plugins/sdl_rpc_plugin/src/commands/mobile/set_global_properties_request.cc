@@ -518,7 +518,6 @@ SetGlobalPropertiesRequest::PrepareResultCodeForResponse(
     const app_mngr::commands::ResponseInfo& second,
     const app_mngr::commands::ResponseInfo& third) {
   SDL_LOG_AUTO_TRACE();
-  mobile_apis::Result::eType result_code = mobile_apis::Result::INVALID_ENUM;
   if (IsResultCodeUnsupported(first, second, third) ||
       IsResultCodeUnsupported(second, third, first) ||
       IsResultCodeUnsupported(third, first, second)) {
@@ -547,7 +546,7 @@ SetGlobalPropertiesRequest::PrepareResultCodeForResponse(
 
   hmi_apis::Common_Result::eType intermediate_result =
       std::max(first_result, second_result);
-  result_code = MessageHelper::HMIToMobileResult(
+  mobile_apis::Result::eType result_code = MessageHelper::HMIToMobileResult(
       std::max(intermediate_result, third_result));
 
   return result_code;

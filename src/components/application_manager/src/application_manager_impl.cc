@@ -3845,9 +3845,7 @@ bool ApplicationManagerImpl::ResetVrHelpTitleItems(
   }
 
   const std::string& vr_help_title = get_settings().vr_help_title();
-  smart_objects::SmartObject so_vr_help_title =
-      smart_objects::SmartObject(smart_objects::SmartType_String);
-  so_vr_help_title = vr_help_title;
+  smart_objects::SmartObject so_vr_help_title(vr_help_title);
 
   app->reset_vr_help_title();
   app->reset_vr_help();
@@ -4390,7 +4388,6 @@ void ApplicationManagerImpl::OnUpdateHMIAppType(
 
     if (it_app_hmi_types_from_policy != app_hmi_types.end() &&
         ((it_app_hmi_types_from_policy->second).size())) {
-      flag_diffirence_app_hmi_type = false;
       hmi_types_from_policy = (it_app_hmi_types_from_policy->second);
 
       if (transform_app_hmi_types.length()) {

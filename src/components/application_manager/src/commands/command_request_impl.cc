@@ -846,7 +846,6 @@ void CommandRequestImpl::GetInfo(
 mobile_apis::Result::eType CommandRequestImpl::PrepareResultCodeForResponse(
     const ResponseInfo& first, const ResponseInfo& second) {
   SDL_LOG_AUTO_TRACE();
-  mobile_apis::Result::eType result_code = mobile_apis::Result::INVALID_ENUM;
   if (IsResultCodeUnsupported(first, second) ||
       IsResultCodeUnsupported(second, first)) {
     return mobile_apis::Result::UNSUPPORTED_RESOURCE;
@@ -867,7 +866,7 @@ mobile_apis::Result::eType CommandRequestImpl::PrepareResultCodeForResponse(
   if (!second.is_unsupported_resource) {
     second_result = second.result_code;
   }
-  result_code =
+  mobile_apis::Result::eType result_code =
       MessageHelper::HMIToMobileResult(std::max(first_result, second_result));
   return result_code;
 }

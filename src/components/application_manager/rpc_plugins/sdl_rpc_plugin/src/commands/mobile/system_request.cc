@@ -466,7 +466,7 @@ void SystemRequest::Run() {
     SDL_LOG_TRACE("Request subtype: " << request_subtype << " is ALLOWED");
   }
 
-  std::string file_name = kSYNC;
+  std::string file_name;
   if ((*message_)[strings::msg_params].keyExists(strings::file_name)) {
     file_name = (*message_)[strings::msg_params][strings::file_name].asString();
   } else {

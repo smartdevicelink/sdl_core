@@ -86,7 +86,7 @@ class VehicleInfoCommandCreator<VehicleInfoInvalidCommand>
     : public application_manager::CommandCreator {
  public:
   // cppcheck-suppress unusedFunction //Used in VehicleInfoCommandCreatorFactory
-  VehicleInfoCommandCreator(const VehicleInfoCommandParams& params) {
+  explicit VehicleInfoCommandCreator(const VehicleInfoCommandParams& params) {
     UNUSED(params);
   }
 

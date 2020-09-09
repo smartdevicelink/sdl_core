@@ -2181,9 +2181,9 @@ int CacheManager::CountUnconsentedGroups(const std::string& policy_app_id,
       pt_->policy_table.app_policies_section;
 
   policy_table::Strings::iterator app_groups;
-  policy_table::Strings::iterator app_groups_end = app_groups;
+  policy_table::Strings::iterator app_groups_end;
   policy_table::Strings::iterator app_pre_groups;
-  policy_table::Strings::iterator app_pre_groups_end = app_pre_groups;
+  policy_table::Strings::iterator app_pre_groups_end;
 
   if (kDeviceId == policy_app_id) {
     app_groups = app_policies_section.device.groups.begin();
