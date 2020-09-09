@@ -239,11 +239,11 @@ void SetGlobalPropertiesRequest::Run() {
     application_manager_.GetPluginManager().ForEachPlugin(
         on_global_properties_updated);
 
-    smart_objects::SmartObject params =
+    smart_objects::SmartObject rc_request_params =
         smart_objects::SmartObject(smart_objects::SmartType_Map);
-    params[strings::app_id] = app->app_id();
-    params[strings::user_location] = user_location;
-    SendRCRequest(params, true);
+    rc_request_params[strings::app_id] = app->app_id();
+    rc_request_params[strings::user_location] = user_location;
+    SendRCRequest(rc_request_params, true);
   }
 
   // check TTS params

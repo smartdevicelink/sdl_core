@@ -160,7 +160,7 @@ char ini_write_value(const char* fname,
                      const char* value,
                      uint8_t flag) {
   FILE *rd_fp, *wr_fp = 0;
-  uint16_t i, cr_count;
+  uint16_t cr_count;
   int32_t wr_result;
   bool chapter_found = false;
   bool value_written = false;
@@ -244,7 +244,7 @@ char ini_write_value(const char* fname,
              first chapter is significant */
           value_written = true;
         } else if (result == INI_RIGHT_ITEM) {
-          for (i = 0; i < cr_count; i++)
+          for (uint16_t i = 0; i < cr_count; i++)
             fprintf(wr_fp, "\n");
           cr_count = 0;
           wr_result = fprintf(wr_fp, "%s=%s\n", item, value);

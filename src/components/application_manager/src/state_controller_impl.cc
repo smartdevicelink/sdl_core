@@ -758,11 +758,11 @@ void StateControllerImpl::on_event(const event_engine::Event& event) {
     case FunctionID::BasicCommunication_OnEventChanged: {
       bool is_active =
           message[strings::msg_params][hmi_notification::is_active].asBool();
-      const uint32_t id =
+      const uint32_t event_id =
           message[strings::msg_params][hmi_notification::event_name].asUInt();
       // TODO(AOleynik): Add verification/conversion check here
       const Common_EventTypes::eType state_id =
-          static_cast<Common_EventTypes::eType>(id);
+          static_cast<Common_EventTypes::eType>(event_id);
       if (is_active) {
         if (Common_EventTypes::AUDIO_SOURCE == state_id) {
           ApplyTempState<HmiState::STATE_ID_AUDIO_SOURCE>();

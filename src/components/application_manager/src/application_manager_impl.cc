@@ -693,9 +693,9 @@ ApplicationSharedPtr ApplicationManagerImpl::RegisterApplication(
   bool is_mismatched_cloud_app = false;
 
   if (apps_to_register_.end() == it) {
-    DevicePredicate finder(application->device());
+    DevicePredicate device_finder(application->device());
     it = std::find_if(
-        apps_to_register_.begin(), apps_to_register_.end(), finder);
+        apps_to_register_.begin(), apps_to_register_.end(), device_finder);
 
     bool found = apps_to_register_.end() != it;
     is_mismatched_cloud_app = found && (*it)->is_cloud_app() &&

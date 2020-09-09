@@ -558,13 +558,13 @@ void TransportAdapterImpl::SearchDeviceDone(const DeviceVector& devices) {
     bool device_found = false;
 
     devices_mutex_.Acquire();
-    for (DeviceMap::iterator it = devices_.begin(); it != devices_.end();
-         ++it) {
-      DeviceSptr existing_device = it->second;
+    for (DeviceMap::iterator iter = devices_.begin(); iter != devices_.end();
+         ++iter) {
+      DeviceSptr existing_device = iter->second;
       if (device->IsSameAs(existing_device.get())) {
         existing_device->set_keep_on_disconnect(true);
         device_found = true;
-        SDL_LOG_DEBUG("device found. DeviceSptr" << it->second);
+        SDL_LOG_DEBUG("device found. DeviceSptr" << iter->second);
         break;
       }
     }

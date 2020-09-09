@@ -710,23 +710,23 @@ void MessageHelper::SendDeleteSubmenuRequest(smart_objects::SmartObject* cmd,
 
     if ((*cmd)[strings::menu_id].asInt() ==
         (*it->second)[strings::menu_params][hmi_request::parent_id].asInt()) {
-      SmartObject msg_params = SmartObject(smart_objects::SmartType_Map);
-      msg_params[strings::cmd_id] = (*it->second)[strings::cmd_id].asInt();
-      msg_params[strings::app_id] = application->app_id();
-      msg_params[strings::grammar_id] = application->get_grammar_id();
-      msg_params[strings::type] = hmi_apis::Common_VRCommandType::Command;
+      SmartObject params = SmartObject(smart_objects::SmartType_Map);
+      params[strings::cmd_id] = (*it->second)[strings::cmd_id].asInt();
+      params[strings::app_id] = application->app_id();
+      params[strings::grammar_id] = application->get_grammar_id();
+      params[strings::type] = hmi_apis::Common_VRCommandType::Command;
 
-      SmartObjectSPtr message = CreateMessageForHMI(
+      SmartObjectSPtr hmi_message = CreateMessageForHMI(
           hmi_apis::messageType::request, app_mngr.GetNextHMICorrelationID());
-      DCHECK(message);
+      DCHECK(hmi_message);
 
-      SmartObject& object = *message;
-      object[strings::params][strings::function_id] =
+      SmartObject& smart_object = *hmi_message;
+      smart_object[strings::params][strings::function_id] =
           hmi_apis::FunctionID::VR_DeleteCommand;
 
-      object[strings::msg_params] = msg_params;
+      smart_object[strings::msg_params] = params;
 
-      app_mngr.GetRPCService().ManageHMICommand(message);
+      app_mngr.GetRPCService().ManageHMICommand(hmi_message);
     }
   }
 }
