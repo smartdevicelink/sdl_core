@@ -1165,7 +1165,7 @@ void FunctionalGroupInserter::operator()(const StringsValueType& group_name) {
 
 void FillFunctionalGroupPermissions(
     FunctionalGroupIDs& ids,
-    const FunctionalGroupNames& names,
+    FunctionalGroupNames& names,
     GroupConsent state,
     std::vector<FunctionalGroupPermission>& permissions) {
   SDL_LOG_AUTO_TRACE();
