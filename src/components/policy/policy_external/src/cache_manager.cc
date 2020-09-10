@@ -1707,6 +1707,7 @@ std::vector<UserFriendlyMessage> CacheManager::GetUserFriendlyMsg(
           SDL_LOG_ERROR("No fallback language found for message code: " << *it);
           continue;
         }
+        // FIXME (VSemenyuk): message_string will always be overwritten by active_hmi_language_message_string
         message_string = fallback_message_string;
       }
       message_string = active_hmi_language_message_string;
