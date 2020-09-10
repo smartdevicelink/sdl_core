@@ -129,7 +129,6 @@ const std::vector<hmi_apis::Common_LightName::eType> light_name_enum_values{
     hmi_apis::Common_LightName::eType::EXTERIOR_LEFT_LIGHTS,
     hmi_apis::Common_LightName::eType::EXTERIOR_RIGHT_LIGHTS,
     hmi_apis::Common_LightName::eType::EXTERIOR_ALL_LIGHTS};
-}  // namespace application_manager_test
 
 bool IsLightNameExists(const hmi_apis::Common_LightName::eType& light_name) {
   auto it = std::find(
@@ -1483,6 +1482,6 @@ TEST_F(
                 tts_capabilities_so[4].asInt()));
 }
 
+}  // namespace application_manager_test
 }  // namespace components
-}  // namespace test
 }  // namespace test
