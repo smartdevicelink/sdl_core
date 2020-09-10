@@ -471,16 +471,3 @@ CSmartFactoryTest::InitStructSchemaItem_Common_2() {
 
   return CObjectSchemaItem::create(schema_members);
 }
-
-std::shared_ptr<ISchemaItem>
-CSmartFactoryTest::ProvideObjectSchemaItemForStruct(
-    TStructsSchemaItems& struct_schema_items,
-    const StructIdentifiersTest::eType struct_id) {
-  const TStructsSchemaItems::const_iterator it =
-      struct_schema_items.find(struct_id);
-  if (it != struct_schema_items.end()) {
-    return it->second;
-  }
-  return ns_smart_device_link::ns_smart_objects::CAlwaysFalseSchemaItem::
-      create();
-}
