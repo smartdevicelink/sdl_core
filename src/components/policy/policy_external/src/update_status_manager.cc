@@ -37,7 +37,7 @@
 
 namespace policy {
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "Policy")
+SDL_CREATE_LOG_VARIABLE("Policy")
 
 UpdateStatusManager::UpdateStatusManager()
     : listener_(NULL)
@@ -48,20 +48,20 @@ UpdateStatusManager::UpdateStatusManager()
   update_status_thread_delegate_ = new UpdateThreadDelegate(this);
   thread_ = threads::CreateThread("UpdateStatusThread",
                                   update_status_thread_delegate_);
-  thread_->start();
+  thread_->Start();
 }
 
 UpdateStatusManager::~UpdateStatusManager() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   DCHECK(update_status_thread_delegate_);
   DCHECK(thread_);
-  thread_->join();
+  thread_->Stop(threads::Thread::kThreadSoftStop);
   delete update_status_thread_delegate_;
   threads::DeleteThread(thread_);
 }
 
 void UpdateStatusManager::ProcessEvent(UpdateEvent event) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   sync_primitives::AutoLock lock(status_lock_);
   current_status_->ProcessEvent(this, event);
   last_processed_event_ = event;
@@ -81,14 +81,14 @@ void UpdateStatusManager::set_listener(PolicyListener* listener) {
 }
 
 void UpdateStatusManager::OnUpdateSentOut(uint32_t update_timeout) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   DCHECK(update_status_thread_delegate_);
   update_status_thread_delegate_->updateTimeOut(update_timeout);
   ProcessEvent(kOnUpdateSentOut);
 }
 
 void UpdateStatusManager::OnUpdateTimeoutOccurs() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
 
   auto& ptu_retry_handler = listener_->ptu_retry_handler();
 
@@ -103,25 +103,25 @@ void UpdateStatusManager::OnUpdateTimeoutOccurs() {
 }
 
 void UpdateStatusManager::OnValidUpdateReceived() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   update_status_thread_delegate_->updateTimeOut(0);  // Stop Timer
   ProcessEvent(kOnValidUpdateReceived);
 }
 
 void UpdateStatusManager::ResetTimeout(uint32_t update_timeout) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   update_status_thread_delegate_->updateTimeOut(
       update_timeout);  // Restart Timer
 }
 
 void UpdateStatusManager::OnWrongUpdateReceived() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   update_status_thread_delegate_->updateTimeOut(0);  // Stop Timer
   ProcessEvent(kOnWrongUpdateReceived);
 }
 
 void UpdateStatusManager::OnResetDefaultPT(bool is_update_required) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   if (is_update_required) {
     ProcessEvent(kOnResetPolicyTableRequireUpdate);
     return;
@@ -130,13 +130,13 @@ void UpdateStatusManager::OnResetDefaultPT(bool is_update_required) {
 }
 
 void UpdateStatusManager::OnResetRetrySequence() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   ProcessEvent(kOnResetRetrySequence);
 }
 
 void UpdateStatusManager::OnExistedApplicationAdded(
     const bool is_update_required) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   if (is_update_required) {
     current_status_.reset(new UpToDateStatus());
     ProcessEvent(kScheduleUpdate);
@@ -144,13 +144,13 @@ void UpdateStatusManager::OnExistedApplicationAdded(
 }
 
 void UpdateStatusManager::OnNewApplicationAdded(const DeviceConsent consent) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   if (kDeviceAllowed != consent) {
-    LOG4CXX_DEBUG(logger_, "Application registered from non-consented device");
+    SDL_LOG_DEBUG("Application registered from non-consented device");
     app_registered_from_non_consented_device_ = true;
     return;
   }
-  LOG4CXX_DEBUG(logger_, "Application registered from consented device");
+  SDL_LOG_DEBUG("Application registered from consented device");
   app_registered_from_non_consented_device_ = false;
   if (kOnResetRetrySequence == last_processed_event_) {
     current_status_.reset(new UpToDateStatus());
@@ -161,7 +161,7 @@ void UpdateStatusManager::OnNewApplicationAdded(const DeviceConsent consent) {
 }
 
 void UpdateStatusManager::OnDeviceConsented() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   if (app_registered_from_non_consented_device_) {
     ProcessEvent(kOnNewAppRegistered);
   }
@@ -176,17 +176,17 @@ bool UpdateStatusManager::IsUpdatePending() const {
 }
 
 void UpdateStatusManager::ScheduleUpdate() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   ProcessEvent(kScheduleUpdate);
 }
 
 void UpdateStatusManager::PendingUpdate() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   ProcessEvent(kPendingUpdate);
 }
 
 void UpdateStatusManager::ScheduleManualUpdate() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   ProcessEvent(kScheduleManualUpdate);
 }
 
@@ -195,19 +195,19 @@ std::string UpdateStatusManager::StringifiedUpdateStatus() const {
 }
 
 void policy::UpdateStatusManager::OnAppsSearchStarted() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   sync_primitives::AutoLock lock(apps_search_in_progress_lock_);
   apps_search_in_progress_ = true;
 }
 
 void policy::UpdateStatusManager::OnAppsSearchCompleted() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   sync_primitives::AutoLock lock(apps_search_in_progress_lock_);
   apps_search_in_progress_ = false;
 }
 
 bool policy::UpdateStatusManager::IsAppsSearchInProgress() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   sync_primitives::AutoLock lock(apps_search_in_progress_lock_);
   return apps_search_in_progress_;
 }
@@ -244,22 +244,22 @@ UpdateStatusManager::UpdateThreadDelegate::UpdateThreadDelegate(
     : timeout_(0)
     , stop_flag_(false)
     , update_status_manager_(update_status_manager) {
-  LOG4CXX_AUTO_TRACE(logger_);
-  LOG4CXX_DEBUG(logger_, "Create UpdateThreadDelegate");
+  SDL_LOG_AUTO_TRACE();
+  SDL_LOG_DEBUG("Create UpdateThreadDelegate");
 }
 
 UpdateStatusManager::UpdateThreadDelegate::~UpdateThreadDelegate() {
-  LOG4CXX_AUTO_TRACE(logger_);
-  LOG4CXX_DEBUG(logger_, "Delete UpdateThreadDelegate");
+  SDL_LOG_AUTO_TRACE();
+  SDL_LOG_DEBUG("Delete UpdateThreadDelegate");
 }
 
 void UpdateStatusManager::UpdateThreadDelegate::threadMain() {
-  LOG4CXX_AUTO_TRACE(logger_);
-  LOG4CXX_DEBUG(logger_, "UpdateStatusManager thread started (started normal)");
+  SDL_LOG_AUTO_TRACE();
+  SDL_LOG_DEBUG("UpdateStatusManager thread started (started normal)");
   sync_primitives::AutoLock auto_lock(state_lock_);
   while (false == stop_flag_) {
     if (timeout_ > 0) {
-      LOG4CXX_DEBUG(logger_, "Timeout is greater then 0");
+      SDL_LOG_DEBUG("Timeout is greater then 0");
       sync_primitives::ConditionalVariable::WaitStatus wait_status =
           termination_condition_.WaitFor(auto_lock, timeout_);
       if (sync_primitives::ConditionalVariable::kTimeout == wait_status) {
@@ -276,16 +276,16 @@ void UpdateStatusManager::UpdateThreadDelegate::threadMain() {
 }
 
 void UpdateStatusManager::UpdateThreadDelegate::exitThreadMain() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   sync_primitives::AutoLock auto_lock(state_lock_);
   stop_flag_ = true;
-  LOG4CXX_DEBUG(logger_, "before notify");
+  SDL_LOG_DEBUG("before notify");
   termination_condition_.NotifyOne();
 }
 
 void UpdateStatusManager::UpdateThreadDelegate::updateTimeOut(
     const uint32_t timeout_ms) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   sync_primitives::AutoLock auto_lock(state_lock_);
   timeout_ = timeout_ms;
   termination_condition_.NotifyOne();

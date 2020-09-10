@@ -46,6 +46,8 @@ using namespace application_manager;
 
 namespace commands {
 
+SDL_CREATE_LOG_VARIABLE("Commands")
+
 OnExitAllApplicationsNotification::OnExitAllApplicationsNotification(
     const application_manager::commands::MessageSharedPtr& message,
     ApplicationManager& application_manager,
@@ -61,12 +63,12 @@ OnExitAllApplicationsNotification::OnExitAllApplicationsNotification(
 OnExitAllApplicationsNotification::~OnExitAllApplicationsNotification() {}
 
 void OnExitAllApplicationsNotification::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
 
   const hmi_apis::Common_ApplicationsCloseReason::eType reason =
       static_cast<hmi_apis::Common_ApplicationsCloseReason::eType>(
           (*message_)[strings::msg_params][hmi_request::reason].asInt());
-  LOG4CXX_DEBUG(logger_, "Reason " << reason);
+  SDL_LOG_DEBUG("Reason " << reason);
 
   mobile_api::AppInterfaceUnregisteredReason::eType mob_reason =
       mobile_api::AppInterfaceUnregisteredReason::INVALID_ENUM;
@@ -90,7 +92,7 @@ void OnExitAllApplicationsNotification::Run() {
       return;
     }
     default: {
-      LOG4CXX_ERROR(logger_, "Unknown Application close reason" << reason);
+      SDL_LOG_ERROR("Unknown Application close reason" << reason);
       return;
     }
   }
@@ -106,7 +108,7 @@ void OnExitAllApplicationsNotification::Run() {
 }
 
 void OnExitAllApplicationsNotification::SendOnSDLPersistenceComplete() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
 
   smart_objects::SmartObjectSPtr message =
       std::make_shared<smart_objects::SmartObject>(

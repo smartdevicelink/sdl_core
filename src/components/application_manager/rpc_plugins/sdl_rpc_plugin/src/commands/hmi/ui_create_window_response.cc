@@ -36,6 +36,8 @@ using namespace application_manager;
 
 namespace commands {
 
+SDL_CREATE_LOG_VARIABLE("Commands")
+
 UICreateWindowResponse::UICreateWindowResponse(
     const application_manager::commands::MessageSharedPtr& message,
     ApplicationManager& application_manager,
@@ -51,7 +53,7 @@ UICreateWindowResponse::UICreateWindowResponse(
 UICreateWindowResponse::~UICreateWindowResponse() {}
 
 void UICreateWindowResponse::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
 
   event_engine::Event event(hmi_apis::FunctionID::UI_CreateWindow);
   event.set_smart_object(*message_);

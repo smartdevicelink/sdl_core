@@ -37,6 +37,8 @@ namespace sdl_rpc_plugin {
 using namespace application_manager;
 namespace commands {
 
+SDL_CREATE_LOG_VARIABLE("Commands")
+
 OnAudioPassThruNotification::OnAudioPassThruNotification(
     const application_manager::commands::MessageSharedPtr& message,
     ApplicationManager& application_manager,
@@ -52,7 +54,7 @@ OnAudioPassThruNotification::OnAudioPassThruNotification(
 OnAudioPassThruNotification::~OnAudioPassThruNotification() {}
 
 void OnAudioPassThruNotification::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
 
   SendNotification();
 }

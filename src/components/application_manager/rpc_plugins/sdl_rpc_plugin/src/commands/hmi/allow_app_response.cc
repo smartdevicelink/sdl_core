@@ -38,6 +38,8 @@ using namespace application_manager;
 
 namespace commands {
 
+SDL_CREATE_LOG_VARIABLE("Commands")
+
 AllowAppResponse::AllowAppResponse(
     const application_manager::commands::MessageSharedPtr& message,
     ApplicationManager& application_manager,
@@ -53,7 +55,7 @@ AllowAppResponse::AllowAppResponse(
 AllowAppResponse::~AllowAppResponse() {}
 
 void AllowAppResponse::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
 
   uint32_t connection_key =
       (*message_)[strings::params][strings::connection_key].asInt();
@@ -61,7 +63,7 @@ void AllowAppResponse::Run() {
   ApplicationSharedPtr app = application_manager_.application(connection_key);
 
   if (!app) {
-    LOG4CXX_ERROR(logger_, "NULL pointer");
+    SDL_LOG_ERROR("NULL pointer");
     return;
   }
   app->set_app_allowed(

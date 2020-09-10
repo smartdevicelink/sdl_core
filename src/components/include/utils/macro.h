@@ -60,9 +60,9 @@
 
 #ifdef DEBUG
 #define ASSERT(condition) \
-  FLUSH_LOGGER();         \
+  SDL_FLUSH_LOGGER();     \
   do {                    \
-    DEINIT_LOGGER();      \
+    SDL_DEINIT_LOGGER();  \
     assert(condition);    \
   } while (false)
 #else  // RELEASE
@@ -76,9 +76,8 @@
 
 #define DCHECK(condition)                                                     \
   if (!(condition)) {                                                         \
-    CREATE_LOGGERPTR_LOCAL(logger_, "Utils");                                 \
-    LOG4CXX_FATAL(logger_,                                                    \
-                  "DCHECK failed with \"" << #condition << "\" ["             \
+    SDL_CREATE_LOCAL_LOG_VARIABLE("Utils");                                   \
+    SDL_LOG_FATAL("DCHECK failed with \"" << #condition << "\" ["             \
                                           << __FUNCTION__ << "][" << __FILE__ \
                                           << ':' << __LINE__ << ']');         \
     ASSERT((condition));                                                      \
@@ -90,9 +89,8 @@
  */
 #define DCHECK_OR_RETURN(condition, return_value)                             \
   if (!(condition)) {                                                         \
-    CREATE_LOGGERPTR_LOCAL(logger_, "Utils");                                 \
-    LOG4CXX_FATAL(logger_,                                                    \
-                  "DCHECK failed with \"" << #condition << "\" ["             \
+    SDL_CREATE_LOCAL_LOG_VARIABLE("Utils");                                   \
+    SDL_LOG_FATAL("DCHECK failed with \"" << #condition << "\" ["             \
                                           << __FUNCTION__ << "][" << __FILE__ \
                                           << ':' << __LINE__ << ']');         \
     ASSERT((condition));                                                      \
@@ -104,9 +102,8 @@
  */
 #define DCHECK_OR_RETURN_VOID(condition)                                      \
   if (!(condition)) {                                                         \
-    CREATE_LOGGERPTR_LOCAL(logger_, "Utils");                                 \
-    LOG4CXX_FATAL(logger_,                                                    \
-                  "DCHECK failed with \"" << #condition << "\" ["             \
+    SDL_CREATE_LOCAL_LOG_VARIABLE("Utils");                                   \
+    SDL_LOG_FATAL("DCHECK failed with \"" << #condition << "\" ["             \
                                           << __FUNCTION__ << "][" << __FILE__ \
                                           << ':' << __LINE__ << ']');         \
     ASSERT((condition));                                                      \

@@ -48,6 +48,8 @@ using namespace application_manager;
 
 namespace commands {
 
+SDL_CREATE_LOG_VARIABLE("Commands")
+
 OnSystemRequestNotification::OnSystemRequestNotification(
     const application_manager::commands::MessageSharedPtr& message,
     ApplicationManager& application_manager,
@@ -63,7 +65,7 @@ OnSystemRequestNotification::OnSystemRequestNotification(
 OnSystemRequestNotification::~OnSystemRequestNotification() {}
 
 void OnSystemRequestNotification::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
 
   smart_objects::SmartObject& params = (*message_)[strings::params];
   smart_objects::SmartObject& msg_params = (*message_)[strings::msg_params];
@@ -96,8 +98,7 @@ void OnSystemRequestNotification::Run() {
       msg_params[strings::url] = policy_handler_.GetNextUpdateUrl(
           policy::PTUIterationType::DefaultIteration, app_id);
       if (0 == app_id) {
-        LOG4CXX_WARN(logger_,
-                     "Can't select application to forward OnSystemRequest.");
+        SDL_LOG_WARN("Can't select application to forward OnSystemRequest.");
         return;
       }
       msg_params[strings::app_id] = app_id;
@@ -110,26 +111,24 @@ void OnSystemRequestNotification::Run() {
   ApplicationSharedPtr app;
   if (msg_params.keyExists(strings::app_id)) {
     const uint32_t app_id = msg_params[strings::app_id].asUInt();
-    LOG4CXX_DEBUG(logger_, "Received OnSystemRequest for appID " << app_id);
-    LOG4CXX_DEBUG(logger_, "Searching app to send OnSystemRequest by appID.");
+    SDL_LOG_DEBUG("Received OnSystemRequest for appID " << app_id);
+    SDL_LOG_DEBUG("Searching app to send OnSystemRequest by appID.");
     app = application_manager_.application(app_id);
   } else {
-    LOG4CXX_DEBUG(logger_,
-                  "Received OnSystemRequest without appID."
-                  " One of registered apps will be used.");
-    LOG4CXX_DEBUG(logger_, "Searching registered app to send OnSystemRequest.");
+    SDL_LOG_DEBUG(
+        "Received OnSystemRequest without appID."
+        " One of registered apps will be used.");
+    SDL_LOG_DEBUG("Searching registered app to send OnSystemRequest.");
     const uint32_t selected_app_id = policy_handler_.GetAppIdForSending();
     if (0 == selected_app_id) {
-      LOG4CXX_WARN(logger_,
-                   "Can't select application to forward OnSystemRequest.");
+      SDL_LOG_WARN("Can't select application to forward OnSystemRequest.");
       return;
     }
     app = application_manager_.application(selected_app_id);
   }
 
   if (app.use_count() == 0) {
-    LOG4CXX_WARN(logger_,
-                 "No valid application found to forward OnSystemRequest.");
+    SDL_LOG_WARN("No valid application found to forward OnSystemRequest.");
     return;
   }
 
@@ -140,16 +139,14 @@ void OnSystemRequestNotification::Run() {
 
   if (policy::kDeviceAllowed !=
       policy_handler_.GetUserConsentForDevice(device_mac)) {
-    LOG4CXX_WARN(logger_,
-                 "Application "
-                     << app->policy_app_id()
-                     << " is registered from non-consented device."
-                        "Can't forward notification to application.");
+    SDL_LOG_WARN("Application "
+                 << app->policy_app_id()
+                 << " is registered from non-consented device. "
+                    "Can't forward notification to application.");
     return;
   }
 
-  LOG4CXX_DEBUG(logger_,
-                "Sending request with application id " << app->policy_app_id());
+  SDL_LOG_DEBUG("Sending request with application id " << app->policy_app_id());
 
   params[strings::connection_key] = app->app_id();
 

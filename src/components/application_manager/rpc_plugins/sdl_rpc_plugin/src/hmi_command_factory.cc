@@ -233,6 +233,8 @@
 #include "sdl_rpc_plugin/commands/hmi/on_ui_reset_timeout_notification.h"
 #include "sdl_rpc_plugin/commands/hmi/on_ui_subtle_alert_pressed_notification.h"
 #include "sdl_rpc_plugin/commands/hmi/on_ui_touch_event_notification.h"
+#include "sdl_rpc_plugin/commands/hmi/on_ui_update_file_notification.h"
+#include "sdl_rpc_plugin/commands/hmi/on_ui_update_sub_menu_notification.h"
 #include "sdl_rpc_plugin/commands/hmi/on_vr_command_notification.h"
 #include "sdl_rpc_plugin/commands/hmi/on_vr_language_change_notification.h"
 #include "sdl_rpc_plugin/commands/hmi/on_vr_started_notification.h"
@@ -268,7 +270,7 @@
 namespace sdl_rpc_plugin {
 using namespace application_manager;
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "HMICommandFactory")
+SDL_CREATE_LOG_VARIABLE("HMICommandFactory")
 
 HMICommandFactory::HMICommandFactory(
     ApplicationManager& application_manager,
@@ -286,20 +288,20 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
   const hmi_apis::FunctionID::eType function_id =
       static_cast<hmi_apis::FunctionID::eType>(
           (*message)[strings::params][strings::function_id].asInt());
-  LOG4CXX_DEBUG(
-      logger_, "HMICommandFactory::CreateCommand function_id: " << function_id);
+  SDL_LOG_DEBUG(
+      "HMICommandFactory::CreateCommand function_id: " << function_id);
 
   const hmi_apis::messageType::eType message_type =
       static_cast<hmi_apis::messageType::eType>(
           (*message)[strings::params][strings::message_type].asInt());
 
   if (hmi_apis::messageType::response == message_type) {
-    LOG4CXX_DEBUG(logger_, "HMICommandFactory::CreateCommand response");
+    SDL_LOG_DEBUG("HMICommandFactory::CreateCommand response");
   } else if ((*message)[strings::params][strings::message_type] ==
              hmi_apis::messageType::error_response) {
-    LOG4CXX_DEBUG(logger_, "HMICommandFactory::CreateCommand error response");
+    SDL_LOG_DEBUG("HMICommandFactory::CreateCommand error response");
   } else {
-    LOG4CXX_DEBUG(logger_, "HMICommandFactory::CreateCommand request");
+    SDL_LOG_DEBUG("HMICommandFactory::CreateCommand request");
   }
 
   return get_creator_factory(function_id, message_type, source).create(message);
@@ -930,6 +932,12 @@ CommandCreator& HMICommandFactory::get_creator_factory(
     }
     case hmi_apis::FunctionID::BasicCommunication_OnAppPropertiesChange: {
       return factory.GetCreator<commands::OnAppPropertiesChangeNotification>();
+    }
+    case hmi_apis::FunctionID::UI_OnUpdateFile: {
+      return factory.GetCreator<commands::OnUIUpdateFileNotification>();
+    }
+    case hmi_apis::FunctionID::UI_OnUpdateSubMenu: {
+      return factory.GetCreator<commands::OnUIUpdateSubMenuNotification>();
     }
     case hmi_apis::FunctionID::UI_OnSubtleAlertPressed: {
       return factory.GetCreator<commands::OnUISubtleAlertPressedNotification>();

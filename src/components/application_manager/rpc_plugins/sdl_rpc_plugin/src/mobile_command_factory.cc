@@ -93,6 +93,8 @@
 #include "sdl_rpc_plugin/commands/mobile/on_system_request_notification.h"
 #include "sdl_rpc_plugin/commands/mobile/on_tbt_client_state_notification.h"
 #include "sdl_rpc_plugin/commands/mobile/on_touch_event_notification.h"
+#include "sdl_rpc_plugin/commands/mobile/on_update_file_notification.h"
+#include "sdl_rpc_plugin/commands/mobile/on_update_sub_menu_notification.h"
 #include "sdl_rpc_plugin/commands/mobile/on_way_point_change_notification.h"
 #include "sdl_rpc_plugin/commands/mobile/perform_audio_pass_thru_request.h"
 #include "sdl_rpc_plugin/commands/mobile/perform_audio_pass_thru_response.h"
@@ -147,7 +149,7 @@
 #include "sdl_rpc_plugin/commands/mobile/update_turn_list_request.h"
 #include "sdl_rpc_plugin/commands/mobile/update_turn_list_response.h"
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "ApplicationManager")
+SDL_CREATE_LOG_VARIABLE("ApplicationManager")
 namespace sdl_rpc_plugin {
 using namespace application_manager;
 
@@ -467,6 +469,12 @@ CommandCreator& MobileCommandFactory::get_notification_creator(
     case mobile_apis::FunctionID::OnWayPointChangeID: {
       return factory.GetCreator<commands::OnWayPointChangeNotification>();
     }
+    case mobile_apis::FunctionID::OnUpdateFileID: {
+      return factory.GetCreator<commands::OnUpdateFileNotification>();
+    }
+    case mobile_apis::FunctionID::OnUpdateSubMenuID: {
+      return factory.GetCreator<commands::OnUpdateSubMenuNotification>();
+    }
     case mobile_apis::FunctionID::OnSubtleAlertPressedID: {
       return factory.GetCreator<commands::OnSubtleAlertPressedNotification>();
     }
@@ -552,8 +560,7 @@ CommandSharedPtr MobileCommandFactory::CreateCommand(
       static_cast<mobile_apis::FunctionID::eType>(
           (*message)[strings::params][strings::function_id].asInt());
 
-  LOG4CXX_DEBUG(
-      logger_,
+  SDL_LOG_DEBUG(
       "MobileCommandFactory::CreateCommand function_id: " << function_id);
 
   return get_creator_factory(function_id, message_type, source).create(message);

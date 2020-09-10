@@ -39,6 +39,7 @@ namespace sdl_rpc_plugin {
 using namespace application_manager;
 
 namespace commands {
+SDL_CREATE_LOG_VARIABLE("Commands")
 
 OnCommandNotification::OnCommandNotification(
     const application_manager::commands::MessageSharedPtr& message,
@@ -55,21 +56,23 @@ OnCommandNotification::OnCommandNotification(
 OnCommandNotification::~OnCommandNotification() {}
 
 void OnCommandNotification::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
 
   ApplicationSharedPtr app = application_manager_.application(
       (*message_)[strings::msg_params][strings::app_id].asInt());
 
   if (!app) {
-    LOG4CXX_ERROR(logger_, "No application associated with session key");
+    SDL_LOG_ERROR("No application associated with session key");
     return;
   }
 
   const uint32_t cmd_id =
       (*message_)[strings::msg_params][strings::cmd_id].asUInt();
 
-  if (!app->FindCommand(cmd_id)) {
-    LOG4CXX_ERROR(logger_, " No applications found for the command " << cmd_id);
+  const auto command = app->FindCommand(cmd_id);
+
+  if (smart_objects::SmartType_Null == command.getType()) {
+    SDL_LOG_ERROR(" No applications found for the command " << cmd_id);
     return;
   }
 

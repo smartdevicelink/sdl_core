@@ -41,6 +41,8 @@ namespace app_service_rpc_plugin {
 using namespace application_manager;
 namespace commands {
 
+SDL_CREATE_LOG_VARIABLE("Commands")
+
 OnAppServiceDataNotificationFromMobile::OnAppServiceDataNotificationFromMobile(
     const application_manager::commands::MessageSharedPtr& message,
     ApplicationManager& application_manager,
@@ -57,8 +59,8 @@ OnAppServiceDataNotificationFromMobile::
     ~OnAppServiceDataNotificationFromMobile() {}
 
 void OnAppServiceDataNotificationFromMobile::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
-  LOG4CXX_DEBUG(logger_, "Received an OnAppServiceData");
+  SDL_LOG_AUTO_TRACE();
+  SDL_LOG_DEBUG("Received an OnAppServiceData");
   MessageHelper::PrintSmartObject(*message_);
 
   uint32_t app_connection_key = connection_key();
@@ -74,9 +76,9 @@ void OnAppServiceDataNotificationFromMobile::Run() {
       app->policy_app_id(), std::string(), service_type, NULL);
 
   if (!result) {
-    LOG4CXX_DEBUG(logger_,
-                  "Incorrect service type received in "
-                  "OnAppServiceDataNotificationFromMobile");
+    SDL_LOG_DEBUG(
+        "Incorrect service type received in "
+        "OnAppServiceDataNotificationFromMobile");
     return;
   }
 
@@ -87,15 +89,15 @@ void OnAppServiceDataNotificationFromMobile::Run() {
   AppService* service =
       application_manager_.GetAppServiceManager().FindServiceByID(service_id);
   if (!service) {
-    LOG4CXX_ERROR(
-        logger_, "No published services exist with service ID: " << service_id);
+    SDL_LOG_ERROR(
+        "No published services exist with service ID: " << service_id);
     return;
   } else if (!service->mobile_service ||
              service->connection_key != app_connection_key) {
-    LOG4CXX_ERROR(logger_, "Service was not published by this application");
+    SDL_LOG_ERROR("Service was not published by this application");
     return;
   } else if (!service->record[strings::service_active].asBool()) {
-    LOG4CXX_ERROR(logger_, "Service is not active");
+    SDL_LOG_ERROR("Service is not active");
     return;
   }
 
@@ -103,11 +105,9 @@ void OnAppServiceDataNotificationFromMobile::Run() {
       service->record[strings::service_manifest][strings::service_type]
           .asString();
   if (published_service_type != service_type) {
-    LOG4CXX_ERROR(logger_,
-                  "Service type mismatch, expected "
-                      << service_type
-                      << ", but service was published with type "
-                      << published_service_type);
+    SDL_LOG_ERROR("Service type mismatch, expected "
+                  << service_type << ", but service was published with type "
+                  << published_service_type);
     return;
   }
 

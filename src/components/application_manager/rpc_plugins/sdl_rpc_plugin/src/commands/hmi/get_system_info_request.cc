@@ -37,6 +37,8 @@ using namespace application_manager;
 
 namespace commands {
 
+SDL_CREATE_LOG_VARIABLE("Commands")
+
 GetSystemInfoRequest::GetSystemInfoRequest(
     const application_manager::commands::MessageSharedPtr& message,
     ApplicationManager& application_manager,
@@ -52,7 +54,7 @@ GetSystemInfoRequest::GetSystemInfoRequest(
 GetSystemInfoRequest::~GetSystemInfoRequest() {}
 
 void GetSystemInfoRequest::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   uint32_t correlation_id = RequestToHMI::correlation_id();
   uint32_t app_id = RequestToHMI::application_id();
   application_manager_.set_application_id(correlation_id, app_id);
@@ -60,7 +62,7 @@ void GetSystemInfoRequest::Run() {
 }
 
 void GetSystemInfoRequest::onTimeOut() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   hmi_capabilities_.UpdateCachedCapabilities();
 }
 

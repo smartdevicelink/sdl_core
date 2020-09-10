@@ -37,6 +37,8 @@ namespace sdl_rpc_plugin {
 using namespace application_manager;
 namespace commands {
 
+SDL_CREATE_LOG_VARIABLE("Commands")
+
 GetSystemInfoResponse::GetSystemInfoResponse(
     const application_manager::commands::MessageSharedPtr& message,
     ApplicationManager& application_manager,
@@ -52,14 +54,14 @@ GetSystemInfoResponse::GetSystemInfoResponse(
 GetSystemInfoResponse::~GetSystemInfoResponse() {}
 
 void GetSystemInfoResponse::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   const auto code = static_cast<hmi_apis::Common_Result::eType>(
       (*message_)[strings::params][hmi_response::code].asInt());
 
   hmi_capabilities_.set_ccpu_version(policy_handler_.GetCCPUVersionFromPT());
 
   if (hmi_apis::Common_Result::SUCCESS != code) {
-    LOG4CXX_WARN(logger_, "GetSystemError returns an error code " << code);
+    SDL_LOG_WARN("GetSystemError returns an error code " << code);
     hmi_capabilities_.UpdateCachedCapabilities();
     policy_handler_.SetPreloadedPtFlag(false);
     return;

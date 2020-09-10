@@ -32,8 +32,9 @@
 
 #include "app_service_rpc_plugin/app_service_app_extension.h"
 #include "app_service_rpc_plugin/app_service_rpc_plugin.h"
+#include "application_manager/include/application_manager/smart_object_keys.h"
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "AppServiceRpcPlugin")
+SDL_CREATE_LOG_VARIABLE("AppServiceRpcPlugin")
 
 namespace app_service_rpc_plugin {
 
@@ -44,22 +45,22 @@ AppServiceAppExtension::AppServiceAppExtension(
     : app_mngr::AppExtension(AppServiceAppExtensionUID)
     , plugin_(plugin)
     , app_(app) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
 }
 
 AppServiceAppExtension::~AppServiceAppExtension() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
 }
 
 bool AppServiceAppExtension::SubscribeToAppService(
     const std::string app_service_type) {
-  LOG4CXX_DEBUG(logger_, "Subscribe to app service: " << app_service_type);
+  SDL_LOG_DEBUG("Subscribe to app service: " << app_service_type);
   return subscribed_data_.insert(app_service_type).second;
 }
 
 bool AppServiceAppExtension::UnsubscribeFromAppService(
     const std::string app_service_type) {
-  LOG4CXX_DEBUG(logger_, app_service_type);
+  SDL_LOG_DEBUG(app_service_type);
   auto it = subscribed_data_.find(app_service_type);
   if (it != subscribed_data_.end()) {
     subscribed_data_.erase(it);
@@ -69,14 +70,13 @@ bool AppServiceAppExtension::UnsubscribeFromAppService(
 }
 
 void AppServiceAppExtension::UnsubscribeFromAppService() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   subscribed_data_.clear();
 }
 
 bool AppServiceAppExtension::IsSubscribedToAppService(
     const std::string app_service_type) const {
-  LOG4CXX_DEBUG(logger_,
-                "isSubscribedToAppService for type: " << app_service_type);
+  SDL_LOG_DEBUG("isSubscribedToAppService for type: " << app_service_type);
   return subscribed_data_.find(app_service_type) != subscribed_data_.end();
 }
 
@@ -86,27 +86,39 @@ AppServiceSubscriptions AppServiceAppExtension::Subscriptions() {
 
 void AppServiceAppExtension::SaveResumptionData(
     smart_objects::SmartObject& resumption_data) {
-  const char* app_service_info = "appService";
-  resumption_data[app_service_info] =
+  resumption_data[app_mngr::hmi_interface::app_service] =
       smart_objects::SmartObject(smart_objects::SmartType_Array);
   int i = 0;
   for (const auto& subscription : subscribed_data_) {
-    resumption_data[app_service_info][i] = subscription;
+    resumption_data[app_mngr::hmi_interface::app_service][i] = subscription;
     i++;
   }
 }
 
 void AppServiceAppExtension::ProcessResumption(
-    const smart_objects::SmartObject& resumption_data) {
-  const char* app_service_info = "appService";
-  if (resumption_data.keyExists(app_service_info)) {
+    const smart_objects::SmartObject& saved_app) {
+  SDL_LOG_AUTO_TRACE();
+
+  const auto& subscriptions =
+      saved_app[application_manager::strings::application_subscriptions];
+
+  if (subscriptions.keyExists(app_mngr::hmi_interface::app_service)) {
     const smart_objects::SmartObject& subscriptions_app_services =
-        resumption_data[app_service_info];
+        subscriptions[app_mngr::hmi_interface::app_service];
     for (size_t i = 0; i < subscriptions_app_services.length(); ++i) {
       std::string service_type = subscriptions_app_services[i].asString();
       SubscribeToAppService(service_type);
     }
   }
+}
+
+void AppServiceAppExtension::RevertResumption(
+    const smart_objects::SmartObject& resumption_data) {
+  SDL_LOG_AUTO_TRACE();
+
+  UNUSED(resumption_data);
+  // ToDo: implementation is blocked by
+  // https://github.com/smartdevicelink/sdl_core/issues/3470
 }
 
 AppServiceAppExtension& AppServiceAppExtension::ExtractASExtension(

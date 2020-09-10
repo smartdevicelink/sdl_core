@@ -33,6 +33,7 @@
 #include "application_manager/commands/request_to_hmi.h"
 #include "application_manager/message_helper.h"
 #include "application_manager/rpc_service.h"
+#include "utils/helpers.h"
 
 namespace application_manager {
 
@@ -70,11 +71,33 @@ static std::map<std::string, std::set<hmi_apis::FunctionID::eType> >
 
 namespace commands {
 
+SDL_CREATE_LOG_VARIABLE("Commands")
+
 bool CheckAvailabilityHMIInterfaces(ApplicationManager& application_manager,
                                     HmiInterfaces::InterfaceID interface) {
   const HmiInterfaces::InterfaceState state =
       application_manager.hmi_interfaces().GetInterfaceState(interface);
   return HmiInterfaces::STATE_NOT_AVAILABLE != state;
+}
+
+bool IsResponseCodeSuccess(
+    const smart_objects::SmartObject& response_from_hmi) {
+  auto response_code = static_cast<hmi_apis::Common_Result::eType>(
+      response_from_hmi[strings::params][hmi_response::code].asInt());
+
+  using helpers::Compare;
+  using helpers::EQ;
+  using helpers::ONE;
+
+  const bool is_result_success =
+      Compare<hmi_apis::Common_Result::eType, EQ, ONE>(
+          response_code,
+          hmi_apis::Common_Result::SUCCESS,
+          hmi_apis::Common_Result::WARNINGS,
+          hmi_apis::Common_Result::WRONG_LANGUAGE,
+          hmi_apis::Common_Result::RETRY,
+          hmi_apis::Common_Result::SAVED);
+  return is_result_success;
 }
 
 bool ChangeInterfaceState(ApplicationManager& application_manager,
@@ -83,13 +106,33 @@ bool ChangeInterfaceState(ApplicationManager& application_manager,
   if (response_from_hmi[strings::msg_params].keyExists(strings::available)) {
     const bool is_available =
         response_from_hmi[strings::msg_params][strings::available].asBool();
-    const HmiInterfaces::InterfaceState interface_state =
-        is_available ? HmiInterfaces::STATE_AVAILABLE
-                     : HmiInterfaces::STATE_NOT_AVAILABLE;
-    application_manager.hmi_interfaces().SetInterfaceState(interface,
-                                                           interface_state);
-    return is_available;
+
+    if (!is_available) {
+      application_manager.hmi_interfaces().SetInterfaceState(
+          interface, HmiInterfaces::STATE_NOT_AVAILABLE);
+      return false;
+    }
+
+    // Process response with result
+    if (response_from_hmi[strings::params].keyExists(hmi_response::code) &&
+        !IsResponseCodeSuccess(response_from_hmi)) {
+      application_manager.hmi_interfaces().SetInterfaceState(
+          interface, HmiInterfaces::STATE_NOT_AVAILABLE);
+      return false;
+    }
+
+    application_manager.hmi_interfaces().SetInterfaceState(
+        interface, HmiInterfaces::STATE_AVAILABLE);
+    return true;
   }
+
+  // Process response with error
+  if (response_from_hmi[strings::params].keyExists(strings::error_msg)) {
+    application_manager.hmi_interfaces().SetInterfaceState(
+        interface, HmiInterfaces::STATE_NOT_AVAILABLE);
+    return false;
+  }
+
   return false;
 }
 
@@ -126,9 +169,8 @@ void RequestToHMI::SendRequest() {
 }
 
 void RequestToHMI::RequestInterfaceCapabilities(const char* interface_name) {
-  LOG4CXX_DEBUG(
-      logger_,
-      "Request capabilities for the " << interface_name << " interface");
+  SDL_LOG_DEBUG("Request capabilities for the " << interface_name
+                                                << " interface");
 
   const auto& request_ids = interface_requests[std::string(interface_name)];
   RequestCapabilities(request_ids);
@@ -143,9 +185,8 @@ void RequestToHMI::UpdateRequestsRequiredForCapabilities(
 
 void RequestToHMI::UpdateRequiredInterfaceCapabilitiesRequests(
     const std::string& interface_name) {
-  LOG4CXX_DEBUG(
-      logger_,
-      "Update requests required for the " << interface_name << " interface");
+  SDL_LOG_DEBUG("Update requests required for the " << interface_name
+                                                    << " interface");
 
   const auto& request_ids = interface_requests[std::string(interface_name)];
   UpdateRequestsRequiredForCapabilities(request_ids);
@@ -153,8 +194,7 @@ void RequestToHMI::UpdateRequiredInterfaceCapabilitiesRequests(
 
 void RequestToHMI::RequestCapabilities(
     const std::set<hmi_apis::FunctionID::eType>& requests_to_send_to_hmi) {
-  LOG4CXX_DEBUG(logger_,
-                "There are " << requests_to_send_to_hmi.size()
+  SDL_LOG_DEBUG("There are " << requests_to_send_to_hmi.size()
                              << " requests to send to the HMI");
 
   for (const auto& function_id : requests_to_send_to_hmi) {

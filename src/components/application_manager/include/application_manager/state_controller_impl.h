@@ -125,6 +125,12 @@ class StateControllerImpl : public event_engine::EventObserver,
 
   void ActivateDefaultWindow(ApplicationSharedPtr app) OVERRIDE;
   void ExitDefaultWindow(ApplicationSharedPtr app) OVERRIDE;
+  void DeactivateApp(ApplicationSharedPtr app,
+                     const WindowID window_id) OVERRIDE;
+
+  void ResumePostponedWindows(const uint32_t app_id) OVERRIDE;
+
+  void DropPostponedWindows(const uint32_t app_id) OVERRIDE;
 
  private:
   int64_t RequestHMIStateChange(ApplicationConstSharedPtr app,
@@ -274,13 +280,6 @@ class StateControllerImpl : public event_engine::EventObserver,
   void TempStateStopped(HmiState::StateID ID);
 
   /**
-   * @brief Sets BACKGROUND or LIMITED hmi level to application
-   * depends on application type
-   * @param app Application to deactivate
-   */
-  void DeactivateApp(ApplicationSharedPtr app, const WindowID window_id);
-
-  /**
    * Function to remove temporary HmiState for application
    */
   template <HmiState::StateID ID>
@@ -426,6 +425,11 @@ class StateControllerImpl : public event_engine::EventObserver,
   StateIDList active_states_;
   mutable sync_primitives::Lock active_states_lock_;
   std::map<uint32_t, HmiStatePtr> waiting_for_response_;
+
+  typedef std::pair<WindowID, HmiStatePtr> WindowStatePair;
+  typedef std::list<WindowStatePair> WindowStatePairs;
+  std::map<uint32_t, WindowStatePairs> postponed_app_widgets_;
+
   ApplicationManager& app_mngr_;
 };
 }  // namespace application_manager

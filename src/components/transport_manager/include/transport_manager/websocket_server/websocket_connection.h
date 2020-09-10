@@ -48,7 +48,6 @@ namespace transport_adapter {
 
 using ::utils::MessageQueue;
 
-typedef ::protocol_handler::RawMessagePtr Message;
 typedef std::queue<Message> AsyncQueue;
 
 class TransportAdapterController;
@@ -75,10 +74,11 @@ class WebSocketConnection
 
   TransportAdapter::Error Disconnect() OVERRIDE;
 
-  TransportAdapter::Error SendData(
-      protocol_handler::RawMessagePtr message) OVERRIDE;
+  TransportAdapter::Error SendData(Message message) OVERRIDE;
 
-  void DataReceive(protocol_handler::RawMessagePtr frame);
+  void DataReceive(Message frame);
+  void DataSendDone(Message frame);
+  void DataSendFailed(Message frame);
   void Run();
   bool IsShuttingDown();
 
@@ -99,13 +99,10 @@ class WebSocketConnection
   class LoopThreadDelegate : public threads::ThreadDelegate {
    public:
     LoopThreadDelegate(MessageQueue<Message, AsyncQueue>* message_queue,
-                       DataWriteCallback data_write,
-                       OnIOErrorCallback on_io_error);
+                       DataWriteCallback data_write);
 
     virtual void threadMain() OVERRIDE;
     virtual void exitThreadMain() OVERRIDE;
-
-    void OnWrite();
 
     void SetShutdown();
 
@@ -113,7 +110,6 @@ class WebSocketConnection
     void DrainQueue();
     MessageQueue<Message, AsyncQueue>& message_queue_;
     DataWriteCallback data_write_;
-    OnIOErrorCallback on_io_error_;
   };
 
   LoopThreadDelegate* thread_delegate_;

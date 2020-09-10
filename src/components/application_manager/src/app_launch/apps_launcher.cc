@@ -28,7 +28,7 @@ struct LauncherGenerator {
   const uint16_t app_launch_retry_wait_time_;
 };
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "AppLaunch")
+SDL_CREATE_LOG_VARIABLE("AppLaunch")
 AppsLauncher::AppsLauncher(
     connection_handler::ConnectionHandler& connection_handler,
     const uint16_t max_number_of_ios_device,
@@ -45,7 +45,7 @@ AppsLauncher::AppsLauncher(
 }
 
 void AppsLauncher::StartLaunching(ApplicationDataPtr app_data) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   sync_primitives::AutoLock lock(launchers_lock_);
   DCHECK_OR_RETURN_VOID(!free_launchers_.empty())
   const AppLaunchers::iterator it = free_launchers_.begin();
@@ -75,18 +75,17 @@ void AppsLauncher::StopLaunching(ApplicationDataPtr app_data) {
     free_launchers_.push_back(launcher);
     works_launchers_.erase(it);
   } else {
-    LOG4CXX_DEBUG(logger_,
-                  "Unable to StopLaunching" << app_data->mobile_app_id_);
+    SDL_LOG_DEBUG("Unable to StopLaunching" << app_data->mobile_app_id_);
   }
 }
 
 void AppsLauncher::OnLaunched(ApplicationDataPtr app_data) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   StopLaunching(app_data);
 }
 
 void AppsLauncher::OnRetryAttemptsExhausted(ApplicationDataPtr app_data) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   StopLaunching(app_data);
 }
 
@@ -110,8 +109,7 @@ void AppsLauncher::Launcher::PosponedLaunch(
   app_data_ = app_data;
   retry_index_ = 0;
   retry_timer_.Start(app_launch_retry_wait_time_, timer::kPeriodic);
-  LOG4CXX_DEBUG(logger_,
-                "Applicaiton " << app_data->mobile_app_id_ << " on device "
+  SDL_LOG_DEBUG("Applicaiton " << app_data->mobile_app_id_ << " on device "
                                << app_data->device_mac_
                                << " will be launched in "
                                << app_launch_retry_wait_time_ << " ms");
@@ -125,8 +123,7 @@ void AppsLauncher::Launcher::Clear() {
 
 void AppsLauncher::Launcher::LaunchNow() {
   if (retry_index_++ < app_launch_max_retry_attempt_) {
-    LOG4CXX_DEBUG(logger_,
-                  "Run App " << app_data_->mobile_app_id_ << "with bundle "
+    SDL_LOG_DEBUG("Run App " << app_data_->mobile_app_id_ << "with bundle "
                              << app_data_->bundle_id_ << " On Device "
                              << app_data_->device_mac_);
 

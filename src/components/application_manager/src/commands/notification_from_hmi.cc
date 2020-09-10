@@ -39,6 +39,8 @@ namespace application_manager {
 
 namespace commands {
 
+SDL_CREATE_LOG_VARIABLE("Commands")
+
 NotificationFromHMI::NotificationFromHMI(
     const MessageSharedPtr& message,
     ApplicationManager& application_manager,
@@ -93,7 +95,7 @@ void NotificationFromHMI::CreateHMIRequest(
   smart_objects::SmartObjectSPtr result =
       std::make_shared<smart_objects::SmartObject>();
   if (!result) {
-    LOG4CXX_ERROR(logger_, "Memory allocation failed.");
+    SDL_LOG_ERROR("Memory allocation failed.");
     return;
   }
 
@@ -115,7 +117,7 @@ void NotificationFromHMI::CreateHMIRequest(
   request[strings::msg_params] = msg_params;
 
   if (!rpc_service_.ManageHMICommand(result)) {
-    LOG4CXX_ERROR(logger_, "Unable to send request");
+    SDL_LOG_ERROR("Unable to send request");
     return;
   }
 }

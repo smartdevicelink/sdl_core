@@ -42,8 +42,10 @@ using namespace application_manager;
 
 namespace commands {
 
+SDL_CREATE_LOG_VARIABLE("Commands")
+
 void RegisterAppInterfaceResponse::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
 
   mobile_apis::Result::eType result_code = mobile_apis::Result::SUCCESS;
   bool success = (*message_)[strings::msg_params][strings::success].asBool();
@@ -102,8 +104,7 @@ void RegisterAppInterfaceResponse::Run() {
   // Add registered application to the policy db right after response sent to
   // mobile to be able to check all other API according to app permissions
   if (!app) {
-    LOG4CXX_ERROR(logger_,
-                  "Application with connection key " << connection_key()
+    SDL_LOG_ERROR("Application with connection key " << connection_key()
                                                      << " is not registered.");
     return;
   }
@@ -113,7 +114,7 @@ void RegisterAppInterfaceResponse::Run() {
 
 void RegisterAppInterfaceResponse::SetHeartBeatTimeout(
     uint32_t connection_key, const std::string& mobile_app_id) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   policy::PolicyHandlerInterface& policy_handler = policy_handler_;
   if (policy_handler.PolicyEnabled()) {
     const uint32_t timeout = policy_handler.HeartBeatTimeout(mobile_app_id);
@@ -122,7 +123,7 @@ void RegisterAppInterfaceResponse::SetHeartBeatTimeout(
           connection_key, timeout);
     }
   } else {
-    LOG4CXX_INFO(logger_, "Policy is turn off");
+    SDL_LOG_INFO("Policy is turn off");
   }
 }
 

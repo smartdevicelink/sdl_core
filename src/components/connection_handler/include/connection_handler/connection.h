@@ -41,6 +41,7 @@
 #include "protocol/service_type.h"
 #include "protocol_handler/protocol_packet.h"
 #include "utils/lock.h"
+#include "utils/semantic_version.h"
 #include "utils/threads/thread.h"
 
 #ifdef ENABLE_SECURITY
@@ -98,12 +99,14 @@ typedef std::vector<Service> ServiceList;
 struct Session {
   ServiceList service_list;
   uint8_t protocol_version;
+  utils::SemanticVersion full_protocol_version;
 #ifdef ENABLE_SECURITY
   security_manager::SSLContext* ssl_context;
 #endif  // ENABLE_SECURITY
   Session()
       : service_list()
       , protocol_version(::protocol_handler::PROTOCOL_VERSION_2)
+      , full_protocol_version(utils::SemanticVersion(2, 0, 0))
 #ifdef ENABLE_SECURITY
       , ssl_context(NULL)
 #endif  // ENABLE_SECURITY
@@ -112,6 +115,7 @@ struct Session {
   explicit Session(const ServiceList& services, uint8_t protocol_version)
       : service_list(services)
       , protocol_version(protocol_version)
+      , full_protocol_version(utils::SemanticVersion(protocol_version, 0, 0))
 #ifdef ENABLE_SECURITY
       , ssl_context(NULL)
 #endif  // ENABLE_SECURITY
@@ -184,7 +188,8 @@ class Connection {
   bool AddNewService(uint8_t session_id,
                      protocol_handler::ServiceType service_type,
                      const bool is_protected,
-                     transport_manager::ConnectionUID connection_id);
+                     transport_manager::ConnectionUID connection_id,
+                     std::string* err_reason = nullptr);
   /**
    * @brief Removes service from session
    * @param session_id session ID
@@ -290,6 +295,15 @@ class Connection {
                                     uint8_t protocol_version);
 
   /**
+   * @brief changes protocol version in session
+   * @param  session_id session id
+   * @param  full_protocol_version full protocol version of the registered
+   * application
+   */
+  void UpdateProtocolVersionSession(
+      uint8_t session_id, const utils::SemanticVersion& full_protocol_version);
+
+  /**
    * @brief checks if session supports heartbeat
    * @param  session_id session id
    * @return TRUE on success, otherwise FALSE
@@ -304,6 +318,17 @@ class Connection {
    *   return FALSE
    */
   bool ProtocolVersion(uint8_t session_id, uint8_t& protocol_version);
+
+  /**
+   * @brief find protocol version for session
+   * @param session_id id of session which is launched on mobile side
+   * @param full_protocol_version where to write the full protocol version
+   * output
+   * @return TRUE if session exists otherwise
+   *   return FALSE
+   */
+  bool ProtocolVersion(uint8_t session_id,
+                       utils::SemanticVersion& full_protocol_version);
 
   /**
    * @brief Returns the primary connection handle associated with this

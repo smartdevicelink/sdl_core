@@ -155,9 +155,6 @@ class MockApplicationManager : public application_manager::ApplicationManager {
                void(const protocol_handler::ServiceType service_type,
                     const uint32_t app_id,
                     const bool streaming_data_available));
-  MOCK_METHOD1(
-      SendHMIStatusNotification,
-      void(const std::shared_ptr<application_manager::Application> app));
   MOCK_METHOD1(SendDriverDistractionState,
                void(application_manager::ApplicationSharedPtr app));
   MOCK_METHOD2(SendGetIconUrlNotifications,
@@ -232,6 +229,13 @@ class MockApplicationManager : public application_manager::ApplicationManager {
   MOCK_CONST_METHOD0(IsStopping, bool());
   MOCK_METHOD1(RemoveAppFromTTSGlobalPropertiesList,
                void(const uint32_t app_id));
+  MOCK_METHOD2(ResetGlobalProperties,
+               application_manager::ResetGlobalPropertiesResult(
+                   const smart_objects::SmartObject& global_properties_ids,
+                   const uint32_t app_id));
+  MOCK_METHOD1(
+      ResetAllApplicationGlobalProperties,
+      application_manager::ResetGlobalPropertiesResult(const uint32_t app_id));
   MOCK_METHOD4(
       SaveBinary,
       mobile_apis::Result::eType(const std::vector<uint8_t>& binary_data,
@@ -342,7 +346,7 @@ class MockApplicationManager : public application_manager::ApplicationManager {
                     const smart_objects::SmartObject& display_capabilities));
   MOCK_CONST_METHOD1(IsAppSubscribedForWayPoints, bool(uint32_t));
   MOCK_CONST_METHOD1(IsAppSubscribedForWayPoints,
-                     bool(application_manager::ApplicationSharedPtr));
+                     bool(application_manager::Application& app));
   MOCK_METHOD1(SubscribeAppForWayPoints, void(uint32_t));
   MOCK_METHOD1(SubscribeAppForWayPoints,
                void(application_manager::ApplicationSharedPtr));
