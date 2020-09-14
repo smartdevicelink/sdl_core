@@ -54,6 +54,15 @@
                 "NORMAL": 4,
                 "NONE": 0
             },
+            "subtle_notifications_per_minute_by_priority": {
+                "EMERGENCY": 60,
+                "NAVIGATION": 20,
+                "PROJECTION": 20,
+                "VOICECOM": 30,
+                "COMMUNICATION": 15,
+                "NORMAL": 10,
+                "NONE": 0
+            },
             "lock_screen_dismissal_enabled": true
         },
         "functional_groupings": {
@@ -82,6 +91,20 @@
                         "hmi_levels": [
                             "FULL",
                             "LIMITED"
+                        ]
+                    },
+                    "SubtleAlert": {
+                        "hmi_levels": [
+                            "FULL",
+                            "LIMITED",
+                            "BACKGROUND"
+                        ]
+                    },
+                    "OnSubtleAlertPressed": {
+                        "hmi_levels": [
+                            "FULL",
+                            "LIMITED",
+                            "BACKGROUND"
                         ]
                     },
                     "ChangeRegistration": {
@@ -399,6 +422,20 @@
                             "LIMITED",
                             "BACKGROUND"
                         ]
+                    },
+                    "OnUpdateFile": {
+                        "hmi_levels": [
+                            "FULL",
+                            "LIMITED",
+                            "BACKGROUND"
+                        ]
+                    },
+                    "OnUpdateSubMenu": {
+                        "hmi_levels": [
+                            "FULL",
+                            "LIMITED",
+                            "BACKGROUND"
+                        ]
                     }
                 }
             },
@@ -506,7 +543,9 @@
                             "myKey",
                             "prndl",
                             "rpm",
-                            "steeringWheelAngle"
+                            "steeringWheelAngle",
+                            "gearStatus",
+                            "handsOffSteering"
                         ]
                     },
                     "OnVehicleData": {
@@ -523,7 +562,9 @@
                             "myKey",
                             "prndl",
                             "rpm",
-                            "steeringWheelAngle"
+                            "steeringWheelAngle",
+                            "gearStatus",
+                            "handsOffSteering"
                         ]
                     },
                     "SubscribeVehicleData": {
@@ -540,7 +581,9 @@
                             "myKey",
                             "prndl",
                             "rpm",
-                            "steeringWheelAngle"
+                            "steeringWheelAngle",
+                            "gearStatus",
+                            "handsOffSteering"
                         ]
                     },
                     "UnsubscribeVehicleData": {
@@ -557,7 +600,9 @@
                             "myKey",
                             "prndl",
                             "rpm",
-                            "steeringWheelAngle"
+                            "steeringWheelAngle",
+                            "gearStatus",
+                            "handsOffSteering"
                         ]
                     }
                 }
@@ -587,7 +632,9 @@
                             "odometer",
                             "tirePressure",
                             "vin",
-                            "wiperStatus"
+                            "wiperStatus",
+                            "stabilityControlsStatus",
+                            "windowStatus"
                         ]
                     },
                     "OnVehicleData": {
@@ -612,7 +659,9 @@
                             "odometer",
                             "tirePressure",
                             "vin",
-                            "wiperStatus"
+                            "wiperStatus",
+                            "stabilityControlsStatus",
+                            "windowStatus"
                         ]
                     },
                     "SubscribeVehicleData": {
@@ -636,7 +685,9 @@
                             "cloudAppVehicleID",
                             "odometer",
                             "tirePressure",
-                            "wiperStatus"
+                            "wiperStatus",
+                            "stabilityControlsStatus",
+                            "windowStatus"
                         ]
                     },
                     "UnsubscribeVehicleData": {
@@ -660,7 +711,9 @@
                             "cloudAppVehicleID",
                             "odometer",
                             "tirePressure",
-                            "wiperStatus"
+                            "wiperStatus",
+                            "stabilityControlsStatus",
+                            "windowStatus"
                         ]
                     }
                 }
@@ -3334,13 +3387,17 @@
                     "type": "Float",
                     "mandatory": false,
                     "minvalue": -6,
-                    "maxvalue": 106
+                    "maxvalue": 106,
+                    "deprecated": true,
+                    "since": "7.0"
                 },
                 {
                     "name": "fuelLevel_State",
                     "key": "OEM_REF_FUEL_LEV_ST",
                     "type": "ComponentVolumeStatus",
-                    "mandatory": false
+                    "mandatory": false,
+                    "deprecated": true,
+                    "since": "7.0"
                 },
                 {
                     "name": "instantFuelConsumption",
@@ -3366,6 +3423,38 @@
                             "mandatory": false,
                             "minvalue": 0,
                             "maxvalue": 10000
+                        },
+                        {
+                            "name": "level",
+                            "key": "OEM_REF_FUEL_RAN_LVL",
+                            "type": "Float",
+                            "minvalue": -6,
+                            "maxvalue": 1000000,
+                            "mandatory": false,
+                            "since": "7.0"
+                        },
+                        {
+                            "name": "levelState",
+                            "key": "OEM_REF_FUEL_RAN_LVL_STATE",
+                            "type": "ComponentVolumeStatus",
+                            "mandatory": false,
+                            "since": "7.0"
+                        },
+                        {
+                            "name": "capacity",
+                            "key": "OEM_REF_FUEL_RAN_CAP",
+                            "type": "Float",
+                            "minvalue": 0,
+                            "maxvalue": 1000000,
+                            "mandatory": false,
+                            "since": "7.0"
+                        },
+                        {
+                            "name": "capacityUnit",
+                            "key": "OEM_REF_FUEL_RAN_CAP_UNIT",
+                            "type": "CapacityUnit",
+                            "mandatory": false,
+                            "since": "7.0"
                         }
                     ],
                     "key": "OEM_REF_FUEL_RAN",
@@ -3403,7 +3492,36 @@
                     "name": "prndl",
                     "key": "OEM_REF_PRNDL",
                     "type": "PRNDL",
-                    "mandatory": false
+                    "mandatory": false,
+                    "since": "2.0",
+                    "until": "7.0"
+                },
+                {
+                    "name": "gearStatus",
+                    "params": [
+                        {
+                            "name": "userSelectedGear",
+                            "key": "OEM_REF_USER_GEAR",
+                            "type": "PRNDL",
+                            "mandatory": false
+                        },
+                        {
+                            "name": "actualGear",
+                            "key": "OEM_REF_ACT_GEAR",
+                            "type": "PRNDL",
+                            "mandatory": false
+                        },
+                        {
+                            "name": "transmissionType",
+                            "key": "OEM_REF_TR_TYPE",
+                            "type": "TransmissionType",
+                            "mandatory": false
+                        }
+                    ],
+                    "key": "OEM_REF_GEAR_STATUS",
+                    "type": "Struct",
+                    "mandatory": false,
+                    "since": "7.0"
                 },
                 {
                     "name": "tirePressure",
@@ -3908,11 +4026,128 @@
                     "since": "5.0"
                 },
                 {
+                    "name": "stabilityControlsStatus",
+                    "params": [
+                        {
+                            "name": "escSystem",
+                            "key": "OEM_REF_ESC_SYSTEM",
+                            "type": "VehicleDataStatus",
+                            "mandatory": false
+                        },
+                        {
+                            "name": "trailerSwayControl",
+                            "key": "OEM_REF_TRAIL_SW_CTRL",
+                            "type": "VehicleDataStatus",
+                            "mandatory": false
+                        }
+                    ],
+                    "key": "OEM_REF_STAB_CTRLS_ST",
+                    "type": "Struct",
+                    "mandatory": false,
+                    "since": "7.0"
+                },
+                {
                     "name": "cloudAppVehicleID",
                     "key": "OEM_REF_CL_APP_VEH_ID",
                     "type": "String",
                     "mandatory": false,
                     "since": "5.1"
+                },
+                {
+                    "name": "windowStatus",
+                    "params": [
+                        {
+                            "name": "location",
+                            "params": [
+                                {
+                                    "name": "col",
+                                    "key": "OEM_REF_WND_LOC_COL",
+                                    "type": "Integer",
+                                    "mandatory": true,
+                                    "minvalue": -1,
+                                    "maxvalue": 100
+                                },
+                                {
+                                    "name": "row",
+                                    "key": "OEM_REF_WND_LOC_ROW",
+                                    "type": "Integer",
+                                    "mandatory": true,
+                                    "minvalue": -1,
+                                    "maxvalue": 100
+                                },
+                                {
+                                    "name": "level",
+                                    "key": "OEM_REF_WND_LOC_LVL",
+                                    "type": "Integer",
+                                    "mandatory": false,
+                                    "defvalue" : 0,
+                                    "minvalue": -1,
+                                    "maxvalue": 100
+                                },
+                                {
+                                    "name": "colspan",
+                                    "key": "OEM_REF_WND_LOC_COLSPN",
+                                    "type": "Integer",
+                                    "mandatory": false,
+                                    "defvalue" : 1,
+                                    "minvalue": 1,
+                                    "maxvalue": 100
+                                },
+                                {
+                                    "name": "rowspan",
+                                    "key": "OEM_REF_WND_LOC_ROWSPN",
+                                    "type": "Integer",
+                                    "mandatory": false,
+                                    "defvalue" : 1,
+                                    "minvalue": 1,
+                                    "maxvalue": 100
+                                },
+                                {
+                                    "name": "levelspan",
+                                    "key": "OEM_REF_WND_LOC_LVLSPN",
+                                    "type": "Integer",
+                                    "mandatory": false,
+                                    "defvalue" : 1,
+                                    "minvalue": 1,
+                                    "maxvalue": 100
+                                }
+                            ],
+                            "key": "OEM_REF_WND_LOC",
+                            "type": "Struct",
+                            "mandatory": true
+                        },
+                        {
+                            "name": "state",
+                            "params": [
+                                {
+                                    "name": "approximatePosition",
+                                    "key": "OEM_REF_WND_STATE_APRPOS",
+                                    "type": "Integer",
+                                    "mandatory": true,
+                                    "minvalue": 0,
+                                    "maxvalue": 100
+                                },
+                                {
+                                    "name": "deviation",
+                                    "key": "OEM_REF_WND_STATE_DEV",
+                                    "type": "Integer",
+                                    "mandatory": true,
+                                    "minvalue": 0,
+                                    "maxvalue": 100
+                                }
+                            ],
+                            "key": "OEM_REF_WND_STATE",
+                            "type": "Struct",
+                            "mandatory": true
+                        }
+                    ],
+                    "key": "OEM_REF_WND_STATUS",
+                    "array": true,
+                    "type": "Struct",
+                    "mandatory": false,
+                    "minsize": 0,
+                    "maxsize": 100,
+                    "since": "7.0"
                 },
                 {
                     "name": "eCallInfo",
@@ -4082,6 +4317,13 @@
                     "key": "OEM_REF_MY_KEY",
                     "type": "Struct",
                     "mandatory": false
+                },
+                {
+                    "name": "handsOffSteering",
+                    "key": "OEM_REF_HANDS_OFF_STRNG",
+                    "type": "Boolean",
+                    "mandatory": false,
+                    "since": "7.0"
                 }
             ]
         }

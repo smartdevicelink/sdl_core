@@ -6,6 +6,8 @@ using namespace application_manager;
 
 namespace commands {
 
+SDL_CREATE_LOG_VARIABLE("Commands")
+
 GetCloudAppPropertiesRequest::GetCloudAppPropertiesRequest(
     const app_mngr::commands::MessageSharedPtr& message,
     app_mngr::ApplicationManager& application_manager,
@@ -21,11 +23,11 @@ GetCloudAppPropertiesRequest::GetCloudAppPropertiesRequest(
 GetCloudAppPropertiesRequest::~GetCloudAppPropertiesRequest() {}
 
 void GetCloudAppPropertiesRequest::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   ApplicationSharedPtr app = application_manager_.application(connection_key());
 
   if (!app) {
-    LOG4CXX_ERROR(logger_, "Application is not registered");
+    SDL_LOG_ERROR("Application is not registered");
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     return;
   }
@@ -83,7 +85,7 @@ void GetCloudAppPropertiesRequest::Run() {
 
 void GetCloudAppPropertiesRequest::on_event(
     const app_mngr::event_engine::Event& event) {
-  LOG4CXX_INFO(logger_, "GetCloudAppPropertiesRequest on_event");
+  SDL_LOG_INFO("GetCloudAppPropertiesRequest on_event");
 }
 
 }  // namespace commands

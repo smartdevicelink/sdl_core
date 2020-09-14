@@ -124,6 +124,8 @@ struct OnDriverDistractionProcessor {
 };
 }  // namespace
 
+SDL_CREATE_LOG_VARIABLE("Commands")
+
 OnDriverDistractionNotification::OnDriverDistractionNotification(
     const application_manager::commands::MessageSharedPtr& message,
     ApplicationManager& application_manager,
@@ -139,7 +141,7 @@ OnDriverDistractionNotification::OnDriverDistractionNotification(
 OnDriverDistractionNotification::~OnDriverDistractionNotification() {}
 
 void OnDriverDistractionNotification::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   const auto state =
       static_cast<hmi_apis::Common_DriverDistractionState::eType>(
           (*message_)[strings::msg_params][hmi_notification::state].asInt());
@@ -147,7 +149,7 @@ void OnDriverDistractionNotification::Run() {
 
   auto on_driver_distraction = std::make_shared<smart_objects::SmartObject>();
   if (!on_driver_distraction) {
-    LOG4CXX_ERROR(logger_, "NULL pointer");
+    SDL_LOG_ERROR("NULL pointer");
     return;
   }
   (*on_driver_distraction)[strings::params][strings::function_id] =

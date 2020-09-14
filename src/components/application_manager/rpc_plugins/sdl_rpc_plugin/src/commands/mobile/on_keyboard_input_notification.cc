@@ -43,6 +43,8 @@ namespace commands {
 
 namespace mobile {
 
+SDL_CREATE_LOG_VARIABLE("Commands")
+
 OnKeyBoardInputNotification::OnKeyBoardInputNotification(
     const application_manager::commands::MessageSharedPtr& message,
     ApplicationManager& application_manager,
@@ -58,7 +60,7 @@ OnKeyBoardInputNotification::OnKeyBoardInputNotification(
 OnKeyBoardInputNotification::~OnKeyBoardInputNotification() {}
 
 void OnKeyBoardInputNotification::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
 
   ApplicationSharedPtr app_to_notify;
 
@@ -70,15 +72,14 @@ void OnKeyBoardInputNotification::Run() {
     if (app->is_perform_interaction_active() &&
         (*it)->perform_interaction_layout() ==
             mobile_apis::LayoutMode::KEYBOARD) {
-      LOG4CXX_INFO(logger_,
-                   "There is application with active PerformInteraction");
+      SDL_LOG_INFO("There is application with active PerformInteraction");
       app_to_notify = app;
       break;
     }
 
     if (mobile_apis::HMILevel::eType::HMI_FULL ==
         app->hmi_level(mobile_apis::PredefinedWindows::DEFAULT_WINDOW)) {
-      LOG4CXX_INFO(logger_, "There is application in HMI_FULL level");
+      SDL_LOG_INFO("There is application in HMI_FULL level");
       app_to_notify = app;
     }
   }

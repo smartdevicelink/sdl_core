@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, Ford Motor Company
+ * Copyright (c) 2020, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,49 +30,56 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "utils/log_message_loop_thread.h"
-#include "gmock/gmock.h"
-#include "gtest/gtest.h"
-#include "utils/logger_status.h"
+#ifndef SRC_COMPONENTS_UTILS_INCLUDE_UTILS_LOGGER_LOGGER_IMPL_H_
+#define SRC_COMPONENTS_UTILS_INCLUDE_UTILS_LOGGER_LOGGER_IMPL_H_
 
-namespace test {
-namespace components {
-namespace utils_test {
+#include "utils/ilogger.h"
 
-using namespace ::logger;
-using ::testing::_;
+#include <functional>
 
-TEST(LogMessageLoopThread, DestroyLogMessage_loggerStatusDeletingLogger) {
-  logger::logger_status = CreatingLoggerThread;
-  LogMessageLoopThread* loop_thread = new LogMessageLoopThread();
-  // assert
-  EXPECT_EQ(CreatingLoggerThread, logger::logger_status);
+#include "utils/threads/message_loop_thread.h"
 
-  // act
-  delete loop_thread;
+namespace logger {
 
-  // assert
-  EXPECT_EQ(DeletingLoggerThread, logger::logger_status);
+typedef std::queue<LogMessage> LogMessageQueue;
 
-  logger::logger_status = LoggerThreadNotCreated;
-}
+typedef threads::MessageLoopThread<LogMessageQueue>
+    LogMessageLoopThreadTemplate;
 
-class MockLogMessageTest : public LogMessageLoopThread {
+template <typename T>
+using LoopThreadPtr = std::unique_ptr<T, std::function<void(T*)> >;
+
+class LogMessageLoopThread : public LogMessageLoopThreadTemplate,
+                             public LogMessageLoopThreadTemplate::Handler {
  public:
-  MOCK_CONST_METHOD1(Handle, void(const LogMessage message));
+  LogMessageLoopThread(std::function<void(LogMessage)> handler);
+
+  void Push(const LogMessage& message);
+
+  void Handle(const LogMessage message);
+
+  ~LogMessageLoopThread();
+
+ private:
+  std::function<void(LogMessage)> force_log_;
 };
 
-TEST(LogMessageLoopThread, HandleNeverCalled) {
-  logger::logger_status = CreatingLoggerThread;
+class LoggerImpl : public Logger, public LoggerInitializer {
+ public:
+  LoggerImpl(bool use_message_loop_thread = true);
+  void Init(std::unique_ptr<ThirdPartyLoggerInterface>&& impl) override;
+  void DeInit() override;
+  void Flush() override;
 
-  MockLogMessageTest mmock;
-  EXPECT_CALL(mmock, Handle(_)).Times(0);
-  LogMessageLoopThread* loop_thread = new LogMessageLoopThread();
+  bool IsEnabledFor(const std::string& component,
+                    LogLevel log_level) const override;
+  void PushLog(const LogMessage& log_message) override;
 
-  delete loop_thread;
-  logger::logger_status = LoggerThreadNotCreated;
-}
+  std::unique_ptr<ThirdPartyLoggerInterface> impl_;
+  LoopThreadPtr<LogMessageLoopThread> loop_thread_;
+  bool use_message_loop_thread_;
+};
 
-}  // namespace utils_test
-}  // namespace components
-}  // namespace test
+}  // namespace logger
+
+#endif  // SRC_COMPONENTS_UTILS_INCLUDE_UTILS_LOGGER_LOGGER_IMPL_H_

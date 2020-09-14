@@ -183,6 +183,10 @@ TEST_F(
   ON_CALL(mock_hmi_capabilities_, system_display_capabilities())
       .WillByDefault(Return(system_display_capabilities));
 
+  application_manager::DisplayCapabilitiesBuilder builder(*mock_app_);
+  ON_CALL(*mock_app_, display_capabilities_builder())
+      .WillByDefault(ReturnRef(builder));
+
   sdl_rpc_plugin::SDLRPCPlugin sdl_rpc_plugin;
 
   std::shared_ptr<sdl_rpc_plugin::SystemCapabilityAppExtension>
@@ -197,7 +201,7 @@ TEST_F(
       DataAccessor<application_manager::ApplicationSet>(apps, apps_lock_));
 
   ON_CALL(app_mngr_, applications()).WillByDefault(Return(apps_data));
-  ON_CALL(*mock_app_, app_id()).WillByDefault(Return(kConnectionKey));
+  ON_CALL(*mock_app_, app_id()).WillByDefault(Return(kAppId));
   ON_CALL(*mock_app_, display_capabilities()).WillByDefault(Return(nullptr));
   ON_CALL(*mock_app_,
           QueryInterface(sdl_rpc_plugin::SystemCapabilityAppExtension::

@@ -380,7 +380,7 @@ class CommandRequestImpl : public CommandImpl,
    * @param info string with disallowed params enumeration
    * @param param disallowed param
    */
-  void AddDissalowedParameterToInfoString(std::string& info,
+  void AddDisallowedParameterToInfoString(std::string& info,
                                           const std::string& param) const;
 
   /**

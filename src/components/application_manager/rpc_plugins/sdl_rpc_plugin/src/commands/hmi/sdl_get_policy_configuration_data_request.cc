@@ -39,6 +39,8 @@ using namespace application_manager;
 
 namespace commands {
 
+SDL_CREATE_LOG_VARIABLE("Commands")
+
 SDLGetPolicyConfigurationDataRequest::SDLGetPolicyConfigurationDataRequest(
     const application_manager::commands::MessageSharedPtr& message,
     ApplicationManager& application_manager,
@@ -54,7 +56,7 @@ SDLGetPolicyConfigurationDataRequest::SDLGetPolicyConfigurationDataRequest(
 SDLGetPolicyConfigurationDataRequest::~SDLGetPolicyConfigurationDataRequest() {}
 
 void SDLGetPolicyConfigurationDataRequest::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
 
   smart_objects::SmartObject response_value(
       smart_objects::SmartType::SmartType_Array);
@@ -63,7 +65,7 @@ void SDLGetPolicyConfigurationDataRequest::Run() {
       PrepareResponseParams(response_value);
 
   if (hmi_apis::Common_Result::SUCCESS != result_code) {
-    LOG4CXX_ERROR(logger_, "Unable to PrepareResponseParams");
+    SDL_LOG_ERROR("Unable to PrepareResponseParams");
     SendErrorResponse(
         correlation_id(),
         hmi_apis::FunctionID::SDL_GetPolicyConfigurationData,
@@ -87,7 +89,7 @@ void SDLGetPolicyConfigurationDataRequest::Run() {
 hmi_apis::Common_Result::eType
 SDLGetPolicyConfigurationDataRequest::PrepareResponseParams(
     smart_objects::SmartObject& response_out) const {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   const auto policy_type =
       (*message_)[strings::msg_params][strings::policy_type].asString();
 
@@ -96,17 +98,15 @@ SDLGetPolicyConfigurationDataRequest::PrepareResponseParams(
 
   auto policy_table_data = policy_handler_.GetPolicyTableData();
   if (!policy_table_data.isMember(policy_type)) {
-    LOG4CXX_ERROR(
-        logger_,
-        "policy_type " << policy_type << " doesn't exist in policy table.");
+    SDL_LOG_ERROR("policy_type " << policy_type
+                                 << " doesn't exist in policy table.");
     return hmi_apis::Common_Result::DATA_NOT_AVAILABLE;
   }
 
   auto& policy_section_table_data = policy_table_data[policy_type];
   if (!policy_section_table_data.isMember(property)) {
-    LOG4CXX_ERROR(
-        logger_,
-        "property " << property << " doesn't exist in " << policy_type);
+    SDL_LOG_ERROR("property " << property << " doesn't exist in "
+                              << policy_type);
     return hmi_apis::Common_Result::DATA_NOT_AVAILABLE;
   }
 
@@ -126,7 +126,7 @@ void clear_new_line_symbol(std::string& str_to_clear) {
 
 smart_objects::SmartObject SDLGetPolicyConfigurationDataRequest::GetValueParam(
     const Json::Value& policy_property) const {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   smart_objects::SmartObject value(smart_objects::SmartType_Array);
 
   auto put_element_in_value_array = [&value](const Json::Value& element,

@@ -53,6 +53,9 @@ class MockAppExtension : public application_manager::AppExtension {
   MOCK_METHOD1(ProcessResumption,
                void(const ns_smart_device_link::ns_smart_objects::SmartObject&
                         resumption_data));
+  MOCK_METHOD1(RevertResumption,
+               void(const ns_smart_device_link::ns_smart_objects::SmartObject&
+                        subscriptions));
 };
 
 }  // namespace application_manager_test

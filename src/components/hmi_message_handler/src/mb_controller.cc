@@ -33,6 +33,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 using namespace boost::beast::websocket;
 namespace hmi_message_handler {
 
+SDL_CREATE_LOG_VARIABLE("HMIMessageHandler")
+
 CMessageBrokerController::CMessageBrokerController(const std::string& address,
                                                    uint16_t port,
                                                    std::string name,
@@ -50,15 +52,8 @@ CMessageBrokerController::CMessageBrokerController(const std::string& address,
 }
 
 CMessageBrokerController::~CMessageBrokerController() {
-  boost::system::error_code ec;
-  socket_.close();
-  acceptor_.close(ec);
-  if (ec) {
-    std::string str_err = "ErrorMessage Close: " + ec.message();
-    LOG4CXX_ERROR(mb_logger_, str_err);
-  }
-  shutdown_ = true;
-  ioc_.stop();
+  shutdown_.exchange(true);
+  CloseConnection();
 }
 
 bool CMessageBrokerController::StartListener() {
@@ -66,26 +61,26 @@ bool CMessageBrokerController::StartListener() {
   acceptor_.open(endpoint_.protocol(), error);
   if (error) {
     std::string str_err = "ErrorOpen: " + error.message();
-    LOG4CXX_ERROR(mb_logger_, str_err);
+    SDL_LOG_ERROR(str_err);
     return false;
   }
 
   acceptor_.set_option(boost::asio::socket_base::reuse_address(true), error);
   if (error) {
     std::string str_err = "ErrorSetOption: " + error.message();
-    LOG4CXX_ERROR(mb_logger_, str_err);
+    SDL_LOG_ERROR(str_err);
     return false;
   }
   acceptor_.bind(endpoint_, error);
   if (error) {
     std::string str_err = "ErrorBind: " + error.message();
-    LOG4CXX_ERROR(mb_logger_, str_err);
+    SDL_LOG_ERROR(str_err);
     return false;
   }
   acceptor_.listen(boost::asio::socket_base::max_listen_connections, error);
   if (error) {
     std::string str_err = "ErrorListen: " + error.message();
-    LOG4CXX_ERROR(mb_logger_, str_err);
+    SDL_LOG_ERROR(str_err);
     return false;
   }
   return true;
@@ -114,9 +109,8 @@ void CMessageBrokerController::WaitForConnection() {
 
 void CMessageBrokerController::StartSession(boost::system::error_code ec) {
   if (ec) {
-    std::string str_err = "ErrorMessage: " + ec.message();
-    LOG4CXX_ERROR(mb_logger_, str_err);
-    ioc_.stop();
+    SDL_LOG_ERROR("ErrorMessage: " << ec.message());
+    CloseConnection();
     return;
   }
   if (shutdown_) {
@@ -147,11 +141,11 @@ void CMessageBrokerController::sendNotification(Json::Value& message) {
   int subscribersCount = getSubscribersFd(methodName, result);
   if (0 < subscribersCount) {
     std::vector<WebsocketSession*>::iterator it;
-    for (it = result.begin(); it != result.end(); it++) {
+    for (it = result.begin(); it != result.end(); ++it) {
       (*it)->sendJsonMessage(message);
     }
   } else {
-    LOG4CXX_ERROR(mb_logger_, ("No subscribers for this property!\n"));
+    SDL_LOG_ERROR(("No subscribers for this property!\n"));
   }
 }
 
@@ -216,7 +210,8 @@ bool CMessageBrokerController::Connect() {
 }
 
 void CMessageBrokerController::exitReceivingThread() {
-  shutdown_ = true;
+  shutdown_.exchange(true);
+
   mConnectionListLock.Acquire();
   std::vector<std::shared_ptr<hmi_message_handler::WebsocketSession> >::iterator
       it;
@@ -225,19 +220,7 @@ void CMessageBrokerController::exitReceivingThread() {
     it = mConnectionList.erase(it);
   }
   mConnectionListLock.Release();
-
-  boost::system::error_code ec;
-  socket_.close();
-  acceptor_.cancel(ec);
-  if (ec) {
-    std::string str_err = "ErrorMessage Cancel: " + ec.message();
-    LOG4CXX_ERROR(mb_logger_, str_err);
-  }
-  acceptor_.close(ec);
-  if (ec) {
-    std::string str_err = "ErrorMessage Close: " + ec.message();
-  }
-  ioc_.stop();
+  CloseConnection();
 }
 
 std::string CMessageBrokerController::getMethodName(std::string& method) {
@@ -274,7 +257,7 @@ bool CMessageBrokerController::addController(WebsocketSession* ws_session,
         std::map<std::string, WebsocketSession*>::value_type(name, ws_session));
     result = true;
   } else {
-    LOG4CXX_ERROR(mb_logger_, ("Controller already exists!\n"));
+    SDL_LOG_ERROR(("Controller already exists!\n"));
   }
   return result;
 }
@@ -287,7 +270,7 @@ void CMessageBrokerController::deleteController(WebsocketSession* ws_session) {
       if (it->second == ws_session) {
         mControllersList.erase(it++);
       } else {
-        it++;
+        ++it;
       }
     }
   }
@@ -341,10 +324,10 @@ bool CMessageBrokerController::addSubscriber(WebsocketSession* ws_session,
       p = mSubscribersList.equal_range(name);
   if (p.first != p.second) {
     std::multimap<std::string, WebsocketSession*>::iterator itr;
-    for (itr = p.first; itr != p.second; itr++) {
+    for (itr = p.first; itr != p.second; ++itr) {
       if (ws_session == itr->second) {
         result = false;
-        LOG4CXX_ERROR(mb_logger_, ("Subscriber already exists!\n"));
+        SDL_LOG_ERROR(("Subscriber already exists!\n"));
       }
     }
   }
@@ -384,7 +367,7 @@ int CMessageBrokerController::getSubscribersFd(
       p = mSubscribersList.equal_range(name);
   if (p.first != p.second) {
     std::multimap<std::string, WebsocketSession*>::iterator itr;
-    for (itr = p.first; itr != p.second; itr++) {
+    for (itr = p.first; itr != p.second; ++itr) {
       result.push_back(itr->second);
     }
   }
@@ -500,5 +483,28 @@ void CMessageBrokerController::processInternalRequest(
 
 int CMessageBrokerController::getNextControllerId() {
   return 1000 * mControllersIdCounter++;
+}
+
+void CMessageBrokerController::CloseConnection() {
+  if (!ioc_.stopped()) {
+    boost::system::error_code ec;
+
+    acceptor_.cancel(ec);
+    if (ec) {
+      SDL_LOG_ERROR("Acceptor cancel error: " << ec.message());
+    }
+
+    acceptor_.close(ec);
+    if (ec) {
+      SDL_LOG_ERROR("Acceptor close error: " << ec.message());
+    }
+
+    socket_.close(ec);
+    if (ec) {
+      SDL_LOG_ERROR("Socket close error : " << ec.message());
+    }
+
+    ioc_.stop();
+  }
 }
 }  // namespace hmi_message_handler

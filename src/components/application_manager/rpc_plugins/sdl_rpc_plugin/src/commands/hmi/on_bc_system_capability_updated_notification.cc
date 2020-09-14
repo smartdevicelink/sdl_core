@@ -42,6 +42,8 @@ namespace sdl_rpc_plugin {
 using namespace application_manager;
 namespace commands {
 
+SDL_CREATE_LOG_VARIABLE("Commands")
+
 OnBCSystemCapabilityUpdatedNotification::
     OnBCSystemCapabilityUpdatedNotification(
         const application_manager::commands::MessageSharedPtr& message,
@@ -59,10 +61,10 @@ OnBCSystemCapabilityUpdatedNotification::
     ~OnBCSystemCapabilityUpdatedNotification() {}
 
 void OnBCSystemCapabilityUpdatedNotification::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
-  LOG4CXX_DEBUG(logger_,
-                "Sending BasicCommunication.OnSystemCapabilityUpdated "
-                "Notification to HMI");
+  SDL_LOG_AUTO_TRACE();
+  SDL_LOG_DEBUG(
+      "Sending BasicCommunication.OnSystemCapabilityUpdated "
+      "Notification to HMI");
 
   smart_objects::SmartObject& msg_params = (*message_)[strings::msg_params];
 
@@ -150,9 +152,8 @@ void OnBCSystemCapabilityUpdatedNotification::Run() {
                                app_services->end(),
                                matching_service_predicate);
         if (it != app_services->end()) {
-          LOG4CXX_DEBUG(
-              logger_,
-              "Replacing updated record with service_id " << service_id);
+          SDL_LOG_DEBUG("Replacing updated record with service_id "
+                        << service_id);
           app_services->erase(it);
         }
         app_services->push_back(updated_capabilities[i]);
@@ -163,7 +164,7 @@ void OnBCSystemCapabilityUpdatedNotification::Run() {
     }
     case mobile_apis::SystemCapabilityType::DISPLAYS: {
       if (!hmi_capabilities_.system_display_capabilities()) {
-        LOG4CXX_INFO(logger_, "system_display_capabilities are not available");
+        SDL_LOG_INFO("system_display_capabilities are not available");
         return;
       }
       msg_params[strings::system_capability][strings::display_capabilities] =

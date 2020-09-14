@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Ford Motor Company
+ * Copyright (c) 2020, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,29 +30,61 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "utils/logger.h"
-#include <apr_time.h>
-#include "utils/log_message_loop_thread.h"
-#include "utils/logger_status.h"
+#pragma once
 
-void deinit_logger() {
-  CREATE_LOGGERPTR_LOCAL(logger_, "Utils")
-  LOG4CXX_DEBUG(logger_, "Logger deinitialization");
-  logger::set_logs_enabled(false);
-  log4cxx::LoggerPtr rootLogger = log4cxx::Logger::getRootLogger();
-  logger::delete_log_message_loop_thread(rootLogger);
-  log4cxx::spi::LoggerRepositoryPtr repository =
-      rootLogger->getLoggerRepository();
-  log4cxx::LoggerList loggers = repository->getCurrentLoggers();
-  for (log4cxx::LoggerList::iterator i = loggers.begin(); i != loggers.end();
-       ++i) {
-    log4cxx::LoggerPtr logger = *i;
-    logger->removeAllAppenders();
-  }
-  rootLogger->removeAllAppenders();
-  logger::logger_status = logger::LoggerThreadNotCreated;
-}
+#include <chrono>
+#include <string>
+#include <thread>
 
-log4cxx_time_t time_now() {
-  return apr_time_now();
-}
+namespace logger {
+
+enum class LogLevel {
+  TRACE_LEVEL,
+  DEBUG_LEVEL,
+  INFO_LEVEL,
+  WARNING_LEVEL,
+  ERROR_LEVEL,
+  FATAL_LEVEL
+};
+
+struct LocationInfo {
+  std::string file_name;
+  std::string function_name;
+  int line_number;
+};
+
+typedef std::chrono::high_resolution_clock::time_point TimePoint;
+
+struct LogMessage {
+  std::string component_;  // <- component_name
+  LogLevel log_level_;
+  std::string log_event_;
+  TimePoint timestamp_;
+  LocationInfo location_;
+  std::thread::id thread_id_;
+};
+
+class Logger {
+ public:
+  virtual bool IsEnabledFor(const std::string& component,
+                            LogLevel log_level) const = 0;
+  virtual void DeInit() = 0;
+  virtual void Flush() = 0;
+  virtual void PushLog(const LogMessage& log_message) = 0;
+  static Logger& instance(Logger* pre_init = nullptr);
+};
+
+class ThirdPartyLoggerInterface {
+ public:
+  virtual void Init() = 0;
+  virtual void DeInit() = 0;
+  virtual bool IsEnabledFor(const std::string& component,
+                            LogLevel log_level) const = 0;
+  virtual void PushLog(const LogMessage& log_message) = 0;
+};
+
+class LoggerInitializer {
+ public:
+  virtual void Init(std::unique_ptr<ThirdPartyLoggerInterface>&& impl) = 0;
+};
+}  // namespace logger

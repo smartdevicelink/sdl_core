@@ -137,6 +137,9 @@ TEST_F(
   (*message_)[strings::msg_params][strings::app_id] = kAppId;
 
   ON_CALL(app_mngr_, application(kAppId)).WillByDefault(Return(mock_app_));
+  application_manager::DisplayCapabilitiesBuilder builder(*mock_app_);
+  ON_CALL(*mock_app_, display_capabilities_builder())
+      .WillByDefault(ReturnRef(builder));
 
   EXPECT_CALL(*mock_app_,
               set_display_capabilities(

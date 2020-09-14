@@ -33,6 +33,7 @@
 
 #include "sdl_rpc_plugin/commands/mobile/delete_sub_menu_request.h"
 
+#include "application_manager/application.h"
 #include "application_manager/application_impl.h"
 #include "application_manager/message_helper.h"
 #include "interfaces/HMI_API.h"
@@ -42,6 +43,8 @@ namespace sdl_rpc_plugin {
 using namespace application_manager;
 
 namespace commands {
+
+SDL_CREATE_LOG_VARIABLE("Commands")
 
 DeleteSubMenuRequest::DeleteSubMenuRequest(
     const application_manager::commands::MessageSharedPtr& message,
@@ -58,21 +61,23 @@ DeleteSubMenuRequest::DeleteSubMenuRequest(
 DeleteSubMenuRequest::~DeleteSubMenuRequest() {}
 
 void DeleteSubMenuRequest::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
 
   ApplicationSharedPtr app = application_manager_.application(connection_key());
 
   if (!app) {
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
-    LOG4CXX_ERROR(logger_, "Application is not registered");
+    SDL_LOG_ERROR("Application is not registered");
     return;
   }
 
   const int32_t menu_id =
       (*message_)[strings::msg_params][strings::menu_id].asInt();
 
-  if (!app->FindSubMenu(menu_id)) {
-    LOG4CXX_ERROR(logger_, "Menu with id " << menu_id << " is not found.");
+  const auto sub_menu = app->FindSubMenu(menu_id);
+
+  if (smart_objects::SmartType_Null == sub_menu.getType()) {
+    SDL_LOG_ERROR("Menu with id " << menu_id << " is not found.");
     SendResponse(false, mobile_apis::Result::INVALID_ID);
     return;
   }
@@ -88,9 +93,42 @@ void DeleteSubMenuRequest::Run() {
   SendHMIRequest(hmi_apis::FunctionID::UI_DeleteSubMenu, &msg_params, true);
 }
 
+void DeleteSubMenuRequest::DeleteNestedSubMenus(ApplicationSharedPtr const app,
+                                                uint32_t parentID,
+                                                const SubMenuMap& subMenus) {
+  SDL_LOG_AUTO_TRACE();
+
+  SubMenuMap::const_iterator it = subMenus.begin();
+  SDL_LOG_DEBUG("Delete Submenus with Parent ID: " << parentID);
+  while (subMenus.end() != it) {
+    if (!(*it->second).keyExists(strings::parent_id)) {
+      SDL_LOG_ERROR("parent ID does not exist");
+      ++it;
+      continue;
+    }
+
+    if (parentID == (*it->second)[strings::parent_id].asUInt()) {
+      uint32_t menuID = (*it->second)[strings::menu_id].asUInt();
+      DeleteNestedSubMenus(app, menuID, subMenus);
+      DeleteSubMenuVRCommands(app, menuID);
+      DeleteSubMenuUICommands(app, menuID);
+      smart_objects::SmartObject msg_params =
+          smart_objects::SmartObject(smart_objects::SmartType_Map);
+      msg_params[strings::menu_id] = menuID;
+      msg_params[strings::app_id] = app->app_id();
+      SendHMIRequest(hmi_apis::FunctionID::UI_DeleteSubMenu, &msg_params);
+      ++it;
+      SDL_LOG_DEBUG("Removing submenuID: " << menuID);
+      app->RemoveSubMenu(menuID);
+    } else {
+      ++it;
+    }
+  }
+}
+
 void DeleteSubMenuRequest::DeleteSubMenuVRCommands(
-    ApplicationConstSharedPtr app) {
-  LOG4CXX_AUTO_TRACE(logger_);
+    ApplicationConstSharedPtr app, uint32_t parentID) {
+  SDL_LOG_AUTO_TRACE();
 
   const DataAccessor<CommandsMap> accessor = app->commands_map();
   const CommandsMap& commands = accessor.GetData();
@@ -101,7 +139,7 @@ void DeleteSubMenuRequest::DeleteSubMenuVRCommands(
       continue;
     }
 
-    if ((*message_)[strings::msg_params][strings::menu_id].asInt() ==
+    if (parentID ==
         (*it->second)[strings::menu_params][hmi_request::parent_id].asInt()) {
       smart_objects::SmartObject msg_params =
           smart_objects::SmartObject(smart_objects::SmartType_Map);
@@ -116,27 +154,28 @@ void DeleteSubMenuRequest::DeleteSubMenuVRCommands(
 }
 
 void DeleteSubMenuRequest::DeleteSubMenuUICommands(
-    ApplicationSharedPtr const app) {
-  LOG4CXX_AUTO_TRACE(logger_);
-
+    ApplicationSharedPtr const app, uint32_t parentID) {
+  SDL_LOG_AUTO_TRACE();
+  SDL_LOG_DEBUG("Delete UI Commands with Parent ID: " << parentID);
   const DataAccessor<CommandsMap> accessor(app->commands_map());
   const CommandsMap& commands = accessor.GetData();
   CommandsMap::const_iterator it = commands.begin();
 
   while (commands.end() != it) {
     if (!(*it->second).keyExists(strings::menu_params)) {
-      LOG4CXX_ERROR(logger_, "menu_params not exist");
+      SDL_LOG_ERROR("menu_params not exist");
       ++it;
       continue;
     }
 
-    if ((*message_)[strings::msg_params][strings::menu_id].asInt() ==
-        (*it->second)[strings::menu_params][hmi_request::parent_id].asInt()) {
+    if (parentID ==
+        (*it->second)[strings::menu_params][hmi_request::parent_id].asUInt()) {
       smart_objects::SmartObject msg_params =
           smart_objects::SmartObject(smart_objects::SmartType_Map);
       const uint32_t cmd_id = (*it->second)[strings::cmd_id].asUInt();
       msg_params[strings::app_id] = app->app_id();
       msg_params[strings::cmd_id] = cmd_id;
+      SDL_LOG_DEBUG("Removing UI Command: " << cmd_id);
       app->RemoveCommand(cmd_id);
       app->help_prompt_manager().OnVrCommandDeleted(cmd_id, false);
       it = commands.begin();  // Can not relay on
@@ -150,7 +189,7 @@ void DeleteSubMenuRequest::DeleteSubMenuUICommands(
 }
 
 void DeleteSubMenuRequest::on_event(const event_engine::Event& event) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   const smart_objects::SmartObject& message = event.smart_object();
 
   switch (event.id()) {
@@ -168,14 +207,19 @@ void DeleteSubMenuRequest::on_event(const event_engine::Event& event) {
           application_manager_.application(connection_key());
 
       if (!application) {
-        LOG4CXX_ERROR(logger_, "NULL pointer");
+        SDL_LOG_ERROR("NULL pointer");
         return;
       }
 
       if (result) {
         // delete sub menu items from SDL and HMI
-        DeleteSubMenuVRCommands(application);
-        DeleteSubMenuUICommands(application);
+        uint32_t parentID =
+            (*message_)[strings::msg_params][strings::menu_id].asUInt();
+        const DataAccessor<SubMenuMap> accessor = application->sub_menu_map();
+        const SubMenuMap& subMenus = accessor.GetData();
+        DeleteNestedSubMenus(application, parentID, subMenus);
+        DeleteSubMenuVRCommands(application, parentID);
+        DeleteSubMenuUICommands(application, parentID);
         application->RemoveSubMenu(
             (*message_)[strings::msg_params][strings::menu_id].asInt());
       }
@@ -187,7 +231,7 @@ void DeleteSubMenuRequest::on_event(const event_engine::Event& event) {
       break;
     }
     default: {
-      LOG4CXX_ERROR(logger_, "Received unknown event" << event.id());
+      SDL_LOG_ERROR("Received unknown event" << event.id());
       return;
     }
   }

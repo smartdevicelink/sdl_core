@@ -37,6 +37,8 @@
 namespace rc_rpc_plugin {
 namespace commands {
 
+SDL_CREATE_LOG_VARIABLE("Commands")
+
 RCOnInteriorVehicleDataNotification::RCOnInteriorVehicleDataNotification(
     const app_mngr::commands::MessageSharedPtr& message,
     const RCCommandParams& params)
@@ -50,7 +52,7 @@ RCOnInteriorVehicleDataNotification::RCOnInteriorVehicleDataNotification(
 RCOnInteriorVehicleDataNotification::~RCOnInteriorVehicleDataNotification() {}
 
 void RCOnInteriorVehicleDataNotification::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   (*message_)[app_mngr::strings::params][app_mngr::strings::function_id] =
       static_cast<int>(mobile_apis::FunctionID::eType::OnInteriorVehicleDataID);
 

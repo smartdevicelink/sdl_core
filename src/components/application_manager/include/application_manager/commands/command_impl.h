@@ -122,6 +122,10 @@ class CommandImpl : public Command {
    */
   WindowID window_id() const OVERRIDE;
 
+  void set_warning_info(const std::string info) OVERRIDE;
+
+  std::string warning_info() const OVERRIDE;
+
   /*
    * @brief Function is called by RequestController when request execution time
    * has exceed it's limit
@@ -205,12 +209,14 @@ class CommandImpl : public Command {
   HMICapabilities& hmi_capabilities_;
   policy::PolicyHandlerInterface& policy_handler_;
 
+  /**
+   * @brief warning_info_ Defines a warning message to send in the case of a
+   * successful response
+   */
+  std::string warning_info_;
+
   CommandParametersPermissions parameters_permissions_;
   CommandParametersPermissions removed_parameters_permissions_;
-
-#ifdef ENABLE_LOG
-  static log4cxx::LoggerPtr logger_;
-#endif  // ENABLE_LOG
 
  private:
   DISALLOW_COPY_AND_ASSIGN(CommandImpl);

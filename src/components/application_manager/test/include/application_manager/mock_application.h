@@ -67,6 +67,8 @@ class MockApplication : public ::application_manager::Application {
   MOCK_METHOD1(set_is_navi, void(bool allow));
   MOCK_CONST_METHOD0(mobile_projection_enabled, bool());
   MOCK_METHOD1(set_mobile_projection_enabled, void(bool allow));
+  MOCK_CONST_METHOD0(webengine_projection_enabled, bool());
+  MOCK_METHOD1(set_webengine_projection_enabled, void(const bool allow));
   MOCK_CONST_METHOD0(video_streaming_approved, bool());
   MOCK_METHOD1(set_video_streaming_approved, void(bool state));
   MOCK_CONST_METHOD0(audio_streaming_approved, bool());
@@ -315,19 +317,19 @@ class MockApplication : public ::application_manager::Application {
                void(uint32_t cmd_id,
                     const smart_objects::SmartObject& command));
   MOCK_METHOD1(RemoveCommand, void(uint32_t cmd_id));
-  MOCK_METHOD1(FindCommand, smart_objects::SmartObject*(uint32_t cmd_id));
+  MOCK_METHOD1(FindCommand, smart_objects::SmartObject(uint32_t cmd_id));
   MOCK_METHOD2(AddSubMenu,
                void(uint32_t menu_id, const smart_objects::SmartObject& menu));
   MOCK_METHOD1(RemoveSubMenu, void(uint32_t menu_id));
-  MOCK_CONST_METHOD1(FindSubMenu,
-                     smart_objects::SmartObject*(uint32_t menu_id));
-  MOCK_METHOD1(IsSubMenuNameAlreadyExist, bool(const std::string& name));
+  MOCK_CONST_METHOD1(FindSubMenu, smart_objects::SmartObject(uint32_t menu_id));
+  MOCK_METHOD2(IsSubMenuNameAlreadyExist,
+               bool(const std::string& name, const uint32_t parent_id));
   MOCK_METHOD2(AddChoiceSet,
                void(uint32_t choice_set_id,
                     const smart_objects::SmartObject& choice_set));
   MOCK_METHOD1(RemoveChoiceSet, void(uint32_t choice_set_id));
   MOCK_METHOD1(FindChoiceSet,
-               smart_objects::SmartObject*(uint32_t choice_set_id));
+               smart_objects::SmartObject(uint32_t choice_set_id));
   MOCK_METHOD3(AddPerformInteractionChoiceSet,
                void(uint32_t correlation_id,
                     uint32_t choice_set_id,
