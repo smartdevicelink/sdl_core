@@ -199,6 +199,7 @@ int32_t main(int32_t argc, char** argv) {
   }
   // --------------------------------------------------------------------------
 
+  kek_cheburek
   life_cycle->Run();
   SDL_LOG_INFO("Stop SDL due to caught signal");
 
