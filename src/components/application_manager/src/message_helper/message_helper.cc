@@ -3482,16 +3482,20 @@ void MessageHelper::SubscribeApplicationToSoftButton(
     ApplicationSharedPtr app,
     int32_t function_id,
     const WindowID window_id) {
-  SoftButtonID softbuttons_id;
-  smart_objects::SmartObject& soft_buttons =
-      message_params[strings::soft_buttons];
-  unsigned int length = soft_buttons.length();
-  for (unsigned int i = 0; i < length; ++i) {
-    const auto button_id = std::make_pair(
-        soft_buttons[i][strings::soft_button_id].asUInt(), window_id);
-    softbuttons_id.insert(button_id);
+  if (!message_params.keyExists(strings::soft_buttons)) {
+    return;
   }
-  app->SubscribeToSoftButtons(function_id, softbuttons_id);
+
+  std::set<uint32_t> soft_buttons;
+
+  auto& soft_buttons_so = message_params[strings::soft_buttons];
+  for (const auto& softbutton : *(soft_buttons_so.asArray())) {
+    const auto button_id = softbutton.asUInt();
+    soft_buttons.insert(button_id);
+  }
+
+  WindowSoftButtons window_buttons{window_id, soft_buttons};
+  app->SubscribeToSoftButtons(function_id, window_buttons);
 }
 
 void MessageHelper::SubscribeApplicationToSoftButton(

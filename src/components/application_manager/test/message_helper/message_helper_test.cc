@@ -976,16 +976,42 @@ TEST_F(MessageHelperTest, StringToHmiLevel_LevelString_EqEType) {
   }
 }
 
-TEST_F(MessageHelperTest, SubscribeApplicationToSoftButton_CallFromApp) {
-  // Create application mock
+TEST_F(MessageHelperTest,
+       SubscribeApplicationToSoftButton_SoftbuttonsIsAnsent_DoesntCallFromApp) {
   MockApplicationSharedPtr appSharedPtr = std::make_shared<MockApplication>();
-  // Prepare data for method
   smart_objects::SmartObject message_params;
   size_t function_id = 1;
-  //
+  WindowSoftButtons window_buttons{
+      mobile_apis::PredefinedWindows::DEFAULT_WINDOW, {}};
+
   EXPECT_CALL(*appSharedPtr,
-              SubscribeToSoftButtons(function_id, SoftButtonID()))
-      .Times(1);
+              SubscribeToSoftButtons(function_id, window_buttons))
+      .Times(0);
+  MessageHelper::SubscribeApplicationToSoftButton(
+      message_params, appSharedPtr, function_id);
+}
+
+TEST_F(MessageHelperTest,
+       SubscribeApplicationToSoftButton_SoftbuttonsExist_CallFromApp) {
+  MockApplicationSharedPtr appSharedPtr = std::make_shared<MockApplication>();
+  smart_objects::SmartObject message_params;
+  message_params[strings::soft_buttons] =
+      new smart_objects::SmartObject(smart_objects::SmartType_Array);
+  const uint32_t softbutton1 = 1u;
+  const uint32_t softbutton2 = 2u;
+  const uint32_t softbutton3 = 3u;
+  message_params[strings::soft_buttons][0] = softbutton1;
+  message_params[strings::soft_buttons][1] = softbutton2;
+  message_params[strings::soft_buttons][2] = softbutton3;
+
+  size_t function_id = 1;
+  WindowSoftButtons window_buttons{
+      mobile_apis::PredefinedWindows::DEFAULT_WINDOW,
+      {softbutton1, softbutton2, softbutton3}};
+
+  EXPECT_CALL(*appSharedPtr,
+              SubscribeToSoftButtons(function_id, window_buttons));
+
   MessageHelper::SubscribeApplicationToSoftButton(
       message_params, appSharedPtr, function_id);
 }
