@@ -1855,7 +1855,7 @@
 
     <enum name="SeatMemoryActionType">
       <element name="SAVE">
-        <description>Save current seat postions and settings to seat memory.</description>
+        <description>Save current seat positions and settings to seat memory.</description>
       </element>
       <element name="RESTORE">
         <description>Restore / apply the seat memory settings to the current seat. </description>
@@ -2200,7 +2200,7 @@
    </param>
    <param name="siriusxmRadioAvailable" type="Boolean" mandatory="false">
      <description>
-       Availability of sirius XM radio.
+       Availability of Sirius XM radio.
        True: Available, False: Not Available, Not present: Not Available.
      </description>
    </param>
@@ -3165,7 +3165,7 @@
   </param>
   <param name="autoCompleteList" type="String" maxlength="1000" minsize="0" maxsize="100" array="true" mandatory="false">
     <description>
-      Allows an app to prepopulate the text field with a list of suggested or completed entries as the user types. 
+      Allows an app to pre-populate the text field with a list of suggested or completed entries as the user types. 
       If empty, the auto-complete list will be removed from the screen.
     </description>
   </param>
@@ -3676,7 +3676,7 @@
         Following cases will cause only affected windows to be included:
         1. App creates a new window. After the window is created, a system capability notification will be sent
         related only to the created window.
-        2. App sets a new layout to the window. The new layout changes window capabilties.
+        2. App sets a new layout to the window. The new layout changes window capabilities.
         The notification will reflect those changes to the single window.
       </description>
     </param>
