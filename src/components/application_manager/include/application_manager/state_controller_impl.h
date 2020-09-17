@@ -35,6 +35,7 @@
 
 #include <list>
 #include <map>
+#include <unordered_set>
 #include "application_manager/application.h"
 #include "application_manager/application_manager.h"
 #include "application_manager/hmi_state.h"
@@ -430,6 +431,7 @@ class StateControllerImpl : public event_engine::EventObserver,
   typedef std::list<WindowStatePair> WindowStatePairs;
   std::map<uint32_t, WindowStatePairs> postponed_app_widgets_;
 
+  std::unordered_set<uint32_t> pending_hmistatus_notification_apps_;
   ApplicationManager& app_mngr_;
 };
 }  // namespace application_manager

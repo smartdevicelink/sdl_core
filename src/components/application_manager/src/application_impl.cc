@@ -116,6 +116,7 @@ ApplicationImpl::ApplicationImpl(
     , is_app_allowed_(true)
     , is_app_data_resumption_allowed_(false)
     , has_been_activated_(false)
+    , is_ready_(false)
     , tts_properties_in_none_(false)
     , tts_properties_in_full_(false)
     , keep_context_(false)
@@ -779,6 +780,15 @@ bool ApplicationImpl::has_been_activated() const {
 
 bool ApplicationImpl::set_activated(bool is_active) {
   has_been_activated_ = is_active;
+  return true;
+}
+
+bool ApplicationImpl::is_ready() const {
+  return is_ready_;
+}
+
+bool ApplicationImpl::set_is_ready(bool is_ready) {
+  is_ready_ = is_ready;
   return true;
 }
 

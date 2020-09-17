@@ -714,7 +714,31 @@ void StateControllerImpl::UpdateAppWindowsStreamingState(
   }
 }
 
-void StateControllerImpl::on_event(const event_engine::MobileEvent& event) {}
+void StateControllerImpl::on_event(const event_engine::MobileEvent& event) {
+  using namespace mobile_apis;
+
+  SDL_LOG_AUTO_TRACE();
+  SDL_LOG_DEBUG("Received event for function" << event.id());
+  switch (event.id()) {
+    case FunctionID::RegisterAppInterfaceID: {
+      uint32_t connection_key =
+          event.smart_object()[strings::connection_key].asUInt();
+      ApplicationSharedPtr app = app_mngr_.application(connection_key);
+
+      if (app.use_count() == 0) {
+        SDL_LOG_ERROR("OnHMIStatusNotification application doesn't exist");
+        return;
+      }
+      auto notification = MessageHelper::CreateHMIStatusNotification(app, 0);
+      app_mngr_.GetRPCService().ManageMobileCommand(
+          notification, commands::Command::SOURCE_SDL);
+
+    } break;
+
+    default:
+      break;
+  }
+}
 
 void StateControllerImpl::on_event(const event_engine::Event& event) {
   using event_engine::Event;
@@ -873,11 +897,20 @@ void StateControllerImpl::OnStateChanged(ApplicationSharedPtr app,
     return;
   }
 
-  auto notification =
-      MessageHelper::CreateHMIStatusNotification(app, window_id);
-  app_mngr_.GetRPCService().ManageMobileCommand(notification,
-                                                commands::Command::SOURCE_SDL);
-
+  if (app->is_ready()) {
+    SDL_LOG_DEBUG("Sending OnHMIStatus to application " << app->app_id());
+    auto notification =
+        MessageHelper::CreateHMIStatusNotification(app, window_id);
+    app_mngr_.GetRPCService().ManageMobileCommand(
+        notification, commands::Command::SOURCE_SDL);
+  } else {
+    SDL_LOG_DEBUG(
+        "Application "
+        << app->app_id()
+        << " not ready to receive OnHMIStatus. Delaying notification");
+    pending_hmistatus_notification_apps_.insert(app->app_id());
+    subscribe_on_event(mobile_apis::FunctionID::RegisterAppInterfaceID);
+  }
   if (mobile_apis::PredefinedWindows::DEFAULT_WINDOW != window_id) {
     SDL_LOG_DEBUG(
         "State was changed not for a main application window. No "
