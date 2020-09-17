@@ -721,9 +721,9 @@ void StateControllerImpl::on_event(const event_engine::MobileEvent& event) {
   SDL_LOG_DEBUG("Received event for function" << event.id());
   switch (event.id()) {
     case FunctionID::RegisterAppInterfaceID: {
+      auto message = event.smart_object();
       uint32_t connection_key =
-          event.smart_object()[strings::params][strings::connection_key]
-              .asUInt();
+          message[strings::params][strings::connection_key].asUInt();
       ApplicationSharedPtr app = app_mngr_.application(connection_key);
 
       if (app.use_count() == 0) {
@@ -740,9 +740,14 @@ void StateControllerImpl::on_event(const event_engine::MobileEvent& event) {
           return;
         }
 
-        auto notification = MessageHelper::CreateHMIStatusNotification(app, 0);
-        app_mngr_.GetRPCService().ManageMobileCommand(
-            notification, commands::Command::SOURCE_SDL);
+        bool success = message[strings::msg_params][strings::success].asBool();
+        if (success) {
+          // Only send notification if RAI was a success
+          auto notification =
+              MessageHelper::CreateHMIStatusNotification(app, 0);
+          app_mngr_.GetRPCService().ManageMobileCommand(
+              notification, commands::Command::SOURCE_SDL);
+        }
 
         apps_with_pending_hmistatus_notification_.erase(app->app_id());
         if (apps_with_pending_hmistatus_notification_.empty()) {

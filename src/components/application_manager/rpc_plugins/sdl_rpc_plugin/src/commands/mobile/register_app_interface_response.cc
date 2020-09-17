@@ -96,7 +96,9 @@ void RegisterAppInterfaceResponse::Run() {
   }
 
   SendResponse(success, result_code, last_message);
-  app->set_is_ready(true);
+  if (success) {
+    app->set_is_ready(true);
+  }
   event_engine::MobileEvent event(
       mobile_apis::FunctionID::RegisterAppInterfaceID);
   smart_objects::SmartObject event_msg(*message_);
