@@ -722,16 +722,28 @@ void StateControllerImpl::on_event(const event_engine::MobileEvent& event) {
   switch (event.id()) {
     case FunctionID::RegisterAppInterfaceID: {
       uint32_t connection_key =
-          event.smart_object()[strings::connection_key].asUInt();
+          event.smart_object()[strings::params][strings::connection_key]
+              .asUInt();
       ApplicationSharedPtr app = app_mngr_.application(connection_key);
 
       if (app.use_count() == 0) {
-        SDL_LOG_ERROR("OnHMIStatusNotification application doesn't exist");
+        SDL_LOG_WARN("Application doesn't exist");
+        return;
+      }
+
+      auto it = pending_hmistatus_notification_apps_.find(app->app_id());
+      if (it == pending_hmistatus_notification_apps_.end()) {
+        SDL_LOG_WARN("Application does not have a pending OnHMIStatus");
         return;
       }
       auto notification = MessageHelper::CreateHMIStatusNotification(app, 0);
       app_mngr_.GetRPCService().ManageMobileCommand(
           notification, commands::Command::SOURCE_SDL);
+
+      pending_hmistatus_notification_apps_.erase(app->app_id());
+      if (pending_hmistatus_notification_apps_.empty()) {
+        unsubscribe_from_event(FunctionID::RegisterAppInterfaceID);
+      }
 
     } break;
 
