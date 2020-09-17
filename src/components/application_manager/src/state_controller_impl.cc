@@ -730,21 +730,25 @@ void StateControllerImpl::on_event(const event_engine::MobileEvent& event) {
         SDL_LOG_WARN("Application doesn't exist");
         return;
       }
+      {
+        sync_primitives::AutoLock autolock(
+            apps_with_pending_hmistatus_notification_lock_);
 
-      auto it = pending_hmistatus_notification_apps_.find(app->app_id());
-      if (it == pending_hmistatus_notification_apps_.end()) {
-        SDL_LOG_WARN("Application does not have a pending OnHMIStatus");
-        return;
+        auto it = apps_with_pending_hmistatus_notification_.find(app->app_id());
+        if (it == apps_with_pending_hmistatus_notification_.end()) {
+          SDL_LOG_WARN("Application does not have a pending OnHMIStatus");
+          return;
+        }
+
+        auto notification = MessageHelper::CreateHMIStatusNotification(app, 0);
+        app_mngr_.GetRPCService().ManageMobileCommand(
+            notification, commands::Command::SOURCE_SDL);
+
+        apps_with_pending_hmistatus_notification_.erase(app->app_id());
+        if (apps_with_pending_hmistatus_notification_.empty()) {
+          unsubscribe_from_event(FunctionID::RegisterAppInterfaceID);
+        }
       }
-      auto notification = MessageHelper::CreateHMIStatusNotification(app, 0);
-      app_mngr_.GetRPCService().ManageMobileCommand(
-          notification, commands::Command::SOURCE_SDL);
-
-      pending_hmistatus_notification_apps_.erase(app->app_id());
-      if (pending_hmistatus_notification_apps_.empty()) {
-        unsubscribe_from_event(FunctionID::RegisterAppInterfaceID);
-      }
-
     } break;
 
     default:
@@ -866,8 +870,8 @@ void StateControllerImpl::ActivateDefaultWindow(ApplicationSharedPtr app) {
 
   SetRegularState(app, window_id, hmi_level, audio_state, video_state, false);
 
-  // After main window activation, streaming state should be updated for another
-  // windows of the app
+  // After main window activation, streaming state should be updated for
+  // another windows of the app
   HmiStatePtr new_state =
       app->RegularHmiState(PredefinedWindows::DEFAULT_WINDOW);
   UpdateAppWindowsStreamingState(app, new_state);
@@ -920,7 +924,11 @@ void StateControllerImpl::OnStateChanged(ApplicationSharedPtr app,
         "Application "
         << app->app_id()
         << " not ready to receive OnHMIStatus. Delaying notification");
-    pending_hmistatus_notification_apps_.insert(app->app_id());
+    {
+      sync_primitives::AutoLock autolock(
+          apps_with_pending_hmistatus_notification_lock_);
+      apps_with_pending_hmistatus_notification_.insert(app->app_id());
+    }
     subscribe_on_event(mobile_apis::FunctionID::RegisterAppInterfaceID);
   }
   if (mobile_apis::PredefinedWindows::DEFAULT_WINDOW != window_id) {
@@ -1265,8 +1273,8 @@ void StateControllerImpl::OnAppDeactivated(
     return;
   }
 
-  // TODO(AOleynik): Need to delete DeactivateReason and modify OnAppDeactivated
-  // when HMI will support that, otherwise won't be testable
+  // TODO(AOleynik): Need to delete DeactivateReason and modify
+  // OnAppDeactivated when HMI will support that, otherwise won't be testable
   DeactivateApp(app, window_id);
 }
 

@@ -431,7 +431,8 @@ class StateControllerImpl : public event_engine::EventObserver,
   typedef std::list<WindowStatePair> WindowStatePairs;
   std::map<uint32_t, WindowStatePairs> postponed_app_widgets_;
 
-  std::unordered_set<uint32_t> pending_hmistatus_notification_apps_;
+  std::unordered_set<uint32_t> apps_with_pending_hmistatus_notification_;
+  mutable sync_primitives::Lock apps_with_pending_hmistatus_notification_lock_;
   ApplicationManager& app_mngr_;
 };
 }  // namespace application_manager
