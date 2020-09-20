@@ -119,7 +119,6 @@ void OnExitApplicationNotification::Run() {
           MessageHelper::GetOnAppInterfaceUnregisteredNotificationToMobile(
               app_id, AppInterfaceUnregisteredReason::RESOURCE_CONSTRAINT);
       SendNotificationToMobile(message);
-      application_manager_.UnregisterApplication(app_id, Result::SUCCESS);
       return;
     }
 

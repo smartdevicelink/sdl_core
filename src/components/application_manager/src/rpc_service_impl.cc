@@ -467,8 +467,8 @@ void RPCServiceImpl::Handle(const impl::MessageToMobile message) {
   SDL_LOG_INFO("Message for mobile given away");
 
   if (close_session) {
-    app_manager_.connection_handler().CloseSession(message->connection_key(),
-                                                   connection_handler::kCommon);
+    app_manager_.connection_handler().CloseSession(
+        message->connection_key(), connection_handler::kFinalMessage);
   }
 }
 

@@ -352,7 +352,8 @@ void ConnectionHandlerImpl::OnConnectionClosed(
     transport_manager::ConnectionUID connection_id) {
   SDL_LOG_AUTO_TRACE();
 
-  OnConnectionEnded(connection_id);
+  auto reason = ClosureReasonHandling(connection_id);
+  OnConnectionEnded(connection_id, reason);
 }
 
 void ConnectionHandlerImpl::OnConnectionClosedFailure(
@@ -367,7 +368,8 @@ void ConnectionHandlerImpl::OnUnexpectedDisconnect(
     const transport_manager::CommunicationError& error) {
   SDL_LOG_AUTO_TRACE();
 
-  OnConnectionEnded(connection_id);
+  auto reason = ClosureReasonHandling(connection_id);
+  OnConnectionEnded(connection_id, reason);
 }
 
 void ConnectionHandlerImpl::OnDeviceConnectionLost(
@@ -388,7 +390,7 @@ void ConnectionHandlerImpl::RemoveConnection(
     const ConnectionHandle connection_handle) {
   SDL_LOG_AUTO_TRACE();
 
-  OnConnectionEnded(connection_handle);
+  OnConnectionEnded(connection_handle, CloseSessionReason::kCommon);
 }
 
 #ifdef ENABLE_SECURITY
@@ -663,6 +665,19 @@ void ConnectionHandlerImpl::OnMalformedMessageCallback(
   SDL_LOG_INFO("Disconnect malformed messaging application");
   CloseConnectionSessions(connection_handle, kMalformed);
   CloseConnection(connection_handle);
+}
+
+void ConnectionHandlerImpl::OnFinalMessageCallback(
+    const uint32_t& connection_key) {
+  SDL_LOG_AUTO_TRACE();
+
+  transport_manager::ConnectionUID connection_handle = 0;
+  uint8_t session_id = 0;
+  PairFromKey(connection_key, &connection_handle, &session_id);
+  const auto result = connections_final_message.insert(connection_handle);
+  SDL_LOG_DEBUG("OnFinalMessageCallback found connection "
+                << connection_handle << " the result of adding is "
+                << std::boolalpha << result.second);
 }
 
 uint32_t ConnectionHandlerImpl::OnSessionEndedCallback(
@@ -1688,9 +1703,11 @@ void ConnectionHandlerImpl::KeepConnectionAlive(uint32_t connection_key,
 }
 
 void ConnectionHandlerImpl::OnConnectionEnded(
-    const transport_manager::ConnectionUID connection_id) {
+    const transport_manager::ConnectionUID connection_id,
+    const CloseSessionReason close_reason) {
   SDL_LOG_INFO("Delete Connection: " << static_cast<int32_t>(connection_id)
-                                     << " from the list.");
+                                     << " from the list."
+                                     << " with reason " << close_reason);
   connection_list_lock_.AcquireForWriting();
   ConnectionList::iterator itr = connection_list_.find(connection_id);
   if (connection_list_.end() == itr) {
@@ -1725,9 +1742,7 @@ void ConnectionHandlerImpl::OnConnectionEnded(
           service_list.rbegin();
       for (; service_list_itr != service_list.rend(); ++service_list_itr) {
         connection_handler_observer_->OnServiceEndedCallback(
-            session_key,
-            service_list_itr->service_type,
-            CloseSessionReason::kCommon);
+            session_key, service_list_itr->service_type, close_reason);
       }
     }
     ending_connection_ = NULL;
@@ -1819,6 +1834,13 @@ bool ConnectionHandlerImpl::ProtocolVersionUsed(
                                                full_protocol_version);
   }
   return false;
+}
+
+CloseSessionReason ConnectionHandlerImpl::ClosureReasonHandling(
+    const transport_manager::ConnectionUID connection_id) {
+  const auto is_final = connections_final_message.erase(connection_id);
+  return is_final ? CloseSessionReason::kFinalMessage
+                  : CloseSessionReason::kCommon;
 }
 
 #ifdef BUILD_TESTS
