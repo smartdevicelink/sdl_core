@@ -42,7 +42,6 @@ class VehicleInfoAppExtension;
 namespace app_mngr = application_manager;
 namespace plugins = application_manager::plugin_manager;
 
-enum SubscribeStatus { SUBSCRIBE, UNSUBSCRIBE };
 bool IsSubscribedAppExist(const std::string& ivi,
                           const app_mngr::ApplicationManager& app_manager);
 
