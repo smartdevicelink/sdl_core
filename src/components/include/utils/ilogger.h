@@ -76,6 +76,7 @@ class Logger {
 
 class ThirdPartyLoggerInterface {
  public:
+  virtual ~ThirdPartyLoggerInterface() {}
   virtual void Init() = 0;
   virtual void DeInit() = 0;
   virtual bool IsEnabledFor(const std::string& component,

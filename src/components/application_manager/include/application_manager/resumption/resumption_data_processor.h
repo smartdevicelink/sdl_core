@@ -74,6 +74,11 @@ struct ResumptionRequest {
 class ResumptionDataProcessor {
  public:
   /**
+   * @brief ResumptionDataProcessor class destructor
+   */
+  virtual ~ResumptionDataProcessor() {}
+
+  /**
    * @brief Running resumption data process from saved_app to application.
    * @param application application which will be resumed
    * @param saved_app application specific section from backup file
