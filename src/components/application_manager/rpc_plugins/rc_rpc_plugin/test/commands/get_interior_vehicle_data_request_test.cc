@@ -732,6 +732,8 @@ TEST_F(GetInteriorVehicleDataRequestTest,
   available_hd_chanels[1] = chanel2_index;
   available_hd_chanels[2] = chanel3_index;
 
+  msg_params[message_params::kModuleData][message_params::kModuleId] =
+      kModuleId;
   msg_params[message_params::kModuleData][message_params::kRadioControlData]
             [message_params::kAvailableHdChannels] = available_hd_chanels;
 
@@ -790,6 +792,8 @@ TEST_F(GetInteriorVehicleDataRequestTest,
       smart_objects::SmartObject(smart_objects::SmartType_Boolean);
   climate_control_data = true;
 
+  msg_params[message_params::kModuleData][message_params::kModuleId] =
+      kModuleId;
   msg_params[message_params::kModuleData][message_params::kClimateControlData]
             [message_params::kClimateEnableAvailable] = climate_control_data;
 
