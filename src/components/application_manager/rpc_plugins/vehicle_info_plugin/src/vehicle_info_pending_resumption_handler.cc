@@ -138,6 +138,7 @@ void VehicleInfoPendingResumptionHandler::RaiseFinishedPendingResumption(
     ext.subscribeToVehicleInfo(subscription);
   }
 
+  unsubscribe_from_event(VehicleInfo_SubscribeVehicleData);
   auto fake_response =
       CreateFakeResponseFromHMI(pending_resumption.subscription_results_,
                                 pending_resumption.fake_corr_id_);
