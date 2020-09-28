@@ -944,6 +944,8 @@ ConnectionHandlerImpl::TransportTypeProfileStringFromDeviceHandle(
     return std::string("IAP_CARPLAY");
   } else if (connection_type == "CLOUD_WEBSOCKET") {
     return std::string("WEBSOCKET");
+  } else if (connection_type == "WEBENGINE_WEBSOCKET") {
+    return std::string("WEBSOCKET");
 #ifdef BUILD_TESTS
   } else if (connection_type == "BTMAC") {
     return std::string("BTMAC");
