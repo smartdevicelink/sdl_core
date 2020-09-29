@@ -3073,16 +3073,12 @@ TEST_F(PolicyHandlerTest, GetAppPropertiesStatus_HybridAppNotChanged_SUCCESS) {
 }
 
 TEST_F(PolicyHandlerTest, GetAppPropertiesStatus_PolicyDisabled_FAIL) {
-  ChangePolicyManagerToMock();
-
   EXPECT_CALL(policy_settings_, enable_policy()).WillOnce(Return(false));
   policy_handler_.LoadPolicyLibrary();
 
   smart_objects::SmartObject properties;
   properties[strings::app_id] = kPolicyAppId_;
 
-  EXPECT_CALL(*mock_policy_manager_, GetAppProperties(_, _)).Times(0);
-  EXPECT_CALL(*mock_policy_manager_, GetInitialAppData(_, _, _)).Times(0);
   const auto expected_app_properties_state =
       policy::PolicyHandlerInterface::AppPropertiesState::NO_CHANGES;
   EXPECT_EQ(expected_app_properties_state,
@@ -3114,16 +3110,11 @@ TEST_F(PolicyHandlerTest, PushAppIdToPTUQueue_PolicyEnabled_SUCCESS) {
 }
 
 TEST_F(PolicyHandlerTest, PushAppIdToPTUQueue_PolicyDisabled_FAIL) {
-  ChangePolicyManagerToMock();
-
-  const uint32_t expected_apps_count = 0u;
   EXPECT_CALL(policy_settings_, enable_policy()).WillOnce(Return(false));
-  EXPECT_CALL(*mock_policy_manager_,
-              UpdatePTUReadyAppsCount(expected_apps_count))
-      .Times(0);
 
   policy_handler_.LoadPolicyLibrary();
   policy_handler_.PushAppIdToPTUQueue(kAppId1_);
+  const uint32_t expected_apps_count = 0u;
   EXPECT_EQ(expected_apps_count,
             policy_handler_.applications_ptu_queue_.size());
 }
@@ -3131,16 +3122,6 @@ TEST_F(PolicyHandlerTest, PushAppIdToPTUQueue_PolicyDisabled_FAIL) {
 TEST_F(PolicyHandlerTest, StopRetrySequence_PolicyEnabled_SUCCESS) {
   ChangePolicyManagerToMock();
   EXPECT_CALL(*mock_policy_manager_, StopRetrySequence());
-  policy_handler_.StopRetrySequence();
-}
-
-TEST_F(PolicyHandlerTest, StopRetrySequence_PolicyDisabled_FAIL) {
-  ChangePolicyManagerToMock();
-
-  EXPECT_CALL(policy_settings_, enable_policy()).WillOnce(Return(false));
-  EXPECT_CALL(*mock_policy_manager_, StopRetrySequence()).Times(0);
-
-  policy_handler_.LoadPolicyLibrary();
   policy_handler_.StopRetrySequence();
 }
 
@@ -3154,10 +3135,7 @@ TEST_F(PolicyHandlerTest, GetPolicyTableData_PolicyEnabled_SUCCESS) {
 }
 
 TEST_F(PolicyHandlerTest, GetPolicyTableData_PolicyDisabled_FAIL) {
-  ChangePolicyManagerToMock();
-
   EXPECT_CALL(policy_settings_, enable_policy()).WillOnce(Return(false));
-  EXPECT_CALL(*mock_policy_manager_, GetPolicyTableData()).Times(0);
 
   policy_handler_.LoadPolicyLibrary();
 
@@ -3185,10 +3163,7 @@ TEST_F(PolicyHandlerTest, GetRemovedVehicleDataItems_PolicyEnabled_SUCCESS) {
 TEST_F(PolicyHandlerTest, GetRemovedVehicleDataItems_PolicyDisabled_FAIL) {
   using rpc::policy_table_interface_base::VehicleDataItem;
 
-  ChangePolicyManagerToMock();
-
   EXPECT_CALL(policy_settings_, enable_policy()).WillOnce(Return(false));
-  EXPECT_CALL(*mock_policy_manager_, GetRemovedVehicleDataItems()).Times(0);
 
   policy_handler_.LoadPolicyLibrary();
 
@@ -3226,16 +3201,6 @@ TEST_F(PolicyHandlerTest, OnLocalAppAdded_PolicyEnabled_SUCCESS) {
   policy_handler_.OnLocalAppAdded();
 }
 
-TEST_F(PolicyHandlerTest, OnLocalAppAdded_PolicyDisabled_FAIL) {
-  ChangePolicyManagerToMock();
-
-  EXPECT_CALL(policy_settings_, enable_policy()).WillOnce(Return(false));
-  EXPECT_CALL(*mock_policy_manager_, OnLocalAppAdded()).Times(0);
-
-  policy_handler_.LoadPolicyLibrary();
-  policy_handler_.OnLocalAppAdded();
-}
-
 TEST_F(PolicyHandlerTest, OnPermissionsUpdated_PolicyEnabled_SUCCESS) {
   ChangePolicyManagerToMock();
 
@@ -3255,14 +3220,10 @@ TEST_F(PolicyHandlerTest, OnPermissionsUpdated_PolicyEnabled_SUCCESS) {
 }
 
 TEST_F(PolicyHandlerTest, OnPermissionsUpdated_PolicyDisabled_FAIL) {
-  ChangePolicyManagerToMock();
-
   EXPECT_CALL(policy_settings_, enable_policy()).WillOnce(Return(false));
   policy_handler_.LoadPolicyLibrary();
 
   EXPECT_CALL(app_manager_, application(kDeviceId_, kPolicyAppId_)).Times(0);
-  EXPECT_CALL(*mock_policy_manager_, GetAppEncryptionRequired(kPolicyAppId_))
-      .Times(0);
   EXPECT_CALL(*mock_app_, app_id()).Times(0);
 
   Permissions app_permissions;
@@ -3279,16 +3240,6 @@ TEST_F(PolicyHandlerTest, IsNewApplication_PolicyEnabled_SUCCESS) {
   EXPECT_CALL(*mock_policy_manager_, IsNewApplication(kPolicyAppId_))
       .WillOnce(Return(true));
   EXPECT_TRUE(policy_handler_.IsNewApplication(kPolicyAppId_));
-}
-
-TEST_F(PolicyHandlerTest, IsNewApplication_PolicyDisabled_FAIL) {
-  ChangePolicyManagerToMock();
-
-  EXPECT_CALL(policy_settings_, enable_policy()).WillOnce(Return(false));
-  policy_handler_.LoadPolicyLibrary();
-
-  EXPECT_CALL(*mock_policy_manager_, IsNewApplication(kPolicyAppId_)).Times(0);
-  EXPECT_FALSE(policy_handler_.IsNewApplication(kPolicyAppId_));
 }
 
 }  // namespace policy_handler_test
