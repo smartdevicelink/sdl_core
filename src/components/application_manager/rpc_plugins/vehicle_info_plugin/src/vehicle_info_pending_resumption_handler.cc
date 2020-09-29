@@ -38,6 +38,7 @@
 #include "application_manager/resumption/resumption_data_processor.h"
 #include "utils/helpers.h"
 #include "vehicle_info_plugin/custom_vehicle_data_manager.h"
+#include "vehicle_info_plugin/vehicle_info_plugin.h"
 
 namespace vehicle_info_plugin {
 SDL_CREATE_LOG_VARIABLE("VehicleInfoPlugin")
@@ -208,6 +209,7 @@ void VehicleInfoPendingResumptionHandler::on_event(
   SDL_LOG_AUTO_TRACE();
   sync_primitives::AutoLock lock(pending_resumption_lock_);
   using namespace application_manager;
+
   if (pending_requests_.empty()) {
     SDL_LOG_DEBUG("Not waiting for any response");
     return;
@@ -269,7 +271,17 @@ void VehicleInfoPendingResumptionHandler::HandleResumptionSubscriptionRequest(
   SDL_LOG_TRACE("app id " << app.app_id());
   auto& ext = dynamic_cast<VehicleInfoAppExtension&>(extension);
 
-  const auto subscriptions = ext.PendingSubscriptions().GetData();
+  auto subscriptions = ext.PendingSubscriptions().GetData();
+  for (auto ivi = subscriptions.begin(); ivi != subscriptions.end();) {
+    if (IsSubscribedAppExist(*ivi, application_manager_)) {
+      ext.RemovePendingSubscription(*ivi);
+      ext.subscribeToVehicleInfo(*ivi);
+      subscriptions.erase(ivi++);
+    } else {
+      ++ivi;
+    }
+  }
+
   if (subscriptions.empty()) {
     SDL_LOG_DEBUG("Subscriptions is empty");
     return;

@@ -42,7 +42,8 @@ class VehicleInfoAppExtension;
 namespace app_mngr = application_manager;
 namespace plugins = application_manager::plugin_manager;
 
-enum SubscribeStatus { SUBSCRIBE, UNSUBSCRIBE };
+bool IsSubscribedAppExist(const std::string& ivi,
+                          const app_mngr::ApplicationManager& app_manager);
 
 class VehicleInfoPlugin : public plugins::RPCPlugin {
  public:
@@ -96,7 +97,6 @@ class VehicleInfoPlugin : public plugins::RPCPlugin {
       const std::set<std::string>& list_of_subscriptions);
 
  private:
-  bool IsSubscribedAppExist(const std::string& ivi);
   bool IsAnyPendingSubscriptionExist(const std::string& ivi);
   void UnsubscribeFromRemovedVDItems();
   smart_objects::SmartObjectSPtr GetUnsubscribeIVIRequest(

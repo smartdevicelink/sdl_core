@@ -48,6 +48,7 @@ using namespace vehicle_info_plugin;
 
 using ::testing::_;
 using ::testing::DoAll;
+using ::testing::Mock;
 using ::testing::NiceMock;
 using ::testing::Return;
 using ::testing::ReturnRef;
@@ -226,8 +227,10 @@ class VehicleInfoPendingResumptionHandlerTest : public ::testing::Test {
   VehicleInfoPendingResumptionHandlerTest()
       : mock_message_helper_(
             *application_manager::MockMessageHelper::message_helper_mock())
-
-  {}
+      , applications_lock_(std::make_shared<sync_primitives::Lock>())
+      , applications_(application_set_, applications_lock_) {
+    Mock::VerifyAndClearExpectations(&mock_message_helper_);
+  }
 
   void SetUp() OVERRIDE {
     ON_CALL(app_manager_mock_, event_dispatcher())
@@ -238,11 +241,18 @@ class VehicleInfoPendingResumptionHandlerTest : public ::testing::Test {
         .WillByDefault(ReturnRef(resume_ctrl_mock_));
     ON_CALL(resume_ctrl_mock_, resumption_data_processor())
         .WillByDefault(ReturnRef(resumption_data_processor_mock_));
+    EXPECT_CALL(app_manager_mock_, applications())
+        .WillRepeatedly(Return(applications_));
 
     resumption_handler_.reset(
         new vehicle_info_plugin::VehicleInfoPendingResumptionHandler(
             app_manager_mock_, custom_vehicle_data_manager_mock_));
     MessageHelperResponseCreateExpectation();
+  }
+
+  ~VehicleInfoPendingResumptionHandlerTest() {
+    Mock::VerifyAndClearExpectations(&mock_message_helper_);
+    Mock::VerifyAndClearExpectations(&app_manager_mock_);
   }
 
   void MessageHelperResponseCreateExpectation() {
@@ -277,12 +287,15 @@ class VehicleInfoPendingResumptionHandlerTest : public ::testing::Test {
 
   MockMessageHelper& mock_message_helper_;
   MockApplicationManager app_manager_mock_;
-  MockResumeCtrl resume_ctrl_mock_;
+  NiceMock<MockResumeCtrl> resume_ctrl_mock_;
   MockResumptionDataProcessor resumption_data_processor_mock_;
   MockEventDispatcher event_dispatcher_mock_;
   MockRPCService mock_rpc_service_;
   NiceMock<MockCustomVehicleDataManager> custom_vehicle_data_manager_mock_;
   vehicle_info_plugin::VehicleInfoPlugin plugin_;
+  application_manager::ApplicationSet application_set_;
+  std::shared_ptr<sync_primitives::Lock> applications_lock_;
+  DataAccessor<application_manager::ApplicationSet> applications_;
 
   std::unique_ptr<vehicle_info_plugin::VehicleInfoPendingResumptionHandler>
       resumption_handler_;
@@ -300,6 +313,8 @@ TEST_F(VehicleInfoPendingResumptionHandlerTest, NoSubscriptionNoAction) {
 TEST_F(VehicleInfoPendingResumptionHandlerTest,
        OneAppSeveralVehicleDataSuccess) {
   auto mock_app = CreateApp(1);
+  application_set_.insert(mock_app);
+
   auto ext = CreateExtension(*mock_app);
   ext->AddPendingSubscription("gps");
   ext->AddPendingSubscription("speed");
@@ -327,6 +342,8 @@ TEST_F(VehicleInfoPendingResumptionHandlerTest,
 TEST_F(VehicleInfoPendingResumptionHandlerTest,
        OneAppSeveralVehicleDataResponseSuccess) {
   auto mock_app = CreateApp(1);
+  application_set_.insert(mock_app);
+
   auto ext = CreateExtension(*mock_app);
   ext->AddPendingSubscription("gps");
   ext->AddPendingSubscription("speed");
@@ -372,6 +389,8 @@ TEST_F(VehicleInfoPendingResumptionHandlerTest,
 TEST_F(VehicleInfoPendingResumptionHandlerTest,
        OneAppSeveralVehicleDataResponseOneFailed) {
   auto mock_app = CreateApp(1);
+  application_set_.insert(mock_app);
+
   auto ext = CreateExtension(*mock_app);
   ext->AddPendingSubscription("gps");
   ext->AddPendingSubscription("speed");
@@ -417,6 +436,8 @@ TEST_F(VehicleInfoPendingResumptionHandlerTest,
 TEST_F(VehicleInfoPendingResumptionHandlerTest,
        OneAppSeveralVehicleDataResponseAllFailed) {
   auto mock_app = CreateApp(1);
+  application_set_.insert(mock_app);
+
   auto ext = CreateExtension(*mock_app);
   ext->AddPendingSubscription("gps");
   ext->AddPendingSubscription("speed");
@@ -457,6 +478,8 @@ TEST_F(VehicleInfoPendingResumptionHandlerTest,
 TEST_F(VehicleInfoPendingResumptionHandlerTest,
        OneAppSeveralVehicleDataResponseOveralResultFailed) {
   auto mock_app = CreateApp(1);
+  application_set_.insert(mock_app);
+
   auto ext = CreateExtension(*mock_app);
   ext->AddPendingSubscription("gps");
   ext->AddPendingSubscription("speed");
@@ -491,7 +514,11 @@ TEST_F(VehicleInfoPendingResumptionHandlerTest,
 
 TEST_F(VehicleInfoPendingResumptionHandlerTest, TwoAppsOneSharedDataSuccess) {
   auto mock_app = CreateApp(1);
+  application_set_.insert(mock_app);
+
   auto mock_app2 = CreateApp(2);
+  application_set_.insert(mock_app2);
+
   auto ext = CreateExtension(*mock_app);
   auto ext2 = CreateExtension(*mock_app2);
   ext->AddPendingSubscription("gps");
@@ -533,7 +560,11 @@ TEST_F(VehicleInfoPendingResumptionHandlerTest, TwoAppsOneSharedDataSuccess) {
 TEST_F(VehicleInfoPendingResumptionHandlerTest,
        TwoAppsMultipleSharedDataSuccessResumption) {
   auto mock_app = CreateApp(1);
+  application_set_.insert(mock_app);
+
   auto mock_app2 = CreateApp(2);
+  application_set_.insert(mock_app2);
+
   auto ext = CreateExtension(*mock_app);
   auto ext2 = CreateExtension(*mock_app2);
   ext->AddPendingSubscription("gps");
@@ -580,7 +611,11 @@ TEST_F(VehicleInfoPendingResumptionHandlerTest,
 TEST_F(VehicleInfoPendingResumptionHandlerTest,
        TwoAppsOneSharedDataFailRetryforSecondApp) {
   auto mock_app = CreateApp(1);
+  application_set_.insert(mock_app);
+
   auto mock_app2 = CreateApp(2);
+  application_set_.insert(mock_app2);
+
   auto ext = CreateExtension(*mock_app);
   auto ext2 = CreateExtension(*mock_app2);
   ext->AddPendingSubscription("gps");
@@ -633,4 +668,29 @@ TEST_F(VehicleInfoPendingResumptionHandlerTest,
   EXPECT_EQ(ext2->PendingSubscriptions().GetData().size(), 0u);
 }
 
+TEST_F(VehicleInfoPendingResumptionHandlerTest,
+       TwoAppsOneSharedDataAlreadySubscribedByFirstAppNoRetryforSecondApp) {
+  auto mock_app = CreateApp(1);
+  application_set_.insert(mock_app);
+
+  auto mock_app2 = CreateApp(2);
+  application_set_.insert(mock_app2);
+
+  auto ext = CreateExtension(*mock_app);
+  auto ext2 = CreateExtension(*mock_app2);
+
+  ext->subscribeToVehicleInfo("gps");
+  ext2->AddPendingSubscription("gps");
+
+  EXPECT_CALL(resumption_data_processor_mock_, SubscribeToResponse(_, _))
+      .Times(0);
+  EXPECT_CALL(event_dispatcher_mock_, raise_event(_)).Times(0);
+  EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_, _)).Times(0);
+
+  resumption_handler_->HandleResumptionSubscriptionRequest(*ext2, *mock_app2);
+
+  EXPECT_TRUE(ext->isSubscribedToVehicleInfo("gps"));
+  EXPECT_TRUE(ext2->isSubscribedToVehicleInfo("gps"));
+  EXPECT_EQ(ext2->PendingSubscriptions().GetData().size(), 0u);
+}
 }  // namespace vehicle_info_plugin_test
