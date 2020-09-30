@@ -465,10 +465,21 @@ void ConnectionHandlerImpl::OnSessionStartedCallback(
     return;
   }
 #endif  // ENABLE_SECURITY
-  sync_primitives::AutoReadLock lock(connection_list_lock_);
-  ConnectionList::iterator it =
-      connection_list_.find(primary_connection_handle);
-  if (connection_list_.end() == it) {
+
+  auto find_connection =
+      [this](const transport_manager::ConnectionUID& primary_connection_handle)
+      -> Connection* {
+    sync_primitives::AutoReadLock lock(connection_list_lock_);
+    auto it = connection_list_.find(primary_connection_handle);
+    if (it != connection_list_.end()) {
+      return it->second;
+    }
+    return nullptr;
+  };
+
+  Connection* connection = find_connection(primary_connection_handle);
+
+  if (!connection) {
     SDL_LOG_ERROR("Unknown connection!");
     protocol_handler_->NotifySessionStarted(
         context,
@@ -477,7 +488,6 @@ void ConnectionHandlerImpl::OnSessionStartedCallback(
     return;
   }
 
-  Connection* connection = it->second;
   context.is_new_service_ =
       !connection->SessionServiceExists(session_id, service_type);
 
