@@ -714,7 +714,52 @@ void StateControllerImpl::UpdateAppWindowsStreamingState(
   }
 }
 
-void StateControllerImpl::on_event(const event_engine::MobileEvent& event) {}
+void StateControllerImpl::on_event(const event_engine::MobileEvent& event) {
+  using namespace mobile_apis;
+
+  SDL_LOG_AUTO_TRACE();
+  SDL_LOG_DEBUG("Received event for function" << event.id());
+  switch (event.id()) {
+    case FunctionID::RegisterAppInterfaceID: {
+      auto message = event.smart_object();
+      uint32_t connection_key =
+          message[strings::params][strings::connection_key].asUInt();
+      ApplicationSharedPtr app = app_mngr_.application(connection_key);
+
+      if (app.use_count() == 0) {
+        SDL_LOG_WARN("Application doesn't exist");
+        return;
+      }
+      {
+        sync_primitives::AutoLock autolock(
+            apps_with_pending_hmistatus_notification_lock_);
+
+        auto it = apps_with_pending_hmistatus_notification_.find(app->app_id());
+        if (it == apps_with_pending_hmistatus_notification_.end()) {
+          SDL_LOG_WARN("Application does not have a pending OnHMIStatus");
+          return;
+        }
+
+        bool success = message[strings::msg_params][strings::success].asBool();
+        if (success) {
+          // Only send notification if RAI was a success
+          auto notification =
+              MessageHelper::CreateHMIStatusNotification(app, 0);
+          app_mngr_.GetRPCService().ManageMobileCommand(
+              notification, commands::Command::SOURCE_SDL);
+        }
+
+        apps_with_pending_hmistatus_notification_.erase(app->app_id());
+        if (apps_with_pending_hmistatus_notification_.empty()) {
+          unsubscribe_from_event(FunctionID::RegisterAppInterfaceID);
+        }
+      }
+    } break;
+
+    default:
+      break;
+  }
+}
 
 void StateControllerImpl::on_event(const event_engine::Event& event) {
   using event_engine::Event;
@@ -830,8 +875,8 @@ void StateControllerImpl::ActivateDefaultWindow(ApplicationSharedPtr app) {
 
   SetRegularState(app, window_id, hmi_level, audio_state, video_state, false);
 
-  // After main window activation, streaming state should be updated for another
-  // windows of the app
+  // After main window activation, streaming state should be updated for
+  // another windows of the app
   HmiStatePtr new_state =
       app->RegularHmiState(PredefinedWindows::DEFAULT_WINDOW);
   UpdateAppWindowsStreamingState(app, new_state);
@@ -873,11 +918,24 @@ void StateControllerImpl::OnStateChanged(ApplicationSharedPtr app,
     return;
   }
 
-  auto notification =
-      MessageHelper::CreateHMIStatusNotification(app, window_id);
-  app_mngr_.GetRPCService().ManageMobileCommand(notification,
-                                                commands::Command::SOURCE_SDL);
-
+  if (app->is_ready()) {
+    SDL_LOG_DEBUG("Sending OnHMIStatus to application " << app->app_id());
+    auto notification =
+        MessageHelper::CreateHMIStatusNotification(app, window_id);
+    app_mngr_.GetRPCService().ManageMobileCommand(
+        notification, commands::Command::SOURCE_SDL);
+  } else {
+    SDL_LOG_DEBUG(
+        "Application "
+        << app->app_id()
+        << " not ready to receive OnHMIStatus. Delaying notification");
+    {
+      sync_primitives::AutoLock autolock(
+          apps_with_pending_hmistatus_notification_lock_);
+      apps_with_pending_hmistatus_notification_.insert(app->app_id());
+    }
+    subscribe_on_event(mobile_apis::FunctionID::RegisterAppInterfaceID);
+  }
   if (mobile_apis::PredefinedWindows::DEFAULT_WINDOW != window_id) {
     SDL_LOG_DEBUG(
         "State was changed not for a main application window. No "
@@ -943,6 +1001,11 @@ void StateControllerImpl::OnApplicationRegistered(
     const mobile_apis::HMILevel::eType default_level) {
   SDL_LOG_AUTO_TRACE();
 
+  if (app->is_cloud_app()) {
+    // Return here, there should already be an onHMIStatus=FULL being processed
+    // for when the cloud app was initially activated by the hmi
+    return;
+  }
   // After app registration HMI level should be set for DEFAULT_WINDOW only
   OnAppWindowAdded(app,
                    mobile_apis::PredefinedWindows::DEFAULT_WINDOW,
@@ -1220,8 +1283,8 @@ void StateControllerImpl::OnAppDeactivated(
     return;
   }
 
-  // TODO(AOleynik): Need to delete DeactivateReason and modify OnAppDeactivated
-  // when HMI will support that, otherwise won't be testable
+  // TODO(AOleynik): Need to delete DeactivateReason and modify
+  // OnAppDeactivated when HMI will support that, otherwise won't be testable
   DeactivateApp(app, window_id);
 }
 

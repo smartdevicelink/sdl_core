@@ -1015,7 +1015,7 @@ void ResumptionDataProcessorImpl::DeletePluginsSubscriptions(
 
   if (!status.successful_module_subscriptions_.empty()) {
     extension_modules_subscriptions[message_params::kModuleData] =
-        new smart_objects::SmartObject(smart_objects::SmartType_Array);
+        smart_objects::SmartObject(smart_objects::SmartType_Array);
 
     auto& module_data_so =
         extension_modules_subscriptions[message_params::kModuleData];
@@ -1023,7 +1023,7 @@ void ResumptionDataProcessorImpl::DeletePluginsSubscriptions(
     uint32_t index = 0;
     for (const auto& module : status.successful_module_subscriptions_) {
       module_data_so[index] =
-          new smart_objects::SmartObject(smart_objects::SmartType_Map);
+          smart_objects::SmartObject(smart_objects::SmartType_Map);
       module_data_so[index][message_params::kModuleType] = module.first;
       module_data_so[index][message_params::kModuleId] = module.second;
       index++;

@@ -2331,12 +2331,6 @@ void PolicyHandler::OnSetCloudAppProperties(
   policy_manager_->InitCloudApp(policy_app_id);
 
   bool auth_token_update = false;
-  if (properties.keyExists(strings::enabled)) {
-    bool enabled = properties[strings::enabled].asBool();
-    policy_manager_->SetCloudAppEnabled(policy_app_id, enabled);
-    auth_token_update = enabled;
-    application_manager_.RefreshCloudAppInformation();
-  }
   if (properties.keyExists(strings::auth_token)) {
     std::string auth_token = properties[strings::auth_token].asString();
     policy_manager_->SetAppAuthToken(policy_app_id, auth_token);
@@ -2369,6 +2363,14 @@ void PolicyHandler::OnSetCloudAppProperties(
         EnumToString(value, &hybrid_app_preference);
     policy_manager_->SetHybridAppPreference(policy_app_id,
                                             hybrid_app_preference);
+  }
+  if (properties.keyExists(strings::enabled)) {
+    bool enabled = properties[strings::enabled].asBool();
+    policy_manager_->SetCloudAppEnabled(policy_app_id, enabled);
+    if (!auth_token_update) {
+      auth_token_update = enabled;
+    }
+    application_manager_.RefreshCloudAppInformation();
   }
 
   if (auth_token_update) {

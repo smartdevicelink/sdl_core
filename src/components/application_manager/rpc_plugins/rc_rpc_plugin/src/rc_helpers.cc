@@ -306,6 +306,11 @@ smart_objects::SmartObject RCHelpers::MergeModuleData(
 
   smart_objects::SmartObject result = data1;
 
+  if (data2.empty()) {
+    SDL_LOG_ERROR("Data received from module is empty");
+    return result;
+  }
+
   for (auto it = data2.map_begin(); it != data2.map_end(); ++it) {
     const std::string& key = it->first;
     smart_objects::SmartObject& value = it->second;
@@ -315,9 +320,9 @@ smart_objects::SmartObject RCHelpers::MergeModuleData(
     }
 
     // Merge maps and arrays with `id` param included, replace other types
-    if (value.getType() == smart_objects::SmartType::SmartType_Map) {
+    if (smart_objects::SmartType::SmartType_Map == value.getType()) {
       value = MergeModuleData(result[key], value);
-    } else if (value.getType() == smart_objects::SmartType::SmartType_Array) {
+    } else if (smart_objects::SmartType::SmartType_Array == value.getType()) {
       value = MergeArray(result[key], value);
     }
     result[key] = value;
