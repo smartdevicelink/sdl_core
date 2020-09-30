@@ -1260,7 +1260,7 @@ class ApplicationManagerImpl
                           const bool allow_unknown_parameters = false);
 
   template <typename ApplicationList>
-  void PrepareApplicationListSO(ApplicationList app_list,
+  void PrepareApplicationListSO(ApplicationList& app_list,
                                 smart_objects::SmartObject& applications,
                                 ApplicationManager& app_mngr) {
     smart_objects::SmartArray* app_array = applications.asArray();

@@ -1218,10 +1218,13 @@ void ApplicationManagerImpl::CreatePendingApplication(
   application->set_hybrid_app_preference(hybrid_app_preference_enum);
   application->set_cloud_app_certificate(app_properties.certificate);
 
-  sync_primitives::AutoLock lock(apps_to_register_list_lock_ptr_);
-  SDL_LOG_DEBUG("apps_to_register_ size before: " << apps_to_register_.size());
-  apps_to_register_.insert(application);
-  SDL_LOG_DEBUG("apps_to_register_ size after: " << apps_to_register_.size());
+  {
+    sync_primitives::AutoLock lock(apps_to_register_list_lock_ptr_);
+    SDL_LOG_DEBUG(
+        "apps_to_register_ size before: " << apps_to_register_.size());
+    apps_to_register_.insert(application);
+    SDL_LOG_DEBUG("apps_to_register_ size after: " << apps_to_register_.size());
+  }
 
   SendUpdateAppList();
 }
@@ -1345,10 +1348,8 @@ void ApplicationManagerImpl::SetPendingApplicationState(
       app->app_id(), mobile_apis::Result::INVALID_ENUM, true, true);
   app->MarkUnregistered();
 
-  {
-    sync_primitives::AutoLock lock(apps_to_register_list_lock_ptr_);
-    apps_to_register_.insert(app);
-  }
+  sync_primitives::AutoLock lock(apps_to_register_list_lock_ptr_);
+  apps_to_register_.insert(app);
 }
 
 void ApplicationManagerImpl::OnConnectionStatusUpdated() {
@@ -1639,11 +1640,14 @@ void ApplicationManagerImpl::SendUpdateAppList() {
   (*request)[strings::msg_params][strings::applications] =
       SmartObject(SmartType_Array);
 
-  SmartObject& applications =
+  SmartObject& applications_so =
       (*request)[strings::msg_params][strings::applications];
 
-  PrepareApplicationListSO(applications_, applications, *this);
-  PrepareApplicationListSO(apps_to_register_, applications, *this);
+  const auto applications_list = applications().GetData();
+  PrepareApplicationListSO(applications_list, applications_so, *this);
+
+  const auto pending_apps_list = AppsWaitingForRegistration().GetData();
+  PrepareApplicationListSO(pending_apps_list, applications_so, *this);
 
   rpc_service_->ManageHMICommand(request);
 }
@@ -1891,8 +1895,8 @@ bool ApplicationManagerImpl::StartNaviService(
       /* Fix: For NaviApp1 Switch to NaviApp2, App1's Endcallback() arrives
        later than App2's Startcallback(). Cause streaming issue on HMI.
       */
-      sync_primitives::AutoLock lock(applications_list_lock_ptr_);
-      for (auto app : applications_) {
+      auto accessor = applications();
+      for (auto app : accessor.GetData()) {
         if (!app || (!app->is_navi() && !app->mobile_projection_enabled())) {
           SDL_LOG_DEBUG("Continue, Not Navi App Id: " << app->app_id());
           continue;
@@ -2862,6 +2866,7 @@ void ApplicationManagerImpl::ProcessQueryApp(
     CreateApplications(*obj_array, connection_key);
     SendUpdateAppList();
 
+    sync_primitives::AutoLock lock(apps_to_register_list_lock_ptr_);
     AppsWaitRegistrationSet::const_iterator it = apps_to_register_.begin();
     for (; it != apps_to_register_.end(); ++it) {
       const std::string full_icon_path((*it)->app_icon_path());
@@ -3298,7 +3303,8 @@ void ApplicationManagerImpl::UnregisterApplication(
   plugin_manager_->ForEachPlugin(on_app_unregistered);
   request_ctrl_.terminateAppRequests(app_id);
 
-  if (applications_.empty()) {
+  const bool is_applications_list_empty = applications().GetData().empty();
+  if (is_applications_list_empty) {
     policy_handler_->StopRetrySequence();
   }
   return;
@@ -4104,9 +4110,7 @@ void ApplicationManagerImpl::OnApplicationListUpdateTimer() {
   const bool is_new_app_registered = registered_during_timer_execution_;
   registered_during_timer_execution_ = false;
 
-  apps_to_register_list_lock_ptr_->Acquire();
-  const bool trigger_ptu = apps_size_ != applications_.size();
-  apps_to_register_list_lock_ptr_->Release();
+  const bool trigger_ptu = apps_size_ != applications().GetData().size();
 
   if (is_new_app_registered) {
     SendUpdateAppList();
