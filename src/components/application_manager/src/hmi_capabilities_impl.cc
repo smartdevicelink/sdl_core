@@ -950,7 +950,9 @@ bool HMICapabilitiesImpl::LoadCapabilitiesFromFile() {
             ConvertStringToEnum<hmi_apis::Common_HmiZoneCapabilities::eType>(
                 ui_hmi_zone_capabilities_node.asString());
         if (hmi_apis::Common_HmiZoneCapabilities::INVALID_ENUM != enum_value) {
-          smart_objects::SmartObject hmi_zone_capabilities_so = enum_value;
+          smart_objects::SmartObject hmi_zone_capabilities_so(
+              smart_objects::SmartType_Array);
+          hmi_zone_capabilities_so = enum_value;
           set_hmi_zone_capabilities(hmi_zone_capabilities_so);
         }
       }
