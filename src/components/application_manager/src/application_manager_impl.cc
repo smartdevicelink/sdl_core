@@ -229,7 +229,7 @@ ApplicationManagerImpl::ApplicationManagerImpl(
 ApplicationManagerImpl::~ApplicationManagerImpl() {
   SDL_LOG_AUTO_TRACE();
 
-  is_stopping_ = true;
+  is_stopping_.store(true);
   SendOnSDLClose();
   media_manager_ = NULL;
   hmi_handler_ = NULL;
@@ -2538,9 +2538,7 @@ bool ApplicationManagerImpl::Init(
 
 bool ApplicationManagerImpl::Stop() {
   SDL_LOG_AUTO_TRACE();
-  stopping_application_mng_lock_.Acquire();
-  is_stopping_ = true;
-  stopping_application_mng_lock_.Release();
+  is_stopping_.store(true);
   application_list_update_timer_.Stop();
   try {
     if (unregister_reason_ ==
@@ -2965,9 +2963,7 @@ void ApplicationManagerImpl::SetUnregisterAllApplicationsReason(
 void ApplicationManagerImpl::HeadUnitReset(
     mobile_api::AppInterfaceUnregisteredReason::eType reason) {
   SDL_LOG_AUTO_TRACE();
-  stopping_application_mng_lock_.Acquire();
-  is_stopping_ = true;
-  stopping_application_mng_lock_.Release();
+  is_stopping_.store(true);
   switch (reason) {
     case mobile_api::AppInterfaceUnregisteredReason::MASTER_RESET: {
       SDL_LOG_TRACE("Performing MASTER_RESET");
@@ -3374,7 +3370,6 @@ mobile_apis::Result::eType ApplicationManagerImpl::CheckPolicyPermissions(
 }
 
 bool ApplicationManagerImpl::is_stopping() const {
-  sync_primitives::AutoLock lock(stopping_application_mng_lock_);
   return is_stopping_;
 }
 
