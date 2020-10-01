@@ -111,10 +111,11 @@ void AlertRequest::Run() {
         (*message_)[strings::msg_params][strings::tts_chunks].length();
   }
 
-  if ((tts_chunks_exists && length_tts_chunks) ||
-      ((*message_)[strings::msg_params].keyExists(strings::play_tone) &&
-       (*message_)[strings::msg_params][strings::play_tone].asBool())) {
+  if (tts_chunks_exists && length_tts_chunks) {
     awaiting_tts_speak_response_ = true;
+  } else if ((*message_)[strings::msg_params].keyExists(strings::play_tone) &&
+             (*message_)[strings::msg_params][strings::play_tone].asBool()) {
+    set_warning_info("playTone ignored since TTS Chunks were not provided");
   }
 
   SendAlertRequest(app_id);
