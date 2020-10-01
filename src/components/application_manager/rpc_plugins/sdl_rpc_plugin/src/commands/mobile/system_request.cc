@@ -34,10 +34,12 @@ Copyright (c) 2018, Ford Motor Company
 #include "sdl_rpc_plugin/commands/mobile/system_request.h"
 
 #include <stdio.h>
+
 #include <algorithm>
 #include <sstream>
 #include <string>
 #include <vector>
+
 #include "application_manager/policies/policy_handler_interface.h"
 #include "formatters/CFormatterJsonBase.h"
 #include "interfaces/MOBILE_API.h"
@@ -70,11 +72,99 @@ const unsigned int kAppIdLengthMax = 40U;
 const unsigned int kAppNameLengthMax = 100U;
 const unsigned int kLanguageArraySizeMax = 100U;
 
+typedef std::set<std::string> SynonymsSet;
+typedef std::map<std::string, SynonymsSet> SynonymsMap;
+
+bool ValidateSynonymsAtLanguage(const smart_objects::SmartObject& language,
+                                const std::string& language_name,
+                                SynonymsMap& synonyms_map) {
+  if (!language[language_name].keyExists(json::vrSynonyms)) {
+    SDL_LOG_WARN(kQueryAppsValidationFailedPrefix
+                 << "'languages.vrSynonyms' doesn't exist");
+    return false;
+  }
+  const smart_objects::SmartArray* synonyms_array =
+      language[language_name][json::vrSynonyms].asArray();
+  if (!synonyms_array) {
+    SDL_LOG_WARN(kQueryAppsValidationFailedPrefix
+                 << "vrSynonyms is not array.");
+    return false;
+  }
+  const size_t synonyms_array_size = synonyms_array->size();
+  if (synonyms_array_size < kVrArraySizeMin) {
+    SDL_LOG_WARN(kQueryAppsValidationFailedPrefix
+                 << "vrSynomyms array has [" << synonyms_array_size
+                 << "] size < allowed min size [" << kVrArraySizeMin << "]");
+    return false;
+  }
+  if (synonyms_array_size > kVrArraySizeMax) {
+    SDL_LOG_WARN(kQueryAppsValidationFailedPrefix
+                 << "vrSynomyms array size [" << synonyms_array_size
+                 << "] exceeds maximum allowed size [" << kVrArraySizeMax
+                 << "]");
+    return false;
+  }
+
+  for (std::size_t idx = 0; idx < synonyms_array_size; ++idx) {
+    const smart_objects::SmartObject& synonym = (*synonyms_array)[idx];
+    const std::string vrSynonym = synonym.asString();
+    if (vrSynonym.length() > kVrSynonymLengthMax) {
+      SDL_LOG_WARN(kQueryAppsValidationFailedPrefix
+                   << "vrSYnomym item [" << idx << "] exceeds max length ["
+                   << vrSynonym.length() << "]>[" << kVrSynonymLengthMax
+                   << "]");
+      return false;
+    }
+    if (vrSynonym.length() < kVrSynonymLengthMin) {
+      SDL_LOG_WARN(kQueryAppsValidationFailedPrefix
+                   << "vrSYnomym item [" << idx << "] length ["
+                   << vrSynonym.length() << "] is less then min length ["
+                   << kVrSynonymLengthMin << "] allowed.");
+      return false;
+    }
+    // Verify duplicates
+    SynonymsMap::iterator synonyms_map_iter = synonyms_map.find(language_name);
+    if (synonyms_map_iter != synonyms_map.end()) {
+      if (!(*synonyms_map_iter).second.insert(vrSynonym).second) {
+        SDL_LOG_WARN(kQueryAppsValidationFailedPrefix
+                     << "vrSYnomym item already defined [" << vrSynonym.c_str()
+                     << "] for language [" << language_name << "]");
+        return false;
+      }
+    }
+  }
+  return true;
+}
+
+bool CheckMandatoryParametersPresent(
+    const smart_objects::SmartObject& app_data) {
+  if (!app_data.keyExists(json::android) && !app_data.keyExists(json::ios)) {
+    return false;
+  }
+
+  if (app_data.keyExists(json::android) &&
+      !app_data[json::android].keyExists(json::packageName)) {
+    return false;
+  }
+
+  if (app_data.keyExists(json::ios) &&
+      !app_data[json::ios].keyExists(json::urlScheme)) {
+    return false;
+  }
+
+  if (!app_data.keyExists(json::appId)) {
+    return false;
+  }
+
+  if (!app_data.keyExists(json::name)) {
+    return false;
+  }
+
+  return true;
+}
+
 class QueryAppsDataValidator {
  public:
-  typedef std::set<std::string> SynonymsSet;
-  typedef std::map<std::string, SynonymsSet> SynonymsMap;
-
   QueryAppsDataValidator(smart_objects::SmartObject& object,
                          const ApplicationManager& manager)
       : data_(object), manager_(manager) {}
@@ -298,96 +388,6 @@ class QueryAppsDataValidator {
     return true;
   }
 
-  bool ValidateSynonymsAtLanguage(const smart_objects::SmartObject& language,
-                                  const std::string& language_name,
-                                  SynonymsMap& synonyms_map) const {
-    if (!language[language_name].keyExists(json::vrSynonyms)) {
-      SDL_LOG_WARN(kQueryAppsValidationFailedPrefix
-                   << "'languages.vrSynonyms' doesn't exist");
-      return false;
-    }
-    const smart_objects::SmartArray* synonyms_array =
-        language[language_name][json::vrSynonyms].asArray();
-    if (!synonyms_array) {
-      SDL_LOG_WARN(kQueryAppsValidationFailedPrefix
-                   << "vrSynonyms is not array.");
-      return false;
-    }
-    const size_t synonyms_array_size = synonyms_array->size();
-    if (synonyms_array_size < kVrArraySizeMin) {
-      SDL_LOG_WARN(kQueryAppsValidationFailedPrefix
-                   << "vrSynomyms array has [" << synonyms_array_size
-                   << "] size < allowed min size [" << kVrArraySizeMin << "]");
-      return false;
-    }
-    if (synonyms_array_size > kVrArraySizeMax) {
-      SDL_LOG_WARN(kQueryAppsValidationFailedPrefix
-                   << "vrSynomyms array size [" << synonyms_array_size
-                   << "] exceeds maximum allowed size [" << kVrArraySizeMax
-                   << "]");
-      return false;
-    }
-
-    for (std::size_t idx = 0; idx < synonyms_array_size; ++idx) {
-      const smart_objects::SmartObject& synonym = (*synonyms_array)[idx];
-      const std::string vrSynonym = synonym.asString();
-      if (vrSynonym.length() > kVrSynonymLengthMax) {
-        SDL_LOG_WARN(kQueryAppsValidationFailedPrefix
-                     << "vrSYnomym item [" << idx << "] exceeds max length ["
-                     << vrSynonym.length() << "]>[" << kVrSynonymLengthMax
-                     << "]");
-        return false;
-      }
-      if (vrSynonym.length() < kVrSynonymLengthMin) {
-        SDL_LOG_WARN(kQueryAppsValidationFailedPrefix
-                     << "vrSYnomym item [" << idx << "] length ["
-                     << vrSynonym.length() << "] is less then min length ["
-                     << kVrSynonymLengthMin << "] allowed.");
-        return false;
-      }
-      // Verify duplicates
-      SynonymsMap::iterator synonyms_map_iter =
-          synonyms_map.find(language_name);
-      if (synonyms_map_iter != synonyms_map.end()) {
-        if (!(*synonyms_map_iter).second.insert(vrSynonym).second) {
-          SDL_LOG_WARN(kQueryAppsValidationFailedPrefix
-                       << "vrSYnomym item already defined ["
-                       << vrSynonym.c_str() << "] for language ["
-                       << language_name << "]");
-          return false;
-        }
-      }
-    }
-    return true;
-  }
-
-  bool CheckMandatoryParametersPresent(
-      const smart_objects::SmartObject& app_data) const {
-    if (!app_data.keyExists(json::android) && !app_data.keyExists(json::ios)) {
-      return false;
-    }
-
-    if (app_data.keyExists(json::android) &&
-        !app_data[json::android].keyExists(json::packageName)) {
-      return false;
-    }
-
-    if (app_data.keyExists(json::ios) &&
-        !app_data[json::ios].keyExists(json::urlScheme)) {
-      return false;
-    }
-
-    if (!app_data.keyExists(json::appId)) {
-      return false;
-    }
-
-    if (!app_data.keyExists(json::name)) {
-      return false;
-    }
-
-    return true;
-  }
-
   smart_objects::SmartObject& data_;
   std::set<std::string> applications_id_set_;
   const ApplicationManager& manager_;
@@ -466,7 +466,7 @@ void SystemRequest::Run() {
     SDL_LOG_TRACE("Request subtype: " << request_subtype << " is ALLOWED");
   }
 
-  std::string file_name = kSYNC;
+  std::string file_name;
   if ((*message_)[strings::msg_params].keyExists(strings::file_name)) {
     file_name = (*message_)[strings::msg_params][strings::file_name].asString();
   } else {

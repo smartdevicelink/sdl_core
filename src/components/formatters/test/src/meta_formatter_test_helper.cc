@@ -148,7 +148,7 @@ void CMetaFormatterTestHelper::CompareObjects(const SmartObject& first,
 
     for (std::set<std::string>::const_iterator key = keys.begin();
          key != keys.end();
-         key++) {
+         ++key) {
       CompareObjects(first.getElement(*key), second.getElement(*key));
     }
   } else if (SmartType_Boolean == first.getType()) {

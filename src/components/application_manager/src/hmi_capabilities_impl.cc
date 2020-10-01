@@ -610,7 +610,7 @@ struct JsonCapabilitiesGetter {
    * @param json_cache_node reference to cached JSON capabilities node
    */
   JsonCapabilitiesGetter(Json::Value& json_default_node,
-                         Json::Value& json_cache_node)
+                         const Json::Value& json_cache_node)
       : json_default_node_(json_default_node)
       , json_cache_node_(json_cache_node) {}
 
@@ -941,18 +941,17 @@ bool HMICapabilitiesImpl::LoadCapabilitiesFromFile() {
                                         pcm_capabilities_so);
         set_pcm_stream_capabilities(pcm_capabilities_so);
       }
-
       auto ui_hmi_zone_capabilities_node =
           json_ui_getter.GetJsonMember(hmi_response::hmi_zone_capabilities,
                                        hmi_apis::FunctionID::UI_GetCapabilities,
                                        requests_required_for_capabilities_);
       if (!ui_hmi_zone_capabilities_node.isNull()) {
-        smart_objects::SmartObject hmi_zone_capabilities_so =
-            smart_objects::SmartObject(smart_objects::SmartType_Array);
         auto enum_value =
             ConvertStringToEnum<hmi_apis::Common_HmiZoneCapabilities::eType>(
                 ui_hmi_zone_capabilities_node.asString());
         if (hmi_apis::Common_HmiZoneCapabilities::INVALID_ENUM != enum_value) {
+          smart_objects::SmartObject hmi_zone_capabilities_so(
+              smart_objects::SmartType_Array);
           hmi_zone_capabilities_so = enum_value;
           set_hmi_zone_capabilities(hmi_zone_capabilities_so);
         }

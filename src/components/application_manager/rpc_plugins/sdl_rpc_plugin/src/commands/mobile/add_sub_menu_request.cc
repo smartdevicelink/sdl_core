@@ -209,9 +209,9 @@ bool AddSubMenuRequest::Init() {
 
 bool AddSubMenuRequest::CheckSubMenuName() {
   SDL_LOG_AUTO_TRACE();
-  const char* str = NULL;
 
-  str = (*message_)[strings::msg_params][strings::menu_name].asCharArray();
+  const char* str =
+      (*message_)[strings::msg_params][strings::menu_name].asCharArray();
   if (!CheckSyntax(str)) {
     SDL_LOG_INFO("Invalid subMenu name.");
     return false;

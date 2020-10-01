@@ -212,11 +212,14 @@ RCRPCPlugin::Apps RCRPCPlugin::GetRCApplications(
   ApplicationSet accessor = app_mngr.applications().GetData();
 
   std::vector<ApplicationSharedPtr> result;
-  for (const auto& it : accessor) {
-    if (it->is_remote_control_supported()) {
-      result.push_back(it);
-    }
-  }
+
+  std::copy_if(accessor.begin(),
+               accessor.end(),
+               std::back_inserter(result),
+               [](const ApplicationSharedPtr& app) {
+                 return app->is_remote_control_supported();
+               });
+
   return result;
 }
 

@@ -56,8 +56,7 @@ using boost::system::error_code;
 uint64_t file_system::GetAvailableDiskSpace(const std::string& path) {
   SDL_LOG_AUTO_TRACE();
   error_code ec;
-  fs::space_info si = {0, 0, 0};
-  si = fs::space(path, ec);
+  fs::space_info si = fs::space(path, ec);
 
   if (ec) {
     // If something went wrong, assume no free space
@@ -466,11 +465,10 @@ bool file_system::ReadFile(const std::string& name, std::string& result) {
 const std::string file_system::ConvertPathForURL(const std::string& path) {
   SDL_LOG_AUTO_TRACE();
   const std::string reserved_symbols = "!#$&'()*+,:;=?@[] ";
-  size_t pos = std::string::npos;
   std::string converted_path;
 
   for (const auto symbol : path) {
-    pos = reserved_symbols.find_first_of(symbol);
+    size_t pos = reserved_symbols.find_first_of(symbol);
     if (pos != std::string::npos) {
       const size_t size = 100;
       char percent_value[size];

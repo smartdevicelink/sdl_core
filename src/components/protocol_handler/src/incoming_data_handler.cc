@@ -158,7 +158,7 @@ RESULT_CODE IncomingDataHandler::CreateFrame(
     }
     SDL_LOG_DEBUG("Payload size " << header_.dataSize);
     const uint32_t packet_size = GetPacketSize(header_);
-    if (packet_size <= 0) {
+    if (packet_size == 0) {
       SDL_LOG_WARN("Null packet size");
       ++data_it;
       --data_size;

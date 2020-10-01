@@ -163,9 +163,13 @@ TcpClientListener::~TcpClientListener() {
 void SetKeepaliveOptions(const int fd) {
   SDL_LOG_AUTO_TRACE();
   SDL_LOG_DEBUG("fd: " << fd);
+  // cppcheck-suppress unreadVariable
   int yes = 1;
+  // cppcheck-suppress unreadVariable
   int keepidle = 3;  // 3 seconds to disconnection detecting
+  // cppcheck-suppress unreadVariable
   int keepcnt = 5;
+  // cppcheck-suppress unreadVariable
   int keepintvl = 1;
 #ifdef __linux__
   int user_timeout = 7000;  // milliseconds

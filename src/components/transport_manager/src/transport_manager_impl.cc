@@ -1386,7 +1386,8 @@ void TransportManagerImpl::Handle(::protocol_handler::RawMessagePtr msg) {
   }
 
   TransportAdapter* transport_adapter = connection->transport_adapter;
-  if (NULL == transport_adapter) {
+
+  if (nullptr == transport_adapter) {
     std::string error_text = "Transport adapter is not found";
     SDL_LOG_ERROR(error_text);
     RaiseEvent(&TransportManagerListener::OnTMMessageSendFailed,

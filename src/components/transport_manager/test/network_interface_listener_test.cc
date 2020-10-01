@@ -30,22 +30,8 @@ class NetworkInterfaceListenerTest : public ::testing::Test {
   virtual ~NetworkInterfaceListenerTest() {}
 
  protected:
-  struct InterfaceEntry {
-    const char* name;
-    const char* ipv4_address;
-    const char* ipv6_address;
-    unsigned int flags;
-  };
-
   void Deinit() {
     delete interface_listener_impl_;
-  }
-
-  void SleepFor(long msec) const {
-    if (msec > 0) {
-      struct timespec ts = {0, msec * 1000 * 1000};
-      nanosleep(&ts, NULL);
-    }
   }
 
   NetworkInterfaceListenerImpl* interface_listener_impl_;

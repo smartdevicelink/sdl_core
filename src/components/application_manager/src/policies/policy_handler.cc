@@ -2394,8 +2394,6 @@ bool PolicyHandler::CheckAppServiceParameters(
     const std::string& requested_service_name,
     const std::string& requested_service_type,
     smart_objects::SmartArray* requested_handled_rpcs) const {
-  std::string service_name = std::string();
-  std::string service_type = std::string();
   std::vector<int32_t> handled_rpcs = {};
 
   policy_table::AppServiceParameters app_service_parameters =

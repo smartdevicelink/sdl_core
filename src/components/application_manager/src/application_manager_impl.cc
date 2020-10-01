@@ -693,9 +693,9 @@ ApplicationSharedPtr ApplicationManagerImpl::RegisterApplication(
   bool is_mismatched_cloud_app = false;
 
   if (apps_to_register_.end() == it) {
-    DevicePredicate finder(application->device());
+    DevicePredicate device_finder(application->device());
     it = std::find_if(
-        apps_to_register_.begin(), apps_to_register_.end(), finder);
+        apps_to_register_.begin(), apps_to_register_.end(), device_finder);
 
     bool found = apps_to_register_.end() != it;
     is_mismatched_cloud_app = found && (*it)->is_cloud_app() &&
@@ -3083,11 +3083,11 @@ void ApplicationManagerImpl::UnregisterAllApplications() {
   SDL_LOG_DEBUG("Unregister reason  " << unregister_reason_);
 
   SetHMICooperating(false);
-  bool is_ignition_off = false;
+
   using namespace mobile_api::AppInterfaceUnregisteredReason;
   using namespace helpers;
 
-  is_ignition_off =
+  bool is_ignition_off =
       Compare<eType, EQ, ONE>(unregister_reason_, IGNITION_OFF, INVALID_ENUM);
 
   bool is_unexpected_disconnect = Compare<eType, NEQ, ALL>(
@@ -3846,9 +3846,7 @@ bool ApplicationManagerImpl::ResetVrHelpTitleItems(
   }
 
   const std::string& vr_help_title = get_settings().vr_help_title();
-  smart_objects::SmartObject so_vr_help_title =
-      smart_objects::SmartObject(smart_objects::SmartType_String);
-  so_vr_help_title = vr_help_title;
+  smart_objects::SmartObject so_vr_help_title(vr_help_title);
 
   app->reset_vr_help_title();
   app->reset_vr_help();
@@ -4380,7 +4378,7 @@ void ApplicationManagerImpl::OnUpdateHMIAppType(
   std::vector<std::string> hmi_types_from_policy;
   smart_objects::SmartObject transform_app_hmi_types(
       smart_objects::SmartType_Array);
-  bool flag_diffirence_app_hmi_type = false;
+  bool flag_diffirence_app_hmi_type;
   DataAccessor<ApplicationSet> accessor(applications());
   for (ApplicationSetIt it = accessor.GetData().begin();
        it != accessor.GetData().end();
@@ -4389,7 +4387,6 @@ void ApplicationManagerImpl::OnUpdateHMIAppType(
 
     if (it_app_hmi_types_from_policy != app_hmi_types.end() &&
         ((it_app_hmi_types_from_policy->second).size())) {
-      flag_diffirence_app_hmi_type = false;
       hmi_types_from_policy = (it_app_hmi_types_from_policy->second);
 
       if (transform_app_hmi_types.length()) {
@@ -4611,7 +4608,6 @@ void ApplicationManagerImpl::SendGetIconUrlNotifications(
       continue;
     }
 
-    std::string endpoint = app_icon_it->second.endpoint;
     bool pending_request = app_icon_it->second.pending_request;
 
     if (pending_request) {
@@ -4942,7 +4938,7 @@ void ApplicationManagerImpl::SetMockMediaManager(
 #endif  // BUILD_TESTS
 struct MobileAppIdPredicate {
   std::string policy_app_id_;
-  MobileAppIdPredicate(const std::string& policy_app_id)
+  explicit MobileAppIdPredicate(const std::string& policy_app_id)
       : policy_app_id_(policy_app_id) {}
   bool operator()(const ApplicationSharedPtr app) const {
     return app ? policy_app_id_ == app->policy_app_id() : false;
@@ -4951,7 +4947,8 @@ struct MobileAppIdPredicate {
 
 struct TakeDeviceHandle {
  public:
-  TakeDeviceHandle(const ApplicationManager& app_mngr) : app_mngr_(app_mngr) {}
+  explicit TakeDeviceHandle(const ApplicationManager& app_mngr)
+      : app_mngr_(app_mngr) {}
   std::string operator()(ApplicationSharedPtr& app) {
     DCHECK_OR_RETURN(app, "");
     return MessageHelper::GetDeviceMacAddressForHandle(app->device(),
