@@ -37,6 +37,9 @@
 #define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TCP_TCP_CLIENT_LISTENER_H_
 
 #include "transport_manager/transport_adapter/client_connection_listener.h"
+
+#include <atomic>
+
 #include "utils/lock.h"
 #include "utils/threads/thread_delegate.h"
 
@@ -149,8 +152,8 @@ class TcpClientListener : public ClientConnectionListener {
   bool started_;
   threads::Thread* thread_;
   int socket_;
-  bool thread_stop_requested_;
-  bool remove_devices_on_terminate_;
+  std::atomic_bool thread_stop_requested_;
+  std::atomic_bool remove_devices_on_terminate_;
   int pipe_fds_[2];
   NetworkInterfaceListener* interface_listener_;
   const std::string designated_interface_;
