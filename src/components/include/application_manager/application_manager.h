@@ -558,6 +558,8 @@ class ApplicationManager {
       const std::shared_ptr<smart_objects::SmartObject>&
           request_for_registration) = 0;
 
+  virtual void FinalizeAppRegistration(ApplicationSharedPtr application, const uint32_t connection_key) = 0;
+
   virtual void SendUpdateAppList() = 0;
 
   virtual void MarkAppsGreyOut(const connection_handler::DeviceHandle handle,

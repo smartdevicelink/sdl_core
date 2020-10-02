@@ -742,6 +742,13 @@ void RegisterAppInterfaceRequest::Run() {
   SetupAppDeviceInfo(application);
   auto status_notifier = AddApplicationDataToPolicy(application);
 
+  auto on_app_registered = [application](plugin_manager::RPCPlugin& plugin) {
+    plugin.OnApplicationEvent(plugin_manager::kApplicationRegistered,
+                              application);
+  };
+  application_manager_.ApplyFunctorForEachPlugin(on_app_registered);
+  application_manager_.FinalizeAppRegistration(application, connection_key());
+
   std::string add_info;
   const auto is_resumption_required = ApplicationDataShouldBeResumed(add_info);
 
@@ -761,12 +768,6 @@ void RegisterAppInterfaceRequest::Run() {
   // By default app subscribed to CUSTOM_BUTTON
   SendSubscribeCustomButtonNotification();
   SendChangeRegistrationOnHMI(application);
-
-  auto on_app_registered = [application](plugin_manager::RPCPlugin& plugin) {
-    plugin.OnApplicationEvent(plugin_manager::kApplicationRegistered,
-                              application);
-  };
-  application_manager_.ApplyFunctorForEachPlugin(on_app_registered);
 
   if (is_resumption_required) {
     const auto& msg_params = (*message_)[strings::msg_params];

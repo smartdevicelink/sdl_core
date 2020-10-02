@@ -755,6 +755,11 @@ ApplicationSharedPtr ApplicationManagerImpl::RegisterApplication(
   // Timer will be started after hmi level resumption.
   resume_controller().OnAppRegistrationStart(policy_app_id, device_mac);
 
+  return application;
+}
+
+void ApplicationManagerImpl::FinalizeAppRegistration(ApplicationSharedPtr application, const uint32_t connection_key) {
+  
   AddAppToRegisteredAppList(application);
 
   // Update cloud app information, in case any pending apps are unable to be
@@ -772,8 +777,6 @@ ApplicationSharedPtr ApplicationManagerImpl::RegisterApplication(
     connection_handler::DeviceHandle secondary_device_handle = itr->second;
     application->set_secondary_device(secondary_device_handle);
   }
-
-  return application;
 }
 
 bool ApplicationManagerImpl::ActivateApplication(ApplicationSharedPtr app) {
