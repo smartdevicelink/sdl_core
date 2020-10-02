@@ -1813,8 +1813,8 @@ bool ApplicationManagerImpl::CheckResumptionRequiredTransportAvailable(
   } else {
     // check all AppHMITypes that the app has
     for (size_t i = 0; i < app_types_array->length(); i++) {
-      const std::string app_type_string =
-          AppHMITypeToString(static_cast<mobile_apis::AppHMIType::eType>(
+      std::string app_type_string =
+          EnumToString(static_cast<mobile_apis::AppHMIType::eType>(
               app_types_array->getElement(i).asUInt()));
       bool transport_is_found = false;
 
@@ -2703,8 +2703,7 @@ void ApplicationManagerImpl::PullLanguagesInfo(const SmartObject& app_data,
   }
 
   const HMICapabilities& hmi_cap = hmi_capabilities();
-  std::string cur_vr_lang(
-      MessageHelper::CommonLanguageToString(hmi_cap.active_vr_language()));
+  std::string cur_vr_lang(EnumToString(hmi_cap.active_vr_language()));
   const SmartObject& languages = app_data[json::languages];
 
   std::transform(
@@ -3348,8 +3347,8 @@ mobile_apis::Result::eType ApplicationManagerImpl::CheckPolicyPermissions(
 #ifdef ENABLE_LOG
   const std::string log_msg =
       "Application: " + app->policy_app_id() + ", RPC: " + function_id +
-      ", window_id: " + std::to_string(window_id) + ", HMI status: " +
-      MessageHelper::StringifiedHMILevel(app->hmi_level(window_id));
+      ", window_id: " + std::to_string(window_id) +
+      ", HMI status: " + EnumToString(app->hmi_level(window_id));
 #endif  // ENABLE_LOG
   if (result.hmi_level_permitted != policy::kRpcAllowed) {
     SDL_LOG_WARN("Request is blocked by policies. " << log_msg);
@@ -4283,69 +4282,6 @@ ApplicationManagerImpl::CreateAllAppGlobalPropsIDList(
   return global_properties;
 }
 
-mobile_apis::AppHMIType::eType ApplicationManagerImpl::StringToAppHMIType(
-    std::string str) {
-  SDL_LOG_AUTO_TRACE();
-  if ("DEFAULT" == str) {
-    return mobile_apis::AppHMIType::DEFAULT;
-  } else if ("COMMUNICATION" == str) {
-    return mobile_apis::AppHMIType::COMMUNICATION;
-  } else if ("MEDIA" == str) {
-    return mobile_apis::AppHMIType::MEDIA;
-  } else if ("MESSAGING" == str) {
-    return mobile_apis::AppHMIType::MESSAGING;
-  } else if ("NAVIGATION" == str) {
-    return mobile_apis::AppHMIType::NAVIGATION;
-  } else if ("PROJECTION" == str) {
-    return mobile_apis::AppHMIType::PROJECTION;
-  } else if ("INFORMATION" == str) {
-    return mobile_apis::AppHMIType::INFORMATION;
-  } else if ("SOCIAL" == str) {
-    return mobile_apis::AppHMIType::SOCIAL;
-  } else if ("BACKGROUND_PROCESS" == str) {
-    return mobile_apis::AppHMIType::BACKGROUND_PROCESS;
-  } else if ("TESTING" == str) {
-    return mobile_apis::AppHMIType::TESTING;
-  } else if ("SYSTEM" == str) {
-    return mobile_apis::AppHMIType::SYSTEM;
-  } else {
-    return mobile_apis::AppHMIType::INVALID_ENUM;
-  }
-}
-
-const std::string ApplicationManagerImpl::AppHMITypeToString(
-    mobile_apis::AppHMIType::eType type) const {
-  SDL_LOG_AUTO_TRACE();
-  switch (type) {
-    case mobile_apis::AppHMIType::DEFAULT:
-      return "DEFAULT";
-    case mobile_apis::AppHMIType::COMMUNICATION:
-      return "COMMUNICATION";
-    case mobile_apis::AppHMIType::MEDIA:
-      return "MEDIA";
-    case mobile_apis::AppHMIType::MESSAGING:
-      return "MESSAGING";
-    case mobile_apis::AppHMIType::NAVIGATION:
-      return "NAVIGATION";
-    case mobile_apis::AppHMIType::INFORMATION:
-      return "INFORMATION";
-    case mobile_apis::AppHMIType::SOCIAL:
-      return "SOCIAL";
-    case mobile_apis::AppHMIType::BACKGROUND_PROCESS:
-      return "BACKGROUND_PROCESS";
-    case mobile_apis::AppHMIType::TESTING:
-      return "TESTING";
-    case mobile_apis::AppHMIType::SYSTEM:
-      return "SYSTEM";
-    case mobile_apis::AppHMIType::PROJECTION:
-      return "PROJECTION";
-    case mobile_apis::AppHMIType::REMOTE_CONTROL:
-      return "REMOTE_CONTROL";
-    default:
-      return "INVALID_ENUM";
-  }
-}
-
 bool ApplicationManagerImpl::CompareAppHMIType(
     const smart_objects::SmartObject& from_policy,
     const smart_objects::SmartObject& from_application) {
@@ -4396,7 +4332,8 @@ void ApplicationManagerImpl::OnUpdateHMIAppType(
 
       for (uint32_t i = 0; i < hmi_types_from_policy.size(); ++i) {
         transform_app_hmi_types[i] =
-            StringToAppHMIType(hmi_types_from_policy[i]);
+            StringToEnum<mobile_api::AppHMIType::eType>(
+                hmi_types_from_policy[i]);
       }
 
       ApplicationConstSharedPtr app = *it;
@@ -4543,8 +4480,7 @@ void ApplicationManagerImpl::SendDriverDistractionState(
             driver_distraction_state()) {
       bool dismissal_enabled = *lock_screen_dismissal;
       if (dismissal_enabled) {
-        const auto language =
-            MessageHelper::MobileLanguageToString(application->ui_language());
+        const auto language = EnumToString(application->ui_language());
 
         const auto warning_message =
             policy_handler_->LockScreenDismissalWarningMessage(language);

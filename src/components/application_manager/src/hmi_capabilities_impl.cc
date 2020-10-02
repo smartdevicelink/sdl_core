@@ -745,7 +745,6 @@ bool HMICapabilitiesImpl::LoadCapabilitiesFromFile() {
 
     JsonCapabilitiesGetter json_root_getter(root_json, root_json_override);
     // UI
-
     if (json_root_getter.IsInterfaceJsonMemberExists(hmi_interface::ui)) {
       auto json_ui_getter =
           GetInterfaceGetter(hmi_interface::ui, json_root_getter);
@@ -757,7 +756,8 @@ bool HMICapabilitiesImpl::LoadCapabilitiesFromFile() {
 
       if (!ui_language_node.isNull()) {
         const std::string lang = ui_language_node.asString();
-        set_active_ui_language(MessageHelper::CommonLanguageFromString(lang));
+        set_active_ui_language(
+            StringToEnum<hmi_apis::Common_Language::eType>(lang));
       }
 
       auto ui_languages_node = json_ui_getter.GetJsonMember(
@@ -1045,6 +1045,7 @@ bool HMICapabilitiesImpl::LoadCapabilitiesFromFile() {
             set_video_streaming_supported(true);
           }
         }
+
         if (JsonIsMemberSafe(ui_system_capabilities_node,
                              strings::driver_distraction_capability)) {
           Json::Value dd_capability = ui_system_capabilities_node.get(
@@ -1086,7 +1087,7 @@ bool HMICapabilitiesImpl::LoadCapabilitiesFromFile() {
             auto it = lights.asArray()->begin();
             for (; it != lights.asArray()->end(); ++it) {
               smart_objects::SmartObject& light_name_so = (*it)[strings::name];
-              auto light_name = MessageHelper::CommonLightNameFromString(
+              auto light_name = StringToEnum<hmi_apis::Common_LightName::eType>(
                   light_name_so.asString());
               light_name_so = light_name;
             }
@@ -1129,7 +1130,8 @@ bool HMICapabilitiesImpl::LoadCapabilitiesFromFile() {
                                        requests_required_for_capabilities_);
       if (!vr_language_node.isNull()) {
         const std::string lang = vr_language_node.asString();
-        set_active_vr_language(MessageHelper::CommonLanguageFromString(lang));
+        set_active_vr_language(
+            StringToEnum<hmi_apis::Common_Language::eType>(lang));
       }
 
       auto vr_languages_node = json_vr_getter.GetJsonMember(
@@ -1170,7 +1172,8 @@ bool HMICapabilitiesImpl::LoadCapabilitiesFromFile() {
                                         requests_required_for_capabilities_);
       if (!tts_language_node.isNull()) {
         const std::string lang = tts_language_node.asString();
-        set_active_tts_language(MessageHelper::CommonLanguageFromString(lang));
+        set_active_tts_language(
+            StringToEnum<hmi_apis::Common_Language::eType>(lang));
       }
 
       auto tts_languages_node = json_tts_getter.GetJsonMember(
@@ -1277,7 +1280,7 @@ bool HMICapabilitiesImpl::LoadCapabilitiesFromFile() {
     return false;
   }
   return true;
-}
+}  // namespace application_manager
 
 hmi_apis::Common_Language::eType
 HMICapabilitiesImpl::GetActiveLanguageForInterface(
@@ -1366,8 +1369,8 @@ bool HMICapabilitiesImpl::AllFieldsSaved(
           GetActiveLanguageForInterface(interface_name);
       const auto json_language = interface_node[hmi_response::language];
 
-      if (active_language !=
-          MessageHelper::CommonLanguageFromString(json_language.asString())) {
+      if (active_language != StringToEnum<hmi_apis::Common_Language::eType>(
+                                 json_language.asString())) {
         SDL_LOG_DEBUG("Active " << interface_name
                                 << " language is not the same as the persisted "
                                    "one. Field should be overwritten");
@@ -1506,8 +1509,7 @@ void HMICapabilitiesImpl::PrepareUiJsonValueForSaving(
     }
 
     else if (section_to_update == hmi_response::language) {
-      out_node[hmi_response::language] =
-          MessageHelper::CommonLanguageToString(active_ui_language());
+      out_node[hmi_response::language] = EnumToString(active_ui_language());
     }
 
     else if (section_to_update == hmi_response::languages) {
@@ -1530,8 +1532,7 @@ void HMICapabilitiesImpl::PrepareVrJsonValueForSaving(
 
   for (const auto& section_to_update : sections_to_update) {
     if (section_to_update == hmi_response::language) {
-      out_node[hmi_response::language] =
-          MessageHelper::CommonLanguageToString(active_vr_language());
+      out_node[hmi_response::language] = EnumToString(active_vr_language());
     }
 
     if (section_to_update == hmi_response::languages) {
@@ -1554,8 +1555,7 @@ void HMICapabilitiesImpl::PrepareTtsJsonValueForSaving(
 
   for (const auto& section_to_update : sections_to_update) {
     if (section_to_update == hmi_response::language) {
-      out_node[hmi_response::language] =
-          MessageHelper::CommonLanguageToString(active_tts_language());
+      out_node[hmi_response::language] = EnumToString(active_tts_language());
     }
 
     if (section_to_update == hmi_response::languages) {
@@ -1820,8 +1820,8 @@ void HMICapabilitiesImpl::convert_json_languages_to_obj(
     const Json::Value& json_languages,
     smart_objects::SmartObject& languages) const {
   for (uint32_t i = 0, j = 0; i < json_languages.size(); ++i) {
-    languages[j++] =
-        MessageHelper::CommonLanguageFromString(json_languages[i].asString());
+    languages[j++] = StringToEnum<hmi_apis::Common_Language::eType>(
+        json_languages[i].asString());
   }
 }
 

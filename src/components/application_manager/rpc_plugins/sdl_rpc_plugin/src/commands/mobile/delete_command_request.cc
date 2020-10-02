@@ -155,7 +155,7 @@ void DeleteCommandRequest::on_event(const event_engine::Event& event) {
       ui_result_ = static_cast<hmi_apis::Common_Result::eType>(
           message[strings::params][hmi_response::code].asInt());
       SDL_LOG_DEBUG("Received UI_DeleteCommand event with result "
-                    << MessageHelper::HMIResultToString(ui_result_));
+                    << EnumToString(ui_result_));
       GetInfo(message, ui_info_);
       break;
     }
@@ -165,7 +165,7 @@ void DeleteCommandRequest::on_event(const event_engine::Event& event) {
       vr_result_ = static_cast<hmi_apis::Common_Result::eType>(
           message[strings::params][hmi_response::code].asInt());
       SDL_LOG_DEBUG("Received VR_DeleteCommand event with result "
-                    << MessageHelper::HMIResultToString(vr_result_));
+                    << EnumToString(vr_result_));
       GetInfo(message, vr_info_);
       break;
     }

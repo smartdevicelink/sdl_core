@@ -1230,21 +1230,6 @@ class ApplicationManagerImpl
                          smart_objects::SmartObject& vrSynonym);
 
   /**
-   * @brief Method transforms string to AppHMIType
-   * @param str contains string AppHMIType
-   * @return enum AppHMIType
-   */
-  mobile_apis::AppHMIType::eType StringToAppHMIType(std::string str);
-
-  /**
-   * @brief Returns a string representation of AppHMIType
-   * @param type an enum value of AppHMIType
-   * @return string representation of the enum value
-   */
-  const std::string AppHMITypeToString(
-      mobile_apis::AppHMIType::eType type) const;
-
-  /**
    * @brief Method compares arrays of app HMI type
    * @param from_policy contains app HMI type from policy
    * @param from_application contains app HMI type from application

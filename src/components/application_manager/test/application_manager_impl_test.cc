@@ -1576,7 +1576,7 @@ TEST_F(ApplicationManagerImplTest,
   // - .ini file specifies TCP_WIFI for EMPTY_APP entry.
   //   -> The app does not have required transport.
   bool result = CheckResumptionRequiredTransportAvailableTest(
-      NULL,
+      nullptr,
       primary_device_handle,
       primary_transport_device_string,
       secondary_device_handle,

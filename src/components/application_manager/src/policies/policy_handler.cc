@@ -756,9 +756,8 @@ void PolicyHandler::OnGetUserFriendlyMessage(
   POLICY_LIB_CHECK_VOID();
 
 #ifdef EXTERNAL_PROPRIETARY_MODE
-  const std::string active_hmi_language =
-      application_manager::MessageHelper::CommonLanguageToString(
-          application_manager_.hmi_capabilities().active_ui_language());
+  const std::string active_hmi_language = application_manager::EnumToString(
+      application_manager_.hmi_capabilities().active_ui_language());
   const std::vector<UserFriendlyMessage> result =
       policy_manager_->GetUserFriendlyMessages(
           message_codes, language, active_hmi_language);
@@ -1492,8 +1491,7 @@ void PolicyHandler::OnPermissionsUpdated(const std::string& device_id,
   // level to default
   mobile_apis::HMILevel::eType current_hmi_level =
       app->hmi_level(mobile_apis::PredefinedWindows::DEFAULT_WINDOW);
-  mobile_apis::HMILevel::eType hmi_level =
-      MessageHelper::StringToHMILevel(default_hmi);
+  auto hmi_level = StringToEnum<mobile_apis::HMILevel::eType>(default_hmi);
 
   if (mobile_apis::HMILevel::INVALID_ENUM == hmi_level) {
     SDL_LOG_WARN("Couldn't convert default hmi level " << default_hmi
@@ -1705,7 +1703,7 @@ void PolicyHandler::CheckPermissions(
     CheckPermissionResult& result) {
   POLICY_LIB_CHECK_VOID();
   const std::string hmi_level =
-      MessageHelper::StringifiedHMILevel(app->hmi_level(window_id));
+      application_manager::EnumToString(app->hmi_level(window_id));
   if (hmi_level.empty()) {
     SDL_LOG_WARN("HMI level for " << app->policy_app_id() << " is invalid, rpc "
                                   << rpc << " is not allowed.");
@@ -2721,8 +2719,7 @@ void PolicyHandler::OnUpdateHMIStatus(const std::string& device_id,
                                                 << policy_app_id);
     return;
   }
-  mobile_apis::HMILevel::eType level =
-      MessageHelper::StringToHMILevel(hmi_level);
+  auto level = StringToEnum<mobile_apis::HMILevel::eType>(hmi_level);
   if (mobile_apis::HMILevel::INVALID_ENUM == level) {
     SDL_LOG_WARN("Couldn't convert default hmi level " << hmi_level
                                                        << " to enum.");
@@ -2795,8 +2792,7 @@ void PolicyHandler::OnUpdateHMILevel(const std::string& device_id,
                                                 << policy_app_id);
     return;
   }
-  mobile_apis::HMILevel::eType level =
-      MessageHelper::StringToHMILevel(hmi_level);
+  auto level = StringToEnum<mobile_apis::HMILevel::eType>(hmi_level);
   if (mobile_apis::HMILevel::INVALID_ENUM == level) {
     SDL_LOG_WARN("Couldn't convert default hmi level " << hmi_level
                                                        << " to enum.");

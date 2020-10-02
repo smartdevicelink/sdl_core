@@ -256,8 +256,6 @@ class HMICommandsNotificationsTest
     ON_CALL(app_mngr_, application_by_hmi_app(_)).WillByDefault(Return(app_));
     ON_CALL(*app_ptr_, app_id()).WillByDefault(Return(kAppId_));
     ON_CALL(app_mngr_, application(kConnectionKey)).WillByDefault(Return(app_));
-    ON_CALL(mock_message_helper_, MobileLanguageToString(kMobileLanguage))
-        .WillByDefault(Return(kDefaultLanguage));
     ON_CALL(app_mngr_, connection_handler())
         .WillByDefault(ReturnRef(mock_connection_handler_));
   }
@@ -786,7 +784,6 @@ TEST_F(HMICommandsNotificationsTest,
   std::shared_ptr<Command> command =
       CreateCommand<OnSystemInfoChangedNotification>(message);
 
-  EXPECT_CALL(mock_message_helper_, CommonLanguageToString(_));
   EXPECT_CALL(mock_policy_handler_, OnSystemInfoChanged(_));
   command->Run();
 }
@@ -1842,7 +1839,7 @@ TEST_F(HMICommandsNotificationsTest, OnDriverDistractionNotificationEmptyData) {
 
   ON_CALL(mock_policy_handler_, LockScreenDismissalEnabledState())
       .WillByDefault(Return(OptionalBool(true)));
-  std::string required_language = "en-us";
+  std::string required_language = "EN-US";
   ON_CALL(mock_policy_handler_,
           LockScreenDismissalWarningMessage(required_language))
       .WillByDefault(Return(
@@ -1872,7 +1869,7 @@ TEST_F(HMICommandsNotificationsTest,
   typedef boost::optional<bool> OptionalBool;
   ON_CALL(mock_policy_handler_, LockScreenDismissalEnabledState())
       .WillByDefault(Return(OptionalBool(true)));
-  std::string required_language = "en-us";
+  std::string required_language = "EN-US";
   ON_CALL(mock_policy_handler_,
           LockScreenDismissalWarningMessage(required_language))
       .WillByDefault(Return(
@@ -1900,7 +1897,9 @@ TEST_F(HMICommandsNotificationsTest, OnDriverDistractionNotificationValidApp) {
   typedef boost::optional<bool> OptionalBool;
   ON_CALL(mock_policy_handler_, LockScreenDismissalEnabledState())
       .WillByDefault(Return(OptionalBool(true)));
-  std::string required_language = "en-us";
+  std::string required_language = "EN-US";
+  ON_CALL(*app_ptr_, ui_language()).WillByDefault(ReturnRef(kMobileLanguage));
+
   ON_CALL(mock_policy_handler_,
           LockScreenDismissalWarningMessage(required_language))
       .WillByDefault(Return(
