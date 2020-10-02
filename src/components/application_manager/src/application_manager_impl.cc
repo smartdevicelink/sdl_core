@@ -3602,7 +3602,6 @@ void ApplicationManagerImpl::OnAppStreaming(
       // Don't stop activity in media_manager_ in that case
       // Just cancel the temporary streaming state
       state_ctrl_.OnVideoStreamingStopped(app);
-      media_manager_->SuspendStreaming(app_id, service_type);
       break;
     }
   }

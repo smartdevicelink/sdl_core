@@ -281,11 +281,6 @@ void MediaManagerImpl::StopStreaming(
   }
 }
 
-void MediaManagerImpl::SuspendStreaming(
-    int32_t application_key, protocol_handler::ServiceType service_type) {
-  SDL_LOG_AUTO_TRACE();  
-}
-
 void MediaManagerImpl::SetProtocolHandler(
     protocol_handler::ProtocolHandler* protocol_handler) {
   protocol_handler_ = protocol_handler;

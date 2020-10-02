@@ -79,9 +79,6 @@ class MediaManagerImpl : public MediaManager,
                               protocol_handler::ServiceType service_type);
   virtual void StopStreaming(int32_t application_key,
                              protocol_handler::ServiceType service_type);
-  void SuspendStreaming(int32_t application_key,
-                        protocol_handler::ServiceType service_type) OVERRIDE;
-
   virtual void SetProtocolHandler(
       protocol_handler::ProtocolHandler* protocol_handler);
   virtual void OnMessageReceived(

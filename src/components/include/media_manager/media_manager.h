@@ -62,14 +62,6 @@ class MediaManager {
                               protocol_handler::ServiceType service_type) = 0;
   virtual void StopStreaming(int32_t application_key,
                              protocol_handler::ServiceType service_type) = 0;
-  /**
-   * @brief Performs actions required for adapters proper suspension
-   * @param application_key connection key of suspended application
-   * @param service_type type of service to suspend
-   */
-  virtual void SuspendStreaming(int32_t application_key,
-                                protocol_handler::ServiceType service_type) = 0;
-
   virtual void FramesProcessed(int32_t application_key,
                                int32_t frame_number) = 0;
   /**
