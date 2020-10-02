@@ -2329,12 +2329,6 @@ void PolicyHandler::OnSetCloudAppProperties(
   policy_manager_->InitCloudApp(policy_app_id);
 
   bool auth_token_update = false;
-  if (properties.keyExists(strings::enabled)) {
-    bool enabled = properties[strings::enabled].asBool();
-    policy_manager_->SetCloudAppEnabled(policy_app_id, enabled);
-    auth_token_update = enabled;
-    application_manager_.RefreshCloudAppInformation();
-  }
   if (properties.keyExists(strings::auth_token)) {
     std::string auth_token = properties[strings::auth_token].asString();
     policy_manager_->SetAppAuthToken(policy_app_id, auth_token);
@@ -2368,6 +2362,14 @@ void PolicyHandler::OnSetCloudAppProperties(
     policy_manager_->SetHybridAppPreference(policy_app_id,
                                             hybrid_app_preference);
   }
+  if (properties.keyExists(strings::enabled)) {
+    bool enabled = properties[strings::enabled].asBool();
+    policy_manager_->SetCloudAppEnabled(policy_app_id, enabled);
+    if (!auth_token_update) {
+      auth_token_update = enabled;
+    }
+    application_manager_.RefreshCloudAppInformation();
+  }
 
   if (auth_token_update) {
     AppProperties app_properties;
@@ -2390,8 +2392,6 @@ bool PolicyHandler::CheckAppServiceParameters(
     const std::string& requested_service_name,
     const std::string& requested_service_type,
     smart_objects::SmartArray* requested_handled_rpcs) const {
-  std::string service_name = std::string();
-  std::string service_type = std::string();
   std::vector<int32_t> handled_rpcs = {};
 
   policy_table::AppServiceParameters app_service_parameters =

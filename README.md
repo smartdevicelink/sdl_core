@@ -1,5 +1,5 @@
 [![Slack Status](http://sdlslack.herokuapp.com/badge.svg)](http://slack.smartdevicelink.com)
-[![Build Status](https://opensdl-jenkins.prjdmz.luxoft.com/job/develop_nightly_coverage/badge/icon?subject=UT%20coverage%20build)](https://opensdl-jenkins.prjdmz.luxoft.com/job/develop_nightly_coverage/)
+[![Build Status](https://opensdl-jenkins.prjdmz.luxoft.com/job/develop_weekly_coverage/badge/icon?subject=UT%20coverage%20build)](https://opensdl-jenkins.prjdmz.luxoft.com/job/develop_weekly_coverage/)
 [![Build Status](https://opensdl-jenkins.prjdmz.luxoft.com/view/Smokes/job/Develop_TCP_ATF_Smoke_P/badge/icon?subject=Smoke%20tests)](https://opensdl-jenkins.prjdmz.luxoft.com/view/Smokes/job/Develop_TCP_ATF_Smoke_P/)
 [![Build Status](https://opensdl-jenkins.prjdmz.luxoft.com/job/Develop_SDL_Checkstyle/badge/icon?subject=Coding%20style)](https://opensdl-jenkins.prjdmz.luxoft.com/job/Develop_SDL_Checkstyle/)
 

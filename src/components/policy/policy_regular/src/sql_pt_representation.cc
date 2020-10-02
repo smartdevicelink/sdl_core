@@ -2770,9 +2770,7 @@ SQLPTRepresentation::SelectCompositeVehicleDataItems() const {
     if (!vdi.is_initialized()) {
       return policy_table::VehicleDataItems();
     }
-    for (const auto& item : vdi) {
-      result.push_back(item);
-    }
+    std::copy(vdi.begin(), vdi.end(), std::back_inserter(result));
   }
 
   return result;

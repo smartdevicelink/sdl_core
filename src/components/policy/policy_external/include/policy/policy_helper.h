@@ -68,13 +68,6 @@ struct CompareGroupName {
   const StringsValueType& group_name_;
 };
 
-/*
- * @brief Used for compare of policies parameters mapped with specific
- * application ids
- */
-bool operator!=(const policy_table::ApplicationParams& first,
-                const policy_table::ApplicationParams& second);
-
 /**
  * @brief Helper struct for checking changes of application policies, which
  * come with update along with current data snapshot
@@ -391,15 +384,6 @@ FunctionalGroupIDs ExcludeSame(const FunctionalGroupIDs& from,
  */
 FunctionalGroupIDs Merge(const FunctionalGroupIDs& first,
                          const FunctionalGroupIDs& second);
-
-/**
- * @brief Finds same values
- * @param first First source of values
- * @param second Second source of values
- * @return Same values set, if any found
- */
-FunctionalGroupIDs FindSame(const FunctionalGroupIDs& first,
-                            const FunctionalGroupIDs& second);
 
 /**
  * @brief Unwrap application policies from predefined values to specific policy

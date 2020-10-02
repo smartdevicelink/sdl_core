@@ -111,10 +111,8 @@ void SetGlobalPropertiesRequest::Run() {
     return;
   }
 
-  mobile_apis::Result::eType verification_result = mobile_apis::Result::SUCCESS;
-
   if (msg_params.keyExists(strings::menu_icon)) {
-    verification_result = MessageHelper::VerifyImage(
+    mobile_apis::Result::eType verification_result = MessageHelper::VerifyImage(
         msg_params[strings::menu_icon], app, application_manager_);
     if (mobile_apis::Result::INVALID_DATA == verification_result) {
       SDL_LOG_ERROR("MessageHelper::VerifyImage return "
@@ -241,11 +239,11 @@ void SetGlobalPropertiesRequest::Run() {
     application_manager_.GetPluginManager().ForEachPlugin(
         on_global_properties_updated);
 
-    smart_objects::SmartObject params =
+    smart_objects::SmartObject rc_request_params =
         smart_objects::SmartObject(smart_objects::SmartType_Map);
-    params[strings::app_id] = app->app_id();
-    params[strings::user_location] = user_location;
-    SendRCRequest(params, true);
+    rc_request_params[strings::app_id] = app->app_id();
+    rc_request_params[strings::user_location] = user_location;
+    SendRCRequest(rc_request_params, true);
   }
 
   // check TTS params
@@ -257,7 +255,7 @@ void SetGlobalPropertiesRequest::Run() {
     if (is_help_prompt_present) {
       smart_objects::SmartObject& help_prompt =
           (*message_)[strings::msg_params][strings::help_prompt];
-      verification_result =
+      mobile_apis::Result::eType verification_result =
           MessageHelper::VerifyTtsFiles(help_prompt, app, application_manager_);
 
       if (mobile_apis::Result::FILE_NOT_FOUND == verification_result) {
@@ -273,8 +271,9 @@ void SetGlobalPropertiesRequest::Run() {
     if (is_timeout_prompt_present) {
       smart_objects::SmartObject& timeout_prompt =
           (*message_)[strings::msg_params][strings::timeout_prompt];
-      verification_result = MessageHelper::VerifyTtsFiles(
-          timeout_prompt, app, application_manager_);
+      mobile_apis::Result::eType verification_result =
+          MessageHelper::VerifyTtsFiles(
+              timeout_prompt, app, application_manager_);
 
       if (mobile_apis::Result::FILE_NOT_FOUND == verification_result) {
         SDL_LOG_ERROR("MessageHelper::VerifyTtsFiles return "
@@ -291,7 +290,7 @@ void SetGlobalPropertiesRequest::Run() {
           std::begin(invalid_params),
           std::end(invalid_params),
           std::string(""),
-          [](std::string& first, std::string& second) {
+          [](std::string& first, const std::string& second) {
             return first.empty() ? second : first + ", " + second;
           });
       const std::string info =
@@ -518,7 +517,6 @@ SetGlobalPropertiesRequest::PrepareResultCodeForResponse(
     const app_mngr::commands::ResponseInfo& second,
     const app_mngr::commands::ResponseInfo& third) {
   SDL_LOG_AUTO_TRACE();
-  mobile_apis::Result::eType result_code = mobile_apis::Result::INVALID_ENUM;
   if (IsResultCodeUnsupported(first, second, third) ||
       IsResultCodeUnsupported(second, third, first) ||
       IsResultCodeUnsupported(third, first, second)) {
@@ -547,7 +545,7 @@ SetGlobalPropertiesRequest::PrepareResultCodeForResponse(
 
   hmi_apis::Common_Result::eType intermediate_result =
       std::max(first_result, second_result);
-  result_code = MessageHelper::HMIToMobileResult(
+  mobile_apis::Result::eType result_code = MessageHelper::HMIToMobileResult(
       std::max(intermediate_result, third_result));
 
   return result_code;

@@ -97,7 +97,7 @@ TcpClientListener::TcpClientListener(TransportAdapterController* controller,
 
 TransportAdapter::Error TcpClientListener::Init() {
   SDL_LOG_AUTO_TRACE();
-  thread_stop_requested_ = false;
+  thread_stop_requested_.store(false);
 
   if (!IsListeningOnSpecificInterface()) {
     // Network interface is not specified. We will listen on all interfaces
@@ -163,9 +163,13 @@ TcpClientListener::~TcpClientListener() {
 void SetKeepaliveOptions(const int fd) {
   SDL_LOG_AUTO_TRACE();
   SDL_LOG_DEBUG("fd: " << fd);
+  // cppcheck-suppress unreadVariable
   int yes = 1;
+  // cppcheck-suppress unreadVariable
   int keepidle = 3;  // 3 seconds to disconnection detecting
+  // cppcheck-suppress unreadVariable
   int keepcnt = 5;
+  // cppcheck-suppress unreadVariable
   int keepintvl = 1;
 #ifdef __linux__
   int user_timeout = 7000;  // milliseconds
@@ -343,7 +347,7 @@ void TcpClientListener::StopLoop() {
     return;
   }
 
-  thread_stop_requested_ = true;
+  thread_stop_requested_.store(true);
 
   char dummy[1] = {0};
   int ret = write(pipe_fds_[1], dummy, sizeof(dummy));
@@ -459,7 +463,7 @@ TransportAdapter::Error TcpClientListener::StartListeningThread() {
     }
   }
 
-  thread_stop_requested_ = false;
+  thread_stop_requested_.store(false);
 
   if (!thread_->Start()) {
     return TransportAdapter::FAIL;
@@ -538,7 +542,7 @@ bool TcpClientListener::StartOnNetworkInterface() {
       }
     }
 
-    remove_devices_on_terminate_ = true;
+    remove_devices_on_terminate_.store(true);
 
     if (TransportAdapter::OK != StartListeningThread()) {
       SDL_LOG_WARN("Failed to start TCP client listener");
@@ -564,7 +568,7 @@ bool TcpClientListener::StopOnNetworkInterface() {
       socket_ = -1;
     }
 
-    remove_devices_on_terminate_ = false;
+    remove_devices_on_terminate_.store(false);
 
     SDL_LOG_INFO("TCP server socket on " << designated_interface_
                                          << " stopped");

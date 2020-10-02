@@ -68,15 +68,6 @@ class Launcher {
     LaunchNext();
   }
 
-  void OnAppRegistered(const ApplicationDataPtr& app_data) {
-    std::vector<ApplicationDataPtr>& apps = apps_on_device_->second;
-    std::vector<ApplicationDataPtr>::iterator it =
-        std::find(apps.begin(), apps.end(), app_data);
-    if (it != apps.end()) {
-      apps.erase(it);
-    }
-  }
-
   void Clear() {
     gap_between_app_timer_.Stop();
     wait_before_launch_timer_.Stop();

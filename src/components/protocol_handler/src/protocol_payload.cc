@@ -93,8 +93,11 @@ std::ostream& operator<<(std::ostream& os, const ProtocolPayloadV2& payload) {
             << ", data (bytes): " << payload.data.size() << ")";
 }
 
+#ifdef BUILD_TESTS
+// cppcheck-suppress unusedFunction //Used in unit tests
 size_t ProtocolPayloadV2SizeBits() {
   return PayloadHeaderBits;
 }
+#endif  // BUILD_TESTS
 
 }  // namespace protocol_handler

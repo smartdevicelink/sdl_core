@@ -270,367 +270,279 @@ class SmartObjectConvertionTimeTest : public ::testing::Test {
     return CSmartSchema(CObjectSchemaItem::create(rootMembersMap));
   }
 
-  // Create SmartObjectSchema for test object
-  CSmartSchema initObjectSchema() {
-    std::set<TestType::eType> resultCode_allowedEnumSubsetValues;
-    resultCode_allowedEnumSubsetValues.insert(
-        TestType::APPLICATION_NOT_REGISTERED);
-    resultCode_allowedEnumSubsetValues.insert(TestType::SUCCESS);
-    resultCode_allowedEnumSubsetValues.insert(
-        TestType::TOO_MANY_PENDING_REQUESTS);
-    resultCode_allowedEnumSubsetValues.insert(TestType::REJECTED);
-    resultCode_allowedEnumSubsetValues.insert(TestType::INVALID_DATA);
-    resultCode_allowedEnumSubsetValues.insert(TestType::OUT_OF_MEMORY);
-    resultCode_allowedEnumSubsetValues.insert(TestType::ABORTED);
-    resultCode_allowedEnumSubsetValues.insert(TestType::USER_DISALLOWED);
-    resultCode_allowedEnumSubsetValues.insert(TestType::GENERIC_ERROR);
-    resultCode_allowedEnumSubsetValues.insert(TestType::DISALLOWED);
+  TEST_F(SmartObjectConvertionTimeTest, test_int_object_convertion) {
+    SmartObject srcObj, dstObj;
+    CSmartSchema schema = initObjectSchema();
 
-    std::set<FunctionIdTest::eType> functionId_allowedEnumSubsetValues;
-    functionId_allowedEnumSubsetValues.insert(
-        FunctionIdTest::RegisterAppInterface);
-    functionId_allowedEnumSubsetValues.insert(
-        FunctionIdTest::UnregisterAppInterface);
-    functionId_allowedEnumSubsetValues.insert(
-        FunctionIdTest::SetGlobalProperties);
+    srcObj.setSchema(schema);
+    dstObj.setSchema(schema);
 
-    std::set<MessageTypeTest::eType> messageType_allowedEnumSubsetValues;
-    messageType_allowedEnumSubsetValues.insert(MessageTypeTest::request);
-    messageType_allowedEnumSubsetValues.insert(MessageTypeTest::response);
-    messageType_allowedEnumSubsetValues.insert(MessageTypeTest::notification);
+    srcObj[S_PARAMS][S_MESSAGE_TYPE] = MessageTypeTest::request;
+    srcObj[S_PARAMS][S_FUNCTION_ID] = FunctionIdTest::RegisterAppInterface;
+    srcObj[S_PARAMS][S_CORRELATION_ID] = 13;
+    srcObj[S_PARAMS][S_PROTOCOL_TYPE] = 0;
+    srcObj[S_PARAMS][S_PROTOCOL_VERSION] = 1;
+    srcObj[S_MSG_PARAMS]["value"] = 5;
 
-    ISchemaItemPtr success_SchemaItem =
-        CBoolSchemaItem::create(TSchemaItemParameter<bool>());
+    printf("\n INT value.\n");
+    calculateConvertionTime(srcObj, dstObj);
+  }
 
-    ISchemaItemPtr resultCode_SchemaItem =
-        TEnumSchemaItem<TestType::eType>::create(
-            resultCode_allowedEnumSubsetValues,
-            TSchemaItemParameter<TestType::eType>());
+  TEST_F(SmartObjectConvertionTimeTest, test_double_object_convertion) {
+    SmartObject srcObj, dstObj;
+    CSmartSchema schema = initObjectSchema();
 
-    ISchemaItemPtr info_SchemaItem =
-        CStringSchemaItem::create(TSchemaItemParameter<size_t>(0),
-                                  TSchemaItemParameter<size_t>(1000),
-                                  TSchemaItemParameter<std::string>());
+    srcObj.setSchema(schema);
+    dstObj.setSchema(schema);
 
-    ISchemaItemPtr tryAgainTime_SchemaItem =
-        TNumberSchemaItem<int>::create(TSchemaItemParameter<int>(0),
-                                       TSchemaItemParameter<int>(2000000000),
-                                       TSchemaItemParameter<int>());
+    srcObj[S_PARAMS][S_MESSAGE_TYPE] = MessageTypeTest::request;
+    srcObj[S_PARAMS][S_FUNCTION_ID] = FunctionIdTest::RegisterAppInterface;
+    srcObj[S_PARAMS][S_CORRELATION_ID] = 13;
+    srcObj[S_PARAMS][S_PROTOCOL_TYPE] = 0;
+    srcObj[S_PARAMS][S_PROTOCOL_VERSION] = 2;
+    srcObj[S_MSG_PARAMS]["value1"] = 3.1415926;
+    srcObj[S_MSG_PARAMS]["value2"] = 32.6;
+    srcObj[S_MSG_PARAMS]["value3"] = 33.945;
+    srcObj[S_MSG_PARAMS]["value4"] = -12.5487698;
+    srcObj[S_MSG_PARAMS]["value5"] = 0.61287346;
 
-    std::map<std::string, SMember> schemaMembersMap;
+    printf("\n Double value.\n");
+    calculateConvertionTime(srcObj, dstObj);
+  }
 
-    schemaMembersMap["success"] = SMember(success_SchemaItem, true);
-    schemaMembersMap["resultCode"] = SMember(resultCode_SchemaItem, true);
-    schemaMembersMap["info"] = SMember(info_SchemaItem, false);
-    schemaMembersMap["tryAgainTime"] = SMember(tryAgainTime_SchemaItem, true);
+  TEST_F(SmartObjectConvertionTimeTest, test_some_object_convertion) {
+    SmartObject srcObj, dstObj;
+    CSmartSchema schema = initObjectSchema();
 
-    std::map<std::string, SMember> paramsMembersMap;
-    paramsMembersMap
-        [ns_smart_device_link::ns_json_handler::strings::S_FUNCTION_ID] =
-            SMember(TEnumSchemaItem<FunctionIdTest::eType>::create(
-                        functionId_allowedEnumSubsetValues),
-                    true);
-    paramsMembersMap
-        [ns_smart_device_link::ns_json_handler::strings::S_MESSAGE_TYPE] =
-            SMember(TEnumSchemaItem<MessageTypeTest::eType>::create(
-                        messageType_allowedEnumSubsetValues),
-                    true);
-    paramsMembersMap
-        [ns_smart_device_link::ns_json_handler::strings::S_CORRELATION_ID] =
-            SMember(TNumberSchemaItem<int>::create(), true);
-    paramsMembersMap
-        [ns_smart_device_link::ns_json_handler::strings::S_PROTOCOL_VERSION] =
-            SMember(
-                TNumberSchemaItem<int>::create(TSchemaItemParameter<int>(1),
-                                               TSchemaItemParameter<int>(2)),
-                true);
-    paramsMembersMap
-        [ns_smart_device_link::ns_json_handler::strings::S_PROTOCOL_TYPE] =
-            SMember(TNumberSchemaItem<int>::create(), true);
+    srcObj.setSchema(schema);
+    dstObj.setSchema(schema);
 
-    std::map<std::string, SMember> rootMembersMap;
-    rootMembersMap
-        [ns_smart_device_link::ns_json_handler::strings::S_MSG_PARAMS] =
-            SMember(CObjectSchemaItem::create(schemaMembersMap), true);
-    rootMembersMap[ns_smart_device_link::ns_json_handler::strings::S_PARAMS] =
-        SMember(CObjectSchemaItem::create(paramsMembersMap), true);
-    return CSmartSchema(CObjectSchemaItem::create(rootMembersMap));
+    srcObj[S_PARAMS][S_MESSAGE_TYPE] = MessageTypeTest::request;
+    srcObj[S_PARAMS][S_FUNCTION_ID] = FunctionIdTest::RegisterAppInterface;
+    srcObj[S_PARAMS][S_CORRELATION_ID] = 13;
+    srcObj[S_PARAMS][S_PROTOCOL_TYPE] = 0;
+    srcObj[S_PARAMS][S_PROTOCOL_VERSION] = 2;
+    srcObj[S_MSG_PARAMS]["appId"] = "APP ID";
+    srcObj[S_MSG_PARAMS]["appName"] = "APP NAME";
+    srcObj[S_MSG_PARAMS]["appType"][0] = "SYSTEM";
+    srcObj[S_MSG_PARAMS]["appType"][1] = "COMMUNICATION";
+    srcObj[S_MSG_PARAMS]["hmiDisplayLanguageDesired"] = "RU-RU";
+    srcObj[S_MSG_PARAMS]["isMediaApplication"] = true;
+    srcObj[S_MSG_PARAMS]["languageDesired"] = "EN-US";
+    srcObj[S_MSG_PARAMS]["ngnMediaScreenAppName"] = "SCREEN NAME";
+    srcObj[S_MSG_PARAMS]["syncMsgVersion"]["majorVersion"] = 2;
+    srcObj[S_MSG_PARAMS]["syncMsgVersion"]["minorVersion"] = 10;
+    srcObj[S_MSG_PARAMS]["syncMsgVersion"]["patchVersion"] = 5;
+
+    srcObj[S_MSG_PARAMS]["ttsName"][0]["text"] = "ABC";
+    srcObj[S_MSG_PARAMS]["ttsName"][0]["type"] = "TEXT";
+    srcObj[S_MSG_PARAMS]["vrSynonyms"][0] = "Synonym1";
+    srcObj[S_MSG_PARAMS]["vrSynonyms"][1] = "Synonym2";
+    srcObj[S_MSG_PARAMS]["null"] = SmartObject();
+    srcObj[S_MSG_PARAMS]["double"] = -0.1234;
+
+    printf("\n Random object.\n");
+    calculateConvertionTime(srcObj, dstObj);
+  }
+
+  TEST_F(SmartObjectConvertionTimeTest, test_map_object_convertion) {
+    SmartObject srcObj, dstObj, mapObj, innerObj;
+    CSmartSchema schema = initObjectSchema();
+
+    srcObj.setSchema(schema);
+    dstObj.setSchema(schema);
+
+    // First iteration
+    mapObj["request"]["name"] = "My Request";
+    mapObj["request"]["id"] = 123;
+    mapObj["response"]["name"] = "My Response";
+    mapObj["response"]["id"] = 456;
+    mapObj["we"]["need"]["to"]["go"]["deeper"] = true;
+
+    srcObj[S_PARAMS][S_MESSAGE_TYPE] = MessageTypeTest::request;
+    srcObj[S_PARAMS][S_FUNCTION_ID] = FunctionIdTest::RegisterAppInterface;
+    srcObj[S_PARAMS][S_CORRELATION_ID] = 13;
+    srcObj[S_PARAMS][S_PROTOCOL_TYPE] = 0;
+    srcObj[S_PARAMS][S_PROTOCOL_VERSION] = 2;
+    srcObj[S_MSG_PARAMS]["value"] = mapObj;
+
+    printf("\n MAP object.\n");
+    calculateConvertionTime(srcObj, dstObj);
+
+    // Second iteration
+    innerObj = mapObj;
+    mapObj["request"]["value"] = innerObj;
+    mapObj["response"]["value"] = innerObj;
+    mapObj["we"]["need"]["to"]["go"]["deeper"]["value"] = innerObj;
+    srcObj[S_MSG_PARAMS]["value"] = mapObj;
+
+    printf("\n Complex MAP object.\n");
+    calculateConvertionTime(srcObj, dstObj);
+
+    // Third iteration
+    innerObj = mapObj;
+    mapObj["request"]["value"] = innerObj;
+    mapObj["response"]["value"] = innerObj;
+    mapObj["we"]["need"]["to"]["go"]["deeper"]["value"] = innerObj;
+    srcObj[S_MSG_PARAMS]["value"] = mapObj;
+
+    printf("\n Very Complex MAP object.\n");
+    calculateConvertionTime(srcObj, dstObj);
+
+    // Last iteration
+    innerObj = mapObj;
+    mapObj["request"]["value"] = innerObj;
+    mapObj["response"]["value"] = innerObj;
+    mapObj["we"]["need"]["to"]["go"]["deeper"]["value"] = innerObj;
+    srcObj[S_MSG_PARAMS]["value"] = mapObj;
+
+    printf("\n Very Very Complex MAP object.\n");
+    calculateConvertionTime(srcObj, dstObj);
+  }
+
+  TEST_F(SmartObjectConvertionTimeTest, test_array_convertion) {
+    SmartObject srcObj, dstObj, arrayObj, innerObj;
+    CSmartSchema schema = initObjectSchema();
+    int arraySize = 10;
+
+    srcObj.setSchema(schema);
+    dstObj.setSchema(schema);
+
+    // First iteration
+    for (int i = 0; i < arraySize; i++) {
+      arrayObj[i] = rand();
+    }
+
+    srcObj[S_PARAMS][S_MESSAGE_TYPE] = MessageTypeTest::request;
+    srcObj[S_PARAMS][S_FUNCTION_ID] = FunctionIdTest::RegisterAppInterface;
+    srcObj[S_PARAMS][S_CORRELATION_ID] = 13;
+    srcObj[S_PARAMS][S_PROTOCOL_TYPE] = 0;
+    srcObj[S_PARAMS][S_PROTOCOL_VERSION] = 2;
+    srcObj[S_MSG_PARAMS]["array"] = arrayObj;
+
+    printf("\n Array object [%d].\n", arraySize);
+    calculateConvertionTime(srcObj, dstObj);
+
+    // Second iteration
+    printf("\n Array object [%d x %d].\n", arraySize, arraySize);
+    innerObj = arrayObj;
+    for (int i = 0; i < arraySize; i++) {
+      arrayObj[i] = innerObj;
+    }
+
+    srcObj[S_PARAMS][S_MESSAGE_TYPE] = MessageTypeTest::request;
+    srcObj[S_PARAMS][S_FUNCTION_ID] = FunctionIdTest::RegisterAppInterface;
+    srcObj[S_PARAMS][S_CORRELATION_ID] = 13;
+    srcObj[S_PARAMS][S_PROTOCOL_TYPE] = 0;
+    srcObj[S_PARAMS][S_PROTOCOL_VERSION] = 2;
+    srcObj[S_MSG_PARAMS]["array"] = arrayObj;
+
+    calculateConvertionTime(srcObj, dstObj);
+
+    // Third iteration
+    printf(
+        "\n Array object [%d x %d x %d].\n", arraySize, arraySize, arraySize);
+    innerObj = arrayObj;
+    for (int i = 0; i < arraySize; i++) {
+      arrayObj[i] = innerObj;
+    }
+
+    srcObj[S_PARAMS][S_MESSAGE_TYPE] = MessageTypeTest::request;
+    srcObj[S_PARAMS][S_FUNCTION_ID] = FunctionIdTest::RegisterAppInterface;
+    srcObj[S_PARAMS][S_CORRELATION_ID] = 13;
+    srcObj[S_PARAMS][S_PROTOCOL_TYPE] = 0;
+    srcObj[S_PARAMS][S_PROTOCOL_VERSION] = 2;
+    srcObj[S_MSG_PARAMS]["array"] = arrayObj;
+
+    calculateConvertionTime(srcObj, dstObj);
+
+    // Fourth iteration
+    printf("\n Array object [%d x %d x %d x %d].\n",
+           arraySize,
+           arraySize,
+           arraySize,
+           arraySize);
+    innerObj = arrayObj;
+    for (int i = 0; i < arraySize; i++) {
+      arrayObj[i] = innerObj;
+    }
+
+    srcObj[S_PARAMS][S_MESSAGE_TYPE] = MessageTypeTest::request;
+    srcObj[S_PARAMS][S_FUNCTION_ID] = FunctionIdTest::RegisterAppInterface;
+    srcObj[S_PARAMS][S_CORRELATION_ID] = 13;
+    srcObj[S_PARAMS][S_PROTOCOL_TYPE] = 0;
+    srcObj[S_PARAMS][S_PROTOCOL_VERSION] = 2;
+    srcObj[S_MSG_PARAMS]["array"] = arrayObj;
+
+    calculateConvertionTime(srcObj, dstObj);
+
+    // Last iteration
+    printf("\n Array object [%d x %d x %d x %d x %d].\n",
+           arraySize,
+           arraySize,
+           arraySize,
+           arraySize,
+           arraySize);
+    innerObj = arrayObj;
+    for (int i = 0; i < arraySize; i++) {
+      arrayObj[i] = innerObj;
+    }
+
+    srcObj[S_PARAMS][S_MESSAGE_TYPE] = MessageTypeTest::request;
+    srcObj[S_PARAMS][S_FUNCTION_ID] = FunctionIdTest::RegisterAppInterface;
+    srcObj[S_PARAMS][S_CORRELATION_ID] = 13;
+    srcObj[S_PARAMS][S_PROTOCOL_TYPE] = 0;
+    srcObj[S_PARAMS][S_PROTOCOL_VERSION] = 2;
+    srcObj[S_MSG_PARAMS]["array"] = arrayObj;
+
+    calculateConvertionTime(srcObj, dstObj);
+  }
+
+  TEST_F(SmartObjectConvertionTimeTest, test_object_with_enum_convertion) {
+    SmartObject srcObj, dstObj;
+    CSmartSchema schema = initObjectSchema();
+
+    srcObj.setSchema(schema);
+    dstObj.setSchema(schema);
+
+    srcObj[S_PARAMS][S_MESSAGE_TYPE] = MessageTypeTest::request;
+    srcObj[S_PARAMS][S_FUNCTION_ID] = FunctionIdTest::RegisterAppInterface;
+    srcObj[S_PARAMS][S_CORRELATION_ID] = 13;
+    srcObj[S_PARAMS][S_PROTOCOL_TYPE] = 0;
+    srcObj[S_PARAMS][S_PROTOCOL_VERSION] = 2;
+    srcObj[S_MSG_PARAMS]["success"] = true;
+    srcObj[S_MSG_PARAMS]["resultCode"] = 2;
+    srcObj[S_MSG_PARAMS]["info"] = "Some string";
+    srcObj[S_MSG_PARAMS]["tryAgainTime"] = 322;
+    srcObj.setSchema(schema);
+
+    printf("\n Object with enum.\n");
+    calculateConvertionTime(srcObj, dstObj);
+  }
+
+  TEST_F(SmartObjectConvertionTimeTest, test_object_without_enum_convertion) {
+    SmartObject srcObj, dstObj;
+    CSmartSchema schema = initObjectSchema();
+
+    srcObj.setSchema(schema);
+    dstObj.setSchema(schema);
+
+    srcObj[S_PARAMS][S_MESSAGE_TYPE] = MessageTypeTest::request;
+    srcObj[S_PARAMS][S_FUNCTION_ID] = FunctionIdTest::RegisterAppInterface;
+    srcObj[S_PARAMS][S_CORRELATION_ID] = 13;
+    srcObj[S_PARAMS][S_PROTOCOL_TYPE] = 0;
+    srcObj[S_PARAMS][S_PROTOCOL_VERSION] = 2;
+    srcObj[S_MSG_PARAMS]["success"] = true;
+    srcObj[S_MSG_PARAMS]["resultCode"] = 2;
+    srcObj[S_MSG_PARAMS]["info"] = "Some string";
+    srcObj[S_MSG_PARAMS]["tryAgainTime"] = 322;
+
+    printf("\n Object without enum.\n");
+    calculateConvertionTime(srcObj, dstObj);
   }
 };
-
-TEST_F(SmartObjectConvertionTimeTest, test_int_object_convertion) {
-  SmartObject srcObj, dstObj;
-  CSmartSchema schema = initObjectSchema();
-
-  srcObj.setSchema(schema);
-  dstObj.setSchema(schema);
-
-  srcObj[S_PARAMS][S_MESSAGE_TYPE] = MessageTypeTest::request;
-  srcObj[S_PARAMS][S_FUNCTION_ID] = FunctionIdTest::RegisterAppInterface;
-  srcObj[S_PARAMS][S_CORRELATION_ID] = 13;
-  srcObj[S_PARAMS][S_PROTOCOL_TYPE] = 0;
-  srcObj[S_PARAMS][S_PROTOCOL_VERSION] = 1;
-  srcObj[S_MSG_PARAMS]["value"] = 5;
-
-  printf("\n INT value.\n");
-  calculateConvertionTime(srcObj, dstObj);
-}
-
-TEST_F(SmartObjectConvertionTimeTest, test_double_object_convertion) {
-  SmartObject srcObj, dstObj;
-  CSmartSchema schema = initObjectSchema();
-
-  srcObj.setSchema(schema);
-  dstObj.setSchema(schema);
-
-  srcObj[S_PARAMS][S_MESSAGE_TYPE] = MessageTypeTest::request;
-  srcObj[S_PARAMS][S_FUNCTION_ID] = FunctionIdTest::RegisterAppInterface;
-  srcObj[S_PARAMS][S_CORRELATION_ID] = 13;
-  srcObj[S_PARAMS][S_PROTOCOL_TYPE] = 0;
-  srcObj[S_PARAMS][S_PROTOCOL_VERSION] = 2;
-  srcObj[S_MSG_PARAMS]["value1"] = 3.1415926;
-  srcObj[S_MSG_PARAMS]["value2"] = 32.6;
-  srcObj[S_MSG_PARAMS]["value3"] = 33.945;
-  srcObj[S_MSG_PARAMS]["value4"] = -12.5487698;
-  srcObj[S_MSG_PARAMS]["value5"] = 0.61287346;
-
-  printf("\n Double value.\n");
-  calculateConvertionTime(srcObj, dstObj);
-}
-
-TEST_F(SmartObjectConvertionTimeTest, test_some_object_convertion) {
-  SmartObject srcObj, dstObj;
-  CSmartSchema schema = initObjectSchema();
-
-  srcObj.setSchema(schema);
-  dstObj.setSchema(schema);
-
-  srcObj[S_PARAMS][S_MESSAGE_TYPE] = MessageTypeTest::request;
-  srcObj[S_PARAMS][S_FUNCTION_ID] = FunctionIdTest::RegisterAppInterface;
-  srcObj[S_PARAMS][S_CORRELATION_ID] = 13;
-  srcObj[S_PARAMS][S_PROTOCOL_TYPE] = 0;
-  srcObj[S_PARAMS][S_PROTOCOL_VERSION] = 2;
-  srcObj[S_MSG_PARAMS]["appId"] = "APP ID";
-  srcObj[S_MSG_PARAMS]["appName"] = "APP NAME";
-  srcObj[S_MSG_PARAMS]["appType"][0] = "SYSTEM";
-  srcObj[S_MSG_PARAMS]["appType"][1] = "COMMUNICATION";
-  srcObj[S_MSG_PARAMS]["hmiDisplayLanguageDesired"] = "RU-RU";
-  srcObj[S_MSG_PARAMS]["isMediaApplication"] = true;
-  srcObj[S_MSG_PARAMS]["languageDesired"] = "EN-US";
-  srcObj[S_MSG_PARAMS]["ngnMediaScreenAppName"] = "SCREEN NAME";
-  srcObj[S_MSG_PARAMS]["syncMsgVersion"]["majorVersion"] = 2;
-  srcObj[S_MSG_PARAMS]["syncMsgVersion"]["minorVersion"] = 10;
-  srcObj[S_MSG_PARAMS]["syncMsgVersion"]["patchVersion"] = 5;
-
-  srcObj[S_MSG_PARAMS]["ttsName"][0]["text"] = "ABC";
-  srcObj[S_MSG_PARAMS]["ttsName"][0]["type"] = "TEXT";
-  srcObj[S_MSG_PARAMS]["vrSynonyms"][0] = "Synonym1";
-  srcObj[S_MSG_PARAMS]["vrSynonyms"][1] = "Synonym2";
-  srcObj[S_MSG_PARAMS]["null"] = SmartObject();
-  srcObj[S_MSG_PARAMS]["double"] = -0.1234;
-
-  printf("\n Random object.\n");
-  calculateConvertionTime(srcObj, dstObj);
-}
-
-TEST_F(SmartObjectConvertionTimeTest, test_map_object_convertion) {
-  SmartObject srcObj, dstObj, mapObj, innerObj;
-  CSmartSchema schema = initObjectSchema();
-
-  srcObj.setSchema(schema);
-  dstObj.setSchema(schema);
-
-  // First iteration
-  mapObj["request"]["name"] = "My Request";
-  mapObj["request"]["id"] = 123;
-  mapObj["response"]["name"] = "My Response";
-  mapObj["response"]["id"] = 456;
-  mapObj["we"]["need"]["to"]["go"]["deeper"] = true;
-
-  srcObj[S_PARAMS][S_MESSAGE_TYPE] = MessageTypeTest::request;
-  srcObj[S_PARAMS][S_FUNCTION_ID] = FunctionIdTest::RegisterAppInterface;
-  srcObj[S_PARAMS][S_CORRELATION_ID] = 13;
-  srcObj[S_PARAMS][S_PROTOCOL_TYPE] = 0;
-  srcObj[S_PARAMS][S_PROTOCOL_VERSION] = 2;
-  srcObj[S_MSG_PARAMS]["value"] = mapObj;
-
-  printf("\n MAP object.\n");
-  calculateConvertionTime(srcObj, dstObj);
-
-  // Second iteration
-  innerObj = mapObj;
-  mapObj["request"]["value"] = innerObj;
-  mapObj["response"]["value"] = innerObj;
-  mapObj["we"]["need"]["to"]["go"]["deeper"]["value"] = innerObj;
-  srcObj[S_MSG_PARAMS]["value"] = mapObj;
-
-  printf("\n Complex MAP object.\n");
-  calculateConvertionTime(srcObj, dstObj);
-
-  // Third iteration
-  innerObj = mapObj;
-  mapObj["request"]["value"] = innerObj;
-  mapObj["response"]["value"] = innerObj;
-  mapObj["we"]["need"]["to"]["go"]["deeper"]["value"] = innerObj;
-  srcObj[S_MSG_PARAMS]["value"] = mapObj;
-
-  printf("\n Very Complex MAP object.\n");
-  calculateConvertionTime(srcObj, dstObj);
-
-  // Last iteration
-  innerObj = mapObj;
-  mapObj["request"]["value"] = innerObj;
-  mapObj["response"]["value"] = innerObj;
-  mapObj["we"]["need"]["to"]["go"]["deeper"]["value"] = innerObj;
-  srcObj[S_MSG_PARAMS]["value"] = mapObj;
-
-  printf("\n Very Very Complex MAP object.\n");
-  calculateConvertionTime(srcObj, dstObj);
-}
-
-TEST_F(SmartObjectConvertionTimeTest, test_array_convertion) {
-  SmartObject srcObj, dstObj, arrayObj, innerObj;
-  CSmartSchema schema = initObjectSchema();
-  int arraySize = 10;
-
-  srcObj.setSchema(schema);
-  dstObj.setSchema(schema);
-
-  // First iteration
-  for (int i = 0; i < arraySize; i++) {
-    arrayObj[i] = rand();
-  }
-
-  srcObj[S_PARAMS][S_MESSAGE_TYPE] = MessageTypeTest::request;
-  srcObj[S_PARAMS][S_FUNCTION_ID] = FunctionIdTest::RegisterAppInterface;
-  srcObj[S_PARAMS][S_CORRELATION_ID] = 13;
-  srcObj[S_PARAMS][S_PROTOCOL_TYPE] = 0;
-  srcObj[S_PARAMS][S_PROTOCOL_VERSION] = 2;
-  srcObj[S_MSG_PARAMS]["array"] = arrayObj;
-
-  printf("\n Array object [%d].\n", arraySize);
-  calculateConvertionTime(srcObj, dstObj);
-
-  // Second iteration
-  printf("\n Array object [%d x %d].\n", arraySize, arraySize);
-  innerObj = arrayObj;
-  for (int i = 0; i < arraySize; i++) {
-    arrayObj[i] = innerObj;
-  }
-
-  srcObj[S_PARAMS][S_MESSAGE_TYPE] = MessageTypeTest::request;
-  srcObj[S_PARAMS][S_FUNCTION_ID] = FunctionIdTest::RegisterAppInterface;
-  srcObj[S_PARAMS][S_CORRELATION_ID] = 13;
-  srcObj[S_PARAMS][S_PROTOCOL_TYPE] = 0;
-  srcObj[S_PARAMS][S_PROTOCOL_VERSION] = 2;
-  srcObj[S_MSG_PARAMS]["array"] = arrayObj;
-
-  calculateConvertionTime(srcObj, dstObj);
-
-  // Third iteration
-  printf("\n Array object [%d x %d x %d].\n", arraySize, arraySize, arraySize);
-  innerObj = arrayObj;
-  for (int i = 0; i < arraySize; i++) {
-    arrayObj[i] = innerObj;
-  }
-
-  srcObj[S_PARAMS][S_MESSAGE_TYPE] = MessageTypeTest::request;
-  srcObj[S_PARAMS][S_FUNCTION_ID] = FunctionIdTest::RegisterAppInterface;
-  srcObj[S_PARAMS][S_CORRELATION_ID] = 13;
-  srcObj[S_PARAMS][S_PROTOCOL_TYPE] = 0;
-  srcObj[S_PARAMS][S_PROTOCOL_VERSION] = 2;
-  srcObj[S_MSG_PARAMS]["array"] = arrayObj;
-
-  calculateConvertionTime(srcObj, dstObj);
-
-  // Fourth iteration
-  printf("\n Array object [%d x %d x %d x %d].\n",
-         arraySize,
-         arraySize,
-         arraySize,
-         arraySize);
-  innerObj = arrayObj;
-  for (int i = 0; i < arraySize; i++) {
-    arrayObj[i] = innerObj;
-  }
-
-  srcObj[S_PARAMS][S_MESSAGE_TYPE] = MessageTypeTest::request;
-  srcObj[S_PARAMS][S_FUNCTION_ID] = FunctionIdTest::RegisterAppInterface;
-  srcObj[S_PARAMS][S_CORRELATION_ID] = 13;
-  srcObj[S_PARAMS][S_PROTOCOL_TYPE] = 0;
-  srcObj[S_PARAMS][S_PROTOCOL_VERSION] = 2;
-  srcObj[S_MSG_PARAMS]["array"] = arrayObj;
-
-  calculateConvertionTime(srcObj, dstObj);
-
-  // Last iteration
-  printf("\n Array object [%d x %d x %d x %d x %d].\n",
-         arraySize,
-         arraySize,
-         arraySize,
-         arraySize,
-         arraySize);
-  innerObj = arrayObj;
-  for (int i = 0; i < arraySize; i++) {
-    arrayObj[i] = innerObj;
-  }
-
-  srcObj[S_PARAMS][S_MESSAGE_TYPE] = MessageTypeTest::request;
-  srcObj[S_PARAMS][S_FUNCTION_ID] = FunctionIdTest::RegisterAppInterface;
-  srcObj[S_PARAMS][S_CORRELATION_ID] = 13;
-  srcObj[S_PARAMS][S_PROTOCOL_TYPE] = 0;
-  srcObj[S_PARAMS][S_PROTOCOL_VERSION] = 2;
-  srcObj[S_MSG_PARAMS]["array"] = arrayObj;
-
-  calculateConvertionTime(srcObj, dstObj);
-}
-
-TEST_F(SmartObjectConvertionTimeTest, test_object_with_enum_convertion) {
-  SmartObject srcObj, dstObj;
-  CSmartSchema schema = initObjectSchema();
-
-  srcObj.setSchema(schema);
-  dstObj.setSchema(schema);
-
-  srcObj[S_PARAMS][S_MESSAGE_TYPE] = MessageTypeTest::request;
-  srcObj[S_PARAMS][S_FUNCTION_ID] = FunctionIdTest::RegisterAppInterface;
-  srcObj[S_PARAMS][S_CORRELATION_ID] = 13;
-  srcObj[S_PARAMS][S_PROTOCOL_TYPE] = 0;
-  srcObj[S_PARAMS][S_PROTOCOL_VERSION] = 2;
-  srcObj[S_MSG_PARAMS]["success"] = true;
-  srcObj[S_MSG_PARAMS]["resultCode"] = 2;
-  srcObj[S_MSG_PARAMS]["info"] = "Some string";
-  srcObj[S_MSG_PARAMS]["tryAgainTime"] = 322;
-  srcObj.setSchema(schema);
-
-  printf("\n Object with enum.\n");
-  calculateConvertionTime(srcObj, dstObj);
-}
-
-TEST_F(SmartObjectConvertionTimeTest, test_object_without_enum_convertion) {
-  SmartObject srcObj, dstObj;
-  CSmartSchema schema = initObjectSchema();
-
-  srcObj.setSchema(schema);
-  dstObj.setSchema(schema);
-
-  srcObj[S_PARAMS][S_MESSAGE_TYPE] = MessageTypeTest::request;
-  srcObj[S_PARAMS][S_FUNCTION_ID] = FunctionIdTest::RegisterAppInterface;
-  srcObj[S_PARAMS][S_CORRELATION_ID] = 13;
-  srcObj[S_PARAMS][S_PROTOCOL_TYPE] = 0;
-  srcObj[S_PARAMS][S_PROTOCOL_VERSION] = 2;
-  srcObj[S_MSG_PARAMS]["success"] = true;
-  srcObj[S_MSG_PARAMS]["resultCode"] = 2;
-  srcObj[S_MSG_PARAMS]["info"] = "Some string";
-  srcObj[S_MSG_PARAMS]["tryAgainTime"] = 322;
-
-  printf("\n Object without enum.\n");
-  calculateConvertionTime(srcObj, dstObj);
-}
-
 }  // namespace smart_object_test
 }  // namespace components
-}  // namespace test
 
 namespace ns_smart_device_link {
 namespace ns_smart_objects {

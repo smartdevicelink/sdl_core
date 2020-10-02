@@ -55,9 +55,9 @@ struct ResponseParams {
 
 void PrepareResponseResult(
     ResponseParams& response_params_out,
-    rc_rpc_plugin::ResourceReleasedState::eType& released_result) {
+    const rc_rpc_plugin::ResourceReleasedState::eType& released_result) {
   std::stringstream ss;
-  auto info_inserter = [&ss, response_params_out](std::string info) {
+  auto info_inserter = [&ss, response_params_out](const std::string& info) {
     ss << "Module [" << response_params_out.module_type << ":"
        << response_params_out.module_id << "] " << info;
   };

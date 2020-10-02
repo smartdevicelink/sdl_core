@@ -34,12 +34,12 @@
 #include "sdl_rpc_plugin/commands/mobile/perform_interaction_request.h"
 
 #include <string.h>
+
 #include <numeric>
 #include <string>
 
 #include "application_manager/application_impl.h"
 #include "application_manager/message_helper.h"
-
 #include "interfaces/HMI_API.h"
 #include "interfaces/MOBILE_API.h"
 #include "utils/custom_string.h"
@@ -871,9 +871,9 @@ void PerformInteractionRequest::DisablePerformInteraction() {
 
 bool PerformInteractionRequest::IsWhiteSpaceExist() {
   SDL_LOG_AUTO_TRACE();
-  const char* str = NULL;
 
-  str = (*message_)[strings::msg_params][strings::initial_text].asCharArray();
+  const char* str =
+      (*message_)[strings::msg_params][strings::initial_text].asCharArray();
   if (!CheckSyntax(str)) {
     SDL_LOG_ERROR("Invalid initial_text syntax check failed");
     return true;
@@ -1038,7 +1038,6 @@ bool PerformInteractionRequest::CheckChoiceIDFromRequest(
     const smart_objects::SmartObject& choice_set_id_list) const {
   SDL_LOG_AUTO_TRACE();
 
-  size_t choice_list_length = 0;
   std::set<uint32_t> choice_id_set;
   std::pair<std::set<uint32_t>::iterator, bool> ins_res;
 
@@ -1046,12 +1045,11 @@ bool PerformInteractionRequest::CheckChoiceIDFromRequest(
     auto choice_set = app->FindChoiceSet(choice_set_id_list[i].asInt());
     if (smart_objects::SmartType_Null == choice_set.getType()) {
       SDL_LOG_ERROR(
-
           "Couldn't find choiceset_id = " << choice_set_id_list[i].asInt());
       return false;
     }
 
-    choice_list_length = choice_set[strings::choice_set].length();
+    size_t choice_list_length = choice_set[strings::choice_set].length();
     const smart_objects::SmartObject& choices_list =
         choice_set[strings::choice_set];
     for (size_t k = 0; k < choice_list_length; ++k) {
@@ -1076,15 +1074,14 @@ const bool PerformInteractionRequest::HasHMIResponsesToWait() const {
 void PerformInteractionRequest::SendBothModeResponse(
     const smart_objects::SmartObject& msg_param) {
   SDL_LOG_AUTO_TRACE();
-  mobile_apis::Result::eType perform_interaction_result_code =
-      mobile_apis::Result::INVALID_ENUM;
+
   app_mngr::commands::ResponseInfo ui_perform_info(
       ui_result_code_, HmiInterfaces::HMI_INTERFACE_UI, application_manager_);
   app_mngr::commands::ResponseInfo vr_perform_info(
       vr_result_code_, HmiInterfaces::HMI_INTERFACE_VR, application_manager_);
   const bool result =
       PrepareResultForMobileResponse(ui_perform_info, vr_perform_info);
-  perform_interaction_result_code =
+  mobile_apis::Result::eType perform_interaction_result_code =
       PrepareResultCodeForResponse(ui_perform_info, vr_perform_info);
   const smart_objects::SmartObject* response_params =
       msg_param.empty() ? NULL : &msg_param;

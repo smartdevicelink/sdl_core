@@ -57,7 +57,7 @@ namespace {
 namespace custom_str = utils::custom_string;
 
 struct AppHMITypeInserter {
-  AppHMITypeInserter(smart_objects::SmartObject& so_array)
+  explicit AppHMITypeInserter(smart_objects::SmartObject& so_array)
       : index_(0), so_array_(so_array) {}
 
   bool operator()(const std::string& app_hmi_type) {
@@ -110,7 +110,7 @@ class SmartArrayValueExtractor {
 };
 
 struct IsSameNickname {
-  IsSameNickname(const custom_str::CustomString app_name)
+  explicit IsSameNickname(const custom_str::CustomString app_name)
       : app_name_(app_name) {}
   bool operator()(const policy::StringArray::value_type& nickname) const {
     return app_name_.CompareIgnoreCase(nickname.c_str());
@@ -1317,9 +1317,9 @@ bool RegisterAppInterfaceRequest::IsApplicationWithSameAppIdRegistered() {
 
 bool RegisterAppInterfaceRequest::IsWhiteSpaceExist() {
   SDL_LOG_AUTO_TRACE();
-  const char* str = NULL;
 
-  str = (*message_)[strings::msg_params][strings::app_name].asCharArray();
+  const char* str =
+      (*message_)[strings::msg_params][strings::app_name].asCharArray();
   if (!CheckSyntax(str)) {
     SDL_LOG_ERROR("Invalid app_name syntax check failed");
     return true;

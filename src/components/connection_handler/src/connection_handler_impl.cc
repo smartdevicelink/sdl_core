@@ -215,7 +215,7 @@ namespace {
 struct DeviceFinder {
   explicit DeviceFinder(const std::string& device_uid)
       : device_uid_(device_uid) {}
-  bool operator()(const DeviceMap::value_type& device) {
+  bool operator()(const DeviceMap::value_type& device) const {
     return device_uid_ == device.second.mac_address();
   }
 
@@ -465,10 +465,21 @@ void ConnectionHandlerImpl::OnSessionStartedCallback(
     return;
   }
 #endif  // ENABLE_SECURITY
-  sync_primitives::AutoReadLock lock(connection_list_lock_);
-  ConnectionList::iterator it =
-      connection_list_.find(primary_connection_handle);
-  if (connection_list_.end() == it) {
+
+  auto find_connection =
+      [this](const transport_manager::ConnectionUID& primary_connection_handle)
+      -> Connection* {
+    sync_primitives::AutoReadLock lock(connection_list_lock_);
+    auto it = connection_list_.find(primary_connection_handle);
+    if (it != connection_list_.end()) {
+      return it->second;
+    }
+    return nullptr;
+  };
+
+  Connection* connection = find_connection(primary_connection_handle);
+
+  if (!connection) {
     SDL_LOG_ERROR("Unknown connection!");
     protocol_handler_->NotifySessionStarted(
         context,
@@ -477,7 +488,6 @@ void ConnectionHandlerImpl::OnSessionStartedCallback(
     return;
   }
 
-  Connection* connection = it->second;
   context.is_new_service_ =
       !connection->SessionServiceExists(session_id, service_type);
 
@@ -944,6 +954,8 @@ ConnectionHandlerImpl::TransportTypeProfileStringFromDeviceHandle(
     return std::string("IAP_CARPLAY");
   } else if (connection_type == "CLOUD_WEBSOCKET") {
     return std::string("WEBSOCKET");
+  } else if (connection_type == "WEBENGINE_WEBSOCKET") {
+    return std::string("WEBENGINE");
 #ifdef BUILD_TESTS
   } else if (connection_type == "BTMAC") {
     return std::string("BTMAC");
@@ -1157,7 +1169,7 @@ const uint8_t ConnectionHandlerImpl::GetSessionIdFromSecondaryTransport(
     transport_manager::ConnectionUID secondary_transport_id) const {
   sync_primitives::AutoLock auto_lock(session_connection_map_lock_ptr_);
   SessionConnectionMap::const_iterator it = session_connection_map_.begin();
-  for (; session_connection_map_.end() != it; it++) {
+  for (; session_connection_map_.end() != it; ++it) {
     SessionTransports st = it->second;
     if (st.secondary_transport == secondary_transport_id) {
       return it->first;
