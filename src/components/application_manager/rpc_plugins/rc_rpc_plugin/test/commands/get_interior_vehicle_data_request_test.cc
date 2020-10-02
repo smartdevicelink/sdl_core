@@ -31,11 +31,17 @@
  */
 
 #include "rc_rpc_plugin/commands/mobile/get_interior_vehicle_data_request.h"
+
+#include "gtest/gtest.h"
+
+#include <stdint.h>
+#include <chrono>
+#include <thread>
+
 #include "application_manager/commands/command_request_test.h"
 #include "application_manager/event_engine/event_dispatcher.h"
 #include "application_manager/message_helper.h"
 #include "application_manager/mock_application.h"
-#include "gtest/gtest.h"
 #include "rc_rpc_plugin/mock/mock_interior_data_cache.h"
 #include "rc_rpc_plugin/mock/mock_interior_data_manager.h"
 #include "rc_rpc_plugin/mock/mock_rc_capabilities_manager.h"
@@ -45,10 +51,6 @@
 #include "rc_rpc_plugin/rc_command_factory.h"
 #include "rc_rpc_plugin/rc_module_constants.h"
 #include "rc_rpc_plugin/rc_rpc_plugin.h"
-
-#include <stdint.h>
-#include <chrono>
-#include <thread>
 
 using application_manager::ApplicationSet;
 using ::application_manager::ApplicationSharedPtr;
@@ -822,6 +824,63 @@ TEST_F(GetInteriorVehicleDataRequestTest,
                            .asBool();
 
   EXPECT_TRUE(climate_enable_available);
+}
+
+TEST_F(GetInteriorVehicleDataRequestTest, ProcessingSuccessResultCodes) {
+  using rc_rpc_plugin::commands::GetInteriorVehicleDataRequest;
+  namespace hmi_response = application_manager::hmi_response;
+  namespace strings = application_manager::strings;
+
+  std::set<hmi_apis::Common_Result::eType> success_result_codes{
+      hmi_apis::Common_Result::SUCCESS,
+      hmi_apis::Common_Result::WARNINGS,
+      hmi_apis::Common_Result::WRONG_LANGUAGE,
+      hmi_apis::Common_Result::RETRY,
+      hmi_apis::Common_Result::SAVED};
+
+  ON_CALL(mock_interior_data_cache_, Contains(_)).WillByDefault(Return(false));
+  ON_CALL(mock_interior_data_manager_, CheckRequestsToHMIFrequency(_))
+      .WillByDefault(Return(true));
+
+  MessageSharedPtr hmi_response_message = CreateBasicMessage();
+  auto& hmi_response_params =
+      (*hmi_response_message)[application_manager::strings::msg_params];
+  hmi_response_params[strings::connection_key] = kAppId;
+  auto climate_control_data =
+      smart_objects::SmartObject(smart_objects::SmartType_Boolean);
+  climate_control_data = true;
+
+  auto& msg_params = (*hmi_response_message)[strings::msg_params];
+  msg_params[message_params::kModuleData][message_params::kClimateControlData]
+            [message_params::kClimateEnableAvailable] = climate_control_data;
+  msg_params[message_params::kModuleData][message_params::kModuleId] =
+      "00bd6d93-e093-4bf0-9784-281febe41bed";
+
+  MessageSharedPtr mobile_message = CreateBasicMessage();
+  auto message_to_mob = CreateBasicMessage();
+
+  for (const auto& result_code : success_result_codes) {
+    hmi_response_params[hmi_response::code] = result_code;
+
+    EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_, _))
+        .WillOnce(Return(true));
+    EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(_, _))
+        .WillOnce(DoAll(SaveArg<0>(&message_to_mob), Return(true)));
+
+    auto command =
+        CreateRCCommand<GetInteriorVehicleDataRequest>(mobile_message);
+    ASSERT_TRUE(command->Init());
+    command->Run();
+
+    application_manager::event_engine::Event event(
+        hmi_apis::FunctionID::RC_GetInteriorVehicleData);
+    event.set_smart_object(*hmi_response_message);
+    command->on_event(event);
+
+    const bool success =
+        (*message_to_mob)[strings::msg_params][strings::success].asBool();
+    EXPECT_TRUE(success);
+  }
 }
 
 }  // namespace rc_rpc_plugin_test
