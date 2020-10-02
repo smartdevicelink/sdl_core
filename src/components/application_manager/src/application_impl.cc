@@ -659,10 +659,9 @@ void ApplicationImpl::SuspendStreaming(
 }
 
 void ApplicationImpl::WakeUpStreaming(
-    protocol_handler::ServiceType service_type, uint32_t timer_len) {
+    protocol_handler::ServiceType service_type) {
   using namespace protocol_handler;
   SDL_LOG_AUTO_TRACE();
-  const bool is_custom_timeout = 0 != timer_len;
 
   // See the comment in StopStreaming(). Also, please make sure that we acquire
   // streaming_stop_lock_ then xxx_streaming_suspended_lock_ in this order!
@@ -680,13 +679,8 @@ void ApplicationImpl::WakeUpStreaming(
       }
     }
 
-    if (is_custom_timeout) {
-      SDL_LOG_DEBUG("New estimated video playback time is: " << timer_len);
-    }
-
-    video_stream_suspend_timer_.Start(
-        is_custom_timeout ? timer_len : video_stream_suspend_timeout_,
-        timer::kPeriodic);
+    video_stream_suspend_timer_.Start(video_stream_suspend_timeout_,
+                                      timer::kPeriodic);
   } else if (ServiceType::kAudio == service_type) {
     {  // reduce the range of audio_streaming_suspended_lock_
       sync_primitives::AutoLock lock(audio_streaming_suspended_lock_);
@@ -698,14 +692,8 @@ void ApplicationImpl::WakeUpStreaming(
         audio_streaming_suspended_ = false;
       }
     }
-
-    if (is_custom_timeout) {
-      SDL_LOG_DEBUG("New estimated audio playback time is: " << timer_len);
-    }
-
-    audio_stream_suspend_timer_.Start(
-        is_custom_timeout ? timer_len : audio_stream_suspend_timeout_,
-        timer::kPeriodic);
+    audio_stream_suspend_timer_.Start(audio_stream_suspend_timeout_,
+                                      timer::kPeriodic);
   }
 }
 

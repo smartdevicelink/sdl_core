@@ -33,7 +33,6 @@
 #ifndef SRC_COMPONENTS_MEDIA_MANAGER_INCLUDE_MEDIA_MANAGER_MEDIA_MANAGER_IMPL_H_
 #define SRC_COMPONENTS_MEDIA_MANAGER_INCLUDE_MEDIA_MANAGER_MEDIA_MANAGER_IMPL_H_
 
-#include <chrono>
 #include <map>
 #include <string>
 #include "interfaces/MOBILE_API.h"
@@ -93,8 +92,6 @@ class MediaManagerImpl : public MediaManager,
 
   virtual const MediaManagerSettings& settings() const OVERRIDE;
 
-  virtual uint32_t DataSizeToMilliseconds(uint64_t data_size) const OVERRIDE;
-
 #ifdef BUILD_TESTS
   void set_mock_a2dp_player(MediaAdapter* media_adapter);
   void set_mock_mic_listener(MediaListenerPtr media_listener);
@@ -119,12 +116,6 @@ class MediaManagerImpl : public MediaManager,
 
   std::map<protocol_handler::ServiceType, MediaAdapterImplPtr> streamer_;
   std::map<protocol_handler::ServiceType, MediaListenerPtr> streamer_listener_;
-
-  uint32_t bits_per_sample_;
-  uint32_t sampling_rate_;
-  uint64_t stream_data_size_;
-  std::chrono::time_point<std::chrono::system_clock>
-      socket_audio_stream_start_time_;
 
   application_manager::ApplicationManager& application_manager_;
 
