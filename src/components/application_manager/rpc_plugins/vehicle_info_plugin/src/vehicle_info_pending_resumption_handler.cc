@@ -138,6 +138,7 @@ void VehicleInfoPendingResumptionHandler::RaiseFinishedPendingResumption(
     ext.subscribeToVehicleInfo(subscription);
   }
 
+  unsubscribe_from_event(VehicleInfo_SubscribeVehicleData);
   auto fake_response =
       CreateFakeResponseFromHMI(pending_resumption.subscription_results_,
                                 pending_resumption.fake_corr_id_);
@@ -197,8 +198,10 @@ void VehicleInfoPendingResumptionHandler::TriggerPendingResumption() {
                   << " is already waiting for HMI response");
     return;
   }
-  SendHMIRequestForNotSubscribed(pending_resumption);
-  pending_resumption.waiting_for_hmi_response_ = true;
+  if (!pending_resumption.IsSuccessfullyDone()) {
+    SendHMIRequestForNotSubscribed(pending_resumption);
+    pending_resumption.waiting_for_hmi_response_ = true;
+  }
 }
 
 void VehicleInfoPendingResumptionHandler::on_event(

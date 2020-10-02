@@ -150,6 +150,8 @@ class ApplicationImpl : public virtual Application,
   inline bool app_allowed() const;
   bool has_been_activated() const;
   bool set_activated(bool is_active);
+  bool is_ready() const;
+  bool set_is_ready(bool is_ready);
 
   const Version& version() const;
   void set_hmi_application_id(uint32_t hmi_app_id);
@@ -582,6 +584,7 @@ class ApplicationImpl : public virtual Application,
   bool is_app_allowed_;
   bool is_app_data_resumption_allowed_;
   bool has_been_activated_;
+  bool is_ready_;
   bool tts_properties_in_none_;
   bool tts_properties_in_full_;
   bool keep_context_;
