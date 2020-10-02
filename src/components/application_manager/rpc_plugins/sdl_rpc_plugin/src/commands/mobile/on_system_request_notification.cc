@@ -173,7 +173,7 @@ void OnSystemRequestNotification::AddHeader(BinaryMessage& message) const {
   }
 
   char timeout_str[24];
-  if (0 > sprintf(timeout_str, "%d", timeout)) {
+  if (0 > sprintf(timeout_str, "%u", timeout)) {
     memset(timeout_str, 0, sizeof(timeout_str));
   }
 

@@ -872,7 +872,6 @@ ModuleConfig::ModuleConfig(const Json::Value* value__)
           impl::ValueMember(value__, "lock_screen_dismissal_enabled")) {}
 
 void ModuleConfig::SafeCopyFrom(const ModuleConfig& from) {
-  exchange_after_x_days = from.exchange_after_x_days;
   exchange_after_x_kilometers = from.exchange_after_x_kilometers;
   exchange_after_x_days = from.exchange_after_x_days;
   exchange_after_x_ignition_cycles = from.exchange_after_x_ignition_cycles;

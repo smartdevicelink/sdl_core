@@ -102,30 +102,6 @@ smart_objects::SmartObjectSPtr GetHashUpdateNotification(
       app_id);
 }
 
-std::string MessageHelper::HMIResultToString(
-    hmi_apis::Common_Result::eType hmi_result) {
-  return MockMessageHelper::message_helper_mock()->HMIResultToString(
-      hmi_result);
-}
-
-hmi_apis::Common_Result::eType MessageHelper::HMIResultFromString(
-    const std::string& hmi_result) {
-  return MockMessageHelper::message_helper_mock()->HMIResultFromString(
-      hmi_result);
-}
-
-std::string MessageHelper::MobileResultToString(
-    mobile_apis::Result::eType mobile_result) {
-  return MockMessageHelper::message_helper_mock()->MobileResultToString(
-      mobile_result);
-}
-
-mobile_api::Result::eType MessageHelper::MobileResultFromString(
-    const std::string& mobile_result) {
-  return MockMessageHelper::message_helper_mock()->MobileResultFromString(
-      mobile_result);
-}
-
 mobile_api::Result::eType MessageHelper::HMIToMobileResult(
     const hmi_apis::Common_Result::eType hmi_result) {
   return MockMessageHelper::message_helper_mock()->HMIToMobileResult(
@@ -136,11 +112,6 @@ hmi_apis::Common_Result::eType MessageHelper::MobileToHMIResult(
     const mobile_api::Result::eType mobile_result) {
   return MockMessageHelper::message_helper_mock()->MobileToHMIResult(
       mobile_result);
-}
-
-mobile_api::HMILevel::eType MessageHelper::StringToHMILevel(
-    const std::string& hmi_level) {
-  return MockMessageHelper::message_helper_mock()->StringToHMILevel(hmi_level);
 }
 
 smart_objects::SmartObjectSPtr MessageHelper::CreateDeviceListSO(
@@ -286,18 +257,6 @@ void MessageHelper::SendUpdateSDLResponse(const std::string& result,
       result, correlation_id, app_mngr);
 }
 
-hmi_apis::Common_Language::eType MessageHelper::CommonLanguageFromString(
-    const std::string& language) {
-  return MockMessageHelper::message_helper_mock()->CommonLanguageFromString(
-      language);
-}
-
-hmi_apis::Common_LightName::eType MessageHelper::CommonLightNameFromString(
-    const std::string& lightName) {
-  return MockMessageHelper::message_helper_mock()->CommonLightNameFromString(
-      lightName);
-}
-
 smart_objects::SmartObjectSPtr MessageHelper::CreateModuleInfoSO(
     uint32_t function_id, ApplicationManager& app_mngr) {
   return MockMessageHelper::message_helper_mock()->CreateModuleInfoSO(
@@ -374,16 +333,6 @@ mobile_apis::Result::eType MessageHelper::VerifyImageFiles(
     ApplicationManager& app_mngr) {
   return MockMessageHelper::message_helper_mock()->VerifyImageFiles(
       message, app, app_mngr);
-}
-
-std::string MessageHelper::CommonLanguageToString(
-    hmi_apis::Common_Language::eType lang) {
-  return MockMessageHelper::message_helper_mock()->CommonLanguageToString(lang);
-}
-
-std::string MessageHelper::MobileLanguageToString(
-    mobile_apis::Language::eType lang) {
-  return MockMessageHelper::message_helper_mock()->MobileLanguageToString(lang);
 }
 
 smart_objects::SmartObjectSPtr MessageHelper::GetBCActivateAppRequestToHMI(
@@ -572,12 +521,6 @@ void MessageHelper::SendSetAppIcon(const uint32_t app_id,
                                    ApplicationManager& application_manager) {
   MockMessageHelper::message_helper_mock()->SendSetAppIcon(
       app_id, icon_path, application_manager);
-}
-
-std::string MessageHelper::StringifiedHMILevel(
-    const mobile_apis::HMILevel::eType hmi_level) {
-  return MockMessageHelper::message_helper_mock()->StringifiedHMILevel(
-      hmi_level);
 }
 
 std::string MessageHelper::GetDeviceMacAddressForHandle(

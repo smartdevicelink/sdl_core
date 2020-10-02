@@ -35,6 +35,7 @@
 
 #include <stdint.h>
 #include <algorithm>
+#include <atomic>
 #include <deque>
 #include <map>
 #include <memory>
@@ -1229,21 +1230,6 @@ class ApplicationManagerImpl
                          smart_objects::SmartObject& vrSynonym);
 
   /**
-   * @brief Method transforms string to AppHMIType
-   * @param str contains string AppHMIType
-   * @return enum AppHMIType
-   */
-  mobile_apis::AppHMIType::eType StringToAppHMIType(std::string str);
-
-  /**
-   * @brief Returns a string representation of AppHMIType
-   * @param type an enum value of AppHMIType
-   * @return string representation of the enum value
-   */
-  const std::string AppHMITypeToString(
-      mobile_apis::AppHMIType::eType type) const;
-
-  /**
    * @brief Method compares arrays of app HMI type
    * @param from_policy contains app HMI type from policy
    * @param from_application contains app HMI type from application
@@ -1260,7 +1246,7 @@ class ApplicationManagerImpl
                           const bool allow_unknown_parameters = false);
 
   template <typename ApplicationList>
-  void PrepareApplicationListSO(ApplicationList app_list,
+  void PrepareApplicationListSO(ApplicationList& app_list,
                                 smart_objects::SmartObject& applications,
                                 ApplicationManager& app_mngr) {
     smart_objects::SmartArray* app_array = applications.asArray();
@@ -1666,7 +1652,6 @@ class ApplicationManagerImpl
   sync_primitives::Lock close_app_timer_pool_lock_;
   sync_primitives::Lock end_stream_timer_pool_lock_;
 
-  mutable sync_primitives::RecursiveLock stopping_application_mng_lock_;
   StateControllerImpl state_ctrl_;
   std::unique_ptr<app_launch::AppLaunchData> app_launch_dto_;
   std::unique_ptr<app_launch::AppLaunchCtrl> app_launch_ctrl_;
@@ -1700,7 +1685,7 @@ class ApplicationManagerImpl
 
   std::atomic<bool> registered_during_timer_execution_;
 
-  volatile bool is_stopping_;
+  std::atomic<bool> is_stopping_;
 
   std::unique_ptr<CommandHolder> commands_holder_;
 

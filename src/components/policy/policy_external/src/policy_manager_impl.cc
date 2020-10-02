@@ -62,7 +62,7 @@ namespace {
 struct GroupNamesAppender
     : public std::unary_function<void,
                                  const policy::FunctionalGroupPermission&> {
-  GroupNamesAppender(policy_table::Strings& names) : names_(names) {}
+  explicit GroupNamesAppender(policy_table::Strings& names) : names_(names) {}
 
   void operator()(const policy::FunctionalGroupPermission& value) {
     names_.push_back(value.group_name);
@@ -1827,13 +1827,12 @@ bool PolicyManagerImpl::IsNeedToUpdateExternalConsentStatus(
   ItemV difference_v;
   difference_v.resize(new_status_v.size() + existing_status_v.size());
 
-  ItemV::iterator ci = difference_v.begin();
-  ci = std::set_difference(new_status_v.begin(),
-                           new_status_v.end(),
-                           existing_status_v.begin(),
-                           existing_status_v.end(),
-                           difference_v.begin(),
-                           ConsentStatusComparatorFunc);
+  ItemV::iterator ci = std::set_difference(new_status_v.begin(),
+                                           new_status_v.end(),
+                                           existing_status_v.begin(),
+                                           existing_status_v.end(),
+                                           difference_v.begin(),
+                                           ConsentStatusComparatorFunc);
   difference_v.resize(ci - difference_v.begin());
 
   return !difference_v.empty();
@@ -2386,7 +2385,7 @@ void PolicyManagerImpl::SetDefaultHmiTypes(
 }
 
 struct HMITypeToInt {
-  int operator()(const policy_table::AppHMITypes::value_type item) {
+  int operator()(const policy_table::AppHMITypes::value_type item) const {
     return policy_table::AppHMIType(item);
   }
 };
@@ -2587,6 +2586,7 @@ __attribute__((visibility("default"))) policy::PolicyManager* CreateManager(
   return new policy::PolicyManagerImpl();
 }
 
+// cppcheck-suppress unusedFunction
 __attribute__((visibility("default"))) void DeleteManager(
     policy::PolicyManager* pm) {
   delete pm;

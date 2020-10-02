@@ -671,6 +671,8 @@ class Application : public virtual InitialApplicationData,
   virtual bool app_allowed() const = 0;
   virtual bool has_been_activated() const = 0;
   virtual bool set_activated(bool is_active) = 0;
+  virtual bool is_ready() const = 0;
+  virtual bool set_is_ready(bool is_ready) = 0;
 
   virtual const Version& version() const = 0;
   virtual void set_hmi_application_id(uint32_t hmi_app_id) = 0;

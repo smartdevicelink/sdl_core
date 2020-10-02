@@ -76,11 +76,6 @@ UsbHandler::~UsbHandler() {
   }
 }
 
-bool operator==(const usbd_device_instance_t& a,
-                const usbd_device_instance_t& b) {
-  return a.path == b.path && a.devno == b.devno;
-}
-
 void UsbHandler::DeviceArrived(usbd_connection* connection,
                                usbd_device_instance_t* instance) {
   for (Devices::const_iterator it = devices_.begin(); it != devices_.end();

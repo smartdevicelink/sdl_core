@@ -116,6 +116,7 @@ ApplicationImpl::ApplicationImpl(
     , is_app_allowed_(true)
     , is_app_data_resumption_allowed_(false)
     , has_been_activated_(false)
+    , is_ready_(false)
     , tts_properties_in_none_(false)
     , tts_properties_in_full_(false)
     , keep_context_(false)
@@ -310,8 +311,9 @@ bool ApplicationImpl::webengine_projection_enabled() const {
 
 struct StateIDComparator {
   HmiState::StateID state_id_;
-  StateIDComparator(HmiState::StateID state_id) : state_id_(state_id) {}
-  bool operator()(const HmiStatePtr cur) {
+  explicit StateIDComparator(HmiState::StateID state_id)
+      : state_id_(state_id) {}
+  bool operator()(const HmiStatePtr cur) const {
     return cur->state_id() == state_id_;
   }
 };
@@ -472,10 +474,6 @@ void ApplicationImpl::set_name(const custom_str::CustomString& name) {
 void ApplicationImpl::set_is_media_application(bool option) {
   SDL_LOG_TRACE("option " << std::boolalpha << option);
   is_media_ = option;
-}
-
-bool IsTTSState(const HmiStatePtr state) {
-  return state->state_id() == HmiState::STATE_ID_TTS_SESSION;
 }
 
 void ApplicationImpl::set_tts_properties_in_none(bool active) {
@@ -659,7 +657,7 @@ void ApplicationImpl::WakeUpStreaming(
 
   if (ServiceType::kMobileNav == service_type) {
     {  // reduce the range of video_streaming_suspended_lock_
-      sync_primitives::AutoLock lock(video_streaming_suspended_lock_);
+      sync_primitives::AutoLock auto_lock(video_streaming_suspended_lock_);
       if (video_streaming_suspended_) {
         application_manager_.OnAppStreaming(app_id(), service_type, true);
         application_manager_.ProcessOnDataStreamingNotification(
@@ -672,7 +670,7 @@ void ApplicationImpl::WakeUpStreaming(
         timer::kPeriodic);
   } else if (ServiceType::kAudio == service_type) {
     {  // reduce the range of audio_streaming_suspended_lock_
-      sync_primitives::AutoLock lock(audio_streaming_suspended_lock_);
+      sync_primitives::AutoLock auto_lock(audio_streaming_suspended_lock_);
       if (audio_streaming_suspended_) {
         application_manager_.OnAppStreaming(app_id(), service_type, true);
         application_manager_.ProcessOnDataStreamingNotification(
@@ -779,6 +777,15 @@ bool ApplicationImpl::has_been_activated() const {
 
 bool ApplicationImpl::set_activated(bool is_active) {
   has_been_activated_ = is_active;
+  return true;
+}
+
+bool ApplicationImpl::is_ready() const {
+  return is_ready_;
+}
+
+bool ApplicationImpl::set_is_ready(bool is_ready) {
+  is_ready_ = is_ready;
   return true;
 }
 
@@ -930,10 +937,7 @@ bool ApplicationImpl::AreCommandLimitsExceeded(
 
       limit.first = current;
       limit.second = 1;
-
       return false;
-
-      break;
     }
     // In case of policy table values, there is EVEN limitation for number of
     // commands per minute, e.g. 10 command per minute i.e. 1 command per 6 sec
@@ -974,7 +978,6 @@ bool ApplicationImpl::AreCommandLimitsExceeded(
       cmd_number_to_time_limits_[cmd_id] = {current, dummy_limit};
 
       return false;
-      break;
     }
     default: {
       SDL_LOG_WARN("Limit source is not implemented.");
@@ -1153,10 +1156,10 @@ void ApplicationImpl::SubscribeToSoftButtons(
 struct FindSoftButtonId {
   uint32_t soft_button_id_;
 
-  FindSoftButtonId(const uint32_t soft_button_id)
+  explicit FindSoftButtonId(const uint32_t soft_button_id)
       : soft_button_id_(soft_button_id) {}
 
-  bool operator()(const std::pair<uint32_t, WindowID>& element) {
+  bool operator()(const std::pair<uint32_t, WindowID>& element) const {
     return soft_button_id_ == element.first;
   }
 };

@@ -197,9 +197,12 @@ InteriorDataManagerImpl::AppsSubscribedModuleTypes() {
     auto app_subscriptions = rc_extension->InteriorVehicleDataSubscriptions();
     std::vector<std::string> app_module_types;
 
-    for (auto& app_subscription : app_subscriptions) {
-      app_module_types.push_back(app_subscription.first);
-    }
+    std::transform(app_subscriptions.begin(),
+                   app_subscriptions.end(),
+                   std::back_inserter(app_module_types),
+                   [](const ModuleUid& app_subscription) {
+                     return app_subscription.first;
+                   });
 
     std::sort(app_module_types.begin(), app_module_types.end());
     result[app_ptr] = app_module_types;

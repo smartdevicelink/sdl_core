@@ -49,8 +49,7 @@ TrackResult RequestTracker::Track(const ApplicationID& app_id,
   SDL_LOG_AUTO_TRACE();
   bool track_result = false;
 
-  SDL_LOG_DEBUG("Tracking request for level: "
-                << MessageHelper::StringifiedHMILevel(level));
+  SDL_LOG_DEBUG("Tracking request for level: " << EnumToString(level));
 
   if (mobile_apis::HMILevel::HMI_NONE == level) {
     track_result = Track(app_id,

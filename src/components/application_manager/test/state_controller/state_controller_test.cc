@@ -727,6 +727,7 @@ class StateControllerImplTest : public ::testing::Test {
         .WillByDefault(Return(vc));
     ON_CALL(**app_mock, IsAudioApplication())
         .WillByDefault(Return(media || navi || vc));
+    ON_CALL(**app_mock, is_ready()).WillByDefault(Return(true));
 
     EXPECT_CALL(**app_mock, usage_report())
         .WillRepeatedly(ReturnRef(usage_stat));

@@ -49,14 +49,6 @@ namespace commands = app_mngr::commands;
 namespace message_params = rc_rpc_plugin::message_params;
 
 SDL_CREATE_LOG_VARIABLE("Resumption")
-std::map<hmi_apis::Common_ModuleType::eType, std::string>
-    module_types_str_mapping{
-        {hmi_apis::Common_ModuleType::eType::CLIMATE, {"CLIMATE"}},
-        {hmi_apis::Common_ModuleType::eType::RADIO, {"RADIO"}},
-        {hmi_apis::Common_ModuleType::eType::SEAT, {"SEAT"}},
-        {hmi_apis::Common_ModuleType::eType::AUDIO, {"AUDIO"}},
-        {hmi_apis::Common_ModuleType::eType::LIGHT, {"LIGHT"}},
-        {hmi_apis::Common_ModuleType::eType::HMI_SETTINGS, {"HMI_SETTINGS"}}};
 
 bool ResumptionRequestID::operator<(const ResumptionRequestID& other) const {
   return correlation_id < other.correlation_id ||
@@ -1015,7 +1007,7 @@ void ResumptionDataProcessorImpl::DeletePluginsSubscriptions(
 
   if (!status.successful_module_subscriptions_.empty()) {
     extension_modules_subscriptions[message_params::kModuleData] =
-        new smart_objects::SmartObject(smart_objects::SmartType_Array);
+        smart_objects::SmartObject(smart_objects::SmartType_Array);
 
     auto& module_data_so =
         extension_modules_subscriptions[message_params::kModuleData];
@@ -1023,7 +1015,7 @@ void ResumptionDataProcessorImpl::DeletePluginsSubscriptions(
     uint32_t index = 0;
     for (const auto& module : status.successful_module_subscriptions_) {
       module_data_so[index] =
-          new smart_objects::SmartObject(smart_objects::SmartType_Map);
+          smart_objects::SmartObject(smart_objects::SmartType_Map);
       module_data_so[index][message_params::kModuleType] = module.first;
       module_data_so[index][message_params::kModuleId] = module.second;
       index++;
@@ -1117,7 +1109,7 @@ void ResumptionDataProcessorImpl::CheckModuleDataSubscription(
           response_module_data_so[message_params::kModuleType].asUInt());
 
   const auto responsed_module_type_str =
-      module_types_str_mapping[responsed_module_type_int];
+      application_manager::EnumToString(responsed_module_type_int);
 
   const auto response_module_id =
       response_module_data_so[message_params::kModuleId].asString();

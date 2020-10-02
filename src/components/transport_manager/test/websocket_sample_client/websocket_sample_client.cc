@@ -105,7 +105,6 @@ bool WSSampleClient<WS>::Connect(tcp::resolver::results_type& results) {
   boost::system::error_code ec;
   boost::asio::connect(ws_->next_layer(), results.begin(), results.end(), ec);
   if (ec) {
-    std::string str_err = "ErrorMessage: " + ec.message();
     return false;
   }
   return true;
@@ -116,7 +115,6 @@ bool WSSampleClient<WSS>::Connect(tcp::resolver::results_type& results) {
   boost::system::error_code ec;
   boost::asio::connect(ws_->lowest_layer(), results.begin(), results.end(), ec);
   if (ec) {
-    std::string str_err = "ErrorMessage: " + ec.message();
     return false;
   }
   return true;
@@ -128,7 +126,6 @@ bool WSSampleClient<WS>::Handshake(const std::string& host,
   boost::system::error_code ec;
   ws_->handshake(host, target, ec);
   if (ec) {
-    std::string str_err = "ErrorMessage: " + ec.message();
     return false;
   }
   return true;
@@ -156,7 +153,6 @@ bool WSSampleClient<WSS>::Handshake(const std::string& host,
 
   ws_->handshake(host, target, ec);
   if (ec) {
-    std::string str_err = "ErrorMessage: " + ec.message();
     return false;
   }
 

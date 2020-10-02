@@ -1576,7 +1576,7 @@ TEST_F(ApplicationManagerImplTest,
   // - .ini file specifies TCP_WIFI for EMPTY_APP entry.
   //   -> The app does not have required transport.
   bool result = CheckResumptionRequiredTransportAvailableTest(
-      NULL,
+      nullptr,
       primary_device_handle,
       primary_transport_device_string,
       secondary_device_handle,
@@ -2099,6 +2099,7 @@ TEST_F(
   app_manager_impl_->SetPluginManager(rpc_plugin_manager);
   auto wep_nonmedia_app = app_manager_impl_->RegisterApplication(rai_ptr);
   wep_nonmedia_app->set_is_media_application(false);
+  wep_nonmedia_app->set_is_ready(true);
 
   EXPECT_EQ(protocol_handler::MajorProtocolVersion::PROTOCOL_VERSION_2,
             wep_nonmedia_app->protocol_version());
@@ -2203,6 +2204,7 @@ TEST_F(
   app_manager_impl_->SetPluginManager(rpc_plugin_manager);
   auto wep_media_app = app_manager_impl_->RegisterApplication(rai_ptr);
   wep_media_app->set_is_media_application(true);
+  wep_media_app->set_is_ready(true);
 
   EXPECT_EQ(protocol_handler::MajorProtocolVersion::PROTOCOL_VERSION_2,
             wep_media_app->protocol_version());

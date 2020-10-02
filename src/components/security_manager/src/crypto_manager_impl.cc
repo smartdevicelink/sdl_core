@@ -338,10 +338,16 @@ bool CryptoManagerImpl::IsCertificateUpdateRequired(
 
   const double seconds = difftime(certificates_time, system_time);
 
-  SDL_LOG_DEBUG(
-      "Certificate UTC time: " << asctime(gmtime(&certificates_time)));
+  const size_t maxsize = 40;
+  char certificate_utc_time[maxsize];
+  std::strftime(
+      certificate_utc_time, maxsize, "%c", gmtime(&certificates_time));
+  SDL_LOG_DEBUG("Certificate UTC time: " << certificate_utc_time);
 
-  SDL_LOG_DEBUG("Host UTC time: " << asctime(gmtime(&system_time)));
+  char host_utc_time[maxsize];
+  std::strftime(host_utc_time, maxsize, "%c", gmtime(&system_time));
+  SDL_LOG_DEBUG("Host UTC time: " << host_utc_time);
+
   SDL_LOG_DEBUG("Seconds before expiration: " << seconds);
   if (seconds < 0) {
     SDL_LOG_WARN("Certificate is already expired.");
