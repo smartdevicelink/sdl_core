@@ -758,8 +758,8 @@ ApplicationSharedPtr ApplicationManagerImpl::RegisterApplication(
   return application;
 }
 
-void ApplicationManagerImpl::FinalizeAppRegistration(ApplicationSharedPtr application, const uint32_t connection_key) {
-  
+void ApplicationManagerImpl::FinalizeAppRegistration(
+    ApplicationSharedPtr application, const uint32_t connection_key) {
   AddAppToRegisteredAppList(application);
 
   // Update cloud app information, in case any pending apps are unable to be

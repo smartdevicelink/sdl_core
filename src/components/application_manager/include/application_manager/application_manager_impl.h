@@ -371,7 +371,8 @@ class ApplicationManagerImpl
       const std::shared_ptr<smart_objects::SmartObject>&
           request_for_registration) OVERRIDE;
 
-  void FinalizeAppRegistration(ApplicationSharedPtr application, const uint32_t connection_key) OVERRIDE;
+  void FinalizeAppRegistration(ApplicationSharedPtr application,
+                               const uint32_t connection_key) OVERRIDE;
   /*
    * @brief Closes application by id
    *
