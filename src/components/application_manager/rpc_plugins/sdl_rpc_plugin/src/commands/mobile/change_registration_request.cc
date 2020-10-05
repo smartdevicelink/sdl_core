@@ -461,11 +461,7 @@ bool ChangeRegistrationRequest::PrepareResponseParameters(
 bool ChangeRegistrationRequest::IsLanguageSupportedByUI(
     const int32_t& hmi_display_lang) {
   const HMICapabilities& hmi_capabilities = hmi_capabilities_;
-<<<<<<< HEAD
-  auto ui_languages = hmi_capabilities.ui_supported_languages();
-=======
   const auto ui_languages = hmi_capabilities.ui_supported_languages();
->>>>>>> release/7.0.0
 
   if (!ui_languages) {
     SDL_LOG_ERROR("NULL pointer");
@@ -486,11 +482,7 @@ bool ChangeRegistrationRequest::IsLanguageSupportedByUI(
 bool ChangeRegistrationRequest::IsLanguageSupportedByVR(
     const int32_t& hmi_display_lang) {
   const HMICapabilities& hmi_capabilities = hmi_capabilities_;
-<<<<<<< HEAD
-  auto vr_languages = hmi_capabilities.vr_supported_languages();
-=======
   const auto vr_languages = hmi_capabilities.vr_supported_languages();
->>>>>>> release/7.0.0
 
   if (!vr_languages) {
     SDL_LOG_ERROR("NULL pointer");
@@ -511,11 +503,7 @@ bool ChangeRegistrationRequest::IsLanguageSupportedByVR(
 bool ChangeRegistrationRequest::IsLanguageSupportedByTTS(
     const int32_t& hmi_display_lang) {
   const HMICapabilities& hmi_capabilities = hmi_capabilities_;
-<<<<<<< HEAD
-  auto tts_languages = hmi_capabilities.tts_supported_languages();
-=======
   const auto tts_languages = hmi_capabilities.tts_supported_languages();
->>>>>>> release/7.0.0
 
   if (!tts_languages) {
     SDL_LOG_ERROR("NULL pointer");

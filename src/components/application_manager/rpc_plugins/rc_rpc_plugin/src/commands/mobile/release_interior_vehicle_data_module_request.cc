@@ -92,13 +92,8 @@ ReleaseInteriorVehicleDataModuleRequest::
     : RCCommandRequest(message, params) {}
 
 bool ReleaseInteriorVehicleDataModuleRequest::ProcessCapabilities() {
-<<<<<<< HEAD
-  LOG4CXX_AUTO_TRACE(logger_);
-  auto rc_capabilities = hmi_capabilities_.rc_capability();
-=======
   SDL_LOG_AUTO_TRACE();
   const auto rc_capability = hmi_capabilities_.rc_capability();
->>>>>>> release/7.0.0
 
   const std::string module_type = ModuleType();
   const std::string module_id = ModuleId();

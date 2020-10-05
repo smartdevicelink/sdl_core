@@ -73,15 +73,10 @@ class SetInteriorVehicleDataRequestTest
  public:
   SetInteriorVehicleDataRequestTest()
       : mock_app_(std::make_shared<NiceMock<MockApplication> >())
-<<<<<<< HEAD
-      , rc_app_extention_(std::make_shared<RCAppExtension>(kModuleId))
-      , rc_capabilities_(CreateMessage(smart_objects::SmartType_Array)) {}
-=======
       , rc_app_extension_(
             std::make_shared<RCAppExtension>(kModuleId, rc_plugin_, *mock_app_))
       , rc_capabilities_(std::make_shared<smart_objects::SmartObject>(
             smart_objects::SmartType::SmartType_Array)) {}
->>>>>>> release/7.0.0
 
   void SetUp() OVERRIDE {
     smart_objects::SmartObject control_caps((smart_objects::SmartType_Array));

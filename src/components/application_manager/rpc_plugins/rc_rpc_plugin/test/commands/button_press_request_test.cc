@@ -79,12 +79,8 @@ class ButtonPressRequestTest
     : public CommandRequestTest<CommandsTestMocks::kIsNice> {
  public:
   ButtonPressRequestTest()
-<<<<<<< HEAD
-      : rc_capabilities_(CreateMessage(smart_objects::SmartType_Array))
-=======
       : rc_capabilities_(std::make_shared<smart_objects::SmartObject>(
             smart_objects::SmartType_Map))
->>>>>>> release/7.0.0
       , mock_app_(std::make_shared<NiceMock<MockApplication> >())
       , rc_app_extension_(std::make_shared<rc_rpc_plugin::RCAppExtension>(
             kModuleId, rc_plugin_, *mock_app_)) {}

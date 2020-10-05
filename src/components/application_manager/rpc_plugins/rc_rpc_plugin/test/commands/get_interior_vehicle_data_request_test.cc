@@ -100,12 +100,8 @@ class GetInteriorVehicleDataRequestTest
             kModuleId, rc_plugin_, *mock_app2_))
       , apps_lock_(std::make_shared<sync_primitives::Lock>())
       , apps_da_(apps_, apps_lock_)
-<<<<<<< HEAD
-      , rc_capabilities_(CreateMessage(smart_objects::SmartType_Array)) {
-=======
       , rc_capabilities_(std::make_shared<smart_objects::SmartObject>(
             smart_objects::SmartType::SmartType_Array)) {
->>>>>>> release/7.0.0
     ON_CALL(*mock_app_, app_id()).WillByDefault(Return(kAppId));
     ON_CALL(*mock_app2_, app_id()).WillByDefault(Return(kAppId2));
     ON_CALL(*mock_app_, is_remote_control_supported())

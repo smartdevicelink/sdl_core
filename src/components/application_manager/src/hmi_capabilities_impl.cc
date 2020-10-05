@@ -225,40 +225,25 @@ HMICapabilitiesImpl::active_tts_language() const {
 
 void HMICapabilitiesImpl::set_ui_supported_languages(
     const smart_objects::SmartObject& supported_languages) {
-<<<<<<< HEAD
-  smart_objects::SmartObjectSPtr new_value =
-      std::make_shared<smart_objects::SmartObject>(supported_languages);
-  sync_primitives::AutoWriteLock lock(hmi_capabilities_lock_);
-=======
   auto new_value =
       std::make_shared<smart_objects::SmartObject>(supported_languages);
->>>>>>> release/7.0.0
+  sync_primitives::AutoWriteLock lock(hmi_capabilities_lock_);
   ui_supported_languages_.swap(new_value);
 }
 
 void HMICapabilitiesImpl::set_tts_supported_languages(
     const smart_objects::SmartObject& supported_languages) {
-<<<<<<< HEAD
-  smart_objects::SmartObjectSPtr new_value =
-      std::make_shared<smart_objects::SmartObject>(supported_languages);
-  sync_primitives::AutoWriteLock lock(hmi_capabilities_lock_);
-=======
   auto new_value =
       std::make_shared<smart_objects::SmartObject>(supported_languages);
->>>>>>> release/7.0.0
+  sync_primitives::AutoWriteLock lock(hmi_capabilities_lock_);
   tts_supported_languages_.swap(new_value);
 }
 
 void HMICapabilitiesImpl::set_vr_supported_languages(
     const smart_objects::SmartObject& supported_languages) {
-<<<<<<< HEAD
-  smart_objects::SmartObjectSPtr new_value =
-      std::make_shared<smart_objects::SmartObject>(supported_languages);
-  sync_primitives::AutoWriteLock lock(hmi_capabilities_lock_);
-=======
   auto new_value =
       std::make_shared<smart_objects::SmartObject>(supported_languages);
->>>>>>> release/7.0.0
+  sync_primitives::AutoWriteLock lock(hmi_capabilities_lock_);
   vr_supported_languages_.swap(new_value);
 }
 
@@ -323,15 +308,9 @@ void HMICapabilitiesImpl::set_speech_capabilities(
 
 void HMICapabilitiesImpl::set_audio_pass_thru_capabilities(
     const smart_objects::SmartObject& audio_pass_thru_capabilities) {
-<<<<<<< HEAD
-  smart_objects::SmartObjectSPtr new_value =
-      std::make_shared<smart_objects::SmartObject>(
-          audio_pass_thru_capabilities);
-  sync_primitives::AutoWriteLock lock(hmi_capabilities_lock_);
-=======
   auto new_value = std::make_shared<smart_objects::SmartObject>(
       audio_pass_thru_capabilities);
->>>>>>> release/7.0.0
+  sync_primitives::AutoWriteLock lock(hmi_capabilities_lock_);
   audio_pass_thru_capabilities_.swap(new_value);
 }
 
@@ -353,13 +332,8 @@ void HMICapabilitiesImpl::set_preset_bank_capabilities(
 
 void HMICapabilitiesImpl::set_vehicle_type(
     const smart_objects::SmartObject& vehicle_type) {
-<<<<<<< HEAD
-  smart_objects::SmartObjectSPtr new_value =
-      std::make_shared<smart_objects::SmartObject>(vehicle_type);
-  sync_primitives::AutoWriteLock lock(hmi_capabilities_lock_);
-=======
   auto new_value = std::make_shared<smart_objects::SmartObject>(vehicle_type);
->>>>>>> release/7.0.0
+  sync_primitives::AutoWriteLock lock(hmi_capabilities_lock_);
   vehicle_type_.swap(new_value);
 }
 
@@ -393,52 +367,32 @@ void HMICapabilitiesImpl::set_driver_distraction_supported(
 
 void HMICapabilitiesImpl::set_navigation_capability(
     const smart_objects::SmartObject& navigation_capability) {
-<<<<<<< HEAD
-  smart_objects::SmartObjectSPtr new_value =
-      std::make_shared<smart_objects::SmartObject>(navigation_capability);
-  sync_primitives::AutoWriteLock lock(hmi_capabilities_lock_);
-=======
   auto new_value =
       std::make_shared<smart_objects::SmartObject>(navigation_capability);
->>>>>>> release/7.0.0
+  sync_primitives::AutoWriteLock lock(hmi_capabilities_lock_);
   navigation_capability_.swap(new_value);
 }
 
 void HMICapabilitiesImpl::set_phone_capability(
     const smart_objects::SmartObject& phone_capability) {
-<<<<<<< HEAD
-  smart_objects::SmartObjectSPtr new_value =
-      std::make_shared<smart_objects::SmartObject>(phone_capability);
-  sync_primitives::AutoWriteLock lock(hmi_capabilities_lock_);
-=======
   auto new_value =
       std::make_shared<smart_objects::SmartObject>(phone_capability);
->>>>>>> release/7.0.0
+  sync_primitives::AutoWriteLock lock(hmi_capabilities_lock_);
   phone_capability_.swap(new_value);
 }
 
 void HMICapabilitiesImpl::set_video_streaming_capability(
     const smart_objects::SmartObject& video_streaming_capability) {
-<<<<<<< HEAD
-  smart_objects::SmartObjectSPtr new_value =
-      std::make_shared<smart_objects::SmartObject>(video_streaming_capability);
-  sync_primitives::AutoWriteLock lock(hmi_capabilities_lock_);
-=======
   auto new_value =
       std::make_shared<smart_objects::SmartObject>(video_streaming_capability);
->>>>>>> release/7.0.0
+  sync_primitives::AutoWriteLock lock(hmi_capabilities_lock_);
   video_streaming_capability_.swap(new_value);
 }
 
 void HMICapabilitiesImpl::set_rc_capability(
     const smart_objects::SmartObject& rc_capability) {
-<<<<<<< HEAD
-  smart_objects::SmartObjectSPtr new_value =
-      std::make_shared<smart_objects::SmartObject>(rc_capability);
-  sync_primitives::AutoWriteLock lock(hmi_capabilities_lock_);
-  rc_capability_.swap(new_value);
-=======
   auto new_value = std::make_shared<smart_objects::SmartObject>(rc_capability);
+  sync_primitives::AutoWriteLock lock(hmi_capabilities_lock_);
   rc_capability_.swap(new_value);
 }
 
@@ -446,20 +400,15 @@ void HMICapabilitiesImpl::set_driver_distraction_capability(
     const smart_objects::SmartObject& driver_distraction_capability) {
   auto new_value = std::make_shared<smart_objects::SmartObject>(
       driver_distraction_capability);
+  sync_primitives::AutoWriteLock lock(hmi_capabilities_lock_);
   driver_distraction_capability_.swap(new_value);
->>>>>>> release/7.0.0
 }
 
 void HMICapabilitiesImpl::set_seat_location_capability(
     const smart_objects::SmartObject& seat_location_capability) {
-<<<<<<< HEAD
-  smart_objects::SmartObjectSPtr new_value =
-      std::make_shared<smart_objects::SmartObject>(seat_location_capability);
-  sync_primitives::AutoWriteLock lock(hmi_capabilities_lock_);
-=======
   auto new_value =
       std::make_shared<smart_objects::SmartObject>(seat_location_capability);
->>>>>>> release/7.0.0
+  sync_primitives::AutoWriteLock lock(hmi_capabilities_lock_);
   seat_location_capability_.swap(new_value);
 }
 
@@ -503,28 +452,19 @@ bool HMICapabilitiesImpl::is_rc_cooperating() const {
 
 const smart_objects::SmartObjectSPtr
 HMICapabilitiesImpl::ui_supported_languages() const {
-<<<<<<< HEAD
   sync_primitives::AutoReadLock lock(hmi_capabilities_lock_);
-=======
->>>>>>> release/7.0.0
   return ui_supported_languages_;
 }
 
 const smart_objects::SmartObjectSPtr
 HMICapabilitiesImpl::vr_supported_languages() const {
-<<<<<<< HEAD
   sync_primitives::AutoReadLock lock(hmi_capabilities_lock_);
-=======
->>>>>>> release/7.0.0
   return vr_supported_languages_;
 }
 
 const smart_objects::SmartObjectSPtr
 HMICapabilitiesImpl::tts_supported_languages() const {
-<<<<<<< HEAD
   sync_primitives::AutoReadLock lock(hmi_capabilities_lock_);
-=======
->>>>>>> release/7.0.0
   return tts_supported_languages_;
 }
 
@@ -620,18 +560,13 @@ bool HMICapabilitiesImpl::rc_supported() const {
   return is_rc_supported_;
 }
 
-<<<<<<< HEAD
-const smart_objects::SmartObjectSPtr
-HMICapabilitiesImpl::navigation_capability() const {
-  sync_primitives::AutoReadLock lock(hmi_capabilities_lock_);
-=======
 bool HMICapabilitiesImpl::driver_distraction_supported() const {
   return is_driver_distraction_supported_;
 }
 
 const smart_objects::SmartObjectSPtr
 HMICapabilitiesImpl::navigation_capability() const {
->>>>>>> release/7.0.0
+  sync_primitives::AutoReadLock lock(hmi_capabilities_lock_);
   return navigation_capability_;
 }
 
@@ -649,22 +584,17 @@ HMICapabilitiesImpl::video_streaming_capability() const {
 
 const smart_objects::SmartObjectSPtr HMICapabilitiesImpl::rc_capability()
     const {
-<<<<<<< HEAD
   sync_primitives::AutoReadLock lock(hmi_capabilities_lock_);
-=======
->>>>>>> release/7.0.0
   return rc_capability_;
 }
 
 const smart_objects::SmartObjectSPtr
-<<<<<<< HEAD
-=======
 HMICapabilitiesImpl::driver_distraction_capability() const {
+  sync_primitives::AutoReadLock lock(hmi_capabilities_lock_);
   return driver_distraction_capability_;
 }
 
 const smart_objects::SmartObjectSPtr
->>>>>>> release/7.0.0
 HMICapabilitiesImpl::seat_location_capability() const {
   sync_primitives::AutoReadLock lock(hmi_capabilities_lock_);
   return seat_location_capability_;

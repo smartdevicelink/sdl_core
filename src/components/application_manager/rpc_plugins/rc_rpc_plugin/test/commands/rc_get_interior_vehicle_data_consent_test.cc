@@ -106,12 +106,8 @@ class RCGetInteriorVehicleDataConsentTest
   RCGetInteriorVehicleDataConsentTest()
       : mock_app_(std::make_shared<NiceMock<MockApplication> >())
       , command_holder(app_mngr_)
-<<<<<<< HEAD
-      , rc_capabilities_(CreateMessage(smart_objects::SmartType_Array))
-=======
       , rc_capabilities_(std::make_shared<smart_objects::SmartObject>(
             smart_objects::SmartType::SmartType_Array))
->>>>>>> release/7.0.0
       , request_controller(mock_request_controler)
       , rpc_protection_manager_(
             std::make_shared<application_manager::MockRPCProtectionManager>())

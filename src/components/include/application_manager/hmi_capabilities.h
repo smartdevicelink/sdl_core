@@ -433,14 +433,8 @@ class HMICapabilities {
   virtual void set_navigation_capability(
       const smart_objects::SmartObject& navigation_capability) = 0;
 
-<<<<<<< HEAD
-  /*
-   * @brief Retrieves information regarding the navigation system capabilityp
-   *
-=======
   /**
    * @brief Retrieves information regarding the navigation system capability
->>>>>>> release/7.0.0
    * @return NAVIGATION system capability
    */
   virtual const smart_objects::SmartObjectSPtr navigation_capability()
@@ -482,9 +476,6 @@ class HMICapabilities {
   virtual void set_rc_capability(
       const smart_objects::SmartObject& rc_capability) = 0;
 
-<<<<<<< HEAD
-  virtual const smart_objects::SmartObjectSPtr rc_capability() const = 0;
-=======
   /**
    * @brief Retrieves information regarding the remote control capabilities
    * @return RC capabilities
@@ -496,7 +487,6 @@ class HMICapabilities {
 
   virtual const smart_objects::SmartObjectSPtr driver_distraction_capability()
       const = 0;
->>>>>>> release/7.0.0
 
   /**
    * @brief Sets available SeatLocation capabilities for further usage by
