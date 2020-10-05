@@ -251,25 +251,6 @@ class ResumeCtrlTest : public ::testing::Test {
  * @brief  Group of tests which check starting resumption with different data
  */
 
-TEST_F(ResumeCtrlTest, StartResumption_AppWithGrammarId) {
-  smart_objects::SmartObject saved_app;
-  saved_app[application_manager::strings::hash_id] = kHash_;
-  saved_app[application_manager::strings::grammar_id] = kTestGrammarId_;
-
-  // Check RestoreApplicationData
-  GetInfoFromApp();
-  ON_CALL(mock_app_mngr_, GetDefaultHmiLevel(const_app_))
-      .WillByDefault(Return(kDefaultTestLevel_));
-  ON_CALL(*mock_storage_,
-          GetSavedApplication(kTestPolicyAppId_, kMacAddress_, _))
-      .WillByDefault(DoAll(SetArgReferee<2>(saved_app), Return(true)));
-
-  EXPECT_CALL(*mock_app_, set_grammar_id(kTestGrammarId_));
-
-  const bool res = res_ctrl_->StartResumption(mock_app_, kHash_, callback_);
-  EXPECT_TRUE(res);
-}
-
 MATCHER_P4(CheckAppFile, is_persistent, is_download, file_name, file_type, "") {
   application_manager::AppFile app_file = arg;
   return app_file.is_persistent == is_persistent &&
