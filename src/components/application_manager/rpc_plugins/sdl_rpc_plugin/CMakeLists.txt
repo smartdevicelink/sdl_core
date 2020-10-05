@@ -54,7 +54,6 @@ set(LIBRARIES
   ApplicationManager
   HMI_API
   MOBILE_API
-  MessageHelper
   connectionHandler
   v4_protocol_v1_2_no_extra
   SmartObjects
@@ -72,6 +71,7 @@ target_link_libraries("sdl_rpc_plugin_static" ${LIBRARIES})
 
 add_library("sdl_rpc_plugin" SHARED "src/sdl_rpc_plugin.cc")
 target_link_libraries("sdl_rpc_plugin" sdl_rpc_plugin_static)
+target_link_libraries("sdl_rpc_plugin" MessageHelper)
 
 set(INSTALL_DESTINATION bin)
 

@@ -41,6 +41,8 @@ namespace rc_rpc_plugin {
 using namespace application_manager;
 namespace commands {
 
+SDL_CREATE_LOG_VARIABLE("Commands")
+
 namespace {
 struct ResponseParams {
   std::string response_info;
@@ -53,9 +55,9 @@ struct ResponseParams {
 
 void PrepareResponseResult(
     ResponseParams& response_params_out,
-    rc_rpc_plugin::ResourceReleasedState::eType& released_result) {
+    const rc_rpc_plugin::ResourceReleasedState::eType& released_result) {
   std::stringstream ss;
-  auto info_inserter = [&ss, response_params_out](std::string info) {
+  auto info_inserter = [&ss, response_params_out](const std::string& info) {
     ss << "Module [" << response_params_out.module_type << ":"
        << response_params_out.module_id << "] " << info;
   };
@@ -90,17 +92,21 @@ ReleaseInteriorVehicleDataModuleRequest::
     : RCCommandRequest(message, params) {}
 
 bool ReleaseInteriorVehicleDataModuleRequest::ProcessCapabilities() {
+<<<<<<< HEAD
   LOG4CXX_AUTO_TRACE(logger_);
   auto rc_capabilities = hmi_capabilities_.rc_capability();
+=======
+  SDL_LOG_AUTO_TRACE();
+  const auto rc_capability = hmi_capabilities_.rc_capability();
+>>>>>>> release/7.0.0
 
   const std::string module_type = ModuleType();
   const std::string module_id = ModuleId();
   const ModuleUid module(module_type, module_id);
-  if (rc_capabilities &&
+  if (rc_capability &&
       !rc_capabilities_manager_.CheckIfModuleExistsInCapabilities(module)) {
-    LOG4CXX_WARN(
-        logger_,
-        "Accessing not supported module: " << module_type << " " << module_id);
+    SDL_LOG_WARN("Accessing not supported module: " << module_type << " "
+                                                    << module_id);
     SendResponse(false,
                  mobile_apis::Result::UNSUPPORTED_RESOURCE,
                  "Accessing not supported module");
@@ -110,7 +116,7 @@ bool ReleaseInteriorVehicleDataModuleRequest::ProcessCapabilities() {
 }
 
 void ReleaseInteriorVehicleDataModuleRequest::Execute() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
 
   if (!ProcessCapabilities()) {
     return;
@@ -122,7 +128,7 @@ void ReleaseInteriorVehicleDataModuleRequest::Execute() {
   ApplicationSharedPtr app = application_manager_.application(connection_key());
 
   if (!app) {
-    LOG4CXX_ERROR(logger_, "Application is not registered");
+    SDL_LOG_ERROR("Application is not registered");
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     return;
   }
@@ -149,12 +155,11 @@ void ReleaseInteriorVehicleDataModuleRequest::Execute() {
         NotificationTrigger::MODULE_ALLOCATION, app);
   }
 
-  LOG4CXX_DEBUG(logger_,
-                "Resource for module: "
-                    << ModuleType() << " with id: " << module_id
-                    << " was released with result " << std::boolalpha
-                    << response_params.success_result
-                    << " and result_code: " << response_params.result_code);
+  SDL_LOG_DEBUG("Resource for module: "
+                << ModuleType() << " with id: " << module_id
+                << " was released with result " << std::boolalpha
+                << response_params.success_result
+                << " and result_code: " << response_params.result_code);
 
   SendResponse(response_params.success_result,
                response_params.result_code,
@@ -162,7 +167,7 @@ void ReleaseInteriorVehicleDataModuleRequest::Execute() {
 }
 
 std::string ReleaseInteriorVehicleDataModuleRequest::ModuleType() const {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   mobile_apis::ModuleType::eType module_type =
       static_cast<mobile_apis::ModuleType::eType>(
           (*message_)[app_mngr::strings::msg_params]
@@ -176,7 +181,7 @@ std::string ReleaseInteriorVehicleDataModuleRequest::ModuleType() const {
 }
 
 std::string ReleaseInteriorVehicleDataModuleRequest::ModuleId() const {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   auto msg_params = (*message_)[app_mngr::strings::msg_params];
   if (msg_params.keyExists(message_params::kModuleId)) {
     return msg_params[message_params::kModuleId].asString();

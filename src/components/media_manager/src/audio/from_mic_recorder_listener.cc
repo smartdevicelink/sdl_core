@@ -37,7 +37,7 @@
 
 namespace media_manager {
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "MediaManager")
+SDL_CREATE_LOG_VARIABLE("MediaManager")
 
 FromMicRecorderListener::FromMicRecorderListener(
     const std::string& file_name,
@@ -48,10 +48,10 @@ FromMicRecorderListener::FromMicRecorderListener(
     , application_manager_(app_mngr) {}
 
 FromMicRecorderListener::~FromMicRecorderListener() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   if (reader_) {
-    reader_->join();
-    delete reader_->delegate();
+    reader_->Stop(threads::Thread::kThreadSoftStop);
+    delete reader_->GetDelegate();
     threads::DeleteThread(reader_);
   }
 }
@@ -63,9 +63,8 @@ void FromMicRecorderListener::OnErrorReceived(int32_t application_key,
                                               const DataForListener& data) {}
 
 void FromMicRecorderListener::OnActivityStarted(int32_t application_key) {
-  LOG4CXX_INFO(
-      logger_,
-      "FromMicRecorderListener::OnActivityStarted " << application_key);
+  SDL_LOG_INFO("FromMicRecorderListener::OnActivityStarted "
+               << application_key);
   if (application_key == current_application_) {
     return;
   }
@@ -75,23 +74,21 @@ void FromMicRecorderListener::OnActivityStarted(int32_t application_key) {
     reader_ = threads::CreateThread("RecorderSender", thread_delegate);
   }
   if (reader_) {
-    reader_->start();
+    reader_->Start();
     current_application_ = application_key;
   }
 }
 
 void FromMicRecorderListener::OnActivityEnded(int32_t application_key) {
-  LOG4CXX_INFO(logger_,
-               "FromMicRecorderListener::OnActivityEnded " << application_key);
+  SDL_LOG_INFO("FromMicRecorderListener::OnActivityEnded " << application_key);
   if (application_key != current_application_) {
-    LOG4CXX_WARN(logger_,
-                 "Not performing activity on " << application_key << " but on "
+    SDL_LOG_WARN("Not performing activity on " << application_key << " but on "
                                                << current_application_);
     return;
   }
   if (reader_) {
-    reader_->join();
-    delete reader_->delegate();
+    reader_->Stop(threads::Thread::kThreadSoftStop);
+    delete reader_->GetDelegate();
     threads::DeleteThread(reader_);
     reader_ = NULL;
   }

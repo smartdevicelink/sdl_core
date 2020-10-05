@@ -113,6 +113,17 @@ const std::string kCreateSchema =
     "CREATE INDEX IF NOT EXISTS "
     "`notifications_by_priority.fk_notifications_by_priority_priority1_idx` "
     "  ON `notifications_by_priority`(`priority_value`); "
+    "CREATE TABLE IF NOT EXISTS `subtle_notifications_by_priority`( "
+    "  `priority_value` VARCHAR(45) PRIMARY KEY NOT NULL, "
+    "  `value` INTEGER NOT NULL, "
+    "  CONSTRAINT `fk_subtle_notifications_by_priority_priority1` "
+    "    FOREIGN KEY(`priority_value`) "
+    "    REFERENCES `priority`(`value`) "
+    "); "
+    "CREATE INDEX IF NOT EXISTS "
+    "`subtle_notifications_by_priority.fk_subtle_notifications_by_priority_"
+    "priority1_idx` "
+    "  ON `subtle_notifications_by_priority`(`priority_value`); "
     "CREATE TABLE IF NOT EXISTS `language`( "
     "  `code` VARCHAR(25) PRIMARY KEY NOT NULL "
     "); "
@@ -623,6 +634,10 @@ const std::string kDropSchema =
     "DROP INDEX IF EXISTS "
     "`notifications_by_priority.fk_notifications_by_priority_priority1_idx`; "
     "DROP TABLE IF EXISTS `notifications_by_priority`; "
+    "DROP INDEX IF EXISTS "
+    "`subtle_notifications_by_priority.fk_subtle_notifications_by_priority_"
+    "priority1_idx`; "
+    "DROP TABLE IF EXISTS `subtle_notifications_by_priority`; "
     "DROP TABLE IF EXISTS `hmi_level`; "
     "DROP TABLE IF EXISTS `hybrid_app_preference`; "
     "DROP TABLE IF EXISTS `priority`; "
@@ -664,6 +679,7 @@ const std::string kDeleteData =
     "DELETE FROM `message_type`; "
     "DELETE FROM `language`; "
     "DELETE FROM `notifications_by_priority`; "
+    "DELETE FROM `subtle_notifications_by_priority`; "
     "DELETE FROM `hmi_level`; "
     "DELETE FROM `priority`; "
     "DELETE FROM `functional_group`; "
@@ -875,6 +891,11 @@ const std::string kInsertNotificationsByPriority =
     "`value`) "
     "  VALUES (?, ?)";
 
+const std::string kInsertSubtleNotificationsByPriority =
+    "INSERT OR REPLACE INTO `subtle_notifications_by_priority` "
+    "(`priority_value`, `value`) "
+    "  VALUES (?, ?)";
+
 const std::string kInsertDeviceData =
     "INSERT OR IGNORE INTO `device` (`id`) VALUES (?)";
 
@@ -921,6 +942,9 @@ const std::string kSelectEndpoints =
 
 const std::string kSelectNotificationsPerMin =
     "SELECT `priority_value`, `value` FROM notifications_by_priority";
+
+const std::string kSelectSubtleNotificationsPerMin =
+    "SELECT `priority_value`, `value` FROM subtle_notifications_by_priority";
 
 const std::string kSelectNotificationsPerPriority =
     "SELECT `value` FROM notifications_by_priority WHERE `priority_value` = ? ";

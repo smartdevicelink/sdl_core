@@ -65,6 +65,8 @@ class InteriorDataManagerImpl : public InteriorDataManager {
 
   bool CheckRequestsToHMIFrequency(const ModuleUid& module) OVERRIDE;
 
+  void OnResumptionRevert(const std::set<ModuleUid>& subscriptions) OVERRIDE;
+
  private:
   /**
    * @brief UpdateHMISubscriptionsOnPolicyUpdated process policy update event.

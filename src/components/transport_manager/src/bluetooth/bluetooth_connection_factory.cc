@@ -41,7 +41,7 @@
 namespace transport_manager {
 namespace transport_adapter {
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "TransportManager")
+SDL_CREATE_LOG_VARIABLE("TransportManager")
 
 BluetoothConnectionFactory::BluetoothConnectionFactory(
     TransportAdapterController* controller)
@@ -53,15 +53,14 @@ TransportAdapter::Error BluetoothConnectionFactory::Init() {
 
 TransportAdapter::Error BluetoothConnectionFactory::CreateConnection(
     const DeviceUID& device_uid, const ApplicationHandle& app_handle) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   std::shared_ptr<BluetoothSocketConnection> connection =
       std::make_shared<BluetoothSocketConnection>(
           device_uid, app_handle, controller_);
   controller_->ConnectionCreated(connection, device_uid, app_handle);
   TransportAdapter::Error error = connection->Start();
   if (TransportAdapter::OK != error) {
-    LOG4CXX_ERROR(logger_,
-                  "Bluetooth connection::Start() failed with error: " << error);
+    SDL_LOG_ERROR("Bluetooth connection::Start() failed with error: " << error);
   }
   return error;
 }

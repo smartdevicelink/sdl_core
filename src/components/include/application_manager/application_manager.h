@@ -89,6 +89,7 @@ class Application;
 class AppServiceManager;
 class StateControllerImpl;
 struct CommandParametersPermissions;
+struct ResetGlobalPropertiesResult;
 using policy::RPCParams;
 typedef std::vector<ApplicationSharedPtr> AppSharedPtrs;
 struct ApplicationsSorter {
@@ -344,17 +345,37 @@ class ApplicationManager {
 
   /**
    * @brief Checks if Application is subscribed for way points
-   * @param Application pointer
+   * @param Application id
    * @return true if Application is subscribed for way points
    * otherwise false
    */
-  virtual bool IsAppSubscribedForWayPoints(ApplicationSharedPtr app) const = 0;
+  virtual bool IsAppSubscribedForWayPoints(uint32_t app_id) const = 0;
+
+  /**
+   * @brief Checks if Application is subscribed for way points
+   * @param Application reference
+   * @return true if Application is subscribed for way points
+   * otherwise false
+   */
+  virtual bool IsAppSubscribedForWayPoints(Application& app) const = 0;
+
+  /**
+   * @brief Subscribe Application for way points
+   * @param Application id
+   */
+  virtual void SubscribeAppForWayPoints(uint32_t id) = 0;
 
   /**
    * @brief Subscribe Application for way points
    * @param Application pointer
    */
   virtual void SubscribeAppForWayPoints(ApplicationSharedPtr app) = 0;
+
+  /**
+   * @brief Unsubscribe Application for way points
+   * @param Application id
+   */
+  virtual void UnsubscribeAppFromWayPoints(uint32_t app_id) = 0;
 
   /**
    * @brief Unsubscribe Application for way points
@@ -367,6 +388,13 @@ class ApplicationManager {
    * @return true if some app is subscribed otherwise false
    */
   virtual bool IsAnyAppSubscribedForWayPoints() const = 0;
+
+  /**
+   * @brief Save message after OnWayPointsChangeNotification reception
+   * @param way_points_message pointer to the smartobject
+   */
+  virtual void SaveWayPointsMessage(
+      smart_objects::SmartObjectSPtr way_points_message) = 0;
 
   /**
    * @brief Get subscribed for way points
@@ -485,7 +513,13 @@ class ApplicationManager {
 
   virtual void ConnectToDevice(const std::string& device_mac) = 0;
 
-  virtual void OnHMIStartedCooperation() = 0;
+  virtual void OnHMIReady() = 0;
+
+  /**
+   * @brief Send GetCapabilities requests for
+   * each interface (VR, TTS, UI etc) to HMI
+   */
+  virtual void RequestForInterfacesAvailability() = 0;
 
   virtual void DisconnectCloudApp(ApplicationSharedPtr app) = 0;
 
@@ -504,6 +538,13 @@ class ApplicationManager {
   GetCloudAppConnectionStatus(ApplicationConstSharedPtr app) const = 0;
 
   virtual bool IsHMICooperating() const = 0;
+
+  /*
+   * @brief Hold or respond to all pending RAI requests
+   * @param hmi_cooperating new state to be set
+   */
+  virtual void SetHMICooperating(const bool hmi_cooperating) = 0;
+
   /**
    * @brief Notifies all components interested in Vehicle Data update
    * i.e. new value of odometer etc and returns list of applications
@@ -544,6 +585,26 @@ class ApplicationManager {
   virtual bool IsStopping() const = 0;
 
   virtual void RemoveAppFromTTSGlobalPropertiesList(const uint32_t app_id) = 0;
+
+  /**
+   * @brief Resets application's global properties to default values
+   * @param global_properties_ids container with global properties IDs to reset
+   * @param app_id ID of app which properties to reset
+   * @return struct with flags indicating success global properties reset
+   */
+  virtual ResetGlobalPropertiesResult ResetGlobalProperties(
+      const smart_objects::SmartObject& global_properties_ids,
+      const uint32_t app_id) = 0;
+
+  /**
+   * @brief Resets all application's global properties to default values
+   * returning struct that indicates which properties have been
+   * successfully reset.
+   * @param app_id ID of app which properties to reset
+   * @return struct with flags indicating global properties reset
+   */
+  virtual ResetGlobalPropertiesResult ResetAllApplicationGlobalProperties(
+      const uint32_t app_id) = 0;
 
   virtual mobile_apis::Result::eType SaveBinary(
       const std::vector<uint8_t>& binary_data,

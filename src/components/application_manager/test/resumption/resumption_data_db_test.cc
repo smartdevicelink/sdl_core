@@ -61,10 +61,6 @@ using namespace file_system;
 using namespace resumption;
 using namespace mobile_apis;
 
-namespace {
-const std::string kPath =
-    file_system::CurrentWorkingDirectory() + "/" + "test_storage";
-}
 class ResumptionDataDBTest : public ResumptionDataTest {
  protected:
   void SetUp() OVERRIDE {
@@ -88,10 +84,11 @@ class ResumptionDataDBTest : public ResumptionDataTest {
     kDatabaseName = "resumption";
     if (is_in_file) {
       path_ = "test_storage";
-      CreateDirectory(file_system::CurrentWorkingDirectory() + "/" + path_);
-      CreateDirectory(kPath);
+      std::string test_storage_path =
+          file_system::CurrentWorkingDirectory() + "/" + "test_storage";
+      CreateDirectory(test_storage_path);
       test_db_ = new utils::dbms::SQLDatabase(kDatabaseName);
-      test_db_->set_path(kPath + "/");
+      test_db_->set_path(test_storage_path + "/");
       res_db_ = new TestResumptionDataDB(In_File_Storage);
     } else {
       res_db_ = new TestResumptionDataDB(In_Memory_Storage);
@@ -137,6 +134,7 @@ class ResumptionDataDBTest : public ResumptionDataTest {
   // Check that db includes tables with given elements
   void CheckSavedDB();
   static const bool is_in_file = false;
+
   const std::string tables_exist =
       "SELECT COUNT(*) FROM sqlite_master WHERE `type` = 'table';";
   const std::string init_last_ign_count =

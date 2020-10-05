@@ -41,6 +41,8 @@ using namespace application_manager;
 
 namespace commands {
 
+SDL_CREATE_LOG_VARIABLE("Commands")
+
 ScrollableMessageResponse::ScrollableMessageResponse(
     const application_manager::commands::MessageSharedPtr& message,
     ApplicationManager& application_manager,
@@ -54,7 +56,7 @@ ScrollableMessageResponse::ScrollableMessageResponse(
                           policy_handler) {}
 
 void ScrollableMessageResponse::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   mobile_apis::Result::eType result_code =
       static_cast<mobile_apis::Result::eType>(
           (*message_)[strings::msg_params][strings::result_code].asInt());

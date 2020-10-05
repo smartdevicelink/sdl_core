@@ -205,6 +205,15 @@ class ConnectionHandler {
                                               uint8_t protocol_version) = 0;
 
   /**
+   * @brief binds protocol version with session
+   * @param connection_key pair of connection and session id
+   * @param full_protocol_version contains full protocol version of registered
+   * application.
+   */
+  virtual void BindProtocolVersionWithSession(
+      uint32_t connection_key,
+      const utils::SemanticVersion& full_protocol_version) = 0;
+  /**
    * \brief information about given Connection Key.
    * \param key Unique key used by other components as session identifier
    * \param app_id Returned: ApplicationID

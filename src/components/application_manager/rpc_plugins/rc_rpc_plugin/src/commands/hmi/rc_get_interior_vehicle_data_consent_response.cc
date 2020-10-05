@@ -36,6 +36,8 @@
 namespace rc_rpc_plugin {
 namespace commands {
 
+SDL_CREATE_LOG_VARIABLE("Commands")
+
 RCGetInteriorVehicleDataConsentResponse::
     RCGetInteriorVehicleDataConsentResponse(
         const application_manager::commands::MessageSharedPtr& message,
@@ -48,7 +50,7 @@ RCGetInteriorVehicleDataConsentResponse::
           params.policy_handler_) {}
 
 void RCGetInteriorVehicleDataConsentResponse::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
 
   app_mngr::event_engine::Event event(
       hmi_apis::FunctionID::RC_GetInteriorVehicleDataConsent);

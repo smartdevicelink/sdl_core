@@ -123,7 +123,7 @@ class AlertRequest : public app_mngr::commands::CommandRequestImpl {
    *
    * @return TRUE on success, otherwise FALSE
    */
-  bool CheckStringsOfAlertRequest();
+  bool CheckStrings();
 
   /*
    * @brief Prepare result code and result for sending to mobile application
@@ -137,7 +137,6 @@ class AlertRequest : public app_mngr::commands::CommandRequestImpl {
   bool awaiting_ui_alert_response_;
   bool awaiting_tts_speak_response_;
   bool awaiting_tts_stop_speaking_response_;
-  bool is_alert_succeeded_;
   bool is_ui_alert_sent_;
   hmi_apis::Common_Result::eType alert_result_;
   smart_objects::SmartObject alert_response_params_;

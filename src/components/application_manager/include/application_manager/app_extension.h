@@ -33,15 +33,18 @@
 #ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_APP_EXTENSION_H_
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_APP_EXTENSION_H_
 
+#include <functional>
 #include <memory>
 
-namespace ns_smart_device_link {
-namespace ns_smart_objects {
-class SmartObject;
-}
-}  // namespace ns_smart_device_link
+#include "smart_objects/smart_object.h"
+
+namespace resumption {
+struct ResumptionRequest;
+class ResumptionDataProcessor;
+}  // namespace resumption
 
 namespace application_manager {
+namespace ns_smart = ns_smart_device_link::ns_smart_objects;
 
 typedef int AppExtensionUID;
 
@@ -59,16 +62,23 @@ class AppExtension {
    * @param resumption_data data reference to data, that will be appended by
    * plugin
    */
-  virtual void SaveResumptionData(
-      ns_smart_device_link::ns_smart_objects::SmartObject& resumption_data) = 0;
+  virtual void SaveResumptionData(ns_smart::SmartObject& resumption_data) = 0;
 
   /**
    * @brief ProcessResumption Method called by SDL during resumption.
    * @param resumption_data list of resumption data
+   * @param subscriber callbacks for subscribing
    */
   virtual void ProcessResumption(
-      const ns_smart_device_link::ns_smart_objects::SmartObject&
-          resumption_data) = 0;
+      const ns_smart::SmartObject& resumption_data) = 0;
+
+  /**
+   * @brief RevertResumption Method called by SDL during revert resumption.
+   * @param resumption_data Resumption data in the SmartObject representation
+   * that contains subscription (VehicleInfo, RemoteControl, etc.)
+   */
+  virtual void RevertResumption(
+      const ns_smart::SmartObject& resumption_data) = 0;
 
  private:
   const AppExtensionUID kUid_;
