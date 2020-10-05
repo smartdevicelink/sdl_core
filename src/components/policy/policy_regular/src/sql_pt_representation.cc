@@ -2625,22 +2625,25 @@ policy_table::VehicleDataItem SQLPTRepresentation::PopulateVDIFromQuery(
     *result.deprecated = query.GetBoolean(8);
   }
   if (!query.IsNull(9)) {
-    *result.minvalue = query.GetInteger(9);
+    *result.defvalue = query.GetString(9);
   }
   if (!query.IsNull(10)) {
-    *result.maxvalue = query.GetInteger(10);
+    *result.minvalue = query.GetInteger(10);
   }
   if (!query.IsNull(11)) {
-    *result.minsize = query.GetUInteger(11);
+    *result.maxvalue = query.GetInteger(11);
   }
   if (!query.IsNull(12)) {
-    *result.maxsize = query.GetUInteger(12);
+    *result.minsize = query.GetUInteger(12);
   }
   if (!query.IsNull(13)) {
-    *result.minlength = query.GetUInteger(13);
+    *result.maxsize = query.GetUInteger(13);
   }
   if (!query.IsNull(14)) {
-    *result.maxlength = query.GetUInteger(14);
+    *result.minlength = query.GetUInteger(14);
+  }
+  if (!query.IsNull(15)) {
+    *result.maxlength = query.GetUInteger(15);
   }
   result.params->mark_initialized();
 
@@ -2688,24 +2691,27 @@ bool SQLPTRepresentation::InsertVehicleDataItem(
   vehicle_data_item.deprecated.is_initialized()
       ? query.Bind(8, *vehicle_data_item.deprecated)
       : query.Bind(8);
-  vehicle_data_item.minvalue.is_initialized()
-      ? query.Bind(9, *vehicle_data_item.minvalue)
+  vehicle_data_item.defvalue.is_initialized()
+      ? query.Bind(9, *vehicle_data_item.defvalue)
       : query.Bind(9);
-  vehicle_data_item.maxvalue.is_initialized()
-      ? query.Bind(10, *vehicle_data_item.maxvalue)
+  vehicle_data_item.minvalue.is_initialized()
+      ? query.Bind(10, *vehicle_data_item.minvalue)
       : query.Bind(10);
-  vehicle_data_item.minsize.is_initialized()
-      ? query.Bind(11, static_cast<int64_t>(*vehicle_data_item.minsize))
+  vehicle_data_item.maxvalue.is_initialized()
+      ? query.Bind(11, *vehicle_data_item.maxvalue)
       : query.Bind(11);
-  vehicle_data_item.maxsize.is_initialized()
-      ? query.Bind(12, static_cast<int64_t>(*vehicle_data_item.maxsize))
+  vehicle_data_item.minsize.is_initialized()
+      ? query.Bind(12, static_cast<int64_t>(*vehicle_data_item.minsize))
       : query.Bind(12);
-  vehicle_data_item.minlength.is_initialized()
-      ? query.Bind(13, static_cast<int64_t>(*vehicle_data_item.minlength))
+  vehicle_data_item.maxsize.is_initialized()
+      ? query.Bind(13, static_cast<int64_t>(*vehicle_data_item.maxsize))
       : query.Bind(13);
-  vehicle_data_item.maxlength.is_initialized()
-      ? query.Bind(14, static_cast<int64_t>(*vehicle_data_item.maxlength))
+  vehicle_data_item.minlength.is_initialized()
+      ? query.Bind(14, static_cast<int64_t>(*vehicle_data_item.minlength))
       : query.Bind(14);
+  vehicle_data_item.maxlength.is_initialized()
+      ? query.Bind(15, static_cast<int64_t>(*vehicle_data_item.maxlength))
+      : query.Bind(15);
 
   if (!query.Exec() || !query.Reset()) {
     SDL_LOG_ERROR("Failed to insert vehicle data item: "

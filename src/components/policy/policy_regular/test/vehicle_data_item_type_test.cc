@@ -123,6 +123,7 @@ class VehicleDataItemTypeTest : public ::testing::Test {
     str.AddField("until", "5.0");
     str.AddField("removed", true);
     str.AddField("deprecated", true);
+    str.AddField("defvalue", "1");
     str.AddField("minvalue", 1);
     str.AddField("maxvalue", 2);
     str.AddField("minsize", 10);
@@ -171,6 +172,7 @@ TEST_F(VehicleDataItemTypeTest, CheckConvertFromJsonToVehicleDataItem_Success) {
   EXPECT_TRUE((std::string)*vdi.until == "5.0");
   EXPECT_TRUE(*vdi.removed == true);
   EXPECT_TRUE(*vdi.deprecated == true);
+  EXPECT_TRUE(*vdi.defvalue == "1");
   EXPECT_TRUE(*vdi.minvalue == 1);
   EXPECT_TRUE(*vdi.maxvalue == 2);
   EXPECT_TRUE(*vdi.minsize == 10);
@@ -201,6 +203,7 @@ TEST_F(VehicleDataItemTypeTest, CheckIsValid_Struct_Success) {
   VehicleDataItem vdi(&json_);
 
   vdi.type = "Struct";
+  *vdi.defvalue = nullptr;
   EXPECT_TRUE(vdi.is_valid());
 }
 
@@ -227,9 +230,11 @@ TEST_F(VehicleDataItemTypeTest, CheckIsValid_PODTypes_Success) {
   EXPECT_TRUE(vdi.is_valid());
 
   vdi.type = "String";
+  *vdi.defvalue = "TestStringVal";
   EXPECT_TRUE(vdi.is_valid());
 
   vdi.type = "Boolean";
+  *vdi.defvalue = "true";
   EXPECT_TRUE(vdi.is_valid());
 }
 
