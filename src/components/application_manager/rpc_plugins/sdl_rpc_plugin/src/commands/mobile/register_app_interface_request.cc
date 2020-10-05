@@ -746,6 +746,9 @@ void RegisterAppInterfaceRequest::Run() {
     plugin.OnApplicationEvent(plugin_manager::kApplicationRegistered,
                               application);
   };
+  // To prevent timing issues, this event is called before an app is accessible
+  // by the applications accessor. This prevents incoming hmi rpcs from
+  // attempting to access an app before it has been fully initialized.
   application_manager_.ApplyFunctorForEachPlugin(on_app_registered);
   application_manager_.FinalizeAppRegistration(application, connection_key());
 
