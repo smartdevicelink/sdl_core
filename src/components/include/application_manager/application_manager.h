@@ -554,9 +554,24 @@ class ApplicationManager {
    */
   virtual void IviInfoUpdated(const std::string& vehicle_info, int value) = 0;
 
+  /**
+   * @brief Creates the application object for a newly registered application.
+   * This method performs initialiation of the app object by setting properties
+   * and starting the resumption process if applicable.
+   * @param request_for_registration Smart Object RegisterAppInterfaceRequest
+   * message received from mobile.
+   */
   virtual ApplicationSharedPtr RegisterApplication(
       const std::shared_ptr<smart_objects::SmartObject>&
           request_for_registration) = 0;
+  /**
+   * @brief Completes initialization process by adding the app to the
+   * applications accessor. App is now accessible by all other Core components.
+   * @param application ApplicationSharedPtr for newly registered application.
+   * @param connection_key Internal application id of registering application.
+   */
+  virtual void FinalizeAppRegistration(ApplicationSharedPtr application,
+                                       const uint32_t connection_key) = 0;
 
   virtual void SendUpdateAppList() = 0;
 

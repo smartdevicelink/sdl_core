@@ -220,6 +220,9 @@ class MockApplicationManager : public application_manager::ApplicationManager {
                application_manager::ApplicationSharedPtr(
                    const std::shared_ptr<smart_objects::SmartObject>&
                        request_for_registration));
+  MOCK_METHOD2(FinalizeAppRegistration,
+               void(application_manager::ApplicationSharedPtr,
+                    const uint32_t connection_key));
   MOCK_METHOD0(SendUpdateAppList, void());
   MOCK_METHOD2(MarkAppsGreyOut,
                void(const connection_handler::DeviceHandle handle,
