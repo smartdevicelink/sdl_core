@@ -652,7 +652,6 @@ class ConnectionHandlerImpl
   /**
    * @brief Called when connection is closed.
    * @param connection_id Connection unique identifier.
-   * @param close_reason Reason for a session closing
    */
   void OnConnectionEnded(const transport_manager::ConnectionUID connection_id);
 
