@@ -89,8 +89,27 @@ UsbHandler::UsbHandler()
 }
 
 UsbHandler::~UsbHandler() {
-  shutdown_requested_ = true;
-  SDL_LOG_INFO("UsbHandler thread finished");
+  SDL_LOG_AUTO_TRACE();
+
+  // Notify Thread to stop on next iteration...
+  RequestStopThread();
+
+  // ... and unregister hotplug callbacks in order to wake
+  // libusb_handle_events()
+  DeregisterHotplugCallbacks();
+
+  // Now it is safe to join the Thread and free up resources
+  JoinAndDeleteThread();
+  InvokeLibusbExit();
+}
+
+void UsbHandler::RequestStopThread() {
+  SDL_LOG_AUTO_TRACE();
+  shutdown_requested_.store(true);
+}
+
+void UsbHandler::DeregisterHotplugCallbacks() {
+  SDL_LOG_AUTO_TRACE();
 
   if (libusb_context_) {
     // The libusb_hotplug_deregister_callback() wakes up blocking call of
@@ -99,10 +118,20 @@ UsbHandler::~UsbHandler() {
                                        arrived_callback_handle_);
     libusb_hotplug_deregister_callback(libusb_context_, left_callback_handle_);
   }
+}
 
+void UsbHandler::JoinAndDeleteThread() {
+  SDL_LOG_AUTO_TRACE();
+
+  // Let thread finish on its own
   thread_->Stop(threads::Thread::kThreadSoftStop);
   delete thread_->GetDelegate();
   threads::DeleteThread(thread_);
+  SDL_LOG_INFO("UsbHandler thread finished");
+}
+
+void UsbHandler::InvokeLibusbExit() {
+  SDL_LOG_AUTO_TRACE();
 
   if (libusb_context_) {
     libusb_exit(libusb_context_);

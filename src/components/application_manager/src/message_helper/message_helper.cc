@@ -2684,9 +2684,9 @@ void MessageHelper::SendSystemRequestNotification(
 
   content[strings::params][strings::connection_key] = connection_key;
   PrintSmartObject(content);
-  DCHECK(app_mngr.GetRPCService().ManageMobileCommand(
+  app_mngr.GetRPCService().ManageMobileCommand(
       std::make_shared<smart_objects::SmartObject>(content),
-      commands::Command::SOURCE_SDL));
+      commands::Command::SOURCE_SDL);
 }
 
 void MessageHelper::SendLaunchApp(const uint32_t connection_key,
