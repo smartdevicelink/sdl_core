@@ -352,8 +352,7 @@ void ConnectionHandlerImpl::OnConnectionClosed(
     transport_manager::ConnectionUID connection_id) {
   SDL_LOG_AUTO_TRACE();
 
-  auto reason = ClosureReasonHandling(connection_id);
-  OnConnectionEnded(connection_id, reason);
+  OnConnectionEnded(connection_id);
 }
 
 void ConnectionHandlerImpl::OnConnectionClosedFailure(
@@ -367,9 +366,8 @@ void ConnectionHandlerImpl::OnUnexpectedDisconnect(
     transport_manager::ConnectionUID connection_id,
     const transport_manager::CommunicationError& error) {
   SDL_LOG_AUTO_TRACE();
-
-  auto reason = ClosureReasonHandling(connection_id);
-  OnConnectionEnded(connection_id, reason);
+  UNUSED(error);
+  OnConnectionEnded(connection_id);
 }
 
 void ConnectionHandlerImpl::OnDeviceConnectionLost(
@@ -390,7 +388,7 @@ void ConnectionHandlerImpl::RemoveConnection(
     const ConnectionHandle connection_handle) {
   SDL_LOG_AUTO_TRACE();
 
-  OnConnectionEnded(connection_handle, CloseSessionReason::kCommon);
+  OnConnectionEnded(connection_handle);
 }
 
 #ifdef ENABLE_SECURITY
@@ -1703,8 +1701,8 @@ void ConnectionHandlerImpl::KeepConnectionAlive(uint32_t connection_key,
 }
 
 void ConnectionHandlerImpl::OnConnectionEnded(
-    const transport_manager::ConnectionUID connection_id,
-    const CloseSessionReason close_reason) {
+    const transport_manager::ConnectionUID connection_id) {
+  const auto close_reason = ClosureReasonHandling(connection_id);
   SDL_LOG_INFO("Delete Connection: " << static_cast<int32_t>(connection_id)
                                      << " from the list."
                                      << " with reason " << close_reason);

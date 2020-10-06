@@ -654,8 +654,7 @@ class ConnectionHandlerImpl
    * @param connection_id Connection unique identifier.
    * @param close_reason Reason for a session closing
    */
-  void OnConnectionEnded(const transport_manager::ConnectionUID connection_id,
-                         const CloseSessionReason close_reason);
+  void OnConnectionEnded(const transport_manager::ConnectionUID connection_id);
 
   const uint8_t GetSessionIdFromSecondaryTransport(
       transport_manager::ConnectionUID secondary_transport_id) const;
