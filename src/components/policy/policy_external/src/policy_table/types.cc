@@ -2464,7 +2464,7 @@ void VehicleDataItem::ReportErrors(rpc::ValidationReport* report__) const {
   }
   if (!ValidateDefault()) {
     report__->set_validation_info("Invalid default value: " +
-                                  std::string(defvalue));
+                                  std::string(*defvalue));
   }
   if (!minvalue.is_valid()) {
     minvalue.ReportErrors(&report__->ReportSubobject("minvalue"));
