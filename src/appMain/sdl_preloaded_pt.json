@@ -1675,6 +1675,17 @@
                         ]
                     }
                 }
+            },
+            "DialNumber": {
+                "rpcs": {
+                    "DialNumber": {
+                        "hmi_levels": [
+                            "BACKGROUND",
+                            "FULL",
+                            "LIMITED"
+                        ]
+                    }
+                }
             }
         },
         "consumer_friendly_messages": {
