@@ -3026,7 +3026,6 @@
                 "priority": "NONE",
                 "default_hmi": "NONE",
                 "groups": [
-                    "DialNumber",
                     "Base-4"
                 ],
                 "RequestType": [],
