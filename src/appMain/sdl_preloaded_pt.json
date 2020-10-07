@@ -204,13 +204,6 @@
                             "LIMITED"
                         ]
                     },
-                    "DialNumber": {
-                        "hmi_levels": [
-                            "BACKGROUND",
-                            "FULL",
-                            "LIMITED"
-                        ]
-                    },
                     "OnButtonEvent": {
                         "hmi_levels": [
                             "FULL",
@@ -1196,13 +1189,6 @@
                             "LIMITED"
                         ]
                     },
-                    "DialNumber": {
-                        "hmi_levels": [
-                            "BACKGROUND",
-                            "FULL",
-                            "LIMITED"
-                        ]
-                    },
                     "OnButtonEvent": {
                         "hmi_levels": [
                             "FULL",
@@ -1686,6 +1672,17 @@
                           "FULL",
                           "LIMITED",
                           "NONE"
+                        ]
+                    }
+                }
+            },
+            "DialNumber": {
+                "rpcs": {
+                    "DialNumber": {
+                        "hmi_levels": [
+                            "BACKGROUND",
+                            "FULL",
+                            "LIMITED"
                         ]
                     }
                 }
@@ -3029,6 +3026,7 @@
                 "priority": "NONE",
                 "default_hmi": "NONE",
                 "groups": [
+                    "DialNumber",
                     "Base-4"
                 ],
                 "RequestType": [],
