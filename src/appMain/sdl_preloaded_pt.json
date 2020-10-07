@@ -204,6 +204,13 @@
                             "LIMITED"
                         ]
                     },
+                    "DialNumber": {
+                        "hmi_levels": [
+                            "BACKGROUND",
+                            "FULL",
+                            "LIMITED"
+                        ]
+                    },
                     "OnButtonEvent": {
                         "hmi_levels": [
                             "FULL",
@@ -1183,6 +1190,13 @@
                         ]
                     },
                     "OnAudioPassThru": {
+                        "hmi_levels": [
+                            "BACKGROUND",
+                            "FULL",
+                            "LIMITED"
+                        ]
+                    },
+                    "DialNumber": {
                         "hmi_levels": [
                             "BACKGROUND",
                             "FULL",
