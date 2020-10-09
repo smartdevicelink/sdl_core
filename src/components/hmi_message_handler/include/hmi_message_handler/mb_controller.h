@@ -98,7 +98,7 @@ class CMessageBrokerController {
 
   void sendResponse(Json::Value& message);
 
-  void sendJsonMessage(Json::Value& message);
+  bool sendJsonMessage(Json::Value& message);
 
   void subscribeTo(std::string property);
 

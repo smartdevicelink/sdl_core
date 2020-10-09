@@ -283,6 +283,26 @@ void RPCHandlerImpl::OnMessageReceived(
 
 void RPCHandlerImpl::OnErrorSending(
     hmi_message_handler::MessageSharedPointer message) {
+  SDL_LOG_AUTO_TRACE();
+  smart_objects::SmartObjectSPtr smart_object =
+      std::make_shared<smart_objects::SmartObject>();
+  std::string warning_info;
+  bool allow_unknown_parameters = true;
+  if (ConvertMessageToSO(
+          *message, *smart_object, warning_info, allow_unknown_parameters)) {
+    (*smart_object)[strings::params][strings::message_type] =
+        application_manager::MessageType::kResponse;
+    (*smart_object).erase(strings::msg_params);
+    (*smart_object)[strings::params][hmi_response::code] =
+        hmi_apis::Common_Result::GENERIC_ERROR;
+    (*smart_object)[strings::params][strings::error_msg] =
+        std::string("Error sending message, mb component not registered");
+
+    if (!app_manager_.GetRPCService().ManageHMICommand(
+            smart_object, commands::Command::SOURCE_HMI, warning_info)) {
+      SDL_LOG_ERROR("Received command didn't run successfully");
+    }
+  }
   return;
 }
 
