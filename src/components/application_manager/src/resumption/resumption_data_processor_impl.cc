@@ -311,8 +311,11 @@ void ResumptionDataProcessorImpl::FinalizeResumption(
   } else {
     SDL_LOG_ERROR("Resumption for app " << app_id << " failed");
     callback(mobile_apis::Result::RESUME_FAILED, "Data resumption failed");
-    RevertRestoredData(application_manager_.application(app_id));
+    auto app = application_manager_.application(app_id);
+    RevertRestoredData(app);
     application_manager_.state_controller().DropPostponedWindows(app_id);
+    auto& builder = app->display_capabilities_builder();
+    builder.StopWaitingForWindows();
   }
   EraseAppResumptionData(app_id);
 }
@@ -1096,7 +1099,7 @@ void ResumptionDataProcessorImpl::CheckCreateWindowResponse(
     SDL_LOG_ERROR("UI_CreateWindow for correlation id: " << correlation_id
                                                          << " has failed");
     auto& builder = application->display_capabilities_builder();
-    builder.ResetDisplayCapabilities();
+    builder.ResetDisplayCapabilities(window_id);
     return;
   }
 

@@ -154,7 +154,7 @@ bool DisplayCapabilitiesBuilder::IsWaitingForWindowCapabilities(
   return false;
 }
 
-void DisplayCapabilitiesBuilder::ResetDisplayCapabilities() {
+void DisplayCapabilitiesBuilder::StopWaitingForWindows() {
   SDL_LOG_AUTO_TRACE();
   sync_primitives::AutoLock lock(display_capabilities_lock_);
   for (auto& window_id : window_ids_to_resume_) {
@@ -162,6 +162,15 @@ void DisplayCapabilitiesBuilder::ResetDisplayCapabilities() {
       window_ids_to_resume_.erase(window_id);
     }
   }
+}
+
+void DisplayCapabilitiesBuilder::ResetDisplayCapabilities(
+    const WindowID window_id) {
+  SDL_LOG_AUTO_TRACE();
+  sync_primitives::AutoLock lock(display_capabilities_lock_);
+
+  SDL_LOG_DEBUG("Window id " << window_id << " will be erased");
+  window_ids_to_resume_.erase(window_id);
 
   if (display_capabilities_) {
     auto* cur_window_caps_ptr =
@@ -180,14 +189,17 @@ void DisplayCapabilitiesBuilder::ResetDisplayCapabilities() {
   }
 }
 
-void DisplayCapabilitiesBuilder::StopWaitingForWindow(
-    const WindowID window_id) {
+void DisplayCapabilitiesBuilder::StopWaitingForMainWindow() {
   SDL_LOG_AUTO_TRACE();
   sync_primitives::AutoLock lock(display_capabilities_lock_);
-  SDL_LOG_DEBUG("Window id " << window_id << " will be erased");
-  window_ids_to_resume_.erase(window_id);
+  window_ids_to_resume_.erase(mobile_apis::PredefinedWindows::DEFAULT_WINDOW);
 
   InvokeResumeCallback();
+}
+
+void DisplayCapabilitiesBuilder::StopWaitingForWidgets() {
+  SDL_LOG_AUTO_TRACE();
+  is_widget_windows_resumption_ = false;
 }
 
 }  // namespace application_manager

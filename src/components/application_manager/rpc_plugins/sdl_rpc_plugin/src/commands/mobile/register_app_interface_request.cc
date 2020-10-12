@@ -457,8 +457,7 @@ void FinishSendingResponseToMobile(const smart_objects::SmartObject& msg_params,
 
   // Once HMI level is set we can safely forward system capabilities for the
   // main window and it won't be blocked by policies
-  application->display_capabilities_builder().StopWaitingForWindow(
-      mobile_apis::PredefinedWindows::DEFAULT_WINDOW);
+  application->display_capabilities_builder().StopWaitingForMainWindow();
 
   if (notify_upd_manager) {
     (*notify_upd_manager)();

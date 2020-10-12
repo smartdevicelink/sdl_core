@@ -662,6 +662,8 @@ void ResumeCtrlImpl::StartWaitingForDisplayCapabilitiesUpdate(
              const smart_objects::SmartObject& display_capabilities) -> void {
     SDL_LOG_AUTO_TRACE();
     ProcessSystemCapabilityUpdated(app, display_capabilities);
+    auto& builder = app.display_capabilities_builder();
+    builder.StopWaitingForWidgets();
   };
   auto& builder = application->display_capabilities_builder();
 

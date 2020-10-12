@@ -79,15 +79,30 @@ class DisplayCapabilitiesBuilder {
 
   /**
    * @brief ResetDisplayCapabilities resets stored notification
-   */
-  void ResetDisplayCapabilities();
-
-  /**
-   * @brief StopWaitingForWindow stop waiting for window resumption by removing
-   * window_id from windows pending resumption
+   * and stops waiting for window_id resumption
    * @param window_id window id to be removed
    */
-  void StopWaitingForWindow(const WindowID window_id);
+  void ResetDisplayCapabilities(const WindowID window_id);
+
+  /**
+   * @brief StopWaitingForMainWindow stops waiting for main window resumption
+   * by removing DEFAULT_WINDOW window_id from windows pending resumption
+   */
+  void StopWaitingForMainWindow();
+
+  /**
+   * @brief StopWaitingForWidgets stops waiting for widgets resumption
+   * by setting the is_widget_windows_resumption_ flag to false
+   * Will be called with the resume callback invoked
+   */
+  void StopWaitingForWidgets();
+
+  /**
+   * @brief StopWaitingForWindows stops waiting for windows resumption by
+   * clearing the window_ids_to_resume_ set
+   * Will be called if data resumption fails
+   */
+  void StopWaitingForWindows();
 
   /**
    * @brief retreives stored notification data
