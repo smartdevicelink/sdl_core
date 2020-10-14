@@ -70,7 +70,9 @@ void MessageBrokerAdapter::SendMessageToHMI(
     return;
   }
 
-  sendJsonMessage(json_value);
+  if (!sendJsonMessage(json_value)) {
+    handler()->OnErrorSending(message);
+  }
 }
 
 void MessageBrokerAdapter::processResponse(std::string method,

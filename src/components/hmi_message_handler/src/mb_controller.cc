@@ -176,13 +176,13 @@ void CMessageBrokerController::sendResponse(Json::Value& message) {
   }
 }
 
-void CMessageBrokerController::sendJsonMessage(Json::Value& message) {
+bool CMessageBrokerController::sendJsonMessage(Json::Value& message) {
   if (isNotification(message)) {
     sendNotification(message);
-    return;
+    return true;
   } else if (isResponse(message)) {
     sendResponse(message);
-    return;
+    return true;
   }
 
   // Send request
@@ -205,10 +205,11 @@ void CMessageBrokerController::sendJsonMessage(Json::Value& message) {
   if (!ws) {
     SDL_LOG_ERROR(
         "A controller is not found for the method: " << component_name);
-    return;
+    return false;
   }
 
   ws->sendJsonMessage(message);
+  return true;
 }
 
 void CMessageBrokerController::subscribeTo(std::string property) {}
