@@ -606,10 +606,10 @@ class ConnectionHandlerImpl
    * \note This is invoked only once but can be invoked by multiple threads.
    * Also it can be invoked before OnServiceStartedCallback() returns.
    **/
-  virtual void NotifyServiceStartedResult(
-      uint32_t session_key,
-      bool result,
-      std::vector<std::string>& rejected_params);
+  void NotifyServiceStartedResult(uint32_t session_key,
+                                  bool result,
+                                  std::vector<std::string>& rejected_params,
+                                  const std::string& reason) OVERRIDE;
 
   /**
    * \brief Called when secondary transport with given session ID is established

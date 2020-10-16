@@ -541,7 +541,7 @@ TEST_F(ApplicationManagerImplTest, OnServiceStartedCallback_RpcService) {
 
   bool result = false;
   std::vector<std::string> rejected_params;
-  EXPECT_CALL(mock_connection_handler_, NotifyServiceStartedResult(_, _, _))
+  EXPECT_CALL(mock_connection_handler_, NotifyServiceStartedResult(_, _, _, _))
       .WillOnce(DoAll(SaveArg<1>(&result), SaveArg<2>(&rejected_params)));
 
   app_manager_impl_->OnServiceStartedCallback(
@@ -563,7 +563,7 @@ TEST_F(ApplicationManagerImplTest, OnServiceStartedCallback_UnknownApp) {
 
   bool result = false;
   std::vector<std::string> rejected_params;
-  EXPECT_CALL(mock_connection_handler_, NotifyServiceStartedResult(_, _, _))
+  EXPECT_CALL(mock_connection_handler_, NotifyServiceStartedResult(_, _, _, _))
       .WillOnce(DoAll(SaveArg<1>(&result), SaveArg<2>(&rejected_params)));
 
   app_manager_impl_->OnServiceStartedCallback(
@@ -585,7 +585,7 @@ TEST_F(ApplicationManagerImplTest, OnServiceStartedCallback_UnknownService) {
 
   bool result = false;
   std::vector<std::string> rejected_params;
-  EXPECT_CALL(mock_connection_handler_, NotifyServiceStartedResult(_, _, _))
+  EXPECT_CALL(mock_connection_handler_, NotifyServiceStartedResult(_, _, _, _))
       .WillOnce(DoAll(SaveArg<1>(&result), SaveArg<2>(&rejected_params)));
 
   app_manager_impl_->OnServiceStartedCallback(
@@ -616,7 +616,7 @@ TEST_F(ApplicationManagerImplTest, OnServiceStartedCallback_VideoServiceStart) {
 
   bool result = false;
   std::vector<std::string> rejected_params;
-  EXPECT_CALL(mock_connection_handler_, NotifyServiceStartedResult(_, _, _))
+  EXPECT_CALL(mock_connection_handler_, NotifyServiceStartedResult(_, _, _, _))
       .WillOnce(DoAll(SaveArg<1>(&result), SaveArg<2>(&rejected_params)));
 
   // check: SetVideoConfig() should not be called, StartStreaming() is called
@@ -647,7 +647,7 @@ TEST_F(ApplicationManagerImplTest,
 
   bool result = false;
   std::vector<std::string> rejected_params;
-  EXPECT_CALL(mock_connection_handler_, NotifyServiceStartedResult(_, _, _))
+  EXPECT_CALL(mock_connection_handler_, NotifyServiceStartedResult(_, _, _, _))
       .WillOnce(DoAll(SaveArg<1>(&result), SaveArg<2>(&rejected_params)));
 
   // check: SetVideoConfig() and StartStreaming() should not be called
@@ -684,7 +684,7 @@ TEST_F(ApplicationManagerImplTest,
 
   bool result = false;
   std::vector<std::string> rejected_params;
-  EXPECT_CALL(mock_connection_handler_, NotifyServiceStartedResult(_, _, _))
+  EXPECT_CALL(mock_connection_handler_, NotifyServiceStartedResult(_, _, _, _))
       .WillOnce(DoAll(SaveArg<1>(&result), SaveArg<2>(&rejected_params)));
 
   // check: SetVideoConfig() and StartStreaming() should not be called
@@ -720,7 +720,7 @@ TEST_F(ApplicationManagerImplTest,
 
   bool result = false;
   std::vector<std::string> rejected_params;
-  EXPECT_CALL(mock_connection_handler_, NotifyServiceStartedResult(_, _, _))
+  EXPECT_CALL(mock_connection_handler_, NotifyServiceStartedResult(_, _, _, _))
       .WillOnce(DoAll(SaveArg<1>(&result), SaveArg<2>(&rejected_params)));
 
   BsonObject input_params;
@@ -809,7 +809,7 @@ TEST_F(ApplicationManagerImplTest,
 
   bool result = false;
   std::vector<std::string> rejected_params;
-  EXPECT_CALL(mock_connection_handler_, NotifyServiceStartedResult(_, _, _))
+  EXPECT_CALL(mock_connection_handler_, NotifyServiceStartedResult(_, _, _, _))
       .WillOnce(DoAll(SaveArg<1>(&result), SaveArg<2>(&rejected_params)));
 
   BsonObject input_params;
@@ -888,7 +888,7 @@ TEST_F(ApplicationManagerImplTest,
 
   bool result = false;
   std::vector<std::string> rejected_params;
-  EXPECT_CALL(mock_connection_handler_, NotifyServiceStartedResult(_, _, _))
+  EXPECT_CALL(mock_connection_handler_, NotifyServiceStartedResult(_, _, _, _))
       .WillOnce(DoAll(SaveArg<1>(&result), SaveArg<2>(&rejected_params)));
 
   BsonObject input_params;
@@ -928,7 +928,7 @@ TEST_F(ApplicationManagerImplTest, OnServiceStartedCallback_AudioServiceStart) {
 
   bool result = false;
   std::vector<std::string> rejected_params;
-  EXPECT_CALL(mock_connection_handler_, NotifyServiceStartedResult(_, _, _))
+  EXPECT_CALL(mock_connection_handler_, NotifyServiceStartedResult(_, _, _, _))
       .WillOnce(DoAll(SaveArg<1>(&result), SaveArg<2>(&rejected_params)));
 
   // check: SetVideoConfig() should not be called, StartStreaming() is called
@@ -963,7 +963,7 @@ TEST_F(ApplicationManagerImplTest,
 
   bool result = false;
   std::vector<std::string> rejected_params;
-  EXPECT_CALL(mock_connection_handler_, NotifyServiceStartedResult(_, _, _))
+  EXPECT_CALL(mock_connection_handler_, NotifyServiceStartedResult(_, _, _, _))
       .WillOnce(DoAll(SaveArg<1>(&result), SaveArg<2>(&rejected_params)));
 
   BsonObject input_params;

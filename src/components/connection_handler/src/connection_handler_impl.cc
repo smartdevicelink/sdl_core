@@ -520,7 +520,7 @@ void ConnectionHandlerImpl::OnSessionStartedCallback(
           context,
           rejected_params,
           "Cannot start " +
-              std::string(is_protected ? "a protected" : " an unprotected") +
+              std::string(is_protected ? "a protected" : "an unprotected") +
               " service of type " + std::to_string(service_type) + ". " +
               err_reason);
       return;
@@ -550,7 +550,8 @@ void ConnectionHandlerImpl::OnSessionStartedCallback(
         params);
   } else {
     if (protocol_handler_) {
-      protocol_handler_->NotifySessionStarted(context, rejected_params);
+      protocol_handler_->NotifySessionStarted(
+          context, rejected_params, std::string());
     }
   }
 }
@@ -558,7 +559,8 @@ void ConnectionHandlerImpl::OnSessionStartedCallback(
 void ConnectionHandlerImpl::NotifyServiceStartedResult(
     uint32_t session_key,
     bool result,
-    std::vector<std::string>& rejected_params) {
+    std::vector<std::string>& rejected_params,
+    const std::string& reason) {
   SDL_LOG_AUTO_TRACE();
 
   protocol_handler::SessionContext context;
@@ -599,7 +601,7 @@ void ConnectionHandlerImpl::NotifyServiceStartedResult(
   }
 
   if (protocol_handler_ != NULL) {
-    protocol_handler_->NotifySessionStarted(context, rejected_params);
+    protocol_handler_->NotifySessionStarted(context, rejected_params, reason);
   }
 }
 

@@ -451,7 +451,7 @@ void ProtocolHandlerImpl::SendStartSessionNAck(ConnectionID connection_id,
                                                uint8_t session_id,
                                                uint8_t protocol_version,
                                                uint8_t service_type,
-                                               const std::string reason) {
+                                               const std::string& reason) {
   std::vector<std::string> rejectedParams;
   SendStartSessionNAck(connection_id,
                        session_id,
@@ -467,7 +467,7 @@ void ProtocolHandlerImpl::SendStartSessionNAck(
     uint8_t protocol_version,
     uint8_t service_type,
     std::vector<std::string>& rejectedParams,
-    const std::string reason) {
+    const std::string& reason) {
   SDL_LOG_AUTO_TRACE();
 
   ProtocolFramePtr ptr(
@@ -1736,12 +1736,18 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessageStartSession(
                   << service_type << ", disallowed by settings.");
     service_status_update_handler_->OnServiceUpdate(
         connection_key, service_type, settings_check);
-    SendStartSessionNAck(connection_id,
-                         session_id,
-                         protocol_version,
-                         service_type,
-                         "Service type: " + std::to_string(service_type) +
-                             " disallowed by settings");
+
+    std::string reason("Service type: " + std::to_string(service_type) +
+                       " disallowed by settings.");
+    if (ServiceStatus::PROTECTION_ENFORCED == settings_check) {
+      reason += " Allowed only in protected mode";
+    }
+    if (ServiceStatus::UNSECURE_START_FAILED == settings_check) {
+      reason += " Allowed only in unprotected mode";
+    }
+
+    SendStartSessionNAck(
+        connection_id, session_id, protocol_version, service_type, reason);
     return RESULT_OK;
   }
 
@@ -1820,7 +1826,7 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessageRegisterSecondaryTransport(
 void ProtocolHandlerImpl::NotifySessionStarted(
     const SessionContext& context,
     std::vector<std::string>& rejected_params,
-    const std::string err_reason) {
+    const std::string& err_reason) {
   SDL_LOG_AUTO_TRACE();
 
   ProtocolFramePtr packet;

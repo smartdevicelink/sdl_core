@@ -379,7 +379,7 @@ class ProtocolHandlerImpl
                             uint8_t session_id,
                             uint8_t protocol_version,
                             uint8_t service_type,
-                            const std::string reason);
+                            const std::string& reason);
 
   /**
    * \brief Sends fail of starting session to mobile application
@@ -395,7 +395,7 @@ class ProtocolHandlerImpl
                             uint8_t protocol_version,
                             uint8_t service_type,
                             std::vector<std::string>& rejectedParams,
-                            const std::string reason);
+                            const std::string& reason);
 
   /**
    * \brief Sends acknowledgement of end session/service to mobile application
@@ -457,7 +457,7 @@ class ProtocolHandlerImpl
    */
   void NotifySessionStarted(const SessionContext& context,
                             std::vector<std::string>& rejected_params,
-                            const std::string err_reason) OVERRIDE;
+                            const std::string& err_reason) OVERRIDE;
 
 #ifdef BUILD_TESTS
   const impl::FromMobileQueue& get_from_mobile_queue() const {
