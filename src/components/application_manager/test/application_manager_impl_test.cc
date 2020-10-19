@@ -94,9 +94,14 @@ using test::components::policy_test::MockPolicyHandlerInterface;
 
 using namespace application_manager;
 
-// custom action to call a member function with 4 arguments
-ACTION_P6(InvokeMemberFuncWithArg4, ptr, memberFunc, a, b, c, d) {
-  (ptr->*memberFunc)(a, b, c, d);
+// custom action to call a member function with 2 arguments
+ACTION_P4(InvokeMemberFuncWithArg2, ptr, memberFunc, a, b) {
+  (ptr->*memberFunc)(a, b);
+}
+
+// custom action to call a member function with 3 arguments
+ACTION_P5(InvokeMemberFuncWithArg3, ptr, memberFunc, a, b, c) {
+  (ptr->*memberFunc)(a, b, c);
 }
 
 namespace {
@@ -746,18 +751,15 @@ TEST_F(ApplicationManagerImplTest,
   converted_params[strings::height] = 640;
   converted_params[strings::width] = 480;
 
-  std::vector<std::string> empty;
-
   // check: SetVideoConfig() and StartStreaming() are called
   EXPECT_CALL(*mock_app_ptr_, SetVideoConfig(service_type, converted_params))
-      .WillOnce(DoAll(InvokeMemberFuncWithArg4(
-                          app_manager_impl_.get(),
-                          &ApplicationManagerImpl::OnStreamingConfigured,
-                          session_key,
-                          service_type,
-                          true,
-                          ByRef(empty)),
-                      Return(true)));
+      .WillOnce(
+          DoAll(InvokeMemberFuncWithArg2(
+                    app_manager_impl_.get(),
+                    &ApplicationManagerImpl::OnStreamingSuccessfulConfiguration,
+                    session_key,
+                    service_type),
+                Return(true)));
   EXPECT_CALL(*mock_app_ptr_, StartStreaming(service_type)).WillOnce(Return());
 
   app_manager_impl_->OnServiceStartedCallback(
@@ -838,17 +840,18 @@ TEST_F(ApplicationManagerImplTest,
   std::vector<std::string> rejected_list;
   rejected_list.push_back(std::string("protocol"));
   rejected_list.push_back(std::string("codec"));
+  std::string reason;
 
   // simulate HMI returning negative response
   EXPECT_CALL(*mock_app_ptr_, SetVideoConfig(service_type, converted_params))
-      .WillOnce(DoAll(InvokeMemberFuncWithArg4(
-                          app_manager_impl_.get(),
-                          &ApplicationManagerImpl::OnStreamingConfigured,
-                          session_key,
-                          service_type,
-                          false,
-                          ByRef(rejected_list)),
-                      Return(true)));
+      .WillOnce(
+          DoAll(InvokeMemberFuncWithArg3(
+                    app_manager_impl_.get(),
+                    &ApplicationManagerImpl::OnStreamingConfigurationFailed,
+                    session_key,
+                    ByRef(rejected_list),
+                    ByRef(reason)),
+                Return(true)));
 
   // check: StartStreaming() should not be called
   EXPECT_CALL(*mock_app_ptr_, StartStreaming(service_type)).Times(0);

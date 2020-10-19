@@ -873,18 +873,24 @@ class ApplicationManager {
                                protocol_handler::ServiceType service_type) = 0;
 
   /**
-   * @brief Called when application completes streaming configuration
+   * @brief Called when application successfully completes streaming
+   * configuration
    * @param app_id Streaming application id
    * @param service_type Streaming service type
-   * @param result true if configuration is successful, false otherwise
-   * @param rejected_params list of rejected parameters' name. Valid
-   *                        only when result is false.
    */
-  virtual void OnStreamingConfigured(
+  virtual void OnStreamingSuccessfulConfiguration(
+      uint32_t app_id, protocol_handler::ServiceType service_type) = 0;
+
+  /**
+   * @brief Called when application fails streaming configuration
+   * @param app_id Streaming application id
+   * @param rejected_params list of rejected parameters' name
+   * @param reason NACK reason
+   */
+  virtual void OnStreamingConfigurationFailed(
       uint32_t app_id,
-      protocol_handler::ServiceType service_type,
-      bool result,
-      std::vector<std::string>& rejected_params) = 0;
+      std::vector<std::string>& rejected_params,
+      const std::string& reason) = 0;
 
   virtual const ApplicationManagerSettings& get_settings() const = 0;
   // Extract the app ID to use internally based on the UseFullAppID .ini setting
