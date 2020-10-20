@@ -408,7 +408,11 @@ void StateControllerImpl::HmiLevelConflictResolver::operator()(
             ? mobile_apis::HMILevel::HMI_LIMITED
             : to_resolve_hmi_level;
   } else {
-    result_hmi_level = mobile_apis::HMILevel::HMI_BACKGROUND;
+    result_hmi_level =
+        mobile_apis::HMILevel::HMI_FULL == to_resolve_hmi_level &&
+                mobile_apis::HMILevel::HMI_FULL != applied_hmi_level
+            ? to_resolve_hmi_level
+            : mobile_apis::HMILevel::HMI_BACKGROUND;
   }
 
   if (std::make_tuple(to_resolve_hmi_level,
