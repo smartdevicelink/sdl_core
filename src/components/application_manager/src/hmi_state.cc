@@ -249,19 +249,12 @@ mobile_apis::HMILevel::eType PhoneCallHmiState::max_hmi_level() const {
   using namespace helpers;
   using namespace mobile_apis;
 
-  if (WindowType::WIDGET == window_type()) {
-<<<<<<< HEAD
+  if (HMILevel::INVALID_ENUM == parent()->hmi_level()) {
     return parent()->hmi_level();
   }
 
-  if (Compare<HMILevel::eType, EQ, ONE>(parent()->hmi_level(),
-                                        HMILevel::INVALID_ENUM,
-                                        HMILevel::HMI_BACKGROUND,
-                                        HMILevel::HMI_NONE)) {
-    return parent()->hmi_level();
-=======
+  if (WindowType::WIDGET == window_type()) {
     return std::max(HMILevel::HMI_FULL, parent_max_hmi_level());
->>>>>>> release/7.0.0
   }
 
   auto expected = HMILevel::HMI_FULL;
@@ -290,22 +283,15 @@ mobile_apis::HMILevel::eType DeactivateHMI::max_hmi_level() const {
   using namespace helpers;
   using namespace mobile_apis;
 
+  if (HMILevel::INVALID_ENUM == parent()->hmi_level()) {
+    return parent()->hmi_level();
+  }
+
   if (WindowType::WIDGET == window_type()) {
     return std::max(HMILevel::HMI_FULL, parent_max_hmi_level());
   }
 
-<<<<<<< HEAD
-  if (Compare<HMILevel::eType, EQ, ONE>(parent()->hmi_level(),
-                                        HMILevel::INVALID_ENUM,
-                                        HMILevel::HMI_BACKGROUND,
-                                        HMILevel::HMI_NONE)) {
-    return parent()->hmi_level();
-  }
-
-  return HMILevel::HMI_BACKGROUND;
-=======
   return std::max(HMILevel::HMI_BACKGROUND, parent_max_hmi_level());
->>>>>>> release/7.0.0
 }
 
 AudioSource::AudioSource(std::shared_ptr<Application> app,
@@ -345,22 +331,18 @@ mobile_apis::VideoStreamingState::eType AudioSource::video_streaming_state()
 mobile_apis::HMILevel::eType AudioSource::max_hmi_level() const {
   using namespace mobile_apis;
 
+  if (HMILevel::INVALID_ENUM == parent()->hmi_level()) {
+    return parent()->hmi_level();
+  }
+
   if (WindowType::WIDGET == window_type()) {
     return std::max(HMILevel::HMI_FULL, parent_max_hmi_level());
   }
 
-<<<<<<< HEAD
-  // Checking for NONE  is necessary to avoid issue during
-  // calculation of HMI level during setting default HMI level
-  if (keep_context_ || HMILevel::HMI_NONE == parent()->hmi_level() ||
-      HMILevel::INVALID_ENUM == parent()->hmi_level()) {
-    return parent()->hmi_level();
-=======
   auto expected = HMILevel::HMI_FULL;
   if (!keep_context_ && is_media_app() && !is_navi_app() &&
       !is_projection_app()) {
     expected = HMILevel::HMI_BACKGROUND;
->>>>>>> release/7.0.0
   }
 
   return std::max(expected, parent_max_hmi_level());
@@ -426,21 +408,17 @@ mobile_apis::HMILevel::eType EmbeddedNavi::max_hmi_level() const {
   using namespace mobile_apis;
   using namespace helpers;
 
+  if (HMILevel::INVALID_ENUM == parent()->hmi_level()) {
+    return parent()->hmi_level();
+  }
+
   if (WindowType::WIDGET == window_type()) {
     return std::max(HMILevel::HMI_FULL, parent_max_hmi_level());
   }
 
-<<<<<<< HEAD
-  if (Compare<HMILevel::eType, EQ, ONE>(parent()->hmi_level(),
-                                        HMILevel::INVALID_ENUM,
-                                        HMILevel::HMI_BACKGROUND,
-                                        HMILevel::HMI_NONE)) {
-    return parent()->hmi_level();
-=======
   auto expected = HMILevel::HMI_FULL;
   if (is_navi_app()) {
     expected = HMILevel::HMI_BACKGROUND;
->>>>>>> release/7.0.0
   }
 
   return std::max(expected, parent_max_hmi_level());
