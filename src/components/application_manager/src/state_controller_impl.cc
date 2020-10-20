@@ -915,7 +915,7 @@ void StateControllerImpl::OnStateChanged(ApplicationSharedPtr app,
 
   if ((new_state->hmi_level() == mobile_apis::HMILevel::INVALID_ENUM) &&
       (old_state->hmi_level() == mobile_apis::HMILevel::INVALID_ENUM)) {
-    LOG4CXX_ERROR(logger_, "HMI level is invalid data.");
+    SDL_LOG_DEBUG("HMI level is invalid data.");
     return;
   }
 
