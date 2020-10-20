@@ -105,7 +105,8 @@ void AddSubMenuRequest::Run() {
     smart_objects::SmartObject parent = app->FindSubMenu(parent_id);
     if (smart_objects::SmartType_Null == parent.getType()) {
       SDL_LOG_ERROR("Parent ID " << parent_id << " doesn't exist");
-      SendResponse(false, mobile_apis::Result::INVALID_ID);
+      SendResponse(
+          false, mobile_apis::Result::INVALID_ID, "Parent ID doesn't exist");
       return;
     }
   }
