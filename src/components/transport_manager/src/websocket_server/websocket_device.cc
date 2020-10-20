@@ -37,7 +37,7 @@
 
 namespace transport_manager {
 namespace transport_adapter {
-CREATE_LOGGERPTR_GLOBAL(logger_, "TransportManager")
+SDL_CREATE_LOG_VARIABLE("TransportManager")
 
 WebSocketDevice::WebSocketDevice(const std::string& name,
                                  const DeviceUID& unique_device_id)
@@ -46,7 +46,7 @@ WebSocketDevice::WebSocketDevice(const std::string& name,
     , protocol_(boost::asio::ip::tcp::v4()) {}
 
 bool WebSocketDevice::IsSameAs(const Device* other) const {
-  LOG4CXX_TRACE(logger_, "enter. device: " << other);
+  SDL_LOG_TRACE("enter. device: " << other);
 
   const WebSocketDevice* other_websocket_device =
       dynamic_cast<const WebSocketDevice*>(other);

@@ -66,7 +66,7 @@ class CArraySchemaItem : public ISchemaItem {
   /**
    * @brief Validate smart object.
    * @param Object Object to validate.
-   * @param report__ object for reporting errors during validation
+   * @param report object for reporting errors during validation
    * @param MessageVersion to check mobile RPC version against RPC Spec History
    * @param allow_unknown_enums
    *   false - unknown enum values (left as string values after applySchema)
@@ -76,17 +76,21 @@ class CArraySchemaItem : public ISchemaItem {
    **/
   errors::eType validate(
       const SmartObject& Object,
-      rpc::ValidationReport* report__,
+      rpc::ValidationReport* report,
       const utils::SemanticVersion& MessageVersion = utils::SemanticVersion(),
       const bool allow_unknown_enums = false) OVERRIDE;
+
+  bool filterInvalidEnums(SmartObject& Object,
+                          const utils::SemanticVersion& MessageVersion,
+                          rpc::ValidationReport* report) OVERRIDE;
 
   /**
    * @brief Apply schema.
    *
    * @param Object Object to apply schema.
    * @param remove_unknown_parameters contains true if need to remove unknown
-   *parameters
-   * from smart object otherwise contains false.
+   * parameters from smart object, otherwise contains false.
+   * @param MessageVersion the version of the schema to be applied
    **/
   void applySchema(SmartObject& Object,
                    const bool remove_unknown_parameters,
@@ -113,6 +117,8 @@ class CArraySchemaItem : public ISchemaItem {
   void BuildObjectBySchema(const SmartObject& pattern_object,
                            SmartObject& result_object) OVERRIDE;
 
+  TypeID GetType() OVERRIDE;
+
  private:
   /**
    * @brief Constructor.
@@ -124,6 +130,7 @@ class CArraySchemaItem : public ISchemaItem {
   CArraySchemaItem(const ISchemaItemPtr ElementSchemaItem,
                    const TSchemaItemParameter<size_t>& MinSize,
                    const TSchemaItemParameter<size_t>& MaxSize);
+
   /**
    * @brief SchemaItem for array elements.
    **/

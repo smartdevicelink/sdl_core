@@ -38,6 +38,8 @@ using namespace application_manager;
 
 namespace commands {
 
+SDL_CREATE_LOG_VARIABLE("Commands")
+
 UIPerformInteractionResponse::UIPerformInteractionResponse(
     const application_manager::commands::MessageSharedPtr& message,
     ApplicationManager& application_manager,
@@ -53,7 +55,7 @@ UIPerformInteractionResponse::UIPerformInteractionResponse(
 UIPerformInteractionResponse::~UIPerformInteractionResponse() {}
 
 void UIPerformInteractionResponse::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   event_engine::Event event(hmi_apis::FunctionID::UI_PerformInteraction);
   event.set_smart_object(*message_);
   event.raise(application_manager_.event_dispatcher());

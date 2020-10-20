@@ -76,36 +76,73 @@ typedef pthread_t PlatformThreadHandle;
  * printf("ok!\n");
  */
 
-class Thread;
-void enqueue_to_join(Thread* thread);
-
 Thread* CreateThread(const char* name, ThreadDelegate* delegate);
 void DeleteThread(Thread* thread);
 
 class Thread {
- private:
-  const std::string name_;
-  // Should be locked to protect delegate_ value
-  sync_primitives::Lock delegate_lock_;
-  ThreadDelegate* delegate_;
-  PlatformThreadHandle handle_;
-  ThreadOptions thread_options_;
-  // Should be locked to protect isThreadRunning_ and thread_created_ values
-  sync_primitives::Lock state_lock_;
-  volatile unsigned int isThreadRunning_;
-  volatile bool stopped_;
-  volatile bool finalized_;
-  bool thread_created_;
-  // Signalled when Thread::start() is called
-  sync_primitives::ConditionalVariable run_cond_;
-
  public:
-  static int count;
+  /**
+   * @brief ThreadCommand is used to command the thread
+   * kThreadCommandNone - no command, used to indicate that there is no pending
+   * command
+   * kThreadCommandRun - commands thread to run (do another iteration)
+   * kThreadCommandFinalize - informs thread that must exit
+   */
+  enum ThreadCommand {
+    kThreadCommandNone,  // must be first
+    kThreadCommandRun,
+    kThreadCommandFinalize  // keep last
+    // in case of new commands - update/check threadFunc()
+  };
+
+  /**
+   * @brief ThreadState informs outside world about its state
+   * kThreadStateError - if pthread_create returned an error
+   * kThreadStateNone - there is no thread at all
+   * kThreadStateIdle - the thread is in state idle
+   * kThreadStateRunning - thread is in state running (executing delegates
+   * threadMain())
+   * kThreadStateCompleted - thread completed
+   */
+  enum ThreadState {
+    kThreadStateError = -1,
+    kThreadStateNone,
+    kThreadStateIdle,
+    kThreadStateRunning,
+    kThreadStateCompleted
+  };
+
+  /**
+   * @brief ThreadStopOption
+   * kThreadStopDelegate - executing delegates exitThreadMain and
+   * move thread to kThreadStateIdle
+   * kThreadSoftStop - executing kThreadStopDelegate and
+   * move thread to kThreadStateCompleted
+   * kThreadForceStop - executing kThreadSoftStop,
+   * if necessary pthread_cancel or pthread_exit and
+   * move thread to kThreadStateCompleted
+   */
+  enum ThreadStopOption {
+    kThreadStopDelegate,
+    kThreadSoftStop,
+    kThreadForceStop
+  };
+
+  /**
+   * @brief ThreadJoinOption
+   * kThreadJoinDelegate - waiting for finish threadMain
+   * kThreadJoinThread - waiting for finish threadFunc
+   */
+  enum ThreadJoinOption { kThreadJoinDelegate, kThreadJoinThread };
+
+  friend Thread* CreateThread(const char* name, ThreadDelegate* delegate);
+  friend void DeleteThread(Thread* thread);
+
   /**
    * @brief Starts the thread.
    * @return true if the thread was successfully started.
    */
-  bool start();
+  bool Start();
 
   /**
    * @brief Starts the thread. Behaves exactly like \ref start() in addition to
@@ -114,26 +151,44 @@ class Thread {
    * for details.
    * @return true if the thread was successfully started.
    */
-  bool start(const ThreadOptions& options);
+  bool Start(const ThreadOptions& options);
 
-  sync_primitives::Lock& delegate_lock() {
-    return delegate_lock_;
-  }
+  /**
+   * @brief Signals the thread to exit and returns once the thread has exited.
+   * After this method returns, the Thread object is completely reset and may
+   * be used as if it were newly constructed (i.e., Start may be called again).
+   *
+   * Stop may be called multiple times and is simply ignored if the thread is
+   * already stopped.
+   *
+   * Stop will wait for delegate exit
+   */
+  bool Stop(const ThreadStopOption stop_option);
 
-  ThreadDelegate* delegate() const {
+  /**
+   * @brief Blocks the current thread until
+   * the fucntion identified by join_option finishes execution.
+   * If that fucntion has already terminated, then
+   * Join returns immediately.
+   * @param join_option - specify function to wait
+   */
+  void Join(const ThreadJoinOption join_option);
+
+  ThreadDelegate* GetDelegate() const {
     return delegate_;
   }
 
-  void set_delegate(ThreadDelegate* delegate) {
+  void SetDelegate(ThreadDelegate* delegate) {
+    Stop(kThreadStopDelegate);
     delegate_ = delegate;
   }
 
-  friend Thread* CreateThread(const char* name, ThreadDelegate* delegate);
-  friend void DeleteThread(Thread* thread);
-
- public:
-  // Yield current thread
-  static void yield();
+  /**
+   * @brief Causes the calling thread to relinquish the CPU.  The
+   * thread is moved to the end of the queue for its static priority and a
+   * new thread gets to run.
+   */
+  static void SchedYield();
 
   // Get unique ID of currently executing thread
   static PlatformThreadHandle CurrentId();
@@ -143,22 +198,10 @@ class Thread {
                            std::string name);
 
   /**
-   * @brief Signals the thread to exit and returns once the thread has exited.
-   * After this method returns, the Thread object is completely reset and may
-   * be used as if it were newly constructed (i.e., Start may be called again).
-   *
-   * Stop may be called multiple times and is simply ignored if the thread is
-   * already stopped.
-   */
-  void stop();
-
-  void join();
-
-  /**
    * @brief Get thread name.
    * @return thread name
    */
-  const std::string& name() {
+  const std::string& GetThreadName() {
     return name_;
   }
 
@@ -167,17 +210,16 @@ class Thread {
    * When a thread is running, the thread_id_ is non-zero.
    * @return true if the thread has been started, and not yet stopped.
    */
-  bool is_running() const {
-    return isThreadRunning_;
+  bool IsRunning() {
+    sync_primitives::AutoLock auto_lock(state_lock_);
+    return kThreadStateRunning == thread_state_;
   }
-
-  void set_running(bool running);
 
   /**
    * @brief Is thread joinable?
    * @return - Returns true if the thread is joinable.
    */
-  bool is_joinable() const {
+  bool IsJoinable() const {
     return thread_options_.is_joinable();
   }
 
@@ -185,7 +227,7 @@ class Thread {
    * @brief Thread stack size
    * @return thread stack size
    */
-  size_t stack_size() const {
+  size_t StackSize() const {
     return thread_options_.stack_size();
   }
 
@@ -193,7 +235,7 @@ class Thread {
    * @brief The native thread handle.
    * @return thread handle.
    */
-  PlatformThreadHandle thread_handle() const {
+  PlatformThreadHandle ThreadHandle() const {
     return handle_;
   }
 
@@ -207,7 +249,7 @@ class Thread {
    * @brief Thread options.
    * @return thread options.
    */
-  const ThreadOptions& thread_options() const {
+  const ThreadOptions& GetThreadOptions() const {
     return thread_options_;
   }
 
@@ -215,9 +257,6 @@ class Thread {
    * @brief Minimum size of thread stack for specific platform.
    */
   static size_t kMinStackSize;
-
- protected:
-  sync_primitives::ConditionalVariable state_cond_;
 
  private:
   /**
@@ -235,6 +274,83 @@ class Thread {
   static void* threadFunc(void* arg);
   static void cleanup(void* arg);
   DISALLOW_COPY_AND_ASSIGN(Thread);
+
+  /**
+   * @brief Initializes the thread attributes and
+   * set thread options into attributes
+   * @param thread_options - thread options
+   * @return pthread_attr_t - initialized the thread attributes
+   */
+  pthread_attr_t SetThreadCreationAttributes(ThreadOptions* thread_options);
+
+  /**
+   * @brief Executing delegates exitThreadMain and move thread to
+   * kThreadStateIdle. That funciton is not thread safe.
+   * @param auto_lock - Locked object is used to wait
+   * thread iteration completion
+   * @return true if delegate has been successfully stopped,
+   * false otherwise
+   */
+  bool StopDelegate(sync_primitives::AutoLock& auto_lock);
+
+  /**
+   * @brief Executing StopDelegate and run kThreadCommandFinalize command,
+   * move thread to kThreadStateCompleted,
+   * that funciton is not thread safe
+   * @param auto_lock - Locked object used for waiting
+   * of the last iteration in thread
+   * @return true if thread has been successfully stopped,
+   * false otherwise
+   */
+  bool StopSoft(sync_primitives::AutoLock& auto_lock);
+
+  /**
+   * @brief Executing StopSoft, if necessary pthread_cancel or pthread_exit
+   * and move thread to kThreadStateCompleted,
+   * that funciton is not thread safe
+   * @param auto_lock - Locked object used for waiting
+   * of the last iteration in thread
+   */
+  void StopForce(sync_primitives::AutoLock& auto_lock);
+
+  /**
+   * @brief Waiting finished iteration in thread,
+   * that funciton is not thread safe
+   * @param auto_lock - Locked object using for waiting
+   * finishing iteration in thread
+   */
+  void JoinDelegate(sync_primitives::AutoLock& auto_lock);
+
+  const std::string name_;
+  ThreadDelegate* delegate_;
+  PlatformThreadHandle handle_;
+  ThreadOptions thread_options_;
+  // Should be locked to protect thread state
+  sync_primitives::Lock state_lock_;
+  sync_primitives::ConditionalVariable state_cond_;
+
+  /**
+   * @brief Used to request actions from worker thread.
+   */
+  volatile ThreadCommand thread_command_;
+
+  /**
+   * @brief Used from worker thread to inform about its status.
+   */
+  volatile ThreadState thread_state_;
+
+#ifdef BUILD_TESTS
+  FRIEND_TEST(PosixThreadTest,
+              StartThreadWithNullPtrDelegate_ExpectThreadStateNone);
+  FRIEND_TEST(PosixThreadTest,
+              StartThreadExecutingThreadMain_ExpectThreadStateRunning);
+  FRIEND_TEST(
+      PosixThreadTest,
+      StartThreadExecutingThreadMainCallStopDelegate_ExpectThreadStateIdle);
+  FRIEND_TEST(
+      PosixThreadTest,
+      StartThreadExecutingThreadMainCallForceStop_ExpectThreadStateCompleted);
+#endif
 };
 
 }  // namespace threads

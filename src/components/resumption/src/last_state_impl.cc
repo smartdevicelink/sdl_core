@@ -37,23 +37,23 @@
 
 namespace resumption {
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "Resumption")
+SDL_CREATE_LOG_VARIABLE("Resumption")
 
 LastStateImpl::LastStateImpl(const std::string& app_storage_folder,
                              const std::string& app_info_storage)
     : app_storage_folder_(app_storage_folder)
     , app_info_storage_(app_info_storage) {
   LoadFromFileSystem();
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
 }
 
 LastStateImpl::~LastStateImpl() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   SaveToFileSystem();
 }
 
 void LastStateImpl::SaveStateToFileSystem() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
 
   std::string styled_string;
   {
@@ -64,14 +64,13 @@ void LastStateImpl::SaveStateToFileSystem() {
   const std::vector<uint8_t> char_vector_pdata(styled_string.begin(),
                                                styled_string.end());
   DCHECK(file_system::CreateDirectoryRecursively(app_storage_folder_));
-  LOG4CXX_INFO(logger_,
-               "LastState::SaveStateToFileSystem[DEPRECATED] "
-                   << app_info_storage_ << styled_string);
+  SDL_LOG_INFO("LastState::SaveStateToFileSystem[DEPRECATED] "
+               << app_info_storage_ << styled_string);
   DCHECK(file_system::Write(app_info_storage_, char_vector_pdata));
 }
 
 void LastStateImpl::SaveToFileSystem() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
 
   std::string styled_string;
   {
@@ -82,8 +81,8 @@ void LastStateImpl::SaveToFileSystem() {
   const std::vector<uint8_t> char_vector_pdata(styled_string.begin(),
                                                styled_string.end());
   DCHECK(file_system::CreateDirectoryRecursively(app_storage_folder_));
-  LOG4CXX_INFO(
-      logger_,
+  SDL_LOG_INFO(
+
       "LastState::SaveToFileSystem " << app_info_storage_ << styled_string);
   DCHECK(file_system::Write(app_info_storage_, char_vector_pdata));
 }
@@ -94,17 +93,16 @@ void LastStateImpl::LoadFromFileSystem() {
   utils::JsonReader reader;
 
   if (result && reader.parse(buffer, &dictionary_)) {
-    LOG4CXX_INFO(logger_,
-                 "Valid last state was found." << dictionary_.toStyledString());
+    SDL_LOG_INFO("Valid last state was found." << dictionary_.toStyledString());
     return;
   }
-  LOG4CXX_WARN(logger_, "No valid last state was found.");
+  SDL_LOG_WARN("No valid last state was found.");
 }
 
 void LastStateImpl::RemoveFromFileSystem() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   if (!file_system::DeleteFile(app_info_storage_)) {
-    LOG4CXX_WARN(logger_, "Failed attempt to delete " << app_info_storage_);
+    SDL_LOG_WARN("Failed attempt to delete " << app_info_storage_);
   }
 }
 

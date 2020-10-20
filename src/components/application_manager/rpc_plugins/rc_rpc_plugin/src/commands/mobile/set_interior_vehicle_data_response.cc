@@ -5,6 +5,8 @@
 namespace rc_rpc_plugin {
 namespace commands {
 
+SDL_CREATE_LOG_VARIABLE("Commands")
+
 SetInteriorVehicleDataResponse::SetInteriorVehicleDataResponse(
     const app_mngr::commands::MessageSharedPtr& message,
     const RCCommandParams& params)
@@ -17,7 +19,7 @@ SetInteriorVehicleDataResponse::SetInteriorVehicleDataResponse(
 SetInteriorVehicleDataResponse::~SetInteriorVehicleDataResponse() {}
 
 void SetInteriorVehicleDataResponse::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   application_manager_.GetRPCService().SendMessageToMobile(message_);
 }
 

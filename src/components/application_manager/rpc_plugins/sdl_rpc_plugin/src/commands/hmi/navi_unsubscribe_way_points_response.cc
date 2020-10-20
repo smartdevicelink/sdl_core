@@ -40,6 +40,8 @@ using namespace application_manager;
 
 namespace commands {
 
+SDL_CREATE_LOG_VARIABLE("Commands")
+
 NaviUnsubscribeWayPointsResponse::NaviUnsubscribeWayPointsResponse(
     const application_manager::commands::MessageSharedPtr& message,
     ApplicationManager& application_manager,
@@ -55,7 +57,7 @@ NaviUnsubscribeWayPointsResponse::NaviUnsubscribeWayPointsResponse(
 NaviUnsubscribeWayPointsResponse::~NaviUnsubscribeWayPointsResponse() {}
 
 void NaviUnsubscribeWayPointsResponse::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
 
   event_engine::Event event(
       hmi_apis::FunctionID::Navigation_UnsubscribeWayPoints);

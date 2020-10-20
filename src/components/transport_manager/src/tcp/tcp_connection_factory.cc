@@ -39,7 +39,7 @@
 namespace transport_manager {
 namespace transport_adapter {
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "TransportManager")
+SDL_CREATE_LOG_VARIABLE("TransportManager")
 
 TcpConnectionFactory::TcpConnectionFactory(
     TransportAdapterController* controller)
@@ -51,9 +51,9 @@ TransportAdapter::Error TcpConnectionFactory::Init() {
 
 TransportAdapter::Error TcpConnectionFactory::CreateConnection(
     const DeviceUID& device_uid, const ApplicationHandle& app_handle) {
-  LOG4CXX_AUTO_TRACE(logger_);
-  LOG4CXX_DEBUG(
-      logger_,
+  SDL_LOG_AUTO_TRACE();
+  SDL_LOG_DEBUG(
+
       "DeviceUID: " << &device_uid << ", ApplicationHandle: " << &app_handle);
   std::shared_ptr<TcpServerOriginatedSocketConnection> connection =
       std::make_shared<TcpServerOriginatedSocketConnection>(
@@ -61,9 +61,8 @@ TransportAdapter::Error TcpConnectionFactory::CreateConnection(
   controller_->ConnectionCreated(connection, device_uid, app_handle);
   const TransportAdapter::Error error = connection->Start();
   if (TransportAdapter::OK != error) {
-    LOG4CXX_ERROR(logger_,
-                  "TCP ServerOriginated connection::Start() failed with error: "
-                      << error);
+    SDL_LOG_ERROR("TCP ServerOriginated connection::Start() failed with error: "
+                  << error);
   }
   return error;
 }

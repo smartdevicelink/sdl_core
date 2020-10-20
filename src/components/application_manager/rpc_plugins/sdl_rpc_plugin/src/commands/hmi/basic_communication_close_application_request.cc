@@ -36,6 +36,8 @@ namespace sdl_rpc_plugin {
 using namespace application_manager;
 namespace commands {
 
+SDL_CREATE_LOG_VARIABLE("Commands")
+
 BasicCommunicationCloseApplicationRequest::
     BasicCommunicationCloseApplicationRequest(
         const application_manager::commands::MessageSharedPtr& message,
@@ -53,7 +55,7 @@ BasicCommunicationCloseApplicationRequest::
     ~BasicCommunicationCloseApplicationRequest() {}
 
 void BasicCommunicationCloseApplicationRequest::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   SendRequest();
 }
 

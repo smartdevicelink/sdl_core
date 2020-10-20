@@ -39,6 +39,8 @@ using namespace application_manager;
 
 namespace commands {
 
+SDL_CREATE_LOG_VARIABLE("Commands")
+
 NaviShowConstantTBTResponse::NaviShowConstantTBTResponse(
     const application_manager::commands::MessageSharedPtr& message,
     ApplicationManager& application_manager,
@@ -54,7 +56,7 @@ NaviShowConstantTBTResponse::NaviShowConstantTBTResponse(
 NaviShowConstantTBTResponse::~NaviShowConstantTBTResponse() {}
 
 void NaviShowConstantTBTResponse::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
 
   event_engine::Event event(hmi_apis::FunctionID::Navigation_ShowConstantTBT);
   event.set_smart_object(*message_);

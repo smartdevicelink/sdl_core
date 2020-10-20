@@ -87,6 +87,13 @@ class InteriorDataManager {
    * false.
    */
   virtual bool CheckRequestsToHMIFrequency(const ModuleUid& module) = 0;
+
+  /**
+   * @brief Reverts resumption data and sends ubsubscribe vehicle data request
+   * to a HMI
+   * @param subscriptions Module data that SDL should unsubscribe off
+   */
+  virtual void OnResumptionRevert(const std::set<ModuleUid>& subscriptions) = 0;
 };
 
 }  // namespace rc_rpc_plugin

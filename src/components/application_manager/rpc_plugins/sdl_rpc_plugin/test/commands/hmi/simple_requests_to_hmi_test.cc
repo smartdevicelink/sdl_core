@@ -85,6 +85,7 @@
 #include "sdl_rpc_plugin/commands/hmi/ui_set_media_clock_timer_request.h"
 #include "sdl_rpc_plugin/commands/hmi/ui_show_request.h"
 #include "sdl_rpc_plugin/commands/hmi/ui_slider_request.h"
+#include "sdl_rpc_plugin/commands/hmi/ui_subtle_alert_request.h"
 #include "sdl_rpc_plugin/commands/hmi/vr_add_command_request.h"
 #include "sdl_rpc_plugin/commands/hmi/vr_change_registration_request.h"
 #include "sdl_rpc_plugin/commands/hmi/vr_delete_command_request.h"
@@ -156,6 +157,7 @@ typedef Types<sdl_rpc_plugin::commands::hmi::DialNumberRequest,
               sdl_rpc_plugin::commands::UIAddCommandRequest,
               sdl_rpc_plugin::commands::UIAddSubmenuRequest,
               sdl_rpc_plugin::commands::UIAlertRequest,
+              sdl_rpc_plugin::commands::UISubtleAlertRequest,
               sdl_rpc_plugin::commands::UIChangeRegistrationRequest,
               sdl_rpc_plugin::commands::UIDeleteCommandRequest,
               sdl_rpc_plugin::commands::UIDeleteSubmenuRequest,

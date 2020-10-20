@@ -90,7 +90,6 @@ class RequestInfoTest : public ::testing::Test {
 };
 
 TEST_F(RequestInfoTest, RequestInfoEqualEndTime) {
-  std::vector<std::shared_ptr<TestRequestInfo> > requests;
   const date_time::TimeDuration& time = date_time::getCurrentTime();
   for (uint32_t i = 0; i < count_of_requests_for_test_; ++i) {
     std::shared_ptr<TestRequestInfo> request = CreateTestInfo(

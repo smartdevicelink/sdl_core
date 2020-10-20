@@ -39,6 +39,8 @@ using namespace application_manager;
 
 namespace commands {
 
+SDL_CREATE_LOG_VARIABLE("Commands")
+
 AddStatisticsInfoNotification::AddStatisticsInfoNotification(
     const application_manager::commands::MessageSharedPtr& message,
     ApplicationManager& application_manager,
@@ -54,7 +56,7 @@ AddStatisticsInfoNotification::AddStatisticsInfoNotification(
 AddStatisticsInfoNotification::~AddStatisticsInfoNotification() {}
 
 void AddStatisticsInfoNotification::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
 
   int type = (*message_)[strings::msg_params][hmi_notification::statistic_type]
                  .asInt();

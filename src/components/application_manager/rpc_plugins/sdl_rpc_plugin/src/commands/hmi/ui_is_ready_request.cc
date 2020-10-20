@@ -31,13 +31,14 @@
  */
 
 #include "sdl_rpc_plugin/commands/hmi/ui_is_ready_request.h"
-#include "application_manager/message_helper.h"
 #include "application_manager/rpc_service.h"
 
 namespace sdl_rpc_plugin {
 using namespace application_manager;
 
 namespace commands {
+
+SDL_CREATE_LOG_VARIABLE("Commands")
 
 UIIsReadyRequest::UIIsReadyRequest(
     const application_manager::commands::MessageSharedPtr& message,
@@ -55,17 +56,17 @@ UIIsReadyRequest::UIIsReadyRequest(
 UIIsReadyRequest::~UIIsReadyRequest() {}
 
 void UIIsReadyRequest::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   subscribe_on_event(hmi_apis::FunctionID::UI_IsReady, correlation_id());
   SendRequest();
 }
 
 void UIIsReadyRequest::on_event(const event_engine::Event& event) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   const smart_objects::SmartObject& message = event.smart_object();
   switch (event.id()) {
     case hmi_apis::FunctionID::UI_IsReady: {
-      LOG4CXX_DEBUG(logger_, "Received UI_IsReady event");
+      SDL_LOG_DEBUG("Received UI_IsReady event");
       unsubscribe_from_event(hmi_apis::FunctionID::UI_IsReady);
       const bool is_available = app_mngr::commands::ChangeInterfaceState(
           application_manager_, message, HmiInterfaces::HMI_INTERFACE_UI);
@@ -73,15 +74,16 @@ void UIIsReadyRequest::on_event(const event_engine::Event& event) {
       hmi_capabilities.set_is_ui_cooperating(is_available);
       if (!app_mngr::commands::CheckAvailabilityHMIInterfaces(
               application_manager_, HmiInterfaces::HMI_INTERFACE_UI)) {
-        LOG4CXX_INFO(logger_,
-                     "HmiInterfaces::HMI_INTERFACE_UI isn't available");
+        UpdateRequiredInterfaceCapabilitiesRequests(hmi_interface::ui);
+        SDL_LOG_INFO("HmiInterfaces::HMI_INTERFACE_UI isn't available");
         return;
       }
-      SendMessageToHMI();
+
+      RequestInterfaceCapabilities(hmi_interface::ui);
       break;
     }
     default: {
-      LOG4CXX_ERROR(logger_, "Received unknown event" << event.id());
+      SDL_LOG_ERROR("Received unknown event " << event.id());
       return;
     }
   }
@@ -89,25 +91,7 @@ void UIIsReadyRequest::on_event(const event_engine::Event& event) {
 
 void UIIsReadyRequest::onTimeOut() {
   // Note(dtrunov): According to new requirment APPLINK-27956
-  SendMessageToHMI();
-}
-
-void UIIsReadyRequest::SendMessageToHMI() {
-  std::shared_ptr<smart_objects::SmartObject> get_language(
-      MessageHelper::CreateModuleInfoSO(hmi_apis::FunctionID::UI_GetLanguage,
-                                        application_manager_));
-  HMICapabilities& hmi_capabilities = hmi_capabilities_;
-  hmi_capabilities.set_handle_response_for(*get_language);
-  rpc_service_.ManageHMICommand(get_language);
-  std::shared_ptr<smart_objects::SmartObject> get_all_languages(
-      MessageHelper::CreateModuleInfoSO(
-          hmi_apis::FunctionID::UI_GetSupportedLanguages,
-          application_manager_));
-  rpc_service_.ManageHMICommand(get_all_languages);
-  std::shared_ptr<smart_objects::SmartObject> get_capabilities(
-      MessageHelper::CreateModuleInfoSO(
-          hmi_apis::FunctionID::UI_GetCapabilities, application_manager_));
-  rpc_service_.ManageHMICommand(get_capabilities);
+  RequestInterfaceCapabilities(hmi_interface::ui);
 }
 
 }  // namespace commands

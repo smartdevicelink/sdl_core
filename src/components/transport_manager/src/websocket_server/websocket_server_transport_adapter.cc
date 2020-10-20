@@ -48,7 +48,7 @@
 namespace transport_manager {
 namespace transport_adapter {
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "WebSocketTransportAdapter")
+SDL_CREATE_LOG_VARIABLE("WebSocketTransportAdapter")
 
 WebSocketServerTransportAdapter::WebSocketServerTransportAdapter(
     resumption::LastStateWrapperPtr last_state_wrapper,
@@ -63,7 +63,7 @@ WebSocketServerTransportAdapter::~WebSocketServerTransportAdapter() {}
 
 void WebSocketServerTransportAdapter::TransportConfigUpdated(
     const TransportConfig& new_config) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
 
   transport_config_ = new_config;
 
@@ -74,7 +74,7 @@ void WebSocketServerTransportAdapter::TransportConfigUpdated(
 
 TransportConfig WebSocketServerTransportAdapter::GetTransportConfiguration()
     const {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   return transport_config_;
 }
 
@@ -83,14 +83,14 @@ DeviceType WebSocketServerTransportAdapter::GetDeviceType() const {
 }
 
 DeviceSptr WebSocketServerTransportAdapter::AddDevice(DeviceSptr device) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   webengine_device_ = device;
   Store();
   return TransportAdapterImpl::AddDevice(webengine_device_);
 }
 
 TransportAdapter::Error WebSocketServerTransportAdapter::Init() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   if (webengine_device_) {
     AddDevice(webengine_device_);
   }
@@ -98,12 +98,12 @@ TransportAdapter::Error WebSocketServerTransportAdapter::Init() {
 }
 
 void WebSocketServerTransportAdapter::Store() const {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   if (webengine_device_) {
     Json::Value& dictionary = last_state().get_dictionary();
     if (dictionary["TransportManager"].isMember("WebsocketServerAdapter")) {
-      LOG4CXX_DEBUG(
-          logger_, "WebsocketServerAdapter already exists. Storing is skipped");
+      SDL_LOG_DEBUG(
+          "WebsocketServerAdapter already exists. Storing is skipped");
       return;
     }
 
@@ -118,7 +118,7 @@ void WebSocketServerTransportAdapter::Store() const {
 }
 
 bool WebSocketServerTransportAdapter::Restore() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   const Json::Value& dictionary = last_state().get_dictionary();
   const Json::Value ws_adapter_dictionary =
       dictionary["TransportManager"]["WebsocketServerAdapter"];
@@ -133,7 +133,7 @@ bool WebSocketServerTransportAdapter::Restore() {
 }
 
 std::string WebSocketServerTransportAdapter::GetStoredDeviceID() const {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   return webengine_device_id_;
 }
 

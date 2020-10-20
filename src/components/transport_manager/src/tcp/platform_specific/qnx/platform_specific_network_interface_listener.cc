@@ -3,7 +3,7 @@
 namespace transport_manager {
 namespace transport_adapter {
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "TransportManager")
+SDL_CREATE_LOG_VARIABLE("TransportManager")
 
 PlatformSpecificNetworkInterfaceListener::
     PlatformSpecificNetworkInterfaceListener(
@@ -12,25 +12,25 @@ PlatformSpecificNetworkInterfaceListener::
 
 PlatformSpecificNetworkInterfaceListener::
     ~PlatformSpecificNetworkInterfaceListener() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
 }
 
 bool PlatformSpecificNetworkInterfaceListener::Init() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   return true;
 }
 
 void PlatformSpecificNetworkInterfaceListener::Deinit() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
 }
 
 bool PlatformSpecificNetworkInterfaceListener::Start() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   return true;
 }
 
 bool PlatformSpecificNetworkInterfaceListener::Stop() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   return true;
 }
 

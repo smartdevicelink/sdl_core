@@ -35,6 +35,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 namespace transport_manager {
 namespace transport_adapter {
 
+SDL_CREATE_LOG_VARIABLE("WebSocketSecureSession")
+
 using namespace boost::beast::websocket;
 
 template <typename ExecutorType>
@@ -42,13 +44,19 @@ WebSocketSecureSession<ExecutorType>::WebSocketSecureSession(
     tcp::socket socket,
     ssl::context& ctx,
     DataReceiveCallback data_receive,
+    DataSendDoneCallback data_send_done,
+    DataSendFailedCallback data_send_failed,
     OnIOErrorCallback on_error)
-    : WebSocketSession<ExecutorType>(
-          std::move(socket), ctx, data_receive, on_error) {}
+    : WebSocketSession<ExecutorType>(std::move(socket),
+                                     ctx,
+                                     data_receive,
+                                     data_send_done,
+                                     data_send_failed,
+                                     on_error) {}
 
 template <typename ExecutorType>
 void WebSocketSecureSession<ExecutorType>::AsyncAccept() {
-  LOG4CXX_AUTO_TRACE(ws_logger_);
+  SDL_LOG_AUTO_TRACE();
   // Perform the SSL handshake
   WebSocketSecureSession<ExecutorType>::ws_.next_layer().async_handshake(
       ssl::stream_base::server,
@@ -62,10 +70,10 @@ void WebSocketSecureSession<ExecutorType>::AsyncAccept() {
 template <typename ExecutorType>
 void WebSocketSecureSession<ExecutorType>::AsyncHandshake(
     boost::system::error_code ec) {
-  LOG4CXX_AUTO_TRACE(ws_logger_);
+  SDL_LOG_AUTO_TRACE();
   if (ec) {
     auto str_err = "ErrorMessage: " + ec.message();
-    LOG4CXX_ERROR(ws_logger_, str_err);
+    SDL_LOG_ERROR(str_err);
     WebSocketSession<ExecutorType>::on_io_error_();
     return;
   }

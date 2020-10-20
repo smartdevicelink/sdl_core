@@ -38,7 +38,7 @@
 
 namespace test {
 namespace components {
-namespace resumprion_test {
+namespace resumption_test {
 
 class MockResumeCtrl : public resumption::ResumeCtrl {
  public:
@@ -59,12 +59,16 @@ class MockResumeCtrl : public resumption::ResumeCtrl {
   MOCK_CONST_METHOD0(is_suspended, bool());
   MOCK_METHOD0(StopSavePersistentDataTimer, void());
   MOCK_METHOD0(StartSavePersistentDataTimer, void());
-  MOCK_METHOD2(StartResumption,
+  MOCK_METHOD3(StartResumption,
                bool(app_mngr::ApplicationSharedPtr application,
-                    const std::string& hash));
+                    const std::string& hash,
+                    resumption::ResumeCtrl::ResumptionCallBack));
   MOCK_METHOD1(StartResumptionOnlyHMILevel,
                bool(app_mngr::ApplicationSharedPtr application));
   MOCK_METHOD1(RetryResumption, void(const uint32_t app_id));
+  MOCK_METHOD2(HandleOnTimeOut,
+               void(const uint32_t correlation_id,
+                    const hmi_apis::FunctionID::eType));
   MOCK_METHOD1(CheckPersistenceFilesForResumption,
                bool(app_mngr::ApplicationSharedPtr application));
   MOCK_METHOD2(CheckApplicationHash,
@@ -103,15 +107,11 @@ class MockResumeCtrl : public resumption::ResumeCtrl {
                     bool check_policy));
   MOCK_CONST_METHOD0(LaunchTime, time_t());
 
-  MOCK_METHOD2(RestoreAppWidgets,
-               size_t(app_mngr::ApplicationSharedPtr application,
-                      const smart_objects::SmartObject& saved_app));
-
-  MOCK_METHOD1(RestoreWidgetsHMIState,
-               void(const smart_objects::SmartObject& response_message));
-
-  MOCK_METHOD1(StartWaitingForDisplayCapabilitiesUpdate,
-               void(application_manager::ApplicationSharedPtr application));
+  MOCK_METHOD2(StartWaitingForDisplayCapabilitiesUpdate,
+               void(application_manager::ApplicationSharedPtr application,
+                    const bool is_resume_app));
+  MOCK_METHOD0(resumption_data_processor,
+               resumption::ResumptionDataProcessor&());
 
 #ifdef BUILD_TESTS
   MOCK_METHOD1(set_resumption_storage,
@@ -120,7 +120,7 @@ class MockResumeCtrl : public resumption::ResumeCtrl {
 #endif  // BUILD_TESTS
 };
 
-}  // namespace resumprion_test
+}  // namespace resumption_test
 }  // namespace components
 }  // namespace test
 

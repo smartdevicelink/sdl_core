@@ -87,7 +87,7 @@ class StreamerAdapter : public MediaAdapterImpl {
   };
 
  private:
-  int32_t current_application_;
+  std::atomic_int current_application_;
   utils::MessageQueue<protocol_handler::RawMessagePtr> messages_;
 
   Streamer* streamer_;

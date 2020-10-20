@@ -33,14 +33,24 @@
 #include <string>
 
 #include "gmock/gmock.h"
-
 #include "smart_objects/array_schema_item.h"
+#include "smart_objects/enum_schema_item.h"
+#include "smart_objects/object_schema_item.h"
 #include "smart_objects/smart_object.h"
 #include "smart_objects/string_schema_item.h"
 
 namespace test {
 namespace components {
 namespace smart_object_test {
+
+namespace ExampleEnum {
+enum eType { INVALID_ENUM = -1, Value0 = 0, Value1, Value2 };
+}  // namespace ExampleEnum
+
+namespace Keys {
+const char OPTIONAL_PARAM[] = "optionalParam";
+const char MANDATORY_PARAM[] = "mandatoryParam";
+}  // namespace Keys
 
 /**
  * Test ArraySchemaItem no schema item, no min and max size
@@ -345,6 +355,189 @@ TEST(test_map_validate, test_ArraySchemaItemTest) {
   EXPECT_EQ(std::string("Out of array"), obj["array"][4].asString());
 }
 
+TEST(test_array_with_unknown_enum, test_ArraySchemaItemTest) {
+  using namespace ns_smart_device_link::ns_smart_objects;
+  SmartObject obj;
+  std::set<ExampleEnum::eType> enum_values;
+  enum_values.insert(ExampleEnum::Value0);
+  enum_values.insert(ExampleEnum::Value1);
+  enum_values.insert(ExampleEnum::Value2);
+
+  ISchemaItemPtr item = CArraySchemaItem::create(
+      TEnumSchemaItem<ExampleEnum::eType>::create(enum_values),
+      TSchemaItemParameter<size_t>(1));
+
+  obj[0] = "Value0";
+  obj[1] = "Value10";
+  obj[2] = "Value1";
+
+  item->applySchema(obj, true);
+
+  rpc::ValidationReport report("RPC");
+  EXPECT_FALSE(
+      item->filterInvalidEnums(obj, utils::SemanticVersion(), &report));
+  EXPECT_NE(std::string(""), rpc::PrettyFormat(report));
+
+  EXPECT_EQ((size_t)2, obj.length());
+  EXPECT_EQ(0, obj[0].asInt());
+  EXPECT_EQ(1, obj[1].asInt());
+
+  report = rpc::ValidationReport("RPC");
+  EXPECT_EQ(errors::OK, item->validate(obj, &report));
+  EXPECT_EQ(std::string(""), rpc::PrettyFormat(report));
+}
+
+TEST(test_array_with_unknown_enums, test_ArraySchemaItemTest) {
+  using namespace ns_smart_device_link::ns_smart_objects;
+  SmartObject obj;
+  std::set<ExampleEnum::eType> enum_values;
+  enum_values.insert(ExampleEnum::Value0);
+  enum_values.insert(ExampleEnum::Value1);
+  enum_values.insert(ExampleEnum::Value2);
+
+  ISchemaItemPtr item = CArraySchemaItem::create(
+      TEnumSchemaItem<ExampleEnum::eType>::create(enum_values),
+      TSchemaItemParameter<size_t>(1));
+
+  obj[0] = "Value10";
+  obj[1] = "Value11";
+  obj[2] = "Value12";
+
+  item->applySchema(obj, true);
+
+  rpc::ValidationReport report("RPC");
+  EXPECT_TRUE(item->filterInvalidEnums(obj, utils::SemanticVersion(), &report));
+  EXPECT_NE(std::string(""), rpc::PrettyFormat(report));
+
+  EXPECT_EQ((size_t)0, obj.length());
+
+  report = rpc::ValidationReport("RPC");
+  EXPECT_EQ(errors::OUT_OF_RANGE, item->validate(obj, &report));
+  EXPECT_NE(std::string(""), rpc::PrettyFormat(report));
+}
+
+TEST(test_array_of_objects_with_unknown_enum, test_ArraySchemaItemTest) {
+  using namespace ns_smart_device_link::ns_smart_objects;
+  SmartObject obj;
+  std::set<ExampleEnum::eType> enum_values;
+  enum_values.insert(ExampleEnum::Value0);
+  enum_values.insert(ExampleEnum::Value1);
+  enum_values.insert(ExampleEnum::Value2);
+
+  Members structMembersMap;
+  structMembersMap[Keys::OPTIONAL_PARAM] =
+      SMember(TEnumSchemaItem<ExampleEnum::eType>::create(enum_values), false);
+  structMembersMap[Keys::MANDATORY_PARAM] =
+      SMember(TEnumSchemaItem<ExampleEnum::eType>::create(enum_values), true);
+
+  ISchemaItemPtr item =
+      CArraySchemaItem::create(CObjectSchemaItem::create(structMembersMap),
+                               TSchemaItemParameter<size_t>(1));
+
+  SmartObject struct1;
+  struct1[Keys::MANDATORY_PARAM] = "Value0";
+  SmartObject struct2;
+  struct2[Keys::MANDATORY_PARAM] = "Value11";
+  SmartObject struct3;
+  struct3[Keys::MANDATORY_PARAM] = "Value2";
+  obj[0] = struct1;
+  obj[1] = struct2;
+  obj[2] = struct3;
+
+  item->applySchema(obj, true);
+
+  rpc::ValidationReport report("RPC");
+  EXPECT_FALSE(
+      item->filterInvalidEnums(obj, utils::SemanticVersion(), &report));
+  EXPECT_NE(std::string(""), rpc::PrettyFormat(report));
+
+  EXPECT_EQ((size_t)2, obj.length());
+  EXPECT_EQ(0, obj[0][Keys::MANDATORY_PARAM].asInt());
+  EXPECT_EQ(2, obj[1][Keys::MANDATORY_PARAM].asInt());
+
+  report = rpc::ValidationReport("RPC");
+  EXPECT_EQ(errors::OK, item->validate(obj, &report));
+  EXPECT_EQ(std::string(""), rpc::PrettyFormat(report));
+}
+
+TEST(test_array_of_objects_with_unknown_optional_enums,
+     test_ArraySchemaItemTest) {
+  using namespace ns_smart_device_link::ns_smart_objects;
+  SmartObject obj;
+  std::set<ExampleEnum::eType> enum_values;
+  enum_values.insert(ExampleEnum::Value0);
+  enum_values.insert(ExampleEnum::Value1);
+  enum_values.insert(ExampleEnum::Value2);
+
+  Members structMembersMap;
+  structMembersMap[Keys::OPTIONAL_PARAM] =
+      SMember(TEnumSchemaItem<ExampleEnum::eType>::create(enum_values), false);
+  structMembersMap[Keys::MANDATORY_PARAM] =
+      SMember(TEnumSchemaItem<ExampleEnum::eType>::create(enum_values), true);
+
+  ISchemaItemPtr item =
+      CArraySchemaItem::create(CObjectSchemaItem::create(structMembersMap),
+                               TSchemaItemParameter<size_t>(1));
+
+  SmartObject struct1;
+  struct1[Keys::OPTIONAL_PARAM] = "Value10";
+  struct1[Keys::MANDATORY_PARAM] = "Value0";
+  SmartObject struct2;
+  struct2[Keys::OPTIONAL_PARAM] = "Value0";
+  struct2[Keys::MANDATORY_PARAM] = "Value1";
+  SmartObject struct3;
+  struct3[Keys::OPTIONAL_PARAM] = "Value12";
+  struct3[Keys::MANDATORY_PARAM] = "Value2";
+  obj[0] = struct1;
+  obj[1] = struct2;
+  obj[2] = struct3;
+
+  item->applySchema(obj, true);
+
+  rpc::ValidationReport report("RPC");
+  EXPECT_FALSE(
+      item->filterInvalidEnums(obj, utils::SemanticVersion(), &report));
+  EXPECT_NE(std::string(""), rpc::PrettyFormat(report));
+
+  // Unknown sub-parameter values should be filtered, but not array elements
+  EXPECT_EQ((size_t)3, obj.length());
+  EXPECT_EQ(0, obj[0][Keys::MANDATORY_PARAM].asInt());
+  EXPECT_FALSE(obj[0].keyExists(Keys::OPTIONAL_PARAM));
+  EXPECT_EQ(1, obj[1][Keys::MANDATORY_PARAM].asInt());
+  EXPECT_EQ(0, obj[1][Keys::OPTIONAL_PARAM].asInt());
+  EXPECT_EQ(2, obj[2][Keys::MANDATORY_PARAM].asInt());
+  EXPECT_FALSE(obj[2].keyExists(Keys::OPTIONAL_PARAM));
+
+  report = rpc::ValidationReport("RPC");
+  EXPECT_EQ(errors::OK, item->validate(obj, &report));
+  EXPECT_EQ(std::string(""), rpc::PrettyFormat(report));
+}
+
 }  // namespace smart_object_test
 }  // namespace components
 }  // namespace test
+
+namespace ns_smart_device_link {
+namespace ns_smart_objects {
+
+namespace ExampleEnum = test::components::smart_object_test::ExampleEnum;
+typedef EnumConversionHelper<ExampleEnum::eType> EnumConverter;
+
+template <>
+const EnumConverter::EnumToCStringMap EnumConverter::enum_to_cstring_map_ =
+    EnumConverter::InitEnumToCStringMap();
+
+template <>
+const EnumConverter::CStringToEnumMap EnumConverter::cstring_to_enum_map_ =
+    EnumConverter::InitCStringToEnumMap();
+
+template <>
+const char* const EnumConverter::cstring_values_[] = {
+    "Value0", "Value1", "Value2"};
+
+template <>
+const ExampleEnum::eType EnumConverter::enum_values_[] = {
+    ExampleEnum::Value0, ExampleEnum::Value1, ExampleEnum::Value2};
+
+}  // namespace ns_smart_objects
+}  // namespace ns_smart_device_link
