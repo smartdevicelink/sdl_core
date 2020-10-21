@@ -377,7 +377,7 @@ class MockApplicationManager : public application_manager::ApplicationManager {
   MOCK_METHOD0(OnTimerSendTTSGlobalProperties, void());
   MOCK_METHOD0(OnLowVoltage, void());
   MOCK_METHOD0(OnWakeUp, void());
-  MOCK_METHOD2(OnStreamingSuccessfulConfiguration,
+  MOCK_METHOD2(OnStreamingConfigurationSuccessful,
                void(uint32_t app_id,
                     protocol_handler::ServiceType service_type));
   MOCK_METHOD3(OnStreamingConfigurationFailed,

@@ -96,7 +96,7 @@ void NaviSetVideoConfigRequest::on_event(const event_engine::Event& event) {
 
       if (code == hmi_apis::Common_Result::SUCCESS) {
         SDL_LOG_DEBUG("Received SetVideoConfig success response");
-        application_manager_.OnStreamingSuccessfulConfiguration(
+        application_manager_.OnStreamingConfigurationSuccessful(
             app->app_id(), protocol_handler::ServiceType::kMobileNav);
       } else {
         SDL_LOG_DEBUG("Received SetVideoConfig failure response (" << event.id()
@@ -119,7 +119,9 @@ void NaviSetVideoConfigRequest::on_event(const event_engine::Event& event) {
         }
 
         application_manager_.OnStreamingConfigurationFailed(
-            app->app_id(), rejected_params, std::string());
+            app->app_id(),
+            rejected_params,
+            "Received SetVideoConfig failure response");
 
         break;
       }
@@ -142,7 +144,9 @@ void NaviSetVideoConfigRequest::onTimeOut() {
 
   std::vector<std::string> empty;
   application_manager_.OnStreamingConfigurationFailed(
-      app->app_id(), empty, std::string());
+      app->app_id(),
+      empty,
+      "Timed out while waiting for SetVideoConfig response");
 
   application_manager_.TerminateRequest(
       connection_key(), correlation_id(), function_id());

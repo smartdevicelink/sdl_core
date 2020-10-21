@@ -878,13 +878,13 @@ class ApplicationManager {
    * @param app_id Streaming application id
    * @param service_type Streaming service type
    */
-  virtual void OnStreamingSuccessfulConfiguration(
+  virtual void OnStreamingConfigurationSuccessful(
       uint32_t app_id, protocol_handler::ServiceType service_type) = 0;
 
   /**
    * @brief Called when application fails streaming configuration
    * @param app_id Streaming application id
-   * @param rejected_params list of rejected parameters' name
+   * @param rejected_params list of rejected parameter names
    * @param reason NACK reason
    */
   virtual void OnStreamingConfigurationFailed(

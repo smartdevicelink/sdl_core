@@ -557,28 +557,6 @@ TEST_F(ApplicationManagerImplTest, OnServiceStartedCallback_RpcService) {
   EXPECT_TRUE(rejected_params.empty());
 }
 
-TEST_F(ApplicationManagerImplTest, OnServiceStartedCallback_UnknownApp) {
-  AddMockApplication();
-
-  const connection_handler::DeviceHandle device_handle = 0;
-  const protocol_handler::ServiceType service_type =
-      protocol_handler::ServiceType::kInvalidServiceType;
-  const int32_t session_key = 123;
-  EXPECT_CALL(*mock_app_ptr_, app_id()).WillRepeatedly(Return(456));
-
-  bool result = false;
-  std::vector<std::string> rejected_params;
-  EXPECT_CALL(mock_connection_handler_, NotifyServiceStartedResult(_, _, _, _))
-      .WillOnce(DoAll(SaveArg<1>(&result), SaveArg<2>(&rejected_params)));
-
-  app_manager_impl_->OnServiceStartedCallback(
-      device_handle, session_key, service_type, NULL);
-
-  // check: return value is false and list is empty
-  EXPECT_FALSE(result);
-  EXPECT_TRUE(rejected_params.empty());
-}
-
 TEST_F(ApplicationManagerImplTest, OnServiceStartedCallback_UnknownService) {
   AddMockApplication();
 
@@ -756,7 +734,7 @@ TEST_F(ApplicationManagerImplTest,
       .WillOnce(
           DoAll(InvokeMemberFuncWithArg2(
                     app_manager_impl_.get(),
-                    &ApplicationManagerImpl::OnStreamingSuccessfulConfiguration,
+                    &ApplicationManagerImpl::OnStreamingConfigurationSuccessful,
                     session_key,
                     service_type),
                 Return(true)));

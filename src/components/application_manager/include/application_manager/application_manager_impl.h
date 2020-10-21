@@ -870,7 +870,7 @@ class ApplicationManagerImpl
   void ForbidStreaming(uint32_t app_id,
                        protocol_handler::ServiceType service_type) OVERRIDE;
 
-  void OnStreamingSuccessfulConfiguration(
+  void OnStreamingConfigurationSuccessful(
       uint32_t app_id, protocol_handler::ServiceType service_type) OVERRIDE;
 
   void OnStreamingConfigurationFailed(uint32_t app_id,

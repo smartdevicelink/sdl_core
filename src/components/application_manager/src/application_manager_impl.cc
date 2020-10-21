@@ -1939,7 +1939,7 @@ bool ApplicationManagerImpl::StartNaviService(
       }
     }
     // no configuration is needed, or SetVideoConfig is not sent
-    OnStreamingSuccessfulConfiguration(app_id, service_type);
+    OnStreamingConfigurationSuccessful(app_id, service_type);
     return true;
   }
   SDL_LOG_WARN("Refused navi service by HMI level");
@@ -1952,7 +1952,7 @@ bool ApplicationManagerImpl::StartNaviService(
   return false;
 }
 
-void ApplicationManagerImpl::OnStreamingSuccessfulConfiguration(
+void ApplicationManagerImpl::OnStreamingConfigurationSuccessful(
     uint32_t app_id, protocol_handler::ServiceType service_type) {
   SDL_LOG_AUTO_TRACE();
 
@@ -2099,8 +2099,6 @@ void ApplicationManagerImpl::OnServiceStartedCallback(
   if (!app) {
     SDL_LOG_WARN("The application with id:" << session_key
                                             << " doesn't exists.");
-    connection_handler().NotifyServiceStartedResult(
-        session_key, false, empty, reason);
     return;
   }
 
