@@ -264,9 +264,8 @@ void ResumeCtrlImpl::ApplicationResumptiOnTimer() {
       SDL_LOG_ERROR("Invalid app_id = " << *it);
       continue;
     }
-    if (!StartAppHmiStateResumption(app)) {
-      app->set_is_resuming(false);
-    }
+    StartAppHmiStateResumption(app);
+    app->set_is_resuming(false);
   }
   is_resumption_active_ = false;
   waiting_for_timer_.clear();
