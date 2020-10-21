@@ -457,7 +457,7 @@ class ProtocolHandlerImpl
    */
   void NotifySessionStarted(const SessionContext& context,
                             std::vector<std::string>& rejected_params,
-                            const std::string& err_reason) OVERRIDE;
+                            const std::string err_reason) OVERRIDE;
 
 #ifdef BUILD_TESTS
   const impl::FromMobileQueue& get_from_mobile_queue() const {

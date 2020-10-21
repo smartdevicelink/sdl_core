@@ -137,9 +137,10 @@ class ProtocolHandler {
    * @param err_reason string with NACK reason. Only valid when
    * generated_session_id is 0.
    */
-  virtual void NotifySessionStarted(const SessionContext& context,
-                                    std::vector<std::string>& rejected_params,
-                                    const std::string& err_reason) = 0;
+  virtual void NotifySessionStarted(
+      const SessionContext& context,
+      std::vector<std::string>& rejected_params,
+      const std::string err_reason = std::string()) = 0;
 
   virtual bool IsRPCServiceSecure(const uint32_t connection_key) const = 0;
 

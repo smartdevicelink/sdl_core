@@ -550,8 +550,7 @@ void ConnectionHandlerImpl::OnSessionStartedCallback(
         params);
   } else {
     if (protocol_handler_) {
-      protocol_handler_->NotifySessionStarted(
-          context, rejected_params, std::string());
+      protocol_handler_->NotifySessionStarted(context, rejected_params);
     }
   }
 }

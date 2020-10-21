@@ -67,7 +67,7 @@ class MockProtocolHandler : public ::protocol_handler::ProtocolHandler {
   MOCK_METHOD3(NotifySessionStarted,
                void(const ::protocol_handler::SessionContext& context,
                     std::vector<std::string>& rejected_params,
-                    const std::string& err_reason));
+                    const std::string err_reason));
   MOCK_METHOD0(NotifyOnGetSystemTimeFailed, void());
   MOCK_CONST_METHOD1(IsRPCServiceSecure, bool(const uint32_t connection_key));
   MOCK_METHOD0(ProcessFailedPTU, void());

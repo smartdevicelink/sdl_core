@@ -1826,7 +1826,7 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessageRegisterSecondaryTransport(
 void ProtocolHandlerImpl::NotifySessionStarted(
     const SessionContext& context,
     std::vector<std::string>& rejected_params,
-    const std::string& err_reason) {
+    const std::string err_reason) {
   SDL_LOG_AUTO_TRACE();
 
   ProtocolFramePtr packet;
