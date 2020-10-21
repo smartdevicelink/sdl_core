@@ -249,7 +249,7 @@ mobile_apis::HMILevel::eType PhoneCallHmiState::max_hmi_level() const {
   using namespace helpers;
   using namespace mobile_apis;
 
-  if (HMILevel::INVALID_ENUM == parent()->hmi_level()) {
+  if (parent() && HMILevel::INVALID_ENUM == parent()->hmi_level()) {
     return parent()->hmi_level();
   }
 
@@ -283,7 +283,7 @@ mobile_apis::HMILevel::eType DeactivateHMI::max_hmi_level() const {
   using namespace helpers;
   using namespace mobile_apis;
 
-  if (HMILevel::INVALID_ENUM == parent()->hmi_level()) {
+  if (parent() && HMILevel::INVALID_ENUM == parent()->hmi_level()) {
     return parent()->hmi_level();
   }
 
@@ -331,7 +331,7 @@ mobile_apis::VideoStreamingState::eType AudioSource::video_streaming_state()
 mobile_apis::HMILevel::eType AudioSource::max_hmi_level() const {
   using namespace mobile_apis;
 
-  if (HMILevel::INVALID_ENUM == parent()->hmi_level()) {
+  if (parent() && HMILevel::INVALID_ENUM == parent()->hmi_level()) {
     return parent()->hmi_level();
   }
 
@@ -408,7 +408,7 @@ mobile_apis::HMILevel::eType EmbeddedNavi::max_hmi_level() const {
   using namespace mobile_apis;
   using namespace helpers;
 
-  if (HMILevel::INVALID_ENUM == parent()->hmi_level()) {
+  if (parent() && HMILevel::INVALID_ENUM == parent()->hmi_level()) {
     return parent()->hmi_level();
   }
 
