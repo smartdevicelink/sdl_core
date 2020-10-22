@@ -311,8 +311,7 @@ void ResumptionDataProcessorImpl::FinalizeResumption(
   } else {
     SDL_LOG_ERROR("Resumption for app " << app_id << " failed");
     callback(mobile_apis::Result::RESUME_FAILED, "Data resumption failed");
-    auto app = application_manager_.application(app_id);
-    RevertRestoredData(app);
+    RevertRestoredData(application_manager_.application(app_id));
     application_manager_.state_controller().DropPostponedWindows(app_id);
   }
   EraseAppResumptionData(app_id);
