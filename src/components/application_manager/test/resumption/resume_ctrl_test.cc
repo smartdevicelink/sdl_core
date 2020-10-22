@@ -967,8 +967,7 @@ TEST_F(ResumeCtrlTest, RestoreAppHMIState_RestoreHMILevelFull) {
   ON_CALL(mock_app_mngr_, GetUserConsentForDevice("12345"))
       .WillByDefault(Return(policy::kDeviceAllowed));
 
-  const bool res = res_ctrl_->RestoreAppHMIState(mock_app_);
-  EXPECT_TRUE(res);
+  res_ctrl_->RestoreAppHMIState(mock_app_);
 }
 
 TEST_F(ResumeCtrlTest, SetupDefaultHMILevel) {
