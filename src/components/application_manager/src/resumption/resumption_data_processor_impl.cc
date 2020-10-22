@@ -314,8 +314,6 @@ void ResumptionDataProcessorImpl::FinalizeResumption(
     auto app = application_manager_.application(app_id);
     RevertRestoredData(app);
     application_manager_.state_controller().DropPostponedWindows(app_id);
-    auto& builder = app->display_capabilities_builder();
-    builder.StopWaitingForWindows();
   }
   EraseAppResumptionData(app_id);
 }
@@ -920,6 +918,9 @@ void ResumptionDataProcessorImpl::DeleteWindowsSubscriptions(
                                 app_mngr::HmiState::StateID::STATE_ID_REGULAR);
     application->remove_window_capability(window_id);
   }
+
+  auto& builder = application->display_capabilities_builder();
+  builder.StopWaitingForWindows();
 }
 
 void ResumptionDataProcessorImpl::DeletePluginsSubscriptions(
