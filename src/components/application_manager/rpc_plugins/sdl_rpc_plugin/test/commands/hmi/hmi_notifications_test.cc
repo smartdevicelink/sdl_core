@@ -1028,14 +1028,12 @@ TEST_F(HMICommandsNotificationsTest,
   using ExitReason = hmi_apis::Common_ApplicationExitReason::eType;
   std::vector<ExitReason> reason_list = {
       ExitReason::UNAUTHORIZED_TRANSPORT_REGISTRATION,
-      ExitReason::UNSUPPORTED_HMI_RESOURCE,
-      ExitReason::RESOURCE_CONSTRAINT};
+      ExitReason::UNSUPPORTED_HMI_RESOURCE};
 
   using UnregisteredReason = mobile_apis::AppInterfaceUnregisteredReason::eType;
   std::vector<UnregisteredReason> mobile_reason_list = {
       UnregisteredReason::APP_UNAUTHORIZED,
-      UnregisteredReason::UNSUPPORTED_HMI_RESOURCE,
-      UnregisteredReason::RESOURCE_CONSTRAINT};
+      UnregisteredReason::UNSUPPORTED_HMI_RESOURCE};
 
   std::vector<mobile_apis::AppInterfaceUnregisteredReason::eType>::iterator
       it_mobile_reason = mobile_reason_list.begin();
@@ -1066,6 +1064,47 @@ TEST_F(HMICommandsNotificationsTest,
                     kAppId_, mobile_apis::Result::SUCCESS, false, false));
     command->Run();
   }
+}
+
+TEST_F(HMICommandsNotificationsTest,
+       OnExitApplicationNotificationResourceConstraintReason) {
+  auto message = CreateMessage();
+  (*message)[am::strings::msg_params][am::strings::app_id] = kAppId_;
+  const auto notification = std::make_shared<smart_objects::SmartObject>();
+  (*notification)[am::strings::params][am::strings::function_id] =
+      static_cast<int32_t>(
+          mobile_apis::FunctionID::OnAppInterfaceUnregisteredID);
+  (*notification)[am::strings::params][am::strings::message_type] =
+      static_cast<int32_t>(am::MessageType::kNotification);
+  (*notification)[am::strings::params][am::strings::connection_key] = kAppId_;
+
+  using ExitReason = hmi_apis::Common_ApplicationExitReason::eType;
+  auto hmi_reason = ExitReason::RESOURCE_CONSTRAINT;
+
+  using UnregisteredReason = mobile_apis::AppInterfaceUnregisteredReason::eType;
+  auto mobile_reason = UnregisteredReason::RESOURCE_CONSTRAINT;
+
+  (*message)[am::strings::msg_params][am::strings::reason] = hmi_reason;
+  const auto command = CreateCommand<OnExitApplicationNotification>(message);
+
+  (*notification)[am::strings::msg_params][am::strings::reason] =
+      static_cast<int32_t>(mobile_reason);
+
+  am::plugin_manager::MockRPCPluginManager mock_rpc_plugin_manager_;
+  EXPECT_CALL(app_mngr_, GetPluginManager())
+      .WillRepeatedly(ReturnRef(mock_rpc_plugin_manager_));
+
+  EXPECT_CALL(app_mngr_, application(kAppId_)).WillRepeatedly(Return(app_));
+  EXPECT_CALL(
+      mock_message_helper_,
+      GetOnAppInterfaceUnregisteredNotificationToMobile(kAppId_, mobile_reason))
+      .WillOnce(Return(notification));
+  EXPECT_CALL(mock_rpc_service_,
+              ManageMobileCommand(notification, Command::SOURCE_SDL));
+  EXPECT_CALL(app_mngr_, UnregisterApplication(_, _, _, _)).Times(0);
+
+  ASSERT_TRUE(command->Init());
+  command->Run();
 }
 
 TEST_F(HMICommandsNotificationsTest,

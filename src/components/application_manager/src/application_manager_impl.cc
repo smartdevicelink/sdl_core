@@ -2173,6 +2173,12 @@ void ApplicationManagerImpl::OnServiceEndedCallback(
         is_unexpected_disconnect = false;
         break;
       }
+      case CloseSessionReason::kFinalMessage: {
+        reason = Result::SUCCESS;
+        is_resuming = false;
+        is_unexpected_disconnect = false;
+        break;
+      }
       default: {
         reason = Result::INVALID_ENUM;
         is_resuming = true;
