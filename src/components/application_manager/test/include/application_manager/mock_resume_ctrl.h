@@ -96,11 +96,11 @@ class MockResumeCtrl : public resumption::ResumeCtrl {
   MOCK_CONST_METHOD2(GetSavedAppHmiLevel,
                      int32_t(const std::string&, const std::string&));
   MOCK_METHOD1(RestoreAppHMIState,
-               bool(application_manager::ApplicationSharedPtr application));
+               void(application_manager::ApplicationSharedPtr application));
   MOCK_METHOD1(SetupDefaultHMILevel,
                bool(application_manager::ApplicationSharedPtr application));
   MOCK_METHOD1(StartAppHmiStateResumption,
-               bool(application_manager::ApplicationSharedPtr application));
+               void(application_manager::ApplicationSharedPtr application));
   MOCK_METHOD3(SetAppHMIState,
                bool(application_manager::ApplicationSharedPtr application,
                     const mobile_apis::HMILevel::eType hmi_level,
