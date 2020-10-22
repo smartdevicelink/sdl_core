@@ -683,6 +683,11 @@ struct VehicleDataItem : CompositeType {
    * @return true if type is valid.
    */
   bool ValidateTypes() const;
+  /**
+   * @brief Validates default value of vehicle data item based
+   * on type, unable to validate enum values
+   * @return true if defvalue is valid.
+   */
   bool ValidateDefault() const;
   bool IsPrimitiveType() const;
   bool ValidateNaming(std::string str) const;
