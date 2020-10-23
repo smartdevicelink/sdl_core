@@ -667,15 +667,6 @@ class ConnectionHandlerImpl
   Connection* GetPrimaryConnection(
       const ConnectionHandle connection_handle) const;
 
-  /**
-   * @brief Handling a reason for closing a session
-   * @param connection_id Connection unique identifier.
-   * @return the reason for connection closed, if connection processed final
-   * message returns kFinalMessage, otherwise returns kCommon
-   */
-  CloseSessionReason ClosureReasonHandling(
-      const transport_manager::ConnectionUID connection_id);
-
   const ConnectionHandlerSettings& settings_;
   /**
    * \brief Pointer to observer
@@ -731,11 +722,6 @@ class ConnectionHandlerImpl
    * @brief connection object as it's being closed
    */
   Connection* ending_connection_;
-
-  /**
-   * @brief List connection, which processed final message
-   */
-  std::set<transport_manager::ConnectionUID> connections_final_message;
 
 #ifdef BUILD_TESTS
   // Methods for test usage
