@@ -93,16 +93,15 @@ void NaviSetVideoConfigRequest::on_event(const event_engine::Event& event) {
       const hmi_apis::Common_Result::eType code =
           static_cast<hmi_apis::Common_Result::eType>(
               message[strings::params][hmi_response::code].asInt());
-      bool result = false;
-      std::vector<std::string> rejected_params;
 
       if (code == hmi_apis::Common_Result::SUCCESS) {
         SDL_LOG_DEBUG("Received SetVideoConfig success response");
-        result = true;
+        application_manager_.OnStreamingConfigurationSuccessful(
+            app->app_id(), protocol_handler::ServiceType::kMobileNav);
       } else {
         SDL_LOG_DEBUG("Received SetVideoConfig failure response (" << event.id()
                                                                    << ")");
-        result = false;
+        std::vector<std::string> rejected_params;
         if (message[strings::msg_params].keyExists(strings::rejected_params)) {
           const smart_objects::SmartArray* list =
               message[strings::msg_params][strings::rejected_params].asArray();
@@ -118,13 +117,14 @@ void NaviSetVideoConfigRequest::on_event(const event_engine::Event& event) {
             }
           }
         }
+
+        application_manager_.OnStreamingConfigurationFailed(
+            app->app_id(),
+            rejected_params,
+            "Received SetVideoConfig failure response");
+
+        break;
       }
-      application_manager_.OnStreamingConfigured(
-          app->app_id(),
-          protocol_handler::ServiceType::kMobileNav,
-          result,
-          rejected_params);
-      break;
     }
     default:
       SDL_LOG_ERROR("Received unknown event " << event.id());
@@ -143,8 +143,10 @@ void NaviSetVideoConfigRequest::onTimeOut() {
   }
 
   std::vector<std::string> empty;
-  application_manager_.OnStreamingConfigured(
-      app->app_id(), protocol_handler::ServiceType::kMobileNav, false, empty);
+  application_manager_.OnStreamingConfigurationFailed(
+      app->app_id(),
+      empty,
+      "Timed out while waiting for SetVideoConfig response");
 
   application_manager_.TerminateRequest(
       connection_key(), correlation_id(), function_id());

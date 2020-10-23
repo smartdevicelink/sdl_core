@@ -870,19 +870,12 @@ class ApplicationManagerImpl
   void ForbidStreaming(uint32_t app_id,
                        protocol_handler::ServiceType service_type) OVERRIDE;
 
-  /**
-   * @brief Called when application completes streaming configuration
-   * @param app_id Streaming application id
-   * @param service_type Streaming service type
-   * @param result true if configuration is successful, false otherwise
-   * @param rejected_params list of rejected parameters' name. Valid
-   *                        only when result is false.
-   */
-  void OnStreamingConfigured(
-      uint32_t app_id,
-      protocol_handler::ServiceType service_type,
-      bool result,
-      std::vector<std::string>& rejected_params) OVERRIDE;
+  void OnStreamingConfigurationSuccessful(
+      uint32_t app_id, protocol_handler::ServiceType service_type) OVERRIDE;
+
+  void OnStreamingConfigurationFailed(uint32_t app_id,
+                                      std::vector<std::string>& rejected_params,
+                                      const std::string& reason) OVERRIDE;
 
   void OnAppStreaming(uint32_t app_id,
                       protocol_handler::ServiceType service_type,

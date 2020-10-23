@@ -3954,7 +3954,7 @@ TEST_F(ProtocolHandlerImplTest, StartSession_NACKReason_DisallowedBySettings) {
   bson_object_initialize_default(&bson_nack_params);
   // NAK reason param
   std::string reason = "Service type: " + std::to_string(service_type) +
-                       " disallowed by settings";
+                       " disallowed by settings.";
   bson_object_put_string(&bson_nack_params,
                          protocol_handler::strings::reason,
                          const_cast<char*>(reason.c_str()));

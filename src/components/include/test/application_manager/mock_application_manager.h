@@ -377,11 +377,13 @@ class MockApplicationManager : public application_manager::ApplicationManager {
   MOCK_METHOD0(OnTimerSendTTSGlobalProperties, void());
   MOCK_METHOD0(OnLowVoltage, void());
   MOCK_METHOD0(OnWakeUp, void());
-  MOCK_METHOD4(OnStreamingConfigured,
+  MOCK_METHOD2(OnStreamingConfigurationSuccessful,
                void(uint32_t app_id,
-                    protocol_handler::ServiceType service_type,
-                    bool result,
-                    std::vector<std::string>& rejected_params));
+                    protocol_handler::ServiceType service_type));
+  MOCK_METHOD3(OnStreamingConfigurationFailed,
+               void(uint32_t app_id,
+                    std::vector<std::string>& rejected_params,
+                    const std::string& reason));
   MOCK_METHOD2(ProcessReconnection,
                void(application_manager::ApplicationSharedPtr application,
                     const uint32_t connection_key));

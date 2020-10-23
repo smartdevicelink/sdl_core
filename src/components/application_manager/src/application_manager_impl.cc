@@ -1926,7 +1926,7 @@ bool ApplicationManagerImpl::StartNaviService(
       }
 
       if (!rejected_params.empty()) {
-        OnStreamingConfigured(app_id, service_type, false, rejected_params);
+        OnStreamingConfigurationFailed(app_id, rejected_params, std::string());
         return false;
       } else if (!converted_params.empty()) {
         SDL_LOG_INFO("Sending video configuration params");
@@ -1939,76 +1939,80 @@ bool ApplicationManagerImpl::StartNaviService(
       }
     }
     // no configuration is needed, or SetVideoConfig is not sent
-    std::vector<std::string> empty;
-    OnStreamingConfigured(app_id, service_type, true, empty);
+    OnStreamingConfigurationSuccessful(app_id, service_type);
     return true;
-
-  } else {
-    SDL_LOG_WARN("Refused navi service by HMI level");
   }
+  SDL_LOG_WARN("Refused navi service by HMI level");
   std::vector<std::string> empty;
-  OnStreamingConfigured(app_id, service_type, false, empty);
+  OnStreamingConfigurationFailed(
+      app_id,
+      empty,
+      "Service type: " + std::to_string(service_type) +
+          " disallowed with current HMI level");
   return false;
 }
 
-void ApplicationManagerImpl::OnStreamingConfigured(
-    uint32_t app_id,
-    protocol_handler::ServiceType service_type,
-    bool result,
-    std::vector<std::string>& rejected_params) {
-  using namespace protocol_handler;
+void ApplicationManagerImpl::OnStreamingConfigurationSuccessful(
+    uint32_t app_id, protocol_handler::ServiceType service_type) {
   SDL_LOG_AUTO_TRACE();
 
-  SDL_LOG_INFO("OnStreamingConfigured called for service "
-               << service_type << ", result=" << result);
+  SDL_LOG_INFO("Streaming configuration successful for service "
+               << service_type);
+  std::vector<std::string> empty;
+  std::string reason;
+  {
+    sync_primitives::AutoLock lock(navi_service_status_lock_);
 
-  if (result) {
-    std::vector<std::string> empty;
+    NaviServiceStatusMap::iterator it = navi_service_status_.find(app_id);
+    if (navi_service_status_.end() == it) {
+      SDL_LOG_WARN("Application not found in navi status map");
+      connection_handler().NotifyServiceStartedResult(
+          app_id, false, empty, reason);
+      return;
+    }
+
+    // Fill NaviServices map. Set true to first value of pair if
+    // we've started video service or to second value if we've
+    // started audio service
+    service_type == protocol_handler::ServiceType::kMobileNav
+        ? it->second.first = true
+        : it->second.second = true;
+
     {
-      sync_primitives::AutoLock lock(navi_service_status_lock_);
-
-      NaviServiceStatusMap::iterator it = navi_service_status_.find(app_id);
-      if (navi_service_status_.end() == it) {
-        SDL_LOG_WARN("Application not found in navi status map");
-        connection_handler().NotifyServiceStartedResult(app_id, false, empty);
-        return;
-      }
-
-      // Fill NaviServices map. Set true to first value of pair if
-      // we've started video service or to second value if we've
-      // started audio service
-      service_type == ServiceType::kMobileNav ? it->second.first = true
-                                              : it->second.second = true;
-
-      {
-        sync_primitives::AutoLock lock(navi_app_to_stop_lock_);
-        for (size_t i = 0; i < navi_app_to_stop_.size(); ++i) {
-          if (app_id == navi_app_to_stop_[i]) {
-            sync_primitives::AutoLock lock(close_app_timer_pool_lock_);
-            close_app_timer_pool_.erase(close_app_timer_pool_.begin() + i);
-            navi_app_to_stop_.erase(navi_app_to_stop_.begin() + i);
-            break;
-          }
+      sync_primitives::AutoLock lock(navi_app_to_stop_lock_);
+      for (size_t i = 0; i < navi_app_to_stop_.size(); ++i) {
+        if (app_id == navi_app_to_stop_[i]) {
+          sync_primitives::AutoLock lock(close_app_timer_pool_lock_);
+          close_app_timer_pool_.erase(close_app_timer_pool_.begin() + i);
+          navi_app_to_stop_.erase(navi_app_to_stop_.begin() + i);
+          break;
         }
       }
     }
-
-    application(app_id)->StartStreaming(service_type);
-    connection_handler().NotifyServiceStartedResult(app_id, true, empty);
-
-    // Fix: For wifi Secondary
-    // Should erase appid from deque of ForbidStreaming() push in the last time
-    std::deque<uint32_t>::const_iterator iter = std::find(
-        navi_app_to_end_stream_.begin(), navi_app_to_end_stream_.end(), app_id);
-    if (navi_app_to_end_stream_.end() != iter) {
-      navi_app_to_end_stream_.erase(iter);
-    }
-  } else {
-    std::vector<std::string> converted_params =
-        ConvertRejectedParamList(rejected_params);
-    connection_handler().NotifyServiceStartedResult(
-        app_id, false, converted_params);
   }
+
+  application(app_id)->StartStreaming(service_type);
+  connection_handler().NotifyServiceStartedResult(app_id, true, empty, reason);
+
+  // Fix: For wifi Secondary
+  // Should erase appid from deque of ForbidStreaming() push in the last time
+  std::deque<uint32_t>::const_iterator iter = std::find(
+      navi_app_to_end_stream_.begin(), navi_app_to_end_stream_.end(), app_id);
+  if (navi_app_to_end_stream_.end() != iter) {
+    navi_app_to_end_stream_.erase(iter);
+  }
+}
+
+void ApplicationManagerImpl::OnStreamingConfigurationFailed(
+    uint32_t app_id,
+    std::vector<std::string>& rejected_params,
+    const std::string& reason) {
+  SDL_LOG_AUTO_TRACE();
+
+  std::vector<std::string> converted_params =
+      ConvertRejectedParamList(rejected_params);
+  connection_handler().NotifyServiceStartedResult(
+      app_id, false, converted_params, reason);
 }
 
 void ApplicationManagerImpl::StopNaviService(
@@ -2083,17 +2087,18 @@ void ApplicationManagerImpl::OnServiceStartedCallback(
   SDL_LOG_DEBUG("ServiceType = " << type << ". Session = " << std::hex
                                  << session_key);
   std::vector<std::string> empty;
+  std::string reason;
 
   if (kRpc == type) {
     SDL_LOG_DEBUG("RPC service is about to be started.");
-    connection_handler().NotifyServiceStartedResult(session_key, true, empty);
+    connection_handler().NotifyServiceStartedResult(
+        session_key, true, empty, reason);
     return;
   }
   ApplicationSharedPtr app = application(session_key);
   if (!app) {
     SDL_LOG_WARN("The application with id:" << session_key
                                             << " doesn't exists.");
-    connection_handler().NotifyServiceStartedResult(session_key, false, empty);
     return;
   }
 
@@ -2106,12 +2111,15 @@ void ApplicationManagerImpl::OnServiceStartedCallback(
       return;
     } else {
       SDL_LOG_WARN("Refuse not navi/projection application");
+      reason = "Service type: " + std::to_string(type) +
+               " disallowed with current HMI type";
     }
   } else {
     SDL_LOG_WARN("Refuse unknown service");
   }
 
-  connection_handler().NotifyServiceStartedResult(session_key, false, empty);
+  connection_handler().NotifyServiceStartedResult(
+      session_key, false, empty, reason);
 }
 
 void ApplicationManagerImpl::OnServiceEndedCallback(

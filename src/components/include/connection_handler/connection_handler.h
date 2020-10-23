@@ -297,7 +297,8 @@ class ConnectionHandler {
   virtual void NotifyServiceStartedResult(
       uint32_t session_key,
       bool result,
-      std::vector<std::string>& rejected_params) = 0;
+      std::vector<std::string>& rejected_params,
+      const std::string& reason) = 0;
 
   /**
    * \brief Called when secondary transport with given session ID is established
