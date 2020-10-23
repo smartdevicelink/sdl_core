@@ -682,10 +682,16 @@ void ConnectionHandlerImpl::OnFinalMessageCallback(
   transport_manager::ConnectionUID connection_handle = 0;
   uint8_t session_id = 0;
   PairFromKey(connection_key, &connection_handle, &session_id);
-  const auto result = connections_final_message.insert(connection_handle);
-  SDL_LOG_DEBUG("OnFinalMessageCallback found connection "
-                << connection_handle << " the result of adding is "
-                << std::boolalpha << result.second);
+
+  sync_primitives::AutoWriteLock connection_list_lock(connection_list_lock_);
+  ConnectionList::iterator connection_it =
+      connection_list_.find(connection_handle);
+
+  if (connection_list_.end() != connection_it) {
+    SDL_LOG_DEBUG("OnFinalMessageCallback found connection "
+                  << connection_handle);
+    connection_it->second->OnFinalMessageCallback(session_id);
+  }
 }
 
 uint32_t ConnectionHandlerImpl::OnSessionEndedCallback(
@@ -1714,10 +1720,8 @@ void ConnectionHandlerImpl::KeepConnectionAlive(uint32_t connection_key,
 
 void ConnectionHandlerImpl::OnConnectionEnded(
     const transport_manager::ConnectionUID connection_id) {
-  const auto close_reason = ClosureReasonHandling(connection_id);
   SDL_LOG_INFO("Delete Connection: " << static_cast<int32_t>(connection_id)
-                                     << " from the list."
-                                     << " with reason " << close_reason);
+                                     << " from the list.");
   connection_list_lock_.AcquireForWriting();
   ConnectionList::iterator itr = connection_list_.find(connection_id);
   if (connection_list_.end() == itr) {
@@ -1742,6 +1746,10 @@ void ConnectionHandlerImpl::OnConnectionEnded(
          ++session_it) {
       const uint32_t session_key =
           KeyFromPair(connection_id, session_it->first);
+      const CloseSessionReason close_reason =
+          session_it->second.final_message_sent()
+              ? CloseSessionReason::kFinalMessage
+              : CloseSessionReason::kCommon;
       const ServiceList& service_list = session_it->second.service_list;
 
       // Fix:
@@ -1844,13 +1852,6 @@ bool ConnectionHandlerImpl::ProtocolVersionUsed(
                                                full_protocol_version);
   }
   return false;
-}
-
-CloseSessionReason ConnectionHandlerImpl::ClosureReasonHandling(
-    const transport_manager::ConnectionUID connection_id) {
-  const auto is_final = connections_final_message.erase(connection_id);
-  return is_final ? CloseSessionReason::kFinalMessage
-                  : CloseSessionReason::kCommon;
 }
 
 #ifdef BUILD_TESTS
