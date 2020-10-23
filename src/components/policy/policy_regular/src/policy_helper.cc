@@ -322,7 +322,6 @@ void policy::CheckAppPolicy::NotifySystem(
   const auto devices_ids = listener.GetDevicesIds(app_policy.first);
   if (devices_ids.empty()) {
     SDL_LOG_WARN(
-
         "Couldn't find device info for application id: " << app_policy.first);
     return;
   }
@@ -616,7 +615,6 @@ bool CheckAppPolicy::IsAppPropertiesChanged(
 
   if (!IsKnownAppication(app_policy.first)) {
     SDL_LOG_DEBUG(
-
         "AppProperties provided for new application: " << app_policy.first);
     return true;
   }

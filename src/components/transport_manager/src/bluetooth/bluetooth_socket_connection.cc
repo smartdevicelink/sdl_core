@@ -92,9 +92,8 @@ bool BluetoothSocketConnection::Establish(ConnectError** error) {
   do {
     rfcomm_socket = socket(AF_BLUETOOTH, SOCK_STREAM, BTPROTO_RFCOMM);
     if (-1 == rfcomm_socket) {
-      SDL_LOG_ERROR_WITH_ERRNO(
-
-          "Failed to create RFCOMM socket for device " << device_handle());
+      SDL_LOG_ERROR_WITH_ERRNO("Failed to create RFCOMM socket for device "
+                               << device_handle());
       *error = new ConnectError();
       SDL_LOG_TRACE("exit with FALSE");
       return false;
@@ -117,7 +116,6 @@ bool BluetoothSocketConnection::Establish(ConnectError** error) {
   SDL_LOG_INFO("rfcomm Connect attempts finished");
   if (0 != connect_status) {
     SDL_LOG_DEBUG(
-
         "Failed to Connect to remote device "
         << BluetoothDevice::GetUniqueDeviceId(remoteSocketAddress.rc_bdaddr)
         << " for session " << this);

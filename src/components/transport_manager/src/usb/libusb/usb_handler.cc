@@ -163,7 +163,6 @@ void UsbHandler::DeviceArrived(libusb_device* device_libusb) {
   libusb_ret = libusb_get_configuration(device_handle_libusb, &configuration);
   if (LIBUSB_SUCCESS != libusb_ret) {
     SDL_LOG_INFO(
-
         "libusb_get_configuration failed: " << libusb_error_name(libusb_ret));
     SDL_LOG_TRACE("exit. Condition: LIBUSB_SUCCESS != libusb_ret");
     return;
@@ -174,7 +173,6 @@ void UsbHandler::DeviceArrived(libusb_device* device_libusb) {
         libusb_set_configuration(device_handle_libusb, kUsbConfiguration);
     if (LIBUSB_SUCCESS != libusb_ret) {
       SDL_LOG_INFO(
-
           "libusb_set_configuration failed: " << libusb_error_name(libusb_ret));
       SDL_LOG_TRACE("exit. Condition: LIBUSB_SUCCESS != libusb_ret");
       return;
@@ -184,7 +182,6 @@ void UsbHandler::DeviceArrived(libusb_device* device_libusb) {
   libusb_ret = libusb_claim_interface(device_handle_libusb, 0);
   if (LIBUSB_SUCCESS != libusb_ret) {
     SDL_LOG_INFO(
-
         "libusb_claim_interface failed: " << libusb_error_name(libusb_ret));
     CloseDeviceHandle(device_handle_libusb);
     SDL_LOG_TRACE("exit. Condition: LIBUSB_SUCCESS != libusb_ret");
@@ -449,7 +446,6 @@ void UsbHandler::SubmitControlTransfer(
   const int libusb_ret = libusb_submit_transfer(libusb_transfer);
   if (LIBUSB_SUCCESS != libusb_ret) {
     SDL_LOG_ERROR(
-
         "libusb_submit_transfer failed: " << libusb_error_name(libusb_ret));
     libusb_free_transfer(libusb_transfer);
     sequence_state->Finish();

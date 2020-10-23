@@ -675,7 +675,6 @@ bool CheckAppPolicy::IsAppPropertiesChanged(
 
   if (!IsKnownAppication(app_policy.first)) {
     SDL_LOG_DEBUG(
-
         "AppProperties provided for new application: " << app_policy.first);
     return true;
   }

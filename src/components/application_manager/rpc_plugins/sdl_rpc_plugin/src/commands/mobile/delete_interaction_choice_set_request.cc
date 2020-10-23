@@ -65,9 +65,8 @@ void DeleteInteractionChoiceSetRequest::Run() {
   ApplicationSharedPtr app = application_manager_.application(connection_key());
 
   if (!app) {
-    SDL_LOG_ERROR(
-
-        "No application associated with connection key " << connection_key());
+    SDL_LOG_ERROR("No application associated with connection key "
+                  << connection_key());
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     return;
   }

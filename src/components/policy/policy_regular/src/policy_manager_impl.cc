@@ -328,7 +328,6 @@ PolicyManager::PtProcessingResult PolicyManagerImpl::LoadPT(
     const std::string& file, const BinaryMessage& pt_content) {
   SDL_LOG_INFO("LoadPT of size " << pt_content.size());
   SDL_LOG_DEBUG(
-
       "PTU content is: " << std::string(pt_content.begin(), pt_content.end()));
 
 #if defined USE_HMI_PTU_DECRYPTION && defined PROPRIETARY_MODE
@@ -386,7 +385,6 @@ PolicyManager::PtProcessingResult PolicyManagerImpl::LoadPT(
   // Replace current data with updated
   if (!cache_->ApplyUpdate(*pt_update)) {
     SDL_LOG_WARN(
-
         "Unsuccessful save of updated policy table, trying another exchange");
     return PtProcessingResult::kNewPtRequired;
   }
@@ -1023,7 +1021,6 @@ void PolicyManagerImpl::CheckPendingPermissionsChanges(
       app_permissions_diff_.find(policy_app_id);
   if (app_permissions_diff_.end() == it_pending) {
     SDL_LOG_WARN(
-
         "No pending permissions had been found for appID: " << policy_app_id);
     return;
   }
@@ -1041,7 +1038,6 @@ void PolicyManagerImpl::CheckPendingPermissionsChanges(
   for (; it_groups != it_end_groups; ++it_groups) {
     if (policy::kGroupUndefined == it_groups->state) {
       SDL_LOG_DEBUG(
-
           "Unconsented groups still present for appID: " << policy_app_id);
       it_pending->second.appPermissionsConsentNeeded = true;
       return;
@@ -1049,7 +1045,6 @@ void PolicyManagerImpl::CheckPendingPermissionsChanges(
   }
 
   SDL_LOG_DEBUG(
-
       "Unconsented groups not present anymore for appID: " << policy_app_id);
   it_pending->second.appPermissionsConsentNeeded = false;
   return;

@@ -85,9 +85,8 @@ A2DPSourcePlayerAdapter::~A2DPSourcePlayerAdapter() {
 }
 
 void A2DPSourcePlayerAdapter::StartActivity(int32_t application_key) {
-  SDL_LOG_INFO(
-
-      "Starting a2dp playing music for " << application_key << " application.");
+  SDL_LOG_INFO("Starting a2dp playing music for " << application_key
+                                                  << " application.");
   if (application_key != current_application_) {
     current_application_ = application_key;
 
