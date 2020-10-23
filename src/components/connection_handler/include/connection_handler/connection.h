@@ -100,7 +100,6 @@ struct Session {
   ServiceList service_list;
   uint8_t protocol_version;
   utils::SemanticVersion full_protocol_version;
-  bool final_message_sent_;
 #ifdef ENABLE_SECURITY
   security_manager::SSLContext* ssl_context;
 #endif  // ENABLE_SECURITY
@@ -108,7 +107,6 @@ struct Session {
       : service_list()
       , protocol_version(::protocol_handler::PROTOCOL_VERSION_2)
       , full_protocol_version(utils::SemanticVersion(2, 0, 0))
-      , final_message_sent_(false)
 #ifdef ENABLE_SECURITY
       , ssl_context(NULL)
 #endif  // ENABLE_SECURITY
@@ -118,7 +116,6 @@ struct Session {
       : service_list(services)
       , protocol_version(protocol_version)
       , full_protocol_version(utils::SemanticVersion(protocol_version, 0, 0))
-      , final_message_sent_(false)
 #ifdef ENABLE_SECURITY
       , ssl_context(NULL)
 #endif  // ENABLE_SECURITY
@@ -127,8 +124,6 @@ struct Session {
   Service* FindService(const protocol_handler::ServiceType& service_type);
   const Service* FindService(
       const protocol_handler::ServiceType& service_type) const;
-  const bool final_message_sent() const;
-  void set_final_message_sent(const bool final_message_sent);
 };
 
 /**
@@ -183,9 +178,14 @@ class Connection {
 
   /**
    * @brief Called upon final message being sent for a session
-   * @param session session ID
    */
-  void OnFinalMessageCallback(uint8_t session_id);
+  void OnFinalMessageCallback();
+
+  /**
+   * @brief Check whether final message was sent from this connection
+   * @return true if final message was sent by any session of this connection
+   */
+  bool IsFinalMessageSent() const;
 
   /**
    * @brief Adds uprotected service to session or
@@ -389,6 +389,7 @@ class Connection {
   HeartBeatMonitor* heartbeat_monitor_;
   uint32_t heartbeat_timeout_;
   threads::Thread* heart_beat_monitor_thread_;
+  bool final_message_sent_;
 
   DISALLOW_COPY_AND_ASSIGN(Connection);
 };

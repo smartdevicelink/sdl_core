@@ -74,14 +74,6 @@ const Service* Session::FindService(
   return NULL;
 }
 
-const bool Session::final_message_sent() const {
-  return final_message_sent_;
-}
-
-void Session::set_final_message_sent(const bool final_message_sent) {
-  final_message_sent_ = final_message_sent;
-}
-
 Connection::Connection(ConnectionHandle connection_handle,
                        DeviceHandle connection_device_handle,
                        ConnectionHandler* connection_handler,
@@ -90,7 +82,8 @@ Connection::Connection(ConnectionHandle connection_handle,
     , connection_handle_(connection_handle)
     , connection_device_handle_(connection_device_handle)
     , primary_connection_handle_(0)
-    , heartbeat_timeout_(heartbeat_timeout) {
+    , heartbeat_timeout_(heartbeat_timeout)
+    , final_message_sent_(false) {
   SDL_LOG_AUTO_TRACE();
   DCHECK(connection_handler_);
 
@@ -170,18 +163,13 @@ uint32_t Connection::RemoveSession(uint8_t session_id) {
   return session_id;
 }
 
-void Connection::OnFinalMessageCallback(uint8_t session_id) {
+void Connection::OnFinalMessageCallback() {
   SDL_LOG_AUTO_TRACE();
+  final_message_sent_ = true;
+}
 
-  sync_primitives::AutoLock lock(session_map_lock_);
-
-  SessionMap::iterator it = session_map_.find(session_id);
-  if (session_map_.end() == it) {
-    SDL_LOG_WARN("Session not found in this connection!");
-    return;
-  }
-
-  it->second.set_final_message_sent(true);
+bool Connection::IsFinalMessageSent() const {
+  return final_message_sent_;
 }
 
 bool Connection::AddNewService(uint8_t session_id,

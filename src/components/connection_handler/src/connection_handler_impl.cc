@@ -680,7 +680,7 @@ void ConnectionHandlerImpl::OnFinalMessageCallback(
   if (connection_list_.end() != connection_it) {
     SDL_LOG_DEBUG("OnFinalMessageCallback found connection "
                   << connection_handle);
-    connection_it->second->OnFinalMessageCallback(session_id);
+    connection_it->second->OnFinalMessageCallback();
   }
 }
 
@@ -1729,15 +1729,15 @@ void ConnectionHandlerImpl::OnConnectionEnded(
     ending_connection_ = connection.get();
     const SessionMap session_map = connection->session_map();
 
+    const CloseSessionReason close_reason =
+        connection->IsFinalMessageSent() ? CloseSessionReason::kFinalMessage
+                                         : CloseSessionReason::kCommon;
+
     for (SessionMap::const_iterator session_it = session_map.begin();
          session_map.end() != session_it;
          ++session_it) {
       const uint32_t session_key =
           KeyFromPair(connection_id, session_it->first);
-      const CloseSessionReason close_reason =
-          session_it->second.final_message_sent()
-              ? CloseSessionReason::kFinalMessage
-              : CloseSessionReason::kCommon;
       const ServiceList& service_list = session_it->second.service_list;
 
       // Fix:
