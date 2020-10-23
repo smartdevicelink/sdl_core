@@ -221,9 +221,8 @@ bool CreateInteractionChoiceSetRequest::compareSynonyms(
                           CreateInteractionChoiceSetRequest::compareStr);
 
   if (it != vr_cmds_1->end()) {
-    SDL_LOG_INFO(
-
-        "Incoming choice set has duplicated VR synonyms " << it->asString());
+    SDL_LOG_INFO("Incoming choice set has duplicated VR synonyms "
+                 << it->asString());
     return true;
   }
 
@@ -331,9 +330,8 @@ void CreateInteractionChoiceSetRequest::SendVRAddCommandRequests(
 
     VRCommandInfo vr_command(vr_cmd_id);
     sent_commands_map_[vr_corr_id] = vr_command;
-    SDL_LOG_DEBUG(
-
-        "VR_command sent corr_id " << vr_corr_id << " cmd_id " << vr_corr_id);
+    SDL_LOG_DEBUG("VR_command sent corr_id " << vr_corr_id << " cmd_id "
+                                             << vr_corr_id);
   }
   expected_chs_count_ = chs_num;
   SDL_LOG_DEBUG("expected_chs_count_ = " << expected_chs_count_);

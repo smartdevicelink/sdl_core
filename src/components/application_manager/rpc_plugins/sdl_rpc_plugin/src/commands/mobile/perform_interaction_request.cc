@@ -598,9 +598,8 @@ void PerformInteractionRequest::SendVRPerformInteractionRequest(
         MessageHelper::VerifyTtsFiles(help_prompt, app, application_manager_);
 
     if (mobile_apis::Result::FILE_NOT_FOUND == verification_result) {
-      SDL_LOG_WARN(
-
-          "MessageHelper::VerifyTtsFiles return " << verification_result);
+      SDL_LOG_WARN("MessageHelper::VerifyTtsFiles return "
+                   << verification_result);
       invalid_params.push_back("help_prompt");
     } else {
       msg_params[strings::help_prompt] = help_prompt;
@@ -646,9 +645,8 @@ void PerformInteractionRequest::SendVRPerformInteractionRequest(
             timeout_prompt, app, application_manager_);
 
     if (mobile_apis::Result::FILE_NOT_FOUND == verification_result) {
-      SDL_LOG_WARN(
-
-          "MessageHelper::VerifyTtsFiles return " << verification_result);
+      SDL_LOG_WARN("MessageHelper::VerifyTtsFiles return "
+                   << verification_result);
       invalid_params.push_back("timeout_prompt");
     } else {
       msg_params[strings::timeout_prompt] = timeout_prompt;
@@ -667,9 +665,8 @@ void PerformInteractionRequest::SendVRPerformInteractionRequest(
             initial_prompt, app, application_manager_);
 
     if (mobile_apis::Result::FILE_NOT_FOUND == verification_result) {
-      SDL_LOG_WARN(
-
-          "MessageHelper::VerifyTtsFiles return " << verification_result);
+      SDL_LOG_WARN("MessageHelper::VerifyTtsFiles return "
+                   << verification_result);
       invalid_params.push_back("initial_prompt");
     } else {
       msg_params[strings::initial_prompt] = initial_prompt;
@@ -1008,7 +1005,6 @@ bool PerformInteractionRequest::CheckChoiceSetListVRCommands(
     // this should never ever happen since this was already checked
     if (smart_objects::SmartType_Null == choice_set.getType()) {
       SDL_LOG_ERROR(
-
           "Couldn't find choiceset_id = " << choice_set_id_list[i].asInt());
       SendResponse(false, mobile_apis::Result::INVALID_ID);
       return false;

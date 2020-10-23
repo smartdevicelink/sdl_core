@@ -92,9 +92,8 @@ void SQLPTRepresentation::CheckPermissions(const PTString& app_id,
   utils::dbms::SQLQuery query(db());
 
   if (!query.Prepare(sql_pt::kSelectRpc)) {
-    SDL_LOG_WARN(
-
-        "Incorrect select statement from rpcs" << query.LastError().text());
+    SDL_LOG_WARN("Incorrect select statement from rpcs"
+                 << query.LastError().text());
     return;
   }
   query.Bind(0, app_id);
@@ -363,9 +362,8 @@ InitResult SQLPTRepresentation::Init(const PolicySettings* settings) {
             utils::dbms::SQLQuery check_first_run(db());
             if (check_first_run.Prepare(sql_pt::kIsFirstRun) &&
                 check_first_run.Next()) {
-              SDL_LOG_INFO(
-
-                  "Selecting is first run " << check_first_run.GetBoolean(0));
+              SDL_LOG_INFO("Selecting is first run "
+                           << check_first_run.GetBoolean(0));
               if (check_first_run.GetBoolean(0)) {
                 utils::dbms::SQLQuery set_not_first_run(db());
                 set_not_first_run.Exec(sql_pt::kSetNotFirstRun);
@@ -387,13 +385,11 @@ InitResult SQLPTRepresentation::Init(const PolicySettings* settings) {
   utils::dbms::SQLQuery query(db());
   if (!query.Exec(sql_pt::kCreateSchema)) {
     SDL_LOG_ERROR(
-
         "Failed creating schema of database: " << query.LastError().text());
     return InitResult::FAIL;
   }
   if (!query.Exec(sql_pt::kInsertInitData)) {
     SDL_LOG_ERROR(
-
         "Failed insert init data to database: " << query.LastError().text());
     return InitResult::FAIL;
   }
@@ -426,7 +422,6 @@ bool SQLPTRepresentation::Clear() {
   }
   if (!query.Exec(sql_pt::kInsertInitData)) {
     SDL_LOG_ERROR(
-
         "Failed insert init data to database: " << query.LastError().text());
     return false;
   }
@@ -441,13 +436,11 @@ bool SQLPTRepresentation::RefreshDB() {
   }
   if (!query.Exec(sql_pt::kCreateSchema)) {
     SDL_LOG_ERROR(
-
         "Failed creating schema of database: " << query.LastError().text());
     return false;
   }
   if (!query.Exec(sql_pt::kInsertInitData)) {
     SDL_LOG_ERROR(
-
         "Failed insert init data to database: " << query.LastError().text());
     return false;
   }
@@ -2746,7 +2739,6 @@ bool SQLPTRepresentation::InsertVehicleDataItem(
 
       if (!query.Exec() || !query.Reset()) {
         SDL_LOG_ERROR(
-
             "Failed to insert to vehicle data item relations helper table: "
             << static_cast<std::string>(param.key)
             << ". Error: " << query.LastError().text());

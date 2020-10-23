@@ -403,9 +403,8 @@ bool AllowProtection(const ConnectionHandlerSettings& settings,
   if (std::find(force_unprotected_list.begin(),
                 force_unprotected_list.end(),
                 service_type) != force_unprotected_list.end()) {
-    SDL_LOG_ERROR(
-
-        "Service " << static_cast<int>(service_type) << " shall be protected");
+    SDL_LOG_ERROR("Service " << static_cast<int>(service_type)
+                             << " shall be protected");
     return false;
   }
   SDL_LOG_DEBUG("Service " << static_cast<int>(service_type) << " allowed");
@@ -730,16 +729,14 @@ uint32_t ConnectionHandlerImpl::OnSessionEndedCallback(
       KeyFromPair(primary_connection_handle, session_id);
 
   if (protocol_handler::kRpc == service_type) {
-    SDL_LOG_INFO(
-
-        "Session " << static_cast<uint32_t>(session_id) << " to be removed");
+    SDL_LOG_INFO("Session " << static_cast<uint32_t>(session_id)
+                            << " to be removed");
     // old version of protocol doesn't support hash
     if (protocol_handler::HASH_ID_NOT_SUPPORTED != *hashCode) {
       if (protocol_handler::HASH_ID_WRONG == *hashCode ||
           session_key != *hashCode) {
-        SDL_LOG_WARN(
-
-            "Wrong hash_id for session " << static_cast<uint32_t>(session_id));
+        SDL_LOG_WARN("Wrong hash_id for session "
+                     << static_cast<uint32_t>(session_id));
         *hashCode = protocol_handler::HASH_ID_WRONG;
 
         if (err_reason) {
@@ -759,13 +756,11 @@ uint32_t ConnectionHandlerImpl::OnSessionEndedCallback(
       return 0;
     }
   } else {
-    SDL_LOG_INFO(
-
-        "Service " << static_cast<uint32_t>(service_type) << " to be removed");
+    SDL_LOG_INFO("Service " << static_cast<uint32_t>(service_type)
+                            << " to be removed");
     if (!connection->RemoveService(session_id, service_type)) {
-      SDL_LOG_WARN(
-
-          "Couldn't remove service " << static_cast<uint32_t>(service_type));
+      SDL_LOG_WARN("Couldn't remove service "
+                   << static_cast<uint32_t>(service_type));
       if (err_reason) {
         *err_reason = "Couldn't remove service " +
                       std::to_string(static_cast<uint32_t>(service_type));
@@ -989,11 +984,10 @@ void ConnectionHandlerImpl::PairFromKey(
     uint8_t* session_id) const {
   *connection_handle = key & 0xFF00FFFF;
   *session_id = key >> 16;
-  SDL_LOG_DEBUG(
-
-      "ConnectionHandle:" << static_cast<int32_t>(*connection_handle)
-                          << " Session:" << static_cast<int32_t>(*session_id)
-                          << " for key:" << static_cast<int32_t>(key));
+  SDL_LOG_DEBUG("ConnectionHandle:"
+                << static_cast<int32_t>(*connection_handle)
+                << " Session:" << static_cast<int32_t>(*session_id)
+                << " for key:" << static_cast<int32_t>(key));
 }
 
 int32_t ConnectionHandlerImpl::GetDataOnSessionKey(
@@ -1576,9 +1570,8 @@ void ConnectionHandlerImpl::CloseSession(ConnectionHandle connection_handle,
     return;
   }
 
-  SDL_LOG_DEBUG(
-
-      "Session with id: " << session_id << " has been closed successfully");
+  SDL_LOG_DEBUG("Session with id: " << session_id
+                                    << " has been closed successfully");
 }
 
 void ConnectionHandlerImpl::CloseConnectionSessions(

@@ -1305,7 +1305,6 @@ int CacheManager::IgnitionCyclesBeforeExchange() {
       *pt_->policy_table.module_meta->ignition_cycles_since_last_exchange);
   current = std::max(last_exch, 0);
   SDL_LOG_DEBUG(
-
       "IgnitionCyclesBeforeExchange current:" << static_cast<int>(current));
 
   return std::max(limit - current, 0);
@@ -1343,7 +1342,6 @@ bool CacheManager::SetCountersPassedForSuccessfulUpdate(
     case DAYS_AFTER_EPOCH:
       *pt_->policy_table.module_meta->pt_exchanged_x_days_after_epoch = value;
       SDL_LOG_DEBUG(
-
           "SetCountersPassedForSuccessfulUpdate days after epoch:" << value);
       break;
     default:
@@ -2353,9 +2351,8 @@ bool CacheManager::CleanupUnpairedDevices() {
 
     SDL_LOG_DEBUG("Device_data size is: " << device_data.size());
     device_data.erase(it_device);
-    SDL_LOG_INFO(
-
-        "Device id " << *iter << " had been deleted from device_data section.");
+    SDL_LOG_INFO("Device id " << *iter
+                              << " had been deleted from device_data section.");
     SDL_LOG_DEBUG("Device_data size is: " << device_data.size());
   }
   is_unpaired_.clear();

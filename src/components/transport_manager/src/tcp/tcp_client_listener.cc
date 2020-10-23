@@ -252,7 +252,6 @@ void TcpClientListener::Loop() {
       if (ret < 0) {
         if (errno != EINTR && errno != EAGAIN && errno != EWOULDBLOCK) {
           SDL_LOG_WARN(
-
               "Failed to read from pipe, aborting TCP server socket loop.");
           break;
         }
@@ -497,9 +496,8 @@ void TcpClientListener::OnIPAddressUpdated(const std::string ipv4_addr,
     if (IsListeningOnSpecificInterface()) {
       if (!current_ip_address_.empty()) {
         // the server socket is running, terminate it
-        SDL_LOG_DEBUG(
-
-            "Stopping current TCP server socket on " << designated_interface_);
+        SDL_LOG_DEBUG("Stopping current TCP server socket on "
+                      << designated_interface_);
         StopOnNetworkInterface();
       }
       if (!ipv4_addr.empty()) {

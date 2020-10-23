@@ -154,9 +154,8 @@ bool CryptoManagerImpl::Init() {
   }
   SDL_LOG_DEBUG("Peer verification "
                 << (get_settings().verify_peer() ? "enabled" : "disabled"));
-  SDL_LOG_DEBUG(
-
-      "CA certificate file is \"" << get_settings().ca_cert_path() << '"');
+  SDL_LOG_DEBUG("CA certificate file is \"" << get_settings().ca_cert_path()
+                                            << '"');
 
 #if OPENSSL_VERSION_NUMBER < CONST_SSL_METHOD_MINIMAL_VERSION
   SSL_METHOD* method;
@@ -387,9 +386,8 @@ bool CryptoManagerImpl::SaveCertificateData(
   UNUSED(cert_guard);
 
   if (1 != BIO_reset(bio_cert)) {
-    SDL_LOG_WARN(
-
-        "Unabled to reset BIO in order to read private key, " << LastError());
+    SDL_LOG_WARN("Unabled to reset BIO in order to read private key, "
+                 << LastError());
   }
 
   EVP_PKEY* pkey = NULL;

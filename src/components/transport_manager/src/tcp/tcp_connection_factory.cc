@@ -52,9 +52,8 @@ TransportAdapter::Error TcpConnectionFactory::Init() {
 TransportAdapter::Error TcpConnectionFactory::CreateConnection(
     const DeviceUID& device_uid, const ApplicationHandle& app_handle) {
   SDL_LOG_AUTO_TRACE();
-  SDL_LOG_DEBUG(
-
-      "DeviceUID: " << &device_uid << ", ApplicationHandle: " << &app_handle);
+  SDL_LOG_DEBUG("DeviceUID: " << &device_uid
+                              << ", ApplicationHandle: " << &app_handle);
   std::shared_ptr<TcpServerOriginatedSocketConnection> connection =
       std::make_shared<TcpServerOriginatedSocketConnection>(
           device_uid, app_handle, controller_);
