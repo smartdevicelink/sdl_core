@@ -366,7 +366,7 @@ void ConnectionHandlerImpl::OnUnexpectedDisconnect(
     transport_manager::ConnectionUID connection_id,
     const transport_manager::CommunicationError& error) {
   SDL_LOG_AUTO_TRACE();
-
+  UNUSED(error);
   OnConnectionEnded(connection_id);
 }
 
@@ -673,6 +673,25 @@ void ConnectionHandlerImpl::OnMalformedMessageCallback(
   SDL_LOG_INFO("Disconnect malformed messaging application");
   CloseConnectionSessions(connection_handle, kMalformed);
   CloseConnection(connection_handle);
+}
+
+void ConnectionHandlerImpl::OnFinalMessageCallback(
+    const uint32_t& connection_key) {
+  SDL_LOG_AUTO_TRACE();
+
+  transport_manager::ConnectionUID connection_handle = 0;
+  uint8_t session_id = 0;
+  PairFromKey(connection_key, &connection_handle, &session_id);
+
+  sync_primitives::AutoWriteLock connection_list_lock(connection_list_lock_);
+  ConnectionList::iterator connection_it =
+      connection_list_.find(connection_handle);
+
+  if (connection_list_.end() != connection_it) {
+    SDL_LOG_DEBUG("OnFinalMessageCallback found connection "
+                  << connection_handle);
+    connection_it->second->OnFinalMessageCallback();
+  }
 }
 
 uint32_t ConnectionHandlerImpl::OnSessionEndedCallback(
@@ -1716,6 +1735,10 @@ void ConnectionHandlerImpl::OnConnectionEnded(
     ending_connection_ = connection.get();
     const SessionMap session_map = connection->session_map();
 
+    const CloseSessionReason close_reason =
+        connection->IsFinalMessageSent() ? CloseSessionReason::kFinalMessage
+                                         : CloseSessionReason::kCommon;
+
     for (SessionMap::const_iterator session_it = session_map.begin();
          session_map.end() != session_it;
          ++session_it) {
@@ -1731,9 +1754,7 @@ void ConnectionHandlerImpl::OnConnectionEnded(
           service_list.rbegin();
       for (; service_list_itr != service_list.rend(); ++service_list_itr) {
         connection_handler_observer_->OnServiceEndedCallback(
-            session_key,
-            service_list_itr->service_type,
-            CloseSessionReason::kCommon);
+            session_key, service_list_itr->service_type, close_reason);
       }
     }
     ending_connection_ = NULL;

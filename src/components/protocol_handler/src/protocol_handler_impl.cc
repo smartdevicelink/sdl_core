@@ -1069,6 +1069,7 @@ void ProtocolHandlerImpl::OnTMMessageSend(const RawMessagePtr message) {
 
   if (ready_to_close_connections_.end() != connection_it) {
     ready_to_close_connections_.erase(connection_it);
+    session_observer_.OnFinalMessageCallback(connection_handle);
     transport_manager_.Disconnect(connection_handle);
     return;
   }

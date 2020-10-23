@@ -48,7 +48,13 @@
  */
 namespace connection_handler {
 
-enum CloseSessionReason { kCommon = 0, kFlood, kMalformed, kUnauthorizedApp };
+enum CloseSessionReason {
+  kCommon = 0,
+  kFlood,
+  kMalformed,
+  kUnauthorizedApp,
+  kFinalMessage
+};
 
 class ConnectionHandlerObserver;
 

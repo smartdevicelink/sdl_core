@@ -855,6 +855,24 @@ TEST_F(ConnectionHandlerTest, OnConnectionClosed) {
   connection_handler_->OnConnectionClosed(uid_);
 }
 
+TEST_F(ConnectionHandlerTest, OnFinalMessageCallback_OnConnectionClosed) {
+  AddTestDeviceConnection();
+  AddTestSession();
+
+  connection_handler_test::MockConnectionHandlerObserver
+      mock_connection_handler_observer;
+  connection_handler_->set_connection_handler_observer(
+      &mock_connection_handler_observer);
+
+  EXPECT_CALL(mock_connection_handler_observer,
+              OnServiceEndedCallback(connection_key_, kBulk, kFinalMessage));
+  EXPECT_CALL(mock_connection_handler_observer,
+              OnServiceEndedCallback(connection_key_, kRpc, kFinalMessage));
+
+  connection_handler_->OnFinalMessageCallback(connection_key_);
+  connection_handler_->OnConnectionClosed(uid_);
+}
+
 TEST_F(ConnectionHandlerTest, OnUnexpectedDisconnect) {
   AddTestDeviceConnection();
   AddTestSession();
@@ -871,6 +889,27 @@ TEST_F(ConnectionHandlerTest, OnUnexpectedDisconnect) {
               OnServiceEndedCallback(
                   connection_key_, kRpc, CloseSessionReason::kCommon));
 
+  connection_handler_->OnUnexpectedDisconnect(uid_, err);
+}
+
+TEST_F(ConnectionHandlerTest, OnFinalMessageCallback_OnUnexpectedDisconnect) {
+  AddTestDeviceConnection();
+  AddTestSession();
+
+  connection_handler_test::MockConnectionHandlerObserver
+      mock_connection_handler_observer;
+  connection_handler_->set_connection_handler_observer(
+      &mock_connection_handler_observer);
+
+  EXPECT_CALL(mock_connection_handler_observer,
+              OnServiceEndedCallback(
+                  connection_key_, kBulk, CloseSessionReason::kFinalMessage));
+  EXPECT_CALL(mock_connection_handler_observer,
+              OnServiceEndedCallback(
+                  connection_key_, kRpc, CloseSessionReason::kFinalMessage));
+
+  connection_handler_->OnFinalMessageCallback(connection_key_);
+  transport_manager::CommunicationError err;
   connection_handler_->OnUnexpectedDisconnect(uid_, err);
 }
 

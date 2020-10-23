@@ -35,6 +35,7 @@
 
 #include <list>
 #include <map>
+#include <set>
 #include <string>
 #include <vector>
 
@@ -271,6 +272,8 @@ class ConnectionHandlerImpl
    * \param connection_key  used by other components as application identifier
    */
   void OnMalformedMessageCallback(const uint32_t& connection_key) OVERRIDE;
+
+  void OnFinalMessageCallback(const uint32_t& connection_key) OVERRIDE;
 
   /**
    * @brief Converts connection handle to transport type string used in
@@ -646,6 +649,10 @@ class ConnectionHandlerImpl
    **/
   void RemoveConnection(const ConnectionHandle connection_handle);
 
+  /**
+   * @brief Called when connection is closed.
+   * @param connection_id Connection unique identifier.
+   */
   void OnConnectionEnded(const transport_manager::ConnectionUID connection_id);
 
   const uint8_t GetSessionIdFromSecondaryTransport(

@@ -177,6 +177,17 @@ class Connection {
   uint32_t RemoveSession(uint8_t session_id);
 
   /**
+   * @brief Called upon final message being sent for a session
+   */
+  void OnFinalMessageCallback();
+
+  /**
+   * @brief Check whether final message was sent from this connection
+   * @return true if final message was sent by any session of this connection
+   */
+  bool IsFinalMessageSent() const;
+
+  /**
    * @brief Adds uprotected service to session or
    * check protection to service has been started before
    * @param session_id session ID
@@ -378,6 +389,7 @@ class Connection {
   HeartBeatMonitor* heartbeat_monitor_;
   uint32_t heartbeat_timeout_;
   threads::Thread* heart_beat_monitor_thread_;
+  bool final_message_sent_;
 
   DISALLOW_COPY_AND_ASSIGN(Connection);
 };
