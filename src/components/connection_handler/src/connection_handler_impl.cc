@@ -984,10 +984,10 @@ void ConnectionHandlerImpl::PairFromKey(
     uint8_t* session_id) const {
   *connection_handle = key & 0xFF00FFFF;
   *session_id = key >> 16;
-  SDL_LOG_DEBUG("ConnectionHandle:"
+  SDL_LOG_DEBUG("ConnectionHandle: "
                 << static_cast<int32_t>(*connection_handle)
-                << " Session:" << static_cast<int32_t>(*session_id)
-                << " for key:" << static_cast<int32_t>(key));
+                << " Session: " << static_cast<int32_t>(*session_id)
+                << " for key: " << static_cast<int32_t>(key));
 }
 
 int32_t ConnectionHandlerImpl::GetDataOnSessionKey(
