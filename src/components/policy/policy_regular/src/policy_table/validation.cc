@@ -288,9 +288,8 @@ bool VehicleDataItem::Validate() const {
   };
 
   if (!ValidateTypes()) {
-    SDL_LOG_ERROR(
-
-        "Unknown type: " << std::string(type) << " of " << std::string(key));
+    SDL_LOG_ERROR("Unknown type: " << std::string(type) << " of "
+                                   << std::string(key));
     return false;
   }
   return true;

@@ -480,6 +480,7 @@ const std::string kCreateSchema =
     "  `until` VARCHAR(45), "
     "  `removed` BOOL, "
     "  `deprecated` BOOL, "
+    "  `defvalue` VARCHAR(65535), "
     "  `minvalue` INTEGER, "
     "  `maxvalue` INTEGER, "
     "  `minsize` INTEGER, "
@@ -759,13 +760,14 @@ const std::string kInsertVehicleDataItem =
     "  `until`, "
     "  `removed`, "
     "  `deprecated`, "
+    "  `defvalue`, "
     "  `minvalue`, "
     "  `maxvalue`, "
     "  `minsize`, "
     "  `maxsize`, "
     "  `minlength`, "
     "  `maxlength`) "
-    "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ";
+    "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ";
 
 const std::string kInsertVehicleDataItemParams =
     "INSERT INTO `vehicle_data_item_parameters` ("

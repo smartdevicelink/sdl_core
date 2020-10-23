@@ -105,8 +105,9 @@ mobile_apis::Result::eType PrepareResultCodeAndInfo(
   } else {
     info = "Accessing not supported module data.";
   }
-  return result_code;
+
   SDL_LOG_WARN(info);
+  return result_code;
 }
 
 void SetInteriorVehicleDataRequest::Execute() {

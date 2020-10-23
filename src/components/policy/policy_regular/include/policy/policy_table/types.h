@@ -551,6 +551,7 @@ struct VehicleDataItem : CompositeType {
   Optional<String<0, 255> > until;
   Optional<Boolean> removed;
   Optional<Boolean> deprecated;
+  Optional<String<0, UINT32_MAX> > defvalue;
   Optional<Float<-INT32_MAX, INT32_MAX> > minvalue;
   Optional<Float<-INT32_MAX, INT32_MAX> > maxvalue;
   Optional<Integer<uint32_t, 0, UINT32_MAX> > minsize;
@@ -579,6 +580,12 @@ struct VehicleDataItem : CompositeType {
    * @return true if type is valid.
    */
   bool ValidateTypes() const;
+  /**
+   * @brief Validates default value of vehicle data item based
+   * on type, unable to validate enum values
+   * @return true if defvalue is valid.
+   */
+  bool ValidateDefault() const;
   bool IsPrimitiveType() const;
   bool ValidateNaming(std::string str) const;
 

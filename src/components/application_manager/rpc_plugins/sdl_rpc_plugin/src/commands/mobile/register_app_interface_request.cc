@@ -56,66 +56,14 @@
 namespace {
 namespace custom_str = utils::custom_string;
 
-mobile_apis::AppHMIType::eType StringToAppHMIType(const std::string& str) {
-  if ("DEFAULT" == str) {
-    return mobile_apis::AppHMIType::DEFAULT;
-  } else if ("COMMUNICATION" == str) {
-    return mobile_apis::AppHMIType::COMMUNICATION;
-  } else if ("MEDIA" == str) {
-    return mobile_apis::AppHMIType::MEDIA;
-  } else if ("MESSAGING" == str) {
-    return mobile_apis::AppHMIType::MESSAGING;
-  } else if ("NAVIGATION" == str) {
-    return mobile_apis::AppHMIType::NAVIGATION;
-  } else if ("INFORMATION" == str) {
-    return mobile_apis::AppHMIType::INFORMATION;
-  } else if ("SOCIAL" == str) {
-    return mobile_apis::AppHMIType::SOCIAL;
-  } else if ("BACKGROUND_PROCESS" == str) {
-    return mobile_apis::AppHMIType::BACKGROUND_PROCESS;
-  } else if ("TESTING" == str) {
-    return mobile_apis::AppHMIType::TESTING;
-  } else if ("SYSTEM" == str) {
-    return mobile_apis::AppHMIType::SYSTEM;
-  } else if ("PROJECTION" == str) {
-    return mobile_apis::AppHMIType::PROJECTION;
-  } else if ("REMOTE_CONTROL" == str) {
-    return mobile_apis::AppHMIType::REMOTE_CONTROL;
-  } else if ("WEB_VIEW" == str) {
-    return mobile_apis::AppHMIType::WEB_VIEW;
-  } else {
-    return mobile_apis::AppHMIType::INVALID_ENUM;
-  }
-}
-
-std::string AppHMITypeToString(mobile_apis::AppHMIType::eType type) {
-  const std::map<mobile_apis::AppHMIType::eType, std::string> app_hmi_type_map =
-      {{mobile_apis::AppHMIType::DEFAULT, "DEFAULT"},
-       {mobile_apis::AppHMIType::REMOTE_CONTROL, "REMOTE_CONTROL"},
-       {mobile_apis::AppHMIType::COMMUNICATION, "COMMUNICATION"},
-       {mobile_apis::AppHMIType::MEDIA, "MEDIA"},
-       {mobile_apis::AppHMIType::MESSAGING, "MESSAGING"},
-       {mobile_apis::AppHMIType::NAVIGATION, "NAVIGATION"},
-       {mobile_apis::AppHMIType::INFORMATION, "INFORMATION"},
-       {mobile_apis::AppHMIType::SOCIAL, "SOCIAL"},
-       {mobile_apis::AppHMIType::BACKGROUND_PROCESS, "BACKGROUND_PROCESS"},
-       {mobile_apis::AppHMIType::TESTING, "TESTING"},
-       {mobile_apis::AppHMIType::SYSTEM, "SYSTEM"},
-       {mobile_apis::AppHMIType::PROJECTION, "PROJECTION"},
-       {mobile_apis::AppHMIType::WEB_VIEW, "WEB_VIEW"}};
-
-  std::map<mobile_apis::AppHMIType::eType, std::string>::const_iterator iter =
-      app_hmi_type_map.find(type);
-
-  return app_hmi_type_map.end() != iter ? iter->second : std::string("");
-}
-
 struct AppHMITypeInserter {
-  AppHMITypeInserter(smart_objects::SmartObject& so_array)
+  explicit AppHMITypeInserter(smart_objects::SmartObject& so_array)
       : index_(0), so_array_(so_array) {}
 
   bool operator()(const std::string& app_hmi_type) {
-    so_array_[index_] = StringToAppHMIType(app_hmi_type);
+    so_array_[index_] =
+        application_manager::StringToEnum<mobile_apis::AppHMIType::eType>(
+            app_hmi_type);
     ++index_;
     return true;
   }
@@ -131,7 +79,7 @@ struct CheckMissedTypes {
       : policy_app_types_(policy_app_types), log_(log) {}
 
   bool operator()(const smart_objects::SmartArray::value_type& value) {
-    std::string app_type_str = AppHMITypeToString(
+    std::string app_type_str = application_manager::EnumToString(
         static_cast<mobile_apis::AppHMIType::eType>(value.asInt()));
     if (!app_type_str.empty()) {
       policy::StringArray::const_iterator it = policy_app_types_.begin();
@@ -162,7 +110,7 @@ class SmartArrayValueExtractor {
 };
 
 struct IsSameNickname {
-  IsSameNickname(const custom_str::CustomString app_name)
+  explicit IsSameNickname(const custom_str::CustomString app_name)
       : app_name_(app_name) {}
   bool operator()(const policy::StringArray::value_type& nickname) const {
     return app_name_.CompareIgnoreCase(nickname.c_str());
@@ -742,6 +690,16 @@ void RegisterAppInterfaceRequest::Run() {
   SetupAppDeviceInfo(application);
   auto status_notifier = AddApplicationDataToPolicy(application);
 
+  auto on_app_registered = [application](plugin_manager::RPCPlugin& plugin) {
+    plugin.OnApplicationEvent(plugin_manager::kApplicationRegistered,
+                              application);
+  };
+  // To prevent timing issues, this event is called before an app is accessible
+  // by the applications accessor. This prevents incoming hmi rpcs from
+  // attempting to access an app before it has been fully initialized.
+  application_manager_.ApplyFunctorForEachPlugin(on_app_registered);
+  application_manager_.FinalizeAppRegistration(application, connection_key());
+
   std::string add_info;
   const auto is_resumption_required = ApplicationDataShouldBeResumed(add_info);
 
@@ -761,12 +719,6 @@ void RegisterAppInterfaceRequest::Run() {
   // By default app subscribed to CUSTOM_BUTTON
   SendSubscribeCustomButtonNotification();
   SendChangeRegistrationOnHMI(application);
-
-  auto on_app_registered = [application](plugin_manager::RPCPlugin& plugin) {
-    plugin.OnApplicationEvent(plugin_manager::kApplicationRegistered,
-                              application);
-  };
-  application_manager_.ApplyFunctorForEachPlugin(on_app_registered);
 
   if (is_resumption_required) {
     const auto& msg_params = (*message_)[strings::msg_params];
@@ -1369,9 +1321,9 @@ bool RegisterAppInterfaceRequest::IsApplicationWithSameAppIdRegistered() {
 
 bool RegisterAppInterfaceRequest::IsWhiteSpaceExist() {
   SDL_LOG_AUTO_TRACE();
-  const char* str = NULL;
 
-  str = (*message_)[strings::msg_params][strings::app_name].asCharArray();
+  const char* str =
+      (*message_)[strings::msg_params][strings::app_name].asCharArray();
   if (!CheckSyntax(str)) {
     SDL_LOG_ERROR("Invalid app_name syntax check failed");
     return true;

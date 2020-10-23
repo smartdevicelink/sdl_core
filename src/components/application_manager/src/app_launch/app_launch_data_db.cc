@@ -278,10 +278,9 @@ std::vector<ApplicationDataPtr> AppLaunchDataDB::GetAppDataByDevMac(
 
 bool AppLaunchDataDB::Clear() {
   SDL_LOG_AUTO_TRACE();
-  bool retVal = false;
 
   utils::dbms::SQLQuery query(db());
-  retVal = query.Exec(kDropSchema);
+  bool retVal = query.Exec(kDropSchema);
 
   if (retVal) {
     SDL_LOG_INFO("App_Launch table had been cleared successfully");

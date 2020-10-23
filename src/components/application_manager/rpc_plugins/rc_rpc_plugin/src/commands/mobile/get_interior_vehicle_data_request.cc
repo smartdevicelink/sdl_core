@@ -245,7 +245,10 @@ void GetInteriorVehicleDataRequest::on_event(
       helpers::Compare<mobile_apis::Result::eType, helpers::EQ, helpers::ONE>(
           result_code,
           mobile_apis::Result::SUCCESS,
-          mobile_apis::Result::WARNINGS);
+          mobile_apis::Result::WARNINGS,
+          mobile_apis::Result::WRONG_LANGUAGE,
+          mobile_apis::Result::RETRY,
+          mobile_apis::Result::SAVED);
 
   if (mobile_apis::Result::READ_ONLY == result_code) {
     result = false;

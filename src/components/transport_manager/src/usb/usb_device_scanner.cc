@@ -47,7 +47,7 @@ SDL_CREATE_LOG_VARIABLE("TransportManager")
 class AoaInitSequence : public UsbControlTransferSequence {
  public:
   AoaInitSequence();
-  AoaInitSequence(const TransportManagerSettings& settings);
+  explicit AoaInitSequence(const TransportManagerSettings& settings);
   virtual ~AoaInitSequence() {}
 
  private:

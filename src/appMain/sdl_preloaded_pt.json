@@ -1675,6 +1675,17 @@
                         ]
                     }
                 }
+            },
+            "DialNumber": {
+                "rpcs": {
+                    "DialNumber": {
+                        "hmi_levels": [
+                            "BACKGROUND",
+                            "FULL",
+                            "LIMITED"
+                        ]
+                    }
+                }
             }
         },
         "consumer_friendly_messages": {
@@ -4080,7 +4091,7 @@
                                     "key": "OEM_REF_WND_LOC_LVL",
                                     "type": "Integer",
                                     "mandatory": false,
-                                    "defvalue" : 0,
+                                    "defvalue" : "0",
                                     "minvalue": -1,
                                     "maxvalue": 100
                                 },
@@ -4089,7 +4100,7 @@
                                     "key": "OEM_REF_WND_LOC_COLSPN",
                                     "type": "Integer",
                                     "mandatory": false,
-                                    "defvalue" : 1,
+                                    "defvalue" : "1",
                                     "minvalue": 1,
                                     "maxvalue": 100
                                 },
@@ -4098,7 +4109,7 @@
                                     "key": "OEM_REF_WND_LOC_ROWSPN",
                                     "type": "Integer",
                                     "mandatory": false,
-                                    "defvalue" : 1,
+                                    "defvalue" : "1",
                                     "minvalue": 1,
                                     "maxvalue": 100
                                 },
@@ -4107,7 +4118,7 @@
                                     "key": "OEM_REF_WND_LOC_LVLSPN",
                                     "type": "Integer",
                                     "mandatory": false,
-                                    "defvalue" : 1,
+                                    "defvalue" : "1",
                                     "minvalue": 1,
                                     "maxvalue": 100
                                 }

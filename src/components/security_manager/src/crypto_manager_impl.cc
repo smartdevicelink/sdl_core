@@ -154,9 +154,8 @@ bool CryptoManagerImpl::Init() {
   }
   SDL_LOG_DEBUG("Peer verification "
                 << (get_settings().verify_peer() ? "enabled" : "disabled"));
-  SDL_LOG_DEBUG(
-
-      "CA certificate file is \"" << get_settings().ca_cert_path() << '"');
+  SDL_LOG_DEBUG("CA certificate file is \"" << get_settings().ca_cert_path()
+                                            << '"');
 
 #if OPENSSL_VERSION_NUMBER < CONST_SSL_METHOD_MINIMAL_VERSION
   SSL_METHOD* method;
@@ -338,10 +337,16 @@ bool CryptoManagerImpl::IsCertificateUpdateRequired(
 
   const double seconds = difftime(certificates_time, system_time);
 
-  SDL_LOG_DEBUG(
-      "Certificate UTC time: " << asctime(gmtime(&certificates_time)));
+  const size_t maxsize = 40;
+  char certificate_utc_time[maxsize];
+  std::strftime(
+      certificate_utc_time, maxsize, "%c", gmtime(&certificates_time));
+  SDL_LOG_DEBUG("Certificate UTC time: " << certificate_utc_time);
 
-  SDL_LOG_DEBUG("Host UTC time: " << asctime(gmtime(&system_time)));
+  char host_utc_time[maxsize];
+  std::strftime(host_utc_time, maxsize, "%c", gmtime(&system_time));
+  SDL_LOG_DEBUG("Host UTC time: " << host_utc_time);
+
   SDL_LOG_DEBUG("Seconds before expiration: " << seconds);
   if (seconds < 0) {
     SDL_LOG_WARN("Certificate is already expired.");
@@ -381,9 +386,8 @@ bool CryptoManagerImpl::SaveCertificateData(
   UNUSED(cert_guard);
 
   if (1 != BIO_reset(bio_cert)) {
-    SDL_LOG_WARN(
-
-        "Unabled to reset BIO in order to read private key, " << LastError());
+    SDL_LOG_WARN("Unabled to reset BIO in order to read private key, "
+                 << LastError());
   }
 
   EVP_PKEY* pkey = NULL;

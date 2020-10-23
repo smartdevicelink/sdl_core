@@ -137,15 +137,13 @@ bool CMessageBrokerController::isNotification(Json::Value& message) {
 
 void CMessageBrokerController::sendNotification(Json::Value& message) {
   std::string methodName = message["method"].asString();
-  std::vector<WebsocketSession*> result;
-  int subscribersCount = getSubscribersFd(methodName, result);
-  if (0 < subscribersCount) {
-    std::vector<WebsocketSession*>::iterator it;
-    for (it = result.begin(); it != result.end(); ++it) {
-      (*it)->sendJsonMessage(message);
-    }
-  } else {
-    SDL_LOG_ERROR(("No subscribers for this property!\n"));
+  const auto result = getSubscribersFd(methodName);
+  if (result.empty()) {
+    SDL_LOG_ERROR("No subscribers for method: " << methodName);
+  }
+
+  for (const auto& ws : result) {
+    ws->sendJsonMessage(message);
   }
 }
 
@@ -159,40 +157,59 @@ bool CMessageBrokerController::isResponse(Json::Value& message) {
 }
 
 void CMessageBrokerController::sendResponse(Json::Value& message) {
-  WebsocketSession* ws;
-  std::map<std::string, WebsocketSession*>::iterator it;
-  sync_primitives::AutoLock request_lock(mRequestListLock);
-
+  std::weak_ptr<WebsocketSession> weak_ws;
   std::string id = message["id"].asString();
-  it = mRequestList.find(id);
-  if (it != mRequestList.end()) {
-    ws = it->second;
+
+  {
+    sync_primitives::AutoLock request_lock(mRequestListLock);
+    const auto it = mRequestList.find(id);
+    if (it != mRequestList.end()) {
+      std::swap(weak_ws, it->second);
+      mRequestList.erase(it);
+    }
+  }
+
+  if (auto ws = weak_ws.lock()) {
     ws->sendJsonMessage(message);
-    mRequestList.erase(it);
+  } else {
+    SDL_LOG_ERROR("A request is not found for id: " << id);
   }
 }
 
-void CMessageBrokerController::sendJsonMessage(Json::Value& message) {
+bool CMessageBrokerController::sendJsonMessage(Json::Value& message) {
   if (isNotification(message)) {
     sendNotification(message);
-    return;
+    return true;
   } else if (isResponse(message)) {
     sendResponse(message);
-    return;
+    return true;
   }
 
   // Send request
-  WebsocketSession* ws;
-  std::map<std::string, WebsocketSession*>::iterator it;
+  std::shared_ptr<WebsocketSession> ws;
   std::string method = message["method"].asString();
   std::string component_name = GetComponentName(method);
 
-  sync_primitives::AutoLock lock(mControllersListLock);
-  it = mControllersList.find(component_name);
-  if (it != mControllersList.end()) {
-    ws = it->second;
-    ws->sendJsonMessage(message);
+  {
+    sync_primitives::AutoLock lock(mControllersListLock);
+    const auto it = mControllersList.find(component_name);
+    if (it != mControllersList.end()) {
+      ws = it->second.lock();
+      if (!ws) {
+        // Clear expired
+        mControllersList.erase(it);
+      }
+    }
   }
+
+  if (!ws) {
+    SDL_LOG_ERROR(
+        "A controller is not found for the method: " << component_name);
+    return false;
+  }
+
+  ws->sendJsonMessage(message);
+  return true;
 }
 
 void CMessageBrokerController::subscribeTo(std::string property) {}
@@ -245,139 +262,121 @@ std::string CMessageBrokerController::GetComponentName(std::string& method) {
   return return_string;
 }
 
-bool CMessageBrokerController::addController(WebsocketSession* ws_session,
-                                             std::string name) {
-  bool result = false;
-  std::map<std::string, WebsocketSession*>::iterator it;
-
+bool CMessageBrokerController::addController(WebsocketSession& ws_session,
+                                             const std::string& name) {
   sync_primitives::AutoLock lock(mControllersListLock);
-  it = mControllersList.find(name);
-  if (it == mControllersList.end()) {
-    mControllersList.insert(
-        std::map<std::string, WebsocketSession*>::value_type(name, ws_session));
-    result = true;
-  } else {
-    SDL_LOG_ERROR(("Controller already exists!\n"));
-  }
-  return result;
+  return mControllersList.emplace(name, ws_session.shared_from_this()).second;
 }
 
-void CMessageBrokerController::deleteController(WebsocketSession* ws_session) {
-  {
-    sync_primitives::AutoLock lock(mControllersListLock);
-    std::map<std::string, WebsocketSession*>::iterator it;
-    for (it = mControllersList.begin(); it != mControllersList.end();) {
-      if (it->second == ws_session) {
-        mControllersList.erase(it++);
-      } else {
-        ++it;
-      }
-    }
-  }
+void CMessageBrokerController::deleteController(WebsocketSession& ws_session) {
   removeSubscribersBySession(ws_session);
-}
-
-void CMessageBrokerController::deleteController(std::string name) {
-  std::map<std::string, WebsocketSession*>::iterator it;
-  WebsocketSession* ws;
-  {
-    sync_primitives::AutoLock lock(mControllersListLock);
-    it = mControllersList.find(name);
-    if (it != mControllersList.end()) {
-      ws = it->second;
-      mControllersList.erase(it);
+  sync_primitives::AutoLock lock(mControllersListLock);
+  for (auto it = mControllersList.cbegin(); it != mControllersList.cend();) {
+    const std::shared_ptr<WebsocketSession> ws = it->second.lock();
+    if (!ws || ws.get() == &ws_session) {
+      it = mControllersList.erase(it);
     } else {
-      return;
+      ++it;
     }
   }
-  removeSubscribersBySession(ws);
+}
+
+void CMessageBrokerController::deleteController(const std::string& name) {
+  std::weak_ptr<WebsocketSession> weak_ws;
+  {
+    sync_primitives::AutoLock lock(mControllersListLock);
+    const auto it = mControllersList.find(name);
+    if (it != mControllersList.end()) {
+      std::swap(weak_ws, it->second);
+      mControllersList.erase(it);
+    }
+  }
+
+  if (auto ws = weak_ws.lock()) {
+    removeSubscribersBySession(*ws);
+  } else {
+    SDL_LOG_ERROR("A controller is not found for the method: " << name);
+  }
 }
 
 void CMessageBrokerController::removeSubscribersBySession(
-    const WebsocketSession* ws) {
+    const WebsocketSession& ws) {
   sync_primitives::AutoLock lock(mSubscribersListLock);
-  std::multimap<std::string, WebsocketSession*>::iterator it_s =
-      mSubscribersList.begin();
-  for (; it_s != mSubscribersList.end();) {
-    if (it_s->second == ws) {
-      mSubscribersList.erase(it_s++);
+  for (auto it_s = mSubscribersList.cbegin();
+       it_s != mSubscribersList.cend();) {
+    auto ws_session = it_s->second.lock();
+    if (!ws_session || ws_session.get() == &ws) {
+      it_s = mSubscribersList.erase(it_s);
     } else {
       ++it_s;
     }
   }
 }
 
-void CMessageBrokerController::pushRequest(Json::Value& message,
-                                           WebsocketSession* ws_session) {
-  sync_primitives::AutoLock lock(mRequestListLock);
+bool CMessageBrokerController::pushRequest(Json::Value& message,
+                                           WebsocketSession& ws_session) {
   std::string id = message["id"].asString();
-  mRequestList.insert(
-      std::map<std::string, WebsocketSession*>::value_type(id, ws_session));
+  sync_primitives::AutoLock lock(mRequestListLock);
+  return mRequestList.emplace(std::move(id), ws_session.shared_from_this())
+      .second;
 }
 
-bool CMessageBrokerController::addSubscriber(WebsocketSession* ws_session,
-                                             std::string name) {
-  bool result = true;
+bool CMessageBrokerController::addSubscriber(WebsocketSession& ws_session,
+                                             const std::string& name) {
   sync_primitives::AutoLock lock(mSubscribersListLock);
-  std::pair<std::multimap<std::string, WebsocketSession*>::iterator,
-            std::multimap<std::string, WebsocketSession*>::iterator>
-      p = mSubscribersList.equal_range(name);
-  if (p.first != p.second) {
-    std::multimap<std::string, WebsocketSession*>::iterator itr;
-    for (itr = p.first; itr != p.second; ++itr) {
-      if (ws_session == itr->second) {
-        result = false;
-        SDL_LOG_ERROR(("Subscriber already exists!\n"));
-      }
+  auto p = mSubscribersList.equal_range(name);
+  for (auto it = p.first; it != p.second;) {
+    const std::shared_ptr<WebsocketSession> ws = it->second.lock();
+    if (!ws) {
+      // Clear expired
+      it = mSubscribersList.erase(it);
+    } else if (ws.get() == &ws_session) {
+      // Found an element: {name, ws_session}
+      return false;
+    } else {
+      ++it;
     }
   }
-  if (result) {
-    mSubscribersList.insert(
-        std::map<std::string, WebsocketSession*>::value_type(name, ws_session));
+
+  // Not found an element: {name, ws_session}
+  mSubscribersList.emplace_hint(p.second, name, ws_session.shared_from_this());
+  return true;
+}
+
+void CMessageBrokerController::deleteSubscriber(const WebsocketSession& ws,
+                                                const std::string& name) {
+  sync_primitives::AutoLock lock(mSubscribersListLock);
+  auto p = mSubscribersList.equal_range(name);
+  for (auto it = p.first; it != p.second;) {
+    const std::shared_ptr<WebsocketSession> ws_session = it->second.lock();
+    if (!ws_session || &ws == ws_session.get()) {
+      it = mSubscribersList.erase(it);
+    } else {
+      ++it;
+    }
   }
+}
+
+std::vector<std::shared_ptr<WebsocketSession> >
+CMessageBrokerController::getSubscribersFd(const std::string& name) {
+  std::vector<std::shared_ptr<WebsocketSession> > result;
+  sync_primitives::AutoLock lock(mSubscribersListLock);
+  auto p = mSubscribersList.equal_range(name);
+  for (auto it = p.first; it != p.second;) {
+    if (std::shared_ptr<WebsocketSession> ws = it->second.lock()) {
+      result.push_back(std::move(ws));
+      ++it;
+    } else {
+      // Clear expired
+      it = mSubscribersList.erase(it);
+    }
+  }
+
   return result;
 }
 
-void CMessageBrokerController::deleteSubscriber(WebsocketSession* ws,
-                                                std::string name) {
-  sync_primitives::AutoLock lock(mSubscribersListLock);
-  std::pair<std::multimap<std::string, WebsocketSession*>::iterator,
-            std::multimap<std::string, WebsocketSession*>::iterator>
-      p = mSubscribersList.equal_range(name);
-  if (p.first != p.second) {
-    std::multimap<std::string, WebsocketSession*>::iterator itr;
-    for (itr = p.first; itr != p.second;) {
-      if (ws == itr->second) {
-        mSubscribersList.erase(itr++);
-      } else {
-        ++itr;
-      }
-    }
-  }
-}
-
-int CMessageBrokerController::getSubscribersFd(
-    std::string name, std::vector<WebsocketSession*>& result) {
-  int res = 0;
-  std::map<std::string, WebsocketSession*>::iterator it;
-
-  sync_primitives::AutoLock lock(mSubscribersListLock);
-  std::pair<std::multimap<std::string, WebsocketSession*>::iterator,
-            std::multimap<std::string, WebsocketSession*>::iterator>
-      p = mSubscribersList.equal_range(name);
-  if (p.first != p.second) {
-    std::multimap<std::string, WebsocketSession*>::iterator itr;
-    for (itr = p.first; itr != p.second; ++itr) {
-      result.push_back(itr->second);
-    }
-  }
-
-  res = result.size();
-  return res;
-}
-
 void CMessageBrokerController::processInternalRequest(
-    Json::Value& message, WebsocketSession* ws_session) {
+    const Json::Value& message, WebsocketSession& ws_session) {
   std::string method = message["method"].asString();
   std::string methodName = getMethodName(method);
   if (methodName == "registerComponent") {
@@ -390,7 +389,7 @@ void CMessageBrokerController::processInternalRequest(
         response["id"] = message["id"];
         response["jsonrpc"] = "2.0";
         response["result"] = getNextControllerId();
-        ws_session->sendJsonMessage(response);
+        ws_session.sendJsonMessage(response);
       } else {
         Json::Value error, err;
         error["id"] = message["id"];
@@ -398,7 +397,7 @@ void CMessageBrokerController::processInternalRequest(
         err["code"] = CONTROLLER_EXISTS;
         err["message"] = "Controller has been already registered.";
         error["error"] = err;
-        ws_session->sendJsonMessage(error);
+        ws_session.sendJsonMessage(error);
       }
     } else {
       Json::Value error, err;
@@ -407,7 +406,7 @@ void CMessageBrokerController::processInternalRequest(
       err["code"] = INVALID_REQUEST;
       err["message"] = "Wrong method parameter.";
       error["error"] = err;
-      ws_session->sendJsonMessage(error);
+      ws_session.sendJsonMessage(error);
     }
   } else if (methodName == "subscribeTo") {
     Json::Value params = message["params"];
@@ -418,7 +417,7 @@ void CMessageBrokerController::processInternalRequest(
         response["id"] = message["id"];
         response["jsonrpc"] = "2.0";
         response["result"] = "OK";
-        ws_session->sendJsonMessage(response);
+        ws_session.sendJsonMessage(response);
       } else {
         Json::Value error, err;
         error["id"] = message["id"];
@@ -426,7 +425,7 @@ void CMessageBrokerController::processInternalRequest(
         err["code"] = CONTROLLER_EXISTS;
         err["message"] = "Subscribe has been already registered.";
         error["error"] = err;
-        ws_session->sendJsonMessage(error);
+        ws_session.sendJsonMessage(error);
       }
     } else {
       Json::Value error, err;
@@ -435,7 +434,7 @@ void CMessageBrokerController::processInternalRequest(
       err["code"] = INVALID_REQUEST;
       err["message"] = "Wrong method parameter.";
       error["error"] = err;
-      ws_session->sendJsonMessage(error);
+      ws_session.sendJsonMessage(error);
     }
 
   } else if (methodName == "unregisterComponent") {
@@ -448,7 +447,7 @@ void CMessageBrokerController::processInternalRequest(
       response["id"] = message["id"];
       response["jsonrpc"] = "2.0";
       response["result"] = "OK";
-      ws_session->sendJsonMessage(response);
+      ws_session.sendJsonMessage(response);
     } else {
       Json::Value error, err;
       error["id"] = message["id"];
@@ -456,7 +455,7 @@ void CMessageBrokerController::processInternalRequest(
       err["code"] = INVALID_REQUEST;
       err["message"] = "Wrong method parameter.";
       error["error"] = err;
-      ws_session->sendJsonMessage(error);
+      ws_session.sendJsonMessage(error);
     }
   } else if (methodName == "unsubscribeFrom") {
     Json::Value params = message["params"];
@@ -467,7 +466,7 @@ void CMessageBrokerController::processInternalRequest(
       response["id"] = message["id"];
       response["jsonrpc"] = "2.0";
       response["result"] = "OK";
-      ws_session->sendJsonMessage(response);
+      ws_session.sendJsonMessage(response);
     } else {
       Json::Value error, err;
       error["id"] = message["id"];
@@ -475,7 +474,7 @@ void CMessageBrokerController::processInternalRequest(
       err["code"] = INVALID_REQUEST;
       err["message"] = "Wrong method parameter.";
       error["error"] = err;
-      ws_session->sendJsonMessage(error);
+      ws_session.sendJsonMessage(error);
     }
   } else {
   }

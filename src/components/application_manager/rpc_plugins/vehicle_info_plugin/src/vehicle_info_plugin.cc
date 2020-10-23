@@ -48,6 +48,21 @@ namespace strings = application_manager::strings;
 namespace plugins = application_manager::plugin_manager;
 namespace commands = application_manager::commands;
 
+bool IsSubscribedAppExist(
+    const std::string& ivi,
+    const application_manager::ApplicationManager& app_manager) {
+  SDL_LOG_AUTO_TRACE();
+  auto apps_accessor = app_manager.applications();
+
+  for (auto& app : apps_accessor.GetData()) {
+    auto& ext = VehicleInfoAppExtension::ExtractVIExtension(*app);
+    if (ext.isSubscribedToVehicleInfo(ivi)) {
+      return true;
+    }
+  }
+  return false;
+}
+
 VehicleInfoPlugin::VehicleInfoPlugin()
     : application_manager_(nullptr), pending_resumption_handler_(nullptr) {}
 
@@ -164,13 +179,6 @@ void VehicleInfoPlugin::ProcessResumptionSubscription(
     application_manager::Application& app, VehicleInfoAppExtension& ext) {
   SDL_LOG_AUTO_TRACE();
 
-  auto pending = ext.PendingSubscriptions().GetData();
-  for (const auto& ivi : pending) {
-    if (IsSubscribedAppExist(ivi)) {
-      ext.RemovePendingSubscription(ivi);
-      ext.subscribeToVehicleInfo(ivi);
-    }
-  }
   pending_resumption_handler_->HandleResumptionSubscriptionRequest(ext, app);
 }
 
@@ -181,10 +189,9 @@ void VehicleInfoPlugin::RevertResumption(
   UNUSED(app);
 
   pending_resumption_handler_->OnResumptionRevert();
-
   std::set<std::string> subscriptions_to_revert;
   for (auto& ivi_data : list_of_subscriptions) {
-    if (!IsSubscribedAppExist(ivi_data) &&
+    if (!IsSubscribedAppExist(ivi_data, *application_manager_) &&
         !IsAnyPendingSubscriptionExist(ivi_data)) {
       subscriptions_to_revert.insert(ivi_data);
     }
@@ -228,19 +235,6 @@ smart_objects::SmartObjectSPtr VehicleInfoPlugin::CreateUnsubscriptionRequest(
   (*request)[strings::msg_params] = msg_params;
 
   return request;
-}
-
-bool VehicleInfoPlugin::IsSubscribedAppExist(const std::string& ivi) {
-  SDL_LOG_AUTO_TRACE();
-  auto apps_accessor = application_manager_->applications();
-
-  for (auto& app : apps_accessor.GetData()) {
-    auto& ext = VehicleInfoAppExtension::ExtractVIExtension(*app);
-    if (ext.isSubscribedToVehicleInfo(ivi)) {
-      return true;
-    }
-  }
-  return false;
 }
 
 bool VehicleInfoPlugin::IsAnyPendingSubscriptionExist(const std::string& ivi) {

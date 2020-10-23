@@ -57,22 +57,12 @@ class MockMessageHelper {
                smart_objects::SmartObjectSPtr(const uint32_t app_id));
   MOCK_METHOD2(SendHashUpdateNotification,
                void(const uint32_t app_id, ApplicationManager& app_mngr));
-  MOCK_METHOD1(HMIResultToString,
-               std::string(hmi_apis::Common_Result::eType hmi_result));
-  MOCK_METHOD1(HMIResultFromString,
-               hmi_apis::Common_Result::eType(const std::string& hmi_result));
-  MOCK_METHOD1(MobileResultToString,
-               std::string(mobile_apis::Result::eType mobile_result));
-  MOCK_METHOD1(MobileResultFromString,
-               mobile_api::Result::eType(const std::string& mobile_result));
   MOCK_METHOD1(HMIToMobileResult,
                mobile_api::Result::eType(
                    const hmi_apis::Common_Result::eType hmi_result));
   MOCK_METHOD1(MobileToHMIResult,
                hmi_apis::Common_Result::eType(
                    const mobile_api::Result::eType mobile_result));
-  MOCK_METHOD1(StringToHMILevel,
-               mobile_api::HMILevel::eType(const std::string& hmi_level));
   MOCK_METHOD3(CreateDeviceListSO,
                smart_objects::SmartObjectSPtr(
                    const connection_handler::DeviceMap& devices,
@@ -177,14 +167,6 @@ class MockMessageHelper {
                     const std::vector<uint8_t>& policy_data,
                     const std::string& url,
                     ApplicationManager& app_mngr));
-  MOCK_METHOD1(CommonLanguageFromString,
-               hmi_apis::Common_Language::eType(const std::string& language));
-  MOCK_METHOD1(CommonLightNameFromString,
-               hmi_apis::Common_LightName::eType(const std::string& lightName));
-  MOCK_METHOD1(CommonLanguageToString,
-               std::string(hmi_apis::Common_Language::eType));
-  MOCK_METHOD1(MobileLanguageToString,
-               std::string(mobile_apis::Language::eType));
   MOCK_METHOD2(CreateModuleInfoSO,
                smart_objects::SmartObjectSPtr(uint32_t function_id,
                                               ApplicationManager& app_mngr));
@@ -340,8 +322,6 @@ class MockMessageHelper {
                void(const uint32_t app_id,
                     const std::string& icon_path,
                     ApplicationManager& application_manager));
-  MOCK_METHOD1(StringifiedHMILevel,
-               std::string(const mobile_apis::HMILevel::eType hmi_level));
   MOCK_METHOD2(GetDeviceMacAddressForHandle,
                std::string(const transport_manager::DeviceHandle device_handle,
                            const ApplicationManager& app_mngr));

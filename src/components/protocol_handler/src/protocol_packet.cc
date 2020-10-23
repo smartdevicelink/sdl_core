@@ -359,12 +359,11 @@ RESULT_CODE ProtocolPacket::ProtocolHeaderValidator::validate(
       if (header.dataSize > payload_size ||
           (FRAME_TYPE_CONTROL != header.frameType && header.dataSize == 0u)) {
         UNUSED(StringifyFrameType);
-        SDL_LOG_WARN(
-
-            "Packet data size of "
-            << StringifyFrameType(header.frameType)
-            << " frame must be in range (0, payload_size=" << payload_size
-            << "], but actual value is " << header.dataSize);
+        SDL_LOG_WARN("Packet data size of "
+                     << StringifyFrameType(header.frameType)
+                     << " frame must be in range (0, payload_size="
+                     << payload_size << "], but actual value is "
+                     << header.dataSize);
         return RESULT_FAIL;
       }
     } break;

@@ -77,10 +77,8 @@ void SetMediaClockRequest::Run() {
   }
 
   if (isDataValid()) {
-    smart_objects::SmartObject msg_params =
-        smart_objects::SmartObject(smart_objects::SmartType_Map);
     // copy entirely msg
-    msg_params = (*message_)[strings::msg_params];
+    smart_objects::SmartObject msg_params = (*message_)[strings::msg_params];
     msg_params[strings::app_id] = app->app_id();
     StartAwaitForInterface(HmiInterfaces::HMI_INTERFACE_UI);
 

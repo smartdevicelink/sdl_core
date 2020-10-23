@@ -94,9 +94,14 @@ using test::components::policy_test::MockPolicyHandlerInterface;
 
 using namespace application_manager;
 
-// custom action to call a member function with 4 arguments
-ACTION_P6(InvokeMemberFuncWithArg4, ptr, memberFunc, a, b, c, d) {
-  (ptr->*memberFunc)(a, b, c, d);
+// custom action to call a member function with 2 arguments
+ACTION_P4(InvokeMemberFuncWithArg2, ptr, memberFunc, a, b) {
+  (ptr->*memberFunc)(a, b);
+}
+
+// custom action to call a member function with 3 arguments
+ACTION_P5(InvokeMemberFuncWithArg3, ptr, memberFunc, a, b, c) {
+  (ptr->*memberFunc)(a, b, c);
 }
 
 namespace {
@@ -541,7 +546,7 @@ TEST_F(ApplicationManagerImplTest, OnServiceStartedCallback_RpcService) {
 
   bool result = false;
   std::vector<std::string> rejected_params;
-  EXPECT_CALL(mock_connection_handler_, NotifyServiceStartedResult(_, _, _))
+  EXPECT_CALL(mock_connection_handler_, NotifyServiceStartedResult(_, _, _, _))
       .WillOnce(DoAll(SaveArg<1>(&result), SaveArg<2>(&rejected_params)));
 
   app_manager_impl_->OnServiceStartedCallback(
@@ -549,28 +554,6 @@ TEST_F(ApplicationManagerImplTest, OnServiceStartedCallback_RpcService) {
 
   // check: return value is true and list is empty
   EXPECT_TRUE(result);
-  EXPECT_TRUE(rejected_params.empty());
-}
-
-TEST_F(ApplicationManagerImplTest, OnServiceStartedCallback_UnknownApp) {
-  AddMockApplication();
-
-  const connection_handler::DeviceHandle device_handle = 0;
-  const protocol_handler::ServiceType service_type =
-      protocol_handler::ServiceType::kInvalidServiceType;
-  const int32_t session_key = 123;
-  EXPECT_CALL(*mock_app_ptr_, app_id()).WillRepeatedly(Return(456));
-
-  bool result = false;
-  std::vector<std::string> rejected_params;
-  EXPECT_CALL(mock_connection_handler_, NotifyServiceStartedResult(_, _, _))
-      .WillOnce(DoAll(SaveArg<1>(&result), SaveArg<2>(&rejected_params)));
-
-  app_manager_impl_->OnServiceStartedCallback(
-      device_handle, session_key, service_type, NULL);
-
-  // check: return value is false and list is empty
-  EXPECT_FALSE(result);
   EXPECT_TRUE(rejected_params.empty());
 }
 
@@ -585,7 +568,7 @@ TEST_F(ApplicationManagerImplTest, OnServiceStartedCallback_UnknownService) {
 
   bool result = false;
   std::vector<std::string> rejected_params;
-  EXPECT_CALL(mock_connection_handler_, NotifyServiceStartedResult(_, _, _))
+  EXPECT_CALL(mock_connection_handler_, NotifyServiceStartedResult(_, _, _, _))
       .WillOnce(DoAll(SaveArg<1>(&result), SaveArg<2>(&rejected_params)));
 
   app_manager_impl_->OnServiceStartedCallback(
@@ -616,7 +599,7 @@ TEST_F(ApplicationManagerImplTest, OnServiceStartedCallback_VideoServiceStart) {
 
   bool result = false;
   std::vector<std::string> rejected_params;
-  EXPECT_CALL(mock_connection_handler_, NotifyServiceStartedResult(_, _, _))
+  EXPECT_CALL(mock_connection_handler_, NotifyServiceStartedResult(_, _, _, _))
       .WillOnce(DoAll(SaveArg<1>(&result), SaveArg<2>(&rejected_params)));
 
   // check: SetVideoConfig() should not be called, StartStreaming() is called
@@ -647,7 +630,7 @@ TEST_F(ApplicationManagerImplTest,
 
   bool result = false;
   std::vector<std::string> rejected_params;
-  EXPECT_CALL(mock_connection_handler_, NotifyServiceStartedResult(_, _, _))
+  EXPECT_CALL(mock_connection_handler_, NotifyServiceStartedResult(_, _, _, _))
       .WillOnce(DoAll(SaveArg<1>(&result), SaveArg<2>(&rejected_params)));
 
   // check: SetVideoConfig() and StartStreaming() should not be called
@@ -684,7 +667,7 @@ TEST_F(ApplicationManagerImplTest,
 
   bool result = false;
   std::vector<std::string> rejected_params;
-  EXPECT_CALL(mock_connection_handler_, NotifyServiceStartedResult(_, _, _))
+  EXPECT_CALL(mock_connection_handler_, NotifyServiceStartedResult(_, _, _, _))
       .WillOnce(DoAll(SaveArg<1>(&result), SaveArg<2>(&rejected_params)));
 
   // check: SetVideoConfig() and StartStreaming() should not be called
@@ -720,7 +703,7 @@ TEST_F(ApplicationManagerImplTest,
 
   bool result = false;
   std::vector<std::string> rejected_params;
-  EXPECT_CALL(mock_connection_handler_, NotifyServiceStartedResult(_, _, _))
+  EXPECT_CALL(mock_connection_handler_, NotifyServiceStartedResult(_, _, _, _))
       .WillOnce(DoAll(SaveArg<1>(&result), SaveArg<2>(&rejected_params)));
 
   BsonObject input_params;
@@ -746,18 +729,15 @@ TEST_F(ApplicationManagerImplTest,
   converted_params[strings::height] = 640;
   converted_params[strings::width] = 480;
 
-  std::vector<std::string> empty;
-
   // check: SetVideoConfig() and StartStreaming() are called
   EXPECT_CALL(*mock_app_ptr_, SetVideoConfig(service_type, converted_params))
-      .WillOnce(DoAll(InvokeMemberFuncWithArg4(
-                          app_manager_impl_.get(),
-                          &ApplicationManagerImpl::OnStreamingConfigured,
-                          session_key,
-                          service_type,
-                          true,
-                          ByRef(empty)),
-                      Return(true)));
+      .WillOnce(
+          DoAll(InvokeMemberFuncWithArg2(
+                    app_manager_impl_.get(),
+                    &ApplicationManagerImpl::OnStreamingConfigurationSuccessful,
+                    session_key,
+                    service_type),
+                Return(true)));
   EXPECT_CALL(*mock_app_ptr_, StartStreaming(service_type)).WillOnce(Return());
 
   app_manager_impl_->OnServiceStartedCallback(
@@ -809,7 +789,7 @@ TEST_F(ApplicationManagerImplTest,
 
   bool result = false;
   std::vector<std::string> rejected_params;
-  EXPECT_CALL(mock_connection_handler_, NotifyServiceStartedResult(_, _, _))
+  EXPECT_CALL(mock_connection_handler_, NotifyServiceStartedResult(_, _, _, _))
       .WillOnce(DoAll(SaveArg<1>(&result), SaveArg<2>(&rejected_params)));
 
   BsonObject input_params;
@@ -838,17 +818,18 @@ TEST_F(ApplicationManagerImplTest,
   std::vector<std::string> rejected_list;
   rejected_list.push_back(std::string("protocol"));
   rejected_list.push_back(std::string("codec"));
+  std::string reason;
 
   // simulate HMI returning negative response
   EXPECT_CALL(*mock_app_ptr_, SetVideoConfig(service_type, converted_params))
-      .WillOnce(DoAll(InvokeMemberFuncWithArg4(
-                          app_manager_impl_.get(),
-                          &ApplicationManagerImpl::OnStreamingConfigured,
-                          session_key,
-                          service_type,
-                          false,
-                          ByRef(rejected_list)),
-                      Return(true)));
+      .WillOnce(
+          DoAll(InvokeMemberFuncWithArg3(
+                    app_manager_impl_.get(),
+                    &ApplicationManagerImpl::OnStreamingConfigurationFailed,
+                    session_key,
+                    ByRef(rejected_list),
+                    ByRef(reason)),
+                Return(true)));
 
   // check: StartStreaming() should not be called
   EXPECT_CALL(*mock_app_ptr_, StartStreaming(service_type)).Times(0);
@@ -888,7 +869,7 @@ TEST_F(ApplicationManagerImplTest,
 
   bool result = false;
   std::vector<std::string> rejected_params;
-  EXPECT_CALL(mock_connection_handler_, NotifyServiceStartedResult(_, _, _))
+  EXPECT_CALL(mock_connection_handler_, NotifyServiceStartedResult(_, _, _, _))
       .WillOnce(DoAll(SaveArg<1>(&result), SaveArg<2>(&rejected_params)));
 
   BsonObject input_params;
@@ -928,7 +909,7 @@ TEST_F(ApplicationManagerImplTest, OnServiceStartedCallback_AudioServiceStart) {
 
   bool result = false;
   std::vector<std::string> rejected_params;
-  EXPECT_CALL(mock_connection_handler_, NotifyServiceStartedResult(_, _, _))
+  EXPECT_CALL(mock_connection_handler_, NotifyServiceStartedResult(_, _, _, _))
       .WillOnce(DoAll(SaveArg<1>(&result), SaveArg<2>(&rejected_params)));
 
   // check: SetVideoConfig() should not be called, StartStreaming() is called
@@ -963,7 +944,7 @@ TEST_F(ApplicationManagerImplTest,
 
   bool result = false;
   std::vector<std::string> rejected_params;
-  EXPECT_CALL(mock_connection_handler_, NotifyServiceStartedResult(_, _, _))
+  EXPECT_CALL(mock_connection_handler_, NotifyServiceStartedResult(_, _, _, _))
       .WillOnce(DoAll(SaveArg<1>(&result), SaveArg<2>(&rejected_params)));
 
   BsonObject input_params;
@@ -1576,7 +1557,7 @@ TEST_F(ApplicationManagerImplTest,
   // - .ini file specifies TCP_WIFI for EMPTY_APP entry.
   //   -> The app does not have required transport.
   bool result = CheckResumptionRequiredTransportAvailableTest(
-      NULL,
+      nullptr,
       primary_device_handle,
       primary_transport_device_string,
       secondary_device_handle,

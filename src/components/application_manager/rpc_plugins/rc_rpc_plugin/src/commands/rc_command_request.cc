@@ -247,8 +247,8 @@ void RCCommandRequest::ProcessAccessResponse(
           mobile_apis::Result::SUCCESS,
           mobile_apis::Result::WARNINGS);
 
-  bool is_allowed = false;
   if (result) {
+    bool is_allowed = false;
     if (message[app_mngr::strings::msg_params].keyExists(
             message_params::kAllowed)) {
       is_allowed =

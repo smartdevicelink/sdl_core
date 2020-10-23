@@ -417,17 +417,15 @@ bool PlatformSpecificNetworkInterfaceListener::UpdateStatus(
     switch (type) {
       case RTM_NEWLINK: {
         const std::string& ifname = GetInterfaceName(it->if_index);
-        SDL_LOG_DEBUG(
-
-            "netlink event: interface " << ifname << " created or updated");
+        SDL_LOG_DEBUG("netlink event: interface " << ifname
+                                                  << " created or updated");
         status.SetName(ifname);
         status.SetFlags(it->flags);
         break;
       }
       case RTM_DELLINK:
-        SDL_LOG_DEBUG(
-
-            "netlink event: interface " << status.GetName() << " removed");
+        SDL_LOG_DEBUG("netlink event: interface " << status.GetName()
+                                                  << " removed");
         status_table_.erase(it->if_index);
         break;
       case RTM_NEWADDR: {

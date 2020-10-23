@@ -84,9 +84,10 @@ const SystemInfo GetSystemInfoResponse::GetSystemInfo() const {
   info.wers_country_code =
       (*message_)[strings::msg_params]["wersCountryCode"].asString();
 
-  const auto lang_code = static_cast<hmi_apis::Common_Language::eType>(
-      (*message_)[strings::msg_params]["language"].asUInt());
-  info.language = MessageHelper::CommonLanguageToString(lang_code);
+  const uint32_t lang_code =
+      (*message_)[strings::msg_params]["language"].asUInt();
+  info.language = application_manager::EnumToString(
+      static_cast<hmi_apis::Common_Language::eType>(lang_code));
 
   return info;
 }

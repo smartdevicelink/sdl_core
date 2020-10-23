@@ -190,7 +190,6 @@ int TransportManagerImpl::ConnectDevice(const DeviceHandle device_handle) {
   if (!this->is_initialized_) {
     SDL_LOG_ERROR("TransportManager is not initialized.");
     SDL_LOG_TRACE(
-
         "exit with E_TM_IS_NOT_INITIALIZED. Condition: !this->is_initialized_");
     return E_TM_IS_NOT_INITIALIZED;
   }
@@ -234,7 +233,6 @@ int TransportManagerImpl::DisconnectDevice(const DeviceHandle device_handle) {
   if (!this->is_initialized_) {
     SDL_LOG_ERROR("TransportManager is not initialized.");
     SDL_LOG_TRACE(
-
         "exit with E_TM_IS_NOT_INITIALIZED. Condition: !this->is_initialized_");
     return E_TM_IS_NOT_INITIALIZED;
   }
@@ -259,7 +257,6 @@ int TransportManagerImpl::Disconnect(const ConnectionUID cid) {
   if (!this->is_initialized_) {
     SDL_LOG_ERROR("TransportManager is not initialized.");
     SDL_LOG_TRACE(
-
         "exit with E_TM_IS_NOT_INITIALIZED. Condition: !this->is_initialized_");
     return E_TM_IS_NOT_INITIALIZED;
   }
@@ -317,7 +314,6 @@ int TransportManagerImpl::DisconnectForce(const ConnectionUID cid) {
   const ConnectionInternal* connection = GetConnection(cid);
   if (NULL == connection) {
     SDL_LOG_ERROR(
-
         "TransportManagerImpl::DisconnectForce: Connection does not exist.");
     SDL_LOG_TRACE("exit with E_INVALID_HANDLE. Condition: NULL == connection");
     return E_INVALID_HANDLE;
@@ -411,7 +407,6 @@ int TransportManagerImpl::SendMessageToDevice(
 
     if (connection->shutdown_) {
       SDL_LOG_ERROR(
-
           "TransportManagerImpl::Disconnect: Connection is to shut down.");
       SDL_LOG_TRACE(
           "exit with E_CONNECTION_IS_TO_SHUTDOWN. Condition: "
@@ -522,7 +517,6 @@ int TransportManagerImpl::SearchDevices() {
   if (!this->is_initialized_) {
     SDL_LOG_ERROR("TM is not initialized");
     SDL_LOG_TRACE(
-
         "exit with E_TM_IS_NOT_INITIALIZED. Condition: !this->is_initialized_");
     return E_TM_IS_NOT_INITIALIZED;
   }
@@ -1005,9 +999,8 @@ bool TransportManagerImpl::UpdateDeviceMapping(
     item = device_to_adapter_map_.begin();
   }
 
-  SDL_LOG_DEBUG(
-
-      "After cleanup. Device map size is " << device_to_adapter_map_.size());
+  SDL_LOG_DEBUG("After cleanup. Device map size is "
+                << device_to_adapter_map_.size());
 
   for (DeviceList::const_iterator it = adapter_device_list.begin();
        it != adapter_device_list.end();
@@ -1031,9 +1024,8 @@ bool TransportManagerImpl::UpdateDeviceMapping(
     RaiseEvent(&TransportManagerListener::OnDeviceFound, info);
   }
 
-  SDL_LOG_DEBUG(
-
-      "After update. Device map size is " << device_to_adapter_map_.size());
+  SDL_LOG_DEBUG("After update. Device map size is "
+                << device_to_adapter_map_.size());
 
   return true;
 }
@@ -1386,7 +1378,8 @@ void TransportManagerImpl::Handle(::protocol_handler::RawMessagePtr msg) {
   }
 
   TransportAdapter* transport_adapter = connection->transport_adapter;
-  if (NULL == transport_adapter) {
+
+  if (nullptr == transport_adapter) {
     std::string error_text = "Transport adapter is not found";
     SDL_LOG_ERROR(error_text);
     RaiseEvent(&TransportManagerListener::OnTMMessageSendFailed,

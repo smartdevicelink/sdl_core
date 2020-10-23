@@ -86,9 +86,8 @@ bool PipeStreamerAdapter::PipeStreamer::Connect() {
     return false;
   }
 
-  SDL_LOG_INFO(
-
-      "Pipe " << named_pipe_path_ << " was successfuly opened for writing");
+  SDL_LOG_INFO("Pipe " << named_pipe_path_
+                       << " was successfuly opened for writing");
   return true;
 }
 

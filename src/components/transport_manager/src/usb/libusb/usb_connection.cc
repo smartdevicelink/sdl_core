@@ -108,10 +108,8 @@ bool UsbConnection::PostInTransfer() {
   const int libusb_ret = libusb_submit_transfer(in_transfer_);
   if (LIBUSB_SUCCESS != libusb_ret) {
     SDL_LOG_ERROR(
-
         "libusb_submit_transfer failed: " << libusb_error_name(libusb_ret));
     SDL_LOG_TRACE(
-
         "exit with FALSE. Condition: LIBUSB_SUCCESS != libusb_submit_transfer");
     return false;
   }
@@ -192,7 +190,6 @@ TransportAdapter::Error UsbConnection::PostOutTransfer() {
   const int libusb_ret = libusb_submit_transfer(out_transfer_);
   if (LIBUSB_SUCCESS != libusb_ret) {
     SDL_LOG_ERROR(
-
         "libusb_submit_transfer failed: " << libusb_error_name(libusb_ret));
     SDL_LOG_TRACE("exit with TransportAdapter::FAIL. Condition: "
                   << "LIBUSB_SUCCESS != libusb_fill_bulk_transfer");
@@ -211,7 +208,6 @@ void UsbConnection::OnOutTransfer(libusb_transfer* transfer) {
       bytes_sent_ += transfer->actual_length;
       if (current_out_message_->data_size() == bytes_sent_) {
         SDL_LOG_DEBUG(
-
             "USB out transfer, data sent: " << current_out_message_.get());
         controller_->DataSendDone(
             device_uid_, app_handle_, current_out_message_);
@@ -219,7 +215,6 @@ void UsbConnection::OnOutTransfer(libusb_transfer* transfer) {
       }
     } else {
       SDL_LOG_ERROR(
-
           "USB out transfer failed: " << libusb_error_name(transfer->status));
       controller_->DataSendFailed(
           device_uid_, app_handle_, current_out_message_, DataSendError());

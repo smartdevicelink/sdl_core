@@ -80,9 +80,7 @@ void ShowConstantTBTRequest::Run() {
     return;
   }
 
-  smart_objects::SmartObject msg_params =
-      smart_objects::SmartObject(smart_objects::SmartType_Map);
-  msg_params = (*message_)[strings::msg_params];
+  smart_objects::SmartObject msg_params = (*message_)[strings::msg_params];
 
   if (IsWhiteSpaceExist()) {
     SDL_LOG_ERROR("Incoming show constant TBT has contains \t\n \\t \\n");

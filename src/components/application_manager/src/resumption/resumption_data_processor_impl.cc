@@ -49,14 +49,6 @@ namespace commands = app_mngr::commands;
 namespace message_params = rc_rpc_plugin::message_params;
 
 SDL_CREATE_LOG_VARIABLE("Resumption")
-std::map<hmi_apis::Common_ModuleType::eType, std::string>
-    module_types_str_mapping{
-        {hmi_apis::Common_ModuleType::eType::CLIMATE, {"CLIMATE"}},
-        {hmi_apis::Common_ModuleType::eType::RADIO, {"RADIO"}},
-        {hmi_apis::Common_ModuleType::eType::SEAT, {"SEAT"}},
-        {hmi_apis::Common_ModuleType::eType::AUDIO, {"AUDIO"}},
-        {hmi_apis::Common_ModuleType::eType::LIGHT, {"LIGHT"}},
-        {hmi_apis::Common_ModuleType::eType::HMI_SETTINGS, {"HMI_SETTINGS"}}};
 
 bool ResumptionRequestID::operator<(const ResumptionRequestID& other) const {
   return correlation_id < other.correlation_id ||
@@ -79,12 +71,6 @@ void ResumptionDataProcessorImpl::Restore(
     ResumeCtrl::ResumptionCallBack callback) {
   SDL_LOG_AUTO_TRACE();
 
-  if (!HasDataToRestore(saved_app)) {
-    SDL_LOG_DEBUG("No data to restore, resumption is successful");
-    callback(mobile_apis::Result::SUCCESS, "Data resumption succesful");
-    return;
-  }
-
   AddFiles(application, saved_app);
   AddSubmenus(application, saved_app);
   AddCommands(application, saved_app);
@@ -93,97 +79,13 @@ void ResumptionDataProcessorImpl::Restore(
   AddSubscriptions(application, saved_app);
   AddWindows(application, saved_app);
 
-  resumption_status_lock_.AcquireForReading();
   const auto app_id = application->app_id();
-  bool is_requests_list_empty = true;
-  if (resumption_status_.find(app_id) != resumption_status_.end()) {
-    is_requests_list_empty =
-        resumption_status_[app_id].list_of_sent_requests.empty();
-  }
-  resumption_status_lock_.Release();
-
-  if (!is_requests_list_empty) {
+  if (!IsResumptionFinished(app_id)) {
     sync_primitives::AutoWriteLock lock(register_callbacks_lock_);
     register_callbacks_[app_id] = callback;
   } else {
-    SDL_LOG_DEBUG("No requests to HMI for " << app_id
-                                            << " , resumption is successful");
-    callback(mobile_apis::Result::SUCCESS, "Data resumption successful");
+    FinalizeResumption(callback, app_id);
   }
-}
-
-bool ResumptionDataProcessorImpl::HasDataToRestore(
-    const smart_objects::SmartObject& saved_app) const {
-  SDL_LOG_AUTO_TRACE();
-
-  auto has_data_to_restore = [&saved_app]() -> bool {
-    return !saved_app[strings::application_files].empty() ||
-           !saved_app[strings::application_submenus].empty() ||
-           !saved_app[strings::application_commands].empty() ||
-           !saved_app[strings::application_choice_sets].empty() ||
-           !saved_app[strings::windows_info].empty();
-  };
-
-  auto has_gp_to_restore = [&saved_app]() -> bool {
-    const smart_objects::SmartObject& global_properties =
-        saved_app[strings::application_global_properties];
-
-    return !global_properties[strings::help_prompt].empty() ||
-           !global_properties[strings::keyboard_properties].empty() ||
-           !global_properties[strings::menu_icon].empty() ||
-           !global_properties[strings::menu_title].empty() ||
-           !global_properties[strings::timeout_prompt].empty() ||
-           !global_properties[strings::vr_help].empty() ||
-           !global_properties[strings::vr_help_title].empty();
-  };
-
-  auto has_subscriptions_to_restore = [&saved_app]() -> bool {
-    const smart_objects::SmartObject& subscriptions =
-        saved_app[strings::application_subscriptions];
-
-    const bool has_ivi_subscriptions =
-        !subscriptions[strings::application_vehicle_info].empty();
-
-    const bool has_button_subscriptions =
-        !subscriptions[strings::application_buttons].empty() &&
-        !(subscriptions[strings::application_buttons].length() == 1 &&
-          static_cast<hmi_apis::Common_ButtonName::eType>(
-              subscriptions[strings::application_buttons][0].asInt()) ==
-              hmi_apis::Common_ButtonName::CUSTOM_BUTTON);
-
-    const bool has_waypoints_subscriptions =
-        subscriptions[strings::subscribed_for_way_points].asBool();
-
-    const bool has_appservice_subscriptions =
-        subscriptions.keyExists(app_mngr::hmi_interface::app_service) &&
-        !subscriptions[app_mngr::hmi_interface::app_service].empty();
-
-    const bool has_system_capability_subscriptions =
-        subscriptions.keyExists(strings::system_capability) &&
-        !subscriptions[strings::system_capability].empty();
-
-    return has_ivi_subscriptions || has_button_subscriptions ||
-           has_waypoints_subscriptions || has_appservice_subscriptions ||
-           has_system_capability_subscriptions;
-  };
-
-  if (has_data_to_restore()) {
-    SDL_LOG_DEBUG("Application has data to restore");
-    return true;
-  }
-
-  if (has_gp_to_restore()) {
-    SDL_LOG_DEBUG("Application has global properties to restore");
-    return true;
-  }
-
-  if (has_subscriptions_to_restore()) {
-    SDL_LOG_DEBUG("Application has subscriptions to restore");
-    return true;
-  }
-
-  SDL_LOG_DEBUG("Application does not have any data to restore");
-  return false;
 }
 
 utils::Optional<uint32_t>
@@ -268,7 +170,7 @@ void ResumptionDataProcessorImpl::ProcessResumptionStatus(
   }
 }
 
-bool ResumptionDataProcessorImpl::IsResumptionFinished(
+void ResumptionDataProcessorImpl::EraseProcessedRequest(
     const uint32_t app_id, const ResumptionRequest& found_request) {
   SDL_LOG_AUTO_TRACE();
 
@@ -285,8 +187,19 @@ bool ResumptionDataProcessorImpl::IsResumptionFinished(
                                 found_request.request_id.function_id;
                    });
   list_of_sent_requests.erase(request_iter);
+}
 
-  return list_of_sent_requests.empty();
+bool ResumptionDataProcessorImpl::IsResumptionFinished(
+    const uint32_t app_id) const {
+  SDL_LOG_AUTO_TRACE();
+
+  sync_primitives::AutoReadLock lock(resumption_status_lock_);
+  bool is_requests_list_empty = true;
+  const auto app_status = resumption_status_.find(app_id);
+  if (app_status != resumption_status_.end()) {
+    is_requests_list_empty = app_status->second.list_of_sent_requests.empty();
+  }
+  return is_requests_list_empty;
 }
 
 utils::Optional<ResumeCtrl::ResumptionCallBack>
@@ -307,7 +220,7 @@ bool ResumptionDataProcessorImpl::IsResumptionSuccessful(
   sync_primitives::AutoReadLock lock(resumption_status_lock_);
   auto it = resumption_status_.find(app_id);
   if (resumption_status_.end() == it) {
-    return false;
+    return true;
   }
 
   const ApplicationResumptionStatus& status = it->second;
@@ -317,17 +230,27 @@ bool ResumptionDataProcessorImpl::IsResumptionSuccessful(
 }
 
 void ResumptionDataProcessorImpl::EraseAppResumptionData(
-    const uint32_t app_id,
-    const hmi_apis::FunctionID::eType function_id,
-    const int32_t corr_id) {
+    const uint32_t app_id) {
   SDL_LOG_AUTO_TRACE();
 
+  std::vector<ResumptionRequest> all_requests;
+
   resumption_status_lock_.AcquireForWriting();
+  all_requests.insert(all_requests.end(),
+                      resumption_status_[app_id].successful_requests.begin(),
+                      resumption_status_[app_id].successful_requests.end());
+  all_requests.insert(all_requests.end(),
+                      resumption_status_[app_id].error_requests.begin(),
+                      resumption_status_[app_id].error_requests.end());
+
   resumption_status_.erase(app_id);
   resumption_status_lock_.Release();
 
   request_app_ids_lock_.AcquireForWriting();
-  request_app_ids_.erase({function_id, corr_id});
+  for (auto request : all_requests) {
+    request_app_ids_.erase(
+        {request.request_id.function_id, request.request_id.correlation_id});
+  }
   request_app_ids_lock_.Release();
 
   register_callbacks_lock_.AcquireForWriting();
@@ -362,8 +285,9 @@ void ResumptionDataProcessorImpl::ProcessResponseFromHMI(
   auto request = *found_request;
 
   ProcessResumptionStatus(app_id, response, request);
+  EraseProcessedRequest(app_id, request);
 
-  if (!IsResumptionFinished(app_id, request)) {
+  if (!IsResumptionFinished(app_id)) {
     SDL_LOG_DEBUG("Resumption app "
                   << app_id << " not finished. Some requests are still waited");
     return;
@@ -375,7 +299,11 @@ void ResumptionDataProcessorImpl::ProcessResponseFromHMI(
     return;
   }
   auto callback = *found_callback;
+  FinalizeResumption(callback, app_id);
+}
 
+void ResumptionDataProcessorImpl::FinalizeResumption(
+    const ResumeCtrl::ResumptionCallBack& callback, const uint32_t app_id) {
   if (IsResumptionSuccessful(app_id)) {
     SDL_LOG_DEBUG("Resumption for app " << app_id << " successful");
     callback(mobile_apis::Result::SUCCESS, "Data resumption successful");
@@ -386,8 +314,7 @@ void ResumptionDataProcessorImpl::ProcessResponseFromHMI(
     RevertRestoredData(application_manager_.application(app_id));
     application_manager_.state_controller().DropPostponedWindows(app_id);
   }
-
-  EraseAppResumptionData(app_id, function_id, corr_id);
+  EraseAppResumptionData(app_id);
 }
 
 void ResumptionDataProcessorImpl::HandleOnTimeOut(
@@ -1117,7 +1044,7 @@ void ResumptionDataProcessorImpl::CheckModuleDataSubscription(
           response_module_data_so[message_params::kModuleType].asUInt());
 
   const auto responsed_module_type_str =
-      module_types_str_mapping[responsed_module_type_int];
+      application_manager::EnumToString(responsed_module_type_int);
 
   const auto response_module_id =
       response_module_data_so[message_params::kModuleId].asString();

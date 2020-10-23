@@ -66,8 +66,7 @@ enum ErrorCode {
 
 class WebsocketSession;
 
-class CMessageBrokerController
-    : public std::enable_shared_from_this<CMessageBrokerController> {
+class CMessageBrokerController {
  public:
   CMessageBrokerController(const std::string& address,
                            uint16_t port,
@@ -99,7 +98,7 @@ class CMessageBrokerController
 
   void sendResponse(Json::Value& message);
 
-  void sendJsonMessage(Json::Value& message);
+  bool sendJsonMessage(Json::Value& message);
 
   void subscribeTo(std::string property);
 
@@ -123,26 +122,26 @@ class CMessageBrokerController
 
   std::string GetComponentName(std::string& method);
 
-  void processInternalRequest(Json::Value& message,
-                              WebsocketSession* ws_session);
+  void processInternalRequest(const Json::Value& message,
+                              WebsocketSession& ws_session);
 
-  void pushRequest(Json::Value& message, WebsocketSession* ws_session);
+  bool pushRequest(Json::Value& message, WebsocketSession& ws_session);
 
   // Registry
-  bool addController(WebsocketSession* ws_session, std::string name);
+  bool addController(WebsocketSession& ws_session, const std::string& name);
 
-  void deleteController(WebsocketSession* ws_session);
+  void deleteController(WebsocketSession& ws_session);
 
-  void deleteController(std::string name);
+  void deleteController(const std::string& name);
 
-  void removeSubscribersBySession(const WebsocketSession* ws);
+  void removeSubscribersBySession(const WebsocketSession& ws);
 
-  bool addSubscriber(WebsocketSession* ws_session, std::string name);
+  bool addSubscriber(WebsocketSession& ws_session, const std::string& name);
 
-  void deleteSubscriber(WebsocketSession* ws, std::string name);
+  void deleteSubscriber(const WebsocketSession& ws, const std::string& name);
 
-  int getSubscribersFd(std::string name,
-                       std::vector<WebsocketSession*>& result);
+  std::vector<std::shared_ptr<WebsocketSession> > getSubscribersFd(
+      const std::string& name);
 
   int getNextControllerId();
 
@@ -168,13 +167,13 @@ class CMessageBrokerController
       mConnectionList;
   sync_primitives::Lock mConnectionListLock;
 
-  std::map<std::string, WebsocketSession*> mControllersList;
+  std::map<std::string, std::weak_ptr<WebsocketSession> > mControllersList;
   sync_primitives::Lock mControllersListLock;
 
-  std::multimap<std::string, WebsocketSession*> mSubscribersList;
+  std::multimap<std::string, std::weak_ptr<WebsocketSession> > mSubscribersList;
   sync_primitives::Lock mSubscribersListLock;
 
-  std::map<std::string, WebsocketSession*> mRequestList;
+  std::map<std::string, std::weak_ptr<WebsocketSession> > mRequestList;
   sync_primitives::Lock mRequestListLock;
 
   std::atomic_bool shutdown_;

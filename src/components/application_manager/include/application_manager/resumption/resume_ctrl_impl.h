@@ -83,9 +83,8 @@ class ResumeCtrlImpl : public ResumeCtrl {
   /**
    * @brief Set application HMI Level and ausio_state as saved
    * @param application is application witch HMI Level is need to restore
-   * @return true if success, otherwise return false
    */
-  bool RestoreAppHMIState(app_mngr::ApplicationSharedPtr application) OVERRIDE;
+  void RestoreAppHMIState(app_mngr::ApplicationSharedPtr application) OVERRIDE;
 
   /**
    * @brief Set application HMI Level as stored in policy
@@ -234,9 +233,8 @@ class ResumeCtrlImpl : public ResumeCtrl {
    * @brief Resume HMI Level and audio streaming state if needed
    * @param application - application to restore hmi level
    * and audio streaming state
-   * @return true if success otherwise false
    */
-  bool StartAppHmiStateResumption(
+  void StartAppHmiStateResumption(
       app_mngr::ApplicationSharedPtr application) OVERRIDE;
 
   /**
