@@ -35,8 +35,11 @@
 
 #include "application_manager/application.h"
 #include "application_manager/application_manager.h"
+#include "application_manager/postponed_activation_controller.h"
 #include "application_manager/request_controller_settings.h"
 #include "stdint.h"
+
+class PostponedActivationController;
 
 namespace application_manager {
 class StateController {
@@ -246,6 +249,8 @@ class StateController {
    * @param app_id id of application to check
    */
   virtual void DropPostponedWindows(const uint32_t app_id) = 0;
+
+  virtual PostponedActivationController& GetPostponedActivationController() = 0;
 };
 
 }  // namespace application_manager

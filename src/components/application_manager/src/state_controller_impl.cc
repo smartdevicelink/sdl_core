@@ -56,7 +56,9 @@ bool IsStateChanged(const HmiState& old_state, const HmiState& new_state) {
 }  // unnamed namespace
 
 StateControllerImpl::StateControllerImpl(ApplicationManager& app_mngr)
-    : EventObserver(app_mngr.event_dispatcher()), app_mngr_(app_mngr) {
+    : EventObserver(app_mngr.event_dispatcher())
+    , app_mngr_(app_mngr)
+    , postponed_activation_controller_() {
   subscribe_on_event(hmi_apis::FunctionID::BasicCommunication_OnAppActivated);
   subscribe_on_event(hmi_apis::FunctionID::BasicCommunication_OnAppDeactivated);
   subscribe_on_event(hmi_apis::FunctionID::TTS_Started);
@@ -955,6 +957,15 @@ void StateControllerImpl::OnStateChanged(ApplicationSharedPtr app,
 
   if (new_state->hmi_level() == mobile_apis::HMILevel::HMI_NONE) {
     app->ResetDataInNone();
+    if (mobile_apis::HMILevel::INVALID_ENUM == old_state->hmi_level()) {
+      const uint32_t app_id = app->app_id();
+      const uint32_t corr_id =
+          postponed_activation_controller_.GetPendingActivationCorrId(app_id);
+      if (corr_id > 0) {
+        app_mngr_.GetPolicyHandler().OnActivateApp(app_id, corr_id);
+        postponed_activation_controller_.RemoveAppToActivate(app_id);
+      }
+    }
   }
 
   app_mngr_.OnHMIStateChanged(app->app_id(), old_state, new_state);
@@ -1413,6 +1424,11 @@ mobile_apis::VideoStreamingState::eType StateControllerImpl::CalcVideoState(
                 << app->app_id() << " for " << hmi_level << " HMI level is "
                 << state);
   return state;
+}
+
+PostponedActivationController&
+StateControllerImpl::GetPostponedActivationController() {
+  return postponed_activation_controller_;
 }
 
 }  // namespace application_manager
