@@ -917,6 +917,12 @@ void StateControllerImpl::OnStateChanged(ApplicationSharedPtr app,
   SDL_LOG_DEBUG("Window #" << window_id << " old state: " << *old_state);
   SDL_LOG_DEBUG("Window #" << window_id << " new state: " << *new_state);
 
+  if ((new_state->hmi_level() == mobile_apis::HMILevel::INVALID_ENUM) &&
+      (old_state->hmi_level() == mobile_apis::HMILevel::INVALID_ENUM)) {
+    SDL_LOG_DEBUG("HMI level is invalid data.");
+    return;
+  }
+
   if (!IsStateChanged(*old_state, *new_state)) {
     SDL_LOG_DEBUG("State has NOT been changed.");
     return;
