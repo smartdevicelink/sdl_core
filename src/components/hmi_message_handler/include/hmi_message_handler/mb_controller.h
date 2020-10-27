@@ -58,8 +58,6 @@ using namespace boost::beast::websocket;
 
 namespace hmi_message_handler {
 
-CREATE_LOGGERPTR_GLOBAL(mb_logger_, "HMIMessageHandler")
-
 enum ErrorCode {
   CONTROLLER_EXISTS = -32000,
   SUBSCRIBTION_EXISTS = -32001,
@@ -149,6 +147,8 @@ class CMessageBrokerController
   int getNextControllerId();
 
  private:
+  void CloseConnection();
+
   boost::asio::io_context ioc_;
   const std::string& address_;
   uint16_t port_;

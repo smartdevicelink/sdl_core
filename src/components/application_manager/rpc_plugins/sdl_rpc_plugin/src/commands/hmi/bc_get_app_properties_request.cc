@@ -39,6 +39,8 @@ namespace sdl_rpc_plugin {
 using namespace application_manager;
 namespace commands {
 
+SDL_CREATE_LOG_VARIABLE("Commands")
+
 BCGetAppPropertiesRequest::BCGetAppPropertiesRequest(
     const application_manager::commands::MessageSharedPtr& message,
     ApplicationManager& application_manager,
@@ -54,15 +56,14 @@ BCGetAppPropertiesRequest::BCGetAppPropertiesRequest(
 void BCGetAppPropertiesRequest::FillAppProperties(
     const std::string& policy_app_id,
     smart_objects::SmartObject& out_properties) const {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
 
   policy::AppProperties app_properties;
   const bool result =
       policy_handler_.GetAppProperties(policy_app_id, app_properties);
 
   if (!result) {
-    LOG4CXX_DEBUG(
-        logger_,
+    SDL_LOG_DEBUG(
         "Failed to get app parameters for policy_app_id: " << policy_app_id);
     return;
   }
@@ -98,7 +99,7 @@ void BCGetAppPropertiesRequest::FillAppProperties(
 }
 
 void BCGetAppPropertiesRequest::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
 
   const auto& msg_params = (*message_)[strings::msg_params];
   smart_objects::SmartObject response_params(smart_objects::SmartType_Map);
@@ -111,9 +112,9 @@ void BCGetAppPropertiesRequest::Run() {
       response_params[strings::properties][0] = properties;
     }
   } else {
-    LOG4CXX_DEBUG(logger_,
-                  "policyAppID was absent in request, all apps properties "
-                  "will be returned.");
+    SDL_LOG_DEBUG(
+        "policyAppID was absent in request, all apps properties "
+        "will be returned.");
     const auto app_ids = policy_handler_.GetApplicationPolicyIDs();
     int i = 0;
     for (auto& app_id : app_ids) {

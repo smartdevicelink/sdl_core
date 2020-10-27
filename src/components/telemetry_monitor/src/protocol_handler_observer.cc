@@ -37,7 +37,7 @@
 
 namespace telemetry_monitor {
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "TelemetryMonitor")
+SDL_CREATE_LOG_VARIABLE("TelemetryMonitor")
 
 ProtocolHandlerObserver::ProtocolHandlerObserver(
     TelemetryMonitor* telemetry_monitor)
@@ -49,8 +49,8 @@ void ProtocolHandlerObserver::StartMessageProcess(
     return;
   }
   if (time_starts.find(message_id) != time_starts.end()) {
-    LOG4CXX_DEBUG(
-        logger_,
+    SDL_LOG_DEBUG(
+
         "Already waiting for stop processing for Message ID: " << message_id);
     return;
   }
@@ -63,7 +63,7 @@ void ProtocolHandlerObserver::EndMessageProcess(
   std::map<uint32_t, date_time::TimeDuration>::const_iterator it =
       time_starts.find(message_id);
   if (it == time_starts.end()) {
-    LOG4CXX_WARN(logger_, "Cant find start time for message" << message_id);
+    SDL_LOG_WARN("Cant find start time for message" << message_id);
     return;
   }
   m->begin = time_starts[message_id];

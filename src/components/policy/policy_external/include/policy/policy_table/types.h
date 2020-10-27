@@ -382,6 +382,8 @@ struct ModuleConfig : CompositeType {
   ServiceEndpoints endpoints;
   Optional<ServiceEndpointProperties> endpoint_properties;
   NumberOfNotificationsPerMinute notifications_per_minute_by_priority;
+  Optional<NumberOfNotificationsPerMinute>
+      subtle_notifications_per_minute_by_priority;
   Optional<String<0, 100> > vehicle_make;
   Optional<String<0, 100> > vehicle_model;
   Optional<String<0, 4> > vehicle_year;
@@ -485,7 +487,7 @@ struct ConsumerFriendlyMessages : CompositeType {
 
 struct ModuleMeta : CompositeType {
  public:
-  Optional<String<0, 250> > ccpu_version;
+  Optional<String<0, 500> > ccpu_version;
   Optional<String<0, 250> > language;
   Optional<String<0, 250> > wers_country_code;
   Optional<Integer<uint32_t, 0, ODO_MAX> > pt_exchanged_at_odometer_x;

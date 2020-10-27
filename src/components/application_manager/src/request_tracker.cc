@@ -39,19 +39,18 @@ namespace application_manager {
 
 namespace request_controller {
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "RequestController")
+SDL_CREATE_LOG_VARIABLE("RequestController")
 
 RequestTracker::RequestTracker(const RequestControlerSettings& settings)
     : settings_(settings) {}
 
 TrackResult RequestTracker::Track(const ApplicationID& app_id,
                                   const mobile_apis::HMILevel::eType level) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   bool track_result = false;
 
-  LOG4CXX_DEBUG(logger_,
-                "Tracking request for level: "
-                    << MessageHelper::StringifiedHMILevel(level));
+  SDL_LOG_DEBUG("Tracking request for level: "
+                << MessageHelper::StringifiedHMILevel(level));
 
   if (mobile_apis::HMILevel::HMI_NONE == level) {
     track_result = Track(app_id,
@@ -76,44 +75,41 @@ bool RequestTracker::Track(const ApplicationID& app_id,
                            const uint32_t time_scale,
                            const uint32_t max_requests,
                            ApplicationsRequestsTracker& tracker) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   using namespace date_time;
 
   if (!time_scale || !max_requests) {
-    LOG4CXX_INFO(logger_, "Time scale request tracking is disabled.");
+    SDL_LOG_INFO("Time scale request tracking is disabled.");
     return true;
   }
 
-  LOG4CXX_DEBUG(logger_,
-                "Time scale is: " << time_scale << ". Max requests number is: "
+  SDL_LOG_DEBUG("Time scale is: " << time_scale << ". Max requests number is: "
                                   << max_requests);
 
-  LOG4CXX_DEBUG(logger_, "Tracking app id: " << app_id);
+  SDL_LOG_DEBUG("Tracking app id: " << app_id);
   ApplicationsRequestsTracker::iterator it_app = tracker.find(app_id);
 
   if (tracker.end() == it_app) {
-    LOG4CXX_DEBUG(logger_, "Adding new application into tracking.");
+    SDL_LOG_DEBUG("Adding new application into tracking.");
     tracker[app_id].push_back(getCurrentTime());
     return true;
   }
 
-  LOG4CXX_DEBUG(logger_,
-                "Amount of known requests is: " << it_app->second.size());
+  SDL_LOG_DEBUG("Amount of known requests is: " << it_app->second.size());
 
   if (it_app->second.size() < max_requests) {
-    LOG4CXX_DEBUG(logger_, "Adding new request into tracking.");
+    SDL_LOG_DEBUG("Adding new request into tracking.");
     tracker[app_id].push_back(getCurrentTime());
     return true;
   }
 
-  LOG4CXX_DEBUG(logger_,
-                "Oldest request is added at: "
-                    << getmSecs(it_app->second.front())
-                    << ". Current time is: " << getmSecs(getCurrentTime())
-                    << ". Time scale is: " << time_scale);
+  SDL_LOG_DEBUG("Oldest request is added at: "
+                << getmSecs(it_app->second.front())
+                << ". Current time is: " << getmSecs(getCurrentTime())
+                << ". Time scale is: " << time_scale);
 
   if (calculateTimeSpan(it_app->second.front()) > time_scale) {
-    LOG4CXX_DEBUG(logger_, "Dropping oldest request, adding new one.");
+    SDL_LOG_DEBUG("Dropping oldest request, adding new one.");
     ApplicationsRequestsTracker::mapped_type& times = tracker[app_id];
 
     DCHECK_OR_RETURN(!times.empty(), false);
@@ -123,7 +119,7 @@ bool RequestTracker::Track(const ApplicationID& app_id,
     return true;
   }
 
-  LOG4CXX_DEBUG(logger_, "Requests amount per time scale is exceeded.");
+  SDL_LOG_DEBUG("Requests amount per time scale is exceeded.");
 
   return false;
 }

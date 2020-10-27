@@ -79,6 +79,7 @@
 #include "sdl_rpc_plugin/commands/hmi/on_ui_keyboard_input_notification.h"
 #include "sdl_rpc_plugin/commands/hmi/on_ui_language_change_notification.h"
 #include "sdl_rpc_plugin/commands/hmi/on_ui_reset_timeout_notification.h"
+#include "sdl_rpc_plugin/commands/hmi/on_ui_subtle_alert_pressed_notification.h"
 #include "sdl_rpc_plugin/commands/hmi/on_ui_touch_event_notification.h"
 #include "sdl_rpc_plugin/commands/hmi/on_video_data_streaming_notification.h"
 #include "sdl_rpc_plugin/commands/hmi/on_vr_command_notification.h"
@@ -100,6 +101,7 @@
 #include "application_manager/mock_rpc_plugin_manager.h"
 #include "application_manager/mock_state_controller.h"
 #include "application_manager/policies/mock_policy_handler_interface.h"
+#include "application_manager/resumption/resumption_data_processor.h"
 #include "application_manager/smart_object_keys.h"
 #include "connection_handler/mock_connection_handler.h"
 #include "connection_handler/mock_connection_handler_settings.h"
@@ -256,6 +258,8 @@ class HMICommandsNotificationsTest
     ON_CALL(app_mngr_, application(kConnectionKey)).WillByDefault(Return(app_));
     ON_CALL(mock_message_helper_, MobileLanguageToString(kMobileLanguage))
         .WillByDefault(Return(kDefaultLanguage));
+    ON_CALL(app_mngr_, connection_handler())
+        .WillByDefault(ReturnRef(mock_connection_handler_));
   }
 
   am::ApplicationSharedPtr ConfigureApp(NiceMock<MockApplication>** app_mock,
@@ -479,6 +483,21 @@ TEST_F(HMICommandsNotificationsTest, OnUITouchEventSendNotificationToMobile) {
 }
 
 TEST_F(HMICommandsNotificationsTest,
+       OnUISubtleAlertPressedSendNotificationToMobile) {
+  MessageSharedPtr message = CreateMessage();
+  std::shared_ptr<Command> command =
+      CreateCommand<OnUISubtleAlertPressedNotification>(message);
+  EXPECT_CALL(mock_rpc_service_,
+              ManageMobileCommand(_, Command::CommandSource::SOURCE_SDL));
+  command->Run();
+  EXPECT_EQ(
+      static_cast<int32_t>(mobile_apis::FunctionID::OnSubtleAlertPressedID),
+      (*message)[am::strings::params][am::strings::function_id].asInt());
+  EXPECT_EQ(static_cast<int32_t>(am::MessageType::kNotification),
+            (*message)[am::strings::params][am::strings::message_type].asInt());
+}
+
+TEST_F(HMICommandsNotificationsTest,
        OnAppRegisteredNotificationSendNotificationToHmi) {
   int32_t event_id = hmi_apis::FunctionID::INVALID_ENUM;
   MessageSharedPtr message = CreateMessage();
@@ -545,7 +564,7 @@ TEST_F(HMICommandsNotificationsTest, OnReadyNotificationEventDispatcher) {
   std::shared_ptr<Command> command =
       CreateCommand<OnReadyNotification>(message);
 
-  EXPECT_CALL(app_mngr_, OnHMIStartedCooperation());
+  EXPECT_CALL(app_mngr_, OnHMIReady());
   EXPECT_CALL(app_mngr_, event_dispatcher());
   EXPECT_CALL(mock_event_dispatcher_, raise_event(_))
       .WillOnce(GetEventId(&event_id));
@@ -957,7 +976,7 @@ TEST_F(HMICommandsNotificationsTest,
       kCorrelationId_;
   MessageSharedPtr temp_message = CreateMessage();
 
-  resumprion_test::MockResumeCtrl mock_resume_ctrl;
+  resumption_test::MockResumeCtrl mock_resume_ctrl;
   EXPECT_CALL(app_mngr_, resume_controller())
       .WillOnce(ReturnRef(mock_resume_ctrl));
   EXPECT_CALL(mock_resume_ctrl, OnSuspend());
@@ -1009,18 +1028,17 @@ TEST_F(HMICommandsNotificationsTest,
       static_cast<int32_t>(am::MessageType::kNotification);
   (*notification)[am::strings::params][am::strings::connection_key] = kAppId_;
 
-  std::vector<hmi_apis::Common_ApplicationExitReason::eType> reason_list;
-  reason_list.push_back(hmi_apis::Common_ApplicationExitReason::
-                            UNAUTHORIZED_TRANSPORT_REGISTRATION);
-  reason_list.push_back(
-      hmi_apis::Common_ApplicationExitReason::UNSUPPORTED_HMI_RESOURCE);
+  using ExitReason = hmi_apis::Common_ApplicationExitReason::eType;
+  std::vector<ExitReason> reason_list = {
+      ExitReason::UNAUTHORIZED_TRANSPORT_REGISTRATION,
+      ExitReason::UNSUPPORTED_HMI_RESOURCE,
+      ExitReason::RESOURCE_CONSTRAINT};
 
-  std::vector<mobile_apis::AppInterfaceUnregisteredReason::eType>
-      mobile_reason_list;
-  mobile_reason_list.push_back(
-      mobile_apis::AppInterfaceUnregisteredReason::APP_UNAUTHORIZED);
-  mobile_reason_list.push_back(
-      mobile_apis::AppInterfaceUnregisteredReason::UNSUPPORTED_HMI_RESOURCE);
+  using UnregisteredReason = mobile_apis::AppInterfaceUnregisteredReason::eType;
+  std::vector<UnregisteredReason> mobile_reason_list = {
+      UnregisteredReason::APP_UNAUTHORIZED,
+      UnregisteredReason::UNSUPPORTED_HMI_RESOURCE,
+      UnregisteredReason::RESOURCE_CONSTRAINT};
 
   std::vector<mobile_apis::AppInterfaceUnregisteredReason::eType>::iterator
       it_mobile_reason = mobile_reason_list.begin();

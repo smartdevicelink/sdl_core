@@ -122,7 +122,8 @@ class PolicyHandler : public PolicyHandlerInterface,
       const RPCParams& rpc_params,
       CheckPermissionResult& result) OVERRIDE;
 
-  uint32_t GetNotificationsNumber(const std::string& priority) const OVERRIDE;
+  uint32_t GetNotificationsNumber(const std::string& priority,
+                                  const bool is_subtle = false) const OVERRIDE;
   virtual DeviceConsent GetUserConsentForDevice(
       const std::string& device_id) const OVERRIDE;
 
@@ -384,6 +385,10 @@ class PolicyHandler : public PolicyHandlerInterface,
   void OnGetSystemInfo(const std::string& ccpu_version,
                        const std::string& wers_country_code,
                        const std::string& language) OVERRIDE;
+
+  void SetPreloadedPtFlag(const bool is_preloaded) OVERRIDE;
+
+  std::string GetCCPUVersionFromPT() const OVERRIDE;
 
   /**
    * @brief Sends GetVehicleData request in case when Vechicle info is ready.

@@ -30,14 +30,51 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "rc_rpc_plugin/rc_app_extension.h"
 #include <algorithm>
+
+#include "rc_rpc_plugin/rc_app_extension.h"
+
 #include "rc_rpc_plugin/rc_module_constants.h"
+#include "rc_rpc_plugin/rc_rpc_plugin.h"
 #include "smart_objects/smart_object.h"
+#include "utils/logger.h"
+
+SDL_CREATE_LOG_VARIABLE("RemoteControlModule")
+
+namespace {
+std::set<rc_rpc_plugin::ModuleUid> ConvertSmartObjectToModuleCollection(
+    const smart_objects::SmartObject& resumption_data) {
+  using namespace rc_rpc_plugin;
+
+  if (!resumption_data.keyExists(application_manager::hmi_interface::rc)) {
+    SDL_LOG_DEBUG("No resumption module data subscription to revert");
+    return {};
+  }
+
+  const auto& module_data =
+      resumption_data[application_manager::hmi_interface::rc]
+                     [message_params::kModuleData];
+
+  std::set<rc_rpc_plugin::ModuleUid> module_collection;
+
+  if (!module_data.empty()) {
+    for (const auto& module : *(module_data.asArray())) {
+      const auto module_type = module[message_params::kModuleType].asString();
+      const auto module_id = module[message_params::kModuleId].asString();
+
+      module_collection.insert({module_type, module_id});
+    }
+  }
+
+  return module_collection;
+}
+}  // namespace
 
 namespace rc_rpc_plugin {
-RCAppExtension::RCAppExtension(application_manager::AppExtensionUID uid)
-    : AppExtension(uid) {}
+RCAppExtension::RCAppExtension(application_manager::AppExtensionUID uid,
+                               RCRPCPlugin& plugin,
+                               application_manager::Application& application)
+    : AppExtension(uid), plugin_(plugin), application_(application) {}
 
 void RCAppExtension::SubscribeToInteriorVehicleData(const ModuleUid& module) {
   subscribed_interior_vehicle_data_.insert(module);
@@ -50,10 +87,18 @@ void RCAppExtension::UnsubscribeFromInteriorVehicleData(
 
 void RCAppExtension::UnsubscribeFromInteriorVehicleDataOfType(
     const std::string& module_type) {
+  bool unsubscribed = false;
   for (auto& item : subscribed_interior_vehicle_data_) {
     if (module_type == item.first) {
       subscribed_interior_vehicle_data_.erase(item);
+      unsubscribed = true;
     }
+  }
+
+  if (unsubscribed) {
+    // If didin't unsubscribe from some module type, we don't need to update
+    // application hash
+    UpdateHash();
   }
 }
 
@@ -81,14 +126,122 @@ bool RCAppExtension::IsSubscribedToInteriorVehicleData(
 }
 
 void RCAppExtension::SaveResumptionData(
-    ns_smart_device_link::ns_smart_objects::SmartObject& resumption_data) {}
+    smart_objects::SmartObject& resumption_data) {
+  SDL_LOG_AUTO_TRACE();
+
+  if (subscribed_interior_vehicle_data_.empty()) {
+    SDL_LOG_DEBUG("Subscribed modules data is absent");
+    return;
+  }
+
+  resumption_data[message_params::kModuleData] =
+      smart_objects::SmartObject(smart_objects::SmartType_Array);
+  auto& module_data = resumption_data[message_params::kModuleData];
+
+  uint32_t index = 0;
+  for (const auto& module_uid : subscribed_interior_vehicle_data_) {
+    SDL_LOG_DEBUG("Save module: [" << module_uid.first << ":"
+                                   << module_uid.second << "]");
+    auto module_info_so =
+        smart_objects::SmartObject(smart_objects::SmartType_Map);
+    module_info_so[message_params::kModuleType] = module_uid.first;
+    module_info_so[message_params::kModuleId] = module_uid.second;
+    module_data[index++] = module_info_so;
+  }
+}
 
 void RCAppExtension::ProcessResumption(
-    const ns_smart_device_link::ns_smart_objects::SmartObject&
-        resumption_data) {}
+    const smart_objects::SmartObject& saved_app) {
+  SDL_LOG_AUTO_TRACE();
+  SDL_LOG_TRACE("app id : " << application_.app_id());
+
+  if (!saved_app.keyExists(
+          application_manager::strings::application_subscriptions)) {
+    SDL_LOG_DEBUG("application_subscriptions section does not exist");
+    return;
+  }
+
+  const auto& resumption_data =
+      saved_app[application_manager::strings::application_subscriptions];
+
+  if (!resumption_data.keyExists(message_params::kModuleData)) {
+    SDL_LOG_DEBUG("kModuleData section does not exist");
+    return;
+  }
+
+  auto& module_data = resumption_data[message_params::kModuleData];
+
+  if (0 == module_data.length()) {
+    SDL_LOG_WARN("Subscribed modules data is absent");
+    return;
+  }
+
+  for (const auto& module_so : *module_data.asArray()) {
+    const auto module_type = module_so[message_params::kModuleType].asString();
+    const auto module_id = module_so[message_params::kModuleId].asString();
+
+    ModuleUid module{module_type, module_id};
+    SDL_LOG_TRACE("app id " << application_.app_id() << " type : "
+                            << module_type << " id <" << module_id);
+    AddPendingSubscription(module);
+  }
+
+  plugin_.ProcessResumptionSubscription(application_, *this);
+}
+
+void RCAppExtension::RevertResumption(
+    const smart_objects::SmartObject& resumption_data) {
+  SDL_LOG_AUTO_TRACE();
+
+  UnsubscribeFromInteriorVehicleData();
+
+  const auto module_subscriptions =
+      ConvertSmartObjectToModuleCollection(resumption_data);
+
+  for (auto& module : module_subscriptions) {
+    SDL_LOG_TRACE("Requested to unsubscribe module_type  "
+                  << module.first << "module_id: " << module.second);
+  }
+  std::set<rc_rpc_plugin::ModuleUid> to_be_unsubscribed;
+
+  const auto app_id = application_.app_id();
+  auto no_apps_subscribed = [app_id,
+                             this](const rc_rpc_plugin::ModuleUid& module) {
+    if (plugin_.IsOtherAppsSubscribed(module, app_id)) {
+      SDL_LOG_DEBUG("Some other app except " << app_id
+                                             << " is already subscribed to "
+                                             << " module_type  " << module.first
+                                             << "module_id: " << module.second);
+      return false;
+    }
+    return true;
+  };
+  std::copy_if(module_subscriptions.begin(),
+               module_subscriptions.end(),
+               std::inserter(to_be_unsubscribed, to_be_unsubscribed.end()),
+               no_apps_subscribed);
+
+  plugin_.RevertResumption(to_be_unsubscribed);
+}
 
 std::set<ModuleUid> RCAppExtension::InteriorVehicleDataSubscriptions() const {
   return subscribed_interior_vehicle_data_;
+}
+
+bool RCAppExtension::AddPendingSubscription(const ModuleUid& module) {
+  return pending_subscriptions_.insert(module).second;
+}
+
+void RCAppExtension::RemovePendingSubscription(const ModuleUid& module) {
+  pending_subscriptions_.erase(module);
+}
+
+void RCAppExtension::RemovePendingSubscriptions() {
+  pending_subscriptions_.clear();
+}
+
+std::set<ModuleUid> RCAppExtension::PendingSubscriptions() {
+  return pending_subscriptions_;
 }
 
 Grid RCAppExtension::GetUserLocation() const {
@@ -109,6 +262,10 @@ void RCAppExtension::SetUserLocation(
 
 void RCAppExtension::SetUserLocation(const Grid& grid) {
   user_location_ = grid;
+}
+
+void RCAppExtension::UpdateHash() {
+  application_.UpdateHash();
 }
 
 RCAppExtension::~RCAppExtension() {}

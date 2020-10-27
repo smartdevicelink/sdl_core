@@ -142,7 +142,7 @@ TEST_F(DeleteInteractionChoiceSetRequestTest, Run_FindChoiceSetFail_UNSUCCESS) {
 
   EXPECT_CALL(app_mngr_, application(kConnectionKey)).WillOnce(Return(app_));
 
-  smart_objects::SmartObject* choice_set_id = NULL;
+  smart_objects::SmartObject choice_set_id(smart_objects::SmartType_Null);
   EXPECT_CALL(*app_, FindChoiceSet(kChoiceSetId))
       .WillOnce(Return(choice_set_id));
 
@@ -161,9 +161,9 @@ TEST_F(DeleteInteractionChoiceSetRequestTest, Run_ChoiceSetInUse_SUCCESS) {
 
   EXPECT_CALL(app_mngr_, application(kConnectionKey)).WillOnce(Return(app_));
 
-  smart_objects::SmartObject* choice_set_id =
-      &((*message_)[am::strings::msg_params]
-                   [am::strings::interaction_choice_set_id]);
+  smart_objects::SmartObject choice_set_id =
+      (*message_)[am::strings::msg_params]
+                 [am::strings::interaction_choice_set_id];
 
   choice_set_map_[0].insert(
       std::make_pair(kChoiceSetId,
@@ -189,10 +189,11 @@ TEST_F(DeleteInteractionChoiceSetRequestTest,
       kConnectionKey;
   (*message_)[am::strings::msg_params][am::strings::interaction_choice_set_id] =
       kChoiceSetId;
-  smart_objects::SmartObject* choice_set_id =
-      &((*message_)[am::strings::msg_params]
-                   [am::strings::interaction_choice_set_id]);
-  smart_objects::SmartObject* invalid_choice_set_id = NULL;
+  smart_objects::SmartObject choice_set_id =
+      (*message_)[am::strings::msg_params]
+                 [am::strings::interaction_choice_set_id];
+  smart_objects::SmartObject invalid_choice_set_id(
+      smart_objects::SmartType_Null);
 
   EXPECT_CALL(app_mngr_, application(kConnectionKey))
       .WillRepeatedly(Return(app_));
@@ -228,8 +229,8 @@ TEST_F(DeleteInteractionChoiceSetRequestTest, Run_SendVrDeleteCommand_SUCCESS) {
   (*message_)[am::strings::msg_params][am::strings::grammar_id] = kGrammarId;
   (*message_)[am::strings::msg_params][am::strings::choice_set][0]
              [am::strings::choice_id] = kChoiceId;
-  smart_objects::SmartObject* choice_set_id =
-      &((*message_)[am::strings::msg_params]);
+  smart_objects::SmartObject choice_set_id =
+      (*message_)[am::strings::msg_params];
 
   EXPECT_CALL(app_mngr_, application(kConnectionKey))
       .WillRepeatedly(Return(app_));

@@ -45,7 +45,7 @@
 namespace transport_manager {
 namespace transport_adapter {
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "TransportManager")
+SDL_CREATE_LOG_VARIABLE("TransportManager")
 
 UsbConnection::UsbConnection(const DeviceUID& device_uid,
                              const ApplicationHandle& app_handle,
@@ -81,13 +81,13 @@ UsbConnection::~UsbConnection() {
   if (in_pipe_) {
     const int close_pipe_rc = usbd_close_pipe(in_pipe_);
     if (EOK != close_pipe_rc) {
-      LOG4CXX_ERROR(logger_, "Failed to close pipe: " << close_pipe_rc);
+      SDL_LOG_ERROR("Failed to close pipe: " << close_pipe_rc);
     }
   }
   if (out_pipe_) {
     const int close_pipe_rc = usbd_close_pipe(out_pipe_);
     if (EOK != close_pipe_rc) {
-      LOG4CXX_ERROR(logger_, "Failed to close pipe: " << close_pipe_rc);
+      SDL_LOG_ERROR("Failed to close pipe: " << close_pipe_rc);
     }
   }
 }
@@ -107,7 +107,7 @@ bool UsbConnection::PostInTransfer() {
       usbd_io(in_urb_, in_pipe_, InTransferCallback, this, USBD_TIME_INFINITY);
   if (EOK != io_rc) {
     pending_in_transfer_ = false;
-    LOG4CXX_ERROR(logger_, "Failed to post in transfer: " << io_rc);
+    SDL_LOG_ERROR("Failed to post in transfer: " << io_rc);
     return false;
   }
   return true;
@@ -119,11 +119,10 @@ void UsbConnection::OnInTransfer(usbd_urb* urb) {
   bool error = false;
   const int urb_status_rc = usbd_urb_status(urb, &status, &len);
   if (EOK != urb_status_rc && EIO != urb_status_rc) {  // EIO is OK
-    LOG4CXX_ERROR(logger_, "Get in urb status failed: " << urb_status_rc);
+    SDL_LOG_ERROR("Get in urb status failed: " << urb_status_rc);
     error = true;
   }
-  LOG4CXX_INFO(logger_,
-               "USB in transfer, status " << std::hex << status << ", length "
+  SDL_LOG_INFO("USB in transfer, status " << std::hex << status << ", length "
                                           << std::dec << len);
 
   if (!error) {
@@ -139,7 +138,7 @@ void UsbConnection::OnInTransfer(usbd_urb* urb) {
   }
 
   if (error) {
-    LOG4CXX_ERROR(logger_, "USB in transfer failed");
+    SDL_LOG_ERROR("USB in transfer failed");
     controller_->DataReceiveFailed(
         device_uid_, app_handle_, DataReceiveError());
   } else {
@@ -173,14 +172,14 @@ bool UsbConnection::PostOutTransfer() {
   out_buffer_ = usbd_alloc(len);
   memmove(out_buffer_, current_out_message_->data() + bytes_sent_, len);
   usbd_setup_bulk(out_urb_, URB_DIR_OUT, out_buffer_, len);
-  LOG4CXX_INFO(logger_, "out transfer :" << len);
+  SDL_LOG_INFO("out transfer :" << len);
   pending_out_transfer_ = true;
   const int io_rc = usbd_io(
       out_urb_, out_pipe_, OutTransferCallback, this, USBD_TIME_INFINITY);
   if (EOK != io_rc) {
     pending_out_transfer_ = false;
     usbd_free(out_buffer_);
-    LOG4CXX_ERROR(logger_, "Failed to post out transfer: " << io_rc);
+    SDL_LOG_ERROR("Failed to post out transfer: " << io_rc);
     return false;
   }
   return true;
@@ -193,11 +192,10 @@ void UsbConnection::OnOutTransfer(usbd_urb* urb) {
   bool error = false;
   const int urb_status_rc = usbd_urb_status(urb, &status, &len);
   if (EOK != urb_status_rc && EIO != urb_status_rc) {  // EIO is OK
-    LOG4CXX_ERROR(logger_, "Get out urb status failed: " << urb_status_rc);
+    SDL_LOG_ERROR("Get out urb status failed: " << urb_status_rc);
     error = true;
   }
-  LOG4CXX_INFO(logger_,
-               "USB out transfer, status " << std::hex << status << ", length "
+  SDL_LOG_INFO("USB out transfer, status " << std::hex << status << ", length "
                                            << std::dec << len);
 
   if (!error) {
@@ -215,15 +213,14 @@ void UsbConnection::OnOutTransfer(usbd_urb* urb) {
   sync_primitives::AutoLock locker(out_messages_mutex_);
 
   if (error) {
-    LOG4CXX_ERROR(logger_, "USB out transfer failed");
+    SDL_LOG_ERROR("USB out transfer failed");
     controller_->DataSendFailed(
         device_uid_, app_handle_, current_out_message_, DataSendError());
     PopOutMessage();
   } else {
     bytes_sent_ += len;
     if (bytes_sent_ == current_out_message_->data_size()) {
-      LOG4CXX_INFO(
-          logger_,
+      SDL_LOG_INFO(
           "USB out transfer, data sent: " << current_out_message_.get());
       controller_->DataSendDone(device_uid_, app_handle_, current_out_message_);
       PopOutMessage();
@@ -256,7 +253,7 @@ TransportAdapter::Error UsbConnection::SendData(
 }
 
 void UsbConnection::Finalise() {
-  LOG4CXX_INFO(logger_, "Finalising");
+  SDL_LOG_INFO("Finalising");
   sync_primitives::AutoLock locker(out_messages_mutex_);
   disconnecting_ = true;
   usbd_abort_pipe(in_pipe_);
@@ -272,7 +269,7 @@ void UsbConnection::Finalise() {
 }
 
 TransportAdapter::Error UsbConnection::Disconnect() {
-  LOG4CXX_INFO(logger_, "Disconnecting");
+  SDL_LOG_INFO("Disconnecting");
   Finalise();
   controller_->DisconnectDone(device_uid_, app_handle_);
   return TransportAdapter::OK;
@@ -285,13 +282,13 @@ bool UsbConnection::Init() {
   in_urb_ = usbd_alloc_urb(NULL);
   out_urb_ = usbd_alloc_urb(NULL);
   if (NULL == in_urb_ || NULL == out_urb_) {
-    LOG4CXX_ERROR(logger_, "usbd_alloc_urb failed");
+    SDL_LOG_ERROR("usbd_alloc_urb failed");
     return false;
   }
 
   in_buffer_ = static_cast<unsigned char*>(usbd_alloc(kInBufferSize));
   if (NULL == in_buffer_) {
-    LOG4CXX_ERROR(logger_, "usbd_alloc failed");
+    SDL_LOG_ERROR("usbd_alloc failed");
     return false;
   }
 
@@ -314,7 +311,7 @@ bool UsbConnection::OpenEndpoints() {
   usbd_device_descriptor_t* device_desc =
       usbd_device_descriptor(usbd_device_, &device_desc_node);
   if (0 == device_desc) {
-    LOG4CXX_ERROR(logger_, "Device descriptor not found");
+    SDL_LOG_ERROR("Device descriptor not found");
     return false;
   }
   usbd_desc_node* cfg_desc_node = NULL;
@@ -331,8 +328,7 @@ bool UsbConnection::OpenEndpoints() {
     if (config_desc == NULL) {
       break;
     }
-    LOG4CXX_INFO(logger_,
-                 "USB configuration " << static_cast<int>(
+    SDL_LOG_INFO("USB configuration " << static_cast<int>(
                      config_desc->configuration.bConfigurationValue));
     int iface = 0;
     usbd_desc_node* iface_desc_node;
@@ -350,11 +346,10 @@ bool UsbConnection::OpenEndpoints() {
 #endif
       const uint8_t interface_subclass =
           iface_desc->interface.bInterfaceSubClass;
-      LOG4CXX_INFO(logger_,
-                   "USB interface number "
-                       << static_cast<int>(interface_number) << ", subclass "
-                       << std::hex << static_cast<int>(interface_subclass)
-                       << std::dec);
+      SDL_LOG_INFO("USB interface number "
+                   << static_cast<int>(interface_number) << ", subclass "
+                   << std::hex << static_cast<int>(interface_subclass)
+                   << std::dec);
       if (interface_subclass != 0xff) {
         continue;
       }
@@ -370,10 +365,9 @@ bool UsbConnection::OpenEndpoints() {
         if ((attributes & 0x03) == USB_ATTRIB_BULK) {
           const uint8_t endpoint_address =
               endpoint_desc->endpoint.bEndpointAddress;
-          LOG4CXX_INFO(logger_,
-                       "Endpoint with address "
-                           << std::hex << static_cast<int>(endpoint_address)
-                           << std::dec << " found");
+          SDL_LOG_INFO("Endpoint with address "
+                       << std::hex << static_cast<int>(endpoint_address)
+                       << std::dec << " found");
           if (endpoint_address & USB_ENDPOINT_IN) {
             if (NULL == in_endpoint_desc) {
               in_endpoint_desc = endpoint_desc;
@@ -396,13 +390,13 @@ bool UsbConnection::OpenEndpoints() {
 
   int open_pipe_rc = usbd_open_pipe(usbd_device_, in_endpoint_desc, &in_pipe_);
   if (EOK != open_pipe_rc) {
-    LOG4CXX_ERROR(logger_, "Cannot open input pipe, error " << open_pipe_rc);
+    SDL_LOG_ERROR("Cannot open input pipe, error " << open_pipe_rc);
     return false;
   }
 
   open_pipe_rc = usbd_open_pipe(usbd_device_, out_endpoint_desc, &out_pipe_);
   if (EOK != open_pipe_rc) {
-    LOG4CXX_ERROR(logger_, "Cannot open output pipe, error " << open_pipe_rc);
+    SDL_LOG_ERROR("Cannot open output pipe, error " << open_pipe_rc);
     return false;
   }
 

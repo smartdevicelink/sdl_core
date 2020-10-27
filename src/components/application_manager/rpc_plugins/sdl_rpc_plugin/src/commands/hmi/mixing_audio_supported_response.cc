@@ -36,6 +36,8 @@ using namespace application_manager;
 
 namespace commands {
 
+SDL_CREATE_LOG_VARIABLE("Commands")
+
 MixingAudioSupportedResponse::MixingAudioSupportedResponse(
     const application_manager::commands::MessageSharedPtr& message,
     ApplicationManager& application_manager,
@@ -51,7 +53,7 @@ MixingAudioSupportedResponse::MixingAudioSupportedResponse(
 MixingAudioSupportedResponse::~MixingAudioSupportedResponse() {}
 
 void MixingAudioSupportedResponse::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
 
   hmi_capabilities_.set_attenuated_supported(
       (*message_)[strings::msg_params][hmi_response::attenuated_supported]

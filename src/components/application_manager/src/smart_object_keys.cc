@@ -85,6 +85,7 @@ const char* user_location = "userLocation";
 const char* num_ticks = "numTicks";
 const char* slider_footer = "sliderFooter";
 const char* menu_id = "menuID";
+const char* parent_id = "parentID";
 const char* menu_name = "menuName";
 const char* menu_layout = "menuLayout";
 const char* menu_layouts_available = "menuLayoutsAvailable";
@@ -163,6 +164,8 @@ const char* system_capabilities = "systemCapabilities";
 const char* navigation_capability = "navigationCapability";
 const char* phone_capability = "phoneCapability";
 const char* video_streaming_capability = "videoStreamingCapability";
+const char* driver_distraction_capability = "driverDistractionCapability";
+const char* driver_distraction = "driverDistraction";
 const char* rc_capability = "remoteControlCapability";
 const char* seat_location_capability = "seatLocationCapability";
 const char* app_services_capabilities = "appServicesCapabilities";
@@ -263,6 +266,7 @@ const char* cloud_app_vehicle_id = "cloudAppVehicleID";
 const char* external_temp = "externalTemperature";
 const char* turn_signal = "turnSignal";
 const char* vin = "vin";
+const char* gearStatus = "gearStatus";
 const char* prndl = "prndl";
 const char* tire_pressure = "tirePressure";
 const char* odometer = "odometer";
@@ -276,6 +280,7 @@ const char* head_lamp_status = "headLampStatus";
 const char* engine_torque = "engineTorque";
 const char* acc_pedal_pos = "accPedalPosition";
 const char* steering_wheel_angle = "steeringWheelAngle";
+const char* stability_controls_status = "stabilityControlsStatus";
 const char* e_call_info = "eCallInfo";
 const char* airbag_status = "airbagStatus";
 const char* emergency_event = "emergencyEvent";
@@ -301,6 +306,8 @@ const char* system_software_version = "systemSoftwareVersion";
 const char* priority = "priority";
 const char* engine_oil_life = "engineOilLife";
 const char* oem_custom_data_type = "oemCustomDataType";
+const char* window_status = "windowStatus";
+const char* hands_off_steering = "handsOffSteering";
 
 // app services
 const char* app_service_manifest = "appServiceManifest";
@@ -439,6 +446,19 @@ const char* const y = "y";
 const char* const preferred_fps = "preferredFPS";
 }  // namespace strings
 
+namespace hmi_interface {
+const char* basic_communication = "BasicCommunication";
+const char* buttons = "Buttons";
+const char* navigation = "Navigation";
+const char* sdl = "SDL";
+const char* tts = "TTS";
+const char* ui = "UI";
+const char* vr = "VR";
+const char* rc = "RC";
+const char* vehicle_info = "VehicleInfo";
+const char* app_service = "AppService";
+}  // namespace hmi_interface
+
 namespace json {
 const char* appId = "appId";
 const char* name = "name";
@@ -548,6 +568,7 @@ const char* capabilities = "capabilities";
 const char* speech_capabilities = "speechCapabilities";
 const char* prerecorded_speech_capabilities = "prerecordedSpeechCapabilities";
 const char* preset_bank_capabilities = "presetBankCapabilities";
+const char* on_screen_presets_available = "onScreenPresetsAvailable";
 const char* allowed = "allowed";
 const char* vehicle_type = "vehicleType";
 const char* did_result = "didResult";

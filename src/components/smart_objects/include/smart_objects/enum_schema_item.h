@@ -323,7 +323,7 @@ bool TEnumSchemaItem<EnumType>::filterInvalidEnums(
     const utils::SemanticVersion& MessageVersion,
     rpc::ValidationReport* report) {
   rpc::ValidationReport dummy_report("");
-  if (validate(Object, &dummy_report, MessageVersion) != errors::OK) {
+  if (validate(Object, &dummy_report, MessageVersion) == errors::OUT_OF_RANGE) {
     std::string validation_info =
         "Ignored invalid value - " + Object.asString();
     report->set_validation_info(validation_info);
@@ -338,19 +338,18 @@ errors::eType TEnumSchemaItem<EnumType>::validate(
     rpc::ValidationReport* report,
     const utils::SemanticVersion& MessageVersion,
     const bool allow_unknown_enums) {
-  if (SmartType_Integer != Object.getType()) {
-    std::string validation_info;
-    if (SmartType_String == Object.getType()) {
-      if (allow_unknown_enums) {
-        return errors::OK;
-      }
-      validation_info = "Invalid enum value: " + Object.asString();
-    } else {
-      validation_info =
-          "Incorrect type, expected: " +
-          SmartObject::typeToString(SmartType_Integer) +
-          " (enum), got: " + SmartObject::typeToString(Object.getType());
+  if (SmartType_String == Object.getType()) {
+    if (allow_unknown_enums) {
+      return errors::OK;
     }
+    std::string validation_info = "Invalid enum value: " + Object.asString();
+    report->set_validation_info(validation_info);
+    return errors::OUT_OF_RANGE;
+  } else if (SmartType_Integer != Object.getType()) {
+    std::string validation_info =
+        "Incorrect type, expected: " +
+        SmartObject::typeToString(SmartType_Integer) +
+        " (enum), got: " + SmartObject::typeToString(Object.getType());
     report->set_validation_info(validation_info);
     return errors::INVALID_VALUE;
   }
@@ -359,9 +358,8 @@ errors::eType TEnumSchemaItem<EnumType>::validate(
       mAllowedElements.find(static_cast<EnumType>(Object.asInt()));
 
   if (elements_it == mAllowedElements.end()) {
-    std::stringstream stream;
-    stream << "Invalid enum value: " << Object.asInt();
-    std::string validation_info = stream.str();
+    std::string validation_info =
+        "Invalid enum value: " + std::to_string(Object.asInt());
     report->set_validation_info(validation_info);
     return errors::OUT_OF_RANGE;
   }
@@ -380,7 +378,7 @@ errors::eType TEnumSchemaItem<EnumType>::validate(
                                         " removed for SyncMsgVersion " +
                                         MessageVersion.toString();
           report->set_validation_info(validation_info);
-          return errors::INVALID_VALUE;
+          return errors::OUT_OF_RANGE;
         } else if (signature.mSince == boost::none &&
                    signature.mUntil == boost::none) {
           // Element does not exist for this version
@@ -388,7 +386,7 @@ errors::eType TEnumSchemaItem<EnumType>::validate(
                                         " does not exist for SyncMsgVersion " +
                                         MessageVersion.toString();
           report->set_validation_info(validation_info);
-          return errors::INVALID_VALUE;
+          return errors::OUT_OF_RANGE;
         }
       }
     }
