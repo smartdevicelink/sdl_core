@@ -311,8 +311,7 @@ void SDLActivateAppRequest::on_event(const event_engine::Event& event) {
         "yet, postpone activation");
     auto& postponed_activation_ctrl = application_manager_.state_controller()
                                           .GetPostponedActivationController();
-    postponed_activation_ctrl.AddAppToActivate(app->app_id(),
-                                               correlation_id());
+    postponed_activation_ctrl.AddAppToActivate(app->app_id(), correlation_id());
     return;
   }
 
