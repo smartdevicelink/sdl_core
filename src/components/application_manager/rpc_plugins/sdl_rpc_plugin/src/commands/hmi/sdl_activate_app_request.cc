@@ -302,6 +302,20 @@ void SDLActivateAppRequest::on_event(const event_engine::Event& event) {
         "Application not found by HMI app id: " << hmi_application_id);
     return;
   }
+
+  auto main_state =
+      app->CurrentHmiState(mobile_apis::PredefinedWindows::DEFAULT_WINDOW);
+  if (mobile_apis::HMILevel::INVALID_ENUM == main_state->hmi_level()) {
+    SDL_LOG_DEBUG(
+        "Application registration is not completed, HMI level hasn't set "
+        "yet, postpone activation");
+    auto& postponed_activation_ctrl = application_manager_.state_controller()
+                                          .GetPostponedActivationController();
+    postponed_activation_ctrl.AddAppToActivate(app->app_id(),
+                                               correlation_id());
+    return;
+  }
+
   policy_handler_.OnActivateApp(app->app_id(), correlation_id());
 }
 
