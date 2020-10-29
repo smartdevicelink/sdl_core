@@ -1011,9 +1011,10 @@ void StateControllerImpl::OnApplicationRegistered(
     const mobile_apis::HMILevel::eType default_level) {
   SDL_LOG_AUTO_TRACE();
 
-  if (app->is_cloud_app()) {
-    // Return here, there should already be an onHMIStatus=FULL being processed
-    // for when the cloud app was initially activated by the hmi
+  if (app->hmi_level(mobile_apis::PredefinedWindows::DEFAULT_WINDOW) ==
+      mobile_apis::HMILevel::HMI_FULL) {
+    // Return here, cloud or web apps may have already been activated
+    // by the time app registration is processed
     return;
   }
   // After app registration HMI level should be set for DEFAULT_WINDOW only
