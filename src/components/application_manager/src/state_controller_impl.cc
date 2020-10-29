@@ -957,7 +957,14 @@ void StateControllerImpl::OnStateChanged(ApplicationSharedPtr app,
 
   if (new_state->hmi_level() == mobile_apis::HMILevel::HMI_NONE) {
     app->ResetDataInNone();
-    if (mobile_apis::HMILevel::INVALID_ENUM == old_state->hmi_level()) {
+  }
+
+  app_mngr_.OnHMIStateChanged(app->app_id(), old_state, new_state);
+  app->usage_report().RecordHmiStateChanged(new_state->hmi_level());
+
+  if (mobile_apis::HMILevel::INVALID_ENUM == old_state->hmi_level()) {
+    const auto app_default_hmi_level = app_mngr_.GetDefaultHmiLevel(app);
+    if (app_default_hmi_level == new_state->hmi_level()) {
       const uint32_t app_id = app->app_id();
       const uint32_t corr_id =
           postponed_activation_controller_.GetPendingActivationCorrId(app_id);
@@ -967,9 +974,6 @@ void StateControllerImpl::OnStateChanged(ApplicationSharedPtr app,
       }
     }
   }
-
-  app_mngr_.OnHMIStateChanged(app->app_id(), old_state, new_state);
-  app->usage_report().RecordHmiStateChanged(new_state->hmi_level());
 }
 
 bool StateControllerImpl::IsTempStateActive(HmiState::StateID id) const {
