@@ -556,6 +556,10 @@ TEST_F(SDLActivateAppRequestTest, OnEvent_SUCCESS) {
 
   MockAppPtr mock_app(CreateMockApp());
   EXPECT_CALL(app_mngr_, application_by_hmi_app(_)).WillOnce(Return(mock_app));
+
+  auto hmi_state = std::make_shared<am::HmiState>(mock_app, app_mngr_);
+  hmi_state->set_hmi_level(mobile_apis::HMILevel::HMI_NONE);
+  EXPECT_CALL(*mock_app, CurrentHmiState(_)).WillOnce(Return(hmi_state));
   EXPECT_CALL(*mock_app, app_id()).WillOnce(Return(kAppID));
 
   EXPECT_CALL(mock_policy_handler_, OnActivateApp(kAppID, kCorrelationID));
