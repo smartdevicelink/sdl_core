@@ -1157,18 +1157,23 @@ bool PerformInteractionRequest::SetChoiceIdToResponseMsgParams(
     return false;
   }
 
-  if (mobile_apis::InteractionMode::eType::MANUAL_ONLY == interaction_mode_) {
-    msg_param[strings::choice_id] = ui_choice_id_received_;
-    return true;
+  switch (interaction_mode_) {
+    case mobile_apis::InteractionMode::eType::MANUAL_ONLY:
+      if (ui_choice_id_valid) {
+        msg_param[strings::choice_id] = ui_choice_id_received_;
+      }
+    case mobile_apis::InteractionMode::eType::VR_ONLY:
+      if (vr_choice_id_valid) {
+        msg_param[strings::choice_id] = vr_choice_id_received_;
+      }
+    default:
+      if (ui_choice_id_valid) {
+        msg_param[strings::choice_id] = ui_choice_id_received_;
+      } else if (vr_choice_id_valid) {
+        msg_param[strings::choice_id] = vr_choice_id_received_;
+      }
   }
 
-  if (mobile_apis::InteractionMode::eType::VR_ONLY == interaction_mode_) {
-    msg_param[strings::choice_id] = vr_choice_id_received_;
-    return true;
-  }
-
-  msg_param[strings::choice_id] =
-      ui_choice_id_valid ? ui_choice_id_received_ : vr_choice_id_received_;
   return true;
 }
 
