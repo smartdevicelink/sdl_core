@@ -1613,9 +1613,9 @@ class ApplicationManagerImpl
   hmi_apis::HMI_API* hmi_so_factory_;
   mobile_apis::MOBILE_API* mobile_so_factory_;
 
-  static uint32_t mobile_corelation_id_;
-  static uint32_t corelation_id_;
-  static const uint32_t max_corelation_id_;
+  std::atomic_uint32_t mobile_corelation_id_;
+  std::atomic_uint32_t corelation_id_;
+  const uint32_t max_corelation_id_;
 
   std::unique_ptr<HMICapabilities> hmi_capabilities_;
   // The reason of HU shutdown

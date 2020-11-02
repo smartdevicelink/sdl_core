@@ -145,10 +145,6 @@ struct PolicyAppIdComparator {
   const std::string& policy_app_id_;
 };
 
-uint32_t ApplicationManagerImpl::mobile_corelation_id_ = 0;
-uint32_t ApplicationManagerImpl::corelation_id_ = 0;
-const uint32_t ApplicationManagerImpl::max_corelation_id_ = UINT_MAX;
-
 namespace formatters = ns_smart_device_link::ns_json_handler::formatters;
 namespace jhs = ns_smart_device_link::ns_json_handler::strings;
 
@@ -176,6 +172,9 @@ ApplicationManagerImpl::ApplicationManagerImpl(
     , request_ctrl_(am_settings)
     , hmi_so_factory_(NULL)
     , mobile_so_factory_(NULL)
+    , mobile_corelation_id_(0)
+    , corelation_id_(0)
+    , max_corelation_id_(UINT_MAX)
     , hmi_capabilities_(new HMICapabilitiesImpl(*this))
     , unregister_reason_(
           mobile_api::AppInterfaceUnregisteredReason::INVALID_ENUM)
