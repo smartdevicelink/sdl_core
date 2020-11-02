@@ -324,6 +324,15 @@ endif()
 if (BUILD_BT_SUPPORT)
   add_definitions(-DBLUETOOTH_SUPPORT)
   message(STATUS "Bluetooth support enabled")
+  # Don't check for BlueZ version if we are cross-compiling, let that be specified in the toolchain
+  if (NOT CROSS_HOST)
+    exec_program("which bluetoothctl"
+                 OUTPUT_VARIABLE BLUETOOTHCTL_DIR)
+    if (BLUETOOTHCTL_DIR)
+      add_definitions(-DBLUEZ5)
+      message(STATUS "BlueZ 5 detected")
+    endif ()
+  endif ()
 endif()
 
 if (BUILD_CLOUD_APP_SUPPORT)
