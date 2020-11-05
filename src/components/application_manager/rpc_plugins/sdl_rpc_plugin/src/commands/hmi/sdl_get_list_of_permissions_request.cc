@@ -39,6 +39,8 @@ using namespace application_manager;
 
 namespace commands {
 
+SDL_CREATE_LOG_VARIABLE("Commands")
+
 SDLGetListOfPermissionsRequest::SDLGetListOfPermissionsRequest(
     const application_manager::commands::MessageSharedPtr& message,
     ApplicationManager& application_manager,
@@ -54,7 +56,7 @@ SDLGetListOfPermissionsRequest::SDLGetListOfPermissionsRequest(
 SDLGetListOfPermissionsRequest::~SDLGetListOfPermissionsRequest() {}
 
 void SDLGetListOfPermissionsRequest::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   uint32_t connection_key = 0;
   if ((*message_)[strings::msg_params].keyExists(strings::app_id)) {
     connection_key = (*message_)[strings::msg_params][strings::app_id].asUInt();

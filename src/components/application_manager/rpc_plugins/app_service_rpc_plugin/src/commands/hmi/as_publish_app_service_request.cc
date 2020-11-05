@@ -39,6 +39,8 @@ namespace app_service_rpc_plugin {
 using namespace application_manager;
 namespace commands {
 
+SDL_CREATE_LOG_VARIABLE("Commands")
+
 ASPublishAppServiceRequest::ASPublishAppServiceRequest(
     const application_manager::commands::MessageSharedPtr& message,
     ApplicationManager& application_manager,
@@ -54,8 +56,8 @@ ASPublishAppServiceRequest::ASPublishAppServiceRequest(
 ASPublishAppServiceRequest::~ASPublishAppServiceRequest() {}
 
 void ASPublishAppServiceRequest::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
-  LOG4CXX_DEBUG(logger_, "Received a PublishAppService request from HMI");
+  SDL_LOG_AUTO_TRACE();
+  SDL_LOG_DEBUG("Received a PublishAppService request from HMI");
   smart_objects::SmartObject response_params =
       smart_objects::SmartObject(smart_objects::SmartType_Map);
   smart_objects::SmartObject manifest =

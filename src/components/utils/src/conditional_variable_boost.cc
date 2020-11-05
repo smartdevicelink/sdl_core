@@ -46,7 +46,7 @@ const long kNanosecondsPerMillisecond = 1000000;
 
 namespace sync_primitives {
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "Utils")
+SDL_CREATE_LOG_VARIABLE("Utils")
 
 ConditionalVariable::ConditionalVariable() {}
 
@@ -75,13 +75,13 @@ bool ConditionalVariable::Wait(BaseLock& lock) {
       cond_var_.wait<boost::recursive_mutex>(test_rec_lock->mutex_);
     } else {
       // unknown, give up the lock
-      LOG4CXX_ERROR(logger_, "Unknown lock type!");
+      SDL_LOG_ERROR("Unknown lock type!");
       NOTREACHED();
     }
     lock.AssertFreeAndMarkTaken();
   } catch (const boost::exception& error) {
     std::string error_string = boost::diagnostic_information(error);
-    LOG4CXX_FATAL(logger_, error_string);
+    SDL_LOG_FATAL(error_string);
     NOTREACHED();
   }
   return true;
@@ -115,7 +115,7 @@ ConditionalVariable::WaitStatus ConditionalVariable::WaitFor(
           test_rec_lock->mutex_, boost::posix_time::milliseconds(milliseconds));
     } else {
       // this is an unknown lock, we have an issue
-      LOG4CXX_ERROR(logger_, "Unknown lock type!");
+      SDL_LOG_ERROR("Unknown lock type!");
       NOTREACHED();
     }
 
@@ -125,7 +125,7 @@ ConditionalVariable::WaitStatus ConditionalVariable::WaitFor(
     lock.AssertFreeAndMarkTaken();
   } catch (const boost::exception& error) {
     std::string error_string = boost::diagnostic_information(error);
-    LOG4CXX_FATAL(logger_, error_string);
+    SDL_LOG_FATAL(error_string);
     NOTREACHED();
   }
 

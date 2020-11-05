@@ -35,7 +35,6 @@
 #include "application_manager/message.h"
 #include "application_manager/mock_application.h"
 #include "application_manager/mock_application_manager.h"
-#include "application_manager/mock_hmi_capabilities.h"
 #include "application_manager/resumption/resume_ctrl.h"
 #include "application_manager/state_controller.h"
 #include "gmock/gmock.h"
@@ -110,10 +109,6 @@ class MediaManagerImplTest : public ::testing::Test {
         .WillByDefault(ReturnRef(kDefaultValue));
     ON_CALL(mock_media_manager_settings_, audio_server_type())
         .WillByDefault(ReturnRef(kDefaultValue));
-    ON_CALL(mock_hmi_capabilities_, pcm_stream_capabilities())
-        .WillByDefault(Return(nullptr));
-    ON_CALL(app_mngr_, hmi_capabilities())
-        .WillByDefault(ReturnRef(mock_hmi_capabilities_));
     mock_app_ = std::make_shared<MockApp>();
     media_manager_impl_.reset(
         new MediaManagerImpl(app_mngr_, mock_media_manager_settings_));
@@ -181,7 +176,7 @@ class MediaManagerImplTest : public ::testing::Test {
         .WillOnce(Return(true));
     EXPECT_CALL(app_mngr_, application(kConnectionKey))
         .WillOnce(Return(mock_app_));
-    EXPECT_CALL(*mock_app_, WakeUpStreaming(service_type, 0ull));
+    EXPECT_CALL(*mock_app_, WakeUpStreaming(service_type));
     MockMediaAdapterImplPtr mock_media_streamer =
         std::make_shared<MockMediaAdapterImpl>();
     media_manager_impl_->set_mock_streamer(service_type, mock_media_streamer);
@@ -211,7 +206,6 @@ class MediaManagerImplTest : public ::testing::Test {
   const ::testing::NiceMock<MockMediaManagerSettings>
       mock_media_manager_settings_;
   std::shared_ptr<MediaManagerImpl> media_manager_impl_;
-  application_manager_test::MockHMICapabilities mock_hmi_capabilities_;
 };
 
 TEST_F(MediaManagerImplTest,
@@ -331,7 +325,12 @@ TEST_F(MediaManagerImplTest,
     EXPECT_EQ(data[i], result[i]);
   }
   media_manager_impl_->StartMicrophoneRecording(
-      kApplicationKey, kOutputFile, kDuration);
+      kApplicationKey,
+      kOutputFile,
+      kDuration,
+      mobile_apis::SamplingRate::SamplingRate_8KHZ,
+      mobile_apis::BitsPerSample::BitsPerSample_8_BIT,
+      mobile_apis::AudioType::PCM);
   EXPECT_TRUE(RemoveDirectory(kResourceFolder, true));
   EXPECT_TRUE(RemoveDirectory(kStorageFolder, true));
 }
@@ -342,7 +341,12 @@ TEST_F(MediaManagerImplTest,
   media_manager_impl_->set_mock_mic_listener(media_adapter_listener_mock_);
   EXPECT_FALSE(FileExists(kOutputFilePath));
   media_manager_impl_->StartMicrophoneRecording(
-      kApplicationKey, kOutputFile, kDuration);
+      kApplicationKey,
+      kOutputFile,
+      kDuration,
+      mobile_apis::SamplingRate::SamplingRate_8KHZ,
+      mobile_apis::BitsPerSample::BitsPerSample_8_BIT,
+      mobile_apis::AudioType::PCM);
 }
 
 TEST_F(MediaManagerImplTest,
@@ -358,7 +362,12 @@ TEST_F(MediaManagerImplTest,
   media_manager_impl_->set_mock_mic_listener(media_adapter_listener_mock_);
   EXPECT_TRUE(FileExists(kOutputFilePath));
   media_manager_impl_->StartMicrophoneRecording(
-      kApplicationKey, kOutputFile, kDuration);
+      kApplicationKey,
+      kOutputFile,
+      kDuration,
+      mobile_apis::SamplingRate::SamplingRate_8KHZ,
+      mobile_apis::BitsPerSample::BitsPerSample_8_BIT,
+      mobile_apis::AudioType::PCM);
   chmod(kOutputFilePath.c_str(), S_IWUSR);
   EXPECT_TRUE(RemoveDirectory(kStorageFolder, true));
 }

@@ -36,6 +36,8 @@ using namespace application_manager;
 
 namespace commands {
 
+SDL_CREATE_LOG_VARIABLE("Commands")
+
 VIIsReadyResponse::VIIsReadyResponse(
     const application_manager::commands::MessageSharedPtr& message,
     const VehicleInfoCommandParams& params)
@@ -48,7 +50,7 @@ VIIsReadyResponse::VIIsReadyResponse(
 VIIsReadyResponse::~VIIsReadyResponse() {}
 
 void VIIsReadyResponse::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   event_engine::Event event(hmi_apis::FunctionID::VehicleInfo_IsReady);
   event.set_smart_object(*message_);
   event.raise(application_manager_.event_dispatcher());

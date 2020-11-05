@@ -66,33 +66,22 @@ namespace test {
 namespace components {
 namespace policy_test {
 
-namespace {
-const int32_t kPolicyTablesNumber = 27;
-}
-
 class SQLPTRepresentationTest : public SQLPTRepresentation,
                                 public ::testing::Test {
- public:
-  static const bool in_memory_;
-
  protected:
-  static SQLPTRepresentation* reps;
-  static const std::string kDatabaseName;
-  static utils::dbms::SQLQuery* query_wrapper_;
+  static std::shared_ptr<SQLPTRepresentation> reps;
+  static std::shared_ptr<utils::dbms::SQLQuery> query_wrapper_;
   // Gtest can show message that this object doesn't destroyed
-  static std::unique_ptr<policy_handler_test::MockPolicySettings>
+  static std::shared_ptr<policy_handler_test::MockPolicySettings>
       policy_settings_;
 
   static void SetUpTestCase() {
-    const std::string kAppStorageFolder = "storage_SQLPTRepresentationTest";
-    reps = new SQLPTRepresentation(in_memory_);
+    reps = std::make_shared<SQLPTRepresentation>(true);
     ASSERT_TRUE(reps != NULL);
-    policy_settings_ = std::unique_ptr<policy_handler_test::MockPolicySettings>(
-        new policy_handler_test::MockPolicySettings());
-    ON_CALL(*policy_settings_, app_storage_folder())
-        .WillByDefault(ReturnRef(kAppStorageFolder));
+    policy_settings_ =
+        std::make_shared<policy_handler_test::MockPolicySettings>();
     EXPECT_EQ(::policy::SUCCESS, reps->Init(policy_settings_.get()));
-    query_wrapper_ = new utils::dbms::SQLQuery(reps->db());
+    query_wrapper_ = std::make_shared<utils::dbms::SQLQuery>(reps->db());
     ASSERT_TRUE(query_wrapper_ != NULL);
   }
 
@@ -101,12 +90,9 @@ class SQLPTRepresentationTest : public SQLPTRepresentation,
   }
 
   static void TearDownTestCase() {
-    delete query_wrapper_;
     EXPECT_TRUE(reps->Drop());
     EXPECT_TRUE(reps->Close());
     reps->RemoveDB();
-    delete reps;
-    policy_settings_.reset();
   }
 
   virtual utils::dbms::SQLDatabase* db() const {
@@ -259,6 +245,20 @@ class SQLPTRepresentationTest : public SQLPTRepresentation,
         Json::Value(5);
     module_config["notifications_per_minute_by_priority"]["none"] =
         Json::Value(6);
+    module_config["subtle_notifications_per_minute_by_priority"] =
+        Json::Value(Json::objectValue);
+    module_config["subtle_notifications_per_minute_by_priority"]["emergency"] =
+        Json::Value(7);
+    module_config["subtle_notifications_per_minute_by_priority"]["navigation"] =
+        Json::Value(8);
+    module_config["subtle_notifications_per_minute_by_priority"]["VOICECOMM"] =
+        Json::Value(9);
+    module_config["subtle_notifications_per_minute_by_priority"]
+                 ["communication"] = Json::Value(10);
+    module_config["subtle_notifications_per_minute_by_priority"]["normal"] =
+        Json::Value(11);
+    module_config["subtle_notifications_per_minute_by_priority"]["none"] =
+        Json::Value(12);
     module_config["vehicle_make"] = Json::Value("MakeT");
     module_config["vehicle_model"] = Json::Value("ModelT");
     module_config["vehicle_year"] = Json::Value("2014");
@@ -343,16 +343,15 @@ class SQLPTRepresentationTest : public SQLPTRepresentation,
   }
 };
 
-SQLPTRepresentation* SQLPTRepresentationTest::reps = 0;
-utils::dbms::SQLQuery* SQLPTRepresentationTest::query_wrapper_ = 0;
-const std::string SQLPTRepresentationTest::kDatabaseName = ":memory:";
-const bool SQLPTRepresentationTest::in_memory_ = true;
-std::unique_ptr<policy_handler_test::MockPolicySettings>
-    SQLPTRepresentationTest::policy_settings_;
+std::shared_ptr<SQLPTRepresentation> SQLPTRepresentationTest::reps = NULL;
+std::shared_ptr<utils::dbms::SQLQuery> SQLPTRepresentationTest::query_wrapper_ =
+    NULL;
+std::shared_ptr<policy_handler_test::MockPolicySettings>
+    SQLPTRepresentationTest::policy_settings_ = NULL;
 
 class SQLPTRepresentationTest2 : public ::testing::Test {
  protected:
-  SQLPTRepresentation* reps;
+  std::shared_ptr<SQLPTRepresentation> reps;
   NiceMock<policy_handler_test::MockPolicySettings> policy_settings_;
   virtual void SetUp() OVERRIDE {
     file_system::CreateDirectory(kAppStorageFolder);
@@ -363,13 +362,14 @@ class SQLPTRepresentationTest2 : public ::testing::Test {
         .WillByDefault(Return(kOpenAttemptTimeoutMs));
     ON_CALL(policy_settings_, attempts_to_open_policy_db())
         .WillByDefault(Return(kAttemptsToOpenPolicyDB));
-    reps = new SQLPTRepresentation;
+    reps = std::make_shared<SQLPTRepresentation>();
     ASSERT_TRUE(reps != NULL);
   }
 
   virtual void TearDown() OVERRIDE {
+    chmod(kAppStorageFolder.c_str(), 755);
     file_system::RemoveDirectory(kAppStorageFolder, true);
-    delete reps;
+    reps.reset();
   }
   const std::string kAppStorageFolder = "storage123";
   const uint16_t kOpenAttemptTimeoutMs = 70u;
@@ -408,6 +408,7 @@ TEST_F(SQLPTRepresentationTest, VehicleDataItem_Store_Complete_Item) {
   *message.until = "5.0";
   *message.removed = false;
   *message.deprecated = false;
+  *message.defvalue = "0";
   *message.minvalue = 0;
   *message.maxvalue = 255;
   *message.minsize = 0;
@@ -499,8 +500,8 @@ TEST_F(SQLPTRepresentationTest,
   query.Prepare(query_select);
   query.Next();
 
-  // 41 - is current total tables number created by schema
-  const int policy_tables_number = 41;
+  // 42 - is current total tables number created by schema
+  const int policy_tables_number = 42;
   ASSERT_EQ(policy_tables_number, query.GetInteger(0));
 
   const std::string query_select_count_of_iap_buffer_full =
@@ -1153,17 +1154,11 @@ TEST_F(SQLPTRepresentationTest,
   EXPECT_EQ("EMERGENCY", priority);
 }
 
-namespace {
-const std::string kAppStorageFolder = "storage";
-}
 TEST(SQLPTRepresentationTest3, Init_InitNewDataBase_ExpectResultSuccess) {
   // Arrange
-  const bool in_memory_ = true;
   NiceMock<policy_handler_test::MockPolicySettings> policy_settings_;
-  SQLPTRepresentation reps(in_memory_);
+  SQLPTRepresentation reps(true);
   // Checks
-  ON_CALL(policy_settings_, app_storage_folder())
-      .WillByDefault(ReturnRef(kAppStorageFolder));
   EXPECT_EQ(::policy::SUCCESS, reps.Init(&policy_settings_));
   EXPECT_EQ(::policy::EXISTS, reps.Init(&policy_settings_));
   reps.RemoveDB();
@@ -1185,10 +1180,7 @@ TEST(SQLPTRepresentationTest3,
      Close_InitNewDataBaseThenClose_ExpectResultSuccess) {
   // Arrange
   NiceMock<policy_handler_test::MockPolicySettings> policy_settings_;
-  ON_CALL(policy_settings_, app_storage_folder())
-      .WillByDefault(ReturnRef(kAppStorageFolder));
-  const bool in_memory_ = true;
-  SQLPTRepresentation reps(in_memory_);
+  SQLPTRepresentation reps(true);
   EXPECT_EQ(::policy::SUCCESS, reps.Init(&policy_settings_));
   EXPECT_TRUE(reps.Close());
   utils::dbms::SQLError error(utils::dbms::Error::OK);
@@ -1630,9 +1622,8 @@ TEST_F(SQLPTRepresentationTest,
 
 TEST(SQLPTRepresentationTest3, RemoveDB_RemoveDB_ExpectFileDeleted) {
   // Arrange
-  const bool in_memory_ = true;
   policy_handler_test::MockPolicySettings policy_settings_;
-  SQLPTRepresentation reps(in_memory_);
+  SQLPTRepresentation reps(true);
   EXPECT_EQ(::policy::SUCCESS, reps.Init(&policy_settings_));
   EXPECT_EQ(::policy::EXISTS, reps.Init(&policy_settings_));
   std::string path = (reps.db())->get_path();
@@ -1736,6 +1727,7 @@ TEST_F(SQLPTRepresentationTest,
   EXPECT_EQ(0u, config.seconds_between_retries.size());
   EXPECT_EQ(0u, config.endpoints.size());
   EXPECT_EQ(0u, config.notifications_per_minute_by_priority.size());
+  EXPECT_EQ(0u, (*config.subtle_notifications_per_minute_by_priority).size());
 
   policy_table::ConsumerFriendlyMessages messages;
   GatherConsumerFriendlyMessages(&messages);
@@ -1842,6 +1834,19 @@ TEST_F(SQLPTRepresentationTest,
   ASSERT_EQ(4, config.notifications_per_minute_by_priority["communication"]);
   ASSERT_EQ(5, config.notifications_per_minute_by_priority["normal"]);
   ASSERT_EQ(6, config.notifications_per_minute_by_priority["none"]);
+  ASSERT_EQ(6u, (*config.subtle_notifications_per_minute_by_priority).size());
+  ASSERT_EQ(7,
+            (*config.subtle_notifications_per_minute_by_priority)["emergency"]);
+  ASSERT_EQ(
+      8, (*config.subtle_notifications_per_minute_by_priority)["navigation"]);
+  ASSERT_EQ(9,
+            (*config.subtle_notifications_per_minute_by_priority)["VOICECOMM"]);
+  ASSERT_EQ(
+      10,
+      (*config.subtle_notifications_per_minute_by_priority)["communication"]);
+  ASSERT_EQ(11,
+            (*config.subtle_notifications_per_minute_by_priority)["normal"]);
+  ASSERT_EQ(12, (*config.subtle_notifications_per_minute_by_priority)["none"]);
   EXPECT_EQ(1u, config.endpoints.size());
   policy_table::ServiceEndpoints& service_endpoints = config.endpoints;
   EXPECT_EQ("0x00", service_endpoints.begin()->first);

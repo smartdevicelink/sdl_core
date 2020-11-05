@@ -1,5 +1,8 @@
 #include "policy/policy_table/types.h"
+
 #include <algorithm>
+#include <regex>
+
 #include "rpc_base/rpc_base_json_inl.h"
 
 namespace rpc {
@@ -859,6 +862,8 @@ ModuleConfig::ModuleConfig(const Json::Value* value__)
     , endpoint_properties(impl::ValueMember(value__, "endpoint_properties"))
     , notifications_per_minute_by_priority(
           impl::ValueMember(value__, "notifications_per_minute_by_priority"))
+    , subtle_notifications_per_minute_by_priority(impl::ValueMember(
+          value__, "subtle_notifications_per_minute_by_priority"))
     , vehicle_make(impl::ValueMember(value__, "vehicle_make"))
     , vehicle_model(impl::ValueMember(value__, "vehicle_model"))
     , vehicle_year(impl::ValueMember(value__, "vehicle_year"))
@@ -870,7 +875,6 @@ ModuleConfig::ModuleConfig(const Json::Value* value__)
           impl::ValueMember(value__, "lock_screen_dismissal_enabled")) {}
 
 void ModuleConfig::SafeCopyFrom(const ModuleConfig& from) {
-  exchange_after_x_days = from.exchange_after_x_days;
   exchange_after_x_kilometers = from.exchange_after_x_kilometers;
   exchange_after_x_days = from.exchange_after_x_days;
   exchange_after_x_ignition_cycles = from.exchange_after_x_ignition_cycles;
@@ -882,6 +886,8 @@ void ModuleConfig::SafeCopyFrom(const ModuleConfig& from) {
       from.notifications_per_minute_by_priority;
   lock_screen_dismissal_enabled = from.lock_screen_dismissal_enabled;
 
+  subtle_notifications_per_minute_by_priority.assign_if_valid(
+      from.subtle_notifications_per_minute_by_priority);
   certificate.assign_if_valid(from.certificate);
   vehicle_make.assign_if_valid(from.vehicle_make);
   vehicle_model.assign_if_valid(from.vehicle_model);
@@ -909,6 +915,9 @@ Json::Value ModuleConfig::ToJsonValue() const {
   impl::WriteJsonField("endpoint_properties", endpoint_properties, &result__);
   impl::WriteJsonField("notifications_per_minute_by_priority",
                        notifications_per_minute_by_priority,
+                       &result__);
+  impl::WriteJsonField("subtle_notifications_per_minute_by_priority",
+                       subtle_notifications_per_minute_by_priority,
                        &result__);
   impl::WriteJsonField("vehicle_make", vehicle_make, &result__);
   impl::WriteJsonField("vehicle_model", vehicle_model, &result__);
@@ -953,6 +962,9 @@ bool ModuleConfig::is_valid() const {
     return false;
   }
   if (!notifications_per_minute_by_priority.is_valid()) {
+    return false;
+  }
+  if (!subtle_notifications_per_minute_by_priority.is_valid()) {
     return false;
   }
   if (!vehicle_make.is_valid()) {
@@ -1019,6 +1031,9 @@ bool ModuleConfig::struct_empty() const {
   if (notifications_per_minute_by_priority.is_initialized()) {
     return false;
   }
+  if (subtle_notifications_per_minute_by_priority.is_initialized()) {
+    return false;
+  }
   if (lock_screen_dismissal_enabled.is_initialized()) {
     return false;
   }
@@ -1079,6 +1094,11 @@ void ModuleConfig::ReportErrors(rpc::ValidationReport* report__) const {
   if (!notifications_per_minute_by_priority.is_valid()) {
     notifications_per_minute_by_priority.ReportErrors(
         &report__->ReportSubobject("notifications_per_minute_by_priority"));
+  }
+  if (!subtle_notifications_per_minute_by_priority.is_valid()) {
+    subtle_notifications_per_minute_by_priority.ReportErrors(
+        &report__->ReportSubobject(
+            "subtle_notifications_per_minute_by_priority"));
   }
   if (!lock_screen_dismissal_enabled.is_valid()) {
     lock_screen_dismissal_enabled.ReportErrors(
@@ -1143,6 +1163,7 @@ void ModuleConfig::SetPolicyTableType(PolicyTableType pt_type) {
   endpoints.SetPolicyTableType(pt_type);
   endpoint_properties.SetPolicyTableType(pt_type);
   notifications_per_minute_by_priority.SetPolicyTableType(pt_type);
+  subtle_notifications_per_minute_by_priority.SetPolicyTableType(pt_type);
   lock_screen_dismissal_enabled.SetPolicyTableType(pt_type);
   vehicle_make.SetPolicyTableType(pt_type);
   vehicle_model.SetPolicyTableType(pt_type);
@@ -2198,6 +2219,7 @@ VehicleDataItem::VehicleDataItem(const VehicleDataItem& vehicle_data)
     , until(vehicle_data.until)
     , removed(vehicle_data.removed)
     , deprecated(vehicle_data.deprecated)
+    , defvalue(vehicle_data.defvalue)
     , minvalue(vehicle_data.minvalue)
     , maxvalue(vehicle_data.maxvalue)
     , minsize(vehicle_data.minsize)
@@ -2217,12 +2239,17 @@ VehicleDataItem::VehicleDataItem(const Json::Value* value__)
     , until(impl::ValueMember(value__, "until"))
     , removed(impl::ValueMember(value__, "removed"))
     , deprecated(impl::ValueMember(value__, "deprecated"))
+    , defvalue(static_cast<Json::Value*>(nullptr))
     , minvalue(impl::ValueMember(value__, "minvalue"))
     , maxvalue(impl::ValueMember(value__, "maxvalue"))
     , minsize(impl::ValueMember(value__, "minsize"))
     , maxsize(impl::ValueMember(value__, "maxsize"))
     , minlength(impl::ValueMember(value__, "minlength"))
-    , maxlength(impl::ValueMember(value__, "maxlength")) {}
+    , maxlength(impl::ValueMember(value__, "maxlength")) {
+  if (value__->isMember("defvalue")) {
+    *defvalue = impl::ValueMember(value__, "defvalue")->asString();
+  }
+}
 
 VehicleDataItem::~VehicleDataItem() {}
 
@@ -2248,6 +2275,7 @@ Json::Value VehicleDataItem::ToJsonValue() const {
   impl::WriteJsonField("until", until, &ret);
   impl::WriteJsonField("removed", removed, &ret);
   impl::WriteJsonField("deprecated", deprecated, &ret);
+  impl::WriteJsonField("defvalue", defvalue, &ret);
   impl::WriteJsonField("minvalue", minvalue, &ret);
   impl::WriteJsonField("maxvalue", maxvalue, &ret);
   impl::WriteJsonField("minsize", minsize, &ret);
@@ -2262,9 +2290,10 @@ bool VehicleDataItem::operator==(const VehicleDataItem& vd) {
           mandatory == vd.mandatory && params == vd.params &&
           array == vd.array && since == vd.since && until == vd.until &&
           removed == vd.removed && deprecated == vd.deprecated &&
-          minvalue == vd.minvalue && maxvalue == vd.maxvalue &&
-          minsize == vd.minsize && maxsize == vd.maxsize &&
-          minlength == vd.minlength && maxlength == vd.maxlength);
+          defvalue == vd.defvalue && minvalue == vd.minvalue &&
+          maxvalue == vd.maxvalue && minsize == vd.minsize &&
+          maxsize == vd.maxsize && minlength == vd.minlength &&
+          maxlength == vd.maxlength);
 }
 
 bool VehicleDataItem::is_valid() const {
@@ -2296,6 +2325,9 @@ bool VehicleDataItem::is_valid() const {
     return false;
   }
   if (!deprecated.is_valid()) {
+    return false;
+  }
+  if (!(defvalue.is_valid() && ValidateDefault())) {
     return false;
   }
   if (!minvalue.is_valid()) {
@@ -2352,6 +2384,9 @@ bool VehicleDataItem::struct_not_empty() const {
     return false;
   }
   if (!deprecated.is_initialized()) {
+    return false;
+  }
+  if (!defvalue.is_initialized()) {
     return false;
   }
   if (!minvalue.is_initialized()) {
@@ -2424,6 +2459,13 @@ void VehicleDataItem::ReportErrors(rpc::ValidationReport* report__) const {
   if (!deprecated.is_valid()) {
     deprecated.ReportErrors(&report__->ReportSubobject("deprecated"));
   }
+  if (!defvalue.is_valid()) {
+    defvalue.ReportErrors(&report__->ReportSubobject("defvalue"));
+  }
+  if (!ValidateDefault()) {
+    report__->set_validation_info("Invalid default value: " +
+                                  std::string(*defvalue));
+  }
   if (!minvalue.is_valid()) {
     minvalue.ReportErrors(&report__->ReportSubobject("minvalue"));
   }
@@ -2456,6 +2498,7 @@ void VehicleDataItem::SetPolicyTableType(PolicyTableType pt_type) {
   until.SetPolicyTableType(pt_type);
   removed.SetPolicyTableType(pt_type);
   deprecated.SetPolicyTableType(pt_type);
+  defvalue.SetPolicyTableType(pt_type);
   minvalue.SetPolicyTableType(pt_type);
   maxvalue.SetPolicyTableType(pt_type);
   minsize.SetPolicyTableType(pt_type);
@@ -2489,6 +2532,46 @@ bool VehicleDataItem::ValidateNaming(std::string str) const {
 
   return !empty_string(str) && !contains_spaces(str) &&
          !contains_spec_chars(str);
+}
+
+bool VehicleDataItem::ValidateDefault() const {
+  if (!defvalue.is_initialized()) {
+    return true;
+  }
+  std::string value = std::string(*defvalue);
+  bool valid = false;
+  if (VehicleDataItem::kInteger == std::string(type)) {
+    // Match int
+    std::regex pattern("^-?\\d+$");
+    bool type_matches = std::regex_match(value, pattern);
+    if (type_matches) {
+      size_t int_value = std::stol(value);
+      valid = (!minvalue.is_initialized() || int_value >= *minvalue) &&
+              (!maxvalue.is_initialized() || int_value <= *maxvalue);
+    }
+  } else if (VehicleDataItem::kFloat == std::string(type) ||
+             VehicleDataItem::kDouble == std::string(type)) {
+    // Match double
+    std::regex pattern("^-?\\d+(\\.\\d+)?$");
+    bool type_matches = std::regex_match(value, pattern);
+    if (type_matches) {
+      double dbl_value = std::stod(value);
+      valid = (!minvalue.is_initialized() || dbl_value >= *minvalue) &&
+              (!maxvalue.is_initialized() || dbl_value <= *maxvalue);
+    }
+  } else if (VehicleDataItem::kString == std::string(type)) {
+    size_t length = value.length();
+    valid = (!minsize.is_initialized() || length >= *minsize) &&
+            (!maxsize.is_initialized() || length <= *maxsize);
+  } else if (VehicleDataItem::kBoolean == std::string(type)) {
+    valid = ("false" == value || "true" == value);
+  } else if (VehicleDataItem::kStruct != std::string(type) &&
+             !IsPrimitiveType()) {
+    // Enum values cannot be validated here
+    valid = true;
+  }
+
+  return valid;
 }
 
 bool VehicleDataItem::ValidateTypes() const {

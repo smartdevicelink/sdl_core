@@ -212,6 +212,12 @@ class Profile : public protocol_handler::ProtocolHandlerSettings,
   const std::string& hmi_capabilities_file_name() const;
 
   /**
+   * @brief Returns hmi capabilities cache file name
+   * @return hmi capabilities cache file name
+   */
+  const std::string& hmi_capabilities_cache_file_name() const;
+
+  /**
    * @brief Returns help promt vector
    */
   const std::vector<std::string>& help_prompt() const;
@@ -985,6 +991,7 @@ class Profile : public protocol_handler::ProtocolHandlerSettings,
   uint32_t stop_streaming_timeout_;
   uint16_t time_testing_port_;
   std::string hmi_capabilities_file_name_;
+  std::string hmi_capabilities_cache_file_name_;
   std::vector<std::string> help_prompt_;
   std::vector<std::string> time_out_promt_;
   std::vector<std::string> vr_commands_;

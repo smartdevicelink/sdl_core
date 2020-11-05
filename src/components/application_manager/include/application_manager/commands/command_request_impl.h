@@ -166,14 +166,6 @@ class CommandRequestImpl : public CommandImpl,
       const smart_objects::SmartObject* response_params = NULL,
       const std::vector<uint8_t> binary_data = std::vector<uint8_t>());
 
-  /**
-   * @brief Check syntax of string from mobile
-   * @param str - string that need to be checked
-   * @param allow_empty_string if true methods allow empty sting
-   * @return true if success otherwise return false
-   */
-  bool CheckSyntax(const std::string& str, bool allow_empty_line = false);
-
   void SendProviderRequest(
       const mobile_apis::FunctionID::eType& mobile_function_id,
       const hmi_apis::FunctionID::eType& hmi_function_id,
@@ -388,7 +380,7 @@ class CommandRequestImpl : public CommandImpl,
    * @param info string with disallowed params enumeration
    * @param param disallowed param
    */
-  void AddDissalowedParameterToInfoString(std::string& info,
+  void AddDisallowedParameterToInfoString(std::string& info,
                                           const std::string& param) const;
 
   /**

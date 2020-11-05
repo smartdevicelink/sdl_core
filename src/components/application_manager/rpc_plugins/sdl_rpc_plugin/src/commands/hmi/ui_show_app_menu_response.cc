@@ -37,6 +37,9 @@ namespace sdl_rpc_plugin {
 namespace app_mngr = application_manager;
 
 namespace commands {
+
+SDL_CREATE_LOG_VARIABLE("Commands")
+
 UIShowAppMenuResponse::UIShowAppMenuResponse(
     const app_mngr::commands::MessageSharedPtr& message,
     app_mngr::ApplicationManager& application_manager,
@@ -52,7 +55,7 @@ UIShowAppMenuResponse::UIShowAppMenuResponse(
 UIShowAppMenuResponse::~UIShowAppMenuResponse() {}
 
 void UIShowAppMenuResponse::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
 
   app_mngr::event_engine::Event event(hmi_apis::FunctionID::UI_ShowAppMenu);
   event.set_smart_object(*message_);

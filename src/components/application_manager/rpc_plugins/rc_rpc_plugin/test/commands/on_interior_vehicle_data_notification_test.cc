@@ -74,14 +74,15 @@ class OnInteriorVehicleDataNotificationTest
  public:
   OnInteriorVehicleDataNotificationTest()
       : mock_app_(std::make_shared<NiceMock<MockApplication> >())
-      , rc_app_extention_(std::make_shared<RCAppExtension>(kModuleId))
+      , rc_app_extension_(
+            std::make_shared<RCAppExtension>(kModuleId, rc_plugin_, *mock_app_))
       , apps_lock_(std::make_shared<sync_primitives::Lock>())
       , apps_da_(apps_, apps_lock_) {
     ON_CALL(*mock_app_, app_id()).WillByDefault(Return(kAppId));
     ON_CALL(*mock_app_, is_remote_control_supported())
         .WillByDefault(Return(true));
     ON_CALL(*mock_app_, QueryInterface(_))
-        .WillByDefault(Return(rc_app_extention_));
+        .WillByDefault(Return(rc_app_extension_));
   }
 
   MessageSharedPtr CreateBasicMessage() {
@@ -120,7 +121,8 @@ class OnInteriorVehicleDataNotificationTest
 
  protected:
   std::shared_ptr<MockApplication> mock_app_;
-  std::shared_ptr<RCAppExtension> rc_app_extention_;
+  RCRPCPlugin rc_plugin_;
+  std::shared_ptr<RCAppExtension> rc_app_extension_;
   testing::NiceMock<rc_rpc_plugin_test::MockResourceAllocationManager>
       mock_allocation_manager_;
   testing::NiceMock<rc_rpc_plugin_test::MockInteriorDataCache>
@@ -141,7 +143,7 @@ TEST_F(OnInteriorVehicleDataNotificationTest,
   MessageSharedPtr mobile_message = CreateBasicMessage();
   apps_.insert(mock_app_);
   const ModuleUid module(module_type, module_id);
-  rc_app_extention_->SubscribeToInteriorVehicleData(module);
+  rc_app_extension_->SubscribeToInteriorVehicleData(module);
   ON_CALL(app_mngr_, applications()).WillByDefault(Return(apps_da_));
 
   // Expectations

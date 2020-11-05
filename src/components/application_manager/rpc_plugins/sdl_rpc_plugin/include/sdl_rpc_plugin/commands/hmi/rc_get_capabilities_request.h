@@ -61,10 +61,9 @@ class RCGetCapabilitiesRequest : public app_mngr::commands::RequestToHMI {
    **/
   virtual ~RCGetCapabilitiesRequest();
 
-  /**
-   * @brief Execute command
-   **/
-  virtual void Run();
+  void Run() OVERRIDE;
+
+  void onTimeOut() OVERRIDE;
 
  private:
   DISALLOW_COPY_AND_ASSIGN(RCGetCapabilitiesRequest);

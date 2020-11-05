@@ -49,6 +49,16 @@ namespace ns_smart_objects {
 class SmartObject;
 class SMember;
 
+enum TypeID {
+  TYPE_NONE,
+  TYPE_OBJECT,
+  TYPE_ARRAY,
+  TYPE_STRING,
+  TYPE_NUMBER,
+  TYPE_ENUM,
+  TYPE_BOOLEAN
+};
+
 /**
  * @brief Base schema item.
  **/
@@ -58,7 +68,7 @@ class ISchemaItem {
    * @brief Validate smart object.
    *
    * @param Object Object to validate.
-   * @param report__ object for reporting errors during validation
+   * @param report object for reporting errors during validation
    * message if an error occurs
    * @param MessageVersion to check mobile RPC version against RPC Spec History
    * @param allow_unknown_enums
@@ -69,7 +79,7 @@ class ISchemaItem {
    **/
   virtual errors::eType validate(
       const SmartObject& Object,
-      rpc::ValidationReport* report__,
+      rpc::ValidationReport* report,
       const utils::SemanticVersion& MessageVersion = utils::SemanticVersion(),
       const bool allow_unknown_enums = false);
 
@@ -92,12 +102,26 @@ class ISchemaItem {
   virtual bool hasDefaultValue(SmartObject& Object);
 
   /**
+   * @brief Filter invalid enum values
+   *
+   * @param Object Object to check for invalid enum values
+   * @param MessageVersion the version of the schema to use for validation
+   * @param report object for reporting enums which were removed during the
+   * process
+   *
+   * @return true if the value being checked should be filtered, false otherwise
+   **/
+  virtual bool filterInvalidEnums(SmartObject& Object,
+                                  const utils::SemanticVersion& MessageVersion,
+                                  rpc::ValidationReport* report);
+
+  /**
    * @brief Apply schema.
    *
    * @param Object Object to apply schema.
    * @param remove_unknown_parameters contains true if need to remove unknown
-   *parameters
-   * from smart object otherwise contains false.
+   * parameters from smart object, otherwise contains false.
+   * @param MessageVersion the version of the schema to be applied
    **/
   virtual void applySchema(
       ns_smart_device_link::ns_smart_objects::SmartObject& Object,
@@ -142,6 +166,13 @@ class ISchemaItem {
    * @return value of any parameter
    */
   virtual size_t GetMemberSize();
+
+  /**
+   * @brief Get type ID of schema
+   *
+   * @return The type ID of this schema
+   */
+  virtual TypeID GetType();
 
   virtual ~ISchemaItem() {}
 };

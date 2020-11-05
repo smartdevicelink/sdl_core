@@ -68,7 +68,7 @@ class TNumberSchemaItem : public CDefaultSchemaItem<NumberType> {
   /**
    * @brief Validate smart object.
    * @param Object Object to validate.
-   * @param report__ object for reporting errors during validation
+   * @param report object for reporting errors during validation
    * @param MessageVersion to check mobile RPC version against RPC Spec History
    * @param allow_unknown_enums
    *   false - unknown enum values (left as string values after applySchema)
@@ -78,9 +78,11 @@ class TNumberSchemaItem : public CDefaultSchemaItem<NumberType> {
    **/
   errors::eType validate(
       const SmartObject& Object,
-      rpc::ValidationReport* report__,
+      rpc::ValidationReport* report,
       const utils::SemanticVersion& MessageVersion = utils::SemanticVersion(),
       const bool allow_unknown_enums = false) OVERRIDE;
+
+  TypeID GetType() OVERRIDE;
 
  private:
   /**
@@ -142,7 +144,7 @@ bool TNumberSchemaItem<NumberType>::isValidNumberType(SmartType type) {
 template <typename NumberType>
 errors::eType TNumberSchemaItem<NumberType>::validate(
     const SmartObject& Object,
-    rpc::ValidationReport* report__,
+    rpc::ValidationReport* report,
     const utils::SemanticVersion& MessageVersion,
     const bool allow_unknown_enums) {
   if (!isValidNumberType(Object.getType())) {
@@ -152,7 +154,7 @@ errors::eType TNumberSchemaItem<NumberType>::validate(
     std::string validation_info =
         "Incorrect type, expected: " + SmartObject::typeToString(expectedType) +
         ", got: " + SmartObject::typeToString(Object.getType());
-    report__->set_validation_info(validation_info);
+    report->set_validation_info(validation_info);
     return errors::INVALID_VALUE;
   }
   NumberType value(0);
@@ -176,7 +178,7 @@ errors::eType TNumberSchemaItem<NumberType>::validate(
     stream << "Value too small, got: " << value
            << ", minimum allowed: " << rangeLimit;
     std::string validation_info = stream.str();
-    report__->set_validation_info(validation_info);
+    report->set_validation_info(validation_info);
     return errors::OUT_OF_RANGE;
   }
 
@@ -185,10 +187,15 @@ errors::eType TNumberSchemaItem<NumberType>::validate(
     stream << "Value too large, got: " << value
            << ", maximum allowed: " << rangeLimit;
     std::string validation_info = stream.str();
-    report__->set_validation_info(validation_info);
+    report->set_validation_info(validation_info);
     return errors::OUT_OF_RANGE;
   }
   return errors::OK;
+}
+
+template <typename NumberType>
+TypeID TNumberSchemaItem<NumberType>::GetType() {
+  return TYPE_NUMBER;
 }
 
 template <typename NumberType>

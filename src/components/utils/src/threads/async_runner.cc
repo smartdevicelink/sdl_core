@@ -38,28 +38,28 @@
 
 namespace threads {
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "Utils")
+SDL_CREATE_LOG_VARIABLE("Utils")
 
 AsyncRunner::AsyncRunner(const std::string& thread_name)
     : executor_(new AsyncRunnerDelegate) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   thread_ = threads::CreateThread(thread_name.c_str(), executor_);
-  thread_->start();
+  thread_->Start();
 }
 
 void AsyncRunner::AsyncRun(ThreadDelegate* delegate) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   executor_->runDelegate(delegate);
 }
 
 void AsyncRunner::Stop() {
-  LOG4CXX_AUTO_TRACE(logger_);
-  thread_->join();
+  SDL_LOG_AUTO_TRACE();
+  thread_->Stop(threads::Thread::kThreadStopDelegate);
 }
 
 AsyncRunner::~AsyncRunner() {
-  LOG4CXX_AUTO_TRACE(logger_);
-  thread_->join();
+  SDL_LOG_AUTO_TRACE();
+  thread_->Stop(threads::Thread::kThreadSoftStop);
   delete executor_;
   threads::DeleteThread(thread_);
 }
@@ -81,7 +81,7 @@ void AsyncRunner::AsyncRunnerDelegate::processDelegate() {
 }
 
 void AsyncRunner::AsyncRunnerDelegate::waitForDelegate() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   sync_primitives::AutoLock lock(delegates_queue_lock_);
   if (!stop_flag_ && delegates_queue_.empty()) {
     delegate_notifier_.Wait(lock);
@@ -89,7 +89,7 @@ void AsyncRunner::AsyncRunnerDelegate::waitForDelegate() {
 }
 
 void AsyncRunner::AsyncRunnerDelegate::threadMain() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   while (!stop_flag_) {
     processDelegate();
     waitForDelegate();
@@ -97,14 +97,14 @@ void AsyncRunner::AsyncRunnerDelegate::threadMain() {
 }
 
 void AsyncRunner::AsyncRunnerDelegate::exitThreadMain() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   sync_primitives::AutoLock lock(delegates_queue_lock_);
   stop_flag_ = true;
   delegate_notifier_.NotifyOne();
 }
 
 void AsyncRunner::AsyncRunnerDelegate::runDelegate(ThreadDelegate* delegate) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   sync_primitives::AutoLock lock(delegates_queue_lock_);
   delegates_queue_.push(delegate);
   delegate_notifier_.NotifyOne();

@@ -674,7 +674,7 @@ class SmartObject FINAL {
   /**
    * @brief Validates object according to attached schema.
    *
-   * @param report__ object for reporting errors during validation
+   * @param report object for reporting errors during validation
    * @param messageVersion of the mobile app to check against RPC Spec Schema
    * @param allow_unknown_enums
    *   false - unknown enum values (left as string values after applySchema)
@@ -683,7 +683,7 @@ class SmartObject FINAL {
    * @return Result of validation.
    */
   errors::eType validate(
-      rpc::ValidationReport* report__,
+      rpc::ValidationReport* report,
       const utils::SemanticVersion& MessageVersion = utils::SemanticVersion(),
       const bool allow_unknown_enums = false);
 

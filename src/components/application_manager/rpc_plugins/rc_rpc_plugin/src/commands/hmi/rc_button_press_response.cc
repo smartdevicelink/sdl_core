@@ -36,6 +36,8 @@
 namespace rc_rpc_plugin {
 namespace commands {
 
+SDL_CREATE_LOG_VARIABLE("Commands")
+
 RCButtonPressResponse::RCButtonPressResponse(
     const application_manager::commands::MessageSharedPtr& message,
     const RCCommandParams& params)
@@ -47,7 +49,7 @@ RCButtonPressResponse::RCButtonPressResponse(
           params.policy_handler_) {}
 
 void RCButtonPressResponse::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
 
   app_mngr::event_engine::Event event(
       hmi_apis::FunctionID::Buttons_ButtonPress);

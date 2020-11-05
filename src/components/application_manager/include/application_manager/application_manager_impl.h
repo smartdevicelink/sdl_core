@@ -35,6 +35,7 @@
 
 #include <stdint.h>
 #include <algorithm>
+#include <atomic>
 #include <deque>
 #include <map>
 #include <memory>
@@ -132,7 +133,7 @@ struct AppIconInfo {
       : endpoint(ws_endpoint), pending_request(pending) {}
 };
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "ApplicationManager")
+SDL_CREATE_LOG_VARIABLE("ApplicationManager")
 typedef std::shared_ptr<timer::Timer> TimerSPtr;
 
 class ApplicationManagerImpl
@@ -271,17 +272,40 @@ class ApplicationManagerImpl
 
   /**
    * @brief Checks if Application is subscribed for way points
-   * @param Application pointer
+   * @param Application id
    * @return true if Application is subscribed for way points
    * otherwise false
    */
-  bool IsAppSubscribedForWayPoints(ApplicationSharedPtr app) const OVERRIDE;
+  bool IsAppSubscribedForWayPoints(uint32_t app_id) const OVERRIDE;
+
+  /**
+   * @brief Checks if Application is subscribed for way points
+   * @param Application reference
+   * @return true if Application is subscribed for way points
+   * otherwise false
+   */
+  bool IsAppSubscribedForWayPoints(Application& app) const OVERRIDE;
+
+  void SaveWayPointsMessage(
+      smart_objects::SmartObjectSPtr way_points_message) OVERRIDE;
+
+  /**
+   * @brief Subscribe Application for way points
+   * @param Application id
+   */
+  void SubscribeAppForWayPoints(uint32_t app_id) OVERRIDE;
 
   /**
    * @brief Subscribe Application for way points
    * @param Application pointer
    */
   void SubscribeAppForWayPoints(ApplicationSharedPtr app) OVERRIDE;
+
+  /**
+   * @brief Unsubscribe Application for way points
+   * @param Application id
+   */
+  void UnsubscribeAppFromWayPoints(uint32_t app_id) OVERRIDE;
 
   /**
    * @brief Unsubscribe Application for way points
@@ -346,6 +370,9 @@ class ApplicationManagerImpl
   ApplicationSharedPtr RegisterApplication(
       const std::shared_ptr<smart_objects::SmartObject>&
           request_for_registration) OVERRIDE;
+
+  void FinalizeAppRegistration(ApplicationSharedPtr application,
+                               const uint32_t connection_key) OVERRIDE;
   /*
    * @brief Closes application by id
    *
@@ -388,6 +415,7 @@ class ApplicationManagerImpl
    * @brief Closes all registered applications
    */
   void UnregisterAllApplications();
+
   bool ActivateApplication(ApplicationSharedPtr app) OVERRIDE;
 
   /**
@@ -400,7 +428,10 @@ class ApplicationManagerImpl
   mobile_api::HMILevel::eType IsHmiLevelFullAllowed(ApplicationSharedPtr app);
 
   void ConnectToDevice(const std::string& device_mac) OVERRIDE;
-  void OnHMIStartedCooperation() OVERRIDE;
+
+  void OnHMIReady() OVERRIDE;
+
+  void RequestForInterfacesAvailability() OVERRIDE;
 
   void DisconnectCloudApp(ApplicationSharedPtr app) OVERRIDE;
 
@@ -840,29 +871,16 @@ class ApplicationManagerImpl
   void ForbidStreaming(uint32_t app_id,
                        protocol_handler::ServiceType service_type) OVERRIDE;
 
-  /**
-   * @brief Called when application completes streaming configuration
-   * @param app_id Streaming application id
-   * @param service_type Streaming service type
-   * @param result true if configuration is successful, false otherwise
-   * @param rejected_params list of rejected parameters' name. Valid
-   *                        only when result is false.
-   */
-  void OnStreamingConfigured(
-      uint32_t app_id,
-      protocol_handler::ServiceType service_type,
-      bool result,
-      std::vector<std::string>& rejected_params) OVERRIDE;
+  void OnStreamingConfigurationSuccessful(
+      uint32_t app_id, protocol_handler::ServiceType service_type) OVERRIDE;
 
-  /**
-   * @brief Callback calls when application starts/stops data streaming
-   * @param app_id Streaming application id
-   * @param service_type Streaming service type
-   * @param state Shows if streaming started or stopped
-   */
+  void OnStreamingConfigurationFailed(uint32_t app_id,
+                                      std::vector<std::string>& rejected_params,
+                                      const std::string& reason) OVERRIDE;
+
   void OnAppStreaming(uint32_t app_id,
                       protocol_handler::ServiceType service_type,
-                      bool state) OVERRIDE;
+                      const Application::StreamingState new_state) OVERRIDE;
 
   mobile_api::HMILevel::eType GetDefaultHmiLevel(
       ApplicationConstSharedPtr application) const;
@@ -934,6 +952,7 @@ class ApplicationManagerImpl
    */
   bool IsHMICooperating() const OVERRIDE;
 
+  void SetHMICooperating(const bool hmi_cooperating) OVERRIDE;
   /**
    * @brief Method used to send default app tts globalProperties
    * in case they were not provided from mobile side after defined time
@@ -955,6 +974,13 @@ class ApplicationManagerImpl
    * send TTS global properties after timeout
    */
   void RemoveAppFromTTSGlobalPropertiesList(const uint32_t app_id) OVERRIDE;
+
+  ResetGlobalPropertiesResult ResetGlobalProperties(
+      const smart_objects::SmartObject& global_properties_ids,
+      const uint32_t app_id) OVERRIDE;
+
+  ResetGlobalPropertiesResult ResetAllApplicationGlobalProperties(
+      const uint32_t app_id) OVERRIDE;
 
   // TODO(AOleynik): Temporary added, to fix build. Should be reworked.
   connection_handler::ConnectionHandler& connection_handler() const OVERRIDE;
@@ -1195,21 +1221,6 @@ class ApplicationManagerImpl
                          smart_objects::SmartObject& vrSynonym);
 
   /**
-   * @brief Method transforms string to AppHMIType
-   * @param str contains string AppHMIType
-   * @return enum AppHMIType
-   */
-  mobile_apis::AppHMIType::eType StringToAppHMIType(std::string str);
-
-  /**
-   * @brief Returns a string representation of AppHMIType
-   * @param type an enum value of AppHMIType
-   * @return string representation of the enum value
-   */
-  const std::string AppHMITypeToString(
-      mobile_apis::AppHMIType::eType type) const;
-
-  /**
    * @brief Method compares arrays of app HMI type
    * @param from_policy contains app HMI type from policy
    * @param from_application contains app HMI type from application
@@ -1226,17 +1237,15 @@ class ApplicationManagerImpl
                           const bool allow_unknown_parameters = false);
 
   template <typename ApplicationList>
-  void PrepareApplicationListSO(ApplicationList app_list,
+  void PrepareApplicationListSO(ApplicationList& app_list,
                                 smart_objects::SmartObject& applications,
                                 ApplicationManager& app_mngr) {
-    CREATE_LOGGERPTR_LOCAL(logger_, "ApplicationManager");
-
     smart_objects::SmartArray* app_array = applications.asArray();
     uint32_t app_count = NULL == app_array ? 0 : app_array->size();
     typename ApplicationList::const_iterator it;
     for (it = app_list.begin(); it != app_list.end(); ++it) {
       if (it->use_count() == 0) {
-        LOG4CXX_ERROR(logger_, "Application not found ");
+        SDL_LOG_ERROR("Application not found");
         continue;
       }
 
@@ -1250,12 +1259,12 @@ class ApplicationManagerImpl
                                                     app_mngr)) {
         applications[app_count++] = hmi_application;
       } else {
-        LOG4CXX_DEBUG(logger_, "Can't CreateHMIApplicationStruct ");
+        SDL_LOG_DEBUG("Can't CreateHMIApplicationStruct");
       }
     }
 
     if (0 == app_count) {
-      LOG4CXX_WARN(logger_, "Empty applications list");
+      SDL_LOG_WARN("Empty applications list");
     }
   }
 
@@ -1316,6 +1325,39 @@ class ApplicationManagerImpl
    */
   void SendMobileMessage(smart_objects::SmartObjectSPtr message);
 
+  /**
+   * @brief Sets default value of the HELPPROMT global property
+   * to the first vrCommand of the Command Menu registered in application
+   *
+   * @param app Registered application
+   * @param is_timeout_promp Flag indicating that timeout prompt
+   * should be reset
+   *
+   * @return TRUE on success, otherwise FALSE
+   */
+  bool ResetHelpPromt(ApplicationSharedPtr app) const;
+
+  /**
+   * @brief  Sets default value of the TIMEOUTPROMT global property
+   * to the first vrCommand of the Command Menu registered in application
+   *
+   * @param app Registered application
+   *
+   * @return TRUE on success, otherwise FALSE
+   */
+  bool ResetTimeoutPromt(ApplicationSharedPtr app) const;
+
+  /**
+   * @brief Sets default value of the VRHELPTITLE global property
+   * to the application name and value of the VRHELPITEMS global property
+   * to value equal to registered command -1(default command “Help / Cancel”.)
+   *
+   * @param app Registered application
+   *
+   * @return TRUE on success, otherwise FALSE
+   */
+  bool ResetVrHelpTitleItems(ApplicationSharedPtr app) const;
+
  private:
   /*
    * NaviServiceStatusMap shows which navi service (audio/video) is opened
@@ -1338,6 +1380,16 @@ class ApplicationManagerImpl
    */
   std::string GetHashedAppID(uint32_t connection_key,
                              const std::string& policy_app_id) const;
+
+  /**
+   * @brief CreateAllAppGlobalPropsIDList creates an array of all application
+   * global properties IDs. Used as utility to call
+   * ApplicationManger::ResetGlobalProperties
+   * with all global properties.
+   * @return array smart object with global properties identifiers.
+   */
+  const smart_objects::SmartObjectSPtr CreateAllAppGlobalPropsIDList(
+      const uint32_t app_id) const;
 
   /**
    * @brief Removes suspended and stopped timers from timer pool
@@ -1510,6 +1562,8 @@ class ApplicationManagerImpl
    */
   std::set<uint32_t> subscribed_way_points_apps_list_;
 
+  smart_objects::SmartObjectSPtr way_points_data_;
+
   /**
    * @brief Map contains applications which
    * will send TTS global properties to HMI after timeout
@@ -1589,7 +1643,6 @@ class ApplicationManagerImpl
   sync_primitives::Lock close_app_timer_pool_lock_;
   sync_primitives::Lock end_stream_timer_pool_lock_;
 
-  mutable sync_primitives::RecursiveLock stopping_application_mng_lock_;
   StateControllerImpl state_ctrl_;
   std::unique_ptr<app_launch::AppLaunchData> app_launch_dto_;
   std::unique_ptr<app_launch::AppLaunchCtrl> app_launch_ctrl_;
@@ -1623,7 +1676,7 @@ class ApplicationManagerImpl
 
   std::atomic<bool> registered_during_timer_execution_;
 
-  volatile bool is_stopping_;
+  std::atomic<bool> is_stopping_;
 
   std::unique_ptr<CommandHolder> commands_holder_;
 

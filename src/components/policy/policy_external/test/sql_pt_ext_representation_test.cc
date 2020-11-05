@@ -65,32 +65,24 @@ class SQLPTExtRepresentationTest : public ::testing::Test {
   SQLPTExtRepresentationTest() : reps_(NULL) {}
 
  protected:
-  SQLPTExtRepresentation* reps_;
+  std::shared_ptr<SQLPTExtRepresentation> reps_;
   policy_handler_test::MockPolicySettings policy_settings_;
-  static const string kDatabaseName;
   PermissionConsent perm_consent;
   FunctionalGroupPermission group1_perm;
   FunctionalGroupPermission group2_perm;
-  utils::dbms::SQLQuery* query_wrapper_;
-  static const bool in_memory_;
-  const std::string kAppStorageFolder = "storage_SQLPTExtRepresentationTest";
+  std::shared_ptr<utils::dbms::SQLQuery> query_wrapper_;
 
   void SetUp() OVERRIDE {
-    file_system::DeleteFile(kDatabaseName);
-    reps_ = new SQLPTExtRepresentation(in_memory_);
+    reps_ = std::make_shared<SQLPTExtRepresentation>(true);
     ASSERT_TRUE(reps_ != NULL);
-    ON_CALL(policy_settings_, app_storage_folder())
-        .WillByDefault(ReturnRef(kAppStorageFolder));
     ASSERT_EQ(SUCCESS, reps_->Init(&policy_settings_));
-    query_wrapper_ = new utils::dbms::SQLQuery(reps_->db());
+    query_wrapper_ = std::make_shared<utils::dbms::SQLQuery>(reps_->db());
     ASSERT_TRUE(query_wrapper_ != NULL);
   }
 
   void TearDown() OVERRIDE {
-    delete query_wrapper_;
     EXPECT_TRUE(reps_->Drop());
     EXPECT_TRUE(reps_->Close());
-    delete reps_;
   }
 
   void FillGroupPermission(
@@ -261,9 +253,6 @@ SQLPTExtRepresentationTest::GetDataInternal(
   return table.policy_table.functional_groupings;
 }
 
-const string SQLPTExtRepresentationTest::kDatabaseName = ":memory:";
-const bool SQLPTExtRepresentationTest::in_memory_ = true;
-
 ::testing::AssertionResult IsValid(const policy_table::Table& table) {
   if (table.is_valid()) {
     return ::testing::AssertionSuccess();
@@ -317,6 +306,20 @@ TEST_F(SQLPTExtRepresentationTest,
       Json::Value(5);
   module_config["notifications_per_minute_by_priority"]["none"] =
       Json::Value(6);
+  module_config["subtle_notifications_per_minute_by_priority"] =
+      Json::Value(Json::objectValue);
+  module_config["subtle_notifications_per_minute_by_priority"]["emergency"] =
+      Json::Value(7);
+  module_config["subtle_notifications_per_minute_by_priority"]["navigation"] =
+      Json::Value(8);
+  module_config["subtle_notifications_per_minute_by_priority"]["VOICECOMM"] =
+      Json::Value(9);
+  module_config["subtle_notifications_per_minute_by_priority"]
+               ["communication"] = Json::Value(10);
+  module_config["subtle_notifications_per_minute_by_priority"]["normal"] =
+      Json::Value(11);
+  module_config["subtle_notifications_per_minute_by_priority"]["none"] =
+      Json::Value(12);
   module_config["vehicle_make"] = Json::Value("MakeT");
   module_config["vehicle_model"] = Json::Value("ModelT");
   module_config["vehicle_year"] = Json::Value("2014");

@@ -36,6 +36,8 @@ using namespace application_manager;
 
 namespace commands {
 
+SDL_CREATE_LOG_VARIABLE("Commands")
+
 AudioStartStreamResponse::AudioStartStreamResponse(
     const application_manager::commands::MessageSharedPtr& message,
     ApplicationManager& application_manager,
@@ -51,7 +53,7 @@ AudioStartStreamResponse::AudioStartStreamResponse(
 AudioStartStreamResponse::~AudioStartStreamResponse() {}
 
 void AudioStartStreamResponse::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
 
   event_engine::Event event(hmi_apis::FunctionID::Navigation_StartAudioStream);
   event.set_smart_object(*message_);
