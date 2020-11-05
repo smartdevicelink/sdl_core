@@ -167,6 +167,8 @@ TEST_F(ReleaseInteriorVehicleDataModuleRequestTest,
   ON_CALL(mock_allocation_manager_,
           ReleaseResource(kModuleType, kModuleID, kAppID))
       .WillByDefault(Return(ResourceReleasedState::eType::NOT_ALLOCATED));
+  ON_CALL(mock_hmi_capabilities_, rc_capability())
+      .WillByDefault(Return(smart_objects::SmartObjectSPtr()));
 
   MessageSharedPtr message_to_mobile = CreateMessage();
 
@@ -197,7 +199,8 @@ TEST_F(ReleaseInteriorVehicleDataModuleRequestTest,
           ReleaseResource(kModuleType, kModuleID, kAppID))
       .WillByDefault(Return(ResourceReleasedState::eType::IS_ALLOCATED));
   MessageSharedPtr message_to_mobile = CreateMessage();
-
+  ON_CALL(mock_hmi_capabilities_, rc_capability())
+      .WillByDefault(Return(smart_objects::SmartObjectSPtr()));
   EXPECT_CALL(
       mock_rpc_service_,
       ManageMobileCommand(
@@ -224,6 +227,8 @@ TEST_F(ReleaseInteriorVehicleDataModuleRequestTest,
   ON_CALL(mock_allocation_manager_,
           ReleaseResource(kModuleType, kModuleID, kAppID))
       .WillByDefault(Return(ResourceReleasedState::eType::IS_RELEASED));
+  ON_CALL(mock_hmi_capabilities_, rc_capability())
+      .WillByDefault(Return(smart_objects::SmartObjectSPtr()));
 
   MessageSharedPtr message_to_mobile = CreateMessage();
 

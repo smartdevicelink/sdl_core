@@ -516,9 +516,8 @@ bool SecurityManagerImpl::ProcessHandshakeData(
   const uint32_t seqNumber = inMessage->get_header().seq_number;
   const uint32_t connection_key = inMessage->get_connection_key();
 
-  SDL_LOG_DEBUG(
-
-      "Received " << inMessage->get_data_size() << " bytes handshake data ");
+  SDL_LOG_DEBUG("Received " << inMessage->get_data_size()
+                            << " bytes handshake data ");
 
   if (!inMessage->get_data_size()) {
     const std::string error_text("SendHandshakeData: null arguments size.");

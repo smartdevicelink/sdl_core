@@ -36,6 +36,8 @@ namespace sdl_rpc_plugin {
 
 SDL_CREATE_LOG_VARIABLE("SdlRPCPlugin")
 
+using hmi_apis::FunctionID::Navigation_SubscribeWayPoints;
+
 WayPointsPendingResumptionHandler::WayPointsPendingResumptionHandler(
     application_manager::ApplicationManager& application_manager)
     : PendingResumptionHandler(application_manager) {}
@@ -43,9 +45,10 @@ WayPointsPendingResumptionHandler::WayPointsPendingResumptionHandler(
 smart_objects::SmartObjectSPtr
 WayPointsPendingResumptionHandler::CreateSubscriptionRequest() {
   SDL_LOG_AUTO_TRACE();
+
   auto subscribe_waypoints_msg =
       application_manager::MessageHelper::CreateMessageForHMI(
-          hmi_apis::FunctionID::Navigation_SubscribeWayPoints,
+          Navigation_SubscribeWayPoints,
           application_manager_.GetNextHMICorrelationID());
   (*subscribe_waypoints_msg)[application_manager::strings::params]
                             [application_manager::strings::message_type] =
@@ -53,40 +56,52 @@ WayPointsPendingResumptionHandler::CreateSubscriptionRequest() {
   return subscribe_waypoints_msg;
 }
 
+void WayPointsPendingResumptionHandler::SendPendingHMIRequest(
+    PendingRequest& pending_request) {
+  SDL_LOG_AUTO_TRACE();
+  using namespace application_manager;
+
+  SDL_LOG_DEBUG("Sending request with function id: "
+                << Navigation_SubscribeWayPoints
+                << " and correlation_id: " << pending_request.corr_id_);
+
+  auto request = MessageHelper::CreateMessageForHMI(
+      Navigation_SubscribeWayPoints, pending_request.corr_id_);
+  (*request)[strings::params][strings::message_type] =
+      hmi_apis::messageType::request;
+  subscribe_on_event(Navigation_SubscribeWayPoints, pending_request.corr_id_);
+  application_manager_.GetRPCService().ManageHMICommand(request);
+  pending_request.waiting_for_hmi_response_ = true;
+}
+
 void WayPointsPendingResumptionHandler::HandleResumptionSubscriptionRequest(
     application_manager::AppExtension& extension,
     application_manager::Application& app) {
   SDL_LOG_AUTO_TRACE();
-  WayPointsAppExtension& ext = dynamic_cast<WayPointsAppExtension&>(extension);
-  smart_objects::SmartObjectSPtr request = CreateSubscriptionRequest();
-  smart_objects::SmartObject& request_ref = *request;
-  const auto function_id = static_cast<hmi_apis::FunctionID::eType>(
-      request_ref[application_manager::strings::params]
-                 [application_manager::strings::function_id]
-                     .asInt());
-  const uint32_t corr_id =
-      request_ref[application_manager::strings::params]
-                 [application_manager::strings::correlation_id]
-                     .asUInt();
+  using namespace application_manager;
+  sync_primitives::AutoLock lock(pending_resumption_lock_);
+  UNUSED(extension);
 
+  if (application_manager_.IsAnyAppSubscribedForWayPoints()) {
+    SDL_LOG_DEBUG(
+        "Subscription to waypoint already exist, no need to send "
+        "request to HMI");
+    application_manager_.SubscribeAppForWayPoints(app.app_id());
+    return;
+  }
+
+  const auto request = CreateSubscriptionRequest();
+  const auto corr_id =
+      (*request)[strings::params][strings::correlation_id].asInt();
   auto resumption_request =
-      MakeResumptionRequest(corr_id, function_id, *request);
-  app_ids_.push(app.app_id());
+      MakeResumptionRequest(corr_id, Navigation_SubscribeWayPoints, *request);
 
-  if (pending_requests_.empty()) {
-    SDL_LOG_DEBUG("There are no pending requests for app_id: " << app.app_id());
-    pending_requests_[corr_id] = request_ref;
-    subscribe_on_event(function_id, corr_id);
-    SDL_LOG_DEBUG("Sending request with function id: "
-                  << function_id << " and correlation_id: " << corr_id);
+  PendingRequest pending_request(app.app_id(), corr_id);
+  pending_requests_.push_back(pending_request);
+  SDL_LOG_DEBUG("Add to pending resumptins corr_id = " << corr_id);
 
-    application_manager_.GetRPCService().ManageHMICommand(request);
-  } else {
-    SDL_LOG_DEBUG("There are pending requests. Frozen resumption for app id "
-                  << app.app_id() << " corr id = " << corr_id);
-    ResumptionAwaitingHandling frozen_res{
-        app.app_id(), ext, resumption_request};
-    frozen_resumptions_.push_back(frozen_res);
+  if (pending_requests_.size() == 1) {
+    SendPendingHMIRequest(pending_requests_.front());
   }
   resumption_data_processor().SubscribeToResponse(app.app_id(),
                                                   resumption_request);
@@ -94,42 +109,32 @@ void WayPointsPendingResumptionHandler::HandleResumptionSubscriptionRequest(
 
 void WayPointsPendingResumptionHandler::OnResumptionRevert() {
   SDL_LOG_AUTO_TRACE();
-  using namespace application_manager;
+  sync_primitives::AutoLock lock(pending_resumption_lock_);
 
-  if (!pending_requests_.empty()) {
-    SDL_LOG_DEBUG("Still waiting for some response");
+  if (pending_requests_.empty()) {
+    SDL_LOG_DEBUG("No pending resumptions");
     return;
   }
 
-  if (!frozen_resumptions_.empty()) {
-    ResumptionAwaitingHandling frozen_resumption = frozen_resumptions_.back();
-    frozen_resumptions_.pop_back();
-
-    auto request = std::make_shared<smart_objects::SmartObject>(
-        frozen_resumption.request_to_send_.message);
-    const uint32_t cid =
-        (*request)[strings::params][strings::correlation_id].asUInt();
-    const auto fid = static_cast<hmi_apis::FunctionID::eType>(
-        (*request)[strings::params][strings::function_id].asInt());
-
-    SDL_LOG_DEBUG("Subscribing for event with function id: "
-                  << fid << " correlation id: " << cid);
-    subscribe_on_event(fid, cid);
-    pending_requests_[cid] = *request;
-    SDL_LOG_DEBUG("Sending request with fid: " << fid << " and cid: " << cid);
-    application_manager_.GetRPCService().ManageHMICommand(request);
+  auto& pending_request = pending_requests_.front();
+  if (pending_request.waiting_for_hmi_response_) {
+    SDL_LOG_DEBUG("Pending resumption for  "
+                  << pending_request.app_id_
+                  << " is already waiting for HMI response");
+    return;
   }
+  SendPendingHMIRequest(pending_request);
 }
 
 void WayPointsPendingResumptionHandler::RaiseFakeSuccessfulResponse(
-    ns_smart_device_link::ns_smart_objects::SmartObject response,
     const int32_t corr_id) {
   using namespace application_manager;
-  response[strings::params][strings::correlation_id] = corr_id;
-  auto fid = static_cast<hmi_apis::FunctionID::eType>(
-      response[strings::params][strings::function_id].asInt());
-  event_engine::Event event(fid);
-  event.set_smart_object(response);
+
+  auto response = MessageHelper::CreateResponseMessageFromHmi(
+      Navigation_SubscribeWayPoints, corr_id, hmi_apis::Common_Result::SUCCESS);
+
+  event_engine::Event event(Navigation_SubscribeWayPoints);
+  event.set_smart_object(*response);
 
   SDL_LOG_TRACE("Raise fake response for subscriber. corr_id : " << corr_id);
   event.raise(application_manager_.event_dispatcher());
@@ -139,6 +144,14 @@ void WayPointsPendingResumptionHandler::on_event(
     const application_manager::event_engine::Event& event) {
   using namespace application_manager;
   SDL_LOG_AUTO_TRACE();
+  sync_primitives::AutoLock lock(pending_resumption_lock_);
+
+  unsubscribe_from_event(Navigation_SubscribeWayPoints);
+
+  if (pending_requests_.empty()) {
+    SDL_LOG_DEBUG("Not waiting for any response");
+    return;
+  }
 
   const smart_objects::SmartObject& response = event.smart_object();
   const uint32_t corr_id = event.smart_object_correlation_id();
@@ -146,64 +159,45 @@ void WayPointsPendingResumptionHandler::on_event(
   SDL_LOG_TRACE("Received event with function id: "
                 << event.id() << " and correlation id: " << corr_id);
 
-  smart_objects::SmartObject pending_request;
-  if (pending_requests_.find(corr_id) == pending_requests_.end()) {
-    SDL_LOG_ERROR("corr id " << corr_id << " NOT found");
-    return;
-  }
-  pending_request = pending_requests_[corr_id];
-  pending_requests_.erase(corr_id);
-  if (app_ids_.empty()) {
-    SDL_LOG_ERROR("app_ids is empty");
-    return;
-  }
-  uint32_t app_id = app_ids_.front();
-  app_ids_.pop();
-  auto app = application_manager_.application(app_id);
+  auto current_pending = pending_requests_.front();
+  pending_requests_.pop_front();
+
+  auto app = application_manager_.application(current_pending.app_id_);
   if (!app) {
-    SDL_LOG_ERROR("Application not found " << app_id);
+    SDL_LOG_WARN("Application not found " << current_pending.app_id_);
     return;
   }
 
   if (resumption::IsResponseSuccessful(response)) {
-    SDL_LOG_DEBUG("Resumption of subscriptions is successful");
-
+    SDL_LOG_DEBUG("Resumption of waypoints is successful");
     application_manager_.SubscribeAppForWayPoints(app);
-
-    for (auto& frozen_resumption : frozen_resumptions_) {
-      auto corr_id = frozen_resumption.request_to_send_
-                         .message[strings::params][strings::correlation_id]
-                         .asInt();
-      RaiseFakeSuccessfulResponse(response, corr_id);
-      application_manager_.SubscribeAppForWayPoints(frozen_resumption.app_id);
-    }
-    frozen_resumptions_.clear();
-  } else {
-    SDL_LOG_DEBUG("Resumption of subscriptions is NOT successful");
-
-    if (frozen_resumptions_.empty()) {
-      SDL_LOG_DEBUG("frozen resumptions list is empty");
-      return;
-    }
-
-    ResumptionAwaitingHandling frozen_resumption = frozen_resumptions_.back();
-    frozen_resumptions_.pop_back();
-    auto resumption_req = frozen_resumption.request_to_send_;
-    const uint32_t cid =
-        resumption_req.message[strings::params][strings::correlation_id]
-            .asInt();
-    const hmi_apis::FunctionID::eType fid =
-        static_cast<hmi_apis::FunctionID::eType>(
-            resumption_req.message[strings::params][strings::function_id]
-                .asInt());
-    subscribe_on_event(fid, cid);
-    auto request =
-        std::make_shared<smart_objects::SmartObject>(resumption_req.message);
-    SDL_LOG_DEBUG("Subscribing for event with function id: "
-                  << fid << " correlation id: " << cid);
-    pending_requests_[cid] = *request;
-    SDL_LOG_DEBUG("Sending request with fid: " << fid << " and cid: " << cid);
-    application_manager_.GetRPCService().ManageHMICommand(request);
   }
+  ProcessNextPendingResumption();
 }
+
+void WayPointsPendingResumptionHandler::ProcessNextPendingResumption() {
+  SDL_LOG_AUTO_TRACE();
+  if (pending_requests_.empty()) {
+    SDL_LOG_DEBUG("No more pending resumptions");
+    return;
+  }
+  auto& pending = pending_requests_.front();
+  if (pending.waiting_for_hmi_response_) {
+    SDL_LOG_DEBUG("Request was already sent to HMI for " << pending.app_id_);
+    return;
+  }
+
+  if (!application_manager_.IsAnyAppSubscribedForWayPoints()) {
+    SendPendingHMIRequest(pending);
+    return;
+  }
+
+  auto pending_copy = pending;
+  pending_requests_.pop_front();
+  auto app = application_manager_.application(pending_copy.app_id_);
+  application_manager_.SubscribeAppForWayPoints(app);
+  RaiseFakeSuccessfulResponse(pending_copy.corr_id_);
+  ProcessNextPendingResumption();
+}
+
 }  // namespace sdl_rpc_plugin

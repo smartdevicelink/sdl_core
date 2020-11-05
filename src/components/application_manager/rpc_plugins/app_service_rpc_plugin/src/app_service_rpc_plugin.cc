@@ -107,14 +107,15 @@ void AppServiceRpcPlugin::DeleteSubscriptions(
 
 }  // namespace app_service_rpc_plugin
 
-extern "C" __attribute__((visibility("default")))
-application_manager::plugin_manager::RPCPlugin*
-Create(logger::Logger* logger_instance) {
+using RPCPlugin = application_manager::plugin_manager::RPCPlugin;
+// cppcheck-suppress unusedFunction
+extern "C" __attribute__((visibility("default"))) RPCPlugin* Create(
+    logger::Logger* logger_instance) {
   logger::Logger::instance(logger_instance);
   return new app_service_rpc_plugin::AppServiceRpcPlugin();
 }
 
-extern "C" __attribute__((visibility("default"))) void Delete(
-    application_manager::plugin_manager::RPCPlugin* data) {
+// cppcheck-suppress unusedFunction
+extern "C" __attribute__((visibility("default"))) void Delete(RPCPlugin* data) {
   delete data;
 }

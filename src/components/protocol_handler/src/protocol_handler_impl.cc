@@ -139,7 +139,6 @@ ProtocolHandlerImpl::ProtocolHandlerImpl(
     }
   } else {
     SDL_LOG_WARN(
-
         "Malformed message filtering is disabled."
         << "Connection will be close on first malformed message detection");
   }
@@ -320,7 +319,6 @@ void ProtocolHandlerImpl::SendStartSessionAck(
           &params, strings::protocol_version, protocol_version_string);
       UNUSED(protocol_ver_written);
       SDL_LOG_DEBUG(
-
           "Protocol version parameter was written to bson params: "
           << protocol_ver_written << "; Value: "
           << bson_object_get_string(&params, strings::protocol_version));
@@ -346,7 +344,6 @@ void ProtocolHandlerImpl::SendStartSessionAck(
                     sizeof(secondaryTransport));
             secondaryTransport[sizeof(secondaryTransport) - 1] = '\0';
             SDL_LOG_DEBUG(
-
                 "Adding "
                 << secondaryTransport
                 << " to secondaryTransports parameter of StartSessionAck");
@@ -387,7 +384,6 @@ void ProtocolHandlerImpl::SendStartSessionAck(
             send_transport_update_event = true;
           } else {
             SDL_LOG_DEBUG(
-
                 "Multiple transports feature is disabled by configuration");
             // In this case, we must remember that this session will never have
             // a secondary transport.
@@ -396,7 +392,6 @@ void ProtocolHandlerImpl::SendStartSessionAck(
           }
         } else {
           SDL_LOG_WARN(
-
               "Failed to set up secondary transport and service type params");
           connection_handler_.SetSecondaryTransportID(session_id,
                                                       kDisabledSecondary);
@@ -451,7 +446,7 @@ void ProtocolHandlerImpl::SendStartSessionNAck(ConnectionID connection_id,
                                                uint8_t session_id,
                                                uint8_t protocol_version,
                                                uint8_t service_type,
-                                               const std::string reason) {
+                                               const std::string& reason) {
   std::vector<std::string> rejectedParams;
   SendStartSessionNAck(connection_id,
                        session_id,
@@ -467,7 +462,7 @@ void ProtocolHandlerImpl::SendStartSessionNAck(
     uint8_t protocol_version,
     uint8_t service_type,
     std::vector<std::string>& rejectedParams,
-    const std::string reason) {
+    const std::string& reason) {
   SDL_LOG_AUTO_TRACE();
 
   ProtocolFramePtr ptr(
@@ -669,7 +664,6 @@ void ProtocolHandlerImpl::SendEndServicePrivate(int32_t primary_connection_id,
                   << static_cast<int32_t>(session_id));
   } else {
     SDL_LOG_WARN(
-
         "SendEndServicePrivate is failed connection or session does not exist");
   }
 }
@@ -1075,6 +1069,7 @@ void ProtocolHandlerImpl::OnTMMessageSend(const RawMessagePtr message) {
 
   if (ready_to_close_connections_.end() != connection_it) {
     ready_to_close_connections_.erase(connection_it);
+    session_observer_.OnFinalMessageCallback(connection_handle);
     transport_manager_.Disconnect(connection_handle);
     return;
   }
@@ -1243,7 +1238,7 @@ void ProtocolHandlerImpl::OnTransportConfigUpdated(
     if (st.secondary_transport != kDisabledSecondary) {
       SendTransportUpdateEvent(st.primary_transport, itr->first);
     }
-    itr++;
+    ++itr;
   }
 }
 
@@ -1451,7 +1446,6 @@ RESULT_CODE ProtocolHandlerImpl::HandleSingleFrameMessage(
   SDL_LOG_AUTO_TRACE();
 
   SDL_LOG_DEBUG(
-
       "FRAME_TYPE_SINGLE message of size "
       << packet->data_size() << "; message "
       << ConvertPacketDataToString(packet->data(), packet->data_size()));
@@ -1706,7 +1700,6 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessageStartSession(
     const ProtocolFramePtr packet) {
   SDL_LOG_AUTO_TRACE();
   SDL_LOG_DEBUG(
-
       "Protocol version:" << static_cast<int>(packet->protocol_version()));
   const ServiceType service_type = ServiceTypeFromByte(packet->service_type());
 
@@ -1736,12 +1729,18 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessageStartSession(
                   << service_type << ", disallowed by settings.");
     service_status_update_handler_->OnServiceUpdate(
         connection_key, service_type, settings_check);
-    SendStartSessionNAck(connection_id,
-                         session_id,
-                         protocol_version,
-                         service_type,
-                         "Service type: " + std::to_string(service_type) +
-                             " disallowed by settings");
+
+    std::string reason("Service type: " + std::to_string(service_type) +
+                       " disallowed by settings.");
+    if (ServiceStatus::PROTECTION_ENFORCED == settings_check) {
+      reason += " Allowed only in protected mode";
+    }
+    if (ServiceStatus::UNSECURE_START_FAILED == settings_check) {
+      reason += " Allowed only in unprotected mode";
+    }
+
+    SendStartSessionNAck(
+        connection_id, session_id, protocol_version, service_type, reason);
     return RESULT_OK;
   }
 
@@ -2052,9 +2051,8 @@ void ProtocolHandlerImpl::NotifySessionStarted(
 RESULT_CODE ProtocolHandlerImpl::HandleControlMessageHeartBeat(
     const ProtocolPacket& packet) {
   const ConnectionID connection_id = packet.connection_id();
-  SDL_LOG_DEBUG(
-
-      "Sending heart beat acknowledgment for connection " << connection_id);
+  SDL_LOG_DEBUG("Sending heart beat acknowledgment for connection "
+                << connection_id);
   uint8_t protocol_version;
   if (session_observer_.ProtocolVersionUsed(
           connection_id, packet.session_id(), protocol_version)) {
@@ -2143,9 +2141,8 @@ bool ProtocolHandlerImpl::TrackMalformedMessage(const uint32_t& connection_key,
                                             << malformed_message_frequency);
     if (!get_settings().malformed_message_filtering() ||
         malformed_message_frequency > malformed_frequency_count) {
-      SDL_LOG_WARN(
-
-          "Malformed frequency of " << connection_key << " is marked as high.");
+      SDL_LOG_WARN("Malformed frequency of " << connection_key
+                                             << " is marked as high.");
       session_observer_.OnMalformedMessageCallback(connection_key);
       malformed_message_meter_.RemoveIdentifier(connection_key);
       return true;
@@ -2248,9 +2245,8 @@ RESULT_CODE ProtocolHandlerImpl::EncryptFrame(ProtocolFramePtr packet) {
   security_manager::SSLContext* context = session_observer_.GetSSLContext(
       connection_key, ServiceTypeFromByte(packet->service_type()));
 
-  SDL_LOG_DEBUG(
-
-      "Protection flag is: " << packet->protection_flag() << std::boolalpha);
+  SDL_LOG_DEBUG("Protection flag is: " << packet->protection_flag()
+                                       << std::boolalpha);
   if ((!context || !context->IsInitCompleted()) || !packet->protection_flag()) {
     SDL_LOG_DEBUG("Ecryption is skipped!");
     return RESULT_OK;
@@ -2492,7 +2488,6 @@ const bool ProtocolHandlerImpl::ParseSecondaryTransportConfiguration(
       secondary_transport_types = settings_.secondary_transports_for_wifi();
     } else {
       SDL_LOG_ERROR(
-
           "Bad or unknown device type in ParseSecondaryTransportConfiguration");
       return false;
     }
@@ -2556,13 +2551,11 @@ void ProtocolHandlerImpl::GenerateSecondaryTransportsForStartSessionAck(
     } else if (transport_type.CompareIgnoreCase("Bluetooth")) {
       if (device_is_ios) {
         SDL_LOG_TRACE(
-
             "Adding IAP_BLUETOOTH to secondaryTransports for StartSessionAck");
         secondaryTransports.push_back("IAP_BLUETOOTH");
       }
       if (device_is_android) {
         SDL_LOG_TRACE(
-
             "Adding SPP_BLUETOOTH to secondaryTransports for StartSessionAck");
         secondaryTransports.push_back("SPP_BLUETOOTH");
       }
@@ -2573,7 +2566,7 @@ void ProtocolHandlerImpl::GenerateSecondaryTransportsForStartSessionAck(
       secondaryTransports.push_back("TCP_WIFI");
     }
 
-    it++;
+    ++it;
   }
 }
 
@@ -2600,11 +2593,10 @@ void ProtocolHandlerImpl::GenerateServiceTransportsForStartSessionAck(
     bool fPrimaryAdded = false;
     bool fSecondaryAdded = false;
     std::vector<std::string>::const_iterator it = service_transports.begin();
-    for (; it != service_transports.end(); it++) {
+    for (; it != service_transports.end(); ++it) {
       const utils::custom_string::CustomString transport(*it);
-      SDL_LOG_TRACE(
-
-          "Service Allowed to run on " << transport.c_str() << " transport");
+      SDL_LOG_TRACE("Service Allowed to run on " << transport.c_str()
+                                                 << " transport");
 
       if (!fPrimaryAdded &&
           (transport.CompareIgnoreCase(primary_connection_type.c_str()) ||

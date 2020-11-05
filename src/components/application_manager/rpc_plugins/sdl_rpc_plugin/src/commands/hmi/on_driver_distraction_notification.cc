@@ -78,8 +78,7 @@ struct OnDriverDistractionProcessor {
       if (is_lock_screen_dismissal_exists &&
           msg_params[mobile_notification::lock_screen_dismissal_enabled]
               .asBool()) {
-        const auto language =
-            MessageHelper::MobileLanguageToString(application->ui_language());
+        const auto language = EnumToString(application->ui_language());
 
         const auto warning_message =
             application_manager_.GetPolicyHandler()

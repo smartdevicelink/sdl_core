@@ -3550,6 +3550,56 @@ TEST_F(ProtocolHandlerImplTest, MalformedLimitVerification_NullCount) {
   EXPECT_TRUE(waiter->WaitFor(times, kAsyncExpectationsTimeout));
 }
 
+TEST_F(ProtocolHandlerImplTest, OnFinalMessageCallback) {
+  const auto protection = false;
+  const auto is_final_message = true;
+  const uint32_t total_data_size = 1;
+  UCharDataVector data(total_data_size);
+
+  ProtocolFramePtr ptr(new protocol_handler::ProtocolPacket(connection_id,
+                                                            PROTOCOL_VERSION_3,
+                                                            protection,
+                                                            FRAME_TYPE_SINGLE,
+                                                            kControl,
+                                                            FRAME_DATA_SINGLE,
+                                                            session_id,
+                                                            total_data_size,
+                                                            message_id,
+                                                            &data[0]));
+
+  using RawFordMessageToMobile = protocol_handler::impl::RawFordMessageToMobile;
+  using Handler = protocol_handler::impl::ToMobileQueue::Handler;
+
+  auto message =
+      std::make_shared<RawFordMessageToMobile>(ptr, is_final_message);
+  auto raw_message = ptr->serializePacket();
+
+  auto handler = std::static_pointer_cast<Handler>(protocol_handler_impl);
+  auto transport_manager_listener =
+      std::static_pointer_cast<TransportManagerListener>(protocol_handler_impl);
+
+  EXPECT_CALL(session_observer_mock,
+              ProtocolVersionUsed(connection_id, session_id, An<uint8_t&>()))
+      .WillRepeatedly(Return(false));
+
+  EXPECT_CALL(session_observer_mock,
+              PairFromKey(raw_message->connection_key(), _, _))
+      .WillRepeatedly(
+          DoAll(SetArgPointee<1>(connection_id), SetArgPointee<2>(session_id)));
+
+  EXPECT_CALL(transport_manager_mock, SendMessageToDevice(_))
+      .WillOnce(Return(E_SUCCESS));
+
+  EXPECT_CALL(session_observer_mock, OnFinalMessageCallback(connection_id));
+  EXPECT_CALL(transport_manager_mock, Disconnect(connection_id));
+
+  handler->Handle(*message);
+  // Put the message to list of connections ready to close
+  transport_manager_listener->OnTMMessageSend(raw_message);
+  // Processing the list of connections ready to close
+  transport_manager_listener->OnTMMessageSend(raw_message);
+}
+
 TEST_F(ProtocolHandlerImplTest,
        SendEndServicePrivate_NoConnection_MessageNotSent) {
   // Expect check connection with ProtocolVersionUsed
@@ -3954,7 +4004,7 @@ TEST_F(ProtocolHandlerImplTest, StartSession_NACKReason_DisallowedBySettings) {
   bson_object_initialize_default(&bson_nack_params);
   // NAK reason param
   std::string reason = "Service type: " + std::to_string(service_type) +
-                       " disallowed by settings";
+                       " disallowed by settings.";
   bson_object_put_string(&bson_nack_params,
                          protocol_handler::strings::reason,
                          const_cast<char*>(reason.c_str()));

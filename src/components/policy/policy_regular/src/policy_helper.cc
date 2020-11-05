@@ -54,9 +54,10 @@ bool CompareStrings(const StringsValueType& first,
 }
 
 struct CheckGroupName {
-  CheckGroupName(const policy::StringsValueType& value) : value_(value) {}
+  explicit CheckGroupName(const policy::StringsValueType& value)
+      : value_(value) {}
 
-  bool operator()(const FunctionalGroupNames::value_type& value) {
+  bool operator()(const FunctionalGroupNames::value_type& value) const {
     return value.second.second == std::string(value_);
   }
 
@@ -99,25 +100,6 @@ bool CompareGroupName::operator()(
   const std::string gn_ = group_name_;
   const std::string gn_compare = group_name_to_compare;
   return !(strcasecmp(gn_.c_str(), gn_compare.c_str()));
-}
-
-bool operator!=(const policy_table::ApplicationParams& first,
-                const policy_table::ApplicationParams& second) {
-  if (first.groups.size() != second.groups.size()) {
-    return true;
-  }
-  StringsConstItr it_first = first.groups.begin();
-  StringsConstItr it_first_end = first.groups.end();
-  StringsConstItr it_second = second.groups.begin();
-  StringsConstItr it_second_end = second.groups.end();
-  for (; it_first != it_first_end; ++it_first) {
-    CompareGroupName gp(*it_first);
-    StringsConstItr it = std::find_if(it_second, it_second_end, gp);
-    if (it_second_end == it) {
-      return true;
-    }
-  }
-  return false;
 }
 
 CheckAppPolicy::CheckAppPolicy(
@@ -340,7 +322,6 @@ void policy::CheckAppPolicy::NotifySystem(
   const auto devices_ids = listener.GetDevicesIds(app_policy.first);
   if (devices_ids.empty()) {
     SDL_LOG_WARN(
-
         "Couldn't find device info for application id: " << app_policy.first);
     return;
   }
@@ -559,8 +540,7 @@ bool CheckAppPolicy::IsConsentRequired(const std::string& app_id,
     return false;
   }
 
-  bool is_preconsented = false;
-  return it->second.user_consent_prompt.is_initialized() && !is_preconsented;
+  return it->second.user_consent_prompt.is_initialized();
 }
 
 bool CheckAppPolicy::IsRequestTypeChanged(
@@ -635,7 +615,6 @@ bool CheckAppPolicy::IsAppPropertiesChanged(
 
   if (!IsKnownAppication(app_policy.first)) {
     SDL_LOG_DEBUG(
-
         "AppProperties provided for new application: " << app_policy.first);
     return true;
   }
@@ -707,7 +686,7 @@ bool CheckAppPolicy::IsEncryptionRequiredFlagChanged(
     return result;
   };
 
-  auto get_app_rpcs = [](const std::string group_name,
+  auto get_app_rpcs = [](const std::string& group_name,
                          const FunctionalGroupings& groups)
       -> rpc::Optional<policy_table::Rpcs> {
     auto it = groups.find(group_name);
@@ -1104,28 +1083,6 @@ FunctionalGroupIDs Merge(const FunctionalGroupIDs& first,
       std::distance(merged.begin(), std::unique(merged.begin(), merged.end())));
 
   return merged;
-}
-
-FunctionalGroupIDs FindSame(const FunctionalGroupIDs& first,
-                            const FunctionalGroupIDs& second) {
-  SDL_LOG_INFO("Find same groups");
-  FunctionalGroupIDs first_copy(first);
-  FunctionalGroupIDs second_copy(second);
-
-  std::sort(first_copy.begin(), first_copy.end());
-  std::sort(second_copy.begin(), second_copy.end());
-
-  FunctionalGroupIDs same;
-  std::set_intersection(first_copy.begin(),
-                        first_copy.end(),
-                        second_copy.begin(),
-                        second_copy.end(),
-                        std::back_inserter(same));
-
-  same.resize(
-      std::distance(same.begin(), std::unique(same.begin(), same.end())));
-
-  return same;
 }
 
 bool UnwrapAppPolicies(policy_table::ApplicationPolicies& app_policies) {

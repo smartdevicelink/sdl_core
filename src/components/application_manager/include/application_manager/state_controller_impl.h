@@ -133,6 +133,8 @@ class StateControllerImpl : public event_engine::EventObserver,
 
   void DropPostponedWindows(const uint32_t app_id) OVERRIDE;
 
+  PostponedActivationController& GetPostponedActivationController() OVERRIDE;
+
  private:
   int64_t RequestHMIStateChange(ApplicationConstSharedPtr app,
                                 hmi_apis::Common_HMILevel::eType level,
@@ -434,6 +436,7 @@ class StateControllerImpl : public event_engine::EventObserver,
   std::unordered_set<uint32_t> apps_with_pending_hmistatus_notification_;
   mutable sync_primitives::Lock apps_with_pending_hmistatus_notification_lock_;
   ApplicationManager& app_mngr_;
+  PostponedActivationController postponed_activation_controller_;
 };
 }  // namespace application_manager
 

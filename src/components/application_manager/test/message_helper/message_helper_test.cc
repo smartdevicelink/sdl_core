@@ -641,41 +641,6 @@ class MessageHelperTest : public ::testing::Test {
   const size_t delta_from_functions_id;
 };
 
-TEST_F(MessageHelperTest,
-       CommonLanguageFromString_StringValueOfEnum_CorrectEType) {
-  HmiLanguage::eType enum_value;
-  HmiLanguage::eType enum_from_string_value;
-  // Check all languages >= 0
-  for (size_t array_index = 0; array_index < language_strings.size();
-       ++array_index) {
-    enum_value = static_cast<HmiLanguage::eType>(array_index);
-    enum_from_string_value =
-        MessageHelper::CommonLanguageFromString(language_strings[array_index]);
-    EXPECT_EQ(enum_value, enum_from_string_value);
-  }
-  // Check InvalidEnum == -1
-  enum_value = HmiLanguage::INVALID_ENUM;
-  enum_from_string_value = MessageHelper::CommonLanguageFromString("");
-  EXPECT_EQ(enum_value, enum_from_string_value);
-}
-
-TEST_F(MessageHelperTest,
-       CommonLanguageToString_ETypeValueOfEnum_CorrectString) {
-  std::string string_from_enum;
-  HmiLanguage::eType casted_enum;
-  // Check all languages >=0
-  for (size_t array_index = 0; array_index < language_strings.size();
-       ++array_index) {
-    casted_enum = static_cast<HmiLanguage::eType>(array_index);
-    string_from_enum = MessageHelper::CommonLanguageToString(casted_enum);
-    EXPECT_EQ(language_strings[array_index], string_from_enum);
-  }
-  // Check InvalidEnum == -1
-  string_from_enum =
-      MessageHelper::CommonLanguageToString(HmiLanguage::INVALID_ENUM);
-  EXPECT_EQ("", string_from_enum);
-}
-
 TEST_F(MessageHelperTest, ConvertEnumAPINoCheck_AnyEnumType_AnotherEnumType) {
   hmi_apis::Common_LayoutMode::eType tested_enum_value =
       hmi_apis::Common_LayoutMode::ICON_ONLY;
@@ -684,38 +649,6 @@ TEST_F(MessageHelperTest, ConvertEnumAPINoCheck_AnyEnumType_AnotherEnumType) {
                                            hmi_apis::Common_AppHMIType::eType>(
           tested_enum_value);
   EXPECT_EQ(hmi_apis::Common_AppHMIType::DEFAULT, converted);
-}
-
-TEST_F(MessageHelperTest, HMIResultFromString_StringValueOfEnum_CorrectEType) {
-  HmiResults::eType enum_value;
-  HmiResults::eType enum_from_string_value;
-  // Check all results >= 0
-  for (size_t array_index = 0; array_index < hmi_result_strings.size();
-       ++array_index) {
-    enum_value = static_cast<HmiResults::eType>(array_index);
-    enum_from_string_value =
-        MessageHelper::HMIResultFromString(hmi_result_strings[array_index]);
-    EXPECT_EQ(enum_value, enum_from_string_value);
-  }
-  // Check InvalidEnum == -1
-  enum_value = HmiResults::INVALID_ENUM;
-  enum_from_string_value = MessageHelper::HMIResultFromString("");
-  EXPECT_EQ(enum_value, enum_from_string_value);
-}
-
-TEST_F(MessageHelperTest, HMIResultToString_ETypeValueOfEnum_CorrectString) {
-  std::string string_from_enum;
-  HmiResults::eType casted_enum;
-  // Check all results >=0
-  for (size_t array_index = 0; array_index < hmi_result_strings.size();
-       ++array_index) {
-    casted_enum = static_cast<HmiResults::eType>(array_index);
-    string_from_enum = MessageHelper::HMIResultToString(casted_enum);
-    EXPECT_EQ(hmi_result_strings[array_index], string_from_enum);
-  }
-  // Check InvalidEnum == -1
-  string_from_enum = MessageHelper::HMIResultToString(HmiResults::INVALID_ENUM);
-  EXPECT_EQ("", string_from_enum);
 }
 
 TEST_F(MessageHelperTest,
@@ -727,7 +660,7 @@ TEST_F(MessageHelperTest,
   for (size_t enum_index = 0; enum_index < hmi_result_strings.size();
        ++enum_index) {
     tested_enum =
-        MessageHelper::MobileResultFromString(hmi_result_strings[enum_index]);
+        StringToEnum<MobileResults::eType>(hmi_result_strings[enum_index]);
     casted_hmi_enum = static_cast<HmiResults::eType>(enum_index);
     converted_enum = MessageHelper::HMIToMobileResult(casted_hmi_enum);
     EXPECT_EQ(tested_enum, converted_enum);
@@ -952,27 +885,6 @@ TEST_F(MessageHelperTest,
     casted_enum = static_cast<mobile_apis::FunctionID::eType>(i);
     converted = MessageHelper::StringifiedFunctionID(casted_enum);
     EXPECT_EQ(events_id_strings[i - delta_from_functions_id], converted);
-  }
-}
-
-TEST_F(MessageHelperTest,
-       StringifiedHmiLevel_LevelEnum_EqualsWithStringsInArray) {
-  mobile_apis::HMILevel::eType casted_enum;
-  std::string converted_value;
-  for (size_t i = 0; i < hmi_level_strings.size(); ++i) {
-    casted_enum = static_cast<mobile_apis::HMILevel::eType>(i);
-    converted_value = MessageHelper::StringifiedHMILevel(casted_enum);
-    EXPECT_EQ(hmi_level_strings[i], converted_value);
-  }
-}
-
-TEST_F(MessageHelperTest, StringToHmiLevel_LevelString_EqEType) {
-  mobile_apis::HMILevel::eType tested_enum;
-  mobile_apis::HMILevel::eType converted_enum;
-  for (size_t i = 0; i < hmi_level_strings.size(); ++i) {
-    tested_enum = static_cast<mobile_apis::HMILevel::eType>(i);
-    converted_enum = MessageHelper::StringToHMILevel(hmi_level_strings[i]);
-    EXPECT_EQ(tested_enum, converted_enum);
   }
 }
 

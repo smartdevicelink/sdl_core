@@ -121,7 +121,7 @@ class WebsocketConnectionTest : public ::testing::Test {
   std::shared_ptr<websocket::WSSSession> wss_session;
   WebsocketClient ws_client;
   std::string kHost = "127.0.0.1";
-  uint16_t kPort = 8080;
+  uint16_t kPort = 48080;
   std::string kPath = "/folder/file.html/";
   std::string kQuery = "?eventId=2345&eventName='Test'&expectedResult=true";
   std::string kFragment = "#section_1";

@@ -166,7 +166,8 @@ struct LinkCollector
   typedef std::vector<policy_table::UserConsentRecords::key_type>
       ApplicationsIds;
 
-  LinkCollector(std::map<std::string, std::string>& links) : links_(links) {}
+  explicit LinkCollector(std::map<std::string, std::string>& links)
+      : links_(links) {}
 
   void operator()(const policy_table::DeviceData::value_type& value) {
     using namespace policy_table;
@@ -208,10 +209,12 @@ struct ExternalConsentConsentGroupAppender
 };
 
 struct DefaultPolicyUpdater {
-  DefaultPolicyUpdater(const policy_table::ApplicationParams& default_params)
+  explicit DefaultPolicyUpdater(
+      const policy_table::ApplicationParams& default_params)
       : default_params_(default_params) {}
 
-  void operator()(policy_table::ApplicationPolicies::value_type& pt_value) {
+  void operator()(
+      policy_table::ApplicationPolicies::value_type& pt_value) const {
     if (policy::kDefaultId == pt_value.second.get_string()) {
       pt_value.second = default_params_;
       pt_value.second.set_to_string(policy::kDefaultId);
@@ -1302,7 +1305,6 @@ int CacheManager::IgnitionCyclesBeforeExchange() {
       *pt_->policy_table.module_meta->ignition_cycles_since_last_exchange);
   current = std::max(last_exch, 0);
   SDL_LOG_DEBUG(
-
       "IgnitionCyclesBeforeExchange current:" << static_cast<int>(current));
 
   return std::max(limit - current, 0);
@@ -1340,7 +1342,6 @@ bool CacheManager::SetCountersPassedForSuccessfulUpdate(
     case DAYS_AFTER_EPOCH:
       *pt_->policy_table.module_meta->pt_exchanged_x_days_after_epoch = value;
       SDL_LOG_DEBUG(
-
           "SetCountersPassedForSuccessfulUpdate days after epoch:" << value);
       break;
     default:
@@ -1704,6 +1705,8 @@ std::vector<UserFriendlyMessage> CacheManager::GetUserFriendlyMsg(
           SDL_LOG_ERROR("No fallback language found for message code: " << *it);
           continue;
         }
+        // FIXME (VSemenyuk): message_string will always be overwritten by
+        // active_hmi_language_message_string
         message_string = fallback_message_string;
       }
       message_string = active_hmi_language_message_string;
@@ -1827,10 +1830,6 @@ bool CacheManager::GetPriority(const std::string& policy_app_id,
 
 void CacheManager::CheckSnapshotInitialization() {
   CACHE_MANAGER_CHECK_VOID();
-  if (!snapshot_) {
-    SDL_LOG_ERROR("Snapshot pointer is not initialized");
-    return;
-  }
 
   *(snapshot_->policy_table.module_config.preloaded_pt) = false;
 
@@ -2182,9 +2181,9 @@ int CacheManager::CountUnconsentedGroups(const std::string& policy_app_id,
       pt_->policy_table.app_policies_section;
 
   policy_table::Strings::iterator app_groups;
-  policy_table::Strings::iterator app_groups_end = app_groups;
+  policy_table::Strings::iterator app_groups_end;
   policy_table::Strings::iterator app_pre_groups;
-  policy_table::Strings::iterator app_pre_groups_end = app_pre_groups;
+  policy_table::Strings::iterator app_pre_groups_end;
 
   if (kDeviceId == policy_app_id) {
     app_groups = app_policies_section.device.groups.begin();
@@ -2294,11 +2293,10 @@ std::string CacheManager::GetCCPUVersionFromPT() const {
 
 bool CacheManager::IsMetaInfoPresent() const {
   CACHE_MANAGER_CHECK(false);
-  bool result = true;
   sync_primitives::AutoLock lock(cache_lock_);
-  result = NULL != pt_->policy_table.module_meta->ccpu_version &&
-           NULL != pt_->policy_table.module_meta->wers_country_code &&
-           NULL != pt_->policy_table.module_meta->language;
+  bool result = NULL != pt_->policy_table.module_meta->ccpu_version &&
+                NULL != pt_->policy_table.module_meta->wers_country_code &&
+                NULL != pt_->policy_table.module_meta->language;
   return result;
 }
 
@@ -2353,9 +2351,8 @@ bool CacheManager::CleanupUnpairedDevices() {
 
     SDL_LOG_DEBUG("Device_data size is: " << device_data.size());
     device_data.erase(it_device);
-    SDL_LOG_INFO(
-
-        "Device id " << *iter << " had been deleted from device_data section.");
+    SDL_LOG_INFO("Device id " << *iter
+                              << " had been deleted from device_data section.");
     SDL_LOG_DEBUG("Device_data size is: " << device_data.size());
   }
   is_unpaired_.clear();

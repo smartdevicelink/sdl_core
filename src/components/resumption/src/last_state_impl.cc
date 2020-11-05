@@ -81,9 +81,8 @@ void LastStateImpl::SaveToFileSystem() {
   const std::vector<uint8_t> char_vector_pdata(styled_string.begin(),
                                                styled_string.end());
   DCHECK(file_system::CreateDirectoryRecursively(app_storage_folder_));
-  SDL_LOG_INFO(
-
-      "LastState::SaveToFileSystem " << app_info_storage_ << styled_string);
+  SDL_LOG_INFO("LastState::SaveToFileSystem " << app_info_storage_
+                                              << styled_string);
   DCHECK(file_system::Write(app_info_storage_, char_vector_pdata));
 }
 

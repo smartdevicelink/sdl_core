@@ -123,10 +123,11 @@ class MockConnectionHandler : public connection_handler::ConnectionHandler {
                    transport_manager::ConnectionUID secondary_transport_id));
   MOCK_CONST_METHOD1(GetSessionTransports,
                      const SessionTransports(uint8_t session_id));
-  MOCK_METHOD3(NotifyServiceStartedResult,
+  MOCK_METHOD4(NotifyServiceStartedResult,
                void(uint32_t session_key,
                     bool result,
-                    std::vector<std::string>& rejected_params));
+                    std::vector<std::string>& rejected_params,
+                    const std::string& reason));
   MOCK_METHOD3(
       OnSecondaryTransportStarted,
       bool(transport_manager::ConnectionUID& primary_connection_handle,

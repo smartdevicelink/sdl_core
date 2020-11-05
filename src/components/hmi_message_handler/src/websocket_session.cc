@@ -85,7 +85,7 @@ void WebsocketSession::Recv(boost::system::error_code ec) {
     SDL_LOG_ERROR(str_err);
     shutdown_ = true;
     thread_delegate_->SetShutdown();
-    controller_->deleteController(this);
+    controller_->deleteController(*this);
     return;
   }
 
@@ -126,7 +126,7 @@ void WebsocketSession::Read(boost::system::error_code ec,
     SDL_LOG_ERROR(str_err);
     shutdown_ = true;
     thread_delegate_->SetShutdown();
-    controller_->deleteController(this);
+    controller_->deleteController(*this);
     buffer_.consume(buffer_.size());
     return;
   }
@@ -198,9 +198,9 @@ void WebsocketSession::onMessageReceived(Json::Value message) {
       std::string component_name = GetComponentName(method);
 
       if (component_name == "MB") {
-        controller_->processInternalRequest(message, this);
+        controller_->processInternalRequest(message, *this);
       } else {
-        controller_->pushRequest(message, this);
+        controller_->pushRequest(message, *this);
         controller_->processRequest(message);
       }
     }

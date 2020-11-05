@@ -215,7 +215,7 @@ namespace {
 struct DeviceFinder {
   explicit DeviceFinder(const std::string& device_uid)
       : device_uid_(device_uid) {}
-  bool operator()(const DeviceMap::value_type& device) {
+  bool operator()(const DeviceMap::value_type& device) const {
     return device_uid_ == device.second.mac_address();
   }
 
@@ -366,7 +366,7 @@ void ConnectionHandlerImpl::OnUnexpectedDisconnect(
     transport_manager::ConnectionUID connection_id,
     const transport_manager::CommunicationError& error) {
   SDL_LOG_AUTO_TRACE();
-
+  UNUSED(error);
   OnConnectionEnded(connection_id);
 }
 
@@ -403,9 +403,8 @@ bool AllowProtection(const ConnectionHandlerSettings& settings,
   if (std::find(force_unprotected_list.begin(),
                 force_unprotected_list.end(),
                 service_type) != force_unprotected_list.end()) {
-    SDL_LOG_ERROR(
-
-        "Service " << static_cast<int>(service_type) << " shall be protected");
+    SDL_LOG_ERROR("Service " << static_cast<int>(service_type)
+                             << " shall be protected");
     return false;
   }
   SDL_LOG_DEBUG("Service " << static_cast<int>(service_type) << " allowed");
@@ -465,10 +464,21 @@ void ConnectionHandlerImpl::OnSessionStartedCallback(
     return;
   }
 #endif  // ENABLE_SECURITY
-  sync_primitives::AutoReadLock lock(connection_list_lock_);
-  ConnectionList::iterator it =
-      connection_list_.find(primary_connection_handle);
-  if (connection_list_.end() == it) {
+
+  auto find_connection =
+      [this](const transport_manager::ConnectionUID& primary_connection_handle)
+      -> Connection* {
+    sync_primitives::AutoReadLock lock(connection_list_lock_);
+    auto it = connection_list_.find(primary_connection_handle);
+    if (it != connection_list_.end()) {
+      return it->second;
+    }
+    return nullptr;
+  };
+
+  Connection* connection = find_connection(primary_connection_handle);
+
+  if (!connection) {
     SDL_LOG_ERROR("Unknown connection!");
     protocol_handler_->NotifySessionStarted(
         context,
@@ -477,7 +487,6 @@ void ConnectionHandlerImpl::OnSessionStartedCallback(
     return;
   }
 
-  Connection* connection = it->second;
   context.is_new_service_ =
       !connection->SessionServiceExists(session_id, service_type);
 
@@ -510,7 +519,7 @@ void ConnectionHandlerImpl::OnSessionStartedCallback(
           context,
           rejected_params,
           "Cannot start " +
-              std::string(is_protected ? "a protected" : " an unprotected") +
+              std::string(is_protected ? "a protected" : "an unprotected") +
               " service of type " + std::to_string(service_type) + ". " +
               err_reason);
       return;
@@ -548,7 +557,8 @@ void ConnectionHandlerImpl::OnSessionStartedCallback(
 void ConnectionHandlerImpl::NotifyServiceStartedResult(
     uint32_t session_key,
     bool result,
-    std::vector<std::string>& rejected_params) {
+    std::vector<std::string>& rejected_params,
+    const std::string& reason) {
   SDL_LOG_AUTO_TRACE();
 
   protocol_handler::SessionContext context;
@@ -589,7 +599,7 @@ void ConnectionHandlerImpl::NotifyServiceStartedResult(
   }
 
   if (protocol_handler_ != NULL) {
-    protocol_handler_->NotifySessionStarted(context, rejected_params);
+    protocol_handler_->NotifySessionStarted(context, rejected_params, reason);
   }
 }
 
@@ -665,6 +675,25 @@ void ConnectionHandlerImpl::OnMalformedMessageCallback(
   CloseConnection(connection_handle);
 }
 
+void ConnectionHandlerImpl::OnFinalMessageCallback(
+    const uint32_t& connection_key) {
+  SDL_LOG_AUTO_TRACE();
+
+  transport_manager::ConnectionUID connection_handle = 0;
+  uint8_t session_id = 0;
+  PairFromKey(connection_key, &connection_handle, &session_id);
+
+  sync_primitives::AutoWriteLock connection_list_lock(connection_list_lock_);
+  ConnectionList::iterator connection_it =
+      connection_list_.find(connection_handle);
+
+  if (connection_list_.end() != connection_it) {
+    SDL_LOG_DEBUG("OnFinalMessageCallback found connection "
+                  << connection_handle);
+    connection_it->second->OnFinalMessageCallback();
+  }
+}
+
 uint32_t ConnectionHandlerImpl::OnSessionEndedCallback(
     const transport_manager::ConnectionUID connection_handle,
     const uint8_t session_id,
@@ -719,16 +748,14 @@ uint32_t ConnectionHandlerImpl::OnSessionEndedCallback(
       KeyFromPair(primary_connection_handle, session_id);
 
   if (protocol_handler::kRpc == service_type) {
-    SDL_LOG_INFO(
-
-        "Session " << static_cast<uint32_t>(session_id) << " to be removed");
+    SDL_LOG_INFO("Session " << static_cast<uint32_t>(session_id)
+                            << " to be removed");
     // old version of protocol doesn't support hash
     if (protocol_handler::HASH_ID_NOT_SUPPORTED != *hashCode) {
       if (protocol_handler::HASH_ID_WRONG == *hashCode ||
           session_key != *hashCode) {
-        SDL_LOG_WARN(
-
-            "Wrong hash_id for session " << static_cast<uint32_t>(session_id));
+        SDL_LOG_WARN("Wrong hash_id for session "
+                     << static_cast<uint32_t>(session_id));
         *hashCode = protocol_handler::HASH_ID_WRONG;
 
         if (err_reason) {
@@ -748,13 +775,11 @@ uint32_t ConnectionHandlerImpl::OnSessionEndedCallback(
       return 0;
     }
   } else {
-    SDL_LOG_INFO(
-
-        "Service " << static_cast<uint32_t>(service_type) << " to be removed");
+    SDL_LOG_INFO("Service " << static_cast<uint32_t>(service_type)
+                            << " to be removed");
     if (!connection->RemoveService(session_id, service_type)) {
-      SDL_LOG_WARN(
-
-          "Couldn't remove service " << static_cast<uint32_t>(service_type));
+      SDL_LOG_WARN("Couldn't remove service "
+                   << static_cast<uint32_t>(service_type));
       if (err_reason) {
         *err_reason = "Couldn't remove service " +
                       std::to_string(static_cast<uint32_t>(service_type));
@@ -944,6 +969,8 @@ ConnectionHandlerImpl::TransportTypeProfileStringFromDeviceHandle(
     return std::string("IAP_CARPLAY");
   } else if (connection_type == "CLOUD_WEBSOCKET") {
     return std::string("WEBSOCKET");
+  } else if (connection_type == "WEBENGINE_WEBSOCKET") {
+    return std::string("WEBENGINE");
 #ifdef BUILD_TESTS
   } else if (connection_type == "BTMAC") {
     return std::string("BTMAC");
@@ -976,11 +1003,10 @@ void ConnectionHandlerImpl::PairFromKey(
     uint8_t* session_id) const {
   *connection_handle = key & 0xFF00FFFF;
   *session_id = key >> 16;
-  SDL_LOG_DEBUG(
-
-      "ConnectionHandle:" << static_cast<int32_t>(*connection_handle)
-                          << " Session:" << static_cast<int32_t>(*session_id)
-                          << " for key:" << static_cast<int32_t>(key));
+  SDL_LOG_DEBUG("ConnectionHandle: "
+                << static_cast<int32_t>(*connection_handle)
+                << " Session: " << static_cast<int32_t>(*session_id)
+                << " for key: " << static_cast<int32_t>(key));
 }
 
 int32_t ConnectionHandlerImpl::GetDataOnSessionKey(
@@ -1157,7 +1183,7 @@ const uint8_t ConnectionHandlerImpl::GetSessionIdFromSecondaryTransport(
     transport_manager::ConnectionUID secondary_transport_id) const {
   sync_primitives::AutoLock auto_lock(session_connection_map_lock_ptr_);
   SessionConnectionMap::const_iterator it = session_connection_map_.begin();
-  for (; session_connection_map_.end() != it; it++) {
+  for (; session_connection_map_.end() != it; ++it) {
     SessionTransports st = it->second;
     if (st.secondary_transport == secondary_transport_id) {
       return it->first;
@@ -1563,9 +1589,8 @@ void ConnectionHandlerImpl::CloseSession(ConnectionHandle connection_handle,
     return;
   }
 
-  SDL_LOG_DEBUG(
-
-      "Session with id: " << session_id << " has been closed successfully");
+  SDL_LOG_DEBUG("Session with id: " << session_id
+                                    << " has been closed successfully");
 }
 
 void ConnectionHandlerImpl::CloseConnectionSessions(
@@ -1710,6 +1735,10 @@ void ConnectionHandlerImpl::OnConnectionEnded(
     ending_connection_ = connection.get();
     const SessionMap session_map = connection->session_map();
 
+    const CloseSessionReason close_reason =
+        connection->IsFinalMessageSent() ? CloseSessionReason::kFinalMessage
+                                         : CloseSessionReason::kCommon;
+
     for (SessionMap::const_iterator session_it = session_map.begin();
          session_map.end() != session_it;
          ++session_it) {
@@ -1725,9 +1754,7 @@ void ConnectionHandlerImpl::OnConnectionEnded(
           service_list.rbegin();
       for (; service_list_itr != service_list.rend(); ++service_list_itr) {
         connection_handler_observer_->OnServiceEndedCallback(
-            session_key,
-            service_list_itr->service_type,
-            CloseSessionReason::kCommon);
+            session_key, service_list_itr->service_type, close_reason);
       }
     }
     ending_connection_ = NULL;

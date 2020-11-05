@@ -46,13 +46,12 @@ SingleThreadSimpleValidator::~SingleThreadSimpleValidator() {}
 void SingleThreadSimpleValidator::AssertRunningOnCreationThread() const {
   PlatformThreadHandle current_id = Thread::CurrentId();
   if (creation_thread_id_ != current_id) {
-    SDL_LOG_ERROR(
-
-        "Single-threaded object created at thread "
-        << creation_thread_id_ << " is accessed from thread " << current_id
+    SDL_LOG_ERROR("Single-threaded object created at thread "
+                  << creation_thread_id_ << " is accessed from thread "
+                  << current_id
 #ifdef BACKTRACE_SUPPORT
-        << "\n"
-        << utils::Backtrace()
+                  << "\n"
+                  << utils::Backtrace()
 #endif
     );
   }

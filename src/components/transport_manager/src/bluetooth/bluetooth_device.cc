@@ -69,7 +69,6 @@ bool BluetoothDevice::GetRfcommChannel(const ApplicationHandle app_handle,
       std::find(rfcomm_channels_.begin(), rfcomm_channels_.end(), channel);
   if (it == rfcomm_channels_.end()) {
     SDL_LOG_TRACE(
-
         "exit with FALSE. Condition: channel not found in RfcommChannelVector");
     return false;
   }

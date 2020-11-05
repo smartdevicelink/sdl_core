@@ -115,14 +115,6 @@ void SDLRPCPlugin::ProcessResumptionSubscription(
     application_manager::Application& app, WayPointsAppExtension& ext) {
   SDL_LOG_AUTO_TRACE();
 
-  if (application_manager_->IsAnyAppSubscribedForWayPoints()) {
-    SDL_LOG_DEBUG(
-        "Subscription to waypoint already exist, no need to send "
-        "request to HMI");
-    application_manager_->SubscribeAppForWayPoints(app.app_id());
-    return;
-  }
-
   pending_resumption_handler_->HandleResumptionSubscriptionRequest(ext, app);
 }
 

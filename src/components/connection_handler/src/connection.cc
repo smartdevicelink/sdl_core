@@ -82,7 +82,8 @@ Connection::Connection(ConnectionHandle connection_handle,
     , connection_handle_(connection_handle)
     , connection_device_handle_(connection_device_handle)
     , primary_connection_handle_(0)
-    , heartbeat_timeout_(heartbeat_timeout) {
+    , heartbeat_timeout_(heartbeat_timeout)
+    , final_message_sent_(false) {
   SDL_LOG_AUTO_TRACE();
   DCHECK(connection_handler_);
 
@@ -110,7 +111,7 @@ Connection::~Connection() {
                  << static_cast<int>(session_it->first)
                  << " from Session/Connection Map in Connection Destructor");
     connection_handler_->RemoveSession(session_it->first);
-    session_it++;
+    ++session_it;
   }
 
   session_map_.clear();
@@ -160,6 +161,15 @@ uint32_t Connection::RemoveSession(uint8_t session_id) {
   session_map_.erase(session_id);
 
   return session_id;
+}
+
+void Connection::OnFinalMessageCallback() {
+  SDL_LOG_AUTO_TRACE();
+  final_message_sent_ = true;
+}
+
+bool Connection::IsFinalMessageSent() const {
+  return final_message_sent_;
 }
 
 bool Connection::AddNewService(uint8_t session_id,
@@ -324,7 +334,7 @@ uint8_t Connection::RemoveSecondaryServices(
         removed_services_list.push_back(service_it->service_type);
         service_it = service_list.erase(service_it);
       } else {
-        service_it++;
+        ++service_it;
       }
     }
 

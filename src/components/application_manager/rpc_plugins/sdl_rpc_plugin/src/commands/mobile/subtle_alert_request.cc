@@ -349,7 +349,6 @@ void SubtleAlertRequest::SendSubtleAlertRequest(int32_t app_id) {
         hmi_apis::Common_TextFieldName::subtleAlertText2;
     msg_params[hmi_request::alert_strings][index][hmi_request::field_text] =
         (*message_)[strings::msg_params][strings::alert_text2];
-    index++;
   }
 
   // softButtons
@@ -407,8 +406,6 @@ void SubtleAlertRequest::SendSpeakRequest(int32_t app_id,
   // crate HMI speak request
   SmartObject msg_params = smart_objects::SmartObject(SmartType_Map);
   if (tts_chunks_exists && length_tts_chunks) {
-    msg_params[hmi_request::tts_chunks] =
-        smart_objects::SmartObject(SmartType_Array);
     msg_params[hmi_request::tts_chunks] =
         (*message_)[strings::msg_params][strings::tts_chunks];
   }

@@ -86,15 +86,13 @@ void SDLGetUserFriendlyMessageRequest::Run() {
   if ((*message_)[strings::msg_params].keyExists(strings::language)) {
     uint32_t lang_code =
         (*message_)[strings::msg_params][strings::language].asUInt();
-    required_language =
-        application_manager::MessageHelper::CommonLanguageToString(
-            static_cast<hmi_apis::Common_Language::eType>(lang_code));
+    required_language = application_manager::EnumToString(
+        static_cast<hmi_apis::Common_Language::eType>(lang_code));
   } else {
     hmi_apis::Common_Language::eType ui_language =
         hmi_capabilities_.active_ui_language();
 
-    required_language =
-        application_manager::MessageHelper::CommonLanguageToString(ui_language);
+    required_language = application_manager::EnumToString(ui_language);
   }
 
   policy_handler_.OnGetUserFriendlyMessage(

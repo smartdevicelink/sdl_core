@@ -69,8 +69,7 @@ namespace {
 const uint32_t kConnectionKey = 2u;
 const std::string ccpu_version("4.1.3.B_EB355B");
 const std::string wers_country_code("WAEGB");
-const uint32_t lang_code = 0u;
-const std::string kLanguage = "";
+const std::string lang_code("EN-US");
 }  // namespace
 
 class GetSystemInfoResponseTest
@@ -99,15 +98,8 @@ TEST_F(GetSystemInfoResponseTest, GetSystemInfo_SUCCESS) {
 
   ResponseFromHMIPtr command(CreateCommand<GetSystemInfoResponse>(command_msg));
 
-  std::string language;
-  EXPECT_CALL(mock_message_helper_,
-              CommonLanguageToString(
-                  static_cast<hmi_apis::Common_Language::eType>(lang_code)))
-      .WillOnce(Return(language));
-  EXPECT_EQ(kLanguage, language);
-
   EXPECT_CALL(mock_policy_handler_,
-              OnGetSystemInfo(ccpu_version, wers_country_code, kLanguage));
+              OnGetSystemInfo(ccpu_version, wers_country_code, lang_code));
 
   command->Run();
 }
@@ -120,11 +112,6 @@ TEST_F(GetSystemInfoResponseTest, GetSystemInfo_UNSUCCESS) {
       (capabilities_);
 
   ResponseFromHMIPtr command(CreateCommand<GetSystemInfoResponse>(command_msg));
-
-  EXPECT_CALL(mock_message_helper_,
-              CommonLanguageToString(
-                  static_cast<hmi_apis::Common_Language::eType>(lang_code)))
-      .Times(0);
 
   EXPECT_CALL(mock_hmi_capabilities_, UpdateCachedCapabilities());
   EXPECT_CALL(mock_policy_handler_, SetPreloadedPtFlag(false));

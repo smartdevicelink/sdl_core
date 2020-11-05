@@ -111,18 +111,28 @@ rc_rpc_types::ModuleIdConsentVector RCHelpers::FillModuleConsents(
 std::vector<std::string> RCHelpers::RetrieveModuleIds(
     const ns_smart_device_link::ns_smart_objects::SmartObject& moduleIds) {
   std::vector<std::string> module_ids;
-  for (const auto& module_id : (*moduleIds.asArray())) {
-    module_ids.push_back(module_id.asString());
-  }
+
+  std::transform((*moduleIds.asArray()).begin(),
+                 (*moduleIds.asArray()).end(),
+                 std::back_inserter(module_ids),
+                 [](const smart_objects::SmartObject& module_id) {
+                   return module_id.asString();
+                 });
+
   return module_ids;
 }
 
 std::vector<bool> RCHelpers::RetrieveModuleConsents(
     const ns_smart_device_link::ns_smart_objects::SmartObject& consents) {
   std::vector<bool> module_consents;
-  for (const auto& allowed_item : (*consents.asArray())) {
-    module_consents.push_back(allowed_item.asBool());
-  }
+
+  std::transform((*consents.asArray()).begin(),
+                 (*consents.asArray()).end(),
+                 std::back_inserter(module_consents),
+                 [](const smart_objects::SmartObject& allowed_item) {
+                   return allowed_item.asBool();
+                 });
+
   return module_consents;
 }
 
@@ -333,11 +343,14 @@ smart_objects::SmartObject RCHelpers::MergeArray(
   }
 
   auto& data2_array = *data2.asArray();
-  for (const auto& data_item : data2_array) {
-    if (data_item.getType() != smart_objects::SmartType_Map ||
-        !data_item.keyExists(application_manager::strings::id)) {
-      return data2;
-    }
+
+  auto compare = [](const smart_objects::SmartObject& data_item) {
+    return (data_item.getType() != smart_objects::SmartType_Map ||
+            !data_item.keyExists(application_manager::strings::id));
+  };
+
+  if (std::any_of(data2_array.begin(), data2_array.end(), compare)) {
+    return data2;
   }
 
   smart_objects::SmartObject result = data1;

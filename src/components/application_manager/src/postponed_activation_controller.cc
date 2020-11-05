@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Ford Motor Company
+ * Copyright (c) 2020, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,52 +30,37 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "protocol/rpc_type.h"
+#include "application_manager/postponed_activation_controller.h"
 
-#include "utils/logger.h"
-#include "utils/macro.h"
+namespace application_manager {
 
-namespace protocol_handler {
+SDL_CREATE_LOG_VARIABLE("StateControllerImpl")
 
-SDL_CREATE_LOG_VARIABLE("ProtocolHandler")
+PostponedActivationController::PostponedActivationController()
+    : activate_app_list_lock_ptr_(std::make_shared<sync_primitives::Lock>()) {}
 
-namespace {
-bool IsSupported(RpcType rpc_type) {
-  switch (rpc_type) {
-    case kRpcTypeRequest:
-    case kRpcTypeResponse:
-    case kRpcTypeNotification:
-      return true;
-    default:
-      return false;
+void PostponedActivationController::AddAppToActivate(uint32_t app_id,
+                                                     uint32_t corr_id) {
+  SDL_LOG_AUTO_TRACE();
+  sync_primitives::AutoLock lock(activate_app_list_lock_ptr_);
+  app_to_activate_.insert(std::pair<uint32_t, uint32_t>(app_id, corr_id));
+}
+
+uint32_t PostponedActivationController::GetPendingActivationCorrId(
+    uint32_t app_id) const {
+  SDL_LOG_AUTO_TRACE();
+  sync_primitives::AutoLock lock(activate_app_list_lock_ptr_);
+  auto it = app_to_activate_.find(app_id);
+  if (app_to_activate_.end() == it) {
+    return 0;
   }
-}
-}  // namespace
-
-RpcType RpcTypeFromByte(uint8_t byte) {
-  RpcType type = RpcType(byte);
-  bool supported_type = IsSupported(type);
-  if (!supported_type) {
-    SDL_LOG_INFO("Invalid service type: " << int32_t(byte));
-  }
-
-  return supported_type ? type : kRpcTypeReserved;
+  return it->second;
 }
 
-const char* RpcTypeToString(RpcType type) {
-  switch (type) {
-    case kRpcTypeRequest:
-      return "kRpcTypeRequest";
-    case kRpcTypeResponse:
-      return "kRpcTypeResponse";
-    case kRpcTypeNotification:
-      return "kRpcTypeNotification";
-    default:
-      return "kRpcTypeReserved";
-  }
+void PostponedActivationController::RemoveAppToActivate(uint32_t app_id) {
+  SDL_LOG_AUTO_TRACE();
+  sync_primitives::AutoLock lock(activate_app_list_lock_ptr_);
+  app_to_activate_.erase(app_id);
 }
 
-std::ostream& operator<<(std::ostream& os, RpcType rpc_type) {
-  return os << RpcTypeToString(rpc_type);
-}
-}  // namespace protocol_handler
+}  // namespace application_manager

@@ -60,7 +60,7 @@ namespace strings = app_mngr::strings;
 template <typename VehicleInfoCommandType>
 class VehicleInfoCommandCreator : public application_manager::CommandCreator {
  public:
-  VehicleInfoCommandCreator(const VehicleInfoCommandParams& params)
+  explicit VehicleInfoCommandCreator(const VehicleInfoCommandParams& params)
       : params_(params) {}
 
  private:
@@ -85,7 +85,7 @@ template <>
 class VehicleInfoCommandCreator<VehicleInfoInvalidCommand>
     : public application_manager::CommandCreator {
  public:
-  VehicleInfoCommandCreator(const VehicleInfoCommandParams& params) {
+  explicit VehicleInfoCommandCreator(const VehicleInfoCommandParams& params) {
     UNUSED(params);
   }
 
@@ -103,7 +103,8 @@ class VehicleInfoCommandCreator<VehicleInfoInvalidCommand>
 };
 
 struct VehicleInfoCommandCreatorFactory {
-  VehicleInfoCommandCreatorFactory(const VehicleInfoCommandParams& params)
+  explicit VehicleInfoCommandCreatorFactory(
+      const VehicleInfoCommandParams& params)
       : params_(params) {}
 
   template <typename VehicleInfoCommandType>

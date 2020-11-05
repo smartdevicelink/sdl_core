@@ -43,7 +43,7 @@ namespace commands {
 namespace {
 struct ProtoV4AppsOnDevice : std::unary_function<ApplicationSharedPtr, bool> {
   connection_handler::DeviceHandle handle_;
-  ProtoV4AppsOnDevice(const connection_handler::DeviceHandle handle)
+  explicit ProtoV4AppsOnDevice(const connection_handler::DeviceHandle handle)
       : handle_(handle) {}
   bool operator()(const ApplicationSharedPtr app) const {
     return app ? handle_ == app->device() &&
@@ -118,6 +118,15 @@ void SDLActivateAppRequest::Run() {
 
   ApplicationConstSharedPtr app =
       application_manager_.WaitingApplicationByID(app_id());
+
+  if (!app) {
+    app = application_manager_.application(app_id());
+    if (!app) {
+      SDL_LOG_WARN("Can't find application within waiting apps: " << app_id());
+      return;
+    }
+  }
+
   if (application_manager_.state_controller().IsStateActive(
           HmiState::STATE_ID_DEACTIVATE_HMI)) {
     SDL_LOG_DEBUG(
@@ -139,6 +148,18 @@ void SDLActivateAppRequest::Run() {
     application_manager_.connection_handler().ConnectToDevice(app->device());
   } else {
     const uint32_t application_id = app_id();
+    auto main_state =
+        app->CurrentHmiState(mobile_apis::PredefinedWindows::DEFAULT_WINDOW);
+    if (mobile_apis::HMILevel::INVALID_ENUM == main_state->hmi_level()) {
+      SDL_LOG_DEBUG(
+          "Application registration is not completed, HMI level hasn't set "
+          "yet, postpone activation");
+      auto& postponed_activation_ctrl = application_manager_.state_controller()
+                                            .GetPostponedActivationController();
+      postponed_activation_ctrl.AddAppToActivate(application_id,
+                                                 correlation_id());
+      return;
+    }
     policy_handler_.OnActivateApp(application_id, correlation_id());
   }
 }
@@ -186,6 +207,18 @@ void SDLActivateAppRequest::Run() {
 
   if (app_to_activate->IsRegistered()) {
     SDL_LOG_DEBUG("Application is registered. Activating.");
+    auto main_state = app_to_activate->CurrentHmiState(
+        mobile_apis::PredefinedWindows::DEFAULT_WINDOW);
+    if (mobile_apis::HMILevel::INVALID_ENUM == main_state->hmi_level()) {
+      SDL_LOG_DEBUG(
+          "Application registration is not completed, HMI level hasn't set "
+          "yet, postpone activation");
+      auto& postponed_activation_ctrl = application_manager_.state_controller()
+                                            .GetPostponedActivationController();
+      postponed_activation_ctrl.AddAppToActivate(application_id,
+                                                 correlation_id());
+      return;
+    }
     policy_handler_.OnActivateApp(application_id, correlation_id());
     return;
   } else if (app_to_activate->is_cloud_app()) {
@@ -269,6 +302,19 @@ void SDLActivateAppRequest::on_event(const event_engine::Event& event) {
         "Application not found by HMI app id: " << hmi_application_id);
     return;
   }
+
+  auto main_state =
+      app->CurrentHmiState(mobile_apis::PredefinedWindows::DEFAULT_WINDOW);
+  if (mobile_apis::HMILevel::INVALID_ENUM == main_state->hmi_level()) {
+    SDL_LOG_DEBUG(
+        "Application registration is not completed, HMI level hasn't set "
+        "yet, postpone activation");
+    auto& postponed_activation_ctrl = application_manager_.state_controller()
+                                          .GetPostponedActivationController();
+    postponed_activation_ctrl.AddAppToActivate(app->app_id(), correlation_id());
+    return;
+  }
+
   policy_handler_.OnActivateApp(app->app_id(), correlation_id());
 }
 

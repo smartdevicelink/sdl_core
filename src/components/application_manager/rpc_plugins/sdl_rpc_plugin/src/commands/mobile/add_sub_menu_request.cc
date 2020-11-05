@@ -96,13 +96,23 @@ void AddSubMenuRequest::Run() {
     return;
   }
 
-  const std::string& menu_name =
-      received_msg_params[strings::menu_name].asString();
-
   const uint32_t parent_id =
       received_msg_params.keyExists(strings::parent_id)
           ? received_msg_params[strings::parent_id].asUInt()
           : 0;
+
+  if (0 != parent_id) {
+    smart_objects::SmartObject parent = app->FindSubMenu(parent_id);
+    if (smart_objects::SmartType_Null == parent.getType()) {
+      SDL_LOG_ERROR("Parent ID " << parent_id << " doesn't exist");
+      SendResponse(
+          false, mobile_apis::Result::INVALID_ID, "Parent ID doesn't exist");
+      return;
+    }
+  }
+
+  const std::string& menu_name =
+      received_msg_params[strings::menu_name].asString();
 
   if (app->IsSubMenuNameAlreadyExist(menu_name, parent_id)) {
     SDL_LOG_ERROR("Menu name " << menu_name << " is duplicated.");
@@ -209,9 +219,9 @@ bool AddSubMenuRequest::Init() {
 
 bool AddSubMenuRequest::CheckSubMenuName() {
   SDL_LOG_AUTO_TRACE();
-  const char* str = NULL;
 
-  str = (*message_)[strings::msg_params][strings::menu_name].asCharArray();
+  const char* str =
+      (*message_)[strings::msg_params][strings::menu_name].asCharArray();
   if (!CheckSyntax(str)) {
     SDL_LOG_INFO("Invalid subMenu name.");
     return false;

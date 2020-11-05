@@ -67,7 +67,7 @@ smart_objects::SmartObject AppServiceManager::PublishAppService(
     const bool mobile_service,
     const uint32_t connection_key) {
   SDL_LOG_AUTO_TRACE();
-  std::string str_to_hash = "";
+  std::string str_to_hash;
   std::string service_id = "";
 
   std::string service_type = manifest[strings::service_type].asString();
@@ -413,10 +413,10 @@ bool AppServiceManager::ActivateAppService(const std::string service_id) {
       EnumConversionHelper<mobile_apis::AppServiceType::eType>::EnumToString(
           mobile_apis::AppServiceType::NAVIGATION, &navi_service_type);
   if (service_type == navi_service_type) {
-    smart_objects::SmartObject msg_params;
-    msg_params[strings::system_capability][strings::system_capability_type] =
+    smart_objects::SmartObject params;
+    params[strings::system_capability][strings::system_capability_type] =
         mobile_apis::SystemCapabilityType::NAVIGATION;
-    MessageHelper::BroadcastCapabilityUpdate(msg_params, app_manager_);
+    MessageHelper::BroadcastCapabilityUpdate(params, app_manager_);
   }
   return true;
 }

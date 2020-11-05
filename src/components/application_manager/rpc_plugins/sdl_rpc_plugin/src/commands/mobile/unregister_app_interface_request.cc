@@ -51,11 +51,6 @@ void UnregisterAppInterfaceRequest::Run() {
     return;
   }
 
-  rpc_service_.ManageMobileCommand(
-      MessageHelper::GetOnAppInterfaceUnregisteredNotificationToMobile(
-          connection_key(),
-          mobile_api::AppInterfaceUnregisteredReason::INVALID_ENUM),
-      SOURCE_SDL);
   application_manager_.EndNaviServices(connection_key());
   application_manager_.UnregisterApplication(connection_key(),
                                              mobile_apis::Result::SUCCESS);
