@@ -38,6 +38,8 @@ namespace app_service_rpc_plugin {
 using namespace application_manager;
 namespace commands {
 
+SDL_CREATE_LOG_VARIABLE("Commands")
+
 PerformAppServiceInteractionResponseFromMobile::
     PerformAppServiceInteractionResponseFromMobile(
         const application_manager::commands::MessageSharedPtr& message,
@@ -55,7 +57,7 @@ PerformAppServiceInteractionResponseFromMobile::
     ~PerformAppServiceInteractionResponseFromMobile() {}
 
 void PerformAppServiceInteractionResponseFromMobile::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   event_engine::MobileEvent event(
       mobile_apis::FunctionID::PerformAppServiceInteractionID);
   event.set_smart_object(*message_);

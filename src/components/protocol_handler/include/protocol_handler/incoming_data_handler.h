@@ -67,7 +67,7 @@ class IncomingDataHandler {
    * \return list of complete, correct packets
    */
   ProtocolFramePtrList ProcessData(const RawMessage& tm_message,
-                                   RESULT_CODE* result,
+                                   RESULT_CODE& out_result,
                                    size_t* malformed_occurrence);
   /**
    * @brief Add connection for data handling and verification

@@ -38,6 +38,8 @@ using namespace application_manager;
 
 namespace commands {
 
+SDL_CREATE_LOG_VARIABLE("Commands")
+
 ButtonGetCapabilitiesResponse::ButtonGetCapabilitiesResponse(
     const application_manager::commands::MessageSharedPtr& message,
     ApplicationManager& application_manager,
@@ -53,26 +55,35 @@ ButtonGetCapabilitiesResponse::ButtonGetCapabilitiesResponse(
 ButtonGetCapabilitiesResponse::~ButtonGetCapabilitiesResponse() {}
 
 void ButtonGetCapabilitiesResponse::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   const hmi_apis::Common_Result::eType code =
       static_cast<hmi_apis::Common_Result::eType>(
           (*message_)[strings::params][hmi_response::code].asInt());
 
+  hmi_capabilities_.UpdateRequestsRequiredForCapabilities(
+      hmi_apis::FunctionID::Buttons_GetCapabilities);
+
   if (hmi_apis::Common_Result::SUCCESS != code) {
-    LOG4CXX_ERROR(logger_, "Error is returned. Capabilities won't be updated.");
+    SDL_LOG_ERROR("Error is returned. Capabilities won't be updated.");
     return;
   }
 
-  HMICapabilities& hmi_capabilities = hmi_capabilities_;
-
-  hmi_capabilities.set_button_capabilities(
+  std::vector<std::string> sections_to_update{
+      hmi_response::button_capabilities};
+  hmi_capabilities_.set_button_capabilities(
       (*message_)[strings::msg_params][hmi_response::capabilities]);
 
   if ((*message_)[strings::msg_params].keyExists(
           hmi_response::preset_bank_capabilities)) {
-    hmi_capabilities.set_preset_bank_capabilities(
+    sections_to_update.push_back(hmi_response::preset_bank_capabilities);
+    hmi_capabilities_.set_preset_bank_capabilities(
         (*message_)[strings::msg_params]
                    [hmi_response::preset_bank_capabilities]);
+  }
+
+  if (!hmi_capabilities_.SaveCachedCapabilitiesToFile(
+          hmi_interface::buttons, sections_to_update, message_->getSchema())) {
+    SDL_LOG_ERROR("Failed to save Buttons.GetCapabilities response to cache");
   }
 }
 

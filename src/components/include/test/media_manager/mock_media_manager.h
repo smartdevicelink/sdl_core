@@ -47,6 +47,13 @@ class MockMediaManager : public media_manager::MediaManager {
                void(int32_t application_key,
                     const std::string& outputFileName,
                     int32_t duration));
+  MOCK_METHOD6(StartMicrophoneRecording,
+               void(int32_t application_key,
+                    const std::string& outputFileName,
+                    int32_t duration,
+                    mobile_apis::SamplingRate::eType,
+                    mobile_apis::BitsPerSample::eType,
+                    mobile_apis::AudioType::eType));
   MOCK_METHOD1(StopMicrophoneRecording, void(int32_t application_key));
   MOCK_METHOD2(StartStreaming,
                void(int32_t application_key,
@@ -57,7 +64,6 @@ class MockMediaManager : public media_manager::MediaManager {
   MOCK_METHOD2(FramesProcessed,
                void(int32_t application_key, int32_t frame_number));
   MOCK_CONST_METHOD0(settings, const media_manager::MediaManagerSettings&());
-  MOCK_CONST_METHOD1(DataSizeToMilliseconds, uint32_t(uint64_t data_size));
 };
 
 }  // namespace media_manager_test

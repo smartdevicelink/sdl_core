@@ -122,7 +122,8 @@ class PolicyHandler : public PolicyHandlerInterface,
       const RPCParams& rpc_params,
       CheckPermissionResult& result) OVERRIDE;
 
-  uint32_t GetNotificationsNumber(const std::string& priority) const OVERRIDE;
+  uint32_t GetNotificationsNumber(const std::string& priority,
+                                  const bool is_subtle = false) const OVERRIDE;
   virtual DeviceConsent GetUserConsentForDevice(
       const std::string& device_id) const OVERRIDE;
 
@@ -324,6 +325,8 @@ class PolicyHandler : public PolicyHandlerInterface,
 
   void OnSystemRequestReceived() const OVERRIDE;
 
+  void TriggerPTUOnStartupIfRequired() OVERRIDE;
+
   /**
    * @brief Get appropriate message parameters and send them with response
    * to HMI
@@ -383,6 +386,10 @@ class PolicyHandler : public PolicyHandlerInterface,
                        const std::string& wers_country_code,
                        const std::string& language) OVERRIDE;
 
+  void SetPreloadedPtFlag(const bool is_preloaded) OVERRIDE;
+
+  std::string GetCCPUVersionFromPT() const OVERRIDE;
+
   /**
    * @brief Sends GetVehicleData request in case when Vechicle info is ready.
    */
@@ -417,7 +424,9 @@ class PolicyHandler : public PolicyHandlerInterface,
   uint32_t ChoosePTUApplication(
       const PTUIterationType iteration_type =
           PTUIterationType::DefaultIteration) OVERRIDE;
-  void CacheRetryInfo(const uint32_t app_id, const std::string url) OVERRIDE;
+  void CacheRetryInfo(const uint32_t app_id = 0,
+                      const std::string url = std::string(),
+                      const std::string snapshot_path = std::string()) OVERRIDE;
 #endif  // EXTERNAL_PROPRIETARY_MODE
 
   uint32_t GetAppIdForSending() const OVERRIDE;
@@ -694,7 +703,7 @@ class PolicyHandler : public PolicyHandlerInterface,
 
 #ifdef BUILD_TESTS
   void SetPolicyManager(std::shared_ptr<PolicyManager> pm) {
-    policy_manager_ = pm;
+    ExchangePolicyManager(pm);
   }
 #endif  // BUILD_TESTS
 
@@ -892,8 +901,28 @@ class PolicyHandler : public PolicyHandlerInterface,
    */
   void GetRegisteredLinks(std::map<std::string, std::string>& out_links) const;
 
+  /**
+   * @brief Load policy manager
+   * This method is thread safe
+   * @return Pointer to the policy manager instance or null if not inited
+   */
+  std::shared_ptr<PolicyManager> LoadPolicyManager() const;
+
+  /**
+   * @brief Exchange a policy manager
+   * This method is thread safe
+   * @param policy_manager - new policy manager
+   */
+  void ExchangePolicyManager(std::shared_ptr<PolicyManager> policy_manager);
+
   mutable sync_primitives::RWLock policy_manager_lock_;
-  std::shared_ptr<PolicyManager> policy_manager_;
+
+  /**
+   * @brief Policy manager
+   * @note Use atomic_policy_manager_ only with
+   * LoadPolicyManager and ExchangePolicyManager methods!
+   */
+  std::shared_ptr<PolicyManager> atomic_policy_manager_;
   std::shared_ptr<PolicyEventObserver> event_observer_;
   uint32_t last_activated_app_id_;
 
@@ -901,14 +930,13 @@ class PolicyHandler : public PolicyHandlerInterface,
   // PTU retry information
   uint32_t last_ptu_app_id_;
   std::string retry_update_url_;
+  std::string policy_snapshot_path_;
 #endif  // EXTERNAL_PROPRIETARY_MODE
 
   /**
    * @brief Contains device handles, which were sent for user consent to HMI
    */
   DeviceHandles pending_device_handles_;
-
-  inline bool CreateManager();
 
   typedef std::list<PolicyHandlerObserver*> HandlersCollection;
   HandlersCollection listeners_;

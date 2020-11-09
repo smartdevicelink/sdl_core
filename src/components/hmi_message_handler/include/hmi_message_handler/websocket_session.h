@@ -83,8 +83,6 @@ typedef std::shared_ptr<std::string> Message;
 
 namespace hmi_message_handler {
 
-CREATE_LOGGERPTR_GLOBAL(ws_logger_, "HMIMessageHandler")
-
 class CMessageBrokerController;
 
 class WebsocketSession : public std::enable_shared_from_this<WebsocketSession> {

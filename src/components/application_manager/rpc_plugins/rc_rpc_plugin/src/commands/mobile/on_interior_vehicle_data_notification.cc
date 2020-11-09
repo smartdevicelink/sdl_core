@@ -40,7 +40,7 @@
 namespace rc_rpc_plugin {
 namespace commands {
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "RemoteControlModule")
+SDL_CREATE_LOG_VARIABLE("Commands")
 
 OnInteriorVehicleDataNotification::OnInteriorVehicleDataNotification(
     const app_mngr::commands::MessageSharedPtr& message,
@@ -65,7 +65,7 @@ void OnInteriorVehicleDataNotification::AddDataToCache(
 }
 
 void OnInteriorVehicleDataNotification::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
 
   const std::string module_type = ModuleType();
   const std::string module_id = ModuleId();
@@ -87,10 +87,9 @@ void OnInteriorVehicleDataNotification::Run() {
 
     const auto extension = RCHelpers::GetRCExtension(app);
     DCHECK(extension);
-    LOG4CXX_TRACE(logger_,
-                  "Check subscription for " << app.app_id()
-                                            << "and module type " << module_type
-                                            << " " << module_id);
+    SDL_LOG_TRACE("Check subscription for "
+                  << app.app_id() << "and module type " << module_type << " "
+                  << module_id);
 
     if (extension->IsSubscribedToInteriorVehicleData(module)) {
       (*message_)[app_mngr::strings::params]
@@ -105,7 +104,7 @@ void OnInteriorVehicleDataNotification::Run() {
 }
 
 std::string OnInteriorVehicleDataNotification::ModuleId() const {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   auto msg_params = (*message_)[app_mngr::strings::msg_params];
   if (msg_params[message_params::kModuleData].keyExists(
           message_params::kModuleId)) {

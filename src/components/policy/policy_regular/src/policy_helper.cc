@@ -44,7 +44,7 @@ namespace custom_str = utils::custom_string;
 
 namespace {
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "Policy")
+SDL_CREATE_LOG_VARIABLE("Policy")
 
 bool CompareStrings(const StringsValueType& first,
                     const StringsValueType& second) {
@@ -54,9 +54,10 @@ bool CompareStrings(const StringsValueType& first,
 }
 
 struct CheckGroupName {
-  CheckGroupName(const policy::StringsValueType& value) : value_(value) {}
+  explicit CheckGroupName(const policy::StringsValueType& value)
+      : value_(value) {}
 
-  bool operator()(const FunctionalGroupNames::value_type& value) {
+  bool operator()(const FunctionalGroupNames::value_type& value) const {
     return value.second.second == std::string(value_);
   }
 
@@ -99,25 +100,6 @@ bool CompareGroupName::operator()(
   const std::string gn_ = group_name_;
   const std::string gn_compare = group_name_to_compare;
   return !(strcasecmp(gn_.c_str(), gn_compare.c_str()));
-}
-
-bool operator!=(const policy_table::ApplicationParams& first,
-                const policy_table::ApplicationParams& second) {
-  if (first.groups.size() != second.groups.size()) {
-    return true;
-  }
-  StringsConstItr it_first = first.groups.begin();
-  StringsConstItr it_first_end = first.groups.end();
-  StringsConstItr it_second = second.groups.begin();
-  StringsConstItr it_second_end = second.groups.end();
-  for (; it_first != it_first_end; ++it_first) {
-    CompareGroupName gp(*it_first);
-    StringsConstItr it = std::find_if(it_second, it_second_end, gp);
-    if (it_second_end == it) {
-      return true;
-    }
-  }
-  return false;
 }
 
 CheckAppPolicy::CheckAppPolicy(
@@ -302,7 +284,7 @@ std::vector<FunctionalGroupPermission> policy::CheckAppPolicy::GetRevokedGroups(
 
   FunctionalGroupNames groups_attributes;
   if (!pm_->cache_->GetFunctionalGroupNames(groups_attributes)) {
-    LOG4CXX_WARN(logger_, "Can't get functional group names");
+    SDL_LOG_WARN("Can't get functional group names");
     return std::vector<FunctionalGroupPermission>();
   }
 
@@ -339,8 +321,7 @@ void policy::CheckAppPolicy::NotifySystem(
   auto& listener = *pm_->listener();
   const auto devices_ids = listener.GetDevicesIds(app_policy.first);
   if (devices_ids.empty()) {
-    LOG4CXX_WARN(
-        logger_,
+    SDL_LOG_WARN(
         "Couldn't find device info for application id: " << app_policy.first);
     return;
   }
@@ -352,7 +333,7 @@ void policy::CheckAppPolicy::NotifySystem(
 
 bool CheckAppPolicy::IsAppRevoked(
     const AppPoliciesValueType& app_policy) const {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   // Application params are not initialized = application revoked
   // i.e. "123":null
   return app_policy.second.is_null();
@@ -380,7 +361,7 @@ bool CheckAppPolicy::NicknamesMatch(
 
 void CheckAppPolicy::AddResult(const std::string& app_id,
                                PermissionsCheckResult result) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   const auto item = std::make_pair(app_id, result);
   out_results_.insert(item);
 }
@@ -395,8 +376,7 @@ bool CheckAppPolicy::operator()(const AppPoliciesValueType& app_policy) {
   }
 
   if (!IsKnownAppication(app_id)) {
-    LOG4CXX_WARN(logger_,
-                 "Application:" << app_id << " is not present in snapshot.");
+    SDL_LOG_WARN("Application:" << app_id << " is not present in snapshot.");
     return true;
   }
 
@@ -427,16 +407,14 @@ bool CheckAppPolicy::operator()(const AppPoliciesValueType& app_policy) {
     }
   }
   if (RESULT_NO_CHANGES == result) {
-    LOG4CXX_INFO(
-        logger_,
-        "Permissions for application:" << app_id << " wasn't changed.");
+    SDL_LOG_INFO("Permissions for application:" << app_id
+                                                << " wasn't changed.");
     AddResult(app_id, RESULT_NO_CHANGES);
     return true;
   }
 
-  LOG4CXX_INFO(
-      logger_,
-      "Permissions for application:" << app_id << " have been changed.");
+  SDL_LOG_INFO("Permissions for application:" << app_id
+                                              << " have been changed.");
 
   if (IsPredefinedApp(app_policy)) {
     const auto& snapshot_app_policy_begin =
@@ -562,8 +540,7 @@ bool CheckAppPolicy::IsConsentRequired(const std::string& app_id,
     return false;
   }
 
-  bool is_preconsented = false;
-  return it->second.user_consent_prompt.is_initialized() && !is_preconsented;
+  return it->second.user_consent_prompt.is_initialized();
 }
 
 bool CheckAppPolicy::IsRequestTypeChanged(
@@ -616,7 +593,7 @@ bool CheckAppPolicy::IsRequestSubTypeChanged(
 
 bool CheckAppPolicy::IsAppPropertiesProvided(
     const AppPoliciesValueType& app_policy) const {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   if (app_policy.second.hybrid_app_preference.is_initialized() ||
       app_policy.second.endpoint.is_initialized() ||
       app_policy.second.enabled.is_initialized() ||
@@ -630,15 +607,14 @@ bool CheckAppPolicy::IsAppPropertiesProvided(
 
 bool CheckAppPolicy::IsAppPropertiesChanged(
     const AppPoliciesValueType& app_policy) const {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
 
   if (!IsAppPropertiesProvided(app_policy)) {
     return false;
   }
 
   if (!IsKnownAppication(app_policy.first)) {
-    LOG4CXX_DEBUG(
-        logger_,
+    SDL_LOG_DEBUG(
         "AppProperties provided for new application: " << app_policy.first);
     return true;
   }
@@ -649,33 +625,33 @@ bool CheckAppPolicy::IsAppPropertiesChanged(
 
   if (app_policy.second.enabled.is_initialized() &&
       app_policy.second.enabled != snapshot_properties.second.enabled) {
-    LOG4CXX_DEBUG(logger_, "\"enabled\" was changed");
+    SDL_LOG_DEBUG("\"enabled\" was changed");
     return true;
   }
 
   if (app_policy.second.endpoint.is_initialized() &&
       app_policy.second.endpoint != snapshot_properties.second.endpoint) {
-    LOG4CXX_DEBUG(logger_, "\"endpoint\" was changed");
+    SDL_LOG_DEBUG("\"endpoint\" was changed");
     return true;
   }
 
   if (app_policy.second.hybrid_app_preference.is_initialized() &&
       app_policy.second.hybrid_app_preference !=
           snapshot_properties.second.hybrid_app_preference) {
-    LOG4CXX_DEBUG(logger_, "\"hybrid_app_preference\" was changed");
+    SDL_LOG_DEBUG("\"hybrid_app_preference\" was changed");
     return true;
   }
 
   if (app_policy.second.auth_token.is_initialized() &&
       app_policy.second.auth_token != snapshot_properties.second.auth_token) {
-    LOG4CXX_DEBUG(logger_, "\"auth_token\" was changed");
+    SDL_LOG_DEBUG("\"auth_token\" was changed");
     return true;
   }
 
   if (app_policy.second.cloud_transport_type.is_initialized() &&
       app_policy.second.cloud_transport_type !=
           snapshot_properties.second.cloud_transport_type) {
-    LOG4CXX_DEBUG(logger_, "\"cloud_transport_type\" was changed");
+    SDL_LOG_DEBUG("\"cloud_transport_type\" was changed");
     return true;
   }
 
@@ -690,7 +666,7 @@ bool CheckAppPolicy::IsEncryptionRequiredFlagChanged(
       -> rpc::Optional<rpc::Boolean> {
     auto it = policies.find(policy_app_id);
     if (policies.end() == it) {
-      LOG4CXX_WARN(logger_, "App is not present in policies" << policy_app_id);
+      SDL_LOG_WARN("App is not present in policies " << policy_app_id);
       return rpc::Optional<rpc::Boolean>(false);
     }
     return it->second.encryption_required;
@@ -702,7 +678,7 @@ bool CheckAppPolicy::IsEncryptionRequiredFlagChanged(
     policy_table::Strings result;
     auto it = policies.find(policy_app_id);
     if (policies.end() == it) {
-      LOG4CXX_WARN(logger_, "App is not present in policies" << policy_app_id);
+      SDL_LOG_WARN("App is not present in policies " << policy_app_id);
       return result;
     }
     auto& groups = it->second.groups;
@@ -710,7 +686,7 @@ bool CheckAppPolicy::IsEncryptionRequiredFlagChanged(
     return result;
   };
 
-  auto get_app_rpcs = [](const std::string group_name,
+  auto get_app_rpcs = [](const std::string& group_name,
                          const FunctionalGroupings& groups)
       -> rpc::Optional<policy_table::Rpcs> {
     auto it = groups.find(group_name);
@@ -1047,7 +1023,7 @@ void FillFunctionalGroupPermissions(
     FunctionalGroupNames& names,
     GroupConsent state,
     std::vector<FunctionalGroupPermission>& permissions) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   FunctionalGroupIDs::const_iterator it = ids.begin();
   FunctionalGroupIDs::const_iterator it_end = ids.end();
   for (; it != it_end; ++it) {
@@ -1067,7 +1043,7 @@ bool IsPredefinedApp(const AppPoliciesValueType& app) {
 
 FunctionalGroupIDs ExcludeSame(const FunctionalGroupIDs& from,
                                const FunctionalGroupIDs& what) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   FunctionalGroupIDs from_copy(from);
   FunctionalGroupIDs what_copy(what);
 
@@ -1089,7 +1065,7 @@ FunctionalGroupIDs ExcludeSame(const FunctionalGroupIDs& from,
 
 FunctionalGroupIDs Merge(const FunctionalGroupIDs& first,
                          const FunctionalGroupIDs& second) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   FunctionalGroupIDs first_copy(first);
   FunctionalGroupIDs second_copy(second);
 
@@ -1109,28 +1085,6 @@ FunctionalGroupIDs Merge(const FunctionalGroupIDs& first,
   return merged;
 }
 
-FunctionalGroupIDs FindSame(const FunctionalGroupIDs& first,
-                            const FunctionalGroupIDs& second) {
-  LOG4CXX_INFO(logger_, "Find same groups");
-  FunctionalGroupIDs first_copy(first);
-  FunctionalGroupIDs second_copy(second);
-
-  std::sort(first_copy.begin(), first_copy.end());
-  std::sort(second_copy.begin(), second_copy.end());
-
-  FunctionalGroupIDs same;
-  std::set_intersection(first_copy.begin(),
-                        first_copy.end(),
-                        second_copy.begin(),
-                        second_copy.end(),
-                        std::back_inserter(same));
-
-  same.resize(
-      std::distance(same.begin(), std::unique(same.begin(), same.end())));
-
-  return same;
-}
-
 bool UnwrapAppPolicies(policy_table::ApplicationPolicies& app_policies) {
   policy_table::ApplicationPolicies::iterator it = app_policies.begin();
   policy_table::ApplicationPolicies::iterator it_default =
@@ -1142,9 +1096,9 @@ bool UnwrapAppPolicies(policy_table::ApplicationPolicies& app_policies) {
         (*it).second = (*it_default).second;
         it->second.set_to_string(kDefaultId);
       } else {
-        LOG4CXX_ERROR(logger_,
-                      "There is no default application policy was "
-                      "found in PTU.");
+        SDL_LOG_ERROR(
+            "There is no default application policy was "
+            "found in PTU.");
         return false;
       }
     }

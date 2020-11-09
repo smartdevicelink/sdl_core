@@ -39,6 +39,8 @@ namespace sdl_rpc_plugin {
 using namespace application_manager;
 namespace commands {
 
+SDL_CREATE_LOG_VARIABLE("Commands")
+
 CloseApplicationRequest::CloseApplicationRequest(
     const application_manager::commands::MessageSharedPtr& message,
     ApplicationManager& application_manager,
@@ -54,11 +56,11 @@ CloseApplicationRequest::CloseApplicationRequest(
 CloseApplicationRequest::~CloseApplicationRequest() {}
 
 void CloseApplicationRequest::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   ApplicationSharedPtr app = application_manager_.application(connection_key());
 
   if (app.use_count() == 0) {
-    LOG4CXX_ERROR(logger_, "Application does not exist");
+    SDL_LOG_ERROR("Application does not exist");
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     return;
   }
@@ -71,7 +73,7 @@ void CloseApplicationRequest::Run() {
 }
 
 void CloseApplicationRequest::on_event(const event_engine::Event& event) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   const smart_objects::SmartObject& message = event.smart_object();
 
   auto msg_params = message[strings::msg_params];
@@ -89,7 +91,7 @@ void CloseApplicationRequest::on_event(const event_engine::Event& event) {
         application_manager_.application(connection_key());
 
     if (app.use_count() == 0) {
-      LOG4CXX_ERROR(logger_, "Application does not exist");
+      SDL_LOG_ERROR("Application does not exist");
       SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
       return;
     }

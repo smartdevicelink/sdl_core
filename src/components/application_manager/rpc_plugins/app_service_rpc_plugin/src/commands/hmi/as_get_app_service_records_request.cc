@@ -38,6 +38,8 @@ namespace app_service_rpc_plugin {
 using namespace application_manager;
 namespace commands {
 
+SDL_CREATE_LOG_VARIABLE("Commands")
+
 ASGetAppServiceRecordsRequest::ASGetAppServiceRecordsRequest(
     const application_manager::commands::MessageSharedPtr& message,
     ApplicationManager& application_manager,
@@ -53,7 +55,7 @@ ASGetAppServiceRecordsRequest::ASGetAppServiceRecordsRequest(
 ASGetAppServiceRecordsRequest::~ASGetAppServiceRecordsRequest() {}
 
 void ASGetAppServiceRecordsRequest::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   std::string type;
   if ((*message_)[strings::msg_params].keyExists(strings::service_type)) {
     type = (*message_)[strings::msg_params][strings::service_type].asString();

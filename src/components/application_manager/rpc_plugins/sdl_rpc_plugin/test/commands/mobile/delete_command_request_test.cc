@@ -152,9 +152,10 @@ TEST_F(DeleteCommandRequestTest,
 
   ON_CALL(app_mngr_, application(_)).WillByDefault(Return(mock_app_));
 
-  MessageSharedPtr test_msg(CreateMessage(smart_objects::SmartType_Map));
-  (*test_msg)[am::strings::vr_commands] = 0;
-  (*test_msg)[am::strings::menu_params] = 0;
+  smart_objects::SmartObject test_msg(
+      *CreateMessage(smart_objects::SmartType_Map));
+  test_msg[am::strings::vr_commands] = 0;
+  test_msg[am::strings::menu_params] = 0;
 
   ON_CALL(hmi_interfaces_, GetInterfaceFromFunction(_))
       .WillByDefault(Return(am::HmiInterfaces::HMI_INTERFACE_VR));
@@ -164,8 +165,7 @@ TEST_F(DeleteCommandRequestTest,
   ON_CALL(hmi_interfaces_,
           GetInterfaceState(am::HmiInterfaces::HMI_INTERFACE_VR))
       .WillByDefault(Return(am::HmiInterfaces::STATE_AVAILABLE));
-  ON_CALL(*mock_app_, FindCommand(kCommandId))
-      .WillByDefault(Return(test_msg.get()));
+  ON_CALL(*mock_app_, FindCommand(kCommandId)).WillByDefault(Return(test_msg));
   ON_CALL(*mock_app_, get_grammar_id()).WillByDefault(Return(kConnectionKey));
   MessageSharedPtr msg(CreateMessage(smart_objects::SmartType_Map));
   (*msg)[am::strings::params][am::hmi_response::code] =
@@ -216,9 +216,10 @@ TEST_F(DeleteCommandRequestTest,
   MockAppPtr app = CreateMockApp();
   ON_CALL(app_mngr_, application(_)).WillByDefault(Return(app));
 
-  MessageSharedPtr test_msg(CreateMessage(smart_objects::SmartType_Map));
-  (*test_msg)[am::strings::vr_commands] = 0;
-  (*test_msg)[am::strings::menu_params] = 0;
+  smart_objects::SmartObject test_msg(
+      *CreateMessage(smart_objects::SmartType_Map));
+  test_msg[am::strings::vr_commands] = 0;
+  test_msg[am::strings::menu_params] = 0;
 
   ON_CALL(hmi_interfaces_, GetInterfaceFromFunction(_))
       .WillByDefault(Return(am::HmiInterfaces::HMI_INTERFACE_UI));
@@ -228,7 +229,7 @@ TEST_F(DeleteCommandRequestTest,
   ON_CALL(hmi_interfaces_,
           GetInterfaceState(am::HmiInterfaces::HMI_INTERFACE_VR))
       .WillByDefault(Return(am::HmiInterfaces::STATE_AVAILABLE));
-  ON_CALL(*app, FindCommand(kCommandId)).WillByDefault(Return(test_msg.get()));
+  ON_CALL(*app, FindCommand(kCommandId)).WillByDefault(Return(test_msg));
   ON_CALL(*app, get_grammar_id()).WillByDefault(Return(kConnectionKey));
   MessageSharedPtr msg(CreateMessage(smart_objects::SmartType_Map));
   (*msg)[am::strings::params][am::hmi_response::code] =

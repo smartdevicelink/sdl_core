@@ -130,8 +130,11 @@ class HandshakeHandler : public security_manager::SecurityManagerListener {
    * @brief Performs related actions if handshake was failed
    * @param params set of params used in bson part of message
    * @param service_status - service status to be sent to HMI
+   * @param err_reason - Optional error description
    */
-  void ProcessFailedHandshake(BsonObject& params, ServiceStatus service_status);
+  void ProcessFailedHandshake(BsonObject& params,
+                              ServiceStatus service_status,
+                              std::string err_reason = std::string());
 
   /**
    * @brief Determines whether service can be protected

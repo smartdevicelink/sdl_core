@@ -55,7 +55,7 @@
 #include "app_service_rpc_plugin/commands/hmi/on_as_app_service_data_notification.h"
 #include "app_service_rpc_plugin/commands/hmi/on_as_app_service_data_notification_from_hmi.h"
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "AppServiceRpcPlugin")
+SDL_CREATE_LOG_VARIABLE("AppServiceRpcPlugin")
 
 namespace app_service_rpc_plugin {
 namespace strings = app_mngr::strings;
@@ -69,7 +69,7 @@ AppServiceHmiCommandFactory::AppServiceHmiCommandFactory(
     , rpc_service_(rpc_service)
     , hmi_capabilities_(hmi_capabilities)
     , policy_handler_(policy_handler) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
 }
 
 app_mngr::CommandSharedPtr AppServiceHmiCommandFactory::CreateCommand(
@@ -95,9 +95,8 @@ app_mngr::CommandSharedPtr AppServiceHmiCommandFactory::CreateCommand(
   }
 
   UNUSED(message_type_str);
-  LOG4CXX_DEBUG(logger_,
-                "HMICommandFactory::CreateCommand function_id: "
-                    << function_id << ", message type: " << message_type_str);
+  SDL_LOG_DEBUG("HMICommandFactory::CreateCommand function_id: "
+                << function_id << ", message type: " << message_type_str);
 
   return buildCommandCreator(function_id, message_type, source).create(message);
 }
@@ -105,8 +104,7 @@ app_mngr::CommandSharedPtr AppServiceHmiCommandFactory::CreateCommand(
 bool AppServiceHmiCommandFactory::IsAbleToProcess(
     const int32_t function_id,
     const app_mngr::commands::Command::CommandSource source) const {
-  LOG4CXX_DEBUG(logger_,
-                "HMI App Service Plugin IsAbleToProcess: " << function_id);
+  SDL_LOG_DEBUG("HMI App Service Plugin IsAbleToProcess: " << function_id);
   UNUSED(source);
   return buildCommandCreator(
              function_id, hmi_apis::messageType::INVALID_ENUM, source)
@@ -120,8 +118,7 @@ app_mngr::CommandCreator& AppServiceHmiCommandFactory::buildCommandCreator(
   auto factory = app_mngr::CommandCreatorFactory(
       application_manager_, rpc_service_, hmi_capabilities_, policy_handler_);
 
-  LOG4CXX_DEBUG(logger_,
-                "buildCommandCreator: " << function_id << " " << source);
+  SDL_LOG_DEBUG("buildCommandCreator: " << function_id << " " << source);
 
   switch (function_id) {
     case hmi_apis::FunctionID::AppService_PublishAppService:
@@ -191,7 +188,7 @@ app_mngr::CommandCreator& AppServiceHmiCommandFactory::buildCommandCreator(
                  : factory.GetCreator<
                        commands::ASGetActiveServiceConsentResponse>();
     default:
-      LOG4CXX_WARN(logger_, "Unsupported HMI function_id: " << function_id);
+      SDL_LOG_WARN("Unsupported HMI function_id: " << function_id);
   }
   return factory.GetCreator<app_mngr::InvalidCommand>();
 }

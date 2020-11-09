@@ -48,7 +48,13 @@
  */
 namespace connection_handler {
 
-enum CloseSessionReason { kCommon = 0, kFlood, kMalformed, kUnauthorizedApp };
+enum CloseSessionReason {
+  kCommon = 0,
+  kFlood,
+  kMalformed,
+  kUnauthorizedApp,
+  kFinalMessage
+};
 
 class ConnectionHandlerObserver;
 
@@ -205,6 +211,15 @@ class ConnectionHandler {
                                               uint8_t protocol_version) = 0;
 
   /**
+   * @brief binds protocol version with session
+   * @param connection_key pair of connection and session id
+   * @param full_protocol_version contains full protocol version of registered
+   * application.
+   */
+  virtual void BindProtocolVersionWithSession(
+      uint32_t connection_key,
+      const utils::SemanticVersion& full_protocol_version) = 0;
+  /**
    * \brief information about given Connection Key.
    * \param key Unique key used by other components as session identifier
    * \param app_id Returned: ApplicationID
@@ -288,7 +303,8 @@ class ConnectionHandler {
   virtual void NotifyServiceStartedResult(
       uint32_t session_key,
       bool result,
-      std::vector<std::string>& rejected_params) = 0;
+      std::vector<std::string>& rejected_params,
+      const std::string& reason) = 0;
 
   /**
    * \brief Called when secondary transport with given session ID is established

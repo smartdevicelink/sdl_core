@@ -39,6 +39,8 @@ using namespace application_manager;
 
 namespace commands {
 
+SDL_CREATE_LOG_VARIABLE("Commands")
+
 OnAwakeSDLNotification::OnAwakeSDLNotification(
     const application_manager::commands::MessageSharedPtr& message,
     ApplicationManager& application_manager,
@@ -54,7 +56,7 @@ OnAwakeSDLNotification::OnAwakeSDLNotification(
 OnAwakeSDLNotification::~OnAwakeSDLNotification() {}
 
 void OnAwakeSDLNotification::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
 
   if (!application_manager_.resume_controller().is_suspended()) {
     return;
