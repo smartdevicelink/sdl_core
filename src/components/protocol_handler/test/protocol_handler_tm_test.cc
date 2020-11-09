@@ -425,7 +425,8 @@ class ProtocolHandlerImplTest : public ::testing::Test {
     protocol_handler_impl->AddProtocolObserver(&mock_protocol_observer);
     EXPECT_CALL(mock_protocol_observer, OnMobileMessageSent(_));
 
-    EXPECT_CALL(session_observer_mock, ProtocolVersionUsed(_, _, _))
+    EXPECT_CALL(session_observer_mock,
+                ProtocolVersionUsed(_, _, An<uint8_t&>()))
         .WillOnce(Return(false));
 
     tm_listener->OnTMMessageSend(message);
@@ -3215,7 +3216,7 @@ TEST_F(ProtocolHandlerImplTest, DISABLED_FloodVerification) {
                   session_id,
                   some_data.size(),
                   message_id,
-                  &some_data[0]);
+                  some_data.data());
   }
 
   EXPECT_TRUE(waiter->WaitFor(times, kAsyncExpectationsTimeout));
@@ -3259,7 +3260,7 @@ TEST_F(ProtocolHandlerImplTest, DISABLED_FloodVerification_ThresholdValue) {
                   session_id,
                   some_data.size(),
                   message_id,
-                  &some_data[0]);
+                  some_data.data());
   }
 
   EXPECT_TRUE(waiter->WaitFor(times, kAsyncExpectationsTimeout));
@@ -3295,7 +3296,7 @@ TEST_F(ProtocolHandlerImplTest, DISABLED_FloodVerification_VideoFrameSkip) {
                   session_id,
                   some_data.size(),
                   message_id,
-                  &some_data[0]);
+                  some_data.data());
   }
 
   EXPECT_TRUE(waiter->WaitFor(times, kAsyncExpectationsTimeout));
@@ -3331,7 +3332,7 @@ TEST_F(ProtocolHandlerImplTest, DISABLED_FloodVerification_AudioFrameSkip) {
                   session_id,
                   some_data.size(),
                   message_id,
-                  &some_data[0]);
+                  some_data.data());
   }
 
   EXPECT_TRUE(waiter->WaitFor(times, kAsyncExpectationsTimeout));
@@ -3367,7 +3368,7 @@ TEST_F(ProtocolHandlerImplTest, DISABLED_FloodVerificationDisable) {
                   session_id,
                   some_data.size(),
                   message_id,
-                  &some_data[0]);
+                  some_data.data());
   }
 
   EXPECT_TRUE(waiter->WaitFor(times, kAsyncExpectationsTimeout));
@@ -3399,7 +3400,7 @@ TEST_F(ProtocolHandlerImplTest, MalformedVerificationDisable) {
                   session_id,
                   some_data.size(),
                   message_id,
-                  &some_data[0]);
+                  some_data.data());
   }
 
   EXPECT_TRUE(waiter->WaitFor(times, kAsyncExpectationsTimeout));
@@ -3442,7 +3443,7 @@ TEST_F(ProtocolHandlerImplTest, DISABLED_MalformedLimitVerification) {
                   session_id,
                   some_data.size(),
                   message_id,
-                  &some_data[0]);
+                  some_data.data());
     // Common message
     SendTMMessage(connection_id,
                   PROTOCOL_VERSION_1,
@@ -3453,7 +3454,7 @@ TEST_F(ProtocolHandlerImplTest, DISABLED_MalformedLimitVerification) {
                   session_id,
                   some_data.size(),
                   message_id,
-                  &some_data[0]);
+                  some_data.data());
   }
 
   EXPECT_TRUE(waiter->WaitFor(times, kAsyncExpectationsTimeout));
@@ -3499,7 +3500,7 @@ TEST_F(ProtocolHandlerImplTest,
                   session_id,
                   some_data.size(),
                   message_id,
-                  &some_data[0]);
+                  some_data.data());
     // Malformed message 2
     SendTMMessage(connection_id,
                   PROTOCOL_VERSION_1,
@@ -3510,7 +3511,7 @@ TEST_F(ProtocolHandlerImplTest,
                   session_id,
                   some_data.size(),
                   message_id,
-                  &some_data[0]);
+                  some_data.data());
     // Malformed message 3
     SendTMMessage(connection_id,
                   PROTOCOL_VERSION_1,
@@ -3521,7 +3522,7 @@ TEST_F(ProtocolHandlerImplTest,
                   session_id,
                   some_data.size(),
                   message_id,
-                  &some_data[0]);
+                  some_data.data());
 
     // Common message
     SendTMMessage(connection_id,
@@ -3533,7 +3534,7 @@ TEST_F(ProtocolHandlerImplTest,
                   session_id,
                   some_data.size(),
                   message_id,
-                  &some_data[0]);
+                  some_data.data());
   }
 
   EXPECT_TRUE(waiter->WaitFor(times, kAsyncExpectationsTimeout));
@@ -3569,7 +3570,7 @@ TEST_F(ProtocolHandlerImplTest, MalformedLimitVerification_MalformedOnly) {
                   session_id,
                   some_data.size(),
                   message_id,
-                  &some_data[0]);
+                  some_data.data());
     // Malformed message 2
     SendTMMessage(connection_id,
                   PROTOCOL_VERSION_1,
@@ -3580,7 +3581,7 @@ TEST_F(ProtocolHandlerImplTest, MalformedLimitVerification_MalformedOnly) {
                   session_id,
                   some_data.size(),
                   message_id,
-                  &some_data[0]);
+                  some_data.data());
     // Malformed message 3
     SendTMMessage(connection_id,
                   PROTOCOL_VERSION_1,
@@ -3591,7 +3592,7 @@ TEST_F(ProtocolHandlerImplTest, MalformedLimitVerification_MalformedOnly) {
                   session_id,
                   some_data.size(),
                   message_id,
-                  &some_data[0]);
+                  some_data.data());
 
     // No common message
   }
@@ -3626,7 +3627,7 @@ TEST_F(ProtocolHandlerImplTest, MalformedLimitVerification_NullTimePeriod) {
                   session_id,
                   some_data.size(),
                   message_id,
-                  &some_data[0]);
+                  some_data.data());
   }
 
   EXPECT_TRUE(waiter->WaitFor(times, kAsyncExpectationsTimeout));
@@ -3659,7 +3660,7 @@ TEST_F(ProtocolHandlerImplTest, MalformedLimitVerification_NullCount) {
                   session_id,
                   some_data.size(),
                   message_id,
-                  &some_data[0]);
+                  some_data.data());
   }
 
   EXPECT_TRUE(waiter->WaitFor(times, kAsyncExpectationsTimeout));
@@ -3680,7 +3681,7 @@ TEST_F(ProtocolHandlerImplTest, OnFinalMessageCallback) {
                                                             session_id,
                                                             total_data_size,
                                                             message_id,
-                                                            &data[0]));
+                                                            data.data()));
 
   using RawFordMessageToMobile = protocol_handler::impl::RawFordMessageToMobile;
   using Handler = protocol_handler::impl::ToMobileQueue::Handler;
@@ -3857,7 +3858,8 @@ TEST_F(ProtocolHandlerImplTest,
 
   AddSession(waiter, times);
   // ProtocolVersionUsed fails
-  EXPECT_CALL(session_observer_mock, ProtocolVersionUsed(connection_id, _, _))
+  EXPECT_CALL(session_observer_mock,
+              ProtocolVersionUsed(connection_id, _, An<uint8_t&>()))
       .WillOnce(DoAll(NotifyTestAsyncWaiter(waiter),
                       SetArgReferee<2>(PROTOCOL_VERSION_3),
                       Return(true)))
@@ -3918,7 +3920,7 @@ TEST_F(ProtocolHandlerImplTest,
   UCharDataVector data(total_data_size);
   RawMessagePtr message = std::make_shared<RawMessage>(connection_key,
                                                        PROTOCOL_VERSION_3,
-                                                       &data[0],
+                                                       data.data(),
                                                        total_data_size,
                                                        false,
                                                        kControl);
@@ -3959,7 +3961,7 @@ TEST_F(ProtocolHandlerImplTest,
   UCharDataVector data(total_data_size);
   RawMessagePtr message = std::make_shared<RawMessage>(connection_key,
                                                        PROTOCOL_VERSION_3,
-                                                       &data[0],
+                                                       data.data(),
                                                        total_data_size,
                                                        false,
                                                        kRpc);
@@ -4005,7 +4007,7 @@ TEST_F(ProtocolHandlerImplTest, SendMessageToMobileApp_SendMultiframeMessage) {
   const uint8_t first_consecutive_frame = 0x01;
   RawMessagePtr message = std::make_shared<RawMessage>(connection_key,
                                                        PROTOCOL_VERSION_3,
-                                                       &data[0],
+                                                       data.data(),
                                                        total_data_size,
                                                        false,
                                                        kBulk);
@@ -4093,7 +4095,9 @@ TEST_F(ProtocolHandlerImplTest,
           DoAll(SetArgPointee<1>(connection_id), SetArgPointee<2>(session_id)));
 
   EXPECT_CALL(transport_manager_mock, Disconnect(connection_id));
-  EXPECT_CALL(session_observer_mock, ProtocolVersionUsed(_, _, _)).Times(0);
+  EXPECT_CALL(session_observer_mock, OnFinalMessageCallback(connection_id));
+  EXPECT_CALL(session_observer_mock, ProtocolVersionUsed(_, _, An<uint8_t&>()))
+      .Times(0);
 
   tm_listener->OnTMMessageSend(message);
 }
@@ -4106,14 +4110,15 @@ TEST_F(ProtocolHandlerImplTest, OnTMMessageSend_InvalidData_Cancelled) {
     data[i] = -1;
   }
   RawMessagePtr message = std::make_shared<RawMessage>(
-      connection_key, PROTOCOL_VERSION_3, &data[0], data_size, PROTECTION_OFF);
+      connection_key, PROTOCOL_VERSION_3, data, data_size, PROTECTION_OFF);
   EXPECT_CALL(session_observer_mock,
               PairFromKey(message->connection_key(), _, _))
       .WillOnce(
           DoAll(SetArgPointee<1>(connection_id), SetArgPointee<2>(session_id)));
 
   EXPECT_CALL(transport_manager_mock, Disconnect(0)).Times(0);
-  EXPECT_CALL(session_observer_mock, ProtocolVersionUsed(_, _, _)).Times(0);
+  EXPECT_CALL(session_observer_mock, ProtocolVersionUsed(_, _, An<uint8_t&>()))
+      .Times(0);
 
   tm_listener->OnTMMessageSend(message);
 }
@@ -4141,7 +4146,7 @@ TEST_F(ProtocolHandlerImplTest, SendFrame_SendMessageToDeviceFailed_FAIL) {
                                                          session_id,
                                                          some_data.size(),
                                                          message_id,
-                                                         &some_data[0]),
+                                                         some_data.data()),
       kFinalMessage);
   EXPECT_CALL(transport_manager_mock, SendMessageToDevice(_))
       .WillOnce(Return(transport_manager::E_INTERNAL_ERROR));
@@ -4163,7 +4168,7 @@ TEST_F(ProtocolHandlerImplTest, Handle_SingleFrameMessage_SUCCESS) {
                                                          session_id,
                                                          data_size,
                                                          message_id,
-                                                         &some_data[0]));
+                                                         some_data.data()));
 
   connection_handler::SessionTransports st;
   st.primary_transport = connection_id;
@@ -4192,11 +4197,14 @@ TEST_F(ProtocolHandlerImplTest,
           session_id,
           some_data.size(),
           message_id,
-          &some_data[0]));
+          some_data.data()));
 
   EXPECT_CALL(session_observer_mock,
-              OnSessionEndedCallback(
-                  connection_id, session_id, An<uint32_t*>(), kControl))
+              OnSessionEndedCallback(connection_id,
+                                     session_id,
+                                     An<uint32_t*>(),
+                                     kControl,
+                                     An<std::string*>()))
       .WillOnce(Return(kInvalidSessionId));
 
   protocol_handler_impl_as_listener->Handle(message);
@@ -4217,10 +4225,13 @@ TEST_F(ProtocolHandlerImplTest, Handle_ControlMessage_EndServiceACK_SUCCESS) {
           session_id,
           some_data.size(),
           message_id,
-          &some_data[0]));
+          some_data.data()));
   EXPECT_CALL(session_observer_mock,
-              OnSessionEndedCallback(
-                  connection_id, session_id, An<uint32_t*>(), kControl))
+              OnSessionEndedCallback(connection_id,
+                                     session_id,
+                                     An<uint32_t*>(),
+                                     kControl,
+                                     An<std::string*>()))
       .WillOnce(Return(kValidSessionId));
 
   protocol_handler_impl_as_listener->Handle(message);
@@ -4241,7 +4252,7 @@ TEST_F(ProtocolHandlerImplTest, Handle_ControlMessage_HeartBeatAck_SUCCESS) {
           session_id,
           some_data.size(),
           message_id,
-          &some_data[0]));
+          some_data.data()));
   EXPECT_CALL(session_observer_mock,
               OnSessionEndedCallback(_, _, An<uint32_t*>(), _))
       .Times(0);
@@ -4266,7 +4277,7 @@ TEST_F(ProtocolHandlerImplTest, Handle_ControlMessage_Default_SUCCESS) {
           session_id,
           some_data.size(),
           message_id,
-          &some_data[0]));
+          some_data.data()));
   EXPECT_CALL(session_observer_mock,
               OnSessionEndedCallback(_, _, An<uint32_t*>(), _))
       .Times(0);
@@ -4292,12 +4303,15 @@ TEST_F(ProtocolHandlerImplTest,
           session_id,
           some_data.size(),
           message_id,
-          &some_data[0]));
+          some_data.data()));
 
   uint32_t hash_id;
   EXPECT_CALL(session_observer_mock,
-              OnSessionEndedCallback(
-                  connection_id, session_id, An<uint32_t*>(), kControl))
+              OnSessionEndedCallback(connection_id,
+                                     session_id,
+                                     An<uint32_t*>(),
+                                     kControl,
+                                     An<std::string*>()))
       .WillOnce(DoAll(SaveArgPointee<2>(&hash_id), Return(kInvalidSessionId)));
 
   protocol_handler_impl_as_listener->Handle(message);
@@ -4324,12 +4338,15 @@ TEST_F(ProtocolHandlerImplTest, GetHashId_SecondProtocolVersion_HashWrong) {
           session_id,
           some_data.size(),
           message_id,
-          &some_data[0]));
+          some_data.data()));
 
   uint32_t hash_id;
   EXPECT_CALL(session_observer_mock,
-              OnSessionEndedCallback(
-                  connection_id, session_id, An<uint32_t*>(), kControl))
+              OnSessionEndedCallback(connection_id,
+                                     session_id,
+                                     An<uint32_t*>(),
+                                     kControl,
+                                     An<std::string*>()))
       .WillOnce(DoAll(SaveArgPointee<2>(&hash_id), Return(kInvalidSessionId)));
 
   protocol_handler_impl_as_listener->Handle(message);
@@ -4357,15 +4374,18 @@ TEST_F(ProtocolHandlerImplTest, GetHashId_CorrectData_CorrectHash) {
           session_id,
           some_data.size(),
           message_id,
-          &some_data[0]));
+          some_data.data()));
 
   const uint32_t exp_hash_id =
       BE_TO_LE32(*(reinterpret_cast<uint32_t*>(some_data.data())));
   uint32_t hash_id;
 
   EXPECT_CALL(session_observer_mock,
-              OnSessionEndedCallback(
-                  connection_id, session_id, An<uint32_t*>(), kControl))
+              OnSessionEndedCallback(connection_id,
+                                     session_id,
+                                     An<uint32_t*>(),
+                                     kControl,
+                                     An<std::string*>()))
       .WillOnce(DoAll(SaveArgPointee<2>(&hash_id), Return(kValidSessionId)));
 
   protocol_handler_impl_as_listener->Handle(message);
@@ -4392,12 +4412,15 @@ TEST_F(ProtocolHandlerImplTest, GetHashId_InvalidData_WrongHash) {
           session_id,
           some_data.size(),
           message_id,
-          &some_data[0]));
+          some_data.data()));
 
   uint32_t hash_id;
   EXPECT_CALL(session_observer_mock,
-              OnSessionEndedCallback(
-                  connection_id, session_id, An<uint32_t*>(), kControl))
+              OnSessionEndedCallback(connection_id,
+                                     session_id,
+                                     An<uint32_t*>(),
+                                     kControl,
+                                     An<std::string*>()))
       .WillOnce(DoAll(SaveArgPointee<2>(&hash_id), Return(kValidSessionId)));
 
   protocol_handler_impl_as_listener->Handle(message);
@@ -4411,10 +4434,9 @@ TEST_F(ProtocolHandlerImplTest, GetHashId_ProtocolVersion5_ValidData) {
           protocol_handler_impl.get());
 
   const uint8_t data_size = 5u;
-  uint8_t data[data_size] = {0x00};
-  data[0] = data_size;
+  uint8_t data[data_size] = {data_size};
 
-  BsonObject obj = bson_object_from_bytes(&data[0]);
+  BsonObject obj = bson_object_from_bytes(data);
   const uint32_t exp_hash_id =
       (uint32_t)bson_object_get_int32(&obj, protocol_handler::strings::hash_id);
   bson_object_deinitialize(&obj);
@@ -4430,12 +4452,15 @@ TEST_F(ProtocolHandlerImplTest, GetHashId_ProtocolVersion5_ValidData) {
           session_id,
           data_size,
           message_id,
-          &data[0]));
+          data));
 
   uint32_t hash_id;
   EXPECT_CALL(session_observer_mock,
-              OnSessionEndedCallback(
-                  connection_id, session_id, An<uint32_t*>(), kControl))
+              OnSessionEndedCallback(connection_id,
+                                     session_id,
+                                     An<uint32_t*>(),
+                                     kControl,
+                                     An<std::string*>()))
       .WillOnce(DoAll(SaveArgPointee<2>(&hash_id), Return(kValidSessionId)));
 
   protocol_handler_impl_as_listener->Handle(message);
@@ -4564,8 +4589,6 @@ TEST_F(ProtocolHandlerImplTest, PopValidAndExpiredMultiframes) {
 
   AddSession(waiter, times);
 
-  // Create messages so the execution will enter
-  // PopValidAndExpiredMultiframes
   const uint8_t data_size = 1u;
   uint8_t data = 7u;
   ProtocolFramePtr first_frame = CreateFramePtrWithData(data, FRAME_TYPE_FIRST);
@@ -4752,9 +4775,12 @@ TEST_F(ProtocolHandlerImplTest,
       .WillOnce(DoAll(NotifyTestAsyncWaiter(waiter), Return(true)));
   times++;
 
-  EXPECT_CALL(
-      session_observer_mock,
-      OnSessionEndedCallback(connection_id, session_id, An<uint32_t*>(), kRpc));
+  EXPECT_CALL(session_observer_mock,
+              OnSessionEndedCallback(connection_id,
+                                     session_id,
+                                     An<uint32_t*>(),
+                                     kRpc,
+                                     An<std::string*>()));
 
   const uint8_t data_size = 1u;
   EXPECT_CALL(ssl_context_mock, Encrypt(frame_ptr->data(), data_size, _, _))
@@ -4926,7 +4952,7 @@ TEST_F(ProtocolHandlerImplTest,
   times++;
 
   EXPECT_CALL(session_observer_mock,
-              ProtocolVersionUsed(connection_id, session_id, _));
+              ProtocolVersionUsed(connection_id, session_id, An<uint8_t&>()));
 
   tm_listener->OnTMMessageReceived(frame_ptr->serializePacket());
 
@@ -4997,7 +5023,8 @@ TEST_F(ProtocolHandlerImplTest, DecryptFrame_DecryptFailed_Cancelled) {
   uint32_t session_message_id;
   EXPECT_CALL(
       session_observer_mock,
-      OnSessionEndedCallback(connection_id, session_id, An<uint32_t*>(), kRpc))
+      OnSessionEndedCallback(
+          connection_id, session_id, An<uint32_t*>(), kRpc, An<std::string*>()))
       .WillOnce(DoAll(SaveArgPointee<2>(&session_message_id),
                       Return(kInvalidSessionId)));
 
@@ -5072,7 +5099,7 @@ TEST_F(ProtocolHandlerImplTest, SendFrame_EncryptFailed_FAIL) {
                                                          session_id,
                                                          some_data.size(),
                                                          message_id,
-                                                         &some_data[0]),
+                                                         some_data.data()),
       kFinalMessage);
   protocol_handler_impl_as_listener->Handle(message);
 }

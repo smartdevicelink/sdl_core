@@ -1276,7 +1276,7 @@ RESULT_CODE ProtocolHandlerImpl::SendFrame(const ProtocolFramePtr packet) {
 
   SDL_LOG_DEBUG(
       "Packet to be sent: "
-      << ConvertPacketDataToString(packet->data(), packet->data_size())
+      << utils::ConvertBinaryDataToString(packet->data(), packet->data_size())
       << " of size: " << packet->data_size());
   const RawMessagePtr message_to_send = packet->serializePacket();
   if (!message_to_send) {
@@ -1441,7 +1441,7 @@ RESULT_CODE ProtocolHandlerImpl::HandleSingleFrameMessage(
   SDL_LOG_DEBUG(
       "FRAME_TYPE_SINGLE message of size "
       << packet->data_size() << "; message "
-      << ConvertPacketDataToString(packet->data(), packet->data_size()));
+      << utils::ConvertBinaryDataToString(packet->data(), packet->data_size()));
 
   // Replace a potential secondary transport ID in the packet with the primary
   // transport ID

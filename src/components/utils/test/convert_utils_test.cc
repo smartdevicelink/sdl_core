@@ -68,7 +68,7 @@ TEST(ConvertUtilsTest, ConvertBinaryDataToString_ValidCharacteres_CorrectText) {
   const uint8_t data[] = {'s', 'u', 'c', 'c', 'e', 's', 's'};
   const std::string convertion_result = "success";
   const size_t data_size = 7;
-  EXPECT_EQ(convertion_result, ConvertBinaryDataToString(&data[0], data_size));
+  EXPECT_EQ(convertion_result, ConvertBinaryDataToString(data, data_size));
 }
 
 TEST(ConvertUtilsTest,
@@ -77,7 +77,7 @@ TEST(ConvertUtilsTest,
   uint8_t data[data_size];
   data[0] = 0u;
   const std::string is_raw_data = "is raw data";
-  EXPECT_EQ(is_raw_data, ConvertBinaryDataToString(&data[0], data_size));
+  EXPECT_EQ(is_raw_data, ConvertBinaryDataToString(data, data_size));
 }
 
 }  // namespace utils_test
