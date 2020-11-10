@@ -39,11 +39,12 @@ include(${CMAKE_SOURCE_DIR}/tools/cmake/helpers/platform.cmake)
 #Jenkins integration section
 #dont modify this section if you dont know details about integration with Jenkins!!!
 set (HMI "web" CACHE STRING "HMI type")
-option(HMI2 "Use Qt HMI" OFF)
 option(EXTENDED_MEDIA_MODE "Turn on and off extended Madia Manager features relates to PulseAudio A2DP and GStreamer" OFF)
 option(BUILD_SHARED_LIBS "Build all libraries as shared (if ON) or static (if OFF)" OFF)
 option(BUILD_BT_SUPPORT "Bluetooth support" ON)
 option(BUILD_USB_SUPPORT "libusb support" ON)
+option(BUILD_CLOUD_APP_SUPPORT "Cloud App Transport Support" ON)
+option(BUILD_WEBSOCKET_SERVER_SUPPORT "Web Engine App Transport Support" ON)
 option(BUILD_BACKTRACE_SUPPORT "backtrace support" ON)
 option(BUILD_TESTS "Possibility to build and run tests" OFF)
 option(TELEMETRY_MONITOR "Enable profiling time test util" ON)
@@ -52,7 +53,7 @@ option(ENABLE_GCOV "gcov code coverage feature" OFF)
 option(ENABLE_SANITIZE "Sanitize tool" OFF)
 option(ENABLE_SECURITY "Security Ford protocol protection" ON)
 option(ENABLE_HMI_PTU_DECRYPTION "Policy table update parsed by hmi" ON)
-option(REMOTE_CONTROL "Enable Reverse functionality" ON)
+option(ENABLE_IAP2EMULATION "IAP2 emulation via tcp" OFF)
 option(USE_COTIRE "Use Cotire to speed up build (currently only for commands tests)" ON)
 option(USE_GOLD_LD "Use gold linker intead of GNU linker" ON)
 option(USE_CCACHE "Turn on ccache usage" ON)
@@ -90,15 +91,12 @@ else ()
 endif()
 
 if (HMI_TYPE_OPTION)
-  if (${HMI_TYPE_OPTION} STREQUAL "HTML5")
-    message(STATUS "Jenkins integration: select HTML5 HMI")
-    set (HMI "web")
-  elseif (${HMI_TYPE_OPTION} STREQUAL "NONE")
+  if (${HMI_TYPE_OPTION} STREQUAL "NONE")
     message(STATUS "Jenkins integration: select HMI none")
     set (HMI "no")
   else ()
-    message(STATUS "Jenkins integration: select QML HMI none")
-    set (HMI "qt")
+    message(STATUS "Jenkins integration: select HTML5 HMI")
+    set (HMI "web")
   endif()
 endif()
 
@@ -117,9 +115,6 @@ if (HMI_ADAPTER_OPTION)
   if (${HMI_ADAPTER_OPTION} STREQUAL "MESSAGEBROKER")
     message(STATUS "Jenkins integration: selected HMI adapter MESSAGEBROKER")
     set (HMIADAPTER "messagebroker")
-  elseif (${HMI_ADAPTER_OPTION} STREQUAL "DBUS")
-    message(STATUS "Jenkins integration: selected HMI adapter DBUS")
-    set (HMIADAPTER "dbus")
   endif()
 endif()
 
@@ -160,12 +155,67 @@ if (OS_TYPE_OPTION)
   endif()
 endif()
 
-if (REMOTE_CONTROL)
-  add_definitions(-DSDL_REMOTE_CONTROL)
-  message(STATUS "Remote control support is enabled (aka Reverse SDL or SDL-RC)")
-endif()
-
 #Jenkins integration section end
+
+#Deliver Build Configuration
+
+set(build_config_path "src/appMain/build_config.txt")
+FILE(WRITE "${build_config_path}" "")
+
+get_property(cHelpString CACHE EXTENDED_POLICY PROPERTY HELPSTRING)
+get_property(cType CACHE EXTENDED_POLICY PROPERTY TYPE)
+get_property(cValue CACHE EXTENDED_POLICY PROPERTY VALUE)
+file(APPEND "${build_config_path}" "//${cHelpString}\n")
+file(APPEND "${build_config_path}" "EXTENDED_POLICY:${cType}=${cValue}\n\n")
+
+get_property(cHelpString CACHE BUILD_BT_SUPPORT PROPERTY HELPSTRING)
+get_property(cType CACHE BUILD_BT_SUPPORT PROPERTY TYPE)
+get_property(cValue CACHE BUILD_BT_SUPPORT PROPERTY VALUE)
+file(APPEND "${build_config_path}" "//${cHelpString}\n")
+file(APPEND "${build_config_path}" "BUILD_BT_SUPPORT:${cType}=${cValue}\n\n")
+
+get_property(cHelpString CACHE BUILD_USB_SUPPORT PROPERTY HELPSTRING)
+get_property(cType CACHE BUILD_USB_SUPPORT PROPERTY TYPE)
+get_property(cValue CACHE BUILD_USB_SUPPORT PROPERTY VALUE)
+file(APPEND "${build_config_path}" "//${cHelpString}\n")
+file(APPEND "${build_config_path}" "BUILD_USB_SUPPORT:${cType}=${cValue}\n\n")
+
+get_property(cHelpString CACHE ENABLE_SECURITY PROPERTY HELPSTRING)
+get_property(cType CACHE ENABLE_SECURITY PROPERTY TYPE)
+get_property(cValue CACHE ENABLE_SECURITY PROPERTY VALUE)
+file(APPEND "${build_config_path}" "//${cHelpString}\n")
+file(APPEND "${build_config_path}" "ENABLE_SECURITY:${cType}=${cValue}\n\n")
+
+get_property(cHelpString CACHE EXTENDED_MEDIA_MODE PROPERTY HELPSTRING)
+get_property(cType CACHE EXTENDED_MEDIA_MODE PROPERTY TYPE)
+get_property(cValue CACHE EXTENDED_MEDIA_MODE PROPERTY VALUE)
+file(APPEND "${build_config_path}" "//${cHelpString}\n")
+file(APPEND "${build_config_path}" "EXTENDED_MEDIA_MODE:${cType}=${cValue}\n\n")
+
+get_property(cHelpString CACHE TELEMETRY_MONITOR PROPERTY HELPSTRING)
+get_property(cType CACHE TELEMETRY_MONITOR PROPERTY TYPE)
+get_property(cValue CACHE TELEMETRY_MONITOR PROPERTY VALUE)
+file(APPEND "${build_config_path}" "//${cHelpString}\n")
+file(APPEND "${build_config_path}" "TELEMETRY_MONITOR:${cType}=${cValue}\n\n")
+
+get_property(cHelpString CACHE HMI PROPERTY HELPSTRING)
+get_property(cType CACHE HMI PROPERTY TYPE)
+get_property(cValue CACHE HMI PROPERTY VALUE)
+file(APPEND "${build_config_path}" "//${cHelpString}\n")
+file(APPEND "${build_config_path}" "HMI:${cType}=${cValue}\n\n")
+
+get_property(cHelpString CACHE ENABLE_HMI_PTU_DECRYPTION PROPERTY HELPSTRING)
+get_property(cType CACHE ENABLE_HMI_PTU_DECRYPTION PROPERTY TYPE)
+get_property(cValue CACHE ENABLE_HMI_PTU_DECRYPTION PROPERTY VALUE)
+file(APPEND "${build_config_path}" "//${cHelpString}\n")
+file(APPEND "${build_config_path}" "ENABLE_HMI_PTU_DECRYPTION:${cType}=${cValue}\n")
+
+get_property(cHelpString CACHE BUILD_WEBSOCKET_SERVER_SUPPORT PROPERTY HELPSTRING)
+get_property(cType CACHE BUILD_WEBSOCKET_SERVER_SUPPORT PROPERTY TYPE)
+get_property(cValue CACHE BUILD_WEBSOCKET_SERVER_SUPPORT PROPERTY VALUE)
+file(APPEND "${build_config_path}" "//${cHelpString}\n")
+file(APPEND "${build_config_path}" "BUILD_WEBSOCKET_SERVER_SUPPORT:${cType}=${cValue}\n")
+
 
 add_custom_target(pasa-tarball
   COMMAND ${CMAKE_SOURCE_DIR}/tools/Utils/export-customer-specific.sh ${CMAKE_SOURCE_DIR} ${CMAKE_BINARY_DIR} pasa
@@ -184,7 +234,6 @@ add_custom_target(genivi-tarball
   COMMAND tar -cz -C /tmp/GENIVI -f ${CMAKE_BINARY_DIR}/genivi.tar.gz .
 )
 
-
 project (${PROJECT})
 
 #ADD_DEPENDENCIES(${PROJECT} Policy)
@@ -196,7 +245,8 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
 set(CMAKE_INSTALL_PREFIX ${CMAKE_CURRENT_BINARY_DIR})
 set(ARCHIVE_OUTPUT_DIRECTORY ./bin)
 
-set(CMAKE_CXX_FLAGS "-fPIC -std=gnu++0x -Wall -Werror -Wno-deprecated-declarations -Wuninitialized -Wvla")
+set(EXCLUDE_ERROR_FLAGS "-Wno-error=unused-variable -Wno-error=unused-but-set-variable -Wno-error=deprecated-declarations")
+set(CMAKE_CXX_FLAGS "-fPIC -std=gnu++0x -Wall -fvisibility=hidden -Werror ${EXCLUDE_ERROR_FLAGS} -Wuninitialized -Wvla")
 
 if (USE_GOLD_LD)
   execute_process(COMMAND ld -v OUTPUT_VARIABLE result)
@@ -276,6 +326,16 @@ if (BUILD_BT_SUPPORT)
   message(STATUS "Bluetooth support enabled")
 endif()
 
+if (BUILD_CLOUD_APP_SUPPORT)
+  add_definitions(-DCLOUD_APP_WEBSOCKET_TRANSPORT_SUPPORT)
+  message(STATUS "Cloud app websocket support enabled")
+endif()
+
+if (BUILD_WEBSOCKET_SERVER_SUPPORT)
+  add_definitions(-DWEBSOCKET_SERVER_TRANSPORT_SUPPORT)
+  message(STATUS "Web engine app websocket support enabled")
+endif()
+
 if (BUILD_BACKTRACE_SUPPORT)
   add_definitions(-DBACKTRACE_SUPPORT)
   message(STATUS "Backtrace support enabled")
@@ -297,7 +357,9 @@ endif()
 if (${EXTENDED_POLICY} STREQUAL "EXTERNAL_PROPRIETARY")
     add_definitions(-DEXTERNAL_PROPRIETARY_MODE)
     set(POLICY_PATH ${COMPONENTS_DIR}/policy/policy_external/)
-    set(POLICY_GLOBAL_INCLUDE_PATH ${COMPONENTS_DIR}/include/policy/policy_external/)
+    set(POLICY_GLOBAL_INCLUDE_PATH
+      ${COMPONENTS_DIR}/include/policy/policy_external/
+      ${CMAKE_BINARY_DIR}/src/components/policy/policy_external/)
     set(POLICY_MOCK_INCLUDE_PATH ${COMPONENTS_DIR}/include/test/policy/policy_external/)
     message(STATUS "EXTERNAL_PROPRIETARY policy enabled")
 else()
@@ -308,7 +370,9 @@ else()
      message(STATUS "HTTP policy enabled")
    endif()
    set(POLICY_PATH ${COMPONENTS_DIR}/policy/policy_regular/)
-   set(POLICY_GLOBAL_INCLUDE_PATH ${COMPONENTS_DIR}/include/policy/policy_regular/)
+   set(POLICY_GLOBAL_INCLUDE_PATH
+    ${COMPONENTS_DIR}/include/policy/policy_regular/
+    ${CMAKE_BINARY_DIR}/src/components/policy/policy_regular/)
    set(POLICY_MOCK_INCLUDE_PATH ${COMPONENTS_DIR}/include/test/policy/policy_regular/)
 endif()
 
@@ -324,38 +388,10 @@ if (EXTENDED_MEDIA_MODE)
   add_definitions(${GLIB2_CFLAGS})
 endif()
 
-if(HMI STREQUAL "qt")
-  if(CMAKE_SYSTEM_NAME STREQUAL "QNX")
-    set(qt_version "4.8.5")
-  else()
-    set(qt_version "5.1.0")
-  endif()
-
-  execute_process(
-    COMMAND ${CMAKE_SOURCE_DIR}/FindQt.sh -v ${qt_version}
-    OUTPUT_VARIABLE qt_bin_dir
-  )
-  message(STATUS "Binary directory Qt ${qt_version} is ${qt_bin_dir}")
-  set(ENV{PATH} ${qt_bin_dir}:$ENV{PATH})
-
-  if(CMAKE_SYSTEM_NAME STREQUAL "QNX")
-    find_package(Qt4 ${qt_version} REQUIRED QtCore QtGui QtDBus QtDeclarative)
-  else ()
-    find_package(Qt5Core REQUIRED)
-    find_package(Qt5DBus REQUIRED)
-    find_package(Qt5Qml REQUIRED)
-    find_package(Qt5Quick REQUIRED)
-    set(qmlplugindump_binary ${qt_bin_dir}/qmlplugindump)
-  endif()
-endif()
-
 # Building application
 
 # --- Type HMI
-if (HMI STREQUAL "qt")
-    set(QT_HMI ON)
-    add_definitions(-DQT_HMI)
-elseif (HMI STREQUAL "web")
+if (HMI STREQUAL "web")
     set(WEB_HMI ON)
     add_definitions(-DWEB_HMI)
 else ()
@@ -363,19 +399,10 @@ else ()
     add_definitions(-DNO_HMI)
 endif ()
 
-if (HMI STREQUAL "qt" AND NOT DEFINED HMIADAPTER)
-    set(HMIADAPTER "dbus")
-endif()
 if (HMI STREQUAL "web" AND NOT DEFINED HMIADAPTER)
     set(HMIADAPTER "messagebroker")
 endif()
 
-if (HMIADAPTER STREQUAL "dbus")
-    set(HMI_DBUS_API ON)
-    add_definitions(-DDBUS_HMIADAPTER)
-    add_definitions(-DHMI_DBUS_API)
-    set(install-3rd_party_dbus "install-3rd_party_dbus")
-endif()
 if (HMIADAPTER STREQUAL "messagebroker")
     set(HMI_JSON_API ON)
     add_definitions(-DMESSAGEBROKER_HMIADAPTER)
@@ -407,6 +434,11 @@ endif()
 if(ENABLE_HMI_PTU_DECRYPTION)
   add_definitions(-DUSE_HMI_PTU_DECRYPTION)
   message(STATUS "HMI PTU decription enabled")
+endif()
+
+if(ENABLE_IAP2EMULATION)
+  add_definitions(-DENABLE_IAP2EMULATION)
+  message(STATUS "IAP2 emulation enabled")
 endif()
 
 set(RTLIB rt)
@@ -478,4 +510,3 @@ find_package(Doxygen)
     message(STATUS "To enable processing of MscGen comments please install mscgen")
     message(STATUS "sudo apt-get install mscgen")
 endif()
-

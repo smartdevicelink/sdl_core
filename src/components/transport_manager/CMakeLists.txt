@@ -40,9 +40,15 @@ include_directories (
   ${COMPONENTS_DIR}/resumption/include
   ${POLICY_GLOBAL_INCLUDE_PATH}/
   ${JSONCPP_INCLUDE_DIRECTORY}
-  ${LIBUSB_INCLUDE_DIRECTORY}
   ${LOG4CXX_INCLUDE_DIRECTORY}
+  ${BOOST_INCLUDE_DIR}
 )
+
+if (CMAKE_SYSTEM_NAME STREQUAL "QNX")
+    include_directories ("${CMAKE_CURRENT_SOURCE_DIR}/include/transport_manager/tcp/platform_specific/qnx")
+elseif (CMAKE_SYSTEM_NAME STREQUAL "Linux")
+    include_directories ("${CMAKE_CURRENT_SOURCE_DIR}/include/transport_manager/tcp/platform_specific/linux")
+endif ()
 
 set(PATHS
   ${CMAKE_CURRENT_SOURCE_DIR}/include
@@ -67,17 +73,25 @@ else()
   )
 endif()
 
+if(BUILD_CLOUD_APP_SUPPORT)
+  GET_PROPERTY(BOOST_LIBS_DIRECTORY GLOBAL PROPERTY GLOBAL_BOOST_LIBS)
+  list(APPEND LIBRARIES boost_system boost_regex -L${BOOST_LIBS_DIRECTORY})
+else()
+  list(APPEND EXCLUDE_PATHS
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/transport_manager/cloud
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/cloud
+  )
+endif()
+
 if(BUILD_USB_SUPPORT)
   if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
-    set(EXCLUDE_PATHS
+    list(APPEND EXCLUDE_PATHS
       ${COMPONENTS_DIR}/transport_manager/include/transport_manager/usb/qnx
       ${COMPONENTS_DIR}/transport_manager/src/usb/qnx
     )
-    list(APPEND LIBRARIES
-      Libusb-1.0.16
-    )
+
   elseif(CMAKE_SYSTEM_NAME STREQUAL "QNX")
-    set(EXCLUDE_PATHS
+    list(APPEND EXCLUDE_PATHS
       ${COMPONENTS_DIR}/transport_manager/include/transport_manager/usb/libusb
       ${COMPONENTS_DIR}/transport_manager/src/usb/libusb
     )
@@ -92,7 +106,41 @@ else()
   )
 endif()
 
+if(NOT BUILD_WEBSOCKET_SERVER_SUPPORT)
+  list(APPEND EXCLUDE_PATHS
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/transport_manager/websocket_server
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/websocket_server
+  )
+elseif(NOT ENABLE_SECURITY)
+  list(APPEND EXCLUDE_PATHS
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/transport_manager/websocket_server/websocket_secure_session.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/websocket_server/websocket_secure_session.cc
+  )
+endif()
+
+if(NOT ENABLE_IAP2EMULATION)
+  list (APPEND EXCLUDE_PATHS
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/iap2_emulation/iap2_transport_adapter.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/iap2_emulation/iap2_transport_adapter.cc
+  )
+endif()
+
+# exclude platform-dependent files before running collect_sources
+list(APPEND EXCLUDE_PATHS
+  ${COMPONENTS_DIR}/transport_manager/include/transport_manager/tcp/platform_specific
+  ${COMPONENTS_DIR}/transport_manager/src/tcp/platform_specific
+)
+
 collect_sources(SOURCES "${PATHS}" "${EXCLUDE_PATHS}")
+
+# then add platform-dependent files later
+set(PLATFORM_DEPENDENT_SOURCES)
+if (CMAKE_SYSTEM_NAME STREQUAL "QNX")
+  collect_sources(PLATFORM_DEPENDENT_SOURCES "${COMPONENTS_DIR}/transport_manager/src/tcp/platform_specific/qnx")
+elseif (CMAKE_SYSTEM_NAME STREQUAL "Linux")
+  collect_sources(PLATFORM_DEPENDENT_SOURCES "${COMPONENTS_DIR}/transport_manager/src/tcp/platform_specific/linux")
+endif ()
+list(APPEND SOURCES ${PLATFORM_DEPENDENT_SOURCES})
 
 add_library("TransportManager" ${SOURCES})
 target_link_libraries("TransportManager" ${LIBRARIES})
@@ -104,3 +152,4 @@ endif()
 if(BUILD_TESTS)
   add_subdirectory(test)
 endif()
+

@@ -34,21 +34,21 @@
  */
 
 #include "transport_manager/usb/usb_aoa_adapter.h"
-#include "transport_manager/usb/usb_device_scanner.h"
-#include "transport_manager/usb/usb_connection_factory.h"
 #include "transport_manager/usb/common.h"
+#include "transport_manager/usb/usb_connection_factory.h"
+#include "transport_manager/usb/usb_device_scanner.h"
 #include "utils/logger.h"
 
 namespace transport_manager {
 namespace transport_adapter {
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "TransportManager")
-UsbAoaAdapter::UsbAoaAdapter(resumption::LastState& last_state,
+SDL_CREATE_LOG_VARIABLE("TransportManager")
+UsbAoaAdapter::UsbAoaAdapter(resumption::LastStateWrapperPtr last_state_wrapper,
                              const TransportManagerSettings& settings)
-    : TransportAdapterImpl(new UsbDeviceScanner(this),
+    : TransportAdapterImpl(new UsbDeviceScanner(this, settings),
                            new UsbConnectionFactory(this),
                            NULL,
-                           last_state,
+                           last_state_wrapper,
                            settings)
     , is_initialised_(false)
     , usb_handler_(new UsbHandler()) {
@@ -60,7 +60,7 @@ UsbAoaAdapter::UsbAoaAdapter(resumption::LastState& last_state,
 UsbAoaAdapter::~UsbAoaAdapter() {}
 
 DeviceType UsbAoaAdapter::GetDeviceType() const {
-  return PASA_AOA;
+  return AOA;
 }
 
 bool UsbAoaAdapter::IsInitialised() const {
@@ -68,23 +68,21 @@ bool UsbAoaAdapter::IsInitialised() const {
 }
 
 TransportAdapter::Error UsbAoaAdapter::Init() {
-  LOG4CXX_TRACE(logger_, "enter");
+  SDL_LOG_TRACE("enter");
   TransportAdapter::Error error = usb_handler_->Init();
   if (error != TransportAdapter::OK) {
-    LOG4CXX_TRACE(logger_,
-                  "exit with error "
-                      << error << ". Condition: error != TransportAdapter::OK");
+    SDL_LOG_TRACE("exit with error "
+                  << error << ". Condition: error != TransportAdapter::OK");
     return error;
   }
   error = TransportAdapterImpl::Init();
   if (error != TransportAdapter::OK) {
-    LOG4CXX_TRACE(logger_,
-                  "exit with error "
-                      << error << ". Condition: error != TransportAdapter::OK");
+    SDL_LOG_TRACE("exit with error "
+                  << error << ". Condition: error != TransportAdapter::OK");
     return error;
   }
   is_initialised_ = true;
-  LOG4CXX_TRACE(logger_, "exit with TransportAdapter::OK");
+  SDL_LOG_TRACE("exit with TransportAdapter::OK");
   return TransportAdapter::OK;
 }
 

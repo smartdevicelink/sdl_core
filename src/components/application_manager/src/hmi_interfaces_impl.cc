@@ -61,8 +61,6 @@ generate_function_to_interface_convert_map() {
       HmiInterfaces::HMI_INTERFACE_BasicCommunication;
   convert_map[BasicCommunication_OnFileRemoved] =
       HmiInterfaces::HMI_INTERFACE_BasicCommunication;
-  convert_map[BasicCommunication_AllowDeviceToConnect] =
-      HmiInterfaces::HMI_INTERFACE_BasicCommunication;
   convert_map[BasicCommunication_OnDeviceChosen] =
       HmiInterfaces::HMI_INTERFACE_BasicCommunication;
   convert_map[BasicCommunication_OnFindApplications] =
@@ -105,6 +103,12 @@ generate_function_to_interface_convert_map() {
       HmiInterfaces::HMI_INTERFACE_BasicCommunication;
   convert_map[BasicCommunication_OnEventChanged] =
       HmiInterfaces::HMI_INTERFACE_BasicCommunication;
+  convert_map[BasicCommunication_OnServiceUpdate] =
+      HmiInterfaces::HMI_INTERFACE_BasicCommunication;
+  convert_map[BasicCommunication_GetFilePath] =
+      HmiInterfaces::HMI_INTERFACE_BasicCommunication;
+  convert_map[BasicCommunication_CloseApplication] =
+      HmiInterfaces::HMI_INTERFACE_BasicCommunication;
   convert_map[VR_IsReady] = HmiInterfaces::HMI_INTERFACE_VR;
   convert_map[VR_Started] = HmiInterfaces::HMI_INTERFACE_VR;
   convert_map[VR_Stopped] = HmiInterfaces::HMI_INTERFACE_VR;
@@ -130,17 +134,22 @@ generate_function_to_interface_convert_map() {
   convert_map[TTS_SetGlobalProperties] = HmiInterfaces::HMI_INTERFACE_TTS;
   convert_map[TTS_OnResetTimeout] = HmiInterfaces::HMI_INTERFACE_TTS;
   convert_map[UI_Alert] = HmiInterfaces::HMI_INTERFACE_UI;
+  convert_map[UI_SubtleAlert] = HmiInterfaces::HMI_INTERFACE_UI;
   convert_map[UI_Show] = HmiInterfaces::HMI_INTERFACE_UI;
   convert_map[UI_AddCommand] = HmiInterfaces::HMI_INTERFACE_UI;
   convert_map[UI_DeleteCommand] = HmiInterfaces::HMI_INTERFACE_UI;
   convert_map[UI_AddSubMenu] = HmiInterfaces::HMI_INTERFACE_UI;
   convert_map[UI_DeleteSubMenu] = HmiInterfaces::HMI_INTERFACE_UI;
+  convert_map[UI_ShowAppMenu] = HmiInterfaces::HMI_INTERFACE_UI;
+  convert_map[UI_CreateWindow] = HmiInterfaces::HMI_INTERFACE_UI;
+  convert_map[UI_DeleteWindow] = HmiInterfaces::HMI_INTERFACE_UI;
   convert_map[UI_PerformInteraction] = HmiInterfaces::HMI_INTERFACE_UI;
   convert_map[UI_SetMediaClockTimer] = HmiInterfaces::HMI_INTERFACE_UI;
   convert_map[UI_SetGlobalProperties] = HmiInterfaces::HMI_INTERFACE_UI;
   convert_map[UI_OnCommand] = HmiInterfaces::HMI_INTERFACE_UI;
   convert_map[UI_OnSystemContext] = HmiInterfaces::HMI_INTERFACE_UI;
   convert_map[UI_GetCapabilities] = HmiInterfaces::HMI_INTERFACE_UI;
+  convert_map[UI_CancelInteraction] = HmiInterfaces::HMI_INTERFACE_UI;
   convert_map[UI_ChangeRegistration] = HmiInterfaces::HMI_INTERFACE_UI;
   convert_map[UI_OnLanguageChange] = HmiInterfaces::HMI_INTERFACE_UI;
   convert_map[UI_GetSupportedLanguages] = HmiInterfaces::HMI_INTERFACE_UI;
@@ -148,7 +157,6 @@ generate_function_to_interface_convert_map() {
   convert_map[UI_OnDriverDistraction] = HmiInterfaces::HMI_INTERFACE_UI;
   convert_map[UI_SetAppIcon] = HmiInterfaces::HMI_INTERFACE_UI;
   convert_map[UI_SetDisplayLayout] = HmiInterfaces::HMI_INTERFACE_UI;
-  convert_map[UI_ShowCustomForm] = HmiInterfaces::HMI_INTERFACE_UI;
   convert_map[UI_OnKeyboardInput] = HmiInterfaces::HMI_INTERFACE_UI;
   convert_map[UI_OnTouchEvent] = HmiInterfaces::HMI_INTERFACE_UI;
   convert_map[UI_Slider] = HmiInterfaces::HMI_INTERFACE_UI;
@@ -219,9 +227,26 @@ generate_function_to_interface_convert_map() {
   convert_map[SDL_OnStatusUpdate] = HmiInterfaces::HMI_INTERFACE_SDL;
   convert_map[SDL_OnSystemError] = HmiInterfaces::HMI_INTERFACE_SDL;
   convert_map[SDL_AddStatisticsInfo] = HmiInterfaces::HMI_INTERFACE_SDL;
-  convert_map[SDL_GetURLS] = HmiInterfaces::HMI_INTERFACE_SDL;
   convert_map[RC_IsReady] = HmiInterfaces::HMI_INTERFACE_RC;
   convert_map[RC_GetCapabilities] = HmiInterfaces::HMI_INTERFACE_RC;
+  convert_map[Buttons_ButtonPress] = HmiInterfaces::HMI_INTERFACE_RC;
+  convert_map[RC_SetInteriorVehicleData] = HmiInterfaces::HMI_INTERFACE_RC;
+  convert_map[RC_GetInteriorVehicleData] = HmiInterfaces::HMI_INTERFACE_RC;
+  convert_map[RC_GetInteriorVehicleDataConsent] =
+      HmiInterfaces::HMI_INTERFACE_RC;
+  convert_map[RC_OnInteriorVehicleData] = HmiInterfaces::HMI_INTERFACE_RC;
+  convert_map[RC_OnRemoteControlSettings] = HmiInterfaces::HMI_INTERFACE_RC;
+  convert_map[RC_SetGlobalProperties] = HmiInterfaces::HMI_INTERFACE_RC;
+  convert_map[AppService_PublishAppService] =
+      HmiInterfaces::HMI_INTERFACE_AppService;
+  convert_map[AppService_UnpublishAppService] =
+      HmiInterfaces::HMI_INTERFACE_AppService;
+  convert_map[AppService_GetAppServiceData] =
+      HmiInterfaces::HMI_INTERFACE_AppService;
+  convert_map[AppService_PerformAppServiceInteraction] =
+      HmiInterfaces::HMI_INTERFACE_AppService;
+  convert_map[AppService_GetActiveServiceConsent] =
+      HmiInterfaces::HMI_INTERFACE_AppService;
   return convert_map;
 }
 
@@ -244,6 +269,8 @@ HmiInterfacesImpl::HmiInterfacesImpl() {
   interfaces_states_[HmiInterfaces::HMI_INTERFACE_VR] =
       HmiInterfaces::STATE_NOT_RESPONSE;
   interfaces_states_[HmiInterfaces::HMI_INTERFACE_RC] =
+      HmiInterfaces::STATE_NOT_RESPONSE;
+  interfaces_states_[HmiInterfaces::HMI_INTERFACE_AppService] =
       HmiInterfaces::STATE_NOT_RESPONSE;
 }
 

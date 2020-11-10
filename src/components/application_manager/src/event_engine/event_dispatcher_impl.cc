@@ -31,42 +31,41 @@
  */
 
 #include "application_manager/event_engine/event_dispatcher_impl.h"
-#include "interfaces/HMI_API.h"
-#include "application_manager/event_engine/event_observer.h"
 #include <algorithm>
+#include "application_manager/event_engine/event_observer.h"
+#include "interfaces/HMI_API.h"
 
 namespace application_manager {
 namespace event_engine {
 using namespace sync_primitives;
 
-EventDispatcherImpl::EventDispatcherImpl()
-    : state_lock_(false), observer_lock_(true), observers_event_() {}
+EventDispatcherImpl::EventDispatcherImpl() : observers_event_() {}
 
 EventDispatcherImpl::~EventDispatcherImpl() {}
 
 void EventDispatcherImpl::raise_event(const Event& event) {
+  ObserverVector observers;
+  AutoLock observer_lock(observer_lock_);
   {
-    AutoLock auto_lock(state_lock_);
+    AutoLock state_lock(state_lock_);
+
     // check if event is notification
     if (hmi_apis::messageType::notification == event.smart_object_type()) {
       const uint32_t notification_correlation_id = 0;
-      observers_ = observers_event_[event.id()][notification_correlation_id];
+      observers = observers_event_[event.id()][notification_correlation_id];
     }
 
     if (hmi_apis::messageType::response == event.smart_object_type() ||
         hmi_apis::messageType::error_response == event.smart_object_type()) {
-      observers_ =
+      observers =
           observers_event_[event.id()][event.smart_object_correlation_id()];
     }
   }
 
-  // Call observers
-  EventObserver* temp;
-  while (!observers_.empty()) {
-    observer_lock_.Acquire();
-    temp = *observers_.begin();
-    observers_.erase(observers_.begin());
-    observer_lock_.Release();
+  while (!observers.empty()) {
+    EventObserver* temp = *observers.begin();
+    observers.erase(observers.begin());
+    AutoUnlock unlock_observer(observer_lock);
     temp->on_event(event);
   }
 }
@@ -79,7 +78,7 @@ void EventDispatcherImpl::add_observer(const Event::EventID& event_id,
 }
 
 struct IdCheckFunctor {
-  IdCheckFunctor(const unsigned long id) : target_id(id) {}
+  explicit IdCheckFunctor(const unsigned long id) : target_id(id) {}
 
   bool operator()(const EventObserver* obs) const {
     return (obs->id() == target_id);
@@ -118,6 +117,79 @@ void EventDispatcherImpl::remove_observer_from_vector(EventObserver& observer) {
   AutoLock auto_lock(observer_lock_);
 
   observers_.erase(
+      std::remove_if(
+          observers_.begin(), observers_.end(), IdCheckFunctor(observer.id())),
+      observers_.end());
+}
+
+// Mobile Events
+
+void EventDispatcherImpl::raise_mobile_event(const MobileEvent& event) {
+  AutoLock observer_lock(mobile_observer_lock_);
+  {
+    AutoLock state_lock(mobile_state_lock_);
+
+    // check if event is notification
+    if (mobile_apis::messageType::notification == event.smart_object_type()) {
+      const uint32_t notification_correlation_id = 0;
+      mobile_observers_ =
+          mobile_observers_event_[event.id()][notification_correlation_id];
+    }
+
+    if (mobile_apis::messageType::response == event.smart_object_type()) {
+      mobile_observers_ =
+          mobile_observers_event_[event.id()]
+                                 [event.smart_object_correlation_id()];
+    }
+  }
+
+  // Call observers
+  while (!mobile_observers_.empty()) {
+    EventObserver* temp = *mobile_observers_.begin();
+    mobile_observers_.erase(mobile_observers_.begin());
+    AutoUnlock unlock_observer(observer_lock);
+    temp->on_event(event);
+  }
+}
+
+void EventDispatcherImpl::add_mobile_observer(
+    const MobileEvent::MobileEventID& event_id,
+    int32_t mobile_correlation_id,
+    EventObserver& observer) {
+  AutoLock auto_lock(mobile_state_lock_);
+  mobile_observers_event_[event_id][mobile_correlation_id].push_back(&observer);
+}
+
+void EventDispatcherImpl::remove_mobile_observer(
+    const MobileEvent::MobileEventID& event_id, EventObserver& observer) {
+  remove_mobile_observer_from_vector(observer);
+  AutoLock auto_lock(mobile_state_lock_);
+  ObserversMap::iterator it = mobile_observers_event_[event_id].begin();
+
+  for (; mobile_observers_event_[event_id].end() != it; ++it) {
+    ObserverVector& obs_vec = it->second;
+    const ObserverVector::iterator obs_vec_it = obs_vec.end();
+    obs_vec.erase(
+        std::remove_if(
+            obs_vec.begin(), obs_vec_it, IdCheckFunctor(observer.id())),
+        obs_vec_it);
+  }
+}
+
+void EventDispatcherImpl::remove_mobile_observer(EventObserver& observer) {
+  remove_mobile_observer_from_vector(observer);
+  MobileEventObserverMap::iterator event_map = mobile_observers_event_.begin();
+
+  for (; mobile_observers_event_.end() != event_map; ++event_map) {
+    remove_mobile_observer(event_map->first, observer);
+  }
+}
+
+void EventDispatcherImpl::remove_mobile_observer_from_vector(
+    EventObserver& observer) {
+  AutoLock auto_lock(mobile_observer_lock_);
+
+  mobile_observers_.erase(
       std::remove_if(
           observers_.begin(), observers_.end(), IdCheckFunctor(observer.id())),
       observers_.end());

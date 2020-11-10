@@ -1,5 +1,6 @@
 #ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_APP_LAUNCH_APPS_LAUNCHER_H_
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_APP_LAUNCH_APPS_LAUNCHER_H_
+#include <memory>
 #include "application_manager/app_launch/app_launch_data.h"
 #include "connection_handler/connection_handler.h"
 #include "utils/timer.h"
@@ -69,7 +70,7 @@ class AppsLauncher {
     connection_handler::ConnectionHandler& connection_handler_;
     AppsLauncher& parent_;
   };
-  typedef utils::SharedPtr<Launcher> LauncherPtr;
+  typedef std::shared_ptr<Launcher> LauncherPtr;
   typedef std::vector<LauncherPtr> AppLaunchers;
 
  private:

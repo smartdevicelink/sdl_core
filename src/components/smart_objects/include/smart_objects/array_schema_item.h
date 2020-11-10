@@ -34,13 +34,14 @@
 
 #include <stddef.h>
 
-#include "utils/shared_ptr.h"
-#include "smart_objects/schema_item.h"
 #include "smart_objects/always_true_schema_item.h"
+#include "smart_objects/schema_item.h"
 #include "smart_objects/schema_item_parameter.h"
 
-namespace NsSmartDeviceLink {
-namespace NsSmartObjects {
+#include "utils/semantic_version.h"
+
+namespace ns_smart_device_link {
+namespace ns_smart_objects {
 /**
  * @brief Array schema item.
  **/
@@ -55,7 +56,7 @@ class CArraySchemaItem : public ISchemaItem {
    *
    * @return Shared pointer to a new schema item.
    **/
-  static utils::SharedPtr<CArraySchemaItem> create(
+  static std::shared_ptr<CArraySchemaItem> create(
       const ISchemaItemPtr ElementSchemaItem = CAlwaysTrueSchemaItem::create(),
       const TSchemaItemParameter<size_t>& MinSize =
           TSchemaItemParameter<size_t>(),
@@ -64,30 +65,47 @@ class CArraySchemaItem : public ISchemaItem {
 
   /**
    * @brief Validate smart object.
-   *
    * @param Object Object to validate.
-   *
-   * @return NsSmartObjects::Errors::eType
+   * @param report object for reporting errors during validation
+   * @param MessageVersion to check mobile RPC version against RPC Spec History
+   * @param allow_unknown_enums
+   *   false - unknown enum values (left as string values after applySchema)
+   *   will be considered invalid.
+   *   true - such values will be considered valid.
+   * @return ns_smart_objects::errors::eType
    **/
-  Errors::eType validate(const SmartObject& Object) OVERRIDE;
+  errors::eType validate(
+      const SmartObject& Object,
+      rpc::ValidationReport* report,
+      const utils::SemanticVersion& MessageVersion = utils::SemanticVersion(),
+      const bool allow_unknown_enums = false) OVERRIDE;
+
+  bool filterInvalidEnums(SmartObject& Object,
+                          const utils::SemanticVersion& MessageVersion,
+                          rpc::ValidationReport* report) OVERRIDE;
 
   /**
    * @brief Apply schema.
    *
    * @param Object Object to apply schema.
-   *
-   * @param RemoveFakeParameters contains true if need to remove fake parameters
-   * from smart object otherwise contains false.
+   * @param remove_unknown_parameters contains true if need to remove unknown
+   * parameters from smart object, otherwise contains false.
+   * @param MessageVersion the version of the schema to be applied
    **/
   void applySchema(SmartObject& Object,
-                   const bool RemoveFakeParameters) OVERRIDE;
+                   const bool remove_unknown_parameters,
+                   const utils::SemanticVersion& MessageVersion =
+                       utils::SemanticVersion()) OVERRIDE;
 
   /**
    * @brief Unapply schema.
    *
    * @param Object Object to unapply schema.
+   * @param remove_unknown_parameters contains true if need to remove unknown
+   *parameters
    **/
-  void unapplySchema(SmartObject& Object) OVERRIDE;
+  void unapplySchema(SmartObject& Object,
+                     const bool remove_unknown_parameters) OVERRIDE;
 
   /**
    * @brief Build smart object by smart schema having copied matched
@@ -98,6 +116,8 @@ class CArraySchemaItem : public ISchemaItem {
    */
   void BuildObjectBySchema(const SmartObject& pattern_object,
                            SmartObject& result_object) OVERRIDE;
+
+  TypeID GetType() OVERRIDE;
 
  private:
   /**
@@ -110,6 +130,7 @@ class CArraySchemaItem : public ISchemaItem {
   CArraySchemaItem(const ISchemaItemPtr ElementSchemaItem,
                    const TSchemaItemParameter<size_t>& MinSize,
                    const TSchemaItemParameter<size_t>& MaxSize);
+
   /**
    * @brief SchemaItem for array elements.
    **/
@@ -124,7 +145,7 @@ class CArraySchemaItem : public ISchemaItem {
   const TSchemaItemParameter<size_t> mMaxSize;
   DISALLOW_COPY_AND_ASSIGN(CArraySchemaItem);
 };
-}  // namespace NsSmartObjects
-}  // namespace NsSmartDeviceLink
+}  // namespace ns_smart_objects
+}  // namespace ns_smart_device_link
 
 #endif  // SRC_COMPONENTS_SMART_OBJECTS_INCLUDE_SMART_OBJECTS_ARRAY_SCHEMA_ITEM_H_

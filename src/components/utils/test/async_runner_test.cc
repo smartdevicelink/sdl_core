@@ -30,17 +30,15 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "utils/threads/async_runner.h"
 #include <stdlib.h>
 #include <ctime>
 #include <memory>
-#include "utils/lock.h"
-#include "utils/threads/async_runner.h"
 #include "utils/conditional_variable.h"
-#include "utils/shared_ptr.h"
-#include "utils/make_shared.h"
+#include "utils/lock.h"
 
-#include "gtest/gtest.h"
 #include "gmock/gmock.h"
+#include "gtest/gtest.h"
 
 namespace test {
 namespace components {
@@ -51,7 +49,7 @@ using namespace threads;
 namespace {
 size_t kCheckValue = 0u;
 const size_t kDelegatesAmount = 4u;
-}
+}  // namespace
 
 // ThreadDelegate successor
 class TestThreadDelegate : public ThreadDelegate {
@@ -92,10 +90,10 @@ class AsyncRunnerTest : public ::testing::Test {
 
  protected:
   ThreadDelegate** delegates_;
-  ::utils::SharedPtr<AsyncRunner> async_runner_;
+  std::shared_ptr<AsyncRunner> async_runner_;
 
   void CreateThreadsArray() {
-    delegates_ = new ThreadDelegate* [kDelegatesAmount];
+    delegates_ = new ThreadDelegate*[kDelegatesAmount];
   }
 
   void DeleteThreadsArray() {
@@ -103,7 +101,7 @@ class AsyncRunnerTest : public ::testing::Test {
   }
 
   void CreateAsyncRunner() {
-    async_runner_ = ::utils::MakeShared<AsyncRunner>("test");
+    async_runner_ = std::make_shared<AsyncRunner>("test");
   }
 };
 
@@ -128,8 +126,8 @@ TEST_F(AsyncRunnerTest, StopThenRun_ExpectDelegateNotStarted) {
   // Check that delegate was not started due to Stop() called before AsyncRun()
   EXPECT_CALL(mock_thread_delegate, threadMain()).Times(0);
   {
-    ::utils::SharedPtr<AsyncRunner> async_runner =
-        ::utils::MakeShared<AsyncRunner>("test");
+    std::shared_ptr<AsyncRunner> async_runner =
+        std::make_shared<AsyncRunner>("test");
     async_runner->Stop();
     async_runner->AsyncRun(&mock_thread_delegate);
   }

@@ -30,9 +30,9 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "rpc_base/validation_report.h"
 #include <string>
 #include "gtest/gtest.h"
-#include "rpc_base/validation_report.h"
 
 namespace test {
 namespace components {
@@ -75,7 +75,7 @@ class ValidationReportTest : public testing::Test {
     } else {
       temp = "";
     }
-    result = parent_name + temp + obj_name + ":" + " " + val_info + "\n";
+    result = parent_name + temp + obj_name + ":" + " " + val_info;
   }
 
   void ClearValidationInfo() {

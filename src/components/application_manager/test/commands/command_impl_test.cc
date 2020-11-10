@@ -31,39 +31,38 @@
  */
 
 #include <stdint.h>
-#include <string>
 #include <algorithm>
 #include <functional>
 #include <set>
+#include <string>
 
 #include "gtest/gtest.h"
-#include "utils/shared_ptr.h"
-#include "smart_objects/smart_object.h"
-#include "application_manager/smart_object_keys.h"
-#include "application_manager/commands/commands_test.h"
+
+#include "application_manager/application_manager.h"
 #include "application_manager/commands/command.h"
 #include "application_manager/commands/command_impl.h"
-#include "application_manager/application_manager.h"
+#include "application_manager/commands/commands_test.h"
 #include "application_manager/mock_application.h"
+#include "application_manager/smart_object_keys.h"
+#include "smart_objects/smart_object.h"
 
 namespace test {
 namespace components {
 namespace commands_test {
 namespace command_impl {
 
-using ::testing::Return;
-using ::testing::AtLeast;
 using ::testing::_;
+using ::testing::AtLeast;
+using ::testing::Return;
 
-using ::utils::SharedPtr;
 namespace strings = ::application_manager::strings;
-using ::application_manager::commands::CommandImpl;
 using ::application_manager::ApplicationManager;
-using ::application_manager::commands::MessageSharedPtr;
 using ::application_manager::ApplicationSharedPtr;
+using ::application_manager::commands::CommandImpl;
+using ::application_manager::commands::MessageSharedPtr;
 using ::test::components::application_manager_test::MockApplication;
 
-typedef SharedPtr<MockApplication> MockAppPtr;
+typedef std::shared_ptr<MockApplication> MockAppPtr;
 
 namespace {
 const uint32_t kDefaultMsgCount = 5u;
@@ -83,12 +82,20 @@ class CommandImplTest : public CommandsTest<CommandsTestMocks::kIsNice> {
  public:
   class UnwrappedCommandImpl : CommandImpl {
    public:
-    using CommandImpl::ReplaceMobileByHMIAppId;
-    using CommandImpl::ReplaceHMIByMobileAppId;
+    using CommandImpl::ReplaceHMIWithMobileAppId;
+    using CommandImpl::ReplaceMobileWithHMIAppId;
 
-    UnwrappedCommandImpl(const MessageSharedPtr& message,
-                         ApplicationManager& application_manager)
-        : CommandImpl(message, application_manager) {}
+    UnwrappedCommandImpl(
+        const MessageSharedPtr& message,
+        ApplicationManager& application_manager,
+        application_manager::rpc_service::RPCService& rpc_service,
+        application_manager::HMICapabilities& hmi_capabilities,
+        policy::PolicyHandlerInterface& policy_handler)
+        : CommandImpl(message,
+                      application_manager,
+                      rpc_service,
+                      hmi_capabilities,
+                      policy_handler) {}
   };
 
   // Create `SmartObject` which handle array of `SmartObjects`
@@ -118,11 +125,11 @@ class CommandImplTest : public CommandsTest<CommandsTestMocks::kIsNice> {
 };
 
 typedef CommandImplTest::UnwrappedCommandImpl UCommandImpl;
-typedef SharedPtr<UCommandImpl> UCommandImplPtr;
+typedef std::shared_ptr<UCommandImpl> UCommandImplPtr;
 
 TEST_F(CommandImplTest, GetMethods_SUCCESS) {
   MessageSharedPtr msg;
-  SharedPtr<CommandImpl> command =
+  std::shared_ptr<CommandImpl> command =
       CreateCommand<CommandImpl>(kDefaultTimeout_, msg);
 
   // Current implementation always return `true`
@@ -151,16 +158,16 @@ TEST_F(CommandImplTest, GetMethods_SUCCESS) {
   EXPECT_NO_THROW(command->onTimeOut());
 }
 
-TEST_F(CommandImplTest, ReplaceMobileByHMIAppId_NoAppIdInMessage_UNSUCCESS) {
+TEST_F(CommandImplTest, ReplaceMobileWithHMIAppId_NoAppIdInMessage_UNSUCCESS) {
   MessageSharedPtr msg;
   UCommandImplPtr command = CreateCommand<UCommandImpl>(msg);
 
   EXPECT_CALL(app_mngr_, application(_)).Times(0);
 
-  command->ReplaceMobileByHMIAppId(*msg);
+  command->ReplaceMobileWithHMIAppId(*msg);
 }
 
-TEST_F(CommandImplTest, ReplaceMobileByHMIAppId_SUCCESS) {
+TEST_F(CommandImplTest, ReplaceMobileWithHMIAppId_SUCCESS) {
   MessageSharedPtr msg = CreateMessage();
   (*msg)[strings::app_id] = kAppId1;
 
@@ -171,12 +178,12 @@ TEST_F(CommandImplTest, ReplaceMobileByHMIAppId_SUCCESS) {
   EXPECT_CALL(app_mngr_, application(kAppId1)).WillOnce(Return(app));
   ON_CALL(*app, hmi_app_id()).WillByDefault(Return(kAppId2));
 
-  command->ReplaceMobileByHMIAppId(*msg);
+  command->ReplaceMobileWithHMIAppId(*msg);
 
   EXPECT_EQ(kAppId2, (*msg)[strings::app_id].asUInt());
 }
 
-TEST_F(CommandImplTest, ReplaceMobileByHMIAppId_Array_SUCCESS) {
+TEST_F(CommandImplTest, ReplaceMobileWithHMIAppId_Array_SUCCESS) {
   MessageSharedPtr msg = CreateArrayMessage(kDefaultMsgCount);
   UCommandImplPtr command = CreateCommand<UCommandImpl>(msg);
 
@@ -187,14 +194,14 @@ TEST_F(CommandImplTest, ReplaceMobileByHMIAppId_Array_SUCCESS) {
       .WillRepeatedly(Return(app));
   ON_CALL(*app, hmi_app_id()).WillByDefault(Return(kAppId2));
 
-  command->ReplaceMobileByHMIAppId(*msg);
+  command->ReplaceMobileWithHMIAppId(*msg);
 
   EXPECT_TRUE(msg->asArray());
   std::for_each(
       msg->asArray()->begin(), msg->asArray()->end(), ExpectEqualAppId);
 }
 
-TEST_F(CommandImplTest, ReplaceMobileByHMIAppId_Map_SUCCESS) {
+TEST_F(CommandImplTest, ReplaceMobileWithHMIAppId_Map_SUCCESS) {
   MessageSharedPtr msg = CreateMapMessage(kDefaultMsgCount);
   UCommandImplPtr command = CreateCommand<UCommandImpl>(msg);
 
@@ -205,7 +212,7 @@ TEST_F(CommandImplTest, ReplaceMobileByHMIAppId_Map_SUCCESS) {
       .WillRepeatedly(Return(app));
   ON_CALL(*app, hmi_app_id()).WillByDefault(Return(kAppId2));
 
-  command->ReplaceMobileByHMIAppId(*msg);
+  command->ReplaceMobileWithHMIAppId(*msg);
 
   std::set<std::string> keys(msg->enumerate());
   std::for_each(keys.begin(),
@@ -213,16 +220,17 @@ TEST_F(CommandImplTest, ReplaceMobileByHMIAppId_Map_SUCCESS) {
                 std::bind2nd(std::ptr_fun(&ExpectEqualKeyAppId), msg));
 }
 
-TEST_F(CommandImplTest, ReplaceHMIByMobileAppId_NoHMIAppIdInMessage_UNSUCCESS) {
+TEST_F(CommandImplTest,
+       ReplaceHMIWithMobileAppId_NoHMIAppIdInMessage_UNSUCCESS) {
   MessageSharedPtr msg;
   UCommandImplPtr command = CreateCommand<UCommandImpl>(msg);
 
   EXPECT_CALL(app_mngr_, application_by_hmi_app(_)).Times(0);
 
-  command->ReplaceHMIByMobileAppId(*msg);
+  command->ReplaceHMIWithMobileAppId(*msg);
 }
 
-TEST_F(CommandImplTest, ReplaceHMIByMobileAppId_SUCCESS) {
+TEST_F(CommandImplTest, ReplaceHMIWithMobileAppId_SUCCESS) {
   MessageSharedPtr msg = CreateMessage();
   (*msg)[strings::app_id] = kAppId1;
 
@@ -233,12 +241,12 @@ TEST_F(CommandImplTest, ReplaceHMIByMobileAppId_SUCCESS) {
   EXPECT_CALL(app_mngr_, application_by_hmi_app(kAppId1)).WillOnce(Return(app));
   ON_CALL(*app, app_id()).WillByDefault(Return(kAppId2));
 
-  command->ReplaceHMIByMobileAppId(*msg);
+  command->ReplaceHMIWithMobileAppId(*msg);
 
   EXPECT_EQ(kAppId2, (*msg)[strings::app_id].asUInt());
 }
 
-TEST_F(CommandImplTest, ReplaceHMIByMobileAppId_Array_SUCCESS) {
+TEST_F(CommandImplTest, ReplaceHMIWithMobileAppId_Array_SUCCESS) {
   MessageSharedPtr msg = CreateArrayMessage(kDefaultMsgCount);
 
   UCommandImplPtr command = CreateCommand<UCommandImpl>(msg);
@@ -249,14 +257,14 @@ TEST_F(CommandImplTest, ReplaceHMIByMobileAppId_Array_SUCCESS) {
       .WillRepeatedly(Return(app));
   ON_CALL(*app, app_id()).WillByDefault(Return(kAppId2));
 
-  command->ReplaceHMIByMobileAppId(*msg);
+  command->ReplaceHMIWithMobileAppId(*msg);
 
   EXPECT_TRUE(msg->asArray());
   std::for_each(
       msg->asArray()->begin(), msg->asArray()->end(), ExpectEqualAppId);
 }
 
-TEST_F(CommandImplTest, ReplaceHMIByMobileAppId_Map_SUCCESS) {
+TEST_F(CommandImplTest, ReplaceHMIWithMobileAppId_Map_SUCCESS) {
   MessageSharedPtr msg = CreateMapMessage(kDefaultMsgCount);
 
   UCommandImplPtr command = CreateCommand<UCommandImpl>(msg);
@@ -267,7 +275,7 @@ TEST_F(CommandImplTest, ReplaceHMIByMobileAppId_Map_SUCCESS) {
       .WillRepeatedly(Return(app));
   ON_CALL(*app, app_id()).WillByDefault(Return(kAppId2));
 
-  command->ReplaceHMIByMobileAppId(*msg);
+  command->ReplaceHMIWithMobileAppId(*msg);
 
   std::set<std::string> keys = msg->enumerate();
   std::for_each(keys.begin(),

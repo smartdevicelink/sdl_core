@@ -30,13 +30,26 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "application_manager/message_helper.h"
 #include "application_manager/mock_message_helper.h"
+#include "application_manager/message_helper.h"
 #include "application_manager/policies/policy_handler_interface.h"
-#include "gtest/gtest.h"
 #include "gmock/gmock.h"
+#include "gtest/gtest.h"
+#include "transport_manager/common.h"
 
 namespace application_manager {
+
+smart_objects::SmartObjectSPtr MessageHelper::CreateNotification(
+    mobile_apis::FunctionID::eType function_id, uint32_t app_id) {
+  return MockMessageHelper::message_helper_mock()->CreateNotification(
+      function_id, app_id);
+}
+
+smart_objects::SmartObjectSPtr MessageHelper::CreateHMINotification(
+    hmi_apis::FunctionID::eType function_id) {
+  return MockMessageHelper::message_helper_mock()->CreateHMINotification(
+      function_id);
+}
 
 void MessageHelper::SendHashUpdateNotification(uint32_t const app_id,
                                                ApplicationManager& app_mngr) {
@@ -89,30 +102,6 @@ smart_objects::SmartObjectSPtr GetHashUpdateNotification(
       app_id);
 }
 
-std::string MessageHelper::HMIResultToString(
-    hmi_apis::Common_Result::eType hmi_result) {
-  return MockMessageHelper::message_helper_mock()->HMIResultToString(
-      hmi_result);
-}
-
-hmi_apis::Common_Result::eType MessageHelper::HMIResultFromString(
-    const std::string& hmi_result) {
-  return MockMessageHelper::message_helper_mock()->HMIResultFromString(
-      hmi_result);
-}
-
-std::string MessageHelper::MobileResultToString(
-    mobile_apis::Result::eType mobile_result) {
-  return MockMessageHelper::message_helper_mock()->MobileResultToString(
-      mobile_result);
-}
-
-mobile_api::Result::eType MessageHelper::MobileResultFromString(
-    const std::string& mobile_result) {
-  return MockMessageHelper::message_helper_mock()->MobileResultFromString(
-      mobile_result);
-}
-
 mobile_api::Result::eType MessageHelper::HMIToMobileResult(
     const hmi_apis::Common_Result::eType hmi_result) {
   return MockMessageHelper::message_helper_mock()->HMIToMobileResult(
@@ -123,11 +112,6 @@ hmi_apis::Common_Result::eType MessageHelper::MobileToHMIResult(
     const mobile_api::Result::eType mobile_result) {
   return MockMessageHelper::message_helper_mock()->MobileToHMIResult(
       mobile_result);
-}
-
-mobile_api::HMILevel::eType MessageHelper::StringToHMILevel(
-    const std::string& hmi_level) {
-  return MockMessageHelper::message_helper_mock()->StringToHMILevel(hmi_level);
 }
 
 smart_objects::SmartObjectSPtr MessageHelper::CreateDeviceListSO(
@@ -199,9 +183,19 @@ void MessageHelper::SendGetListOfPermissionsResponse(
 void MessageHelper::SendOnPermissionsChangeNotification(
     uint32_t connection_key,
     const policy::Permissions& permissions,
-    ApplicationManager& app_mngr) {
+    ApplicationManager& app_mngr,
+    const policy::EncryptionRequired require_encryption) {
   MockMessageHelper::message_helper_mock()->SendOnPermissionsChangeNotification(
-      connection_key, permissions, app_mngr);
+      connection_key, permissions, app_mngr, require_encryption);
+}
+
+void MessageHelper::SendPolicySnapshotNotification(
+    uint32_t connection_key,
+    const std::string& snapshot_file_path,
+    const std::string& url,
+    ApplicationManager& app_mngr) {
+  MockMessageHelper::message_helper_mock()->SendPolicySnapshotNotification(
+      connection_key, snapshot_file_path, url, app_mngr);
 }
 
 void MessageHelper::SendPolicySnapshotNotification(
@@ -229,7 +223,6 @@ void MessageHelper::SendPolicyUpdate(const std::string& file_path,
       file_path, timeout, retries, app_mngr);
 }
 
-#ifdef SDL_REMOTE_CONTROL
 void MessageHelper::SendActivateAppToHMI(
     uint32_t const app_id,
     ApplicationManager& application_manager,
@@ -239,26 +232,29 @@ void MessageHelper::SendActivateAppToHMI(
       app_id, application_manager, level, send_policy_priority);
 }
 
-void MessageHelper::SendHMIStatusNotification(
-    const Application& application_impl,
-    ApplicationManager& application_manager) {
-  MockMessageHelper::message_helper_mock()->SendHMIStatusNotification(
-      application_impl, application_manager);
+smart_objects::SmartObjectSPtr MessageHelper::CreateMessageForHMI(
+    hmi_apis::messageType::eType message_type, const uint32_t correlation_id) {
+  return MockMessageHelper::message_helper_mock()->CreateMessageForHMI(
+      message_type, correlation_id);
 }
 
-#endif  // SDL_REMOTE_CONTROL
+smart_objects::SmartObjectSPtr MessageHelper::CreateMessageForHMI(
+    hmi_apis::FunctionID::eType function_id, const uint32_t correlation_id) {
+  return MockMessageHelper::message_helper_mock()->CreateMessageForHMI(
+      function_id, correlation_id);
+}
+
+smart_objects::SmartObjectSPtr MessageHelper::CreateHMIStatusNotification(
+    ApplicationSharedPtr application, const WindowID window_id) {
+  return MockMessageHelper::message_helper_mock()->CreateHMIStatusNotification(
+      application, window_id);
+}
 
 void MessageHelper::SendUpdateSDLResponse(const std::string& result,
                                           uint32_t correlation_id,
                                           ApplicationManager& app_mngr) {
   MockMessageHelper::message_helper_mock()->SendUpdateSDLResponse(
       result, correlation_id, app_mngr);
-}
-
-hmi_apis::Common_Language::eType MessageHelper::CommonLanguageFromString(
-    const std::string& language) {
-  return MockMessageHelper::message_helper_mock()->CommonLanguageFromString(
-      language);
 }
 
 smart_objects::SmartObjectSPtr MessageHelper::CreateModuleInfoSO(
@@ -283,10 +279,10 @@ void MessageHelper::SendOnResumeAudioSourceToHMI(const uint32_t app_id,
       app_id, app_mngr);
 }
 
-smart_objects::SmartObjectList MessageHelper::CreateAddSubMenuRequestToHMI(
-    ApplicationConstSharedPtr app, const uint32_t correlation_id) {
-  return MockMessageHelper::message_helper_mock()->CreateAddSubMenuRequestToHMI(
-      app, correlation_id);
+smart_objects::SmartObjectList MessageHelper::CreateAddSubMenuRequestsToHMI(
+    ApplicationConstSharedPtr app, ApplicationManager& app_mngr) {
+  return MockMessageHelper::message_helper_mock()
+      ->CreateAddSubMenuRequestsToHMI(app, app_mngr);
 }
 
 smart_objects::SmartObjectList MessageHelper::CreateAddCommandRequestToHMI(
@@ -305,13 +301,15 @@ MessageHelper::CreateAddVRCommandRequestFromChoiceToHMI(
 void MessageHelper::SendGlobalPropertiesToHMI(ApplicationConstSharedPtr app,
                                               ApplicationManager& app_mngr) {
   return MockMessageHelper::message_helper_mock()->SendGlobalPropertiesToHMI(
-      app);
+      app, app_mngr);
 }
 
-smart_objects::SmartObjectList MessageHelper::GetIVISubscriptionRequests(
-    ApplicationSharedPtr app, ApplicationManager& app_mngr) {
-  return MockMessageHelper::message_helper_mock()->GetIVISubscriptionRequests(
-      app);
+mobile_apis::Result::eType MessageHelper::VerifyTtsFiles(
+    smart_objects::SmartObject& message,
+    ApplicationConstSharedPtr app,
+    ApplicationManager& app_mngr) {
+  return MockMessageHelper::message_helper_mock()->VerifyTtsFiles(
+      message, app, app_mngr);
 }
 
 mobile_apis::Result::eType MessageHelper::VerifyImage(
@@ -322,6 +320,13 @@ mobile_apis::Result::eType MessageHelper::VerifyImage(
       message, app, app_mngr);
 }
 
+MessageHelper::ChoiceSetVRCommandsStatus
+MessageHelper::CheckChoiceSetVRCommands(
+    const smart_objects::SmartObject& choice_set) {
+  return MockMessageHelper::message_helper_mock()->CheckChoiceSetVRCommands(
+      choice_set);
+}
+
 mobile_apis::Result::eType MessageHelper::VerifyImageFiles(
     smart_objects::SmartObject& message,
     ApplicationConstSharedPtr app,
@@ -330,28 +335,23 @@ mobile_apis::Result::eType MessageHelper::VerifyImageFiles(
       message, app, app_mngr);
 }
 
-std::string MessageHelper::CommonLanguageToString(
-    hmi_apis::Common_Language::eType lang) {
-  return MockMessageHelper::message_helper_mock()->CommonLanguageToString(lang);
-}
-
 smart_objects::SmartObjectSPtr MessageHelper::GetBCActivateAppRequestToHMI(
     ApplicationConstSharedPtr app,
-    const protocol_handler::SessionObserver& session_observer,
     const policy::PolicyHandlerInterface& policy_handler,
     hmi_apis::Common_HMILevel::eType level,
     bool send_policy_priority,
     ApplicationManager& app_mngr) {
   return MockMessageHelper::message_helper_mock()->GetBCActivateAppRequestToHMI(
-      app,
-      session_observer,
-      policy_handler,
-      level,
-      send_policy_priority,
-      app_mngr);
+      app, policy_handler, level, send_policy_priority, app_mngr);
 }
 
-NsSmartDeviceLink::NsSmartObjects::SmartObjectSPtr
+smart_objects::SmartObjectSPtr MessageHelper::GetBCCloseApplicationRequestToHMI(
+    ApplicationConstSharedPtr app, ApplicationManager& app_mngr) {
+  return MockMessageHelper::message_helper_mock()
+      ->GetBCCloseApplicationRequestToHMI(app, app_mngr);
+}
+
+ns_smart_device_link::ns_smart_objects::SmartObjectSPtr
 MessageHelper::GetOnAppInterfaceUnregisteredNotificationToMobile(
     int32_t connection_key,
     mobile_apis::AppInterfaceUnregisteredReason::eType reason) {
@@ -367,6 +367,16 @@ mobile_apis::Result::eType MessageHelper::ProcessSoftButtons(
     ApplicationManager& app_mngr) {
   return MockMessageHelper::message_helper_mock()->ProcessSoftButtons(
       message_params, app, policy_handler, app_mngr);
+}
+
+void MessageHelper::SubscribeApplicationToSoftButton(
+    smart_objects::SmartObject& message_params,
+    ApplicationSharedPtr app,
+    int32_t function_id,
+    const WindowID window_id) {
+  return MockMessageHelper::message_helper_mock()
+      ->SubscribeApplicationToSoftButton(
+          message_params, app, function_id, window_id);
 }
 
 void MessageHelper::SubscribeApplicationToSoftButton(
@@ -417,6 +427,16 @@ void MessageHelper::SendUIChangeRegistrationRequestToHMI(
       ->SendUIChangeRegistrationRequestToHMI(app, app_mngr);
 }
 
+bool MessageHelper::CreateDeviceInfo(
+    connection_handler::DeviceHandle device_handle,
+    const protocol_handler::SessionObserver& session_observer,
+    const policy::PolicyHandlerInterface& policy_handler,
+    ApplicationManager& app_mngr,
+    smart_objects::SmartObject* output) {
+  return MockMessageHelper::message_helper_mock()->CreateDeviceInfo(
+      device_handle, session_observer, policy_handler, app_mngr, output);
+}
+
 bool MessageHelper::CreateHMIApplicationStruct(
     ApplicationConstSharedPtr app,
     const protocol_handler::SessionObserver& session_observer,
@@ -425,6 +445,13 @@ bool MessageHelper::CreateHMIApplicationStruct(
     ApplicationManager& app_mngr) {
   return MockMessageHelper::message_helper_mock()->CreateHMIApplicationStruct(
       app, session_observer, policy_handler, output, app_mngr);
+}
+
+smart_objects::SmartObjectSPtr
+MessageHelper::CreateOnAppPropertiesChangeNotification(
+    const std::string& policy_app_id, ApplicationManager& app_mngr) {
+  return MockMessageHelper::message_helper_mock()
+      ->CreateOnAppPropertiesChangeNotification(policy_app_id, app_mngr);
 }
 
 void MessageHelper::SendOnAppUnregNotificationToHMI(
@@ -443,9 +470,10 @@ void MessageHelper::SendLaunchApp(const uint32_t connection_key,
       connection_key, urlSchema, packageName, app_man);
 }
 
-bool MessageHelper::SendUnsubscribedWayPoints(ApplicationManager& app_mngr) {
-  return MockMessageHelper::message_helper_mock()->SendUnsubscribedWayPoints(
-      app_mngr);
+smart_objects::SmartObjectSPtr MessageHelper::CreateUnsubscribeWayPointsRequest(
+    const uint32_t correlation_id) {
+  return MockMessageHelper::message_helper_mock()
+      ->CreateUnsubscribeWayPointsRequest(correlation_id);
 }
 
 void MessageHelper::SendQueryApps(const uint32_t connection_key,
@@ -482,6 +510,12 @@ bool MessageHelper::PrintSmartObject(const smart_objects::SmartObject& object) {
   return MockMessageHelper::message_helper_mock()->PrintSmartObject(object);
 }
 
+WindowID MessageHelper::ExtractWindowIdFromSmartObject(
+    const smart_objects::SmartObject& s_map) {
+  return MockMessageHelper::message_helper_mock()
+      ->ExtractWindowIdFromSmartObject(s_map);
+}
+
 void MessageHelper::SendSetAppIcon(const uint32_t app_id,
                                    const std::string& icon_path,
                                    ApplicationManager& application_manager) {
@@ -489,16 +523,160 @@ void MessageHelper::SendSetAppIcon(const uint32_t app_id,
       app_id, icon_path, application_manager);
 }
 
-std::string MessageHelper::StringifiedHMILevel(
-    const mobile_apis::HMILevel::eType hmi_level) {
-  return MockMessageHelper::message_helper_mock()->StringifiedHMILevel(
-      hmi_level);
-}
-
 std::string MessageHelper::GetDeviceMacAddressForHandle(
-    const uint32_t device_handle, const ApplicationManager& app_mngr) {
+    const transport_manager::DeviceHandle device_handle,
+    const ApplicationManager& app_mngr) {
   return MockMessageHelper::message_helper_mock()->GetDeviceMacAddressForHandle(
       device_handle, app_mngr);
 }
 
+smart_objects::SmartObjectSPtr MessageHelper::CreateDeleteUICommandRequest(
+    smart_objects::SmartObject* cmd,
+    const uint32_t app_id,
+    const uint32_t corr_id) {
+  return MockMessageHelper::message_helper_mock()->CreateDeleteUICommandRequest(
+      cmd, app_id, corr_id);
+}
+
+smart_objects::SmartObjectSPtr MessageHelper::CreateDeleteVRCommandRequest(
+    smart_objects::SmartObject* cmd,
+    ApplicationSharedPtr application,
+    const uint32_t corr_id) {
+  return MockMessageHelper::message_helper_mock()->CreateDeleteVRCommandRequest(
+      cmd, application, corr_id);
+}
+
+void MessageHelper::SendDeleteSubmenuRequest(smart_objects::SmartObject* cmd,
+                                             ApplicationSharedPtr application,
+                                             ApplicationManager& app_mngr) {
+  return MockMessageHelper::message_helper_mock()->SendDeleteSubmenuRequest(
+      cmd, application, app_mngr);
+}
+
+void MessageHelper::SendDeleteChoiceSetRequest(smart_objects::SmartObject* cmd,
+                                               ApplicationSharedPtr application,
+                                               ApplicationManager& app_mngr) {
+  return MockMessageHelper::message_helper_mock()->SendDeleteChoiceSetRequest(
+      cmd, application, app_mngr);
+}
+
+void MessageHelper::SendResetPropertiesRequest(ApplicationSharedPtr application,
+                                               ApplicationManager& app_mngr) {
+  return MockMessageHelper::message_helper_mock()->SendResetPropertiesRequest(
+      application, app_mngr);
+}
+
+smart_objects::SmartObjectSPtr
+MessageHelper::CreateUIResetGlobalPropertiesRequest(
+    const ResetGlobalPropertiesResult& reset_result,
+    ApplicationSharedPtr application) {
+  return MockMessageHelper::message_helper_mock()
+      ->CreateUIResetGlobalPropertiesRequest(reset_result, application);
+}
+
+smart_objects::SmartObjectSPtr
+MessageHelper::CreateTTSResetGlobalPropertiesRequest(
+    const ResetGlobalPropertiesResult& reset_result,
+    ApplicationSharedPtr application) {
+  return MockMessageHelper::message_helper_mock()
+      ->CreateTTSResetGlobalPropertiesRequest(reset_result, application);
+}
+
+smart_objects::SmartObjectList
+MessageHelper::CreateGlobalPropertiesRequestsToHMI(
+    ApplicationConstSharedPtr app, ApplicationManager& app_mngr) {
+  return MockMessageHelper::message_helper_mock()
+      ->CreateGlobalPropertiesRequestsToHMI(app, app_mngr);
+}
+
+smart_objects::SmartObjectSPtr
+MessageHelper::CreateOnButtonSubscriptionNotification(
+    uint32_t app_id,
+    hmi_apis::Common_ButtonName::eType button,
+    bool is_subscribed) {
+  return MockMessageHelper::message_helper_mock()
+      ->CreateOnButtonSubscriptionNotification(app_id, button, is_subscribed);
+}
+
+smart_objects::SmartObjectList
+MessageHelper::CreateOnButtonSubscriptionNotificationsForApp(
+    ApplicationConstSharedPtr application,
+    ApplicationManager& app_mngr,
+    const ButtonSubscriptions& button_subscriptions) {
+  return MockMessageHelper::message_helper_mock()
+      ->CreateOnButtonSubscriptionNotificationsForApp(
+          application, app_mngr, button_subscriptions);
+}
+
+void MessageHelper::SendUnsubscribeButtonNotification(
+    mobile_apis::ButtonName::eType button,
+    ApplicationSharedPtr application,
+    ApplicationManager& app_mngr) {
+  return MockMessageHelper::message_helper_mock()
+      ->SendUnsubscribeButtonNotification(button, application, app_mngr);
+}
+
+smart_objects::SmartObject MessageHelper::CreateAppServiceCapabilities(
+    std::vector<smart_objects::SmartObject>& all_services) {
+  return MockMessageHelper::message_helper_mock()->CreateAppServiceCapabilities(
+      all_services);
+}
+
+void MessageHelper::BroadcastCapabilityUpdate(
+    smart_objects::SmartObject& msg_params, ApplicationManager& app_mngr) {
+  MockMessageHelper::message_helper_mock()->BroadcastCapabilityUpdate(
+      msg_params, app_mngr);
+}
+
+smart_objects::SmartObjectList MessageHelper::CreateUICreateWindowRequestsToHMI(
+    application_manager::ApplicationSharedPtr application,
+    ApplicationManager& app_mngr,
+    const smart_objects::SmartObject& windows_info) {
+  return MockMessageHelper::message_helper_mock()
+      ->CreateUICreateWindowRequestsToHMI(application, app_mngr, windows_info);
+}
+
+smart_objects::SmartObjectSPtr
+MessageHelper::CreateDisplayCapabilityUpdateToMobile(
+    const smart_objects::SmartObject& system_capabilities, Application& app) {
+  return MockMessageHelper::message_helper_mock()
+      ->CreateDisplayCapabilityUpdateToMobile(system_capabilities, app);
+}
+
+smart_objects::SmartObjectSPtr MessageHelper::CreateOnServiceUpdateNotification(
+    const hmi_apis::Common_ServiceType::eType service_type,
+    const hmi_apis::Common_ServiceEvent::eType service_event,
+    const hmi_apis::Common_ServiceStatusUpdateReason::eType
+        service_update_reason,
+    const uint32_t app_id) {
+  return MockMessageHelper::message_helper_mock()
+      ->CreateOnServiceUpdateNotification(
+          service_type, service_event, service_update_reason, app_id);
+}
+
+smart_objects::SmartObjectSPtr MessageHelper::CreateUIDeleteWindowRequestToHMI(
+    ApplicationSharedPtr application,
+    ApplicationManager& app_mngr,
+    const WindowID window_id) {
+  return MockMessageHelper::message_helper_mock()
+      ->CreateUIDeleteWindowRequestToHMI(application, app_mngr, window_id);
+}
+
+smart_objects::SmartObjectSPtr MessageHelper::CreateNegativeResponseFromHmi(
+    const int32_t function_id,
+    const uint32_t correlation_id,
+    const int32_t result_code,
+    const std::string& info) {
+  return MockMessageHelper::message_helper_mock()
+      ->CreateNegativeResponseFromHmi(
+          function_id, correlation_id, result_code, info);
+}
+
+smart_objects::SmartObjectSPtr MessageHelper::CreateResponseMessageFromHmi(
+    const int32_t function_id,
+    const uint32_t correlation_id,
+    const int32_t result_code) {
+  return MockMessageHelper::message_helper_mock()->CreateResponseMessageFromHmi(
+      function_id, correlation_id, result_code);
+}
 }  // namespace application_manager

@@ -1,5 +1,8 @@
 // This file is generated, do not edit
 #include "policy/policy_table/types.h"
+
+#include <regex>
+
 #include "rpc_base/rpc_base_json_inl.h"
 
 namespace rpc {
@@ -31,7 +34,6 @@ PolicyBase::~PolicyBase() {}
 PolicyBase::PolicyBase(const Json::Value* value__)
     : CompositeType(InitHelper(value__, &Json::Value::isObject))
     , priority(impl::ValueMember(value__, "priority")) {}
-
 Json::Value PolicyBase::ToJsonValue() const {
   Json::Value result__(Json::objectValue);
   impl::WriteJsonField("priority", priority, &result__);
@@ -149,6 +151,109 @@ void ApplicationPoliciesSection::SetPolicyTableType(PolicyTableType pt_type) {
   device.SetPolicyTableType(pt_type);
   apps.SetPolicyTableType(pt_type);
 }
+// Handled RPC Methods
+AppServiceHandledRpc::AppServiceHandledRpc() : CompositeType(kUninitialized) {}
+
+AppServiceHandledRpc::~AppServiceHandledRpc() {}
+
+AppServiceHandledRpc::AppServiceHandledRpc(const Json::Value* value__)
+    : CompositeType(InitHelper(value__, &Json::Value::isObject))
+    , function_id(impl::ValueMember(value__, "function_id")) {}
+
+Json::Value AppServiceHandledRpc::ToJsonValue() const {
+  Json::Value result__(Json::objectValue);
+  impl::WriteJsonField("function_id", function_id, &result__);
+  return result__;
+}
+
+bool AppServiceHandledRpc::is_valid() const {
+  if (!function_id.is_valid()) {
+    return false;
+  }
+  return Validate();
+}
+
+bool AppServiceHandledRpc::is_initialized() const {
+  return (initialization_state__ != kUninitialized) || (!struct_empty());
+}
+
+bool AppServiceHandledRpc::struct_empty() const {
+  if (function_id.is_initialized()) {
+    return false;
+  }
+  return true;
+}
+
+void AppServiceHandledRpc::SetPolicyTableType(PolicyTableType pt_type) {
+  function_id.SetPolicyTableType(pt_type);
+}
+
+void AppServiceHandledRpc::ReportErrors(rpc::ValidationReport* report__) const {
+  if (struct_empty()) {
+    rpc::CompositeType::ReportErrors(report__);
+  }
+  if (!function_id.is_valid()) {
+    function_id.ReportErrors(&report__->ReportSubobject("function_id"));
+  }
+}
+
+// AppServiceInfo methods
+AppServiceInfo::AppServiceInfo() : CompositeType(kUninitialized) {}
+
+AppServiceInfo::~AppServiceInfo() {}
+
+AppServiceInfo::AppServiceInfo(const Json::Value* value__)
+    : CompositeType(InitHelper(value__, &Json::Value::isObject))
+    , service_names(impl::ValueMember(value__, "service_names"))
+    , handled_rpcs(impl::ValueMember(value__, "handled_rpcs")) {}
+
+Json::Value AppServiceInfo::ToJsonValue() const {
+  Json::Value result__(Json::objectValue);
+  impl::WriteJsonField("service_names", service_names, &result__);
+  impl::WriteJsonField("parameters", handled_rpcs, &result__);
+  return result__;
+}
+
+bool AppServiceInfo::is_valid() const {
+  if (!service_names.is_valid()) {
+    return false;
+  }
+  if (!handled_rpcs.is_valid()) {
+    return false;
+  }
+  return Validate();
+}
+
+bool AppServiceInfo::is_initialized() const {
+  return (initialization_state__ != kUninitialized) || (!struct_empty());
+}
+
+bool AppServiceInfo::struct_empty() const {
+  if (service_names.is_initialized()) {
+    return false;
+  }
+  if (handled_rpcs.is_initialized()) {
+    return false;
+  }
+  return true;
+}
+
+void AppServiceInfo::SetPolicyTableType(PolicyTableType pt_type) {
+  service_names.SetPolicyTableType(pt_type);
+  handled_rpcs.SetPolicyTableType(pt_type);
+}
+
+void AppServiceInfo::ReportErrors(rpc::ValidationReport* report__) const {
+  if (struct_empty()) {
+    rpc::CompositeType::ReportErrors(report__);
+  }
+  if (!service_names.is_valid()) {
+    service_names.ReportErrors(&report__->ReportSubobject("service_names"));
+  }
+  if (!handled_rpcs.is_valid()) {
+    handled_rpcs.ReportErrors(&report__->ReportSubobject("handled_rpcs"));
+  }
+}
 
 // ApplicationParams methods
 ApplicationParams::ApplicationParams() : PolicyBase(), groups() {}
@@ -164,14 +269,21 @@ ApplicationParams::ApplicationParams(const Json::Value* value__)
     , nicknames(impl::ValueMember(value__, "nicknames"))
     , AppHMIType(impl::ValueMember(value__, "AppHMIType"))
     , RequestType(impl::ValueMember(value__, "RequestType"))
+    , RequestSubType(impl::ValueMember(value__, "RequestSubType"))
     , memory_kb(impl::ValueMember(value__, "memory_kb"), 0)
     , heart_beat_timeout_ms(impl::ValueMember(value__, "heart_beat_timeout_ms"))
-    , certificate(impl::ValueMember(value__, "certificate"), "not_specified")
-#ifdef SDL_REMOTE_CONTROL
+    , certificate(impl::ValueMember(value__, "certificate"))
     , moduleType(impl::ValueMember(value__, "moduleType"))
-#endif  // SDL_REMOTE_CONTROL
-{
-}
+    , hybrid_app_preference(impl::ValueMember(value__, "hybrid_app_preference"))
+    , endpoint(impl::ValueMember(value__, "endpoint"))
+    , enabled(impl::ValueMember(value__, "enabled"))
+    , auth_token(impl::ValueMember(value__, "auth_token"))
+    , cloud_transport_type(impl::ValueMember(value__, "cloud_transport_type"))
+    , icon_url(impl::ValueMember(value__, "icon_url"))
+    , app_service_parameters(impl::ValueMember(value__, "app_services"))
+    , allow_unknown_rpc_passthrough(
+          impl::ValueMember(value__, "allow_unknown_rpc_passthrough"))
+    , encryption_required(impl::ValueMember(value__, "encryption_required")) {}
 
 Json::Value ApplicationParams::ToJsonValue() const {
   Json::Value result__(PolicyBase::ToJsonValue());
@@ -179,17 +291,31 @@ Json::Value ApplicationParams::ToJsonValue() const {
   impl::WriteJsonField("nicknames", nicknames, &result__);
   impl::WriteJsonField("AppHMIType", AppHMIType, &result__);
   impl::WriteJsonField("RequestType", RequestType, &result__);
+  impl::WriteJsonField("RequestSubType", RequestSubType, &result__);
   impl::WriteJsonField("memory_kb", memory_kb, &result__);
   impl::WriteJsonField(
       "heart_beat_timeout_ms", heart_beat_timeout_ms, &result__);
-#ifdef SDL_REMOTE_CONTROL
+  impl::WriteJsonField("certificate", certificate, &result__);
   impl::WriteJsonField("moduleType", moduleType, &result__);
-#endif  // SDL_REMOTE_CONTROL
+  impl::WriteJsonField(
+      "hybrid_app_preference", hybrid_app_preference, &result__);
+  impl::WriteJsonField("endpoint", endpoint, &result__);
+  impl::WriteJsonField("enabled", enabled, &result__);
+  impl::WriteJsonField("auth_token", auth_token, &result__);
+  impl::WriteJsonField("cloud_transport_type", cloud_transport_type, &result__);
+  impl::WriteJsonField("icon_url", auth_token, &result__);
+  impl::WriteJsonField("app_services", app_service_parameters, &result__);
+  impl::WriteJsonField("allow_unknown_rpc_passthrough",
+                       allow_unknown_rpc_passthrough,
+                       &result__);
+  impl::WriteJsonField("encryption_required", encryption_required, &result__);
+
   return result__;
 }
 
 bool ApplicationParams::is_valid() const {
-  // RequestType is not validated since there is high-level validation logic,
+  // RequestType and RequestSubType are not validated since there is high-level
+  // validation logic,
   // which takes into account information not available here.
   if (!PolicyBase::is_valid()) {
     return false;
@@ -212,11 +338,36 @@ bool ApplicationParams::is_valid() const {
   if (!certificate.is_valid()) {
     return false;
   }
-#ifdef SDL_REMOTE_CONTROL
   if (!moduleType.is_valid()) {
     return false;
   }
-#endif  // SDL_REMOTE_CONTROL
+  if (!endpoint.is_valid()) {
+    return false;
+  }
+  if (!enabled.is_valid()) {
+    return false;
+  }
+  if (!auth_token.is_valid()) {
+    return false;
+  }
+  if (!cloud_transport_type.is_valid()) {
+    return false;
+  }
+  if (!hybrid_app_preference.is_valid()) {
+    return false;
+  }
+  if (!icon_url.is_valid()) {
+    return false;
+  }
+  if (!app_service_parameters.is_valid()) {
+    return false;
+  }
+  if (!allow_unknown_rpc_passthrough.is_valid()) {
+    return false;
+  }
+  if (!encryption_required.is_valid()) {
+    return false;
+  }
   return Validate();
 }
 
@@ -240,6 +391,9 @@ bool ApplicationParams::struct_empty() const {
   if (RequestType.is_initialized()) {
     return false;
   }
+  if (RequestSubType.is_initialized()) {
+    return false;
+  }
   if (memory_kb.is_initialized()) {
     return false;
   }
@@ -249,11 +403,36 @@ bool ApplicationParams::struct_empty() const {
   if (certificate.is_initialized()) {
     return false;
   }
-#ifdef SDL_REMOTE_CONTROL
   if (moduleType.is_initialized()) {
     return false;
   }
-#endif  // SDL_REMOTE_CONTROL
+  if (endpoint.is_initialized()) {
+    return false;
+  }
+  if (enabled.is_initialized()) {
+    return false;
+  }
+  if (auth_token.is_initialized()) {
+    return false;
+  }
+  if (cloud_transport_type.is_initialized()) {
+    return false;
+  }
+  if (hybrid_app_preference.is_initialized()) {
+    return false;
+  }
+  if (icon_url.is_initialized()) {
+    return false;
+  }
+  if (app_service_parameters.is_initialized()) {
+    return false;
+  }
+  if (allow_unknown_rpc_passthrough.is_initialized()) {
+    return false;
+  }
+  if (encryption_required.is_initialized()) {
+    return false;
+  }
   return true;
 }
 
@@ -273,6 +452,9 @@ void ApplicationParams::ReportErrors(rpc::ValidationReport* report__) const {
   if (!RequestType.is_valid()) {
     RequestType.ReportErrors(&report__->ReportSubobject("RequestType"));
   }
+  if (!RequestSubType.is_valid()) {
+    RequestSubType.ReportErrors(&report__->ReportSubobject("RequestSubType"));
+  }
   if (!priority.is_valid()) {
     priority.ReportErrors(&report__->ReportSubobject("priority"));
   }
@@ -286,11 +468,40 @@ void ApplicationParams::ReportErrors(rpc::ValidationReport* report__) const {
   if (!certificate.is_valid()) {
     certificate.ReportErrors(&report__->ReportSubobject("certificate"));
   }
-#ifdef SDL_REMOTE_CONTROL
   if (!moduleType.is_valid()) {
     moduleType.ReportErrors(&report__->ReportSubobject("moduleType"));
   }
-#endif  // SDL_REMOTE_CONTROL
+  if (!endpoint.is_valid()) {
+    moduleType.ReportErrors(&report__->ReportSubobject("endpoint"));
+  }
+  if (!enabled.is_valid()) {
+    moduleType.ReportErrors(&report__->ReportSubobject("enabled"));
+  }
+  if (!auth_token.is_valid()) {
+    moduleType.ReportErrors(&report__->ReportSubobject("auth_token"));
+  }
+  if (!cloud_transport_type.is_valid()) {
+    moduleType.ReportErrors(&report__->ReportSubobject("cloud_transport_type"));
+  }
+  if (!hybrid_app_preference.is_valid()) {
+    moduleType.ReportErrors(
+        &report__->ReportSubobject("hybrid_app_preference"));
+  }
+  if (!icon_url.is_valid()) {
+    moduleType.ReportErrors(&report__->ReportSubobject("icon_url"));
+  }
+  if (!app_service_parameters.is_valid()) {
+    app_service_parameters.ReportErrors(
+        &report__->ReportSubobject("app_services"));
+  }
+  if (!allow_unknown_rpc_passthrough.is_valid()) {
+    allow_unknown_rpc_passthrough.ReportErrors(
+        &report__->ReportSubobject("allow_unknown_rpc_passthrough"));
+  }
+  if (!encryption_required.is_valid()) {
+    encryption_required.ReportErrors(
+        &report__->ReportSubobject("encryption_required"));
+  }
 }
 
 void ApplicationParams::SetPolicyTableType(PolicyTableType pt_type) {
@@ -298,29 +509,40 @@ void ApplicationParams::SetPolicyTableType(PolicyTableType pt_type) {
   groups.SetPolicyTableType(pt_type);
   AppHMIType.SetPolicyTableType(pt_type);
   RequestType.SetPolicyTableType(pt_type);
+  RequestSubType.SetPolicyTableType(pt_type);
   memory_kb.SetPolicyTableType(pt_type);
   heart_beat_timeout_ms.SetPolicyTableType(pt_type);
   certificate.SetPolicyTableType(pt_type);
-#ifdef SDL_REMOTE_CONTROL
   moduleType.SetPolicyTableType(pt_type);
-#endif  // SDL_REMOTE_CONTROL
+  endpoint.SetPolicyTableType(pt_type);
+  enabled.SetPolicyTableType(pt_type);
+  cloud_transport_type.SetPolicyTableType(pt_type);
+  hybrid_app_preference.SetPolicyTableType(pt_type);
+  icon_url.SetPolicyTableType(pt_type);
+  app_service_parameters.SetPolicyTableType(pt_type);
+  allow_unknown_rpc_passthrough.SetPolicyTableType(pt_type);
 }
 
 // RpcParameters methods
 RpcParameters::RpcParameters() : CompositeType(kUninitialized) {}
+
 RpcParameters::RpcParameters(const HmiLevels& hmi_levels)
     : CompositeType(kUninitialized), hmi_levels(hmi_levels) {}
+
 RpcParameters::~RpcParameters() {}
+
 RpcParameters::RpcParameters(const Json::Value* value__)
     : CompositeType(InitHelper(value__, &Json::Value::isObject))
     , hmi_levels(impl::ValueMember(value__, "hmi_levels"))
     , parameters(impl::ValueMember(value__, "parameters")) {}
+
 Json::Value RpcParameters::ToJsonValue() const {
   Json::Value result__(Json::objectValue);
   impl::WriteJsonField("hmi_levels", hmi_levels, &result__);
   impl::WriteJsonField("parameters", parameters, &result__);
   return result__;
 }
+
 bool RpcParameters::is_valid() const {
   if (!hmi_levels.is_valid()) {
     return false;
@@ -328,11 +550,14 @@ bool RpcParameters::is_valid() const {
   if (!parameters.is_valid()) {
     return false;
   }
+
   return Validate();
 }
+
 bool RpcParameters::is_initialized() const {
   return (initialization_state__ != kUninitialized) || (!struct_empty());
 }
+
 bool RpcParameters::struct_empty() const {
   if (hmi_levels.is_initialized()) {
     return false;
@@ -343,6 +568,7 @@ bool RpcParameters::struct_empty() const {
 
   return true;
 }
+
 void RpcParameters::ReportErrors(rpc::ValidationReport* report__) const {
   if (struct_empty()) {
     rpc::CompositeType::ReportErrors(report__);
@@ -363,18 +589,25 @@ void RpcParameters::SetPolicyTableType(PolicyTableType pt_type) {
 
 // Rpcs methods
 Rpcs::Rpcs() : CompositeType(kUninitialized) {}
+
 Rpcs::Rpcs(const Rpc& rpcs) : CompositeType(kUninitialized), rpcs(rpcs) {}
+
 Rpcs::~Rpcs() {}
+
 Rpcs::Rpcs(const Json::Value* value__)
     : CompositeType(InitHelper(value__, &Json::Value::isObject))
     , user_consent_prompt(impl::ValueMember(value__, "user_consent_prompt"))
-    , rpcs(impl::ValueMember(value__, "rpcs")) {}
+    , rpcs(impl::ValueMember(value__, "rpcs"))
+    , encryption_required(impl::ValueMember(value__, "encryption_required")) {}
+
 Json::Value Rpcs::ToJsonValue() const {
   Json::Value result__(Json::objectValue);
   impl::WriteJsonField("user_consent_prompt", user_consent_prompt, &result__);
   impl::WriteJsonField("rpcs", rpcs, &result__);
+  impl::WriteJsonField("encryption_required", encryption_required, &result__);
   return result__;
 }
+
 bool Rpcs::is_valid() const {
   if (!user_consent_prompt.is_valid()) {
     return false;
@@ -382,11 +615,16 @@ bool Rpcs::is_valid() const {
   if (!rpcs.is_valid()) {
     return false;
   }
+  if (!encryption_required.is_valid()) {
+    return false;
+  }
   return Validate();
 }
+
 bool Rpcs::is_initialized() const {
   return (initialization_state__ != kUninitialized) || (!struct_empty());
 }
+
 bool Rpcs::struct_empty() const {
   if (user_consent_prompt.is_initialized()) {
     return false;
@@ -394,9 +632,12 @@ bool Rpcs::struct_empty() const {
   if (rpcs.is_initialized()) {
     return false;
   }
-
+  if (encryption_required.is_initialized()) {
+    return false;
+  }
   return true;
 }
+
 void Rpcs::ReportErrors(rpc::ValidationReport* report__) const {
   if (struct_empty()) {
     rpc::CompositeType::ReportErrors(report__);
@@ -408,6 +649,10 @@ void Rpcs::ReportErrors(rpc::ValidationReport* report__) const {
   if (!rpcs.is_valid()) {
     rpcs.ReportErrors(&report__->ReportSubobject("rpcs"));
   }
+  if (!encryption_required.is_valid()) {
+    encryption_required.ReportErrors(
+        &report__->ReportSubobject("encryption_required"));
+  }
 }
 
 void Rpcs::SetPolicyTableType(PolicyTableType pt_type) {
@@ -416,8 +661,60 @@ void Rpcs::SetPolicyTableType(PolicyTableType pt_type) {
   rpcs.SetPolicyTableType(pt_type);
 }
 
+// EndpointProperties methods
+EndpointProperty::EndpointProperty() : CompositeType(kUninitialized) {}
+
+EndpointProperty::~EndpointProperty() {}
+
+EndpointProperty::EndpointProperty(const Json::Value* value__)
+    : CompositeType(InitHelper(value__, &Json::Value::isObject))
+    , version(impl::ValueMember(value__, "version")) {}
+
+Json::Value EndpointProperty::ToJsonValue() const {
+  Json::Value result__(Json::objectValue);
+  impl::WriteJsonField("version", version, &result__);
+  return result__;
+}
+
+bool EndpointProperty::is_valid() const {
+  if (!version.is_valid()) {
+    return false;
+  }
+  return Validate();
+}
+
+bool EndpointProperty::is_initialized() const {
+  return (initialization_state__ != kUninitialized) || (!struct_empty());
+}
+
+bool EndpointProperty::struct_empty() const {
+  if (version.is_initialized()) {
+    return false;
+  }
+
+  return true;
+}
+
+void EndpointProperty::ReportErrors(rpc::ValidationReport* report__) const {
+  if (struct_empty()) {
+    rpc::CompositeType::ReportErrors(report__);
+  }
+  if (!version.is_valid()) {
+    version.ReportErrors(&report__->ReportSubobject("version"));
+  }
+}
+
+void EndpointProperty::SetPolicyTableType(PolicyTableType pt_type) {
+  CompositeType::SetPolicyTableType(pt_type);
+  version.SetPolicyTableType(pt_type);
+}
+
 // ModuleConfig methods
 ModuleConfig::ModuleConfig() : CompositeType(kUninitialized) {}
+
+const std::string ModuleConfig::kDefaultOemMappingServiceName =
+    "custom_vehicle_data_mapping_url";
+
 ModuleConfig::ModuleConfig(
     uint8_t exchange_after_x_ignition_cycles,
     int64_t exchange_after_x_kilometers,
@@ -425,6 +722,7 @@ ModuleConfig::ModuleConfig(
     uint16_t timeout_after_x_seconds,
     const SecondsBetweenRetries& seconds_between_retries,
     const ServiceEndpoints& endpoints,
+    const ServiceEndpointProperties& endpoint_properties,
     const NumberOfNotificationsPerMinute& notifications_per_minute_by_priority)
     : CompositeType(kUninitialized)
     , exchange_after_x_ignition_cycles(exchange_after_x_ignition_cycles)
@@ -433,13 +731,17 @@ ModuleConfig::ModuleConfig(
     , timeout_after_x_seconds(timeout_after_x_seconds)
     , seconds_between_retries(seconds_between_retries)
     , endpoints(endpoints)
+    , endpoint_properties(endpoint_properties)
     , notifications_per_minute_by_priority(
           notifications_per_minute_by_priority) {}
+
 ModuleConfig::~ModuleConfig() {}
+
 ModuleConfig::ModuleConfig(const Json::Value* value__)
     : CompositeType(InitHelper(value__, &Json::Value::isObject))
     , device_certificates(impl::ValueMember(value__, "device_certificates"))
     , preloaded_pt(impl::ValueMember(value__, "preloaded_pt"))
+    , full_app_id_supported(impl::ValueMember(value__, "full_app_id_supported"))
     , exchange_after_x_ignition_cycles(
           impl::ValueMember(value__, "exchange_after_x_ignition_cycles"))
     , exchange_after_x_kilometers(
@@ -450,13 +752,18 @@ ModuleConfig::ModuleConfig(const Json::Value* value__)
     , seconds_between_retries(
           impl::ValueMember(value__, "seconds_between_retries"))
     , endpoints(impl::ValueMember(value__, "endpoints"))
+    , endpoint_properties(impl::ValueMember(value__, "endpoint_properties"))
     , notifications_per_minute_by_priority(
           impl::ValueMember(value__, "notifications_per_minute_by_priority"))
+    , subtle_notifications_per_minute_by_priority(impl::ValueMember(
+          value__, "subtle_notifications_per_minute_by_priority"))
     , vehicle_make(impl::ValueMember(value__, "vehicle_make"))
     , vehicle_model(impl::ValueMember(value__, "vehicle_model"))
     , vehicle_year(impl::ValueMember(value__, "vehicle_year"))
     , preloaded_date(impl::ValueMember(value__, "preloaded_date"))
-    , certificate(impl::ValueMember(value__, "certificate")) {}
+    , certificate(impl::ValueMember(value__, "certificate"))
+    , lock_screen_dismissal_enabled(
+          impl::ValueMember(value__, "lock_screen_dismissal_enabled")) {}
 
 void ModuleConfig::SafeCopyFrom(const ModuleConfig& from) {
   //  device_certificates = from.device_certificates;  // According to the
@@ -467,9 +774,14 @@ void ModuleConfig::SafeCopyFrom(const ModuleConfig& from) {
   timeout_after_x_seconds = from.timeout_after_x_seconds;
   seconds_between_retries = from.seconds_between_retries;
   endpoints = from.endpoints;
+  endpoint_properties = from.endpoint_properties;
   notifications_per_minute_by_priority =
       from.notifications_per_minute_by_priority;
 
+  lock_screen_dismissal_enabled = from.lock_screen_dismissal_enabled;
+
+  subtle_notifications_per_minute_by_priority.assign_if_valid(
+      from.subtle_notifications_per_minute_by_priority);
   vehicle_make.assign_if_valid(from.vehicle_make);
   vehicle_model.assign_if_valid(from.vehicle_model);
   vehicle_year.assign_if_valid(from.vehicle_year);
@@ -479,6 +791,8 @@ void ModuleConfig::SafeCopyFrom(const ModuleConfig& from) {
 Json::Value ModuleConfig::ToJsonValue() const {
   Json::Value result__(Json::objectValue);
   impl::WriteJsonField("preloaded_pt", preloaded_pt, &result__);
+  impl::WriteJsonField(
+      "full_app_id_supported", full_app_id_supported, &result__);
   impl::WriteJsonField("exchange_after_x_ignition_cycles",
                        exchange_after_x_ignition_cycles,
                        &result__);
@@ -491,18 +805,29 @@ Json::Value ModuleConfig::ToJsonValue() const {
   impl::WriteJsonField(
       "seconds_between_retries", seconds_between_retries, &result__);
   impl::WriteJsonField("endpoints", endpoints, &result__);
+  impl::WriteJsonField("endpoint_properties", endpoint_properties, &result__);
   impl::WriteJsonField("notifications_per_minute_by_priority",
                        notifications_per_minute_by_priority,
+                       &result__);
+  impl::WriteJsonField("subtle_notifications_per_minute_by_priority",
+                       subtle_notifications_per_minute_by_priority,
                        &result__);
   impl::WriteJsonField("vehicle_make", vehicle_make, &result__);
   impl::WriteJsonField("vehicle_model", vehicle_model, &result__);
   impl::WriteJsonField("vehicle_year", vehicle_year, &result__);
   impl::WriteJsonField("certificate", certificate, &result__);
   impl::WriteJsonField("preloaded_date", preloaded_date, &result__);
+  impl::WriteJsonField("lock_screen_dismissal_enabled",
+                       lock_screen_dismissal_enabled,
+                       &result__);
   return result__;
 }
+
 bool ModuleConfig::is_valid() const {
   if (!preloaded_pt.is_valid()) {
+    return false;
+  }
+  if (!full_app_id_supported.is_valid()) {
     return false;
   }
   if (!exchange_after_x_ignition_cycles.is_valid()) {
@@ -523,7 +848,16 @@ bool ModuleConfig::is_valid() const {
   if (!endpoints.is_valid()) {
     return false;
   }
+  if (!endpoint_properties.is_valid()) {
+    return false;
+  }
   if (!notifications_per_minute_by_priority.is_valid()) {
+    return false;
+  }
+  if (!subtle_notifications_per_minute_by_priority.is_valid()) {
+    return false;
+  }
+  if (!lock_screen_dismissal_enabled.is_valid()) {
     return false;
   }
   if (!vehicle_make.is_valid()) {
@@ -543,11 +877,16 @@ bool ModuleConfig::is_valid() const {
   }
   return Validate();
 }
+
 bool ModuleConfig::is_initialized() const {
   return (initialization_state__ != kUninitialized) || (!struct_empty());
 }
+
 bool ModuleConfig::struct_empty() const {
   if (preloaded_pt.is_initialized()) {
+    return false;
+  }
+  if (full_app_id_supported.is_initialized()) {
     return false;
   }
 
@@ -568,11 +907,22 @@ bool ModuleConfig::struct_empty() const {
   if (seconds_between_retries.is_initialized()) {
     return false;
   }
+
   if (endpoints.is_initialized()) {
     return false;
   }
 
+  if (endpoint_properties.is_initialized()) {
+    return false;
+  }
+
   if (notifications_per_minute_by_priority.is_initialized()) {
+    return false;
+  }
+  if (subtle_notifications_per_minute_by_priority.is_initialized()) {
+    return false;
+  }
+  if (lock_screen_dismissal_enabled.is_initialized()) {
     return false;
   }
   if (vehicle_make.is_initialized()) {
@@ -587,6 +937,7 @@ bool ModuleConfig::struct_empty() const {
   }
   return true;
 }
+
 void ModuleConfig::ReportErrors(rpc::ValidationReport* report__) const {
   if (struct_empty()) {
     rpc::CompositeType::ReportErrors(report__);
@@ -597,6 +948,10 @@ void ModuleConfig::ReportErrors(rpc::ValidationReport* report__) const {
   }
   if (!preloaded_pt.is_valid()) {
     preloaded_pt.ReportErrors(&report__->ReportSubobject("preloaded_pt"));
+  }
+  if (!full_app_id_supported.is_valid()) {
+    full_app_id_supported.ReportErrors(
+        &report__->ReportSubobject("full_app_id_supported"));
   }
   if (!exchange_after_x_ignition_cycles.is_valid()) {
     exchange_after_x_ignition_cycles.ReportErrors(
@@ -621,9 +976,22 @@ void ModuleConfig::ReportErrors(rpc::ValidationReport* report__) const {
   if (!endpoints.is_valid()) {
     endpoints.ReportErrors(&report__->ReportSubobject("endpoints"));
   }
+  if (!endpoint_properties.is_valid()) {
+    endpoint_properties.ReportErrors(
+        &report__->ReportSubobject("endpoint_properties"));
+  }
   if (!notifications_per_minute_by_priority.is_valid()) {
     notifications_per_minute_by_priority.ReportErrors(
         &report__->ReportSubobject("notifications_per_minute_by_priority"));
+  }
+  if (!subtle_notifications_per_minute_by_priority.is_valid()) {
+    subtle_notifications_per_minute_by_priority.ReportErrors(
+        &report__->ReportSubobject(
+            "subtle_notifications_per_minute_by_priority"));
+  }
+  if (!lock_screen_dismissal_enabled.is_valid()) {
+    lock_screen_dismissal_enabled.ReportErrors(
+        &report__->ReportSubobject("lock_screen_dismissal_enabled"));
   }
   if (!vehicle_make.is_valid()) {
     vehicle_make.ReportErrors(&report__->ReportSubobject("vehicle_make"));
@@ -656,13 +1024,17 @@ void ModuleConfig::ReportErrors(rpc::ValidationReport* report__) const {
 void ModuleConfig::SetPolicyTableType(PolicyTableType pt_type) {
   CompositeType::SetPolicyTableType(pt_type);
   preloaded_pt.SetPolicyTableType(pt_type);
+  full_app_id_supported.SetPolicyTableType(pt_type);
   exchange_after_x_ignition_cycles.SetPolicyTableType(pt_type);
   exchange_after_x_kilometers.SetPolicyTableType(pt_type);
   exchange_after_x_days.SetPolicyTableType(pt_type);
   timeout_after_x_seconds.SetPolicyTableType(pt_type);
   seconds_between_retries.SetPolicyTableType(pt_type);
   endpoints.SetPolicyTableType(pt_type);
+  endpoint_properties.SetPolicyTableType(pt_type);
   notifications_per_minute_by_priority.SetPolicyTableType(pt_type);
+  subtle_notifications_per_minute_by_priority.SetPolicyTableType(pt_type);
+  lock_screen_dismissal_enabled.SetPolicyTableType(pt_type);
   vehicle_make.SetPolicyTableType(pt_type);
   vehicle_model.SetPolicyTableType(pt_type);
   vehicle_year.SetPolicyTableType(pt_type);
@@ -670,7 +1042,9 @@ void ModuleConfig::SetPolicyTableType(PolicyTableType pt_type) {
 
 // MessageString methods
 MessageString::MessageString() : CompositeType(kUninitialized) {}
+
 MessageString::~MessageString() {}
+
 MessageString::MessageString(const Json::Value* value__)
     : CompositeType(InitHelper(value__, &Json::Value::isObject))
     , line1(impl::ValueMember(value__, "line1"))
@@ -678,6 +1052,7 @@ MessageString::MessageString(const Json::Value* value__)
     , tts(impl::ValueMember(value__, "tts"))
     , label(impl::ValueMember(value__, "label"))
     , textBody(impl::ValueMember(value__, "textBody")) {}
+
 Json::Value MessageString::ToJsonValue() const {
   Json::Value result__(Json::objectValue);
   impl::WriteJsonField("line1", line1, &result__);
@@ -687,6 +1062,7 @@ Json::Value MessageString::ToJsonValue() const {
   impl::WriteJsonField("textBody", textBody, &result__);
   return result__;
 }
+
 bool MessageString::is_valid() const {
   if (struct_empty()) {
     return initialization_state__ == kInitialized && Validate();
@@ -708,9 +1084,11 @@ bool MessageString::is_valid() const {
   }
   return Validate();
 }
+
 bool MessageString::is_initialized() const {
   return (initialization_state__ != kUninitialized) || (!struct_empty());
 }
+
 bool MessageString::struct_empty() const {
   if (line1.is_initialized()) {
     return false;
@@ -731,6 +1109,7 @@ bool MessageString::struct_empty() const {
   }
   return true;
 }
+
 void MessageString::ReportErrors(rpc::ValidationReport* report__) const {
   if (struct_empty()) {
     rpc::CompositeType::ReportErrors(report__);
@@ -765,17 +1144,22 @@ void MessageString::SetPolicyTableType(PolicyTableType pt_type) {
 const std::string MessageLanguages::default_language_("en-us");
 
 MessageLanguages::MessageLanguages() : CompositeType(kUninitialized) {}
+
 MessageLanguages::MessageLanguages(const Languages& languages)
     : CompositeType(kUninitialized), languages(languages) {}
+
 MessageLanguages::~MessageLanguages() {}
+
 MessageLanguages::MessageLanguages(const Json::Value* value__)
     : CompositeType(InitHelper(value__, &Json::Value::isObject))
     , languages(impl::ValueMember(value__, "languages")) {}
+
 Json::Value MessageLanguages::ToJsonValue() const {
   Json::Value result__(Json::objectValue);
   impl::WriteJsonField("languages", languages, &result__);
   return result__;
 }
+
 bool MessageLanguages::is_valid() const {
   if (!languages.is_valid()) {
     return false;
@@ -786,9 +1170,11 @@ bool MessageLanguages::is_valid() const {
   }
   return Validate();
 }
+
 bool MessageLanguages::is_initialized() const {
   return (initialization_state__ != kUninitialized) || (!struct_empty());
 }
+
 bool MessageLanguages::struct_empty() const {
   if (languages.is_initialized()) {
     return false;
@@ -827,19 +1213,24 @@ void MessageLanguages::SetPolicyTableType(PolicyTableType pt_type) {
 // ConsumerFriendlyMessages methods
 ConsumerFriendlyMessages::ConsumerFriendlyMessages()
     : CompositeType(kUninitialized) {}
+
 ConsumerFriendlyMessages::ConsumerFriendlyMessages(const std::string& version)
     : CompositeType(kUninitialized), version(version) {}
+
 ConsumerFriendlyMessages::~ConsumerFriendlyMessages() {}
+
 ConsumerFriendlyMessages::ConsumerFriendlyMessages(const Json::Value* value__)
     : CompositeType(InitHelper(value__, &Json::Value::isObject))
     , version(impl::ValueMember(value__, "version"))
     , messages(impl::ValueMember(value__, "messages")) {}
+
 Json::Value ConsumerFriendlyMessages::ToJsonValue() const {
   Json::Value result__(Json::objectValue);
   impl::WriteJsonField("version", version, &result__);
   impl::WriteJsonField("messages", messages, &result__);
   return result__;
 }
+
 bool ConsumerFriendlyMessages::is_valid() const {
   if (!version.is_valid()) {
     return false;
@@ -849,9 +1240,11 @@ bool ConsumerFriendlyMessages::is_valid() const {
   }
   return Validate();
 }
+
 bool ConsumerFriendlyMessages::is_initialized() const {
   return (initialization_state__ != kUninitialized) || (!struct_empty());
 }
+
 bool ConsumerFriendlyMessages::struct_empty() const {
   if (version.is_initialized()) {
     return false;
@@ -862,6 +1255,7 @@ bool ConsumerFriendlyMessages::struct_empty() const {
 
   return true;
 }
+
 void ConsumerFriendlyMessages::ReportErrors(
     rpc::ValidationReport* report__) const {
   if (struct_empty()) {
@@ -892,7 +1286,9 @@ void ConsumerFriendlyMessages::SetPolicyTableType(PolicyTableType pt_type) {
 
 // ModuleMeta methods
 ModuleMeta::ModuleMeta() : CompositeType(kUninitialized) {}
+
 ModuleMeta::~ModuleMeta() {}
+
 ModuleMeta::ModuleMeta(const Json::Value* value__)
     : CompositeType(InitHelper(value__, &Json::Value::isObject))
     , pt_exchanged_at_odometer_x(
@@ -900,7 +1296,9 @@ ModuleMeta::ModuleMeta(const Json::Value* value__)
     , pt_exchanged_x_days_after_epoch(
           impl::ValueMember(value__, "pt_exchanged_x_days_after_epoch"))
     , ignition_cycles_since_last_exchange(
-          impl::ValueMember(value__, "ignition_cycles_since_last_exchange")) {}
+          impl::ValueMember(value__, "ignition_cycles_since_last_exchange"))
+    , ccpu_version(impl::ValueMember(value__, "ccpu_version")) {}
+
 Json::Value ModuleMeta::ToJsonValue() const {
   Json::Value result__(Json::objectValue);
   impl::WriteJsonField(
@@ -913,9 +1311,13 @@ Json::Value ModuleMeta::ToJsonValue() const {
                        &result__);
   return result__;
 }
+
 bool ModuleMeta::is_valid() const {
   if (struct_empty()) {
     return initialization_state__ == kInitialized && Validate();
+  }
+  if (!ccpu_version.is_valid()) {
+    return false;
   }
   if (!pt_exchanged_at_odometer_x.is_valid()) {
     return false;
@@ -928,10 +1330,15 @@ bool ModuleMeta::is_valid() const {
   }
   return Validate();
 }
+
 bool ModuleMeta::is_initialized() const {
   return (initialization_state__ != kUninitialized) || (!struct_empty());
 }
+
 bool ModuleMeta::struct_empty() const {
+  if (ccpu_version.is_initialized()) {
+    return false;
+  }
   if (pt_exchanged_at_odometer_x.is_initialized()) {
     return false;
   }
@@ -944,9 +1351,13 @@ bool ModuleMeta::struct_empty() const {
   }
   return true;
 }
+
 void ModuleMeta::ReportErrors(rpc::ValidationReport* report__) const {
   if (struct_empty()) {
     rpc::CompositeType::ReportErrors(report__);
+  }
+  if (!ccpu_version.is_valid()) {
+    ccpu_version.ReportErrors(&report__->ReportSubobject("ccpu_version"));
   }
   if (!pt_exchanged_at_odometer_x.is_valid()) {
     pt_exchanged_at_odometer_x.ReportErrors(
@@ -1006,7 +1417,9 @@ AppLevel::AppLevel(uint16_t minutes_in_hmi_full,
     , count_of_tls_errors(count_of_tls_errors)
     , count_of_run_attempts_while_revoked(count_of_run_attempts_while_revoked) {
 }
+
 AppLevel::~AppLevel() {}
+
 AppLevel::AppLevel(const Json::Value* value__)
     : CompositeType(InitHelper(value__, &Json::Value::isObject))
     , minutes_in_hmi_full(impl::ValueMember(value__, "minutes_in_hmi_full"))
@@ -1042,6 +1455,7 @@ Json::Value AppLevel::ToJsonValue() const {
   impl::WriteJsonField("count_of_TLS_errors", count_of_tls_errors, &result__);
   return result__;
 }
+
 bool AppLevel::is_valid() const {
   if (!minutes_in_hmi_full.is_valid()) {
     return false;
@@ -1090,9 +1504,11 @@ bool AppLevel::is_valid() const {
   }
   return Validate();
 }
+
 bool AppLevel::is_initialized() const {
   return (initialization_state__ != kUninitialized) || (!struct_empty());
 }
+
 bool AppLevel::struct_empty() const {
   if (minutes_in_hmi_full.is_initialized()) {
     return false;
@@ -1147,6 +1563,7 @@ bool AppLevel::struct_empty() const {
   }
   return true;
 }
+
 void AppLevel::ReportErrors(rpc::ValidationReport* report__) const {
   if (struct_empty()) {
     rpc::CompositeType::ReportErrors(report__);
@@ -1171,6 +1588,7 @@ Json::Value UsageAndErrorCounts::ToJsonValue() const {
   impl::WriteJsonField("app_level", app_level, &result__);
   return result__;
 }
+
 bool UsageAndErrorCounts::is_valid() const {
   if (struct_empty()) {
     return initialization_state__ == kInitialized && Validate();
@@ -1180,15 +1598,18 @@ bool UsageAndErrorCounts::is_valid() const {
   }
   return Validate();
 }
+
 bool UsageAndErrorCounts::is_initialized() const {
   return (initialization_state__ != kUninitialized) || (!struct_empty());
 }
+
 bool UsageAndErrorCounts::struct_empty() const {
   if (app_level.is_initialized()) {
     return false;
   }
   return true;
 }
+
 void UsageAndErrorCounts::ReportErrors(rpc::ValidationReport* report__) const {
   if (struct_empty()) {
     rpc::CompositeType::ReportErrors(report__);
@@ -1211,33 +1632,511 @@ void UsageAndErrorCounts::SetPolicyTableType(PolicyTableType pt_type) {
 
 // DeviceParams methods
 DeviceParams::DeviceParams() : CompositeType(kUninitialized) {}
+
 DeviceParams::~DeviceParams() {}
+
 DeviceParams::DeviceParams(const Json::Value* value__)
     : CompositeType(InitHelper(value__, &Json::Value::isObject)) {}
+
 Json::Value DeviceParams::ToJsonValue() const {
   Json::Value result__(Json::objectValue);
   return result__;
 }
+
 bool DeviceParams::is_valid() const {
   if (struct_empty()) {
     return initialization_state__ == kInitialized && Validate();
   }
   return Validate();
 }
+
 bool DeviceParams::is_initialized() const {
   return (initialization_state__ != kUninitialized) || (!struct_empty());
 }
+
 bool DeviceParams::struct_empty() const {
   return true;
 }
+
 void DeviceParams::ReportErrors(rpc::ValidationReport* report__) const {
   if (struct_empty()) {
     rpc::CompositeType::ReportErrors(report__);
   }
 }
 
+// VehicleDataItem methods
+VehicleDataItem::VehicleDataItem() : CompositeType(kUninitialized) {}
+
+VehicleDataItem::VehicleDataItem(const VehicleDataItem& vehicle_data)
+    : CompositeType(vehicle_data.initialization_state__)
+    , name(vehicle_data.name)
+    , type(vehicle_data.type)
+    , key(vehicle_data.key)
+    , mandatory(vehicle_data.mandatory)
+    , params(vehicle_data.params)
+    , array(vehicle_data.array)
+    , since(vehicle_data.since)
+    , until(vehicle_data.until)
+    , removed(vehicle_data.removed)
+    , deprecated(vehicle_data.deprecated)
+    , defvalue(vehicle_data.defvalue)
+    , minvalue(vehicle_data.minvalue)
+    , maxvalue(vehicle_data.maxvalue)
+    , minsize(vehicle_data.minsize)
+    , maxsize(vehicle_data.maxsize)
+    , minlength(vehicle_data.minlength)
+    , maxlength(vehicle_data.maxlength) {}
+
+VehicleDataItem::VehicleDataItem(const Json::Value* value__)
+    : CompositeType(InitHelper(value__, &Json::Value::isObject))
+    , name(impl::ValueMember(value__, "name"))
+    , type(impl::ValueMember(value__, "type"))
+    , key(impl::ValueMember(value__, "key"))
+    , mandatory(impl::ValueMember(value__, "mandatory"))
+    , params(impl::ValueMember(value__, "params"))
+    , array(impl::ValueMember(value__, "array"))
+    , since(impl::ValueMember(value__, "since"))
+    , until(impl::ValueMember(value__, "until"))
+    , removed(impl::ValueMember(value__, "removed"))
+    , deprecated(impl::ValueMember(value__, "deprecated"))
+    , defvalue(static_cast<Json::Value*>(nullptr))
+    , minvalue(impl::ValueMember(value__, "minvalue"))
+    , maxvalue(impl::ValueMember(value__, "maxvalue"))
+    , minsize(impl::ValueMember(value__, "minsize"))
+    , maxsize(impl::ValueMember(value__, "maxsize"))
+    , minlength(impl::ValueMember(value__, "minlength"))
+    , maxlength(impl::ValueMember(value__, "maxlength")) {
+  if (value__->isMember("defvalue")) {
+    *defvalue = impl::ValueMember(value__, "defvalue")->asString();
+  }
+}
+
+VehicleDataItem::~VehicleDataItem() {}
+
+const std::string VehicleDataItem::kInteger = "Integer";
+const std::string VehicleDataItem::kStruct = "Struct";
+const std::string VehicleDataItem::kString = "String";
+const std::string VehicleDataItem::kFloat = "Float";
+const std::string VehicleDataItem::kDouble = "Double";
+const std::string VehicleDataItem::kBoolean = "Boolean";
+
+const std::vector<std::string> VehicleDataItem::kPODTypes = {
+    kInteger, kFloat, kDouble, kString, kBoolean};
+
+Json::Value VehicleDataItem::ToJsonValue() const {
+  Json::Value ret(Json::objectValue);
+  impl::WriteJsonField("name", name, &ret);
+  impl::WriteJsonField("type", type, &ret);
+  impl::WriteJsonField("key", key, &ret);
+  impl::WriteJsonField("array", array, &ret);
+  impl::WriteJsonField("mandatory", mandatory, &ret);
+  impl::WriteJsonField("params", params, &ret);
+  impl::WriteJsonField("since", since, &ret);
+  impl::WriteJsonField("until", until, &ret);
+  impl::WriteJsonField("removed", removed, &ret);
+  impl::WriteJsonField("deprecated", deprecated, &ret);
+  impl::WriteJsonField("defvalue", defvalue, &ret);
+  impl::WriteJsonField("minvalue", minvalue, &ret);
+  impl::WriteJsonField("maxvalue", maxvalue, &ret);
+  impl::WriteJsonField("minsize", minsize, &ret);
+  impl::WriteJsonField("maxsize", maxsize, &ret);
+  impl::WriteJsonField("minlength", minlength, &ret);
+  impl::WriteJsonField("maxlength", maxlength, &ret);
+  return ret;
+}
+
+bool VehicleDataItem::operator==(const VehicleDataItem& vd) {
+  return (name == vd.name && type == vd.type && key == vd.key &&
+          mandatory == vd.mandatory && params == vd.params &&
+          array == vd.array && since == vd.since && until == vd.until &&
+          removed == vd.removed && deprecated == vd.deprecated &&
+          defvalue == vd.defvalue && minvalue == vd.minvalue &&
+          maxvalue == vd.maxvalue && minsize == vd.minsize &&
+          maxsize == vd.maxsize && minlength == vd.minlength &&
+          maxlength == vd.maxlength);
+}
+
+bool VehicleDataItem::is_valid() const {
+  if (!name.is_valid()) {
+    return false;
+  }
+  if (!type.is_valid()) {
+    return false;
+  }
+  if (!key.is_valid()) {
+    return false;
+  }
+  if (!array.is_valid()) {
+    return false;
+  }
+  if (!mandatory.is_valid()) {
+    return false;
+  }
+  if (!params.is_valid()) {
+    return false;
+  }
+  if (!since.is_valid()) {
+    return false;
+  }
+  if (!until.is_valid()) {
+    return false;
+  }
+  if (!removed.is_valid()) {
+    return false;
+  }
+  if (!deprecated.is_valid()) {
+    return false;
+  }
+  if (!(defvalue.is_valid() && ValidateDefault())) {
+    return false;
+  }
+  if (!minvalue.is_valid()) {
+    return false;
+  }
+  if (!maxvalue.is_valid()) {
+    return false;
+  }
+  if (!minsize.is_valid()) {
+    return false;
+  }
+  if (!maxsize.is_valid()) {
+    return false;
+  }
+  if (!minlength.is_valid()) {
+    return false;
+  }
+  if (!maxlength.is_valid()) {
+    return false;
+  }
+  return Validate();
+}
+
+bool VehicleDataItem::is_initialized() const {
+  return (initialization_state__ != kUninitialized) || (struct_not_empty());
+}
+
+bool VehicleDataItem::struct_not_empty() const {
+  if (!name.is_initialized()) {
+    return false;
+  }
+  if (!type.is_initialized()) {
+    return false;
+  }
+  if (!key.is_initialized()) {
+    return false;
+  }
+  if (!array.is_initialized()) {
+    return false;
+  }
+  if (!mandatory.is_initialized()) {
+    return false;
+  }
+  if (!params.is_initialized()) {
+    return false;
+  }
+  if (!since.is_initialized()) {
+    return false;
+  }
+  if (!until.is_initialized()) {
+    return false;
+  }
+  if (!removed.is_initialized()) {
+    return false;
+  }
+  if (!deprecated.is_initialized()) {
+    return false;
+  }
+  if (!defvalue.is_initialized()) {
+    return false;
+  }
+  if (!minvalue.is_initialized()) {
+    return false;
+  }
+  if (!maxvalue.is_initialized()) {
+    return false;
+  }
+  if (!minsize.is_initialized()) {
+    return false;
+  }
+  if (!maxsize.is_initialized()) {
+    return false;
+  }
+  if (!minlength.is_initialized()) {
+    return false;
+  }
+  if (!maxlength.is_initialized()) {
+    return false;
+  }
+  return true;
+}
+
+void VehicleDataItem::ReportErrors(rpc::ValidationReport* report__) const {
+  if (!struct_not_empty()) {
+    rpc::CompositeType::ReportErrors(report__);
+  }
+  if (!name.is_valid()) {
+    name.ReportErrors(&report__->ReportSubobject("name"));
+  }
+  if (!ValidateNaming(std::string(name))) {
+    report__->set_validation_info(
+        "Invalid name values [" + std::string(name) +
+        "]. It should not contain spaces or invalid chars.");
+  }
+  if (!type.is_valid()) {
+    type.ReportErrors(&report__->ReportSubobject("type"));
+  }
+  if (type.is_initialized() && !ValidateTypes()) {
+    report__->set_validation_info("Unknown type [" + std::string(name) +
+                                  "]: '" + std::string(type) + "'.");
+  }
+  if (!key.is_valid()) {
+    key.ReportErrors(&report__->ReportSubobject("key"));
+  }
+  if (!ValidateNaming(std::string(key))) {
+    report__->set_validation_info(
+        "Invalid key values [" + std::string(key) +
+        "]. It should not contain spaces or invalid chars.");
+  }
+  if (!array.is_valid()) {
+    array.ReportErrors(&report__->ReportSubobject("array"));
+  }
+  if (!mandatory.is_valid()) {
+    mandatory.ReportErrors(&report__->ReportSubobject("mandatory"));
+  }
+  if (!params.is_valid()) {
+    params.ReportErrors(&report__->ReportSubobject("params"));
+  }
+  if (!since.is_valid()) {
+    since.ReportErrors(&report__->ReportSubobject("since"));
+  }
+  if (!until.is_valid()) {
+    until.ReportErrors(&report__->ReportSubobject("until"));
+  }
+  if (!removed.is_valid()) {
+    removed.ReportErrors(&report__->ReportSubobject("removed"));
+  }
+  if (!deprecated.is_valid()) {
+    deprecated.ReportErrors(&report__->ReportSubobject("deprecated"));
+  }
+  if (!defvalue.is_valid()) {
+    defvalue.ReportErrors(&report__->ReportSubobject("defvalue"));
+  }
+  if (!ValidateDefault()) {
+    report__->set_validation_info("Invalid default value: " +
+                                  std::string(*defvalue));
+  }
+  if (!minvalue.is_valid()) {
+    minvalue.ReportErrors(&report__->ReportSubobject("minvalue"));
+  }
+  if (!maxvalue.is_valid()) {
+    maxvalue.ReportErrors(&report__->ReportSubobject("maxvalue"));
+  }
+  if (!minsize.is_valid()) {
+    minsize.ReportErrors(&report__->ReportSubobject("minsize"));
+  }
+  if (!maxsize.is_valid()) {
+    maxsize.ReportErrors(&report__->ReportSubobject("maxsize"));
+  }
+  if (!minlength.is_valid()) {
+    minlength.ReportErrors(&report__->ReportSubobject("minlength"));
+  }
+  if (!maxlength.is_valid()) {
+    maxlength.ReportErrors(&report__->ReportSubobject("maxlength"));
+  }
+}
+
+void VehicleDataItem::SetPolicyTableType(PolicyTableType pt_type) {
+  CompositeType::SetPolicyTableType(pt_type);
+  name.SetPolicyTableType(pt_type);
+  type.SetPolicyTableType(pt_type);
+  key.SetPolicyTableType(pt_type);
+  array.SetPolicyTableType(pt_type);
+  mandatory.SetPolicyTableType(pt_type);
+  params.SetPolicyTableType(pt_type);
+  since.SetPolicyTableType(pt_type);
+  until.SetPolicyTableType(pt_type);
+  removed.SetPolicyTableType(pt_type);
+  deprecated.SetPolicyTableType(pt_type);
+  defvalue.SetPolicyTableType(pt_type);
+  minvalue.SetPolicyTableType(pt_type);
+  maxvalue.SetPolicyTableType(pt_type);
+  minsize.SetPolicyTableType(pt_type);
+  maxsize.SetPolicyTableType(pt_type);
+  minlength.SetPolicyTableType(pt_type);
+  maxlength.SetPolicyTableType(pt_type);
+}
+
+bool VehicleDataItem::ValidateNaming(std::string str) const {
+  auto contains_spec_chars = [](std::string str) {
+    const auto invalid_chars = "!@#$%^&*";
+    return str.npos != str.find_first_of(invalid_chars);
+  };
+
+  auto contains_spaces = [](std::string str) {
+    const auto found_space =
+        std::find_if(str.begin(), str.end(), [](unsigned char ch) {
+          return std::isspace(ch);
+        });
+
+    return found_space != str.end();
+  };
+
+  auto empty_string = [](std::string str) {
+    str.erase(std::remove_if(str.begin(),
+                             str.end(),
+                             [](unsigned char ch) { return std::isspace(ch); }),
+              str.end());
+    return str.length() < 1;
+  };
+
+  return !empty_string(str) && !contains_spaces(str) &&
+         !contains_spec_chars(str);
+}
+
+bool VehicleDataItem::ValidateTypes() const {
+  if (VehicleDataItem::kStruct == std::string(type)) {
+    return params.is_initialized() && !(params->empty()) && params.is_valid();
+  }
+  // params should be empty for POD types and for enum values
+  return (!(params.is_initialized()) || params->empty());
+}
+
+bool VehicleDataItem::ValidateDefault() const {
+  if (!defvalue.is_initialized()) {
+    return true;
+  }
+  std::string value = std::string(*defvalue);
+  bool valid = false;
+  if (VehicleDataItem::kInteger == std::string(type)) {
+    // Match int
+    std::regex pattern("^-?\\d+$");
+    bool type_matches = std::regex_match(value, pattern);
+    if (type_matches) {
+      size_t int_value = std::stol(value);
+      valid = (!minvalue.is_initialized() || int_value >= *minvalue) &&
+              (!maxvalue.is_initialized() || int_value <= *maxvalue);
+    }
+  } else if (VehicleDataItem::kFloat == std::string(type) ||
+             VehicleDataItem::kDouble == std::string(type)) {
+    // Match double
+    std::regex pattern("^-?\\d+(\\.\\d+)?$");
+    bool type_matches = std::regex_match(value, pattern);
+    if (type_matches) {
+      double dbl_value = std::stod(value);
+      valid = (!minvalue.is_initialized() || dbl_value >= *minvalue) &&
+              (!maxvalue.is_initialized() || dbl_value <= *maxvalue);
+    }
+  } else if (VehicleDataItem::kString == std::string(type)) {
+    size_t length = value.length();
+    valid = (!minsize.is_initialized() || length >= *minsize) &&
+            (!maxsize.is_initialized() || length <= *maxsize);
+  } else if (VehicleDataItem::kBoolean == std::string(type)) {
+    valid = ("false" == value || "true" == value);
+  } else if (VehicleDataItem::kStruct != std::string(type) &&
+             !IsPrimitiveType()) {
+    // Enum values cannot be validated here
+    valid = true;
+  }
+
+  return valid;
+}
+
+bool VehicleDataItem::IsPrimitiveType() const {
+  return helpers::in_range(kPODTypes, std::string(type));
+}
+
+// VehicleData methods
+VehicleData::VehicleData() : CompositeType(kUninitialized) {}
+
+VehicleData::VehicleData(const VehicleData& vehicle_data)
+    : CompositeType(vehicle_data.initialization_state__)
+    , schema_version(vehicle_data.schema_version)
+    , schema_items(vehicle_data.schema_items) {}
+
+VehicleData::VehicleData(const Json::Value* value__)
+    : CompositeType(InitHelper(value__, &Json::Value::isObject))
+    , schema_version(impl::ValueMember(value__, "schema_version"))
+    , schema_items(impl::ValueMember(value__, "schema_items")) {}
+
+VehicleData::~VehicleData() {}
+
+bool VehicleData::is_valid() const {
+  if (!schema_version.is_valid()) {
+    return false;
+  }
+  if (!schema_items.is_valid()) {
+    return false;
+  }
+  return Validate();
+}
+
+bool VehicleData::is_initialized() const {
+  return (initialization_state__ != kUninitialized) || (!struct_empty());
+}
+
+bool VehicleData::struct_empty() const {
+  if (schema_version.is_initialized()) {
+    return false;
+  }
+  if (schema_items.is_initialized()) {
+    return false;
+  }
+  return true;
+}
+
+Json::Value VehicleData::ToJsonValue() const {
+  Json::Value ret(Json::objectValue);
+  impl::WriteJsonField("schema_version", schema_version, &ret);
+  impl::WriteJsonField("schema_items", schema_items, &ret);
+  return ret;
+}
+
+void VehicleData::ReportErrors(rpc::ValidationReport* report__) const {
+  if (struct_empty()) {
+    rpc::CompositeType::ReportErrors(report__);
+  }
+  const auto pt_type = GetPolicyTableType();
+  const auto pt_type_str = PolicyTableTypeToString(pt_type);
+  std::string validation_info = "";
+
+  if (PT_SNAPSHOT == pt_type) {
+    if (schema_items.is_initialized()) {
+      validation_info +=
+          "; schema_items " + omitted_validation_info + pt_type_str;
+    }
+    if (!schema_version.is_initialized()) {
+      validation_info +=
+          "; schema_version " + required_validation_info + pt_type_str;
+    }
+    report__->set_validation_info(validation_info);
+  }
+
+  if (PT_UPDATE == pt_type || PT_PRELOADED == pt_type) {
+    if ((schema_version.is_initialized() && !schema_items.is_initialized()) ||
+        (!schema_version.is_initialized() && schema_items.is_initialized())) {
+      validation_info += "; schema_version and schema_items " +
+                         required_validation_info + pt_type_str;
+    }
+    report__->set_validation_info(validation_info);
+  }
+
+  if (!schema_version.is_valid()) {
+    schema_version.ReportErrors(&report__->ReportSubobject("schema_version"));
+  }
+  if (!schema_items.is_valid()) {
+    schema_items.ReportErrors(&report__->ReportSubobject("schema_items"));
+  }
+}
+
+void VehicleData::SetPolicyTableType(PolicyTableType pt_type) {
+  CompositeType::SetPolicyTableType(pt_type);
+  schema_version.SetPolicyTableType(pt_type);
+  schema_items.SetPolicyTableType(pt_type);
+}
+
 // PolicyTable methods
 PolicyTable::PolicyTable() : CompositeType(kUninitialized) {}
+
 PolicyTable::PolicyTable(
     const ApplicationPoliciesSection& app_policies_section,
     const FunctionalGroupings& functional_groupings,
@@ -1248,7 +2147,9 @@ PolicyTable::PolicyTable(
     , functional_groupings(functional_groupings)
     , consumer_friendly_messages(consumer_friendly_messages)
     , module_config(module_config) {}
+
 PolicyTable::~PolicyTable() {}
+
 PolicyTable::PolicyTable(const Json::Value* value__)
     : CompositeType(InitHelper(value__, &Json::Value::isObject))
     , app_policies_section(impl::ValueMember(value__, "app_policies"))
@@ -1259,7 +2160,9 @@ PolicyTable::PolicyTable(const Json::Value* value__)
     , module_meta(impl::ValueMember(value__, "module_meta"))
     , usage_and_error_counts(
           impl::ValueMember(value__, "usage_and_error_counts"))
-    , device_data(impl::ValueMember(value__, "device_data")) {}
+    , device_data(impl::ValueMember(value__, "device_data"))
+    , vehicle_data(impl::ValueMember(value__, "vehicle_data")) {}
+
 Json::Value PolicyTable::ToJsonValue() const {
   Json::Value result__(Json::objectValue);
   impl::WriteJsonField("app_policies", app_policies_section, &result__);
@@ -1271,8 +2174,10 @@ Json::Value PolicyTable::ToJsonValue() const {
   impl::WriteJsonField(
       "usage_and_error_counts", usage_and_error_counts, &result__);
   impl::WriteJsonField("device_data", device_data, &result__);
+  impl::WriteJsonField("vehicle_data", vehicle_data, &result__);
   return result__;
 }
+
 bool PolicyTable::is_valid() const {
   if (!app_policies_section.is_valid()) {
     return false;
@@ -1295,11 +2200,16 @@ bool PolicyTable::is_valid() const {
   if (!device_data.is_valid()) {
     return false;
   }
+  if (!vehicle_data.is_valid()) {
+    return false;
+  }
   return Validate();
 }
+
 bool PolicyTable::is_initialized() const {
   return (initialization_state__ != kUninitialized) || (!struct_empty());
 }
+
 bool PolicyTable::struct_empty() const {
   if (app_policies_section.is_initialized()) {
     return false;
@@ -1325,8 +2235,12 @@ bool PolicyTable::struct_empty() const {
   if (device_data.is_initialized()) {
     return false;
   }
+  if (vehicle_data.is_initialized()) {
+    return false;
+  }
   return true;
 }
+
 void PolicyTable::ReportErrors(rpc::ValidationReport* report__) const {
   if (struct_empty()) {
     rpc::CompositeType::ReportErrors(report__);
@@ -1366,6 +2280,9 @@ void PolicyTable::ReportErrors(rpc::ValidationReport* report__) const {
   if (!device_data.is_valid()) {
     device_data.ReportErrors(&report__->ReportSubobject("device_data"));
   }
+  if (!vehicle_data.is_valid()) {
+    vehicle_data.ReportErrors(&report__->ReportSubobject("vehicle_data"));
+  }
 }
 
 void PolicyTable::SetPolicyTableType(PolicyTableType pt_type) {
@@ -1377,36 +2294,45 @@ void PolicyTable::SetPolicyTableType(PolicyTableType pt_type) {
   module_meta.SetPolicyTableType(pt_type);
   usage_and_error_counts.SetPolicyTableType(pt_type);
   device_data.SetPolicyTableType(pt_type);
+  vehicle_data.SetPolicyTableType(pt_type);
 }
 
 // Table methods
 Table::Table() : CompositeType(kUninitialized) {}
+
 Table::Table(const PolicyTable& policy_table)
     : CompositeType(kUninitialized), policy_table(policy_table) {}
+
 Table::~Table() {}
+
 Table::Table(const Json::Value* value__)
     : CompositeType(InitHelper(value__, &Json::Value::isObject))
     , policy_table(impl::ValueMember(value__, "policy_table")) {}
+
 Json::Value Table::ToJsonValue() const {
   Json::Value result__(Json::objectValue);
   impl::WriteJsonField("policy_table", policy_table, &result__);
   return result__;
 }
+
 bool Table::is_valid() const {
   if (!policy_table.is_valid()) {
     return false;
   }
   return Validate();
 }
+
 bool Table::is_initialized() const {
   return (initialization_state__ != kUninitialized) || (!struct_empty());
 }
+
 bool Table::struct_empty() const {
   if (policy_table.is_initialized()) {
     return false;
   }
   return true;
 }
+
 void Table::ReportErrors(rpc::ValidationReport* report__) const {
   if (struct_empty()) {
     rpc::CompositeType::ReportErrors(report__);

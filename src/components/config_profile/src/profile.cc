@@ -33,17 +33,18 @@
 #include "config_profile/profile.h"
 
 #include <errno.h>
-#include <string.h>
 #include <stdlib.h>
-#include <sstream>
+#include <string.h>
 #include <algorithm>
+#include <numeric>
+#include <sstream>
 
 #include <string>
 
 #include "config_profile/ini_file.h"
+#include "utils/file_system.h"
 #include "utils/logger.h"
 #include "utils/threads/thread.h"
-#include "utils/file_system.h"
 
 #ifdef ENABLE_SECURITY
 #include <openssl/ssl.h>
@@ -52,15 +53,13 @@
 namespace {
 #define LOG_UPDATED_VALUE(value, key, section)                              \
   {                                                                         \
-    LOG4CXX_INFO(logger_,                                                   \
-                 "Setting value '" << value << "' for key '" << key         \
+    SDL_LOG_INFO("Setting value '" << value << "' for key '" << key         \
                                    << "' in section '" << section << "'."); \
   }
 
 #define LOG_UPDATED_BOOL_VALUE(value, key, section)                            \
   {                                                                            \
-    LOG4CXX_INFO(logger_,                                                      \
-                 "Setting value '" << std::boolalpha << value << "' for key '" \
+    SDL_LOG_INFO("Setting value '" << std::boolalpha << value << "' for key '" \
                                    << key << "' in section '" << section       \
                                    << "'.");                                   \
   }
@@ -80,6 +79,7 @@ const char* kMediaManagerSection = "MEDIA MANAGER";
 const char* kGlobalPropertiesSection = "GLOBAL PROPERTIES";
 const char* kVrCommandsSection = "VR COMMANDS";
 const char* kTransportManagerSection = "TransportManager";
+const char* kCloudAppTransportSection = "CloudAppConnections";
 const char* kApplicationManagerSection = "ApplicationManager";
 const char* kFilesystemRestrictionsSection = "FILESYSTEM RESTRICTIONS";
 const char* kIAPSection = "IAP";
@@ -88,9 +88,18 @@ const char* kSDL4Section = "SDL4";
 const char* kSDL5Section = "SDL5";
 const char* kResumptionSection = "Resumption";
 const char* kAppLaunchSection = "AppLaunch";
+const char* kMultipleTransportsSection = "MultipleTransports";
+const char* kServicesMapSection = "ServicesMap";
+const char* kTransportRequiredForResumptionSection =
+    "TransportRequiredForResumption";
+const char* kLowBandwidthTransportResumptionLevelSection =
+    "LowBandwidthTransportResumptionLevel";
+const char* kAppServicesSection = "AppServices";
+const char* kRCModuleConsentSection = "RCModuleConsent";
 
 const char* kSDLVersionKey = "SDLVersion";
 const char* kHmiCapabilitiesKey = "HMICapabilities";
+const char* kHmiCapabilitiesCacheFileKey = "HMICapabilitiesCacheFile";
 const char* kPathToSnapshotKey = "PathToSnapshot";
 const char* kPreloadedPTKey = "PreloadedPT";
 const char* kAttemptsToOpenPolicyDBKey = "AttemptsToOpenPolicyDB";
@@ -146,6 +155,18 @@ const char* kHeartBeatTimeoutKey = "HeartBeatTimeout";
 const char* kMaxSupportedProtocolVersionKey = "MaxSupportedProtocolVersion";
 const char* kUseLastStateKey = "UseLastState";
 const char* kTCPAdapterPortKey = "TCPAdapterPort";
+const char* kTCPAdapterNetworkInterfaceKey = "TCPAdapterNetworkInterface";
+#ifdef WEBSOCKET_SERVER_TRANSPORT_SUPPORT
+const char* kWebSocketServerAddressKey = "WebSocketServerAddress";
+const char* kWebSocketServerPortKey = "WebSocketServerPort";
+#ifdef ENABLE_SECURITY
+const char* kWSServerCertificatePathKey = "WSServerCertificatePath";
+const char* kWSServerCACertificaePathKey = "WSServerCACertificatePath";
+const char* kWSServerKeyPathKey = "WSServerKeyPath";
+#endif  // ENABLE_SECURITY
+#endif  // WEBSOCKET_SERVER_TRANSPORT_SUPPORT
+const char* kCloudAppRetryTimeoutKey = "CloudAppRetryTimeout";
+const char* kCloudAppMaxRetryAttemptsKey = "CloudAppMaxRetryAttempts";
 const char* kServerPortKey = "ServerPort";
 const char* kVideoStreamingPortKey = "VideoStreamingPort";
 const char* kAudioStreamingPortKey = "AudioStreamingPort";
@@ -172,15 +193,25 @@ const char* kAppHmiLevelNoneRequestsTimeScaleKey =
 const char* kPendingRequestsAmoundKey = "PendingRequestsAmount";
 const char* kSupportedDiagModesKey = "SupportedDiagModes";
 const char* kTransportManagerDisconnectTimeoutKey = "DisconnectTimeout";
+const char* kBluetoothUUIDKey = "BluetoothUUID";
+const char* kAOAFilterManufacturerKey = "AOAFilterManufacturer";
+const char* kAOAFilterModelNameKey = "AOAFilterModelName";
+const char* kAOAFilterDescriptionKey = "AOAFilterDescription";
+const char* kAOAFilterVersionKey = "AOAFilterVersion";
+const char* kAOAFilterURIKey = "AOAFilterURI";
+const char* kAOAFilterSerialNumber = "AOAFilterSerialNumber";
 const char* kTTSDelimiterKey = "TTSDelimiter";
 const char* kRecordingFileNameKey = "RecordingFileName";
 const char* kRecordingFileSourceKey = "RecordingFileSource";
 const char* kEnablePolicy = "EnablePolicy";
+const char* kUseFullAppID = "UseFullAppID";
 const char* kEventMQKey = "EventMQ";
 const char* kAckMQKey = "AckMQ";
 const char* kApplicationListUpdateTimeoutKey = "ApplicationListUpdateTimeout";
 const char* kReadDIDFrequencykey = "ReadDIDRequest";
 const char* kGetVehicleDataFrequencyKey = "GetVehicleDataRequest";
+const char* kGetInteriorVehicleDataFrequencyKey =
+    "GetInteriorVehicleDataRequest";
 const char* kLegacyProtocolMaskKey = "LegacyProtocol";
 const char* kHubProtocolMaskKey = "HubProtocol";
 const char* kPoolProtocolMaskKey = "PoolProtocol";
@@ -211,6 +242,70 @@ const char* kRemoveBundleIDattemptsKey = "RemoveBundleIDattempts";
 const char* kMaxNumberOfiOSDeviceKey = "MaxNumberOfiOSDevice";
 const char* kWaitTimeBetweenAppsKey = "WaitTimeBetweenApps";
 const char* kEnableAppLaunchIOSKey = "EnableAppLaunchIOS";
+const char* kAppTransportChangeTimerKey = "AppTransportChangeTimer";
+const char* kAppTransportChangeTimerAdditionKey =
+    "AppTransportChangeTimerAddition";
+const char* kLowVoltageSignalOffsetKey = "LowVoltageSignal";
+const char* kWakeUpSignalOffsetKey = "WakeUpSignal";
+const char* kIgnitionOffSignalOffsetKey = "IgnitionOffSignal";
+const char* kMultipleTransportsEnabledKey = "MultipleTransportsEnabled";
+const char* kSecondaryTransportForBluetoothKey =
+    "SecondaryTransportForBluetooth";
+const char* kSecondaryTransportForUSBKey = "SecondaryTransportForUSB";
+const char* kSecondaryTransportForWiFiKey = "SecondaryTransportForWiFi";
+const char* kAudioServiceTransportsKey = "AudioServiceTransports";
+const char* kVideoServiceTransportsKey = "VideoServiceTransports";
+const char* kRpcPassThroughTimeoutKey = "RpcPassThroughTimeout";
+const char* kPeriodForConsentExpirationKey = "PeriodForConsentExpiration";
+
+const char* kDefaultTransportRequiredForResumptionKey =
+    "DefaultTransportRequiredForResumption";
+const char* kAppHMITypeDefault = "DEFAULT";
+const char* kCommunicationTransportRequiredForResumptionKey =
+    "CommunicationTransportRequiredForResumption";
+const char* kAppHMITypeCommunication = "COMMUNICATION";
+const char* kMediaTransportRequiredForResumptionKey =
+    "MediaTransportRequiredForResumption";
+const char* kAppHMITypeMedia = "MEDIA";
+const char* kMessagingTransportRequiredForResumptionKey =
+    "MessagingTransportRequiredForResumption";
+const char* kAppHMITypeMessaging = "MESSAGING";
+const char* kNavigationTransportRequiredForResumptionKey =
+    "NavigationTransportRequiredForResumption";
+const char* kAppHMITypeNavigation = "NAVIGATION";
+const char* kInformationTransportRequiredForResumptionKey =
+    "InformationTransportRequiredForResumption";
+const char* kAppHMITypeInformation = "INFORMATION";
+const char* kSocialTransportRequiredForResumptionKey =
+    "SocialTransportRequiredForResumption";
+const char* kAppHMITypeSocial = "SOCIAL";
+const char* kBackgroundProcessTransportRequiredForResumptionKey =
+    "BackgroundProcessTransportRequiredForResumption";
+const char* kAppHMITypeBackgroundProcess = "BACKGROUND_PROCESS";
+const char* kTestingTransportRequiredForResumptionKey =
+    "TestingTransportRequiredForResumption";
+const char* kAppHMITypeTesting = "TESTING";
+const char* kSystemTransportRequiredForResumptionKey =
+    "SystemTransportRequiredForResumption";
+const char* kAppHMITypeSystem = "SYSTEM";
+const char* kProjectionTransportRequiredForResumptionKey =
+    "ProjectionTransportRequiredForResumption";
+const char* kAppHMITypeProjection = "PROJECTION";
+const char* kRemoteControlTransportRequiredForResumptionKey =
+    "RemoteControlTransportRequiredForResumption";
+const char* kAppHMITypeRemoteControl = "REMOTE_CONTROL";
+const char* kEmptyAppTransportRequiredForResumptionKey =
+    "EmptyAppTransportRequiredForResumption";
+const char* kAppHMITypeEmptyApp = "EMPTY_APP";
+const char* kNavigationLowBandwidthResumptionLevelKey =
+    "NavigationLowBandwidthResumptionLevel";
+const char* kProjectionLowBandwidthResumptionLevelKey =
+    "ProjectionLowBandwidthResumptionLevel";
+const char* kMediaLowBandwidthResumptionLevelKey =
+    "MediaLowBandwidthResumptionLevel";
+const char* kHMIOriginIDKey = "HMIOriginID";
+const char* kEmbeddedServicesKey = "EmbeddedServices";
+
 #ifdef WEB_HMI
 const char* kDefaultLinkToWebHMI = "HMI/index.html";
 #endif  // WEB_HMI
@@ -218,6 +313,7 @@ const char* kDefaultPoliciesSnapshotFileName = "sdl_snapshot.json";
 const char* kDefaultHmiCapabilitiesFileName = "hmi_capabilities.json";
 const char* kDefaultPreloadedPTFileName = "sdl_preloaded_pt.json";
 const char* kDefaultServerAddress = "127.0.0.1";
+const char* kDefaultWebsocketServerAddress = "0.0.0.0";
 const char* kDefaultAppInfoFileName = "app_info.dat";
 const char* kDefaultSystemFilesPath = "/tmp/fs/mp/images/ivsu_cache";
 const char* kDefaultPluginsPath = "plugins";
@@ -234,6 +330,7 @@ const char* kDefaultHubProtocolMask = "com.smartdevicelink.prot";
 const char* kDefaultPoolProtocolMask = "com.smartdevicelink.prot";
 const char* kDefaultIAPSystemConfig = "/fs/mp/etc/mm/ipod.cfg";
 const char* kDefaultIAP2SystemConfig = "/fs/mp/etc/mm/iap2.cfg";
+const char* kDefaultTransportManagerTCPAdapterNetworkInterface = "";
 
 #ifdef ENABLE_SECURITY
 const char* kDefaultSecurityProtocol = "TLSv1.2";
@@ -246,6 +343,9 @@ const uint32_t kDefaultHubProtocolIndex = 0;
 const uint32_t kDefaultHeartBeatTimeout = 0;
 const uint16_t kDefaultMaxSupportedProtocolVersion = 5;
 const uint16_t kDefautTransportManagerTCPPort = 12345;
+const uint16_t kDefaultWebSocketServerPort = 2020;
+const uint16_t kDefaultCloudAppRetryTimeout = 1000;
+const uint16_t kDefaultCloudAppMaxRetryAttempts = 5;
 const uint16_t kDefaultServerPort = 8087;
 const uint16_t kDefaultVideoStreamingPort = 5050;
 const uint16_t kDefaultAudioStreamingPort = 5080;
@@ -273,6 +373,7 @@ const uint32_t kDefaultTransportManagerDisconnectTimeout = 0;
 const uint32_t kDefaultApplicationListUpdateTimeout = 1;
 const std::pair<uint32_t, uint32_t> kReadDIDFrequency = {5, 1};
 const std::pair<uint32_t, uint32_t> kGetVehicleDataFrequency = {5, 1};
+const std::pair<uint32_t, uint32_t> kGetInteriorVehicleDataFrequency = {20, 1};
 const std::pair<uint32_t, uint32_t> kStartStreamRetryAmount = {3, 1};
 const uint32_t kDefaultMaxThreadPoolSize = 2;
 const int kDefaultIAP2HubConnectAttempts = 0;
@@ -304,13 +405,45 @@ const uint16_t kDefaultRemoveBundleIDattempts = 3;
 const uint16_t kDefaultMaxNumberOfiOSDevice = 10;
 const uint16_t kDefaultWaitTimeBetweenApps = 4000;
 const bool kDefaultEnableAppLaunchIOS = true;
+const uint32_t kDefaultAppTransportChangeTimer = 500u;
+const uint32_t kDefaultAppTransportChangeTimerAddition = 0u;
+const int32_t kDefaultLowVoltageSignalOffset = 1;
+const int32_t kDefaultWakeUpSignalOffset = 2;
+const int32_t kDefaultIgnitionOffSignalOffset = 3;
 const std::string kAllowedSymbols =
     "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ01234567890_.-";
+const bool kDefaultMultipleTransportsEnabled = false;
+const char* kDefaultLowBandwidthResumptionLevel = "NONE";
+const uint32_t kDefaultRpcPassThroughTimeout = 10000;
+const uint16_t kDefaultPeriodForConsentExpiration = 30;
+const char* kDefaultHMIOriginId = "HMI_ID";
+const std::vector<uint8_t> kDefaultBluetoothUUID = {0x93,
+                                                    0x6D,
+                                                    0xA0,
+                                                    0x1F,
+                                                    0x9A,
+                                                    0xBD,
+                                                    0x4D,
+                                                    0x9D,
+                                                    0x80,
+                                                    0xC7,
+                                                    0x02,
+                                                    0xAF,
+                                                    0x85,
+                                                    0xC8,
+                                                    0x22,
+                                                    0xA8};
+const char* kDefaultAOAFilterManufacturer = "SDL";
+const char* kDefaultAOAFilterModelName = "Core";
+const char* kDefaultAOAFilterDescription = "SmartDeviceLink Core Component USB";
+const char* kDefaultAOAFilterVersion = "1.0";
+const char* kDefaultAOAFilterURI = "http://www.smartdevicelink.org";
+const char* kDefaultAOAFilterSerialNumber = "N000000";
 }  // namespace
 
 namespace profile {
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "Profile")
+SDL_CREATE_LOG_VARIABLE("Profile")
 
 Profile::Profile()
     : sdl_version_(kDefaultSDLVersion)
@@ -338,6 +471,7 @@ Profile::Profile()
     , stop_streaming_timeout_(kDefaultStopStreamingTimeout)
     , time_testing_port_(kDefaultTimeTestingPort)
     , hmi_capabilities_file_name_(kDefaultHmiCapabilitiesFileName)
+    , hmi_capabilities_cache_file_name_()
     , help_prompt_()
     , time_out_promt_()
     , min_tread_stack_size_(threads::Thread::kMinStackSize)
@@ -365,12 +499,19 @@ Profile::Profile()
     , max_supported_protocol_version_(kDefaultMaxSupportedProtocolVersion)
     , policy_snapshot_file_name_(kDefaultPoliciesSnapshotFileName)
     , enable_policy_(false)
+    , use_full_app_id_(true)
     , transport_manager_disconnect_timeout_(
           kDefaultTransportManagerDisconnectTimeout)
     , use_last_state_(false)
     , supported_diag_modes_()
     , system_files_path_(kDefaultSystemFilesPath)
     , transport_manager_tcp_adapter_port_(kDefautTransportManagerTCPPort)
+#ifdef WEBSOCKET_SERVER_TRANSPORT_SUPPORT
+    , websocket_server_address_(kDefaultWebsocketServerAddress)
+    , websocket_server_port_(kDefaultWebSocketServerPort)
+#endif
+    , cloud_app_retry_timeout_(kDefaultCloudAppRetryTimeout)
+    , cloud_app_max_retry_attempts_(kDefaultCloudAppMaxRetryAttempts)
     , tts_delimiter_(kDefaultTtsDelimiter)
     , audio_data_stopped_timeout_(kDefaultAudioDataStoppedTimeout)
     , video_data_stopped_timeout_(kDefaultVideoDataStoppedTimeout)
@@ -398,6 +539,11 @@ Profile::Profile()
     , attempts_to_open_resumption_db_(kDefaultAttemptsToOpenResumptionDB)
     , open_attempt_timeout_ms_resumption_db_(
           kDefaultOpenAttemptTimeoutMsResumptionDB)
+    , navigation_lowbandwidth_resumption_level_(
+          kDefaultLowBandwidthResumptionLevel)
+    , projection_lowbandwidth_resumption_level_(
+          kDefaultLowBandwidthResumptionLevel)
+    , media_lowbandwidth_resumption_level_(kDefaultLowBandwidthResumptionLevel)
     , app_launch_wait_time_(kDefaultAppLaunchWaitTime)
     , app_launch_max_retry_attempt_(kDefaultAppLaunchMaxRetryAttempt)
     , app_launch_retry_wait_time_(kDefaultAppLaunchRetryWaitTime)
@@ -405,8 +551,17 @@ Profile::Profile()
     , max_number_of_ios_device_(kDefaultMaxNumberOfiOSDevice)
     , wait_time_between_apps_(kDefaultWaitTimeBetweenApps)
     , enable_app_launch_ios_(kDefaultEnableAppLaunchIOS)
+    , app_tranport_change_timer_(kDefaultAppTransportChangeTimer)
+    , app_tranport_change_timer_addition_(
+          kDefaultAppTransportChangeTimerAddition)
+    , multiple_transports_enabled_(kDefaultMultipleTransportsEnabled)
     , error_occured_(false)
-    , error_description_() {
+    , error_description_()
+    , low_voltage_signal_offset_(kDefaultLowVoltageSignalOffset)
+    , wake_up_signal_offset_(kDefaultWakeUpSignalOffset)
+    , ignition_off_signal_offset_(kDefaultIgnitionOffSignalOffset)
+    , rpc_pass_through_timeout_(kDefaultRpcPassThroughTimeout)
+    , period_for_consent_expiration_(kDefaultPeriodForConsentExpiration) {
   // SDL version
   ReadStringValue(
       &sdl_version_, kDefaultSDLVersion, kMainSection, kSDLVersionKey);
@@ -451,8 +606,16 @@ const std::string& Profile::app_resource_folder() const {
   return app_resource_folder_;
 }
 
-bool Profile::enable_protocol_4() const {
-  return max_supported_protocol_version_ >= 4;
+int Profile::low_voltage_signal_offset() const {
+  return low_voltage_signal_offset_;
+}
+
+int Profile::wake_up_signal_offset() const {
+  return wake_up_signal_offset_;
+}
+
+int Profile::ignition_off_signal_offset() const {
+  return ignition_off_signal_offset_;
 }
 
 const std::string& Profile::app_icons_folder() const {
@@ -485,6 +648,10 @@ size_t Profile::maximum_video_payload_size() const {
 
 const std::string& Profile::hmi_capabilities_file_name() const {
   return hmi_capabilities_file_name_;
+}
+
+const std::string& Profile::hmi_capabilities_cache_file_name() const {
+  return hmi_capabilities_cache_file_name_;
 }
 
 const std::string& Profile::server_address() const {
@@ -651,6 +818,10 @@ bool Profile::enable_policy() const {
   return enable_policy_;
 }
 
+bool Profile::use_full_app_id() const {
+  return use_full_app_id_;
+}
+
 uint32_t Profile::transport_manager_disconnect_timeout() const {
   return transport_manager_disconnect_timeout_;
 }
@@ -672,6 +843,74 @@ const std::vector<uint32_t>& Profile::supported_diag_modes() const {
 
 uint16_t Profile::transport_manager_tcp_adapter_port() const {
   return transport_manager_tcp_adapter_port_;
+}
+
+const std::string& Profile::transport_manager_tcp_adapter_network_interface()
+    const {
+  return transport_manager_tcp_adapter_network_interface_;
+}
+
+#ifdef WEBSOCKET_SERVER_TRANSPORT_SUPPORT
+const std::string& Profile::websocket_server_address() const {
+  return websocket_server_address_;
+}
+
+uint16_t Profile::websocket_server_port() const {
+  return websocket_server_port_;
+}
+#ifdef ENABLE_SECURITY
+const std::string& Profile::ws_server_cert_path() const {
+  return ws_server_cert_path_;
+}
+
+const std::string& Profile::ws_server_key_path() const {
+  return ws_server_key_path_;
+}
+
+const std::string& Profile::ws_server_ca_cert_path() const {
+  return ws_server_ca_cert_path_;
+}
+
+const bool Profile::wss_server_supported() const {
+  return is_wss_settings_setup_;
+}
+#endif  // ENABLE_SECURITY
+#endif  // WEBSOCKET_SERVER_TRANSPORT_SUPPORT
+
+uint32_t Profile::cloud_app_retry_timeout() const {
+  return cloud_app_retry_timeout_;
+}
+
+uint16_t Profile::cloud_app_max_retry_attempts() const {
+  return cloud_app_max_retry_attempts_;
+}
+
+const uint8_t* Profile::bluetooth_uuid() const {
+  return bluetooth_uuid_.data();
+}
+
+const std::string& Profile::aoa_filter_manufacturer() const {
+  return aoa_filter_manufacturer_;
+}
+
+const std::string& Profile::aoa_filter_model_name() const {
+  return aoa_filter_model_name_;
+}
+
+const std::string& Profile::aoa_filter_description() const {
+  return aoa_filter_description_;
+}
+
+const std::string& Profile::aoa_filter_version() const {
+  return aoa_filter_version_;
+}
+
+const std::string& Profile::aoa_filter_uri() const {
+  return aoa_filter_uri_;
+}
+
+const std::string& Profile::aoa_filter_serial_number() const {
+  return aoa_filter_serial_number_;
 }
 
 const std::string& Profile::tts_delimiter() const {
@@ -704,6 +943,11 @@ const std::pair<uint32_t, int32_t>& Profile::read_did_frequency() const {
 const std::pair<uint32_t, int32_t>& Profile::get_vehicle_data_frequency()
     const {
   return get_vehicle_data_frequency_;
+}
+
+const std::pair<uint32_t, int32_t>&
+Profile::get_interior_vehicle_data_frequency() const {
+  return get_interior_vehicle_data_frequency_;
 }
 
 const std::pair<uint32_t, int32_t>& Profile::start_stream_retry_amount() const {
@@ -891,6 +1135,23 @@ uint16_t Profile::open_attempt_timeout_ms_resumption_db() const {
   return open_attempt_timeout_ms_resumption_db_;
 }
 
+const std::map<std::string, std::vector<std::string> >&
+Profile::transport_required_for_resumption_map() const {
+  return transport_required_for_resumption_map_;
+}
+
+const std::string& Profile::navigation_lowbandwidth_resumption_level() const {
+  return navigation_lowbandwidth_resumption_level_;
+}
+
+const std::string& Profile::projection_lowbandwidth_resumption_level() const {
+  return projection_lowbandwidth_resumption_level_;
+}
+
+const std::string& Profile::media_lowbandwidth_resumption_level() const {
+  return media_lowbandwidth_resumption_level_;
+}
+
 const uint16_t Profile::app_launch_max_retry_attempt() const {
   return app_launch_max_retry_attempt_;
 }
@@ -907,6 +1168,14 @@ const bool Profile::enable_app_launch_ios() const {
   return enable_app_launch_ios_;
 }
 
+uint32_t Profile::app_transport_change_timer() const {
+  return app_tranport_change_timer_;
+}
+
+uint32_t Profile::app_transport_change_timer_addition() const {
+  return app_tranport_change_timer_addition_;
+}
+
 const uint16_t Profile::max_number_of_ios_device() const {
   return max_number_of_ios_device_;
 }
@@ -917,6 +1186,39 @@ const uint16_t Profile::remove_bundle_id_attempts() const {
 
 const uint16_t Profile::wait_time_between_apps() const {
   return wait_time_between_apps_;
+}
+
+const bool Profile::multiple_transports_enabled() const {
+  return multiple_transports_enabled_;
+}
+
+uint32_t Profile::rpc_pass_through_timeout() const {
+  return rpc_pass_through_timeout_;
+}
+
+uint16_t Profile::period_for_consent_expiration() const {
+  return period_for_consent_expiration_;
+}
+
+const std::vector<std::string>& Profile::secondary_transports_for_bluetooth()
+    const {
+  return secondary_transports_for_bluetooth_;
+}
+
+const std::vector<std::string>& Profile::secondary_transports_for_usb() const {
+  return secondary_transports_for_usb_;
+}
+
+const std::vector<std::string>& Profile::secondary_transports_for_wifi() const {
+  return secondary_transports_for_wifi_;
+}
+
+const std::vector<std::string>& Profile::audio_service_transports() const {
+  return audio_service_transports_;
+}
+
+const std::vector<std::string>& Profile::video_service_transports() const {
+  return video_service_transports_;
 }
 
 const bool Profile::ErrorOccured() const {
@@ -934,8 +1236,16 @@ bool Profile::IsFileNamePortable(const std::string& file_name) const {
   return true;
 }
 
+const std::vector<std::string>& Profile::embedded_services() const {
+  return embedded_services_;
+}
+
+const std::string Profile::hmi_origin_id() const {
+  return hmi_origin_id_;
+}
+
 void Profile::UpdateValues() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
 
   // SDL version
   ReadStringValue(
@@ -976,6 +1286,7 @@ void Profile::UpdateValues() {
 
   ReadStringValue(
       &cert_path_, "", kSecuritySection, kSecurityCertificatePathKey);
+
   ReadStringValue(
       &ca_cert_path_, "", kSecuritySection, kSecurityCACertificatePathKey);
 
@@ -1027,6 +1338,21 @@ void Profile::UpdateValues() {
   }
 
   LOG_UPDATED_VALUE(app_storage_folder_, kAppStorageFolderKey, kMainSection);
+
+  // HMI capabilities cache file
+  ReadStringValue(&hmi_capabilities_cache_file_name_,
+                  "",
+                  kMainSection,
+                  kHmiCapabilitiesCacheFileKey);
+
+  if (!hmi_capabilities_cache_file_name_.empty()) {
+    hmi_capabilities_cache_file_name_ =
+        app_storage_folder_ + "/" + hmi_capabilities_cache_file_name_;
+  }
+
+  LOG_UPDATED_VALUE(hmi_capabilities_cache_file_name_,
+                    kHmiCapabilitiesCacheFileKey,
+                    kMainSection);
 
   // Application resourse folder
   ReadStringValue(&app_resource_folder_,
@@ -1224,7 +1550,8 @@ void Profile::UpdateValues() {
                   kMediaManagerSection,
                   kNamedVideoPipePathKey);
 
-  named_video_pipe_path_ = app_storage_folder_ + "/" + named_video_pipe_path_;
+  named_video_pipe_path_ = app_storage_folder_ + "/" +
+                           std::string(named_video_pipe_path_, 0, NAME_MAX);
 
   LOG_UPDATED_VALUE(
       named_video_pipe_path_, kNamedVideoPipePathKey, kMediaManagerSection);
@@ -1235,7 +1562,8 @@ void Profile::UpdateValues() {
                   kMediaManagerSection,
                   kNamedAudioPipePathKey);
 
-  named_audio_pipe_path_ = app_storage_folder_ + "/" + named_audio_pipe_path_;
+  named_audio_pipe_path_ = app_storage_folder_ + "/" +
+                           std::string(named_audio_pipe_path_, 0, NAME_MAX);
 
   LOG_UPDATED_VALUE(
       named_audio_pipe_path_, kNamedAudioPipePathKey, kMediaManagerSection);
@@ -1244,7 +1572,8 @@ void Profile::UpdateValues() {
   ReadStringValue(
       &video_stream_file_, "", kMediaManagerSection, kVideoStreamFileKey);
 
-  video_stream_file_ = app_storage_folder_ + "/" + video_stream_file_;
+  video_stream_file_ =
+      app_storage_folder_ + "/" + std::string(video_stream_file_, 0, NAME_MAX);
 
   LOG_UPDATED_VALUE(
       video_stream_file_, kVideoStreamFileKey, kMediaManagerSection);
@@ -1253,7 +1582,8 @@ void Profile::UpdateValues() {
   ReadStringValue(
       &audio_stream_file_, "", kMediaManagerSection, kAudioStreamFileKey);
 
-  audio_stream_file_ = app_storage_folder_ + "/" + audio_stream_file_;
+  audio_stream_file_ =
+      app_storage_folder_ + "/" + std::string(audio_stream_file_, 0, NAME_MAX);
 
   LOG_UPDATED_VALUE(
       audio_stream_file_, kAudioStreamFileKey, kMediaManagerSection);
@@ -1409,8 +1739,7 @@ void Profile::UpdateValues() {
   help_prompt_.clear();
   std::string help_prompt_value;
   if (ReadValue(&help_prompt_value, kGlobalPropertiesSection, kHelpPromptKey)) {
-    char* str = NULL;
-    str = strtok(const_cast<char*>(help_prompt_value.c_str()), ",");
+    char* str = strtok(const_cast<char*>(help_prompt_value.c_str()), ",");
     while (str != NULL) {
       // Default prompt should have delimiter included for each item
       const std::string prompt_item = std::string(str) + tts_delimiter_;
@@ -1429,8 +1758,7 @@ void Profile::UpdateValues() {
   std::string timeout_prompt_value;
   if (ReadValue(
           &timeout_prompt_value, kGlobalPropertiesSection, kTimeoutPromptKey)) {
-    char* str = NULL;
-    str = strtok(const_cast<char*>(timeout_prompt_value.c_str()), ",");
+    char* str = strtok(const_cast<char*>(timeout_prompt_value.c_str()), ",");
     while (str != NULL) {
       // Default prompt should have delimiter included for each item
       const std::string prompt_item = std::string(str) + tts_delimiter_;
@@ -1454,8 +1782,7 @@ void Profile::UpdateValues() {
   vr_commands_.clear();
   std::string vr_help_command_value;
   if (ReadValue(&vr_help_command_value, kVrCommandsSection, kHelpCommandKey)) {
-    char* str = NULL;
-    str = strtok(const_cast<char*>(vr_help_command_value.c_str()), ",");
+    char* str = strtok(const_cast<char*>(vr_help_command_value.c_str()), ",");
     while (str != NULL) {
       const std::string vr_item = str;
       vr_commands_.push_back(vr_item);
@@ -1537,8 +1864,8 @@ void Profile::UpdateValues() {
                       "",
                       kMainSection,
                       kSupportedDiagModesKey)) {
-    char* str = NULL;
-    str = strtok(const_cast<char*>(supported_diag_modes_value.c_str()), ",");
+    char* str =
+        strtok(const_cast<char*>(supported_diag_modes_value.c_str()), ",");
     while (str != NULL) {
       errno = 0;
       uint32_t user_value = strtol(str, NULL, 16);
@@ -1592,6 +1919,144 @@ void Profile::UpdateValues() {
 
   LOG_UPDATED_VALUE(transport_manager_tcp_adapter_port_,
                     kTCPAdapterPortKey,
+                    kTransportManagerSection);
+
+  // Transport manager TCP network interface
+  ReadStringValue(&transport_manager_tcp_adapter_network_interface_,
+                  kDefaultTransportManagerTCPAdapterNetworkInterface,
+                  kTransportManagerSection,
+                  kTCPAdapterNetworkInterfaceKey);
+
+  LOG_UPDATED_VALUE(transport_manager_tcp_adapter_network_interface_,
+                    kTCPAdapterNetworkInterfaceKey,
+                    kTransportManagerSection);
+#ifdef WEBSOCKET_SERVER_TRANSPORT_SUPPORT
+  // Websocket server address
+  ReadStringValue(&websocket_server_address_,
+                  kDefaultWebsocketServerAddress,
+                  kTransportManagerSection,
+                  kWebSocketServerAddressKey);
+
+  LOG_UPDATED_VALUE(websocket_server_address_,
+                    kWebSocketServerAddressKey,
+                    kTransportManagerSection);
+
+  // Websocket non-secured server port
+  ReadUIntValue(&websocket_server_port_,
+                kDefaultWebSocketServerPort,
+                kTransportManagerSection,
+                kWebSocketServerPortKey);
+
+  LOG_UPDATED_VALUE(websocket_server_port_,
+                    kWebSocketServerPortKey,
+                    kTransportManagerSection);
+
+#ifdef ENABLE_SECURITY
+  const bool is_ws_server_cert_setup =
+      ReadStringValue(&ws_server_cert_path_,
+                      "",
+                      kTransportManagerSection,
+                      kWSServerCertificatePathKey);
+
+  LOG_UPDATED_VALUE(ws_server_cert_path_,
+                    kWSServerCertificatePathKey,
+                    kTransportManagerSection);
+
+  const bool is_ws_server_key_setup = ReadStringValue(
+      &ws_server_key_path_, "", kTransportManagerSection, kWSServerKeyPathKey);
+
+  LOG_UPDATED_VALUE(
+      ws_server_key_path_, kWSServerKeyPathKey, kTransportManagerSection);
+
+  const bool is_ws_ca_cert_setup =
+      ReadStringValue(&ws_server_ca_cert_path_,
+                      "",
+                      kTransportManagerSection,
+                      kWSServerCACertificaePathKey);
+
+  LOG_UPDATED_VALUE(ws_server_ca_cert_path_,
+                    kWSServerCACertificaePathKey,
+                    kTransportManagerSection);
+
+  is_wss_settings_setup_ =
+      is_ws_server_cert_setup && is_ws_server_key_setup && is_ws_ca_cert_setup;
+#endif  // ENABLE_SECURITY
+#endif  // WEBSOCKET_SERVER_TRANSPORT_SUPPORT
+
+  ReadUIntValue(&cloud_app_retry_timeout_,
+                kDefaultCloudAppRetryTimeout,
+                kCloudAppTransportSection,
+                kCloudAppRetryTimeoutKey);
+
+  LOG_UPDATED_VALUE(cloud_app_retry_timeout_,
+                    kCloudAppRetryTimeoutKey,
+                    kCloudAppTransportSection);
+
+  ReadUIntValue(&cloud_app_max_retry_attempts_,
+                kDefaultCloudAppMaxRetryAttempts,
+                kCloudAppTransportSection,
+                kCloudAppMaxRetryAttemptsKey);
+
+  LOG_UPDATED_VALUE(cloud_app_max_retry_attempts_,
+                    kCloudAppMaxRetryAttemptsKey,
+                    kCloudAppTransportSection);
+
+  bool read_result = true;
+  bluetooth_uuid_ = ReadUint8Container(
+      kTransportManagerSection, kBluetoothUUIDKey, &read_result);
+  if (!read_result || bluetooth_uuid_.size() != 16) {
+    bluetooth_uuid_ = kDefaultBluetoothUUID;
+  }
+
+  ReadStringValue(&aoa_filter_manufacturer_,
+                  kDefaultAOAFilterManufacturer,
+                  kTransportManagerSection,
+                  kAOAFilterManufacturerKey);
+
+  LOG_UPDATED_VALUE(aoa_filter_manufacturer_,
+                    kAOAFilterManufacturerKey,
+                    kTransportManagerSection);
+
+  ReadStringValue(&aoa_filter_model_name_,
+                  kDefaultAOAFilterModelName,
+                  kTransportManagerSection,
+                  kAOAFilterModelNameKey);
+
+  LOG_UPDATED_VALUE(
+      aoa_filter_model_name_, kAOAFilterModelNameKey, kTransportManagerSection);
+
+  ReadStringValue(&aoa_filter_description_,
+                  kDefaultAOAFilterDescription,
+                  kTransportManagerSection,
+                  kAOAFilterDescriptionKey);
+
+  LOG_UPDATED_VALUE(aoa_filter_description_,
+                    kAOAFilterDescriptionKey,
+                    kTransportManagerSection);
+
+  ReadStringValue(&aoa_filter_version_,
+                  kDefaultAOAFilterVersion,
+                  kTransportManagerSection,
+                  kAOAFilterVersionKey);
+
+  LOG_UPDATED_VALUE(
+      aoa_filter_version_, kAOAFilterVersionKey, kTransportManagerSection);
+
+  ReadStringValue(&aoa_filter_uri_,
+                  kDefaultAOAFilterURI,
+                  kTransportManagerSection,
+                  kAOAFilterURIKey);
+
+  LOG_UPDATED_VALUE(
+      aoa_filter_uri_, kAOAFilterURIKey, kTransportManagerSection);
+
+  ReadStringValue(&aoa_filter_serial_number_,
+                  kDefaultAOAFilterSerialNumber,
+                  kTransportManagerSection,
+                  kAOAFilterSerialNumber);
+
+  LOG_UPDATED_VALUE(aoa_filter_serial_number_,
+                    kAOAFilterSerialNumber,
                     kTransportManagerSection);
 
   // Event MQ
@@ -1685,6 +2150,15 @@ void Profile::UpdateValues() {
     enable_policy_ = false;
   }
 
+  // Use full app ID internally?
+  std::string use_full_id_string;
+  if (ReadValue(&use_full_id_string, kPolicySection, kUseFullAppID) &&
+      0 == strcmp("true", use_full_id_string.c_str())) {
+    use_full_app_id_ = true;
+  } else {
+    use_full_app_id_ = false;
+  }
+
   // Max protocol version
   ReadUIntValue(&max_supported_protocol_version_,
                 kDefaultMaxSupportedProtocolVersion,
@@ -1718,6 +2192,11 @@ void Profile::UpdateValues() {
                        kGetVehicleDataFrequency,
                        kMainSection,
                        kGetVehicleDataFrequencyKey);
+
+  ReadUintIntPairValue(&get_interior_vehicle_data_frequency_,
+                       kGetInteriorVehicleDataFrequency,
+                       kMainSection,
+                       kGetInteriorVehicleDataFrequencyKey);
 
   ReadUIntValue(&max_thread_pool_size_,
                 kDefaultMaxThreadPoolSize,
@@ -1825,6 +2304,84 @@ void Profile::UpdateValues() {
                     kOpenAttemptTimeoutMsResumptionDBKey,
                     kResumptionSection);
 
+  {  // read parameters from TransportRequiredForResumption section
+    struct KeyPair {
+      const char* ini_key_name;
+      const char* map_key_name;
+    } keys[] = {
+        {kDefaultTransportRequiredForResumptionKey, kAppHMITypeDefault},
+        {kCommunicationTransportRequiredForResumptionKey,
+         kAppHMITypeCommunication},
+        {kMediaTransportRequiredForResumptionKey, kAppHMITypeMedia},
+        {kMessagingTransportRequiredForResumptionKey, kAppHMITypeMessaging},
+        {kNavigationTransportRequiredForResumptionKey, kAppHMITypeNavigation},
+        {kInformationTransportRequiredForResumptionKey, kAppHMITypeInformation},
+        {kSocialTransportRequiredForResumptionKey, kAppHMITypeSocial},
+        {kBackgroundProcessTransportRequiredForResumptionKey,
+         kAppHMITypeBackgroundProcess},
+        {kTestingTransportRequiredForResumptionKey, kAppHMITypeTesting},
+        {kSystemTransportRequiredForResumptionKey, kAppHMITypeSystem},
+        {kProjectionTransportRequiredForResumptionKey, kAppHMITypeProjection},
+        {kRemoteControlTransportRequiredForResumptionKey,
+         kAppHMITypeRemoteControl},
+        {kEmptyAppTransportRequiredForResumptionKey, kAppHMITypeEmptyApp},
+        {NULL, NULL}};
+    struct KeyPair* entry = keys;
+
+    while (entry->ini_key_name != NULL) {
+      bool exist = false;
+      std::vector<std::string> transport_list =
+          ReadStringContainer(kTransportRequiredForResumptionSection,
+                              entry->ini_key_name,
+                              &exist,
+                              true);
+      if (exist) {
+        transport_required_for_resumption_map_[entry->map_key_name] =
+            transport_list;
+
+        const std::string list_with_comma = std::accumulate(
+            transport_list.begin(),
+            transport_list.end(),
+            std::string(""),
+            [](std::string& first, std::string& second) {
+              return first.empty() ? second : first + ", " + second;
+            });
+        LOG_UPDATED_VALUE(list_with_comma,
+                          entry->ini_key_name,
+                          kTransportRequiredForResumptionSection);
+      }
+      entry++;
+    }
+  }
+
+  // Read parameters from LowBandwidthTransportResumptionLevel section
+  ReadStringValue(&navigation_lowbandwidth_resumption_level_,
+                  kDefaultLowBandwidthResumptionLevel,
+                  kLowBandwidthTransportResumptionLevelSection,
+                  kNavigationLowBandwidthResumptionLevelKey);
+
+  LOG_UPDATED_VALUE(navigation_lowbandwidth_resumption_level_,
+                    kNavigationLowBandwidthResumptionLevelKey,
+                    kLowBandwidthTransportResumptionLevelSection);
+
+  ReadStringValue(&projection_lowbandwidth_resumption_level_,
+                  kDefaultLowBandwidthResumptionLevel,
+                  kLowBandwidthTransportResumptionLevelSection,
+                  kProjectionLowBandwidthResumptionLevelKey);
+
+  LOG_UPDATED_VALUE(projection_lowbandwidth_resumption_level_,
+                    kProjectionLowBandwidthResumptionLevelKey,
+                    kLowBandwidthTransportResumptionLevelSection);
+
+  ReadStringValue(&media_lowbandwidth_resumption_level_,
+                  kDefaultLowBandwidthResumptionLevel,
+                  kLowBandwidthTransportResumptionLevelSection,
+                  kMediaLowBandwidthResumptionLevelKey);
+
+  LOG_UPDATED_VALUE(media_lowbandwidth_resumption_level_,
+                    kMediaLowBandwidthResumptionLevelKey,
+                    kLowBandwidthTransportResumptionLevelSection);
+
   // Read parameters from App Launch section
   ReadUIntValue(&app_launch_wait_time_,
                 kDefaultAppLaunchWaitTime,
@@ -1884,6 +2441,156 @@ void Profile::UpdateValues() {
 
   LOG_UPDATED_BOOL_VALUE(
       enable_app_launch_ios_, kEnableAppLaunchIOSKey, kAppLaunchSection);
+
+  ReadUIntValue(&app_tranport_change_timer_,
+                kDefaultAppTransportChangeTimer,
+                kMainSection,
+                kAppTransportChangeTimerKey);
+
+  LOG_UPDATED_VALUE(
+      app_tranport_change_timer_, kAppTransportChangeTimerKey, kMainSection);
+
+  ReadUIntValue(&app_tranport_change_timer_addition_,
+                kDefaultAppTransportChangeTimerAddition,
+                kMainSection,
+                kAppTransportChangeTimerAdditionKey);
+
+  LOG_UPDATED_VALUE(app_tranport_change_timer_addition_,
+                    kAppTransportChangeTimerAdditionKey,
+                    kMainSection);
+
+  ReadIntValue(&low_voltage_signal_offset_,
+               kDefaultLowVoltageSignalOffset,
+               kMainSection,
+               kLowVoltageSignalOffsetKey);
+
+  LOG_UPDATED_VALUE(
+      low_voltage_signal_offset_, kLowVoltageSignalOffsetKey, kMainSection);
+
+  ReadIntValue(&wake_up_signal_offset_,
+               kDefaultWakeUpSignalOffset,
+               kMainSection,
+               kWakeUpSignalOffsetKey);
+
+  LOG_UPDATED_VALUE(
+      wake_up_signal_offset_, kWakeUpSignalOffsetKey, kMainSection);
+
+  ReadIntValue(&ignition_off_signal_offset_,
+               kDefaultIgnitionOffSignalOffset,
+               kMainSection,
+               kIgnitionOffSignalOffsetKey);
+
+  LOG_UPDATED_VALUE(
+      ignition_off_signal_offset_, kIgnitionOffSignalOffsetKey, kMainSection);
+
+  ReadBoolValue(&multiple_transports_enabled_,
+                kDefaultMultipleTransportsEnabled,
+                kMultipleTransportsSection,
+                kMultipleTransportsEnabledKey);
+
+  LOG_UPDATED_BOOL_VALUE(multiple_transports_enabled_,
+                         kMultipleTransportsEnabledKey,
+                         kMultipleTransportsSection);
+
+  ReadUIntValue(&rpc_pass_through_timeout_,
+                kDefaultRpcPassThroughTimeout,
+                kAppServicesSection,
+                kRpcPassThroughTimeoutKey);
+
+  LOG_UPDATED_VALUE(rpc_pass_through_timeout_,
+                    kRpcPassThroughTimeoutKey,
+                    kAppServicesSection);
+
+  ReadUIntValue(&period_for_consent_expiration_,
+                kDefaultPeriodForConsentExpiration,
+                kRCModuleConsentSection,
+                kPeriodForConsentExpirationKey);
+
+  LOG_UPDATED_VALUE(period_for_consent_expiration_,
+                    kPeriodForConsentExpirationKey,
+                    kRCModuleConsentSection);
+
+  {  // Secondary Transports and ServicesMap
+    struct KeyPair {
+      std::vector<std::string>* ini_vector;
+      const char* ini_section_name;
+      const char* ini_key_name;
+    } keys[] = {{&secondary_transports_for_bluetooth_,
+                 kMultipleTransportsSection,
+                 kSecondaryTransportForBluetoothKey},
+                {&secondary_transports_for_usb_,
+                 kMultipleTransportsSection,
+                 kSecondaryTransportForUSBKey},
+                {&secondary_transports_for_wifi_,
+                 kMultipleTransportsSection,
+                 kSecondaryTransportForWiFiKey},
+                {&audio_service_transports_,
+                 kServicesMapSection,
+                 kAudioServiceTransportsKey},
+                {&video_service_transports_,
+                 kServicesMapSection,
+                 kVideoServiceTransportsKey},
+                {NULL, NULL, NULL}};
+    struct KeyPair* entry = keys;
+
+    while (entry->ini_vector != NULL) {
+      bool exist = false;
+      std::vector<std::string> profile_entry = ReadStringContainer(
+          entry->ini_section_name, entry->ini_key_name, &exist, true);
+      if (exist) {
+        *entry->ini_vector = profile_entry;
+
+        const std::string list_with_comma = std::accumulate(
+            profile_entry.begin(),
+            profile_entry.end(),
+            std::string(""),
+            [](std::string& first, std::string& second) {
+              return first.empty() ? second : first + ", " + second;
+            });
+        LOG_UPDATED_VALUE(
+            list_with_comma, entry->ini_key_name, entry->ini_section_name);
+      }
+      entry++;
+    }
+  }
+
+  ReadStringValue(&hmi_origin_id_,
+                  kDefaultHMIOriginId,
+                  kAppServicesSection,
+                  kHMIOriginIDKey);
+
+  LOG_UPDATED_VALUE(hmi_origin_id_, kHMIOriginIDKey, kAppServicesSection);
+
+  {  // App Services map
+    struct KeyPair {
+      std::vector<std::string>* ini_vector;
+      const char* ini_section_name;
+      const char* ini_key_name;
+    } keys[] = {
+        {&embedded_services_, kAppServicesSection, kEmbeddedServicesKey},
+        {NULL, NULL, NULL}};
+    struct KeyPair* entry = keys;
+
+    while (entry->ini_vector != NULL) {
+      bool exist = false;
+      std::vector<std::string> profile_entry = ReadStringContainer(
+          entry->ini_section_name, entry->ini_key_name, &exist, true);
+      if (exist) {
+        *entry->ini_vector = profile_entry;
+
+        const std::string list_with_comma = std::accumulate(
+            profile_entry.begin(),
+            profile_entry.end(),
+            std::string(""),
+            [](std::string& first, std::string& second) {
+              return first.empty() ? second : first + ", " + second;
+            });
+        LOG_UPDATED_VALUE(
+            list_with_comma, entry->ini_key_name, entry->ini_section_name);
+      }
+      entry++;
+    }
+  }
 }
 
 bool Profile::ReadValue(bool* value,
@@ -1911,15 +2618,22 @@ bool Profile::ReadValue(std::string* value,
                         const char* const pSection,
                         const char* const pKey) const {
   DCHECK(value);
+  return ReadValueEmpty(value, pSection, pKey) && "\0" != *value;
+}
+
+bool Profile::ReadValueEmpty(std::string* value,
+                             const char* const pSection,
+                             const char* const pKey) const {
+  DCHECK(value);
   bool ret = false;
 
   char buf[INI_LINE_LEN + 1];
   *buf = '\0';
-  if ((0 != ini_read_value(config_file_name_.c_str(), pSection, pKey, buf)) &&
-      ('\0' != *buf)) {
+  if (0 != ini_read_value(config_file_name_.c_str(), pSection, pKey, buf)) {
     *value = buf;
     ret = true;
   }
+
   return ret;
 }
 
@@ -1981,7 +2695,23 @@ namespace {
 int32_t hex_to_int(const std::string& value) {
   return static_cast<int32_t>(strtol(value.c_str(), NULL, 16));
 }
+
+uint8_t hex_to_uint8(const std::string& value) {
+  return static_cast<uint8_t>(strtol(value.c_str(), NULL, 16));
 }
+
+std::string trim_string(const std::string& str) {
+  const char* delims = " \t";
+
+  size_t start = str.find_first_not_of(delims);
+  if (std::string::npos == start) {
+    return std::string();
+  }
+  size_t end = str.find_last_not_of(delims);
+
+  return str.substr(start, end - start + 1);
+}
+}  // namespace
 
 std::vector<int> Profile::ReadIntContainer(const char* const pSection,
                                            const char* const pKey,
@@ -1995,12 +2725,30 @@ std::vector<int> Profile::ReadIntContainer(const char* const pSection,
   return value_list;
 }
 
+std::vector<uint8_t> Profile::ReadUint8Container(const char* const pSection,
+                                                 const char* const pKey,
+                                                 bool* out_result) const {
+  const std::vector<std::string> string_list =
+      ReadStringContainer(pSection, pKey, out_result);
+  std::vector<uint8_t> value_list;
+  value_list.resize(string_list.size());
+  std::transform(
+      string_list.begin(), string_list.end(), value_list.begin(), hex_to_uint8);
+  return value_list;
+}
+
 std::vector<std::string> Profile::ReadStringContainer(
     const char* const pSection,
     const char* const pKey,
-    bool* out_result) const {
+    bool* out_result,
+    bool allow_empty) const {
   std::string string;
-  const bool result = ReadValue(&string, pSection, pKey);
+  bool result;
+  if (allow_empty) {
+    result = ReadValueEmpty(&string, pSection, pKey);
+  } else {
+    result = ReadValue(&string, pSection, pKey);
+  }
   if (out_result)
     *out_result = result;
   std::vector<std::string> value_container;
@@ -2010,7 +2758,7 @@ std::vector<std::string> Profile::ReadStringContainer(
     while (iss) {
       if (!getline(iss, temp_str, ','))
         break;
-      value_container.push_back(temp_str);
+      value_container.push_back(trim_string(temp_str));
     }
   }
   return value_container;
@@ -2100,7 +2848,7 @@ bool Profile::StringToNumber(const std::string& input, uint64_t& output) const {
 
 bool Profile::IsRelativePath(const std::string& path) {
   if (path.empty()) {
-    LOG4CXX_ERROR(logger_, "Empty path passed.");
+    SDL_LOG_ERROR("Empty path passed.");
     return false;
   }
   return '/' != path[0];

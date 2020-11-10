@@ -33,9 +33,9 @@
 #ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_ADAPTER_TRANSPORT_ADAPTER_LISTENER_H_
 #define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_ADAPTER_TRANSPORT_ADAPTER_LISTENER_H_
 
+#include "protocol/common.h"
 #include "transport_manager/common.h"
 #include "transport_manager/error.h"
-#include "protocol/common.h"
 
 namespace transport_manager {
 namespace transport_adapter {
@@ -92,6 +92,25 @@ class TransportAdapterListener {
       const TransportAdapter* adapter) = 0;
 
   /**
+   * @brief Reaction to connection status update
+   * @param adapter Current transport adapter
+   */
+  virtual void OnConnectionStatusUpdated(const TransportAdapter* adapter) = 0;
+
+  /**
+   * @brief Search specified device adapter in the container of shared pointers
+   * to device adapters to be sure it is available,
+   * launch event ON_CONNECT_PENDING in transport manager.
+   *
+   * @param device_adater Pointer to the device adapter.
+   * @param device_handle Device unique identifier.
+   * @param app_id Handle of application.
+   */
+  virtual void OnConnectPending(const TransportAdapter* adapter,
+                                const DeviceUID& device_handle,
+                                const ApplicationHandle& app_id) = 0;
+
+  /**
    * @brief Search specified device adapter in the container of shared pointers
    *to device adapters to be sure it is available,
    * launch event ON_CONNECT_DONE in transport manager.
@@ -146,6 +165,7 @@ class TransportAdapterListener {
                                       const DeviceUID& device_handle,
                                       const ApplicationHandle& app_handle,
                                       const CommunicationError& error) = 0;
+
   /**
    * @brief Search specified device adapter in the container of shared pointers
    *to device adapters to be sure it is available,
@@ -269,8 +289,24 @@ class TransportAdapterListener {
   virtual void OnCommunicationError(const TransportAdapter* transport_adapter,
                                     const DeviceUID& device_handle,
                                     const ApplicationHandle& app_handle) = 0;
+  /**
+   * @brief OnTransportSwitchRequested notifies on received signal to start
+   * transport switching flow (at the moment Bluetooth to USB only)
+   * @param transport_adapter Transport adapter who received the signal
+   */
+  virtual void OnTransportSwitchRequested(
+      const TransportAdapter* transport_adapter) = 0;
+
+  /**
+   * @brief Notification that the transport's specific configuration has been
+   *        updated.
+   *
+   * @param transport_adapter  pointer to the transport adapter
+   */
+  virtual void OnTransportConfigUpdated(
+      const TransportAdapter* transport_adapter) = 0;
 };
 
-}  // transport_adapter namespace
-}  // transport_manager namespace
+}  // namespace transport_adapter
+}  // namespace transport_manager
 #endif  // SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_ADAPTER_TRANSPORT_ADAPTER_LISTENER_H_

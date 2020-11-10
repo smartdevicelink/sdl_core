@@ -36,19 +36,19 @@
 #ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TCP_TCP_DEVICE_H_
 #define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TCP_TCP_DEVICE_H_
 
-#include <memory.h>
-#include <signal.h>
-#include <errno.h>
 #include <arpa/inet.h>
+#include <errno.h>
+#include <memory.h>
 #include <netinet/in.h>
-#include <sys/types.h>
+#include <signal.h>
 #include <sys/socket.h>
+#include <sys/types.h>
 
 #include <map>
 #include <string>
 
-#include "utils/lock.h"
 #include "transport_manager/transport_adapter/device.h"
+#include "utils/lock.h"
 
 namespace transport_manager {
 namespace transport_adapter {
@@ -65,6 +65,18 @@ class TcpDevice : public Device {
    * @param name Device Name.
    **/
   TcpDevice(const in_addr_t& in_addr, const std::string& name);
+
+#if defined(ENABLE_IAP2EMULATION)
+  /**
+   * @brief TcpDevice
+   * @param in_addr IP address of device
+   * @param device_uid Unique device id
+   * @param transport_switch_id Id used for transport switching
+   */
+  TcpDevice(const in_addr_t& in_addr,
+            const std::string& device_uid,
+            const std::string& transport_switch_id);
+#endif
 
   virtual ~TcpDevice();
 

@@ -32,12 +32,12 @@
 
 #ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_APP_LAUNCH_APP_LAUNCH_CTRL_H_
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_APP_LAUNCH_APP_LAUNCH_CTRL_H_
+#include <memory>
 #include <string>
-#include "utils/shared_ptr.h"
 
 namespace application_manager {
 class Application;
-typedef utils::SharedPtr<const Application> ApplicationConstSharedPtr;
+typedef std::shared_ptr<const Application> ApplicationConstSharedPtr;
 }  // namespace application_manager
 
 namespace app_launch {
@@ -49,22 +49,22 @@ namespace app_launch {
 class AppLaunchCtrl {
  public:
   /**
- * @brief OnAppRegistered should be called when application registered
- * Save application parameters to database
- * @param app application to save
- */
+   * @brief OnAppRegistered should be called when application registered
+   * Save application parameters to database
+   * @param app application to save
+   */
   virtual void OnAppRegistered(const application_manager::Application& app) = 0;
 
   /**
- * @brief OnDeviceConnected shoudl be called on device connected event
- * Start launching saaved applications on ios device
- * @param device_mac
- */
+   * @brief OnDeviceConnected shoudl be called on device connected event
+   * Start launching saaved applications on ios device
+   * @param device_mac
+   */
   virtual void OnDeviceConnected(const std::string& device_mac) = 0;
 
   /**
- * @brief OnMasterReset clear database of saved applications
- */
+   * @brief OnMasterReset clear database of saved applications
+   */
   virtual void OnMasterReset() = 0;
   virtual ~AppLaunchCtrl() {}
 };

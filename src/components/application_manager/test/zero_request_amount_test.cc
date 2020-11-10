@@ -30,19 +30,19 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <string>
 #include <algorithm>
+#include <string>
 #include "gtest/gtest.h"
 
-#include "application_manager/request_controller.h"
-#include "application_manager/commands/command_request_impl.h"
 #include "application_manager/application_manager_impl.h"
-#include "application_manager/message_helper.h"
+#include "application_manager/commands/command_request_impl.h"
 #include "application_manager/commands/mobile/put_file_request.h"
 #include "application_manager/commands/mobile/register_app_interface_request.h"
 #include "application_manager/commands/mobile/unregister_app_interface_request.h"
-#include "smart_objects/smart_object.h"
+#include "application_manager/message_helper.h"
+#include "application_manager/request_controller.h"
 #include "interfaces/MOBILE_API.h"
+#include "smart_objects/smart_object.h"
 
 namespace test {
 namespace components {
@@ -51,7 +51,7 @@ using namespace ::profile;
 
 using namespace application_manager::request_controller;
 using namespace application_manager;
-using namespace NsSmartDeviceLink::NsSmartObjects;
+using namespace ns_smart_device_link::ns_smart_objects;
 
 commands::Command* RegisterApplication() {
   SmartObjectSPtr resultsmart =

@@ -31,6 +31,10 @@
  */
 #ifndef SRC_COMPONENTS_INCLUDE_SECURITY_MANAGER_SECURITY_MANAGER_LISTENER_H_
 #define SRC_COMPONENTS_INCLUDE_SECURITY_MANAGER_SECURITY_MANAGER_LISTENER_H_
+
+#include <string>
+#include "security_manager/ssl_context.h"
+
 namespace security_manager {
 
 class SecurityManagerListener {
@@ -44,10 +48,40 @@ class SecurityManagerListener {
    */
   virtual bool OnHandshakeDone(uint32_t connection_key,
                                SSLContext::HandshakeResult result) = 0;
+
+  /**
+   * @brief Notification about handshake failure
+   * @return true on success notification handling or false otherwise
+   */
+  virtual bool OnGetSystemTimeFailed() = 0;
+
   /**
    * @brief Notify listeners that certificate update is required.
    */
   virtual void OnCertificateUpdateRequired() = 0;
+
+  virtual bool OnPTUFailed() = 0;
+
+#ifdef EXTERNAL_PROPRIETARY_MODE
+  /**
+   * @brief OnCertDecryptFailed is called when certificate decryption fails in
+   * external flow
+   * @return since this callback is a part of SecurityManagerListener, bool
+   * return value is used to indicate whether listener instance can be deleted
+   * by calling entity. if true - listener can be deleted and removed from
+   * listeners by SecurityManager, false - listener retains its place within
+   * SecurityManager.
+   */
+  virtual bool OnCertDecryptFailed() = 0;
+#endif
+
+  /**
+   * @brief Get certificate data from policy
+   * @param reference to string where to save certificate data
+   * @return true if listener saved some data to string otherwise false
+   */
+  virtual bool GetPolicyCertificateData(std::string& data) const = 0;
+
   virtual ~SecurityManagerListener() {}
 };
 }  // namespace security_manager

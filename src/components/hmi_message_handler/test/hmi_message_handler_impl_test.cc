@@ -30,21 +30,22 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "gtest/gtest.h"
-#include "application_manager/message.h"
 #include "hmi_message_handler/hmi_message_handler_impl.h"
+#include "application_manager/message.h"
+#include "gtest/gtest.h"
 #include "hmi_message_handler/messagebroker_adapter.h"
-#include "hmi_message_handler/mock_hmi_message_observer.h"
-#include "hmi_message_handler/mock_hmi_message_handler_settings.h"
 #include "hmi_message_handler/mock_hmi_message_adapter_impl.h"
+#include "hmi_message_handler/mock_hmi_message_handler_settings.h"
+#include "hmi_message_handler/mock_hmi_message_observer.h"
+#include "utils/jsoncpp_reader_wrapper.h"
 #include "utils/test_async_waiter.h"
 
 namespace test {
 namespace components {
 namespace hmi_message_handler_test {
 
-using ::testing::Return;
 using ::testing::_;
+using ::testing::Return;
 
 class HMIMessageHandlerImplTest : public ::testing::Test {
  public:
@@ -57,6 +58,7 @@ class HMIMessageHandlerImplTest : public ::testing::Test {
   hmi_message_handler::MessageBrokerAdapter* mb_adapter_;
   hmi_message_handler::HMIMessageHandlerImpl* hmi_handler_;
   MockHMIMessageObserver* mock_hmi_message_observer_;
+
   testing::NiceMock<MockHMIMessageHandlerSettings>
       mock_hmi_message_handler_settings;
   const uint64_t stack_size = 1000u;
@@ -68,7 +70,7 @@ class HMIMessageHandlerImplTest : public ::testing::Test {
         mock_hmi_message_handler_settings);
     ASSERT_TRUE(NULL != hmi_handler_);
     mb_adapter_ = new hmi_message_handler::MessageBrokerAdapter(
-        hmi_handler_, "localhost", 22);
+        hmi_handler_, "127.0.0.1", 8087);
     ASSERT_TRUE(NULL != mb_adapter_);
     mock_hmi_message_observer_ = new MockHMIMessageObserver();
     ASSERT_TRUE(NULL != mock_hmi_message_observer_);
@@ -85,7 +87,7 @@ class HMIMessageHandlerImplTest : public ::testing::Test {
 
   hmi_message_handler::MessageSharedPointer CreateMessage() {
     // The ServiceType doesn't really matter
-    return new application_manager::Message(
+    return std::make_shared<application_manager::Message>(
         protocol_handler::MessagePriority::FromServiceType(
             protocol_handler::ServiceType::kInvalidServiceType));
   }
@@ -103,7 +105,7 @@ TEST_F(HMIMessageHandlerImplTest,
 TEST_F(HMIMessageHandlerImplTest,
        OnErrorSending_NotEmptyMessage_ExpectOnErrorSendingProceeded) {
   // Arrange
-  utils::SharedPtr<application_manager::Message> message = CreateMessage();
+  std::shared_ptr<application_manager::Message> message = CreateMessage();
 
   EXPECT_CALL(*mock_hmi_message_observer_, OnErrorSending(message));
   // Act
@@ -112,7 +114,7 @@ TEST_F(HMIMessageHandlerImplTest,
 
 TEST_F(HMIMessageHandlerImplTest, OnErrorSending_InvalidObserver_Cancelled) {
   // Arrange
-  utils::SharedPtr<application_manager::Message> message = CreateMessage();
+  std::shared_ptr<application_manager::Message> message = CreateMessage();
 
   hmi_handler_->set_message_observer(NULL);
   EXPECT_CALL(*mock_hmi_message_observer_, OnErrorSending(_)).Times(0);
@@ -186,6 +188,53 @@ TEST_F(HMIMessageHandlerImplTest, SendMessageToHMI_Success) {
   hmi_handler_->messages_to_hmi()->WaitDumpQueue();
 
   EXPECT_TRUE(waiter.WaitFor(1, 100));
+}
+
+TEST(WebsocketSessionTest, SendMessage_UnpreparedConnection_WithoutFall) {
+  // Value "threadsafe" is preferable for this case, but as workaround for
+  // possible bug in gcc compiler value "fast" was set. Because of this warning
+  // message is appeared.
+
+  // ToDo: set value "threadsafe", if current version of gcc can handle
+  // this value correctly without causing of core dump.
+
+  ::testing::FLAGS_gtest_death_test_style = "fast";
+
+  auto send_message = []() {
+    auto message =
+        "{\"id\" : 1,\"jsonrpc\" : \"2.0\",\"method\" : "
+        "\"BasicCommunication.GetSystemInfo\"}";
+
+    utils::JsonReader reader;
+    Json::Value json_value;
+
+    ASSERT_TRUE(reader.parse(message, &json_value));
+
+    // Make unprepared connection
+    boost::asio::io_context ioc{1};
+    boost::asio::ip::tcp::acceptor acceptor{
+        ioc, {boost::asio::ip::make_address("127.0.0.1"), 8087}};
+    boost::asio::ip::tcp::socket socket{ioc};
+
+    std::unique_ptr<hmi_message_handler::WebsocketSession> session(
+        new hmi_message_handler::WebsocketSession(std::move(socket), nullptr));
+
+    // Send message to unprepared connection
+    session->sendJsonMessage(json_value);
+
+    // Wait for the message to be processed
+    std::this_thread::sleep_for(std::chrono::milliseconds(100));
+
+    // Stopping connection thread
+    session->Shutdown();
+    session = nullptr;
+
+    exit(0);
+  };
+
+  // Expected exit code 0, if test terminate by other signal(SIGABRT or
+  // SIGSEGV), we will get failed test
+  EXPECT_EXIT(send_message(), ::testing::ExitedWithCode(0), "");
 }
 
 }  // namespace hmi_message_handler_test

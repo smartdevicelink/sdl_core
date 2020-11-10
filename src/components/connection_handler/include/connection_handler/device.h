@@ -33,9 +33,10 @@
 #ifndef SRC_COMPONENTS_CONNECTION_HANDLER_INCLUDE_CONNECTION_HANDLER_DEVICE_H_
 #define SRC_COMPONENTS_CONNECTION_HANDLER_INCLUDE_CONNECTION_HANDLER_DEVICE_H_
 
-#include <string>
 #include <map>
+#include <string>
 #include <vector>
+#include "transport_manager/common.h"
 
 /**
  * \namespace connection_handler
@@ -46,7 +47,7 @@ namespace connection_handler {
 /**
  * \brief Type for DeviceHandle
  */
-typedef uint32_t DeviceHandle;
+typedef transport_manager::DeviceHandle DeviceHandle;
 typedef std::vector<int32_t> AppList;
 
 /**
@@ -76,9 +77,9 @@ class Device {
   std::string user_friendly_name() const;
 
   /**
-      *\brief Also should be used for iOS USB connections
-      *(better not know why this same method)
-      */
+   *\brief Also should be used for iOS USB connections
+   *(better not know why this same method)
+   */
   std::string mac_address() const;
 
   /**
@@ -112,6 +113,6 @@ class Device {
 /**
  * \brief Type for Devices map
  */
-typedef std::map<int32_t, Device> DeviceMap;
+typedef std::map<DeviceHandle, Device> DeviceMap;
 }  // namespace connection_handler
 #endif  // SRC_COMPONENTS_CONNECTION_HANDLER_INCLUDE_CONNECTION_HANDLER_DEVICE_H_

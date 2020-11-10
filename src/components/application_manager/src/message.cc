@@ -36,7 +36,7 @@ namespace {
 bool BinaryDataPredicate(uint8_t i, uint8_t j) {
   return (i == j);
 }
-}
+}  // namespace
 
 namespace application_manager {
 
@@ -64,8 +64,8 @@ Message::Message(protocol_handler::MessagePriority priority)
     , binary_data_(NULL)
     , data_size_(0)
     , payload_size_(0)
-    , version_(
-          protocol_handler::MajorProtocolVersion::PROTOCOL_VERSION_UNKNOWN) {}
+    , version_(protocol_handler::MajorProtocolVersion::PROTOCOL_VERSION_UNKNOWN)
+    , is_message_encrypted_(false) {}
 
 Message::Message(const Message& message)
     : function_id_(0)
@@ -76,8 +76,8 @@ Message::Message(const Message& message)
     , binary_data_(NULL)
     , data_size_(0)
     , payload_size_(0)
-    , version_(
-          protocol_handler::MajorProtocolVersion::PROTOCOL_VERSION_UNKNOWN) {
+    , version_(protocol_handler::MajorProtocolVersion::PROTOCOL_VERSION_UNKNOWN)
+    , is_message_encrypted_(false) {
   *this = message;
 }
 
@@ -89,7 +89,7 @@ Message& Message::operator=(const Message& message) {
   set_data_size(message.data_size_);
   set_payload_size(message.payload_size_);
   if (message.binary_data_) {
-    set_binary_data(message.binary_data_);
+    set_binary_data(static_cast<const BinaryData*>(message.binary_data_));
   }
   set_json_message(message.json_message_);
   set_protocol_version(message.protocol_version());
@@ -130,11 +130,9 @@ int32_t Message::function_id() const {
   return function_id_;
 }
 
-#ifdef SDL_REMOTE_CONTROL
 std::string Message::function_name() const {
   return function_name_;
 }
-#endif  // SDL_REMOTE_CONTROL
 
 int32_t Message::correlation_id() const {
   return correlation_id_;
@@ -142,6 +140,10 @@ int32_t Message::correlation_id() const {
 
 int32_t Message::connection_key() const {
   return connection_key_;
+}
+
+bool Message::is_message_encrypted() const {
+  return is_message_encrypted_;
 }
 
 MessageType Message::type() const {
@@ -176,11 +178,9 @@ void Message::set_function_id(int32_t id) {
   function_id_ = id;
 }
 
-#ifdef SDL_REMOTE_CONTROL
 void Message::set_function_name(const std::string& name) {
   function_name_ = name;
 }
-#endif  // SDL_REMOTE_CONTROL
 
 void Message::set_correlation_id(int32_t id) {
   correlation_id_ = id;
@@ -192,20 +192,6 @@ void Message::set_connection_key(int32_t key) {
 
 void Message::set_message_type(MessageType type) {
   type_ = type;
-}
-
-// DEPRECATED
-void Message::set_binary_data(BinaryData* data) {
-  if (NULL == data) {
-    NOTREACHED();
-    return;
-  }
-
-  if (binary_data_) {
-    delete binary_data_;
-  }
-
-  binary_data_ = new BinaryData(*data);
 }
 
 void Message::set_binary_data(const BinaryData* data) {
@@ -244,6 +230,10 @@ void Message::set_data_size(size_t data_size) {
 
 void Message::set_payload_size(size_t payload_size) {
   payload_size_ = payload_size;
+}
+
+void Message::set_message_encryption(const bool protection) {
+  is_message_encrypted_ = protection;
 }
 
 bool Message::is_sufficient_version(

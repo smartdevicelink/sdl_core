@@ -51,6 +51,60 @@ class TransportManagerSettings : public TransportManagerMMESettings {
    * @brief Returns port for TCP transport adapter
    */
   virtual uint16_t transport_manager_tcp_adapter_port() const = 0;
+
+  /**
+   * @brief Returns the millisecond count before timeout
+   * for transport change feature occures.
+   */
+  virtual uint32_t app_transport_change_timer() const = 0;
+
+  /**
+   * @brief Returns the millisecond count as addition to
+   * the transport change timeout value.
+   */
+  virtual uint32_t app_transport_change_timer_addition() const = 0;
+
+  /**
+   * @brief Returns the network interface name for TCP transport adapter
+   */
+  virtual const std::string& transport_manager_tcp_adapter_network_interface()
+      const = 0;
+#ifdef WEBSOCKET_SERVER_TRANSPORT_SUPPORT
+  /**
+   *@brief Returns websocket server address
+   */
+  virtual const std::string& websocket_server_address() const = 0;
+
+  /**
+   * @brief Returns port for websocket server
+   */
+  virtual uint16_t websocket_server_port() const = 0;
+
+#ifdef ENABLE_SECURITY
+  virtual const std::string& ws_server_cert_path() const = 0;
+  virtual const std::string& ws_server_key_path() const = 0;
+  virtual const std::string& ws_server_ca_cert_path() const = 0;
+  virtual const bool wss_server_supported() const = 0;
+#endif  // ENABLE_SECURITY
+#endif  // WEBSOCKET_SERVER_TRANSPORT_SUPPORT
+  /**
+   * @brief Returns retry timeout for cloud app connections
+   */
+  virtual uint32_t cloud_app_retry_timeout() const = 0;
+
+  /**
+   * @brief Returns maximum retry attempts for cloud app connections
+   */
+  virtual uint16_t cloud_app_max_retry_attempts() const = 0;
+
+  virtual const uint8_t* bluetooth_uuid() const = 0;
+
+  virtual const std::string& aoa_filter_manufacturer() const = 0;
+  virtual const std::string& aoa_filter_model_name() const = 0;
+  virtual const std::string& aoa_filter_description() const = 0;
+  virtual const std::string& aoa_filter_version() const = 0;
+  virtual const std::string& aoa_filter_uri() const = 0;
+  virtual const std::string& aoa_filter_serial_number() const = 0;
 };
 }  // namespace transport_manager
 #endif  // SRC_COMPONENTS_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_MANAGER_SETTINGS_H_

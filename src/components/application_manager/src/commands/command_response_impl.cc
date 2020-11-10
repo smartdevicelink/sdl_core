@@ -32,14 +32,25 @@
 
 #include "application_manager/commands/command_response_impl.h"
 #include "application_manager/application_manager.h"
+#include "application_manager/rpc_service.h"
 
 namespace application_manager {
 
 namespace commands {
 
+SDL_CREATE_LOG_VARIABLE("Commands");
+
 CommandResponseImpl::CommandResponseImpl(
-    const MessageSharedPtr& message, ApplicationManager& application_manager)
-    : CommandImpl(message, application_manager) {}
+    const MessageSharedPtr& message,
+    ApplicationManager& application_manager,
+    rpc_service::RPCService& rpc_service,
+    HMICapabilities& hmi_capabilities,
+    policy::PolicyHandlerInterface& policy_handler)
+    : CommandImpl(message,
+                  application_manager,
+                  rpc_service,
+                  hmi_capabilities,
+                  policy_handler) {}
 
 CommandResponseImpl::~CommandResponseImpl() {}
 
@@ -57,7 +68,7 @@ void CommandResponseImpl::SendResponse(
     bool success,
     const mobile_apis::Result::eType& result_code,
     bool final_message) {
-  LOG4CXX_INFO(logger_, "Trying to send response");
+  SDL_LOG_INFO("Trying to send response");
 
   (*message_)[strings::params][strings::protocol_type] = mobile_protocol_type_;
   (*message_)[strings::params][strings::protocol_version] = protocol_version_;
@@ -80,7 +91,7 @@ void CommandResponseImpl::SendResponse(
     }
   }
 
-  application_manager_.SendMessageToMobile(message_, final_message);
+  rpc_service_.SendMessageToMobile(message_, final_message);
 }
 
 }  // namespace commands

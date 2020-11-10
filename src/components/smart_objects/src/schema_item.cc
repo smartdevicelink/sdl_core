@@ -32,11 +32,15 @@
 
 #include "smart_objects/schema_item.h"
 
-namespace NsSmartDeviceLink {
-namespace NsSmartObjects {
+namespace ns_smart_device_link {
+namespace ns_smart_objects {
 
-Errors::eType ISchemaItem::validate(const SmartObject& object) {
-  return Errors::ERROR;
+errors::eType ISchemaItem::validate(
+    const SmartObject& object,
+    rpc::ValidationReport* report,
+    const utils::SemanticVersion& MessageVersion,
+    const bool allow_unknown_enums) {
+  return errors::ERROR;
 }
 
 bool ISchemaItem::setDefaultValue(SmartObject& Object) {
@@ -47,10 +51,19 @@ bool ISchemaItem::hasDefaultValue(SmartObject& Object) {
   return false;
 }
 
-void ISchemaItem::applySchema(SmartObject& Object,
-                              const bool RemoveFakeParameters) {}
+bool ISchemaItem::filterInvalidEnums(
+    SmartObject& Object,
+    const utils::SemanticVersion& MessageVersion,
+    rpc::ValidationReport* report) {
+  return false;
+}
 
-void ISchemaItem::unapplySchema(SmartObject& Object) {}
+void ISchemaItem::applySchema(SmartObject& Object,
+                              const bool remove_unknown_parameters,
+                              const utils::SemanticVersion& MessageVersion) {}
+
+void ISchemaItem::unapplySchema(SmartObject& Object,
+                                const bool remove_unknown_parameters) {}
 
 void ISchemaItem::BuildObjectBySchema(const SmartObject& pattern_object,
                                       SmartObject& result_object) {}
@@ -59,5 +72,9 @@ size_t ISchemaItem::GetMemberSize() {
   return 0;
 }
 
-}  // namespace NsSmartObjects
-}  // namespace NsSmartDeviceLink
+TypeID ISchemaItem::GetType() {
+  return TYPE_NONE;
+}
+
+}  // namespace ns_smart_objects
+}  // namespace ns_smart_device_link

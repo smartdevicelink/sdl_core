@@ -5,6 +5,8 @@ namespace application_manager {
 namespace strings {
 
 const char* params = "params";
+const char* require_encryption = "requireEncryption";
+const char* protection = "protection";
 const char* message_type = "message_type";
 const char* correlation_id = "correlation_id";
 const char* function_id = "function_id";
@@ -18,7 +20,9 @@ const char* msg_params = "msg_params";
 const char* method_name = "methodName";
 const char* info = "info";
 const char* app_id = "appID";
+const char* full_app_id = "fullAppID";
 const char* bundle_id = "appBundleID";
+const char* window_id = "windowID";
 const char* app_info = "appInfo";
 const char* app_launch = "app_launch";
 const char* app_launch_list = "app_launch_list";
@@ -26,6 +30,7 @@ const char* app_launch_last_session = "app_launch_last_session";
 const char* policy_app_id = "policyAppID";
 const char* hmi_app_id = "hmiAppID";
 const char* device_id = "deviceID";
+const char* subscribe = "subscribe";
 const char* subscribed_for_way_points = "subscribed_for_way_points";
 const char* url = "url";
 const char* urlScheme = "urlScheme";
@@ -42,7 +47,7 @@ const char* ngn_media_screen_app_name = "ngnMediaScreenAppName";
 const char* vr_synonyms = "vrSynonyms";
 const char* uses_vehicle_data = "usesVehicleData";
 const char* is_media_application = "isMediaApplication";
-const char* greyOut = "greyOut";
+const char* grey_out = "greyOut";
 const char* language_desired = "languageDesired";
 const char* auto_activated_id = "autoActivateID";
 const char* app_type = "appType";
@@ -57,6 +62,7 @@ const char* main_field_1 = "mainField1";
 const char* main_field_2 = "mainField2";
 const char* main_field_3 = "mainField3";
 const char* main_field_4 = "mainField4";
+const char* template_title = "templateTitle";
 const char* metadata_tags = "metadataTags";
 const char* eta = "eta";
 const char* time_to_destination = "timeToDestination";
@@ -75,10 +81,14 @@ const char* menu_icon = "menuIcon";
 const char* keyboard_properties = "keyboardProperties";
 const char* vr_commands = "vrCommands";
 const char* position = "position";
+const char* user_location = "userLocation";
 const char* num_ticks = "numTicks";
 const char* slider_footer = "sliderFooter";
 const char* menu_id = "menuID";
+const char* parent_id = "parentID";
 const char* menu_name = "menuName";
+const char* menu_layout = "menuLayout";
+const char* menu_layouts_available = "menuLayoutsAvailable";
 const char* interaction_choice_set_id = "interactionChoiceSetID";
 const char* interaction_choice_set_id_list = "interactionChoiceSetIDList";
 const char* choice_set = "choiceSet";
@@ -94,7 +104,10 @@ const char* initial_prompt = "initialPrompt";
 const char* initial_text = "initialText";
 const char* duration = "duration";
 const char* progress_indicator = "progressIndicator";
+const char* func_id = "functionID";
+const char* cancel_id = "cancelID";
 const char* alert_type = "alertType";
+const char* alert_icon = "alertIcon";
 const char* play_tone = "playTone";
 const char* soft_buttons = "softButtons";
 const char* soft_button_id = "softButtonID";
@@ -124,14 +137,24 @@ const char* hours = "hours";
 const char* minutes = "minutes";
 const char* seconds = "seconds";
 const char* update_mode = "updateMode";
+const char* audioStreamingIndicator = "audioStreamingIndicator";
 const char* trigger_source = "triggerSource";
 const char* hmi_level = "hmiLevel";
 const char* activate_app_hmi_level = "level";
 const char* audio_streaming_state = "audioStreamingState";
+const char* video_streaming_state = "videoStreamingState";
 const char* system_context = "systemContext";
+const char* window_name = "windowName";
+const char* window_type = "type";
+const char* window_type_supported = "windowTypeSupported";
+const char* maximum_number_of_windows = "maximumNumberOfWindows";
+const char* window_capabilities = "windowCapabilities";
+const char* associated_service_type = "associatedServiceType";
+const char* duplicate_updates_from_window_id = "duplicateUpdatesFromWindowID";
 const char* speech_capabilities = "speechCapabilities";
 const char* vr_capabilities = "vrCapabilities";
 const char* audio_pass_thru_capabilities = "audioPassThruCapabilities";
+const char* audio_pass_thru_capabilities_list = "audioPassThruCapabilitiesList";
 const char* pcm_stream_capabilities = "pcmStreamCapabilities";
 const char* audio_pass_thru_icon = "audioPassThruIcon";
 const char* way_points = "wayPoints";
@@ -141,21 +164,55 @@ const char* system_capabilities = "systemCapabilities";
 const char* navigation_capability = "navigationCapability";
 const char* phone_capability = "phoneCapability";
 const char* video_streaming_capability = "videoStreamingCapability";
+const char* driver_distraction_capability = "driverDistractionCapability";
+const char* driver_distraction = "driverDistraction";
 const char* rc_capability = "remoteControlCapability";
+const char* seat_location_capability = "seatLocationCapability";
+const char* app_services_capabilities = "appServicesCapabilities";
+const char* day_color_scheme = "dayColorScheme";
+const char* night_color_scheme = "nightColorScheme";
+const char* primary_color = "primaryColor";
+const char* secondary_color = "secondaryColor";
+const char* background_color = "backgroundColor";
+const char* red = "red";
+const char* green = "green";
+const char* blue = "blue";
+const char* display_layout = "displayLayout";
+const char* template_configuration = "templateConfiguration";
+const char* template_layout = "template";
+const char* icon_resumed = "iconResumed";
+const char* nicknames = "nicknames";
+const char* enabled = "enabled";
+const char* auth_token = "authToken";
+const char* cloud_transport_type = "cloudTransportType";
+const char* hybrid_app_preference = "hybridAppPreference";
+const char* is_cloud_application = "isCloudApplication";
+const char* cloud_connection_status = "cloudConnectionStatus";
+const char* endpoint = "endpoint";
+const char* display_capabilities = "displayCapabilities";
+const char* policy_type = "policyType";
+const char* property = "property";
+const char* displays = "displays";
+const char* seat_location = "seatLocation";
 
 // PutFile
 const char* sync_file_name = "syncFileName";
 const char* file_name = "fileName";
+const char* file_path = "filePath";
 const char* file_type = "fileType";
 const char* file_size = "fileSize";
+const char* crc32_check_sum = "crc";
 const char* request_type = "requestType";
+const char* request_subtype = "requestSubType";
 const char* persistent_file = "persistentFile";
 const char* file_data = "fileData";
 const char* space_available = "spaceAvailable";
 const char* image_type = "imageType";
+const char* is_template = "isTemplate";
 const char* image = "image";
 const char* type = "type";
 const char* system_file = "systemFile";
+const char* is_system_file = "isSystemFile";
 const char* offset = "offset";
 const char* length = "length";
 const char* secondary_image = "secondaryImage";
@@ -168,6 +225,7 @@ const char* did_location = "didLocation";
 const char* app_list = "appList";
 const char* device_list = "deviceList";
 const char* device_info = "deviceInfo";
+const char* secondary_device_info = "secondaryDeviceInfo";
 const char* name = "name";
 const char* id = "id";
 const char* isSDLAllowed = "isSDLAllowed";
@@ -193,6 +251,7 @@ const char* key_press_mode = "keypressMode";
 // duplicate names from hmi_request
 const char* limited_character_list = "limitedCharacterList";
 const char* auto_complete_text = "autoCompleteText";
+const char* auto_complete_list = "autoCompleteList";
 const char* navigation_text = "navigationText";
 
 // vehicle info
@@ -202,12 +261,17 @@ const char* rpm = "rpm";
 const char* fuel_level = "fuelLevel";
 const char* fuel_level_state = "fuelLevel_State";
 const char* instant_fuel_consumption = "instantFuelConsumption";
+const char* fuel_range = "fuelRange";
+const char* cloud_app_vehicle_id = "cloudAppVehicleID";
 const char* external_temp = "externalTemperature";
+const char* turn_signal = "turnSignal";
 const char* vin = "vin";
+const char* gearStatus = "gearStatus";
 const char* prndl = "prndl";
 const char* tire_pressure = "tirePressure";
 const char* odometer = "odometer";
 const char* belt_status = "beltStatus";
+const char* electronic_park_brake_status = "electronicParkBrakeStatus";
 const char* body_information = "bodyInformation";
 const char* device_status = "deviceStatus";
 const char* driver_braking = "driverBraking";
@@ -216,10 +280,12 @@ const char* head_lamp_status = "headLampStatus";
 const char* engine_torque = "engineTorque";
 const char* acc_pedal_pos = "accPedalPosition";
 const char* steering_wheel_angle = "steeringWheelAngle";
+const char* stability_controls_status = "stabilityControlsStatus";
 const char* e_call_info = "eCallInfo";
 const char* airbag_status = "airbagStatus";
 const char* emergency_event = "emergencyEvent";
 const char* cluster_mode_status = "clusterModeStatus";
+const char* cluster_modes = "clusterModes";
 const char* my_key = "myKey";
 const char* help_prompt = "helpPrompt";
 const char* scroll_message_body = "scrollableMessageBody";
@@ -238,6 +304,53 @@ const char* remote_control = "remoteControl";
 const char* sdl_version = "sdlVersion";
 const char* system_software_version = "systemSoftwareVersion";
 const char* priority = "priority";
+const char* engine_oil_life = "engineOilLife";
+const char* oem_custom_data_type = "oemCustomDataType";
+const char* window_status = "windowStatus";
+const char* hands_off_steering = "handsOffSteering";
+
+// app services
+const char* app_service_manifest = "appServiceManifest";
+const char* service_name = "serviceName";
+const char* service_type = "serviceType";
+const char* service_icon = "serviceIcon";
+const char* allow_app_consumers = "allowAppConsumers";
+const char* rpc_spec_version = "rpcSpecVersion";
+const char* handled_rpcs = "handledRPCs";
+const char* media_service_manifest = "mediaServiceManifest";
+const char* app_service_record = "appServiceRecord";
+const char* service_id = "serviceID";
+const char* service_manifest = "serviceManifest";
+const char* service_published = "servicePublished";
+const char* service_active = "serviceActive";
+const char* app_service_id = "appServiceId";
+const char* service_data = "serviceData";
+const char* media_service_data = "mediaServiceData";
+const char* media_image = "mediaImage";
+const char* weather_service_data = "weatherServiceData";
+const char* location = "location";
+const char* current_forecast = "currentForecast";
+const char* minute_forecast = "minuteForecast";
+const char* hourly_forecast = "hourlyForecast";
+const char* multiday_forecast = "multidayForecast";
+const char* weather_icon = "weatherIcon";
+const char* navigation_service_data = "navigationServiceData";
+const char* origin = "origin";
+const char* destination = "destination";
+const char* instructions = "instructions";
+const char* location_details = "locationDetails";
+const char* request_service_active = "requestServiceActive";
+const char* app_services = "appServices";
+const char* update_reason = "updateReason";
+const char* updated_app_service_record = "updatedAppServiceRecord";
+const char* service_records = "serviceRecords";
+const char* activate = "activate";
+const char* set_as_default = "setAsDefault";
+const char* origin_app = "originApp";
+
+// sis data
+const char* station_short_name = "stationShortName";
+const char* station_location = "stationLocation";
 
 // resuming
 const char* application_commands = "applicationCommands";
@@ -246,7 +359,7 @@ const char* application_choice_sets = "applicationChoiceSets";
 const char* application_global_properties = "globalProperties";
 const char* application_vehicle_info = "vehicleInfo";
 const char* application_buttons = "buttons";
-const char* application_subscribtions = "subscribtions";
+const char* application_subscriptions = "subscriptions";
 const char* application_files = "applicationFiles";
 const char* application_show = "applicationShow";
 const char* resumption = "resumption";
@@ -256,6 +369,7 @@ const char* last_ign_off_time = "last_ign_off_time";
 const char* resume_vr_grammars = "resumeVrGrammars";
 
 const char* ign_off_count = "ign_off_count";
+const char* global_ign_on_counter = "global_ign_on_counter";
 const char* suspend_count = "suspend_count";
 
 const char* connection_info = "connection_info";
@@ -266,8 +380,12 @@ const char* time_stamp = "timeStamp";
 const char* manual_text_entry = "manualTextEntry";
 const char* image_type_supported = "imageTypeSupported";
 const char* unexpected_disconnect = "unexpectedDisconnect";
+
+const char* shifted = "shifted";
+const char* altitude = "altitude";
 const char* longitude_degrees = "longitudeDegrees";
 const char* latitude_degrees = "latitudeDegrees";
+
 const char* address = "address";
 const char* country_name = "countryName";
 const char* country_code = "countryCode";
@@ -290,13 +408,16 @@ const char* delivery_mode = "deliveryMode";
 
 const char* audio_streaming_indicator = "audioStreamingIndicator";
 
+const char* windows_info = "windowsInfo";
+
 const char* const keyboard_properties_supported = "keyboardPropertiesSupported";
 const char* const language_supported = "languageSupported";
 const char* const keyboard_layout_supported = "keyboardLayoutSupported";
 const char* const keypress_mode_supported = "keypressModeSupported";
 const char* const limited_characters_list_supported =
     "limitedCharactersListSupported";
-const char* const auto_complete_text_supported = "autoCompleteTextSupported";
+const char* const send_location_enabled = "sendLocationEnabled";
+const char* const get_way_points_enabled = "getWayPointsEnabled";
 const char* const entity_type = "entityType";
 const char* const entity_id = "entityID";
 const char* const status = "status";
@@ -315,11 +436,27 @@ const char* const resolution_height = "resolutionHeight";
 const char* const max_bitrate = "maxBitrate";
 const char* const supported_formats = "supportedFormats";
 const char* const haptic_spatial_data_supported = "hapticSpatialDataSupported";
+const char* const diagonal_screen_size = "diagonalScreenSize";
+const char* const pixel_per_inch = "pixelPerInch";
+const char* const scale = "scale";
 const char* const haptic_rect_data = "hapticRectData";
 const char* const rect = "rect";
 const char* const x = "x";
 const char* const y = "y";
 }  // namespace strings
+
+namespace hmi_interface {
+const char* basic_communication = "BasicCommunication";
+const char* buttons = "Buttons";
+const char* navigation = "Navigation";
+const char* sdl = "SDL";
+const char* tts = "TTS";
+const char* ui = "UI";
+const char* vr = "VR";
+const char* rc = "RC";
+const char* vehicle_info = "VehicleInfo";
+const char* app_service = "AppService";
+}  // namespace hmi_interface
 
 namespace json {
 const char* appId = "appId";
@@ -351,12 +488,14 @@ const char* instance_follow_redirect = "InstanceFollowRedirect";
 const char* charset = "charset";
 const char* content_lenght = "Content_Lenght";
 const char* GET = "GET";
-}  // http_request
+}  // namespace http_request
 
 namespace mobile_notification {
 const char* state = "state";
 const char* syncp_timeout = "Timeout";
 const char* syncp_url = "URL";
+const char* lock_screen_dismissal_enabled = "lockScreenDismissalEnabled";
+const char* lock_screen_dismissal_warning = "lockScreenDismissalWarning";
 }  // namespace mobile_notification
 
 namespace hmi_levels {
@@ -364,7 +503,17 @@ const char* kFull = "FULL";
 const char* kLimited = "LIMITED";
 const char* kBackground = "BACKGROUND";
 const char* kNone = "NONE";
-}
+}  // namespace hmi_levels
+
+namespace time_keys {
+const char* millisecond = "millisecond";
+const char* second = "second";
+const char* minute = "minute";
+const char* hour = "hour";
+const char* day = "day";
+const char* month = "month";
+const char* year = "year";
+}  // namespace time_keys
 
 namespace hmi_request {
 const char* parent_id = "parentID";
@@ -391,7 +540,7 @@ const char* keyboard_properties = "keyboardProperties";
 const char* method_name = "methodName";
 const char* keyboard_layout = "keyboardLayout";
 const char* limited_character_list = "limitedCharacterList";
-const char* auto_complete_text = "autoCompleteText";
+const char* auto_complete_list = "autoCompleteList";
 const char* file = "file";
 const char* file_name = "fileName";
 const char* retry = "retry";
@@ -418,6 +567,7 @@ const char* capabilities = "capabilities";
 const char* speech_capabilities = "speechCapabilities";
 const char* prerecorded_speech_capabilities = "prerecordedSpeechCapabilities";
 const char* preset_bank_capabilities = "presetBankCapabilities";
+const char* on_screen_presets_available = "onScreenPresetsAvailable";
 const char* allowed = "allowed";
 const char* vehicle_type = "vehicleType";
 const char* did_result = "didResult";
@@ -426,6 +576,7 @@ const char* dtc = "dtc";
 const char* ecu_header = "ecuHeader";
 const char* image_capabilities = "imageCapabilities";
 const char* display_type = "displayType";
+const char* display_name = "displayName";
 const char* text_fields = "textFields";
 const char* media_clock_formats = "mediaClockFormats";
 const char* graphic_supported = "graphicSupported";
@@ -436,7 +587,7 @@ const char* num_custom_presets_available = "numCustomPresetsAvailable";
 const char* urls = "urls";
 const char* policy_app_id = "policyAppID";
 const char* enabled = "enabled";
-
+const char* system_time = "systemTime";
 }  // namespace hmi_response
 
 namespace hmi_notification {
@@ -451,7 +602,9 @@ const char* policyfile = "policyfile";
 const char* is_active = "isActive";
 const char* is_deactivated = "isDeactivated";
 const char* event_name = "eventName";
-
+const char* service_type = "serviceType";
+const char* service_event = "serviceEvent";
+const char* reason = "reason";
 }  // namespace hmi_notification
 
 }  // namespace application_manager

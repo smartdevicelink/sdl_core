@@ -35,7 +35,7 @@
 
 #include "application_manager/resumption/resumption_data.h"
 #include "json/json.h"
-#include "resumption/last_state.h"
+#include "resumption/last_state_wrapper.h"
 
 namespace resumption {
 
@@ -49,7 +49,12 @@ class ResumptionDataJson : public ResumptionData {
    * @brief Constructor of ResumptionDataJson
    */
   ResumptionDataJson(
-      LastState& last_state,
+      resumption::LastStateWrapperPtr last_state_wrapper,
+      const application_manager::ApplicationManager& application_manager);
+
+  DEPRECATED
+  ResumptionDataJson(
+      LastState&,
       const application_manager::ApplicationManager& application_manager);
 
   /**
@@ -80,18 +85,16 @@ class ResumptionDataJson : public ResumptionData {
    */
   virtual uint32_t GetHMIApplicationID(const std::string& policy_app_id,
                                        const std::string& device_id) const;
-
   /**
    * @brief Increments ignition counter for all registered applications
    * and remember ign_off time stamp
    */
-  virtual void OnSuspend();
+  void IncrementIgnOffCount() FINAL;
 
   /**
-   * @brief Increments ignition counter for all registered applications
-   * and remember ign_off time stamp
+   * @brief Decrements ignition counter for all registered applications
    */
-  virtual void OnAwake();
+  void DecrementIgnOffCount() FINAL;
 
   /**
    * @brief Retrieves hash ID for the given mobile app ID
@@ -135,6 +138,12 @@ class ResumptionDataJson : public ResumptionData {
    */
   virtual uint32_t GetIgnOffTime() const;
 
+  void IncrementGlobalIgnOnCounter() OVERRIDE;
+
+  uint32_t GetGlobalIgnOnCounter() const OVERRIDE;
+
+  void ResetGlobalIgnOnCount() OVERRIDE;
+
   /**
    * @brief Checks if saved data have application
    * @param policy_app_id - mobile application id
@@ -171,9 +180,8 @@ class ResumptionDataJson : public ResumptionData {
    */
   void Persist() OVERRIDE;
 
-  resumption::LastState& last_state() const {
-    return last_state_;
-  }
+  DEPRECATED
+  resumption::LastState& last_state() const;
 
  private:
   /**
@@ -181,22 +189,26 @@ class ResumptionDataJson : public ResumptionData {
    * or adds the new one.
    * @param policy_app_id application id.
    * @param device_id unique id of device.
+   * @param dictionary - data dictionary where all necessary info stored
    * @return the reference to the record in applications array.
    */
   Json::Value& GetFromSavedOrAppend(const std::string& policy_app_id,
-                                    const std::string& device_id) const;
+                                    const std::string& device_id,
+                                    Json::Value& dictionary) const;
 
   /**
    * @brief Get applications for resumption of LastState
+   * @param dictionary - data dictionary where all necessary info stored
    * @return applications for resumption of LastState
    */
-  Json::Value& GetSavedApplications() const;
+  Json::Value& GetSavedApplications(Json::Value& dictionary) const;
 
   /**
    * @brief Get Resumption section of LastState
+   * @param dictionary - data dictionary where all necessary info stored
    * @return Resumption section of LastState in Json
    */
-  Json::Value& GetResumptionData() const;
+  Json::Value& GetResumptionData(Json::Value& dictionary) const;
 
   /**
    * @brief GetObjectIndex allows to obtain specified object index from
@@ -210,15 +222,17 @@ class ResumptionDataJson : public ResumptionData {
 
   /**
    * @brief Set applications for resumption to LastState
+   * @param dictionary - data dictionary where all necessary info stored
    * @parems apps_json applications to write in LastState
    */
-  void SetSavedApplication(Json::Value& apps_json);
+  void SetSavedApplication(Json::Value& apps_json, Json::Value& dictionary);
 
   /**
    * @brief Setup IgnOff time to LastState
+   * @param dictionary - data dictionary where all necessary info stored
    * @param ign_off_time - igition off time
    */
-  void SetLastIgnOffTime(time_t ign_off_time);
+  void SetLastIgnOffTime(time_t ign_off_time, Json::Value& dictionary);
 
   /*
    * @brief Return true if application resumption data is valid,
@@ -227,7 +241,7 @@ class ResumptionDataJson : public ResumptionData {
    */
   bool IsResumptionDataValid(uint32_t index) const;
 
-  LastState& last_state_;
+  resumption::LastStateWrapperPtr last_state_wrapper_;
   DISALLOW_COPY_AND_ASSIGN(ResumptionDataJson);
 };
 }  // namespace resumption

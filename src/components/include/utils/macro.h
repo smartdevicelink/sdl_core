@@ -40,7 +40,7 @@
 #include "logger.h"
 
 // A macro to set some action for variable to avoid "unused variable" warning
-#define UNUSED(x) (void) x;
+#define UNUSED(x) (void)x;
 // A macro to disallow the copy constructor and operator= functions
 // This should be used in the private: declarations for a class
 #define DISALLOW_COPY_AND_ASSIGN(TypeName) \
@@ -60,9 +60,9 @@
 
 #ifdef DEBUG
 #define ASSERT(condition) \
-  FLUSH_LOGGER();         \
+  SDL_FLUSH_LOGGER();     \
   do {                    \
-    DEINIT_LOGGER();      \
+    SDL_DEINIT_LOGGER();  \
     assert(condition);    \
   } while (false)
 #else  // RELEASE
@@ -76,9 +76,8 @@
 
 #define DCHECK(condition)                                                     \
   if (!(condition)) {                                                         \
-    CREATE_LOGGERPTR_LOCAL(logger_, "Utils");                                 \
-    LOG4CXX_FATAL(logger_,                                                    \
-                  "DCHECK failed with \"" << #condition << "\" ["             \
+    SDL_CREATE_LOCAL_LOG_VARIABLE("Utils");                                   \
+    SDL_LOG_FATAL("DCHECK failed with \"" << #condition << "\" ["             \
                                           << __FUNCTION__ << "][" << __FILE__ \
                                           << ':' << __LINE__ << ']');         \
     ASSERT((condition));                                                      \
@@ -90,9 +89,8 @@
  */
 #define DCHECK_OR_RETURN(condition, return_value)                             \
   if (!(condition)) {                                                         \
-    CREATE_LOGGERPTR_LOCAL(logger_, "Utils");                                 \
-    LOG4CXX_FATAL(logger_,                                                    \
-                  "DCHECK failed with \"" << #condition << "\" ["             \
+    SDL_CREATE_LOCAL_LOG_VARIABLE("Utils");                                   \
+    SDL_LOG_FATAL("DCHECK failed with \"" << #condition << "\" ["             \
                                           << __FUNCTION__ << "][" << __FILE__ \
                                           << ':' << __LINE__ << ']');         \
     ASSERT((condition));                                                      \
@@ -104,9 +102,8 @@
  */
 #define DCHECK_OR_RETURN_VOID(condition)                                      \
   if (!(condition)) {                                                         \
-    CREATE_LOGGERPTR_LOCAL(logger_, "Utils");                                 \
-    LOG4CXX_FATAL(logger_,                                                    \
-                  "DCHECK failed with \"" << #condition << "\" ["             \
+    SDL_CREATE_LOCAL_LOG_VARIABLE("Utils");                                   \
+    SDL_LOG_FATAL("DCHECK failed with \"" << #condition << "\" ["             \
                                           << __FUNCTION__ << "][" << __FILE__ \
                                           << ':' << __LINE__ << ']');         \
     ASSERT((condition));                                                      \
@@ -133,9 +130,9 @@
 #endif
 
 /*
-* @brief Calculate size of na array
-* @param arr  array, which size need to calculate
-*/
+ * @brief Calculate size of na array
+ * @param arr  array, which size need to calculate
+ */
 #define ARRAYSIZE(arr) sizeof(arr) / sizeof(*arr)
 
 #ifdef BUILD_TESTS
@@ -144,5 +141,23 @@
 #else  // BUILD_TESTS
 #define FRIEND_TEST(test_case_name, test_name)
 #endif  // BUILD_TESTS
+
+/*
+ * @brief deprecate a method declaration, a warning will be thrown by your
+ *        compiler if a method with this macro is used
+ */
+#if __cplusplus > 201103L
+#define DEPRECATED [[deprecated]]
+#else
+#ifdef __GNUC__
+#define DEPRECATED __attribute__((deprecated))
+#define DEPRECATED_CLASS __attribute__((deprecated))
+#elif defined(_MSC_VER)
+#define DEPRECATED __declspec(deprecated)
+#else
+#pragma message("WARNING: You need to implement DEPRECATED for this compiler")
+#define DEPRECATED
+#endif
+#endif
 
 #endif  // SRC_COMPONENTS_INCLUDE_UTILS_MACRO_H_

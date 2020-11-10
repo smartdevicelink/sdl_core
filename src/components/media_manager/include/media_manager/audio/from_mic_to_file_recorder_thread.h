@@ -33,10 +33,11 @@
 #ifndef SRC_COMPONENTS_MEDIA_MANAGER_INCLUDE_MEDIA_MANAGER_AUDIO_FROM_MIC_TO_FILE_RECORDER_THREAD_H_
 #define SRC_COMPONENTS_MEDIA_MANAGER_INCLUDE_MEDIA_MANAGER_AUDIO_FROM_MIC_TO_FILE_RECORDER_THREAD_H_
 
-#include <net/if.h>
 #include <gst/gst.h>
+#include <net/if.h>
 #include <string>
 
+#include "interfaces/MOBILE_API.h"
 #include "utils/lock.h"
 #include "utils/threads/thread.h"
 #include "utils/threads/thread_delegate.h"
@@ -45,7 +46,15 @@ namespace media_manager {
 
 class FromMicToFileRecorderThread : public threads::ThreadDelegate {
  public:
-  FromMicToFileRecorderThread(const std::string& output_file, int32_t duration);
+  FromMicToFileRecorderThread(
+      const std::string& output_file,
+      int32_t duration,
+      mobile_apis::SamplingRate::eType sampling_rate =
+          mobile_apis::SamplingRate::INVALID_ENUM,
+      mobile_apis::BitsPerSample::eType bits_per_sample =
+          mobile_apis::BitsPerSample::INVALID_ENUM,
+      mobile_apis::AudioType::eType audio_type =
+          mobile_apis::AudioType::INVALID_ENUM);
   ~FromMicToFileRecorderThread();
   void threadMain();
 
@@ -67,6 +76,8 @@ class FromMicToFileRecorderThread : public threads::ThreadDelegate {
   sync_primitives::Lock stopFlagLock_;
 
   std::string outputFileName_, durationString_;
+  mobile_apis::SamplingRate::eType samplingRate_;
+  mobile_apis::BitsPerSample::eType bitsPerSample_;
 
   typedef struct {
     GstElement* pipeline;
@@ -77,6 +88,10 @@ class FromMicToFileRecorderThread : public threads::ThreadDelegate {
   void deinitArgs();
 
   void psleep(void* timeout);
+  // create_caps_string() creates a string which is fed to capsfilter's "caps"
+  // property. The string specifies audio format. example:
+  // "audio/x-raw,format=(string)S16LE,rate=44100,channels=1"
+  std::string create_caps_string();
 
   class SleepThreadDelegate : public threads::ThreadDelegate {
    public:

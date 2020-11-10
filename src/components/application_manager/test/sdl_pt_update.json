@@ -1,7 +1,7 @@
 {
    "policy_table" : {
       "app_policies" : {
-         "1766825573" : {
+         "1010101010" : {
             "AppHMIType" : [ "MEDIA" ],
             "certificate" : "akdjfhaliuygrglurng",
             "default_hmi" : "BACKGROUND",
@@ -20,7 +20,13 @@
             "nicknames" : [ "SyncProxyTester" ],
             "priority" : "EMERGENCY",
             "steal_focus" : true,
-            "watchdog_timer_ms" : 20000
+            "watchdog_timer_ms" : 20000,
+            "app_services": {
+               "MEDIA": {
+                  "service_names" : ["SDL App", "SDL Music"],
+                  "handled_rpcs" : [{"function_id": 41}]
+               }
+            }
          },
          "default" : {
             "default_hmi" : "NONE",
@@ -1433,6 +1439,7 @@
                   "parameters" : [
                      "accPedalPosition",
                      "beltStatus",
+                     "electronicParkBrakeStatus",
                      "driverBraking",
                      "myKey",
                      "prndl",
@@ -1445,6 +1452,7 @@
                   "parameters" : [
                      "accPedalPosition",
                      "beltStatus",
+                     "electronicParkBrakeStatus",
                      "driverBraking",
                      "myKey",
                      "prndl",
@@ -1457,6 +1465,7 @@
                   "parameters" : [
                      "accPedalPosition",
                      "beltStatus",
+                     "electronicParkBrakeStatus",
                      "driverBraking",
                      "myKey",
                      "prndl",
@@ -1469,6 +1478,7 @@
                   "parameters" : [
                      "accPedalPosition",
                      "beltStatus",
+                     "electronicParkBrakeStatus",
                      "driverBraking",
                      "myKey",
                      "prndl",
@@ -1587,59 +1597,79 @@
                "GetVehicleData" : {
                   "hmi_levels" : [ "BACKGROUND", "FULL", "LIMITED" ],
                   "parameters" : [
+                     "engineOilLife",
                      "engineTorque",
                      "externalTemperature",
+                     "turnSignal",
                      "fuelLevel",
                      "fuelLevel_State",
                      "headLampStatus",
                      "instantFuelConsumption",
+                     "fuelRange",
+                     "cloudAppVehicleID",
                      "odometer",
                      "tirePressure",
                      "vin",
-                     "wiperStatus"
+                     "wiperStatus",
+                     "stabilityControlsStatus"
                   ]
                },
                "OnVehicleData" : {
                   "hmi_levels" : [ "BACKGROUND", "FULL", "LIMITED" ],
                   "parameters" : [
+                     "engineOilLife",
                      "engineTorque",
                      "externalTemperature",
+                     "turnSignal",
                      "fuelLevel",
                      "fuelLevel_State",
                      "headLampStatus",
                      "instantFuelConsumption",
+                     "fuelRange",
+                     "cloudAppVehicleID",
                      "odometer",
                      "tirePressure",
                      "vin",
-                     "wiperStatus"
+                     "wiperStatus",
+                     "stabilityControlsStatus"
                   ]
                },
                "SubscribeVehicleData" : {
                   "hmi_levels" : [ "BACKGROUND", "FULL", "LIMITED" ],
                   "parameters" : [
+                     "engineOilLife",
                      "engineTorque",
                      "externalTemperature",
+                     "turnSignal",
                      "fuelLevel",
                      "fuelLevel_State",
                      "headLampStatus",
                      "instantFuelConsumption",
+                     "fuelRange",
+                     "cloudAppVehicleID",
                      "odometer",
                      "tirePressure",
-                     "wiperStatus"
+                     "wiperStatus",
+                     "stabilityControlsStatus"
                   ]
                },
                "UnsubscribeVehicleData" : {
                   "hmi_levels" : [ "BACKGROUND", "FULL", "LIMITED" ],
                   "parameters" : [
+                     "engineOilLife",
                      "engineTorque",
                      "externalTemperature",
+                     "turnSignal",
                      "fuelLevel",
                      "fuelLevel_State",
                      "headLampStatus",
                      "instantFuelConsumption",
+                     "fuelRange",
+                     "cloudAppVehicleID",
                      "odometer",
                      "tirePressure",
-                     "wiperStatus"
+                     "wiperStatus",
+                     "stabilityControlsStatus"
                   ]
                }
             },
@@ -1698,7 +1728,7 @@
          },
          "endpoints" : {
             "0x07" : {
-               "default" : [ "http://policies.telematics.ford.com/api/policies" ]
+               "default" : [ "http://x.x.x.x:3000/api/1/policies" ]
             }
          },
          "exchange_after_x_days" : 30,
@@ -1708,9 +1738,19 @@
             "COMMUNICATION" : 6,
             "EMERGENCY" : 60,
             "NAVIGATION" : 15,
+            "PROJECTION": 15,
             "NONE" : 0,
             "NORMAL" : 4,
             "VOICECOMM" : 10
+         },
+         "subtle_notifications_per_minute_by_priority": {
+            "COMMUNICATION": 15,
+            "EMERGENCY": 60,
+            "NAVIGATION": 20,
+            "PROJECTION": 20,
+            "NONE": 0,
+            "NORMAL": 10,
+            "VOICECOMM": 30
          },
          "seconds_between_retries" : [ 1, 5, 25, 125, 625 ],
          "timeout_after_x_seconds" : 60,

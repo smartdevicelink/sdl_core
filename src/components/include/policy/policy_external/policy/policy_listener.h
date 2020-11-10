@@ -42,26 +42,24 @@ namespace policy {
 
 namespace custom_str = utils::custom_string;
 
+class PTURetryHandler;
+
 class PolicyListener {
  public:
   virtual ~PolicyListener() {}
-  virtual void OnPermissionsUpdated(const std::string& policy_app_id,
+  virtual void OnPermissionsUpdated(const std::string& device_id,
+                                    const std::string& policy_app_id,
                                     const Permissions& permissions,
                                     const policy::HMILevel& default_hmi) = 0;
-  virtual void OnPermissionsUpdated(const std::string& policy_app_id,
+  virtual void OnPermissionsUpdated(const std::string& device_id,
+                                    const std::string& policy_app_id,
                                     const Permissions& permissions) = 0;
-  virtual void OnPendingPermissionChange(const std::string& policy_app_id) = 0;
+  virtual void OnPendingPermissionChange(const std::string& device_id,
+                                         const std::string& policy_app_id) = 0;
   virtual void OnUpdateStatusChanged(const std::string&) = 0;
-
-  /**
- * Gets device ID
- * @param policy_app_id
- * @return device ID
- * @deprecated see std::vector<std::string> GetDevicesIds(const std::string&)
- */
   virtual std::string OnCurrentDeviceIdUpdateRequired(
+      const transport_manager::DeviceHandle& device_handle,
       const std::string& policy_app_id) = 0;
-  virtual void OnSystemInfoUpdateRequired() = 0;
   virtual custom_str::CustomString GetAppName(
       const std::string& policy_app_id) = 0;
   virtual void OnUpdateHMIAppType(
@@ -102,10 +100,20 @@ class PolicyListener {
   /**
    * @brief Sends OnAppPermissionsChanged notification to HMI
    * @param permissions contains parameter for OnAppPermisionChanged
+   * @param device_id device identifier
    * @param policy_app_id contains policy application id
    */
   virtual void SendOnAppPermissionsChanged(
       const AppPermissions& permissions,
+      const std::string& device_id,
+      const std::string& policy_app_id) const = 0;
+
+  /**
+   * @brief Send OnAppPropertiesChangeNotification to the HMI
+   * @param policy_app_id policy app id
+   */
+
+  virtual void SendOnAppPropertiesChangeNotification(
       const std::string& policy_app_id) const = 0;
 
   /**
@@ -120,6 +128,16 @@ class PolicyListener {
    * @param certificate_data the value of the updated field.
    */
   virtual void OnCertificateUpdated(const std::string& certificate_data) = 0;
+
+  /**
+   * @brief OnAuthTokenUpdated the callback which signals if an app's auth token
+   * field has been updated during a PTU
+   *
+   * @param policy_app_id the policy app id tied to the updated field.
+   * @param auth_token the value of the updated field.
+   */
+  virtual void OnAuthTokenUpdated(const std::string& policy_app_id,
+                                  const std::string& auth_token) = 0;
 
   /**
    * @brief OnPTUFinishedd the callback which signals PTU has finished
@@ -137,14 +155,13 @@ class PolicyListener {
   virtual void GetRegisteredLinks(
       std::map<std::string, std::string>& out_links) const = 0;
 
-#ifdef SDL_REMOTE_CONTROL
   /**
    * Gets devices ids by policy application id
    * @param policy_app_id
    * @return list devices ids
    */
   virtual std::vector<std::string> GetDevicesIds(
-      const std::string& policy_app_id) = 0;
+      const std::string& policy_app_id) const = 0;
 
   /**
    * Notifies about changing HMI level
@@ -174,7 +191,13 @@ class PolicyListener {
                                  const std::string& policy_app_id,
                                  const std::string& hmi_level) = 0;
 
-#endif  // SDL_REMOTE_CONTROL
+  /**
+   * @brief Notify Connected mobile apps about changing state of
+   * LockScreenDismissal
+   */
+  virtual void OnLockScreenDismissalStateChanged() = 0;
+
+  virtual PTURetryHandler& ptu_retry_handler() const = 0;
 };
 }  // namespace policy
 #endif  // SRC_COMPONENTS_INCLUDE_POLICY_POLICY_EXTERNAL_POLICY_POLICY_LISTENER_H_

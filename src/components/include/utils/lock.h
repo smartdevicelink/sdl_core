@@ -32,24 +32,18 @@
 #ifndef SRC_COMPONENTS_INCLUDE_UTILS_LOCK_H_
 #define SRC_COMPONENTS_INCLUDE_UTILS_LOCK_H_
 
-#if defined(OS_POSIX)
-#include <pthread.h>
-#include <sched.h>
-#else
-#error Please implement lock for your OS
-#endif
 #include <stdint.h>
-#include "utils/macro.h"
+#include <boost/thread/mutex.hpp>
+#include <boost/thread/recursive_mutex.hpp>
+#include <iostream>
+#include <memory>
 #include "utils/atomic.h"
+#include "utils/macro.h"
 #include "utils/memory_barrier.h"
 
-namespace sync_primitives {
+using boost::system::error_code;
 
-namespace impl {
-#if defined(OS_POSIX)
-typedef pthread_mutex_t PlatformMutex;
-#endif
-}  // namespace impl
+namespace sync_primitives {
 
 class SpinMutex {
  public:
@@ -78,71 +72,98 @@ class SpinMutex {
   volatile unsigned int state_;
 };
 
-/* Platform-indepenednt NON-RECURSIVE lock (mutex) wrapper
-   Please use AutoLock to ackquire and (automatically) release it
-   It eases balancing of multple lock taking/releasing and makes it
-   Impossible to forget to release the lock:
-   ...
-   ConcurentlyAccessedData data_;
-   sync_primitives::Lock data_lock_;
-   ...
-   {
-     sync_primitives::AutoLock auto_lock(data_lock_);
-     data_.ReadOrWriteData();
-   } // lock is automatically released here
-*/
-class Lock {
+/* Abstract base class that allows AutoLock to handle both recursive and
+ * non-recursive locks
+ */
+class BaseLock {
  public:
-  Lock();
-  Lock(bool is_recursive);
-  ~Lock();
-
+  BaseLock() {}
+  virtual ~BaseLock() {}
   // Ackquire the lock. Must be called only once on a thread.
   // Please consider using AutoLock to capture it.
-  void Acquire();
+  virtual void Acquire() = 0;
   // Release the lock. Must be called only once on a thread after lock.
   // was acquired. Please consider using AutoLock to automatically release
   // the lock
-  void Release();
+  virtual void Release() = 0;
   // Try if lock can be captured and lock it if it was possible.
   // If it captured, lock must be manually released calling to Release
   // when protected resource access was finished.
   // @returns wether lock was captured.
-  bool Try();
+  virtual bool Try() = 0;
 
- private:
-  impl::PlatformMutex mutex_;
-
-#ifndef NDEBUG
-  /**
-  * @brief Basic debugging aid, a flag that signals wether this lock is
-  * currently taken
-  * Allows detection of abandoned and recursively captured mutexes
-  */
-  uint32_t lock_taken_;
-
-  /**
-  * @brief Describe if mutex is recurcive or not
-  */
-  bool is_mutex_recursive_;
-
-  void AssertFreeAndMarkTaken();
-  void AssertTakenAndMarkFree();
-#else
-  void AssertFreeAndMarkTaken() {}
-  void AssertTakenAndMarkFree() {}
-#endif
-
-  void Init(bool is_recursive);
+ protected:
+  // Ensures safety in locking
+  virtual void AssertTakenAndMarkFree() = 0;
+  virtual void AssertFreeAndMarkTaken() = 0;
 
   friend class ConditionalVariable;
+};
+
+/*
+ * Platform-indepenednt NON-RECURSIVE lock (mutex) wrapper
+ */
+class Lock : public BaseLock {
+ public:
+  Lock();
+  ~Lock();
+
+  virtual void Acquire();
+
+  virtual void Release();
+
+  virtual bool Try();
+
+ private:
+  /**
+   * @brief Basic debugging aid, a flag that signals wether this lock is
+   * currently taken
+   * Allows detection of abandoned and recursively captured mutexes
+   */
+  uint32_t lock_taken_;
+  virtual void AssertTakenAndMarkFree();
+  virtual void AssertFreeAndMarkTaken();
+  boost::mutex mutex_;
   DISALLOW_COPY_AND_ASSIGN(Lock);
+  friend class ConditionalVariable;
+};
+
+/*
+ * Platform-indepenednt RECURSIVE lock (mutex) wrapper
+ */
+class RecursiveLock : public BaseLock {
+ public:
+  RecursiveLock();
+  ~RecursiveLock();
+
+  virtual void Acquire();
+
+  virtual void Release();
+
+  virtual bool Try();
+
+ private:
+  /**
+   * @brief Basic debugging aid, a flag that signals wether this lock is
+   * currently taken
+   * Allows detection of abandoned and recursively captured mutexes
+   */
+  uint32_t lock_taken_;
+  virtual void AssertTakenAndMarkFree();
+  virtual void AssertFreeAndMarkTaken();
+  boost::recursive_mutex mutex_;
+  DISALLOW_COPY_AND_ASSIGN(RecursiveLock);
+  friend class ConditionalVariable;
 };
 
 // This class is used to automatically acquire and release the a lock
 class AutoLock {
  public:
-  explicit AutoLock(Lock& lock) : lock_(lock) {
+  explicit AutoLock(const std::shared_ptr<BaseLock>& lock) : lock_(*lock) {
+    lock_.Acquire();
+  }
+  explicit AutoLock(BaseLock& lock) : lock_(lock) {
+    // std::cerr << "lock is at " << &lock << std::endl;
     lock_.Acquire();
   }
   ~AutoLock() {
@@ -150,21 +171,35 @@ class AutoLock {
   }
 
  private:
-  Lock& GetLock() {
+  BaseLock& GetLock() {
     return lock_;
   }
-  Lock& lock_;
+  BaseLock& lock_;
 
  private:
   friend class AutoUnlock;
   friend class ConditionalVariable;
   DISALLOW_COPY_AND_ASSIGN(AutoLock);
 };
-
+/*   Please use AutoLock to acquire and (automatically) release it
+ * It eases balancing of multple lock taking/releasing and makes it
+ * Impossible to forget to release the lock:
+ *   ...
+ *   ConcurentlyAccessedData data_;
+ *   sync_primitives::Lock data_lock_;
+ *   ...
+ * {
+ *   sync_primitives::AutoLock auto_lock(data_lock_);
+ *   data_.ReadOrWriteData();
+ * } // lock is automatically released here
+ */
 // This class is used to temporarly unlock autolocked lock
 class AutoUnlock {
  public:
-  explicit AutoUnlock(Lock& lock) : lock_(lock) {
+  explicit AutoUnlock(const std::shared_ptr<BaseLock>& lock) : lock_(*lock) {
+    lock_.Release();
+  }
+  explicit AutoUnlock(BaseLock& lock) : lock_(lock) {
     lock_.Release();
   }
   explicit AutoUnlock(AutoLock& lock) : lock_(lock.GetLock()) {
@@ -175,7 +210,7 @@ class AutoUnlock {
   }
 
  private:
-  Lock& lock_;
+  BaseLock& lock_;
 
  private:
   DISALLOW_COPY_AND_ASSIGN(AutoUnlock);

@@ -34,11 +34,14 @@
 #define SRC_COMPONENTS_INCLUDE_UTILS_MESSAGEMETER_H_
 
 #include <cstddef>
-#include <set>
 #include <map>
+#include <set>
 #include "utils/date_time.h"
+#include "utils/lock.h"
 
 namespace utils {
+
+SDL_CREATE_LOG_VARIABLE("MessageMeter")
 /**
     @brief The MessageMeter class need to count message frequency
     Default time range value is 1 second
@@ -82,40 +85,53 @@ class MessageMeter {
   void ClearIdentifiers();
 
   void set_time_range(const size_t time_range_msecs);
-  void set_time_range(const TimevalStruct& time_range);
-  TimevalStruct time_range() const;
+  void set_time_range(const date_time::TimeDuration& time_range);
+  date_time::TimeDuration time_range() const;
 
  private:
-  TimevalStruct time_range_;
-  typedef std::multiset<TimevalStruct> Timings;
+  size_t FrequencyImpl(const Id& id);
+
+  date_time::TimeDuration time_range_;
+  typedef std::multiset<date_time::TimeDuration> Timings;
   typedef std::map<Id, Timings> TimingMap;
   TimingMap timing_map_;
+  sync_primitives::Lock timing_map_lock_;
 };
 
 template <class Id>
-MessageMeter<Id>::MessageMeter()
-    : time_range_(TimevalStruct{0, 0}) {
-  time_range_.tv_sec = 1;
+MessageMeter<Id>::MessageMeter() {
+  time_range_ = date_time::seconds(1);
 }
 
 template <class Id>
 size_t MessageMeter<Id>::TrackMessage(const Id& id) {
+  SDL_LOG_AUTO_TRACE();
   return TrackMessages(id, 1);
 }
 
 template <class Id>
 size_t MessageMeter<Id>::TrackMessages(const Id& id, const size_t count) {
+  SDL_LOG_AUTO_TRACE();
+  sync_primitives::AutoLock lock(timing_map_lock_);
   Timings& timings = timing_map_[id];
-  const TimevalStruct current_time = date_time::DateTime::getCurrentTime();
+  const date_time::TimeDuration current_time = date_time::getCurrentTime();
   for (size_t i = 0; i < count; ++i) {
     // Adding to the end is amortized constant
     timings.insert(timings.end(), current_time);
   }
-  return Frequency(id);
+  return FrequencyImpl(id);
 }
 
 template <class Id>
 size_t MessageMeter<Id>::Frequency(const Id& id) {
+  SDL_LOG_AUTO_TRACE();
+  sync_primitives::AutoLock lock(timing_map_lock_);
+  return FrequencyImpl(id);
+}
+
+template <class Id>
+size_t MessageMeter<Id>::FrequencyImpl(const Id& id) {
+  SDL_LOG_AUTO_TRACE();
   typename TimingMap::iterator it = timing_map_.find(id);
   if (it == timing_map_.end()) {
     return 0u;
@@ -124,39 +140,39 @@ size_t MessageMeter<Id>::Frequency(const Id& id) {
   if (timings.empty()) {
     return 0u;
   }
-  const TimevalStruct actual_begin_time = date_time::DateTime::Sub(
-      date_time::DateTime::getCurrentTime(), time_range_);
+  const date_time::TimeDuration actual_begin_time =
+      (date_time::getCurrentTime() - time_range_);
   timings.erase(timings.begin(), timings.upper_bound(actual_begin_time));
   return timings.size();
 }
 
 template <class Id>
 void MessageMeter<Id>::RemoveIdentifier(const Id& id) {
+  SDL_LOG_AUTO_TRACE();
+  sync_primitives::AutoLock lock(timing_map_lock_);
   timing_map_.erase(id);
 }
 
 template <class Id>
 void MessageMeter<Id>::ClearIdentifiers() {
+  SDL_LOG_AUTO_TRACE();
+  sync_primitives::AutoLock lock(timing_map_lock_);
   timing_map_.clear();
 }
 
 template <class Id>
 void MessageMeter<Id>::set_time_range(const size_t time_range_msecs) {
-  // TODO(EZamakhov): move to date_time::DateTime
-  const size_t secs =
-      time_range_msecs / date_time::DateTime::MILLISECONDS_IN_SECOND;
-  time_range_.tv_sec = secs;
-  const size_t mSecs =
-      time_range_msecs % date_time::DateTime::MILLISECONDS_IN_SECOND;
-  time_range_.tv_usec =
-      mSecs * date_time::DateTime::MICROSECONDS_IN_MILLISECOND;
+  SDL_LOG_AUTO_TRACE();
+  time_range_ = date_time::milliseconds(time_range_msecs);
 }
 template <class Id>
-void MessageMeter<Id>::set_time_range(const TimevalStruct& time_range) {
+void MessageMeter<Id>::set_time_range(
+    const date_time::TimeDuration& time_range) {
+  SDL_LOG_AUTO_TRACE();
   time_range_ = time_range;
 }
 template <class Id>
-TimevalStruct MessageMeter<Id>::time_range() const {
+date_time::TimeDuration MessageMeter<Id>::time_range() const {
   return time_range_;
 }
 }  // namespace utils

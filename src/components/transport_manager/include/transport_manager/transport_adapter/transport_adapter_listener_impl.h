@@ -34,8 +34,8 @@
 #define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_ADAPTER_TRANSPORT_ADAPTER_LISTENER_IMPL_H_
 
 #include "transport_manager/common.h"
-#include "transport_manager/transport_adapter/transport_adapter_listener.h"
 #include "transport_manager/transport_adapter/transport_adapter.h"
+#include "transport_manager/transport_adapter/transport_adapter_listener.h"
 #include "transport_manager/transport_manager.h"
 
 namespace transport_manager {
@@ -48,26 +48,6 @@ using transport_manager::transport_adapter::TransportAdapter;
 class TransportAdapterListenerImpl
     : public transport_adapter::TransportAdapterListener {
  public:
-  /**
-   * @enum Available types of events.
-   */
-  enum EventTypeEnum {
-    ON_SEARCH_DONE = 0,
-    ON_SEARCH_FAIL,
-    ON_DEVICE_LIST_UPDATED,
-    ON_FIND_NEW_APPLICATIONS_REQUEST,
-    ON_CONNECT_DONE,
-    ON_CONNECT_FAIL,
-    ON_DISCONNECT_DONE,
-    ON_DISCONNECT_FAIL,
-    ON_SEND_DONE,
-    ON_SEND_FAIL,
-    ON_RECEIVED_DONE,
-    ON_RECEIVED_FAIL,
-    ON_COMMUNICATION_ERROR,
-    ON_UNEXPECTED_DISCONNECT
-  };
-
   /**
    * @brief Constructor.
    *
@@ -106,6 +86,24 @@ class TransportAdapterListenerImpl
   virtual void OnDeviceListUpdated(const TransportAdapter* adapter);
 
   virtual void OnFindNewApplicationsRequest(const TransportAdapter* adapter);
+
+  /**
+   * @brief Passes notification to that the cloud conection status has updated
+   */
+  virtual void OnConnectionStatusUpdated(const TransportAdapter* adapter);
+
+  /**
+   * @brief Search specified device adapter in the container of shared pointers
+   * to device adapters to be sure it is available,
+   * launch event ON_CONNECT_PENDING in transport manager.
+   *
+   * @param device_adater Pointer to the device adapter.
+   * @param device_handle Device unique identifier.
+   * @param app_id Handle of application.
+   */
+  virtual void OnConnectPending(const TransportAdapter* adapter,
+                                const DeviceUID& device_handle,
+                                const ApplicationHandle& app_id);
 
   /**
    * @brief Search specified device adapter in the container of shared pointers
@@ -283,7 +281,23 @@ class TransportAdapterListenerImpl
    */
   virtual void OnCommunicationError(const TransportAdapter* adapter,
                                     const DeviceUID& device,
-                                    const ApplicationHandle& app_id);
+                                    const ApplicationHandle& app_id) OVERRIDE;
+
+  /**
+   * @brief OnTransportSwitchRequested notifies on received signal to start
+   * transport switching flow (at the moment Bluetooth to USB only)
+   * @param transport_adapter Transport adapter who received the signal
+   */
+  void OnTransportSwitchRequested(const TransportAdapter* adapter) OVERRIDE;
+
+  /**
+   * @brief Notification that the transport's specific configuration has been
+   *        updated.
+   *
+   * @param transport_adapter  pointer to the transport adapter
+   */
+  void OnTransportConfigUpdated(
+      const transport_adapter::TransportAdapter* adapter) OVERRIDE;
 
  private:
   TransportManager* transport_manager_;

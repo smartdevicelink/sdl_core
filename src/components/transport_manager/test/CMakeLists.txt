@@ -42,10 +42,31 @@ include_directories(
 )
 
 set(EXCLUDE_PATHS
+  platform_specific
   raw_message_matcher.cc
 )
 
+if (NOT BUILD_CLOUD_APP_SUPPORT)
+  list(APPEND EXCLUDE_PATHS
+    ${CMAKE_CURRENT_SOURCE_DIR}/sample_websocket_server.cc
+  )
+endif()
+
+if (NOT BUILD_WEBSOCKET_SERVER_SUPPORT)
+  list(APPEND EXCLUDE_PATHS
+    ${CMAKE_CURRENT_SOURCE_DIR}/websocket_client_connection_test.cc
+    ${CMAKE_CURRENT_SOURCE_DIR}/websocket_connection_test.cc
+    ${CMAKE_CURRENT_SOURCE_DIR}/websocket_server_listener_test.cc
+  )
+endif()
+
 collect_sources(SOURCES "${CMAKE_CURRENT_SOURCE_DIR}" "${EXCLUDE_PATHS}")
+
+set(PLATFORM_DEPENDENT_SOURCES)
+if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
+  collect_sources(PLATFORM_DEPENDENT_SOURCES platform_specific/linux)
+endif()
+list(APPEND SOURCES ${PLATFORM_DEPENDENT_SOURCES})
 
 set(LIBRARIES
   gmock
@@ -59,7 +80,7 @@ set(LIBRARIES
 )
 
 if (BUILD_USB_SUPPORT)
-  list(APPEND LIBRARIES Libusb-1.0.16)
+  list(APPEND LIBRARIES libusb-1.0.so)
 endif()
 
 if (BUILD_BT_SUPPORT)
@@ -68,6 +89,12 @@ if (BUILD_BT_SUPPORT)
  endif()
 endif()
 
+if(BUILD_CLOUD_APP_SUPPORT)
+  GET_PROPERTY(BOOST_LIBS_DIRECTORY GLOBAL PROPERTY GLOBAL_BOOST_LIBS)
+  list(APPEND LIBRARIES boost_system boost_regex crypto ssl -L${BOOST_LIBS_DIRECTORY})
+endif()
+
 create_test("transport_manager_test" "${SOURCES}" "${LIBRARIES}")
 
 file(COPY smartDeviceLink_test.ini DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+file(COPY "test_certs/" DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/test_certs)

@@ -36,13 +36,11 @@
 #include <stddef.h>
 #include <string>
 
-#include "utils/shared_ptr.h"
-
 #include "smart_objects/default_shema_item.h"
 #include "smart_objects/schema_item_parameter.h"
 
-namespace NsSmartDeviceLink {
-namespace NsSmartObjects {
+namespace ns_smart_device_link {
+namespace ns_smart_objects {
 /**
  * @brief String schema item.
  **/
@@ -54,19 +52,32 @@ class CStringSchemaItem : public CDefaultSchemaItem<std::string> {
    * @param DefaultValue Default value.
    * @return Shared pointer to a new schema item.
    **/
-  static utils::SharedPtr<CStringSchemaItem> create(
+  static std::shared_ptr<CStringSchemaItem> create(
       const TSchemaItemParameter<size_t>& MinLength =
           TSchemaItemParameter<size_t>(),
       const TSchemaItemParameter<size_t>& MaxLength =
           TSchemaItemParameter<size_t>(),
       const TSchemaItemParameter<std::string>& DefaultValue =
           TSchemaItemParameter<std::string>());
+
   /**
    * @brief Validate smart object.
    * @param Object Object to validate.
-   * @return NsSmartObjects::Errors::eType
+   * @param report object for reporting errors during validation
+   * @param MessageVersion to check mobile RPC version against RPC Spec History
+   * @param allow_unknown_enums
+   *   false - unknown enum values (left as string values after applySchema)
+   *   will be considered invalid.
+   *   true - such values will be considered valid.
+   * @return ns_smart_objects::errors::eType
    **/
-  Errors::eType validate(const SmartObject& Object) OVERRIDE;
+  errors::eType validate(
+      const SmartObject& Object,
+      rpc::ValidationReport* report,
+      const utils::SemanticVersion& MessageVersion = utils::SemanticVersion(),
+      const bool allow_unknown_enums = false) OVERRIDE;
+
+  TypeID GetType() OVERRIDE;
 
  private:
   /**
@@ -86,6 +97,6 @@ class CStringSchemaItem : public CDefaultSchemaItem<std::string> {
   const TSchemaItemParameter<size_t> mMaxLength;
   DISALLOW_COPY_AND_ASSIGN(CStringSchemaItem);
 };
-}  // namespace NsSmartObjects
-}  // namespace NsSmartDeviceLink
+}  // namespace ns_smart_objects
+}  // namespace ns_smart_device_link
 #endif  // SRC_COMPONENTS_SMART_OBJECTS_INCLUDE_SMART_OBJECTS_STRING_SCHEMA_ITEM_H_

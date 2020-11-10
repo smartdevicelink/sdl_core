@@ -33,13 +33,25 @@
 #ifndef SRC_COMPONENTS_INCLUDE_TRANSPORT_MANAGER_COMMON_H_
 #define SRC_COMPONENTS_INCLUDE_TRANSPORT_MANAGER_COMMON_H_
 
-#include <vector>
+#include <map>
 #include <string>
+#include <vector>
 
 /**
  * @brief - transport_manager namespace
  */
 namespace transport_manager {
+
+/**
+ * @enum Actions that could
+ * be performed on connected clients.
+ */
+enum class TransportAction {
+  kVisibilityOn,
+  kVisibilityOff,
+  kListeningOn,
+  kListeningOff
+};
 
 /**
  * @enum Transport manager states.
@@ -55,10 +67,17 @@ enum {
   E_INTERNAL_ERROR
 };
 
+enum ConnectionStatus { INVALID = -1, PENDING, RETRY, CONNECTED, CLOSING };
+
+namespace webengine_constants {
+const std::string kWebEngineConnectionType("WEBENGINE_WEBSOCKET");
+const std::string kWebEngineDeviceName("Web Engine");
+}  // namespace webengine_constants
+
 /**
  * @brief Type definition for variable that hold handle of device.
  */
-typedef unsigned int DeviceHandle;
+typedef size_t DeviceHandle;
 
 /**
  * @brief Type definition for variable that hold connection unique identifier.
@@ -90,5 +109,12 @@ typedef int ApplicationHandle;
  * @brief Type definition for vector that contain ApplicationHandle variables.
  */
 typedef std::vector<ApplicationHandle> ApplicationList;
+
+/**
+ * @brief SwitchableDevices defines list of devices having transport switch id
+ * i.e. able to switch their transport. Maps unique device id (MAC, serial etc.)
+ * to transport switch id (e.g. connection UUID for iAP2 transport)
+ */
+typedef std::map<DeviceUID, std::string> SwitchableDevices;
 }  // namespace transport_manager
 #endif  // SRC_COMPONENTS_INCLUDE_TRANSPORT_MANAGER_COMMON_H_

@@ -35,7 +35,7 @@
 #include <test_rpc_interface/interface.h>
 #include <test_rpc_interface/functions.h>
 
-#include "json/reader.h"
+#include "utils/jsoncpp_reader_wrapper.h"
 #include "json/writer.h"
 #include "rpc_base/gtest_support.h"
 
@@ -52,23 +52,30 @@ public:
 
 class GeneratedInterfaceTests: public ::testing::Test {
  public:
+  GeneratedInterfaceTests(){
+    reader_ = std::unique_ptr<Json::CharReader>(reader_builder_.newCharReader());
+    writer_builder_.settings_["indentation"] = "";
+  }
+
   Json::Value JsonValue(const char* json) {
+    utils::JsonReader reader_;
     Json::Value value;
-    reader.parse(json, value);
+    reader_.parse(json, &value);
     return value;
   }
-  Json::Reader reader;
-  Json::FastWriter writer;
+
+  std::unique_ptr<Json::CharReader> reader_;
+  Json::CharReaderBuilder reader_builder_;
+  Json::StreamWriterBuilder writer_builder_;
 };
 
 TEST_F(GeneratedInterfaceTests, ScrollableMessageTest) {
-  const char* org_json = "{\"reason\":\"MASTER_RESET\"}\n";
+  const char* org_json = "{\"reason\":\"MASTER_RESET\"}";
   Value json_value = JsonValue(org_json);
   notification::OnAppInterfaceUnregistered oaiu(&json_value);
   ASSERT_TRUE(oaiu.is_initialized());
   ASSERT_RPCTYPE_VALID(oaiu);
-
-  std::string serialized = writer.write(oaiu.ToJsonValue());
+  const std::string serialized = Json::writeString(writer_builder_, oaiu.ToJsonValue());
   ASSERT_EQ(org_json, serialized);
 }
 
@@ -79,26 +86,26 @@ TEST_F(GeneratedInterfaceTests, FunctionWithoutParams) {
   oapt.mark_initialized();
   ASSERT_TRUE(oapt.is_initialized());
   ASSERT_RPCTYPE_VALID(oapt);
-  std::string serialized = writer.write(oapt.ToJsonValue());
-  ASSERT_EQ("{}\n", serialized);
+  const std::string serialized = Json::writeString(writer_builder_, oapt.ToJsonValue());
+  ASSERT_EQ("{}", serialized);
 }
 
 TEST_F(GeneratedInterfaceTests, DefValueTest) {
   const char* org_json = "{\"menuID\":2,\"menuName\":\"Hello\"}";
-  const char* awaited_json = "{\"menuID\":2,\"menuName\":\"Hello\",\"position\":1000}\n";
+  const char* awaited_json = "{\"menuID\":2,\"menuName\":\"Hello\",\"position\":1000}";
   Value json_value = JsonValue(org_json);
   request::AddSubMenu aasm(&json_value);
   ASSERT_TRUE(aasm.is_initialized());
   ASSERT_RPCTYPE_VALID(aasm);
   ASSERT_EQ(aasm.position, 1000);
 
-  std::string serialized = writer.write(aasm.ToJsonValue());
+  const std::string serialized = Json::writeString(writer_builder_, aasm.ToJsonValue());
   ASSERT_EQ(awaited_json, serialized);
 }
 
 TEST_F(GeneratedInterfaceTests, MapTest) {
   const char* expected_json =
-  "{\"choiceID\":1,\"menuName\":\"Menu name\",\"vrCommands\":{\"one\":\"First value\",\"two\":\"Second value\"}}\n";
+  "{\"choiceID\":1,\"menuName\":\"Menu name\",\"vrCommands\":{\"one\":\"First value\",\"two\":\"Second value\"}}";
 
   Choice choice;
   ASSERT_FALSE(choice.is_initialized());
@@ -110,20 +117,20 @@ TEST_F(GeneratedInterfaceTests, MapTest) {
   ASSERT_TRUE(choice.is_initialized());
   ASSERT_RPCTYPE_VALID(choice);
 
-  std::string serialized = writer.write(choice.ToJsonValue());
+  const std::string serialized = Json::writeString(writer_builder_, choice.ToJsonValue());
   ASSERT_EQ(expected_json, serialized);
 }
 
 TEST_F(GeneratedInterfaceTests, TypedefTest) {
   const char* expected_json =
-  "{\"optionalResArrMap\":{\"World\":[\"INVALID_DATA\"]},\"resArrMap\":{\"Hello\":[\"SUCCESS\"]}}\n";
+  "{\"optionalResArrMap\":{\"World\":[\"INVALID_DATA\"]},\"resArrMap\":{\"Hello\":[\"SUCCESS\"]}}";
 
   TdStruct ts;
   ts.resArrMap["Hello"].push_back(R_SUCCESS);
   (*ts.optionalResArrMap)["World"].push_back(R_INVALID_DATA);
   ASSERT_TRUE(ts.is_initialized());
   ASSERT_RPCTYPE_VALID(ts);
-  std::string serialized = writer.write(ts.ToJsonValue());
+  const std::string serialized = Json::writeString(writer_builder_, ts.ToJsonValue());
   ASSERT_EQ(expected_json, serialized);
 }
 
@@ -182,26 +189,26 @@ TEST_F(GeneratedInterfaceTests, TestNullableStructMember) {
 
 TEST_F(GeneratedInterfaceTests, TestNullableStructMemberNullInitializationFromJson) {
   const char* input_json =
-      "{\"nullableInt\":null}\n";
+      "{\"nullableInt\":null}";
   Value json_value = JsonValue(input_json);
   TestStructWithNullableParam with_nullable(&json_value);
   ASSERT_TRUE(with_nullable.is_initialized());
   ASSERT_RPCTYPE_VALID(with_nullable);
   ASSERT_TRUE(with_nullable.nullableInt.is_null());
-  std::string result = writer.write(with_nullable.ToJsonValue());
+  const std::string result = Json::writeString(writer_builder_, with_nullable.ToJsonValue());
   ASSERT_EQ(input_json, result);
 }
 
 TEST_F(GeneratedInterfaceTests, TestNullableStructMemberInitializationFromJson) {
   const char* input_json =
-      "{\"nullableInt\":3}\n";
+      "{\"nullableInt\":3}";
   Value json_value = JsonValue(input_json);
   TestStructWithNullableParam with_nullable(&json_value);
   ASSERT_TRUE(with_nullable.is_initialized());
   ASSERT_RPCTYPE_VALID(with_nullable);
   ASSERT_FALSE(with_nullable.nullableInt.is_null());
   ASSERT_EQ(3, with_nullable.nullableInt);
-  std::string result = writer.write(with_nullable.ToJsonValue());
+  const std::string result = Json::writeString(writer_builder_, with_nullable.ToJsonValue());
   ASSERT_EQ(input_json, result);
 }
 
@@ -211,15 +218,15 @@ TEST_F(GeneratedInterfaceTests, TestNullableEnumInitialization) {
   strct_with_nullable.nonNullableEnum = IT_STATIC;
   ASSERT_TRUE(strct_with_nullable.is_initialized());
   ASSERT_RPCTYPE_VALID(strct_with_nullable);
-  std::string result = writer.write(strct_with_nullable.ToJsonValue());
-  const char* awaited_json1 = "{\"nonNullableEnum\":\"STATIC\",\"nullableEnum\":\"DYNAMIC\"}\n";
+  std::string result = Json::writeString(writer_builder_, strct_with_nullable.ToJsonValue());
+  const char* awaited_json1 = "{\"nonNullableEnum\":\"STATIC\",\"nullableEnum\":\"DYNAMIC\"}";
   ASSERT_EQ(awaited_json1, result);
 
   strct_with_nullable.nullableEnum.set_to_null();
   ASSERT_TRUE(strct_with_nullable.is_initialized());
   ASSERT_RPCTYPE_VALID(strct_with_nullable);
-  result = writer.write(strct_with_nullable.ToJsonValue());
-  const char* awaited_json2 = "{\"nonNullableEnum\":\"STATIC\",\"nullableEnum\":null}\n";
+  result = Json::writeString(writer_builder_, strct_with_nullable.ToJsonValue());
+  const char* awaited_json2 = "{\"nonNullableEnum\":\"STATIC\",\"nullableEnum\":null}";
   ASSERT_EQ(awaited_json2, result);
 }
 
@@ -233,8 +240,8 @@ TEST_F(GeneratedInterfaceTests, TestStructWithNullableTypedef) {
   ASSERT_EQ(R_SUCCESS, swntd.nullableTdResult);
 
   swntd.nullableTdResult.set_to_null();
-  const char* awaited_json = "{\"nullableTdResult\":null}\n";
-  std::string result = writer.write(swntd.ToJsonValue());
+  const char* awaited_json = "{\"nullableTdResult\":null}";
+  const std::string result = Json::writeString(writer_builder_, swntd.ToJsonValue());
   ASSERT_EQ(awaited_json, result);
 }
 
@@ -247,8 +254,8 @@ TEST_F(GeneratedInterfaceTests, TestNullingStructWithNullableMapOfNullableInts) 
   ASSERT_TRUE(nmoni.is_initialized());
   ASSERT_RPCTYPE_VALID(nmoni);
   ASSERT_TRUE(nmoni.nullableMap.is_null());
-  const char* awaited_json = "{\"nullableMap\":null}\n";
-  std::string result = writer.write(nmoni.ToJsonValue());
+  const char* awaited_json = "{\"nullableMap\":null}";
+  const std::string result = Json::writeString(writer_builder_, nmoni.ToJsonValue());
   ASSERT_EQ(awaited_json, result);
 }
 
@@ -263,8 +270,8 @@ TEST_F(GeneratedInterfaceTests, TestNullingValueInStructWithNullableMapOfNullabl
   ASSERT_RPCTYPE_VALID(nmoni);
   ASSERT_FALSE(nmoni.nullableMap.is_null());
   ASSERT_TRUE(nmoni.nullableMap["Hello"].is_null());
-  const char* awaited_json = "{\"nullableMap\":{\"Hello\":null}}\n";
-  std::string result = writer.write(nmoni.ToJsonValue());
+  const char* awaited_json = "{\"nullableMap\":{\"Hello\":null}}";
+  const std::string result = Json::writeString(writer_builder_, nmoni.ToJsonValue());
   ASSERT_EQ(awaited_json, result);
 }
 
@@ -303,8 +310,8 @@ TEST_F(GeneratedInterfaceTests, EmptyStructJsonTests) {
   e.mark_initialized();
   ASSERT_RPCTYPE_VALID(e);
   ASSERT_TRUE(e.is_initialized());
-  const char* expected_json = "{}\n";
-  ASSERT_EQ(expected_json, writer.write(e.ToJsonValue()));
+  const char* expected_json = "{}";
+  ASSERT_EQ(expected_json, Json::writeString(writer_builder_, e.ToJsonValue()));
 }
 
 TEST_F(GeneratedInterfaceTests, StructWithOptionalEmptyStructFieldJsonTest) {
@@ -314,8 +321,8 @@ TEST_F(GeneratedInterfaceTests, StructWithOptionalEmptyStructFieldJsonTest) {
   oe.mark_initialized();
   ASSERT_RPCTYPE_VALID(oe);
   ASSERT_TRUE(oe.is_initialized());
-  const char* expected_json = "{}\n";
-  ASSERT_EQ(expected_json, writer.write(oe.ToJsonValue()));
+  const char* expected_json = "{}";
+  ASSERT_EQ(expected_json, Json::writeString(writer_builder_, oe.ToJsonValue()));
 }
 
 TEST_F(GeneratedInterfaceTests, StructWithMandatoryEmptyStructFieldJsonTest) {
@@ -325,8 +332,8 @@ TEST_F(GeneratedInterfaceTests, StructWithMandatoryEmptyStructFieldJsonTest) {
   me.emptyOne.mark_initialized();
   ASSERT_RPCTYPE_VALID(me);
   ASSERT_TRUE(me.is_initialized());
-  const char* expected_json = "{\"emptyOne\":{}}\n";
-  ASSERT_EQ(expected_json, writer.write(me.ToJsonValue()));
+  const char* expected_json = "{\"emptyOne\":{}}";
+  ASSERT_EQ(expected_json, Json::writeString(writer_builder_, me.ToJsonValue()));
 }
 
 TEST_F(GeneratedInterfaceTests, StructWithOneOptionalIntFieldTest) {
@@ -350,18 +357,18 @@ TEST_F(GeneratedInterfaceTests, StructWithOneOptionalIntFieldJsonTest) {
   ASSERT_FALSE(soo.is_valid());
   ASSERT_FALSE(soo.is_initialized());
   soo.mark_initialized();
-  const char* expected_json = "{}\n";
-  ASSERT_EQ(expected_json, writer.write(soo.ToJsonValue()));
+  const char* expected_json = "{}";
+  ASSERT_EQ(expected_json, Json::writeString(writer_builder_, soo.ToJsonValue()));
 }
 
 TEST_F(GeneratedInterfaceTests, StructWithOneInitializedOptionalIntFieldJsonTest) {
-  const char* input_json = "{\"optionalInt\":11}\n";
+  const char* input_json = "{\"optionalInt\":11}";
   Json::Value json_value = JsonValue(input_json);
   StructWithOneOptionalIntField soo(&json_value);
   ASSERT_RPCTYPE_VALID(soo);
   ASSERT_TRUE(soo.is_initialized());
   ASSERT_EQ(11, *soo.optionalInt);
-  ASSERT_EQ(input_json, writer.write(soo.ToJsonValue()));
+  ASSERT_EQ(input_json, Json::writeString(writer_builder_, soo.ToJsonValue()));
 }
 
 TEST_F(GeneratedInterfaceTests, StructWithFieldOfStructThatMightBeEmptyTest) {
@@ -384,18 +391,18 @@ TEST_F(GeneratedInterfaceTests, StructWithFieldOfStructThatMightBeEmptyJsonNoVal
   ASSERT_FALSE(sfme.struct_empty());
   ASSERT_RPCTYPE_VALID(sfme);
   ASSERT_TRUE(sfme.is_initialized());
-  const char* expcected_json = "{\"fieldThatMightBeEmpty\":{}}\n";
-  ASSERT_EQ(expcected_json, writer.write(sfme.ToJsonValue()));
+  const char* expcected_json = "{\"fieldThatMightBeEmpty\":{}}";
+  ASSERT_EQ(expcected_json, Json::writeString(writer_builder_, sfme.ToJsonValue()));
 }
 
 TEST_F(GeneratedInterfaceTests, StructWithFieldOfStructThatMightBeEmptyJsonHasValueTest) {
-  const char* input_json = "{\"fieldThatMightBeEmpty\":{\"optionalInt\":12}}\n";
+  const char* input_json = "{\"fieldThatMightBeEmpty\":{\"optionalInt\":12}}";
   Json::Value json_value = JsonValue(input_json);
   StructWithFieldOfStructThatMightBeEmpty sfme(&json_value);
   ASSERT_RPCTYPE_VALID(sfme);
   ASSERT_TRUE(sfme.is_initialized());
   ASSERT_EQ(12, *sfme.fieldThatMightBeEmpty.optionalInt);
-  ASSERT_EQ(input_json, writer.write(sfme.ToJsonValue()));
+  ASSERT_EQ(input_json, Json::writeString(writer_builder_, sfme.ToJsonValue()));
 }
 
 TEST_F(GeneratedInterfaceTests, StructWithFieldOfOptionalMapTest) {
@@ -418,8 +425,8 @@ TEST_F(GeneratedInterfaceTests, StructWithFieldOfOptionalMapToJsonTest) {
   ASSERT_TRUE(snom.struct_empty());
   ASSERT_RPCTYPE_VALID(snom);
   ASSERT_TRUE(snom.is_initialized());
-  const char* expected_json = "{}\n";
-  ASSERT_EQ(expected_json, writer.write(snom.ToJsonValue()));
+  const char* expected_json = "{}";
+  ASSERT_EQ(expected_json, Json::writeString(writer_builder_, snom.ToJsonValue()));
 }
 
 TEST_F(GeneratedInterfaceTests, StructWithFieldOfOptionalMapNulledToJsonTest) {
@@ -431,64 +438,64 @@ TEST_F(GeneratedInterfaceTests, StructWithFieldOfOptionalMapNulledToJsonTest) {
   ASSERT_FALSE(snom.struct_empty());
   ASSERT_RPCTYPE_VALID(snom);
   ASSERT_TRUE(snom.is_initialized());
-  const char* expected_json = "{\"nullableOptionalIntMap\":null}\n";
-  ASSERT_EQ(expected_json, writer.write(snom.ToJsonValue()));
+  const char* expected_json = "{\"nullableOptionalIntMap\":null}";
+  ASSERT_EQ(expected_json, Json::writeString(writer_builder_, snom.ToJsonValue()));
 }
 
 TEST_F(GeneratedInterfaceTests, StructWithFieldOfOptionalMapNulledInJsonTest) {
-  const char* input_json = "{\"nullableOptionalIntMap\":null}\n";
+  const char* input_json = "{\"nullableOptionalIntMap\":null}";
   Json::Value json_value = JsonValue(input_json);
   StructWithNullableOptionalMap snom(&json_value);
   ASSERT_RPCTYPE_VALID(snom);
   ASSERT_TRUE(snom.is_initialized());
   ASSERT_TRUE(snom.nullableOptionalIntMap->is_null());
-  ASSERT_EQ(input_json, writer.write(snom.ToJsonValue()));
+  ASSERT_EQ(input_json, Json::writeString(writer_builder_, snom.ToJsonValue()));
 }
 
 TEST_F(GeneratedInterfaceTests, StructWithFieldOfOptionalMapInitializedInJsonTest) {
-  const char* input_json = "{\"nullableOptionalIntMap\":{\"Hello\":2}}\n";
+  const char* input_json = "{\"nullableOptionalIntMap\":{\"Hello\":2}}";
   Json::Value json_value = JsonValue(input_json);
   StructWithNullableOptionalMap snom(&json_value);
   ASSERT_RPCTYPE_VALID(snom);
   ASSERT_TRUE(snom.is_initialized());
   ASSERT_FALSE(snom.nullableOptionalIntMap->is_null());
-  ASSERT_EQ(input_json, writer.write(snom.ToJsonValue()));
+  ASSERT_EQ(input_json, Json::writeString(writer_builder_, snom.ToJsonValue()));
 }
 
 TEST_F(GeneratedInterfaceTests, StructWithOptionalArrayTest) {
-  const char* expected_json = "{}\n";
+  const char* expected_json = "{}";
   StructWithOptionalIntArray soia;
   ASSERT_TRUE(soia.struct_empty());
   ASSERT_FALSE(soia.is_valid());
   ASSERT_FALSE(soia.is_initialized());
   soia.mark_initialized();
-  ASSERT_EQ(expected_json, writer.write(soia.ToJsonValue()));
+  ASSERT_EQ(expected_json, Json::writeString(writer_builder_, soia.ToJsonValue()));
   (*soia.optionalIntArray).push_back(2);
   ASSERT_RPCTYPE_VALID(soia);
   ASSERT_TRUE(soia.is_initialized());
-  const char* expected_json2 = "{\"optionalIntArray\":[2]}\n";
-  ASSERT_EQ(expected_json2, writer.write(soia.ToJsonValue()));
+  const char* expected_json2 = "{\"optionalIntArray\":[2]}";
+  ASSERT_EQ(expected_json2, Json::writeString(writer_builder_, soia.ToJsonValue()));
 }
 
 TEST_F(GeneratedInterfaceTests, StructWithMandatoryArrayTest) {
-  const char* expected_json = "{\"mandatoryIntArray\":[]}\n";
+  const char* expected_json = "{\"mandatoryIntArray\":[]}";
   StructWithMandatoryIntArray smia;
   ASSERT_FALSE(smia.is_valid());
   ASSERT_FALSE(smia.is_initialized());
   smia.mandatoryIntArray.mark_initialized();
   ASSERT_RPCTYPE_VALID(smia);
   ASSERT_TRUE(smia.is_initialized());
-  ASSERT_EQ(expected_json, writer.write(smia.ToJsonValue()));
+  ASSERT_EQ(expected_json, Json::writeString(writer_builder_, smia.ToJsonValue()));
 
   smia.mandatoryIntArray.push_back(3);
   ASSERT_RPCTYPE_VALID(smia);
   ASSERT_TRUE(smia.is_initialized());
-  const char* expected_json2 = "{\"mandatoryIntArray\":[3]}\n";
-  ASSERT_EQ(expected_json2, writer.write(smia.ToJsonValue()));
+  const char* expected_json2 = "{\"mandatoryIntArray\":[3]}";
+  ASSERT_EQ(expected_json2, Json::writeString(writer_builder_, smia.ToJsonValue()));
 }
 
 TEST_F(GeneratedInterfaceTests, StructWithOptionalMapTest) {
-  const char* expected_json = "{}\n";
+  const char* expected_json = "{}";
   StructWithOptionalIntMap soim;
   ASSERT_TRUE(soim.struct_empty());
   ASSERT_FALSE(soim.is_valid());
@@ -497,32 +504,32 @@ TEST_F(GeneratedInterfaceTests, StructWithOptionalMapTest) {
   ASSERT_TRUE(soim.struct_empty());
   ASSERT_RPCTYPE_VALID(soim);
   ASSERT_TRUE(soim.is_initialized());
-  ASSERT_EQ(expected_json, writer.write(soim.ToJsonValue()));
+  ASSERT_EQ(expected_json, Json::writeString(writer_builder_, soim.ToJsonValue()));
   (*soim.optionalIntMap)["Yay"] = 2;
   ASSERT_RPCTYPE_VALID(soim);
   ASSERT_TRUE(soim.is_initialized());
-  const char* expected_json2 = "{\"optionalIntMap\":{\"Yay\":2}}\n";
-  ASSERT_EQ(expected_json2, writer.write(soim.ToJsonValue()));
+  const char* expected_json2 = "{\"optionalIntMap\":{\"Yay\":2}}";
+  ASSERT_EQ(expected_json2, Json::writeString(writer_builder_, soim.ToJsonValue()));
 }
 
 TEST_F(GeneratedInterfaceTests, StructWithMandatoryMapTest) {
-  const char* expected_json = "{\"mandatoryIntMap\":{}}\n";
+  const char* expected_json = "{\"mandatoryIntMap\":{}}";
   StructWithMandatoryIntMap smim;
   ASSERT_FALSE(smim.is_valid());
   ASSERT_FALSE(smim.is_initialized());
   smim.mandatoryIntMap.mark_initialized();
   ASSERT_RPCTYPE_VALID(smim);
   ASSERT_TRUE(smim.is_initialized());
-  ASSERT_EQ(expected_json, writer.write(smim.ToJsonValue()));
+  ASSERT_EQ(expected_json, Json::writeString(writer_builder_, smim.ToJsonValue()));
   smim.mandatoryIntMap["Yay"] = 2;
   ASSERT_RPCTYPE_VALID(smim);
   ASSERT_TRUE(smim.is_initialized());
-  const char* expected_json2 = "{\"mandatoryIntMap\":{\"Yay\":2}}\n";
-  ASSERT_EQ(expected_json2, writer.write(smim.ToJsonValue()));
+  const char* expected_json2 = "{\"mandatoryIntMap\":{\"Yay\":2}}";
+  ASSERT_EQ(expected_json2, Json::writeString(writer_builder_, smim.ToJsonValue()));
 }
 
 TEST_F(GeneratedInterfaceTests, StructWithMandatoryMapInitFromWrongJsonTest) {
-  const char* empty_json = "{}\n";
+  const char* empty_json = "{}";
   Json::Value json_value = JsonValue(empty_json);
 
   StructWithMandatoryIntMap smim(&json_value);
@@ -535,8 +542,8 @@ TEST_F(GeneratedInterfaceTests, StructWithMandatoryMapInitFromWrongJsonTest) {
   ASSERT_FALSE(smim.struct_empty());
   ASSERT_RPCTYPE_VALID(smim);
   ASSERT_TRUE(smim.is_initialized());
-  const char* expected_json = "{\"mandatoryIntMap\":{\"Yay\":2}}\n";
-  ASSERT_EQ(expected_json, writer.write(smim.ToJsonValue()));
+  const char* expected_json = "{\"mandatoryIntMap\":{\"Yay\":2}}";
+  ASSERT_EQ(expected_json, Json::writeString(writer_builder_, smim.ToJsonValue()));
 }
 
 TEST_F(GeneratedInterfaceTests, ReportIncorrectlyInitializedMap1) {
@@ -545,7 +552,7 @@ TEST_F(GeneratedInterfaceTests, ReportIncorrectlyInitializedMap1) {
   ASSERT_FALSE(smim.is_valid());
   rpc::ValidationReport report("smim");
   smim.ReportErrors(&report);
-  ASSERT_EQ("smim.mandatoryIntMap: object is not initialized\n", PrettyFormat(report));
+  ASSERT_EQ("smim.mandatoryIntMap: object is not initialized", PrettyFormat(report));
 }
 
 TEST_F(GeneratedInterfaceTests, ReportIncorrectlyInitializedMap2) {
@@ -556,7 +563,7 @@ TEST_F(GeneratedInterfaceTests, ReportIncorrectlyInitializedMap2) {
   ASSERT_EQ("c: object is not initialized\n"
             "c.choiceID: value is not initialized\n"
             "c.menuName: value is not initialized\n"
-            "c.vrCommands: object is not initialized\n", PrettyFormat(report));
+            "c.vrCommands: object is not initialized", PrettyFormat(report));
 }
 
 TEST_F(GeneratedInterfaceTests, TestFrankenstructCreation) {
@@ -584,7 +591,7 @@ TEST_F(GeneratedInterfaceTests, TestFrankenstructCreation) {
 }
 
 TEST_F(GeneratedInterfaceTests, FrankenstructToJson) {
-  const char* expected_json = "{\"hello\":\"str\",\"mandatoryInt\":2}\n";
+  const char* expected_json = "{\"hello\":\"str\",\"mandatoryInt\":2}";
   FrankenstructOfEmptyStringWithMandatoryInt fbmi;
   fbmi.mandatoryInt = 2;
   fbmi["hello"] = "str";
@@ -592,12 +599,11 @@ TEST_F(GeneratedInterfaceTests, FrankenstructToJson) {
   ASSERT_RPCTYPE_VALID(fbmi);
   ASSERT_FALSE(fbmi.empty());
   ASSERT_FALSE(fbmi.struct_empty());
-  ASSERT_EQ(expected_json,
-            writer.write(fbmi.ToJsonValue()));
+  ASSERT_EQ(expected_json, Json::writeString(writer_builder_, fbmi.ToJsonValue()));
 }
 
 TEST_F(GeneratedInterfaceTests, FrankenstructFromJson) {
-  const char* input_json = "{\"hello\":\"str\",\"mandatoryInt\":2}\n";
+  const char* input_json = "{\"hello\":\"str\",\"mandatoryInt\":2}";
   Json::Value json_value = JsonValue(input_json);
   FrankenstructOfEmptyStringWithMandatoryInt fbmi(&json_value);
   ASSERT_TRUE(fbmi.is_initialized());
@@ -610,7 +616,7 @@ TEST_F(GeneratedInterfaceTests, FrankenstructFromJson) {
 }
 
 TEST_F(GeneratedInterfaceTests, FrankenstructFromInvalidJson) {
-  const char* input_json = "{\"hello\":true,\"mandatoryInt\":2}\n";
+  const char* input_json = "{\"hello\":true,\"mandatoryInt\":2}";
   Json::Value json_value = JsonValue(input_json);
   FrankenstructOfEmptyStringWithMandatoryInt fbmi(&json_value);
   ASSERT_TRUE(fbmi.is_initialized());
@@ -621,7 +627,7 @@ TEST_F(GeneratedInterfaceTests, FrankenstructFromInvalidJson) {
   ASSERT_EQ(2, fbmi.mandatoryInt);
   rpc::ValidationReport report("fbmi");
   fbmi.ReportErrors(&report);
-  ASSERT_EQ("fbmi[\"hello\"]: value initialized incorrectly\n", PrettyFormat(report));
+  ASSERT_EQ("fbmi[\"hello\"]: value initialized incorrectly", PrettyFormat(report));
 }
 
 }  // namespace test

@@ -49,7 +49,7 @@ namespace smart_object_test {
  * and leave SmartObject in previous state.
  **/
 TEST(test_no_default_value, test_StringSchemaItemTest) {
-  using namespace NsSmartDeviceLink::NsSmartObjects;
+  using namespace ns_smart_device_link::ns_smart_objects;
   SmartObject obj;
 
   ISchemaItemPtr item =
@@ -59,8 +59,9 @@ TEST(test_no_default_value, test_StringSchemaItemTest) {
   obj = "New valid string";
   ASSERT_EQ(std::string("New valid string"), obj.asString());
 
-  int resultType = item->validate(obj);
-  EXPECT_EQ(Errors::OK, resultType);
+  rpc::ValidationReport report("RPC");
+  int resultType = item->validate(obj, &report);
+  EXPECT_EQ(errors::OK, resultType);
   bool resDefault = item->setDefaultValue(obj);
   EXPECT_FALSE(resDefault);
   EXPECT_EQ(std::string("New valid string"), obj.asString());
@@ -68,8 +69,8 @@ TEST(test_no_default_value, test_StringSchemaItemTest) {
   // Obj - bool
   obj = true;
 
-  resultType = item->validate(obj);
-  EXPECT_EQ(Errors::INVALID_VALUE, resultType);
+  resultType = item->validate(obj, &report);
+  EXPECT_EQ(errors::INVALID_VALUE, resultType);
   resDefault = item->setDefaultValue(obj);
   EXPECT_FALSE(resDefault);
   EXPECT_TRUE(obj.asBool());
@@ -77,13 +78,13 @@ TEST(test_no_default_value, test_StringSchemaItemTest) {
   // Object - number
   obj = 3.1415926;
 
-  resultType = item->validate(obj);
-  EXPECT_EQ(Errors::INVALID_VALUE, resultType);
+  resultType = item->validate(obj, &report);
+  EXPECT_EQ(errors::INVALID_VALUE, resultType);
 
   resDefault = item->setDefaultValue(obj);
   EXPECT_FALSE(resDefault);
-  resultType = item->validate(obj);
-  EXPECT_EQ(Errors::INVALID_VALUE, resultType);
+  resultType = item->validate(obj, &report);
+  EXPECT_EQ(errors::INVALID_VALUE, resultType);
   EXPECT_EQ(3.1415926, obj.asDouble());
 }
 
@@ -97,7 +98,7 @@ TEST(test_no_default_value, test_StringSchemaItemTest) {
  *default value.
  **/
 TEST(test_item_with_default_value, test_StringSchemaItemTest) {
-  using namespace NsSmartDeviceLink::NsSmartObjects;
+  using namespace ns_smart_device_link::ns_smart_objects;
   SmartObject obj;
 
   ISchemaItemPtr item = CStringSchemaItem::create(
@@ -110,8 +111,9 @@ TEST(test_item_with_default_value, test_StringSchemaItemTest) {
   obj = "New valid string";
   ASSERT_EQ(std::string("New valid string"), obj.asString());
 
-  int resultType = item->validate(obj);
-  EXPECT_EQ(Errors::OK, resultType);
+  rpc::ValidationReport report("RPC");
+  int resultType = item->validate(obj, &report);
+  EXPECT_EQ(errors::OK, resultType);
   bool resDefault = item->setDefaultValue(obj);
   EXPECT_TRUE(resDefault);
   EXPECT_EQ(std::string("Default string"), obj.asString());
@@ -119,8 +121,8 @@ TEST(test_item_with_default_value, test_StringSchemaItemTest) {
   // Obj - bool
   obj = true;
 
-  resultType = item->validate(obj);
-  EXPECT_EQ(Errors::INVALID_VALUE, resultType);
+  resultType = item->validate(obj, &report);
+  EXPECT_EQ(errors::INVALID_VALUE, resultType);
   resDefault = item->setDefaultValue(obj);
   EXPECT_TRUE(resDefault);
   EXPECT_EQ(std::string("Default string"), obj.asString());
@@ -128,13 +130,13 @@ TEST(test_item_with_default_value, test_StringSchemaItemTest) {
   // Object - number
   obj = 3.1415926;
 
-  resultType = item->validate(obj);
-  EXPECT_EQ(Errors::INVALID_VALUE, resultType);
+  resultType = item->validate(obj, &report);
+  EXPECT_EQ(errors::INVALID_VALUE, resultType);
 
   resDefault = item->setDefaultValue(obj);
   EXPECT_TRUE(resDefault);
-  resultType = item->validate(obj);
-  EXPECT_EQ(Errors::OK, resultType);
+  resultType = item->validate(obj, &report);
+  EXPECT_EQ(errors::OK, resultType);
   EXPECT_EQ(std::string("Default string"), obj.asString());
 }
 
@@ -142,7 +144,7 @@ TEST(test_item_with_default_value, test_StringSchemaItemTest) {
  * Test StringSchemaItem with max length
  **/
 TEST(test_item_with_max_length, test_StringSchemaItemTest) {
-  using namespace NsSmartDeviceLink::NsSmartObjects;
+  using namespace ns_smart_device_link::ns_smart_objects;
   SmartObject obj;
 
   ISchemaItemPtr item = CStringSchemaItem::create(
@@ -154,8 +156,9 @@ TEST(test_item_with_max_length, test_StringSchemaItemTest) {
   obj = "New valid string";
   ASSERT_EQ(std::string("New valid string"), obj.asString());
 
-  int resultType = item->validate(obj);
-  EXPECT_EQ(Errors::OK, resultType);
+  rpc::ValidationReport report("RPC");
+  int resultType = item->validate(obj, &report);
+  EXPECT_EQ(errors::OK, resultType);
   bool resDefault = item->setDefaultValue(obj);
   EXPECT_TRUE(resDefault);
   EXPECT_EQ(std::string("Default string"), obj.asString());
@@ -164,18 +167,18 @@ TEST(test_item_with_max_length, test_StringSchemaItemTest) {
   obj = "New very very loooooong string";
   ASSERT_EQ(std::string("New very very loooooong string"), obj.asString());
 
-  resultType = item->validate(obj);
-  EXPECT_EQ(Errors::OUT_OF_RANGE, resultType);
+  resultType = item->validate(obj, &report);
+  EXPECT_EQ(errors::OUT_OF_RANGE, resultType);
 
   resDefault = item->setDefaultValue(obj);
   EXPECT_TRUE(resDefault);
   EXPECT_EQ(std::string("Default string"), obj.asString());
-  resultType = item->validate(obj);
-  EXPECT_EQ(Errors::OK, resultType);
+  resultType = item->validate(obj, &report);
+  EXPECT_EQ(errors::OK, resultType);
 }
 
 TEST(test_map_validate, test_StringSchemaItemTest) {
-  using namespace NsSmartDeviceLink::NsSmartObjects;
+  using namespace ns_smart_device_link::ns_smart_objects;
   SmartObject obj;
 
   ISchemaItemPtr item = CStringSchemaItem::create(
@@ -188,20 +191,21 @@ TEST(test_map_validate, test_StringSchemaItemTest) {
   obj["bool"] = true;
   obj["num"] = 3.14;
 
-  int resultType = item->validate(obj["str"]);
-  EXPECT_EQ(Errors::OK, resultType);
+  rpc::ValidationReport report("RPC");
+  int resultType = item->validate(obj["str"], &report);
+  EXPECT_EQ(errors::OK, resultType);
 
-  resultType = item->validate(obj["long"]);
-  EXPECT_EQ(Errors::OUT_OF_RANGE, resultType);
+  resultType = item->validate(obj["long"], &report);
+  EXPECT_EQ(errors::OUT_OF_RANGE, resultType);
 
-  resultType = item->validate(obj["bool"]);
-  EXPECT_EQ(Errors::INVALID_VALUE, resultType);
+  resultType = item->validate(obj["bool"], &report);
+  EXPECT_EQ(errors::INVALID_VALUE, resultType);
 
-  resultType = item->validate(obj["num"]);
-  EXPECT_EQ(Errors::INVALID_VALUE, resultType);
+  resultType = item->validate(obj["num"], &report);
+  EXPECT_EQ(errors::INVALID_VALUE, resultType);
 
-  resultType = item->validate(obj);
-  EXPECT_EQ(Errors::INVALID_VALUE, resultType);
+  resultType = item->validate(obj, &report);
+  EXPECT_EQ(errors::INVALID_VALUE, resultType);
 
   bool resDefault = item->setDefaultValue(obj["str"]);
   EXPECT_TRUE(resDefault);
@@ -215,28 +219,28 @@ TEST(test_map_validate, test_StringSchemaItemTest) {
   EXPECT_TRUE(resDefault);
   EXPECT_EQ(std::string("Default string"), obj["num"].asString());
 
-  resultType = item->validate(obj["str"]);
-  EXPECT_EQ(Errors::OK, resultType);
+  resultType = item->validate(obj["str"], &report);
+  EXPECT_EQ(errors::OK, resultType);
 
-  resultType = item->validate(obj["long"]);
-  EXPECT_EQ(Errors::OUT_OF_RANGE, resultType);
+  resultType = item->validate(obj["long"], &report);
+  EXPECT_EQ(errors::OUT_OF_RANGE, resultType);
 
-  resultType = item->validate(obj["bool"]);
-  EXPECT_EQ(Errors::OK, resultType);
+  resultType = item->validate(obj["bool"], &report);
+  EXPECT_EQ(errors::OK, resultType);
 
-  resultType = item->validate(obj["num"]);
-  EXPECT_EQ(Errors::OK, resultType);
+  resultType = item->validate(obj["num"], &report);
+  EXPECT_EQ(errors::OK, resultType);
 
   resDefault = item->setDefaultValue(obj);
   EXPECT_TRUE(resDefault);
   EXPECT_EQ(std::string("Default string"), obj.asString());
 
-  resultType = item->validate(obj);
-  EXPECT_EQ(Errors::OK, resultType);
+  resultType = item->validate(obj, &report);
+  EXPECT_EQ(errors::OK, resultType);
 }
 
 TEST(test_array_validate, test_StringSchemaItemTest) {
-  using namespace NsSmartDeviceLink::NsSmartObjects;
+  using namespace ns_smart_device_link::ns_smart_objects;
   SmartObject obj;
 
   ISchemaItemPtr item = CStringSchemaItem::create(
@@ -250,23 +254,24 @@ TEST(test_array_validate, test_StringSchemaItemTest) {
   obj[3] = 3.14;
   obj[4] = "New valid string";
 
-  int resultType = item->validate(obj[0]);
-  EXPECT_EQ(Errors::OK, resultType);
+  rpc::ValidationReport report("RPC");
+  int resultType = item->validate(obj[0], &report);
+  EXPECT_EQ(errors::OK, resultType);
 
-  resultType = item->validate(obj[1]);
-  EXPECT_EQ(Errors::OUT_OF_RANGE, resultType);
+  resultType = item->validate(obj[1], &report);
+  EXPECT_EQ(errors::OUT_OF_RANGE, resultType);
 
-  resultType = item->validate(obj[2]);
-  EXPECT_EQ(Errors::INVALID_VALUE, resultType);
+  resultType = item->validate(obj[2], &report);
+  EXPECT_EQ(errors::INVALID_VALUE, resultType);
 
-  resultType = item->validate(obj[3]);
-  EXPECT_EQ(Errors::INVALID_VALUE, resultType);
+  resultType = item->validate(obj[3], &report);
+  EXPECT_EQ(errors::INVALID_VALUE, resultType);
 
-  resultType = item->validate(obj[4]);
-  EXPECT_EQ(Errors::OK, resultType);
+  resultType = item->validate(obj[4], &report);
+  EXPECT_EQ(errors::OK, resultType);
 
-  resultType = item->validate(obj);
-  EXPECT_EQ(Errors::INVALID_VALUE, resultType);
+  resultType = item->validate(obj, &report);
+  EXPECT_EQ(errors::INVALID_VALUE, resultType);
 
   bool resDefault = item->setDefaultValue(obj[0]);
   EXPECT_TRUE(resDefault);
@@ -284,25 +289,25 @@ TEST(test_array_validate, test_StringSchemaItemTest) {
   EXPECT_EQ(std::string("Default string"), obj[4].asString());
   EXPECT_EQ(std::string("Default string"), obj[5].asString());
 
-  resultType = item->validate(obj[0]);
-  EXPECT_EQ(Errors::OK, resultType);
-  resultType = item->validate(obj[1]);
-  EXPECT_EQ(Errors::OUT_OF_RANGE, resultType);
-  resultType = item->validate(obj[2]);
-  EXPECT_EQ(Errors::OK, resultType);
-  resultType = item->validate(obj[3]);
-  EXPECT_EQ(Errors::INVALID_VALUE, resultType);
-  resultType = item->validate(obj[4]);
-  EXPECT_EQ(Errors::OK, resultType);
-  resultType = item->validate(obj[5]);
-  EXPECT_EQ(Errors::OK, resultType);
+  resultType = item->validate(obj[0], &report);
+  EXPECT_EQ(errors::OK, resultType);
+  resultType = item->validate(obj[1], &report);
+  EXPECT_EQ(errors::OUT_OF_RANGE, resultType);
+  resultType = item->validate(obj[2], &report);
+  EXPECT_EQ(errors::OK, resultType);
+  resultType = item->validate(obj[3], &report);
+  EXPECT_EQ(errors::INVALID_VALUE, resultType);
+  resultType = item->validate(obj[4], &report);
+  EXPECT_EQ(errors::OK, resultType);
+  resultType = item->validate(obj[5], &report);
+  EXPECT_EQ(errors::OK, resultType);
 
   resDefault = item->setDefaultValue(obj);
   EXPECT_TRUE(resDefault);
   EXPECT_EQ(std::string("Default string"), obj.asString());
 
-  resultType = item->validate(obj);
-  EXPECT_EQ(Errors::OK, resultType);
+  resultType = item->validate(obj, &report);
+  EXPECT_EQ(errors::OK, resultType);
 }
 
 }  // namespace smart_object_test

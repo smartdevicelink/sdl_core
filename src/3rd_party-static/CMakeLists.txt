@@ -29,24 +29,21 @@
 # POSSIBILITY OF SUCH DAMAGE.
 
 # --- jsoncpp
-add_subdirectory(./jsoncpp)
+include(${CMAKE_SOURCE_DIR}/tools/cmake/helpers/sources.cmake)
+
+set(JSONCPP_INCLUDE_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/jsoncpp/include ${CMAKE_SOURCE_DIR}/src/components/utils/include)
 set(JSONCPP_INCLUDE_DIRECTORY ${JSONCPP_INCLUDE_DIRECTORY} PARENT_SCOPE)
 
-# --- Message Broker
-add_subdirectory(./message_broker)
-set(MESSAGE_BROKER_INCLUDE_DIRECTORY ${MESSAGE_BROKER_INCLUDE_DIRECTORY} PARENT_SCOPE)
+include_directories(
+  ${JSONCPP_INCLUDE_DIRECTORY}
+)
+
+collect_sources(SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/jsoncpp/src/lib_json")
+add_library(jsoncpp ${SOURCES})
 
 # --- encryption
 add_subdirectory(./encryption)
 set(ENCRYPTION_INCLUDE_DIRECTORY ${ENCRYPTION_INCLUDE_DIRECTORY} PARENT_SCOPE)
-
-if (BUILD_USB_SUPPORT)
-  if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
-    add_subdirectory(./libusbx-1.0.16)
-    set(LIBUSB_INCLUDE_DIRECTORY ${LIBUSB_INCLUDE_DIRECTORY} PARENT_SCOPE)
-    set(LIBUSB_LIBS_DIRECTORY ${LIBUSB_LIBS_DIRECTORY} PARENT_SCOPE)
-  endif()
-endif()
 
 # --- gmock
 if(BUILD_TESTS)
