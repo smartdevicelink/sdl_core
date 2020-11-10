@@ -183,6 +183,8 @@ std::pair<std::string, mobile_apis::VehicleDataType::eType>
         std::make_pair(
             strings::cloud_app_vehicle_id,
             mobile_apis::VehicleDataType::VEHICLEDATA_CLOUDAPPVEHICLEID),
+        std::make_pair(strings::climate_data,
+                       mobile_apis::VehicleDataType::VEHICLEDATA_CLIMATEDATA),
         std::make_pair(strings::external_temp,
                        mobile_apis::VehicleDataType::VEHICLEDATA_EXTERNTEMP),
         std::make_pair(strings::turn_signal,

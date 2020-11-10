@@ -1208,6 +1208,7 @@
   <element name="VEHICLEDATA_FUELLEVEL_STATE" />
   <element name="VEHICLEDATA_FUELCONSUMPTION" />
   <element name="VEHICLEDATA_EXTERNTEMP" />
+  <element name="VEHICLEDATA_CLIMATEDATA"/>
   <element name="VEHICLEDATA_VIN" />
   <element name="VEHICLEDATA_GEARSTATUS" />
   <element name="VEHICLEDATA_PRNDL" />
@@ -2226,7 +2227,7 @@
  </enum>
 
  <struct name="Temperature">
-    <param name="unit" type="TemperatureUnit" mandatory="true" >
+    <param name="unit" type="Common.TemperatureUnit" mandatory="true" >
       <description>Temperature Unit</description>
     </param>
     <param name="value" type="Float" mandatory="true" >
@@ -4300,6 +4301,18 @@
       </param>
     </struct>
 
+    <struct name="ClimateData">
+      <param name="externalTemperature" type="Common.Temperature" mandatory="false">
+        <description>The external temperature in degrees celsius</description>
+      </param>
+      <param name="cabinTemperature" type="Common.Temperature" mandatory="false">
+        <description>Internal ambient cabin temperature in degrees celsius</description>
+      </param>
+      <param name="atmosphericPressure" type="Float" minvalue="0" maxvalue="2000" mandatory="false">
+        <description>Current atmospheric pressure in mBar</description>
+      </param>
+    </struct>
+
     <struct name="GearStatus">
       <param name="userSelectedGear" type="Common.PRNDL" mandatory="false">
         <description>Gear position selected by the user i.e. Park, Drive, Reverse</description>
@@ -6230,6 +6243,9 @@
     <param name="externalTemperature" type="Boolean" mandatory="false">
       <description>The external temperature in degrees celsius</description>
     </param>
+    <param name="climateData" type="Boolean" mandatory="false">
+      <description>See ClimateData</description>
+    </param>
     <param name="turnSignal" type="Boolean" mandatory="false">
         <description>See TurnSignal</description>
     </param>
@@ -6337,6 +6353,9 @@
     </param>
     <param name="externalTemperature" type="Common.VehicleDataResult" mandatory="false">
       <description>The external temperature in degrees celsius.</description>
+    </param>
+    <param name="climateData" type="Common.VehicleDataResult" mandatory="false">
+      <description>See ClimateData</description>
     </param>
     <param name="turnSignal" type="Common.VehicleDataResult" mandatory="false">
         <description>See TurnSignal</description>
@@ -6449,6 +6468,9 @@
     <param name="externalTemperature" type="Boolean" mandatory="false">
       <description>The external temperature in degrees celsius.</description>
     </param>
+    <param name="climateData" type="Boolean" mandatory="false">
+      <description>See ClimateData</description>
+    </param>
     <param name="turnSignal" type="Boolean" mandatory="false">
         <description>See TurnSignal</description>
     </param>
@@ -6556,6 +6578,9 @@
     </param>
     <param name="externalTemperature" type="Common.VehicleDataResult" mandatory="false">
       <description>The external temperature in degrees celsius</description>
+    </param>
+    <param name="climateData" type="Common.VehicleDataResult" mandatory="false">
+      <description>See ClimateData</description>
     </param>
     <param name="turnSignal" type="Common.VehicleDataResult" mandatory="false">
         <description>See TurnSignal</description>
@@ -6665,6 +6690,9 @@
     </param>
     <param name="externalTemperature" type="Boolean" mandatory="false">
       <description>The external temperature in degrees celsius</description>
+    </param>
+    <param name="climateData" type="Boolean" mandatory="false">
+      <description>See ClimateData</description>
     </param>
     <param name="turnSignal" type="Boolean" mandatory="false">
         <description>See TurnSignal</description>
@@ -6777,6 +6805,9 @@
     <param name="externalTemperature" type="Float" minvalue="-40" maxvalue="100" mandatory="false">
       <description>The external temperature in degrees celsius</description>
     </param>
+    <param name="climateData" type="Common.ClimateData" mandatory="false">
+      <description>See ClimateData</description>
+    </param>
     <param name="turnSignal" type="Common.TurnSignal" mandatory="false">
         <description>See TurnSignal</description>
     </param>
@@ -6888,6 +6919,9 @@
     </param>
     <param name="externalTemperature" type="Float" minvalue="-40" maxvalue="100" mandatory="false">
       <description>The external temperature in degrees celsius</description>
+    </param>
+    <param name="climateData" type="Common.ClimateData" mandatory="false">
+      <description>See ClimateData</description>
     </param>
     <param name="turnSignal" type="Common.TurnSignal" mandatory="false">
         <description>See TurnSignal</description>
