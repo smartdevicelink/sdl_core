@@ -246,6 +246,8 @@ std::pair<std::string, mobile_apis::VehicleDataType::eType>
                        mobile_apis::VehicleDataType::VEHICLEDATA_ENGINEOILLIFE),
         std::make_pair(strings::window_status,
                        mobile_apis::VehicleDataType::VEHICLEDATA_WINDOWSTATUS),
+        std::make_pair(strings::seat_occupancy,
+                       mobile_apis::VehicleDataType::VEHICLEDATA_SEATOCCUPANCY),
         std::make_pair(
             strings::hands_off_steering,
             mobile_apis::VehicleDataType::VEHICLEDATA_HANDSOFFSTEERING)};

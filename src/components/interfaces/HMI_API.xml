@@ -1237,6 +1237,7 @@
   <element name="VEHICLEDATA_STABILITYCONTROLSSTATUS" />
   <element name="VEHICLEDATA_WINDOWSTATUS"/>
   <element name="VEHICLEDATA_HANDSOFFSTEERING"/>
+  <element name="VEHICLEDATA_SEATOCCUPANCY"/>
 </enum>
 
 <enum name="WiperStatus">
@@ -1791,7 +1792,7 @@
 
 <struct name="SeatLocation">
     <description>Describes the location of a seat.</description>
-    <param name="grid" type="Grid"  mandatory="false">
+    <param name="grid" type="Common.Grid"  mandatory="false">
     </param>
 </struct>
 
@@ -1804,6 +1805,21 @@
     <param name="seats" type="SeatLocation" array="true" mandatory="false">
         <description>Contains a list of SeatLocation in the vehicle</description>
     </param>
+</struct>
+
+<struct name="SeatStatus">
+  <description>Describes the status of a parameter of seat.</description>
+  <param name="seatLocation" type="Common.SeatLocation"  mandatory="true"/>
+  <param name="conditionActive" type="Boolean"  mandatory="true"/>
+</struct>
+
+<struct name="SeatOccupancy">
+  <param name="seatsOccupied" type="Common.SeatStatus" array="true" minsize="0" maxsize="100" mandatory="false">
+    <description>Seat status array containing location and whether the seats are occupied.</description>
+  </param>
+  <param name="seatsBelted" type="Common.SeatStatus" array="true" minsize="0" maxsize="100" mandatory="false">
+    <description>Seat status array containing location and whether the seats are belted.</description>
+  </param>
 </struct>
 
 <enum name="ModuleType">
@@ -6290,6 +6306,9 @@
     <param name="handsOffSteering" type="Boolean" mandatory="false">
       <description>To indicate whether driver hands are off the steering wheel</description>
     </param>
+    <param name="seatOccupancy" type="Boolean" mandatory="false">
+      <description>See SeatOccupancy</description>
+    </param>
 
         <!-- Ford Specific Data Items -->
     <param name="eCallInfo" type="Boolean" mandatory="false">
@@ -6397,6 +6416,9 @@
     </param>
     <param name="handsOffSteering" type="Common.VehicleDataResult" mandatory="false">
       <description>To indicate whether driver hands are off the steering wheel</description>
+    </param>
+    <param name="seatOccupancy" type="Common.VehicleDataResult" mandatory="false">
+      <description>See SeatOccupancy</description>
     </param>
 
         <!-- Ford Specific Data Items -->
@@ -6509,6 +6531,9 @@
     <param name="handsOffSteering" type="Boolean" mandatory="false">
       <description>To indicate whether driver hands are off the steering wheel</description>
     </param>
+    <param name="seatOccupancy" type="Boolean" mandatory="false">
+      <description>See SeatOccupancy</description>
+    </param>
 
         <!-- Ford Specific Data Items -->
     <param name="eCallInfo" type="Boolean" mandatory="false">
@@ -6616,6 +6641,9 @@
     </param>
     <param name="handsOffSteering" type="Common.VehicleDataResult" mandatory="false">
       <description>To indicate whether driver hands are off the steering wheel</description>
+    </param>
+    <param name="seatOccupancy" type="Common.VehicleDataResult" mandatory="false">
+      <description>See SeatOccupancy</description>
     </param>
 
         <!-- Ford Specific Data Items -->
@@ -6729,6 +6757,9 @@
     <param name="handsOffSteering" type="Boolean" mandatory="false">
       <description>To indicate whether driver hands are off the steering wheel</description>
     </param>
+    <param name="seatOccupancy" type="Boolean" mandatory="false">
+      <description>See SeatOccupancy</description>
+    </param>
 
         <!-- Ford Specific Data Items -->
     <param name="eCallInfo" type="Boolean" mandatory="false">
@@ -6839,6 +6870,9 @@
     </param>
     <param name="handsOffSteering" type="Boolean" mandatory="false">
       <description>To indicate whether driver hands are off the steering wheel</description>
+    </param>
+    <param name="seatOccupancy" type="Common.SeatOccupancy" mandatory="false">
+      <description>See SeatOccupancy</description>
     </param>
 
         <!-- Ford Specific Data Items -->
@@ -6951,6 +6985,9 @@
     </param>
     <param name="handsOffSteering" type="Boolean" mandatory="false">
       <description>To indicate whether driver hands are off the steering wheel</description>
+    </param>
+    <param name="seatOccupancy" type="Common.SeatOccupancy" mandatory="false">
+      <description>See SeatOccupancy</description>
     </param>
 
         <!-- Ford Specific Data Items -->
