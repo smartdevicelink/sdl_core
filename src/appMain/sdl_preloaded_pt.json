@@ -4339,6 +4339,33 @@
                     "type": "Boolean",
                     "mandatory": false,
                     "since": "7.0"
+                },
+                {
+                    "name": "seatOccupancy",
+                    "key": "OEM_REF_SEAT_OCCUP",
+                    "params": [
+                        {
+                            "name": "seatsOccupied",
+                            "key": "OEM_REF_SEATS_OCCUP",
+                            "type": "SeatStatus",
+                            "array": true,
+                            "minvalue": 0,
+                            "maxvalue": 100,
+                            "mandatory": false
+                        },
+                        {
+                            "name": "seatsBelted",
+                            "key": "OEM_REF_SEATS_BELT",
+                            "type": "SeatStatus",
+                            "array": true,
+                            "minvalue": 0,
+                            "maxvalue": 100,
+                            "mandatory": false
+                        }
+                    ],
+                    "type": "Struct",
+                    "mandatory": false,
+                    "since": "7.1"
                 }
             ]
         }
