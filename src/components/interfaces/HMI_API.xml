@@ -3219,7 +3219,7 @@
   <param name="status" type="Common.ComponentVolumeStatus" mandatory="true">
     <description>The status of component volume. See ComponentVolumeStatus.</description>
   </param>
-  <param name="tpms" type="TPMS" mandatory="false">
+  <param name="tpms" type="Common.TPMS" mandatory="false">
       <description>The status of TPMS according to the particular tire.</description>
   </param>
   <param name="pressure" type="Float" mandatory="false" minvalue="0" maxvalue="2000">
