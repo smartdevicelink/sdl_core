@@ -43,6 +43,7 @@
 
 // ----------------------------------------------------------------------------
 #ifdef ENABLE_LOG
+#include "utils/logger/boostlogger.h"
 #include "utils/logger/log4cxxlogger.h"
 #include "utils/logger/logger_impl.h"
 #endif  // ENABLE_LOG
@@ -142,8 +143,10 @@ int32_t main(int32_t argc, char** argv) {
   if (profile_instance.logs_enabled()) {
     // Logger initialization
     // Redefine for each paticular logger implementation
-    auto logger = std::unique_ptr<logger::Log4CXXLogger>(
-        new logger::Log4CXXLogger("log4cxx.properties"));
+    // auto logger = std::unique_ptr<logger::Log4CXXLogger>(
+    //     new logger::Log4CXXLogger("log4cxx.properties"));
+    auto logger =
+        std::unique_ptr<logger::BoostLogger>(new logger::BoostLogger(""));
     logger_impl->Init(std::move(logger));
   }
 #endif
