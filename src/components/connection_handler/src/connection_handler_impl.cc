@@ -1669,7 +1669,7 @@ void ConnectionHandlerImpl::SendEndService(uint32_t key, uint8_t service_type) {
 
 bool ConnectionHandlerImpl::IsSessionHeartbeatTracked(
     const uint32_t connection_key) const {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   uint32_t connection_handle = 0;
   uint8_t session_id = 0;
   PairFromKey(connection_key, &connection_handle, &session_id);

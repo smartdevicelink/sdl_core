@@ -88,7 +88,7 @@ void HeartBeatMonitor::threadMain() {
 
 void HeartBeatMonitor::AddSession(uint8_t session_id) {
   if (0 == default_heartbeat_timeout_) {
-    SDL_LOG_INFO(logger_,
+    SDL_LOG_INFO(
                  "Won't add session with id "
                      << static_cast<uint32_t>(session_id)
                      << " because Heartbeat is disabled.");
@@ -136,7 +136,7 @@ void HeartBeatMonitor::KeepAlive(uint8_t session_id) {
 
 bool HeartBeatMonitor::IsSessionHeartbeatTracked(
     const uint8_t session_id) const {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   AutoLock auto_lock(sessions_list_lock_);
 
   return sessions_.end() != sessions_.find(session_id);
