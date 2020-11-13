@@ -418,6 +418,11 @@ void ProtocolHandlerImpl::SendStartSessionAck(
   raw_ford_messages_to_mobile_.PostMessage(
       impl::RawFordMessageToMobile(ptr, false));
 
+  const uint32_t connection_key =
+      session_observer_.KeyFromPair(connection_id, session_id);
+  connection_handler_.BindProtocolVersionWithSession(connection_key,
+                                                     ack_protocol_version);
+
   SDL_LOG_DEBUG("SendStartSessionAck() for connection "
                 << connection_id << " for service_type "
                 << static_cast<int32_t>(service_type) << " session_id "
@@ -2044,16 +2049,23 @@ void ProtocolHandlerImpl::NotifySessionStarted(
 RESULT_CODE ProtocolHandlerImpl::HandleControlMessageHeartBeat(
     const ProtocolPacket& packet) {
   const ConnectionID connection_id = packet.connection_id();
+  const uint32_t session_id = packet.session_id();
   SDL_LOG_DEBUG("Sending heart beat acknowledgment for connection "
-                << connection_id);
+                << connection_id << " session " << session_id);
   uint8_t protocol_version;
   if (session_observer_.ProtocolVersionUsed(
-          connection_id, packet.session_id(), protocol_version)) {
+          connection_id, session_id, protocol_version)) {
     // TODO(EZamakhov): investigate message_id for HeartBeatAck
     if (protocol_version >= PROTOCOL_VERSION_3 &&
         protocol_version <= PROTOCOL_VERSION_5) {
-      return SendHeartBeatAck(
-          connection_id, packet.session_id(), packet.message_id());
+      const uint32_t connection_key =
+          session_observer_.KeyFromPair(connection_id, session_id);
+      if (!connection_handler_.IsSessionHeartbeatTracked(connection_key)) {
+        SDL_LOG_DEBUG("Session heartbeat tracking is not started. "
+                      << "Starting it for session " << session_id);
+        connection_handler_.StartSessionHeartBeat(connection_key);
+      }
+      return SendHeartBeatAck(connection_id, session_id, packet.message_id());
     } else {
       SDL_LOG_WARN("HeartBeat is not supported");
       return RESULT_HEARTBEAT_IS_NOT_SUPPORTED;

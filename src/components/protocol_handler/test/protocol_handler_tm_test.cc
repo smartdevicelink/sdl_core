@@ -2055,7 +2055,7 @@ void ProtocolHandlerImplTest::VerifySecondaryTransportParamsInStartSessionAck(
   AddSecurityManager();
 
   EXPECT_CALL(session_observer_mock, KeyFromPair(connection_id, session_id))
-      .WillOnce(Return(connection_key));
+      .WillRepeatedly(Return(connection_key));
 
   EXPECT_CALL(session_observer_mock, GetSSLContext(connection_key, kRpc))
       .WillOnce(ReturnNull());
@@ -2167,7 +2167,7 @@ void ProtocolHandlerImplTest::VerifyCloudAppParamsInStartSessionAck(
   AddSecurityManager();
 
   EXPECT_CALL(session_observer_mock, KeyFromPair(connection_id, session_id))
-      .WillOnce(Return(connection_key));
+      .WillRepeatedly(Return(connection_key));
 
   EXPECT_CALL(session_observer_mock, GetSSLContext(connection_key, kRpc))
       .WillOnce(ReturnNull());
@@ -2637,7 +2637,7 @@ TEST_F(ProtocolHandlerImplTest,
   AddSecurityManager();
 
   EXPECT_CALL(session_observer_mock, KeyFromPair(connection_id, session_id))
-      .WillOnce(Return(connection_key));
+      .WillRepeatedly(Return(connection_key));
 
   EXPECT_CALL(session_observer_mock, GetSSLContext(connection_key, kRpc))
       .WillOnce(ReturnNull());
@@ -2823,7 +2823,7 @@ TEST_F(ProtocolHandlerImplTest,
   AddSecurityManager();
 
   EXPECT_CALL(session_observer_mock, KeyFromPair(connection_id, session_id))
-      .WillOnce(Return(connection_key));
+      .WillRepeatedly(Return(connection_key));
 
   EXPECT_CALL(session_observer_mock, GetSSLContext(connection_key, kRpc))
       .WillOnce(ReturnNull());
@@ -2944,7 +2944,7 @@ TEST_F(ProtocolHandlerImplTest,
   AddSecurityManager();
 
   EXPECT_CALL(session_observer_mock, KeyFromPair(connection_id, session_id))
-      .WillOnce(Return(connection_key));
+      .WillRepeatedly(Return(connection_key));
 
   EXPECT_CALL(session_observer_mock, GetSSLContext(connection_key, kRpc))
       .WillOnce(ReturnNull());
