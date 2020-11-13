@@ -2057,9 +2057,8 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessageHeartBeat(
     const ProtocolPacket& packet) {
   const ConnectionID connection_id = packet.connection_id();
   const uint32_t session_id = packet.session_id();
-  SDL_LOG_DEBUG(
-                "Sending heart beat acknowledgment for connection "
-                    << connection_id << " session " << session_id);
+  SDL_LOG_DEBUG("Sending heart beat acknowledgment for connection "
+                << connection_id << " session " << session_id);
   uint8_t protocol_version;
   if (session_observer_.ProtocolVersionUsed(
           connection_id, session_id, protocol_version)) {
@@ -2069,9 +2068,8 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessageHeartBeat(
       const uint32_t connection_key =
           session_observer_.KeyFromPair(connection_id, session_id);
       if (!connection_handler_.IsSessionHeartbeatTracked(connection_key)) {
-        SDL_LOG_DEBUG(
-                      "Session heartbeat tracking is not started. "
-                          << "Starting it for session " << session_id);
+        SDL_LOG_DEBUG("Session heartbeat tracking is not started. "
+                      << "Starting it for session " << session_id);
         connection_handler_.StartSessionHeartBeat(connection_key);
       }
       return SendHeartBeatAck(connection_id, session_id, packet.message_id());

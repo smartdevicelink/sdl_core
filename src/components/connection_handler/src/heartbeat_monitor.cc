@@ -88,10 +88,9 @@ void HeartBeatMonitor::threadMain() {
 
 void HeartBeatMonitor::AddSession(uint8_t session_id) {
   if (0 == default_heartbeat_timeout_) {
-    SDL_LOG_INFO(
-                 "Won't add session with id "
-                     << static_cast<uint32_t>(session_id)
-                     << " because Heartbeat is disabled.");
+    SDL_LOG_INFO("Won't add session with id "
+                 << static_cast<uint32_t>(session_id)
+                 << " because Heartbeat is disabled.");
     return;
   }
 
