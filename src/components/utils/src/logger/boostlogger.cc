@@ -73,6 +73,19 @@ void BoostLogger::Init() {
       boost::log::trivial::severity_level,
       char>("Severity");
 
+  // Allows %Severity% to be used in ini config file for property Filter.
+  boost::log::register_simple_filter_factory<std::string, char>("Tag");
+  // Allows %Severity% to be used in ini config file for property Format.
+  boost::log::register_simple_formatter_factory<std::string, char>("Tag");
+
+  boost::log::register_simple_formatter_factory<std::_Put_time<char>, char>(
+      "TimeStamp");
+  boost::log::register_simple_formatter_factory<std::thread::id, char>(
+      "ThreadId");
+  boost::log::register_simple_formatter_factory<std::string, char>("FileName");
+  boost::log::register_simple_formatter_factory<int, char>("LineNum");
+  boost::log::register_simple_formatter_factory<std::string, char>("Trace");
+
   std::ifstream file(filename_);
   logging::init_from_stream(file);
 
@@ -113,19 +126,33 @@ void BoostLogger::PushLog(const LogMessage& log_message) {
   auto time = std::chrono::system_clock::to_time_t(log_message.timestamp_);
 
   src::severity_logger<logging::trivial::severity_level> slg;
+  // boost::format fmt = boost::format("%1% [%2%][%3%][%4%] %5%:%6% %7%: %8%") %
+  //                     getBoostLogLevel(log_message.log_level_) %
+  //                     std::put_time(std::localtime(&time), "%d %b %Y %T") %
+  //                     log_message.thread_id_ % log_message.component_ %
+  //                     log_message.location_.file_name.c_str() %
+  //                     log_message.location_.line_number %
+  //                     log_message.location_.function_name.c_str() %
+  //                     log_message.log_event_;
 
-  boost::format fmt = boost::format("%1% [%2%][%3%][%4%] %5%:%6% %7%: %8%") %
-                      getBoostLogLevel(log_message.log_level_) %
-                      std::put_time(std::localtime(&time), "%d %b %Y %T") %
-                      log_message.thread_id_ % log_message.component_ %
-                      log_message.location_.file_name.c_str() %
-                      log_message.location_.line_number %
-                      log_message.location_.function_name.c_str() %
-                      log_message.log_event_;
+  slg.add_attribute("TimeStamp",
+                    attrs::constant<std::_Put_time<char> >(
+                        std::put_time(std::localtime(&time), "%d %b %Y %T")));
+  slg.add_attribute("ThreadId",
+                    attrs::constant<std::thread::id>(log_message.thread_id_));
+  slg.add_attribute("Tag",
+                    attrs::constant<std::string>(log_message.component_));
+  slg.add_attribute(
+      "FileName",
+      attrs::constant<std::string>(log_message.location_.file_name));
+  slg.add_attribute("LineNum",
+                    attrs::constant<int>(log_message.location_.line_number));
+  slg.add_attribute(
+      "Trace",
+      attrs::constant<std::string>(log_message.location_.function_name));
 
-  BOOST_LOG_CHANNEL_SEV(
-      slg, log_message.component_, getBoostLogLevel(log_message.log_level_))
-      << fmt.str();
+  BOOST_LOG_SEV(slg, getBoostLogLevel(log_message.log_level_))
+      << log_message.log_event_;
 }
 
 }  // namespace logger
