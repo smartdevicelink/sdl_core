@@ -617,6 +617,25 @@ bool AppServiceManager::UpdateNavigationCapabilities(
   return true;
 }
 
+bool AppServiceManager::IsWayPointsHandled() {
+  auto service = ActiveServiceForType(
+      EnumToString(mobile_apis::AppServiceType::NAVIGATION));
+  if (!service || !service->mobile_service ||
+      !service->record[strings::service_manifest].keyExists(
+          strings::handled_rpcs)) {
+    return false;
+  }
+
+  smart_objects::SmartObject& handled_rpcs =
+      service->record[strings::service_manifest][strings::handled_rpcs];
+  for (size_t i = 0; i < handled_rpcs.length(); ++i) {
+    if (handled_rpcs[i].asInt() == mobile_apis::FunctionID::GetWayPointsID) {
+      return true;
+    }
+  }
+  return false;
+}
+
 void AppServiceManager::AppServiceUpdated(
     const smart_objects::SmartObject& service_record,
     const mobile_apis::ServiceUpdateReason::eType update_reason,

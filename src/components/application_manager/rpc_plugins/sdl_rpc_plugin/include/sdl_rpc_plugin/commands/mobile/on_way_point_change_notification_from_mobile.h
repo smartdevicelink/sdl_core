@@ -30,62 +30,46 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_MOBILE_SUBSCRIBE_WAY_POINTS_REQUEST_H_
-#define SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_MOBILE_SUBSCRIBE_WAY_POINTS_REQUEST_H_
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_MOBILE_ON_WAY_POINT_CHANGE_NOTIFICATION_FROM_MOBILE_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_MOBILE_ON_WAY_POINT_CHANGE_NOTIFICATION_FROM_MOBILE_H_
 
-#include "application_manager/commands/command_request_impl.h"
+#include "application_manager/commands/command_notification_from_mobile_impl.h"
+#include "utils/macro.h"
 
 namespace sdl_rpc_plugin {
 namespace app_mngr = application_manager;
 
 namespace commands {
 
-/**
- * @brief SubsribeWayPointsRequest command class
- **/
-class SubscribeWayPointsRequest
-    : public app_mngr::commands::CommandRequestImpl {
+class OnWayPointChangeNotificationFromMobile
+    : public app_mngr::commands::CommandNotificationFromMobileImpl {
  public:
   /**
-   * \brief SubscribeWayPointsRequest class constructor
+   * @brief OnWayPointChangeNotificationFromMobile class constructor
+   *
+   * @param message Incoming SmartObject message
    **/
-  SubscribeWayPointsRequest(const app_mngr::commands::MessageSharedPtr& message,
-                            app_mngr::ApplicationManager& application_manager,
-                            app_mngr::rpc_service::RPCService& rpc_service,
-                            app_mngr::HMICapabilities& hmi_capabilities,
-                            policy::PolicyHandlerInterface& policy_handler);
+  OnWayPointChangeNotificationFromMobile(
+      const app_mngr::commands::MessageSharedPtr& message,
+      app_mngr::ApplicationManager& application_manager,
+      app_mngr::rpc_service::RPCService& rpc_service,
+      app_mngr::HMICapabilities& hmi_capabilities,
+      policy::PolicyHandlerInterface& policy_handler);
 
   /**
-   * \brief SubscribeWayPointsRequest class destructor
+   * @brief OnWayPointChangeNotificationFromMobile class destructor
    **/
-  ~SubscribeWayPointsRequest();
+  virtual ~OnWayPointChangeNotificationFromMobile();
 
   /**
    * @brief Execute command
    **/
-  void Run() FINAL;
-  /**
-   * @brief Interface method that is called whenever new event received
-   *
-   * @param event The received event
-   */
-  void on_event(const app_mngr::event_engine::Event& event) FINAL;
-
-  /**
-   * @brief Init sets hash update mode for request
-   */
-  bool Init() FINAL;
-
-  void onTimeOut() FINAL;
+  virtual void Run() OVERRIDE;
 
  private:
-  bool IsWayPointsAppServiceAvailable();
-
-  DISALLOW_COPY_AND_ASSIGN(SubscribeWayPointsRequest);
+  DISALLOW_COPY_AND_ASSIGN(OnWayPointChangeNotificationFromMobile);
 };
 
 }  // namespace commands
-
 }  // namespace sdl_rpc_plugin
-
-#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_MOBILE_SUBSCRIBE_WAY_POINTS_REQUEST_H_
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_MOBILE_ON_WAY_POINT_CHANGE_NOTIFICATION_FROM_MOBILE_H_

@@ -56,6 +56,7 @@ void OnNaviWayPointChangeNotification::Run() {
   // prepare SmartObject for mobile factory
   (*message_)[strings::params][strings::function_id] =
       static_cast<int32_t>(mobile_apis::FunctionID::OnWayPointChangeID);
+  application_manager_.SaveWayPointsMessage(message_, 0);
 
   SendNotificationToMobile(message_);
 }

@@ -75,7 +75,11 @@ class UnsubscribeWayPointsRequest
    */
   bool Init() FINAL;
 
+  void onTimeOut() FINAL;
+
  private:
+  bool IsWayPointsAppServiceAvailable();
+
   DISALLOW_COPY_AND_ASSIGN(UnsubscribeWayPointsRequest);
 };
 
