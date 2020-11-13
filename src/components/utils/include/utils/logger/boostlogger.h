@@ -47,7 +47,7 @@ class BoostLogger : public ThirdPartyLoggerInterface {
   void PushLog(const LogMessage& log_message) override;
 
  private:
-  //   std::string filename_;
+  std::string filename_;
 };
 
 }  // namespace logger

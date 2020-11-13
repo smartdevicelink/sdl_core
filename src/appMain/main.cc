@@ -145,8 +145,8 @@ int32_t main(int32_t argc, char** argv) {
     // Redefine for each paticular logger implementation
     // auto logger = std::unique_ptr<logger::Log4CXXLogger>(
     //     new logger::Log4CXXLogger("log4cxx.properties"));
-    auto logger =
-        std::unique_ptr<logger::BoostLogger>(new logger::BoostLogger(""));
+    auto logger = std::unique_ptr<logger::BoostLogger>(
+        new logger::BoostLogger("boostlogconfig.ini"));
     logger_impl->Init(std::move(logger));
   }
 #endif

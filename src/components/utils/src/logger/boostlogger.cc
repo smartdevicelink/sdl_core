@@ -41,11 +41,13 @@
 #include <boost/log/sinks/text_ostream_backend.hpp>
 #include <boost/log/sources/logger.hpp>
 #include <boost/log/sources/record_ostream.hpp>
+#include <boost/log/sources/severity_channel_logger.hpp>
 #include <boost/log/sources/severity_logger.hpp>
 #include <boost/log/support/date_time.hpp>
 #include <boost/log/trivial.hpp>
 #include <boost/log/utility/setup/common_attributes.hpp>
 #include <boost/log/utility/setup/file.hpp>
+#include <boost/log/utility/setup/from_stream.hpp>
 #include <fstream>
 
 namespace logger {
@@ -57,19 +59,25 @@ namespace keywords = boost::log::keywords;
 namespace expr = boost::log::expressions;
 namespace attrs = boost::log::attributes;
 
-BoostLogger::BoostLogger(const std::string& filename) {}
+BoostLogger::BoostLogger(const std::string& filename) : filename_(filename) {}
 
 void BoostLogger::Init() {
   // Construct the sink
-  typedef sinks::synchronous_sink<sinks::text_ostream_backend> text_sink;
-  boost::shared_ptr<text_sink> sink = boost::make_shared<text_sink>();
 
-  // Add a stream to write log to
-  sink->locked_backend()->add_stream(
-      boost::make_shared<std::ofstream>("SmartDeviceLinkCore.log"));
+  // Allows %Severity% to be used in ini config file for property Filter.
+  boost::log::
+      register_simple_filter_factory<boost::log::trivial::severity_level, char>(
+          "Severity");
+  // Allows %Severity% to be used in ini config file for property Format.
+  boost::log::register_simple_formatter_factory<
+      boost::log::trivial::severity_level,
+      char>("Severity");
+
+  std::ifstream file(filename_);
+  logging::init_from_stream(file);
 
   // Register the sink in the logging core
-  logging::core::get()->add_sink(sink);
+  // logging::core::get()->add_sink(sink);
 }
 
 void BoostLogger::DeInit() {
@@ -115,7 +123,9 @@ void BoostLogger::PushLog(const LogMessage& log_message) {
                       log_message.location_.function_name.c_str() %
                       log_message.log_event_;
 
-  BOOST_LOG_SEV(slg, getBoostLogLevel(log_message.log_level_)) << fmt.str();
+  BOOST_LOG_CHANNEL_SEV(
+      slg, log_message.component_, getBoostLogLevel(log_message.log_level_))
+      << fmt.str();
 }
 
 }  // namespace logger
