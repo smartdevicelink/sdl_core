@@ -32,7 +32,6 @@
 
 #include "utils/logger/boostlogger.h"
 
-#include <boost/date_time/posix_time/posix_time_types.hpp>
 #include <boost/format.hpp>
 #include <boost/log/core.hpp>
 #include <boost/log/expressions.hpp>
@@ -47,9 +46,12 @@
 #include <boost/log/trivial.hpp>
 #include <boost/log/utility/setup/common_attributes.hpp>
 #include <boost/log/utility/setup/file.hpp>
-#include <boost/log/utility/setup/from_stream.hpp>
+#include <boost/log/utility/setup/from_settings.hpp>
+#include <boost/log/utility/setup/settings_parser.hpp>
 #include <fstream>
 
+#include <boost/date_time/c_local_time_adjustor.hpp>
+#include <boost/date_time/local_time_adjustor.hpp>
 namespace logger {
 
 namespace logging = boost::log;
@@ -78,7 +80,7 @@ void BoostLogger::Init() {
   // Allows %Severity% to be used in ini config file for property Format.
   boost::log::register_simple_formatter_factory<std::string, char>("Tag");
 
-  boost::log::register_simple_formatter_factory<std::_Put_time<char>, char>(
+  boost::log::register_simple_formatter_factory<boost::posix_time::ptime, char>(
       "TimeStamp");
   boost::log::register_simple_formatter_factory<std::thread::id, char>(
       "ThreadId");
@@ -87,7 +89,10 @@ void BoostLogger::Init() {
   boost::log::register_simple_formatter_factory<std::string, char>("Trace");
 
   std::ifstream file(filename_);
-  logging::init_from_stream(file);
+
+  boost::log::settings setts = boost::log::parse_settings(file);
+
+  logging::init_from_settings(setts);
 
   // Register the sink in the logging core
   // logging::core::get()->add_sink(sink);
@@ -116,6 +121,23 @@ logging::trivial::severity_level getBoostLogLevel(LogLevel log_level) {
   }
 }
 
+boost::posix_time::ptime BoostLogger::GetLocalPosixTime(
+    const logger::TimePoint& timestamp) {
+  auto time = std::chrono::duration_cast<std::chrono::microseconds>(
+                  timestamp.time_since_epoch())
+                  .count();
+
+  boost::posix_time::ptime time_epoch(boost::gregorian::date(1970, 1, 1));
+  boost::posix_time::ptime utc_time =
+      time_epoch + boost::posix_time::microseconds(time);
+
+  typedef boost::date_time::c_local_adjustor<boost::posix_time::ptime>
+      local_adj;
+  auto local_time = local_adj::utc_to_local(utc_time);
+
+  return local_time;
+}
+
 bool BoostLogger::IsEnabledFor(const std::string& component,
                                LogLevel log_level) const {
   // To be implemented once the config file adds limiting the log level
@@ -123,8 +145,6 @@ bool BoostLogger::IsEnabledFor(const std::string& component,
 }
 
 void BoostLogger::PushLog(const LogMessage& log_message) {
-  auto time = std::chrono::system_clock::to_time_t(log_message.timestamp_);
-
   src::severity_logger<logging::trivial::severity_level> slg;
   // boost::format fmt = boost::format("%1% [%2%][%3%][%4%] %5%:%6% %7%: %8%") %
   //                     getBoostLogLevel(log_message.log_level_) %
@@ -135,9 +155,9 @@ void BoostLogger::PushLog(const LogMessage& log_message) {
   //                     log_message.location_.function_name.c_str() %
   //                     log_message.log_event_;
 
+  auto local_time = GetLocalPosixTime(log_message.timestamp_);
   slg.add_attribute("TimeStamp",
-                    attrs::constant<std::_Put_time<char> >(
-                        std::put_time(std::localtime(&time), "%d %b %Y %T")));
+                    attrs::constant<boost::posix_time::ptime>(local_time));
   slg.add_attribute("ThreadId",
                     attrs::constant<std::thread::id>(log_message.thread_id_));
   slg.add_attribute("Tag",

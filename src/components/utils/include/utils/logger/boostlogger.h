@@ -32,7 +32,7 @@
 #pragma once
 
 #define BOOST_LOG_DYN_LINK 1
-#include <log4cxx/logger.h>
+#include <boost/date_time/posix_time/posix_time_types.hpp>
 #include "utils/ilogger.h"
 
 namespace logger {
@@ -47,6 +47,9 @@ class BoostLogger : public ThirdPartyLoggerInterface {
   void PushLog(const LogMessage& log_message) override;
 
  private:
+  boost::posix_time::ptime GetLocalPosixTime(
+      const logger::TimePoint& timestamp);
+
   std::string filename_;
 };
 
