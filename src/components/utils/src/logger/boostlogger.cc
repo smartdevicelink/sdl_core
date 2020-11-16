@@ -52,6 +52,9 @@
 
 #include <boost/date_time/c_local_time_adjustor.hpp>
 #include <boost/date_time/local_time_adjustor.hpp>
+
+#include <boost/regex.hpp>
+
 namespace logger {
 
 namespace logging = boost::log;
@@ -64,22 +67,12 @@ namespace attrs = boost::log::attributes;
 BoostLogger::BoostLogger(const std::string& filename) : filename_(filename) {}
 
 void BoostLogger::Init() {
-  // Construct the sink
-
-  // Allows %Severity% to be used in ini config file for property Filter.
-  boost::log::
-      register_simple_filter_factory<boost::log::trivial::severity_level, char>(
-          "Severity");
+  // Add formatting parameters to INI file
   // Allows %Severity% to be used in ini config file for property Format.
   boost::log::register_simple_formatter_factory<
       boost::log::trivial::severity_level,
       char>("Severity");
-
-  // Allows %Severity% to be used in ini config file for property Filter.
-  boost::log::register_simple_filter_factory<std::string, char>("Tag");
-  // Allows %Severity% to be used in ini config file for property Format.
-  boost::log::register_simple_formatter_factory<std::string, char>("Tag");
-
+  boost::log::register_simple_formatter_factory<std::string, char>("Component");
   boost::log::register_simple_formatter_factory<boost::posix_time::ptime, char>(
       "TimeStamp");
   boost::log::register_simple_formatter_factory<std::thread::id, char>(
@@ -88,14 +81,18 @@ void BoostLogger::Init() {
   boost::log::register_simple_formatter_factory<int, char>("LineNum");
   boost::log::register_simple_formatter_factory<std::string, char>("Trace");
 
+  // Add filter parameters to INI file
+  // Allows %Severity% to be used in ini config file for property Filter.
+  boost::log::
+      register_simple_filter_factory<boost::log::trivial::severity_level, char>(
+          "Severity");
+  boost::log::register_simple_filter_factory<std::string, char>("Component");
+
   std::ifstream file(filename_);
 
   boost::log::settings setts = boost::log::parse_settings(file);
 
   logging::init_from_settings(setts);
-
-  // Register the sink in the logging core
-  // logging::core::get()->add_sink(sink);
 }
 
 void BoostLogger::DeInit() {
@@ -138,6 +135,21 @@ boost::posix_time::ptime BoostLogger::GetLocalPosixTime(
   return local_time;
 }
 
+std::string BoostLogger::GetFilteredFunctionTrace(
+    const std::string& full_function_signature) {
+  boost::regex function_pattern("([^\\s]*)\\((.*)\\)");
+  boost::smatch results;
+
+  if (!boost::regex_search(
+          full_function_signature, results, function_pattern)) {
+    // Invalid pattern
+    return std::string(full_function_signature);
+  }
+
+  // Get the function name(including namespaces) from the function signature
+  return std::string(results[1]);
+}
+
 bool BoostLogger::IsEnabledFor(const std::string& component,
                                LogLevel log_level) const {
   // To be implemented once the config file adds limiting the log level
@@ -145,31 +157,23 @@ bool BoostLogger::IsEnabledFor(const std::string& component,
 }
 
 void BoostLogger::PushLog(const LogMessage& log_message) {
-  src::severity_logger<logging::trivial::severity_level> slg;
-  // boost::format fmt = boost::format("%1% [%2%][%3%][%4%] %5%:%6% %7%: %8%") %
-  //                     getBoostLogLevel(log_message.log_level_) %
-  //                     std::put_time(std::localtime(&time), "%d %b %Y %T") %
-  //                     log_message.thread_id_ % log_message.component_ %
-  //                     log_message.location_.file_name.c_str() %
-  //                     log_message.location_.line_number %
-  //                     log_message.location_.function_name.c_str() %
-  //                     log_message.log_event_;
-
   auto local_time = GetLocalPosixTime(log_message.timestamp_);
+  std::string func_name =
+      GetFilteredFunctionTrace(log_message.location_.function_name);
+
+  src::severity_logger<logging::trivial::severity_level> slg;
   slg.add_attribute("TimeStamp",
                     attrs::constant<boost::posix_time::ptime>(local_time));
   slg.add_attribute("ThreadId",
                     attrs::constant<std::thread::id>(log_message.thread_id_));
-  slg.add_attribute("Tag",
+  slg.add_attribute("Component",
                     attrs::constant<std::string>(log_message.component_));
   slg.add_attribute(
       "FileName",
       attrs::constant<std::string>(log_message.location_.file_name));
   slg.add_attribute("LineNum",
                     attrs::constant<int>(log_message.location_.line_number));
-  slg.add_attribute(
-      "Trace",
-      attrs::constant<std::string>(log_message.location_.function_name));
+  slg.add_attribute("Trace", attrs::constant<std::string>(func_name));
 
   BOOST_LOG_SEV(slg, getBoostLogLevel(log_message.log_level_))
       << log_message.log_event_;

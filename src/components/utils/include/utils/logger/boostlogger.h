@@ -50,6 +50,9 @@ class BoostLogger : public ThirdPartyLoggerInterface {
   boost::posix_time::ptime GetLocalPosixTime(
       const logger::TimePoint& timestamp);
 
+  std::string GetFilteredFunctionTrace(
+      const std::string& full_function_signature);
+
   std::string filename_;
 };
 
