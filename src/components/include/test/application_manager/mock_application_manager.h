@@ -184,6 +184,8 @@ class MockApplicationManager : public application_manager::ApplicationManager {
                void(application_manager::ApplicationSharedPtr app));
   MOCK_METHOD1(OnApplicationSwitched,
                void(application_manager::ApplicationSharedPtr app));
+  MOCK_METHOD0(v4_protocol_so_factory,
+               ns_smart_device_link_rpc::V1::v4_protocol_v1_2_no_extra&());
   MOCK_CONST_METHOD0(connection_handler,
                      connection_handler::ConnectionHandler&());
   MOCK_CONST_METHOD0(protocol_handler, protocol_handler::ProtocolHandler&());

@@ -42,6 +42,9 @@
 #include "connection_handler/connection_handler.h"
 #include "utils/data_accessor.h"
 
+#include "interfaces/v4_protocol_v1_2_no_extra.h"
+#include "interfaces/v4_protocol_v1_2_no_extra_schema.h"
+
 #include "application_manager/application_manager_settings.h"
 #include "application_manager/hmi_interfaces.h"
 #include "application_manager/plugin_manager/rpc_plugin_manager.h"
@@ -774,6 +777,9 @@ class ApplicationManager {
    * @return reference to hmi_interfaces component
    */
   virtual HmiInterfaces& hmi_interfaces() = 0;
+
+  virtual ns_smart_device_link_rpc::V1::v4_protocol_v1_2_no_extra&
+  v4_protocol_so_factory() = 0;
 
   virtual app_launch::AppLaunchCtrl& app_launch_ctrl() = 0;
 
