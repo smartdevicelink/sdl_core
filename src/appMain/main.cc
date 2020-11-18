@@ -46,6 +46,8 @@
 
 #ifdef LOG4CXX_LOGGER
 #include "utils/logger/log4cxxlogger.h"
+#include "utils/appenders_loader.h"
+
 #else  // LOG4CXX_LOGGER
 #include "utils/logger/boostlogger.h"
 #endif  // LOG4CXX_LOGGER
@@ -59,7 +61,6 @@
 #include "signal_handlers.h"
 
 #include "config_profile/profile.h"
-#include "utils/appenders_loader.h"
 #include "utils/signals.h"
 #include "utils/system.h"
 
