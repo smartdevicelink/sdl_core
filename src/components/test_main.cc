@@ -3,7 +3,6 @@
 #include "utils/custom_string.h"
 
 #ifdef ENABLE_LOG
-#include "utils/logger/log4cxxlogger.h"
 #include "utils/logger/logger_impl.h"
 #endif  // ENABLE_LOG
 
@@ -15,8 +14,6 @@ int main(int argc, char** argv) {
   // --------------------------------------------------------------------------
   // Logger initialization
   // Redefine for each paticular logger implementation
-  auto logger = std::unique_ptr<logger::Log4CXXLogger>(
-      new logger::Log4CXXLogger("log4cxx.properties"));
   auto logger_impl =
       std::unique_ptr<logger::LoggerImpl>(new logger::LoggerImpl(false));
   logger::Logger::instance(logger_impl.get());

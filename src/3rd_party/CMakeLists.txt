@@ -47,7 +47,7 @@ if(FORCE_3RD_PARTY)
   endif()
 endif()
 
-if(ENABLE_LOG)
+if(ENABLE_LOG AND ${LOGGER_NAME} STREQUAL "LOG4CXX")
   # --- libexpat
   add_subdirectory(expat-2.1.0)
   set(EXPAT_LIBS_DIRECTORY ${3RD_PARTY_INSTALL_PREFIX_ARCH}/lib PARENT_SCOPE)

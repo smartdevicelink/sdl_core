@@ -43,8 +43,13 @@
 
 // ----------------------------------------------------------------------------
 #ifdef ENABLE_LOG
-#include "utils/logger/boostlogger.h"
+
+#ifdef LOG4CXX_LOGGER
 #include "utils/logger/log4cxxlogger.h"
+#else  // LOG4CXX_LOGGER
+#include "utils/logger/boostlogger.h"
+#endif  // LOG4CXX_LOGGER
+
 #include "utils/logger/logger_impl.h"
 #endif  // ENABLE_LOG
 
@@ -143,19 +148,25 @@ int32_t main(int32_t argc, char** argv) {
   if (profile_instance.logs_enabled()) {
     // Logger initialization
     // Redefine for each paticular logger implementation
-    // auto logger = std::unique_ptr<logger::Log4CXXLogger>(
-    //     new logger::Log4CXXLogger("log4cxx.properties"));
+#ifdef LOG4CXX_LOGGER
+    auto logger = std::unique_ptr<logger::Log4CXXLogger>(
+        new logger::Log4CXXLogger("log4cxx.properties"));
+#else   // LOG4CXX_LOGGER
     auto logger = std::unique_ptr<logger::BoostLogger>(
         new logger::BoostLogger("boostlogconfig.ini"));
+#endif  // LOG4CXX_LOGGER
+
     logger_impl->Init(std::move(logger));
   }
 #endif
 
   threads::Thread::SetNameForId(threads::Thread::CurrentId(), "SDLCore");
 
+#ifdef LOG4CXX_LOGGER
   if (!utils::appenders_loader.Loaded()) {
     SDL_LOG_ERROR("Appenders plugin not loaded, file logging disabled");
   }
+#endif  // LOG4CXX_LOGGER
 
   SDL_LOG_INFO("Application started!");
   SDL_LOG_INFO("SDL version: " << profile_instance.sdl_version());

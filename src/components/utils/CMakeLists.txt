@@ -69,7 +69,7 @@ if(NOT BUILD_BACKTRACE_SUPPORT)
   )
 endif()
 
-if(ENABLE_LOG)
+if (ENABLE_LOG AND ${LOGGER_NAME} STREQUAL "LOG4CXX")
   list(APPEND LIBRARIES
 	log4cxx -L${LOG4CXX_LIBS_DIRECTORY}
     apr-1 -L${APR_LIBS_DIRECTORY}
@@ -78,7 +78,6 @@ if(ENABLE_LOG)
   )
 else()
   list(APPEND EXCLUDE_PATHS
-    auto_trace.cc
     logger/log4cxxlogger.cc
   )
 endif()
