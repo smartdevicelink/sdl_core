@@ -45,8 +45,8 @@
 #ifdef ENABLE_LOG
 
 #ifdef LOG4CXX_LOGGER
-#include "utils/logger/log4cxxlogger.h"
 #include "utils/appenders_loader.h"
+#include "utils/logger/log4cxxlogger.h"
 
 #else  // LOG4CXX_LOGGER
 #include "utils/logger/boostlogger.h"
