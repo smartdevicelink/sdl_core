@@ -87,6 +87,7 @@ void BoostLogger::Init() {
       register_simple_filter_factory<boost::log::trivial::severity_level, char>(
           "Severity");
   boost::log::register_simple_filter_factory<std::string, char>("Component");
+  boost::log::register_simple_filter_factory<std::string, char>("Trace");
 
   std::ifstream file(filename_);
   boost::log::settings settings = boost::log::parse_settings(file);
