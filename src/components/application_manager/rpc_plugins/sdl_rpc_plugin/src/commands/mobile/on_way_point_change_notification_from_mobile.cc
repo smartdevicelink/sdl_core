@@ -74,8 +74,7 @@ void OnWayPointChangeNotificationFromMobile::Run() {
       application_manager_.GetAppServiceManager().FindWayPointsHandler();
   if (!service || !service->mobile_service ||
       service->connection_key != connection_key()) {
-    SDL_LOG_ERROR(
-        "Application is not active NAVIGATION ASP");
+    SDL_LOG_ERROR("Application is not active NAVIGATION ASP");
     return;
   }
 
