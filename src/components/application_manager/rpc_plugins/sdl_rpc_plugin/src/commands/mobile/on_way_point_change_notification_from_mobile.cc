@@ -71,15 +71,14 @@ void OnWayPointChangeNotificationFromMobile::Run() {
   }
 
   auto service =
-      application_manager_.GetAppServiceManager().ActiveServiceForType(
-          EnumToString(mobile_apis::AppServiceType::NAVIGATION));
+      application_manager_.GetAppServiceManager().FindWayPointsHandler();
   if (!service || !service->mobile_service ||
       service->connection_key != connection_key()) {
     SDL_LOG_ERROR(
-        "OnWayPointChangeNotificationFromMobile application is not active "
-        "NAVIGATION ASP");
+        "Application is not active NAVIGATION ASP");
     return;
   }
+
   application_manager_.SaveWayPointsMessage(message_, connection_key());
 
   (*message_)[strings::params][strings::message_type] =

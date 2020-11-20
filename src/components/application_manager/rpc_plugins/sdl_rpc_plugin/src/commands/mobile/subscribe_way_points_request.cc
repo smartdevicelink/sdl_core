@@ -103,7 +103,7 @@ void SubscribeWayPointsRequest::on_event(const event_engine::Event& event) {
       if (result) {
         application_manager_.SubscribeAppForWayPoints(app, true);
       } else if (application_manager_.GetAppServiceManager()
-                     .IsWayPointsHandled()) {
+                     .FindWayPointsHandler() != nullptr) {
         application_manager_.SubscribeAppForWayPoints(app, false);
         result = true;
         result_code = hmi_apis::Common_Result::WARNINGS;
@@ -123,7 +123,8 @@ void SubscribeWayPointsRequest::on_event(const event_engine::Event& event) {
 
 void SubscribeWayPointsRequest::onTimeOut() {
   SDL_LOG_AUTO_TRACE();
-  if (application_manager_.GetAppServiceManager().IsWayPointsHandled()) {
+  if (application_manager_.GetAppServiceManager().FindWayPointsHandler() !=
+      nullptr) {
     ApplicationSharedPtr app =
         application_manager_.application(connection_key());
     application_manager_.SubscribeAppForWayPoints(app, false);

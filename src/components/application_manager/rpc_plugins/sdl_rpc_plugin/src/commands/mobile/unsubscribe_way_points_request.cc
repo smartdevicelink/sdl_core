@@ -109,7 +109,7 @@ void UnsubscribeWayPointsRequest::on_event(const event_engine::Event& event) {
       if (result) {
         application_manager_.UnsubscribeAppFromWayPoints(app, true);
       } else if (application_manager_.GetAppServiceManager()
-                     .IsWayPointsHandled()) {
+                     .FindWayPointsHandler() != nullptr) {
         application_manager_.UnsubscribeAppFromWayPoints(app, false);
         result = true;
         result_code = hmi_apis::Common_Result::WARNINGS;
@@ -129,7 +129,8 @@ void UnsubscribeWayPointsRequest::on_event(const event_engine::Event& event) {
 
 void UnsubscribeWayPointsRequest::onTimeOut() {
   SDL_LOG_AUTO_TRACE();
-  if (application_manager_.GetAppServiceManager().IsWayPointsHandled()) {
+  if (application_manager_.GetAppServiceManager().FindWayPointsHandler() !=
+      nullptr) {
     ApplicationSharedPtr app =
         application_manager_.application(connection_key());
     application_manager_.UnsubscribeAppFromWayPoints(app, false);

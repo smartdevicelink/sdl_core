@@ -32,6 +32,8 @@
 
 #include "sdl_rpc_plugin/commands/hmi/on_navi_way_point_change_notification.h"
 
+#include "application_manager/app_service_manager.h"
+
 namespace sdl_rpc_plugin {
 using namespace application_manager;
 
@@ -58,7 +60,10 @@ void OnNaviWayPointChangeNotification::Run() {
       static_cast<int32_t>(mobile_apis::FunctionID::OnWayPointChangeID);
   application_manager_.SaveWayPointsMessage(message_, 0);
 
-  SendNotificationToMobile(message_);
+  if (application_manager_.GetAppServiceManager().FindWayPointsHandler() ==
+      nullptr) {
+    SendNotificationToMobile(message_);
+  }
 }
 
 }  // namespace commands

@@ -4737,7 +4737,7 @@ void ApplicationManagerImpl::SubscribeAppForWayPoints(uint32_t app_id,
   }
   SDL_LOG_DEBUG("There are applications subscribed: "
                 << subscribed_way_points_apps_list_.size());
-  if (GetAppServiceManager().IsWayPointsHandled()) {
+  if (GetAppServiceManager().FindWayPointsHandler() != nullptr) {
     auto service = GetAppServiceManager().ActiveServiceForType(
         EnumToString(mobile_apis::AppServiceType::NAVIGATION));
     auto it = mobile_way_points_data_.find(service->connection_key);

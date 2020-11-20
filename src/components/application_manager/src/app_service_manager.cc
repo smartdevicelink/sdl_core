@@ -617,23 +617,23 @@ bool AppServiceManager::UpdateNavigationCapabilities(
   return true;
 }
 
-bool AppServiceManager::IsWayPointsHandled() {
+AppService* AppServiceManager::FindWayPointsHandler() {
   auto service = ActiveServiceForType(
       EnumToString(mobile_apis::AppServiceType::NAVIGATION));
   if (!service || !service->mobile_service ||
       !service->record[strings::service_manifest].keyExists(
           strings::handled_rpcs)) {
-    return false;
+    return nullptr;
   }
 
   smart_objects::SmartObject& handled_rpcs =
       service->record[strings::service_manifest][strings::handled_rpcs];
   for (size_t i = 0; i < handled_rpcs.length(); ++i) {
     if (handled_rpcs[i].asInt() == mobile_apis::FunctionID::GetWayPointsID) {
-      return true;
+      return service;
     }
   }
-  return false;
+  return nullptr;
 }
 
 void AppServiceManager::AppServiceUpdated(
