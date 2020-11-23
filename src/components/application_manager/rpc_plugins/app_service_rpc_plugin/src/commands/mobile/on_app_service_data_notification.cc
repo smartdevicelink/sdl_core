@@ -46,6 +46,8 @@ namespace app_service_rpc_plugin {
 using namespace application_manager;
 namespace commands {
 
+SDL_CREATE_LOG_VARIABLE("Commands")
+
 OnAppServiceDataNotification::OnAppServiceDataNotification(
     const application_manager::commands::MessageSharedPtr& message,
     ApplicationManager& application_manager,
@@ -61,8 +63,8 @@ OnAppServiceDataNotification::OnAppServiceDataNotification(
 OnAppServiceDataNotification::~OnAppServiceDataNotification() {}
 
 void OnAppServiceDataNotification::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
-  LOG4CXX_DEBUG(logger_, "Sending OnAppServiceData to consumer");
+  SDL_LOG_AUTO_TRACE();
+  SDL_LOG_DEBUG("Sending OnAppServiceData to consumer");
 
   std::string service_id =
       (*message_)[strings::msg_params][strings::service_data]
@@ -72,15 +74,15 @@ void OnAppServiceDataNotification::Run() {
       application_manager_.GetAppServiceManager().FindServiceByID(service_id);
 
   if (!service) {
-    LOG4CXX_ERROR(logger_, "Service sending OnAppServiceData is not published");
+    SDL_LOG_ERROR("Service sending OnAppServiceData is not published");
     return;
   } else if (!service
                   ->record[strings::service_manifest]
                           [strings::allow_app_consumers]
                   .asBool()) {
-    LOG4CXX_ERROR(logger_,
-                  "Service does not allow for app consumers, skipping mobile "
-                  "OnAppServiceData notification");
+    SDL_LOG_ERROR(
+        "Service does not allow for app consumers, skipping mobile "
+        "OnAppServiceData notification");
     return;
   }
 
@@ -93,7 +95,7 @@ void OnAppServiceDataNotification::Run() {
       [service_type](const ApplicationSharedPtr app) {
         DCHECK_OR_RETURN(app, false);
         auto& ext = AppServiceAppExtension::ExtractASExtension(*app);
-        LOG4CXX_DEBUG(logger_, "Check subscription for type: " << service_type);
+        SDL_LOG_DEBUG("Check subscription for type: " << service_type);
         return ext.IsSubscribedToAppService(service_type);
       };
 
@@ -107,12 +109,11 @@ void OnAppServiceDataNotification::Run() {
   for (; applications.end() != app_it; ++app_it) {
     const ApplicationSharedPtr app = *app_it;
     if (!app) {
-      LOG4CXX_ERROR(logger_, "NULL pointer");
+      SDL_LOG_ERROR("NULL pointer");
       continue;
     }
-    LOG4CXX_DEBUG(logger_,
-                  "Sending OnAppServiceDataNotification to mobile connection: "
-                      << app->app_id());
+    SDL_LOG_DEBUG("Sending OnAppServiceDataNotification to mobile connection: "
+                  << app->app_id());
     (*message_)[app_mngr::strings::params][app_mngr::strings::connection_key] =
         app->app_id();
     SendNotification();

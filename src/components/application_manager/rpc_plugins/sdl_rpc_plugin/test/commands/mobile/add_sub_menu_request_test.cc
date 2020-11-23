@@ -104,6 +104,31 @@ TEST_F(AddSubMenuRequestTest, Run_ImageVerificationFailed_EXPECT_INVALID_DATA) {
   request_ptr->Run();
 }
 
+TEST_F(AddSubMenuRequestTest, Run_NonExistentParentID_EXPECT_INVALID_ID) {
+  const uint32_t menu_id = 10;
+  const uint32_t parent_id = 4;
+  MessageSharedPtr msg = CreateMsgParams();
+  SmartObject& msg_params = (*msg)[am::strings::msg_params];
+
+  msg_params[am::strings::menu_id] = menu_id;
+  msg_params[am::strings::menu_name] = "test";
+  msg_params[am::strings::parent_id] = parent_id;
+
+  SmartObject sub_menu(smart_objects::SmartType_Null);
+  EXPECT_CALL(*mock_app, FindSubMenu(menu_id)).WillOnce(Return(sub_menu));
+
+  SmartObject parent(smart_objects::SmartType_Null);
+  EXPECT_CALL(*mock_app, FindSubMenu(parent_id)).WillOnce(Return(parent));
+
+  EXPECT_CALL(mock_rpc_service_,
+              ManageMobileCommand(
+                  MobileResultCodeIs(mobile_apis::Result::INVALID_ID), _));
+  std::shared_ptr<AddSubMenuRequest> request_ptr =
+      CreateCommand<AddSubMenuRequest>(msg);
+
+  request_ptr->Run();
+}
+
 TEST_F(AddSubMenuRequestTest, OnEvent_UI_UNSUPPORTED_RESOURCE) {
   const uint32_t menu_id = 10u;
   MessageSharedPtr msg = CreateMessage(smart_objects::SmartType_Map);

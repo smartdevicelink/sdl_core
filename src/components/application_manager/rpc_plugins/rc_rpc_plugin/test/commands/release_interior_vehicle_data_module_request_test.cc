@@ -84,16 +84,10 @@ using namespace rc_rpc_plugin;
 class ReleaseInteriorVehicleDataModuleRequestTest
     : public CommandRequestTest<CommandsTestMocks::kIsNice> {
  public:
-  ReleaseInteriorVehicleDataModuleRequestTest() : mock_app_(CreateMockApp()) {}
-
-  void SetUp() OVERRIDE {
-    TestPreCondition();
-    ON_CALL(app_mngr_, application(kAppID)).WillByDefault(Return(mock_app_));
-    ON_CALL(*mock_app_, app_id()).WillByDefault(Return(kAppID));
-    ON_CALL(mock_rc_capabilities_manager_,
-            GetDefaultModuleIdFromCapabilities(kModuleType))
-        .WillByDefault(Return(kDefaultModuleID));
-  }
+  ReleaseInteriorVehicleDataModuleRequestTest()
+      : mock_app_(CreateMockApp())
+      , rc_capabilities_(std::make_shared<smart_objects::SmartObject>(
+            smart_objects::SmartType::SmartType_Array)) {}
 
   MessageSharedPtr CreateBasicMessage() {
     MessageSharedPtr message = CreateMessage();
@@ -109,13 +103,6 @@ class ReleaseInteriorVehicleDataModuleRequestTest
     (*message)[application_manager::strings::msg_params]
               [message_params::kModuleId] = kModuleID;
     return message;
-  }
-
-  void TestPreCondition() {
-    message_ = CreateBasicMessage();
-    command_ =
-        CreateRCCommand<commands::ReleaseInteriorVehicleDataModuleRequest>(
-            message_);
   }
 
   template <class Command>
@@ -134,6 +121,26 @@ class ReleaseInteriorVehicleDataModuleRequestTest
   }
 
  protected:
+  void SetUp() OVERRIDE {
+    TestPreCondition();
+    ON_CALL(app_mngr_, application(kAppID)).WillByDefault(Return(mock_app_));
+    ON_CALL(*mock_app_, app_id()).WillByDefault(Return(kAppID));
+    ON_CALL(mock_hmi_capabilities_, rc_capability())
+        .WillByDefault(Return(rc_capabilities_));
+    ON_CALL(mock_rc_capabilities_manager_, CheckIfModuleExistsInCapabilities(_))
+        .WillByDefault(Return(true));
+    ON_CALL(mock_rc_capabilities_manager_,
+            GetDefaultModuleIdFromCapabilities(kModuleType))
+        .WillByDefault(Return(kDefaultModuleID));
+  }
+
+  void TestPreCondition() {
+    message_ = CreateBasicMessage();
+    command_ =
+        CreateRCCommand<commands::ReleaseInteriorVehicleDataModuleRequest>(
+            message_);
+  }
+
   MessageSharedPtr message_;
   ReleaseCommandPtr command_;
 
@@ -143,6 +150,7 @@ class ReleaseInteriorVehicleDataModuleRequestTest
   MockInteriorDataManager mock_interior_data_manager_;
   NiceMock<MockRCCapabilitiesManager> mock_rc_capabilities_manager_;
   MockRCConsentManager mock_rc_consent_manger_;
+  smart_objects::SmartObjectSPtr rc_capabilities_;
 };
 
 TEST_F(ReleaseInteriorVehicleDataModuleRequestTest,
@@ -159,6 +167,8 @@ TEST_F(ReleaseInteriorVehicleDataModuleRequestTest,
   ON_CALL(mock_allocation_manager_,
           ReleaseResource(kModuleType, kModuleID, kAppID))
       .WillByDefault(Return(ResourceReleasedState::eType::NOT_ALLOCATED));
+  ON_CALL(mock_hmi_capabilities_, rc_capability())
+      .WillByDefault(Return(smart_objects::SmartObjectSPtr()));
 
   MessageSharedPtr message_to_mobile = CreateMessage();
 
@@ -189,7 +199,8 @@ TEST_F(ReleaseInteriorVehicleDataModuleRequestTest,
           ReleaseResource(kModuleType, kModuleID, kAppID))
       .WillByDefault(Return(ResourceReleasedState::eType::IS_ALLOCATED));
   MessageSharedPtr message_to_mobile = CreateMessage();
-
+  ON_CALL(mock_hmi_capabilities_, rc_capability())
+      .WillByDefault(Return(smart_objects::SmartObjectSPtr()));
   EXPECT_CALL(
       mock_rpc_service_,
       ManageMobileCommand(
@@ -216,6 +227,8 @@ TEST_F(ReleaseInteriorVehicleDataModuleRequestTest,
   ON_CALL(mock_allocation_manager_,
           ReleaseResource(kModuleType, kModuleID, kAppID))
       .WillByDefault(Return(ResourceReleasedState::eType::IS_RELEASED));
+  ON_CALL(mock_hmi_capabilities_, rc_capability())
+      .WillByDefault(Return(smart_objects::SmartObjectSPtr()));
 
   MessageSharedPtr message_to_mobile = CreateMessage();
 

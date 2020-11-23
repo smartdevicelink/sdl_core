@@ -71,6 +71,12 @@ class OnAppInterfaceUnregisteredNotification
   virtual void Run();
 
  private:
+  /**
+   * @brief Check whether a connection to mobile must be closed after sending
+   * this message
+   **/
+  bool IsFinalMessage() const;
+
   DISALLOW_COPY_AND_ASSIGN(OnAppInterfaceUnregisteredNotification);
 };
 

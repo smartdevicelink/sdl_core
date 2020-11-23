@@ -52,6 +52,33 @@ using ::testing::Return;
 using ::testing::ReturnPointee;
 using ::testing::ReturnRef;
 
+ResumptionDataTest::~ResumptionDataTest() {
+  delete help_prompt_;
+  delete timeout_prompt_;
+  delete vr_help_;
+  delete vr_help_title_;
+  delete vr_synonyms_;
+  delete keyboard_props_;
+  delete menu_title_;
+  delete menu_icon_;
+
+  for (am::CommandsMap::iterator it = test_commands_map.begin();
+       test_commands_map.end() != it;
+       ++it) {
+    delete it->second;
+  }
+  for (am::SubMenuMap::iterator it = test_submenu_map.begin();
+       test_submenu_map.end() != it;
+       ++it) {
+    delete it->second;
+  }
+  for (am::ChoiceSetMap::iterator it = test_choiceset_map.begin();
+       test_choiceset_map.end() != it;
+       ++it) {
+    delete it->second;
+  }
+}
+
 void ResumptionDataTest::CheckSavedApp(sm::SmartObject& resume_app_list) {
   EXPECT_EQ(policy_app_id_, resume_app_list[am::strings::app_id].asString());
   EXPECT_EQ(grammar_id_, resume_app_list[am::strings::grammar_id].asUInt());
@@ -149,7 +176,7 @@ void ResumptionDataTest::CheckChoiceSet(sm::SmartObject& res_list) {
       sm::SmartObject command = res_list[i][am::strings::choice_set][j];
       EXPECT_EQ(i + j, command[am::strings::choice_id].asUInt());
       char numb[12];
-      std::snprintf(numb, 12, "%d", i + j);
+      std::snprintf(numb, 12, "%u", i + j);
       std::string test_choice =
           (*test_choiceset_map[i])[am::strings::choice_set][j]
                                   [am::strings::vr_commands][0]
@@ -313,11 +340,10 @@ void ResumptionDataTest::CheckTimeoutPrompt(
 
 void ResumptionDataTest::CheckVRHelp(sm::SmartObject& res_list) {
   std::string text;
-  int position;
   for (uint i = 0; i < kCountOfVrhelptitle_; ++i) {
     text = (*vr_help_)[i][am::strings::text].asString();
     EXPECT_EQ(text, res_list[i][am::strings::text].asString());
-    position = (*vr_help_)[i][am::strings::position].asInt();
+    int position = (*vr_help_)[i][am::strings::position].asInt();
     EXPECT_EQ(position, res_list[i][am::strings::position].asInt());
   }
 }
@@ -490,7 +516,7 @@ void ResumptionDataTest::SetCommands() {
   sm::SmartObject sm_icon;
   for (uint32_t i = 0; i < kCountOfCommands_; ++i) {
     char numb[12];
-    std::snprintf(numb, 12, "%d", i);
+    std::snprintf(numb, 12, "%u", i);
     sm_comm[am::strings::cmd_id] = i;
     sm_comm[am::strings::menu_params][am::strings::position] = i;
     sm_comm[am::strings::menu_params][am::hmi_request::parent_id] = i;
@@ -499,7 +525,7 @@ void ResumptionDataTest::SetCommands() {
 
     for (uint32_t j = 0; j < kCountOfChoice_; ++j) {
       char vr[12];
-      std::snprintf(vr, 12, "%d", i + j);
+      std::snprintf(vr, 12, "%u", i + j);
       vr_commandsvector[j] = "VrCommand " + std::string(vr);
     }
     sm_comm[am::strings::vr_commands] = vr_commandsvector;
@@ -517,7 +543,7 @@ void ResumptionDataTest::SetSubmenues() {
   sm::SmartObject sm_comm;
   for (uint32_t i = 10; i < kCountOfSubmenues_ + 10; ++i) {
     char numb[12];
-    std::snprintf(numb, 12, "%d", i);
+    std::snprintf(numb, 12, "%u", i);
     sm_comm[am::strings::menu_id] = i;
     sm_comm[am::strings::position] = i;
     sm_comm[am::strings::menu_name] = "SubMenu" + std::string(numb);
@@ -536,7 +562,7 @@ void ResumptionDataTest::SetChoiceSet() {
   for (uint32_t i = 0; i < kCountOfChoiceSets_; ++i) {
     for (uint32_t j = 0; j < kCountOfChoice_; ++j) {
       char numb[12];
-      std::snprintf(numb, 12, "%d", i + j);
+      std::snprintf(numb, 12, "%u", i + j);
 
       choice[am::strings::choice_id] = i + j;
       vr_commandsvector[0] = "ChoiceSet VrCommand " + std::string(numb);
@@ -569,11 +595,10 @@ void ResumptionDataTest::SetChoiceSet() {
 
 void ResumptionDataTest::SetAppFiles() {
   am::AppFile test_file;
-  int file_types;
   for (uint i = 0; i < kCountOfFiles_; ++i) {
     char numb[12];
     std::snprintf(numb, 12, "%d", i);
-    file_types = i;
+    int file_types = i;
     test_file.is_persistent = true;
     test_file.is_download_complete = true;
     test_file.file_type = static_cast<FileType::eType>(file_types);

@@ -1,5 +1,6 @@
+
 /*
- * Copyright (c) 2015, Ford Motor Company
+ * Copyright (c) 2020, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,47 +31,53 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "utils/log_message_loop_thread.h"
-#include "gmock/gmock.h"
+#include "utils/convert_utils.h"
 #include "gtest/gtest.h"
-#include "utils/logger_status.h"
 
 namespace test {
 namespace components {
 namespace utils_test {
 
-using namespace ::logger;
-using ::testing::_;
+using namespace ::utils;
 
-TEST(LogMessageLoopThread, DestroyLogMessage_loggerStatusDeletingLogger) {
-  logger::logger_status = CreatingLoggerThread;
-  LogMessageLoopThread* loop_thread = new LogMessageLoopThread();
-  // assert
-  EXPECT_EQ(CreatingLoggerThread, logger::logger_status);
-
-  // act
-  delete loop_thread;
-
-  // assert
-  EXPECT_EQ(DeletingLoggerThread, logger::logger_status);
-
-  logger::logger_status = LoggerThreadNotCreated;
+TEST(ConvertUtilsTest, ConvertInt64ToLongLongInt_CorrectValue) {
+  int64_t value_to_convert = 42;
+  EXPECT_EQ(typeid(long long int),
+            typeid(ConvertInt64ToLongLongInt(value_to_convert)));
 }
 
-class MockLogMessageTest : public LogMessageLoopThread {
- public:
-  MOCK_CONST_METHOD1(Handle, void(const LogMessage message));
-};
+TEST(ConvertUtilsTest, ConvertLongLongIntToInt64_CorrectValue) {
+  long long int value_to_convert = 42;
+  EXPECT_EQ(typeid(int64_t),
+            typeid(ConvertLongLongIntToInt64(value_to_convert)));
+}
 
-TEST(LogMessageLoopThread, HandleNeverCalled) {
-  logger::logger_status = CreatingLoggerThread;
+TEST(ConvertUtilsTest, ConvertUInt64ToLongLongUInt_CorrectValue) {
+  uint64_t value_to_convert = 42;
+  EXPECT_EQ(typeid(unsigned long long int),
+            typeid(ConvertUInt64ToLongLongUInt(value_to_convert)));
+}
 
-  MockLogMessageTest mmock;
-  EXPECT_CALL(mmock, Handle(_)).Times(0);
-  LogMessageLoopThread* loop_thread = new LogMessageLoopThread();
+TEST(ConvertUtilsTest, ConvertLongLongUIntToUInt64_CorrectValue) {
+  unsigned long long int value_to_convert = 42;
+  EXPECT_EQ(typeid(uint64_t),
+            typeid(ConvertLongLongUIntToUInt64(value_to_convert)));
+}
 
-  delete loop_thread;
-  logger::logger_status = LoggerThreadNotCreated;
+TEST(ConvertUtilsTest, ConvertBinaryDataToString_ValidCharacteres_CorrectText) {
+  const uint8_t data[] = {'s', 'u', 'c', 'c', 'e', 's', 's'};
+  const std::string convertion_result = "success";
+  const size_t data_size = 7;
+  EXPECT_EQ(convertion_result, ConvertBinaryDataToString(data, data_size));
+}
+
+TEST(ConvertUtilsTest,
+     ConvertBinaryDataToString_NotValidCharacters_CorrectText) {
+  const size_t data_size = 7;
+  uint8_t data[data_size];
+  data[0] = 0u;
+  const std::string is_raw_data = "is raw data";
+  EXPECT_EQ(is_raw_data, ConvertBinaryDataToString(data, data_size));
 }
 
 }  // namespace utils_test

@@ -49,6 +49,8 @@ class MockInteriorDataManager : public rc_rpc_plugin::InteriorDataManager {
   MOCK_METHOD1(StoreRequestToHMITime, void(const rc_rpc_plugin::ModuleUid&));
   MOCK_METHOD1(CheckRequestsToHMIFrequency,
                bool(const rc_rpc_plugin::ModuleUid&));
+  MOCK_METHOD1(OnResumptionRevert,
+               void(const std::set<rc_rpc_plugin::ModuleUid>& subscriptions));
 };
 
 }  // namespace rc_rpc_plugin_test

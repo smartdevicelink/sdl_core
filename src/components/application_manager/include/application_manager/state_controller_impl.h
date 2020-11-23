@@ -35,6 +35,7 @@
 
 #include <list>
 #include <map>
+#include <unordered_set>
 #include "application_manager/application.h"
 #include "application_manager/application_manager.h"
 #include "application_manager/hmi_state.h"
@@ -125,6 +126,14 @@ class StateControllerImpl : public event_engine::EventObserver,
 
   void ActivateDefaultWindow(ApplicationSharedPtr app) OVERRIDE;
   void ExitDefaultWindow(ApplicationSharedPtr app) OVERRIDE;
+  void DeactivateApp(ApplicationSharedPtr app,
+                     const WindowID window_id) OVERRIDE;
+
+  void ResumePostponedWindows(const uint32_t app_id) OVERRIDE;
+
+  void DropPostponedWindows(const uint32_t app_id) OVERRIDE;
+
+  PostponedActivationController& GetPostponedActivationController() OVERRIDE;
 
  private:
   int64_t RequestHMIStateChange(ApplicationConstSharedPtr app,
@@ -274,13 +283,6 @@ class StateControllerImpl : public event_engine::EventObserver,
   void TempStateStopped(HmiState::StateID ID);
 
   /**
-   * @brief Sets BACKGROUND or LIMITED hmi level to application
-   * depends on application type
-   * @param app Application to deactivate
-   */
-  void DeactivateApp(ApplicationSharedPtr app, const WindowID window_id);
-
-  /**
    * Function to remove temporary HmiState for application
    */
   template <HmiState::StateID ID>
@@ -426,7 +428,15 @@ class StateControllerImpl : public event_engine::EventObserver,
   StateIDList active_states_;
   mutable sync_primitives::Lock active_states_lock_;
   std::map<uint32_t, HmiStatePtr> waiting_for_response_;
+
+  typedef std::pair<WindowID, HmiStatePtr> WindowStatePair;
+  typedef std::list<WindowStatePair> WindowStatePairs;
+  std::map<uint32_t, WindowStatePairs> postponed_app_widgets_;
+
+  std::unordered_set<uint32_t> apps_with_pending_hmistatus_notification_;
+  mutable sync_primitives::Lock apps_with_pending_hmistatus_notification_lock_;
   ApplicationManager& app_mngr_;
+  PostponedActivationController postponed_activation_controller_;
 };
 }  // namespace application_manager
 

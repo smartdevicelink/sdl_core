@@ -39,6 +39,8 @@ namespace app_mngr = application_manager;
 
 namespace commands {
 
+SDL_CREATE_LOG_VARIABLE("Commands")
+
 ShowAppMenuResponse::ShowAppMenuResponse(
     const app_mngr::commands::MessageSharedPtr& message,
     app_mngr::ApplicationManager& application_manager,
@@ -54,7 +56,7 @@ ShowAppMenuResponse::ShowAppMenuResponse(
 ShowAppMenuResponse::~ShowAppMenuResponse() {}
 
 void ShowAppMenuResponse::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
 
   rpc_service_.SendMessageToMobile(message_);
 }
