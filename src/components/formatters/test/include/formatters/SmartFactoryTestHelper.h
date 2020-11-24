@@ -110,10 +110,6 @@ class CSmartFactoryTest : public CSmartFactory<FunctionIdTest::eType,
                    std::shared_ptr<ISchemaItem> >
       TStructsSchemaItems;
 
-  static std::shared_ptr<ISchemaItem> ProvideObjectSchemaItemForStruct(
-      TStructsSchemaItems& struct_schema_items,
-      const StructIdentifiersTest::eType struct_id);
-
   void InitStructSchemes(TStructsSchemaItems& struct_schema_items);
 
   void InitFunctionSchemes(

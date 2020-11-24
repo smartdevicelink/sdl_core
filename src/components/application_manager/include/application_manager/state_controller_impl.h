@@ -35,6 +35,7 @@
 
 #include <list>
 #include <map>
+#include <unordered_set>
 #include "application_manager/application.h"
 #include "application_manager/application_manager.h"
 #include "application_manager/hmi_state.h"
@@ -131,6 +132,8 @@ class StateControllerImpl : public event_engine::EventObserver,
   void ResumePostponedWindows(const uint32_t app_id) OVERRIDE;
 
   void DropPostponedWindows(const uint32_t app_id) OVERRIDE;
+
+  PostponedActivationController& GetPostponedActivationController() OVERRIDE;
 
  private:
   int64_t RequestHMIStateChange(ApplicationConstSharedPtr app,
@@ -430,7 +433,10 @@ class StateControllerImpl : public event_engine::EventObserver,
   typedef std::list<WindowStatePair> WindowStatePairs;
   std::map<uint32_t, WindowStatePairs> postponed_app_widgets_;
 
+  std::unordered_set<uint32_t> apps_with_pending_hmistatus_notification_;
+  mutable sync_primitives::Lock apps_with_pending_hmistatus_notification_lock_;
   ApplicationManager& app_mngr_;
+  PostponedActivationController postponed_activation_controller_;
 };
 }  // namespace application_manager
 

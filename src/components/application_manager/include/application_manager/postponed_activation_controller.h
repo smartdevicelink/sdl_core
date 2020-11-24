@@ -30,62 +30,49 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#pragma once
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_POSTPONED_ACTIVATION_CONTROLLER_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_POSTPONED_ACTIVATION_CONTROLLER_H_
 
-#include <chrono>
-#include <string>
-#include <thread>
+#include "application.h"
 
-namespace logger {
+namespace application_manager {
 
-enum class LogLevel {
-  TRACE_LEVEL,
-  DEBUG_LEVEL,
-  INFO_LEVEL,
-  WARNING_LEVEL,
-  ERROR_LEVEL,
-  FATAL_LEVEL
-};
+/**
+ * @brief AppToActivateSet is a map of application ids expected to be
+ * activated after the registration is completed (default hmi level is assigned)
+ * and correlation_ids of the SDLActivateApp requests
+ */
+typedef std::map<uint32_t, uint32_t> AppToActivate;
 
-struct LocationInfo {
-  std::string file_name;
-  std::string function_name;
-  int line_number;
-};
-
-typedef std::chrono::high_resolution_clock::time_point TimePoint;
-
-struct LogMessage {
-  std::string component_;  // <- component_name
-  LogLevel log_level_;
-  std::string log_event_;
-  TimePoint timestamp_;
-  LocationInfo location_;
-  std::thread::id thread_id_;
-};
-
-class Logger {
+class PostponedActivationController {
  public:
-  virtual bool IsEnabledFor(const std::string& component,
-                            LogLevel log_level) const = 0;
-  virtual void DeInit() = 0;
-  virtual void Flush() = 0;
-  virtual void PushLog(const LogMessage& log_message) = 0;
-  static Logger& instance(Logger* pre_init = nullptr);
-};
+  PostponedActivationController();
 
-class ThirdPartyLoggerInterface {
- public:
-  virtual ~ThirdPartyLoggerInterface() {}
-  virtual void Init() = 0;
-  virtual void DeInit() = 0;
-  virtual bool IsEnabledFor(const std::string& component,
-                            LogLevel log_level) const = 0;
-  virtual void PushLog(const LogMessage& log_message) = 0;
-};
+  /**
+   * @brief AddAppToActivate adds app_id to app_to_activate_ map
+   * @param app_id id of the app that should be activated
+   * @param corr_id correlation_id of the SDLActivateApp request
+   */
+  void AddAppToActivate(uint32_t app_id, uint32_t corr_id);
 
-class LoggerInitializer {
- public:
-  virtual void Init(std::unique_ptr<ThirdPartyLoggerInterface>&& impl) = 0;
+  /**
+   * @brief GetPendingActivationCorrId gets the pending
+   * activation correlation id
+   * @param app_id application id
+   * @return correlation id of the SDLActivateApp requests
+   */
+  uint32_t GetPendingActivationCorrId(uint32_t app_id) const;
+
+  /**
+   * @brief RemoveAppToActivate removes app_id from app_to_activate_ map
+   * @param app_id application id
+   */
+  void RemoveAppToActivate(uint32_t app_id);
+
+ private:
+  AppToActivate app_to_activate_;
+  mutable std::shared_ptr<sync_primitives::Lock> activate_app_list_lock_ptr_;
 };
-}  // namespace logger
+}  // namespace application_manager
+
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_POSTPONED_ACTIVATION_CONTROLLER_H_

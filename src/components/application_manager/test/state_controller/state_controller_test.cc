@@ -727,6 +727,7 @@ class StateControllerImplTest : public ::testing::Test {
         .WillByDefault(Return(vc));
     ON_CALL(**app_mock, IsAudioApplication())
         .WillByDefault(Return(media || navi || vc));
+    ON_CALL(**app_mock, is_ready()).WillByDefault(Return(true));
 
     EXPECT_CALL(**app_mock, usage_report())
         .WillRepeatedly(ReturnRef(usage_stat));
@@ -1538,7 +1539,7 @@ TEST_F(StateControllerImplTest, MoveSimpleAppToValidStates) {
   namespace AudioStreamingState = mobile_apis::AudioStreamingState;
   namespace VideoStreamingState = mobile_apis::VideoStreamingState;
   namespace SystemContext = mobile_apis::SystemContext;
-  HmiStatePtr initial_state = createHmiState(HMILevel::INVALID_ENUM,
+  HmiStatePtr initial_state = createHmiState(HMILevel::HMI_NONE,
                                              AudioStreamingState::INVALID_ENUM,
                                              VideoStreamingState::INVALID_ENUM,
                                              SystemContext::INVALID_ENUM);
@@ -1579,7 +1580,7 @@ TEST_F(StateControllerImplTest, MoveAudioNotResumeAppToValidStates) {
   NiceMock<application_manager_test::MockApplication>* audio_app_mock =
       media_navi_vc_app_ptr_;
 
-  HmiStatePtr initial_state = createHmiState(HMILevel::INVALID_ENUM,
+  HmiStatePtr initial_state = createHmiState(HMILevel::HMI_NONE,
                                              AudioStreamingState::INVALID_ENUM,
                                              VideoStreamingState::INVALID_ENUM,
                                              SystemContext::INVALID_ENUM);
@@ -1618,7 +1619,7 @@ TEST_F(StateControllerImplTest, MoveAudioResumeAppToValidStates) {
   NiceMock<application_manager_test::MockApplication>* audio_app_mock =
       media_navi_vc_app_ptr_;
 
-  HmiStatePtr initial_state = createHmiState(HMILevel::INVALID_ENUM,
+  HmiStatePtr initial_state = createHmiState(HMILevel::HMI_NONE,
                                              AudioStreamingState::INVALID_ENUM,
                                              VideoStreamingState::INVALID_ENUM,
                                              SystemContext::INVALID_ENUM);

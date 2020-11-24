@@ -89,8 +89,27 @@ UsbHandler::UsbHandler()
 }
 
 UsbHandler::~UsbHandler() {
-  shutdown_requested_ = true;
-  SDL_LOG_INFO("UsbHandler thread finished");
+  SDL_LOG_AUTO_TRACE();
+
+  // Notify Thread to stop on next iteration...
+  RequestStopThread();
+
+  // ... and unregister hotplug callbacks in order to wake
+  // libusb_handle_events()
+  DeregisterHotplugCallbacks();
+
+  // Now it is safe to join the Thread and free up resources
+  JoinAndDeleteThread();
+  InvokeLibusbExit();
+}
+
+void UsbHandler::RequestStopThread() {
+  SDL_LOG_AUTO_TRACE();
+  shutdown_requested_.store(true);
+}
+
+void UsbHandler::DeregisterHotplugCallbacks() {
+  SDL_LOG_AUTO_TRACE();
 
   if (libusb_context_) {
     // The libusb_hotplug_deregister_callback() wakes up blocking call of
@@ -99,10 +118,20 @@ UsbHandler::~UsbHandler() {
                                        arrived_callback_handle_);
     libusb_hotplug_deregister_callback(libusb_context_, left_callback_handle_);
   }
+}
 
+void UsbHandler::JoinAndDeleteThread() {
+  SDL_LOG_AUTO_TRACE();
+
+  // Let thread finish on its own
   thread_->Stop(threads::Thread::kThreadSoftStop);
   delete thread_->GetDelegate();
   threads::DeleteThread(thread_);
+  SDL_LOG_INFO("UsbHandler thread finished");
+}
+
+void UsbHandler::InvokeLibusbExit() {
+  SDL_LOG_AUTO_TRACE();
 
   if (libusb_context_) {
     libusb_exit(libusb_context_);
@@ -134,7 +163,6 @@ void UsbHandler::DeviceArrived(libusb_device* device_libusb) {
   libusb_ret = libusb_get_configuration(device_handle_libusb, &configuration);
   if (LIBUSB_SUCCESS != libusb_ret) {
     SDL_LOG_INFO(
-
         "libusb_get_configuration failed: " << libusb_error_name(libusb_ret));
     SDL_LOG_TRACE("exit. Condition: LIBUSB_SUCCESS != libusb_ret");
     return;
@@ -145,7 +173,6 @@ void UsbHandler::DeviceArrived(libusb_device* device_libusb) {
         libusb_set_configuration(device_handle_libusb, kUsbConfiguration);
     if (LIBUSB_SUCCESS != libusb_ret) {
       SDL_LOG_INFO(
-
           "libusb_set_configuration failed: " << libusb_error_name(libusb_ret));
       SDL_LOG_TRACE("exit. Condition: LIBUSB_SUCCESS != libusb_ret");
       return;
@@ -155,7 +182,6 @@ void UsbHandler::DeviceArrived(libusb_device* device_libusb) {
   libusb_ret = libusb_claim_interface(device_handle_libusb, 0);
   if (LIBUSB_SUCCESS != libusb_ret) {
     SDL_LOG_INFO(
-
         "libusb_claim_interface failed: " << libusb_error_name(libusb_ret));
     CloseDeviceHandle(device_handle_libusb);
     SDL_LOG_TRACE("exit. Condition: LIBUSB_SUCCESS != libusb_ret");
@@ -420,7 +446,6 @@ void UsbHandler::SubmitControlTransfer(
   const int libusb_ret = libusb_submit_transfer(libusb_transfer);
   if (LIBUSB_SUCCESS != libusb_ret) {
     SDL_LOG_ERROR(
-
         "libusb_submit_transfer failed: " << libusb_error_name(libusb_ret));
     libusb_free_transfer(libusb_transfer);
     sequence_state->Finish();

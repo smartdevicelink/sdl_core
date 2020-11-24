@@ -125,14 +125,22 @@ class ResumptionDataProcessorImpl
                                const ResumptionRequest& found_request);
 
   /**
-   * @brief IsResumptionFinished checks whether some responses are still waiting
+   * @brief EraseProcessedRequest erases processed request from list of pending
+   * requests
    * @param app_id ID of application, related to event
    * @param found_request reference to found request
-   * @return true, if resumption for this application is finished, or false, if
-   * some requests aren't processed  yet
    */
-  bool IsResumptionFinished(const uint32_t app_id,
-                            const ResumptionRequest& found_request);
+  void EraseProcessedRequest(const uint32_t app_id,
+                             const ResumptionRequest& found_request);
+
+  /**
+   * @brief IsResumptionFinished checks whether some responses are still
+   * waiting
+   * @param app_id ID of application, related to event
+   * @return true, if resumption for this application is finished, or false, if
+   * some requests aren't processed yet
+   */
+  bool IsResumptionFinished(const uint32_t app_id) const;
 
   /**
    * @brief IsResumptionSuccessful checks whether overall resumption status
@@ -156,12 +164,8 @@ class ResumptionDataProcessorImpl
    * @brief EraseAppResumptionData erases data, needed for resumption, for
    * given application
    * @param app_id ID of application, related to event
-   * @param function_id Function ID
-   * @param corr_id Correlation ID
    */
-  void EraseAppResumptionData(const uint32_t app_id,
-                              const hmi_apis::FunctionID::eType function_id,
-                              const int32_t corr_id);
+  void EraseAppResumptionData(const uint32_t app_id);
 
   /**
    * @brief Processes response message from HMI
@@ -173,6 +177,14 @@ class ResumptionDataProcessorImpl
                               const hmi_apis::FunctionID::eType function_id,
                               const int32_t corr_id);
 
+  /**
+   * @brief Checks whether resumption is successful and finalizes resumption
+   * corresponding to result of this check
+   * @param callback Function to be called when data resumption will be finished
+   * @param app_id ID of application, related to event
+   */
+  void FinalizeResumption(const ResumeCtrl::ResumptionCallBack& callback,
+                          const uint32_t app_id);
   /**
    * @brief Revert the data to the state before Resumption
    * @param shared ptr to application
@@ -355,34 +367,25 @@ class ResumptionDataProcessorImpl
       const smart_objects::SmartObject& request,
       const smart_objects::SmartObject& response) const;
 
-  /**
-   * @brief Determines whether application has saved data, including
-   * submenus, commands, choice sets, global properties, subscriptions to
-   * restore.
-   * @param saved_app smart object containing saved app data
-   * @return bool value stating whether app has mentioned data to restore
-   */
-  bool HasDataToRestore(const smart_objects::SmartObject& saved_app) const;
-
   app_mngr::ApplicationManager& application_manager_;
 
   /**
    * @brief A map of the IDs and Application Resumption Status for these ID
    **/
   std::map<std::int32_t, ApplicationResumptionStatus> resumption_status_;
-  sync_primitives::RWLock resumption_status_lock_;
+  mutable sync_primitives::RWLock resumption_status_lock_;
 
   /**
    * @brief A map of callbacks used when resumption is finished
    */
   std::map<std::int32_t, ResumeCtrl::ResumptionCallBack> register_callbacks_;
-  sync_primitives::RWLock register_callbacks_lock_;
+  mutable sync_primitives::RWLock register_callbacks_lock_;
 
   /**
    * @brief A map of sent requests and corresponding app_id
    */
   std::map<ResumptionRequestID, std::uint32_t> request_app_ids_;
-  sync_primitives::RWLock request_app_ids_lock_;
+  mutable sync_primitives::RWLock request_app_ids_lock_;
 };
 
 }  // namespace resumption

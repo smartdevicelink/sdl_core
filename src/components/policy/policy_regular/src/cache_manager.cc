@@ -79,7 +79,7 @@ SDL_CREATE_LOG_VARIABLE("Policy")
   }
 
 struct LanguageFinder {
-  LanguageFinder(const std::string& language) : language_(language) {}
+  explicit LanguageFinder(const std::string& language) : language_(language) {}
   bool operator()(const policy_table::Languages::value_type& lang) const {
     return !strcasecmp(language_.c_str(), lang.first.c_str());
   }
@@ -89,10 +89,12 @@ struct LanguageFinder {
 };
 
 struct PolicyTableUpdater {
-  PolicyTableUpdater(const policy_table::ApplicationParams& default_params)
+  explicit PolicyTableUpdater(
+      const policy_table::ApplicationParams& default_params)
       : default_params_(default_params) {}
 
-  void operator()(policy_table::ApplicationPolicies::value_type& pt_value) {
+  void operator()(
+      policy_table::ApplicationPolicies::value_type& pt_value) const {
     if (policy::kDefaultId == pt_value.second.get_string()) {
       pt_value.second = default_params_;
       pt_value.second.set_to_string(policy::kDefaultId);
@@ -607,7 +609,6 @@ int CacheManager::IgnitionCyclesBeforeExchange() {
       *pt_->policy_table.module_meta->ignition_cycles_since_last_exchange);
   current = std::max(last_exch, 0);
   SDL_LOG_DEBUG(
-
       "IgnitionCyclesBeforeExchange current:" << static_cast<int>(current));
 
   return std::max(limit - current, 0);
@@ -645,7 +646,6 @@ bool CacheManager::SetCountersPassedForSuccessfulUpdate(
     case DAYS_AFTER_EPOCH:
       *pt_->policy_table.module_meta->pt_exchanged_x_days_after_epoch = value;
       SDL_LOG_DEBUG(
-
           "SetCountersPassedForSuccessfulUpdate days after epoch:" << value);
       break;
     default:
@@ -1138,10 +1138,6 @@ bool CacheManager::GetPriority(const std::string& policy_app_id,
 
 void CacheManager::CheckSnapshotInitialization() {
   CACHE_MANAGER_CHECK_VOID();
-  if (!snapshot_) {
-    SDL_LOG_ERROR("Snapshot pointer is not initialized");
-    return;
-  }
 
   *(snapshot_->policy_table.module_config.preloaded_pt) = false;
 
@@ -1309,8 +1305,6 @@ void CacheManager::PersistData() {
           copy_pt.policy_table.app_policies_section.apps.end();
 
       bool is_revoked = false;
-      bool is_default_policy;
-      bool is_predata_policy;
 
       for (; app_policy_iter != app_policy_iter_end; ++app_policy_iter) {
         const std::string app_id = (*app_policy_iter).first;
@@ -1321,7 +1315,7 @@ void CacheManager::PersistData() {
               copy_pt.policy_table.app_policies_section.apps[app_id].is_null();
         }
 
-        is_default_policy =
+        bool is_default_policy =
             copy_pt.policy_table.app_policies_section.apps.end() !=
                 copy_pt.policy_table.app_policies_section.apps.find(app_id) &&
             policy::kDefaultId ==
@@ -1329,7 +1323,7 @@ void CacheManager::PersistData() {
                     .get_string();
 
         // TODO(AOleynik): Remove this field from DB
-        is_predata_policy =
+        bool is_predata_policy =
             copy_pt.policy_table.app_policies_section.apps.end() !=
                 copy_pt.policy_table.app_policies_section.apps.find(app_id) &&
             policy::kPreDataConsentId ==

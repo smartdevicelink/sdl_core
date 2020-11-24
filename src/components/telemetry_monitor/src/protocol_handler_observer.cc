@@ -50,7 +50,6 @@ void ProtocolHandlerObserver::StartMessageProcess(
   }
   if (time_starts.find(message_id) != time_starts.end()) {
     SDL_LOG_DEBUG(
-
         "Already waiting for stop processing for Message ID: " << message_id);
     return;
   }

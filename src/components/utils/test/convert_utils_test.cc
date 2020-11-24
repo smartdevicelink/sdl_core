@@ -1,5 +1,6 @@
+
 /*
- * Copyright (c) 2014, Ford Motor Company
+ * Copyright (c) 2020, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,26 +31,55 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_INCLUDE_TEST_PROTOCOL_HANDLER_MOCK_TELEMETRY_OBSERVER_H_
-#define SRC_COMPONENTS_INCLUDE_TEST_PROTOCOL_HANDLER_MOCK_TELEMETRY_OBSERVER_H_
-
-#include "gmock/gmock.h"
-
-#include "protocol_handler/telemetry_observer.h"
+#include "utils/convert_utils.h"
+#include "gtest/gtest.h"
 
 namespace test {
 namespace components {
-namespace protocol_handler_test {
+namespace utils_test {
 
-class MockPHTelemetryObserver : public PHTelemetryObserver {
- public:
-  MOCK_METHOD2(StartMessageProcess,
-               void(uint32_t message_id,
-                    const date_time::TimeDuration& start_time));
-  MOCK_METHOD1(EndMessageProcess, void(std::shared_ptr<MessageMetric> m));
-};
+using namespace ::utils;
 
-}  // namespace protocol_handler_test
+TEST(ConvertUtilsTest, ConvertInt64ToLongLongInt_CorrectValue) {
+  int64_t value_to_convert = 42;
+  EXPECT_EQ(typeid(long long int),
+            typeid(ConvertInt64ToLongLongInt(value_to_convert)));
+}
+
+TEST(ConvertUtilsTest, ConvertLongLongIntToInt64_CorrectValue) {
+  long long int value_to_convert = 42;
+  EXPECT_EQ(typeid(int64_t),
+            typeid(ConvertLongLongIntToInt64(value_to_convert)));
+}
+
+TEST(ConvertUtilsTest, ConvertUInt64ToLongLongUInt_CorrectValue) {
+  uint64_t value_to_convert = 42;
+  EXPECT_EQ(typeid(unsigned long long int),
+            typeid(ConvertUInt64ToLongLongUInt(value_to_convert)));
+}
+
+TEST(ConvertUtilsTest, ConvertLongLongUIntToUInt64_CorrectValue) {
+  unsigned long long int value_to_convert = 42;
+  EXPECT_EQ(typeid(uint64_t),
+            typeid(ConvertLongLongUIntToUInt64(value_to_convert)));
+}
+
+TEST(ConvertUtilsTest, ConvertBinaryDataToString_ValidCharacteres_CorrectText) {
+  const uint8_t data[] = {'s', 'u', 'c', 'c', 'e', 's', 's'};
+  const std::string convertion_result = "success";
+  const size_t data_size = 7;
+  EXPECT_EQ(convertion_result, ConvertBinaryDataToString(data, data_size));
+}
+
+TEST(ConvertUtilsTest,
+     ConvertBinaryDataToString_NotValidCharacters_CorrectText) {
+  const size_t data_size = 7;
+  uint8_t data[data_size];
+  data[0] = 0u;
+  const std::string is_raw_data = "is raw data";
+  EXPECT_EQ(is_raw_data, ConvertBinaryDataToString(data, data_size));
+}
+
+}  // namespace utils_test
 }  // namespace components
 }  // namespace test
-#endif  // SRC_COMPONENTS_INCLUDE_TEST_PROTOCOL_HANDLER_MOCK_TELEMETRY_OBSERVER_H_

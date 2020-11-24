@@ -56,7 +56,9 @@ bool IsStateChanged(const HmiState& old_state, const HmiState& new_state) {
 }  // unnamed namespace
 
 StateControllerImpl::StateControllerImpl(ApplicationManager& app_mngr)
-    : EventObserver(app_mngr.event_dispatcher()), app_mngr_(app_mngr) {
+    : EventObserver(app_mngr.event_dispatcher())
+    , app_mngr_(app_mngr)
+    , postponed_activation_controller_() {
   subscribe_on_event(hmi_apis::FunctionID::BasicCommunication_OnAppActivated);
   subscribe_on_event(hmi_apis::FunctionID::BasicCommunication_OnAppDeactivated);
   subscribe_on_event(hmi_apis::FunctionID::TTS_Started);
@@ -394,7 +396,7 @@ void StateControllerImpl::HmiLevelConflictResolver::operator()(
     result_video_state = mobile_apis::VideoStreamingState::STREAMABLE;
   }
 
-  mobile_apis::HMILevel::eType result_hmi_level = state_to_resolve->hmi_level();
+  mobile_apis::HMILevel::eType result_hmi_level;
 
   using namespace helpers;
   if (mobile_apis::VideoStreamingState::STREAMABLE == result_video_state ||
@@ -408,7 +410,11 @@ void StateControllerImpl::HmiLevelConflictResolver::operator()(
             ? mobile_apis::HMILevel::HMI_LIMITED
             : to_resolve_hmi_level;
   } else {
-    result_hmi_level = mobile_apis::HMILevel::HMI_BACKGROUND;
+    result_hmi_level =
+        mobile_apis::HMILevel::HMI_FULL == to_resolve_hmi_level &&
+                mobile_apis::HMILevel::HMI_FULL != applied_hmi_level
+            ? to_resolve_hmi_level
+            : mobile_apis::HMILevel::HMI_BACKGROUND;
   }
 
   if (std::make_tuple(to_resolve_hmi_level,
@@ -714,7 +720,52 @@ void StateControllerImpl::UpdateAppWindowsStreamingState(
   }
 }
 
-void StateControllerImpl::on_event(const event_engine::MobileEvent& event) {}
+void StateControllerImpl::on_event(const event_engine::MobileEvent& event) {
+  using namespace mobile_apis;
+
+  SDL_LOG_AUTO_TRACE();
+  SDL_LOG_DEBUG("Received event for function" << event.id());
+  switch (event.id()) {
+    case FunctionID::RegisterAppInterfaceID: {
+      auto message = event.smart_object();
+      uint32_t connection_key =
+          message[strings::params][strings::connection_key].asUInt();
+      ApplicationSharedPtr app = app_mngr_.application(connection_key);
+
+      if (app.use_count() == 0) {
+        SDL_LOG_WARN("Application doesn't exist");
+        return;
+      }
+      {
+        sync_primitives::AutoLock autolock(
+            apps_with_pending_hmistatus_notification_lock_);
+
+        auto it = apps_with_pending_hmistatus_notification_.find(app->app_id());
+        if (it == apps_with_pending_hmistatus_notification_.end()) {
+          SDL_LOG_WARN("Application does not have a pending OnHMIStatus");
+          return;
+        }
+
+        bool success = message[strings::msg_params][strings::success].asBool();
+        if (success) {
+          // Only send notification if RAI was a success
+          auto notification =
+              MessageHelper::CreateHMIStatusNotification(app, 0);
+          app_mngr_.GetRPCService().ManageMobileCommand(
+              notification, commands::Command::SOURCE_SDL);
+        }
+
+        apps_with_pending_hmistatus_notification_.erase(app->app_id());
+        if (apps_with_pending_hmistatus_notification_.empty()) {
+          unsubscribe_from_event(FunctionID::RegisterAppInterfaceID);
+        }
+      }
+    } break;
+
+    default:
+      break;
+  }
+}
 
 void StateControllerImpl::on_event(const event_engine::Event& event) {
   using event_engine::Event;
@@ -758,11 +809,11 @@ void StateControllerImpl::on_event(const event_engine::Event& event) {
     case FunctionID::BasicCommunication_OnEventChanged: {
       bool is_active =
           message[strings::msg_params][hmi_notification::is_active].asBool();
-      const uint32_t id =
+      const uint32_t event_id =
           message[strings::msg_params][hmi_notification::event_name].asUInt();
       // TODO(AOleynik): Add verification/conversion check here
       const Common_EventTypes::eType state_id =
-          static_cast<Common_EventTypes::eType>(id);
+          static_cast<Common_EventTypes::eType>(event_id);
       if (is_active) {
         if (Common_EventTypes::AUDIO_SOURCE == state_id) {
           ApplyTempState<HmiState::STATE_ID_AUDIO_SOURCE>();
@@ -830,8 +881,8 @@ void StateControllerImpl::ActivateDefaultWindow(ApplicationSharedPtr app) {
 
   SetRegularState(app, window_id, hmi_level, audio_state, video_state, false);
 
-  // After main window activation, streaming state should be updated for another
-  // windows of the app
+  // After main window activation, streaming state should be updated for
+  // another windows of the app
   HmiStatePtr new_state =
       app->RegularHmiState(PredefinedWindows::DEFAULT_WINDOW);
   UpdateAppWindowsStreamingState(app, new_state);
@@ -868,16 +919,35 @@ void StateControllerImpl::OnStateChanged(ApplicationSharedPtr app,
   SDL_LOG_DEBUG("Window #" << window_id << " old state: " << *old_state);
   SDL_LOG_DEBUG("Window #" << window_id << " new state: " << *new_state);
 
+  if ((new_state->hmi_level() == mobile_apis::HMILevel::INVALID_ENUM) &&
+      (old_state->hmi_level() == mobile_apis::HMILevel::INVALID_ENUM)) {
+    SDL_LOG_DEBUG("HMI level is invalid data.");
+    return;
+  }
+
   if (!IsStateChanged(*old_state, *new_state)) {
     SDL_LOG_DEBUG("State has NOT been changed.");
     return;
   }
 
-  auto notification =
-      MessageHelper::CreateHMIStatusNotification(app, window_id);
-  app_mngr_.GetRPCService().ManageMobileCommand(notification,
-                                                commands::Command::SOURCE_SDL);
-
+  if (app->is_ready()) {
+    SDL_LOG_DEBUG("Sending OnHMIStatus to application " << app->app_id());
+    auto notification =
+        MessageHelper::CreateHMIStatusNotification(app, window_id);
+    app_mngr_.GetRPCService().ManageMobileCommand(
+        notification, commands::Command::SOURCE_SDL);
+  } else {
+    SDL_LOG_DEBUG(
+        "Application "
+        << app->app_id()
+        << " not ready to receive OnHMIStatus. Delaying notification");
+    {
+      sync_primitives::AutoLock autolock(
+          apps_with_pending_hmistatus_notification_lock_);
+      apps_with_pending_hmistatus_notification_.insert(app->app_id());
+    }
+    subscribe_on_event(mobile_apis::FunctionID::RegisterAppInterfaceID);
+  }
   if (mobile_apis::PredefinedWindows::DEFAULT_WINDOW != window_id) {
     SDL_LOG_DEBUG(
         "State was changed not for a main application window. No "
@@ -891,6 +961,19 @@ void StateControllerImpl::OnStateChanged(ApplicationSharedPtr app,
 
   app_mngr_.OnHMIStateChanged(app->app_id(), old_state, new_state);
   app->usage_report().RecordHmiStateChanged(new_state->hmi_level());
+
+  if (mobile_apis::HMILevel::INVALID_ENUM == old_state->hmi_level()) {
+    const auto app_default_hmi_level = app_mngr_.GetDefaultHmiLevel(app);
+    if (app_default_hmi_level == new_state->hmi_level()) {
+      const uint32_t app_id = app->app_id();
+      const uint32_t corr_id =
+          postponed_activation_controller_.GetPendingActivationCorrId(app_id);
+      if (corr_id > 0) {
+        app_mngr_.GetPolicyHandler().OnActivateApp(app_id, corr_id);
+        postponed_activation_controller_.RemoveAppToActivate(app_id);
+      }
+    }
+  }
 }
 
 bool StateControllerImpl::IsTempStateActive(HmiState::StateID id) const {
@@ -1220,8 +1303,8 @@ void StateControllerImpl::OnAppDeactivated(
     return;
   }
 
-  // TODO(AOleynik): Need to delete DeactivateReason and modify OnAppDeactivated
-  // when HMI will support that, otherwise won't be testable
+  // TODO(AOleynik): Need to delete DeactivateReason and modify
+  // OnAppDeactivated when HMI will support that, otherwise won't be testable
   DeactivateApp(app, window_id);
 }
 
@@ -1340,6 +1423,11 @@ mobile_apis::VideoStreamingState::eType StateControllerImpl::CalcVideoState(
                 << app->app_id() << " for " << hmi_level << " HMI level is "
                 << state);
   return state;
+}
+
+PostponedActivationController&
+StateControllerImpl::GetPostponedActivationController() {
+  return postponed_activation_controller_;
 }
 
 }  // namespace application_manager

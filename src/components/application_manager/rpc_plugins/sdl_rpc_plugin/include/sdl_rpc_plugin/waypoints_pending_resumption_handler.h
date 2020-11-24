@@ -58,35 +58,50 @@ class WayPointsPendingResumptionHandler
  private:
   /**
    * @brief RaiseFakeSuccessfulResponse raise event for the subscriber that
-   * contains emulated successful response from HMI To avoid double subscription
-   * WayPointsPendingResumptionHandler freezes sending requests to HMI. But
-   * resumption_data_processor().SubscribeOnResponse() need to be called to
-   * provide information that some data need to be resumed. So if pending
-   * request exists, SDL creates preliminary requests to HMI, subscribe the
-   * subscriber to this request but do not send it to HMI. It freezes this
-   * requests to precess the one by one when a response to the current request
-   * will be received When SDL receives a response from HMI it may satisfy some
-   * frozen requests. If it does SDL will create faked HMI response(based on the
-   * real one with corr_id replacement) and raise event. So that
-   * subscriber::on_event will be called with an appropriate response to the
-   * request that SDL was not sent to HMI.
-   * @param response message that will be raised with corr_id replacement
-   * @param corr_id correlation id that will be replaced in response to notify
-   * the subscriber
+   * contains emulated successful response from HMI. To avoid double
+   * subscription WayPointsPendingResumptionHandler freezes sending requests to
+   * HMI. But resumption_data_processor().SubscribeOnResponse() need to be
+   * called to provide information that some data need to be resumed. So if
+   * pending request exists, SDL creates preliminary requests to HMI, subscribe
+   * the subscriber to this request but do not send it to HMI. It freezes this
+   * requests to process the one by one when a response to the current request
+   * will be received. When SDL receives a response from HMI it may satisfy some
+   * frozen requests. If it does SDL will create fake successful HMI
+   * response and raise event. So that subscriber::on_event will be called with
+   * an appropriate response to the request that SDL was not sent to HMI.
+   * @param corr_id correlation id of next pending request
    */
-  void RaiseFakeSuccessfulResponse(smart_objects::SmartObject response,
-                                   const int32_t corr_id);
+  void RaiseFakeSuccessfulResponse(const int32_t corr_id);
   smart_objects::SmartObjectSPtr CreateSubscriptionRequest();
 
-  struct ResumptionAwaitingHandling {
-    const uint32_t app_id;
-    WayPointsAppExtension& ext;
-    resumption::ResumptionRequest request_to_send_;
+  /**
+   * @brief ProcessNextPendingResumption is responsible for processing of next
+   * pending request. If any application is already subscribed to waypoints,
+   * this method ensures that current application will be subscribed to
+   * waypoints too or send request to HMI otherwise
+   */
+  void ProcessNextPendingResumption();
+
+  struct PendingRequest {
+    explicit PendingRequest(const uint32_t app_id, const uint32_t corr_id)
+        : app_id_(app_id)
+        , corr_id_(corr_id)
+        , waiting_for_hmi_response_(false) {}
+    uint32_t app_id_;
+    uint32_t corr_id_;
+    bool waiting_for_hmi_response_;
   };
 
-  std::vector<ResumptionAwaitingHandling> frozen_resumptions_;
-  std::map<uint32_t, smart_objects::SmartObject> pending_requests_;
-  std::queue<uint32_t> app_ids_;
+  /**
+   * @brief SendPendingHMIRequest is responsible for creating and sending of
+   * next pending request to HMI. Also here this request is marked as waiting
+   * for response.
+   * @param pending_request Next pending request
+   */
+  void SendPendingHMIRequest(PendingRequest& pending_request);
+
+  std::deque<PendingRequest> pending_requests_;
+  sync_primitives::RecursiveLock pending_resumption_lock_;
 };
 }  // namespace sdl_rpc_plugin
 

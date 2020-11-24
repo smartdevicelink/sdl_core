@@ -88,15 +88,16 @@ class MockApplication : public ::application_manager::Application {
                void(protocol_handler::ServiceType service_type));
   MOCK_METHOD1(SuspendStreaming,
                void(protocol_handler::ServiceType service_type));
-  MOCK_METHOD2(WakeUpStreaming,
-               void(protocol_handler::ServiceType service_type,
-                    uint32_t timer_len));
+  MOCK_METHOD1(WakeUpStreaming,
+               void(protocol_handler::ServiceType service_type));
   MOCK_CONST_METHOD0(is_voice_communication_supported, bool());
   MOCK_METHOD1(set_voice_communication_supported,
                void(bool is_voice_communication_supported));
   MOCK_CONST_METHOD0(app_allowed, bool());
   MOCK_CONST_METHOD0(has_been_activated, bool());
   MOCK_METHOD1(set_activated, bool(bool is_active));
+  MOCK_CONST_METHOD0(is_ready, bool());
+  MOCK_METHOD1(set_is_ready, bool(bool is_active));
   MOCK_CONST_METHOD0(version, const ::application_manager::Version&());
   MOCK_METHOD1(set_hmi_application_id, void(uint32_t hmi_app_id));
   MOCK_CONST_METHOD0(hmi_app_id, uint32_t());

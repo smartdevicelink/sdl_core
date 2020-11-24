@@ -80,45 +80,6 @@ using ::testing::ReturnRef;
 
 using namespace application_manager;
 
-typedef std::map<std::string, hmi_apis::Common_Language::eType>
-    LanguageCStringToEnumMap;
-
-typedef std::map<std::string, hmi_apis::Common_LightName::eType>
-    LightNameCStringToEnumMap;
-
-static LanguageCStringToEnumMap languages_map;
-static LightNameCStringToEnumMap light_names_map;
-
-const std::vector<std::string> language_string_values{
-    {"EN-US"}, {"ES-MX"}, {"FR-CA"}, {"DE-DE"}, {"ES-ES"}, {"EN-GB"}, {"RU-RU"},
-    {"TR-TR"}, {"PL-PL"}, {"FR-FR"}, {"IT-IT"}, {"SV-SE"}, {"PT-PT"}, {"NL-NL"},
-    {"EN-AU"}, {"ZH-CN"}, {"ZH-TW"}, {"JA-JP"}, {"AR-SA"}, {"KO-KR"}, {"PT-BR"},
-    {"CS-CZ"}, {"DA-DK"}, {"NO-NO"}, {"NL-BE"}, {"EL-GR"}, {"HU-HU"}, {"FI-FI"},
-    {"SK-SK"}, {"EN-IN"}, {"TH-TH"}, {"EN-SA"}, {"HE-IL"}, {"RO-RO"}, {"UK-UA"},
-    {"ID-ID"}, {"VI-VN"}, {"MS-MY"}, {"HI-IN"}};
-
-const std::vector<hmi_apis::Common_Language::eType> language_enum_values{
-    hmi_apis::Common_Language::EN_US, hmi_apis::Common_Language::ES_MX,
-    hmi_apis::Common_Language::FR_CA, hmi_apis::Common_Language::DE_DE,
-    hmi_apis::Common_Language::ES_ES, hmi_apis::Common_Language::EN_GB,
-    hmi_apis::Common_Language::RU_RU, hmi_apis::Common_Language::TR_TR,
-    hmi_apis::Common_Language::PL_PL, hmi_apis::Common_Language::FR_FR,
-    hmi_apis::Common_Language::IT_IT, hmi_apis::Common_Language::SV_SE,
-    hmi_apis::Common_Language::PT_PT, hmi_apis::Common_Language::NL_NL,
-    hmi_apis::Common_Language::EN_AU, hmi_apis::Common_Language::ZH_CN,
-    hmi_apis::Common_Language::ZH_TW, hmi_apis::Common_Language::JA_JP,
-    hmi_apis::Common_Language::AR_SA, hmi_apis::Common_Language::KO_KR,
-    hmi_apis::Common_Language::PT_BR, hmi_apis::Common_Language::CS_CZ,
-    hmi_apis::Common_Language::DA_DK, hmi_apis::Common_Language::NO_NO,
-    hmi_apis::Common_Language::NL_BE, hmi_apis::Common_Language::EL_GR,
-    hmi_apis::Common_Language::HU_HU, hmi_apis::Common_Language::FI_FI,
-    hmi_apis::Common_Language::SK_SK, hmi_apis::Common_Language::EN_IN,
-    hmi_apis::Common_Language::TH_TH, hmi_apis::Common_Language::EN_SA,
-    hmi_apis::Common_Language::HE_IL, hmi_apis::Common_Language::RO_RO,
-    hmi_apis::Common_Language::UK_UA, hmi_apis::Common_Language::ID_ID,
-    hmi_apis::Common_Language::VI_VN, hmi_apis::Common_Language::MS_MY,
-    hmi_apis::Common_Language::HI_IN};
-
 const std::vector<hmi_apis::Common_LightName::eType> light_name_enum_values{
     hmi_apis::Common_LightName::eType::FRONT_LEFT_HIGH_BEAM,
     hmi_apis::Common_LightName::eType::FRONT_RIGHT_HIGH_BEAM,
@@ -169,109 +130,6 @@ const std::vector<hmi_apis::Common_LightName::eType> light_name_enum_values{
     hmi_apis::Common_LightName::eType::EXTERIOR_RIGHT_LIGHTS,
     hmi_apis::Common_LightName::eType::EXTERIOR_ALL_LIGHTS};
 
-const std::vector<std::string> light_name_string_values{
-    {"FRONT_LEFT_HIGH_BEAM"},
-    {"FRONT_RIGHT_HIGH_BEAM"},
-    {"FRONT_LEFT_LOW_BEAM"},
-    {"FRONT_RIGHT_LOW_BEAM"},
-    {"FRONT_LEFT_PARKING_LIGHT"},
-    {"FRONT_RIGHT_PARKING_LIGHT"},
-    {"FRONT_LEFT_FOG_LIGHT"},
-    {"FRONT_RIGHT_FOG_LIGHT"},
-    {"FRONT_LEFT_DAYTIME_RUNNING_LIGHT"},
-    {"FRONT_RIGHT_DAYTIME_RUNNING_LIGHT"},
-    {"FRONT_LEFT_TURN_LIGHT"},
-    {"FRONT_RIGHT_TURN_LIGHT"},
-    {"REAR_LEFT_FOG_LIGHT"},
-    {"REAR_RIGHT_FOG_LIGHT"},
-    {"REAR_LEFT_TAIL_LIGHT"},
-    {"REAR_RIGHT_TAIL_LIGHT"},
-    {"REAR_LEFT_BRAKE_LIGHT"},
-    {"REAR_RIGHT_BRAKE_LIGHT"},
-    {"REAR_LEFT_TURN_LIGHT"},
-    {"REAR_RIGHT_TURN_LIGHT"},
-    {"REAR_REGISTRATION_PLATE_LIGHT"},
-    {"HIGH_BEAMS"},
-    {"LOW_BEAMS"},
-    {"FOG_LIGHTS"},
-    {"RUNNING_LIGHTS"},
-    {"PARKING_LIGHTS"},
-    {"BRAKE_LIGHTS"},
-    {"REAR_REVERSING_LIGHTS"},
-    {"SIDE_MARKER_LIGHTS"},
-    {"LEFT_TURN_LIGHTS"},
-    {"RIGHT_TURN_LIGHTS"},
-    {"HAZARD_LIGHTS"},
-    {"REAR_CARGO_LIGHTS"},
-    {"REAR_TRUCK_BED_LIGHTS"},
-    {"REAR_TRAILER_LIGHTS"},
-    {"LEFT_SPOT_LIGHTS"},
-    {"RIGHT_SPOT_LIGHTS"},
-    {"LEFT_PUDDLE_LIGHTS"},
-    {"RIGHT_PUDDLE_LIGHTS"},
-    {"AMBIENT_LIGHTS"},
-    {"OVERHEAD_LIGHTS"},
-    {"READING_LIGHTS"},
-    {"TRUNK_LIGHTS"},
-    {"EXTERIOR_FRONT_LIGHTS"},
-    {"EXTERIOR_REAR_LIGHTS"},
-    {"EXTERIOR_LEFT_LIGHTS"},
-    {"EXTERIOR_RIGHT_LIGHTS"},
-    {"EXTERIOR_ALL_LIGHTS"}};
-
-void InitLightNameStringToEnumMap(
-    LightNameCStringToEnumMap& out_light_names_map) {
-  for (size_t i = 0; i < light_name_string_values.size(); ++i) {
-    out_light_names_map[light_name_string_values[i]] =
-        light_name_enum_values[i];
-  }
-}
-
-bool LightNameStringToEnum(const std::string& light_name_str,
-                           hmi_apis::Common_LightName::eType& out_value) {
-  auto it = light_names_map.find(light_name_str);
-  if (it == light_names_map.end()) {
-    return false;
-  }
-  out_value = it->second;
-  return true;
-}
-
-void InitLanguageStringToEnumMap(LanguageCStringToEnumMap& out_languages_map) {
-  for (size_t i = 0; i < language_string_values.size(); ++i) {
-    out_languages_map[language_string_values[i]] = language_enum_values[i];
-  }
-}
-
-bool LanguageStringToEnum(const std::string& language_str,
-                          hmi_apis::Common_Language::eType& out_value) {
-  LanguageCStringToEnumMap::const_iterator it =
-      languages_map.find(language_str);
-  if (it == languages_map.end()) {
-    return false;
-  }
-  out_value = it->second;
-  return true;
-}
-
-hmi_apis::Common_Language::eType TestCommonLanguageFromString(
-    const std::string& language) {
-  hmi_apis::Common_Language::eType value;
-  if (LanguageStringToEnum(language, value)) {
-    return value;
-  }
-  return hmi_apis::Common_Language::INVALID_ENUM;
-}
-
-hmi_apis::Common_LightName::eType TestCommonLightNameFromString(
-    const std::string& light_name_str) {
-  hmi_apis::Common_LightName::eType value;
-  if (LightNameStringToEnum(light_name_str, value)) {
-    return value;
-  }
-  return hmi_apis::Common_LightName::INVALID_ENUM;
-}
-
 bool IsLightNameExists(const hmi_apis::Common_LightName::eType& light_name) {
   auto it = std::find(
       light_name_enum_values.begin(), light_name_enum_values.end(), light_name);
@@ -283,14 +141,7 @@ class HMICapabilitiesTest : public ::testing::Test {
   HMICapabilitiesTest()
       : last_state_wrapper_(std::make_shared<resumption::LastStateWrapperImpl>(
             std::make_shared<resumption::LastStateImpl>(kAppStorageFolder,
-                                                        kAppInfoStorage))) {
-    if (languages_map.empty()) {
-      InitLanguageStringToEnumMap(languages_map);
-    }
-    if (light_names_map.empty()) {
-      InitLightNameStringToEnumMap(light_names_map);
-    }
-  }
+                                                        kAppInfoStorage))) {}
 
   void SetUp() OVERRIDE {
     ON_CALL(mock_app_mngr_, event_dispatcher())
@@ -325,13 +176,6 @@ class HMICapabilitiesTest : public ::testing::Test {
 
   void SetUpLanguageAndLightCapabilitiesExpectation() {
     ON_CALL(mock_app_mngr_, IsSOStructValid(_, _)).WillByDefault(Return(true));
-
-    EXPECT_CALL(*(MockMessageHelper::message_helper_mock()),
-                CommonLanguageFromString(_))
-        .WillRepeatedly(Invoke(TestCommonLanguageFromString));
-    EXPECT_CALL(*(MockMessageHelper::message_helper_mock()),
-                CommonLightNameFromString(_))
-        .WillRepeatedly(Invoke(TestCommonLightNameFromString));
   }
 
   std::shared_ptr<HMICapabilitiesImpl> hmi_capabilities_;
@@ -1011,10 +855,6 @@ TEST_F(HMICapabilitiesTest,
   ON_CALL(mock_application_manager_settings_, hmi_capabilities_file_name())
       .WillByDefault(ReturnRef(hmi_capabilities_file));
 
-  EXPECT_CALL(*(MockMessageHelper::message_helper_mock()),
-              CommonLanguageFromString(_))
-      .WillRepeatedly(Invoke(TestCommonLanguageFromString));
-
   hmi_capabilities_->Init(last_state_wrapper_);
 
   // with old audio pass thru format, the object is an array containing a single
@@ -1201,10 +1041,7 @@ TEST_F(
     HMICapabilitiesTest,
     SaveCachedCapabilitiesToFile_LanguageIsNotTheSameAsPersisted_SaveNewLanguageToCache) {
   SetUpLanguageAndLightCapabilitiesExpectation();
-  const std::string new_language = "RU_RU";
-  ON_CALL(*(MockMessageHelper::message_helper_mock()),
-          CommonLanguageToString(_))
-      .WillByDefault(Return(new_language));
+  const std::string new_language = "RU-RU";
 
   hmi_capabilities_->Init(last_state_wrapper_);
   hmi_capabilities_->set_active_tts_language(hmi_apis::Common_Language::RU_RU);

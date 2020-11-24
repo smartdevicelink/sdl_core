@@ -217,6 +217,8 @@ class RegisterAppInterfaceRequestTest
         .WillByDefault(Return(smart_objects::SmartObjectSPtr()));
     ON_CALL(mock_hmi_capabilities_, display_capabilities())
         .WillByDefault(Return(smart_objects::SmartObjectSPtr()));
+    ON_CALL(mock_hmi_capabilities_, seat_location_capability())
+        .WillByDefault(Return(smart_objects::SmartObjectSPtr()));
     ON_CALL(mock_hmi_capabilities_, audio_pass_thru_capabilities())
         .WillByDefault(Return(smart_objects::SmartObjectSPtr()));
     ON_CALL(mock_hmi_capabilities_, vehicle_type())

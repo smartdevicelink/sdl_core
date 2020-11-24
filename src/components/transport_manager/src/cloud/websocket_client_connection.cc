@@ -95,7 +95,6 @@ TransportAdapter::Error WebsocketClientConnection::Start() {
   SDL_LOG_DEBUG(
       "Cloud app authentication token: " << cloud_properties.auth_token);
   SDL_LOG_DEBUG(
-
       "Cloud app transport type: " << cloud_properties.cloud_transport_type);
   SDL_LOG_DEBUG("Cloud app hybrid app preference: "
                 << cloud_properties.hybrid_app_preference);
@@ -163,9 +162,8 @@ TransportAdapter::Error WebsocketClientConnection::Start() {
 #endif  // ENABLE_SECURITY
   if (ec) {
     std::string str_err = "ErrorMessage: " + ec.message();
-    SDL_LOG_ERROR(
-
-        "Could not complete handshake with host/port: " << host << ":" << port);
+    SDL_LOG_ERROR("Could not complete handshake with host/port: " << host << ":"
+                                                                  << port);
     SDL_LOG_ERROR(str_err);
     return TransportAdapter::FAIL;
   }
@@ -202,9 +200,8 @@ TransportAdapter::Error WebsocketClientConnection::Start() {
 
   boost::asio::post(io_pool_, [&]() { ioc_.run(); });
 
-  SDL_LOG_DEBUG(
-
-      "Successfully started websocket connection @: " << host << ":" << port);
+  SDL_LOG_DEBUG("Successfully started websocket connection @: " << host << ":"
+                                                                << port);
   return TransportAdapter::OK;
 }
 
@@ -248,7 +245,6 @@ void WebsocketClientConnection::OnRead(boost::system::error_code ec,
     Shutdown();
     return;
   }
-  std::string data_str = boost::beast::buffers_to_string(buffer_.data());
 
   ssize_t size = (ssize_t)buffer_.size();
   const uint8_t* data = boost::asio::buffer_cast<const uint8_t*>(

@@ -30,7 +30,6 @@ bool VerifyPredefinedApp(ApplicationPolicies::value_type& app_policies) {
     if (PT_PRELOADED == app_policies.second.GetPolicyTableType() &&
         predefined_request_types.is_cleaned_up()) {
       SDL_LOG_ERROR(
-
           app_id << " policy RequestTypes is empty after clean-up. Exiting.");
       return false;
     }
@@ -326,9 +325,8 @@ bool VehicleDataItem::Validate() const {
   };
 
   if (!ValidateTypes()) {
-    SDL_LOG_ERROR(
-
-        "Unknown type: " << std::string(type) << " of " << std::string(key));
+    SDL_LOG_ERROR("Unknown type: " << std::string(type) << " of "
+                                   << std::string(key));
     return false;
   }
   return true;

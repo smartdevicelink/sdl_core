@@ -221,9 +221,8 @@ bool CreateInteractionChoiceSetRequest::compareSynonyms(
                           CreateInteractionChoiceSetRequest::compareStr);
 
   if (it != vr_cmds_1->end()) {
-    SDL_LOG_INFO(
-
-        "Incoming choice set has duplicated VR synonyms " << it->asString());
+    SDL_LOG_INFO("Incoming choice set has duplicated VR synonyms "
+                 << it->asString());
     return true;
   }
 
@@ -239,9 +238,8 @@ bool CreateInteractionChoiceSetRequest::compareStr(
 bool CreateInteractionChoiceSetRequest::IsWhiteSpaceExist(
     const smart_objects::SmartObject& choice_set) {
   SDL_LOG_AUTO_TRACE();
-  const char* str = NULL;
 
-  str = choice_set[strings::menu_name].asCharArray();
+  const char* str = choice_set[strings::menu_name].asCharArray();
   if (!CheckSyntax(str)) {
     SDL_LOG_ERROR("Invalid menu_name syntax check failed");
     return true;
@@ -322,8 +320,6 @@ void CreateInteractionChoiceSetRequest::SendVRAddCommandRequests(
     msg_params[strings::cmd_id] =
         choice_set[strings::choice_set][chs_num][strings::choice_id];
     msg_params[strings::vr_commands] =
-        smart_objects::SmartObject(smart_objects::SmartType_Array);
-    msg_params[strings::vr_commands] =
         choice_set[strings::choice_set][chs_num][strings::vr_commands];
 
     sync_primitives::AutoLock commands_lock(vr_commands_lock_);
@@ -334,9 +330,8 @@ void CreateInteractionChoiceSetRequest::SendVRAddCommandRequests(
 
     VRCommandInfo vr_command(vr_cmd_id);
     sent_commands_map_[vr_corr_id] = vr_command;
-    SDL_LOG_DEBUG(
-
-        "VR_command sent corr_id " << vr_corr_id << " cmd_id " << vr_corr_id);
+    SDL_LOG_DEBUG("VR_command sent corr_id " << vr_corr_id << " cmd_id "
+                                             << vr_corr_id);
   }
   expected_chs_count_ = chs_num;
   SDL_LOG_DEBUG("expected_chs_count_ = " << expected_chs_count_);

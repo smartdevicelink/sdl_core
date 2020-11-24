@@ -35,6 +35,7 @@
 
 #include <stdint.h>
 #include <algorithm>
+#include <atomic>
 #include <deque>
 #include <map>
 #include <memory>
@@ -369,6 +370,9 @@ class ApplicationManagerImpl
   ApplicationSharedPtr RegisterApplication(
       const std::shared_ptr<smart_objects::SmartObject>&
           request_for_registration) OVERRIDE;
+
+  void FinalizeAppRegistration(ApplicationSharedPtr application,
+                               const uint32_t connection_key) OVERRIDE;
   /*
    * @brief Closes application by id
    *
@@ -411,6 +415,7 @@ class ApplicationManagerImpl
    * @brief Closes all registered applications
    */
   void UnregisterAllApplications();
+
   bool ActivateApplication(ApplicationSharedPtr app) OVERRIDE;
 
   /**
@@ -866,29 +871,16 @@ class ApplicationManagerImpl
   void ForbidStreaming(uint32_t app_id,
                        protocol_handler::ServiceType service_type) OVERRIDE;
 
-  /**
-   * @brief Called when application completes streaming configuration
-   * @param app_id Streaming application id
-   * @param service_type Streaming service type
-   * @param result true if configuration is successful, false otherwise
-   * @param rejected_params list of rejected parameters' name. Valid
-   *                        only when result is false.
-   */
-  void OnStreamingConfigured(
-      uint32_t app_id,
-      protocol_handler::ServiceType service_type,
-      bool result,
-      std::vector<std::string>& rejected_params) OVERRIDE;
+  void OnStreamingConfigurationSuccessful(
+      uint32_t app_id, protocol_handler::ServiceType service_type) OVERRIDE;
 
-  /**
-   * @brief Callback calls when application starts/stops data streaming
-   * @param app_id Streaming application id
-   * @param service_type Streaming service type
-   * @param state Shows if streaming started or stopped
-   */
+  void OnStreamingConfigurationFailed(uint32_t app_id,
+                                      std::vector<std::string>& rejected_params,
+                                      const std::string& reason) OVERRIDE;
+
   void OnAppStreaming(uint32_t app_id,
                       protocol_handler::ServiceType service_type,
-                      bool state) OVERRIDE;
+                      const Application::StreamingState new_state) OVERRIDE;
 
   mobile_api::HMILevel::eType GetDefaultHmiLevel(
       ApplicationConstSharedPtr application) const;
@@ -1232,21 +1224,6 @@ class ApplicationManagerImpl
                          smart_objects::SmartObject& vrSynonym);
 
   /**
-   * @brief Method transforms string to AppHMIType
-   * @param str contains string AppHMIType
-   * @return enum AppHMIType
-   */
-  mobile_apis::AppHMIType::eType StringToAppHMIType(std::string str);
-
-  /**
-   * @brief Returns a string representation of AppHMIType
-   * @param type an enum value of AppHMIType
-   * @return string representation of the enum value
-   */
-  const std::string AppHMITypeToString(
-      mobile_apis::AppHMIType::eType type) const;
-
-  /**
    * @brief Method compares arrays of app HMI type
    * @param from_policy contains app HMI type from policy
    * @param from_application contains app HMI type from application
@@ -1263,7 +1240,7 @@ class ApplicationManagerImpl
                           const bool allow_unknown_parameters = false);
 
   template <typename ApplicationList>
-  void PrepareApplicationListSO(ApplicationList app_list,
+  void PrepareApplicationListSO(ApplicationList& app_list,
                                 smart_objects::SmartObject& applications,
                                 ApplicationManager& app_mngr) {
     smart_objects::SmartArray* app_array = applications.asArray();
@@ -1669,7 +1646,6 @@ class ApplicationManagerImpl
   sync_primitives::Lock close_app_timer_pool_lock_;
   sync_primitives::Lock end_stream_timer_pool_lock_;
 
-  mutable sync_primitives::RecursiveLock stopping_application_mng_lock_;
   StateControllerImpl state_ctrl_;
   std::unique_ptr<app_launch::AppLaunchData> app_launch_dto_;
   std::unique_ptr<app_launch::AppLaunchCtrl> app_launch_ctrl_;
@@ -1703,7 +1679,7 @@ class ApplicationManagerImpl
 
   std::atomic<bool> registered_during_timer_execution_;
 
-  volatile bool is_stopping_;
+  std::atomic<bool> is_stopping_;
 
   std::unique_ptr<CommandHolder> commands_holder_;
 

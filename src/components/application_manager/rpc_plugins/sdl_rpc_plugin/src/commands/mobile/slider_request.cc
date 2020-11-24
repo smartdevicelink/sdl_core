@@ -109,9 +109,7 @@ void SliderRequest::Run() {
     return;
   }
 
-  smart_objects::SmartObject msg_params =
-      smart_objects::SmartObject(smart_objects::SmartType_Map);
-  msg_params = (*message_)[strings::msg_params];
+  smart_objects::SmartObject msg_params = (*message_)[strings::msg_params];
   msg_params[strings::app_id] = application->app_id();
 
   if (!(*message_)[strings::msg_params].keyExists(strings::timeout)) {
@@ -183,9 +181,9 @@ void SliderRequest::on_event(const event_engine::Event& event) {
 
 bool SliderRequest::IsWhiteSpaceExist() {
   SDL_LOG_AUTO_TRACE();
-  const char* str = NULL;
 
-  str = (*message_)[strings::msg_params][strings::slider_header].asCharArray();
+  const char* str =
+      (*message_)[strings::msg_params][strings::slider_header].asCharArray();
   if (!CheckSyntax(str)) {
     SDL_LOG_ERROR("Invalid slider_header value syntax check failed");
     return true;

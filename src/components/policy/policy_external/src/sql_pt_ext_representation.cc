@@ -1123,7 +1123,6 @@ void SQLPTExtRepresentation::GatherConsentGroup(
   // Fill data for ExternalConsent consents
   if (!query.Prepare(sql_pt_ext::kSelectExternalConsentStatusGroup)) {
     SDL_LOG_WARN(
-
         "Incorrect select statement for ExternalConsent consented groups.");
     return;
   }

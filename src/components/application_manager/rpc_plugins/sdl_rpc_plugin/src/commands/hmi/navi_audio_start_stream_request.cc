@@ -144,41 +144,46 @@ void AudioStartStreamRequest::onTimeOut() {
 void AudioStartStreamRequest::RetryStartSession() {
   SDL_LOG_AUTO_TRACE();
 
+  auto retry_start_session = [this](const uint32_t hmi_app_id) {
+    ApplicationSharedPtr app =
+        application_manager_.application_by_hmi_app(hmi_app_id);
+
+    if (!app) {
+      SDL_LOG_ERROR("StartAudioStreamRequest aborted. Application not found");
+      return;
+    }
+
+    if (!app->audio_streaming_allowed()) {
+      SDL_LOG_WARN("Audio streaming not allowed");
+      return;
+    }
+
+    if (app->audio_streaming_approved()) {
+      SDL_LOG_INFO("AudioStartStream retry sequence stopped. "
+                   << "SUCCESS received");
+      app->set_audio_stream_retry_number(0);
+      return;
+    }
+
+    uint32_t curr_retry_number = app->audio_stream_retry_number() + 1;
+
+    if (curr_retry_number <= retry_number_) {
+      SDL_LOG_DEBUG("Retry number " << curr_retry_number << " of "
+                                    << retry_number_);
+      MessageHelper::SendAudioStartStream(app->app_id(), application_manager_);
+      app->set_audio_stream_retry_number(curr_retry_number);
+    } else {
+      SDL_LOG_DEBUG("Audio start stream retry sequence stopped. "
+                    << "Attempts expired.");
+
+      application_manager_.EndNaviServices(app->app_id());
+    }
+  };
+
+  retry_start_session(application_id());
+
   application_manager_.TerminateRequest(
       connection_key(), correlation_id(), function_id());
-
-  ApplicationSharedPtr app =
-      application_manager_.application_by_hmi_app(application_id());
-  if (!app) {
-    SDL_LOG_ERROR("StartAudioStreamRequest aborted. Application not found");
-    return;
-  }
-
-  if (!app->audio_streaming_allowed()) {
-    SDL_LOG_WARN("Audio streaming not allowed");
-    return;
-  }
-
-  if (app->audio_streaming_approved()) {
-    SDL_LOG_INFO("AudioStartStream retry sequence stopped. "
-                 << "SUCCESS received");
-    app->set_audio_stream_retry_number(0);
-    return;
-  }
-
-  uint32_t curr_retry_number = app->audio_stream_retry_number();
-
-  if (curr_retry_number <= retry_number_) {
-    SDL_LOG_DEBUG("Retry number " << curr_retry_number << " of "
-                                  << retry_number_);
-    MessageHelper::SendAudioStartStream(app->app_id(), application_manager_);
-    app->set_audio_stream_retry_number(++curr_retry_number);
-  } else {
-    SDL_LOG_DEBUG("Audio start stream retry sequence stopped. "
-                  << "Attempts expired.");
-
-    application_manager_.EndNaviServices(app->app_id());
-  }
 }
 
 }  // namespace commands
