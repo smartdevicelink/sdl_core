@@ -41,6 +41,7 @@
 
 #include "application_manager/mock_application_manager.h"
 #include "application_manager/mock_application_manager_settings.h"
+#include "application_manager/mock_event_dispatcher.h"
 #include "application_manager/mock_hmi_capabilities.h"
 #include "application_manager/mock_rpc_service.h"
 #include "application_manager/policies/mock_policy_handler_interface.h"
@@ -68,6 +69,7 @@ using ::test::components::application_manager_test::MockApplication;
 using ::test::components::application_manager_test::MockApplicationManager;
 using ::test::components::application_manager_test::
     MockApplicationManagerSettings;
+using ::test::components::event_engine_test::MockEventDispatcher;
 
 // Depending on the value type will be selected
 template <const bool kIf, class ThenT, class ElseT>
@@ -145,6 +147,23 @@ class CommandsTest : public ::testing::Test {
                                      mock_policy_handler_);
   }
 
+  void InitEventDispatcher() {
+    ON_CALL(app_mngr_, event_dispatcher())
+        .WillByDefault(ReturnRef(event_dispatcher_));
+  }
+
+  void InitNegativeResponse() {
+    MessageSharedPtr timeout_response =
+        CommandsTest<kIsNice>::CreateMessage(smart_objects::SmartType_Map);
+    (*timeout_response)[am::strings::msg_params][am::strings::result_code] =
+        am::mobile_api::Result::GENERIC_ERROR;
+    (*timeout_response)[am::strings::msg_params][am::strings::success] = false;
+
+    ON_CALL(mock_message_helper_,
+            CreateNegativeResponse(_, _, _, mobile_apis::Result::GENERIC_ERROR))
+        .WillByDefault(Return(timeout_response));
+  }
+
   enum { kDefaultTimeout_ = 100 };
 
   MockAppManager app_mngr_;
@@ -154,6 +173,7 @@ class CommandsTest : public ::testing::Test {
   testing::NiceMock<policy_test::MockPolicyHandlerInterface>
       mock_policy_handler_;
   MockAppManagerSettings app_mngr_settings_;
+  MockEventDispatcher event_dispatcher_;
   MOCK(am::MockHmiInterfaces) mock_hmi_interfaces_;
   am::MockMessageHelper& mock_message_helper_;
 

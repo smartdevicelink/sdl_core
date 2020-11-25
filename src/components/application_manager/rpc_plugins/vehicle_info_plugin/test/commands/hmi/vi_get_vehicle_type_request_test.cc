@@ -99,7 +99,7 @@ TEST_F(
   ASSERT_TRUE(command->Init());
 
   command->Run();
-  command->onTimeOut();
+  command->OnTimeOut();
 }
 
 }  // namespace vi_get_vehicle_type_request

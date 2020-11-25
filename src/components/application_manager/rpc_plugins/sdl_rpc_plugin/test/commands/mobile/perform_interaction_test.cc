@@ -173,6 +173,26 @@ class PerformInteractionRequestTest
       performinteraction_choice_set_lock_ptr_;
 };
 
+class PerformInteractionRequestTestClass : public PerformInteractionRequest {
+ public:
+  PerformInteractionRequestTestClass(
+      const app_mngr::commands::MessageSharedPtr& message,
+      app_mngr::ApplicationManager& application_manager,
+      app_mngr::rpc_service::RPCService& rpc_service,
+      app_mngr::HMICapabilities& hmi_capabilities,
+      policy::PolicyHandlerInterface& policy_handler)
+      : PerformInteractionRequest(message,
+                                  application_manager,
+                                  rpc_service,
+                                  hmi_capabilities,
+                                  policy_handler) {}
+
+  void StartAwaitForInterfaces() {
+    StartAwaitForInterface(am::HmiInterfaces::HMI_INTERFACE_VR);
+    StartAwaitForInterface(am::HmiInterfaces::HMI_INTERFACE_UI);
+  }
+};
+
 TEST_F(PerformInteractionRequestTest, OnTimeout_VR_GENERIC_ERROR) {
   MessageSharedPtr response_msg_vr =
       CreateMessage(smart_objects::SmartType_Map);
@@ -182,8 +202,8 @@ TEST_F(PerformInteractionRequestTest, OnTimeout_VR_GENERIC_ERROR) {
   MessageSharedPtr request_msg = CreateMessage(smart_objects::SmartType_Map);
   (*request_msg)[strings::msg_params][strings::interaction_mode] =
       mobile_apis::InteractionMode::BOTH;
-  std::shared_ptr<PerformInteractionRequest> command =
-      CreateCommand<PerformInteractionRequest>(request_msg);
+  std::shared_ptr<PerformInteractionRequestTestClass> command =
+      CreateCommand<PerformInteractionRequestTestClass>(request_msg);
   MockAppPtr mock_app;
 
   ON_CALL(app_mngr_, application(_)).WillByDefault(Return(mock_app));
@@ -192,6 +212,7 @@ TEST_F(PerformInteractionRequestTest, OnTimeout_VR_GENERIC_ERROR) {
   event.set_smart_object(*response_msg_vr);
 
   command->Init();
+  command->StartAwaitForInterfaces();
   command->on_event(event);
   MessageSharedPtr response_to_mobile =
       CreateMessage(smart_objects::SmartType_Map);
@@ -208,7 +229,7 @@ TEST_F(PerformInteractionRequestTest, OnTimeout_VR_GENERIC_ERROR) {
       mock_rpc_service_,
       ManageMobileCommand(_, am::commands::Command::CommandSource::SOURCE_SDL))
       .WillOnce(DoAll(SaveArg<0>(&vr_command_result), Return(true)));
-  command->onTimeOut();
+  command->OnTimeOut();
 
   EXPECT_EQ(
       (*vr_command_result)[strings::msg_params][strings::success].asBool(),
@@ -222,8 +243,8 @@ TEST_F(PerformInteractionRequestTest,
        OnEvent_BOTHMode_UIChoiceIdReceivedFirst) {
   MessageSharedPtr msg_from_mobile =
       CreateRequestMessage(mobile_apis::InteractionMode::BOTH);
-  std::shared_ptr<PerformInteractionRequest> command =
-      CreateCommand<PerformInteractionRequest>(msg_from_mobile);
+  std::shared_ptr<PerformInteractionRequestTestClass> command =
+      CreateCommand<PerformInteractionRequestTestClass>(msg_from_mobile);
 
   ASSERT_TRUE(command->Init());
 
@@ -244,6 +265,8 @@ TEST_F(PerformInteractionRequestTest,
       ManageMobileCommand(_, am::commands::Command::CommandSource::SOURCE_SDL))
       .WillOnce(DoAll(SaveArg<0>(&response_to_mobile), Return(true)));
 
+  command->StartAwaitForInterfaces();
+
   command->on_event(event_ui);
   command->on_event(event_vr);
 
@@ -256,8 +279,8 @@ TEST_F(PerformInteractionRequestTest,
        OnEvent_BOTHMode_VRChoiceIdReceivedFirst) {
   MessageSharedPtr msg_from_mobile =
       CreateRequestMessage(mobile_apis::InteractionMode::BOTH);
-  std::shared_ptr<PerformInteractionRequest> command =
-      CreateCommand<PerformInteractionRequest>(msg_from_mobile);
+  std::shared_ptr<PerformInteractionRequestTestClass> command =
+      CreateCommand<PerformInteractionRequestTestClass>(msg_from_mobile);
 
   ASSERT_TRUE(command->Init());
 
@@ -277,6 +300,8 @@ TEST_F(PerformInteractionRequestTest,
               ManageHMICommand(
                   _, am::commands::Command::CommandSource::SOURCE_SDL_TO_HMI))
       .WillOnce(DoAll(SaveArg<0>(&request_to_hmi), Return(true)));
+
+  command->StartAwaitForInterfaces();
 
   command->on_event(event_vr);
   EXPECT_EQ(hmi_apis::FunctionID::UI_ClosePopUp,
@@ -298,10 +323,12 @@ TEST_F(PerformInteractionRequestTest,
        OnEvent_VRHmiSendSuccess_UNSUPPORTED_RESOURCE) {
   MessageSharedPtr msg_from_mobile =
       CreateRequestMessage(mobile_apis::InteractionMode::VR_ONLY);
-  std::shared_ptr<PerformInteractionRequest> command =
-      CreateCommand<PerformInteractionRequest>(msg_from_mobile);
+  std::shared_ptr<PerformInteractionRequestTestClass> command =
+      CreateCommand<PerformInteractionRequestTestClass>(msg_from_mobile);
 
   ASSERT_TRUE(command->Init());
+
+  command->StartAwaitForInterfaces();
 
   MockAppPtr mock_app;
   EXPECT_CALL(app_mngr_, application(_)).WillRepeatedly(Return(mock_app));
@@ -344,10 +371,12 @@ TEST_F(PerformInteractionRequestTest,
        OnEvent_UIHmiSendSuccess_UNSUPPORTED_RESOURCE) {
   MessageSharedPtr msg_from_mobile =
       CreateRequestMessage(mobile_apis::InteractionMode::VR_ONLY);
-  std::shared_ptr<PerformInteractionRequest> command =
-      CreateCommand<PerformInteractionRequest>(msg_from_mobile);
+  std::shared_ptr<PerformInteractionRequestTestClass> command =
+      CreateCommand<PerformInteractionRequestTestClass>(msg_from_mobile);
 
   ASSERT_TRUE(command->Init());
+
+  command->StartAwaitForInterfaces();
 
   MockAppPtr mock_app;
   EXPECT_CALL(app_mngr_, application(_)).WillRepeatedly(Return(mock_app));
@@ -387,10 +416,13 @@ TEST_F(
 
   MessageSharedPtr msg_from_mobile =
       CreateRequestMessage(mobile_apis::InteractionMode::VR_ONLY);
-  std::shared_ptr<PerformInteractionRequest> command =
-      CreateCommand<PerformInteractionRequest>(msg_from_mobile);
+  std::shared_ptr<PerformInteractionRequestTestClass> command =
+      CreateCommand<PerformInteractionRequestTestClass>(msg_from_mobile);
 
   ASSERT_TRUE(command->Init());
+
+  command->StartAwaitForInterfaces();
+  command->StartAwaitForInterfaces();
 
   MockAppPtr mock_app;
   EXPECT_CALL(app_mngr_, application(_)).WillRepeatedly(Return(mock_app));
@@ -429,10 +461,12 @@ TEST_F(
 
   auto msg_from_mobile =
       CreateRequestMessage(mobile_apis::InteractionMode::BOTH);
-  std::shared_ptr<PerformInteractionRequest> command =
-      CreateCommand<PerformInteractionRequest>(msg_from_mobile);
+  std::shared_ptr<PerformInteractionRequestTestClass> command =
+      CreateCommand<PerformInteractionRequestTestClass>(msg_from_mobile);
 
   ASSERT_TRUE(command->Init());
+
+  command->StartAwaitForInterfaces();
 
   MessageSharedPtr response_msg_vr =
       CreateHMIResponseMessage(hmi_apis::Common_Result::UNSUPPORTED_RESOURCE,
@@ -478,10 +512,12 @@ TEST_F(
 
   MessageSharedPtr msg_from_mobile =
       CreateRequestMessage(mobile_apis::InteractionMode::BOTH);
-  std::shared_ptr<PerformInteractionRequest> command =
-      CreateCommand<PerformInteractionRequest>(msg_from_mobile);
+  std::shared_ptr<PerformInteractionRequestTestClass> command =
+      CreateCommand<PerformInteractionRequestTestClass>(msg_from_mobile);
 
   ASSERT_TRUE(command->Init());
+
+  command->StartAwaitForInterfaces();
 
   MessageSharedPtr response_msg_vr = CreateHMIResponseMessageWithChoiceID(
       hmi_apis::Common_Result::SUCCESS, "", kVrChoiceID);
@@ -526,10 +562,12 @@ TEST_F(
 
   auto msg_from_mobile =
       CreateRequestMessage(mobile_apis::InteractionMode::VR_ONLY);
-  std::shared_ptr<PerformInteractionRequest> command =
-      CreateCommand<PerformInteractionRequest>(msg_from_mobile);
+  std::shared_ptr<PerformInteractionRequestTestClass> command =
+      CreateCommand<PerformInteractionRequestTestClass>(msg_from_mobile);
 
   ASSERT_TRUE(command->Init());
+
+  command->StartAwaitForInterfaces();
 
   MessageSharedPtr response_msg_vr = CreateHMIResponseMessage(
       hmi_apis::Common_Result::WARNINGS, "WARNING MESSAGE");
@@ -574,10 +612,12 @@ TEST_F(
 
   auto msg_from_mobile =
       CreateRequestMessage(mobile_apis::InteractionMode::BOTH);
-  std::shared_ptr<PerformInteractionRequest> command =
-      CreateCommand<PerformInteractionRequest>(msg_from_mobile);
+  std::shared_ptr<PerformInteractionRequestTestClass> command =
+      CreateCommand<PerformInteractionRequestTestClass>(msg_from_mobile);
 
   ASSERT_TRUE(command->Init());
+
+  command->StartAwaitForInterfaces();
 
   MessageSharedPtr response_msg_vr =
       CreateHMIResponseMessage(hmi_apis::Common_Result::SUCCESS, "");
@@ -622,10 +662,12 @@ TEST_F(
 
   auto msg_from_mobile =
       CreateRequestMessage(mobile_apis::InteractionMode::BOTH);
-  std::shared_ptr<PerformInteractionRequest> command =
-      CreateCommand<PerformInteractionRequest>(msg_from_mobile);
+  std::shared_ptr<PerformInteractionRequestTestClass> command =
+      CreateCommand<PerformInteractionRequestTestClass>(msg_from_mobile);
 
   ASSERT_TRUE(command->Init());
+
+  command->StartAwaitForInterfaces();
 
   MessageSharedPtr response_msg_vr = CreateHMIResponseMessage(
       hmi_apis::Common_Result::UNSUPPORTED_RESOURCE, "VR error message");

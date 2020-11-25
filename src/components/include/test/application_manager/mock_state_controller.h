@@ -113,6 +113,7 @@ class MockStateController : public am::StateController {
   MOCK_METHOD2(DeactivateApp,
                void(am::ApplicationSharedPtr app,
                     const am::WindowID window_id));
+  MOCK_METHOD1(OnTimeOutActivateAppRequest, void(uint32_t hmi_app_id));
   MOCK_METHOD0(GetPostponedActivationController,
                application_manager::PostponedActivationController&());
 };

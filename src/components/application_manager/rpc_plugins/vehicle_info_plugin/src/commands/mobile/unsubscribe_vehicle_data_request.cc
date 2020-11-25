@@ -52,11 +52,11 @@ SDL_CREATE_LOG_VARIABLE("Commands")
 UnsubscribeVehicleDataRequest::UnsubscribeVehicleDataRequest(
     const application_manager::commands::MessageSharedPtr& message,
     const VehicleInfoCommandParams& params)
-    : CommandRequestImpl(message,
-                         params.application_manager_,
-                         params.rpc_service_,
-                         params.hmi_capabilities_,
-                         params.policy_handler_)
+    : RequestFromMobileImpl(message,
+                            params.application_manager_,
+                            params.rpc_service_,
+                            params.hmi_capabilities_,
+                            params.policy_handler_)
     , custom_vehicle_data_manager_(params.custom_vehicle_data_manager_) {}
 
 UnsubscribeVehicleDataRequest::~UnsubscribeVehicleDataRequest() {}
@@ -189,7 +189,7 @@ void UnsubscribeVehicleDataRequest::on_event(const event_engine::Event& event) {
   EndAwaitForInterface(HmiInterfaces::HMI_INTERFACE_VehicleInfo);
 
   ApplicationSharedPtr app =
-      application_manager_.application(CommandRequestImpl::connection_key());
+      application_manager_.application(RequestFromMobileImpl::connection_key());
 
   if (!app) {
     SDL_LOG_ERROR("NULL pointer.");
