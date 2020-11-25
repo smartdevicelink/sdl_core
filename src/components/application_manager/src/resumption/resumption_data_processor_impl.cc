@@ -331,7 +331,8 @@ void ResumptionDataProcessorImpl::HandleOnTimeOut(
   ProcessResponseFromHMI(*error_response, function_id, corr_id);
 }
 
-void ResumptionDataProcessorImpl::on_event(const event_engine::Event& event) {
+void ResumptionDataProcessorImpl::HandleOnEvent(
+    const event_engine::Event& event) {
   SDL_LOG_AUTO_TRACE();
   SDL_LOG_DEBUG(
       "Handling response message from HMI "

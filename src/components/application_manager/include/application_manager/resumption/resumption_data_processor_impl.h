@@ -79,7 +79,11 @@ class ResumptionDataProcessorImpl
                smart_objects::SmartObject& saved_app,
                ResumeCtrl::ResumptionCallBack callback) override;
 
-  void on_event(const app_mngr::event_engine::Event& event) override;
+  /**
+   * @brief Event, that raised if application get resumption response from HMI
+   * @param event : event object, that contains smart_object with HMI message
+   */
+  void HandleOnEvent(const app_mngr::event_engine::Event& event) OVERRIDE;
 
   void HandleOnTimeOut(const uint32_t correlation_id,
                        const hmi_apis::FunctionID::eType function_id) override;

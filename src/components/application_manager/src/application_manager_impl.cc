@@ -173,7 +173,7 @@ ApplicationManagerImpl::ApplicationManagerImpl(
     , connection_handler_(NULL)
     , policy_handler_(new policy::PolicyHandler(policy_settings, *this))
     , protocol_handler_(NULL)
-    , request_ctrl_(am_settings)
+    , request_ctrl_(am_settings, event_dispatcher_)
     , hmi_so_factory_(NULL)
     , mobile_so_factory_(NULL)
     , hmi_capabilities_(new HMICapabilitiesImpl(*this))
@@ -4975,6 +4975,22 @@ void ApplicationManagerImpl::ChangeAppsHMILevel(
   } else {
     SDL_LOG_WARN("Redundant changing HMI level: " << level);
   }
+}
+
+bool ApplicationManagerImpl::RetainRequestInstance(
+    const uint32_t connection_key, const uint32_t correlation_id) {
+  return request_ctrl_.RetainRequestInstance(connection_key, correlation_id);
+}
+
+void ApplicationManagerImpl::RemoveRetainedRequest(
+    const uint32_t connection_key, const uint32_t correlation_id) {
+  request_ctrl_.RemoveRetainedRequest(connection_key, correlation_id);
+}
+
+bool ApplicationManagerImpl::IsStillWaitingForResponse(
+    const uint32_t connection_key, const uint32_t correlation_id) const {
+  return request_ctrl_.IsStillWaitingForResponse(connection_key,
+                                                 correlation_id);
 }
 
 }  // namespace application_manager

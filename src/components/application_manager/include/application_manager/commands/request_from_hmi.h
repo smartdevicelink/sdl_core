@@ -33,7 +33,7 @@
 #ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_REQUEST_FROM_HMI_H_
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_REQUEST_FROM_HMI_H_
 
-#include "application_manager/commands/command_impl.h"
+#include "application_manager/commands/command_request_impl.h"
 #include "interfaces/HMI_API.h"
 #include "smart_objects/smart_object.h"
 
@@ -43,7 +43,7 @@ namespace commands {
 
 namespace ns_smart = ns_smart_device_link::ns_smart_objects;
 
-class RequestFromHMI : public CommandImpl, public event_engine::EventObserver {
+class RequestFromHMI : public CommandRequestImpl {
  public:
   RequestFromHMI(const MessageSharedPtr& message,
                  ApplicationManager& application_manager,
@@ -54,8 +54,11 @@ class RequestFromHMI : public CommandImpl, public event_engine::EventObserver {
   virtual bool Init();
   virtual bool CleanUp();
   virtual void Run();
-  virtual void on_event(const event_engine::Event& event);
+
+  void on_event(const event_engine::Event& event);
   void on_event(const event_engine::MobileEvent& event) OVERRIDE;
+  void OnTimeOut() OVERRIDE;
+
   /**
    * @brief SendResponse allows to send response to hmi
    * @param correlation_id the correlation id for the rfesponse.

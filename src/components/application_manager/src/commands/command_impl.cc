@@ -37,16 +37,6 @@
 #include "application_manager/message_helper.h"
 
 namespace application_manager {
-
-namespace {
-struct AppExtensionPredicate {
-  AppExtensionUID uid;
-  bool operator()(const ApplicationSharedPtr app) {
-    return app ? (app->QueryInterface(uid).use_count() != 0) : false;
-  }
-};
-}  // namespace
-
 namespace commands {
 
 SDL_CREATE_LOG_VARIABLE("Commands")
@@ -86,6 +76,8 @@ bool CommandImpl::CleanUp() {
 
 void CommandImpl::Run() {}
 
+void CommandImpl::OnUpdateTimeOut() {}
+
 uint32_t CommandImpl::default_timeout() const {
   return default_timeout_;
 }
@@ -111,6 +103,8 @@ uint32_t CommandImpl::connection_key() const {
   return (*message_)[strings::params][strings::connection_key].asUInt();
 }
 
+void CommandImpl::HandleTimeOut() {}
+
 void CommandImpl::set_warning_info(const std::string info) {
   warning_info_ = info;
 }
@@ -118,8 +112,6 @@ void CommandImpl::set_warning_info(const std::string info) {
 std::string CommandImpl::warning_info() const {
   return warning_info_;
 }
-
-void CommandImpl::onTimeOut() {}
 
 bool CommandImpl::AllowedToTerminate() {
   return allowed_to_terminate_;

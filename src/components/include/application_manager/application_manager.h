@@ -672,6 +672,36 @@ class ApplicationManager {
                                 const uint32_t corr_id,
                                 const int32_t function_id) = 0;
 
+  /**
+   * @brief RetainRequestInstance retains request instance by its
+   * connection+correlation key
+   * @param connection_key connection key of application
+   * @param correlation_id correlation id of request
+   * @return true if request was rerained. false if the request with such
+   * connection+correlation key was not found
+   */
+  virtual bool RetainRequestInstance(const uint32_t connection_key,
+                                     const uint32_t correlation_id) = 0;
+
+  /**
+   * @brief RemoveRetainedRequest removes request instance retained before
+   * @param connection_key connection key of application
+   * @param correlation_id correlation id of request
+   */
+  virtual void RemoveRetainedRequest(const uint32_t connection_key,
+                                     const uint32_t correlation_id) = 0;
+
+  /**
+   * @brief IsStillWaitingForResponse check if request is still waiting for
+   * response
+   * @param connection_key connection key of application
+   * @param correlation_id correlation id of request
+   * @return true if request is still waiting for response, otherwise returns
+   * false
+   */
+  virtual bool IsStillWaitingForResponse(
+      const uint32_t connection_key, const uint32_t correlation_id) const = 0;
+
   /*
    * @brief Closes application by id
    *
