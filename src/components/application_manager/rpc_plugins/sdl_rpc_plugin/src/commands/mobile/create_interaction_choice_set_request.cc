@@ -32,6 +32,7 @@
  */
 
 #include "sdl_rpc_plugin/commands/mobile/create_interaction_choice_set_request.h"
+
 #include <algorithm>
 #include <cstring>
 #include <string>
@@ -58,17 +59,16 @@ CreateInteractionChoiceSetRequest::CreateInteractionChoiceSetRequest(
     rpc_service::RPCService& rpc_service,
     HMICapabilities& hmi_capabilities,
     policy::PolicyHandlerInterface& policy_handler)
-    : CommandRequestImpl(message,
-                         application_manager,
-                         rpc_service,
-                         hmi_capabilities,
-                         policy_handler)
+    : RequestFromMobileImpl(message,
+                            application_manager,
+                            rpc_service,
+                            hmi_capabilities,
+                            policy_handler)
     , choice_set_id_(0)
     , expected_chs_count_(0)
     , received_chs_count_(0)
     , should_send_warnings_(false)
-    , error_from_hmi_(false)
-    , is_timed_out_(false) {}
+    , error_from_hmi_(false) {}
 
 CreateInteractionChoiceSetRequest::~CreateInteractionChoiceSetRequest() {
   SDL_LOG_AUTO_TRACE();
@@ -406,13 +406,13 @@ void CreateInteractionChoiceSetRequest::on_event(
   }
 }
 
-void CreateInteractionChoiceSetRequest::onTimeOut() {
+void CreateInteractionChoiceSetRequest::OnTimeOut() {
   SDL_LOG_AUTO_TRACE();
 
   if (!error_from_hmi_) {
-    SendResponse(false, mobile_apis::Result::GENERIC_ERROR);
+    RequestFromMobileImpl::OnTimeOut();
   }
-  CommandRequestImpl::onTimeOut();
+
   DeleteChoices();
 
   auto& resume_ctrl = application_manager_.resume_controller();
@@ -421,10 +421,6 @@ void CreateInteractionChoiceSetRequest::onTimeOut() {
       correlation_id(),
       static_cast<hmi_apis::FunctionID::eType>(function_id()));
 
-  // We have to keep request alive until receive all responses from HMI
-  // according to SDLAQ-CRS-2976
-  sync_primitives::AutoLock timeout_lock_(is_timed_out_lock_);
-  is_timed_out_ = true;
   application_manager_.TerminateRequest(
       connection_key(), correlation_id(), function_id());
 }

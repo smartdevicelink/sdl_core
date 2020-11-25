@@ -50,8 +50,7 @@ UIIsReadyRequest::UIIsReadyRequest(
                    application_manager,
                    rpc_service,
                    hmi_capabilities,
-                   policy_handle)
-    , EventObserver(application_manager.event_dispatcher()) {}
+                   policy_handle) {}
 
 UIIsReadyRequest::~UIIsReadyRequest() {}
 
@@ -89,7 +88,7 @@ void UIIsReadyRequest::on_event(const event_engine::Event& event) {
   }
 }
 
-void UIIsReadyRequest::onTimeOut() {
+void UIIsReadyRequest::OnTimeOut() {
   // Note(dtrunov): According to new requirment APPLINK-27956
   RequestInterfaceCapabilities(hmi_interface::ui);
 }

@@ -22,7 +22,8 @@ class RCPendingResumptionHandler : public resumption::PendingResumptionHandler {
       application_manager::ApplicationManager& application_manager,
       rc_rpc_plugin::InteriorDataCache& interior_data_cache);
 
-  void on_event(const application_manager::event_engine::Event& event) override;
+  void HandleOnEvent(
+      const application_manager::event_engine::Event& event) override;
 
   void HandleResumptionSubscriptionRequest(
       application_manager::AppExtension& extension,

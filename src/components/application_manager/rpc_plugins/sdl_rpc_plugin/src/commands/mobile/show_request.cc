@@ -52,11 +52,11 @@ ShowRequest::ShowRequest(
     app_mngr::rpc_service::RPCService& rpc_service,
     app_mngr::HMICapabilities& hmi_capabilities,
     policy::PolicyHandlerInterface& policy_handler)
-    : CommandRequestImpl(message,
-                         application_manager,
-                         rpc_service,
-                         hmi_capabilities,
-                         policy_handler)
+    : RequestFromMobileImpl(message,
+                            application_manager,
+                            rpc_service,
+                            hmi_capabilities,
+                            policy_handler)
     , core_result_code_(mobile_apis::Result::INVALID_ENUM)
     , current_window_id_(mobile_apis::PredefinedWindows::DEFAULT_WINDOW)
     , template_config_(smart_objects::SmartType::SmartType_Null)

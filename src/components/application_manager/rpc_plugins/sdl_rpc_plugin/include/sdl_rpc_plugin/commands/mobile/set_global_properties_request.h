@@ -33,8 +33,9 @@
 #ifndef SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_MOBILE_SET_GLOBAL_PROPERTIES_REQUEST_H_
 #define SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_MOBILE_SET_GLOBAL_PROPERTIES_REQUEST_H_
 #include <string>
+
 #include "application_manager/application.h"
-#include "application_manager/commands/command_request_impl.h"
+#include "application_manager/commands/request_from_mobile_impl.h"
 #include "utils/macro.h"
 
 namespace sdl_rpc_plugin {
@@ -46,7 +47,7 @@ namespace commands {
  * @brief Register app interface request  command class
  **/
 class SetGlobalPropertiesRequest
-    : public app_mngr::commands::CommandRequestImpl {
+    : public app_mngr::commands::RequestFromMobileImpl {
  public:
   /**
    * @brief SetGlobalPropertiesRequest class constructor
@@ -82,7 +83,7 @@ class SetGlobalPropertiesRequest
    */
   bool Init() FINAL;
 
-  void onTimeOut() OVERRIDE;
+  void OnTimeOut() OVERRIDE;
 
   /**
    * @brief Prepares total result for mobile according to three results:

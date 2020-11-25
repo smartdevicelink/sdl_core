@@ -53,8 +53,7 @@ UpdateDeviceListRequest::UpdateDeviceListRequest(
                    application_manager,
                    rpc_service,
                    hmi_capabilities,
-                   policy_handle)
-    , EventObserver(application_manager_.event_dispatcher()) {}
+                   policy_handle) {}
 
 UpdateDeviceListRequest::~UpdateDeviceListRequest() {}
 

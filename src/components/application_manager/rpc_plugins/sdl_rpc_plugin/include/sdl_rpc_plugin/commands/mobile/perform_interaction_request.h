@@ -38,6 +38,7 @@
 
 #include "application_manager/application.h"
 #include "application_manager/commands/command_request_impl.h"
+#include "application_manager/commands/request_from_mobile_impl.h"
 #include "utils/macro.h"
 
 namespace sdl_rpc_plugin {
@@ -51,7 +52,7 @@ namespace commands {
  * @brief PerformInteractionRequest command class
  **/
 class PerformInteractionRequest
-    : public app_mngr::commands::CommandRequestImpl {
+    : public app_mngr::commands::RequestFromMobileImpl {
  public:
   /**
    * @brief PerformInteractionRequest class constructor
@@ -79,19 +80,9 @@ class PerformInteractionRequest
    **/
   virtual void Run();
 
-  /**
-   * @brief Interface method that is called whenever new event received
-   *
-   * @param event The received event
-   */
-  virtual void on_event(const app_mngr::event_engine::Event& event);
+  void on_event(const app_mngr::event_engine::Event& event) FINAL;
 
-  /*
-   * @brief Function is called by RequestController when request execution time
-   * has exceed it's limit
-   *
-   */
-  virtual void onTimeOut();
+  void OnTimeOut() FINAL;
 
  protected:
   /**
@@ -277,11 +268,10 @@ class PerformInteractionRequest
       smart_objects::SmartObject& msg_param) const;
 
   mobile_apis::InteractionMode::eType interaction_mode_;
+
   std::int32_t ui_choice_id_received_;
   std::int32_t vr_choice_id_received_;
 
-  bool ui_response_received_;
-  bool vr_response_received_;
   bool app_pi_was_active_before_;
   static uint32_t pi_requests_count_;
   hmi_apis::Common_Result::eType vr_result_code_;

@@ -31,7 +31,9 @@
  */
 
 #include "rc_rpc_plugin/commands/rc_command_request.h"
+
 #include <sstream>
+
 #include "application_manager/hmi_interfaces.h"
 #include "application_manager/message_helper.h"
 #include "application_manager/policies/policy_handler_interface.h"
@@ -49,7 +51,7 @@ namespace commands {
 RCCommandRequest::RCCommandRequest(
     const app_mngr::commands::MessageSharedPtr& message,
     const RCCommandParams& params)
-    : application_manager::commands::CommandRequestImpl(
+    : application_manager::commands::RequestFromMobileImpl(
           message,
           params.application_manager_,
           params.rpc_service_,
@@ -74,18 +76,18 @@ bool RCCommandRequest::IsInterfaceAvailable(
   return app_mngr::HmiInterfaces::STATE_NOT_AVAILABLE != state;
 }
 
-void RCCommandRequest::onTimeOut() {
+void RCCommandRequest::OnTimeOut() {
   SDL_LOG_AUTO_TRACE();
   const std::string module_type = ModuleType();
   SetResourceState(module_type, ResourceState::FREE);
-  SendResponse(
-      false, mobile_apis::Result::GENERIC_ERROR, "Request timeout expired");
+
+  RequestFromMobileImpl::OnTimeOut();
 }
 
 bool RCCommandRequest::CheckDriverConsent() {
   SDL_LOG_AUTO_TRACE();
   app_mngr::ApplicationSharedPtr app =
-      application_manager_.application(CommandRequestImpl::connection_key());
+      application_manager_.application(connection_key());
 
   const std::string module_type = ModuleType();
   rc_rpc_plugin::TypeAccess access = CheckModule(module_type, app);
@@ -131,7 +133,7 @@ void RCCommandRequest::SendDisallowed(rc_rpc_plugin::TypeAccess access) {
 void RCCommandRequest::Run() {
   SDL_LOG_AUTO_TRACE();
   app_mngr::ApplicationSharedPtr app =
-      application_manager_.application(CommandRequestImpl::connection_key());
+      application_manager_.application(connection_key());
 
   if (!IsInterfaceAvailable(app_mngr::HmiInterfaces::HMI_INTERFACE_RC)) {
     SDL_LOG_WARN("HMI interface RC is not available");
@@ -224,19 +226,19 @@ void RCCommandRequest::on_event(const app_mngr::event_engine::Event& event) {
 void RCCommandRequest::ProcessAccessResponse(
     const app_mngr::event_engine::Event& event) {
   SDL_LOG_AUTO_TRACE();
-  app_mngr::ApplicationSharedPtr app =
-      application_manager_.application(CommandRequestImpl::connection_key());
+
+  auto app = application_manager_.application(connection_key());
   const std::string module_type = ModuleType();
   const std::string module_id = ModuleId();
+
   if (!app) {
     SDL_LOG_ERROR("NULL pointer.");
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED, "");
     return;
   }
 
-  const smart_objects::SmartObject& message = event.smart_object();
-
-  mobile_apis::Result::eType result_code =
+  const auto& message = event.smart_object();
+  const auto result_code =
       GetMobileResultCode(static_cast<hmi_apis::Common_Result::eType>(
           message[app_mngr::strings::params][app_mngr::hmi_response::code]
               .asUInt()));
@@ -323,7 +325,7 @@ void RCCommandRequest::SendGetUserConsent(
     const smart_objects::SmartObject& module_ids) {
   SDL_LOG_AUTO_TRACE();
   app_mngr::ApplicationSharedPtr app =
-      application_manager_.application(CommandRequestImpl::connection_key());
+      application_manager_.application(connection_key());
   DCHECK(app);
   smart_objects::SmartObject msg_params =
       smart_objects::SmartObject(smart_objects::SmartType_Map);

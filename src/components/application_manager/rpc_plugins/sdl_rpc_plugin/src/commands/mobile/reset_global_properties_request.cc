@@ -35,7 +35,6 @@
 
 #include "application_manager/application_impl.h"
 #include "application_manager/message_helper.h"
-
 #include "interfaces/HMI_API.h"
 #include "interfaces/MOBILE_API.h"
 
@@ -52,11 +51,11 @@ ResetGlobalPropertiesRequest::ResetGlobalPropertiesRequest(
     app_mngr::rpc_service::RPCService& rpc_service,
     app_mngr::HMICapabilities& hmi_capabilities,
     policy::PolicyHandlerInterface& policy_handler)
-    : CommandRequestImpl(message,
-                         application_manager,
-                         rpc_service,
-                         hmi_capabilities,
-                         policy_handler)
+    : RequestFromMobileImpl(message,
+                            application_manager,
+                            rpc_service,
+                            hmi_capabilities,
+                            policy_handler)
     , ui_result_(hmi_apis::Common_Result::INVALID_ENUM)
     , tts_result_(hmi_apis::Common_Result::INVALID_ENUM) {}
 
@@ -193,11 +192,6 @@ bool ResetGlobalPropertiesRequest::PrepareResponseParameters(
   }
 
   return result;
-}
-
-bool ResetGlobalPropertiesRequest::IsPendingResponseExist() {
-  return IsInterfaceAwaited(HmiInterfaces::HMI_INTERFACE_TTS) ||
-         IsInterfaceAwaited(HmiInterfaces::HMI_INTERFACE_UI);
 }
 
 }  // namespace commands

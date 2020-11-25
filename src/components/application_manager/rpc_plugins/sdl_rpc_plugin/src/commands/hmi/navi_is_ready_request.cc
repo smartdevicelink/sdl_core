@@ -49,8 +49,7 @@ NaviIsReadyRequest::NaviIsReadyRequest(
                    application_manager,
                    rpc_service,
                    hmi_capabilities,
-                   policy_handle)
-    , EventObserver(application_manager.event_dispatcher()) {}
+                   policy_handle) {}
 
 NaviIsReadyRequest::~NaviIsReadyRequest() {}
 

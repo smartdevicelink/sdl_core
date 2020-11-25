@@ -275,7 +275,7 @@ void ASGetAppServiceDataRequestFromHMI::on_event(
   }
 }
 
-void ASGetAppServiceDataRequestFromHMI::onTimeOut() {
+void ASGetAppServiceDataRequestFromHMI::OnTimeOut() {
   SDL_LOG_AUTO_TRACE();
   SendErrorResponse(correlation_id(),
                     hmi_apis::FunctionID::AppService_GetAppServiceData,

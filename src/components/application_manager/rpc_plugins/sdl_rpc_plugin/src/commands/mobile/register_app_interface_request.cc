@@ -134,11 +134,11 @@ RegisterAppInterfaceRequest::RegisterAppInterfaceRequest(
     app_mngr::rpc_service::RPCService& rpc_service,
     app_mngr::HMICapabilities& hmi_capabilities,
     policy::PolicyHandlerInterface& policy_handler)
-    : CommandRequestImpl(message,
-                         application_manager,
-                         rpc_service,
-                         hmi_capabilities,
-                         policy_handler)
+    : RequestFromMobileImpl(message,
+                            application_manager,
+                            rpc_service,
+                            hmi_capabilities,
+                            policy_handler)
     , are_tts_chunks_invalid_(false)
     , are_hmi_types_invalid_(false)
     , is_resumption_failed_(false)

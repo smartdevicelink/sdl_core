@@ -50,8 +50,7 @@ TTSIsReadyRequest::TTSIsReadyRequest(
                    application_manager,
                    rpc_service,
                    hmi_capabilities,
-                   policy_handler)
-    , EventObserver(application_manager.event_dispatcher()) {}
+                   policy_handler) {}
 
 TTSIsReadyRequest::~TTSIsReadyRequest() {}
 
@@ -90,7 +89,7 @@ void TTSIsReadyRequest::on_event(const event_engine::Event& event) {
   }
 }
 
-void TTSIsReadyRequest::onTimeOut() {
+void TTSIsReadyRequest::OnTimeOut() {
   // Note(dtrunov): According to new requirment  APPLINK-27956
   RequestInterfaceCapabilities(hmi_interface::tts);
 }

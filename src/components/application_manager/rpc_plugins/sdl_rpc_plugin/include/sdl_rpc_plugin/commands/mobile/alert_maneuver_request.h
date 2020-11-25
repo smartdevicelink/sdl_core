@@ -34,8 +34,8 @@
 #ifndef SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_MOBILE_ALERT_MANEUVER_REQUEST_H_
 #define SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_MOBILE_ALERT_MANEUVER_REQUEST_H_
 
-#include "application_manager/commands/command_request_impl.h"
 #include "application_manager/commands/pending.h"
+#include "application_manager/commands/request_from_mobile_impl.h"
 #include "interfaces/MOBILE_API.h"
 #include "utils/macro.h"
 
@@ -47,7 +47,7 @@ namespace commands {
 /**
  * @brief AlertManeuverRequest command class
  **/
-class AlertManeuverRequest : public app_mngr::commands::CommandRequestImpl {
+class AlertManeuverRequest : public app_mngr::commands::RequestFromMobileImpl {
  public:
   /**
    * @brief AlertManeuverRequest class constructor
@@ -70,12 +70,7 @@ class AlertManeuverRequest : public app_mngr::commands::CommandRequestImpl {
    **/
   virtual void Run();
 
-  /**
-   * @brief Interface method that is called whenever new event received
-   *
-   * @param event The received event
-   */
-  virtual void on_event(const app_mngr::event_engine::Event& event);
+  void on_event(const app_mngr::event_engine::Event& event) FINAL;
 
  private:
   /**

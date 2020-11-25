@@ -37,7 +37,6 @@
 
 #include "application_manager/application_impl.h"
 #include "application_manager/message_helper.h"
-
 #include "application_manager/policies/policy_handler.h"
 #include "smart_objects/smart_object.h"
 #include "utils/helpers.h"
@@ -55,11 +54,11 @@ AlertRequest::AlertRequest(
     rpc_service::RPCService& rpc_service,
     HMICapabilities& hmi_capabilities,
     policy::PolicyHandlerInterface& policy_handler)
-    : CommandRequestImpl(message,
-                         application_manager,
-                         rpc_service,
-                         hmi_capabilities,
-                         policy_handler)
+    : RequestFromMobileImpl(message,
+                            application_manager,
+                            rpc_service,
+                            hmi_capabilities,
+                            policy_handler)
     , awaiting_ui_alert_response_(false)
     , awaiting_tts_speak_response_(false)
     , awaiting_tts_stop_speaking_response_(false)
@@ -122,6 +121,18 @@ void AlertRequest::Run() {
   if (awaiting_tts_speak_response_) {
     SendSpeakRequest(app_id, tts_chunks_exists, length_tts_chunks);
   }
+}
+
+void AlertRequest::OnTimeOut() {
+  SDL_LOG_AUTO_TRACE();
+  if (false ==
+      (*message_)[strings::msg_params].keyExists(strings::soft_buttons)) {
+    RequestFromMobileImpl::OnTimeOut();
+    return;
+  }
+  SDL_LOG_INFO(
+      "Default timeout ignored. "
+      "AlertRequest with soft buttons wait timeout on HMI side");
 }
 
 void AlertRequest::on_event(const event_engine::Event& event) {
@@ -190,9 +201,11 @@ void AlertRequest::on_event(const event_engine::Event& event) {
     }
   }
 
-  if (HasHmiResponsesToWait()) {
+  if (IsPendingResponseExist()) {
+    SDL_LOG_DEBUG("Command is still waiting for HMI response");
     return;
   }
+
   mobile_apis::Result::eType result_code = mobile_apis::Result::INVALID_ENUM;
   std::string info;
   const bool result = PrepareResponseParameters(result_code, info);
@@ -464,7 +477,7 @@ bool AlertRequest::CheckStrings() {
   return true;
 }
 
-bool AlertRequest::HasHmiResponsesToWait() {
+bool AlertRequest::IsPendingResponseExist() {
   SDL_LOG_AUTO_TRACE();
   return awaiting_ui_alert_response_ || awaiting_tts_speak_response_ ||
          awaiting_tts_stop_speaking_response_;

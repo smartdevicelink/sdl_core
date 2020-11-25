@@ -31,6 +31,7 @@
  */
 
 #include "sdl_rpc_plugin/commands/hmi/navi_set_video_config_request.h"
+
 #include <string>
 #include <vector>
 
@@ -51,8 +52,7 @@ NaviSetVideoConfigRequest::NaviSetVideoConfigRequest(
                    application_manager,
                    rpc_service,
                    hmi_capabilities,
-                   policy_handle)
-    , EventObserver(application_manager.event_dispatcher()) {}
+                   policy_handle) {}
 
 NaviSetVideoConfigRequest::~NaviSetVideoConfigRequest() {}
 
@@ -132,7 +132,7 @@ void NaviSetVideoConfigRequest::on_event(const event_engine::Event& event) {
   }
 }
 
-void NaviSetVideoConfigRequest::onTimeOut() {
+void NaviSetVideoConfigRequest::OnTimeOut() {
   SDL_LOG_WARN("Timed out while waiting for SetVideoConfig response");
 
   ApplicationSharedPtr app =

@@ -50,8 +50,7 @@ VRIsReadyRequest::VRIsReadyRequest(
                    application_manager,
                    rpc_service,
                    hmi_capabilities,
-                   policy_handle)
-    , EventObserver(application_manager.event_dispatcher()) {}
+                   policy_handle) {}
 
 VRIsReadyRequest::~VRIsReadyRequest() {}
 
@@ -90,7 +89,7 @@ void VRIsReadyRequest::on_event(const event_engine::Event& event) {
   }
 }
 
-void VRIsReadyRequest::onTimeOut() {
+void VRIsReadyRequest::OnTimeOut() {
   // Note(dtrunov): According to new requirment APPLINK-27956
   RequestInterfaceCapabilities(hmi_interface::vr);
 }

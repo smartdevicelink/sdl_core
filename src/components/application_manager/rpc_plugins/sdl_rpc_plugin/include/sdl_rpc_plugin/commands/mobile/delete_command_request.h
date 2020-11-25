@@ -1,3 +1,4 @@
+
 /*
 
  Copyright (c) 2018, Ford Motor Company
@@ -36,7 +37,7 @@
 
 #include <string>
 
-#include "application_manager/commands/command_request_impl.h"
+#include "application_manager/commands/request_from_mobile_impl.h"
 #include "utils/macro.h"
 
 namespace sdl_rpc_plugin {
@@ -47,7 +48,7 @@ namespace commands {
 /**
  * @brief DeleteCommandRequest command class
  **/
-class DeleteCommandRequest : public app_mngr::commands::CommandRequestImpl {
+class DeleteCommandRequest : public app_mngr::commands::RequestFromMobileImpl {
  public:
   /**
    * @brief DeleteCommandRequest class constructor
@@ -70,11 +71,6 @@ class DeleteCommandRequest : public app_mngr::commands::CommandRequestImpl {
    **/
   void Run() FINAL;
 
-  /**
-   * @brief Interface method that is called whenever new event received
-   *
-   * @param event The received event
-   */
   void on_event(const app_mngr::event_engine::Event& event) FINAL;
 
   /**
@@ -86,13 +82,6 @@ class DeleteCommandRequest : public app_mngr::commands::CommandRequestImpl {
   DISALLOW_COPY_AND_ASSIGN(DeleteCommandRequest);
 
   /*
-   * @brief Check if there some not delivered hmi responses exist
-   *
-   * @return true if all responses received
-   */
-  bool IsPendingResponseExist();
-
-  /*
    * @brief Prepare result code and result for sending to mobile application
    * @param result_code contains result code for sending to mobile application
    * @param info contains info for mobile app.
@@ -100,12 +89,6 @@ class DeleteCommandRequest : public app_mngr::commands::CommandRequestImpl {
    */
   bool PrepareResponseParameters(mobile_apis::Result::eType& result_code,
                                  std::string& info);
-
-  bool is_ui_send_;
-  bool is_vr_send_;
-
-  bool is_ui_received_;
-  bool is_vr_received_;
 
   hmi_apis::Common_Result::eType ui_result_;
   hmi_apis::Common_Result::eType vr_result_;
