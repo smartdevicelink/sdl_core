@@ -912,9 +912,12 @@ TEST_F(MessageHelperTest,
   const uint32_t softbutton1 = 1u;
   const uint32_t softbutton2 = 2u;
   const uint32_t softbutton3 = 3u;
-  message_params[strings::soft_buttons][0] = softbutton1;
-  message_params[strings::soft_buttons][1] = softbutton2;
-  message_params[strings::soft_buttons][2] = softbutton3;
+  message_params[strings::soft_buttons][0][strings::soft_button_id] =
+      softbutton1;
+  message_params[strings::soft_buttons][1][strings::soft_button_id] =
+      softbutton2;
+  message_params[strings::soft_buttons][2][strings::soft_button_id] =
+      softbutton3;
 
   size_t function_id = 1;
   WindowSoftButtons window_buttons{

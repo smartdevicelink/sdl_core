@@ -3373,7 +3373,7 @@ void MessageHelper::SubscribeApplicationToSoftButton(
 
   auto& soft_buttons_so = message_params[strings::soft_buttons];
   for (const auto& softbutton : *(soft_buttons_so.asArray())) {
-    const auto button_id = softbutton.asUInt();
+    const auto button_id = softbutton[strings::soft_button_id].asUInt();
     soft_buttons.insert(button_id);
   }
 

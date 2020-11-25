@@ -1157,7 +1157,7 @@ void ApplicationImpl::SubscribeToSoftButtons(
     return;
   }
 
-  auto command_soft_buttons = cmd_softbuttonid_[cmd_id];
+  auto& command_soft_buttons = cmd_softbuttonid_[cmd_id];
 
   const auto window_id = window_softbuttons.first;
   auto find_window_id = [window_id](const WindowSoftButtons& window_buttons) {
@@ -1172,9 +1172,11 @@ void ApplicationImpl::SubscribeToSoftButtons(
     return;
   }
 
-  auto soft_buttons = subscribed_window_buttons->second;
-  soft_buttons.insert(window_softbuttons.second.begin(),
-                      window_softbuttons.second.end());
+  WindowSoftButtons new_window_soft_buttons = *subscribed_window_buttons;
+  new_window_soft_buttons.second.insert(window_softbuttons.second.begin(),
+                                        window_softbuttons.second.end());
+  command_soft_buttons.erase(subscribed_window_buttons);
+  command_soft_buttons.insert(new_window_soft_buttons);
 }
 
 struct FindSoftButtonId {
@@ -1241,7 +1243,7 @@ WindowID ApplicationImpl::GetSoftButtonWindowID(const uint32_t softbutton_id) {
                      find_window_softbutton_id);
 
     if (found_window_softbutton_id != window_softbuttons.end()) {
-      found_window_softbutton_id->first;
+      return found_window_softbutton_id->first;
     }
   }
 
