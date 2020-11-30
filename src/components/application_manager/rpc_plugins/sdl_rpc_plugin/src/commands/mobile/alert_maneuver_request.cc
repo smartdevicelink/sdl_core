@@ -236,7 +236,6 @@ bool AlertManeuverRequest::PrepareResponseParameters(
                   application_manager_.hmi_interfaces().GetInterfaceState(
                       HmiInterfaces::HMI_INTERFACE_TTS)))) {
     result_code = mobile_apis::Result::WARNINGS;
-    return_info = std::string("Unsupported phoneme type sent in a prompt");
     return result;
   }
   result_code =
