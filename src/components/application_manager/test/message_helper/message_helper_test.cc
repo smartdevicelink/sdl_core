@@ -888,8 +888,9 @@ TEST_F(MessageHelperTest,
   }
 }
 
-TEST_F(MessageHelperTest,
-       SubscribeApplicationToSoftButton_SoftbuttonsIsAnsent_DoesntCallFromApp) {
+TEST_F(
+    MessageHelperTest,
+    SubscribeApplicationToSoftButton_SoftbuttonsAreAbsent_DoesntCallFromApp) {
   MockApplicationSharedPtr appSharedPtr = std::make_shared<MockApplication>();
   smart_objects::SmartObject message_params;
   size_t function_id = 1;

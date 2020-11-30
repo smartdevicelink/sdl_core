@@ -170,14 +170,14 @@ typedef std::map<uint32_t, smart_objects::SmartObject*> PerformChoice;
 typedef std::map<uint32_t, PerformChoice> PerformChoiceSetMap;
 
 /**
- * @brief Defines id of SoftButtons related to a specified WindowID
- */
-typedef std::set<std::pair<WindowID, std::set<uint32_t> > > SoftButtonIDs;
-
-/**
  * @brief Defines id of SoftButtons for specified WindowID
  */
 typedef std::pair<WindowID, std::set<uint32_t> > WindowSoftButtons;
+
+/**
+ * @brief Defines id of SoftButtons related to a specified WindowID
+ */
+typedef std::set<WindowSoftButtons> SoftButtonIDs;
 
 /**
  * @brief Defines set of buttons subscription
@@ -966,7 +966,7 @@ class Application : public virtual InitialApplicationData,
    * Alert, Show, ScrollableMessage, ShowConstantTBT, AlertManeuver,
    * UpdateTurnList
    * @param cmd_id Unique command id from mobile API
-   * @param list of softbuttons were created by command.
+   * @param window_softbuttons list of softbuttons were created by command.
    */
   virtual void SubscribeToSoftButtons(
       int32_t cmd_id, const WindowSoftButtons& window_softbuttons) = 0;
