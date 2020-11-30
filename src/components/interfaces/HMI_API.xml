@@ -5954,12 +5954,10 @@
     <param name="nextTurnIcon" type="Common.Image" mandatory="false">
     </param>
     <param name="distanceToManeuver" type="Float" minvalue="0" maxvalue="1000000000" mandatory="true">
-      <description>Fraction of distance till next maneuver (from previous maneuver).</description>
-      <description>May be used to calculate progress bar.</description>
+      <description>Distance (in meters) until next maneuver. May be used to calculate progress bar.</description>
     </param>
     <param name="distanceToManeuverScale" type="Float" minvalue="0" maxvalue="1000000000" mandatory="true">
-      <description>Fraction of distance till next maneuver (starting from when AlertManeuver is triggered).</description>
-      <description>May be used to calculate progress bar.</description>
+      <description>Distance (in meters) from previous maneuver to next maneuver. May be used to calculate progress bar.</description>
     </param>
     <param name="maneuverComplete" type="Boolean" mandatory="false">
       <description>If and when a maneuver has completed while an AlertManeuver is active, SDL will send this value set to TRUE in order to clear the AlertManeuver overlay.</description>
