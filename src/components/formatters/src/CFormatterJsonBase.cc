@@ -95,7 +95,7 @@ void ns_smart_device_link::ns_json_handler::formatters::CFormatterJsonBase::
 
       for (std::set<std::string>::const_iterator key = keys.begin();
            key != keys.end();
-           key++) {
+           ++key) {
         Json::Value value(Json::nullValue);
 
         objToJsonValue(obj.getElement(*key), value);

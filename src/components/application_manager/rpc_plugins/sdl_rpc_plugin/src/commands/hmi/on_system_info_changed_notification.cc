@@ -40,6 +40,8 @@ using namespace application_manager;
 
 namespace commands {
 
+SDL_CREATE_LOG_VARIABLE("Commands")
+
 OnSystemInfoChangedNotification::OnSystemInfoChangedNotification(
     const application_manager::commands::MessageSharedPtr& message,
     ApplicationManager& application_manager,
@@ -55,12 +57,11 @@ OnSystemInfoChangedNotification::OnSystemInfoChangedNotification(
 OnSystemInfoChangedNotification::~OnSystemInfoChangedNotification() {}
 
 void OnSystemInfoChangedNotification::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   uint32_t lang_code =
       (*message_)[strings::msg_params][strings::language].asUInt();
-  const std::string language =
-      application_manager::MessageHelper::CommonLanguageToString(
-          static_cast<hmi_apis::Common_Language::eType>(lang_code));
+  const std::string language = application_manager::EnumToString(
+      static_cast<hmi_apis::Common_Language::eType>(lang_code));
 
   policy_handler_.OnSystemInfoChanged(language);
 }

@@ -89,6 +89,7 @@ class Application;
 class AppServiceManager;
 class StateControllerImpl;
 struct CommandParametersPermissions;
+struct ResetGlobalPropertiesResult;
 using policy::RPCParams;
 typedef std::vector<ApplicationSharedPtr> AppSharedPtrs;
 struct ApplicationsSorter {
@@ -352,11 +353,11 @@ class ApplicationManager {
 
   /**
    * @brief Checks if Application is subscribed for way points
-   * @param Application pointer
+   * @param Application reference
    * @return true if Application is subscribed for way points
    * otherwise false
    */
-  virtual bool IsAppSubscribedForWayPoints(ApplicationSharedPtr app) const = 0;
+  virtual bool IsAppSubscribedForWayPoints(Application& app) const = 0;
 
   /**
    * @brief Subscribe Application for way points
@@ -553,9 +554,24 @@ class ApplicationManager {
    */
   virtual void IviInfoUpdated(const std::string& vehicle_info, int value) = 0;
 
+  /**
+   * @brief Creates the application object for a newly registered application.
+   * This method performs initialiation of the app object by setting properties
+   * and starting the resumption process if applicable.
+   * @param request_for_registration Smart Object RegisterAppInterfaceRequest
+   * message received from mobile.
+   */
   virtual ApplicationSharedPtr RegisterApplication(
       const std::shared_ptr<smart_objects::SmartObject>&
           request_for_registration) = 0;
+  /**
+   * @brief Completes initialization process by adding the app to the
+   * applications accessor. App is now accessible by all other Core components.
+   * @param application ApplicationSharedPtr for newly registered application.
+   * @param connection_key Internal application id of registering application.
+   */
+  virtual void FinalizeAppRegistration(ApplicationSharedPtr application,
+                                       const uint32_t connection_key) = 0;
 
   virtual void SendUpdateAppList() = 0;
 
@@ -584,6 +600,26 @@ class ApplicationManager {
   virtual bool IsStopping() const = 0;
 
   virtual void RemoveAppFromTTSGlobalPropertiesList(const uint32_t app_id) = 0;
+
+  /**
+   * @brief Resets application's global properties to default values
+   * @param global_properties_ids container with global properties IDs to reset
+   * @param app_id ID of app which properties to reset
+   * @return struct with flags indicating success global properties reset
+   */
+  virtual ResetGlobalPropertiesResult ResetGlobalProperties(
+      const smart_objects::SmartObject& global_properties_ids,
+      const uint32_t app_id) = 0;
+
+  /**
+   * @brief Resets all application's global properties to default values
+   * returning struct that indicates which properties have been
+   * successfully reset.
+   * @param app_id ID of app which properties to reset
+   * @return struct with flags indicating global properties reset
+   */
+  virtual ResetGlobalPropertiesResult ResetAllApplicationGlobalProperties(
+      const uint32_t app_id) = 0;
 
   virtual mobile_apis::Result::eType SaveBinary(
       const std::vector<uint8_t>& binary_data,
@@ -792,11 +828,11 @@ class ApplicationManager {
    * @brief Callback calls when application starts/stops data streaming
    * @param app_id Streaming application id
    * @param service_type Streaming service type
-   * @param state Shows if streaming started or stopped
+   * @param new_state Defines new streaming state
    */
   virtual void OnAppStreaming(uint32_t app_id,
                               protocol_handler::ServiceType service_type,
-                              bool state) = 0;
+                              const Application::StreamingState new_state) = 0;
 
   /**
    * @brief CreateRegularState create regular HMI state for application
@@ -837,18 +873,24 @@ class ApplicationManager {
                                protocol_handler::ServiceType service_type) = 0;
 
   /**
-   * @brief Called when application completes streaming configuration
+   * @brief Called when application successfully completes streaming
+   * configuration
    * @param app_id Streaming application id
    * @param service_type Streaming service type
-   * @param result true if configuration is successful, false otherwise
-   * @param rejected_params list of rejected parameters' name. Valid
-   *                        only when result is false.
    */
-  virtual void OnStreamingConfigured(
+  virtual void OnStreamingConfigurationSuccessful(
+      uint32_t app_id, protocol_handler::ServiceType service_type) = 0;
+
+  /**
+   * @brief Called when application fails streaming configuration
+   * @param app_id Streaming application id
+   * @param rejected_params list of rejected parameter names
+   * @param reason NACK reason
+   */
+  virtual void OnStreamingConfigurationFailed(
       uint32_t app_id,
-      protocol_handler::ServiceType service_type,
-      bool result,
-      std::vector<std::string>& rejected_params) = 0;
+      std::vector<std::string>& rejected_params,
+      const std::string& reason) = 0;
 
   virtual const ApplicationManagerSettings& get_settings() const = 0;
   // Extract the app ID to use internally based on the UseFullAppID .ini setting

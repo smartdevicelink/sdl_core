@@ -39,6 +39,8 @@ using namespace application_manager;
 
 namespace commands {
 
+SDL_CREATE_LOG_VARIABLE("Commands")
+
 VRGetSupportedLanguagesResponse::VRGetSupportedLanguagesResponse(
     const application_manager::commands::MessageSharedPtr& message,
     ApplicationManager& application_manager,
@@ -54,7 +56,7 @@ VRGetSupportedLanguagesResponse::VRGetSupportedLanguagesResponse(
 VRGetSupportedLanguagesResponse::~VRGetSupportedLanguagesResponse() {}
 
 void VRGetSupportedLanguagesResponse::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
 
   const hmi_apis::Common_Result::eType code =
       static_cast<hmi_apis::Common_Result::eType>(
@@ -71,8 +73,8 @@ void VRGetSupportedLanguagesResponse::Run() {
     std::vector<std::string> sections_to_update{hmi_response::languages};
     if (!hmi_capabilities_.SaveCachedCapabilitiesToFile(
             hmi_interface::vr, sections_to_update, message_->getSchema())) {
-      LOG4CXX_ERROR(
-          logger_, "Failed to save VR.GetSupportedLanguages response to cache");
+      SDL_LOG_ERROR(
+          "Failed to save VR.GetSupportedLanguages response to cache");
     }
   }
 }

@@ -82,15 +82,15 @@ class ButtonPressRequestTest
       : rc_capabilities_(std::make_shared<smart_objects::SmartObject>(
             smart_objects::SmartType_Map))
       , mock_app_(std::make_shared<NiceMock<MockApplication> >())
-      , rc_app_extention_(
-            std::make_shared<rc_rpc_plugin::RCAppExtension>(kModuleId)) {}
+      , rc_app_extension_(std::make_shared<rc_rpc_plugin::RCAppExtension>(
+            kModuleId, rc_plugin_, *mock_app_)) {}
 
   void SetUp() OVERRIDE {
     smart_objects::SmartObject control_caps((smart_objects::SmartType_Array));
     (*rc_capabilities_)[strings::kradioControlCapabilities] = control_caps;
     ON_CALL(app_mngr_, application(_)).WillByDefault(Return(mock_app_));
     ON_CALL(*mock_app_, QueryInterface(RCRPCPlugin::kRCPluginID))
-        .WillByDefault(Return(rc_app_extention_));
+        .WillByDefault(Return(rc_app_extension_));
     ON_CALL(app_mngr_, GetPolicyHandler())
         .WillByDefault(ReturnRef(mock_policy_handler_));
     ON_CALL(app_mngr_, hmi_capabilities())
@@ -143,7 +143,8 @@ class ButtonPressRequestTest
  protected:
   smart_objects::SmartObjectSPtr rc_capabilities_;
   std::shared_ptr<MockApplication> mock_app_;
-  std::shared_ptr<rc_rpc_plugin::RCAppExtension> rc_app_extention_;
+  RCRPCPlugin rc_plugin_;
+  std::shared_ptr<rc_rpc_plugin::RCAppExtension> rc_app_extension_;
   test::components::policy_test::MockPolicyHandlerInterface
       mock_policy_handler_;
   testing::NiceMock<rc_rpc_plugin_test::MockResourceAllocationManager>

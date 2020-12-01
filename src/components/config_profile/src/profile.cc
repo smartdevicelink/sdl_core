@@ -53,15 +53,13 @@
 namespace {
 #define LOG_UPDATED_VALUE(value, key, section)                              \
   {                                                                         \
-    LOG4CXX_INFO(logger_,                                                   \
-                 "Setting value '" << value << "' for key '" << key         \
+    SDL_LOG_INFO("Setting value '" << value << "' for key '" << key         \
                                    << "' in section '" << section << "'."); \
   }
 
 #define LOG_UPDATED_BOOL_VALUE(value, key, section)                            \
   {                                                                            \
-    LOG4CXX_INFO(logger_,                                                      \
-                 "Setting value '" << std::boolalpha << value << "' for key '" \
+    SDL_LOG_INFO("Setting value '" << std::boolalpha << value << "' for key '" \
                                    << key << "' in section '" << section       \
                                    << "'.");                                   \
   }
@@ -445,7 +443,7 @@ const char* kDefaultAOAFilterSerialNumber = "N000000";
 
 namespace profile {
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "Profile")
+SDL_CREATE_LOG_VARIABLE("Profile")
 
 Profile::Profile()
     : sdl_version_(kDefaultSDLVersion)
@@ -1247,7 +1245,7 @@ const std::string Profile::hmi_origin_id() const {
 }
 
 void Profile::UpdateValues() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
 
   // SDL version
   ReadStringValue(
@@ -1552,7 +1550,8 @@ void Profile::UpdateValues() {
                   kMediaManagerSection,
                   kNamedVideoPipePathKey);
 
-  named_video_pipe_path_ = app_storage_folder_ + "/" + named_video_pipe_path_;
+  named_video_pipe_path_ = app_storage_folder_ + "/" +
+                           std::string(named_video_pipe_path_, 0, NAME_MAX);
 
   LOG_UPDATED_VALUE(
       named_video_pipe_path_, kNamedVideoPipePathKey, kMediaManagerSection);
@@ -1563,7 +1562,8 @@ void Profile::UpdateValues() {
                   kMediaManagerSection,
                   kNamedAudioPipePathKey);
 
-  named_audio_pipe_path_ = app_storage_folder_ + "/" + named_audio_pipe_path_;
+  named_audio_pipe_path_ = app_storage_folder_ + "/" +
+                           std::string(named_audio_pipe_path_, 0, NAME_MAX);
 
   LOG_UPDATED_VALUE(
       named_audio_pipe_path_, kNamedAudioPipePathKey, kMediaManagerSection);
@@ -1572,7 +1572,8 @@ void Profile::UpdateValues() {
   ReadStringValue(
       &video_stream_file_, "", kMediaManagerSection, kVideoStreamFileKey);
 
-  video_stream_file_ = app_storage_folder_ + "/" + video_stream_file_;
+  video_stream_file_ =
+      app_storage_folder_ + "/" + std::string(video_stream_file_, 0, NAME_MAX);
 
   LOG_UPDATED_VALUE(
       video_stream_file_, kVideoStreamFileKey, kMediaManagerSection);
@@ -1581,7 +1582,8 @@ void Profile::UpdateValues() {
   ReadStringValue(
       &audio_stream_file_, "", kMediaManagerSection, kAudioStreamFileKey);
 
-  audio_stream_file_ = app_storage_folder_ + "/" + audio_stream_file_;
+  audio_stream_file_ =
+      app_storage_folder_ + "/" + std::string(audio_stream_file_, 0, NAME_MAX);
 
   LOG_UPDATED_VALUE(
       audio_stream_file_, kAudioStreamFileKey, kMediaManagerSection);
@@ -1737,8 +1739,7 @@ void Profile::UpdateValues() {
   help_prompt_.clear();
   std::string help_prompt_value;
   if (ReadValue(&help_prompt_value, kGlobalPropertiesSection, kHelpPromptKey)) {
-    char* str = NULL;
-    str = strtok(const_cast<char*>(help_prompt_value.c_str()), ",");
+    char* str = strtok(const_cast<char*>(help_prompt_value.c_str()), ",");
     while (str != NULL) {
       // Default prompt should have delimiter included for each item
       const std::string prompt_item = std::string(str) + tts_delimiter_;
@@ -1757,8 +1758,7 @@ void Profile::UpdateValues() {
   std::string timeout_prompt_value;
   if (ReadValue(
           &timeout_prompt_value, kGlobalPropertiesSection, kTimeoutPromptKey)) {
-    char* str = NULL;
-    str = strtok(const_cast<char*>(timeout_prompt_value.c_str()), ",");
+    char* str = strtok(const_cast<char*>(timeout_prompt_value.c_str()), ",");
     while (str != NULL) {
       // Default prompt should have delimiter included for each item
       const std::string prompt_item = std::string(str) + tts_delimiter_;
@@ -1782,8 +1782,7 @@ void Profile::UpdateValues() {
   vr_commands_.clear();
   std::string vr_help_command_value;
   if (ReadValue(&vr_help_command_value, kVrCommandsSection, kHelpCommandKey)) {
-    char* str = NULL;
-    str = strtok(const_cast<char*>(vr_help_command_value.c_str()), ",");
+    char* str = strtok(const_cast<char*>(vr_help_command_value.c_str()), ",");
     while (str != NULL) {
       const std::string vr_item = str;
       vr_commands_.push_back(vr_item);
@@ -1865,8 +1864,8 @@ void Profile::UpdateValues() {
                       "",
                       kMainSection,
                       kSupportedDiagModesKey)) {
-    char* str = NULL;
-    str = strtok(const_cast<char*>(supported_diag_modes_value.c_str()), ",");
+    char* str =
+        strtok(const_cast<char*>(supported_diag_modes_value.c_str()), ",");
     while (str != NULL) {
       errno = 0;
       uint32_t user_value = strtol(str, NULL, 16);
@@ -2849,7 +2848,7 @@ bool Profile::StringToNumber(const std::string& input, uint64_t& output) const {
 
 bool Profile::IsRelativePath(const std::string& path) {
   if (path.empty()) {
-    LOG4CXX_ERROR(logger_, "Empty path passed.");
+    SDL_LOG_ERROR("Empty path passed.");
     return false;
   }
   return '/' != path[0];

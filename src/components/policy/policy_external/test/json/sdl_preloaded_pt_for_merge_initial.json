@@ -2056,7 +2056,8 @@
               "myKey",
               "prndl",
               "rpm",
-              "steeringWheelAngle"
+              "steeringWheelAngle",
+              "handsOffSteering"
             ]
           },
           "OnVehicleData" :
@@ -2071,7 +2072,8 @@
               "myKey",
               "prndl",
               "rpm",
-              "steeringWheelAngle"
+              "steeringWheelAngle",
+              "handsOffSteering"
             ]
           },
           "SubscribeVehicleData" :
@@ -2086,7 +2088,8 @@
               "myKey",
               "prndl",
               "rpm",
-              "steeringWheelAngle"
+              "steeringWheelAngle",
+              "handsOffSteering"
             ]
           },
           "UnsubscribeVehicleData" :
@@ -2101,7 +2104,8 @@
               "myKey",
               "prndl",
               "rpm",
-              "steeringWheelAngle"
+              "steeringWheelAngle",
+              "handsOffSteering"
             ]
           }
         },
@@ -2325,7 +2329,8 @@
               "odometer",
               "tirePressure",
               "vin",
-              "wiperStatus"
+              "wiperStatus",
+              "stabilityControlsStatus"
             ]
           },
           "OnVehicleData" :
@@ -2348,7 +2353,8 @@
               "odometer",
               "tirePressure",
               "vin",
-              "wiperStatus"
+              "wiperStatus",
+              "stabilityControlsStatus"
             ]
           },
           "SubscribeVehicleData" :
@@ -2370,7 +2376,8 @@
               "cloudAppVehicleID",
               "odometer",
               "tirePressure",
-              "wiperStatus"
+              "wiperStatus",
+              "stabilityControlsStatus"
             ]
           },
           "UnsubscribeVehicleData" :
@@ -2392,7 +2399,8 @@
               "cloudAppVehicleID",
               "odometer",
               "tirePressure",
-              "wiperStatus"
+              "wiperStatus",
+              "stabilityControlsStatus"
             ]
           }
         },
@@ -2420,9 +2428,20 @@
         "COMMUNICATION" : 6,
         "EMERGENCY" : 60,
         "NAVIGATION" : 15,
+        "PROJECTION" : 15,
         "NONE" : 0,
         "NORMAL" : 4,
         "VOICECOM" : 20
+      },
+      "subtle_notifications_per_minute_by_priority":
+      {
+        "COMMUNICATION": 15,
+        "EMERGENCY": 60,
+        "NAVIGATION": 20,
+        "PROJECTION": 20,
+        "NONE": 0,
+        "NORMAL": 10,
+        "VOICECOM": 30
       },
       "preloaded_date" : "2012-12-15",
       "preloaded_pt" : true,

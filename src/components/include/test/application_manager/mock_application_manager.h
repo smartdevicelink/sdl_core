@@ -155,9 +155,6 @@ class MockApplicationManager : public application_manager::ApplicationManager {
                void(const protocol_handler::ServiceType service_type,
                     const uint32_t app_id,
                     const bool streaming_data_available));
-  MOCK_METHOD1(
-      SendHMIStatusNotification,
-      void(const std::shared_ptr<application_manager::Application> app));
   MOCK_METHOD1(SendDriverDistractionState,
                void(application_manager::ApplicationSharedPtr app));
   MOCK_METHOD2(SendGetIconUrlNotifications,
@@ -223,6 +220,9 @@ class MockApplicationManager : public application_manager::ApplicationManager {
                application_manager::ApplicationSharedPtr(
                    const std::shared_ptr<smart_objects::SmartObject>&
                        request_for_registration));
+  MOCK_METHOD2(FinalizeAppRegistration,
+               void(application_manager::ApplicationSharedPtr,
+                    const uint32_t connection_key));
   MOCK_METHOD0(SendUpdateAppList, void());
   MOCK_METHOD2(MarkAppsGreyOut,
                void(const connection_handler::DeviceHandle handle,
@@ -232,6 +232,13 @@ class MockApplicationManager : public application_manager::ApplicationManager {
   MOCK_CONST_METHOD0(IsStopping, bool());
   MOCK_METHOD1(RemoveAppFromTTSGlobalPropertiesList,
                void(const uint32_t app_id));
+  MOCK_METHOD2(ResetGlobalProperties,
+               application_manager::ResetGlobalPropertiesResult(
+                   const smart_objects::SmartObject& global_properties_ids,
+                   const uint32_t app_id));
+  MOCK_METHOD1(
+      ResetAllApplicationGlobalProperties,
+      application_manager::ResetGlobalPropertiesResult(const uint32_t app_id));
   MOCK_METHOD4(
       SaveBinary,
       mobile_apis::Result::eType(const std::vector<uint8_t>& binary_data,
@@ -305,10 +312,11 @@ class MockApplicationManager : public application_manager::ApplicationManager {
   MOCK_METHOD1(OnAppUnauthorized, void(const uint32_t& app_id));
   MOCK_METHOD1(ActivateApplication,
                bool(application_manager::ApplicationSharedPtr app));
-  MOCK_METHOD3(OnAppStreaming,
-               void(uint32_t app_id,
-                    protocol_handler::ServiceType service_type,
-                    bool state));
+  MOCK_METHOD3(
+      OnAppStreaming,
+      void(uint32_t app_id,
+           protocol_handler::ServiceType service_type,
+           application_manager::Application::StreamingState new_state));
   MOCK_CONST_METHOD6(CreateRegularState,
                      application_manager::HmiStatePtr(
                          application_manager::ApplicationSharedPtr app,
@@ -342,7 +350,7 @@ class MockApplicationManager : public application_manager::ApplicationManager {
                     const smart_objects::SmartObject& display_capabilities));
   MOCK_CONST_METHOD1(IsAppSubscribedForWayPoints, bool(uint32_t));
   MOCK_CONST_METHOD1(IsAppSubscribedForWayPoints,
-                     bool(application_manager::ApplicationSharedPtr));
+                     bool(application_manager::Application& app));
   MOCK_METHOD1(SubscribeAppForWayPoints, void(uint32_t));
   MOCK_METHOD1(SubscribeAppForWayPoints,
                void(application_manager::ApplicationSharedPtr));
@@ -369,11 +377,13 @@ class MockApplicationManager : public application_manager::ApplicationManager {
   MOCK_METHOD0(OnTimerSendTTSGlobalProperties, void());
   MOCK_METHOD0(OnLowVoltage, void());
   MOCK_METHOD0(OnWakeUp, void());
-  MOCK_METHOD4(OnStreamingConfigured,
+  MOCK_METHOD2(OnStreamingConfigurationSuccessful,
                void(uint32_t app_id,
-                    protocol_handler::ServiceType service_type,
-                    bool result,
-                    std::vector<std::string>& rejected_params));
+                    protocol_handler::ServiceType service_type));
+  MOCK_METHOD3(OnStreamingConfigurationFailed,
+               void(uint32_t app_id,
+                    std::vector<std::string>& rejected_params,
+                    const std::string& reason));
   MOCK_METHOD2(ProcessReconnection,
                void(application_manager::ApplicationSharedPtr application,
                     const uint32_t connection_key));

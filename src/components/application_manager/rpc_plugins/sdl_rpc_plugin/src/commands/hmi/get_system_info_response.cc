@@ -37,6 +37,8 @@ namespace sdl_rpc_plugin {
 using namespace application_manager;
 namespace commands {
 
+SDL_CREATE_LOG_VARIABLE("Commands")
+
 GetSystemInfoResponse::GetSystemInfoResponse(
     const application_manager::commands::MessageSharedPtr& message,
     ApplicationManager& application_manager,
@@ -52,14 +54,14 @@ GetSystemInfoResponse::GetSystemInfoResponse(
 GetSystemInfoResponse::~GetSystemInfoResponse() {}
 
 void GetSystemInfoResponse::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   const auto code = static_cast<hmi_apis::Common_Result::eType>(
       (*message_)[strings::params][hmi_response::code].asInt());
 
   hmi_capabilities_.set_ccpu_version(policy_handler_.GetCCPUVersionFromPT());
 
   if (hmi_apis::Common_Result::SUCCESS != code) {
-    LOG4CXX_WARN(logger_, "GetSystemError returns an error code " << code);
+    SDL_LOG_WARN("GetSystemError returns an error code " << code);
     hmi_capabilities_.UpdateCachedCapabilities();
     policy_handler_.SetPreloadedPtFlag(false);
     return;
@@ -82,9 +84,10 @@ const SystemInfo GetSystemInfoResponse::GetSystemInfo() const {
   info.wers_country_code =
       (*message_)[strings::msg_params]["wersCountryCode"].asString();
 
-  const auto lang_code = static_cast<hmi_apis::Common_Language::eType>(
-      (*message_)[strings::msg_params]["language"].asUInt());
-  info.language = MessageHelper::CommonLanguageToString(lang_code);
+  const uint32_t lang_code =
+      (*message_)[strings::msg_params]["language"].asUInt();
+  info.language = application_manager::EnumToString(
+      static_cast<hmi_apis::Common_Language::eType>(lang_code));
 
   return info;
 }

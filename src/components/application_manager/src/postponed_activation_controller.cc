@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Ford Motor Company
+ * Copyright (c) 2020, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,26 +30,37 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_INCLUDE_TEST_PROTOCOL_HANDLER_MOCK_TELEMETRY_OBSERVER_H_
-#define SRC_COMPONENTS_INCLUDE_TEST_PROTOCOL_HANDLER_MOCK_TELEMETRY_OBSERVER_H_
+#include "application_manager/postponed_activation_controller.h"
 
-#include "gmock/gmock.h"
+namespace application_manager {
 
-#include "protocol_handler/telemetry_observer.h"
+SDL_CREATE_LOG_VARIABLE("StateControllerImpl")
 
-namespace test {
-namespace components {
-namespace protocol_handler_test {
+PostponedActivationController::PostponedActivationController()
+    : activate_app_list_lock_ptr_(std::make_shared<sync_primitives::Lock>()) {}
 
-class MockPHTelemetryObserver : public PHTelemetryObserver {
- public:
-  MOCK_METHOD2(StartMessageProcess,
-               void(uint32_t message_id,
-                    const date_time::TimeDuration& start_time));
-  MOCK_METHOD1(EndMessageProcess, void(std::shared_ptr<MessageMetric> m));
-};
+void PostponedActivationController::AddAppToActivate(uint32_t app_id,
+                                                     uint32_t corr_id) {
+  SDL_LOG_AUTO_TRACE();
+  sync_primitives::AutoLock lock(activate_app_list_lock_ptr_);
+  app_to_activate_.insert(std::pair<uint32_t, uint32_t>(app_id, corr_id));
+}
 
-}  // namespace protocol_handler_test
-}  // namespace components
-}  // namespace test
-#endif  // SRC_COMPONENTS_INCLUDE_TEST_PROTOCOL_HANDLER_MOCK_TELEMETRY_OBSERVER_H_
+uint32_t PostponedActivationController::GetPendingActivationCorrId(
+    uint32_t app_id) const {
+  SDL_LOG_AUTO_TRACE();
+  sync_primitives::AutoLock lock(activate_app_list_lock_ptr_);
+  auto it = app_to_activate_.find(app_id);
+  if (app_to_activate_.end() == it) {
+    return 0;
+  }
+  return it->second;
+}
+
+void PostponedActivationController::RemoveAppToActivate(uint32_t app_id) {
+  SDL_LOG_AUTO_TRACE();
+  sync_primitives::AutoLock lock(activate_app_list_lock_ptr_);
+  app_to_activate_.erase(app_id);
+}
+
+}  // namespace application_manager

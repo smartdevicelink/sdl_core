@@ -47,6 +47,7 @@
 #include "application_manager/mock_resume_ctrl.h"
 #include "application_manager/policies/mock_policy_handler_interface.h"
 #include "application_manager/resumption/resume_ctrl.h"
+#include "application_manager/resumption/resumption_data_processor.h"
 #include "application_manager/state_controller.h"
 #include "policy/usage_statistics/mock_statistics_manager.h"
 #include "resumption/last_state.h"
@@ -260,8 +261,8 @@ TEST_F(ApplicationImplTest, AddStates_RemoveNotLastNotFirstState) {
   app_impl->RemoveHMIState(kDefaultWindowId, state2->state_id());
   HmiStatePtr current_state = app_impl->CurrentHmiState(kDefaultWindowId);
   EXPECT_EQ(state3, current_state);
-  // HMI level is equal to parent hmi_level
-  EXPECT_EQ(HMILevel::HMI_FULL, current_state->hmi_level());
+  // HMI level is equal to state3 hmi_level
+  EXPECT_EQ(HMILevel::HMI_LIMITED, current_state->hmi_level());
   EXPECT_EQ(HmiState::STATE_ID_TTS_SESSION, current_state->state_id());
   EXPECT_EQ(state1, current_state->parent());
 }
@@ -270,10 +271,9 @@ TEST_F(ApplicationImplTest, AddStates_RemoveFirstState) {
   HmiStatePtr state1 = TestAddHmiState(HMILevel::HMI_FULL,
                                        HmiState::STATE_ID_PHONE_CALL,
                                        &ApplicationImpl::AddHMIState);
-  // Second state
-  TestAddHmiState(HMILevel::HMI_NONE,
-                  HmiState::STATE_ID_VIDEO_STREAMING,
-                  &ApplicationImpl::AddHMIState);
+  HmiStatePtr state2 = TestAddHmiState(HMILevel::HMI_NONE,
+                                       HmiState::STATE_ID_VIDEO_STREAMING,
+                                       &ApplicationImpl::AddHMIState);
   HmiStatePtr state3 = TestAddHmiState(HMILevel::HMI_LIMITED,
                                        HmiState::STATE_ID_TTS_SESSION,
                                        &ApplicationImpl::AddHMIState);
@@ -286,7 +286,7 @@ TEST_F(ApplicationImplTest, AddStates_RemoveFirstState) {
   // Last state does not have a parent
   EXPECT_EQ(HMILevel::HMI_LIMITED, current_state->hmi_level());
   EXPECT_EQ(HmiState::STATE_ID_TTS_SESSION, current_state->state_id());
-  EXPECT_EQ(nullptr, current_state->parent());
+  EXPECT_EQ(state2, current_state->parent());
 }
 
 TEST_F(ApplicationImplTest, SetRegularState_RemoveFirstState) {
@@ -307,7 +307,7 @@ TEST_F(ApplicationImplTest, SetRegularState_RemoveFirstState) {
   HmiStatePtr current_state = app_impl->CurrentHmiState(kDefaultWindowId);
   EXPECT_EQ(state3, current_state);
   // Last state has a parent
-  EXPECT_EQ(HMILevel::HMI_FULL, current_state->hmi_level());
+  EXPECT_EQ(HMILevel::HMI_LIMITED, current_state->hmi_level());
   EXPECT_EQ(HmiState::STATE_ID_TTS_SESSION, current_state->state_id());
   EXPECT_EQ(state2, current_state->parent());
 }
@@ -534,16 +534,16 @@ TEST_F(ApplicationImplTest, AreCommandLimitsExceeded_LimitFromPT) {
   EXPECT_CALL(policy_interface, GetPriority(policy_app_id, _))
       .WillRepeatedly(Return(false));
 
-  EXPECT_CALL(policy_interface, GetNotificationsNumber(_))
+  EXPECT_CALL(policy_interface, GetNotificationsNumber(_, false))
       .WillOnce(Return(cmd_limit));
   EXPECT_FALSE(app_impl->AreCommandLimitsExceeded(FunctionID::ReadDIDID,
                                                   TLimitSource::POLICY_TABLE));
 
-  EXPECT_CALL(policy_interface, GetNotificationsNumber(_))
+  EXPECT_CALL(policy_interface, GetNotificationsNumber(_, false))
       .WillOnce(Return(cmd_limit));
   EXPECT_FALSE(app_impl->AreCommandLimitsExceeded(FunctionID::GetVehicleDataID,
                                                   TLimitSource::POLICY_TABLE));
-  EXPECT_CALL(policy_interface, GetNotificationsNumber(_))
+  EXPECT_CALL(policy_interface, GetNotificationsNumber(_, false))
       .WillRepeatedly(Return(0));
   EXPECT_TRUE(app_impl->AreCommandLimitsExceeded(FunctionID::ReadDIDID,
                                                  TLimitSource::POLICY_TABLE));
@@ -597,6 +597,7 @@ TEST_F(ApplicationImplTest, ChangeSupportingAppHMIType_TypeNotNaviNotVoice) {
   EXPECT_FALSE(app_impl->is_navi());
   EXPECT_FALSE(app_impl->is_voice_communication_supported());
   EXPECT_FALSE(app_impl->mobile_projection_enabled());
+  EXPECT_FALSE(app_impl->webengine_projection_enabled());
 
   app_impl->set_app_types(type_media);
   app_impl->ChangeSupportingAppHMIType();
@@ -604,6 +605,7 @@ TEST_F(ApplicationImplTest, ChangeSupportingAppHMIType_TypeNotNaviNotVoice) {
   EXPECT_FALSE(app_impl->is_navi());
   EXPECT_FALSE(app_impl->is_voice_communication_supported());
   EXPECT_FALSE(app_impl->mobile_projection_enabled());
+  EXPECT_FALSE(app_impl->webengine_projection_enabled());
 }
 
 TEST_F(ApplicationImplTest, ChangeSupportingAppHMIType_TypeIsVoice) {
@@ -613,6 +615,7 @@ TEST_F(ApplicationImplTest, ChangeSupportingAppHMIType_TypeIsVoice) {
   EXPECT_FALSE(app_impl->is_navi());
   EXPECT_FALSE(app_impl->is_voice_communication_supported());
   EXPECT_FALSE(app_impl->mobile_projection_enabled());
+  EXPECT_FALSE(app_impl->webengine_projection_enabled());
 
   app_impl->set_app_types(type_comm);
   app_impl->ChangeSupportingAppHMIType();
@@ -620,6 +623,7 @@ TEST_F(ApplicationImplTest, ChangeSupportingAppHMIType_TypeIsVoice) {
   EXPECT_FALSE(app_impl->is_navi());
   EXPECT_TRUE(app_impl->is_voice_communication_supported());
   EXPECT_FALSE(app_impl->mobile_projection_enabled());
+  EXPECT_FALSE(app_impl->webengine_projection_enabled());
 }
 
 TEST_F(ApplicationImplTest, ChangeSupportingAppHMIType_TypeIsNavi) {
@@ -629,6 +633,7 @@ TEST_F(ApplicationImplTest, ChangeSupportingAppHMIType_TypeIsNavi) {
   EXPECT_FALSE(app_impl->is_navi());
   EXPECT_FALSE(app_impl->is_voice_communication_supported());
   EXPECT_FALSE(app_impl->mobile_projection_enabled());
+  EXPECT_FALSE(app_impl->webengine_projection_enabled());
 
   app_impl->set_app_types(type_navi);
   app_impl->ChangeSupportingAppHMIType();
@@ -636,6 +641,71 @@ TEST_F(ApplicationImplTest, ChangeSupportingAppHMIType_TypeIsNavi) {
   EXPECT_TRUE(app_impl->is_navi());
   EXPECT_FALSE(app_impl->is_voice_communication_supported());
   EXPECT_FALSE(app_impl->mobile_projection_enabled());
+  EXPECT_FALSE(app_impl->webengine_projection_enabled());
+}
+
+TEST_F(ApplicationImplTest, ChangeSupportingAppHMIType_TypeIsWebView) {
+  smart_objects::SmartObject app_types;
+  app_types[0] = mobile_apis::AppHMIType::WEB_VIEW;
+
+  EXPECT_FALSE(app_impl->is_navi());
+  EXPECT_FALSE(app_impl->is_voice_communication_supported());
+  EXPECT_FALSE(app_impl->mobile_projection_enabled());
+  EXPECT_FALSE(app_impl->webengine_projection_enabled());
+
+  app_impl->set_app_types(app_types);
+  app_impl->ChangeSupportingAppHMIType();
+
+  EXPECT_FALSE(app_impl->is_navi());
+  EXPECT_FALSE(app_impl->is_voice_communication_supported());
+  EXPECT_FALSE(app_impl->mobile_projection_enabled());
+  EXPECT_TRUE(app_impl->webengine_projection_enabled());
+}
+
+TEST_F(ApplicationImplTest,
+       ChangeSupportingAppHMIType_TypeFromWebViewToProjection) {
+  smart_objects::SmartObject app_types;
+  app_types[0] = mobile_apis::AppHMIType::WEB_VIEW;
+
+  EXPECT_FALSE(app_impl->mobile_projection_enabled());
+  EXPECT_FALSE(app_impl->webengine_projection_enabled());
+
+  app_impl->set_app_types(app_types);
+  app_impl->ChangeSupportingAppHMIType();
+
+  EXPECT_FALSE(app_impl->mobile_projection_enabled());
+  EXPECT_TRUE(app_impl->webengine_projection_enabled());
+
+  app_types[0] = mobile_apis::AppHMIType::PROJECTION;
+
+  app_impl->set_app_types(app_types);
+  app_impl->ChangeSupportingAppHMIType();
+
+  EXPECT_FALSE(app_impl->webengine_projection_enabled());
+  EXPECT_TRUE(app_impl->mobile_projection_enabled());
+}
+
+TEST_F(ApplicationImplTest,
+       ChangeSupportingAppHMIType_TypeFromProjectionToWebView) {
+  smart_objects::SmartObject app_types;
+  app_types[0] = mobile_apis::AppHMIType::PROJECTION;
+
+  EXPECT_FALSE(app_impl->mobile_projection_enabled());
+  EXPECT_FALSE(app_impl->webengine_projection_enabled());
+
+  app_impl->set_app_types(app_types);
+  app_impl->ChangeSupportingAppHMIType();
+
+  EXPECT_FALSE(app_impl->webengine_projection_enabled());
+  EXPECT_TRUE(app_impl->mobile_projection_enabled());
+
+  app_types[0] = mobile_apis::AppHMIType::WEB_VIEW;
+
+  app_impl->set_app_types(app_types);
+  app_impl->ChangeSupportingAppHMIType();
+
+  EXPECT_FALSE(app_impl->mobile_projection_enabled());
+  EXPECT_TRUE(app_impl->webengine_projection_enabled());
 }
 
 TEST_F(ApplicationImplTest, ChangeSupportingAppHMIType_TypeIsNaviAndVoice) {
@@ -647,6 +717,7 @@ TEST_F(ApplicationImplTest, ChangeSupportingAppHMIType_TypeIsNaviAndVoice) {
   EXPECT_FALSE(app_impl->is_navi());
   EXPECT_FALSE(app_impl->is_voice_communication_supported());
   EXPECT_FALSE(app_impl->mobile_projection_enabled());
+  EXPECT_FALSE(app_impl->webengine_projection_enabled());
 
   app_impl->set_app_types(app_types);
   app_impl->ChangeSupportingAppHMIType();
@@ -654,6 +725,7 @@ TEST_F(ApplicationImplTest, ChangeSupportingAppHMIType_TypeIsNaviAndVoice) {
   EXPECT_TRUE(app_impl->is_navi());
   EXPECT_TRUE(app_impl->is_voice_communication_supported());
   EXPECT_FALSE(app_impl->mobile_projection_enabled());
+  EXPECT_FALSE(app_impl->webengine_projection_enabled());
 }
 
 TEST_F(ApplicationImplTest,
@@ -667,6 +739,7 @@ TEST_F(ApplicationImplTest,
   EXPECT_FALSE(app_impl->is_navi());
   EXPECT_FALSE(app_impl->is_voice_communication_supported());
   EXPECT_FALSE(app_impl->mobile_projection_enabled());
+  EXPECT_FALSE(app_impl->webengine_projection_enabled());
 
   app_impl->set_app_types(app_types);
   app_impl->ChangeSupportingAppHMIType();
@@ -674,13 +747,14 @@ TEST_F(ApplicationImplTest,
   EXPECT_TRUE(app_impl->is_navi());
   EXPECT_TRUE(app_impl->is_voice_communication_supported());
   EXPECT_TRUE(app_impl->mobile_projection_enabled());
+  EXPECT_FALSE(app_impl->webengine_projection_enabled());
 }
 
 TEST_F(ApplicationImplTest, UpdateHash_AppMngrNotSuspended) {
   EXPECT_CALL(*MockMessageHelper::message_helper_mock(),
               SendHashUpdateNotification(app_id, _))
       .Times(1);
-  resumprion_test::MockResumeCtrl mock_resume_ctrl;
+  resumption_test::MockResumeCtrl mock_resume_ctrl;
   EXPECT_CALL(mock_application_manager_, resume_controller())
       .WillOnce(ReturnRef(mock_resume_ctrl));
   EXPECT_CALL(mock_resume_ctrl, is_suspended()).WillOnce(Return(false));
@@ -693,7 +767,7 @@ TEST_F(ApplicationImplTest, UpdateHash_AppMngrSuspended) {
   EXPECT_CALL(*MockMessageHelper::message_helper_mock(),
               SendHashUpdateNotification(app_id, _))
       .Times(0);
-  resumprion_test::MockResumeCtrl mock_resume_ctrl;
+  resumption_test::MockResumeCtrl mock_resume_ctrl;
   EXPECT_CALL(mock_application_manager_, resume_controller())
       .WillOnce(ReturnRef(mock_resume_ctrl));
   EXPECT_CALL(mock_resume_ctrl, is_suspended()).WillOnce(Return(true));
@@ -763,7 +837,6 @@ TEST_F(ApplicationImplTest, StartStreaming_StreamingApproved) {
 TEST_F(ApplicationImplTest, SuspendNaviStreaming) {
   protocol_handler::ServiceType type =
       protocol_handler::ServiceType::kMobileNav;
-  EXPECT_CALL(mock_application_manager_, OnAppStreaming(app_id, type, false));
   EXPECT_CALL(mock_application_manager_,
               ProcessOnDataStreamingNotification(type, app_id, false));
   app_impl->SuspendStreaming(type);
@@ -771,7 +844,6 @@ TEST_F(ApplicationImplTest, SuspendNaviStreaming) {
 
 TEST_F(ApplicationImplTest, SuspendAudioStreaming) {
   protocol_handler::ServiceType type = protocol_handler::ServiceType::kAudio;
-  EXPECT_CALL(mock_application_manager_, OnAppStreaming(app_id, type, false));
   EXPECT_CALL(mock_application_manager_,
               ProcessOnDataStreamingNotification(type, app_id, false));
   app_impl->SuspendStreaming(type);
@@ -780,12 +852,16 @@ TEST_F(ApplicationImplTest, SuspendAudioStreaming) {
 // TODO {AKozoriz} : Fix tests with streaming (APPLINK-19289)
 TEST_F(ApplicationImplTest, DISABLED_Suspend_WakeUpAudioStreaming) {
   protocol_handler::ServiceType type = protocol_handler::ServiceType::kAudio;
-  EXPECT_CALL(mock_application_manager_, OnAppStreaming(app_id, type, false));
+  EXPECT_CALL(
+      mock_application_manager_,
+      OnAppStreaming(app_id, type, Application::StreamingState::kSuspended));
   EXPECT_CALL(*MockMessageHelper::message_helper_mock(),
               SendOnDataStreaming(type, false, _));
   app_impl->SuspendStreaming(type);
 
-  EXPECT_CALL(mock_application_manager_, OnAppStreaming(app_id, type, true));
+  EXPECT_CALL(
+      mock_application_manager_,
+      OnAppStreaming(app_id, type, Application::StreamingState::kStarted));
   EXPECT_CALL(*MockMessageHelper::message_helper_mock(),
               SendOnDataStreaming(type, true, _));
   app_impl->WakeUpStreaming(type);
@@ -794,12 +870,16 @@ TEST_F(ApplicationImplTest, DISABLED_Suspend_WakeUpAudioStreaming) {
 TEST_F(ApplicationImplTest, DISABLED_Suspend_WakeUpNaviStreaming) {
   protocol_handler::ServiceType type =
       protocol_handler::ServiceType::kMobileNav;
-  EXPECT_CALL(mock_application_manager_, OnAppStreaming(app_id, type, false));
+  EXPECT_CALL(
+      mock_application_manager_,
+      OnAppStreaming(app_id, type, Application::StreamingState::kSuspended));
   EXPECT_CALL(*MockMessageHelper::message_helper_mock(),
               SendOnDataStreaming(type, false, _));
   app_impl->SuspendStreaming(type);
 
-  EXPECT_CALL(mock_application_manager_, OnAppStreaming(app_id, type, true));
+  EXPECT_CALL(
+      mock_application_manager_,
+      OnAppStreaming(app_id, type, Application::StreamingState::kStarted));
   EXPECT_CALL(*MockMessageHelper::message_helper_mock(),
               SendOnDataStreaming(type, true, _));
   app_impl->WakeUpStreaming(type);
@@ -811,7 +891,9 @@ TEST_F(ApplicationImplTest, StopStreaming_StreamingApproved) {
       protocol_handler::ServiceType::kMobileNav;
   app_impl->set_video_streaming_approved(true);
 
-  EXPECT_CALL(mock_application_manager_, OnAppStreaming(app_id, type, false));
+  EXPECT_CALL(
+      mock_application_manager_,
+      OnAppStreaming(app_id, type, Application::StreamingState::kStopped));
   EXPECT_CALL(mock_application_manager_,
               ProcessOnDataStreamingNotification(type, app_id, false));
   EXPECT_CALL(*MockMessageHelper::message_helper_mock(),
@@ -823,7 +905,9 @@ TEST_F(ApplicationImplTest, StopStreaming_StreamingApproved) {
   // Stop audio streaming
   app_impl->set_audio_streaming_approved(true);
   type = protocol_handler::ServiceType::kAudio;
-  EXPECT_CALL(mock_application_manager_, OnAppStreaming(app_id, type, false));
+  EXPECT_CALL(
+      mock_application_manager_,
+      OnAppStreaming(app_id, type, Application::StreamingState::kStopped));
   EXPECT_CALL(mock_application_manager_,
               ProcessOnDataStreamingNotification(type, app_id, false));
   EXPECT_CALL(*MockMessageHelper::message_helper_mock(),

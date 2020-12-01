@@ -6,7 +6,7 @@
 #include "rc_rpc_plugin/rc_rpc_plugin.h"
 
 namespace rc_rpc_plugin {
-CREATE_LOGGERPTR_GLOBAL(logger_, "RemoteControlModule");
+SDL_CREATE_LOG_VARIABLE("RemoteControlModule");
 
 const std::vector<std::string> RCHelpers::buttons_climate() {
   std::vector<std::string> data;
@@ -111,18 +111,28 @@ rc_rpc_types::ModuleIdConsentVector RCHelpers::FillModuleConsents(
 std::vector<std::string> RCHelpers::RetrieveModuleIds(
     const ns_smart_device_link::ns_smart_objects::SmartObject& moduleIds) {
   std::vector<std::string> module_ids;
-  for (const auto& module_id : (*moduleIds.asArray())) {
-    module_ids.push_back(module_id.asString());
-  }
+
+  std::transform((*moduleIds.asArray()).begin(),
+                 (*moduleIds.asArray()).end(),
+                 std::back_inserter(module_ids),
+                 [](const smart_objects::SmartObject& module_id) {
+                   return module_id.asString();
+                 });
+
   return module_ids;
 }
 
 std::vector<bool> RCHelpers::RetrieveModuleConsents(
     const ns_smart_device_link::ns_smart_objects::SmartObject& consents) {
   std::vector<bool> module_consents;
-  for (const auto& allowed_item : (*consents.asArray())) {
-    module_consents.push_back(allowed_item.asBool());
-  }
+
+  std::transform((*consents.asArray()).begin(),
+                 (*consents.asArray()).end(),
+                 std::back_inserter(module_consents),
+                 [](const smart_objects::SmartObject& allowed_item) {
+                   return allowed_item.asBool();
+                 });
+
   return module_consents;
 }
 
@@ -138,7 +148,7 @@ RCHelpers::GetModuleTypeToDataMapping() {
         {enums_value::kHmiSettings, message_params::kHmiSettingsControlData}};
     auto it = mapping.find(module_type);
     if (mapping.end() == it) {
-      LOG4CXX_ERROR(logger_, "Unknown module type" << module_type);
+      SDL_LOG_ERROR("Unknown module type " << module_type);
       return std::string();
     }
     return it->second;
@@ -159,7 +169,7 @@ RCHelpers::GetModuleTypeToCapabilitiesMapping() {
         {enums_value::kHmiSettings, strings::khmiSettingsControlCapabilities}};
     auto it = mapping.find(module_type);
     if (mapping.end() == it) {
-      LOG4CXX_ERROR(logger_, "Unknown module type" << module_type);
+      SDL_LOG_ERROR("Unknown module type " << module_type);
       return std::string();
     }
     return it->second;
@@ -175,15 +185,17 @@ const std::vector<std::string> RCHelpers::GetModuleTypesList() {
 
 RCAppExtensionPtr RCHelpers::GetRCExtension(
     application_manager::Application& app) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   auto extension_interface = app.QueryInterface(RCRPCPlugin::kRCPluginID);
   auto extension =
       std::static_pointer_cast<RCAppExtension>(extension_interface);
   return extension;
 }
 
-smart_objects::SmartObjectSPtr RCHelpers::CreateUnsubscribeRequestToHMI(
-    const ModuleUid& module, const uint32_t correlation_id) {
+smart_objects::SmartObjectSPtr RCHelpers::CreateGetInteriorVDRequestToHMI(
+    const ModuleUid& module,
+    const uint32_t correlation_id,
+    const InteriorDataAction action) {
   using namespace smart_objects;
   namespace commands = application_manager::commands;
   namespace am_strings = application_manager::strings;
@@ -200,7 +212,10 @@ smart_objects::SmartObjectSPtr RCHelpers::CreateUnsubscribeRequestToHMI(
   params[am_strings::correlation_id] = correlation_id;
   params[am_strings::function_id] =
       hmi_apis::FunctionID::RC_GetInteriorVehicleData;
-  msg_params[message_params::kSubscribe] = false;
+  if (NONE != action) {
+    msg_params[message_params::kSubscribe] =
+        (SUBSCRIBE == action) ? true : false;
+  }
   msg_params[message_params::kModuleType] = module.first;
   msg_params[message_params::kModuleId] = module.second;
   return message;
@@ -257,7 +272,7 @@ void RCHelpers::RemoveRedundantGPSDataFromIVDataMsg(
   using namespace message_params;
   using namespace application_manager::strings;
 
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   if (!msg_params.keyExists(kModuleData)) {
     return;
   }
@@ -291,6 +306,11 @@ smart_objects::SmartObject RCHelpers::MergeModuleData(
 
   smart_objects::SmartObject result = data1;
 
+  if (data2.empty()) {
+    SDL_LOG_ERROR("Data received from module is empty");
+    return result;
+  }
+
   for (auto it = data2.map_begin(); it != data2.map_end(); ++it) {
     const std::string& key = it->first;
     smart_objects::SmartObject& value = it->second;
@@ -300,9 +320,9 @@ smart_objects::SmartObject RCHelpers::MergeModuleData(
     }
 
     // Merge maps and arrays with `id` param included, replace other types
-    if (value.getType() == smart_objects::SmartType::SmartType_Map) {
+    if (smart_objects::SmartType::SmartType_Map == value.getType()) {
       value = MergeModuleData(result[key], value);
-    } else if (value.getType() == smart_objects::SmartType::SmartType_Array) {
+    } else if (smart_objects::SmartType::SmartType_Array == value.getType()) {
       value = MergeArray(result[key], value);
     }
     result[key] = value;
@@ -323,11 +343,14 @@ smart_objects::SmartObject RCHelpers::MergeArray(
   }
 
   auto& data2_array = *data2.asArray();
-  for (const auto& data_item : data2_array) {
-    if (data_item.getType() != smart_objects::SmartType_Map ||
-        !data_item.keyExists(application_manager::strings::id)) {
-      return data2;
-    }
+
+  auto compare = [](const smart_objects::SmartObject& data_item) {
+    return (data_item.getType() != smart_objects::SmartType_Map ||
+            !data_item.keyExists(application_manager::strings::id));
+  };
+
+  if (std::any_of(data2_array.begin(), data2_array.end(), compare)) {
+    return data2;
   }
 
   smart_objects::SmartObject result = data1;
@@ -360,6 +383,29 @@ smart_objects::SmartObject RCHelpers::MergeArray(
   }
 
   return result;
+}
+
+bool RCHelpers::IsResponseSuccessful(
+    const smart_objects::SmartObject& response) {
+  hmi_apis::messageType::eType message_type =
+      static_cast<hmi_apis::messageType::eType>(
+          response[application_manager::strings::params]
+                  [application_manager::strings::message_type]
+                      .asInt());
+  const bool is_correct_message_type =
+      hmi_apis::messageType::response == message_type;
+
+  bool is_subscribe_successful = false;
+
+  if (response[application_manager::strings::msg_params].keyExists(
+          rc_rpc_plugin::message_params::kIsSubscribed)) {
+    is_subscribe_successful =
+        response[application_manager::strings::msg_params]
+                [rc_rpc_plugin::message_params::kIsSubscribed]
+                    .asBool();
+  }
+
+  return is_correct_message_type && is_subscribe_successful;
 }
 
 }  // namespace rc_rpc_plugin

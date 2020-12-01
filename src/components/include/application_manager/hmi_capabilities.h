@@ -408,7 +408,23 @@ class HMICapabilities {
    */
   virtual bool rc_supported() const = 0;
 
-  /**
+  /*
+   * @brief Interface to store whether HMI supports driver distraction menu
+   * limits
+   *
+   * @param supported Indicates whether driver distraction menu limits is
+   * supported by HMI
+   */
+  virtual void set_driver_distraction_supported(const bool supported) = 0;
+
+  /*
+   * @brief Retrieves whether HMI supports driver distraction menu limits
+   *
+   * @return TRUE if it supported, otherwise FALSE
+   */
+  virtual bool driver_distraction_supported() const = 0;
+
+  /*
    * @brief Interface used to store information regarding
    * the navigation "System Capability"
    * @param navigation_capability contains information related
@@ -465,6 +481,12 @@ class HMICapabilities {
    * @return RC capabilities
    */
   virtual const smart_objects::SmartObjectSPtr rc_capability() const = 0;
+
+  virtual void set_driver_distraction_capability(
+      const smart_objects::SmartObject& driver_distraction_capability) = 0;
+
+  virtual const smart_objects::SmartObjectSPtr driver_distraction_capability()
+      const = 0;
 
   /**
    * @brief Sets available SeatLocation capabilities for further usage by

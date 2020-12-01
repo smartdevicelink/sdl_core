@@ -35,14 +35,14 @@
 
 namespace utils {
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "JsoncppReaderWrapper")
+SDL_CREATE_LOG_VARIABLE("JsoncppReaderWrapper")
 
 JsonReader::JsonReader() {
   reader_ = std::unique_ptr<Json::CharReader>(reader_builder_.newCharReader());
 }
 
 bool JsonReader::parse(const std::string& json, Json::Value* root) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   JSONCPP_STRING err;
   bool is_parsing_ok = false;
   const size_t json_len = json.length();
@@ -50,12 +50,12 @@ bool JsonReader::parse(const std::string& json, Json::Value* root) {
     is_parsing_ok =
         reader_->parse(json.c_str(), json.c_str() + json_len, root, &err);
   } catch (Json::RuntimeError& e) {
-    LOG4CXX_DEBUG(logger_, "Exception caught during parse json: " << e.what());
+    SDL_LOG_DEBUG("Exception caught during parse json: " << e.what());
     return false;
   }
 
   if (!is_parsing_ok) {
-    LOG4CXX_ERROR(logger_, "Json parsing fails: " << err);
+    SDL_LOG_ERROR("Json parsing fails: " << err);
   }
   return is_parsing_ok;
 }

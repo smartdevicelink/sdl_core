@@ -70,6 +70,7 @@ using security_manager::SSLContext;
 
 using security_manager_test::InternalErrorWithErrId;
 using ::testing::_;
+using ::testing::An;
 using ::testing::DoAll;
 using ::testing::Return;
 using ::testing::ReturnNull;
@@ -286,7 +287,7 @@ TEST_F(SecurityManagerTest, SecurityManager_NULLCryptoManager) {
   TestAsyncWaiter waiter;
   EXPECT_CALL(mock_session_observer, PairFromKey(kKey, _, _));
   EXPECT_CALL(mock_session_observer,
-              ProtocolVersionUsed(connection_id, session_id, _))
+              ProtocolVersionUsed(connection_id, session_id, An<uint8_t&>()))
       .WillOnce(Return(true));
 
   EXPECT_CALL(mock_protocol_handler,
@@ -332,7 +333,7 @@ TEST_F(SecurityManagerTest, GetEmptyQuery) {
   // uint8_t protocol_version = 0;
   EXPECT_CALL(mock_session_observer, PairFromKey(kKey, _, _));
   EXPECT_CALL(mock_session_observer,
-              ProtocolVersionUsed(connection_id, session_id, _))
+              ProtocolVersionUsed(connection_id, session_id, An<uint8_t&>()))
       .WillOnce(Return(true));
 
   EXPECT_CALL(
@@ -354,7 +355,7 @@ TEST_F(SecurityManagerTest, GetWrongJSONSize) {
   // uint8_t protocol_version = 0;
   EXPECT_CALL(mock_session_observer, PairFromKey(kKey, _, _));
   EXPECT_CALL(mock_session_observer,
-              ProtocolVersionUsed(connection_id, session_id, _))
+              ProtocolVersionUsed(connection_id, session_id, An<uint8_t&>()))
       .WillOnce(Return(true));
   // Expect InternalError with ERROR_ID
   EXPECT_CALL(
@@ -382,7 +383,7 @@ TEST_F(SecurityManagerTest, GetInvalidQueryId) {
       .WillOnce(NotifyTestAsyncWaiter(&waiter));
   times++;
   EXPECT_CALL(mock_session_observer,
-              ProtocolVersionUsed(connection_id, session_id, _))
+              ProtocolVersionUsed(connection_id, session_id, An<uint8_t&>()))
       .WillOnce(DoAll(NotifyTestAsyncWaiter(&waiter), Return(true)));
   times++;
 
@@ -429,7 +430,7 @@ TEST_F(SecurityManagerTest, CreateSSLContext_ErrorCreateSSL) {
   // uint8_t protocol_version = 0;
   EXPECT_CALL(mock_session_observer, PairFromKey(kKey, _, _));
   EXPECT_CALL(mock_session_observer,
-              ProtocolVersionUsed(connection_id, session_id, _))
+              ProtocolVersionUsed(connection_id, session_id, An<uint8_t&>()))
       .WillOnce(Return(true));
   EXPECT_CALL(mock_protocol_handler,
               SendMessageToMobileApp(
@@ -459,7 +460,7 @@ TEST_F(SecurityManagerTest, CreateSSLContext_SetSSLContextError) {
   // uint8_t protocol_version = 0;
   EXPECT_CALL(mock_session_observer, PairFromKey(kKey, _, _));
   EXPECT_CALL(mock_session_observer,
-              ProtocolVersionUsed(connection_id, session_id, _))
+              ProtocolVersionUsed(connection_id, session_id, An<uint8_t&>()))
       .WillOnce(Return(true));
 
   EXPECT_CALL(
@@ -515,7 +516,7 @@ TEST_F(SecurityManagerTest, StartHandshake_ServiceStillUnprotected) {
   // uint8_t protocol_version = 0;
   EXPECT_CALL(mock_session_observer, PairFromKey(kKey, _, _));
   EXPECT_CALL(mock_session_observer,
-              ProtocolVersionUsed(connection_id, session_id, _))
+              ProtocolVersionUsed(connection_id, session_id, An<uint8_t&>()))
       .WillOnce(Return(true));
   // Expect InternalError with ERROR_INTERNAL
   EXPECT_CALL(mock_protocol_handler,
@@ -548,7 +549,7 @@ TEST_F(SecurityManagerTest, StartHandshake_SSLInternalError) {
 
   EXPECT_CALL(mock_session_observer, PairFromKey(kKey, _, _));
   EXPECT_CALL(mock_session_observer,
-              ProtocolVersionUsed(connection_id, session_id, _))
+              ProtocolVersionUsed(connection_id, session_id, An<uint8_t&>()))
       .WillOnce(Return(true));
   // Expect notifying listeners (unsuccess)
   EXPECT_CALL(*mock_sm_listener,
@@ -579,7 +580,7 @@ TEST_F(SecurityManagerTest, ProcessHandshakeData_WrongDataSize) {
   TestAsyncWaiter waiter;
   EXPECT_CALL(mock_session_observer, PairFromKey(kKey, _, _));
   EXPECT_CALL(mock_session_observer,
-              ProtocolVersionUsed(connection_id, session_id, _))
+              ProtocolVersionUsed(connection_id, session_id, An<uint8_t&>()))
       .WillOnce(Return(true));
 
   // Expect InternalError with ERROR_ID
@@ -612,7 +613,7 @@ TEST_F(SecurityManagerTest, DISABLED_ProcessHandshakeData_ServiceNotProtected) {
       .WillOnce(NotifyTestAsyncWaiter(&waiter));
   times++;
   EXPECT_CALL(mock_session_observer,
-              ProtocolVersionUsed(connection_id, session_id, _))
+              ProtocolVersionUsed(connection_id, session_id, An<uint8_t&>()))
       .WillOnce(DoAll(NotifyTestAsyncWaiter(&waiter), Return(true)));
   times++;
   EXPECT_CALL(
@@ -664,7 +665,7 @@ TEST_F(SecurityManagerTest, ProcessHandshakeData_InvalidData) {
       .WillRepeatedly(NotifyTestAsyncWaiter(&waiter));
   times += handshake_emulates;
   EXPECT_CALL(mock_session_observer,
-              ProtocolVersionUsed(connection_id, session_id, _))
+              ProtocolVersionUsed(connection_id, session_id, An<uint8_t&>()))
       .Times(handshake_emulates)
       .WillRepeatedly(DoAll(NotifyTestAsyncWaiter(&waiter), Return(true)));
   times += handshake_emulates;
@@ -746,7 +747,7 @@ TEST_F(SecurityManagerTest, ProcessHandshakeData_Answer) {
       .WillRepeatedly(NotifyTestAsyncWaiter(&waiter));
   times += handshake_emulates;
   EXPECT_CALL(mock_session_observer,
-              ProtocolVersionUsed(connection_id, session_id, _))
+              ProtocolVersionUsed(connection_id, session_id, An<uint8_t&>()))
       .Times(handshake_emulates)
       .WillRepeatedly(DoAll(NotifyTestAsyncWaiter(&waiter), Return(true)));
   times += handshake_emulates;
@@ -877,7 +878,7 @@ TEST_F(SecurityManagerTest, ProcessHandshakeData_HandshakeFinished) {
   // uint8_t protocol_version = 0;
   EXPECT_CALL(mock_session_observer, PairFromKey(kKey, _, _)).Times(2);
   EXPECT_CALL(mock_session_observer,
-              ProtocolVersionUsed(connection_id, session_id, _))
+              ProtocolVersionUsed(connection_id, session_id, An<uint8_t&>()))
       .Times(2)
       .WillRepeatedly(DoAll(NotifyTestAsyncWaiter(&waiter), Return(true)));
   times += 2;  // matches to the number above
