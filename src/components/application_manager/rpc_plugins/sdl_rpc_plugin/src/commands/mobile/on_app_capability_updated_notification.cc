@@ -37,6 +37,8 @@ namespace sdl_rpc_plugin {
 namespace commands {
 namespace mobile {
 
+SDL_CREATE_LOG_VARIABLE("Commands")
+
 OnAppCapabilityUpdatedNotification::OnAppCapabilityUpdatedNotification(
     const application_manager::commands::MessageSharedPtr& message,
     app_mngr::ApplicationManager& application_manager,
@@ -52,12 +54,12 @@ OnAppCapabilityUpdatedNotification::OnAppCapabilityUpdatedNotification(
 OnAppCapabilityUpdatedNotification::~OnAppCapabilityUpdatedNotification() {}
 
 void OnAppCapabilityUpdatedNotification::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   app_mngr::ApplicationSharedPtr app =
       application_manager_.application(connection_key());
 
   if (!app) {
-    LOG4CXX_ERROR(logger_, "No application associated with session key");
+    SDL_LOG_ERROR("No application associated with session key");
     return;
   }
 

@@ -37,6 +37,8 @@ namespace app_mngr = application_manager;
 
 namespace commands {
 
+SDL_CREATE_LOG_VARIABLE("Commands")
+
 BCOnAppCapabilityUpdatedNotification::BCOnAppCapabilityUpdatedNotification(
     const application_manager::commands::MessageSharedPtr& message,
     application_manager::ApplicationManager& application_manager,
@@ -52,7 +54,7 @@ BCOnAppCapabilityUpdatedNotification::BCOnAppCapabilityUpdatedNotification(
 BCOnAppCapabilityUpdatedNotification::~BCOnAppCapabilityUpdatedNotification() {}
 
 void BCOnAppCapabilityUpdatedNotification::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
 
   SendNotification();
 }

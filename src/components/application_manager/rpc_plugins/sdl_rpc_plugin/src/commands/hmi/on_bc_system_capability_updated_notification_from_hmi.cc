@@ -88,7 +88,7 @@ OnBCSystemCapabilityUpdatedNotificationFromHMI::
   // Remove app_id from notification to mobile
   RemoveAppIdFromNotification();
   if (app->is_resuming() && app->is_app_data_resumption_allowed()) {
-    SDL_LOG_DEBUG(logger_, "Application is resuming");
+    SDL_LOG_DEBUG("Application is resuming");
     app->display_capabilities_builder().UpdateDisplayCapabilities(
         display_capabilities);
     return ProcessSystemDisplayCapabilitiesResult::CAPABILITIES_CACHED;
@@ -108,15 +108,15 @@ bool OnBCSystemCapabilityUpdatedNotificationFromHMI::
     ProcessVideoStreamingCapability(
         const smart_objects::SmartObject& system_capability) {
   if (!system_capability.keyExists(strings::video_streaming_capability)) {
-    SDL_LOG_WARN(logger_,
-                 "VideoStreamingCapability is absent in the notification. "
-                 "Notification Will be ignored");
+    SDL_LOG_WARN(
+        "VideoStreamingCapability is absent in the notification. "
+        "Notification Will be ignored");
     return false;
   }
   if (!(*message_)[strings::msg_params].keyExists(strings::app_id)) {
-    SDL_LOG_WARN(logger_,
-                 "Notification doesn't contain an application id. Will "
-                 "be ignored");
+    SDL_LOG_WARN(
+        "Notification doesn't contain an application id. Will "
+        "be ignored");
     return false;
   }
 
@@ -125,10 +125,9 @@ bool OnBCSystemCapabilityUpdatedNotificationFromHMI::
 
   auto app = application_manager_.application(app_id);
   if (!app) {
-    SDL_LOG_WARN(logger_,
-                 "Application with app_id: "
-                     << app_id
-                     << " isn't registered. Notification will be ignored");
+    SDL_LOG_WARN("Application with app_id: "
+                 << app_id
+                 << " isn't registered. Notification will be ignored");
     return false;
   }
 
@@ -137,11 +136,10 @@ bool OnBCSystemCapabilityUpdatedNotificationFromHMI::
 
   if (!system_capability_extension.IsSubscribedTo(
           mobile_apis::SystemCapabilityType::VIDEO_STREAMING)) {
-    SDL_LOG_WARN(logger_,
-                 "The Application with app_id: "
-                     << app_id
-                     << " isn't subscribed to the VIDEO_STREAMING system "
-                        "capability type. Notification will be ignored");
+    SDL_LOG_WARN("The Application with app_id: "
+                 << app_id
+                 << " isn't subscribed to the VIDEO_STREAMING system "
+                    "capability type. Notification will be ignored");
     return false;
   }
   return true;
@@ -194,9 +192,7 @@ void OnBCSystemCapabilityUpdatedNotificationFromHMI::Run() {
       RemoveAppIdFromNotification();
       break;
     }
-    default: {
-      SDL_LOG_ERROR(logger_, "Unknown system capability type received");
-    }
+    default: { SDL_LOG_ERROR("Unknown system capability type received"); }
   }
 
   SendNotificationToMobile(message_);

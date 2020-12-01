@@ -548,7 +548,7 @@ bool MobileCommandFactory::IsAbleToProcess(
     const int32_t function_id,
     const application_manager::commands::Command::CommandSource message_source)
     const {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   auto id = static_cast<mobile_apis::FunctionID::eType>(function_id);
   return get_command_creator(id, mobile_apis::messageType::INVALID_ENUM)
              .CanBeCreated() ||
