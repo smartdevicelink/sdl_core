@@ -1326,6 +1326,7 @@
   <element name="QWERTY" />
   <element name="QWERTZ" />
   <element name="AZERTY" />
+  <element name="NUMERIC"/>
 </enum>
 
 <enum name="KeyboardEvent">
@@ -1335,6 +1336,15 @@
   <element name="ENTRY_VOICE" />
   <element name="ENTRY_CANCELLED" />
   <element name="ENTRY_ABORTED" />
+  <element name="INPUT_KEY_MASK_ENABLED"/>
+  <element name="INPUT_KEY_MASK_DISABLED"/>
+</enum>
+
+<enum name="KeyboardInputMask">
+  <description>Enumeration listing possible input character masking.</description>
+  <element name="ENABLE_INPUT_KEY_MASK" />
+  <element name="DISABLE_INPUT_KEY_MASK" />
+  <element name="USER_CHOICE_INPUT_KEY_MASK" />
 </enum>
 
 <enum name="KeypressMode">
@@ -3169,6 +3179,13 @@
       If empty, the auto-complete list will be removed from the screen.
     </description>
   </param>
+  <param name="maskInputCharacters" type="KeyboardInputMask" mandatory="false">
+    <description>Allows an app to mask entered characters on HMI</description>
+  </param>
+  <param name="customizeKeys" type="String" maxlength="1" minsize="1" maxsize="10" array="true" mandatory="false">
+    <description>Array of special characters to show in customizable Keys.</description>
+    <description>If omitted, keyboard will show default special characters</description>
+  </param>
 </struct>
 
 <struct name="Turn">
@@ -3623,6 +3640,26 @@
     <param name="maximumNumberOfWindows" type="Integer" mandatory="true" />
   </struct>
 
+  <struct name="ConfigurableKeyboards">
+    <description>
+      Describes number of configurable Keys for Special characters.
+    </description>
+    <param name="keyboardLayout" type="KeyboardLayout" mandatory="true"/>
+    <param name="numConfigurableKeys" type="Integer" mandatory="true"/>
+  </struct>
+
+  <struct name="KeyboardCapabilities">
+    <param name="maskInputCharactersSupported" type="Boolean" mandatory="false">
+      <description>Availability of capability to mask input characters using keyboard. True: Available, False: Not Available</description>
+    </param>
+    <param name="supportedKeyboardLayouts" type="KeyboardLayout" minsize="1" maxsize="1000" array="true" mandatory="false">
+      <description>Supported keyboard layouts by HMI.</description>
+    </param>
+    <param name="configurableKeys" type="ConfigurableKeyboards" minsize="1" maxsize="1000" array="true" mandatory="false">
+      <description>Get Number of Keys for Special characters, App can customize as per their needs.</description>
+    </param>
+  </struct>
+
   <struct name="WindowCapability">
     <param name="windowID" type="Integer" mandatory="false">
       <description>
@@ -3656,6 +3693,9 @@
     </param>
     <param name="dynamicUpdateCapabilities" type="DynamicUpdateCapabilities" mandatory="false">
       <description>Contains the head unit's capabilities for dynamic updating features declaring if the module will send dynamic update RPCs.</description>
+    </param>
+    <param name="keyboardCapabilities" type="KeyboardCapabilities" mandatory="false">
+      <description>See KeyboardCapabilities</description>
     </param>
   </struct>
 
