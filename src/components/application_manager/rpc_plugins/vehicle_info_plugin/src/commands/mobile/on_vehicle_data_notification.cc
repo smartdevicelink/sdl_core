@@ -112,15 +112,23 @@ void OnVehicleDataNotification::Run() {
             mobile_api::FunctionID::OnVehicleDataID),
         appSO[idx].enumerate(),
         &params_permissions);
-
-    for (const auto& param : appSO[idx].enumerate()) {
-      const auto& allowed_params = params_permissions.allowed_params;
-      auto param_allowed = allowed_params.find(param);
-      if (allowed_params.end() == param_allowed) {
-        SDL_LOG_DEBUG("Param " << param << " is not allowed by policy for app "
-                               << notify_apps[idx]->app_id()
-                               << ". It will be ignored.");
-        appSO[idx].erase(param);
+    if (parameters_permissions_.allowed_params.empty() &&
+        parameters_permissions_.disallowed_params.empty() &&
+        parameters_permissions_.undefined_params.empty()) {
+      SDL_LOG_DEBUG(
+          "No parameter permissions provided, all params are allowed");
+    }
+    else {
+      for (const auto& param : appSO[idx].enumerate()) {
+        const auto& allowed_params = params_permissions.allowed_params;
+        auto param_allowed = allowed_params.find(param);
+        if (allowed_params.end() == param_allowed) {
+          SDL_LOG_DEBUG("Param " << param
+                                 << " is not allowed by policy for app "
+                                 << notify_apps[idx]->app_id()
+                                 << ". It will be ignored.");
+          appSO[idx].erase(param);
+        }
       }
     }
 
