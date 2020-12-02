@@ -59,10 +59,10 @@ option(USE_GOLD_LD "Use gold linker intead of GNU linker" ON)
 option(USE_CCACHE "Turn on ccache usage" ON)
 option(USE_DISTCC "Turn on distributed build_usage" OFF)
 
-set(LOGGER_NAME "BOOST" CACHE STRING "Logging library to use (BOOST, LOG4CXX)")
+set(LOGGER_NAME "LOG4CXX" CACHE STRING "Logging library to use (BOOST, LOG4CXX)")
 set_property(CACHE LOGGER_NAME PROPERTY STRINGS BOOST LOG4CXX)
 if(LOGGER_NAME STREQUAL "")
-  set(LOGGER_NAME "BOOST")
+  set(LOGGER_NAME "LOG4CXX")
 endif()
 
 set (EXTENDED_POLICY "PROPRIETARY" CACHE STRING "Policy mode (PROPRIETARY, HTTP or EXTERNAL_PROPRIETARY)")

@@ -60,16 +60,16 @@ int main(int argc, char** argv) {
   // --------------------------------------------------------------------------
   // Logger initialization
   // Redefine for each paticular logger implementation
-// #ifdef LOG4CXX_LOGGER
-//     auto logger = std::unique_ptr<logger::Log4CXXLogger>(
-//         new logger::Log4CXXLogger("log4cxx.properties"));
-// #else   // LOG4CXX_LOGGER
-//     auto logger = std::unique_ptr<logger::BoostLogger>(
-//         new logger::BoostLogger("boostlogconfig.ini"));
-// #endif  // LOG4CXX_LOGGER
-//   auto logger_impl = std::unique_ptr<logger::LoggerImpl>(new logger::LoggerImpl());
-//   logger::Logger::instance(logger_impl.get());
-//   logger_impl->Init(std::move(logger));
+#ifdef LOG4CXX_LOGGER
+    auto logger = std::unique_ptr<logger::Log4CXXLogger>(
+        new logger::Log4CXXLogger("log4cxx.properties"));
+#else   // LOG4CXX_LOGGER
+    auto logger = std::unique_ptr<logger::BoostLogger>(
+        new logger::BoostLogger("boostlogconfig.ini"));
+#endif  // LOG4CXX_LOGGER
+  auto logger_impl = std::unique_ptr<logger::LoggerImpl>(new logger::LoggerImpl());
+  logger::Logger::instance(logger_impl.get());
+  logger_impl->Init(std::move(logger));
 #endif  // ENABLE_LOG
 
   std::string pt_type_str = argv[1];

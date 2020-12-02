@@ -129,6 +129,7 @@ list(APPEND LIBRARIES boost_date_time -L${BOOST_LIBS_DIRECTORY})
 list(APPEND LIBRARIES boost_filesystem -L${BOOST_LIBS_DIRECTORY})
 list(APPEND LIBRARIES boost_log_setup -L${BOOST_LIBS_DIRECTORY})
 list(APPEND LIBRARIES boost_log -L${BOOST_LIBS_DIRECTORY})
+list(APPEND LIBRARIES boost_regex -L${BOOST_LIBS_DIRECTORY})
 target_link_libraries("Utils" ${LIBRARIES})
 add_dependencies("Utils" Boost)
 
