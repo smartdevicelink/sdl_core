@@ -69,7 +69,7 @@ class NaviStartStreamRequest : public app_mngr::commands::RequestToHMI {
   /**
    * @brief On event callback
    **/
-  void on_event(const app_mngr::event_engine::Event& event) OVERRIDE;
+  void on_event(const app_mngr::event_engine::Event& event) FINAL;
 
   void OnTimeOut() FINAL;
 

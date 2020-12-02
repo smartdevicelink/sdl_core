@@ -86,7 +86,7 @@ class ASPerformAppServiceInteractionRequestFromHMI
   /**
    * @brief onTimeOut from request controller
    */
-  virtual void OnTimeOut();
+  void OnTimeOut() FINAL;
 
  private:
   DISALLOW_COPY_AND_ASSIGN(ASPerformAppServiceInteractionRequestFromHMI);

@@ -422,7 +422,6 @@ TEST_F(
   ASSERT_TRUE(command->Init());
 
   command->StartAwaitForInterfaces();
-  command->StartAwaitForInterfaces();
 
   MockAppPtr mock_app;
   EXPECT_CALL(app_mngr_, application(_)).WillRepeatedly(Return(mock_app));

@@ -94,7 +94,7 @@ class RequestFromHMI : public CommandRequestImpl {
       const mobile_apis::FunctionID::eType& mobile_function_id,
       const hmi_apis::FunctionID::eType& hmi_function_id,
       const smart_objects::SmartObject* msg,
-      bool use_events = false);
+      bool use_events);
 
   void SendMobileRequest(const mobile_apis::FunctionID::eType& function_id,
                          const ApplicationSharedPtr app,

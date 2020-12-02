@@ -754,7 +754,7 @@ bool RequestFromMobileImpl::PrepareResultForMobileResponse(
 
 void RequestFromMobileImpl::GetInfo(
     const smart_objects::SmartObject& response_from_hmi,
-    std::string& out_info) {
+    std::string& out_info) const {
   if (response_from_hmi[strings::msg_params].keyExists(strings::info)) {
     if (!response_from_hmi[strings::msg_params][strings::info].empty()) {
       out_info =

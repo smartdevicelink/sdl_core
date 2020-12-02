@@ -231,18 +231,21 @@ void ChangeRegistrationRequest::Run() {
     return;
   }
   if (HmiInterfaces::InterfaceState::STATE_NOT_AVAILABLE != vr_state) {
-    // VR processing
-    SendVRRequest(app, msg_params);
     StartAwaitForInterface(HmiInterfaces::InterfaceID::HMI_INTERFACE_VR);
   }
   if (HmiInterfaces::InterfaceState::STATE_NOT_AVAILABLE != tts_state) {
-    // TTS processing
-    SendTTSRequest(app, msg_params);
     StartAwaitForInterface(HmiInterfaces::InterfaceID::HMI_INTERFACE_TTS);
   }
 
   if (HmiInterfaces::InterfaceState::STATE_NOT_AVAILABLE != ui_state) {
     SendUIRequest(app, msg_params, hmi_language);
+  }
+
+  if (IsInterfaceAwaited(HmiInterfaces::HMI_INTERFACE_TTS)) {
+    SendTTSRequest(app, msg_params);
+  }
+  if (IsInterfaceAwaited(HmiInterfaces::HMI_INTERFACE_UI)) {
+    SendVRRequest(app, msg_params);
   }
 }
 

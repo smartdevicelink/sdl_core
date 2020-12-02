@@ -143,7 +143,7 @@ class RequestFromMobileImpl : public CommandRequestImpl {
       const mobile_apis::FunctionID::eType& mobile_function_id,
       const hmi_apis::FunctionID::eType& hmi_function_id,
       const smart_objects::SmartObject* msg,
-      bool use_events = false);
+      bool use_events);
 
   /*
    * @brief Creates Mobile response
@@ -224,7 +224,7 @@ class RequestFromMobileImpl : public CommandRequestImpl {
    * and returns parameter for sending to mobile app.
    * @param result_code contains result code from HMI response
    * @param interface contains interface for which HMI sent response
-   * @return true if result code complies successful result cods
+   * @return true if result code complies successful result code
    * otherwise returns false.
    */
   bool PrepareResultForMobileResponse(
@@ -234,9 +234,9 @@ class RequestFromMobileImpl : public CommandRequestImpl {
   /**
    * @brief Checks result code from HMI for splitted RPC
    * and returns parameter for sending to mobile app.
-   * @param first contains result_code from HMI response and
+   * @param out_first contains result_code from HMI response and
    * interface that returns response
-   * @param second contains result_code from HMI response and
+   * @param out_second contains result_code from HMI response and
    * interface that returns response
    * @return true if result code complies successful result code
    * otherwise returns false
@@ -248,13 +248,11 @@ class RequestFromMobileImpl : public CommandRequestImpl {
    * @brief If message from HMI contains returns this info
    * or process result code from HMI and checks state of interface
    * and create info.
-   * @param interface contains interface for which HMI sent response
-   * @param result_code contains result code from HMI
    * @param response_from_hmi contains response from HMI
    * @param out_info contain info for sending to application
    */
   void GetInfo(const smart_objects::SmartObject& response_from_hmi,
-               std::string& out_info);
+               std::string& out_info) const;
 
   /**
    * @brief Prepare result code for sending to mobile application
@@ -280,10 +278,19 @@ class RequestFromMobileImpl : public CommandRequestImpl {
   bool IsResultCodeUnsupported(const ResponseInfo& first,
                                const ResponseInfo& second) const;
 
+  /**
+   * @brief Checks result code from HMI for splitted RPC
+   * and returns parameter for sending to mobile app.
+   * @param first contains result_code from HMI response and
+   * interface that returns response
+   * @param second contains result_code from HMI response and
+   * interface that returns response
+   * @return true if result code complies successful result code
+   * otherwise returns false
+   */
   bool CheckResultCode(const ResponseInfo& first,
                        const ResponseInfo& second) const;
 
- protected:
   /**
    * @brief Returns policy parameters permissions
    * @return Parameters permissions struct reference
@@ -314,6 +321,11 @@ class RequestFromMobileImpl : public CommandRequestImpl {
   void AddDisallowedParametersToInfo(
       smart_objects::SmartObject& response) const;
 
+  /**
+   * @brief Checks if HMI interface is available for the target function
+   * @param hmi_correlation_id HMI correlation id
+   * @param function_id Response message, which info should be extended
+   */
   bool ProcessHMIInterfacesAvailability(
       const uint32_t hmi_correlation_id,
       const hmi_apis::FunctionID::eType& function_id);

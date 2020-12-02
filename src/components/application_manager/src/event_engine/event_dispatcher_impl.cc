@@ -90,6 +90,7 @@ struct IdCheckFunctor {
 
 void EventDispatcherImpl::remove_observer(const Event::EventID& event_id,
                                           const int32_t hmi_correlation_id) {
+  AutoLock auto_lock(state_lock_);
   auto& observers = observers_event_[event_id][hmi_correlation_id];
   for (auto observer : observers) {
     remove_observer_from_vector(*observer);

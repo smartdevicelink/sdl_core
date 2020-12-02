@@ -152,9 +152,7 @@ void AlertManeuverRequest::Run() {
         hmi_apis::Common_MethodName::ALERT_MANEUVER;
 
     StartAwaitForInterface(HmiInterfaces::HMI_INTERFACE_TTS);
-    if (IsInterfaceAwaited(HmiInterfaces::HMI_INTERFACE_TTS)) {
-      SendHMIRequest(hmi_apis::FunctionID::TTS_Speak, &msg_params, true);
-    }
+    SendHMIRequest(hmi_apis::FunctionID::TTS_Speak, &msg_params, true);
   }
 }
 

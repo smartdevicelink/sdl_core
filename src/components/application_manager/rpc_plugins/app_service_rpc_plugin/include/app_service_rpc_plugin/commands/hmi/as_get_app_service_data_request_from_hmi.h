@@ -71,7 +71,7 @@ class ASGetAppServiceDataRequestFromHMI
   /**
    * @brief onTimeOut from request controller
    */
-  virtual void OnTimeOut();
+  void OnTimeOut() FINAL;
 
   /**
    * @brief on_event allows to handle events

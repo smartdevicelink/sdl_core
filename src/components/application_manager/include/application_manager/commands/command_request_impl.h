@@ -1,17 +1,22 @@
 /*
  Copyright (c) 2016, Ford Motor Company
  All rights reserved.
+
  Redistribution and use in source and binary forms, with or without
  modification, are permitted provided that the following conditions are met:
+
  Redistributions of source code must retain the above copyright notice, this
  list of conditions and the following disclaimer.
+
  Redistributions in binary form must reproduce the above copyright notice,
  this list of conditions and the following
  disclaimer in the documentation and/or other materials provided with the
  distribution.
+
  Neither the name of the Ford Motor Company nor the names of its contributors
  may be used to endorse or promote products derived from this software
  without specific prior written permission.
+
  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -72,9 +77,16 @@ class CommandRequestImpl : public CommandImpl,
    **/
   virtual ~CommandRequestImpl();
 
+  /**
+   * @brief Send request to mobile
+   * @param function_id Function id
+   * @param msg Request to mobile
+   * @param use_event - true if request should be subscribed to an event,
+   * otherwise false
+   **/
   void SendMobileRequest(const mobile_apis::FunctionID::eType& function_id,
                          smart_objects::SmartObjectSPtr msg,
-                         bool use_events = false);
+                         bool use_events);
 
   /**
    * @brief Checks Mobile result code for single RPC
@@ -203,6 +215,9 @@ class CommandRequestImpl : public CommandImpl,
    */
   mutable sync_primitives::RecursiveLock state_lock_;
 
+  /**
+   * @brief Current state of request to synchronize its life cycle
+   */
   RequestState current_state_;
 
  private:
@@ -210,8 +225,8 @@ class CommandRequestImpl : public CommandImpl,
 
   /**
    * @brief Changes request state to "kProcessEvent", retain request instance
-   * @return false if request is already in timeout state.
-   * If request is succesfully retained returns true/
+   * @return false if request is not ready to handle event right now.
+   * If request is succesfully retained returns true
    */
   bool StartOnEventHandling();
 

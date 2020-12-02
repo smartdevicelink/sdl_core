@@ -125,8 +125,7 @@ void AlertRequest::Run() {
 
 void AlertRequest::OnTimeOut() {
   SDL_LOG_AUTO_TRACE();
-  if (false ==
-      (*message_)[strings::msg_params].keyExists(strings::soft_buttons)) {
+  if (!(*message_)[strings::msg_params].keyExists(strings::soft_buttons)) {
     RequestFromMobileImpl::OnTimeOut();
     return;
   }
