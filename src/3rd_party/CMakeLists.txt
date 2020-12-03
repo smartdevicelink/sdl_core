@@ -221,8 +221,12 @@ else()
 endif()
 
 set(BOOST_ROOT ${3RD_PARTY_INSTALL_PREFIX})
-find_package(Boost 1.66.0 COMPONENTS system thread date_time filesystem regex log log_setup)
+set(BOOST_COMPONENTS system thread date_time filesystem regex)
+if (ENABLE_LOG AND ${LOGGER_NAME} STREQUAL "BOOST")
+  list(APPEND BOOST_COMPONENTS log log_setup)
+endif()
 
+find_package(Boost 1.66.0 COMPONENTS ${BOOST_COMPONENTS})
 set(BOOST_LIB_SOURCE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/boost_src)
 set(BOOST_LIBS_DIRECTORY ${3RD_PARTY_INSTALL_PREFIX}/lib)
 set(BOOST_INCLUDE_DIR ${3RD_PARTY_INSTALL_PREFIX}/include PARENT_SCOPE)
@@ -234,15 +238,23 @@ if (NOT ${Boost_FOUND})
     set(BOOST_INSTALL_COMMAND sudo ./b2 install)
   endif()
   include(ExternalProject)
+
+  set(boost_component_install_flags --with-system --with-thread --with-date_time --with-filesystem --with-regex)
+  set(boost_component_libraries system thread date_time filesystem regex)
+  if (ENABLE_LOG AND ${LOGGER_NAME} STREQUAL "BOOST")
+    list(APPEND boost_component_install_flags --with-log)
+    list(APPEND boost_component_libraries log)
+  endif()
+  string (REPLACE ";" "," boost_component_libraries_str "${boost_component_libraries}")
   ExternalProject_Add(
     Boost
     URL https://mirror.bazel.build/dl.bintray.com/boostorg/release/1.68.0/source/boost_1_68_0.tar.gz
     URL_HASH SHA256=da3411ea45622579d419bfda66f45cd0f8c32a181d84adfa936f5688388995cf
     DOWNLOAD_DIR ${BOOST_LIB_SOURCE_DIRECTORY}
     SOURCE_DIR ${BOOST_LIB_SOURCE_DIRECTORY}
-    CONFIGURE_COMMAND ./bootstrap.sh --with-libraries=system,thread,date_time,filesystem,regex,log --prefix=${3RD_PARTY_INSTALL_PREFIX}
+    CONFIGURE_COMMAND ./bootstrap.sh --with-libraries=${boost_component_libraries_str} --prefix=${3RD_PARTY_INSTALL_PREFIX}
     BUILD_COMMAND ./b2
-    INSTALL_COMMAND ${BOOST_INSTALL_COMMAND} --with-system --with-thread --with-date_time --with-filesystem --with-regex --with-log --prefix=${3RD_PARTY_INSTALL_PREFIX} > boost_install.log
+    INSTALL_COMMAND ${BOOST_INSTALL_COMMAND} ${boost_component_install_flags} --prefix=${3RD_PARTY_INSTALL_PREFIX} > boost_install.log
     INSTALL_DIR ${3RD_PARTY_INSTALL_PREFIX}
     BUILD_IN_SOURCE true
   )
