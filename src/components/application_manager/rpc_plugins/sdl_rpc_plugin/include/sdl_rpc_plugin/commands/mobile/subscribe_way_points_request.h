@@ -79,8 +79,6 @@ class SubscribeWayPointsRequest
   void onTimeOut() FINAL;
 
  private:
-  bool IsWayPointsAppServiceAvailable();
-
   DISALLOW_COPY_AND_ASSIGN(SubscribeWayPointsRequest);
 };
 
