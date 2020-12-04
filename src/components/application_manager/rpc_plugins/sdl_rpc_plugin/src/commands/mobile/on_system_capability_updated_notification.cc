@@ -212,12 +212,12 @@ void OnSystemCapabilityUpdatedNotification::Run() {
       case mobile_apis::SystemCapabilityType::DISPLAYS: {
         SDL_LOG_DEBUG("Using common display capabilities");
         auto capabilities = hmi_capabilities_.system_display_capabilities();
-        if (app->is_resuming() && app->is_app_data_resumption_allowed()) {
+        auto& builder = app->display_capabilities_builder();
+        if (app->is_resuming() && builder.IsWindowResumptionNeeded()) {
           SDL_LOG_DEBUG("Application "
                         << app->app_id()
                         << " is resuming. Providing cached capabilities");
-          auto display_caps =
-              app->display_capabilities_builder().display_capabilities();
+          auto display_caps = builder.display_capabilities();
           capabilities = display_caps;
         } else if (app->display_capabilities()) {
           SDL_LOG_DEBUG("Application " << app->app_id()
