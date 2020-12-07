@@ -1359,7 +1359,6 @@ void PolicyHandler::OnAllowSDLFunctionalityNotification(
       }
 
 #ifdef EXTERNAL_PROPRIETARY_MODE
-
       ApplicationSet applications;
       {
         DataAccessor<ApplicationSet> accessor =
@@ -1405,6 +1404,8 @@ void PolicyHandler::OnAllowSDLFunctionalityNotification(
   }
 
 #ifdef EXTERNAL_PROPRIETARY_MODE
+  SDL_LOG_DEBUG("[!] OnAllowSDLFunctionality: is_allowed="
+                << is_allowed << ", device_mac=" << device_mac);
 
   if (last_activated_app_id_) {
     ApplicationSharedPtr app =
@@ -1416,7 +1417,19 @@ void PolicyHandler::OnAllowSDLFunctionalityNotification(
                    << "' not found among registered applications.");
       return;
     }
-    if (is_allowed) {
+
+    std::string policy_app_id = app->policy_app_id();
+    AppPermissions permissions(policy_app_id);
+    const auto policy_manager = LoadPolicyManager();
+
+    bool is_allowed_by_policies = true;
+    if (PolicyEnabled()) {
+      permissions = policy_manager->GetAppPermissionsChanges(app->mac_address(),
+                                                             policy_app_id);
+      is_allowed_by_policies = !permissions.appRevoked;
+    }
+
+    if (is_allowed && is_allowed_by_policies) {
       // Send HMI status notification to mobile
       // Put application in full
       AudioStreamingState::eType audio_state =
