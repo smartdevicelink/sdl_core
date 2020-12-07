@@ -59,7 +59,6 @@ void StreamerAdapter::StartActivity(int32_t application_key) {
                                               << " has been already started");
     return;
   }
-  messages_.Reset();
 
   DCHECK(thread_);
   const size_t kStackSize = 16384;
@@ -87,6 +86,7 @@ void StreamerAdapter::StopActivity(int32_t application_key) {
 
   DCHECK(streamer_);
   streamer_->exitThreadMain();
+  messages_.Reset();
 
   for (std::set<MediaListenerPtr>::iterator it = media_listeners_.begin();
        media_listeners_.end() != it;

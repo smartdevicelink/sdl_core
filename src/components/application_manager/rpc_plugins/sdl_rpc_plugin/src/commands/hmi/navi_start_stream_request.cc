@@ -146,41 +146,46 @@ void NaviStartStreamRequest::onTimeOut() {
 void NaviStartStreamRequest::RetryStartSession() {
   SDL_LOG_AUTO_TRACE();
 
+  auto retry_start_session = [this](const uint32_t hmi_app_id) {
+    ApplicationSharedPtr app =
+        application_manager_.application_by_hmi_app(hmi_app_id);
+
+    if (!app) {
+      SDL_LOG_ERROR("NaviStartStreamRequest aborted. Application not found");
+      return;
+    }
+
+    if (!app->video_streaming_allowed()) {
+      SDL_LOG_WARN("Video streaming not allowed");
+      return;
+    }
+
+    if (app->video_streaming_approved()) {
+      SDL_LOG_INFO("NaviStartStream retry sequence stopped. "
+                   << "SUCCESS received");
+      app->set_video_stream_retry_number(0);
+      return;
+    }
+
+    uint32_t curr_retry_number = app->video_stream_retry_number() + 1;
+
+    if (curr_retry_number <= retry_number_) {
+      SDL_LOG_DEBUG("Retry number " << curr_retry_number << " of "
+                                    << retry_number_);
+      MessageHelper::SendNaviStartStream(app->app_id(), application_manager_);
+      app->set_video_stream_retry_number(curr_retry_number);
+    } else {
+      SDL_LOG_DEBUG("NaviStartStream retry sequence stopped. "
+                    << "Attempts expired");
+
+      application_manager_.EndNaviServices(app->app_id());
+    }
+  };
+
+  retry_start_session(application_id());
+
   application_manager_.TerminateRequest(
       connection_key(), correlation_id(), function_id());
-
-  ApplicationSharedPtr app =
-      application_manager_.application_by_hmi_app(application_id());
-  if (!app) {
-    SDL_LOG_ERROR("NaviStartStreamRequest aborted. Application not found");
-    return;
-  }
-
-  if (!app->video_streaming_allowed()) {
-    SDL_LOG_WARN("Video streaming not allowed");
-    return;
-  }
-
-  if (app->video_streaming_approved()) {
-    SDL_LOG_INFO("NaviStartStream retry sequence stopped. "
-                 << "SUCCESS received");
-    app->set_video_stream_retry_number(0);
-    return;
-  }
-
-  uint32_t curr_retry_number = app->video_stream_retry_number();
-
-  if (curr_retry_number <= retry_number_) {
-    SDL_LOG_DEBUG("Retry number " << curr_retry_number << " of "
-                                  << retry_number_);
-    MessageHelper::SendNaviStartStream(app->app_id(), application_manager_);
-    app->set_video_stream_retry_number(++curr_retry_number);
-  } else {
-    SDL_LOG_DEBUG("NaviStartStream retry sequence stopped. "
-                  << "Attempts expired");
-
-    application_manager_.EndNaviServices(app->app_id());
-  }
 }
 
 }  // namespace commands

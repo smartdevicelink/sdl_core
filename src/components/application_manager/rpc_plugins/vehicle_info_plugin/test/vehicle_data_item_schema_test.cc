@@ -85,6 +85,7 @@ class VehicleDataItemSchemaTest : public ::testing::Test {
       schema.params->mark_initialized();
       schema.mandatory = true;
       *schema.array = false;
+      *schema.defvalue = "10";
       // default value bounds
       *schema.minvalue = 10;
       *schema.maxvalue = 100;

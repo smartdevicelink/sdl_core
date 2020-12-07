@@ -179,6 +179,13 @@ class SessionObserver {
   virtual void OnMalformedMessageCallback(const uint32_t& connection_key) = 0;
 
   /**
+   * @brief Callback function used by ProtocolHandler when the last message was
+   * sent for a mobile connection
+   * @param connection_key used by other components as an application identifier
+   */
+  virtual void OnFinalMessageCallback(const uint32_t& connection_key) = 0;
+
+  /**
    * @brief Converts connection handle to transport type string used in
    * smartDeviceLink.ini file, e.g. "TCP_WIFI"
    * @param connection_handle A connection identifier

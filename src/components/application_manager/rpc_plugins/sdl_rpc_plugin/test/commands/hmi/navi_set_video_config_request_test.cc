@@ -101,11 +101,9 @@ TEST_F(NaviSetVideoConfigRequestTest, OnEventWithSuccessResponse) {
   Event event(kEventID);
   event.set_smart_object(*event_msg);
 
-  std::vector<std::string> empty;
-  EXPECT_CALL(
-      app_mngr_,
-      OnStreamingConfigured(
-          kAppId, protocol_handler::ServiceType::kMobileNav, true, empty))
+  EXPECT_CALL(app_mngr_,
+              OnStreamingConfigurationSuccessful(
+                  kAppId, protocol_handler::ServiceType::kMobileNav))
       .Times(1);
 
   command->on_event(event);
@@ -151,10 +149,9 @@ TEST_F(NaviSetVideoConfigRequestTest, OnEventWithRejectedResponse) {
   event.set_smart_object(*event_msg);
 
   std::vector<std::string> rejected_params;
-  EXPECT_CALL(app_mngr_,
-              OnStreamingConfigured(
-                  kAppId, protocol_handler::ServiceType::kMobileNav, false, _))
-      .WillOnce(SaveArg<3>(&rejected_params));
+  std::string reason("Received SetVideoConfig failure response");
+  EXPECT_CALL(app_mngr_, OnStreamingConfigurationFailed(kAppId, _, reason))
+      .WillOnce(SaveArg<1>(&rejected_params));
 
   command->on_event(event);
 
@@ -181,10 +178,8 @@ TEST_F(NaviSetVideoConfigRequestTest,
   event.set_smart_object(*event_msg);
 
   std::vector<std::string> empty;
-  EXPECT_CALL(
-      app_mngr_,
-      OnStreamingConfigured(
-          kAppId, protocol_handler::ServiceType::kMobileNav, false, empty))
+  std::string reason("Received SetVideoConfig failure response");
+  EXPECT_CALL(app_mngr_, OnStreamingConfigurationFailed(kAppId, empty, reason))
       .WillOnce(Return());
 
   command->on_event(event);
@@ -198,10 +193,8 @@ TEST_F(NaviSetVideoConfigRequestTest, OnTimeout) {
       CreateCommand<NaviSetVideoConfigRequest>(request_msg);
 
   std::vector<std::string> empty;
-  EXPECT_CALL(
-      app_mngr_,
-      OnStreamingConfigured(
-          kAppId, protocol_handler::ServiceType::kMobileNav, false, empty))
+  std::string reason("Timed out while waiting for SetVideoConfig response");
+  EXPECT_CALL(app_mngr_, OnStreamingConfigurationFailed(kAppId, empty, reason))
       .WillOnce(Return());
 
   EXPECT_CALL(app_mngr_, TerminateRequest(_, _, _)).Times(1);

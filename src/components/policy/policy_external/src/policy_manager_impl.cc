@@ -62,7 +62,7 @@ namespace {
 struct GroupNamesAppender
     : public std::unary_function<void,
                                  const policy::FunctionalGroupPermission&> {
-  GroupNamesAppender(policy_table::Strings& names) : names_(names) {}
+  explicit GroupNamesAppender(policy_table::Strings& names) : names_(names) {}
 
   void operator()(const policy::FunctionalGroupPermission& value) {
     names_.push_back(value.group_name);
@@ -465,7 +465,6 @@ PolicyManager::PtProcessingResult PolicyManagerImpl::LoadPT(
     const std::string& file, const BinaryMessage& pt_content) {
   SDL_LOG_INFO("LoadPT of size " << pt_content.size());
   SDL_LOG_DEBUG(
-
       "PTU content is: " << std::string(pt_content.begin(), pt_content.end()));
 
   // Parse message into table struct
@@ -491,7 +490,6 @@ PolicyManager::PtProcessingResult PolicyManagerImpl::LoadPT(
   auto policy_table_snapshot = cache_->GenerateSnapshot();
   if (!policy_table_snapshot) {
     SDL_LOG_ERROR(
-
         "Failed to create snapshot of policy table, trying another exchange");
     return PtProcessingResult::kNewPtRequired;
   }
@@ -507,7 +505,6 @@ PolicyManager::PtProcessingResult PolicyManagerImpl::LoadPT(
   // Replace current data with updated
   if (!cache_->ApplyUpdate(*pt_update)) {
     SDL_LOG_WARN(
-
         "Unsuccessful save of updated policy table, trying another exchange");
     return PtProcessingResult::kNewPtRequired;
   }
@@ -968,7 +965,6 @@ void PolicyManagerImpl::CheckPermissions(const PTString& device_id,
                  hmi_level)) {
     // RPC found in allowed == allowed by backend, but disallowed by user
     SDL_LOG_DEBUG(
-
         "RPC found in allowed == allowed by backend, but disallowed by user");
     result.hmi_level_permitted = kRpcUserDisallowed;
   } else {
@@ -1266,7 +1262,6 @@ void PolicyManagerImpl::CheckPendingPermissionsChanges(
       app_permissions_diff_.find(policy_app_id);
   if (app_permissions_diff_.end() == it_pending) {
     SDL_LOG_WARN(
-
         "No pending permissions had been found for appID: " << policy_app_id);
     return;
   }
@@ -1284,7 +1279,6 @@ void PolicyManagerImpl::CheckPendingPermissionsChanges(
   for (; it_groups != it_end_groups; ++it_groups) {
     if (policy::kGroupUndefined == it_groups->state) {
       SDL_LOG_DEBUG(
-
           "Unconsented groups still present for appID: " << policy_app_id);
       it_pending->second.appPermissionsConsentNeeded = true;
       return;
@@ -1292,7 +1286,6 @@ void PolicyManagerImpl::CheckPendingPermissionsChanges(
   }
 
   SDL_LOG_DEBUG(
-
       "Unconsented groups not present anymore for appID: " << policy_app_id);
   it_pending->second.appPermissionsConsentNeeded = false;
   return;
@@ -1827,13 +1820,12 @@ bool PolicyManagerImpl::IsNeedToUpdateExternalConsentStatus(
   ItemV difference_v;
   difference_v.resize(new_status_v.size() + existing_status_v.size());
 
-  ItemV::iterator ci = difference_v.begin();
-  ci = std::set_difference(new_status_v.begin(),
-                           new_status_v.end(),
-                           existing_status_v.begin(),
-                           existing_status_v.end(),
-                           difference_v.begin(),
-                           ConsentStatusComparatorFunc);
+  ItemV::iterator ci = std::set_difference(new_status_v.begin(),
+                                           new_status_v.end(),
+                                           existing_status_v.begin(),
+                                           existing_status_v.end(),
+                                           difference_v.begin(),
+                                           ConsentStatusComparatorFunc);
   difference_v.resize(ci - difference_v.begin());
 
   return !difference_v.empty();
@@ -2255,16 +2247,14 @@ void PolicyManagerImpl::AddNewApplication(const std::string& device_id,
 
   if (kDeviceHasNoConsent == device_consent ||
       kDeviceDisallowed == device_consent) {
-    SDL_LOG_INFO(
-
-        "Setting " << policy::kPreDataConsentId
-                   << " permissions for application id: " << application_id);
+    SDL_LOG_INFO("Setting "
+                 << policy::kPreDataConsentId
+                 << " permissions for application id: " << application_id);
     cache_->SetPredataPolicy(application_id);
   } else {
-    SDL_LOG_INFO(
-
-        "Setting " << policy::kDefaultId
-                   << " permissions for application id: " << application_id);
+    SDL_LOG_INFO("Setting "
+                 << policy::kDefaultId
+                 << " permissions for application id: " << application_id);
     cache_->SetDefaultPolicy(application_id);
   }
 
@@ -2285,10 +2275,9 @@ void PolicyManagerImpl::PromoteExistedApplication(
                 << " device_consent: " << device_consent);
   if (kDeviceAllowed == device_consent &&
       cache_->IsPredataPolicy(application_id)) {
-    SDL_LOG_INFO(
-
-        "Setting " << policy::kDefaultId
-                   << " permissions for application id: " << application_id);
+    SDL_LOG_INFO("Setting "
+                 << policy::kDefaultId
+                 << " permissions for application id: " << application_id);
     cache_->SetDefaultPolicy(application_id);
   }
   ProcessExternalConsentStatusForApp(
@@ -2386,7 +2375,7 @@ void PolicyManagerImpl::SetDefaultHmiTypes(
 }
 
 struct HMITypeToInt {
-  int operator()(const policy_table::AppHMITypes::value_type item) {
+  int operator()(const policy_table::AppHMITypes::value_type item) const {
     return policy_table::AppHMIType(item);
   }
 };
@@ -2587,6 +2576,7 @@ __attribute__((visibility("default"))) policy::PolicyManager* CreateManager(
   return new policy::PolicyManagerImpl();
 }
 
+// cppcheck-suppress unusedFunction
 __attribute__((visibility("default"))) void DeleteManager(
     policy::PolicyManager* pm) {
   delete pm;

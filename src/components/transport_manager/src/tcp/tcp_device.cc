@@ -56,9 +56,8 @@ TcpDevice::TcpDevice(const in_addr_t& in_addr,
     , last_handle_(0) {
   SDL_LOG_AUTO_TRACE();
   SDL_LOG_DEBUG("Device created with transport switch emulation support.");
-  SDL_LOG_DEBUG(
-
-      "Device parameters: " << device_uid << " / " << transport_switch_id);
+  SDL_LOG_DEBUG("Device parameters: " << device_uid << " / "
+                                      << transport_switch_id);
 }
 #endif  // ENABLE_IAP2EMULATION
 
@@ -69,7 +68,6 @@ bool TcpDevice::IsSameAs(const Device* other) const {
 
   if (other_tcp_device && other_tcp_device->in_addr_ == in_addr_) {
     SDL_LOG_TRACE(
-
         "exit with TRUE. Condition: other_tcp_device->in_addr_ == in_addr_");
     return true;
   } else {

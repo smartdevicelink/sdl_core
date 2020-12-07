@@ -42,7 +42,7 @@ namespace {
 
 struct StateIDComparator {
   application_manager::HmiState::StateID state_id_;
-  StateIDComparator(application_manager::HmiState::StateID state_id)
+  explicit StateIDComparator(application_manager::HmiState::StateID state_id)
       : state_id_(state_id) {}
   bool operator()(const application_manager::HmiStatePtr cur) const {
     return cur->state_id() == state_id_;
@@ -209,8 +209,8 @@ void ApplicationState::EraseHMIState(HmiStates& hmi_states,
   } else {
     HmiStates::iterator next = it;
     HmiStates::iterator prev = it;
-    next++;
-    prev--;
+    ++next;
+    --prev;
 
     if (hmi_states.end() != next) {
       HmiStatePtr next_state = *next;

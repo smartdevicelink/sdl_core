@@ -56,7 +56,9 @@ bool IsStateChanged(const HmiState& old_state, const HmiState& new_state) {
 }  // unnamed namespace
 
 StateControllerImpl::StateControllerImpl(ApplicationManager& app_mngr)
-    : EventObserver(app_mngr.event_dispatcher()), app_mngr_(app_mngr) {
+    : EventObserver(app_mngr.event_dispatcher())
+    , app_mngr_(app_mngr)
+    , postponed_activation_controller_() {
   subscribe_on_event(hmi_apis::FunctionID::BasicCommunication_OnAppActivated);
   subscribe_on_event(hmi_apis::FunctionID::BasicCommunication_OnAppDeactivated);
   subscribe_on_event(hmi_apis::FunctionID::TTS_Started);
@@ -394,7 +396,7 @@ void StateControllerImpl::HmiLevelConflictResolver::operator()(
     result_video_state = mobile_apis::VideoStreamingState::STREAMABLE;
   }
 
-  mobile_apis::HMILevel::eType result_hmi_level = state_to_resolve->hmi_level();
+  mobile_apis::HMILevel::eType result_hmi_level;
 
   using namespace helpers;
   if (mobile_apis::VideoStreamingState::STREAMABLE == result_video_state ||
@@ -408,7 +410,11 @@ void StateControllerImpl::HmiLevelConflictResolver::operator()(
             ? mobile_apis::HMILevel::HMI_LIMITED
             : to_resolve_hmi_level;
   } else {
-    result_hmi_level = mobile_apis::HMILevel::HMI_BACKGROUND;
+    result_hmi_level =
+        mobile_apis::HMILevel::HMI_FULL == to_resolve_hmi_level &&
+                mobile_apis::HMILevel::HMI_FULL != applied_hmi_level
+            ? to_resolve_hmi_level
+            : mobile_apis::HMILevel::HMI_BACKGROUND;
   }
 
   if (std::make_tuple(to_resolve_hmi_level,
@@ -803,11 +809,11 @@ void StateControllerImpl::on_event(const event_engine::Event& event) {
     case FunctionID::BasicCommunication_OnEventChanged: {
       bool is_active =
           message[strings::msg_params][hmi_notification::is_active].asBool();
-      const uint32_t id =
+      const uint32_t event_id =
           message[strings::msg_params][hmi_notification::event_name].asUInt();
       // TODO(AOleynik): Add verification/conversion check here
       const Common_EventTypes::eType state_id =
-          static_cast<Common_EventTypes::eType>(id);
+          static_cast<Common_EventTypes::eType>(event_id);
       if (is_active) {
         if (Common_EventTypes::AUDIO_SOURCE == state_id) {
           ApplyTempState<HmiState::STATE_ID_AUDIO_SOURCE>();
@@ -913,6 +919,12 @@ void StateControllerImpl::OnStateChanged(ApplicationSharedPtr app,
   SDL_LOG_DEBUG("Window #" << window_id << " old state: " << *old_state);
   SDL_LOG_DEBUG("Window #" << window_id << " new state: " << *new_state);
 
+  if ((new_state->hmi_level() == mobile_apis::HMILevel::INVALID_ENUM) &&
+      (old_state->hmi_level() == mobile_apis::HMILevel::INVALID_ENUM)) {
+    SDL_LOG_DEBUG("HMI level is invalid data.");
+    return;
+  }
+
   if (!IsStateChanged(*old_state, *new_state)) {
     SDL_LOG_DEBUG("State has NOT been changed.");
     return;
@@ -949,6 +961,19 @@ void StateControllerImpl::OnStateChanged(ApplicationSharedPtr app,
 
   app_mngr_.OnHMIStateChanged(app->app_id(), old_state, new_state);
   app->usage_report().RecordHmiStateChanged(new_state->hmi_level());
+
+  if (mobile_apis::HMILevel::INVALID_ENUM == old_state->hmi_level()) {
+    const auto app_default_hmi_level = app_mngr_.GetDefaultHmiLevel(app);
+    if (app_default_hmi_level == new_state->hmi_level()) {
+      const uint32_t app_id = app->app_id();
+      const uint32_t corr_id =
+          postponed_activation_controller_.GetPendingActivationCorrId(app_id);
+      if (corr_id > 0) {
+        app_mngr_.GetPolicyHandler().OnActivateApp(app_id, corr_id);
+        postponed_activation_controller_.RemoveAppToActivate(app_id);
+      }
+    }
+  }
 }
 
 bool StateControllerImpl::IsTempStateActive(HmiState::StateID id) const {
@@ -1001,11 +1026,6 @@ void StateControllerImpl::OnApplicationRegistered(
     const mobile_apis::HMILevel::eType default_level) {
   SDL_LOG_AUTO_TRACE();
 
-  if (app->is_cloud_app()) {
-    // Return here, there should already be an onHMIStatus=FULL being processed
-    // for when the cloud app was initially activated by the hmi
-    return;
-  }
   // After app registration HMI level should be set for DEFAULT_WINDOW only
   OnAppWindowAdded(app,
                    mobile_apis::PredefinedWindows::DEFAULT_WINDOW,
@@ -1403,6 +1423,11 @@ mobile_apis::VideoStreamingState::eType StateControllerImpl::CalcVideoState(
                 << app->app_id() << " for " << hmi_level << " HMI level is "
                 << state);
   return state;
+}
+
+PostponedActivationController&
+StateControllerImpl::GetPostponedActivationController() {
+  return postponed_activation_controller_;
 }
 
 }  // namespace application_manager

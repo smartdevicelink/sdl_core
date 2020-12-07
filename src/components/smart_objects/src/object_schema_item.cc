@@ -146,7 +146,7 @@ errors::eType CObjectSchemaItem::validate(
     }
     const SmartObject& field = object.getElement(key);
 
-    errors::eType result = errors::OK;
+    errors::eType result;
     // Check if MessageVersion matches schema version
     if (correct_member) {
       result =

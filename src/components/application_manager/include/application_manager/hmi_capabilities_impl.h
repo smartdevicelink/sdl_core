@@ -39,6 +39,7 @@
 #include "interfaces/MOBILE_API.h"
 #include "json/json.h"
 #include "utils/macro.h"
+#include "utils/rwlock.h"
 
 namespace application_manager {
 class ApplicationManager;
@@ -485,6 +486,7 @@ class HMICapabilitiesImpl : public HMICapabilities {
   ApplicationManager& app_mngr_;
   HMILanguageHandler hmi_language_handler_;
 
+  mutable sync_primitives::RWLock hmi_capabilities_lock_;
   std::set<hmi_apis::FunctionID::eType> requests_required_for_capabilities_;
 
   DISALLOW_COPY_AND_ASSIGN(HMICapabilitiesImpl);

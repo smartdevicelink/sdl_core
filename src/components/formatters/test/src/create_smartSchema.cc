@@ -139,6 +139,8 @@ const AppTypeTest::eType
         test::components::formatters::AppTypeTest::MEDIA,
 };
 
+#ifdef BUILD_TESTS
+// cppcheck-suppress unusedFunction //Used in unit tests
 CSmartSchema initObjectSchema() {
   std::set<TestType::eType> resultCode_allowedEnumSubsetValues;
   resultCode_allowedEnumSubsetValues.insert(
@@ -222,6 +224,7 @@ CSmartSchema initObjectSchema() {
   return CSmartSchema(CObjectSchemaItem::create(rootMembersMap));
 };
 
+// cppcheck-suppress unusedFunction //Used in unit tests
 CSmartSchema initSchemaForMetaFormatter() {
   std::set<TestType::eType> resultCode_allowedEnumSubsetValues;
   resultCode_allowedEnumSubsetValues.insert(
@@ -336,15 +339,6 @@ CSmartSchema initSchemaForMetaFormatter() {
   ISchemaItemPtr majorVersion_SchemaItem = TNumberSchemaItem<int>::create();
   ISchemaItemPtr minorVersion_SchemaItem = TNumberSchemaItem<int>::create();
   ISchemaItemPtr patchVersion_SchemaItem = TNumberSchemaItem<int>::create();
-  ISchemaItemPtr syncMsg_SchemaItem =
-      CStringSchemaItem::create(TSchemaItemParameter<size_t>(0),
-                                TSchemaItemParameter<size_t>(1000),
-                                TSchemaItemParameter<std::string>());
-
-  ISchemaItemPtr syncMsgVersion_SchemaItem =
-      CArraySchemaItem::create(syncMsg_SchemaItem,
-                               TSchemaItemParameter<size_t>(0),
-                               TSchemaItemParameter<size_t>(1000));
 
   // Creation map for syncMsgVersion
   std::map<std::string, SMember> schemaSyncMsgVersionMap;
@@ -400,6 +394,7 @@ CSmartSchema initSchemaForMetaFormatter() {
       SMember(CObjectSchemaItem::create(paramsMembersMap), true);
   return CSmartSchema(CObjectSchemaItem::create(rootMembersMap));
 };
+#endif  // BUILD_TESTS
 
 }  // namespace formatters
 }  // namespace components

@@ -39,7 +39,6 @@ class CryptoManagerSettingsImpl : public CryptoManagerSettings {
     }
 
     SDL_LOG_ERROR(
-
         "Unknown protocol: " << profile_.security_manager_protocol_name());
     return static_cast<security_manager::Protocol>(-1);
   }

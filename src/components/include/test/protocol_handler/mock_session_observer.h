@@ -83,6 +83,7 @@ class MockSessionObserver : public ::protocol_handler::SessionObserver {
                void(const uint32_t& connection_key));
   MOCK_METHOD1(OnMalformedMessageCallback,
                void(const uint32_t& connection_key));
+  MOCK_METHOD1(OnFinalMessageCallback, void(const uint32_t& connection_key));
   MOCK_CONST_METHOD1(
       TransportTypeProfileStringFromConnHandle,
       const std::string(transport_manager::ConnectionUID connection_handle));

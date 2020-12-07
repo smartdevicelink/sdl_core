@@ -43,6 +43,7 @@
 #include "utils/prioritized_queue.h"
 #include "utils/threads/message_loop_thread.h"
 
+#include "utils/convert_utils.h"
 #include "utils/custom_string.h"
 #include "utils/messagemeter.h"
 #include "utils/semantic_version.h"
@@ -379,7 +380,7 @@ class ProtocolHandlerImpl
                             uint8_t session_id,
                             uint8_t protocol_version,
                             uint8_t service_type,
-                            const std::string reason);
+                            const std::string& reason);
 
   /**
    * \brief Sends fail of starting session to mobile application
@@ -395,7 +396,7 @@ class ProtocolHandlerImpl
                             uint8_t protocol_version,
                             uint8_t service_type,
                             std::vector<std::string>& rejectedParams,
-                            const std::string reason);
+                            const std::string& reason);
 
   /**
    * \brief Sends acknowledgement of end session/service to mobile application
@@ -674,7 +675,7 @@ class ProtocolHandlerImpl
 
   RESULT_CODE HandleControlMessageHeartBeat(const ProtocolPacket& packet);
 
-  void PopValideAndExpirateMultiframes();
+  void PopValidAndExpiredMultiframes();
 
   // threads::MessageLoopThread<*>::Handler implementations
   // CALLED ON raw_ford_messages_from_mobile_ thread!

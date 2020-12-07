@@ -56,8 +56,7 @@ using boost::system::error_code;
 uint64_t file_system::GetAvailableDiskSpace(const std::string& path) {
   SDL_LOG_AUTO_TRACE();
   error_code ec;
-  fs::space_info si = {0, 0, 0};
-  si = fs::space(path, ec);
+  fs::space_info si = fs::space(path, ec);
 
   if (ec) {
     // If something went wrong, assume no free space
@@ -74,9 +73,8 @@ uint64_t file_system::FileSize(const std::string& path) {
   const uint64_t fsize = static_cast<uint64_t>(fs::file_size(path, ec));
 
   if (ec) {
-    SDL_LOG_ERROR_WITH_ERRNO(
-
-        "Unable to get file size: '" << path << "', reason: " << ec.message());
+    SDL_LOG_ERROR_WITH_ERRNO("Unable to get file size: '"
+                             << path << "', reason: " << ec.message());
     return 0;
   }
   return fsize;
@@ -174,9 +172,8 @@ bool file_system::IsDirectory(const std::string& name) {
 bool file_system::DirectoryExists(const std::string& name) {
   SDL_LOG_AUTO_TRACE();
   const bool exists = FileExists(name) && IsDirectory(name);
-  SDL_LOG_DEBUG(
-
-      "Directory '" << name << "' " << (exists ? "exists" : "NOT exists"));
+  SDL_LOG_DEBUG("Directory '" << name << "' "
+                              << (exists ? "exists" : "NOT exists"));
   return exists;
 }
 
@@ -305,10 +302,9 @@ void file_system::remove_directory_content(const std::string& directory_name) {
   while (dir_iter != end) {
     fs::remove_all(dir_iter->path(), ec);
     if (ec) {
-      SDL_LOG_ERROR_WITH_ERRNO(
-
-          "Unable to remove file: " << dir_iter->path().string() << " reason "
-                                    << ec.message());
+      SDL_LOG_ERROR_WITH_ERRNO("Unable to remove file: "
+                               << dir_iter->path().string() << " reason "
+                               << ec.message());
     }
     dir_iter.increment(ec);
     if (ec) {
@@ -325,7 +321,6 @@ bool file_system::RemoveDirectory(const std::string& directory_name,
   // Make sure the directory exists
   if (!DirectoryExists(directory_name) && IsAccessible(directory_name, W_OK)) {
     SDL_LOG_WARN(
-
         "Unable to remove directory either doesn't exist or is not accessible");
     return false;
   }
@@ -466,11 +461,10 @@ bool file_system::ReadFile(const std::string& name, std::string& result) {
 const std::string file_system::ConvertPathForURL(const std::string& path) {
   SDL_LOG_AUTO_TRACE();
   const std::string reserved_symbols = "!#$&'()*+,:;=?@[] ";
-  size_t pos = std::string::npos;
   std::string converted_path;
 
   for (const auto symbol : path) {
-    pos = reserved_symbols.find_first_of(symbol);
+    size_t pos = reserved_symbols.find_first_of(symbol);
     if (pos != std::string::npos) {
       const size_t size = 100;
       char percent_value[size];
@@ -519,9 +513,8 @@ bool file_system::CopyFile(const std::string& src, const std::string& dst) {
   error_code ec;
   fs::copy_file(src, dst, ec);
   if (ec) {
-    SDL_LOG_ERROR_WITH_ERRNO(
-
-        "Unable to copy file: '" << src << "', reason: " << ec.message());
+    SDL_LOG_ERROR_WITH_ERRNO("Unable to copy file: '"
+                             << src << "', reason: " << ec.message());
     // something failed
     return false;
   }

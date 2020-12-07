@@ -242,6 +242,10 @@ PhoneCallHmiState::PhoneCallHmiState(std::shared_ptr<Application> app,
     : HmiState(app, app_mngr, STATE_ID_PHONE_CALL) {}
 
 mobile_apis::HMILevel::eType PhoneCallHmiState::hmi_level() const {
+  using namespace mobile_apis;
+  if (HMILevel::INVALID_ENUM == parent_hmi_level()) {
+    return parent_hmi_level();
+  }
   return std::max(parent_hmi_level(), max_hmi_level());
 }
 
@@ -272,6 +276,10 @@ DeactivateHMI::DeactivateHMI(std::shared_ptr<Application> app,
     : HmiState(app, app_mngr, STATE_ID_DEACTIVATE_HMI) {}
 
 mobile_apis::HMILevel::eType DeactivateHMI::hmi_level() const {
+  using namespace mobile_apis;
+  if (HMILevel::INVALID_ENUM == parent_hmi_level()) {
+    return parent_hmi_level();
+  }
   return std::max(parent_hmi_level(), max_hmi_level());
 }
 
@@ -295,6 +303,10 @@ AudioSource::AudioSource(std::shared_ptr<Application> app,
 
 mobile_apis::HMILevel::eType AudioSource::hmi_level() const {
   using namespace mobile_apis;
+
+  if (HMILevel::INVALID_ENUM == parent_hmi_level()) {
+    return parent_hmi_level();
+  }
 
   if (WindowType::WIDGET == window_type() || keep_context_) {
     return std::max(parent_hmi_level(), max_hmi_level());
@@ -368,6 +380,10 @@ mobile_apis::HMILevel::eType EmbeddedNavi::hmi_level() const {
   using namespace mobile_apis;
   using namespace helpers;
 
+  if (HMILevel::INVALID_ENUM == parent_hmi_level()) {
+    return parent_hmi_level();
+  }
+
   if (WindowType::WIDGET == window_type()) {
     return std::max(parent_hmi_level(), max_hmi_level());
   }
@@ -426,6 +442,8 @@ const StateID2StrMap kStateID2StrMap =
         HmiState::StateID::STATE_ID_EMBEDDED_NAVI, "EMBEDDED_NAVI");
 }  // anonymous namespace
 
+// cppcheck-suppress unusedFunction //Used in the next
+// overload of operator<<
 std::ostream& operator<<(std::ostream& os, const HmiState::StateID src) {
   try {
     os << kStateID2StrMap.left.at(src);

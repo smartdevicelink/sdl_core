@@ -96,15 +96,6 @@ void DeleteCommandRequest::Run() {
       (*message_)[strings::msg_params][strings::cmd_id];
   msg_params[strings::app_id] = application->app_id();
 
-  // we should specify amount of required responses in the 1st request
-  uint32_t chaining_counter = 0;
-  if (command.keyExists(strings::menu_params)) {
-    ++chaining_counter;
-  }
-
-  if (command.keyExists(strings::vr_commands)) {
-    ++chaining_counter;
-  }
   /* Need to set all flags before sending request to HMI
    * for correct processing this flags in method on_event */
   if (command.keyExists(strings::menu_params)) {
@@ -164,7 +155,7 @@ void DeleteCommandRequest::on_event(const event_engine::Event& event) {
       ui_result_ = static_cast<hmi_apis::Common_Result::eType>(
           message[strings::params][hmi_response::code].asInt());
       SDL_LOG_DEBUG("Received UI_DeleteCommand event with result "
-                    << MessageHelper::HMIResultToString(ui_result_));
+                    << EnumToString(ui_result_));
       GetInfo(message, ui_info_);
       break;
     }
@@ -174,7 +165,7 @@ void DeleteCommandRequest::on_event(const event_engine::Event& event) {
       vr_result_ = static_cast<hmi_apis::Common_Result::eType>(
           message[strings::params][hmi_response::code].asInt());
       SDL_LOG_DEBUG("Received VR_DeleteCommand event with result "
-                    << MessageHelper::HMIResultToString(vr_result_));
+                    << EnumToString(vr_result_));
       GetInfo(message, vr_info_);
       break;
     }

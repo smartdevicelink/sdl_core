@@ -161,7 +161,7 @@ smart_objects::SmartObject CustomVehicleDataManagerImpl::CreateHMIMessageParams(
       const policy_table::VehicleDataItem&)>
       ParamsConstructor;
 
-  auto fill_param = [](ParamsConstructor& constructor,
+  auto fill_param = [](const ParamsConstructor& constructor,
                        const policy_table::VehicleDataItem& param,
                        smart_objects::SmartObject* out_params) {
     DCHECK_OR_RETURN_VOID(out_params)
@@ -354,12 +354,14 @@ void CustomVehicleDataManagerImpl::UpdateVehicleDataItems() {
   };
 
   auto get_vehicle_data_history =
-      [&vehicle_data_items](std::string name) -> std::vector<VehicleDataItem> {
+      [&vehicle_data_items](
+          const std::string& name) -> std::vector<VehicleDataItem> {
     std::vector<VehicleDataItem> result;
-    std::copy_if(vehicle_data_items.begin(),
-                 vehicle_data_items.end(),
-                 std::back_inserter(result),
-                 [&name](VehicleDataItem& item) { return item.name == name; });
+    std::copy_if(
+        vehicle_data_items.begin(),
+        vehicle_data_items.end(),
+        std::back_inserter(result),
+        [&name](const VehicleDataItem& item) { return item.name == name; });
 
     std::sort(result.begin(),
               result.end(),

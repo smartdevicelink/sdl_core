@@ -84,9 +84,8 @@ class ResumeCtrl {
   /**
    * @brief Set application HMI Level and ausio_state as saved
    * @param application is application witch HMI Level is need to restore
-   * @return true if success, otherwise return false
    */
-  virtual bool RestoreAppHMIState(
+  virtual void RestoreAppHMIState(
       application_manager::ApplicationSharedPtr application) = 0;
 
   /**
@@ -255,7 +254,7 @@ class ResumeCtrl {
    * @param application - application to restore hmi level
    * and audio streaming state
    */
-  virtual bool StartAppHmiStateResumption(
+  virtual void StartAppHmiStateResumption(
       application_manager::ApplicationSharedPtr application) = 0;
 
   /**

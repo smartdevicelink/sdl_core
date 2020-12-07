@@ -408,6 +408,7 @@ TEST_F(SQLPTRepresentationTest, VehicleDataItem_Store_Complete_Item) {
   *message.until = "5.0";
   *message.removed = false;
   *message.deprecated = false;
+  *message.defvalue = "0";
   *message.minvalue = 0;
   *message.maxvalue = 255;
   *message.minsize = 0;

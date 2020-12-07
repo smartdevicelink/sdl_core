@@ -60,9 +60,8 @@ void OnSystemInfoChangedNotification::Run() {
   SDL_LOG_AUTO_TRACE();
   uint32_t lang_code =
       (*message_)[strings::msg_params][strings::language].asUInt();
-  const std::string language =
-      application_manager::MessageHelper::CommonLanguageToString(
-          static_cast<hmi_apis::Common_Language::eType>(lang_code));
+  const std::string language = application_manager::EnumToString(
+      static_cast<hmi_apis::Common_Language::eType>(lang_code));
 
   policy_handler_.OnSystemInfoChanged(language);
 }
