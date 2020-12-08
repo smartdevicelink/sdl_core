@@ -96,16 +96,24 @@ void BoostLogger::Init() {
 
   if (settings.has_section("Sinks")) {
     auto& sinks = settings.property_tree().get_child("Sinks");
-    for (auto& sink : sinks) {
-      std::string sink_name = "Sinks." + sink.first;
+
+    for (auto it = sinks.begin(); it != sinks.end();) {
+      bool to_be_removed = false;
+      std::string sink_name = "Sinks." + it->first;
 
       // Disable logging for particular sinks
       if (boost::optional<std::string> param =
               settings[sink_name]["DisableLogging"]) {
         bool sink_disabled = (param.get() == "true");
         if (sink_disabled) {
-          sinks.erase(sink.first);
+          to_be_removed = true;
         }
+      }
+
+      if (to_be_removed) {
+        it = sinks.erase(it);
+      } else {
+        it++;
       }
     }
   }
