@@ -178,7 +178,10 @@ std::string BoostLogger::GetFilteredFunctionTrace(
 
 bool BoostLogger::IsEnabledFor(const std::string& component,
                                LogLevel log_level) const {
-  // To be implemented once the config file adds limiting the log level
+  // Basic filtering based on component name and log level is currently handled
+  // using the Filter attribute. This function should be implemented if we add
+  // custom attributes for filtering or additional logic for filtering based on
+  // component name and log level.
   return true;
 }
 
