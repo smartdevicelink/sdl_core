@@ -1404,9 +1404,6 @@ void PolicyHandler::OnAllowSDLFunctionalityNotification(
   }
 
 #ifdef EXTERNAL_PROPRIETARY_MODE
-  SDL_LOG_DEBUG("[!] OnAllowSDLFunctionality: is_allowed="
-                << is_allowed << ", device_mac=" << device_mac);
-
   if (last_activated_app_id_) {
     ApplicationSharedPtr app =
         application_manager_.application(last_activated_app_id_);
