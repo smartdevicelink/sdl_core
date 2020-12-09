@@ -117,8 +117,7 @@ void OnVehicleDataNotification::Run() {
         parameters_permissions_.undefined_params.empty()) {
       SDL_LOG_DEBUG(
           "No parameter permissions provided, all params are allowed");
-    }
-    else {
+    } else {
       for (const auto& param : appSO[idx].enumerate()) {
         const auto& allowed_params = params_permissions.allowed_params;
         auto param_allowed = allowed_params.find(param);
