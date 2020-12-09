@@ -270,7 +270,7 @@ class ProtocolHandlerImplTest : public ::testing::Test {
   void AddSession(const std::shared_ptr<TestAsyncWaiter>& waiter,
                   uint32_t& times) {
     using namespace protocol_handler;
-    ASSERT_TRUE(NULL != waiter.get());
+    ASSERT_TRUE(NULL != waiter);
 
     AddConnection();
     const ServiceType start_service = kRpc;
@@ -546,7 +546,7 @@ TEST_F(ProtocolHandlerImplTest,
   const int call_times = 5;
   AddConnection();
 
-  TestAsyncWaiter waiter;
+  std::shared_ptr<TestAsyncWaiter> waiter = std::make_shared<TestAsyncWaiter>();
   uint32_t times = 0;
   ServiceType service_type;
   // Expect verification of allowed transport
@@ -579,7 +579,7 @@ TEST_F(ProtocolHandlerImplTest,
       .
       // Return sessions start rejection
       WillRepeatedly(
-          DoAll(NotifyTestAsyncWaiter(&waiter),
+          DoAll(NotifyTestAsyncWaiter(waiter),
                 SaveArg<2>(&service_type),
                 InvokeMemberFuncWithArg3(protocol_handler_impl.get(),
                                          &ProtocolHandler::NotifySessionStarted,
@@ -603,7 +603,7 @@ TEST_F(ProtocolHandlerImplTest,
               SendMessageToDevice(ControlMessage(FRAME_DATA_START_SERVICE_NACK,
                                                  PROTECTION_OFF)))
       .Times(call_times)
-      .WillRepeatedly(DoAll(NotifyTestAsyncWaiter(&waiter), Return(E_SUCCESS)));
+      .WillRepeatedly(DoAll(NotifyTestAsyncWaiter(waiter), Return(E_SUCCESS)));
   times += call_times;
 
   SendControlMessage(
@@ -617,7 +617,7 @@ TEST_F(ProtocolHandlerImplTest,
   SendControlMessage(
       PROTECTION_OFF, kBulk, NEW_SESSION_ID, FRAME_DATA_START_SERVICE);
 
-  EXPECT_TRUE(waiter.WaitFor(times, kAsyncExpectationsTimeout));
+  EXPECT_TRUE(waiter->WaitFor(times, kAsyncExpectationsTimeout));
 }
 /*
  * ProtocolHandler shall send NAck on session_observer rejection
@@ -638,7 +638,7 @@ TEST_F(ProtocolHandlerImplTest, StartSession_Protected_SessionObserverReject) {
   const bool callback_protection_flag = PROTECTION_OFF;
 #endif  // ENABLE_SECURITY
 
-  TestAsyncWaiter waiter;
+  std::shared_ptr<TestAsyncWaiter> waiter = std::make_shared<TestAsyncWaiter>();
   uint32_t times = 0;
   ServiceType service_type;
   // Expect verification of allowed transport
@@ -671,7 +671,7 @@ TEST_F(ProtocolHandlerImplTest, StartSession_Protected_SessionObserverReject) {
       .
       // Return sessions start rejection
       WillRepeatedly(DoAll(
-          NotifyTestAsyncWaiter(&waiter),
+          NotifyTestAsyncWaiter(waiter),
           SaveArg<2>(&service_type),
           InvokeMemberFuncWithArg3(protocol_handler_impl.get(),
                                    &ProtocolHandler::NotifySessionStarted,
@@ -695,7 +695,7 @@ TEST_F(ProtocolHandlerImplTest, StartSession_Protected_SessionObserverReject) {
               SendMessageToDevice(ControlMessage(FRAME_DATA_START_SERVICE_NACK,
                                                  PROTECTION_OFF)))
       .Times(call_times)
-      .WillRepeatedly(DoAll(NotifyTestAsyncWaiter(&waiter), Return(E_SUCCESS)));
+      .WillRepeatedly(DoAll(NotifyTestAsyncWaiter(waiter), Return(E_SUCCESS)));
   times += call_times;
 
   SendControlMessage(
@@ -709,7 +709,7 @@ TEST_F(ProtocolHandlerImplTest, StartSession_Protected_SessionObserverReject) {
   SendControlMessage(
       PROTECTION_ON, kBulk, NEW_SESSION_ID, FRAME_DATA_START_SERVICE);
 
-  EXPECT_TRUE(waiter.WaitFor(times, kAsyncExpectationsTimeout));
+  EXPECT_TRUE(waiter->WaitFor(times, kAsyncExpectationsTimeout));
 }
 /*
  * ProtocolHandler shall send Ack on session_observer accept
@@ -721,7 +721,7 @@ TEST_F(ProtocolHandlerImplTest,
   AddConnection();
   const ServiceType start_service = kRpc;
 
-  TestAsyncWaiter waiter;
+  std::shared_ptr<TestAsyncWaiter> waiter = std::make_shared<TestAsyncWaiter>();
   uint32_t times = 0;
   // Expect verification of allowed transport
   EXPECT_CALL(session_observer_mock,
@@ -748,7 +748,7 @@ TEST_F(ProtocolHandlerImplTest,
       .
       // Return sessions start success
       WillOnce(
-          DoAll(NotifyTestAsyncWaiter(&waiter),
+          DoAll(NotifyTestAsyncWaiter(waiter),
                 InvokeMemberFuncWithArg3(protocol_handler_impl.get(),
                                          &ProtocolHandler::NotifySessionStarted,
                                          GetSessionContext(connection_id,
@@ -766,13 +766,13 @@ TEST_F(ProtocolHandlerImplTest,
   EXPECT_CALL(transport_manager_mock,
               SendMessageToDevice(
                   ControlMessage(FRAME_DATA_START_SERVICE_ACK, PROTECTION_OFF)))
-      .WillOnce(DoAll(NotifyTestAsyncWaiter(&waiter), Return(E_SUCCESS)));
+      .WillOnce(DoAll(NotifyTestAsyncWaiter(waiter), Return(E_SUCCESS)));
   times++;
 
   SendControlMessage(
       PROTECTION_OFF, start_service, NEW_SESSION_ID, FRAME_DATA_START_SERVICE);
 
-  EXPECT_TRUE(waiter.WaitFor(times, kAsyncExpectationsTimeout));
+  EXPECT_TRUE(waiter->WaitFor(times, kAsyncExpectationsTimeout));
 }
 /*
  * ProtocolHandler shall send Ack on session_observer accept
@@ -851,7 +851,7 @@ TEST_F(ProtocolHandlerImplTest,
                                                   std::string("BTMAC")),
                                        connection_id2);
 
-  TestAsyncWaiter waiter;
+  std::shared_ptr<TestAsyncWaiter> waiter = std::make_shared<TestAsyncWaiter>();
   uint32_t times = 0;
 
   // Expect verification of allowed transport
@@ -894,7 +894,7 @@ TEST_F(ProtocolHandlerImplTest,
                                        An<const BsonObject*>()))
       // don't call NotifySessionStartedContext() immediately, instead call it
       // after second OnSessionStartedCallback()
-      .WillOnce(NotifyTestAsyncWaiter(&waiter));
+      .WillOnce(NotifyTestAsyncWaiter(waiter));
   times++;
 
   BsonObject bson_params2;
@@ -920,7 +920,7 @@ TEST_F(ProtocolHandlerImplTest,
                                        PROTECTION_OFF,
                                        An<const BsonObject*>()))
       .WillOnce(DoAll(
-          NotifyTestAsyncWaiter(&waiter),
+          NotifyTestAsyncWaiter(waiter),
           InvokeMemberFuncWithArg3(protocol_handler_impl.get(),
                                    &ProtocolHandler::NotifySessionStarted,
                                    GetSessionContext(connection_id2,
@@ -962,7 +962,7 @@ TEST_F(ProtocolHandlerImplTest,
                                                  PROTECTION_OFF,
                                                  connection_id1,
                                                  Eq(ack_params))))
-      .WillOnce(DoAll(NotifyTestAsyncWaiter(&waiter), Return(E_SUCCESS)));
+      .WillOnce(DoAll(NotifyTestAsyncWaiter(waiter), Return(E_SUCCESS)));
   times++;
 
   BsonArray bson_arr;
@@ -984,7 +984,7 @@ TEST_F(ProtocolHandlerImplTest,
                                                  PROTECTION_OFF,
                                                  connection_id2,
                                                  Eq(nack_params))))
-      .WillOnce(DoAll(NotifyTestAsyncWaiter(&waiter), Return(E_SUCCESS)));
+      .WillOnce(DoAll(NotifyTestAsyncWaiter(waiter), Return(E_SUCCESS)));
   times++;
 
   SendTMMessage(connection_id1,
@@ -1009,7 +1009,7 @@ TEST_F(ProtocolHandlerImplTest,
                 message_id,
                 params2.size() > 0 ? &params2[0] : NULL);
 
-  EXPECT_TRUE(waiter.WaitFor(times, kAsyncExpectationsTimeout));
+  EXPECT_TRUE(waiter->WaitFor(times, kAsyncExpectationsTimeout));
 
   bson_object_deinitialize(&bson_params1);
   bson_object_deinitialize(&bson_params2);
@@ -1024,7 +1024,7 @@ TEST_F(ProtocolHandlerImplTest, StartSession_Audio_RejectByTransportType) {
   AddConnection();
   const ServiceType start_service = kAudio;
 
-  TestAsyncWaiter waiter;
+  std::shared_ptr<TestAsyncWaiter> waiter = std::make_shared<TestAsyncWaiter>();
   uint32_t times = 0;
   // Expect verification of allowed transport
   EXPECT_CALL(session_observer_mock,
@@ -1048,13 +1048,13 @@ TEST_F(ProtocolHandlerImplTest, StartSession_Audio_RejectByTransportType) {
   EXPECT_CALL(transport_manager_mock,
               SendMessageToDevice(ControlMessage(FRAME_DATA_START_SERVICE_NACK,
                                                  PROTECTION_OFF)))
-      .WillOnce(DoAll(NotifyTestAsyncWaiter(&waiter), Return(E_SUCCESS)));
+      .WillOnce(DoAll(NotifyTestAsyncWaiter(waiter), Return(E_SUCCESS)));
   times++;
 
   SendControlMessage(
       PROTECTION_OFF, start_service, NEW_SESSION_ID, FRAME_DATA_START_SERVICE);
 
-  EXPECT_TRUE(waiter.WaitFor(times, kAsyncExpectationsTimeout));
+  EXPECT_TRUE(waiter->WaitFor(times, kAsyncExpectationsTimeout));
 }
 
 /*
@@ -1066,7 +1066,7 @@ TEST_F(ProtocolHandlerImplTest, StartSession_Video_RejectByTransportType) {
   AddConnection();
   const ServiceType start_service = kMobileNav;
 
-  TestAsyncWaiter waiter;
+  std::shared_ptr<TestAsyncWaiter> waiter = std::make_shared<TestAsyncWaiter>();
   uint32_t times = 0;
   // Expect verification of allowed transport
   EXPECT_CALL(session_observer_mock,
@@ -1091,13 +1091,13 @@ TEST_F(ProtocolHandlerImplTest, StartSession_Video_RejectByTransportType) {
   EXPECT_CALL(transport_manager_mock,
               SendMessageToDevice(ControlMessage(FRAME_DATA_START_SERVICE_NACK,
                                                  PROTECTION_OFF)))
-      .WillOnce(DoAll(NotifyTestAsyncWaiter(&waiter), Return(E_SUCCESS)));
+      .WillOnce(DoAll(NotifyTestAsyncWaiter(waiter), Return(E_SUCCESS)));
   times++;
 
   SendControlMessage(
       PROTECTION_OFF, start_service, NEW_SESSION_ID, FRAME_DATA_START_SERVICE);
 
-  EXPECT_TRUE(waiter.WaitFor(times, kAsyncExpectationsTimeout));
+  EXPECT_TRUE(waiter->WaitFor(times, kAsyncExpectationsTimeout));
 }
 
 // TODO(EZamakhov): add test for get_hash_id/set_hash_id from
@@ -1260,7 +1260,7 @@ TEST_F(ProtocolHandlerImplTest, SecurityEnable_StartSessionUnprotected) {
   AddSecurityManager();
   const ServiceType start_service = kRpc;
 
-  TestAsyncWaiter waiter;
+  std::shared_ptr<TestAsyncWaiter> waiter = std::make_shared<TestAsyncWaiter>();
   uint32_t times = 0;
   // Expect verification of allowed transport
   EXPECT_CALL(session_observer_mock,
@@ -1287,7 +1287,7 @@ TEST_F(ProtocolHandlerImplTest, SecurityEnable_StartSessionUnprotected) {
       .
       // Return sessions start success
       WillOnce(
-          DoAll(NotifyTestAsyncWaiter(&waiter),
+          DoAll(NotifyTestAsyncWaiter(waiter),
                 InvokeMemberFuncWithArg3(protocol_handler_impl.get(),
                                          &ProtocolHandler::NotifySessionStarted,
                                          GetSessionContext(connection_id,
@@ -1305,13 +1305,13 @@ TEST_F(ProtocolHandlerImplTest, SecurityEnable_StartSessionUnprotected) {
   EXPECT_CALL(transport_manager_mock,
               SendMessageToDevice(
                   ControlMessage(FRAME_DATA_START_SERVICE_ACK, PROTECTION_OFF)))
-      .WillOnce(DoAll(NotifyTestAsyncWaiter(&waiter), Return(E_SUCCESS)));
+      .WillOnce(DoAll(NotifyTestAsyncWaiter(waiter), Return(E_SUCCESS)));
   times++;
 
   SendControlMessage(
       PROTECTION_OFF, start_service, NEW_SESSION_ID, FRAME_DATA_START_SERVICE);
 
-  EXPECT_TRUE(waiter.WaitFor(times, kAsyncExpectationsTimeout));
+  EXPECT_TRUE(waiter->WaitFor(times, kAsyncExpectationsTimeout));
 }
 /*
  * ProtocolHandler shall send Ack with PROTECTION_OFF on fail SLL creation
@@ -1322,7 +1322,7 @@ TEST_F(ProtocolHandlerImplTest, SecurityEnable_StartSessionProtected_Fail) {
   AddSecurityManager();
   const ServiceType start_service = kRpc;
 
-  TestAsyncWaiter waiter;
+  std::shared_ptr<TestAsyncWaiter> waiter = std::make_shared<TestAsyncWaiter>();
   uint32_t times = 0;
 
   protocol_handler::SessionContext context = GetSessionContext(connection_id,
@@ -1358,7 +1358,7 @@ TEST_F(ProtocolHandlerImplTest, SecurityEnable_StartSessionProtected_Fail) {
       .
       // Return sessions start success
       WillOnce(
-          DoAll(NotifyTestAsyncWaiter(&waiter),
+          DoAll(NotifyTestAsyncWaiter(waiter),
                 InvokeMemberFuncWithArg3(protocol_handler_impl.get(),
                                          &ProtocolHandler::NotifySessionStarted,
                                          context,
@@ -1374,20 +1374,20 @@ TEST_F(ProtocolHandlerImplTest, SecurityEnable_StartSessionProtected_Fail) {
                                    ContextCreationStrategy::kUseExisting))
       .
       // Return fail protection
-      WillOnce(DoAll(NotifyTestAsyncWaiter(&waiter), ReturnNull()));
+      WillOnce(DoAll(NotifyTestAsyncWaiter(waiter), ReturnNull()));
   times++;
 
   // Expect send Ack with PROTECTION_OFF (on fail SLL creation)
   EXPECT_CALL(transport_manager_mock,
               SendMessageToDevice(
                   ControlMessage(FRAME_DATA_START_SERVICE_ACK, PROTECTION_OFF)))
-      .WillOnce(DoAll(NotifyTestAsyncWaiter(&waiter), Return(E_SUCCESS)));
+      .WillOnce(DoAll(NotifyTestAsyncWaiter(waiter), Return(E_SUCCESS)));
   times++;
 
   SendControlMessage(
       PROTECTION_ON, start_service, NEW_SESSION_ID, FRAME_DATA_START_SERVICE);
 
-  EXPECT_TRUE(waiter.WaitFor(times, kAsyncExpectationsTimeout));
+  EXPECT_TRUE(waiter->WaitFor(times, kAsyncExpectationsTimeout));
 }
 /*
  * ProtocolHandler shall send Ack with PROTECTION_ON on already established and
@@ -1400,7 +1400,7 @@ TEST_F(ProtocolHandlerImplTest,
   AddSecurityManager();
   const ServiceType start_service = kRpc;
 
-  TestAsyncWaiter waiter;
+  std::shared_ptr<TestAsyncWaiter> waiter = std::make_shared<TestAsyncWaiter>();
   uint32_t times = 0;
   // Expect verification of allowed transport
   EXPECT_CALL(session_observer_mock,
@@ -1427,7 +1427,7 @@ TEST_F(ProtocolHandlerImplTest,
       .
       // Return sessions start success
       WillOnce(
-          DoAll(NotifyTestAsyncWaiter(&waiter),
+          DoAll(NotifyTestAsyncWaiter(waiter),
                 InvokeMemberFuncWithArg3(protocol_handler_impl.get(),
                                          &ProtocolHandler::NotifySessionStarted,
                                          GetSessionContext(connection_id,
@@ -1445,34 +1445,33 @@ TEST_F(ProtocolHandlerImplTest,
   EXPECT_CALL(security_manager_mock, CreateSSLContext(connection_key, _))
       .
       // Return new SSLContext
-      WillOnce(
-          DoAll(NotifyTestAsyncWaiter(&waiter), Return(&ssl_context_mock)));
+      WillOnce(DoAll(NotifyTestAsyncWaiter(waiter), Return(&ssl_context_mock)));
   times++;
 
   // Initilization check
   EXPECT_CALL(ssl_context_mock, IsInitCompleted())
       .
       // emulate SSL is initilized
-      WillOnce(DoAll(NotifyTestAsyncWaiter(&waiter), Return(true)));
+      WillOnce(DoAll(NotifyTestAsyncWaiter(waiter), Return(true)));
   times++;
 
   // Expect service protection enable
   EXPECT_CALL(session_observer_mock,
               SetProtectionFlag(connection_key, start_service))
-      .WillOnce(NotifyTestAsyncWaiter(&waiter));
+      .WillOnce(NotifyTestAsyncWaiter(waiter));
   times++;
 
   // Expect send Ack with PROTECTION_ON (on SSL is initilized)
   EXPECT_CALL(transport_manager_mock,
               SendMessageToDevice(
                   ControlMessage(FRAME_DATA_START_SERVICE_ACK, PROTECTION_ON)))
-      .WillOnce(DoAll(NotifyTestAsyncWaiter(&waiter), Return(E_SUCCESS)));
+      .WillOnce(DoAll(NotifyTestAsyncWaiter(waiter), Return(E_SUCCESS)));
   times++;
 
   SendControlMessage(
       PROTECTION_ON, start_service, NEW_SESSION_ID, FRAME_DATA_START_SERVICE);
 
-  EXPECT_TRUE(waiter.WaitFor(times, kAsyncExpectationsTimeout));
+  EXPECT_TRUE(waiter->WaitFor(times, kAsyncExpectationsTimeout));
 }
 /*
  * ProtocolHandler shall send Ack with PROTECTION_OFF on session handshhake fail
@@ -1484,7 +1483,7 @@ TEST_F(ProtocolHandlerImplTest,
   AddSecurityManager();
   const ServiceType start_service = kRpc;
 
-  TestAsyncWaiter waiter;
+  std::shared_ptr<TestAsyncWaiter> waiter = std::make_shared<TestAsyncWaiter>();
   uint32_t times = 0;
   protocol_handler::SessionContext context = GetSessionContext(connection_id,
                                                                NEW_SESSION_ID,
@@ -1519,7 +1518,7 @@ TEST_F(ProtocolHandlerImplTest,
       .
       // Return sessions start success
       WillOnce(
-          DoAll(NotifyTestAsyncWaiter(&waiter),
+          DoAll(NotifyTestAsyncWaiter(waiter),
                 InvokeMemberFuncWithArg3(protocol_handler_impl.get(),
                                          &ProtocolHandler::NotifySessionStarted,
                                          context,
@@ -1544,14 +1543,14 @@ TEST_F(ProtocolHandlerImplTest,
   EXPECT_CALL(ssl_context_mock, IsInitCompleted())
       .
       // emulate SSL is not initilized
-      WillOnce(DoAll(NotifyTestAsyncWaiter(&waiter), Return(false)));
+      WillOnce(DoAll(NotifyTestAsyncWaiter(waiter), Return(false)));
   times++;
 
   // Pending handshake check
   EXPECT_CALL(ssl_context_mock, IsHandshakePending())
       .
       // emulate is pending
-      WillOnce(DoAll(NotifyTestAsyncWaiter(&waiter), Return(true)));
+      WillOnce(DoAll(NotifyTestAsyncWaiter(waiter), Return(true)));
   times++;
 
   // Expect add listener for handshake result
@@ -1565,13 +1564,13 @@ TEST_F(ProtocolHandlerImplTest,
   EXPECT_CALL(transport_manager_mock,
               SendMessageToDevice(
                   ControlMessage(FRAME_DATA_START_SERVICE_ACK, PROTECTION_OFF)))
-      .WillOnce(DoAll(NotifyTestAsyncWaiter(&waiter), Return(E_SUCCESS)));
+      .WillOnce(DoAll(NotifyTestAsyncWaiter(waiter), Return(E_SUCCESS)));
   times++;
 
   SendControlMessage(
       PROTECTION_ON, start_service, NEW_SESSION_ID, FRAME_DATA_START_SERVICE);
 
-  EXPECT_TRUE(waiter.WaitFor(times, kAsyncExpectationsTimeout));
+  EXPECT_TRUE(waiter->WaitFor(times, kAsyncExpectationsTimeout));
 }
 /*
  * ProtocolHandler shall send Ack with PROTECTION_ON on session handshhake
@@ -1589,7 +1588,7 @@ TEST_F(ProtocolHandlerImplTest,
   ON_CALL(protocol_handler_settings_mock, force_protected_service())
       .WillByDefault(ReturnRefOfCopy(services));
 
-  TestAsyncWaiter waiter;
+  std::shared_ptr<TestAsyncWaiter> waiter = std::make_shared<TestAsyncWaiter>();
   uint32_t times = 0;
   // Expect verification of allowed transport
   EXPECT_CALL(session_observer_mock,
@@ -1616,7 +1615,7 @@ TEST_F(ProtocolHandlerImplTest,
       .
       // Return sessions start success
       WillOnce(
-          DoAll(NotifyTestAsyncWaiter(&waiter),
+          DoAll(NotifyTestAsyncWaiter(waiter),
                 InvokeMemberFuncWithArg3(protocol_handler_impl.get(),
                                          &ProtocolHandler::NotifySessionStarted,
                                          GetSessionContext(connection_id,
@@ -1633,29 +1632,28 @@ TEST_F(ProtocolHandlerImplTest,
   EXPECT_CALL(security_manager_mock, CreateSSLContext(connection_key, _))
       .
       // Return new SSLContext
-      WillOnce(
-          DoAll(NotifyTestAsyncWaiter(&waiter), Return(&ssl_context_mock)));
+      WillOnce(DoAll(NotifyTestAsyncWaiter(waiter), Return(&ssl_context_mock)));
   times++;
 
   // Initilization check
   EXPECT_CALL(ssl_context_mock, IsInitCompleted())
       .
       // emulate SSL is not initilized
-      WillOnce(DoAll(NotifyTestAsyncWaiter(&waiter), Return(false)));
+      WillOnce(DoAll(NotifyTestAsyncWaiter(waiter), Return(false)));
   times++;
 
   // Pending handshake check
   EXPECT_CALL(ssl_context_mock, IsHandshakePending())
       .
       // emulate is pending
-      WillOnce(DoAll(NotifyTestAsyncWaiter(&waiter), Return(true)));
+      WillOnce(DoAll(NotifyTestAsyncWaiter(waiter), Return(true)));
   times++;
 
   // Expect add listener for handshake result
   EXPECT_CALL(security_manager_mock, AddListener(_))
       // Emulate handshake fail
       .WillOnce(
-          DoAll(NotifyTestAsyncWaiter(&waiter),
+          DoAll(NotifyTestAsyncWaiter(waiter),
                 Invoke(OnHandshakeDoneFunctor(
                     connection_key,
                     security_manager::SSLContext::Handshake_Result_Success))));
@@ -1666,26 +1664,26 @@ TEST_F(ProtocolHandlerImplTest,
               GetSSLContext(connection_key, start_service))
       .
       // Emulate protection for service is not enabled
-      WillOnce(DoAll(NotifyTestAsyncWaiter(&waiter), ReturnNull()));
+      WillOnce(DoAll(NotifyTestAsyncWaiter(waiter), ReturnNull()));
   times++;
 
   // Expect service protection enable
   EXPECT_CALL(session_observer_mock,
               SetProtectionFlag(connection_key, start_service))
-      .WillOnce(NotifyTestAsyncWaiter(&waiter));
+      .WillOnce(NotifyTestAsyncWaiter(waiter));
   times++;
 
   // Expect send Ack with PROTECTION_OFF (on fail handshake)
   EXPECT_CALL(transport_manager_mock,
               SendMessageToDevice(
                   ControlMessage(FRAME_DATA_START_SERVICE_ACK, PROTECTION_ON)))
-      .WillOnce(DoAll(NotifyTestAsyncWaiter(&waiter), Return(E_SUCCESS)));
+      .WillOnce(DoAll(NotifyTestAsyncWaiter(waiter), Return(E_SUCCESS)));
   times++;
 
   SendControlMessage(
       PROTECTION_ON, start_service, NEW_SESSION_ID, FRAME_DATA_START_SERVICE);
 
-  EXPECT_TRUE(waiter.WaitFor(times, kAsyncExpectationsTimeout));
+  EXPECT_TRUE(waiter->WaitFor(times, kAsyncExpectationsTimeout));
 }
 /*
  * ProtocolHandler shall send Ack with PROTECTION_ON on session handshhake
@@ -1703,7 +1701,7 @@ TEST_F(
   ON_CALL(protocol_handler_settings_mock, force_protected_service())
       .WillByDefault(ReturnRefOfCopy(services));
 
-  TestAsyncWaiter waiter;
+  std::shared_ptr<TestAsyncWaiter> waiter = std::make_shared<TestAsyncWaiter>();
   uint32_t times = 0;
   // Expect verification of allowed transport
   EXPECT_CALL(session_observer_mock,
@@ -1730,7 +1728,7 @@ TEST_F(
       .
       // Return sessions start success
       WillOnce(
-          DoAll(NotifyTestAsyncWaiter(&waiter),
+          DoAll(NotifyTestAsyncWaiter(waiter),
                 InvokeMemberFuncWithArg3(protocol_handler_impl.get(),
                                          &ProtocolHandler::NotifySessionStarted,
                                          GetSessionContext(connection_id,
@@ -1747,8 +1745,7 @@ TEST_F(
   EXPECT_CALL(security_manager_mock, CreateSSLContext(connection_key, _))
       .
       // Return new SSLContext
-      WillOnce(
-          DoAll(NotifyTestAsyncWaiter(&waiter), Return(&ssl_context_mock)));
+      WillOnce(DoAll(NotifyTestAsyncWaiter(waiter), Return(&ssl_context_mock)));
   times++;
 
   // Initilization check
@@ -1761,14 +1758,14 @@ TEST_F(
   EXPECT_CALL(ssl_context_mock, IsHandshakePending())
       .
       // emulate is pending
-      WillOnce(DoAll(NotifyTestAsyncWaiter(&waiter), Return(true)));
+      WillOnce(DoAll(NotifyTestAsyncWaiter(waiter), Return(true)));
   times++;
 
   // Expect add listener for handshake result
   EXPECT_CALL(security_manager_mock, AddListener(_))
       // Emulate handshake fail
       .WillOnce(
-          DoAll(NotifyTestAsyncWaiter(&waiter),
+          DoAll(NotifyTestAsyncWaiter(waiter),
                 Invoke(OnHandshakeDoneFunctor(
                     connection_key,
                     security_manager::SSLContext::Handshake_Result_Success))));
@@ -1779,26 +1776,26 @@ TEST_F(
               GetSSLContext(connection_key, start_service))
       .
       // Emulate protection for service is not enabled
-      WillOnce(DoAll(NotifyTestAsyncWaiter(&waiter), ReturnNull()));
+      WillOnce(DoAll(NotifyTestAsyncWaiter(waiter), ReturnNull()));
   times++;
 
   // Expect service protection enable
   EXPECT_CALL(session_observer_mock,
               SetProtectionFlag(connection_key, start_service))
-      .WillOnce(NotifyTestAsyncWaiter(&waiter));
+      .WillOnce(NotifyTestAsyncWaiter(waiter));
   times++;
 
   // Expect send Ack with PROTECTION_OFF (on fail handshake)
   EXPECT_CALL(transport_manager_mock,
               SendMessageToDevice(
                   ControlMessage(FRAME_DATA_START_SERVICE_ACK, PROTECTION_ON)))
-      .WillOnce(DoAll(NotifyTestAsyncWaiter(&waiter), Return(E_SUCCESS)));
+      .WillOnce(DoAll(NotifyTestAsyncWaiter(waiter), Return(E_SUCCESS)));
   times++;
 
   SendControlMessage(
       PROTECTION_ON, start_service, NEW_SESSION_ID, FRAME_DATA_START_SERVICE);
 
-  EXPECT_TRUE(waiter.WaitFor(times, kAsyncExpectationsTimeout));
+  EXPECT_TRUE(waiter->WaitFor(times, kAsyncExpectationsTimeout));
 }
 /*
  * ProtocolHandler shall send Ack with PROTECTION_ON on session handshhake
@@ -1815,7 +1812,7 @@ TEST_F(ProtocolHandlerImplTest,
   ON_CALL(protocol_handler_settings_mock, force_protected_service())
       .WillByDefault(ReturnRefOfCopy(services));
 
-  TestAsyncWaiter waiter;
+  std::shared_ptr<TestAsyncWaiter> waiter = std::make_shared<TestAsyncWaiter>();
   uint32_t times = 0;
   // Expect verification of allowed transport
   EXPECT_CALL(session_observer_mock,
@@ -1842,7 +1839,7 @@ TEST_F(ProtocolHandlerImplTest,
       .
       // Return sessions start success
       WillOnce(
-          DoAll(NotifyTestAsyncWaiter(&waiter),
+          DoAll(NotifyTestAsyncWaiter(waiter),
                 InvokeMemberFuncWithArg3(protocol_handler_impl.get(),
                                          &ProtocolHandler::NotifySessionStarted,
                                          GetSessionContext(connection_id,
@@ -1862,34 +1859,33 @@ TEST_F(ProtocolHandlerImplTest,
                                    ContextCreationStrategy::kUseExisting))
       .
       // Return new SSLContext
-      WillOnce(
-          DoAll(NotifyTestAsyncWaiter(&waiter), Return(&ssl_context_mock)));
+      WillOnce(DoAll(NotifyTestAsyncWaiter(waiter), Return(&ssl_context_mock)));
   times++;
 
   // Initilization check
   EXPECT_CALL(ssl_context_mock, IsInitCompleted())
       .
       // emulate SSL is not initilized
-      WillOnce(DoAll(NotifyTestAsyncWaiter(&waiter), Return(false)));
+      WillOnce(DoAll(NotifyTestAsyncWaiter(waiter), Return(false)));
   times++;
 
   // Pending handshake check
   EXPECT_CALL(ssl_context_mock, IsHandshakePending())
       .
       // emulate is pending
-      WillOnce(DoAll(NotifyTestAsyncWaiter(&waiter), Return(false)));
+      WillOnce(DoAll(NotifyTestAsyncWaiter(waiter), Return(false)));
   times++;
 
   // Wait restart handshake operation
   EXPECT_CALL(security_manager_mock, StartHandshake(connection_key))
-      .WillOnce(NotifyTestAsyncWaiter(&waiter));
+      .WillOnce(NotifyTestAsyncWaiter(waiter));
   times++;
 
   // Expect add listener for handshake result
   EXPECT_CALL(security_manager_mock, AddListener(_))
       // Emulate handshake
       .WillOnce(
-          DoAll(NotifyTestAsyncWaiter(&waiter),
+          DoAll(NotifyTestAsyncWaiter(waiter),
                 Invoke(OnHandshakeDoneFunctor(
                     connection_key,
                     security_manager::SSLContext::Handshake_Result_Success))));
@@ -1900,30 +1896,30 @@ TEST_F(ProtocolHandlerImplTest,
               GetSSLContext(connection_key, start_service))
       .
       // Emulate protection for service is not enabled
-      WillOnce(DoAll(NotifyTestAsyncWaiter(&waiter), ReturnNull()));
+      WillOnce(DoAll(NotifyTestAsyncWaiter(waiter), ReturnNull()));
   times++;
 
   EXPECT_CALL(security_manager_mock, IsSystemTimeProviderReady())
-      .WillOnce(DoAll(NotifyTestAsyncWaiter(&waiter), Return(true)));
+      .WillOnce(DoAll(NotifyTestAsyncWaiter(waiter), Return(true)));
   times++;
 
   EXPECT_CALL(session_observer_mock,
               SetProtectionFlag(connection_key, start_service))
-      .WillOnce(NotifyTestAsyncWaiter(&waiter));
+      .WillOnce(NotifyTestAsyncWaiter(waiter));
   times++;
 
   //   Expect send Ack with PROTECTION_ON (on successfull handshake)
   EXPECT_CALL(transport_manager_mock,
               SendMessageToDevice(
                   ControlMessage(FRAME_DATA_START_SERVICE_ACK, PROTECTION_ON)))
-      .WillOnce(DoAll(NotifyTestAsyncWaiter(&waiter), Return(E_SUCCESS)));
+      .WillOnce(DoAll(NotifyTestAsyncWaiter(waiter), Return(E_SUCCESS)));
 
   times++;
 
   SendControlMessage(
       PROTECTION_ON, start_service, NEW_SESSION_ID, FRAME_DATA_START_SERVICE);
 
-  EXPECT_TRUE(waiter.WaitFor(times, kAsyncExpectationsTimeout));
+  EXPECT_TRUE(waiter->WaitFor(times, kAsyncExpectationsTimeout));
 }
 #endif  // ENABLE_SECURITY
 
@@ -1943,7 +1939,7 @@ void ProtocolHandlerImplTest::VerifySecondaryTransportParamsInStartSessionAck(
       .WillRepeatedly(Return(maximum_rpc_payload_size));
   InitProtocolHandlerImpl(0u, 0u);
 
-  TestAsyncWaiter waiter;
+  std::shared_ptr<TestAsyncWaiter> waiter = std::make_shared<TestAsyncWaiter>();
   uint32_t times = 0;
 
   const uint8_t input_protocol_version = 5;
@@ -2048,7 +2044,7 @@ void ProtocolHandlerImplTest::VerifySecondaryTransportParamsInStartSessionAck(
       transport_manager_mock,
       SendMessageToDevice(ControlMessage(
           FRAME_DATA_START_SERVICE_ACK, PROTECTION_OFF, connection_id, _)))
-      .WillOnce(DoAll(NotifyTestAsyncWaiter(&waiter), Return(E_SUCCESS)));
+      .WillOnce(DoAll(NotifyTestAsyncWaiter(waiter), Return(E_SUCCESS)));
   times++;
 
 #ifdef ENABLE_SECURITY
@@ -2069,7 +2065,7 @@ void ProtocolHandlerImplTest::VerifySecondaryTransportParamsInStartSessionAck(
                                              false /* protection */,
                                              full_version);
 
-  EXPECT_TRUE(waiter.WaitFor(times, kAsyncExpectationsTimeout));
+  EXPECT_TRUE(waiter->WaitFor(times, kAsyncExpectationsTimeout));
 }
 
 void ProtocolHandlerImplTest::VerifyCloudAppParamsInStartSessionAck(
@@ -2079,7 +2075,7 @@ void ProtocolHandlerImplTest::VerifyCloudAppParamsInStartSessionAck(
       .WillRepeatedly(Return(maximum_rpc_payload_size));
   InitProtocolHandlerImpl(0u, 0u);
 
-  TestAsyncWaiter waiter;
+  std::shared_ptr<TestAsyncWaiter> waiter = std::make_shared<TestAsyncWaiter>();
   uint32_t times = 0;
 
   const uint8_t input_protocol_version = 5;
@@ -2160,7 +2156,7 @@ void ProtocolHandlerImplTest::VerifyCloudAppParamsInStartSessionAck(
                                                  PROTECTION_OFF,
                                                  connection_id,
                                                  Eq(expected_param))))
-      .WillOnce(DoAll(NotifyTestAsyncWaiter(&waiter), Return(E_SUCCESS)));
+      .WillOnce(DoAll(NotifyTestAsyncWaiter(waiter), Return(E_SUCCESS)));
   times++;
 
 #ifdef ENABLE_SECURITY
@@ -2183,7 +2179,7 @@ void ProtocolHandlerImplTest::VerifyCloudAppParamsInStartSessionAck(
                                              false /* protection */,
                                              full_version);
 
-  EXPECT_TRUE(waiter.WaitFor(times, kAsyncExpectationsTimeout));
+  EXPECT_TRUE(waiter->WaitFor(times, kAsyncExpectationsTimeout));
 }
 
 TEST_F(ProtocolHandlerImplTest,
@@ -2547,7 +2543,7 @@ TEST_F(
 // Secondary transport param should not be included for apps with v5.0.0
 TEST_F(ProtocolHandlerImplTest,
        StartSessionAck_Unprotected_NoSecondaryTransportParamsForV5) {
-  TestAsyncWaiter waiter;
+  std::shared_ptr<TestAsyncWaiter> waiter = std::make_shared<TestAsyncWaiter>();
   uint32_t times = 0;
 
   const uint8_t input_protocol_version = 5;
@@ -2618,7 +2614,7 @@ TEST_F(ProtocolHandlerImplTest,
                                                  PROTECTION_OFF,
                                                  connection_id,
                                                  Eq(expected_param))))
-      .WillOnce(DoAll(NotifyTestAsyncWaiter(&waiter), Return(E_SUCCESS)));
+      .WillOnce(DoAll(NotifyTestAsyncWaiter(waiter), Return(E_SUCCESS)));
   times++;
 
   connection_handler::SessionTransports dummy_st = {0, 0};
@@ -2651,7 +2647,7 @@ TEST_F(ProtocolHandlerImplTest,
                                              false /* protection */,
                                              full_version);
 
-  EXPECT_TRUE(waiter.WaitFor(times, kAsyncExpectationsTimeout));
+  EXPECT_TRUE(waiter->WaitFor(times, kAsyncExpectationsTimeout));
 }
 
 TEST_F(ProtocolHandlerImplTest, StartSessionAck_PrimaryTransportUSBHostMode) {
@@ -2719,7 +2715,7 @@ TEST_F(ProtocolHandlerImplTest, StartSessionAck_CloudAppAuthTokenAvailable) {
 
 TEST_F(ProtocolHandlerImplTest,
        TransportEventUpdate_afterVersionNegotiation_TCPEnabled) {
-  TestAsyncWaiter waiter;
+  std::shared_ptr<TestAsyncWaiter> waiter = std::make_shared<TestAsyncWaiter>();
   uint32_t times = 0;
 
   const uint8_t input_protocol_version = 5;
@@ -2789,7 +2785,7 @@ TEST_F(ProtocolHandlerImplTest,
       transport_manager_mock,
       SendMessageToDevice(ControlMessage(
           FRAME_DATA_START_SERVICE_ACK, PROTECTION_OFF, connection_id, _)))
-      .WillOnce(DoAll(NotifyTestAsyncWaiter(&waiter), Return(E_SUCCESS)));
+      .WillOnce(DoAll(NotifyTestAsyncWaiter(waiter), Return(E_SUCCESS)));
   times++;
 
   EXPECT_CALL(session_observer_mock, ProtocolVersionUsed(_, _, An<uint8_t&>()))
@@ -2816,7 +2812,7 @@ TEST_F(ProtocolHandlerImplTest,
                                          PROTECTION_OFF,
                                          connection_id,
                                          Eq(expected_param))))
-      .WillOnce(DoAll(NotifyTestAsyncWaiter(&waiter), Return(E_SUCCESS)));
+      .WillOnce(DoAll(NotifyTestAsyncWaiter(waiter), Return(E_SUCCESS)));
   times++;
 
 #ifdef ENABLE_SECURITY
@@ -2837,12 +2833,12 @@ TEST_F(ProtocolHandlerImplTest,
                                              false /* protection */,
                                              full_version);
 
-  EXPECT_TRUE(waiter.WaitFor(times, kAsyncExpectationsTimeout));
+  EXPECT_TRUE(waiter->WaitFor(times, kAsyncExpectationsTimeout));
 }
 
 TEST_F(ProtocolHandlerImplTest,
        TransportEventUpdate_afterVersionNegotiation_TCPDisabled) {
-  TestAsyncWaiter waiter;
+  std::shared_ptr<TestAsyncWaiter> waiter = std::make_shared<TestAsyncWaiter>();
   uint32_t times = 0;
 
   const uint8_t input_protocol_version = 5;
@@ -2910,7 +2906,7 @@ TEST_F(ProtocolHandlerImplTest,
       transport_manager_mock,
       SendMessageToDevice(ControlMessage(
           FRAME_DATA_START_SERVICE_ACK, PROTECTION_OFF, connection_id, _)))
-      .WillOnce(DoAll(NotifyTestAsyncWaiter(&waiter), Return(E_SUCCESS)));
+      .WillOnce(DoAll(NotifyTestAsyncWaiter(waiter), Return(E_SUCCESS)));
   times++;
 
   EXPECT_CALL(session_observer_mock, ProtocolVersionUsed(_, _, An<uint8_t&>()))
@@ -2937,7 +2933,7 @@ TEST_F(ProtocolHandlerImplTest,
                                          PROTECTION_OFF,
                                          connection_id,
                                          Eq(expected_param))))
-      .WillOnce(DoAll(NotifyTestAsyncWaiter(&waiter), Return(E_SUCCESS)));
+      .WillOnce(DoAll(NotifyTestAsyncWaiter(waiter), Return(E_SUCCESS)));
   times++;
 
 #ifdef ENABLE_SECURITY
@@ -2958,7 +2954,7 @@ TEST_F(ProtocolHandlerImplTest,
                                              false /* protection */,
                                              full_version);
 
-  EXPECT_TRUE(waiter.WaitFor(times, kAsyncExpectationsTimeout));
+  EXPECT_TRUE(waiter->WaitFor(times, kAsyncExpectationsTimeout));
 }
 
 TEST_F(ProtocolHandlerImplTest,
@@ -2966,7 +2962,7 @@ TEST_F(ProtocolHandlerImplTest,
   using connection_handler::SessionConnectionMap;
   using connection_handler::SessionTransports;
 
-  TestAsyncWaiter waiter;
+  std::shared_ptr<TestAsyncWaiter> waiter = std::make_shared<TestAsyncWaiter>();
   uint32_t times = 0;
 
   char tcp_address[] = "172.16.2.3";
@@ -3020,12 +3016,12 @@ TEST_F(ProtocolHandlerImplTest,
                                          PROTECTION_OFF,
                                          device2_primary_connection_id,
                                          Eq(expected_param))))
-      .WillOnce(DoAll(NotifyTestAsyncWaiter(&waiter), Return(E_SUCCESS)));
+      .WillOnce(DoAll(NotifyTestAsyncWaiter(waiter), Return(E_SUCCESS)));
   times++;
 
   tm_listener->OnTransportConfigUpdated(configs);
 
-  EXPECT_TRUE(waiter.WaitFor(times, kAsyncExpectationsTimeout));
+  EXPECT_TRUE(waiter->WaitFor(times, kAsyncExpectationsTimeout));
 }
 
 TEST_F(ProtocolHandlerImplTest,
@@ -3033,7 +3029,7 @@ TEST_F(ProtocolHandlerImplTest,
   using connection_handler::SessionConnectionMap;
   using connection_handler::SessionTransports;
 
-  TestAsyncWaiter waiter;
+  std::shared_ptr<TestAsyncWaiter> waiter = std::make_shared<TestAsyncWaiter>();
   uint32_t times = 0;
 
   char tcp_address[] = "172.16.2.3";
@@ -3090,7 +3086,7 @@ TEST_F(ProtocolHandlerImplTest,
                                          PROTECTION_OFF,
                                          device1_primary_connection_id,
                                          Eq(expected_param))))
-      .WillOnce(DoAll(NotifyTestAsyncWaiter(&waiter), Return(E_SUCCESS)));
+      .WillOnce(DoAll(NotifyTestAsyncWaiter(waiter), Return(E_SUCCESS)));
   times++;
   EXPECT_CALL(
       transport_manager_mock,
@@ -3098,18 +3094,18 @@ TEST_F(ProtocolHandlerImplTest,
                                          PROTECTION_OFF,
                                          device3_primary_connection_id,
                                          Eq(expected_param))))
-      .WillOnce(DoAll(NotifyTestAsyncWaiter(&waiter), Return(E_SUCCESS)));
+      .WillOnce(DoAll(NotifyTestAsyncWaiter(waiter), Return(E_SUCCESS)));
   times++;
 
   tm_listener->OnTransportConfigUpdated(configs);
 
-  EXPECT_TRUE(waiter.WaitFor(times, kAsyncExpectationsTimeout));
+  EXPECT_TRUE(waiter->WaitFor(times, kAsyncExpectationsTimeout));
 }
 
 TEST_F(ProtocolHandlerImplTest, RegisterSecondaryTransport_SUCCESS) {
   AddConnection();
 
-  TestAsyncWaiter waiter;
+  std::shared_ptr<TestAsyncWaiter> waiter = std::make_shared<TestAsyncWaiter>();
   uint32_t times = 0;
 
   transport_manager::ConnectionUID primary_connection_id = 123;
@@ -3129,7 +3125,7 @@ TEST_F(ProtocolHandlerImplTest, RegisterSecondaryTransport_SUCCESS) {
                                  PROTECTION_OFF,
                                  connection_id,
                                  _)))
-      .WillOnce(DoAll(NotifyTestAsyncWaiter(&waiter), Return(E_SUCCESS)));
+      .WillOnce(DoAll(NotifyTestAsyncWaiter(waiter), Return(E_SUCCESS)));
   times++;
 
   SendControlMessage(PROTECTION_OFF,
@@ -3138,13 +3134,13 @@ TEST_F(ProtocolHandlerImplTest, RegisterSecondaryTransport_SUCCESS) {
                      FRAME_DATA_REGISTER_SECONDARY_TRANSPORT,
                      PROTOCOL_VERSION_5);
 
-  EXPECT_TRUE(waiter.WaitFor(times, kAsyncExpectationsTimeout));
+  EXPECT_TRUE(waiter->WaitFor(times, kAsyncExpectationsTimeout));
 }
 
 TEST_F(ProtocolHandlerImplTest, RegisterSecondaryTransport_FAILURE) {
   AddConnection();
 
-  TestAsyncWaiter waiter;
+  std::shared_ptr<TestAsyncWaiter> waiter = std::make_shared<TestAsyncWaiter>();
   uint32_t times = 0;
 
   transport_manager::ConnectionUID primary_connection_id = 123;
@@ -3165,7 +3161,7 @@ TEST_F(ProtocolHandlerImplTest, RegisterSecondaryTransport_FAILURE) {
                                  PROTECTION_OFF,
                                  connection_id,
                                  _)))
-      .WillOnce(DoAll(NotifyTestAsyncWaiter(&waiter), Return(E_SUCCESS)));
+      .WillOnce(DoAll(NotifyTestAsyncWaiter(waiter), Return(E_SUCCESS)));
   times++;
 
   SendControlMessage(PROTECTION_OFF,
@@ -3174,7 +3170,7 @@ TEST_F(ProtocolHandlerImplTest, RegisterSecondaryTransport_FAILURE) {
                      FRAME_DATA_REGISTER_SECONDARY_TRANSPORT,
                      PROTOCOL_VERSION_5);
 
-  EXPECT_TRUE(waiter.WaitFor(times, kAsyncExpectationsTimeout));
+  EXPECT_TRUE(waiter->WaitFor(times, kAsyncExpectationsTimeout));
 }
 
 TEST_F(ProtocolHandlerImplTest, DISABLED_FloodVerification) {
@@ -5246,7 +5242,7 @@ TEST_F(ProtocolHandlerImplTest, StartSession_NACKReason_SessionObserverReject) {
       .WillRepeatedly(ReturnNull());
 #endif  // ENABLE_SECURITY
 
-  TestAsyncWaiter waiter;
+  std::shared_ptr<TestAsyncWaiter> waiter = std::make_shared<TestAsyncWaiter>();
   uint32_t times = 0;
   ServiceType service_type;
   // Expect verification of allowed transport
@@ -5275,7 +5271,7 @@ TEST_F(ProtocolHandlerImplTest, StartSession_NACKReason_SessionObserverReject) {
       .
       // Return sessions start rejection
       WillRepeatedly(
-          DoAll(NotifyTestAsyncWaiter(&waiter),
+          DoAll(NotifyTestAsyncWaiter(waiter),
                 SaveArg<2>(&service_type),
                 InvokeMemberFuncWithArg3(
                     protocol_handler_impl.get(),
@@ -5314,7 +5310,7 @@ TEST_F(ProtocolHandlerImplTest, StartSession_NACKReason_SessionObserverReject) {
                                                  Eq(nack_params))))
       .Times(call_times)
 
-      .WillRepeatedly(DoAll(NotifyTestAsyncWaiter(&waiter), Return(E_SUCCESS)));
+      .WillRepeatedly(DoAll(NotifyTestAsyncWaiter(waiter), Return(E_SUCCESS)));
   times += call_times;
 
   for (const ServiceType& service_type : service_types) {
@@ -5325,7 +5321,7 @@ TEST_F(ProtocolHandlerImplTest, StartSession_NACKReason_SessionObserverReject) {
                        PROTOCOL_VERSION_5);
   }
 
-  EXPECT_TRUE(waiter.WaitFor(times, kAsyncExpectationsTimeout));
+  EXPECT_TRUE(waiter->WaitFor(times, kAsyncExpectationsTimeout));
 }
 
 /*

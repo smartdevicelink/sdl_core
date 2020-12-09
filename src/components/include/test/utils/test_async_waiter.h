@@ -48,11 +48,12 @@ namespace test {
  *
  * Usage example:
  * TEST() {
- *   TestAsyncWaiter waiter;
+ *   std::shared_ptr<TestAsyncWaiter> waiter =
+ *     std::make_shared<TestAsyncWaiter>();
  *   EXPECT_CALL(mock, InterestingCall())
  *       .Times(n)
- *       .WillRepeatedly(NotifyTestAsyncWaiter(&waiter));
- *   EXPECT_TRUE(waiter.WaitFor(n, 1000));
+ *       .WillRepeatedly(NotifyTestAsyncWaiter(waiter));
+ *   EXPECT_TRUE(waiter->WaitFor(n, 1000));
  * }
  */
 class TestAsyncWaiter {
