@@ -643,14 +643,14 @@
   <element name="subtleAlertSoftButtonText">
     <description>A text field in the soft button of a subtle alert; applies to `SubtleAlert` `softButtons`</description>
   </element>
-  <element name="timeToDestination"/>
-    <!-- TO DO to be removed -->
-  <element name="turnText"/>
+  <element name="timeToDestination">
+      <description>Optional time to destination field for ShowConstantTBT</description>
+  </element>
+  <element name="turnText">
+      <description>Turn text for turnList parameter of UpdateTurnList</description>
+  </element>
   <element name="navigationText">
     <description>Navigation text for UpdateTurnList.</description>
-  </element>
-  <element name="notificationText">
-    <description>Text of notification to be displayed on screen.</description>
   </element>
 </enum>
 
