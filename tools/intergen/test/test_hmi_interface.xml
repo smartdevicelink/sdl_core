@@ -471,9 +471,6 @@
   <element name="sliderFooter">
     <description> Footer text for slider</description>
   </element>
-  <element name="notificationText">
-    <description>Text of notification to be displayed on screen.</description>
-  </element>
   <element name="menuName">
     <description> Primary text for Choice</description>
   </element>
