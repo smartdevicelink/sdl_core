@@ -104,10 +104,7 @@ void BoostLogger::Init() {
       // Disable logging for particular sinks
       if (boost::optional<std::string> param =
               settings[sink_name]["DisableLogging"]) {
-        bool sink_disabled = (param.get() == "true");
-        if (sink_disabled) {
-          to_be_removed = true;
-        }
+        to_be_removed = (param.get() == "true");
       }
 
       if (to_be_removed) {
