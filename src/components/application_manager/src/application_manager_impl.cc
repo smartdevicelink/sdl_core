@@ -3244,6 +3244,8 @@ void ApplicationManagerImpl::UnregisterApplication(
       return;
     }
 
+    resume_controller().RemoveFromResumption(app_id);
+
     if (is_resuming) {
       resume_controller().SaveApplication(app_to_remove);
     } else {
