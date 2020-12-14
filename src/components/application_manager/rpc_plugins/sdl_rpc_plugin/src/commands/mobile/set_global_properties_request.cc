@@ -151,6 +151,17 @@ void SetGlobalPropertiesRequest::Run() {
     return;
   }
 
+  if (!AreCustomizableKeysAllowed()) {
+    SDL_LOG_ERROR(
+        "Number of customizable keys exceeds the maximum number for this "
+        "layout");
+    SendResponse(
+        false,
+        mobile_apis::Result::INVALID_DATA,
+        "customizeKeys exceeds the number of customizable keys in this Layout");
+    return;
+  }
+
   // if application waits for sending ttsGlobalProperties need to remove this
   // application from tts_global_properties_app_list_
   application_manager_.RemoveAppFromTTSGlobalPropertiesList(connection_key());
@@ -642,7 +653,24 @@ void SetGlobalPropertiesRequest::PrepareUIRequestMenuAndKeyboardData(
   if (is_keyboard_props_present) {
     out_params[hmi_request::keyboard_properties] =
         msg_params[hmi_request::keyboard_properties];
-    app->set_keyboard_props(msg_params[hmi_request::keyboard_properties]);
+
+    if (msg_params[hmi_request::keyboard_properties].keyExists(
+            hmi_request::keyboard_layout)) {
+      app->set_keyboard_props(msg_params[hmi_request::keyboard_properties]);
+      return;
+    }
+
+    smart_objects::SmartObject cached_keyboard_props(
+        msg_params[hmi_request::keyboard_properties]);
+    auto saved_keyboard_props = app->keyboard_props();
+    if (saved_keyboard_props) {
+      if (saved_keyboard_props->keyExists(hmi_request::keyboard_layout)) {
+        cached_keyboard_props[hmi_request::keyboard_layout] =
+            static_cast<hmi_apis::Common_KeyboardLayout::eType>(
+                (*saved_keyboard_props)[hmi_request::keyboard_layout].asInt());
+      }
+    }
+    app->set_keyboard_props(cached_keyboard_props);
   }
 }
 
@@ -820,9 +848,130 @@ bool SetGlobalPropertiesRequest::IsWhiteSpaceExist() {
         }
       }
     }
+
+    if (msg_params[strings::keyboard_properties].keyExists(
+            hmi_request::customize_keys)) {
+      const smart_objects::SmartArray* custom_keys_array =
+          msg_params[strings::keyboard_properties][hmi_request::customize_keys]
+              .asArray();
+
+      for (auto keys : (*custom_keys_array)) {
+        if (!CheckSyntax(keys.asCharArray())) {
+          SDL_LOG_ERROR(
+              "Invalid keyboard_properties "
+              "customize_keys syntax check failed");
+          return true;
+        }
+      }
+    }
   }
+
   return false;
 }
 
+hmi_apis::Common_KeyboardLayout::eType
+SetGlobalPropertiesRequest::GetKeyboardLayout() const {
+  SDL_LOG_AUTO_TRACE();
+
+  const smart_objects::SmartObject& msg_params =
+      (*message_)[strings::msg_params];
+  if (msg_params[strings::keyboard_properties].keyExists(
+          hmi_request::keyboard_layout)) {
+    return static_cast<hmi_apis::Common_KeyboardLayout::eType>(
+        msg_params[strings::keyboard_properties][hmi_request::keyboard_layout]
+            .asInt());
+  }
+
+  ApplicationSharedPtr app = application_manager_.application(connection_key());
+  auto saved_keyboard_props = app->keyboard_props();
+  if (saved_keyboard_props) {
+    if (saved_keyboard_props->keyExists(hmi_request::keyboard_layout)) {
+      return static_cast<hmi_apis::Common_KeyboardLayout::eType>(
+          (*saved_keyboard_props)[hmi_request::keyboard_layout].asInt());
+    }
+  }
+
+  return hmi_apis::Common_KeyboardLayout::QWERTY;
+}
+
+uint32_t SetGlobalPropertiesRequest::GetAllowedNumberOfConfigurableKeys()
+    const {
+  SDL_LOG_AUTO_TRACE();
+
+  ApplicationSharedPtr app = application_manager_.application(connection_key());
+  auto display_capabilities = app->display_capabilities();
+  if (!display_capabilities) {
+    SDL_LOG_WARN("Display capabilities are not available");
+    return 0;
+  }
+
+  auto* window_capabilities =
+      (*display_capabilities)[0][strings::window_capabilities].asArray();
+
+  if (!window_capabilities) {
+    SDL_LOG_WARN("Window capabilities are not available");
+    return 0;
+  }
+
+  if (!(*window_capabilities)[0].keyExists(
+          hmi_response::keyboard_capabilities)) {
+    SDL_LOG_WARN("Keyboard capabilities are not available");
+    return 0;
+  }
+
+  if (!(*window_capabilities)[0][hmi_response::keyboard_capabilities].keyExists(
+          hmi_response::configurable_keys)) {
+    SDL_LOG_WARN("Configurable keys are not available");
+    return 0;
+  }
+
+  auto configurable_keyboards =
+      (*window_capabilities)[0][hmi_response::keyboard_capabilities]
+                            [hmi_response::configurable_keys]
+                                .asArray();
+
+  const auto requested_layout = GetKeyboardLayout();
+  for (auto keyboard : (*configurable_keyboards)) {
+    if (requested_layout ==
+        static_cast<hmi_apis::Common_KeyboardLayout::eType>(
+            keyboard[hmi_request::keyboard_layout].asInt())) {
+      return keyboard[hmi_response::num_configurable_keys].asUInt();
+    }
+  }
+
+  return 0;
+}
+
+bool SetGlobalPropertiesRequest::AreCustomizableKeysAllowed() const {
+  SDL_LOG_AUTO_TRACE();
+
+  const smart_objects::SmartObject& msg_params =
+      (*message_)[strings::msg_params];
+
+  if (!msg_params.keyExists(strings::keyboard_properties)) {
+    SDL_LOG_WARN("Keyboard properties are not available");
+    return true;
+  }
+
+  if (!msg_params[strings::keyboard_properties].keyExists(
+          hmi_request::customize_keys)) {
+    SDL_LOG_WARN("Customizable keys are not available");
+    return true;
+  }
+
+  auto custom_keys_array =
+      msg_params[strings::keyboard_properties][hmi_request::customize_keys]
+          .asArray();
+  if (custom_keys_array) {
+    uint32_t requested_key_count = custom_keys_array->size();
+    uint32_t allowed_key_count = GetAllowedNumberOfConfigurableKeys();
+
+    if (requested_key_count > allowed_key_count) {
+      return false;
+    }
+  }
+
+  return true;
+}
 }  // namespace commands
 }  // namespace sdl_rpc_plugin
