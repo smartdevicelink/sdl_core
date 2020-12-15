@@ -97,6 +97,7 @@
 #include "sdl_rpc_plugin/commands/mobile/on_update_file_notification.h"
 #include "sdl_rpc_plugin/commands/mobile/on_update_sub_menu_notification.h"
 #include "sdl_rpc_plugin/commands/mobile/on_way_point_change_notification.h"
+#include "sdl_rpc_plugin/commands/mobile/on_way_point_change_notification_from_mobile.h"
 #include "sdl_rpc_plugin/commands/mobile/perform_audio_pass_thru_request.h"
 #include "sdl_rpc_plugin/commands/mobile/perform_audio_pass_thru_response.h"
 #include "sdl_rpc_plugin/commands/mobile/perform_interaction_request.h"
@@ -491,6 +492,10 @@ CommandCreator& MobileCommandFactory::get_notification_from_mobile_creator(
   switch (id) {
     case mobile_apis::FunctionID::OnHMIStatusID: {
       return factory.GetCreator<commands::OnHMIStatusNotificationFromMobile>();
+    }
+    case mobile_apis::FunctionID::OnWayPointChangeID: {
+      return factory
+          .GetCreator<commands::OnWayPointChangeNotificationFromMobile>();
     }
     case mobile_apis::FunctionID::OnAppCapabilityUpdatedID: {
       return factory
