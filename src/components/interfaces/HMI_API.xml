@@ -634,15 +634,6 @@
   <element name="phoneNumber">
     <description> Optional phone number of intended location / establishment (if applicable) for SendLocation.</description>
   </element>
-  <element name="subtleAlertText1">
-    <description>The first line of the subtle alert text field; applies to `SubtleAlert` `alertText1`</description>
-  </element>
-  <element name="subtleAlertText2">
-    <description>The second line of the subtle alert text field; applies to `SubtleAlert` `alertText2`</description>
-  </element>
-  <element name="subtleAlertSoftButtonText">
-    <description>A text field in the soft button of a subtle alert; applies to `SubtleAlert` `softButtons`</description>
-  </element>
   <element name="timeToDestination">
       <description>Optional time to destination field for ShowConstantTBT</description>
   </element>
@@ -651,6 +642,15 @@
   </element>
   <element name="navigationText">
     <description>Navigation text for UpdateTurnList.</description>
+  </element>
+  <element name="subtleAlertText1">
+    <description>The first line of the subtle alert text field; applies to `SubtleAlert` `alertText1`</description>
+  </element>
+  <element name="subtleAlertText2">
+    <description>The second line of the subtle alert text field; applies to `SubtleAlert` `alertText2`</description>
+  </element>
+  <element name="subtleAlertSoftButtonText">
+    <description>A text field in the soft button of a subtle alert; applies to `SubtleAlert` `softButtons`</description>
   </element>
 </enum>
 
