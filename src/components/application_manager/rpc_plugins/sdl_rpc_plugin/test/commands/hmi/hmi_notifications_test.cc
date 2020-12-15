@@ -92,6 +92,7 @@
 #include "utils/signals.h"
 
 #include "application_manager/hmi_capabilities_impl.h"
+#include "application_manager/mock_app_service_manager.h"
 #include "application_manager/mock_application.h"
 #include "application_manager/mock_application_manager.h"
 #include "application_manager/mock_event_dispatcher.h"
@@ -106,6 +107,8 @@
 #include "connection_handler/mock_connection_handler.h"
 #include "connection_handler/mock_connection_handler_settings.h"
 #include "protocol_handler/mock_session_observer.h"
+#include "resumption/last_state_wrapper_impl.h"
+#include "resumption/mock_last_state.h"
 #include "smart_objects/smart_object.h"
 #include "test/application_manager/mock_application_manager_settings.h"
 #include "transport_manager/mock_transport_manager.h"
@@ -127,6 +130,7 @@ using ::test::components::application_manager_test::MockApplication;
 using ::test::components::application_manager_test::MockApplicationManager;
 using ::test::components::application_manager_test::
     MockApplicationManagerSettings;
+using ::test::components::application_manager_test::MockAppServiceManager;
 using ::test::components::event_engine_test::MockEventDispatcher;
 using ::testing::_;
 using ::testing::InSequence;
@@ -216,7 +220,11 @@ class HMICommandsNotificationsTest
   HMICommandsNotificationsTest()
       : applications_lock_(std::make_shared<sync_primitives::Lock>())
       , applications_(application_set_, applications_lock_)
-      , app_ptr_(NULL) {}
+      , app_ptr_(NULL)
+      , mock_last_state_(std::make_shared<resumption_test::MockLastState>())
+      , last_state_wrapper_(std::make_shared<resumption::LastStateWrapperImpl>(
+            mock_last_state_))
+      , mock_app_service_manager_(app_mngr_, last_state_wrapper_) {}
 
   ~HMICommandsNotificationsTest() {
     // Fix DataAccessor release and WinQt crash
@@ -244,6 +252,9 @@ class HMICommandsNotificationsTest
 
   MockConnectionHandler mock_connection_handler_;
   MockSessionObserver mock_session_observer_;
+  std::shared_ptr<resumption_test::MockLastState> mock_last_state_;
+  resumption::LastStateWrapperPtr last_state_wrapper_;
+  MockAppServiceManager mock_app_service_manager_;
 
   void InitCommand(const uint32_t& default_timeout) OVERRIDE {
     app_ = ConfigureApp(&app_ptr_, kAppId_, NOT_MEDIA, NOT_NAVI, NOT_VC);
@@ -256,6 +267,8 @@ class HMICommandsNotificationsTest
     ON_CALL(app_mngr_, application_by_hmi_app(_)).WillByDefault(Return(app_));
     ON_CALL(*app_ptr_, app_id()).WillByDefault(Return(kAppId_));
     ON_CALL(app_mngr_, application(kConnectionKey)).WillByDefault(Return(app_));
+    ON_CALL(app_mngr_, GetAppServiceManager())
+        .WillByDefault(ReturnRef(mock_app_service_manager_));
     ON_CALL(app_mngr_, connection_handler())
         .WillByDefault(ReturnRef(mock_connection_handler_));
   }
@@ -428,6 +441,8 @@ TEST_F(HMICommandsNotificationsTest,
   MessageSharedPtr message = CreateMessage();
   std::shared_ptr<Command> command =
       CreateCommand<OnNaviWayPointChangeNotification>(message);
+  EXPECT_CALL(mock_app_service_manager_, FindWayPointsHandler())
+      .WillOnce(Return(nullptr));
   EXPECT_CALL(mock_rpc_service_,
               ManageMobileCommand(_, Command::CommandSource::SOURCE_SDL));
   command->Run();
