@@ -162,6 +162,7 @@ ApplicationManagerImpl::ApplicationManagerImpl(
           std::make_shared<sync_primitives::RecursiveLock>())
     , apps_to_register_list_lock_ptr_(std::make_shared<sync_primitives::Lock>())
     , reregister_wait_list_lock_ptr_(std::make_shared<sync_primitives::Lock>())
+    , subscribed_to_hmi_way_points_(false)
     , audio_pass_thru_active_(false)
     , audio_pass_thru_app_id_(0)
     , driver_distraction_state_(hmi_apis::Common_DriverDistractionState::DD_OFF)
@@ -673,6 +674,8 @@ ApplicationSharedPtr ApplicationManagerImpl::RegisterApplication(
       static_cast<protocol_handler::MajorProtocolVersion>(
           message[strings::params][strings::protocol_version].asInt());
   application->set_protocol_version(protocol_version);
+  connection_handler_->BindProtocolVersionWithSession(connection_key,
+                                                      protocol_version);
 
   // Keep HMI add id in case app is present in "waiting for registration" list
   apps_to_register_list_lock_ptr_->Acquire();
@@ -1720,11 +1723,11 @@ void ApplicationManagerImpl::SwitchApplication(ApplicationSharedPtr app,
 
   bool is_subscribed_to_way_points = IsAppSubscribedForWayPoints(*app);
   if (is_subscribed_to_way_points) {
-    UnsubscribeAppFromWayPoints(app);
+    UnsubscribeAppFromWayPoints(app, false);
   }
   SwitchApplicationParameters(app, connection_key, device_id, mac_address);
   if (is_subscribed_to_way_points) {
-    SubscribeAppForWayPoints(app);
+    SubscribeAppForWayPoints(app, false);
   }
 
   // Normally this is done during registration, however since switched apps are
@@ -3250,7 +3253,7 @@ void ApplicationManagerImpl::UnregisterApplication(
     }
 
     if (IsAppSubscribedForWayPoints(app_id)) {
-      UnsubscribeAppFromWayPoints(app_id);
+      UnsubscribeAppFromWayPoints(app_id, true);
       if (!IsAnyAppSubscribedForWayPoints()) {
         SDL_LOG_DEBUG("Send UnsubscribeWayPoints");
         auto request = MessageHelper::CreateUnsubscribeWayPointsRequest(
@@ -4714,42 +4717,69 @@ bool ApplicationManagerImpl::IsAppSubscribedForWayPoints(
   return IsAppSubscribedForWayPoints(app.app_id());
 }
 
-void ApplicationManagerImpl::SubscribeAppForWayPoints(uint32_t app_id) {
+void ApplicationManagerImpl::SubscribeAppForWayPoints(uint32_t app_id,
+                                                      bool response_from_hmi) {
   SDL_LOG_AUTO_TRACE();
   sync_primitives::AutoLock lock(subscribed_way_points_apps_lock_);
   SDL_LOG_DEBUG("Subscribing " << app_id);
   subscribed_way_points_apps_list_.insert(app_id);
+  if (response_from_hmi) {
+    subscribed_to_hmi_way_points_ = true;
+  }
   SDL_LOG_DEBUG("There are applications subscribed: "
                 << subscribed_way_points_apps_list_.size());
-  if (way_points_data_) {
-    smart_objects::SmartObjectSPtr way_point_notification_ =
-        std::make_shared<smart_objects::SmartObject>(*way_points_data_);
-    (*way_point_notification_)[strings::params][strings::connection_key] =
+  if (GetAppServiceManager().FindWayPointsHandler() != nullptr) {
+    auto service = GetAppServiceManager().ActiveServiceForType(
+        EnumToString(mobile_apis::AppServiceType::NAVIGATION));
+    auto it = mobile_way_points_data_.find(service->connection_key);
+    if (mobile_way_points_data_.end() == it) {
+      SDL_LOG_DEBUG("No waypoint data provided by app service provider yet");
+      return;
+    }
+    smart_objects::SmartObjectSPtr way_point_notification =
+        std::make_shared<smart_objects::SmartObject>(it->second);
+    (*way_point_notification)[strings::params][strings::connection_key] =
         app_id;
-    GetRPCService().SendMessageToMobile(way_point_notification_);
+    GetRPCService().SendMessageToMobile(way_point_notification);
+  } else if (hmi_way_points_data_) {
+    smart_objects::SmartObjectSPtr way_point_notification =
+        std::make_shared<smart_objects::SmartObject>(*hmi_way_points_data_);
+    (*way_point_notification)[strings::params][strings::connection_key] =
+        app_id;
+    GetRPCService().SendMessageToMobile(way_point_notification);
   }
 }
 
-void ApplicationManagerImpl::SubscribeAppForWayPoints(
-    ApplicationSharedPtr app) {
-  SubscribeAppForWayPoints(app->app_id());
+void ApplicationManagerImpl::SubscribeAppForWayPoints(ApplicationSharedPtr app,
+                                                      bool response_from_hmi) {
+  SubscribeAppForWayPoints(app->app_id(), response_from_hmi);
 }
 
-void ApplicationManagerImpl::UnsubscribeAppFromWayPoints(uint32_t app_id) {
+void ApplicationManagerImpl::UnsubscribeAppFromWayPoints(
+    uint32_t app_id, bool response_from_hmi) {
   SDL_LOG_AUTO_TRACE();
   sync_primitives::AutoLock lock(subscribed_way_points_apps_lock_);
   SDL_LOG_DEBUG("Unsubscribing " << app_id);
   subscribed_way_points_apps_list_.erase(app_id);
+  if (response_from_hmi) {
+    subscribed_to_hmi_way_points_ = false;
+  }
   SDL_LOG_DEBUG("There are applications subscribed: "
                 << subscribed_way_points_apps_list_.size());
   if (subscribed_way_points_apps_list_.empty()) {
-    way_points_data_.reset();
+    hmi_way_points_data_.reset();
+    mobile_way_points_data_.clear();
   }
 }
 
 void ApplicationManagerImpl::UnsubscribeAppFromWayPoints(
-    ApplicationSharedPtr app) {
-  UnsubscribeAppFromWayPoints(app->app_id());
+    ApplicationSharedPtr app, bool response_from_hmi) {
+  UnsubscribeAppFromWayPoints(app->app_id(), response_from_hmi);
+}
+
+bool ApplicationManagerImpl::IsSubscribedToHMIWayPoints() const {
+  SDL_LOG_AUTO_TRACE();
+  return subscribed_to_hmi_way_points_;
 }
 
 bool ApplicationManagerImpl::IsAnyAppSubscribedForWayPoints() const {
@@ -4761,9 +4791,17 @@ bool ApplicationManagerImpl::IsAnyAppSubscribedForWayPoints() const {
 }
 
 void ApplicationManagerImpl::SaveWayPointsMessage(
-    std::shared_ptr<smart_objects::SmartObject> way_points_message) {
+    std::shared_ptr<smart_objects::SmartObject> way_points_message,
+    uint32_t app_id) {
   sync_primitives::AutoLock lock(subscribed_way_points_apps_lock_);
-  way_points_data_ = way_points_message;
+  // Notification from HMI
+  if (0 == app_id) {
+    hmi_way_points_data_ = way_points_message;
+  }
+  // Notification from app service provider
+  else {
+    mobile_way_points_data_[app_id] = *way_points_message;
+  }
 }
 
 const std::set<uint32_t> ApplicationManagerImpl::GetAppsSubscribedForWayPoints()
