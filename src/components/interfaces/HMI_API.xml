@@ -640,9 +640,6 @@
   <element name="turnText">
       <description>Turn text for turnList parameter of UpdateTurnList</description>
   </element>
-  <element name="navigationText">
-    <description>Navigation text for UpdateTurnList.</description>
-  </element>
   <element name="subtleAlertText1">
     <description>The first line of the subtle alert text field; applies to `SubtleAlert` `alertText1`</description>
   </element>

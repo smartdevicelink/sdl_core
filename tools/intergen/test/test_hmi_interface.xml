@@ -456,9 +456,6 @@
   <element name="totalDistance">
     <description> Total distance to destination for navigation</description>
   </element>
-  <element name="navigationText">
-    <description>Navigation text for UpdateTurnList.</description>
-  </element>
   <element name="audioPassThruDisplayText1">
     <description> First line of text for audio pass thru</description>
   </element>
