@@ -674,6 +674,8 @@ ApplicationSharedPtr ApplicationManagerImpl::RegisterApplication(
       static_cast<protocol_handler::MajorProtocolVersion>(
           message[strings::params][strings::protocol_version].asInt());
   application->set_protocol_version(protocol_version);
+  connection_handler_->BindProtocolVersionWithSession(connection_key,
+                                                      protocol_version);
 
   // Keep HMI add id in case app is present in "waiting for registration" list
   apps_to_register_list_lock_ptr_->Acquire();
