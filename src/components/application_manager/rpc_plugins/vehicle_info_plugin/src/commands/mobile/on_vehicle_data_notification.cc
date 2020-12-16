@@ -112,9 +112,9 @@ void OnVehicleDataNotification::Run() {
             mobile_api::FunctionID::OnVehicleDataID),
         appSO[idx].enumerate(),
         &params_permissions);
-    if (parameters_permissions_.allowed_params.empty() &&
-        parameters_permissions_.disallowed_params.empty() &&
-        parameters_permissions_.undefined_params.empty()) {
+    if (params_permissions.allowed_params.empty() &&
+        params_permissions.disallowed_params.empty() &&
+        params_permissions.undefined_params.empty()) {
       SDL_LOG_DEBUG(
           "No parameter permissions provided, all params are allowed");
     } else {
