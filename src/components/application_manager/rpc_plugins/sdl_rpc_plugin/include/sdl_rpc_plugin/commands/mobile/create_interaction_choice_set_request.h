@@ -178,23 +178,6 @@ class CreateInteractionChoiceSetRequest
   };
 
   /*
-   * @brief Predicate for using with CheckChoiceSet method to compare menu name
-   *param
-   *
-   * return TRUE if there is coincidence of menu name, otherwise FALSE
-   */
-  struct CoincidencePredicateMenuName {
-    CoincidencePredicateMenuName(const std::string& newItem)
-        : newItem_(newItem) {}
-
-    bool operator()(smart_objects::SmartObject obj) {
-      return obj[app_mngr::strings::menu_name].asString() == newItem_;
-    }
-
-    const std::string& newItem_;
-  };
-
-  /*
    * @brief Predicate for using with CheckChoiceSet method to compare VR
    *commands param
    *
