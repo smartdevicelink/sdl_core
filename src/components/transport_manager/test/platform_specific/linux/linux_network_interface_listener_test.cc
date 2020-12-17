@@ -119,7 +119,7 @@ TEST_F(NetworkInterfaceListenerTest, Start_success) {
 
   // after stated, it is expected that the listener notifies current IP address
   // (if it's available)
-  std::shared_ptr<TestAsyncWaiter> waiter = std::make_shared<TestAsyncWaiter>();
+  auto waiter = TestAsyncWaiter::createInstance();
   EXPECT_CALL(mock_tcp_client_listener_,
               OnIPAddressUpdated(entries[0].ipv4_address, ""))
       .WillOnce(NotifyTestAsyncWaiter(waiter));

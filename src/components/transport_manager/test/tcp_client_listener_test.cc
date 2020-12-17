@@ -250,7 +250,7 @@ TEST_P(TcpClientListenerTest, ClientConnection) {
   int s = socket(AF_INET, SOCK_STREAM, 0);
   EXPECT_TRUE(0 <= s);
 
-  std::shared_ptr<TestAsyncWaiter> waiter = std::make_shared<TestAsyncWaiter>();
+  auto waiter = TestAsyncWaiter::createInstance();
 
   // controller should be notified of AddDevice event
   DeviceSptr mock_device = std::make_shared<MockTCPDevice>(

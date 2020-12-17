@@ -1045,7 +1045,7 @@ TEST_F(ConnectionHandlerTest, CloseSessionWithCommonReason) {
 
   connection_handler_->set_protocol_handler(&mock_protocol_handler_);
 
-  std::shared_ptr<TestAsyncWaiter> waiter = std::make_shared<TestAsyncWaiter>();
+  auto waiter = TestAsyncWaiter::createInstance();
   uint32_t times = 0;
   EXPECT_CALL(mock_protocol_handler_,
               SendEndSession(uid_, out_context_.new_session_id_))
@@ -1087,7 +1087,7 @@ TEST_F(ConnectionHandlerTest, CloseSessionWithFloodReason) {
 
   connection_handler_->set_protocol_handler(&mock_protocol_handler_);
 
-  std::shared_ptr<TestAsyncWaiter> waiter = std::make_shared<TestAsyncWaiter>();
+  auto waiter = TestAsyncWaiter::createInstance();
   uint32_t times = 0;
   EXPECT_CALL(mock_protocol_handler_,
               SendEndSession(uid_, out_context_.new_session_id_))
@@ -1129,7 +1129,7 @@ TEST_F(ConnectionHandlerTest, CloseSessionWithMalformedMessage) {
 
   connection_handler_->set_protocol_handler(&mock_protocol_handler_);
 
-  std::shared_ptr<TestAsyncWaiter> waiter = std::make_shared<TestAsyncWaiter>();
+  auto waiter = TestAsyncWaiter::createInstance();
   uint32_t times = 0;
   EXPECT_CALL(mock_protocol_handler_,
               SendEndSession(uid_, out_context_.new_session_id_))
@@ -1170,7 +1170,7 @@ TEST_F(ConnectionHandlerTest, CloseConnectionSessionsWithMalformedMessage) {
 
   connection_handler_->set_protocol_handler(&mock_protocol_handler_);
 
-  std::shared_ptr<TestAsyncWaiter> waiter = std::make_shared<TestAsyncWaiter>();
+  auto waiter = TestAsyncWaiter::createInstance();
   uint32_t times = 0;
   EXPECT_CALL(mock_protocol_handler_,
               SendEndSession(uid_, out_context_.new_session_id_))
@@ -1229,7 +1229,7 @@ TEST_F(ConnectionHandlerTest, CloseConnectionSessionsWithCommonReason) {
 
   connection_handler_->set_protocol_handler(&mock_protocol_handler_);
 
-  std::shared_ptr<TestAsyncWaiter> waiter = std::make_shared<TestAsyncWaiter>();
+  auto waiter = TestAsyncWaiter::createInstance();
   uint32_t times = 0;
   EXPECT_CALL(mock_protocol_handler_,
               SendEndSession(uid_, out_context_.new_session_id_))

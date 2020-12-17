@@ -202,7 +202,7 @@ TEST_F(AppLaunchCtrlTest, StoredAppIsLaunchedAfterDeviceConnected) {
   app_launch::ApplicationDataPtr app_to_launch = GetTestAppData(0);
   MockAppPtr app = GetTestApp(0);
 
-  std::shared_ptr<TestAsyncWaiter> waiter = std::make_shared<TestAsyncWaiter>();
+  auto waiter = TestAsyncWaiter::createInstance();
   applications_on_device.push_back(app_to_launch);
   EXPECT_CALL(app_launch_data_mock_,
               GetApplicationDataByDevice(app_to_launch->device_mac_))
@@ -224,7 +224,7 @@ TEST_F(AppLaunchCtrlTest, RelaunchAppIfNotRegisteredMultipleTimes) {
   app_launch::ApplicationDataPtr app_to_launch = GetTestAppData(0);
   applications_on_device.push_back(app_to_launch);
 
-  std::shared_ptr<TestAsyncWaiter> waiter = std::make_shared<TestAsyncWaiter>();
+  auto waiter = TestAsyncWaiter::createInstance();
   const uint32_t times = settings_.app_launch_max_retry_attempt();
   EXPECT_CALL(app_launch_data_mock_,
               GetApplicationDataByDevice(app_to_launch->device_mac_))
@@ -253,7 +253,7 @@ TEST_F(AppLaunchCtrlTest, LaunchMultipleApps) {
     apps.push_back(it->second);
   }
 
-  std::shared_ptr<TestAsyncWaiter> waiter = std::make_shared<TestAsyncWaiter>();
+  auto waiter = TestAsyncWaiter::createInstance();
   const uint32_t times = apps_and_data.size();
   EXPECT_CALL(app_launch_data_mock_, GetApplicationDataByDevice(DeviceMac(1)))
       .WillOnce(Return(apps));
@@ -285,7 +285,7 @@ TEST_F(AppLaunchCtrlTest, LaunchMultipleAppsNoRegister) {
     apps.push_back(it->second);
   }
 
-  std::shared_ptr<TestAsyncWaiter> waiter = std::make_shared<TestAsyncWaiter>();
+  auto waiter = TestAsyncWaiter::createInstance();
   const uint32_t times =
       settings_.app_launch_max_retry_attempt() * apps_and_data.size();
   EXPECT_CALL(app_launch_data_mock_, GetApplicationDataByDevice(DeviceMac(1)))
@@ -343,7 +343,7 @@ TEST_F(AppLaunchCtrlTest, LaunchMultipleAppsInHMILevelOrder) {
     apps.push_back(app_data);
   }
 
-  std::shared_ptr<TestAsyncWaiter> waiter = std::make_shared<TestAsyncWaiter>();
+  auto waiter = TestAsyncWaiter::createInstance();
   const uint32_t times = apps_and_data.size();
   EXPECT_CALL(app_launch_data_mock_, GetApplicationDataByDevice(DeviceMac(1)))
       .WillOnce(Return(apps));

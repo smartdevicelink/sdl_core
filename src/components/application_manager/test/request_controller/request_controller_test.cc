@@ -162,8 +162,7 @@ class RequestControllerTestClass : public ::testing::Test {
 TEST_F(RequestControllerTestClass,
        AddMobileRequest_DuplicateCorrelationId_INVALID_ID) {
   RequestPtr request_valid = GetMockRequest();
-  std::shared_ptr<TestAsyncWaiter> waiter_valid =
-      std::make_shared<TestAsyncWaiter>();
+  auto waiter_valid = TestAsyncWaiter::createInstance();
   ON_CALL(*request_valid, default_timeout()).WillByDefault(Return(0));
   EXPECT_CALL(*request_valid, Init()).WillOnce(Return(true));
   EXPECT_CALL(*request_valid, Run())
@@ -180,8 +179,7 @@ TEST_F(RequestControllerTestClass,
   // The command should not be run if another command with the same
   // correlation_id is waiting for a response
   RequestPtr request_dup_corr_id = GetMockRequest();
-  std::shared_ptr<TestAsyncWaiter> waiter_dup =
-      std::make_shared<TestAsyncWaiter>();
+  auto waiter_dup = TestAsyncWaiter::createInstance();
   ON_CALL(*request_dup_corr_id, default_timeout()).WillByDefault(Return(0));
   EXPECT_CALL(*request_dup_corr_id, Init()).WillOnce(Return(true));
   ON_CALL(*request_dup_corr_id, Run())
@@ -284,7 +282,7 @@ TEST_F(RequestControllerTestClass, OnTimer_SUCCESS) {
   RequestPtr mock_request = GetMockRequest(
       kDefaultCorrelationID, kDefaultConnectionKey, request_timeout);
 
-  std::shared_ptr<TestAsyncWaiter> waiter = std::make_shared<TestAsyncWaiter>();
+  auto waiter = TestAsyncWaiter::createInstance();
   EXPECT_EQ(RequestController::SUCCESS,
             AddRequest(default_settings_,
                        mock_request,

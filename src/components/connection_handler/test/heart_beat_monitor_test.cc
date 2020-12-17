@@ -123,7 +123,7 @@ TEST_F(HeartBeatMonitorTest, TimerElapsed) {
 
   const uint32_t session = connection_->AddNewSession(kDefaultConnectionHandle);
 
-  std::shared_ptr<TestAsyncWaiter> waiter = std::make_shared<TestAsyncWaiter>();
+  auto waiter = TestAsyncWaiter::createInstance();
   uint32_t times = 0;
   EXPECT_CALL(connection_handler_mock_, CloseSession(_, session, _))
       .WillOnce(DoAll(NotifyTestAsyncWaiter(waiter),
@@ -166,7 +166,7 @@ TEST_F(HeartBeatMonitorTest, NotKeptAlive) {
 
   const uint32_t session = connection_->AddNewSession(kDefaultConnectionHandle);
 
-  std::shared_ptr<TestAsyncWaiter> waiter = std::make_shared<TestAsyncWaiter>();
+  auto waiter = TestAsyncWaiter::createInstance();
   uint32_t times = 0;
   EXPECT_CALL(connection_handler_mock_, SendHeartBeat(_, session))
       .WillOnce(NotifyTestAsyncWaiter(waiter));
@@ -203,7 +203,7 @@ TEST_F(HeartBeatMonitorTest, TwoSessionsElapsed) {
   const uint32_t kSession2 =
       connection_->AddNewSession(kAnotherConnectionHandle);
 
-  std::shared_ptr<TestAsyncWaiter> waiter = std::make_shared<TestAsyncWaiter>();
+  auto waiter = TestAsyncWaiter::createInstance();
   uint32_t times = 0;
   EXPECT_CALL(connection_handler_mock_, CloseSession(_, kSession1, _))
       .WillOnce(DoAll(NotifyTestAsyncWaiter(waiter),
@@ -256,7 +256,7 @@ TEST_F(HeartBeatMonitorTest, DecreaseHeartBeatTimeout) {
   const uint32_t kSession =
       connection_->AddNewSession(kDefaultConnectionHandle);
 
-  std::shared_ptr<TestAsyncWaiter> waiter = std::make_shared<TestAsyncWaiter>();
+  auto waiter = TestAsyncWaiter::createInstance();
   uint32_t times = 0;
   EXPECT_CALL(connection_handler_mock_, CloseSession(_, kSession, _))
       .WillOnce(DoAll(NotifyTestAsyncWaiter(waiter),

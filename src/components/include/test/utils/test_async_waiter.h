@@ -48,8 +48,7 @@ namespace test {
  *
  * Usage example:
  * TEST() {
- *   std::shared_ptr<TestAsyncWaiter> waiter =
- *     std::make_shared<TestAsyncWaiter>();
+ *   auto waiter = TestAsyncWaiter::createInstance();
  *   EXPECT_CALL(mock, InterestingCall())
  *       .Times(n)
  *       .WillRepeatedly(NotifyTestAsyncWaiter(waiter));
@@ -58,8 +57,6 @@ namespace test {
  */
 class TestAsyncWaiter {
  public:
-  TestAsyncWaiter() : notified_(false), count_(0), lock_(), cond_var_() {}
-
   /**
    * @brief WaitFor
    * Waits for specified number of notifications but not longer
@@ -81,6 +78,10 @@ class TestAsyncWaiter {
     return true;
   }
 
+  static std::shared_ptr<TestAsyncWaiter> createInstance() {
+    return std::shared_ptr<TestAsyncWaiter>(new TestAsyncWaiter());
+  }
+
   /**
    * @brief Notify
    * Notifies async waiter
@@ -93,6 +94,8 @@ class TestAsyncWaiter {
   }
 
  private:
+  TestAsyncWaiter() : notified_(false), count_(0), lock_(), cond_var_() {}
+
   bool notified_;
   uint32_t count_;
   sync_primitives::Lock lock_;

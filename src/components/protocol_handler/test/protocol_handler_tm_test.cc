@@ -546,7 +546,7 @@ TEST_F(ProtocolHandlerImplTest,
   const int call_times = 5;
   AddConnection();
 
-  std::shared_ptr<TestAsyncWaiter> waiter = std::make_shared<TestAsyncWaiter>();
+  auto waiter = TestAsyncWaiter::createInstance();
   uint32_t times = 0;
   ServiceType service_type;
   // Expect verification of allowed transport
@@ -638,7 +638,7 @@ TEST_F(ProtocolHandlerImplTest, StartSession_Protected_SessionObserverReject) {
   const bool callback_protection_flag = PROTECTION_OFF;
 #endif  // ENABLE_SECURITY
 
-  std::shared_ptr<TestAsyncWaiter> waiter = std::make_shared<TestAsyncWaiter>();
+  auto waiter = TestAsyncWaiter::createInstance();
   uint32_t times = 0;
   ServiceType service_type;
   // Expect verification of allowed transport
@@ -721,7 +721,7 @@ TEST_F(ProtocolHandlerImplTest,
   AddConnection();
   const ServiceType start_service = kRpc;
 
-  std::shared_ptr<TestAsyncWaiter> waiter = std::make_shared<TestAsyncWaiter>();
+  auto waiter = TestAsyncWaiter::createInstance();
   uint32_t times = 0;
   // Expect verification of allowed transport
   EXPECT_CALL(session_observer_mock,
@@ -783,7 +783,7 @@ TEST_F(ProtocolHandlerImplTest,
 TEST_F(ProtocolHandlerImplTest, StartSession_Protected_SessionObserverAccept) {
   SetProtocolVersion2();
 
-  std::shared_ptr<TestAsyncWaiter> waiter = std::make_shared<TestAsyncWaiter>();
+  auto waiter = TestAsyncWaiter::createInstance();
   uint32_t times = 0;
 
   AddSession(waiter, times);
@@ -851,7 +851,7 @@ TEST_F(ProtocolHandlerImplTest,
                                                   std::string("BTMAC")),
                                        connection_id2);
 
-  std::shared_ptr<TestAsyncWaiter> waiter = std::make_shared<TestAsyncWaiter>();
+  auto waiter = TestAsyncWaiter::createInstance();
   uint32_t times = 0;
 
   // Expect verification of allowed transport
@@ -1024,7 +1024,7 @@ TEST_F(ProtocolHandlerImplTest, StartSession_Audio_RejectByTransportType) {
   AddConnection();
   const ServiceType start_service = kAudio;
 
-  std::shared_ptr<TestAsyncWaiter> waiter = std::make_shared<TestAsyncWaiter>();
+  auto waiter = TestAsyncWaiter::createInstance();
   uint32_t times = 0;
   // Expect verification of allowed transport
   EXPECT_CALL(session_observer_mock,
@@ -1066,7 +1066,7 @@ TEST_F(ProtocolHandlerImplTest, StartSession_Video_RejectByTransportType) {
   AddConnection();
   const ServiceType start_service = kMobileNav;
 
-  std::shared_ptr<TestAsyncWaiter> waiter = std::make_shared<TestAsyncWaiter>();
+  auto waiter = TestAsyncWaiter::createInstance();
   uint32_t times = 0;
   // Expect verification of allowed transport
   EXPECT_CALL(session_observer_mock,
@@ -1106,7 +1106,7 @@ TEST_F(ProtocolHandlerImplTest, StartSession_Video_RejectByTransportType) {
  * ProtocolHandler shall send NAck on session_observer rejection
  */
 TEST_F(ProtocolHandlerImplTest, EndSession_SessionObserverReject) {
-  std::shared_ptr<TestAsyncWaiter> waiter = std::make_shared<TestAsyncWaiter>();
+  auto waiter = TestAsyncWaiter::createInstance();
   uint32_t times = 0;
 
   AddSession(waiter, times);
@@ -1146,7 +1146,7 @@ TEST_F(ProtocolHandlerImplTest, EndSession_SessionObserverReject) {
  * ProtocolHandler shall send NAck on wrong hash code
  */
 TEST_F(ProtocolHandlerImplTest, EndSession_Success) {
-  std::shared_ptr<TestAsyncWaiter> waiter = std::make_shared<TestAsyncWaiter>();
+  auto waiter = TestAsyncWaiter::createInstance();
   uint32_t times = 0;
 
   AddSession(waiter, times);
@@ -1182,7 +1182,7 @@ TEST_F(ProtocolHandlerImplTest, EndSession_Success) {
 #ifdef ENABLE_SECURITY
 TEST_F(ProtocolHandlerImplTest, SecurityEnable_StartSessionProtocoloV1) {
   using namespace protocol_handler;
-  std::shared_ptr<TestAsyncWaiter> waiter = std::make_shared<TestAsyncWaiter>();
+  auto waiter = TestAsyncWaiter::createInstance();
   uint32_t times = 0;
 
   AddSession(waiter, times);
@@ -1260,7 +1260,7 @@ TEST_F(ProtocolHandlerImplTest, SecurityEnable_StartSessionUnprotected) {
   AddSecurityManager();
   const ServiceType start_service = kRpc;
 
-  std::shared_ptr<TestAsyncWaiter> waiter = std::make_shared<TestAsyncWaiter>();
+  auto waiter = TestAsyncWaiter::createInstance();
   uint32_t times = 0;
   // Expect verification of allowed transport
   EXPECT_CALL(session_observer_mock,
@@ -1322,7 +1322,7 @@ TEST_F(ProtocolHandlerImplTest, SecurityEnable_StartSessionProtected_Fail) {
   AddSecurityManager();
   const ServiceType start_service = kRpc;
 
-  std::shared_ptr<TestAsyncWaiter> waiter = std::make_shared<TestAsyncWaiter>();
+  auto waiter = TestAsyncWaiter::createInstance();
   uint32_t times = 0;
 
   protocol_handler::SessionContext context = GetSessionContext(connection_id,
@@ -1400,7 +1400,7 @@ TEST_F(ProtocolHandlerImplTest,
   AddSecurityManager();
   const ServiceType start_service = kRpc;
 
-  std::shared_ptr<TestAsyncWaiter> waiter = std::make_shared<TestAsyncWaiter>();
+  auto waiter = TestAsyncWaiter::createInstance();
   uint32_t times = 0;
   // Expect verification of allowed transport
   EXPECT_CALL(session_observer_mock,
@@ -1483,7 +1483,7 @@ TEST_F(ProtocolHandlerImplTest,
   AddSecurityManager();
   const ServiceType start_service = kRpc;
 
-  std::shared_ptr<TestAsyncWaiter> waiter = std::make_shared<TestAsyncWaiter>();
+  auto waiter = TestAsyncWaiter::createInstance();
   uint32_t times = 0;
   protocol_handler::SessionContext context = GetSessionContext(connection_id,
                                                                NEW_SESSION_ID,
@@ -1588,7 +1588,7 @@ TEST_F(ProtocolHandlerImplTest,
   ON_CALL(protocol_handler_settings_mock, force_protected_service())
       .WillByDefault(ReturnRefOfCopy(services));
 
-  std::shared_ptr<TestAsyncWaiter> waiter = std::make_shared<TestAsyncWaiter>();
+  auto waiter = TestAsyncWaiter::createInstance();
   uint32_t times = 0;
   // Expect verification of allowed transport
   EXPECT_CALL(session_observer_mock,
@@ -1701,7 +1701,7 @@ TEST_F(
   ON_CALL(protocol_handler_settings_mock, force_protected_service())
       .WillByDefault(ReturnRefOfCopy(services));
 
-  std::shared_ptr<TestAsyncWaiter> waiter = std::make_shared<TestAsyncWaiter>();
+  auto waiter = TestAsyncWaiter::createInstance();
   uint32_t times = 0;
   // Expect verification of allowed transport
   EXPECT_CALL(session_observer_mock,
@@ -1812,7 +1812,7 @@ TEST_F(ProtocolHandlerImplTest,
   ON_CALL(protocol_handler_settings_mock, force_protected_service())
       .WillByDefault(ReturnRefOfCopy(services));
 
-  std::shared_ptr<TestAsyncWaiter> waiter = std::make_shared<TestAsyncWaiter>();
+  auto waiter = TestAsyncWaiter::createInstance();
   uint32_t times = 0;
   // Expect verification of allowed transport
   EXPECT_CALL(session_observer_mock,
@@ -1939,7 +1939,7 @@ void ProtocolHandlerImplTest::VerifySecondaryTransportParamsInStartSessionAck(
       .WillRepeatedly(Return(maximum_rpc_payload_size));
   InitProtocolHandlerImpl(0u, 0u);
 
-  std::shared_ptr<TestAsyncWaiter> waiter = std::make_shared<TestAsyncWaiter>();
+  auto waiter = TestAsyncWaiter::createInstance();
   uint32_t times = 0;
 
   const uint8_t input_protocol_version = 5;
@@ -2075,7 +2075,7 @@ void ProtocolHandlerImplTest::VerifyCloudAppParamsInStartSessionAck(
       .WillRepeatedly(Return(maximum_rpc_payload_size));
   InitProtocolHandlerImpl(0u, 0u);
 
-  std::shared_ptr<TestAsyncWaiter> waiter = std::make_shared<TestAsyncWaiter>();
+  auto waiter = TestAsyncWaiter::createInstance();
   uint32_t times = 0;
 
   const uint8_t input_protocol_version = 5;
@@ -2543,7 +2543,7 @@ TEST_F(
 // Secondary transport param should not be included for apps with v5.0.0
 TEST_F(ProtocolHandlerImplTest,
        StartSessionAck_Unprotected_NoSecondaryTransportParamsForV5) {
-  std::shared_ptr<TestAsyncWaiter> waiter = std::make_shared<TestAsyncWaiter>();
+  auto waiter = TestAsyncWaiter::createInstance();
   uint32_t times = 0;
 
   const uint8_t input_protocol_version = 5;
@@ -2715,7 +2715,7 @@ TEST_F(ProtocolHandlerImplTest, StartSessionAck_CloudAppAuthTokenAvailable) {
 
 TEST_F(ProtocolHandlerImplTest,
        TransportEventUpdate_afterVersionNegotiation_TCPEnabled) {
-  std::shared_ptr<TestAsyncWaiter> waiter = std::make_shared<TestAsyncWaiter>();
+  auto waiter = TestAsyncWaiter::createInstance();
   uint32_t times = 0;
 
   const uint8_t input_protocol_version = 5;
@@ -2838,7 +2838,7 @@ TEST_F(ProtocolHandlerImplTest,
 
 TEST_F(ProtocolHandlerImplTest,
        TransportEventUpdate_afterVersionNegotiation_TCPDisabled) {
-  std::shared_ptr<TestAsyncWaiter> waiter = std::make_shared<TestAsyncWaiter>();
+  auto waiter = TestAsyncWaiter::createInstance();
   uint32_t times = 0;
 
   const uint8_t input_protocol_version = 5;
@@ -2962,7 +2962,7 @@ TEST_F(ProtocolHandlerImplTest,
   using connection_handler::SessionConnectionMap;
   using connection_handler::SessionTransports;
 
-  std::shared_ptr<TestAsyncWaiter> waiter = std::make_shared<TestAsyncWaiter>();
+  auto waiter = TestAsyncWaiter::createInstance();
   uint32_t times = 0;
 
   char tcp_address[] = "172.16.2.3";
@@ -3029,7 +3029,7 @@ TEST_F(ProtocolHandlerImplTest,
   using connection_handler::SessionConnectionMap;
   using connection_handler::SessionTransports;
 
-  std::shared_ptr<TestAsyncWaiter> waiter = std::make_shared<TestAsyncWaiter>();
+  auto waiter = TestAsyncWaiter::createInstance();
   uint32_t times = 0;
 
   char tcp_address[] = "172.16.2.3";
@@ -3105,7 +3105,7 @@ TEST_F(ProtocolHandlerImplTest,
 TEST_F(ProtocolHandlerImplTest, RegisterSecondaryTransport_SUCCESS) {
   AddConnection();
 
-  std::shared_ptr<TestAsyncWaiter> waiter = std::make_shared<TestAsyncWaiter>();
+  auto waiter = TestAsyncWaiter::createInstance();
   uint32_t times = 0;
 
   transport_manager::ConnectionUID primary_connection_id = 123;
@@ -3140,7 +3140,7 @@ TEST_F(ProtocolHandlerImplTest, RegisterSecondaryTransport_SUCCESS) {
 TEST_F(ProtocolHandlerImplTest, RegisterSecondaryTransport_FAILURE) {
   AddConnection();
 
-  std::shared_ptr<TestAsyncWaiter> waiter = std::make_shared<TestAsyncWaiter>();
+  auto waiter = TestAsyncWaiter::createInstance();
   uint32_t times = 0;
 
   transport_manager::ConnectionUID primary_connection_id = 123;
@@ -3179,7 +3179,7 @@ TEST_F(ProtocolHandlerImplTest, DISABLED_FloodVerification) {
   InitProtocolHandlerImpl(period_msec, max_messages);
   AddConnection();
 
-  std::shared_ptr<TestAsyncWaiter> waiter = std::make_shared<TestAsyncWaiter>();
+  auto waiter = TestAsyncWaiter::createInstance();
   uint32_t times = 0;
 
   AddSession(waiter, times);
@@ -3224,7 +3224,7 @@ TEST_F(ProtocolHandlerImplTest, DISABLED_FloodVerification_ThresholdValue) {
   InitProtocolHandlerImpl(period_msec, max_messages);
   AddConnection();
 
-  std::shared_ptr<TestAsyncWaiter> waiter = std::make_shared<TestAsyncWaiter>();
+  auto waiter = TestAsyncWaiter::createInstance();
   uint32_t times = 0;
 
   AddSession(waiter, times);
@@ -3268,7 +3268,7 @@ TEST_F(ProtocolHandlerImplTest, DISABLED_FloodVerification_VideoFrameSkip) {
   InitProtocolHandlerImpl(period_msec, max_messages);
   AddConnection();
 
-  std::shared_ptr<TestAsyncWaiter> waiter = std::make_shared<TestAsyncWaiter>();
+  auto waiter = TestAsyncWaiter::createInstance();
   uint32_t times = 0;
 
   AddSession(waiter, times);
@@ -3304,7 +3304,7 @@ TEST_F(ProtocolHandlerImplTest, DISABLED_FloodVerification_AudioFrameSkip) {
   InitProtocolHandlerImpl(period_msec, max_messages);
   AddConnection();
 
-  std::shared_ptr<TestAsyncWaiter> waiter = std::make_shared<TestAsyncWaiter>();
+  auto waiter = TestAsyncWaiter::createInstance();
   uint32_t times = 0;
 
   AddSession(waiter, times);
@@ -3340,7 +3340,7 @@ TEST_F(ProtocolHandlerImplTest, DISABLED_FloodVerificationDisable) {
   InitProtocolHandlerImpl(period_msec, max_messages);
   AddConnection();
 
-  std::shared_ptr<TestAsyncWaiter> waiter = std::make_shared<TestAsyncWaiter>();
+  auto waiter = TestAsyncWaiter::createInstance();
   uint32_t times = 0;
 
   AddSession(waiter, times);
@@ -3376,7 +3376,7 @@ TEST_F(ProtocolHandlerImplTest, MalformedVerificationDisable) {
   InitProtocolHandlerImpl(0u, 0u, false, period_msec, max_messages);
   AddConnection();
 
-  std::shared_ptr<TestAsyncWaiter> waiter = std::make_shared<TestAsyncWaiter>();
+  auto waiter = TestAsyncWaiter::createInstance();
   uint32_t times = 0;
 
   AddSession(waiter, times);
@@ -3408,7 +3408,7 @@ TEST_F(ProtocolHandlerImplTest, DISABLED_MalformedLimitVerification) {
   InitProtocolHandlerImpl(0u, 0u, true, period_msec, max_messages);
   AddConnection();
 
-  std::shared_ptr<TestAsyncWaiter> waiter = std::make_shared<TestAsyncWaiter>();
+  auto waiter = TestAsyncWaiter::createInstance();
   uint32_t times = 0;
 
   AddSession(waiter, times);
@@ -3463,7 +3463,7 @@ TEST_F(ProtocolHandlerImplTest,
   InitProtocolHandlerImpl(0u, 0u, true, period_msec, max_messages);
   AddConnection();
 
-  std::shared_ptr<TestAsyncWaiter> waiter = std::make_shared<TestAsyncWaiter>();
+  auto waiter = TestAsyncWaiter::createInstance();
   uint32_t times = 0;
 
   AddSession(waiter, times);
@@ -3542,7 +3542,7 @@ TEST_F(ProtocolHandlerImplTest, MalformedLimitVerification_MalformedOnly) {
   InitProtocolHandlerImpl(0u, 0u, true, period_msec, max_messages);
   AddConnection();
 
-  std::shared_ptr<TestAsyncWaiter> waiter = std::make_shared<TestAsyncWaiter>();
+  auto waiter = TestAsyncWaiter::createInstance();
   uint32_t times = 0;
 
   AddSession(waiter, times);
@@ -3602,7 +3602,7 @@ TEST_F(ProtocolHandlerImplTest, MalformedLimitVerification_NullTimePeriod) {
   InitProtocolHandlerImpl(0u, 0u, true, period_msec, max_messages);
   AddConnection();
 
-  std::shared_ptr<TestAsyncWaiter> waiter = std::make_shared<TestAsyncWaiter>();
+  auto waiter = TestAsyncWaiter::createInstance();
   uint32_t times = 0;
 
   AddSession(waiter, times);
@@ -3635,7 +3635,7 @@ TEST_F(ProtocolHandlerImplTest, MalformedLimitVerification_NullCount) {
   InitProtocolHandlerImpl(0u, 0u, true, period_msec, max_messages);
   AddConnection();
 
-  std::shared_ptr<TestAsyncWaiter> waiter = std::make_shared<TestAsyncWaiter>();
+  auto waiter = TestAsyncWaiter::createInstance();
   uint32_t times = 0;
 
   AddSession(waiter, times);
@@ -3728,7 +3728,7 @@ TEST_F(ProtocolHandlerImplTest,
 TEST_F(ProtocolHandlerImplTest,
        DISABLED_SendEndServicePrivate_EndSession_MessageSent) {
   // Arrange
-  std::shared_ptr<TestAsyncWaiter> waiter = std::make_shared<TestAsyncWaiter>();
+  auto waiter = TestAsyncWaiter::createInstance();
   uint32_t times = 0;
 
   AddSession(waiter, times);
@@ -3755,7 +3755,7 @@ TEST_F(ProtocolHandlerImplTest,
 TEST_F(ProtocolHandlerImplTest,
        SendEndServicePrivate_ServiceTypeControl_MessageSent) {
   // Arrange
-  std::shared_ptr<TestAsyncWaiter> waiter = std::make_shared<TestAsyncWaiter>();
+  auto waiter = TestAsyncWaiter::createInstance();
   uint32_t times = 0;
 
   AddSession(waiter, times);
@@ -3794,7 +3794,7 @@ TEST_F(ProtocolHandlerImplTest, SendHeartBeat_NoConnection_NotSent) {
 
 TEST_F(ProtocolHandlerImplTest, SendHeartBeat_Successful) {
   // Arrange
-  std::shared_ptr<TestAsyncWaiter> waiter = std::make_shared<TestAsyncWaiter>();
+  auto waiter = TestAsyncWaiter::createInstance();
   uint32_t times = 0;
 
   AddSession(waiter, times);
@@ -3819,7 +3819,7 @@ TEST_F(ProtocolHandlerImplTest, SendHeartBeat_Successful) {
 
 TEST_F(ProtocolHandlerImplTest, SendHeartBeatAck_Successful) {
   // Arrange
-  std::shared_ptr<TestAsyncWaiter> waiter = std::make_shared<TestAsyncWaiter>();
+  auto waiter = TestAsyncWaiter::createInstance();
   uint32_t times = 0;
 
   AddSession(waiter, times);
@@ -3849,7 +3849,7 @@ TEST_F(ProtocolHandlerImplTest, SendHeartBeatAck_Successful) {
 TEST_F(ProtocolHandlerImplTest,
        SendHeartBeatAck_ProtocolVersionUsedFail_Cancelled) {
   // Arrange
-  std::shared_ptr<TestAsyncWaiter> waiter = std::make_shared<TestAsyncWaiter>();
+  auto waiter = TestAsyncWaiter::createInstance();
   uint32_t times = 0;
 
   AddSession(waiter, times);
@@ -3873,7 +3873,7 @@ TEST_F(ProtocolHandlerImplTest,
 TEST_F(ProtocolHandlerImplTest,
        DISABLED_SendHeartBeatAck_WrongProtocolVersion_NotSent) {
   // Arrange
-  std::shared_ptr<TestAsyncWaiter> waiter = std::make_shared<TestAsyncWaiter>();
+  auto waiter = TestAsyncWaiter::createInstance();
   uint32_t times = 0;
 
   AddSession(waiter, times);
@@ -3907,7 +3907,7 @@ TEST_F(ProtocolHandlerImplTest,
 TEST_F(ProtocolHandlerImplTest,
        SendMessageToMobileApp_SendSingleControlMessage) {
   // Arrange
-  std::shared_ptr<TestAsyncWaiter> waiter = std::make_shared<TestAsyncWaiter>();
+  auto waiter = TestAsyncWaiter::createInstance();
   uint32_t times = 0;
 
   AddSession(waiter, times);
@@ -3948,7 +3948,7 @@ TEST_F(ProtocolHandlerImplTest,
 TEST_F(ProtocolHandlerImplTest,
        SendMessageToMobileApp_SendSingleNonControlMessage) {
   // Arrange
-  std::shared_ptr<TestAsyncWaiter> waiter = std::make_shared<TestAsyncWaiter>();
+  auto waiter = TestAsyncWaiter::createInstance();
   uint32_t times = 0;
 
   AddSession(waiter, times);
@@ -3993,7 +3993,7 @@ TEST_F(ProtocolHandlerImplTest,
 
 TEST_F(ProtocolHandlerImplTest, SendMessageToMobileApp_SendMultiframeMessage) {
   // Arrange
-  std::shared_ptr<TestAsyncWaiter> waiter = std::make_shared<TestAsyncWaiter>();
+  auto waiter = TestAsyncWaiter::createInstance();
   uint32_t times = 0;
 
   AddSession(waiter, times);
@@ -4052,7 +4052,7 @@ TEST_F(ProtocolHandlerImplTest, SendMessageToMobileApp_SendMultiframeMessage) {
 TEST_F(ProtocolHandlerImplTest,
        SendMessageToMobileApp_NullMessagePointer_Cancelled) {
   // Arrange
-  std::shared_ptr<TestAsyncWaiter> waiter = std::make_shared<TestAsyncWaiter>();
+  auto waiter = TestAsyncWaiter::createInstance();
   uint32_t times = 0;
 
   AddSession(waiter, times);
@@ -4465,7 +4465,7 @@ TEST_F(ProtocolHandlerImplTest, GetHashId_ProtocolVersion5_ValidData) {
 }
 
 TEST_F(ProtocolHandlerImplTest, SetHashId_CorrectHashId) {
-  std::shared_ptr<TestAsyncWaiter> waiter = std::make_shared<TestAsyncWaiter>();
+  auto waiter = TestAsyncWaiter::createInstance();
   uint32_t times = 0;
 
   const uint8_t input_protocol_version = 3;
@@ -4508,7 +4508,7 @@ TEST_F(ProtocolHandlerImplTest, SetHashId_CorrectHashId) {
 }
 
 TEST_F(ProtocolHandlerImplTest, SetHashId_HASH_ID_NOT_SUPPORTED) {
-  std::shared_ptr<TestAsyncWaiter> waiter = std::make_shared<TestAsyncWaiter>();
+  auto waiter = TestAsyncWaiter::createInstance();
   uint32_t times = 0;
 
   const uint8_t input_protocol_version = 3;
@@ -4543,7 +4543,7 @@ TEST_F(ProtocolHandlerImplTest, SetHashId_HASH_ID_NOT_SUPPORTED) {
 }
 
 TEST_F(ProtocolHandlerImplTest, SetHashId_HASH_ID_WRONG) {
-  std::shared_ptr<TestAsyncWaiter> waiter = std::make_shared<TestAsyncWaiter>();
+  auto waiter = TestAsyncWaiter::createInstance();
   uint32_t times = 0;
 
   const uint8_t input_protocol_version = 3;
@@ -4580,7 +4580,7 @@ TEST_F(ProtocolHandlerImplTest, SetHashId_HASH_ID_WRONG) {
 
 TEST_F(ProtocolHandlerImplTest, PopValidAndExpiredMultiframes) {
   using namespace protocol_handler;
-  std::shared_ptr<TestAsyncWaiter> waiter = std::make_shared<TestAsyncWaiter>();
+  auto waiter = TestAsyncWaiter::createInstance();
   uint32_t times = 0;
 
   AddSession(waiter, times);
@@ -4624,7 +4624,7 @@ TEST_F(ProtocolHandlerImplTest, PopValidAndExpiredMultiframes) {
 }
 
 TEST_F(ProtocolHandlerImplTest, HandleFromMobile_FrameTypeSingle_Handled) {
-  std::shared_ptr<TestAsyncWaiter> waiter = std::make_shared<TestAsyncWaiter>();
+  auto waiter = TestAsyncWaiter::createInstance();
   uint32_t times = 0;
 
   AddSession(waiter, times);
@@ -4651,7 +4651,7 @@ TEST_F(ProtocolHandlerImplTest, HandleFromMobile_FrameTypeSingle_Handled) {
 
 #ifdef ENABLE_SECURITY
 TEST_F(ProtocolHandlerImplTest, EncryptFrame_NoSecurityManagerSet_Cancelled) {
-  std::shared_ptr<TestAsyncWaiter> waiter = std::make_shared<TestAsyncWaiter>();
+  auto waiter = TestAsyncWaiter::createInstance();
   uint32_t times = 0;
 
   AddSession(waiter, times);
@@ -4682,7 +4682,7 @@ TEST_F(ProtocolHandlerImplTest, EncryptFrame_NoSecurityManagerSet_Cancelled) {
 
 TEST_F(ProtocolHandlerImplTest,
        EncryptFrame_ControlFrameType_ContinueUnencrypted) {
-  std::shared_ptr<TestAsyncWaiter> waiter = std::make_shared<TestAsyncWaiter>();
+  auto waiter = TestAsyncWaiter::createInstance();
   uint32_t times = 0;
 
   AddSession(waiter, times);
@@ -4713,7 +4713,7 @@ TEST_F(ProtocolHandlerImplTest,
 
 TEST_F(ProtocolHandlerImplTest,
        EncryptFrame_SSLContextInitNotCompleted_ContinueUnencrypted) {
-  std::shared_ptr<TestAsyncWaiter> waiter = std::make_shared<TestAsyncWaiter>();
+  auto waiter = TestAsyncWaiter::createInstance();
   uint32_t times = 0;
 
   AddSession(waiter, times);
@@ -4752,7 +4752,7 @@ TEST_F(ProtocolHandlerImplTest,
 
 TEST_F(ProtocolHandlerImplTest,
        EncryptFrame_EncryptFailed_ContinueUnencrypted) {
-  std::shared_ptr<TestAsyncWaiter> waiter = std::make_shared<TestAsyncWaiter>();
+  auto waiter = TestAsyncWaiter::createInstance();
   uint32_t times = 0;
 
   AddSession(waiter, times);
@@ -4805,7 +4805,7 @@ TEST_F(ProtocolHandlerImplTest,
 
 TEST_F(ProtocolHandlerImplTest,
        EncryptFrame_EncryptSucceeded_ContinueEncrypted) {
-  std::shared_ptr<TestAsyncWaiter> waiter = std::make_shared<TestAsyncWaiter>();
+  auto waiter = TestAsyncWaiter::createInstance();
   uint32_t times = 0;
 
   AddSession(waiter, times);
@@ -4854,7 +4854,7 @@ TEST_F(ProtocolHandlerImplTest,
 }
 
 TEST_F(ProtocolHandlerImplTest, DecryptFrame_NoSecurityManager_Cancelled) {
-  std::shared_ptr<TestAsyncWaiter> waiter = std::make_shared<TestAsyncWaiter>();
+  auto waiter = TestAsyncWaiter::createInstance();
   uint32_t times = 0;
 
   AddSession(waiter, times);
@@ -4886,7 +4886,7 @@ TEST_F(ProtocolHandlerImplTest, DecryptFrame_NoSecurityManager_Cancelled) {
 
 TEST_F(ProtocolHandlerImplTest,
        DISABLED_DecryptFrame_ProtectionFlagOff_ContinueUndecrypted) {
-  std::shared_ptr<TestAsyncWaiter> waiter = std::make_shared<TestAsyncWaiter>();
+  auto waiter = TestAsyncWaiter::createInstance();
   uint32_t times = 0;
 
   AddSession(waiter, times);
@@ -4920,7 +4920,7 @@ TEST_F(ProtocolHandlerImplTest,
 
 TEST_F(ProtocolHandlerImplTest,
        DISABLED_DecryptFrame_FrameTypeControl_ContinueUndecrypted) {
-  std::shared_ptr<TestAsyncWaiter> waiter = std::make_shared<TestAsyncWaiter>();
+  auto waiter = TestAsyncWaiter::createInstance();
   uint32_t times = 0;
 
   AddSession(waiter, times);
@@ -4957,7 +4957,7 @@ TEST_F(ProtocolHandlerImplTest,
 
 TEST_F(ProtocolHandlerImplTest,
        DecryptFrame_SSLContextInitNotCompleted_Cancelled) {
-  std::shared_ptr<TestAsyncWaiter> waiter = std::make_shared<TestAsyncWaiter>();
+  auto waiter = TestAsyncWaiter::createInstance();
   uint32_t times = 0;
 
   AddSession(waiter, times);
@@ -4991,7 +4991,7 @@ TEST_F(ProtocolHandlerImplTest,
 }
 
 TEST_F(ProtocolHandlerImplTest, DecryptFrame_DecryptFailed_Cancelled) {
-  std::shared_ptr<TestAsyncWaiter> waiter = std::make_shared<TestAsyncWaiter>();
+  auto waiter = TestAsyncWaiter::createInstance();
   uint32_t times = 0;
 
   AddSession(waiter, times);
@@ -5035,7 +5035,7 @@ TEST_F(ProtocolHandlerImplTest, DecryptFrame_DecryptFailed_Cancelled) {
 
 TEST_F(ProtocolHandlerImplTest,
        DecryptFrame_DecryptSucceeded_ContinueDecrypted) {
-  std::shared_ptr<TestAsyncWaiter> waiter = std::make_shared<TestAsyncWaiter>();
+  auto waiter = TestAsyncWaiter::createInstance();
   uint32_t times = 0;
 
   AddSession(waiter, times);
@@ -5102,7 +5102,7 @@ TEST_F(ProtocolHandlerImplTest, SendFrame_EncryptFailed_FAIL) {
 #endif  // ENABLE_SECURITY
 
 TEST_F(ProtocolHandlerImplTest, SendServiceDataAck_PreVersion5) {
-  std::shared_ptr<TestAsyncWaiter> waiter = std::make_shared<TestAsyncWaiter>();
+  auto waiter = TestAsyncWaiter::createInstance();
   uint32_t times = 0;
 
   AddSession(waiter, times);
@@ -5129,7 +5129,7 @@ TEST_F(ProtocolHandlerImplTest, SendServiceDataAck_PreVersion5) {
 }
 
 TEST_F(ProtocolHandlerImplTest, SendServiceDataAck_AfterVersion5) {
-  std::shared_ptr<TestAsyncWaiter> waiter = std::make_shared<TestAsyncWaiter>();
+  auto waiter = TestAsyncWaiter::createInstance();
   uint32_t times = 0;
 
   AddSession(waiter, times);
@@ -5242,7 +5242,7 @@ TEST_F(ProtocolHandlerImplTest, StartSession_NACKReason_SessionObserverReject) {
       .WillRepeatedly(ReturnNull());
 #endif  // ENABLE_SECURITY
 
-  std::shared_ptr<TestAsyncWaiter> waiter = std::make_shared<TestAsyncWaiter>();
+  auto waiter = TestAsyncWaiter::createInstance();
   uint32_t times = 0;
   ServiceType service_type;
   // Expect verification of allowed transport
@@ -5333,7 +5333,7 @@ TEST_F(ProtocolHandlerImplTest,
   const utils::SemanticVersion min_reason_param_version(5, 3, 0);
   std::string err_reason =
       "Wrong hash_id for session " + std::to_string(session_id);
-  std::shared_ptr<TestAsyncWaiter> waiter = std::make_shared<TestAsyncWaiter>();
+  auto waiter = TestAsyncWaiter::createInstance();
   uint32_t times = 0;
 
   AddSession(waiter, times);

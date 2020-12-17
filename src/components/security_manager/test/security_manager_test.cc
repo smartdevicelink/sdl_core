@@ -284,7 +284,7 @@ TEST_F(SecurityManagerTest, SecurityManager_NULLCryptoManager) {
   uint32_t connection_id = 0;
   uint8_t session_id = 0;
 
-  std::shared_ptr<TestAsyncWaiter> waiter = std::make_shared<TestAsyncWaiter>();
+  auto waiter = TestAsyncWaiter::createInstance();
   EXPECT_CALL(mock_session_observer, PairFromKey(kKey, _, _));
   EXPECT_CALL(mock_session_observer,
               ProtocolVersionUsed(connection_id, session_id, An<uint8_t&>()))
@@ -377,7 +377,7 @@ TEST_F(SecurityManagerTest, GetInvalidQueryId) {
   uint32_t connection_id = 0;
   uint8_t session_id = 0;
 
-  std::shared_ptr<TestAsyncWaiter> waiter = std::make_shared<TestAsyncWaiter>();
+  auto waiter = TestAsyncWaiter::createInstance();
   uint32_t times = 0;
   EXPECT_CALL(mock_session_observer, PairFromKey(kKey, _, _))
       .WillOnce(NotifyTestAsyncWaiter(waiter));
@@ -577,7 +577,7 @@ TEST_F(SecurityManagerTest, ProcessHandshakeData_WrongDataSize) {
   uint32_t connection_id = 0;
   uint8_t session_id = 0;
 
-  std::shared_ptr<TestAsyncWaiter> waiter = std::make_shared<TestAsyncWaiter>();
+  auto waiter = TestAsyncWaiter::createInstance();
   EXPECT_CALL(mock_session_observer, PairFromKey(kKey, _, _));
   EXPECT_CALL(mock_session_observer,
               ProtocolVersionUsed(connection_id, session_id, An<uint8_t&>()))
@@ -607,7 +607,7 @@ TEST_F(SecurityManagerTest, DISABLED_ProcessHandshakeData_ServiceNotProtected) {
   uint32_t connection_id = 0;
   uint8_t session_id = 0;
 
-  std::shared_ptr<TestAsyncWaiter> waiter = std::make_shared<TestAsyncWaiter>();
+  auto waiter = TestAsyncWaiter::createInstance();
   uint32_t times = 0;
   EXPECT_CALL(mock_session_observer, PairFromKey(kKey, _, _))
       .WillOnce(NotifyTestAsyncWaiter(waiter));
@@ -658,7 +658,7 @@ TEST_F(SecurityManagerTest, ProcessHandshakeData_InvalidData) {
   uint32_t connection_id = 0;
   uint8_t session_id = 0;
 
-  std::shared_ptr<TestAsyncWaiter> waiter = std::make_shared<TestAsyncWaiter>();
+  auto waiter = TestAsyncWaiter::createInstance();
   uint32_t times = 0;
   EXPECT_CALL(mock_session_observer, PairFromKey(kKey, _, _))
       .Times(handshake_emulates)
@@ -740,7 +740,7 @@ TEST_F(SecurityManagerTest, ProcessHandshakeData_Answer) {
   uint32_t connection_id = 0;
   uint8_t session_id = 0;
 
-  std::shared_ptr<TestAsyncWaiter> waiter = std::make_shared<TestAsyncWaiter>();
+  auto waiter = TestAsyncWaiter::createInstance();
   uint32_t times = 0;
   EXPECT_CALL(mock_session_observer, PairFromKey(kKey, _, _))
       .Times(handshake_emulates)
@@ -813,7 +813,7 @@ TEST_F(SecurityManagerTest, ProcessHandshakeData_HandshakeFinished) {
   // Count handshake calls
   const int handshake_emulates = 6;
 
-  std::shared_ptr<TestAsyncWaiter> waiter = std::make_shared<TestAsyncWaiter>();
+  auto waiter = TestAsyncWaiter::createInstance();
   uint32_t times = 0;
   // Expect no errors
   // Expect notifying listeners (success)

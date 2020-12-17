@@ -175,7 +175,7 @@ TEST_F(HMIMessageHandlerImplTest, OnMessageReceived_InvalidObserver_Cancelled) {
 TEST_F(HMIMessageHandlerImplTest, SendMessageToHMI_Success) {
   hmi_message_handler::MessageSharedPointer message = CreateMessage();
 
-  std::shared_ptr<TestAsyncWaiter> waiter = std::make_shared<TestAsyncWaiter>();
+  auto waiter = TestAsyncWaiter::createInstance();
 
   MockHMIMessageAdapterImpl message_adapter(hmi_handler_);
   EXPECT_CALL(message_adapter, SendMessageToHMI(message))
