@@ -677,8 +677,8 @@ void CacheManager::ProcessUpdate(
     const policy_table::ApplicationPolicies::const_iterator
         initial_policy_iter) {
   using namespace policy;
-  using rpc::policy_table_interface_base::RequestTypes;
   using rpc::policy_table_interface_base::ApplicationParams;
+  using rpc::policy_table_interface_base::RequestTypes;
   const RequestTypes& new_request_types =
       *(initial_policy_iter->second.RequestType);
 

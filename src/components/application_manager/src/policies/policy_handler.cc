@@ -601,7 +601,7 @@ void PolicyHandler::OnDeviceConsentChanged(const std::string& device_id,
       policy_manager->SendNotificationOnPermissionsUpdated(device_id,
                                                            policy_app_id);
 
-      if (policy_manager_->IsPredataPolicy(policy_app_id) && !is_allowed) {
+      if (policy_manager->IsPredataPolicy(policy_app_id) && !is_allowed) {
         SetHeartBeatTimeout(policy_app_id, (*it_app_list)->app_id());
       }
     }
@@ -773,15 +773,18 @@ void PolicyHandler::OnAppPermissionConsentInternal(
 
 void PolicyHandler::SetHeartBeatTimeout(const std::string& policy_app_id,
                                         const uint32_t app_id) {
-  LOG4CXX_AUTO_TRACE(logger_);
-  const uint32_t timeout = policy_manager_->HeartBeatTimeout(policy_app_id);
+  SDL_LOG_AUTO_TRACE();
+
+  const std::shared_ptr<PolicyManager> policy_manager = LoadPolicyManager();
+  POLICY_LIB_CHECK_VOID(policy_manager);
+
+  const uint32_t timeout = policy_manager->HeartBeatTimeout(policy_app_id);
   if (0 != timeout) {
-    LOG4CXX_DEBUG(logger_,
-                  "SetHeartBeatTimeout for " << app_id << " is " << timeout);
+    SDL_LOG_DEBUG("SetHeartBeatTimeout for " << app_id << " is " << timeout);
     application_manager_.connection_handler().SetHeartBeatTimeout(app_id,
                                                                   timeout);
   } else {
-    LOG4CXX_DEBUG(logger_, "SetHeartBeatTimeout for " << app_id << "  ignored");
+    SDL_LOG_DEBUG("SetHeartBeatTimeout for " << app_id << "  ignored");
   }
 }
 
