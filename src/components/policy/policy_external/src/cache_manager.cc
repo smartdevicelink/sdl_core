@@ -348,7 +348,8 @@ bool CacheManager::CanAppKeepContext(const std::string& app_id) const {
   bool result = false;
   if (kDeviceId == app_id) {
     result = pt_->policy_table.app_policies_section.device.keep_context;
-  } else if (IsApplicationRepresented(app_id)) {
+  } else if (IsApplicationRepresented(app_id) &&
+             !IsApplicationRevoked(app_id)) {
     result = pt_->policy_table.app_policies_section.apps[app_id].keep_context;
   }
   return result;
@@ -407,7 +408,8 @@ bool CacheManager::CanAppStealFocus(const std::string& app_id) const {
   bool result = false;
   if (kDeviceId == app_id) {
     result = pt_->policy_table.app_policies_section.device.steal_focus;
-  } else if (IsApplicationRepresented(app_id)) {
+  } else if (IsApplicationRepresented(app_id) &&
+             !IsApplicationRevoked(app_id)) {
     result = pt_->policy_table.app_policies_section.apps[app_id].steal_focus;
   }
   return result;
@@ -422,7 +424,8 @@ bool CacheManager::GetDefaultHMI(const std::string& app_id,
   if (kDeviceId == app_id) {
     default_hmi = EnumToJsonString(
         pt_->policy_table.app_policies_section.device.default_hmi);
-  } else if (IsApplicationRepresented(app_id)) {
+  } else if (IsApplicationRepresented(app_id) &&
+             !IsApplicationRevoked(app_id)) {
     default_hmi = EnumToJsonString(
         pt_->policy_table.app_policies_section.apps[app_id].default_hmi);
   }
@@ -1820,7 +1823,8 @@ bool CacheManager::GetPriority(const std::string& policy_app_id,
 
   policy_table::ApplicationPolicies::const_iterator policy_iter =
       policies.find(policy_app_id);
-  const bool app_id_exists = policies.end() != policy_iter;
+  const bool app_id_exists =
+      policies.end() != policy_iter && !IsApplicationRevoked(policy_app_id);
   if (app_id_exists) {
     priority = EnumToJsonString((*policy_iter).second.priority);
   }
