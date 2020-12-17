@@ -39,26 +39,25 @@ using namespace application_manager;
 
 namespace commands {
 
+SDL_CREATE_LOG_VARIABLE("Commands")
+
 ReadDIDResponse::ReadDIDResponse(
     const application_manager::commands::MessageSharedPtr& message,
-    ApplicationManager& application_manager,
-    app_mngr::rpc_service::RPCService& rpc_service,
-    app_mngr::HMICapabilities& hmi_capabilities,
-    policy::PolicyHandlerInterface& policy_handler)
+    const VehicleInfoCommandParams& params)
     : CommandResponseImpl(message,
-                          application_manager,
-                          rpc_service,
-                          hmi_capabilities,
-                          policy_handler) {}
+                          params.application_manager_,
+                          params.rpc_service_,
+                          params.hmi_capabilities_,
+                          params.policy_handler_) {}
 
 ReadDIDResponse::~ReadDIDResponse() {}
 
 void ReadDIDResponse::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
 
   rpc_service_.SendMessageToMobile(message_);
 }
 
 }  // namespace commands
 
-}  // namespace application_manager
+}  // namespace vehicle_info_plugin

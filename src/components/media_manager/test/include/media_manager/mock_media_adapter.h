@@ -34,8 +34,8 @@
 #define SRC_COMPONENTS_MEDIA_MANAGER_TEST_INCLUDE_MEDIA_MANAGER_MOCK_MEDIA_ADAPTER_H_
 
 #include "gmock/gmock.h"
-#include "media_manager/media_manager.h"
 #include "media_manager/media_adapter.h"
+#include "media_manager/media_manager.h"
 
 namespace test {
 namespace components {

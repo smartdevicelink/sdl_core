@@ -42,6 +42,8 @@ using namespace application_manager;
 
 namespace commands {
 
+SDL_CREATE_LOG_VARIABLE("Commands")
+
 OnTTSLanguageChangeNotification::OnTTSLanguageChangeNotification(
     const application_manager::commands::MessageSharedPtr& message,
     ApplicationManager& application_manager,
@@ -57,22 +59,31 @@ OnTTSLanguageChangeNotification::OnTTSLanguageChangeNotification(
 OnTTSLanguageChangeNotification::~OnTTSLanguageChangeNotification() {}
 
 void OnTTSLanguageChangeNotification::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
 
-  HMICapabilities& hmi_capabilities = hmi_capabilities_;
-
-  hmi_capabilities.set_active_tts_language(
+  hmi_capabilities_.set_active_tts_language(
       static_cast<hmi_apis::Common_Language::eType>(
           (*message_)[strings::msg_params][strings::language].asInt()));
 
   /* need to clarify, because unchanged VR
   cause WRONG_LANGUAGE on Register */
-  hmi_capabilities.set_active_vr_language(
+  hmi_capabilities_.set_active_vr_language(
       static_cast<hmi_apis::Common_Language::eType>(
           (*message_)[strings::msg_params][strings::language].asInt()));
 
+  std::vector<std::string> sections_to_update{hmi_response::language};
+  if (!hmi_capabilities_.SaveCachedCapabilitiesToFile(
+          hmi_interface::tts, sections_to_update, message_->getSchema())) {
+    SDL_LOG_ERROR("Failed to save TTS.OnLanguageChange response to cache");
+  }
+
+  if (!hmi_capabilities_.SaveCachedCapabilitiesToFile(
+          hmi_interface::vr, sections_to_update, message_->getSchema())) {
+    SDL_LOG_ERROR("Failed to save VR.OnLanguageChange response to cache");
+  }
+
   (*message_)[strings::msg_params][strings::hmi_display_language] =
-      hmi_capabilities.active_ui_language();
+      hmi_capabilities_.active_ui_language();
 
   (*message_)[strings::params][strings::function_id] =
       static_cast<int32_t>(mobile_apis::FunctionID::OnLanguageChangeID);
@@ -100,4 +111,4 @@ void OnTTSLanguageChangeNotification::Run() {
 
 }  // namespace commands
 
-}  // namespace application_manager
+}  // namespace sdl_rpc_plugin

@@ -31,10 +31,10 @@
  */
 
 #include "application_manager/request_info.h"
-#include "application_manager/mock_request.h"
 #include <iostream>
-#include <vector>
 #include <limits>
+#include <vector>
+#include "application_manager/mock_request.h"
 #include "gmock/gmock.h"
 
 namespace request_info = application_manager::request_controller;
@@ -46,10 +46,10 @@ namespace application_manager_test {
 class TestRequestInfo : public request_info::RequestInfo {
  public:
   TestRequestInfo(request_info::RequestPtr request,
-                  const RequestType requst_type,
+                  const RequestType request_type,
                   const date_time::TimeDuration& start_time,
                   const uint64_t timeout_msec)
-      : RequestInfo(request, requst_type, start_time, timeout_msec) {}
+      : RequestInfo(request, request_type, start_time, timeout_msec) {}
   void SetEndTime(const date_time::TimeDuration& end_time) {
     end_time_ = end_time;
   }
@@ -77,20 +77,19 @@ class RequestInfoTest : public ::testing::Test {
   std::shared_ptr<TestRequestInfo> CreateTestInfo(
       uint32_t connection_key,
       uint32_t correlation_id,
-      request_info::RequestInfo::RequestType requst_type,
+      request_info::RequestInfo::RequestType request_type,
       const date_time::TimeDuration& start_time,
       uint64_t timeout_msec) {
     std::shared_ptr<MockRequest> mock_request =
         std::make_shared<MockRequest>(connection_key, correlation_id);
     std::shared_ptr<TestRequestInfo> request =
         std::make_shared<TestRequestInfo>(
-            mock_request, requst_type, start_time, timeout_msec);
+            mock_request, request_type, start_time, timeout_msec);
     return request;
   }
 };
 
 TEST_F(RequestInfoTest, RequestInfoEqualEndTime) {
-  std::vector<std::shared_ptr<TestRequestInfo> > requests;
   const date_time::TimeDuration& time = date_time::getCurrentTime();
   for (uint32_t i = 0; i < count_of_requests_for_test_; ++i) {
     std::shared_ptr<TestRequestInfo> request = CreateTestInfo(

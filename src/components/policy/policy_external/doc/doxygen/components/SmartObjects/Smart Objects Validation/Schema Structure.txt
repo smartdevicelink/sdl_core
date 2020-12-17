@@ -19,7 +19,7 @@ ns_smart_device_link::ns_smart_objects::CArraySchemaItem provides validation for
 ns_smart_device_link::ns_smart_objects::CObjectSchemaItem used in case when Schema Item includes another Schema Item. Actually this is only way to create tree node of new Schema. All other Schema Items will be used only to become leafs of validation tree.
 
 After creation of all required Schema Items (which is actually bind in the tree) it is possible to create Schema.
-Schema can be initialized not only by raw root Schema Item, but also by special abstraction called Member (defined by ns_smart_device_link::ns_smart_objects::CObjectSchemaItem::SMember class). So every root item (ns_smart_device_link::ns_smart_objects::CObjectSchemaItem) firstly should be wrapped as Member. This wrapping process also allows to set "is mandatory" status for every Member.
+Schema can be initialized not only by raw root Schema Item, but also by special abstraction called Member (defined by ns_smart_device_link::ns_smart_objects::SMember class). So every root item (ns_smart_device_link::ns_smart_objects::CObjectSchemaItem) firstly should be wrapped as Member. This wrapping process also allows to set "is mandatory" status for every Member.
 
  and pass root Schema Item as initial parameter to the new Schema.
 
@@ -69,29 +69,29 @@ TSharedPtr<ISchemaItem> resultCode_SchemaItem = TEnumSchemaItem<Result::eType>::
 // Provides additional human readable info regarding the result.
 TSharedPtr<ISchemaItem> info_SchemaItem = CStringSchemaItem::create(TSchemaItemParameter<size_t>(1000), TSchemaItemParameter<std::string>());
 
-schemaMembersMap["success"] = CObjectSchemaItem::SMember(success_SchemaItem, true);
+schemaMembersMap["success"] = SMember(success_SchemaItem, true);
 
-schemaMembersMap["resultCode"] = CObjectSchemaItem::SMember(resultCode_SchemaItem, true);
+schemaMembersMap["resultCode"] = SMember(resultCode_SchemaItem, true);
 
-schemaMembersMap["info"] = CObjectSchemaItem::SMember(info_SchemaItem, false);
+schemaMembersMap["info"] = SMember(info_SchemaItem, false);
 
-std::map<std::string, CObjectSchemaItem::SMember> paramsMembersMap;
+std::map<std::string, SMember> paramsMembersMap;
 
-paramsMembersMap[ns_smart_device_link::ns_json_handler::strings::S_FUNCTION_ID] = CObjectSchemaItem::SMember(TEnumSchemaItem<FunctionID::eType>::create(FunctionIDItems), true);
+paramsMembersMap[ns_smart_device_link::ns_json_handler::strings::S_FUNCTION_ID] = SMember(TEnumSchemaItem<FunctionID::eType>::create(FunctionIDItems), true);
 
-paramsMembersMap[ns_smart_device_link::ns_json_handler::strings::S_MESSAGE_TYPE] = CObjectSchemaItem::SMember(TEnumSchemaItem<messageType::eType>::create(MessageTypeItems), true);
+paramsMembersMap[ns_smart_device_link::ns_json_handler::strings::S_MESSAGE_TYPE] = SMember(TEnumSchemaItem<messageType::eType>::create(MessageTypeItems), true);
 
-paramsMembersMap[ns_smart_device_link::ns_json_handler::strings::S_CORRELATION_ID] = CObjectSchemaItem::SMember(TNumberSchemaItem<int>::create(), true);
+paramsMembersMap[ns_smart_device_link::ns_json_handler::strings::S_CORRELATION_ID] = SMember(TNumberSchemaItem<int>::create(), true);
 
-paramsMembersMap[ns_smart_device_link::ns_json_handler::strings::S_PROTOCOL_VERSION] = CObjectSchemaItem::SMember(TNumberSchemaItem<int>::create(1, 2), true);
+paramsMembersMap[ns_smart_device_link::ns_json_handler::strings::S_PROTOCOL_VERSION] = SMember(TNumberSchemaItem<int>::create(1, 2), true);
 
-paramsMembersMap[ns_smart_device_link::ns_json_handler::strings::S_PROTOCOL_TYPE] = CObjectSchemaItem::SMember(TNumberSchemaItem<int>::create(), true);
+paramsMembersMap[ns_smart_device_link::ns_json_handler::strings::S_PROTOCOL_TYPE] = SMember(TNumberSchemaItem<int>::create(), true);
 
-std::map<std::string, CObjectSchemaItem::SMember> rootMembersMap;
+std::map<std::string, SMember> rootMembersMap;
 
-rootMembersMap[ns_smart_device_link::ns_json_handler::strings::S_MSG_PARAMS] = CObjectSchemaItem::SMember(CObjectSchemaItem::create(schemaMembersMap), true);
+rootMembersMap[ns_smart_device_link::ns_json_handler::strings::S_MSG_PARAMS] = SMember(CObjectSchemaItem::create(schemaMembersMap), true);
 
-rootMembersMap[ns_smart_device_link::ns_json_handler::strings::S_PARAMS] = CObjectSchemaItem::SMember(CObjectSchemaItem::create(paramsMembersMap), true);
+rootMembersMap[ns_smart_device_link::ns_json_handler::strings::S_PARAMS] = SMember(CObjectSchemaItem::create(paramsMembersMap), true);
 
 
 CSmartSchema(CObjectSchemaItem::create(rootMembersMap));

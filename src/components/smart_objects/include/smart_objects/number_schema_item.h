@@ -33,8 +33,8 @@
 #ifndef SRC_COMPONENTS_SMART_OBJECTS_INCLUDE_SMART_OBJECTS_NUMBER_SCHEMA_ITEM_H_
 #define SRC_COMPONENTS_SMART_OBJECTS_INCLUDE_SMART_OBJECTS_NUMBER_SCHEMA_ITEM_H_
 
-#include <typeinfo>
 #include <limits>
+#include <typeinfo>
 
 #include "smart_objects/default_shema_item.h"
 #include "smart_objects/schema_item_parameter.h"
@@ -68,14 +68,21 @@ class TNumberSchemaItem : public CDefaultSchemaItem<NumberType> {
   /**
    * @brief Validate smart object.
    * @param Object Object to validate.
-   * @param report__ object for reporting errors during validation
+   * @param report object for reporting errors during validation
    * @param MessageVersion to check mobile RPC version against RPC Spec History
+   * @param allow_unknown_enums
+   *   false - unknown enum values (left as string values after applySchema)
+   *   will be considered invalid.
+   *   true - such values will be considered valid.
    * @return ns_smart_objects::errors::eType
    **/
-  errors::eType validate(const SmartObject& Object,
-                         rpc::ValidationReport* report__,
-                         const utils::SemanticVersion& MessageVersion =
-                             utils::SemanticVersion()) OVERRIDE;
+  errors::eType validate(
+      const SmartObject& Object,
+      rpc::ValidationReport* report,
+      const utils::SemanticVersion& MessageVersion = utils::SemanticVersion(),
+      const bool allow_unknown_enums = false) OVERRIDE;
+
+  TypeID GetType() OVERRIDE;
 
  private:
   /**
@@ -108,10 +115,11 @@ class TNumberSchemaItem : public CDefaultSchemaItem<NumberType> {
 };
 
 template <typename NumberType>
-std::shared_ptr<TNumberSchemaItem<NumberType> > TNumberSchemaItem<
-    NumberType>::create(const TSchemaItemParameter<NumberType>& MinValue,
-                        const TSchemaItemParameter<NumberType>& MaxValue,
-                        const TSchemaItemParameter<NumberType>& DefaultValue) {
+std::shared_ptr<TNumberSchemaItem<NumberType> >
+TNumberSchemaItem<NumberType>::create(
+    const TSchemaItemParameter<NumberType>& MinValue,
+    const TSchemaItemParameter<NumberType>& MaxValue,
+    const TSchemaItemParameter<NumberType>& DefaultValue) {
   return std::shared_ptr<TNumberSchemaItem<NumberType> >(
       new TNumberSchemaItem<NumberType>(MinValue, MaxValue, DefaultValue));
 }
@@ -136,8 +144,9 @@ bool TNumberSchemaItem<NumberType>::isValidNumberType(SmartType type) {
 template <typename NumberType>
 errors::eType TNumberSchemaItem<NumberType>::validate(
     const SmartObject& Object,
-    rpc::ValidationReport* report__,
-    const utils::SemanticVersion& MessageVersion) {
+    rpc::ValidationReport* report,
+    const utils::SemanticVersion& MessageVersion,
+    const bool allow_unknown_enums) {
   if (!isValidNumberType(Object.getType())) {
     SmartType expectedType = (typeid(double) == typeid(Object.getType()))
                                  ? SmartType_Double
@@ -145,7 +154,7 @@ errors::eType TNumberSchemaItem<NumberType>::validate(
     std::string validation_info =
         "Incorrect type, expected: " + SmartObject::typeToString(expectedType) +
         ", got: " + SmartObject::typeToString(Object.getType());
-    report__->set_validation_info(validation_info);
+    report->set_validation_info(validation_info);
     return errors::INVALID_VALUE;
   }
   NumberType value(0);
@@ -169,7 +178,7 @@ errors::eType TNumberSchemaItem<NumberType>::validate(
     stream << "Value too small, got: " << value
            << ", minimum allowed: " << rangeLimit;
     std::string validation_info = stream.str();
-    report__->set_validation_info(validation_info);
+    report->set_validation_info(validation_info);
     return errors::OUT_OF_RANGE;
   }
 
@@ -178,10 +187,15 @@ errors::eType TNumberSchemaItem<NumberType>::validate(
     stream << "Value too large, got: " << value
            << ", maximum allowed: " << rangeLimit;
     std::string validation_info = stream.str();
-    report__->set_validation_info(validation_info);
+    report->set_validation_info(validation_info);
     return errors::OUT_OF_RANGE;
   }
   return errors::OK;
+}
+
+template <typename NumberType>
+TypeID TNumberSchemaItem<NumberType>::GetType() {
+  return TYPE_NUMBER;
 }
 
 template <typename NumberType>

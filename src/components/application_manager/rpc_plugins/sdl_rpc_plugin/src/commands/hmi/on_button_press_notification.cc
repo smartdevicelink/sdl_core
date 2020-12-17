@@ -33,8 +33,8 @@
 #include "sdl_rpc_plugin/commands/hmi/on_button_press_notification.h"
 
 #include "application_manager/application_impl.h"
-#include "utils/logger.h"
 #include "application_manager/event_engine/event.h"
+#include "utils/logger.h"
 
 namespace sdl_rpc_plugin {
 using namespace application_manager;
@@ -42,6 +42,8 @@ using namespace application_manager;
 namespace commands {
 
 namespace hmi {
+
+SDL_CREATE_LOG_VARIABLE("Commands")
 
 OnButtonPressNotification::OnButtonPressNotification(
     const application_manager::commands::MessageSharedPtr& message,
@@ -56,7 +58,7 @@ OnButtonPressNotification::OnButtonPressNotification(
                           policy_handle) {}
 
 void OnButtonPressNotification::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   event_engine::Event event(hmi_apis::FunctionID::Buttons_OnButtonPress);
   event.set_smart_object(*message_);
   event.raise(application_manager_.event_dispatcher());
@@ -69,4 +71,4 @@ void OnButtonPressNotification::Run() {
 
 }  // namespace commands
 
-}  // namespace application_manager
+}  // namespace sdl_rpc_plugin

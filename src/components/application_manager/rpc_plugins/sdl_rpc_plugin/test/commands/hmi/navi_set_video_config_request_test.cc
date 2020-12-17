@@ -36,14 +36,14 @@
 
 #include "gtest/gtest.h"
 
-#include "smart_objects/smart_object.h"
-#include "application_manager/smart_object_keys.h"
 #include "application_manager/commands/command_request_test.h"
-#include "application_manager/mock_application_manager.h"
-#include "application_manager/hmi_interfaces.h"
-#include "application_manager/mock_hmi_interface.h"
 #include "application_manager/event_engine/event.h"
+#include "application_manager/hmi_interfaces.h"
+#include "application_manager/mock_application_manager.h"
 #include "application_manager/mock_event_dispatcher.h"
+#include "application_manager/mock_hmi_interface.h"
+#include "application_manager/smart_object_keys.h"
+#include "smart_objects/smart_object.h"
 
 namespace test {
 namespace components {
@@ -55,8 +55,8 @@ using ::testing::_;
 using ::testing::ReturnRef;
 namespace am = ::application_manager;
 using am::commands::MessageSharedPtr;
-using sdl_rpc_plugin::commands::NaviSetVideoConfigRequest;
 using am::event_engine::Event;
+using sdl_rpc_plugin::commands::NaviSetVideoConfigRequest;
 
 namespace {
 const uint32_t kAppId = 1u;
@@ -101,11 +101,9 @@ TEST_F(NaviSetVideoConfigRequestTest, OnEventWithSuccessResponse) {
   Event event(kEventID);
   event.set_smart_object(*event_msg);
 
-  std::vector<std::string> empty;
-  EXPECT_CALL(
-      app_mngr_,
-      OnStreamingConfigured(
-          kAppId, protocol_handler::ServiceType::kMobileNav, true, empty))
+  EXPECT_CALL(app_mngr_,
+              OnStreamingConfigurationSuccessful(
+                  kAppId, protocol_handler::ServiceType::kMobileNav))
       .Times(1);
 
   command->on_event(event);
@@ -151,10 +149,9 @@ TEST_F(NaviSetVideoConfigRequestTest, OnEventWithRejectedResponse) {
   event.set_smart_object(*event_msg);
 
   std::vector<std::string> rejected_params;
-  EXPECT_CALL(app_mngr_,
-              OnStreamingConfigured(
-                  kAppId, protocol_handler::ServiceType::kMobileNav, false, _))
-      .WillOnce(SaveArg<3>(&rejected_params));
+  std::string reason("Received SetVideoConfig failure response");
+  EXPECT_CALL(app_mngr_, OnStreamingConfigurationFailed(kAppId, _, reason))
+      .WillOnce(SaveArg<1>(&rejected_params));
 
   command->on_event(event);
 
@@ -181,10 +178,8 @@ TEST_F(NaviSetVideoConfigRequestTest,
   event.set_smart_object(*event_msg);
 
   std::vector<std::string> empty;
-  EXPECT_CALL(
-      app_mngr_,
-      OnStreamingConfigured(
-          kAppId, protocol_handler::ServiceType::kMobileNav, false, empty))
+  std::string reason("Received SetVideoConfig failure response");
+  EXPECT_CALL(app_mngr_, OnStreamingConfigurationFailed(kAppId, empty, reason))
       .WillOnce(Return());
 
   command->on_event(event);
@@ -198,10 +193,8 @@ TEST_F(NaviSetVideoConfigRequestTest, OnTimeout) {
       CreateCommand<NaviSetVideoConfigRequest>(request_msg);
 
   std::vector<std::string> empty;
-  EXPECT_CALL(
-      app_mngr_,
-      OnStreamingConfigured(
-          kAppId, protocol_handler::ServiceType::kMobileNav, false, empty))
+  std::string reason("Timed out while waiting for SetVideoConfig response");
+  EXPECT_CALL(app_mngr_, OnStreamingConfigurationFailed(kAppId, empty, reason))
       .WillOnce(Return());
 
   EXPECT_CALL(app_mngr_, TerminateRequest(_, _, _)).Times(1);

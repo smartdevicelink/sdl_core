@@ -33,10 +33,10 @@
 #ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_TEST_INCLUDE_TRANSPORT_MANAGER_MOCK_TRANSPORT_MANAGER_IMPL_H_
 #define SRC_COMPONENTS_TRANSPORT_MANAGER_TEST_INCLUDE_TRANSPORT_MANAGER_MOCK_TRANSPORT_MANAGER_IMPL_H_
 
-#include "gmock/gmock.h"
 #include "config_profile/profile.h"
-#include "transport_manager/transport_manager_impl.h"
+#include "gmock/gmock.h"
 #include "transport_manager/mock_transport_manager_settings.h"
+#include "transport_manager/transport_manager_impl.h"
 #include "transport_manager/transport_manager_settings.h"
 
 namespace test {

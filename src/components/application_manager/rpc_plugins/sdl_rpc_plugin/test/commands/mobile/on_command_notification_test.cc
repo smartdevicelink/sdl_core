@@ -35,11 +35,11 @@
 
 #include "gtest/gtest.h"
 
-#include "smart_objects/smart_object.h"
-#include "application_manager/smart_object_keys.h"
-#include "application_manager/commands/commands_test.h"
 #include "application_manager/commands/command_impl.h"
+#include "application_manager/commands/commands_test.h"
+#include "application_manager/smart_object_keys.h"
 #include "mobile/on_command_notification.h"
+#include "smart_objects/smart_object.h"
 
 namespace test {
 namespace components {
@@ -86,8 +86,10 @@ TEST_F(OnCommandNotificationTest, Run_NoAppsForTheCommand_UNSUCCESS) {
   MockAppPtr mock_app(CreateMockApp());
   EXPECT_CALL(app_mngr_, application(kAppId)).WillOnce(Return(mock_app));
 
+  smart_objects::SmartObject invalid_command(smart_objects::SmartType_Null);
+
   EXPECT_CALL(*mock_app, FindCommand(kCommandId))
-      .WillOnce(Return(static_cast<SmartObject*>(NULL)));
+      .WillOnce(Return(invalid_command));
 
   EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(_, _)).Times(0);
 
@@ -121,9 +123,9 @@ TEST_F(OnCommandNotificationTest, Run_SUCCESS) {
   MockAppPtr mock_app(CreateMockApp());
   EXPECT_CALL(app_mngr_, application(kAppId)).WillOnce(Return(mock_app));
 
-  MessageSharedPtr dummy_msg(CreateMessage());
+  smart_objects::SmartObject empty_command(smart_objects::SmartType_Map);
   EXPECT_CALL(*mock_app, FindCommand(kCommandId))
-      .WillOnce(Return(dummy_msg.get()));
+      .WillOnce(Return(empty_command));
   EXPECT_CALL(mock_rpc_service_,
               SendMessageToMobile(CheckNotificationMessage(), _));
 

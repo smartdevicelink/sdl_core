@@ -33,13 +33,15 @@
 
 #include "sdl_rpc_plugin/commands/mobile/set_display_layout_request.h"
 
-#include "application_manager/message_helper.h"
 #include "application_manager/application_impl.h"
+#include "application_manager/message_helper.h"
 
 namespace sdl_rpc_plugin {
 using namespace application_manager;
 
 namespace commands {
+
+SDL_CREATE_LOG_VARIABLE("Commands")
 
 SetDisplayLayoutRequest::SetDisplayLayoutRequest(
     const application_manager::commands::MessageSharedPtr& message,
@@ -56,11 +58,11 @@ SetDisplayLayoutRequest::SetDisplayLayoutRequest(
 SetDisplayLayoutRequest::~SetDisplayLayoutRequest() {}
 
 void SetDisplayLayoutRequest::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   ApplicationSharedPtr app = application_manager_.application(connection_key());
 
   if (!app) {
-    LOG4CXX_ERROR(logger_, "Application is not registered");
+    SDL_LOG_ERROR("Application is not registered");
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     return;
   }
@@ -75,45 +77,42 @@ void SetDisplayLayoutRequest::Run() {
     new_layout = msg_params[strings::display_layout].asString();
   }
 
-  if (new_layout != old_layout &&
-      !new_layout.empty()) {  // Template switched, allow any color change
-    LOG4CXX_DEBUG(logger_,
-                  "SetDisplayLayoutRequest New Layout: " << new_layout);
+  if (new_layout != old_layout && !new_layout.empty()) {
+    // Template switched, hence allow any color change
+    SDL_LOG_DEBUG("SetDisplayLayoutRequest New Layout: " << new_layout);
     app->set_display_layout(new_layout);
   } else {
-    LOG4CXX_DEBUG(logger_, "SetDisplayLayoutRequest No Layout Change");
+    SDL_LOG_DEBUG("SetDisplayLayoutRequest No Layout Change");
     // Template layout is the same as previous layout
     // Reject message if colors are set
     if (msg_params.keyExists(strings::day_color_scheme) &&
-        app->day_color_scheme() != NULL &&
-        !(msg_params[strings::day_color_scheme] ==
-          *(app->day_color_scheme()))) {
-      // Color scheme param exists and has been previously set, do not allow
-      // color change
-      LOG4CXX_DEBUG(logger_, "Reject Day Color Scheme Change");
+        app->day_color_scheme().getType() != smart_objects::SmartType_Null &&
+        msg_params[strings::day_color_scheme] != app->day_color_scheme()) {
+      // Color scheme param exists and has been previously set,
+      // hence do not allow color change
+      SDL_LOG_DEBUG("Reject Day Color Scheme Change");
       SendResponse(false, mobile_apis::Result::REJECTED);
       return;
     }
 
     if (msg_params.keyExists(strings::night_color_scheme) &&
-        app->night_color_scheme() != NULL &&
-        !(msg_params[strings::night_color_scheme] ==
-          *(app->night_color_scheme()))) {
-      // Color scheme param exists and has been previously set, do not allow
-      // color change
-      LOG4CXX_DEBUG(logger_, "Reject Night Color Scheme Change");
+        app->night_color_scheme().getType() != smart_objects::SmartType_Null &&
+        msg_params[strings::night_color_scheme] != app->night_color_scheme()) {
+      // Color scheme param exists and has been previously set,
+      // hence do not allow color change
+      SDL_LOG_DEBUG("Reject Night Color Scheme Change");
       SendResponse(false, mobile_apis::Result::REJECTED);
       return;
     }
   }
 
   if (msg_params.keyExists(strings::day_color_scheme)) {
-    LOG4CXX_DEBUG(logger_, "Allow Day Color Scheme Change");
+    SDL_LOG_DEBUG("Allow Day Color Scheme Change");
     app->set_day_color_scheme(msg_params[strings::day_color_scheme]);
   }
 
   if (msg_params.keyExists(strings::night_color_scheme)) {
-    LOG4CXX_DEBUG(logger_, "Allow Night Color Scheme Change");
+    SDL_LOG_DEBUG("Allow Night Color Scheme Change");
     app->set_night_color_scheme(msg_params[strings::night_color_scheme]);
   }
 
@@ -125,12 +124,20 @@ void SetDisplayLayoutRequest::Run() {
 }
 
 void SetDisplayLayoutRequest::on_event(const event_engine::Event& event) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
+
+  ApplicationSharedPtr app = application_manager_.application(connection_key());
+
+  if (!app) {
+    SDL_LOG_ERROR("Application is not registered");
+    SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
+    return;
+  }
 
   const smart_objects::SmartObject& message = event.smart_object();
   switch (event.id()) {
     case hmi_apis::FunctionID::UI_SetDisplayLayout: {
-      LOG4CXX_INFO(logger_, "Received UI_SetDisplayLayout event");
+      SDL_LOG_INFO("Received UI_SetDisplayLayout event");
       EndAwaitForInterface(HmiInterfaces::HMI_INTERFACE_UI);
       hmi_apis::Common_Result::eType result_code =
           static_cast<hmi_apis::Common_Result::eType>(
@@ -143,26 +150,40 @@ void SetDisplayLayoutRequest::on_event(const event_engine::Event& event) {
       if (response_success) {
         HMICapabilities& hmi_capabilities = hmi_capabilities_;
 
-        // in case templates_available is empty copy from hmi capabilities
+        // In case templates_available is empty copy from hmi capabilities
         if (msg_params.keyExists(hmi_response::display_capabilities)) {
-          if (0 ==
+          if (0 == msg_params[hmi_response::display_capabilities]
+                             [hmi_response::templates_available]
+                                 .length()) {
+            auto display_capabilities = hmi_capabilities.display_capabilities();
+            if (display_capabilities) {
               msg_params[hmi_response::display_capabilities]
-                        [hmi_response::templates_available].length()) {
-            msg_params[hmi_response::display_capabilities]
-                      [hmi_response::templates_available] =
-                          hmi_capabilities.display_capabilities()->getElement(
-                              hmi_response::templates_available);
+                        [hmi_response::templates_available] =
+                            display_capabilities->getElement(
+                                hmi_response::templates_available);
+            }
           }
         }
+        const Version& app_version = app->version();
+        if (app_version.max_supported_api_version >= APIVersion::kAPIV6) {
+          // In case of successful response warn user that this RPC is
+          // deprecated from 6.0 and higher API versions
+          result_code = hmi_apis::Common_Result::WARNINGS;
+          info =
+              "The RPC is deprecated and will be removed in a future version. "
+              "The requested display layout is set to the main window. Please "
+              "use `Show.templateConfiguration` instead.";
+        }
       }
+
       SendResponse(response_success,
                    MessageHelper::HMIToMobileResult(result_code),
-                   info.empty() ? NULL : info.c_str(),
+                   info.empty() ? nullptr : info.c_str(),
                    &msg_params);
       break;
     }
     default: {
-      LOG4CXX_ERROR(logger_, "Received unknown event" << event.id());
+      SDL_LOG_ERROR("Received unknown event " << event.id());
       return;
     }
   }
@@ -170,4 +191,4 @@ void SetDisplayLayoutRequest::on_event(const event_engine::Event& event) {
 
 }  // namespace commands
 
-}  // namespace application_manager
+}  // namespace sdl_rpc_plugin

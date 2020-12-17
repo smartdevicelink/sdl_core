@@ -57,7 +57,8 @@ const char* FormatterJsonRpc::kData = "data";
 const char* FormatterJsonRpc::kMessage = "message";
 
 bool FormatterJsonRpc::ToString(const ns_smart_objects::SmartObject& obj,
-                                std::string& out_str) {
+                                std::string& out_str,
+                                const bool remove_unknown_parameters) {
   bool result = true;
   try {
     Json::Value root(Json::objectValue);
@@ -66,7 +67,8 @@ bool FormatterJsonRpc::ToString(const ns_smart_objects::SmartObject& obj,
 
     ns_smart_objects::SmartObject formatted_object(obj);
     Json::Value msg_params_json(Json::objectValue);
-    formatted_object.getSchema().unapplySchema(formatted_object);
+    formatted_object.getSchema().unapplySchema(formatted_object,
+                                               remove_unknown_parameters);
 
     bool is_message_params = formatted_object.keyExists(strings::S_MSG_PARAMS);
     bool empty_message_params = true;
@@ -120,8 +122,7 @@ bool FormatterJsonRpc::ToString(const ns_smart_objects::SmartObject& obj,
               if (ns_smart_objects::SmartType_Integer != code.getType()) {
                 result = false;
               } else {
-                root[kResult][kCode] =
-                    utils::ConvertInt64ToLongLongInt(code.asInt());
+                root[kResult][kCode] = code.asInt();
               }
             }
           } else if (kNotification == message_type) {
@@ -137,8 +138,7 @@ bool FormatterJsonRpc::ToString(const ns_smart_objects::SmartObject& obj,
             if (ns_smart_objects::SmartType_Integer != code.getType()) {
               result = false;
             } else {
-              root[kError][kCode] =
-                  utils::ConvertInt64ToLongLongInt(code.asInt());
+              root[kError][kCode] = code.asInt();
             }
           }
         }
@@ -178,7 +178,7 @@ bool FormatterJsonRpc::SetId(const ns_smart_objects::SmartObject& params,
         params.getElement(strings::S_CORRELATION_ID);
 
     if (ns_smart_objects::SmartType_Integer == id.getType()) {
-      id_container[kId] = utils::ConvertUInt64ToLongLongUInt(id.asUInt());
+      id_container[kId] = id.asUInt();
       result = true;
     }
   }

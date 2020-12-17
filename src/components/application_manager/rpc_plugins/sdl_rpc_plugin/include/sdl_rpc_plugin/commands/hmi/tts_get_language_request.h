@@ -61,10 +61,9 @@ class TTSGetLanguageRequest : public app_mngr::commands::RequestToHMI {
    **/
   virtual ~TTSGetLanguageRequest();
 
-  /**
-   * @brief Execute command
-   **/
-  virtual void Run();
+  void Run() OVERRIDE;
+
+  void onTimeOut() OVERRIDE;
 
  private:
   DISALLOW_COPY_AND_ASSIGN(TTSGetLanguageRequest);
@@ -72,6 +71,6 @@ class TTSGetLanguageRequest : public app_mngr::commands::RequestToHMI {
 
 }  // namespace commands
 
-}  // namespace application_manager
+}  // namespace sdl_rpc_plugin
 
 #endif  // SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_HMI_TTS_GET_LANGUAGE_REQUEST_H_

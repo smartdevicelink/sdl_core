@@ -1,10 +1,12 @@
 
 #ifndef SRC_COMPONENTS_SECURITY_MANAGER_INCLUDE_SECURITY_MANAGER_CRYPTO_MANAGER_SETTINGS_IMPL_H_
 #define SRC_COMPONENTS_SECURITY_MANAGER_INCLUDE_SECURITY_MANAGER_CRYPTO_MANAGER_SETTINGS_IMPL_H_
-#include "security_manager/security_manager_settings.h"
 #include "config_profile/profile.h"
+#include "security_manager/security_manager_settings.h"
 
 namespace security_manager {
+
+SDL_CREATE_LOG_VARIABLE("SecurityManager")
 
 class CryptoManagerSettingsImpl : public CryptoManagerSettings {
  public:
@@ -19,8 +21,6 @@ class CryptoManagerSettingsImpl : public CryptoManagerSettings {
   }
 
   Protocol security_manager_protocol_name() const OVERRIDE {
-    CREATE_LOGGERPTR_LOCAL(logger_, "SecurityManager")
-
     const std::string& protocol_str = profile_.security_manager_protocol_name();
     if (protocol_str == "TLSv1.0") {
       return security_manager::TLSv1;
@@ -38,8 +38,7 @@ class CryptoManagerSettingsImpl : public CryptoManagerSettings {
       return security_manager::DTLSv1;
     }
 
-    LOG4CXX_ERROR(
-        logger_,
+    SDL_LOG_ERROR(
         "Unknown protocol: " << profile_.security_manager_protocol_name());
     return static_cast<security_manager::Protocol>(-1);
   }

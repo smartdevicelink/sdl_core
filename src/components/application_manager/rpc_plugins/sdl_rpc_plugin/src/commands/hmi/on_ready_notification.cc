@@ -37,6 +37,8 @@ using namespace application_manager;
 
 namespace commands {
 
+SDL_CREATE_LOG_VARIABLE("Commands")
+
 OnReadyNotification::OnReadyNotification(
     const application_manager::commands::MessageSharedPtr& message,
     ApplicationManager& application_manager,
@@ -52,9 +54,9 @@ OnReadyNotification::OnReadyNotification(
 OnReadyNotification::~OnReadyNotification() {}
 
 void OnReadyNotification::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
 
-  application_manager_.OnHMIStartedCooperation();
+  application_manager_.OnHMIReady();
   event_engine::Event event(hmi_apis::FunctionID::BasicCommunication_OnReady);
   event.set_smart_object(*message_);
   event.raise(application_manager_.event_dispatcher());
@@ -62,4 +64,4 @@ void OnReadyNotification::Run() {
 
 }  // namespace commands
 
-}  // namespace application_manager
+}  // namespace sdl_rpc_plugin

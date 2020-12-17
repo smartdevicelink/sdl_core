@@ -31,8 +31,8 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <string>
 #include "sdl_rpc_plugin/commands/mobile/list_files_request.h"
+#include <string>
 
 #include "application_manager/application_impl.h"
 
@@ -43,6 +43,8 @@ namespace sdl_rpc_plugin {
 using namespace application_manager;
 
 namespace commands {
+
+SDL_CREATE_LOG_VARIABLE("Commands")
 
 ListFilesRequest::ListFilesRequest(
     const application_manager::commands::MessageSharedPtr& message,
@@ -59,24 +61,25 @@ ListFilesRequest::ListFilesRequest(
 ListFilesRequest::~ListFilesRequest() {}
 
 void ListFilesRequest::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
 
   ApplicationSharedPtr application =
       application_manager_.application(connection_key());
 
   if (!application) {
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
-    LOG4CXX_ERROR(logger_, "Application is not registered");
+    SDL_LOG_ERROR("Application is not registered");
     return;
   }
 
-  if ((mobile_api::HMILevel::HMI_NONE == application->hmi_level()) &&
+  if ((mobile_api::HMILevel::HMI_NONE ==
+       application->hmi_level(
+           mobile_apis::PredefinedWindows::DEFAULT_WINDOW)) &&
       (application_manager_.get_settings().list_files_in_none() <=
        application->list_files_in_none_count())) {
     // If application is in the HMI_NONE level the quantity of allowed
     // DeleteFile request is limited by the configuration profile
-    LOG4CXX_ERROR(logger_,
-                  "Too many requests from the app with HMILevel HMI_NONE ");
+    SDL_LOG_ERROR("Too many requests from the app with HMILevel HMI_NONE ");
     SendResponse(false, mobile_apis::Result::REJECTED);
     return;
   }
@@ -95,11 +98,10 @@ void ListFilesRequest::Run() {
   std::vector<std::string>::const_iterator it = persistent_files.begin();
   for (; it != persistent_files.end(); ++it) {
     if (i < application_manager_.get_settings().list_files_response_size()) {
-      LOG4CXX_DEBUG(logger_, "File " + *it + " added to ListFiles response");
+      SDL_LOG_DEBUG("File " + *it + " added to ListFiles response");
       (*message_)[strings::msg_params][strings::filenames][i++] = *it;
     } else {
-      LOG4CXX_DEBUG(logger_,
-                    "File " + *it + " not added to ListFiles response");
+      SDL_LOG_DEBUG("File " + *it + " not added to ListFiles response");
     }
   }
   (*message_)[strings::params][strings::message_type] =
@@ -112,4 +114,4 @@ void ListFilesRequest::Run() {
 
 }  // namespace commands
 
-}  // namespace application_manager
+}  // namespace sdl_rpc_plugin

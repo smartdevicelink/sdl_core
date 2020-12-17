@@ -34,18 +34,18 @@
 #include <string>
 
 #include "gtest/gtest.h"
-#include "mobile/unsubscribe_way_points_request.h"
 #include "interfaces/MOBILE_API.h"
+#include "mobile/unsubscribe_way_points_request.h"
 
-#include "smart_objects/smart_object.h"
-#include "application_manager/commands/commands_test.h"
-#include "application_manager/commands/command_request_test.h"
 #include "application_manager/application.h"
-#include "application_manager/mock_application_manager.h"
+#include "application_manager/commands/command_request_test.h"
+#include "application_manager/commands/commands_test.h"
+#include "application_manager/event_engine/event.h"
 #include "application_manager/mock_application.h"
+#include "application_manager/mock_application_manager.h"
 #include "application_manager/mock_message_helper.h"
 #include "application_manager/smart_object_keys.h"
-#include "application_manager/event_engine/event.h"
+#include "smart_objects/smart_object.h"
 
 namespace test {
 namespace components {
@@ -59,8 +59,8 @@ namespace mobile_result = mobile_apis::Result;
 using ::testing::_;
 using ::testing::Return;
 
-using sdl_rpc_plugin::commands::UnsubscribeWayPointsRequest;
 using am::commands::MessageSharedPtr;
+using sdl_rpc_plugin::commands::UnsubscribeWayPointsRequest;
 
 namespace {
 const uint32_t kConnectionKey = 3u;
@@ -100,9 +100,7 @@ TEST_F(UnsubscribeWayPointsRequestTest,
   EXPECT_CALL(app_mngr_, application(kConnectionKey))
       .WillOnce(Return(mock_app));
 
-  EXPECT_CALL(app_mngr_,
-              IsAppSubscribedForWayPoints(
-                  ::testing::Matcher<am::ApplicationSharedPtr>(mock_app)))
+  EXPECT_CALL(app_mngr_, IsAppSubscribedForWayPoints(Ref(*mock_app)))
       .WillOnce(Return(false));
 
   EXPECT_CALL(
@@ -117,14 +115,21 @@ TEST_F(UnsubscribeWayPointsRequestTest, Run_AppSubscribedForWayPoints_SUCCESS) {
   EXPECT_CALL(app_mngr_, application(kConnectionKey))
       .WillOnce(Return(mock_app));
 
-  EXPECT_CALL(app_mngr_,
-              IsAppSubscribedForWayPoints(
-                  ::testing::Matcher<am::ApplicationSharedPtr>(mock_app)))
+  EXPECT_CALL(app_mngr_, IsAppSubscribedForWayPoints(Ref(*mock_app)))
       .WillOnce(Return(true));
 
+  const std::set<uint32_t> subscribed_apps{kConnectionKey};
+
+  EXPECT_CALL(app_mngr_, GetAppsSubscribedForWayPoints())
+      .WillOnce(Return(subscribed_apps));
+
+  EXPECT_CALL(app_mngr_, IsSubscribedToHMIWayPoints()).WillOnce(Return(true));
+
   EXPECT_CALL(mock_rpc_service_,
-              ManageHMICommand(HMIResultCodeIs(
-                  hmi_apis::FunctionID::Navigation_UnsubscribeWayPoints)));
+              ManageHMICommand(
+                  HMIResultCodeIs(
+                      hmi_apis::FunctionID::Navigation_UnsubscribeWayPoints),
+                  _));
 
   command_->Run();
 }
@@ -153,9 +158,10 @@ TEST_F(UnsubscribeWayPointsRequestTest,
   Event event(hmi_apis::FunctionID::Navigation_UnsubscribeWayPoints);
   event.set_smart_object(*event_msg);
 
-  EXPECT_CALL(app_mngr_,
-              UnsubscribeAppFromWayPoints(
-                  ::testing::Matcher<am::ApplicationSharedPtr>(mock_app)));
+  EXPECT_CALL(
+      app_mngr_,
+      UnsubscribeAppFromWayPoints(
+          ::testing::Matcher<am::ApplicationSharedPtr>(mock_app), true));
 
   EXPECT_CALL(
       mock_rpc_service_,

@@ -30,9 +30,9 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "rpc_base/validation_report.h"
 #include <string>
 #include "gtest/gtest.h"
-#include "rpc_base/validation_report.h"
 
 namespace test {
 namespace components {

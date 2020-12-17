@@ -43,9 +43,10 @@ std::shared_ptr<CAlwaysFalseSchemaItem> CAlwaysFalseSchemaItem::create() {
 
 errors::eType CAlwaysFalseSchemaItem::validate(
     const SmartObject& Object,
-    rpc::ValidationReport* report__,
-    const utils::SemanticVersion& MessageVersion) {
-  report__->set_validation_info("Generic error");
+    rpc::ValidationReport* report,
+    const utils::SemanticVersion& MessageVersion,
+    const bool allow_unknown_enums) {
+  report->set_validation_info("Generic error");
   return errors::ERROR;
 }
 

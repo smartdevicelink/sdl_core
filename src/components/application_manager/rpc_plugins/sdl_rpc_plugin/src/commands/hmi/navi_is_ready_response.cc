@@ -36,6 +36,8 @@ using namespace application_manager;
 
 namespace commands {
 
+SDL_CREATE_LOG_VARIABLE("Commands")
+
 NaviIsReadyResponse::NaviIsReadyResponse(
     const application_manager::commands::MessageSharedPtr& message,
     ApplicationManager& application_manager,
@@ -51,11 +53,11 @@ NaviIsReadyResponse::NaviIsReadyResponse(
 NaviIsReadyResponse::~NaviIsReadyResponse() {}
 
 void NaviIsReadyResponse::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   event_engine::Event event(hmi_apis::FunctionID::Navigation_IsReady);
   event.set_smart_object(*message_);
   event.raise(application_manager_.event_dispatcher());
 }
 
 }  // namespace commands
-}  // namespace application_manager
+}  // namespace sdl_rpc_plugin

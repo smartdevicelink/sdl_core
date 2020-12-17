@@ -32,8 +32,8 @@
 
 #include <stdint.h>
 #include <memory>
-#include <string>
 #include <set>
+#include <string>
 
 #include "mobile/add_command_request.h"
 
@@ -41,16 +41,18 @@
 
 #include "utils/helpers.h"
 
-#include "smart_objects/smart_object.h"
-#include "utils/custom_string.h"
 #include "application_manager/commands/command_request_test.h"
-#include "application_manager/smart_object_keys.h"
+#include "application_manager/event_engine/event.h"
 #include "application_manager/mock_application.h"
 #include "application_manager/mock_application_manager.h"
-#include "application_manager/mock_message_helper.h"
-#include "application_manager/event_engine/event.h"
-#include "application_manager/mock_hmi_interface.h"
 #include "application_manager/mock_help_prompt_manager.h"
+#include "application_manager/mock_hmi_interface.h"
+#include "application_manager/mock_message_helper.h"
+#include "application_manager/mock_resume_ctrl.h"
+#include "application_manager/resumption/resumption_data_processor.h"
+#include "application_manager/smart_object_keys.h"
+#include "smart_objects/smart_object.h"
+#include "utils/custom_string.h"
 
 namespace test {
 namespace components {
@@ -60,17 +62,17 @@ namespace add_command_request {
 
 namespace am = application_manager;
 namespace am_test = application_manager_test;
-using am::commands::CommandImpl;
 using am::ApplicationManager;
-using am::commands::MessageSharedPtr;
 using am::ApplicationSharedPtr;
-using ::testing::_;
-using ::testing::Return;
-using ::testing::InSequence;
-using sdl_rpc_plugin::commands::AddCommandRequest;
-using ns_smart_device_link::ns_smart_objects::SmartObjectSPtr;
-using ::test::components::application_manager_test::MockApplication;
+using am::commands::CommandImpl;
+using am::commands::MessageSharedPtr;
 using am::event_engine::EventObserver;
+using ns_smart_device_link::ns_smart_objects::SmartObjectSPtr;
+using sdl_rpc_plugin::commands::AddCommandRequest;
+using ::test::components::application_manager_test::MockApplication;
+using ::testing::_;
+using ::testing::InSequence;
+using ::testing::Return;
 using namespace smart_objects;
 
 namespace custom_str = utils::custom_string;
@@ -104,6 +106,7 @@ class AddCommandRequestTest
  public:
   AddCommandRequestTest()
       : msg_(CreateMessage())
+      , smart_obj_(smart_objects::SmartType_Null)
       , default_app_name_("test_default_app_name_")
       , lock_ptr_(std::make_shared<sync_primitives::Lock>())
       , mock_help_prompt_manager_(
@@ -124,8 +127,7 @@ class AddCommandRequestTest
 
   void InitGetters() {
     ON_CALL(*mock_app_, app_id()).WillByDefault(Return(kAppId));
-    ON_CALL(*mock_app_, FindCommand(kCmdId))
-        .WillByDefault(Return(so_ptr_.get()));
+    ON_CALL(*mock_app_, FindCommand(kCmdId)).WillByDefault(Return(smart_obj_));
   }
 
   void CreateBasicParamsUIRequest() {
@@ -173,8 +175,7 @@ class AddCommandRequestTest
     SmartObject& image = msg_params[cmd_icon];
     EXPECT_CALL(mock_message_helper_, VerifyImage(image, _, _))
         .WillOnce(Return(mobile_apis::Result::SUCCESS));
-    EXPECT_CALL(*mock_app_, FindCommand(kCmdId))
-        .WillOnce(Return(so_ptr_.get()));
+    EXPECT_CALL(*mock_app_, FindCommand(kCmdId)).WillOnce(Return(smart_obj_));
     SmartObject first_command = SmartObject(SmartType_Map);
     SmartObject second_command = SmartObject(SmartType_Map);
     const am::CommandsMap commands_map =
@@ -182,19 +183,19 @@ class AddCommandRequestTest
     EXPECT_CALL(*mock_app_, commands_map())
         .WillRepeatedly(Return(DataAccessor<application_manager::CommandsMap>(
             commands_map, lock_ptr_)));
-    so_ptr_ = std::make_shared<SmartObject>(SmartType_Map);
+    SmartObject sub_menu(SmartType_Map);
     EXPECT_CALL(*mock_app_, FindSubMenu(kSecondParentId))
-        .WillOnce(Return(so_ptr_.get()));
+        .WillOnce(Return(sub_menu));
     {
       InSequence dummy;
 
       EXPECT_CALL(mock_rpc_service_,
                   ManageHMICommand(
-                      HMIResultCodeIs(hmi_apis::FunctionID::UI_AddCommand)))
+                      HMIResultCodeIs(hmi_apis::FunctionID::UI_AddCommand), _))
           .WillOnce(Return(true));
       EXPECT_CALL(mock_rpc_service_,
                   ManageHMICommand(
-                      HMIResultCodeIs(hmi_apis::FunctionID::VR_AddCommand)))
+                      HMIResultCodeIs(hmi_apis::FunctionID::VR_AddCommand), _))
           .WillOnce(Return(true));
     }
     EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(_, _)).Times(0);
@@ -207,7 +208,7 @@ class AddCommandRequestTest
     EXPECT_CALL(*mock_app_, RemoveCommand(kCmdId));
 
     EXPECT_CALL(mock_rpc_service_,
-                ManageHMICommand(HMIResultCodeIs(cmd_to_delete)))
+                ManageHMICommand(HMIResultCodeIs(cmd_to_delete), _))
 
         .WillOnce(Return(true));
     SmartObjectSPtr response = std::make_shared<SmartObject>(SmartType_Map);
@@ -221,13 +222,14 @@ class AddCommandRequestTest
         mock_rpc_service_,
         ManageMobileCommand(response,
                             am::commands::Command::CommandSource::SOURCE_SDL));
+
     std::shared_ptr<CommandRequestImpl> base_class_request =
         static_cast<std::shared_ptr<CommandRequestImpl> >(request_ptr);
     base_class_request->onTimeOut();
   }
 
   MessageSharedPtr msg_;
-  SmartObjectSPtr so_ptr_;
+  smart_objects::SmartObject smart_obj_;
   const utils::custom_string::CustomString default_app_name_;
   std::shared_ptr<sync_primitives::Lock> lock_ptr_;
   std::shared_ptr<am_test::MockHelpPromptManager> mock_help_prompt_manager_;
@@ -276,7 +278,7 @@ TEST_F(AddCommandRequestTest, Run_ImageVerificationFailed_EXPECT_WARNINGS) {
           commands_map, lock_ptr_)));
   EXPECT_CALL(
       mock_rpc_service_,
-      ManageHMICommand(HMIResultCodeIs(hmi_apis::FunctionID::UI_AddCommand)))
+      ManageHMICommand(HMIResultCodeIs(hmi_apis::FunctionID::UI_AddCommand), _))
       .WillOnce(Return(true));
   std::shared_ptr<AddCommandRequest> request_ptr =
       CreateCommand<AddCommandRequest>(msg_);
@@ -292,14 +294,13 @@ TEST_F(AddCommandRequestTest, Run_MenuNameHasSyntaxError_EXPECT_INVALID_DATA) {
   SmartObject& image = msg_params[cmd_icon];
   EXPECT_CALL(mock_message_helper_, VerifyImage(image, _, _))
       .WillOnce(Return(mobile_apis::Result::SUCCESS));
-  EXPECT_CALL(*mock_app_, FindCommand(kCmdId)).WillOnce(Return(so_ptr_.get()));
+  EXPECT_CALL(*mock_app_, FindCommand(kCmdId)).WillOnce(Return(smart_obj_));
   am::CommandsMap commands_map;
   EXPECT_CALL(*mock_app_, commands_map())
       .WillRepeatedly(Return(DataAccessor<application_manager::CommandsMap>(
           commands_map, lock_ptr_)));
   SmartObject parent = SmartObject(SmartType_Map);
-  EXPECT_CALL(*mock_app_, FindSubMenu(kFirstParentId))
-      .WillOnce(Return(&parent));
+  EXPECT_CALL(*mock_app_, FindSubMenu(kFirstParentId)).WillOnce(Return(parent));
 
   EXPECT_CALL(mock_rpc_service_,
               ManageMobileCommand(
@@ -314,7 +315,7 @@ TEST_F(AddCommandRequestTest,
   CreateBasicParamsVRRequest();
   SmartObject& msg_params = (*msg_)[strings::msg_params];
   msg_params[vr_commands][0] = kErroredVRCommand;
-  EXPECT_CALL(*mock_app_, FindCommand(kCmdId)).WillOnce(Return(so_ptr_.get()));
+  EXPECT_CALL(*mock_app_, FindCommand(kCmdId)).WillOnce(Return(smart_obj_));
   am::CommandsMap commands_map;
   EXPECT_CALL(*mock_app_, commands_map())
       .WillRepeatedly(Return(DataAccessor<application_manager::CommandsMap>(
@@ -340,7 +341,7 @@ TEST_F(AddCommandRequestTest, Run_CMDIconHasError_EXPECT_INVALID_DATA) {
   SmartObject& image = msg_params[cmd_icon];
   EXPECT_CALL(mock_message_helper_, VerifyImage(image, _, _))
       .WillOnce(Return(mobile_apis::Result::SUCCESS));
-  EXPECT_CALL(*mock_app_, FindCommand(kCmdId)).WillOnce(Return(so_ptr_.get()));
+  EXPECT_CALL(*mock_app_, FindCommand(kCmdId)).WillOnce(Return(smart_obj_));
   am::CommandsMap commands_map;
   EXPECT_CALL(*mock_app_, commands_map())
       .WillRepeatedly(Return(DataAccessor<application_manager::CommandsMap>(
@@ -360,8 +361,9 @@ TEST_F(AddCommandRequestTest, Run_CommandIDAlreadyExists_EXPECT_INVALID_ID) {
   SmartObject& image = msg_params[cmd_icon];
   EXPECT_CALL(mock_message_helper_, VerifyImage(image, _, _))
       .WillOnce(Return(mobile_apis::Result::SUCCESS));
-  so_ptr_ = std::make_shared<SmartObject>(SmartType_Map);
-  EXPECT_CALL(*mock_app_, FindCommand(kCmdId)).WillOnce(Return(so_ptr_.get()));
+  SmartObject existing_cmd_so(smart_objects::SmartType_Map);
+  EXPECT_CALL(*mock_app_, FindCommand(kCmdId))
+      .WillOnce(Return(existing_cmd_so));
 
   EXPECT_CALL(mock_rpc_service_,
               ManageMobileCommand(
@@ -379,7 +381,7 @@ TEST_F(AddCommandRequestTest,
   SmartObject& image = msg_params[cmd_icon];
   EXPECT_CALL(mock_message_helper_, VerifyImage(image, _, _))
       .WillOnce(Return(mobile_apis::Result::SUCCESS));
-  EXPECT_CALL(*mock_app_, FindCommand(kCmdId)).WillOnce(Return(so_ptr_.get()));
+  EXPECT_CALL(*mock_app_, FindCommand(kCmdId)).WillOnce(Return(smart_obj_));
   SmartObject first_command = SmartObject(SmartType_Map);
   SmartObject second_command = SmartObject(SmartType_Map);
   const am::CommandsMap commands_map =
@@ -404,7 +406,7 @@ TEST_F(AddCommandRequestTest,
   SmartObject& image = msg_params[cmd_icon];
   EXPECT_CALL(mock_message_helper_, VerifyImage(image, _, _))
       .WillOnce(Return(mobile_apis::Result::SUCCESS));
-  EXPECT_CALL(*mock_app_, FindCommand(kCmdId)).WillOnce(Return(so_ptr_.get()));
+  EXPECT_CALL(*mock_app_, FindCommand(kCmdId)).WillOnce(Return(smart_obj_));
   SmartObject first_command = SmartObject(SmartType_Map);
   SmartObject second_command = SmartObject(SmartType_Map);
   const am::CommandsMap commands_map =
@@ -412,8 +414,10 @@ TEST_F(AddCommandRequestTest,
   EXPECT_CALL(*mock_app_, commands_map())
       .WillRepeatedly(Return(DataAccessor<application_manager::CommandsMap>(
           commands_map, lock_ptr_)));
+
+  SmartObject invalid_command(SmartType_Null);
   EXPECT_CALL(*mock_app_, FindSubMenu(kSecondParentId))
-      .WillOnce(Return(so_ptr_.get()));
+      .WillOnce(Return(invalid_command));
 
   EXPECT_CALL(mock_rpc_service_,
               ManageMobileCommand(
@@ -432,7 +436,7 @@ TEST_F(AddCommandRequestTest,
   SmartObject& image = msg_params[cmd_icon];
   EXPECT_CALL(mock_message_helper_, VerifyImage(image, _, _))
       .WillOnce(Return(mobile_apis::Result::SUCCESS));
-  EXPECT_CALL(*mock_app_, FindCommand(kCmdId)).WillOnce(Return(so_ptr_.get()));
+  EXPECT_CALL(*mock_app_, FindCommand(kCmdId)).WillOnce(Return(smart_obj_));
 
   SmartObject first_command = SmartObject(SmartType_Map);
   SmartObject second_command = SmartObject(SmartType_Map);
@@ -441,9 +445,9 @@ TEST_F(AddCommandRequestTest,
   EXPECT_CALL(*mock_app_, commands_map())
       .WillRepeatedly(Return(DataAccessor<application_manager::CommandsMap>(
           commands_map, lock_ptr_)));
-  so_ptr_ = std::make_shared<SmartObject>(SmartType_Map);
+  SmartObject sub_menu(SmartType_Map);
   EXPECT_CALL(*mock_app_, FindSubMenu(kSecondParentId))
-      .WillOnce(Return(so_ptr_.get()));
+      .WillOnce(Return(sub_menu));
 
   EXPECT_CALL(mock_rpc_service_,
               ManageMobileCommand(
@@ -459,7 +463,7 @@ TEST_F(AddCommandRequestTest, Run_MsgDataEmpty_EXPECT_INVALID_DATA) {
   SmartObject& msg_params = (*msg)[strings::msg_params];
   msg_params[app_id] = kAppId;
   msg_params[cmd_id] = kCmdId;
-  EXPECT_CALL(*mock_app_, FindCommand(kCmdId)).WillOnce(Return(so_ptr_.get()));
+  EXPECT_CALL(*mock_app_, FindCommand(kCmdId)).WillOnce(Return(smart_obj_));
 
   EXPECT_CALL(mock_rpc_service_,
               ManageMobileCommand(
@@ -478,7 +482,7 @@ TEST_F(AddCommandRequestTest,
   SmartObject& image = msg_params[cmd_icon];
   EXPECT_CALL(mock_message_helper_, VerifyImage(image, _, _))
       .WillOnce(Return(mobile_apis::Result::SUCCESS));
-  EXPECT_CALL(*mock_app_, FindCommand(kCmdId)).WillOnce(Return(so_ptr_.get()));
+  EXPECT_CALL(*mock_app_, FindCommand(kCmdId)).WillOnce(Return(smart_obj_));
   SmartObject first_command = SmartObject(SmartType_Map);
   SmartObject second_command = SmartObject(SmartType_Map);
   const am::CommandsMap commands_map =
@@ -486,19 +490,19 @@ TEST_F(AddCommandRequestTest,
   EXPECT_CALL(*mock_app_, commands_map())
       .WillRepeatedly(Return(DataAccessor<application_manager::CommandsMap>(
           commands_map, lock_ptr_)));
-  so_ptr_ = std::make_shared<SmartObject>(SmartType_Map);
+  SmartObject sub_menu(SmartType_Map);
   EXPECT_CALL(*mock_app_, FindSubMenu(kSecondParentId))
-      .WillOnce(Return(so_ptr_.get()));
+      .WillOnce(Return(sub_menu));
   {
     InSequence dummy;
 
-    EXPECT_CALL(
-        mock_rpc_service_,
-        ManageHMICommand(HMIResultCodeIs(hmi_apis::FunctionID::UI_AddCommand)))
+    EXPECT_CALL(mock_rpc_service_,
+                ManageHMICommand(
+                    HMIResultCodeIs(hmi_apis::FunctionID::UI_AddCommand), _))
         .WillOnce(Return(true));
-    EXPECT_CALL(
-        mock_rpc_service_,
-        ManageHMICommand(HMIResultCodeIs(hmi_apis::FunctionID::VR_AddCommand)))
+    EXPECT_CALL(mock_rpc_service_,
+                ManageHMICommand(
+                    HMIResultCodeIs(hmi_apis::FunctionID::VR_AddCommand), _))
         .WillOnce(Return(true));
   }
   EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(_, _)).Times(0);
@@ -512,7 +516,7 @@ TEST_F(AddCommandRequestTest, GetRunMethods_SUCCESS) {
   SmartObject& image = (*msg_)[msg_params][cmd_icon];
   EXPECT_CALL(mock_message_helper_, VerifyImage(image, _, _))
       .WillOnce(Return(mobile_apis::Result::SUCCESS));
-  EXPECT_CALL(*mock_app_, FindCommand(kCmdId)).WillOnce(Return(so_ptr_.get()));
+  EXPECT_CALL(*mock_app_, FindCommand(kCmdId)).WillOnce(Return(smart_obj_));
   EXPECT_CALL(*mock_app_, AddCommand(kCmdId, (*msg_)[msg_params]));
 
   am::CommandsMap commands_map;
@@ -522,7 +526,7 @@ TEST_F(AddCommandRequestTest, GetRunMethods_SUCCESS) {
 
   EXPECT_CALL(
       mock_rpc_service_,
-      ManageHMICommand(HMIResultCodeIs(hmi_apis::FunctionID::UI_AddCommand)))
+      ManageHMICommand(HMIResultCodeIs(hmi_apis::FunctionID::UI_AddCommand), _))
       .WillOnce(Return(true));
   std::shared_ptr<AddCommandRequest> request_ptr =
       CreateCommand<AddCommandRequest>(msg_);
@@ -547,7 +551,7 @@ TEST_F(AddCommandRequestTest, OnEvent_UI_SUCCESS) {
 
   EXPECT_CALL(
       mock_rpc_service_,
-      ManageHMICommand(HMIResultCodeIs(hmi_apis::FunctionID::UI_AddCommand)))
+      ManageHMICommand(HMIResultCodeIs(hmi_apis::FunctionID::UI_AddCommand), _))
       .WillOnce(Return(true));
 
   EXPECT_CALL(*mock_app_, help_prompt_manager())
@@ -578,7 +582,7 @@ TEST_F(AddCommandRequestTest, OnEvent_VR_SUCCESS) {
 
   EXPECT_CALL(
       mock_rpc_service_,
-      ManageHMICommand(HMIResultCodeIs(hmi_apis::FunctionID::VR_AddCommand)))
+      ManageHMICommand(HMIResultCodeIs(hmi_apis::FunctionID::VR_AddCommand), _))
       .WillOnce(Return(true));
 
   EXPECT_CALL(*mock_app_, help_prompt_manager())
@@ -659,7 +663,7 @@ TEST_F(AddCommandRequestTest,
 
   EXPECT_CALL(
       mock_rpc_service_,
-      ManageHMICommand(HMIResultCodeIs(hmi_apis::FunctionID::UI_AddCommand)))
+      ManageHMICommand(HMIResultCodeIs(hmi_apis::FunctionID::UI_AddCommand), _))
       .WillOnce(Return(true));
   std::shared_ptr<AddCommandRequest> request_ptr =
       CreateCommand<AddCommandRequest>(msg_);
@@ -690,13 +694,13 @@ TEST_F(AddCommandRequestTest,
   {
     InSequence dummy;
 
-    EXPECT_CALL(
-        mock_rpc_service_,
-        ManageHMICommand(HMIResultCodeIs(hmi_apis::FunctionID::UI_AddCommand)))
+    EXPECT_CALL(mock_rpc_service_,
+                ManageHMICommand(
+                    HMIResultCodeIs(hmi_apis::FunctionID::UI_AddCommand), _))
         .WillOnce(Return(true));
-    EXPECT_CALL(
-        mock_rpc_service_,
-        ManageHMICommand(HMIResultCodeIs(hmi_apis::FunctionID::VR_AddCommand)))
+    EXPECT_CALL(mock_rpc_service_,
+                ManageHMICommand(
+                    HMIResultCodeIs(hmi_apis::FunctionID::VR_AddCommand), _))
         .WillOnce(Return(true));
   }
   EXPECT_CALL(mock_rpc_service_,
@@ -734,13 +738,13 @@ TEST_F(
           commands_map, lock_ptr_)));
   {
     InSequence dummy;
-    EXPECT_CALL(
-        mock_rpc_service_,
-        ManageHMICommand(HMIResultCodeIs(hmi_apis::FunctionID::UI_AddCommand)))
+    EXPECT_CALL(mock_rpc_service_,
+                ManageHMICommand(
+                    HMIResultCodeIs(hmi_apis::FunctionID::UI_AddCommand), _))
         .WillOnce(Return(true));
-    EXPECT_CALL(
-        mock_rpc_service_,
-        ManageHMICommand(HMIResultCodeIs(hmi_apis::FunctionID::VR_AddCommand)))
+    EXPECT_CALL(mock_rpc_service_,
+                ManageHMICommand(
+                    HMIResultCodeIs(hmi_apis::FunctionID::VR_AddCommand), _))
         .WillOnce(Return(true));
   }
 
@@ -779,13 +783,13 @@ TEST_F(
   {
     InSequence dummy;
 
-    EXPECT_CALL(
-        mock_rpc_service_,
-        ManageHMICommand(HMIResultCodeIs(hmi_apis::FunctionID::UI_AddCommand)))
+    EXPECT_CALL(mock_rpc_service_,
+                ManageHMICommand(
+                    HMIResultCodeIs(hmi_apis::FunctionID::UI_AddCommand), _))
         .WillOnce(Return(true));
-    EXPECT_CALL(
-        mock_rpc_service_,
-        ManageHMICommand(HMIResultCodeIs(hmi_apis::FunctionID::VR_AddCommand)))
+    EXPECT_CALL(mock_rpc_service_,
+                ManageHMICommand(
+                    HMIResultCodeIs(hmi_apis::FunctionID::VR_AddCommand), _))
         .WillOnce(Return(true));
   }
 
@@ -824,13 +828,13 @@ TEST_F(
   {
     InSequence dummy;
 
-    EXPECT_CALL(
-        mock_rpc_service_,
-        ManageHMICommand(HMIResultCodeIs(hmi_apis::FunctionID::UI_AddCommand)))
+    EXPECT_CALL(mock_rpc_service_,
+                ManageHMICommand(
+                    HMIResultCodeIs(hmi_apis::FunctionID::UI_AddCommand), _))
         .WillOnce(Return(true));
-    EXPECT_CALL(
-        mock_rpc_service_,
-        ManageHMICommand(HMIResultCodeIs(hmi_apis::FunctionID::VR_AddCommand)))
+    EXPECT_CALL(mock_rpc_service_,
+                ManageHMICommand(
+                    HMIResultCodeIs(hmi_apis::FunctionID::VR_AddCommand), _))
         .WillOnce(Return(true));
   }
   std::shared_ptr<AddCommandRequest> request_ptr =
@@ -873,13 +877,13 @@ TEST_F(
           commands_map, lock_ptr_)));
   {
     InSequence dummy;
-    EXPECT_CALL(
-        mock_rpc_service_,
-        ManageHMICommand(HMIResultCodeIs(hmi_apis::FunctionID::UI_AddCommand)))
+    EXPECT_CALL(mock_rpc_service_,
+                ManageHMICommand(
+                    HMIResultCodeIs(hmi_apis::FunctionID::UI_AddCommand), _))
         .WillOnce(Return(true));
-    EXPECT_CALL(
-        mock_rpc_service_,
-        ManageHMICommand(HMIResultCodeIs(hmi_apis::FunctionID::VR_AddCommand)))
+    EXPECT_CALL(mock_rpc_service_,
+                ManageHMICommand(
+                    HMIResultCodeIs(hmi_apis::FunctionID::VR_AddCommand), _))
         .WillOnce(Return(true));
   }
   std::shared_ptr<AddCommandRequest> request_ptr =
@@ -921,7 +925,7 @@ TEST_F(
           commands_map, lock_ptr_)));
   EXPECT_CALL(
       mock_rpc_service_,
-      ManageHMICommand(HMIResultCodeIs(hmi_apis::FunctionID::UI_AddCommand)))
+      ManageHMICommand(HMIResultCodeIs(hmi_apis::FunctionID::UI_AddCommand), _))
       .WillOnce(Return(true));
   std::shared_ptr<AddCommandRequest> request_ptr =
       CreateCommand<AddCommandRequest>(msg_);
@@ -958,7 +962,7 @@ TEST_F(
 
   EXPECT_CALL(
       mock_rpc_service_,
-      ManageHMICommand(HMIResultCodeIs(hmi_apis::FunctionID::VR_AddCommand)))
+      ManageHMICommand(HMIResultCodeIs(hmi_apis::FunctionID::VR_AddCommand), _))
       .WillOnce(Return(true));
   std::shared_ptr<AddCommandRequest> request_ptr =
       CreateCommand<AddCommandRequest>(msg_);
@@ -996,13 +1000,13 @@ TEST_F(AddCommandRequestTest,
           commands_map, lock_ptr_)));
   {
     InSequence dummy;
-    EXPECT_CALL(
-        mock_rpc_service_,
-        ManageHMICommand(HMIResultCodeIs(hmi_apis::FunctionID::UI_AddCommand)))
+    EXPECT_CALL(mock_rpc_service_,
+                ManageHMICommand(
+                    HMIResultCodeIs(hmi_apis::FunctionID::UI_AddCommand), _))
         .WillOnce(Return(true));
-    EXPECT_CALL(
-        mock_rpc_service_,
-        ManageHMICommand(HMIResultCodeIs(hmi_apis::FunctionID::VR_AddCommand)))
+    EXPECT_CALL(mock_rpc_service_,
+                ManageHMICommand(
+                    HMIResultCodeIs(hmi_apis::FunctionID::VR_AddCommand), _))
         .WillOnce(Return(true));
   }
   EXPECT_CALL(mock_rpc_service_,
@@ -1020,9 +1024,9 @@ TEST_F(AddCommandRequestTest,
   event_ui.set_smart_object(*msg_ui);
   Event event_vr(hmi_apis::FunctionID::VR_AddCommand);
   event_vr.set_smart_object(*msg_);
-  EXPECT_CALL(
-      mock_rpc_service_,
-      ManageHMICommand(HMIResultCodeIs(hmi_apis::FunctionID::VR_DeleteCommand)))
+  EXPECT_CALL(mock_rpc_service_,
+              ManageHMICommand(
+                  HMIResultCodeIs(hmi_apis::FunctionID::VR_DeleteCommand), _))
       .WillOnce(Return(true));
   EXPECT_CALL(*mock_app_, RemoveCommand(kCmdId)).Times(2);
   request_ptr->on_event(event_ui);
@@ -1044,13 +1048,13 @@ TEST_F(AddCommandRequestTest,
           commands_map, lock_ptr_)));
   {
     InSequence dummy;
-    EXPECT_CALL(
-        mock_rpc_service_,
-        ManageHMICommand(HMIResultCodeIs(hmi_apis::FunctionID::UI_AddCommand)))
+    EXPECT_CALL(mock_rpc_service_,
+                ManageHMICommand(
+                    HMIResultCodeIs(hmi_apis::FunctionID::UI_AddCommand), _))
         .WillOnce(Return(true));
-    EXPECT_CALL(
-        mock_rpc_service_,
-        ManageHMICommand(HMIResultCodeIs(hmi_apis::FunctionID::VR_AddCommand)))
+    EXPECT_CALL(mock_rpc_service_,
+                ManageHMICommand(
+                    HMIResultCodeIs(hmi_apis::FunctionID::VR_AddCommand), _))
         .WillOnce(Return(true));
   }
   EXPECT_CALL(mock_rpc_service_,
@@ -1063,9 +1067,9 @@ TEST_F(AddCommandRequestTest,
   Event event_ui(hmi_apis::FunctionID::UI_AddCommand);
   event_ui.set_smart_object(*msg_);
   request_ptr->on_event(event_ui);
-  EXPECT_CALL(
-      mock_rpc_service_,
-      ManageHMICommand(HMIResultCodeIs(hmi_apis::FunctionID::UI_DeleteCommand)))
+  EXPECT_CALL(mock_rpc_service_,
+              ManageHMICommand(
+                  HMIResultCodeIs(hmi_apis::FunctionID::UI_DeleteCommand), _))
       .WillOnce(Return(true));
   EXPECT_CALL(*mock_app_, RemoveCommand(kCmdId)).Times(2);
   Event event_vr(hmi_apis::FunctionID::VR_AddCommand);
@@ -1092,6 +1096,7 @@ TEST_F(AddCommandRequestTest,
   EXPECT_CALL(mock_rpc_service_,
               ManageMobileCommand(
                   response, am::commands::Command::CommandSource::SOURCE_SDL));
+
   std::shared_ptr<CommandRequestImpl> base_class_request =
       static_cast<std::shared_ptr<CommandRequestImpl> >(
           CreateCommand<AddCommandRequest>(msg_));
@@ -1106,7 +1111,7 @@ TEST_F(AddCommandRequestTest, OnTimeOut_AppRemoveCommandCalled) {
   msg_params[menu_params][hmi_request::parent_id] = kSecondParentId;
   EXPECT_CALL(mock_message_helper_, VerifyImage(image, _, _))
       .WillOnce(Return(mobile_apis::Result::SUCCESS));
-  EXPECT_CALL(*mock_app_, FindCommand(kCmdId)).WillOnce(Return(so_ptr_.get()));
+  EXPECT_CALL(*mock_app_, FindCommand(kCmdId)).WillOnce(Return(smart_obj_));
   SmartObject first_command = SmartObject(SmartType_Map);
   SmartObject second_command = SmartObject(SmartType_Map);
   const am::CommandsMap commands_map =
@@ -1114,18 +1119,18 @@ TEST_F(AddCommandRequestTest, OnTimeOut_AppRemoveCommandCalled) {
   EXPECT_CALL(*mock_app_, commands_map())
       .WillRepeatedly(Return(DataAccessor<application_manager::CommandsMap>(
           commands_map, lock_ptr_)));
-  so_ptr_ = std::make_shared<SmartObject>(SmartType_Map);
+  SmartObject sub_menu(SmartType_Map);
   EXPECT_CALL(*mock_app_, FindSubMenu(kSecondParentId))
-      .WillOnce(Return(so_ptr_.get()));
+      .WillOnce(Return(sub_menu));
   {
     InSequence dummy;
-    EXPECT_CALL(
-        mock_rpc_service_,
-        ManageHMICommand(HMIResultCodeIs(hmi_apis::FunctionID::UI_AddCommand)))
+    EXPECT_CALL(mock_rpc_service_,
+                ManageHMICommand(
+                    HMIResultCodeIs(hmi_apis::FunctionID::UI_AddCommand), _))
         .WillOnce(Return(true));
-    EXPECT_CALL(
-        mock_rpc_service_,
-        ManageHMICommand(HMIResultCodeIs(hmi_apis::FunctionID::VR_AddCommand)))
+    EXPECT_CALL(mock_rpc_service_,
+                ManageHMICommand(
+                    HMIResultCodeIs(hmi_apis::FunctionID::VR_AddCommand), _))
         .WillOnce(Return(true));
   }
   EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(_, _)).Times(0);
@@ -1142,6 +1147,7 @@ TEST_F(AddCommandRequestTest, OnTimeOut_AppRemoveCommandCalled) {
   EXPECT_CALL(mock_rpc_service_,
               ManageMobileCommand(
                   response, am::commands::Command::CommandSource::SOURCE_SDL));
+
   std::shared_ptr<CommandRequestImpl> base_class_request =
       static_cast<std::shared_ptr<CommandRequestImpl> >(request_ptr);
   base_class_request->onTimeOut();

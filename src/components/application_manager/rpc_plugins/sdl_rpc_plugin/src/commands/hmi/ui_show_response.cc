@@ -37,6 +37,8 @@ using namespace application_manager;
 
 namespace commands {
 
+SDL_CREATE_LOG_VARIABLE("Commands")
+
 UIShowResponse::UIShowResponse(
     const application_manager::commands::MessageSharedPtr& message,
     ApplicationManager& application_manager,
@@ -52,7 +54,7 @@ UIShowResponse::UIShowResponse(
 UIShowResponse::~UIShowResponse() {}
 
 void UIShowResponse::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
 
   event_engine::Event event(hmi_apis::FunctionID::UI_Show);
   event.set_smart_object(*message_);
@@ -61,4 +63,4 @@ void UIShowResponse::Run() {
 
 }  // namespace commands
 
-}  // namespace application_manager
+}  // namespace sdl_rpc_plugin

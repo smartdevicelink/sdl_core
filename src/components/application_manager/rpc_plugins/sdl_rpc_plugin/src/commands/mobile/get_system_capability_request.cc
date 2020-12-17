@@ -32,10 +32,17 @@
 
 #include "sdl_rpc_plugin/commands/mobile/get_system_capability_request.h"
 
+#include <set>
+#include "application_manager/app_service_manager.h"
+#include "application_manager/message_helper.h"
+#include "sdl_rpc_plugin/extensions/system_capability_app_extension.h"
+
 namespace sdl_rpc_plugin {
 using namespace application_manager;
 
 namespace commands {
+
+SDL_CREATE_LOG_VARIABLE("Commands")
 
 GetSystemCapabilityRequest::GetSystemCapabilityRequest(
     const application_manager::commands::MessageSharedPtr& message,
@@ -52,18 +59,18 @@ GetSystemCapabilityRequest::GetSystemCapabilityRequest(
 GetSystemCapabilityRequest::~GetSystemCapabilityRequest() {}
 
 void GetSystemCapabilityRequest::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
 
   ApplicationSharedPtr app = application_manager_.application(connection_key());
 
   if (!app) {
-    LOG4CXX_ERROR(logger_, "Application is not registered");
+    SDL_LOG_ERROR("Application is not registered");
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     return;
   }
 
   if ((*message_)[strings::msg_params].empty()) {
-    LOG4CXX_ERROR(logger_, strings::msg_params << " is empty.");
+    SDL_LOG_ERROR(strings::msg_params << " is empty.");
     SendResponse(false, mobile_apis::Result::INVALID_DATA);
     return;
   }
@@ -80,10 +87,20 @@ void GetSystemCapabilityRequest::Run() {
 
   switch (response_type) {
     case mobile_apis::SystemCapabilityType::NAVIGATION: {
+      smart_objects::SmartObject nav_capability(smart_objects::SmartType_Map);
+      bool has_nav_capability = false;
       if (hmi_capabilities.navigation_capability()) {
+        has_nav_capability = true;
+        nav_capability = *hmi_capabilities.navigation_capability();
+      }
+
+      has_nav_capability = application_manager_.GetAppServiceManager()
+                               .UpdateNavigationCapabilities(nav_capability) ||
+                           has_nav_capability;
+
+      if (has_nav_capability) {
         response_params[strings::system_capability]
-                       [strings::navigation_capability] =
-                           *hmi_capabilities.navigation_capability();
+                       [strings::navigation_capability] = nav_capability;
       } else {
         SendResponse(false, mobile_apis::Result::DATA_NOT_AVAILABLE);
         return;
@@ -118,6 +135,17 @@ void GetSystemCapabilityRequest::Run() {
       }
       break;
     }
+    case mobile_apis::SystemCapabilityType::SEAT_LOCATION: {
+      if (hmi_capabilities.seat_location_capability()) {
+        response_params[strings::system_capability]
+                       [strings::seat_location_capability] =
+                           *hmi_capabilities.seat_location_capability();
+      } else {
+        SendResponse(false, mobile_apis::Result::DATA_NOT_AVAILABLE);
+        return;
+      }
+      break;
+    }
     case mobile_apis::SystemCapabilityType::VIDEO_STREAMING:
       if (hmi_capabilities.video_streaming_capability()) {
         response_params[strings::system_capability]
@@ -128,16 +156,76 @@ void GetSystemCapabilityRequest::Run() {
         return;
       }
       break;
+    case mobile_apis::SystemCapabilityType::APP_SERVICES: {
+      auto all_services =
+          application_manager_.GetAppServiceManager().GetAllServiceRecords();
+      response_params[strings::system_capability]
+                     [strings::app_services_capabilities] =
+                         MessageHelper::CreateAppServiceCapabilities(
+                             all_services);
+      break;
+    }
+    case mobile_apis::SystemCapabilityType::DRIVER_DISTRACTION:
+      if (hmi_capabilities.driver_distraction_capability()) {
+        response_params[strings::system_capability]
+                       [strings::driver_distraction_capability] =
+                           *hmi_capabilities.driver_distraction_capability();
+      } else {
+        SendResponse(false, mobile_apis::Result::DATA_NOT_AVAILABLE);
+        return;
+      }
+      break;
+    case mobile_apis::SystemCapabilityType::DISPLAYS: {
+      auto capabilities = hmi_capabilities.system_display_capabilities();
+      if (app->display_capabilities()) {
+        capabilities = app->display_capabilities();
+      }
+
+      if (!capabilities) {
+        SendResponse(false, mobile_apis::Result::DATA_NOT_AVAILABLE);
+        SDL_LOG_INFO("system_display_capabilities are not available");
+        return;
+      }
+
+      response_params[strings::system_capability]
+                     [strings::display_capabilities] = *capabilities;
+      break;
+    }
     default:  // Return unsupported resource
       SendResponse(false, mobile_apis::Result::UNSUPPORTED_RESOURCE);
       return;
   }
-  SendResponse(true, mobile_apis::Result::SUCCESS, NULL, &response_params);
+
+  const char* info = nullptr;
+  // Ignore subscription/unsubscription for DISPLAYS type
+  if (mobile_apis::SystemCapabilityType::DISPLAYS != response_type) {
+    if ((*message_)[app_mngr::strings::msg_params].keyExists(
+            strings::subscribe)) {
+      auto& ext = SystemCapabilityAppExtension::ExtractExtension(*app);
+      if ((*message_)[app_mngr::strings::msg_params][strings::subscribe]
+              .asBool() == true) {
+        SDL_LOG_DEBUG("Subscribe to system capability: " << response_type);
+        ext.SubscribeTo(response_type);
+      } else {
+        SDL_LOG_DEBUG("Unsubscribe from system capability: " << response_type);
+        ext.UnsubscribeFrom(response_type);
+      }
+    }
+  } else {
+    if ((*message_)[app_mngr::strings::msg_params].keyExists(
+            strings::subscribe)) {
+      info =
+          "Subscribe parameter is ignored. Auto Subscription/Unsubscription is "
+          "used for DISPLAY capability type.";
+    }
+  }
+
+  SendResponse(true, mobile_apis::Result::SUCCESS, info, &response_params);
 }
 
 void GetSystemCapabilityRequest::on_event(const event_engine::Event& event) {
-  LOG4CXX_INFO(logger_, "GetSystemCapabilityRequest on_event");
+  SDL_LOG_INFO("GetSystemCapabilityRequest on_event");
 }
 
 }  // namespace commands
-}  // namespace application_manager
+}  // namespace sdl_rpc_plugin

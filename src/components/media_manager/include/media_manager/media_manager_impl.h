@@ -33,13 +33,14 @@
 #ifndef SRC_COMPONENTS_MEDIA_MANAGER_INCLUDE_MEDIA_MANAGER_MEDIA_MANAGER_IMPL_H_
 #define SRC_COMPONENTS_MEDIA_MANAGER_INCLUDE_MEDIA_MANAGER_MEDIA_MANAGER_IMPL_H_
 
-#include <string>
 #include <map>
-#include "protocol_handler/protocol_observer.h"
-#include "protocol_handler/protocol_handler.h"
-#include "media_manager/media_manager.h"
+#include <string>
+#include "interfaces/MOBILE_API.h"
 #include "media_manager/media_adapter_impl.h"
 #include "media_manager/media_adapter_listener.h"
+#include "media_manager/media_manager.h"
+#include "protocol_handler/protocol_handler.h"
+#include "protocol_handler/protocol_observer.h"
 
 namespace application_manager {
 class ApplicationManager;
@@ -61,16 +62,23 @@ class MediaManagerImpl : public MediaManager,
   virtual void PlayA2DPSource(int32_t application_key);
   virtual void StopA2DPSource(int32_t application_key);
 
-  virtual void StartMicrophoneRecording(int32_t application_key,
-                                        const std::string& outputFileName,
-                                        int32_t duration);
+  DEPRECATED virtual void StartMicrophoneRecording(
+      int32_t application_key,
+      const std::string& outputFileName,
+      int32_t duration);
+  virtual void StartMicrophoneRecording(
+      int32_t application_key,
+      const std::string& outputFileName,
+      int32_t duration,
+      mobile_apis::SamplingRate::eType sampling_rate,
+      mobile_apis::BitsPerSample::eType bits_per_sample,
+      mobile_apis::AudioType::eType audio_type);
   virtual void StopMicrophoneRecording(int32_t application_key);
 
   virtual void StartStreaming(int32_t application_key,
                               protocol_handler::ServiceType service_type);
   virtual void StopStreaming(int32_t application_key,
                              protocol_handler::ServiceType service_type);
-
   virtual void SetProtocolHandler(
       protocol_handler::ProtocolHandler* protocol_handler);
   virtual void OnMessageReceived(

@@ -33,12 +33,12 @@
 #ifndef SRC_COMPONENTS_POLICY_POLICY_REGULAR_INCLUDE_POLICY_PT_REPRESENTATION_H_
 #define SRC_COMPONENTS_POLICY_POLICY_REGULAR_INCLUDE_POLICY_PT_REPRESENTATION_H_
 
-#include <vector>
-#include <string>
 #include <memory>
-#include "policy/policy_types.h"
-#include "policy/policy_table/types.h"
+#include <string>
+#include <vector>
 #include "policy/policy_settings.h"
+#include "policy/policy_table/types.h"
+#include "policy/policy_types.h"
 #include "utils/macro.h"
 
 namespace policy {
@@ -123,11 +123,6 @@ class PTRepresentation {
   virtual bool SecondsBetweenRetries(std::vector<int>* seconds) = 0;
 
   /**
-   * @brief Get information about vehicle
-   */
-  virtual const VehicleInfo GetVehicleInfo() const = 0;
-
-  /**
    * @brief Allows to update 'vin' field in module_meta table.
    *
    * @param new 'vin' value.
@@ -157,12 +152,10 @@ class PTRepresentation {
   virtual EndpointUrls GetUpdateUrls(int service_type) = 0;
 
   /**
-   * @brief GetLockScreenIcon allows to obtain lock screen icon url;
-   *
-   * @return url which point to the resourse where lock screen icon could be
-   *obtained.
+   * @brief Records information about head unit system to PT
+   * @return bool Success of operation
    */
-  virtual std::string GetLockScreenIconUrl() const = 0;
+  virtual bool SetMetaInfo(const std::string& ccpu_version) = 0;
 
   /**
    * @brief Get allowed number of notifications
@@ -265,10 +258,10 @@ class PTRepresentation {
   virtual bool IsDefaultPolicy(const std::string& app_id) const = 0;
 
   /**
-       * Checks if the application has pre_data policy
-       * @param app_id application id
-       * @return true if application has pre_data policy
-       */
+   * Checks if the application has pre_data policy
+   * @param app_id application id
+   * @return true if application has pre_data policy
+   */
   virtual bool IsPredataPolicy(const std::string& app_id) const = 0;
 
   /**

@@ -35,10 +35,10 @@
 
 #include "gtest/gtest.h"
 
-#include "smart_objects/smart_object.h"
+#include "create_smartSchema.h"
 #include "formatters/CFormatterJsonSDLRPCv1.h"
 #include "formatters/CSmartFactory.h"
-#include "create_smartSchema.h"
+#include "smart_objects/smart_object.h"
 
 namespace test {
 namespace components {

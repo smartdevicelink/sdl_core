@@ -33,14 +33,14 @@
 #ifndef SRC_COMPONENTS_INCLUDE_CONNECTION_HANDLER_CONNECTION_HANDLER_H_
 #define SRC_COMPONENTS_INCLUDE_CONNECTION_HANDLER_CONNECTION_HANDLER_H_
 
-#include "connection_handler/connection_handler_settings.h"
-#include "transport_manager/transport_manager_listener.h"
-#include "protocol_handler/session_observer.h"
-#include "connection_handler/device.h"
 #include "connection_handler/connection.h"
+#include "connection_handler/connection_handler_settings.h"
+#include "connection_handler/device.h"
 #include "connection_handler/devices_discovery_starter.h"
-#include "utils/macro.h"
+#include "protocol_handler/session_observer.h"
+#include "transport_manager/transport_manager_listener.h"
 #include "utils/data_accessor.h"
+#include "utils/macro.h"
 
 /**
  * \namespace connection_handler
@@ -48,7 +48,13 @@
  */
 namespace connection_handler {
 
-enum CloseSessionReason { kCommon = 0, kFlood, kMalformed, kUnauthorizedApp };
+enum CloseSessionReason {
+  kCommon = 0,
+  kFlood,
+  kMalformed,
+  kUnauthorizedApp,
+  kFinalMessage
+};
 
 class ConnectionHandlerObserver;
 
@@ -80,6 +86,16 @@ class ConnectionHandler {
       connection_handler::DeviceHandle device_handle) = 0;
 
   /**
+   * @brief Retrieves the connection status of a given device
+   *
+   * @param device_handle Handle of device to query
+   *
+   * @return The connection status of the given device
+   */
+  virtual transport_manager::ConnectionStatus GetConnectionStatus(
+      const DeviceHandle& device_handle) const = 0;
+
+  /**
    * @brief RunAppOnDevice allows to run specific application on the certain
    *device.
    *
@@ -92,6 +108,13 @@ class ConnectionHandler {
                               const std::string& bundle_id) const = 0;
 
   virtual void ConnectToAllDevices() = 0;
+
+  virtual void AddCloudAppDevice(
+      const std::string& policy_app_id,
+      const transport_manager::transport_adapter::CloudAppProperties&
+          cloud_properties) = 0;
+
+  virtual void RemoveCloudAppDevice(const DeviceHandle device_id) = 0;
 
   /**
    * @brief  Close the connection revoked by Policy
@@ -110,6 +133,15 @@ class ConnectionHandler {
    * \param connection_key pair of connection handle and session id
    */
   virtual uint32_t GetConnectionSessionsCount(uint32_t connection_key) = 0;
+
+  /**
+   * @brief Get cloud app id by connection id
+   * @param connection_id unique connection id
+   * @return the policy app id of the cloud app if the connection is tied to a
+   * cloud app, an empty string otherwise.
+   */
+  virtual std::string GetCloudAppID(
+      const transport_manager::ConnectionUID connection_id) const = 0;
 
   /**
    * Gets device id by mac address
@@ -132,13 +164,22 @@ class ConnectionHandler {
                             CloseSessionReason close_reason) = 0;
 
   /**
- * @brief SendEndService allows to end up specific service.
- *
- * @param key application identifier whose service should be closed.
- *
- * @param service_type the service that should be closed.
- */
+   * @brief SendEndService allows to end up specific service.
+   *
+   * @param key application identifier whose service should be closed.
+   *
+   * @param service_type the service that should be closed.
+   */
   virtual void SendEndService(uint32_t key, uint8_t service_type) = 0;
+
+  /**
+   * @brief Check is heartbeat monitoring started for specified connection key
+   * @param  connection_key pair of connection and session id
+   * @return returns true if heartbeat monitoring started for specified
+   * connection key otherwise returns false
+   */
+  virtual bool IsSessionHeartbeatTracked(
+      const uint32_t connection_key) const = 0;
 
   /**
    * \brief Start heartbeat for specified session
@@ -162,9 +203,9 @@ class ConnectionHandler {
                                    uint32_t timeout) = 0;
 
   /**
-  * \brief Keep connection associated with the key from being closed by
-  * heartbeat monitor
-  */
+   * \brief Keep connection associated with the key from being closed by
+   * heartbeat monitor
+   */
   virtual void KeepConnectionAlive(uint32_t connection_key,
                                    uint8_t session_id) = 0;
 
@@ -178,6 +219,15 @@ class ConnectionHandler {
   virtual void BindProtocolVersionWithSession(uint32_t connection_key,
                                               uint8_t protocol_version) = 0;
 
+  /**
+   * @brief binds protocol version with session
+   * @param connection_key pair of connection and session id
+   * @param full_protocol_version contains full protocol version of registered
+   * application.
+   */
+  virtual void BindProtocolVersionWithSession(
+      uint32_t connection_key,
+      const utils::SemanticVersion& full_protocol_version) = 0;
   /**
    * \brief information about given Connection Key.
    * \param key Unique key used by other components as session identifier
@@ -262,7 +312,8 @@ class ConnectionHandler {
   virtual void NotifyServiceStartedResult(
       uint32_t session_key,
       bool result,
-      std::vector<std::string>& rejected_params) = 0;
+      std::vector<std::string>& rejected_params,
+      const std::string& reason) = 0;
 
   /**
    * \brief Called when secondary transport with given session ID is established
@@ -285,6 +336,19 @@ class ConnectionHandler {
   virtual void OnSecondaryTransportEnded(
       const transport_manager::ConnectionUID primary_connection_handle,
       const transport_manager::ConnectionUID secondary_connection_handle) = 0;
+
+  /**
+   * @brief GetWebEngineDeviceInfo
+   * @return device info for WebEngine device
+   */
+  virtual const transport_manager::DeviceInfo& GetWebEngineDeviceInfo()
+      const = 0;
+
+  /**
+   * @brief Called when HMI cooperation is started,
+   * creates WebSocketDevice for WebEngine
+   */
+  virtual void CreateWebEngineDevice() = 0;
 
  protected:
   /**

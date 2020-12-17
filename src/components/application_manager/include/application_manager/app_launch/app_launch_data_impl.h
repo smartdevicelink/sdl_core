@@ -33,10 +33,10 @@
 #ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_APP_LAUNCH_APP_LAUNCH_DATA_IMPL_H_
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_APP_LAUNCH_APP_LAUNCH_DATA_IMPL_H_
 
+#include <memory>
 #include "application_manager/app_launch/app_launch_data.h"
 #include "application_manager/app_launch_settings.h"
 #include "utils/macro.h"
-#include <memory>
 
 namespace app_launch {
 

@@ -51,6 +51,8 @@ class CBoolSchemaItem : public CDefaultSchemaItem<bool> {
       const TSchemaItemParameter<bool>& DefaultValue =
           TSchemaItemParameter<bool>());
 
+  TypeID GetType() OVERRIDE;
+
  private:
   explicit CBoolSchemaItem(const TSchemaItemParameter<bool>& DefaultValue);
   SmartType getSmartType() const OVERRIDE;

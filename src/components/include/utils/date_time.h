@@ -53,6 +53,7 @@ const int32_t MILLISECONDS_IN_SECOND = 1000;
 const int32_t MICROSECONDS_IN_MILLISECOND = 1000;
 const int32_t NANOSECONDS_IN_MICROSECOND = 1000;
 const int32_t SECONDS_IN_HOUR = 3600;
+const int32_t SECONDS_IN_DAY = 86400;
 const int32_t MICROSECONDS_IN_SECOND =
     MILLISECONDS_IN_SECOND * MICROSECONDS_IN_MILLISECOND;
 const int32_t NANOSECONDS_IN_MILLISECOND =
@@ -82,6 +83,9 @@ int64_t calculateTimeSpan(const TimeDuration& sinceTime);
 
 // return MILLISECONDS count between time1 and time2
 int64_t calculateTimeDiff(const TimeDuration& time1, const TimeDuration& time2);
+
+// returns difference between specific date and current date
+int64_t calculateAmountDaysFromDate(const std::time_t& start_date);
 
 /**
  * @brief Adds milliseconds to time struct

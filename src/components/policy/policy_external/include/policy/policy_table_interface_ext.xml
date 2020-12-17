@@ -40,6 +40,7 @@
         <element name="beltStatus" />
         <element name="electronicParkBrakeStatus" />
         <element name="driverBraking" />
+        <element name="gearStatus" />
         <element name="prndl" />
         <element name="rpm" />
         <element name="steeringWheelAngle" />
@@ -50,12 +51,15 @@
         <element name="clusterModeStatus" />
         <element name="deviceStatus" />
         <element name="emergencyEvent" />
+        <element name="stabilityControlsStatus" />
         <element name="eCallInfo" />
         <element name="abs_State" />
         <element name="turnSignal" />
         <element name="fuelRange" />
         <element name="tirePressureValue" />
         <element name="tpms" />
+        <element name="cloudAppVehicleID" />
+        <element name="handsOffSteering" />
     </enum>
 
     <enum name="AppHMIType">
@@ -69,6 +73,12 @@
         <element name="BACKGROUND_PROCESS" />
         <element name="TESTING" />
         <element name="SYSTEM" />
+    </enum>
+
+    <enum name="HybridAppPreference">
+        <element name="MOBILE" />
+        <element name="CLOUD" />
+        <element name="BOTH" />
     </enum>
     <!-- Common parameters end -->
 
@@ -92,8 +102,22 @@
         <param name="memory_kb" type="Integer" minvalue="1" maxvalue="65225" mandatory="false"/>
         <param name="watchdog_timer_ms" type="Integer" minvalue="1"
             maxvalue="65225" mandatory="false"/>
-        <param name="certificate" type="String" minlength="0" maxlength="255"
+        <param name="certificate" type="String" minlength="0" maxlength="65535"
             mandatory="false" />
+        <param name="endpoint" type="String" minlength="0" maxlength="255" mandatory="false" />
+        <param name="enabled" type="Boolean" mandatory="false" />
+        <param name="auth_token" type="String" minlength="0" maxlength="65535"
+            mandatory="false" />
+        <param name="cloud_transport_type" type="String" minlength="0" maxlength="255"
+            mandatory="false" />
+        <param name="hybrid_app_preference" type="HybridAppPreference" mandatory="false" />
+        <param name="icon_url" type="String" minlength="0" maxlength="65535"
+            mandatory="false" />
+        <param name="service_name" type="String" mandatory="false" />
+        <param name="service_type" type="String" mandatory="false" />
+        <param name="handled_rpcs" array="true"  mandatory="false" />
+        <param name="allow_unknown_rpc_passthrough" type="Boolean" mandatory="false" />
+        <param name="encryption_required" type="Boolean" mandatory="false"/>
     </struct>
 
     <typedef name="HmiLevels" type="HmiLevel" array="true"
@@ -115,6 +139,7 @@
         <param name="user_consent_prompt" type="String" minlegth="1"
             maxlength="255" mandatory="false"/>
         <param name="rpcs" type="Rpc" null_values_allowed="true"/>
+        <param name="encryption_required" type="Boolean" mandatory="false"/>
     </struct>
     <!-- app_policies section end -->
 
@@ -151,6 +176,8 @@
         <param name="seconds_between_retries" type="SecondsBetweenRetries" />
         <param name="endpoints" type="ServiceEndpoints" />
         <param name="notifications_per_minute_by_priority" type="NumberOfNotificationsPerMinute" />
+        <param name="subtle_notifications_per_minute_by_priority" type="NumberOfNotificationsPerMinute"
+            mandatory="false" />
         <param name="vehicle_make" type="String" maxlength="100"
             mandatory="false" />
         <param name="vehicle_model" type="String" maxlength="100"

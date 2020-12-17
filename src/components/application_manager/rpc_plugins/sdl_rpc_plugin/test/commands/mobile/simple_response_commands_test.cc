@@ -38,37 +38,36 @@
 
 #include "application_manager/commands/commands_test.h"
 #include "application_manager/mock_application_manager.h"
-#include "mobile/delete_command_response.h"
+#include "mobile/add_command_response.h"
+#include "mobile/add_sub_menu_response.h"
 #include "mobile/alert_maneuver_response.h"
 #include "mobile/alert_response.h"
-#include "mobile/list_files_response.h"
-#include "mobile/subscribe_button_response.h"
-#include "mobile/add_sub_menu_response.h"
+#include "mobile/change_registration_response.h"
+#include "mobile/delete_command_response.h"
 #include "mobile/dial_number_response.h"
 #include "mobile/end_audio_pass_thru_response.h"
-#include "mobile/unregister_app_interface_response.h"
-#include "mobile/unsubscribe_button_response.h"
-#include "mobile/unsubscribe_way_points_response.h"
-#include "mobile/update_turn_list_response.h"
-#include "mobile/slider_response.h"
-#include "mobile/speak_response.h"
-#include "mobile/subscribe_way_points_response.h"
-#include "mobile/system_response.h"
+#include "mobile/generic_response.h"
 #include "mobile/get_way_points_response.h"
-#include "mobile/perform_interaction_response.h"
+#include "mobile/list_files_response.h"
 #include "mobile/perform_audio_pass_thru_response.h"
+#include "mobile/perform_interaction_response.h"
+#include "mobile/scrollable_message_response.h"
+#include "mobile/send_location_response.h"
+#include "mobile/set_app_icon_response.h"
+#include "mobile/set_display_layout_response.h"
 #include "mobile/set_global_properties_response.h"
 #include "mobile/set_media_clock_timer_response.h"
 #include "mobile/show_constant_tbt_response.h"
 #include "mobile/show_response.h"
-#include "mobile/add_command_response.h"
-#include "mobile/send_location_response.h"
-#include "mobile/set_app_icon_response.h"
-#include "mobile/set_display_layout_response.h"
-#include "mobile/generic_response.h"
-#include "mobile/set_app_icon_response.h"
-#include "mobile/scrollable_message_response.h"
-#include "mobile/change_registration_response.h"
+#include "mobile/slider_response.h"
+#include "mobile/speak_response.h"
+#include "mobile/subscribe_button_response.h"
+#include "mobile/subscribe_way_points_response.h"
+#include "mobile/system_response.h"
+#include "mobile/unregister_app_interface_response.h"
+#include "mobile/unsubscribe_button_response.h"
+#include "mobile/unsubscribe_way_points_response.h"
+#include "mobile/update_turn_list_response.h"
 
 namespace test {
 namespace components {
@@ -120,7 +119,8 @@ typedef Types<commands::ListFilesResponse,
               commands::SendLocationResponse,
               commands::SetAppIconResponse,
               commands::SetDisplayLayoutResponse,
-              commands::ChangeRegistrationResponse> ResponseCommandsList;
+              commands::ChangeRegistrationResponse>
+    ResponseCommandsList;
 
 TYPED_TEST_CASE(MobileResponseCommandsTest, ResponseCommandsList);
 

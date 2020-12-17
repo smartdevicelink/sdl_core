@@ -36,8 +36,8 @@
 
 #include "application_manager/commands/command_request_impl.h"
 #include "application_manager/policies/policy_handler_interface.h"
-#include "utils/macro.h"
 #include "utils/custom_string.h"
+#include "utils/macro.h"
 
 namespace policy {
 struct DeviceInfo;
@@ -71,17 +71,19 @@ class RegisterAppInterfaceRequest
   /**
    * @brief RegisterAppInterfaceRequest class destructor
    **/
-  virtual ~RegisterAppInterfaceRequest();
+  ~RegisterAppInterfaceRequest();
 
   /**
    * @brief Init required by command resources
    **/
-  virtual bool Init();
+  bool Init() FINAL;
 
   /**
    * @brief Execute command
    **/
-  virtual void Run();
+  void Run() FINAL;
+
+  uint32_t default_timeout() const FINAL;
 
  private:
   /**
@@ -98,11 +100,13 @@ class RegisterAppInterfaceRequest
    * @brief Prepares and sends RegisterAppInterface response to mobile
    * considering application type
    * @param app_type Type of application
+   * @param status_notifier pointer to status notifier callback function
+   * @param add_info - additional information to be sent to mobile app
    **/
-  void SendRegisterAppInterfaceResponseToMobile(ApplicationType app_type);
-
-  smart_objects::SmartObjectSPtr GetLockScreenIconUrlNotification(
-      const uint32_t connection_key, app_mngr::ApplicationSharedPtr app);
+  void SendRegisterAppInterfaceResponseToMobile(
+      ApplicationType app_type,
+      policy::StatusNotifier status_notifier,
+      const std::string& add_info);
 
   /**
    * @brief SendChangeRegistration send ChangeRegistration on HMI
@@ -124,35 +128,46 @@ class RegisterAppInterfaceRequest
   /**
    * @brief Sends OnAppRegistered notification to HMI
    *
-   *@param application_impl application with changed HMI status
-   *
+   * @param app application with changed HMI status
+   * @param resumption If true, resumption-related parameters will be sent to
+   * the HMI
    **/
   void SendOnAppRegisteredNotificationToHMI(
-      const app_mngr::Application& application_impl,
-      bool resumption = false,
-      bool need_restore_vr = false);
-  /*
+      app_mngr::ApplicationConstSharedPtr app, bool resumption);
+
+  /**
    * @brief Check new ID along with known mobile application ID
    *
    * return TRUE if ID is known already, otherwise - FALSE
    */
   bool IsApplicationWithSameAppIdRegistered();
 
-  /*
+  /**
    * @brief Check new application parameters (name, tts, vr) for
    * coincidence with already known parameters of registered applications
    *
-   * return SUCCESS if there is no coincidence of app.name/TTS/VR synonyms,
+   * @return SUCCESS if there is no coincidence of app.name/TTS/VR synonyms,
    * otherwise appropriate error code returns
-  */
+   */
   mobile_apis::Result::eType CheckCoincidence();
 
-  /*
-  * @brief Predicate for using with CheckCoincidence method to compare with VR
-  * synonym SO
-  *
-  * return TRUE if there is coincidence of VR, otherwise FALSE
-  */
+  /**
+   * @brief Search for any apps with the same appName as the one being
+   * registered
+   * @param out_duplicate_apps To be filled with a list of all of the apps which
+   * have duplicate appNames to the app being registered (registered or pending)
+   *
+   * @return TRUE if at least one duplicate app was found, otherwise FALSE
+   */
+  bool GetDuplicateNames(
+      std::vector<app_mngr::ApplicationSharedPtr>& out_duplicate_apps);
+
+  /**
+   * @brief Predicate for using with CheckCoincidence method to compare with VR
+   * synonym SO
+   *
+   * @return TRUE if there is coincidence of VR, otherwise FALSE
+   */
   struct CoincidencePredicateVR {
     CoincidencePredicateVR(const custom_str::CustomString& newItem)
         : newItem_(newItem) {}
@@ -201,17 +216,108 @@ class RegisterAppInterfaceRequest
   void SendSubscribeCustomButtonNotification();
 
   /**
-   * @brief IsApplicationSwitched checks whether application is switched from
-   * another transport. If application id is found, but not in reconnection
+   * @brief IsApplicationSwitched checks whether application is switched
+   * from another transport. If application id is found, but not in reconnection
    * list, returns 'already registered' code. Otherwise - proceed with
    * switching.
    * @return True if application is detected as switched, otherwise false.
    */
   bool IsApplicationSwitched();
 
- private:
+  /**
+   * @brief Information about given Connection Key.
+   * @param key Unique key used by other components as session identifier
+   * @param device_id device identifier.
+   * @param mac_address uniq address
+   * @return false in case of error or true in case of success
+   */
+  bool GetDataOnSessionKey(
+      const uint32_t key,
+      connection_handler::DeviceHandle* device_id = nullptr,
+      std::string* mac_address = nullptr) const;
+
+  /**
+   * @brief Processes AppHMITypes in the received message from mobile and in the
+   * policy table
+   * @param message A message from mobile that could contain AppHMIType
+   * collection
+   * @param app_hmi_types_in_policy AppHMITypes that describes in the policy
+   * table for the app that sent the message
+   * @return Result of processing
+   */
+  mobile_apis::Result::eType ProcessingAppHMITypesPolicies(
+      smart_objects::SmartObject& message,
+      policy::StringArray& app_hmi_types_in_policy);
+
+  /**
+   * @brief Processes AppHMITypes in the received message
+   * @param message A message received from the mobile
+   * @param info Info in a string representation that should be added to the
+   * response info
+   * @param log A log in a string represenation that could contain the
+   * AppHMITypes that are absent in the policy table.
+   */
+  mobile_apis::Result::eType ProcessingAppHMITypesInMessage(
+      const smart_objects::SmartObject& message);
+
+  /**
+   * @brief WaitForHMIIsReady blocking function. Waits for HMI be ready for
+   * requests processing
+   */
+  void WaitForHMIIsReady();
+
+  /**
+   * @brief FillApplicationParams set app application attributes from the RAI
+   * request
+   * @param application applicaiton to fill params
+   */
+  void FillApplicationParams(
+      application_manager::ApplicationSharedPtr application);
+
+  /**
+   * @brief SetupAppDeviceInfo add applicaiton device information to policies
+   * @param application applicaiton to process
+   */
+  void SetupAppDeviceInfo(
+      application_manager::ApplicationSharedPtr application);
+
+  /**
+   * @brief ApplicationDataShouldBeResumed check if application data should be
+   * resumed
+   * @return true if app data should be resumed, otherwise returns false
+   */
+  bool ApplicationDataShouldBeResumed(std::string& add_info);
+
+  /**
+   * @brief CalculateFinalResultCode calculates the final result code
+   * considering all previous conditions
+   * @return calculated result code
+   */
+  mobile_apis::Result::eType CalculateFinalResultCode() const;
+
+  /**
+   * @brief AddApplicationDataToPolicy adds specified application to policy
+   * database and returns a callback with extra actions to be done if required
+   * @param application pointer to application to add
+   * @return callback with extra actions after adding specified application
+   */
+  policy::StatusNotifier AddApplicationDataToPolicy(
+      application_manager::ApplicationSharedPtr application);
+
+  /**
+   * @brief CheckLanguage check if language in RAI matches hmi_capabilities
+   * Setup result_code variable in case of does not match
+   */
+  void CheckLanguage();
+
   std::string response_info_;
-  mobile_apis::Result::eType result_code_;
+  bool are_tts_chunks_invalid_;
+  bool are_hmi_types_invalid_;
+  bool is_resumption_failed_;
+  bool is_wrong_language_;
+
+  connection_handler::DeviceHandle device_handle_;
+  std::string device_id_;
 
   policy::PolicyHandlerInterface& GetPolicyHandler();
   DISALLOW_COPY_AND_ASSIGN(RegisterAppInterfaceRequest);
@@ -219,6 +325,6 @@ class RegisterAppInterfaceRequest
 
 }  // namespace commands
 
-}  // namespace application_manager
+}  // namespace sdl_rpc_plugin
 
 #endif  // SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_MOBILE_REGISTER_APP_INTERFACE_REQUEST_H_

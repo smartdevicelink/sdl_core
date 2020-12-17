@@ -33,13 +33,15 @@
 
 #include "sdl_rpc_plugin/commands/mobile/on_hmi_status_notification.h"
 
-#include "application_manager/message_helper.h"
 #include "application_manager/message.h"
+#include "application_manager/message_helper.h"
 #include "interfaces/MOBILE_API.h"
 
 namespace sdl_rpc_plugin {
 using namespace application_manager;
 namespace commands {
+
+SDL_CREATE_LOG_VARIABLE("Commands")
 
 OnHMIStatusNotification::OnHMIStatusNotification(
     const application_manager::commands::MessageSharedPtr& message,
@@ -56,20 +58,20 @@ OnHMIStatusNotification::OnHMIStatusNotification(
 OnHMIStatusNotification::~OnHMIStatusNotification() {}
 
 void OnHMIStatusNotification::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
 
   (*message_)[strings::params][strings::message_type] =
       static_cast<int32_t>(application_manager::MessageType::kNotification);
   ApplicationSharedPtr app = application_manager_.application(connection_key());
   if (app.use_count() == 0) {
-    LOG4CXX_ERROR(logger_, "OnHMIStatusNotification application doesn't exist");
+    SDL_LOG_ERROR("OnHMIStatusNotification application doesn't exist");
     return;
   }
 
   // If the response has no hmi level, return and don't send the notification
   if (!(*message_)[strings::msg_params].keyExists(strings::hmi_level)) {
     // our notification clearly isn't well-formed
-    LOG4CXX_ERROR(logger_, "OnHMIStatusNotification has no hmiLevel field");
+    SDL_LOG_ERROR("OnHMIStatusNotification has no hmiLevel field");
     return;
   }
 
@@ -82,8 +84,7 @@ void OnHMIStatusNotification::Run() {
       (mobile_apis::HMILevel::HMI_LIMITED == hmi_level)) {
     if (!(app->tts_properties_in_full())) {
       app->set_tts_properties_in_full(true);
-      LOG4CXX_INFO(logger_,
-                   "OnHMIStatusNotification AddAppToTTSGlobalPropertiesList");
+      SDL_LOG_INFO("OnHMIStatusNotification AddAppToTTSGlobalPropertiesList");
       application_manager_.AddAppToTTSGlobalPropertiesList(app->app_id());
     }
   }
@@ -92,4 +93,4 @@ void OnHMIStatusNotification::Run() {
 
 }  // namespace commands
 
-}  // namespace application_manager
+}  // namespace sdl_rpc_plugin

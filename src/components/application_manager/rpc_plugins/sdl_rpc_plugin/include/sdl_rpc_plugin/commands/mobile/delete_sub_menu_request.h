@@ -34,8 +34,8 @@
 #ifndef SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_MOBILE_DELETE_SUB_MENU_REQUEST_H_
 #define SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_MOBILE_DELETE_SUB_MENU_REQUEST_H_
 
-#include "application_manager/commands/command_request_impl.h"
 #include "application_manager/application.h"
+#include "application_manager/commands/command_request_impl.h"
 #include "utils/macro.h"
 
 namespace sdl_rpc_plugin {
@@ -83,27 +83,38 @@ class DeleteSubMenuRequest : public app_mngr::commands::CommandRequestImpl {
 
  private:
   /*
+   * @brief Deletes submenus that have a parentID that matches the parentID
+   * parameter
+   *
+   * @param app_id Application ID
+   * @param parentID Parent ID of a nested submenu
+   */
+  void DeleteNestedSubMenus(app_mngr::ApplicationSharedPtr const app,
+                            uint32_t parentID,
+                            const app_mngr::SubMenuMap& subMenus);
+
+  /*
    * @brief Deletes VR commands from SDL for corresponding submenu ID
    *
    * @param app_id Application ID
-   *
-   * @return TRUE on success, otherwise FALSE
+   * @param parentID Parent ID of a nested submenu
    */
-  void DeleteSubMenuVRCommands(app_mngr::ApplicationConstSharedPtr app);
+  void DeleteSubMenuVRCommands(app_mngr::ApplicationConstSharedPtr app,
+                               uint32_t parentID);
 
   /*
    * @brief Deletes UI commands from SDL for corresponding submenu ID
    *
    * @param app_id Application ID
-   *
-   * @return TRUE on success, otherwise FALSE
+   * @param parentID Parent ID of a nested submenu
    */
-  void DeleteSubMenuUICommands(app_mngr::ApplicationSharedPtr const app);
+  void DeleteSubMenuUICommands(app_mngr::ApplicationSharedPtr const app,
+                               uint32_t parentID);
 
   DISALLOW_COPY_AND_ASSIGN(DeleteSubMenuRequest);
 };
 
 }  // namespace commands
-}  // namespace application_manager
+}  // namespace sdl_rpc_plugin
 
 #endif  // SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_MOBILE_DELETE_SUB_MENU_REQUEST_H_

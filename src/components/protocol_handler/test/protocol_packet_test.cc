@@ -30,42 +30,42 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "gtest/gtest.h"
 #include <vector>
+#include "gtest/gtest.h"
 
-#include "utils/macro.h"
-#include "protocol_handler/protocol_packet.h"
 #include "protocol/common.h"
+#include "protocol_handler/protocol_packet.h"
+#include "utils/macro.h"
 
 namespace test {
 namespace components {
 namespace protocol_handler_test {
 
-using protocol_handler::RawMessagePtr;
-using protocol_handler::ProtocolPacket;
 using protocol_handler::ConnectionID;
-using protocol_handler::FRAME_TYPE_MAX_VALUE;
 using protocol_handler::FRAME_DATA_FIRST;
-using protocol_handler::FRAME_TYPE_FIRST;
-using protocol_handler::PROTOCOL_VERSION_1;
-using protocol_handler::PROTOCOL_VERSION_3;
-using protocol_handler::PROTECTION_OFF;
-using protocol_handler::RESULT_CODE;
-using protocol_handler::RESULT_OK;
-using protocol_handler::RESULT_FAIL;
-using protocol_handler::FRAME_TYPE_CONTROL;
-using protocol_handler::kControl;
-using protocol_handler::kRpc;
-using protocol_handler::kAudio;
-using protocol_handler::kMobileNav;
-using protocol_handler::kBulk;
-using protocol_handler::kInvalidServiceType;
 using protocol_handler::FRAME_DATA_HEART_BEAT;
-using protocol_handler::FRAME_DATA_START_SERVICE_ACK;
 using protocol_handler::FRAME_DATA_LAST_CONSECUTIVE;
+using protocol_handler::FRAME_DATA_START_SERVICE_ACK;
+using protocol_handler::FRAME_TYPE_CONTROL;
+using protocol_handler::FRAME_TYPE_FIRST;
+using protocol_handler::FRAME_TYPE_MAX_VALUE;
+using protocol_handler::kAudio;
+using protocol_handler::kBulk;
+using protocol_handler::kControl;
+using protocol_handler::kInvalidServiceType;
+using protocol_handler::kMobileNav;
+using protocol_handler::kRpc;
+using protocol_handler::PROTECTION_OFF;
 using protocol_handler::PROTOCOL_HEADER_V1_SIZE;
 using protocol_handler::PROTOCOL_HEADER_V2_SIZE;
+using protocol_handler::PROTOCOL_VERSION_1;
+using protocol_handler::PROTOCOL_VERSION_3;
 using protocol_handler::PROTOCOL_VERSION_MAX;
+using protocol_handler::ProtocolPacket;
+using protocol_handler::RawMessagePtr;
+using protocol_handler::RESULT_CODE;
+using protocol_handler::RESULT_FAIL;
+using protocol_handler::RESULT_OK;
 
 class ProtocolPacketTest : public ::testing::Test {
  protected:

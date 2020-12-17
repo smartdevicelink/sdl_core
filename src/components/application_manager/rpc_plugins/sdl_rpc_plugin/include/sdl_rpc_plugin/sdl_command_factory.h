@@ -36,11 +36,11 @@
 #include <memory>
 #include "application_manager/application_manager.h"
 #include "application_manager/command_factory.h"
-#include "sdl_rpc_plugin/hmi_command_factory.h"
-#include "sdl_rpc_plugin/mobile_command_factory.h"
-#include "application_manager/rpc_service.h"
 #include "application_manager/hmi_capabilities.h"
 #include "application_manager/policies/policy_handler_interface.h"
+#include "application_manager/rpc_service.h"
+#include "sdl_rpc_plugin/hmi_command_factory.h"
+#include "sdl_rpc_plugin/mobile_command_factory.h"
 
 namespace sdl_rpc_plugin {
 namespace app_mngr = application_manager;
@@ -69,5 +69,5 @@ class SDLCommandFactory : public app_mngr::CommandFactory {
   std::unique_ptr<HMICommandFactory> hmi_command_factory_;
   std::unique_ptr<MobileCommandFactory> mobile_command_factory_;
 };
-}
+}  // namespace sdl_rpc_plugin
 #endif  // SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_SDL_COMMAND_FACTORY_H

@@ -32,11 +32,12 @@
 
 #ifndef SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_RC_RPC_PLUGIN_INCLUDE_RC_RPC_PLUGIN_RESOURCE_ALLOCATION_MANAGER_IMPL_H_
 #define SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_RC_RPC_PLUGIN_INCLUDE_RC_RPC_PLUGIN_RESOURCE_ALLOCATION_MANAGER_IMPL_H_
-#include "rc_rpc_plugin/resource_allocation_manager.h"
 #include "application_manager/application_impl.h"
 #include "rc_rpc_plugin/rc_app_extension.h"
-#include "utils/macro.h"
+#include "rc_rpc_plugin/rc_capabilities_manager.h"
+#include "rc_rpc_plugin/resource_allocation_manager.h"
 #include "utils/lock.h"
+#include "utils/macro.h"
 
 namespace rc_rpc_plugin {
 
@@ -46,43 +47,52 @@ class ResourceAllocationManagerImpl : public ResourceAllocationManager {
  public:
   ResourceAllocationManagerImpl(
       application_manager::ApplicationManager& app_mngr,
-      application_manager::rpc_service::RPCService& rpc_service);
+      application_manager::rpc_service::RPCService& rpc_service,
+      rc_rpc_plugin::RCCapabilitiesManager& rc_capabilities_manager);
 
   ~ResourceAllocationManagerImpl();
 
   /**
    * @brief AcquireResource forces acquiring resource by application
    * @param module_type resource to acquire
+   * @param module_id uuid of a resource
    * @param app_id application that acquire resourc
    * @return result of acauiring resources
    */
   AcquireResult::eType AcquireResource(const std::string& module_type,
+                                       const std::string& module_id,
                                        const uint32_t app_id) OVERRIDE FINAL;
   /**
    * @brief ForceAcquireResource forces acquiring resource by application
    * @param module_type resource to acquire
+   * @param module_id uuid of a resource
    * @param app_id application that acquire resource
    */
   void ForceAcquireResource(const std::string& module_type,
+                            const std::string& module_id,
                             const uint32_t app_id) FINAL;
 
   /**
-    * @brief SetResourceState changes resource state. Resource must be acquired
-    * beforehand.
-    * @param module_type Resource to change its state
-    * @param app_id Application aquired resource before
-    * @param state State to set for resource
-    */
+   * @brief SetResourceState changes resource state. Resource must be acquired
+   * beforehand.
+   * @param module_type Resource to change its state
+   * @param module_id uuid of a resource
+   * @param app_id Application aquired resource before
+   * @param state State to set for resource
+   */
   void SetResourceState(const std::string& module_type,
+                        const std::string& module_id,
                         const uint32_t app_id,
                         const ResourceState::eType state) FINAL;
 
   /**
    * @brief IsResourceFree check resource state
    * @param module_type Resource name
+   * @param module_id uuid of a resource
    * @return True if free, otherwise - false
    */
-  bool IsResourceFree(const std::string& module_type) const FINAL;
+  bool IsResourceFree(const std::string& module_type,
+                      const std::string& module_id) const FINAL;
 
   void SetAccessMode(
       const hmi_apis::Common_RCAccessMode::eType access_mode) FINAL;
@@ -90,6 +100,7 @@ class ResourceAllocationManagerImpl : public ResourceAllocationManager {
   hmi_apis::Common_RCAccessMode::eType GetAccessMode() const FINAL;
 
   void OnDriverDisallowed(const std::string& module_type,
+                          const std::string& module_id,
                           const uint32_t app_id) FINAL;
 
   /**
@@ -118,6 +129,18 @@ class ResourceAllocationManagerImpl : public ResourceAllocationManager {
 
   void set_rc_enabled(const bool value) FINAL;
 
+  ResourceReleasedState::eType ReleaseResource(
+      const std::string& module_type,
+      const std::string& module_id,
+      const uint32_t application_id) FINAL;
+
+  void SetResourceAcquired(const std::string& module_type,
+                           const std::string& module_id,
+                           const uint32_t app_id) FINAL;
+
+  bool IsResourceAlreadyAcquiredByApp(const rc_rpc_plugin::ModuleUid& moduleUid,
+                                      const uint32_t app_id) const FINAL;
+
  private:
   typedef std::vector<application_manager::ApplicationSharedPtr> Apps;
 
@@ -137,20 +160,23 @@ class ResourceAllocationManagerImpl : public ResourceAllocationManager {
    * @brief IsModuleTypeRejected check if current resource was rejected by
    * driver for current application
    * @param module_type resource to check
+   * @param module_id uuid of a resource
    * @param app_id application id
    * @return true if current resource was rejected by driver for current
    * application, otherwise - false
    */
   bool IsModuleTypeRejected(const std::string& module_type,
+                            const std::string& module_id,
                             const uint32_t app_id);
 
   /**
-   * @brief ReleaseResource Releases resource acquired by application
+   * @brief ReleaseModuleType Releases all resources related to
+   * the corresponding module type acquired by application
    * @param module_type Module name
    * @param application_id Application id
    */
-  void ReleaseResource(const std::string& module_type,
-                       const uint32_t application_id);
+  void ReleaseModuleType(const std::string& module_type,
+                         const uint32_t application_id);
 
   /**
    * @brief GetAcquiredResources Provides resources acquired by particular
@@ -159,6 +185,15 @@ class ResourceAllocationManagerImpl : public ResourceAllocationManager {
    * @return List of acquired resources by specific application
    */
   Resources GetAcquiredResources(const uint32_t application_id) const;
+
+  /**
+   * @brief GetAcquiredModuleTypes Provides module types acquired by particular
+   * application currently
+   * @param application_id Application id
+   * @return List of acquired module types by specific application
+   */
+  std::set<std::string> GetAcquiredModuleTypes(
+      const uint32_t application_id) const;
 
   /**
    * @brief ProcessApplicationPolicyUpdate Checks if allowed modules list is
@@ -175,33 +210,38 @@ class ResourceAllocationManagerImpl : public ResourceAllocationManager {
   void RemoveAppsSubscriptions(const Apps& apps);
 
   /**
-   * @brief SetResourceAquired mark resourse as aquired and process logic of
-   * changing state of aquired resources
-   * @param module_type resource name
-   * @param app applicastion that aquire resource
-   */
-  void SetResourceAquired(const std::string& module_type,
-                          const uint32_t app_id);
-  /**
    * @brief SetResourceFree mark resourse as free and process logic of
    * changing state of aquired resources
    * @param module_type resource name
+   * @param module_id uuid of a resource
    * @param app applicastion that aquire resource
    */
-  void SetResourceFree(const std::string& module_type, const uint32_t app_id);
+  ResourceReleasedState::eType SetResourceFree(const std::string& module_type,
+                                               const std::string& module_id,
+                                               const uint32_t app_id);
+  /**
+   * @brief CheckLocation checks if the user's grid is equal to or is within the
+   * service area of the module, or user location is driver's seat
+   * @param module module type + module id
+   * @return true if the user's grid equals to or is within module service
+   * area or user location is driver's seat, otherwise - false
+   */
+  bool IsUserLocationValid(ModuleUid& module,
+                           application_manager::ApplicationSharedPtr app);
 
   /**
    * @brief AllocatedResources contains link between resource and application
    * owning that resource
    */
-  typedef std::map<std::string, uint32_t> AllocatedResources;
+
+  typedef std::map<ModuleUid, uint32_t> AllocatedResources;
   AllocatedResources allocated_resources_;
   mutable sync_primitives::Lock allocated_resources_lock_;
 
   /**
    * @brief ResourcesState contains states of ALLOCATED resources
    */
-  typedef std::map<std::string, ResourceState::eType> ResourcesState;
+  typedef std::map<ModuleUid, ResourceState::eType> ResourcesState;
   ResourcesState resources_state_;
   mutable sync_primitives::Lock resources_state_lock_;
 
@@ -210,15 +250,16 @@ class ResourceAllocationManagerImpl : public ResourceAllocationManager {
    * driver for application
    * application_id : [vector of rejected resources]
    */
-  typedef std::map<uint32_t, std::vector<std::string> > RejectedResources;
+  typedef std::map<uint32_t, std::vector<ModuleUid> > RejectedResources;
   RejectedResources rejected_resources_for_application_;
   mutable sync_primitives::Lock rejected_resources_for_application_lock_;
 
   hmi_apis::Common_RCAccessMode::eType current_access_mode_;
   application_manager::ApplicationManager& app_mngr_;
   application_manager::rpc_service::RPCService& rpc_service_;
+  rc_rpc_plugin::RCCapabilitiesManager& rc_capabilities_manager_;
   bool is_rc_enabled_;
 };
-}  // rc_rpc_plugin
+}  // namespace rc_rpc_plugin
 
 #endif  // SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_RC_RPC_PLUGIN_INCLUDE_RC_RPC_PLUGIN_RESOURCE_ALLOCATION_MANAGER_IMPL_H_

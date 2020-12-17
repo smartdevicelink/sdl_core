@@ -36,6 +36,8 @@ using namespace application_manager;
 
 namespace commands {
 
+SDL_CREATE_LOG_VARIABLE("Commands")
+
 TTSGetCapabilitiesResponse::TTSGetCapabilitiesResponse(
     const application_manager::commands::MessageSharedPtr& message,
     ApplicationManager& application_manager,
@@ -51,22 +53,39 @@ TTSGetCapabilitiesResponse::TTSGetCapabilitiesResponse(
 TTSGetCapabilitiesResponse::~TTSGetCapabilitiesResponse() {}
 
 void TTSGetCapabilitiesResponse::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
+  const auto result_code = static_cast<hmi_apis::Common_Result::eType>(
+      (*message_)[strings::params][hmi_response::code].asInt());
 
-  HMICapabilities& hmi_capabilities = hmi_capabilities_;
+  hmi_capabilities_.UpdateRequestsRequiredForCapabilities(
+      hmi_apis::FunctionID::TTS_GetCapabilities);
+
+  if (hmi_apis::Common_Result::SUCCESS != result_code) {
+    SDL_LOG_DEBUG("Request was not successful. Don't change HMI capabilities");
+    return;
+  }
+
+  std::vector<std::string> sections_to_update;
   if ((*message_)[strings::msg_params].keyExists(
           hmi_response::speech_capabilities)) {
-    hmi_capabilities.set_speech_capabilities(
+    sections_to_update.push_back(hmi_response::speech_capabilities);
+    hmi_capabilities_.set_speech_capabilities(
         (*message_)[strings::msg_params][hmi_response::speech_capabilities]);
   }
   if ((*message_)[strings::msg_params].keyExists(
           hmi_response::prerecorded_speech_capabilities)) {
-    hmi_capabilities.set_prerecorded_speech(
+    sections_to_update.push_back(hmi_response::prerecorded_speech_capabilities);
+    hmi_capabilities_.set_prerecorded_speech(
         (*message_)[strings::msg_params]
                    [hmi_response::prerecorded_speech_capabilities]);
+  }
+
+  if (!hmi_capabilities_.SaveCachedCapabilitiesToFile(
+          hmi_interface::tts, sections_to_update, message_->getSchema())) {
+    SDL_LOG_ERROR("Failed to save TTS.GetCapabilities response to cache");
   }
 }
 
 }  // namespace commands
 
-}  // namespace application_manager
+}  // namespace sdl_rpc_plugin

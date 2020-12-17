@@ -32,11 +32,14 @@
 
 #include "sdl_rpc_plugin/commands/hmi/sdl_get_list_of_permissions_request.h"
 #include "application_manager/application_manager.h"
+#include "application_manager/policies/policy_handler_interface.h"
 
 namespace sdl_rpc_plugin {
 using namespace application_manager;
 
 namespace commands {
+
+SDL_CREATE_LOG_VARIABLE("Commands")
 
 SDLGetListOfPermissionsRequest::SDLGetListOfPermissionsRequest(
     const application_manager::commands::MessageSharedPtr& message,
@@ -53,7 +56,7 @@ SDLGetListOfPermissionsRequest::SDLGetListOfPermissionsRequest(
 SDLGetListOfPermissionsRequest::~SDLGetListOfPermissionsRequest() {}
 
 void SDLGetListOfPermissionsRequest::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   uint32_t connection_key = 0;
   if ((*message_)[strings::msg_params].keyExists(strings::app_id)) {
     connection_key = (*message_)[strings::msg_params][strings::app_id].asUInt();
@@ -64,4 +67,4 @@ void SDLGetListOfPermissionsRequest::Run() {
 }
 
 }  // namespace commands
-}  // namespace application_manager
+}  // namespace sdl_rpc_plugin
