@@ -356,12 +356,12 @@ bool CacheManager::CanAppKeepContext(const std::string& app_id) const {
 }
 
 uint32_t CacheManager::HeartBeatTimeout(const std::string& app_id) const {
-  LOG4CXX_AUTO_TRACE(logger_);
+  SDL_LOG_AUTO_TRACE();
   CACHE_MANAGER_CHECK(0);
   sync_primitives::AutoLock auto_lock(cache_lock_);
   uint32_t result = 0;
   if (!IsApplicationRepresented(app_id)) {
-    LOG4CXX_WARN(logger_, "Application " << app_id << " is not represented");
+    SDL_LOG_WARN("Application " << app_id << " is not represented");
     return result;
   }
 
@@ -371,7 +371,7 @@ uint32_t CacheManager::HeartBeatTimeout(const std::string& app_id) const {
     result = *(app.heart_beat_timeout_ms);
   }
 
-  LOG4CXX_DEBUG(logger_, "HB timer for app " << app_id << " is " << result);
+  SDL_LOG_DEBUG("HB timer for app " << app_id << " is " << result);
   return result;
 }
 
@@ -690,9 +690,8 @@ void CacheManager::ProcessUpdate(
   if (kPreDataConsentId == app_id) {
     *(params.heart_beat_timeout_ms) =
         *(initial_policy_iter->second.heart_beat_timeout_ms);
-    LOG4CXX_INFO(logger_,
-                 "heart_beat_timeout_ms in predata = "
-                     << *(params.heart_beat_timeout_ms));
+    SDL_LOG_INFO("heart_beat_timeout_ms in predata = "
+                 << *(params.heart_beat_timeout_ms));
   }
   if (app_id == kDefaultId || app_id == kPreDataConsentId) {
     if (new_request_types.is_omitted()) {
