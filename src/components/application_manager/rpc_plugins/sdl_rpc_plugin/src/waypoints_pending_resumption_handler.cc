@@ -154,10 +154,10 @@ void WayPointsPendingResumptionHandler::on_event(
   }
 
   const smart_objects::SmartObject& response = event.smart_object();
-  const uint32_t corr_id = event.smart_object_correlation_id();
 
   SDL_LOG_TRACE("Received event with function id: "
-                << event.id() << " and correlation id: " << corr_id);
+                << event.id() << " and correlation id: "
+                << event.smart_object_correlation_id());
 
   auto current_pending = pending_requests_.front();
   pending_requests_.pop_front();
