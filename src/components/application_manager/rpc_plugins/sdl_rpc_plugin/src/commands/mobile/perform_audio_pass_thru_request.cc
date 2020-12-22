@@ -224,20 +224,17 @@ PerformAudioPassThruRequest::PrepareResponseParameters() {
       HmiInterfaces::HMI_INTERFACE_TTS,
       application_manager_);
 
-  // Note(dtrunov): According to requirment "WARNINGS, success:true on getting
-  // UNSUPPORTED_RESOURCE for "ttsChunks"
+  response_params_.success =
+      PrepareResultForMobileResponse(ui_perform_info, tts_perform_info);
   if (ui_perform_info.is_ok && tts_perform_info.is_unsupported_resource &&
       HmiInterfaces::STATE_AVAILABLE == tts_perform_info.interface_state) {
     response_params_.result_code = mobile_apis::Result::WARNINGS;
-    tts_info_ = "Unsupported phoneme type sent in a prompt";
     response_params_.info = app_mngr::commands::MergeInfos(
         ui_perform_info, ui_info_, tts_perform_info, tts_info_);
     response_params_.success = true;
     return response_params_;
   }
 
-  response_params_.success =
-      PrepareResultForMobileResponse(ui_perform_info, tts_perform_info);
   if (IsResultCodeUnsupported(ui_perform_info, tts_perform_info)) {
     response_params_.result_code = mobile_apis::Result::UNSUPPORTED_RESOURCE;
   } else {
