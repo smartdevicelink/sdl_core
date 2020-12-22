@@ -600,6 +600,10 @@ void PolicyHandler::OnDeviceConsentChanged(const std::string& device_id,
 
       policy_manager->SendNotificationOnPermissionsUpdated(device_id,
                                                            policy_app_id);
+
+      if (policy_manager->IsPredataPolicy(policy_app_id) && !is_allowed) {
+        SetHeartBeatTimeout(policy_app_id, (*it_app_list)->app_id());
+      }
     }
   }
 }
@@ -765,6 +769,23 @@ void PolicyHandler::OnAppPermissionConsentInternal(
     SDL_LOG_WARN("External User Consent Settings status has not been set!");
   }
 #endif
+}
+
+void PolicyHandler::SetHeartBeatTimeout(const std::string& policy_app_id,
+                                        const uint32_t app_id) {
+  SDL_LOG_AUTO_TRACE();
+
+  const std::shared_ptr<PolicyManager> policy_manager = LoadPolicyManager();
+  POLICY_LIB_CHECK_VOID(policy_manager);
+
+  const uint32_t timeout = policy_manager->HeartBeatTimeout(policy_app_id);
+  if (0 != timeout) {
+    SDL_LOG_DEBUG("SetHeartBeatTimeout for " << app_id << " is " << timeout);
+    application_manager_.connection_handler().SetHeartBeatTimeout(app_id,
+                                                                  timeout);
+  } else {
+    SDL_LOG_DEBUG("SetHeartBeatTimeout for " << app_id << "  ignored");
+  }
 }
 
 void policy::PolicyHandler::SetDaysAfterEpoch() {
