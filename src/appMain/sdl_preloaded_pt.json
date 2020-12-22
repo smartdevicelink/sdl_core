@@ -545,6 +545,7 @@
                             "rpm",
                             "steeringWheelAngle",
                             "gearStatus",
+                            "seatOccupancy",
                             "handsOffSteering"
                         ]
                     },
@@ -564,6 +565,7 @@
                             "rpm",
                             "steeringWheelAngle",
                             "gearStatus",
+                            "seatOccupancy",
                             "handsOffSteering"
                         ]
                     },
@@ -583,6 +585,7 @@
                             "rpm",
                             "steeringWheelAngle",
                             "gearStatus",
+                            "seatOccupancy",
                             "handsOffSteering"
                         ]
                     },
@@ -602,6 +605,7 @@
                             "rpm",
                             "steeringWheelAngle",
                             "gearStatus",
+                            "seatOccupancy",
                             "handsOffSteering"
                         ]
                     }
@@ -634,7 +638,6 @@
                             "vin",
                             "wiperStatus",
                             "stabilityControlsStatus",
-                            "seatOccupancy",
                             "windowStatus"
                         ]
                     },
@@ -662,7 +665,6 @@
                             "vin",
                             "wiperStatus",
                             "stabilityControlsStatus",
-                            "seatOccupancy",
                             "windowStatus"
                         ]
                     },
@@ -689,7 +691,6 @@
                             "tirePressure",
                             "wiperStatus",
                             "stabilityControlsStatus",
-                            "seatOccupancy",
                             "windowStatus"
                         ]
                     },
@@ -716,7 +717,6 @@
                             "tirePressure",
                             "wiperStatus",
                             "stabilityControlsStatus",
-                            "seatOccupancy",
                             "windowStatus"
                         ]
                     }
