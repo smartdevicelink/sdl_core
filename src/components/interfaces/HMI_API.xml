@@ -1810,7 +1810,7 @@
 <struct name="SeatStatus">
   <description>Describes the status of a parameter of seat.</description>
   <param name="seatLocation" type="Common.SeatLocation"  mandatory="true"/>
-  <param name="conditionActive" type="Boolean"  mandatory="true"/>
+  <param name="conditionActive" type="Boolean" mandatory="true"/>
 </struct>
 
 <struct name="SeatOccupancy">

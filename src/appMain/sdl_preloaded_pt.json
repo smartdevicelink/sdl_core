@@ -4349,8 +4349,8 @@
                             "key": "OEM_REF_SEATS_OCCUP",
                             "type": "SeatStatus",
                             "array": true,
-                            "minvalue": 0,
-                            "maxvalue": 100,
+                            "minsize": 0,
+                            "maxsize": 100,
                             "mandatory": false
                         },
                         {
@@ -4358,8 +4358,8 @@
                             "key": "OEM_REF_SEATS_BELT",
                             "type": "SeatStatus",
                             "array": true,
-                            "minvalue": 0,
-                            "maxvalue": 100,
+                            "minsize": 0,
+                            "maxsize": 100,
                             "mandatory": false
                         }
                     ],
