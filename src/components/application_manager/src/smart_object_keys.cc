@@ -303,6 +303,7 @@ const char* video_streaming = "videoStreaming";
 const char* remote_control = "remoteControl";
 const char* sdl_version = "sdlVersion";
 const char* system_software_version = "systemSoftwareVersion";
+const char* system_hardware_version = "systemHardwareVersion";
 const char* priority = "priority";
 const char* engine_oil_life = "engineOilLife";
 const char* oem_custom_data_type = "oemCustomDataType";

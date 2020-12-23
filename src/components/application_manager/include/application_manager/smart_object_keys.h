@@ -336,6 +336,7 @@ extern const char* video_streaming;
 extern const char* remote_control;
 extern const char* sdl_version;
 extern const char* system_software_version;
+extern const char* system_hardware_version;
 extern const char* priority;
 extern const char* engine_oil_life;
 extern const char* oem_custom_data_type;
