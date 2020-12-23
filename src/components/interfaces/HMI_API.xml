@@ -4789,6 +4789,9 @@
     <param name="wersCountryCode" type="String" maxlength="500" mandatory="true">
       <description>Country code from the Ford system WERS (i.e.WAEGB).</description>
     </param>
+    <param name="systemHardwareVersion" type="String" maxlength="500" mandatory="false">
+      <description>The hardware version of the system</description>
+    </param>
   </function>
   <function name="OnSystemInfoChanged" messagetype="notification">
     <description>Issued by system to SDL to notify that some system param has changed. Currently applied for Sync Language.</description>
