@@ -215,6 +215,13 @@ class AppServiceManager {
       smart_objects::SmartObject& out_params);
 
   /**
+   * @brief Retrieve the active service for handling waypoints if available
+   * @return The active NAVIGATION service if it handles waypoints, nullptr
+   * otherwise
+   */
+  virtual AppService* FindWayPointsHandler();
+
+  /**
    * @brief Get the RPCPassingHandler tied to this object
    * @return The RPCPassingHandler tied to this object
    */

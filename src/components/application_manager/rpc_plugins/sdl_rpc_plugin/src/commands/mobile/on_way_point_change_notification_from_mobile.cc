@@ -1,6 +1,5 @@
 /*
-
- Copyright (c) 2018, Ford Motor Company
+ Copyright (c) 2020, Ford Motor Company
  All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -31,8 +30,11 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "sdl_rpc_plugin/commands/mobile/on_way_point_change_notification.h"
-#include "application_manager/application_manager.h"
+#include "sdl_rpc_plugin/commands/mobile/on_way_point_change_notification_from_mobile.h"
+
+#include "application_manager/app_service_manager.h"
+#include "application_manager/message.h"
+#include "application_manager/message_helper.h"
 
 namespace sdl_rpc_plugin {
 using namespace application_manager;
@@ -40,33 +42,49 @@ namespace commands {
 
 SDL_CREATE_LOG_VARIABLE("Commands")
 
-OnWayPointChangeNotification::OnWayPointChangeNotification(
+OnWayPointChangeNotificationFromMobile::OnWayPointChangeNotificationFromMobile(
     const application_manager::commands::MessageSharedPtr& message,
     ApplicationManager& application_manager,
     app_mngr::rpc_service::RPCService& rpc_service,
     app_mngr::HMICapabilities& hmi_capabilities,
     policy::PolicyHandlerInterface& policy_handler)
-    : CommandNotificationImpl(message,
-                              application_manager,
-                              rpc_service,
-                              hmi_capabilities,
-                              policy_handler) {}
+    : CommandNotificationFromMobileImpl(message,
+                                        application_manager,
+                                        rpc_service,
+                                        hmi_capabilities,
+                                        policy_handler) {}
 
-OnWayPointChangeNotification::~OnWayPointChangeNotification() {}
+OnWayPointChangeNotificationFromMobile::
+    ~OnWayPointChangeNotificationFromMobile() {}
 
-void OnWayPointChangeNotification::Run() {
+void OnWayPointChangeNotificationFromMobile::Run() {
   SDL_LOG_AUTO_TRACE();
 
-  std::set<uint32_t> subscribed_for_way_points =
-      application_manager_.GetAppsSubscribedForWayPoints();
+  (*message_)[strings::params][strings::message_type] =
+      static_cast<int32_t>(application_manager::MessageType::kNotification);
+  ApplicationSharedPtr app = application_manager_.application(connection_key());
 
-  for (std::set<uint32_t>::const_iterator app_id =
-           subscribed_for_way_points.begin();
-       app_id != subscribed_for_way_points.end();
-       ++app_id) {
-    (*message_)[strings::params][strings::connection_key] = *app_id;
-    SendNotification();
+  if (app.use_count() == 0) {
+    SDL_LOG_ERROR(
+        "OnWayPointChangeNotificationFromMobile application doesn't exist");
+    return;
   }
+
+  auto service =
+      application_manager_.GetAppServiceManager().FindWayPointsHandler();
+  if (!service || !service->mobile_service ||
+      service->connection_key != connection_key()) {
+    SDL_LOG_ERROR("Application is not active NAVIGATION ASP");
+    return;
+  }
+
+  application_manager_.SaveWayPointsMessage(message_, connection_key());
+
+  (*message_)[strings::params][strings::message_type] =
+      static_cast<int32_t>(application_manager::MessageType::kNotification);
+  rpc_service_.ManageMobileCommand(message_, SOURCE_SDL);
 }
+
 }  // namespace commands
+
 }  // namespace sdl_rpc_plugin
