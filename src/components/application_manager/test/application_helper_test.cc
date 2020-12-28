@@ -209,9 +209,6 @@ TEST_F(ApplicationHelperTest, RecallApplicationData_ExpectAppDataReset) {
   EXPECT_TRUE(NULL != file_ptr);
   EXPECT_TRUE(file_ptr->file_name == filename);
 
-  EXPECT_CALL(*mock_message_helper_, CreateUnsubscribeWayPointsRequest(_))
-      .WillOnce(Return(std::make_shared<smart_objects::SmartObject>()));
-
   EXPECT_CALL(*mock_message_helper_, CreateDeleteUICommandRequest(_, _, _))
       .WillOnce(Return(std::make_shared<smart_objects::SmartObject>()));
 
@@ -260,9 +257,6 @@ TEST_F(ApplicationHelperTest, RecallApplicationData_ExpectHMICleanupRequests) {
   app_impl_->AddSubMenu(menu_id, cmd[strings::menu_params]);
   app_impl_->AddChoiceSet(choice_set_id, cmd[strings::msg_params]);
   app_impl_->SubscribeToButton(mobile_apis::ButtonName::AC);
-
-  EXPECT_CALL(*mock_message_helper_, CreateUnsubscribeWayPointsRequest(_))
-      .WillOnce(Return(std::make_shared<smart_objects::SmartObject>()));
 
   EXPECT_CALL(*mock_message_helper_, CreateDeleteUICommandRequest(_, _, _))
       .WillOnce(Return(std::make_shared<smart_objects::SmartObject>()));
