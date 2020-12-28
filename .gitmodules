@@ -3,5 +3,4 @@
 	url = https://github.com/smartdevicelink/jsoncpp.git
 [submodule "tools/rpc_spec"]
 	path = tools/rpc_spec
-	url = https://github.com/LuxoftSDL/rpc_spec.git
-	branch = feature/sdl_0269_new_vehicle_data_climateData
+	url = https://github.com/smartdevicelink/rpc_spec.git
