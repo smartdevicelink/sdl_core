@@ -858,8 +858,7 @@
                         "hmi_levels": [
                             "FULL",
                             "LIMITED",
-                            "BACKGROUND",
-                            "NONE"
+                            "BACKGROUND"
                         ]
                     },
                     "UnpublishAppService": {

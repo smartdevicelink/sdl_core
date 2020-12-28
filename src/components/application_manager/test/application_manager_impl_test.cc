@@ -499,16 +499,16 @@ TEST_F(ApplicationManagerImplTest, ProcessQueryApp_ExpectSuccess) {
 TEST_F(ApplicationManagerImplTest,
        SubscribeAppForWayPoints_ExpectSubscriptionApp) {
   auto app_ptr = std::static_pointer_cast<am::Application>(mock_app_ptr_);
-  app_manager_impl_->SubscribeAppForWayPoints(app_ptr);
+  app_manager_impl_->SubscribeAppForWayPoints(app_ptr, true);
   EXPECT_TRUE(app_manager_impl_->IsAppSubscribedForWayPoints(*app_ptr));
 }
 
 TEST_F(ApplicationManagerImplTest,
-       UnsubscribeAppForWayPoints_ExpectUnsubscriptionApp) {
+       UnsubscribeAppFromWayPoints_ExpectUnsubscriptionApp) {
   auto app_ptr = std::static_pointer_cast<am::Application>(mock_app_ptr_);
-  app_manager_impl_->SubscribeAppForWayPoints(app_ptr);
+  app_manager_impl_->SubscribeAppForWayPoints(app_ptr, true);
   EXPECT_TRUE(app_manager_impl_->IsAppSubscribedForWayPoints(*app_ptr));
-  app_manager_impl_->UnsubscribeAppFromWayPoints(app_ptr);
+  app_manager_impl_->UnsubscribeAppFromWayPoints(app_ptr, true);
   EXPECT_FALSE(app_manager_impl_->IsAppSubscribedForWayPoints(*app_ptr));
   const std::set<uint32_t> result =
       app_manager_impl_->GetAppsSubscribedForWayPoints();
@@ -520,7 +520,7 @@ TEST_F(
     IsAnyAppSubscribedForWayPoints_SubcribeAppForWayPoints_ExpectCorrectResult) {
   EXPECT_FALSE(app_manager_impl_->IsAnyAppSubscribedForWayPoints());
   auto app_ptr = std::static_pointer_cast<am::Application>(mock_app_ptr_);
-  app_manager_impl_->SubscribeAppForWayPoints(app_ptr);
+  app_manager_impl_->SubscribeAppForWayPoints(app_ptr, true);
   EXPECT_TRUE(app_manager_impl_->IsAnyAppSubscribedForWayPoints());
 }
 
@@ -528,7 +528,7 @@ TEST_F(
     ApplicationManagerImplTest,
     GetAppsSubscribedForWayPoints_SubcribeAppForWayPoints_ExpectCorrectResult) {
   auto app_ptr = std::static_pointer_cast<am::Application>(mock_app_ptr_);
-  app_manager_impl_->SubscribeAppForWayPoints(app_ptr);
+  app_manager_impl_->SubscribeAppForWayPoints(app_ptr, true);
   std::set<uint32_t> result =
       app_manager_impl_->GetAppsSubscribedForWayPoints();
   EXPECT_EQ(1u, result.size());
