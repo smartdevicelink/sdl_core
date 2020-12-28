@@ -9,12 +9,16 @@ namespace {
 using namespace application_manager;
 void DeleteWayPoints(ApplicationSharedPtr app,
                      ApplicationManager& app_manager) {
-  app_manager.UnsubscribeAppFromWayPoints(app);
-  if (!app_manager.IsAnyAppSubscribedForWayPoints()) {
+  std::set<uint32_t> subscribed_apps =
+      app_manager.GetAppsSubscribedForWayPoints();
+  bool send_unsubscribe =
+      subscribed_apps.size() <= 1 && app_manager.IsSubscribedToHMIWayPoints();
+  if (send_unsubscribe) {
     auto request = MessageHelper::CreateUnsubscribeWayPointsRequest(
         app_manager.GetNextHMICorrelationID());
     app_manager.GetRPCService().ManageHMICommand(request);
   }
+  app_manager.UnsubscribeAppFromWayPoints(app, send_unsubscribe);
 }
 
 void DeleteCommands(ApplicationSharedPtr app, ApplicationManager& app_manager) {

@@ -1128,7 +1128,8 @@ bool CacheManager::GetPriority(const std::string& policy_app_id,
 
   policy_table::ApplicationPolicies::const_iterator policy_iter =
       policies.find(policy_app_id);
-  const bool app_id_exists = policies.end() != policy_iter;
+  const bool app_id_exists =
+      policies.end() != policy_iter && !IsApplicationRevoked(policy_app_id);
   if (app_id_exists) {
     priority = EnumToJsonString((*policy_iter).second.priority);
   }
