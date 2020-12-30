@@ -1323,19 +1323,6 @@ TEST_F(PolicyHandlerTest, OnSystemInfoChanged) {
   policy_handler_.OnSystemInfoChanged(language);
 }
 
-TEST_F(PolicyHandlerTest, OnGetSystemInfo) {
-  // Arrange
-  ChangePolicyManagerToMock();
-  // Check expectations
-  const std::string ccpu_version("4.1.3.B_EB355B");
-  const std::string wers_country_code("WAEGB");
-  const std::string language("ru-ru");
-  EXPECT_CALL(*mock_policy_manager_,
-              SetSystemInfo(ccpu_version, wers_country_code, language));
-  // Act
-  policy_handler_.OnGetSystemInfo(ccpu_version, wers_country_code, language);
-}
-
 TEST_F(PolicyHandlerTest, IsApplicationRevoked) {
   // Arrange
   EnablePolicy();

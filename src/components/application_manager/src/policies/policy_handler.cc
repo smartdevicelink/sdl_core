@@ -1097,11 +1097,26 @@ void PolicyHandler::OnGetSystemInfo(const std::string& ccpu_version,
   policy_manager->SetSystemInfo(ccpu_version, wers_country_code, language);
 }
 
+void PolicyHandler::OnHardwareVersionReceived(
+    const std::string& hardware_version) {
+  SDL_LOG_AUTO_TRACE();
+  const auto policy_manager = LoadPolicyManager();
+  POLICY_LIB_CHECK_VOID(policy_manager);
+  policy_manager->SetHardwareVersion(hardware_version);
+}
+
 std::string PolicyHandler::GetCCPUVersionFromPT() const {
   SDL_LOG_AUTO_TRACE();
   const auto policy_manager = LoadPolicyManager();
   POLICY_LIB_CHECK_OR_RETURN(policy_manager, std::string());
   return policy_manager->GetCCPUVersionFromPT();
+}
+
+std::string PolicyHandler::GetHardwareVersionFromPT() const {
+  SDL_LOG_AUTO_TRACE();
+  const auto policy_manager = LoadPolicyManager();
+  POLICY_LIB_CHECK_OR_RETURN(policy_manager, std::string());
+  return policy_manager->GetHardwareVersionFromPT();
 }
 
 void PolicyHandler::OnVIIsReady() {
