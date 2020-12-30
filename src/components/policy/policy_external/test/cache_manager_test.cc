@@ -2169,6 +2169,18 @@ TEST_F(CacheManagerTest, RemoveAppConsentForGroup_GroupIsRemoved) {
   EXPECT_FALSE(unconsented_groups_after_removal.empty());
 }
 
+TEST_F(CacheManagerTest, GetHardwareVersion_ValueWasSetBefore_ReturnValue) {
+  std::string hardware_version = "1.1.1.1";
+  cache_manager_->SetHardwareVersion(hardware_version);
+  EXPECT_EQ(hardware_version, cache_manager_->GetHardwareVersionFromPT());
+}
+
+TEST_F(CacheManagerTest,
+       GetHardwareVersion_ValueNotSettedBefore_ReturnEmptyString) {
+  std::string empty_string = "";
+  EXPECT_EQ(empty_string, cache_manager_->GetHardwareVersionFromPT());
+}
+
 }  // namespace policy_test
 }  // namespace components
 }  // namespace test
