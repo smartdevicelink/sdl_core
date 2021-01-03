@@ -926,8 +926,8 @@ void PolicyHandlerTest::TestActivateApp(const uint32_t connection_key,
           _,
           _));
 #endif  // EXTERNAL_PROPRIETARY_MODE
-
-  EXPECT_CALL(*application1, policy_app_id()).WillOnce(Return(kPolicyAppId_));
+  EXPECT_CALL(*application1, policy_app_id())
+      .WillRepeatedly(Return(kPolicyAppId_));
   EXPECT_CALL(*mock_policy_manager_,
               GetAppPermissionsChanges(kMacAddr_, kPolicyAppId_))
       .WillOnce(Return(permissions));
@@ -1798,6 +1798,12 @@ TEST_F(PolicyHandlerTest,
   EXPECT_CALL(conn_handler, GetDeviceID(kPolicyAppId_, _))
       .WillRepeatedly(Return(true));
 
+#ifdef EXTERNAL_PROPRIETARY_MODE
+  AppPermissions permissions(kPolicyAppId_);
+  EXPECT_CALL(*mock_policy_manager_, GetAppPermissionsChanges(_, kPolicyAppId_))
+      .WillOnce(Return(permissions));
+#endif  // EXTERNAL_PROPRIETARY_MODE
+
   policy_handler_.OnAllowSDLFunctionalityNotification(is_allowed,
                                                       kPolicyAppId_);
 }
@@ -1877,6 +1883,12 @@ TEST_F(PolicyHandlerTest,
   EXPECT_CALL(*mock_policy_manager_,
               SetUserConsentForDevice(kPolicyAppId_, is_allowed));
 
+#ifdef EXTERNAL_PROPRIETARY_MODE
+  AppPermissions permissions(kPolicyAppId_);
+  EXPECT_CALL(*mock_policy_manager_, GetAppPermissionsChanges(_, kPolicyAppId_))
+      .WillOnce(Return(permissions));
+#endif  // EXTERNAL_PROPRIETARY_MODE
+
   policy_handler_.OnAllowSDLFunctionalityNotification(is_allowed, "");
 }
 
@@ -1892,6 +1904,12 @@ TEST_F(PolicyHandlerTest,
       .WillOnce(SetArgReferee<0>(device_macs));
 
   EXPECT_CALL(*mock_policy_manager_, SetUserConsentForDevice(_, _)).Times(0);
+
+#ifdef EXTERNAL_PROPRIETARY_MODE
+  AppPermissions permissions(kPolicyAppId_);
+  EXPECT_CALL(*mock_policy_manager_, GetAppPermissionsChanges(_, kPolicyAppId_))
+      .WillOnce(Return(permissions));
+#endif  // EXTERNAL_PROPRIETARY_MODE
 
   const bool is_allowed = true;
   policy_handler_.OnAllowSDLFunctionalityNotification(is_allowed, "");
