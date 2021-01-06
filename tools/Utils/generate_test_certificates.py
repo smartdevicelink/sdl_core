@@ -110,7 +110,7 @@ def gen_expire_cert(out_cert_file, key_file, ca_cert_file, ca_key_file, days, an
         private_key =  %s""" % (os.path.abspath(ca_key_file), ) + """
         default_days = 365
         default_crl_days = 30
-        default_md = md5
+        default_md = sha256
         preserve = no
         policy = generic_policy
         [ generic_policy ]
