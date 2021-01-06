@@ -652,6 +652,18 @@
   <element name="notificationText">
     <description>Text of notification to be displayed on screen.</description>
   </element>
+  <element name="menuCommandSecondaryText">
+      <description>Secondary text for AddCommand</description>
+  </element>
+  <element name="menuCommandTertiaryText">
+      <description>Tertiary text for AddCommand</description>
+  </element>
+  <element name="menuSubMenuSecondaryText">
+      <description>Secondary text for AddSubMenu</description>
+  </element>
+  <element name="menuSubMenuTertiaryText">
+      <description>Tertiary text for AddSubMenu</description>
+  </element>
 </enum>
 
 <enum name="MetadataType">
@@ -741,6 +753,12 @@
   </element>
   <element name="subtleAlertIcon">
     <description>The image of the subtle alert; applies to `SubtleAlert` `alertIcon`</description>
+  </element>
+  <element name="menuCommandSecondaryImage">
+    <description>The secondary image field for AddCommand</description>
+  </element>
+  <element name="menuSubMenuSecondaryImage">
+    <description>The secondary image field for AddSubMenu</description>
   </element>
 </enum>
 
@@ -2932,6 +2950,12 @@
   </param>
   <param name="menuName" type="String" maxlength="500" mandatory="true">
     <description>The name of the sub menu/command.</description>
+  </param>
+  <param name="secondaryText" maxlength="500" type="String" mandatory="false">
+      <description>Optional secondary text to display</description>
+  </param>
+  <param name="tertiaryText" maxlength="500" type="String" mandatory="false">
+      <description>Optional tertiary text to display</description>
   </param>
 </struct>
 
@@ -5409,6 +5433,9 @@
       <description>Image to be displayed for representing the command. See Image.</description>
       <description>If omitted, no (or the default if applicable) icon should be displayed.</description>
     </param>
+    <param name="secondaryImage" type="Common.Image" mandatory="false">
+      <description>Optional secondary image struct for menu cell</description>
+    </param>
     <param name="appID" type="Integer" mandatory="true">
       <description>ID of application that concerns this RPC.</description>
     </param>
@@ -5440,6 +5467,9 @@
     </param>
     <param name="menuIcon" type="Common.Image" mandatory="false">
       <description>The image field for AddSubMenu</description>
+    </param>
+    <param name="secondaryImage" type="Common.Image" mandatory="false">
+        <description>Optional secondary image struct for menu cell</description>
     </param>
     <param name="appID" type="Integer" mandatory="true">
       <description>ID of application that requested this RPC.</description>

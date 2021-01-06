@@ -191,6 +191,15 @@ void AddCommandRequest::Run() {
           (*message_)[strings::msg_params][strings::cmd_icon];
     }
 
+    if (((*message_)[strings::msg_params].keyExists(strings::secondary_image)) &&
+        ((*message_)[strings::msg_params][strings::secondary_image].keyExists(
+            strings::value)) &&
+        (0 < (*message_)[strings::msg_params][strings::secondary_image][strings::value]
+                 .length())) {
+      ui_msg_params[strings::secondary_image] =
+          (*message_)[strings::msg_params][strings::secondary_image];
+    }
+
     send_ui_ = true;
   }
 
