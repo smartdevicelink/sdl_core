@@ -373,8 +373,7 @@ TEST_F(AddCommandRequestTest, Run_CommandIDAlreadyExists_EXPECT_INVALID_ID) {
   request_ptr->Run();
 }
 
-TEST_F(AddCommandRequestTest,
-       Run_CommandNameAlreadyExists_EXPECT_Forwarded) {
+TEST_F(AddCommandRequestTest, Run_CommandNameAlreadyExists_EXPECT_Forwarded) {
   CreateBasicParamsUIRequest();
   (*msg_)[msg_params][menu_name] = kMenuName;
   SmartObject& image = (*msg_)[msg_params][cmd_icon];
@@ -385,7 +384,8 @@ TEST_F(AddCommandRequestTest,
 
   SmartObject first_command = SmartObject(SmartType_Map);
   SmartObject second_command = SmartObject(SmartType_Map);
-  am::CommandsMap commands_map = CreateCommandsMap(first_command, second_command);
+  am::CommandsMap commands_map =
+      CreateCommandsMap(first_command, second_command);
   EXPECT_CALL(*mock_app_, commands_map())
       .WillRepeatedly(Return(DataAccessor<application_manager::CommandsMap>(
           commands_map, lock_ptr_)));
