@@ -107,6 +107,20 @@ void AddCommandRequest::Run() {
     }
   }
 
+  if ((*message_)[strings::msg_params].keyExists(strings::secondary_image)) {
+    mobile_apis::Result::eType verification_result = MessageHelper::VerifyImage(
+        (*message_)[strings::msg_params][strings::secondary_image],
+        app,
+        application_manager_);
+
+    if (mobile_apis::Result::INVALID_DATA == verification_result) {
+      SDL_LOG_ERROR("MessageHelper::VerifyImage return "
+                    << verification_result);
+      SendResponse(false, verification_result);
+      return;
+    }
+  }
+
   if (!((*message_)[strings::msg_params].keyExists(strings::cmd_id))) {
     SDL_LOG_ERROR("INVALID_DATA");
     SendResponse(false, mobile_apis::Result::INVALID_DATA);
@@ -571,6 +585,15 @@ bool AddCommandRequest::IsWhiteSpaceExist() {
               .asCharArray();
     if (!CheckSyntax(str)) {
       SDL_LOG_ERROR("Invalid cmd_icon value syntax check failed");
+      return true;
+    }
+  }
+
+  if ((*message_)[strings::msg_params].keyExists(strings::secondary_image)) {
+    str = (*message_)[strings::msg_params][strings::secondary_image][strings::value]
+              .asCharArray();
+    if (!CheckSyntax(str)) {
+      SDL_LOG_ERROR("Invalid secondaryImage value syntax check failed");
       return true;
     }
   }
