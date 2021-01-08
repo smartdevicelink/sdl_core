@@ -1515,7 +1515,9 @@ void PolicyHandler::OnActivateApp(uint32_t connection_key,
     // is not allowed.
     if (!permissions.isSDLAllowed) {
       permissions.priority.clear();
-      last_activated_app_id_ = connection_key;
+      if (!permissions.appRevoked) {
+        last_activated_app_id_ = connection_key;
+      }
     }
 
     if (permissions.appRevoked) {
