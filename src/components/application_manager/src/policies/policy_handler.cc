@@ -1438,11 +1438,8 @@ void PolicyHandler::OnAllowSDLFunctionalityNotification(
 
     bool is_allowed_by_policies = true;
     if (PolicyEnabled()) {
-      std::string policy_app_id = app->policy_app_id();
-      AppPermissions permissions(policy_app_id);
-      permissions = policy_manager->GetAppPermissionsChanges(app->mac_address(),
-                                                             policy_app_id);
-      is_allowed_by_policies = !permissions.appRevoked;
+      is_allowed_by_policies =
+          policy_manager->IsApplicationRevoked(app->policy_app_id());
     }
 
     if (is_allowed && is_allowed_by_policies) {
