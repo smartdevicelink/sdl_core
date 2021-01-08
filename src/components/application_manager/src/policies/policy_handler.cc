@@ -1439,7 +1439,7 @@ void PolicyHandler::OnAllowSDLFunctionalityNotification(
     bool is_allowed_by_policies = true;
     if (PolicyEnabled()) {
       is_allowed_by_policies =
-          policy_manager->IsApplicationRevoked(app->policy_app_id());
+          !policy_manager->IsApplicationRevoked(app->policy_app_id());
     }
 
     if (is_allowed && is_allowed_by_policies) {
