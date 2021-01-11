@@ -157,6 +157,21 @@ bool SetMediaClockRequest::isDataValid() {
     }
   }
 
+  std::vector<std::string> indicator_keys{strings::forward_seek_indicator,
+                                          strings::back_seek_indicator};
+  for (auto& key : indicator_keys) {
+    if (msg_params.keyExists(key)) {
+      mobile_apis::SeekIndicatorType::eType seek_indicator_type =
+          static_cast<mobile_apis::SeekIndicatorType::eType>(
+              msg_params[key][strings::type].asUInt());
+      if (seek_indicator_type == mobile_apis::SeekIndicatorType::TRACK &&
+          msg_params[key].keyExists(strings::seek_time)) {
+        SDL_LOG_INFO("Invalid data");
+        return false;
+      }
+    }
+  }
+
   SDL_LOG_INFO("Data is valid");
   return true;
 }
