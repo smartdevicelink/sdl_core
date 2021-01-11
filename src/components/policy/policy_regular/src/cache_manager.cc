@@ -1337,7 +1337,7 @@ void CacheManager::PersistData() {
       }
 
       backup_->SetMetaInfo(*(*copy_pt.policy_table.module_meta).ccpu_version);
-      ex_backup_->SetHardwareVersion(
+      backup_->SetHardwareVersion(
           *(*copy_pt.policy_table.module_meta).hardware_version);
 
       // In case of extended policy the meta info should be backuped as well.
