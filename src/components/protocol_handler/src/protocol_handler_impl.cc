@@ -226,6 +226,39 @@ void ProtocolHandlerImpl::SendStartSessionAck(
   bson_object_deinitialize(&empty_param);
 }
 
+void ProtocolHandlerImpl::WriteProtocolVehicleData(
+    BsonObject& params, const connection_handler::ProtocolVehicleData& data) {
+  auto write_string_to_bson = [&params](const std::string& param_name,
+                                        const std::string& param_value) {
+    if (param_value.empty()) {
+      return;
+    }
+
+    const uint16_t max_string_length = 500;
+    char value_buffer[max_string_length + 1];  // extra byte for NULL symbol
+    strncpy(value_buffer, param_value.c_str(), sizeof(value_buffer));
+    value_buffer[max_string_length] = 0;
+
+    if (bson_object_put_string(&params, param_name.c_str(), value_buffer)) {
+      SDL_LOG_DEBUG("Parameter "
+                    << param_name << " has been written to bson with value: "
+                    << bson_object_get_string(&params, param_name.c_str()));
+    } else {
+      SDL_LOG_DEBUG("Failed to write parameter " << param_name
+                                                 << " into bson structure");
+    }
+  };
+
+  write_string_to_bson(strings::vehicle_make, data.vehicle_make);
+  write_string_to_bson(strings::vehicle_model, data.vehicle_model);
+  write_string_to_bson(strings::vehicle_model_year, data.vehicle_year);
+  write_string_to_bson(strings::vehicle_trim, data.vehicle_trim);
+  write_string_to_bson(strings::vehicle_system_software_version,
+                       data.vehicle_system_software_version);
+  write_string_to_bson(strings::vehicle_system_hardware_version,
+                       data.vehicle_system_hardware_version);
+}
+
 void ProtocolHandlerImpl::SendStartSessionAck(
     ConnectionID connection_id,
     uint8_t session_id,
@@ -289,6 +322,12 @@ void ProtocolHandlerImpl::SendStartSessionAck(
         << static_cast<int32_t>(bson_object_get_int64(&params, strings::mtu)));
 
     if (serviceTypeValue == kRpc) {
+      SDL_LOG_DEBUG("Collecting protocol vehicle data");
+      connection_handler::ProtocolVehicleData data;
+      if (connection_handler_.GetProtocolVehicleData(data)) {
+        WriteProtocolVehicleData(params, data);
+      }
+
       // Hash ID is only used in RPC case
       const bool hash_written = bson_object_put_int32(
           &params, strings::hash_id, static_cast<int32_t>(hash_id));

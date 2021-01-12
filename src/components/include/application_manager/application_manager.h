@@ -623,6 +623,12 @@ class ApplicationManager {
 
   virtual bool IsStopping() const = 0;
 
+  /**
+   * @brief Waits for HMI readiness and blocks thread if it's not ready yet
+   * @return true if HMI is ready and cooperating, otherwise returns false
+   */
+  virtual bool WaitForHmiIsReady() = 0;
+
   virtual void RemoveAppFromTTSGlobalPropertiesList(const uint32_t app_id) = 0;
 
   /**

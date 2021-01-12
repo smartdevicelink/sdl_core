@@ -5409,6 +5409,109 @@ TEST_F(ProtocolHandlerImplTest,
   EXPECT_TRUE(waiter->WaitFor(times, kAsyncExpectationsTimeout));
 }
 
+TEST_F(ProtocolHandlerImplTest,
+       StartSessionAck_ProtocolVehicleData_VehicleDataParamsForV5) {
+  TestAsyncWaiter waiter;
+
+  const size_t maximum_rpc_payload_size = 1500;
+  EXPECT_CALL(protocol_handler_settings_mock, maximum_rpc_payload_size())
+      .WillOnce(Return(maximum_rpc_payload_size));
+  InitProtocolHandlerImpl(0u, 0u);
+
+  EXPECT_CALL(protocol_handler_settings_mock, max_supported_protocol_version())
+      .WillOnce(Return(PROTOCOL_VERSION_5));
+
+  std::map<std::string, std::string> vehicle_mapping = {
+      {protocol_handler::strings::vehicle_make, "TestMake"},
+      {protocol_handler::strings::vehicle_model, "TestModel"},
+      {protocol_handler::strings::vehicle_model_year, "2021"},
+      {protocol_handler::strings::vehicle_trim, "TestTrim"},
+      {protocol_handler::strings::vehicle_system_hardware_version, "TestHW"},
+      {protocol_handler::strings::vehicle_system_software_version, "TestSW"}};
+
+  connection_handler::ProtocolVehicleData data{
+      vehicle_mapping[protocol_handler::strings::vehicle_make],
+      vehicle_mapping[protocol_handler::strings::vehicle_model],
+      vehicle_mapping[protocol_handler::strings::vehicle_model_year],
+      vehicle_mapping[protocol_handler::strings::vehicle_trim],
+      vehicle_mapping
+          [protocol_handler::strings::vehicle_system_software_version],
+      vehicle_mapping
+          [protocol_handler::strings::vehicle_system_hardware_version]};
+
+  EXPECT_CALL(connection_handler_mock, GetProtocolVehicleData(_))
+      .WillOnce(DoAll(SetArgReferee<0>(data), Return(true)));
+
+  const uint32_t hash_id = 123456;
+  char full_version_string[] = "5.0.0";
+
+  BsonObject expected_obj;
+  bson_object_initialize_default(&expected_obj);
+  // mtu
+  bson_object_put_int64(&expected_obj,
+                        protocol_handler::strings::mtu,
+                        static_cast<int64_t>(maximum_rpc_payload_size));
+  // hashId
+  bson_object_put_int32(&expected_obj,
+                        protocol_handler::strings::hash_id,
+                        static_cast<int32_t>(hash_id));
+  // protocolVersion
+  bson_object_put_string(&expected_obj,
+                         protocol_handler::strings::protocol_version,
+                         full_version_string);
+
+  // vehicle data
+  const uint16_t max_string_length = 500;
+  for (auto& data_pair : vehicle_mapping) {
+    char value_buffer[max_string_length + 1];  // extra byte for NULL symbol
+    strncpy(value_buffer, data_pair.second.c_str(), sizeof(value_buffer));
+    value_buffer[max_string_length] = 0;
+
+    bson_object_put_string(
+        &expected_obj, data_pair.first.c_str(), value_buffer);
+  }
+
+  std::vector<uint8_t> expected_param =
+      CreateVectorFromBsonObject(&expected_obj);
+
+  bson_object_deinitialize(&expected_obj);
+
+  EXPECT_CALL(transport_manager_mock,
+              SendMessageToDevice(ControlMessage(FRAME_DATA_START_SERVICE_ACK,
+                                                 PROTECTION_OFF,
+                                                 connection_id,
+                                                 Eq(expected_param))))
+      .WillOnce(DoAll(NotifyTestAsyncWaiter(&waiter), Return(E_SUCCESS)));
+
+  connection_handler::SessionTransports dummy_st = {0, 0};
+  EXPECT_CALL(connection_handler_mock,
+              SetSecondaryTransportID(_, kDisabledSecondary))
+      .WillOnce(Return(dummy_st));
+
+#ifdef ENABLE_SECURITY
+  AddSecurityManager();
+
+  EXPECT_CALL(session_observer_mock, KeyFromPair(connection_id, session_id))
+      .WillRepeatedly(Return(connection_key));
+
+  EXPECT_CALL(session_observer_mock, GetSSLContext(connection_key, kRpc))
+      .WillOnce(ReturnNull());
+#endif  // ENABLE_SECURITY
+
+  const uint8_t input_protocol_version = 5;
+  utils::SemanticVersion full_version(5, 0, 0);
+
+  protocol_handler_impl->SendStartSessionAck(connection_id,
+                                             session_id,
+                                             input_protocol_version,
+                                             hash_id,
+                                             kRpc,
+                                             false /* protection */,
+                                             full_version);
+
+  EXPECT_TRUE(waiter.WaitFor(1, kAsyncExpectationsTimeout));
+}
+
 }  // namespace protocol_handler_test
 }  // namespace components
 }  // namespace test

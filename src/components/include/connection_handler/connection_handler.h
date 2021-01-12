@@ -58,6 +58,18 @@ enum CloseSessionReason {
 
 class ConnectionHandlerObserver;
 
+/**
+ * @brief Helper structure to collect all required vehicle data
+ */
+struct ProtocolVehicleData {
+  std::string vehicle_make;
+  std::string vehicle_model;
+  std::string vehicle_year;
+  std::string vehicle_trim;
+  std::string vehicle_system_software_version;
+  std::string vehicle_system_hardware_version;
+};
+
 // The SessionConnectionMap keeps track of the primary and secondary transports
 // associated with a session ID
 typedef struct {
@@ -343,6 +355,14 @@ class ConnectionHandler {
    */
   virtual const transport_manager::DeviceInfo& GetWebEngineDeviceInfo()
       const = 0;
+
+  /**
+   * @brief Collects all vehicle data required by a protocol layer
+   * @param data output structure to store received vehicle data
+   * @return true if data has been received successfully, otherwise returns
+   * false
+   */
+  virtual bool GetProtocolVehicleData(ProtocolVehicleData& data) = 0;
 
   /**
    * @brief Called when HMI cooperation is started,

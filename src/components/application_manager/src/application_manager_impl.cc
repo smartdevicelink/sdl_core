@@ -228,7 +228,7 @@ ApplicationManagerImpl::ApplicationManagerImpl(
 ApplicationManagerImpl::~ApplicationManagerImpl() {
   SDL_LOG_AUTO_TRACE();
 
-  is_stopping_.store(true);
+  InitiateStopping();
   SendOnSDLClose();
   media_manager_ = NULL;
   hmi_handler_ = NULL;
@@ -1598,6 +1598,58 @@ void ApplicationManagerImpl::OnDeviceListUpdated(
   RefreshCloudAppInformation();
 }
 
+bool ApplicationManagerImpl::WaitForHmiIsReady() {
+  sync_primitives::AutoLock lock(wait_for_hmi_lock_);
+  if (!IsStopping() && !IsHMICooperating()) {
+    SDL_LOG_DEBUG("Waiting for the HMI cooperation...");
+    wait_for_hmi_condvar_.Wait(lock);
+  }
+
+  if (IsStopping()) {
+    SDL_LOG_WARN("System is terminating...");
+    return false;
+  }
+
+  return IsHMICooperating();
+}
+
+bool ApplicationManagerImpl::GetProtocolVehicleData(
+    connection_handler::ProtocolVehicleData& data) {
+  SDL_LOG_AUTO_TRACE();
+  using namespace protocol_handler::strings;
+
+  if (!WaitForHmiIsReady()) {
+    SDL_LOG_ERROR("Failed to wait for HMI readiness");
+    return false;
+  }
+
+  const auto vehicle_type_ptr = hmi_capabilities_->vehicle_type();
+  if (vehicle_type_ptr) {
+    if (vehicle_type_ptr->keyExists(vehicle_make)) {
+      data.vehicle_make = vehicle_type_ptr->getElement(vehicle_make).asString();
+    }
+
+    if (vehicle_type_ptr->keyExists(vehicle_model)) {
+      data.vehicle_model =
+          vehicle_type_ptr->getElement(vehicle_model).asString();
+    }
+
+    if (vehicle_type_ptr->keyExists(vehicle_model_year)) {
+      data.vehicle_year =
+          vehicle_type_ptr->getElement(vehicle_model_year).asString();
+    }
+
+    if (vehicle_type_ptr->keyExists(vehicle_trim)) {
+      data.vehicle_trim = vehicle_type_ptr->getElement(vehicle_trim).asString();
+    }
+  }
+
+  data.vehicle_system_software_version = hmi_capabilities_->ccpu_version();
+  data.vehicle_system_hardware_version = hmi_capabilities_->hardware_version();
+
+  return true;
+}
+
 void ApplicationManagerImpl::OnFindNewApplicationsRequest() {
   connection_handler().ConnectToAllDevices();
   SDL_LOG_DEBUG("Starting application list update timer");
@@ -2537,7 +2589,7 @@ bool ApplicationManagerImpl::Init(
 
 bool ApplicationManagerImpl::Stop() {
   SDL_LOG_AUTO_TRACE();
-  is_stopping_.store(true);
+  InitiateStopping();
   application_list_update_timer_.Stop();
   try {
     if (unregister_reason_ ==
@@ -2952,7 +3004,7 @@ void ApplicationManagerImpl::SetUnregisterAllApplicationsReason(
 void ApplicationManagerImpl::HeadUnitReset(
     mobile_api::AppInterfaceUnregisteredReason::eType reason) {
   SDL_LOG_AUTO_TRACE();
-  is_stopping_.store(true);
+  InitiateStopping();
   switch (reason) {
     case mobile_api::AppInterfaceUnregisteredReason::MASTER_RESET: {
       SDL_LOG_TRACE("Performing MASTER_RESET");
@@ -4105,7 +4157,17 @@ bool ApplicationManagerImpl::IsHMICooperating() const {
 }
 
 void ApplicationManagerImpl::SetHMICooperating(const bool hmi_cooperating) {
+  SDL_LOG_AUTO_TRACE();
+  sync_primitives::AutoLock lock(wait_for_hmi_lock_);
   hmi_cooperating_ = hmi_cooperating;
+  wait_for_hmi_condvar_.Broadcast();
+}
+
+void ApplicationManagerImpl::InitiateStopping() {
+  SDL_LOG_AUTO_TRACE();
+  sync_primitives::AutoLock lock(wait_for_hmi_lock_);
+  is_stopping_.store(true);
+  wait_for_hmi_condvar_.Broadcast();
 }
 
 void ApplicationManagerImpl::OnApplicationListUpdateTimer() {
