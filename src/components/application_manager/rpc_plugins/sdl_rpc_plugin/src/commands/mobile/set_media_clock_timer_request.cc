@@ -163,9 +163,9 @@ bool SetMediaClockRequest::isDataValid(std::string& info) {
             mobile_apis::UpdateMode::eType>::EnumToString(update_mode,
                                                           &update_mode_name);
         info = "Start time must be " +
-               std::string((end_time_in_seconds > start_time_in_seconds)
-                               ? "after"
-                               : "before") +
+               std::string((update_mode == mobile_apis::UpdateMode::COUNTUP)
+                               ? "before"
+                               : "after") +
                " the end time for update mode " + update_mode_name;
         SDL_LOG_INFO("Invalid data: " << info);
         return false;
