@@ -3,4 +3,4 @@
 	url = https://github.com/smartdevicelink/jsoncpp.git
 [submodule "tools/rpc_spec"]
 	path = tools/rpc_spec
-	url = https://github.com/shiniwat/rpc_spec.git
+	url = https://github.com/smartdevicelink/rpc_spec.git
