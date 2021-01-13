@@ -88,7 +88,9 @@ void AddSubMenuRequest::Run() {
 
   if (received_msg_params.keyExists(strings::secondary_image)) {
     verification_result = MessageHelper::VerifyImage(
-        received_msg_params[strings::secondary_image], app, application_manager_);
+        received_msg_params[strings::secondary_image],
+        app,
+        application_manager_);
 
     if (mobile_apis::Result::INVALID_DATA == verification_result) {
       SDL_LOG_ERROR("MessageHelper::VerifyImage return "
@@ -161,7 +163,8 @@ void AddSubMenuRequest::Run() {
     msg_params[strings::menu_icon] = received_msg_params[strings::menu_icon];
   }
   if (received_msg_params.keyExists(strings::secondary_image)) {
-    msg_params[strings::secondary_image] = received_msg_params[strings::secondary_image];
+    msg_params[strings::secondary_image] =
+        received_msg_params[strings::secondary_image];
   }
   msg_params[strings::menu_params][strings::menu_name] =
       received_msg_params[strings::menu_name];
@@ -169,10 +172,12 @@ void AddSubMenuRequest::Run() {
     msg_params[strings::menu_params][strings::parent_id] = parent_id;
   }
   if (received_msg_params.keyExists(strings::secondary_text)) {
-    msg_params[strings::menu_params][strings::secondary_text] = received_msg_params[strings::secondary_text];
+    msg_params[strings::menu_params][strings::secondary_text] =
+        received_msg_params[strings::secondary_text];
   }
   if (received_msg_params.keyExists(strings::tertiary_text)) {
-    msg_params[strings::menu_params][strings::tertiary_text] = received_msg_params[strings::tertiary_text];
+    msg_params[strings::menu_params][strings::tertiary_text] =
+        received_msg_params[strings::tertiary_text];
   }
 
   msg_params[strings::app_id] = app->app_id();

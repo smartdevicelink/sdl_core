@@ -205,11 +205,13 @@ void AddCommandRequest::Run() {
           (*message_)[strings::msg_params][strings::cmd_icon];
     }
 
-    if (((*message_)[strings::msg_params].keyExists(strings::secondary_image)) &&
+    if (((*message_)[strings::msg_params].keyExists(
+            strings::secondary_image)) &&
         ((*message_)[strings::msg_params][strings::secondary_image].keyExists(
             strings::value)) &&
-        (0 < (*message_)[strings::msg_params][strings::secondary_image][strings::value]
-                 .length())) {
+        (0 < (*message_)[strings::msg_params][strings::secondary_image]
+                        [strings::value]
+                            .length())) {
       ui_msg_params[strings::secondary_image] =
           (*message_)[strings::msg_params][strings::secondary_image];
     }
@@ -590,8 +592,9 @@ bool AddCommandRequest::IsWhiteSpaceExist() {
   }
 
   if ((*message_)[strings::msg_params].keyExists(strings::secondary_image)) {
-    str = (*message_)[strings::msg_params][strings::secondary_image][strings::value]
-              .asCharArray();
+    str = (*message_)[strings::msg_params][strings::secondary_image]
+                     [strings::value]
+                         .asCharArray();
     if (!CheckSyntax(str)) {
       SDL_LOG_ERROR("Invalid secondaryImage value syntax check failed");
       return true;
