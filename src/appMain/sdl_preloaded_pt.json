@@ -3508,13 +3508,13 @@
                             "params": [
                                 {
                                     "name": "unit",
-                                    "key": "OEM_REF_EXT_TEMP_UNIT",
+                                    "key": "OEM_REF_CABIN_TEMP_VALUE",
                                     "type": "TemperatureUnit",
                                     "mandatory": true
                                 },
                                 {
                                     "name": "value",
-                                    "key": "OEM_REF_EXT_TEMP_VALUE",
+                                    "key": "OEM_REF_CABIN_TEMP_VALUE",
                                     "type": "Float",
                                     "mandatory": true
                                 }
