@@ -184,8 +184,6 @@ class RPCHandlerImpl : public RPCHandler,
 
   hmi_apis::HMI_API& hmi_so_factory();
   mobile_apis::MOBILE_API& mobile_so_factory();
-  ns_smart_device_link_rpc::V1::v4_protocol_v1_2_no_extra&
-  v4_protocol_so_factory();
 
   ApplicationManager& app_manager_;
   // Thread that pumps messages coming from mobile side.

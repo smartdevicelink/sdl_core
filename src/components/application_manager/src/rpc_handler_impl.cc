@@ -493,7 +493,8 @@ bool RPCHandlerImpl::ConvertMessageToSO(
 
           smart_objects::SmartObjectSPtr msg_to_send =
               std::make_shared<smart_objects::SmartObject>(output);
-          v4_protocol_so_factory().attachSchema(*msg_to_send, false);
+          app_manager_.mobile_v4_protocol_so_factory().attachSchema(
+              *msg_to_send, false);
           app_manager_.GetRPCService().SendMessageToMobile(msg_to_send);
           return false;
         }
@@ -600,9 +601,5 @@ mobile_apis::MOBILE_API& RPCHandlerImpl::mobile_so_factory() {
   return mobile_so_factory_;
 }
 
-ns_smart_device_link_rpc::V1::v4_protocol_v1_2_no_extra&
-RPCHandlerImpl::v4_protocol_so_factory() {
-  return app_manager_.v4_protocol_so_factory();
-}
 }  // namespace rpc_handler
 }  // namespace application_manager

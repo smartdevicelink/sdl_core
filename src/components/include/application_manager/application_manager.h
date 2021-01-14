@@ -800,7 +800,7 @@ class ApplicationManager {
   virtual HmiInterfaces& hmi_interfaces() = 0;
 
   virtual ns_smart_device_link_rpc::V1::v4_protocol_v1_2_no_extra&
-  v4_protocol_so_factory() = 0;
+  mobile_v4_protocol_so_factory() = 0;
 
   virtual app_launch::AppLaunchCtrl& app_launch_ctrl() = 0;
 

@@ -175,10 +175,6 @@ ApplicationManagerImpl::ApplicationManagerImpl(
     , policy_handler_(new policy::PolicyHandler(policy_settings, *this))
     , protocol_handler_(NULL)
     , request_ctrl_(am_settings)
-    , hmi_so_factory_(hmi_apis::HMI_API())
-    , mobile_so_factory_(mobile_apis::MOBILE_API())
-    , v4_protocol_so_factory_(
-          ns_smart_device_link_rpc::V1::v4_protocol_v1_2_no_extra())
     , hmi_capabilities_(new HMICapabilitiesImpl(*this))
     , unregister_reason_(
           mobile_api::AppInterfaceUnregisteredReason::INVALID_ENUM)
@@ -2675,8 +2671,8 @@ mobile_apis::MOBILE_API& ApplicationManagerImpl::mobile_so_factory() {
 }
 
 ns_smart_device_link_rpc::V1::v4_protocol_v1_2_no_extra&
-ApplicationManagerImpl::v4_protocol_so_factory() {
-  return v4_protocol_so_factory_;
+ApplicationManagerImpl::mobile_v4_protocol_so_factory() {
+  return mobile_v4_protocol_so_factory_;
 }
 
 HMICapabilities& ApplicationManagerImpl::hmi_capabilities() {
