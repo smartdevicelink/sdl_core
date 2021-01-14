@@ -31,6 +31,8 @@
  */
 
 #include "sdl_rpc_plugin/commands/mobile/subscribe_way_points_request.h"
+
+#include "application_manager/app_service_manager.h"
 #include "application_manager/application_manager.h"
 #include "application_manager/message_helper.h"
 
@@ -72,8 +74,8 @@ void SubscribeWayPointsRequest::Run() {
     return;
   }
 
-  if (application_manager_.IsAnyAppSubscribedForWayPoints()) {
-    application_manager_.SubscribeAppForWayPoints(app);
+  if (application_manager_.IsSubscribedToHMIWayPoints()) {
+    application_manager_.SubscribeAppForWayPoints(app, false);
     SendResponse(true, mobile_apis::Result::SUCCESS);
     return;
   }
@@ -91,15 +93,20 @@ void SubscribeWayPointsRequest::on_event(const event_engine::Event& event) {
     case hmi_apis::FunctionID::Navigation_SubscribeWayPoints: {
       SDL_LOG_INFO("Received Navigation_SubscribeWayPoints event");
       EndAwaitForInterface(HmiInterfaces::HMI_INTERFACE_Navigation);
-      const hmi_apis::Common_Result::eType result_code =
+      hmi_apis::Common_Result::eType result_code =
           static_cast<hmi_apis::Common_Result::eType>(
               message[strings::params][hmi_response::code].asInt());
       std::string response_info;
       GetInfo(message, response_info);
-      const bool result = PrepareResultForMobileResponse(
+      bool result = PrepareResultForMobileResponse(
           result_code, HmiInterfaces::HMI_INTERFACE_Navigation);
       if (result) {
-        application_manager_.SubscribeAppForWayPoints(app);
+        application_manager_.SubscribeAppForWayPoints(app, true);
+      } else if (application_manager_.GetAppServiceManager()
+                     .FindWayPointsHandler() != nullptr) {
+        application_manager_.SubscribeAppForWayPoints(app, false);
+        result = true;
+        result_code = hmi_apis::Common_Result::WARNINGS;
       }
       SendResponse(result,
                    MessageHelper::HMIToMobileResult(result_code),
@@ -111,6 +118,23 @@ void SubscribeWayPointsRequest::on_event(const event_engine::Event& event) {
       SDL_LOG_ERROR("Received unknown event " << event.id());
       break;
     }
+  }
+}
+
+void SubscribeWayPointsRequest::onTimeOut() {
+  SDL_LOG_AUTO_TRACE();
+  if (application_manager_.GetAppServiceManager().FindWayPointsHandler() !=
+      nullptr) {
+    ApplicationSharedPtr app =
+        application_manager_.application(connection_key());
+    application_manager_.SubscribeAppForWayPoints(app, false);
+    SendResponse(true,
+                 mobile_apis::Result::WARNINGS,
+                 "HMI request timeout expired, waypoints are available through "
+                 "NAVIGATION service");
+  } else {
+    SendResponse(
+        false, mobile_apis::Result::GENERIC_ERROR, "Request timeout expired");
   }
 }
 

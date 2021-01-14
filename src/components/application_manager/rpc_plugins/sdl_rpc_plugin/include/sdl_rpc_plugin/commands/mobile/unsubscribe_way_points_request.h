@@ -75,6 +75,8 @@ class UnsubscribeWayPointsRequest
    */
   bool Init() FINAL;
 
+  void onTimeOut() FINAL;
+
  private:
   DISALLOW_COPY_AND_ASSIGN(UnsubscribeWayPointsRequest);
 };

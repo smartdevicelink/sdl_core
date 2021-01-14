@@ -30,42 +30,46 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "sdl_rpc_plugin/commands/hmi/on_navi_way_point_change_notification.h"
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_MOBILE_ON_WAY_POINT_CHANGE_NOTIFICATION_FROM_MOBILE_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_MOBILE_ON_WAY_POINT_CHANGE_NOTIFICATION_FROM_MOBILE_H_
 
-#include "application_manager/app_service_manager.h"
+#include "application_manager/commands/command_notification_from_mobile_impl.h"
+#include "utils/macro.h"
 
 namespace sdl_rpc_plugin {
-using namespace application_manager;
+namespace app_mngr = application_manager;
 
 namespace commands {
 
-SDL_CREATE_LOG_VARIABLE("Commands")
+class OnWayPointChangeNotificationFromMobile
+    : public app_mngr::commands::CommandNotificationFromMobileImpl {
+ public:
+  /**
+   * @brief OnWayPointChangeNotificationFromMobile class constructor
+   *
+   * @param message Incoming SmartObject message
+   **/
+  OnWayPointChangeNotificationFromMobile(
+      const app_mngr::commands::MessageSharedPtr& message,
+      app_mngr::ApplicationManager& application_manager,
+      app_mngr::rpc_service::RPCService& rpc_service,
+      app_mngr::HMICapabilities& hmi_capabilities,
+      policy::PolicyHandlerInterface& policy_handler);
 
-OnNaviWayPointChangeNotification::OnNaviWayPointChangeNotification(
-    const application_manager::commands::MessageSharedPtr& message,
-    ApplicationManager& app_man,
-    rpc_service::RPCService& rpc_service,
-    HMICapabilities& hmi_capabilities,
-    policy::PolicyHandlerInterface& policy_handle)
-    : NotificationFromHMI(
-          message, app_man, rpc_service, hmi_capabilities, policy_handle) {}
+  /**
+   * @brief OnWayPointChangeNotificationFromMobile class destructor
+   **/
+  virtual ~OnWayPointChangeNotificationFromMobile();
 
-OnNaviWayPointChangeNotification::~OnNaviWayPointChangeNotification() {}
+  /**
+   * @brief Execute command
+   **/
+  virtual void Run() OVERRIDE;
 
-void OnNaviWayPointChangeNotification::Run() {
-  SDL_LOG_AUTO_TRACE();
-
-  // prepare SmartObject for mobile factory
-  (*message_)[strings::params][strings::function_id] =
-      static_cast<int32_t>(mobile_apis::FunctionID::OnWayPointChangeID);
-  application_manager_.SaveWayPointsMessage(message_, 0);
-
-  if (application_manager_.GetAppServiceManager().FindWayPointsHandler() ==
-      nullptr) {
-    SendNotificationToMobile(message_);
-  }
-}
+ private:
+  DISALLOW_COPY_AND_ASSIGN(OnWayPointChangeNotificationFromMobile);
+};
 
 }  // namespace commands
-
 }  // namespace sdl_rpc_plugin
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_MOBILE_ON_WAY_POINT_CHANGE_NOTIFICATION_FROM_MOBILE_H_

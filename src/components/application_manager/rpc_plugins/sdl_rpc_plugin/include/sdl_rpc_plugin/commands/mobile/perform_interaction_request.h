@@ -119,15 +119,13 @@ class PerformInteractionRequest
    * @return true if send response to mobile application otherwise
    * return false.
    */
-  bool ProcessVRResponse(const smart_objects::SmartObject& message,
-                         smart_objects::SmartObject& msg_params);
+  bool ProcessVRResponse(const smart_objects::SmartObject& message);
 
   /**
    * @brief Sends PerformInteraction response to mobile side
    * @param message which should send to mobile side
    */
-  void ProcessUIResponse(const smart_objects::SmartObject& message,
-                         smart_objects::SmartObject& msg_params);
+  void ProcessUIResponse(const smart_objects::SmartObject& message);
 
   /*
    * @brief Sends UI PerformInteraction request to HMI
@@ -271,6 +269,7 @@ class PerformInteractionRequest
 
   std::int32_t ui_choice_id_received_;
   std::int32_t vr_choice_id_received_;
+  std::string ui_text_entry_received_;
 
   bool app_pi_was_active_before_;
   static uint32_t pi_requests_count_;

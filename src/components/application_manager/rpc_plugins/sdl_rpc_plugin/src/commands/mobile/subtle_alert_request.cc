@@ -206,20 +206,10 @@ bool SubtleAlertRequest::PrepareResponseParameters(
   bool result =
       PrepareResultForMobileResponse(ui_subtle_alert_info, tts_alert_info);
 
-  /* result=false if UI interface is ok and TTS interface = UNSUPPORTED_RESOURCE
-   * and sdl receive TTS.IsReady=true or SDL doesn't receive response for
-   * TTS.IsReady.
-   */
-  if (result && ui_subtle_alert_info.is_ok &&
-      tts_alert_info.is_unsupported_resource &&
-      HmiInterfaces::STATE_NOT_AVAILABLE != tts_alert_info.interface_state) {
-    result = false;
-  }
   result_code = mobile_apis::Result::WARNINGS;
   if ((ui_subtle_alert_info.is_ok || ui_subtle_alert_info.is_not_used) &&
       tts_alert_info.is_unsupported_resource &&
       HmiInterfaces::STATE_AVAILABLE == tts_alert_info.interface_state) {
-    tts_response_info_ = "Unsupported phoneme type sent in a prompt";
     info = app_mngr::commands::MergeInfos(ui_subtle_alert_info,
                                           ui_response_info_,
                                           tts_alert_info,
@@ -244,7 +234,11 @@ bool SubtleAlertRequest::PrepareResponseParameters(
                                         tts_alert_info,
                                         tts_response_info_);
   // Mobile Alert request is successful when UI_SubtleAlert is successful
-  if (is_ui_subtle_alert_sent_ && !ui_subtle_alert_info.is_ok) {
+  bool has_unsupported_data = ui_subtle_alert_info.is_unsupported_resource &&
+                              HmiInterfaces::STATE_NOT_AVAILABLE !=
+                                  ui_subtle_alert_info.interface_state;
+  if (is_ui_subtle_alert_sent_ && !ui_subtle_alert_info.is_ok &&
+      !has_unsupported_data) {
     return false;
   }
   return result;
