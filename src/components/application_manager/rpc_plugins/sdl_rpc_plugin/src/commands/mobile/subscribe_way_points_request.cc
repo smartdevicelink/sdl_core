@@ -121,7 +121,7 @@ void SubscribeWayPointsRequest::on_event(const event_engine::Event& event) {
   }
 }
 
-void SubscribeWayPointsRequest::onTimeOut() {
+void SubscribeWayPointsRequest::OnTimeOut() {
   SDL_LOG_AUTO_TRACE();
   if (application_manager_.GetAppServiceManager().FindWayPointsHandler() !=
       nullptr) {
