@@ -59,7 +59,7 @@ void RCGetCapabilitiesRequest::Run() {
   SendRequest();
 }
 
-void RCGetCapabilitiesRequest::onTimeOut() {
+void RCGetCapabilitiesRequest::OnTimeOut() {
   SDL_LOG_AUTO_TRACE();
   hmi_capabilities_.UpdateRequestsRequiredForCapabilities(
       hmi_apis::FunctionID::RC_GetCapabilities);

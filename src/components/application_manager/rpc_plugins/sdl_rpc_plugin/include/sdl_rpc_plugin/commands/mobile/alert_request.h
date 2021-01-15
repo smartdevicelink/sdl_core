@@ -36,7 +36,7 @@
 
 #include <string>
 
-#include "application_manager/commands/command_request_impl.h"
+#include "application_manager/commands/request_from_mobile_impl.h"
 #include "interfaces/MOBILE_API.h"
 #include "utils/macro.h"
 
@@ -48,7 +48,7 @@ namespace commands {
 /**
  * @brief AlertRequest command class
  **/
-class AlertRequest : public app_mngr::commands::CommandRequestImpl {
+class AlertRequest : public app_mngr::commands::RequestFromMobileImpl {
  public:
   /**
    * @brief AlertRequest class constructor
@@ -76,12 +76,9 @@ class AlertRequest : public app_mngr::commands::CommandRequestImpl {
    **/
   virtual void Run();
 
-  /**
-   * @brief Interface method that is called whenever new event received
-   *
-   * @param event The received event
-   */
-  void on_event(const app_mngr::event_engine::Event& event);
+  void on_event(const app_mngr::event_engine::Event& event) FINAL;
+
+  void OnTimeOut() FINAL;
 
  protected:
  private:
@@ -116,7 +113,7 @@ class AlertRequest : public app_mngr::commands::CommandRequestImpl {
   /*
    * @brief Tells if there are sent requests without responses
    */
-  bool HasHmiResponsesToWait();
+  bool IsPendingResponseExist();
 
   /*
    * @brief Check if all strings have valid syntax in request

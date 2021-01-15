@@ -70,9 +70,9 @@ class EventObserver {
    *
    * @param event The received event
    */
-  virtual void on_event(const Event& event) = 0;
+  virtual void HandleOnEvent(const Event& event) = 0;
 
-  virtual void on_event(const MobileEvent& event);
+  virtual void HandleOnEvent(const MobileEvent& event);
 
  protected:
   /*

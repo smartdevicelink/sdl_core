@@ -60,7 +60,7 @@ void UIAddCommandRequest::Run() {
   SendRequest();
 }
 
-void UIAddCommandRequest::onTimeOut() {
+void UIAddCommandRequest::OnTimeOut() {
   auto& resume_ctrl = application_manager_.resume_controller();
 
   resume_ctrl.HandleOnTimeOut(

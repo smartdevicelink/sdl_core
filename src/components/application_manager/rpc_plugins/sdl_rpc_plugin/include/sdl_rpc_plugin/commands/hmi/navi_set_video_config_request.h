@@ -43,8 +43,7 @@ namespace commands {
 /**
  * @brief NaviSetVideoConfigRequest command class
  **/
-class NaviSetVideoConfigRequest : public app_mngr::commands::RequestToHMI,
-                                  public app_mngr::event_engine::EventObserver {
+class NaviSetVideoConfigRequest : public app_mngr::commands::RequestToHMI {
  public:
   /**
    * @brief NaviSetVideoConfigRequest class constructor
@@ -76,7 +75,7 @@ class NaviSetVideoConfigRequest : public app_mngr::commands::RequestToHMI,
   /**
    * @brief onTimeOut callback
    */
-  void onTimeOut() OVERRIDE;
+  void OnTimeOut() OVERRIDE;
 
  private:
   DISALLOW_COPY_AND_ASSIGN(NaviSetVideoConfigRequest);

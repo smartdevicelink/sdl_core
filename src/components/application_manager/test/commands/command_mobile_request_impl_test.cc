@@ -35,9 +35,9 @@
 #include <string>
 
 #include "application_manager/commands/command_impl.h"
-#include "application_manager/commands/command_request_impl.h"
 #include "application_manager/commands/command_request_test.h"
 #include "application_manager/commands/commands_test.h"
+#include "application_manager/commands/request_from_mobile_impl.h"
 #include "gtest/gtest.h"
 #include "utils/lock.h"
 
@@ -78,6 +78,7 @@ using am::RPCParams;
 using am::commands::CommandImpl;
 using am::commands::CommandRequestImpl;
 using am::commands::MessageSharedPtr;
+using am::commands::RequestFromMobileImpl;
 using am::event_engine::EventObserver;
 using test::components::application_manager_test::MockAppServiceManager;
 
@@ -101,32 +102,30 @@ const std::string kAppStorageFile = "./app_info.dat";
 const std::string kAppInfoStorage = "app_info_storage";
 }  // namespace
 
-class CommandRequestImplTest
+class RequestFromMobileImplTest
     : public CommandRequestTest<CommandsTestMocks::kIsNice> {
  public:
-  CommandRequestImplTest()
+  RequestFromMobileImplTest()
       : app_set_lock_ptr_(std::make_shared<sync_primitives::Lock>()) {}
 
-  class UnwrappedCommandRequestImpl : public CommandRequestImpl {
+  class UnwrappedRequestFromMobileImpl
+      : public am::commands::RequestFromMobileImpl {
    public:
-    using CommandRequestImpl::AddDisallowedParameters;
-    using CommandRequestImpl::CheckAllowedParameters;
-    using CommandRequestImpl::HasDisallowedParams;
-    using CommandRequestImpl::RemoveDisallowedParameters;
+    UnwrappedRequestFromMobileImpl(
+        const MessageSharedPtr& message,
+        ApplicationManager& ap_man,
+        am::rpc_service::RPCService& rpc_service,
+        am::HMICapabilities& hmi_capabilities,
+        policy::PolicyHandlerInterface& policy_handler)
+        : am::commands::RequestFromMobileImpl(
+              message, ap_man, rpc_service, hmi_capabilities, policy_handler) {}
 
-    UnwrappedCommandRequestImpl(const MessageSharedPtr& message,
-                                ApplicationManager& am,
-                                app_mngr::rpc_service::RPCService& rpc_service,
-                                app_mngr::HMICapabilities& hmi_capabilities,
-                                policy::PolicyHandlerInterface& policy_handler)
-        : CommandRequestImpl(
-              message, am, rpc_service, hmi_capabilities, policy_handler) {}
-
-    const RequestState current_state() const {
-      return current_state_;
+    const RequestState get_current_state() const {
+      return am::commands::CommandRequestImpl::current_state();
     }
-    void set_current_state(const RequestState state) {
-      current_state_ = state;
+
+    void change_current_state(const RequestState state) {
+      am::commands::CommandRequestImpl::set_current_state(state);
     }
 
     CommandParametersPermissions& parameters_permissions() {
@@ -137,8 +136,20 @@ class CommandRequestImplTest
       return removed_parameters_permissions_;
     }
 
-    void SetHashUpdateMode(HashUpdateMode mode) {
+    void SetHashUpdateMode(RequestFromMobileImpl::HashUpdateMode mode) {
       hash_update_mode_ = mode;
+    }
+
+    void RemoveDisallowedParameters() {
+      am::commands::RequestFromMobileImpl::RemoveDisallowedParameters();
+    }
+
+    bool HasDisallowedParams() {
+      return am::commands::RequestFromMobileImpl::HasDisallowedParams();
+    }
+
+    void AddDisallowedParameters(smart_objects::SmartObject& response) {
+      am::commands::RequestFromMobileImpl::AddDisallowedParameters(response);
     }
   };
 
@@ -155,41 +166,24 @@ class CommandRequestImplTest
   std::shared_ptr<sync_primitives::Lock> app_set_lock_ptr_;
 };
 
-typedef CommandRequestImplTest::UnwrappedCommandRequestImpl UCommandRequestImpl;
-typedef std::shared_ptr<UCommandRequestImpl> CommandPtr;
+typedef RequestFromMobileImplTest::UnwrappedRequestFromMobileImpl
+    URequestFromMobileImpl;
+typedef std::shared_ptr<URequestFromMobileImpl> CommandPtr;
 
-TEST_F(CommandRequestImplTest, WindowID_ExpectDefaultWindowID) {
+TEST_F(RequestFromMobileImplTest, WindowID_ExpectDefaultWindowID) {
   auto msg = CreateMessage();
-  const auto command = CreateCommand<UCommandRequestImpl>(msg);
+  const auto command = CreateCommand<URequestFromMobileImpl>(msg);
   EXPECT_EQ(mobile_apis::PredefinedWindows::DEFAULT_WINDOW,
             command->window_id());
 }
 
-TEST_F(CommandRequestImplTest, OnTimeOut_StateCompleted_UNSUCCESS) {
-  CommandPtr command = CreateCommand<UCommandRequestImpl>();
-
-  // Should be called twice:
-  // First -- on `onTimeOut` method call
-  // Second -- on destruction;
-  EXPECT_CALL(event_dispatcher_, remove_observer(_)).Times(2);
-
-  EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(_, _)).Times(0);
-
-  // If `command` already done, then state should change to `kCompleted`.
-  command->set_current_state(RequestState::kCompleted);
-
-  command->onTimeOut();
-
-  EXPECT_EQ(RequestState::kCompleted, command->current_state());
-}
-
-TEST_F(CommandRequestImplTest, OnTimeOut_StateAwaitingHMIResponse_SUCCESS) {
+TEST_F(RequestFromMobileImplTest, OnTimeOut_StateAwaitingHMIResponse_SUCCESS) {
   MessageSharedPtr msg = CreateMessage(smart_objects::SmartType_Map);
   (*msg)[strings::params][strings::correlation_id] = kCorrelationId;
   (*msg)[strings::params][strings::function_id] = kInvalidFunctionId;
   (*msg)[strings::params][strings::connection_key] = kConnectionKey;
 
-  CommandPtr command = CreateCommand<UCommandRequestImpl>(msg);
+  CommandPtr command = CreateCommand<URequestFromMobileImpl>(msg);
 
   MessageSharedPtr dummy_msg(CreateMessage());
   EXPECT_CALL(mock_message_helper_, CreateNegativeResponse(_, _, _, _))
@@ -199,15 +193,15 @@ TEST_F(CommandRequestImplTest, OnTimeOut_StateAwaitingHMIResponse_SUCCESS) {
       mock_rpc_service_,
       ManageMobileCommand(dummy_msg, Command::CommandSource::SOURCE_SDL));
 
-  command->onTimeOut();
+  command->HandleTimeOut();
 
   // If `command` not done till now, then state should change to `kTimedOut`
   // and sent it to application manager to deal with it.
-  EXPECT_EQ(RequestState::kTimedOut, command->current_state());
+  EXPECT_EQ(RequestState::kTimedOut, command->get_current_state());
 }
 
-TEST_F(CommandRequestImplTest, CheckSyntax_SUCCESS) {
-  CommandPtr command = CreateCommand<UCommandRequestImpl>();
+TEST_F(RequestFromMobileImplTest, CheckSyntax_SUCCESS) {
+  CommandPtr command = CreateCommand<URequestFromMobileImpl>();
 
   // Checking message syntax.
   const std::string str1("\t\n");
@@ -221,14 +215,14 @@ TEST_F(CommandRequestImplTest, CheckSyntax_SUCCESS) {
   EXPECT_TRUE(command->CheckSyntax(str4, true));
 }
 
-TEST_F(CommandRequestImplTest, GetMobileResultCode_SUCCESS) {
+TEST_F(RequestFromMobileImplTest, GetMobileResultCode_SUCCESS) {
   union ResultU {
     int32_t value_;
     hmi_apis::Common_Result::eType hmi_;
     mobile_apis::Result::eType mobile_;
   };
 
-  CommandPtr command = CreateCommand<UCommandRequestImpl>();
+  CommandPtr command = CreateCommand<URequestFromMobileImpl>();
 
   // Run thru all possible accordance
   // of HMI and Mobile result codes.
@@ -253,8 +247,8 @@ TEST_F(CommandRequestImplTest, GetMobileResultCode_SUCCESS) {
       command->GetMobileResultCode(hmi_apis::Common_Result::TRUNCATED_DATA));
 }
 
-TEST_F(CommandRequestImplTest, BasicMethodsOverloads_SUCCESS) {
-  CommandPtr command = CreateCommand<UCommandRequestImpl>();
+TEST_F(RequestFromMobileImplTest, BasicMethodsOverloads_SUCCESS) {
+  CommandPtr command = CreateCommand<URequestFromMobileImpl>();
 
   // Current implementation always return `true`
   EXPECT_TRUE(command->Init());
@@ -264,8 +258,8 @@ TEST_F(CommandRequestImplTest, BasicMethodsOverloads_SUCCESS) {
   EXPECT_NO_THROW(command->on_event(event));
 }
 
-TEST_F(CommandRequestImplTest, CreateHMINotification_SUCCESS) {
-  CommandPtr command = CreateCommand<UCommandRequestImpl>();
+TEST_F(RequestFromMobileImplTest, CreateHMINotification_SUCCESS) {
+  CommandPtr command = CreateCommand<URequestFromMobileImpl>();
 
   const std::string kTestParamsKey = "test_msg_params";
 
@@ -284,8 +278,8 @@ TEST_F(CommandRequestImplTest, CreateHMINotification_SUCCESS) {
   EXPECT_TRUE((*result)[strings::msg_params].keyExists(kTestParamsKey));
 }
 
-TEST_F(CommandRequestImplTest, SendHMIRequest_NoUseEvent_SUCCESS) {
-  CommandPtr command = CreateCommand<UCommandRequestImpl>();
+TEST_F(RequestFromMobileImplTest, SendHMIRequest_NoUseEvent_SUCCESS) {
+  CommandPtr command = CreateCommand<URequestFromMobileImpl>();
 
   EXPECT_CALL(app_mngr_, GetNextHMICorrelationID())
       .WillOnce(Return(kCorrelationId));
@@ -302,8 +296,8 @@ TEST_F(CommandRequestImplTest, SendHMIRequest_NoUseEvent_SUCCESS) {
             command->SendHMIRequest(kInvalidFunctionId, NULL, false));
 }
 
-TEST_F(CommandRequestImplTest, SendHMIRequest_UseEvent_SUCCESS) {
-  CommandPtr command = CreateCommand<UCommandRequestImpl>();
+TEST_F(RequestFromMobileImplTest, SendHMIRequest_UseEvent_SUCCESS) {
+  CommandPtr command = CreateCommand<URequestFromMobileImpl>();
 
   EXPECT_CALL(app_mngr_, GetNextHMICorrelationID())
       .WillOnce(Return(kCorrelationId));
@@ -321,7 +315,14 @@ TEST_F(CommandRequestImplTest, SendHMIRequest_UseEvent_SUCCESS) {
             command->SendHMIRequest(kInvalidFunctionId, NULL, true));
 }
 
-TEST_F(CommandRequestImplTest, RemoveDisallowedParameters_SUCCESS) {
+TEST_F(RequestFromMobileImplTest, RemoveDisallowedParameters_SUCCESS) {
+  am::VehicleData vehicle_data;
+  vehicle_data.insert(am::VehicleData::value_type(
+      kMissedParam, mobile_apis::VehicleDataType::VEHICLEDATA_MYKEY));
+
+  EXPECT_CALL(mock_message_helper_, vehicle_data())
+      .WillOnce(ReturnRef(vehicle_data));
+
   MessageSharedPtr msg = CreateMessage();
   (*msg)[strings::msg_params][kDisallowedParam1] = 0u;
   (*msg)[strings::msg_params][kDisallowedParam2] = 0u;
@@ -329,7 +330,8 @@ TEST_F(CommandRequestImplTest, RemoveDisallowedParameters_SUCCESS) {
   (*msg)[strings::msg_params][kUndefinedParam] = 0u;
   (*msg)[strings::msg_params][kMissedParam] = 0u;
 
-  CommandPtr command = CreateCommand<UCommandRequestImpl>(msg);
+  CommandPtr command = CreateCommand<URequestFromMobileImpl>(msg);
+
   CommandParametersPermissions& permission = command->parameters_permissions();
   permission.disallowed_params.insert(kDisallowedParam1);
   permission.disallowed_params.insert(kDisallowedParam2);
@@ -346,27 +348,28 @@ TEST_F(CommandRequestImplTest, RemoveDisallowedParameters_SUCCESS) {
   EXPECT_TRUE(command->HasDisallowedParams());
 }
 
-TEST_F(CommandRequestImplTest,
+TEST_F(RequestFromMobileImplTest,
        CheckAllowedParameters_RegisterAppInterface_SUCCESS) {
   MessageSharedPtr msg = CreateMessage();
   (*msg)[strings::params][strings::function_id] =
       mobile_apis::FunctionID::RegisterAppInterfaceID;
 
-  CommandPtr command = CreateCommand<UCommandRequestImpl>(msg);
+  CommandPtr command = CreateCommand<URequestFromMobileImpl>(msg);
 
   EXPECT_CALL(app_mngr_, applications()).Times(0);
   EXPECT_TRUE(command->CheckPermissions());
 }
 
-TEST_F(CommandRequestImplTest,
+TEST_F(RequestFromMobileImplTest,
        CheckAllowedParameters_NoAppWithSameConnectionKey_UNSUCCESS) {
   MessageSharedPtr message = CreateMessage();
-  CommandPtr command = CreateCommand<UCommandRequestImpl>(message);
+  CommandPtr command = CreateCommand<URequestFromMobileImpl>(message);
   EXPECT_CALL(app_mngr_, application(_)).WillOnce(Return(MockAppPtr()));
   EXPECT_FALSE(command->CheckPermissions());
 }
 
-TEST_F(CommandRequestImplTest, CheckAllowedParameters_NoMsgParamsMap_SUCCESS) {
+TEST_F(RequestFromMobileImplTest,
+       CheckAllowedParameters_NoMsgParamsMap_SUCCESS) {
   MockAppPtr mock_app = CreateMockApp();
   ON_CALL(app_mngr_, application(_)).WillByDefault(Return(mock_app));
   ON_CALL(*mock_app, GetWindowIds())
@@ -380,7 +383,7 @@ TEST_F(CommandRequestImplTest, CheckAllowedParameters_NoMsgParamsMap_SUCCESS) {
   (*message)[strings::msg_params] =
       smart_objects::SmartObject(smart_objects::SmartType_Map);
 
-  CommandPtr command = CreateCommand<UCommandRequestImpl>(message);
+  CommandPtr command = CreateCommand<URequestFromMobileImpl>(message);
 
   EXPECT_CALL(app_mngr_, CheckPolicyPermissions(_, _, _, _, _))
       .WillOnce(Return(kMobResultSuccess));
@@ -388,7 +391,7 @@ TEST_F(CommandRequestImplTest, CheckAllowedParameters_NoMsgParamsMap_SUCCESS) {
   EXPECT_TRUE(command->CheckPermissions());
 }
 
-TEST_F(CommandRequestImplTest,
+TEST_F(RequestFromMobileImplTest,
        CheckAllowedParameters_WrongPolicyPermissions_UNSUCCESS) {
   MockAppPtr mock_app = CreateMockApp();
   ON_CALL(app_mngr_, application(_)).WillByDefault(Return(mock_app));
@@ -405,7 +408,7 @@ TEST_F(CommandRequestImplTest,
   (*message)[strings::params][strings::message_type] =
       mobile_apis::messageType::request;
 
-  CommandPtr command = CreateCommand<UCommandRequestImpl>(message);
+  CommandPtr command = CreateCommand<URequestFromMobileImpl>(message);
 
   EXPECT_CALL(*mock_app, app_id())
       .Times(1)
@@ -425,12 +428,12 @@ ACTION_P(GetArg3, output) {
   *output = arg3;
 }
 
-TEST_F(CommandRequestImplTest, CheckAllowedParameters_MsgParamsMap_SUCCESS) {
+TEST_F(RequestFromMobileImplTest, CheckAllowedParameters_MsgParamsMap_SUCCESS) {
   MessageSharedPtr msg = CreateMessage();
   (*msg)[strings::params][strings::connection_key] = kConnectionKey;
   (*msg)[strings::msg_params][kPolicyAppId] = true;
 
-  CommandPtr command = CreateCommand<UCommandRequestImpl>(msg);
+  CommandPtr command = CreateCommand<URequestFromMobileImpl>(msg);
 
   MockAppPtr app = CreateMockApp();
   ON_CALL(app_mngr_, application(_)).WillByDefault(Return(app));
@@ -449,14 +452,14 @@ TEST_F(CommandRequestImplTest, CheckAllowedParameters_MsgParamsMap_SUCCESS) {
               std::find(params.begin(), params.end(), kPolicyAppId));
 }
 
-TEST_F(CommandRequestImplTest, AddDisallowedParameters_SUCCESS) {
+TEST_F(RequestFromMobileImplTest, AddDisallowedParameters_SUCCESS) {
   am::VehicleData vehicle_data;
   vehicle_data.insert(am::VehicleData::value_type(
       kDisallowedParam1, mobile_apis::VehicleDataType::VEHICLEDATA_MYKEY));
 
   MessageSharedPtr msg;
 
-  CommandPtr command = CreateCommand<UCommandRequestImpl>(msg);
+  CommandPtr command = CreateCommand<URequestFromMobileImpl>(msg);
 
   ON_CALL(mock_message_helper_, vehicle_data())
       .WillByDefault(ReturnRef(vehicle_data));
@@ -469,22 +472,9 @@ TEST_F(CommandRequestImplTest, AddDisallowedParameters_SUCCESS) {
   EXPECT_TRUE((*msg)[strings::msg_params].keyExists(kDisallowedParam1));
 }
 
-TEST_F(CommandRequestImplTest, SendResponse_TimedOut_UNSUCCESS) {
-  CommandPtr command = CreateCommand<UCommandRequestImpl>();
-
-  command->set_current_state(RequestState::kTimedOut);
-
-  EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(_, _)).Times(0);
-
-  // Args do not affect on anything in this case;
-  command->SendResponse(true, kMobResultSuccess, NULL, NULL);
-
-  EXPECT_EQ(RequestState::kTimedOut, command->current_state());
-}
-
-TEST_F(CommandRequestImplTest, SendResponse_SUCCESS) {
+TEST_F(RequestFromMobileImplTest, SendResponse_SUCCESS) {
   MessageSharedPtr msg;
-  CommandPtr command = CreateCommand<UCommandRequestImpl>(msg);
+  CommandPtr command = CreateCommand<URequestFromMobileImpl>(msg);
 
   EXPECT_TRUE(smart_objects::SmartType_Null == (*msg).getType());
 
@@ -496,12 +486,10 @@ TEST_F(CommandRequestImplTest, SendResponse_SUCCESS) {
   // Args do not affect on anything in this case;
   command->SendResponse(true, kMobResultSuccess, NULL, NULL);
 
-  EXPECT_EQ(RequestState::kCompleted, command->current_state());
-
   EXPECT_TRUE(smart_objects::SmartType_Map == (*msg).getType());
 }
 
-TEST_F(CommandRequestImplTest,
+TEST_F(RequestFromMobileImplTest,
        SendResponse_AddDisallowedParametersToInfo_SUCCESS) {
   am::VehicleData vehicle_data;
   vehicle_data.insert(am::VehicleData::value_type(
@@ -511,7 +499,7 @@ TEST_F(CommandRequestImplTest,
   (*msg)[strings::params][strings::function_id] =
       mobile_apis::FunctionID::SubscribeVehicleDataID;
 
-  CommandPtr command = CreateCommand<UCommandRequestImpl>(msg);
+  CommandPtr command = CreateCommand<URequestFromMobileImpl>(msg);
 
   command->removed_parameters_permissions().disallowed_params.insert(
       kDisallowedParam1);
@@ -526,17 +514,16 @@ TEST_F(CommandRequestImplTest,
 
   command->SendResponse(true, kMobResultSuccess, NULL, NULL);
 
-  EXPECT_EQ(RequestState::kCompleted, command->current_state());
-
   EXPECT_TRUE((*result)[strings::msg_params].keyExists(strings::info));
   EXPECT_FALSE(
       (*result)[strings::msg_params][strings::info].asString().empty());
 }
 
-TEST_F(CommandRequestImplTest, HashUpdateAllowed_UpdateExpected) {
+TEST_F(RequestFromMobileImplTest, HashUpdateAllowed_UpdateExpected) {
   MessageSharedPtr msg;
-  CommandPtr command = CreateCommand<UCommandRequestImpl>(msg);
-  command->SetHashUpdateMode(CommandRequestImpl::HashUpdateMode::kDoHashUpdate);
+  CommandPtr command = CreateCommand<URequestFromMobileImpl>(msg);
+  command->SetHashUpdateMode(
+      RequestFromMobileImpl::HashUpdateMode::kDoHashUpdate);
 
   MessageSharedPtr result;
 
@@ -553,11 +540,11 @@ TEST_F(CommandRequestImplTest, HashUpdateAllowed_UpdateExpected) {
   command.reset();
 }
 
-TEST_F(CommandRequestImplTest, HashUpdateDisallowed_HashUpdateNotExpected) {
+TEST_F(RequestFromMobileImplTest, HashUpdateDisallowed_HashUpdateNotExpected) {
   MessageSharedPtr msg;
-  CommandPtr command = CreateCommand<UCommandRequestImpl>(msg);
+  CommandPtr command = CreateCommand<URequestFromMobileImpl>(msg);
   command->SetHashUpdateMode(
-      CommandRequestImpl::HashUpdateMode::kSkipHashUpdate);
+      RequestFromMobileImpl::HashUpdateMode::kSkipHashUpdate);
 
   MessageSharedPtr result;
 
@@ -573,10 +560,11 @@ TEST_F(CommandRequestImplTest, HashUpdateDisallowed_HashUpdateNotExpected) {
   command.reset();
 }
 
-TEST_F(CommandRequestImplTest, RequestFailed_HashUpdateNotExpected) {
+TEST_F(RequestFromMobileImplTest, RequestFailed_HashUpdateNotExpected) {
   MessageSharedPtr msg;
-  CommandPtr command = CreateCommand<UCommandRequestImpl>(msg);
-  command->SetHashUpdateMode(CommandRequestImpl::HashUpdateMode::kDoHashUpdate);
+  CommandPtr command = CreateCommand<URequestFromMobileImpl>(msg);
+  command->SetHashUpdateMode(
+      RequestFromMobileImpl::HashUpdateMode::kDoHashUpdate);
 
   MessageSharedPtr result;
 
@@ -592,10 +580,11 @@ TEST_F(CommandRequestImplTest, RequestFailed_HashUpdateNotExpected) {
   command.reset();
 }
 
-TEST_F(CommandRequestImplTest, AppNotFound_HashUpdateNotExpected) {
+TEST_F(RequestFromMobileImplTest, AppNotFound_HashUpdateNotExpected) {
   MessageSharedPtr msg;
-  CommandPtr command = CreateCommand<UCommandRequestImpl>(msg);
-  command->SetHashUpdateMode(CommandRequestImpl::HashUpdateMode::kDoHashUpdate);
+  CommandPtr command = CreateCommand<URequestFromMobileImpl>(msg);
+  command->SetHashUpdateMode(
+      RequestFromMobileImpl::HashUpdateMode::kDoHashUpdate);
 
   MessageSharedPtr result;
 
@@ -612,7 +601,7 @@ TEST_F(CommandRequestImplTest, AppNotFound_HashUpdateNotExpected) {
   command.reset();
 }
 
-TEST_F(CommandRequestImplTest, SendProviderRequest_ByServiceType) {
+TEST_F(RequestFromMobileImplTest, SendProviderRequest_ByServiceType) {
   auto last_state = std::make_shared<resumption::LastStateWrapperImpl>(
       std::make_shared<resumption::LastStateImpl>(kAppStorageFolder,
                                                   kAppInfoStorage));
@@ -633,7 +622,7 @@ TEST_F(CommandRequestImplTest, SendProviderRequest_ByServiceType) {
       mobile_apis::FunctionID::GetAppServiceDataID;
   (*msg)[strings::msg_params][strings::service_type] = "MEDIA";
 
-  CommandPtr command = CreateCommand<UCommandRequestImpl>(msg);
+  CommandPtr command = CreateCommand<URequestFromMobileImpl>(msg);
   command->SendProviderRequest(
       mobile_apis::FunctionID::GetAppServiceDataID,
       hmi_apis::FunctionID::AppService_GetAppServiceData,
@@ -641,7 +630,7 @@ TEST_F(CommandRequestImplTest, SendProviderRequest_ByServiceType) {
       true);
 }
 
-TEST_F(CommandRequestImplTest, SendProviderRequest_ByProviderID) {
+TEST_F(RequestFromMobileImplTest, SendProviderRequest_ByProviderID) {
   auto last_state = std::make_shared<resumption::LastStateWrapperImpl>(
       std::make_shared<resumption::LastStateImpl>(kAppStorageFolder,
                                                   kAppInfoStorage));
@@ -662,7 +651,7 @@ TEST_F(CommandRequestImplTest, SendProviderRequest_ByProviderID) {
       mobile_apis::FunctionID::GetAppServiceDataID;
   (*msg)[strings::msg_params][strings::service_id] = "serviceid12345";
 
-  CommandPtr command = CreateCommand<UCommandRequestImpl>(msg);
+  CommandPtr command = CreateCommand<URequestFromMobileImpl>(msg);
   command->SendProviderRequest(
       mobile_apis::FunctionID::GetAppServiceDataID,
       hmi_apis::FunctionID::AppService_GetAppServiceData,
@@ -670,7 +659,7 @@ TEST_F(CommandRequestImplTest, SendProviderRequest_ByProviderID) {
       true);
 }
 
-TEST_F(CommandRequestImplTest, SendProviderRequestToHMI_ByProviderID) {
+TEST_F(RequestFromMobileImplTest, SendProviderRequestToHMI_ByProviderID) {
   auto last_state = std::make_shared<resumption::LastStateWrapperImpl>(
       std::make_shared<resumption::LastStateImpl>(kAppStorageFolder,
                                                   kAppInfoStorage));
@@ -691,7 +680,7 @@ TEST_F(CommandRequestImplTest, SendProviderRequestToHMI_ByProviderID) {
       mobile_apis::FunctionID::GetAppServiceDataID;
   (*msg)[strings::msg_params][strings::service_id] = "serviceid12345";
 
-  CommandPtr command = CreateCommand<UCommandRequestImpl>(msg);
+  CommandPtr command = CreateCommand<URequestFromMobileImpl>(msg);
   command->SendProviderRequest(
       mobile_apis::FunctionID::GetAppServiceDataID,
       hmi_apis::FunctionID::AppService_GetAppServiceData,

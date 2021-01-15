@@ -59,6 +59,7 @@ namespace hmi_response = am::hmi_response;
 using am::ApplicationSet;
 using am::commands::MessageSharedPtr;
 using am::event_engine::Event;
+using application_manager::event_engine::EventObserver;
 using connection_handler_test::MockConnectionHandler;
 using policy_test::MockPolicyHandlerInterface;
 using sdl_rpc_plugin::commands::SDLActivateAppRequest;
@@ -503,10 +504,11 @@ TEST_F(SDLActivateAppRequestTest, OnTimeout_SUCCESS) {
 
   std::shared_ptr<SDLActivateAppRequest> command(
       CreateCommand<SDLActivateAppRequest>(msg));
-  ON_CALL(mock_event_dispatcher_, remove_observer(_, _));
+  ON_CALL(mock_event_dispatcher_,
+          remove_observer(_, testing::Matcher<EventObserver&>(_)));
   EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_, _)).WillOnce(Return(true));
 
-  command->onTimeOut();
+  command->OnTimeOut();
 }
 
 TEST_F(SDLActivateAppRequestTest, OnEvent_InvalidEventId_UNSUCCESS) {

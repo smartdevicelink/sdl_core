@@ -62,7 +62,7 @@ TEST_F(BasicCommunicationGetSystemTimeRequestTest, OnTimeout) {
       .WillByDefault(ReturnRef(mock_protocol_handler));
   EXPECT_CALL(mock_protocol_handler, NotifyOnGetSystemTimeFailed());
 
-  command->onTimeOut();
+  command->OnTimeOut();
 }
 
 }  // namespace basic_communication_get_system_time_request

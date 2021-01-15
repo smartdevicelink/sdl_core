@@ -59,7 +59,7 @@ void UIGetCapabilitiesRequest::Run() {
   SendRequest();
 }
 
-void UIGetCapabilitiesRequest::onTimeOut() {
+void UIGetCapabilitiesRequest::OnTimeOut() {
   SDL_LOG_AUTO_TRACE();
   hmi_capabilities_.UpdateRequestsRequiredForCapabilities(
       hmi_apis::FunctionID::UI_GetCapabilities);

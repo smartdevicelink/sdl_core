@@ -60,7 +60,7 @@ void NaviSubscribeWayPointsRequest::Run() {
   SendRequest();
 }
 
-void NaviSubscribeWayPointsRequest::onTimeOut() {
+void NaviSubscribeWayPointsRequest::OnTimeOut() {
   auto& resume_ctrl = application_manager_.resume_controller();
 
   resume_ctrl.HandleOnTimeOut(

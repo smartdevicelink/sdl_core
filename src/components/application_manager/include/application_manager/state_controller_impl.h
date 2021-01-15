@@ -103,6 +103,10 @@ class StateControllerImpl : public event_engine::EventObserver,
       ApplicationSharedPtr app,
       const mobile_apis::HMILevel::eType default_level) OVERRIDE;
 
+  // EventObserver interface
+  void HandleOnEvent(const event_engine::Event& event) OVERRIDE;
+  void HandleOnEvent(const event_engine::MobileEvent& event) OVERRIDE;
+
   void OnAppWindowAdded(
       ApplicationSharedPtr app,
       const WindowID window_id,
@@ -120,10 +124,6 @@ class StateControllerImpl : public event_engine::EventObserver,
 
   bool IsStateActive(HmiState::StateID state_id) const OVERRIDE;
 
-  // EventObserver interface
-  void on_event(const event_engine::Event& event) OVERRIDE;
-  void on_event(const event_engine::MobileEvent& event) OVERRIDE;
-
   void ActivateDefaultWindow(ApplicationSharedPtr app) OVERRIDE;
   void ExitDefaultWindow(ApplicationSharedPtr app) OVERRIDE;
   void DeactivateApp(ApplicationSharedPtr app,
@@ -139,6 +139,7 @@ class StateControllerImpl : public event_engine::EventObserver,
   int64_t RequestHMIStateChange(ApplicationConstSharedPtr app,
                                 hmi_apis::Common_HMILevel::eType level,
                                 bool send_policy_priority);
+
   /**
    * @brief The HmiLevelConflictResolver struct
    * Move other application to HmiStates if applied moved to FULL or LIMITED

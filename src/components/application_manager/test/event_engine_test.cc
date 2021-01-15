@@ -125,7 +125,7 @@ class EventEngineTest : public testing::Test {
         event_id, correlation_id, event_observer_mock_);
     event_->set_smart_object(so);
 
-    EXPECT_CALL(event_observer_mock_, on_event(An<const Event&>()))
+    EXPECT_CALL(event_observer_mock_, HandleOnEvent(An<const Event&>()))
         .Times(calls_number);
     event_dispatcher_instance_->raise_event(*event_);
   }

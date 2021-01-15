@@ -205,7 +205,7 @@ void VehicleInfoPendingResumptionHandler::TriggerPendingResumption() {
   }
 }
 
-void VehicleInfoPendingResumptionHandler::on_event(
+void VehicleInfoPendingResumptionHandler::HandleOnEvent(
     const application_manager::event_engine::Event& event) {
   SDL_LOG_AUTO_TRACE();
   sync_primitives::AutoLock lock(pending_resumption_lock_);

@@ -77,7 +77,7 @@ void VISubscribeVehicleDataRequest::Run() {
   SendRequest();
 }
 
-void VISubscribeVehicleDataRequest::onTimeOut() {
+void VISubscribeVehicleDataRequest::OnTimeOut() {
   event_engine::Event timeout_event(
       hmi_apis::FunctionID::VehicleInfo_SubscribeVehicleData);
   SDL_LOG_AUTO_TRACE();

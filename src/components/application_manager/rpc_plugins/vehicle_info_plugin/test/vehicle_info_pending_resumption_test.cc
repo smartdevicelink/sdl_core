@@ -380,7 +380,7 @@ TEST_F(VehicleInfoPendingResumptionHandlerTest,
               raise_event(EventCheck(subscribed_correlation_id,
                                      expected_data_in_event)));
 
-  resumption_handler_->on_event(event);
+  resumption_handler_->HandleOnEvent(event);
   EXPECT_TRUE(ext->isSubscribedToVehicleInfo("gps"));
   EXPECT_TRUE(ext->isSubscribedToVehicleInfo("speed"));
   EXPECT_EQ(ext->PendingSubscriptions().GetData().size(), 0u);
@@ -427,7 +427,7 @@ TEST_F(VehicleInfoPendingResumptionHandlerTest,
                                      expected_data_in_event)));
 
   // TODO check that raized the same fid and cid as subscribed
-  resumption_handler_->on_event(event);
+  resumption_handler_->HandleOnEvent(event);
   EXPECT_TRUE(ext->isSubscribedToVehicleInfo("gps"));
   EXPECT_FALSE(ext->isSubscribedToVehicleInfo("speed"));
   EXPECT_EQ(ext->PendingSubscriptions().GetData().size(), 0u);
@@ -469,7 +469,7 @@ TEST_F(VehicleInfoPendingResumptionHandlerTest,
   resumption_handler_->HandleResumptionSubscriptionRequest(*ext, *mock_app);
 
   // TODO check that raized the same fid and cid as subscribed
-  resumption_handler_->on_event(event);
+  resumption_handler_->HandleOnEvent(event);
   EXPECT_FALSE(ext->isSubscribedToVehicleInfo("gps"));
   EXPECT_FALSE(ext->isSubscribedToVehicleInfo("speed"));
   EXPECT_EQ(ext->PendingSubscriptions().GetData().size(), 0u);
@@ -506,7 +506,7 @@ TEST_F(VehicleInfoPendingResumptionHandlerTest,
   resumption_handler_->HandleResumptionSubscriptionRequest(*ext, *mock_app);
 
   // TODO check that raized the same fid and cid as subscribed
-  resumption_handler_->on_event(event);
+  resumption_handler_->HandleOnEvent(event);
   EXPECT_FALSE(ext->isSubscribedToVehicleInfo("gps"));
   EXPECT_FALSE(ext->isSubscribedToVehicleInfo("speed"));
   EXPECT_EQ(ext->PendingSubscriptions().GetData().size(), 0u);
@@ -550,7 +550,7 @@ TEST_F(VehicleInfoPendingResumptionHandlerTest, TwoAppsOneSharedDataSuccess) {
   resumption_handler_->HandleResumptionSubscriptionRequest(*ext, *mock_app);
   resumption_handler_->HandleResumptionSubscriptionRequest(*ext2, *mock_app2);
   // TODO check that raized the same fid and cid as subscribed
-  resumption_handler_->on_event(event);
+  resumption_handler_->HandleOnEvent(event);
   EXPECT_TRUE(ext->isSubscribedToVehicleInfo("gps"));
   EXPECT_TRUE(ext2->isSubscribedToVehicleInfo("gps"));
   EXPECT_EQ(ext->PendingSubscriptions().GetData().size(), 0u);
@@ -599,7 +599,7 @@ TEST_F(VehicleInfoPendingResumptionHandlerTest,
   resumption_handler_->HandleResumptionSubscriptionRequest(*ext, *mock_app);
   resumption_handler_->HandleResumptionSubscriptionRequest(*ext2, *mock_app2);
   // TODO check that raized the same fid and cid as subscribed
-  resumption_handler_->on_event(event);
+  resumption_handler_->HandleOnEvent(event);
   EXPECT_TRUE(ext->isSubscribedToVehicleInfo("gps"));
   EXPECT_TRUE(ext->isSubscribedToVehicleInfo("speed"));
   EXPECT_TRUE(ext2->isSubscribedToVehicleInfo("gps"));
@@ -648,7 +648,7 @@ TEST_F(VehicleInfoPendingResumptionHandlerTest,
   resumption_handler_->HandleResumptionSubscriptionRequest(*ext, *mock_app);
   resumption_handler_->HandleResumptionSubscriptionRequest(*ext2, *mock_app2);
   // TODO check that raized the same fid and cid as subscribed
-  resumption_handler_->on_event(event);
+  resumption_handler_->HandleOnEvent(event);
 
   const std::map<std::string, hmi_apis::Common_VehicleDataResultCode::eType>
       second_subscriptions_result = {
@@ -661,7 +661,7 @@ TEST_F(VehicleInfoPendingResumptionHandlerTest,
       VehicleInfo_SubscribeVehicleData);
   second_event.set_smart_object(second_response);
 
-  resumption_handler_->on_event(second_event);
+  resumption_handler_->HandleOnEvent(second_event);
   EXPECT_FALSE(ext->isSubscribedToVehicleInfo("gps"));
   EXPECT_TRUE(ext2->isSubscribedToVehicleInfo("gps"));
   EXPECT_EQ(ext->PendingSubscriptions().GetData().size(), 0u);

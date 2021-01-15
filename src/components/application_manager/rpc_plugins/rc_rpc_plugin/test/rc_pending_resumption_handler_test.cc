@@ -369,7 +369,7 @@ TEST_F(RCPendingResumptionHandlerTest,
 
   EXPECT_CALL(event_dispatcher_mock_, raise_event(EventCheck(kAppId_2)));
 
-  resumption_handler_->on_event(event);
+  resumption_handler_->HandleOnEvent(event);
 }
 
 TEST_F(RCPendingResumptionHandlerTest,
@@ -415,7 +415,7 @@ TEST_F(RCPendingResumptionHandlerTest,
   EXPECT_CALL(mock_rpc_service_,
               ManageHMICommand(MessageCheck(kAppId_2), kSourceHMI));
 
-  resumption_handler_->on_event(event);
+  resumption_handler_->HandleOnEvent(event);
 }
 
 }  // namespace rc_rpc_plugin_test

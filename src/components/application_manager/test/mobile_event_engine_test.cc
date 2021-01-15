@@ -116,7 +116,7 @@ class MobileEventEngineTest : public testing::Test {
     event_dispatcher_instance_->add_mobile_observer(
         event_id, correlation_id, event_observer_mock_);
     event_->set_smart_object(so);
-    EXPECT_CALL(event_observer_mock_, on_event(An<const MobileEvent&>()))
+    EXPECT_CALL(event_observer_mock_, HandleOnEvent(An<const MobileEvent&>()))
         .Times(calls_number);
     event_dispatcher_instance_->raise_mobile_event(*event_);
   }

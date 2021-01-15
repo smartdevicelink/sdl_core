@@ -33,7 +33,7 @@
 #ifndef SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_APP_SERVICE_RPC_PLUGIN_INCLUDE_APP_SERVICE_RPC_PLUGIN_COMMANDS_MOBILE_UNPUBLISH_APP_SERVICE_REQUEST_H_
 #define SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_APP_SERVICE_RPC_PLUGIN_INCLUDE_APP_SERVICE_RPC_PLUGIN_COMMANDS_MOBILE_UNPUBLISH_APP_SERVICE_REQUEST_H_
 
-#include "application_manager/commands/command_request_impl.h"
+#include "application_manager/commands/request_from_mobile_impl.h"
 
 namespace app_service_rpc_plugin {
 namespace app_mngr = application_manager;
@@ -44,7 +44,7 @@ namespace commands {
  * @brief UnpublishAppServiceRequest command class
  **/
 class UnpublishAppServiceRequest
-    : public app_mngr::commands::CommandRequestImpl {
+    : public app_mngr::commands::RequestFromMobileImpl {
  public:
   /**
    * @brief UnpublishAppServiceRequest class constructor

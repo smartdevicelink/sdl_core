@@ -34,7 +34,7 @@
 #ifndef SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_MOBILE_GET_VEHICLE_DATA_REQUEST_H_
 #define SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_MOBILE_GET_VEHICLE_DATA_REQUEST_H_
 
-#include "application_manager/commands/command_request_impl.h"
+#include "application_manager/commands/request_from_mobile_impl.h"
 #include "utils/macro.h"
 #include "vehicle_info_plugin/vehicle_info_command_params.h"
 
@@ -46,7 +46,7 @@ namespace commands {
 /**
  * @brief GetVehicleDataRequest command class
  **/
-class GetVehicleDataRequest : public app_mngr::commands::CommandRequestImpl {
+class GetVehicleDataRequest : public app_mngr::commands::RequestFromMobileImpl {
  public:
   /**
    * @brief GetVehicleDataRequest class constructor
@@ -67,7 +67,7 @@ class GetVehicleDataRequest : public app_mngr::commands::CommandRequestImpl {
   virtual void Run();
 
  protected:
-  virtual void on_event(const app_mngr::event_engine::Event& event);
+  void on_event(const app_mngr::event_engine::Event& event) OVERRIDE;
 
  private:
   /**

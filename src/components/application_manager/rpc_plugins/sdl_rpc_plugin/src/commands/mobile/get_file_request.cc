@@ -67,11 +67,11 @@ GetFileRequest::GetFileRequest(
     app_mngr::rpc_service::RPCService& rpc_service,
     app_mngr::HMICapabilities& hmi_capabilities,
     policy::PolicyHandlerInterface& policy_handler)
-    : CommandRequestImpl(message,
-                         application_manager,
-                         rpc_service,
-                         hmi_capabilities,
-                         policy_handler)
+    : RequestFromMobileImpl(message,
+                            application_manager,
+                            rpc_service,
+                            hmi_capabilities,
+                            policy_handler)
     , file_name_("")
     , file_type_(mobile_apis::FileType::INVALID_ENUM)
     , length_(0)

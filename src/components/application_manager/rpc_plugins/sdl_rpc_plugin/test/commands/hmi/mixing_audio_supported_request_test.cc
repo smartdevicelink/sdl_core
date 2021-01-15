@@ -70,6 +70,8 @@ TEST_F(MixingAudioSupportedRequestTest, RUN_SendRequest_SUCCESS) {
   (*command_msg)[am::strings::params][am::strings::connection_key] =
       kConnectionKey;
 
+  InitEventDispatcher();
+
   RequestToHMIPtr command(
       CreateCommand<MixingAudioSupportedRequest>(command_msg));
   EXPECT_CALL(mock_rpc_service_, SendMessageToHMI(command_msg));

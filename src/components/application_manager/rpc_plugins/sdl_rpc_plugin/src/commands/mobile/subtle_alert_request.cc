@@ -48,11 +48,11 @@ SubtleAlertRequest::SubtleAlertRequest(
     rpc_service::RPCService& rpc_service,
     HMICapabilities& hmi_capabilities,
     policy::PolicyHandlerInterface& policy_handler)
-    : CommandRequestImpl(message,
-                         application_manager,
-                         rpc_service,
-                         hmi_capabilities,
-                         policy_handler)
+    : RequestFromMobileImpl(message,
+                            application_manager,
+                            rpc_service,
+                            hmi_capabilities,
+                            policy_handler)
     , awaiting_ui_subtle_alert_response_(false)
     , awaiting_tts_speak_response_(false)
     , awaiting_tts_stop_speaking_response_(false)

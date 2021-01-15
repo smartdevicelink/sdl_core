@@ -59,7 +59,7 @@ void VRGetSupportedLanguagesRequest::Run() {
   SendRequest();
 }
 
-void VRGetSupportedLanguagesRequest::onTimeOut() {
+void VRGetSupportedLanguagesRequest::OnTimeOut() {
   SDL_LOG_AUTO_TRACE();
   hmi_capabilities_.UpdateRequestsRequiredForCapabilities(
       hmi_apis::FunctionID::VR_GetSupportedLanguages);

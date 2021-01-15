@@ -77,6 +77,7 @@ class UIGetCapabilitiesRequestTest
 
 TEST_F(UIGetCapabilitiesRequestTest, RUN_SendRequest_SUCCESS) {
   MessageSharedPtr command_msg = CreateCommandMsg();
+  InitEventDispatcher();
   RequestToHMIPtr command(CreateCommand<UIGetCapabilitiesRequest>(command_msg));
 
   EXPECT_CALL(mock_rpc_service_, SendMessageToHMI(command_msg));
@@ -92,6 +93,7 @@ TEST_F(UIGetCapabilitiesRequestTest, RUN_SendRequest_SUCCESS) {
 
 TEST_F(UIGetCapabilitiesRequestTest, onTimeOut_UIGetCapabilitiesUpdated) {
   MessageSharedPtr command_msg = CreateCommandMsg();
+  InitEventDispatcher();
   RequestToHMIPtr command(CreateCommand<UIGetCapabilitiesRequest>(command_msg));
 
   EXPECT_CALL(mock_hmi_capabilities_,
@@ -100,7 +102,7 @@ TEST_F(UIGetCapabilitiesRequestTest, onTimeOut_UIGetCapabilitiesUpdated) {
   ASSERT_TRUE(command->Init());
 
   command->Run();
-  command->onTimeOut();
+  command->OnTimeOut();
 
   EXPECT_EQ(CommandImpl::hmi_protocol_type_,
             (*command_msg)[strings::params][strings::protocol_type].asInt());

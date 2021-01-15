@@ -272,7 +272,7 @@ void SDLActivateAppRequest::Run() {
 }
 
 #endif  // EXTERNAL_PROPRIETARY_MODE
-void SDLActivateAppRequest::onTimeOut() {
+void SDLActivateAppRequest::OnTimeOut() {
   using namespace hmi_apis::FunctionID;
   using namespace hmi_apis::Common_Result;
   using namespace application_manager;

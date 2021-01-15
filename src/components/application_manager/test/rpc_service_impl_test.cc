@@ -43,6 +43,7 @@
 #include "application_manager/mock_application_manager.h"
 #include "application_manager/mock_command_factory.h"
 #include "application_manager/mock_command_holder.h"
+#include "application_manager/mock_event_dispatcher.h"
 #include "application_manager/mock_message_helper.h"
 #include "application_manager/mock_request.h"
 #include "application_manager/mock_request_controller_settings.h"
@@ -66,6 +67,7 @@ using test::components::protocol_handler_test::MockProtocolHandler;
 typedef smart_objects::SmartObjectSPtr MessageSharedPtr;
 typedef utils::Optional<am::plugin_manager::RPCPlugin> PluginOpt;
 using test::components::application_manager_test::MockAppServiceManager;
+using test::components::event_engine_test::MockEventDispatcher;
 using ::testing::_;
 using ::testing::NiceMock;
 using ::testing::Return;
@@ -86,7 +88,7 @@ const int32_t kConnectionSessionsCount = 2;
 class RPCServiceImplTest : public ::testing::Test {
  public:
   RPCServiceImplTest()
-      : request_controller_(mock_request_controler_)
+      : request_controller_(mock_request_controler_, mock_event_dispatcher_)
       , mock_rpc_protection_manager_(
             std::make_shared<
                 testing::NiceMock<am::MockRPCProtectionManager> >())
@@ -146,6 +148,7 @@ class RPCServiceImplTest : public ::testing::Test {
   testing::NiceMock<MockRequestControlerSettings> mock_request_controler_;
   testing::NiceMock<MockProtocolHandler> mock_protocol_handler_;
   am::request_controller::RequestController request_controller_;
+  MockEventDispatcher mock_event_dispatcher_;
   testing::NiceMock<MockHMIMessageHandler> mock_hmi_handler_;
   testing::NiceMock<MockCommandHolder> mock_command_holder_;
   std::shared_ptr<am::MockRPCProtectionManager> mock_rpc_protection_manager_;

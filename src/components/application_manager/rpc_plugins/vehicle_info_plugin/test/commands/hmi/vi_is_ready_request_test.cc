@@ -210,7 +210,7 @@ TEST_F(VIIsReadyRequestTest, Run_HMIDoestRespond_SendMessageToHMIByTimeout) {
   ASSERT_TRUE(command_->Init());
 
   command_->Run();
-  command_->onTimeOut();
+  command_->OnTimeOut();
 }
 
 }  // namespace vi_is_ready_request

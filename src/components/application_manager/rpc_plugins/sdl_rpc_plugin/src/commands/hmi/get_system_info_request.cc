@@ -61,7 +61,7 @@ void GetSystemInfoRequest::Run() {
   SendRequest();
 }
 
-void GetSystemInfoRequest::onTimeOut() {
+void GetSystemInfoRequest::OnTimeOut() {
   SDL_LOG_AUTO_TRACE();
   hmi_capabilities_.UpdateCachedCapabilities();
 }

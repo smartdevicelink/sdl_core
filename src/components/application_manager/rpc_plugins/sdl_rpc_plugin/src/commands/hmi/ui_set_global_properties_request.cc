@@ -60,7 +60,7 @@ void UISetGlobalPropertiesRequest::Run() {
   SendRequest();
 }
 
-void UISetGlobalPropertiesRequest::onTimeOut() {
+void UISetGlobalPropertiesRequest::OnTimeOut() {
   auto& resume_ctrl = application_manager_.resume_controller();
   resume_ctrl.HandleOnTimeOut(
       correlation_id(),

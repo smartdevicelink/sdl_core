@@ -52,15 +52,11 @@ DeleteCommandRequest::DeleteCommandRequest(
     rpc_service::RPCService& rpc_service,
     HMICapabilities& hmi_capabilities,
     policy::PolicyHandlerInterface& policy_handler)
-    : CommandRequestImpl(message,
-                         application_manager,
-                         rpc_service,
-                         hmi_capabilities,
-                         policy_handler)
-    , is_ui_send_(false)
-    , is_vr_send_(false)
-    , is_ui_received_(false)
-    , is_vr_received_(false)
+    : RequestFromMobileImpl(message,
+                            application_manager,
+                            rpc_service,
+                            hmi_capabilities,
+                            policy_handler)
     , ui_result_(hmi_apis::Common_Result::INVALID_ENUM)
     , vr_result_(hmi_apis::Common_Result::INVALID_ENUM) {}
 
@@ -99,17 +95,11 @@ void DeleteCommandRequest::Run() {
   /* Need to set all flags before sending request to HMI
    * for correct processing this flags in method on_event */
   if (command.keyExists(strings::menu_params)) {
-    is_ui_send_ = true;
-  }
-  // check vr params
-  if (command.keyExists(strings::vr_commands)) {
-    is_vr_send_ = true;
-  }
-  if (is_ui_send_) {
     StartAwaitForInterface(HmiInterfaces::HMI_INTERFACE_UI);
     SendHMIRequest(hmi_apis::FunctionID::UI_DeleteCommand, &msg_params, true);
   }
-  if (is_vr_send_) {
+  // check vr params
+  if (command.keyExists(strings::vr_commands)) {
     // VR params
     msg_params[strings::grammar_id] = application->get_grammar_id();
     msg_params[strings::type] = hmi_apis::Common_VRCommandType::Command;
@@ -151,7 +141,6 @@ void DeleteCommandRequest::on_event(const event_engine::Event& event) {
   switch (event.id()) {
     case hmi_apis::FunctionID::UI_DeleteCommand: {
       EndAwaitForInterface(HmiInterfaces::HMI_INTERFACE_UI);
-      is_ui_received_ = true;
       ui_result_ = static_cast<hmi_apis::Common_Result::eType>(
           message[strings::params][hmi_response::code].asInt());
       SDL_LOG_DEBUG("Received UI_DeleteCommand event with result "
@@ -161,7 +150,6 @@ void DeleteCommandRequest::on_event(const event_engine::Event& event) {
     }
     case hmi_apis::FunctionID::VR_DeleteCommand: {
       EndAwaitForInterface(HmiInterfaces::HMI_INTERFACE_VR);
-      is_vr_received_ = true;
       vr_result_ = static_cast<hmi_apis::Common_Result::eType>(
           message[strings::params][hmi_response::code].asInt());
       SDL_LOG_DEBUG("Received VR_DeleteCommand event with result "
@@ -214,11 +202,6 @@ void DeleteCommandRequest::on_event(const event_engine::Event& event) {
 bool DeleteCommandRequest::Init() {
   hash_update_mode_ = HashUpdateMode::kDoHashUpdate;
   return true;
-}
-
-bool DeleteCommandRequest::IsPendingResponseExist() {
-  SDL_LOG_AUTO_TRACE();
-  return is_ui_send_ != is_ui_received_ || is_vr_send_ != is_vr_received_;
 }
 
 }  // namespace commands

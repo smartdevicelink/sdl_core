@@ -65,7 +65,7 @@ class TTSGetSupportedLanguagesRequest
 
   void Run() OVERRIDE;
 
-  void onTimeOut() OVERRIDE;
+  void OnTimeOut() OVERRIDE;
 
  private:
   DISALLOW_COPY_AND_ASSIGN(TTSGetSupportedLanguagesRequest);

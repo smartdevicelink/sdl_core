@@ -31,6 +31,7 @@
  */
 
 #include "application_manager/hmi_language_handler.h"
+
 #include "application_manager/application_manager.h"
 #include "application_manager/hmi_capabilities.h"
 #include "application_manager/message_helper.h"
@@ -119,7 +120,7 @@ hmi_apis::Common_Language::eType HMILanguageHandler::get_language_for(
   return Common_Language::INVALID_ENUM;
 }
 
-void HMILanguageHandler::on_event(const event_engine::Event& event) {
+void HMILanguageHandler::HandleOnEvent(const event_engine::Event& event) {
   SDL_LOG_AUTO_TRACE();
   smart_objects::SmartObject msg = event.smart_object();
   switch (event.id()) {

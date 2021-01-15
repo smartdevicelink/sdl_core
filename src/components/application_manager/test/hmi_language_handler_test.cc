@@ -143,10 +143,10 @@ TEST_F(HmiLanguageHandlerTest, OnEvent_AllLanguageIsReceivedAndSame_SUCCESS) {
   // Repeatedly add events to set `is_*_language_received_` flags up
 
   Event ui_event(hmi_apis::FunctionID::UI_GetLanguage);
-  hmi_language_handler_->on_event(ui_event);
+  hmi_language_handler_->HandleOnEvent(ui_event);
 
   Event vr_event(hmi_apis::FunctionID::VR_GetLanguage);
-  hmi_language_handler_->on_event(vr_event);
+  hmi_language_handler_->HandleOnEvent(vr_event);
 
   // After last flag gets up, `VerifyWithPersistedLanguages`
   // method been called to and then will call `hmi_capabilities`
@@ -173,14 +173,14 @@ TEST_F(HmiLanguageHandlerTest, OnEvent_AllLanguageIsReceivedAndSame_SUCCESS) {
   EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(_, _)).Times(0);
   EXPECT_CALL(app_manager_, UnregisterApplication(_, _, _, _)).Times(0);
   Event tts_event(hmi_apis::FunctionID::TTS_GetLanguage);
-  hmi_language_handler_->on_event(tts_event);
+  hmi_language_handler_->HandleOnEvent(tts_event);
 }
 
 TEST_F(HmiLanguageHandlerTest, OnEvent_AllReceivedLanguagesMismatch_SUCCESS) {
   Event ui_event(hmi_apis::FunctionID::UI_GetLanguage);
-  hmi_language_handler_->on_event(ui_event);
+  hmi_language_handler_->HandleOnEvent(ui_event);
   Event vr_event(hmi_apis::FunctionID::VR_GetLanguage);
-  hmi_language_handler_->on_event(vr_event);
+  hmi_language_handler_->HandleOnEvent(vr_event);
 
   ON_CALL(app_manager_, hmi_capabilities())
       .WillByDefault(ReturnRef(hmi_capabilities_));
@@ -212,14 +212,14 @@ TEST_F(HmiLanguageHandlerTest, OnEvent_AllReceivedLanguagesMismatch_SUCCESS) {
   EXPECT_CALL(app_manager_, UnregisterApplication(_, _, _, _)).Times(0);
 
   Event tts_event(hmi_apis::FunctionID::TTS_GetLanguage);
-  hmi_language_handler_->on_event(tts_event);
+  hmi_language_handler_->HandleOnEvent(tts_event);
 }
 
 TEST_F(HmiLanguageHandlerTest, OnEvent_AllReceivedLanguagesMismatch_UNSUCCESS) {
   Event ui_event(hmi_apis::FunctionID::UI_GetLanguage);
-  hmi_language_handler_->on_event(ui_event);
+  hmi_language_handler_->HandleOnEvent(ui_event);
   Event vr_event(hmi_apis::FunctionID::VR_GetLanguage);
-  hmi_language_handler_->on_event(vr_event);
+  hmi_language_handler_->HandleOnEvent(vr_event);
 
   ON_CALL(app_manager_, hmi_capabilities())
       .WillByDefault(ReturnRef(hmi_capabilities_));
@@ -242,7 +242,7 @@ TEST_F(HmiLanguageHandlerTest, OnEvent_AllReceivedLanguagesMismatch_UNSUCCESS) {
   ON_CALL(app_manager_, applications()).WillByDefault(Return(data_accessor));
 
   Event tts_event(hmi_apis::FunctionID::TTS_GetLanguage);
-  hmi_language_handler_->on_event(tts_event);
+  hmi_language_handler_->HandleOnEvent(tts_event);
 }
 
 TEST_F(HmiLanguageHandlerTest,
@@ -299,7 +299,7 @@ TEST_F(HmiLanguageHandlerTest,
   event.set_smart_object(msg);
 
   EXPECT_CALL(app_manager_, hmi_capabilities()).Times(0);
-  hmi_language_handler_->on_event(event);
+  hmi_language_handler_->HandleOnEvent(event);
 
   EXPECT_CALL(app_manager_, hmi_capabilities())
       .WillOnce(ReturnRef(hmi_capabilities_));
@@ -327,7 +327,7 @@ TEST_F(HmiLanguageHandlerTest,
       .WillRepeatedly(ReturnRef(mock_rpc_service_));
   EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(_, _)).Times(2);
   EXPECT_CALL(app_manager_, UnregisterApplication(_, _, _, _)).Times(1);
-  hmi_language_handler_->on_event(event);
+  hmi_language_handler_->HandleOnEvent(event);
 }
 
 TEST_F(HmiLanguageHandlerTest, OnUnregisterApp_SUCCESS) {
@@ -339,7 +339,7 @@ TEST_F(HmiLanguageHandlerTest, OnUnregisterApp_SUCCESS) {
   event.set_smart_object(msg);
 
   EXPECT_CALL(app_manager_, hmi_capabilities()).Times(0);
-  hmi_language_handler_->on_event(event);
+  hmi_language_handler_->HandleOnEvent(event);
 
   hmi_language_handler_->OnUnregisterApplication(app_id);
 
@@ -356,7 +356,7 @@ TEST_F(HmiLanguageHandlerTest, OnUnregisterApp_SUCCESS) {
   EXPECT_CALL(app_manager_, GetRPCService()).Times(0);
   EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(_, _)).Times(0);
   EXPECT_CALL(app_manager_, UnregisterApplication(_, _, _, _)).Times(0);
-  hmi_language_handler_->on_event(event);
+  hmi_language_handler_->HandleOnEvent(event);
 }
 }  // namespace hmi_language_handler
 }  // namespace components

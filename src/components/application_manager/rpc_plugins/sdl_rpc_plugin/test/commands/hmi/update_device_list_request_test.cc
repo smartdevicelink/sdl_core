@@ -64,6 +64,7 @@ namespace strings = am::strings;
 namespace hmi_response = am::hmi_response;
 using am::commands::CommandImpl;
 using am::event_engine::Event;
+using application_manager::event_engine::EventObserver;
 using sdl_rpc_plugin::commands::UpdateDeviceListRequest;
 
 typedef std::shared_ptr<UpdateDeviceListRequest> UpdateDeviceListRequestPtr;
@@ -156,7 +157,8 @@ TEST_F(UpdateDeviceListRequestTest, OnEvent_SUCCESS) {
 
   EXPECT_CALL(app_mngr_, event_dispatcher())
       .WillOnce(ReturnRef(mock_event_dispatcher_));
-  EXPECT_CALL(mock_event_dispatcher_, remove_observer(_, _));
+  EXPECT_CALL(mock_event_dispatcher_,
+              remove_observer(_, testing::Matcher<EventObserver&>(_)));
   EXPECT_CALL(mock_event_dispatcher_, remove_observer(_));
 
   UpdateDeviceListRequestPtr command(CreateCommand<UpdateDeviceListRequest>());

@@ -76,7 +76,7 @@ class SDLActivateAppRequest : public app_mngr::commands::RequestFromHMI {
    * @brief onTimeOut allows to process case when timeout has appeared
    * during request execution.
    */
-  void onTimeOut() OVERRIDE;
+  void OnTimeOut() OVERRIDE;
 
   /**
    * @brief on_event allows to handle events

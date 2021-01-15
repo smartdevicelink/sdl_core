@@ -74,6 +74,7 @@ using ::testing::_;
 using ::testing::InSequence;
 using ::testing::Return;
 using namespace smart_objects;
+using app_mngr::commands::RequestFromMobileImpl;
 
 namespace custom_str = utils::custom_string;
 namespace strings = ::application_manager::strings;
@@ -222,10 +223,9 @@ class AddCommandRequestTest
         mock_rpc_service_,
         ManageMobileCommand(response,
                             am::commands::Command::CommandSource::SOURCE_SDL));
-
-    std::shared_ptr<CommandRequestImpl> base_class_request =
-        static_cast<std::shared_ptr<CommandRequestImpl> >(request_ptr);
-    base_class_request->onTimeOut();
+    std::shared_ptr<RequestFromMobileImpl> base_class_request =
+        static_cast<std::shared_ptr<RequestFromMobileImpl> >(request_ptr);
+    base_class_request->OnTimeOut();
   }
 
   MessageSharedPtr msg_;
@@ -607,22 +607,41 @@ TEST_F(AddCommandRequestTest, OnTimeOut_EXPECT_UI_DeleteCommand) {
 }
 
 TEST_F(AddCommandRequestTest, OnEvent_BothSend_SUCCESS) {
-  MessageSharedPtr command_msg = CreateMessage(SmartType_Map);
-  (*command_msg)[params][connection_key] = kConnectionKey;
-  MessageSharedPtr event_msg = CreateMessage(SmartType_Map);
-  (*event_msg)[params][hmi_response::code] = hmi_apis::Common_Result::SUCCESS;
-  (*event_msg)[msg_params][cmd_id] = kCmdId;
+  CreateBasicParamsVRRequest();
+  CreateBasicParamsUIRequest();
+  SmartObject& params = (*msg_)[strings::params];
+  params[hmi_response::code] = hmi_apis::Common_Result::WARNINGS;
+  SmartObject& image = (*msg_)[msg_params][cmd_icon];
+  EXPECT_CALL(mock_message_helper_, VerifyImage(image, _, _))
+      .WillOnce(Return(mobile_apis::Result::SUCCESS));
 
   Event event_ui(hmi_apis::FunctionID::UI_AddCommand);
-  event_ui.set_smart_object(*event_msg);
-
+  event_ui.set_smart_object(*msg_);
   Event event_vr(hmi_apis::FunctionID::VR_AddCommand);
-  event_vr.set_smart_object(*event_msg);
+  event_vr.set_smart_object(*msg_);
+
+  am::CommandsMap commands_map;
+  EXPECT_CALL(*mock_app_, commands_map())
+      .WillRepeatedly(Return(DataAccessor<application_manager::CommandsMap>(
+          commands_map, lock_ptr_)));
+
+  EXPECT_CALL(
+      mock_rpc_service_,
+      ManageHMICommand(HMIResultCodeIs(hmi_apis::FunctionID::UI_AddCommand), _))
+      .WillOnce(Return(true));
+  EXPECT_CALL(
+      mock_rpc_service_,
+      ManageHMICommand(HMIResultCodeIs(hmi_apis::FunctionID::VR_AddCommand), _))
+      .WillOnce(Return(true));
+
+  EXPECT_CALL(*mock_app_, help_prompt_manager())
+      .WillOnce(ReturnRef(*mock_help_prompt_manager_));
+  EXPECT_CALL(*mock_help_prompt_manager_, OnVrCommandAdded(kCmdId, _, false));
 
   EXPECT_CALL(*mock_app_, RemoveCommand(kCmdId)).Times(0);
 
   std::shared_ptr<AddCommandRequest> request_ptr =
-      CreateCommand<AddCommandRequest>(command_msg);
+      CreateCommand<AddCommandRequest>(msg_);
   request_ptr->Run();
   request_ptr->on_event(event_ui);
   request_ptr->on_event(event_vr);
@@ -1096,11 +1115,10 @@ TEST_F(AddCommandRequestTest,
   EXPECT_CALL(mock_rpc_service_,
               ManageMobileCommand(
                   response, am::commands::Command::CommandSource::SOURCE_SDL));
-
-  std::shared_ptr<CommandRequestImpl> base_class_request =
-      static_cast<std::shared_ptr<CommandRequestImpl> >(
+  std::shared_ptr<RequestFromMobileImpl> base_class_request =
+      static_cast<std::shared_ptr<RequestFromMobileImpl> >(
           CreateCommand<AddCommandRequest>(msg_));
-  base_class_request->onTimeOut();
+  base_class_request->OnTimeOut();
 }
 
 TEST_F(AddCommandRequestTest, OnTimeOut_AppRemoveCommandCalled) {
@@ -1147,10 +1165,9 @@ TEST_F(AddCommandRequestTest, OnTimeOut_AppRemoveCommandCalled) {
   EXPECT_CALL(mock_rpc_service_,
               ManageMobileCommand(
                   response, am::commands::Command::CommandSource::SOURCE_SDL));
-
-  std::shared_ptr<CommandRequestImpl> base_class_request =
-      static_cast<std::shared_ptr<CommandRequestImpl> >(request_ptr);
-  base_class_request->onTimeOut();
+  std::shared_ptr<RequestFromMobileImpl> base_class_request =
+      static_cast<std::shared_ptr<RequestFromMobileImpl> >(request_ptr);
+  base_class_request->OnTimeOut();
 }
 
 }  // namespace add_command_request

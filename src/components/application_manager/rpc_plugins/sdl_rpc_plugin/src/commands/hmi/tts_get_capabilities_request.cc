@@ -59,7 +59,7 @@ void TTSGetCapabilitiesRequest::Run() {
   SendRequest();
 }
 
-void TTSGetCapabilitiesRequest::onTimeOut() {
+void TTSGetCapabilitiesRequest::OnTimeOut() {
   SDL_LOG_AUTO_TRACE();
   hmi_capabilities_.UpdateRequestsRequiredForCapabilities(
       hmi_apis::FunctionID::TTS_GetCapabilities);

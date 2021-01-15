@@ -55,7 +55,7 @@ class UICreateWindowRequest : public app_mngr::commands::RequestToHMI {
 
   void Run() FINAL;
 
-  void onTimeOut() FINAL;
+  void OnTimeOut() FINAL;
 
  private:
   DISALLOW_COPY_AND_ASSIGN(UICreateWindowRequest);

@@ -184,7 +184,7 @@ TEST_F(PerformAudioPassThruRequestTest, OnTimeout_GENERIC_ERROR) {
       ManageMobileCommand(_, am::commands::Command::CommandSource::SOURCE_SDL))
       .WillOnce(DoAll(SaveArg<0>(&vr_command_result), Return(true)));
 
-  command->onTimeOut();
+  command->OnTimeOut();
   EXPECT_EQ((*vr_command_result)[am::strings::msg_params][am::strings::success]
                 .asBool(),
             false);
@@ -756,10 +756,20 @@ TEST_F(PerformAudioPassThruRequestTest,
   // For setting current_state_ -> kCompleted
 
   EXPECT_CALL(mock_rpc_service_, ManageMobileCommand(_, _));
-  command_sptr_->SendResponse(true, am::mobile_api::Result::SUCCESS);
   EXPECT_CALL(mock_rpc_service_, ManageHMICommand(_, _)).Times(0);
 
-  command_sptr_->onTimeOut();
+  MessageSharedPtr timeout_response =
+      CreateMessage(smart_objects::SmartType_Map);
+  (*timeout_response)[am::strings::msg_params][am::strings::result_code] =
+      am::mobile_api::Result::GENERIC_ERROR;
+  (*timeout_response)[am::strings::msg_params][am::strings::success] = false;
+
+  EXPECT_CALL(
+      mock_message_helper_,
+      CreateNegativeResponse(_, _, _, mobile_apis::Result::GENERIC_ERROR))
+      .WillOnce(Return(timeout_response));
+
+  command_sptr_->OnTimeOut();
 }
 
 TEST_F(PerformAudioPassThruRequestTest,
@@ -830,7 +840,7 @@ TEST_F(PerformAudioPassThruRequestTest,
                   HMIResultCodeIs(hmi_apis::FunctionID::TTS_StopSpeaking), _))
       .WillOnce(Return(false));
 
-  command_sptr_->onTimeOut();
+  command_sptr_->OnTimeOut();
 }
 
 }  // namespace perform_audio_pass_thru_request

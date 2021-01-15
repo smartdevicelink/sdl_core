@@ -53,11 +53,11 @@ CreateWindowRequest::CreateWindowRequest(
     rpc_service::RPCService& rpc_service,
     HMICapabilities& hmi_capabilities,
     policy::PolicyHandlerInterface& policy_handler)
-    : CommandRequestImpl(message,
-                         application_manager,
-                         rpc_service,
-                         hmi_capabilities,
-                         policy_handler) {}
+    : RequestFromMobileImpl(message,
+                            application_manager,
+                            rpc_service,
+                            hmi_capabilities,
+                            policy_handler) {}
 
 CreateWindowRequest::~CreateWindowRequest() {}
 
@@ -214,7 +214,7 @@ void CreateWindowRequest::on_event(const event_engine::Event& event) {
   EndAwaitForInterface(HmiInterfaces::HMI_INTERFACE_UI);
 
   const smart_objects::SmartObject& response_message = event.smart_object();
-  const auto result_code = CommandRequestImpl::GetMobileResultCode(
+  const auto result_code = RequestFromMobileImpl::GetMobileResultCode(
       static_cast<hmi_apis::Common_Result::eType>(
           response_message[strings::params][hmi_response::code].asInt()));
 

@@ -37,7 +37,7 @@
 #include <string>
 
 #include "application_manager/application.h"
-#include "application_manager/commands/command_request_impl.h"
+#include "application_manager/commands/request_from_mobile_impl.h"
 #include "utils/macro.h"
 
 namespace sdl_rpc_plugin {
@@ -48,7 +48,7 @@ namespace commands {
 /**
  * @brief AddCommandRequest command class
  **/
-class AddCommandRequest : public app_mngr::commands::CommandRequestImpl {
+class AddCommandRequest : public app_mngr::commands::RequestFromMobileImpl {
  public:
   /**
    * @brief AddCommandRequest class constructor
@@ -71,18 +71,9 @@ class AddCommandRequest : public app_mngr::commands::CommandRequestImpl {
    **/
   void Run() FINAL;
 
-  /**
-   * @brief Interface method that is called whenever new event received
-   *
-   * @param event The received event
-   */
   void on_event(const app_mngr::event_engine::Event& event) FINAL;
 
-  /**
-   * @brief Function is called by RequestController when request execution time
-   * has exceed it's limit
-   */
-  void onTimeOut() FINAL;
+  void OnTimeOut() FINAL;
 
   /**
    * @brief Init sets hash update mode for request
@@ -127,13 +118,6 @@ class AddCommandRequest : public app_mngr::commands::CommandRequestImpl {
 
   DISALLOW_COPY_AND_ASSIGN(AddCommandRequest);
 
-  /*
-   * @brief Check if there some not delivered hmi responses exist
-   *
-   * @return true if all responses received
-   */
-  bool IsPendingResponseExist();
-
   /**
    * @brief Checks add command param
    * When type is String there is a check on the contents \t\n \\t \\n
@@ -150,17 +134,14 @@ class AddCommandRequest : public app_mngr::commands::CommandRequestImpl {
    * @return info for mobile response
    */
   const std::string GenerateMobileResponseInfo();
-  bool send_ui_;
-  bool send_vr_;
-
-  bool is_ui_received_;
-  bool is_vr_received_;
 
   std::string ui_info_;
   std::string vr_info_;
 
   hmi_apis::Common_Result::eType ui_result_;
   hmi_apis::Common_Result::eType vr_result_;
+  bool ui_is_sent_;
+  bool vr_is_sent_;
 };
 
 }  // namespace commands

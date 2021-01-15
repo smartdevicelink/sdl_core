@@ -155,7 +155,7 @@ TEST_F(CommandImplTest, GetMethods_SUCCESS) {
   EXPECT_EQ(kConnectionKey, command->connection_key());
   EXPECT_EQ(kFunctionId, command->function_id());
   EXPECT_NO_THROW(command->Run());
-  EXPECT_NO_THROW(command->onTimeOut());
+  EXPECT_NO_THROW(command->HandleTimeOut());
 }
 
 TEST_F(CommandImplTest, ReplaceMobileWithHMIAppId_NoAppIdInMessage_UNSUCCESS) {

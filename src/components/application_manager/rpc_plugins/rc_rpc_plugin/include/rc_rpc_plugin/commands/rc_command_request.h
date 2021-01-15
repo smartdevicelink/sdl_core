@@ -33,7 +33,7 @@
 #ifndef SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_RC_RPC_PLUGIN_INCLUDE_RC_RPC_PLUGIN_COMMANDS_RC_COMMAND_REQUEST_H_
 #define SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_RC_RPC_PLUGIN_INCLUDE_RC_RPC_PLUGIN_COMMANDS_RC_COMMAND_REQUEST_H_
 
-#include "application_manager/commands/command_request_impl.h"
+#include "application_manager/commands/request_from_mobile_impl.h"
 #include "rc_rpc_plugin/commands/rc_command_params.h"
 #include "rc_rpc_plugin/interior_data_cache.h"
 #include "rc_rpc_plugin/rc_app_extension.h"
@@ -48,7 +48,7 @@ enum TypeAccess { kDisallowed, kAllowed };
 
 namespace commands {
 
-class RCCommandRequest : public app_mngr::commands::CommandRequestImpl {
+class RCCommandRequest : public app_mngr::commands::RequestFromMobileImpl {
  public:
   /**
    * @brief RCCommandRequest class constructor
@@ -65,11 +65,11 @@ class RCCommandRequest : public app_mngr::commands::CommandRequestImpl {
 
   virtual ~RCCommandRequest();
 
-  void onTimeOut() OVERRIDE;
+  void OnTimeOut() OVERRIDE;
 
   void Run() OVERRIDE;
 
-  virtual void on_event(const app_mngr::event_engine::Event& event) OVERRIDE;
+  void on_event(const app_mngr::event_engine::Event& event) OVERRIDE;
 
  protected:
   bool is_subscribed;

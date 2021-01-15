@@ -53,12 +53,11 @@ RequestFromHMI::RequestFromHMI(const MessageSharedPtr& message,
                                rpc_service::RPCService& rpc_service,
                                HMICapabilities& hmi_capabilities,
                                policy::PolicyHandlerInterface& policy_handler)
-    : CommandImpl(message,
-                  application_manager,
-                  rpc_service,
-                  hmi_capabilities,
-                  policy_handler)
-    , EventObserver(application_manager.event_dispatcher()) {
+    : CommandRequestImpl(message,
+                         application_manager,
+                         rpc_service,
+                         hmi_capabilities,
+                         policy_handler) {
   // Replace HMI app id with Mobile connection id
   ReplaceHMIWithMobileAppId(*message);
 }
@@ -78,6 +77,8 @@ void RequestFromHMI::Run() {}
 void RequestFromHMI::on_event(const event_engine::Event& event) {}
 
 void RequestFromHMI::on_event(const event_engine::MobileEvent& event) {}
+
+void RequestFromHMI::OnTimeOut() {}
 
 void RequestFromHMI::SendResponse(
     const bool success,

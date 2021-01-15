@@ -61,12 +61,7 @@ class BasicCommunicationGetSystemTimeRequest
       app_mngr::HMICapabilities& hmi_capabilities,
       policy::PolicyHandlerInterface& policy_handler);
 
-  /**
-   * @brief onTimeOut allows to handle case when
-   * system does not respond for certain request in
-   * appropriate time window.
-   */
-  void onTimeOut() FINAL;
+  void OnTimeOut() FINAL;
 };
 
 }  // namespace commands

@@ -242,7 +242,7 @@ TEST_F(TTSIsReadyRequestTest,
   ASSERT_TRUE(command_->Init());
 
   command_->Run();
-  command_->onTimeOut();
+  command_->OnTimeOut();
 }
 
 }  // namespace tts_is_ready_request

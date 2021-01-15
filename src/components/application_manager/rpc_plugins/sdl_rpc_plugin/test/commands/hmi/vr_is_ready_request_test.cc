@@ -192,7 +192,7 @@ TEST_F(VRIsReadyRequestTest,
        Run_HMIDoestRespond_SendMessageToHMIByTimeout_CacheIsAbsent) {
   HMICapabilitiesExpectations();
   ExpectSendMessagesToHMI();
-  command_->onTimeOut();
+  command_->OnTimeOut();
 }
 
 }  // namespace vr_is_ready_request

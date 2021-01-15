@@ -89,7 +89,7 @@ class PolicyEventObserverTest : public ::testing::Test {
     EXPECT_CALL(policy_handler_mock_,
                 PTUpdatedAt(Counters::KILOMETERS, field_value))
         .Times(pt_updated_calls_number);
-    policy_event_observer_->on_event(*event_);
+    policy_event_observer_->HandleOnEvent(*event_);
   }
 
   void DeleteEvent() {

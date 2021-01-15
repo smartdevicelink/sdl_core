@@ -73,11 +73,11 @@ SetGlobalPropertiesRequest::SetGlobalPropertiesRequest(
     app_mngr::rpc_service::RPCService& rpc_service,
     app_mngr::HMICapabilities& hmi_capabilities,
     policy::PolicyHandlerInterface& policy_handler)
-    : CommandRequestImpl(message,
-                         application_manager,
-                         rpc_service,
-                         hmi_capabilities,
-                         policy_handler)
+    : RequestFromMobileImpl(message,
+                            application_manager,
+                            rpc_service,
+                            hmi_capabilities,
+                            policy_handler)
     , is_ui_send_(false)
     , is_tts_send_(false)
     , is_rc_send_(false)
@@ -414,10 +414,10 @@ bool SetGlobalPropertiesRequest::Init() {
   return true;
 }
 
-void SetGlobalPropertiesRequest::onTimeOut() {
+void SetGlobalPropertiesRequest::OnTimeOut() {
   SDL_LOG_AUTO_TRACE();
 
-  CommandRequestImpl::onTimeOut();
+  RequestFromMobileImpl::HandleTimeOut();
 
   auto& resume_ctrl = application_manager_.resume_controller();
 
@@ -443,7 +443,7 @@ bool SetGlobalPropertiesRequest::PrepareResponseParameters(
   bool result = false;
 
   if (!is_rc_send_) {
-    result = CommandRequestImpl::PrepareResultForMobileResponse(
+    result = RequestFromMobileImpl::PrepareResultForMobileResponse(
         ui_properties_info, tts_properties_info);
   } else {
     result = PrepareResultForMobileResponse(
@@ -464,7 +464,7 @@ bool SetGlobalPropertiesRequest::PrepareResponseParameters(
   }
 
   if (!is_rc_send_) {
-    result_code = CommandRequestImpl::PrepareResultCodeForResponse(
+    result_code = RequestFromMobileImpl::PrepareResultCodeForResponse(
         ui_properties_info, tts_properties_info);
   } else {
     result_code = PrepareResultCodeForResponse(
@@ -505,8 +505,9 @@ bool SetGlobalPropertiesRequest::PrepareResultForMobileResponse(
       (hmi_apis::Common_Result::UNSUPPORTED_RESOURCE == first.result_code) ||
       (hmi_apis::Common_Result::UNSUPPORTED_RESOURCE == second.result_code);
 
-  const bool final_result = CommandRequestImpl::CheckResult(both_info, third) ||
-                            CommandRequestImpl::CheckResult(third, both_info);
+  const bool final_result =
+      RequestFromMobileImpl::CheckResultCode(both_info, third) ||
+      RequestFromMobileImpl::CheckResultCode(third, both_info);
 
   return final_result;
 }

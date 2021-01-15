@@ -56,6 +56,7 @@ using am::MockMessageHelper;
 using am::commands::CommandImpl;
 using am::commands::MessageSharedPtr;
 using am::event_engine::Event;
+using app_mngr::commands::RequestFromMobileImpl;
 using policy_test::MockPolicyHandlerInterface;
 using sdl_rpc_plugin::commands::AlertRequest;
 using ::testing::_;
@@ -207,7 +208,7 @@ TEST_F(AlertRequestTest, OnTimeout_GENERIC_ERROR) {
       ManageMobileCommand(_, am::commands::Command::CommandSource::SOURCE_SDL))
       .WillOnce(DoAll(SaveArg<0>(&ui_command_result), Return(true)));
 
-  command->onTimeOut();
+  command->OnTimeOut();
   EXPECT_EQ((*ui_command_result)[am::strings::msg_params][am::strings::success]
                 .asBool(),
             false);
@@ -259,13 +260,13 @@ TEST_F(AlertRequestTest, OnEvent_UI_HmiSendSuccess_UNSUPPORTED_RESOURCE) {
 
 class CallOnTimeOut {
  public:
-  CallOnTimeOut(CommandRequestImpl& command) : command_(command) {}
+  CallOnTimeOut(RequestFromMobileImpl& command) : command_(command) {}
 
   void operator()() {
-    command_.onTimeOut();
+    command_.OnTimeOut();
   }
 
-  CommandRequestImpl& command_;
+  RequestFromMobileImpl& command_;
 };
 
 TEST_F(AlertRequestTest, Init_DurationExists_SUCCESS) {

@@ -36,6 +36,7 @@
 
 #include "application_manager/application_manager.h"
 #include "application_manager/commands/command_request_impl.h"
+#include "application_manager/commands/request_from_mobile_impl.h"
 #include "utils/macro.h"
 
 namespace sdl_rpc_plugin {
@@ -46,7 +47,7 @@ namespace commands {
 /**
  * @brief PutFileRequest command class
  **/
-class PutFileRequest : public app_mngr::commands::CommandRequestImpl {
+class PutFileRequest : public app_mngr::commands::RequestFromMobileImpl {
  public:
   /**
    * @brief PutFileRequest class constructor

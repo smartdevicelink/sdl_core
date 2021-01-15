@@ -34,7 +34,7 @@
 #ifndef SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_MOBILE_GET_SYSTEM_CAPABILITY_REQUEST_H_
 #define SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_MOBILE_GET_SYSTEM_CAPABILITY_REQUEST_H_
 
-#include "application_manager/commands/command_request_impl.h"
+#include "application_manager/commands/request_from_mobile_impl.h"
 
 namespace sdl_rpc_plugin {
 namespace app_mngr = application_manager;
@@ -42,7 +42,7 @@ namespace app_mngr = application_manager;
 namespace commands {
 
 class GetSystemCapabilityRequest
-    : public app_mngr::commands::CommandRequestImpl {
+    : public app_mngr::commands::RequestFromMobileImpl {
  public:
   GetSystemCapabilityRequest(
       const app_mngr::commands::MessageSharedPtr& message,
@@ -55,7 +55,7 @@ class GetSystemCapabilityRequest
 
   virtual void Run() OVERRIDE;
 
-  virtual void on_event(const app_mngr::event_engine::Event& event);
+  void on_event(const app_mngr::event_engine::Event& event) OVERRIDE;
 
  private:
   DISALLOW_COPY_AND_ASSIGN(GetSystemCapabilityRequest);

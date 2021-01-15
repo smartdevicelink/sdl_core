@@ -77,6 +77,7 @@ class VRGetLanguageRequestTest
 
 TEST_F(VRGetLanguageRequestTest, RUN_SendRequest_SUCCESS) {
   MessageSharedPtr command_msg = CreateCommandMsg();
+  InitEventDispatcher();
   RequestToHMIPtr command(CreateCommand<VRGetLanguageRequest>(command_msg));
 
   EXPECT_CALL(mock_rpc_service_, SendMessageToHMI(command_msg));
@@ -92,6 +93,7 @@ TEST_F(VRGetLanguageRequestTest, RUN_SendRequest_SUCCESS) {
 
 TEST_F(VRGetLanguageRequestTest, onTimeOut_VRGetLanguageUpdated) {
   MessageSharedPtr command_msg = CreateCommandMsg();
+  InitEventDispatcher();
   RequestToHMIPtr command(CreateCommand<VRGetLanguageRequest>(command_msg));
 
   EXPECT_CALL(mock_hmi_capabilities_,
@@ -100,7 +102,7 @@ TEST_F(VRGetLanguageRequestTest, onTimeOut_VRGetLanguageUpdated) {
   ASSERT_TRUE(command->Init());
 
   command->Run();
-  command->onTimeOut();
+  command->OnTimeOut();
 
   EXPECT_EQ(CommandImpl::hmi_protocol_type_,
             (*command_msg)[strings::params][strings::protocol_type].asInt());

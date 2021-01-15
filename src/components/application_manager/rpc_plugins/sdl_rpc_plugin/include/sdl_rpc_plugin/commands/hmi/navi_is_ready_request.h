@@ -43,8 +43,7 @@ namespace commands {
 /**
  * @brief NaviIsReadyRequest command class
  **/
-class NaviIsReadyRequest : public app_mngr::commands::RequestToHMI,
-                           public app_mngr::event_engine::EventObserver {
+class NaviIsReadyRequest : public app_mngr::commands::RequestToHMI {
  public:
   /**
    * @brief NaviIsReadyRequest class constructor

@@ -56,7 +56,7 @@ void VIGetVehicleTypeRequest::Run() {
   SendRequest();
 }
 
-void VIGetVehicleTypeRequest::onTimeOut() {
+void VIGetVehicleTypeRequest::OnTimeOut() {
   SDL_LOG_AUTO_TRACE();
   hmi_capabilities_.UpdateRequestsRequiredForCapabilities(
       hmi_apis::FunctionID::VehicleInfo_GetVehicleType);

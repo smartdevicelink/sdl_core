@@ -47,8 +47,10 @@ class PolicyEventObserver
       policy::PolicyHandlerInterface* const policy_handler,
       application_manager::event_engine::EventDispatcher& event_dispatcher);
   void set_policy_handler(policy::PolicyHandlerInterface* const policy_handler);
-  void on_event(const application_manager::event_engine::Event& event);
-  void on_event(const application_manager::event_engine::MobileEvent& event);
+  void HandleOnEvent(
+      const application_manager::event_engine::Event& event) OVERRIDE;
+  void HandleOnEvent(
+      const application_manager::event_engine::MobileEvent& event) OVERRIDE;
   void subscribe_on_event(
       const application_manager::event_engine::Event::EventID& event_id,
       int32_t hmi_correlation_id = 0);

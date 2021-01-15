@@ -199,7 +199,7 @@ TEST_F(NaviSetVideoConfigRequestTest, OnTimeout) {
 
   EXPECT_CALL(app_mngr_, TerminateRequest(_, _, _)).Times(1);
 
-  command->onTimeOut();
+  command->OnTimeOut();
 }
 
 }  // namespace navi_set_video_config_request
