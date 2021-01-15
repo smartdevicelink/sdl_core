@@ -5553,6 +5553,13 @@
     <param name="audioStreamingIndicator" type="Common.AudioStreamingIndicator" mandatory="false">
       <description>Indicates that a button press of the Play/Pause button would play, pause or Stop the current playback.</description>
     </param>
+    <param name="countRate" type="Float" minvalue="0.1" maxvalue="100.0" defvalue="1.0" mandatory="false">
+      <description>
+        The value of this parameter is the amount that the media clock timer will advance per 1.0 seconds of real time.
+        Values less than 1.0 will therefore advance the timer slower than real-time, while values greater than 1.0 will advance the timer faster than real-time.
+        e.g. If this parameter is set to `0.5`, the timer will advance one second per two seconds real-time, or at 50% speed. If this parameter is set to `2.0`, the timer will advance two seconds per one second real-time, or at 200% speed.
+      </description>
+    </param>
     <param name="appID" type="Integer" mandatory="true">
       <description>ID of application that requested this RPC.</description>
     </param>

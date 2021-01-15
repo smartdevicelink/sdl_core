@@ -87,6 +87,7 @@ class MockAppServiceManager : public application_manager::AppServiceManager {
                     const bool service_published));
   MOCK_METHOD1(UpdateNavigationCapabilities,
                bool(smart_objects::SmartObject& out_params));
+  MOCK_METHOD0(FindWayPointsHandler, application_manager::AppService*());
   MOCK_METHOD0(GetRPCPassingHandler, application_manager::RPCPassingHandler&());
 };
 
