@@ -38,12 +38,14 @@
 #include <utility>
 #include <vector>
 #include "gtest/gtest.h"
+#include "json/reader.h"
 #include "policy/mock_policy_settings.h"
 #include "policy/policy_table/types.h"
 #include "rpc_base/rpc_base.h"
 #include "sqlite_wrapper/sql_query.h"
 #include "utils/file_system.h"
 #include "utils/gen_hash.h"
+#include "utils/jsoncpp_reader_wrapper.h"
 
 using namespace ::policy;
 namespace policy_table = rpc::policy_table_interface_base;
@@ -57,6 +59,40 @@ namespace test {
 namespace components {
 namespace policy_test {
 
+namespace {
+const std::string kSdlPreloadedPtJson = "json/sdl_preloaded_pt.json";
+const std::string kHardwareVersion = "1.1.1.0";
+const std::string kSoftwareVersion = "4.1.3.B_EB355B";
+const std::string kWersCountryCode = "WAEGB";
+const std::string kLanguage = "EN-US";
+}  // namespace
+
+policy_table::Table LoadPreloadedPT(const std::string& filename) {
+  std::ifstream ifile(filename);
+  EXPECT_TRUE(ifile.good());
+  Json::CharReaderBuilder reader_builder;
+  Json::Value root(Json::objectValue);
+  Json::parseFromStream(reader_builder, ifile, &root, nullptr);
+  root["policy_table"]["module_config"].removeMember("preloaded_pt");
+  ifile.close();
+  policy_table::Table table(&root);
+  return table;
+}
+
+Json::Value GetDefaultSnapshotModuleMeta(policy_table::Table& policy_table) {
+  auto json_table = policy_table.ToJsonValue();
+
+  Json::Value default_module_meta = json_table["policy_table"]["module_meta"];
+  default_module_meta["ccpu_version"] = Json::Value("");
+  default_module_meta["hardware_version"] = Json::Value("");
+  default_module_meta["language"] = Json::Value("");
+  default_module_meta["wers_country_code"] = Json::Value("");
+  default_module_meta["pt_exchanged_at_odometer_x"] = Json::Value(0);
+  default_module_meta["pt_exchanged_x_days_after_epoch"] = Json::Value(0);
+  default_module_meta["ignition_cycles_since_last_exchange"] = Json::Value(0);
+  default_module_meta["vin"] = Json::Value("");
+  return default_module_meta;
+}
 class SQLPTExtRepresentationTest : public ::testing::Test {
  public:
   // Collection of pairs of group alias and corresponding group name
@@ -264,163 +300,60 @@ SQLPTExtRepresentationTest::GetDataInternal(
 }
 
 TEST_F(SQLPTExtRepresentationTest,
-       DISABLED_GenerateSnapshot_SetPolicyTable_SnapshotIsPresent) {
-  // TODO(AKutsan): APPLINK-31526 Test requires initial preloaded pt for
-  // preloaded date reading
-  // Arrange
-  Json::Value table(Json::objectValue);
-  table["policy_table"] = Json::Value(Json::objectValue);
+       GenerateSnapshot_DefaultContentOfModuleMeta_MetaInfoPresentInSnapshot) {
+  policy_table::Table update = LoadPreloadedPT(kSdlPreloadedPtJson);
 
-  Json::Value& policy_table = table["policy_table"];
-  policy_table["module_config"] = Json::Value(Json::objectValue);
-  policy_table["functional_groupings"] = Json::Value(Json::objectValue);
-  policy_table["consumer_friendly_messages"] = Json::Value(Json::objectValue);
-  policy_table["app_policies"] = Json::Value(Json::objectValue);
+  ASSERT_TRUE(IsValid(update));
+  EXPECT_TRUE(reps_->Save(update));
 
-  Json::Value& module_config = policy_table["module_config"];
-  module_config["preloaded_date"] = Json::Value("");
-  module_config["exchange_after_x_ignition_cycles"] = Json::Value(10);
-  module_config["exchange_after_x_kilometers"] = Json::Value(100);
-  module_config["exchange_after_x_days"] = Json::Value(5);
-  module_config["timeout_after_x_seconds"] = Json::Value(500);
-  module_config["seconds_between_retries"] = Json::Value(Json::arrayValue);
-  module_config["seconds_between_retries"][0] = Json::Value(10);
-  module_config["seconds_between_retries"][1] = Json::Value(20);
-  module_config["seconds_between_retries"][2] = Json::Value(30);
-  module_config["endpoints"] = Json::Value(Json::objectValue);
-  module_config["endpoints"]["0x00"] = Json::Value(Json::objectValue);
-  module_config["endpoints"]["0x00"]["default"] = Json::Value(Json::arrayValue);
-  module_config["endpoints"]["0x00"]["default"][0] =
-      Json::Value("http://ford.com/cloud/default");
-  module_config["notifications_per_minute_by_priority"] =
-      Json::Value(Json::objectValue);
-  module_config["notifications_per_minute_by_priority"]["emergency"] =
-      Json::Value(1);
-  module_config["notifications_per_minute_by_priority"]["navigation"] =
-      Json::Value(2);
-  module_config["notifications_per_minute_by_priority"]["VOICECOMM"] =
-      Json::Value(3);
-  module_config["notifications_per_minute_by_priority"]["communication"] =
-      Json::Value(4);
-  module_config["notifications_per_minute_by_priority"]["normal"] =
-      Json::Value(5);
-  module_config["notifications_per_minute_by_priority"]["none"] =
-      Json::Value(6);
-  module_config["subtle_notifications_per_minute_by_priority"] =
-      Json::Value(Json::objectValue);
-  module_config["subtle_notifications_per_minute_by_priority"]["emergency"] =
-      Json::Value(7);
-  module_config["subtle_notifications_per_minute_by_priority"]["navigation"] =
-      Json::Value(8);
-  module_config["subtle_notifications_per_minute_by_priority"]["VOICECOMM"] =
-      Json::Value(9);
-  module_config["subtle_notifications_per_minute_by_priority"]
-               ["communication"] = Json::Value(10);
-  module_config["subtle_notifications_per_minute_by_priority"]["normal"] =
-      Json::Value(11);
-  module_config["subtle_notifications_per_minute_by_priority"]["none"] =
-      Json::Value(12);
-  module_config["vehicle_make"] = Json::Value("MakeT");
-  module_config["vehicle_model"] = Json::Value("ModelT");
-  module_config["vehicle_year"] = Json::Value("2014");
-  module_config["certificate"] = Json::Value("my_cert");
+  std::shared_ptr<policy_table::Table> snapshot = reps_->GenerateSnapshot();
 
-  Json::Value& functional_groupings = policy_table["functional_groupings"];
-  functional_groupings["default"] = Json::Value(Json::objectValue);
-  Json::Value& default_group = functional_groupings["default"];
-  default_group["rpcs"] = Json::Value(Json::objectValue);
-  default_group["rpcs"]["Update"] = Json::Value(Json::objectValue);
-  default_group["rpcs"]["Update"]["hmi_levels"] = Json::Value(Json::arrayValue);
-  default_group["rpcs"]["Update"]["hmi_levels"][0] = Json::Value("FULL");
-  default_group["rpcs"]["Update"]["parameters"] = Json::Value(Json::arrayValue);
-  default_group["rpcs"]["Update"]["parameters"][0] = Json::Value("speed");
+  auto expected_module_meta = GetDefaultSnapshotModuleMeta(update);
+  auto& snapshot_module_meta = snapshot->policy_table.module_meta;
+  EXPECT_EQ(expected_module_meta.toStyledString(),
+            snapshot_module_meta.ToJsonValue().toStyledString());
+}
 
-  Json::Value& consumer_friendly_messages =
-      policy_table["consumer_friendly_messages"];
-  consumer_friendly_messages["version"] = Json::Value("1.2");
-  consumer_friendly_messages["messages"] = Json::Value(Json::objectValue);
-  consumer_friendly_messages["messages"]["MSG1"] =
-      Json::Value(Json::objectValue);
-  Json::Value& msg1 = consumer_friendly_messages["messages"]["MSG1"];
-  msg1["languages"] = Json::Value(Json::objectValue);
-  msg1["languages"]["en-us"] = Json::Value(Json::objectValue);
-  msg1["languages"]["en-us"]["tts"] = Json::Value("TTS message");
-  msg1["languages"]["en-us"]["label"] = Json::Value("LABEL message");
-  msg1["languages"]["en-us"]["line1"] = Json::Value("LINE1 message");
-  msg1["languages"]["en-us"]["line2"] = Json::Value("LINE2 message");
-  msg1["languages"]["en-us"]["textBody"] = Json::Value("TEXTBODY message");
+TEST_F(
+    SQLPTExtRepresentationTest,
+    GenerateSnapshot_SetMandatoryMetaInfo_MandatoryMetaInfoIsPresentInSnapshot) {
+  policy_table::Table update = LoadPreloadedPT(kSdlPreloadedPtJson);
 
-  Json::Value& app_policies = policy_table["app_policies"];
-  app_policies["default"] = Json::Value(Json::objectValue);
-  app_policies["default"]["memory_kb"] = Json::Value(50);
-  app_policies["default"]["heart_beat_timeout_ms"] = Json::Value(100);
-  app_policies["default"]["groups"] = Json::Value(Json::arrayValue);
-  app_policies["default"]["groups"][0] = Json::Value("default");
-  app_policies["default"]["priority"] = Json::Value("EMERGENCY");
-  app_policies["default"]["default_hmi"] = Json::Value("FULL");
-  app_policies["default"]["keep_context"] = Json::Value(true);
-  app_policies["default"]["steal_focus"] = Json::Value(true);
-  app_policies["pre_DataConsent"] = Json::Value(Json::objectValue);
-  app_policies["pre_DataConsent"]["memory_kb"] = Json::Value(50);
-  app_policies["pre_DataConsent"]["heart_beat_timeout_ms"] = Json::Value(100);
-  app_policies["pre_DataConsent"]["groups"] = Json::Value(Json::arrayValue);
-  app_policies["pre_DataConsent"]["groups"][0] = Json::Value("default");
-  app_policies["pre_DataConsent"]["priority"] = Json::Value("EMERGENCY");
-  app_policies["pre_DataConsent"]["default_hmi"] = Json::Value("FULL");
-  app_policies["pre_DataConsent"]["keep_context"] = Json::Value(true);
-  app_policies["pre_DataConsent"]["steal_focus"] = Json::Value(true);
-  app_policies["1234"] = Json::Value(Json::objectValue);
-  app_policies["1234"]["memory_kb"] = Json::Value(50);
-  app_policies["1234"]["heart_beat_timeout_ms"] = Json::Value(100);
-  app_policies["1234"]["groups"] = Json::Value(Json::arrayValue);
-  app_policies["1234"]["groups"][0] = Json::Value("default");
-  app_policies["1234"]["priority"] = Json::Value("EMERGENCY");
-  app_policies["1234"]["default_hmi"] = Json::Value("FULL");
-  app_policies["1234"]["keep_context"] = Json::Value(true);
-  app_policies["1234"]["steal_focus"] = Json::Value(true);
-  app_policies["device"] = Json::Value(Json::objectValue);
-  app_policies["device"]["groups"] = Json::Value(Json::arrayValue);
-  app_policies["device"]["groups"][0] = Json::Value("default");
-  app_policies["device"]["priority"] = Json::Value("EMERGENCY");
-  app_policies["device"]["default_hmi"] = Json::Value("FULL");
-  app_policies["device"]["keep_context"] = Json::Value(true);
-  app_policies["device"]["steal_focus"] = Json::Value(true);
-
-  policy_table::Table update(&table);
-  update.SetPolicyTableType(rpc::policy_table_interface_base::PT_UPDATE);
-
-  // Assert
   ASSERT_TRUE(IsValid(update));
   ASSERT_TRUE(reps_->Save(update));
 
-  // Act
+  EXPECT_TRUE(
+      reps_->SetMetaInfo(kSoftwareVersion, kWersCountryCode, kLanguage));
+
   std::shared_ptr<policy_table::Table> snapshot = reps_->GenerateSnapshot();
-  snapshot->SetPolicyTableType(rpc::policy_table_interface_base::PT_SNAPSHOT);
 
-  policy_table["module_meta"] = Json::Value(Json::objectValue);
-  policy_table["usage_and_error_counts"] = Json::Value(Json::objectValue);
-  policy_table["device_data"] = Json::Value(Json::objectValue);
-  policy_table["module_config"]["preloaded_pt"] = Json::Value(false);
+  auto expected_module_meta = GetDefaultSnapshotModuleMeta(update);
+  expected_module_meta["ccpu_version"] = Json::Value(kSoftwareVersion);
+  expected_module_meta["language"] = Json::Value(kLanguage);
+  expected_module_meta["wers_country_code"] = Json::Value(kWersCountryCode);
 
-  Json::Value& module_meta = policy_table["module_meta"];
-  module_meta["ccpu_version"] = Json::Value("");
-  module_meta["language"] = Json::Value("");
-  module_meta["wers_country_code"] = Json::Value("");
-  module_meta["pt_exchanged_at_odometer_x"] = Json::Value(0);
-  module_meta["pt_exchanged_x_days_after_epoch"] = Json::Value(0);
-  module_meta["ignition_cycles_since_last_exchange"] = Json::Value(0);
-  module_meta["vin"] = Json::Value("");
+  auto& snapshot_module_meta = snapshot->policy_table.module_meta;
+  EXPECT_EQ(expected_module_meta.toStyledString(),
+            snapshot_module_meta.ToJsonValue().toStyledString());
+}
 
-  Json::Value& usage_and_error_counts = policy_table["usage_and_error_counts"];
-  usage_and_error_counts["count_of_iap_buffer_full"] = Json::Value(0);
-  usage_and_error_counts["count_sync_out_of_memory"] = Json::Value(0);
-  usage_and_error_counts["count_of_sync_reboots"] = Json::Value(0);
+TEST_F(SQLPTExtRepresentationTest,
+       GenerateSnapshot_SetHardwareVersion_HardwareVersionIsPresentInSnapshot) {
+  policy_table::Table update = LoadPreloadedPT(kSdlPreloadedPtJson);
 
-  policy_table::Table expected(&table);
+  ASSERT_TRUE(IsValid(update));
+  EXPECT_TRUE(reps_->Save(update));
 
-  // Assert
-  EXPECT_EQ(expected.ToJsonValue().toStyledString(),
-            snapshot->ToJsonValue().toStyledString());
+  reps_->SetHardwareVersion(kHardwareVersion);
+  std::shared_ptr<policy_table::Table> snapshot = reps_->GenerateSnapshot();
+
+  auto expected_module_meta = GetDefaultSnapshotModuleMeta(update);
+  expected_module_meta["hardware_version"] = Json::Value(kHardwareVersion);
+
+  auto& snapshot_module_meta = snapshot->policy_table.module_meta;
+  EXPECT_EQ(expected_module_meta.toStyledString(),
+            snapshot_module_meta.ToJsonValue().toStyledString());
+}
 }
 
 TEST_F(
@@ -1159,7 +1092,8 @@ TEST_F(
 TEST_F(SQLPTExtRepresentationTest,
        SetMetaInfo_SetMetaInfo_ExpectValuesSetInParams) {
   // Arrange
-  ASSERT_TRUE(reps_->SetMetaInfo("4.1.3.B_EB355B", "WAEGB", "ru-ru"));
+  ASSERT_TRUE(
+      reps_->SetMetaInfo(kSoftwareVersion, kWersCountryCode, kLanguage));
   utils::dbms::SQLQuery query(reps_->db());
   const std::string query_select_ccpu =
       "SELECT `ccpu_version` FROM `module_meta`";
@@ -1171,13 +1105,13 @@ TEST_F(SQLPTExtRepresentationTest,
   // Assert
   query.Prepare(query_select_ccpu);
   query.Next();
-  EXPECT_EQ("4.1.3.B_EB355B", query.GetString(0));
+  EXPECT_EQ(kSoftwareVersion, query.GetString(0));
   query.Prepare(query_select_wers_country_code);
   query.Next();
-  EXPECT_EQ("WAEGB", query.GetString(0));
+  EXPECT_EQ(kWersCountryCode, query.GetString(0));
   query.Prepare(query_select_language);
   query.Next();
-  EXPECT_EQ("ru-ru", query.GetString(0));
+  EXPECT_EQ(kLanguage, query.GetString(0));
 }
 
 TEST_F(SQLPTExtRepresentationTest,
@@ -1201,6 +1135,17 @@ TEST_F(SQLPTExtRepresentationTest,
   query.Prepare(query_select_language);
   query.Next();
   EXPECT_EQ("ru-ru", query.GetString(0));
+}
+
+TEST_F(SQLPTExtRepresentationTest, SetHardwareVersion_ValueIsSetInModuleMeta) {
+  utils::dbms::SQLQuery query(reps_->db());
+  reps_->SetHardwareVersion(kHardwareVersion);
+  const std::string query_select_hardware_version =
+      "SELECT `hardware_version` FROM `module_meta`";
+
+  query.Prepare(query_select_hardware_version);
+  query.Next();
+  EXPECT_EQ(kHardwareVersion, query.GetString(0));
 }
 
 TEST_F(
