@@ -1181,6 +1181,9 @@ class ApplicationManagerImpl
   void ApplyFunctorForEachPlugin(
       std::function<void(plugin_manager::RPCPlugin&)> functor) OVERRIDE;
 
+  ns_smart_device_link_rpc::V1::v4_protocol_v1_2_no_extra&
+  mobile_v4_protocol_so_factory() OVERRIDE;
+
  private:
   /**
    * @brief Adds application to registered applications list and marks it as
@@ -1604,8 +1607,10 @@ class ApplicationManagerImpl
     mobile_apis::SystemContext::eType system_context;
   };
 
-  hmi_apis::HMI_API* hmi_so_factory_;
-  mobile_apis::MOBILE_API* mobile_so_factory_;
+  hmi_apis::HMI_API hmi_so_factory_;
+  mobile_apis::MOBILE_API mobile_so_factory_;
+  ns_smart_device_link_rpc::V1::v4_protocol_v1_2_no_extra
+      mobile_v4_protocol_so_factory_;
 
   static uint32_t mobile_corelation_id_;
   static uint32_t corelation_id_;
