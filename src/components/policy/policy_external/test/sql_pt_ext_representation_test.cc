@@ -65,6 +65,9 @@ const std::string kHardwareVersion = "1.1.1.0";
 const std::string kSoftwareVersion = "4.1.3.B_EB355B";
 const std::string kWersCountryCode = "WAEGB";
 const std::string kLanguage = "EN-US";
+const std::string kFunctionalGroupWithParams = "Location-1";
+const std::string kUserConsentForGroupWithParams = "Location";
+const std::string kRpcForGroupWithParams = "GetVehicleData";
 }  // namespace
 
 policy_table::Table LoadPreloadedPT(const std::string& filename) {
@@ -93,6 +96,7 @@ Json::Value GetDefaultSnapshotModuleMeta(policy_table::Table& policy_table) {
   default_module_meta["vin"] = Json::Value("");
   return default_module_meta;
 }
+
 class SQLPTExtRepresentationTest : public ::testing::Test {
  public:
   // Collection of pairs of group alias and corresponding group name
@@ -354,6 +358,93 @@ TEST_F(SQLPTExtRepresentationTest,
   EXPECT_EQ(expected_module_meta.toStyledString(),
             snapshot_module_meta.ToJsonValue().toStyledString());
 }
+
+TEST_F(SQLPTExtRepresentationTest, Save_ParametersPresent_ParametersSaved) {
+  policy_table::Table update = LoadPreloadedPT(kSdlPreloadedPtJson);
+  ASSERT_TRUE(IsValid(update));
+
+  policy_table::FunctionalGroupings func_groups;
+  ASSERT_TRUE(reps_->GetFunctionalGroupings(func_groups));
+  EXPECT_TRUE(func_groups.empty());
+
+  EXPECT_TRUE(reps_->Save(update));
+  ASSERT_TRUE(reps_->GetFunctionalGroupings(func_groups));
+
+  policy_table::FunctionalGroupings::iterator func_groups_iter =
+      func_groups.find(kFunctionalGroupWithParams);
+  ASSERT_TRUE(func_groups.end() != func_groups_iter);
+  policy_table::Rpcs& rpcs = func_groups_iter->second;
+  EXPECT_EQ(kUserConsentForGroupWithParams,
+            static_cast<std::string>(*rpcs.user_consent_prompt));
+  policy_table::Rpc& rpc = rpcs.rpcs;
+  policy_table::Rpc::const_iterator rpc_iter = rpc.find(kRpcForGroupWithParams);
+  EXPECT_TRUE(rpc.end() != rpc_iter);
+  const ::policy_table::Parameters& parameters = *(rpc_iter->second.parameters);
+  EXPECT_TRUE(!parameters.empty());
+}
+
+TEST_F(SQLPTExtRepresentationTest, Save_NoParameters_NoParametersSaved) {
+  policy_table::Table update = LoadPreloadedPT(kSdlPreloadedPtJson);
+  ASSERT_TRUE(IsValid(update));
+
+  policy_table::FunctionalGroupings func_groups;
+  ASSERT_TRUE(reps_->GetFunctionalGroupings(func_groups));
+  EXPECT_TRUE(func_groups.empty());
+
+  EXPECT_TRUE(reps_->Save(update));
+  ASSERT_TRUE(reps_->GetFunctionalGroupings(func_groups));
+
+  const std::string func_group_without_params = "Notifications";
+  const std::string user_consent = "Notifications";
+  const std::string rpc_without_params = "Alert";
+
+  policy_table::FunctionalGroupings::iterator func_groups_iter =
+      func_groups.find(func_group_without_params);
+  ASSERT_TRUE(func_groups.end() != func_groups_iter);
+  policy_table::Rpcs& rpcs = func_groups_iter->second;
+  EXPECT_EQ(user_consent, static_cast<std::string>(*rpcs.user_consent_prompt));
+  policy_table::Rpc& rpc = rpcs.rpcs;
+  EXPECT_EQ(1u, rpc.size());
+  policy_table::Rpc::const_iterator rpc_iter = rpc.find(rpc_without_params);
+  EXPECT_TRUE(rpc.end() != rpc_iter);
+  // Check parameters
+  const ::policy_table::Parameters& parameters = *(rpc_iter->second.parameters);
+  EXPECT_FALSE(parameters.is_initialized());
+  EXPECT_TRUE(parameters.empty());
+}
+
+TEST_F(SQLPTExtRepresentationTest, Save_EmptyParameters_ParametersEmpty) {
+  policy_table::Table update = LoadPreloadedPT(kSdlPreloadedPtJson);
+  ASSERT_TRUE(IsValid(update));
+
+  policy_table::FunctionalGroupings func_groups;
+  EXPECT_TRUE(reps_->GetFunctionalGroupings(func_groups));
+  EXPECT_TRUE(func_groups.empty());
+
+  auto json_update = update.ToJsonValue();
+  json_update["policy_table"]["functional_groupings"]
+             [kFunctionalGroupWithParams]["rpcs"][kRpcForGroupWithParams]
+             ["parameters"] = Json::Value(Json::arrayValue);
+  policy_table::Table update_with_empty_param(&json_update);
+
+  EXPECT_TRUE(reps_->Save(update_with_empty_param));
+  EXPECT_TRUE(reps_->GetFunctionalGroupings(func_groups));
+
+  policy_table::FunctionalGroupings::iterator func_groups_iter =
+      func_groups.find(kFunctionalGroupWithParams);
+  ASSERT_TRUE(func_groups.end() != func_groups_iter);
+  policy_table::Rpcs& rpcs = func_groups_iter->second;
+  EXPECT_EQ(kUserConsentForGroupWithParams,
+            static_cast<std::string>(*rpcs.user_consent_prompt));
+  policy_table::Rpc& rpc = rpcs.rpcs;
+  policy_table::Rpc::const_iterator rpc_iter = rpc.find(kRpcForGroupWithParams);
+  EXPECT_TRUE(rpc.end() != rpc_iter);
+  // Check parameters
+  const ::policy_table::Parameters& parameters = *(rpc_iter->second.parameters);
+  // 'parameters' : [] - represented as initialized, but empty
+  // missing 'parameters' - represented as non-initialized and empty
+  EXPECT_TRUE(parameters.is_initialized());
+  EXPECT_TRUE(parameters.empty());
 }
 
 TEST_F(
