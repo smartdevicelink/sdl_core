@@ -72,6 +72,7 @@
 #include "policy/mock_policy_manager.h"
 #include "policy/usage_statistics/mock_statistics_manager.h"
 #include "protocol_handler/mock_session_observer.h"
+#include "utils/test_async_waiter.h"
 
 #include "smart_objects/enum_schema_item.h"
 
@@ -2568,22 +2569,24 @@ TEST_F(PolicyHandlerTest, AddStatisticsInfo_SUCCESS) {
 TEST_F(PolicyHandlerTest, OnSystemError_SUCCESS) {
   EnablePolicyAndPolicyManagerMock();
 
-  sync_primitives::Lock wait_hmi_lock;
-  sync_primitives::AutoLock auto_lock(wait_hmi_lock);
-  WaitAsync waiter(kCallsCount_, kTimeout_);
+  //sync_primitives::Lock wait_hmi_lock;
+  //sync_primitives::AutoLock auto_lock(wait_hmi_lock);
+  auto waiter_first = TestAsyncWaiter::createInstance();
+  //WaitAsync waiter_first(kCallsCount_, kTimeout_);
   EXPECT_CALL(*mock_policy_manager_, Increment(_))
-      .WillOnce(NotifyAsync(&waiter));
+      .WillOnce(NotifyTestAsyncWaiter(waiter_first));
 
   policy_handler_.OnSystemError(hmi_apis::Common_SystemError::SYNC_REBOOTED);
-  EXPECT_TRUE(waiter.Wait(auto_lock));
+  EXPECT_TRUE(waiter_first->WaitFor(kCallsCount_, kTimeout_));
 
-  WaitAsync waiter1(kCallsCount_, kTimeout_);
+  //WaitAsync waiter1(kCallsCount_, kTimeout_);
+  auto waiter_second = TestAsyncWaiter::createInstance();
+
   EXPECT_CALL(*mock_policy_manager_, Increment(_))
-      .WillOnce(NotifyAsync(&waiter1));
-
+      .WillOnce(NotifyTestAsyncWaiter(waiter_second));
   policy_handler_.OnSystemError(
       hmi_apis::Common_SystemError::SYNC_OUT_OF_MEMMORY);
-  EXPECT_TRUE(waiter1.Wait(auto_lock));
+  EXPECT_TRUE(waiter_second->WaitFor(kCallsCount_, kTimeout_));
 }
 
 TEST_F(PolicyHandlerTest, RemoteAppsUrl_EndpointsEmpty_UNSUCCESS) {
