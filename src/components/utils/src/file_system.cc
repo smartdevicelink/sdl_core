@@ -458,6 +458,25 @@ bool file_system::ReadFile(const std::string& name, std::string& result) {
   return true;
 }
 
+const std::string file_system::ConvertPathForURL(const std::string& path) {
+  SDL_LOG_AUTO_TRACE();
+  const std::string reserved_symbols = "!#$&'()*+,:;=?@[] ";
+  std::string converted_path;
+
+  for (const auto symbol : path) {
+    size_t pos = reserved_symbols.find_first_of(symbol);
+    if (pos != std::string::npos) {
+      const size_t size = 100;
+      char percent_value[size];
+      snprintf(percent_value, size, "%%%x", symbol);
+      converted_path += percent_value;
+    } else {
+      converted_path += symbol;
+    }
+  }
+  return converted_path;
+}
+
 bool file_system::CreateFile(const std::string& path) {
   SDL_LOG_AUTO_TRACE();
 

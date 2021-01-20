@@ -40,6 +40,7 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include "utils/macro.h"
 
 namespace file_system {
 
@@ -255,6 +256,9 @@ bool ReadBinaryFile(const std::string& name,
                     uint32_t length);
 
 bool ReadFile(const std::string& name, std::string& result);
+
+DEPRECATED
+const std::string ConvertPathForURL(const std::string& path);
 
 /**
  * @brief Create empty file
