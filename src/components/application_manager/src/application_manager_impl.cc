@@ -3224,15 +3224,17 @@ void ApplicationManagerImpl::UnregisterApplication(
   ApplicationSharedPtr app_to_remove;
   connection_handler::DeviceHandle handle = 0;
   {
-    sync_primitives::AutoLock lock(applications_list_lock_ptr_);
-    auto it_app = applications_.begin();
-    while (applications_.end() != it_app) {
-      if (app_id == (*it_app)->app_id()) {
-        app_to_remove = *it_app;
-        applications_.erase(it_app++);
-        break;
-      } else {
-        ++it_app;
+    {
+      sync_primitives::AutoLock lock(applications_list_lock_ptr_);
+      auto it_app = applications_.begin();
+      while (applications_.end() != it_app) {
+        if (app_id == (*it_app)->app_id()) {
+          app_to_remove = *it_app;
+          applications_.erase(it_app++);
+          break;
+        } else {
+          ++it_app;
+        }
       }
     }
     if (!app_to_remove) {
