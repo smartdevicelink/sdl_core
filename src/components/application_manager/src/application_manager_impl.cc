@@ -1645,7 +1645,11 @@ bool ApplicationManagerImpl::GetProtocolVehicleData(
   }
 
   data.vehicle_system_software_version = hmi_capabilities_->ccpu_version();
+
+  /* Replace empty string with the next line
   data.vehicle_system_hardware_version = hmi_capabilities_->hardware_version();
+  when system_hardware_version source is added */
+  data.vehicle_system_hardware_version = " ";
 
   return true;
 }
