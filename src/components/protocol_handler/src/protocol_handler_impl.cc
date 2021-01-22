@@ -54,10 +54,11 @@ SDL_CREATE_LOG_VARIABLE("ProtocolHandler")
 
 const size_t kStackSize = 131072;
 
-const utils::SemanticVersion default_protocol_version(5, 3, 0);
+const utils::SemanticVersion default_protocol_version(5, 4, 0);
 const utils::SemanticVersion min_multiple_transports_version(5, 1, 0);
 const utils::SemanticVersion min_cloud_app_version(5, 2, 0);
 const utils::SemanticVersion min_reason_param_version(5, 3, 0);
+const utils::SemanticVersion min_vehicle_data_version(5, 4, 0);
 
 ProtocolHandlerImpl::ProtocolHandlerImpl(
     const ProtocolHandlerSettings& settings,
@@ -324,7 +325,8 @@ void ProtocolHandlerImpl::SendStartSessionAck(
     if (serviceTypeValue == kRpc) {
       SDL_LOG_DEBUG("Collecting protocol vehicle data");
       connection_handler::ProtocolVehicleData data;
-      if (connection_handler_.GetProtocolVehicleData(data)) {
+      if (full_version >= min_vehicle_data_version &&
+          connection_handler_.GetProtocolVehicleData(data)) {
         WriteProtocolVehicleData(params, data);
       }
 

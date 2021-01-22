@@ -5443,7 +5443,7 @@ TEST_F(ProtocolHandlerImplTest,
       .WillOnce(DoAll(SetArgReferee<0>(data), Return(true)));
 
   const uint32_t hash_id = 123456;
-  char full_version_string[] = "5.0.0";
+  char full_version_string[] = "5.4.0";
 
   BsonObject expected_obj;
   bson_object_initialize_default(&expected_obj);
@@ -5471,6 +5471,27 @@ TEST_F(ProtocolHandlerImplTest,
         &expected_obj, data_pair.first.c_str(), value_buffer);
   }
 
+  // secondaryTransports
+  BsonArray secondary_transports;
+  bson_array_initialize(&secondary_transports, 0);
+  bson_object_put_array(&expected_obj,
+                        protocol_handler::strings::secondary_transports,
+                        &secondary_transports);
+
+  BsonArray audio_service_transports;
+  bson_array_initialize(&audio_service_transports, 1);
+  bson_array_add_int32(&audio_service_transports, 1);
+  bson_object_put_array(&expected_obj,
+                        protocol_handler::strings::audio_service_transports,
+                        &audio_service_transports);
+
+  BsonArray video_service_transports;
+  bson_array_initialize(&video_service_transports, 1);
+  bson_array_add_int32(&video_service_transports, 1);
+  bson_object_put_array(&expected_obj,
+                        protocol_handler::strings::video_service_transports,
+                        &video_service_transports);
+
   std::vector<uint8_t> expected_param =
       CreateVectorFromBsonObject(&expected_obj);
 
@@ -5487,6 +5508,16 @@ TEST_F(ProtocolHandlerImplTest,
   EXPECT_CALL(connection_handler_mock,
               SetSecondaryTransportID(_, kDisabledSecondary))
       .WillOnce(Return(dummy_st));
+  EXPECT_CALL(protocol_handler_settings_mock, multiple_transports_enabled())
+      .WillRepeatedly(Return(false));
+  std::vector<std::string> empty_vec;
+  EXPECT_CALL(protocol_handler_settings_mock, audio_service_transports())
+      .WillRepeatedly(ReturnRef(empty_vec));
+  EXPECT_CALL(protocol_handler_settings_mock, video_service_transports())
+      .WillRepeatedly(ReturnRef(empty_vec));
+  EXPECT_CALL(session_observer_mock,
+              TransportTypeProfileStringFromConnHandle(connection_id))
+      .WillRepeatedly(Return("WEBSOCKET"));
 
 #ifdef ENABLE_SECURITY
   AddSecurityManager();
@@ -5499,7 +5530,7 @@ TEST_F(ProtocolHandlerImplTest,
 #endif  // ENABLE_SECURITY
 
   const uint8_t input_protocol_version = 5;
-  utils::SemanticVersion full_version(5, 0, 0);
+  utils::SemanticVersion full_version(5, 4, 0);
 
   protocol_handler_impl->SendStartSessionAck(connection_id,
                                              session_id,
