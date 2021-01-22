@@ -159,6 +159,30 @@
                     "rows": 1
                 },
                 {
+                    "name": "menuCommandSecondaryText",
+                    "characterSet": "UTF_8",
+                    "width": 500,
+                    "rows": 1
+                },
+                {
+                    "name": "menuCommandTertiaryText",
+                    "characterSet": "UTF_8",
+                    "width": 500,
+                    "rows": 1
+                },
+                {
+                    "name": "menuSubMenuSecondaryText",
+                    "characterSet": "UTF_8",
+                    "width": 500,
+                    "rows": 1
+                },
+                {
+                    "name": "menuSubMenuTertiaryText",
+                    "characterSet": "UTF_8",
+                    "width": 500,
+                    "rows": 1
+                },
+                {
                     "name": "timeToDestination",
                     "characterSet": "UTF_8",
                     "width": 500,
@@ -207,6 +231,20 @@
                 },
                 {
                     "name": "cmdIcon",
+                    "imageResolution": {
+                        "resolutionWidth": 35,
+                        "resolutionHeight": 35
+                    }
+                },
+                {
+                    "name": "menuCommandSecondaryImage",
+                    "imageResolution": {
+                        "resolutionWidth": 35,
+                        "resolutionHeight": 35
+                    }
+                },
+                {
+                    "name": "menuSubMenuSecondaryImage",
                     "imageResolution": {
                         "resolutionWidth": 35,
                         "resolutionHeight": 35
