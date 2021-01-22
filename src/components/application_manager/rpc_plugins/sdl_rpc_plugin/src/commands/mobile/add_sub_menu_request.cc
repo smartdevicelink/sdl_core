@@ -114,12 +114,6 @@ void AddSubMenuRequest::Run() {
   const std::string& menu_name =
       received_msg_params[strings::menu_name].asString();
 
-  if (app->IsSubMenuNameAlreadyExist(menu_name, parent_id)) {
-    SDL_LOG_ERROR("Menu name " << menu_name << " is duplicated.");
-    SendResponse(false, mobile_apis::Result::DUPLICATE_NAME);
-    return;
-  }
-
   if (!CheckSubMenuName()) {
     SDL_LOG_ERROR("Sub-menu name is not valid.");
     SendResponse(false, mobile_apis::Result::INVALID_DATA);
