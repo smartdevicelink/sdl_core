@@ -128,6 +128,7 @@ TEST_F(WebSocketListenerTest, StartListening_ClientConnect_SUCCESS) {
   ws_client->Stop();
 }
 
+#ifdef ENABLE_SECURITY
 TEST_F(WebSocketListenerTest, StartListening_ClientConnectSecure_SUCCESS) {
   const auto ws_listener = std::make_shared<WebSocketListener>(
       &mock_ta_controller_, mock_tm_settings_, kNumThreads);
@@ -254,6 +255,7 @@ TEST_F(WebSocketListenerTest, StartListening_AcceptorIsOpen_SUCCESS) {
   EXPECT_EQ(TransportAdapter::Error::OK, ws_listener->StartListening());
   ws_client->Stop();
 }
+#endif
 
 }  // namespace transport_manager_test
 }  // namespace components
