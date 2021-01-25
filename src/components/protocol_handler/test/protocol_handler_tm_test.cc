@@ -240,6 +240,7 @@ class ProtocolHandlerImplTest : public ::testing::Test {
     const_cast<protocol_handler::impl::ToMobileQueue&>(
         protocol_handler_impl->get_to_mobile_queue())
         .WaitDumpQueue();
+    protocol_handler_impl->Stop();
   }
 
   // Emulate connection establish
@@ -3173,7 +3174,7 @@ TEST_F(ProtocolHandlerImplTest, RegisterSecondaryTransport_FAILURE) {
   EXPECT_TRUE(waiter->WaitFor(times, kAsyncExpectationsTimeout));
 }
 
-TEST_F(ProtocolHandlerImplTest, DISABLED_FloodVerification) {
+TEST_F(ProtocolHandlerImplTest, FloodVerification) {
   const size_t period_msec = 10000;
   const size_t max_messages = 1000;
   InitProtocolHandlerImpl(period_msec, max_messages);
@@ -3218,7 +3219,7 @@ TEST_F(ProtocolHandlerImplTest, DISABLED_FloodVerification) {
   EXPECT_TRUE(waiter->WaitFor(times, kAsyncExpectationsTimeout));
 }
 
-TEST_F(ProtocolHandlerImplTest, DISABLED_FloodVerification_ThresholdValue) {
+TEST_F(ProtocolHandlerImplTest, FloodVerification_ThresholdValue) {
   const size_t period_msec = 10000;
   const size_t max_messages = 1000;
   InitProtocolHandlerImpl(period_msec, max_messages);
@@ -3262,7 +3263,7 @@ TEST_F(ProtocolHandlerImplTest, DISABLED_FloodVerification_ThresholdValue) {
   EXPECT_TRUE(waiter->WaitFor(times, kAsyncExpectationsTimeout));
 }
 
-TEST_F(ProtocolHandlerImplTest, DISABLED_FloodVerification_VideoFrameSkip) {
+TEST_F(ProtocolHandlerImplTest, FloodVerification_VideoFrameSkip) {
   const size_t period_msec = 10000;
   const size_t max_messages = 1000;
   InitProtocolHandlerImpl(period_msec, max_messages);
@@ -3298,7 +3299,7 @@ TEST_F(ProtocolHandlerImplTest, DISABLED_FloodVerification_VideoFrameSkip) {
   EXPECT_TRUE(waiter->WaitFor(times, kAsyncExpectationsTimeout));
 }
 
-TEST_F(ProtocolHandlerImplTest, DISABLED_FloodVerification_AudioFrameSkip) {
+TEST_F(ProtocolHandlerImplTest, FloodVerification_AudioFrameSkip) {
   const size_t period_msec = 10000;
   const size_t max_messages = 1000;
   InitProtocolHandlerImpl(period_msec, max_messages);
@@ -3334,7 +3335,7 @@ TEST_F(ProtocolHandlerImplTest, DISABLED_FloodVerification_AudioFrameSkip) {
   EXPECT_TRUE(waiter->WaitFor(times, kAsyncExpectationsTimeout));
 }
 
-TEST_F(ProtocolHandlerImplTest, DISABLED_FloodVerificationDisable) {
+TEST_F(ProtocolHandlerImplTest, FloodVerificationDisable) {
   const size_t period_msec = 0;
   const size_t max_messages = 0;
   InitProtocolHandlerImpl(period_msec, max_messages);
@@ -3402,7 +3403,7 @@ TEST_F(ProtocolHandlerImplTest, MalformedVerificationDisable) {
   EXPECT_TRUE(waiter->WaitFor(times, kAsyncExpectationsTimeout));
 }
 
-TEST_F(ProtocolHandlerImplTest, DISABLED_MalformedLimitVerification) {
+TEST_F(ProtocolHandlerImplTest, MalformedLimitVerification) {
   const size_t period_msec = 10000;
   const size_t max_messages = 100;
   InitProtocolHandlerImpl(0u, 0u, true, period_msec, max_messages);
@@ -3456,8 +3457,7 @@ TEST_F(ProtocolHandlerImplTest, DISABLED_MalformedLimitVerification) {
   EXPECT_TRUE(waiter->WaitFor(times, kAsyncExpectationsTimeout));
 }
 
-TEST_F(ProtocolHandlerImplTest,
-       DISABLED_MalformedLimitVerification_MalformedStock) {
+TEST_F(ProtocolHandlerImplTest, MalformedLimitVerification_MalformedStock) {
   const size_t period_msec = 10000;
   const size_t max_messages = 100;
   InitProtocolHandlerImpl(0u, 0u, true, period_msec, max_messages);
@@ -3725,8 +3725,7 @@ TEST_F(ProtocolHandlerImplTest,
   protocol_handler_impl->SendEndSession(connection_id, session_id);
 }
 
-TEST_F(ProtocolHandlerImplTest,
-       DISABLED_SendEndServicePrivate_EndSession_MessageSent) {
+TEST_F(ProtocolHandlerImplTest, SendEndServicePrivate_EndSession_MessageSent) {
   // Arrange
   auto waiter = TestAsyncWaiter::createInstance();
   uint32_t times = 0;
@@ -3870,8 +3869,7 @@ TEST_F(ProtocolHandlerImplTest,
   EXPECT_TRUE(waiter->WaitFor(times, kAsyncExpectationsTimeout));
 }
 
-TEST_F(ProtocolHandlerImplTest,
-       DISABLED_SendHeartBeatAck_WrongProtocolVersion_NotSent) {
+TEST_F(ProtocolHandlerImplTest, SendHeartBeatAck_WrongProtocolVersion_NotSent) {
   // Arrange
   auto waiter = TestAsyncWaiter::createInstance();
   uint32_t times = 0;
@@ -4885,28 +4883,29 @@ TEST_F(ProtocolHandlerImplTest, DecryptFrame_NoSecurityManager_Cancelled) {
 }
 
 TEST_F(ProtocolHandlerImplTest,
-       DISABLED_DecryptFrame_ProtectionFlagOff_ContinueUndecrypted) {
+       DecryptFrame_ProtectionFlagOff_ContinueUndecrypted) {
   auto waiter = TestAsyncWaiter::createInstance();
   uint32_t times = 0;
 
   AddSession(waiter, times);
-
-  const uint8_t data_size = 0u;
+  const uint8_t data_size = 1u;
+  const uint8_t data_value = 7u;
   ProtocolFramePtr frame_ptr =
       std::make_shared<ProtocolPacket>(connection_id,
                                        PROTOCOL_VERSION_3,
                                        PROTECTION_OFF,
-                                       FRAME_TYPE_FIRST,
+                                       FRAME_TYPE_SINGLE,
                                        kAudio,
-                                       FRAME_DATA_FIRST,
+                                       FRAME_DATA_SINGLE,
                                        session_id,
                                        data_size,
                                        message_id,
-                                       null_data_);
+                                       &data_value);
   EXPECT_CALL(ssl_context_mock, Decrypt(_, _, _, _)).Times(0);
 
   protocol_handler_impl->SetTelemetryObserver(&telemetry_observer_mock);
   EXPECT_CALL(telemetry_observer_mock, StartMessageProcess(message_id, _));
+  EXPECT_CALL(telemetry_observer_mock, EndMessageProcess(_));
 
   connection_handler::SessionTransports st;
   st.primary_transport = connection_id;
@@ -4919,7 +4918,7 @@ TEST_F(ProtocolHandlerImplTest,
 }
 
 TEST_F(ProtocolHandlerImplTest,
-       DISABLED_DecryptFrame_FrameTypeControl_ContinueUndecrypted) {
+       DecryptFrame_FrameTypeControl_ContinueUndecrypted) {
   auto waiter = TestAsyncWaiter::createInstance();
   uint32_t times = 0;
 
