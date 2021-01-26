@@ -181,7 +181,7 @@ class MediaManagerImplTest : public ::testing::Test {
         .WillOnce(Return(true));
     EXPECT_CALL(app_mngr_, application(kConnectionKey))
         .WillOnce(Return(mock_app_));
-    EXPECT_CALL(*mock_app_, WakeUpStreaming(service_type, 0ull));
+    EXPECT_CALL(*mock_app_, WakeUpStreaming(service_type, _));
     MockMediaAdapterImplPtr mock_media_streamer =
         std::make_shared<MockMediaAdapterImpl>();
     media_manager_impl_->set_mock_streamer(service_type, mock_media_streamer);
@@ -416,17 +416,11 @@ TEST_F(MediaManagerImplTest,
 
 TEST_F(MediaManagerImplTest,
        CheckFramesProcessed_WithCorrectFramesNumber_SUCCESS) {
-  ON_CALL(mock_media_manager_settings_, video_server_type())
-      .WillByDefault(ReturnRef(kDefaultValue));
-  ON_CALL(mock_media_manager_settings_, audio_server_type())
-      .WillByDefault(ReturnRef(kDefaultValue));
   protocol_handler_test::MockProtocolHandler mock_protocol_handler;
   media_manager_impl_->SetProtocolHandler(&mock_protocol_handler);
   const int32_t frame_number = 10;
   EXPECT_CALL(mock_protocol_handler,
               SendFramesNumber(kApplicationKey, frame_number));
-  EXPECT_CALL(app_mngr_, application(kConnectionKey))
-      .WillOnce(Return(mock_app_));
   media_manager_impl_->FramesProcessed(kApplicationKey, frame_number);
 }
 
