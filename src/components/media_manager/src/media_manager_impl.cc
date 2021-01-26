@@ -35,6 +35,8 @@
 #include "application_manager/application_impl.h"
 #include "application_manager/application_manager.h"
 #include "application_manager/message_helper.h"
+#include "application_manager/smart_object_keys.h"
+#include "interfaces/MOBILE_API.h"
 #include "media_manager/audio/from_mic_recorder_listener.h"
 #include "media_manager/streamer_listener.h"
 #include "protocol_handler/protocol_handler.h"
@@ -64,6 +66,9 @@ MediaManagerImpl::MediaManagerImpl(
     , protocol_handler_(NULL)
     , a2dp_player_(NULL)
     , from_mic_recorder_(NULL)
+    , bits_per_sample_(16)
+    , sampling_rate_(16000)
+    , stream_data_size_(0ull)
     , application_manager_(application_manager) {
   Init();
 }
@@ -159,6 +164,23 @@ void MediaManagerImpl::Init() {
   if (streamer_[ServiceType::kAudio]) {
     streamer_[ServiceType::kAudio]->AddListener(
         streamer_listener_[ServiceType::kAudio]);
+  }
+
+  if (application_manager_.hmi_capabilities().pcm_stream_capabilities()) {
+    const auto pcm_caps =
+        application_manager_.hmi_capabilities().pcm_stream_capabilities();
+
+    if (pcm_caps->keyExists(application_manager::strings::bits_per_sample)) {
+      bits_per_sample_ =
+          pcm_caps->getElement(application_manager::strings::bits_per_sample)
+              .asUInt();
+    }
+
+    if (pcm_caps->keyExists(application_manager::strings::sampling_rate)) {
+      sampling_rate_ =
+          pcm_caps->getElement(application_manager::strings::sampling_rate)
+              .asUInt();
+    }
   }
 }
 
@@ -276,6 +298,8 @@ void MediaManagerImpl::StopStreaming(
     int32_t application_key, protocol_handler::ServiceType service_type) {
   SDL_LOG_AUTO_TRACE();
 
+  stream_data_size_ = 0ull;
+
   if (streamer_[service_type]) {
     streamer_[service_type]->StopActivity(application_key);
   }
@@ -313,7 +337,25 @@ void MediaManagerImpl::OnMessageReceived(
 
   ApplicationSharedPtr app = application_manager_.application(streaming_app_id);
   if (app) {
-    app->WakeUpStreaming(service_type);
+    if (ServiceType::kAudio == service_type &&
+        "socket" == settings().audio_server_type()) {
+      if (stream_data_size_ == 0) {
+        socket_audio_stream_start_time_ = std::chrono::system_clock::now();
+      }
+
+      stream_data_size_ += message->data_size();
+      uint32_t ms_for_all_data = DataSizeToMilliseconds(stream_data_size_);
+      uint32_t ms_since_stream_start =
+          std::chrono::duration_cast<std::chrono::milliseconds>(
+              std::chrono::system_clock::now() -
+              socket_audio_stream_start_time_)
+              .count();
+      uint32_t ms_stream_remaining = ms_for_all_data - ms_since_stream_start;
+
+      app->WakeUpStreaming(service_type, ms_stream_remaining);
+    } else {
+      app->WakeUpStreaming(service_type);
+    }
     streamer_[service_type]->SendData(streaming_app_id, message);
   }
 }
@@ -336,7 +378,8 @@ void MediaManagerImpl::FramesProcessed(int32_t application_key,
     auto video_stream = std::dynamic_pointer_cast<StreamerAdapter>(
         streamer_[protocol_handler::ServiceType::kMobileNav]);
 
-    if (audio_stream.use_count() != 0) {
+    if (audio_stream.use_count() != 0 &&
+        "pipe" == settings().audio_server_type()) {
       size_t audio_queue_size = audio_stream->GetMsgQueueSize();
       SDL_LOG_DEBUG("# Messages in audio queue = " << audio_queue_size);
       if (audio_queue_size > 0) {
@@ -344,7 +387,8 @@ void MediaManagerImpl::FramesProcessed(int32_t application_key,
       }
     }
 
-    if (video_stream.use_count() != 0) {
+    if (video_stream.use_count() != 0 &&
+        "pipe" == settings().video_server_type()) {
       size_t video_queue_size = video_stream->GetMsgQueueSize();
       SDL_LOG_DEBUG("# Messages in video queue = " << video_queue_size);
       if (video_queue_size > 0) {
@@ -356,6 +400,12 @@ void MediaManagerImpl::FramesProcessed(int32_t application_key,
 
 const MediaManagerSettings& MediaManagerImpl::settings() const {
   return settings_;
+}
+
+uint32_t MediaManagerImpl::DataSizeToMilliseconds(uint64_t data_size) const {
+  constexpr uint16_t latency_compensation = 500;
+  return 1000 * data_size / (sampling_rate_ * bits_per_sample_ / 8) +
+         latency_compensation;
 }
 
 }  //  namespace media_manager
