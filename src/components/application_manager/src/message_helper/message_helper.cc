@@ -1244,38 +1244,38 @@ MessageHelper::CreateGlobalPropertiesRequestsToHMI(
 
   // UI global properties
 
-  if (can_send_ui && (app->vr_help_title() || app->vr_help())) {
+  if (can_send_ui &&
+      (app->vr_help_title() || app->vr_help() || app->keyboard_props() ||
+       app->menu_title() || app->menu_icon())) {
     smart_objects::SmartObjectSPtr ui_global_properties = CreateMessageForHMI(
         hmi_apis::messageType::request, app_mngr.GetNextHMICorrelationID());
-    if (!ui_global_properties) {
-      return requests;
-    }
+    if (ui_global_properties) {
+      (*ui_global_properties)[strings::params][strings::function_id] =
+          static_cast<int>(hmi_apis::FunctionID::UI_SetGlobalProperties);
 
-    (*ui_global_properties)[strings::params][strings::function_id] =
-        static_cast<int>(hmi_apis::FunctionID::UI_SetGlobalProperties);
+      smart_objects::SmartObject ui_msg_params =
+          smart_objects::SmartObject(smart_objects::SmartType_Map);
+      if (app->vr_help_title()) {
+        ui_msg_params[strings::vr_help_title] = (*app->vr_help_title());
+      }
+      if (app->vr_help()) {
+        ui_msg_params[strings::vr_help] = (*app->vr_help());
+      }
+      if (app->keyboard_props()) {
+        ui_msg_params[strings::keyboard_properties] = (*app->keyboard_props());
+      }
+      if (app->menu_title()) {
+        ui_msg_params[strings::menu_title] = (*app->menu_title());
+      }
+      if (app->menu_icon()) {
+        ui_msg_params[strings::menu_icon] = (*app->menu_icon());
+      }
+      ui_msg_params[strings::app_id] = app->app_id();
 
-    smart_objects::SmartObject ui_msg_params =
-        smart_objects::SmartObject(smart_objects::SmartType_Map);
-    if (app->vr_help_title()) {
-      ui_msg_params[strings::vr_help_title] = (*app->vr_help_title());
-    }
-    if (app->vr_help()) {
-      ui_msg_params[strings::vr_help] = (*app->vr_help());
-    }
-    if (app->keyboard_props()) {
-      ui_msg_params[strings::keyboard_properties] = (*app->keyboard_props());
-    }
-    if (app->menu_title()) {
-      ui_msg_params[strings::menu_title] = (*app->menu_title());
-    }
-    if (app->menu_icon()) {
-      ui_msg_params[strings::menu_icon] = (*app->menu_icon());
-    }
-    ui_msg_params[strings::app_id] = app->app_id();
+      (*ui_global_properties)[strings::msg_params] = ui_msg_params;
 
-    (*ui_global_properties)[strings::msg_params] = ui_msg_params;
-
-    requests.push_back(ui_global_properties);
+      requests.push_back(ui_global_properties);
+    }
   }
 
   const bool can_send_vr = helpers::
@@ -1289,27 +1289,46 @@ MessageHelper::CreateGlobalPropertiesRequestsToHMI(
     uint32_t correlation_id = app_mngr.GetNextHMICorrelationID();
     smart_objects::SmartObjectSPtr tts_global_properties =
         CreateMessageForHMI(hmi_apis::messageType::request, correlation_id);
-    if (!tts_global_properties) {
-      return requests;
+    if (tts_global_properties) {
+      (*tts_global_properties)[strings::params][strings::function_id] =
+          static_cast<int>(hmi_apis::FunctionID::TTS_SetGlobalProperties);
+
+      smart_objects::SmartObject tts_msg_params =
+          smart_objects::SmartObject(smart_objects::SmartType_Map);
+      if (app->help_prompt()) {
+        tts_msg_params[strings::help_prompt] = (*app->help_prompt());
+      }
+      if (app->timeout_prompt()) {
+        tts_msg_params[strings::timeout_prompt] = (*app->timeout_prompt());
+      }
+      tts_msg_params[strings::app_id] = app->app_id();
+
+      (*tts_global_properties)[strings::msg_params] = tts_msg_params;
+
+      requests.push_back(tts_global_properties);
     }
-
-    (*tts_global_properties)[strings::params][strings::function_id] =
-        static_cast<int>(hmi_apis::FunctionID::TTS_SetGlobalProperties);
-
-    smart_objects::SmartObject tts_msg_params =
-        smart_objects::SmartObject(smart_objects::SmartType_Map);
-    if (app->help_prompt()) {
-      tts_msg_params[strings::help_prompt] = (*app->help_prompt());
-    }
-    if (app->timeout_prompt()) {
-      tts_msg_params[strings::timeout_prompt] = (*app->timeout_prompt());
-    }
-    tts_msg_params[strings::app_id] = app->app_id();
-
-    (*tts_global_properties)[strings::msg_params] = tts_msg_params;
-
-    requests.push_back(tts_global_properties);
   }
+
+  // RC global properties
+  if (!app->get_user_location().empty()) {
+    smart_objects::SmartObjectSPtr rc_global_properties = CreateMessageForHMI(
+        hmi_apis::messageType::request, app_mngr.GetNextHMICorrelationID());
+    if (rc_global_properties) {
+      (*rc_global_properties)[strings::params][strings::function_id] =
+          static_cast<int>(hmi_apis::FunctionID::RC_SetGlobalProperties);
+
+      smart_objects::SmartObject rc_msg_params =
+          smart_objects::SmartObject(smart_objects::SmartType_Map);
+
+      rc_msg_params[strings::user_location] = (app->get_user_location());
+      rc_msg_params[strings::app_id] = app->app_id();
+
+      (*rc_global_properties)[strings::msg_params] = rc_msg_params;
+
+      requests.push_back(rc_global_properties);
+    }
+  }
+
   return requests;
 }
 
