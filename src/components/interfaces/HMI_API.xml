@@ -4349,6 +4349,23 @@
       </param>
     </struct>
 
+    <enum name="SeekIndicatorType">
+      <element name="TRACK" />
+      <element name="TIME" />
+    </enum>
+
+    <struct name="SeekStreamingIndicator">
+      <description>
+        The seek next / skip previous subscription buttons' content
+      </description>
+      <param name="type" type="SeekIndicatorType" mandatory="true" />
+      <param name="seekTime" type="Integer" minvalue="1" maxvalue="99" mandatory="false">
+        <description>
+          If the type is TIME, this number of seconds may be present alongside the skip indicator.
+          It will indicate the number of seconds that the currently playing media will skip forward or backward.
+        </description>
+      </param>
+    </struct>
 </interface>
 
 <interface name="Buttons" version="1.3.0" date="2017-07-18">
@@ -5589,6 +5606,12 @@
     </param>
     <param name="audioStreamingIndicator" type="Common.AudioStreamingIndicator" mandatory="false">
       <description>Indicates that a button press of the Play/Pause button would play, pause or Stop the current playback.</description>
+    </param>
+    <param name="forwardSeekIndicator" type="Common.SeekStreamingIndicator" mandatory="false">
+      <description>Used to control the forward seek button to either skip forward a set amount of time or to the next track.</description>
+    </param>
+    <param name="backSeekIndicator" type="Common.SeekStreamingIndicator" mandatory="false">
+      <description>Used to control the backward seek button to either skip back a set amount of time or to the previous track.</description>
     </param>
     <param name="countRate" type="Float" minvalue="0.1" maxvalue="100.0" defvalue="1.0" mandatory="false">
       <description>
