@@ -85,7 +85,6 @@ OnBCSystemCapabilityUpdatedNotificationFromHMI::
   SDL_LOG_DEBUG("Updating display capabilities for app " << app_id);
   app->set_display_capabilities(display_capabilities);
 
-  // Remove app_id from notification to mobile
   RemoveAppIdFromNotification();
   auto& builder = app->display_capabilities_builder();
   if (builder.IsWaitingForWindowCapabilities(display_capabilities)) {

@@ -40,7 +40,7 @@
 namespace test {
 namespace components {
 namespace commands_test {
-namespace mobile_commands_test {
+namespace hmi_commands_test {
 namespace bc_on_app_capability_updated_notification_test {
 
 using sdl_rpc_plugin::commands::BCOnAppCapabilityUpdatedNotification;
@@ -119,7 +119,7 @@ TEST_F(BCOnAppCapabilityUpdatedNotificationTest, Run_SendMessageToHMI_SUCCESS) {
 }
 
 }  // namespace bc_on_app_capability_updated_notification_test
-}  // namespace mobile_commands_test
+}  // namespace hmi_commands_test
 }  // namespace commands_test
 }  // namespace components
 }  // namespace test
