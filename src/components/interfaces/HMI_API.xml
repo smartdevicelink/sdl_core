@@ -635,10 +635,10 @@
     <description> Optional phone number of intended location / establishment (if applicable) for SendLocation.</description>
   </element>
   <element name="timeToDestination">
-      <description>Optional time to destination field for ShowConstantTBT</description>
+    <description>Optional time to destination field for ShowConstantTBT</description>
   </element>
   <element name="turnText">
-      <description>Turn text for turnList parameter of UpdateTurnList</description>
+    <description>Turn text for turnList parameter of UpdateTurnList</description>
   </element>
   <element name="subtleAlertText1">
     <description>The first line of the subtle alert text field; applies to `SubtleAlert` `alertText1`</description>
