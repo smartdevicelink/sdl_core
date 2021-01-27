@@ -3170,7 +3170,7 @@
 
 <struct name="Turn">
   <param name="navigationText" type="Common.TextFieldStruct" mandatory="false">
-    <description>Uses navigationText from TextFieldStruct.</description>
+    <description>Describes the `Turn` using `TextFieldName` `turnText`</description>
   </param>
   <param name="turnIcon" type="Common.Image" mandatory="false">
   </param>
