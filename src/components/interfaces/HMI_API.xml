@@ -643,15 +643,6 @@
   <element name="subtleAlertSoftButtonText">
     <description>A text field in the soft button of a subtle alert; applies to `SubtleAlert` `softButtons`</description>
   </element>
-  <element name="timeToDestination"/>
-    <!-- TO DO to be removed -->
-  <element name="turnText"/>
-  <element name="navigationText">
-    <description>Navigation text for UpdateTurnList.</description>
-  </element>
-  <element name="notificationText">
-    <description>Text of notification to be displayed on screen.</description>
-  </element>
   <element name="menuCommandSecondaryText">
       <description>Secondary text for AddCommand</description>
   </element>
@@ -663,6 +654,15 @@
   </element>
   <element name="menuSubMenuTertiaryText">
       <description>Tertiary text for AddSubMenu</description>
+  </element>
+  <element name="timeToDestination"/>
+    <!-- TO DO to be removed -->
+  <element name="turnText"/>
+  <element name="navigationText">
+    <description>Navigation text for UpdateTurnList.</description>
+  </element>
+  <element name="notificationText">
+    <description>Text of notification to be displayed on screen.</description>
   </element>
 </enum>
 
