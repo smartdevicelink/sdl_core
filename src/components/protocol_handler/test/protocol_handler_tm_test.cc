@@ -4488,8 +4488,8 @@ TEST_F(ProtocolHandlerImplTest, SetHashId_CorrectHashId) {
 
   RawMessagePtr raw_message;
   EXPECT_CALL(transport_manager_mock, SendMessageToDevice(_))
-      .WillOnce(DoAll(NotifyTestAsyncWaiter(waiter),
-                      SaveArg<0>(&raw_message),
+      .WillOnce(DoAll(SaveArg<0>(&raw_message),
+                      NotifyTestAsyncWaiter(waiter),
                       Return(transport_manager::E_SUCCESS)));
   times++;
 
@@ -4502,6 +4502,7 @@ TEST_F(ProtocolHandlerImplTest, SetHashId_CorrectHashId) {
                                              full_version);
 
   EXPECT_TRUE(waiter->WaitFor(times, kAsyncExpectationsTimeout));
+  ASSERT_NE(0, raw_message.use_count());
 
   ProtocolPacket protocol_packet;
   RESULT_CODE res = protocol_packet.deserializePacket(raw_message->data(),
@@ -4525,8 +4526,8 @@ TEST_F(ProtocolHandlerImplTest, SetHashId_HASH_ID_NOT_SUPPORTED) {
 
   RawMessagePtr raw_message;
   EXPECT_CALL(transport_manager_mock, SendMessageToDevice(_))
-      .WillOnce(DoAll(NotifyTestAsyncWaiter(waiter),
-                      SaveArg<0>(&raw_message),
+      .WillOnce(DoAll(SaveArg<0>(&raw_message),
+                      NotifyTestAsyncWaiter(waiter),
                       Return(transport_manager::E_SUCCESS)));
   times++;
 
@@ -4539,6 +4540,7 @@ TEST_F(ProtocolHandlerImplTest, SetHashId_HASH_ID_NOT_SUPPORTED) {
                                              full_version);
 
   EXPECT_TRUE(waiter->WaitFor(times, kAsyncExpectationsTimeout));
+  ASSERT_NE(0, raw_message.use_count());
 
   ProtocolPacket protocol_packet;
   RESULT_CODE res = protocol_packet.deserializePacket(raw_message->data(),
@@ -4560,8 +4562,8 @@ TEST_F(ProtocolHandlerImplTest, SetHashId_HASH_ID_WRONG) {
 
   RawMessagePtr raw_message;
   EXPECT_CALL(transport_manager_mock, SendMessageToDevice(_))
-      .WillOnce(DoAll(NotifyTestAsyncWaiter(waiter),
-                      SaveArg<0>(&raw_message),
+      .WillOnce(DoAll(SaveArg<0>(&raw_message),
+                      NotifyTestAsyncWaiter(waiter),
                       Return(transport_manager::E_SUCCESS)));
   times++;
 
@@ -4574,6 +4576,7 @@ TEST_F(ProtocolHandlerImplTest, SetHashId_HASH_ID_WRONG) {
                                              full_version);
 
   EXPECT_TRUE(waiter->WaitFor(times, kAsyncExpectationsTimeout));
+  ASSERT_NE(0, raw_message.use_count());
 
   ProtocolPacket protocol_packet;
   RESULT_CODE res = protocol_packet.deserializePacket(raw_message->data(),
@@ -4700,8 +4703,8 @@ TEST_F(ProtocolHandlerImplTest,
 
   RawMessagePtr raw_message;
   EXPECT_CALL(transport_manager_mock, SendMessageToDevice(_))
-      .WillOnce(DoAll(NotifyTestAsyncWaiter(waiter),
-                      SaveArg<0>(&raw_message),
+      .WillOnce(DoAll(SaveArg<0>(&raw_message),
+                      NotifyTestAsyncWaiter(waiter),
                       Return(transport_manager::E_SUCCESS)));
   times++;
 
@@ -4711,10 +4714,11 @@ TEST_F(ProtocolHandlerImplTest,
                                                          kFinalMessage);
   handler->Handle(message);
 
+  EXPECT_TRUE(waiter->WaitFor(times, kAsyncExpectationsTimeout));
+  ASSERT_NE(0, raw_message.use_count());
+
   EXPECT_EQ(data_value,
             raw_message->data()[protocol_handler::PROTOCOL_HEADER_V2_SIZE]);
-
-  EXPECT_TRUE(waiter->WaitFor(times, kAsyncExpectationsTimeout));
 }
 
 TEST_F(ProtocolHandlerImplTest,
@@ -4739,8 +4743,8 @@ TEST_F(ProtocolHandlerImplTest,
 
   RawMessagePtr raw_message;
   EXPECT_CALL(transport_manager_mock, SendMessageToDevice(_))
-      .WillOnce(DoAll(NotifyTestAsyncWaiter(waiter),
-                      SaveArg<0>(&raw_message),
+      .WillOnce(DoAll(SaveArg<0>(&raw_message),
+                      NotifyTestAsyncWaiter(waiter),
                       Return(transport_manager::E_SUCCESS)));
   times++;
 
@@ -4750,10 +4754,11 @@ TEST_F(ProtocolHandlerImplTest,
                                                          kFinalMessage);
   handler->Handle(message);
 
+  EXPECT_TRUE(waiter->WaitFor(times, kAsyncExpectationsTimeout));
+  ASSERT_NE(0, raw_message.use_count());
+
   EXPECT_EQ(data_value,
             raw_message->data()[protocol_handler::PROTOCOL_HEADER_V2_SIZE]);
-
-  EXPECT_TRUE(waiter->WaitFor(times, kAsyncExpectationsTimeout));
 }
 
 TEST_F(ProtocolHandlerImplTest,
@@ -4791,8 +4796,8 @@ TEST_F(ProtocolHandlerImplTest,
 
   RawMessagePtr raw_message;
   EXPECT_CALL(transport_manager_mock, SendMessageToDevice(_))
-      .WillOnce(DoAll(NotifyTestAsyncWaiter(waiter),
-                      SaveArg<0>(&raw_message),
+      .WillOnce(DoAll(SaveArg<0>(&raw_message),
+                      NotifyTestAsyncWaiter(waiter),
                       Return(transport_manager::E_SUCCESS)));
   times++;
 
@@ -4803,10 +4808,11 @@ TEST_F(ProtocolHandlerImplTest,
   message->set_protection_flag(PROTECTION_ON);
   handler->Handle(message);
 
+  EXPECT_TRUE(waiter->WaitFor(times, kAsyncExpectationsTimeout));
+  ASSERT_NE(0, raw_message.use_count());
+
   EXPECT_EQ(data_value,
             raw_message->data()[protocol_handler::PROTOCOL_HEADER_V2_SIZE]);
-
-  EXPECT_TRUE(waiter->WaitFor(times, kAsyncExpectationsTimeout));
 }
 
 TEST_F(ProtocolHandlerImplTest,
@@ -4841,8 +4847,8 @@ TEST_F(ProtocolHandlerImplTest,
 
   RawMessagePtr raw_message;
   EXPECT_CALL(transport_manager_mock, SendMessageToDevice(_))
-      .WillOnce(DoAll(NotifyTestAsyncWaiter(waiter),
-                      SaveArg<0>(&raw_message),
+      .WillOnce(DoAll(SaveArg<0>(&raw_message),
+                      NotifyTestAsyncWaiter(waiter),
                       Return(transport_manager::E_SUCCESS)));
   times++;
 
@@ -4853,10 +4859,11 @@ TEST_F(ProtocolHandlerImplTest,
   message->set_protection_flag(PROTECTION_ON);
   handler->Handle(message);
 
+  EXPECT_TRUE(waiter->WaitFor(times, kAsyncExpectationsTimeout));
+  ASSERT_NE(0, raw_message.use_count());
+
   EXPECT_EQ(encrypted_data,
             raw_message->data()[protocol_handler::PROTOCOL_HEADER_V2_SIZE]);
-
-  EXPECT_TRUE(waiter->WaitFor(times, kAsyncExpectationsTimeout));
 }
 
 TEST_F(ProtocolHandlerImplTest, DecryptFrame_NoSecurityManager_Cancelled) {
