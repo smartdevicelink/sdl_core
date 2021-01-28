@@ -312,11 +312,10 @@ class MockApplicationManager : public application_manager::ApplicationManager {
   MOCK_METHOD1(OnAppUnauthorized, void(const uint32_t& app_id));
   MOCK_METHOD1(ActivateApplication,
                bool(application_manager::ApplicationSharedPtr app));
-  MOCK_METHOD3(
-      OnAppStreaming,
-      void(uint32_t app_id,
-           protocol_handler::ServiceType service_type,
-           application_manager::Application::StreamingState new_state));
+  MOCK_METHOD3(OnAppStreaming,
+               void(uint32_t app_id,
+                    protocol_handler::ServiceType service_type,
+                    bool state));
   MOCK_CONST_METHOD6(CreateRegularState,
                      application_manager::HmiStatePtr(
                          application_manager::ApplicationSharedPtr app,
