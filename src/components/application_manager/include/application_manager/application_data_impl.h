@@ -191,6 +191,12 @@ class DynamicApplicationDataImpl : public virtual Application {
    */
   smart_objects::SmartObject FindSubMenu(uint32_t menu_id) const OVERRIDE;
 
+  /*
+   * @brief Returns true if sub menu with such name already exist
+   */
+  bool IsSubMenuNameAlreadyExist(const std::string& name,
+                                 const uint32_t parent_id);
+
   void SetWindowInfo(const WindowID window_id,
                      const smart_objects::SmartObject& window_info) OVERRIDE;
 

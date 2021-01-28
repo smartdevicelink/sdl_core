@@ -865,6 +865,20 @@ smart_objects::SmartObject DynamicApplicationDataImpl::FindSubMenu(
   return smart_objects::SmartObject(smart_objects::SmartType_Null);
 }
 
+bool DynamicApplicationDataImpl::IsSubMenuNameAlreadyExist(
+    const std::string& name, const uint32_t parent_id) {
+  sync_primitives::AutoLock lock(sub_menu_lock_ptr_);
+  for (SubMenuMap::iterator it = sub_menu_.begin(); sub_menu_.end() != it;
+       ++it) {
+    smart_objects::SmartObject* menu = it->second;
+    if ((*menu)[strings::menu_name].asString() == name &&
+        (*menu)[strings::parent_id].asInt() == parent_id) {
+      return true;
+    }
+  }
+  return false;
+}
+
 DataAccessor<WindowParamsMap>
 DynamicApplicationDataImpl::window_optional_params_map() const {
   return DataAccessor<WindowParamsMap>(window_params_map_,

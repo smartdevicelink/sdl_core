@@ -323,6 +323,8 @@ class MockApplication : public ::application_manager::Application {
                void(uint32_t menu_id, const smart_objects::SmartObject& menu));
   MOCK_METHOD1(RemoveSubMenu, void(uint32_t menu_id));
   MOCK_CONST_METHOD1(FindSubMenu, smart_objects::SmartObject(uint32_t menu_id));
+  MOCK_METHOD2(IsSubMenuNameAlreadyExist,
+               bool(const std::string& name, const uint32_t parent_id));
   MOCK_METHOD2(AddChoiceSet,
                void(uint32_t choice_set_id,
                     const smart_objects::SmartObject& choice_set));

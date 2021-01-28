@@ -367,6 +367,12 @@ class DynamicApplicationData {
   virtual smart_objects::SmartObject FindSubMenu(uint32_t menu_id) const = 0;
 
   /*
+   * @brief Returns true if sub menu with such name already exist
+   */
+  virtual bool IsSubMenuNameAlreadyExist(const std::string& name,
+                                         const uint32_t parent_id) = 0;
+
+  /*
    * @brief Adds a interaction choice set to the application
    *
    * @param choice_set_id Unique ID used for this interaction choice set
