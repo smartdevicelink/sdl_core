@@ -43,6 +43,7 @@
 #include "utils/prioritized_queue.h"
 #include "utils/threads/message_loop_thread.h"
 
+#include "utils/convert_utils.h"
 #include "utils/custom_string.h"
 #include "utils/messagemeter.h"
 #include "utils/semantic_version.h"
@@ -213,7 +214,7 @@ class ProtocolHandlerImpl
 
   void ProcessFailedPTU() OVERRIDE;
 
-#ifdef EXTERNAL_PROPRIETARY_MODE
+#if defined(EXTERNAL_PROPRIETARY_MODE) && defined(ENABLE_SECURITY)
   /**
    * @brief ProcessFailedCertDecrypt is called to notify security manager that
    * certificate decryption failed in the external flow
@@ -674,7 +675,7 @@ class ProtocolHandlerImpl
 
   RESULT_CODE HandleControlMessageHeartBeat(const ProtocolPacket& packet);
 
-  void PopValideAndExpirateMultiframes();
+  void PopValidAndExpiredMultiframes();
 
   // threads::MessageLoopThread<*>::Handler implementations
   // CALLED ON raw_ford_messages_from_mobile_ thread!

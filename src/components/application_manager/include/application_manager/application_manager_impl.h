@@ -286,32 +286,22 @@ class ApplicationManagerImpl
    */
   bool IsAppSubscribedForWayPoints(Application& app) const OVERRIDE;
 
-  void SaveWayPointsMessage(
-      smart_objects::SmartObjectSPtr way_points_message) OVERRIDE;
+  void SaveWayPointsMessage(smart_objects::SmartObjectSPtr way_points_message,
+                            uint32_t app_id = 0) OVERRIDE;
 
-  /**
-   * @brief Subscribe Application for way points
-   * @param Application id
-   */
-  void SubscribeAppForWayPoints(uint32_t app_id) OVERRIDE;
+  void SubscribeAppForWayPoints(uint32_t app_id,
+                                bool response_from_hmi = true) OVERRIDE;
 
-  /**
-   * @brief Subscribe Application for way points
-   * @param Application pointer
-   */
-  void SubscribeAppForWayPoints(ApplicationSharedPtr app) OVERRIDE;
+  void SubscribeAppForWayPoints(ApplicationSharedPtr app,
+                                bool response_from_hmi = true) OVERRIDE;
 
-  /**
-   * @brief Unsubscribe Application for way points
-   * @param Application id
-   */
-  void UnsubscribeAppFromWayPoints(uint32_t app_id) OVERRIDE;
+  void UnsubscribeAppFromWayPoints(uint32_t app_id,
+                                   bool response_from_hmi = true) OVERRIDE;
 
-  /**
-   * @brief Unsubscribe Application for way points
-   * @param Application pointer
-   */
-  void UnsubscribeAppFromWayPoints(ApplicationSharedPtr app) OVERRIDE;
+  void UnsubscribeAppFromWayPoints(ApplicationSharedPtr app,
+                                   bool response_from_hmi = true) OVERRIDE;
+
+  bool IsSubscribedToHMIWayPoints() const OVERRIDE;
 
   /**
    * @brief Is Any Application is subscribed for way points
@@ -1191,6 +1181,9 @@ class ApplicationManagerImpl
   void ApplyFunctorForEachPlugin(
       std::function<void(plugin_manager::RPCPlugin&)> functor) OVERRIDE;
 
+  ns_smart_device_link_rpc::V1::v4_protocol_v1_2_no_extra&
+  mobile_v4_protocol_so_factory() OVERRIDE;
+
  private:
   /**
    * @brief Adds application to registered applications list and marks it as
@@ -1562,7 +1555,11 @@ class ApplicationManagerImpl
    */
   std::set<uint32_t> subscribed_way_points_apps_list_;
 
-  smart_objects::SmartObjectSPtr way_points_data_;
+  bool subscribed_to_hmi_way_points_;
+
+  smart_objects::SmartObjectSPtr hmi_way_points_data_;
+
+  std::map<uint32_t, smart_objects::SmartObject> mobile_way_points_data_;
 
   /**
    * @brief Map contains applications which
@@ -1610,8 +1607,10 @@ class ApplicationManagerImpl
     mobile_apis::SystemContext::eType system_context;
   };
 
-  hmi_apis::HMI_API* hmi_so_factory_;
-  mobile_apis::MOBILE_API* mobile_so_factory_;
+  hmi_apis::HMI_API hmi_so_factory_;
+  mobile_apis::MOBILE_API mobile_so_factory_;
+  ns_smart_device_link_rpc::V1::v4_protocol_v1_2_no_extra
+      mobile_v4_protocol_so_factory_;
 
   std::atomic_uint32_t mobile_corelation_id_;
   std::atomic_uint32_t corelation_id_;

@@ -425,7 +425,7 @@ void SecurityManagerImpl::ProcessFailedPTU() {
   }
 }
 
-#ifdef EXTERNAL_PROPRIETARY_MODE
+#if defined(EXTERNAL_PROPRIETARY_MODE) && defined(ENABLE_SECURITY)
 void SecurityManagerImpl::ProcessFailedCertDecrypt() {
   SDL_LOG_AUTO_TRACE();
   {

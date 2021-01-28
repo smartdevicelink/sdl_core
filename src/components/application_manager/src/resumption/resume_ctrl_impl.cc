@@ -514,16 +514,30 @@ void ResumeCtrlImpl::StartAppHmiStateResumption(
   const bool is_resume_allowed_by_low_voltage =
       CheckLowVoltageRestrictions(saved_app);
 
-  const bool is_hmi_level_allowed_by_ign_cycle =
-      CheckIgnCycleRestrictions(saved_app);
-
+  const time_t sdl_launch_time = LaunchTime();
+  const bool is_unexpected_disconnect_in_current_ign_cycle =
+      sdl_launch_time < saved_app[strings::time_stamp].asInt();
+  SDL_LOG_DEBUG("sdl_launch_time: " << sdl_launch_time
+                                    << ", App disconnect time: "
+                                    << saved_app[strings::time_stamp].asInt());
   const bool is_app_revoked =
       application_manager_.GetPolicyHandler().IsApplicationRevoked(
           application->policy_app_id());
 
-  const bool restore_hmi_level_allowed = is_resume_allowed_by_low_voltage &&
-                                         is_hmi_level_allowed_by_ign_cycle &&
-                                         !is_app_revoked;
+  bool restore_hmi_level_allowed = true;
+  if (!is_unexpected_disconnect_in_current_ign_cycle) {
+    const bool is_hmi_level_allowed_by_ign_cycle =
+        CheckIgnCycleRestrictions(saved_app);
+    restore_hmi_level_allowed = is_resume_allowed_by_low_voltage &&
+                                is_hmi_level_allowed_by_ign_cycle &&
+                                !is_app_revoked;
+  } else {
+    const bool is_resume_app_data_not_expired =
+        !IsAppDataResumptionExpired(saved_app);
+    restore_hmi_level_allowed = is_resume_allowed_by_low_voltage &&
+                                is_resume_app_data_not_expired &&
+                                !is_app_revoked;
+  }
 
   if (restore_hmi_level_allowed) {
     SDL_LOG_INFO("Resume application " << application->policy_app_id());

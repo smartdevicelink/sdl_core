@@ -1667,6 +1667,21 @@ void ConnectionHandlerImpl::SendEndService(uint32_t key, uint8_t service_type) {
   }
 }
 
+bool ConnectionHandlerImpl::IsSessionHeartbeatTracked(
+    const uint32_t connection_key) const {
+  SDL_LOG_AUTO_TRACE();
+  uint32_t connection_handle = 0;
+  uint8_t session_id = 0;
+  PairFromKey(connection_key, &connection_handle, &session_id);
+
+  sync_primitives::AutoReadLock lock(connection_list_lock_);
+  ConnectionList::const_iterator it = connection_list_.find(connection_handle);
+  if (connection_list_.end() != it) {
+    return it->second->IsSessionHeartbeatTracked(session_id);
+  }
+  return false;
+}
+
 void ConnectionHandlerImpl::StartSessionHeartBeat(uint32_t connection_key) {
   SDL_LOG_AUTO_TRACE();
   uint32_t connection_handle = 0;

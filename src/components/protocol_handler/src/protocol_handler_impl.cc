@@ -52,13 +52,6 @@ namespace protocol_handler {
 
 SDL_CREATE_LOG_VARIABLE("ProtocolHandler")
 
-/**
- * Function return packet data as std::string.
- * If packet data is not printable return error message
- */
-std::string ConvertPacketDataToString(const uint8_t* data,
-                                      const size_t data_size);
-
 const size_t kStackSize = 131072;
 
 const utils::SemanticVersion default_protocol_version(5, 3, 0);
@@ -424,6 +417,11 @@ void ProtocolHandlerImpl::SendStartSessionAck(
 
   raw_ford_messages_to_mobile_.PostMessage(
       impl::RawFordMessageToMobile(ptr, false));
+
+  const uint32_t connection_key =
+      session_observer_.KeyFromPair(connection_id, session_id);
+  connection_handler_.BindProtocolVersionWithSession(connection_key,
+                                                     ack_protocol_version);
 
   SDL_LOG_DEBUG("SendStartSessionAck() for connection "
                 << connection_id << " for service_type "
@@ -1171,7 +1169,7 @@ void ProtocolHandlerImpl::ProcessFailedPTU() {
 #endif  // ENABLE_SECURITY
 }
 
-#ifdef EXTERNAL_PROPRIETARY_MODE
+#if defined(EXTERNAL_PROPRIETARY_MODE) && defined(ENABLE_SECURITY)
 void ProtocolHandlerImpl::ProcessFailedCertDecrypt() {
   SDL_LOG_AUTO_TRACE();
   security_manager_->ProcessFailedCertDecrypt();
@@ -1283,7 +1281,7 @@ RESULT_CODE ProtocolHandlerImpl::SendFrame(const ProtocolFramePtr packet) {
 
   SDL_LOG_DEBUG(
       "Packet to be sent: "
-      << ConvertPacketDataToString(packet->data(), packet->data_size())
+      << utils::ConvertBinaryDataToString(packet->data(), packet->data_size())
       << " of size: " << packet->data_size());
   const RawMessagePtr message_to_send = packet->serializePacket();
   if (!message_to_send) {
@@ -1448,7 +1446,7 @@ RESULT_CODE ProtocolHandlerImpl::HandleSingleFrameMessage(
   SDL_LOG_DEBUG(
       "FRAME_TYPE_SINGLE message of size "
       << packet->data_size() << "; message "
-      << ConvertPacketDataToString(packet->data(), packet->data_size()));
+      << utils::ConvertBinaryDataToString(packet->data(), packet->data_size()));
 
   // Replace a potential secondary transport ID in the packet with the primary
   // transport ID
@@ -2051,16 +2049,23 @@ void ProtocolHandlerImpl::NotifySessionStarted(
 RESULT_CODE ProtocolHandlerImpl::HandleControlMessageHeartBeat(
     const ProtocolPacket& packet) {
   const ConnectionID connection_id = packet.connection_id();
+  const uint32_t session_id = packet.session_id();
   SDL_LOG_DEBUG("Sending heart beat acknowledgment for connection "
-                << connection_id);
+                << connection_id << " session " << session_id);
   uint8_t protocol_version;
   if (session_observer_.ProtocolVersionUsed(
-          connection_id, packet.session_id(), protocol_version)) {
+          connection_id, session_id, protocol_version)) {
     // TODO(EZamakhov): investigate message_id for HeartBeatAck
     if (protocol_version >= PROTOCOL_VERSION_3 &&
         protocol_version <= PROTOCOL_VERSION_5) {
-      return SendHeartBeatAck(
-          connection_id, packet.session_id(), packet.message_id());
+      const uint32_t connection_key =
+          session_observer_.KeyFromPair(connection_id, session_id);
+      if (!connection_handler_.IsSessionHeartbeatTracked(connection_key)) {
+        SDL_LOG_DEBUG("Session heartbeat tracking is not started. "
+                      << "Starting it for session " << session_id);
+        connection_handler_.StartSessionHeartBeat(connection_key);
+      }
+      return SendHeartBeatAck(connection_id, session_id, packet.message_id());
     } else {
       SDL_LOG_WARN("HeartBeat is not supported");
       return RESULT_HEARTBEAT_IS_NOT_SUPPORTED;
@@ -2073,7 +2078,7 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessageHeartBeat(
   }
 }
 
-void ProtocolHandlerImpl::PopValideAndExpirateMultiframes() {
+void ProtocolHandlerImpl::PopValidAndExpiredMultiframes() {
   SDL_LOG_AUTO_TRACE();
   const ProtocolFramePtrList& frame_list = multiframe_builder_.PopMultiframes();
   for (ProtocolFramePtrList::const_iterator it = frame_list.begin();
@@ -2180,7 +2185,7 @@ void ProtocolHandlerImpl::Handle(const impl::RawFordMessageFromMobile message) {
       FRAME_TYPE_FIRST == message->frame_type()) {
     SDL_LOG_DEBUG("Packet: dataSize " << message->data_size());
     HandleMessage(message);
-    PopValideAndExpirateMultiframes();
+    PopValidAndExpiredMultiframes();
   } else {
     SDL_LOG_WARN("handleMessagesFromMobileApp() - incorrect or NULL data");
   }
@@ -2395,24 +2400,6 @@ void ProtocolHandlerImpl::SetTelemetryObserver(PHTelemetryObserver* observer) {
   metric_observer_ = observer;
 }
 #endif  // TELEMETRY_MONITOR
-
-std::string ConvertPacketDataToString(const uint8_t* data,
-                                      const size_t data_size) {
-  if (0 == data_size)
-    return std::string();
-  bool is_printable_array = true;
-  std::locale loc;
-  const char* text = reinterpret_cast<const char*>(data);
-  // Check data for printability
-  for (size_t i = 0; i < data_size; ++i) {
-    if (!std::isprint(text[i], loc)) {
-      is_printable_array = false;
-      break;
-    }
-  }
-  return is_printable_array ? std::string(text, data_size)
-                            : std::string("is raw data");
-}
 
 uint8_t ProtocolHandlerImpl::SupportedSDLProtocolVersion() const {
   SDL_LOG_AUTO_TRACE();

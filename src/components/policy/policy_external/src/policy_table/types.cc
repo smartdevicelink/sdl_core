@@ -1357,8 +1357,7 @@ ConsumerFriendlyMessages::ConsumerFriendlyMessages(const Json::Value* value__)
 Json::Value ConsumerFriendlyMessages::ToJsonValue() const {
   Json::Value result__(Json::objectValue);
   impl::WriteJsonField("version", version, &result__);
-  // According to requirements, it is not necessary to provide this to PTS
-  // impl::WriteJsonField("messages", messages, &result__);
+  impl::WriteJsonField("messages", messages, &result__);
   return result__;
 }
 

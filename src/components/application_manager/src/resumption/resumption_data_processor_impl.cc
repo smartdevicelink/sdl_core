@@ -1079,8 +1079,6 @@ void ResumptionDataProcessorImpl::CheckCreateWindowResponse(
     const smart_objects::SmartObject& request,
     const smart_objects::SmartObject& response) const {
   SDL_LOG_AUTO_TRACE();
-  const auto correlation_id =
-      response[strings::params][strings::correlation_id].asInt();
 
   const auto& msg_params = request[strings::msg_params];
   const auto app_id = msg_params[strings::app_id].asInt();
@@ -1093,8 +1091,9 @@ void ResumptionDataProcessorImpl::CheckCreateWindowResponse(
 
   const auto window_id = msg_params[strings::window_id].asInt();
   if (!IsResponseSuccessful(response)) {
-    SDL_LOG_ERROR("UI_CreateWindow for correlation id: " << correlation_id
-                                                         << " has failed");
+    SDL_LOG_ERROR("UI_CreateWindow for correlation id: "
+                  << response[strings::params][strings::correlation_id].asInt()
+                  << " has failed");
     auto& builder = application->display_capabilities_builder();
     builder.ResetDisplayCapabilities();
     return;

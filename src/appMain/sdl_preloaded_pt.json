@@ -854,8 +854,7 @@
                         "hmi_levels": [
                             "FULL",
                             "LIMITED",
-                            "BACKGROUND",
-                            "NONE"
+                            "BACKGROUND"
                         ]
                     },
                     "UnpublishAppService": {
@@ -3859,25 +3858,63 @@
                             "name": "driverDoorAjar",
                             "key": "OEM_REF_DR_DOOR_AJ",
                             "type": "Boolean",
-                            "mandatory": false
+                            "mandatory": false,
+                            "deprecated": true,
+                            "since": "7.1"
                         },
                         {
                             "name": "passengerDoorAjar",
                             "key": "OEM_REF_PAS_DOOR_AJ",
                             "type": "Boolean",
-                            "mandatory": false
+                            "mandatory": false,
+                            "deprecated": true,
+                            "since": "7.1"
                         },
                         {
                             "name": "rearLeftDoorAjar",
                             "key": "OEM_REF_REAR_LEFT_DOOR_AJ",
                             "type": "Boolean",
-                            "mandatory": false
+                            "mandatory": false,
+                            "deprecated": true,
+                            "since": "7.1"
                         },
                         {
                             "name": "rearRightDoorAjar",
                             "key": "OEM_REF_REAR_RIGHT_DOOR_AJ",
                             "type": "Boolean",
-                            "mandatory": false
+                            "mandatory": false,
+                            "deprecated": true,
+                            "since": "7.1"
+                        },
+                        {
+                            "name": "doorStatuses",
+                            "key": "OEM_REF_DOOR_STATUSES",
+                            "array": true,
+                            "type": "DoorStatus",
+                            "mandatory": false,
+                            "minsize": 0,
+                            "maxsize": 100,
+                            "since": "7.1"
+                        },
+                        {
+                            "name": "gateStatuses",
+                            "key": "OEM_REF_GATE_STATUSES",
+                            "array": true,
+                            "type": "GateStatus",
+                            "mandatory": false,
+                            "minsize": 0,
+                            "maxsize": 100,
+                            "since": "7.1"
+                        },
+                        {
+                            "name": "roofStatuses",
+                            "key": "OEM_REF_ROOF_STATUSES",
+                            "array": true,
+                            "type": "RoofStatus",
+                            "mandatory": false,
+                            "minsize": 0,
+                            "maxsize": 100,
+                            "since": "7.1"
                         }
                     ],
                     "key": "OEM_REF_BODY_INF",

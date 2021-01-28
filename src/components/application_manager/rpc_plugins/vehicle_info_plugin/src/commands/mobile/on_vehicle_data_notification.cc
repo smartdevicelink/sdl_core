@@ -103,10 +103,41 @@ void OnVehicleDataNotification::Run() {
     }
   }
 
-  SDL_LOG_DEBUG("Number of Notifications to be send: " << notify_apps.size());
-
   for (size_t idx = 0; idx < notify_apps.size(); idx++) {
-    SDL_LOG_INFO("Send OnVehicleData PRNDL notification to "
+    CommandParametersPermissions params_permissions;
+    application_manager_.CheckPolicyPermissions(
+        notify_apps[idx],
+        window_id(),
+        MessageHelper::StringifiedFunctionID(
+            mobile_api::FunctionID::OnVehicleDataID),
+        appSO[idx].enumerate(),
+        &params_permissions);
+    if (params_permissions.allowed_params.empty() &&
+        params_permissions.disallowed_params.empty() &&
+        params_permissions.undefined_params.empty()) {
+      SDL_LOG_DEBUG(
+          "No parameter permissions provided, all params are allowed");
+    } else {
+      for (const auto& param : appSO[idx].enumerate()) {
+        const auto& allowed_params = params_permissions.allowed_params;
+        auto param_allowed = allowed_params.find(param);
+        if (allowed_params.end() == param_allowed) {
+          SDL_LOG_DEBUG("Param " << param
+                                 << " is not allowed by policy for app "
+                                 << notify_apps[idx]->app_id()
+                                 << ". It will be ignored.");
+          appSO[idx].erase(param);
+        }
+      }
+    }
+
+    if (appSO[idx].empty()) {
+      SDL_LOG_DEBUG("App " << notify_apps[idx]->app_id()
+                           << " will be skipped: there is nothing to notify.");
+      continue;
+    }
+
+    SDL_LOG_INFO("Send OnVehicleData notification to "
                  << notify_apps[idx]->name().c_str() << " application id "
                  << notify_apps[idx]->app_id());
     (*message_)[strings::params][strings::connection_key] =

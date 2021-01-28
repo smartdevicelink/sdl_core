@@ -466,8 +466,6 @@ bool RPCHandlerImpl::ConvertMessageToSO(
       break;
     }
     case protocol_handler::MajorProtocolVersion::PROTOCOL_VERSION_1: {
-      static ns_smart_device_link_rpc::V1::v4_protocol_v1_2_no_extra v1_shema;
-
       if (message.function_id() == 0 || message.type() == kUnknownType) {
         SDL_LOG_ERROR("Message received: UNSUPPORTED_VERSION");
 
@@ -495,7 +493,8 @@ bool RPCHandlerImpl::ConvertMessageToSO(
 
           smart_objects::SmartObjectSPtr msg_to_send =
               std::make_shared<smart_objects::SmartObject>(output);
-          v1_shema.attachSchema(*msg_to_send, false);
+          app_manager_.mobile_v4_protocol_so_factory().attachSchema(
+              *msg_to_send, false);
           app_manager_.GetRPCService().SendMessageToMobile(msg_to_send);
           return false;
         }
@@ -601,5 +600,6 @@ hmi_apis::HMI_API& RPCHandlerImpl::hmi_so_factory() {
 mobile_apis::MOBILE_API& RPCHandlerImpl::mobile_so_factory() {
   return mobile_so_factory_;
 }
+
 }  // namespace rpc_handler
 }  // namespace application_manager

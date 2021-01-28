@@ -42,6 +42,9 @@
 #include "connection_handler/connection_handler.h"
 #include "utils/data_accessor.h"
 
+#include "interfaces/v4_protocol_v1_2_no_extra.h"
+#include "interfaces/v4_protocol_v1_2_no_extra_schema.h"
+
 #include "application_manager/application_manager_settings.h"
 #include "application_manager/hmi_interfaces.h"
 #include "application_manager/plugin_manager/rpc_plugin_manager.h"
@@ -345,7 +348,7 @@ class ApplicationManager {
 
   /**
    * @brief Checks if Application is subscribed for way points
-   * @param Application id
+   * @param app_id Application id
    * @return true if Application is subscribed for way points
    * otherwise false
    */
@@ -353,7 +356,7 @@ class ApplicationManager {
 
   /**
    * @brief Checks if Application is subscribed for way points
-   * @param Application reference
+   * @param app Application reference
    * @return true if Application is subscribed for way points
    * otherwise false
    */
@@ -361,27 +364,45 @@ class ApplicationManager {
 
   /**
    * @brief Subscribe Application for way points
-   * @param Application id
+   * @param app_id Application id
+   * @param response_from_hmi True if a successful HMI response was received
+   * when subscribing
    */
-  virtual void SubscribeAppForWayPoints(uint32_t id) = 0;
+  virtual void SubscribeAppForWayPoints(uint32_t app_id,
+                                        bool response_from_hmi = true) = 0;
 
   /**
    * @brief Subscribe Application for way points
-   * @param Application pointer
+   * @param app Application pointer
+   * @param response_from_hmi True if a successful HMI response was received
+   * when subscribing
    */
-  virtual void SubscribeAppForWayPoints(ApplicationSharedPtr app) = 0;
+  virtual void SubscribeAppForWayPoints(ApplicationSharedPtr app,
+                                        bool response_from_hmi = true) = 0;
 
   /**
    * @brief Unsubscribe Application for way points
-   * @param Application id
+   * @param app_id Application id
+   * @param response_from_hmi True if a successful HMI response was received
+   * when unsubscribing
    */
-  virtual void UnsubscribeAppFromWayPoints(uint32_t app_id) = 0;
+  virtual void UnsubscribeAppFromWayPoints(uint32_t app_id,
+                                           bool response_from_hmi = true) = 0;
 
   /**
    * @brief Unsubscribe Application for way points
-   * @param Application pointer
+   * @param app Application pointer
+   * @param response_from_hmi True if a successful HMI response was received
+   * when unsubscribing
    */
-  virtual void UnsubscribeAppFromWayPoints(ApplicationSharedPtr app) = 0;
+  virtual void UnsubscribeAppFromWayPoints(ApplicationSharedPtr app,
+                                           bool response_from_hmi = true) = 0;
+
+  /**
+   * @brief Is SDL Core subscribed to HMI waypoints
+   * @return true if SDL Core is subscribed to HMI waypoints, otherwise false
+   */
+  virtual bool IsSubscribedToHMIWayPoints() const = 0;
 
   /**
    * @brief Is Any Application is subscribed for way points
@@ -392,9 +413,12 @@ class ApplicationManager {
   /**
    * @brief Save message after OnWayPointsChangeNotification reception
    * @param way_points_message pointer to the smartobject
+   * @param app_id the app ID of the provider sending the way points update or 0
+   * if the HMI is the provider
    */
   virtual void SaveWayPointsMessage(
-      smart_objects::SmartObjectSPtr way_points_message) = 0;
+      smart_objects::SmartObjectSPtr way_points_message,
+      uint32_t app_id = 0) = 0;
 
   /**
    * @brief Get subscribed for way points
@@ -774,6 +798,9 @@ class ApplicationManager {
    * @return reference to hmi_interfaces component
    */
   virtual HmiInterfaces& hmi_interfaces() = 0;
+
+  virtual ns_smart_device_link_rpc::V1::v4_protocol_v1_2_no_extra&
+  mobile_v4_protocol_so_factory() = 0;
 
   virtual app_launch::AppLaunchCtrl& app_launch_ctrl() = 0;
 

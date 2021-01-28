@@ -146,7 +146,7 @@ class ProtocolHandler {
 
   virtual void ProcessFailedPTU() = 0;
 
-#ifdef EXTERNAL_PROPRIETARY_MODE
+#if defined(EXTERNAL_PROPRIETARY_MODE) && defined(ENABLE_SECURITY)
   /**
    * @brief ProcessFailedCertDecrypt is called to notify security manager that
    * certificate decryption failed in the external flow

@@ -685,9 +685,9 @@ TEST_F(ResumeCtrlTest,
   extensions.insert(extensions.begin(), mock_app_extension_);
   EXPECT_CALL(*mock_app_, Extensions()).WillOnce(ReturnRef(extensions));
 
-  EXPECT_CALL(
-      mock_app_mngr_,
-      SubscribeAppForWayPoints(A<application_manager::ApplicationSharedPtr>()));
+  EXPECT_CALL(mock_app_mngr_,
+              SubscribeAppForWayPoints(
+                  A<application_manager::ApplicationSharedPtr>(), true));
   const mobile_apis::HMILevel::eType hmi_test_level =
       mobile_apis::HMILevel::HMI_FULL;
   ON_CALL(mock_app_mngr_, GetDefaultHmiLevel(const_app_))
