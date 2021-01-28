@@ -216,7 +216,7 @@ class SecurityManagerImpl : public SecurityManager,
 
   void ProcessFailedPTU() OVERRIDE;
 
-#ifdef EXTERNAL_PROPRIETARY_MODE
+#if defined(EXTERNAL_PROPRIETARY_MODE) && defined(ENABLE_SECURITY)
   /**
    * @brief ProcessFailedCertDecrypt is called to notify listeners that
    * certificate decryption failed in the external flow

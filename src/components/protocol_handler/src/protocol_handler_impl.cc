@@ -1169,7 +1169,7 @@ void ProtocolHandlerImpl::ProcessFailedPTU() {
 #endif  // ENABLE_SECURITY
 }
 
-#ifdef EXTERNAL_PROPRIETARY_MODE
+#if defined(EXTERNAL_PROPRIETARY_MODE) && defined(ENABLE_SECURITY)
 void ProtocolHandlerImpl::ProcessFailedCertDecrypt() {
   SDL_LOG_AUTO_TRACE();
   security_manager_->ProcessFailedCertDecrypt();

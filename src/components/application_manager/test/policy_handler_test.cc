@@ -926,8 +926,8 @@ void PolicyHandlerTest::TestActivateApp(const uint32_t connection_key,
           _,
           _));
 #endif  // EXTERNAL_PROPRIETARY_MODE
-
-  EXPECT_CALL(*application1, policy_app_id()).WillOnce(Return(kPolicyAppId_));
+  EXPECT_CALL(*application1, policy_app_id())
+      .WillRepeatedly(Return(kPolicyAppId_));
   EXPECT_CALL(*mock_policy_manager_,
               GetAppPermissionsChanges(kMacAddr_, kPolicyAppId_))
       .WillOnce(Return(permissions));
@@ -1915,7 +1915,7 @@ TEST_F(PolicyHandlerTest, OnDeviceConsentChanged_ConsentAllowed) {
   EXPECT_CALL(*mock_app_, policy_app_id()).WillOnce(Return(kPolicyAppId_));
 
   EXPECT_CALL(*mock_policy_manager_, IsPredataPolicy(kPolicyAppId_))
-      .WillOnce(Return(true));
+      .WillRepeatedly(Return(true));
 
   EXPECT_CALL(
       *mock_policy_manager_,
@@ -1944,7 +1944,7 @@ TEST_F(PolicyHandlerTest, OnDeviceConsentChanged_ConsentNotAllowed) {
   EXPECT_CALL(*mock_app_, policy_app_id()).WillOnce(Return(kPolicyAppId_));
 
   EXPECT_CALL(*mock_policy_manager_, IsPredataPolicy(kPolicyAppId_))
-      .WillOnce(Return(true));
+      .WillRepeatedly(Return(true));
 
   EXPECT_CALL(*mock_policy_manager_,
               ReactOnUserDevConsentForApp(handle, kPolicyAppId_, is_allowed))
@@ -1976,7 +1976,7 @@ TEST_F(PolicyHandlerTest, OnDeviceConsentChanged_PredatePolicyNotAllowed) {
 
   // App does not have predate policy
   EXPECT_CALL(*mock_policy_manager_, IsPredataPolicy(kPolicyAppId_))
-      .WillOnce(Return(false));
+      .WillRepeatedly(Return(false));
 
   EXPECT_CALL(
       *mock_policy_manager_,
