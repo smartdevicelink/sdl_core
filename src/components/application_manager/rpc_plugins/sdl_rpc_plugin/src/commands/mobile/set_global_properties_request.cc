@@ -151,7 +151,7 @@ void SetGlobalPropertiesRequest::Run() {
     return;
   }
 
-  if (!AreCustomizableKeysAllowed()) {
+  if (!ValidateCustomKeys()) {
     SDL_LOG_ERROR(
         "Number of customizable keys exceeds the maximum number for this "
         "layout");
@@ -663,12 +663,11 @@ void SetGlobalPropertiesRequest::PrepareUIRequestMenuAndKeyboardData(
     smart_objects::SmartObject cached_keyboard_props(
         msg_params[hmi_request::keyboard_properties]);
     auto saved_keyboard_props = app->keyboard_props();
-    if (saved_keyboard_props) {
-      if (saved_keyboard_props->keyExists(hmi_request::keyboard_layout)) {
-        cached_keyboard_props[hmi_request::keyboard_layout] =
-            static_cast<hmi_apis::Common_KeyboardLayout::eType>(
-                (*saved_keyboard_props)[hmi_request::keyboard_layout].asInt());
-      }
+    if (saved_keyboard_props &&
+        saved_keyboard_props->keyExists(hmi_request::keyboard_layout)) {
+      cached_keyboard_props[hmi_request::keyboard_layout] =
+          static_cast<hmi_apis::Common_KeyboardLayout::eType>(
+              (*saved_keyboard_props)[hmi_request::keyboard_layout].asInt());
     }
     app->set_keyboard_props(cached_keyboard_props);
   }
@@ -942,7 +941,7 @@ uint32_t SetGlobalPropertiesRequest::GetAllowedNumberOfConfigurableKeys()
   return 0;
 }
 
-bool SetGlobalPropertiesRequest::AreCustomizableKeysAllowed() const {
+bool SetGlobalPropertiesRequest::ValidateCustomKeys() const {
   SDL_LOG_AUTO_TRACE();
 
   const smart_objects::SmartObject& msg_params =

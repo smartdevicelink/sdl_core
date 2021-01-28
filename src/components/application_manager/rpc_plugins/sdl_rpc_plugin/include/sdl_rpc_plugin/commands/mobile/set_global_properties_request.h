@@ -220,12 +220,11 @@ class SetGlobalPropertiesRequest
   uint32_t GetAllowedNumberOfConfigurableKeys() const;
 
   /**
-   * @brief Checks if customizable keys are allowed
-   * @return true if customizable keys are allowed or this non-mandatoty
-   * parameter is absent or empty, and false if disallowed
-   *
+   * @brief Checks provided custom keys against capabilities.
+   * @return true if the specified keyboard layout supports the number of
+   * custom keys provided.
    */
-  bool AreCustomizableKeysAllowed() const;
+  bool ValidateCustomKeys() const;
 
   /**
    * @brief Prepare result code and result for sending to mobile application
