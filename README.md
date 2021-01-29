@@ -21,6 +21,7 @@ Pull Requests Welcome!
 Currently supported:
 * Ubuntu Linux 16.04 with GCC 5.4.x
 * Ubuntu Linux 18.04 with GCC 7.5.x
+* Ubuntu Linux 20.04 with GCC 9.3.x
 * [C++11 standard](https://github.com/smartdevicelink/sdl_evolution/issues/132)
 
 ## Getting Started
