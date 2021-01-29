@@ -758,7 +758,7 @@ class CodeGenerator(object):
         result_array = []
         result_array.append(self._impl_code_shared_ptr_vector_template.substitute(var_name = name))
         result = u"\n".join(result_array)
-        if result is not "":
+        if result != "":
             result += u"\n\n"
         return result
 
@@ -789,7 +789,7 @@ class CodeGenerator(object):
                 count += 1
 
         result = u"\n\n".join(result_array)
-        if result is not "":
+        if result != "":
             result += u"\n\n"
         return result
 
@@ -1415,7 +1415,7 @@ class CodeGenerator(object):
                                 is True else u"// {0}\n").format(x)
                                 for x in self._normalize_multiline_comments(
                                     interface_item_base.description)])
-        if description is not u"":
+        if description != u"":
             description = u"".join([u" *\n" if use_doxygen
                                     is True else u"//\n", description])
 
@@ -1425,7 +1425,7 @@ class CodeGenerator(object):
                                        self._normalize_multiline_comments(
                                            interface_item_base.
                                            design_description)])
-        if design_description is not u"":
+        if design_description != u"":
             design_description = u"".join([u" *\n" if use_doxygen is
                                            True else "//\n",
                                            design_description])
@@ -1434,7 +1434,7 @@ class CodeGenerator(object):
                            True else u"// Note: {0}\n").format(x)
                            for x in self._normalize_multiline_comments(
                                [x.value for x in interface_item_base.issues])])
-        if issues is not u"":
+        if issues != u"":
             issues = u"".join([u" *\n" if use_doxygen is
                               True else u"//\n", issues])
 
@@ -1442,7 +1442,7 @@ class CodeGenerator(object):
                           True else u"// ToDo: {0}\n").format(x)
                           for x in self._normalize_multiline_comments(
                               interface_item_base.todos)])
-        if todos is not u"":
+        if todos != u"":
             todos = u"".join([u" *\n" if use_doxygen is
                               True else u"//\n", todos])
 
@@ -1479,7 +1479,7 @@ class CodeGenerator(object):
         return u"".join(
             [u"{0}{1}\n".format(
                 self._indent_template * indent_level,
-                x) if x is not u"" else u"\n" for x in code_lines])
+                x) if x != u"" else u"\n" for x in code_lines])
 
     @staticmethod
     def _normalize_multiline_comments(initial_strings):

@@ -36,20 +36,21 @@
 #include <openssl/err.h>
 #include <openssl/pkcs12.h>
 #include <openssl/ssl.h>
-
 #include <stdio.h>
+
 #include <algorithm>
 #include <ctime>
 #include <fstream>
 #include <iostream>
-#include "security_manager/security_manager.h"
 
+#include "security_manager/security_manager.h"
 #include "utils/atomic.h"
 #include "utils/date_time.h"
 #include "utils/logger.h"
 #include "utils/macro.h"
 #include "utils/scope_guard.h"
 
+#define OPENSSL1_1_VERSION 0x1010100fL
 #define TLS1_1_MINIMAL_VERSION 0x1000103fL
 #define CONST_SSL_METHOD_MINIMAL_VERSION 0x00909000L
 
@@ -174,7 +175,11 @@ bool CryptoManagerImpl::Init() {
 #endif
     case TLSv1:
       SDL_LOG_DEBUG("TLSv1 is used");
+#if OPENSSL_VERSION_NUMBER < OPENSSL1_1_VERSION
       method = is_server ? TLSv1_server_method() : TLSv1_client_method();
+#else
+      method = is_server ? TLS_server_method() : TLS_client_method();
+#endif
       break;
     case TLSv1_1:
       SDL_LOG_DEBUG("TLSv1_1 is used");
@@ -182,8 +187,10 @@ bool CryptoManagerImpl::Init() {
       SDL_LOG_WARN(
           "OpenSSL has no TLSv1.1 with version lower 1.0.1, set TLSv1.0");
       method = is_server ? TLSv1_server_method() : TLSv1_client_method();
-#else
+#elseif OPENSSL_VERSION_NUMBER < OPENSSL1_1_VERSION
       method = is_server ? TLSv1_1_server_method() : TLSv1_1_client_method();
+#else
+      method = is_server ? TLS_server_method() : TLS_client_method();
 #endif
       break;
     case TLSv1_2:
@@ -192,13 +199,19 @@ bool CryptoManagerImpl::Init() {
       SDL_LOG_WARN(
           "OpenSSL has no TLSv1.2 with version lower 1.0.1, set TLSv1.0");
       method = is_server ? TLSv1_server_method() : TLSv1_client_method();
-#else
+#elseif OPENSSL_VERSION_NUMBER < OPENSSL1_1_VERSION
       method = is_server ? TLSv1_2_server_method() : TLSv1_2_client_method();
+#else
+      method = is_server ? TLS_server_method() : TLS_client_method();
 #endif
       break;
     case DTLSv1:
       SDL_LOG_DEBUG("DTLSv1 is used");
+#if OPENSSL_VERSION_NUMBER < OPENSSL1_1_VERSION
       method = is_server ? DTLSv1_server_method() : DTLSv1_client_method();
+#else
+      method = is_server ? DTLS_server_method() : DTLS_client_method();
+#endif
       break;
     default:
       SDL_LOG_ERROR("Unknown protocol: "
