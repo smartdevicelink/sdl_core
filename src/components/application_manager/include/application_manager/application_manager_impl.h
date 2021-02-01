@@ -1612,9 +1612,9 @@ class ApplicationManagerImpl
   ns_smart_device_link_rpc::V1::v4_protocol_v1_2_no_extra
       mobile_v4_protocol_so_factory_;
 
-  std::atomic_uint32_t mobile_corelation_id_;
-  std::atomic_uint32_t corelation_id_;
-  const uint32_t max_corelation_id_;
+  std::atomic_uint32_t mobile_correlation_id_;
+  std::atomic_uint32_t correlation_id_;
+  const uint32_t max_correlation_id_;
 
   std::unique_ptr<HMICapabilities> hmi_capabilities_;
   // The reason of HU shutdown
