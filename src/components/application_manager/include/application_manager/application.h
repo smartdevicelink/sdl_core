@@ -520,6 +520,11 @@ class DynamicApplicationData {
 class Application : public virtual InitialApplicationData,
                     public virtual DynamicApplicationData {
  public:
+  /**
+   * @brief The StreamingState enum defines current streaming state
+   */
+  enum class StreamingState { kStopped, kStarted, kSuspended };
+
   enum ApplicationRegisterState { kRegistered = 0, kWaitingForRegistration };
 
   Application() : is_greyed_out_(false) {}

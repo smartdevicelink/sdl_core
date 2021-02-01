@@ -855,11 +855,16 @@ class ApplicationManager {
    * @brief Callback calls when application starts/stops data streaming
    * @param app_id Streaming application id
    * @param service_type Streaming service type
-   * @param state Shows if streaming started or stopped
+   * @param state True if streaming started, false if streaming stopped.
    */
   virtual void OnAppStreaming(uint32_t app_id,
                               protocol_handler::ServiceType service_type,
                               bool state) = 0;
+
+  DEPRECATED
+  virtual void OnAppStreaming(uint32_t app_id,
+                              protocol_handler::ServiceType service_type,
+                              const Application::StreamingState new_state) = 0;
 
   /**
    * @brief CreateRegularState create regular HMI state for application

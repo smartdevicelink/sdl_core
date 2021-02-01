@@ -3576,6 +3576,48 @@ void ApplicationManagerImpl::OnAppStreaming(
   }
 }
 
+void ApplicationManagerImpl::OnAppStreaming(
+    uint32_t app_id,
+    protocol_handler::ServiceType service_type,
+    const Application::StreamingState new_state) {
+  SDL_LOG_AUTO_TRACE();
+
+  ApplicationSharedPtr app = application(app_id);
+  if (!app || (!app->is_navi() && !app->mobile_projection_enabled())) {
+    SDL_LOG_DEBUG(
+        " There is no navi or projection application with id: " << app_id);
+    return;
+  }
+  DCHECK_OR_RETURN_VOID(media_manager_);
+
+  SDL_LOG_DEBUG("New state for service " << static_cast<int32_t>(service_type)
+                                         << " is "
+                                         << static_cast<int32_t>(new_state));
+  switch (new_state) {
+    case Application::StreamingState::kStopped: {
+      // Stop activity in media_manager_ when service is stopped
+      // State controller has been already notified by kSuspended event
+      // received before
+      media_manager_->StopStreaming(app_id, service_type);
+      break;
+    }
+
+    case Application::StreamingState::kStarted: {
+      // Apply temporary streaming state and start activity in media_manager_
+      state_ctrl_.OnVideoStreamingStarted(app);
+      media_manager_->StartStreaming(app_id, service_type);
+      break;
+    }
+
+    case Application::StreamingState::kSuspended: {
+      // Don't stop activity in media_manager_ in that case
+      // Just cancel the temporary streaming state
+      state_ctrl_.OnVideoStreamingStopped(app);
+      break;
+    }
+  }
+}
+
 void ApplicationManagerImpl::EndNaviServices(uint32_t app_id) {
   using namespace protocol_handler;
   SDL_LOG_AUTO_TRACE();

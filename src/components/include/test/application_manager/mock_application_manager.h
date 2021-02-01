@@ -318,6 +318,12 @@ class MockApplicationManager : public application_manager::ApplicationManager {
                void(uint32_t app_id,
                     protocol_handler::ServiceType service_type,
                     bool state));
+  DEPRECATED
+  MOCK_METHOD3(
+      OnAppStreaming,
+      void(uint32_t app_id,
+           protocol_handler::ServiceType service_type,
+           const application_manager::Application::StreamingState new_state));
   MOCK_CONST_METHOD6(CreateRegularState,
                      application_manager::HmiStatePtr(
                          application_manager::ApplicationSharedPtr app,
