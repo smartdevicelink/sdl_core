@@ -68,30 +68,6 @@ class BCOnAppCapabilityUpdatedNotificationTest
     mock_app_ = CreateMockApp();
   }
 
-  void FillVideoStreamingCapability(
-      smart_objects::SmartObject& video_streaming_capability) {
-    video_streaming_capability[strings::preferred_resolution] =
-        smart_objects::SmartObject(smart_objects::SmartType_Map);
-    video_streaming_capability[strings::preferred_resolution]
-                              [strings::resolution_width] = 800;
-    video_streaming_capability[strings::preferred_resolution]
-                              [strings::resolution_height] = 354;
-    video_streaming_capability[strings::max_bitrate] = 10000;
-    video_streaming_capability[strings::supported_formats] =
-        smart_objects::SmartObject(smart_objects::SmartType_Array);
-    video_streaming_capability[strings::supported_formats][0] =
-        smart_objects::SmartObject(smart_objects::SmartType_Map);
-    video_streaming_capability[strings::supported_formats][0]
-                              [strings::protocol] =
-                                  hmi_apis::Common_VideoStreamingProtocol::RAW;
-    video_streaming_capability[strings::supported_formats][0][strings::codec] =
-        hmi_apis::Common_VideoStreamingCodec::H264;
-    video_streaming_capability[strings::haptic_spatial_data_supported] = true;
-    video_streaming_capability[strings::diagonal_screen_size] = 7.47;
-    video_streaming_capability[strings::pixel_per_inch] = 117.f;
-    video_streaming_capability[strings::scale] = 1.f;
-  }
-
   BCOnAppCapabilityUpdatedNotificationPtr command_;
   MockAppPtr mock_app_;
   MessageSharedPtr message_;
