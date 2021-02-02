@@ -159,9 +159,7 @@ struct ServiceStatus {
       : service_type_(type), service_event_(event), reason_(reason) {}
 };
 
-class ApplicationManagerImplTest
-    : public ::testing::Test,
-      public ::testing::WithParamInterface<ServiceStatus> {
+class ApplicationManagerImplTest : public ::testing::Test {
  public:
   ApplicationManagerImplTest()
       : app_id_(0u)
@@ -406,9 +404,13 @@ MATCHER_P(HMIFunctionIDIs, result_code, "") {
                                       .asInt());
 }
 
+class ApplicationManagerImplTestWithServiceStatus
+    : public ::testing::WithParamInterface<ServiceStatus>,
+      public ApplicationManagerImplTest {};
+
 INSTANTIATE_TEST_CASE_P(
     ProcessServiceStatusUpdate_REQUEST_ACCEPTED,
-    ApplicationManagerImplTest,
+    ApplicationManagerImplTestWithServiceStatus,
     ::testing::Values(ServiceStatus(ServiceType::AUDIO,
                                     ServiceEvent::REQUEST_ACCEPTED,
                                     UpdateReasonOptional::EMPTY),
@@ -421,7 +423,7 @@ INSTANTIATE_TEST_CASE_P(
 
 INSTANTIATE_TEST_CASE_P(
     ProcessServiceStatusUpdate_REQUEST_RECEIVED,
-    ApplicationManagerImplTest,
+    ApplicationManagerImplTestWithServiceStatus,
     ::testing::Values(ServiceStatus(ServiceType::AUDIO,
                                     ServiceEvent::REQUEST_RECEIVED,
                                     UpdateReasonOptional::EMPTY),
@@ -434,7 +436,7 @@ INSTANTIATE_TEST_CASE_P(
 
 INSTANTIATE_TEST_CASE_P(
     ProcessServiceStatusUpdate_REQUEST_REJECTED,
-    ApplicationManagerImplTest,
+    ApplicationManagerImplTestWithServiceStatus,
     ::testing::Values(ServiceStatus(ServiceType::AUDIO,
                                     ServiceEvent::REQUEST_REJECTED,
                                     UpdateReasonOptional::EMPTY),
@@ -445,7 +447,7 @@ INSTANTIATE_TEST_CASE_P(
                                     ServiceEvent::REQUEST_REJECTED,
                                     UpdateReasonOptional::EMPTY)));
 
-TEST_P(ApplicationManagerImplTest,
+TEST_P(ApplicationManagerImplTestWithServiceStatus,
        ProcessServiceStatusUpdate_SendMessageToHMI) {
   smart_objects::SmartObjectSPtr notification_ =
       std::make_shared<smart_objects::SmartObject>(
@@ -2293,6 +2295,42 @@ TEST_F(
 
   app_manager_impl_->RequestForInterfacesAvailability();
 }
+
+class ApplicationManagerImplTestWithFunctionID
+    : public ::testing::WithParamInterface<mobile_apis::FunctionID::eType>,
+      public ApplicationManagerImplTest {};
+
+TEST_P(ApplicationManagerImplTestWithFunctionID,
+       UnsubscribeAppFromSoftButtons_SUCCESS) {
+  AddMockApplication();
+  commands::MessageSharedPtr response_message =
+      std::make_shared<smart_objects::SmartObject>(
+          smart_objects::SmartType_Map);
+
+  const mobile_apis::FunctionID::eType function_id = GetParam();
+  (*response_message)[strings::params][strings::connection_key] =
+      kConnectionKey;
+  (*response_message)[strings::msg_params][strings::result_code] =
+      mobile_apis::Result::SUCCESS;
+  (*response_message)[strings::params][strings::function_id] = function_id;
+
+  EXPECT_CALL(*mock_app_ptr_, app_id()).WillOnce(Return(kConnectionKey));
+  EXPECT_CALL(*mock_app_ptr_, UnsubscribeFromSoftButtons(function_id));
+
+  const bool unsubscribe_result =
+      app_manager_impl_->UnsubscribeAppFromSoftButtons(response_message);
+
+  EXPECT_TRUE(unsubscribe_result);
+}
+
+INSTANTIATE_TEST_CASE_P(
+    UnsubscribeAppFromSoftButtons,
+    ApplicationManagerImplTestWithFunctionID,
+    ::testing::Values(mobile_apis::FunctionID::ScrollableMessageID,
+                      mobile_apis::FunctionID::AlertID,
+                      mobile_apis::FunctionID::AlertManeuverID,
+                      mobile_apis::FunctionID::UpdateTurnListID,
+                      mobile_apis::FunctionID::ShowConstantTBTID));
 
 }  // namespace application_manager_test
 }  // namespace components

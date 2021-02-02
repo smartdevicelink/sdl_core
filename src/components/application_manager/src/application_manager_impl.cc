@@ -4898,6 +4898,23 @@ bool ApplicationManagerImpl::IsSOStructValid(
   return false;
 }
 
+bool ApplicationManagerImpl::UnsubscribeAppFromSoftButtons(
+    const commands::MessageSharedPtr response) {
+  using namespace mobile_apis;
+
+  const uint32_t connection_key =
+      (*response)[strings::params][strings::connection_key].asUInt();
+  const auto function_id = static_cast<FunctionID::eType>(
+      (*response)[strings::params][strings::function_id].asInt());
+
+  ApplicationSharedPtr app = application(connection_key);
+  DCHECK_OR_RETURN(app, false);
+  app->UnsubscribeFromSoftButtons(function_id);
+  SDL_LOG_DEBUG("Application has unsubscribed from softbuttons. FunctionID: "
+                << function_id << ", app_id:" << app->app_id());
+  return true;
+}
+
 #ifdef BUILD_TESTS
 void ApplicationManagerImpl::AddMockApplication(ApplicationSharedPtr mock_app) {
   applications_list_lock_ptr_->Acquire();

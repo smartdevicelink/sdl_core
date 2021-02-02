@@ -1147,20 +1147,36 @@ uint32_t ApplicationImpl::GetAvailableDiskSpace() {
 }
 
 void ApplicationImpl::SubscribeToSoftButtons(
-    int32_t cmd_id, const SoftButtonID& softbuttons_id) {
+    int32_t cmd_id, const WindowSoftButtons& window_softbuttons) {
   sync_primitives::AutoLock lock(cmd_softbuttonid_lock_);
-  if (static_cast<int32_t>(mobile_apis::FunctionID::ScrollableMessageID) ==
-      cmd_id) {
-    CommandSoftButtonID::iterator it = cmd_softbuttonid_.find(cmd_id);
-    if (cmd_softbuttonid_.end() == it) {
-      cmd_softbuttonid_[cmd_id] = softbuttons_id;
-    }
-  } else {
-    auto& soft_button_ids = cmd_softbuttonid_[cmd_id];
-    for (auto& softbutton_item : softbuttons_id) {
-      soft_button_ids.insert(softbutton_item);
-    }
+  CommandSoftButtonID::iterator it = cmd_softbuttonid_.find(cmd_id);
+
+  if (cmd_softbuttonid_.end() == it) {
+    SoftButtonIDs soft_buttons{window_softbuttons};
+    cmd_softbuttonid_.insert({cmd_id, soft_buttons});
+    return;
   }
+
+  auto& command_soft_buttons = cmd_softbuttonid_[cmd_id];
+
+  const auto window_id = window_softbuttons.first;
+  auto find_window_id = [window_id](const WindowSoftButtons& window_buttons) {
+    return window_id == window_buttons.first;
+  };
+
+  auto subscribed_window_buttons = std::find_if(
+      command_soft_buttons.begin(), command_soft_buttons.end(), find_window_id);
+
+  if (subscribed_window_buttons == command_soft_buttons.end()) {
+    command_soft_buttons.insert(window_softbuttons);
+    return;
+  }
+
+  WindowSoftButtons new_window_soft_buttons = *subscribed_window_buttons;
+  new_window_soft_buttons.second.insert(window_softbuttons.second.begin(),
+                                        window_softbuttons.second.end());
+  command_soft_buttons.erase(subscribed_window_buttons);
+  command_soft_buttons.insert(new_window_soft_buttons);
 }
 
 struct FindSoftButtonId {
@@ -1169,24 +1185,46 @@ struct FindSoftButtonId {
   explicit FindSoftButtonId(const uint32_t soft_button_id)
       : soft_button_id_(soft_button_id) {}
 
-  bool operator()(const std::pair<uint32_t, WindowID>& element) const {
-    return soft_button_id_ == element.first;
+  bool operator()(const uint32_t softbutton_id) {
+    return soft_button_id_ == softbutton_id;
   }
+};
+
+struct FindWindowSoftButtonId {
+ public:
+  FindWindowSoftButtonId(const uint32_t soft_button_id)
+      : find_softbutton_id_(soft_button_id) {}
+
+  bool operator()(const WindowSoftButtons& window_buttons) {
+    const auto softbuttons = window_buttons.second;
+    auto found_softbutton = std::find_if(
+        softbuttons.begin(), softbuttons.end(), find_softbutton_id_);
+
+    return found_softbutton != softbuttons.end();
+  }
+
+ private:
+  FindSoftButtonId find_softbutton_id_;
 };
 
 bool ApplicationImpl::IsSubscribedToSoftButton(const uint32_t softbutton_id) {
   SDL_LOG_AUTO_TRACE();
   sync_primitives::AutoLock lock(cmd_softbuttonid_lock_);
-  CommandSoftButtonID::iterator it = cmd_softbuttonid_.begin();
-  for (; it != cmd_softbuttonid_.end(); ++it) {
-    const auto& soft_button_ids = (*it).second;
-    FindSoftButtonId finder(softbutton_id);
-    const auto find_res =
-        std::find_if(soft_button_ids.begin(), soft_button_ids.end(), finder);
-    if ((soft_button_ids.end() != find_res)) {
+
+  for (const auto& command_soft_buttons : cmd_softbuttonid_) {
+    FindWindowSoftButtonId find_window_softbutton_id(softbutton_id);
+    const auto& window_softbuttons = command_soft_buttons.second;
+
+    const auto found_window_softbutton_id =
+        std::find_if(window_softbuttons.begin(),
+                     window_softbuttons.end(),
+                     find_window_softbutton_id);
+
+    if (found_window_softbutton_id != window_softbuttons.end()) {
       return true;
     }
   }
+
   return false;
 }
 
@@ -1194,14 +1232,18 @@ WindowID ApplicationImpl::GetSoftButtonWindowID(const uint32_t softbutton_id) {
   SDL_LOG_AUTO_TRACE();
 
   sync_primitives::AutoLock lock(cmd_softbuttonid_lock_);
-  CommandSoftButtonID::iterator it = cmd_softbuttonid_.begin();
-  for (; it != cmd_softbuttonid_.end(); ++it) {
-    const auto& soft_button_ids = (*it).second;
-    FindSoftButtonId finder(softbutton_id);
-    const auto find_res =
-        std::find_if(soft_button_ids.begin(), soft_button_ids.end(), finder);
-    if ((soft_button_ids.end() != find_res)) {
-      return find_res->second;
+
+  for (const auto& command_soft_buttons : cmd_softbuttonid_) {
+    FindWindowSoftButtonId find_window_softbutton_id(softbutton_id);
+    const auto& window_softbuttons = command_soft_buttons.second;
+
+    const auto found_window_softbutton_id =
+        std::find_if(window_softbuttons.begin(),
+                     window_softbuttons.end(),
+                     find_window_softbutton_id);
+
+    if (found_window_softbutton_id != window_softbuttons.end()) {
+      return found_window_softbutton_id->first;
     }
   }
 
