@@ -744,6 +744,10 @@ void ResumptionDataProcessorImpl::SetGlobalProperties(
       saved_app[strings::application_global_properties];
   application->load_global_properties(properties_so);
 
+  if (saved_app.keyExists(strings::user_location)) {
+    application->set_user_location(saved_app[strings::user_location]);
+  }
+
   ProcessMessagesToHMI(MessageHelper::CreateGlobalPropertiesRequestsToHMI(
       application, application_manager_));
 }
