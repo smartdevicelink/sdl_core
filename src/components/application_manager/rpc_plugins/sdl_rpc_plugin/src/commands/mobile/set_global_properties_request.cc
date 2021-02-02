@@ -653,21 +653,44 @@ void SetGlobalPropertiesRequest::PrepareUIRequestMenuAndKeyboardData(
   if (is_keyboard_props_present) {
     out_params[hmi_request::keyboard_properties] =
         msg_params[hmi_request::keyboard_properties];
+    smart_objects::SmartObject cached_keyboard_props(
+        msg_params[hmi_request::keyboard_properties]);
 
-    if (msg_params[hmi_request::keyboard_properties].keyExists(
-            hmi_request::keyboard_layout)) {
-      app->set_keyboard_props(msg_params[hmi_request::keyboard_properties]);
+    if (cached_keyboard_props.keyExists(hmi_request::auto_complete_list)) {
+      auto auto_complete_list =
+          cached_keyboard_props[hmi_request::auto_complete_list].asArray();
+      if (auto_complete_list && auto_complete_list->empty()) {
+        cached_keyboard_props.erase(hmi_request::auto_complete_list);
+      }
+    }
+
+    auto saved_keyboard_props = app->keyboard_props();
+    if (!saved_keyboard_props) {
+      app->set_keyboard_props(cached_keyboard_props);
       return;
     }
 
-    smart_objects::SmartObject cached_keyboard_props(
-        msg_params[hmi_request::keyboard_properties]);
-    auto saved_keyboard_props = app->keyboard_props();
-    if (saved_keyboard_props &&
+    if (!msg_params[hmi_request::keyboard_properties].keyExists(
+            hmi_request::keyboard_layout) &&
         saved_keyboard_props->keyExists(hmi_request::keyboard_layout)) {
       cached_keyboard_props[hmi_request::keyboard_layout] =
           static_cast<hmi_apis::Common_KeyboardLayout::eType>(
               (*saved_keyboard_props)[hmi_request::keyboard_layout].asInt());
+    }
+
+    if (!msg_params[hmi_request::keyboard_properties].keyExists(
+            hmi_response::language) &&
+        saved_keyboard_props->keyExists(hmi_response::language)) {
+      cached_keyboard_props[hmi_response::language] =
+          static_cast<hmi_apis::Common_Language::eType>(
+              (*saved_keyboard_props)[hmi_response::language].asInt());
+    }
+
+    if (!msg_params[hmi_request::keyboard_properties].keyExists(
+            hmi_request::auto_complete_list) &&
+        saved_keyboard_props->keyExists(hmi_request::auto_complete_list)) {
+      cached_keyboard_props[hmi_request::auto_complete_list] =
+          (*saved_keyboard_props)[hmi_request::auto_complete_list];
     }
     app->set_keyboard_props(cached_keyboard_props);
   }

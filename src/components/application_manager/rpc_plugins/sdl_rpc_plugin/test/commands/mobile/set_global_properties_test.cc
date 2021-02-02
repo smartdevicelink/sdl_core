@@ -1482,6 +1482,133 @@ TEST_F(
   command->Run();
 }
 
+TEST_F(SetGlobalPropertiesRequestTest,
+       Run_RequestContainsLanguageParam_KeyboardPropsCachedAsIs) {
+  MessageSharedPtr msg = CreateMsgParams();
+  auto& keyboard_properties =
+      (*msg)[am::strings::msg_params][am::strings::keyboard_properties];
+  keyboard_properties[am::hmi_response::language] =
+      hmi_apis::Common_Language::EN_GB;
+
+  std::shared_ptr<SetGlobalPropertiesRequest> command(
+      CreateCommand<SetGlobalPropertiesRequest>(msg));
+
+  EXPECT_CALL(*mock_app_, set_keyboard_props(keyboard_properties));
+
+  command->Run();
+}
+
+TEST_F(SetGlobalPropertiesRequestTest,
+       Run_NoLanguageInRequestButPresentInSaved_SavedLanguageCachedAgain) {
+  MessageSharedPtr msg = CreateMsgParams();
+
+  ON_CALL(app_mngr_, application(kConnectionKey))
+      .WillByDefault(Return(mock_app_));
+  auto saved_keyboard_props = SmartObject(smart_objects::SmartType_Map);
+  saved_keyboard_props[am::hmi_response::language] =
+      hmi_apis::Common_Language::EN_GB;
+  EXPECT_CALL(*mock_app_, keyboard_props())
+      .WillRepeatedly(Return(&saved_keyboard_props));
+
+  std::shared_ptr<SetGlobalPropertiesRequest> command(
+      CreateCommand<SetGlobalPropertiesRequest>(msg));
+
+  auto cached_keyboard_props =
+      (*msg)[am::strings::msg_params][am::strings::keyboard_properties];
+  cached_keyboard_props[am::hmi_response::language] =
+      hmi_apis::Common_Language::EN_GB;
+  EXPECT_CALL(*mock_app_, set_keyboard_props(cached_keyboard_props));
+
+  command->Run();
+}
+
+TEST_F(SetGlobalPropertiesRequestTest,
+       Run_NoAutocompleteListInRequestButPresentInSaved_SavedArrayCachedAgain) {
+  MessageSharedPtr msg = CreateMsgParams();
+
+  ON_CALL(app_mngr_, application(kConnectionKey))
+      .WillByDefault(Return(mock_app_));
+  auto saved_keyboard_props = SmartObject(smart_objects::SmartType_Map);
+
+  SmartObject autocomplete_list(smart_objects::SmartType_Array);
+  autocomplete_list[0] = "first";
+  autocomplete_list[1] = "second";
+  saved_keyboard_props[am::hmi_request::auto_complete_list] = autocomplete_list;
+  EXPECT_CALL(*mock_app_, keyboard_props())
+      .WillRepeatedly(Return(&saved_keyboard_props));
+
+  std::shared_ptr<SetGlobalPropertiesRequest> command(
+      CreateCommand<SetGlobalPropertiesRequest>(msg));
+
+  auto cached_keyboard_props =
+      (*msg)[am::strings::msg_params][am::strings::keyboard_properties];
+  cached_keyboard_props[am::hmi_request::auto_complete_list] =
+      autocomplete_list;
+  EXPECT_CALL(*mock_app_, set_keyboard_props(cached_keyboard_props));
+
+  command->Run();
+}
+
+TEST_F(
+    SetGlobalPropertiesRequestTest,
+    Run_NewAutocompleteListInRequestAndAlsoPresentInSaved_TransferAndSaveNewArray) {
+  MessageSharedPtr msg = CreateMsgParams();
+
+  auto& keyboard_properties =
+      (*msg)[am::strings::msg_params][am::strings::keyboard_properties];
+  SmartObject new_list(smart_objects::SmartType_Array);
+  new_list[0] = "first_new_value";
+  new_list[1] = "second_new_value";
+  keyboard_properties[am::hmi_request::auto_complete_list] = new_list;
+
+  ON_CALL(app_mngr_, application(kConnectionKey))
+      .WillByDefault(Return(mock_app_));
+  SmartObject old_list(smart_objects::SmartType_Array);
+  old_list[0] = "old_value";
+  old_list[1] = "another_old_value";
+  auto saved_keyboard_props = SmartObject(smart_objects::SmartType_Map);
+  saved_keyboard_props[am::hmi_request::auto_complete_list] = old_list;
+  EXPECT_CALL(*mock_app_, keyboard_props())
+      .WillRepeatedly(Return(&saved_keyboard_props));
+
+  std::shared_ptr<SetGlobalPropertiesRequest> command(
+      CreateCommand<SetGlobalPropertiesRequest>(msg));
+
+  EXPECT_CALL(*mock_app_, set_keyboard_props(keyboard_properties));
+
+  command->Run();
+}
+
+TEST_F(
+    SetGlobalPropertiesRequestTest,
+    Run_EmptyAutocompleteListInRequestAndAlsoPresentInSaved_TransferButNotSaveEmptyArray) {
+  MessageSharedPtr msg = CreateMsgParams();
+
+  auto& keyboard_properties =
+      (*msg)[am::strings::msg_params][am::strings::keyboard_properties];
+  SmartObject new_list(smart_objects::SmartType_Array);
+  keyboard_properties[am::hmi_request::auto_complete_list] = new_list;
+
+  ON_CALL(app_mngr_, application(kConnectionKey))
+      .WillByDefault(Return(mock_app_));
+  SmartObject old_list(smart_objects::SmartType_Array);
+  old_list[0] = "old_value";
+  old_list[1] = "another_old_value";
+  auto saved_keyboard_props = SmartObject(smart_objects::SmartType_Map);
+  saved_keyboard_props[am::hmi_request::auto_complete_list] = old_list;
+  EXPECT_CALL(*mock_app_, keyboard_props())
+      .WillRepeatedly(Return(&saved_keyboard_props));
+
+  std::shared_ptr<SetGlobalPropertiesRequest> command(
+      CreateCommand<SetGlobalPropertiesRequest>(msg));
+
+  auto properties_without_empty_list(keyboard_properties);
+  properties_without_empty_list.erase(am::hmi_request::auto_complete_list);
+  EXPECT_CALL(*mock_app_, set_keyboard_props(properties_without_empty_list));
+
+  command->Run();
+}
+
 TEST_F(SetGlobalPropertiesRequestTest, Run_NoData_Canceled) {
   MessageSharedPtr msg = CreateMsgParams();
 
