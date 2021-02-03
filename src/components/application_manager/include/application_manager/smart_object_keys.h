@@ -344,6 +344,7 @@ extern const char* engine_oil_life;
 extern const char* oem_custom_data_type;
 extern const char* window_status;
 extern const char* hands_off_steering;
+extern const char* seat_occupancy;
 
 // app services
 extern const char* app_service_manifest;

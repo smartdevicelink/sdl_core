@@ -60,6 +60,7 @@
         <element name="tpms" />
         <element name="cloudAppVehicleID" />
         <element name="handsOffSteering" />
+        <element name="seatOccupancy" />
     </enum>
 
     <enum name="AppHMIType">

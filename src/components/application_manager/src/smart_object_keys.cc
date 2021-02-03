@@ -311,6 +311,7 @@ const char* engine_oil_life = "engineOilLife";
 const char* oem_custom_data_type = "oemCustomDataType";
 const char* window_status = "windowStatus";
 const char* hands_off_steering = "handsOffSteering";
+const char* seat_occupancy = "seatOccupancy";
 
 // app services
 const char* app_service_manifest = "appServiceManifest";
