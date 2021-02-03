@@ -46,6 +46,7 @@
 #include "application_manager/mock_rpc_service.h"
 #include "application_manager/policies/policy_handler.h"
 #include "application_manager/resumption/resume_ctrl.h"
+#include "application_manager/rpc_plugins/rc_rpc_plugin/include/rc_rpc_plugin/rc_module_constants.h"
 #include "application_manager/state_controller.h"
 #include "policy/mock_policy_settings.h"
 #include "smart_objects/enum_schema_item.h"
@@ -167,6 +168,12 @@ TEST(MessageHelperTestCreate,
   EXPECT_CALL(*mock_help_prompt_manager, GetSendingType())
       .WillRepeatedly(Return(HelpPromptManager::SendingType::kSendBoth));
 
+  smart_objects::SmartObject user_loc =
+      smart_objects::SmartObject(smart_objects::SmartType_Map);
+
+  EXPECT_CALL(*appSharedMock, get_user_location())
+      .WillRepeatedly(ReturnRef(user_loc));
+
   application_manager_test::MockApplicationManager mock_application_manager;
   smart_objects::SmartObjectList ptr =
       MessageHelper::CreateGlobalPropertiesRequestsToHMI(
@@ -188,6 +195,10 @@ TEST(MessageHelperTestCreate,
   (*objPtr)[4][strings::menu_icon] = "555";
   (*objPtr)[5][strings::help_prompt] = "666";
   (*objPtr)[6][strings::timeout_prompt] = "777";
+
+  smart_objects::SmartObject user_loc =
+      smart_objects::SmartObject(smart_objects::SmartType_Map);
+  user_loc[rc_rpc_plugin::strings::kGrid] = "[]";
 
   EXPECT_CALL(*appSharedMock, vr_help_title())
       .Times(AtLeast(3))
@@ -211,6 +222,8 @@ TEST(MessageHelperTestCreate,
       .Times(AtLeast(2))
       .WillRepeatedly(Return(&(*objPtr)[4]));
   EXPECT_CALL(*appSharedMock, app_id()).WillRepeatedly(Return(0));
+  EXPECT_CALL(*appSharedMock, get_user_location())
+      .WillRepeatedly(ReturnRef(user_loc));
 
   std::shared_ptr<MockHelpPromptManager> mock_help_prompt_manager =
       std::make_shared<MockHelpPromptManager>();
