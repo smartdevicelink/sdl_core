@@ -206,9 +206,10 @@ class MockApplication : public ::application_manager::Application {
   MOCK_METHOD2(RemoveHMIState,
                void(const application_manager::WindowID window_id,
                     ::application_manager::HmiState::StateID state_id));
-  MOCK_METHOD2(SubscribeToSoftButtons,
-               void(int32_t cmd_id,
-                    const ::application_manager::SoftButtonID& softbuttons_id));
+  MOCK_METHOD2(
+      SubscribeToSoftButtons,
+      void(int32_t cmd_id,
+           const application_manager::WindowSoftButtons& window_softbuttons));
   MOCK_METHOD1(IsSubscribedToSoftButton, bool(const uint32_t softbutton_id));
   MOCK_METHOD1(UnsubscribeFromSoftButtons, void(int32_t cmd_id));
   MOCK_CONST_METHOD0(IsAudioApplication, bool());
