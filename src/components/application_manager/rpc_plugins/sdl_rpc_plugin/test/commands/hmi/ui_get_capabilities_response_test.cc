@@ -344,6 +344,7 @@ TEST_F(UIGetCapabilitiesResponseTest, SetVideoStreamingCapability_SUCCESS) {
   video_streaming_capability[strings::pixel_per_inch] = 117.f;
 
   video_streaming_capability[strings::scale] = 1.f;
+  video_streaming_capability[strings::preferred_fps] = 30;
 
   ResponseFromHMIPtr command(
       CreateCommand<UIGetCapabilitiesResponse>(command_msg));

@@ -488,6 +488,7 @@ extern const char* const haptic_rect_data;
 extern const char* const rect;
 extern const char* const x;
 extern const char* const y;
+extern const char* const preferred_fps;
 }  // namespace strings
 
 namespace hmi_interface {
