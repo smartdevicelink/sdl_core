@@ -50,7 +50,7 @@
 #include "utils/macro.h"
 #include "utils/scope_guard.h"
 
-#define OPENSSL1_1_VERSION 0x1010100fL
+#define OPENSSL1_1_VERSION 0x1010000fL
 #define TLS1_1_MINIMAL_VERSION 0x1000103fL
 #define CONST_SSL_METHOD_MINIMAL_VERSION 0x00909000L
 
@@ -187,7 +187,7 @@ bool CryptoManagerImpl::Init() {
       SDL_LOG_WARN(
           "OpenSSL has no TLSv1.1 with version lower 1.0.1, set TLSv1.0");
       method = is_server ? TLSv1_server_method() : TLSv1_client_method();
-#elseif OPENSSL_VERSION_NUMBER < OPENSSL1_1_VERSION
+#elif OPENSSL_VERSION_NUMBER < OPENSSL1_1_VERSION
       method = is_server ? TLSv1_1_server_method() : TLSv1_1_client_method();
 #else
       method = is_server ? TLS_server_method() : TLS_client_method();
@@ -199,7 +199,7 @@ bool CryptoManagerImpl::Init() {
       SDL_LOG_WARN(
           "OpenSSL has no TLSv1.2 with version lower 1.0.1, set TLSv1.0");
       method = is_server ? TLSv1_server_method() : TLSv1_client_method();
-#elseif OPENSSL_VERSION_NUMBER < OPENSSL1_1_VERSION
+#elif OPENSSL_VERSION_NUMBER < OPENSSL1_1_VERSION
       method = is_server ? TLSv1_2_server_method() : TLSv1_2_client_method();
 #else
       method = is_server ? TLS_server_method() : TLS_client_method();
