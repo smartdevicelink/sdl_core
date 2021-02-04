@@ -314,8 +314,8 @@ bool UnsubscribeVehicleDataRequest::CheckSubscriptionStatus(
 bool UnsubscribeVehicleDataRequest::UnsubscribePendingVehicleData(
     ApplicationSharedPtr app, const smart_objects::SmartObject& msg_params) {
   SDL_LOG_DEBUG("Unsubscribing from all pending VehicleData");
-
-  for (const auto& vi_name : vi_waiting_for_unsubscribe_) {
+  auto pending_vi = vi_waiting_for_unsubscribe_;
+  for (const auto& vi_name : pending_vi) {
     const auto converted_item = ConvertRequestToResponseName(vi_name);
     const bool is_unsubscription_successful =
         CheckSubscriptionStatus(converted_item, msg_params);

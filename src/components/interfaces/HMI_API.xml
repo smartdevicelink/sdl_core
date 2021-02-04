@@ -1237,6 +1237,7 @@
   <element name="VEHICLEDATA_STABILITYCONTROLSSTATUS" />
   <element name="VEHICLEDATA_WINDOWSTATUS"/>
   <element name="VEHICLEDATA_HANDSOFFSTEERING"/>
+  <element name="VEHICLEDATA_SEATOCCUPANCY"/>
 </enum>
 
 <enum name="WiperStatus">
@@ -1741,7 +1742,6 @@
 <!-- End of Policies -->
 
 <!-- Remote Control -->
-
 <struct name="Grid">
     <description>Describes a location (origin coordinates and span) of a vehicle component.</description>
     <param name="col" type="Integer" mandatory="true" minvalue="-1" maxvalue="100">
@@ -1791,7 +1791,7 @@
 
 <struct name="SeatLocation">
     <description>Describes the location of a seat.</description>
-    <param name="grid" type="Grid"  mandatory="false">
+    <param name="grid" type="Common.Grid"  mandatory="false">
     </param>
 </struct>
 
@@ -1804,6 +1804,21 @@
     <param name="seats" type="SeatLocation" array="true" mandatory="false">
         <description>Contains a list of SeatLocation in the vehicle</description>
     </param>
+</struct>
+
+<struct name="SeatStatus">
+  <description>Describes the status of a parameter of seat.</description>
+  <param name="seatLocation" type="Common.SeatLocation" mandatory="true"/>
+  <param name="conditionActive" type="Boolean" mandatory="true"/>
+</struct>
+
+<struct name="SeatOccupancy">
+  <param name="seatsOccupied" type="Common.SeatStatus" array="true" minsize="0" maxsize="100" mandatory="false">
+    <description>Seat status array containing location and whether the seats are occupied.</description>
+  </param>
+  <param name="seatsBelted" type="Common.SeatStatus" array="true" minsize="0" maxsize="100" mandatory="false">
+    <description>Seat status array containing location and whether the seats are belted.</description>
+  </param>
 </struct>
 
 <enum name="ModuleType">
@@ -3334,6 +3349,35 @@
 	</param>
 </struct>
 
+<enum name="DoorStatusType">
+  <element name="CLOSED"/>
+  <element name="LOCKED"/>
+  <element name="AJAR"/>
+  <element name="REMOVED"/>
+</enum>
+
+<struct name="DoorStatus">
+  <description>Describes the status of a parameter of door.</description>
+  <param name="location" type="Common.Grid" mandatory="true"/>
+  <param name="status" type="Common.DoorStatusType" mandatory="true"/>
+</struct>
+
+<struct name="GateStatus">
+  <description>Describes the status of a parameter of trunk/hood/etc.</description>
+  <param name="location" type="Common.Grid" mandatory="true"/>
+  <param name="status" type="Common.DoorStatusType" mandatory="true"/>
+</struct>
+
+<struct name="RoofStatus">
+  <description>
+    Describes the status of a parameter of roof, convertible roof, sunroof/moonroof etc.
+    If roof is open (AJAR), state will determine percentage of roof open.
+  </description>
+  <param name="location" type="Common.Grid" mandatory="true"/>
+  <param name="status" type="Common.DoorStatusType" mandatory="true"/>
+  <param name="state" type="Common.WindowState" mandatory="false"/>
+</struct>
+
 <struct name="BodyInformation">
   <param name="parkBrakeActive" type="Boolean" mandatory="true">
     <description>Must be true if the park brake is active</description>
@@ -3345,16 +3389,25 @@
     <description>The status of the ignition. See IgnitionStatus.</description>
   </param>
   <param name="driverDoorAjar" type="Boolean" mandatory="false">
-    <description>References signal "DrStatDrv_B_Actl".</description>
+    <description>References signal "DrStatDrv_B_Actl". Deprecated starting with RPC Spec 7.1.0.</description>
   </param>
   <param name="passengerDoorAjar" type="Boolean" mandatory="false">
-    <description>References signal "DrStatPsngr_B_Actl".</description>
+    <description>References signal "DrStatPsngr_B_Actl". Deprecated starting with RPC Spec 7.1.0.</description>
   </param>
   <param name="rearLeftDoorAjar" type="Boolean" mandatory="false">
-    <description>References signal "DrStatRl_B_Actl".</description>
+    <description>References signal "DrStatRl_B_Actl". Deprecated starting with RPC Spec 7.1.0.</description>
   </param>
   <param name="rearRightDoorAjar" type="Boolean" mandatory="false">
-    <description>References signal "DrStatRr_B_Actl".</description>
+    <description>References signal "DrStatRr_B_Actl". Deprecated starting with RPC Spec 7.1.0.</description>
+  </param>
+  <param name="doorStatuses" type="Common.DoorStatus" array="true" minsize="0" maxsize="100" mandatory="false">
+    <description>Provides status for doors if Ajar/Closed/Locked</description>
+  </param>
+  <param name="gateStatuses" type="Common.GateStatus" array="true" minsize="0" maxsize="100" mandatory="false">
+    <description>Provides status for trunk/hood/etc. if Ajar/Closed/Locked</description>
+  </param>
+  <param name="roofStatuses" type="Common.RoofStatus" array="true" minsize="0" maxsize="100" mandatory="false">
+    <description>Provides status for roof/convertible roof/sunroof/moonroof etc., if Closed/Ajar/Removed etc.</description>
   </param>
 </struct>
 
@@ -4315,6 +4368,23 @@
       </param>
     </struct>
 
+    <enum name="SeekIndicatorType">
+      <element name="TRACK" />
+      <element name="TIME" />
+    </enum>
+
+    <struct name="SeekStreamingIndicator">
+      <description>
+        The seek next / skip previous subscription buttons' content
+      </description>
+      <param name="type" type="SeekIndicatorType" mandatory="true" />
+      <param name="seekTime" type="Integer" minvalue="1" maxvalue="99" mandatory="false">
+        <description>
+          If the type is TIME, this number of seconds may be present alongside the skip indicator.
+          It will indicate the number of seconds that the currently playing media will skip forward or backward.
+        </description>
+      </param>
+    </struct>
 </interface>
 
 <interface name="Buttons" version="1.3.0" date="2017-07-18">
@@ -5556,6 +5626,19 @@
     <param name="audioStreamingIndicator" type="Common.AudioStreamingIndicator" mandatory="false">
       <description>Indicates that a button press of the Play/Pause button would play, pause or Stop the current playback.</description>
     </param>
+    <param name="forwardSeekIndicator" type="Common.SeekStreamingIndicator" mandatory="false">
+      <description>Used to control the forward seek button to either skip forward a set amount of time or to the next track.</description>
+    </param>
+    <param name="backSeekIndicator" type="Common.SeekStreamingIndicator" mandatory="false">
+      <description>Used to control the backward seek button to either skip back a set amount of time or to the previous track.</description>
+    </param>
+    <param name="countRate" type="Float" minvalue="0.1" maxvalue="100.0" defvalue="1.0" mandatory="false">
+      <description>
+        The value of this parameter is the amount that the media clock timer will advance per 1.0 seconds of real time.
+        Values less than 1.0 will therefore advance the timer slower than real-time, while values greater than 1.0 will advance the timer faster than real-time.
+        e.g. If this parameter is set to `0.5`, the timer will advance one second per two seconds real-time, or at 50% speed. If this parameter is set to `2.0`, the timer will advance two seconds per one second real-time, or at 200% speed.
+      </description>
+    </param>
     <param name="appID" type="Integer" mandatory="true">
       <description>ID of application that requested this RPC.</description>
     </param>
@@ -5957,12 +6040,10 @@
     <param name="nextTurnIcon" type="Common.Image" mandatory="false">
     </param>
     <param name="distanceToManeuver" type="Float" minvalue="0" maxvalue="1000000000" mandatory="true">
-      <description>Fraction of distance till next maneuver (from previous maneuver).</description>
-      <description>May be used to calculate progress bar.</description>
+      <description>Distance (in meters) until next maneuver. May be used to calculate progress bar.</description>
     </param>
     <param name="distanceToManeuverScale" type="Float" minvalue="0" maxvalue="1000000000" mandatory="true">
-      <description>Fraction of distance till next maneuver (starting from when AlertManeuver is triggered).</description>
-      <description>May be used to calculate progress bar.</description>
+      <description>Distance (in meters) from previous maneuver to next maneuver. May be used to calculate progress bar.</description>
     </param>
     <param name="maneuverComplete" type="Boolean" mandatory="false">
       <description>If and when a maneuver has completed while an AlertManeuver is active, SDL will send this value set to TRUE in order to clear the AlertManeuver overlay.</description>
@@ -6293,6 +6374,9 @@
     <param name="handsOffSteering" type="Boolean" mandatory="false">
       <description>To indicate whether driver hands are off the steering wheel</description>
     </param>
+    <param name="seatOccupancy" type="Boolean" mandatory="false">
+      <description>See SeatOccupancy</description>
+    </param>
 
         <!-- Ford Specific Data Items -->
     <param name="eCallInfo" type="Boolean" mandatory="false">
@@ -6400,6 +6484,9 @@
     </param>
     <param name="handsOffSteering" type="Common.VehicleDataResult" mandatory="false">
       <description>To indicate whether driver hands are off the steering wheel</description>
+    </param>
+    <param name="seatOccupancy" type="Common.VehicleDataResult" mandatory="false">
+      <description>See SeatOccupancy</description>
     </param>
 
         <!-- Ford Specific Data Items -->
@@ -6512,6 +6599,9 @@
     <param name="handsOffSteering" type="Boolean" mandatory="false">
       <description>To indicate whether driver hands are off the steering wheel</description>
     </param>
+    <param name="seatOccupancy" type="Boolean" mandatory="false">
+      <description>See SeatOccupancy</description>
+    </param>
 
         <!-- Ford Specific Data Items -->
     <param name="eCallInfo" type="Boolean" mandatory="false">
@@ -6619,6 +6709,9 @@
     </param>
     <param name="handsOffSteering" type="Common.VehicleDataResult" mandatory="false">
       <description>To indicate whether driver hands are off the steering wheel</description>
+    </param>
+    <param name="seatOccupancy" type="Common.VehicleDataResult" mandatory="false">
+      <description>See SeatOccupancy</description>
     </param>
 
         <!-- Ford Specific Data Items -->
@@ -6732,6 +6825,9 @@
     <param name="handsOffSteering" type="Boolean" mandatory="false">
       <description>To indicate whether driver hands are off the steering wheel</description>
     </param>
+    <param name="seatOccupancy" type="Boolean" mandatory="false">
+      <description>See SeatOccupancy</description>
+    </param>
 
         <!-- Ford Specific Data Items -->
     <param name="eCallInfo" type="Boolean" mandatory="false">
@@ -6842,6 +6938,9 @@
     </param>
     <param name="handsOffSteering" type="Boolean" mandatory="false">
       <description>To indicate whether driver hands are off the steering wheel</description>
+    </param>
+    <param name="seatOccupancy" type="Common.SeatOccupancy" mandatory="false">
+      <description>See SeatOccupancy</description>
     </param>
 
         <!-- Ford Specific Data Items -->
@@ -6954,6 +7053,9 @@
     </param>
     <param name="handsOffSteering" type="Boolean" mandatory="false">
       <description>To indicate whether driver hands are off the steering wheel</description>
+    </param>
+    <param name="seatOccupancy" type="Common.SeatOccupancy" mandatory="false">
+      <description>See SeatOccupancy</description>
     </param>
 
         <!-- Ford Specific Data Items -->

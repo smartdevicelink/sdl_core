@@ -86,7 +86,7 @@ void WayPointsPendingResumptionHandler::HandleResumptionSubscriptionRequest(
     SDL_LOG_DEBUG(
         "Subscription to waypoint already exist, no need to send "
         "request to HMI");
-    application_manager_.SubscribeAppForWayPoints(app.app_id());
+    application_manager_.SubscribeAppForWayPoints(app.app_id(), false);
     return;
   }
 
@@ -154,10 +154,10 @@ void WayPointsPendingResumptionHandler::on_event(
   }
 
   const smart_objects::SmartObject& response = event.smart_object();
-  const uint32_t corr_id = event.smart_object_correlation_id();
 
   SDL_LOG_TRACE("Received event with function id: "
-                << event.id() << " and correlation id: " << corr_id);
+                << event.id() << " and correlation id: "
+                << event.smart_object_correlation_id());
 
   auto current_pending = pending_requests_.front();
   pending_requests_.pop_front();
@@ -170,7 +170,7 @@ void WayPointsPendingResumptionHandler::on_event(
 
   if (resumption::IsResponseSuccessful(response)) {
     SDL_LOG_DEBUG("Resumption of waypoints is successful");
-    application_manager_.SubscribeAppForWayPoints(app);
+    application_manager_.SubscribeAppForWayPoints(app, true);
   }
   ProcessNextPendingResumption();
 }
@@ -195,7 +195,7 @@ void WayPointsPendingResumptionHandler::ProcessNextPendingResumption() {
   auto pending_copy = pending;
   pending_requests_.pop_front();
   auto app = application_manager_.application(pending_copy.app_id_);
-  application_manager_.SubscribeAppForWayPoints(app);
+  application_manager_.SubscribeAppForWayPoints(app, false);
   RaiseFakeSuccessfulResponse(pending_copy.corr_id_);
   ProcessNextPendingResumption();
 }
