@@ -145,10 +145,6 @@ struct PolicyAppIdComparator {
   const std::string& policy_app_id_;
 };
 
-uint32_t ApplicationManagerImpl::mobile_corelation_id_ = 0;
-uint32_t ApplicationManagerImpl::corelation_id_ = 0;
-const uint32_t ApplicationManagerImpl::max_corelation_id_ = UINT_MAX;
-
 namespace formatters = ns_smart_device_link::ns_json_handler::formatters;
 namespace jhs = ns_smart_device_link::ns_json_handler::strings;
 
@@ -175,6 +171,9 @@ ApplicationManagerImpl::ApplicationManagerImpl(
     , policy_handler_(new policy::PolicyHandler(policy_settings, *this))
     , protocol_handler_(NULL)
     , request_ctrl_(am_settings)
+    , mobile_correlation_id_(0)
+    , correlation_id_(0)
+    , max_correlation_id_(UINT_MAX)
     , hmi_capabilities_(new HMICapabilitiesImpl(*this))
     , unregister_reason_(
           mobile_api::AppInterfaceUnregisteredReason::INVALID_ENUM)
@@ -1364,23 +1363,23 @@ ApplicationManagerImpl::GetCloudAppConnectionStatus(
 }
 
 uint32_t ApplicationManagerImpl::GetNextMobileCorrelationID() {
-  if (mobile_corelation_id_ < max_corelation_id_) {
-    mobile_corelation_id_++;
+  if (mobile_correlation_id_ < max_correlation_id_) {
+    mobile_correlation_id_++;
   } else {
-    mobile_corelation_id_ = 0;
+    mobile_correlation_id_ = 0;
   }
 
-  return mobile_corelation_id_;
+  return mobile_correlation_id_;
 }
 
 uint32_t ApplicationManagerImpl::GetNextHMICorrelationID() {
-  if (corelation_id_ < max_corelation_id_) {
-    corelation_id_++;
+  if (correlation_id_ < max_correlation_id_) {
+    correlation_id_++;
   } else {
-    corelation_id_ = 0;
+    correlation_id_ = 0;
   }
 
-  return corelation_id_;
+  return correlation_id_;
 }
 
 bool ApplicationManagerImpl::BeginAudioPassThru(uint32_t app_id) {
