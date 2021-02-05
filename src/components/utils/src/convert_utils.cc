@@ -34,6 +34,7 @@
 #include <stdint.h>
 #include <algorithm>
 #include <limits>
+#include <locale>
 #include "utils/macro.h"
 
 long long int utils::ConvertInt64ToLongLongInt(const int64_t value) {

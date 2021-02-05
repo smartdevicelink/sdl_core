@@ -66,6 +66,7 @@ const int kServiceTypeInt = 0;
 const std::string kDeviceNumber = "XXX123456789ZZZ";
 const std::string kAppStorageFolder = "app_storage_folder";
 const std::string kValidAppId = "1234";
+const std::vector<std::string> kDevices{kDeviceNumber};
 }  // namespace
 
 class PolicyManagerImplTest : public ::testing::Test {
@@ -88,6 +89,7 @@ class PolicyManagerImplTest : public ::testing::Test {
 
     ON_CALL(policy_settings_, app_storage_folder())
         .WillByDefault(ReturnRef(kAppStorageFolder));
+    ON_CALL(listener_, GetDevicesIds(_)).WillByDefault(Return(kDevices));
   }
 
   ::testing::AssertionResult IsValid(const policy_table::Table& table) {

@@ -157,6 +157,7 @@ class ResumptionDataTest : public ::testing::Test {
   am::SubMenuMap test_submenu_map;
   am::ChoiceSetMap test_choiceset_map;
   am::AppFilesMap app_files_map_;
+  smart_objects::SmartObject user_location_;
 
   am::ButtonSubscriptions btn_subscr;
 

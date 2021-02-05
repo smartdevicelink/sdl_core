@@ -157,7 +157,8 @@ bool DisplayCapabilitiesBuilder::IsWaitingForWindowCapabilities(
 void DisplayCapabilitiesBuilder::ResetDisplayCapabilities() {
   SDL_LOG_AUTO_TRACE();
   sync_primitives::AutoLock lock(display_capabilities_lock_);
-  for (auto& window_id : window_ids_to_resume_) {
+  auto window_ids = window_ids_to_resume_;
+  for (auto& window_id : window_ids) {
     if (kDefaultWindowID != window_id) {
       window_ids_to_resume_.erase(window_id);
     }
