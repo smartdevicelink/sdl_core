@@ -1503,6 +1503,7 @@ void CacheManager::SetHardwareVersion(const std::string& hardware_version) {
 
 std::string CacheManager::GetCCPUVersionFromPT() const {
   SDL_LOG_AUTO_TRACE();
+  CACHE_MANAGER_CHECK(std::string(""));
   sync_primitives::AutoLock auto_lock(cache_lock_);
 
   rpc::Optional<policy_table::ModuleMeta>& module_meta =
@@ -1512,6 +1513,7 @@ std::string CacheManager::GetCCPUVersionFromPT() const {
 
 std::string CacheManager::GetHardwareVersionFromPT() const {
   SDL_LOG_AUTO_TRACE();
+  CACHE_MANAGER_CHECK(std::string(""));
   sync_primitives::AutoLock auto_lock(cache_lock_);
 
   rpc::Optional<policy_table::ModuleMeta>& module_meta =
