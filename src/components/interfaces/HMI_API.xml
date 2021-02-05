@@ -3197,9 +3197,11 @@
   <param name="maskInputCharacters" type="KeyboardInputMask" mandatory="false">
     <description>Allows an app to mask entered characters on HMI</description>
   </param>
-  <param name="customizeKeys" type="String" maxlength="1" minsize="1" maxsize="10" array="true" mandatory="false">
-    <description>Array of special characters to show in customizable Keys.</description>
-    <description>If omitted, keyboard will show default special characters</description>
+  <param name="customKeys" type="String" maxlength="1" minsize="1" maxsize="10" array="true" mandatory="false">
+    <description>
+      Array of special characters to show in customizable keys.
+      If omitted, keyboard will show default special characters
+    </description>
   </param>
 </struct>
 
@@ -3696,23 +3698,22 @@
     <param name="maximumNumberOfWindows" type="Integer" mandatory="true" />
   </struct>
 
-  <struct name="ConfigurableKeyboards">
+  <struct name="KeyboardLayoutCapability">
     <description>
-      Describes number of configurable Keys for Special characters.
+      Describes the capabilities of a single keyboard layout.
     </description>
     <param name="keyboardLayout" type="KeyboardLayout" mandatory="true"/>
-    <param name="numConfigurableKeys" type="Integer" mandatory="true"/>
+    <param name="numConfigurableKeys" type="Integer" minvalue="0" maxvalue="10" mandatory="true">
+      <description>Number of keys available for special characters, App can customize as per their needs.</description>
+    </param>
   </struct>
 
   <struct name="KeyboardCapabilities">
     <param name="maskInputCharactersSupported" type="Boolean" mandatory="false">
       <description>Availability of capability to mask input characters using keyboard. True: Available, False: Not Available</description>
     </param>
-    <param name="supportedKeyboardLayouts" type="KeyboardLayout" minsize="1" maxsize="1000" array="true" mandatory="false">
-      <description>Supported keyboard layouts by HMI.</description>
-    </param>
-    <param name="configurableKeys" type="ConfigurableKeyboards" minsize="1" maxsize="1000" array="true" mandatory="false">
-      <description>Get Number of Keys for Special characters, App can customize as per their needs.</description>
+    <param name="supportedKeyboards" type="KeyboardLayoutCapability" minsize="1" maxsize="1000" array="true" mandatory="false">
+      <description>Capabilities of supported keyboard layouts by HMI.</description>
     </param>
   </struct>
 

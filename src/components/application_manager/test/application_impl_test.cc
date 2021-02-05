@@ -129,16 +129,6 @@ class ApplicationImplTest : public ::testing::Test {
                               AddSet hmi_action);
 
   void CheckCurrentHMIState();
-
-  std::shared_ptr<smart_objects::SmartObject> SetupConfigurableKeyboard(
-      const hmi_apis::Common_KeyboardLayout::eType layout,
-      const int num_allowed_keys);
-
-  int GetSavedLayout(const smart_objects::SmartObjectSPtr saved_capabilities);
-
-  int GetSavedKeysNumber(
-      const smart_objects::SmartObjectSPtr saved_capabilities);
-
   // 'directory_name' has to be declared prior to 'app_impl' so that when
   // deleting ApplicationImplTest class, 'directory_name' will be removed
   // after 'app_impl' runs its destructor.
@@ -186,44 +176,6 @@ void ApplicationImplTest::CheckCurrentHMIState() {
   HmiStatePtr current_state = app_impl->CurrentHmiState(kDefaultWindowId);
   EXPECT_EQ(test_lvl, current_state->hmi_level());
   EXPECT_EQ(state_id, current_state->state_id());
-}
-
-std::shared_ptr<smart_objects::SmartObject>
-ApplicationImplTest::SetupConfigurableKeyboard(
-    const hmi_apis::Common_KeyboardLayout::eType layout,
-    const int num_allowed_keys) {
-  auto display_capabilities = std::make_shared<smart_objects::SmartObject>(
-      smart_objects::SmartType_Map);
-  auto& configurable_keyboards =
-      (*display_capabilities)[0][strings::window_capabilities][0]
-                             [hmi_response::keyboard_capabilities]
-                             [hmi_response::configurable_keys];
-  configurable_keyboards[0][hmi_request::keyboard_layout] = layout;
-  configurable_keyboards[0][hmi_response::num_configurable_keys] =
-      num_allowed_keys;
-  return display_capabilities;
-}
-
-int ApplicationImplTest::GetSavedLayout(
-    const smart_objects::SmartObjectSPtr saved_capabilities) {
-  auto& saved_configurable_keyboards =
-      (*saved_capabilities)[0][strings::window_capabilities][0]
-                           [hmi_response::keyboard_capabilities]
-                           [hmi_response::configurable_keys];
-  auto saved_layout =
-      saved_configurable_keyboards[0][hmi_request::keyboard_layout];
-  return saved_layout.asInt();
-}
-
-int ApplicationImplTest::GetSavedKeysNumber(
-    const smart_objects::SmartObjectSPtr saved_capabilities) {
-  auto& saved_configurable_keyboards =
-      (*saved_capabilities)[0][strings::window_capabilities][0]
-                           [hmi_response::keyboard_capabilities]
-                           [hmi_response::configurable_keys];
-  auto saved_keys_number =
-      saved_configurable_keyboards[0][hmi_response::num_configurable_keys];
-  return saved_keys_number.asInt();
 }
 
 TEST_F(ApplicationImplTest, AddHmiState_GetCurrentState) {
@@ -1012,103 +964,6 @@ TEST_F(ApplicationImplTest, SetDeferredResumptionHMILevelTest) {
   app_impl->set_deferred_resumption_hmi_level(deferred_level);
 
   EXPECT_EQ(deferred_level, app_impl->deferred_resumption_hmi_level());
-}
-
-TEST_F(
-    ApplicationImplTest,
-    SetDisplayCapabilities_SupportedLayoutPresent_KeyboardCapabilitiesNotModified) {
-  hmi_apis::Common_KeyboardLayout::eType configurable_layout =
-      hmi_apis::Common_KeyboardLayout::QWERTY;
-  const int num_allowed_keys = 2;
-  auto initial_display_capabilities =
-      SetupConfigurableKeyboard(configurable_layout, num_allowed_keys);
-
-  hmi_apis::Common_KeyboardLayout::eType supported_layout =
-      hmi_apis::Common_KeyboardLayout::QWERTY;
-  (*initial_display_capabilities)[0][strings::window_capabilities][0]
-                                 [hmi_response::keyboard_capabilities]
-                                 [hmi_response::supported_keyboard_layouts][0] =
-                                     supported_layout;
-
-  app_impl->set_display_capabilities(*initial_display_capabilities);
-
-  auto saved_display_capabilities = app_impl->display_capabilities();
-
-  EXPECT_EQ(supported_layout,
-            static_cast<hmi_apis::Common_KeyboardLayout::eType>(
-                GetSavedLayout(saved_display_capabilities)));
-  EXPECT_EQ(num_allowed_keys, GetSavedKeysNumber(saved_display_capabilities));
-}
-
-TEST_F(
-    ApplicationImplTest,
-    SetDisplayCapabilities_SupportedLayoutAbsent_KeyboardCapabilitiesNotModified) {
-  hmi_apis::Common_KeyboardLayout::eType configurable_layout =
-      hmi_apis::Common_KeyboardLayout::QWERTY;
-  const int num_allowed_keys = 2;
-  auto initial_display_capabilities =
-      SetupConfigurableKeyboard(configurable_layout, num_allowed_keys);
-
-  app_impl->set_display_capabilities(*initial_display_capabilities);
-
-  auto saved_display_capabilities = app_impl->display_capabilities();
-
-  EXPECT_EQ(configurable_layout,
-            static_cast<hmi_apis::Common_KeyboardLayout::eType>(
-                GetSavedLayout(saved_display_capabilities)));
-  EXPECT_EQ(num_allowed_keys, GetSavedKeysNumber(saved_display_capabilities));
-}
-
-TEST_F(ApplicationImplTest,
-       SetDisplayCapabilities_EraseNotSupportedLayoutFromConfigurableKeys) {
-  hmi_apis::Common_KeyboardLayout::eType configurable_layout =
-      hmi_apis::Common_KeyboardLayout::NUMERIC;
-  const int num_allowed_keys = 2;
-  auto initial_display_capabilities =
-      SetupConfigurableKeyboard(configurable_layout, num_allowed_keys);
-
-  hmi_apis::Common_KeyboardLayout::eType supported_layout =
-      hmi_apis::Common_KeyboardLayout::QWERTY;
-  (*initial_display_capabilities)[0][strings::window_capabilities][0]
-                                 [hmi_response::keyboard_capabilities]
-                                 [hmi_response::supported_keyboard_layouts][0] =
-                                     supported_layout;
-
-  app_impl->set_display_capabilities(*initial_display_capabilities);
-
-  auto saved_display_capabilities = app_impl->display_capabilities();
-
-  EXPECT_EQ(supported_layout,
-            static_cast<hmi_apis::Common_KeyboardLayout::eType>(
-                GetSavedLayout(saved_display_capabilities)));
-  const int unsupported_layout_key_number = 0;
-  EXPECT_EQ(unsupported_layout_key_number,
-            GetSavedKeysNumber(saved_display_capabilities));
-}
-
-TEST_F(
-    ApplicationImplTest,
-    SetDisplayCapabilities_NoConfigurableKeysAndSupportedLayoutPresent_AddSupportedLayout) {
-  auto initial_display_capabilities =
-      std::make_shared<smart_objects::SmartObject>(
-          smart_objects::SmartType_Map);
-  hmi_apis::Common_KeyboardLayout::eType supported_layout =
-      hmi_apis::Common_KeyboardLayout::QWERTY;
-  (*initial_display_capabilities)[0][strings::window_capabilities][0]
-                                 [hmi_response::keyboard_capabilities]
-                                 [hmi_response::supported_keyboard_layouts][0] =
-                                     supported_layout;
-
-  app_impl->set_display_capabilities(*initial_display_capabilities);
-
-  auto saved_display_capabilities = app_impl->display_capabilities();
-
-  EXPECT_EQ(supported_layout,
-            static_cast<hmi_apis::Common_KeyboardLayout::eType>(
-                GetSavedLayout(saved_display_capabilities)));
-  const int unsupported_layout_key_number = 0;
-  EXPECT_EQ(unsupported_layout_key_number,
-            GetSavedKeysNumber(saved_display_capabilities));
 }
 
 }  // namespace application_manager_test

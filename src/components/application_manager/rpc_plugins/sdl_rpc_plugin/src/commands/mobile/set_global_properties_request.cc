@@ -158,7 +158,7 @@ void SetGlobalPropertiesRequest::Run() {
     SendResponse(
         false,
         mobile_apis::Result::INVALID_DATA,
-        "customizeKeys exceeds the number of customizable keys in this Layout");
+        "customKeys exceeds the number of customizable keys in this Layout");
     return;
   }
 
@@ -849,16 +849,16 @@ bool SetGlobalPropertiesRequest::IsWhiteSpaceExist() {
     }
 
     if (msg_params[strings::keyboard_properties].keyExists(
-            hmi_request::customize_keys)) {
+            hmi_request::custom_keys)) {
       const smart_objects::SmartArray* custom_keys_array =
-          msg_params[strings::keyboard_properties][hmi_request::customize_keys]
+          msg_params[strings::keyboard_properties][hmi_request::custom_keys]
               .asArray();
 
       for (auto keys : (*custom_keys_array)) {
         if (!CheckSyntax(keys.asCharArray())) {
           SDL_LOG_ERROR(
               "Invalid keyboard_properties "
-              "customize_keys syntax check failed");
+              "custom_keys syntax check failed");
           return true;
         }
       }
@@ -919,18 +919,18 @@ uint32_t SetGlobalPropertiesRequest::GetAllowedNumberOfConfigurableKeys()
   }
 
   if (!(*window_capabilities)[0][hmi_response::keyboard_capabilities].keyExists(
-          hmi_response::configurable_keys)) {
-    SDL_LOG_WARN("Configurable keys are not available");
+          hmi_response::supported_keyboards)) {
+    SDL_LOG_WARN("Data about supported keyboards is not available");
     return 0;
   }
 
-  auto configurable_keyboards =
+  auto supported_keyboards =
       (*window_capabilities)[0][hmi_response::keyboard_capabilities]
-                            [hmi_response::configurable_keys]
+                            [hmi_response::supported_keyboards]
                                 .asArray();
 
   const auto requested_layout = GetKeyboardLayout();
-  for (auto keyboard : (*configurable_keyboards)) {
+  for (auto keyboard : (*supported_keyboards)) {
     if (requested_layout ==
         static_cast<hmi_apis::Common_KeyboardLayout::eType>(
             keyboard[hmi_request::keyboard_layout].asInt())) {
@@ -953,13 +953,13 @@ bool SetGlobalPropertiesRequest::ValidateCustomKeys() const {
   }
 
   if (!msg_params[strings::keyboard_properties].keyExists(
-          hmi_request::customize_keys)) {
+          hmi_request::custom_keys)) {
     SDL_LOG_WARN("Customizable keys are not available");
     return true;
   }
 
   auto custom_keys_array =
-      msg_params[strings::keyboard_properties][hmi_request::customize_keys]
+      msg_params[strings::keyboard_properties][hmi_request::custom_keys]
           .asArray();
   if (custom_keys_array) {
     uint32_t requested_key_count = custom_keys_array->size();

@@ -403,19 +403,19 @@ class SetGlobalPropertiesRequestTest
     customizable_keys[1] = "@";
     customizable_keys[2] = "&";
     (*msg)[am::strings::msg_params][am::strings::keyboard_properties]
-          [am::hmi_request::customize_keys] = customizable_keys;
+          [am::hmi_request::custom_keys] = customizable_keys;
   }
 
   std::shared_ptr<SmartObject> GetCapabilitiesForConfigurableKeyboard(
       hmi_apis::Common_KeyboardLayout::eType layout, int num_allowed_keys) {
     auto display_capabilities =
         std::make_shared<SmartObject>(smart_objects::SmartType_Map);
-    auto& configurable_keyboards =
+    auto& supported_keyboards =
         (*display_capabilities)[0][am::strings::window_capabilities][0]
                                [am::hmi_response::keyboard_capabilities]
-                               [am::hmi_response::configurable_keys];
-    configurable_keyboards[0][am::hmi_request::keyboard_layout] = layout;
-    configurable_keyboards[0][am::hmi_response::num_configurable_keys] =
+                               [am::hmi_response::supported_keyboards];
+    supported_keyboards[0][am::hmi_request::keyboard_layout] = layout;
+    supported_keyboards[0][am::hmi_response::num_configurable_keys] =
         num_allowed_keys;
     return display_capabilities;
   }
@@ -1293,7 +1293,7 @@ TEST_F(SetGlobalPropertiesRequestTest,
   customizable_keys[1] = "\\n";
   customizable_keys[2] = " ";
   (*msg)[am::strings::msg_params][am::strings::keyboard_properties]
-        [am::hmi_request::customize_keys] = customizable_keys;
+        [am::hmi_request::custom_keys] = customizable_keys;
 
   std::shared_ptr<SetGlobalPropertiesRequest> command(
       CreateCommand<SetGlobalPropertiesRequest>(msg));
