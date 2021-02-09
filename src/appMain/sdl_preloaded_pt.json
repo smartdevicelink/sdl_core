@@ -625,6 +625,7 @@
                             "deviceStatus",
                             "engineOilLife",
                             "engineTorque",
+                            "climateData",
                             "externalTemperature",
                             "turnSignal",
                             "fuelLevel",
@@ -652,6 +653,7 @@
                             "deviceStatus",
                             "engineOilLife",
                             "engineTorque",
+                            "climateData",
                             "externalTemperature",
                             "turnSignal",
                             "fuelLevel",
@@ -679,6 +681,7 @@
                             "deviceStatus",
                             "engineOilLife",
                             "engineTorque",
+                            "climateData",
                             "externalTemperature",
                             "turnSignal",
                             "fuelLevel",
@@ -705,6 +708,7 @@
                             "deviceStatus",
                             "engineOilLife",
                             "engineTorque",
+                            "climateData",
                             "externalTemperature",
                             "turnSignal",
                             "fuelLevel",
@@ -3480,12 +3484,71 @@
                     "since": "5.0"
                 },
                 {
+                    "name": "climateData",
+                    "params": [
+                        {
+                            "name": "externalTemperature",
+                            "key": "OEM_REF_EXT_TEMP",
+                            "params": [
+                                {
+                                    "name": "unit",
+                                    "key": "OEM_REF_EXT_TEMP_UNIT",
+                                    "type": "TemperatureUnit",
+                                    "mandatory": true
+                                },
+                                {
+                                    "name": "value",
+                                    "key": "OEM_REF_EXT_TEMP_VALUE",
+                                    "type": "Float",
+                                    "mandatory": true
+                                }
+                            ],
+                            "type": "Struct",
+                            "mandatory": false
+                        },
+                        {
+                            "name": "cabinTemperature",
+                            "key": "OEM_REF_CABIN_TEMP",
+                            "params": [
+                                {
+                                    "name": "unit",
+                                    "key": "OEM_REF_CABIN_TEMP_VALUE",
+                                    "type": "TemperatureUnit",
+                                    "mandatory": true
+                                },
+                                {
+                                    "name": "value",
+                                    "key": "OEM_REF_CABIN_TEMP_VALUE",
+                                    "type": "Float",
+                                    "mandatory": true
+                                }
+                            ],
+                            "type": "Struct",
+                            "mandatory": false
+                        },
+                        {
+                            "name": "atmosphericPressure",
+                            "key": "OEM_REF_ATMOSPHERIC_PRESSURE",
+                            "type": "Float",
+                            "minvalue": 0,
+                            "maxvalue": 2000,
+                            "mandatory": false
+                        }
+                    ],
+                    "key": "OEM_REF_CLIMATE_DATA",
+                    "type": "Struct",
+                    "mandatory": false,
+                    "since": "7.1"
+                },
+                {
                     "name": "externalTemperature",
                     "key": "OEM_REF_EXT_TEMP",
                     "type": "Float",
                     "mandatory": false,
                     "minvalue": -40,
-                    "maxvalue": 100
+                    "maxvalue": 100,
+                    "deprecated": true,
+                    "since": "7.1"
                 },
                 {
                     "name": "turnSignal",
