@@ -413,7 +413,7 @@ TEST_P(SSLHandshakeTest, CAVerification_ServerSide) {
   GTEST_TRACE(HandshakeProcedure_Success());
 }
 
-TEST_P(SSLHandshakeTest, CAVerification_ServerSide_NoCACertificate) {
+TEST_P(SSLHandshakeTest, DISABLED_CAVerification_ServerSide_NoCACertificate) {
   ASSERT_TRUE(InitServerManagers(
       GetParam().server_protocol, "", "ALL", verify_peer, "unex"))
       << server_manager_->LastError();

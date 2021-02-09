@@ -250,7 +250,7 @@ TEST_P(TcpClientListenerTest, ClientConnection) {
   int s = socket(AF_INET, SOCK_STREAM, 0);
   EXPECT_TRUE(0 <= s);
 
-  TestAsyncWaiter waiter;
+  auto waiter = TestAsyncWaiter::createInstance();
 
   // controller should be notified of AddDevice event
   DeviceSptr mock_device = std::make_shared<MockTCPDevice>(
@@ -258,7 +258,7 @@ TEST_P(TcpClientListenerTest, ClientConnection) {
   EXPECT_CALL(adapter_controller_mock_, AddDevice(_))
       .WillOnce(Return(mock_device));
   EXPECT_CALL(adapter_controller_mock_, ConnectionCreated(_, _, _))
-      .WillOnce(NotifyTestAsyncWaiter(&waiter));
+      .WillOnce(NotifyTestAsyncWaiter(waiter));
 
   // adapter_controller_mock_ may also receive ConnectDone() and
   // ConnectionFinished() from ThreadedSocketConnection. Ignore them as hey are
@@ -273,7 +273,7 @@ TEST_P(TcpClientListenerTest, ClientConnection) {
                     client_addr_len));
 
   // since the connection is handled on another thread, wait for some time
-  EXPECT_TRUE(waiter.WaitFor(1, kConnectionCreatedTimeoutMsec));
+  EXPECT_TRUE(waiter->WaitFor(1, kConnectionCreatedTimeoutMsec));
 
   close(s);
 

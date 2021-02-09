@@ -279,8 +279,8 @@ class ApplicationImpl : public virtual Application,
 
   bool AreCommandLimitsExceeded(mobile_apis::FunctionID::eType cmd_id,
                                 TLimitSource source);
-  virtual void SubscribeToSoftButtons(int32_t cmd_id,
-                                      const SoftButtonID& softbuttons_id);
+  virtual void SubscribeToSoftButtons(
+      int32_t cmd_id, const WindowSoftButtons& window_softbuttons);
   virtual bool IsSubscribedToSoftButton(const uint32_t softbutton_id);
 
   virtual void UnsubscribeFromSoftButtons(int32_t cmd_id);
@@ -638,7 +638,7 @@ class ApplicationImpl : public virtual Application,
   /**
    * @brief Defines id of SoftButton which is related from name of command
    */
-  typedef std::map<int32_t, SoftButtonID> CommandSoftButtonID;
+  typedef std::map<int32_t, SoftButtonIDs> CommandSoftButtonID;
   CommandNumberTimeLimit cmd_number_to_time_limits_;
   CommandSoftButtonID cmd_softbuttonid_;
   // Lock for command soft button id
