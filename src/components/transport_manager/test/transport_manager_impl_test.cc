@@ -555,11 +555,11 @@ TEST_F(TransportManagerImplTest, SendMessageToDevice) {
   // Arrange
   HandleConnection();
 
-  TestAsyncWaiter waiter;
+  auto waiter = TestAsyncWaiter::createInstance();
   EXPECT_CALL(*mock_adapter_,
               SendData(mac_address_, application_id_, test_message_))
       .WillOnce(
-          DoAll(NotifyTestAsyncWaiter(&waiter), Return(TransportAdapter::OK)));
+          DoAll(NotifyTestAsyncWaiter(waiter), Return(TransportAdapter::OK)));
 
 #ifdef TELEMETRY_MONITOR
   EXPECT_CALL(mock_metric_observer_, StartRawMsg(test_message_.get()));
@@ -567,7 +567,7 @@ TEST_F(TransportManagerImplTest, SendMessageToDevice) {
 
   EXPECT_EQ(E_SUCCESS, tm_.SendMessageToDevice(test_message_));
 
-  EXPECT_TRUE(waiter.WaitFor(1, kAsyncExpectationsTimeout));
+  EXPECT_TRUE(waiter->WaitFor(1, kAsyncExpectationsTimeout));
 }
 
 TEST_F(TransportManagerImplTest, SendMessageToDevice_SendingFailed) {
@@ -578,30 +578,30 @@ TEST_F(TransportManagerImplTest, SendMessageToDevice_SendingFailed) {
   EXPECT_CALL(mock_metric_observer_, StartRawMsg(_));
 #endif  // TELEMETRY_MONITOR
 
-  TestAsyncWaiter waiter;
+  auto waiter = TestAsyncWaiter::createInstance();
   EXPECT_CALL(*mock_adapter_,
               SendData(mac_address_, application_id_, test_message_))
       .WillOnce(Return(TransportAdapter::FAIL));
 
   EXPECT_CALL(*tm_listener_, OnTMMessageSendFailed(_, test_message_))
-      .WillOnce(NotifyTestAsyncWaiter(&waiter));
+      .WillOnce(NotifyTestAsyncWaiter(waiter));
   EXPECT_EQ(E_SUCCESS, tm_.SendMessageToDevice(test_message_));
 #ifdef TELEMETRY_MONITOR
   EXPECT_CALL(mock_metric_observer_, StopRawMsg(_)).Times(0);
 #endif  // TELEMETRY_MONITOR
 
-  EXPECT_TRUE(waiter.WaitFor(1, kAsyncExpectationsTimeout));
+  EXPECT_TRUE(waiter->WaitFor(1, kAsyncExpectationsTimeout));
 }
 
 TEST_F(TransportManagerImplTest, SendMessageToDevice_StartTimeObserver) {
   // Arrange
   HandleConnection();
 
-  TestAsyncWaiter waiter;
+  auto waiter = TestAsyncWaiter::createInstance();
   EXPECT_CALL(*mock_adapter_,
               SendData(mac_address_, application_id_, test_message_))
       .WillOnce(
-          DoAll(NotifyTestAsyncWaiter(&waiter), Return(TransportAdapter::OK)));
+          DoAll(NotifyTestAsyncWaiter(waiter), Return(TransportAdapter::OK)));
 
 #ifdef TELEMETRY_MONITOR
   EXPECT_CALL(mock_metric_observer_, StartRawMsg(_));
@@ -609,18 +609,18 @@ TEST_F(TransportManagerImplTest, SendMessageToDevice_StartTimeObserver) {
 
   EXPECT_EQ(E_SUCCESS, tm_.SendMessageToDevice(test_message_));
 
-  EXPECT_TRUE(waiter.WaitFor(1, kAsyncExpectationsTimeout));
+  EXPECT_TRUE(waiter->WaitFor(1, kAsyncExpectationsTimeout));
 }
 
 TEST_F(TransportManagerImplTest, SendMessageToDevice_SendDone) {
   // Arrange
   HandleConnection();
 
-  TestAsyncWaiter waiter;
+  auto waiter = TestAsyncWaiter::createInstance();
   EXPECT_CALL(*mock_adapter_,
               SendData(mac_address_, application_id_, test_message_))
       .WillOnce(
-          DoAll(NotifyTestAsyncWaiter(&waiter), Return(TransportAdapter::OK)));
+          DoAll(NotifyTestAsyncWaiter(waiter), Return(TransportAdapter::OK)));
 
 #ifdef TELEMETRY_MONITOR
   EXPECT_CALL(mock_metric_observer_, StartRawMsg(test_message_.get()));
@@ -630,7 +630,7 @@ TEST_F(TransportManagerImplTest, SendMessageToDevice_SendDone) {
 
   HandleSendDone();
 
-  EXPECT_TRUE(waiter.WaitFor(1, kAsyncExpectationsTimeout));
+  EXPECT_TRUE(waiter->WaitFor(1, kAsyncExpectationsTimeout));
 }
 
 TEST_F(
@@ -639,11 +639,11 @@ TEST_F(
   // Arrange
   HandleConnection();
 
-  TestAsyncWaiter waiter;
+  auto waiter = TestAsyncWaiter::createInstance();
   EXPECT_CALL(*mock_adapter_,
               SendData(mac_address_, application_id_, test_message_))
       .WillOnce(
-          DoAll(NotifyTestAsyncWaiter(&waiter), Return(TransportAdapter::OK)));
+          DoAll(NotifyTestAsyncWaiter(waiter), Return(TransportAdapter::OK)));
 
 #ifdef TELEMETRY_MONITOR
   EXPECT_CALL(mock_metric_observer_, StartRawMsg(test_message_.get()));
@@ -654,7 +654,7 @@ TEST_F(
 
   HandleSendFailed();
 
-  EXPECT_TRUE(waiter.WaitFor(1, kAsyncExpectationsTimeout));
+  EXPECT_TRUE(waiter->WaitFor(1, kAsyncExpectationsTimeout));
 }
 
 TEST_F(TransportManagerImplTest, RemoveDevice_DeviceWasAdded) {
@@ -749,7 +749,7 @@ TEST_F(TransportManagerImplTest, UpdateDeviceList_RemoveDevice) {
  * Tests which check correct handling and receiving events
  */
 TEST_F(TransportManagerImplTest, ReceiveEventFromDevice_OnSearchDeviceDone) {
-  TestAsyncWaiter waiter;
+  auto waiter = TestAsyncWaiter::createInstance();
   TransportAdapterEvent test_event(EventTypeEnum::ON_SEARCH_DONE,
                                    mock_adapter_,
                                    mac_address_,
@@ -758,15 +758,15 @@ TEST_F(TransportManagerImplTest, ReceiveEventFromDevice_OnSearchDeviceDone) {
                                    error_);
 
   EXPECT_CALL(*tm_listener_, OnScanDevicesFinished())
-      .WillOnce(NotifyTestAsyncWaiter(&waiter));
+      .WillOnce(NotifyTestAsyncWaiter(waiter));
 
   tm_.ReceiveEventFromDevice(test_event);
 
-  EXPECT_TRUE(waiter.WaitFor(1, kAsyncExpectationsTimeout));
+  EXPECT_TRUE(waiter->WaitFor(1, kAsyncExpectationsTimeout));
 }
 
 TEST_F(TransportManagerImplTest, ReceiveEventFromDevice_OnSearchDeviceFail) {
-  TestAsyncWaiter waiter;
+  auto waiter = TestAsyncWaiter::createInstance();
   TransportAdapterEvent test_event(EventTypeEnum::ON_SEARCH_FAIL,
                                    mock_adapter_,
                                    mac_address_,
@@ -775,11 +775,11 @@ TEST_F(TransportManagerImplTest, ReceiveEventFromDevice_OnSearchDeviceFail) {
                                    error_);
 
   EXPECT_CALL(*tm_listener_, OnScanDevicesFailed(_))
-      .WillOnce(NotifyTestAsyncWaiter(&waiter));
+      .WillOnce(NotifyTestAsyncWaiter(waiter));
 
   tm_.ReceiveEventFromDevice(test_event);
 
-  EXPECT_TRUE(waiter.WaitFor(1, kAsyncExpectationsTimeout));
+  EXPECT_TRUE(waiter->WaitFor(1, kAsyncExpectationsTimeout));
 }
 
 TEST_F(TransportManagerImplTest, ReceiveEventFromDevice_DeviceListUpdated) {
@@ -793,7 +793,7 @@ TEST_F(TransportManagerImplTest, ReceiveEventFromDevice_DeviceListUpdated) {
   std::vector<DeviceInfo> vector_dev_info;
   vector_dev_info.push_back(dev_info_);
 
-  TestAsyncWaiter waiter;
+  auto waiter = TestAsyncWaiter::createInstance();
   EXPECT_CALL(*mock_adapter_, GetDeviceList())
       .Times(AtLeast(1))
       .WillRepeatedly(Return(device_list_));
@@ -805,14 +805,14 @@ TEST_F(TransportManagerImplTest, ReceiveEventFromDevice_DeviceListUpdated) {
       .WillRepeatedly(Return(dev_info_.connection_type()));
 
   EXPECT_CALL(*tm_listener_, OnDeviceFound(dev_info_))
-      .WillOnce(NotifyTestAsyncWaiter(&waiter));
+      .WillOnce(NotifyTestAsyncWaiter(waiter));
   EXPECT_CALL(*tm_listener_, OnDeviceAdded(dev_info_))
-      .WillOnce(NotifyTestAsyncWaiter(&waiter));
+      .WillOnce(NotifyTestAsyncWaiter(waiter));
 
   tm_.ReceiveEventFromDevice(test_event);
   device_list_.pop_back();
 
-  EXPECT_TRUE(waiter.WaitFor(2, kAsyncExpectationsTimeout));
+  EXPECT_TRUE(waiter->WaitFor(2, kAsyncExpectationsTimeout));
 }
 
 TEST_F(TransportManagerImplTest, CheckEvents) {
@@ -972,13 +972,13 @@ TEST_F(TransportManagerImplTest, HandleMessage_ConnectionNotExist) {
               SendData(mac_address_, application_id_, test_message_))
       .Times(0);
 
-  TestAsyncWaiter waiter;
+  auto waiter = TestAsyncWaiter::createInstance();
   EXPECT_CALL(*tm_listener_, OnTMMessageSendFailed(_, test_message_))
-      .WillOnce(NotifyTestAsyncWaiter(&waiter));
+      .WillOnce(NotifyTestAsyncWaiter(waiter));
 
   tm_.TestHandle(test_message_);
 
-  EXPECT_TRUE(waiter.WaitFor(1, kAsyncExpectationsTimeout));
+  EXPECT_TRUE(waiter->WaitFor(1, kAsyncExpectationsTimeout));
 }
 
 TEST_F(TransportManagerImplTest, SearchDevices_TMIsNotInitialized) {

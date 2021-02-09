@@ -162,35 +162,35 @@ class RequestControllerTestClass : public ::testing::Test {
 TEST_F(RequestControllerTestClass,
        AddMobileRequest_DuplicateCorrelationId_INVALID_ID) {
   RequestPtr request_valid = GetMockRequest();
-  TestAsyncWaiter waiter_valid;
+  auto waiter_valid = TestAsyncWaiter::createInstance();
   ON_CALL(*request_valid, default_timeout()).WillByDefault(Return(0));
   EXPECT_CALL(*request_valid, Init()).WillOnce(Return(true));
   EXPECT_CALL(*request_valid, Run())
       .Times(1)
-      .WillRepeatedly(NotifyTestAsyncWaiter(&waiter_valid));
+      .WillRepeatedly(NotifyTestAsyncWaiter(waiter_valid));
 
   EXPECT_EQ(RequestController::SUCCESS,
             AddRequest(default_settings_,
                        request_valid,
                        RequestInfo::RequestType::MobileRequest,
                        mobile_apis::HMILevel::HMI_NONE));
-  EXPECT_TRUE(waiter_valid.WaitFor(1, 1000));
+  EXPECT_TRUE(waiter_valid->WaitFor(1, 1000));
 
   // The command should not be run if another command with the same
   // correlation_id is waiting for a response
   RequestPtr request_dup_corr_id = GetMockRequest();
-  TestAsyncWaiter waiter_dup;
+  auto waiter_dup = TestAsyncWaiter::createInstance();
   ON_CALL(*request_dup_corr_id, default_timeout()).WillByDefault(Return(0));
   EXPECT_CALL(*request_dup_corr_id, Init()).WillOnce(Return(true));
   ON_CALL(*request_dup_corr_id, Run())
-      .WillByDefault(NotifyTestAsyncWaiter(&waiter_dup));
+      .WillByDefault(NotifyTestAsyncWaiter(waiter_dup));
 
   EXPECT_EQ(RequestController::SUCCESS,
             AddRequest(default_settings_,
                        request_dup_corr_id,
                        RequestInfo::RequestType::MobileRequest,
                        mobile_apis::HMILevel::HMI_NONE));
-  EXPECT_FALSE(waiter_dup.WaitFor(1, 1000));
+  EXPECT_FALSE(waiter_dup->WaitFor(1, 1000));
 }
 
 TEST_F(RequestControllerTestClass,
@@ -282,17 +282,17 @@ TEST_F(RequestControllerTestClass, OnTimer_SUCCESS) {
   RequestPtr mock_request = GetMockRequest(
       kDefaultCorrelationID, kDefaultConnectionKey, request_timeout);
 
-  TestAsyncWaiter waiter;
+  auto waiter = TestAsyncWaiter::createInstance();
   EXPECT_EQ(RequestController::SUCCESS,
             AddRequest(default_settings_,
                        mock_request,
                        RequestInfo::RequestType::MobileRequest));
 
   EXPECT_CALL(*mock_request, onTimeOut())
-      .WillOnce(NotifyTestAsyncWaiter(&waiter));
+      .WillOnce(NotifyTestAsyncWaiter(waiter));
 
   // Waiting for call of `onTimeOut` for `kTimeScale` seconds
-  EXPECT_TRUE(waiter.WaitFor(1, kTimeScale));
+  EXPECT_TRUE(waiter->WaitFor(1, kTimeScale));
 }
 
 }  // namespace request_controller_test

@@ -25,6 +25,7 @@
         <element name="gps" />
         <element name="speed" />
         <element name="engineTorque" />
+        <element name="climateData" />
         <element name="externalTemperature" />
         <element name="turnSignal" />
         <element name="fuelLevel" />
@@ -60,6 +61,7 @@
         <element name="tpms" />
         <element name="cloudAppVehicleID" />
         <element name="handsOffSteering" />
+        <element name="seatOccupancy" />
     </enum>
 
     <enum name="AppHMIType">

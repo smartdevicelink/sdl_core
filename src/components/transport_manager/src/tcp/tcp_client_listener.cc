@@ -41,7 +41,6 @@
 #include <signal.h>
 #include <sys/select.h>
 #include <sys/socket.h>
-#include <sys/sysctl.h>
 #include <sys/types.h>
 #include <unistd.h>
 #ifdef __linux__
@@ -50,6 +49,7 @@
 #include <netinet/in.h>
 #include <netinet/tcp.h>
 #include <netinet/tcp_var.h>
+#include <sys/sysctl.h>
 #include <sys/time.h>
 #endif  // __linux__
 

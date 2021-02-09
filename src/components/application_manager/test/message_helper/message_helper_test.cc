@@ -46,6 +46,7 @@
 #include "application_manager/mock_rpc_service.h"
 #include "application_manager/policies/policy_handler.h"
 #include "application_manager/resumption/resume_ctrl.h"
+#include "application_manager/rpc_plugins/rc_rpc_plugin/include/rc_rpc_plugin/rc_module_constants.h"
 #include "application_manager/state_controller.h"
 #include "policy/mock_policy_settings.h"
 #include "smart_objects/enum_schema_item.h"
@@ -167,6 +168,12 @@ TEST(MessageHelperTestCreate,
   EXPECT_CALL(*mock_help_prompt_manager, GetSendingType())
       .WillRepeatedly(Return(HelpPromptManager::SendingType::kSendBoth));
 
+  smart_objects::SmartObject user_loc =
+      smart_objects::SmartObject(smart_objects::SmartType_Map);
+
+  EXPECT_CALL(*appSharedMock, get_user_location())
+      .WillRepeatedly(ReturnRef(user_loc));
+
   application_manager_test::MockApplicationManager mock_application_manager;
   smart_objects::SmartObjectList ptr =
       MessageHelper::CreateGlobalPropertiesRequestsToHMI(
@@ -188,6 +195,10 @@ TEST(MessageHelperTestCreate,
   (*objPtr)[4][strings::menu_icon] = "555";
   (*objPtr)[5][strings::help_prompt] = "666";
   (*objPtr)[6][strings::timeout_prompt] = "777";
+
+  smart_objects::SmartObject user_loc =
+      smart_objects::SmartObject(smart_objects::SmartType_Map);
+  user_loc[rc_rpc_plugin::strings::kGrid] = "[]";
 
   EXPECT_CALL(*appSharedMock, vr_help_title())
       .Times(AtLeast(3))
@@ -211,6 +222,8 @@ TEST(MessageHelperTestCreate,
       .Times(AtLeast(2))
       .WillRepeatedly(Return(&(*objPtr)[4]));
   EXPECT_CALL(*appSharedMock, app_id()).WillRepeatedly(Return(0));
+  EXPECT_CALL(*appSharedMock, get_user_location())
+      .WillRepeatedly(ReturnRef(user_loc));
 
   std::shared_ptr<MockHelpPromptManager> mock_help_prompt_manager =
       std::make_shared<MockHelpPromptManager>();
@@ -888,16 +901,46 @@ TEST_F(MessageHelperTest,
   }
 }
 
-TEST_F(MessageHelperTest, SubscribeApplicationToSoftButton_CallFromApp) {
-  // Create application mock
+TEST_F(
+    MessageHelperTest,
+    SubscribeApplicationToSoftButton_SoftbuttonsAreAbsent_DoesntCallFromApp) {
   MockApplicationSharedPtr appSharedPtr = std::make_shared<MockApplication>();
-  // Prepare data for method
   smart_objects::SmartObject message_params;
   size_t function_id = 1;
-  //
+  WindowSoftButtons window_buttons{
+      mobile_apis::PredefinedWindows::DEFAULT_WINDOW, {}};
+
   EXPECT_CALL(*appSharedPtr,
-              SubscribeToSoftButtons(function_id, SoftButtonID()))
-      .Times(1);
+              SubscribeToSoftButtons(function_id, window_buttons))
+      .Times(0);
+  MessageHelper::SubscribeApplicationToSoftButton(
+      message_params, appSharedPtr, function_id);
+}
+
+TEST_F(MessageHelperTest,
+       SubscribeApplicationToSoftButton_SoftbuttonsExist_CallFromApp) {
+  MockApplicationSharedPtr appSharedPtr = std::make_shared<MockApplication>();
+  smart_objects::SmartObject message_params;
+  message_params[strings::soft_buttons] =
+      new smart_objects::SmartObject(smart_objects::SmartType_Array);
+  const uint32_t softbutton1 = 1u;
+  const uint32_t softbutton2 = 2u;
+  const uint32_t softbutton3 = 3u;
+  message_params[strings::soft_buttons][0][strings::soft_button_id] =
+      softbutton1;
+  message_params[strings::soft_buttons][1][strings::soft_button_id] =
+      softbutton2;
+  message_params[strings::soft_buttons][2][strings::soft_button_id] =
+      softbutton3;
+
+  size_t function_id = 1;
+  WindowSoftButtons window_buttons{
+      mobile_apis::PredefinedWindows::DEFAULT_WINDOW,
+      {softbutton1, softbutton2, softbutton3}};
+
+  EXPECT_CALL(*appSharedPtr,
+              SubscribeToSoftButtons(function_id, window_buttons));
+
   MessageHelper::SubscribeApplicationToSoftButton(
       message_params, appSharedPtr, function_id);
 }

@@ -348,17 +348,20 @@ bool CacheManager::CanAppKeepContext(const std::string& app_id) const {
   bool result = false;
   if (kDeviceId == app_id) {
     result = pt_->policy_table.app_policies_section.device.keep_context;
-  } else if (IsApplicationRepresented(app_id)) {
+  } else if (IsApplicationRepresented(app_id) &&
+             !IsApplicationRevoked(app_id)) {
     result = pt_->policy_table.app_policies_section.apps[app_id].keep_context;
   }
   return result;
 }
 
 uint32_t CacheManager::HeartBeatTimeout(const std::string& app_id) const {
+  SDL_LOG_AUTO_TRACE();
   CACHE_MANAGER_CHECK(0);
   sync_primitives::AutoLock auto_lock(cache_lock_);
   uint32_t result = 0;
   if (!IsApplicationRepresented(app_id)) {
+    SDL_LOG_WARN("Application " << app_id << " is not represented");
     return result;
   }
 
@@ -368,6 +371,7 @@ uint32_t CacheManager::HeartBeatTimeout(const std::string& app_id) const {
     result = *(app.heart_beat_timeout_ms);
   }
 
+  SDL_LOG_DEBUG("HB timer for app " << app_id << " is " << result);
   return result;
 }
 
@@ -407,7 +411,8 @@ bool CacheManager::CanAppStealFocus(const std::string& app_id) const {
   bool result = false;
   if (kDeviceId == app_id) {
     result = pt_->policy_table.app_policies_section.device.steal_focus;
-  } else if (IsApplicationRepresented(app_id)) {
+  } else if (IsApplicationRepresented(app_id) &&
+             !IsApplicationRevoked(app_id)) {
     result = pt_->policy_table.app_policies_section.apps[app_id].steal_focus;
   }
   return result;
@@ -422,7 +427,8 @@ bool CacheManager::GetDefaultHMI(const std::string& app_id,
   if (kDeviceId == app_id) {
     default_hmi = EnumToJsonString(
         pt_->policy_table.app_policies_section.device.default_hmi);
-  } else if (IsApplicationRepresented(app_id)) {
+  } else if (IsApplicationRepresented(app_id) &&
+             !IsApplicationRevoked(app_id)) {
     default_hmi = EnumToJsonString(
         pt_->policy_table.app_policies_section.apps[app_id].default_hmi);
   }
@@ -671,6 +677,7 @@ void CacheManager::ProcessUpdate(
     const policy_table::ApplicationPolicies::const_iterator
         initial_policy_iter) {
   using namespace policy;
+  using rpc::policy_table_interface_base::ApplicationParams;
   using rpc::policy_table_interface_base::RequestTypes;
   const RequestTypes& new_request_types =
       *(initial_policy_iter->second.RequestType);
@@ -678,6 +685,14 @@ void CacheManager::ProcessUpdate(
   const std::string& app_id = initial_policy_iter->first;
   bool update_request_types = true;
 
+  ApplicationParams& params =
+      pt_->policy_table.app_policies_section.apps[app_id];
+  if (kPreDataConsentId == app_id) {
+    *(params.heart_beat_timeout_ms) =
+        *(initial_policy_iter->second.heart_beat_timeout_ms);
+    SDL_LOG_INFO("heart_beat_timeout_ms in predata = "
+                 << *(params.heart_beat_timeout_ms));
+  }
   if (app_id == kDefaultId || app_id == kPreDataConsentId) {
     if (new_request_types.is_omitted()) {
       SDL_LOG_INFO("Application " << app_id
@@ -1820,7 +1835,8 @@ bool CacheManager::GetPriority(const std::string& policy_app_id,
 
   policy_table::ApplicationPolicies::const_iterator policy_iter =
       policies.find(policy_app_id);
-  const bool app_id_exists = policies.end() != policy_iter;
+  const bool app_id_exists =
+      policies.end() != policy_iter && !IsApplicationRevoked(policy_app_id);
   if (app_id_exists) {
     priority = EnumToJsonString((*policy_iter).second.priority);
   }
@@ -2524,6 +2540,10 @@ bool policy::CacheManager::SetIsPredata(const std::string& app_id) {
   if (IsApplicationRepresented(app_id)) {
     pt_->policy_table.app_policies_section.apps[app_id].set_to_string(
         kPreDataConsentId);
+
+    pt_->policy_table.app_policies_section.apps[app_id].heart_beat_timeout_ms =
+        pt_->policy_table.app_policies_section.apps[kPreDataConsentId]
+            .heart_beat_timeout_ms;
   }
 
   return true;
