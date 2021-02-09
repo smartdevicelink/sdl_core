@@ -1589,7 +1589,6 @@ void PolicyManagerImpl::GetPermissionsForApp(
     FillFunctionalGroupPermissions(
         all_disallowed, group_names, kGroupDisallowed, permissions);
   }
-  return;
 }
 
 std::string& PolicyManagerImpl::GetCurrentDeviceId(
