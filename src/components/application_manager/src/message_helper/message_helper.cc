@@ -408,6 +408,8 @@ MessageHelper::CreateUIResetGlobalPropertiesRequest(
     key_board_properties[strings::auto_complete_text] = "";
     (*ui_reset_global_prop_request)[hmi_request::keyboard_properties] =
         key_board_properties;
+    application->set_keyboard_props(
+        smart_objects::SmartObject(smart_objects::SmartType_Null));
   }
 
   (*ui_reset_global_prop_request)[strings::app_id] = application->app_id();
