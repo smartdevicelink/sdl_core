@@ -105,12 +105,6 @@
                     "rows": 1
                 },
                 {
-                    "name": "navigationText",
-                    "characterSet": "UTF_8",
-                    "width": 500,
-                    "rows": 1
-                },
-                {
                     "name": "audioPassThruDisplayText1",
                     "characterSet": "UTF_8",
                     "width": 500,
@@ -130,12 +124,6 @@
                 },
                 {
                     "name": "sliderFooter",
-                    "characterSet": "UTF_8",
-                    "width": 500,
-                    "rows": 1
-                },
-                {
-                    "name": "notificationText",
                     "characterSet": "UTF_8",
                     "width": 500,
                     "rows": 1
@@ -323,7 +311,8 @@
                 "hapticSpatialDataSupported": false,
                 "diagonalScreenSize": 8,
                 "pixelPerInch": 117,
-                "scale": 1
+                "scale": 1,
+                "preferredFPS": 15
             },
             "driverDistractionCapability": {
                 "menuLength": 10,

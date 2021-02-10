@@ -145,10 +145,6 @@ struct PolicyAppIdComparator {
   const std::string& policy_app_id_;
 };
 
-uint32_t ApplicationManagerImpl::mobile_corelation_id_ = 0;
-uint32_t ApplicationManagerImpl::corelation_id_ = 0;
-const uint32_t ApplicationManagerImpl::max_corelation_id_ = UINT_MAX;
-
 namespace formatters = ns_smart_device_link::ns_json_handler::formatters;
 namespace jhs = ns_smart_device_link::ns_json_handler::strings;
 
@@ -175,8 +171,9 @@ ApplicationManagerImpl::ApplicationManagerImpl(
     , policy_handler_(new policy::PolicyHandler(policy_settings, *this))
     , protocol_handler_(NULL)
     , request_ctrl_(am_settings)
-    , hmi_so_factory_(NULL)
-    , mobile_so_factory_(NULL)
+    , mobile_correlation_id_(0)
+    , correlation_id_(0)
+    , max_correlation_id_(UINT_MAX)
     , hmi_capabilities_(new HMICapabilitiesImpl(*this))
     , unregister_reason_(
           mobile_api::AppInterfaceUnregisteredReason::INVALID_ENUM)
@@ -235,14 +232,6 @@ ApplicationManagerImpl::~ApplicationManagerImpl() {
   media_manager_ = NULL;
   hmi_handler_ = NULL;
   connection_handler_ = NULL;
-  if (hmi_so_factory_) {
-    delete hmi_so_factory_;
-    hmi_so_factory_ = NULL;
-  }
-  if (mobile_so_factory_) {
-    delete mobile_so_factory_;
-    mobile_so_factory_ = NULL;
-  }
   protocol_handler_ = NULL;
   SDL_LOG_DEBUG("Destroying Policy Handler");
   RemovePolicyObserver(this);
@@ -1374,23 +1363,23 @@ ApplicationManagerImpl::GetCloudAppConnectionStatus(
 }
 
 uint32_t ApplicationManagerImpl::GetNextMobileCorrelationID() {
-  if (mobile_corelation_id_ < max_corelation_id_) {
-    mobile_corelation_id_++;
+  if (mobile_correlation_id_ < max_correlation_id_) {
+    mobile_correlation_id_++;
   } else {
-    mobile_corelation_id_ = 0;
+    mobile_correlation_id_ = 0;
   }
 
-  return mobile_corelation_id_;
+  return mobile_correlation_id_;
 }
 
 uint32_t ApplicationManagerImpl::GetNextHMICorrelationID() {
-  if (corelation_id_ < max_corelation_id_) {
-    corelation_id_++;
+  if (correlation_id_ < max_correlation_id_) {
+    correlation_id_++;
   } else {
-    corelation_id_ = 0;
+    correlation_id_ = 0;
   }
 
-  return corelation_id_;
+  return correlation_id_;
 }
 
 bool ApplicationManagerImpl::BeginAudioPassThru(uint32_t app_id) {
@@ -2673,25 +2662,16 @@ bool ApplicationManagerImpl::ConvertSOtoMessage(
 }
 
 hmi_apis::HMI_API& ApplicationManagerImpl::hmi_so_factory() {
-  if (!hmi_so_factory_) {
-    hmi_so_factory_ = new hmi_apis::HMI_API;
-    if (!hmi_so_factory_) {
-      SDL_LOG_ERROR("Out of memory");
-      NOTREACHED();
-    }
-  }
-  return *hmi_so_factory_;
+  return hmi_so_factory_;
 }
 
 mobile_apis::MOBILE_API& ApplicationManagerImpl::mobile_so_factory() {
-  if (!mobile_so_factory_) {
-    mobile_so_factory_ = new mobile_apis::MOBILE_API;
-    if (!mobile_so_factory_) {
-      SDL_LOG_ERROR("Out of memory");
-      NOTREACHED();
-    }
-  }
-  return *mobile_so_factory_;
+  return mobile_so_factory_;
+}
+
+ns_smart_device_link_rpc::V1::v4_protocol_v1_2_no_extra&
+ApplicationManagerImpl::mobile_v4_protocol_so_factory() {
+  return mobile_v4_protocol_so_factory_;
 }
 
 HMICapabilities& ApplicationManagerImpl::hmi_capabilities() {
@@ -4917,6 +4897,23 @@ bool ApplicationManagerImpl::IsSOStructValid(
 
   SDL_LOG_ERROR("Could not find struct id: " << struct_id);
   return false;
+}
+
+bool ApplicationManagerImpl::UnsubscribeAppFromSoftButtons(
+    const commands::MessageSharedPtr response) {
+  using namespace mobile_apis;
+
+  const uint32_t connection_key =
+      (*response)[strings::params][strings::connection_key].asUInt();
+  const auto function_id = static_cast<FunctionID::eType>(
+      (*response)[strings::params][strings::function_id].asInt());
+
+  ApplicationSharedPtr app = application(connection_key);
+  DCHECK_OR_RETURN(app, false);
+  app->UnsubscribeFromSoftButtons(function_id);
+  SDL_LOG_DEBUG("Application has unsubscribed from softbuttons. FunctionID: "
+                << function_id << ", app_id:" << app->app_id());
+  return true;
 }
 
 #ifdef BUILD_TESTS
