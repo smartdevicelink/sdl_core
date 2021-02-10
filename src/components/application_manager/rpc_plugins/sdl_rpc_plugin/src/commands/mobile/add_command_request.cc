@@ -127,10 +127,6 @@ void AddCommandRequest::Run() {
   bool data_exist = false;
 
   if ((*message_)[strings::msg_params].keyExists(strings::menu_params)) {
-    if (!CheckCommandName(app)) {
-      SendResponse(false, mobile_apis::Result::DUPLICATE_NAME);
-      return;
-    }
     if (((*message_)[strings::msg_params][strings::menu_params].keyExists(
             hmi_request::parent_id)) &&
         (0 != (*message_)[strings::msg_params][strings::menu_params]
@@ -218,47 +214,6 @@ void AddCommandRequest::Run() {
     StartAwaitForInterface(HmiInterfaces::HMI_INTERFACE_VR);
     SendHMIRequest(hmi_apis::FunctionID::VR_AddCommand, &vr_msg_params, true);
   }
-}
-
-bool AddCommandRequest::CheckCommandName(ApplicationConstSharedPtr app) {
-  if (!app) {
-    return false;
-  }
-
-  const DataAccessor<CommandsMap> accessor = app->commands_map();
-  const CommandsMap& commands = accessor.GetData();
-  CommandsMap::const_iterator i = commands.begin();
-  uint32_t saved_parent_id = 0;
-  uint32_t parent_id = 0;
-  if ((*message_)[strings::msg_params][strings::menu_params].keyExists(
-          hmi_request::parent_id)) {
-    parent_id = (*message_)[strings::msg_params][strings::menu_params]
-                           [hmi_request::parent_id]
-                               .asUInt();
-  }
-
-  for (; commands.end() != i; ++i) {
-    if (!(*i->second).keyExists(strings::menu_params)) {
-      continue;
-    }
-
-    saved_parent_id = 0;
-    if ((*i->second)[strings::menu_params].keyExists(hmi_request::parent_id)) {
-      saved_parent_id =
-          (*i->second)[strings::menu_params][hmi_request::parent_id].asUInt();
-    }
-    if (((*i->second)[strings::menu_params][strings::menu_name].asString() ==
-         (*message_)[strings::msg_params][strings::menu_params]
-                    [strings::menu_name]
-                        .asString()) &&
-        (saved_parent_id == parent_id)) {
-      SDL_LOG_INFO(
-          "AddCommandRequest::CheckCommandName received"
-          " command name already exist in same level menu");
-      return false;
-    }
-  }
-  return true;
 }
 
 bool AddCommandRequest::CheckCommandVRSynonym(ApplicationConstSharedPtr app) {

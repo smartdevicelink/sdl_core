@@ -195,8 +195,7 @@ void PerformInteractionRequest::Run() {
   switch (interaction_mode_) {
     case mobile_apis::InteractionMode::BOTH: {
       SDL_LOG_DEBUG("Interaction Mode: BOTH");
-      if (!CheckChoiceSetVRSynonyms(app) || !CheckChoiceSetMenuNames(app) ||
-          !CheckVrHelpItemPositions(app) ||
+      if (!CheckChoiceSetVRSynonyms(app) || !CheckVrHelpItemPositions(app) ||
           !CheckChoiceSetListVRCommands(app)) {
         return;
       }
@@ -204,8 +203,7 @@ void PerformInteractionRequest::Run() {
     }
     case mobile_apis::InteractionMode::MANUAL_ONLY: {
       SDL_LOG_DEBUG("Interaction Mode: MANUAL_ONLY");
-      if (!CheckChoiceSetVRSynonyms(app) || !CheckChoiceSetMenuNames(app) ||
-          !CheckVrHelpItemPositions(app)) {
+      if (!CheckChoiceSetVRSynonyms(app) || !CheckVrHelpItemPositions(app)) {
         return;
       }
       break;
@@ -681,60 +679,6 @@ void PerformInteractionRequest::SendVRPerformInteractionRequest(
   StartAwaitForInterface(HmiInterfaces::HMI_INTERFACE_VR);
   SendHMIRequest(
       hmi_apis::FunctionID::VR_PerformInteraction, &msg_params, true);
-}
-
-bool PerformInteractionRequest::CheckChoiceSetMenuNames(
-    application_manager::ApplicationSharedPtr const app) {
-  SDL_LOG_AUTO_TRACE();
-
-  smart_objects::SmartObject& choice_list =
-      (*message_)[strings::msg_params][strings::interaction_choice_set_id_list];
-
-  for (size_t i = 0; i < choice_list.length(); ++i) {
-    // choice_set contains SmartObject msg_params
-    smart_objects::SmartObject i_choice_set =
-        app->FindChoiceSet(choice_list[i].asInt());
-
-    for (size_t j = 0; j < choice_list.length(); ++j) {
-      smart_objects::SmartObject j_choice_set =
-          app->FindChoiceSet(choice_list[j].asInt());
-
-      if (i == j) {
-        // skip check the same element
-        continue;
-      }
-
-      if ((smart_objects::SmartType_Null == i_choice_set.getType()) ||
-          (smart_objects::SmartType_Null == j_choice_set.getType())) {
-        SDL_LOG_ERROR("Invalid ID");
-        SendResponse(false, mobile_apis::Result::INVALID_ID);
-        return false;
-      }
-
-      size_t ii = 0;
-      size_t jj = 0;
-      for (; ii < i_choice_set[strings::choice_set].length(); ++ii) {
-        for (; jj < j_choice_set[strings::choice_set].length(); ++jj) {
-          const std::string& ii_menu_name =
-              i_choice_set[strings::choice_set][ii][strings::menu_name]
-                  .asString();
-          const std::string& jj_menu_name =
-              j_choice_set[strings::choice_set][jj][strings::menu_name]
-                  .asString();
-
-          if (ii_menu_name == jj_menu_name) {
-            SDL_LOG_ERROR("Choice set has duplicated menu name");
-            SendResponse(false,
-                         mobile_apis::Result::DUPLICATE_NAME,
-                         "Choice set has duplicated menu name");
-            return false;
-          }
-        }
-      }
-    }
-  }
-
-  return true;
 }
 
 bool PerformInteractionRequest::CheckChoiceSetVRSynonyms(

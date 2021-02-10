@@ -374,8 +374,8 @@ class DynamicApplicationData {
   /*
    * @brief Returns true if sub menu with such name already exist
    */
-  virtual bool IsSubMenuNameAlreadyExist(const std::string& name,
-                                         const uint32_t parent_id) = 0;
+  DEPRECATED virtual bool IsSubMenuNameAlreadyExist(
+      const std::string& name, const uint32_t parent_id) = 0;
 
   /*
    * @brief Adds a interaction choice set to the application
