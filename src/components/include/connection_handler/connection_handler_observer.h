@@ -177,6 +177,14 @@ class ConnectionHandlerObserver {
    */
   virtual void OnWebEngineDeviceCreated() = 0;
 
+  /**
+   * @brief Collects all vehicle data required by a protocol layer
+   * @param data output structure to store received vehicle data
+   * @return true if data has been received successfully, otherwise returns
+   * false
+   */
+  virtual bool GetProtocolVehicleData(ProtocolVehicleData& data) = 0;
+
  protected:
   /**
    * \brief Destructor

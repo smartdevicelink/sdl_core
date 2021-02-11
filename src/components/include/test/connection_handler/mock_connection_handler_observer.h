@@ -83,6 +83,8 @@ class MockConnectionHandlerObserver
   MOCK_METHOD2(SetPendingApplicationState,
                void(const transport_manager::ConnectionUID connection_id,
                     const transport_manager::DeviceInfo& device_info));
+  MOCK_METHOD1(GetProtocolVehicleData,
+               bool(connection_handler::ProtocolVehicleData& data));
 };
 
 }  // namespace connection_handler_test

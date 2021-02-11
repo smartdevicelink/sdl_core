@@ -58,11 +58,10 @@ void UIGetCapabilitiesResponse::Run() {
   const auto result_code = static_cast<hmi_apis::Common_Result::eType>(
       (*message_)[strings::params][hmi_response::code].asInt());
 
-  hmi_capabilities_.UpdateRequestsRequiredForCapabilities(
-      hmi_apis::FunctionID::UI_GetCapabilities);
-
   if (hmi_apis::Common_Result::SUCCESS != result_code) {
     SDL_LOG_DEBUG("Request was not successful. Don't change HMI capabilities");
+    hmi_capabilities_.UpdateRequestsRequiredForCapabilities(
+        hmi_apis::FunctionID::UI_GetCapabilities);
     return;
   }
 
@@ -164,6 +163,9 @@ void UIGetCapabilitiesResponse::Run() {
     hmi_capabilities_.set_pcm_stream_capabilities(
         msg_params[strings::pcm_stream_capabilities]);
   }
+
+  hmi_capabilities_.UpdateRequestsRequiredForCapabilities(
+      hmi_apis::FunctionID::UI_GetCapabilities);
 
   if (!hmi_capabilities_.SaveCachedCapabilitiesToFile(
           hmi_interface::ui, sections_to_update, message_->getSchema())) {
