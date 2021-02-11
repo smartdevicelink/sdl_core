@@ -3203,6 +3203,7 @@ void ApplicationManagerImpl::UnregisterApplication(
   }
   ApplicationSharedPtr app_to_remove;
   connection_handler::DeviceHandle handle = 0;
+
   {
     sync_primitives::AutoLock lock(applications_list_lock_ptr_);
     auto it_app = applications_.begin();
@@ -3215,63 +3216,64 @@ void ApplicationManagerImpl::UnregisterApplication(
         ++it_app;
       }
     }
-    if (!app_to_remove) {
-      SDL_LOG_ERROR("Cant find application with app_id = " << app_id);
-
-      // Just to terminate RAI in case of connection is dropped (rare case)
-      // App won't be unregistered since RAI has not been started yet
-      SDL_LOG_DEBUG("Trying to terminate possible RAI request.");
-      request_ctrl_.terminateAppRequests(app_id);
-
-      return;
-    }
-
-    if (is_resuming) {
-      resume_controller().SaveApplication(app_to_remove);
-    } else {
-      resume_controller().RemoveApplicationFromSaved(app_to_remove);
-    }
-
-    if (IsAppSubscribedForWayPoints(app_id)) {
-      UnsubscribeAppFromWayPoints(app_id, true);
-      if (!IsAnyAppSubscribedForWayPoints()) {
-        SDL_LOG_DEBUG("Send UnsubscribeWayPoints");
-        auto request = MessageHelper::CreateUnsubscribeWayPointsRequest(
-            GetNextHMICorrelationID());
-        rpc_service_->ManageHMICommand(request);
-      }
-    }
-
-    (hmi_capabilities_->get_hmi_language_handler())
-        .OnUnregisterApplication(app_id);
-
-    if (connection_handler().GetDeviceID(app_to_remove->mac_address(),
-                                         &handle)) {
-      AppV4DevicePredicate finder(handle);
-      ApplicationSharedPtr app = FindApp(applications(), finder);
-      if (!app) {
-        SDL_LOG_DEBUG(
-            "There is no more SDL4 apps with device handle: " << handle);
-
-        RemoveAppsWaitingForRegistration(handle);
-      }
-    }
-
-    MessageHelper::SendOnAppUnregNotificationToHMI(
-        app_to_remove, is_unexpected_disconnect, *this);
-    commands_holder_->Clear(app_to_remove);
-
-    const auto enabled_local_apps = policy_handler_->GetEnabledLocalApps();
-    if (helpers::in_range(enabled_local_apps, app_to_remove->policy_app_id())) {
-      SDL_LOG_DEBUG(
-          "Enabled local app has been unregistered. Re-create "
-          "pending application");
-      CreatePendingLocalApplication(app_to_remove->policy_app_id());
-    }
-
-    RefreshCloudAppInformation();
-    SendUpdateAppList();
   }
+  if (!app_to_remove) {
+    SDL_LOG_ERROR("Cant find application with app_id = " << app_id);
+
+    // Just to terminate RAI in case of connection is dropped (rare case)
+    // App won't be unregistered since RAI has not been started yet
+    SDL_LOG_DEBUG("Trying to terminate possible RAI request.");
+    request_ctrl_.terminateAppRequests(app_id);
+
+    return;
+  }
+
+  resume_controller().RemoveFromResumption(app_id);
+
+  if (is_resuming) {
+    resume_controller().SaveApplication(app_to_remove);
+  } else {
+    resume_controller().RemoveApplicationFromSaved(app_to_remove);
+  }
+
+  if (IsAppSubscribedForWayPoints(app_id)) {
+    UnsubscribeAppFromWayPoints(app_id, true);
+    if (!IsAnyAppSubscribedForWayPoints()) {
+      SDL_LOG_DEBUG("Send UnsubscribeWayPoints");
+      auto request = MessageHelper::CreateUnsubscribeWayPointsRequest(
+          GetNextHMICorrelationID());
+      rpc_service_->ManageHMICommand(request);
+    }
+  }
+
+  (hmi_capabilities_->get_hmi_language_handler())
+      .OnUnregisterApplication(app_id);
+
+  if (connection_handler().GetDeviceID(app_to_remove->mac_address(), &handle)) {
+    AppV4DevicePredicate finder(handle);
+    ApplicationSharedPtr app = FindApp(applications(), finder);
+    if (!app) {
+      SDL_LOG_DEBUG(
+          "There is no more SDL4 apps with device handle: " << handle);
+
+      RemoveAppsWaitingForRegistration(handle);
+    }
+  }
+
+  MessageHelper::SendOnAppUnregNotificationToHMI(
+      app_to_remove, is_unexpected_disconnect, *this);
+  commands_holder_->Clear(app_to_remove);
+
+  const auto enabled_local_apps = policy_handler_->GetEnabledLocalApps();
+  if (helpers::in_range(enabled_local_apps, app_to_remove->policy_app_id())) {
+    SDL_LOG_DEBUG(
+        "Enabled local app has been unregistered. Re-create "
+        "pending application");
+    CreatePendingLocalApplication(app_to_remove->policy_app_id());
+  }
+
+  RefreshCloudAppInformation();
+  SendUpdateAppList();
 
   if (EndAudioPassThru(app_id)) {
     // May be better to put this code in MessageHelper?
