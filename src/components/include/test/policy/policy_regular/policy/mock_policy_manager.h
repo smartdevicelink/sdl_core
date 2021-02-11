@@ -172,6 +172,7 @@ class MockPolicyManager : public PolicyManager {
                void(const std::string& ccpu_version,
                     const std::string& wers_country_code,
                     const std::string& language));
+  MOCK_METHOD1(SetHardwareVersion, void(const std::string& hardware_version));
   MOCK_METHOD1(SetPreloadedPtFlag, void(const bool is_preloaded));
   MOCK_METHOD2(SendNotificationOnPermissionsUpdated,
                void(const std::string& device_id,
@@ -311,6 +312,7 @@ class MockPolicyManager : public PolicyManager {
                      RequestSubType::State(const std::string& policy_app_id));
   MOCK_METHOD0(ResetTimeout, void());
   MOCK_CONST_METHOD0(GetCCPUVersionFromPT, std::string());
+  MOCK_CONST_METHOD0(GetHardwareVersionFromPT, std::string());
 };
 
 }  // namespace policy_manager_test

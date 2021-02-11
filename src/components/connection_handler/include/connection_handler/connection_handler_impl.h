@@ -648,6 +648,8 @@ class ConnectionHandlerImpl
 
   void CreateWebEngineDevice() OVERRIDE;
 
+  bool GetProtocolVehicleData(ProtocolVehicleData& data) OVERRIDE;
+
  private:
   /**
    * \brief Disconnect application.

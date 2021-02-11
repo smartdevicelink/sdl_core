@@ -733,6 +733,14 @@ class ProtocolHandlerImpl
       const uint8_t session_id,
       const bool protection) const;
 
+  /**
+   * @brief Writes available protocol vehicle data into structured bson
+   * @param params bson params to write into
+   * @param data data to write
+   */
+  void WriteProtocolVehicleData(
+      BsonObject& params, const connection_handler::ProtocolVehicleData& data);
+
   const ProtocolHandlerSettings& settings_;
 
   /**

@@ -52,6 +52,8 @@ file (GLOB POLICY_TEST_SOURCES
   ${CMAKE_CURRENT_SOURCE_DIR}/policy_manager_impl_test.cc
   ${CMAKE_CURRENT_SOURCE_DIR}/sql_pt_ext_representation_test.cc
   ${CMAKE_CURRENT_SOURCE_DIR}/sql_pt_representation_test.cc
+  ${CMAKE_CURRENT_SOURCE_DIR}/sql_pt_representation_storage_test.cc
+  ${CMAKE_CURRENT_SOURCE_DIR}/sql_pt_ext_representation_storage_test.cc
   ${CMAKE_CURRENT_SOURCE_DIR}/update_status_manager_test.cc
   ${CMAKE_CURRENT_SOURCE_DIR}/shared_library_test.cc)
 
