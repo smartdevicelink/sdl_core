@@ -919,6 +919,15 @@ void ConnectionHandlerImpl::CreateWebEngineDevice() {
   transport_manager_.CreateWebEngineDevice();
 }
 
+bool ConnectionHandlerImpl::GetProtocolVehicleData(ProtocolVehicleData& data) {
+  sync_primitives::AutoReadLock read_lock(connection_handler_observer_lock_);
+  if (connection_handler_observer_) {
+    return connection_handler_observer_->GetProtocolVehicleData(data);
+  }
+
+  return false;
+}
+
 const std::string
 ConnectionHandlerImpl::TransportTypeProfileStringFromConnHandle(
     transport_manager::ConnectionUID connection_handle) const {

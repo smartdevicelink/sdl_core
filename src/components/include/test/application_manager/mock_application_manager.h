@@ -184,6 +184,8 @@ class MockApplicationManager : public application_manager::ApplicationManager {
                void(application_manager::ApplicationSharedPtr app));
   MOCK_METHOD1(OnApplicationSwitched,
                void(application_manager::ApplicationSharedPtr app));
+  MOCK_METHOD0(mobile_v4_protocol_so_factory,
+               ns_smart_device_link_rpc::V1::v4_protocol_v1_2_no_extra&());
   MOCK_CONST_METHOD0(connection_handler,
                      connection_handler::ConnectionHandler&());
   MOCK_CONST_METHOD0(protocol_handler, protocol_handler::ProtocolHandler&());
@@ -230,6 +232,7 @@ class MockApplicationManager : public application_manager::ApplicationManager {
   MOCK_CONST_METHOD1(IsAppsQueriedFrom,
                      bool(const connection_handler::DeviceHandle handle));
   MOCK_CONST_METHOD0(IsStopping, bool());
+  MOCK_METHOD0(WaitForHmiIsReady, bool());
   MOCK_METHOD1(RemoveAppFromTTSGlobalPropertiesList,
                void(const uint32_t app_id));
   MOCK_METHOD2(ResetGlobalProperties,
@@ -348,6 +351,9 @@ class MockApplicationManager : public application_manager::ApplicationManager {
   MOCK_METHOD2(IsSOStructValid,
                bool(const hmi_apis::StructIdentifiers::eType struct_id,
                     const smart_objects::SmartObject& display_capabilities));
+  MOCK_METHOD1(UnsubscribeAppFromSoftButtons,
+               bool(const application_manager::commands::MessageSharedPtr
+                        response_message));
   MOCK_CONST_METHOD1(IsAppSubscribedForWayPoints, bool(uint32_t));
   MOCK_CONST_METHOD1(IsAppSubscribedForWayPoints,
                      bool(application_manager::Application& app));

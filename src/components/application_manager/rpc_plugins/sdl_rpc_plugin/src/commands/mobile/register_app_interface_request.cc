@@ -159,18 +159,6 @@ uint32_t RegisterAppInterfaceRequest::default_timeout() const {
   return 0;
 }
 
-void RegisterAppInterfaceRequest::WaitForHMIIsReady() {
-  while (!application_manager_.IsStopping() &&
-         !application_manager_.IsHMICooperating()) {
-    SDL_LOG_DEBUG("Waiting for the HMI... conn_key="
-                  << connection_key() << ", correlation_id=" << correlation_id()
-                  << ", default_timeout=" << default_timeout()
-                  << ", thread=" << pthread_self());
-    sleep(1);
-    // TODO(DK): timer_->StartWait(1);
-  }
-}
-
 void RegisterAppInterfaceRequest::FillApplicationParams(
     ApplicationSharedPtr application) {
   SDL_LOG_AUTO_TRACE();
@@ -488,10 +476,8 @@ void RegisterAppInterfaceRequest::Run() {
   SDL_LOG_AUTO_TRACE();
   SDL_LOG_DEBUG("Connection key is " << connection_key());
 
-  WaitForHMIIsReady();
-
-  if (application_manager_.IsStopping()) {
-    SDL_LOG_WARN("The ApplicationManager is stopping!");
+  if (!application_manager_.WaitForHmiIsReady()) {
+    SDL_LOG_WARN("Failed to wait for HMI readiness");
     return;
   }
 

@@ -1097,11 +1097,26 @@ void PolicyHandler::OnGetSystemInfo(const std::string& ccpu_version,
   policy_manager->SetSystemInfo(ccpu_version, wers_country_code, language);
 }
 
+void PolicyHandler::OnHardwareVersionReceived(
+    const std::string& hardware_version) {
+  SDL_LOG_AUTO_TRACE();
+  const auto policy_manager = LoadPolicyManager();
+  POLICY_LIB_CHECK_VOID(policy_manager);
+  policy_manager->SetHardwareVersion(hardware_version);
+}
+
 std::string PolicyHandler::GetCCPUVersionFromPT() const {
   SDL_LOG_AUTO_TRACE();
   const auto policy_manager = LoadPolicyManager();
   POLICY_LIB_CHECK_OR_RETURN(policy_manager, std::string());
   return policy_manager->GetCCPUVersionFromPT();
+}
+
+std::string PolicyHandler::GetHardwareVersionFromPT() const {
+  SDL_LOG_AUTO_TRACE();
+  const auto policy_manager = LoadPolicyManager();
+  POLICY_LIB_CHECK_OR_RETURN(policy_manager, std::string());
+  return policy_manager->GetHardwareVersionFromPT();
 }
 
 void PolicyHandler::OnVIIsReady() {
@@ -1380,7 +1395,6 @@ void PolicyHandler::OnAllowSDLFunctionalityNotification(
       }
 
 #ifdef EXTERNAL_PROPRIETARY_MODE
-
       ApplicationSet applications;
       {
         DataAccessor<ApplicationSet> accessor =
@@ -1426,7 +1440,6 @@ void PolicyHandler::OnAllowSDLFunctionalityNotification(
   }
 
 #ifdef EXTERNAL_PROPRIETARY_MODE
-
   if (last_activated_app_id_) {
     ApplicationSharedPtr app =
         application_manager_.application(last_activated_app_id_);
@@ -1437,7 +1450,14 @@ void PolicyHandler::OnAllowSDLFunctionalityNotification(
                    << "' not found among registered applications.");
       return;
     }
-    if (is_allowed) {
+
+    bool is_allowed_by_policies = true;
+    if (PolicyEnabled()) {
+      is_allowed_by_policies =
+          !policy_manager->IsApplicationRevoked(app->policy_app_id());
+    }
+
+    if (is_allowed && is_allowed_by_policies) {
       // Send HMI status notification to mobile
       // Put application in full
       AudioStreamingState::eType audio_state =
@@ -1510,7 +1530,9 @@ void PolicyHandler::OnActivateApp(uint32_t connection_key,
     // is not allowed.
     if (!permissions.isSDLAllowed) {
       permissions.priority.clear();
-      last_activated_app_id_ = connection_key;
+      if (!permissions.appRevoked) {
+        last_activated_app_id_ = connection_key;
+      }
     }
 
     if (permissions.appRevoked) {

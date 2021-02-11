@@ -72,6 +72,7 @@
 #include "policy/mock_policy_manager.h"
 #include "policy/usage_statistics/mock_statistics_manager.h"
 #include "protocol_handler/mock_session_observer.h"
+#include "utils/test_async_waiter.h"
 
 #include "smart_objects/enum_schema_item.h"
 
@@ -290,40 +291,6 @@ class PolicyHandlerTest : public ::testing::Test {
         policy_handler_.GetAppPropertiesStatus(properties, kPolicyAppId_));
   }
 };
-
-namespace {
-/**
- * @brief The WaitAsync class
- * can wait for a certain amount of function calls from different
- * threads, or a timeout expires.
- */
-class WaitAsync {
- public:
-  WaitAsync(const uint32_t count, const uint32_t timeout)
-      : count_(count), timeout_(timeout) {}
-
-  void Notify() {
-    count_--;
-    cond_var_.NotifyOne();
-  }
-
-  bool Wait(sync_primitives::AutoLock& auto_lock) {
-    while (count_ > 0) {
-      sync_primitives::ConditionalVariable::WaitStatus wait_status =
-          cond_var_.WaitFor(auto_lock, timeout_);
-      if (wait_status == sync_primitives::ConditionalVariable::kTimeout) {
-        return false;
-      }
-    }
-    return true;
-  }
-
- private:
-  int count_;
-  const uint32_t timeout_;
-  sync_primitives::ConditionalVariable cond_var_;
-};
-}  // namespace
 
 TEST_F(PolicyHandlerTest, LoadPolicyLibrary_Method_ExpectLibraryLoaded) {
   // Check before policy enabled from ini file
@@ -926,8 +893,8 @@ void PolicyHandlerTest::TestActivateApp(const uint32_t connection_key,
           _,
           _));
 #endif  // EXTERNAL_PROPRIETARY_MODE
-
-  EXPECT_CALL(*application1, policy_app_id()).WillOnce(Return(kPolicyAppId_));
+  EXPECT_CALL(*application1, policy_app_id())
+      .WillRepeatedly(Return(kPolicyAppId_));
   EXPECT_CALL(*mock_policy_manager_,
               GetAppPermissionsChanges(kMacAddr_, kPolicyAppId_))
       .WillOnce(Return(permissions));
@@ -1321,19 +1288,6 @@ TEST_F(PolicyHandlerTest, OnSystemInfoChanged) {
   EXPECT_CALL(*mock_policy_manager_, SetSystemLanguage(language));
   // Act
   policy_handler_.OnSystemInfoChanged(language);
-}
-
-TEST_F(PolicyHandlerTest, OnGetSystemInfo) {
-  // Arrange
-  ChangePolicyManagerToMock();
-  // Check expectations
-  const std::string ccpu_version("4.1.3.B_EB355B");
-  const std::string wers_country_code("WAEGB");
-  const std::string language("ru-ru");
-  EXPECT_CALL(*mock_policy_manager_,
-              SetSystemInfo(ccpu_version, wers_country_code, language));
-  // Act
-  policy_handler_.OnGetSystemInfo(ccpu_version, wers_country_code, language);
 }
 
 TEST_F(PolicyHandlerTest, IsApplicationRevoked) {
@@ -2258,24 +2212,20 @@ TEST_F(PolicyHandlerTest,
   EXPECT_CALL(*mock_app_, policy_app_id()).WillOnce(Return(kPolicyAppId_));
   EXPECT_CALL(*mock_app_, device()).WillOnce(Return(device));
 
-  sync_primitives::Lock wait_hmi_lock_first;
-  sync_primitives::AutoLock auto_lock_first(wait_hmi_lock_first);
-  WaitAsync waiter_first(kCallsCount_, kTimeout_);
+  auto waiter_first = TestAsyncWaiter::createInstance();
 #ifdef EXTERNAL_PROPRIETARY_MODE
   EXPECT_CALL(*mock_policy_manager_, SetUserConsentForApp(_, _))
-      .WillOnce(NotifyAsync(&waiter_first));
+      .WillOnce(NotifyTestAsyncWaiter(waiter_first));
 #else
   EXPECT_CALL(*mock_policy_manager_, SetUserConsentForApp(_))
-      .WillOnce(NotifyAsync(&waiter_first));
+      .WillOnce(NotifyTestAsyncWaiter(waiter_first));
 #endif
   ExternalConsentStatusItem item(1u, 1u, kStatusOn);
   ExternalConsentStatus external_consent_status;
   external_consent_status.insert(item);
 
 #ifdef EXTERNAL_PROPRIETARY_MODE
-  sync_primitives::Lock wait_hmi_lock_second;
-  sync_primitives::AutoLock auto_lock_second(wait_hmi_lock_second);
-  WaitAsync waiter_second(kCallsCount_, kTimeout_);
+  auto waiter_second = TestAsyncWaiter::createInstance();
 
   EXPECT_CALL(*mock_policy_manager_,
               SetExternalConsentStatus(external_consent_status))
@@ -2286,9 +2236,9 @@ TEST_F(PolicyHandlerTest,
   policy_handler_.OnAppPermissionConsent(kConnectionKey_, permissions);
 
 #endif
-  EXPECT_TRUE(waiter_first.Wait(auto_lock_first));
+  EXPECT_TRUE(waiter_first->WaitFor(kCallsCount_, kTimeout_));
 #ifdef EXTERNAL_PROPRIETARY_MODE
-  EXPECT_TRUE(waiter_second.Wait(auto_lock_second));
+  EXPECT_TRUE(waiter_second->WaitFor(kCallsCount_, kTimeout_));
 #endif
 }
 
@@ -2309,9 +2259,7 @@ TEST_F(PolicyHandlerTest,
 
   permissions.group_permissions.push_back(group_permission_allowed);
 
-  sync_primitives::Lock wait_hmi_lock;
-  sync_primitives::AutoLock auto_lock(wait_hmi_lock);
-  WaitAsync waiter(kCallsCount_, kTimeout_);
+  auto waiter = TestAsyncWaiter::createInstance();
 
   EXPECT_CALL(app_manager_, application(_)).Times(0);
 
@@ -2328,7 +2276,7 @@ TEST_F(PolicyHandlerTest,
   policy_handler_.OnAppPermissionConsent(invalid_connection_key, permissions);
 #endif
 
-  EXPECT_FALSE(waiter.Wait(auto_lock));
+  EXPECT_FALSE(waiter->WaitFor(kCallsCount_, kTimeout_));
 }
 
 TEST_F(PolicyHandlerTest,
@@ -2348,9 +2296,7 @@ TEST_F(PolicyHandlerTest,
 
   permissions.group_permissions.push_back(group_permission_allowed);
 
-  sync_primitives::Lock wait_hmi_lock;
-  sync_primitives::AutoLock auto_lock(wait_hmi_lock);
-  WaitAsync waiter(kCallsCount_, kTimeout_);
+  auto waiter = TestAsyncWaiter::createInstance();
 
   EXPECT_CALL(app_manager_, application(_)).Times(0);
 
@@ -2369,7 +2315,7 @@ TEST_F(PolicyHandlerTest,
   policy_handler_.OnAppPermissionConsent(invalid_connection_key, permissions);
 #endif
 
-  EXPECT_FALSE(waiter.Wait(auto_lock));
+  EXPECT_FALSE(waiter->WaitFor(kCallsCount_, kTimeout_));
 }
 
 ACTION_P(SetDeviceParamsMacAdress, mac_adress) {
@@ -2421,13 +2367,11 @@ TEST_F(PolicyHandlerTest,
   ExternalConsentStatus external_consent_status;
   external_consent_status.insert(item);
 #ifdef EXTERNAL_PROPRIETARY_MODE
-  sync_primitives::Lock wait_hmi_lock;
-  sync_primitives::AutoLock auto_lock(wait_hmi_lock);
-  WaitAsync waiter(kCallsCount_, kTimeout_);
+  auto waiter = TestAsyncWaiter::createInstance();
 
   EXPECT_CALL(*mock_policy_manager_,
               SetExternalConsentStatus(external_consent_status))
-      .WillOnce(DoAll(NotifyAsync(&waiter), Return(true)));
+      .WillOnce(DoAll(NotifyTestAsyncWaiter(waiter), Return(true)));
   policy_handler_.OnAppPermissionConsent(
       invalid_connection_key, permissions, external_consent_status);
 #else
@@ -2436,7 +2380,7 @@ TEST_F(PolicyHandlerTest,
 
   Mock::VerifyAndClearExpectations(mock_app_.get());
 #ifdef EXTERNAL_PROPRIETARY_MODE
-  EXPECT_TRUE(waiter.Wait(auto_lock));
+  EXPECT_TRUE(waiter->WaitFor(kCallsCount_, kTimeout_));
 #endif
 }
 
@@ -2485,9 +2429,7 @@ TEST_F(PolicyHandlerTest,
   ExternalConsentStatus external_consent_status;
   external_consent_status.insert(item);
 #ifdef EXTERNAL_PROPRIETARY_MODE
-  sync_primitives::Lock wait_hmi_lock;
-  sync_primitives::AutoLock auto_lock(wait_hmi_lock);
-  WaitAsync waiter(kCallsCount_, kTimeout_);
+  auto waiter = TestAsyncWaiter::createInstance();
 
   ON_CALL(*mock_policy_manager_, IsNeedToUpdateExternalConsentStatus(_))
       .WillByDefault(Return(false));
@@ -2502,7 +2444,7 @@ TEST_F(PolicyHandlerTest,
 
   Mock::VerifyAndClearExpectations(mock_app_.get());
 #ifdef EXTERNAL_PROPRIETARY_MODE
-  EXPECT_FALSE(waiter.Wait(auto_lock));
+  EXPECT_FALSE(waiter->WaitFor(kCallsCount_, kTimeout_));
 #endif
 }
 
@@ -2553,37 +2495,33 @@ TEST_F(PolicyHandlerTest, AddStatisticsInfo_UnknownStatistics_UNSUCCESS) {
 TEST_F(PolicyHandlerTest, AddStatisticsInfo_SUCCESS) {
   EnablePolicyAndPolicyManagerMock();
 
-  sync_primitives::Lock wait_hmi_lock;
-  sync_primitives::AutoLock auto_lock(wait_hmi_lock);
-  WaitAsync waiter(kCallsCount_, kTimeout_);
+  auto waiter = TestAsyncWaiter::createInstance();
 
   EXPECT_CALL(*mock_policy_manager_, Increment(_))
-      .WillOnce(NotifyAsync(&waiter));
+      .WillOnce(NotifyTestAsyncWaiter(waiter));
 
   policy_handler_.AddStatisticsInfo(
       hmi_apis::Common_StatisticsType::iAPP_BUFFER_FULL);
-  EXPECT_TRUE(waiter.Wait(auto_lock));
+  EXPECT_TRUE(waiter->WaitFor(kCallsCount_, kTimeout_));
 }
 
 TEST_F(PolicyHandlerTest, OnSystemError_SUCCESS) {
   EnablePolicyAndPolicyManagerMock();
 
-  sync_primitives::Lock wait_hmi_lock;
-  sync_primitives::AutoLock auto_lock(wait_hmi_lock);
-  WaitAsync waiter(kCallsCount_, kTimeout_);
+  auto waiter_first = TestAsyncWaiter::createInstance();
   EXPECT_CALL(*mock_policy_manager_, Increment(_))
-      .WillOnce(NotifyAsync(&waiter));
+      .WillOnce(NotifyTestAsyncWaiter(waiter_first));
 
   policy_handler_.OnSystemError(hmi_apis::Common_SystemError::SYNC_REBOOTED);
-  EXPECT_TRUE(waiter.Wait(auto_lock));
+  EXPECT_TRUE(waiter_first->WaitFor(kCallsCount_, kTimeout_));
 
-  WaitAsync waiter1(kCallsCount_, kTimeout_);
+  auto waiter_second = TestAsyncWaiter::createInstance();
+
   EXPECT_CALL(*mock_policy_manager_, Increment(_))
-      .WillOnce(NotifyAsync(&waiter1));
-
+      .WillOnce(NotifyTestAsyncWaiter(waiter_second));
   policy_handler_.OnSystemError(
       hmi_apis::Common_SystemError::SYNC_OUT_OF_MEMMORY);
-  EXPECT_TRUE(waiter1.Wait(auto_lock));
+  EXPECT_TRUE(waiter_second->WaitFor(kCallsCount_, kTimeout_));
 }
 
 TEST_F(PolicyHandlerTest, RemoteAppsUrl_EndpointsEmpty_UNSUCCESS) {

@@ -214,7 +214,7 @@ class ProtocolHandlerImpl
 
   void ProcessFailedPTU() OVERRIDE;
 
-#ifdef EXTERNAL_PROPRIETARY_MODE
+#if defined(EXTERNAL_PROPRIETARY_MODE) && defined(ENABLE_SECURITY)
   /**
    * @brief ProcessFailedCertDecrypt is called to notify security manager that
    * certificate decryption failed in the external flow
@@ -732,6 +732,14 @@ class ProtocolHandlerImpl
       const ConnectionID connection_id,
       const uint8_t session_id,
       const bool protection) const;
+
+  /**
+   * @brief Writes available protocol vehicle data into structured bson
+   * @param params bson params to write into
+   * @param data data to write
+   */
+  void WriteProtocolVehicleData(
+      BsonObject& params, const connection_handler::ProtocolVehicleData& data);
 
   const ProtocolHandlerSettings& settings_;
 

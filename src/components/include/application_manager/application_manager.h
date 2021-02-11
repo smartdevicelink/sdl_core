@@ -42,6 +42,9 @@
 #include "connection_handler/connection_handler.h"
 #include "utils/data_accessor.h"
 
+#include "interfaces/v4_protocol_v1_2_no_extra.h"
+#include "interfaces/v4_protocol_v1_2_no_extra_schema.h"
+
 #include "application_manager/application_manager_settings.h"
 #include "application_manager/hmi_interfaces.h"
 #include "application_manager/plugin_manager/rpc_plugin_manager.h"
@@ -620,6 +623,12 @@ class ApplicationManager {
 
   virtual bool IsStopping() const = 0;
 
+  /**
+   * @brief Waits for HMI readiness and blocks thread if it's not ready yet
+   * @return true if HMI is ready and cooperating, otherwise returns false
+   */
+  virtual bool WaitForHmiIsReady() = 0;
+
   virtual void RemoveAppFromTTSGlobalPropertiesList(const uint32_t app_id) = 0;
 
   /**
@@ -796,6 +805,9 @@ class ApplicationManager {
    */
   virtual HmiInterfaces& hmi_interfaces() = 0;
 
+  virtual ns_smart_device_link_rpc::V1::v4_protocol_v1_2_no_extra&
+  mobile_v4_protocol_so_factory() = 0;
+
   virtual app_launch::AppLaunchCtrl& app_launch_ctrl() = 0;
 
   virtual protocol_handler::MajorProtocolVersion SupportedSDLVersion()
@@ -928,6 +940,14 @@ class ApplicationManager {
   virtual bool IsSOStructValid(
       const hmi_apis::StructIdentifiers::eType struct_id,
       const smart_objects::SmartObject& display_capabilities) = 0;
+
+  /**
+   * @brief Unsubscribe application specified in message from softbuttons.
+   * @param response_message - Response message received from HMI.
+   * @return bool - Result of unsubscribing process.
+   */
+  virtual bool UnsubscribeAppFromSoftButtons(
+      const commands::MessageSharedPtr response_message) = 0;
 };
 
 }  // namespace application_manager

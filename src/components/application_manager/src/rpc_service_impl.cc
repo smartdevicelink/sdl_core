@@ -390,7 +390,10 @@ bool RPCServiceImpl::ManageHMICommand(const commands::MessageSharedPtr message,
 
   if (command->Init()) {
     command->Run();
-    if (kResponse == message_type) {
+    if (helpers::Compare<int32_t, helpers::EQ, helpers::ONE>(
+            message_type, kResponse, kErrorResponse) &&
+        message->getElement(strings::params)
+            .keyExists(strings::correlation_id)) {
       const uint32_t correlation_id =
           (*(message.get()))[strings::params][strings::correlation_id].asUInt();
       const int32_t function_id =

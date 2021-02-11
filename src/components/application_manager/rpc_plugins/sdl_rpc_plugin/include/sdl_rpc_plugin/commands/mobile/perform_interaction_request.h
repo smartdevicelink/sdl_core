@@ -162,16 +162,6 @@ class PerformInteractionRequest
   void SendUIShowVRHelpRequest(app_mngr::ApplicationSharedPtr const app);
 
   /*
-   * @brief Checks if incoming choice set doesn't has similar menu names.
-   *
-   * @param app_id Application ID
-   *
-   * return Return TRUE if there are no similar menu names in choice set,
-   * otherwise FALSE
-   */
-  bool CheckChoiceSetMenuNames(app_mngr::ApplicationSharedPtr const app);
-
-  /*
    * @brief Checks if incoming choice set doesn't has similar VR synonyms.
    *
    * @param app_id Application ID

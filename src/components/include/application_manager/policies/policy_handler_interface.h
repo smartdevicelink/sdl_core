@@ -332,10 +332,24 @@ class PolicyHandlerInterface : public VehicleDataItemProvider {
                                const std::string& language) = 0;
 
   /**
+   * @brief Save hardware version from GetSystemInfo request to policy table, if
+   * present
+   * @param hardware_version Hardware version
+   */
+  virtual void OnHardwareVersionReceived(
+      const std::string& hardware_version) = 0;
+
+  /**
    * @brief Get information about last ccpu_version from PT
    * @return ccpu_version from PT
    */
   virtual std::string GetCCPUVersionFromPT() const = 0;
+
+  /**
+   * @brief Get information about last hardware version from PT
+   * @return hardware version from PT
+   */
+  virtual std::string GetHardwareVersionFromPT() const = 0;
 
   /**
    * @brief Sends GetVehicleData request in case when Vechicle info is ready.

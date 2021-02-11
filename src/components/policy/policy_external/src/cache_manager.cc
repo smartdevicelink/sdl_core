@@ -2047,7 +2047,8 @@ void CacheManager::PersistData() {
             *(*copy_pt.policy_table.module_meta).wers_country_code,
             *(*copy_pt.policy_table.module_meta).language);
         ex_backup_->SetVINValue(*(*copy_pt.policy_table.module_meta).vin);
-
+        ex_backup_->SetHardwareVersion(
+            *(*copy_pt.policy_table.module_meta).hardware_version);
         // Save unpaired flag for devices
         policy_table::DeviceData::const_iterator it_device =
             copy_pt.policy_table.device_data->begin();
@@ -2300,11 +2301,33 @@ bool CacheManager::SetMetaInfo(const std::string& ccpu_version,
   return true;
 }
 
+void CacheManager::SetHardwareVersion(const std::string& hardware_version) {
+  SDL_LOG_AUTO_TRACE();
+  CACHE_MANAGER_CHECK_VOID();
+  sync_primitives::AutoLock auto_lock(cache_lock_);
+
+  *pt_->policy_table.module_meta->hardware_version = hardware_version;
+  Backup();
+}
+
 std::string CacheManager::GetCCPUVersionFromPT() const {
   SDL_LOG_AUTO_TRACE();
+  CACHE_MANAGER_CHECK(std::string(""));
+  sync_primitives::AutoLock auto_lock(cache_lock_);
+
   rpc::Optional<policy_table::ModuleMeta>& module_meta =
       pt_->policy_table.module_meta;
   return *(module_meta->ccpu_version);
+}
+
+std::string CacheManager::GetHardwareVersionFromPT() const {
+  SDL_LOG_AUTO_TRACE();
+  CACHE_MANAGER_CHECK(std::string(""));
+  sync_primitives::AutoLock auto_lock(cache_lock_);
+
+  rpc::Optional<policy_table::ModuleMeta>& module_meta =
+      pt_->policy_table.module_meta;
+  return *(module_meta->hardware_version);
 }
 
 bool CacheManager::IsMetaInfoPresent() const {
