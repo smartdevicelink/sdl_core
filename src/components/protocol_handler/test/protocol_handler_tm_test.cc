@@ -5415,7 +5415,7 @@ TEST_F(ProtocolHandlerImplTest,
 
 TEST_F(ProtocolHandlerImplTest,
        StartSessionAck_ProtocolVehicleData_VehicleDataParamsForV5) {
-  TestAsyncWaiter waiter;
+  auto waiter = TestAsyncWaiter::createInstance();
 
   const size_t maximum_rpc_payload_size = 1500;
   EXPECT_CALL(protocol_handler_settings_mock, maximum_rpc_payload_size())
@@ -5506,7 +5506,7 @@ TEST_F(ProtocolHandlerImplTest,
                                                  PROTECTION_OFF,
                                                  connection_id,
                                                  Eq(expected_param))))
-      .WillOnce(DoAll(NotifyTestAsyncWaiter(&waiter), Return(E_SUCCESS)));
+      .WillOnce(DoAll(NotifyTestAsyncWaiter(waiter), Return(E_SUCCESS)));
 
   connection_handler::SessionTransports dummy_st = {0, 0};
   EXPECT_CALL(connection_handler_mock,
@@ -5544,7 +5544,7 @@ TEST_F(ProtocolHandlerImplTest,
                                              false /* protection */,
                                              full_version);
 
-  EXPECT_TRUE(waiter.WaitFor(1, kAsyncExpectationsTimeout));
+  EXPECT_TRUE(waiter->WaitFor(1, kAsyncExpectationsTimeout));
 }
 
 }  // namespace protocol_handler_test
