@@ -562,7 +562,7 @@ TEST_F(
   EXPECT_EQ(96, vs_capability_so[strings::pixel_per_inch].asInt());
   EXPECT_TRUE(vs_capability_so.keyExists(strings::scale));
   EXPECT_EQ(1, vs_capability_so[strings::scale].asInt());
-  EXPECT_TRUE(vs_capability_so.keyExists(strings::preferred_fps));  
+  EXPECT_TRUE(vs_capability_so.keyExists(strings::preferred_fps));
   EXPECT_TRUE(vs_capability_so.keyExists(
       strings::additional_video_streaming_capabilities));
   const size_t additional_video_streaming_capabilities_len =

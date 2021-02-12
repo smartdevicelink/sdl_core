@@ -342,7 +342,7 @@
                 "resolutionHeight": 380
               },
               "maxBitrate": 20000,
-              "supportedFormats": [            
+              "supportedFormats": [
                 {
                   "protocol": "RAW",
                   "codec": "H264"
