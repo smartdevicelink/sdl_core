@@ -105,12 +105,6 @@
                     "rows": 1
                 },
                 {
-                    "name": "navigationText",
-                    "characterSet": "UTF_8",
-                    "width": 500,
-                    "rows": 1
-                },
-                {
                     "name": "audioPassThruDisplayText1",
                     "characterSet": "UTF_8",
                     "width": 500,
@@ -135,12 +129,6 @@
                     "rows": 1
                 },
                 {
-                    "name": "notificationText",
-                    "characterSet": "UTF_8",
-                    "width": 500,
-                    "rows": 1
-                },
-                {
                     "name": "menuName",
                     "characterSet": "UTF_8",
                     "width": 500,
@@ -154,6 +142,30 @@
                 },
                 {
                     "name": "tertiaryText",
+                    "characterSet": "UTF_8",
+                    "width": 500,
+                    "rows": 1
+                },
+                {
+                    "name": "menuCommandSecondaryText",
+                    "characterSet": "UTF_8",
+                    "width": 500,
+                    "rows": 1
+                },
+                {
+                    "name": "menuCommandTertiaryText",
+                    "characterSet": "UTF_8",
+                    "width": 500,
+                    "rows": 1
+                },
+                {
+                    "name": "menuSubMenuSecondaryText",
+                    "characterSet": "UTF_8",
+                    "width": 500,
+                    "rows": 1
+                },
+                {
+                    "name": "menuSubMenuTertiaryText",
                     "characterSet": "UTF_8",
                     "width": 500,
                     "rows": 1
@@ -207,6 +219,20 @@
                 },
                 {
                     "name": "cmdIcon",
+                    "imageResolution": {
+                        "resolutionWidth": 35,
+                        "resolutionHeight": 35
+                    }
+                },
+                {
+                    "name": "menuCommandSecondaryImage",
+                    "imageResolution": {
+                        "resolutionWidth": 35,
+                        "resolutionHeight": 35
+                    }
+                },
+                {
+                    "name": "menuSubMenuSecondaryImage",
                     "imageResolution": {
                         "resolutionWidth": 35,
                         "resolutionHeight": 35
@@ -342,6 +368,7 @@
               "diagonalScreenSize": 8,
               "pixelPerInch": 96,
               "scale": 1,
+              "preferredFPS": 15,
               "additionalVideoStreamingCapabilities": [
                 {
                   "preferredResolution":

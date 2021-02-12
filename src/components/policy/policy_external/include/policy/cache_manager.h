@@ -597,19 +597,19 @@ class CacheManager : public CacheManagerInterface {
    */
   void SetPreloadedPtFlag(const bool is_preloaded) OVERRIDE;
 
-  /**
-   * @brief Records information about head unit system to PT
-   * @return bool Success of operation
-   */
   bool SetMetaInfo(const std::string& ccpu_version,
                    const std::string& wers_country_code,
-                   const std::string& language);
+                   const std::string& language) OVERRIDE;
+
+  void SetHardwareVersion(const std::string& hardware_version) OVERRIDE;
 
   /**
    * @brief Get information about last ccpu_version from PT
    * @return ccpu_version from PT
    */
   std::string GetCCPUVersionFromPT() const;
+
+  std::string GetHardwareVersionFromPT() const OVERRIDE;
 
   /**
    * @brief Checks, if specific head unit is present in PT

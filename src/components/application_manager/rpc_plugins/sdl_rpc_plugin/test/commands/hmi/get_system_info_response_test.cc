@@ -68,6 +68,7 @@ typedef NiceMock<
 namespace {
 const uint32_t kConnectionKey = 2u;
 const std::string ccpu_version("4.1.3.B_EB355B");
+const std::string kHardwareVersion("1.1.1.1");
 const std::string wers_country_code("WAEGB");
 const std::string lang_code("EN-US");
 }  // namespace
@@ -82,27 +83,19 @@ class GetSystemInfoResponseTest
     (*command_msg)[strings::msg_params]["ccpu_version"] = ccpu_version;
     (*command_msg)[strings::msg_params]["wersCountryCode"] = wers_country_code;
     (*command_msg)[strings::msg_params]["language"] = lang_code;
-
     return command_msg;
+  }
+
+  void SetHardwareVersionFromPT() {
+    const std::string hardware_version_from_pt = "1.1.1.0";
+    ON_CALL(mock_policy_handler_, GetHardwareVersionFromPT())
+        .WillByDefault(Return(hardware_version_from_pt));
+    EXPECT_CALL(mock_hmi_capabilities_,
+                set_hardware_version(hardware_version_from_pt));
   }
 
   SmartObject capabilities_;
 };
-
-TEST_F(GetSystemInfoResponseTest, GetSystemInfo_SUCCESS) {
-  MessageSharedPtr command_msg = CreateCommandMsg();
-  (*command_msg)[strings::params][hmi_response::code] =
-      hmi_apis::Common_Result::SUCCESS;
-  (*command_msg)[strings::msg_params][hmi_response::capabilities] =
-      (capabilities_);
-
-  ResponseFromHMIPtr command(CreateCommand<GetSystemInfoResponse>(command_msg));
-
-  EXPECT_CALL(mock_policy_handler_,
-              OnGetSystemInfo(ccpu_version, wers_country_code, lang_code));
-
-  command->Run();
-}
 
 TEST_F(GetSystemInfoResponseTest, GetSystemInfo_UNSUCCESS) {
   MessageSharedPtr command_msg = CreateCommandMsg();
@@ -129,6 +122,46 @@ TEST_F(GetSystemInfoResponseTest, GetSystemInfo_UpdateCapabilities_Called) {
   ResponseFromHMIPtr command(CreateCommand<GetSystemInfoResponse>(command_msg));
 
   EXPECT_CALL(mock_hmi_capabilities_, OnSoftwareVersionReceived(ccpu_version));
+
+  ASSERT_TRUE(command->Init());
+  command->Run();
+}
+
+TEST_F(GetSystemInfoResponseTest,
+       GetSystemInfo_SaveHardwareVersionToHMICapabilitiesIfPresentInResponse) {
+  MessageSharedPtr command_msg = CreateCommandMsg();
+  (*command_msg)[strings::params][hmi_response::code] =
+      hmi_apis::Common_Result::SUCCESS;
+  (*command_msg)[strings::msg_params][hmi_response::capabilities] =
+      (capabilities_);
+  (*command_msg)[strings::msg_params][strings::system_hardware_version] =
+      kHardwareVersion;
+
+  ResponseFromHMIPtr command(CreateCommand<GetSystemInfoResponse>(command_msg));
+
+  SetHardwareVersionFromPT();
+  EXPECT_CALL(mock_policy_handler_, OnHardwareVersionReceived(_));
+  EXPECT_CALL(mock_hmi_capabilities_, set_hardware_version(kHardwareVersion));
+
+  ASSERT_TRUE(command->Init());
+  command->Run();
+}
+
+TEST_F(
+    GetSystemInfoResponseTest,
+    GetSystemInfo_DontSaveHardwareVersionToHMICapabilitiesIfAbsentInResponse) {
+  MessageSharedPtr command_msg = CreateCommandMsg();
+  (*command_msg)[strings::params][hmi_response::code] =
+      hmi_apis::Common_Result::SUCCESS;
+  (*command_msg)[strings::msg_params][hmi_response::capabilities] =
+      (capabilities_);
+
+  ResponseFromHMIPtr command(CreateCommand<GetSystemInfoResponse>(command_msg));
+
+  SetHardwareVersionFromPT();
+  EXPECT_CALL(mock_policy_handler_, OnHardwareVersionReceived(_)).Times(0);
+  EXPECT_CALL(mock_hmi_capabilities_, set_hardware_version(kHardwareVersion))
+      .Times(0);
 
   ASSERT_TRUE(command->Init());
   command->Run();

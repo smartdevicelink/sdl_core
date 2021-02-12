@@ -81,6 +81,7 @@ const string kDeleteData =
     "DELETE FROM `applicationSubMenuArray`; "
     "DELETE FROM `applicationSubscriptionsArray`; "
     "DELETE FROM `_internal_data`; "
+    "DELETE FROM `applicationUserLocation`;"
     "COMMIT; "
     "VACUUM;";
 
@@ -329,6 +330,7 @@ class ResumptionSqlQueriesTest : public ::testing::Test {
     db_schema.push_back("applicationSubMenuArray");
     db_schema.push_back("applicationSubscriptionsArray");
     db_schema.push_back("_internal_data");
+    db_schema.push_back("applicationUserLocation");
     std::sort(db_schema.begin(), db_schema.end());
   }
 };

@@ -451,9 +451,13 @@ class PolicyManagerImpl : public PolicyManager {
                      const std::string& wers_country_code,
                      const std::string& language) OVERRIDE;
 
+  void SetHardwareVersion(const std::string& hardware_version) OVERRIDE;
+
   void SetPreloadedPtFlag(const bool is_preloaded) OVERRIDE;
 
   std::string GetCCPUVersionFromPT() const OVERRIDE;
+
+  std::string GetHardwareVersionFromPT() const OVERRIDE;
 
   /**
    * @brief Get number of notification by priority

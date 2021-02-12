@@ -634,6 +634,12 @@
   <element name="phoneNumber">
     <description> Optional phone number of intended location / establishment (if applicable) for SendLocation.</description>
   </element>
+  <element name="timeToDestination">
+    <description>Optional time to destination field for ShowConstantTBT</description>
+  </element>
+  <element name="turnText">
+    <description>Turn text for turnList parameter of UpdateTurnList</description>
+  </element>
   <element name="subtleAlertText1">
     <description>The first line of the subtle alert text field; applies to `SubtleAlert` `alertText1`</description>
   </element>
@@ -643,14 +649,17 @@
   <element name="subtleAlertSoftButtonText">
     <description>A text field in the soft button of a subtle alert; applies to `SubtleAlert` `softButtons`</description>
   </element>
-  <element name="timeToDestination"/>
-    <!-- TO DO to be removed -->
-  <element name="turnText"/>
-  <element name="navigationText">
-    <description>Navigation text for UpdateTurnList.</description>
+  <element name="menuCommandSecondaryText">
+      <description>Secondary text for AddCommand</description>
   </element>
-  <element name="notificationText">
-    <description>Text of notification to be displayed on screen.</description>
+  <element name="menuCommandTertiaryText">
+      <description>Tertiary text for AddCommand</description>
+  </element>
+  <element name="menuSubMenuSecondaryText">
+      <description>Secondary text for AddSubMenu</description>
+  </element>
+  <element name="menuSubMenuTertiaryText">
+      <description>Tertiary text for AddSubMenu</description>
   </element>
 </enum>
 
@@ -741,6 +750,12 @@
   </element>
   <element name="subtleAlertIcon">
     <description>The image of the subtle alert; applies to `SubtleAlert` `alertIcon`</description>
+  </element>
+  <element name="menuCommandSecondaryImage">
+    <description>The secondary image field for AddCommand</description>
+  </element>
+  <element name="menuSubMenuSecondaryImage">
+    <description>The secondary image field for AddSubMenu</description>
   </element>
 </enum>
 
@@ -1213,6 +1228,7 @@
   <element name="VEHICLEDATA_FUELLEVEL_STATE" />
   <element name="VEHICLEDATA_FUELCONSUMPTION" />
   <element name="VEHICLEDATA_EXTERNTEMP" />
+  <element name="VEHICLEDATA_CLIMATEDATA"/>
   <element name="VEHICLEDATA_VIN" />
   <element name="VEHICLEDATA_GEARSTATUS" />
   <element name="VEHICLEDATA_PRNDL" />
@@ -1242,6 +1258,7 @@
   <element name="VEHICLEDATA_STABILITYCONTROLSSTATUS" />
   <element name="VEHICLEDATA_WINDOWSTATUS"/>
   <element name="VEHICLEDATA_HANDSOFFSTEERING"/>
+  <element name="VEHICLEDATA_SEATOCCUPANCY"/>
 </enum>
 
 <enum name="WiperStatus">
@@ -1795,7 +1812,7 @@
 
 <struct name="SeatLocation">
     <description>Describes the location of a seat.</description>
-    <param name="grid" type="Grid"  mandatory="false">
+    <param name="grid" type="Common.Grid"  mandatory="false">
     </param>
 </struct>
 
@@ -1808,6 +1825,21 @@
     <param name="seats" type="SeatLocation" array="true" mandatory="false">
         <description>Contains a list of SeatLocation in the vehicle</description>
     </param>
+</struct>
+
+<struct name="SeatStatus">
+  <description>Describes the status of a parameter of seat.</description>
+  <param name="seatLocation" type="Common.SeatLocation" mandatory="true"/>
+  <param name="conditionActive" type="Boolean" mandatory="true"/>
+</struct>
+
+<struct name="SeatOccupancy">
+  <param name="seatsOccupied" type="Common.SeatStatus" array="true" minsize="0" maxsize="100" mandatory="false">
+    <description>Seat status array containing location and whether the seats are occupied.</description>
+  </param>
+  <param name="seatsBelted" type="Common.SeatStatus" array="true" minsize="0" maxsize="100" mandatory="false">
+    <description>Seat status array containing location and whether the seats are belted.</description>
+  </param>
 </struct>
 
 <enum name="ModuleType">
@@ -2230,7 +2262,7 @@
  </enum>
 
  <struct name="Temperature">
-    <param name="unit" type="TemperatureUnit" mandatory="true" >
+    <param name="unit" type="Common.TemperatureUnit" mandatory="true" >
       <description>Temperature Unit</description>
     </param>
     <param name="value" type="Float" mandatory="true" >
@@ -2937,6 +2969,12 @@
   <param name="menuName" type="String" maxlength="500" mandatory="true">
     <description>The name of the sub menu/command.</description>
   </param>
+  <param name="secondaryText" maxlength="500" type="String" mandatory="false">
+      <description>Optional secondary text to display</description>
+  </param>
+  <param name="tertiaryText" maxlength="500" type="String" mandatory="false">
+      <description>Optional tertiary text to display</description>
+  </param>
 </struct>
 
 <enum name="MenuLayout">
@@ -3177,7 +3215,7 @@
 
 <struct name="Turn">
   <param name="navigationText" type="Common.TextFieldStruct" mandatory="false">
-    <description>Uses navigationText from TextFieldStruct.</description>
+    <description>Describes the `Turn` using `TextFieldName` `turnText`</description>
   </param>
   <param name="turnIcon" type="Common.Image" mandatory="false">
   </param>
@@ -3647,6 +3685,9 @@
     </param>
     <param name="scale" type="Float" minvalue="1" maxvalue="10" mandatory="false">
       <description>The scaling factor the app should use to change the size of the projecting view.</description>
+    </param>
+    <param name="preferredFPS" type="Integer" minvalue="0" maxvalue="2147483647" mandatory="false">
+      <description>The preferred frame rate per second of the head unit. The mobile application / app library may take other factors into account that constrain the frame rate lower than this value, but it should not perform streaming at a higher frame rate than this value.</description>
     </param>
     <param name="additionalVideoStreamingCapabilities" type="VideoStreamingCapability" array="true" minsize="1" maxsize="100" mandatory="false">
     </param>
@@ -4356,6 +4397,18 @@
       </param>
     </struct>
 
+    <struct name="ClimateData">
+      <param name="externalTemperature" type="Common.Temperature" mandatory="false">
+        <description>The external temperature in degrees celsius</description>
+      </param>
+      <param name="cabinTemperature" type="Common.Temperature" mandatory="false">
+        <description>Internal ambient cabin temperature in degrees celsius</description>
+      </param>
+      <param name="atmosphericPressure" type="Float" minvalue="0" maxvalue="2000" mandatory="false">
+        <description>Current atmospheric pressure in mBar</description>
+      </param>
+    </struct>
+
     <struct name="GearStatus">
       <param name="userSelectedGear" type="Common.PRNDL" mandatory="false">
         <description>Gear position selected by the user i.e. Park, Drive, Reverse</description>
@@ -4861,6 +4914,9 @@
     </param>
     <param name="wersCountryCode" type="String" maxlength="500" mandatory="true">
       <description>Country code from the Ford system WERS (i.e.WAEGB).</description>
+    </param>
+    <param name="systemHardwareVersion" type="String" maxlength="500" mandatory="false">
+      <description>The hardware version of the system</description>
     </param>
   </function>
   <function name="OnSystemInfoChanged" messagetype="notification">
@@ -5491,6 +5547,9 @@
       <description>Image to be displayed for representing the command. See Image.</description>
       <description>If omitted, no (or the default if applicable) icon should be displayed.</description>
     </param>
+    <param name="secondaryImage" type="Common.Image" mandatory="false">
+      <description>Optional secondary image struct for menu cell</description>
+    </param>
     <param name="appID" type="Integer" mandatory="true">
       <description>ID of application that concerns this RPC.</description>
     </param>
@@ -5522,6 +5581,9 @@
     </param>
     <param name="menuIcon" type="Common.Image" mandatory="false">
       <description>The image field for AddSubMenu</description>
+    </param>
+    <param name="secondaryImage" type="Common.Image" mandatory="false">
+        <description>Optional secondary image struct for menu cell</description>
     </param>
     <param name="appID" type="Integer" mandatory="true">
       <description>ID of application that requested this RPC.</description>
@@ -6323,6 +6385,9 @@
     <param name="externalTemperature" type="Boolean" mandatory="false">
       <description>The external temperature in degrees celsius</description>
     </param>
+    <param name="climateData" type="Boolean" mandatory="false">
+      <description>See ClimateData</description>
+    </param>
     <param name="turnSignal" type="Boolean" mandatory="false">
         <description>See TurnSignal</description>
     </param>
@@ -6383,6 +6448,9 @@
     <param name="handsOffSteering" type="Boolean" mandatory="false">
       <description>To indicate whether driver hands are off the steering wheel</description>
     </param>
+    <param name="seatOccupancy" type="Boolean" mandatory="false">
+      <description>See SeatOccupancy</description>
+    </param>
 
         <!-- Ford Specific Data Items -->
     <param name="eCallInfo" type="Boolean" mandatory="false">
@@ -6430,6 +6498,9 @@
     </param>
     <param name="externalTemperature" type="Common.VehicleDataResult" mandatory="false">
       <description>The external temperature in degrees celsius.</description>
+    </param>
+    <param name="climateData" type="Common.VehicleDataResult" mandatory="false">
+      <description>See ClimateData</description>
     </param>
     <param name="turnSignal" type="Common.VehicleDataResult" mandatory="false">
         <description>See TurnSignal</description>
@@ -6490,6 +6561,9 @@
     </param>
     <param name="handsOffSteering" type="Common.VehicleDataResult" mandatory="false">
       <description>To indicate whether driver hands are off the steering wheel</description>
+    </param>
+    <param name="seatOccupancy" type="Common.VehicleDataResult" mandatory="false">
+      <description>See SeatOccupancy</description>
     </param>
 
         <!-- Ford Specific Data Items -->
@@ -6542,6 +6616,9 @@
     <param name="externalTemperature" type="Boolean" mandatory="false">
       <description>The external temperature in degrees celsius.</description>
     </param>
+    <param name="climateData" type="Boolean" mandatory="false">
+      <description>See ClimateData</description>
+    </param>
     <param name="turnSignal" type="Boolean" mandatory="false">
         <description>See TurnSignal</description>
     </param>
@@ -6602,6 +6679,9 @@
     <param name="handsOffSteering" type="Boolean" mandatory="false">
       <description>To indicate whether driver hands are off the steering wheel</description>
     </param>
+    <param name="seatOccupancy" type="Boolean" mandatory="false">
+      <description>See SeatOccupancy</description>
+    </param>
 
         <!-- Ford Specific Data Items -->
     <param name="eCallInfo" type="Boolean" mandatory="false">
@@ -6649,6 +6729,9 @@
     </param>
     <param name="externalTemperature" type="Common.VehicleDataResult" mandatory="false">
       <description>The external temperature in degrees celsius</description>
+    </param>
+    <param name="climateData" type="Common.VehicleDataResult" mandatory="false">
+      <description>See ClimateData</description>
     </param>
     <param name="turnSignal" type="Common.VehicleDataResult" mandatory="false">
         <description>See TurnSignal</description>
@@ -6710,6 +6793,9 @@
     <param name="handsOffSteering" type="Common.VehicleDataResult" mandatory="false">
       <description>To indicate whether driver hands are off the steering wheel</description>
     </param>
+    <param name="seatOccupancy" type="Common.VehicleDataResult" mandatory="false">
+      <description>See SeatOccupancy</description>
+    </param>
 
         <!-- Ford Specific Data Items -->
     <param name="eCallInfo" type="Common.VehicleDataResult" mandatory="false">
@@ -6758,6 +6844,9 @@
     </param>
     <param name="externalTemperature" type="Boolean" mandatory="false">
       <description>The external temperature in degrees celsius</description>
+    </param>
+    <param name="climateData" type="Boolean" mandatory="false">
+      <description>See ClimateData</description>
     </param>
     <param name="turnSignal" type="Boolean" mandatory="false">
         <description>See TurnSignal</description>
@@ -6822,6 +6911,9 @@
     <param name="handsOffSteering" type="Boolean" mandatory="false">
       <description>To indicate whether driver hands are off the steering wheel</description>
     </param>
+    <param name="seatOccupancy" type="Boolean" mandatory="false">
+      <description>See SeatOccupancy</description>
+    </param>
 
         <!-- Ford Specific Data Items -->
     <param name="eCallInfo" type="Boolean" mandatory="false">
@@ -6869,6 +6961,9 @@
     </param>
     <param name="externalTemperature" type="Float" minvalue="-40" maxvalue="100" mandatory="false">
       <description>The external temperature in degrees celsius</description>
+    </param>
+    <param name="climateData" type="Common.ClimateData" mandatory="false">
+      <description>See ClimateData</description>
     </param>
     <param name="turnSignal" type="Common.TurnSignal" mandatory="false">
         <description>See TurnSignal</description>
@@ -6933,6 +7028,9 @@
     <param name="handsOffSteering" type="Boolean" mandatory="false">
       <description>To indicate whether driver hands are off the steering wheel</description>
     </param>
+    <param name="seatOccupancy" type="Common.SeatOccupancy" mandatory="false">
+      <description>See SeatOccupancy</description>
+    </param>
 
         <!-- Ford Specific Data Items -->
     <param name="eCallInfo" type="Common.ECallInfo" mandatory="false">
@@ -6981,6 +7079,9 @@
     </param>
     <param name="externalTemperature" type="Float" minvalue="-40" maxvalue="100" mandatory="false">
       <description>The external temperature in degrees celsius</description>
+    </param>
+    <param name="climateData" type="Common.ClimateData" mandatory="false">
+      <description>See ClimateData</description>
     </param>
     <param name="turnSignal" type="Common.TurnSignal" mandatory="false">
         <description>See TurnSignal</description>
@@ -7044,6 +7145,9 @@
     </param>
     <param name="handsOffSteering" type="Boolean" mandatory="false">
       <description>To indicate whether driver hands are off the steering wheel</description>
+    </param>
+    <param name="seatOccupancy" type="Common.SeatOccupancy" mandatory="false">
+      <description>See SeatOccupancy</description>
     </param>
 
         <!-- Ford Specific Data Items -->

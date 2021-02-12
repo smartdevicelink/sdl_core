@@ -1860,6 +1860,15 @@ const std::string& HMICapabilitiesImpl::ccpu_version() const {
   return ccpu_version_;
 }
 
+void HMICapabilitiesImpl::set_hardware_version(
+    const std::string& hardware_version) {
+  hardware_version_ = hardware_version;
+}
+
+const std::string& HMICapabilitiesImpl::hardware_version() const {
+  return hardware_version_;
+}
+
 void HMICapabilitiesImpl::convert_json_languages_to_obj(
     const Json::Value& json_languages,
     smart_objects::SmartObject& languages) const {

@@ -571,14 +571,17 @@ TEST_F(ApplicationImplTest, SubscribeToSoftButton_UnsubscribeFromSoftButton) {
     EXPECT_FALSE(app_impl->IsSubscribedToSoftButton(i));
   }
 
-  SoftButtonID test_button;
+  std::set<uint32_t> softbuttons_ids;
+
   for (uint i = 0; i < btn_count; i++) {
-    test_button.insert(std::make_pair(
-        i,
-        static_cast<WindowID>(mobile_apis::PredefinedWindows::DEFAULT_WINDOW)));
+    softbuttons_ids.insert(i);
   }
+
+  WindowSoftButtons window_softbuttons{
+      static_cast<WindowID>(mobile_apis::PredefinedWindows::DEFAULT_WINDOW),
+      softbuttons_ids};
   app_impl->SubscribeToSoftButtons(FunctionID::ScrollableMessageID,
-                                   test_button);
+                                   window_softbuttons);
 
   for (uint i = 0; i < btn_count; i++) {
     EXPECT_TRUE(app_impl->IsSubscribedToSoftButton(i));

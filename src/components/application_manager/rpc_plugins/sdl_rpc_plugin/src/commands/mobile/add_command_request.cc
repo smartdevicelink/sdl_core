@@ -107,6 +107,20 @@ void AddCommandRequest::Run() {
     }
   }
 
+  if ((*message_)[strings::msg_params].keyExists(strings::secondary_image)) {
+    mobile_apis::Result::eType verification_result = MessageHelper::VerifyImage(
+        (*message_)[strings::msg_params][strings::secondary_image],
+        app,
+        application_manager_);
+
+    if (mobile_apis::Result::INVALID_DATA == verification_result) {
+      SDL_LOG_ERROR("MessageHelper::VerifyImage return "
+                    << verification_result);
+      SendResponse(false, verification_result);
+      return;
+    }
+  }
+
   if (!((*message_)[strings::msg_params].keyExists(strings::cmd_id))) {
     SDL_LOG_ERROR("INVALID_DATA");
     SendResponse(false, mobile_apis::Result::INVALID_DATA);
@@ -127,10 +141,6 @@ void AddCommandRequest::Run() {
   bool data_exist = false;
 
   if ((*message_)[strings::msg_params].keyExists(strings::menu_params)) {
-    if (!CheckCommandName(app)) {
-      SendResponse(false, mobile_apis::Result::DUPLICATE_NAME);
-      return;
-    }
     if (((*message_)[strings::msg_params][strings::menu_params].keyExists(
             hmi_request::parent_id)) &&
         (0 != (*message_)[strings::msg_params][strings::menu_params]
@@ -191,6 +201,17 @@ void AddCommandRequest::Run() {
           (*message_)[strings::msg_params][strings::cmd_icon];
     }
 
+    if (((*message_)[strings::msg_params].keyExists(
+            strings::secondary_image)) &&
+        ((*message_)[strings::msg_params][strings::secondary_image].keyExists(
+            strings::value)) &&
+        (0 < (*message_)[strings::msg_params][strings::secondary_image]
+                        [strings::value]
+                            .length())) {
+      ui_msg_params[strings::secondary_image] =
+          (*message_)[strings::msg_params][strings::secondary_image];
+    }
+
     send_ui_ = true;
   }
 
@@ -218,47 +239,6 @@ void AddCommandRequest::Run() {
     StartAwaitForInterface(HmiInterfaces::HMI_INTERFACE_VR);
     SendHMIRequest(hmi_apis::FunctionID::VR_AddCommand, &vr_msg_params, true);
   }
-}
-
-bool AddCommandRequest::CheckCommandName(ApplicationConstSharedPtr app) {
-  if (!app) {
-    return false;
-  }
-
-  const DataAccessor<CommandsMap> accessor = app->commands_map();
-  const CommandsMap& commands = accessor.GetData();
-  CommandsMap::const_iterator i = commands.begin();
-  uint32_t saved_parent_id = 0;
-  uint32_t parent_id = 0;
-  if ((*message_)[strings::msg_params][strings::menu_params].keyExists(
-          hmi_request::parent_id)) {
-    parent_id = (*message_)[strings::msg_params][strings::menu_params]
-                           [hmi_request::parent_id]
-                               .asUInt();
-  }
-
-  for (; commands.end() != i; ++i) {
-    if (!(*i->second).keyExists(strings::menu_params)) {
-      continue;
-    }
-
-    saved_parent_id = 0;
-    if ((*i->second)[strings::menu_params].keyExists(hmi_request::parent_id)) {
-      saved_parent_id =
-          (*i->second)[strings::menu_params][hmi_request::parent_id].asUInt();
-    }
-    if (((*i->second)[strings::menu_params][strings::menu_name].asString() ==
-         (*message_)[strings::msg_params][strings::menu_params]
-                    [strings::menu_name]
-                        .asString()) &&
-        (saved_parent_id == parent_id)) {
-      SDL_LOG_INFO(
-          "AddCommandRequest::CheckCommandName received"
-          " command name already exist in same level menu");
-      return false;
-    }
-  }
-  return true;
 }
 
 bool AddCommandRequest::CheckCommandVRSynonym(ApplicationConstSharedPtr app) {
@@ -562,6 +542,16 @@ bool AddCommandRequest::IsWhiteSpaceExist() {
               .asCharArray();
     if (!CheckSyntax(str)) {
       SDL_LOG_ERROR("Invalid cmd_icon value syntax check failed");
+      return true;
+    }
+  }
+
+  if ((*message_)[strings::msg_params].keyExists(strings::secondary_image)) {
+    str = (*message_)[strings::msg_params][strings::secondary_image]
+                     [strings::value]
+                         .asCharArray();
+    if (!CheckSyntax(str)) {
+      SDL_LOG_ERROR("Invalid secondaryImage value syntax check failed");
       return true;
     }
   }

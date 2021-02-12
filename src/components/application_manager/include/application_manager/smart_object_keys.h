@@ -301,6 +301,7 @@ extern const char* fuel_level_state;
 extern const char* instant_fuel_consumption;
 extern const char* fuel_range;
 extern const char* cloud_app_vehicle_id;
+extern const char* climate_data;
 extern const char* external_temp;
 extern const char* turn_signal;
 extern const char* vin;
@@ -341,11 +342,13 @@ extern const char* video_streaming;
 extern const char* remote_control;
 extern const char* sdl_version;
 extern const char* system_software_version;
+extern const char* system_hardware_version;
 extern const char* priority;
 extern const char* engine_oil_life;
 extern const char* oem_custom_data_type;
 extern const char* window_status;
 extern const char* hands_off_steering;
+extern const char* seat_occupancy;
 
 // app services
 extern const char* app_service_manifest;
@@ -490,6 +493,7 @@ extern const char* const haptic_rect_data;
 extern const char* const rect;
 extern const char* const x;
 extern const char* const y;
+extern const char* const preferred_fps;
 }  // namespace strings
 
 namespace hmi_interface {

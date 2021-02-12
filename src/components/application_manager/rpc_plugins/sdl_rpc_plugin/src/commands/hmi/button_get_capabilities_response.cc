@@ -60,11 +60,10 @@ void ButtonGetCapabilitiesResponse::Run() {
       static_cast<hmi_apis::Common_Result::eType>(
           (*message_)[strings::params][hmi_response::code].asInt());
 
-  hmi_capabilities_.UpdateRequestsRequiredForCapabilities(
-      hmi_apis::FunctionID::Buttons_GetCapabilities);
-
   if (hmi_apis::Common_Result::SUCCESS != code) {
     SDL_LOG_ERROR("Error is returned. Capabilities won't be updated.");
+    hmi_capabilities_.UpdateRequestsRequiredForCapabilities(
+        hmi_apis::FunctionID::Buttons_GetCapabilities);
     return;
   }
 
@@ -80,6 +79,9 @@ void ButtonGetCapabilitiesResponse::Run() {
         (*message_)[strings::msg_params]
                    [hmi_response::preset_bank_capabilities]);
   }
+
+  hmi_capabilities_.UpdateRequestsRequiredForCapabilities(
+      hmi_apis::FunctionID::Buttons_GetCapabilities);
 
   if (!hmi_capabilities_.SaveCachedCapabilitiesToFile(
           hmi_interface::buttons, sections_to_update, message_->getSchema())) {
