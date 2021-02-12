@@ -397,6 +397,29 @@ class SetGlobalPropertiesRequestTest
         ui_result, tts_result, rc_result, false);
   }
 
+  void AddCustomizableKeys(MessageSharedPtr msg) {
+    SmartObject customizable_keys(smart_objects::SmartType_Array);
+    customizable_keys[0] = "%";
+    customizable_keys[1] = "@";
+    customizable_keys[2] = "&";
+    (*msg)[am::strings::msg_params][am::strings::keyboard_properties]
+          [am::hmi_request::custom_keys] = customizable_keys;
+  }
+
+  std::shared_ptr<SmartObject> GetCapabilitiesForConfigurableKeyboard(
+      hmi_apis::Common_KeyboardLayout::eType layout, int num_allowed_keys) {
+    auto display_capabilities =
+        std::make_shared<SmartObject>(smart_objects::SmartType_Map);
+    auto& supported_keyboards =
+        (*display_capabilities)[0][am::strings::window_capabilities][0]
+                               [am::hmi_response::keyboard_capabilities]
+                               [am::hmi_response::supported_keyboards];
+    supported_keyboards[0][am::hmi_request::keyboard_layout] = layout;
+    supported_keyboards[0][am::hmi_response::num_configurable_keys] =
+        num_allowed_keys;
+    return display_capabilities;
+  }
+
   std::shared_ptr<sync_primitives::Lock> lock_ptr_;
   MockAppPtr mock_app_;
   std::shared_ptr<application_manager_test::MockHelpPromptManager>
@@ -1258,6 +1281,330 @@ TEST_F(SetGlobalPropertiesRequestTest,
       CreateCommand<SetGlobalPropertiesRequest>(msg));
 
   ExpectInvalidData();
+
+  command->Run();
+}
+
+TEST_F(SetGlobalPropertiesRequestTest,
+       Run_InvalidCustomizableKeys_INVALID_DATA) {
+  MessageSharedPtr msg = CreateMsgParams();
+  SmartObject customizable_keys(smart_objects::SmartType_Array);
+  customizable_keys[0] = "%";
+  customizable_keys[1] = "\\n";
+  customizable_keys[2] = " ";
+  (*msg)[am::strings::msg_params][am::strings::keyboard_properties]
+        [am::hmi_request::custom_keys] = customizable_keys;
+
+  std::shared_ptr<SetGlobalPropertiesRequest> command(
+      CreateCommand<SetGlobalPropertiesRequest>(msg));
+
+  ExpectInvalidData();
+
+  command->Run();
+}
+
+TEST_F(
+    SetGlobalPropertiesRequestTest,
+    Run_DisallowedNumberOfCustomizableKeysAndLayoutFromRequest_INVALID_DATA) {
+  MessageSharedPtr msg = CreateMsgParams();
+  AddCustomizableKeys(msg);
+  (*msg)[am::strings::msg_params][am::strings::keyboard_properties]
+        [am::hmi_request::keyboard_layout] =
+            hmi_apis::Common_KeyboardLayout::QWERTZ;
+
+  const int num_allowed_keys = 0;
+  auto display_capabilities = GetCapabilitiesForConfigurableKeyboard(
+      hmi_apis::Common_KeyboardLayout::QWERTZ, num_allowed_keys);
+
+  ON_CALL(app_mngr_, application(kConnectionKey))
+      .WillByDefault(Return(mock_app_));
+  ON_CALL(*mock_app_, display_capabilities())
+      .WillByDefault(Return(display_capabilities));
+  std::shared_ptr<SetGlobalPropertiesRequest> command(
+      CreateCommand<SetGlobalPropertiesRequest>(msg));
+
+  ExpectInvalidData();
+
+  command->Run();
+}
+
+TEST_F(SetGlobalPropertiesRequestTest,
+       Run_DisallowedNumberOfCustomizableKeysAndSavedLayout_INVALID_DATA) {
+  MessageSharedPtr msg = CreateMsgParams();
+  AddCustomizableKeys(msg);
+
+  ON_CALL(app_mngr_, application(kConnectionKey))
+      .WillByDefault(Return(mock_app_));
+  auto saved_keyboard_props = SmartObject(smart_objects::SmartType_Map);
+  saved_keyboard_props[am::hmi_request::keyboard_layout] =
+      hmi_apis::Common_KeyboardLayout::QWERTZ;
+  EXPECT_CALL(*mock_app_, keyboard_props())
+      .WillOnce(Return(&saved_keyboard_props));
+
+  const int num_allowed_keys = 0;
+  auto display_capabilities = GetCapabilitiesForConfigurableKeyboard(
+      hmi_apis::Common_KeyboardLayout::QWERTZ, num_allowed_keys);
+
+  ON_CALL(*mock_app_, display_capabilities())
+      .WillByDefault(Return(display_capabilities));
+  std::shared_ptr<SetGlobalPropertiesRequest> command(
+      CreateCommand<SetGlobalPropertiesRequest>(msg));
+
+  ExpectInvalidData();
+
+  command->Run();
+}
+
+TEST_F(SetGlobalPropertiesRequestTest,
+       Run_DisallowedNumberOfCustomizableKeysAndDefaultLayout_INVALID_DATA) {
+  MessageSharedPtr msg = CreateMsgParams();
+  AddCustomizableKeys(msg);
+
+  const int num_allowed_keys = 0;
+  auto display_capabilities = GetCapabilitiesForConfigurableKeyboard(
+      hmi_apis::Common_KeyboardLayout::QWERTY, num_allowed_keys);
+
+  ON_CALL(app_mngr_, application(kConnectionKey))
+      .WillByDefault(Return(mock_app_));
+  ON_CALL(*mock_app_, display_capabilities())
+      .WillByDefault(Return(display_capabilities));
+  std::shared_ptr<SetGlobalPropertiesRequest> command(
+      CreateCommand<SetGlobalPropertiesRequest>(msg));
+
+  ExpectInvalidData();
+
+  command->Run();
+}
+
+TEST_F(SetGlobalPropertiesRequestTest,
+       Run_AllowedNumberOfCustomizableKeysAndNotSupportedLayout_INVALID_DATA) {
+  MessageSharedPtr msg = CreateMsgParams();
+  AddCustomizableKeys(msg);
+  (*msg)[am::strings::msg_params][am::strings::keyboard_properties]
+        [am::hmi_request::keyboard_layout] =
+            hmi_apis::Common_KeyboardLayout::QWERTZ;
+
+  const int num_allowed_keys = 3;
+  auto display_capabilities = GetCapabilitiesForConfigurableKeyboard(
+      hmi_apis::Common_KeyboardLayout::QWERTY, num_allowed_keys);
+
+  ON_CALL(app_mngr_, application(kConnectionKey))
+      .WillByDefault(Return(mock_app_));
+  ON_CALL(*mock_app_, display_capabilities())
+      .WillByDefault(Return(display_capabilities));
+  std::shared_ptr<SetGlobalPropertiesRequest> command(
+      CreateCommand<SetGlobalPropertiesRequest>(msg));
+
+  ExpectInvalidData();
+
+  command->Run();
+}
+
+TEST_F(SetGlobalPropertiesRequestTest,
+       Run_AllowedNumberOfCustomizableKeys_LayoutFromRequestCached) {
+  MessageSharedPtr msg = CreateMsgParams();
+  AddCustomizableKeys(msg);
+  auto& keyboard_properties =
+      (*msg)[am::strings::msg_params][am::strings::keyboard_properties];
+  keyboard_properties[am::hmi_request::keyboard_layout] =
+      hmi_apis::Common_KeyboardLayout::QWERTY;
+
+  const int num_allowed_keys = 3;
+  auto display_capabilities = GetCapabilitiesForConfigurableKeyboard(
+      hmi_apis::Common_KeyboardLayout::QWERTY, num_allowed_keys);
+
+  ON_CALL(app_mngr_, application(kConnectionKey))
+      .WillByDefault(Return(mock_app_));
+  ON_CALL(*mock_app_, display_capabilities())
+      .WillByDefault(Return(display_capabilities));
+  std::shared_ptr<SetGlobalPropertiesRequest> command(
+      CreateCommand<SetGlobalPropertiesRequest>(msg));
+
+  EXPECT_CALL(*mock_app_, set_keyboard_props(keyboard_properties));
+
+  command->Run();
+}
+
+TEST_F(
+    SetGlobalPropertiesRequestTest,
+    Run_AllowedNumberOfCustomizableKeysAndSavedLayout_SavedLayoutCachedAgain) {
+  MessageSharedPtr msg = CreateMsgParams();
+  AddCustomizableKeys(msg);
+
+  ON_CALL(app_mngr_, application(kConnectionKey))
+      .WillByDefault(Return(mock_app_));
+  auto saved_keyboard_props = SmartObject(smart_objects::SmartType_Map);
+  saved_keyboard_props[am::hmi_request::keyboard_layout] =
+      hmi_apis::Common_KeyboardLayout::QWERTZ;
+  EXPECT_CALL(*mock_app_, keyboard_props())
+      .WillRepeatedly(Return(&saved_keyboard_props));
+
+  const int num_allowed_keys = 3;
+  auto display_capabilities = GetCapabilitiesForConfigurableKeyboard(
+      hmi_apis::Common_KeyboardLayout::QWERTZ, num_allowed_keys);
+
+  ON_CALL(*mock_app_, display_capabilities())
+      .WillByDefault(Return(display_capabilities));
+  std::shared_ptr<SetGlobalPropertiesRequest> command(
+      CreateCommand<SetGlobalPropertiesRequest>(msg));
+
+  auto requested_keyboard_properties =
+      (*msg)[am::strings::msg_params][am::strings::keyboard_properties];
+  auto cached_keyboard_props(requested_keyboard_properties);
+  cached_keyboard_props[am::hmi_request::keyboard_layout] =
+      hmi_apis::Common_KeyboardLayout::QWERTZ;
+  EXPECT_CALL(*mock_app_, set_keyboard_props(cached_keyboard_props));
+
+  command->Run();
+}
+
+TEST_F(
+    SetGlobalPropertiesRequestTest,
+    Run_AllowedNumberOfCustomizableKeysAndDefaultLayout_KeyboardPropsCachedAsIs) {
+  MessageSharedPtr msg = CreateMsgParams();
+  AddCustomizableKeys(msg);
+
+  const int num_allowed_keys = 3;
+  auto display_capabilities = GetCapabilitiesForConfigurableKeyboard(
+      hmi_apis::Common_KeyboardLayout::QWERTY, num_allowed_keys);
+
+  ON_CALL(app_mngr_, application(kConnectionKey))
+      .WillByDefault(Return(mock_app_));
+  ON_CALL(*mock_app_, display_capabilities())
+      .WillByDefault(Return(display_capabilities));
+  std::shared_ptr<SetGlobalPropertiesRequest> command(
+      CreateCommand<SetGlobalPropertiesRequest>(msg));
+
+  auto requested_keyboard_properties =
+      (*msg)[am::strings::msg_params][am::strings::keyboard_properties];
+  EXPECT_CALL(*mock_app_, set_keyboard_props(requested_keyboard_properties));
+
+  command->Run();
+}
+
+TEST_F(SetGlobalPropertiesRequestTest,
+       Run_RequestContainsLanguageParam_KeyboardPropsCachedAsIs) {
+  MessageSharedPtr msg = CreateMsgParams();
+  auto& keyboard_properties =
+      (*msg)[am::strings::msg_params][am::strings::keyboard_properties];
+  keyboard_properties[am::hmi_response::language] =
+      hmi_apis::Common_Language::EN_GB;
+
+  std::shared_ptr<SetGlobalPropertiesRequest> command(
+      CreateCommand<SetGlobalPropertiesRequest>(msg));
+
+  EXPECT_CALL(*mock_app_, set_keyboard_props(keyboard_properties));
+
+  command->Run();
+}
+
+TEST_F(SetGlobalPropertiesRequestTest,
+       Run_NoLanguageInRequestButPresentInSaved_SavedLanguageCachedAgain) {
+  MessageSharedPtr msg = CreateMsgParams();
+
+  ON_CALL(app_mngr_, application(kConnectionKey))
+      .WillByDefault(Return(mock_app_));
+  auto saved_keyboard_props = SmartObject(smart_objects::SmartType_Map);
+  saved_keyboard_props[am::hmi_response::language] =
+      hmi_apis::Common_Language::EN_GB;
+  EXPECT_CALL(*mock_app_, keyboard_props())
+      .WillRepeatedly(Return(&saved_keyboard_props));
+
+  std::shared_ptr<SetGlobalPropertiesRequest> command(
+      CreateCommand<SetGlobalPropertiesRequest>(msg));
+
+  auto cached_keyboard_props =
+      (*msg)[am::strings::msg_params][am::strings::keyboard_properties];
+  cached_keyboard_props[am::hmi_response::language] =
+      hmi_apis::Common_Language::EN_GB;
+  EXPECT_CALL(*mock_app_, set_keyboard_props(cached_keyboard_props));
+
+  command->Run();
+}
+
+TEST_F(SetGlobalPropertiesRequestTest,
+       Run_NoAutocompleteListInRequestButPresentInSaved_SavedArrayCachedAgain) {
+  MessageSharedPtr msg = CreateMsgParams();
+
+  ON_CALL(app_mngr_, application(kConnectionKey))
+      .WillByDefault(Return(mock_app_));
+  auto saved_keyboard_props = SmartObject(smart_objects::SmartType_Map);
+
+  SmartObject autocomplete_list(smart_objects::SmartType_Array);
+  autocomplete_list[0] = "first";
+  autocomplete_list[1] = "second";
+  saved_keyboard_props[am::hmi_request::auto_complete_list] = autocomplete_list;
+  EXPECT_CALL(*mock_app_, keyboard_props())
+      .WillRepeatedly(Return(&saved_keyboard_props));
+
+  std::shared_ptr<SetGlobalPropertiesRequest> command(
+      CreateCommand<SetGlobalPropertiesRequest>(msg));
+
+  auto cached_keyboard_props =
+      (*msg)[am::strings::msg_params][am::strings::keyboard_properties];
+  cached_keyboard_props[am::hmi_request::auto_complete_list] =
+      autocomplete_list;
+  EXPECT_CALL(*mock_app_, set_keyboard_props(cached_keyboard_props));
+
+  command->Run();
+}
+
+TEST_F(
+    SetGlobalPropertiesRequestTest,
+    Run_NewAutocompleteListInRequestAndAlsoPresentInSaved_TransferAndSaveNewArray) {
+  MessageSharedPtr msg = CreateMsgParams();
+
+  auto& keyboard_properties =
+      (*msg)[am::strings::msg_params][am::strings::keyboard_properties];
+  SmartObject new_list(smart_objects::SmartType_Array);
+  new_list[0] = "first_new_value";
+  new_list[1] = "second_new_value";
+  keyboard_properties[am::hmi_request::auto_complete_list] = new_list;
+
+  ON_CALL(app_mngr_, application(kConnectionKey))
+      .WillByDefault(Return(mock_app_));
+  SmartObject old_list(smart_objects::SmartType_Array);
+  old_list[0] = "old_value";
+  old_list[1] = "another_old_value";
+  auto saved_keyboard_props = SmartObject(smart_objects::SmartType_Map);
+  saved_keyboard_props[am::hmi_request::auto_complete_list] = old_list;
+  EXPECT_CALL(*mock_app_, keyboard_props())
+      .WillRepeatedly(Return(&saved_keyboard_props));
+
+  std::shared_ptr<SetGlobalPropertiesRequest> command(
+      CreateCommand<SetGlobalPropertiesRequest>(msg));
+
+  EXPECT_CALL(*mock_app_, set_keyboard_props(keyboard_properties));
+
+  command->Run();
+}
+
+TEST_F(
+    SetGlobalPropertiesRequestTest,
+    Run_EmptyAutocompleteListInRequestAndAlsoPresentInSaved_TransferButNotSaveEmptyArray) {
+  MessageSharedPtr msg = CreateMsgParams();
+
+  auto& keyboard_properties =
+      (*msg)[am::strings::msg_params][am::strings::keyboard_properties];
+  SmartObject new_list(smart_objects::SmartType_Array);
+  keyboard_properties[am::hmi_request::auto_complete_list] = new_list;
+
+  ON_CALL(app_mngr_, application(kConnectionKey))
+      .WillByDefault(Return(mock_app_));
+  SmartObject old_list(smart_objects::SmartType_Array);
+  old_list[0] = "old_value";
+  old_list[1] = "another_old_value";
+  auto saved_keyboard_props = SmartObject(smart_objects::SmartType_Map);
+  saved_keyboard_props[am::hmi_request::auto_complete_list] = old_list;
+  EXPECT_CALL(*mock_app_, keyboard_props())
+      .WillRepeatedly(Return(&saved_keyboard_props));
+
+  std::shared_ptr<SetGlobalPropertiesRequest> command(
+      CreateCommand<SetGlobalPropertiesRequest>(msg));
+
+  auto properties_without_empty_list(keyboard_properties);
+  properties_without_empty_list.erase(am::hmi_request::auto_complete_list);
+  EXPECT_CALL(*mock_app_, set_keyboard_props(properties_without_empty_list));
 
   command->Run();
 }
