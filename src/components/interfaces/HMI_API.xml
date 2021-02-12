@@ -847,6 +847,11 @@
   </element>
 </enum>
 
+<enum name="AppCapabilityType">
+  <description>Enumerations of all available app capability types</description>
+  <element name="VIDEO_STREAMING"/>
+</enum>
+
 <!--IVI part-->
 <enum name="ElectronicParkBrakeStatus">
   <element name="CLOSED">
@@ -3703,6 +3708,20 @@
     <param name="preferredFPS" type="Integer" minvalue="0" maxvalue="2147483647" mandatory="false">
       <description>The preferred frame rate per second of the head unit. The mobile application / app library may take other factors into account that constrain the frame rate lower than this value, but it should not perform streaming at a higher frame rate than this value.</description>
     </param>
+    <param name="additionalVideoStreamingCapabilities" type="VideoStreamingCapability" array="true" minsize="1" maxsize="100" mandatory="false">
+    </param>
+  </struct>
+
+  <struct name="AppCapability">
+    <param name="appCapabilityType" type="AppCapabilityType" mandatory="true">
+        <description>
+            Used as a descriptor of what data to expect in this struct.
+            The corresponding param to this enum should be included and the only other param included.
+        </description>
+    </param>
+    <param name="videoStreamingCapability" type="VideoStreamingCapability" mandatory="false">
+        <description>Describes supported capabilities for video streaming </description>
+    </param>
   </struct>
 
   <struct name="DynamicUpdateCapabilities">
@@ -5019,6 +5038,15 @@
     </description>
     <param name="properties" type="Common.AppProperties" mandatory="true">
       <description>The new application properties</description>
+    </param>
+  </function>
+
+  <function name="OnAppCapabilityUpdated" messagetype="notification">
+    <description>A notification to inform HMI that a specific app capability has changed.</description>
+    <param name="appCapability" type="Common.AppCapability" mandatory="true">
+        <description>The app capability that has been updated</description>
+    </param>
+    <param name="appID" type="Integer" mandatory="true">
     </param>
   </function>
 </interface>

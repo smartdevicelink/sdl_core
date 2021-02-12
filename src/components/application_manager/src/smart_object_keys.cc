@@ -197,6 +197,8 @@ const char* policy_type = "policyType";
 const char* property = "property";
 const char* displays = "displays";
 const char* seat_location = "seatLocation";
+const char* app_capability = "appCapability";
+const char* app_capability_type = "appCapabilityType";
 
 // PutFile
 const char* sync_file_name = "syncFileName";
@@ -445,6 +447,8 @@ const char* const haptic_spatial_data_supported = "hapticSpatialDataSupported";
 const char* const diagonal_screen_size = "diagonalScreenSize";
 const char* const pixel_per_inch = "pixelPerInch";
 const char* const scale = "scale";
+const char* const additional_video_streaming_capabilities =
+    "additionalVideoStreamingCapabilities";
 const char* const haptic_rect_data = "hapticRectData";
 const char* const rect = "rect";
 const char* const x = "x";

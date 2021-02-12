@@ -3609,6 +3609,27 @@ void ApplicationManagerImpl::ForbidStreaming(
 }
 
 void ApplicationManagerImpl::OnAppStreaming(
+    uint32_t app_id, protocol_handler::ServiceType service_type, bool state) {
+  SDL_LOG_AUTO_TRACE();
+
+  ApplicationSharedPtr app = application(app_id);
+  if (!app || (!app->is_navi() && !app->mobile_projection_enabled())) {
+    SDL_LOG_DEBUG(
+        " There is no navi or projection application with id: " << app_id);
+    return;
+  }
+  DCHECK_OR_RETURN_VOID(media_manager_);
+
+  if (state) {
+    state_ctrl_.OnVideoStreamingStarted(app);
+    media_manager_->StartStreaming(app_id, service_type);
+  } else {
+    media_manager_->StopStreaming(app_id, service_type);
+    state_ctrl_.OnVideoStreamingStopped(app);
+  }
+}
+
+void ApplicationManagerImpl::OnAppStreaming(
     uint32_t app_id,
     protocol_handler::ServiceType service_type,
     const Application::StreamingState new_state) {

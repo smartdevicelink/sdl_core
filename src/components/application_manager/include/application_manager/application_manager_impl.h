@@ -873,6 +873,10 @@ class ApplicationManagerImpl
 
   void OnAppStreaming(uint32_t app_id,
                       protocol_handler::ServiceType service_type,
+                      bool state) OVERRIDE;
+
+  void OnAppStreaming(uint32_t app_id,
+                      protocol_handler::ServiceType service_type,
                       const Application::StreamingState new_state) OVERRIDE;
 
   mobile_api::HMILevel::eType GetDefaultHmiLevel(

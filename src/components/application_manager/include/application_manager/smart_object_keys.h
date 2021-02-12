@@ -230,6 +230,8 @@ extern const char* policy_type;
 extern const char* property;
 extern const char* displays;
 extern const char* seat_location;
+extern const char* app_capability;
+extern const char* app_capability_type;
 
 // PutFile
 extern const char* sync_file_name;
@@ -486,6 +488,7 @@ extern const char* const haptic_spatial_data_supported;
 extern const char* const diagonal_screen_size;
 extern const char* const pixel_per_inch;
 extern const char* const scale;
+extern const char* const additional_video_streaming_capabilities;
 extern const char* const haptic_rect_data;
 extern const char* const rect;
 extern const char* const x;
