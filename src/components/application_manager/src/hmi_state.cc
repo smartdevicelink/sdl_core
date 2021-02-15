@@ -242,11 +242,7 @@ PhoneCallHmiState::PhoneCallHmiState(std::shared_ptr<Application> app,
     : HmiState(app, app_mngr, STATE_ID_PHONE_CALL) {}
 
 mobile_apis::HMILevel::eType PhoneCallHmiState::hmi_level() const {
-  using namespace mobile_apis;
-  if (HMILevel::INVALID_ENUM == parent_hmi_level()) {
-    return parent_hmi_level();
-  }
-  return std::max(parent_hmi_level(), max_hmi_level());
+  return parent_hmi_level();
 }
 
 mobile_apis::HMILevel::eType PhoneCallHmiState::max_hmi_level() const {
