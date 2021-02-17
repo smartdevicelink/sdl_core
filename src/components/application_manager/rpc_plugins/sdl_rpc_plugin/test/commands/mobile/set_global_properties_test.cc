@@ -1523,6 +1523,47 @@ TEST_F(SetGlobalPropertiesRequestTest,
 }
 
 TEST_F(SetGlobalPropertiesRequestTest,
+       Run_RequestContainsMaskInputCharactersParam_KeyboardPropsCachedAsIs) {
+  MessageSharedPtr msg = CreateMsgParams();
+  auto& keyboard_properties =
+      (*msg)[am::strings::msg_params][am::strings::keyboard_properties];
+  keyboard_properties[am::hmi_request::mask_input_characters] =
+      hmi_apis::Common_KeyboardInputMask::ENABLE_INPUT_KEY_MASK;
+
+  std::shared_ptr<SetGlobalPropertiesRequest> command(
+      CreateCommand<SetGlobalPropertiesRequest>(msg));
+
+  EXPECT_CALL(*mock_app_, set_keyboard_props(keyboard_properties));
+
+  command->Run();
+}
+
+TEST_F(
+    SetGlobalPropertiesRequestTest,
+    Run_NoMaskInputCharactersInRequestButPresentInSaved_SavedParamCachedAgain) {
+  MessageSharedPtr msg = CreateMsgParams();
+
+  ON_CALL(app_mngr_, application(kConnectionKey))
+      .WillByDefault(Return(mock_app_));
+  auto saved_keyboard_props = SmartObject(smart_objects::SmartType_Map);
+  saved_keyboard_props[am::hmi_request::mask_input_characters] =
+      hmi_apis::Common_KeyboardInputMask::USER_CHOICE_INPUT_KEY_MASK;
+  EXPECT_CALL(*mock_app_, keyboard_props())
+      .WillRepeatedly(Return(&saved_keyboard_props));
+
+  std::shared_ptr<SetGlobalPropertiesRequest> command(
+      CreateCommand<SetGlobalPropertiesRequest>(msg));
+
+  auto cached_keyboard_props =
+      (*msg)[am::strings::msg_params][am::strings::keyboard_properties];
+  cached_keyboard_props[am::hmi_request::mask_input_characters] =
+      hmi_apis::Common_KeyboardInputMask::USER_CHOICE_INPUT_KEY_MASK;
+  EXPECT_CALL(*mock_app_, set_keyboard_props(cached_keyboard_props));
+
+  command->Run();
+}
+
+TEST_F(SetGlobalPropertiesRequestTest,
        Run_NoAutocompleteListInRequestButPresentInSaved_SavedArrayCachedAgain) {
   MessageSharedPtr msg = CreateMsgParams();
 
