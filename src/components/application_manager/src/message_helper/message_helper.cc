@@ -404,6 +404,9 @@ MessageHelper::CreateUIResetGlobalPropertiesRequest(
         static_cast<int32_t>(hmi_apis::Common_KeyboardLayout::QWERTY);
     key_board_properties[hmi_request::auto_complete_list] =
         smart_objects::SmartObject(smart_objects::SmartType_Array);
+    key_board_properties[hmi_request::mask_input_characters] =
+        static_cast<int32_t>(
+            hmi_apis::Common_KeyboardInputMask::DISABLE_INPUT_KEY_MASK);
 
     key_board_properties[strings::auto_complete_text] = "";
     (*ui_reset_global_prop_request)[hmi_request::keyboard_properties] =
