@@ -692,6 +692,13 @@ void SetGlobalPropertiesRequest::PrepareUIRequestMenuAndKeyboardData(
       cached_keyboard_props[hmi_request::auto_complete_list] =
           (*saved_keyboard_props)[hmi_request::auto_complete_list];
     }
+
+    if (!msg_params[hmi_request::keyboard_properties].keyExists(
+            hmi_request::mask_input_characters) &&
+        saved_keyboard_props->keyExists(hmi_request::mask_input_characters)) {
+      cached_keyboard_props[hmi_request::mask_input_characters] =
+          (*saved_keyboard_props)[hmi_request::mask_input_characters];
+    }
     app->set_keyboard_props(cached_keyboard_props);
   }
 }
