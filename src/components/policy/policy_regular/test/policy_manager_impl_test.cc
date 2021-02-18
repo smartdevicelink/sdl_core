@@ -599,20 +599,6 @@ TEST_F(PolicyManagerImplTest, GetHMITypes_ValidHmiTypes_ReturnTrue) {
   EXPECT_TRUE(policy_manager_->GetHMITypes(kValidAppId, &app_types));
 }
 
-TEST_F(PolicyManagerImplTest, SetMetaInfo_SetCCPUVersion_SUCCESS) {
-  const std::string ccpu_version = "ccpu_version";
-  const std::string wers_country_code = "wersCountryCode";
-  const std::string language = "language";
-
-  EXPECT_CALL(*mock_cache_manager_,
-              SetMetaInfo(ccpu_version, wers_country_code, language));
-  policy_manager_->SetSystemInfo(ccpu_version, wers_country_code, language);
-
-  EXPECT_CALL(*mock_cache_manager_, GetCCPUVersionFromPT())
-      .WillOnce(Return(ccpu_version));
-  EXPECT_EQ(ccpu_version, policy_manager_->GetCCPUVersionFromPT());
-}
-
 }  // namespace policy_test
 }  // namespace components
 }  // namespace test

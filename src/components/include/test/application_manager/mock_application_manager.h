@@ -232,6 +232,7 @@ class MockApplicationManager : public application_manager::ApplicationManager {
   MOCK_CONST_METHOD1(IsAppsQueriedFrom,
                      bool(const connection_handler::DeviceHandle handle));
   MOCK_CONST_METHOD0(IsStopping, bool());
+  MOCK_METHOD0(WaitForHmiIsReady, bool());
   MOCK_METHOD1(RemoveAppFromTTSGlobalPropertiesList,
                void(const uint32_t app_id));
   MOCK_METHOD2(ResetGlobalProperties,
@@ -314,11 +315,16 @@ class MockApplicationManager : public application_manager::ApplicationManager {
   MOCK_METHOD1(OnAppUnauthorized, void(const uint32_t& app_id));
   MOCK_METHOD1(ActivateApplication,
                bool(application_manager::ApplicationSharedPtr app));
+  MOCK_METHOD3(OnAppStreaming,
+               void(uint32_t app_id,
+                    protocol_handler::ServiceType service_type,
+                    bool state));
+  DEPRECATED
   MOCK_METHOD3(
       OnAppStreaming,
       void(uint32_t app_id,
            protocol_handler::ServiceType service_type,
-           application_manager::Application::StreamingState new_state));
+           const application_manager::Application::StreamingState new_state));
   MOCK_CONST_METHOD6(CreateRegularState,
                      application_manager::HmiStatePtr(
                          application_manager::ApplicationSharedPtr app,

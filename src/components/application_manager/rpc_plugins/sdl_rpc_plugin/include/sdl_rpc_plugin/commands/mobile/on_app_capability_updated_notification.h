@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018, Ford Motor Company
+ * Copyright (c) 2020, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,58 +30,52 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_HMI_GET_SYSTEM_INFO_RESPONSE_H_
-#define SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_HMI_GET_SYSTEM_INFO_RESPONSE_H_
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_MOBILE_ON_APP_CAPABILITY_UPDATED_NOTIFICATION_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_MOBILE_ON_APP_CAPABILITY_UPDATED_NOTIFICATION_H_
 
-#include "application_manager/application_manager.h"
-#include "application_manager/commands/response_from_hmi.h"
+#include "application_manager/commands/command_notification_from_mobile_impl.h"
+#include "utils/macro.h"
 
 namespace sdl_rpc_plugin {
-namespace app_mngr = application_manager;
-
 namespace commands {
+namespace mobile {
 
-struct SystemInfo {
-  std::string ccpu_version;
-  std::string wers_country_code;
-  std::string language;
-  std::string hardware_version;
-};
-
-/**
- * @brief GetSystemInfoResponse command class
- **/
-class GetSystemInfoResponse : public app_mngr::commands::ResponseFromHMI {
+namespace app_mngr = application_manager;
+class OnAppCapabilityUpdatedNotification
+    : public app_mngr::commands::CommandNotificationFromMobileImpl {
  public:
   /**
-   * @brief GetSystemInfoResponse class constructor
-   *
+   * @brief OnAppPermissionChangedNotification class constructor
    * @param message Incoming SmartObject message
+   * @param application_manager Reference to the instance of the Application
+   *Manager
+   * @param rpc_service Reference to the instance of the RPCService
+   * @param hmi_capabilities Reference to the instance of the HMICapabilities
+   * @param policy_handle Reference to the instance of the PolicyHandler
    **/
-  GetSystemInfoResponse(const app_mngr::commands::MessageSharedPtr& message,
-                        app_mngr::ApplicationManager& application_manager,
-                        app_mngr::rpc_service::RPCService& rpc_service,
-                        app_mngr::HMICapabilities& hmi_capabilities,
-                        policy::PolicyHandlerInterface& policy_handle);
+  OnAppCapabilityUpdatedNotification(
+      const app_mngr::commands::MessageSharedPtr& message,
+      app_mngr::ApplicationManager& application_manager,
+      app_mngr::rpc_service::RPCService& rpc_service,
+      app_mngr::HMICapabilities& hmi_capabilities,
+      policy::PolicyHandlerInterface& policy_handle);
 
   /**
-   * @brief GetSystemInfoResponse class destructor
+   * @brief OnAppPermissionChangedNotification class destructor
    **/
-  virtual ~GetSystemInfoResponse();
+  ~OnAppCapabilityUpdatedNotification() OVERRIDE;
 
   /**
    * @brief Execute command
    **/
-  virtual void Run();
+  void Run() OVERRIDE;
 
  private:
-  const SystemInfo GetSystemInfo() const;
-
-  DISALLOW_COPY_AND_ASSIGN(GetSystemInfoResponse);
+  DISALLOW_COPY_AND_ASSIGN(OnAppCapabilityUpdatedNotification);
 };
 
+}  // namespace mobile
 }  // namespace commands
-
 }  // namespace sdl_rpc_plugin
 
-#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_HMI_GET_SYSTEM_INFO_RESPONSE_H_
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_MOBILE_ON_APP_CAPABILITY_UPDATED_NOTIFICATION_H_

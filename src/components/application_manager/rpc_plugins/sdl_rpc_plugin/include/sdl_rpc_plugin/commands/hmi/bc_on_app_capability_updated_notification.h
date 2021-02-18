@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018, Ford Motor Company
+ * Copyright (c) 2020, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,52 +30,35 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "sdl_rpc_plugin/commands/hmi/update_device_list_request.h"
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_HMI_BC_ON_APP_CAPABILITY_UPDATED_NOTIFICATION_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_HMI_BC_ON_APP_CAPABILITY_UPDATED_NOTIFICATION_H_
 
-#include "interfaces/HMI_API.h"
-
-#include <unistd.h>
+#include "application_manager/commands/notification_to_hmi.h"
 
 namespace sdl_rpc_plugin {
-using namespace application_manager;
+namespace app_mngr = application_manager;
 
 namespace commands {
 
-SDL_CREATE_LOG_VARIABLE("Commands")
+class BCOnAppCapabilityUpdatedNotification
+    : public app_mngr::commands::NotificationToHMI {
+ public:
+  BCOnAppCapabilityUpdatedNotification(
+      const app_mngr::commands::MessageSharedPtr& message,
+      app_mngr::ApplicationManager& application_manager,
+      app_mngr::rpc_service::RPCService& rpc_service,
+      app_mngr::HMICapabilities& hmi_capabilities,
+      policy::PolicyHandlerInterface& policy_handle);
 
-UpdateDeviceListRequest::UpdateDeviceListRequest(
-    const application_manager::commands::MessageSharedPtr& message,
-    ApplicationManager& application_manager,
-    rpc_service::RPCService& rpc_service,
-    HMICapabilities& hmi_capabilities,
-    policy::PolicyHandlerInterface& policy_handle)
-    : RequestToHMI(message,
-                   application_manager,
-                   rpc_service,
-                   hmi_capabilities,
-                   policy_handle) {}
+  ~BCOnAppCapabilityUpdatedNotification() OVERRIDE;
 
-UpdateDeviceListRequest::~UpdateDeviceListRequest() {}
+  void Run() OVERRIDE;
 
-void UpdateDeviceListRequest::Run() {
-  SDL_LOG_AUTO_TRACE();
-  // Fix problem with SDL and HMI HTML. This problem is not actual for HMI PASA.
-  // Flag conditional compilation for specific customer is used in order to
-  // exclude
-  // hit code to RTC
-  if (application_manager_.get_settings().launch_hmi()) {
-    SDL_LOG_INFO("Wait for HMI Cooperation");
-    if (!application_manager_.WaitForHmiIsReady()) {
-      SDL_LOG_ERROR("HMI is not ready");
-      return;
-    }
-
-    SDL_LOG_DEBUG("HMI Cooperation is OK");
-  }
-
-  SendRequest();
-}
+ private:
+  DISALLOW_COPY_AND_ASSIGN(BCOnAppCapabilityUpdatedNotification);
+};
 
 }  // namespace commands
-
 }  // namespace sdl_rpc_plugin
+
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_RPC_PLUGINS_SDL_RPC_PLUGIN_INCLUDE_SDL_RPC_PLUGIN_COMMANDS_HMI_BC_ON_APP_CAPABILITY_UPDATED_NOTIFICATION_H_

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018, Ford Motor Company
+ * Copyright (c) 2020, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,55 +29,35 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-#include "vehicle_info_plugin/commands/hmi/vi_get_vehicle_type_response.h"
 
-namespace vehicle_info_plugin {
-using namespace application_manager;
+#include "sdl_rpc_plugin/commands/hmi/bc_on_app_capability_updated_notification.h"
+
+namespace sdl_rpc_plugin {
+namespace app_mngr = application_manager;
 
 namespace commands {
 
 SDL_CREATE_LOG_VARIABLE("Commands")
 
-VIGetVehicleTypeResponse::VIGetVehicleTypeResponse(
+BCOnAppCapabilityUpdatedNotification::BCOnAppCapabilityUpdatedNotification(
     const application_manager::commands::MessageSharedPtr& message,
-    const VehicleInfoCommandParams& params)
-    : ResponseFromHMI(message,
-                      params.application_manager_,
-                      params.rpc_service_,
-                      params.hmi_capabilities_,
-                      params.policy_handler_) {}
+    application_manager::ApplicationManager& application_manager,
+    application_manager::rpc_service::RPCService& rpc_service,
+    application_manager::HMICapabilities& hmi_capabilities,
+    policy::PolicyHandlerInterface& policy_handle)
+    : NotificationToHMI(message,
+                        application_manager,
+                        rpc_service,
+                        hmi_capabilities,
+                        policy_handle) {}
 
-VIGetVehicleTypeResponse::~VIGetVehicleTypeResponse() {}
+BCOnAppCapabilityUpdatedNotification::~BCOnAppCapabilityUpdatedNotification() {}
 
-void VIGetVehicleTypeResponse::Run() {
+void BCOnAppCapabilityUpdatedNotification::Run() {
   SDL_LOG_AUTO_TRACE();
 
-  const auto result_code = static_cast<hmi_apis::Common_Result::eType>(
-      (*message_)[strings::params][hmi_response::code].asInt());
-
-  if (hmi_apis::Common_Result::SUCCESS != result_code) {
-    SDL_LOG_DEBUG("Request was not successful. Don't change HMI capabilities");
-    hmi_capabilities_.UpdateRequestsRequiredForCapabilities(
-        hmi_apis::FunctionID::VehicleInfo_GetVehicleType);
-    return;
-  }
-
-  std::vector<std::string> sections_to_update{hmi_response::vehicle_type};
-  hmi_capabilities_.set_vehicle_type(
-      (*message_)[strings::msg_params][hmi_response::vehicle_type]);
-
-  hmi_capabilities_.UpdateRequestsRequiredForCapabilities(
-      hmi_apis::FunctionID::VehicleInfo_GetVehicleType);
-
-  if (!hmi_capabilities_.SaveCachedCapabilitiesToFile(
-          hmi_interface::vehicle_info,
-          sections_to_update,
-          message_->getSchema())) {
-    SDL_LOG_ERROR(
-        "Failed to save VehicleInfo.GetVehicleType response to cache");
-  }
+  SendNotification();
 }
 
 }  // namespace commands
-
-}  // namespace vehicle_info_plugin
+}  // namespace sdl_rpc_plugin

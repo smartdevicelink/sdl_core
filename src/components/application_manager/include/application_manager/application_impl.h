@@ -142,7 +142,8 @@ class ApplicationImpl : public virtual Application,
   void StopStreamingForce(protocol_handler::ServiceType service_type);
   void StopStreaming(protocol_handler::ServiceType service_type);
   void SuspendStreaming(protocol_handler::ServiceType service_type);
-  void WakeUpStreaming(protocol_handler::ServiceType service_type);
+  void WakeUpStreaming(protocol_handler::ServiceType service_type,
+                       uint32_t timer_len = 0);
 
   virtual bool is_voice_communication_supported() const;
   virtual void set_voice_communication_supported(bool option);

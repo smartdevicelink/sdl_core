@@ -396,18 +396,21 @@ MessageHelper::CreateUIResetGlobalPropertiesRequest(
   }
 
   if (reset_result.keyboard_properties) {
-    smart_objects::SmartObject key_board_properties =
+    smart_objects::SmartObject keyboard_properties =
         smart_objects::SmartObject(smart_objects::SmartType_Map);
-    key_board_properties[strings::language] =
+    keyboard_properties[strings::language] =
         static_cast<int32_t>(hmi_apis::Common_Language::EN_US);
-    key_board_properties[hmi_request::keyboard_layout] =
+    keyboard_properties[hmi_request::keyboard_layout] =
         static_cast<int32_t>(hmi_apis::Common_KeyboardLayout::QWERTY);
-    key_board_properties[hmi_request::auto_complete_list] =
+    keyboard_properties[hmi_request::auto_complete_list] =
         smart_objects::SmartObject(smart_objects::SmartType_Array);
+    keyboard_properties[strings::auto_complete_text] = "";
+    keyboard_properties[hmi_request::mask_input_characters] =
+        static_cast<int32_t>(
+            hmi_apis::Common_KeyboardInputMask::DISABLE_INPUT_KEY_MASK);
 
-    key_board_properties[strings::auto_complete_text] = "";
     (*ui_reset_global_prop_request)[hmi_request::keyboard_properties] =
-        key_board_properties;
+        keyboard_properties;
     application->set_keyboard_props(
         smart_objects::SmartObject(smart_objects::SmartType_Null));
   }
