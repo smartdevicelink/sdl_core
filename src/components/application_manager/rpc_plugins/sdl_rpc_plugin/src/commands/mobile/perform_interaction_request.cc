@@ -1110,27 +1110,15 @@ bool PerformInteractionRequest::SetChoiceIdToResponseMsgParams(
     return true;
   }
 
-  switch (interaction_mode_) {
-    case mobile_apis::InteractionMode::eType::MANUAL_ONLY:
-      if (ui_choice_id_valid) {
-        msg_param[strings::trigger_source] =
-            mobile_apis::TriggerSource::TS_MENU;
-        msg_param[strings::choice_id] = ui_choice_id_received_;
-      }
-    case mobile_apis::InteractionMode::eType::VR_ONLY:
-      if (vr_choice_id_valid) {
-        msg_param[strings::trigger_source] = mobile_apis::TriggerSource::TS_VR;
-        msg_param[strings::choice_id] = vr_choice_id_received_;
-      }
-    default:
-      if (ui_choice_id_valid) {
-        msg_param[strings::trigger_source] =
-            mobile_apis::TriggerSource::TS_MENU;
-        msg_param[strings::choice_id] = ui_choice_id_received_;
-      } else if (vr_choice_id_valid) {
-        msg_param[strings::trigger_source] = mobile_apis::TriggerSource::TS_VR;
-        msg_param[strings::choice_id] = vr_choice_id_received_;
-      }
+  if (ui_choice_id_valid &&
+      interaction_mode_ != mobile_apis::InteractionMode::eType::VR_ONLY) {
+    msg_param[strings::trigger_source] = mobile_apis::TriggerSource::TS_MENU;
+    msg_param[strings::choice_id] = ui_choice_id_received_;
+  } else if (vr_choice_id_valid &&
+             interaction_mode_ !=
+                 mobile_apis::InteractionMode::eType::MANUAL_ONLY) {
+    msg_param[strings::trigger_source] = mobile_apis::TriggerSource::TS_VR;
+    msg_param[strings::choice_id] = vr_choice_id_received_;
   }
 
   return true;
