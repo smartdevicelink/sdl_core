@@ -276,9 +276,9 @@ struct AppPermissions {
       : application_id(app_id)
       , isAppPermissionsRevoked(false)
       , appRevoked(false)
-      , isSDLAllowed(false)
       , appPermissionsConsentNeeded(false)
       , appUnauthorized(false)
+      , isSDLAllowed(false)
       , requestTypeChanged(false)
       , requestSubTypeChanged(false) {}
 
