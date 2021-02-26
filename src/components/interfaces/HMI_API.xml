@@ -3221,7 +3221,7 @@
       If empty, the auto-complete list will be removed from the screen.
     </description>
   </param>
-  <param name="maskInputCharacters" type="KeyboardInputMask" mandatory="false">
+  <param name="maskInputCharacters" type="Common.KeyboardInputMask" mandatory="false">
     <description>Allows an app to mask entered characters on HMI</description>
   </param>
   <param name="customKeys" type="String" maxlength="1" minsize="1" maxsize="10" array="true" mandatory="false">
