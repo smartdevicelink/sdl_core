@@ -375,12 +375,15 @@ class ProtocolHandlerImpl
    * \param protocol_version Version of protocol used for communication
    * \param service_type Type of session: RPC or BULK Data. RPC by default
    * \param reason String stating the reason for the rejecting the start service
+   * \param full_version full protocol version (major.minor.patch) used by the
+   *        mobile proxy
    */
   void SendStartSessionNAck(ConnectionID connection_id,
                             uint8_t session_id,
                             uint8_t protocol_version,
                             uint8_t service_type,
-                            const std::string& reason);
+                            const std::string& reason,
+                            utils::SemanticVersion& full_version);
 
   /**
    * \brief Sends fail of starting session to mobile application
@@ -390,13 +393,16 @@ class ProtocolHandlerImpl
    * \param service_type Type of session: RPC or BULK Data. RPC by default
    * \param rejected_params List of rejected params to send in payload
    * \param reason String stating the reason for the rejecting the start service
+   * \param full_version full protocol version (major.minor.patch) used by the
+   *        mobile proxy
    */
   void SendStartSessionNAck(ConnectionID connection_id,
                             uint8_t session_id,
                             uint8_t protocol_version,
                             uint8_t service_type,
                             std::vector<std::string>& rejectedParams,
-                            const std::string& reason);
+                            const std::string& reason,
+                            utils::SemanticVersion& full_version);
 
   /**
    * \brief Sends acknowledgement of end session/service to mobile application
@@ -456,7 +462,7 @@ class ProtocolHandlerImpl
    * Only valid when generated_session_id is 0. Note, even if
    * generated_session_id is 0, the list may be empty.
    */
-  void NotifySessionStarted(const SessionContext& context,
+  void NotifySessionStarted(SessionContext& context,
                             std::vector<std::string>& rejected_params,
                             const std::string err_reason) OVERRIDE;
 
@@ -740,6 +746,16 @@ class ProtocolHandlerImpl
    */
   void WriteProtocolVehicleData(
       BsonObject& params, const connection_handler::ProtocolVehicleData& data);
+
+  /**
+   * \brief Parces full protocol version from start service message headers bson
+   * \param full_version full protocol version (major.minor.patch) used by the
+   *        mobile proxy
+   * \param packet Sart service message
+   * \return true if version successfully parsed, otherwise false
+   */
+  bool ParseFullVersion(utils::SemanticVersion& full_version,
+                        const ProtocolFramePtr& packet) const;
 
   const ProtocolHandlerSettings& settings_;
 

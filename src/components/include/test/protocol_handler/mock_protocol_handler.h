@@ -65,7 +65,7 @@ class MockProtocolHandler : public ::protocol_handler::ProtocolHandler {
                      const ::protocol_handler::ProtocolHandlerSettings&());
   MOCK_METHOD0(get_session_observer, protocol_handler::SessionObserver&());
   MOCK_METHOD3(NotifySessionStarted,
-               void(const ::protocol_handler::SessionContext& context,
+               void(::protocol_handler::SessionContext& context,
                     std::vector<std::string>& rejected_params,
                     const std::string err_reason));
   MOCK_METHOD0(NotifyOnGetSystemTimeFailed, void());

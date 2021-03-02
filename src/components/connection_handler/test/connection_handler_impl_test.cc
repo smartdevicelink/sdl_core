@@ -1536,7 +1536,7 @@ TEST_F(ConnectionHandlerTest, ServiceStarted_Video_FAILURE) {
                                                 PROTECTION_OFF,
                                                 dummy_params);
 
-  EXPECT_EQ(0u, out_context_.new_session_id_);
+  EXPECT_TRUE(out_context_.is_start_session_failed_);
 }
 
 /*
@@ -1637,8 +1637,10 @@ TEST_F(ConnectionHandlerTest, ServiceStarted_Video_Multiple) {
                                                 PROTECTION_OFF,
                                                 dummy_params);
 
-  EXPECT_NE(0u, new_context_first.new_session_id_);   // result is positive
-  EXPECT_EQ(0u, new_context_second.new_session_id_);  // result is negative
+  EXPECT_FALSE(
+      new_context_first.is_start_session_failed_);  // result is positive
+  EXPECT_TRUE(
+      new_context_second.is_start_session_failed_);  // result is negative
 }
 
 TEST_F(ConnectionHandlerTest,
