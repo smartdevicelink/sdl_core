@@ -1057,6 +1057,11 @@ class PolicyManagerImpl : public PolicyManager {
   void StartPTExchange() OVERRIDE;
 
   /**
+   * @brief Trigger a PTU once on startup if it is required
+   */
+  void TriggerPTUOnStartupIfRequired() OVERRIDE;
+
+  /**
    * @brief Checks is PT exceeded days
    * @return true if exceeded
    */
