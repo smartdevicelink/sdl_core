@@ -126,6 +126,13 @@ HMICapabilitiesImpl::HMICapabilitiesImpl(ApplicationManager& app_mngr)
     is_ivi_cooperating_ = true;
     is_rc_cooperating_ = true;
   }
+  requests_required_for_capabilities_ = {
+      hmi_apis::FunctionID::VehicleInfo_IsReady,
+      hmi_apis::FunctionID::VR_IsReady,
+      hmi_apis::FunctionID::TTS_IsReady,
+      hmi_apis::FunctionID::UI_IsReady,
+      hmi_apis::FunctionID::RC_IsReady,
+      hmi_apis::FunctionID::Navigation_IsReady};
 }
 
 HMICapabilitiesImpl::~HMICapabilitiesImpl() {}

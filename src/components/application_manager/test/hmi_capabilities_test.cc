@@ -130,6 +130,14 @@ const std::vector<hmi_apis::Common_LightName::eType> light_name_enum_values{
     hmi_apis::Common_LightName::eType::EXTERIOR_RIGHT_LIGHTS,
     hmi_apis::Common_LightName::eType::EXTERIOR_ALL_LIGHTS};
 
+const std::vector<hmi_apis::FunctionID::eType> is_ready_requests{
+    hmi_apis::FunctionID::RC_IsReady,
+    hmi_apis::FunctionID::VR_IsReady,
+    hmi_apis::FunctionID::UI_IsReady,
+    hmi_apis::FunctionID::TTS_IsReady,
+    hmi_apis::FunctionID::Navigation_IsReady,
+    hmi_apis::FunctionID::VehicleInfo_IsReady};
+
 bool IsLightNameExists(const hmi_apis::Common_LightName::eType& light_name) {
   auto it = std::find(
       light_name_enum_values.begin(), light_name_enum_values.end(), light_name);
@@ -155,6 +163,13 @@ class HMICapabilitiesTest : public ::testing::Test {
         .WillByDefault(ReturnRef(kHmiCapabilitiesCacheFile));
 
     hmi_capabilities_ = std::make_shared<HMICapabilitiesImpl>(mock_app_mngr_);
+    IsReadyResponsesReceived();
+  }
+
+  void IsReadyResponsesReceived() {
+    for (const auto& request : is_ready_requests) {
+      hmi_capabilities_->UpdateRequestsRequiredForCapabilities(request);
+    }
   }
 
   void TearDown() OVERRIDE {
