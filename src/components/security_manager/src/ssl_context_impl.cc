@@ -131,6 +131,8 @@ CryptoManagerImpl::SSLContextImpl::create_max_block_sizes() {
   rc.insert(std::make_pair("AES128-SHA", seed_sha_max_block_size));
   rc.insert(
       std::make_pair("AES256-GCM-SHA384", aes128_gcm_sha256_max_block_size));
+  rc.insert(std::make_pair("ECDHE-RSA-AES256-GCM-SHA384",
+                           aes128_gcm_sha256_max_block_size));
   rc.insert(std::make_pair("AES256-SHA256", aes128_sha256_max_block_size));
   rc.insert(std::make_pair("AES256-SHA", seed_sha_max_block_size));
   rc.insert(std::make_pair("CAMELLIA128-SHA", seed_sha_max_block_size));
