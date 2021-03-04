@@ -87,7 +87,6 @@ class CMessageBrokerController;
 
 class WebsocketSession : public std::enable_shared_from_this<WebsocketSession> {
   boost::beast::websocket::stream<boost::asio::ip::tcp::socket> ws_;
-  boost::asio::strand<boost::asio::io_context::executor_type> strand_;
   boost::beast::multi_buffer buffer_;
   boost::beast::multi_buffer send_buffer_;
   CMessageBrokerController* controller_;

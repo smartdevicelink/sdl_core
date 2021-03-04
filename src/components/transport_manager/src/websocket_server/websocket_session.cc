@@ -46,9 +46,8 @@ WebSocketSession<tcp::socket&>::WebSocketSession(
     DataSendDoneCallback data_send_done,
     DataSendFailedCallback data_send_failed,
     OnIOErrorCallback on_error)
-    : socket_(std::move(socket))
+    : socket_(boost::asio::make_strand(socket.get_executor()))
     , ws_(socket_)
-    , strand_(ws_.get_executor())
     , data_receive_(data_receive)
     , data_send_done_(data_send_done)
     , data_send_failed_(data_send_failed)
@@ -65,9 +64,8 @@ WebSocketSession<ssl::stream<tcp::socket&> >::WebSocketSession(
     DataSendDoneCallback data_send_done,
     DataSendFailedCallback data_send_failed,
     OnIOErrorCallback on_error)
-    : socket_(std::move(socket))
+    : socket_(boost::asio::make_strand(socket_.get_executor()))
     , ws_(socket_, ctx)
-    , strand_(ws_.get_executor())
     , data_receive_(data_receive)
     , data_send_done_(data_send_done)
     , data_send_failed_(data_send_failed)
@@ -83,11 +81,9 @@ WebSocketSession<ExecutorType>::~WebSocketSession() {}
 template <typename ExecutorType>
 void WebSocketSession<ExecutorType>::AsyncAccept() {
   SDL_LOG_AUTO_TRACE();
-  ws_.async_accept(
-      boost::asio::bind_executor(strand_,
-                                 std::bind(&WebSocketSession::AsyncRead,
-                                           this->shared_from_this(),
-                                           std::placeholders::_1)));
+  ws_.async_accept(std::bind(&WebSocketSession::AsyncRead,
+                             this->shared_from_this(),
+                             std::placeholders::_1));
 }
 
 template <typename ExecutorType>
@@ -100,11 +96,10 @@ void WebSocketSession<ExecutorType>::AsyncRead(boost::system::error_code ec) {
   }
 
   ws_.async_read(buffer_,
-                 boost::asio::bind_executor(strand_,
-                                            std::bind(&WebSocketSession::Read,
-                                                      this->shared_from_this(),
-                                                      std::placeholders::_1,
-                                                      std::placeholders::_2)));
+                 std::bind(&WebSocketSession::Read,
+                           this->shared_from_this(),
+                           std::placeholders::_1,
+                           std::placeholders::_2));
 }
 
 template <typename ExecutorType>

@@ -99,7 +99,6 @@ class WebSocketSession
  protected:
   tcp::socket socket_;
   websocket::stream<ExecutorType> ws_;
-  boost::asio::strand<boost::asio::io_context::executor_type> strand_;
   boost::beast::flat_buffer buffer_;
   DataReceiveCallback data_receive_;
   DataSendDoneCallback data_send_done_;

@@ -80,7 +80,6 @@ class WSSession : public std::enable_shared_from_this<WSSession> {
 
     websocket::stream<tcp::socket> ws_;
     beast::flat_buffer buffer_;
-    boost::asio::strand<boost::asio::io_context::executor_type> strand_;
     http::request<http::string_body> req_;
     std::set<std::string> url_routes_;
   };

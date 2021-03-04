@@ -38,8 +38,10 @@
 #ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_WEBSOCKET_SERVER_WEBSOCKET_DEVICE_H_
 #define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_WEBSOCKET_SERVER_WEBSOCKET_DEVICE_H_
 
+#include <boost/asio/ip/tcp.hpp>
 #include <boost/beast/websocket.hpp>
 #include <string>
+
 #include "transport_manager/transport_adapter/device.h"
 
 namespace transport_manager {
