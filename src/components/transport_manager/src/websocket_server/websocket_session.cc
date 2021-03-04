@@ -46,7 +46,7 @@ WebSocketSession<tcp::socket&>::WebSocketSession(
     DataSendDoneCallback data_send_done,
     DataSendFailedCallback data_send_failed,
     OnIOErrorCallback on_error)
-    : socket_(boost::asio::make_strand(socket.get_executor()))
+    : socket_(std::move(socket))
     , ws_(socket_)
     , data_receive_(data_receive)
     , data_send_done_(data_send_done)
@@ -64,7 +64,7 @@ WebSocketSession<ssl::stream<tcp::socket&> >::WebSocketSession(
     DataSendDoneCallback data_send_done,
     DataSendFailedCallback data_send_failed,
     OnIOErrorCallback on_error)
-    : socket_(boost::asio::make_strand(socket_.get_executor()))
+    : socket_(std::move(socket))
     , ws_(socket_, ctx)
     , data_receive_(data_receive)
     , data_send_done_(data_send_done)

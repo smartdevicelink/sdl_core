@@ -42,8 +42,7 @@ void Fail(char const* tag, boost::system::error_code ec) {
 namespace sample {
 namespace websocket {
 
-WSSession::WSServer::WSServer(tcp::socket&& socket)
-    : ws_(boost::asio::make_strand(socket.get_executor())) {}
+WSSession::WSServer::WSServer(tcp::socket&& socket) : ws_(std::move(socket)) {}
 
 void WSSession::WSServer::AddURLRoute(const std::string& target) {
   url_routes_.insert(ParseRouteFromTarget(target));

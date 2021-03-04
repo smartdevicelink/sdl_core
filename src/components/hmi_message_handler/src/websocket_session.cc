@@ -40,7 +40,7 @@ SDL_CREATE_LOG_VARIABLE("HMIMessageHandler")
 
 WebsocketSession::WebsocketSession(boost::asio::ip::tcp::socket socket,
                                    CMessageBrokerController* controller)
-    : ws_(boost::asio::make_strand(socket.get_executor()))
+    : ws_(std::move(socket))
     , controller_(controller)
     , stop(false)
     , m_receivingBuffer("")
