@@ -221,12 +221,12 @@ else()
 endif()
 
 set(BOOST_ROOT ${3RD_PARTY_INSTALL_PREFIX})
-set(BOOST_LIB_SOURCE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/boost_src)
-set(BOOST_LIBS_DIRECTORY ${3RD_PARTY_INSTALL_PREFIX}/lib)
-set(BOOST_INCLUDE_DIR ${3RD_PARTY_INSTALL_PREFIX}/include PARENT_SCOPE)
-SET_PROPERTY(GLOBAL PROPERTY GLOBAL_BOOST_LIBS ${BOOST_LIBS_DIRECTORY})
 find_package(Boost 1.72.0 COMPONENTS system thread date_time filesystem regex) 
 if (NOT ${Boost_FOUND})
+  set(BOOST_LIB_SOURCE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/boost_src)
+  set(BOOST_LIBS_DIRECTORY ${3RD_PARTY_INSTALL_PREFIX}/lib)
+  set(BOOST_INCLUDE_DIR ${3RD_PARTY_INSTALL_PREFIX}/include PARENT_SCOPE)
+  SET_PROPERTY(GLOBAL PROPERTY GLOBAL_BOOST_LIBS ${BOOST_LIBS_DIRECTORY})
   message(STATUS "Did not find boost. Downloading and installing boost 1.72")
   set(BOOST_INSTALL_COMMAND ./b2 install)
   if (${3RD_PARTY_INSTALL_PREFIX} MATCHES "/usr/local")
@@ -241,12 +241,16 @@ if (NOT ${Boost_FOUND})
     SOURCE_DIR ${BOOST_LIB_SOURCE_DIRECTORY}
     CONFIGURE_COMMAND ./bootstrap.sh --with-libraries=system,thread,date_time,filesystem,regex --prefix=${3RD_PARTY_INSTALL_PREFIX}
     BUILD_COMMAND ./b2
-    INSTALL_COMMAND ${BOOST_INSTALL_COMMAND} --with-system --with-thread --with-date_time --with-filesystem --with-regex --prefix=${3RD_PARTY_INSTALL_PREFIX} > boost_install.log
+    INSTALL_COMMAND ${BOOST_INSTALL_COMMAND} --clean --prefix=${3RD_PARTY_INSTALL_PREFIX} && ${BOOST_INSTALL_COMMAND} --with-system --with-thread --with-date_time --with-filesystem --with-regex --prefix=${3RD_PARTY_INSTALL_PREFIX} > boost_install.log
     INSTALL_DIR ${3RD_PARTY_INSTALL_PREFIX}
     BUILD_IN_SOURCE true
   )
 else()
-add_custom_target(Boost) # empty target, Boost is already installed
+  message (STATUS "Boost installed in " ${Boost_LIBRARY_DIRS} ", " ${Boost_INCLUDE_DIRS})
+  set(BOOST_LIBS_DIRECTORY ${Boost_LIBRARY_DIRS})
+  set(BOOST_INCLUDE_DIR ${Boost_INCLUDE_DIRS} PARENT_SCOPE)
+  SET_PROPERTY(GLOBAL PROPERTY GLOBAL_BOOST_LIBS ${BOOST_LIBS_DIRECTORY})
+  add_custom_target(Boost) # empty target, Boost is already installed
 endif()
 
 add_custom_target(install-3rd_party
