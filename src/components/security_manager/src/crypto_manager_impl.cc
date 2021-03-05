@@ -171,6 +171,7 @@ bool CryptoManagerImpl::Init() {
 #else
       SDL_LOG_DEBUG("SSLv3 is used");
       method = is_server ? SSLv3_server_method() : SSLv3_client_method();
+      SSL_CTX_set_max_proto_version(context_, SSL3_VERSION);
       break;
 #endif
     case TLSv1:
@@ -179,6 +180,7 @@ bool CryptoManagerImpl::Init() {
       method = is_server ? TLSv1_server_method() : TLSv1_client_method();
 #else
       method = is_server ? TLS_server_method() : TLS_client_method();
+      SSL_CTX_set_max_proto_version(context_, TLS1_VERSION);
 #endif
       break;
     case TLSv1_1:
@@ -191,6 +193,7 @@ bool CryptoManagerImpl::Init() {
       method = is_server ? TLSv1_1_server_method() : TLSv1_1_client_method();
 #else
       method = is_server ? TLS_server_method() : TLS_client_method();
+      SSL_CTX_set_max_proto_version(context_, TLS1_1_VERSION);
 #endif
       break;
     case TLSv1_2:
@@ -203,6 +206,8 @@ bool CryptoManagerImpl::Init() {
       method = is_server ? TLSv1_2_server_method() : TLSv1_2_client_method();
 #else
       method = is_server ? TLS_server_method() : TLS_client_method();
+      SSL_CTX_set_max_proto_version(context_, TLS1_2_VERSION);
+
 #endif
       break;
     case DTLSv1:
@@ -211,6 +216,7 @@ bool CryptoManagerImpl::Init() {
       method = is_server ? DTLSv1_server_method() : DTLSv1_client_method();
 #else
       method = is_server ? DTLS_server_method() : DTLS_client_method();
+      SSL_CTX_set_max_proto_version(context_, DTLS1_VERSION);
 #endif
       break;
     default:
@@ -226,7 +232,8 @@ bool CryptoManagerImpl::Init() {
   utils::ScopeGuard guard = utils::MakeGuard(free_ctx, &context_);
 
   // Disable SSL2 as deprecated
-  SSL_CTX_set_options(context_, SSL_OP_NO_SSLv2);
+  // TLS 1.2 is the max supported TLS version for SDL
+  SSL_CTX_set_options(context_, SSL_OP_NO_SSLv2 | SSL_OP_NO_TLSv1_3);
 
   SaveCertificateData(get_settings().certificate_data());
 
@@ -234,11 +241,22 @@ bool CryptoManagerImpl::Init() {
     SDL_LOG_WARN("Empty ciphers list");
   } else {
     SDL_LOG_DEBUG("Cipher list: " << get_settings().ciphers_list());
+    // If using openssl 1.1.1, this method may always return true
+    // https://github.com/openssl/openssl/issues/7196#issue-359287519
     if (!SSL_CTX_set_cipher_list(context_,
                                  get_settings().ciphers_list().c_str())) {
       SDL_LOG_ERROR(
           "Could not set cipher list: " << get_settings().ciphers_list());
       return false;
+    }
+    auto sk = SSL_CTX_get_ciphers(context_);
+    const char* p;
+    for (int i = 0; i < sk_SSL_CIPHER_num(sk); i++) {
+      const SSL_CIPHER* c = sk_SSL_CIPHER_value(sk, i);
+      p = SSL_CIPHER_get_name(c);
+      if (p == NULL)
+        break;
+      SDL_LOG_DEBUG("Using Cipher: " << p);
     }
   }
 
