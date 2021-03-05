@@ -4068,6 +4068,7 @@ TEST_F(ProtocolHandlerImplTest,
   EXPECT_TRUE(waiter->WaitFor(times, kAsyncExpectationsTimeout));
 }
 
+#ifdef ENABLE_SECURITY
 TEST_F(ProtocolHandlerImplTest,
        OnTMMessageSend_ReadyToCloseConnection_Disconnect) {
   OnTMMessageSend();
@@ -4097,6 +4098,7 @@ TEST_F(ProtocolHandlerImplTest,
 
   tm_listener->OnTMMessageSend(message);
 }
+#endif
 
 TEST_F(ProtocolHandlerImplTest, OnTMMessageSend_InvalidData_Cancelled) {
   const uint8_t data_size = 8u;
