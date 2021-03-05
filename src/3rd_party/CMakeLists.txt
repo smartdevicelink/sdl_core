@@ -221,13 +221,13 @@ else()
 endif()
 
 set(BOOST_ROOT ${3RD_PARTY_INSTALL_PREFIX})
-find_package(Boost 1.66.0 COMPONENTS system thread date_time filesystem regex) 
-set(BOOST_LIB_SOURCE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/boost_src)
-set(BOOST_LIBS_DIRECTORY ${3RD_PARTY_INSTALL_PREFIX}/lib)
-set(BOOST_INCLUDE_DIR ${3RD_PARTY_INSTALL_PREFIX}/include PARENT_SCOPE)
-SET_PROPERTY(GLOBAL PROPERTY GLOBAL_BOOST_LIBS ${BOOST_LIBS_DIRECTORY})
+find_package(Boost 1.72.0 COMPONENTS system thread date_time filesystem regex) 
 if (NOT ${Boost_FOUND})
-  message(STATUS "Did not find boost. Downloading and installing boost 1.66")
+  set(BOOST_LIB_SOURCE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/boost_src)
+  set(BOOST_LIBS_DIRECTORY ${3RD_PARTY_INSTALL_PREFIX}/lib)
+  set(BOOST_INCLUDE_DIR ${3RD_PARTY_INSTALL_PREFIX}/include PARENT_SCOPE)
+  SET_PROPERTY(GLOBAL PROPERTY GLOBAL_BOOST_LIBS ${BOOST_LIBS_DIRECTORY})
+  message(STATUS "Did not find boost. Downloading and installing boost 1.72")
   set(BOOST_INSTALL_COMMAND ./b2 install)
   if (${3RD_PARTY_INSTALL_PREFIX} MATCHES "/usr/local")
     set(BOOST_INSTALL_COMMAND sudo ./b2 install)
@@ -235,18 +235,22 @@ if (NOT ${Boost_FOUND})
   include(ExternalProject)
   ExternalProject_Add(
     Boost
-    URL https://mirror.bazel.build/dl.bintray.com/boostorg/release/1.68.0/source/boost_1_68_0.tar.gz
-    URL_HASH SHA256=da3411ea45622579d419bfda66f45cd0f8c32a181d84adfa936f5688388995cf
+    URL https://dl.bintray.com/boostorg/release/1.72.0/source/boost_1_72_0.tar.gz
+    URL_HASH SHA256=c66e88d5786f2ca4dbebb14e06b566fb642a1a6947ad8cc9091f9f445134143f
     DOWNLOAD_DIR ${BOOST_LIB_SOURCE_DIRECTORY}
     SOURCE_DIR ${BOOST_LIB_SOURCE_DIRECTORY}
     CONFIGURE_COMMAND ./bootstrap.sh --with-libraries=system,thread,date_time,filesystem,regex --prefix=${3RD_PARTY_INSTALL_PREFIX}
     BUILD_COMMAND ./b2
-    INSTALL_COMMAND ${BOOST_INSTALL_COMMAND} --with-system --with-thread --with-date_time --with-filesystem --with-regex --prefix=${3RD_PARTY_INSTALL_PREFIX} > boost_install.log
+    INSTALL_COMMAND ${BOOST_INSTALL_COMMAND} --clean --prefix=${3RD_PARTY_INSTALL_PREFIX} && ${BOOST_INSTALL_COMMAND} --with-system --with-thread --with-date_time --with-filesystem --with-regex --prefix=${3RD_PARTY_INSTALL_PREFIX} > boost_install.log
     INSTALL_DIR ${3RD_PARTY_INSTALL_PREFIX}
     BUILD_IN_SOURCE true
   )
 else()
-add_custom_target(Boost) # empty target, Boost is already installed
+  message (STATUS "Boost installed in " ${Boost_LIBRARY_DIRS} ", " ${Boost_INCLUDE_DIRS})
+  set(BOOST_LIBS_DIRECTORY ${Boost_LIBRARY_DIRS})
+  set(BOOST_INCLUDE_DIR ${Boost_INCLUDE_DIRS} PARENT_SCOPE)
+  SET_PROPERTY(GLOBAL PROPERTY GLOBAL_BOOST_LIBS ${BOOST_LIBS_DIRECTORY})
+  add_custom_target(Boost) # empty target, Boost is already installed
 endif()
 
 add_custom_target(install-3rd_party
