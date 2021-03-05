@@ -207,7 +207,6 @@ bool CryptoManagerImpl::Init() {
 #else
       method = is_server ? TLS_server_method() : TLS_client_method();
       SSL_CTX_set_max_proto_version(context_, TLS1_2_VERSION);
-
 #endif
       break;
     case DTLSv1:
