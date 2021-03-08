@@ -38,7 +38,6 @@
 #include <boost/asio/ip/tcp.hpp>
 #include <boost/asio/placeholders.hpp>
 #include <boost/asio/ssl/stream.hpp>
-#include <boost/asio/strand.hpp>
 #include <boost/asio/thread_pool.hpp>
 #include <boost/beast/core.hpp>
 #include <boost/beast/websocket.hpp>
