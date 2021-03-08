@@ -838,7 +838,7 @@ void PolicyHandler::OnSystemRequestReceived() const {
 }
 
 void PolicyHandler::TriggerPTUOnStartupIfRequired() {
-#ifdef PROPRIETARY_MODE
+#if defined(PROPRIETARY_MODE) || defined(EXTERNAL_PROPRIETARY_MODE)
   const auto policy_manager = LoadPolicyManager();
   POLICY_LIB_CHECK_VOID(policy_manager);
   policy_manager->TriggerPTUOnStartupIfRequired();

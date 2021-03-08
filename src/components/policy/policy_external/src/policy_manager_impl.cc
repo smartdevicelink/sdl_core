@@ -762,6 +762,13 @@ void PolicyManagerImpl::StartPTExchange() {
   }
 }
 
+void PolicyManagerImpl::TriggerPTUOnStartupIfRequired() {
+  SDL_LOG_AUTO_TRACE();
+  if (ignition_check) {
+    StartPTExchange();
+  }
+}
+
 void PolicyManagerImpl::OnAppsSearchStarted() {
   SDL_LOG_AUTO_TRACE();
   update_status_manager_.OnAppsSearchStarted();
