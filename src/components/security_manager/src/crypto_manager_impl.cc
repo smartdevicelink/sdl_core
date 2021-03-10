@@ -232,7 +232,7 @@ bool CryptoManagerImpl::Init() {
 
   // Disable SSL2 as deprecated
   // TLS 1.2 is the max supported TLS version for SDL
-  SSL_CTX_set_options(context_, SSL_OP_NO_SSLv2 | SSL_OP_NO_TLSv1_3);
+  SSL_CTX_set_options(context_, SSL_OP_NO_SSLv2);
 
   SaveCertificateData(get_settings().certificate_data());
 
@@ -248,6 +248,7 @@ bool CryptoManagerImpl::Init() {
           "Could not set cipher list: " << get_settings().ciphers_list());
       return false;
     }
+#if OPENSSL_VERSION_NUMBER > OPENSSL1_1_VERSION
     auto sk = SSL_CTX_get_ciphers(context_);
     const char* p;
     for (int i = 0; i < sk_SSL_CIPHER_num(sk); i++) {
@@ -257,6 +258,7 @@ bool CryptoManagerImpl::Init() {
         break;
       SDL_LOG_DEBUG("Using Cipher: " << p);
     }
+#endif
   }
 
   if (get_settings().ca_cert_path().empty()) {
