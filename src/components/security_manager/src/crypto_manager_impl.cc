@@ -232,7 +232,7 @@ bool CryptoManagerImpl::Init() {
 
   // Disable SSL2 as deprecated
   // TLS 1.2 is the max supported TLS version for SDL
-  SSL_CTX_set_options(context_, SSL_OP_NO_SSLv2 | SSL_OP_NO_TLSv1_3);
+  SSL_CTX_set_options(context_, SSL_OP_NO_SSLv2);
 
   SaveCertificateData(get_settings().certificate_data());
 
