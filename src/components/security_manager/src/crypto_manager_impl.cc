@@ -248,7 +248,7 @@ bool CryptoManagerImpl::Init() {
           "Could not set cipher list: " << get_settings().ciphers_list());
       return false;
     }
-#if OPENSSL_VERSION_NUMBER < OPENSSL1_1_VERSION
+#if OPENSSL_VERSION_NUMBER > OPENSSL1_1_VERSION
     auto sk = SSL_CTX_get_ciphers(context_);
     const char* p;
     for (int i = 0; i < sk_SSL_CIPHER_num(sk); i++) {
