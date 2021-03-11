@@ -29,6 +29,7 @@
 
 #include "application_manager/application_manager.h"
 #include "application_manager/commands/command_impl.h"
+#include "application_manager/commands/command_request_impl.h"
 #include "application_manager/display_capabilities_builder.h"
 #include "application_manager/event_engine/event_observer.h"
 #include "application_manager/message_helper.h"
@@ -151,6 +152,8 @@ void ResumptionDataProcessorImpl::ProcessResumptionStatus(
   if (IsResponseSuccessful(response)) {
     status.successful_requests.push_back(found_request);
   } else {
+    SDL_LOG_DEBUG("Resumption request failed");
+    MessageHelper::PrintSmartObject(response);
     status.error_requests.push_back(found_request);
   }
 
@@ -977,7 +980,12 @@ void ResumptionDataProcessorImpl::DeletePluginsSubscriptions(
 }
 
 bool IsResponseSuccessful(const smart_objects::SmartObject& response) {
-  return !response[strings::params].keyExists(strings::error_msg);
+  auto result_code = static_cast<hmi_apis::Common_Result::eType>(
+      response[strings::params][application_manager::hmi_response::code]
+          .asInt());
+
+  return commands::CommandRequestImpl::IsHMIResultSuccess(result_code) ||
+         hmi_apis::Common_Result::UNSUPPORTED_RESOURCE == result_code;
 }
 
 void ResumptionDataProcessorImpl::CheckVehicleDataResponse(
