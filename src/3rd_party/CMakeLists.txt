@@ -221,6 +221,7 @@ else()
 endif()
 
 set(BOOST_ROOT ${3RD_PARTY_INSTALL_PREFIX})
+set(Boost_NO_BOOST_CMAKE ON)
 find_package(Boost 1.72.0 COMPONENTS system thread date_time filesystem regex) 
 if (NOT ${Boost_FOUND})
   set(BOOST_LIB_SOURCE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/boost_src)
