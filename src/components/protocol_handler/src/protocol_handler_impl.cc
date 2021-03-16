@@ -1418,7 +1418,7 @@ RESULT_CODE ProtocolHandlerImpl::SendMultiFrameMessage(
   const ProtocolFramePtr firstPacket(
       new protocol_handler::ProtocolPacket(connection_id,
                                            protocol_version,
-                                           needs_encryption,
+                                           false,
                                            FRAME_TYPE_FIRST,
                                            service_type,
                                            FRAME_DATA_FIRST,
