@@ -1665,6 +1665,7 @@ void PolicyManagerImpl::ResetTimeout() {
 
 void PolicyManagerImpl::OnPTUIterationTimeout() {
   SDL_LOG_DEBUG("Start new retry sequence");
+  listener_->OnCertificateUpdated("");
 
   const bool is_exceeded_retries_count =
       (retry_sequence_seconds_.size() < retry_sequence_index_);
